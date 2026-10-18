@@ -1157,6 +1157,80 @@ export const HEROES = [
     "shape": "pulse",
     "range": 210,
     "radius": 210
+  },
+  {
+    "id": "underdog",
+    "name": "언더독",
+    "title": "마력 없는 주먹",
+    "color": "#9fb2e0",
+    "art": {
+      "atlas": "unit-underdog",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 213,
+        "size": 250
+      }
+    },
+    "damage": 32,
+    "interval": 0.9,
+    "attack": "stone",
+    "trait": {
+      "type": "underdog",
+      "text": "덱이 전부 노멀이면 위력이 80% 오릅니다."
+    },
+    "skill": {
+      "name": "빅쇼",
+      "cost": 80,
+      "type": "bigshow",
+      "text": "적 전체에게 위력 7배 피해를 주고, 아군 전체가 2초 기절합니다."
+    },
+    "heightGroup": "tall",
+    "role": "노멀 덱 · 단일",
+    "shape": "single",
+    "range": 560,
+    "radius": 0
+  },
+  {
+    "id": "toffee_apple",
+    "name": "토피애플",
+    "title": "달콤한 함정",
+    "color": "#e5604a",
+    "art": {
+      "atlas": "unit-toffee_apple",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 236,
+        "size": 250
+      }
+    },
+    "damage": 36,
+    "interval": 1.4,
+    "attack": "sugar",
+    "trait": {
+      "type": "toffee",
+      "text": "폭탄을 설치하면 가장 높은 성급의 토피애플이 3초 기절합니다."
+    },
+    "skill": {
+      "name": "애플봄",
+      "cost": 90,
+      "type": "applebomb",
+      "text": "경로에 폭탄을 설치합니다. 적이 5기 이상일 때 닿으면 전체 7배로 터집니다(보스는 바로). 최대 3개."
+    },
+    "heightGroup": "medium",
+    "role": "저축 폭탄 · 관통",
+    "shape": "beam",
+    "range": 520,
+    "radius": 24
   }
 ];
 
@@ -1612,10 +1686,14 @@ export const ASSET_PATHS = {
   "unit-harmonious": "./assets/merge/units/harmonious.webp",
   "unit-aurora": "./assets/merge/units/aurora.webp",
   "unit-behemoth": "./assets/merge/units/behemoth.webp",
+  "unit-underdog": "./assets/merge/units/underdog.webp",
+  "unit-toffee_apple": "./assets/merge/units/toffee_apple.webp",
   "garden": "./assets/merge/garden.webp",
   "summon-altar": "./assets/merge/summon-altar.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",
   "greenhouse-beds": "./assets/merge/greenhouse-beds.webp",
+  "greenhouse-dawn": "./assets/merge/greenhouse-dawn.webp",
+  "greenhouse-beds-dawn": "./assets/merge/greenhouse-beds-dawn.webp",
   "gifts": "./assets/merge/gifts.webp",
   "fx-emblems": "./assets/merge/fx-emblems.webp",
   "bosses": "./assets/moonlit/realm-bosses.webp",

@@ -12,9 +12,9 @@ export const GIFTS=Object.freeze({
 });
 const group=(gift,ids)=>ids.map(id=>[id,gift]);
 export const FAVORITE=Object.freeze(Object.fromEntries([
-  ...group('candy',['star_boy','siren','guardian','red_dragon','storm_sage','phantom','rumi','galaxy_whale','harmonious','time_ruler']),
+  ...group('candy',['star_boy','siren','guardian','red_dragon','storm_sage','phantom','rumi','galaxy_whale','harmonious','time_ruler','toffee_apple']),
   ...group('letter',['snow_rabbit','night_rabbit','great_detective','santa','flame_sage','lightning_sage','zeke','luna','jasmine','doom','behemoth']),
-  ...group('bouquet',['silver_rabbit','mushroom_king','avalanche_maid','aurora','time_magician','ancient_dragon','queen','cherry_prince','cinderella','frost_witch']),
+  ...group('bouquet',['silver_rabbit','mushroom_king','avalanche_maid','aurora','time_magician','ancient_dragon','queen','cherry_prince','cinderella','frost_witch','underdog']),
 ]));
 // What each companion says to the gift they love.
 export const FAVORITE_LINES=Object.freeze({
@@ -38,6 +38,8 @@ export const FAVORITE_LINES=Object.freeze({
   luna:'…여기서 읽으라고? 됐어, 나중에 혼자 읽을 거야. …버리진 않아.',
   jasmine:'꾸미지 않은 말이라 더 좋아요. 이 편지가 초상화보다 저를 닮았네요.',
   doom:'봉투를 빼앗지 않고 받는 건 처음이군. …답장은 계약서보다 짧게 쓰지.',
+  toffee_apple:'별사탕…! 나한테? 깨물면 없어지잖아… 녹을 때까지 안고 있을래. 헤헤, 달다.',
+  underdog:'…꽃? 웃지 마. 이빨 보이면 다들 도망가던데, 넌 안 도망가네. 고맙다.',
   behemoth:'…편지? 천 년 동안 아무도 나한테 글 같은 건 안 써 줬는데. 구겨지지 않게… 살살, 살살 펴 볼게.',
   silver_rabbit:'쉿… 이렇게 예쁜 꽃은 기도할 때 제단에 몰래 놓아 둘래요.',
   mushroom_king:'숲 냄새가 나는군. 인간치고 제법이다. 그루터기 옆에 두마.',
@@ -72,6 +74,8 @@ export const GIFT_LINES=Object.freeze({
   luna:'…뭐야, 나 주는 거야? 흥, 받아는 줄게. …고마워.',
   jasmine:'성녀가 아니라 저에게 주는 선물이라니… 정말 기뻐요.',
   doom:'…함정은 아니군. 받아 두지. 빚으로 달아 두진 않겠다.',
+  toffee_apple:'선물이야? 나한테? 아하하, 이거 나중에 도로 가져가는 거 아니지? 아니지?',
+  underdog:'받아 두지. 빚으로 달아 두진 않을 테니, 갚겠다고 설치진 마.',
   behemoth:'흐하하, 선물이라고? 부서지지 않게 두 손으로 받아 주지!',
   silver_rabbit:'선물이요…? 오늘 기도에는 감사 한 줄을 더 적어야겠어요.',
   mushroom_king:'흥, 인간 주제에 기특하구나. …받아 두마.',

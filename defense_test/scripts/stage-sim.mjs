@@ -1,5 +1,6 @@
 // Real-stage difficulty bench. Plays whole main stages with the built-in auto-play.
-//   node defense_test/scripts/stage-sim.mjs [--ai smart|basic] [--stages 3,9,15,21,27,33,39,45] [--seeds 10] [--decks "id,id,id,id,id;..."] [--rose auto|N] [--json out.json]
+//   node defense_test/scripts/stage-sim.mjs [--ai smart|basic] [--stages 3,9,15,21,27,33,39,45] [--seeds 10] [--decks "id,id,id,id,id;..."] [--rose auto|N] [--dawn off|mid|full] [--json out.json]
+// Stages go to 90 (part two). --dawn sets the dawn garden's crit beds: off (none), mid (13% / 180%), full (20% / 200%).
 import fs from 'node:fs/promises';
 import {HERO} from '../src/content.js';
 import {heroMultiplier,specialMultiplier,springGauge,seedGold} from '../src/economy.js';
@@ -14,6 +15,8 @@ const opt=(name,fallback)=>{const i=args.indexOf('--'+name);if(i<0)return fallba
 const STAGES=opt('stages','3,9,15,21,27,33,39,45').split(',').map(s=>Number(s.trim()));
 const SEEDS=Number(opt('seeds',10));
 const ROSE=opt('rose','auto');
+const DAWN=opt('dawn','off');if(!['off','mid','full'].includes(DAWN))throw new Error('--dawn must be off, mid or full');
+const CRIT={off:null,mid:{chance:.13,damage:1.8},full:{chance:.2,damage:2}}[DAWN];
 const JSON_OUT=opt('json',null);
 // --ai smart (default): the reasonable player model. --ai basic: the in-game auto helper.
 const AI=opt('ai','smart');if(!['smart','basic'].includes(AI))throw new Error('--ai must be smart or basic');
@@ -33,7 +36,7 @@ const decks=(opt('decks',null)?.split(';')??DEFAULT_DECKS.map(d=>d.join(','))).m
 });
 if(!decks.length)throw new Error('At least one deck is required');
 if(!Number.isInteger(SEEDS)||SEEDS<1)throw new Error('--seeds must be a positive integer');
-if(!STAGES.length||STAGES.some(stage=>!Number.isInteger(stage)||stage<1||stage>45))throw new Error('--stages must be integers from 1 to 45');
+if(!STAGES.length||STAGES.some(stage=>!Number.isInteger(stage)||stage<1||stage>90))throw new Error('--stages must be integers from 1 to 90');
 const roseMode=ROSE==='auto'?ROSE:Number(ROSE);
 if(roseMode!=='auto'&&(!Number.isInteger(roseMode)||roseMode<0))throw new Error('--rose must be auto or a non-negative integer');
 
@@ -50,7 +53,7 @@ const metaFor=(deck,beds)=>{
 
 function play(deck,stage,seed){
   const beds=bedsFor(stage),meta=metaFor(deck,beds);
-  const s=engine.newRun({deck,chapter:stage-1,seed,meta,mode:'main',gaugeMax:springGauge(beds.spring),startGold:seedGold(beds.seed)});
+  const s=engine.newRun({deck,chapter:stage-1,seed,meta,mode:'main',gaugeMax:springGauge(beds.spring),startGold:seedGold(beds.seed),crit:CRIT});
   // Same cadence as the battle frame: step 0.05s, then auto-play once the
   // accumulator reaches 0.32s and resets. Entering reward defers the blessing
   // pick to the next tick, while combat is already paused.
@@ -94,7 +97,7 @@ function printTable(deck,rows,overall){
 }
 
 const started=process.hrtime.bigint();
-console.log(`${AI==="smart"?"합리 오토":"기본 오토"} · 스테이지 ${STAGES.join(',')} · 시드 1..${SEEDS} · 장미 ${roseMode} · 강화 0 · 자동 ${AUTO}s · 제한 ${LIMIT}s`);
+console.log(`${AI==="smart"?"합리 오토":"기본 오토"} · 스테이지 ${STAGES.join(',')} · 시드 1..${SEEDS} · 장미 ${roseMode} · 새벽 ${DAWN} · 강화 0 · 자동 ${AUTO}s · 제한 ${LIMIT}s`);
 const results=[];
 for(const deck of decks){
   const rows=[],overall=tally();

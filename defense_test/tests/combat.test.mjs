@@ -85,15 +85,15 @@ function soloWinner(s){
   return boosted[0];
 }
 
-test('the exact rarity roster has independent valid stats and all 45 stages rotate the nine guardians',()=>{
-  assert.equal(HEROES.length,31);assert.equal(new Set(HEROES.map(h=>h.id)).size,31);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹']);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라']);
+test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
+  assert.equal(HEROES.length,33);assert.equal(new Set(HEROES.map(h=>h.id)).size,33);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독']);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
-  assert.equal(CHAPTERS.length,45);assert.equal(CHAPTERS[8].hp,3.5);
+  assert.equal(CHAPTERS.length,90);assert.equal(CHAPTERS[8].hp,3.5);assert.equal(CHAPTERS[44].part,1);assert.equal(CHAPTERS[45].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
   const step=CHAPTERS[1].hp-CHAPTERS[0].hp;
-  for(let i=1;i<45;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-step)<1e-12);
+  for(let i=1;i<90;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-step)<1e-12);
 });
 
 test('six main waves contain exactly two copies of one boss and stage nine follows the renewed base health and slope',()=>{
@@ -1574,4 +1574,38 @@ test('stacked crush casts (and a dream form on top) still save and resume with e
     const saved=E.restore(E.serialize(s));assert.ok(saved,plan.join('+')+' must restore');assert.equal(saved.volleys.length,pending);
     const t=s.time+3;advanceTo(s,t);advanceTo(saved,t);pack.forEach((e,i)=>close(saved.enemies[i].hp,e.hp));assert.equal(saved.volleys.length,0);
   }
+});
+
+test('underdog: +80% power only while the whole deck is plain normal-rarity heroes; the big show stuns the whole board',()=>{
+  const normals=HEROES.filter(h=>h.rarity==='C'&&!h.hidden).map(h=>h.id).filter(id=>id!=='underdog').slice(0,4);
+  const solid=traitArena([{index:12,hero:'underdog'}]);solid.deck=['underdog',...normals];
+  assert.equal(E.personalTrait(solid,solid.board[12]).damageMultiplier,1.8);
+  const mixed=traitArena([{index:12,hero:'underdog'}]);mixed.deck=['underdog',...normals.slice(0,3),'santa'];
+  assert.equal(E.personalTrait(mixed,mixed.board[12]).damageMultiplier,1);
+  const s=traitArena([{index:12,hero:'underdog'},{index:13,hero:'snow_rabbit'}]);
+  enemiesFor(s,[{hp:1e6},{hp:1e6}]);
+  const before=s.enemies.map(e=>e.hp);
+  readyCast(s,'underdog');
+  assert.ok(s.enemies.every((e,i)=>e.hp<before[i]),'every enemy is hit');
+  assert.ok(s.board.filter(Boolean).every(u=>u.disabled>=2),'the whole board is stunned');
+  assert.ok(E.restore(E.serialize(s)));
+});
+test('toffee apple: sets up to three bombs that wait for five living enemies (or a boss), blast the whole field once, and survive a save',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple'}]);
+  enemiesFor(s,[{hp:1e9},{hp:1e9},{hp:1e9}]);
+  for(let i=0;i<3;i++){s.board[12].disabled=0;readyCast(s,'toffee_apple');}
+  assert.equal(s.bombs.length,3);
+  s.board[12].disabled=0;s.gauge=120;assert.equal(E.cast(s,'toffee_apple').ok,false,'a fourth bomb is refused');
+  assert.equal(E.restore(E.serialize(s)).bombs.length,3,'bombs survive save and restore');
+  const bomb=s.bombs[0];
+  for(const e of s.enemies){e.progress=bomb.progress;e.speed=0;}
+  const hp=s.enemies.map(e=>e.hp);E.step(s,.05);
+  assert.equal(s.bombs.length,3,'three enemies are too few to set it off');
+  assert.deepEqual(s.enemies.map(e=>e.hp),hp);
+  s.enemies=[];
+  enemiesFor(s,Array.from({length:5},()=>({hp:1e9,progress:bomb.progress})));
+  const bomb2=s.bombs[0],n=s.bombs.length;for(const e of s.enemies)e.progress=bomb2.progress;
+  const hp2=s.enemies.map(e=>e.hp);E.step(s,.05);
+  assert.ok(s.bombs.length<n,'five living enemies set a bomb off');
+  assert.ok(s.enemies.some((e,i)=>e.hp<hp2[i]));
 });

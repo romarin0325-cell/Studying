@@ -1,4 +1,4 @@
-import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,TUNING as T} from './content.js';
+import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,LATE_UNLOCK_STAGE,LATE_COMPANIONS,TUNING as T} from './content.js';
 
 export const HOUR=3600000;
 // Season guardian of a calendar month (UTC+9). Counted from year 0 so that, with seven guardians, October to
@@ -40,9 +40,19 @@ export function relicPoints(id,entry){return entry?.owned?COLLECTION_WEIGHT[ARTI
 export const collectionPoints=relics=>ARTIFACTS.reduce((n,a)=>n+relicPoints(a.id,relics?.[a.id]),0);
 export const collectionBonus=relics=>collectionPoints(relics)/COLLECTION_POINTS_PER_PERCENT/100;
 // Dream greenhouse. Every bed is shared by all companions; duplicates stay personal.
-export const BED_IDS=Object.freeze(['rose','spring','seed']);
+export const BED_IDS=Object.freeze(['rose','spring','seed','crit','critDamage','stardust']);
+// Two gardens of three beds each: the dream greenhouse (from the start) and the dawn greenhouse (opens at stage 45).
+export const GARDENS=Object.freeze([{id:'dream',beds:['rose','spring','seed']},{id:'dawn',beds:['crit','critDamage','stardust']}]);
 export const bedCost=(id,level)=>{const b=T.beds[id],rise=b.rise??b.knee,k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,rise)*b.steep**Math.max(0,Math.min(level,k2)-rise)*(b.steep2??b.steep)**Math.max(0,level-k2));};
 export const bedOpen=(id,cleared)=>cleared>=T.beds[id].unlock;
+// Dawn garden effects. Linear and unbounded: crit chance +0.5%/level (20% at 38), crit damage +2%/level (200% at 25),
+// stardust +1%/level (+50% at 49). The soft cap is the price, not a hard max.
+export const critChance=level=>.01+.005*level;
+export const critDamage=level=>1.5+.02*level;
+export const stardustRate=level=>.01+.01*level;
+// Effects only exist once their bed has opened, so stages 1-45 are exactly what they were before part two.
+export const critStats=(beds,cleared)=>bedOpen('crit',cleared)?{chance:critChance(beds?.crit||0),damage:critDamage(beds?.critDamage||0)}:null;
+export const stardustBonus=(beds,cleared)=>bedOpen('stardust',cleared)?stardustRate(beds?.stardust||0):0;
 // Rose: +1% power per level. Spring: +1 max starlight per level. Seed: +2 starting gold per level.
 export const roseAttack=level=>.01*level;
 export const springGauge=level=>120+level;
@@ -58,21 +68,24 @@ export function combatPower(id,entry,beds,relicBonus=0){
 export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
 const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep);
 export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,cleared);return {dust:Math.floor(base*T.dispatchDust),dreams:Math.max(1,Math.floor(base*T.dispatchDreams))};};
+// The stardust bed is applied when a dispatch is collected, so growing it helps dispatches already under way.
+export const dispatchDust=(dust,beds,cleared)=>Math.floor(dust*(1+stardustBonus(beds,cleared)));
 export const stageReward=stage=>T.firstClearBase+T.firstClearStep*stage;
 export const PERFECT_REWARD=100;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
 export const relicThreshold=tier=>Math.ceil(T.relicThresholdBase*(T.relicThresholdGrowth**tier-1)/(T.relicThresholdGrowth-1));
 export function relicRates(draws){const t=relicTier(draws),q=t/(t+T.relicProbabilityHalf),ur=.0005+.0195*q,sr=.0045+.1355*q,r=.035+.255*q;return [1-r-sr-ur,r,sr,ur];}
 export function rollIndex(rates,value){let sum=0;for(let i=0;i<rates.length;i++){sum+=rates[i];if(value<sum)return i;}return rates.length-1;}
-export function heroPool(rarity){return ROSTER[rarity]||[];}
+export const lateOpen=cleared=>cleared>=LATE_UNLOCK_STAGE;
+export function heroPool(rarity,open=true){return (ROSTER[rarity]||[]).filter(id=>open||!LATE_COMPANIONS.includes(id));}
 // A UR from the season banner is the monthly guardian half the time; from the normal
 // banner it is this week's pickup half the time.
-export function drawCharacter(random,season,guardian,pickup=null,urMult=1){
+export function drawCharacter(random,season,guardian,pickup=null,urMult=1,open=true){
   const base=T.heroRates,ur=base[3]*urMult,rates=[base[0]-(ur-base[3]),base[1],base[2],ur];
   const rarity=['C','R','SR','UR'][rollIndex(rates,random())];
-  if(rarity==='UR'&&season&&random()<.5)return guardian;
+  if(rarity==='UR'&&season&&random()<.5&&(open||!LATE_COMPANIONS.includes(guardian)))return guardian;
   if(rarity==='UR'&&!season&&pickup&&random()<.5)return pickup;
-  const pool=ROSTER[rarity];return pool[Math.floor(random()*pool.length)];
+  const pool=heroPool(rarity,open);return pool[Math.floor(random()*pool.length)];
 }
 export function drawRelic(random,draws){const rarity=['C','R','SR','UR'][rollIndex(relicRates(draws),random())],pool=Object.values(ARTIFACT).filter(a=>a.rarity===rarity);return pool[Math.floor(random()*pool.length)].id;}
-export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+profile.cleared*2));}
+export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+profile.cleared*2)*(1+stardustBonus(profile.beds,profile.cleared)));}

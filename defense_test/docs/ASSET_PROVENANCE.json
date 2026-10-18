@@ -220,6 +220,20 @@
       "height": 1024
     },
     {
+      "id": "unit-underdog",
+      "source": "defense_test/assets/merge/units/underdog.webp",
+      "sha256": "9951d01075018c0d79cf4e5e17fec14d55fdf175a3263b75194aeecf83b82870",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-toffee_apple",
+      "source": "defense_test/assets/merge/units/toffee_apple.webp",
+      "sha256": "25884c249e1beba33f021331acc57020b6b54d6704f063786e3238207dd64423",
+      "width": 1024,
+      "height": 1024
+    },
+    {
       "id": "garden",
       "source": "defense_test/assets/merge/garden.webp",
       "sha256": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
@@ -244,6 +258,20 @@
       "id": "greenhouse-beds",
       "source": "defense_test/assets/merge/greenhouse-beds.webp",
       "sha256": "708d2dc9e9c2c4928ed87cbe557580c8b0e008d0db412f1a2ab3c58a5be41ef5",
+      "width": 768,
+      "height": 576
+    },
+    {
+      "id": "greenhouse-dawn",
+      "source": "defense_test/assets/merge/greenhouse-dawn.webp",
+      "sha256": "95a817eacd276c220d749ed561a019f474c8c66e0d7451eca98962b779edc369",
+      "width": 720,
+      "height": 1290
+    },
+    {
+      "id": "greenhouse-beds-dawn",
+      "source": "defense_test/assets/merge/greenhouse-beds-dawn.webp",
+      "sha256": "2885c94a3246a61cd979f6ae612a3ac96e51ac2f2e81b5a30d8c70442e206775",
       "width": 768,
       "height": 576
     },
@@ -403,7 +431,7 @@
       "sha256": "37c7903f9c06b3c7935ea3f28f1dbf01f2fe45696da6b7eef5942ec61f4c1c09"
     }
   },
-  "portraits": 31,
+  "portraits": 33,
   "relics": 27,
   "memorial": [
     {
@@ -509,6 +537,23 @@
       }
     },
     {
+      "id": "underdog",
+      "source": "defense_test/assets/memorial/underdog.avif",
+      "sha256": "fdbfd85df162a7ba2dd772babdd1f12dc8cfee1384579543196e0d0b6b792b98",
+      "width": 720,
+      "height": 1080,
+      "bytes": 50711,
+      "sourceSha256": "f0f3c1f91e1bc8559863e59eccbe1039c2768c7743b1b9a2a572e04b7e54ca3f",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/underdog.webp",
+        "sha256": "21a6b9fda98a072cd09b1626de09326d59234dd3b8caa9756fee55bcb45e1593",
+        "width": 720,
+        "height": 1080,
+        "bytes": 90712,
+        "quality": 82
+      }
+    },
+    {
       "id": "great_detective",
       "source": "defense_test/assets/memorial/great_detective.avif",
       "sha256": "05f879a26fae3fed9c20be4e9af8a881913e21f41c875e56ce2ff943b3e45118",
@@ -608,6 +653,23 @@
         "height": 1080,
         "bytes": 86200,
         "quality": 82
+      }
+    },
+    {
+      "id": "toffee_apple",
+      "source": "defense_test/assets/memorial/toffee_apple.avif",
+      "sha256": "890afc5fd42999683cac280c290941b3bd76c41ab6297ae1a8485e3023d8b0c6",
+      "width": 720,
+      "height": 1080,
+      "bytes": 64253,
+      "sourceSha256": "59719a74d0b7ef15b84a3cada6d2f881053e7b33706f51805cd7f78e585db9b0",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/toffee_apple.webp",
+        "sha256": "7c6aeb757cf6849760ae70165cd06185cb373d12ce1af7206b8e928489cb2099",
+        "width": 720,
+        "height": 1080,
+        "bytes": 95362,
+        "quality": 74
       }
     },
     {

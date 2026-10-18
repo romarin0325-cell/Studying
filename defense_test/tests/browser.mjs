@@ -94,7 +94,7 @@ try{
     const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
     await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
-    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),31);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),33);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
     await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
     await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
     const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
@@ -189,11 +189,13 @@ try{
     assert.ok(navRect.y>height-100,'navigation remains at the bottom');
     await page.locator('.lb-touch').click();assert.equal((await profile(page)).dreams,640);assert.equal(await page.locator('#greet-cue').count(),0);
     await nav(page,'정원');await page.locator('.gd').waitFor();assert.equal(await page.locator('.bed.locked').count(),2);await page.locator('[data-bed-grow="rose"]').click();assert.equal((await profile(page)).beds.rose,1);assert.equal(await page.locator('.bed[data-bed="rose"] .bed-level').innerText(),'Lv.1');
+    await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
+    await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
-    await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),31);assert.equal(await page.locator('.cards .cc.unowned').count(),26);
+    await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
     await shot(page,'collection',width,height);
-    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),13);
-    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),31,'tapping the filter again shows everything');
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
     await page.locator('.cards [data-hero="star_boy"]').click();
     assert.equal(await page.locator('#app').getAttribute('aria-hidden'),'true');
     await shot(page,'detail',width,height);await page.keyboard.press('Escape');assert.equal(await page.locator('#overlay').isVisible(),false);
@@ -207,6 +209,8 @@ try{
     await page.locator('[data-banner="relic"]').click();await shot(page,'relic-summon',width,height);
     assert.match(await page.locator('[data-draw="1"]').innerText(),/1회 소환/);
     await nav(page,'모험');assert.equal(await page.locator('.stage-list .stage').count(),9);assert.equal(await page.locator('[data-cycle="4"]').isDisabled(),true,'chapters open as they are reached');
+    assert.equal(await page.locator('.part-tabs .part').count(),2);assert.equal(await page.locator('.part[data-part="2"]').getAttribute('data-locked'),'true','part two is locked until stage 45');
+    await page.locator('.part[data-part="2"]').click();assert.ok((await page.locator('.part-teaser').innerText()).includes('새벽의 별길'));await close(page);
     await page.locator('[data-prepare-stage="1"]').click();await page.locator('#sheet-footer [data-action="team"]').click();
     await page.locator('[data-action="save-team"]').click();
     assert.equal(await page.locator('[data-begin="main"]').count(),1,'team confirmation returns to preparation');
@@ -256,6 +260,11 @@ try{
     assert.equal((await profile(page)).dreams,3333);assert.ok((await profile(page)).active.run);
     await context.close();
   }
+  const lateProfile=createProfile(NOW);lateProfile.cleared=45;
+  const lateTest=await boot(390,844,lateProfile);await nav(lateTest.page,'동료');
+  assert.equal(await lateTest.page.locator('.cards .cc').count(),33,'the new companions join the collection once stage 45 is cleared');
+  for(const id of ['behemoth','underdog','toffee_apple'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
+  await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();
   const grown=createProfile(NOW);grown.cleared=36;grown.dreams=5000;
   for(const h of HEROES){grown.heroes[h.id].owned=true;grown.heroes[h.id].copies=3;}
   grown.relics.hourglass={owned:true,enhance:2,copies:3};grown.equipped=['hourglass'];

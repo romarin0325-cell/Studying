@@ -20,7 +20,7 @@ function coverage(id,cell){
 // Average enemies one attack reaches, by attack shape.
 const aoe=h=>({single:1,beam:1.5,cleave:1.9,pulse:2.4,chain:2.2,bounce:1.8,cross:1.6}[h.shape]??(h.shape==='zone'?1+h.radius/45:h.shape==='splash'?1+h.radius/70:1));
 // Control and team amplification are not in raw damage.
-const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1};
+const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1,underdog:1,toffee_apple:1};
 
 function unitValue(s,u,i){
   if(!u||u.cursed)return 0;
@@ -118,6 +118,9 @@ function ultValue(s,m,id,gv){
     case 'plague':return strike(3)+list.reduce((n,e)=>n+Math.min(e.hp,8*P*.1*12),0);
     case 'thunder':return strike(7)+control(1.2*scale)+thunderCancel();
     case 'ice_court':{const have=list.reduce((n,e)=>Math.max(n,e.takenBonus||0),0);return strike(9)+control(3)+buff(Math.max(0,E.WINTER_EXPOSURE-have),6);}
+    case 'bigshow':return Math.max(0,strike(E.UNDERDOG.factor)-dps*E.UNDERDOG.stun);
+    // A bomb only explodes with enough enemies alive, so it is set when the field is already crowded.
+    case 'applebomb':return (s.bombs||[]).length>=E.APPLEBOMB.max||list.length<E.APPLEBOMB.minAlive&&!list.some(e=>e.boss)?0:strike(E.APPLEBOMB.factor)*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
     case 'crush':{if(!list.length)return 0;let sum=0;for(const e of list){const p=E.pathPoint(e.progress);sum+=list.reduce((n,t)=>{const q=E.pathPoint(t.progress);return n+(Math.hypot(q.x-p.x,q.y-p.y)<=E.CRUSH.radius?hit(E.CRUSH.factor,t):0);},0);}return sum/list.length*E.CRUSH.hits;}
     case 'freeze':return strike(3)+control(2*scale+3)+thunderCancel();
     case 'avalanche':return list.reduce((n,e)=>n+hit(e.controlTime>0?12:4,e),0)+control(2);

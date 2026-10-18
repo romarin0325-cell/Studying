@@ -107,6 +107,8 @@ export class Sound {
       case 'finisherImpact':this.tone(e.kind==='royal'?110:62,t,.5,.32,'sine',30);this.noise(t,e.kind==='royal'?.2:.34,.18,e.kind==='royal'?5200:1900,'lowpass',300);this.tone(e.kind==='royal'?1320:880,t,.45,.06,'triangle',440,.5);return;
       case 'finisherFizzle':this.tone(440,t,.3,.03,'sine',220);return;
       case 'meteor':this.noise(t,.4,.06,600,'bandpass',3000,1);this.tone(90,t+.35,.4,.16,'sine',40);return;
+      case 'bombSet':this.tone(520,t,.14,.07,'triangle',760);this.tone(1040,t+.05,.1,.04,'sine',null,.4);return;
+      case 'bombBlast':this.tone(80,t,.5,.26,'sine',32);this.noise(t,.45,.16,1500,'lowpass',260,.8);this.chord([72,76,79],t+.02,.4,.03,'triangle',.01,.4);return;
       case 'impact':this.tone(95,t,.25,.1,'sine',45);this.noise(t,.18,.05,1500,'lowpass');return;
       case 'chain':this.noise(t,.12,.03,4000,'bandpass',7000,3);return;
       case 'frostBreak':[96,100,103].forEach((n,i)=>this.tone(midi(n),t+i*.03,.18,.012,'sine',null,.5));this.noise(t,.15,.03,7000,'highpass');return;

@@ -5,6 +5,7 @@
 // anti-aliased rim is despilled (magenta left by JPEG/keying turns the navy outline purple).
 // --install copies the atlas to defense_test/assets/merge/units/<id>.webp. Always review first (lineup, metrics).
 import sharp from 'sharp';
+sharp.cache(false); // Windows keeps cached files open and the despill rename then fails with EPERM
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
