@@ -168,6 +168,7 @@ function chooseBlessing(s,m){
 }
 
 function dodge(s,m){
+  if(process.env.UP_NODODGE)return false; // bench only: a player who never moves units out of lit cells
   const lit=litCells(s);if(!lit.size)return false;
   // A person moves the key units out, not the whole board: two per stun, every unit for the judgement.
   const key=s.telegraph.uid+":"+s.telegraph.ends.toFixed(2);if(m.dodgeKey!==key){m.dodgeKey=key;m.dodged=0;}

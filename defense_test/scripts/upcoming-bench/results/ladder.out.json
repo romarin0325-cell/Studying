@@ -1,0 +1,876 @@
+[
+ {
+  "cfg": {
+   "label": "화상 +snow_rabbit(기존)",
+   "deck": [
+    "snow_rabbit",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 82,
+  "health": 9.6,
+  "rounds": 5.8,
+  "time": 296,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +santa(기존)",
+   "deck": [
+    "santa",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 79,
+  "health": 9.4,
+  "rounds": 5.79,
+  "time": 281,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 12.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +snow_rabbit(기존)",
+   "deck": [
+    "snow_rabbit",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 76,
+  "health": 10,
+  "rounds": 5.76,
+  "time": 332,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +storm_sage(기존)",
+   "deck": [
+    "storm_sage",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 76,
+  "health": 9.2,
+  "rounds": 5.76,
+  "time": 293,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +aurora(기존)",
+   "deck": [
+    "aurora",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 71,
+  "health": 8.1,
+  "rounds": 5.7,
+  "time": 310,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +red_dragon(기존)",
+   "deck": [
+    "red_dragon",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 68,
+  "health": 7.9,
+  "rounds": 5.66,
+  "time": 309,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +ancient_dragon(기존)",
+   "deck": [
+    "ancient_dragon",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 67,
+  "health": 7.6,
+  "rounds": 5.67,
+  "time": 311,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +mushroom_king(기존)",
+   "deck": [
+    "mushroom_king",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 65,
+  "health": 8,
+  "rounds": 5.63,
+  "time": 309,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +silver_rabbit(기존)",
+   "deck": [
+    "silver_rabbit",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 57,
+  "health": 7,
+  "rounds": 5.55,
+  "time": 304,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +night_rabbit(기존)",
+   "deck": [
+    "night_rabbit",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 56,
+  "health": 7,
+  "rounds": 5.54,
+  "time": 301,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +santa(기존)",
+   "deck": [
+    "santa",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 56,
+  "health": 6.5,
+  "rounds": 5.5,
+  "time": 329,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +phantom(기존)",
+   "deck": [
+    "phantom",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 55,
+  "health": 6.3,
+  "rounds": 5.47,
+  "time": 268,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +storm_sage(기존)",
+   "deck": [
+    "storm_sage",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 54,
+  "health": 6.2,
+  "rounds": 5.47,
+  "time": 320,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +avalanche_maid(기존)",
+   "deck": [
+    "avalanche_maid",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 49,
+  "health": 6,
+  "rounds": 5.3,
+  "time": 305,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +snow_rabbit(기존)",
+   "deck": [
+    "snow_rabbit",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 49,
+  "health": 5.8,
+  "rounds": 5.29,
+  "time": 297,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +mushroom_king(기존)",
+   "deck": [
+    "mushroom_king",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 42,
+  "health": 4.5,
+  "rounds": 5.2,
+  "time": 327,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +red_dragon(기존)",
+   "deck": [
+    "red_dragon",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 39,
+  "health": 4.7,
+  "rounds": 5.12,
+  "time": 318,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +silver_rabbit(기존)",
+   "deck": [
+    "silver_rabbit",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 34,
+  "health": 4.5,
+  "rounds": 4.96,
+  "time": 308,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +aurora(기존)",
+   "deck": [
+    "aurora",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 33,
+  "health": 3.8,
+  "rounds": 4.94,
+  "time": 318,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +phantom(기존)",
+   "deck": [
+    "phantom",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 32,
+  "health": 3.9,
+  "rounds": 4.94,
+  "time": 330,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +phantom(기존)",
+   "deck": [
+    "phantom",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 32,
+  "health": 4.3,
+  "rounds": 4.91,
+  "time": 258,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +ancient_dragon(기존)",
+   "deck": [
+    "ancient_dragon",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 31,
+  "health": 3.6,
+  "rounds": 4.9,
+  "time": 311,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +storm_sage(기존)",
+   "deck": [
+    "storm_sage",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 27,
+  "health": 3.2,
+  "rounds": 4.98,
+  "time": 235,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +avalanche_maid(기존)",
+   "deck": [
+    "avalanche_maid",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 26,
+  "health": 2.8,
+  "rounds": 4.88,
+  "time": 234,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +ancient_dragon(기존)",
+   "deck": [
+    "ancient_dragon",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 24,
+  "health": 3.3,
+  "rounds": 4.92,
+  "time": 237,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 10.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +aurora(기존)",
+   "deck": [
+    "aurora",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 24,
+  "health": 3,
+  "rounds": 4.86,
+  "time": 236,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.03,
+  "casts": 11.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +mushroom_king(기존)",
+   "deck": [
+    "mushroom_king",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 24,
+  "health": 2.7,
+  "rounds": 4.81,
+  "time": 236,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 10.4,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +storm_sage(기존)",
+   "deck": [
+    "storm_sage",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 23,
+  "health": 2.3,
+  "rounds": 4.67,
+  "time": 228,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +silver_rabbit(기존)",
+   "deck": [
+    "silver_rabbit",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 23,
+  "health": 3.1,
+  "rounds": 4.67,
+  "time": 229,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.02,
+  "casts": 11.4,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +ancient_dragon(기존)",
+   "deck": [
+    "ancient_dragon",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 23,
+  "health": 2.7,
+  "rounds": 4.62,
+  "time": 227,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +night_rabbit(기존)",
+   "deck": [
+    "night_rabbit",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 22,
+  "health": 2.9,
+  "rounds": 4.76,
+  "time": 235,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +santa(기존)",
+   "deck": [
+    "santa",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 22,
+  "health": 2.6,
+  "rounds": 4.55,
+  "time": 224,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +red_dragon(기존)",
+   "deck": [
+    "red_dragon",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 22,
+  "health": 2.3,
+  "rounds": 4.53,
+  "time": 224,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +mushroom_king(기존)",
+   "deck": [
+    "mushroom_king",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 21,
+  "health": 2.5,
+  "rounds": 4.53,
+  "time": 225,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +avalanche_maid(기존)",
+   "deck": [
+    "avalanche_maid",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 21,
+  "health": 2,
+  "rounds": 4.37,
+  "time": 214,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +aurora(기존)",
+   "deck": [
+    "aurora",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 20,
+  "health": 1.8,
+  "rounds": 4.47,
+  "time": 222,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +night_rabbit(기존)",
+   "deck": [
+    "night_rabbit",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 20,
+  "health": 1.6,
+  "rounds": 4.39,
+  "time": 220,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +silver_rabbit(기존)",
+   "deck": [
+    "silver_rabbit",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 18,
+  "health": 1.9,
+  "rounds": 4.24,
+  "time": 211,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9,
+  "sac": 0
+ }
+]

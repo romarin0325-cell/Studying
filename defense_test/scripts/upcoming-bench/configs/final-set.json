@@ -1,0 +1,64 @@
+{
+ "joker": {
+  "hero": {
+   "joker": {
+    "damage": 22
+   }
+  }
+ },
+ "underdog": {
+  "hero": {
+   "underdog": {
+    "damage": 32
+   }
+  },
+  "upcoming": {
+   "underdog": {
+    "stun": 2,
+    "factor": 7
+   }
+  }
+ },
+ "toffee_apple": {
+  "hero": {
+   "toffee_apple": {
+    "damage": 36
+   }
+  },
+  "upcoming": {
+   "toffee": {
+    "factor": 7,
+    "minAlive": 5,
+    "stun": 3
+   }
+  }
+ },
+ "antropy": {
+  "upcoming": {
+   "antropy": {
+    "factor": 7
+   }
+  }
+ },
+ "ash": {
+  "hero": {
+   "ash": {
+    "damage": 46
+   }
+  },
+  "upcoming": {
+   "ash": {
+    "factor": 10,
+    "radius": 180
+   }
+  }
+ },
+ "cure_master": {
+  "hero": {
+   "cure_master": {
+    "damage": 22
+   }
+  }
+ },
+ "venom": {}
+}

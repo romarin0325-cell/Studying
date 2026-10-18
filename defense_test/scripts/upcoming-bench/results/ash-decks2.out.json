@@ -1,0 +1,1050 @@
+[
+ {
+  "cfg": {
+   "label": "RSR +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 71,
+  "health": 8.4,
+  "rounds": 5.7,
+  "time": 310,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 68,
+  "health": 8,
+  "rounds": 5.68,
+  "time": 310,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +애쉬 B3 d52 x8",
+   "deck": [
+    "ash",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 52
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 8,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 64,
+  "health": 8.2,
+  "rounds": 5.57,
+  "time": 287,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.7,
+  "sac": 2.5
+ },
+ {
+  "cfg": {
+   "label": "RSR +애쉬 B2 d46 x10",
+   "deck": [
+    "ash",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 60,
+  "health": 7.2,
+  "rounds": 5.56,
+  "time": 291,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.7,
+  "sac": 2.7
+ },
+ {
+  "cfg": {
+   "label": "RSR +애쉬 B6 d46 x10 r220",
+   "deck": [
+    "ash",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 220
+     }
+    }
+   }
+  },
+  "win": 60,
+  "health": 7.2,
+  "rounds": 5.56,
+  "time": 290,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.7,
+  "sac": 2.8
+ },
+ {
+  "cfg": {
+   "label": "RSR +애쉬 B4 d46 x12",
+   "deck": [
+    "ash",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 12,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 57,
+  "health": 7.4,
+  "rounds": 5.52,
+  "time": 285,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.5,
+  "sac": 3.1
+ },
+ {
+  "cfg": {
+   "label": "RSR +애쉬 B1 d40 x10",
+   "deck": [
+    "ash",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 55,
+  "health": 6.4,
+  "rounds": 5.54,
+  "time": 293,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.7,
+  "sac": 2.8
+ },
+ {
+  "cfg": {
+   "label": "RSR +애쉬 B5 d40 x14",
+   "deck": [
+    "ash",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 14,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 53,
+  "health": 6.6,
+  "rounds": 5.44,
+  "time": 286,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.5,
+  "sac": 3.3
+ },
+ {
+  "cfg": {
+   "label": "노멀 +애쉬 B3 d52 x8",
+   "deck": [
+    "ash",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 52
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 8,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 50,
+  "health": 5.7,
+  "rounds": 5.32,
+  "time": 307,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 2
+ },
+ {
+  "cfg": {
+   "label": "노멀 +애쉬 B4 d46 x12",
+   "deck": [
+    "ash",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 12,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 46,
+  "health": 5.2,
+  "rounds": 5.27,
+  "time": 310,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 2.3
+ },
+ {
+  "cfg": {
+   "label": "노멀 +애쉬 B2 d46 x10",
+   "deck": [
+    "ash",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 46,
+  "health": 5.1,
+  "rounds": 5.27,
+  "time": 312,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 2
+ },
+ {
+  "cfg": {
+   "label": "노멀 +애쉬 B6 d46 x10 r220",
+   "deck": [
+    "ash",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 220
+     }
+    }
+   }
+  },
+  "win": 45,
+  "health": 5.1,
+  "rounds": 5.26,
+  "time": 311,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 2.1
+ },
+ {
+  "cfg": {
+   "label": "노멀 +애쉬 B1 d40 x10",
+   "deck": [
+    "ash",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 44,
+  "health": 5.2,
+  "rounds": 5.25,
+  "time": 318,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.8,
+  "sac": 1.9
+ },
+ {
+  "cfg": {
+   "label": "노멀 +애쉬 B5 d40 x14",
+   "deck": [
+    "ash",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 14,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 42,
+  "health": 5.2,
+  "rounds": 5.21,
+  "time": 314,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 2.3
+ },
+ {
+  "cfg": {
+   "label": "노멀 +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 38,
+  "health": 4.4,
+  "rounds": 5.03,
+  "time": 308,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 33,
+  "health": 4,
+  "rounds": 4.94,
+  "time": 317,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +애쉬 B6 d46 x10 r220",
+   "deck": [
+    "ash",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 220
+     }
+    }
+   }
+  },
+  "win": 27,
+  "health": 3.9,
+  "rounds": 4.92,
+  "time": 236,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.02,
+  "casts": 10.7,
+  "sac": 1.3
+ },
+ {
+  "cfg": {
+   "label": "화상 +애쉬 B2 d46 x10",
+   "deck": [
+    "ash",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 27,
+  "health": 3.8,
+  "rounds": 4.9,
+  "time": 235,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.02,
+  "casts": 10.6,
+  "sac": 1.2
+ },
+ {
+  "cfg": {
+   "label": "화상 +애쉬 B3 d52 x8",
+   "deck": [
+    "ash",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 52
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 8,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 27,
+  "health": 3.9,
+  "rounds": 4.88,
+  "time": 231,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 10.5,
+  "sac": 1.1
+ },
+ {
+  "cfg": {
+   "label": "화상 +애쉬 B4 d46 x12",
+   "deck": [
+    "ash",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 12,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 26,
+  "health": 3.9,
+  "rounds": 4.88,
+  "time": 234,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.02,
+  "casts": 10.6,
+  "sac": 1.5
+ },
+ {
+  "cfg": {
+   "label": "화상 +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 25,
+  "health": 2.9,
+  "rounds": 4.96,
+  "time": 240,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 10.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +애쉬 B5 d40 x14",
+   "deck": [
+    "ash",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 14,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 25,
+  "health": 3.5,
+  "rounds": 4.87,
+  "time": 236,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 1.4
+ },
+ {
+  "cfg": {
+   "label": "화상 +애쉬 B1 d40 x10",
+   "deck": [
+    "ash",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 25,
+  "health": 3.5,
+  "rounds": 4.81,
+  "time": 233,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.4,
+  "sac": 0.9
+ },
+ {
+  "cfg": {
+   "label": "화상 +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 24,
+  "health": 3.1,
+  "rounds": 4.86,
+  "time": 235,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +애쉬 B4 d46 x12",
+   "deck": [
+    "ash",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 12,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 24,
+  "health": 3,
+  "rounds": 4.51,
+  "time": 222,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.8,
+  "sac": 2.8
+ },
+ {
+  "cfg": {
+   "label": "혼합 +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 23,
+  "health": 1.9,
+  "rounds": 4.59,
+  "time": 229,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +애쉬 B5 d40 x14",
+   "deck": [
+    "ash",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 14,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 23,
+  "health": 2.9,
+  "rounds": 4.49,
+  "time": 221,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.8,
+  "sac": 2.8
+ },
+ {
+  "cfg": {
+   "label": "혼합 +애쉬 B6 d46 x10 r220",
+   "deck": [
+    "ash",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 220
+     }
+    }
+   }
+  },
+  "win": 23,
+  "health": 2.9,
+  "rounds": 4.48,
+  "time": 221,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.8,
+  "sac": 2.5
+ },
+ {
+  "cfg": {
+   "label": "혼합 +애쉬 B2 d46 x10",
+   "deck": [
+    "ash",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 46
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 22,
+  "health": 2.6,
+  "rounds": 4.46,
+  "time": 220,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.7,
+  "sac": 2.5
+ },
+ {
+  "cfg": {
+   "label": "혼합 +애쉬 B3 d52 x8",
+   "deck": [
+    "ash",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 52
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 8,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 22,
+  "health": 3,
+  "rounds": 4.46,
+  "time": 218,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.8,
+  "sac": 2.4
+ },
+ {
+  "cfg": {
+   "label": "혼합 +애쉬 B1 d40 x10",
+   "deck": [
+    "ash",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "ash": {
+      "damage": 40
+     }
+    },
+    "upcoming": {
+     "ash": {
+      "factor": 10,
+      "radius": 180
+     }
+    }
+   }
+  },
+  "win": 22,
+  "health": 2.8,
+  "rounds": 4.43,
+  "time": 219,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.8,
+  "sac": 2.1
+ },
+ {
+  "cfg": {
+   "label": "혼합 +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 20
+  },
+  "win": 20,
+  "health": 2.4,
+  "rounds": 4.67,
+  "time": 232,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.2,
+  "sac": 0
+ }
+]

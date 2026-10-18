@@ -1,0 +1,546 @@
+[
+ {
+  "cfg": {
+   "label": "RSR +큐어 d30",
+   "deck": [
+    "cure_master",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 30
+     }
+    }
+   }
+  },
+  "win": 78,
+  "health": 8.7,
+  "rounds": 5.78,
+  "time": 303,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +큐어 d26",
+   "deck": [
+    "cure_master",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 26
+     }
+    }
+   }
+  },
+  "win": 74,
+  "health": 8.5,
+  "rounds": 5.72,
+  "time": 307,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +큐어 d22",
+   "deck": [
+    "cure_master",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 22
+     }
+    }
+   }
+  },
+  "win": 71,
+  "health": 8.3,
+  "rounds": 5.71,
+  "time": 314,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 69,
+  "health": 8.3,
+  "rounds": 5.68,
+  "time": 309,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 67,
+  "health": 7.8,
+  "rounds": 5.66,
+  "time": 315,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +큐어 d30",
+   "deck": [
+    "cure_master",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 30
+     }
+    }
+   }
+  },
+  "win": 49,
+  "health": 5.6,
+  "rounds": 5.3,
+  "time": 316,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +큐어 d26",
+   "deck": [
+    "cure_master",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 26
+     }
+    }
+   }
+  },
+  "win": 44,
+  "health": 5.2,
+  "rounds": 5.19,
+  "time": 317,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +큐어 d22",
+   "deck": [
+    "cure_master",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 22
+     }
+    }
+   }
+  },
+  "win": 39,
+  "health": 4.4,
+  "rounds": 5.1,
+  "time": 318,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 37,
+  "health": 4.1,
+  "rounds": 5.01,
+  "time": 307,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 30,
+  "health": 3.9,
+  "rounds": 4.89,
+  "time": 310,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +큐어 d30",
+   "deck": [
+    "cure_master",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 30
+     }
+    }
+   }
+  },
+  "win": 27,
+  "health": 3.5,
+  "rounds": 4.87,
+  "time": 235,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 10.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 26,
+  "health": 2.8,
+  "rounds": 4.96,
+  "time": 240,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 10.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 24,
+  "health": 3,
+  "rounds": 4.86,
+  "time": 236,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +큐어 d22",
+   "deck": [
+    "cure_master",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 22
+     }
+    }
+   }
+  },
+  "win": 24,
+  "health": 2.9,
+  "rounds": 4.7,
+  "time": 230,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "화상 +큐어 d26",
+   "deck": [
+    "cure_master",
+    "red_dragon",
+    "santa",
+    "zeke",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 26
+     }
+    }
+   }
+  },
+  "win": 23,
+  "health": 2.9,
+  "rounds": 4.75,
+  "time": 233,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0.01,
+  "casts": 10.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +큐어 d30",
+   "deck": [
+    "cure_master",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 30
+     }
+    }
+   }
+  },
+  "win": 23,
+  "health": 2.4,
+  "rounds": 4.46,
+  "time": 220,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 22,
+  "health": 2.3,
+  "rounds": 4.67,
+  "time": 230,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40
+  },
+  "win": 22,
+  "health": 2.1,
+  "rounds": 4.61,
+  "time": 229,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +큐어 d26",
+   "deck": [
+    "cure_master",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 26
+     }
+    }
+   }
+  },
+  "win": 22,
+  "health": 2.3,
+  "rounds": 4.45,
+  "time": 218,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +큐어 d22",
+   "deck": [
+    "cure_master",
+    "zeke",
+    "luna",
+    "great_detective",
+    "jasmine"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 40,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 22
+     }
+    }
+   }
+  },
+  "win": 22,
+  "health": 2.2,
+  "rounds": 4.42,
+  "time": 219,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.9,
+  "sac": 0
+ }
+]

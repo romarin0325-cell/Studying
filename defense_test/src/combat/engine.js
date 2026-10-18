@@ -54,7 +54,7 @@ export const JOKER_COLORS=['red','blue','green','white','black'];
 export const UPCOMING={
   joker:{order:'cycle',fixed:null,burn:.23,slowAmount:.2,exposure:.06,roulette:3},
   underdog:{bonus:.8,factor:10,stun:3},
-  toffee:{factor:9,max:3,trigger:80,stun:3},
+  toffee:{factor:9,max:3,trigger:80,stun:3,minAlive:1},
   antropy:{factor:7,order:'clear-first'},
   ash:{factor:17,radius:180,refundGold:0},
   cure:{seconds:3},
@@ -1098,7 +1098,7 @@ export function step(s,dt){
     }
   }
   if(s.bombs?.length)s.bombs=s.bombs.filter(bomb=>{
-    if(!s.enemies.some(e=>e.hp>0&&e.progress>=bomb.progress-UPCOMING.toffee.trigger))return true;
+    if(!s.enemies.some(e=>e.hp>0&&e.progress>=bomb.progress-UPCOMING.toffee.trigger)||s.enemies.filter(e=>e.hp>0).length<(UPCOMING.toffee.minAlive||1)&&!s.enemies.some(e=>e.hp>0&&e.boss))return true; // bench knob: a bomb waits until enough enemies are alive (a boss always sets it off)
     for(const e of s.enemies.filter(x=>x.hp>0))damage(s,e,bomb.damage,'toffee_apple');
     event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress)});
     return false;

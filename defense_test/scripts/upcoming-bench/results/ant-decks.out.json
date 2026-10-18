@@ -1,0 +1,666 @@
+[
+ {
+  "cfg": {
+   "label": "RSR상위 +가디언(대조)",
+   "deck": [
+    "guardian",
+    "phantom",
+    "jasmine",
+    "time_magician",
+    "rumi"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 72,
+  "health": 7.3,
+  "rounds": 5.72,
+  "time": 341,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "디버프 +가디언(대조)",
+   "deck": [
+    "guardian",
+    "great_detective",
+    "frost_witch",
+    "flame_sage",
+    "phantom"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 62,
+  "health": 6.3,
+  "rounds": 5.62,
+  "time": 355,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "디버프 +앤트로피x7",
+   "deck": [
+    "antropy",
+    "great_detective",
+    "frost_witch",
+    "flame_sage",
+    "phantom"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 57,
+  "health": 6.4,
+  "rounds": 5.5,
+  "time": 335,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "디버프 +앤트로피x5",
+   "deck": [
+    "antropy",
+    "great_detective",
+    "frost_witch",
+    "flame_sage",
+    "phantom"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 55,
+  "health": 6.4,
+  "rounds": 5.5,
+  "time": 340,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR상위 +앤트로피x7",
+   "deck": [
+    "antropy",
+    "phantom",
+    "jasmine",
+    "time_magician",
+    "rumi"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 47,
+  "health": 6,
+  "rounds": 5.35,
+  "time": 290,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "RSR상위 +앤트로피x5",
+   "deck": [
+    "antropy",
+    "phantom",
+    "jasmine",
+    "time_magician",
+    "rumi"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 45,
+  "health": 5.8,
+  "rounds": 5.33,
+  "time": 291,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +가디언(대조)",
+   "deck": [
+    "guardian",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 33,
+  "health": 3.6,
+  "rounds": 5.1,
+  "time": 350,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +앤트로피x7",
+   "deck": [
+    "antropy",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 30,
+  "health": 3.4,
+  "rounds": 4.93,
+  "time": 309,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +가디언(대조)",
+   "deck": [
+    "guardian",
+    "zeke",
+    "luna",
+    "jasmine",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 28,
+  "health": 3,
+  "rounds": 4.8,
+  "time": 255,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "노멀 +앤트로피x5",
+   "deck": [
+    "antropy",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 27,
+  "health": 3.2,
+  "rounds": 4.87,
+  "time": 309,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.4,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라3 +가디언(대조)",
+   "deck": [
+    "guardian",
+    "siren",
+    "ancient_dragon",
+    "time_magician",
+    "lightning_sage"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 27,
+  "health": 2.1,
+  "rounds": 4.78,
+  "time": 282,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라2(베히모스) +가디언(대조)",
+   "deck": [
+    "guardian",
+    "siren",
+    "ancient_dragon",
+    "harmonious",
+    "behemoth"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 22,
+  "health": 1.8,
+  "rounds": 4.62,
+  "time": 275,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +앤트로피x7",
+   "deck": [
+    "antropy",
+    "zeke",
+    "luna",
+    "jasmine",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 22,
+  "health": 1.8,
+  "rounds": 4.42,
+  "time": 218,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라4 +가디언(대조)",
+   "deck": [
+    "guardian",
+    "behemoth",
+    "siren",
+    "ancient_dragon",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 20,
+  "health": 2.1,
+  "rounds": 4.53,
+  "time": 258,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "혼합 +앤트로피x5",
+   "deck": [
+    "antropy",
+    "zeke",
+    "luna",
+    "jasmine",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 18,
+  "health": 1.6,
+  "rounds": 4.32,
+  "time": 213,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라3 +앤트로피x7",
+   "deck": [
+    "antropy",
+    "siren",
+    "ancient_dragon",
+    "time_magician",
+    "lightning_sage"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 18,
+  "health": 1.7,
+  "rounds": 4.25,
+  "time": 229,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라3 +앤트로피x5",
+   "deck": [
+    "antropy",
+    "siren",
+    "ancient_dragon",
+    "time_magician",
+    "lightning_sage"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 18,
+  "health": 1.6,
+  "rounds": 4.12,
+  "time": 224,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라4 +앤트로피x7",
+   "deck": [
+    "antropy",
+    "behemoth",
+    "siren",
+    "ancient_dragon",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 18,
+  "health": 1.4,
+  "rounds": 4,
+  "time": 212,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라2(베히모스) +앤트로피x7",
+   "deck": [
+    "antropy",
+    "siren",
+    "ancient_dragon",
+    "harmonious",
+    "behemoth"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 17,
+  "health": 0.9,
+  "rounds": 4.1,
+  "time": 228,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라2(베히모스) +앤트로피x5",
+   "deck": [
+    "antropy",
+    "siren",
+    "ancient_dragon",
+    "harmonious",
+    "behemoth"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 17,
+  "health": 0.8,
+  "rounds": 3.95,
+  "time": 221,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라4 +앤트로피x5",
+   "deck": [
+    "antropy",
+    "behemoth",
+    "siren",
+    "ancient_dragon",
+    "great_detective"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 17,
+  "health": 1.2,
+  "rounds": 3.92,
+  "time": 208,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라1 +가디언(대조)",
+   "deck": [
+    "guardian",
+    "siren",
+    "ancient_dragon",
+    "harmonious",
+    "time_magician"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12
+  },
+  "win": 15,
+  "health": 1.2,
+  "rounds": 4.37,
+  "time": 288,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라1 +앤트로피x7",
+   "deck": [
+    "antropy",
+    "siren",
+    "ancient_dragon",
+    "harmonious",
+    "time_magician"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 13,
+  "health": 0.8,
+  "rounds": 3.5,
+  "time": 209,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 9.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "오라1 +앤트로피x5",
+   "deck": [
+    "antropy",
+    "siren",
+    "ancient_dragon",
+    "harmonious",
+    "time_magician"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 12,
+   "set": {
+    "upcoming": {
+     "antropy": {
+      "factor": 5
+     }
+    }
+   }
+  },
+  "win": 12,
+  "health": 0.6,
+  "rounds": 3.35,
+  "time": 202,
+  "disabled": 0,
+  "curse": 0,
+  "judged": 0,
+  "casts": 8.8,
+  "sac": 0
+ }
+]

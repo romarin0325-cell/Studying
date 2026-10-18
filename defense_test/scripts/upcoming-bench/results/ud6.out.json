@@ -1,0 +1,938 @@
+[
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,siren,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "siren",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 62,
+  "health": 6.5,
+  "rounds": 5.6,
+  "time": 343,
+  "disabled": 40.9,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,siren,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "siren",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 60,
+  "health": 7,
+  "rounds": 5.56,
+  "time": 340,
+  "disabled": 35.5,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,night_rabbit,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "night_rabbit",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 58,
+  "health": 6.2,
+  "rounds": 5.5,
+  "time": 314,
+  "disabled": 25.6,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,silver_rabbit,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 56,
+  "health": 6.5,
+  "rounds": 5.54,
+  "time": 333,
+  "disabled": 57.8,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,silver_rabbit,siren,mushroom_king",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "siren",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 54,
+  "health": 5.5,
+  "rounds": 5.42,
+  "time": 331,
+  "disabled": 48.6,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,silver_rabbit,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 52,
+  "health": 6.3,
+  "rounds": 5.52,
+  "time": 326,
+  "disabled": 53.1,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 star_boy,snow_rabbit,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "star_boy",
+    "snow_rabbit",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 52,
+  "health": 5.9,
+  "rounds": 5.42,
+  "time": 324,
+  "disabled": 37.8,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,night_rabbit,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "night_rabbit",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 48,
+  "health": 5.6,
+  "rounds": 5.44,
+  "time": 316,
+  "disabled": 31.5,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b star_boy,snow_rabbit,mushroom_king,joker",
+   "deck": [
+    "underdog",
+    "star_boy",
+    "snow_rabbit",
+    "mushroom_king",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 48,
+  "health": 5.4,
+  "rounds": 5.42,
+  "time": 326,
+  "disabled": 47.3,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,night_rabbit,siren,mushroom_king",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 48,
+  "health": 5.7,
+  "rounds": 5.34,
+  "time": 318,
+  "disabled": 29,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,night_rabbit,siren,mushroom_king",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 48,
+  "health": 5.3,
+  "rounds": 5.32,
+  "time": 315,
+  "disabled": 23,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.2,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,silver_rabbit,night_rabbit,mushroom_king",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "night_rabbit",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 44,
+  "health": 5.1,
+  "rounds": 5.34,
+  "time": 314,
+  "disabled": 28.9,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,silver_rabbit,night_rabbit,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "night_rabbit",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 44,
+  "health": 4.7,
+  "rounds": 5.28,
+  "time": 309,
+  "disabled": 35.8,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,silver_rabbit,siren,mushroom_king",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "siren",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 42,
+  "health": 4.8,
+  "rounds": 5.34,
+  "time": 331,
+  "disabled": 51.6,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,silver_rabbit,night_rabbit,mushroom_king",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "night_rabbit",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 42,
+  "health": 5.3,
+  "rounds": 5.3,
+  "time": 310,
+  "disabled": 38,
+  "curse": 0,
+  "judged": 0,
+  "casts": 12.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,night_rabbit,siren,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 42,
+  "health": 5.3,
+  "rounds": 5.24,
+  "time": 310,
+  "disabled": 23.4,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.4,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,night_rabbit,siren,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 42,
+  "health": 4.4,
+  "rounds": 5.24,
+  "time": 314,
+  "disabled": 26.5,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.4,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 star_boy,snow_rabbit,siren,mushroom_king",
+   "deck": [
+    "underdog",
+    "star_boy",
+    "snow_rabbit",
+    "siren",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 40,
+  "health": 4.8,
+  "rounds": 5.28,
+  "time": 330,
+  "disabled": 35.6,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b star_boy,snow_rabbit,siren,mushroom_king",
+   "deck": [
+    "underdog",
+    "star_boy",
+    "snow_rabbit",
+    "siren",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 40,
+  "health": 4,
+  "rounds": 5.26,
+  "time": 330,
+  "disabled": 39.8,
+  "curse": 0,
+  "judged": 0,
+  "casts": 10.5,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b snow_rabbit,silver_rabbit,siren,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "siren",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 40,
+  "health": 4.6,
+  "rounds": 5.24,
+  "time": 325,
+  "disabled": 47.5,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,silver_rabbit,night_rabbit,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "night_rabbit",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 38,
+  "health": 4.9,
+  "rounds": 5.28,
+  "time": 312,
+  "disabled": 24.2,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.6,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 star_boy,snow_rabbit,silver_rabbit,mushroom_king",
+   "deck": [
+    "underdog",
+    "star_boy",
+    "snow_rabbit",
+    "silver_rabbit",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 38,
+  "health": 4.7,
+  "rounds": 5.22,
+  "time": 321,
+  "disabled": 48.3,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.8,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "U4b star_boy,snow_rabbit,silver_rabbit,mushroom_king",
+   "deck": [
+    "underdog",
+    "star_boy",
+    "snow_rabbit",
+    "silver_rabbit",
+    "mushroom_king"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 28
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 10
+     }
+    }
+   }
+  },
+  "win": 38,
+  "health": 4.5,
+  "rounds": 5.2,
+  "time": 318,
+  "disabled": 55.9,
+  "curse": 0,
+  "judged": 0,
+  "casts": 11.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "F7d32 snow_rabbit,silver_rabbit,siren,joker",
+   "deck": [
+    "underdog",
+    "snow_rabbit",
+    "silver_rabbit",
+    "siren",
+    "joker"
+   ],
+   "stages": "3,9,15,21,27",
+   "seeds": 10,
+   "set": {
+    "hero": {
+     "joker": {
+      "damage": 22
+     },
+     "underdog": {
+      "damage": 32
+     }
+    },
+    "upcoming": {
+     "underdog": {
+      "stun": 2,
+      "factor": 7
+     }
+    }
+   }
+  },
+  "win": 36,
+  "health": 4.5,
+  "rounds": 5.28,
+  "time": 335,
+  "disabled": 46.1,
+  "curse": 0,
+  "judged": 0,
+  "casts": 13.7,
+  "sac": 0
+ }
+]

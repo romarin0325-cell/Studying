@@ -1,0 +1,274 @@
+[
+ {
+  "cfg": {
+   "label": "보스9종(10~18) RSR +큐어 d30",
+   "deck": [
+    "cure_master",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 30
+     }
+    }
+   }
+  },
+  "win": 90,
+  "health": 7.3,
+  "rounds": 5.9,
+  "time": 312,
+  "disabled": 3.1,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 9.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) RSR +큐어 d26",
+   "deck": [
+    "cure_master",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 26
+     }
+    }
+   }
+  },
+  "win": 85,
+  "health": 7.3,
+  "rounds": 5.85,
+  "time": 316,
+  "disabled": 3.1,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 10,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) RSR +큐어 d22",
+   "deck": [
+    "cure_master",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 22
+     }
+    }
+   }
+  },
+  "win": 83,
+  "health": 6.8,
+  "rounds": 5.83,
+  "time": 324,
+  "disabled": 3,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 10.1,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) RSR +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20
+  },
+  "win": 83,
+  "health": 7,
+  "rounds": 5.83,
+  "time": 320,
+  "disabled": 3.4,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 10,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) RSR +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "phantom",
+    "time_magician",
+    "avalanche_maid",
+    "guardian"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20
+  },
+  "win": 81,
+  "health": 6.7,
+  "rounds": 5.81,
+  "time": 317,
+  "disabled": 3.6,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 10,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) 노멀 +큐어 d30",
+   "deck": [
+    "cure_master",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 30
+     }
+    }
+   }
+  },
+  "win": 36,
+  "health": 2.3,
+  "rounds": 5.33,
+  "time": 344,
+  "disabled": 3.7,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 11.7,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) 노멀 +큐어 d26",
+   "deck": [
+    "cure_master",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 26
+     }
+    }
+   }
+  },
+  "win": 34,
+  "health": 1.8,
+  "rounds": 5.3,
+  "time": 350,
+  "disabled": 3.4,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 11.9,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) 노멀 +큐어 d22",
+   "deck": [
+    "cure_master",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20,
+   "set": {
+    "hero": {
+     "cure_master": {
+      "damage": 22
+     }
+    }
+   }
+  },
+  "win": 29,
+  "health": 1.6,
+  "rounds": 5.25,
+  "time": 352,
+  "disabled": 3.8,
+  "curse": 0.22,
+  "judged": 0,
+  "casts": 12,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) 노멀 +flame_sage(대조)",
+   "deck": [
+    "flame_sage",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20
+  },
+  "win": 24,
+  "health": 1.3,
+  "rounds": 5.12,
+  "time": 334,
+  "disabled": 5,
+  "curse": 0.21,
+  "judged": 0,
+  "casts": 11.3,
+  "sac": 0
+ },
+ {
+  "cfg": {
+   "label": "보스9종(10~18) 노멀 +lightning_sage(대조)",
+   "deck": [
+    "lightning_sage",
+    "star_boy",
+    "snow_rabbit",
+    "night_rabbit",
+    "siren"
+   ],
+   "stages": "10,11,12,13,14,15,16,17,18",
+   "seeds": 20
+  },
+  "win": 10,
+  "health": 0.3,
+  "rounds": 4.92,
+  "time": 343,
+  "disabled": 4.7,
+  "curse": 0.2,
+  "judged": 0,
+  "casts": 11.1,
+  "sac": 0
+ }
+]

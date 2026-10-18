@@ -1,0 +1,93 @@
+[
+ {
+  "label": "d22 fixed red",
+  "id": "joker",
+  "ranks": {
+   "3": 0.9195562367167334
+  },
+  "mid": {
+   "crowd": "1.14",
+   "boss": "0.93",
+   "crisis": "0.90",
+   "long": "0.71"
+  }
+ },
+ {
+  "label": "d22 fixed blue",
+  "id": "joker",
+  "ranks": {
+   "3": 0.8945902458878241
+  },
+  "mid": {
+   "crowd": "1.15",
+   "boss": "0.79",
+   "crisis": "1.07",
+   "long": "0.56"
+  }
+ },
+ {
+  "label": "d22 fixed green",
+  "id": "joker",
+  "ranks": {
+   "3": 1.035454023570244
+  },
+  "mid": {
+   "crowd": "1.16",
+   "boss": "1.16",
+   "crisis": "0.88",
+   "long": "0.93"
+  }
+ },
+ {
+  "label": "d22 fixed white",
+  "id": "joker",
+  "ranks": {
+   "3": 0.8014208322962223
+  },
+  "mid": {
+   "crowd": "1.10",
+   "boss": "0.77",
+   "crisis": "0.78",
+   "long": "0.56"
+  }
+ },
+ {
+  "label": "d22 fixed black",
+  "id": "joker",
+  "ranks": {
+   "3": 0.9520795631837409
+  },
+  "mid": {
+   "crowd": "1.10",
+   "boss": "1.03",
+   "crisis": "0.85",
+   "long": "0.83"
+  }
+ },
+ {
+  "label": "d22 cycle",
+  "id": "joker",
+  "ranks": {
+   "3": 1.0360049859835079
+  },
+  "mid": {
+   "crowd": "1.23",
+   "boss": "1.07",
+   "crisis": "1.02",
+   "long": "0.82"
+  }
+ },
+ {
+  "label": "d22 random order",
+  "id": "joker",
+  "ranks": {
+   "3": 0.9384515309461268
+  },
+  "mid": {
+   "crowd": "1.13",
+   "boss": "0.93",
+   "crisis": "0.97",
+   "long": "0.72"
+  }
+ }
+]

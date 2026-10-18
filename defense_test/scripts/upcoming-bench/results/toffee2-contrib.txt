@@ -1,0 +1,5 @@
+I d36 x7 min5 s3             toffee_apple  1★ 1.21 | 3★ 1.08 | 5★ 0.91  (예산 1.1)  mid:{"crowd":"1.97","boss":"0.74","crisis":"1.01","long":"0.61"}
+J d40 x6 min5 s3             toffee_apple  1★ 1.24 | 3★ 1.10 | 5★ 0.88  (예산 1.1)  mid:{"crowd":"1.90","boss":"0.79","crisis":"1.05","long":"0.65"}
+K d36 x8 min5 s2             toffee_apple  1★ 1.33 | 3★ 1.14 | 5★ 0.96  (예산 1.1)  mid:{"crowd":"2.18","boss":"0.75","crisis":"0.97","long":"0.65"}
+L d34 x8 min5 s3             toffee_apple  1★ 1.24 | 3★ 1.11 | 5★ 0.94  (예산 1.1)  mid:{"crowd":"2.08","boss":"0.71","crisis":"1.07","long":"0.59"}
+M d44 x5 min5 s3             toffee_apple  1★ 1.25 | 3★ 1.11 | 5★ 0.90  (예산 1.1)  mid:{"crowd":"1.86","boss":"0.86","crisis":"1.03","long":"0.70"}

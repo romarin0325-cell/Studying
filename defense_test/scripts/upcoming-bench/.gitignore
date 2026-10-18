@@ -1,0 +1,5 @@
+.p-*.json
+.u-*.json
+.tmp-*.json
+node_modules
+*.log
