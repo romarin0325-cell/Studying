@@ -25,6 +25,7 @@ STAT_RENEWAL, SMART_AUTO_AND_CHALLENGES, RELIC_RENEWAL, GROWTH_BALANCE, BALANCE_
 ## 4. 기획
 
 - [UPCOMING_COMPANIONS.md](UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
+- [UPCOMING_BALANCE.md](UPCOMING_BALANCE.md): 추가 예정 동료의 더미 구현 측정과 수치 제안서(2026-10-18). 확정 전이며, 측정 도구는 브랜치 `claude/upcoming-dummy-bench`.
 
 ## 고칠 때 순서
 
