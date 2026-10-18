@@ -248,6 +248,20 @@
       "height": 576
     },
     {
+      "id": "greenhouse-dawn",
+      "source": "defense_test/assets/merge/greenhouse-dawn.webp",
+      "sha256": "95a817eacd276c220d749ed561a019f474c8c66e0d7451eca98962b779edc369",
+      "width": 720,
+      "height": 1290
+    },
+    {
+      "id": "greenhouse-beds-dawn",
+      "source": "defense_test/assets/merge/greenhouse-beds-dawn.webp",
+      "sha256": "2885c94a3246a61cd979f6ae612a3ac96e51ac2f2e81b5a30d8c70442e206775",
+      "width": 768,
+      "height": 576
+    },
+    {
       "id": "gifts",
       "source": "defense_test/assets/merge/gifts.webp",
       "sha256": "c0a3e57c8aa7f7a8a0d97e1dbea448839091a875740aa924ffbce241ffeeafaf",

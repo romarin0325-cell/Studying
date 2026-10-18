@@ -1616,6 +1616,8 @@ export const ASSET_PATHS = {
   "summon-altar": "./assets/merge/summon-altar.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",
   "greenhouse-beds": "./assets/merge/greenhouse-beds.webp",
+  "greenhouse-dawn": "./assets/merge/greenhouse-dawn.webp",
+  "greenhouse-beds-dawn": "./assets/merge/greenhouse-beds-dawn.webp",
   "gifts": "./assets/merge/gifts.webp",
   "fx-emblems": "./assets/merge/fx-emblems.webp",
   "bosses": "./assets/moonlit/realm-bosses.webp",

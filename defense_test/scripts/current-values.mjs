@@ -2,9 +2,9 @@
 // Generated with the other reports (node defense_test/scripts/generated-reports.mjs) and checked by --check and the unit
 // tests, so the numbers cannot drift from the game. The other docs are dated records of the day they were written;
 // when one of their numbers disagrees with this file, this file is right.
-import {HEROES,ARTIFACTS,ROSTER,HIDDEN,TUNING} from '../src/content.js';
+import {HEROES,ARTIFACTS,ROSTER,HIDDEN,TUNING,MAIN_STAGES,PART_STAGES,PARTS,CLEAR_UNLOCKS} from '../src/content.js';
 import * as E from '../src/combat/engine.js';
-import {PERFECT_REWARD,guardianOf} from '../src/economy.js';
+import {PERFECT_REWARD,guardianOf,critChance,critDamage,stardustRate,bedCost,bedMax,GARDENS,roseAttack,springGauge,seedGold} from '../src/economy.js';
 
 const SHAPE={single:'단일',pulse:'원형(자기 칸)',beam:'관통',splash:'범위',cleave:'부채꼴',zone:'장판',cross:'십자',bounce:'도약',chain:'연쇄'};
 const CLASS={tall:'큼',medium:'보통',short:'작음'};
@@ -21,10 +21,20 @@ export function currentValues(){
   lines.push('## 규칙','',
     '- **필살기 피해:** 필살기는 시전 순간 동료 정보에 보이는 위력(`combatStats().damage`)에 배율을 곱한다. 성급·훈련·강화·온실·수집 보너스에 더해 배치 오라, 켜져 있는 필살기 버프, 유물 위력 보너스가 모두 들어간다. 같은 종류 안에서는 가장 센 것 하나(유물은 합산)이고 종류끼리는 곱한다. 그 시전이 거는 버프·노출은 그 시전의 피해에 들어가지 않는다.',
     '- **받는 피해 증가 효과(노출, 확대경, 왕의 인장 등):** 위와 별개로 적에게 걸려 필살기와 일반 공격 모두에 적용된다.',
+    `- **메인 스테이지:** ${MAIN_STAGES}개. ${PARTS.map(x=>`제${x.id}부 「${x.name}」`).join(', ')} 각 ${PART_STAGES}개(5개 장 × 9). 적 체력은 두 부 모두 같은 기울기로 이어진다. 제2부는 스테이지 ${PART_STAGES}를 클리어하면 열린다.`,
+    `- **스테이지 ${Object.keys(CLEAR_UNLOCKS)[0]} 첫 클리어:** 제2부와 새벽 온실이 열리고 ${Object.values(CLEAR_UNLOCKS)[0].map(id=>HEROES.find(h=>h.id===id).name).join(', ')}이(가) 합류한다(임시 편성, 이달의 수호자 순환에도 남아 있다).`,
     `- **퍼펙트 클리어:** 코어 체력을 잃지 않고 메인 스테이지를 클리어하면 퍼펙트. 스테이지마다 첫 퍼펙트에 꿈의결정 ${PERFECT_REWARD}.`,
     `- **일반 소환 UR(${ROSTER.UR.length}명):** ${ROSTER.UR.map(id=>HEROES.find(h=>h.id===id).name).join(', ')}. 매주 월요일(UTC+9) 순서대로 픽업이 돈다.`,
     `- **이달의 수호자(히든 ${HIDDEN.length}명, 시즌 소환에서만):** ${HIDDEN.map(id=>HEROES.find(h=>h.id===id).name).join(' → ')} 순서로 월마다 한 명. 월 번호는 (연도×12+월 인덱스) % ${HIDDEN.length}이고 지금 2026년 10월은 ${HEROES.find(h=>h.id===guardianOf(2026,9)).name}, 2027년 1월은 ${HEROES.find(h=>h.id===guardianOf(2027,0)).name}.`,
     `- **소환 확률:** C/R/SR/UR = ${TUNING.heroRates.map(r=>(r*100).toFixed(1).replace(/\.0$/,'')+'%').join(' / ')}, 천장 ${TUNING.pity.normal}/${TUNING.pity.season}.`,'');
+  const bedRows=GARDENS.flatMap(g=>g.beds.map(id=>{const b=TUNING.beds[id],max=bedMax(id),name={rose:'용기의 장미',spring:'별이슬 샘',seed:'황금 씨앗',crit:'표적의 엉겅퀴',critDamage:'일격의 불꽃나리',stardust:'별비 은방울'}[id];
+    const effect={rose:['위력',l=>'+'+num(roseAttack(l)*100)+'%'],spring:['최대 별빛',l=>String(springGauge(l))],seed:['시작 골드',l=>'+'+seedGold(l)],crit:['치명타 확률',l=>num(critChance(l)*100)+'%'],critDamage:['치명타 대미지',l=>num(critDamage(l)*100)+'%'],stardust:['별똥별 가속(방치·파견 별가루)',l=>'+'+num(stardustRate(l)*100)+'%']}[id];
+    const total=Number.isFinite(max)?Array.from({length:max},(_,l)=>bedCost(id,l)).reduce((a,c)=>a+c,0):null;
+    return `| ${g.id==='dream'?'꿈의 온실':'새벽 온실'} | ${name} | 스테이지 ${b.unlock} | ${effect[0]} | ${effect[1](0)} | ${Number.isFinite(max)?`${effect[1](max)} (레벨 ${max}에서 만개)`:'제한 없음(비용이 가파르게 오름)'} | ${bedCost(id,0)} | ${total===null?'-':total} |`;}));
+  lines.push('## 정원','',
+    '두 정원에 화단이 셋씩 있다. 새벽 온실의 화단은 소프트캡에서 만개하고 더 키울 수 없다. 치명타는 직접 타격·지속 피해·필살기 모두에 적용되며 즉사와 고정 피해는 제외한다. 별똥별 가속은 방치 보상과 파견 보상을 받는 순간에 곱한다.','',
+    '| 정원 | 화단 | 열리는 곳 | 효과 | 시작 | 소프트캡 | 첫 레벨 별가루 | 만개까지 합계 |','|---|---|---|---|---|---|---:|---:|',
+    ...bedRows,'');
   lines.push('## 필살기 상수','',
     '| 항목 | 값 |','|---|---|',
     `| 가디언 대륙의 맥동 | 위력 ${E.QUAKE_FACTOR}배 |`,

@@ -189,6 +189,8 @@ try{
     assert.ok(navRect.y>height-100,'navigation remains at the bottom');
     await page.locator('.lb-touch').click();assert.equal((await profile(page)).dreams,640);assert.equal(await page.locator('#greet-cue').count(),0);
     await nav(page,'정원');await page.locator('.gd').waitFor();assert.equal(await page.locator('.bed.locked').count(),2);await page.locator('[data-bed-grow="rose"]').click();assert.equal((await profile(page)).beds.rose,1);assert.equal(await page.locator('.bed[data-bed="rose"] .bed-level').innerText(),'Lv.1');
+    await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
+    await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
     await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),31);assert.equal(await page.locator('.cards .cc.unowned').count(),26);
     await shot(page,'collection',width,height);
@@ -207,6 +209,8 @@ try{
     await page.locator('[data-banner="relic"]').click();await shot(page,'relic-summon',width,height);
     assert.match(await page.locator('[data-draw="1"]').innerText(),/1회 소환/);
     await nav(page,'모험');assert.equal(await page.locator('.stage-list .stage').count(),9);assert.equal(await page.locator('[data-cycle="4"]').isDisabled(),true,'chapters open as they are reached');
+    assert.equal(await page.locator('.part-tabs .part').count(),2);assert.equal(await page.locator('.part[data-part="2"]').getAttribute('data-locked'),'true','part two is locked until stage 45');
+    await page.locator('.part[data-part="2"]').click();assert.ok((await page.locator('.part-teaser').innerText()).includes('새벽의 별길'));await close(page);
     await page.locator('[data-prepare-stage="1"]').click();await page.locator('#sheet-footer [data-action="team"]').click();
     await page.locator('[data-action="save-team"]').click();
     assert.equal(await page.locator('[data-begin="main"]').count(),1,'team confirmation returns to preparation');

@@ -25,6 +25,7 @@ STAT_RENEWAL, SMART_AUTO_AND_CHALLENGES, RELIC_RENEWAL, GROWTH_BALANCE, BALANCE_
 ## 4. 기획
 
 - [UPCOMING_COMPANIONS.md](UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
+- [DAWN_GARDEN.md](DAWN_GARDEN.md): 제2부(스테이지 46~90)와 새벽 온실(치명타·별똥별 가속)의 규칙, 곡선, 측정, 테스트 도구(2026-10-19, 10차).
 
 ## 고칠 때 순서
 

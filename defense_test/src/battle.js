@@ -1,5 +1,5 @@
 import {HERO} from './content.js';
-import {heroMultiplier,specialMultiplier,springGauge,seedGold,collectionBonus,relicLevel} from './economy.js';
+import {heroMultiplier,specialMultiplier,springGauge,seedGold,collectionBonus,relicLevel,critStats} from './economy.js';
 import * as engine from './combat/engine.js';
 import {TEAM_SIZE} from './team-config.js';
 
@@ -10,7 +10,7 @@ export function createBattle(profile){
   const relicAttack=a.relicAttack??collectionBonus(profile.relics),relicLevels=a.relicLevels??Object.fromEntries(profile.equipped.map(id=>[id,relicLevel(profile.relics[id])]));
   const run=engine.newRun({deck:a.deck,chapter:a.stage-1,seed:a.seed,artifacts:profile.equipped,meta,
     relicAttack,relicLevels,mode:a.mode,boon:a.boon,tier:a.tier||'easy',met:Math.min(9,profile.cleared),
-    gaugeMax:springGauge(profile.beds.spring),startGold:seedGold(profile.beds.seed)});
+    gaugeMax:springGauge(profile.beds.spring),startGold:seedGold(profile.beds.seed),crit:critStats(profile.beds,profile.cleared)});
   if(a.mode==='weekly'){run.globalAttack=.05*a.boon;run.gauge=Math.min(run.gaugeMax,run.gauge+(TEAM_SIZE-a.boon)*4);}
   // Monthly: a boss that reaches the core (7 damage) ends the challenge.
   if(a.mode==='monthly')run.health=engine.MONTHLY_HEALTH;
@@ -20,7 +20,7 @@ export function resumeBattle(profile){
   const a=profile.active;if(!a?.run)return null;
   const s=engine.restore(a.run);if(!s||s.mode!==a.mode||s.chapter!==a.stage-1||s.deck.join()!==a.deck.join())return null;
   const expected=createBattle(profile);
-  if(!expected||JSON.stringify(s.meta)!==JSON.stringify(expected.meta)||s.relicAttack!==expected.relicAttack||JSON.stringify(s.relicLevels||{})!==JSON.stringify(expected.relicLevels)||(s.gaugeMax||engine.GAUGE_MAX)!==expected.gaugeMax||s.artifacts.join()!==expected.artifacts.join()||s.boon!==a.boon||s.seed!==a.seed||(s.tier||'easy')!==(a.tier||'easy'))return null;
+  if(!expected||JSON.stringify(s.meta)!==JSON.stringify(expected.meta)||s.relicAttack!==expected.relicAttack||JSON.stringify(s.relicLevels||{})!==JSON.stringify(expected.relicLevels)||(s.gaugeMax||engine.GAUGE_MAX)!==expected.gaugeMax||s.crit!==undefined&&JSON.stringify(s.crit)!==JSON.stringify(expected.crit)||s.artifacts.join()!==expected.artifacts.join()||s.boon!==a.boon||s.seed!==a.seed||(s.tier||'easy')!==(a.tier||'easy'))return null;
   return s;
 }
 // Optional helper keeps idle play moving; it never changes targets or placement.

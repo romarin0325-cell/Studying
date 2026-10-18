@@ -33,7 +33,7 @@ export class Renderer {
   float(text,x,y,color='#fff2cb',size=24){this.floats.push({text,x,y,color,size,life:1.1,total:1.1});if(this.floats.length>20)this.floats.shift();}
   event(e){
     this.fx.event(e);
-    if(e.type==='hit'){this.bursts(e.x,e.y-20,HERO[e.hero]?.color||'#fff1c9',e.big?9:4,.6);if(e.big&&this.floats.length<10)this.float(String(e.damage),e.x,e.y-30,'#fff3d1',e.damage>300?24:18);}
+    if(e.type==='hit'){this.bursts(e.x,e.y-20,HERO[e.hero]?.color||'#fff1c9',e.big?9:4,.6);if(e.crit)this.bursts(e.x,e.y-22,'#ffd96b',e.big?7:3,.75);if(e.big&&this.floats.length<10)this.float(String(e.damage),e.x,e.y-30,e.crit?'#ffd45a':'#fff3d1',e.crit?(e.damage>300?30:23):e.damage>300?24:18);}
     if(e.type==='kill'){this.bursts(e.x,e.y-15,e.color||'#ebd8a5',e.boss?32:8,e.boss?1.5:.6);if(e.boss)this.shake=9;}
     if(e.type==='summon'){const p=cellPoint(e.index);this.effects.push({type:'summon',...p,color:HERO[e.hero].color,life:.65,total:.65});this.bursts(p.x,p.y,HERO[e.hero].color,12);}
     // Gift ribbon: the summon arrived as a 2-star wearing a ribbon (pink bow, sparkles, a short label).
@@ -61,15 +61,22 @@ export class Renderer {
     ctx.fillStyle='#253b47';ctx.fillRect(0,0,720,780);
     const realm=CHAPTERS[chapter]?.background,img=realm!==undefined?this.art.images['realms-expansion']:this.art.images.garden;
     if(img){if(realm!==undefined){const cell=img.naturalWidth/3;ctx.drawImage(img,realm*cell,0,cell,img.naturalHeight,0,0,720,780);}else ctx.drawImage(img,0,0,720,780);}
-    const dim=ctx.createLinearGradient(0,0,0,780);dim.addColorStop(0,'#101c2e55');dim.addColorStop(.5,'#0d24321a');dim.addColorStop(1,'#0a202f66');ctx.fillStyle=dim;ctx.fillRect(0,0,720,780);
-    line(ctx,PATH,'#192d37a6',57);line(ctx,PATH,'#afa89570',48);line(ctx,PATH,'#cfc6a728',36);
+    const dawn=CHAPTERS[chapter]?.part===2;
+    if(dawn){
+      // The same world at first light: rose-gold sky wash from the top, a low sun glow, plum shadows.
+      ctx.globalCompositeOperation='soft-light';const wash=ctx.createLinearGradient(0,0,0,780);wash.addColorStop(0,'#ff86aae6');wash.addColorStop(.5,'#ffb27acc');wash.addColorStop(1,'#a85a9ae6');ctx.fillStyle=wash;ctx.fillRect(0,0,720,780);
+      ctx.globalCompositeOperation='screen';const sun=ctx.createRadialGradient(540,60,10,540,60,520);sun.addColorStop(0,'#ffd7a2aa');sun.addColorStop(.5,'#ffb48a44');sun.addColorStop(1,'#ffb48a00');ctx.fillStyle=sun;ctx.fillRect(0,0,720,780);
+      ctx.globalCompositeOperation='source-over';
+    }
+    const dim=ctx.createLinearGradient(0,0,0,780);if(dawn){dim.addColorStop(0,'#2a1a3a44');dim.addColorStop(.5,'#2a1a2a12');dim.addColorStop(1,'#2a162c55');}else{dim.addColorStop(0,'#101c2e55');dim.addColorStop(.5,'#0d24321a');dim.addColorStop(1,'#0a202f66');}ctx.fillStyle=dim;ctx.fillRect(0,0,720,780);
+    line(ctx,PATH,dawn?'#2c1c30a6':'#192d37a6',57);line(ctx,PATH,dawn?'#d2b7a070':'#afa89570',48);line(ctx,PATH,dawn?'#f0d4b230':'#cfc6a728',36);
     ctx.setLineDash([1,20]);line(ctx,PATH,'#f9df962e',2);ctx.setLineDash([]);
     // Neutral, identical inlaid tiles. No authored role or optimal-place markers.
     for(let i=0;i<25;i++){
       const p=cellPoint(i),x=p.x-42,y=p.y-42;
       rounded(ctx,x,y+3,84,84,6);ctx.fillStyle='#10273185';ctx.fill();
-      rounded(ctx,x,y,84,82,6);ctx.fillStyle=(Math.floor(i/5)+i%5)%2?'#48616a90':'#5d72768a';ctx.fill();
-      ctx.strokeStyle='#c7d6d029';ctx.lineWidth=1.5;ctx.stroke();
+      rounded(ctx,x,y,84,82,6);ctx.fillStyle=dawn?((Math.floor(i/5)+i%5)%2?'#6a566a90':'#7d68788a'):((Math.floor(i/5)+i%5)%2?'#48616a90':'#5d72768a');ctx.fill();
+      ctx.strokeStyle=dawn?'#e6cfd029':'#c7d6d029';ctx.lineWidth=1.5;ctx.stroke();
       line(ctx,[[x+9,y+2],[x+75,y+2]],'#e5e3c235',1);
       for(const [dx,dy] of [[-28,-28],[28,-28],[-28,28],[28,28]]){ctx.fillStyle='#d8dbca70';ctx.fillRect(p.x+dx-1,p.y+dy-1,2,2);}
       star(ctx,p.x,p.y,4,'#d0d9d24a');
@@ -119,11 +126,11 @@ export class Renderer {
     if(s.phase==='intermission'){ctx.textAlign='center';ctx.font='600 21px system-ui';ctx.fillStyle='#f4e5c0';ctx.fillText(`다음 웨이브까지 ${Math.max(1,Math.ceil(s.breakTime))}초`,360,737);}
     ctx.restore();
   }
-  drawDecor(s){const ctx=this.ctx,t=this.clock;
+  drawDecor(s){const ctx=this.ctx,t=this.clock,dawn=CHAPTERS[s.chapter]?.part===2;
     shadow(ctx,76,144,42,.35);if(!this.art.creature(ctx,15,76,156,112)){star(ctx,76,126,32,'#b597e5',t*.1);}
     if(!this.decorGlow){this.decorGlow=ctx.createRadialGradient(76,136,4,76,136,55);this.decorGlow.addColorStop(0,'#bcd0ff44');this.decorGlow.addColorStop(1,'#bcd0ff00');}ctx.fillStyle=this.decorGlow;ctx.fillRect(21,81,110,110);
-    ctx.textAlign='center';ctx.fillStyle='#f0e3c5';ctx.font='600 18px system-ui';ctx.fillText(CHAPTERS[s.chapter].name,360,85);ctx.fillStyle='#b8d0d5';ctx.font='13px Georgia,serif';ctx.fillText('✦  D R E A M W E A V E R  ✦',360,59);
-    for(let i=0;i<9;i++){const x=(i*103+Math.sin(t*.2+i)*20)%720,y=(i*83-t*7+7800)%780;star(ctx,x,y,1.8+Math.sin(t+i),i%2?'#c7dfc580':'#e5d7a380',t*.2);}
+    ctx.textAlign='center';ctx.fillStyle=dawn?'#ffe6d2':'#f0e3c5';ctx.font='600 18px system-ui';ctx.fillText(CHAPTERS[s.chapter].name,360,85);ctx.fillStyle=dawn?'#e8c4c8':'#b8d0d5';ctx.font='13px Georgia,serif';ctx.fillText('✦  D R E A M W E A V E R  ✦',360,59);
+    for(let i=0;i<(dawn?14:9);i++){const x=(i*103+Math.sin(t*.2+i)*20)%720,y=(i*83-t*7+7800)%780;star(ctx,x,y,1.8+Math.sin(t+i),dawn?(i%2?'#ffd2b4b0':'#ffc4d6b0'):(i%2?'#c7dfc580':'#e5d7a380'),t*.2);}
   }
   drawHero(s,index){const ctx=this.ctx,u=s.board[index],p=cellPoint(index);if(this.drag?.uid===u.uid){shadow(ctx,p.x,p.y+24,20,.2);return;}
     shadow(ctx,p.x,p.y+29,26);

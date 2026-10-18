@@ -85,15 +85,15 @@ function soloWinner(s){
   return boosted[0];
 }
 
-test('the exact rarity roster has independent valid stats and all 45 stages rotate the nine guardians',()=>{
+test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
   assert.equal(HEROES.length,31);assert.equal(new Set(HEROES.map(h=>h.id)).size,31);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹']);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
-  assert.equal(CHAPTERS.length,45);assert.equal(CHAPTERS[8].hp,3.5);
+  assert.equal(CHAPTERS.length,90);assert.equal(CHAPTERS[8].hp,3.5);assert.equal(CHAPTERS[44].part,1);assert.equal(CHAPTERS[45].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
   const step=CHAPTERS[1].hp-CHAPTERS[0].hp;
-  for(let i=1;i<45;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-step)<1e-12);
+  for(let i=1;i<90;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-step)<1e-12);
 });
 
 test('six main waves contain exactly two copies of one boss and stage nine follows the renewed base health and slope',()=>{

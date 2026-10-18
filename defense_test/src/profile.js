@@ -1,5 +1,5 @@
-import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,CHALLENGE_WAVES,ROSTER} from './content.js';
-import {calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
+import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS} from './content.js';
+import {calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,bedMax,bedFull,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
@@ -12,7 +12,7 @@ import {CONSTELLATIONS} from './library.js';
 export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0,bondXp:0});
 export function createProfile(now=Date.now()){
-  return (UNLOCKED?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,beds:{rose:0,spring:0,seed:0},bedRev:3,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
+  return (UNLOCKED?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,perfect:[],
@@ -50,7 +50,7 @@ const BASKET_MS=TUNING.basketHours*HOUR;
 export function basketState(p,now){const elapsed=Math.max(0,now-p.basket.at),ready=Math.min(TUNING.basketMax,Math.floor(elapsed/BASKET_MS));return {ready,full:ready>=TUNING.basketMax,nextIn:ready>=TUNING.basketMax?0:BASKET_MS-elapsed%BASKET_MS,next:p.basket.next};}
 export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
-  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!=='rose,seed,spring'||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==3||p.relicRev!==2||!integer(p.cleared,45)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
+  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!==[...BED_IDS].sort().join()||!BED_IDS.every(id=>integer(p.beds[id],bedMax(id)))||p.bedRev!==4||p.relicRev!==2||!integer(p.cleared,MAIN_STAGES)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.pity||!integer(p.pity.normal)||!integer(p.pity.season))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond,BOND_MAX)||!integer(e.bondXp)||e.bondXp>=Math.max(1,bondNeed(e.bond));}))return false;
   if(!p.gifts||typeof p.gifts!=='object'||Object.keys(p.gifts).sort().join()!=='bouquet,candy,letter'||!GIFT_IDS.every(id=>integer(p.gifts[id],999)))return false;
@@ -66,13 +66,13 @@ export function validateProfile(p){
   if(['combat','idle','free','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
   if(!validStudy(p.study))return false;
   if(!p.basket||!integer(p.basket.at)||!integer(p.basket.next,GIFT_IDS.length-1))return false;
-  if(!Array.isArray(p.perfect)||p.perfect.length>45||new Set(p.perfect).size!==p.perfect.length||p.perfect.some((n,i)=>(i&&n<=p.perfect[i-1])||!integer(n,45)||n<1||n>p.cleared))return false;
+  if(!Array.isArray(p.perfect)||p.perfect.length>MAIN_STAGES||new Set(p.perfect).size!==p.perfect.length||p.perfect.some((n,i)=>(i&&n<=p.perfect[i-1])||!integer(n,MAIN_STAGES)||n<1||n>p.cleared))return false;
   if(!['standard','high','low'].includes(p.settings.quality)||!['monthlyBest','monthlyLifetime','monthlyClaim'].every(k=>validRecord(p[k])))return false;
   if(p.monthlyClaim&&p.monthlyClaim.period!==p.monthly)return false;
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
-  if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly'].includes(r.mode)||!integer(r.stage,45)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
+  if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly'].includes(r.mode)||!integer(r.stage,MAIN_STAGES)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
   for(const k of ['weekly','monthly'])if(p[k]!==null&&(typeof p[k]!=='string'||!/^\d{4}-\d{2}(?:-\d{2})?$/.test(p[k])))return false;
-  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,45)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
+  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
   const a=p.active;
   if(a){
     if(a.stage>p.cleared+1||!integer(a.seed,0xffffffff)||!a.seed||a.token.length>100||a.run!==null&&(typeof a.run!=='string'||a.run.length>2*1024*1024))return false;
@@ -125,7 +125,7 @@ export function migrateRelicSnapshot(p){
   if(a.relicAttack===undefined)a.relicAttack=Number.isFinite(run?.relicAttack)?run.relicAttack:collectionBonus(p.relics);
   if(a.relicLevels===undefined){const from=run?.relicLevels&&typeof run.relicLevels==='object'&&!Array.isArray(run.relicLevels)?run.relicLevels:null;a.relicLevels=Object.fromEntries(equipped.map(id=>[id,from&&Number.isInteger(from[id])?from[id]:relicLevel(p.relics?.[id])]));}
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
@@ -137,6 +137,14 @@ export function migrateBeds(p){
   if(p.beds===undefined&&integer(p.garden)&&p.garden>=1){p.beds={rose:4*(p.garden-1),spring:0,seed:0};delete p.garden;p.bedRev=2;}
   if(p.beds&&typeof p.beds==='object'&&p.bedRev===undefined&&integer(p.beds.rose)){p.beds.rose*=2;p.bedRev=2;}
   if(p.beds&&typeof p.beds==='object'&&p.bedRev===2&&integer(p.beds.spring)&&integer(p.beds.seed)){p.beds.spring=3*Math.min(p.beds.spring,10)+Math.max(0,p.beds.spring-10);p.beds.seed=2*Math.min(p.beds.seed,10)+Math.max(0,p.beds.seed-10);p.bedRev=3;}
+  // Revision 4: the dawn garden's three beds (crit chance, crit damage, stardust) start empty.
+  if(p.beds&&typeof p.beds==='object'&&p.bedRev===3){for(const id of ['crit','critDamage','stardust'])if(p.beds[id]===undefined)p.beds[id]=0;p.bedRev=4;}
+}
+// Companions that join when a stage has been cleared. Returns the ones that were new to this profile.
+export function grantClearUnlocks(p){
+  const fresh=[];
+  for(const [stage,ids] of Object.entries(CLEAR_UNLOCKS))if(p.cleared>=Number(stage))for(const id of ids){const e=p.heroes?.[id];if(e&&!e.owned){e.owned=true;fresh.push(id);}}
+  return fresh;
 }
 export const teamPower=p=>p.deck.reduce((sum,id)=>sum+combatPower(id,p.heroes[id],p.beds,collectionBonus(p.relics)),0);
 function draftOffers(p){
@@ -186,7 +194,7 @@ export function command(p,action,args={},now=Date.now()){
   }
   if(action==='bed'){
     const id=args.id;if(!BED_IDS.includes(id))return no('알 수 없는 화단입니다.');if(p.active)return no('원정 종료 후 성장할 수 있습니다.');
-    if(!bedOpen(id,p.cleared))return no(`스테이지 ${TUNING.beds[id].unlock} 클리어 후 열립니다.`);const cost=bedCost(id,p.beds[id]);
+    if(!bedOpen(id,p.cleared))return no(`스테이지 ${TUNING.beds[id].unlock} 클리어 후 열립니다.`);if(bedFull(id,p.beds[id]))return no('이미 만개했어요.');const cost=bedCost(id,p.beds[id]);
     if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');p.dust-=cost;p.beds[id]++;return {ok:true,level:p.beds[id]};
   }
   if(action==='enhance'){
@@ -213,7 +221,7 @@ export function command(p,action,args={},now=Date.now()){
   }
   if(action==='claimDispatch'){
     if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');// Dispatches sent before dust rewards keep the crystals they promised.
-    const dust=d.dust||0;p.dreams+=d.reward;p.dust+=dust;p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,dust,message:`파견 보상 · ${dust?`별가루 +${fmtN(dust)} · `:''}꿈의결정 +${fmtN(d.reward)}`};
+    const dust=dispatchDust(d.dust||0,p.beds,p.cleared);p.dreams+=d.reward;p.dust+=dust;p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,dust,message:`파견 보상 · ${dust?`별가루 +${fmtN(dust)} · `:''}꿈의결정 +${fmtN(d.reward)}`};
   }
   if(action==='accelerate'){
     if(p.daily.accel)return no('오늘의 가속은 이미 사용했습니다.');
@@ -242,7 +250,7 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='begin'){
     if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
     const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 동료 ${TEAM_SIZE}명이 필요합니다.`);
-    const c=calendar(now),stage=mode==='weekly'&&p.cleared>=3?weeklyStage(p,now):args.stage||Math.min(45,p.cleared+1);if(!integer(stage,45)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
+    const c=calendar(now),stage=mode==='weekly'&&p.cleared>=3?weeklyStage(p,now):args.stage||Math.min(MAIN_STAGES,p.cleared+1);if(!integer(stage,MAIN_STAGES)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
     if(mode!=='main'&&p.cleared<3)return no('스테이지 3 클리어 시 해금됩니다.');
     const tier=mode==='main'?null:args.tier||'easy';if(mode!=='main'&&(!TIERS[tier]||p.cleared<TIERS[tier].unlock))return no(`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock||3} 클리어 후 열립니다.`);
     if(mode==='weekly'&&p.weekly===c.week)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
@@ -258,9 +266,9 @@ export function command(p,action,args={},now=Date.now()){
     if(a.draft.length===TEAM_SIZE){a.deck=[...a.draft];a.offers=[];}else a.offers=draftOffers(p);return {ok:true};
   }
   if(action==='settle'){
-    const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0,clearReward=0,firstPerfect=false;if(!Array.isArray(p.perfect))p.perfect=[];
+    const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0,clearReward=0,firstPerfect=false,unlocked=[],partOpened=false;if(!Array.isArray(p.perfect))p.perfect=[];
     if(a.mode==='main'){
-      if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;}
+      if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
       p.dust+=args.won?40+a.stage*8:12;
     }else if(a.mode==='weekly')reward=weeklyReward(a.tier||'easy',Math.min(CHALLENGE_WAVES,args.round),!!args.won);
     let record=null,newBest=false;
@@ -272,7 +280,7 @@ export function command(p,action,args={},now=Date.now()){
     }
     const perfect=a.mode==='main'&&!!args.won&&args.perfect===true;
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
-    p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward};
+    p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened};
   }
   if(action==='claimMonthly'){
     const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 월간 최고 기록을 확인하세요.');
@@ -296,7 +304,7 @@ export function command(p,action,args={},now=Date.now()){
     return {ok:true,completed,message:completed?`${c.name} 완성! 루미의 그림이 열렸어요.`:`별 하나가 켜졌어요 · ${c.name} ${l.stars}/${c.stars.length}`};
   }
   if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
-  if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');testGrant(p);return {ok:true,message:'테스트 지급: 꿈의결정·별가루 +10,000'};}
+  if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}
   return no('사용할 수 없는 동작입니다.');
 }
 // Every command commits the entire profile, wallet and receipt together.

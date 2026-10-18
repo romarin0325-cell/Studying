@@ -40,9 +40,23 @@ export function relicPoints(id,entry){return entry?.owned?COLLECTION_WEIGHT[ARTI
 export const collectionPoints=relics=>ARTIFACTS.reduce((n,a)=>n+relicPoints(a.id,relics?.[a.id]),0);
 export const collectionBonus=relics=>collectionPoints(relics)/COLLECTION_POINTS_PER_PERCENT/100;
 // Dream greenhouse. Every bed is shared by all companions; duplicates stay personal.
-export const BED_IDS=Object.freeze(['rose','spring','seed']);
+export const BED_IDS=Object.freeze(['rose','spring','seed','crit','critDamage','stardust']);
+// Two gardens of three beds each: the dream greenhouse (from the start) and the dawn greenhouse (opens at stage 45).
+export const GARDENS=Object.freeze([{id:'dream',beds:['rose','spring','seed']},{id:'dawn',beds:['crit','critDamage','stardust']}]);
+export const bedMax=id=>T.beds[id].max??Infinity;
+export const bedFull=(id,level)=>level>=bedMax(id);
 export const bedCost=(id,level)=>{const b=T.beds[id],rise=b.rise??b.knee,k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,rise)*b.steep**Math.max(0,Math.min(level,k2)-rise)*(b.steep2??b.steep)**Math.max(0,level-k2));};
 export const bedOpen=(id,cleared)=>cleared>=T.beds[id].unlock;
+// Dawn garden effects. Crit chance +1%/level to 13%, then +0.5% to the 20% soft cap (26 levels); crit damage (total
+// multiplier) +3%/level to 180%, then +2% to 200% (20 levels); stardust +2%/level to 31%, then +1% to 50% (34 levels).
+export const critChance=level=>.01+Math.min(level,12)*.01+Math.max(0,Math.min(level,26)-12)*.005;
+export const critDamage=level=>1.5+Math.min(level,10)*.03+Math.max(0,Math.min(level,20)-10)*.02;
+export const stardustRate=level=>.01+Math.min(level,15)*.02+Math.max(0,Math.min(level,34)-15)*.01;
+// Effects only exist once their bed has opened, so stages 1-45 are exactly what they were before part two.
+export const critStats=(beds,cleared)=>bedOpen('crit',cleared)?{chance:critChance(beds?.crit||0),damage:critDamage(beds?.critDamage||0)}:null;
+// Expected damage multiplier of the two crit beds alone (what the dawn garden promises on average).
+export const critExpected=beds=>1+critChance(beds?.crit||0)*(critDamage(beds?.critDamage||0)-1);
+export const stardustBonus=(beds,cleared)=>bedOpen('stardust',cleared)?stardustRate(beds?.stardust||0):0;
 // Rose: +1% power per level. Spring: +1 max starlight per level. Seed: +2 starting gold per level.
 export const roseAttack=level=>.01*level;
 export const springGauge=level=>120+level;
@@ -58,6 +72,8 @@ export function combatPower(id,entry,beds,relicBonus=0){
 export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
 const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep);
 export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,cleared);return {dust:Math.floor(base*T.dispatchDust),dreams:Math.max(1,Math.floor(base*T.dispatchDreams))};};
+// The stardust bed is applied when a dispatch is collected, so growing it helps dispatches already under way.
+export const dispatchDust=(dust,beds,cleared)=>Math.floor(dust*(1+stardustBonus(beds,cleared)));
 export const stageReward=stage=>T.firstClearBase+T.firstClearStep*stage;
 export const PERFECT_REWARD=100;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
@@ -75,4 +91,4 @@ export function drawCharacter(random,season,guardian,pickup=null,urMult=1){
   const pool=ROSTER[rarity];return pool[Math.floor(random()*pool.length)];
 }
 export function drawRelic(random,draws){const rarity=['C','R','SR','UR'][rollIndex(relicRates(draws),random())],pool=Object.values(ARTIFACT).filter(a=>a.rarity===rarity);return pool[Math.floor(random()*pool.length)].id;}
-export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+profile.cleared*2));}
+export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+profile.cleared*2)*(1+stardustBonus(profile.beds,profile.cleared)));}

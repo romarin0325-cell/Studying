@@ -86,6 +86,11 @@ export function pathPoint(distance){
   return {x:76,y:142,angle:-Math.PI/2};
 }
 export function random(s){let x=s.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;s.rng=x>>>0;return s.rng/4294967296;}
+// Critical hits (the dawn garden): chance and total damage multiplier, rolled on a stream of their own so the
+// other randomness of a run (summons, rewards, targets) is the same with or without them.
+const critSeed=seed=>((seed>>>0)^0x9e3779b9)>>>0||1;
+function cleanCrit(c){return c&&Number.isFinite(c.chance)&&Number.isFinite(c.damage)&&c.chance>0?{chance:clamp(c.chance,0,1),damage:clamp(c.damage,1,10)}:null;}
+function critRoll(s){let x=s.critRng|0;x^=x<<13;x^=x>>>17;x^=x<<5;s.critRng=x>>>0||1;return s.critRng/4294967296<s.crit.chance;}
 function shuffle(s,values){const a=[...values];for(let i=a.length-1;i>0;i--){const j=Math.floor(random(s)*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 export function validDeck(deck){return Array.isArray(deck)&&deck.length===TEAM_SIZE&&new Set(deck).size===TEAM_SIZE&&deck.every(id=>HERO[id]);}
 export function event(s,type,data={}){s.events.push({type,time:s.time,...data});if(s.events.length>200)s.events.shift();}
@@ -303,11 +308,11 @@ function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,w
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
-export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,relicLevels={},mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy',met=BOSS_ORDER.length}={}){
+export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,relicLevels={},mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy',met=BOSS_ORDER.length,crit=null}={}){
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE),arts=validArtifacts(artifacts)?[...artifacts]:[];
   const levels=Object.fromEntries(arts.filter(id=>Number.isInteger(relicLevels?.[id])&&relicLevels[id]>=1&&relicLevels[id]<=999).map(id=>[id,relicLevels[id]]));
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
-    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
+    board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],crit:cleanCrit(crit),critRng:critSeed(seed),gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
     buffs:{},buffTotals:{},buffScale:{},queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{},leaks:0},tutorial:0,won:false};
   const opening=shuffle(s,chosen).slice(0,3);
@@ -448,12 +453,15 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
   if(!instant&&!flat){
     if(e.rage>0&&!dot)amount*=.75;
   }
+  // Every damaging hit, ticks included, can be critical; instant kills and flat amounts cannot.
+  let critical=false;
+  if(s.crit&&!instant&&!flat&&critRoll(s)){amount*=s.crit.damage;critical=true;}
   const absorbed=Math.min(e.shield||0,amount);e.shield=Math.max(0,(e.shield||0)-absorbed);
   const actual=Math.min(e.hp,amount-absorbed)+absorbed;e.hp-=amount-absorbed;e.hit=.13;s.stats.damage+=actual;s.stats.byHero[hero]=(s.stats.byHero[hero]||0)+actual;
   // No mirror detonation can feed another recording, even when several marks
   // resolve in this frame. Ordinary resolved damage includes shield absorption.
   if(recordMirror)for(const f of s.finishers||[])if(f.kind==='mirror'&&f.target===e.uid&&f.life>0)f.stored=f.cap!==undefined?Math.min(f.cap/.45,f.stored+actual):f.stored+actual;
-  if(!dot&&!instant)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss});
+  if(!dot&&!instant)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss,...(critical?{crit:true}:{})});
   if(e.hp<=0){
     s.stats.kills++;const gold=e.boss?20:e.kind==='armor'?3:2;giveGold(s,gold,'격파');
     if(gift)giveGold(s,1,'선물');
@@ -1144,6 +1152,9 @@ export function restore(raw){
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(s.phoenixUses===undefined)s.phoenixUses=s.phoenixUsed?1:0;if(!Number.isInteger(s.phoenixUses)||s.phoenixUses<0||s.phoenixUses>9)return null;
     if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
+    // A run saved before critical hits has no `crit`; it stays that way (resumeBattle accepts it) and never rolls.
+    if(s.crit!==undefined&&s.crit!==null&&!(numeric(s.crit,['chance','damage'])&&s.crit.chance>0&&s.crit.chance<=1&&s.crit.damage>=1&&s.crit.damage<=10))return null;
+    if(!Number.isInteger(s.critRng)||s.critRng<=0)s.critRng=critSeed(s.seed);
     for(const u of s.board)if(u){
       // An old checkpoint cannot reveal its birth wave. Start its new age
       // effect here once, rather than inventing past waves or changing rank.
