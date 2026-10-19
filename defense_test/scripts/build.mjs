@@ -70,7 +70,8 @@ for(const h of HEROES){
     }else memorial[h.id]=`data:image/${format};base64,`+bytes.toString('base64');
   }
 }
-if(sizes.avif>=2.5*1024*1024||sizes.webp>=2.5*1024*1024||(!web&&byteLength(memorial)>=3*1024*1024))throw new Error('Memorial aggregate budget exceeded.');
+// The AVIF pack stays under 2.5 MiB. The WebP fallback (browsers without AVIF, compat/web builds) holds the same 35+ paintings at up to 96 KiB each, so it gets 4 MiB.
+if(sizes.avif>=2.5*1024*1024||sizes.webp>=4*1024*1024||(!web&&byteLength(memorial)>=3*1024*1024))throw new Error('Memorial aggregate budget exceeded.');
 // Album thumbnails: 240x360 WebP from each memorial painting, so the album never decodes thirty full paintings.
 const memorialThumbs={};let thumbBytes=0;
 for(const h of HEROES){const bytes=await sharp(await fs.readFile(assetFile(MEMORIAL_WEBP_PATHS[h.id]))).resize(240,360).webp({quality:72}).toBuffer();thumbBytes+=bytes.length;memorialThumbs[h.id]='data:image/webp;base64,'+bytes.toString('base64');}
