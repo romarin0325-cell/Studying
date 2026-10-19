@@ -99,6 +99,7 @@ function run() {
         'toeic_explanations.js',
         'api.js',
         'logic.js',
+        'skill_display.js',
         'card_pool_rules.js',
         'battle_runtime.js',
         'rpg_features.js',
