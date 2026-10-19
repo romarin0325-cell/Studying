@@ -241,7 +241,7 @@ test('topUpUnlocked owns companions and relics added after the save, and testGra
   raw.relics.lens.owned=true;raw.relics.lens.enhance=2;raw.relics.lens.copies=1;
   const p=parseProfile(JSON.stringify(raw));
   assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.relics.hourglass.owned,false);
-  topUpUnlocked(p);
+  assert.equal(p.cleared,0);topUpUnlocked(p);assert.equal(p.cleared,90,'an old test save is raised to stage 90');
   assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.heroes.behemoth.bond,10);assert.equal(p.heroes.behemoth.bondXp,0);
   assert.equal(p.heroes.star_boy.bond,6);assert.equal(p.heroes.star_boy.bondXp,3);
   assert.equal(p.relics.hourglass.owned,true);assert.equal(p.relics.hourglass.enhance,6);assert.equal(p.relics.hourglass.copies,20);
@@ -279,12 +279,12 @@ test('perfect clears pay 100 dreams once on main stages',()=>{
   bad.perfect=[1,3];assert.equal(validateProfile(bad),true);
 });
 
-test('unlockProfile owns every companion (three below ten hearts to try gifts), every relic, and clears main stages through 45',()=>{
+test('unlockProfile owns every companion (three below ten hearts to try gifts), every relic, and clears all 90 main stages',()=>{
   const fresh=createProfile(NOW),deck=[...fresh.deck],partner=fresh.partner,relics=structuredClone(fresh.relics);
   const p=unlockProfile(fresh);
   assert.equal(p,fresh);
   assert.ok(HEROES.every(h=>{const e=p.heroes[h.id];return e.owned&&e.bond===({star_boy:6,siren:3,snow_rabbit:8}[h.id]??10)&&e.level===1&&e.enhance===0&&e.copies===0;}));
-  assert.equal(p.cleared,45);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
+  assert.equal(p.cleared,90);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
   assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);
   assert.ok(Object.entries(p.relics).every(([id,r])=>r.owned&&r.enhance==={C:6,R:4,SR:3,UR:1}[ARTIFACT[id].rarity]&&r.copies>0),'every relic owned at a mid-game level with spare duplicates');
   assert.equal(validateProfile(p),true);
@@ -431,4 +431,18 @@ test('an old active run without a relic snapshot copies the saved run, and bad s
   check.active.relicLevels={};assert.equal(validateProfile(check),false);
   check.active.relicLevels={hourglass:2,lens:1};assert.equal(validateProfile(check),false);
   check.active.relicLevels={hourglass:2};assert.equal(validateProfile(check),true);
+});
+
+test('Behemoth cannot be exchanged for before stage 45 in its guardian month, and can after',()=>{
+  const JAN=Date.UTC(2027,0,15,3);
+  const p=createProfile(JAN);assert.equal(calendar(JAN).guardian,'behemoth');
+  p.pity.season=TUNING.pity.season;p.dreams=100000;
+  const early=command(p,'pityClaim',{banner:'season',id:'behemoth'},JAN);
+  assert.equal(early.ok,false);assert.match(early.message,/스테이지 45/);assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.pity.season,TUNING.pity.season,'the gauge is kept');
+  p.cleared=44;assert.equal(command(p,'pityClaim',{banner:'season',id:'behemoth'},JAN).ok,false);
+  // A season pull in that month never hands out Behemoth before 45 (it falls back to the normal URs).
+  const draws=command(p,'draw',{banner:'season',count:10},JAN);assert.equal(draws.ok,true);assert.ok(!draws.items.some(i=>i.id==='behemoth'));
+  p.cleared=45;
+  const late=command(p,'pityClaim',{banner:'season',id:'behemoth'},JAN);
+  assert.equal(late.ok,true);assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.pity.season,10,'200 spent, the 10 pulls above stay');
 });

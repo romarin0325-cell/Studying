@@ -20,7 +20,7 @@ function coverage(id,cell){
 // Average enemies one attack reaches, by attack shape.
 const aoe=h=>({single:1,beam:1.5,cleave:1.9,pulse:2.4,chain:2.2,bounce:1.8,cross:1.6}[h.shape]??(h.shape==='zone'?1+h.radius/45:h.shape==='splash'?1+h.radius/70:1));
 // Control and team amplification are not in raw damage.
-const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1,underdog:1,toffee_apple:1,joker:1,sunflower:1};
+const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1,underdog:1,toffee_apple:1,joker:1,sunflower:1,antropy:1,cure_master:1,ash:1,venom:1};
 
 function unitValue(s,u,i){
   if(!u||u.cursed)return 0;
@@ -56,7 +56,12 @@ function mem(s){let m=memory.get(s);if(!m){m={dps:0,lastDamage:s.stats.damage,la
 const alive=s=>s.enemies.filter(e=>e.hp>0);
 const timeLeft=s=>s.mode==='main'?Math.max(20,(6-s.wave+(['reward','intermission'].includes(s.phase)?0:.5))*50):150;
 const remainingFight=(s,dps)=>(alive(s).reduce((n,e)=>n+e.hp+(e.shield||0),0)+s.queue.reduce((n,q)=>n+q.hp,0))/Math.max(1,dps);
-const litCells=s=>s.telegraph&&['seal','storm','stun1','judgement','thunder'].includes(s.telegraph.pattern)?new Set(s.telegraph.cells):new Set();
+// An immune unit already standing on a lit cell is safe, so it is not a dodge candidate and adds no blocked value.
+// The cell itself stays dangerous: empty lit cells, and anywhere an immune unit now stands, are not places to step onto.
+const litPatterns=['seal','storm','stun1','judgement','thunder'];
+const telegraphCells=s=>s.telegraph&&litPatterns.includes(s.telegraph.pattern)?s.telegraph.cells:[];
+const dangerCells=s=>new Set(telegraphCells(s));
+const litCells=s=>new Set(telegraphCells(s).filter(c=>!(s.board[c]&&E.immune(s,c))));
 
 // Damage-equivalent of one gold: a fresh summon's value over the rest of the stage, per gold.
 function goldValue(s,m){const cost=Math.max(8,E.summonCost(s)||10);return summonValue(s)*m.scale*timeLeft(s)/cost;}
@@ -129,6 +134,26 @@ function ultValue(s,m,id,gv){
     case 'bigshow':return Math.max(0,strike(E.UNDERDOG.factor)-dps*E.UNDERDOG.stun);
     // A bomb only explodes with enough enemies alive, so it is set when the field is already crowded.
     case 'applebomb':return (s.bombs||[]).length>=E.APPLEBOMB.max||list.length<E.APPLEBOMB.minAlive&&!list.some(e=>e.boss)?0:strike(E.APPLEBOMB.factor)*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
+    case 'requiem':{
+      const marked=list.filter(e=>(e.statusEffects||[]).some(x=>x&&x.until-s.time>1e-9)||(e.slowEffects||[]).some(x=>x&&x.until-s.time>1e-9)).length;
+      return Math.max(0,strike(E.REQUIEM.factor)-Math.min(dps*1.2,dps*.12*marked));
+    }
+    case 'lemonade':{
+      const blocked=litCells(s).size&&['seal','storm','stun1','thunder','judgement'].includes(s.telegraph?.pattern)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]&&!E.immune(s,c)?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
+      const freed=CELLS.reduce((n,c)=>{const a=s.board[c];return n+(a&&(a.cursed||a.disabled>0)?unitValue(s,{...a,cursed:false},c)*m.scale*Math.min(8,a.cursed?rem:a.disabled):0);},0);
+      return blocked+freed;
+    }
+    // A one- or two-enemy pack is not worth deleting an ally, unless a boss is standing in it.
+    case 'armageddon':{
+      const near=e=>{const p=E.pathPoint(e.progress);return list.filter(t=>{const q=E.pathPoint(t.progress);return Math.hypot(q.x-p.x,q.y-p.y)<=E.ARMAGEDDON.radius;});};
+      const centre=list.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null);
+      const best=centre?near(centre.e):[];
+      if(best.length<3&&!best.some(e=>e.boss))return 0;
+      const vic=CELLS.map(i=>s.board[i]&&s.board[i].uid!==u.uid&&!E.immune(s,i)?{i,ally:s.board[i]}:null).filter(Boolean).sort((a,b)=>a.ally.rank-b.ally.rank||a.ally.uid-b.ally.uid)[0];
+      const lost=vic?unitValue(s,vic.ally,vic.i)*m.scale*Math.min(24,rem)*.15:0;
+      return best.reduce((n,e)=>n+hit(E.ARMAGEDDON.factor,e),0)-lost;
+    }
+    case 'venomplague':return strike(E.VENOM_PLAGUE.factor)+list.reduce((n,e)=>{const st=E.statusState(s,e);return n+Math.min(e.hp,((e.burn||0)+st.poisonDps)*E.VENOM_PLAGUE.seconds*E.VENOM_PLAGUE.amp);},0);
     case 'crush':{if(!list.length)return 0;let sum=0;for(const e of list){const p=E.pathPoint(e.progress);sum+=list.reduce((n,t)=>{const q=E.pathPoint(t.progress);return n+(Math.hypot(q.x-p.x,q.y-p.y)<=E.CRUSH.radius?hit(E.CRUSH.factor,t):0);},0);}return sum/list.length*E.CRUSH.hits;}
     case 'freeze':return strike(3)+control(2*scale+3)+thunderCancel();
     case 'avalanche':return list.reduce((n,e)=>n+hit(e.controlTime>0?12:4,e),0)+control(2);
@@ -170,16 +195,17 @@ function chooseBlessing(s,m){
 }
 
 function dodge(s,m){
-  const lit=litCells(s);if(!lit.size)return false;
+  const danger=dangerCells(s);if(!danger.size)return false;
+  const lit=litCells(s);
   // A person moves the key units out, not the whole board: two per stun, every unit for the judgement.
   const key=s.telegraph.uid+":"+s.telegraph.ends.toFixed(2);if(m.dodgeKey!==key){m.dodgeKey=key;m.dodged=0;}
   if(s.telegraph.pattern!=="judgement"&&m.dodged>=2)return false;
-  const judgement=s.telegraph.pattern==='judgement',units=[...lit].filter(c=>s.board[c]&&!s.board[c].cursed).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
+  const judgement=s.telegraph.pattern==='judgement',units=[...lit].filter(c=>s.board[c]&&!s.board[c].cursed&&!E.immune(s,c)).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
   for(const c of units){
-    const u=s.board[c];s.board[c]=null;const free=bestCell(s,u,lit);s.board[c]=u;
+    const u=s.board[c];s.board[c]=null;const free=bestCell(s,u,danger);s.board[c]=u;
     if(free.cell>=0){E.move(s,c,free.cell);m.dodged++;return true;}
     // No safe empty cell: swap with the weakest unit outside the light.
-    const weak=CELLS.filter(i=>!lit.has(i)&&s.board[i]).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
+    const weak=CELLS.filter(i=>!danger.has(i)&&s.board[i]).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
     if(weak!==undefined&&unitValue(s,s.board[weak],weak)<unitValue(s,u,c)*.6){E.move(s,c,weak);m.dodged++;return true;}
   }
   return false;
@@ -218,11 +244,11 @@ function act(s,o){
   return E.upgrade(s,o.id).ok;
 }
 function placeNew(s,index){
-  const u=s.board[index];if(!u)return;s.board[index]=null;const {cell}=bestCell(s,u,litCells(s));s.board[index]=u;
+  const u=s.board[index];if(!u)return;s.board[index]=null;const {cell}=bestCell(s,u,dangerCells(s));s.board[index]=u;
   if(cell>=0&&cell!==index&&placeDelta(s,u,cell)>0)E.move(s,index,cell);
 }
 function optimize(s,m){
-  const lit=litCells(s),total=Math.max(1e-9,boardValue(s));let best=null;
+  const lit=dangerCells(s),total=Math.max(1e-9,boardValue(s));let best=null;
   const units=CELLS.filter(c=>s.board[c]&&!s.board[c].cursed).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
   const support=new Set(['siren','ancient_dragon','harmonious','time_magician','lightning_sage','behemoth']);
   const pick=[...new Set([...units.slice(0,10),...units.filter(c=>support.has(s.board[c].hero))])];

@@ -54,7 +54,7 @@ export const CRUSH=Object.freeze({factor:6,radius:150,hits:3,first:.25,gap:.5,qu
 export const WHALE=Object.freeze({factor:8,perMark:1});
 export const RUMI_DREAM=Object.freeze({rank:5,name:'꿈의 형태',phases:Object.freeze([{at:.45,factor:12},{at:1,factor:12},{at:1.55,factor:12},{at:2.3,factor:14}])});
 export const rumiDream=(s,u=bestUnit(s,'rumi'))=>!!u&&u.hero==='rumi'&&u.rank>=RUMI_DREAM.rank;
-export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',cinderella:'midnight',frost_witch:'winter'});
+export const ACTIVE_SKILLS=Object.freeze({rumi:'echo',siren:'haste',ancient_dragon:'awaken',silver_rabbit:'march',santa:'festive',jasmine:'radiance',time_magician:'trauma',harmonious:'harmony',cinderella:'midnight',frost_witch:'winter',venom:'venom'});
 const buffScale=(s,key)=>s.buffScale?.[key]||1;
 // Core health: 20 in stages and drafts, 7 in the monthly boss rush (one boss leak ends it).
 // Zeke's crisis reads "below half" of that, so a full monthly core is never a crisis.
@@ -64,7 +64,7 @@ export const coreCrisis=s=>s.health<coreHealthMax(s)/2;
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 // Running ultimates that refuse a second press: a pure buff would only restart its timer, and the
 // dream form keeps one sequence of phases. Damage-and-buff hybrids
-// (glassfall, gift, goddess, trauma, ice court, crush) stay recastable because the hit is the point.
+// (glassfall, gift, goddess, trauma, ice court, crush, venomplague) stay recastable because the hit is the point.
 export const PURE_BUFFS=new Set(['echo','haste','awaken','march','harmony']);
 export function castLock(s,id){
   const u=bestUnit(s,id);if(!u)return null;
@@ -127,6 +127,13 @@ export const executeThreshold=(e,s=null)=>executeThresholdFor(s?special(s,'luna'
 export function dividend(s){return Math.min(QUEEN_CAP,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
 export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x>0?index-1:-1,x<4?index+1:-1,y>0?index-5:-1,y<4?index+5:-1].filter(i=>i>=0);}
+// Antropy is always immune. A cure master's aura covers the four orthogonal neighbours only, and never herself.
+export function immune(s,index){
+  const u=s.board[index];if(!u)return false;
+  if((u.invincible||0)>0||u.hero==='antropy')return true;
+  return neighbors(index).some(i=>{const n=s.board[i];return n?.hero==='cure_master'&&!n.cursed&&!(n.disabled>0);});
+}
+export function stunUnit(s,index,seconds){const u=s.board[index];if(!u||immune(s,index))return;u.disabled=Math.max(u.disabled||0,seconds);}
 export const targetingLocked=id=>id==='avalanche_maid'||id==='flame_sage';
 export const GROUND_BOUNDS=Object.freeze({left:24,right:696,top:72,bottom:734});
 export const skillGoldCost=id=>HERO[id]?.skill.goldCost||0;
@@ -153,6 +160,12 @@ export const sunRadius=s=>SUNFLOWER.radius[Math.min(SUNFLOWER.max,s.sunlight||0)
 export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','white','black']),roulette:3,burn:.23,slow:.2,exposure:.06});
 export const JOKER_NAMES=Object.freeze({red:'빨강 · 화상',blue:'파랑 · 감속',green:'초록 · 중독',white:'하양 · 성광',black:'검정 · 노출'});
 export const nextJokerColor=color=>JOKER.colors[(Math.max(0,JOKER.colors.indexOf(color))+1)%JOKER.colors.length];
+export const REQUIEM=Object.freeze({factor:7});
+export const LEMONADE=Object.freeze({seconds:3});
+// Ash deletes the lowest other ally, then hits the densest pack inside the radius for 10x. The reduction is a pure cost.
+export const ARMAGEDDON=Object.freeze({factor:10,radius:180});
+// Venom Plague strikes for 3x, stacks poison, then burn and poison ticks deal double (1+amp) for the buff.
+export const VENOM_PLAGUE=Object.freeze({factor:3,stacks:3,seconds:10,amp:1});
 export function personalTrait(s,u,index=s.board.indexOf(u)){
   const trait={damageMultiplier:1,speedBonus:0,chainRatio:.65,extraChain:0,key:null,active:false,label:''};
   if(u.hero==='lightning_sage'){
@@ -179,6 +192,11 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   else if(u.hero==='underdog'){const active=s.deck.every(id=>HERO[id].rarity==='C'&&!HERO[id].hidden);Object.assign(trait,{key:'underdog',active,damageMultiplier:active?1+UNDERDOG.bonus:1,label:active?`노멀 덱 · 위력 +${Math.round(UNDERDOG.bonus*100)}%`:'노멀 덱 대기'});}
   else if(u.hero==='sunflower'){const n=Math.min(SUNFLOWER.max,s.sunlight||0);Object.assign(trait,{key:'sunlight',active:n>0,sunlight:n,radius:SUNFLOWER.radius[n],label:n?`햇빛 ${n}/${SUNFLOWER.max} · 폭발 반경 ${SUNFLOWER.radius[n]}`:`햇빛 0/${SUNFLOWER.max} · 폭발 없음`});}
   else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:`${JOKER_NAMES[color]} · 다음 ${JOKER_NAMES[nextJokerColor(color)].split(' · ')[0]}`});}
+  else if(u.hero==='antropy')Object.assign(trait,{key:'antropy',active:true,label:'디버프 무효'});
+  else if(u.hero==='cure_master'){
+    const n=index<0?0:neighbors(index).filter(i=>s.board[i]).length,active=!u.cursed&&!(u.disabled>0);
+    Object.assign(trait,{key:'cure',active,label:n?`무적 오라 · 아군 ${n}명`:'무적 오라 · 곁에 아군 없음'});
+  }
   return trait;
 }
 export function harmonyAt(s,index){return index<0?0:new Set(neighbors(index).map(i=>s.board[i]?.hero).filter(id=>id&&id!=='harmonious')).size;}
@@ -318,7 +336,7 @@ function addControl(s,e,type,source,owner,duration){
   addStatus(s,e,type,source,owner,1,duration);
 }
 function pushBack(e,distance){e.progress=Math.max(0,e.progress-distance*(e.boss?BOSS_PUSH_SCALE:1));}
-function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,birthWave:s.wave+(['reward','intermission'].includes(s.phase)?1:0),harvest:12,disabled:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:targetingLocked(hero)?'random':HERO[hero].bossDamage||HERO[hero].bossPriority?'boss':'first'};}
+function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,cooldown:.25,windup:0,target:null,attacks:0,pose:0,born:s.time,birthWave:s.wave+(['reward','intermission'].includes(s.phase)?1:0),harvest:12,disabled:0,invincible:0,facing:'down',aim:Math.PI/2,idleFor:0,priority:targetingLocked(hero)?'random':HERO[hero].bossDamage||HERO[hero].bossPriority?'boss':'first'};}
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
@@ -466,6 +484,7 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
   let amount=instant?e.hp+(e.shield||0):flat?value:value*(1+e.takenBonus*(passive?.exposeScale||1))*(passive?.dotScale?.[dotType]||1)*(basic?passive?.basicScale||1:1)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1+RV.lens.boss*relicScaleIn(s,'lens'):1)*(e.boss&&has(s,'royal_seal')?1+RV.royal_seal.boss*relicScaleIn(s,'royal_seal'):1)*(e.slowTime>0&&has(s,'frost')?1+RV.frost.slowed*relicScaleIn(s,'frost'):1)*(has(s,'amulet')&&e.progress>=PATH_LENGTH*2/3?1+RV.amulet.near*relicScaleIn(s,'amulet'):1)*(has(s,'chalice')&&e.burn>0&&e.poison>=RV.chalice.poison?1+RV.chalice.taken*relicScaleIn(s,'chalice'):1)*(1+(e.dawn||0));
   if(!instant&&!flat){
     if(e.rage>0&&!dot)amount*=.75;
+    if((dotType==='burn'||dotType==='poison')&&s.buffs.venom>0)amount*=1+VENOM_PLAGUE.amp;
   }
   // Every damaging hit, ticks included, can be critical; instant kills and flat amounts cannot.
   let critical=false;
@@ -585,6 +604,7 @@ function applyHit(s,shot){
     let from=point;for(const target of others){normalHit(s,target,amount*ratio*prismHit,shot,{},procTargets);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
   }
   if(type==='burn')for(const t of area)addStatus(s,t,'burn',sourceKey('attack',hero.id,shot.uid),hero.id,amount*.23,3);
+  if(type==='venom'&&shot.proc!==false){const src=sourceKey('attack',hero.id,shot.uid);for(const t of area){addPoison(s,t,src,hero.id,1,7,amount);addStatus(s,t,'burn',src,hero.id,amount*.23,3);}}
   if(type==='joker'&&shot.proc!==false){
     const color=s.jokerColor||'red',src=sourceKey('attack',hero.id,shot.uid);
     for(const t of area){
@@ -675,6 +695,33 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,range:h.range,radius:h.radius*(trait.zoneRadiusMultiplier||1),chainRatio:trait.chainRatio,extraChain:trait.extraChain,bonuses};
 }
 
+function debuffCount(s,e){
+  const live=list=>Array.isArray(list)?list.filter(effect=>effect&&effect.until-s.time>1e-9).length:0;
+  if(!Array.isArray(e.statusEffects)&&!Array.isArray(e.slowEffects)){
+    let n=0;
+    if((e.exposed||0)>0&&(e.exposeTime||0)>0)n++;
+    if((e.burn||0)>0&&(e.burnTime||0)>0)n++;
+    if((e.poison||0)>0&&(e.poisonTime||0)>0)n++;
+    if((e.stun||0)>0)n++;
+    if((e.freeze||0)>0)n++;
+    if((e.divine||0)>0&&(e.divineTime||0)>0)n++;
+    if((e.slow||0)>0&&(e.slowTime||0)>0)n++;
+    return n;
+  }
+  return live(e.statusEffects)+live(e.slowEffects);
+}
+function clearEnemyDebuffs(s,e){
+  const n=(Array.isArray(e.statusEffects)?e.statusEffects.length:0)+(Array.isArray(e.slowEffects)?e.slowEffects.length:0);
+  e.statusEffects=[];e.slowEffects=[];
+  syncStatuses(s,e);syncSlows(s,e);
+  return n;
+}
+// Lowest other ally by rank, then uid. The caster and immune units are never the cost.
+function reductionTarget(s,u){
+  let pick=null;
+  for(let i=0;i<s.board.length;i++){const ally=s.board[i];if(!ally||ally.uid===u.uid||immune(s,i))continue;if(!pick||ally.rank<pick.ally.rank||ally.rank===pick.ally.rank&&ally.uid<pick.ally.uid)pick={ally,i};}
+  return pick;
+}
 export function cast(s,id){
   if(s.phase!=='combat'||!s.enemies.some(e=>e.hp>0))return {ok:false,reason:'적이 나타나면 사용할 수 있습니다.'};
   const u=bestUnit(s,id),hero=HERO[id];if(!u||!s.deck.includes(id))return {ok:false,reason:'전장에 이 영웅이 있어야 합니다.'};
@@ -745,7 +792,8 @@ export function cast(s,id){
   else if(type==='thunder'){strike(7);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control*scale);}
   else if(type==='fortune')strike(fortuneFactor(s.gold,s.upgrades[id]||0));
   else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.edictWave=s.wave;}
-  else if(type==='bigshow'){strike(UNDERDOG.factor);for(const ally of s.board)if(ally)ally.disabled=Math.max(ally.disabled||0,UNDERDOG.stun);}
+  // Immunity is sampled first: stunning the protector must not strip the aura from allies in the same cast.
+  else if(type==='bigshow'){strike(UNDERDOG.factor);const victims=s.board.map((ally,i)=>!!ally&&!immune(s,i));victims.forEach((on,i)=>{if(on)stunUnit(s,i,UNDERDOG.stun);});}
   else if(type==='solarflare'){
     // Spends the whole shared stack: 2x with none, +3x per sunlight (11x at three).
     const n=Math.min(SUNFLOWER.max,s.sunlight||0);strike(SUNFLOWER.base+SUNFLOWER.per*n);s.sunlight=0;
@@ -759,9 +807,31 @@ export function cast(s,id){
     // The bomb waits on the path with the damage of this cast; the Toffee Apple that set it is stunned.
     const bomb={uid:s.nextId++,progress:clamp(random(s)*PATH_LENGTH,PATH_LENGTH*.12,PATH_LENGTH*.9),damage:base*APPLEBOMB.factor};
     s.bombs.push(bomb);event(s,'bombSet',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress)});
-    u.disabled=Math.max(u.disabled||0,APPLEBOMB.stun);
+    stunUnit(s,s.board.indexOf(u),APPLEBOMB.stun);
   }
   else if(type==='crush'){visualTargets=[];for(let i=0;i<CRUSH.hits;i++){const life=CRUSH.first+i*CRUSH.gap;s.volleys.push({uid:s.nextId++,source:u.uid,hero:id,kind:'crush',phase:i,rank:u.rank,damage:base*CRUSH.factor,life,total:life,...(i===CRUSH.hits-1?{echo:{}}:{})});}}
+  else if(type==='requiem'){
+    const points=targets.filter(e=>e.hp>0).map(e=>({...pathPoint(e.progress),uid:e.uid,cleared:clearEnemyDebuffs(s,e)}));
+    strike(REQUIEM.factor);
+    event(s,'requiem',{points});
+  }
+  else if(type==='lemonade'){
+    const seconds=skillDuration(s,LEMONADE.seconds*control);
+    for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;ally.invincible=seconds;}
+  }
+  else if(type==='armageddon'){
+    const pick=reductionTarget(s,u);
+    if(pick){s.board[pick.i]=null;syncTimeRuler(s);s.stats.sacrificed=(s.stats.sacrificed||0)+1;event(s,'reduce',{hero:pick.ally.hero,index:pick.i,...cellPoint(pick.i)});}
+    const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=ARMAGEDDON.radius);
+    const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
+    visualTargets=centre?near(centre):[];for(const e of visualTargets)damage(s,e,base*ARMAGEDDON.factor,id);
+    if(centre)event(s,'armageddonBlast',{...pathPoint(centre.progress),radius:ARMAGEDDON.radius});
+  }
+  else if(type==='venomplague'){
+    strike(VENOM_PLAGUE.factor);
+    for(const e of targets)if(e.hp>0)addPoison(s,e,source,id,VENOM_PLAGUE.stacks,12,base);
+    s.buffs.venom=skillDuration(s,VENOM_PLAGUE.seconds*control);
+  }
   if(echoes){
     const ratio=RV.twin.echo*relicScaleIn(s,'twin');
     for(const [uid,dealt] of echoes){
@@ -770,7 +840,7 @@ export function cast(s,id){
     }
     echoMaps.delete(s);
   }
-  const support=!dream&&['echo','haste','awaken','march','gift','trauma','harmony'].includes(type);
+  const support=!dream&&['echo','haste','awaken','march','gift','trauma','harmony','lemonade'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key&&!dream){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
   event(s,'skill',{hero:id,name:dream?RUMI_DREAM.name:hero.skill.name,kind:dream?'dream':type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{})});return {ok:true};
@@ -979,6 +1049,21 @@ export function castPreview(s,id){
     lines.push(`경로에 폭탄을 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);
     lines.push(`적이 다가왔을 때 ${APPLEBOMB.minAlive}기 이상 살아 있으면 적 전체에게 위력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}로 터집니다. 보스가 닿으면 바로 터집니다.`);
     lines.push(`설치한 토피애플은 ${APPLEBOMB.stun}초 동안 기절합니다.`);
+  }else if(type==='requiem'){
+    lines.push(`적의 모든 디버프를 지우고 적 전체에게 위력 ${REQUIEM.factor}배, ${hit(REQUIEM.factor)}를 줍니다.`);
+    const n=targets.filter(e=>debuffCount(s,e)>0).length;
+    if(n)lines.push(`지금 지워지는 디버프가 걸린 적 ${n}기.`);
+  }else if(type==='lemonade'){
+    lines.push(`아군 전체의 기절과 저주를 풀고 ${dur(LEMONADE.seconds)} 동안 무적으로 만듭니다.`);
+    const n=s.board.filter(a=>a&&(a.disabled>0||a.cursed)).length;
+    if(n)lines.push(`지금 행동불능인 동료 ${n}명.`);
+  }else if(type==='armageddon'){
+    const pick=reductionTarget(s,u);
+    lines.push(pick?`지금 환원될 동료: ${HERO[pick.ally.hero].name} ${pick.ally.rank}성`:'환원할 동료가 없습니다.');
+    lines.push(`가장 밀집한 반경 ${ARMAGEDDON.radius}의 적에게 위력 ${ARMAGEDDON.factor}배, ${hit(ARMAGEDDON.factor)}를 줍니다.`);
+  }else if(type==='venomplague'){
+    lines.push(`적 전체에게 위력 ${VENOM_PLAGUE.factor}배, ${hit(VENOM_PLAGUE.factor)}를 주고 중독을 ${VENOM_PLAGUE.stacks}중첩 쌓습니다.`);
+    lines.push(`${dur(VENOM_PLAGUE.seconds)} 동안 적이 받는 화상·중독 피해가 ${1+VENOM_PLAGUE.amp}배가 됩니다.`);
   }else lines.push(hero.skill.text);
 
   const gold=skillGoldCost(id);
@@ -1004,11 +1089,15 @@ function bossCells(s,pattern){
 }
 function bossResolve(s,e,boss,pattern){
   const cells=s.telegraph?.cells||[],shielded=s.buffs.radiance>0;
-  if(pattern==='seal'){if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,boss.sealTime||2.4);event(s,'seal',{cells});}
-  else if(pattern==='storm'){if(!shielded)for(const i of cells)if(s.board[i]){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
-  else if(pattern==='stun1'){if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,2);event(s,'seal',{cells});}
+  // Sample immunity before any stun: disabling the aura source must not expose a neighbour later in the same pattern.
+  const victims=()=>cells.filter(i=>s.board[i]&&!immune(s,i));
+  // An immune unit that a pattern would have hit shows the ward (Antropy's own halo or a cure master's bubble).
+  if(['seal','storm','stun1','thunder','judgement'].includes(pattern)&&!shielded)for(const i of cells)if(s.board[i]&&immune(s,i))event(s,'ward',{...cellPoint(i),hero:s.board[i].hero==='antropy'?'antropy':'cure_master'});
+  if(pattern==='seal'){if(!shielded)for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,boss.sealTime||2.4);event(s,'seal',{cells});}
+  else if(pattern==='storm'){if(!shielded)for(const i of victims()){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
+  else if(pattern==='stun1'){if(!shielded)for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,2);event(s,'seal',{cells});}
   else if(pattern==='starlust'){if(s.gauge>=gaugeCap(s)-1e-6){s.gauge=Math.max(0,s.gauge-60);event(s,'drain');}event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});}
-  else if(pattern==='thunder'){e.judged=true;e.judging=false;if(!shielded)for(const i of cells)if(s.board[i])s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
+  else if(pattern==='thunder'){e.judged=true;e.judging=false;if(!shielded)for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
   else if(pattern==='shuffle'){
     const units=s.board.filter(Boolean),slots=shuffle(s,Array.from({length:25},(_,i)=>i));s.board=Array(25).fill(null);units.forEach((u,i)=>{s.board[slots[i]]=u;});syncTimeRuler(s);
     event(s,'shuffle',{});event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});
@@ -1017,9 +1106,9 @@ function bossResolve(s,e,boss,pattern){
     for(const t of s.enemies){if(t.hp<=0)continue;const controlled=t.statusEffects.some(effect=>['stun','freeze'].includes(effect.type)&&effect.until-s.time>1e-9),slowed=t.slowEffects.some(effect=>effect.until-s.time>1e-9);if(controlled||slowed)continue;t.progress=Math.min(PATH_LENGTH-1,t.progress+PATH_LENGTH*.15);}
     event(s,'rush');event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});
   }else if(pattern==='judgement'){
-    const i=cells[0],u=s.board[i];
-    if(u&&!shielded&&s.board.filter(Boolean).length>1){s.board[i]=null;syncTimeRuler(s);}
-    event(s,'judgement',{index:i,hit:!!u&&!shielded,...cellPoint(i)});
+    const i=cells[0],u=s.board[i],safe=!u||shielded||immune(s,i);
+    if(u&&!safe&&s.board.filter(Boolean).length>1){s.board[i]=null;syncTimeRuler(s);}
+    event(s,'judgement',{index:i,hit:!!u&&!safe,...cellPoint(i)});
   }
 }
 function bossStep(s,e,dt){
@@ -1041,7 +1130,7 @@ function bossStep(s,e,dt){
   e.casts=casts+1;
   if(pattern==='curse'){
     // Unannounced, once per appearance: one random active companion is sealed until it is merged, sold or cleansed.
-    const pool=s.board.flatMap((u,i)=>u&&!u.cursed?[i]:[]);e.skillIn=boss.every||9;
+    const pool=s.board.flatMap((u,i)=>u&&!u.cursed&&!immune(s,i)?[i]:[]);e.skillIn=boss.every||9;
     if(!pool.length||s.buffs.radiance>0)return;
     const i=pool[Math.floor(random(s)*pool.length)];s.board[i].cursed=true;event(s,'curse',{index:i,hero:s.board[i].hero,...cellPoint(i)});return;
   }
@@ -1138,6 +1227,7 @@ export function step(s,dt){
   s.zones=s.zones.filter(z=>z.life>0);
   for(let i=0;i<s.board.length;i++){
     const u=s.board[i];if(!u)continue;u.pose=Math.max(0,u.pose-dt);
+    if(u.invincible>0)u.invincible=Math.max(0,u.invincible-dt);
     if(u.disabled>0){u.disabled-=dt;continue;}
     if(u.cursed)continue;
     if(u.windup>0){u.windup-=dt;if(u.windup<=0)attack(s,u,i);continue;}
@@ -1227,13 +1317,14 @@ export function restore(raw){
       // An old checkpoint cannot reveal its birth wave. Start its new age
       // effect here once, rather than inventing past waves or changing rank.
       if(u.birthWave===undefined)u.birthWave=s.wave;
+      if(u.invincible===undefined)u.invincible=0;
       if(targetingLocked(u.hero)){
         if(!['first','boss','strong','last','random'].includes(u.priority))return null;
         u.priority='random';
       }
     }
     const latestBirthWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);
-    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||u.mergedWave!==undefined&&(!Number.isInteger(u.mergedWave)||u.mergedWave<1||u.mergedWave>latestBirthWave)||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','aim','idleFor'])||u.clock!==undefined&&(!Number.isInteger(u.clock)||u.clock<0||u.clock>11)||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
+    if(s.board.some(u=>u&&(!s.deck.includes(u.hero)||!id(u.uid)||!Number.isInteger(u.rank)||u.rank<1||u.rank>MAX_RANK||!Number.isInteger(u.birthWave)||u.birthWave<1||u.birthWave>latestBirthWave||u.mergedWave!==undefined&&(!Number.isInteger(u.mergedWave)||u.mergedWave<1||u.mergedWave>latestBirthWave)||!numeric(u,['cooldown','windup','attacks','pose','born','harvest','disabled','invincible','aim','idleFor'])||u.invincible<0||u.invincible>10||u.clock!==undefined&&(!Number.isInteger(u.clock)||u.clock<0||u.clock>11)||!['down','up','left','right'].includes(u.facing)||!(targetingLocked(u.hero)?u.priority==='random':['first','boss','strong','last'].includes(u.priority)))))return null;
     if(s.tier===undefined)s.tier='easy';if(!TIERS[s.tier])return null;
     if(s.met===undefined)s.met=BOSS_ORDER.length;if(!Number.isInteger(s.met)||s.met<1||s.met>BOSS_ORDER.length)return null;
     if(s.timeRulerUid===undefined)s.timeRulerUid=null;

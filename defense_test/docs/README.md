@@ -14,6 +14,7 @@
 - [CHARACTER_TRAITS.md](CHARACTER_TRAITS.md): 위력 계산 경로와 특성 판정 기준.
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.
 - [ASSET_PIPELINE.md](ASSET_PIPELINE.md): 에셋·사운드 제작과 검수 절차.
+- [ASSET_CONSISTENCY.md](ASSET_CONSISTENCY.md): 동료 37명의 SD·메모리얼 일관성 평가표(2026-10-19). 크게 어긋난 곳과 나중에 손볼 곳. 측정 도구는 `scripts/art/consistency-report.mjs`, `consistency-table.mjs`.
 - [PARTNER_LINES.md](PARTNER_LINES.md): 대사.
 
 ## 3. 날짜 기록 (그날의 설계·측정)

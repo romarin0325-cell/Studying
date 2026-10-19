@@ -1172,7 +1172,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 256,
-        "y": 213,
+        "y": 208,
         "size": 250
       }
     },
@@ -1209,7 +1209,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 256,
-        "y": 236,
+        "y": 216,
         "size": 250
       }
     },
@@ -1283,7 +1283,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 257,
-        "y": 218,
+        "y": 208,
         "size": 250
       }
     },
@@ -1304,6 +1304,154 @@ export const HEROES = [
     "role": "햇빛 저축 · 단일",
     "shape": "single",
     "range": 500,
+    "radius": 0
+  },
+  {
+    "id": "antropy",
+    "name": "앤트로피",
+    "title": "디버프를 삼키는 빛",
+    "color": "#c9b4f0",
+    "art": {
+      "atlas": "unit-antropy",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 260,
+        "y": 212,
+        "size": 250
+      }
+    },
+    "damage": 24,
+    "interval": 1.4,
+    "attack": "halo",
+    "trait": {
+      "type": "antropy",
+      "text": "자신에게 걸리는 적의 디버프를 무효화합니다."
+    },
+    "skill": {
+      "name": "노바레퀴엠",
+      "cost": 50,
+      "type": "requiem",
+      "text": "적의 모든 디버프를 지우고 전체 7배 피해를 줍니다."
+    },
+    "heightGroup": "short",
+    "role": "오라 덱 · 범위",
+    "shape": "splash",
+    "range": 480,
+    "radius": 70
+  },
+  {
+    "id": "cure_master",
+    "name": "큐어마스터",
+    "title": "굿나잇 큐어",
+    "color": "#ff8fc1",
+    "art": {
+      "atlas": "unit-cure_master",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 269,
+        "y": 206,
+        "size": 250
+      }
+    },
+    "damage": 22,
+    "interval": 1.3,
+    "attack": "syringe",
+    "trait": {
+      "type": "cure",
+      "text": "상하좌우 아군에게 무적 오라를 줍니다. 무적은 기절과 저주, 천벌을 막습니다."
+    },
+    "skill": {
+      "name": "레모네이드",
+      "cost": 50,
+      "type": "lemonade",
+      "text": "아군 전체의 기절과 저주를 풀고 3초 동안 무적으로 만듭니다."
+    },
+    "heightGroup": "medium",
+    "role": "보호 · 장판",
+    "shape": "zone",
+    "range": 460,
+    "radius": 60
+  },
+  {
+    "id": "ash",
+    "name": "애쉬",
+    "title": "재가 된 계약",
+    "color": "#ff7048",
+    "art": {
+      "atlas": "unit-ash",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 241,
+        "y": 210,
+        "size": 250
+      }
+    },
+    "damage": 46,
+    "interval": 1.4,
+    "attack": "fire",
+    "trait": {
+      "type": "burn",
+      "text": "일반 공격에 화상을 겁니다."
+    },
+    "skill": {
+      "name": "아마겟돈",
+      "cost": 70,
+      "type": "armageddon",
+      "text": "가장 성급이 낮은 동료 하나를 별빛으로 환원하고, 가장 밀집한 반경 180의 적에게 위력 10배 피해를 줍니다."
+    },
+    "heightGroup": "medium",
+    "role": "화상 · 환원",
+    "shape": "splash",
+    "range": 470,
+    "radius": 64
+  },
+  {
+    "id": "venom",
+    "name": "베놈",
+    "title": "침묵하는 재앙",
+    "color": "#6bc45a",
+    "art": {
+      "atlas": "unit-venom",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 265,
+        "y": 194,
+        "size": 250
+      }
+    },
+    "damage": 34,
+    "interval": 1.2,
+    "attack": "poison",
+    "trait": {
+      "type": "venom",
+      "text": "일반 공격에 중독과 화상을 함께 겁니다."
+    },
+    "skill": {
+      "name": "플래이그",
+      "cost": 80,
+      "type": "venomplague",
+      "text": "적 전체에게 위력 3배 피해와 중독 3중첩을 주고, 10초 동안 적이 받는 화상·중독 피해가 2배가 됩니다."
+    },
+    "heightGroup": "medium",
+    "role": "지속 단일",
+    "shape": "single",
+    "range": 520,
     "radius": 0
   }
 ];
@@ -1764,6 +1912,10 @@ export const ASSET_PATHS = {
   "unit-toffee_apple": "./assets/merge/units/toffee_apple.webp",
   "unit-joker": "./assets/merge/units/joker.webp",
   "unit-sunflower": "./assets/merge/units/sunflower.webp",
+  "unit-antropy": "./assets/merge/units/antropy.webp",
+  "unit-cure_master": "./assets/merge/units/cure_master.webp",
+  "unit-ash": "./assets/merge/units/ash.webp",
+  "unit-venom": "./assets/merge/units/venom.webp",
   "garden": "./assets/merge/garden.webp",
   "summon-altar": "./assets/merge/summon-altar.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",

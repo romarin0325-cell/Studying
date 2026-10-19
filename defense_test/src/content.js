@@ -11,9 +11,9 @@ export const RARITY = {
 };
 export const ROSTER = {
   C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog','joker','sunflower'],
-  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple'],
-  SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom'],
-  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince'],
+  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple','antropy'],
+  SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom','cure_master','ash'],
+  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','venom'],
 };
 // Season guardians in rotation order (one per month). Behemoth joined as the seventh; see guardianOf().
 export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch','behemoth'];
@@ -49,7 +49,7 @@ export const CLEAR_UNLOCKS=Object.freeze({45:['behemoth']});
 // has been cleared (before that the summon pool and the collection are exactly what they were). Every new
 // companion goes on this list.
 export const LATE_UNLOCK_STAGE=45;
-export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower']);
+export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom']);
 // Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
 // from/to are main-stage equivalents of the first and last wave; long runs also grow the board, so
 // late waves add `late` extra health (quadratic in run progress). Rewards scale with `reward`.

@@ -44,6 +44,8 @@ const ONLY=opt('only',null);
 const VARIANTS=[
   ...['red','blue','green','white','black'].map(c=>({id:'joker',label:'조커 '+engine.JOKER_NAMES[c],apply:s=>{s.jokerColor=c;}})),
   ...[0,1,2,3].map(n=>({id:'sunflower',label:`해바라기 햇빛 ${n}`,apply:s=>{s.sunlight=n;}})),
+  // Stateless companions are measured as they are.
+  ...['antropy','cure_master','ash','venom'].map(id=>({id,label:HERO[id].name,apply:()=>{}})),
 ].filter(v=>!ONLY||v.id===ONLY);
 // C average over the original normals (the index base used by simulate.mjs).
 const BASE=['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king'];

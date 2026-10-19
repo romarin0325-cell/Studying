@@ -24,10 +24,17 @@ FX_PROFILES.underdog={motion:'stone',frame:1,offset:0};
 // Joker throws a spinning card tinted by its current colour; Sunflower throws a small blooming sun. Both are drawn in code.
 FX_PROFILES.joker={motion:'cards',frame:11,offset:0};
 FX_PROFILES.sunflower={motion:'sunbeam',frame:11,offset:0};
+// Antropy throws a thin cracked ring with a star; Cure Master throws a cartoon syringe. Both are drawn in code.
+FX_PROFILES.antropy={motion:'ringshot',frame:11,offset:0};
+FX_PROFILES.cure_master={motion:'syringe',frame:11,offset:0};
+// Ash throws a small black-red fireball with a feather; Venom throws a green venom drop with a black spider-lily petal.
+FX_PROFILES.ash={motion:'blackfire',frame:11,offset:0};
+FX_PROFILES.venom={motion:'venomdrop',frame:11,offset:0};
 export const JOKER_HEX=Object.freeze({red:'#ff5a5a',blue:'#4aa8ff',green:'#5fd36a',white:'#f6f4ff',black:'#241a36'});
 
 function stroke(ctx,points,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
 function disk(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+function heart(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,y+r*.9);ctx.bezierCurveTo(x-r*1.5,y-r*.1,x-r*.8,y-r*1.2,x,y-r*.45);ctx.bezierCurveTo(x+r*.8,y-r*1.2,x+r*1.5,y-r*.1,x,y+r*.9);ctx.fill();}
 function diamond(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x,y+r*.4);ctx.lineTo(x-r,y);ctx.lineTo(x,y-r*.4);ctx.closePath();ctx.fill();}
 function star(ctx,r,color){ctx.fillStyle=color;ctx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,rad=i%2?r*.27:r;i?ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad):ctx.moveTo(Math.cos(a)*rad,Math.sin(a)*rad);}ctx.closePath();ctx.fill();}
 const directional=new Set(['crescent','daggers','leap','ribbon','dragon','claws','comets']);
@@ -41,7 +48,7 @@ export const isUR=hero=>!!HERO[hero]&&(HERO[hero].hidden||HERO[hero].rarity==='U
 const EMBLEM={phantom:0,cinderella:1,zeke:2};
 // Field-wide ultimates whose aura is global get a board-edge glow; partial ones mark their units.
 export const GLOBAL_AURAS=Object.freeze(['echo','haste','awaken','march','festive','radiance','harmony','winter']);
-export const PARTIAL_AURAS=Object.freeze(['trauma','midnight']);
+export const PARTIAL_AURAS=Object.freeze(['trauma','midnight','venom']);
 
 // Same logical shape and dimensions as hit testing; no role labels on empty tiles.
 export function drawAttackRange(ctx,hero,from,aim){
@@ -118,6 +125,13 @@ export class CombatFX{
     if(e.type==='sunCharge'){this.bloomAt=this.clock;for(const p of e.points||[])this.add({type:'sunCharge',x:p.x+28,y:p.y+21,sunlight:e.sunlight,life:.9,total:.9});}
     if(e.type==='sunSpend'&&e.sunlight>0)this.add({type:'sunSpend',points:(e.points||[]).map(p=>({x:p.x+28,y:p.y+21})),sunlight:e.sunlight,life:1.2,total:1.2});
     if(e.type==='jokerColor'){this.wheelAt=this.clock;for(const p of e.points||[])this.add({type:'jokerFlip',x:p.x+28,y:p.y+21,color:e.color,life:.7,total:.7});}
+    if(e.type==='reduce')this.add({type:'reduce',x:e.x,y:e.y,hero:e.hero,life:1.1,total:1.1});
+    if(e.type==='armageddonBlast')this.add({type:'armageddon',x:e.x,y:e.y,radius:e.radius||180,life:1.3,total:1.3});
+    if(e.type==='skill'&&e.kind==='venomplague')for(const p of e.targets||[])this.add({type:'plagueBloom',x:p.x,y:p.y,life:1.1,total:1.1});
+    if(e.type==='ward')this.add({type:'ward',x:e.x,y:e.y,hero:e.hero,life:.7,total:.7});
+    if(e.type==='requiem')for(const p of e.points||[])this.add({type:'wipe',x:p.x,y:p.y,cleared:p.cleared||0,life:.8,total:.8});
+    if(e.type==='skill'&&e.kind==='requiem')this.add({type:'novaRing',x:e.origin.x,y:e.origin.y-10,life:1.25,total:1.25});
+    if(e.type==='skill'&&e.kind==='lemonade')for(const p of e.targets||[])this.add({type:'lemonPop',x:p.x,y:p.y,life:1,total:1});
     if(e.type==='bombSet')this.add({...e,life:.6,total:.6});
     if(e.type==='bombBlast')this.add({...e,life:.9,total:.9});
     if(e.type==='skill'){
@@ -409,6 +423,20 @@ export class CombatFX{
     const ctx=this.ctx;for(const z of s.zones){ctx.save();const fade=Math.min(1,z.life*2),pulse=.65+Math.sin(this.clock*4+z.uid)*.1;ctx.globalAlpha=fade;
       // Star Orbit relic: its own small star-ring decal (the ring is the real radius), nothing else.
       if(z.orbit){this.atlasStamp('orbit-zone',0,1,1,z.x,z.y,z.radius*2.3,z.radius*2.3,0,fade*(.55+pulse*.3),'screen');ctx.restore();continue;}
+      if(z.hero==='cure_master'){
+        // Lemonade fizz: a pale lemon pool with rising bubbles, three lemon slices and two hearts circling. The edge is the real radius.
+        const R=z.radius,t=this.clock;
+        const g=ctx.createRadialGradient(z.x,z.y,R*.1,z.x,z.y,R);g.addColorStop(0,'#fff6c255');g.addColorStop(1,'#ffe06a26');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(z.x,z.y,R,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#ff9fcbaa';ctx.lineWidth=1.8;ctx.setLineDash([5,6]);ctx.lineDashOffset=-t*10;ctx.stroke();ctx.setLineDash([]);
+        if(!this.reduced){
+          for(let i=0;i<8;i++){const ph=(t*.45+i*.29+z.uid*.17)%1,x=z.x+Math.cos(i*2.4+z.uid)*R*.62,y=z.y+R*.35-ph*R*.8,r=2+(i%3)*1.1;ctx.globalAlpha=fade*(1-ph)*.9;ctx.strokeStyle='#ffffffdd';ctx.fillStyle='#fffbd088';ctx.lineWidth=1.1;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.stroke();}
+          ctx.globalAlpha=fade;
+          for(let i=0;i<3;i++){const a=t*.8+i*Math.PI*2/3,x=z.x+Math.cos(a)*R*.74,y=z.y+Math.sin(a)*R*.74;ctx.fillStyle='#ffe55a';ctx.strokeStyle='#fff7b0';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,y,5.4,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.strokeStyle='#e8b81c';ctx.lineWidth=.8;for(let j=0;j<3;j++){const b=j*Math.PI/3+a;ctx.beginPath();ctx.moveTo(x-Math.cos(b)*4.6,y-Math.sin(b)*4.6);ctx.lineTo(x+Math.cos(b)*4.6,y+Math.sin(b)*4.6);ctx.stroke();}}
+          for(let i=0;i<2;i++){const a=-t*.6+i*Math.PI,x=z.x+Math.cos(a)*R*.42,y=z.y+Math.sin(a)*R*.42;heart(ctx,x,y,3.8,i?'#ff8fc1':'#ffd3ec');}
+        }
+        ctx.restore();continue;
+      }
       // Edge is the real collision radius. The painted centre is deliberately quieter.
       ctx.fillStyle=HERO[z.hero].color+'12';ctx.strokeStyle=HERO[z.hero].color+'77';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(z.x,z.y,z.radius,0,Math.PI*2);ctx.fill();ctx.stroke();
       this.stamp(z.hero,z.x,z.y,z.radius*1.45,0,pulse*.35);
@@ -420,7 +448,7 @@ export class CombatFX{
     // Reuse each companion's painted combat emblem. The foot seal conveys a
     // live condition without painting over faces, ranks, enemies or HP bars.
     const ctx=this.ctx;
-    if(foreground){this.drawSunBlooms(s);this.drawJokerWheels(s);}else this.drawSunHalo(s);
+    if(foreground){this.drawPlague(s);this.drawSunBlooms(s);this.drawJokerWheels(s);this.drawAntropyBadges(s);}else{this.drawSunHalo(s);this.drawWards(s);}
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u)continue;
       if(!['lightning_sage','star_boy','aurora','zeke','time_ruler'].includes(u.hero))continue;
@@ -465,6 +493,34 @@ export class CombatFX{
       disk(ctx,cx,cy,3.4,'#7a4a14');disk(ctx,cx,cy,1.5,n>0?'#b9c93a':'#6f7a2e');
     }
   }
+  // Cure Master's aura: a faint heart bubble around every protected ally; while Lemonade runs the bubble turns lemon
+  // gold and a ring counts the invincibility down. Antropy (always immune) shows a cracked-halo badge instead.
+  drawWards(s){
+    const ctx=this.ctx;
+    for(let i=0;i<s.board.length;i++){
+      const u=s.board[i];if(!u)continue;
+      const carer=neighbors(i).some(n=>{const a=s.board[n];return a&&a.hero==='cure_master'&&!a.cursed&&!(a.disabled>0);});
+      const inv=u.invincible||0;if(!carer&&inv<=0)continue;
+      const p=cellPoint(i),gold=inv>0,pulse=this.reduced?0:Math.sin(this.clock*2.2+u.uid)*.06;
+      const g=ctx.createRadialGradient(p.x,p.y+4,10,p.x,p.y+4,40);g.addColorStop(0,gold?'#fff3a800':'#ffd3ec00');g.addColorStop(1,gold?'#ffe27a'+(inv>0?'55':'33'):'#ffb6da38');
+      ctx.save();ctx.globalAlpha=.9+pulse;ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y+4,40,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle=gold?'#ffe27acc':'#ffffff99';ctx.lineWidth=gold?2.4:1.6;ctx.stroke();
+      ctx.strokeStyle='#ffffffcc';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y+4,33,Math.PI*1.12,Math.PI*1.42);ctx.stroke();
+      heart(ctx,p.x+27,p.y-22,3.6,gold?'#fff3a8':'#ffd3ec');
+      if(gold){ctx.strokeStyle='#ffe27a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y+4,45,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.min(1,inv/3));ctx.stroke();}
+      ctx.restore();
+    }
+  }
+  drawAntropyBadges(s){
+    const ctx=this.ctx;
+    for(let i=0;i<s.board.length;i++){
+      const u=s.board[i];if(!u||u.hero!=='antropy')continue;
+      const p=cellPoint(i),cx=p.x+28,cy=p.y+21;
+      ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=.9;ctx.strokeStyle='#c9b4f0';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();
+      ctx.strokeStyle='#efe6ff';ctx.lineWidth=2.2;for(const [a0,a1] of [[.3,2.0],[2.5,4.1],[4.6,5.9]]){ctx.beginPath();ctx.arc(cx,cy,10.5,a0,a1);ctx.stroke();}
+      ctx.translate(cx,cy);star(ctx,5.2,'#ffffff');ctx.restore();
+    }
+  }
   // At full stack the ground under the sunflower holds a soft warm halo (nothing else on the board changes).
   drawSunHalo(s){
     if((s.sunlight||0)<3)return;
@@ -489,6 +545,14 @@ export class CombatFX{
       star(ctx,2.6,'#ffe9a0');
       ctx.save();ctx.translate(cx,cy);star(ctx,3.2,tint==='#241a36'?'#d9c8ff':tint);ctx.restore();
     }
+  }
+  drawPlague(s){
+    if(!(s.buffs?.venom>0))return;
+    const ctx=this.ctx,t=this.clock;
+    for(const e of s.enemies){if(e.hp<=0)continue;const p=pathPoint(e.progress),sway=this.reduced?0:Math.sin(t*3+e.uid)*2;
+      ctx.save();ctx.globalAlpha=.55+Math.min(.25,s.buffs.venom/20);ctx.strokeStyle='#7be04a';ctx.lineWidth=1.8;ctx.setLineDash([3,4]);ctx.lineDashOffset=-t*14;ctx.beginPath();ctx.ellipse(p.x,p.y+6,17+sway,6.5,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+      if(!this.reduced)for(let i=0;i<2;i++){const k=(t*.7+i*.5+e.uid*.13)%1;ctx.globalAlpha=(1-k)*.8;disk(ctx,p.x+Math.sin(t*2+e.uid+i*3)*9,p.y+2-k*22,2,'#9be86a');}
+      ctx.restore();}
   }
   drawStatus(e,p,size){
     const ctx=this.ctx,t=this.clock;
@@ -528,13 +592,39 @@ export class CombatFX{
     if(['crescent','daggers','claws'].includes(f.motion)){this.stamp(h.id,shot.origin.x+(p.x-shot.origin.x)*(.45+t*.55),shot.origin.y+(p.y-shot.origin.y)*(.45+t*.55)-18,50+shot.rank*6,angle,.7);return;}
     ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalAlpha=.96;
     // Deliberately short trails: a crowded board must retain faces and enemy tells.
-    if(!['bolt','ribbon','song','clock','cards','sunbeam'].includes(f.motion))stroke(ctx,[[-13-size,0],[0,0]],h.color+'70',size*.65);
+    if(!['bolt','ribbon','song','clock','cards','sunbeam','ringshot','syringe','blackfire','venomdrop'].includes(f.motion))stroke(ctx,[[-13-size,0],[0,0]],h.color+'70',size*.65);
     if(f.motion==='cards'){
       const tint=JOKER_HEX[s.jokerColor||'red'],lit=tint==='#241a36'?'#b69cff':tint,spin=Math.cos(t*17+shot.uid);
       stroke(ctx,[[-24,0],[-3,0]],lit+'88',3);stroke(ctx,[[-17,-4],[-4,-2]],'#ffffff66',1.4);
       ctx.rotate(-angle+t*5);ctx.scale(Math.max(.18,Math.abs(spin)),1);
       ctx.fillStyle='#fffdf3';ctx.strokeStyle='#1a1240';ctx.lineWidth=1.6;ctx.beginPath();ctx.roundRect(-5.5,-7.5,11,15,2.4);ctx.fill();ctx.stroke();
       diamond(ctx,0,0,4.6,tint);ctx.strokeStyle=tint==='#f6f4ff'?'#8a86b8':'#1a1240';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(0,-4.5*.9);ctx.lineTo(4.6,0);ctx.lineTo(0,4.5*.9);ctx.lineTo(-4.6,0);ctx.closePath();ctx.stroke();
+    }
+    if(f.motion==='blackfire'){
+      // A small black-cored fireball in blood red and orange with a short ember tail and a black feather riding along.
+      for(let i=0;i<4;i++)disk(ctx,-8-i*6,Math.sin(t*14+i*1.7)*2.6,3.6-i*.7,i%2?'#ff6a2acc':'#ffb060cc');
+      disk(ctx,0,0,size*1.35,'#c4261c');disk(ctx,0,0,size*.95,'#ff7a30');disk(ctx,.4,0,size*.5,'#160408');
+      ctx.save();ctx.rotate(t*5);ctx.fillStyle='#14090f';ctx.beginPath();ctx.ellipse(-size*1.2,-size*1.2,size*.45,size*1.2,-.6,0,Math.PI*2);ctx.fill();ctx.restore();
+    }
+    if(f.motion==='venomdrop'){
+      // A teardrop of venom: green with a dark core, trailing droplets, a black lily petal turning behind it.
+      for(let i=0;i<3;i++)disk(ctx,-9-i*6,Math.sin(t*12+i*2)*2.2,2.8-i*.7,i?'#7be04acc':'#c4f08a');
+      ctx.fillStyle='#4fbf3a';ctx.strokeStyle='#1c3a18';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(size*1.9,0);ctx.quadraticCurveTo(size*.6,-size*1.25,-size*.9,0);ctx.quadraticCurveTo(size*.6,size*1.25,size*1.9,0);ctx.fill();ctx.stroke();
+      disk(ctx,0,0,size*.45,'#173016');
+      ctx.save();ctx.rotate(t*6);ctx.fillStyle='#17101f';ctx.beginPath();ctx.ellipse(-size*1.4,size*1.1,size*1.1,size*.32,.5,0,Math.PI*2);ctx.fill();ctx.restore();
+    }
+    if(f.motion==='ringshot'){
+      // A thin cracked ring around a white four-point star; fine violet shards trail behind it.
+      ctx.rotate(t*7);ctx.strokeStyle='#d8c9ff';ctx.lineWidth=2.2;for(const [a0,a1] of [[.2,2.1],[2.5,4.3],[4.7,6.0]]){ctx.beginPath();ctx.arc(0,0,size*1.7,a0,a1);ctx.stroke();}
+      ctx.rotate(-t*7);star(ctx,size*.95,'#ffffff');disk(ctx,-size*2.6,0,1.7,'#efe6ff');disk(ctx,-size*3.8,2.4,1.3,'#c9b4f0');disk(ctx,-size*5,-2,1,'#b9a2f2');
+    }
+    if(f.motion==='syringe'){
+      // A cartoon syringe: pink fins and plunger, yellow lemonade, a silver needle; yellow bubbles pop behind it.
+      for(let i=0;i<3;i++)disk(ctx,-16-i*7,Math.sin(t*12+i*2)*3.2,2.6-i*.6,i?'#ffe27acc':'#fff3b8');
+      ctx.strokeStyle='#dfe7ee';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(18,0);ctx.stroke();
+      ctx.fillStyle='#fff7c9';ctx.strokeStyle='#c0558a';ctx.lineWidth=1.4;ctx.beginPath();ctx.roundRect(-10,-3.7,20,7.4,2.2);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#ffd93b';ctx.fillRect(-8,-2.4,13,4.8);
+      ctx.fillStyle='#ff8fc1';ctx.fillRect(-9,-6,2.2,12);ctx.strokeStyle='#ff8fc1';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(-15,0);ctx.stroke();ctx.fillRect(-17,-4.6,2.4,9.2);
     }
     if(f.motion==='sunbeam'){
       for(let i=0;i<3;i++)disk(ctx,-7-i*7,Math.sin(t*10+i*2)*2.5,2.6-i*.6,i?'#ffd45a99':'#fff3c0');
@@ -630,6 +720,62 @@ export class CombatFX{
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
+      if(e.type==='reduce'){
+        // The reduced ally dissolves into starlight embers that rise toward the gauge at the top.
+        const k=easeOut(window01(t,0,.9)),fade=1-window01(t,.6,1),tint=HERO[e.hero]?.color||'#ffd0a0';
+        this.glow('glow',tint,e.x,e.y-14,100*(1-k*.5),fade*.8);
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        for(let i=0;i<14;i++){const a=hash(e.x+i,2)*Math.PI*2,sx=e.x+Math.cos(a)*10*hash(i,e.y),px=sx+(160-sx)*k*.5*hash(i,5),py=e.y-14+(60-e.y)*k*(.55+hash(i,9)*.45);ctx.globalAlpha=fade;diamond(ctx,px,py,3+hash(i,7)*3,i%3?'#ffe3a8':tint);}
+        ctx.restore();continue;
+      }
+      if(e.type==='armageddon'){
+        // A black sun opens over the densest pack: dark core, blood-red corona, a ring at the true radius, falling embers.
+        const grow=easeOut(window01(t,0,.4)),fade=1-window01(t,.55,1),R=e.radius;
+        ctx.save();ctx.globalAlpha=fade*.55;ctx.fillStyle='#1a0610';ctx.beginPath();ctx.arc(e.x,e.y,R*grow,0,Math.PI*2);ctx.fill();ctx.restore();
+        this.glow('rays','#ff6a3c',e.x,e.y-8,R*2.4*grow,fade*.9,t*1.4);this.glow('glow','#ff3a2a',e.x,e.y-8,R*1.6,fade*.8);
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade;ctx.strokeStyle='#ff7a4a';ctx.lineWidth=7*fade+2;ctx.beginPath();ctx.arc(e.x,e.y,R*grow,0,Math.PI*2);ctx.stroke();
+        ctx.strokeStyle='#ffd2a0';ctx.lineWidth=2.5*fade+1;ctx.beginPath();ctx.arc(e.x,e.y,R*grow*.92,0,Math.PI*2);ctx.stroke();
+        if(!this.reduced)for(let i=0;i<16;i++){const a=hash(e.x,i)*Math.PI*2,r=R*(.2+hash(e.y,i+3)*.8)*grow,fall=window01(t,.2,1);ctx.globalAlpha=fade;diamond(ctx,e.x+Math.cos(a)*r,e.y+Math.sin(a)*r*.7+fall*26,3.4+hash(i,8)*3,i%2?'#ffb070':'#fff0d0');}
+        ctx.restore();continue;
+      }
+      if(e.type==='plagueBloom'){
+        // Plague on one enemy: a black spider lily opens at its feet with green spores.
+        const k=easeOut(window01(t,0,.5)),fade=1-window01(t,.55,1);
+        ctx.save();ctx.translate(e.x,e.y+4);ctx.globalAlpha=fade;
+        for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,len=(10+k*20)*(i%2?.8:1);ctx.strokeStyle='#17101f';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(Math.cos(a)*len*.6,Math.sin(a)*len*.35-6*k,Math.cos(a)*len,Math.sin(a)*len*.55);ctx.stroke();
+          ctx.fillStyle='#86e05a';ctx.beginPath();ctx.arc(Math.cos(a)*len,Math.sin(a)*len*.55,1.6+k,0,Math.PI*2);ctx.fill();}
+        ctx.restore();this.glow('glow','#7be04a',e.x,e.y-8,70*(.6+k*.5),fade*.6);continue;
+      }
+      if(e.type==='ward'){
+        // Immunity just blocked something: a soft ring and sparkles on the cell (pink for Cure Master, violet for Antropy).
+        const tint=e.hero==='antropy'?'#d8c9ff':'#ffb6da',k=easeOut(window01(t,0,.6)),fade=1-window01(t,.4,1);
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.9;ctx.strokeStyle=tint;ctx.lineWidth=3*fade+1;ctx.beginPath();ctx.arc(e.x,e.y-6,16+k*30,0,Math.PI*2);ctx.stroke();
+        if(!this.reduced)for(let i=0;i<5;i++){const a=i/5*Math.PI*2+k*1.4,r=20+k*26;ctx.globalAlpha=fade;diamond(ctx,e.x+Math.cos(a)*r,e.y-6+Math.sin(a)*r,3.2,i%2?'#ffffff':tint);}
+        ctx.restore();this.glow('glow',tint,e.x,e.y-6,70*(1-k*.3),fade*.7);continue;
+      }
+      if(e.type==='wipe'){
+        // Nova Requiem on one enemy: its debuffs shatter outward.
+        const k=easeOut(window01(t,0,.55)),fade=1-window01(t,.4,1);
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.9;ctx.strokeStyle='#efe6ff';ctx.lineWidth=2.4*fade+.8;ctx.beginPath();ctx.arc(e.x,e.y-16,10+k*28,0,Math.PI*2);ctx.stroke();
+        if(!this.reduced)for(let i=0;i<4+Math.min(4,e.cleared);i++){const a=hash(e.x,i)*Math.PI*2,v=18+hash(e.y,i+4)*34;ctx.globalAlpha=fade;diamond(ctx,e.x+Math.cos(a)*v*k,e.y-16+Math.sin(a)*v*k,3+hash(e.x,i+8)*3,i%2?'#ffffff':'#c9b4f0');}
+        ctx.restore();this.glow('glow','#e9defc',e.x,e.y-16,66*(1-k*.4),fade*.6);continue;
+      }
+      if(e.type==='novaRing'){
+        // The cracked halo opens across the whole field: two broken rings and a four-point star at the caster.
+        const k=easeOut(window01(t,0,.7)),fade=1-window01(t,.5,1),flash=1-window01(t,0,.25);
+        ctx.save();ctx.globalCompositeOperation='lighter';
+        for(const [scale,w,col,dash] of [[1,10,'#f3ecff',[130,26,70,22]],[.7,5,'#b9a2f2',[60,18,110,16]]]){ctx.globalAlpha=fade*.9;ctx.strokeStyle=col;ctx.lineWidth=w*fade+2;ctx.setLineDash(dash);ctx.lineDashOffset=-t*120;ctx.beginPath();ctx.arc(e.x,e.y,780*scale*k,0,Math.PI*2);ctx.stroke();}
+        ctx.setLineDash([]);
+        if(flash>0){ctx.globalAlpha=flash;ctx.translate(e.x,e.y);ctx.rotate(t*1.4);star(ctx,110*(.4+k),'#ffffff');}
+        ctx.restore();this.glow('glow','#efe6ff',e.x,e.y,240*(1-k*.5),fade*.7);continue;
+      }
+      if(e.type==='lemonPop'){
+        // Lemonade ultimate on one ally: a lemon-yellow bubble opens and hearts rise out of it.
+        const k=easeOut(window01(t,0,.45)),fade=1-window01(t,.5,1);
+        ctx.save();ctx.globalAlpha=fade*.85;ctx.fillStyle='#fff3a833';ctx.strokeStyle='#ffe27a';ctx.lineWidth=2.2;ctx.beginPath();ctx.arc(e.x,e.y-4,10+k*34,0,Math.PI*2);ctx.fill();ctx.stroke();
+        if(!this.reduced)for(let i=0;i<5;i++){const x=e.x+(hash(e.x+i,3)-.5)*46,y=e.y-8-k*(30+hash(e.y,i)*34);ctx.globalAlpha=fade;heart(ctx,x,y,3.6+hash(i,e.x)*2,i%2?'#ff8fc1':'#ffd3ec');}
+        ctx.restore();this.glow('glow','#ffe27a',e.x,e.y-6,72*(1-k*.3),fade*.6);continue;
+      }
       if(e.type==='impact'&&e.sunR){
         // The ring is the real burst radius (30, 60 or 90): what is drawn is what was hit.
         const fade=1-window01(t,.25,1),grow=easeOut(window01(t,0,.45));

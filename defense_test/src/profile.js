@@ -1,5 +1,5 @@
-import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS} from './content.js';
-import {lateOpen,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
+import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE} from './content.js';
+import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
@@ -240,7 +240,9 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='pityClaim'){
     const banner=args.banner;if(!['normal','season'].includes(banner))return no('교환할 수 없는 소환입니다.');
     if(p.pity[banner]<TUNING.pity[banner])return no(`소환 ${TUNING.pity[banner]}회마다 교환할 수 있어요.`);
-    const c=calendar(now),pool=banner==='season'?[c.guardian]:ROSTER.UR;if(!pool.includes(args.id))return no('교환할 수 있는 동료를 골라 주세요.');
+    const c=calendar(now),pool=banner==='season'?[c.guardian]:heroPool('UR',lateOpen(p.cleared));if(!pool.includes(args.id))return no('교환할 수 있는 동료를 골라 주세요.');
+    // A late companion (Behemoth in its guardian month) cannot be taken through the exchange before stage 45 either.
+    if(LATE_COMPANIONS.includes(args.id)&&!lateOpen(p.cleared))return no(`${HERO[args.id].name}은(는) 스테이지 ${LATE_UNLOCK_STAGE} 클리어 후에 교환할 수 있어요.`);
     p.pity[banner]-=TUNING.pity[banner];const item={id:args.id,fresh:receive(p.heroes,args.id),banner,at:now,pity:true};p.history.unshift(item);p.history=p.history.slice(0,50);
     return {ok:true,item,message:`${HERO[args.id].name}을(를) 데려왔어요`};
   }

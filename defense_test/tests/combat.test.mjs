@@ -5,6 +5,7 @@ import {createBattle,resumeBattle,autoPlay,clearedRounds} from '../src/battle.js
 import {HEROES,HERO,DEFAULT_DECK,CHAPTERS,BOSS_ORDER} from '../src/content.js';
 import {createProfile,command,validateProfile} from '../src/profile.js';
 import {heroMultiplier,collectionBonus,relicScale} from '../src/economy.js';
+import {smartAutoPlay} from '../src/smart-auto.js';
 const NOW=1791082800000;
 function active(mode='main',stage=1){
   const p=createProfile(NOW);p.cleared=stage-1;
@@ -86,9 +87,9 @@ function soloWinner(s){
 }
 
 test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
-  assert.equal(HEROES.length,35);assert.equal(new Set(HEROES.map(h=>h.id)).size,35);
+  assert.equal(HEROES.length,39);assert.equal(new Set(HEROES.map(h=>h.id)).size,39);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플']);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','앤트로피']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
   assert.equal(CHAPTERS.length,90);assert.equal(CHAPTERS[8].hp,3.5);assert.equal(CHAPTERS[44].part,1);assert.equal(CHAPTERS[45].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
@@ -1658,4 +1659,287 @@ test('joker: every ultimate turns the colour one step round (red, blue, green, w
   }
   assert.equal(E.restore(E.serialize(s)).jokerColor,'red');
   const bad=JSON.parse(E.serialize(s));bad.jokerColor='pink';assert.equal(E.restore(bad),null);
+});
+
+function hold(s){for(const u of s.board)if(u){u.cooldown=100;u.windup=0;}}
+function finishTelegraph(s){for(let i=0;i<90&&s.telegraph;i++){hold(s);E.step(s,.05);}assert.equal(s.telegraph,null);}
+function relocate(s,uid,to){
+  let from=s.board.findIndex(u=>u?.uid===uid);assert.ok(from>=0);
+  if(from===to)return;
+  if(s.board[to]&&E.canMerge(s.board[from],s.board[to])){const empty=s.board.findIndex((u,i)=>!u&&i!==from);assert.ok(empty>=0&&E.move(s,to,empty).ok);from=s.board.findIndex(u=>u?.uid===uid);}
+  assert.ok(E.move(s,from,to).ok);
+}
+function armBoss(placements,chapter,progress=400){
+  const s=traitArena(placements);s.chapter=chapter;
+  const [boss]=enemiesFor(s,[{kind:'boss',hp:1e9,progress}]);boss.speed=0;hold(s);
+  return [s,boss];
+}
+
+test('immunity: antropy, an orthogonal cure aura, and the invincible timer',()=>{
+  assert.equal(E.REQUIEM.factor,7);assert.ok(Object.isFrozen(E.REQUIEM));
+  assert.equal(E.LEMONADE.seconds,3);assert.ok(Object.isFrozen(E.LEMONADE));
+  const s=traitArena([
+    {index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:7,hero:'snow_rabbit'},{index:11,hero:'siren'},{index:17,hero:'guardian'},
+    {index:6,hero:'santa'},{index:18,hero:'jasmine'},{index:24,hero:'antropy'},{index:0,hero:'doom'},
+  ]);
+  assert.equal(E.immune(s,1),false,'empty cell');
+  assert.equal(E.immune(s,24),true,'antropy');
+  assert.equal(E.immune(s,12),false,'a cure master does not protect herself');
+  for(const i of [13,7,11,17])assert.equal(E.immune(s,i),true,'orthogonal '+i);
+  assert.equal(E.immune(s,6),false,'diagonal');assert.equal(E.immune(s,18),false,'diagonal');assert.equal(E.immune(s,0),false);
+  assert.deepEqual({key:E.personalTrait(s,s.board[24]).key,active:E.personalTrait(s,s.board[24]).active,label:E.personalTrait(s,s.board[24]).label},{key:'antropy',active:true,label:'디버프 무효'});
+  assert.equal(E.personalTrait(s,s.board[12]).label,'무적 오라 · 아군 4명');assert.equal(E.personalTrait(s,s.board[12]).active,true);
+  const alone=traitArena([{index:4,hero:'cure_master'}]);
+  assert.equal(E.personalTrait(alone,alone.board[4]).label,'무적 오라 · 곁에 아군 없음');
+  s.board[24].cursed=true;s.board[24].disabled=5;assert.equal(E.immune(s,24),true,'antropy stays immune while cursed or disabled');
+  s.board[12].cursed=true;for(const i of [13,7,11,17])assert.equal(E.immune(s,i),false,'a cursed cure grants nothing');
+  assert.equal(E.personalTrait(s,s.board[12]).active,false);assert.equal(E.personalTrait(s,s.board[12]).label,'무적 오라 · 아군 4명');
+  s.board[12].cursed=false;s.board[12].disabled=2;for(const i of [13,7,11,17])assert.equal(E.immune(s,i),false,'a disabled cure grants nothing');
+  assert.equal(E.personalTrait(s,s.board[12]).active,false);
+  s.board[12].disabled=0;s.board[12].invincible=1;assert.equal(E.immune(s,12),true,'invincible covers the cure master herself');
+  const t=traitArena([{index:12,hero:'star_boy'}]),u=t.board[12];
+  assert.equal(E.immune(t,12),false);u.invincible=.12;assert.equal(E.immune(t,12),true);
+  E.stunUnit(t,12,2);assert.equal(u.disabled,0);
+  let n=0;while(u.invincible>0&&n<8){E.step(t,.05);n++;}
+  assert.equal(u.invincible,0);assert.equal(E.immune(t,12),false);assert.ok(n>=2&&n<=4,'the timer expires after a few ticks');
+  E.stunUnit(t,12,2);assert.ok(u.disabled>=2);E.stunUnit(t,3,5);assert.equal(t.board[3],null);
+  const m=traitArena([{index:0,hero:'star_boy'},{index:1,hero:'star_boy'}]);m.board[0].invincible=4;m.board[0].disabled=3;
+  assert.ok(E.move(m,0,1).merged);assert.equal(m.board[1].invincible,0);assert.equal(m.board[1].disabled,0,'a merge keeps the fresh unit, invincible included');
+  const w=traitArena([{index:0,hero:'star_boy',rank:1},{index:2,hero:'siren',rank:2}]);w.board[0].invincible=2;
+  assert.ok(E.move(w,0,2).ok);assert.equal(w.board[2].hero,'star_boy');assert.equal(w.board[2].invincible,2,'a swap keeps the unit timer');
+});
+
+test('boss patterns skip immune units: seal, storm, stun, thunder, judgement and curse',()=>{
+  const seal=armBoss([{index:0,hero:'cure_master'},{index:1,hero:'star_boy'},{index:2,hero:'snow_rabbit'},{index:3,hero:'siren'},{index:4,hero:'antropy'}],0);
+  const [s,boss]=seal;boss.skillIn=0;hold(s);E.step(s,.05);assert.equal(s.telegraph.pattern,'seal');
+  const cells=s.telegraph.cells,uid=id=>s.board.find(u=>u?.hero===id).uid;
+  relocate(s,uid('cure_master'),cells[2]);relocate(s,uid('star_boy'),cells[1]);relocate(s,uid('snow_rabbit'),cells[3]);relocate(s,uid('siren'),cells[0]);relocate(s,uid('antropy'),cells[4]);
+  assert.equal(E.immune(s,cells[2]),false);assert.equal(E.immune(s,cells[1]),true);assert.equal(E.immune(s,cells[3]),true);assert.equal(E.immune(s,cells[0]),false);assert.equal(E.immune(s,cells[4]),true);
+  finishTelegraph(s);
+  assert.ok(s.board[cells[2]].disabled>0,'the cure master herself is stunned');
+  assert.equal(s.board[cells[1]].disabled,0);assert.equal(s.board[cells[3]].disabled,0,'aura is sampled before she is stunned');
+  assert.ok(s.board[cells[0]].disabled>0,'a unit two cells away is not covered');
+  assert.equal(s.board[cells[4]].disabled,0);assert.ok(s.events.some(e=>e.type==='seal'));
+  const [storm]=armBoss([{index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:7,hero:'antropy'},{index:0,hero:'siren'}],4);
+  const stormBoss=storm.enemies[0];stormBoss.skillIn=0;hold(storm);E.step(storm,.05);assert.equal(storm.telegraph.pattern,'storm');
+  const lit=[...storm.telegraph.cells],hits=lit.filter(i=>storm.board[i]&&!E.immune(storm,i));
+  assert.ok(lit.some(i=>storm.board[i]&&E.immune(storm,i)));assert.ok(hits.length>=1);
+  const gauge=storm.gauge,time=storm.time;finishTelegraph(storm);
+  close(storm.gauge,gauge+(storm.time-time)*1.2-5*hits.length,'storm drains 5 starlight per non-immune hit');
+  for(const i of lit)if(storm.board[i])assert.equal(storm.board[i].disabled>0,hits.includes(i));
+  assert.ok(storm.events.some(e=>e.type==='bossCast'&&e.pattern==='storm'));
+  for(const [hero,stunned] of [['antropy',false],['siren',true]]){
+    const [arena,unitBoss]=armBoss([{index:12,hero}],1);unitBoss.skillIn=0;hold(arena);E.step(arena,.05);
+    assert.equal(arena.telegraph.pattern,'stun1');assert.equal(arena.telegraph.cells[0],12);finishTelegraph(arena);
+    assert.equal(arena.board[12].disabled>0,stunned,hero);assert.ok(arena.events.some(e=>e.type==='seal'));
+  }
+  const [thor,thorBoss]=armBoss([{index:12,hero:'antropy'},{index:0,hero:'siren'}],4,E.PATH_LENGTH*.5+1);thorBoss.skillIn=99;hold(thor);E.step(thor,.05);
+  assert.equal(thor.telegraph.pattern,'thunder');const cols=thor.telegraph.cells;
+  relocate(thor,thor.board.find(u=>u?.hero==='antropy').uid,cols[0]);relocate(thor,thor.board.find(u=>u?.hero==='siren').uid,cols[1]);
+  finishTelegraph(thor);assert.equal(thor.board[cols[0]].disabled,0);assert.ok(thor.board[cols[1]].disabled>0);
+  assert.ok(thor.events.some(e=>e.type==='bossCast'&&e.pattern==='thunder'));
+  const [judge,judgeBoss]=armBoss([{index:12,hero:'antropy'},{index:0,hero:'siren'}],8);judgeBoss.skillIn=0;hold(judge);E.step(judge,.05);
+  assert.equal(judge.telegraph.pattern,'judgement');const marked=judge.telegraph.cells[0];
+  relocate(judge,judge.board.find(u=>u?.hero==='antropy').uid,marked);finishTelegraph(judge);
+  assert.equal(judge.board[marked]?.hero,'antropy');assert.equal(judge.board.filter(Boolean).length,2);
+  assert.equal(judge.events.filter(e=>e.type==='judgement').pop().hit,false);
+  const [plain,plainBoss]=armBoss([{index:12,hero:'star_boy'},{index:0,hero:'siren'}],8);plainBoss.skillIn=0;hold(plain);E.step(plain,.05);
+  const markedPlain=plain.telegraph.cells[0];finishTelegraph(plain);
+  assert.equal(plain.board[markedPlain],null);assert.equal(plain.events.filter(e=>e.type==='judgement').pop().hit,true);
+  const [curse,curseBoss]=armBoss([{index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:0,hero:'antropy'},{index:24,hero:'snow_rabbit'}],3);
+  curse.board[12].invincible=5;curseBoss.skillIn=0;hold(curse);E.step(curse,.05);
+  assert.equal(curse.board[24].cursed,true);assert.ok(curse.board.every((u,i)=>i===24||!u?.cursed),'curse never picks an immune unit');
+  const [safe,safeBoss]=armBoss([{index:0,hero:'antropy'},{index:6,hero:'antropy'}],3);safeBoss.skillIn=0;hold(safe);E.step(safe,.05);
+  assert.equal(safe.board.some(u=>u?.cursed),false);assert.equal(safe.events.some(e=>e.type==='curse'),false);
+});
+
+test('bigshow and applebomb do not stun an immune ally',()=>{
+  const s=traitArena([{index:7,hero:'cure_master'},{index:12,hero:'underdog'},{index:18,hero:'snow_rabbit'},{index:24,hero:'antropy'}]);
+  enemiesFor(s,[{hp:1e9}]);readyCast(s,'underdog');
+  assert.ok(s.board[7].disabled>0,'the cure master is not immune to her own show');
+  assert.equal(s.board[12].disabled,0,'the ally beside her was immune when the stun was sampled');
+  assert.ok(s.board[18].disabled>=2);assert.equal(s.board[24].disabled,0);
+  const beside=traitArena([{index:12,hero:'cure_master'},{index:13,hero:'toffee_apple'}]);
+  enemiesFor(beside,[{hp:1e9}]);readyCast(beside,'toffee_apple');assert.equal(beside.board[13].disabled,0);assert.equal(beside.bombs.length,1);
+  const lone=traitArena([{index:12,hero:'toffee_apple'}]);enemiesFor(lone,[{hp:1e9}]);readyCast(lone,'toffee_apple');assert.ok(lone.board[12].disabled>=3);
+});
+
+test('lemonade clears disables and curses, grants invincible, and round-trips through a save',()=>{
+  const s=traitArena([{index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:18,hero:'snow_rabbit'}]);
+  enemiesFor(s,[{hp:1e9}]);s.board[13].disabled=4;s.board[13].cursed=true;s.board[18].disabled=2;
+  const preview=E.castPreview(s,'cure_master');
+  assert.equal(preview.lines[0],'아군 전체의 기절과 저주를 풀고 3초 동안 무적으로 만듭니다.');
+  assert.equal(preview.lines[1],'지금 행동불능인 동료 2명.');
+  const before=E.serialize(s),events=s.events.length;E.castPreview(s,'cure_master');assert.equal(E.serialize(s),before);assert.equal(s.events.length,events);
+  const damage=s.stats.damage;readyCast(s,'cure_master');assert.equal(s.stats.damage,damage);
+  for(const u of s.board)if(u){assert.equal(u.disabled,0);assert.equal(u.cursed,false);assert.equal(u.invincible,3);}
+  const skill=s.events.filter(e=>e.type==='skill').pop();assert.equal(skill.kind,'lemonade');assert.equal(skill.support,true);
+  assert.ok(E.restore(E.serialize(s)).board.every(u=>!u||u.invincible===3));
+  const boosted=traitArena([{index:12,hero:'cure_master'}]);boosted.meta.cure_master={power:1,special:2};enemiesFor(boosted,[{hp:1e9}]);
+  const boostedPreview=E.castPreview(boosted,'cure_master');assert.equal(boostedPreview.lines.length,1);assert.ok(boostedPreview.lines[0].includes('6초'));
+  readyCast(boosted,'cure_master');assert.equal(boosted.board[12].invincible,6);
+  const old=JSON.parse(E.serialize(s));delete old.board[12].invincible;assert.equal(E.restore(old).board[12].invincible,0);
+  for(const bad of [-1,NaN,11]){const raw=JSON.parse(E.serialize(s));raw.board[12].invincible=bad;assert.equal(E.restore(raw),null,'invincible '+bad);}
+});
+
+test('requiem wipes debuffs before the 7x hit, so exposure does not amplify it',()=>{
+  const s=traitArena([{index:12,hero:'antropy'}]);
+  const [foe,clean]=enemiesFor(s,[{hp:1e9,progress:600},{hp:1e9,progress:800}]);
+  const until=s.time+5;
+  foe.statusEffects=[
+    {type:'burn',source:'t:burn',owner:'antropy',amount:10,until},
+    {type:'poison',source:'t:poison',owner:'antropy',amount:3,until,power:10},
+    {type:'exposure',source:'t:exp',owner:null,amount:.35,until},
+    {type:'divine',source:'t:div',owner:'antropy',amount:2,until},
+    {type:'stun',source:'t:stun',owner:null,amount:1,until},
+  ];
+  foe.slowEffects=[{source:'t:slow',owner:'antropy',amount:.4,until}];
+  foe.ccImmune=s.time+9;foe.frostLock=s.time+4;foe.shield=0;foe.rage=0;
+  const base=E.combatStats(s,s.board[12]).damage,hit=`${Math.round(base*7).toLocaleString('ko-KR')} 피해`;
+  const preview=E.castPreview(s,'antropy');
+  assert.equal(preview.lines[0],`적의 모든 디버프를 지우고 적 전체에게 위력 7배, ${hit}를 줍니다.`);
+  assert.equal(preview.lines[1],'지금 지워지는 디버프가 걸린 적 1기.');
+  const saved=E.serialize(s);E.castPreview(s,'antropy');assert.equal(E.serialize(s),saved);
+  const hp=foe.hp,hp2=clean.hp,lock=foe.ccImmune,frost=foe.frostLock;readyCast(s,'antropy');
+  close(hp-foe.hp,base*7,'debuffed enemy');close(hp2-clean.hp,base*7,'clean enemy takes the same hit');
+  const st=E.statusState(s,foe);
+  assert.equal(st.burn,0);assert.equal(st.poison,0);assert.equal(st.exposure,0);assert.equal(st.divine,0);assert.equal(st.stun,0);assert.equal(st.slow,0);
+  assert.equal(foe.controlTime,0);assert.equal(foe.slowTime,0);assert.equal(foe.statusEffects.length,0);assert.equal(foe.slowEffects.length,0);
+  assert.equal(foe.ccImmune,lock);assert.equal(foe.frostLock,frost);
+  const req=s.events.find(e=>e.type==='requiem');
+  assert.equal(req.points.find(p=>p.uid===foe.uid).cleared,6);assert.equal(req.points.find(p=>p.uid===clean.uid).cleared,0);
+  assert.ok(s.events.some(e=>e.type==='skill'&&e.kind==='requiem'));
+  const bare=traitArena([{index:12,hero:'antropy'}]);enemiesFor(bare,[{hp:1e9}]);
+  const bareBase=E.combatStats(bare,bare.board[12]).damage;
+  assert.deepEqual(E.castPreview(bare,'antropy').lines,[`적의 모든 디버프를 지우고 적 전체에게 위력 7배, ${Math.round(bareBase*7).toLocaleString('ko-KR')} 피해를 줍니다.`]);
+});
+
+test('cure master basic attack leaves a zone that damages a nearby enemy',()=>{
+  const s=traitArena([{index:12,hero:'cure_master'}]);
+  const [near,mid,far]=enemiesFor(s,[{hp:1e9,progress:1200},{hp:1e9,progress:1240},{hp:1e9,progress:1500}]);
+  const shot=launchNormal(s,s.board[12]);shot.target=mid.uid;
+  const hpNear=near.hp,hpMid=mid.hp,hpFar=far.hp;resolveNormal(s,shot);
+  assert.equal(s.zones.length,1);assert.equal(s.zones[0].hero,'cure_master');assert.equal(s.zones[0].radius,HERO.cure_master.radius);
+  assert.ok(mid.hp<hpMid);assert.equal(near.hp,hpNear);assert.equal(far.hp,hpFar);
+  const tick=s.zones[0].damage*.22;E.step(s,.05);
+  close(hpNear-near.hp,tick,'zone tick');assert.equal(far.hp,hpFar);
+});
+
+test('smart auto holds lemonade until someone needs it and spends requiem on living enemies',()=>{
+  const idle=traitArena([{index:17,hero:'cure_master',rank:2},{index:12,hero:'cure_master',rank:1}]);
+  enemiesFor(idle,[{hp:1e9,progress:1200}]);idle.gauge=120;idle.gold=0;
+  for(const u of idle.board)if(u){u.cooldown=100;u.disabled=0;u.cursed=false;}
+  smartAutoPlay(idle);assert.equal(idle.stats.skills,0);
+  const busy=traitArena([{index:17,hero:'cure_master',rank:2},{index:12,hero:'cure_master',rank:1}]);
+  enemiesFor(busy,[{hp:1e9,progress:1200}]);busy.gauge=120;busy.gold=0;
+  for(const u of busy.board)if(u)u.cooldown=100;busy.board[12].disabled=4;
+  smartAutoPlay(busy);assert.equal(busy.stats.skills,1);assert.equal(busy.board[12].disabled,0);assert.ok(busy.board[12].invincible>0);
+  const s=traitArena([{index:12,hero:'antropy'}]);const [foe]=enemiesFor(s,[{hp:1e9}]);
+  s.gauge=120;s.gold=0;s.board[12].cooldown=100;const hp=foe.hp;
+  smartAutoPlay(s);assert.equal(s.stats.skills,1);assert.ok(foe.hp<hp);
+});
+
+test('ash: armageddon reduces the lowest other ally, skips an immune one, and still blasts when she is alone',()=>{
+  assert.deepEqual(E.ARMAGEDDON,{factor:10,radius:180});
+  const dist=(a,b)=>Math.hypot(E.pathPoint(a.progress).x-E.pathPoint(b.progress).x,E.pathPoint(a.progress).y-E.pathPoint(b.progress).y);
+  const hitLine=base=>`가장 밀집한 반경 ${E.ARMAGEDDON.radius}의 적에게 위력 ${E.ARMAGEDDON.factor}배, ${Math.round(base*E.ARMAGEDDON.factor).toLocaleString('ko-KR')} 피해를 줍니다.`;
+  const s=traitArena([{index:12,hero:'ash',rank:1},{index:0,hero:'star_boy',rank:1},{index:24,hero:'snow_rabbit',rank:3}]);
+  const enemies=enemiesFor(s,[100,130,160,1200].map(progress=>({hp:1e9,progress})));
+  assert.deepEqual(enemies.map(e=>e.progress),[100,130,160,1200]);
+  const base=E.combatStats(s,s.board[12]).damage,preview=E.castPreview(s,'ash');
+  assert.deepEqual(preview.lines,[`지금 환원될 동료: ${HERO.star_boy.name} 1성`,hitLine(base)]);
+  const savedPreview=E.serialize(s);E.castPreview(s,'ash');assert.equal(E.serialize(s),savedPreview);
+  const before=enemies.map(e=>e.hp),gold=s.gold,income=JSON.stringify(s.stats.income),mark=s.events.length;
+  readyCast(s,'ash');
+  assert.equal(s.board[12].hero,'ash','Ash herself is not the cost');assert.equal(s.board[0],null);assert.equal(s.board[24].hero,'snow_rabbit');
+  assert.equal(s.stats.sacrificed,1);assert.equal(s.gold,gold);assert.equal(JSON.stringify(s.stats.income),income);
+  for(const [i,e] of enemies.entries())close(before[i]-e.hp,dist(e,{progress:160})<=E.ARMAGEDDON.radius?base*E.ARMAGEDDON.factor:0,'blast at '+e.progress);
+  assert.ok(dist(enemies[3],{progress:160})>E.ARMAGEDDON.radius);assert.equal(enemies.filter(e=>dist(e,{progress:160})<=E.ARMAGEDDON.radius).length,3);
+  const fresh=s.events.slice(mark),red=fresh.find(e=>e.type==='reduce'),blast=fresh.find(e=>e.type==='armageddonBlast');
+  assert.deepEqual({hero:red.hero,index:red.index,x:red.x,y:red.y},{hero:'star_boy',index:0,...E.cellPoint(0)});
+  assert.equal(blast.radius,E.ARMAGEDDON.radius);assert.equal(blast.x,E.pathPoint(160).x);assert.equal(blast.y,E.pathPoint(160).y);
+  assert.ok(fresh.some(e=>e.type==='skill'&&e.kind==='armageddon'));
+  const back=E.restore(E.serialize(s));assert.ok(back);
+  assert.equal(back.board[0],null);assert.equal(back.board[12].hero,'ash');assert.equal(back.board[24].hero,'snow_rabbit');assert.equal(back.stats.sacrificed,1);
+  for(let i=0;i<enemies.length;i++)close(back.enemies[i].hp,enemies[i].hp);
+  const tie=traitArena([{index:12,hero:'ash',rank:1},{index:2,hero:'snow_rabbit',rank:1},{index:4,hero:'star_boy',rank:1}]);
+  enemiesFor(tie,[{hp:1e9}]);readyCast(tie,'ash');
+  assert.equal(tie.board[12].hero,'ash');assert.equal(tie.board[2],null,'lowest uid wins the rank tie');assert.equal(tie.board[4].hero,'star_boy');
+  const immune=traitArena([{index:0,hero:'star_boy',rank:1},{index:1,hero:'cure_master',rank:5},{index:12,hero:'ash',rank:3},{index:24,hero:'snow_rabbit',rank:2}]);
+  enemiesFor(immune,[{hp:1e9}]);assert.equal(E.immune(immune,0),true);assert.equal(E.immune(immune,24),false);
+  const immuneGold=immune.gold;
+  assert.equal(E.castPreview(immune,'ash').lines[0],`지금 환원될 동료: ${HERO.snow_rabbit.name} 2성`);
+  readyCast(immune,'ash');
+  assert.equal(immune.board[0].hero,'star_boy');assert.equal(immune.board[1].hero,'cure_master');assert.equal(immune.board[12].hero,'ash');assert.equal(immune.board[24],null);
+  assert.equal(immune.stats.sacrificed,1);assert.equal(immune.gold,immuneGold);
+  assert.deepEqual({hero:immune.events.find(e=>e.type==='reduce').hero,index:immune.events.find(e=>e.type==='reduce').index},{hero:'snow_rabbit',index:24});
+  const alone=traitArena([{index:12,hero:'ash'}]);
+  const [foe]=enemiesFor(alone,[{hp:1e9,progress:1200}]);
+  const aloneBase=E.combatStats(alone,alone.board[12]).damage,aloneGold=alone.gold,aloneHp=foe.hp;
+  assert.deepEqual(E.castPreview(alone,'ash').lines,['환원할 동료가 없습니다.',hitLine(aloneBase)]);
+  readyCast(alone,'ash');
+  close(aloneHp-foe.hp,aloneBase*E.ARMAGEDDON.factor);assert.equal(alone.board[12].hero,'ash');assert.equal(alone.stats.sacrificed||0,0);assert.equal(alone.gold,aloneGold);
+  assert.equal(alone.events.some(e=>e.type==='reduce'),false);assert.equal(alone.events.find(e=>e.type==='armageddonBlast').radius,E.ARMAGEDDON.radius);
+  const burn=traitArena([{index:12,hero:'ash'}]);const [target]=enemiesFor(burn,[{hp:1e9,progress:1200}]);
+  const shot=launchNormal(burn,burn.board[12]);resolveNormal(burn,shot);
+  close(target.burn,shot.damage*.23);close(target.burnTime,3);assert.equal(target.burnOwner,'ash');
+});
+
+test('venom: a normal hit applies poison and burn, and the plague doubles those ticks for about 10 seconds',()=>{
+  assert.deepEqual(E.VENOM_PLAGUE,{factor:3,stacks:3,seconds:10,amp:1});
+  assert.equal(E.ACTIVE_SKILLS.venom,'venom');assert.equal(E.PURE_BUFFS.has('venomplague'),false);
+  const s=traitArena([{index:12,hero:'venom'}]);const [e]=enemiesFor(s,[{hp:1e9,progress:1200}]);
+  s.buffs.echo=5;s.buffTotals.echo=5;s.buffScale.echo=1;
+  const shot=launchNormal(s,s.board[12]),echo=s.shots.find(x=>x.proc===false);assert.ok(echo);
+  resolveNormal(s,shot);
+  assert.equal(E.statusState(s,e).poison,1);close(e.burn,shot.damage*.23);close(e.burnTime,3);
+  const applied=e.statusEffects.find(x=>x.type==='poison');assert.equal(applied.amount,1);close(applied.until-s.time,7);close(applied.power,shot.damage);
+  const stacks=E.statusState(s,e).poison,burned=e.burn;s.shots=[echo];echo.life=.001;E.step(s,.001);
+  assert.equal(E.statusState(s,e).poison,stacks,'an echo is not a normal hit');close(e.burn,burned);
+  const field=traitArena([{index:12,hero:'venom'}]);
+  const pack=enemiesFor(field,[100,900].map(progress=>({hp:1e9,progress})));
+  const base=E.combatStats(field,field.board[12]).damage,preview=E.castPreview(field,'venom');
+  assert.deepEqual(preview.lines,[
+    `적 전체에게 위력 ${E.VENOM_PLAGUE.factor}배, ${Math.round(base*E.VENOM_PLAGUE.factor).toLocaleString('ko-KR')} 피해를 주고 중독을 ${E.VENOM_PLAGUE.stacks}중첩 쌓습니다.`,
+    '10초 동안 적이 받는 화상·중독 피해가 2배가 됩니다.',
+  ]);
+  const before=E.serialize(field);E.castPreview(field,'venom');assert.equal(E.serialize(field),before);
+  const hp=pack.map(foe=>foe.hp),gold=field.gold,mark=field.events.length;readyCast(field,'venom');
+  for(const [i,foe] of pack.entries()){
+    close(hp[i]-foe.hp,base*E.VENOM_PLAGUE.factor);
+    assert.equal(E.statusState(field,foe).poison,E.VENOM_PLAGUE.stacks);
+    const effect=foe.statusEffects.find(x=>x.type==='poison');assert.equal(effect.amount,3);close(effect.power,base);close(effect.until-field.time,12);
+  }
+  close(field.buffs.venom,E.VENOM_PLAGUE.seconds);assert.equal(field.buffTotals.venom,field.buffs.venom);assert.equal(field.buffScale.venom,1);
+  assert.equal(field.gold,gold);assert.equal(E.castLock(field,'venom'),null);
+  assert.deepEqual(field.events.slice(mark).map(ev=>ev.type).filter(type=>type!=='hit'),['skill']);
+  const back=E.restore(E.serialize(field));assert.ok(back);close(back.buffs.venom,field.buffs.venom);assert.equal(back.buffTotals.venom,field.buffTotals.venom);assert.equal(E.statusState(back,back.enemies[0]).poison,3);
+  const dot=(type,buff)=>{
+    // A 1e9 pool quantizes a sub-point tick, so the measured enemy stays near 1e6.
+    const run=traitArena([{index:12,hero:'venom'}]);const [foe]=enemiesFor(run,[{hp:1e6,progress:1200}]);quiet(run);
+    const owner=run.board[12].uid;
+    foe.statusEffects=[type==='burn'
+      ?{type:'burn',source:`attack:venom:${owner}`,owner:'venom',amount:80,until:run.time+4}
+      :{type:'poison',source:`skill:venom:${owner}`,owner:'venom',amount:2,until:run.time+8,power:40}];
+    if(buff)run.buffs.venom=5;const at=foe.hp;E.step(run,.05);return at-foe.hp;
+  };
+  close(dot('burn',false),80*.05);close(dot('burn',true),80*.05*(1+E.VENOM_PLAGUE.amp));
+  const poisonStep=2*40*E.POISON_POWER_RATIO*.05;close(dot('poison',false),poisonStep);close(dot('poison',true),poisonStep*(1+E.VENOM_PLAGUE.amp));
+  // 0.05 steps leave a residue at exactly 10s; the buff is gone on the next step.
+  const start=field.time;advanceTo(field,start+9.9);assert.ok(field.buffs.venom>.05);advanceTo(field,start+10);assert.ok(!(field.buffs.venom>1e-4));advanceTo(field,start+10.05);assert.equal(E.activeSkill(field,'venom'),null);
+  const boosted=traitArena([{index:12,hero:'venom'}]);boosted.meta.venom={special:2};enemiesFor(boosted,[{hp:1e9}]);
+  assert.equal(E.castPreview(boosted,'venom').lines[1],'20초 동안 적이 받는 화상·중독 피해가 2배가 됩니다.');
+  readyCast(boosted,'venom');close(boosted.buffs.venom,20);
+});
+
+test('smart auto holds armageddon for a straggler and spends it on a cluster, and spends venomplague',()=>{
+  const one=traitArena([{index:12,hero:'ash'}]);const [straggler]=enemiesFor(one,[{hp:1e9,progress:1200}]);
+  one.gauge=120;one.gold=0;one.board[12].cooldown=100;const hp=straggler.hp;
+  smartAutoPlay(one);assert.equal(one.stats.skills,0);assert.equal(straggler.hp,hp);
+  const pack=traitArena([{index:12,hero:'ash'}]);const group=enemiesFor(pack,[100,130,160,190].map(progress=>({hp:1e9,progress})));
+  pack.gauge=120;pack.gold=0;pack.board[12].cooldown=100;const before=group.map(e=>e.hp);
+  smartAutoPlay(pack);assert.equal(pack.stats.skills,1);assert.ok(group.every((e,i)=>e.hp<before[i]));
+  const v=traitArena([{index:12,hero:'venom'}]);const [foe]=enemiesFor(v,[{hp:1e9,progress:1200}]);
+  v.gauge=120;v.gold=0;v.board[12].cooldown=100;const vh=foe.hp;
+  smartAutoPlay(v);assert.equal(v.stats.skills,1);assert.ok(foe.hp<vh);assert.ok(v.buffs.venom>0);
 });
