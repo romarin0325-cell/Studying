@@ -9,7 +9,7 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,66);
+  assert.equal(Object.keys(ASSET_PATHS).length,68);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.
@@ -28,4 +28,10 @@ test('all collection, boss and battle textures resolve to local art with valid a
   assert.equal(ARTIFACTS.length,27);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,27);
   // Rows of three in the collection: 12 C, 6 R, 6 SR, 3 UR.
   assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,3]);
+});
+
+test('every unit faces outward: the left cell looks left, the right cell is its mirror view and looks right',async()=>{
+  const {reversedUnits,notMirrored}=await import('../scripts/art/check-facing.mjs');
+  assert.deepEqual(await reversedUnits(),[],'a left/right cell pair that faces the wrong way');
+  assert.deepEqual(await notMirrored(),[],'a right cell that is not the mirror view of the left cell');
 });

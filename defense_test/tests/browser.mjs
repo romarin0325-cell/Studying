@@ -192,7 +192,7 @@ try{
     await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
     await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
-    await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
+    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),/스테이지 45 클리어 후 신규 동료 8명/);assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
     await shot(page,'collection',width,height);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
@@ -264,7 +264,17 @@ try{
     await context.close();
   }
   const lateProfile=createProfile(NOW);lateProfile.cleared=45;
-  const lateTest=await boot(390,844,lateProfile);await nav(lateTest.page,'동료');
+  const lateTest=await boot(390,844,lateProfile);
+  // The first load after clearing stage 45 announces who joined the summon: eight tiles, shown once.
+  await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
+  assert.equal(await lateTest.page.locator('.late-card').count(),8,'eight new companions are announced');
+  assert.equal((await profile(lateTest.page)).noticeLate.length,8,'the announcement is recorded as seen');
+  await shot(lateTest.page,'late-notice',390,844);
+  await lateTest.page.locator('[data-action="late-summon"]').click();await lateTest.page.locator('.sm-late.open').waitFor();
+  assert.equal(await lateTest.page.locator('#sheet[data-kind="late"]').count(),0,'the announcement closes');
+  await lateTest.page.locator('[data-action="rates"]').click();assert.match(await lateTest.page.locator('#sheet-body').innerText(),/신규 동료[\s\S]*언더독[\s\S]*베놈/);await close(lateTest.page);
+  await reload(lateTest);assert.equal(await lateTest.page.locator('#sheet[data-kind="late"]').count(),0,'not announced again after a reload');
+  await nav(lateTest.page,'동료');
   assert.equal(await lateTest.page.locator('.cards .cc').count(),39,'the new companions join the collection once stage 45 is cleared');
   for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
   await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();

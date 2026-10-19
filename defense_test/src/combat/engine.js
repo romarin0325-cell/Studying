@@ -150,8 +150,8 @@ function syncTimeRuler(s){
   s.timeRulerUid=unit.uid;return unit;
 }
 // Underdog (노멀 덱 다크호스) and Toffee Apple (저축 폭탄): numbers from docs/UPCOMING_BALANCE.md.
-export const UNDERDOG=Object.freeze({bonus:.8,factor:7,stun:2});
-export const APPLEBOMB=Object.freeze({factor:7,max:3,trigger:80,stun:3,minAlive:5});
+export const UNDERDOG=Object.freeze({bonus:.8,factor:10,stun:2});
+export const APPLEBOMB=Object.freeze({factor:9,max:5,trigger:80,stun:3});
 // Sunflower: one shared stack (0..3) of sunlight, +1 when a wave ends while a sunflower stands on the board. Its basic
 // attack bursts around the target with the radius of the current stack; Solar Flare spends the whole stack.
 export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:3});
@@ -161,9 +161,9 @@ export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','wh
 export const JOKER_NAMES=Object.freeze({red:'빨강 · 화상',blue:'파랑 · 감속',green:'초록 · 중독',white:'하양 · 성광',black:'검정 · 노출'});
 export const nextJokerColor=color=>JOKER.colors[(Math.max(0,JOKER.colors.indexOf(color))+1)%JOKER.colors.length];
 export const REQUIEM=Object.freeze({factor:7});
-export const LEMONADE=Object.freeze({seconds:3});
-// Ash deletes the lowest other ally, then hits the densest pack inside the radius for 10x. The reduction is a pure cost.
-export const ARMAGEDDON=Object.freeze({factor:10,radius:180});
+export const LEMONADE=Object.freeze({seconds:4});
+// Ash burns the lowest other ally (an immune pick is guarded, not skipped), then hits the densest pack inside the radius.
+export const ARMAGEDDON=Object.freeze({factor:15,radius:180});
 // Venom Plague strikes for 3x, stacks poison, then burn and poison ticks deal double (1+amp) for the buff.
 export const VENOM_PLAGUE=Object.freeze({factor:3,stacks:3,seconds:10,amp:1});
 export function personalTrait(s,u,index=s.board.indexOf(u)){
@@ -229,10 +229,11 @@ const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed
 export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
   const trait={snow_rabbit:[['40%',slow(.4)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
-    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]]}[id]||[];
+    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
-    siren:[['10초',sec(10)]],ancient_dragon:[['10초',sec(10)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(10)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]]}[id]||[];
+    siren:[['10초',sec(10)]],ancient_dragon:[['10초',sec(10)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(10)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]],
+    luna:[['40%',pctText(executeThresholdFor(k))]],phantom:[['25%',pctText(Math.min(DAMAGE_TAKEN_CAP,.25*k))]],cure_master:[['4초',sec(4)]],venom:[['10초',sec(10)]]}[id]||[];
   return {trait,skill};
 }
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
@@ -716,10 +717,10 @@ function clearEnemyDebuffs(s,e){
   syncStatuses(s,e);syncSlows(s,e);
   return n;
 }
-// Lowest other ally by rank, then uid. The caster and immune units are never the cost.
+// Lowest other ally by rank, then uid. Immunity is a consume-guard, not a skip.
 function reductionTarget(s,u){
   let pick=null;
-  for(let i=0;i<s.board.length;i++){const ally=s.board[i];if(!ally||ally.uid===u.uid||immune(s,i))continue;if(!pick||ally.rank<pick.ally.rank||ally.rank===pick.ally.rank&&ally.uid<pick.ally.uid)pick={ally,i};}
+  for(let i=0;i<s.board.length;i++){const ally=s.board[i];if(!ally||ally.uid===u.uid)continue;if(!pick||ally.rank<pick.ally.rank||ally.rank===pick.ally.rank&&ally.uid<pick.ally.uid)pick={ally,i};}
   return pick;
 }
 export function cast(s,id){
@@ -804,8 +805,9 @@ export function cast(s,id){
     event(s,'jokerColor',{from,color:s.jokerColor,points:s.board.flatMap((a,i)=>a?.hero==='joker'?[cellPoint(i)]:[])});
   }
   else if(type==='applebomb'){
-    // The bomb waits on the path with the damage of this cast; the Toffee Apple that set it is stunned.
-    const bomb={uid:s.nextId++,progress:clamp(random(s)*PATH_LENGTH,PATH_LENGTH*.12,PATH_LENGTH*.9),damage:base*APPLEBOMB.factor};
+    // Place ahead of the foremost living enemy so the bomb can wait; never below PATH_LENGTH*.12 or past *.9.
+    const lead=targets.reduce((m,e)=>Math.max(m,e.progress),0),ahead=lead+140,cap=PATH_LENGTH*.9;
+    const bomb={uid:s.nextId++,progress:clamp(ahead<cap?ahead+random(s)*(cap-ahead):cap,PATH_LENGTH*.12,cap),damage:base*APPLEBOMB.factor};
     s.bombs.push(bomb);event(s,'bombSet',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress)});
     stunUnit(s,s.board.indexOf(u),APPLEBOMB.stun);
   }
@@ -821,7 +823,10 @@ export function cast(s,id){
   }
   else if(type==='armageddon'){
     const pick=reductionTarget(s,u);
-    if(pick){s.board[pick.i]=null;syncTimeRuler(s);s.stats.sacrificed=(s.stats.sacrificed||0)+1;event(s,'reduce',{hero:pick.ally.hero,index:pick.i,...cellPoint(pick.i)});}
+    if(pick){
+      if(immune(s,pick.i))event(s,'ward',{...cellPoint(pick.i),hero:s.board[pick.i].hero==='antropy'?'antropy':'cure_master'});
+      else{s.board[pick.i]=null;syncTimeRuler(s);s.stats.sacrificed=(s.stats.sacrificed||0)+1;event(s,'reduce',{hero:pick.ally.hero,index:pick.i,...cellPoint(pick.i)});}
+    }
     const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=ARMAGEDDON.radius);
     const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
     visualTargets=centre?near(centre):[];for(const e of visualTargets)damage(s,e,base*ARMAGEDDON.factor,id);
@@ -904,7 +909,7 @@ export function castPreview(s,id){
   }else if(type==='goddess'){
     lines.push(`적 전체에게 위력 5배, ${hit(5)}를 줍니다.`);
     lines.push(`${dur(8,'radiance')} 동안 모든 동료의 위력이 ${pct(.5*scale)}% 오릅니다.`);
-    lines.push('행동 불능을 모두 풀고, 지속 동안 봉인과 폭풍의 행동 불능과 별빛 감소를 막습니다.');
+    lines.push('기절과 저주를 한 번 풉니다.');
   }else if(type==='trauma'){
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 줍니다.`);
     // +110% damage and +35% speed are fixed. buffScale is stored and not applied.
@@ -1046,8 +1051,8 @@ export function castPreview(s,id){
     lines.push(`적 전체에게 위력 ${JOKER.roulette}배, ${hit(JOKER.roulette)}를 주고 색을 ${JOKER_NAMES[nextJokerColor(color)].split(' · ')[0]}으로 바꿉니다.`);
   }else if(type==='applebomb'){
     const set=(s.bombs||[]).length;
-    lines.push(`경로에 폭탄을 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);
-    lines.push(`적이 다가왔을 때 ${APPLEBOMB.minAlive}기 이상 살아 있으면 적 전체에게 위력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}로 터집니다. 보스가 닿으면 바로 터집니다.`);
+    lines.push(`경로 앞쪽에 폭탄을 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);
+    lines.push(`적이 가까이 오면 바로 터져 적 전체에게 위력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}를 줍니다.`);
     lines.push(`설치한 토피애플은 ${APPLEBOMB.stun}초 동안 기절합니다.`);
   }else if(type==='requiem'){
     lines.push(`적의 모든 디버프를 지우고 적 전체에게 위력 ${REQUIEM.factor}배, ${hit(REQUIEM.factor)}를 줍니다.`);
@@ -1059,7 +1064,7 @@ export function castPreview(s,id){
     if(n)lines.push(`지금 행동불능인 동료 ${n}명.`);
   }else if(type==='armageddon'){
     const pick=reductionTarget(s,u);
-    lines.push(pick?`지금 환원될 동료: ${HERO[pick.ally.hero].name} ${pick.ally.rank}성`:'환원할 동료가 없습니다.');
+    lines.push(!pick?'소멸할 동료가 없습니다.':immune(s,pick.i)?`${HERO[pick.ally.hero].name} ${pick.ally.rank}성은 무적이라 소멸하지 않습니다.`:`지금 소멸하는 동료: ${HERO[pick.ally.hero].name} ${pick.ally.rank}성.`);
     lines.push(`가장 밀집한 반경 ${ARMAGEDDON.radius}의 적에게 위력 ${ARMAGEDDON.factor}배, ${hit(ARMAGEDDON.factor)}를 줍니다.`);
   }else if(type==='venomplague'){
     lines.push(`적 전체에게 위력 ${VENOM_PLAGUE.factor}배, ${hit(VENOM_PLAGUE.factor)}를 주고 중독을 ${VENOM_PLAGUE.stacks}중첩 쌓습니다.`);
@@ -1088,16 +1093,16 @@ function bossCells(s,pattern){
   return [];
 }
 function bossResolve(s,e,boss,pattern){
-  const cells=s.telegraph?.cells||[],shielded=s.buffs.radiance>0;
+  const cells=s.telegraph?.cells||[];
   // Sample immunity before any stun: disabling the aura source must not expose a neighbour later in the same pattern.
   const victims=()=>cells.filter(i=>s.board[i]&&!immune(s,i));
   // An immune unit that a pattern would have hit shows the ward (Antropy's own halo or a cure master's bubble).
-  if(['seal','storm','stun1','thunder','judgement'].includes(pattern)&&!shielded)for(const i of cells)if(s.board[i]&&immune(s,i))event(s,'ward',{...cellPoint(i),hero:s.board[i].hero==='antropy'?'antropy':'cure_master'});
-  if(pattern==='seal'){if(!shielded)for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,boss.sealTime||2.4);event(s,'seal',{cells});}
-  else if(pattern==='storm'){if(!shielded)for(const i of victims()){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
-  else if(pattern==='stun1'){if(!shielded)for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,2);event(s,'seal',{cells});}
+  if(['seal','storm','stun1','thunder','judgement'].includes(pattern))for(const i of cells)if(s.board[i]&&immune(s,i))event(s,'ward',{...cellPoint(i),hero:s.board[i].hero==='antropy'?'antropy':'cure_master'});
+  if(pattern==='seal'){for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,boss.sealTime||2.4);event(s,'seal',{cells});}
+  else if(pattern==='storm'){for(const i of victims()){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
+  else if(pattern==='stun1'){for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,2);event(s,'seal',{cells});}
   else if(pattern==='starlust'){if(s.gauge>=gaugeCap(s)-1e-6){s.gauge=Math.max(0,s.gauge-60);event(s,'drain');}event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});}
-  else if(pattern==='thunder'){e.judged=true;e.judging=false;if(!shielded)for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
+  else if(pattern==='thunder'){e.judged=true;e.judging=false;for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,3);event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
   else if(pattern==='shuffle'){
     const units=s.board.filter(Boolean),slots=shuffle(s,Array.from({length:25},(_,i)=>i));s.board=Array(25).fill(null);units.forEach((u,i)=>{s.board[slots[i]]=u;});syncTimeRuler(s);
     event(s,'shuffle',{});event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});
@@ -1106,7 +1111,7 @@ function bossResolve(s,e,boss,pattern){
     for(const t of s.enemies){if(t.hp<=0)continue;const controlled=t.statusEffects.some(effect=>['stun','freeze'].includes(effect.type)&&effect.until-s.time>1e-9),slowed=t.slowEffects.some(effect=>effect.until-s.time>1e-9);if(controlled||slowed)continue;t.progress=Math.min(PATH_LENGTH-1,t.progress+PATH_LENGTH*.15);}
     event(s,'rush');event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});
   }else if(pattern==='judgement'){
-    const i=cells[0],u=s.board[i],safe=!u||shielded||immune(s,i);
+    const i=cells[0],u=s.board[i],safe=!u||immune(s,i);
     if(u&&!safe&&s.board.filter(Boolean).length>1){s.board[i]=null;syncTimeRuler(s);}
     event(s,'judgement',{index:i,hit:!!u&&!safe,...cellPoint(i)});
   }
@@ -1131,7 +1136,7 @@ function bossStep(s,e,dt){
   if(pattern==='curse'){
     // Unannounced, once per appearance: one random active companion is sealed until it is merged, sold or cleansed.
     const pool=s.board.flatMap((u,i)=>u&&!u.cursed&&!immune(s,i)?[i]:[]);e.skillIn=boss.every||9;
-    if(!pool.length||s.buffs.radiance>0)return;
+    if(!pool.length)return;
     const i=pool[Math.floor(random(s)*pool.length)];s.board[i].cursed=true;event(s,'curse',{index:i,hero:s.board[i].hero,...cellPoint(i)});return;
   }
   const time=TELEGRAPH_TIME[pattern]||2.6;e.channel=time;e.channelHp=e.hp+(e.shield||0);
@@ -1203,11 +1208,10 @@ export function step(s,dt){
       else{e.hp=0;s.health-=e.boss?7:e.kind==='armor'?2:1;s.stats.leaks=(s.stats.leaks||0)+1;event(s,'leak',{boss:e.boss,health:s.health});if(has(s,'amulet')&&(s.amuletUsed||0)<RV.amulet.uses){s.amuletUsed=(s.amuletUsed||0)+1;addGauge(s,RV.amulet.starlight*relicScaleIn(s,'amulet'));}}
     }
   }
-  // A bomb goes off when an enemy reaches it, but only while at least APPLEBOMB.minAlive enemies are alive (a boss
-  // always sets it off), so it is not wasted on the last straggler.
+  // A bomb goes off when any living enemy is within APPLEBOMB.trigger of it or already past it.
   if(s.bombs.length)s.bombs=s.bombs.filter(bomb=>{
     const alive=s.enemies.filter(e=>e.hp>0);
-    if(!alive.some(e=>e.progress>=bomb.progress-APPLEBOMB.trigger)||alive.length<APPLEBOMB.minAlive&&!alive.some(e=>e.boss))return true;
+    if(!alive.some(e=>e.progress>=bomb.progress-APPLEBOMB.trigger))return true;
     for(const e of alive)damage(s,e,bomb.damage,'toffee_apple');
     event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress)});
     return false;

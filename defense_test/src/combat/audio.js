@@ -98,7 +98,11 @@ export class Sound {
       case 'move':this.tone(520,t,.06,.025,'sine',380);return;
       case 'sell':this.tone(1320,t,.08,.03,'triangle',990);this.tone(990,t+.06,.1,.025,'triangle',700);return;
       case 'income':this.tone(1568,t,.07,.02,'square',null,.1);this.tone(2093,t+.05,.12,.018,'triangle',null,.2);return;
-      case 'skill':{if(e.locked){[69,76,81].forEach((n,i)=>this.tone(midi(n),t+i*.1,.3,.04,'sine',null,.4));this.noise(t,.5,.02,800,'bandpass',4000,.8,.3);return;}
+      case 'skill':{if(e.kind==='bigshow'){
+        // The fist falls (rising whoosh), lands (deep thump plus a crack of stone), and the board rings.
+        this.noise(t,.26,.07,300,'bandpass',3200,1.1);this.tone(52,t+.3,.9,.34,'sine',24);this.noise(t+.3,.6,.22,2200,'lowpass',180,.9,.3);
+        this.tone(130,t+.3,.35,.12,'square',60);this.chord([55,62,69],t+.32,.8,.05,'sawtooth',.01,.5);return;}
+        if(e.locked){[69,76,81].forEach((n,i)=>this.tone(midi(n),t+i*.1,.3,.04,'sine',null,.4));this.noise(t,.5,.02,800,'bandpass',4000,.8,.3);return;}
         // Wind-up, impact, then a bright chord: every ultimate lands like a moment.
         this.noise(t,.3,.05,300,'bandpass',4200,1.2);this.tone(70,t+.26,.6,.22,'sine',32);this.noise(t+.26,.45,.12,2800,'lowpass',400,.7,.25);
         this.chord(e.support?[72,76,79,84]:[69,73,76,81],t+.3,.9,.045,'sawtooth',.012,.45);this.chord([84,88,91],t+.34,.7,.02,'triangle',.02,.5);return;}
