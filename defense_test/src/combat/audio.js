@@ -107,6 +107,9 @@ export class Sound {
       case 'finisherImpact':this.tone(e.kind==='royal'?110:62,t,.5,.32,'sine',30);this.noise(t,e.kind==='royal'?.2:.34,.18,e.kind==='royal'?5200:1900,'lowpass',300);this.tone(e.kind==='royal'?1320:880,t,.45,.06,'triangle',440,.5);return;
       case 'finisherFizzle':this.tone(440,t,.3,.03,'sine',220);return;
       case 'meteor':this.noise(t,.4,.06,600,'bandpass',3000,1);this.tone(90,t+.35,.4,.16,'sine',40);return;
+      case 'sunCharge':this.chord([523,659,784],t,.5,.035,'sine',.02,.5);this.tone(1568,t+.12,.2,.03,'sine');return;
+      case 'sunSpend':this.tone(220,t,.7,.1,'sawtooth',880);this.noise(t,.5,.07,3000,'highpass',900,.6);this.chord([523,659,784,1047],t+.1,.7,.04,'triangle',.02,.5);return;
+      case 'jokerColor':for(let i=0;i<5;i++)this.tone(600+i*110,t+i*.045,.06,.05,'square');this.tone(1320,t+.26,.2,.05,'triangle');return;
       case 'bombSet':this.tone(520,t,.14,.07,'triangle',760);this.tone(1040,t+.05,.1,.04,'sine',null,.4);return;
       case 'bombBlast':this.tone(80,t,.5,.26,'sine',32);this.noise(t,.45,.16,1500,'lowpass',260,.8);this.chord([72,76,79],t+.02,.4,.03,'triangle',.01,.4);return;
       case 'impact':this.tone(95,t,.25,.1,'sine',45);this.noise(t,.18,.05,1500,'lowpass');return;

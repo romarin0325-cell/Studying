@@ -86,8 +86,8 @@ function soloWinner(s){
 }
 
 test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
-  assert.equal(HEROES.length,33);assert.equal(new Set(HEROES.map(h=>h.id)).size,33);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독']);
+  assert.equal(HEROES.length,35);assert.equal(new Set(HEROES.map(h=>h.id)).size,35);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
   assert.equal(CHAPTERS.length,90);assert.equal(CHAPTERS[8].hp,3.5);assert.equal(CHAPTERS[44].part,1);assert.equal(CHAPTERS[45].part,2);
@@ -1608,4 +1608,54 @@ test('toffee apple: sets up to three bombs that wait for five living enemies (or
   const hp2=s.enemies.map(e=>e.hp);E.step(s,.05);
   assert.ok(s.bombs.length<n,'five living enemies set a bomb off');
   assert.ok(s.enemies.some((e,i)=>e.hp<hp2[i]));
+});
+
+test('sunflower: one shared sunlight stack that fills only while a sunflower stands, widens the burst 30/60/90 and is spent by Solar Flare',()=>{
+  const endWave=s=>{s.enemies=[];s.queue=[];s.phase='combat';E.step(s,.05);assert.equal(s.phase,'reward');s.phase='combat';s.reward=null;s.queue=[{kind:'grunt',hp:1e9}];s.spawnIn=1e6;};
+  const s=traitArena([{index:12,hero:'sunflower'},{index:13,hero:'sunflower',rank:2}]);
+  assert.equal(s.sunlight,0);assert.equal(E.sunRadius(s),0);
+  const seen=[];for(let i=0;i<5;i++){endWave(s);seen.push(s.sunlight);}
+  assert.deepEqual(seen,[1,2,3,3,3],'two sunflowers share one stack that gains one per wave and stops at three');
+  assert.deepEqual([0,1,2,3].map(n=>{s.sunlight=n;return E.sunRadius(s);}),[0,30,60,90]);
+  const none=traitArena([{index:12,hero:'joker'}]);endWave(none);assert.equal(none.sunlight,0,'no sunflower on the board, no sunlight');
+  assert.equal(E.personalTrait(s,s.board[12]).label,'햇빛 3/3 · 폭발 반경 90');
+  s.sunlight=0;assert.equal(E.personalTrait(s,s.board[12]).label,'햇빛 0/3 · 폭발 없음');
+  // The burst hits exactly the enemies inside the radius of the current stack.
+  for(const n of [0,1,2,3]){
+    const a=traitArena([{index:12,hero:'sunflower'}]);a.sunlight=n;
+    const foes=enemiesFor(a,[20,50,80,200].map(d=>({progress:1000+d,hp:1e6})).concat([{progress:1000,hp:1e6}]));
+    const target=foes[4],hp=foes.map(e=>e.hp);
+    const u=a.board[12];u.target=target.uid;const shot=launchNormal(a,u);shot.target=target.uid;resolveNormal(a,shot);
+    const tp=E.pathPoint(target.progress),R=E.sunRadius(a);
+    foes.forEach((e,i)=>{const p=E.pathPoint(e.progress),inside=e===target||R>0&&Math.hypot(p.x-tp.x,p.y-tp.y)<=R;assert.equal(e.hp<hp[i],inside,`stack ${n} enemy ${i}`);});
+  }
+  // Solar Flare: 2x with none, +3x per sunlight, and it spends the whole stack.
+  for(const n of [0,1,3]){
+    const a=traitArena([{index:12,hero:'sunflower'}]);a.sunlight=n;
+    const [foe]=enemiesFor(a,[{hp:1e9}]),base=E.combatStats(a,a.board[12]).damage,hp=foe.hp;
+    const preview=E.castPreview(a,'sunflower');assert.ok(preview.lines[0].includes(`햇빛 ${n}개`)&&preview.lines[0].includes(`위력 ${2+3*n}배`));
+    readyCast(a,'sunflower');close(hp-foe.hp,base*(2+3*n),'solar flare damage at stack '+n);assert.equal(a.sunlight,0);
+  }
+  const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(saved.sunlight,s.sunlight);
+  const bad=JSON.parse(E.serialize(s));bad.sunlight=4;assert.equal(E.restore(bad),null);
+});
+test('joker: every ultimate turns the colour one step round (red, blue, green, white, black) and the basic attack applies that colour\'s status',()=>{
+  const expected={red:e=>e.burnTime>0,blue:e=>e.slowTime>0,green:e=>e.poison>0,white:e=>e.divine>=1,black:e=>e.exposeTime>0};
+  for(const [color,test] of Object.entries(expected)){
+    const s=traitArena([{index:12,hero:'joker'}]);s.jokerColor=color;
+    const [foe]=enemiesFor(s,[{hp:1e9}]),u=s.board[12];u.target=foe.uid;
+    const shot=launchNormal(s,u);shot.target=foe.uid;resolveNormal(s,shot);E.statusState(s,foe);
+    assert.ok(test(foe),color+' status after one hit');
+    for(const other of Object.keys(expected))if(other!==color&&other!=='red'&&color!=='red')assert.ok(!expected[other](foe)||other===color,color+' does not also apply '+other);
+  }
+  const s=traitArena([{index:12,hero:'joker'}]);
+  const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage,order=['red','blue','green','white','black','red'];
+  assert.equal(s.jokerColor,'red');
+  for(let i=0;i<5;i++){
+    const hp=foe.hp;s.board[12].disabled=0;const preview=E.castPreview(s,'joker');
+    assert.ok(preview.lines[0].includes(E.JOKER_NAMES[order[i+1]].split(' · ')[0]));
+    readyCast(s,'joker');close(hp-foe.hp,base*3,'roulette strikes 3x');assert.equal(s.jokerColor,order[i+1]);
+  }
+  assert.equal(E.restore(E.serialize(s)).jokerColor,'red');
+  const bad=JSON.parse(E.serialize(s));bad.jokerColor='pink';assert.equal(E.restore(bad),null);
 });

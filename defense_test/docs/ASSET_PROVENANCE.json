@@ -234,6 +234,20 @@
       "height": 1024
     },
     {
+      "id": "unit-joker",
+      "source": "defense_test/assets/merge/units/joker.webp",
+      "sha256": "e60422f948ebb7a128cdba703cc1c602fca135b0897f42c0c3051224eb8e032a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-sunflower",
+      "source": "defense_test/assets/merge/units/sunflower.webp",
+      "sha256": "1e1966a8a3da96cd5ac8344f66ecb5fc279088ff6df927d05756fa16e0177f59",
+      "width": 1024,
+      "height": 1024
+    },
+    {
       "id": "garden",
       "source": "defense_test/assets/merge/garden.webp",
       "sha256": "2cf5196e183d4029562fe58ed52e53fe77df54983fb7d5be32ecf399a549546c",
@@ -431,7 +445,7 @@
       "sha256": "37c7903f9c06b3c7935ea3f28f1dbf01f2fe45696da6b7eef5942ec61f4c1c09"
     }
   },
-  "portraits": 33,
+  "portraits": 35,
   "relics": 27,
   "memorial": [
     {
@@ -550,6 +564,40 @@
         "width": 720,
         "height": 1080,
         "bytes": 90712,
+        "quality": 82
+      }
+    },
+    {
+      "id": "joker",
+      "source": "defense_test/assets/memorial/joker.avif",
+      "sha256": "c44e7cb3df26b4c395574ca1412da539cc52a7a27d17f97a77a41f4271d1ec69",
+      "width": 720,
+      "height": 1080,
+      "bytes": 69520,
+      "sourceSha256": "2878cd737daf2e2a4480d8071259678b2896682ecaa82b8f7b4568e0b369be4e",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/joker.webp",
+        "sha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
+        "width": 720,
+        "height": 1080,
+        "bytes": 97802,
+        "quality": 62
+      }
+    },
+    {
+      "id": "sunflower",
+      "source": "defense_test/assets/memorial/sunflower.avif",
+      "sha256": "d866554c5f33b3b407d595e898d3cfb5dc1ccae2bb7ddf6dd806940bd2a05ee9",
+      "width": 720,
+      "height": 1080,
+      "bytes": 45001,
+      "sourceSha256": "aeecb33e413ade6feb4db259684e33d84b57c9125e3a735faa7b83e391c74300",
+      "webp": {
+        "source": "defense_test/assets/memorial-webp/sunflower.webp",
+        "sha256": "c985bcab237ac96dbfaf7771236a7021b84432b0d22125daa0dc418f0a9ca3ec",
+        "width": 720,
+        "height": 1080,
+        "bytes": 82690,
         "quality": 82
       }
     },

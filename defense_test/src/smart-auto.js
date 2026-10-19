@@ -20,7 +20,7 @@ function coverage(id,cell){
 // Average enemies one attack reaches, by attack shape.
 const aoe=h=>({single:1,beam:1.5,cleave:1.9,pulse:2.4,chain:2.2,bounce:1.8,cross:1.6}[h.shape]??(h.shape==='zone'?1+h.radius/45:h.shape==='splash'?1+h.radius/70:1));
 // Control and team amplification are not in raw damage.
-const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1,underdog:1,toffee_apple:1};
+const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,phantom:1.3,guardian:1.3,great_detective:1.5,storm_sage:1.1,avalanche_maid:1.1,aurora:1.1,underdog:1,toffee_apple:1,joker:1,sunflower:1};
 
 function unitValue(s,u,i){
   if(!u||u.cursed)return 0;
@@ -118,6 +118,14 @@ function ultValue(s,m,id,gv){
     case 'plague':return strike(3)+list.reduce((n,e)=>n+Math.min(e.hp,8*P*.1*12),0);
     case 'thunder':return strike(7)+control(1.2*scale)+thunderCancel();
     case 'ice_court':{const have=list.reduce((n,e)=>Math.max(n,e.takenBonus||0),0);return strike(9)+control(3)+buff(Math.max(0,E.WINTER_EXPOSURE-have),6);}
+    // The shared sunlight stack is worth saving: below two stacks the burst is not worth the starlight, at two only a
+    // crisis (the danger rule above) pays for it, at three it is a full 11x. Casting also drops the wider burst.
+    case 'solarflare':{
+      const n=Math.min(E.SUNFLOWER.max,s.sunlight||0);if(n<2)return 0;
+      const i=s.board.indexOf(u),lost=(i>=0?unitValue(s,u,i):0)*m.scale*Math.min(rem,24)*.1*n;
+      return Math.max(0,strike(E.SUNFLOWER.base+E.SUNFLOWER.per*n)*(n>=3?1:.6)-lost);
+    }
+    case 'roulette':return strike(E.JOKER.roulette);
     case 'bigshow':return Math.max(0,strike(E.UNDERDOG.factor)-dps*E.UNDERDOG.stun);
     // A bomb only explodes with enough enemies alive, so it is set when the field is already crowded.
     case 'applebomb':return (s.bombs||[]).length>=E.APPLEBOMB.max||list.length<E.APPLEBOMB.minAlive&&!list.some(e=>e.boss)?0:strike(E.APPLEBOMB.factor)*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
