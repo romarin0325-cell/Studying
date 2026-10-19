@@ -69,11 +69,12 @@ const LECTURE_FORMAT = `모든 답변은 다음의 구성을 따릅니다:
 
 const GEMINI_FLASH_MODEL_ID = 'gemini-3.8-flash';
 const GEMINI_FLASH_LITE_MODEL_ID = 'gemini-3.5-flash-lite';
-const GEMINI_PRO_MODEL_ID = 'gemini-4-argon';
+const GEMINI_ARGON_MODEL_ID = 'gemini-4-argon';
+const GEMINI_PRO_MODEL_ID = GEMINI_ARGON_MODEL_ID;
 const GEMINI_GENERATE_CONTENT_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 const LUMI_MODEL_OPTIONS = Object.freeze([
-    { id: GEMINI_PRO_MODEL_ID, label: 'Pro', flashLike: false, allowSearch: true, allowSampling: true },
+    { id: GEMINI_ARGON_MODEL_ID, label: 'Argon', flashLike: false, allowSearch: true, useThinkingBudget: true, allowSampling: true },
     { id: GEMINI_FLASH_MODEL_ID, label: 'Flash', flashLike: true, allowSearch: true, allowSampling: false },
     { id: GEMINI_FLASH_LITE_MODEL_ID, label: 'Lite', flashLike: true, allowSearch: false, allowSampling: false }
 ]);
