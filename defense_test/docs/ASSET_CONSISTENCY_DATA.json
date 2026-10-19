@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-19",
+  "generated": "2026-10-20",
   "castStats": {
     "sd": {
       "bboxW": {
@@ -63,7 +63,7 @@
         "max": 0.765
       },
       "dark": {
-        "median": 0.125,
+        "median": 0.126,
         "mad": 0.041,
         "min": 0.026,
         "max": 0.38
@@ -76,7 +76,7 @@
       },
       "rimR": {
         "median": 35.346,
-        "mad": 16.528,
+        "mad": 16.757,
         "min": 7.664,
         "max": 123.55
       },
@@ -87,13 +87,13 @@
         "max": 118.683
       },
       "rimB": {
-        "median": 55.686,
-        "mad": 16.387,
+        "median": 53.188,
+        "mad": 16.841,
         "min": 15.545,
         "max": 125.621
       },
       "rimLightness": {
-        "median": 0.179,
+        "median": 0.176,
         "mad": 0.062,
         "min": 0.056,
         "max": 0.437
@@ -102,7 +102,7 @@
         "median": 8.276,
         "mad": 19.998,
         "min": -33.889,
-        "max": 57.827
+        "max": 56.109
       },
       "rimThickness": {
         "median": 4,
@@ -162,63 +162,63 @@
     "memorial": {
       "lightness": {
         "median": 0.538,
-        "mad": 0.102,
-        "min": 0.228,
+        "mad": 0.096,
+        "min": 0.236,
         "max": 0.806
       },
       "saturation": {
-        "median": 0.361,
-        "mad": 0.071,
+        "median": 0.345,
+        "mad": 0.072,
         "min": 0.141,
         "max": 0.729
       },
       "contrast": {
-        "median": 0.218,
-        "mad": 0.039,
+        "median": 0.231,
+        "mad": 0.038,
         "min": 0.136,
         "max": 0.351
       },
       "darkRatio": {
         "median": 0.099,
-        "mad": 0.097,
+        "mad": 0.094,
         "min": 0,
         "max": 0.648
       },
       "edge": {
-        "median": 0.071,
-        "mad": 0.014,
+        "median": 0.076,
+        "mad": 0.015,
         "min": 0.043,
-        "max": 0.126
+        "max": 0.162
       },
       "sharpness": {
-        "median": 0.086,
+        "median": 0.093,
         "mad": 0.021,
-        "min": 0.039,
-        "max": 0.174
+        "min": 0.05,
+        "max": 0.305
       },
       "bgBusy": {
-        "median": 0.046,
-        "mad": 0.009,
+        "median": 0.048,
+        "mad": 0.007,
         "min": 0.012,
-        "max": 0.095
+        "max": 0.153
       },
       "warmth": {
         "median": 0.591,
         "mad": 0.303,
         "min": 0.007,
-        "max": 0.994
+        "max": 0.992
       },
       "colourfulness": {
-        "median": 51.365,
-        "mad": 11.913,
+        "median": 46.467,
+        "mad": 10.894,
         "min": 20.075,
         "max": 79.518
       },
       "fileKiB": {
-        "median": 78.232,
-        "mad": 8.74,
+        "median": 78.313,
+        "mad": 8.939,
         "min": 44.08,
-        "max": 95.867
+        "max": 95.51
       }
     }
   },
@@ -280,7 +280,7 @@
         },
         "dark": {
           "value": 0.098,
-          "z": -0.441,
+          "z": -0.451,
           "grade": "ok"
         },
         "edge": {
@@ -290,7 +290,7 @@
         },
         "rimR": {
           "value": 63.807,
-          "z": 1.162,
+          "z": 1.146,
           "grade": "ok"
         },
         "rimG": {
@@ -300,12 +300,12 @@
         },
         "rimB": {
           "value": 67.287,
-          "z": 0.477,
+          "z": 0.565,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.255,
-          "z": 0.826,
+          "z": 0.873,
           "grade": "ok"
         },
         "rimNavy": {
@@ -362,37 +362,37 @@
       "memorial": {
         "lightness": {
           "value": 0.512,
-          "z": -0.172,
+          "z": -0.183,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.539,
-          "z": 1.696,
+          "z": 1.822,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.28,
-          "z": 1.057,
+          "z": 0.876,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.28,
-          "z": 1.256,
+          "z": 1.302,
           "grade": "ok"
         },
         "edge": {
           "value": 0.076,
-          "z": 0.233,
+          "z": -0.008,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.112,
-          "z": 0.847,
+          "z": 0.604,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.045,
-          "z": -0.088,
+          "z": -0.294,
           "grade": "ok"
         },
         "warmth": {
@@ -402,12 +402,12 @@
         },
         "colourfulness": {
           "value": 76.648,
-          "z": 1.431,
+          "z": 1.869,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 78.328,
-          "z": 0.007,
+          "z": 0.001,
           "grade": "ok"
         }
       }
@@ -469,7 +469,7 @@
         },
         "dark": {
           "value": 0.09,
-          "z": -0.579,
+          "z": -0.59,
           "grade": "ok"
         },
         "edge": {
@@ -479,7 +479,7 @@
         },
         "rimR": {
           "value": 16.887,
-          "z": -0.753,
+          "z": -0.743,
           "grade": "ok"
         },
         "rimG": {
@@ -489,12 +489,12 @@
         },
         "rimB": {
           "value": 45.161,
-          "z": -0.433,
+          "z": -0.321,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.118,
-          "z": -0.652,
+          "z": -0.624,
           "grade": "ok"
         },
         "rimNavy": {
@@ -551,37 +551,37 @@
       "memorial": {
         "lightness": {
           "value": 0.783,
-          "z": 1.616,
+          "z": 1.721,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.336,
-          "z": -0.244,
+          "z": -0.09,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.145,
-          "z": -1.26,
+          "z": -1.535,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.001,
-          "z": -0.674,
+          "z": -0.699,
           "grade": "ok"
         },
         "edge": {
           "value": 0.054,
-          "z": -0.779,
+          "z": -0.964,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.077,
-          "z": -0.277,
+          "z": -0.504,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.039,
-          "z": -0.503,
+          "z": -0.815,
           "grade": "ok"
         },
         "warmth": {
@@ -591,13 +591,13 @@
         },
         "colourfulness": {
           "value": 30.736,
-          "z": -1.168,
+          "z": -0.974,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 51.92,
-          "z": -2.031,
-          "grade": "warn"
+          "z": -1.991,
+          "grade": "ok"
         }
       }
     },
@@ -658,7 +658,7 @@
         },
         "dark": {
           "value": 0.048,
-          "z": -1.263,
+          "z": -1.282,
           "grade": "ok"
         },
         "edge": {
@@ -668,7 +668,7 @@
         },
         "rimR": {
           "value": 94.798,
-          "z": 2.426,
+          "z": 2.393,
           "grade": "warn"
         },
         "rimG": {
@@ -678,12 +678,12 @@
         },
         "rimB": {
           "value": 75.77,
-          "z": 0.827,
+          "z": 0.904,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.334,
-          "z": 1.678,
+          "z": 1.735,
           "grade": "ok"
         },
         "rimNavy": {
@@ -740,37 +740,37 @@
       "memorial": {
         "lightness": {
           "value": 0.651,
-          "z": 0.747,
+          "z": 0.795,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.31,
-          "z": -0.493,
+          "z": -0.335,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.218,
-          "z": 0,
+          "z": -0.224,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0,
-          "z": -0.681,
+          "z": -0.706,
           "grade": "ok"
         },
         "edge": {
           "value": 0.055,
-          "z": -0.725,
+          "z": -0.912,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.082,
-          "z": -0.132,
+          "z": -0.362,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.03,
-          "z": -1.121,
+          "z": -1.592,
           "grade": "ok"
         },
         "warmth": {
@@ -780,12 +780,12 @@
         },
         "colourfulness": {
           "value": 26.08,
-          "z": -1.432,
+          "z": -1.262,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 49.801,
-          "z": -2.194,
+          "z": -2.151,
           "grade": "warn"
         }
       }
@@ -847,7 +847,7 @@
         },
         "dark": {
           "value": 0.139,
-          "z": 0.219,
+          "z": 0.215,
           "grade": "ok"
         },
         "edge": {
@@ -857,7 +857,7 @@
         },
         "rimR": {
           "value": 58.892,
-          "z": 0.961,
+          "z": 0.948,
           "grade": "ok"
         },
         "rimG": {
@@ -867,12 +867,12 @@
         },
         "rimB": {
           "value": 58.246,
-          "z": 0.105,
+          "z": 0.203,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.226,
-          "z": 0.505,
+          "z": 0.548,
           "grade": "ok"
         },
         "rimNavy": {
@@ -934,12 +934,12 @@
         },
         "saturation": {
           "value": 0.244,
-          "z": -1.117,
+          "z": -0.95,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.236,
-          "z": 0.307,
+          "z": 0.095,
           "grade": "ok"
         },
         "darkRatio": {
@@ -949,17 +949,17 @@
         },
         "edge": {
           "value": 0.053,
-          "z": -0.858,
+          "z": -1.038,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.054,
-          "z": -1.015,
+          "z": -1.233,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.036,
-          "z": -0.674,
+          "z": -1.03,
           "grade": "ok"
         },
         "warmth": {
@@ -969,12 +969,12 @@
         },
         "colourfulness": {
           "value": 37.215,
-          "z": -0.801,
+          "z": -0.573,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 56.252,
-          "z": -1.696,
+          "z": -1.664,
           "grade": "ok"
         }
       }
@@ -1036,7 +1036,7 @@
         },
         "dark": {
           "value": 0.072,
-          "z": -0.873,
+          "z": -0.888,
           "grade": "ok"
         },
         "edge": {
@@ -1056,12 +1056,12 @@
         },
         "rimB": {
           "value": 87.121,
-          "z": 1.294,
+          "z": 1.359,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.237,
-          "z": 0.631,
+          "z": 0.674,
           "grade": "ok"
         },
         "rimNavy": {
@@ -1118,37 +1118,37 @@
       "memorial": {
         "lightness": {
           "value": 0.721,
-          "z": 1.209,
+          "z": 1.287,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.633,
-          "z": 2.599,
+          "z": 2.711,
           "grade": "warn"
         },
         "contrast": {
           "value": 0.148,
-          "z": -1.206,
+          "z": -1.479,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0,
-          "z": -0.681,
+          "z": -0.706,
           "grade": "ok"
         },
         "edge": {
           "value": 0.052,
-          "z": -0.881,
+          "z": -1.059,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.061,
-          "z": -0.808,
+          "z": -1.029,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.026,
-          "z": -1.429,
+          "z": -1.978,
           "grade": "ok"
         },
         "warmth": {
@@ -1158,12 +1158,12 @@
         },
         "colourfulness": {
           "value": 75.76,
-          "z": 1.381,
+          "z": 1.814,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 58.938,
-          "z": -1.489,
+          "z": -1.462,
           "grade": "ok"
         }
       }
@@ -1225,7 +1225,7 @@
         },
         "dark": {
           "value": 0.242,
-          "z": 1.91,
+          "z": 1.922,
           "grade": "ok"
         },
         "edge": {
@@ -1235,7 +1235,7 @@
         },
         "rimR": {
           "value": 7.664,
-          "z": -1.13,
+          "z": -1.114,
           "grade": "ok"
         },
         "rimG": {
@@ -1245,12 +1245,12 @@
         },
         "rimB": {
           "value": 21.918,
-          "z": -1.39,
+          "z": -1.252,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.056,
-          "z": -1.328,
+          "z": -1.309,
           "grade": "ok"
         },
         "rimNavy": {
@@ -1307,37 +1307,37 @@
       "memorial": {
         "lightness": {
           "value": 0.359,
-          "z": -1.187,
+          "z": -1.263,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.291,
-          "z": -0.67,
+          "z": -0.509,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.193,
-          "z": -0.433,
+          "z": -0.674,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.189,
-          "z": 0.627,
+          "z": 0.65,
           "grade": "ok"
         },
         "edge": {
           "value": 0.053,
-          "z": -0.844,
+          "z": -1.025,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.05,
-          "z": -1.144,
+          "z": -1.36,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.045,
-          "z": -0.045,
+          "z": -0.24,
           "grade": "ok"
         },
         "warmth": {
@@ -1347,12 +1347,12 @@
         },
         "colourfulness": {
           "value": 46.467,
-          "z": -0.277,
+          "z": 0,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 78.232,
-          "z": 0,
+          "z": -0.006,
           "grade": "ok"
         }
       }
@@ -1414,7 +1414,7 @@
         },
         "dark": {
           "value": 0.356,
-          "z": 3.783,
+          "z": 3.812,
           "grade": "out"
         },
         "edge": {
@@ -1424,7 +1424,7 @@
         },
         "rimR": {
           "value": 15.24,
-          "z": -0.821,
+          "z": -0.809,
           "grade": "ok"
         },
         "rimG": {
@@ -1434,12 +1434,12 @@
         },
         "rimB": {
           "value": 52.043,
-          "z": -0.15,
+          "z": -0.046,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.114,
-          "z": -0.704,
+          "z": -0.677,
           "grade": "ok"
         },
         "rimNavy": {
@@ -1495,53 +1495,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.294,
-          "z": -1.62,
+          "value": 0.372,
+          "z": -1.176,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.209,
-          "z": -1.458,
+          "value": 0.259,
+          "z": -0.812,
           "grade": "ok"
         },
         "contrast": {
-          "value": 0.205,
-          "z": -0.222,
+          "value": 0.248,
+          "z": 0.305,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.438,
-          "z": 2.353,
-          "grade": "warn"
+          "value": 0.322,
+          "z": 1.607,
+          "grade": "ok"
         },
         "edge": {
-          "value": 0.047,
-          "z": -1.098,
+          "value": 0.088,
+          "z": 0.517,
           "grade": "ok"
         },
         "sharpness": {
-          "value": 0.039,
-          "z": -1.505,
+          "value": 0.117,
+          "z": 0.759,
           "grade": "ok"
         },
         "bgBusy": {
-          "value": 0.033,
-          "z": -0.921,
+          "value": 0.062,
+          "z": 1.297,
           "grade": "ok"
         },
         "warmth": {
-          "value": 0.994,
-          "z": 0.896,
+          "value": 0.98,
+          "z": 0.864,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 38.913,
-          "z": -0.705,
+          "value": 35.574,
+          "z": -0.674,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 72.725,
-          "z": -0.425,
+          "value": 88.586,
+          "z": 0.775,
           "grade": "ok"
         }
       }
@@ -1597,43 +1597,43 @@
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.44,
-          "z": -0.811,
+          "value": 0.433,
+          "z": -0.862,
           "grade": "ok"
         },
         "dark": {
-          "value": 0.125,
-          "z": 0,
+          "value": 0.128,
+          "z": 0.041,
           "grade": "ok"
         },
         "edge": {
           "value": 0.283,
-          "z": -0.355,
+          "z": -0.357,
           "grade": "ok"
         },
         "rimR": {
-          "value": 31.099,
-          "z": -0.173,
+          "value": 31.803,
+          "z": -0.143,
           "grade": "ok"
         },
         "rimG": {
-          "value": 23.731,
-          "z": -0.369,
+          "value": 23.75,
+          "z": -0.368,
           "grade": "ok"
         },
         "rimB": {
-          "value": 66.77,
-          "z": 0.456,
+          "value": 65.023,
+          "z": 0.474,
           "grade": "ok"
         },
         "rimLightness": {
-          "value": 0.179,
+          "value": 0.176,
           "z": 0,
           "grade": "ok"
         },
         "rimNavy": {
-          "value": 35.67,
-          "z": 0.924,
+          "value": 33.219,
+          "z": 0.841,
           "grade": "ok"
         },
         "rimThickness": {
@@ -1642,33 +1642,33 @@
           "grade": "ok"
         },
         "highlightPct": {
-          "value": 0.419,
-          "z": -0.386,
+          "value": 0.39,
+          "z": -0.41,
           "grade": "ok"
         },
         "highlightBlobsPer10k": {
-          "value": 12.142,
-          "z": -0.272,
+          "value": 10.806,
+          "z": -0.319,
           "grade": "ok"
         },
         "flatShare": {
           "value": 0.501,
-          "z": 1.01,
+          "z": 1.004,
           "grade": "ok"
         },
         "gradientSoftness": {
           "value": 0.073,
-          "z": 0.168,
+          "z": 0.166,
           "grade": "ok"
         },
         "paletteSize": {
-          "value": 836,
-          "z": 0.799,
+          "value": 851,
+          "z": 0.874,
           "grade": "ok"
         },
         "top5Share": {
-          "value": 0.281,
-          "z": -0.72,
+          "value": 0.271,
+          "z": -0.827,
           "grade": "ok"
         },
         "viewAreaSpread": {
@@ -1684,53 +1684,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.437,
-          "z": -0.674,
+          "value": 0.52,
+          "z": -0.131,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.357,
-          "z": -0.044,
+          "value": 0.325,
+          "z": -0.186,
           "grade": "ok"
         },
         "contrast": {
-          "value": 0.265,
-          "z": 0.804,
+          "value": 0.25,
+          "z": 0.339,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.294,
-          "z": 1.359,
+          "value": 0.111,
+          "z": 0.088,
           "grade": "ok"
         },
         "edge": {
-          "value": 0.126,
-          "z": 2.572,
-          "grade": "warn"
+          "value": 0.162,
+          "z": 3.799,
+          "grade": "out"
         },
         "sharpness": {
-          "value": 0.172,
-          "z": 2.81,
-          "grade": "warn"
+          "value": 0.305,
+          "z": 6.766,
+          "grade": "out"
         },
         "bgBusy": {
-          "value": 0.095,
-          "z": 3.587,
+          "value": 0.153,
+          "z": 9.559,
           "grade": "out"
         },
         "warmth": {
-          "value": 0.876,
-          "z": 0.635,
+          "value": 0.904,
+          "z": 0.696,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 55.129,
-          "z": 0.213,
+          "value": 46.148,
+          "z": -0.02,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 91.496,
-          "z": 1.024,
+          "value": 95.51,
+          "z": 1.298,
           "grade": "ok"
         }
       }
@@ -1781,48 +1781,48 @@
           "grade": "ok"
         },
         "lightness": {
-          "value": 0.434,
-          "z": -0.753,
+          "value": 0.435,
+          "z": -0.747,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.606,
-          "z": 0.414,
+          "value": 0.602,
+          "z": 0.384,
           "grade": "ok"
         },
         "dark": {
           "value": 0.101,
-          "z": -0.407,
+          "z": -0.411,
           "grade": "ok"
         },
         "edge": {
-          "value": 0.338,
-          "z": 0.851,
+          "value": 0.337,
+          "z": 0.829,
           "grade": "ok"
         },
         "rimR": {
-          "value": 59.413,
-          "z": 0.982,
+          "value": 60.372,
+          "z": 1.007,
           "grade": "ok"
         },
         "rimG": {
-          "value": 47.155,
-          "z": 0.531,
+          "value": 47.34,
+          "z": 0.538,
           "grade": "ok"
         },
         "rimB": {
-          "value": 55.686,
+          "value": 53.188,
           "z": 0,
           "grade": "ok"
         },
         "rimLightness": {
-          "value": 0.217,
-          "z": 0.411,
+          "value": 0.214,
+          "z": 0.42,
           "grade": "ok"
         },
         "rimNavy": {
-          "value": -3.727,
-          "z": -0.405,
+          "value": -7.184,
+          "z": -0.521,
           "grade": "ok"
         },
         "rimThickness": {
@@ -1847,17 +1847,17 @@
         },
         "gradientSoftness": {
           "value": 0.072,
-          "z": 0.061,
+          "z": 0.028,
           "grade": "ok"
         },
         "paletteSize": {
-          "value": 693,
-          "z": 0.085,
+          "value": 696,
+          "z": 0.1,
           "grade": "ok"
         },
         "top5Share": {
-          "value": 0.312,
-          "z": -0.395,
+          "value": 0.311,
+          "z": -0.405,
           "grade": "ok"
         },
         "viewAreaSpread": {
@@ -1873,53 +1873,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.351,
-          "z": -1.243,
+          "value": 0.358,
+          "z": -1.272,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.432,
-          "z": 0.674,
+          "value": 0.43,
+          "z": 0.793,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.197,
-          "z": -0.363,
+          "z": -0.612,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.24,
-          "z": 0.984,
+          "value": 0.293,
+          "z": 1.399,
           "grade": "ok"
         },
         "edge": {
-          "value": 0.075,
-          "z": 0.212,
+          "value": 0.081,
+          "z": 0.223,
           "grade": "ok"
         },
         "sharpness": {
-          "value": 0.081,
-          "z": -0.146,
+          "value": 0.122,
+          "z": 0.927,
           "grade": "ok"
         },
         "bgBusy": {
-          "value": 0.028,
-          "z": -1.249,
+          "value": 0.048,
+          "z": 0,
           "grade": "ok"
         },
         "warmth": {
-          "value": 0.904,
-          "z": 0.696,
+          "value": 0.781,
+          "z": 0.422,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 74.209,
-          "z": 1.293,
+          "value": 77.607,
+          "z": 1.928,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 86.674,
-          "z": 0.651,
+          "value": 80.752,
+          "z": 0.184,
           "grade": "ok"
         }
       }
@@ -1981,7 +1981,7 @@
         },
         "dark": {
           "value": 0.126,
-          "z": 0.006,
+          "z": 0,
           "grade": "ok"
         },
         "edge": {
@@ -1991,7 +1991,7 @@
         },
         "rimR": {
           "value": 16.029,
-          "z": -0.788,
+          "z": -0.778,
           "grade": "ok"
         },
         "rimG": {
@@ -2001,12 +2001,12 @@
         },
         "rimB": {
           "value": 59.71,
-          "z": 0.166,
+          "z": 0.261,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.145,
-          "z": -0.365,
+          "z": -0.333,
           "grade": "ok"
         },
         "rimNavy": {
@@ -2063,37 +2063,37 @@
       "memorial": {
         "lightness": {
           "value": 0.568,
-          "z": 0.198,
+          "z": 0.211,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.274,
-          "z": -0.838,
+          "z": -0.674,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.236,
-          "z": 0.307,
+          "z": 0.096,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.015,
-          "z": -0.578,
+          "z": -0.599,
           "grade": "ok"
         },
         "edge": {
           "value": 0.066,
-          "z": -0.246,
+          "z": -0.46,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.085,
-          "z": -0.022,
+          "z": -0.254,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.046,
-          "z": 0.029,
+          "z": -0.146,
           "grade": "ok"
         },
         "warmth": {
@@ -2103,7 +2103,7 @@
         },
         "colourfulness": {
           "value": 32.288,
-          "z": -1.08,
+          "z": -0.878,
           "grade": "ok"
         },
         "fileKiB": {
@@ -2170,7 +2170,7 @@
         },
         "dark": {
           "value": 0.098,
-          "z": -0.445,
+          "z": -0.456,
           "grade": "ok"
         },
         "edge": {
@@ -2180,7 +2180,7 @@
         },
         "rimR": {
           "value": 21.934,
-          "z": -0.547,
+          "z": -0.54,
           "grade": "ok"
         },
         "rimG": {
@@ -2190,12 +2190,12 @@
         },
         "rimB": {
           "value": 21.344,
-          "z": -1.414,
+          "z": -1.275,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.091,
-          "z": -0.949,
+          "z": -0.924,
           "grade": "ok"
         },
         "rimNavy": {
@@ -2252,37 +2252,37 @@
       "memorial": {
         "lightness": {
           "value": 0.623,
-          "z": 0.557,
+          "z": 0.593,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.446,
-          "z": 0.809,
+          "z": 0.948,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.166,
-          "z": -0.899,
+          "z": -1.159,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.005,
-          "z": -0.647,
+          "z": -0.671,
           "grade": "ok"
         },
         "edge": {
           "value": 0.064,
-          "z": -0.305,
+          "z": -0.516,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.093,
-          "z": 0.242,
+          "z": 0.007,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.027,
-          "z": -1.323,
+          "z": -1.845,
           "grade": "ok"
         },
         "warmth": {
@@ -2292,12 +2292,12 @@
         },
         "colourfulness": {
           "value": 70.774,
-          "z": 1.099,
+          "z": 1.505,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 69.492,
-          "z": -0.674,
+          "z": -0.666,
           "grade": "ok"
         }
       }
@@ -2359,7 +2359,7 @@
         },
         "dark": {
           "value": 0.09,
-          "z": -0.585,
+          "z": -0.597,
           "grade": "ok"
         },
         "edge": {
@@ -2369,7 +2369,7 @@
         },
         "rimR": {
           "value": 30.282,
-          "z": -0.207,
+          "z": -0.204,
           "grade": "ok"
         },
         "rimG": {
@@ -2379,12 +2379,12 @@
         },
         "rimB": {
           "value": 69.039,
-          "z": 0.55,
+          "z": 0.635,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.192,
-          "z": 0.143,
+          "z": 0.181,
           "grade": "ok"
         },
         "rimNavy": {
@@ -2441,37 +2441,37 @@
       "memorial": {
         "lightness": {
           "value": 0.806,
-          "z": 1.77,
+          "z": 1.885,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.729,
-          "z": 3.514,
+          "z": 3.613,
           "grade": "out"
         },
         "contrast": {
           "value": 0.144,
-          "z": -1.276,
+          "z": -1.551,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.009,
-          "z": -0.624,
+          "z": -0.647,
           "grade": "ok"
         },
         "edge": {
           "value": 0.055,
-          "z": -0.76,
+          "z": -0.945,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.081,
-          "z": -0.148,
+          "z": -0.377,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.027,
-          "z": -1.356,
+          "z": -1.886,
           "grade": "ok"
         },
         "warmth": {
@@ -2481,12 +2481,12 @@
         },
         "colourfulness": {
           "value": 42.63,
-          "z": -0.495,
+          "z": -0.238,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 62.203,
-          "z": -1.237,
+          "z": -1.215,
           "grade": "ok"
         }
       }
@@ -2548,7 +2548,7 @@
         },
         "dark": {
           "value": 0.099,
-          "z": -0.44,
+          "z": -0.451,
           "grade": "ok"
         },
         "edge": {
@@ -2558,7 +2558,7 @@
         },
         "rimR": {
           "value": 72.01,
-          "z": 1.496,
+          "z": 1.476,
           "grade": "ok"
         },
         "rimG": {
@@ -2568,12 +2568,12 @@
         },
         "rimB": {
           "value": 48.208,
-          "z": -0.308,
+          "z": -0.199,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.234,
-          "z": 0.599,
+          "z": 0.642,
           "grade": "ok"
         },
         "rimNavy": {
@@ -2630,37 +2630,37 @@
       "memorial": {
         "lightness": {
           "value": 0.591,
-          "z": 0.348,
+          "z": 0.37,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.361,
-          "z": 0,
+          "z": 0.151,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.259,
-          "z": 0.702,
+          "z": 0.506,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.05,
-          "z": -0.337,
+          "z": -0.349,
           "grade": "ok"
         },
         "edge": {
           "value": 0.077,
-          "z": 0.288,
+          "z": 0.044,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.086,
-          "z": 0,
+          "z": -0.231,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.051,
-          "z": 0.392,
+          "z": 0.309,
           "grade": "ok"
         },
         "warmth": {
@@ -2670,12 +2670,12 @@
         },
         "colourfulness": {
           "value": 56.077,
-          "z": 0.267,
+          "z": 0.595,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 81.414,
-          "z": 0.246,
+          "z": 0.234,
           "grade": "ok"
         }
       }
@@ -2737,7 +2737,7 @@
         },
         "dark": {
           "value": 0.148,
-          "z": 0.367,
+          "z": 0.364,
           "grade": "ok"
         },
         "edge": {
@@ -2747,7 +2747,7 @@
         },
         "rimR": {
           "value": 29.341,
-          "z": -0.245,
+          "z": -0.242,
           "grade": "ok"
         },
         "rimG": {
@@ -2757,12 +2757,12 @@
         },
         "rimB": {
           "value": 15.545,
-          "z": -1.652,
+          "z": -1.508,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.083,
-          "z": -1.035,
+          "z": -1.012,
           "grade": "ok"
         },
         "rimNavy": {
@@ -2819,37 +2819,37 @@
       "memorial": {
         "lightness": {
           "value": 0.443,
-          "z": -0.634,
+          "z": -0.674,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.35,
-          "z": -0.109,
+          "z": 0.044,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.277,
-          "z": 1.008,
+          "z": 0.825,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.253,
-          "z": 1.073,
+          "z": 1.112,
           "grade": "ok"
         },
         "edge": {
           "value": 0.087,
-          "z": 0.783,
+          "z": 0.512,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.119,
-          "z": 1.092,
+          "z": 0.847,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.061,
-          "z": 1.084,
+          "z": 1.178,
           "grade": "ok"
         },
         "warmth": {
@@ -2859,12 +2859,12 @@
         },
         "colourfulness": {
           "value": 57.481,
-          "z": 0.346,
+          "z": 0.682,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 85.771,
-          "z": 0.582,
+          "z": 0.563,
           "grade": "ok"
         }
       }
@@ -2926,7 +2926,7 @@
         },
         "dark": {
           "value": 0.028,
-          "z": -1.604,
+          "z": -1.626,
           "grade": "ok"
         },
         "edge": {
@@ -2936,7 +2936,7 @@
         },
         "rimR": {
           "value": 80.324,
-          "z": 1.836,
+          "z": 1.81,
           "grade": "ok"
         },
         "rimG": {
@@ -2946,12 +2946,12 @@
         },
         "rimB": {
           "value": 125.621,
-          "z": 2.879,
+          "z": 2.901,
           "grade": "warn"
         },
         "rimLightness": {
           "value": 0.391,
-          "z": 2.287,
+          "z": 2.352,
           "grade": "warn"
         },
         "rimNavy": {
@@ -3008,37 +3008,37 @@
       "memorial": {
         "lightness": {
           "value": 0.793,
-          "z": 1.684,
+          "z": 1.793,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.569,
-          "z": 1.983,
-          "grade": "ok"
+          "z": 2.104,
+          "grade": "warn"
         },
         "contrast": {
           "value": 0.136,
-          "z": -1.415,
+          "z": -1.696,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0,
-          "z": -0.68,
+          "z": -0.705,
           "grade": "ok"
         },
         "edge": {
           "value": 0.093,
-          "z": 1.02,
+          "z": 0.735,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.111,
-          "z": 0.807,
+          "z": 0.566,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.05,
-          "z": 0.302,
+          "z": 0.196,
           "grade": "ok"
         },
         "warmth": {
@@ -3048,12 +3048,12 @@
         },
         "colourfulness": {
           "value": 55.239,
-          "z": 0.219,
+          "z": 0.543,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 84.18,
-          "z": 0.459,
+          "z": 0.443,
           "grade": "ok"
         }
       }
@@ -3115,7 +3115,7 @@
         },
         "dark": {
           "value": 0.214,
-          "z": 1.45,
+          "z": 1.458,
           "grade": "ok"
         },
         "edge": {
@@ -3125,7 +3125,7 @@
         },
         "rimR": {
           "value": 18.19,
-          "z": -0.7,
+          "z": -0.691,
           "grade": "ok"
         },
         "rimG": {
@@ -3135,12 +3135,12 @@
         },
         "rimB": {
           "value": 58.996,
-          "z": 0.136,
+          "z": 0.233,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.131,
-          "z": -0.519,
+          "z": -0.489,
           "grade": "ok"
         },
         "rimNavy": {
@@ -3196,53 +3196,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.318,
-          "z": -1.461,
+          "value": 0.427,
+          "z": -0.787,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.417,
-          "z": 0.532,
+          "value": 0.345,
+          "z": 0,
           "grade": "ok"
         },
         "contrast": {
-          "value": 0.188,
-          "z": -0.524,
+          "value": 0.247,
+          "z": 0.29,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.423,
-          "z": 2.253,
-          "grade": "warn"
+          "value": 0.244,
+          "z": 1.046,
+          "grade": "ok"
         },
         "edge": {
-          "value": 0.103,
-          "z": 1.498,
+          "value": 0.118,
+          "z": 1.888,
           "grade": "ok"
         },
         "sharpness": {
-          "value": 0.12,
-          "z": 1.111,
-          "grade": "ok"
+          "value": 0.211,
+          "z": 3.789,
+          "grade": "out"
         },
         "bgBusy": {
-          "value": 0.058,
-          "z": 0.869,
-          "grade": "ok"
+          "value": 0.082,
+          "z": 3.089,
+          "grade": "out"
         },
         "warmth": {
-          "value": 0.645,
-          "z": 0.121,
+          "value": 0.857,
+          "z": 0.591,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 77.765,
-          "z": 1.495,
+          "value": 60.405,
+          "z": 0.863,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 95.867,
-          "z": 1.361,
+          "value": 93.127,
+          "z": 1.118,
           "grade": "ok"
         }
       }
@@ -3294,47 +3294,47 @@
         },
         "lightness": {
           "value": 0.783,
-          "z": 0.997,
+          "z": 0.994,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.521,
-          "z": -0.212,
+          "value": 0.518,
+          "z": -0.233,
           "grade": "ok"
         },
         "dark": {
-          "value": 0.05,
-          "z": -1.236,
+          "value": 0.051,
+          "z": -1.242,
           "grade": "ok"
         },
         "edge": {
           "value": 0.289,
-          "z": -0.223,
+          "z": -0.225,
           "grade": "ok"
         },
         "rimR": {
-          "value": 71.247,
-          "z": 1.465,
+          "value": 71.51,
+          "z": 1.456,
           "grade": "ok"
         },
         "rimG": {
-          "value": 60.696,
-          "z": 1.052,
+          "value": 60.758,
+          "z": 1.054,
           "grade": "ok"
         },
         "rimB": {
-          "value": 120.673,
-          "z": 2.675,
+          "value": 119.099,
+          "z": 2.64,
           "grade": "warn"
         },
         "rimLightness": {
-          "value": 0.356,
-          "z": 1.908,
+          "value": 0.353,
+          "z": 1.936,
           "grade": "ok"
         },
         "rimNavy": {
-          "value": 49.425,
-          "z": 1.388,
+          "value": 47.589,
+          "z": 1.326,
           "grade": "ok"
         },
         "rimThickness": {
@@ -3343,38 +3343,38 @@
           "grade": "ok"
         },
         "highlightPct": {
-          "value": 2.853,
-          "z": 1.604,
+          "value": 2.961,
+          "z": 1.692,
           "grade": "ok"
         },
         "highlightBlobsPer10k": {
-          "value": 91.357,
-          "z": 2.532,
+          "value": 87.963,
+          "z": 2.412,
           "grade": "warn"
         },
         "flatShare": {
           "value": 0.62,
-          "z": 2.651,
+          "z": 2.654,
           "grade": "warn"
         },
         "gradientSoftness": {
           "value": 0.07,
-          "z": -0.128,
+          "z": -0.134,
           "grade": "ok"
         },
         "paletteSize": {
-          "value": 346,
-          "z": -1.649,
+          "value": 331,
+          "z": -1.724,
           "grade": "ok"
         },
         "top5Share": {
-          "value": 0.577,
-          "z": 2.411,
+          "value": 0.576,
+          "z": 2.402,
           "grade": "warn"
         },
         "viewAreaSpread": {
-          "value": 0.242,
-          "z": 1.215,
+          "value": 0.241,
+          "z": 1.201,
           "grade": "ok"
         },
         "feetSpread": {
@@ -3385,53 +3385,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.476,
-          "z": -0.416,
+          "value": 0.514,
+          "z": -0.17,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.316,
-          "z": -0.434,
+          "value": 0.343,
+          "z": -0.026,
           "grade": "ok"
         },
         "contrast": {
-          "value": 0.251,
-          "z": 0.569,
+          "value": 0.26,
+          "z": 0.523,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.173,
-          "z": 0.517,
+          "value": 0.174,
+          "z": 0.542,
           "grade": "ok"
         },
         "edge": {
-          "value": 0.066,
-          "z": -0.218,
+          "value": 0.105,
+          "z": 1.295,
           "grade": "ok"
         },
         "sharpness": {
-          "value": 0.089,
-          "z": 0.11,
-          "grade": "ok"
+          "value": 0.162,
+          "z": 2.199,
+          "grade": "warn"
         },
         "bgBusy": {
-          "value": 0.046,
-          "z": 0,
-          "grade": "ok"
+          "value": 0.083,
+          "z": 3.203,
+          "grade": "out"
         },
         "warmth": {
-          "value": 0.052,
-          "z": -1.199,
+          "value": 0.099,
+          "z": -1.094,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 37.004,
-          "z": -0.813,
+          "value": 39.805,
+          "z": -0.413,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 81.324,
-          "z": 0.239,
+          "value": 94.201,
+          "z": 1.199,
           "grade": "ok"
         }
       }
@@ -3493,7 +3493,7 @@
         },
         "dark": {
           "value": 0.145,
-          "z": 0.323,
+          "z": 0.319,
           "grade": "ok"
         },
         "edge": {
@@ -3503,7 +3503,7 @@
         },
         "rimR": {
           "value": 11.727,
-          "z": -0.964,
+          "z": -0.951,
           "grade": "ok"
         },
         "rimG": {
@@ -3513,12 +3513,12 @@
         },
         "rimB": {
           "value": 45.932,
-          "z": -0.401,
+          "z": -0.291,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.113,
-          "z": -0.707,
+          "z": -0.68,
           "grade": "ok"
         },
         "rimNavy": {
@@ -3575,37 +3575,37 @@
       "memorial": {
         "lightness": {
           "value": 0.589,
-          "z": 0.332,
+          "z": 0.354,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.402,
-          "z": 0.391,
+          "z": 0.536,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.181,
-          "z": -0.637,
+          "z": -0.887,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.005,
-          "z": -0.651,
+          "z": -0.674,
           "grade": "ok"
         },
         "edge": {
           "value": 0.061,
-          "z": -0.473,
+          "z": -0.674,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.061,
-          "z": -0.79,
+          "z": -1.011,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.043,
-          "z": -0.199,
+          "z": -0.434,
           "grade": "ok"
         },
         "warmth": {
@@ -3615,12 +3615,12 @@
         },
         "colourfulness": {
           "value": 64.961,
-          "z": 0.77,
+          "z": 1.145,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 70.961,
-          "z": -0.561,
+          "z": -0.555,
           "grade": "ok"
         }
       }
@@ -3682,7 +3682,7 @@
         },
         "dark": {
           "value": 0.144,
-          "z": 0.315,
+          "z": 0.311,
           "grade": "ok"
         },
         "edge": {
@@ -3692,7 +3692,7 @@
         },
         "rimR": {
           "value": 31.37,
-          "z": -0.162,
+          "z": -0.16,
           "grade": "ok"
         },
         "rimG": {
@@ -3702,12 +3702,12 @@
         },
         "rimB": {
           "value": 25.452,
-          "z": -1.244,
+          "z": -1.111,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.102,
-          "z": -0.832,
+          "z": -0.806,
           "grade": "ok"
         },
         "rimNavy": {
@@ -3764,37 +3764,37 @@
       "memorial": {
         "lightness": {
           "value": 0.46,
-          "z": -0.519,
+          "z": -0.552,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.346,
-          "z": -0.148,
+          "z": 0.005,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.275,
-          "z": 0.97,
+          "z": 0.786,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.25,
-          "z": 1.048,
+          "z": 1.086,
           "grade": "ok"
         },
         "edge": {
           "value": 0.067,
-          "z": -0.189,
+          "z": -0.406,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.088,
-          "z": 0.07,
+          "z": -0.162,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.055,
-          "z": 0.683,
+          "z": 0.674,
           "grade": "ok"
         },
         "warmth": {
@@ -3804,12 +3804,12 @@
         },
         "colourfulness": {
           "value": 45.56,
-          "z": -0.329,
+          "z": -0.056,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 73.445,
-          "z": -0.369,
+          "z": -0.367,
           "grade": "ok"
         }
       }
@@ -3871,7 +3871,7 @@
         },
         "dark": {
           "value": 0.135,
-          "z": 0.156,
+          "z": 0.151,
           "grade": "ok"
         },
         "edge": {
@@ -3881,7 +3881,7 @@
         },
         "rimR": {
           "value": 42.803,
-          "z": 0.304,
+          "z": 0.3,
           "grade": "ok"
         },
         "rimG": {
@@ -3891,12 +3891,12 @@
         },
         "rimB": {
           "value": 50.422,
-          "z": -0.217,
+          "z": -0.111,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.181,
-          "z": 0.027,
+          "z": 0.063,
           "grade": "ok"
         },
         "rimNavy": {
@@ -3953,37 +3953,37 @@
       "memorial": {
         "lightness": {
           "value": 0.558,
-          "z": 0.128,
+          "z": 0.137,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.239,
-          "z": -1.169,
+          "z": -1.001,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.258,
-          "z": 0.678,
+          "z": 0.481,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.078,
-          "z": -0.143,
+          "z": -0.149,
           "grade": "ok"
         },
         "edge": {
           "value": 0.07,
-          "z": -0.019,
+          "z": -0.245,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.072,
-          "z": -0.449,
+          "z": -0.674,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.048,
-          "z": 0.127,
+          "z": -0.023,
           "grade": "ok"
         },
         "warmth": {
@@ -3993,12 +3993,12 @@
         },
         "colourfulness": {
           "value": 39.711,
-          "z": -0.66,
+          "z": -0.418,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 69.373,
-          "z": -0.684,
+          "z": -0.674,
           "grade": "ok"
         }
       }
@@ -4070,7 +4070,7 @@
         },
         "rimR": {
           "value": 48.933,
-          "z": 0.554,
+          "z": 0.547,
           "grade": "ok"
         },
         "rimG": {
@@ -4080,12 +4080,12 @@
         },
         "rimB": {
           "value": 36.285,
-          "z": -0.799,
+          "z": -0.677,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.136,
-          "z": -0.466,
+          "z": -0.436,
           "grade": "ok"
         },
         "rimNavy": {
@@ -4142,37 +4142,37 @@
       "memorial": {
         "lightness": {
           "value": 0.519,
-          "z": -0.127,
+          "z": -0.136,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.389,
-          "z": 0.268,
+          "z": 0.415,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.231,
-          "z": 0.215,
+          "z": 0,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.067,
-          "z": -0.218,
+          "z": -0.226,
           "grade": "ok"
         },
         "edge": {
           "value": 0.073,
-          "z": 0.087,
+          "z": -0.146,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.079,
-          "z": -0.211,
+          "z": -0.439,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.05,
-          "z": 0.314,
+          "z": 0.212,
           "grade": "ok"
         },
         "warmth": {
@@ -4182,12 +4182,12 @@
         },
         "colourfulness": {
           "value": 51.365,
-          "z": 0,
+          "z": 0.303,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 77.717,
-          "z": -0.04,
+          "z": -0.045,
           "grade": "ok"
         }
       }
@@ -4249,7 +4249,7 @@
         },
         "dark": {
           "value": 0.121,
-          "z": -0.069,
+          "z": -0.076,
           "grade": "ok"
         },
         "edge": {
@@ -4259,7 +4259,7 @@
         },
         "rimR": {
           "value": 32.963,
-          "z": -0.097,
+          "z": -0.096,
           "grade": "ok"
         },
         "rimG": {
@@ -4269,12 +4269,12 @@
         },
         "rimB": {
           "value": 41.24,
-          "z": -0.595,
+          "z": -0.479,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.142,
-          "z": -0.396,
+          "z": -0.365,
           "grade": "ok"
         },
         "rimNavy": {
@@ -4331,37 +4331,37 @@
       "memorial": {
         "lightness": {
           "value": 0.581,
-          "z": 0.282,
+          "z": 0.3,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.41,
-          "z": 0.465,
+          "z": 0.609,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.217,
-          "z": -0.032,
+          "z": -0.257,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.006,
-          "z": -0.639,
+          "z": -0.663,
           "grade": "ok"
         },
         "edge": {
           "value": 0.08,
-          "z": 0.446,
+          "z": 0.193,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.106,
-          "z": 0.674,
+          "z": 0.434,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.047,
-          "z": 0.071,
+          "z": -0.095,
           "grade": "ok"
         },
         "warmth": {
@@ -4371,12 +4371,12 @@
         },
         "colourfulness": {
           "value": 63.14,
-          "z": 0.667,
+          "z": 1.032,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 73.25,
-          "z": -0.384,
+          "z": -0.382,
           "grade": "ok"
         }
       }
@@ -4438,7 +4438,7 @@
         },
         "dark": {
           "value": 0.108,
-          "z": -0.284,
+          "z": -0.293,
           "grade": "ok"
         },
         "edge": {
@@ -4448,7 +4448,7 @@
         },
         "rimR": {
           "value": 20.513,
-          "z": -0.605,
+          "z": -0.597,
           "grade": "ok"
         },
         "rimG": {
@@ -4458,12 +4458,12 @@
         },
         "rimB": {
           "value": 34.023,
-          "z": -0.892,
+          "z": -0.768,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.099,
-          "z": -0.864,
+          "z": -0.839,
           "grade": "ok"
         },
         "rimNavy": {
@@ -4520,38 +4520,38 @@
       "memorial": {
         "lightness": {
           "value": 0.401,
-          "z": -0.907,
+          "z": -0.966,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.308,
-          "z": -0.509,
+          "z": -0.351,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.165,
-          "z": -0.919,
+          "z": -1.18,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.165,
-          "z": 0.457,
+          "z": 0.474,
           "grade": "ok"
         },
         "edge": {
           "value": 0.043,
-          "z": -1.298,
+          "z": -1.453,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.059,
-          "z": -0.864,
+          "z": -1.084,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.012,
-          "z": -2.455,
-          "grade": "warn"
+          "z": -3.266,
+          "grade": "out"
         },
         "warmth": {
           "value": 0.051,
@@ -4560,12 +4560,12 @@
         },
         "colourfulness": {
           "value": 30.569,
-          "z": -1.177,
+          "z": -0.984,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 44.08,
-          "z": -2.636,
+          "z": -2.583,
           "grade": "warn"
         }
       }
@@ -4617,47 +4617,47 @@
         },
         "lightness": {
           "value": 0.686,
-          "z": 0.512,
+          "z": 0.508,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.701,
-          "z": 1.112,
+          "value": 0.696,
+          "z": 1.071,
           "grade": "ok"
         },
         "dark": {
-          "value": 0.056,
-          "z": -1.141,
+          "value": 0.058,
+          "z": -1.121,
           "grade": "ok"
         },
         "edge": {
           "value": 0.338,
-          "z": 0.857,
+          "z": 0.851,
           "grade": "ok"
         },
         "rimR": {
-          "value": 51.873,
-          "z": 0.674,
+          "value": 52.671,
+          "z": 0.697,
           "grade": "ok"
         },
         "rimG": {
-          "value": 45.03,
-          "z": 0.45,
+          "value": 44.871,
+          "z": 0.444,
           "grade": "ok"
         },
         "rimB": {
-          "value": 109.7,
-          "z": 2.223,
+          "value": 108.779,
+          "z": 2.226,
           "grade": "warn"
         },
         "rimLightness": {
-          "value": 0.3,
-          "z": 1.305,
+          "value": 0.297,
+          "z": 1.332,
           "grade": "ok"
         },
         "rimNavy": {
-          "value": 57.827,
-          "z": 1.671,
+          "value": 56.109,
+          "z": 1.613,
           "grade": "ok"
         },
         "rimThickness": {
@@ -4666,33 +4666,33 @@
           "grade": "ok"
         },
         "highlightPct": {
-          "value": 0.235,
-          "z": -0.537,
+          "value": 0.159,
+          "z": -0.599,
           "grade": "ok"
         },
         "highlightBlobsPer10k": {
-          "value": 6.985,
-          "z": -0.454,
+          "value": 8.131,
+          "z": -0.414,
           "grade": "ok"
         },
         "flatShare": {
           "value": 0.495,
-          "z": 0.919,
+          "z": 0.929,
           "grade": "ok"
         },
         "gradientSoftness": {
           "value": 0.087,
-          "z": 1.5,
+          "z": 1.486,
           "grade": "ok"
         },
         "paletteSize": {
-          "value": 894,
-          "z": 1.089,
+          "value": 905,
+          "z": 1.144,
           "grade": "ok"
         },
         "top5Share": {
-          "value": 0.277,
-          "z": -0.764,
+          "value": 0.27,
+          "z": -0.843,
           "grade": "ok"
         },
         "viewAreaSpread": {
@@ -4708,53 +4708,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.681,
-          "z": 0.94,
+          "value": 0.802,
+          "z": 1.854,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.557,
-          "z": 1.874,
-          "grade": "ok"
+          "value": 0.645,
+          "z": 2.825,
+          "grade": "warn"
         },
         "contrast": {
-          "value": 0.183,
-          "z": -0.602,
+          "value": 0.156,
+          "z": -1.343,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.021,
-          "z": -0.535,
+          "value": 0.011,
+          "z": -0.626,
           "grade": "ok"
         },
         "edge": {
-          "value": 0.108,
-          "z": 1.741,
+          "value": 0.11,
+          "z": 1.502,
           "grade": "ok"
         },
         "sharpness": {
-          "value": 0.169,
-          "z": 2.699,
-          "grade": "warn"
+          "value": 0.262,
+          "z": 5.407,
+          "grade": "out"
         },
         "bgBusy": {
-          "value": 0.064,
-          "z": 1.316,
+          "value": 0.057,
+          "z": 0.826,
           "grade": "ok"
         },
         "warmth": {
-          "value": 0.987,
-          "z": 0.88,
+          "value": 0.928,
+          "z": 0.749,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 61.859,
-          "z": 0.594,
+          "value": 49.482,
+          "z": 0.187,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 92.014,
-          "z": 1.064,
+          "value": 78.313,
+          "z": 0,
           "grade": "ok"
         }
       }
@@ -4816,7 +4816,7 @@
         },
         "dark": {
           "value": 0.359,
-          "z": 3.842,
+          "z": 3.872,
           "grade": "out"
         },
         "edge": {
@@ -4826,7 +4826,7 @@
         },
         "rimR": {
           "value": 21.895,
-          "z": -0.549,
+          "z": -0.541,
           "grade": "ok"
         },
         "rimG": {
@@ -4836,12 +4836,12 @@
         },
         "rimB": {
           "value": 47.291,
-          "z": -0.346,
+          "z": -0.236,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.116,
-          "z": -0.674,
+          "z": -0.647,
           "grade": "ok"
         },
         "rimNavy": {
@@ -4897,53 +4897,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.279,
-          "z": -1.717,
+          "value": 0.334,
+          "z": -1.443,
           "grade": "ok"
         },
         "saturation": {
-          "value": 0.402,
-          "z": 0.391,
+          "value": 0.246,
+          "z": -0.931,
           "grade": "ok"
         },
         "contrast": {
-          "value": 0.171,
-          "z": -0.806,
+          "value": 0.169,
+          "z": -1.108,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.554,
-          "z": 3.161,
-          "grade": "out"
+          "value": 0.302,
+          "z": 1.459,
+          "grade": "ok"
         },
         "edge": {
-          "value": 0.071,
-          "z": 0,
+          "value": 0.082,
+          "z": 0.277,
           "grade": "ok"
         },
         "sharpness": {
-          "value": 0.074,
-          "z": -0.38,
+          "value": 0.106,
+          "z": 0.413,
           "grade": "ok"
         },
         "bgBusy": {
-          "value": 0.04,
-          "z": -0.426,
+          "value": 0.051,
+          "z": 0.253,
           "grade": "ok"
         },
         "warmth": {
-          "value": 0.992,
-          "z": 0.892,
+          "value": 0.921,
+          "z": 0.733,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 59.48,
-          "z": 0.459,
+          "value": 46.14,
+          "z": -0.02,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 89.234,
-          "z": 0.849,
+          "value": 89.605,
+          "z": 0.852,
           "grade": "ok"
         }
       }
@@ -5005,7 +5005,7 @@
         },
         "dark": {
           "value": 0.193,
-          "z": 1.113,
+          "z": 1.117,
           "grade": "ok"
         },
         "edge": {
@@ -5015,7 +5015,7 @@
         },
         "rimR": {
           "value": 14.498,
-          "z": -0.851,
+          "z": -0.839,
           "grade": "ok"
         },
         "rimG": {
@@ -5025,12 +5025,12 @@
         },
         "rimB": {
           "value": 43.831,
-          "z": -0.488,
+          "z": -0.375,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.102,
-          "z": -0.826,
+          "z": -0.801,
           "grade": "ok"
         },
         "rimNavy": {
@@ -5087,37 +5087,37 @@
       "memorial": {
         "lightness": {
           "value": 0.534,
-          "z": -0.03,
+          "z": -0.032,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.441,
-          "z": 0.762,
+          "z": 0.902,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.237,
-          "z": 0.316,
+          "z": 0.105,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.133,
-          "z": 0.237,
+          "z": 0.245,
           "grade": "ok"
         },
         "edge": {
           "value": 0.076,
-          "z": 0.241,
+          "z": 0,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.095,
-          "z": 0.29,
+          "z": 0.055,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.042,
-          "z": -0.278,
+          "z": -0.532,
           "grade": "ok"
         },
         "warmth": {
@@ -5127,12 +5127,12 @@
         },
         "colourfulness": {
           "value": 79.518,
-          "z": 1.594,
-          "grade": "ok"
+          "z": 2.046,
+          "grade": "warn"
         },
         "fileKiB": {
           "value": 81.959,
-          "z": 0.288,
+          "z": 0.275,
           "grade": "ok"
         }
       }
@@ -5194,7 +5194,7 @@
         },
         "dark": {
           "value": 0.262,
-          "z": 2.253,
+          "z": 2.268,
           "grade": "warn"
         },
         "edge": {
@@ -5204,7 +5204,7 @@
         },
         "rimR": {
           "value": 20.372,
-          "z": -0.611,
+          "z": -0.603,
           "grade": "ok"
         },
         "rimG": {
@@ -5214,12 +5214,12 @@
         },
         "rimB": {
           "value": 21.355,
-          "z": -1.413,
+          "z": -1.275,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.071,
-          "z": -1.16,
+          "z": -1.139,
           "grade": "ok"
         },
         "rimNavy": {
@@ -5276,37 +5276,37 @@
       "memorial": {
         "lightness": {
           "value": 0.465,
-          "z": -0.485,
+          "z": -0.516,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.255,
-          "z": -1.019,
+          "z": -0.853,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.243,
-          "z": 0.426,
+          "z": 0.219,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.132,
-          "z": 0.235,
+          "z": 0.244,
           "grade": "ok"
         },
         "edge": {
           "value": 0.066,
-          "z": -0.235,
+          "z": -0.449,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.082,
-          "z": -0.122,
+          "z": -0.352,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.051,
-          "z": 0.36,
+          "z": 0.269,
           "grade": "ok"
         },
         "warmth": {
@@ -5316,12 +5316,12 @@
         },
         "colourfulness": {
           "value": 35.281,
-          "z": -0.911,
+          "z": -0.693,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 66.801,
-          "z": -0.882,
+          "z": -0.869,
           "grade": "ok"
         }
       }
@@ -5383,7 +5383,7 @@
         },
         "dark": {
           "value": 0.026,
-          "z": -1.63,
+          "z": -1.651,
           "grade": "ok"
         },
         "edge": {
@@ -5393,7 +5393,7 @@
         },
         "rimR": {
           "value": 123.55,
-          "z": 3.6,
+          "z": 3.55,
           "grade": "out"
         },
         "rimG": {
@@ -5403,12 +5403,12 @@
         },
         "rimB": {
           "value": 89.661,
-          "z": 1.398,
+          "z": 1.461,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.41,
-          "z": 2.494,
+          "z": 2.561,
           "grade": "warn"
         },
         "rimNavy": {
@@ -5465,37 +5465,37 @@
       "memorial": {
         "lightness": {
           "value": 0.755,
-          "z": 1.434,
+          "z": 1.526,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.291,
-          "z": -0.674,
+          "z": -0.513,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.205,
-          "z": -0.229,
+          "z": -0.462,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0,
-          "z": -0.681,
+          "z": -0.705,
           "grade": "ok"
         },
         "edge": {
           "value": 0.05,
-          "z": -0.985,
+          "z": -1.158,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.051,
-          "z": -1.133,
+          "z": -1.35,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.046,
-          "z": 0.015,
+          "z": -0.165,
           "grade": "ok"
         },
         "warmth": {
@@ -5505,12 +5505,12 @@
         },
         "colourfulness": {
           "value": 26.931,
-          "z": -1.383,
+          "z": -1.21,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 58.877,
-          "z": -1.494,
+          "z": -1.466,
           "grade": "ok"
         }
       }
@@ -5572,7 +5572,7 @@
         },
         "dark": {
           "value": 0.136,
-          "z": 0.169,
+          "z": 0.164,
           "grade": "ok"
         },
         "edge": {
@@ -5582,7 +5582,7 @@
         },
         "rimR": {
           "value": 38.774,
-          "z": 0.14,
+          "z": 0.138,
           "grade": "ok"
         },
         "rimG": {
@@ -5592,12 +5592,12 @@
         },
         "rimB": {
           "value": 28.936,
-          "z": -1.101,
+          "z": -0.971,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.132,
-          "z": -0.51,
+          "z": -0.481,
           "grade": "ok"
         },
         "rimNavy": {
@@ -5654,37 +5654,37 @@
       "memorial": {
         "lightness": {
           "value": 0.616,
-          "z": 0.51,
+          "z": 0.543,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.306,
-          "z": -0.525,
+          "z": -0.366,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.289,
-          "z": 1.215,
+          "z": 1.04,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.146,
-          "z": 0.328,
+          "z": 0.34,
           "grade": "ok"
         },
         "edge": {
           "value": 0.092,
-          "z": 1.017,
+          "z": 0.733,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.142,
-          "z": 1.826,
+          "z": 1.571,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.079,
-          "z": 2.41,
+          "z": 2.844,
           "grade": "warn"
         },
         "warmth": {
@@ -5694,12 +5694,12 @@
         },
         "colourfulness": {
           "value": 46.742,
-          "z": -0.262,
+          "z": 0.017,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 78.879,
-          "z": 0.05,
+          "z": 0.043,
           "grade": "ok"
         }
       }
@@ -5761,7 +5761,7 @@
         },
         "dark": {
           "value": 0.071,
-          "z": -0.884,
+          "z": -0.899,
           "grade": "ok"
         },
         "edge": {
@@ -5771,7 +5771,7 @@
         },
         "rimR": {
           "value": 45.945,
-          "z": 0.433,
+          "z": 0.427,
           "grade": "ok"
         },
         "rimG": {
@@ -5781,12 +5781,12 @@
         },
         "rimB": {
           "value": 63.358,
-          "z": 0.316,
+          "z": 0.407,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.213,
-          "z": 0.366,
+          "z": 0.407,
           "grade": "ok"
         },
         "rimNavy": {
@@ -5843,38 +5843,38 @@
       "memorial": {
         "lightness": {
           "value": 0.493,
-          "z": -0.303,
+          "z": -0.323,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.472,
-          "z": 1.06,
+          "z": 1.195,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.296,
-          "z": 1.327,
+          "z": 1.156,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.303,
-          "z": 1.42,
+          "z": 1.472,
           "grade": "ok"
         },
         "edge": {
           "value": 0.056,
-          "z": -0.674,
+          "z": -0.865,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.08,
-          "z": -0.191,
+          "z": -0.42,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.026,
-          "z": -1.456,
-          "grade": "ok"
+          "z": -2.012,
+          "grade": "warn"
         },
         "warmth": {
           "value": 0.095,
@@ -5883,12 +5883,12 @@
         },
         "colourfulness": {
           "value": 61.071,
-          "z": 0.549,
+          "z": 0.904,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 63.264,
-          "z": -1.155,
+          "z": -1.135,
           "grade": "ok"
         }
       }
@@ -5950,7 +5950,7 @@
         },
         "dark": {
           "value": 0.027,
-          "z": -1.61,
+          "z": -1.631,
           "grade": "ok"
         },
         "edge": {
@@ -5960,7 +5960,7 @@
         },
         "rimR": {
           "value": 119.823,
-          "z": 3.447,
+          "z": 3.4,
           "grade": "out"
         },
         "rimG": {
@@ -5970,12 +5970,12 @@
         },
         "rimB": {
           "value": 109.988,
-          "z": 2.235,
+          "z": 2.275,
           "grade": "warn"
         },
         "rimLightness": {
           "value": 0.424,
-          "z": 2.646,
+          "z": 2.715,
           "grade": "warn"
         },
         "rimNavy": {
@@ -6032,37 +6032,37 @@
       "memorial": {
         "lightness": {
           "value": 0.695,
-          "z": 1.034,
+          "z": 1.101,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.305,
-          "z": -0.541,
+          "z": -0.382,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.197,
-          "z": -0.374,
+          "z": -0.613,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0,
-          "z": -0.683,
+          "z": -0.708,
           "grade": "ok"
         },
         "edge": {
           "value": 0.068,
-          "z": -0.124,
+          "z": -0.344,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.061,
-          "z": -0.793,
+          "z": -1.014,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.045,
-          "z": -0.081,
+          "z": -0.285,
           "grade": "ok"
         },
         "warmth": {
@@ -6072,7 +6072,7 @@
         },
         "colourfulness": {
           "value": 39.452,
-          "z": -0.674,
+          "z": -0.434,
           "grade": "ok"
         },
         "fileKiB": {
@@ -6139,7 +6139,7 @@
         },
         "dark": {
           "value": 0.38,
-          "z": 4.184,
+          "z": 4.217,
           "grade": "out"
         },
         "edge": {
@@ -6149,7 +6149,7 @@
         },
         "rimR": {
           "value": 33.969,
-          "z": -0.056,
+          "z": -0.055,
           "grade": "ok"
         },
         "rimG": {
@@ -6159,12 +6159,12 @@
         },
         "rimB": {
           "value": 50.64,
-          "z": -0.208,
+          "z": -0.102,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.162,
-          "z": -0.178,
+          "z": -0.144,
           "grade": "ok"
         },
         "rimNavy": {
@@ -6220,53 +6220,53 @@
       },
       "memorial": {
         "lightness": {
-          "value": 0.228,
-          "z": -2.051,
+          "value": 0.238,
+          "z": -2.116,
           "grade": "warn"
         },
         "saturation": {
-          "value": 0.528,
-          "z": 1.595,
+          "value": 0.282,
+          "z": -0.595,
           "grade": "ok"
         },
         "contrast": {
-          "value": 0.23,
-          "z": 0.197,
+          "value": 0.227,
+          "z": -0.069,
           "grade": "ok"
         },
         "darkRatio": {
-          "value": 0.55,
-          "z": 3.131,
+          "value": 0.551,
+          "z": 3.254,
           "grade": "out"
         },
         "edge": {
-          "value": 0.066,
-          "z": -0.207,
+          "value": 0.087,
+          "z": 0.474,
           "grade": "ok"
         },
         "sharpness": {
-          "value": 0.094,
-          "z": 0.273,
+          "value": 0.139,
+          "z": 1.459,
           "grade": "ok"
         },
         "bgBusy": {
-          "value": 0.031,
-          "z": -1.063,
+          "value": 0.051,
+          "z": 0.331,
           "grade": "ok"
         },
         "warmth": {
-          "value": 0.009,
-          "z": -1.295,
+          "value": 0.026,
+          "z": -1.256,
           "grade": "ok"
         },
         "colourfulness": {
-          "value": 54.465,
-          "z": 0.175,
+          "value": 45.508,
+          "z": -0.059,
           "grade": "ok"
         },
         "fileKiB": {
-          "value": 89.49,
-          "z": 0.869,
+          "value": 92.92,
+          "z": 1.102,
           "grade": "ok"
         }
       }
@@ -6328,7 +6328,7 @@
         },
         "dark": {
           "value": 0.127,
-          "z": 0.025,
+          "z": 0.019,
           "grade": "ok"
         },
         "edge": {
@@ -6338,7 +6338,7 @@
         },
         "rimR": {
           "value": 34.203,
-          "z": -0.047,
+          "z": -0.046,
           "grade": "ok"
         },
         "rimG": {
@@ -6348,12 +6348,12 @@
         },
         "rimB": {
           "value": 36.347,
-          "z": -0.796,
+          "z": -0.674,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.135,
-          "z": -0.469,
+          "z": -0.439,
           "grade": "ok"
         },
         "rimNavy": {
@@ -6410,37 +6410,37 @@
       "memorial": {
         "lightness": {
           "value": 0.534,
-          "z": -0.033,
+          "z": -0.035,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.141,
-          "z": -2.1,
-          "grade": "warn"
+          "z": -1.918,
+          "grade": "ok"
         },
         "contrast": {
           "value": 0.281,
-          "z": 1.069,
+          "z": 0.888,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.17,
-          "z": 0.495,
+          "z": 0.513,
           "grade": "ok"
         },
         "edge": {
           "value": 0.105,
-          "z": 1.599,
+          "z": 1.282,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.117,
-          "z": 1.028,
+          "z": 0.784,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.093,
-          "z": 3.43,
+          "z": 4.125,
           "grade": "out"
         },
         "warmth": {
@@ -6450,12 +6450,12 @@
         },
         "colourfulness": {
           "value": 20.075,
-          "z": -1.772,
+          "z": -1.634,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 77.633,
-          "z": -0.046,
+          "z": -0.051,
           "grade": "ok"
         }
       }
@@ -6517,7 +6517,7 @@
         },
         "dark": {
           "value": 0.132,
-          "z": 0.113,
+          "z": 0.108,
           "grade": "ok"
         },
         "edge": {
@@ -6527,7 +6527,7 @@
         },
         "rimR": {
           "value": 50.912,
-          "z": 0.635,
+          "z": 0.627,
           "grade": "ok"
         },
         "rimG": {
@@ -6537,12 +6537,12 @@
         },
         "rimB": {
           "value": 57.52,
-          "z": 0.075,
+          "z": 0.173,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.209,
-          "z": 0.329,
+          "z": 0.37,
           "grade": "ok"
         },
         "rimNavy": {
@@ -6599,37 +6599,37 @@
       "memorial": {
         "lightness": {
           "value": 0.558,
-          "z": 0.13,
+          "z": 0.138,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.657,
-          "z": 2.824,
+          "z": 2.933,
           "grade": "warn"
         },
         "contrast": {
           "value": 0.351,
-          "z": 2.278,
+          "z": 2.145,
           "grade": "warn"
         },
         "darkRatio": {
           "value": 0.346,
-          "z": 1.715,
+          "z": 1.777,
           "grade": "ok"
         },
         "edge": {
           "value": 0.107,
-          "z": 1.691,
+          "z": 1.369,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.174,
-          "z": 2.869,
+          "z": 2.6,
           "grade": "warn"
         },
         "bgBusy": {
           "value": 0.059,
-          "z": 0.948,
+          "z": 1.008,
           "grade": "ok"
         },
         "warmth": {
@@ -6639,12 +6639,12 @@
         },
         "colourfulness": {
           "value": 61.3,
-          "z": 0.562,
+          "z": 0.918,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 93.4,
-          "z": 1.171,
+          "z": 1.138,
           "grade": "ok"
         }
       }
@@ -6706,7 +6706,7 @@
         },
         "dark": {
           "value": 0.274,
-          "z": 2.446,
+          "z": 2.463,
           "grade": "warn"
         },
         "edge": {
@@ -6716,7 +6716,7 @@
         },
         "rimR": {
           "value": 51.684,
-          "z": 0.667,
+          "z": 0.658,
           "grade": "ok"
         },
         "rimG": {
@@ -6726,12 +6726,12 @@
         },
         "rimB": {
           "value": 50.555,
-          "z": -0.211,
+          "z": -0.105,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.193,
-          "z": 0.158,
+          "z": 0.196,
           "grade": "ok"
         },
         "rimNavy": {
@@ -6788,37 +6788,37 @@
       "memorial": {
         "lightness": {
           "value": 0.236,
-          "z": -2.002,
+          "z": -2.131,
           "grade": "warn"
         },
         "saturation": {
           "value": 0.229,
-          "z": -1.259,
+          "z": -1.09,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.152,
-          "z": -1.14,
+          "z": -1.41,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.648,
-          "z": 3.808,
+          "z": 3.948,
           "grade": "out"
         },
         "edge": {
           "value": 0.082,
-          "z": 0.505,
+          "z": 0.249,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.108,
-          "z": 0.725,
+          "z": 0.484,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.043,
-          "z": -0.204,
+          "z": -0.439,
           "grade": "ok"
         },
         "warmth": {
@@ -6828,12 +6828,12 @@
         },
         "colourfulness": {
           "value": 35.989,
-          "z": -0.871,
+          "z": -0.649,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 85.152,
-          "z": 0.534,
+          "z": 0.516,
           "grade": "ok"
         }
       }
@@ -6895,7 +6895,7 @@
         },
         "dark": {
           "value": 0.034,
-          "z": -1.494,
+          "z": -1.514,
           "grade": "ok"
         },
         "edge": {
@@ -6905,7 +6905,7 @@
         },
         "rimR": {
           "value": 102.768,
-          "z": 2.751,
+          "z": 2.714,
           "grade": "warn"
         },
         "rimG": {
@@ -6915,12 +6915,12 @@
         },
         "rimB": {
           "value": 108.358,
-          "z": 2.168,
+          "z": 2.21,
           "grade": "warn"
         },
         "rimLightness": {
           "value": 0.408,
-          "z": 2.472,
+          "z": 2.538,
           "grade": "warn"
         },
         "rimNavy": {
@@ -6977,37 +6977,37 @@
       "memorial": {
         "lightness": {
           "value": 0.777,
-          "z": 1.578,
+          "z": 1.68,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.383,
-          "z": 0.206,
+          "z": 0.354,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.191,
-          "z": -0.467,
+          "z": -0.709,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.001,
-          "z": -0.68,
+          "z": -0.705,
           "grade": "ok"
         },
         "edge": {
           "value": 0.074,
-          "z": 0.152,
+          "z": -0.084,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.083,
-          "z": -0.086,
+          "z": -0.316,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.043,
-          "z": -0.221,
+          "z": -0.46,
           "grade": "ok"
         },
         "warmth": {
@@ -7017,12 +7017,12 @@
         },
         "colourfulness": {
           "value": 35.314,
-          "z": -0.909,
+          "z": -0.691,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 78.871,
-          "z": 0.049,
+          "z": 0.042,
           "grade": "ok"
         }
       }
@@ -7084,7 +7084,7 @@
         },
         "dark": {
           "value": 0.029,
-          "z": -1.579,
+          "z": -1.6,
           "grade": "ok"
         },
         "edge": {
@@ -7094,7 +7094,7 @@
         },
         "rimR": {
           "value": 122.855,
-          "z": 3.571,
+          "z": 3.522,
           "grade": "out"
         },
         "rimG": {
@@ -7104,12 +7104,12 @@
         },
         "rimB": {
           "value": 94.442,
-          "z": 1.595,
+          "z": 1.652,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.437,
-          "z": 2.785,
+          "z": 2.856,
           "grade": "warn"
         },
         "rimNavy": {
@@ -7166,37 +7166,37 @@
       "memorial": {
         "lightness": {
           "value": 0.804,
-          "z": 1.754,
+          "z": 1.867,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.58,
-          "z": 2.085,
+          "z": 2.206,
           "grade": "warn"
         },
         "contrast": {
           "value": 0.138,
-          "z": -1.387,
+          "z": -1.667,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.001,
-          "z": -0.678,
+          "z": -0.702,
           "grade": "ok"
         },
         "edge": {
           "value": 0.077,
-          "z": 0.275,
+          "z": 0.032,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.093,
-          "z": 0.234,
+          "z": 0,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.049,
-          "z": 0.211,
+          "z": 0.082,
           "grade": "ok"
         },
         "warmth": {
@@ -7206,12 +7206,12 @@
         },
         "colourfulness": {
           "value": 54.024,
-          "z": 0.151,
+          "z": 0.468,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 89.594,
-          "z": 0.877,
+          "z": 0.851,
           "grade": "ok"
         }
       }
@@ -7273,7 +7273,7 @@
         },
         "dark": {
           "value": 0.032,
-          "z": -1.527,
+          "z": -1.547,
           "grade": "ok"
         },
         "edge": {
@@ -7283,7 +7283,7 @@
         },
         "rimR": {
           "value": 52.103,
-          "z": 0.684,
+          "z": 0.674,
           "grade": "ok"
         },
         "rimG": {
@@ -7293,12 +7293,12 @@
         },
         "rimB": {
           "value": 107.984,
-          "z": 2.153,
+          "z": 2.195,
           "grade": "warn"
         },
         "rimLightness": {
           "value": 0.314,
-          "z": 1.458,
+          "z": 1.512,
           "grade": "ok"
         },
         "rimNavy": {
@@ -7355,38 +7355,38 @@
       "memorial": {
         "lightness": {
           "value": 0.657,
-          "z": 0.783,
+          "z": 0.833,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.539,
-          "z": 1.693,
+          "z": 1.819,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.254,
-          "z": 0.613,
+          "z": 0.414,
           "grade": "ok"
         },
         "darkRatio": {
           "value": 0.071,
-          "z": -0.19,
+          "z": -0.197,
           "grade": "ok"
         },
         "edge": {
           "value": 0.098,
-          "z": 1.299,
+          "z": 0.999,
           "grade": "ok"
         },
         "sharpness": {
           "value": 0.088,
-          "z": 0.082,
+          "z": -0.15,
           "grade": "ok"
         },
         "bgBusy": {
           "value": 0.082,
-          "z": 2.611,
-          "grade": "warn"
+          "z": 3.097,
+          "grade": "out"
         },
         "warmth": {
           "value": 0.114,
@@ -7395,12 +7395,12 @@
         },
         "colourfulness": {
           "value": 51.537,
-          "z": 0.01,
+          "z": 0.314,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 93.211,
-          "z": 1.156,
+          "z": 1.124,
           "grade": "ok"
         }
       }
@@ -7462,7 +7462,7 @@
         },
         "dark": {
           "value": 0.152,
-          "z": 0.445,
+          "z": 0.443,
           "grade": "ok"
         },
         "edge": {
@@ -7472,7 +7472,7 @@
         },
         "rimR": {
           "value": 23.908,
-          "z": -0.467,
+          "z": -0.46,
           "grade": "ok"
         },
         "rimG": {
@@ -7482,12 +7482,12 @@
         },
         "rimB": {
           "value": 72.073,
-          "z": 0.674,
+          "z": 0.756,
           "grade": "ok"
         },
         "rimLightness": {
           "value": 0.165,
-          "z": -0.148,
+          "z": -0.114,
           "grade": "ok"
         },
         "rimNavy": {
@@ -7544,17 +7544,17 @@
       "memorial": {
         "lightness": {
           "value": 0.518,
-          "z": -0.132,
+          "z": -0.141,
           "grade": "ok"
         },
         "saturation": {
           "value": 0.329,
-          "z": -0.305,
+          "z": -0.15,
           "grade": "ok"
         },
         "contrast": {
           "value": 0.258,
-          "z": 0.674,
+          "z": 0.478,
           "grade": "ok"
         },
         "darkRatio": {
@@ -7564,17 +7564,17 @@
         },
         "edge": {
           "value": 0.118,
-          "z": 2.24,
-          "grade": "warn"
+          "z": 1.887,
+          "grade": "ok"
         },
         "sharpness": {
           "value": 0.154,
-          "z": 2.212,
-          "grade": "warn"
+          "z": 1.952,
+          "grade": "ok"
         },
         "bgBusy": {
           "value": 0.093,
-          "z": 3.425,
+          "z": 4.119,
           "grade": "out"
         },
         "warmth": {
@@ -7584,12 +7584,12 @@
         },
         "colourfulness": {
           "value": 47.354,
-          "z": -0.227,
+          "z": 0.055,
           "grade": "ok"
         },
         "fileKiB": {
           "value": 93.58,
-          "z": 1.184,
+          "z": 1.152,
           "grade": "ok"
         }
       }

@@ -236,28 +236,28 @@
     {
       "id": "unit-joker",
       "source": "defense_test/assets/merge/units/joker.webp",
-      "sha256": "e60422f948ebb7a128cdba703cc1c602fca135b0897f42c0c3051224eb8e032a",
+      "sha256": "3f318634f393939c037f5f0bf2d36dc3f1f31ca490df2c4f5bc256df9dcce22a",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-sunflower",
       "source": "defense_test/assets/merge/units/sunflower.webp",
-      "sha256": "4c0ba57f4caef4132e6edd0fd07d08b50399e1f18b06640248242c4728b9dab7",
+      "sha256": "b3ca62f3ce5c97d331636870cfac235d23ea6ab3e60b11e032daf2433bc5190c",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-antropy",
       "source": "defense_test/assets/merge/units/antropy.webp",
-      "sha256": "a552f9440e5f158e377b32d7968e4edd8beeea7bd26ca78e765b102311d8e73e",
+      "sha256": "f446f1ac17baab01f583e81aa86fe7bce5782ed90b3873fe4448f724361932be",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-cure_master",
       "source": "defense_test/assets/merge/units/cure_master.webp",
-      "sha256": "837b774705c5e06edbe6134fb43fe28fe1f21c7ded9cecabeb6e561554842723",
+      "sha256": "470f9921b8f74f2868b4ab8bd6a4f4e10e386129ff1b35518166e04950fd3508",
       "width": 1024,
       "height": 1024
     },
@@ -423,6 +423,20 @@
       "height": 256
     },
     {
+      "id": "effects-applebomb",
+      "source": "defense_test/assets/merge/effects-applebomb.webp",
+      "sha256": "858287defd5620900aeb643ecd6d3db6d0a494c82a778115948a9c453110bad3",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "effects-bigshow",
+      "source": "defense_test/assets/merge/effects-bigshow.webp",
+      "sha256": "5bbadd4cca6df529575941727736e2bb9a4161a1a6c1d04e2b74fbbfb3a25f01",
+      "width": 1024,
+      "height": 512
+    },
+    {
       "id": "ultimates",
       "source": "defense_test/assets/merge/ultimates.webp",
       "sha256": "3e8f54fd40b53dec39d3fd16207452f4a9afcb52c9d9022005679a6f1f672cc7",
@@ -581,51 +595,51 @@
     {
       "id": "underdog",
       "source": "defense_test/assets/memorial/underdog.avif",
-      "sha256": "36602f44d6b98ac43cc11bebd7c9b739c95e844396dbca17ded0be045ba8d181",
+      "sha256": "fdbfd85df162a7ba2dd772babdd1f12dc8cfee1384579543196e0d0b6b792b98",
       "width": 720,
       "height": 1080,
-      "bytes": 44842,
-      "sourceSha256": "c0bf994d149fca8bfc3945c0e05d6e22a0ab3bf3944ce677742e2f7e8ddbc673",
+      "bytes": 50711,
+      "sourceSha256": "f0f3c1f91e1bc8559863e59eccbe1039c2768c7743b1b9a2a572e04b7e54ca3f",
       "webp": {
         "source": "defense_test/assets/memorial-webp/underdog.webp",
-        "sha256": "08a4404e61fda705268de65ce4487c5a786d4a23bc89483464147c599f4e1df4",
+        "sha256": "21a6b9fda98a072cd09b1626de09326d59234dd3b8caa9756fee55bcb45e1593",
         "width": 720,
         "height": 1080,
-        "bytes": 74470,
+        "bytes": 90712,
         "quality": 82
       }
     },
     {
       "id": "joker",
       "source": "defense_test/assets/memorial/joker.avif",
-      "sha256": "a666df994b1368c3038c007584230708bc43666d9edb3a05c836b20c98dab4bb",
+      "sha256": "c44e7cb3df26b4c395574ca1412da539cc52a7a27d17f97a77a41f4271d1ec69",
       "width": 720,
       "height": 1080,
-      "bytes": 57582,
-      "sourceSha256": "2e4a4aeae7fd6728f6b85169c5407d2309a8d7c17868d6c706fc3802953253a7",
+      "bytes": 69520,
+      "sourceSha256": "2878cd737daf2e2a4480d8071259678b2896682ecaa82b8f7b4568e0b369be4e",
       "webp": {
         "source": "defense_test/assets/memorial-webp/joker.webp",
-        "sha256": "6edd79d71781ba080216361656baac255ef2e25a0b775888e0dd2d287ed8e604",
+        "sha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
         "width": 720,
         "height": 1080,
-        "bytes": 93692,
-        "quality": 76
+        "bytes": 97802,
+        "quality": 62
       }
     },
     {
       "id": "sunflower",
       "source": "defense_test/assets/memorial/sunflower.avif",
-      "sha256": "1d93dca749f6ba6e17d04e86a875f7839749a68204cb340eec7d7be1c41a160b",
+      "sha256": "d866554c5f33b3b407d595e898d3cfb5dc1ccae2bb7ddf6dd806940bd2a05ee9",
       "width": 720,
       "height": 1080,
-      "bytes": 48596,
-      "sourceSha256": "2122d32b47c0c397c653fdd38ec8650667a4232727ee09a921fca27a7055e2fa",
+      "bytes": 45001,
+      "sourceSha256": "aeecb33e413ade6feb4db259684e33d84b57c9125e3a735faa7b83e391c74300",
       "webp": {
         "source": "defense_test/assets/memorial-webp/sunflower.webp",
-        "sha256": "575e7ac596ecb6d7115630605aed7da82bf5fb025e023e8c9a75147702cdbb3c",
+        "sha256": "c985bcab237ac96dbfaf7771236a7021b84432b0d22125daa0dc418f0a9ca3ec",
         "width": 720,
         "height": 1080,
-        "bytes": 88754,
+        "bytes": 82690,
         "quality": 82
       }
     },
@@ -734,35 +748,35 @@
     {
       "id": "toffee_apple",
       "source": "defense_test/assets/memorial/toffee_apple.avif",
-      "sha256": "7116b3cb9bea11b522a7ef1f2b1a45e4f1cd71eedc7a4654af19457d3c7ad54e",
+      "sha256": "890afc5fd42999683cac280c290941b3bd76c41ab6297ae1a8485e3023d8b0c6",
       "width": 720,
       "height": 1080,
-      "bytes": 61216,
-      "sourceSha256": "733718e12016c35b03efcabbe123073e418f314482455038de50a090bbfdd198",
+      "bytes": 64253,
+      "sourceSha256": "59719a74d0b7ef15b84a3cada6d2f881053e7b33706f51805cd7f78e585db9b0",
       "webp": {
         "source": "defense_test/assets/memorial-webp/toffee_apple.webp",
-        "sha256": "cac24d6273eba7ab0ac455ac8ac3ee7c6d8ef09afb0de058a38bf93f0cdb92f1",
+        "sha256": "7c6aeb757cf6849760ae70165cd06185cb373d12ce1af7206b8e928489cb2099",
         "width": 720,
         "height": 1080,
-        "bytes": 98168,
-        "quality": 78
+        "bytes": 95362,
+        "quality": 74
       }
     },
     {
       "id": "antropy",
       "source": "defense_test/assets/memorial/antropy.avif",
-      "sha256": "47f1e715901b882cd22efe8a89b9fa8f8b2099a283bb79a2d86a1cc7d4a74b11",
+      "sha256": "36898a42c64d252416fe74b87a03759cd5a99f203e74538d3112027699fce254",
       "width": 720,
       "height": 1080,
-      "bytes": 46146,
-      "sourceSha256": "8eddb7c36d27f4a2d844956ae3f5c90f5c5a722956600904a9bacbba34cdc484",
+      "bytes": 55041,
+      "sourceSha256": "5035ae2405f5d2e4f0cc1c3bc3ed7a3ef3e25c9ff7a196601fd1e6b6ea1cc7e5",
       "webp": {
         "source": "defense_test/assets/memorial-webp/antropy.webp",
-        "sha256": "16f85c12ad4cb4af7a777064ff2470368f596d79b700f0bba8982e01c24ae08a",
+        "sha256": "ce7bcaedd4f5d9011dd1ed30b6990b23f01eeafeda1dd4dd639ab16e977dbee9",
         "width": 720,
         "height": 1080,
-        "bytes": 83276,
-        "quality": 82
+        "bytes": 96462,
+        "quality": 80
       }
     },
     {
@@ -870,35 +884,35 @@
     {
       "id": "cure_master",
       "source": "defense_test/assets/memorial/cure_master.avif",
-      "sha256": "1de23fd61fb810b053b92b93722175bcd97e09aebfacbe7e3d3d1aa4cd76c755",
+      "sha256": "1529f210d9ea3d8e45982fc52a2b3f4eb987177b3f1fcbd4ef1ed451f7883027",
       "width": 720,
       "height": 1080,
-      "bytes": 48325,
-      "sourceSha256": "79a6c3f3d44ebc1c1f8e5b7a30798da3b4c267db1995f6bb7a2fffff4d9aa0d0",
+      "bytes": 40913,
+      "sourceSha256": "e1118907c66ed80980c86bffa6ad8e398d6b52ec4234c16e0d8ef4d44f878213",
       "webp": {
         "source": "defense_test/assets/memorial-webp/cure_master.webp",
-        "sha256": "9fbb3b9542b9ab87da9eb7fad1267ecf61b8ce23bcc776caef40a47aadae1112",
+        "sha256": "290ad3f07b21400ee61eb7de42365a3d6652e62e95b79bb027fcf92eaab94a94",
         "width": 720,
         "height": 1080,
-        "bytes": 94222,
+        "bytes": 80192,
         "quality": 82
       }
     },
     {
       "id": "ash",
       "source": "defense_test/assets/memorial/ash.avif",
-      "sha256": "e8c5edf4899fbb9f004f53628a6fde40d4f16eceb3f4b58972b5914a70f00855",
+      "sha256": "19203d6f7791c47cd3179066d71b9c2147c4454ff3eca0533252808f3ea8e8a4",
       "width": 720,
       "height": 1080,
-      "bytes": 52706,
-      "sourceSha256": "a53f2341bf78a2710ce5872825b465ba206491de6e8b2043cd8a6dc1ecf057d6",
+      "bytes": 57810,
+      "sourceSha256": "d9a4baddffa13e41b7e9b8e7b1a94f6d8f19232f4ec78067e0ecf07432b33a10",
       "webp": {
         "source": "defense_test/assets/memorial-webp/ash.webp",
-        "sha256": "8a62c733178a684c0a8cd3b337752fe0597ba26d38b02e90cf36aec888b93057",
+        "sha256": "fc1181154c5636e926e5d477c0c92573389fb30be9cd34aa5a98386859f78d14",
         "width": 720,
         "height": 1080,
-        "bytes": 91376,
-        "quality": 80
+        "bytes": 91756,
+        "quality": 78
       }
     },
     {
@@ -1006,18 +1020,18 @@
     {
       "id": "venom",
       "source": "defense_test/assets/memorial/venom.avif",
-      "sha256": "ff234413e7bd034209c76d261183abc3c91b0f11e63eef0b8aca6d7431cf4d47",
+      "sha256": "4f43b04fda3ef9b42acb59e3a7a861c36ec47dba80df6df06198669d2c3d5c4a",
       "width": 720,
       "height": 1080,
-      "bytes": 54277,
-      "sourceSha256": "be2cab0a5dd6130399e38cc701dc65c86161db001b765c8ad3062a528d05afe6",
+      "bytes": 50916,
+      "sourceSha256": "bc4129d1c49fbf2e69dc0dc352cf5d7d613fa7f7ca0f5ab67e004d5d17140c62",
       "webp": {
         "source": "defense_test/assets/memorial-webp/venom.webp",
-        "sha256": "6770192411966f682f5749de09a2d5584731eba2cadef32479eeddce1c88fad9",
+        "sha256": "07e404ddc5ecf352585dd3e9b193244359b17edef5f8a5e899a3143b3c468942",
         "width": 720,
         "height": 1080,
-        "bytes": 91638,
-        "quality": 80
+        "bytes": 95150,
+        "quality": 82
       }
     },
     {

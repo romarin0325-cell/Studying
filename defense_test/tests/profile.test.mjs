@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING} from '../src/content.js';
 import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
+import {lateNoticeIds} from '../src/profile.js';
+import {LATE_COMPANIONS} from '../src/content.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away,command} from '../src/profile.js';
 import {monthlyReward,weeklyReward} from '../src/monthly.js';
 import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel} from '../src/economy.js';
@@ -445,4 +447,22 @@ test('Behemoth cannot be exchanged for before stage 45 in its guardian month, an
   p.cleared=45;
   const late=command(p,'pityClaim',{banner:'season',id:'behemoth'},JAN);
   assert.equal(late.ok,true);assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.pity.season,10,'200 spent, the 10 pulls above stay');
+});
+
+test('the stage 45 announcement covers the late companions once: not before 45, never twice, old saves get an empty list',()=>{
+  const fresh=createProfile(NOW),announced=LATE_COMPANIONS.filter(id=>!HERO[id].hidden);
+  assert.deepEqual(lateNoticeIds(fresh),[],'nothing to announce before stage 45');
+  fresh.cleared=44;assert.deepEqual(lateNoticeIds(fresh),[]);
+  fresh.cleared=45;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, behemoth excluded');
+  assert.equal(announced.length,8);assert.ok(!announced.includes('behemoth'));
+  assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);
+  assert.deepEqual(lateNoticeIds(fresh),[]);assert.deepEqual(fresh.noticeLate.slice().sort(),announced.slice().sort());
+  assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);assert.equal(fresh.noticeLate.length,announced.length,'marking twice adds nothing');
+  assert.equal(validateProfile(fresh),true);
+  // a save from before the announcement has no field: it migrates to an empty list and is told once
+  const old=JSON.parse(JSON.stringify(createProfile(NOW)));delete old.noticeLate;old.cleared=60;
+  const loaded=parseProfile(JSON.stringify(old));assert.ok(loaded);assert.deepEqual(loaded.noticeLate,[]);assert.equal(lateNoticeIds(loaded).length,8);
+  // bad data is rejected
+  const bad=createProfile(NOW);bad.noticeLate=['no_such_hero'];assert.equal(validateProfile(bad),false);
+  const bad2=createProfile(NOW);bad2.noticeLate='all';assert.equal(validateProfile(bad2),false);
 });

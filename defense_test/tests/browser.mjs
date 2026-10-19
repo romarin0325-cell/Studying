@@ -192,7 +192,7 @@ try{
     await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
     await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
-    await nav(page,'동료');assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
+    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),/스테이지 45 클리어 후 신규 동료 8명/);assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
     await shot(page,'collection',width,height);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
@@ -244,10 +244,13 @@ try{
     await page.locator(`[data-skill="${move.hero}"]`).click();
     assert.equal(await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1,'real manual skill');
     await page.locator('[data-action="leave"]').click();await page.locator('[data-action="save-leave"]').click();
-    const saved=await profile(page);assert.ok(saved.active.run);await reload(test);
+    const saved=await profile(page);assert.ok(saved.active.run);
+    // Reload only once the save is on disk; CI twice lost the save across this reload (2026-10-19, 10-20).
+    await page.waitForFunction(({key,revision})=>{try{const disk=JSON.parse(localStorage.getItem(key)||'null');return disk?.revision===revision&&!!disk.active?.run;}catch{return false;}},{key:SAVE_KEY,revision:saved.revision});
+    await reload(test);
     // CI once timed out here (2026-10-19, passed on rerun). If the home screen offers no resume, say what the save looked like.
     await page.locator('[data-action="resume"],[data-action="prepare"]').first().waitFor();
-    if(!await page.locator('[data-action="resume"]').count()){const after=await profile(page);assert.fail('no resume after reload: active='+JSON.stringify(after.active?Object.keys(after.active):null)+' run='+!!after.active?.run+' revision '+saved.revision+'->'+after.revision);}
+    if(!await page.locator('[data-action="resume"]').count()){const after=await profile(page),disk=await page.evaluate(key=>{const raw=localStorage.getItem(key);if(!raw)return 'empty';try{const d=JSON.parse(raw);return 'revision '+d.revision+' run '+!!d.active?.run;}catch{return 'unreadable';}},SAVE_KEY),warning=await page.locator('.toast,.warning,[role=alert]').allInnerTexts().catch(()=>[]);assert.fail('no resume after reload: active='+JSON.stringify(after.active?Object.keys(after.active):null)+' run='+!!after.active?.run+' revision '+saved.revision+'->'+after.revision+' disk='+disk+' notes='+JSON.stringify(warning));}
     await page.locator('[data-action="resume"]').click();await page.locator('#arena').waitFor();await page.locator('[data-action="pause"]').click();
     assert.ok((await page.evaluate(()=>window.STAR_GARDEN.battle.time))>=battleTime);
     assert.deepEqual((await profile(page)).active.deck,saved.active.deck);
@@ -264,7 +267,17 @@ try{
     await context.close();
   }
   const lateProfile=createProfile(NOW);lateProfile.cleared=45;
-  const lateTest=await boot(390,844,lateProfile);await nav(lateTest.page,'동료');
+  const lateTest=await boot(390,844,lateProfile);
+  // The first load after clearing stage 45 announces who joined the summon: eight tiles, shown once.
+  await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
+  assert.equal(await lateTest.page.locator('.late-card').count(),8,'eight new companions are announced');
+  assert.equal((await profile(lateTest.page)).noticeLate.length,8,'the announcement is recorded as seen');
+  await shot(lateTest.page,'late-notice',390,844);
+  await lateTest.page.locator('[data-action="late-summon"]').click();await lateTest.page.locator('.sm-late.open').waitFor();
+  assert.ok(await lateTest.page.locator('#overlay').isHidden(),'the announcement closes');
+  await lateTest.page.locator('[data-action="rates"]').click();assert.match(await lateTest.page.locator('#sheet-body').innerText(),/신규 동료[\s\S]*언더독[\s\S]*베놈/);await close(lateTest.page);
+  await reload(lateTest);await lateTest.page.waitForTimeout(1200);assert.ok(await lateTest.page.locator('#overlay').isHidden(),'not announced again after a reload');
+  await nav(lateTest.page,'동료');
   assert.equal(await lateTest.page.locator('.cards .cc').count(),39,'the new companions join the collection once stage 45 is cleared');
   for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
   await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();

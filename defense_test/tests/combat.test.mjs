@@ -1578,6 +1578,7 @@ test('stacked crush casts (and a dream form on top) still save and resume with e
 });
 
 test('underdog: +80% power only while the whole deck is plain normal-rarity heroes; the big show stuns the whole board',()=>{
+  assert.deepEqual(E.UNDERDOG,{bonus:.8,factor:10,stun:2});
   const normals=HEROES.filter(h=>h.rarity==='C'&&!h.hidden).map(h=>h.id).filter(id=>id!=='underdog').slice(0,4);
   const solid=traitArena([{index:12,hero:'underdog'}]);solid.deck=['underdog',...normals];
   assert.equal(E.personalTrait(solid,solid.board[12]).damageMultiplier,1.8);
@@ -1585,30 +1586,36 @@ test('underdog: +80% power only while the whole deck is plain normal-rarity hero
   assert.equal(E.personalTrait(mixed,mixed.board[12]).damageMultiplier,1);
   const s=traitArena([{index:12,hero:'underdog'},{index:13,hero:'snow_rabbit'}]);
   enemiesFor(s,[{hp:1e6},{hp:1e6}]);
-  const before=s.enemies.map(e=>e.hp);
+  const before=s.enemies.map(e=>e.hp),base=E.combatStats(s,s.board[12]).damage;
+  const preview=E.castPreview(s,'underdog');assert.ok(preview.lines[0].includes(`위력 ${E.UNDERDOG.factor}배`));
   readyCast(s,'underdog');
-  assert.ok(s.enemies.every((e,i)=>e.hp<before[i]),'every enemy is hit');
+  for(const [i,e] of s.enemies.entries())close(before[i]-e.hp,base*E.UNDERDOG.factor);
   assert.ok(s.board.filter(Boolean).every(u=>u.disabled>=2),'the whole board is stunned');
   assert.ok(E.restore(E.serialize(s)));
 });
-test('toffee apple: sets up to three bombs that wait for five living enemies (or a boss), blast the whole field once, and survive a save',()=>{
+test('toffee apple: places up to five bombs ahead of the lead enemy; one nearby enemy sets one off; a sixth is refused',()=>{
+  assert.deepEqual(E.APPLEBOMB,{factor:9,max:5,trigger:80,stun:3});
   const s=traitArena([{index:12,hero:'toffee_apple'}]);
-  enemiesFor(s,[{hp:1e9},{hp:1e9},{hp:1e9}]);
-  for(let i=0;i<3;i++){s.board[12].disabled=0;readyCast(s,'toffee_apple');}
-  assert.equal(s.bombs.length,3);
-  s.board[12].disabled=0;s.gauge=120;assert.equal(E.cast(s,'toffee_apple').ok,false,'a fourth bomb is refused');
-  assert.equal(E.restore(E.serialize(s)).bombs.length,3,'bombs survive save and restore');
-  const bomb=s.bombs[0];
-  for(const e of s.enemies){e.progress=bomb.progress;e.speed=0;}
-  const hp=s.enemies.map(e=>e.hp);E.step(s,.05);
-  assert.equal(s.bombs.length,3,'three enemies are too few to set it off');
-  assert.deepEqual(s.enemies.map(e=>e.hp),hp);
-  s.enemies=[];
-  enemiesFor(s,Array.from({length:5},()=>({hp:1e9,progress:bomb.progress})));
-  const bomb2=s.bombs[0],n=s.bombs.length;for(const e of s.enemies)e.progress=bomb2.progress;
-  const hp2=s.enemies.map(e=>e.hp);E.step(s,.05);
-  assert.ok(s.bombs.length<n,'five living enemies set a bomb off');
-  assert.ok(s.enemies.some((e,i)=>e.hp<hp2[i]));
+  const [lead]=enemiesFor(s,[{hp:1e9,progress:400}]);
+  const base=E.combatStats(s,s.board[12]).damage,preview=E.castPreview(s,'toffee_apple');
+  assert.deepEqual(preview.lines,[
+    `경로 앞쪽에 폭탄을 설치합니다(최대 ${E.APPLEBOMB.max}개, 지금 0개).`,
+    `적이 가까이 오면 바로 터져 적 전체에게 위력 ${E.APPLEBOMB.factor}배, ${Math.round(base*E.APPLEBOMB.factor).toLocaleString('ko-KR')} 피해를 줍니다.`,
+    `설치한 토피애플은 ${E.APPLEBOMB.stun}초 동안 기절합니다.`,
+  ]);
+  readyCast(s,'toffee_apple');
+  assert.equal(s.bombs.length,1);assert.ok(s.bombs[0].progress>=lead.progress+140);assert.ok(s.bombs[0].progress>=E.PATH_LENGTH*.12);assert.ok(s.bombs[0].progress<=E.PATH_LENGTH*.9);
+  close(s.bombs[0].damage,base*E.APPLEBOMB.factor);assert.ok(s.board[12].disabled>=3);
+  const placed=s.bombs[0],far=placed.progress-E.APPLEBOMB.trigger-1;lead.progress=far;lead.speed=0;
+  const hpFar=lead.hp;E.step(s,.05);assert.equal(s.bombs.length,1);assert.equal(lead.hp,hpFar);
+  lead.progress=placed.progress-E.APPLEBOMB.trigger;const hp=lead.hp;E.step(s,.05);
+  assert.equal(s.bombs.length,0,'one enemy inside the trigger sets the bomb off');close(hp-lead.hp,placed.damage);
+  const pack=traitArena([{index:12,hero:'toffee_apple'}]);enemiesFor(pack,[{hp:1e9,progress:200}]);
+  for(let i=0;i<5;i++){pack.board[12].disabled=0;readyCast(pack,'toffee_apple');}
+  assert.equal(pack.bombs.length,5);
+  pack.board[12].disabled=0;pack.gauge=120;assert.equal(E.cast(pack,'toffee_apple').ok,false,'a sixth bomb is refused');
+  assert.equal(E.cast(pack,'toffee_apple').reason,'폭탄이 가득 찼습니다.');
+  assert.equal(E.restore(E.serialize(pack)).bombs.length,5,'bombs survive save and restore');
 });
 
 test('sunflower: one shared sunlight stack that fills only while a sunflower stands, widens the burst 30/60/90 and is spent by Solar Flare',()=>{
@@ -1634,13 +1641,13 @@ test('sunflower: one shared sunlight stack that fills only while a sunflower sta
   for(const n of [0,1,3]){
     const a=traitArena([{index:12,hero:'sunflower'}]);a.sunlight=n;
     const [foe]=enemiesFor(a,[{hp:1e9}]),base=E.combatStats(a,a.board[12]).damage,hp=foe.hp;
-    const preview=E.castPreview(a,'sunflower');assert.ok(preview.lines[0].includes(`햇빛 ${n}개`)&&preview.lines[0].includes(`위력 ${2+3*n}배`));
-    readyCast(a,'sunflower');close(hp-foe.hp,base*(2+3*n),'solar flare damage at stack '+n);assert.equal(a.sunlight,0);
+    const preview=E.castPreview(a,'sunflower');assert.ok(preview.lines[0].includes(`햇빛 ${n}개`)&&preview.lines[0].includes(`위력 ${2+4*n}배`));
+    readyCast(a,'sunflower');close(hp-foe.hp,base*(2+4*n),'solar flare damage at stack '+n);assert.equal(a.sunlight,0);
   }
   const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(saved.sunlight,s.sunlight);
   const bad=JSON.parse(E.serialize(s));bad.sunlight=4;assert.equal(E.restore(bad),null);
 });
-test('joker: every ultimate turns the colour one step round (red, blue, green, white, black) and the basic attack applies that colour\'s status',()=>{
+test('joker: every ultimate turns the colour to a random different one and the basic attack applies that colour\'s status',()=>{
   const expected={red:e=>e.burnTime>0,blue:e=>e.slowTime>0,green:e=>e.poison>0,white:e=>e.divine>=1,black:e=>e.exposeTime>0};
   for(const [color,test] of Object.entries(expected)){
     const s=traitArena([{index:12,hero:'joker'}]);s.jokerColor=color;
@@ -1650,14 +1657,17 @@ test('joker: every ultimate turns the colour one step round (red, blue, green, w
     for(const other of Object.keys(expected))if(other!==color&&other!=='red'&&color!=='red')assert.ok(!expected[other](foe)||other===color,color+' does not also apply '+other);
   }
   const s=traitArena([{index:12,hero:'joker'}]);
-  const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage,order=['red','blue','green','white','black','red'];
+  const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage,seen=new Set();
   assert.equal(s.jokerColor,'red');
-  for(let i=0;i<5;i++){
-    const hp=foe.hp;s.board[12].disabled=0;const preview=E.castPreview(s,'joker');
-    assert.ok(preview.lines[0].includes(E.JOKER_NAMES[order[i+1]].split(' · ')[0]));
-    readyCast(s,'joker');close(hp-foe.hp,base*3,'roulette strikes 3x');assert.equal(s.jokerColor,order[i+1]);
+  for(let i=0;i<40;i++){
+    const hp=foe.hp,from=s.jokerColor;s.board[12].disabled=0;const preview=E.castPreview(s,'joker');
+    assert.ok(preview.lines[0].includes('무작위')&&preview.lines[0].includes(E.JOKER_NAMES[from].split(' · ')[0]));
+    readyCast(s,'joker');close(hp-foe.hp,base*3,'roulette strikes 3x');assert.notEqual(s.jokerColor,from,'the colour always changes');
+    assert.ok(E.JOKER.colors.includes(s.jokerColor));seen.add(s.jokerColor);
   }
-  assert.equal(E.restore(E.serialize(s)).jokerColor,'red');
+  assert.equal(seen.size,5,'every colour comes up eventually, in no fixed order');
+  const twin=E.restore(E.serialize(s));assert.equal(E.pickJokerColor(twin,twin.jokerColor),E.pickJokerColor(s,s.jokerColor),'the pick follows the saved random stream');
+  assert.equal(E.restore(E.serialize(s)).jokerColor,s.jokerColor);
   const bad=JSON.parse(E.serialize(s));bad.jokerColor='pink';assert.equal(E.restore(bad),null);
 });
 
@@ -1677,7 +1687,7 @@ function armBoss(placements,chapter,progress=400){
 
 test('immunity: antropy, an orthogonal cure aura, and the invincible timer',()=>{
   assert.equal(E.REQUIEM.factor,7);assert.ok(Object.isFrozen(E.REQUIEM));
-  assert.equal(E.LEMONADE.seconds,3);assert.ok(Object.isFrozen(E.LEMONADE));
+  assert.equal(E.LEMONADE.seconds,4);assert.ok(Object.isFrozen(E.LEMONADE));
   const s=traitArena([
     {index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:7,hero:'snow_rabbit'},{index:11,hero:'siren'},{index:17,hero:'guardian'},
     {index:6,hero:'santa'},{index:18,hero:'jasmine'},{index:24,hero:'antropy'},{index:0,hero:'doom'},
@@ -1764,20 +1774,37 @@ test('bigshow and applebomb do not stun an immune ally',()=>{
   const lone=traitArena([{index:12,hero:'toffee_apple'}]);enemiesFor(lone,[{hp:1e9}]);readyCast(lone,'toffee_apple');assert.ok(lone.board[12].disabled>=3);
 });
 
+test('goddess dispels stun and curse once, grants power, and no longer shields boss patterns',()=>{
+  const s=traitArena([{index:12,hero:'jasmine'},{index:0,hero:'star_boy'}]);
+  enemiesFor(s,[{hp:1e9}]);s.board[0].disabled=4;s.board[0].cursed=true;
+  const preview=E.castPreview(s,'jasmine');
+  assert.ok(preview.lines[1].includes('8초'));assert.equal(preview.lines[2],'기절과 저주를 한 번 풉니다.');
+  readyCast(s,'jasmine');
+  assert.equal(s.board[0].disabled,0);assert.equal(s.board[0].cursed,false);close(s.buffs.radiance,8);
+  const [seal]=armBoss([{index:12,hero:'jasmine'},{index:0,hero:'star_boy'}],0);
+  seal.buffs.radiance=8;seal.enemies[0].skillIn=0;hold(seal);E.step(seal,.05);assert.equal(seal.telegraph.pattern,'seal');
+  const cells=seal.telegraph.cells,uid=id=>seal.board.find(u=>u?.hero===id).uid;
+  relocate(seal,uid('jasmine'),cells[2]);relocate(seal,uid('star_boy'),cells[1]);finishTelegraph(seal);
+  assert.ok(seal.board[cells[2]].disabled>0);assert.ok(seal.board[cells[1]].disabled>0);
+  const [curse,curseBoss]=armBoss([{index:12,hero:'jasmine'},{index:0,hero:'star_boy'}],3);
+  curse.buffs.radiance=8;curseBoss.skillIn=0;hold(curse);E.step(curse,.05);
+  assert.ok(curse.board.some(u=>u?.cursed),'curse lands during radiance');
+});
+
 test('lemonade clears disables and curses, grants invincible, and round-trips through a save',()=>{
   const s=traitArena([{index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:18,hero:'snow_rabbit'}]);
   enemiesFor(s,[{hp:1e9}]);s.board[13].disabled=4;s.board[13].cursed=true;s.board[18].disabled=2;
   const preview=E.castPreview(s,'cure_master');
-  assert.equal(preview.lines[0],'아군 전체의 기절과 저주를 풀고 3초 동안 무적으로 만듭니다.');
+  assert.equal(preview.lines[0],'아군 전체의 기절과 저주를 풀고 4초 동안 무적으로 만듭니다.');
   assert.equal(preview.lines[1],'지금 행동불능인 동료 2명.');
   const before=E.serialize(s),events=s.events.length;E.castPreview(s,'cure_master');assert.equal(E.serialize(s),before);assert.equal(s.events.length,events);
   const damage=s.stats.damage;readyCast(s,'cure_master');assert.equal(s.stats.damage,damage);
-  for(const u of s.board)if(u){assert.equal(u.disabled,0);assert.equal(u.cursed,false);assert.equal(u.invincible,3);}
+  for(const u of s.board)if(u){assert.equal(u.disabled,0);assert.equal(u.cursed,false);assert.equal(u.invincible,4);}
   const skill=s.events.filter(e=>e.type==='skill').pop();assert.equal(skill.kind,'lemonade');assert.equal(skill.support,true);
-  assert.ok(E.restore(E.serialize(s)).board.every(u=>!u||u.invincible===3));
+  assert.ok(E.restore(E.serialize(s)).board.every(u=>!u||u.invincible===4));
   const boosted=traitArena([{index:12,hero:'cure_master'}]);boosted.meta.cure_master={power:1,special:2};enemiesFor(boosted,[{hp:1e9}]);
-  const boostedPreview=E.castPreview(boosted,'cure_master');assert.equal(boostedPreview.lines.length,1);assert.ok(boostedPreview.lines[0].includes('6초'));
-  readyCast(boosted,'cure_master');assert.equal(boosted.board[12].invincible,6);
+  const boostedPreview=E.castPreview(boosted,'cure_master');assert.equal(boostedPreview.lines.length,1);assert.ok(boostedPreview.lines[0].includes('8초'));
+  readyCast(boosted,'cure_master');assert.equal(boosted.board[12].invincible,8);
   const old=JSON.parse(E.serialize(s));delete old.board[12].invincible;assert.equal(E.restore(old).board[12].invincible,0);
   for(const bad of [-1,NaN,11]){const raw=JSON.parse(E.serialize(s));raw.board[12].invincible=bad;assert.equal(E.restore(raw),null,'invincible '+bad);}
 });
@@ -1839,15 +1866,15 @@ test('smart auto holds lemonade until someone needs it and spends requiem on liv
   smartAutoPlay(s);assert.equal(s.stats.skills,1);assert.ok(foe.hp<hp);
 });
 
-test('ash: armageddon reduces the lowest other ally, skips an immune one, and still blasts when she is alone',()=>{
-  assert.deepEqual(E.ARMAGEDDON,{factor:10,radius:180});
+test('ash: armageddon burns the lowest other ally, guards an immune one, and still blasts when she is alone',()=>{
+  assert.deepEqual(E.ARMAGEDDON,{factor:15,radius:180});assert.equal(HERO.ash.damage,31);
   const dist=(a,b)=>Math.hypot(E.pathPoint(a.progress).x-E.pathPoint(b.progress).x,E.pathPoint(a.progress).y-E.pathPoint(b.progress).y);
   const hitLine=base=>`가장 밀집한 반경 ${E.ARMAGEDDON.radius}의 적에게 위력 ${E.ARMAGEDDON.factor}배, ${Math.round(base*E.ARMAGEDDON.factor).toLocaleString('ko-KR')} 피해를 줍니다.`;
   const s=traitArena([{index:12,hero:'ash',rank:1},{index:0,hero:'star_boy',rank:1},{index:24,hero:'snow_rabbit',rank:3}]);
   const enemies=enemiesFor(s,[100,130,160,1200].map(progress=>({hp:1e9,progress})));
   assert.deepEqual(enemies.map(e=>e.progress),[100,130,160,1200]);
   const base=E.combatStats(s,s.board[12]).damage,preview=E.castPreview(s,'ash');
-  assert.deepEqual(preview.lines,[`지금 환원될 동료: ${HERO.star_boy.name} 1성`,hitLine(base)]);
+  assert.deepEqual(preview.lines,[`지금 소멸하는 동료: ${HERO.star_boy.name} 1성.`,hitLine(base)]);
   const savedPreview=E.serialize(s);E.castPreview(s,'ash');assert.equal(E.serialize(s),savedPreview);
   const before=enemies.map(e=>e.hp),gold=s.gold,income=JSON.stringify(s.stats.income),mark=s.events.length;
   readyCast(s,'ash');
@@ -1867,16 +1894,19 @@ test('ash: armageddon reduces the lowest other ally, skips an immune one, and st
   assert.equal(tie.board[12].hero,'ash');assert.equal(tie.board[2],null,'lowest uid wins the rank tie');assert.equal(tie.board[4].hero,'star_boy');
   const immune=traitArena([{index:0,hero:'star_boy',rank:1},{index:1,hero:'cure_master',rank:5},{index:12,hero:'ash',rank:3},{index:24,hero:'snow_rabbit',rank:2}]);
   enemiesFor(immune,[{hp:1e9}]);assert.equal(E.immune(immune,0),true);assert.equal(E.immune(immune,24),false);
-  const immuneGold=immune.gold;
-  assert.equal(E.castPreview(immune,'ash').lines[0],`지금 환원될 동료: ${HERO.snow_rabbit.name} 2성`);
+  const immuneGold=immune.gold,immuneHp=immune.enemies[0].hp,immuneBase=E.combatStats(immune,immune.board[12]).damage,immuneMark=immune.events.length;
+  assert.equal(E.castPreview(immune,'ash').lines[0],`${HERO.star_boy.name} 1성은 무적이라 소멸하지 않습니다.`);
   readyCast(immune,'ash');
-  assert.equal(immune.board[0].hero,'star_boy');assert.equal(immune.board[1].hero,'cure_master');assert.equal(immune.board[12].hero,'ash');assert.equal(immune.board[24],null);
-  assert.equal(immune.stats.sacrificed,1);assert.equal(immune.gold,immuneGold);
-  assert.deepEqual({hero:immune.events.find(e=>e.type==='reduce').hero,index:immune.events.find(e=>e.type==='reduce').index},{hero:'snow_rabbit',index:24});
+  assert.equal(immune.board[0].hero,'star_boy');assert.equal(immune.board[1].hero,'cure_master');assert.equal(immune.board[12].hero,'ash');assert.equal(immune.board[24].hero,'snow_rabbit');
+  assert.equal(immune.stats.sacrificed||0,0);assert.equal(immune.gold,immuneGold);
+  assert.equal(immune.events.slice(immuneMark).some(e=>e.type==='reduce'),false);
+  const ward=immune.events.slice(immuneMark).find(e=>e.type==='ward');
+  assert.deepEqual({hero:ward.hero,x:ward.x,y:ward.y},{hero:'cure_master',...E.cellPoint(0)});
+  close(immuneHp-immune.enemies[0].hp,immuneBase*E.ARMAGEDDON.factor);
   const alone=traitArena([{index:12,hero:'ash'}]);
   const [foe]=enemiesFor(alone,[{hp:1e9,progress:1200}]);
   const aloneBase=E.combatStats(alone,alone.board[12]).damage,aloneGold=alone.gold,aloneHp=foe.hp;
-  assert.deepEqual(E.castPreview(alone,'ash').lines,['환원할 동료가 없습니다.',hitLine(aloneBase)]);
+  assert.deepEqual(E.castPreview(alone,'ash').lines,['소멸할 동료가 없습니다.',hitLine(aloneBase)]);
   readyCast(alone,'ash');
   close(aloneHp-foe.hp,aloneBase*E.ARMAGEDDON.factor);assert.equal(alone.board[12].hero,'ash');assert.equal(alone.stats.sacrificed||0,0);assert.equal(alone.gold,aloneGold);
   assert.equal(alone.events.some(e=>e.type==='reduce'),false);assert.equal(alone.events.find(e=>e.type==='armageddonBlast').radius,E.ARMAGEDDON.radius);

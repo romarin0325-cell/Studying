@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,ARTIFACTS} from '../src/content.js';
+import {HEROES,ARTIFACTS,DEFAULT_DECK} from '../src/content.js';
 import * as E from '../src/combat/engine.js';
 
 test('every enhancement-scaled number in the hero sheet is written in that hero text, in order',()=>{
@@ -11,6 +11,32 @@ test('every enhancement-scaled number in the hero sheet is written in that hero 
     }
   }
   assert.equal(E.scaledTokens('snow_rabbit',1.3).trait[0][1],'52%');assert.equal(E.scaledTokens('luna',1.5).trait[0][1],'50%');
+  assert.equal(E.scaledTokens('cure_master',1).skill[0][0],'4초');assert.equal(E.scaledTokens('cure_master',1.5).skill[0][1],'6초');
+  assert.equal(E.scaledTokens('venom',1).skill[0][0],'10초');assert.equal(E.scaledTokens('joker',1).trait[0][0],'20%');
+});
+test('castPreview numbers that grow with enhancement are listed in scaledTokens',()=>{
+  const lines=(id,k)=>{
+    const deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5);
+    const s=E.newRun({deck,seed:1,meta:{[id]:{power:1,special:k}}});
+    const t=s.board.find(Boolean);s.board.fill(null);
+    s.board[12]={...t,uid:s.nextId++,hero:id,rank:1,disabled:0,cursed:false,cooldown:100,windup:0};
+    return E.castPreview(s,id)?.lines||[];
+  };
+  const shown=(blob,token)=>{
+    if(blob.includes(token)||blob.includes(token.replace(/(\d+)\.\d+/,'$1')))return true;
+    const n=parseFloat(token);if(!Number.isFinite(n))return false;
+    return blob.includes(Math.round(n)+token.replace(/^[0-9.]+/,''));
+  };
+  const nums=s=>[...s.matchAll(/\d+(?:\.\d+)?(?:초|%)/g)].map(m=>m[0]);
+  for(const h of HEROES){
+    const a=lines(h.id,1),b=lines(h.id,1.5);
+    if(a.join('\n')===b.join('\n'))continue;
+    const tokens=E.scaledTokens(h.id,1).skill,live=E.scaledTokens(h.id,1.5).skill;
+    const changed=b.filter((line,i)=>line!==a[i]).join('\n');
+    const printed=a.flatMap((line,i)=>line===b[i]?[]:nums(line)).filter(n=>h.skill.text.includes(n));
+    if(printed.length)assert.ok(tokens.length,h.id+': preview changes with special');
+    if(live.length)assert.ok(live.some(([,v])=>shown(changed,v)),h.id+': live skill token appears in the changed preview');
+  }
 });
 test('hero texts state behaviour, not the general rules',()=>{
   for(const h of HEROES)for(const text of [h.trait.text,h.skill.text])assert.ok(!/성급이 오를수록|성급·|훈련으로 증가|상한이 없|그대로 적용|함께 적용됩니다|보스는 1초/.test(text),h.id+': '+text);

@@ -2,12 +2,12 @@ import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RAR
 import {talkLines,greetLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
 import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
-import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
+import {ProfileStore,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
 import {questionOf,pickQuestion,lectureById,termById,lectureQuestions,termQuestions,KIND_NAME} from './quiz.js';
 import {CONSTELLATIONS,LIBRARY_ART,LIBRARY_STARS} from './library.js';
-import {TUTOR_MODELS,tutorSettings,saveTutorSettings,explainWithRumi,tutorHtml} from './tutor.js';
+import {TUTOR_PROVIDERS,TUTOR_MODELS,tutorSettings,saveTutorSettings,explainWithRumi,tutorHtml} from './tutor.js';
 import {createBattle,resumeBattle,autoPlay as helperAuto,clearedRounds} from './battle.js';
 import {smartAutoPlay} from './smart-auto.js';
 import * as E from './combat/engine.js';
@@ -399,7 +399,7 @@ function leave(){
 function retireSheet(){
   show('도전을 종료할까요?','확인',`<p class="subtext">완료한 ${clearedRounds(run)}라운드까지 ${run.mode==='monthly'?'기록합니다. 월간 보상은 기록 화면에서 직접 확정하며, 언제든 다시 도전할 수 있습니다.':run.mode==='weekly'?'정산합니다. 이번 주 입장 횟수는 돌아오지 않습니다.':'정산합니다. 첫 클리어 보상은 받을 수 없습니다.'}</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="confirm-retire">종료하고 ${run.mode==='monthly'?'기록':'정산'}</button></div>`,'retire');
 }
-const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${TEST_TOOLS.map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button></div>`;
+const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${TEST_TOOLS.map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button><button class="secondary" data-test-tool="late-notice">신규 동료 안내 보기</button></div>`;
 function showSettings(){
   show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·스킬을 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
     <div class="settings-row"><div><strong>전장 화질</strong><small>기본은 선명도와 전력 사용의 균형을 맞춥니다.</small></div><select id="quality-select" aria-label="전장 화질">${[['standard','기본'],['high','고화질'],['low','절전']].map(([id,text])=>`<option value="${id}" ${p().settings.quality===id?'selected':''}>${text}</option>`).join('')}</select></div>
@@ -410,7 +410,7 @@ function showSettings(){
     <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
 function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
-function close(){if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result';releaseMemorial();modal=null;modalInfo=null;if(wasLeave&&!saveBlocked)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}}
+function close(){if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late';releaseMemorial();modal=null;modalInfo=null;if(wasLeave&&!saveBlocked)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
@@ -577,7 +577,7 @@ function renderCollection(){
   const tabs=[['hero','동료',`${owned}/${shown().length}`],['relic','유물',`${relics}/${ARTIFACTS.length}`],['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
   return `<section class="book">
     <div class="tabbar">${tabs.map(([id,name,count])=>`<button data-collection="${id}" aria-pressed="${collection===id}"><b>${name}</b><small>${count}</small></button>`).join('')}</div>
-    ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}</section>`;
+    ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&p().cleared<PART_STAGES?`<p class="late-collection-note">${icon('lock')} 스테이지 ${PART_STAGES} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
 }
 function rarityFilter(list,table){
   return `<div class="rare-filter">${RARITIES.map(r=>{const all=list.filter(x=>x.rarity===r),have=all.filter(x=>table[x.id].owned).length;return `<button data-filter="${r}" data-rarity="${r}" aria-pressed="${rarity===r}">${badge(r)}<span>${have}/${all.length}</span>${have===all.length?`<i class="done">${icon('check')}</i>`:''}</button>`;}).join('')}</div>`;
@@ -619,7 +619,7 @@ function heroDetail(id){
     <div class="hd-skill trait"><span class="hd-tag">특성</span><p>${liveText(h.trait.text,scaled.trait)}</p></div>
     ${e.owned?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story.title)}</strong></span>${icon('chevron')}</button>`:''}
     <details class="more"><summary>능력치 자세히</summary><div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>${e.owned?powerBreakdown(id):''}
-      <p class="fineprint">강화마다 기본 위력 +5%, 5단계마다 색으로 표시된 수치 +10%. 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
+      <p class="fineprint">${scaled.trait.length+scaled.skill.length?'강화마다 기본 위력 +5%, 5단계마다 색으로 표시된 수치 +10%.':'강화마다 기본 위력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
     e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}" ${p().partner===id?'disabled':''}>${p().partner===id?'지금 파트너':'파트너로'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>${isAway?'파견 중':'편성'}</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
 }
 function powerBreakdown(id){
@@ -700,6 +700,31 @@ function partTeaser(){
 }
 // Arrival after the first clear of stage 45: the new companion flips in, and the dawn garden is one tap away.
 const subjectOf=name=>{const c=name.charCodeAt(name.length-1)-0xAC00;return name+(c>=0&&c<11172&&c%28?'이':'가');};
+// ───────── Late companions: the stage 45 announcement ─────────
+// Every companion on LATE_COMPANIONS joins the normal summon and the collection once stage 45 is cleared. Cleared saves that were never told
+// see the announcement once, after the stage 45 reveal or on the next home screen.
+const lateNew=()=>LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id));
+const lateRarityLine=()=>RARITIES.map(r=>({r,n:lateNew().filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n).map(x=>`${RARITY[x.r].name} ${x.n}`).join(' · ');
+function maybeLateNotice(){if(modal||screen==='battle'||screen==='draft'||!lateNoticeIds(p()).length)return;showLateNotice();}
+function showLateNotice(){
+  const ids=lateNoticeIds(p()).length?lateNoticeIds(p()):lateNew();
+  const tiles=ids.map((id,i)=>`<div class="late-card" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>${HERO[id].name}</b><small>${HERO[id].role.split(' · ')[0]}</small></div>`).join('');
+  show('새 동료가 합류했어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="late-notice"><span class="late-flash" aria-hidden="true"></span><p class="late-lede"><b>신규 동료 ${ids.length}명</b>이 별빛 소환에 합류했어요</p><div class="late-grid">${tiles}</div>
+    <ul class="late-notes"><li>일반 소환과 시즌 소환의 <b>같은 등급 안에서 똑같은 확률</b>로 나와요(${lateRarityLine()}).</li><li>도감에도 모두 추가됐어요. 정확한 확률은 소환 화면의 <b>확률</b>에서 볼 수 있어요.</li></ul></div>`,
+    `<button class="secondary" data-action="late-close">나중에</button><button class="primary shine" data-action="late-summon">소환하러 가기</button>`,'late');
+  sound.reveal?.('SR');
+  act('noticeLate',{},false);
+}
+function lateStrip(){
+  const open=p().cleared>=PART_STAGES,n=lateNew().length;
+  return `<button class="sm-late ${open?'open':''}" data-action="late-info" aria-label="신규 동료 ${n}명">${icon(open?'star':'lock')}<span>${open?`신규 동료 ${n}명 소환 중`:`스테이지 ${PART_STAGES} 클리어 후 신규 동료 ${n}명이 합류해요`}</span><i>${icon('chevron')}</i></button>`;
+}
+// A hero's chance in the current banner (same rules as drawCharacter: pickup or guardian take half of the UR share).
+function heroChance(id){
+  const c=calendar(now()),r=RARITIES.indexOf(HERO[id].rarity),pool=heroPool(HERO[id].rarity,lateOpen(p().cleared)),base=T.heroRates[r];
+  if(HERO[id].rarity!=='UR')return base/pool.length;
+  return banner==='season'?base*.5/pool.length:base*((id===c.pickup?.5:0)+.5/pool.length);
+}
 function showArrival({part=false,unlocked=[]}={}){
   const ids=unlocked.filter(id=>HERO[id]),cards=ids.map((id,i)=>`<div class="reveal-card" data-rarity="${HERO[id].rarity}" style="--i:${i}">${card(id,'hero',{id,fresh:true},ids.length===1)}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join('');
   show(part?'새벽의 별길이 열렸어요':'새 동료',`스테이지 ${PART_STAGES} 클리어`,`<div class="reveal-stage arrival" data-top="UR" data-count="${ids.length||1}">${part?'<p class="arrival-line">스테이지 46–90과 새벽 온실이 열렸어요</p>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span>${ids.length?`<div class="reveal-grid ${ids.length===1?'single':''}">${cards}</div><p class="reveal-caption">${subjectOf(ids.map(id=>HERO[id].name).join(', '))} 정원을 찾아왔어요</p><button class="reveal-skip" data-action="reveal-skip">바로 보기</button>`:''}</div>`,
@@ -760,6 +785,7 @@ function renderSummon(){
       <div class="sm-copy"><span class="sm-tag">${copy.tag}</span><h2>${copy.title}</h2><p>${copy.desc}</p></div>
       <div class="sm-tools"><button class="sm-tool" data-action="rates">${icon('info')}<span>확률</span></button><button class="sm-tool" data-action="history">${icon('clock')}<span>기록</span></button></div>
       ${banner==='relic'?relicTierChip():pityChip()}</div>
+    ${banner==='relic'?'':lateStrip()}
     <div class="sm-actions"><button class="secondary sm-one" data-draw="1">${free?`<b>무료 소환</b><small>오늘 1회</small>`:`<b>1회 소환</b>${gem(cost,dreams<cost)}`}</button><button class="primary shine sm-ten" data-draw="10"><b>10회 소환</b>${gem(cost*10,dreams<cost*10)}${banner==='relic'?'':'<small class="sm-boost">퀴즈 정답 시 UR 2배</small>'}</button></div></section>`;
 }
 function pityChip(){
@@ -788,6 +814,10 @@ function rates(){
   if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%",closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<PART_STAGES;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${PART_STAGES} 클리어 후</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${half}</b></div>`;}
   const urCount=heroPool('UR',lateOpen(p().cleared)).length;
   if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/urCount)}</b></div><div class="rate-row"><span>UR · 나머지 ${urCount-1}종 각각</span><b>${pct(T.heroRates[3]*.5/urCount)}</b></div>`;
+  if(banner!=='relic'){
+    const open=p().cleared>=PART_STAGES;
+    rows+=`<div class="rate-head">신규 동료${open?'':` <small>스테이지 ${PART_STAGES} 클리어 후 합류</small>`}</div>`+(open?lateNew().map(id=>`<div class="rate-row"><span>${badge(HERO[id].rarity)} ${HERO[id].name}</span><b>${pct(heroChance(id))}</b></div>`).join(''):`<div class="rate-row late-closed"><span>${icon('lock')} ${lateRarityLine()}</span><b>${lateNew().length}명</b></div>`);
+  }
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'시즌':'일반',`${rows}
     <ul class="notes">${banner==='relic'?`<li>누적 ${fmt(p().relicDraws)}회. 단계가 오를수록 높은 등급 확률이 올라가고, 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
       :`<li>${banner==='season'?'UR의 절반은 이달의 수호자예요. 다른 달 수호자는 나오지 않아요.':`UR의 절반은 이번 주 픽업, 절반은 일반 UR ${urCount}종(픽업 포함) 중 하나예요. 픽업은 매주 월요일에 바뀌어요.`}</li><li>교환: 유료 소환 ${T.pity[banner]}회마다 ${banner==='season'?'이달의 수호자':`일반 UR ${urCount}종 중 원하는 한 명`}을(를) 데려올 수 있어요. UR이 나와도 초기화되지 않고 시즌이 바뀌어도 이어져요.</li><li>10회 소환 전 별빛 퀴즈를 맞히면 그 10회의 UR 확률이 2배가 돼요. 가끔 행운이 찾아올 수도 있어요.</li>`}<li>1회와 10회의 확률은 같아요. 중복은 강화 재료가 돼요.</li></ul>
@@ -895,11 +925,13 @@ const libraryDot=()=>!libraryDone()&&!libraryToday()&&p().study.wrong.length>0;
 const wrongEntry=(kind,id)=>p().study.wrong.find(w=>w.kind===kind&&w.id===id)||null;
 const solved=(kind,id)=>p().study.solved.includes(`${kind}:${id}`);
 function tutorPanel(){
-  const t=tutorSettings();
-  return `<div class="tutor-panel"><strong>루미의 설명 · AI</strong><small>별의 서재에서 틀린 문제를 루미가 자세히 설명해 줘요. Google Gemini API 키가 필요해요.</small>
-    <input id="tutor-key" type="password" autocomplete="off" spellcheck="false" placeholder="Gemini API 키 붙여넣기" value="${escapeText(t.key)}" aria-label="Gemini API 키">
-    <div class="tutor-row"><select id="tutor-model" aria-label="해설 모델">${TUTOR_MODELS.map(m=>`<option value="${m.id}" ${t.model===m.id?'selected':''}>${m.label}</option>`).join('')}</select><button class="secondary" data-action="tutor-save">저장</button>${t.key?'<button class="secondary" data-action="tutor-clear">지우기</button>':''}</div>
-    <p class="fineprint">${t.key?'키가 저장되어 있어요. ':''}키는 이 기기의 브라우저에만 저장되고 백업 파일에는 들어가지 않아요. 설명을 요청하면 문제와 강의 내용이 Google로 전송돼요.</p></div>`;
+  const t=tutorSettings(),info=TUTOR_PROVIDERS.find(x=>x.id===t.provider),deepseek=t.provider==='deepseek';
+  return `<div class="tutor-panel"><strong>루미의 설명 · AI</strong><small>별의 서재에서 틀린 문제를 루미가 자세히 설명해 줘요.</small>
+    <div class="tutor-tabs" role="tablist" aria-label="AI 제공자">${TUTOR_PROVIDERS.map(x=>`<button role="tab" class="tutor-tab ${x.id===t.provider?'on':''}" aria-selected="${x.id===t.provider}" data-action="tutor-provider" data-provider="${x.id}">${x.label}</button>`).join('')}</div>
+    <input id="tutor-key" type="password" autocomplete="off" spellcheck="false" placeholder="${info.keyName} 붙여넣기" value="${escapeText(t.key)}" aria-label="${info.keyName}">
+    ${deepseek?`<input id="tutor-base" type="url" autocomplete="off" spellcheck="false" value="${escapeText(t.base)}" aria-label="중계 서버 주소">`:''}
+    <div class="tutor-row"><select id="tutor-model" aria-label="해설 모델">${TUTOR_MODELS.filter(m=>m.provider===t.provider).map(m=>`<option value="${m.id}" ${t.model===m.id?'selected':''}>${m.label}</option>`).join('')}</select><button class="secondary" data-action="tutor-save">저장</button>${t.key?'<button class="secondary" data-action="tutor-clear">지우기</button>':''}</div>
+    <p class="fineprint">${t.key?'키가 저장되어 있어요. ':''}키는 이 기기의 브라우저에만 저장되고 백업 파일에는 들어가지 않아요. 설명을 요청하면 문제와 강의 내용이 ${deepseek?'Coral Bricks':'Google'}로 전송돼요.${deepseek?' Coral Bricks는 브라우저에서 바로 부를 수 없어서, PC에서 <code>node defense_test/scripts/serve.mjs</code>를 켜 두면 위 주소의 중계 서버를 거쳐 보내요.':''}</p></div>`;
 }
 // Shared question markup: choices are buttons until answered, then ✓ marks the answer and ✗ the pick.
 function questionBlock(q,chosen=-1,answered=true){
@@ -1047,7 +1079,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=rarity===d.filter?'all':d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}if(d.part){focusPart(Number(d.part));return;}
   if(d.garden){gardenTab=d.garden;bedFocus=GARDENS.find(g=>g.id===gardenTab).beds[0];refreshGarden();return;}
-  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:['behemoth']});return;}const r=act('testGrant',{kind:d.testTool});if(r.ok){cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
+  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:['behemoth']});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const r=act('testGrant',{kind:d.testTool});if(r.ok){cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
   if(d.bed){bedFocus=d.bed;refreshGarden();return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
   if(d.libraryTab){close();libraryTab=d.libraryTab;if(screen!=='library'){screen='library';render();}else{render();$('content').scrollTop=0;}return;}
@@ -1075,6 +1107,7 @@ document.addEventListener('click',e=>{
     'save-team':()=>{if(act('deck',{ids:editingDeck}).ok){const back=teamReturn;teamReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
     'go-collection':()=>{close();screen='collection';collection='hero';render();},'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},
+    'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=PART_STAGES)showLateNotice();else show('신규 동료',`스테이지 ${PART_STAGES} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${lateNew().map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${PART_STAGES}을(를) 처음 클리어하면 일반 소환과 시즌 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
     'go-garden':()=>{close();screen='garden';render();},'go-dawn':()=>{close();screen='garden';gardenTab='dawn';bedFocus='crit';render();},'go-home-gift':()=>{close();screen='home';giftTray=true;render();giftTray=true;const t=$('gift-tray');if(t){t.innerHTML=trayMarkup(p().partner);t.hidden=false;}},
     'monthly-claim':confirmMonthlyClaim,'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},
     speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},
@@ -1085,8 +1118,9 @@ document.addEventListener('click',e=>{
     library:()=>{close();screen='library';render();},'library-back':()=>{close();screen='library';libraryTab='gallery';render();},'bonus-reveal':showBonus,accel:accelQuiz,
     'quiz-go':()=>{const s=quizState;if(!s||s.mode!=='gacha'||s.chosen<0)return;banner=s.banner;if(draw(10,false,s.chosen===s.question.answer)){quizHold.gacha=null;quizState=null;}},
     'quiz-skip':()=>{const s=quizState;if(!s||s.chosen>=0)return;banner=s.banner;if(draw(10)){quizHold.gacha=null;quizState=null;}},'quiz-next':nextPractice,
-    'tutor-save':()=>{const ok=saveTutorSettings({key:$('tutor-key')?.value,model:$('tutor-model')?.value});toast(ok?'AI 설명 설정을 저장했어요.':'이 브라우저에 저장할 수 없어요.');showSettings();},
-    'tutor-clear':()=>{saveTutorSettings({key:'',model:tutorSettings().model});tutorCache.clear();toast('API 키를 지웠어요.');showSettings();},
+    'tutor-save':()=>{const ok=saveTutorSettings({key:$('tutor-key')?.value,model:$('tutor-model')?.value,base:$('tutor-base')?.value});tutorCache.clear();toast(ok?'AI 설명 설정을 저장했어요.':'이 브라우저에 저장할 수 없어요.');showSettings();},
+    'tutor-clear':()=>{saveTutorSettings({key:''});tutorCache.clear();toast('API 키를 지웠어요.');showSettings();},
+    'tutor-provider':()=>{if(saveTutorSettings({provider:d.provider}))tutorCache.clear();showSettings();},
     'today-star':todayStar,pity:pitySheet,'pity-claim':claimPity,basket:()=>claimBasket(button),'claim-all':()=>claimDispatches(p().dispatches.filter(x=>x.end<=now()).map(x=>x.slot)),
     'relic-info':relicInfo,'mode-info':()=>modeInfo(d.kind),'dispatch-info':dispatchInfo,
   };actions[d.action]?.();
@@ -1141,7 +1175,7 @@ art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 �
   else if(splash){Promise.race([art.ready,new Promise(r=>setTimeout(r,1400))]).then(()=>setTimeout(()=>splash.classList.add('ready'),250));
     splash.addEventListener('click',()=>{if(!splash.classList.contains('ready')||splash.classList.contains('out'))return;sound.unlock();splash.classList.add('out');setTimeout(()=>splash.remove(),650);
       if(screen==='home')setTimeout(()=>{const hero=HERO[p().partner];say(partnerLines(hero)[0]);},700);});}}
-$('app').dataset.solo=String(SOLO);syncFullscreen();render();requestAnimationFrame(frame);
+$('app').dataset.solo=String(SOLO);syncFullscreen();render();requestAnimationFrame(frame);setTimeout(maybeLateNotice,700);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
 window.STAR_GARDEN={get profile(){return p();},get audio(){return {scene:sound.scene(),music:sound.playing?.id||null,loading:sound.loading||null,fallback:sound.failed,voices:sound.voices};},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};

@@ -105,12 +105,11 @@ function ultValue(s,m,id,gv){
     case 'march':return buff(fam('march','speed',E.ULT_BUFF.march.speed*scale),E.ULT_BUFF.march.seconds)+dps*.04*Math.min(8,rem);
     case 'awaken':return buff(fam('awaken','power',E.ULT_BUFF.awaken.power*scale),E.ULT_BUFF.awaken.seconds);
     case 'harmony':{const p=fam('harmony','power',E.ULT_BUFF.harmony.power),q=fam('harmony','speed',E.ULT_BUFF.harmony.speed);return buff((1+p)*(1+q)-1,E.ULT_BUFF.harmony.seconds);}
-    case 'goddess':{const blocked=litCells(s).size&&['seal','storm','stun1','thunder','judgement'].includes(s.telegraph?.pattern)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
-      const freed=CELLS.reduce((n,c)=>{const a=s.board[c];return n+(a&&(a.cursed||a.disabled>0)?unitValue(s,{...a,cursed:false},c)*m.scale*Math.min(8,a.cursed?rem:a.disabled):0);},0);
-      return strike(5)+buff(fam('radiance','power',E.ULT_BUFF.radiance.power*scale),8)+blocked+freed;}
+    case 'goddess':{const freed=CELLS.reduce((n,c)=>{const a=s.board[c];return n+(a&&(a.cursed||a.disabled>0)?unitValue(s,{...a,cursed:false},c)*m.scale*Math.min(8,a.cursed?rem:a.disabled):0);},0);
+      return strike(5)+buff(fam('radiance','power',E.ULT_BUFF.radiance.power*scale),8)+freed;}
     case 'trauma':{const mags=CELLS.filter(c=>s.board[c]?.hero==='time_magician');return strike(4)+mags.reduce((n,c)=>n+unitValue(s,s.board[c],c)*m.scale*(2.1*1.35-1)*Math.min(10,rem),0);}
     case 'glassfall':{const top=E.topCinderella(s),i=top?s.board.indexOf(top):-1;return strike(E.CINDERELLA.ult)+(top?unitValue(s,top,i)*m.scale*1.9*Math.min(10,rem):0);}
-    case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),6);
+    case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),8);
     case 'dividend':return strike(4)+(E.QUEEN_TAX+(s.edictWave!==s.wave?E.waveIncome(s.wave)*.5:0))*gv;
     case 'fortune':return strike(E.fortuneFactor(s.gold-E.skillGoldCost(id),s.upgrades[id]||0))-E.skillGoldCost(id)*gv;
     case 'expose':{const ex=E.detectiveExposure(s,u),lasting=list.reduce((n,e)=>n+e.hp,0)>dps*4;return strike(3)+(lasting?dps*ex*Math.min(10,rem):0)+follow()*ex;}
@@ -132,8 +131,7 @@ function ultValue(s,m,id,gv){
     }
     case 'roulette':return strike(E.JOKER.roulette);
     case 'bigshow':return Math.max(0,strike(E.UNDERDOG.factor)-dps*E.UNDERDOG.stun);
-    // A bomb only explodes with enough enemies alive, so it is set when the field is already crowded.
-    case 'applebomb':return (s.bombs||[]).length>=E.APPLEBOMB.max||list.length<E.APPLEBOMB.minAlive&&!list.some(e=>e.boss)?0:strike(E.APPLEBOMB.factor)*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
+    case 'applebomb':return (s.bombs||[]).length>=E.APPLEBOMB.max?0:strike(E.APPLEBOMB.factor)*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
     case 'requiem':{
       const marked=list.filter(e=>(e.statusEffects||[]).some(x=>x&&x.until-s.time>1e-9)||(e.slowEffects||[]).some(x=>x&&x.until-s.time>1e-9)).length;
       return Math.max(0,strike(E.REQUIEM.factor)-Math.min(dps*1.2,dps*.12*marked));
@@ -149,8 +147,8 @@ function ultValue(s,m,id,gv){
       const centre=list.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null);
       const best=centre?near(centre.e):[];
       if(best.length<3&&!best.some(e=>e.boss))return 0;
-      const vic=CELLS.map(i=>s.board[i]&&s.board[i].uid!==u.uid&&!E.immune(s,i)?{i,ally:s.board[i]}:null).filter(Boolean).sort((a,b)=>a.ally.rank-b.ally.rank||a.ally.uid-b.ally.uid)[0];
-      const lost=vic?unitValue(s,vic.ally,vic.i)*m.scale*Math.min(24,rem)*.15:0;
+      const vic=CELLS.map(i=>s.board[i]&&s.board[i].uid!==u.uid?{i,ally:s.board[i]}:null).filter(Boolean).sort((a,b)=>a.ally.rank-b.ally.rank||a.ally.uid-b.ally.uid)[0];
+      const lost=vic&&!E.immune(s,vic.i)?unitValue(s,vic.ally,vic.i)*m.scale*Math.min(24,rem)*.15:0;
       return best.reduce((n,e)=>n+hit(E.ARMAGEDDON.factor,e),0)-lost;
     }
     case 'venomplague':return strike(E.VENOM_PLAGUE.factor)+list.reduce((n,e)=>{const st=E.statusState(s,e);return n+Math.min(e.hp,((e.burn||0)+st.poisonDps)*E.VENOM_PLAGUE.seconds*E.VENOM_PLAGUE.amp);},0);
