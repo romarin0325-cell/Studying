@@ -29,7 +29,7 @@
 - 필드버프 정의에는 `valentine`, `arena`, `destiny_oath`가 포함됩니다. 레거시 매뉴얼 목록은 불완전합니다.
 - 기본 아티팩트는 26종이고, 보스 처치 저확률 해금 **신기/마신기 10종**이 일부 기본 아티팩트를 대체합니다.
 - 실전마법연습 루미 질문은 Part 5/6/7 모두에서 열립니다. Part 6/7만 해당한다는 서술은 구버전입니다.
-- Gemini Flash 모델 ID는 `gemini-3.8-flash`, Lite는 `gemini-3.5-flash-lite`, Pro는 `gemini-2.5-pro`입니다.
+- Gemini Flash 모델 ID는 `gemini-3.8-flash`, Lite는 `gemini-3.5-flash-lite`, Argon은 `gemini-4-argon`입니다.
 - 문법/TOEIC 보기는 정답이 한 개만 남도록 유일성을 강제합니다.
 - `overdrive`는 상수·보상 분기에 남아 있지만 모드 선택 UI에는 없습니다. 선택 가능한 모드는 아래 6장을 따릅니다.
 
@@ -330,7 +330,7 @@ MP 예외:
 - 완료 세트는 `state.completedToeicSets`에 남기고 미완료 세트만 고릅니다. 소진되면 초기화 확인을 띄웁니다.
 - 문법·TOEIC 보기는 정답이 유일해야 합니다.
 - API 키는 `cardRpgApiKey`. 루미 질문, TOEIC 질문, 과외, 데이트, 포춘쿠키가 공유합니다.
-- 모델: Pro `gemini-2.5-pro`, Flash `gemini-3.8-flash`, Lite `gemini-3.5-flash-lite`. 데이트/포춘쿠키는 Flash → Lite 폴백.
+- 모델: Argon `gemini-4-argon`, Flash `gemini-3.8-flash`, Lite `gemini-3.5-flash-lite`. 데이트/포춘쿠키는 Flash → Lite 폴백.
 - 실전마법연습 누적 3회(꿈의회랑 제외)면 `hiddenStudyReady`.
 
 기본 전투와 내장 학습 데이터는 API 없이 동작합니다.
