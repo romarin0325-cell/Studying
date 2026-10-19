@@ -107,6 +107,10 @@ export class Sound {
       case 'finisherImpact':this.tone(e.kind==='royal'?110:62,t,.5,.32,'sine',30);this.noise(t,e.kind==='royal'?.2:.34,.18,e.kind==='royal'?5200:1900,'lowpass',300);this.tone(e.kind==='royal'?1320:880,t,.45,.06,'triangle',440,.5);return;
       case 'finisherFizzle':this.tone(440,t,.3,.03,'sine',220);return;
       case 'meteor':this.noise(t,.4,.06,600,'bandpass',3000,1);this.tone(90,t+.35,.4,.16,'sine',40);return;
+      case 'reduce':this.tone(300,t,.5,.06,'sine',900);this.chord([392,523,659],t+.05,.5,.03,'triangle',.02,.5);return;
+      case 'armageddonBlast':this.tone(60,t,.8,.3,'sine',28);this.noise(t,.7,.2,1800,'lowpass',200,.9);this.chord([65,98,131],t+.02,.7,.04,'sawtooth',.01,.6);return;
+      case 'ward':this.tone(1180,t,.12,.045,'sine');this.tone(1570,t+.06,.16,.035,'sine');return;
+      case 'requiem':this.tone(140,t,.9,.09,'sine',70);this.noise(t,.5,.06,5200,'highpass',1800,.7);this.chord([392,494,587,740],t+.05,.9,.035,'triangle',.02,.6);return;
       case 'sunCharge':this.chord([523,659,784],t,.5,.035,'sine',.02,.5);this.tone(1568,t+.12,.2,.03,'sine');return;
       case 'sunSpend':this.tone(220,t,.7,.1,'sawtooth',880);this.noise(t,.5,.07,3000,'highpass',900,.6);this.chord([523,659,784,1047],t+.1,.7,.04,'triangle',.02,.5);return;
       case 'jokerColor':for(let i=0;i<5;i++)this.tone(600+i*110,t+i*.045,.06,.05,'square');this.tone(1320,t+.26,.2,.05,'triangle');return;

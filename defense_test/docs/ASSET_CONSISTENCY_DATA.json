@@ -1,0 +1,7598 @@
+{
+  "generated": "2026-10-19",
+  "castStats": {
+    "sd": {
+      "bboxW": {
+        "median": 296,
+        "mad": 32,
+        "min": 227,
+        "max": 423
+      },
+      "bboxH": {
+        "median": 404,
+        "mad": 19,
+        "min": 372,
+        "max": 472
+      },
+      "topY": {
+        "median": 77,
+        "mad": 17,
+        "min": 9,
+        "max": 122
+      },
+      "feetY": {
+        "median": 480,
+        "mad": 1,
+        "min": 478,
+        "max": 503
+      },
+      "silhouetteArea": {
+        "median": 76382,
+        "mad": 8909,
+        "min": 48338,
+        "max": 110208
+      },
+      "headCenterToFeet": {
+        "median": 270,
+        "mad": 13,
+        "min": 217,
+        "max": 294
+      },
+      "comXOffset": {
+        "median": -2.176,
+        "mad": 3.243,
+        "min": -14.43,
+        "max": 28.026
+      },
+      "cellMargin": {
+        "median": 31,
+        "mad": 1,
+        "min": 8,
+        "max": 32
+      },
+      "lightness": {
+        "median": 0.584,
+        "mad": 0.135,
+        "min": 0.256,
+        "max": 0.799
+      },
+      "saturation": {
+        "median": 0.55,
+        "mad": 0.092,
+        "min": 0.195,
+        "max": 0.765
+      },
+      "dark": {
+        "median": 0.125,
+        "mad": 0.041,
+        "min": 0.026,
+        "max": 0.38
+      },
+      "edge": {
+        "median": 0.299,
+        "mad": 0.03,
+        "min": 0.152,
+        "max": 0.379
+      },
+      "rimR": {
+        "median": 35.346,
+        "mad": 16.528,
+        "min": 7.664,
+        "max": 123.55
+      },
+      "rimG": {
+        "median": 33.324,
+        "mad": 17.557,
+        "min": 4.478,
+        "max": 118.683
+      },
+      "rimB": {
+        "median": 55.686,
+        "mad": 16.387,
+        "min": 15.545,
+        "max": 125.621
+      },
+      "rimLightness": {
+        "median": 0.179,
+        "mad": 0.062,
+        "min": 0.056,
+        "max": 0.437
+      },
+      "rimNavy": {
+        "median": 8.276,
+        "mad": 19.998,
+        "min": -33.889,
+        "max": 57.827
+      },
+      "rimThickness": {
+        "median": 4,
+        "mad": 1,
+        "min": 0,
+        "max": 14
+      },
+      "highlightPct": {
+        "median": 0.891,
+        "mad": 0.825,
+        "min": 0,
+        "max": 5.896
+      },
+      "highlightBlobsPer10k": {
+        "median": 19.82,
+        "mad": 19.059,
+        "min": 0,
+        "max": 120.502
+      },
+      "flatShare": {
+        "median": 0.428,
+        "mad": 0.049,
+        "min": 0.331,
+        "max": 0.62
+      },
+      "gradientSoftness": {
+        "median": 0.071,
+        "mad": 0.007,
+        "min": 0.043,
+        "max": 0.095
+      },
+      "paletteSize": {
+        "median": 676,
+        "mad": 135,
+        "min": 329,
+        "max": 1460
+      },
+      "top5Share": {
+        "median": 0.349,
+        "mad": 0.064,
+        "min": 0.181,
+        "max": 0.581
+      },
+      "viewAreaSpread": {
+        "median": 0.155,
+        "mad": 0.048,
+        "min": 0.057,
+        "max": 0.386
+      },
+      "feetSpread": {
+        "median": 1,
+        "mad": 1,
+        "min": 0,
+        "max": 24
+      }
+    },
+    "memorial": {
+      "lightness": {
+        "median": 0.538,
+        "mad": 0.102,
+        "min": 0.228,
+        "max": 0.806
+      },
+      "saturation": {
+        "median": 0.361,
+        "mad": 0.071,
+        "min": 0.141,
+        "max": 0.729
+      },
+      "contrast": {
+        "median": 0.218,
+        "mad": 0.039,
+        "min": 0.136,
+        "max": 0.351
+      },
+      "darkRatio": {
+        "median": 0.099,
+        "mad": 0.097,
+        "min": 0,
+        "max": 0.648
+      },
+      "edge": {
+        "median": 0.071,
+        "mad": 0.014,
+        "min": 0.043,
+        "max": 0.126
+      },
+      "sharpness": {
+        "median": 0.086,
+        "mad": 0.021,
+        "min": 0.039,
+        "max": 0.174
+      },
+      "bgBusy": {
+        "median": 0.046,
+        "mad": 0.009,
+        "min": 0.012,
+        "max": 0.095
+      },
+      "warmth": {
+        "median": 0.591,
+        "mad": 0.303,
+        "min": 0.007,
+        "max": 0.994
+      },
+      "colourfulness": {
+        "median": 51.365,
+        "mad": 11.913,
+        "min": 20.075,
+        "max": 79.518
+      },
+      "fileKiB": {
+        "median": 78.232,
+        "mad": 8.74,
+        "min": 44.08,
+        "max": 95.867
+      }
+    }
+  },
+  "heroes": {
+    "star_boy": {
+      "name": "별똥별소년",
+      "rarity": "C",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 271,
+          "z": -0.527,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 402,
+          "z": -0.071,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 79,
+          "z": 0.079,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 57947,
+          "z": -1.396,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 251,
+          "z": -0.986,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -4.938,
+          "z": -0.575,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.653,
+          "z": 0.344,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.655,
+          "z": 0.772,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.098,
+          "z": -0.441,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.355,
+          "z": 1.238,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 63.807,
+          "z": 1.162,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 58.483,
+          "z": 0.967,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 67.287,
+          "z": 0.477,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.255,
+          "z": 0.826,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 3.48,
+          "z": -0.162,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 1.605,
+          "z": 0.584,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 47.112,
+          "z": 0.966,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.349,
+          "z": -1.1,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.081,
+          "z": 0.907,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 1410,
+          "z": 3.667,
+          "grade": "out"
+        },
+        "top5Share": {
+          "value": 0.348,
+          "z": -0.015,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.129,
+          "z": -0.367,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.512,
+          "z": -0.172,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.539,
+          "z": 1.696,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.28,
+          "z": 1.057,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.28,
+          "z": 1.256,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.076,
+          "z": 0.233,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.112,
+          "z": 0.847,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.045,
+          "z": -0.088,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.44,
+          "z": -0.336,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 76.648,
+          "z": 1.431,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 78.328,
+          "z": 0.007,
+          "grade": "ok"
+        }
+      }
+    },
+    "snow_rabbit": {
+      "name": "눈토끼",
+      "rarity": "C",
+      "heightGroup": "short",
+      "sd": {
+        "bboxW": {
+          "value": 301,
+          "z": 0.105,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 399,
+          "z": -0.177,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 82,
+          "z": 0.198,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 64357,
+          "z": -0.91,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 252,
+          "z": -0.934,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -6.747,
+          "z": -0.951,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.729,
+          "z": 0.725,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.625,
+          "z": 0.551,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.09,
+          "z": -0.579,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.288,
+          "z": -0.262,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 16.887,
+          "z": -0.753,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 16.214,
+          "z": -0.657,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 45.161,
+          "z": -0.433,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.118,
+          "z": -0.652,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 28.275,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 2.805,
+          "z": 1.565,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 63.863,
+          "z": 1.559,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.518,
+          "z": 1.245,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.07,
+          "z": -0.146,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 676,
+          "z": 0,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.472,
+          "z": 1.298,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.155,
+          "z": 0,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.783,
+          "z": 1.616,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.336,
+          "z": -0.244,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.145,
+          "z": -1.26,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.001,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.054,
+          "z": -0.779,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.077,
+          "z": -0.277,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.039,
+          "z": -0.503,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.132,
+          "z": -1.021,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 30.736,
+          "z": -1.168,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 51.92,
+          "z": -2.031,
+          "grade": "warn"
+        }
+      }
+    },
+    "silver_rabbit": {
+      "name": "은토끼",
+      "rarity": "C",
+      "heightGroup": "short",
+      "sd": {
+        "bboxW": {
+          "value": 288,
+          "z": -0.169,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 419,
+          "z": 0.532,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 61,
+          "z": -0.635,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 73910,
+          "z": -0.187,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 230,
+          "z": -2.075,
+          "grade": "warn"
+        },
+        "comXOffset": {
+          "value": 2.323,
+          "z": 0.936,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.787,
+          "z": 1.017,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.494,
+          "z": -0.41,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.048,
+          "z": -1.263,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.296,
+          "z": -0.073,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 94.798,
+          "z": 2.426,
+          "grade": "warn"
+        },
+        "rimG": {
+          "value": 87.2,
+          "z": 2.07,
+          "grade": "warn"
+        },
+        "rimB": {
+          "value": 75.77,
+          "z": 0.827,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.334,
+          "z": 1.678,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -19.027,
+          "z": -0.921,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 0,
+          "z": -2.698,
+          "grade": "warn"
+        },
+        "highlightPct": {
+          "value": 4.074,
+          "z": 2.603,
+          "grade": "warn"
+        },
+        "highlightBlobsPer10k": {
+          "value": 67.515,
+          "z": 1.688,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.528,
+          "z": 1.381,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.068,
+          "z": -0.347,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 479,
+          "z": -0.984,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.529,
+          "z": 1.901,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.227,
+          "z": 1.001,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.651,
+          "z": 0.747,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.31,
+          "z": -0.493,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.218,
+          "z": 0,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0,
+          "z": -0.681,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.055,
+          "z": -0.725,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.082,
+          "z": -0.132,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.03,
+          "z": -1.121,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.992,
+          "z": 0.891,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 26.08,
+          "z": -1.432,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 49.801,
+          "z": -2.194,
+          "grade": "warn"
+        }
+      }
+    },
+    "night_rabbit": {
+      "name": "밤토끼",
+      "rarity": "C",
+      "heightGroup": "short",
+      "sd": {
+        "bboxW": {
+          "value": 247,
+          "z": -1.033,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 437,
+          "z": 1.171,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 52,
+          "z": -0.992,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 488,
+          "z": 5.396,
+          "grade": "out"
+        },
+        "silhouetteArea": {
+          "value": 66268,
+          "z": -0.766,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 267,
+          "z": -0.156,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -0.19,
+          "z": 0.413,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 23,
+          "z": -5.396,
+          "grade": "out"
+        },
+        "lightness": {
+          "value": 0.623,
+          "z": 0.194,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.345,
+          "z": -1.512,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.139,
+          "z": 0.219,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.267,
+          "z": -0.708,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 58.892,
+          "z": 0.961,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 55.589,
+          "z": 0.855,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 58.246,
+          "z": 0.105,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.226,
+          "z": 0.505,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -0.646,
+          "z": -0.301,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 5.896,
+          "z": 4.093,
+          "grade": "out"
+        },
+        "highlightBlobsPer10k": {
+          "value": 101.406,
+          "z": 2.887,
+          "grade": "warn"
+        },
+        "flatShare": {
+          "value": 0.508,
+          "z": 1.104,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.062,
+          "z": -0.892,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 383,
+          "z": -1.464,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.581,
+          "z": 2.452,
+          "grade": "warn"
+        },
+        "viewAreaSpread": {
+          "value": 0.218,
+          "z": 0.879,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 9,
+          "z": 5.396,
+          "grade": "out"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.538,
+          "z": 0,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.244,
+          "z": -1.117,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.236,
+          "z": 0.307,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.099,
+          "z": 0,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.053,
+          "z": -0.858,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.054,
+          "z": -1.015,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.036,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.288,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 37.215,
+          "z": -0.801,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 56.252,
+          "z": -1.696,
+          "grade": "ok"
+        }
+      }
+    },
+    "siren": {
+      "name": "세이렌",
+      "rarity": "C",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 298,
+          "z": 0.042,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 372,
+          "z": -1.136,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 109,
+          "z": 1.27,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 71486,
+          "z": -0.371,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 251,
+          "z": -0.986,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -2.176,
+          "z": 0,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.719,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.748,
+          "z": 1.456,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.072,
+          "z": -0.873,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.338,
+          "z": 0.849,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 35.346,
+          "z": 0,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 39.446,
+          "z": 0.235,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 87.121,
+          "z": 1.294,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.237,
+          "z": 0.631,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 51.775,
+          "z": 1.467,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 1.021,
+          "z": 0.106,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 33.433,
+          "z": 0.482,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.44,
+          "z": 0.167,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.08,
+          "z": 0.788,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 1225,
+          "z": 2.743,
+          "grade": "warn"
+        },
+        "top5Share": {
+          "value": 0.385,
+          "z": 0.376,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.167,
+          "z": 0.17,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.721,
+          "z": 1.209,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.633,
+          "z": 2.599,
+          "grade": "warn"
+        },
+        "contrast": {
+          "value": 0.148,
+          "z": -1.206,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0,
+          "z": -0.681,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.052,
+          "z": -0.881,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.061,
+          "z": -0.808,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.026,
+          "z": -1.429,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.118,
+          "z": -1.052,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 75.76,
+          "z": 1.381,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 58.938,
+          "z": -1.489,
+          "grade": "ok"
+        }
+      }
+    },
+    "mushroom_king": {
+      "name": "머쉬룸킹",
+      "rarity": "C",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 335,
+          "z": 0.822,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 384,
+          "z": -0.71,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 97,
+          "z": 0.794,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 78214,
+          "z": 0.139,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 217,
+          "z": -2.75,
+          "grade": "warn"
+        },
+        "comXOffset": {
+          "value": 0.441,
+          "z": 0.544,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.354,
+          "z": -1.154,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.477,
+          "z": -0.535,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.242,
+          "z": 1.91,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.227,
+          "z": -1.599,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 7.664,
+          "z": -1.13,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 8.614,
+          "z": -0.949,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 21.918,
+          "z": -1.39,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.056,
+          "z": -1.328,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 14.254,
+          "z": 0.202,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 9,
+          "z": 3.372,
+          "grade": "out"
+        },
+        "highlightPct": {
+          "value": 0.066,
+          "z": -0.675,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 2.941,
+          "z": -0.597,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.485,
+          "z": 0.777,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.058,
+          "z": -1.302,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 742,
+          "z": 0.33,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.231,
+          "z": -1.249,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.18,
+          "z": 0.354,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.359,
+          "z": -1.187,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.291,
+          "z": -0.67,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.193,
+          "z": -0.433,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.189,
+          "z": 0.627,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.053,
+          "z": -0.844,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.05,
+          "z": -1.144,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.045,
+          "z": -0.045,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.007,
+          "z": -1.299,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 46.467,
+          "z": -0.277,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 78.232,
+          "z": 0,
+          "grade": "ok"
+        }
+      }
+    },
+    "underdog": {
+      "name": "언더독",
+      "rarity": "C",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 263,
+          "z": -0.696,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 443,
+          "z": 1.384,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 38,
+          "z": -1.547,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 84853,
+          "z": 0.641,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 272,
+          "z": 0.104,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -0.977,
+          "z": 0.25,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.321,
+          "z": -1.32,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.384,
+          "z": -1.222,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.356,
+          "z": 3.783,
+          "grade": "out"
+        },
+        "edge": {
+          "value": 0.223,
+          "z": -1.693,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 15.24,
+          "z": -0.821,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 5.589,
+          "z": -1.065,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 52.043,
+          "z": -0.15,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.114,
+          "z": -0.704,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 36.803,
+          "z": 0.962,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 6,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.211,
+          "z": -0.556,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 6.953,
+          "z": -0.455,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.474,
+          "z": 0.631,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.056,
+          "z": -1.475,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 329,
+          "z": -1.734,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.412,
+          "z": 0.662,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.152,
+          "z": -0.037,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.294,
+          "z": -1.62,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.209,
+          "z": -1.458,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.205,
+          "z": -0.222,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.438,
+          "z": 2.353,
+          "grade": "warn"
+        },
+        "edge": {
+          "value": 0.047,
+          "z": -1.098,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.039,
+          "z": -1.505,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.033,
+          "z": -0.921,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.994,
+          "z": 0.896,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 38.913,
+          "z": -0.705,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 72.725,
+          "z": -0.425,
+          "grade": "ok"
+        }
+      }
+    },
+    "joker": {
+      "name": "조커",
+      "rarity": "C",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 396,
+          "z": 2.108,
+          "grade": "warn"
+        },
+        "bboxH": {
+          "value": 406,
+          "z": 0.071,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 74,
+          "z": -0.119,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 82362,
+          "z": 0.453,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 251,
+          "z": -0.986,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -3.939,
+          "z": -0.367,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.519,
+          "z": -0.329,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.44,
+          "z": -0.811,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.125,
+          "z": 0,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.283,
+          "z": -0.355,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 31.099,
+          "z": -0.173,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 23.731,
+          "z": -0.369,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 66.77,
+          "z": 0.456,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.179,
+          "z": 0,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 35.67,
+          "z": 0.924,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 5,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.419,
+          "z": -0.386,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 12.142,
+          "z": -0.272,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.501,
+          "z": 1.01,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.073,
+          "z": 0.168,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 836,
+          "z": 0.799,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.281,
+          "z": -0.72,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.335,
+          "z": 2.521,
+          "grade": "warn"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.437,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.357,
+          "z": -0.044,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.265,
+          "z": 0.804,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.294,
+          "z": 1.359,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.126,
+          "z": 2.572,
+          "grade": "warn"
+        },
+        "sharpness": {
+          "value": 0.172,
+          "z": 2.81,
+          "grade": "warn"
+        },
+        "bgBusy": {
+          "value": 0.095,
+          "z": 3.587,
+          "grade": "out"
+        },
+        "warmth": {
+          "value": 0.876,
+          "z": 0.635,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 55.129,
+          "z": 0.213,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 91.496,
+          "z": 1.024,
+          "grade": "ok"
+        }
+      }
+    },
+    "sunflower": {
+      "name": "해바라기",
+      "rarity": "C",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 254,
+          "z": -0.885,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 418,
+          "z": 0.497,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 62,
+          "z": -0.595,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 57757,
+          "z": -1.41,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 271,
+          "z": 0.052,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 2.15,
+          "z": 0.9,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.434,
+          "z": -0.753,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.606,
+          "z": 0.414,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.101,
+          "z": -0.407,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.338,
+          "z": 0.851,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 59.413,
+          "z": 0.982,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 47.155,
+          "z": 0.531,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 55.686,
+          "z": 0,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.217,
+          "z": 0.411,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -3.727,
+          "z": -0.405,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0,
+          "z": -0.729,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 0,
+          "z": -0.701,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.479,
+          "z": 0.7,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.072,
+          "z": 0.061,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 693,
+          "z": 0.085,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.312,
+          "z": -0.395,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.306,
+          "z": 2.105,
+          "grade": "warn"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.351,
+          "z": -1.243,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.432,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.197,
+          "z": -0.363,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.24,
+          "z": 0.984,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.075,
+          "z": 0.212,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.081,
+          "z": -0.146,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.028,
+          "z": -1.249,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.904,
+          "z": 0.696,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 74.209,
+          "z": 1.293,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 86.674,
+          "z": 0.651,
+          "grade": "ok"
+        }
+      }
+    },
+    "great_detective": {
+      "name": "명탐정",
+      "rarity": "R",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 227,
+          "z": -1.454,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 394,
+          "z": -0.355,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 87,
+          "z": 0.397,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 56641,
+          "z": -1.495,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 266,
+          "z": -0.208,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -5.3,
+          "z": -0.65,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.605,
+          "z": 0.104,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.636,
+          "z": 0.634,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.126,
+          "z": 0.006,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.365,
+          "z": 1.445,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 16.029,
+          "z": -0.788,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 15.954,
+          "z": -0.667,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 59.71,
+          "z": 0.166,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.145,
+          "z": -0.365,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 43.682,
+          "z": 1.194,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 5,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 1.409,
+          "z": 0.423,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 43.608,
+          "z": 0.842,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.348,
+          "z": -1.118,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.095,
+          "z": 2.249,
+          "grade": "warn"
+        },
+        "paletteSize": {
+          "value": 656,
+          "z": -0.1,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.318,
+          "z": -0.332,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.227,
+          "z": 1.013,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.568,
+          "z": 0.198,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.274,
+          "z": -0.838,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.236,
+          "z": 0.307,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.015,
+          "z": -0.578,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.066,
+          "z": -0.246,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.085,
+          "z": -0.022,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.046,
+          "z": 0.029,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.326,
+          "z": -0.589,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 32.288,
+          "z": -1.08,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 74.637,
+          "z": -0.277,
+          "grade": "ok"
+        }
+      }
+    },
+    "guardian": {
+      "name": "가디언",
+      "rarity": "R",
+      "heightGroup": "short",
+      "sd": {
+        "bboxW": {
+          "value": 304,
+          "z": 0.169,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 426,
+          "z": 0.781,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 56,
+          "z": -0.833,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 481,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 79598,
+          "z": 0.243,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 271,
+          "z": 0.052,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 28.026,
+          "z": 6.282,
+          "grade": "out"
+        },
+        "cellMargin": {
+          "value": 30,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.523,
+          "z": -0.309,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.687,
+          "z": 1.004,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.098,
+          "z": -0.445,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.301,
+          "z": 0.04,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 21.934,
+          "z": -0.547,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 25.691,
+          "z": -0.293,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 21.344,
+          "z": -1.414,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.091,
+          "z": -0.949,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -0.59,
+          "z": -0.299,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.067,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 2.89,
+          "z": -0.599,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.455,
+          "z": 0.365,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.067,
+          "z": -0.421,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 982,
+          "z": 1.529,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.224,
+          "z": -1.323,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.077,
+          "z": -1.085,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.623,
+          "z": 0.557,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.446,
+          "z": 0.809,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.166,
+          "z": -0.899,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.005,
+          "z": -0.647,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.064,
+          "z": -0.305,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.093,
+          "z": 0.242,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.027,
+          "z": -1.323,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.295,
+          "z": -0.658,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 70.774,
+          "z": 1.099,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 69.492,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      }
+    },
+    "avalanche_maid": {
+      "name": "메이드",
+      "rarity": "R",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 376,
+          "z": 1.686,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 401,
+          "z": -0.106,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 81,
+          "z": 0.159,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 481,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 90715,
+          "z": 1.085,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 264,
+          "z": -0.311,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 2.014,
+          "z": 0.872,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 30,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.682,
+          "z": 0.49,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.642,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.09,
+          "z": -0.585,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.329,
+          "z": 0.659,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 30.282,
+          "z": -0.207,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 31.393,
+          "z": -0.074,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 69.039,
+          "z": 0.55,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.192,
+          "z": 0.143,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 38.756,
+          "z": 1.028,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 2.814,
+          "z": 1.573,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 49.055,
+          "z": 1.035,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.427,
+          "z": -0.014,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.081,
+          "z": 0.884,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 557,
+          "z": -0.595,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.427,
+          "z": 0.823,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.276,
+          "z": 1.694,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.806,
+          "z": 1.77,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.729,
+          "z": 3.514,
+          "grade": "out"
+        },
+        "contrast": {
+          "value": 0.144,
+          "z": -1.276,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.009,
+          "z": -0.624,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.055,
+          "z": -0.76,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.081,
+          "z": -0.148,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.027,
+          "z": -1.356,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.038,
+          "z": -1.229,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 42.63,
+          "z": -0.495,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 62.203,
+          "z": -1.237,
+          "grade": "ok"
+        }
+      }
+    },
+    "santa": {
+      "name": "산타",
+      "rarity": "R",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 306,
+          "z": 0.211,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 414,
+          "z": 0.355,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 69,
+          "z": -0.317,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 482,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 75536,
+          "z": -0.064,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 259,
+          "z": -0.571,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -1.654,
+          "z": 0.109,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 29,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.652,
+          "z": 0.338,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.498,
+          "z": -0.382,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.099,
+          "z": -0.44,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.247,
+          "z": -1.155,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 72.01,
+          "z": 1.496,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 48.784,
+          "z": 0.594,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 48.208,
+          "z": -0.308,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.234,
+          "z": 0.599,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -23.802,
+          "z": -1.082,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 2.113,
+          "z": 0.999,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 47.792,
+          "z": 0.99,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.504,
+          "z": 1.049,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.065,
+          "z": -0.587,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 713,
+          "z": 0.185,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.398,
+          "z": 0.516,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.129,
+          "z": -0.364,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 3,
+          "z": 1.349,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.591,
+          "z": 0.348,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.361,
+          "z": 0,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.259,
+          "z": 0.702,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.05,
+          "z": -0.337,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.077,
+          "z": 0.288,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.086,
+          "z": 0,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.051,
+          "z": 0.392,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.979,
+          "z": 0.864,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 56.077,
+          "z": 0.267,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 81.414,
+          "z": 0.246,
+          "grade": "ok"
+        }
+      }
+    },
+    "red_dragon": {
+      "name": "레드드래곤",
+      "rarity": "R",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 277,
+          "z": -0.4,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 425,
+          "z": 0.745,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 55,
+          "z": -0.873,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 76843,
+          "z": 0.035,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 280,
+          "z": 0.519,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 5.665,
+          "z": 1.631,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.481,
+          "z": -0.518,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.765,
+          "z": 1.577,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.148,
+          "z": 0.367,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.354,
+          "z": 1.211,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 29.341,
+          "z": -0.245,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 14.064,
+          "z": -0.74,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 15.545,
+          "z": -1.652,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.083,
+          "z": -1.035,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -13.796,
+          "z": -0.744,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 5,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.364,
+          "z": -0.431,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 8.199,
+          "z": -0.411,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.385,
+          "z": -0.607,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.087,
+          "z": 1.435,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 713,
+          "z": 0.185,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.288,
+          "z": -0.651,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.115,
+          "z": -0.552,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.443,
+          "z": -0.634,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.35,
+          "z": -0.109,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.277,
+          "z": 1.008,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.253,
+          "z": 1.073,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.087,
+          "z": 0.783,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.119,
+          "z": 1.092,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.061,
+          "z": 1.084,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.904,
+          "z": 0.697,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 57.481,
+          "z": 0.346,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 85.771,
+          "z": 0.582,
+          "grade": "ok"
+        }
+      }
+    },
+    "aurora": {
+      "name": "아우로라",
+      "rarity": "R",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 296,
+          "z": 0,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 372,
+          "z": -1.136,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 111,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 482,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 77188,
+          "z": 0.061,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 263,
+          "z": -0.363,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -6.176,
+          "z": -0.832,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 29,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.763,
+          "z": 0.894,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.615,
+          "z": 0.479,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.028,
+          "z": -1.604,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.299,
+          "z": -0.009,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 80.324,
+          "z": 1.836,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 71.935,
+          "z": 1.483,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 125.621,
+          "z": 2.879,
+          "grade": "warn"
+        },
+        "rimLightness": {
+          "value": 0.391,
+          "z": 2.287,
+          "grade": "warn"
+        },
+        "rimNavy": {
+          "value": 45.297,
+          "z": 1.249,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.891,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 27.725,
+          "z": 0.28,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.454,
+          "z": 0.351,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.071,
+          "z": -0.052,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 642,
+          "z": -0.17,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.349,
+          "z": 0,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.162,
+          "z": 0.097,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.793,
+          "z": 1.684,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.569,
+          "z": 1.983,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.136,
+          "z": -1.415,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0,
+          "z": -0.68,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.093,
+          "z": 1.02,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.111,
+          "z": 0.807,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.05,
+          "z": 0.302,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.216,
+          "z": -0.834,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 55.239,
+          "z": 0.219,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 84.18,
+          "z": 0.459,
+          "grade": "ok"
+        }
+      }
+    },
+    "toffee_apple": {
+      "name": "토피애플",
+      "rarity": "R",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 327,
+          "z": 0.653,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 380,
+          "z": -0.852,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 101,
+          "z": 0.952,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 75580,
+          "z": -0.061,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 264,
+          "z": -0.311,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -11.593,
+          "z": -1.959,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.367,
+          "z": -1.088,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.641,
+          "z": 0.668,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.214,
+          "z": 1.45,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.233,
+          "z": -1.474,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 18.19,
+          "z": -0.7,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 6.589,
+          "z": -1.027,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 58.996,
+          "z": 0.136,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.131,
+          "z": -0.519,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 40.807,
+          "z": 1.097,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 5,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.067,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 4.499,
+          "z": -0.542,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.436,
+          "z": 0.107,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.067,
+          "z": -0.466,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 806,
+          "z": 0.65,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.214,
+          "z": -1.43,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.241,
+          "z": 1.199,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.318,
+          "z": -1.461,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.417,
+          "z": 0.532,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.188,
+          "z": -0.524,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.423,
+          "z": 2.253,
+          "grade": "warn"
+        },
+        "edge": {
+          "value": 0.103,
+          "z": 1.498,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.12,
+          "z": 1.111,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.058,
+          "z": 0.869,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.645,
+          "z": 0.121,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 77.765,
+          "z": 1.495,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 95.867,
+          "z": 1.361,
+          "grade": "ok"
+        }
+      }
+    },
+    "antropy": {
+      "name": "앤트로피",
+      "rarity": "R",
+      "heightGroup": "short",
+      "sd": {
+        "bboxW": {
+          "value": 279,
+          "z": -0.358,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 393,
+          "z": -0.39,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 88,
+          "z": 0.436,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 67756,
+          "z": -0.653,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 268,
+          "z": -0.104,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 0.25,
+          "z": 0.505,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.783,
+          "z": 0.997,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.521,
+          "z": -0.212,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.05,
+          "z": -1.236,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.289,
+          "z": -0.223,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 71.247,
+          "z": 1.465,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 60.696,
+          "z": 1.052,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 120.673,
+          "z": 2.675,
+          "grade": "warn"
+        },
+        "rimLightness": {
+          "value": 0.356,
+          "z": 1.908,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 49.425,
+          "z": 1.388,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 2.853,
+          "z": 1.604,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 91.357,
+          "z": 2.532,
+          "grade": "warn"
+        },
+        "flatShare": {
+          "value": 0.62,
+          "z": 2.651,
+          "grade": "warn"
+        },
+        "gradientSoftness": {
+          "value": 0.07,
+          "z": -0.128,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 346,
+          "z": -1.649,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.577,
+          "z": 2.411,
+          "grade": "warn"
+        },
+        "viewAreaSpread": {
+          "value": 0.242,
+          "z": 1.215,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.476,
+          "z": -0.416,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.316,
+          "z": -0.434,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.251,
+          "z": 0.569,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.173,
+          "z": 0.517,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.066,
+          "z": -0.218,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.089,
+          "z": 0.11,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.046,
+          "z": 0,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.052,
+          "z": -1.199,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 37.004,
+          "z": -0.813,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 81.324,
+          "z": 0.239,
+          "grade": "ok"
+        }
+      }
+    },
+    "storm_sage": {
+      "name": "폭풍의현자",
+      "rarity": "SR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 289,
+          "z": -0.148,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 425,
+          "z": 0.745,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 57,
+          "z": -0.794,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 481,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 77811,
+          "z": 0.108,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 286,
+          "z": 0.83,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -6.377,
+          "z": -0.874,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 30,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.421,
+          "z": -0.819,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.557,
+          "z": 0.054,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.145,
+          "z": 0.323,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.317,
+          "z": 0.4,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 11.727,
+          "z": -0.964,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 18.585,
+          "z": -0.566,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 45.932,
+          "z": -0.401,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.113,
+          "z": -0.707,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 34.205,
+          "z": 0.875,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 5,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.004,
+          "z": -0.726,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 0.257,
+          "z": -0.692,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.396,
+          "z": -0.455,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.072,
+          "z": 0.087,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 986,
+          "z": 1.549,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.209,
+          "z": -1.489,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.152,
+          "z": -0.044,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.589,
+          "z": 0.332,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.402,
+          "z": 0.391,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.181,
+          "z": -0.637,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.005,
+          "z": -0.651,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.061,
+          "z": -0.473,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.061,
+          "z": -0.79,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.043,
+          "z": -0.199,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.247,
+          "z": -0.765,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 64.961,
+          "z": 0.77,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 70.961,
+          "z": -0.561,
+          "grade": "ok"
+        }
+      }
+    },
+    "flame_sage": {
+      "name": "화염의현자",
+      "rarity": "SR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 247,
+          "z": -1.033,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 399,
+          "z": -0.177,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 81,
+          "z": 0.159,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 63040,
+          "z": -1.01,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 272,
+          "z": 0.104,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -2.49,
+          "z": -0.065,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.453,
+          "z": -0.655,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.658,
+          "z": 0.793,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.144,
+          "z": 0.315,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.279,
+          "z": -0.463,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 31.37,
+          "z": -0.162,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 11.781,
+          "z": -0.828,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 25.452,
+          "z": -1.244,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.102,
+          "z": -0.832,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -5.918,
+          "z": -0.479,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 5,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.46,
+          "z": -0.353,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 10.152,
+          "z": -0.342,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.43,
+          "z": 0.027,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.068,
+          "z": -0.34,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 612,
+          "z": -0.32,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.324,
+          "z": -0.274,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.112,
+          "z": -0.598,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.46,
+          "z": -0.519,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.346,
+          "z": -0.148,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.275,
+          "z": 0.97,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.25,
+          "z": 1.048,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.067,
+          "z": -0.189,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.088,
+          "z": 0.07,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.055,
+          "z": 0.683,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.878,
+          "z": 0.638,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 45.56,
+          "z": -0.329,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 73.445,
+          "z": -0.369,
+          "grade": "ok"
+        }
+      }
+    },
+    "lightning_sage": {
+      "name": "번개의현자",
+      "rarity": "SR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 252,
+          "z": -0.927,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 400,
+          "z": -0.142,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 80,
+          "z": 0.119,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 59667,
+          "z": -1.265,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 275,
+          "z": 0.259,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -14.103,
+          "z": -2.481,
+          "grade": "warn"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.56,
+          "z": -0.121,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.383,
+          "z": -1.231,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.135,
+          "z": 0.156,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.368,
+          "z": 1.526,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 42.803,
+          "z": 0.304,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 44.056,
+          "z": 0.412,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 50.422,
+          "z": -0.217,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.181,
+          "z": 0.027,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 7.619,
+          "z": -0.022,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 5.211,
+          "z": 3.532,
+          "grade": "out"
+        },
+        "highlightBlobsPer10k": {
+          "value": 120.502,
+          "z": 3.563,
+          "grade": "out"
+        },
+        "flatShare": {
+          "value": 0.376,
+          "z": -0.722,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.084,
+          "z": 1.169,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 754,
+          "z": 0.39,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.385,
+          "z": 0.376,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.057,
+          "z": -1.365,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.558,
+          "z": 0.128,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.239,
+          "z": -1.169,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.258,
+          "z": 0.678,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.078,
+          "z": -0.143,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.07,
+          "z": -0.019,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.072,
+          "z": -0.449,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.048,
+          "z": 0.127,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.404,
+          "z": -0.415,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 39.711,
+          "z": -0.66,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 69.373,
+          "z": -0.684,
+          "grade": "ok"
+        }
+      }
+    },
+    "time_magician": {
+      "name": "시간의마술사",
+      "rarity": "SR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 295,
+          "z": -0.021,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 421,
+          "z": 0.603,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 60,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 69375,
+          "z": -0.53,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 286,
+          "z": 0.83,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -4.588,
+          "z": -0.502,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.356,
+          "z": -1.145,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.487,
+          "z": -0.463,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.166,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.248,
+          "z": -1.136,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 48.933,
+          "z": 0.554,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 20.484,
+          "z": -0.493,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 36.285,
+          "z": -0.799,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.136,
+          "z": -0.466,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -12.647,
+          "z": -0.706,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 7,
+          "z": 2.023,
+          "grade": "warn"
+        },
+        "highlightPct": {
+          "value": 0.037,
+          "z": -0.698,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 1.009,
+          "z": -0.666,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.402,
+          "z": -0.367,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.058,
+          "z": -1.23,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 883,
+          "z": 1.034,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.285,
+          "z": -0.683,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.174,
+          "z": 0.267,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 2,
+          "z": 0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.519,
+          "z": -0.127,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.389,
+          "z": 0.268,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.231,
+          "z": 0.215,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.067,
+          "z": -0.218,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.073,
+          "z": 0.087,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.079,
+          "z": -0.211,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.05,
+          "z": 0.314,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.856,
+          "z": 0.589,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 51.365,
+          "z": 0,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 77.717,
+          "z": -0.04,
+          "grade": "ok"
+        }
+      }
+    },
+    "ancient_dragon": {
+      "name": "에인션트드래곤",
+      "rarity": "SR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 351,
+          "z": 1.159,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 453,
+          "z": 1.739,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 26,
+          "z": -2.023,
+          "grade": "warn"
+        },
+        "feetY": {
+          "value": 478,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 110208,
+          "z": 2.561,
+          "grade": "warn"
+        },
+        "headCenterToFeet": {
+          "value": 293,
+          "z": 1.193,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 12.222,
+          "z": 2.995,
+          "grade": "warn"
+        },
+        "cellMargin": {
+          "value": 26,
+          "z": -3.372,
+          "grade": "out"
+        },
+        "lightness": {
+          "value": 0.503,
+          "z": -0.405,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.57,
+          "z": 0.144,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.121,
+          "z": -0.069,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.323,
+          "z": 0.516,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 32.963,
+          "z": -0.097,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 28.411,
+          "z": -0.189,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 41.24,
+          "z": -0.595,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.142,
+          "z": -0.396,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 8.276,
+          "z": 0,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 5,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.066,
+          "z": -0.675,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 2.994,
+          "z": -0.595,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.428,
+          "z": 0,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.081,
+          "z": 0.864,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 854,
+          "z": 0.889,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.221,
+          "z": -1.363,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.155,
+          "z": 0.002,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 4,
+          "z": 2.023,
+          "grade": "warn"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.581,
+          "z": 0.282,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.41,
+          "z": 0.465,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.217,
+          "z": -0.032,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.006,
+          "z": -0.639,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.08,
+          "z": 0.446,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.106,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.047,
+          "z": 0.071,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.628,
+          "z": 0.082,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 63.14,
+          "z": 0.667,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 73.25,
+          "z": -0.384,
+          "grade": "ok"
+        }
+      }
+    },
+    "phantom": {
+      "name": "팬텀",
+      "rarity": "SR",
+      "heightGroup": "short",
+      "sd": {
+        "bboxW": {
+          "value": 237,
+          "z": -1.244,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 373,
+          "z": -1.1,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 108,
+          "z": 1.23,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 48338,
+          "z": -2.123,
+          "grade": "warn"
+        },
+        "headCenterToFeet": {
+          "value": 249,
+          "z": -1.09,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -2.563,
+          "z": -0.081,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.493,
+          "z": -0.458,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.431,
+          "z": -0.875,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.108,
+          "z": -0.284,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.33,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 20.513,
+          "z": -0.605,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 15.767,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 34.023,
+          "z": -0.892,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.099,
+          "z": -0.864,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 13.51,
+          "z": 0.177,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.298,
+          "z": -0.485,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 10.137,
+          "z": -0.343,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.367,
+          "z": -0.848,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.078,
+          "z": 0.624,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 438,
+          "z": -1.189,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.286,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.119,
+          "z": -0.504,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.401,
+          "z": -0.907,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.308,
+          "z": -0.509,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.165,
+          "z": -0.919,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.165,
+          "z": 0.457,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.043,
+          "z": -1.298,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.059,
+          "z": -0.864,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.012,
+          "z": -2.455,
+          "grade": "warn"
+        },
+        "warmth": {
+          "value": 0.051,
+          "z": -1.201,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 30.569,
+          "z": -1.177,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 44.08,
+          "z": -2.636,
+          "grade": "warn"
+        }
+      }
+    },
+    "cure_master": {
+      "name": "큐어마스터",
+      "rarity": "SR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 331,
+          "z": 0.738,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 393,
+          "z": -0.39,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 88,
+          "z": 0.436,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 87325,
+          "z": 0.828,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 274,
+          "z": 0.208,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 6.722,
+          "z": 1.851,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.686,
+          "z": 0.512,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.701,
+          "z": 1.112,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.056,
+          "z": -1.141,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.338,
+          "z": 0.857,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 51.873,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 45.03,
+          "z": 0.45,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 109.7,
+          "z": 2.223,
+          "grade": "warn"
+        },
+        "rimLightness": {
+          "value": 0.3,
+          "z": 1.305,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 57.827,
+          "z": 1.671,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.235,
+          "z": -0.537,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 6.985,
+          "z": -0.454,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.495,
+          "z": 0.919,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.087,
+          "z": 1.5,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 894,
+          "z": 1.089,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.277,
+          "z": -0.764,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.271,
+          "z": 1.625,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.681,
+          "z": 0.94,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.557,
+          "z": 1.874,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.183,
+          "z": -0.602,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.021,
+          "z": -0.535,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.108,
+          "z": 1.741,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.169,
+          "z": 2.699,
+          "grade": "warn"
+        },
+        "bgBusy": {
+          "value": 0.064,
+          "z": 1.316,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.987,
+          "z": 0.88,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 61.859,
+          "z": 0.594,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 92.014,
+          "z": 1.064,
+          "grade": "ok"
+        }
+      }
+    },
+    "ash": {
+      "name": "애쉬",
+      "rarity": "SR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 379,
+          "z": 1.749,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 390,
+          "z": -0.497,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 91,
+          "z": 0.555,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 86216,
+          "z": 0.745,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 270,
+          "z": 0,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -14.43,
+          "z": -2.549,
+          "grade": "warn"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.256,
+          "z": -1.645,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.359,
+          "z": -1.408,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.359,
+          "z": 3.842,
+          "grade": "out"
+        },
+        "edge": {
+          "value": 0.152,
+          "z": -3.26,
+          "grade": "out"
+        },
+        "rimR": {
+          "value": 21.895,
+          "z": -0.549,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 11.352,
+          "z": -0.844,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 47.291,
+          "z": -0.346,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.116,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 25.397,
+          "z": 0.577,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 13,
+          "z": 6.07,
+          "grade": "out"
+        },
+        "highlightPct": {
+          "value": 0.008,
+          "z": -0.722,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 0.464,
+          "z": -0.685,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.549,
+          "z": 1.663,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.043,
+          "z": -2.701,
+          "grade": "warn"
+        },
+        "paletteSize": {
+          "value": 369,
+          "z": -1.534,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.374,
+          "z": 0.262,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.386,
+          "z": 3.225,
+          "grade": "out"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.279,
+          "z": -1.717,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.402,
+          "z": 0.391,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.171,
+          "z": -0.806,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.554,
+          "z": 3.161,
+          "grade": "out"
+        },
+        "edge": {
+          "value": 0.071,
+          "z": 0,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.074,
+          "z": -0.38,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.04,
+          "z": -0.426,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.992,
+          "z": 0.892,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 59.48,
+          "z": 0.459,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 89.234,
+          "z": 0.849,
+          "grade": "ok"
+        }
+      }
+    },
+    "zeke": {
+      "name": "지크",
+      "rarity": "UR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 291,
+          "z": -0.105,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 438,
+          "z": 1.207,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 66,
+          "z": -0.436,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 503,
+          "z": 15.513,
+          "grade": "out"
+        },
+        "silhouetteArea": {
+          "value": 75466,
+          "z": -0.069,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 294,
+          "z": 1.245,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 5.595,
+          "z": 1.616,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 8,
+          "z": -15.513,
+          "grade": "out"
+        },
+        "lightness": {
+          "value": 0.452,
+          "z": -0.662,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.735,
+          "z": 1.36,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.193,
+          "z": 1.113,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.288,
+          "z": -0.257,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 14.498,
+          "z": -0.851,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 4.478,
+          "z": -1.108,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 43.831,
+          "z": -0.488,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.102,
+          "z": -0.826,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 29.333,
+          "z": 0.71,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 6,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.366,
+          "z": -0.43,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 8.481,
+          "z": -0.401,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.394,
+          "z": -0.475,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.071,
+          "z": 0,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 744,
+          "z": 0.34,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.251,
+          "z": -1.046,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.07,
+          "z": -1.193,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 24,
+          "z": 15.513,
+          "grade": "out"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.534,
+          "z": -0.03,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.441,
+          "z": 0.762,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.237,
+          "z": 0.316,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.133,
+          "z": 0.237,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.076,
+          "z": 0.241,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.095,
+          "z": 0.29,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.042,
+          "z": -0.278,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.633,
+          "z": 0.093,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 79.518,
+          "z": 1.594,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 81.959,
+          "z": 0.288,
+          "grade": "ok"
+        }
+      }
+    },
+    "luna": {
+      "name": "루나",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 263,
+          "z": -0.696,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 389,
+          "z": -0.532,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 92,
+          "z": 0.595,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 71506,
+          "z": -0.369,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 269,
+          "z": -0.052,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -2.919,
+          "z": -0.155,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.443,
+          "z": -0.707,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.497,
+          "z": -0.393,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.262,
+          "z": 2.253,
+          "grade": "warn"
+        },
+        "edge": {
+          "value": 0.299,
+          "z": -0.003,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 20.372,
+          "z": -0.611,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 12.574,
+          "z": -0.797,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 21.355,
+          "z": -1.413,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.071,
+          "z": -1.16,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 0.983,
+          "z": -0.246,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 14,
+          "z": 6.745,
+          "grade": "out"
+        },
+        "highlightPct": {
+          "value": 0.25,
+          "z": -0.524,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 7.552,
+          "z": -0.434,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.331,
+          "z": -1.342,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.076,
+          "z": 0.419,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 651,
+          "z": -0.125,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.312,
+          "z": -0.397,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.107,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 2,
+          "z": 0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.465,
+          "z": -0.485,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.255,
+          "z": -1.019,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.243,
+          "z": 0.426,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.132,
+          "z": 0.235,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.066,
+          "z": -0.235,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.082,
+          "z": -0.122,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.051,
+          "z": 0.36,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.65,
+          "z": 0.132,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 35.281,
+          "z": -0.911,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 66.801,
+          "z": -0.882,
+          "grade": "ok"
+        }
+      }
+    },
+    "jasmine": {
+      "name": "자스민",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 364,
+          "z": 1.433,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 425,
+          "z": 0.745,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 58,
+          "z": -0.754,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 482,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 98863,
+          "z": 1.702,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 284,
+          "z": 0.726,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 2.366,
+          "z": 0.945,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 29,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.754,
+          "z": 0.849,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.532,
+          "z": -0.132,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.026,
+          "z": -1.63,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.327,
+          "z": 0.612,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 123.55,
+          "z": 3.6,
+          "grade": "out"
+        },
+        "rimG": {
+          "value": 99.631,
+          "z": 2.547,
+          "grade": "warn"
+        },
+        "rimB": {
+          "value": 89.661,
+          "z": 1.398,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.41,
+          "z": 2.494,
+          "grade": "warn"
+        },
+        "rimNavy": {
+          "value": -33.889,
+          "z": -1.422,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 0,
+          "z": -2.698,
+          "grade": "warn"
+        },
+        "highlightPct": {
+          "value": 1.747,
+          "z": 0.7,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 45.518,
+          "z": 0.909,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.38,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.079,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 641,
+          "z": -0.175,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.307,
+          "z": -0.446,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.143,
+          "z": -0.172,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.755,
+          "z": 1.434,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.291,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.205,
+          "z": -0.229,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0,
+          "z": -0.681,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.05,
+          "z": -0.985,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.051,
+          "z": -1.133,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.046,
+          "z": 0.015,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.81,
+          "z": 0.488,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 26.931,
+          "z": -1.383,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 58.877,
+          "z": -1.494,
+          "grade": "ok"
+        }
+      }
+    },
+    "queen": {
+      "name": "여왕",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 310,
+          "z": 0.295,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 471,
+          "z": 2.378,
+          "grade": "warn"
+        },
+        "topY": {
+          "value": 31,
+          "z": -1.825,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 501,
+          "z": 14.164,
+          "grade": "out"
+        },
+        "silhouetteArea": {
+          "value": 95697,
+          "z": 1.462,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 290,
+          "z": 1.038,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -3.474,
+          "z": -0.27,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 10,
+          "z": -14.164,
+          "grade": "out"
+        },
+        "lightness": {
+          "value": 0.584,
+          "z": 0,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.484,
+          "z": -0.482,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.136,
+          "z": 0.169,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.369,
+          "z": 1.534,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 38.774,
+          "z": 0.14,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 33.324,
+          "z": 0,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 28.936,
+          "z": -1.101,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.132,
+          "z": -0.51,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -9.838,
+          "z": -0.611,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 1.575,
+          "z": 0.559,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 44.202,
+          "z": 0.863,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.383,
+          "z": -0.629,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.093,
+          "z": 2.008,
+          "grade": "warn"
+        },
+        "paletteSize": {
+          "value": 641,
+          "z": -0.175,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.405,
+          "z": 0.59,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.111,
+          "z": -0.613,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 21,
+          "z": 13.49,
+          "grade": "out"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.616,
+          "z": 0.51,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.306,
+          "z": -0.525,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.289,
+          "z": 1.215,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.146,
+          "z": 0.328,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.092,
+          "z": 1.017,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.142,
+          "z": 1.826,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.079,
+          "z": 2.41,
+          "grade": "warn"
+        },
+        "warmth": {
+          "value": 0.885,
+          "z": 0.653,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 46.742,
+          "z": -0.262,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 78.879,
+          "z": 0.05,
+          "grade": "ok"
+        }
+      }
+    },
+    "rumi": {
+      "name": "루미",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 264,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 404,
+          "z": 0,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 77,
+          "z": 0,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 80068,
+          "z": 0.279,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 248,
+          "z": -1.141,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -0.146,
+          "z": 0.422,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.713,
+          "z": 0.645,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.55,
+          "z": 0,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.071,
+          "z": -0.884,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.343,
+          "z": 0.97,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 45.945,
+          "z": 0.433,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 50.222,
+          "z": 0.649,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 63.358,
+          "z": 0.316,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.213,
+          "z": 0.366,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 17.413,
+          "z": 0.308,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 4.662,
+          "z": 3.084,
+          "grade": "out"
+        },
+        "highlightBlobsPer10k": {
+          "value": 97.792,
+          "z": 2.759,
+          "grade": "warn"
+        },
+        "flatShare": {
+          "value": 0.424,
+          "z": -0.062,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.087,
+          "z": 1.492,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 698,
+          "z": 0.11,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.392,
+          "z": 0.447,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.07,
+          "z": -1.183,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.493,
+          "z": -0.303,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.472,
+          "z": 1.06,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.296,
+          "z": 1.327,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.303,
+          "z": 1.42,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.056,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.08,
+          "z": -0.191,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.026,
+          "z": -1.456,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.095,
+          "z": -1.103,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 61.071,
+          "z": 0.549,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 63.264,
+          "z": -1.155,
+          "grade": "ok"
+        }
+      }
+    },
+    "cherry_prince": {
+      "name": "체리프린스",
+      "rarity": "UR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 265,
+          "z": -0.653,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 387,
+          "z": -0.603,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 94,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 67473,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 257,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -2.207,
+          "z": -0.006,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 31,
+          "z": 0,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.766,
+          "z": 0.912,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.439,
+          "z": -0.815,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.027,
+          "z": -1.61,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.299,
+          "z": 0,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 119.823,
+          "z": 3.447,
+          "grade": "out"
+        },
+        "rimG": {
+          "value": 98.175,
+          "z": 2.491,
+          "grade": "warn"
+        },
+        "rimB": {
+          "value": 109.988,
+          "z": 2.235,
+          "grade": "warn"
+        },
+        "rimLightness": {
+          "value": 0.424,
+          "z": 2.646,
+          "grade": "warn"
+        },
+        "rimNavy": {
+          "value": -9.835,
+          "z": -0.611,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 2,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 3.475,
+          "z": 2.113,
+          "grade": "warn"
+        },
+        "highlightBlobsPer10k": {
+          "value": 83.589,
+          "z": 2.257,
+          "grade": "warn"
+        },
+        "flatShare": {
+          "value": 0.415,
+          "z": -0.182,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.071,
+          "z": -0.058,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 528,
+          "z": -0.739,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.448,
+          "z": 1.044,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.15,
+          "z": -0.071,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 3,
+          "z": 1.349,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.695,
+          "z": 1.034,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.305,
+          "z": -0.541,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.197,
+          "z": -0.374,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0,
+          "z": -0.683,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.068,
+          "z": -0.124,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.061,
+          "z": -0.793,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.045,
+          "z": -0.081,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.667,
+          "z": 0.169,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 39.452,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 74.533,
+          "z": -0.285,
+          "grade": "ok"
+        }
+      }
+    },
+    "venom": {
+      "name": "베놈",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 326,
+          "z": 0.632,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 448,
+          "z": 1.562,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 32,
+          "z": -1.785,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 75822,
+          "z": -0.042,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 285,
+          "z": 0.778,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 7.08,
+          "z": 1.925,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.344,
+          "z": -1.203,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.311,
+          "z": -1.758,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.38,
+          "z": 4.184,
+          "grade": "out"
+        },
+        "edge": {
+          "value": 0.194,
+          "z": -2.324,
+          "grade": "warn"
+        },
+        "rimR": {
+          "value": 33.969,
+          "z": -0.056,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 34.263,
+          "z": 0.036,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 50.64,
+          "z": -0.208,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.162,
+          "z": -0.178,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 16.671,
+          "z": 0.283,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.231,
+          "z": -0.54,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 13.848,
+          "z": -0.211,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.575,
+          "z": 2.027,
+          "grade": "warn"
+        },
+        "gradientSoftness": {
+          "value": 0.052,
+          "z": -1.803,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 406,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.357,
+          "z": 0.078,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.171,
+          "z": 0.228,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.228,
+          "z": -2.051,
+          "grade": "warn"
+        },
+        "saturation": {
+          "value": 0.528,
+          "z": 1.595,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.23,
+          "z": 0.197,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.55,
+          "z": 3.131,
+          "grade": "out"
+        },
+        "edge": {
+          "value": 0.066,
+          "z": -0.207,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.094,
+          "z": 0.273,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.031,
+          "z": -1.063,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.009,
+          "z": -1.295,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 54.465,
+          "z": 0.175,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 89.49,
+          "z": 0.869,
+          "grade": "ok"
+        }
+      }
+    },
+    "time_ruler": {
+      "name": "시간의지배자",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 307,
+          "z": 0.232,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 378,
+          "z": -0.923,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 102,
+          "z": 0.992,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 76382,
+          "z": 0,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 271,
+          "z": 0.052,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 0.749,
+          "z": 0.608,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.603,
+          "z": 0.094,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.195,
+          "z": -2.612,
+          "grade": "warn"
+        },
+        "dark": {
+          "value": 0.127,
+          "z": 0.025,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.317,
+          "z": 0.391,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 34.203,
+          "z": -0.047,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 32.746,
+          "z": -0.022,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 36.347,
+          "z": -0.796,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.135,
+          "z": -0.469,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 2.145,
+          "z": -0.207,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 4.838,
+          "z": 3.227,
+          "grade": "out"
+        },
+        "highlightBlobsPer10k": {
+          "value": 98.322,
+          "z": 2.778,
+          "grade": "warn"
+        },
+        "flatShare": {
+          "value": 0.421,
+          "z": -0.096,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.078,
+          "z": 0.58,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 357,
+          "z": -1.594,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.413,
+          "z": 0.676,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.12,
+          "z": -0.482,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.534,
+          "z": -0.033,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.141,
+          "z": -2.1,
+          "grade": "warn"
+        },
+        "contrast": {
+          "value": 0.281,
+          "z": 1.069,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.17,
+          "z": 0.495,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.105,
+          "z": 1.599,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.117,
+          "z": 1.028,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.093,
+          "z": 3.43,
+          "grade": "out"
+        },
+        "warmth": {
+          "value": 0.677,
+          "z": 0.192,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 20.075,
+          "z": -1.772,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 77.633,
+          "z": -0.046,
+          "grade": "ok"
+        }
+      }
+    },
+    "galaxy_whale": {
+      "name": "은하고래",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 317,
+          "z": 0.443,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 423,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 57,
+          "z": -0.794,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 479,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 88870,
+          "z": 0.945,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 276,
+          "z": 0.311,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -3.208,
+          "z": -0.215,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 32,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.652,
+          "z": 0.339,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.602,
+          "z": 0.379,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.132,
+          "z": 0.113,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.379,
+          "z": 1.769,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 50.912,
+          "z": 0.635,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 45.051,
+          "z": 0.451,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 57.52,
+          "z": 0.075,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.209,
+          "z": 0.329,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 6.608,
+          "z": -0.056,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 2.988,
+          "z": 1.714,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 79.442,
+          "z": 2.11,
+          "grade": "warn"
+        },
+        "flatShare": {
+          "value": 0.351,
+          "z": -1.07,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.092,
+          "z": 1.959,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 689,
+          "z": 0.065,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.378,
+          "z": 0.301,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.1,
+          "z": -0.764,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.558,
+          "z": 0.13,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.657,
+          "z": 2.824,
+          "grade": "warn"
+        },
+        "contrast": {
+          "value": 0.351,
+          "z": 2.278,
+          "grade": "warn"
+        },
+        "darkRatio": {
+          "value": 0.346,
+          "z": 1.715,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.107,
+          "z": 1.691,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.174,
+          "z": 2.869,
+          "grade": "warn"
+        },
+        "bgBusy": {
+          "value": 0.059,
+          "z": 0.948,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.414,
+          "z": -0.394,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 61.3,
+          "z": 0.562,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 93.4,
+          "z": 1.171,
+          "grade": "ok"
+        }
+      }
+    },
+    "doom": {
+      "name": "둠",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 262,
+          "z": -0.717,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 373,
+          "z": -1.1,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 122,
+          "z": 1.785,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 494,
+          "z": 9.443,
+          "grade": "out"
+        },
+        "silhouetteArea": {
+          "value": 59337,
+          "z": -1.29,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 257,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -5.559,
+          "z": -0.704,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 17,
+          "z": -9.443,
+          "grade": "out"
+        },
+        "lightness": {
+          "value": 0.365,
+          "z": -1.099,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.329,
+          "z": -1.628,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.274,
+          "z": 2.446,
+          "grade": "warn"
+        },
+        "edge": {
+          "value": 0.328,
+          "z": 0.625,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 51.684,
+          "z": 0.667,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 45.275,
+          "z": 0.459,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 50.555,
+          "z": -0.211,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.193,
+          "z": 0.158,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": -1.128,
+          "z": -0.317,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 4,
+          "z": 0,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.307,
+          "z": -0.478,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 12.134,
+          "z": -0.272,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.346,
+          "z": -1.135,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.08,
+          "z": 0.858,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 407,
+          "z": -1.344,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.374,
+          "z": 0.263,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.139,
+          "z": -0.228,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 5,
+          "z": 2.698,
+          "grade": "warn"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.236,
+          "z": -2.002,
+          "grade": "warn"
+        },
+        "saturation": {
+          "value": 0.229,
+          "z": -1.259,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.152,
+          "z": -1.14,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.648,
+          "z": 3.808,
+          "grade": "out"
+        },
+        "edge": {
+          "value": 0.082,
+          "z": 0.505,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.108,
+          "z": 0.725,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.043,
+          "z": -0.204,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.11,
+          "z": -1.07,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 35.989,
+          "z": -0.871,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 85.152,
+          "z": 0.534,
+          "grade": "ok"
+        }
+      }
+    },
+    "cinderella": {
+      "name": "신데렐라",
+      "rarity": "UR",
+      "heightGroup": "medium",
+      "sd": {
+        "bboxW": {
+          "value": 370,
+          "z": 1.56,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 412,
+          "z": 0.284,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 71,
+          "z": -0.238,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 482,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 101438,
+          "z": 1.897,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 292,
+          "z": 1.141,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -3.661,
+          "z": -0.309,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 29,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.799,
+          "z": 1.077,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.608,
+          "z": 0.423,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.034,
+          "z": -1.494,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.262,
+          "z": -0.825,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 102.768,
+          "z": 2.751,
+          "grade": "warn"
+        },
+        "rimG": {
+          "value": 94.78,
+          "z": 2.361,
+          "grade": "warn"
+        },
+        "rimB": {
+          "value": 108.358,
+          "z": 2.168,
+          "grade": "warn"
+        },
+        "rimLightness": {
+          "value": 0.408,
+          "z": 2.472,
+          "grade": "warn"
+        },
+        "rimNavy": {
+          "value": 5.59,
+          "z": -0.091,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 2,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 3.844,
+          "z": 2.415,
+          "grade": "warn"
+        },
+        "highlightBlobsPer10k": {
+          "value": 76.697,
+          "z": 2.013,
+          "grade": "warn"
+        },
+        "flatShare": {
+          "value": 0.505,
+          "z": 1.054,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.061,
+          "z": -1.004,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 716,
+          "z": 0.2,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.461,
+          "z": 1.183,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.263,
+          "z": 1.509,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 1,
+          "z": 0,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.777,
+          "z": 1.578,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.383,
+          "z": 0.206,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.191,
+          "z": -0.467,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.001,
+          "z": -0.68,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.074,
+          "z": 0.152,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.083,
+          "z": -0.086,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.043,
+          "z": -0.221,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.591,
+          "z": 0,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 35.314,
+          "z": -0.909,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 78.871,
+          "z": 0.049,
+          "grade": "ok"
+        }
+      }
+    },
+    "harmonious": {
+      "name": "하모니어스",
+      "rarity": "UR",
+      "heightGroup": "short",
+      "sd": {
+        "bboxW": {
+          "value": 387,
+          "z": 1.918,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 393,
+          "z": -0.39,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 90,
+          "z": 0.516,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 482,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 97879,
+          "z": 1.628,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 257,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 2.47,
+          "z": 0.966,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 29,
+          "z": -1.349,
+          "grade": "ok"
+        },
+        "lightness": {
+          "value": 0.68,
+          "z": 0.477,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.668,
+          "z": 0.871,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.029,
+          "z": -1.579,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.31,
+          "z": 0.241,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 122.855,
+          "z": 3.571,
+          "grade": "out"
+        },
+        "rimG": {
+          "value": 118.683,
+          "z": 3.279,
+          "grade": "out"
+        },
+        "rimB": {
+          "value": 94.442,
+          "z": 1.595,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.437,
+          "z": 2.785,
+          "grade": "warn"
+        },
+        "rimNavy": {
+          "value": -28.413,
+          "z": -1.237,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 0,
+          "z": -2.698,
+          "grade": "warn"
+        },
+        "highlightPct": {
+          "value": 1.042,
+          "z": 0.123,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 19.82,
+          "z": 0,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.43,
+          "z": 0.02,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.07,
+          "z": -0.113,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 1460,
+          "z": 3.917,
+          "grade": "out"
+        },
+        "top5Share": {
+          "value": 0.224,
+          "z": -1.333,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.282,
+          "z": 1.777,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 3,
+          "z": 1.349,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.804,
+          "z": 1.754,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.58,
+          "z": 2.085,
+          "grade": "warn"
+        },
+        "contrast": {
+          "value": 0.138,
+          "z": -1.387,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.001,
+          "z": -0.678,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.077,
+          "z": 0.275,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.093,
+          "z": 0.234,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.049,
+          "z": 0.211,
+          "grade": "ok"
+        },
+        "warmth": {
+          "value": 0.833,
+          "z": 0.537,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 54.024,
+          "z": 0.151,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 89.594,
+          "z": 0.877,
+          "grade": "ok"
+        }
+      }
+    },
+    "frost_witch": {
+      "name": "혹한의마녀",
+      "rarity": "UR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 295,
+          "z": -0.021,
+          "grade": "ok"
+        },
+        "bboxH": {
+          "value": 431,
+          "z": 0.958,
+          "grade": "ok"
+        },
+        "topY": {
+          "value": 53,
+          "z": -0.952,
+          "grade": "ok"
+        },
+        "feetY": {
+          "value": 483,
+          "z": 2.023,
+          "grade": "warn"
+        },
+        "silhouetteArea": {
+          "value": 81791,
+          "z": 0.41,
+          "grade": "ok"
+        },
+        "headCenterToFeet": {
+          "value": 272,
+          "z": 0.104,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": -5.419,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 28,
+          "z": -2.023,
+          "grade": "warn"
+        },
+        "lightness": {
+          "value": 0.757,
+          "z": 0.865,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.634,
+          "z": 0.615,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.032,
+          "z": -1.527,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.285,
+          "z": -0.324,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 52.103,
+          "z": 0.684,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 74.102,
+          "z": 1.567,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 107.984,
+          "z": 2.153,
+          "grade": "warn"
+        },
+        "rimLightness": {
+          "value": 0.314,
+          "z": 1.458,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 55.881,
+          "z": 1.606,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 3,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 1.32,
+          "z": 0.351,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 38.88,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.404,
+          "z": -0.337,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.067,
+          "z": -0.375,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 541,
+          "z": -0.674,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.356,
+          "z": 0.073,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.23,
+          "z": 1.053,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 3,
+          "z": 1.349,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.657,
+          "z": 0.783,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.539,
+          "z": 1.693,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.254,
+          "z": 0.613,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.071,
+          "z": -0.19,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.098,
+          "z": 1.299,
+          "grade": "ok"
+        },
+        "sharpness": {
+          "value": 0.088,
+          "z": 0.082,
+          "grade": "ok"
+        },
+        "bgBusy": {
+          "value": 0.082,
+          "z": 2.611,
+          "grade": "warn"
+        },
+        "warmth": {
+          "value": 0.114,
+          "z": -1.06,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 51.537,
+          "z": 0.01,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 93.211,
+          "z": 1.156,
+          "grade": "ok"
+        }
+      }
+    },
+    "behemoth": {
+      "name": "베히모스",
+      "rarity": "UR",
+      "heightGroup": "tall",
+      "sd": {
+        "bboxW": {
+          "value": 423,
+          "z": 2.677,
+          "grade": "warn"
+        },
+        "bboxH": {
+          "value": 472,
+          "z": 2.414,
+          "grade": "warn"
+        },
+        "topY": {
+          "value": 9,
+          "z": -2.698,
+          "grade": "warn"
+        },
+        "feetY": {
+          "value": 480,
+          "z": 0,
+          "grade": "ok"
+        },
+        "silhouetteArea": {
+          "value": 108048,
+          "z": 2.397,
+          "grade": "warn"
+        },
+        "headCenterToFeet": {
+          "value": 289,
+          "z": 0.986,
+          "grade": "ok"
+        },
+        "comXOffset": {
+          "value": 2.685,
+          "z": 1.011,
+          "grade": "ok"
+        },
+        "cellMargin": {
+          "value": 9,
+          "z": -14.839,
+          "grade": "out"
+        },
+        "lightness": {
+          "value": 0.386,
+          "z": -0.991,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.283,
+          "z": -1.961,
+          "grade": "ok"
+        },
+        "dark": {
+          "value": 0.152,
+          "z": 0.445,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.298,
+          "z": -0.037,
+          "grade": "ok"
+        },
+        "rimR": {
+          "value": 23.908,
+          "z": -0.467,
+          "grade": "ok"
+        },
+        "rimG": {
+          "value": 12.031,
+          "z": -0.818,
+          "grade": "ok"
+        },
+        "rimB": {
+          "value": 72.073,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "rimLightness": {
+          "value": 0.165,
+          "z": -0.148,
+          "grade": "ok"
+        },
+        "rimNavy": {
+          "value": 48.165,
+          "z": 1.345,
+          "grade": "ok"
+        },
+        "rimThickness": {
+          "value": 6,
+          "z": 1.349,
+          "grade": "ok"
+        },
+        "highlightPct": {
+          "value": 0.203,
+          "z": -0.563,
+          "grade": "ok"
+        },
+        "highlightBlobsPer10k": {
+          "value": 2.869,
+          "z": -0.6,
+          "grade": "ok"
+        },
+        "flatShare": {
+          "value": 0.411,
+          "z": -0.239,
+          "grade": "ok"
+        },
+        "gradientSoftness": {
+          "value": 0.067,
+          "z": -0.418,
+          "grade": "ok"
+        },
+        "paletteSize": {
+          "value": 621,
+          "z": -0.275,
+          "grade": "ok"
+        },
+        "top5Share": {
+          "value": 0.181,
+          "z": -1.781,
+          "grade": "ok"
+        },
+        "viewAreaSpread": {
+          "value": 0.087,
+          "z": -0.954,
+          "grade": "ok"
+        },
+        "feetSpread": {
+          "value": 0,
+          "z": -0.674,
+          "grade": "ok"
+        }
+      },
+      "memorial": {
+        "lightness": {
+          "value": 0.518,
+          "z": -0.132,
+          "grade": "ok"
+        },
+        "saturation": {
+          "value": 0.329,
+          "z": -0.305,
+          "grade": "ok"
+        },
+        "contrast": {
+          "value": 0.258,
+          "z": 0.674,
+          "grade": "ok"
+        },
+        "darkRatio": {
+          "value": 0.097,
+          "z": -0.012,
+          "grade": "ok"
+        },
+        "edge": {
+          "value": 0.118,
+          "z": 2.24,
+          "grade": "warn"
+        },
+        "sharpness": {
+          "value": 0.154,
+          "z": 2.212,
+          "grade": "warn"
+        },
+        "bgBusy": {
+          "value": 0.093,
+          "z": 3.425,
+          "grade": "out"
+        },
+        "warmth": {
+          "value": 0.506,
+          "z": -0.188,
+          "grade": "ok"
+        },
+        "colourfulness": {
+          "value": 47.354,
+          "z": -0.227,
+          "grade": "ok"
+        },
+        "fileKiB": {
+          "value": 93.58,
+          "z": 1.184,
+          "grade": "ok"
+        }
+      }
+    }
+  }
+}

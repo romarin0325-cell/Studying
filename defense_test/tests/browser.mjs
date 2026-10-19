@@ -94,7 +94,7 @@ try{
     const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
     await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
-    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),35);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),39);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
     await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
     await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
     const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
@@ -245,6 +245,9 @@ try{
     assert.equal(await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1,'real manual skill');
     await page.locator('[data-action="leave"]').click();await page.locator('[data-action="save-leave"]').click();
     const saved=await profile(page);assert.ok(saved.active.run);await reload(test);
+    // CI once timed out here (2026-10-19, passed on rerun). If the home screen offers no resume, say what the save looked like.
+    await page.locator('[data-action="resume"],[data-action="prepare"]').first().waitFor();
+    if(!await page.locator('[data-action="resume"]').count()){const after=await profile(page);assert.fail('no resume after reload: active='+JSON.stringify(after.active?Object.keys(after.active):null)+' run='+!!after.active?.run+' revision '+saved.revision+'->'+after.revision);}
     await page.locator('[data-action="resume"]').click();await page.locator('#arena').waitFor();await page.locator('[data-action="pause"]').click();
     assert.ok((await page.evaluate(()=>window.STAR_GARDEN.battle.time))>=battleTime);
     assert.deepEqual((await profile(page)).active.deck,saved.active.deck);
@@ -262,8 +265,8 @@ try{
   }
   const lateProfile=createProfile(NOW);lateProfile.cleared=45;
   const lateTest=await boot(390,844,lateProfile);await nav(lateTest.page,'동료');
-  assert.equal(await lateTest.page.locator('.cards .cc').count(),35,'the new companions join the collection once stage 45 is cleared');
-  for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
+  assert.equal(await lateTest.page.locator('.cards .cc').count(),39,'the new companions join the collection once stage 45 is cleared');
+  for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
   await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();
   const grown=createProfile(NOW);grown.cleared=36;grown.dreams=5000;
   for(const h of HEROES){grown.heroes[h.id].owned=true;grown.heroes[h.id].copies=3;}

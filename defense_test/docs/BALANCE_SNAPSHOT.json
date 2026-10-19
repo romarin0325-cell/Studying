@@ -106,13 +106,13 @@
     },
     {
       "name": "specific SR",
-      "perDraw": 0.008,
-      "meanDraws": 125,
-      "medianDraws": 87,
-      "p90Draws": 287,
-      "at20": 0.14840433291485078,
-      "at50": 0.3307573538670161,
-      "at100": 0.5521142805969217
+      "perDraw": 0.006,
+      "meanDraws": 166.66666666666666,
+      "medianDraws": 116,
+      "p90Draws": 383,
+      "at20": 0.11340007965220833,
+      "at50": 0.2598508923653916,
+      "at100": 0.4521792984676929
     },
     {
       "name": "any normal UR",
@@ -1606,6 +1606,12 @@
       "hidden": false
     },
     {
+      "id": "antropy",
+      "name": "앤트로피",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
       "id": "storm_sage",
       "name": "폭풍의현자",
       "rarity": "SR",
@@ -1642,6 +1648,18 @@
       "hidden": false
     },
     {
+      "id": "cure_master",
+      "name": "큐어마스터",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "ash",
+      "name": "애쉬",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
       "id": "zeke",
       "name": "지크",
       "rarity": "UR",
@@ -1674,6 +1692,12 @@
     {
       "id": "cherry_prince",
       "name": "체리프린스",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "venom",
+      "name": "베놈",
       "rarity": "UR",
       "hidden": false
     },

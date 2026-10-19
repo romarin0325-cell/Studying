@@ -45,7 +45,7 @@ for(const a of ARTIFACTS){
 }
 const expectedIds=HEROES.map(h=>h.id).sort().join(',');
 for(const map of [MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST]){
-  if(Object.keys(map).sort().join(',')!==expectedIds||HEROES.length!==35)throw new Error('Memorial roster mismatch.');
+  if(Object.keys(map).sort().join(',')!==expectedIds||HEROES.length!==39)throw new Error('Memorial roster mismatch.');
 }
 async function readMemorial(id,format){
   const entry=MEMORIAL_MEDIA_MANIFEST[id],record=format==='avif'?entry:entry.webp;

@@ -12,9 +12,9 @@ export const GIFTS=Object.freeze({
 });
 const group=(gift,ids)=>ids.map(id=>[id,gift]);
 export const FAVORITE=Object.freeze(Object.fromEntries([
-  ...group('candy',['star_boy','siren','guardian','red_dragon','storm_sage','phantom','rumi','galaxy_whale','harmonious','time_ruler','toffee_apple','sunflower']),
+  ...group('candy',['star_boy','siren','guardian','red_dragon','storm_sage','phantom','rumi','galaxy_whale','harmonious','time_ruler','toffee_apple','sunflower','cure_master','venom']),
   ...group('letter',['snow_rabbit','night_rabbit','great_detective','santa','flame_sage','lightning_sage','zeke','luna','jasmine','doom','behemoth','joker']),
-  ...group('bouquet',['silver_rabbit','mushroom_king','avalanche_maid','aurora','time_magician','ancient_dragon','queen','cherry_prince','cinderella','frost_witch','underdog']),
+  ...group('bouquet',['silver_rabbit','mushroom_king','avalanche_maid','aurora','time_magician','ancient_dragon','queen','cherry_prince','cinderella','frost_witch','underdog','antropy','ash']),
 ]));
 // What each companion says to the gift they love.
 export const FAVORITE_LINES=Object.freeze({
@@ -38,6 +38,10 @@ export const FAVORITE_LINES=Object.freeze({
   luna:'…여기서 읽으라고? 됐어, 나중에 혼자 읽을 거야. …버리진 않아.',
   jasmine:'꾸미지 않은 말이라 더 좋아요. 이 편지가 초상화보다 저를 닮았네요.',
   doom:'봉투를 빼앗지 않고 받는 건 처음이군. …답장은 계약서보다 짧게 쓰지.',
+  ash:'어머, 꽃? …시들 때까지는 두고 볼 테니까, 태워 버릴 일은 없을 거야. 감사 인사는 안 해. 이미 얼굴에 써 있으니까.',
+  venom:'…받아도 되나요. 내 손에서는 곧 시들 텐데. …그래도, 오늘은 시들지 않게 두고 볼게요.',
+  antropy:'꽃…? 지우지 않고 받은 건 처음이에요. 시들 때까지 곁에 둘게요.',
+  cure_master:'별사탕이다♡ 약은 달아야 먹기 쉽죠! 이건 제가 먼저 맛 좀 볼게요♡',
   joker:'편지? 와, 봉투 뜯는 순간이 제일 소름 돋는데! …이거 좋아. 답장은 카드로 보낼게. 뒷면은 비워 두고.',
   sunflower:'별사탕? 햇빛 굳혀 놓은 것 같네. 아껴 먹을게. …아니, 지금 먹을래. 졸려서 못 참겠어.',
   toffee_apple:'별사탕…! 나한테? 깨물면 없어지잖아… 녹을 때까지 안고 있을래. 헤헤, 달다.',
@@ -76,6 +80,10 @@ export const GIFT_LINES=Object.freeze({
   luna:'…뭐야, 나 주는 거야? 흥, 받아는 줄게. …고마워.',
   jasmine:'성녀가 아니라 저에게 주는 선물이라니… 정말 기뻐요.',
   doom:'…함정은 아니군. 받아 두지. 빚으로 달아 두진 않겠다.',
+  ash:'흥, 공물이라고 해 두지. 상급 악마에게 바치는 거니까 당연한 거야. …고마워.',
+  venom:'…가까이 오지 않아도 돼요. 거기 두고 가요. 나중에, 천천히 받을게요.',
+  antropy:'받아도 되나요. …지우지 않을 거예요. 약속해요.',
+  cure_master:'선물이에요? 어머, 환자분 마음이 아주 건강하시네요♡ 잘 받을게요!',
   joker:'선물? 포장지부터 뜯어 볼게. 안에 뭐가 있든 웃을 준비는 되어 있어. 항상.',
   sunflower:'선물이야? 고맙다는 말은 해 지기 전에 해 둘게. 해 지면 졸려서 까먹거든.',
   toffee_apple:'선물이야? 나한테? 아하하, 이거 나중에 도로 가져가는 거 아니지? 아니지?',

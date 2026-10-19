@@ -772,11 +772,11 @@ function relicTierChip(){
 }
 let pityPick=null;
 function pitySheet(){
-  const which=banner==='relic'?'normal':banner,n=p().pity[which],max=T.pity[which],c=calendar(now()),pool=which==='season'?[c.guardian]:[c.pickup,...ROSTER.UR.filter(id=>id!==c.pickup)];
-  if(!pool.includes(pityPick))pityPick=pool[0];const full=n>=max;
+  const which=banner==='relic'?'normal':banner,n=p().pity[which],max=T.pity[which],c=calendar(now()),pool=which==='season'?[c.guardian]:[c.pickup,...heroPool('UR',lateOpen(p().cleared)).filter(id=>id!==c.pickup)];
+  if(!pool.includes(pityPick))pityPick=pool[0];const locked=LATE_COMPANIONS.includes(pityPick)&&p().cleared<PART_STAGES,full=n>=max&&!locked;
   show('교환',which==='season'?'시즌 소환':'일반 소환',`<div class="pity-meter"><span class="pity-ring big" style="--p:${Math.min(1,n/max).toFixed(3)}">${icon('star')}</span><div><b>${n}<em>/${max}</em></b><p>유료 소환 1회마다 1이 쌓여요. ${max}가 되면 원하는 동료 한 명을 데려올 수 있어요. UR이 나와도 줄지 않아요.</p></div></div>
     <div class="pity-pool">${pool.map(id=>`<button class="pity-pick ${pityPick===id?'on':''}" data-pity-pick="${id}" data-rarity="UR">${image(id)}<b>${HERO[id].name}</b>${id===c.pickup&&which==='normal'?'<small>이번 주 픽업</small>':''}${p().heroes[id].owned?`<small class="have">보유 +${p().heroes[id].enhance}</small>`:''}</button>`).join('')}</div>`,
-    `<button class="primary wide shine" data-action="pity-claim" ${full?'':'disabled'}>${full?`${HERO[pityPick].name} 데려오기`:`${max-n}회 더 소환하면 교환할 수 있어요`}</button>`,'pity');
+    `<button class="primary wide shine" data-action="pity-claim" ${full?'':'disabled'}>${locked?`스테이지 ${PART_STAGES} 클리어 후 교환할 수 있어요`:full?`${HERO[pityPick].name} 데려오기`:`${max-n}회 더 소환하면 교환할 수 있어요`}</button>`,'pity');
 }
 function claimPity(){
   const which=banner==='relic'?'normal':banner,result=act('pityClaim',{banner:which,id:pityPick},false);if(!result.ok){toast(result.message);return;}
@@ -785,11 +785,12 @@ function claimPity(){
 function rates(){
   const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates;
   let rows=RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
-  if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%";rows+=`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${half}</b></div>`;}
-  if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/ROSTER.UR.length)}</b></div><div class="rate-row"><span>UR · 나머지 5종 각각</span><b>${pct(T.heroRates[3]*.5/6)}</b></div>`;
+  if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%",closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<PART_STAGES;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${PART_STAGES} 클리어 후</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${half}</b></div>`;}
+  const urCount=heroPool('UR',lateOpen(p().cleared)).length;
+  if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/urCount)}</b></div><div class="rate-row"><span>UR · 나머지 ${urCount-1}종 각각</span><b>${pct(T.heroRates[3]*.5/urCount)}</b></div>`;
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'시즌':'일반',`${rows}
     <ul class="notes">${banner==='relic'?`<li>누적 ${fmt(p().relicDraws)}회. 단계가 오를수록 높은 등급 확률이 올라가고, 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
-      :`<li>${banner==='season'?'UR의 절반은 이달의 수호자예요. 다른 달 수호자는 나오지 않아요.':'UR의 절반은 이번 주 픽업, 절반은 일반 UR 6종(픽업 포함) 중 하나예요. 픽업은 매주 월요일에 바뀌어요.'}</li><li>교환: 유료 소환 ${T.pity[banner]}회마다 ${banner==='season'?'이달의 수호자':'일반 UR 6종 중 원하는 한 명'}을(를) 데려올 수 있어요. UR이 나와도 초기화되지 않고 시즌이 바뀌어도 이어져요.</li><li>10회 소환 전 별빛 퀴즈를 맞히면 그 10회의 UR 확률이 2배가 돼요. 가끔 행운이 찾아올 수도 있어요.</li>`}<li>1회와 10회의 확률은 같아요. 중복은 강화 재료가 돼요.</li></ul>
+      :`<li>${banner==='season'?'UR의 절반은 이달의 수호자예요. 다른 달 수호자는 나오지 않아요.':`UR의 절반은 이번 주 픽업, 절반은 일반 UR ${urCount}종(픽업 포함) 중 하나예요. 픽업은 매주 월요일에 바뀌어요.`}</li><li>교환: 유료 소환 ${T.pity[banner]}회마다 ${banner==='season'?'이달의 수호자':`일반 UR ${urCount}종 중 원하는 한 명`}을(를) 데려올 수 있어요. UR이 나와도 초기화되지 않고 시즌이 바뀌어도 이어져요.</li><li>10회 소환 전 별빛 퀴즈를 맞히면 그 10회의 UR 확률이 2배가 돼요. 가끔 행운이 찾아올 수도 있어요.</li>`}<li>1회와 10회의 확률은 같아요. 중복은 강화 재료가 돼요.</li></ul>
     <details class="more"><summary>얻을 수 있는 대상</summary>${(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES))).map(h=>`<div class="rate-row"><span>${h.name}</span>${badge(h.rarity)}</div>`).join('')}</details>`,`<button class="primary wide" data-action="close">확인</button>`,'rates');
 }
 
