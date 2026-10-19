@@ -244,10 +244,13 @@ try{
     await page.locator(`[data-skill="${move.hero}"]`).click();
     assert.equal(await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1,'real manual skill');
     await page.locator('[data-action="leave"]').click();await page.locator('[data-action="save-leave"]').click();
-    const saved=await profile(page);assert.ok(saved.active.run);await reload(test);
+    const saved=await profile(page);assert.ok(saved.active.run);
+    // Reload only once the save is on disk; CI twice lost the save across this reload (2026-10-19, 10-20).
+    await page.waitForFunction(({key,revision})=>{try{const disk=JSON.parse(localStorage.getItem(key)||'null');return disk?.revision===revision&&!!disk.active?.run;}catch{return false;}},{key:SAVE_KEY,revision:saved.revision});
+    await reload(test);
     // CI once timed out here (2026-10-19, passed on rerun). If the home screen offers no resume, say what the save looked like.
     await page.locator('[data-action="resume"],[data-action="prepare"]').first().waitFor();
-    if(!await page.locator('[data-action="resume"]').count()){const after=await profile(page);assert.fail('no resume after reload: active='+JSON.stringify(after.active?Object.keys(after.active):null)+' run='+!!after.active?.run+' revision '+saved.revision+'->'+after.revision);}
+    if(!await page.locator('[data-action="resume"]').count()){const after=await profile(page),disk=await page.evaluate(key=>{const raw=localStorage.getItem(key);if(!raw)return 'empty';try{const d=JSON.parse(raw);return 'revision '+d.revision+' run '+!!d.active?.run;}catch{return 'unreadable';}},SAVE_KEY),warning=await page.locator('.toast,.warning,[role=alert]').allInnerTexts().catch(()=>[]);assert.fail('no resume after reload: active='+JSON.stringify(after.active?Object.keys(after.active):null)+' run='+!!after.active?.run+' revision '+saved.revision+'->'+after.revision+' disk='+disk+' notes='+JSON.stringify(warning));}
     await page.locator('[data-action="resume"]').click();await page.locator('#arena').waitFor();await page.locator('[data-action="pause"]').click();
     assert.ok((await page.evaluate(()=>window.STAR_GARDEN.battle.time))>=battleTime);
     assert.deepEqual((await profile(page)).active.deck,saved.active.deck);

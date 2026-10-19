@@ -1630,3 +1630,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .rate-row.late-closed{color:var(--text3)}.rate-row.late-closed .ic{width:14px;height:14px;vertical-align:-2px}
 .late-collection-note{display:flex;align-items:center;justify-content:center;gap:6px;margin:12px 0 4px;padding:9px 12px;border-radius:12px;font-size:12px;color:var(--text3);background:rgba(8,11,31,.5);border:1px dashed var(--line2)}
 .late-collection-note .ic{width:14px;height:14px}
+.tutor-tabs{display:flex;gap:6px;padding:3px;border-radius:12px;background:var(--raise);border:1px solid var(--line2)}
+.tutor-tab{flex:1;min-height:38px;border-radius:9px;font-size:13px;font-weight:700;color:var(--text3);background:transparent}
+.tutor-tab.on{background:var(--panel,#1c2733);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.25)}
+.tutor-panel .fineprint code{font-size:11px;padding:1px 4px;border-radius:5px;background:var(--raise)}
