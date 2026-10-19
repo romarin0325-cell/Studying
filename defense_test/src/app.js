@@ -1,7 +1,7 @@
 import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
+import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
