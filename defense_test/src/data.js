@@ -1231,6 +1231,80 @@ export const HEROES = [
     "shape": "beam",
     "range": 520,
     "radius": 24
+  },
+  {
+    "id": "joker",
+    "name": "조커",
+    "title": "색이 바뀌는 광대",
+    "color": "#f06aa8",
+    "art": {
+      "atlas": "unit-joker",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 272,
+        "y": 228,
+        "size": 250
+      }
+    },
+    "damage": 22,
+    "interval": 1,
+    "attack": "cards",
+    "trait": {
+      "type": "joker",
+      "text": "필살기를 쓸 때마다 색이 바뀌고, 색에 따라 일반 공격이 상태 이상을 겁니다. 빨강 화상, 파랑 감속, 초록 중독, 하양 성광, 검정 노출."
+    },
+    "skill": {
+      "name": "레인보우 룰렛",
+      "cost": 50,
+      "type": "roulette",
+      "text": "적 전체에게 위력 3배 피해를 주고 다음 색으로 바꿉니다."
+    },
+    "heightGroup": "medium",
+    "role": "상태 부여 · 범위",
+    "shape": "splash",
+    "range": 430,
+    "radius": 56
+  },
+  {
+    "id": "sunflower",
+    "name": "해바라기",
+    "title": "느긋한 광합성",
+    "color": "#f2c230",
+    "art": {
+      "atlas": "unit-sunflower",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 257,
+        "y": 218,
+        "size": 250
+      }
+    },
+    "damage": 36,
+    "interval": 1,
+    "attack": "sun",
+    "trait": {
+      "type": "sunlight",
+      "text": "웨이브를 마칠 때마다 햇빛이 쌓입니다(최대 3, 모든 해바라기가 함께 씀). 햇빛 1·2·3개일 때 일반 공격이 반경 30·60·90으로 터집니다."
+    },
+    "skill": {
+      "name": "솔라플레어",
+      "cost": 90,
+      "type": "solarflare",
+      "text": "햇빛을 모두 써서 적 전체에게 위력 2배 + 햇빛당 3배 피해를 줍니다(3개면 11배)."
+    },
+    "heightGroup": "medium",
+    "role": "햇빛 저축 · 단일",
+    "shape": "single",
+    "range": 500,
+    "radius": 0
   }
 ];
 
@@ -1688,6 +1762,8 @@ export const ASSET_PATHS = {
   "unit-behemoth": "./assets/merge/units/behemoth.webp",
   "unit-underdog": "./assets/merge/units/underdog.webp",
   "unit-toffee_apple": "./assets/merge/units/toffee_apple.webp",
+  "unit-joker": "./assets/merge/units/joker.webp",
+  "unit-sunflower": "./assets/merge/units/sunflower.webp",
   "garden": "./assets/merge/garden.webp",
   "summon-altar": "./assets/merge/summon-altar.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",

@@ -1552,6 +1552,18 @@
       "hidden": false
     },
     {
+      "id": "joker",
+      "name": "조커",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "sunflower",
+      "name": "해바라기",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
       "id": "great_detective",
       "name": "명탐정",
       "rarity": "R",

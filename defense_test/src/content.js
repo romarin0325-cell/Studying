@@ -10,7 +10,7 @@ export const RARITY = {
   UR:{name:'얼티밋레어',color:'#e6be6c',motif:'왕관'},
 };
 export const ROSTER = {
-  C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog'],
+  C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog','joker','sunflower'],
   R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple'],
   SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom'],
   UR:['zeke','luna','jasmine','queen','rumi','cherry_prince'],
@@ -49,7 +49,7 @@ export const CLEAR_UNLOCKS=Object.freeze({45:['behemoth']});
 // has been cleared (before that the summon pool and the collection are exactly what they were). Every new
 // companion goes on this list.
 export const LATE_UNLOCK_STAGE=45;
-export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple']);
+export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower']);
 // Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
 // from/to are main-stage equivalents of the first and last wave; long runs also grow the board, so
 // late waves add `late` extra health (quadratic in run progress). Rewards scale with `reward`.
