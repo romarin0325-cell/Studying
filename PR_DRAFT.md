@@ -1,6 +1,3 @@
-# Title
-feat(card): 카드 및 카드 클로드의 Pro 모델 옵션을 Gemini 4 Argon으로 업그레이드
-
 ## Summary
 `card` 및 `card_claude`의 고성능 모델 옵션을 기존 `gemini-2.5-pro`에서 `defense_test`와 동일한 `gemini-4-argon`(Argon)으로 업그레이드했습니다.
 
