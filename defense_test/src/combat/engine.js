@@ -29,7 +29,7 @@ export const rankSupport=rank=>1+.2*(rank-1);
 export const rankControl=rank=>1+.1*(rank-1);
 export const TRAINING_STEP=.25;
 // Field-wide ultimate buffs. They multiply with placement auras, so they stay modest.
-export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:10},awaken:{power:.35,seconds:10},march:{speed:.2,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.22,speed:.22,seconds:10},echo:{ratio:.65,seconds:8}});
+export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:10},awaken:{power:.35,seconds:10},march:{speed:.2,seconds:8},festive:{speed:.2,seconds:8},radiance:{power:.5,seconds:8},harmony:{power:.22,speed:.22,seconds:10},echo:{ratio:.65,seconds:8}});
 // Divine marks feed starlight when the marked enemy falls (per remaining stack).
 export const DIVINE_GAUGE=.5,DIVINE_BOSS_GAUGE=3;
 // Bosses take half stun/freeze duration and half knockback/pull, then 2 s of control immunity.
@@ -99,11 +99,11 @@ export function has(s,id){return s.artifacts.includes(id);}
 export const RELIC_VALUES=Object.freeze({
   // Relic pass 7 (docs/RELIC_PASS7.md): lantern refunds a share and hourglass adds a little per merge, so no ultimate
   // or merge loop can feed itself; outliers above ~1.3x of their budget came down; constellation rewards a real mosaic.
-  hourglass:{starlight:10,store:60},ember:{burn:.7},frost:{slowed:.22},banner:{power:.21},chorus:{speed:.35,count:3},lantern:{refund:.25},lens:{boss:.3},seed:{poison:.4},
-  feather:{base:6,perWave:3,cap:60},crown:{power:.16},sprout:{power:.25,discount:2},amulet:{near:.35,starlight:15,uses:1},
+  hourglass:{starlight:10,store:60},ember:{burn:.7},frost:{slowed:.22},banner:{power:.21},chorus:{speed:.35,count:3},lantern:{refund:.2},lens:{boss:.3},seed:{poison:.4},
+  feather:{base:6,perWave:3,cap:60},crown:{power:.16},sprout:{power:.2,discount:2},amulet:{near:.35,starlight:15,uses:1},
   meteor:{hit:1.1},prism:{chain:.7},tide:{splash:.22},roots:{life:.15,radius:.06},guild:{power:.25},phoenix:{taken:.2,uses:1},
-  twin:{echo:1},constellation:{three:.32,four:.5},alchemy:{power:.5,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.35,poison:5},
-  royal_seal:{starlight:30,boss:.35},gift_ribbon:{chance:.25},broken_clock:{duration:1},
+  twin:{echo:1},constellation:{three:.32,four:.5},alchemy:{power:.5,waves:3},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.6,poison:5},
+  royal_seal:{starlight:30,boss:.4},gift_ribbon:{chance:.25},broken_clock:{duration:1},
 });
 const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
@@ -154,12 +154,13 @@ export const UNDERDOG=Object.freeze({bonus:.8,factor:10,stun:2});
 export const APPLEBOMB=Object.freeze({factor:9,max:5,trigger:80,stun:3});
 // Sunflower: one shared stack (0..3) of sunlight, +1 when a wave ends while a sunflower stands on the board. Its basic
 // attack bursts around the target with the radius of the current stack; Solar Flare spends the whole stack.
-export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:3});
+export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:4});
 export const sunRadius=s=>SUNFLOWER.radius[Math.min(SUNFLOWER.max,s.sunlight||0)];
 // Joker: the colour changes with every ultimate (in this order) and tints the basic attack's status.
 export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','white','black']),roulette:3,burn:.23,slow:.2,exposure:.06});
 export const JOKER_NAMES=Object.freeze({red:'빨강 · 화상',blue:'파랑 · 감속',green:'초록 · 중독',white:'하양 · 성광',black:'검정 · 노출'});
-export const nextJokerColor=color=>JOKER.colors[(Math.max(0,JOKER.colors.indexOf(color))+1)%JOKER.colors.length];
+// The roulette picks a new colour at random among the four it is not showing, so every cast changes the colour.
+export const pickJokerColor=(s,color)=>{const others=JOKER.colors.filter(c=>c!==color);return others[Math.min(others.length-1,Math.floor(random(s)*others.length))];};
 export const REQUIEM=Object.freeze({factor:7});
 export const LEMONADE=Object.freeze({seconds:4});
 // Ash burns the lowest other ally (an immune pick is guarded, not skipped), then hits the densest pack inside the radius.
@@ -191,7 +192,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,label:'일반 적 명중마다 즉사 1%'});
   else if(u.hero==='underdog'){const active=s.deck.every(id=>HERO[id].rarity==='C'&&!HERO[id].hidden);Object.assign(trait,{key:'underdog',active,damageMultiplier:active?1+UNDERDOG.bonus:1,label:active?`노멀 덱 · 위력 +${Math.round(UNDERDOG.bonus*100)}%`:'노멀 덱 대기'});}
   else if(u.hero==='sunflower'){const n=Math.min(SUNFLOWER.max,s.sunlight||0);Object.assign(trait,{key:'sunlight',active:n>0,sunlight:n,radius:SUNFLOWER.radius[n],label:n?`햇빛 ${n}/${SUNFLOWER.max} · 폭발 반경 ${SUNFLOWER.radius[n]}`:`햇빛 0/${SUNFLOWER.max} · 폭발 없음`});}
-  else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:`${JOKER_NAMES[color]} · 다음 ${JOKER_NAMES[nextJokerColor(color)].split(' · ')[0]}`});}
+  else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:`${JOKER_NAMES[color]} · 필살기로 무작위 변경`});}
   else if(u.hero==='antropy')Object.assign(trait,{key:'antropy',active:true,label:'디버프 무효'});
   else if(u.hero==='cure_master'){
     const n=index<0?0:neighbors(index).filter(i=>s.board[i]).length,active=!u.cursed&&!(u.disabled>0);
@@ -232,7 +233,7 @@ export function scaledTokens(id,k){
     luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
-    siren:[['10초',sec(10)]],ancient_dragon:[['10초',sec(10)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(6)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(10)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]],
+    siren:[['10초',sec(10)]],ancient_dragon:[['10초',sec(10)]],silver_rabbit:[['8초',sec(8)]],santa:[['8초',sec(8)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(10)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]],
     luna:[['40%',pctText(executeThresholdFor(k))]],phantom:[['25%',pctText(Math.min(DAMAGE_TAKEN_CAP,.25*k))]],cure_master:[['4초',sec(4)]],venom:[['10초',sec(10)]]}[id]||[];
   return {trait,skill};
 }
@@ -748,7 +749,7 @@ export function cast(s,id){
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,ULT_BUFF.awaken.seconds*control,'awaken');
   else if(type==='march')s.buffs.march=skillDuration(s,ULT_BUFF.march.seconds*control,'march');
   else if(type==='glassfall'){strike(CINDERELLA.ult);s.buffs.midnight=skillDuration(s,10*control);u.clock=0;}
-  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,6*control,'festive');}
+  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,8*control,'festive');}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control,'radiance');for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control,'trauma');}
   else if(type==='ice_court'){const winter=skillDuration(s,6*control);strike(9);for(const e of targets)if(e.hp>0){addSlow(s,e,source,.5,6);addStatus(s,e,'exposure',source,id,WINTER_EXPOSURE,winter);}s.buffs.winter=winter;}
@@ -801,7 +802,7 @@ export function cast(s,id){
     event(s,'sunSpend',{sunlight:n,points:s.board.flatMap((a,i)=>a?.hero==='sunflower'?[cellPoint(i)]:[])});
   }
   else if(type==='roulette'){
-    strike(JOKER.roulette);const from=s.jokerColor||'red';s.jokerColor=nextJokerColor(from);
+    strike(JOKER.roulette);const from=s.jokerColor||'red';s.jokerColor=pickJokerColor(s,from);
     event(s,'jokerColor',{from,color:s.jokerColor,points:s.board.flatMap((a,i)=>a?.hero==='joker'?[cellPoint(i)]:[])});
   }
   else if(type==='applebomb'){
@@ -905,7 +906,7 @@ export function castPreview(s,id){
     lines.push(`${dur(10)} 동안 진짜 신데렐라의 공격 속도가 ${pct(CINDERELLA.haste)}% 오르고, 4번째 공격마다 자정의 종이 울립니다.`);
   }else if(type==='gift'){
     lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 1성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 1성으로 전장에 합류합니다.');
-    lines.push(`${dur(6,'festive')} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
+    lines.push(`${dur(8,'festive')} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
   }else if(type==='goddess'){
     lines.push(`적 전체에게 위력 5배, ${hit(5)}를 줍니다.`);
     lines.push(`${dur(8,'radiance')} 동안 모든 동료의 위력이 ${pct(.5*scale)}% 오릅니다.`);
@@ -1048,7 +1049,7 @@ export function castPreview(s,id){
     lines.push(`햇빛 ${n}개를 모두 써서 적 전체에게 위력 ${f}배, ${hit(f)}를 줍니다.`);
   }else if(type==='roulette'){
     const color=s.jokerColor||'red';
-    lines.push(`적 전체에게 위력 ${JOKER.roulette}배, ${hit(JOKER.roulette)}를 주고 색을 ${JOKER_NAMES[nextJokerColor(color)].split(' · ')[0]}으로 바꿉니다.`);
+    lines.push(`적 전체에게 위력 ${JOKER.roulette}배, ${hit(JOKER.roulette)}를 주고 지금 ${JOKER_NAMES[color].split(' · ')[0]}을 뺀 네 색 중 하나로 무작위로 바꿉니다.`);
   }else if(type==='applebomb'){
     const set=(s.bombs||[]).length;
     lines.push(`경로 앞쪽에 폭탄을 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);

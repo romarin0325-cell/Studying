@@ -109,7 +109,7 @@ function ultValue(s,m,id,gv){
       return strike(5)+buff(fam('radiance','power',E.ULT_BUFF.radiance.power*scale),8)+freed;}
     case 'trauma':{const mags=CELLS.filter(c=>s.board[c]?.hero==='time_magician');return strike(4)+mags.reduce((n,c)=>n+unitValue(s,s.board[c],c)*m.scale*(2.1*1.35-1)*Math.min(10,rem),0);}
     case 'glassfall':{const top=E.topCinderella(s),i=top?s.board.indexOf(top):-1;return strike(E.CINDERELLA.ult)+(top?unitValue(s,top,i)*m.scale*1.9*Math.min(10,rem):0);}
-    case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),6);
+    case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),8);
     case 'dividend':return strike(4)+(E.QUEEN_TAX+(s.edictWave!==s.wave?E.waveIncome(s.wave)*.5:0))*gv;
     case 'fortune':return strike(E.fortuneFactor(s.gold-E.skillGoldCost(id),s.upgrades[id]||0))-E.skillGoldCost(id)*gv;
     case 'expose':{const ex=E.detectiveExposure(s,u),lasting=list.reduce((n,e)=>n+e.hp,0)>dps*4;return strike(3)+(lasting?dps*ex*Math.min(10,rem):0)+follow()*ex;}

@@ -851,9 +851,9 @@ export const HEROES = [
     },
     "skill": {
       "name": "한밤의 선물",
-      "cost": 65,
+      "cost": 80,
       "type": "gift",
-      "text": "편성된 동료 한 명이 1성으로 합류하고, 6초 동안 모든 동료의 공격 속도가 20% 오릅니다."
+      "text": "편성된 동료 한 명이 1성으로 합류하고, 8초 동안 모든 동료의 공격 속도가 20% 오릅니다."
     },
     "heightGroup": "medium",
     "role": "선물 · 포격",
@@ -1255,13 +1255,13 @@ export const HEROES = [
     "attack": "cards",
     "trait": {
       "type": "joker",
-      "text": "필살기를 쓸 때마다 색이 바뀌고, 색에 따라 일반 공격이 상태 이상을 겁니다. 빨강 화상, 파랑 감속 20%, 초록 중독, 하양 성광, 검정 노출."
+      "text": "필살기를 쓸 때마다 색이 무작위로 바뀌고, 색에 따라 일반 공격이 상태 이상을 겁니다. 빨강 화상, 파랑 감속 20%, 초록 중독, 하양 성광, 검정 노출."
     },
     "skill": {
       "name": "레인보우 룰렛",
       "cost": 50,
       "type": "roulette",
-      "text": "적 전체에게 위력 3배 피해를 주고 다음 색으로 바꿉니다."
+      "text": "적 전체에게 위력 3배 피해를 주고 색을 지금과 다른 무작위 색으로 바꿉니다."
     },
     "heightGroup": "medium",
     "role": "상태 부여 · 범위",
@@ -1298,7 +1298,7 @@ export const HEROES = [
       "name": "솔라플레어",
       "cost": 90,
       "type": "solarflare",
-      "text": "햇빛을 모두 써서 적 전체에게 위력 2배 + 햇빛당 3배 피해를 줍니다(3개면 11배)."
+      "text": "햇빛을 모두 써서 적 전체에게 위력 2배 + 햇빛당 4배 피해를 줍니다(3개면 14배)."
     },
     "heightGroup": "medium",
     "role": "햇빛 저축 · 단일",
@@ -1510,8 +1510,8 @@ export const ARTIFACTS = [
   {
     "id": "lantern",
     "name": "꺼지지 않는 등불",
-    "text": "필살기를 쓰면 쓴 별빛의 25%를 돌려받습니다.",
-    "scale": ["25%"],
+    "text": "필살기를 쓰면 쓴 별빛의 20%를 돌려받습니다.",
+    "scale": ["20%"],
     "icon": 5,
     "atlas": "relics",
     "rarity": "common",
@@ -1560,8 +1560,8 @@ export const ARTIFACTS = [
   {
     "id": "sprout",
     "name": "풋내기 훈장",
-    "text": "1·2성 동료의 위력이 25% 오르고, 동료 소환 비용이 2G 줄어듭니다.",
-    "scale": ["25%"],
+    "text": "1·2성 동료의 위력이 20% 오르고, 동료 소환 비용이 2G 줄어듭니다.",
+    "scale": ["20%"],
     "icon": 0,
     "atlas": "relics-new",
     "rarity": "common",
@@ -1690,8 +1690,8 @@ export const ARTIFACTS = [
   {
     "id": "chalice",
     "name": "독화의 성배",
-    "text": "불타면서 독이 5중첩 이상 쌓인 적이 받는 피해가 35% 늘어납니다.",
-    "scale": ["35%"],
+    "text": "불타면서 독이 5중첩 이상 쌓인 적이 받는 피해가 60% 늘어납니다.",
+    "scale": ["60%"],
     "icon": 2,
     "atlas": "relics-new",
     "rarity": "epic",
@@ -1700,8 +1700,8 @@ export const ARTIFACTS = [
   {
     "id": "royal_seal",
     "name": "결전의 인장",
-    "text": "보스가 나타날 때마다 별빛을 30 얻고, 보스에게 주는 피해가 35% 늘어납니다.",
-    "scale": ["30", "35%"],
+    "text": "보스가 나타날 때마다 별빛을 30 얻고, 보스에게 주는 피해가 40% 늘어납니다.",
+    "scale": ["30", "40%"],
     "icon": 1,
     "atlas": "relics-expansion",
     "rarity": "rare",

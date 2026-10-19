@@ -1641,13 +1641,13 @@ test('sunflower: one shared sunlight stack that fills only while a sunflower sta
   for(const n of [0,1,3]){
     const a=traitArena([{index:12,hero:'sunflower'}]);a.sunlight=n;
     const [foe]=enemiesFor(a,[{hp:1e9}]),base=E.combatStats(a,a.board[12]).damage,hp=foe.hp;
-    const preview=E.castPreview(a,'sunflower');assert.ok(preview.lines[0].includes(`햇빛 ${n}개`)&&preview.lines[0].includes(`위력 ${2+3*n}배`));
-    readyCast(a,'sunflower');close(hp-foe.hp,base*(2+3*n),'solar flare damage at stack '+n);assert.equal(a.sunlight,0);
+    const preview=E.castPreview(a,'sunflower');assert.ok(preview.lines[0].includes(`햇빛 ${n}개`)&&preview.lines[0].includes(`위력 ${2+4*n}배`));
+    readyCast(a,'sunflower');close(hp-foe.hp,base*(2+4*n),'solar flare damage at stack '+n);assert.equal(a.sunlight,0);
   }
   const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(saved.sunlight,s.sunlight);
   const bad=JSON.parse(E.serialize(s));bad.sunlight=4;assert.equal(E.restore(bad),null);
 });
-test('joker: every ultimate turns the colour one step round (red, blue, green, white, black) and the basic attack applies that colour\'s status',()=>{
+test('joker: every ultimate turns the colour to a random different one and the basic attack applies that colour\'s status',()=>{
   const expected={red:e=>e.burnTime>0,blue:e=>e.slowTime>0,green:e=>e.poison>0,white:e=>e.divine>=1,black:e=>e.exposeTime>0};
   for(const [color,test] of Object.entries(expected)){
     const s=traitArena([{index:12,hero:'joker'}]);s.jokerColor=color;
@@ -1657,14 +1657,17 @@ test('joker: every ultimate turns the colour one step round (red, blue, green, w
     for(const other of Object.keys(expected))if(other!==color&&other!=='red'&&color!=='red')assert.ok(!expected[other](foe)||other===color,color+' does not also apply '+other);
   }
   const s=traitArena([{index:12,hero:'joker'}]);
-  const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage,order=['red','blue','green','white','black','red'];
+  const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage,seen=new Set();
   assert.equal(s.jokerColor,'red');
-  for(let i=0;i<5;i++){
-    const hp=foe.hp;s.board[12].disabled=0;const preview=E.castPreview(s,'joker');
-    assert.ok(preview.lines[0].includes(E.JOKER_NAMES[order[i+1]].split(' · ')[0]));
-    readyCast(s,'joker');close(hp-foe.hp,base*3,'roulette strikes 3x');assert.equal(s.jokerColor,order[i+1]);
+  for(let i=0;i<40;i++){
+    const hp=foe.hp,from=s.jokerColor;s.board[12].disabled=0;const preview=E.castPreview(s,'joker');
+    assert.ok(preview.lines[0].includes('무작위')&&preview.lines[0].includes(E.JOKER_NAMES[from].split(' · ')[0]));
+    readyCast(s,'joker');close(hp-foe.hp,base*3,'roulette strikes 3x');assert.notEqual(s.jokerColor,from,'the colour always changes');
+    assert.ok(E.JOKER.colors.includes(s.jokerColor));seen.add(s.jokerColor);
   }
-  assert.equal(E.restore(E.serialize(s)).jokerColor,'red');
+  assert.equal(seen.size,5,'every colour comes up eventually, in no fixed order');
+  const twin=E.restore(E.serialize(s));assert.equal(E.pickJokerColor(twin,twin.jokerColor),E.pickJokerColor(s,s.jokerColor),'the pick follows the saved random stream');
+  assert.equal(E.restore(E.serialize(s)).jokerColor,s.jokerColor);
   const bad=JSON.parse(E.serialize(s));bad.jokerColor='pink';assert.equal(E.restore(bad),null);
 });
 

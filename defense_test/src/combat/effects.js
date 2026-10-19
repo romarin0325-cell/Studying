@@ -197,22 +197,19 @@ export class CombatFX{
     const ctx=this.ctx,hit=.36,cx=360,cy=440,reduced=this.reduced,art=this.art.images['effects-bigshow'];
     const drop=window01(age,.05,hit),land=age>=hit,since=Math.max(0,age-hit),lift=window01(age,.7,1.15),fade=1-window01(age,.95,1.2);
     ctx.save();ctx.globalAlpha=Math.min(.4,age*2)*(1-window01(age,1.2,2));ctx.fillStyle='#08060f';ctx.fillRect(0,0,720,780);ctx.restore();
-    const S=520,top=land?cy-S*.52+10*Math.min(1,since*14)-lift*620:-S*.62+(cy-S*.52+S*.62)*drop*drop;
+    const S=440,top=land?cy-S*.52+10*Math.min(1,since*14)-lift*620:-S*.62+(cy-S*.52+S*.62)*drop*drop;
     if(land){
       // crater decal on the ground under everything else: it widens fast, then fades slowly
       const grow=easeOut(window01(since,0,.5)),a=1-window01(age,1.55,2.35);
-      if(art&&a>0){this.atlasStamp('effects-bigshow',1,2,1,cx,cy+34,(210+640*grow),(210+640*grow)*.62,0,Math.min(1,a*1.2),'source-over');}
+      if(art&&a>0){this.atlasStamp('effects-bigshow',1,2,1,cx,cy+34,(190+560*grow),(190+560*grow)*.62,0,Math.min(1,a*1.1)*.64,'screen');}
     }
     if(fade>0&&age>.03){
       ctx.save();ctx.globalAlpha=fade;
       if(art){
-        // sleeve continued upward so the painted fist never shows a cut edge
-        const sw=S*.37,sx=cx-sw/2+S*.01,topEdge=top;
-        const g=ctx.createLinearGradient(0,topEdge-120,0,topEdge+6);g.addColorStop(0,'#0c0912');g.addColorStop(1,'#15111c');
-        ctx.fillStyle=g;ctx.fillRect(sx,topEdge-700,sw,706);
-        ctx.fillStyle='#8a8aa0';for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(sx+sw*.2+i*sw*.2,topEdge-14-(i%2)*10,3.4,0,Math.PI*2);ctx.fill();}
-        if(!land&&!reduced){ctx.globalAlpha=fade*.3;this.atlasStamp('effects-bigshow',0,2,1,cx,top+S/2-80*(1-drop),S*1.04,S*1.04,0,1,'source-over');ctx.globalAlpha=fade;}
-        this.atlasStamp('effects-bigshow',0,2,1,cx,top+S/2,S*(1+(land?.05*Math.max(0,1-since*7):0)),S*(1+(land?.05*Math.max(0,1-since*7):0)),0,1,'source-over');
+        // screen blend: the dark sleeve and outline vanish, so the fist is a glowing shape with no cut edge (like the other ultimates)
+        if(!land&&!reduced){ctx.globalAlpha=fade*.3;this.atlasStamp('effects-bigshow',0,2,1,cx,top+S/2-80*(1-drop),S*1.04,S*1.04,0,1,'screen');ctx.globalAlpha=fade;}
+        const grow=1+(land?.05*Math.max(0,1-since*7):0);
+        this.atlasStamp('effects-bigshow',0,2,1,cx,top+S/2,S*grow,S*grow,0,.86,'screen');
       }else{
         if(!land&&!reduced){ctx.globalAlpha=fade*.35;this.drawFist(cx,top+S*.55-110*(1-drop),1.25);ctx.globalAlpha=fade;}
         this.drawFist(cx,top+S*.55,1.25+(land?.06*Math.max(0,1-since*8):0));
@@ -221,8 +218,8 @@ export class CombatFX{
     }
     if(!land)return;
     const flash=1-window01(since,0,.22),ring=easeOut(window01(since,0,.55)),dust=window01(since,0,1);
-    ctx.save();ctx.globalAlpha=flash*.6;ctx.globalCompositeOperation='lighter';ctx.fillStyle='#fff4dc';ctx.fillRect(0,0,720,780);ctx.restore();
-    this.glow('rays','#ffd9a0',cx,cy+30,640*Math.min(1,since*4),(1-dust)*.8,since*1.2);
+    ctx.save();ctx.globalAlpha=flash*.3;ctx.globalCompositeOperation='lighter';ctx.fillStyle='#fff4dc';ctx.fillRect(0,0,720,780);ctx.restore();
+    this.glow('rays','#ffd9a0',cx,cy+30,560*Math.min(1,since*4),(1-dust)*.7,since*1.2);
     ctx.save();ctx.globalCompositeOperation='lighter';
     for(const [scale,w,col] of [[1,12,'#ffe6c0'],[.72,6,'#ff9a5a']]){ctx.globalAlpha=(1-ring)*.95;ctx.strokeStyle=col;ctx.lineWidth=w*(1-ring)+2;ctx.beginPath();ctx.ellipse(cx,cy+30,Math.max(8,430*ring*scale),Math.max(4,250*ring*scale),0,0,Math.PI*2);ctx.stroke();}
     ctx.restore();
@@ -465,10 +462,11 @@ export class CombatFX{
       const p=pathPoint(b.progress),ctx=this.ctx,pulse=.5+Math.sin(this.clock*4+b.uid)*.5,x=p.x,y=p.y-12,r=12+pulse*1.5;
       if(this.art.images['effects-applebomb']){
         // Painted toffee-apple bomb: it breathes, its fuse spits sparks, and a ground ring marks where it will go off.
-        const bob=this.reduced?0:Math.sin(this.clock*3+b.uid)*2,size=104+pulse*6;
-        ctx.save();ctx.globalAlpha=.55;ctx.fillStyle='#0b1220';ctx.beginPath();ctx.ellipse(x,p.y+6,32,10,0,0,Math.PI*2);ctx.fill();ctx.restore();
-        this.glow('glow','#ff5a46',x,y-14,120+pulse*30,.38);
-        this.atlasStamp('effects-applebomb',0,2,1,x,y-30+bob,size,size,0,1,'source-over');
+        const bob=this.reduced?0:Math.sin(this.clock*3+b.uid)*2,size=82+pulse*5;
+        ctx.save();ctx.globalAlpha=.4;ctx.fillStyle='#0b1220';ctx.beginPath();ctx.ellipse(x,p.y+6,24,7,0,0,Math.PI*2);ctx.fill();ctx.restore();
+        this.glow('glow','#ff5a46',x,y-14,110+pulse*26,.4);
+        this.atlasStamp('effects-applebomb',0,2,1,x,y-24+bob,size,size,0,.86,'source-over');
+        this.atlasStamp('effects-applebomb',0,2,1,x,y-24+bob,size,size,0,.3+pulse*.18,'screen');
         ctx.save();ctx.strokeStyle='#ffb06a';ctx.globalAlpha=.55+pulse*.25;ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.lineDashOffset=-this.clock*12;ctx.beginPath();ctx.ellipse(x,p.y+6,APPLE_TRIGGER*.45,APPLE_TRIGGER*.16,0,0,Math.PI*2);ctx.stroke();ctx.restore();
         if(!this.reduced)for(let i=0;i<3;i++){const k=(this.clock*1.6+i/3+b.uid*.21)%1;ctx.save();ctx.globalAlpha=(1-k)*.95;ctx.globalCompositeOperation='lighter';disk(ctx,x-1+Math.sin(k*9+i)*7,y-70-k*30,2.4*(1-k)+.6,i%2?'#ffd27a':'#fff1b8');ctx.restore();}
         continue;
@@ -608,7 +606,7 @@ export class CombatFX{
       this.glow('glow','#ffd45a',p.x,p.y+28,96,.26+(this.reduced?0:Math.sin(this.clock*3+u.uid)*.06));}
   }
   // Joker: a small roulette. Five colours sit on a ring in cast order; the current one is always at the top and lit,
-  // the others are dimmed. A cast spins the wheel one step.
+  // the others are dimmed. A cast spins the wheel and settles on the colour the roulette picked.
   drawJokerWheels(s){
     const ctx=this.ctx,names=['red','blue','green','white','black'],idx=Math.max(0,names.indexOf(s.jokerColor||'red')),since=this.clock-(this.wheelAt??-9),offset=since<.7?(1-easeOut(since/.7))*Math.PI*2/5:0;
     for(let i=0;i<s.board.length;i++){
@@ -922,10 +920,10 @@ export class CombatFX{
       }
       if(e.type==='bombBlast'&&this.art.images['effects-applebomb']){
         // Painted burst: it slams out to the real radius (about a field wide), spins a little, then falls away in sugar sparks.
-        const rad=170,pop=easeOut(window01(t,0,.28)),fade=1-window01(t,.5,1),size=rad*2.7*(.45+.55*pop);
-        ctx.save();ctx.globalAlpha=Math.min(1,fade*1.25)*.35*(1-window01(t,.2,.6));ctx.globalCompositeOperation='lighter';ctx.fillStyle='#fff2d0';ctx.fillRect(0,0,720,780);ctx.restore();
-        this.glow('glow','#ff7a3a',e.x,e.y-10,rad*3*(.6+.4*pop),fade*.85);
-        this.atlasStamp('effects-applebomb',1,2,1,e.x,e.y-8,size,size,t*.5,Math.max(0,fade),'source-over');
+        const rad=170,pop=easeOut(window01(t,0,.28)),fade=1-window01(t,.42,1),size=rad*2.15*(.4+.6*pop);
+        ctx.save();ctx.globalAlpha=Math.min(1,fade*1.25)*.16*(1-window01(t,.2,.6));ctx.globalCompositeOperation='lighter';ctx.fillStyle='#fff2d0';ctx.fillRect(0,0,720,780);ctx.restore();
+        this.glow('glow','#ff7a3a',e.x,e.y-10,rad*2.6*(.6+.4*pop),fade*.8);
+        this.atlasStamp('effects-applebomb',1,2,1,e.x,e.y-8,size,size,t*.4,Math.max(0,fade)*.82,'screen');
         const ring=easeOut(window01(t,0,.6));ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-ring)*.9;ctx.strokeStyle='#ffd7a8';ctx.lineWidth=8*(1-ring)+2;ctx.beginPath();ctx.ellipse(e.x,e.y+6,Math.max(10,rad*ring*1.05),Math.max(5,rad*ring*.46),0,0,Math.PI*2);ctx.stroke();ctx.restore();
         if(!this.reduced)for(let i=0;i<18;i++){const a=hash(e.x,i)*Math.PI*2,v=70+hash(e.y,i+3)*150,k=easeOut(t);ctx.save();ctx.globalAlpha=fade;ctx.translate(e.x+Math.cos(a)*v*k,e.y+Math.sin(a)*v*k*.62+k*k*30);ctx.rotate(a+k*6);diamond(ctx,0,0,4+hash(e.x,i+7)*5,['#ff5a46','#ffd27a','#fff1d6','#c44a2a'][i%4]);ctx.restore();}
         continue;

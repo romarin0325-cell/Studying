@@ -271,9 +271,9 @@ try{
   assert.equal((await profile(lateTest.page)).noticeLate.length,8,'the announcement is recorded as seen');
   await shot(lateTest.page,'late-notice',390,844);
   await lateTest.page.locator('[data-action="late-summon"]').click();await lateTest.page.locator('.sm-late.open').waitFor();
-  assert.equal(await lateTest.page.locator('#sheet[data-kind="late"]').count(),0,'the announcement closes');
+  assert.ok(await lateTest.page.locator('#overlay').isHidden(),'the announcement closes');
   await lateTest.page.locator('[data-action="rates"]').click();assert.match(await lateTest.page.locator('#sheet-body').innerText(),/신규 동료[\s\S]*언더독[\s\S]*베놈/);await close(lateTest.page);
-  await reload(lateTest);assert.equal(await lateTest.page.locator('#sheet[data-kind="late"]').count(),0,'not announced again after a reload');
+  await reload(lateTest);await lateTest.page.waitForTimeout(1200);assert.ok(await lateTest.page.locator('#overlay').isHidden(),'not announced again after a reload');
   await nav(lateTest.page,'동료');
   assert.equal(await lateTest.page.locator('.cards .cc').count(),39,'the new companions join the collection once stage 45 is cleared');
   for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
