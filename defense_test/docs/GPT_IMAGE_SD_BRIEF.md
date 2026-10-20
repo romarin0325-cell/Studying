@@ -25,30 +25,32 @@
 ## 2. 작업 순서
 
 1. 이 문서와 `ASSET_PIPELINE.md` §0·§2·§3을 읽는다.
-2. 캐릭터마다 §3의 참조 세 장을 **순서대로** 붙인다. 순서가 바뀌면 프롬프트의 "Image 1/2/3"이 틀어진다.
-3. §5의 프롬프트를 고치지 않고 붙여 넣어 **새 대화에서 4장**을 뽑는다. 한 장을 대화로 고쳐 가지 않는다(편집은 고치라고 한 곳 밖도 바꾼다).
+2. 사용자가 원화 한 장을 첨부하면, §3의 명령으로 그 캐릭터의 **참조 보드 한 장**을 만든다. 기준 시트는 저장소에서 읽고, 얼굴은 표의 좌표로 원화에서 자른다. 보드의 왼쪽·가운데·오른쪽 칸이 프롬프트의 Image 1·2·3이다. 생성할 때는 이 보드 한 장만 넣는다.
+3. §5의 프롬프트를 고치지 않고 붙여 넣어 **4장을 각각 새로 생성**한다. 한 장을 대화로 고쳐 가지 않는다(편집은 고치라고 한 곳 밖도 바꾼다).
 4. §4로 거른다. 눈으로 보는 항목을 먼저 보고, 남은 후보는 §6의 1~5단계로 잰다. 탈락 사유가 같으면 §5-7의 문장을 프롬프트 끝에 덧붙여 4장을 다시 뽑는다. 두 번 해도 통과가 없으면 멈추고 사용자에게 후보를 보여 준다.
 5. 통과한 후보 중 §4-2 순서로 한 장을 고른다. 고른 원본 PNG와 탈락 후보는 저장소 밖에 둔다.
 6. 패킹·검수·설치(§6)는 Manus가 해도 되고, 고른 시트를 Claude에게 넘겨도 된다.
 
 ## 3. 참조 이미지
 
-| 캐릭터 | Image 1 (틀·화풍) | Image 2 (정체성) | Image 3 (표정) |
-|---|---|---|---|
-| 애쉬 | `avalanche_maid` | `애쉬.png` | 애쉬 얼굴 확대 |
-| 베놈 | `time_ruler` | `베놈.png` | 베놈 얼굴 확대 |
-| 조커 | `star_boy` | `조커.png` | 조커 얼굴 확대 |
-| 언더독 | `zeke` | `언더독.png` | 언더독 얼굴 확대 |
-| 해바라기 | `siren` | `해바라기.jpg` | 해바라기 얼굴 확대 |
-| 큐어마스터 | `avalanche_maid` | `큐어마스터.png` | 큐어마스터 얼굴 확대 |
+| 캐릭터 (id) | 프롬프트 | Image 1: 기준 시트 (저장소) | Image 2: 원화 (사용자 첨부) | Image 3: 얼굴 좌표 (원화 대비 x,y,w,h) |
+|---|---|---|---|---|
+| 큐어마스터 (`cure_master`) | §5-6 | `avalanche_maid` | `큐어마스터.png` | `0.188,0.113,0.650,0.315` |
+| 애쉬 (`ash`) | §5-1 | `avalanche_maid` | `애쉬.png` | `0.320,0.067,0.416,0.208` |
+| 베놈 (`venom`) | §5-2 | `time_ruler` | `베놈.png` | `0.559,0.094,0.391,0.195` |
+| 조커 (`joker`) | §5-3 | `star_boy` | `조커.png` | `0.247,0.156,0.559,0.258` |
+| 언더독 (`underdog`) | §5-4 | `zeke` | `언더독.png` | `0.338,0.023,0.547,0.258` |
+| 해바라기 (`sunflower`) | §5-5 | `siren` | `해바라기.jpg` | `0.275,0.164,0.478,0.230` |
 
-- **준비된 묶음:** `C:\Users\romar\Downloads\캐릭터\에셋\gpt-sd-ref\<id>\`에 `1-master-*.png`, `2-original.png`, `3-face.png`가 있다. 원화는 저장소에 없으므로 이 묶음을 업로드한다.
-- **Image 1을 저장소에서 만들 때:** 저장소 루트에서 아래를 실행한다.
+- **참조 보드:** Manus에는 한 번에 이미지 한 장만 첨부할 수 있다. 그래서 세 장을 가로로 붙인 보드 한 장을 만들어 생성에 넣는다(왼쪽 Image 1, 가운데 Image 2, 오른쪽 Image 3). 칸마다 높이 1024px이고, 흰 바탕과 흰 간격 위에 둔다. 글자는 넣지 않는다(프롬프트가 칸을 위치로 부른다). 프롬프트의 REFERENCE BOARD 문단이 보드를 세 장으로 읽게 하고, 보드 배치를 따라 그리지 않게 한다.
+- **보드 만들기:** 저장소 루트에서 `npm ci` 후 아래를 실행한다. 인자는 위 표의 기준 시트 id, 첨부된 원화 경로, 얼굴 좌표, 출력 경로다. 기준 시트는 `defense_test/assets/merge/units/<id>.webp`를 읽어 자홍 바탕에 놓는다.
 
   ```bash
-  node -e "require('sharp')('defense_test/assets/merge/units/avalanche_maid.webp').flatten({background:'#ff00ff'}).png().toFile('master.png')"
+  node defense_test/scripts/art/ref-board.mjs avalanche_maid 큐어마스터.png 0.188,0.113,0.650,0.315 board-cure_master.png
   ```
 
+- **얼굴 좌표:** 이전에 쓰던 얼굴 확대본을 원화와 대조해 찾은 값이다. 원화의 크기가 바뀌어도 비율이라 그대로 맞는다. 원화를 자르거나 다른 판을 첨부하면 맞지 않는다.
+- **확인:** 보드 오른쪽 칸에 그 캐릭터의 얼굴이 크게 보여야 한다. 아니면 생성하지 말고 멈춘다.
 - **마스터를 고른 이유:** 마스터는 모두 GPT로 만든 승인 캐스트이고, 같은 체형과 키 그룹이다.
   - 애쉬·큐어마스터: 아발란체메이드는 여성형 보통 키(턱 아래 1.30H)다. 트윈테일·짧은 치마·스타킹·구두 구성이 같다.
   - 베놈: 시간의지배자는 여성형 보통 키(1.31H)다. 캐스트에서 검은 드레스를 가장 잘 읽히게 칠했다.
@@ -86,6 +88,8 @@
 
 ```text
 Create ONE finished production sprite sheet: a four-view turnaround of the chibi game character ASH for a mobile tower-defense game. It must look drawn by the same artist, in the same session, as Image 1.
+
+REFERENCE BOARD: the one attached image has three panels side by side on white. Read it as three separate images: LEFT panel = Image 1, MIDDLE panel = Image 2, RIGHT panel = Image 3. Do not reproduce the board, its white gaps or its three-panel layout; the output is only the 2x2 sheet described below.
 
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = AVALANCHE MAID, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size and height of the head in each cell, the chin height, the foot line, the short super-deformed body, the line art, the cel shading and the eye rendering. Do NOT copy her face, light-blue hair, spiral eyes, maid costume or colours.
@@ -140,6 +144,8 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 ```text
 Create ONE finished production sprite sheet: a four-view turnaround of the chibi game character VENOM for a mobile tower-defense game. It must look drawn by the same artist, in the same session, as Image 1.
 
+REFERENCE BOARD: the one attached image has three panels side by side on white. Read it as three separate images: LEFT panel = Image 1, MIDDLE panel = Image 2, RIGHT panel = Image 3. Do not reproduce the board, its white gaps or its three-panel layout; the output is only the 2x2 sheet described below.
+
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = TIME RULER, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size of the head, the foot line, the super-deformed construction, the line art, the cel shading, the eye rendering and the way her black dress is painted. Do NOT copy her face, silver hair, red eyes, earrings or dress design.
 - Image 2 = VENOM's original illustration. Use it ONLY for identity: hair, colours, crown, gown, vine and spider lily. Do NOT copy its pose (hands on the chest, flying), its tall realistic body, the low camera, the aurora sky, the black sun, the forest, the green fire, the glowing butterflies or the roots covering the ground.
@@ -191,6 +197,8 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 
 ```text
 Create ONE finished production sprite sheet: a four-view turnaround of the chibi game character JOKER for a mobile tower-defense game. It must look drawn by the same artist, in the same session, as Image 1.
+
+REFERENCE BOARD: the one attached image has three panels side by side on white. Read it as three separate images: LEFT panel = Image 1, MIDDLE panel = Image 2, RIGHT panel = Image 3. Do not reproduce the board, its white gaps or its three-panel layout; the output is only the 2x2 sheet described below.
 
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = STAR BOY, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size and height of the head in each cell, the chin height, the foot line, the short slim super-deformed body, the line art, the cel shading and the eye rendering. Do NOT copy his face, spiky white-and-yellow hair, blue outfit or colours.
@@ -246,6 +254,8 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 ```text
 Create ONE finished production sprite sheet: a four-view turnaround of the chibi game character UNDERDOG for a mobile tower-defense game. It must look drawn by the same artist, in the same session, as Image 1.
 
+REFERENCE BOARD: the one attached image has three panels side by side on white. Read it as three separate images: LEFT panel = Image 1, MIDDLE panel = Image 2, RIGHT panel = Image 3. Do not reproduce the board, its white gaps or its three-panel layout; the output is only the 2x2 sheet described below.
+
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = ZEKE, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size of the head, the foot line, the super-deformed male construction, the line art, the cel shading and the eye rendering. Do NOT copy his face, flame hair, armour, sword, red coat or colours.
 - Image 2 = UNDERDOG's original illustration. Use it ONLY for identity: face, hair, skin tone, tattoo, coat, chain belt and build. Do NOT copy its hands-behind-the-head pose, the hood pulled over the head, its realistic proportions, the low camera, the purple stage lights or the fog.
@@ -291,6 +301,8 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 
 ```text
 Create ONE finished production sprite sheet: a four-view turnaround of the chibi game character SUNFLOWER for a mobile tower-defense game. It must look drawn by the same artist, in the same session, as Image 1.
+
+REFERENCE BOARD: the one attached image has three panels side by side on white. Read it as three separate images: LEFT panel = Image 1, MIDDLE panel = Image 2, RIGHT panel = Image 3. Do not reproduce the board, its white gaps or its three-panel layout; the output is only the 2x2 sheet described below.
 
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = SIREN, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size of the head, the foot line, the short slim super-deformed body, the line art, the cel shading and the eye rendering. Do NOT copy her face, long blue hair, headphones, outfit or colours.
@@ -340,6 +352,8 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 
 ```text
 Create ONE finished production sprite sheet: a four-view turnaround of the chibi game character CURE MASTER for a mobile tower-defense game. It must look drawn by the same artist, in the same session, as Image 1.
+
+REFERENCE BOARD: the one attached image has three panels side by side on white. Read it as three separate images: LEFT panel = Image 1, MIDDLE panel = Image 2, RIGHT panel = Image 3. Do not reproduce the board, its white gaps or its three-panel layout; the output is only the 2x2 sheet described below.
 
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = AVALANCHE MAID, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size and height of the head in each cell, the chin height, the foot line, the short super-deformed body, the line art, the cel shading and the eye rendering. Do NOT copy her face, spiral eyes, light-blue twin tails, maid costume or colours.
@@ -400,6 +414,7 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 | 좌우 방향이 틀렸다 | `CORRECTION: in the BOTTOM-LEFT cell the nose must point to the LEFT edge of the picture; in the BOTTOM-RIGHT cell the nose must point to the RIGHT edge. The two side views are mirror images of each other.` |
 | 뒷모습에 얼굴 | `CORRECTION: the TOP-RIGHT cell is seen from directly behind. Only the back of the head and hair are visible; no eyes, no mouth, no face.` |
 | 외곽선이 갈색·자주·검정 | `CORRECTION: every outline must be dark navy-indigo, about #23213A, exactly like Image 1. No brown, maroon or pure black lines.` |
+| 보드 배치를 따라 그렸다(세 칸, 원화 장면 등) | `CORRECTION: the attached board is only reference material. Do not draw three panels or copy the original illustration's scene. Output exactly one 2x2 sheet of four chibi views.` |
 | 흰 배경·체커보드 | `CORRECTION: the background must be real transparency, or one flat solid magenta #FF00FF. Not white, not a painted checkerboard.` |
 | 소품 손이 바뀐다 | `CORRECTION: the prop stays in the character's RIGHT hand in every view: viewer's left in the front view, viewer's right in the back view, near side in the RIGHT view, far side in the LEFT view.` |
 | 얼굴이 원화와 다르다 | `CORRECTION: the face drifted from Image 3. Copy Image 3's eye shape, eye colour, eyebrows and mouth exactly; keep only the line and shading style of Image 1.` |
@@ -470,7 +485,48 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 7. **화면 확인.** 390×844에서 홈 파트너, 동료 카드·정보, 전투 4방향, 컷인, 결과 MVP, 소환 연출을 캡처한다. 밤·맑음 두 테마 모두 본다.
 8. **기록.** `ASSET_PIPELINE.md`에 4-x 절을 더한다. 내용: 모델, 후보 수, 고른 후보 파일명, 탈락 사유, 측정값. 고른 원본 PNG는 저장소 밖에 둔다.
 
-## 7. 이전 프롬프트(나노바나나)와 달라진 점
+## 7. Manus에 보내는 메시지
+
+한 대화에서 캐릭터 한 명씩 진행한다. 메시지마다 그 캐릭터의 원화 한 장만 첨부한다. 순서는 §3 표 순서다(큐어마스터 → 애쉬 → 베놈 → 조커 → 언더독 → 해바라기).
+
+**첫 메시지** (첨부: `큐어마스터.png`)
+
+```text
+저장소 https://github.com/romarin0325-cell/Studying (main 브랜치)의 defense_test/docs/GPT_IMAGE_SD_BRIEF.md 를 끝까지 읽고, 그 지시서대로 게임 캐릭터의 SD 4방향 시트를 만들어 줘. 같은 문서가 가리키는 defense_test/docs/ASSET_PIPELINE.md 의 §0, §2, §3도 읽어.
+
+이 대화에서 캐릭터 6명을 한 명씩 진행할 거야. 나는 메시지마다 그 캐릭터의 원화 한 장만 첨부해. 기준 시트(Image 1)는 저장소에 있고, 얼굴 확대(Image 3)는 지시서 §3의 좌표로 원화에서 잘라. 이번 첨부는 큐어마스터 원화야.
+
+반드시 지킬 것
+- 이미지 생성 도구에는 지시서 §5의 그 캐릭터 코드 블록 전체를 한 글자도 바꾸지 말고 그대로 넣어. 요약, 번역, 다듬기, 합치기 모두 금지야.
+- 생성할 때 넣는 이미지는 §3의 명령으로 만든 참조 보드 한 장뿐이야. 원화를 따로 넣지 마.
+- 한 번에 캐릭터 한 명, 시트 한 장만 생성해. 후보는 매번 새로 생성하고, 나온 이미지를 대화로 고쳐 가지 마.
+- 출력은 정사각형, 가능한 가장 큰 크기, 투명 배경 PNG. 투명이 안 되면 단색 자홍 #FF00FF 배경.
+- 저장소 파일은 바꾸지 마. 커밋, 푸시, PR도 하지 마. 지시서 §6의 6~8단계(설치)는 하지 마.
+- 지시서대로 할 수 없는 상황(보드를 못 만듦, 프롬프트가 잘림, 이미지를 넣을 수 없음)이면 임의로 바꾸지 말고 멈춘 뒤 알려 줘.
+
+캐릭터 한 명마다 할 일
+1. 저장소 루트에서 npm ci 를 한 번 실행해. 그다음 §3 표의 그 캐릭터 줄로 참조 보드를 만들고, 오른쪽 칸에 그 캐릭터의 얼굴이 크게 보이는지 확인해.
+2. §3 표의 프롬프트 절(§5-x)과 보드로 후보 4장을 각각 생성해.
+3. §4-1 규칙 1~5, 7, 8로 4장을 하나씩 확인하고, 탈락이면 규칙 번호를 적어.
+4. 4장 중 3장 이상이 같은 이유로 탈락하면 §5-7의 해당 문장을 프롬프트 끝에 붙여 4장을 다시 생성해. 한 번만 해.
+5. 남은 후보에 §6의 1~5단계를 실행해 비율을 재고(§4-1의 6번), §4-2 순서로 한 장을 골라. 3단계의 HEAD_PROFILE.json 수정은 네 작업 복사본에서만 해. 2단계의 두개골 상자 값이 애매하면 읽은 값과 grid 이미지를 함께 보고해.
+6. 결과를 보고하고 멈춰. 다음 원화를 첨부하면 다음 캐릭터를 진행해.
+
+결과물: 캐릭터마다 <id>.zip 하나
+- candidates/: 생성한 후보 전부(<id>-r<회차>-c<번호>.png)
+- picked.png: 고른 시트, 생성된 그대로
+- board.png: 쓴 참조 보드
+- measure/: grid-front.png, pack-sd 출력 JSON, review-sd 출력 텍스트, heads.png, lineup-96.png
+- report.md: 쓴 프롬프트 절과 덧붙인 문장, 후보별 통과/탈락과 규칙 번호, 고른 후보와 이유 한 줄, 두개골 상자 값(left, top, right, chin), review-sd 결과(headW, headH, body, outline rgb, 범위 안/밖), 지시서대로 하지 못한 점
+```
+
+**다음 메시지들** (첨부: 그 캐릭터의 원화 한 장. `<이름>`과 `<id>`만 바꾼다)
+
+```text
+다음은 <이름>(<id>)이야. 첨부한 원화로 같은 순서를 진행해. 지시서 §3 표의 <이름> 줄(기준 시트, 얼굴 좌표)과 그 줄의 프롬프트 절을 써. 끝나면 <id>.zip을 주고 멈춰.
+```
+
+## 8. 이전 프롬프트(나노바나나)와 달라진 점
 
 | 항목 | 이전 | 이번 |
 |---|---|---|
