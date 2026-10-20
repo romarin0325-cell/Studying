@@ -22,6 +22,11 @@
 
 결론: GPT Image 2.5는 그림 품질과 방향 지시는 잘 따른다. 그러나 기본 비율이 3등신에 가까운 치비다. 이 게임 캐스트는 약 2.3등신이다. 그래서 아래 프롬프트는 비율을 세 가지로 겹쳐 지시한다. Image 1을 틀로 쓰게 하고, 셀 안의 높이 비율을 숫자로 주고, 흔한 실수("3등신")를 직접 금지한다.
 
+### 1-1. 실제 적용 결과 (2026-10-21)
+
+- **큐어마스터 (설치함):** 이 지시서로 8장을 뽑았고, 몸 길이 보정 문장을 한 번 덧붙여 1장이 통과했다(머리 160.7×149.3, 턱 아래 206, 외곽선 남색). 다만 바깥 외곽선이 3px로 캐스트(대부분 4px)보다 얇았다. 그래서 `thicken-outline.mjs`로 바깥 윤곽만 1px 보강했다. 그 뒤 프롬프트의 외곽선 굵기 문장을 아래처럼 고쳤다.
+- **조커 (보류):** 지시서 없이 만든 시트(`joker_outfit_edit_v1.png`)는 머리를 캐스트 크기에 맞추면 턱 아래 몸이 약 293px(머리 높이의 약 1.97배)였다. 보통 키 범위 143~218을 크게 넘고, 모자와 지팡이가 셀 밖으로 나갔다. 나노바나나2·프로로 "머리는 그대로, 몸만 짧게"를 세 방식(편집, 발 높이 가이드, 승인 동료를 틀로 쓰는 마네킹)으로 17장 시도했다. 모두 몸 길이가 거의 그대로였다. 조커는 반드시 §5-3 프롬프트로 다시 뽑는다. 몸이 길면 §5-7의 첫 문장을 붙인다.
+
 ## 2. 작업 순서
 
 1. 이 문서와 `ASSET_PIPELINE.md` §0·§2·§3을 읽는다.
@@ -71,6 +76,7 @@
 6. **비율:** §6의 1~5단계(상자 읽기 → 패킹 → 검수)로 잰다. 패킹이 "painted pixels exceed frame"으로 거부되거나, `body`·`headW`·`headH`가 §6-5 범위 밖이면 탈락이다. 머리카락과 모자 부피가 캐릭터마다 달라서 눈대중 규칙으로는 가를 수 없다(시험본도 눈으로는 그럴듯해 보였다).
 7. 캐릭터별 MUST HAVE 중 하나라도 없거나 MUST NOT 중 하나라도 있다.
 8. 글자, 라벨, 칸 선, 이펙트(빛, 불꽃, 반짝이)가 있다.
+9. 외곽선이 갈색·자주·검정이다. 굵기는 탈락 사유가 아니다(§6-5에서 재고 보강한다).
 
 ### 4-2. 남은 후보 고르는 순서
 
@@ -114,7 +120,7 @@ PROPORTIONS (ultra super-deformed, exactly like Image 1; a taller 3-head chibi i
 - FEMALE-FORM chibi body like Image 1: slim, short, straight legs standing close together with the feet almost touching, small hands and feet, narrow shoulders, slim waist. Not the sturdy wide-stance body of a male chibi.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered with Image 1's finish (large, glossy, layered iris colour, two small white catchlights) but NOT Image 1's spiral pupils. Tiny nose, small mouth, soft blush.
 - Her black hair, dress, wings and shoes are painted as deep charcoal-indigo with clearly visible blue-grey highlights and fold lines, like the dark navy parts of Image 1, so every shape reads at small size. No large flat pure-black areas.
@@ -169,7 +175,7 @@ PROPORTIONS (super-deformed like Image 1 but at the TALL, slender end of the gro
 - FEMALE-FORM, slender: narrow shoulders, long neck, long slim arms, small hands; the legs are hidden inside a narrow column gown; tiny pointed black shoes just visible at the hem.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Paint her black hair and black gown exactly like Image 1's black dress: deep charcoal-indigo with clearly visible blue-grey highlights and fold lines, so the shapes read at small size. No large flat pure-black areas.
 - Simplify for a 40-pixel game token: few large, clear shapes.
@@ -223,7 +229,7 @@ PROPORTIONS (ultra super-deformed, exactly like Image 1; a taller 3-head chibi i
 - Slim youthful boyish chibi body like Image 1: narrow shoulders, slim short straight legs, feet slightly apart like Image 1, small hands.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered like Image 1: large and glossy, two small white catchlights. Tiny nose, soft blush.
 - His black clothes are painted as deep charcoal-indigo with clearly visible blue-grey highlights and fold lines so the shapes read at small size. No large flat pure-black areas.
@@ -279,7 +285,7 @@ PROPORTIONS (super-deformed like Image 1; a 3-head or 4-head chibi is WRONG)
 - MALE-FORM, heavily muscular chibi: shoulders about 1.6 times the skull width, thick trapezius and a bull neck, thick short arms, big fists (each about a third of the skull height) hanging relaxed at the sides; sturdy short legs, feet about one skull width apart.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not purple.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not purple.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair; simple muscle shading.
 - His black coat, trousers and boots are painted as deep charcoal-indigo with clearly visible blue-grey highlights and fold lines so the shapes read at small size. No large flat pure-black areas.
 - Simplify for a 40-pixel game token: few large, clear shapes; only a few studs; the tattoo as a bold simple pattern.
@@ -327,7 +333,7 @@ PROPORTIONS (ultra super-deformed like Image 1; a taller 3-head chibi is WRONG)
 - FEMALE-FORM chibi body like Image 1: slim, short, straight legs standing close together with the feet almost touching, small hands and feet, narrow shoulders, slim waist.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not olive.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not olive.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered like Image 1: large and glossy, layered iris colour, catchlights; but with the relaxed half-lidded shape of Image 3.
 - Simplify for a 40-pixel game token: only a few flower dots on the dress, no tiny thorns or tiny flowers on the vines.
@@ -378,7 +384,7 @@ PROPORTIONS (ultra super-deformed, exactly like Image 1; a taller 3-head chibi i
 - FEMALE-FORM chibi body like Image 1: slim, short, straight legs standing close together with the feet almost touching, small hands and feet, narrow shoulders, slim waist.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon, not pink.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon, not pink.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered with Image 1's finish (large, glossy, layered iris colour, catchlights) but NOT Image 1's spiral pupils. Tiny nose, small mouth, soft blush.
 - All pinks are clear rose or bubblegum pink, never magenta.
@@ -414,6 +420,7 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 | 좌우 방향이 틀렸다 | `CORRECTION: in the BOTTOM-LEFT cell the nose must point to the LEFT edge of the picture; in the BOTTOM-RIGHT cell the nose must point to the RIGHT edge. The two side views are mirror images of each other.` |
 | 뒷모습에 얼굴 | `CORRECTION: the TOP-RIGHT cell is seen from directly behind. Only the back of the head and hair are visible; no eyes, no mouth, no face.` |
 | 외곽선이 갈색·자주·검정 | `CORRECTION: every outline must be dark navy-indigo, about #23213A, exactly like Image 1. No brown, maroon or pure black lines.` |
+| 바깥 외곽선이 가늘다 | `CORRECTION: the outer silhouette line was too thin. Make the line around the whole figure as bold as Image 1's: about 0.8% of the cell width, clearly bolder than the inner lines.` |
 | 보드 배치를 따라 그렸다(세 칸, 원화 장면 등) | `CORRECTION: the attached board is only reference material. Do not draw three panels or copy the original illustration's scene. Output exactly one 2x2 sheet of four chibi views.` |
 | 흰 배경·체커보드 | `CORRECTION: the background must be real transparency, or one flat solid magenta #FF00FF. Not white, not a painted checkerboard.` |
 | 소품 손이 바뀐다 | `CORRECTION: the prop stays in the character's RIGHT hand in every view: viewer's left in the front view, viewer's right in the back view, near side in the RIGHT view, far side in the LEFT view.` |
@@ -469,7 +476,14 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
    | headW / headH | 150~168 / 143~156 |
    | body | 보통 143~218, 큰 키 189~211 |
    | outline rgb | 세 값 모두 90 이하이고 파랑(B)이 빨강(R)보다 크다(남색). 캐스트 중앙값은 (35,33,53)이다 |
+   | 바깥 외곽선 굵기 | 4px 이상(아발란체메이드·세이렌 4, 지크 6, 별똥별소년 3). 아래 명령의 `before` 값으로 잰다 |
    | 그림 | `<id>-heads.png`에서 얼굴 크기가 이웃 캐스트와 같다. `<id>-lineup-96.png`에서 튀지 않는다 |
+
+   바깥 외곽선이 3px 이하이면 바깥 윤곽만 1px 보강한다. 얼굴·내부 선·색은 바뀌지 않는다. 결과를 원본·캐스트와 1:1로 나란히 보고, 보강이 두드러져 보이면 원본을 쓴다.
+
+   ```bash
+   node defense_test/scripts/art/thicken-outline.mjs work/<id>/<id>.webp work/<id>/<id>-outline.webp 1 --measure
+   ```
 
 6. **설치.**
 
@@ -477,6 +491,7 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
    node defense_test/scripts/art/pack-sd.mjs sheet.png work/<id> <id> <left>,<top>,<right>,<chin> --install
    ```
 
+   - 5단계에서 외곽선을 보강했다면 `work/<id>/<id>-outline.webp`를 `defense_test/assets/merge/units/<id>.webp`에 덮어쓴다.
    - `defense_test/src/data.js`에서 그 동료의 `art.portrait`를 출력된 `portrait` 값으로 바꾼다(`size` 250).
    - `node defense_test/scripts/art/check-facing.mjs`를 실행한다. 출력에 `<id>`가 있으면 `--fix <id>`(좌우 칸 맞바꿈)로 고치고 다시 실행한다. 베놈은 `CHECKED_BY_EYE`에 있으므로 눈으로 본다.
    - `node defense_test/scripts/art/consistency-report.mjs`를 실행한다. 그 동료의 `bboxH`가 같은 키 그룹 중앙값의 95~105%면 끝이다. 95% 미만이면 `headOverrides`에 `scale = min(1.08, 중앙값 ÷ bboxH)`를 넣고(이유 문장 포함) 4번부터 다시 한다.

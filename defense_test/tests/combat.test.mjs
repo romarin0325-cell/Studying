@@ -388,7 +388,7 @@ test('Doom refunds once in either Rumi merge direction and a merge records its w
     const [enemy]=enemiesFor(s,[{progress:1200}]);s.gold=100;s.gauge=30;s.upgrades.doom=2;
     const before=enemy.hp,refund=E.doomRefund(2,2),result=E.move(s,0,1);
     assert.ok(result.ok&&result.merged);assert.equal(result.refund,refund);assert.equal(s.gold,100+refund);
-    assert.equal(s.stats.income['합성 환급'],refund);assert.equal(s.stats.merges,1);assert.equal(s.gauge,42);
+    assert.equal(s.stats.income['합성 환급'],refund);assert.equal(s.stats.merges,1);assert.equal(s.gauge,36);
     assert.equal(s.board[1].hero,'doom');assert.equal(s.board[1].rank,3);assert.equal(s.board[1].mergedWave,s.wave);
     assert.equal(enemy.hp,before);assert.equal(s.stats.byHero.doom,undefined);
   }
@@ -663,10 +663,10 @@ test('Ares reshuffles the board at most twice; love Iris drains only a full gaug
 
 test('Queen pays 12G (+6G per rank, cap 90); Doom refunds without training and training raises the fortune',()=>{
   assert.equal(E.queenIncome(1,1),12);assert.equal(E.queenIncome(2,1),18);assert.equal(E.QUEEN_CAP,90);assert.equal(E.QUEEN_TAX,20);
-  assert.equal(E.fortuneFactor(0),7);assert.equal(E.fortuneFactor(39),8);assert.equal(E.fortuneFactor(500),12);assert.equal(E.fortuneFactor(500,3),15);
-  assert.equal(E.doomRefund(1),50);assert.equal(E.doomRefund(3),150);
-  const s=traitArena([{hero:'doom',index:12}]),[e]=enemiesFor(s,[{progress:600}]);s.gauge=120;s.gold=25+60;const hp=e.hp,base=E.power(s,s.board[12]);
-  assert.ok(E.cast(s,'doom').ok);close(hp-e.hp,base*10,'60 gold left after paying gives 7+3 = 10x');assert.equal(s.gold,60);
+  assert.equal(E.fortuneFactor(0),7);assert.equal(E.fortuneFactor(39),7);assert.equal(E.fortuneFactor(40),8);assert.equal(E.fortuneFactor(500),12);assert.equal(E.fortuneFactor(500,3),15);
+  assert.equal(E.doomRefund(1),40);assert.equal(E.doomRefund(3),120);assert.equal(E.skillGoldCost('doom'),40);
+  const s=traitArena([{hero:'doom',index:12}]),[e]=enemiesFor(s,[{progress:600}]);s.gauge=120;s.gold=40+120;const hp=e.hp,base=E.power(s,s.board[12]);
+  assert.ok(E.cast(s,'doom').ok);close(hp-e.hp,base*10,'120 gold left after paying 40 gives 7+3 = 10x');assert.equal(s.gold,120);
   // The merge refund is the same before and after training.
   for(const level of [0,5]){
     const r=traitArena([{hero:'doom',index:0,rank:2},{hero:'doom',index:1,rank:2}]);r.upgrades.doom=level;const gold=r.gold;
@@ -786,14 +786,14 @@ test('Detective ultimate resolves its own hit with only the old exposure before 
   }
 });
 
-test('Doom ultimate atomically spends 25 gold for its base fortune damage and leaves every state field untouched on insufficient funds',()=>{
-  for(const [gold,gauge] of [[24,120],[25,HERO.doom.skill.cost-.01]]){
+test('Doom ultimate atomically spends 40 gold for its base fortune damage and leaves every state field untouched on insufficient funds',()=>{
+  for(const [gold,gauge] of [[39,120],[40,HERO.doom.skill.cost-.01]]){
     const s=traitArena([{hero:'doom',index:12}]);enemiesFor(s,[{progress:1200}]);s.gold=gold;s.gauge=gauge;
     const before=E.serialize(s),events=structuredClone(s.events);assert.equal(E.cast(s,'doom').ok,false);
     assert.equal(E.serialize(s),before);assert.deepEqual(s.events,events);
   }
   const s=traitArena([{hero:'doom',index:12}]),enemies=enemiesFor(s,[{progress:100},{kind:'boss',progress:1200}]);
-  s.gold=25;s.gauge=120;const before=enemies.map(e=>e.hp);assert.ok(E.cast(s,'doom').ok);
+  s.gold=40;s.gauge=120;const before=enemies.map(e=>e.hp);assert.ok(E.cast(s,'doom').ok);
   assert.equal(s.gold,0);assert.equal(s.gauge,120-HERO.doom.skill.cost);assert.equal(s.stats.skills,1);
   assert.equal(s.stats.income['필살기'],undefined);
   for(const [i,e] of enemies.entries())close(before[i]-e.hp,E.power(s,s.board[12])*E.fortuneFactor(0));
@@ -803,11 +803,11 @@ test('Doom ultimate atomically spends 25 gold for its base fortune damage and le
 test('autoPlay skips unaffordable Doom and still casts another ready ultimate against a boss',()=>{
   const s=traitArena([{hero:'doom',index:0},{hero:'star_boy',index:12}]);
   const [boss]=enemiesFor(s,[{kind:'boss',progress:1200}]);
-  s.gold=24;s.gauge=120;s.freeSummons=0;s.paidSummons=100;
+  s.gold=39;s.gauge=120;s.freeSummons=0;s.paidSummons=100;
   assert.equal(s.deck[0],'doom');assert.ok(E.summonCost(s)>s.gold);
-  assert.equal(E.skillGoldCost('doom'),25);assert.equal(E.skillGoldCost('star_boy'),0);
+  assert.equal(E.skillGoldCost('doom'),40);assert.equal(E.skillGoldCost('star_boy'),0);
   const hp=boss.hp;autoPlay(s);
-  assert.equal(s.stats.skills,1);assert.equal(s.gold,24);
+  assert.equal(s.stats.skills,1);assert.equal(s.gold,39);
   assert.equal(s.gauge,0,'Wish upon a Star spends the whole gauge');
   assert.equal(s.paidSummons,100);assert.equal(s.stats.merges,0);assert.equal(s.board.filter(Boolean).length,2);
   assert.equal(s.finishers.length,1);assert.equal(s.finishers[0].source,s.board[12].uid);
@@ -931,10 +931,10 @@ test('divine is three independently timed stacks that feed starlight on a kill a
   advanceTo(s,until);assert.equal(e.divine,1);
   // A kill pays the base starlight plus 0.5 per remaining stack (bosses: 15 + 3 per stack).
   const finisher=launchNormal(s,s.board[12]);s.gauge=0;e.hp=1;resolveNormal(s,finisher);
-  assert.ok(e.hp<=0);close(s.gauge,1.3+.5+.001*1.2,'one divine stack on a kill');
+  assert.ok(e.hp<=0);close(s.gauge,1.3+.5+.001*E.STARLIGHT_PER_SECOND,'one divine stack on a kill');
   const b=traitArena([{hero:'night_rabbit',index:12}]),[boss]=enemiesFor(b,[{kind:'boss'}]);
   boss.statusEffects.push({type:'divine',source:'legacy:divine',owner:null,amount:2,until:b.time+6});E.statusState(b,boss);
-  const blow=launchNormal(b,b.board[12]);b.gauge=0;boss.hp=1;resolveNormal(b,blow);assert.ok(boss.hp<=0);close(b.gauge,15+2*3+.001*1.2,'two divine stacks on a boss kill');
+  const blow=launchNormal(b,b.board[12]);b.gauge=0;boss.hp=1;resolveNormal(b,blow);assert.ok(boss.hp<=0);close(b.gauge,15+2*3+.001*E.STARLIGHT_PER_SECOND,'two divine stacks on a boss kill');
   assert.ok(fresh.until>until);
 });
 
@@ -1081,7 +1081,7 @@ test('relic unique effects scale with relicLevels and missing levels stay at 1',
   close(E.combatStats(crown,crown.board[12]).damage/E.power(crown,crown.board[12]),1+RV.crown.power*relicScale(3),'crown scales ranked damage');
   const glass=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{artifacts:['hourglass']});
   glass.relicLevels={hourglass:5};glass.gauge=0;assert.ok(E.move(glass,0,1).merged);
-  close(glass.gauge,12+RV.hourglass.starlight*relicScale(5),'hourglass adds its starlight to the merge grant');
+  close(glass.gauge,E.MERGE_STARLIGHT+RV.hourglass.starlight*relicScale(5),'hourglass adds its starlight to the merge grant');
 });
 
 test('gift_ribbon rolls its scaled chance on every summon-button hero, free or paid, and flashes the cell',()=>{
@@ -1220,12 +1220,12 @@ test('ultimate control ignores a boss\'s control immunity; a second ultimate con
 
 test('relic pass 7: no ultimate or merge loop, and the three new relics',()=>{
   // Lantern + hourglass + Santa: two gifts and their merge cost more starlight than they give back, even at level 10.
-  const scale=relicScale(10),santa=HERO.santa.skill.cost,refund=santa*E.RELIC_VALUES.lantern.refund*scale,merge=12+E.RELIC_VALUES.hourglass.starlight*scale;
+  const scale=relicScale(10),santa=HERO.santa.skill.cost,refund=santa*E.RELIC_VALUES.lantern.refund*scale,merge=E.MERGE_STARLIGHT+E.RELIC_VALUES.hourglass.starlight*scale;
   assert.ok(2*(santa-refund)>merge+20,`cycle nets ${(merge-2*(santa-refund)).toFixed(1)}`);
   // Broken clock no longer repays starlight, for a gift or for a pure buff.
   const clock=traitArena([{hero:'siren',index:12},{hero:'santa',index:13}],{artifacts:['broken_clock']});clock.relicLevels={broken_clock:10};enemiesFor(clock,[{hp:1e9}]);quiet(clock);
   clock.gauge=120;assert.ok(E.cast(clock,'santa').ok);assert.equal(clock.clockBank,undefined);
-  const beforeGauge=clock.gauge;clock.buffs={haste:5};for(let i=0;i<20;i++)E.step(clock,.05);close(clock.gauge,beforeGauge+1.2,'only the 1.2/s trickle');
+  const beforeGauge=clock.gauge;clock.buffs={haste:5};for(let i=0;i<20;i++)E.step(clock,.05);close(clock.gauge,beforeGauge+E.STARLIGHT_PER_SECOND,'only the wave trickle');
   assert.ok(E.restore(E.serialize(clock)));
   // Sprout medal: 1-2 star companions hit harder and summons are cheaper.
   const sprout=traitArena([{hero:'star_boy',index:12,rank:2},{hero:'siren',index:6,rank:3}],{artifacts:['sprout']});sprout.relicLevels={sprout:1};
@@ -1343,12 +1343,12 @@ test('tempo bell raises attack speed per wave after the first, up to its cap',()
 test('royal seal grants starlight once per boss spawn and amplifies boss damage only',()=>{
   const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_seal']});s.relicLevels={royal_seal:5};const m=relicScale(5);
   const star=E.RELIC_VALUES.royal_seal.starlight;
-  const total=star*2*m+.15*1.2;
+  const total=star*2*m+.15*E.STARLIGHT_PER_SECOND;
   if(total>E.gaugeCap(s))s.gaugeMax=Math.min(E.GAUGE_MAX+400,Math.max(E.GAUGE_MAX,Math.ceil(total)));
   quiet(s);s.enemies=[];s.queue=[{kind:'boss',hp:1e6},{kind:'boss',hp:1e6},{kind:'grunt',hp:1e6}];s.spawnIn=0;s.gauge=0;
-  E.step(s,.05);close(s.gauge,star*m+.05*1.2);s.spawnIn=0;
-  E.step(s,.05);close(s.gauge,star*2*m+.1*1.2);s.spawnIn=0;
-  E.step(s,.05);close(s.gauge,star*2*m+.15*1.2);
+  E.step(s,.05);close(s.gauge,star*m+.05*E.STARLIGHT_PER_SECOND);s.spawnIn=0;
+  E.step(s,.05);close(s.gauge,star*2*m+.1*E.STARLIGHT_PER_SECOND);s.spawnIn=0;
+  E.step(s,.05);close(s.gauge,star*2*m+.15*E.STARLIGHT_PER_SECOND);
   const hit=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_seal']});hit.relicLevels={royal_seal:5};hit.enemies=[];
   const [boss,grunt]=enemiesFor(hit,[{kind:'boss',hp:500,progress:1200},{hp:1e7,progress:400}]);quiet(hit);
   const shot=launchNormal(hit,hit.board[12]);assert.equal(shot.target,boss.uid);const hp=boss.hp;resolveNormal(hit,shot);
@@ -1372,8 +1372,8 @@ test('broken clock doubles buff and trauma duration and grants no starlight',()=
   const trauma=traitArena([{hero:'time_magician',index:12}],{artifacts:['broken_clock']});trauma.relicLevels={broken_clock:5};
   enemiesFor(trauma,[{hp:1e8}]);quiet(trauma);trauma.gauge=120;assert.ok(E.cast(trauma,'time_magician').ok);
   close(trauma.buffs.trauma,10*stretch);
-  // No repayment: a haste buff leaves only the normal 1.2/s trickle. An old save drops clockBank.
-  s.buffs={haste:5};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,1.2);
+  // No repayment: a haste buff leaves only the normal wave trickle. An old save drops clockBank.
+  s.buffs={haste:5};s.gauge=0;for(let i=0;i<20;i++)E.step(s,.05);close(s.gauge,E.STARLIGHT_PER_SECOND);
   const old=JSON.parse(E.serialize(s));old.clockBank=40;const back=E.restore(old);assert.ok(back);assert.equal(back.clockBank,undefined);
 });
 
@@ -1426,7 +1426,7 @@ test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, pr
 
 test('hourglass banks merge starlight that would overflow and returns it after the next ultimate',()=>{
   const s=traitArena([{hero:'star_boy',index:12},{hero:'star_boy',index:13}],{artifacts:['hourglass']});s.relicLevels={hourglass:1};
-  const cap=E.gaugeCap(s),gain=12+E.RELIC_VALUES.hourglass.starlight;s.gauge=cap-10;
+  const cap=E.gaugeCap(s),gain=E.MERGE_STARLIGHT+E.RELIC_VALUES.hourglass.starlight;s.gauge=cap-10;
   assert.ok(E.move(s,12,13).ok);assert.equal(s.gauge,cap);close(s.sandStore,gain-10);
   enemiesFor(s,[{progress:100,hp:1e9}]);const banked=s.sandStore;assert.ok(E.cast(s,'star_boy').ok);close(s.gauge,banked);assert.equal(s.sandStore,0);
   const plain=traitArena([{hero:'star_boy',index:12},{hero:'star_boy',index:13}]);plain.gauge=E.gaugeCap(plain)-10;E.move(plain,12,13);assert.equal(plain.sandStore||0,0);
@@ -1719,7 +1719,7 @@ test('immunity: antropy, an orthogonal cure aura, and the invincible timer',()=>
   assert.ok(E.move(w,0,2).ok);assert.equal(w.board[2].hero,'star_boy');assert.equal(w.board[2].invincible,2,'a swap keeps the unit timer');
 });
 
-test('boss patterns skip immune units: seal, storm, stun, thunder, judgement and curse',()=>{
+test('boss patterns skip immune units: seal, storm, stun, thunder and curse; judgement spares only invincible units',()=>{
   const seal=armBoss([{index:0,hero:'cure_master'},{index:1,hero:'star_boy'},{index:2,hero:'snow_rabbit'},{index:3,hero:'siren'},{index:4,hero:'antropy'}],0);
   const [s,boss]=seal;boss.skillIn=0;hold(s);E.step(s,.05);assert.equal(s.telegraph.pattern,'seal');
   const cells=s.telegraph.cells,uid=id=>s.board.find(u=>u?.hero===id).uid;
@@ -1735,7 +1735,7 @@ test('boss patterns skip immune units: seal, storm, stun, thunder, judgement and
   const lit=[...storm.telegraph.cells],hits=lit.filter(i=>storm.board[i]&&!E.immune(storm,i));
   assert.ok(lit.some(i=>storm.board[i]&&E.immune(storm,i)));assert.ok(hits.length>=1);
   const gauge=storm.gauge,time=storm.time;finishTelegraph(storm);
-  close(storm.gauge,gauge+(storm.time-time)*1.2-5*hits.length,'storm drains 5 starlight per non-immune hit');
+  close(storm.gauge,gauge+(storm.time-time)*E.STARLIGHT_PER_SECOND-5*hits.length,'storm drains 5 starlight per non-immune hit');
   for(const i of lit)if(storm.board[i])assert.equal(storm.board[i].disabled>0,hits.includes(i));
   assert.ok(storm.events.some(e=>e.type==='bossCast'&&e.pattern==='storm'));
   for(const [hero,stunned] of [['antropy',false],['siren',true]]){
@@ -1750,9 +1750,13 @@ test('boss patterns skip immune units: seal, storm, stun, thunder, judgement and
   assert.ok(thor.events.some(e=>e.type==='bossCast'&&e.pattern==='thunder'));
   const [judge,judgeBoss]=armBoss([{index:12,hero:'antropy'},{index:0,hero:'siren'}],8);judgeBoss.skillIn=0;hold(judge);E.step(judge,.05);
   assert.equal(judge.telegraph.pattern,'judgement');const marked=judge.telegraph.cells[0];
+  // Judgement removes a companion. That is not a debuff: Antropy's immunity does not stop it, invincibility does.
   relocate(judge,judge.board.find(u=>u?.hero==='antropy').uid,marked);finishTelegraph(judge);
-  assert.equal(judge.board[marked]?.hero,'antropy');assert.equal(judge.board.filter(Boolean).length,2);
-  assert.equal(judge.events.filter(e=>e.type==='judgement').pop().hit,false);
+  assert.equal(judge.board[marked],null);assert.equal(judge.board.filter(Boolean).length,1);
+  assert.equal(judge.events.filter(e=>e.type==='judgement').pop().hit,true);
+  const [ward,wardBoss]=armBoss([{index:12,hero:'antropy'},{index:0,hero:'siren'}],8);wardBoss.skillIn=0;hold(ward);E.step(ward,.05);
+  const wardCell=ward.telegraph.cells[0];relocate(ward,ward.board.find(u=>u?.hero==='antropy').uid,wardCell);ward.board[wardCell].invincible=30;finishTelegraph(ward);
+  assert.equal(ward.board[wardCell]?.hero,'antropy');assert.equal(ward.events.filter(e=>e.type==='judgement').pop().hit,false);
   const [plain,plainBoss]=armBoss([{index:12,hero:'star_boy'},{index:0,hero:'siren'}],8);plainBoss.skillIn=0;hold(plain);E.step(plain,.05);
   const markedPlain=plain.telegraph.cells[0];finishTelegraph(plain);
   assert.equal(plain.board[markedPlain],null);assert.equal(plain.events.filter(e=>e.type==='judgement').pop().hit,true);
@@ -1866,7 +1870,7 @@ test('smart auto holds lemonade until someone needs it and spends requiem on liv
   smartAutoPlay(s);assert.equal(s.stats.skills,1);assert.ok(foe.hp<hp);
 });
 
-test('ash: armageddon burns the lowest other ally, guards an immune one, and still blasts when she is alone',()=>{
+test('ash: armageddon burns the lowest other ally, spares an invincible one (not Antropy), and still blasts when she is alone',()=>{
   assert.deepEqual(E.ARMAGEDDON,{factor:15,radius:180});assert.equal(HERO.ash.damage,31);
   const dist=(a,b)=>Math.hypot(E.pathPoint(a.progress).x-E.pathPoint(b.progress).x,E.pathPoint(a.progress).y-E.pathPoint(b.progress).y);
   const hitLine=base=>`가장 밀집한 반경 ${E.ARMAGEDDON.radius}의 적에게 위력 ${E.ARMAGEDDON.factor}배, ${Math.round(base*E.ARMAGEDDON.factor).toLocaleString('ko-KR')} 피해를 줍니다.`;
@@ -1903,6 +1907,11 @@ test('ash: armageddon burns the lowest other ally, guards an immune one, and sti
   const ward=immune.events.slice(immuneMark).find(e=>e.type==='ward');
   assert.deepEqual({hero:ward.hero,x:ward.x,y:ward.y},{hero:'cure_master',...E.cellPoint(0)});
   close(immuneHp-immune.enemies[0].hp,immuneBase*E.ARMAGEDDON.factor);
+  // Antropy nullifies stuns and curses, but removal is not a debuff: a 1-star Antropy is burned like anyone else.
+  const debuffOnly=traitArena([{index:0,hero:'antropy',rank:1},{index:12,hero:'ash',rank:2},{index:24,hero:'snow_rabbit',rank:2}]);
+  enemiesFor(debuffOnly,[{hp:1e9}]);assert.equal(E.immune(debuffOnly,0),true);assert.equal(E.invincible(debuffOnly,0),false);
+  assert.equal(E.castPreview(debuffOnly,'ash').lines[0],`지금 소멸하는 동료: ${HERO.antropy.name} 1성.`);
+  readyCast(debuffOnly,'ash');assert.equal(debuffOnly.board[0],null);assert.equal(debuffOnly.stats.sacrificed,1);
   const alone=traitArena([{index:12,hero:'ash'}]);
   const [foe]=enemiesFor(alone,[{hp:1e9,progress:1200}]);
   const aloneBase=E.combatStats(alone,alone.board[12]).damage,aloneGold=alone.gold,aloneHp=foe.hp;
