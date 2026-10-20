@@ -36,8 +36,7 @@
 
 ## 루미의 설명 (AI 해설)
 
-- 설정 → "루미의 설명 · AI"에서 제공자 탭(Google Gemini / DeepSeek · Coral Bricks)을 고르고, 그 제공자의 API 키와 모델을 넣습니다. Gemini는 3.8 Flash 기본 · Gemini 4 Argon · 3.5 Flash Lite, DeepSeek는 V4.1 Flash(빠름) · V4.1 Flash 추론(깊이, `reasoning_effort: high`). 제공자마다 키와 모델을 따로 기억합니다.
-- **DeepSeek(Coral Bricks)는 로컬 중계 서버가 필요합니다.** Coral Bricks API(`https://inference.coralbricks.ai/v1`, OpenAI 호환)는 CORS로 자기 사이트에서만 브라우저 호출을 받기 때문에, 게임은 `http://127.0.0.1:4178/coralbricks/v1`(설정에서 바꿀 수 있음)로 보내고 `node defense_test/scripts/serve.mjs`가 `chat/completions`·`models`만 Coral Bricks로 넘깁니다. 키는 요청마다 지나갈 뿐 서버에 저장하지 않습니다. 서버가 꺼져 있으면 "중계 서버에 연결하지 못했어요"가 뜹니다.
+- 설정 → "루미의 설명 · AI"에 Gemini API 키를 넣고 모델을 고릅니다(3.8 Flash 기본 · Gemini 4 Argon · 3.5 Flash Lite).
 - 키는 이 브라우저의 `localStorage['star-garden-tutor']`에만 저장되고 저장 데이터·백업 파일에는 들어가지 않습니다.
 - 요청에는 문제, 보기, 고른 답, 정답, 해설, 출전, 관련 강의 본문(또는 용어 설명)이 들어갑니다. 루미는 "형아"라고 부르며 핵심 한 줄 → 정답 이유 → 오답 이유 → 비유 → 시험 출제 방식 → 외우는 요령 순서로 설명합니다(`src/tutor.js`).
 - 키가 있으면 설명을 들은 뒤(또는 오류가 난 뒤) 별을 밝힐 수 있습니다. 키가 없으면 교재 해설과 강의를 읽고 바로 밝힐 수 있습니다.
