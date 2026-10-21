@@ -1,0 +1,9 @@
+{
+  "name": "card-rpg-deepseek",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "verify": "node --check src/deepseek.js && node build.mjs && node tests/smoke.mjs"
+  }
+}
