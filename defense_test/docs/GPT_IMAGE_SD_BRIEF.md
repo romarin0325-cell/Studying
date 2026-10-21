@@ -65,18 +65,18 @@
   - 해바라기: 세이렌은 여성형 보통 키(1.17H)다. 가는 다리가 드러나 체형을 읽기 쉽다.
 - 다른 새 캐릭터(토피애플·앤트로피·베히모스 등 나노바나나 제작)는 마스터로 쓰지 않는다(`ASSET_PIPELINE.md` §0-5).
 
-### 3-1. 원화·현재 에셋과 다르게 쓴 곳 (사용자 승인 필요)
+### 3-1. 원화·현재 에셋과 다르게 쓴 곳
 
-의상·머리·소품은 원화와 현재 에셋 그대로 쓴다. 프롬프트에서 다르게 쓰려면 이 표에 적고 사용자 승인을 받는다. 아래는 2026-10-21에 원화와 현재 에셋을 대조해 찾은 것이다. **승인 전에는 프롬프트를 바꾸지 않았다.** 승인되지 않은 줄은 원화대로 되돌린다.
+의상·머리·소품은 원화와 현재 에셋 그대로 쓴다. 칸 크기(셀 폭 70%, 위 여백 5%) 때문에 줄인 것만 아래에 남겼고, 그 밖의 차이는 원화대로 되돌렸다(2026-10-21: 애쉬 가터 금지, 베놈 앞머리·넓은 이마 금지, 조커 바디수트·노출 금지, 언더독 가슴 열림 제한). 프롬프트에서 새로 다르게 쓰려면 이 표에 적고 사용자 승인을 받는다. 이 프롬프트와 같은 내용이 로컬 문서 `manus_2img`(이미지 2장 첨부용)에도 있다.
 
-| 캐릭터 | 프롬프트가 쓴 것 | 원화·현재 에셋 | 쓴 이유 |
+| 캐릭터 | 프롬프트가 쓴 것 | 원화·현재 에셋 | 이유 |
 |---|---|---|---|
-| 애쉬 | 작게 접힌 날개(폭 두개골 1.6배 이하), 큰 날개·펼친 날개 금지 | 큰 날개를 펼침 | 칸 폭 70% 제한 |
-| 베놈 | 앞머리를 짧게 내려 이마를 가리고 넓은 이마 금지, 가시관 높이 0.5H 이하 | 가운데 가르마로 이마가 드러남, 가시관이 더 높고 넓음 | 머리 크기 일치(이유는 기록 없음) |
-| 조커 | 모자 폭 두개골 1.7배 이하, 지팡이를 몸에 붙임 | 모자가 더 넓고 지팡이 고리가 큼 | 칸 폭 70% 제한 |
-| 언더독 | 코트가 정강이까지, 가슴은 명치까지만 열림 | 로브가 발목까지, 가슴이 허리띠 가까이까지 열림 | 이유는 기록 없음 |
-| 큐어마스터 | 스타킹에 가터 언급 없음 | 원화에 가터가 있음(설치된 에셋도 없음) | 이유는 기록 없음 |
-| 해바라기 | (대조에서 다른 곳 없음) | | |
+| 애쉬 | 날개를 펼치되 폭 두개골의 2.0배 이하 | 큰 날개를 펼침(현재 에셋은 약 1.8배) | 칸 폭 70% |
+| 베놈 | 가시관 높이 0.6H 이하 | 원화의 관이 더 큼(현재 에셋 약 0.57H) | 위 여백 5% |
+| 조커 | 모자 폭 두개골 1.9배 이하, 지팡이 포함 전체 폭 75% 이하, 지팡이를 몸에 붙임 | 모자와 지팡이 고리가 더 큼(현재 에셋 모자 약 1.86배) | 칸 폭 |
+| 언더독 | 코트가 정강이까지 | 발목까지 오는 긴 로브 | 치비라 다리가 보여야 함 |
+| 큐어마스터 | 스타킹의 가터 스트랩을 쓰지 않음 | 원화에 있음(설치된 에셋에도 없음) | 작은 칸에서 읽히지 않음. 넣으려면 스타킹 문구에 "with thin white garter straps" |
+| 해바라기 | (다른 곳 없음) | | |
 
 ## 4. 후보 거르기
 
@@ -146,15 +146,15 @@ A haughty, arrogant young archdemon girl whose fire burns everything; utterly su
 FACE (the most important part; identical in every view that shows the face): sharp crimson-red eyes with the upper lids lowered into a contemptuous half-lidded look, thick dark upper lashes, small pupils with one highlight; one eyebrow slightly raised; pink blush; a smug closed-mouth cat smile shaped like a small "ω" (corners up, no teeth). Her chin is raised a little so she looks down at the viewer.
 HAIR: long black hair (charcoal with blue-grey shine) whose lower third fades to deep crimson; two high twin tails, each tied with a black ribbon topped by a small black feather ornament that stands up like a little wing; bangs falling between the eyes and thin side locks.
 COSTUME: off-shoulder glossy black gothic mini dress; black criss-cross lacing down the front of the bodice; long bell sleeves ending in black ruffles; a black choker with a small silver cross charm; a teal-lined underskirt peeking below the black skirt hem; sheer dark-brown thigh-high stockings with lace tops; thin black garter straps holding the stocking tops, as in Image 2; black high-heeled Mary Jane shoes with ankle straps and small black bows. The V-shaped neckline is laced criss-cross, exactly as in Image 2.
-WINGS: a pair of SMALL folded black feathered demon wings on her back, tips angled up behind the shoulders, total wingspan at most 1.6 times the skull width. FRONT view: the wing tips peek out behind the shoulders. BACK view: both wings fully visible. Side views: one folded wing behind the back.
+WINGS: a pair of black feathered demon wings on her back, spread out to both sides behind the shoulders like Image 2 but compact: total wingspan at most 2.0 times the skull width, tips pointing outward and a little up. FRONT view: both wings spread behind the shoulders. BACK view: both wings fully visible. Side views: the near wing is visible behind the back, the far wing mostly hidden.
 POSE AND HANDS (the same in all four views): her LEFT hand rests on her hip; her RIGHT arm hangs relaxed with long dark-red nails.
 - FRONT view: the hand on the hip is on the viewer's RIGHT.
 - BACK view: the hand on the hip is on the viewer's LEFT.
 - LEFT view: the hand on the hip is on the near side, in front.
 - RIGHT view: the hand on the hip is on the far side, mostly hidden.
 
-MUST HAVE: half-lidded red eyes and the ω smirk; black twin tails with crimson ends and feather ornaments; small folded black wings; choker with a cross; teal underskirt; brown thigh-high stockings; black heels; left hand on the hip.
-MUST NOT: fire or flames, a fireball, horns, a halo, a tail, large or spread wings, an open mouth or teeth, an angry or shy face, a white background.
+MUST HAVE: half-lidded red eyes and the ω smirk; black twin tails with crimson ends and feather ornaments; compact spread black wings; choker with a cross; teal underskirt; brown thigh-high stockings; black heels; left hand on the hip.
+MUST NOT: fire or flames, a fireball, horns, a halo, a tail, wings wider than 2.0 times the skull width, an open mouth or teeth, an angry or shy face, a white background.
 
 FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; head size, chin height and foot line match Image 1; dark navy outline; transparent or flat magenta background; everything inside its own cell.
 ```
@@ -198,8 +198,8 @@ STYLE (match Image 1)
 CHARACTER: VENOM
 The witch who brings plague to the continent. Nobody ever stands near her. She must look MYSTERIOUS, TALL, ELEGANT and OVERWHELMING: a beautiful catastrophe from a dark fairy tale, a slender young witch of about twenty. Never plump, never motherly, never a cute doll.
 FACE (identical in every view that shows the face): completely expressionless and cold; no smile, no frown, no blush. Narrow, long, half-lidded eyes with long dark lashes; bright pale-green irises with tiny pupils and one small highlight; she looks straight at the viewer from slightly above (chin slightly raised). Thin straight dark eyebrows. Very pale porcelain skin. A tiny closed neutral mouth. Thin black crack lines like cracked porcelain on her LEFT cheek (the viewer's right in the front view), running down that side of the neck to the collarbone.
-HAIR: very long glossy black hair reaching the hips, parted in the centre, smooth with soft waves; the lower third fades to bright toxic green. Long face-framing side locks; short soft bangs partly cover the forehead so the forehead is not a large bare area.
-CROWN: thin black thorn branches rising straight up from the top of the head like slim antlers, carrying five round pale-green rose buds. Narrow: no wider than the hair. At most 0.5 H tall above the hair.
+HAIR: very long glossy black hair reaching the hips, parted in the centre, smooth with soft waves; the lower third fades to bright toxic green. Long face-framing side locks; no bangs: the hair is parted in the centre and falls to both sides, leaving the forehead visible exactly as in Image 2.
+CROWN: thin black thorn branches rising straight up from the top of the head like slim antlers, carrying five round pale-green rose buds. Narrow: no wider than the hair. At most 0.6 H tall above the hair.
 COSTUME: a long, tight, strapless black gown shaped like a narrow column, with a high slit at the front hem that shows only the shin; thin green vein lines painted in the cloth (painted, not glowing); the hem dissolves into a few short black root tendrils on the ground, spreading no wider than 1.2 times the skull width. Bare shoulders and arms, a thin black choker, a thin bright-green vine coiled twice around her LEFT forearm, long pointed black nails.
 PROP: her RIGHT hand holds one tall black spider lily upright by its long green stem at her side; the flower head (black-purple petals, faint red centre) is level with the top of her head. Her left hand hangs relaxed.
 - FRONT view: the lily is on the viewer's LEFT.
@@ -208,7 +208,7 @@ PROP: her RIGHT hand holds one tall black spider lily upright by its long green 
 - LEFT view: the lily is on the far side; its flower head shows above and behind her shoulder.
 
 MUST HAVE: cold half-lidded green eyes; pale skin with crack lines; centre-parted black hair with green ends; thorn crown with five green buds; strapless black column gown with a slit and root-tendril hem; spider lily in the right hand; vine around the left forearm.
-MUST NOT: a smile or blush, round doll eyes, a large bare forehead, a wide A-line or bell skirt, butterflies, green fire, glow, aura, floating objects, roots spreading across the floor, a white background.
+MUST NOT: a smile or blush, round doll eyes, bangs covering the forehead, a wide A-line or bell skirt, butterflies, green fire, glow, aura, floating objects, roots spreading across the floor, a white background.
 
 FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; the head is the same size as Image 1's and the body is longer; dark navy outline; transparent or flat magenta background; everything inside its own cell.
 ```
@@ -239,7 +239,7 @@ PROPORTIONS (ultra super-deformed, exactly like Image 1; a taller 3-head chibi i
 - The whole figure without the hat is about 2.2 heads tall. The head with its hair is as tall as everything below the chin.
 - H = skull height (chin to top of the skull, ignoring hair volume, circlet and hat). Chin to soles, including legs and boots = 1.20 H, about the same as Image 1.
 - In every cell, measured from the top edge of the cell: soles at 94%, chin at 58%, top of the skull at 29%. Skull width about 31% of the cell width. This is the same placement as Image 1.
-- Everything (hat, staff, cape, ribbons) stays inside its cell with at least 5% empty margin on every side. Total figure width including the staff at most 70% of the cell width.
+- Everything (hat, staff, cape, ribbons) stays inside its cell with at least 5% empty margin on every side. Total figure width including the staff at most 75% of the cell width.
 - Slim youthful boyish chibi body like Image 1: narrow shoulders, slim short straight legs, feet slightly apart like Image 1, small hands.
 
 STYLE (match Image 1)
@@ -255,7 +255,7 @@ CHARACTER: JOKER
 An ageless, genderless being said to have existed before the creator made the world. It appears as a slim young jester boy in bizarre clothes. It always smiles, and the smile is a little too wide: cheerful on the surface, faintly uncanny underneath. Never a villain snarl, never angry, never horror.
 FACE (the most important part; identical in every view that shows the face): very bright blue eyes opened a little too wide; each pupil is a pale vertical diamond-shaped glint; heavy dark upper lash lines; eyebrows raised; pink blush with fine diagonal hatching on the cheeks; a huge open grin showing one straight row of white upper teeth, the corners of the mouth pulled high. Two small black upward-pointing triangle marks at the centre of the bangs. In the side views the grin still shows the teeth.
 HAIR: a short, messy, silvery-white bob with one ahoge tuft; the lower third of the hair fades to lime yellow-green.
-HEADWEAR: a gold circlet across the forehead with a small gold pyramid stud at the centre. On top, a JESTER HAT with two floppy horns curving out to the sides, striped rose pink and black, a gold ball on each horn tip and a small gold ring on top between the horns. Hat width at most 1.7 times the skull width.
+HEADWEAR: a gold circlet across the forehead with a small gold pyramid stud at the centre. On top, a JESTER HAT with two floppy horns curving out to the sides, striped rose pink and black, a gold ball on each horn tip and a small gold ring on top between the horns. Hat width at most 1.9 times the skull width.
 COSTUME (copy Image 2's outfit; add nothing and remove nothing): a black cropped jacket with puffed shoulders, gold trim and a few small gold spikes on the shoulders, worn open at the front and ending above the navel; a small gold collar with a blue diamond gem at the throat; two black star-shaped pieces on the chest, one on each side of the jacket opening, exactly as in Image 2; nothing is worn under the jacket, so the slim midriff between the jacket and the shorts is bare skin with a small navel, exactly as in Image 2; long black gloves with gold cuffs; glossy black short shorts; glossy black thigh-high boots with a few gold diamond studs and gold toe caps; a short black cape with blue-violet lining hanging from the shoulders to the knees; two short black ribbon tails with gold four-point-star tips hanging from the back of the jacket.
 PROP: the RIGHT hand holds a tall slim gold staff upright beside the body, as tall as the whole figure, topped by a gold ring with small spikes holding a pink crystal orb with a white four-point star inside. The staff stays close to the body. The left hand hangs relaxed.
 - FRONT view: the staff is on the viewer's LEFT.
@@ -309,7 +309,7 @@ CHARACTER: UNDERDOG
 An ordinary human with no magic and no training, a rough street brawler in his late twenties. Nobles' sons once used him as a "human sandbag"; one day he knocked every one of them down and walked out. He throws broken stones at eyes and hits before a spell can finish. Cocky and unafraid.
 FACE (the most important part; it must read as a hardened adult man even in chibi form; identical in every view that shows the face): a squarer jaw and chin than Image 1, less round cheeks; heavy, thick, dark, straight eyebrows angled down toward the nose; narrow half-lidded dark-brown eyes with smaller irises than Image 1 and one small highlight; a wild, confident, toothy grin with the upper teeth showing and one corner of the mouth higher. Light warm skin as in Image 2 (not tanned, not bronze). Messy dark-brown hair falling forward over the forehead in uneven strands, short at the back and sides. Small silver stud earrings.
 TATTOO: a bold dark tribal pattern on the right side of his neck (the viewer's left in the front view), continuing down across the upper chest.
-COSTUME: a glossy black short-sleeved long robe-coat worn open in a deep V down to the sternum, showing the tattoo and the chest muscles (not open to the navel); a few small silver studs along the front edges and the sleeve hems; a black hood lying down, bunched behind the neck; a thick silver chain-rope belt with a loop knot at the waist; coat skirts reaching the shins with a side slit; black trousers; plain black boots. Empty hands. No weapons, no armour, no gloves.
+COSTUME: a glossy black short-sleeved long robe-coat worn open in a deep V down to the chain-rope belt, showing the tattoo, the chest and the abs exactly as in Image 2; a few small silver studs along the front edges and the sleeve hems; a black hood lying down, bunched behind the neck; a thick silver chain-rope belt with a loop knot at the waist; coat skirts reaching the shins with a side slit; black trousers; plain black boots. Empty hands. No weapons, no armour, no gloves.
 
 MUST HAVE: hard adult face with heavy brows, narrow eyes and a toothy grin; messy dark-brown hair; neck and chest tattoo; open black studded robe-coat; hood down behind the neck; silver chain-rope belt; broad muscular build with big relaxed fists.
 MUST NOT: a clean-cut pretty boy, a gentle smile, round soft cheeks, big sparkly eyes, tanned or bronze skin, the hood on the head, weapons, fog, glow, a white background.
