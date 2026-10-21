@@ -25,7 +25,8 @@
 ### 1-1. 실제 적용 결과 (2026-10-21)
 
 - **큐어마스터 (설치함):** 이 지시서로 8장을 뽑았고, 몸 길이 보정 문장을 한 번 덧붙여 1장이 통과했다(머리 160.7×149.3, 턱 아래 206, 외곽선 남색). 다만 바깥 외곽선이 3px로 캐스트(대부분 4px)보다 얇았다. 그래서 `thicken-outline.mjs`로 바깥 윤곽만 1px 보강했다. 그 뒤 프롬프트의 외곽선 굵기 문장을 아래처럼 고쳤다.
-- **조커 (보류):** 지시서 없이 만든 시트(`joker_outfit_edit_v1.png`)는 머리를 캐스트 크기에 맞추면 턱 아래 몸이 약 293px(머리 높이의 약 1.97배)였다. 보통 키 범위 143~218을 크게 넘고, 모자와 지팡이가 셀 밖으로 나갔다. 나노바나나2·프로로 "머리는 그대로, 몸만 짧게"를 세 방식(편집, 발 높이 가이드, 승인 동료를 틀로 쓰는 마네킹)으로 17장 시도했다. 모두 몸 길이가 거의 그대로였다. 조커는 반드시 §5-3 프롬프트로 다시 뽑는다. 몸이 길면 §5-7의 첫 문장을 붙인다.
+- **조커 (보류):** 첫 시트(`joker_outfit_edit_v1.png`)는 머리를 캐스트 크기에 맞추면 턱 아래 몸이 약 293px(머리 높이의 약 1.97배)였다. 보통 키 범위 143~218을 크게 넘고, 모자와 지팡이가 셀 밖으로 나갔다. 나노바나나2·프로로 "머리는 그대로, 몸만 짧게"를 세 방식(편집, 발 높이 가이드, 승인 동료를 틀로 쓰는 마네킹)으로 17장 시도했다. 모두 몸 길이가 거의 그대로였다. 조커는 반드시 §5-3 프롬프트로 다시 뽑는다. 몸이 길면 §5-7의 첫 문장을 붙인다.
+  - **의상 정정 (2026-10-21):** 이 지시서의 첫 버전(12b8ba2)은 조커 원화에 없는 "가슴과 배를 덮는 바디수트"를 쓰고 원화의 가슴 별 조각·드러난 배를 금지했다. 같은 문서 §0의 기준("의상은 원화를 따른다")과 모순이었고, 첫 시트의 가슴 처리는 그 모순 속에서 나왔다. §5-3을 원화와 같게 고쳤다(열린 크롭 재킷, 가슴의 검은 별 조각 두 개, 드러난 배와 배꼽). 애쉬의 "가터 금지"도 같은 이유로 고쳤다(원화에는 가터가 있다).
 
 ## 2. 작업 순서
 
@@ -64,6 +65,19 @@
   - 해바라기: 세이렌은 여성형 보통 키(1.17H)다. 가는 다리가 드러나 체형을 읽기 쉽다.
 - 다른 새 캐릭터(토피애플·앤트로피·베히모스 등 나노바나나 제작)는 마스터로 쓰지 않는다(`ASSET_PIPELINE.md` §0-5).
 
+### 3-1. 원화·현재 에셋과 다르게 쓴 곳 (사용자 승인 필요)
+
+의상·머리·소품은 원화와 현재 에셋 그대로 쓴다. 프롬프트에서 다르게 쓰려면 이 표에 적고 사용자 승인을 받는다. 아래는 2026-10-21에 원화와 현재 에셋을 대조해 찾은 것이다. **승인 전에는 프롬프트를 바꾸지 않았다.** 승인되지 않은 줄은 원화대로 되돌린다.
+
+| 캐릭터 | 프롬프트가 쓴 것 | 원화·현재 에셋 | 쓴 이유 |
+|---|---|---|---|
+| 애쉬 | 작게 접힌 날개(폭 두개골 1.6배 이하), 큰 날개·펼친 날개 금지 | 큰 날개를 펼침 | 칸 폭 70% 제한 |
+| 베놈 | 앞머리를 짧게 내려 이마를 가리고 넓은 이마 금지, 가시관 높이 0.5H 이하 | 가운데 가르마로 이마가 드러남, 가시관이 더 높고 넓음 | 머리 크기 일치(이유는 기록 없음) |
+| 조커 | 모자 폭 두개골 1.7배 이하, 지팡이를 몸에 붙임 | 모자가 더 넓고 지팡이 고리가 큼 | 칸 폭 70% 제한 |
+| 언더독 | 코트가 정강이까지, 가슴은 명치까지만 열림 | 로브가 발목까지, 가슴이 허리띠 가까이까지 열림 | 이유는 기록 없음 |
+| 큐어마스터 | 스타킹에 가터 언급 없음 | 원화에 가터가 있음(설치된 에셋도 없음) | 이유는 기록 없음 |
+| 해바라기 | (대조에서 다른 곳 없음) | | |
+
 ## 4. 후보 거르기
 
 ### 4-1. 하나라도 해당하면 탈락
@@ -74,7 +88,7 @@
 4. 뒷모습(오른쪽 위)에 얼굴이나 눈이 보인다.
 5. 네 칸의 자세·소품 손·표정이 서로 다르다.
 6. **비율:** §6의 1~5단계(상자 읽기 → 패킹 → 검수)로 잰다. 패킹이 "painted pixels exceed frame"으로 거부되거나, `body`·`headW`·`headH`가 §6-5 범위 밖이면 탈락이다. 머리카락과 모자 부피가 캐릭터마다 달라서 눈대중 규칙으로는 가를 수 없다(시험본도 눈으로는 그럴듯해 보였다).
-7. 캐릭터별 MUST HAVE 중 하나라도 없거나 MUST NOT 중 하나라도 있다.
+7. 캐릭터별 MUST HAVE 중 하나라도 없거나 MUST NOT 중 하나라도 있다. 의상이 원화와 다르면(없는 옷이 더해졌거나 있는 장식·노출이 지워졌으면) 같은 탈락이다.
 8. 글자, 라벨, 칸 선, 이펙트(빛, 불꽃, 반짝이)가 있다.
 9. 외곽선이 갈색·자주·검정이다. 굵기는 탈락 사유가 아니다(§6-5에서 재고 보강한다).
 
@@ -131,7 +145,7 @@ CHARACTER: ASH
 A haughty, arrogant young archdemon girl whose fire burns everything; utterly sure of herself and looking down on everyone. Never shy, never angry, never scared.
 FACE (the most important part; identical in every view that shows the face): sharp crimson-red eyes with the upper lids lowered into a contemptuous half-lidded look, thick dark upper lashes, small pupils with one highlight; one eyebrow slightly raised; pink blush; a smug closed-mouth cat smile shaped like a small "ω" (corners up, no teeth). Her chin is raised a little so she looks down at the viewer.
 HAIR: long black hair (charcoal with blue-grey shine) whose lower third fades to deep crimson; two high twin tails, each tied with a black ribbon topped by a small black feather ornament that stands up like a little wing; bangs falling between the eyes and thin side locks.
-COSTUME: off-shoulder glossy black gothic mini dress; black criss-cross lacing down the front of the bodice; long bell sleeves ending in black ruffles; a black choker with a small silver cross charm; a teal-lined underskirt peeking below the black skirt hem; sheer dark-brown thigh-high stockings with lace tops; black high-heeled Mary Jane shoes with ankle straps and small black bows. The chest is covered; no garter straps.
+COSTUME: off-shoulder glossy black gothic mini dress; black criss-cross lacing down the front of the bodice; long bell sleeves ending in black ruffles; a black choker with a small silver cross charm; a teal-lined underskirt peeking below the black skirt hem; sheer dark-brown thigh-high stockings with lace tops; thin black garter straps holding the stocking tops, as in Image 2; black high-heeled Mary Jane shoes with ankle straps and small black bows. The V-shaped neckline is laced criss-cross, exactly as in Image 2.
 WINGS: a pair of SMALL folded black feathered demon wings on her back, tips angled up behind the shoulders, total wingspan at most 1.6 times the skull width. FRONT view: the wing tips peek out behind the shoulders. BACK view: both wings fully visible. Side views: one folded wing behind the back.
 POSE AND HANDS (the same in all four views): her LEFT hand rests on her hip; her RIGHT arm hangs relaxed with long dark-red nails.
 - FRONT view: the hand on the hip is on the viewer's RIGHT.
@@ -140,7 +154,7 @@ POSE AND HANDS (the same in all four views): her LEFT hand rests on her hip; her
 - RIGHT view: the hand on the hip is on the far side, mostly hidden.
 
 MUST HAVE: half-lidded red eyes and the ω smirk; black twin tails with crimson ends and feather ornaments; small folded black wings; choker with a cross; teal underskirt; brown thigh-high stockings; black heels; left hand on the hip.
-MUST NOT: fire or flames, a fireball, horns, a halo, a tail, large or spread wings, an open mouth or teeth, an angry or shy face, a bare chest, garter straps, a white background.
+MUST NOT: fire or flames, a fireball, horns, a halo, a tail, large or spread wings, an open mouth or teeth, an angry or shy face, a white background.
 
 FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; head size, chin height and foot line match Image 1; dark navy outline; transparent or flat magenta background; everything inside its own cell.
 ```
@@ -208,7 +222,7 @@ REFERENCE BOARD: the one attached image has three panels side by side on white. 
 
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = STAR BOY, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size and height of the head in each cell, the chin height, the foot line, the short slim super-deformed body, the line art, the cel shading and the eye rendering. Do NOT copy his face, spiky white-and-yellow hair, blue outfit or colours.
-- Image 2 = JOKER's original illustration. Use it ONLY for identity: hair, colours, jester hat, outfit and staff. Do NOT copy its jumping pose, its realistic body, the bare chest and belly, the cosmic purple background, the sparkles or the floating ribbons.
+- Image 2 = JOKER's original illustration. Use it ONLY for identity: hair, colours, jester hat, outfit and staff. Copy the outfit exactly as drawn there: the open-front cropped jacket, the black star pieces on the chest and the bare midriff. Do NOT copy its jumping pose, its realistic body, the cosmic purple background, the sparkles or the floating ribbons.
 - Image 3 = close-up of JOKER's face. Copy the eye shape, the diamond pupils, the eyebrows, the blush, the grin and the expression exactly.
 
 SHEET LAYOUT
@@ -242,17 +256,17 @@ An ageless, genderless being said to have existed before the creator made the wo
 FACE (the most important part; identical in every view that shows the face): very bright blue eyes opened a little too wide; each pupil is a pale vertical diamond-shaped glint; heavy dark upper lash lines; eyebrows raised; pink blush with fine diagonal hatching on the cheeks; a huge open grin showing one straight row of white upper teeth, the corners of the mouth pulled high. Two small black upward-pointing triangle marks at the centre of the bangs. In the side views the grin still shows the teeth.
 HAIR: a short, messy, silvery-white bob with one ahoge tuft; the lower third of the hair fades to lime yellow-green.
 HEADWEAR: a gold circlet across the forehead with a small gold pyramid stud at the centre. On top, a JESTER HAT with two floppy horns curving out to the sides, striped rose pink and black, a gold ball on each horn tip and a small gold ring on top between the horns. Hat width at most 1.7 times the skull width.
-COSTUME: a black cropped jacket with puffed shoulders, gold trim and a few small gold spikes on the shoulders; a gold high collar with a blue diamond gem brooch at the throat; a black star-shaped emblem on the chest; under the jacket a black high-neck bodysuit that covers the whole chest and belly; long black gloves with gold cuffs; glossy black short shorts; glossy black thigh-high boots with a few gold diamond studs and gold toe caps; a short black cape with blue-violet lining hanging from the shoulders to the knees; two short black ribbon tails with gold four-point-star tips hanging from the back of the jacket.
+COSTUME (copy Image 2's outfit; add nothing and remove nothing): a black cropped jacket with puffed shoulders, gold trim and a few small gold spikes on the shoulders, worn open at the front and ending above the navel; a small gold collar with a blue diamond gem at the throat; two black star-shaped pieces on the chest, one on each side of the jacket opening, exactly as in Image 2; nothing is worn under the jacket, so the slim midriff between the jacket and the shorts is bare skin with a small navel, exactly as in Image 2; long black gloves with gold cuffs; glossy black short shorts; glossy black thigh-high boots with a few gold diamond studs and gold toe caps; a short black cape with blue-violet lining hanging from the shoulders to the knees; two short black ribbon tails with gold four-point-star tips hanging from the back of the jacket.
 PROP: the RIGHT hand holds a tall slim gold staff upright beside the body, as tall as the whole figure, topped by a gold ring with small spikes holding a pink crystal orb with a white four-point star inside. The staff stays close to the body. The left hand hangs relaxed.
 - FRONT view: the staff is on the viewer's LEFT.
 - BACK view: the staff is on the viewer's RIGHT.
 - RIGHT view: the staff is on the near side, in front of the body.
 - LEFT view: the staff is on the far side; the orb shows above and behind the shoulder.
 
-MUST HAVE: too-wide toothy grin; blue eyes with diamond pupils; hatched blush; two triangle marks on the bangs; white bob with lime-green ends; gold circlet with a pyramid stud; pink-and-black two-horn jester hat with gold balls; blue gem collar; black star emblem; covered torso; thigh-high boots; gold staff with a pink star orb in the right hand.
-MUST NOT: a bare chest or belly, an angry or evil face, horror features, a closed mouth, a cosmic background, sparkles, floating cards, a white background.
+MUST HAVE: too-wide toothy grin; blue eyes with diamond pupils; hatched blush; two triangle marks on the bangs; white bob with lime-green ends; gold circlet with a pyramid stud; pink-and-black two-horn jester hat with gold balls; blue gem collar; open cropped jacket with two black star pieces on the chest; bare midriff with a small navel, exactly as in Image 2; thigh-high boots; gold staff with a pink star orb in the right hand.
+MUST NOT: a bodysuit, shirt or any cloth under the jacket, a chest without the two black star pieces, an angry or evil face, horror features, a closed mouth, a cosmic background, sparkles, floating cards, a white background.
 
-FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; head size, chin height and foot line match Image 1; dark navy outline; transparent or flat magenta background; everything inside its own cell.
+FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; head size, chin height and foot line match Image 1; the jacket front, the chest star pieces and the bare midriff match Image 2; dark navy outline; transparent or flat magenta background; everything inside its own cell.
 ```
 
 ### 5-4. 언더독 (underdog, 남성, 큰 키)
