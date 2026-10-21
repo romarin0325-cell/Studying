@@ -7,7 +7,7 @@ import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} fro
 import {COURSE} from './course.js';
 import {questionOf,pickQuestion,lectureById,termById,lectureQuestions,termQuestions,KIND_NAME} from './quiz.js';
 import {CONSTELLATIONS,LIBRARY_ART,LIBRARY_STARS} from './library.js';
-import {TUTOR_PROVIDERS,TUTOR_MODELS,tutorSettings,saveTutorSettings,explainWithRumi,tutorHtml} from './tutor.js';
+import {TUTOR_MODELS,tutorSettings,saveTutorSettings,explainWithRumi,tutorHtml} from './tutor.js';
 import {createBattle,resumeBattle,autoPlay as helperAuto,clearedRounds} from './battle.js';
 import {smartAutoPlay} from './smart-auto.js';
 import * as E from './combat/engine.js';
@@ -925,13 +925,11 @@ const libraryDot=()=>!libraryDone()&&!libraryToday()&&p().study.wrong.length>0;
 const wrongEntry=(kind,id)=>p().study.wrong.find(w=>w.kind===kind&&w.id===id)||null;
 const solved=(kind,id)=>p().study.solved.includes(`${kind}:${id}`);
 function tutorPanel(){
-  const t=tutorSettings(),info=TUTOR_PROVIDERS.find(x=>x.id===t.provider),deepseek=t.provider==='deepseek';
-  return `<div class="tutor-panel"><strong>루미의 설명 · AI</strong><small>별의 서재에서 틀린 문제를 루미가 자세히 설명해 줘요.</small>
-    <div class="tutor-tabs" role="tablist" aria-label="AI 제공자">${TUTOR_PROVIDERS.map(x=>`<button role="tab" class="tutor-tab ${x.id===t.provider?'on':''}" aria-selected="${x.id===t.provider}" data-action="tutor-provider" data-provider="${x.id}">${x.label}</button>`).join('')}</div>
-    <input id="tutor-key" type="password" autocomplete="off" spellcheck="false" placeholder="${info.keyName} 붙여넣기" value="${escapeText(t.key)}" aria-label="${info.keyName}">
-    ${deepseek?`<input id="tutor-base" type="url" autocomplete="off" spellcheck="false" value="${escapeText(t.base)}" aria-label="중계 서버 주소">`:''}
-    <div class="tutor-row"><select id="tutor-model" aria-label="해설 모델">${TUTOR_MODELS.filter(m=>m.provider===t.provider).map(m=>`<option value="${m.id}" ${t.model===m.id?'selected':''}>${m.label}</option>`).join('')}</select><button class="secondary" data-action="tutor-save">저장</button>${t.key?'<button class="secondary" data-action="tutor-clear">지우기</button>':''}</div>
-    <p class="fineprint">${t.key?'키가 저장되어 있어요. ':''}키는 이 기기의 브라우저에만 저장되고 백업 파일에는 들어가지 않아요. 설명을 요청하면 문제와 강의 내용이 ${deepseek?'Coral Bricks':'Google'}로 전송돼요.${deepseek?' Coral Bricks는 브라우저에서 바로 부를 수 없어서, PC에서 <code>node defense_test/scripts/serve.mjs</code>를 켜 두면 위 주소의 중계 서버를 거쳐 보내요.':''}</p></div>`;
+  const t=tutorSettings();
+  return `<div class="tutor-panel"><strong>루미의 설명 · AI</strong><small>별의 서재에서 틀린 문제를 루미가 자세히 설명해 줘요. Google Gemini API 키가 필요해요.</small>
+    <input id="tutor-key" type="password" autocomplete="off" spellcheck="false" placeholder="Gemini API 키 붙여넣기" value="${escapeText(t.key)}" aria-label="Gemini API 키">
+    <div class="tutor-row"><select id="tutor-model" aria-label="해설 모델">${TUTOR_MODELS.map(m=>`<option value="${m.id}" ${t.model===m.id?'selected':''}>${m.label}</option>`).join('')}</select><button class="secondary" data-action="tutor-save">저장</button>${t.key?'<button class="secondary" data-action="tutor-clear">지우기</button>':''}</div>
+    <p class="fineprint">${t.key?'키가 저장되어 있어요. ':''}키는 이 기기의 브라우저에만 저장되고 백업 파일에는 들어가지 않아요. 설명을 요청하면 문제와 강의 내용이 Google로 전송돼요.</p></div>`;
 }
 // Shared question markup: choices are buttons until answered, then ✓ marks the answer and ✗ the pick.
 function questionBlock(q,chosen=-1,answered=true){
@@ -1118,9 +1116,8 @@ document.addEventListener('click',e=>{
     library:()=>{close();screen='library';render();},'library-back':()=>{close();screen='library';libraryTab='gallery';render();},'bonus-reveal':showBonus,accel:accelQuiz,
     'quiz-go':()=>{const s=quizState;if(!s||s.mode!=='gacha'||s.chosen<0)return;banner=s.banner;if(draw(10,false,s.chosen===s.question.answer)){quizHold.gacha=null;quizState=null;}},
     'quiz-skip':()=>{const s=quizState;if(!s||s.chosen>=0)return;banner=s.banner;if(draw(10)){quizHold.gacha=null;quizState=null;}},'quiz-next':nextPractice,
-    'tutor-save':()=>{const ok=saveTutorSettings({key:$('tutor-key')?.value,model:$('tutor-model')?.value,base:$('tutor-base')?.value});tutorCache.clear();toast(ok?'AI 설명 설정을 저장했어요.':'이 브라우저에 저장할 수 없어요.');showSettings();},
-    'tutor-clear':()=>{saveTutorSettings({key:''});tutorCache.clear();toast('API 키를 지웠어요.');showSettings();},
-    'tutor-provider':()=>{if(saveTutorSettings({provider:d.provider}))tutorCache.clear();showSettings();},
+    'tutor-save':()=>{const ok=saveTutorSettings({key:$('tutor-key')?.value,model:$('tutor-model')?.value});toast(ok?'AI 설명 설정을 저장했어요.':'이 브라우저에 저장할 수 없어요.');showSettings();},
+    'tutor-clear':()=>{saveTutorSettings({key:'',model:tutorSettings().model});tutorCache.clear();toast('API 키를 지웠어요.');showSettings();},
     'today-star':todayStar,pity:pitySheet,'pity-claim':claimPity,basket:()=>claimBasket(button),'claim-all':()=>claimDispatches(p().dispatches.filter(x=>x.end<=now()).map(x=>x.slot)),
     'relic-info':relicInfo,'mode-info':()=>modeInfo(d.kind),'dispatch-info':dispatchInfo,
   };actions[d.action]?.();
