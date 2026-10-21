@@ -22,6 +22,12 @@
 
 결론: GPT Image 2.5는 그림 품질과 방향 지시는 잘 따른다. 그러나 기본 비율이 3등신에 가까운 치비다. 이 게임 캐스트는 약 2.3등신이다. 그래서 아래 프롬프트는 비율을 세 가지로 겹쳐 지시한다. Image 1을 틀로 쓰게 하고, 셀 안의 높이 비율을 숫자로 주고, 흔한 실수("3등신")를 직접 금지한다.
 
+### 1-1. 실제 적용 결과 (2026-10-21)
+
+- **큐어마스터 (설치함):** 이 지시서로 8장을 뽑았고, 몸 길이 보정 문장을 한 번 덧붙여 1장이 통과했다(머리 160.7×149.3, 턱 아래 206, 외곽선 남색). 다만 바깥 외곽선이 3px로 캐스트(대부분 4px)보다 얇았다. 그래서 `thicken-outline.mjs`로 바깥 윤곽만 1px 보강했다. 그 뒤 프롬프트의 외곽선 굵기 문장을 아래처럼 고쳤다.
+- **조커 (보류):** 첫 시트(`joker_outfit_edit_v1.png`)는 머리를 캐스트 크기에 맞추면 턱 아래 몸이 약 293px(머리 높이의 약 1.97배)였다. 보통 키 범위 143~218을 크게 넘고, 모자와 지팡이가 셀 밖으로 나갔다. 나노바나나2·프로로 "머리는 그대로, 몸만 짧게"를 세 방식(편집, 발 높이 가이드, 승인 동료를 틀로 쓰는 마네킹)으로 17장 시도했다. 모두 몸 길이가 거의 그대로였다. 조커는 반드시 §5-3 프롬프트로 다시 뽑는다. 몸이 길면 §5-7의 첫 문장을 붙인다.
+  - **의상 정정 (2026-10-21):** 이 지시서의 첫 버전(12b8ba2)은 조커 원화에 없는 "가슴과 배를 덮는 바디수트"를 쓰고 원화의 가슴 별 조각·드러난 배를 금지했다. 같은 문서 §0의 기준("의상은 원화를 따른다")과 모순이었다. 사용자가 Manus의 추론 과정에서 이 모순을 확인했다. 첫 시트(`joker_outfit_edit_v1.png`)가 어떤 프롬프트로 만들어졌는지는 이 저장소에 기록이 없다(작성자가 근거 없이 "지시서 없이 만들었다"고 썼던 것을 지웠다). §5-3을 원화와 같게 고쳤다(열린 크롭 재킷, 가슴의 검은 별 조각 두 개, 드러난 배와 배꼽). 애쉬의 "가터 금지"도 같은 이유로 고쳤다(원화에는 가터가 있다).
+
 ## 2. 작업 순서
 
 1. 이 문서와 `ASSET_PIPELINE.md` §0·§2·§3을 읽는다.
@@ -59,6 +65,19 @@
   - 해바라기: 세이렌은 여성형 보통 키(1.17H)다. 가는 다리가 드러나 체형을 읽기 쉽다.
 - 다른 새 캐릭터(토피애플·앤트로피·베히모스 등 나노바나나 제작)는 마스터로 쓰지 않는다(`ASSET_PIPELINE.md` §0-5).
 
+### 3-1. 원화·현재 에셋과 다르게 쓴 곳
+
+의상·머리·소품은 원화와 현재 에셋 그대로 쓴다. 칸 크기(셀 폭 70%, 위 여백 5%) 때문에 줄인 것만 아래에 남겼고, 그 밖의 차이는 원화대로 되돌렸다(2026-10-21: 애쉬 가터 금지, 베놈 앞머리·넓은 이마 금지, 조커 바디수트·노출 금지, 언더독 가슴 열림 제한). 프롬프트에서 새로 다르게 쓰려면 이 표에 적고 사용자 승인을 받는다. 이 프롬프트와 같은 내용이 로컬 문서 `manus_2img`(이미지 2장 첨부용)에도 있다.
+
+| 캐릭터 | 프롬프트가 쓴 것 | 원화·현재 에셋 | 이유 |
+|---|---|---|---|
+| 애쉬 | 날개를 펼치되 폭 두개골의 2.0배 이하 | 큰 날개를 펼침(현재 에셋은 약 1.8배) | 칸 폭 70% |
+| 베놈 | 가시관 높이 0.6H 이하 | 원화의 관이 더 큼(현재 에셋 약 0.57H) | 위 여백 5% |
+| 조커 | 모자 폭 두개골 1.9배 이하, 지팡이 포함 전체 폭 75% 이하, 지팡이를 몸에 붙임 | 모자와 지팡이 고리가 더 큼(현재 에셋 모자 약 1.86배) | 칸 폭 |
+| 언더독 | 코트가 정강이까지 | 발목까지 오는 긴 로브 | 치비라 다리가 보여야 함 |
+| 큐어마스터 | 스타킹의 가터 스트랩을 쓰지 않음 | 원화에 있음(설치된 에셋에도 없음) | 작은 칸에서 읽히지 않음. 넣으려면 스타킹 문구에 "with thin white garter straps" |
+| 해바라기 | (다른 곳 없음) | | |
+
 ## 4. 후보 거르기
 
 ### 4-1. 하나라도 해당하면 탈락
@@ -69,8 +88,9 @@
 4. 뒷모습(오른쪽 위)에 얼굴이나 눈이 보인다.
 5. 네 칸의 자세·소품 손·표정이 서로 다르다.
 6. **비율:** §6의 1~5단계(상자 읽기 → 패킹 → 검수)로 잰다. 패킹이 "painted pixels exceed frame"으로 거부되거나, `body`·`headW`·`headH`가 §6-5 범위 밖이면 탈락이다. 머리카락과 모자 부피가 캐릭터마다 달라서 눈대중 규칙으로는 가를 수 없다(시험본도 눈으로는 그럴듯해 보였다).
-7. 캐릭터별 MUST HAVE 중 하나라도 없거나 MUST NOT 중 하나라도 있다.
+7. 캐릭터별 MUST HAVE 중 하나라도 없거나 MUST NOT 중 하나라도 있다. 의상이 원화와 다르면(없는 옷이 더해졌거나 있는 장식·노출이 지워졌으면) 같은 탈락이다.
 8. 글자, 라벨, 칸 선, 이펙트(빛, 불꽃, 반짝이)가 있다.
+9. 외곽선이 갈색·자주·검정이다. 굵기는 탈락 사유가 아니다(§6-5에서 재고 보강한다).
 
 ### 4-2. 남은 후보 고르는 순서
 
@@ -114,7 +134,7 @@ PROPORTIONS (ultra super-deformed, exactly like Image 1; a taller 3-head chibi i
 - FEMALE-FORM chibi body like Image 1: slim, short, straight legs standing close together with the feet almost touching, small hands and feet, narrow shoulders, slim waist. Not the sturdy wide-stance body of a male chibi.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered with Image 1's finish (large, glossy, layered iris colour, two small white catchlights) but NOT Image 1's spiral pupils. Tiny nose, small mouth, soft blush.
 - Her black hair, dress, wings and shoes are painted as deep charcoal-indigo with clearly visible blue-grey highlights and fold lines, like the dark navy parts of Image 1, so every shape reads at small size. No large flat pure-black areas.
@@ -125,16 +145,16 @@ CHARACTER: ASH
 A haughty, arrogant young archdemon girl whose fire burns everything; utterly sure of herself and looking down on everyone. Never shy, never angry, never scared.
 FACE (the most important part; identical in every view that shows the face): sharp crimson-red eyes with the upper lids lowered into a contemptuous half-lidded look, thick dark upper lashes, small pupils with one highlight; one eyebrow slightly raised; pink blush; a smug closed-mouth cat smile shaped like a small "ω" (corners up, no teeth). Her chin is raised a little so she looks down at the viewer.
 HAIR: long black hair (charcoal with blue-grey shine) whose lower third fades to deep crimson; two high twin tails, each tied with a black ribbon topped by a small black feather ornament that stands up like a little wing; bangs falling between the eyes and thin side locks.
-COSTUME: off-shoulder glossy black gothic mini dress; black criss-cross lacing down the front of the bodice; long bell sleeves ending in black ruffles; a black choker with a small silver cross charm; a teal-lined underskirt peeking below the black skirt hem; sheer dark-brown thigh-high stockings with lace tops; black high-heeled Mary Jane shoes with ankle straps and small black bows. The chest is covered; no garter straps.
-WINGS: a pair of SMALL folded black feathered demon wings on her back, tips angled up behind the shoulders, total wingspan at most 1.6 times the skull width. FRONT view: the wing tips peek out behind the shoulders. BACK view: both wings fully visible. Side views: one folded wing behind the back.
+COSTUME: off-shoulder glossy black gothic mini dress; black criss-cross lacing down the front of the bodice; long bell sleeves ending in black ruffles; a black choker with a small silver cross charm; a teal-lined underskirt peeking below the black skirt hem; sheer dark-brown thigh-high stockings with lace tops; thin black garter straps holding the stocking tops, as in Image 2; black high-heeled Mary Jane shoes with ankle straps and small black bows. The V-shaped neckline is laced criss-cross, exactly as in Image 2.
+WINGS: a pair of black feathered demon wings on her back, spread out to both sides behind the shoulders like Image 2 but compact: total wingspan at most 2.0 times the skull width, tips pointing outward and a little up. FRONT view: both wings spread behind the shoulders. BACK view: both wings fully visible. Side views: the near wing is visible behind the back, the far wing mostly hidden.
 POSE AND HANDS (the same in all four views): her LEFT hand rests on her hip; her RIGHT arm hangs relaxed with long dark-red nails.
 - FRONT view: the hand on the hip is on the viewer's RIGHT.
 - BACK view: the hand on the hip is on the viewer's LEFT.
 - LEFT view: the hand on the hip is on the near side, in front.
 - RIGHT view: the hand on the hip is on the far side, mostly hidden.
 
-MUST HAVE: half-lidded red eyes and the ω smirk; black twin tails with crimson ends and feather ornaments; small folded black wings; choker with a cross; teal underskirt; brown thigh-high stockings; black heels; left hand on the hip.
-MUST NOT: fire or flames, a fireball, horns, a halo, a tail, large or spread wings, an open mouth or teeth, an angry or shy face, a bare chest, garter straps, a white background.
+MUST HAVE: half-lidded red eyes and the ω smirk; black twin tails with crimson ends and feather ornaments; compact spread black wings; choker with a cross; teal underskirt; brown thigh-high stockings; black heels; left hand on the hip.
+MUST NOT: fire or flames, a fireball, horns, a halo, a tail, wings wider than 2.0 times the skull width, an open mouth or teeth, an angry or shy face, a white background.
 
 FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; head size, chin height and foot line match Image 1; dark navy outline; transparent or flat magenta background; everything inside its own cell.
 ```
@@ -169,7 +189,7 @@ PROPORTIONS (super-deformed like Image 1 but at the TALL, slender end of the gro
 - FEMALE-FORM, slender: narrow shoulders, long neck, long slim arms, small hands; the legs are hidden inside a narrow column gown; tiny pointed black shoes just visible at the hem.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Paint her black hair and black gown exactly like Image 1's black dress: deep charcoal-indigo with clearly visible blue-grey highlights and fold lines, so the shapes read at small size. No large flat pure-black areas.
 - Simplify for a 40-pixel game token: few large, clear shapes.
@@ -178,8 +198,8 @@ STYLE (match Image 1)
 CHARACTER: VENOM
 The witch who brings plague to the continent. Nobody ever stands near her. She must look MYSTERIOUS, TALL, ELEGANT and OVERWHELMING: a beautiful catastrophe from a dark fairy tale, a slender young witch of about twenty. Never plump, never motherly, never a cute doll.
 FACE (identical in every view that shows the face): completely expressionless and cold; no smile, no frown, no blush. Narrow, long, half-lidded eyes with long dark lashes; bright pale-green irises with tiny pupils and one small highlight; she looks straight at the viewer from slightly above (chin slightly raised). Thin straight dark eyebrows. Very pale porcelain skin. A tiny closed neutral mouth. Thin black crack lines like cracked porcelain on her LEFT cheek (the viewer's right in the front view), running down that side of the neck to the collarbone.
-HAIR: very long glossy black hair reaching the hips, parted in the centre, smooth with soft waves; the lower third fades to bright toxic green. Long face-framing side locks; short soft bangs partly cover the forehead so the forehead is not a large bare area.
-CROWN: thin black thorn branches rising straight up from the top of the head like slim antlers, carrying five round pale-green rose buds. Narrow: no wider than the hair. At most 0.5 H tall above the hair.
+HAIR: very long glossy black hair reaching the hips, parted in the centre, smooth with soft waves; the lower third fades to bright toxic green. Long face-framing side locks; no bangs: the hair is parted in the centre and falls to both sides, leaving the forehead visible exactly as in Image 2.
+CROWN: thin black thorn branches rising straight up from the top of the head like slim antlers, carrying five round pale-green rose buds. Narrow: no wider than the hair. At most 0.6 H tall above the hair.
 COSTUME: a long, tight, strapless black gown shaped like a narrow column, with a high slit at the front hem that shows only the shin; thin green vein lines painted in the cloth (painted, not glowing); the hem dissolves into a few short black root tendrils on the ground, spreading no wider than 1.2 times the skull width. Bare shoulders and arms, a thin black choker, a thin bright-green vine coiled twice around her LEFT forearm, long pointed black nails.
 PROP: her RIGHT hand holds one tall black spider lily upright by its long green stem at her side; the flower head (black-purple petals, faint red centre) is level with the top of her head. Her left hand hangs relaxed.
 - FRONT view: the lily is on the viewer's LEFT.
@@ -188,7 +208,7 @@ PROP: her RIGHT hand holds one tall black spider lily upright by its long green 
 - LEFT view: the lily is on the far side; its flower head shows above and behind her shoulder.
 
 MUST HAVE: cold half-lidded green eyes; pale skin with crack lines; centre-parted black hair with green ends; thorn crown with five green buds; strapless black column gown with a slit and root-tendril hem; spider lily in the right hand; vine around the left forearm.
-MUST NOT: a smile or blush, round doll eyes, a large bare forehead, a wide A-line or bell skirt, butterflies, green fire, glow, aura, floating objects, roots spreading across the floor, a white background.
+MUST NOT: a smile or blush, round doll eyes, bangs covering the forehead, a wide A-line or bell skirt, butterflies, green fire, glow, aura, floating objects, roots spreading across the floor, a white background.
 
 FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; the head is the same size as Image 1's and the body is longer; dark navy outline; transparent or flat magenta background; everything inside its own cell.
 ```
@@ -202,7 +222,7 @@ REFERENCE BOARD: the one attached image has three panels side by side on white. 
 
 REFERENCE IMAGES (each has exactly one job)
 - Image 1 = STAR BOY, an approved character from the same game. Use it as the TEMPLATE for: the 2x2 sheet layout, the camera, the size and height of the head in each cell, the chin height, the foot line, the short slim super-deformed body, the line art, the cel shading and the eye rendering. Do NOT copy his face, spiky white-and-yellow hair, blue outfit or colours.
-- Image 2 = JOKER's original illustration. Use it ONLY for identity: hair, colours, jester hat, outfit and staff. Do NOT copy its jumping pose, its realistic body, the bare chest and belly, the cosmic purple background, the sparkles or the floating ribbons.
+- Image 2 = JOKER's original illustration. Use it ONLY for identity: hair, colours, jester hat, outfit and staff. Copy the outfit exactly as drawn there: the open-front cropped jacket, the black star pieces on the chest and the bare midriff. Do NOT copy its jumping pose, its realistic body, the cosmic purple background, the sparkles or the floating ribbons.
 - Image 3 = close-up of JOKER's face. Copy the eye shape, the diamond pupils, the eyebrows, the blush, the grin and the expression exactly.
 
 SHEET LAYOUT
@@ -219,11 +239,11 @@ PROPORTIONS (ultra super-deformed, exactly like Image 1; a taller 3-head chibi i
 - The whole figure without the hat is about 2.2 heads tall. The head with its hair is as tall as everything below the chin.
 - H = skull height (chin to top of the skull, ignoring hair volume, circlet and hat). Chin to soles, including legs and boots = 1.20 H, about the same as Image 1.
 - In every cell, measured from the top edge of the cell: soles at 94%, chin at 58%, top of the skull at 29%. Skull width about 31% of the cell width. This is the same placement as Image 1.
-- Everything (hat, staff, cape, ribbons) stays inside its cell with at least 5% empty margin on every side. Total figure width including the staff at most 70% of the cell width.
+- Everything (hat, staff, cape, ribbons) stays inside its cell with at least 5% empty margin on every side. Total figure width including the staff at most 75% of the cell width.
 - Slim youthful boyish chibi body like Image 1: narrow shoulders, slim short straight legs, feet slightly apart like Image 1, small hands.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered like Image 1: large and glossy, two small white catchlights. Tiny nose, soft blush.
 - His black clothes are painted as deep charcoal-indigo with clearly visible blue-grey highlights and fold lines so the shapes read at small size. No large flat pure-black areas.
@@ -235,18 +255,18 @@ CHARACTER: JOKER
 An ageless, genderless being said to have existed before the creator made the world. It appears as a slim young jester boy in bizarre clothes. It always smiles, and the smile is a little too wide: cheerful on the surface, faintly uncanny underneath. Never a villain snarl, never angry, never horror.
 FACE (the most important part; identical in every view that shows the face): very bright blue eyes opened a little too wide; each pupil is a pale vertical diamond-shaped glint; heavy dark upper lash lines; eyebrows raised; pink blush with fine diagonal hatching on the cheeks; a huge open grin showing one straight row of white upper teeth, the corners of the mouth pulled high. Two small black upward-pointing triangle marks at the centre of the bangs. In the side views the grin still shows the teeth.
 HAIR: a short, messy, silvery-white bob with one ahoge tuft; the lower third of the hair fades to lime yellow-green.
-HEADWEAR: a gold circlet across the forehead with a small gold pyramid stud at the centre. On top, a JESTER HAT with two floppy horns curving out to the sides, striped rose pink and black, a gold ball on each horn tip and a small gold ring on top between the horns. Hat width at most 1.7 times the skull width.
-COSTUME: a black cropped jacket with puffed shoulders, gold trim and a few small gold spikes on the shoulders; a gold high collar with a blue diamond gem brooch at the throat; a black star-shaped emblem on the chest; under the jacket a black high-neck bodysuit that covers the whole chest and belly; long black gloves with gold cuffs; glossy black short shorts; glossy black thigh-high boots with a few gold diamond studs and gold toe caps; a short black cape with blue-violet lining hanging from the shoulders to the knees; two short black ribbon tails with gold four-point-star tips hanging from the back of the jacket.
+HEADWEAR: a gold circlet across the forehead with a small gold pyramid stud at the centre. On top, a JESTER HAT with two floppy horns curving out to the sides, striped rose pink and black, a gold ball on each horn tip and a small gold ring on top between the horns. Hat width at most 1.9 times the skull width.
+COSTUME (copy Image 2's outfit; add nothing and remove nothing): a black cropped jacket with puffed shoulders, gold trim and a few small gold spikes on the shoulders, worn open at the front and ending above the navel; a small gold collar with a blue diamond gem at the throat; two black star-shaped pieces on the chest, one on each side of the jacket opening, exactly as in Image 2; nothing is worn under the jacket, so the slim midriff between the jacket and the shorts is bare skin with a small navel, exactly as in Image 2; long black gloves with gold cuffs; glossy black short shorts; glossy black thigh-high boots with a few gold diamond studs and gold toe caps; a short black cape with blue-violet lining hanging from the shoulders to the knees; two short black ribbon tails with gold four-point-star tips hanging from the back of the jacket.
 PROP: the RIGHT hand holds a tall slim gold staff upright beside the body, as tall as the whole figure, topped by a gold ring with small spikes holding a pink crystal orb with a white four-point star inside. The staff stays close to the body. The left hand hangs relaxed.
 - FRONT view: the staff is on the viewer's LEFT.
 - BACK view: the staff is on the viewer's RIGHT.
 - RIGHT view: the staff is on the near side, in front of the body.
 - LEFT view: the staff is on the far side; the orb shows above and behind the shoulder.
 
-MUST HAVE: too-wide toothy grin; blue eyes with diamond pupils; hatched blush; two triangle marks on the bangs; white bob with lime-green ends; gold circlet with a pyramid stud; pink-and-black two-horn jester hat with gold balls; blue gem collar; black star emblem; covered torso; thigh-high boots; gold staff with a pink star orb in the right hand.
-MUST NOT: a bare chest or belly, an angry or evil face, horror features, a closed mouth, a cosmic background, sparkles, floating cards, a white background.
+MUST HAVE: too-wide toothy grin; blue eyes with diamond pupils; hatched blush; two triangle marks on the bangs; white bob with lime-green ends; gold circlet with a pyramid stud; pink-and-black two-horn jester hat with gold balls; blue gem collar; open cropped jacket with two black star pieces on the chest; bare midriff with a small navel, exactly as in Image 2; thigh-high boots; gold staff with a pink star orb in the right hand.
+MUST NOT: a bodysuit, shirt or any cloth under the jacket, a chest without the two black star pieces, an angry or evil face, horror features, a closed mouth, a cosmic background, sparkles, floating cards, a white background.
 
-FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; head size, chin height and foot line match Image 1; dark navy outline; transparent or flat magenta background; everything inside its own cell.
+FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left and bottom-right faces right; the back view shows no face; head size, chin height and foot line match Image 1; the jacket front, the chest star pieces and the bare midriff match Image 2; dark navy outline; transparent or flat magenta background; everything inside its own cell.
 ```
 
 ### 5-4. 언더독 (underdog, 남성, 큰 키)
@@ -279,7 +299,7 @@ PROPORTIONS (super-deformed like Image 1; a 3-head or 4-head chibi is WRONG)
 - MALE-FORM, heavily muscular chibi: shoulders about 1.6 times the skull width, thick trapezius and a bull neck, thick short arms, big fists (each about a third of the skull height) hanging relaxed at the sides; sturdy short legs, feet about one skull width apart.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not purple.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not purple.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair; simple muscle shading.
 - His black coat, trousers and boots are painted as deep charcoal-indigo with clearly visible blue-grey highlights and fold lines so the shapes read at small size. No large flat pure-black areas.
 - Simplify for a 40-pixel game token: few large, clear shapes; only a few studs; the tattoo as a bold simple pattern.
@@ -289,7 +309,7 @@ CHARACTER: UNDERDOG
 An ordinary human with no magic and no training, a rough street brawler in his late twenties. Nobles' sons once used him as a "human sandbag"; one day he knocked every one of them down and walked out. He throws broken stones at eyes and hits before a spell can finish. Cocky and unafraid.
 FACE (the most important part; it must read as a hardened adult man even in chibi form; identical in every view that shows the face): a squarer jaw and chin than Image 1, less round cheeks; heavy, thick, dark, straight eyebrows angled down toward the nose; narrow half-lidded dark-brown eyes with smaller irises than Image 1 and one small highlight; a wild, confident, toothy grin with the upper teeth showing and one corner of the mouth higher. Light warm skin as in Image 2 (not tanned, not bronze). Messy dark-brown hair falling forward over the forehead in uneven strands, short at the back and sides. Small silver stud earrings.
 TATTOO: a bold dark tribal pattern on the right side of his neck (the viewer's left in the front view), continuing down across the upper chest.
-COSTUME: a glossy black short-sleeved long robe-coat worn open in a deep V down to the sternum, showing the tattoo and the chest muscles (not open to the navel); a few small silver studs along the front edges and the sleeve hems; a black hood lying down, bunched behind the neck; a thick silver chain-rope belt with a loop knot at the waist; coat skirts reaching the shins with a side slit; black trousers; plain black boots. Empty hands. No weapons, no armour, no gloves.
+COSTUME: a glossy black short-sleeved long robe-coat worn open in a deep V down to the chain-rope belt, showing the tattoo, the chest and the abs exactly as in Image 2; a few small silver studs along the front edges and the sleeve hems; a black hood lying down, bunched behind the neck; a thick silver chain-rope belt with a loop knot at the waist; coat skirts reaching the shins with a side slit; black trousers; plain black boots. Empty hands. No weapons, no armour, no gloves.
 
 MUST HAVE: hard adult face with heavy brows, narrow eyes and a toothy grin; messy dark-brown hair; neck and chest tattoo; open black studded robe-coat; hood down behind the neck; silver chain-rope belt; broad muscular build with big relaxed fists.
 MUST NOT: a clean-cut pretty boy, a gentle smile, round soft cheeks, big sparkly eyes, tanned or bronze skin, the hood on the head, weapons, fog, glow, a white background.
@@ -327,7 +347,7 @@ PROPORTIONS (ultra super-deformed like Image 1; a taller 3-head chibi is WRONG)
 - FEMALE-FORM chibi body like Image 1: slim, short, straight legs standing close together with the feet almost touching, small hands and feet, narrow shoulders, slim waist.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not olive.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not olive.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered like Image 1: large and glossy, layered iris colour, catchlights; but with the relaxed half-lidded shape of Image 3.
 - Simplify for a 40-pixel game token: only a few flower dots on the dress, no tiny thorns or tiny flowers on the vines.
@@ -378,7 +398,7 @@ PROPORTIONS (ultra super-deformed, exactly like Image 1; a taller 3-head chibi i
 - FEMALE-FORM chibi body like Image 1: slim, short, straight legs standing close together with the feet almost touching, small hands and feet, narrow shoulders, slim waist.
 
 STYLE (match Image 1)
-- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, a little heavier on the outer silhouette. Not black, not brown, not maroon, not pink.
+- Clean, even, dark navy-indigo outline (about #23213A) around the whole figure and on inner lines, with the OUTER silhouette line clearly bolder than the inner lines: about 0.8% of the cell width (about 8 px on a 960 px cell), the same weight as the outer line of Image 1. Not black, not brown, not maroon, not pink.
 - Cel shading: base colour + one shadow tone + a soft gradient on the hair; light from the upper left; one glossy highlight band on the hair.
 - Eyes rendered with Image 1's finish (large, glossy, layered iris colour, catchlights) but NOT Image 1's spiral pupils. Tiny nose, small mouth, soft blush.
 - All pinks are clear rose or bubblegum pink, never magenta.
@@ -414,6 +434,7 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
 | 좌우 방향이 틀렸다 | `CORRECTION: in the BOTTOM-LEFT cell the nose must point to the LEFT edge of the picture; in the BOTTOM-RIGHT cell the nose must point to the RIGHT edge. The two side views are mirror images of each other.` |
 | 뒷모습에 얼굴 | `CORRECTION: the TOP-RIGHT cell is seen from directly behind. Only the back of the head and hair are visible; no eyes, no mouth, no face.` |
 | 외곽선이 갈색·자주·검정 | `CORRECTION: every outline must be dark navy-indigo, about #23213A, exactly like Image 1. No brown, maroon or pure black lines.` |
+| 바깥 외곽선이 가늘다 | `CORRECTION: the outer silhouette line was too thin. Make the line around the whole figure as bold as Image 1's: about 0.8% of the cell width, clearly bolder than the inner lines.` |
 | 보드 배치를 따라 그렸다(세 칸, 원화 장면 등) | `CORRECTION: the attached board is only reference material. Do not draw three panels or copy the original illustration's scene. Output exactly one 2x2 sheet of four chibi views.` |
 | 흰 배경·체커보드 | `CORRECTION: the background must be real transparency, or one flat solid magenta #FF00FF. Not white, not a painted checkerboard.` |
 | 소품 손이 바뀐다 | `CORRECTION: the prop stays in the character's RIGHT hand in every view: viewer's left in the front view, viewer's right in the back view, near side in the RIGHT view, far side in the LEFT view.` |
@@ -469,7 +490,14 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
    | headW / headH | 150~168 / 143~156 |
    | body | 보통 143~218, 큰 키 189~211 |
    | outline rgb | 세 값 모두 90 이하이고 파랑(B)이 빨강(R)보다 크다(남색). 캐스트 중앙값은 (35,33,53)이다 |
+   | 바깥 외곽선 굵기 | 4px 이상(아발란체메이드·세이렌 4, 지크 6, 별똥별소년 3). 아래 명령의 `before` 값으로 잰다 |
    | 그림 | `<id>-heads.png`에서 얼굴 크기가 이웃 캐스트와 같다. `<id>-lineup-96.png`에서 튀지 않는다 |
+
+   바깥 외곽선이 3px 이하이면 바깥 윤곽만 1px 보강한다. 얼굴·내부 선·색은 바뀌지 않는다. 결과를 원본·캐스트와 1:1로 나란히 보고, 보강이 두드러져 보이면 원본을 쓴다.
+
+   ```bash
+   node defense_test/scripts/art/thicken-outline.mjs work/<id>/<id>.webp work/<id>/<id>-outline.webp 1 --measure
+   ```
 
 6. **설치.**
 
@@ -477,6 +505,7 @@ FINAL CHECK before output: four figures in a 2x2 grid; bottom-left faces left an
    node defense_test/scripts/art/pack-sd.mjs sheet.png work/<id> <id> <left>,<top>,<right>,<chin> --install
    ```
 
+   - 5단계에서 외곽선을 보강했다면 `work/<id>/<id>-outline.webp`를 `defense_test/assets/merge/units/<id>.webp`에 덮어쓴다.
    - `defense_test/src/data.js`에서 그 동료의 `art.portrait`를 출력된 `portrait` 값으로 바꾼다(`size` 250).
    - `node defense_test/scripts/art/check-facing.mjs`를 실행한다. 출력에 `<id>`가 있으면 `--fix <id>`(좌우 칸 맞바꿈)로 고치고 다시 실행한다. 베놈은 `CHECKED_BY_EYE`에 있으므로 눈으로 본다.
    - `node defense_test/scripts/art/consistency-report.mjs`를 실행한다. 그 동료의 `bboxH`가 같은 키 그룹 중앙값의 95~105%면 끝이다. 95% 미만이면 `headOverrides`에 `scale = min(1.08, 중앙값 ÷ bboxH)`를 넣고(이유 문장 포함) 4번부터 다시 한다.

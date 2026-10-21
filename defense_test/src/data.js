@@ -809,14 +809,14 @@ export const HEROES = [
     "attack": "shadow",
     "trait": {
       "type": "sacrifice",
-      "text": "일직선으로 관통합니다. 둠끼리 합성하면 재료 성급 × 50G를 즉시 돌려받습니다."
+      "text": "일직선으로 관통합니다. 둠끼리 합성하면 재료 성급 × 40G를 즉시 돌려받습니다."
     },
     "skill": {
       "name": "왕궁의 암거래",
       "cost": 60,
-      "goldCost": 25,
+      "goldCost": 40,
       "type": "fortune",
-      "text": "골드 25를 내고 적 전체에게 위력 7배 피해를 줍니다. 내고 남은 골드 20마다 +1배(최대 +5배). 훈련할 때마다 기본 배율이 1배씩 오릅니다."
+      "text": "골드 40을 내고 적 전체에게 위력 7배 피해를 줍니다. 내고 남은 골드 40마다 +1배(최대 +5배). 훈련할 때마다 기본 배율이 1배씩 오릅니다."
     },
     "heightGroup": "medium",
     "role": "합성 경제 · 관통검",
@@ -1329,7 +1329,7 @@ export const HEROES = [
     "attack": "halo",
     "trait": {
       "type": "antropy",
-      "text": "자신에게 걸리는 적의 디버프를 무효화합니다."
+      "text": "적과 아군이 거는 기절과 저주를 무효화합니다. 소멸은 막지 못합니다."
     },
     "skill": {
       "name": "노바레퀴엠",
@@ -1356,8 +1356,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 269,
-        "y": 206,
+        "x": 248,
+        "y": 199,
         "size": 250
       }
     },

@@ -61,7 +61,9 @@ const remainingFight=(s,dps)=>(alive(s).reduce((n,e)=>n+e.hp+(e.shield||0),0)+s.
 const litPatterns=['seal','storm','stun1','judgement','thunder'];
 const telegraphCells=s=>s.telegraph&&litPatterns.includes(s.telegraph.pattern)?s.telegraph.cells:[];
 const dangerCells=s=>new Set(telegraphCells(s));
-const litCells=s=>new Set(telegraphCells(s).filter(c=>!(s.board[c]&&E.immune(s,c))));
+// Removal (judgement) is not a debuff: only invincibility keeps a unit safe from it.
+const safeFrom=(s,c)=>s.telegraph?.pattern==='judgement'?E.invincible(s,c):E.immune(s,c);
+const litCells=s=>new Set(telegraphCells(s).filter(c=>!(s.board[c]&&safeFrom(s,c))));
 
 // Damage-equivalent of one gold: a fresh summon's value over the rest of the stage, per gold.
 function goldValue(s,m){const cost=Math.max(8,E.summonCost(s)||10);return summonValue(s)*m.scale*timeLeft(s)/cost;}
@@ -137,7 +139,7 @@ function ultValue(s,m,id,gv){
       return Math.max(0,strike(E.REQUIEM.factor)-Math.min(dps*1.2,dps*.12*marked));
     }
     case 'lemonade':{
-      const blocked=litCells(s).size&&['seal','storm','stun1','thunder','judgement'].includes(s.telegraph?.pattern)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]&&!E.immune(s,c)?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
+      const blocked=litCells(s).size&&['seal','storm','stun1','thunder','judgement'].includes(s.telegraph?.pattern)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]&&!safeFrom(s,c)?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
       const freed=CELLS.reduce((n,c)=>{const a=s.board[c];return n+(a&&(a.cursed||a.disabled>0)?unitValue(s,{...a,cursed:false},c)*m.scale*Math.min(8,a.cursed?rem:a.disabled):0);},0);
       return blocked+freed;
     }
@@ -148,7 +150,7 @@ function ultValue(s,m,id,gv){
       const best=centre?near(centre.e):[];
       if(best.length<3&&!best.some(e=>e.boss))return 0;
       const vic=CELLS.map(i=>s.board[i]&&s.board[i].uid!==u.uid?{i,ally:s.board[i]}:null).filter(Boolean).sort((a,b)=>a.ally.rank-b.ally.rank||a.ally.uid-b.ally.uid)[0];
-      const lost=vic&&!E.immune(s,vic.i)?unitValue(s,vic.ally,vic.i)*m.scale*Math.min(24,rem)*.15:0;
+      const lost=vic&&!E.invincible(s,vic.i)?unitValue(s,vic.ally,vic.i)*m.scale*Math.min(24,rem)*.15:0;
       return best.reduce((n,e)=>n+hit(E.ARMAGEDDON.factor,e),0)-lost;
     }
     case 'venomplague':return strike(E.VENOM_PLAGUE.factor)+list.reduce((n,e)=>{const st=E.statusState(s,e);return n+Math.min(e.hp,((e.burn||0)+st.poisonDps)*E.VENOM_PLAGUE.seconds*E.VENOM_PLAGUE.amp);},0);
@@ -198,7 +200,7 @@ function dodge(s,m){
   // A person moves the key units out, not the whole board: two per stun, every unit for the judgement.
   const key=s.telegraph.uid+":"+s.telegraph.ends.toFixed(2);if(m.dodgeKey!==key){m.dodgeKey=key;m.dodged=0;}
   if(s.telegraph.pattern!=="judgement"&&m.dodged>=2)return false;
-  const judgement=s.telegraph.pattern==='judgement',units=[...lit].filter(c=>s.board[c]&&!s.board[c].cursed&&!E.immune(s,c)).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
+  const judgement=s.telegraph.pattern==='judgement',units=[...lit].filter(c=>s.board[c]&&!s.board[c].cursed&&!safeFrom(s,c)).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
   for(const c of units){
     const u=s.board[c];s.board[c]=null;const free=bestCell(s,u,danger);s.board[c]=u;
     if(free.cell>=0){E.move(s,c,free.cell);m.dodged++;return true;}

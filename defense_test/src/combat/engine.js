@@ -109,9 +109,12 @@ const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
 export function summonCost(s){return s.freeSummons>0?0:Math.max(8,10+s.paidSummons*2-(has(s,'sprout')?RV.sprout.discount:0));}
 // Doom's merge refund is flat per material rank, so merging never waits on training.
-export const DOOM_REFUND=50;
+export const DOOM_REFUND=40;
 export const doomRefund=rank=>DOOM_REFUND*rank;
-export const waveIncome=wave=>48+Math.floor(wave);
+export const waveIncome=wave=>56+Math.floor(wave);
+// Pass 14: a merge gives less starlight (12 -> 6) and the wave trickle more (1.2 -> 1.5/s), so a deck that
+// merges a lot no longer turns gold into ultimates; bosses pay 30G.
+export const MERGE_STARLIGHT=6,STARLIGHT_PER_SECOND=1.5,BOSS_GOLD=30;
 const CLOCK_BUFFS=['haste','awaken','march','festive','radiance','harmony','echo','trauma'];
 export const skillDuration=(s,seconds,key)=>seconds*(CLOCK_BUFFS.includes(key)&&has(s,'broken_clock')?1+RV.broken_clock.duration*relicScaleIn(s,'broken_clock'):1);
 export const unitForm=(s,u)=>u.hero==='time_magician'&&s.buffs.trauma>0?'trauma':null;
@@ -120,18 +123,25 @@ export const queenIncome=(rank,wave,level=0)=>6+rank*6+Math.floor((wave-1)/3)+le
 export const QUEEN_CAP=90;
 // Immediate gold from the Queen's ultimate. +50% of this wave's base income is edictWave, once per wave.
 export const QUEEN_TAX=20;
-// Doom's black market: 7x base (+1x per training level), +1x for every 20 gold left after paying, up to +5x.
-export const fortuneFactor=(goldAfter,level=0)=>7+level+Math.min(5,Math.floor(Math.max(0,goldAfter)/20));
+// Doom's black market: 7x base (+1x per training level), +1x for every 40 gold left after paying, up to +5x.
+export const fortuneFactor=(goldAfter,level=0)=>7+level+Math.min(5,Math.floor(Math.max(0,goldAfter)/40));
 export const executeThresholdFor=k=>Math.min(.5,.4+(k-1)*.2);
 export const executeThreshold=(e,s=null)=>executeThresholdFor(s?special(s,'luna'):1);
 export function dividend(s){return Math.min(QUEEN_CAP,s.board.reduce((n,u)=>n+(u?.hero==='queen'?queenIncome(u.rank,s.wave,s.upgrades.queen):0),0));}
 export function upgradeCost(s,id){return Math.ceil((28+(s.upgrades[id]||0)*24)*(1-s.trainingDiscount));}
 export function neighbors(index){const x=index%5,y=Math.floor(index/5);return [x>0?index-1:-1,x<4?index+1:-1,y>0?index-5:-1,y<4?index+5:-1].filter(i=>i>=0);}
-// Antropy is always immune. A cure master's aura covers the four orthogonal neighbours only, and never herself.
+// Invincibility (lemonade, or a cure master's aura on the four orthogonal neighbours, never herself) blocks
+// debuffs and removal alike: Thor's judgement and Ash's Armageddon.
+export function invincible(s,index){
+  const u=s.board[index];if(!u)return false;
+  if((u.invincible||0)>0)return true;
+  return neighbors(index).some(i=>{const n=s.board[i];return n?.hero==='cure_master'&&!n.cursed&&!(n.disabled>0);});
+}
+// Debuff immunity: stuns, seals and curses from enemies or allies. Antropy always has it. Removal is not a debuff,
+// so Antropy alone does not stop judgement or Armageddon.
 export function immune(s,index){
   const u=s.board[index];if(!u)return false;
-  if((u.invincible||0)>0||u.hero==='antropy')return true;
-  return neighbors(index).some(i=>{const n=s.board[i];return n?.hero==='cure_master'&&!n.cursed&&!(n.disabled>0);});
+  return u.hero==='antropy'||invincible(s,index);
 }
 export function stunUnit(s,index,seconds){const u=s.board[index];if(!u||immune(s,index))return;u.disabled=Math.max(u.disabled||0,seconds);}
 export const targetingLocked=id=>id==='avalanche_maid'||id==='flame_sage';
@@ -379,7 +389,7 @@ export function move(s,from,to){
     if(refund)giveGold(s,refund,'합성 환급');
     const unit=makeUnit(s,id,rank);unit.priority=targetingLocked(id)?'random':(b.hero==='rumi'?a:b).priority;unit.cooldown=.06;unit.mergedWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);s.board[to]=unit;s.board[from]=null;syncTimeRuler(s);
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,sourceKey('merge',id,unit.uid),id,2,8,power(s,unit));
-    s.stats.merges++;{const gain=12+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0);if(has(s,'hourglass'))s.sandStore=Math.min(RV.hourglass.store,(s.sandStore||0)+Math.max(0,s.gauge+gain-gaugeCap(s)));addGauge(s,gain);}s.tutorial=Math.max(s.tutorial,2);
+    s.stats.merges++;{const gain=MERGE_STARLIGHT+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0);if(has(s,'hourglass'))s.sandStore=Math.min(RV.hourglass.store,(s.sandStore||0)+Math.max(0,s.gauge+gain-gaugeCap(s)));addGauge(s,gain);}s.tutorial=Math.max(s.tutorial,2);
     event(s,'merge',{from,to,hero:id,rank,refund});return {ok:true,merged:true,index:to,refund};
   }
   s.board[to]=a;s.board[from]=b;syncTimeRuler(s);event(s,'move',{from,to});return {ok:true,index:to};
@@ -498,7 +508,7 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
   if(recordMirror)for(const f of s.finishers||[])if(f.kind==='mirror'&&f.target===e.uid&&f.life>0)f.stored=f.cap!==undefined?Math.min(f.cap/.45,f.stored+actual):f.stored+actual;
   if(!dot&&!instant)event(s,'hit',{uid:e.uid,...pathPoint(e.progress),damage:Math.round(amount),hero,big:amount>100||!!e.boss,...(critical?{crit:true}:{})});
   if(e.hp<=0){
-    s.stats.kills++;const gold=e.boss?20:e.kind==='armor'?3:2;giveGold(s,gold,'격파');
+    s.stats.kills++;const gold=e.boss?BOSS_GOLD:e.kind==='armor'?3:2;giveGold(s,gold,'격파');
     if(gift)giveGold(s,1,'선물');
     addGauge(s,(e.boss?15:1.3)+e.divine*(e.boss?DIVINE_BOSS_GAUGE:DIVINE_GAUGE));
     // A frozen enemy that falls spreads the witch's cold; Winter Court freezes nearby foes.
@@ -825,7 +835,7 @@ export function cast(s,id){
   else if(type==='armageddon'){
     const pick=reductionTarget(s,u);
     if(pick){
-      if(immune(s,pick.i))event(s,'ward',{...cellPoint(pick.i),hero:s.board[pick.i].hero==='antropy'?'antropy':'cure_master'});
+      if(invincible(s,pick.i))event(s,'ward',{...cellPoint(pick.i),hero:'cure_master'});
       else{s.board[pick.i]=null;syncTimeRuler(s);s.stats.sacrificed=(s.stats.sacrificed||0)+1;event(s,'reduce',{hero:pick.ally.hero,index:pick.i,...cellPoint(pick.i)});}
     }
     const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=ARMAGEDDON.radius);
@@ -1034,7 +1044,7 @@ export function castPreview(s,id){
     const stun=1.2*control*scale;
     lines.push(`적 전체에게 위력 7배, ${hit(7)}를 줍니다.`);
     lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
-  }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 20마다 +1배 (최대 ${12+level}배).`);}
+  }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 40마다 +1배 (최대 ${12+level}배).`);}
   else if(type==='dividend'){
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
     lines.push(s.edictWave===s.wave?'이번 웨이브의 수입 증가는 이미 적용됐습니다.':'이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다.');
@@ -1065,7 +1075,7 @@ export function castPreview(s,id){
     if(n)lines.push(`지금 행동불능인 동료 ${n}명.`);
   }else if(type==='armageddon'){
     const pick=reductionTarget(s,u);
-    lines.push(!pick?'소멸할 동료가 없습니다.':immune(s,pick.i)?`${HERO[pick.ally.hero].name} ${pick.ally.rank}성은 무적이라 소멸하지 않습니다.`:`지금 소멸하는 동료: ${HERO[pick.ally.hero].name} ${pick.ally.rank}성.`);
+    lines.push(!pick?'소멸할 동료가 없습니다.':invincible(s,pick.i)?`${HERO[pick.ally.hero].name} ${pick.ally.rank}성은 무적이라 소멸하지 않습니다.`:`지금 소멸하는 동료: ${HERO[pick.ally.hero].name} ${pick.ally.rank}성.`);
     lines.push(`가장 밀집한 반경 ${ARMAGEDDON.radius}의 적에게 위력 ${ARMAGEDDON.factor}배, ${hit(ARMAGEDDON.factor)}를 줍니다.`);
   }else if(type==='venomplague'){
     lines.push(`적 전체에게 위력 ${VENOM_PLAGUE.factor}배, ${hit(VENOM_PLAGUE.factor)}를 주고 중독을 ${VENOM_PLAGUE.stacks}중첩 쌓습니다.`);
@@ -1098,7 +1108,8 @@ function bossResolve(s,e,boss,pattern){
   // Sample immunity before any stun: disabling the aura source must not expose a neighbour later in the same pattern.
   const victims=()=>cells.filter(i=>s.board[i]&&!immune(s,i));
   // An immune unit that a pattern would have hit shows the ward (Antropy's own halo or a cure master's bubble).
-  if(['seal','storm','stun1','thunder','judgement'].includes(pattern))for(const i of cells)if(s.board[i]&&immune(s,i))event(s,'ward',{...cellPoint(i),hero:s.board[i].hero==='antropy'?'antropy':'cure_master'});
+  if(['seal','storm','stun1','thunder'].includes(pattern))for(const i of cells)if(s.board[i]&&immune(s,i))event(s,'ward',{...cellPoint(i),hero:invincible(s,i)?'cure_master':'antropy'});
+  if(pattern==='judgement')for(const i of cells)if(s.board[i]&&invincible(s,i))event(s,'ward',{...cellPoint(i),hero:'cure_master'});
   if(pattern==='seal'){for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,boss.sealTime||2.4);event(s,'seal',{cells});}
   else if(pattern==='storm'){for(const i of victims()){s.board[i].disabled=1.8;s.gauge=Math.max(0,s.gauge-5);}event(s,'bossCast',{boss:e.boss,pattern,cells,...pathPoint(e.progress)});}
   else if(pattern==='stun1'){for(const i of victims())s.board[i].disabled=Math.max(s.board[i].disabled,2);event(s,'seal',{cells});}
@@ -1112,7 +1123,7 @@ function bossResolve(s,e,boss,pattern){
     for(const t of s.enemies){if(t.hp<=0)continue;const controlled=t.statusEffects.some(effect=>['stun','freeze'].includes(effect.type)&&effect.until-s.time>1e-9),slowed=t.slowEffects.some(effect=>effect.until-s.time>1e-9);if(controlled||slowed)continue;t.progress=Math.min(PATH_LENGTH-1,t.progress+PATH_LENGTH*.15);}
     event(s,'rush');event(s,'bossCast',{boss:e.boss,pattern,...pathPoint(e.progress)});
   }else if(pattern==='judgement'){
-    const i=cells[0],u=s.board[i],safe=!u||immune(s,i);
+    const i=cells[0],u=s.board[i],safe=!u||invincible(s,i);
     if(u&&!safe&&s.board.filter(Boolean).length>1){s.board[i]=null;syncTimeRuler(s);}
     event(s,'judgement',{index:i,hit:!!u&&!safe,...cellPoint(i)});
   }
@@ -1196,7 +1207,7 @@ export function step(s,dt){
   for(const key of Object.keys(s.buffs))s.buffs[key]=Math.max(0,s.buffs[key]-dt);
   while(s.reserves.length&&freeCell(s)>=0)place(s,s.reserves.shift(),2);
   if(s.phase==='intermission'){s.breakTime-=dt;if(s.breakTime<=0)beginWave(s,s.wave+1);return;}
-  s.waveTime+=dt;addGauge(s,dt*1.2);
+  s.waveTime+=dt;addGauge(s,dt*STARLIGHT_PER_SECOND);
   s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter,s.mode).interval;}
   for(const e of s.enemies){
     if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);e.dotFlash-=dt;

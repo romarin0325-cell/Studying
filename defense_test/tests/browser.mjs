@@ -147,9 +147,13 @@ try{
     await inspectCell(f.page,6);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 적/);
     await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/경로 위/);await shot(f.page,'trait-fixed-target',width,height);
     await inspectCell(f.page,16);assert.match(await f.page.locator('.unit-trait-line').innerText(),/이후 웨이브.*125%/);
-    const doom=f.page.locator('[data-skill="doom"]');assert.equal(await doom.isEnabled(),false);assert.match(await doom.getAttribute('aria-label'),/25골드.*골드 부족/);assert.match(await doom.innerText(),/25G/);await f.context.close();
+    const doom=f.page.locator('[data-skill="doom"]');assert.equal(await doom.getAttribute('aria-disabled'),'true');assert.match(await doom.getAttribute('aria-label'),/40골드.*골드 부족/);assert.match(await doom.innerText(),/40G/);
+    // An unavailable ultimate still opens its info card on a long press, and a tap does not cast it.
+    await f.page.locator('[data-action="deselect"]').click();const box=await doom.boundingBox();await f.page.mouse.move(box.x+box.width/2,box.y+box.height/2);await f.page.mouse.down();
+    await f.page.locator('#skill-tip').waitFor();assert.match(await f.page.locator('#skill-tip').innerText(),/왕궁의 암거래/);await f.page.mouse.up();
+    await doom.click({force:true});assert.equal(await f.page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),0);await f.context.close();
   }
-  const paid=await boot(390,844,traitFixture(['doom','flame_sage','storm_sage','galaxy_whale','avalanche_maid'],[[6,'doom']],{gold:25}));
+  const paid=await boot(390,844,traitFixture(['doom','flame_sage','storm_sage','galaxy_whale','avalanche_maid'],[[6,'doom']],{gold:40}));
   await paid.page.locator('[data-action="resume"]').click();await paid.page.locator('[data-skill="doom"]').click();
   assert.equal(await paid.page.evaluate(()=>window.STAR_GARDEN.battle.gold),0);assert.equal(await paid.page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1);await paid.context.close();
   const wind=traitFixture(['storm_sage','flame_sage','doom','galaxy_whale','avalanche_maid'],[[12,'storm_sage']]);
