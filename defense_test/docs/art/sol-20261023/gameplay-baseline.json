@@ -1,0 +1,197 @@
+{
+  "baseCommit": "e3999265dc38a9087b525c29cf77bba7c5551df7",
+  "heroes": [
+    {
+      "id": "underdog",
+      "name": "언더독",
+      "title": "마력 없는 주먹",
+      "color": "#9fb2e0",
+      "damage": 22,
+      "interval": 0.9,
+      "attack": "stone",
+      "trait": {
+        "type": "underdog",
+        "text": "덱이 전부 노멀이면 위력이 80% 오릅니다."
+      },
+      "skill": {
+        "name": "빅쇼",
+        "cost": 80,
+        "type": "bigshow",
+        "text": "적 전체에게 위력 10배 피해를 주고, 아군 전체가 2초 기절합니다."
+      },
+      "heightGroup": "tall",
+      "role": "노멀 덱 · 단일",
+      "shape": "single",
+      "range": 560,
+      "radius": 0
+    },
+    {
+      "id": "toffee_apple",
+      "name": "토피애플",
+      "title": "달콤한 함정",
+      "color": "#e5604a",
+      "damage": 36,
+      "interval": 1.4,
+      "attack": "sugar",
+      "trait": {
+        "type": "toffee",
+        "text": "폭탄을 설치하면 가장 높은 성급의 토피애플이 3초 기절합니다."
+      },
+      "skill": {
+        "name": "애플봄",
+        "cost": 95,
+        "type": "applebomb",
+        "text": "경로 앞쪽에 폭탄을 설치합니다(최대 5개). 적이 가까이 오면 바로 터져 적 전체에게 위력 9배 피해를 줍니다."
+      },
+      "heightGroup": "medium",
+      "role": "저축 폭탄 · 관통",
+      "shape": "beam",
+      "range": 520,
+      "radius": 24
+    },
+    {
+      "id": "joker",
+      "name": "조커",
+      "title": "색이 바뀌는 광대",
+      "color": "#f06aa8",
+      "damage": 22,
+      "interval": 1,
+      "attack": "cards",
+      "trait": {
+        "type": "joker",
+        "text": "필살기를 쓸 때마다 색이 무작위로 바뀌고, 색에 따라 일반 공격이 상태 이상을 겁니다. 빨강 화상, 파랑 감속 20%, 초록 중독, 하양 성광, 검정 노출."
+      },
+      "skill": {
+        "name": "레인보우 룰렛",
+        "cost": 50,
+        "type": "roulette",
+        "text": "적 전체에게 위력 3배 피해를 주고 색을 지금과 다른 무작위 색으로 바꿉니다."
+      },
+      "heightGroup": "medium",
+      "role": "상태 부여 · 범위",
+      "shape": "splash",
+      "range": 430,
+      "radius": 56
+    },
+    {
+      "id": "sunflower",
+      "name": "해바라기",
+      "title": "느긋한 광합성",
+      "color": "#f2c230",
+      "damage": 36,
+      "interval": 1,
+      "attack": "sun",
+      "trait": {
+        "type": "sunlight",
+        "text": "웨이브를 마칠 때마다 햇빛이 쌓입니다(최대 3, 모든 해바라기가 함께 씀). 햇빛 1·2·3개일 때 일반 공격이 반경 30·60·90으로 터집니다."
+      },
+      "skill": {
+        "name": "솔라플레어",
+        "cost": 90,
+        "type": "solarflare",
+        "text": "햇빛을 모두 써서 적 전체에게 위력 2배 + 햇빛당 4배 피해를 줍니다(3개면 14배)."
+      },
+      "heightGroup": "medium",
+      "role": "햇빛 저축 · 단일",
+      "shape": "single",
+      "range": 500,
+      "radius": 0
+    },
+    {
+      "id": "antropy",
+      "name": "앤트로피",
+      "title": "디버프를 삼키는 빛",
+      "color": "#c9b4f0",
+      "damage": 24,
+      "interval": 1.4,
+      "attack": "halo",
+      "trait": {
+        "type": "antropy",
+        "text": "적과 아군이 거는 기절과 저주를 무효화합니다. 소멸은 막지 못합니다."
+      },
+      "skill": {
+        "name": "노바레퀴엠",
+        "cost": 50,
+        "type": "requiem",
+        "text": "적의 모든 디버프를 지우고 전체 7배 피해를 줍니다."
+      },
+      "heightGroup": "short",
+      "role": "오라 덱 · 범위",
+      "shape": "splash",
+      "range": 480,
+      "radius": 70
+    },
+    {
+      "id": "cure_master",
+      "name": "큐어마스터",
+      "title": "굿나잇 큐어",
+      "color": "#ff8fc1",
+      "damage": 22,
+      "interval": 1.3,
+      "attack": "syringe",
+      "trait": {
+        "type": "cure",
+        "text": "상하좌우 아군에게 무적 오라를 줍니다. 무적은 기절과 저주, 천벌을 막습니다."
+      },
+      "skill": {
+        "name": "레모네이드",
+        "cost": 50,
+        "type": "lemonade",
+        "text": "아군 전체의 기절과 저주를 풀고 4초 동안 무적으로 만듭니다."
+      },
+      "heightGroup": "medium",
+      "role": "보호 · 장판",
+      "shape": "zone",
+      "range": 460,
+      "radius": 60
+    },
+    {
+      "id": "ash",
+      "name": "애쉬",
+      "title": "재가 된 계약",
+      "color": "#ff7048",
+      "damage": 31,
+      "interval": 1.4,
+      "attack": "fire",
+      "trait": {
+        "type": "burn",
+        "text": "일반 공격에 화상을 겁니다."
+      },
+      "skill": {
+        "name": "아마겟돈",
+        "cost": 70,
+        "type": "armageddon",
+        "text": "가장 성급이 낮은 동료 한 명을 불태워 소멸시키고(무적이면 소멸하지 않습니다), 가장 밀집한 반경 180의 적에게 위력 15배 피해를 줍니다."
+      },
+      "heightGroup": "medium",
+      "role": "화상 · 환원",
+      "shape": "splash",
+      "range": 470,
+      "radius": 64
+    },
+    {
+      "id": "venom",
+      "name": "베놈",
+      "title": "침묵하는 재앙",
+      "color": "#6bc45a",
+      "damage": 34,
+      "interval": 1.2,
+      "attack": "poison",
+      "trait": {
+        "type": "venom",
+        "text": "일반 공격에 중독과 화상을 함께 겁니다."
+      },
+      "skill": {
+        "name": "플래이그",
+        "cost": 80,
+        "type": "venomplague",
+        "text": "적 전체에게 위력 3배 피해와 중독 3중첩을 주고, 10초 동안 적이 받는 화상·중독 피해가 2배가 됩니다."
+      },
+      "heightGroup": "medium",
+      "role": "지속 단일",
+      "shape": "single",
+      "range": 520,
+      "radius": 0
+    }
+  ]
+}

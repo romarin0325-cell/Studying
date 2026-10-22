@@ -1,0 +1,341 @@
+{
+  "cases": 38,
+  "errors": [],
+  "externalRequests": [],
+  "viewport": [
+    390,
+    844
+  ],
+  "scenarios": [
+    {
+      "label": "night-home",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-portrait-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-portrait-joker",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-portrait-sunflower",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-portrait-underdog",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-portrait-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-portrait-venom",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-portrait-ash",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-portrait-antropy",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-battle-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-joker",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-sunflower",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-underdog",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-battle-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-venom",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-ash",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-antropy",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-home",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-portrait-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-portrait-joker",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-portrait-sunflower",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-portrait-underdog",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-portrait-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-portrait-venom",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-portrait-ash",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-portrait-antropy",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": {
+        "left": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-battle-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-joker",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-sunflower",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-underdog",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-battle-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-venom",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-ash",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-antropy",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    }
+  ]
+}

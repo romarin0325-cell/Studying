@@ -1,0 +1,67 @@
+{
+  "cases": 8,
+  "errors": [],
+  "externalRequests": [],
+  "viewport": [
+    390,
+    844
+  ],
+  "scenarios": [
+    {
+      "label": "night-battle-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-underdog",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-battle-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "night-cast-ash",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-battle-toffee_apple",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-underdog",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-battle-cure_master",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    },
+    {
+      "label": "bright-cast-ash",
+      "w": 390,
+      "document": 390,
+      "missing": [],
+      "modal": null
+    }
+  ]
+}

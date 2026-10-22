@@ -836,7 +836,7 @@ export function cast(s,id){
     const pick=reductionTarget(s,u);
     if(pick){
       if(invincible(s,pick.i))event(s,'ward',{...cellPoint(pick.i),hero:'cure_master'});
-      else{s.board[pick.i]=null;syncTimeRuler(s);s.stats.sacrificed=(s.stats.sacrificed||0)+1;event(s,'reduce',{hero:pick.ally.hero,index:pick.i,...cellPoint(pick.i)});}
+      else{s.board[pick.i]=null;syncTimeRuler(s);s.stats.sacrificed=(s.stats.sacrificed||0)+1;event(s,'reduce',{hero:pick.ally.hero,by:'ash',index:pick.i,...cellPoint(pick.i)});}
     }
     const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=ARMAGEDDON.radius);
     const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
@@ -1225,7 +1225,9 @@ export function step(s,dt){
     const alive=s.enemies.filter(e=>e.hp>0);
     if(!alive.some(e=>e.progress>=bomb.progress-APPLEBOMB.trigger))return true;
     for(const e of alive)damage(s,e,bomb.damage,'toffee_apple');
-    event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress)});
+    // Visual receipts must retain even lethal hits after dead enemies leave the
+    // renderer's map. This is a global bomb, not a local circular splash.
+    event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress),targets:alive.map(e=>({uid:e.uid,...pathPoint(e.progress)}))});
     return false;
   });
   for(const z of s.zones){

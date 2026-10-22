@@ -14,6 +14,7 @@
 - [CHARACTER_TRAITS.md](CHARACTER_TRAITS.md): 위력 계산 경로와 특성 판정 기준.
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.
 - [ASSET_PIPELINE.md](ASSET_PIPELINE.md): 에셋·사운드 제작과 검수 절차.
+- [SOL_ASSET_AND_VFX.md](SOL_ASSET_AND_VFX.md): Sol 최종 SD 8명 설치, 역할에 따른 공격·필살기 판단표, 실제 렌더러 전후 비교와 확장 규칙.
 - [GPT_IMAGE_SD_BRIEF.md](GPT_IMAGE_SD_BRIEF.md): 나노바나나로 만든 동료 6명의 SD를 GPT Image 2.5(Manus)로 다시 그리는 지시서. 참조·프롬프트·거르기·패킹 순서.
 - [ASSET_CONSISTENCY.md](ASSET_CONSISTENCY.md): 동료 37명의 SD·메모리얼 일관성 평가표(2026-10-19). 크게 어긋난 곳과 나중에 손볼 곳. 측정 도구는 `scripts/art/consistency-report.mjs`, `consistency-table.mjs`.
 - [PARTNER_LINES.md](PARTNER_LINES.md): 대사.

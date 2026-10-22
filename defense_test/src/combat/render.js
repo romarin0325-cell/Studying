@@ -1,6 +1,7 @@
 import {HERO,ASSET_PATHS,BOSSES,CHAPTERS,TRANSFORM_ART} from '../content.js';
 import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm,topCinderella} from './engine.js';
 import {CombatFX,drawAttackRange,isUR} from './effects.js';
+import {COMPANION_VISUALS} from './companion-vfx.js';
 
 export class Art {
   constructor(){this.images={};this.failed=[];this.ready=this.load();}
@@ -49,7 +50,7 @@ export class Renderer {
     if(e.type==='bombBlast'){this.shake=7;this.bursts(e.x,e.y,'#ff6a50',20,1.1);}
     if(e.type==='bombSet')this.bursts(e.x,e.y-8,'#ffd9c8',8,.6);
     if(e.type==='crushPhase'){this.shake=4;this.bursts(e.x,e.y,HERO.behemoth.color,8,.7);}
-    if(e.type==='skill'){const life=e.kind==='dream'?2.9:e.kind==='bigshow'?2.4:1.6;this.skill={...e,uid:++this.skillSeq,life,total:life};this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!e.locked)this.shake=isUR(e.hero)?7:4;}
+    if(e.type==='skill'){const life=e.kind==='dream'?2.9:e.kind==='bigshow'?2.4:1.6;this.skill={...e,uid:++this.skillSeq,life,total:life};this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!e.locked)this.shake=COMPANION_VISUALS[e.hero]?(e.hero==='underdog'?6:e.hero==='ash'?4:2):isUR(e.hero)?7:4;}
     if(e.type==='finisherImpact'){this.shake=3;if(e.kind==='mirror')this.float(`천만경 ${Math.round(e.damage)}`,e.x,e.y-85,'#f0c9ff',22);}
     if(e.type==='income')this.float(`+${e.gold} G`,e.x,e.y-40,'#f2d596',17);
     if(e.type==='chain')this.effects.push({...e,life:.24,total:.24});
@@ -148,6 +149,8 @@ export class Renderer {
     let dx=0,dy=idle,angle=0,squash=1;const pressed=this.press===index&&!this.drag;if(pressed)dy-=6;
     if(u.windup>0){dx=-Math.cos(aim)*2.5;dy-=Math.sin(aim)*2.5;squash=.96;}
     if(u.pose>0){const t=1-u.pose/.3,pulse=Math.sin(t*Math.PI);dx=Math.cos(aim)*pulse*4;dy+=Math.sin(aim)*pulse*4;angle=Math.cos(aim)*pulse*.025;squash=1+pulse*.035;}
+    const slam=u.hero==='underdog'&&this.skills.find(skill=>skill.hero===u.hero&&skill.origin?.x===p.x&&skill.origin?.y===p.y&&skill.total-skill.life<.24);
+    if(slam&&!this.reduced){const t=(slam.total-slam.life)/.24,pulse=Math.sin(t*Math.PI);dy+=pulse*8;dx+=pulse*4;angle+=pulse*.12;}
     this.art.hero(ctx,u.hero,p.x+dx,p.y+31+dy+(1-ease)*15,126*(.8+.2*ease)*(pressed?1.05:1),{direction:u.facing||'down',alpha:u.disabled>0||u.cursed?.52:1,angle,squash,form:unitForm(s,u)});
     if(u.windup>0){star(ctx,p.x+Math.cos(aim)*14,p.y+5+Math.sin(aim)*10,4,HERO[u.hero].color,this.clock*3);}
     const start=p.x-(u.rank-1)*6;

@@ -1,0 +1,198 @@
+{
+  "tool": "built-in image_gen",
+  "packing": "independent source cells uniformly contained with transparent gutter; no runtime pixel processing",
+  "assets": [
+    {
+      "id": "effects-sol-sweet",
+      "sourceName": "exec-4539ee9e-07aa-4d59-9d38-d92e9ce3305e.png",
+      "sourceSha256": "a850b0138d46be2b21be28497f9be57bd8db6934e154200388c0849965a9230c",
+      "outputSha256": "b12c695409fbac3439cbb3ea126618bb6d4db4373a9480b404a25d6a61830054",
+      "bytes": 214570,
+      "width": 1024,
+      "height": 512,
+      "columns": 4,
+      "rows": 2,
+      "frames": [
+        {
+          "frame": 0,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 453,
+            "height": 381
+          }
+        },
+        {
+          "frame": 1,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 453,
+            "top": 0,
+            "width": 434,
+            "height": 381
+          }
+        },
+        {
+          "frame": 2,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 887,
+            "top": 0,
+            "width": 443,
+            "height": 381
+          }
+        },
+        {
+          "frame": 3,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 1330,
+            "top": 0,
+            "width": 444,
+            "height": 381
+          }
+        },
+        {
+          "frame": 4,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 0,
+            "top": 381,
+            "width": 466,
+            "height": 506
+          }
+        },
+        {
+          "frame": 5,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 466,
+            "top": 381,
+            "width": 427,
+            "height": 506
+          }
+        },
+        {
+          "frame": 6,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 893,
+            "top": 381,
+            "width": 437,
+            "height": 506
+          }
+        },
+        {
+          "frame": 7,
+          "source": "effects-sol-sweet",
+          "rect": {
+            "left": 1330,
+            "top": 381,
+            "width": 444,
+            "height": 506
+          }
+        }
+      ]
+    },
+    {
+      "id": "effects-sol-twilight",
+      "sourceName": "exec-e5c37c84-2d74-4e1a-8b24-7bed57028b59.png",
+      "sourceSha256": "3542bc4c740b3b84455f0a7331441bf8b190b9fa93ffd9218bd71bf2b20e696c",
+      "outputSha256": "3dc2127b0b13d714b05bb3946e7c126a305bbce6f4059f0fba84cf6a3d90f461",
+      "bytes": 209102,
+      "width": 1024,
+      "height": 512,
+      "columns": 4,
+      "rows": 2,
+      "frames": [
+        {
+          "frame": 0,
+          "source": "effects-sol-twilight",
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 443,
+            "height": 381
+          }
+        },
+        {
+          "frame": 1,
+          "source": "effects-sol-twilight",
+          "rect": {
+            "left": 443,
+            "top": 0,
+            "width": 444,
+            "height": 381
+          }
+        },
+        {
+          "frame": 2,
+          "source": "effects-sol-twilight",
+          "rect": {
+            "left": 887,
+            "top": 0,
+            "width": 443,
+            "height": 381
+          }
+        },
+        {
+          "frame": 3,
+          "source": "orbit",
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 887,
+            "height": 887
+          }
+        },
+        {
+          "frame": 4,
+          "source": "effects-sol-twilight",
+          "rect": {
+            "left": 0,
+            "top": 381,
+            "width": 443,
+            "height": 506
+          }
+        },
+        {
+          "frame": 5,
+          "source": "effects-sol-twilight",
+          "rect": {
+            "left": 443,
+            "top": 381,
+            "width": 444,
+            "height": 506
+          }
+        },
+        {
+          "frame": 6,
+          "source": "effects-sol-twilight",
+          "rect": {
+            "left": 887,
+            "top": 381,
+            "width": 450,
+            "height": 506
+          }
+        },
+        {
+          "frame": 7,
+          "source": "orbit",
+          "rect": {
+            "left": 0,
+            "top": 887,
+            "width": 887,
+            "height": 887
+          }
+        }
+      ]
+    },
+    {
+      "id": "antropy-orbit-refinement",
+      "sourceName": "exec-6019b046-db8d-48f2-ad6a-2cafaa1f58ce.png",
+      "sourceSha256": "e2f1b3fb5961dc9d2859ac2c4dff1ac13dad64ba046becf3e578a30f392ee168",
+      "reason": "Reject filled purple disc; retain empty thin orbital halo."
+    }
+  ]
+}
