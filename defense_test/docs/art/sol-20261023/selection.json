@@ -1,0 +1,1202 @@
+{
+  "baseCommit": "e3999265dc38a9087b525c29cf77bba7c5551df7",
+  "selectedFrom": "user-reviewed Sol delivery 2026-10-23",
+  "cell": 512,
+  "anchor": [
+    256,
+    480
+  ],
+  "method": "Uniform whole-figure scale, per-direction sole translation; no silhouette autofit or anisotropic deformation",
+  "headDefinition": "Cranium and face, excluding hair volume, hats, ears, horns, flowers, ornaments and weapons",
+  "uncertaintySourcePixels": {
+    "front": 12,
+    "back": 16,
+    "side": 12
+  },
+  "assets": [
+    {
+      "id": "toffee_apple",
+      "name": "토피애플",
+      "selectedStem": "toffee_apple",
+      "sha256": "c841329e1d3ce16053ce88918653750544d1944c410a880d0b9473d58bd51145",
+      "bytes": 208264,
+      "portrait": {
+        "x": 267,
+        "y": 215,
+        "size": 250
+      },
+      "sourceSha256": "92354d76513e14a1c8aac2b2afbf34cb0c70c89eaae67789c5a4548139f48ad1",
+      "uniformScale": 0.71228974,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            628
+          ],
+          "sourceSkull": [
+            258,
+            134,
+            477,
+            350
+          ],
+          "sourceFeet": [
+            352.8,
+            614
+          ],
+          "scale": 0.71228974,
+          "translation": [
+            5,
+            43
+          ],
+          "packedSkull": [
+            188.77,
+            138.45,
+            344.76,
+            292.3
+          ],
+          "packedSole": 480.35,
+          "bodyBelowChin": 187.7,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            628
+          ],
+          "sourceSkull": [
+            151,
+            134,
+            370,
+            350
+          ],
+          "sourceFeet": [
+            270.7,
+            614
+          ],
+          "scale": 0.71228974,
+          "translation": [
+            63,
+            43
+          ],
+          "packedSkull": [
+            170.56,
+            138.45,
+            326.55,
+            292.3
+          ],
+          "packedSole": 480.35,
+          "bodyBelowChin": 187.7,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            628,
+            627,
+            626
+          ],
+          "sourceSkull": [
+            245,
+            93,
+            448,
+            304
+          ],
+          "sourceFeet": [
+            334.72,
+            585
+          ],
+          "scale": 0.71228974,
+          "translation": [
+            18,
+            63
+          ],
+          "packedSkull": [
+            192.51,
+            129.24,
+            337.11,
+            279.54
+          ],
+          "packedSole": 479.69,
+          "bodyBelowChin": 200.46,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            628,
+            627,
+            626
+          ],
+          "sourceSkull": [
+            213,
+            93,
+            416,
+            304
+          ],
+          "sourceFeet": [
+            317.08,
+            585
+          ],
+          "scale": 0.71228974,
+          "translation": [
+            30,
+            63
+          ],
+          "packedSkull": [
+            181.72,
+            129.24,
+            326.31,
+            279.54
+          ],
+          "packedSole": 479.69,
+          "bodyBelowChin": 200.46,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "joker",
+      "name": "조커",
+      "selectedStem": "joker",
+      "sha256": "fae67c2179bf0b304d171304129ff0152193426f4b61a6b4a922632ab0d5911f",
+      "bytes": 243686,
+      "portrait": {
+        "x": 266,
+        "y": 220,
+        "size": 250
+      },
+      "sourceSha256": "d0376cb8dbae4dc53d3f8655229f82324a285f3933ca0e5793c2ec63e45870a8",
+      "uniformScale": 0.75100985,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            623
+          ],
+          "sourceSkull": [
+            218,
+            149,
+            434,
+            346
+          ],
+          "sourceFeet": [
+            312.71,
+            594
+          ],
+          "scale": 0.75100985,
+          "translation": [
+            21,
+            34
+          ],
+          "packedSkull": [
+            184.72,
+            145.9,
+            346.94,
+            293.85
+          ],
+          "packedSole": 480.1,
+          "bodyBelowChin": 186.15,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            623
+          ],
+          "sourceSkull": [
+            208,
+            157,
+            424,
+            354
+          ],
+          "sourceFeet": [
+            311.69,
+            593
+          ],
+          "scale": 0.75100985,
+          "translation": [
+            22,
+            35
+          ],
+          "packedSkull": [
+            178.21,
+            152.91,
+            340.43,
+            300.86
+          ],
+          "packedSole": 480.35,
+          "bodyBelowChin": 179.14,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            623,
+            627,
+            631
+          ],
+          "sourceSkull": [
+            218,
+            139,
+            422,
+            337
+          ],
+          "sourceFeet": [
+            297.62,
+            583
+          ],
+          "scale": 0.75100985,
+          "translation": [
+            32,
+            42
+          ],
+          "packedSkull": [
+            195.72,
+            146.39,
+            348.93,
+            295.09
+          ],
+          "packedSole": 479.84,
+          "bodyBelowChin": 184.91,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            623,
+            627,
+            631
+          ],
+          "sourceSkull": [
+            233,
+            139,
+            437,
+            337
+          ],
+          "sourceFeet": [
+            333.34,
+            583
+          ],
+          "scale": 0.75100985,
+          "translation": [
+            6,
+            42
+          ],
+          "packedSkull": [
+            180.99,
+            146.39,
+            334.19,
+            295.09
+          ],
+          "packedSole": 479.84,
+          "bodyBelowChin": 184.91,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "sunflower",
+      "name": "해바라기",
+      "selectedStem": "sunflower",
+      "sha256": "e755a9547b6a719139210b07fc48ca7ab4a834156426ffa8184a6fcf108448a1",
+      "bytes": 180400,
+      "portrait": {
+        "x": 251,
+        "y": 208,
+        "size": 250
+      },
+      "sourceSha256": "24819fb32dcf0b0c603405f91996bb991f39a09cd85aa3fe21b8e66b08a8f261",
+      "uniformScale": 0.67681992,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            628
+          ],
+          "sourceSkull": [
+            257,
+            108,
+            493,
+            330
+          ],
+          "sourceFeet": [
+            382.5,
+            620
+          ],
+          "scale": 0.67681992,
+          "translation": [
+            -3,
+            60
+          ],
+          "packedSkull": [
+            170.94,
+            133.1,
+            330.67,
+            283.35
+          ],
+          "packedSole": 479.63,
+          "bodyBelowChin": 196.65,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            628
+          ],
+          "sourceSkull": [
+            177,
+            110,
+            413,
+            332
+          ],
+          "sourceFeet": [
+            287.5,
+            620
+          ],
+          "scale": 0.67681992,
+          "translation": [
+            61,
+            60
+          ],
+          "packedSkull": [
+            180.8,
+            134.45,
+            340.53,
+            284.7
+          ],
+          "packedSole": 479.63,
+          "bodyBelowChin": 195.3,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            628,
+            627,
+            626
+          ],
+          "sourceSkull": [
+            238,
+            87,
+            449,
+            301
+          ],
+          "sourceFeet": [
+            333,
+            588
+          ],
+          "scale": 0.67681992,
+          "translation": [
+            31,
+            82
+          ],
+          "packedSkull": [
+            192.08,
+            140.88,
+            334.89,
+            285.72
+          ],
+          "packedSole": 479.97,
+          "bodyBelowChin": 194.28,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            628,
+            627,
+            626
+          ],
+          "sourceSkull": [
+            196,
+            91,
+            407,
+            305
+          ],
+          "sourceFeet": [
+            325.5,
+            586
+          ],
+          "scale": 0.67681992,
+          "translation": [
+            36,
+            83
+          ],
+          "packedSkull": [
+            168.66,
+            144.59,
+            311.47,
+            289.43
+          ],
+          "packedSole": 479.62,
+          "bodyBelowChin": 190.57,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "underdog",
+      "name": "언더독",
+      "selectedStem": "underdog",
+      "sha256": "fc95c5c763cea99fe8af5e7b8e3d4b9fc61e531a23d890304d71bc546d18bb48",
+      "bytes": 162898,
+      "portrait": {
+        "x": 238,
+        "y": 219,
+        "size": 250
+      },
+      "sourceSha256": "f95775f89cd582e667e9b59a7217816733f10969d62efb485ab624a46ddc24cf",
+      "uniformScale": 0.68133445,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            638
+          ],
+          "sourceSkull": [
+            229,
+            127,
+            464,
+            347
+          ],
+          "sourceFeet": [
+            372.5,
+            620
+          ],
+          "scale": 0.68133445,
+          "translation": [
+            2,
+            58
+          ],
+          "packedSkull": [
+            158.03,
+            144.53,
+            318.14,
+            294.42
+          ],
+          "packedSole": 480.43,
+          "bodyBelowChin": 185.58,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            638
+          ],
+          "sourceSkull": [
+            165,
+            127,
+            400,
+            347
+          ],
+          "sourceFeet": [
+            278.5,
+            620
+          ],
+          "scale": 0.68133445,
+          "translation": [
+            66,
+            58
+          ],
+          "packedSkull": [
+            178.42,
+            144.53,
+            338.53,
+            294.42
+          ],
+          "packedSole": 480.43,
+          "bodyBelowChin": 185.58,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            638,
+            627,
+            616
+          ],
+          "sourceSkull": [
+            231,
+            75,
+            446,
+            287
+          ],
+          "sourceFeet": [
+            381.5,
+            536
+          ],
+          "scale": 0.68133445,
+          "translation": [
+            -4,
+            115
+          ],
+          "packedSkull": [
+            153.39,
+            166.1,
+            299.88,
+            310.54
+          ],
+          "packedSole": 480.2,
+          "bodyBelowChin": 169.46,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            638,
+            627,
+            616
+          ],
+          "sourceSkull": [
+            184,
+            77,
+            399,
+            289
+          ],
+          "sourceFeet": [
+            273.5,
+            536
+          ],
+          "scale": 0.68133445,
+          "translation": [
+            70,
+            115
+          ],
+          "packedSkull": [
+            195.37,
+            167.46,
+            341.85,
+            311.91
+          ],
+          "packedSole": 480.2,
+          "bodyBelowChin": 168.09,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "cure_master",
+      "name": "큐어마스터",
+      "selectedStem": "cure_master",
+      "sha256": "897e3527b970bf4371d503fd7f1bdd588e3b113f220be50d8597ccec6deae42e",
+      "bytes": 275484,
+      "portrait": {
+        "x": 257,
+        "y": 208,
+        "size": 250
+      },
+      "sourceSha256": "fed5c58d8a0753e6af7b1657f5206133f31ccba7c8b760f61ed206ed739d5723",
+      "uniformScale": 0.75021689,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            622
+          ],
+          "sourceSkull": [
+            242,
+            133,
+            449,
+            339
+          ],
+          "sourceFeet": [
+            344.5,
+            598
+          ],
+          "scale": 0.75021689,
+          "translation": [
+            -2,
+            31
+          ],
+          "packedSkull": [
+            179.55,
+            130.78,
+            334.85,
+            285.32
+          ],
+          "packedSole": 479.63,
+          "bodyBelowChin": 194.68,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            622
+          ],
+          "sourceSkull": [
+            187,
+            133,
+            394,
+            339
+          ],
+          "sourceFeet": [
+            286.5,
+            597
+          ],
+          "scale": 0.75021689,
+          "translation": [
+            41,
+            32
+          ],
+          "packedSkull": [
+            181.29,
+            131.78,
+            336.59,
+            286.32
+          ],
+          "packedSole": 479.88,
+          "bodyBelowChin": 193.68,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            622,
+            627,
+            632
+          ],
+          "sourceSkull": [
+            228,
+            84,
+            421,
+            285
+          ],
+          "sourceFeet": [
+            335,
+            540
+          ],
+          "scale": 0.75021689,
+          "translation": [
+            5,
+            75
+          ],
+          "packedSkull": [
+            176.05,
+            138.02,
+            320.84,
+            288.81
+          ],
+          "packedSole": 480.12,
+          "bodyBelowChin": 191.19,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            622,
+            627,
+            632
+          ],
+          "sourceSkull": [
+            193,
+            86,
+            386,
+            287
+          ],
+          "sourceFeet": [
+            304.5,
+            540
+          ],
+          "scale": 0.75021689,
+          "translation": [
+            28,
+            75
+          ],
+          "packedSkull": [
+            172.79,
+            139.52,
+            317.58,
+            290.31
+          ],
+          "packedSole": 480.12,
+          "bodyBelowChin": 189.69,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "venom",
+      "name": "베놈",
+      "selectedStem": "venom_idle",
+      "sha256": "071bedcc87f3bd4e34233ee65e42e2cfe9b25a49191f4373be542b7011d93606",
+      "bytes": 284650,
+      "portrait": {
+        "x": 262,
+        "y": 208,
+        "size": 250
+      },
+      "sourceSha256": "55953e0157cc3443dde97d2300396e675c8d774dbd63d3f9a092ca7299a5e2f5",
+      "uniformScale": 0.74511456,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            619
+          ],
+          "sourceSkull": [
+            243,
+            148,
+            457,
+            350
+          ],
+          "sourceFeet": [
+            342.5,
+            615
+          ],
+          "scale": 0.74511456,
+          "translation": [
+            1,
+            22
+          ],
+          "packedSkull": [
+            182.06,
+            132.28,
+            341.52,
+            282.79
+          ],
+          "packedSole": 480.25,
+          "bodyBelowChin": 197.21,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            619
+          ],
+          "sourceSkull": [
+            204,
+            148,
+            418,
+            350
+          ],
+          "sourceFeet": [
+            299,
+            615
+          ],
+          "scale": 0.74511456,
+          "translation": [
+            33,
+            22
+          ],
+          "packedSkull": [
+            185,
+            132.28,
+            344.46,
+            282.79
+          ],
+          "packedSole": 480.25,
+          "bodyBelowChin": 197.21,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            619,
+            627,
+            635
+          ],
+          "sourceSkull": [
+            207,
+            107,
+            407,
+            311
+          ],
+          "sourceFeet": [
+            327.5,
+            561
+          ],
+          "scale": 0.74511456,
+          "translation": [
+            12,
+            62
+          ],
+          "packedSkull": [
+            166.24,
+            141.73,
+            315.26,
+            293.73
+          ],
+          "packedSole": 480.01,
+          "bodyBelowChin": 186.27,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            619,
+            627,
+            635
+          ],
+          "sourceSkull": [
+            243,
+            107,
+            443,
+            311
+          ],
+          "sourceFeet": [
+            311,
+            560
+          ],
+          "scale": 0.74511456,
+          "translation": [
+            24,
+            63
+          ],
+          "packedSkull": [
+            205.06,
+            142.73,
+            354.09,
+            294.73
+          ],
+          "packedSole": 480.26,
+          "bodyBelowChin": 185.27,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "ash",
+      "name": "애쉬",
+      "selectedStem": "ash",
+      "sha256": "090901a0f1f503dbf5ec4a65e309039f01afd94b7b9320e672327623e7dfb1e8",
+      "bytes": 239152,
+      "portrait": {
+        "x": 263,
+        "y": 222,
+        "size": 250
+      },
+      "sourceSha256": "211c1fcb5e2da0afc60e81da60e93e773781beac607ed1ea38f2f91a5c466ebe",
+      "uniformScale": 0.72961609,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            620
+          ],
+          "sourceSkull": [
+            218,
+            123,
+            439,
+            327
+          ],
+          "sourceFeet": [
+            320,
+            578
+          ],
+          "scale": 0.72961609,
+          "translation": [
+            23,
+            58
+          ],
+          "packedSkull": [
+            182.06,
+            147.74,
+            343.3,
+            296.58
+          ],
+          "packedSole": 479.72,
+          "bodyBelowChin": 183.42,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            620
+          ],
+          "sourceSkull": [
+            187,
+            123,
+            408,
+            327
+          ],
+          "sourceFeet": [
+            312.5,
+            579
+          ],
+          "scale": 0.72961609,
+          "translation": [
+            28,
+            58
+          ],
+          "packedSkull": [
+            164.44,
+            147.74,
+            325.68,
+            296.58
+          ],
+          "packedSole": 480.45,
+          "bodyBelowChin": 183.42,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            620,
+            627,
+            634
+          ],
+          "sourceSkull": [
+            215,
+            111,
+            419,
+            308
+          ],
+          "sourceFeet": [
+            297.5,
+            555
+          ],
+          "scale": 0.72961609,
+          "translation": [
+            39,
+            75
+          ],
+          "packedSkull": [
+            195.87,
+            155.99,
+            344.71,
+            299.72
+          ],
+          "packedSole": 479.94,
+          "bodyBelowChin": 180.28,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            620,
+            627,
+            634
+          ],
+          "sourceSkull": [
+            196,
+            110,
+            400,
+            307
+          ],
+          "sourceFeet": [
+            332,
+            555
+          ],
+          "scale": 0.72961609,
+          "translation": [
+            14,
+            75
+          ],
+          "packedSkull": [
+            157,
+            155.26,
+            305.85,
+            298.99
+          ],
+          "packedSole": 479.94,
+          "bodyBelowChin": 181.01,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "antropy",
+      "name": "앤트로피",
+      "selectedStem": "antropy_idle",
+      "sha256": "b88eafca07b51487dd88a960b42f8d8192949ca2aa848a2a423c7c1d0910ef92",
+      "bytes": 213376,
+      "portrait": {
+        "x": 247,
+        "y": 219,
+        "size": 250
+      },
+      "sourceSha256": "809b5dadd82c8bac3d2b3a465954f105049b828d50128b838ce62ee1d3ec2059",
+      "uniformScale": 0.70757866,
+      "frames": [
+        {
+          "direction": "down/front",
+          "sourceRect": [
+            0,
+            0,
+            627,
+            640
+          ],
+          "sourceSkull": [
+            219,
+            155,
+            443,
+            369
+          ],
+          "sourceFeet": [
+            343,
+            630
+          ],
+          "scale": 0.70757866,
+          "translation": [
+            13,
+            34
+          ],
+          "packedSkull": [
+            167.96,
+            143.67,
+            326.46,
+            295.1
+          ],
+          "packedSole": 479.77,
+          "bodyBelowChin": 184.9,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up/back",
+          "sourceRect": [
+            627,
+            0,
+            627,
+            640
+          ],
+          "sourceSkull": [
+            185,
+            155,
+            409,
+            369
+          ],
+          "sourceFeet": [
+            280,
+            630
+          ],
+          "scale": 0.70757866,
+          "translation": [
+            58,
+            34
+          ],
+          "packedSkull": [
+            188.9,
+            143.67,
+            347.4,
+            295.1
+          ],
+          "packedSole": 479.77,
+          "bodyBelowChin": 184.9,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": [
+            0,
+            640,
+            627,
+            614
+          ],
+          "sourceSkull": [
+            228,
+            111,
+            433,
+            317
+          ],
+          "sourceFeet": [
+            357,
+            568
+          ],
+          "scale": 0.70757866,
+          "translation": [
+            3,
+            78
+          ],
+          "packedSkull": [
+            164.33,
+            156.54,
+            309.38,
+            302.3
+          ],
+          "packedSole": 479.9,
+          "bodyBelowChin": 177.7,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": [
+            627,
+            640,
+            627,
+            614
+          ],
+          "sourceSkull": [
+            199,
+            111,
+            404,
+            317
+          ],
+          "sourceFeet": [
+            311,
+            568
+          ],
+          "scale": 0.70757866,
+          "translation": [
+            36,
+            78
+          ],
+          "packedSkull": [
+            176.81,
+            156.54,
+            321.86,
+            302.3
+          ],
+          "packedSole": 479.9,
+          "bodyBelowChin": 177.7,
+          "paintedClipping": 0
+        }
+      ]
+    }
+  ]
+}

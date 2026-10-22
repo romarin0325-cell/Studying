@@ -3,6 +3,20 @@
   "policy": "independently maintained local atlases; build-time authored portrait crops; no runtime pixel processing",
   "assets": [
     {
+      "id": "effects-sol-sweet",
+      "source": "defense_test/assets/merge/effects-sol-sweet.webp",
+      "sha256": "b12c695409fbac3439cbb3ea126618bb6d4db4373a9480b404a25d6a61830054",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "effects-sol-twilight",
+      "source": "defense_test/assets/merge/effects-sol-twilight.webp",
+      "sha256": "3dc2127b0b13d714b05bb3946e7c126a305bbce6f4059f0fba84cf6a3d90f461",
+      "width": 1024,
+      "height": 512
+    },
+    {
       "id": "unit-zeke",
       "source": "defense_test/assets/merge/units/zeke.webp",
       "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
@@ -222,56 +236,56 @@
     {
       "id": "unit-underdog",
       "source": "defense_test/assets/merge/units/underdog.webp",
-      "sha256": "f320d35667f5dcbfc11a1230eb3b18de8c83dc0ded586b0f1520e7ccc5f136eb",
+      "sha256": "fc95c5c763cea99fe8af5e7b8e3d4b9fc61e531a23d890304d71bc546d18bb48",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-toffee_apple",
       "source": "defense_test/assets/merge/units/toffee_apple.webp",
-      "sha256": "25a17f0d9b6eb0623210aca0c952c62a2df84eed9530756fcfe16792d3abf6b2",
+      "sha256": "c841329e1d3ce16053ce88918653750544d1944c410a880d0b9473d58bd51145",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-joker",
       "source": "defense_test/assets/merge/units/joker.webp",
-      "sha256": "3f318634f393939c037f5f0bf2d36dc3f1f31ca490df2c4f5bc256df9dcce22a",
+      "sha256": "fae67c2179bf0b304d171304129ff0152193426f4b61a6b4a922632ab0d5911f",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-sunflower",
       "source": "defense_test/assets/merge/units/sunflower.webp",
-      "sha256": "b3ca62f3ce5c97d331636870cfac235d23ea6ab3e60b11e032daf2433bc5190c",
+      "sha256": "e755a9547b6a719139210b07fc48ca7ab4a834156426ffa8184a6fcf108448a1",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-antropy",
       "source": "defense_test/assets/merge/units/antropy.webp",
-      "sha256": "f446f1ac17baab01f583e81aa86fe7bce5782ed90b3873fe4448f724361932be",
+      "sha256": "b88eafca07b51487dd88a960b42f8d8192949ca2aa848a2a423c7c1d0910ef92",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-cure_master",
       "source": "defense_test/assets/merge/units/cure_master.webp",
-      "sha256": "ec7b418c33ab455883da5270b1a4be9e68c90b59a4b5151088c25243af7278d0",
+      "sha256": "897e3527b970bf4371d503fd7f1bdd588e3b113f220be50d8597ccec6deae42e",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-ash",
       "source": "defense_test/assets/merge/units/ash.webp",
-      "sha256": "da9648d61f49496444abc537d0b079851c87eed66d5df7efe166b50049b886e6",
+      "sha256": "090901a0f1f503dbf5ec4a65e309039f01afd94b7b9320e672327623e7dfb1e8",
       "width": 1024,
       "height": 1024
     },
     {
       "id": "unit-venom",
       "source": "defense_test/assets/merge/units/venom.webp",
-      "sha256": "260baecd7b42045c1f4778ebbfd37a878127be1bd4c55bbc63003a47e7ace465",
+      "sha256": "071bedcc87f3bd4e34233ee65e42e2cfe9b25a49191f4373be542b7011d93606",
       "width": 1024,
       "height": 1024
     },

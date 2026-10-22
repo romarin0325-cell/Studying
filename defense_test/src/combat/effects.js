@@ -1,5 +1,6 @@
 import {HERO,HEROES} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
+import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 const dedicated=hero=>hero==='queen'||ULTIMATE_FRAMES[hero]!==undefined;
 export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field'; // crush is a field ultimate
@@ -87,13 +88,14 @@ export class CombatFX{
   // Big signature art for a field ultimate: dedicated emblem when one exists, else the ultimate frame.
   centerArt(hero,x,y,size,angle,alpha){if(!this.emblem(hero,x,y,size,angle,alpha))this.ultimate(hero,x,y,size,size,angle,alpha);}
   point(uid,fallback){return this.enemies.get(uid)?.point||fallback;}
-  ultimate(hero,x,y,width,height=width,angle=0,alpha=1){const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
+  ultimate(hero,x,y,width,height=width,angle=0,alpha=1){const own=COMPANION_VISUALS[hero];if(own&&this.art.images[own.atlas]){this.atlasStamp(own.atlas,own.frame+4,4,2,x,y,width,height,angle,alpha,'source-over');return;}const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
   atlasStamp(atlas,frame,columns,rows,x,y,width,height=width,angle=0,alpha=1,blend='screen'){
     const ctx=this.ctx,img=this.art.images[atlas];if(!img||alpha<=0)return;
     const w=img.naturalWidth/columns,h=img.naturalHeight/rows;
     ctx.save();ctx.globalAlpha*=alpha;ctx.globalCompositeOperation=blend;ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(img,frame%columns*w,Math.floor(frame/columns)*h,w,h,-width/2,-height/2,width,height);ctx.restore();
   }
   stamp(hero,x,y,size,angle=0,alpha=1,form=null){
+    const own=COMPANION_VISUALS[hero];if(own&&this.art.images[own.atlas]){this.atlasStamp(own.atlas,own.frame,4,2,x,y,size,size,angle,alpha,'source-over');return;}
     const ctx=this.ctx,fx=FX_PROFILES[hero];if(!fx||alpha<=0)return;
     if(fx.atlas&&this.art.images[fx.atlas]){this.atlasStamp(fx.atlas,form==='trauma'?6:fx.frame,fx.columns,fx.rows,x,y,size,size,fx.motion==='halo'?0:angle,alpha);return;}
     const img=this.art.images.effects;
@@ -125,8 +127,8 @@ export class CombatFX{
     if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
     if(e.type==='sunCharge'){this.bloomAt=this.clock;for(const p of e.points||[])this.add({type:'sunCharge',x:p.x+28,y:p.y+21,sunlight:e.sunlight,life:.9,total:.9});}
     if(e.type==='sunSpend'&&e.sunlight>0)this.add({type:'sunSpend',points:(e.points||[]).map(p=>({x:p.x+28,y:p.y+21})),sunlight:e.sunlight,life:1.2,total:1.2});
-    if(e.type==='jokerColor'){this.wheelAt=this.clock;for(const p of e.points||[])this.add({type:'jokerFlip',x:p.x+28,y:p.y+21,color:e.color,life:.7,total:.7});}
-    if(e.type==='reduce')this.add({type:'reduce',x:e.x,y:e.y,hero:e.hero,life:1.1,total:1.1});
+    if(e.type==='jokerColor'){this.companionJoker=e.color;this.wheelAt=this.clock;for(const p of e.points||[])this.add({type:'jokerFlip',x:p.x+28,y:p.y+21,color:e.color,life:.7,total:.7});}
+    if(e.type==='reduce')this.add({...e,life:1.1,total:1.1});
     if(e.type==='armageddonBlast')this.add({type:'armageddon',x:e.x,y:e.y,radius:e.radius||180,life:1.3,total:1.3});
     if(e.type==='skill'&&e.kind==='venomplague')for(const p of e.targets||[])this.add({type:'plagueBloom',x:p.x,y:p.y,life:1.1,total:1.1});
     if(e.type==='ward')this.add({type:'ward',x:e.x,y:e.y,hero:e.hero,life:.7,total:.7});
@@ -135,6 +137,7 @@ export class CombatFX{
     if(e.type==='skill'&&e.kind==='lemonade')for(const p of e.targets||[])this.add({type:'lemonPop',x:p.x,y:p.y,life:1,total:1});
     if(e.type==='bombSet')this.add({...e,life:.6,total:.6});
     if(e.type==='bombBlast')this.add({...e,life:.9,total:.9});
+    if(companionSkillEvents(this,e))return;
     if(e.type==='skill'){
       if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
@@ -236,6 +239,7 @@ export class CombatFX{
   }
   drawSkillField(skill){
     if(!skill||skill.life<=0)return;
+    if(drawCompanionSkill(this,skill))return;
     this.drawCast(skill);
     const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero],age=skill.total-skill.life;
     const t=Math.max(0,Math.min(1,1-skill.life/skill.total)),fade=Math.min(1,t*12)*(1-t),motion=this.reduced?.28:t;
@@ -459,6 +463,7 @@ export class CombatFX{
   drawPersistent(s){
     // Toffee Apple bombs wait on the path as glossy red apples with a lit fuse.
     for(const b of s.bombs||[]){
+      if(drawCompanionBomb(this,b))continue;
       const p=pathPoint(b.progress),ctx=this.ctx,pulse=.5+Math.sin(this.clock*4+b.uid)*.5,x=p.x,y=p.y-12,r=12+pulse*1.5;
       if(this.art.images['effects-applebomb']){
         // Painted toffee-apple bomb: it breathes, its fuse spits sparks, and a ground ring marks where it will go off.
@@ -651,6 +656,7 @@ export class CombatFX{
     const t=Math.max(0,Math.min(1,1-shot.life/shot.total)),to={x:p.x,y:p.y-18},angle=Math.atan2(to.y-shot.from.y,to.x-shot.from.x),size=4+Math.min(5,shot.rank)*.65;
     const arc=['icicles','dragon','planet'].includes(f.motion)?34:f.motion==='leap'?20:7;
     const x=shot.from.x+(to.x-shot.from.x)*t,y=shot.from.y+(to.y-shot.from.y)*t-Math.sin(t*Math.PI)*arc;
+    if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(['zeke','guardian','ancient_dragon','behemoth'].includes(h.id))return;
     if(h.shape==='beam'&&f.motion==='candy'){
       const len=64+shot.rank*4;ctx.save();ctx.translate(x,y);ctx.rotate(angle);
@@ -798,6 +804,7 @@ export class CombatFX{
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
+      if(drawCompanionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(e.type==='reduce'){
         // The reduced ally dissolves into starlight embers that rise toward the gauge at the top.
         const k=easeOut(window01(t,0,.9)),fade=1-window01(t,.6,1),tint=HERO[e.hero]?.color||'#ffd0a0';

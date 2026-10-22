@@ -1171,8 +1171,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 208,
+        "x": 238,
+        "y": 219,
         "size": 250
       }
     },
@@ -1208,8 +1208,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 216,
+        "x": 267,
+        "y": 215,
         "size": 250
       }
     },
@@ -1245,8 +1245,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 272,
-        "y": 228,
+        "x": 266,
+        "y": 220,
         "size": 250
       }
     },
@@ -1282,7 +1282,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 257,
+        "x": 251,
         "y": 208,
         "size": 250
       }
@@ -1319,8 +1319,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 260,
-        "y": 212,
+        "x": 247,
+        "y": 219,
         "size": 250
       }
     },
@@ -1356,8 +1356,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 248,
-        "y": 199,
+        "x": 257,
+        "y": 208,
         "size": 250
       }
     },
@@ -1393,8 +1393,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 241,
-        "y": 210,
+        "x": 263,
+        "y": 222,
         "size": 250
       }
     },
@@ -1430,8 +1430,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 265,
-        "y": 194,
+        "x": 262,
+        "y": 208,
         "size": 250
       }
     },
@@ -1877,6 +1877,8 @@ export const TRANSFORM_ART = {
 };
 
 export const ASSET_PATHS = {
+  "effects-sol-sweet": "./assets/merge/effects-sol-sweet.webp",
+  "effects-sol-twilight": "./assets/merge/effects-sol-twilight.webp",
   "unit-zeke": "./assets/merge/units/zeke.webp",
   "unit-rumi": "./assets/merge/units/rumi.webp",
   "unit-luna": "./assets/merge/units/luna.webp",

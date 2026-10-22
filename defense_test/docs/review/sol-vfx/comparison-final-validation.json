@@ -1,0 +1,487 @@
+{
+  "cases": 15,
+  "errors": [],
+  "externalRequests": [],
+  "peakImpacts": 9,
+  "geometry": {
+    "width": 390,
+    "document": 390,
+    "canvases": [
+      {
+        "width": 366,
+        "height": 396.5
+      },
+      {
+        "width": 366,
+        "height": 396.5
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "attack",
+        "theme": "night",
+        "dense": true,
+        "crowded": false,
+        "reduced": false
+      },
+      "time": 0.3,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "skill",
+        "theme": "night",
+        "dense": true,
+        "crowded": false,
+        "reduced": false
+      },
+      "time": 0.2333333333333333,
+      "draws": [
+        {
+          "facing": "down",
+          "impacts": 8,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 9719.600000000004,
+          "gauge": 40.34999999999998,
+          "sacrificed": 0
+        },
+        {
+          "facing": "down",
+          "impacts": 8,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 9719.600000000004,
+          "gauge": 40.34999999999998,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "attack",
+        "dense": false,
+        "crowded": false,
+        "side": "left",
+        "reduced": false
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "attack",
+        "dense": false,
+        "crowded": false,
+        "side": "right",
+        "reduced": false
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "right",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "right",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "attack",
+        "theme": "bright",
+        "dense": true,
+        "crowded": false,
+        "reduced": true
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "skill",
+        "theme": "bright",
+        "dense": true,
+        "crowded": false,
+        "reduced": true
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "down",
+          "impacts": 8,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 9719.600000000004,
+          "gauge": 40.599999999999966,
+          "sacrificed": 0
+        },
+        {
+          "facing": "down",
+          "impacts": 8,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 9719.600000000004,
+          "gauge": 40.599999999999966,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "attack",
+        "theme": "night",
+        "dense": true,
+        "crowded": true,
+        "reduced": false
+      },
+      "time": 1.9999999999999978,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 9,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 1276.99,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 9,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 1276.99,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "ash",
+        "mode": "attack",
+        "theme": "night",
+        "dense": true,
+        "crowded": false,
+        "reduced": false
+      },
+      "time": 0.3,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "ash",
+        "mode": "skill",
+        "theme": "night",
+        "dense": true,
+        "crowded": false,
+        "reduced": false
+      },
+      "time": 0.2333333333333333,
+      "draws": [
+        {
+          "facing": "down",
+          "impacts": 5,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 7703.887500000001,
+          "gauge": 50.34999999999998,
+          "sacrificed": 1
+        },
+        {
+          "facing": "down",
+          "impacts": 2,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 7703.887500000001,
+          "gauge": 50.34999999999998,
+          "sacrificed": 1
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "ash",
+        "mode": "attack",
+        "dense": false,
+        "crowded": false,
+        "side": "left",
+        "reduced": false
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "ash",
+        "mode": "attack",
+        "dense": false,
+        "crowded": false,
+        "side": "right",
+        "reduced": false
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "right",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "right",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "ash",
+        "mode": "attack",
+        "theme": "bright",
+        "dense": true,
+        "crowded": false,
+        "reduced": true
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 0,
+          "shots": 1,
+          "bombs": 0,
+          "damage": 0,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "ash",
+        "mode": "skill",
+        "theme": "bright",
+        "dense": true,
+        "crowded": false,
+        "reduced": true
+      },
+      "time": 0.39999999999999997,
+      "draws": [
+        {
+          "facing": "down",
+          "impacts": 5,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 7703.887500000001,
+          "gauge": 50.599999999999966,
+          "sacrificed": 1
+        },
+        {
+          "facing": "down",
+          "impacts": 2,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 7703.887500000001,
+          "gauge": 50.599999999999966,
+          "sacrificed": 1
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "ash",
+        "mode": "attack",
+        "theme": "night",
+        "dense": true,
+        "crowded": true,
+        "reduced": false
+      },
+      "time": 1.9999999999999978,
+      "draws": [
+        {
+          "facing": "left",
+          "impacts": 7,
+          "shots": 18,
+          "bombs": 0,
+          "damage": 1207.5921995833346,
+          "gauge": 120,
+          "sacrificed": 0
+        },
+        {
+          "facing": "left",
+          "impacts": 7,
+          "shots": 18,
+          "bombs": 0,
+          "damage": 1207.5921995833346,
+          "gauge": 120,
+          "sacrificed": 0
+        }
+      ]
+    },
+    {
+      "config": {
+        "hero": "underdog",
+        "mode": "skill",
+        "crowded": false,
+        "reduced": false,
+        "theme": "night"
+      },
+      "time": 0.2333333333333333,
+      "draws": [
+        {
+          "facing": "down",
+          "impacts": 8,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 9719.600000000004,
+          "gauge": 40.34999999999998,
+          "sacrificed": 0
+        },
+        {
+          "facing": "down",
+          "impacts": 8,
+          "shots": 0,
+          "bombs": 0,
+          "damage": 9719.600000000004,
+          "gauge": 40.34999999999998,
+          "sacrificed": 0
+        }
+      ]
+    }
+  ],
+  "limits": "Offline desktop Chromium emulation, not physical Android/iOS, thermal or long-duration certification."
+}
