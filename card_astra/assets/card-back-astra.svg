@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 500">
+<defs><linearGradient id="night" x2=".8" y2="1"><stop stop-color="#294d64"/><stop offset="1" stop-color="#0b202f"/></linearGradient><radialGradient id="light"><stop stop-color="#a9dcf1" stop-opacity=".12"/><stop offset="1" stop-color="#a9dcf1" stop-opacity="0"/></radialGradient></defs>
+<rect width="300" height="500" rx="16" fill="url(#night)"/><rect x="9" y="9" width="282" height="482" rx="10" fill="none" stroke="#b8d8e1" stroke-opacity=".3"/>
+<circle cx="150" cy="243" r="140" fill="url(#light)"/>
+<g fill="none" stroke="#b4dce7"><circle cx="150" cy="243" r="94" opacity=".25"/><circle cx="150" cy="243" r="72" opacity=".16"/><ellipse cx="150" cy="243" rx="110" ry="36" transform="rotate(-38 150 243)" opacity=".45"/>
+<path d="M150 149v15m0 158v15M56 243h15m158 0h15M150 194l12 37 37 12-37 12-12 37-12-37-37-12 37-12Z" stroke-width="1.5" opacity=".85"/>
+<path d="M35 55h38m154 0h38M35 445h38m154 0h38M150 40v23m-5-12h10" opacity=".45"/></g>
+<g fill="#d5d9bd"><circle cx="71" cy="296" r="3"/><circle cx="217" cy="184" r="2.5"/><circle cx="102" cy="186" r="1.5"/><circle cx="197" cy="303" r="1.5"/></g>
+<text x="150" y="414" fill="#b8d8e1" opacity=".65" font-family="Georgia,serif" font-size="10" letter-spacing="3" text-anchor="middle">DREAMWEAVER</text></svg>

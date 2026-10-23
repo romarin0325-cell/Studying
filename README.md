@@ -5,6 +5,7 @@
 | 게임 | 문서 시작점 | 활성 실행 소스 |
 | --- | --- | --- |
 | 루미의 별빛 원정 · Defense | [defense/doc](defense/doc/README.md) | `defense/merge/` |
+| DREAMWEAVER · Astra | [card_astra](card_astra/README.md) | 규칙 `card/game/`, 새 화면 `card_astra/src/` |
 | DREAMWEAVER · Card | [card/doc](card/doc/README.md) | 규칙 `card/game/`, 화면 `card/src/` |
 | 별의 잔향 · ASTRAL BLOOM · Shooter | [shooter/doc](shooter/doc/README.md) | `shooter/` |
 | ASTRA: NOCTURNE · Survivor | [survivor/doc](survivor/doc/README.md) | `survivor/src/` |

@@ -21,6 +21,19 @@ function games(plan) {
   return new Set(plan.steps.map(step => step.game));
 }
 
+test('Astra edition builds before its focused browser check and never selects unrelated games', () => {
+  const plan = createPlan(changes('card_astra/src/edition.js', 'card_astra/src/edition.css', 'card_astra/tests/smoke.mjs'));
+  assert.deepEqual([...games(plan)], ['card']);
+  assert.ok(ids(plan).indexOf('card:astra:build') < ids(plan).indexOf('card:astra:smoke'));
+  assert.deepEqual(plan.browsers, ['chromium']);
+  assert.equal(plan.steps.filter(step => step.args.includes('card_astra/tests/smoke.mjs') && !step.args.includes('--check')).length, 1);
+  assert.deepEqual(plan.warnings, []);
+  const removed = createPlan([{status:'D', paths:['card_deepseek/build.mjs']}, {status:'D', paths:['card_deepseek/dist/DREAMWEAVER-DeepSeek.html']}]);
+  assert.deepEqual(removed.steps, []);
+  assert.deepEqual(removed.warnings, []);
+  assert.deepEqual(createPlan(changes('card_astra/README.md')).steps, []);
+});
+
 test('Star Garden is an isolated target with one build and no existing Defense commands', () => {
   const plan = createPlan(changes('defense_test/src/content.js', 'defense_test/src/app.js', 'defense_test/src/combat/engine.js', 'defense_test/dist/StarGardenDefense.html', 'scripts/verify_plan.js'));
   assert.deepEqual(plan.blocked, []);
