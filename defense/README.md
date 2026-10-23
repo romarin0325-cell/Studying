@@ -1,70 +1,56 @@
-# 루미의 별빛 원정 · ASTRA
+# 드림위버: 별빛 정원 — DREAMWEAVER 외전 디펜스
 
-30명의 동료로 만드는 세로 모바일 5×5 합성 디펜스. 동료 6명과 유물 최대 3개를 골라 출발하고,
-소환·드래그 합성·공유 별빛 필살기·매 물결 축복으로 12물결을 막는다.
-활성 코드는 `merge/`다. PR #546 직전 게임은 `../defense_legacy/`에 그대로 보존되어 있다.
+동료 39명과 보스 9종이 나오는 수집/성장 디펜스 게임입니다. 저장소의 정식 Defense이며(`defense_test/`에서 승격, 옛 Hero Core Defense는 삭제), 데이터·에셋·폰트·전투 코드는 모두 이 폴더에 있습니다. 현재 배포·압축·원본 보존 안내는 [단일 HTML 빌드](docs/SINGLE_HTML_OPTIMIZATION.md), 작업 규칙은 [AGENTS.md](AGENTS.md)를 봅니다.
 
 ## 바로 실행
 
-`npm run serve:defense` → http://127.0.0.1:4174/
+- `dist/StarGardenDefense.html`(일반판) 또는 `dist/StarGardenDefenseBright.html`(Bright)를 브라우저로 엽니다. 그림·BGM·폰트·게임 코드가 포함된 오프라인 단일 파일입니다.
+- 초기 동료는 별똥별소년·눈토끼·밤토끼·세이렌·명탐정 각 1명이며 항상 5명을 편성합니다.
+- 새 전투는 그중 랜덤 3명으로 시작합니다. 위치 이동·교환·합성은 드래그로만 하며, 탭은 동료 정보를 표시합니다. 별빛 기본 최대치는 120이고, 별이슬 샘 레벨마다 1씩 늘어납니다.
+- 하단 메뉴: 홈 / 동료 / 모험 / 소환 / 파견.
+- 홈에서 파트너와 대화하고, 인사·선물·별똥별(방치 보상)·꿈의 온실을 합니다. 동료 메뉴에서 성장·중복 강화·유물 장착을 합니다.
+- 전투 자동 보조는 처음에 켜져 있습니다. 소환·합성·훈련·보스 스킬을 보조하며 직접 배치, 합성, 타깃 우선순위와 스킬을 조작할 수 있습니다. 전투는 일시정지·2배속·저장 후 귀환·중도 정산을 지원합니다.
+- 주간·월간 도전은 쉬움이 메인 3스테이지, 어려움이 18, 심연이 36에서 열립니다. 라인업은 메인에서 만난 보스만 씁니다. 만난 순서로 최대 9종이고, 이번 주 스테이지는 주 번호를 만난 수로 나눈 나머지에 1을 더한 값입니다. 파견 슬롯은 9·18·27·36스테이지 클리어에서 열립니다.
+- 주간 입장은 주 1회입니다. 월간 보스전은 무제한 도전으로 최고 기록을 갱신하고, 그 기록의 보상을 월 1회 직접 확정합니다. 저장된 동일 원정은 이어갈 수 있습니다.
+- 설정에서 JSON 백업을 저장하고 가져올 수 있습니다. 파일을 다른 기기나 다른 브라우저로 옮길 때 백업도 옮깁니다.
 
-한 파일 배포본은 `dist-local/HeroCoreDefense.html`이다. 기존 경로 호환을 위해 파일명을 유지하며,
-게임 표제와 브라우저 제목은 **루미의 별빛 원정 · ASTRA**다.
-`npm run build:defense-local`이 코드·스타일·43개 이미지를 내장한다.
-개발용 index.html은 ES module이므로 서버로 연다.
+## 개발
 
-## 이번 원정의 규칙
-
-- 초기 동료 세 명과 이후 소환은 편성한 6명 중 매번 독립적인 1/6 무작위 추출이다. 같은 동료가 연속으로 나올 수 있다.
-- 초기 배치와 별도로 처음 세 번은 무료 소환. 이후 10G부터 유료 소환할 때마다 2G씩 계속 증가하며 상한은 없다. 시작 별빛은 90이다.
-- 동료를 **탭하면 정보**, **드래그하면 이동·교환·합성**한다. 탭 두 번으로는 배치를 바꾸지 않는다.
-- 같은 동료·같은 등급을 겹치면 성급이 오른다. 루미는 같은 성급의 모든 동료와 합성한다.
-- 30명은 사거리·부채꼴·관통·도탄·십자·자기 칸 충격·장판·인접 지원이 다르다. 혹한의마녀의 서리 빙결, 하모니어스의 종류 수 기반 지원, 아우로라의 반사·피해 기록이 추가됐다.
-- 여섯 필살기는 별빛 하나를 공유한다. 배치된 동료의 필살기만 쓸 수 있다.
-- 이자와 물결 상점은 없다. 둠의 합성 환급, 여왕의 성장 배당, 머쉬룸킹의 자리 수확으로 경제를 선택한다.
-- 매 물결 뒤 **축복 6종 중 3개**가 나타나고 하나를 고른다. 12물결 뒤에도 선택하고 승리한다.
-- 출발 전 **유물 24개(일반 10 / 레어 8 / 에픽 6)** 중 최대 3개. 모두 처음부터 사용 가능하다.
-- 동행 강화는 해당 동료의 모든 배치 개체에 적용된다. 지원·경제 동료는 주 역할 수치도 강화된다.
-
-루미의 소환 세계이므로 원작 설정의 강함 순서보다 Defense 안의 역할 분배와 재미가 우선이다.
-
-## 모바일과 저장
-
-전투는 화면 높이에 맞춰 배치된다. 편성 제목·동료 미리보기·하단 확정 버튼은 고정하고 목록만 스크롤한다.
-동행 강화 후 스크롤과 선택 버튼을 유지한다. 초상화는 원본 crop 해상도로 준비한다.
-홈·전투 상단의 전체화면 버튼으로 진입/복귀한다. 미지원 브라우저에서는 안내를 제공한다.
-배치한 동료의 정보에는 성급·강화·인접 지원·유물·현재 버프가 반영된 타격과 실제 공격 주기를 표시한다.
-
-프로필·기록은 기존 `astra.confluence.*` 키를 보존한다.
-진행 데이터는 규칙 변경으로 VERSION 2이며, 이전 VERSION 1의 진행 중 전투는 홈 안내 후 새로 시작한다.
-이전 원정이 자동 변환된다고 가정하지 않는다. 저장이 차단되면 경고와 메모리 동작을 제공한다.
-
-## 설계·아트
-
-- [게임 진행·기능 의도·밸런스·전체 동료 능력 문서 시작점](doc/README.md)
-- [소스 구조와 수정 위치](doc/SOURCE_DESIGN.md)
-- [30명·24유물·6축복·7지역·보스의 현재 밸런스](doc/BALANCE.md)
-- [동료 30명·트라우마 변신·보스 9종 능력과 컨셉](doc/CHARACTERS.md)
-- [초기 역할·밸런스 설계 배경](doc/BALANCE_DESIGN.md)
-- [이번 추가 에셋과 생성 기록](doc/ART_ASSETS.md)
-- [기존 캐릭터 아트 계약](ART_DIRECTION.md)
-- [방향도 제작 지침](docs/CONFLUENCE_ART_PLAYBOOK.md)
-- [두개부·체형 프로필](docs/art/HEAD_PROFILE.json)
-- [해부학 기준점과 원본 해시](docs/art/ANATOMICAL_LANDMARKS.json)
-- [혹한의마녀·하모니어스·아우로라 통합·아트 검수](docs/art/trio/README.md)
-
-## 검증
+저장소 루트의 잠긴 의존성을 설치한 뒤 실행합니다.
 
 ```powershell
+npm ci
 npm run verify:plan
 npm run verify
-npm run verify -- --only defense
+node defense/scripts/serve.mjs
 ```
 
-루트 verify는 Defense를 자동 실행하지 않는다. 전용 `--only defense`가 scoped diff에 필요한 검사를 선택한다.
-브라우저 검사는 네 세로 화면, 드래그 전용 합성, 유물/축복, 편성/강화 스크롤, 21종 이펙트,
-25동료 전장 부하를 다룬다. 한 파일 검사는 추가 네트워크 요청을 전부 차단한 상태에서 실행한다.
-전체 밸런스·경험·복원력 검사는 사용자가 전체 Defense 검증을 요청한 경우에만 실행한다.
+단위·계약 테스트는 `npm run test:defense`, 오프라인 브라우저 검증은 `npm run test:defense:browser`, 빌드는 `npm run build:defense`입니다.
 
-기술 검사는 재미나 실제 휴대전화 품질의 인증이 아니다.
-실제 Android/iPhone의 터치·메모리·발열·주소창 변화와 장기 밸런스는 별도 확인 대상이다.
+빌드 서버: http://127.0.0.1:4178/ . 폴더의 원본 `index.html`은 빌드 템플릿이므로 완성된 HTML로 실행합니다.
+
+루트 검증(`npm run verify`)은 이 게임의 관련 계약·브라우저 검증만 선택하고 다른 게임의 런타임 검증을 호출하지 않습니다. 캐릭터·유물·보스·그림 영역의 정의는 `src/data.js`, 원본 그림은 `assets/merge`와 `assets/moonlit`, 폰트와 SIL OFL 라이선스는 `assets/Jua-Regular.ttf`와 `assets/Jua-OFL.txt`에 있습니다. 빌드·보고서·테스트에서 다른 게임 폴더를 읽지 않습니다.
+
+선택기는 변경한 게임의 필요한 검사와 빌드만 수행합니다. 직접 빌드할 때는 `node defense/scripts/build.mjs` 한 번으로 일반판과 Bright를 함께 생성합니다. 이미 빌드했다면 같은 입력을 다시 빌드하지 않습니다. CI는 정식 두 파일과 현재 입력을 비교합니다. `--solo`, `--compat`, `--web`, `--unlocked` 테스트 출력은 CI에서도 생성합니다. 명시적 `--check`는 지정한 출력의 비교 검사입니다.
+
+이미지나 압축 설정을 바꿀 때만 먼저 `node defense/scripts/optimize-images.mjs`를 실행해 별도 압축본과 경로·용도 목록을 갱신합니다. 원본 그림은 보존합니다. `build.mjs`는 정적 압축본과 `assets/optimized/ui/`의 초상화·전신·유물 아이콘·앨범 썸네일을 검증해 읽고 HTML과 `test-results/build-size-*.json`을 출력합니다. 일반 코드를 수정할 때 압축 팩을 다시 생성하지 않습니다. UI 자르기 좌표나 UI 프로필만 바꾸면 `node defense/scripts/optimize-images.mjs --derived-only`를 실행합니다.
+
+자동화에서 `node defense/scripts/build.mjs --solo --outdir <임시폴더>`처럼 출력 위치를 격리할 수 있습니다. `node --test defense/tests/build.test.mjs`는 빈 출력 폴더의 CI 테스트 빌드, 일반/Bright 비교 검사, 이미지 재인코딩 금지를 확인합니다.
+
+원본 수치·데이터·그림이 실제로 바뀔 때만 해당 `generated-reports.mjs` 보고서를 갱신합니다. 배포 압축만 바뀌는 작업에 밸런스 보고서 재생성을 요구하지 않습니다.
+
+| 작업 | 소스/기록 |
+| --- | --- |
+| 규칙·캐릭터·유물 | `src/content.js`, `src/data.js`, `src/combat/engine.js` |
+| 화면·테마 | `src/app.js`, `src/style.css`, `src/theme-bright.css`, `scripts/theme-bright.mjs` |
+| 원본·압축본 경로/용도/해시 | [ASSET_OPTIMIZATION.json](docs/ASSET_OPTIMIZATION.json) |
+| 압축 설정·대상·UI 자르기/사용처 | `scripts/image-policy.mjs`, `scripts/optimize-images.mjs` |
+| 내장/preload 대상 | `src/asset-policy.js` |
+| 단일 HTML·용량 보고서 | `scripts/build.mjs` |
+| 메모리얼 선택/스토리 | `src/memorial-media.js`, `src/memorial.js` |
+
+## 문서
+
+[docs/README.md](docs/README.md)가 색인입니다. 지금 수치는 [CURRENT_VALUES.md](docs/CURRENT_VALUES.md), 상태 효과 규칙은 [STATUS_RULES.md](docs/STATUS_RULES.md), 에셋 제작 절차는 [ASSET_PIPELINE.md](docs/ASSET_PIPELINE.md), 빌드·압축 규칙은 [SINGLE_HTML_OPTIMIZATION.md](docs/SINGLE_HTML_OPTIMIZATION.md)에 있습니다. 구현 전 기획은 `docs/plans/`, 과거 설계·측정 기록은 `docs/archive/`입니다. 수치 재생성: `node defense/scripts/analyze.mjs`(밸런스 스냅샷), `node defense/scripts/simulate.mjs`(기여도 시뮬레이션).
+
+수치 조정의 출발점은 `src/data.js`의 캐릭터·유물·보스 정의, `src/content.js`의 `TUNING`과 스테이지 구성, `src/economy.js`, `src/combat/engine.js`의 `wavePlan`입니다. 저장 키는 `astra.star-garden.test.v1`입니다. 서버가 없는 테스트라 기간과 파견은 기기 시계를 사용하며, 실제 단말 성능과 장기 잔존율은 별도 플레이테스트 대상입니다.

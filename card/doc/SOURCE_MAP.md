@@ -2,7 +2,7 @@
 
 [문서 시작점](README.md) · [상세 구조 지도](../card_game_structure.md) · [코딩 계약](../CODING_GUIDE.md)
 
-기준: `7635238`. 활성 규칙은 `card/game/`, DREAMWEAVER 화면은 `card/src/`다. `card_legacy/`와 `dist/`를 수정 원본으로 쓰지 않는다.
+기준: `7635238`. 활성 규칙은 `card/game/`, DREAMWEAVER 화면은 `card/src/`다. `dist/`를 수정 원본으로 쓰지 않는다.
 
 ## 실행 경로
 

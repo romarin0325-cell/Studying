@@ -157,7 +157,7 @@ function parseArgs(argv) {
     throw new Error('Unknown game: ' + options.onlyGame);
   }
   if (options.full && !options.onlyGame) {
-    throw new Error('--full requires --game <card|shooter|defense>.');
+    throw new Error('--full requires --game <card|shooter>.');
   }
   return options;
 }

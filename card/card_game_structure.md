@@ -1,6 +1,6 @@
 # Card Game Structure Map
 
-활성 Card는 DREAMWEAVER입니다. 규칙은 `card/game/`에 두고, 세로 모바일 화면은 `card/src/`가 `RPG`를 훅합니다. `card_legacy/`는 승격 시점 스냅샷이며 실행·수정 대상이 아닙니다.
+활성 Card는 DREAMWEAVER입니다. 규칙은 `card/game/`에 두고, 세로 모바일 화면은 `card/src/`가 `RPG`를 훅합니다.
 
 시각 자료는 [card_game_structure_visual.html](./card_game_structure_visual.html)입니다.
 

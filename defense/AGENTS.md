@@ -1,13 +1,65 @@
-# Defense work
+# Star Garden (defense/) 작업 규칙
 
-- For character, portrait or attack-pose edits, read [ART_DIRECTION.md](ART_DIRECTION.md)
-  and preserve the approved cast's identity, shading and body proportions.
-- Placement spots must use identical neutral markers. Do not put role tips,
-  optimal-hero labels, role colors or reward/drawback descriptions on spots.
-  Internal design metadata is for authoring/testing. Players discover placement
-  tradeoffs; only actual attack range/shape and aura connections are visualized.
-- Keep targeting, collisions and previews on the shared logical attack geometry.
-- Preserve failed/hung-image fallbacks and older Safari API fallbacks.
-- Defense verification follows the common minimal verification policy. When files
-  under `defense/` change, the verifier selects only directly relevant checks or
-  builds. Full balance, experience, and resilience suites are manual.
+상위 `AGENTS.md`의 기능·범위별 검증 원칙을 따른다. 이 폴더의 규칙은 두 부분이다: 사용자가 반복해 지적한 작업 지침(아래 "작업 지침"), 그리고 빌드·에셋 배포 규칙(그 뒤 "빌드와 에셋 배포").
+
+## 작업 지침
+사용자가 여러 번 반복해서 지적한 내용을 정리한 규칙이다. 지시를 받으면 먼저 여기에 비추어 본다.
+
+### 목적 우선
+- 문자 그대로의 지시나 최소 수정이 아니라 지시의 목적을 최대로 달성하는 방법을 찾는다. 기존 구조·에셋 재활용이 목적에 맞지 않으면 새로 만든다(에셋 생성 도구와 다른 AI도 쓸 수 있다).
+- 기준은 블루아카이브·스텔라소라 같은 상용 수집형 게임과 상용 방치형 게임이다. 결과물이 그 수준으로 보이는지 스스로 묻고, 아니면 끝난 것이 아니다.
+- 한 곳의 문제를 고치다 다른 곳을 겹치거나 가리게 만들지 않는다. 고친 뒤 화면 전체를 다시 본다.
+
+### UI
+- 모바일 세로(390×844 전체화면)가 기준이다. 바꾼 화면은 그 크기로 캡처해 확인한다. 메인 메뉴는 위쪽, 전투 화면은 아래쪽에 여백을 둔다.
+- 기본 화면은 한눈에 들어오는 정보만 보여 준다. 자세한 내용은 펼치거나 눌러서 본다.
+- 스스로 알 수 있는 정보에 상자나 설명을 붙이지 않는다. 주요 버튼과 기능을 스크롤 아래로 밀지 않는다.
+- 불필요한 화면 흔들림, 재생성, 레이아웃 이동을 만들지 않는다. 글자 수나 숫자 자릿수가 바뀌어도 줄과 칸이 움직이지 않아야 한다. 길어진 글은 잘라 내지 말고 접히게 한다.
+- 수집·호감도·학습 보상처럼 오래 걸려 얻는 보상은 그 무게에 맞는 연출과 감상 방법을 준다.
+
+### 문구
+- 설명은 현재 수치만 보여 주고, 강화로 바뀌는 숫자는 색으로 구분한다. "강화로 오릅니다", "상한이 없습니다" 같은 일반 규칙 문장은 쓰지 않고 예외만 적는다.
+- 조건부 효과는 "강화" 상태 표시와 지금 적용되는 숫자로 보여 준다. 설명을 읽은 플레이어의 추론과 실제 동작이 모드마다 같아야 한다.
+- 한 단어로 충분한 라벨은 한 단어로 쓴다. 캐릭터 대사는 각자의 말투를 지킨다(공용 대사를 돌려쓰지 않는다).
+
+### 밸런스
+- 상식적인 대표 상황과 유효 조합으로 정적 분석을 먼저 하고, 그 상황을 시뮬레이터에 넣어 비교한다. 모든 상황을 재는 시뮬레이터는 없다.
+- 영웅 예산은 C 1 / R 1.1 / SR 1.25 / UR 1.5, 유물 예산은 C 1.0 / R 1.2 / SR 1.45 / UR 1.8(조건 가중치 적용)이다. 필살기는 배율이 아니라 실제 피해와 효과(별빛 100당 가치)로 비교한다.
+- 범용 유물은 수수하지만 안전하게, 특화 유물은 빌드를 바꾸고 재미있게 한다. 시너지로 생기는 새 조합은 환영하지만, 별빛·골드·소환이 스스로를 불리는 순환은 만들지 않는다(필살기 → 별빛, 합성 → 별빛, 소환 → 합성 경로를 항상 계산한다).
+- 조건부 필살기는 조건이 맞으면 무조건부보다 확실히 좋아야 하고, 어떤 필살기도 다른 필살기의 완전한 하위호환이 되지 않게 한다. 예외의 예외는 만들지 않는다.
+- 캐릭터 밸런스 변경은 사용자가 의도와 수치를 검증한 뒤 지시한다. 지시가 없으면 제안서로만 낸다.
+
+### 에셋 일관성 (새 캐릭터를 만들기 전에 먼저 분석한다)
+- 지시를 기다리지 않고 원화와 기존 캐스트를 보고 성별 체형(여성형·남성형·중성), 키 그룹, 머리 상자 규칙을 스스로 정한 뒤 만든다. 이 분석 없이 생성하지 않는다.
+- 체형은 같은 성별형의 승인된 SD를 마스터로 준다. 여성형은 다리가 가늘고 붙어 서며 손발이 작고, 남성형(눈토끼·지크·언더독 등)은 다리가 굵고 보폭이 넓다. 다른 체형의 마스터를 쓰면 결과가 어긋난다.
+- 머리 크기는 얼굴과 두개골이다. 모자, 뿔, 꽃, 덩굴, 머리 장식, 머리카락의 부피는 상자에 넣지 않는다. 상자를 잡은 뒤 반드시 기존 캐스트 옆에 1:1로 놓고 얼굴 크기를 눈으로 비교한다(숫자가 범위 안이어도).
+- 원화의 인상은 형용사로만 옮기지 않는다. 눈 모양·동공·표정처럼 눈에 보이는 특징으로 풀어 쓰고 얼굴 확대 참조를 함께 준다.
+
+### 메모리얼 일러스트
+- 신규 8명(언더독·토피애플·조커·해바라기·앤트로피·큐어마스터·애쉬·베놈)의 메모리얼은 사용자 결정(2026-10-20)으로 이전 나노바나나 버전이 채택본이다. 장면 연출형 재제작본은 되돌렸다.
+- 메모리얼을 다시 만들기 전에 사용자에게 방향(원화 중심 대 장면 연출)을 확인한다. 후보는 기존 채택본과 같은 크기로 나란히 놓고 정체성과 완성도를 따로 평가해 기록한 뒤 일괄 교체 전에 한두 장을 먼저 보여 준다. 절차는 docs/ASSET_PIPELINE.md 4-5.
+
+### 방향·좌우 검수
+- 유닛 아틀라스의 왼쪽/오른쪽 칸은 눈으로 판단하지 않는다. `scripts/art/check-facing.mjs`로 재고, 게임에서 적을 좌우에 두고 실제 화면을 캡처해 확인한다. 얼굴이 가려진 캐릭터는 특히 눈으로 읽을 수 없다. 사용자가 방향이 반대라고 지적하면 먼저 재현하고, 그림이 맞아 보인다는 이유로 정상이라고 답하지 않는다.
+
+### 도구
+- 수치·규칙을 바꾸면 같은 변경에서 `node defense/scripts/generated-reports.mjs`로 `docs/CURRENT_VALUES.md` 등을 다시 만들고(테스트가 검사한다), 규칙 문서를 고친다. 문서 분류와 순서는 `docs/README.md`를 따른다. 날짜 기록 문서는 맨 위 변경 블록에만 적는다.
+- 코딩·시뮬레이터 같은 반복 작업은 Grok을 적극적으로 쓴다. 판단과 최종 품질은 Claude가 책임진다.
+- 에셋·사운드 제작은 `docs/ASSET_PIPELINE.md`의 절차·합격 기준·도구(`scripts/art`, `scripts/sound`)를 따른다. 캐릭터의 표정·질감·분위기가 먼저이고, 세트와 맞추는 수정은 머리 배율·장식 높이·테두리 같은 기하로 한정한다.
+- Gemini API는 에셋 생성(나노바나나)에만 쓴다. Gemini 4 Argon은 사용자가 그 턴에 허락했을 때만 의견 수렴에 쓴다. API 키는 커밋하지 않는다.
+- 완료하면 PR을 준비 상태로 열고, 필요하면 모든 동료·유물이 열린 로컬 테스트 빌드(`node defense/scripts/build.mjs --unlocked`)를 함께 만든다.
+
+## 빌드와 에셋 배포
+
+2026-10-24 갱신: CI 임시 빌드와 사전 생성 UI 이미지를 포함한 배포 규칙은 다음과 같다.
+
+- 압축 전 `assets/merge`, `moonlit`, `bright`, `library`, `memorial`, `memorial-webp` 파일을 덮어쓰거나 삭제하지 않는다. 제작 PNG가 Git 밖에 있으므로 복구 가능한 보관본이다. 새 그림도 원본이 Git에 없으면 가공 전 파일과 압축본을 모두 보관한다.
+- 배포 압축본은 `assets/optimized/`, 설정·용도는 `scripts/image-policy.mjs`, 실제 경로·해시·해상도·용량·보존 판단은 `docs/ASSET_OPTIMIZATION.json`에서 관리한다. 이전 압축 결과를 재압축하지 않는다.
+- `docs/ASSET_OPTIMIZATION.json`은 배포 입력이다. 일반 문서로 취급해 빌드를 생략하지 않는다. 압축 정책/검증 도구 및 Bright CSS 변환 도구 변경도 해당 게임 빌드를 선택한다.
+- 이미지/압축 설정을 바꿀 때만 `node defense/scripts/optimize-images.mjs`를 실행한다. UI 자르기 좌표·UI 압축 설정만 바꾸면 `--derived-only`로 해당 파생본만 갱신한다. `assets/optimized/ui/`와 같은 매니페스트를 함께 커밋한다. 일반 빌드는 이미지 인코딩이나 누락 파일 자동 복구를 하지 않는다.
+- `node defense/scripts/build.mjs` 한 번으로 일반판과 Bright를 함께 갱신하고 둘 다 커밋한다. `--bright`나 `--unlocked` 출력은 정식 두 파일 갱신을 대신하지 않는다. CI의 자동 비교는 정식 일반/Bright 출력에만 적용한다. `--solo`, `--compat`, `--web`, `--unlocked`는 CI에서도 생성하며, 명시한 `--check`는 해당 출력의 비교 검사로 유지한다.
+- 초상화·전신·유물 아이콘·메모리얼 썸네일은 수동 준비 단계에서 보관한 원본으로부터 만들고 `assets/optimized/ui/`의 고정 경로에 재사용한다. 원본 해시·자르기/그리드 좌표·압축 설정·출력 해시가 맞아야 빌드가 통과한다. 축소 전투용 압축본에서 다시 자르지 않는다. 단일 HTML에는 메모리얼 본편 한 코덱만 넣고 작은 앨범 썸네일을 유지한다.
+- `src/asset-policy.js`의 런타임/빌드 전용 구분을 내장과 preload에 같이 적용한다. 내장 제외 파일의 오프라인 상대 경로 요청을 만들지 않는다.
+- 배포 압축만 바뀌면 밸런스·원본 provenance 보고서를 재생성하지 않는다. 원본 데이터나 그림이 바뀌었을 때만 해당 보고서를 갱신한다. 현재 안내는 `docs/SINGLE_HTML_OPTIMIZATION.md`; 과거 측정은 날짜가 있는 기록으로 유지한다.
+- 변경 이미지와 두 테마를 Chromium 390×844에서 짧게 확인한다. 다른 게임·여러 브라우저·장시간 전투는 기본 실행하지 않는다. 파일 크기, 실제 FPS, 화질 승인을 구별해 보고한다.
+- 작업 전에 여유 공간을 확인한다. 기존 worktree를 우선 사용하고, 디스크가 부족하면 필요한 게임만 sparse checkout하고 의존성을 재사용한다. 불필요한 저장소/node_modules/검토 자료 복제를 피한다. 검토 캡처는 고정 `test-results/` 경로를 재사용한다. UI 배포본은 `assets/optimized/ui/` 한 곳에 보관하고 날짜별 캐시를 추가하지 않는다. 자동 빌드 검사 출력은 `--outdir`로 임시 폴더에 격리하고 검사 후 정리한다. 기존 자료는 사용자 지시에 따라 관리하며 무단 삭제하지 않는다.

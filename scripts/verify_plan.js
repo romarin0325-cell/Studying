@@ -2,24 +2,8 @@
 
 const path = require('path');
 
-const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'idle', 'survivor', 'defense_test', 'defense']);
-const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'idle', 'survivor', 'defense_test']);
-const DEFENSE_TOOLS = new Set([
-  'scripts/build_defense_local.mjs', 'scripts/prepare_defense_art.mjs',
-  'scripts/verify_defense.js', 'scripts/verify_defense_confluence.mjs',
-  'scripts/verify_defense_browser.js', 'scripts/verify_defense_experience.js',
-  'scripts/verify_defense_local_bundle.js', 'scripts/verify_defense_resilience.js',
-  'scripts/defense_browser_suite.cjs', 'scripts/serve_defense.js',
-  'scripts/pack_defense_directions.mjs', 'scripts/validate_defense_directions.mjs',
-  'scripts/export_defense_directions.mjs', 'scripts/build_defense_head_review.mjs',
-  'scripts/make_defense_geometry_reference.mjs'
-]);
-const DEFENSE_ART_INPUTS = new Set([
-  'defense/docs/art/HEAD_PROFILE.json', 'defense/docs/art/ANATOMICAL_LANDMARKS.json'
-]);
-const DEFENSE_TEST_REPORTS = new Set([
-  'defense_test/docs/BALANCE_SNAPSHOT.json', 'defense_test/docs/ASSET_PROVENANCE.json'
-]);
+const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'survivor', 'defense']);
+const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'survivor']);
 
 function normalizePath(file) {
   return String(file || '').replace(/\\/g, '/').replace(/^\.\//, '');
@@ -54,9 +38,8 @@ function currentChangePaths(changes) {
 }
 
 function isDocumentation(file) {
-  if (file === 'defense_test/docs/ASSET_OPTIMIZATION.json') return false;
-  if (DEFENSE_ART_INPUTS.has(file)
-    || file === 'survivor/assets/Jua-OFL.txt' || file === 'defense_test/assets/Jua-OFL.txt') return false;
+  if (file === 'defense/docs/ASSET_OPTIMIZATION.json') return false;
+  if (file === 'survivor/assets/Jua-OFL.txt' || file === 'defense/assets/Jua-OFL.txt') return false;
   const lower = file.toLowerCase();
   return (
     lower.endsWith('.md')
@@ -322,108 +305,6 @@ function planShooter(plan, files, currentFiles) {
   }
 }
 
-function planDefense(plan, files, currentFiles) {
-  const defenseFiles = files.filter(file => file.startsWith('defense/'));
-  if (defenseFiles.length === 0) {
-    if (files.some(file => DEFENSE_TOOLS.has(file))) plan.skipped.push('Defense tooling has no changed Defense product file; no game runtime is selected.');
-    return;
-  }
-  const currentSet = new Set(currentFiles);
-  for (const file of files.filter(file => DEFENSE_TOOLS.has(file) && currentSet.has(file))) addNodeCheck(plan, 'defense', file);
-  const productFiles = defenseFiles.filter(file => !isDocumentation(file));
-  const directTests = productFiles.filter(file => (
-    currentSet.has(file) && /^defense\/tests\/.+\.test\.mjs$/.test(file)
-  ));
-  addNodeTest(
-    plan,
-    'defense',
-    'defense:changed-tests',
-    'Run changed Defense tests directly',
-    directTests
-  );
-
-  const sourceFiles = productFiles.filter(file => (
-    !file.startsWith('defense/tests/')
-    && !file.startsWith('defense/dist-local/')
-    && file !== 'defense/AGENTS.md'
-  ));
-  for (const file of sourceFiles.filter(file => (
-    currentSet.has(file) && /\.(?:js|mjs|cjs)$/.test(file)
-  ))) {
-    addNodeCheck(plan, 'defense', file);
-  }
-
-  const mergeTests = [];
-  if (sourceFiles.some(file => /^defense\/merge\/(?:engine|content|main)\.js$/.test(file))) {
-    mergeTests.push('defense/tests/unit/confluence.test.mjs');
-  }
-  if (sourceFiles.some(file => file.startsWith('defense/assets/') || DEFENSE_ART_INPUTS.has(file))) {
-    mergeTests.push('defense/tests/integration/confluence-art.test.mjs');
-  }
-  addNodeTest(
-    plan,
-    'defense',
-    'defense:nearby-regressions',
-    'Run the closest Defense regression tests',
-    mergeTests.filter(file => !directTests.includes(file))
-  );
-
-  if (sourceFiles.length > 0) {
-    if (sourceFiles.some(file => file.startsWith('defense/assets/'))) {
-      addStep(
-        plan,
-        makeStep(
-          'defense:asset-cache',
-          'defense',
-          'Check changed Defense asset preprocessing without forcing regeneration',
-          'npm',
-          ['run', 'prepare:defense-art', '--', '--check'],
-          { needsInstall: true }
-        )
-      );
-    }
-    addStep(
-      plan,
-      makeStep(
-        'defense:build-local',
-        'defense',
-        'Build the changed HeroCoreDefense deployment input once',
-        'npm',
-        ['run', 'build:defense-local'],
-        { needsInstall: true }
-      )
-    );
-  }
-}
-
-function planIdle(plan, files, currentFiles) {
-  const current = new Set(currentFiles);
-  const product = files.filter(file => file.startsWith('idle/') && !isDocumentation(file));
-  const direct = product.filter(file => current.has(file) && /^idle\/tests\/.+\.test\.mjs$/.test(file));
-  const inputs = product.filter(file => /^(?:idle\/src\/|idle\/styles\/|idle\/assets\/|idle\/index\.html$|idle\/package\.json$|idle\/scripts\/(?:build|prepare-thumbnails)\.mjs$)/.test(file));
-
-  // Standalone scripts outside build
-  const standaloneScripts = product.filter(file => current.has(file) && file.startsWith('idle/scripts/') && !inputs.includes(file) && /\.(?:js|mjs|cjs)$/.test(file));
-  for (const file of standaloneScripts) addNodeCheck(plan, 'idle', file);
-
-  const tests = new Set(direct);
-  const add = name => tests.add('idle/tests/' + name + '.test.mjs');
-  if (inputs.some(file => /idle\/src\/(?:core|systems)\//.test(file))) add('core');
-  if (inputs.some(file => /idle\/src\/(?:combat|data\/balance|systems\/expeditions)/.test(file))) add('combat');
-
-  addNodeTest(plan, 'idle', 'idle:contracts-and-regressions', 'Check only mapped Idle contracts and regressions', [...tests]);
-  if (tests.has('idle/tests/contracts.test.mjs')) {
-    const step = plan.steps.find(s => s.id === 'idle:contracts-and-regressions');
-    if (step) step.needsInstall = true;
-  }
-  if (inputs.length) {
-    addStep(plan, makeStep('idle:build', 'idle', 'Build the changed AstralCompanions deployment inputs once', 'node', ['idle/scripts/build.mjs'], { needsInstall: true }));
-  }
-  if (product.some(file => file === 'idle/tests/browser.mjs' || file.startsWith('idle/tests/fixtures/'))) {
-    addBrowserScript(plan, 'idle', 'idle:offline-browser', 'Boot the committed single-file game and exercise changed UI/storage', 'idle/tests/browser.mjs');
-  }
-}
-
 function planSurvivor(plan, files, currentFiles) {
   const product = files.filter(file => file.startsWith('survivor/') && !isDocumentation(file));
   if (!product.length) return;
@@ -456,40 +337,40 @@ function planSurvivor(plan, files, currentFiles) {
   }
 }
 
-function planDefenseTest(plan, files, currentFiles) {
-  const product = files.filter(file => file.startsWith('defense_test/') && !isDocumentation(file));
+function planDefense(plan, files, currentFiles) {
+  const product = files.filter(file => file.startsWith('defense/') && !isDocumentation(file));
   if (!product.length) return;
-  const inputs = product.filter(file => /^defense_test\/(?:src\/|assets\/|index\.html$|package\.json$|docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|local-inputs|image-pack|image-policy|theme-bright)\.mjs$)/.test(file));
+  const inputs = product.filter(file => /^defense\/(?:src\/|assets\/|index\.html$|package\.json$|docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|local-inputs|image-pack|image-policy|theme-bright)\.mjs$)/.test(file));
   const current = new Set(currentFiles);
-  const direct = product.filter(file => current.has(file) && /^defense_test\/tests\/.*\.test\.mjs$/.test(file));
-  const reportScripts = product.some(file => /^defense_test\/scripts\/(?:analyze|report-data|generated-reports)\.mjs$/.test(file));
+  const direct = product.filter(file => current.has(file) && /^defense\/tests\/.*\.test\.mjs$/.test(file));
+  const reportScripts = product.some(file => /^defense\/scripts\/(?:analyze|report-data|generated-reports)\.mjs$/.test(file));
 
   // Standalone scripts outside build
-  const standaloneScripts = product.filter(file => current.has(file) && file.startsWith('defense_test/scripts/') && !inputs.includes(file) && /\.(?:js|mjs|cjs)$/.test(file));
-  for (const file of standaloneScripts) addNodeCheck(plan, 'defense_test', file);
+  const standaloneScripts = product.filter(file => current.has(file) && file.startsWith('defense/scripts/') && !inputs.includes(file) && /\.(?:js|mjs|cjs)$/.test(file));
+  for (const file of standaloneScripts) addNodeCheck(plan, 'defense', file);
 
   const checks = new Set(direct);
-  const add = name => checks.add('defense_test/tests/' + name + '.test.mjs');
+  const add = name => checks.add('defense/tests/' + name + '.test.mjs');
 
-  if (inputs.some(file => /^defense_test\/(?:docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|image-pack|image-policy|local-inputs)\.mjs$|assets\/optimized\/ui\/)/.test(file))) add('build');
+  if (inputs.some(file => /^defense\/(?:docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|image-pack|image-policy|local-inputs)\.mjs$|assets\/optimized\/ui\/)/.test(file))) add('build');
   if (inputs.some(file => file.endsWith('/economy.js'))) add('economy');
   if (inputs.some(file => /(?:src\/battle\.js|src\/combat\/engine\.js)$/.test(file))) add('combat');
-  if (inputs.includes('defense_test/src/profile.js')) add('profile');
-  if (inputs.includes('defense_test/src/monthly.js')) add('monthly');
-  if (inputs.includes('defense_test/src/runtime.js')) add('runtime');
+  if (inputs.includes('defense/src/profile.js')) add('profile');
+  if (inputs.includes('defense/src/monthly.js')) add('monthly');
+  if (inputs.includes('defense/src/runtime.js')) add('runtime');
   if (reportScripts) add('generated-reports');
 
-  addNodeTest(plan, 'defense_test', 'defense_test:contracts-and-regressions', 'Check Star Garden collection, growth, tickets and actual combat regressions', [...checks]);
-  if (checks.has('defense_test/tests/generated-reports.test.mjs') || checks.has('defense_test/tests/assets.test.mjs') || checks.has('defense_test/tests/build.test.mjs')) {
-    const step = plan.steps.find(s => s.id === 'defense_test:contracts-and-regressions');
+  addNodeTest(plan, 'defense', 'defense:contracts-and-regressions', 'Check Star Garden collection, growth, tickets and actual combat regressions', [...checks]);
+  if (checks.has('defense/tests/generated-reports.test.mjs') || checks.has('defense/tests/assets.test.mjs') || checks.has('defense/tests/build.test.mjs')) {
+    const step = plan.steps.find(s => s.id === 'defense:contracts-and-regressions');
     if (step) step.needsInstall = true;
   }
 
   if (inputs.length) {
-    addStep(plan, makeStep('defense_test:build', 'defense_test', 'Build Star Garden from its deployment inputs once', 'node', ['defense_test/scripts/build.mjs'], { needsInstall: true }));
+    addStep(plan, makeStep('defense:build', 'defense', 'Build Star Garden from its deployment inputs once', 'node', ['defense/scripts/build.mjs'], { needsInstall: true }));
   }
-  if (product.includes('defense_test/tests/browser.mjs')) {
-    addBrowserScript(plan, 'defense_test', 'defense_test:offline-browser', 'Exercise the standalone portrait UI, draft and resume offline', 'defense_test/tests/browser.mjs');
+  if (product.includes('defense/tests/browser.mjs')) {
+    addBrowserScript(plan, 'defense', 'defense:offline-browser', 'Exercise the standalone portrait UI, draft and resume offline', 'defense/tests/browser.mjs');
   }
 }
 
@@ -537,9 +418,7 @@ function createPlan(changes, options = {}) {
   }
   if (shouldPlan('shooter')) planShooter(plan, files, currentFiles);
   if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
-  if (shouldPlan('idle')) planIdle(plan, files, currentFiles);
   if (shouldPlan('survivor')) planSurvivor(plan, files, currentFiles);
-  if (shouldPlan('defense_test')) planDefenseTest(plan, files, currentFiles);
 
   for (const game of plan.detectedGames) {
     if (onlyGame && game !== onlyGame) {
@@ -559,9 +438,8 @@ function createPlan(changes, options = {}) {
     ...files.filter(file => file.startsWith('card_deepseek/') && !currentFiles.includes(file)),
     ...files.filter(file => file.startsWith('scripts/verify_card_')),
     ...files.filter(file => file === 'scripts/verify_gemini_api_models.js'),
-    ...files.filter(file => DEFENSE_TOOLS.has(file)),
     ...ordinaryDocs,
-    ...files.filter(file => file.startsWith('defense_legacy/')),
+    ...files.filter(file => file.startsWith('rpg/')),
     '.gitignore',
     '.gitattributes'
   ]);
@@ -616,30 +494,8 @@ function fullPlan(game) {
         { needsInstall: true, browsers: ['chromium'] }
       )
     );
-  } else if (game === 'survivor' || game === 'defense_test') {
+  } else if (game === 'survivor' || game === 'defense') {
     throw new Error('Use the mapped standalone-game checks; a full-suite alias is not defined.');
-  } else if (game === 'idle') {
-    addStep(plan, makeStep('full:idle', 'idle', 'Explicit full Idle validation', 'npm', ['run', 'verify', '--prefix', 'idle'], { needsInstall: true, browsers: ['chromium'] }));
-  } else {
-    const scripts = [
-      'lint:defense',
-      'test:defense',
-      'test:defense:local',
-      'test:defense:browser',
-      'test:defense:experience',
-      'test:defense:resilience'
-    ];
-    for (const script of scripts) {
-      addStep(
-        plan,
-        makeStep('full:defense:' + script, 'defense', 'Run full Defense check: ' + script, 'npm', ['run', script], {
-          needsInstall: true,
-          browsers: script.includes('browser') || script.includes('experience') || script.includes('resilience')
-            ? ['chromium', 'webkit']
-            : []
-        })
-      );
-    }
   }
   plan.needsInstall = true;
   plan.browsers = [...new Set(plan.steps.flatMap(step => step.browsers))].sort();
