@@ -54,6 +54,21 @@ test('Star Garden compression inventory and imported build helpers are deploymen
   }
 });
 
+test('Star Garden build contracts run for preparation inputs and install dependencies even when test-only', () => {
+  for (const file of ['defense_test/scripts/build.mjs', 'defense_test/scripts/image-policy.mjs', 'defense_test/scripts/image-pack.mjs', 'defense_test/docs/ASSET_OPTIMIZATION.json', 'defense_test/assets/optimized/ui/portraits/zeke.webp']) {
+    const plan = createPlan(changes(file));
+    const step = plan.steps.find(s => s.id === 'defense_test:contracts-and-regressions');
+    assert.ok(step.args.includes('defense_test/tests/build.test.mjs'), file);
+    assert.equal(step.needsInstall, true, file);
+    assert.equal(plan.steps.filter(s => s.id === 'defense_test:build').length, 1, file);
+    assert.deepEqual(plan.browsers, [], file);
+    assert.deepEqual([...games(plan)], ['defense_test'], file);
+  }
+  const direct = createPlan(changes('defense_test/tests/build.test.mjs'));
+  assert.equal(direct.steps.find(s => s.args.includes('defense_test/tests/build.test.mjs')).needsInstall, true);
+  assert.ok(!direct.steps.some(s => s.id === 'defense_test:build'));
+});
+
 test('Star Garden docs, test-only and unknown paths keep the smallest safe boundary', () => {
   const docs = createPlan(changes('defense_test/README.md', 'defense_test/docs/UI_ASSET_RESEARCH.md'));
   assert.deepEqual(docs.steps, []);
