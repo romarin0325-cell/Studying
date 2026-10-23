@@ -100,8 +100,11 @@ export function drawCompanionSkill(fx,skill){
     return true;
   }
   if(id==='underdog'){
-    // No conjured sky fist: a short physical strike at the brawler, then grit
-    // racing into the lanes. The actual stun remains visible on allied units.
+    // A short physical strike at the brawler, then grit racing into the lanes. The whole-field hit raises the
+    // stone-burst emblem over the board like every field ultimate. The actual stun remains visible on allied units.
+    const k=RARITY_WEIGHT[HERO[id].rarity]||1,size=400*k;
+    fx.glow('rays','#e0c9a6',360,405,size*1.2*pop,out*.45,age*.4);
+    painted(fx,id,true,360,405,size*(.55+.45*pop),undefined,0,out*.85);
     dustHit(fx,o.x,o.y+18,t,2.2,.95);
     floorArc(fx,o.x,o.y+24,440,t,'#ddc5a5',.7);
     ctx.save();ctx.globalAlpha=out*.58;

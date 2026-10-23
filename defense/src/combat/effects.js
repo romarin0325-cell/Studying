@@ -254,7 +254,7 @@ export class CombatFX{
     const layout=ultimateLayout(skill.kind),ur=isUR(skill.hero);
     const k=ur?1:RARITY_SCALE[h.rarity]||1;
     // Directed ultimates show the caster's emblem before the strike; non-UR casts get a smaller one by rarity.
-    if(dedicated(skill.hero)&&(skill.locked||layout==='target'||layout==='pull')&&(ur||!skill.locked)){const pop=easeBack(window01(age,.04,.38)),a=1-window01(age,.7,1.3),e=ur?300:260*k;this.glow('rays',h.color,skill.origin.x,skill.origin.y-40,e*1.27*pop,a*.6,age*.6);this.ultimate(skill.hero,skill.origin.x,skill.origin.y-44,e*pop,e*pop,0,a*.95);}
+    if(dedicated(skill.hero)&&(skill.locked||layout==='target'||layout==='pull')){const pop=easeBack(window01(age,.04,.38)),a=1-window01(age,.7,1.3),e=ur?300:260*k;this.glow('rays',h.color,skill.origin.x,skill.origin.y-40,e*1.27*pop,a*.6,age*.6);this.ultimate(skill.hero,skill.origin.x,skill.origin.y-44,e*pop,e*pop,0,a*.95);}
     if(skill.locked||skill.kind==='trauma')return;
     if(skill.kind==='bigshow'){this.drawBigShow(skill,age);return;}
     if(ur&&layout!=='support')this.drawStarRain(skill,age);
