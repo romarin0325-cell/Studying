@@ -86,3 +86,7 @@ export const CLOSE_BOND=6;
 export const talkLines=(id,bond=0)=>{const l=PARTNER_LINES[id];return l?bond>=CLOSE_BOND?[...l.talk,l.close]:[...l.talk]:['…'];};
 // The day's greeting alternates between the two by calendar day.
 export const greetLine=(id,day='')=>{const g=PARTNER_LINES[id]?.greet||['…'];let n=0;for(const ch of day)n+=ch.charCodeAt(0);return g[n%g.length];};
+// The first-meeting line on the summon spotlight (a new companion joins). Until a companion has its own line,
+// the first daily greeting stands in.
+export const JOIN_LINES=Object.freeze({});
+export const joinLine=id=>JOIN_LINES[id]||PARTNER_LINES[id]?.greet?.[0]||'…';
