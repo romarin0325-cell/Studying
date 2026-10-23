@@ -38,3 +38,24 @@ export function imageInputs(){
   }
   return inputs;
 }
+
+// Fixed destinations prevent dated cache copies. The recipe is part of the manifest
+// so changes to portraits, relic grid positions or crop sizes invalidate old files.
+export function derivedImageInputs(){
+  const inputs=[];
+  for(const h of HEROES){
+    const source=ASSET_PATHS[h.art.atlas],p=h.art.portrait;
+    if(!p)throw new Error('Missing reviewed portrait frame: '+h.id);
+    inputs.push({id:'portrait:'+h.id,source,profile:'portrait',
+      crop:{left:Math.round(p.x-p.size/2),top:Math.round(p.y-p.size/2),width:p.size,height:p.size},
+      destination:'./assets/optimized/ui/portraits/'+h.id+'.webp',uses:['window.__GARDEN_MEDIA__; collection / party / summon']});
+    inputs.push({id:'figure:'+h.id,source,profile:'figure',crop:{left:0,top:0,width:512,height:512},
+      destination:'./assets/optimized/ui/figures/'+h.id+'.webp',uses:['window.__GARDEN_MEDIA__; home / details / cut-in / results']});
+  }
+  for(const a of ARTIFACTS)inputs.push({id:'relic:'+a.id,source:ASSET_PATHS[a.atlas],profile:'relic',
+    crop:{columns:a.atlas==='relics'?5:2,rows:a.atlas==='relics'?4:2,index:a.icon},
+    destination:'./assets/optimized/ui/relics/'+a.id+'.webp',uses:['window.__GARDEN_MEDIA__; collection / summon / equipment']});
+  for(const h of HEROES)inputs.push({id:'memorialThumb:'+h.id,source:MEMORIAL_WEBP_PATHS[h.id],profile:'memorialThumb',crop:null,
+    destination:'./assets/optimized/ui/memorial-thumbs/'+h.id+'.webp',uses:['window.__MEMORIAL_THUMBS__; album without full-painting decode']});
+  return inputs;
+}

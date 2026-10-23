@@ -3,25 +3,28 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {build,transform} from 'esbuild';
 import sharp from 'sharp';
-import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
+import {HEROES,ARTIFACTS} from '../src/content.js';
 import {gameRoot as game,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
 import {LIBRARY_ART} from '../src/library.js';
 import {brightCss} from './theme-bright.mjs';
 import {MUSIC} from '../src/audio-tracks.js';
 import {RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
-import {BRIGHT_ART,DERIVED_PROFILES} from './image-policy.mjs';
+import {BRIGHT_ART} from './image-policy.mjs';
 import {loadImagePack} from './image-pack.mjs';
 
 const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),unlocked=process.argv.includes('--unlocked'),bright=process.argv.includes('--bright');
 if(unlocked&&(solo||web||compat))throw new Error('--unlocked cannot be combined with --solo, --web or --compat.');
 if(web&&(solo||compat))throw new Error('Choose folder or standalone distribution.');
 if(bright&&(solo||web||compat))throw new Error('--bright combines only with --unlocked.');
-const output=path.join(game,unlocked?'test-results/unlocked':compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
+const outAt=process.argv.indexOf('--outdir');
+if(outAt>=0&&(!process.argv[outAt+1]||process.argv[outAt+1].startsWith('--')))throw new Error('--outdir requires a directory.');
+const output=outAt>=0?path.resolve(process.argv[outAt+1]):path.join(game,unlocked?'test-results/unlocked':compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
 // Every normal release builds both skins from one shared media/JS pass. Explicit
 // --bright and the optional distribution flags retain their single-output mode.
 const themes=!solo&&!web&&!compat&&!bright?[false,true]:[bright];
-const check=process.argv.includes('--check')||process.env.CI==='true';
+const release=!solo&&!web&&!compat&&!unlocked;
+const check=process.argv.includes('--check')||(release&&process.env.CI==='true');
 const mode=web?'web':compat?'compat':'standalone',hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const byteLength=value=>Buffer.byteLength(typeof value==='string'?value:JSON.stringify(value));
 const readText=async file=>(await fs.readFile(file,'utf8')).replace(/\r\n/g,'\n');
@@ -34,20 +37,13 @@ for(const [id,relative] of Object.entries(RUNTIME_ASSET_PATHS)){
   sizes.battle+=bytes.length;assets[id]='data:image/webp;base64,'+bytes.toString('base64');
 }
 for(const h of HEROES){
-  const file=assetFile(ASSET_PATHS[h.art.atlas]),p=h.art.portrait;
-  if(!p)throw new Error('Missing reviewed portrait frame: '+h.id);
-  const crop={left:Math.round(p.x-p.size/2),top:Math.round(p.y-p.size/2),width:p.size,height:p.size};
-  const {width:pw,height:ph,...portraitOptions}=DERIVED_PROFILES.portrait,{width:fw,height:fh,...figureOptions}=DERIVED_PROFILES.figure;
-  const portrait=await sharp(file).extract(crop).resize(pw,ph).webp(portraitOptions).toBuffer();
-  const figure=await sharp(file).extract({left:0,top:0,width:fw,height:fh}).webp(figureOptions).toBuffer();
+  const portrait=pack.readDerived('portrait:'+h.id),figure=pack.readDerived('figure:'+h.id);
   sizes.portraits+=portrait.length;sizes.figures+=figure.length;
   media['portrait:'+h.id]='data:image/webp;base64,'+portrait.toString('base64');
   media['figure:'+h.id]='data:image/webp;base64,'+figure.toString('base64');
 }
 for(const a of ARTIFACTS){
-  const file=assetFile(ASSET_PATHS[a.atlas]),m=await sharp(file).metadata(),columns=a.atlas==='relics'?5:2,rows=a.atlas==='relics'?4:2,w=m.width/columns,h=m.height/rows;
-  const {width,height,...options}=DERIVED_PROFILES.relic;
-  const bytes=await sharp(file).extract({left:a.icon%columns*w,top:Math.floor(a.icon/columns)*h,width:w,height:h}).resize(width,height,{fit:'contain'}).webp(options).toBuffer();
+  const bytes=pack.readDerived('relic:'+a.id);
   sizes.relics+=bytes.length;media['relic:'+a.id]='data:image/webp;base64,'+bytes.toString('base64');
 }
 const expectedIds=HEROES.map(h=>h.id).sort().join(',');
@@ -83,7 +79,7 @@ for(const h of HEROES){
 if(sizes.avif>=2.5*1024*1024||sizes.webp>=4*1024*1024||(!web&&byteLength(memorial)>=(compat?5.5:3)*1024*1024))throw new Error('Memorial aggregate budget exceeded.');
 // Album thumbnails: 240x360 WebP from each memorial painting, so the album never decodes thirty full paintings.
 const memorialThumbs={};let thumbBytes=0;
-for(const h of HEROES){const {width,height,...options}=DERIVED_PROFILES.memorialThumb;const bytes=await sharp(await fs.readFile(assetFile(MEMORIAL_WEBP_PATHS[h.id]))).resize(width,height).webp(options).toBuffer();thumbBytes+=bytes.length;memorialThumbs[h.id]='data:image/webp;base64,'+bytes.toString('base64');}
+for(const h of HEROES){const bytes=pack.readDerived('memorialThumb:'+h.id);thumbBytes+=bytes.length;memorialThumbs[h.id]='data:image/webp;base64,'+bytes.toString('base64');}
 // Star library illustrations: small WebP files embedded in every build (shown only after a constellation is finished).
 const library={};let libraryBytes=0;
 for(const [id,relative] of Object.entries(LIBRARY_ART)){

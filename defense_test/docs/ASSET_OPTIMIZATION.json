@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "pass": "2026-10-23 single-HTML optimization",
-  "policy": "Never overwrite/delete the pre-pass image. Both source and smaller encoding stay in Git; no runtime transcoding or persistent build cache.",
+  "policy": "Preserve every pre-pass source. Commit smaller static encodings and fixed-path UI crops; normal builds validate/read them without encoding or cache repair.",
   "encoder": {
     "sharp": "0.35.4",
     "vips": "8.18.6",
@@ -84,7 +84,9 @@
     "sourceBytes": 20717714,
     "deployableSourceBytes": 19542844,
     "outputBytes": 11880364,
-    "optimizedFiles": 148
+    "optimizedFiles": 148,
+    "derivedFiles": 144,
+    "derivedOutputBytes": 3245812
   },
   "images": [
     {
@@ -5000,6 +5002,3679 @@
         }
       },
       "decision": "Separate smaller encoding; source preserved."
+    }
+  ],
+  "derivedEncoder": {
+    "sharp": "0.35.4",
+    "vips": "8.18.6",
+    "webp": "1.6.0"
+  },
+  "derived": [
+    {
+      "id": "portrait:star_boy",
+      "source": "./assets/merge/units/star_boy.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 123,
+        "top": 104,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/star_boy.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/star_boy.webp",
+        "bytes": 23346,
+        "sha256": "caa13cc2edff8bc66686218270302d2d50d7d9fa92ed03e91168ef2bd334cf34",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:star_boy",
+      "source": "./assets/merge/units/star_boy.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/star_boy.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+      "output": {
+        "path": "./assets/optimized/ui/figures/star_boy.webp",
+        "bytes": 39500,
+        "sha256": "a7e89f5b0f921067beb4e2e0b3cbf8a953940e0ecbe80976c2007ed75db80396",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:snow_rabbit",
+      "source": "./assets/merge/units/snow_rabbit.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 103,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/snow_rabbit.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/snow_rabbit.webp",
+        "bytes": 19236,
+        "sha256": "74b57e9f5d9601325bbb086e5a8b4359188cf463cb3e1359108995c3fa5e5b67",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:snow_rabbit",
+      "source": "./assets/merge/units/snow_rabbit.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/snow_rabbit.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "output": {
+        "path": "./assets/optimized/ui/figures/snow_rabbit.webp",
+        "bytes": 29992,
+        "sha256": "bb5dfdff3c942d8ae2a4e2e8bad9f898c427b0835e2d90ff01864d2f4387151f",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:silver_rabbit",
+      "source": "./assets/merge/units/silver_rabbit.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 124,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/silver_rabbit.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/silver_rabbit.webp",
+        "bytes": 23456,
+        "sha256": "cf5bf76750c73c29b3adb77ff244f027ddf4638e8b9ae51bd56fb12662d6b1a8",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:silver_rabbit",
+      "source": "./assets/merge/units/silver_rabbit.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/silver_rabbit.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "output": {
+        "path": "./assets/optimized/ui/figures/silver_rabbit.webp",
+        "bytes": 43722,
+        "sha256": "0f6491c73e318ef668499ccfb476fadc277bf682f692447ae2d3d690b76de3c7",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:night_rabbit",
+      "source": "./assets/merge/units/night_rabbit.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 96,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/night_rabbit.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/night_rabbit.webp",
+        "bytes": 19858,
+        "sha256": "3dc252570e3a5b869b056cf520963bacabe61e1fda7507ef8678a74bd7b43cdc",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:night_rabbit",
+      "source": "./assets/merge/units/night_rabbit.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/night_rabbit.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "output": {
+        "path": "./assets/optimized/ui/figures/night_rabbit.webp",
+        "bytes": 28636,
+        "sha256": "44cd6ba4291c39ba4cda4268de7cdf26b468a6118bd8dfbbbc1076a49af98fde",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:siren",
+      "source": "./assets/merge/units/siren.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 104,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/siren.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/siren.webp",
+        "bytes": 18680,
+        "sha256": "be6213dbe3ae115d5f68996e1b08e02aae14c96b91f325e9beb58c8b0e92586f",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:siren",
+      "source": "./assets/merge/units/siren.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/siren.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "output": {
+        "path": "./assets/optimized/ui/figures/siren.webp",
+        "bytes": 33854,
+        "sha256": "0dbea278dd65dff5b77963e6c83307b4acf80020a8944be01600585afb2a4951",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:mushroom_king",
+      "source": "./assets/merge/units/mushroom_king.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 138,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/mushroom_king.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/mushroom_king.webp",
+        "bytes": 15004,
+        "sha256": "245321b0d332798228d34c150838787d47a3b678697a8660f84017e3acb68535",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:mushroom_king",
+      "source": "./assets/merge/units/mushroom_king.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/mushroom_king.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "output": {
+        "path": "./assets/optimized/ui/figures/mushroom_king.webp",
+        "bytes": 26126,
+        "sha256": "38457de49c345246e71fd196f01d31a9c95f064ad2bdd47850f7bdf99902f1ee",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:underdog",
+      "source": "./assets/merge/units/underdog.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 113,
+        "top": 94,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/underdog.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "fc95c5c763cea99fe8af5e7b8e3d4b9fc61e531a23d890304d71bc546d18bb48",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/underdog.webp",
+        "bytes": 17994,
+        "sha256": "b366f490fef1ed8035df7d9e217e26011d6f9c4765fb6e5c0eaefa909e448658",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:underdog",
+      "source": "./assets/merge/units/underdog.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/underdog.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "fc95c5c763cea99fe8af5e7b8e3d4b9fc61e531a23d890304d71bc546d18bb48",
+      "output": {
+        "path": "./assets/optimized/ui/figures/underdog.webp",
+        "bytes": 29986,
+        "sha256": "483cc82af1556934673b0a4d0954d5956cf7985221cf9a684e9a97eeb0e65f9f",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:joker",
+      "source": "./assets/merge/units/joker.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 141,
+        "top": 95,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/joker.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "fae67c2179bf0b304d171304129ff0152193426f4b61a6b4a922632ab0d5911f",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/joker.webp",
+        "bytes": 22644,
+        "sha256": "29e7e2e2d9c46f8af33306dda0953ac504753b3c8f73155f7f77891498a0fef6",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:joker",
+      "source": "./assets/merge/units/joker.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/joker.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "fae67c2179bf0b304d171304129ff0152193426f4b61a6b4a922632ab0d5911f",
+      "output": {
+        "path": "./assets/optimized/ui/figures/joker.webp",
+        "bytes": 48688,
+        "sha256": "ec864178b6a5294ea5c2d8aa1897139ab2a2ce8205b9889972ed13a195cebeec",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:sunflower",
+      "source": "./assets/merge/units/sunflower.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 126,
+        "top": 83,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/sunflower.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "e755a9547b6a719139210b07fc48ca7ab4a834156426ffa8184a6fcf108448a1",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/sunflower.webp",
+        "bytes": 24134,
+        "sha256": "123432043ddca122c4d69d10e4bb02ca12276b7240d30b6fa5790f08e3490097",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:sunflower",
+      "source": "./assets/merge/units/sunflower.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/sunflower.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "e755a9547b6a719139210b07fc48ca7ab4a834156426ffa8184a6fcf108448a1",
+      "output": {
+        "path": "./assets/optimized/ui/figures/sunflower.webp",
+        "bytes": 37902,
+        "sha256": "81130a0999e784e843318a720b7afc9d73c739e38483214a453af9279dc969ec",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:great_detective",
+      "source": "./assets/merge/units/great_detective.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 89,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/great_detective.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/great_detective.webp",
+        "bytes": 17866,
+        "sha256": "fd02eb8deefe1566997d525bb5d86c20ab218b54faab83eab30fadc53c8fb0a7",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:great_detective",
+      "source": "./assets/merge/units/great_detective.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/great_detective.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "output": {
+        "path": "./assets/optimized/ui/figures/great_detective.webp",
+        "bytes": 29026,
+        "sha256": "6d214785c7f3b6fd01bd5d31610608aa8a1e591fe10ced3731f1e537a66dd963",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:guardian",
+      "source": "./assets/merge/units/guardian.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 85,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/guardian.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/guardian.webp",
+        "bytes": 18194,
+        "sha256": "e7348c1d6fd3cb5fdd44fcf684b3d8584dd75e0f41c0112cf86e6105f18dabdb",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:guardian",
+      "source": "./assets/merge/units/guardian.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/guardian.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "output": {
+        "path": "./assets/optimized/ui/figures/guardian.webp",
+        "bytes": 32572,
+        "sha256": "9bce700a89479ff751e15379ea20f11cca51219129ad5b4ef580b5eb1cc168d2",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:avalanche_maid",
+      "source": "./assets/merge/units/avalanche_maid.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 92,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/avalanche_maid.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/avalanche_maid.webp",
+        "bytes": 21216,
+        "sha256": "bab06b84bf3842d79fad50de210f95463d703e738995c306bd1aa154fabb140a",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:avalanche_maid",
+      "source": "./assets/merge/units/avalanche_maid.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/avalanche_maid.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "output": {
+        "path": "./assets/optimized/ui/figures/avalanche_maid.webp",
+        "bytes": 44542,
+        "sha256": "4d6914ffc016689595e91a9e5b532ee85159577ee3a98637e169a879a3d37118",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:santa",
+      "source": "./assets/merge/units/santa.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 98,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/santa.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/santa.webp",
+        "bytes": 19672,
+        "sha256": "d30de45f9e0d7f65d9958ed85de338313e301fdd5f99aad01de30f5ebb14d83f",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:santa",
+      "source": "./assets/merge/units/santa.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/santa.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+      "output": {
+        "path": "./assets/optimized/ui/figures/santa.webp",
+        "bytes": 35978,
+        "sha256": "d7ade65a218a66233ae1443ffc9f7cf2d1e5cc954f6dd3cd8957da77bd31900e",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:red_dragon",
+      "source": "./assets/merge/units/red_dragon.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 74,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/red_dragon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/red_dragon.webp",
+        "bytes": 21168,
+        "sha256": "6778ead60a3c062626a566860e58800dff0421b152a0aa01783da5547c836ae6",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:red_dragon",
+      "source": "./assets/merge/units/red_dragon.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/red_dragon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "output": {
+        "path": "./assets/optimized/ui/figures/red_dragon.webp",
+        "bytes": 38294,
+        "sha256": "c951e98c00ba9073e01e02a6e2ef30015f65e3fc3ea7b3ed7964993e7f05aabb",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:aurora",
+      "source": "./assets/merge/units/aurora.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 94,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/aurora.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/aurora.webp",
+        "bytes": 18970,
+        "sha256": "23cb5481b9092ebafc29a6a211c0e8036fbcd681af2872fc716dec2d1c2873c6",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:aurora",
+      "source": "./assets/merge/units/aurora.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/aurora.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "output": {
+        "path": "./assets/optimized/ui/figures/aurora.webp",
+        "bytes": 39094,
+        "sha256": "699e3c0255a3c49b4bc8be1e836fc69f6ee27c1cb05e9ec886b222d8796a7475",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:toffee_apple",
+      "source": "./assets/merge/units/toffee_apple.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 142,
+        "top": 90,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/toffee_apple.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "c841329e1d3ce16053ce88918653750544d1944c410a880d0b9473d58bd51145",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/toffee_apple.webp",
+        "bytes": 22832,
+        "sha256": "a0d8635f3850475cb490748401593b22e2a498a3621295e2f4bd61505cedef0a",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:toffee_apple",
+      "source": "./assets/merge/units/toffee_apple.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/toffee_apple.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "c841329e1d3ce16053ce88918653750544d1944c410a880d0b9473d58bd51145",
+      "output": {
+        "path": "./assets/optimized/ui/figures/toffee_apple.webp",
+        "bytes": 39384,
+        "sha256": "fafe5dc3d8ecd0a0bb114ab3f3d2a5e845108387f138fd2fe717404157efb92e",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:antropy",
+      "source": "./assets/merge/units/antropy.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 122,
+        "top": 94,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/antropy.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "b88eafca07b51487dd88a960b42f8d8192949ca2aa848a2a423c7c1d0910ef92",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/antropy.webp",
+        "bytes": 20564,
+        "sha256": "6e648721275931ef40c238c5e7064bc4a8d91e57229bd6b002b6b72487255350",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:antropy",
+      "source": "./assets/merge/units/antropy.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/antropy.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "b88eafca07b51487dd88a960b42f8d8192949ca2aa848a2a423c7c1d0910ef92",
+      "output": {
+        "path": "./assets/optimized/ui/figures/antropy.webp",
+        "bytes": 41828,
+        "sha256": "cfcaf6af5dd2ffa3029a577b385fc815099ac9c59eaa76074b704d1e7aa0cdfc",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:storm_sage",
+      "source": "./assets/merge/units/storm_sage.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 70,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/storm_sage.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/storm_sage.webp",
+        "bytes": 20902,
+        "sha256": "6063a96fdcad4c7da7392ffcba3fc05d25f3855e24bbe90ca4d131d655ecb058",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:storm_sage",
+      "source": "./assets/merge/units/storm_sage.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/storm_sage.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "output": {
+        "path": "./assets/optimized/ui/figures/storm_sage.webp",
+        "bytes": 37156,
+        "sha256": "b6330d3fbe0c29c9ade223f8bb1b9a9144003a87dba6fede3444d33ee51f1c34",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:flame_sage",
+      "source": "./assets/merge/units/flame_sage.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 82,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/flame_sage.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/flame_sage.webp",
+        "bytes": 16730,
+        "sha256": "8a657d7547f5a8948ab18f225267de2197fd4c9bd806a1c31ea727069b29ef6a",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:flame_sage",
+      "source": "./assets/merge/units/flame_sage.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/flame_sage.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "output": {
+        "path": "./assets/optimized/ui/figures/flame_sage.webp",
+        "bytes": 27822,
+        "sha256": "797937571e6c2127091d025cdcfebc8a0852eb4d9b5966747bf6dde4400086f6",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:lightning_sage",
+      "source": "./assets/merge/units/lightning_sage.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 79,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/lightning_sage.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/lightning_sage.webp",
+        "bytes": 18784,
+        "sha256": "09cb53d9766a3ee136e49266a0e69d3658e4a8b5de57a34355b4b486f3174ed0",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:lightning_sage",
+      "source": "./assets/merge/units/lightning_sage.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/lightning_sage.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "output": {
+        "path": "./assets/optimized/ui/figures/lightning_sage.webp",
+        "bytes": 30250,
+        "sha256": "6d64efa842ba6c84043aa0717e6c98a47d0f0fe5b6945084dd52f9952227bf48",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:time_magician",
+      "source": "./assets/merge/units/time_magician.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 130,
+        "top": 69,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/time_magician.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/time_magician.webp",
+        "bytes": 18260,
+        "sha256": "f688c46d1250c56e9b9096e9abc2f93add9bb4d25d9dc17f24cd398a6b71548b",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:time_magician",
+      "source": "./assets/merge/units/time_magician.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/time_magician.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+      "output": {
+        "path": "./assets/optimized/ui/figures/time_magician.webp",
+        "bytes": 37748,
+        "sha256": "3d1977ffb77ce800fcd93625979af785cb875eeb5928b1d4e7305c9f02240d96",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:ancient_dragon",
+      "source": "./assets/merge/units/ancient_dragon.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 60,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/ancient_dragon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/ancient_dragon.webp",
+        "bytes": 20698,
+        "sha256": "dddd9791a97996fffc7e15b585333329a72295464b4590a6184992f60f87639f",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:ancient_dragon",
+      "source": "./assets/merge/units/ancient_dragon.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/ancient_dragon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "output": {
+        "path": "./assets/optimized/ui/figures/ancient_dragon.webp",
+        "bytes": 46798,
+        "sha256": "f562a939e283c2e80af80245173a7567d6a226f76d8b9aed88a1eccc2ed3ca25",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:phantom",
+      "source": "./assets/merge/units/phantom.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 106,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/phantom.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/phantom.webp",
+        "bytes": 15588,
+        "sha256": "bfd36540341944e840a2c43c86e508f227f43cd3b6c21fe72df6f4a3fd769862",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:phantom",
+      "source": "./assets/merge/units/phantom.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/phantom.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "output": {
+        "path": "./assets/optimized/ui/figures/phantom.webp",
+        "bytes": 21966,
+        "sha256": "d61b6f08388e98bd57ec626e9b0310d531fd31d0f482da5e2ced4c177df03a7e",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:cure_master",
+      "source": "./assets/merge/units/cure_master.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 132,
+        "top": 83,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/cure_master.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "897e3527b970bf4371d503fd7f1bdd588e3b113f220be50d8597ccec6deae42e",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/cure_master.webp",
+        "bytes": 19558,
+        "sha256": "1c384c5499c8e702a7d3d18fefe52d06ebeea708d5cbc181b5e0e8ae95cbe963",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:cure_master",
+      "source": "./assets/merge/units/cure_master.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/cure_master.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "897e3527b970bf4371d503fd7f1bdd588e3b113f220be50d8597ccec6deae42e",
+      "output": {
+        "path": "./assets/optimized/ui/figures/cure_master.webp",
+        "bytes": 57088,
+        "sha256": "3fdffc9863503179eadf5bf19a4789753799d0c1c468d4f7886234576c272a14",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:ash",
+      "source": "./assets/merge/units/ash.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 138,
+        "top": 97,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/ash.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "090901a0f1f503dbf5ec4a65e309039f01afd94b7b9320e672327623e7dfb1e8",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/ash.webp",
+        "bytes": 17804,
+        "sha256": "eb0849ddb74bce0b414b2360a4ec196d623d68706639669ca3dc69354a20b0d1",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:ash",
+      "source": "./assets/merge/units/ash.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/ash.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "090901a0f1f503dbf5ec4a65e309039f01afd94b7b9320e672327623e7dfb1e8",
+      "output": {
+        "path": "./assets/optimized/ui/figures/ash.webp",
+        "bytes": 44976,
+        "sha256": "a72f72ce4f8f8aa07fabdfe60f115ba07dc36dc34452be049c2985f84e824cb4",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:zeke",
+      "source": "./assets/merge/units/zeke.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 84,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/zeke.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/zeke.webp",
+        "bytes": 18882,
+        "sha256": "63f0dbba1e6a315b4304e5859e3027bde6215098b08491c0d90bdb842bb23f02",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:zeke",
+      "source": "./assets/merge/units/zeke.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/zeke.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "output": {
+        "path": "./assets/optimized/ui/figures/zeke.webp",
+        "bytes": 35514,
+        "sha256": "92d13ba28a900672a4de0687a56b2686f8c24f8c15cfc1fdb05f9eaf1b7b9fbd",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:luna",
+      "source": "./assets/merge/units/luna.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 86,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/luna.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/luna.webp",
+        "bytes": 17446,
+        "sha256": "faa7551ee18516dc300cb89c72202986d6697ffbff49cc39dc3087ad5a147028",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:luna",
+      "source": "./assets/merge/units/luna.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/luna.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "output": {
+        "path": "./assets/optimized/ui/figures/luna.webp",
+        "bytes": 30174,
+        "sha256": "50c03279d3c4f4623fc48e8ec5719b5bfa00c540b18e4d787eab5897eb984aff",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:jasmine",
+      "source": "./assets/merge/units/jasmine.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 128,
+        "top": 73,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/jasmine.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/jasmine.webp",
+        "bytes": 21650,
+        "sha256": "6fbada5f3d42fa51dba4361a23035ee87d98f48e8b5cacbc18a6f4d6f4a5eaba",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:jasmine",
+      "source": "./assets/merge/units/jasmine.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/jasmine.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+      "output": {
+        "path": "./assets/optimized/ui/figures/jasmine.webp",
+        "bytes": 54514,
+        "sha256": "92d8aab75e963a71979e2285afe8069590d8147e282e1c31da4af0f2baa997dd",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:queen",
+      "source": "./assets/merge/units/queen.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 86,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/queen.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/queen.webp",
+        "bytes": 26560,
+        "sha256": "d2a7265014d0b7c5492dcc3d1fb900693da7fee97ec2a247d6e71381fe03f741",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:queen",
+      "source": "./assets/merge/units/queen.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/queen.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "output": {
+        "path": "./assets/optimized/ui/figures/queen.webp",
+        "bytes": 44448,
+        "sha256": "aeaeede7756e5339f848621aa66aa0a0ccfdab9e87b7389a4b122cfc4e54225d",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:rumi",
+      "source": "./assets/merge/units/rumi.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 107,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/rumi.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/rumi.webp",
+        "bytes": 21258,
+        "sha256": "afdab986666eaad5ce0729fa6ab0ebdf87652e02c71a9e0679555f4b6bb0e939",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:rumi",
+      "source": "./assets/merge/units/rumi.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/rumi.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "output": {
+        "path": "./assets/optimized/ui/figures/rumi.webp",
+        "bytes": 35372,
+        "sha256": "67a4c9af6e36779e3b3483f6c4b2242401f7aa51bf8445c72e2c95c508deeb8b",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:cherry_prince",
+      "source": "./assets/merge/units/cherry_prince.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 132,
+        "top": 98,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/cherry_prince.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/cherry_prince.webp",
+        "bytes": 20458,
+        "sha256": "da5eb8d1bbbf388e8daf0df2c94bd77acb37f0c46516bc793e0ba92b7425a63f",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:cherry_prince",
+      "source": "./assets/merge/units/cherry_prince.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/cherry_prince.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+      "output": {
+        "path": "./assets/optimized/ui/figures/cherry_prince.webp",
+        "bytes": 38106,
+        "sha256": "4d92bbed4805f220f1ab695feafdb561a3fbc52cf9b3ab619acc3c9ca70ccb80",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:venom",
+      "source": "./assets/merge/units/venom.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 137,
+        "top": 83,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/venom.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "071bedcc87f3bd4e34233ee65e42e2cfe9b25a49191f4373be542b7011d93606",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/venom.webp",
+        "bytes": 19624,
+        "sha256": "7bd273ded2e003bf1a4df5fbd75cce85f0ea3d372e6cf7d05df000ff672eef33",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:venom",
+      "source": "./assets/merge/units/venom.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/venom.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "071bedcc87f3bd4e34233ee65e42e2cfe9b25a49191f4373be542b7011d93606",
+      "output": {
+        "path": "./assets/optimized/ui/figures/venom.webp",
+        "bytes": 51474,
+        "sha256": "1a9038c8fd71eff4dc701393bea9ba81d3bbf9e5dbf73c13a042cb31af955078",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:time_ruler",
+      "source": "./assets/merge/units/time_ruler.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 83,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/time_ruler.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/time_ruler.webp",
+        "bytes": 15656,
+        "sha256": "404deb65eaa8908405f5e07fb1032237e77e629869d4c824598dcce42d2ecaa3",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:time_ruler",
+      "source": "./assets/merge/units/time_ruler.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/time_ruler.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "output": {
+        "path": "./assets/optimized/ui/figures/time_ruler.webp",
+        "bytes": 29100,
+        "sha256": "d347867686d42e0d9fc8a3dc3692f5cbb88fba6cc567b74b7a10b504637172fa",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:galaxy_whale",
+      "source": "./assets/merge/units/galaxy_whale.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 78,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/galaxy_whale.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/galaxy_whale.webp",
+        "bytes": 26054,
+        "sha256": "72078c1643ac25d908acdd3109961f35e3825c348935b23897d66eda08a820ec",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:galaxy_whale",
+      "source": "./assets/merge/units/galaxy_whale.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/galaxy_whale.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "output": {
+        "path": "./assets/optimized/ui/figures/galaxy_whale.webp",
+        "bytes": 46668,
+        "sha256": "07d5569ac0104b456342c8c979368bfd77e974521f6d90c051ccded17f401e3d",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:doom",
+      "source": "./assets/merge/units/doom.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 126,
+        "top": 112,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/doom.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/doom.webp",
+        "bytes": 16040,
+        "sha256": "03dd5a0703ebd6f22a0e02661ce5165e8f456fe66cc32e3308726a13e7606a26",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:doom",
+      "source": "./assets/merge/units/doom.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/doom.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+      "output": {
+        "path": "./assets/optimized/ui/figures/doom.webp",
+        "bytes": 30798,
+        "sha256": "bd55012b57bf0609c9fd6292b2b9b53cd9af43b5ac90c1d83a2c2f50eea88de8",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:cinderella",
+      "source": "./assets/merge/units/cinderella.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 127,
+        "top": 65,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/cinderella.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/cinderella.webp",
+        "bytes": 24244,
+        "sha256": "d375749c2e7c53355a89791bcd43ddc275d3f8f8696f038f292d396ecb2cbb59",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:cinderella",
+      "source": "./assets/merge/units/cinderella.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/cinderella.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "output": {
+        "path": "./assets/optimized/ui/figures/cinderella.webp",
+        "bytes": 60550,
+        "sha256": "6247ba4741a756be6ccf7b6521800922300dcf42d9e5638e7ce9b806988ac2dc",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:harmonious",
+      "source": "./assets/merge/units/harmonious.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 129,
+        "top": 100,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/harmonious.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/harmonious.webp",
+        "bytes": 23298,
+        "sha256": "44d1b581c50c7071290a8327097d1ff5bc8f00a11d9d26e9a8762a9e0c315c8a",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:harmonious",
+      "source": "./assets/merge/units/harmonious.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/harmonious.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "output": {
+        "path": "./assets/optimized/ui/figures/harmonious.webp",
+        "bytes": 64358,
+        "sha256": "341f29a55013e770e2b85bc14829fc692c222b94263a7a5b91ead492dfd61c86",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:frost_witch",
+      "source": "./assets/merge/units/frost_witch.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 126,
+        "top": 86,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/frost_witch.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/frost_witch.webp",
+        "bytes": 21566,
+        "sha256": "9d4178ef637b74259543936bfbdc4593d316223277cee7f4e245178f5470dba1",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:frost_witch",
+      "source": "./assets/merge/units/frost_witch.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/frost_witch.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "output": {
+        "path": "./assets/optimized/ui/figures/frost_witch.webp",
+        "bytes": 45630,
+        "sha256": "56ba3c185da9246575ce9caa681b9a5d45a813ea635442dada146a6d4005d21e",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:behemoth",
+      "source": "./assets/merge/units/behemoth.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 120,
+        "top": 66,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/behemoth.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "b51bf716bbbaec063072fa9bf4c9c0aca30121bb83ccd6dfece4fd55495d428e",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/behemoth.webp",
+        "bytes": 19236,
+        "sha256": "af5f75454de9e78131423897570d9097dd1b5397b20a2a2b97c28fdefdd26b02",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:behemoth",
+      "source": "./assets/merge/units/behemoth.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/behemoth.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "b51bf716bbbaec063072fa9bf4c9c0aca30121bb83ccd6dfece4fd55495d428e",
+      "output": {
+        "path": "./assets/optimized/ui/figures/behemoth.webp",
+        "bytes": 46934,
+        "sha256": "d74c7042a257cd5a09f8e89060a82460355d901132645fb5d7f40362ca84a638",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:hourglass",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 0
+      },
+      "destination": "./assets/optimized/ui/relics/hourglass.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/hourglass.webp",
+        "bytes": 19170,
+        "sha256": "3cdda62322c6237fdcdb3ec2303c31063429423524448af8b4ebbca303cb997d",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:ember",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 1
+      },
+      "destination": "./assets/optimized/ui/relics/ember.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/ember.webp",
+        "bytes": 14618,
+        "sha256": "c9948ad6538b0a3bf51dcc46002f6cdad4e7d7a7031cbfdf7579af7abd0cf9aa",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:frost",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 2
+      },
+      "destination": "./assets/optimized/ui/relics/frost.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/frost.webp",
+        "bytes": 23634,
+        "sha256": "7e8f50bdba07af6ec2c9f0105a768ba3d3e6b75a7c369680940012bae81da1e2",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:banner",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 3
+      },
+      "destination": "./assets/optimized/ui/relics/banner.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/banner.webp",
+        "bytes": 17238,
+        "sha256": "c476743f8cd867d751394e089237e97b5ebe47ced0877b083f62961544f07356",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:chorus",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 4
+      },
+      "destination": "./assets/optimized/ui/relics/chorus.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/chorus.webp",
+        "bytes": 21556,
+        "sha256": "27fc38a5e882f2abc3c27212ffd1fd6d67259c4673274629b53765a519daefff",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:lantern",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 5
+      },
+      "destination": "./assets/optimized/ui/relics/lantern.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/lantern.webp",
+        "bytes": 13678,
+        "sha256": "a3bdebc87f176aa777e5d1b780a6d48c656df7fc23d5929f51e5c65c879ba356",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:lens",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 6
+      },
+      "destination": "./assets/optimized/ui/relics/lens.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/lens.webp",
+        "bytes": 14000,
+        "sha256": "8d01971f957947007ca2b4f65f5ee51792e5e7cdeae32e9934051a624b0ffe30",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:seed",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 7
+      },
+      "destination": "./assets/optimized/ui/relics/seed.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/seed.webp",
+        "bytes": 16666,
+        "sha256": "5506ca2a679b08cedc7d03223ef3185051289520039632897ad4750ab6774de1",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:feather",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 8
+      },
+      "destination": "./assets/optimized/ui/relics/feather.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/feather.webp",
+        "bytes": 14044,
+        "sha256": "66a2bf09be104f5c2a8a2cf40ac87dd4688edb2451e14047ddd8f30c1c07f7c6",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:crown",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 9
+      },
+      "destination": "./assets/optimized/ui/relics/crown.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/crown.webp",
+        "bytes": 19564,
+        "sha256": "64efe35415aa18c0ac1b336ee1ee30fbb3c8dad2413f2f337e8cfa0f492e5886",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:sprout",
+      "source": "./assets/merge/relics-new.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 0
+      },
+      "destination": "./assets/optimized/ui/relics/sprout.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+      "output": {
+        "path": "./assets/optimized/ui/relics/sprout.webp",
+        "bytes": 11764,
+        "sha256": "23a9b41e418e8e28292145be29d3812ca95eea6b07a4043e0acaacd40d33b8e9",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:amulet",
+      "source": "./assets/merge/relics-new.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 1
+      },
+      "destination": "./assets/optimized/ui/relics/amulet.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+      "output": {
+        "path": "./assets/optimized/ui/relics/amulet.webp",
+        "bytes": 14362,
+        "sha256": "20c76c7c457b1253c3f353ae83b521851b992ef0731174d7daafb68007dc5b61",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:meteor",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 10
+      },
+      "destination": "./assets/optimized/ui/relics/meteor.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/meteor.webp",
+        "bytes": 17156,
+        "sha256": "ec80864eea58052d6498046dcd400fbc905f89213ebe064b58759a9ddc4b73f8",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:prism",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 11
+      },
+      "destination": "./assets/optimized/ui/relics/prism.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/prism.webp",
+        "bytes": 21008,
+        "sha256": "3b44fd337ccbf0e010c456a36b386c22a692d8c842267bd0bd7b5a5650a2e26c",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:tide",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 12
+      },
+      "destination": "./assets/optimized/ui/relics/tide.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/tide.webp",
+        "bytes": 20772,
+        "sha256": "91782e676afa945a03403073085daf82551833f79de2f2acac4fbf00f3cbb1b6",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:roots",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 13
+      },
+      "destination": "./assets/optimized/ui/relics/roots.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/roots.webp",
+        "bytes": 25048,
+        "sha256": "e722a67e5d0ce1428cbdf519a6f69160e853aeb57964483a03fb34e398b59622",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:guild",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 14
+      },
+      "destination": "./assets/optimized/ui/relics/guild.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/guild.webp",
+        "bytes": 16652,
+        "sha256": "99d9fa0705fd9dc67e8574f5dccc9d19eda18d8f90db3cd891cb3f124f907c41",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:phoenix",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 15
+      },
+      "destination": "./assets/optimized/ui/relics/phoenix.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/phoenix.webp",
+        "bytes": 18306,
+        "sha256": "e06d2100185d929097ba76b7515e366044e983042407ac9131080c6812a0277e",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:twin",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 16
+      },
+      "destination": "./assets/optimized/ui/relics/twin.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/twin.webp",
+        "bytes": 25566,
+        "sha256": "8be9f2fcc32ad2da4dbd2c90079912aa737912f887861f5851df6cb6a964c3f5",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:constellation",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 17
+      },
+      "destination": "./assets/optimized/ui/relics/constellation.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/constellation.webp",
+        "bytes": 23242,
+        "sha256": "ecdda70748eb022e6fb468faef0b25ec43b33a5c2db35f4406c3c50bd3b3eefd",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:alchemy",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 18
+      },
+      "destination": "./assets/optimized/ui/relics/alchemy.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/alchemy.webp",
+        "bytes": 17296,
+        "sha256": "27286a73b3a8fa017c68f71664bbe0f920bfc4b379c37113148c426a8ad5c4ff",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:orbit",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 19
+      },
+      "destination": "./assets/optimized/ui/relics/orbit.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/orbit.webp",
+        "bytes": 14522,
+        "sha256": "adab0826380167f34c3a9c9fbc5ff7d45c7c96f23afa6da1a555001d7b498aeb",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:tempo_bell",
+      "source": "./assets/merge/relics-expansion.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 0
+      },
+      "destination": "./assets/optimized/ui/relics/tempo_bell.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "output": {
+        "path": "./assets/optimized/ui/relics/tempo_bell.webp",
+        "bytes": 15426,
+        "sha256": "f0c8302b3cc73505b12ce5446b7fed8372196ddfac650c5bd3264c0643944e8e",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:chalice",
+      "source": "./assets/merge/relics-new.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 2
+      },
+      "destination": "./assets/optimized/ui/relics/chalice.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+      "output": {
+        "path": "./assets/optimized/ui/relics/chalice.webp",
+        "bytes": 10796,
+        "sha256": "6ff5eb756813b4992b49c6c6a4c04ac65df084a5fa660053d23d3ec7bee1baf9",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:royal_seal",
+      "source": "./assets/merge/relics-expansion.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 1
+      },
+      "destination": "./assets/optimized/ui/relics/royal_seal.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "output": {
+        "path": "./assets/optimized/ui/relics/royal_seal.webp",
+        "bytes": 14830,
+        "sha256": "cfb37aba54733099112bb9a92b73a8f258ac0827506601d055d293ee94dd8fc7",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:gift_ribbon",
+      "source": "./assets/merge/relics-expansion.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 2
+      },
+      "destination": "./assets/optimized/ui/relics/gift_ribbon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "output": {
+        "path": "./assets/optimized/ui/relics/gift_ribbon.webp",
+        "bytes": 16788,
+        "sha256": "1b273450877d6b4039ee6ab7f48521ab8391472947d9f2b1afdd04d168f52008",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:broken_clock",
+      "source": "./assets/merge/relics-expansion.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 3
+      },
+      "destination": "./assets/optimized/ui/relics/broken_clock.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "output": {
+        "path": "./assets/optimized/ui/relics/broken_clock.webp",
+        "bytes": 20242,
+        "sha256": "7be988b8ec12f6325745a048a7d0dc416ed2115fcc6238422aa0c60a440902c2",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:star_boy",
+      "source": "./assets/memorial-webp/star_boy.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/star_boy.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "6c41dffb11c60b363ae594e5dee5155f91ba6386382016e9770872d540c1dadd",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/star_boy.webp",
+        "bytes": 12054,
+        "sha256": "0190a7e93f72d6867fe57662ff36ab4b8176b55fbea0f09f8eabfdca74e018f0",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:snow_rabbit",
+      "source": "./assets/memorial-webp/snow_rabbit.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/snow_rabbit.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "dbe385fdf0495d28d35fc8e9bace7db17190a828b2cdf5ac0aaff64d998b8ca3",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/snow_rabbit.webp",
+        "bytes": 7432,
+        "sha256": "0e72b0b5f3cea55cabf5f605a676bf8530ece714c327a2d9e35abc37498baf1b",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:silver_rabbit",
+      "source": "./assets/memorial-webp/silver_rabbit.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/silver_rabbit.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "81e3d74230c042d38987feecc21709bb7d4003ae29c6e8aa4c5ad969d15d39d6",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/silver_rabbit.webp",
+        "bytes": 6560,
+        "sha256": "888898fcd9ce782600e5295ead309bd3aa06173b8aa635e31b41add89238e7f5",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:night_rabbit",
+      "source": "./assets/memorial-webp/night_rabbit.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/night_rabbit.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "b3e61b61d4a4c464cb09fd36c001745048f6406af552a4d1059d002bb9500709",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/night_rabbit.webp",
+        "bytes": 8672,
+        "sha256": "b8b71ee31bdcbc19d93e29a386432e9a952bce96026958d404b15a3d2f6ed6f0",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:siren",
+      "source": "./assets/memorial-webp/siren.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/siren.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "8a9707ce0628a7dda79ffe5c8bec10ff7ff4118561a5566904668ee8217c994c",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/siren.webp",
+        "bytes": 8534,
+        "sha256": "8aa79e8e02224cae1f3f7d33b402e2bb1bc3eb4ef3ccc36b16b9c5ff52ffec59",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:mushroom_king",
+      "source": "./assets/memorial-webp/mushroom_king.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/mushroom_king.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "13378ad2613ced6340beebb75169d05b917ce5c32978c0ae522621db65337161",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/mushroom_king.webp",
+        "bytes": 10656,
+        "sha256": "b7d52d9ac631a1a4e54b797f6db23fb326747ec74a7fb56aa927ef87512f9927",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:underdog",
+      "source": "./assets/memorial-webp/underdog.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/underdog.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "21a6b9fda98a072cd09b1626de09326d59234dd3b8caa9756fee55bcb45e1593",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/underdog.webp",
+        "bytes": 13064,
+        "sha256": "773a382ace08e27da91e06b27dbec0e39ac647ad69cbe4da355f4300a97f707e",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:joker",
+      "source": "./assets/memorial-webp/joker.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/joker.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/joker.webp",
+        "bytes": 18722,
+        "sha256": "e6ecb00b647b8ef3f5eae50d1f03b4eb6bcb7629e55ee2ed615ad50b62ed12a2",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:sunflower",
+      "source": "./assets/memorial-webp/sunflower.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/sunflower.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "c985bcab237ac96dbfaf7771236a7021b84432b0d22125daa0dc418f0a9ca3ec",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/sunflower.webp",
+        "bytes": 10554,
+        "sha256": "68e0081df395b54e255f5a5f61c3d9f103472b1f0f2c2a65e738d1b3573afe6a",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:great_detective",
+      "source": "./assets/memorial-webp/great_detective.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/great_detective.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "7958dd96b1bc706a2057c54b7bc7fb4b5a1cd12e26fc5ee9988ddad4f5e21614",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/great_detective.webp",
+        "bytes": 10984,
+        "sha256": "d9f4530defa6d462535b18e125457df504c7157d6bd0ad5a7091815353b2c2c6",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:guardian",
+      "source": "./assets/memorial-webp/guardian.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/guardian.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "923afd6d716fca0f3d7ff02147332578c5f2642efa426dfb755665fe8a7496ad",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/guardian.webp",
+        "bytes": 10192,
+        "sha256": "3575cc54a3a6c17274a7622ea3ac73aba542f726c2db63779a69873347c3786a",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:avalanche_maid",
+      "source": "./assets/memorial-webp/avalanche_maid.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/avalanche_maid.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "a64c281f668e40e035791565ea7679cc31b05cc8920d12d0f8c12010c8a95cf3",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/avalanche_maid.webp",
+        "bytes": 7958,
+        "sha256": "dd85a7b95cda4b69ea79ee39e0dc35c8f77ac0e7258a24c908f9cb6a70c9bac8",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:santa",
+      "source": "./assets/memorial-webp/santa.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/santa.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "4f1bca17d5378cfec36d483bc588416b2222b3f72bf208c4284d59dd69e60feb",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/santa.webp",
+        "bytes": 13138,
+        "sha256": "3a82cf75a90d108a8fa433ed3012f110e4ac55671c1f1d5cbd31f0ad39ff534a",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:red_dragon",
+      "source": "./assets/memorial-webp/red_dragon.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/red_dragon.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "9e80fa15178db815f1755fd4273876e9dddf18176f0f4940d35ab4c1fd0c47af",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/red_dragon.webp",
+        "bytes": 13170,
+        "sha256": "e27dc7751478e2183de40c128e176e277198706714e9b17de75ac9a22e7fc804",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:aurora",
+      "source": "./assets/memorial-webp/aurora.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/aurora.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "0f327ba639993bd87a813fb6d1d0cb306626aa9aac68cdbd69ae5612c23c7cc0",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/aurora.webp",
+        "bytes": 10330,
+        "sha256": "22098dd903781f54abf7740976a106de8c81c7fa37965b4ffdf03c37e277af35",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:toffee_apple",
+      "source": "./assets/memorial-webp/toffee_apple.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/toffee_apple.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "7c6aeb757cf6849760ae70165cd06185cb373d12ce1af7206b8e928489cb2099",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/toffee_apple.webp",
+        "bytes": 17288,
+        "sha256": "60b4806ff180d0902fc95106f74d507cea12171e3fab0925e1cbcf40719cacf1",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:antropy",
+      "source": "./assets/memorial-webp/antropy.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/antropy.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "ce7bcaedd4f5d9011dd1ed30b6990b23f01eeafeda1dd4dd639ab16e977dbee9",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/antropy.webp",
+        "bytes": 13400,
+        "sha256": "71310684e222a53f64f932d808f6eb7103e16f9321ab82f7f2e3eccec620f1d6",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:storm_sage",
+      "source": "./assets/memorial-webp/storm_sage.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/storm_sage.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "f0faa6e0589e608a01dba3e36356eea01607c2ab01723b43d8587305f1fb85cf",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/storm_sage.webp",
+        "bytes": 10014,
+        "sha256": "6c9672ed0a271b017cbd517cb049635a190b9bf97ef07ec9f6d6c043259fc324",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:flame_sage",
+      "source": "./assets/memorial-webp/flame_sage.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/flame_sage.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "f83e7dd252226ec1bda701235af7e51d2a9417d9fd8a05b01d2ce558c27281eb",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/flame_sage.webp",
+        "bytes": 11052,
+        "sha256": "c388f8efa385ea3b9229343ac3c66eccf6b11ce0bd2b497faaeb35994956fd9e",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:lightning_sage",
+      "source": "./assets/memorial-webp/lightning_sage.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/lightning_sage.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "9238b74fed639ce7f232838094f95f29528d3239f0ea666b33917ac71b24e723",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/lightning_sage.webp",
+        "bytes": 10396,
+        "sha256": "a34c12af8c85d1dec5102bbcb8cafc8ac7bc2368893ad3761461aa9fc8dd30b9",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:time_magician",
+      "source": "./assets/memorial-webp/time_magician.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/time_magician.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "b42a90ab7f06a304d01c818d39ab046c9015a5df8fab8b8532e42a4c612847f8",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/time_magician.webp",
+        "bytes": 11186,
+        "sha256": "399771444a49d26ae327c0a6b39c153f7170f7deac6e4c6cdd16383906c41ebb",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:ancient_dragon",
+      "source": "./assets/memorial-webp/ancient_dragon.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/ancient_dragon.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "52030a12be7335f8981e332d4cd0ffd9b8045058f886012af92eb8fb884b6ed9",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/ancient_dragon.webp",
+        "bytes": 11128,
+        "sha256": "39988daf65f7b80cc46b18f2c9475b6420f861f1307f4af8fe6845b4d05094ff",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:phantom",
+      "source": "./assets/memorial-webp/phantom.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/phantom.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "b1ef0d414d0f5637a111af608e04f6f830a355ae7bb03e3f6c513b98af60d1c0",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/phantom.webp",
+        "bytes": 6136,
+        "sha256": "2619fecf03436b12f6cdbd560d25f4b3d075e8e4456dc011f17a30486aa9fb53",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:cure_master",
+      "source": "./assets/memorial-webp/cure_master.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/cure_master.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "290ad3f07b21400ee61eb7de42365a3d6652e62e95b79bb027fcf92eaab94a94",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/cure_master.webp",
+        "bytes": 11816,
+        "sha256": "cd3792671561fb846e95f7934daa6bf2f91f8e240cb58334dc095fbd892e02e4",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:ash",
+      "source": "./assets/memorial-webp/ash.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/ash.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "fc1181154c5636e926e5d477c0c92573389fb30be9cd34aa5a98386859f78d14",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/ash.webp",
+        "bytes": 13544,
+        "sha256": "82afef64f7d5e5571de737127cdcaba4f80ab624c0d4fd6f186252d69d6d8b7f",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:zeke",
+      "source": "./assets/memorial-webp/zeke.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/zeke.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "4e86b97b3414ab4d20a59381d315471b60c38222831c290ddb70dfa5c9dd4752",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/zeke.webp",
+        "bytes": 12244,
+        "sha256": "1d68790889e7563a7b74f8d07903f27af086084631a214f6b22acfd4a4f42fdb",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:luna",
+      "source": "./assets/memorial-webp/luna.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/luna.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "dd35e79940115a2d9011ab73c5c3c9aa948a9159b012adb237034062a3fa54b2",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/luna.webp",
+        "bytes": 9162,
+        "sha256": "24e79bc6397d99d06e3f455a02d821ccdd806c45ad73d829d693552f8cdc5000",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:jasmine",
+      "source": "./assets/memorial-webp/jasmine.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/jasmine.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "5ad029a6b5ac78aa5b5561f2522542413200143bc2d9d01c951e533ed4d7455f",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/jasmine.webp",
+        "bytes": 8370,
+        "sha256": "3d50019f794be44eec32cf9b3d0d643db31731c74756993cee8ffa658b761fd6",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:queen",
+      "source": "./assets/memorial-webp/queen.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/queen.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "9fd6f23c9feac602caf9b8319ac42426913eb0df9034127c4e08ca97941e387e",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/queen.webp",
+        "bytes": 12332,
+        "sha256": "0918d7949047bcd024866e15736e919be27d1bdc73e8c51dca31e29c041531bf",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:rumi",
+      "source": "./assets/memorial-webp/rumi.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/rumi.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "809f741137f6b46400f8b6d9d16775d3081d82cea937891f648e48eaef6eac8c",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/rumi.webp",
+        "bytes": 9550,
+        "sha256": "ea3b052c7c609bf3b6fe07f3d8a5d8da0511055ac5cc31e5870c70c746ea4b0c",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:cherry_prince",
+      "source": "./assets/memorial-webp/cherry_prince.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/cherry_prince.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "aab03fde6bdf95a5bb37d504d120880f32f2b94f5dbdfc061a7f614697e142b8",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/cherry_prince.webp",
+        "bytes": 11438,
+        "sha256": "619b14849a316f93ace6857fd7685231dffcda2fdf975df1c63fea91042fefe4",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:venom",
+      "source": "./assets/memorial-webp/venom.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/venom.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "07e404ddc5ecf352585dd3e9b193244359b17edef5f8a5e899a3143b3c468942",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/venom.webp",
+        "bytes": 12868,
+        "sha256": "c4711d6ae892fa9156a359d4b38abfa01626cbf7dd33fe582c5d843db52ff2c9",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:time_ruler",
+      "source": "./assets/memorial-webp/time_ruler.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/time_ruler.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "8bf0b229aedb4b8bddce9948d55ee67f2a946d2b87ae0cdfe5b864f29c0fea2a",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/time_ruler.webp",
+        "bytes": 12594,
+        "sha256": "017fac050c9e319e7bf67a8a4aaba3a491734ecbd16736fd309c42f4846b7120",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:galaxy_whale",
+      "source": "./assets/memorial-webp/galaxy_whale.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/galaxy_whale.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "247a91145c3efa696b68f13229966a25f2c92f8a4d6d00969763a23a8bb9f0ee",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/galaxy_whale.webp",
+        "bytes": 14466,
+        "sha256": "ede389689542a4490a3e417b7886ebfd3fee7bc28a7002b72ae706ec74b650fd",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:doom",
+      "source": "./assets/memorial-webp/doom.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/doom.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "995906b5a9c88dad17c52cc5f7bd785875289938a5c47eab3c254b6752a2bac5",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/doom.webp",
+        "bytes": 9920,
+        "sha256": "f6dea002254d3c6c8cc442a59be9d9ca45f3ae41826f4b0769eced3ddf3eb96b",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:cinderella",
+      "source": "./assets/memorial-webp/cinderella.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/cinderella.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "c22a63016e64196da000e33cf46e8c92a1a85608dccbb90bcda02105c27b7d70",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/cinderella.webp",
+        "bytes": 11020,
+        "sha256": "74f0cdd04191871ad7a417544e3175c84ce20b9a529d098f2313d807132b0f15",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:harmonious",
+      "source": "./assets/memorial-webp/harmonious.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/harmonious.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "2b44a4b65e1b180e22da6330fd43e249ef29cd491ef571fc7938b487aa6859a5",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/harmonious.webp",
+        "bytes": 12174,
+        "sha256": "3dd3e7c24cc245a60dd46ced4b1cbd31e4adcdfe2b26ffefad5c781a50605b7b",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:frost_witch",
+      "source": "./assets/memorial-webp/frost_witch.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/frost_witch.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "be82b01f1e5cd48cfe34e92fe603d468fb5393be9d2fede5139295ced86afa8b",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/frost_witch.webp",
+        "bytes": 16160,
+        "sha256": "7f53a257627ea76268bf02b32658acb224597c0b55de74495f203d512bf08abc",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:behemoth",
+      "source": "./assets/memorial-webp/behemoth.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
+        "bytes": 15892,
+        "sha256": "f93c0ed05650ade6e48dc676c8cf3683adab426744043a8d2b2a21f1673e5649",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
     }
   ]
 }

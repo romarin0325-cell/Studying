@@ -471,6 +471,7 @@ function planDefenseTest(plan, files, currentFiles) {
   const checks = new Set(direct);
   const add = name => checks.add('defense_test/tests/' + name + '.test.mjs');
 
+  if (inputs.some(file => /^defense_test\/(?:docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|image-pack|image-policy|local-inputs)\.mjs$|assets\/optimized\/ui\/)/.test(file))) add('build');
   if (inputs.some(file => file.endsWith('/economy.js'))) add('economy');
   if (inputs.some(file => /(?:src\/battle\.js|src\/combat\/engine\.js)$/.test(file))) add('combat');
   if (inputs.includes('defense_test/src/profile.js')) add('profile');
@@ -479,7 +480,7 @@ function planDefenseTest(plan, files, currentFiles) {
   if (reportScripts) add('generated-reports');
 
   addNodeTest(plan, 'defense_test', 'defense_test:contracts-and-regressions', 'Check Star Garden collection, growth, tickets and actual combat regressions', [...checks]);
-  if (checks.has('defense_test/tests/generated-reports.test.mjs') || checks.has('defense_test/tests/assets.test.mjs')) {
+  if (checks.has('defense_test/tests/generated-reports.test.mjs') || checks.has('defense_test/tests/assets.test.mjs') || checks.has('defense_test/tests/build.test.mjs')) {
     const step = plan.steps.find(s => s.id === 'defense_test:contracts-and-regressions');
     if (step) step.needsInstall = true;
   }

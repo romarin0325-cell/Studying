@@ -1,6 +1,6 @@
 # 별빛 정원 에셋 제작·검증 파이프라인
 
-현재 배포 가공 규칙은 [단일 HTML 최적화](SINGLE_HTML_OPTIMIZATION.md)와 [경로·용도·원본/압축본 해시 목록](ASSET_OPTIMIZATION.json)을 따른다. 아래 제작 절차로 얻은 보관본은 덮어쓰지 않고 `assets/optimized/`에 배포 압축본을 별도 생성한다. 일반판과 Bright는 공통 빌드 한 번으로 갱신한다.
+현재 배포 가공 규칙은 [단일 HTML 최적화](SINGLE_HTML_OPTIMIZATION.md)와 [경로·용도·원본/압축본 해시 목록](ASSET_OPTIMIZATION.json)을 따른다. 아래 제작 절차로 얻은 보관본은 덮어쓰지 않고 `assets/optimized/`에 배포 압축본을 별도 생성한다. 일반판과 Bright는 공통 빌드 한 번으로 갱신한다. 초상화·전신·유물 아이콘·앨범 썸네일은 `assets/optimized/ui/`에서 재사용하며, 일반 빌드에서 재압축하지 않는다. UI 설정/자르기만 바꾸면 `node defense_test/scripts/optimize-images.mjs --derived-only`로 갱신하고 원본 해시·사용처·출력 목록을 함께 커밋한다.
 
 2026-10-23 추가: 사용자 승인 Sol SD 8명과 새 VFX를 적용했다. [적용·판단·확장 기록](SOL_ASSET_AND_VFX.md), [실제 렌더러 전후 비교](review/sol-vfx/index.html)를 함께 본다. 이 작업은 내장 `image_gen`과 native alpha를 사용했다. 아래의 나노바나나·자홍 키 배경 절차를 Sol 승인본에 소급 적용하거나, 이미 검수한 SD를 다시 생성하지 않는다.
 
