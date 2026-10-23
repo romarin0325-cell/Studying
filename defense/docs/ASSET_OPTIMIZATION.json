@@ -55,7 +55,7 @@
     "outputBytes": 11900818,
     "optimizedFiles": 148,
     "derivedFiles": 144,
-    "derivedOutputBytes": 3418174
+    "derivedOutputBytes": 3418204
   },
   "images": [
     {
@@ -5825,7 +5825,7 @@
       "source": "./assets/cast-v2/toffee_apple.webp",
       "profile": "portrait",
       "crop": {
-        "left": 136,
+        "left": 129,
         "top": 102,
         "width": 250,
         "height": 250
@@ -5837,8 +5837,8 @@
       "sourceSha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
       "output": {
         "path": "./assets/optimized/ui/portraits/toffee_apple.webp",
-        "bytes": 24310,
-        "sha256": "7cd514438c34ca1eaeb7c8cefa169eae0d0a13279b783b88003f0a83d489cfee",
+        "bytes": 24162,
+        "sha256": "069b22831380e57fa742976495c66a24947f602a913d02aab60d4d9eb4d8cdd8",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6095,7 +6095,7 @@
       "source": "./assets/cast-v2/time_magician.webp",
       "profile": "portrait",
       "crop": {
-        "left": 130,
+        "left": 123,
         "top": 82,
         "width": 250,
         "height": 250
@@ -6107,8 +6107,8 @@
       "sourceSha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
       "output": {
         "path": "./assets/optimized/ui/portraits/time_magician.webp",
-        "bytes": 19512,
-        "sha256": "d346852af5a270bb4d0a54099c3202c73363f2ea55d3c877eb93a2f93c81583c",
+        "bytes": 20272,
+        "sha256": "a74b378004109c02359c39eb1eea6b45e7aa6c0e6889fb190cd28133ec274ebc",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6582,7 +6582,7 @@
       "profile": "portrait",
       "crop": {
         "left": 136,
-        "top": 88,
+        "top": 80,
         "width": 250,
         "height": 250
       },
@@ -6593,8 +6593,8 @@
       "sourceSha256": "a52e14daa819efb8eafd850b4b1693c8884db8887828bbb9d544f8efd3d5d647",
       "output": {
         "path": "./assets/optimized/ui/portraits/rumi.webp",
-        "bytes": 20784,
-        "sha256": "acbb2be4ae5529df79ba63007fd9ee81b042143377a7bd20b3725772979e5874",
+        "bytes": 20516,
+        "sha256": "d5d4f3643aa059508fd7eb10536566744063b815a8e6adb7ff796e0148ccecf0",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6852,7 +6852,7 @@
       "profile": "portrait",
       "crop": {
         "left": 128,
-        "top": 82,
+        "top": 74,
         "width": 250,
         "height": 250
       },
@@ -6863,8 +6863,8 @@
       "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
       "output": {
         "path": "./assets/optimized/ui/portraits/doom.webp",
-        "bytes": 17658,
-        "sha256": "c9053433e1461e675cc49307e602b0bb915f8db94e1306752a0847733839587d",
+        "bytes": 17400,
+        "sha256": "18a09f33aae41f747fa58ddce68630bf462020d34f8713c3cce11ef98cc295cf",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6959,7 +6959,7 @@
       "source": "./assets/cast-v2/harmonious.webp",
       "profile": "portrait",
       "crop": {
-        "left": 137,
+        "left": 130,
         "top": 100,
         "width": 250,
         "height": 250
@@ -6971,8 +6971,8 @@
       "sourceSha256": "779f238b18fcb66cd0eafc8dc32a57027fc426da7ac0141f81d5838f294712d2",
       "output": {
         "path": "./assets/optimized/ui/portraits/harmonious.webp",
-        "bytes": 23642,
-        "sha256": "1fefe53a20c3b28f0d1f88796ff97fdac93afb3a97f4aff5125693244f5e1285",
+        "bytes": 23586,
+        "sha256": "3dc533fbf69ff64342ff11b259488dbfbe9893b33353972313683f51088c520e",
         "metadata": {
           "width": 240,
           "height": 240,

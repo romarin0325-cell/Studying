@@ -123,7 +123,7 @@ function card(id,kind='hero',receipt=null,full=false){
 // The three relic slots: what is equipped now, tap to open it.
 function relicSlots(compact=false){
   const worn=p().equipped;
-  return `<div class="relic-slots ${compact?'compact':''}">${compact?'':`<div class="relic-slots-head"><b>장착 중인 유물 ${worn.length}/3</b><small>장착한 유물의 효과가 원정에 적용됩니다</small></div>`}<div class="relic-slot-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="relic-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<span><b>${ARTIFACT[id].name}</b>${compact?'':`<small>Lv.${relicLevel(p().relics[id])}</small>`}</span></button>`:`<span class="relic-slot empty">${icon('plus')}<small>빈 칸</small></span>`;}).join('')}</div></div>`;
+  return `<div class="relic-slots ${compact?'compact':''}">${compact?'':`<div class="relic-slots-head"><b>장착 중인 유물 ${worn.length}/3</b><small>장착한 유물의 효과가 원정에 적용됩니다</small></div>`}<div class="relic-slot-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="relic-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<span><b>${ARTIFACT[id].name}</b>${compact?'':`<small>Lv.${relicLevel(p().relics[id])}</small>`}</span></button>`:`<button class="relic-slot empty" data-action="relic-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div></div>`;
 }
 // Puts the current value of each enhancement-scaled number into the (escaped) description, coloured.
 const liveText=(text,tokens)=>{let out=escapeText(text),pos=0;for(const [from,to] of tokens){const f=escapeText(from),at=out.indexOf(f,pos);if(at<0)continue;const mark=`<em class="scaled">${escapeText(to)}</em>`;out=out.slice(0,at)+mark+out.slice(at+f.length);pos=at+mark.length;}return out;};
@@ -187,6 +187,15 @@ function team(edit=false){
   if(!edit){teamReturn=modal==='prepare'?modalInfo:null;editingDeck=[...p().deck];}
   show('팀 편성',`출전 ${editingDeck.length}/${TEAM_SIZE}`,`${five(editingDeck,true)}<p class="fineprint" style="margin-top:10px">서로 다른 동료 ${TEAM_SIZE}명이 필요합니다. 편성된 동료를 누르면 해제됩니다.</p><div class="choose-list" style="margin-top:14px">${HEROES.filter(h=>p().heroes[h.id].owned).map(h=>`<button class="choose-row" data-team-pick="${h.id}" aria-pressed="${editingDeck.includes(h.id)}" ${away(p(),h.id)||p().active?'disabled':''}>${portrait(h.id)}<div><strong>${h.name}${badge(h.rarity)}</strong><small>${away(p(),h.id)?'파견 중 · 귀환 후 편성 가능':`${h.role} · 전투력 ${cpOf(h.id)}`}</small></div><span class="mark">${editingDeck.includes(h.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
     `<button class="primary wide" data-action="save-team" ${editingDeck.length!==TEAM_SIZE||p().active?'disabled':''}>편성 확정 (${editingDeck.length}/${TEAM_SIZE})</button>`,'team');
+}
+// Relic loadout: the same flow as the team sheet (slots on top, owned list below, confirm returns to the prep sheet).
+let editingRelics=[],relicReturn=null;
+function relicTeam(edit=false){
+  if(!edit){relicReturn=modal==='prepare'?modalInfo:null;editingRelics=[...p().equipped];}
+  const owned=ARTIFACTS.filter(a=>p().relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
+  const slots=`<div class="relic-slot-row">${[0,1,2].map(i=>{const id=editingRelics[i];return id?`<button class="relic-slot filled" data-relic-pick="${id}" data-rarity="${ARTIFACT[id].rarity}" aria-label="${ARTIFACT[id].name} 장착 해제">${image(id)}<span><b>${ARTIFACT[id].name}</b></span></button>`:`<button class="relic-slot empty" data-action="focus-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div>`;
+  show('유물 장착',`장착 ${editingRelics.length}/3`,`${slots}<p class="fineprint" style="margin-top:10px">장착한 유물을 누르면 해제됩니다.</p><div class="choose-list" style="margin-top:14px">${owned.map(a=>`<button class="choose-row relic-row" data-relic-pick="${a.id}" aria-pressed="${editingRelics.includes(a.id)}" ${p().active?'disabled':''}><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${relicLevel(p().relics[a.id])}</span></strong><small class="relic-effect">${relicText(a.id,relicLevel(p().relics[a.id]))}</small></div><span class="mark">${editingRelics.includes(a.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
+    `<button class="primary wide" data-action="save-relics" ${p().active?'disabled':''}>장착 확정 (${editingRelics.length}/3)</button>`,'relic-team');
 }
 function begin(kind,stage){const result=act('begin',{mode:kind,stage:kind==='weekly'?weeklyChapter()+1:stage,...(kind==='main'?{}:{tier:challengeTier})},false);if(!result.ok)return;close();if(kind==='weekly'){screen='draft';render();}else startBattle();}
 function renderDraft(){
@@ -589,7 +598,7 @@ function heroView(){
 }
 function relicView(){
   const worn=p().equipped,bonus=collectionBonus(p().relics),list=ARTIFACTS.filter(a=>rarity==='all'||a.rarity===rarity).sort((a,b)=>Number(p().relics[b.id].owned)-Number(p().relics[a.id].owned)||RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
-  return `<div class="relic-top"><div class="equip-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="equip-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<small>${ARTIFACT[id].name}</small></button>`:`<span class="equip-slot">${icon('plus')}<small>빈 칸</small></span>`;}).join('')}</div>
+  return `<div class="relic-top"><div class="equip-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="equip-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<small>${ARTIFACT[id].name}</small></button>`:`<button class="equip-slot" data-action="relic-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div>
     <button class="relic-bonus" data-action="relic-info"><small>수집 보너스</small><b>+${(bonus*100).toFixed(1)}%</b><span>모든 동료 위력 ${icon('info')}</span></button></div>
     ${rarityFilter(ARTIFACTS,p().relics)}<div class="cards relics">${list.map(a=>relicCard(a.id)).join('')}</div>`;
 }
@@ -769,7 +778,7 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){
     :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'주간 드래프트':'월간 보스전'}</h2><p>${kind==='weekly'?`보유 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'주간 드래프트':'월간 보스전','출격 준비',`${head}
     ${kind==='weekly'?'':`<div class="panel-head"><h3>출전 팀</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span></div>${five(p().deck)}`}
-    <div class="panel-head"><h3>장착 유물</h3><button class="link" data-action="go-relics">변경</button></div>${relicSlots(true)}`,
+    <div class="panel-head"><h3>장착 유물</h3><button class="link" data-action="relic-team">변경</button></div>${relicSlots(true)}`,
     `<div class="dialog-buttons">${kind==='weekly'?'':'<button class="secondary" data-action="team">편성</button>'}<button class="primary shine" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장'}</button></div>`,'prepare',{stage,kind});
 }
 
@@ -1091,6 +1100,7 @@ document.addEventListener('click',e=>{
   if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic,c=centerOf(button);if(act('enhance',{id,kind:d.enhance?'hero':'relic'},false).ok){refreshBehind();(d.enhance?heroDetail:relicDetail)(id);burst(c.x,c.y,{count:14,spread:80,size:11,color:'#ffe39a'});}return;}
   if(d.equip){if(act('equip',{id:d.equip},false).ok){refreshBehind();relicDetail(d.equip);}return;}
   if(d.setPartner){if(act('partner',{id:d.setPartner},false).ok){close();if(screen==='home')render();toast(`파트너 · ${HERO[d.setPartner].name}`);}return;}
+  if(d.relicPick){const i=editingRelics.indexOf(d.relicPick);if(i>=0)editingRelics.splice(i,1);else if(editingRelics.length<3)editingRelics.push(d.relicPick);else{toast('유물은 3개까지 장착해요. 먼저 하나를 빼 주세요.');return;}relicTeam(true);return;}
   if(d.teamPick){const i=editingDeck.indexOf(d.teamPick);if(i>=0)editingDeck.splice(i,1);else if(editingDeck.length<TEAM_SIZE)editingDeck.push(d.teamPick);else{toast(`편성은 ${TEAM_SIZE}명이에요. 먼저 한 명을 빼 주세요.`);return;}team(true);return;}
   if(d.dispatchSlot){dispatchTap(Number(d.dispatchSlot));return;}
   if(d.send){if(act('dispatch',{id:d.send,slot:Number(d.slot)},false).ok){close();refreshGarden();toast(`${HERO[d.send].name} 파견 출발 · ${T.dispatchHours}시간`);}return;}
@@ -1098,7 +1108,7 @@ document.addEventListener('click',e=>{
   if(d.skill){if(skillHeld){skillHeld=false;return;}if(button.classList.contains('unavailable'))return;battleCommand(E.cast(run,d.skill));return;}if(d.train){battleCommand(E.upgrade(run,d.train));training();return;}if(d.sell){battleCommand(E.sell(run,Number(d.sell)));return;}if(d.reward){battleCommand(E.chooseReward(run,d.reward));close();previousPhase='';return;}
   if(d.setting){if(act('setting',{id:d.setting,value:!p().settings[d.setting]},false).ok)showSettings();return;}if(d.daily){claimDaily([d.daily]);return;}
   if(d.confirmMonthly){if(act('claimMonthly',{token:d.confirmMonthly}).ok){close();render();}return;}
-  const actions={close:()=>{if(modal==='reward')return;if(modal==='draw'&&bonusItems){showBonus();return;}close();},settings:showSettings,partner:partners,team:()=>team(),'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
+  const actions={close:()=>{if(modal==='reward')return;if(modal==='draw'&&bonusItems){showBonus();return;}close();},settings:showSettings,partner:partners,team:()=>team(),'relic-team':()=>relicTeam(),'save-relics':()=>{if(act('relics',{ids:editingRelics}).ok){const back=relicReturn;relicReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
     'daily-all':()=>claimDaily(DAILY_MISSIONS.filter(m=>missionDone(todayDaily(),m.id)&&!todayDaily().claimed.includes(m.id)).map(m=>m.id)),
     bond:()=>bondSheet(d.id||p().partner),'gift-tray':()=>toggleTray(button),talk,'lobby-view':()=>setLobbyView(!lobbyView),idle:collectStars,'idle-shard':collectStars,
     'memorial-story':()=>toggleStory(button),fullscreen:toggleFullscreen,'unit-info':unitInfo,'reveal-skip':skipReveal,

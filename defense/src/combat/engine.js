@@ -234,7 +234,7 @@ export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*2}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 반경 ${Number((CRUSH.radius*(1+level*CRUSH.trainingRadius)).toFixed(3))}`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*2}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -960,7 +960,7 @@ export function castPreview(s,id){
     lines.push(`적 전체에게 위력 9배, ${hit(9)}를 줍니다.`);
     lines.push(`적은 ${sec(winterDuration(s,u))} 동안 ${pctText(slowOf(WINTER_COURT.slow*scale))} 느려집니다.`);
     lines.push(`겨울 동안 적이 받는 피해가 ${pct(WINTER_EXPOSURE)}% 늘어납니다.`);
-    lines.push(`겨울은 ${sec(winterDuration(s,u))} 동안 이어지고, 쓰러진 적 주변 120 안의 일반 적이 ${sec(WINTER_COURT.killFreeze)} 동안 얼어붙습니다.`);
+    lines.push(`겨울은 ${sec(winterDuration(s,u))} 동안 이어지고, 쓰러진 적 주변의 일반 적이 ${sec(WINTER_COURT.killFreeze)} 동안 얼어붙습니다.`);
   }else if(type==='harmony'){
     const level=s.upgrades.harmonious||0,field=control*scale;
     lines.push(`${dur(ULT_BUFF.harmony.seconds,'harmony')} 동안 모든 동료의 위력 ${pct((ULT_BUFF.harmony.power+level*.02)*field)}%, 공격 속도 ${pct((ULT_BUFF.harmony.speed+level*.02)*field)}%가 오릅니다.`);
@@ -1078,9 +1078,11 @@ export function castPreview(s,id){
   }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 40마다 +1배 (최대 ${12+level}배).`);}
   else if(type==='dividend'){
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
-    lines.push(s.edictWave===s.wave?'이번 웨이브의 수입 증가는 이미 적용됐습니다.':'이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다.');
+    // The edict pays half of this wave's base income once; a second cast in the same wave only adds the tax.
+    const edict=Math.round(waveIncome(s.wave)*.5);lines.push(`이번 웨이브 종료 시 추가 골드 +${edict}${s.edictWave===s.wave?' · 적용 중':''}`);
   }else if(type==='crush'){
-    lines.push(`무작위 적 주변(반경 ${Number(crushRadius(s).toFixed(3))})에 ${hit(CRUSH.factor)}를 ${CRUSH.gap}초 간격으로 ${CRUSH.hits}번 줍니다.`);
+    const grow=Math.round((s.upgrades.behemoth||0)*CRUSH.trainingRadius*100);
+    lines.push(`무작위 적 주변에 ${hit(CRUSH.factor)}를 ${CRUSH.gap}초 간격으로 ${CRUSH.hits}번 줍니다.${grow?` 훈련으로 범위 +${grow}%.`:''}`);
     if(targets.length===1)lines.push(`적이 하나뿐이면 모두 그 적에게 들어갑니다(합계 ${hit(CRUSH.factor*CRUSH.hits)}).`);
   }else if(type==='bigshow'){
     lines.push(`적 전체에게 위력 ${UNDERDOG.factor}배, ${hit(UNDERDOG.factor)}를 줍니다.`);

@@ -910,6 +910,12 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .relic-slot small{font-size:10px;color:var(--text3)}
 .relic-slot.empty{justify-content:center;border:1.5px dashed var(--line2);color:var(--text3);font-size:11px}
 .relic-slot.empty .ic{width:14px;height:14px}
+.relic-slot.empty{background:none;cursor:pointer}
+.relic-row .portrait{display:grid;place-items:center}
+.relic-row .portrait img{width:38px;height:38px;object-fit:contain}
+.relic-row strong{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.relic-row .relic-lv{font-size:11px;font-weight:700;color:var(--text3)}
+.relic-row small.relic-effect{display:block;white-space:normal;overflow:visible;line-height:1.4;word-break:keep-all;color:var(--text2)}
 .relic-slots.compact{padding:0;background:none;border:0;margin:0 0 4px}
 .relic-slots.compact .relic-slot{min-height:46px}
 .relic-slots.compact .relic-slot.filled img{width:32px;height:32px}

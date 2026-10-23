@@ -58,7 +58,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 261,
-        "y": 213,
+        "y": 205,
         "size": 250
       }
     },
@@ -800,7 +800,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 253,
-        "y": 207,
+        "y": 199,
         "size": 250
       }
     },
@@ -948,7 +948,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 255,
+        "x": 248,
         "y": 207,
         "size": 250
       }
@@ -1060,7 +1060,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 262,
+        "x": 255,
         "y": 225,
         "size": 250
       }
@@ -1150,7 +1150,7 @@ export const HEROES = [
       "name": "대지분쇄",
       "cost": 70,
       "type": "crush",
-      "text": "무작위 적을 노려 주변(반경 112.5)에 위력 6배 충격을 0.5초 간격으로 3번 줍니다. 훈련마다 기본 반경의 5%가 더해집니다."
+      "text": "무작위 적을 노려 주변에 위력 6배 충격을 0.5초 간격으로 3번 줍니다. 훈련마다 범위 +5%."
     },
     "heightGroup": "tall",
     "role": "오라 증폭 · 대지 분쇄",
@@ -1208,7 +1208,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 261,
+        "x": 254,
         "y": 227,
         "size": 250
       }
@@ -1338,7 +1338,7 @@ export const HEROES = [
       "text": "적의 모든 디버프를 지우고 전체 7배 피해를 줍니다."
     },
     "heightGroup": "short",
-    "role": "오라 덱 · 범위",
+    "role": "디버프 무효 · 범위",
     "shape": "splash",
     "range": 480,
     "radius": 70
@@ -1412,7 +1412,7 @@ export const HEROES = [
       "text": "가장 성급이 낮은 동료 한 명을 불태워 소멸시키고(무적이면 소멸하지 않습니다), 가장 밀집한 반경 180의 적에게 위력 18배 피해를 줍니다."
     },
     "heightGroup": "medium",
-    "role": "화상 · 환원",
+    "role": "화상 · 범위",
     "shape": "splash",
     "range": 470,
     "radius": 64
@@ -1449,7 +1449,7 @@ export const HEROES = [
       "text": "적 전체에게 위력 3배 피해와 중독 3중첩을 주고, 10초 동안 적이 받는 화상·중독 피해가 2배가 됩니다."
     },
     "heightGroup": "medium",
-    "role": "지속 단일",
+    "role": "지속 피해 · 단일",
     "shape": "single",
     "range": 520,
     "radius": 0
