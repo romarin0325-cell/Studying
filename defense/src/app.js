@@ -1,5 +1,5 @@
 import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
-import {talkLines,greetLine} from './lines.js';
+import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
 import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
@@ -152,10 +152,29 @@ function confirmMonthlyClaim(){
   show('이 기록으로 보상을 확정할까요?',`${record.period} 월간 보스전`,`<div class="claim-score"><b>${record.round}</b><span>${tierName(record)} · 보스 격파</span></div><div class="reward-box"><span>확정할 보상</span>${gem(monthlyReward(record))}</div><p class="subtext">이번 달 보상은 한 번만 받을 수 있습니다. 기록을 더 올리고 싶다면 재도전한 뒤 수령하세요. 확정 후에도 최고 기록은 계속 갱신됩니다.</p>`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">더 도전하기</button><button class="primary" data-confirm-monthly="${record.token}">보상 확정</button></div>`,'monthly-claim');
 }
-// Summon reveal: a falling star in the best rarity's colour, a burst, then the
-// cards deal in face-down and flip one by one. Tapping the stage shows all.
-// A correct star quiz boosts a 10-pull (UR ×2); a lucky one adds a bonus 10-pull revealed after the first.
-let bonusItems=null;
+// Summon reveal. A falling star opens it. Each new result, and every SR/UR, then
+// gets a full-screen spotlight in pull order. The tall cards deal and flip after
+// that. Tap a spotlight for the next one. 건너뛰기 drops the remaining spotlights
+// into the deal; 모두 보기 (and a tap during the meteor) opens every card at once.
+// A correct star quiz boosts a 10-pull (UR ×2); a lucky one adds a bonus 10-pull.
+let bonusItems=null,spotItems=[],spotAt=0,spotToken=0;
+const motionOff=()=>$('app').dataset.reduced==='true'||!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const rarityOfId=id=>(HERO[id]||ARTIFACT[id]).rarity;
+function clearRevealTimers(){for(const t of revealTimers)clearTimeout(t);revealTimers=[];}
+// Portrait box in the 512 figure: same face size and eye line on every card.
+function faceVars(id){
+  const box=HERO[id]?.art?.portrait;
+  if(!box?.size)return '--px:.5;--py:.4;--ps:.49';
+  return `--px:${(box.x/512).toFixed(4)};--py:${(box.y/512).toFixed(4)};--ps:${(box.size/512).toFixed(4)}`;
+}
+function pullCard(item,kind,single){
+  const relic=kind==='relic',h=relic?ARTIFACT[item.id]:HERO[item.id];
+  const art=relic?`<span class="art relic-art">${image(item.id)}</span>`
+    :single?`<span class="art figure-art">${image(item.id,true)}</span>`
+    :`<span class="art face-art" style="${faceVars(item.id)}">${image(item.id,true)}</span>`;
+  return `<button class="hero-card pull-card" data-${relic?'relic':'hero'}="${item.id}" data-rarity="${h.rarity}" aria-label="${h.name}, ${h.rarity}, ${item.fresh?'신규 획득':'중복'}"><span class="pull-shade" aria-hidden="true"></span>${badge(h.rarity)}<span class="tag ${item.fresh?'new':'plus'}">${item.fresh?'NEW':'+1'}</span>${art}<span class="plate"><strong>${escapeText(h.name)}</strong></span></button>`;
+}
+const spotlightItem=item=>{const r=rarityOfId(item.id);return !!(item.fresh||r==='SR'||r==='UR');};
 function draw(count,free=false,boost=false){
   const result=act('draw',{banner,count,free,...(boost?{boost:true}:{})},false);if(!result.ok)return false;render();
   bonusItems=result.bonus?.length?result.bonus:null;
@@ -164,22 +183,69 @@ function draw(count,free=false,boost=false){
 function showBonus(){
   const items=bonusItems;bonusItems=null;if(!items)return;reveal(items,{count:items.length,lucky:true});
   // Luck confetti: pink and gold bursts around the stage before the cards deal.
-  if($('app').dataset.reduced!=='true')[[.2,.3],[.8,.26],[.5,.18],[.3,.62],[.72,.6]].forEach(([x,y],i)=>revealTimers.push(setTimeout(()=>{if(modal==='draw')burst(innerWidth*x,innerHeight*y,{count:14,spread:90,size:12,duration:1000,color:i%2?'#ffe08a':'#ffb3e0'});},250+i*140)));
+  if(!motionOff())[[.2,.3],[.8,.26],[.5,.18],[.3,.62],[.72,.6]].forEach(([x,y],i)=>revealTimers.push(setTimeout(()=>{if(modal==='draw')burst(innerWidth*x,innerHeight*y,{count:14,spread:90,size:12,duration:1000,color:i%2?'#ffe08a':'#ffb3e0'});},250+i*140)));
 }
 function reveal(items,{count,cost=0,boost=false,lucky=false}){
-  for(const t of revealTimers)clearTimeout(t);revealTimers=[];
-  const rarityOf=item=>(HERO[item.id]||ARTIFACT[item.id]).rarity,rank=item=>RARITIES.indexOf(rarityOf(item));
-  const best=items.reduce((a,b)=>rank(b)>rank(a)?b:a),top=rarityOf(best),kind=banner==='relic'?'relic':'hero',price=banner==='relic'?T.relicDrawCost:T.heroDrawCost;
-  const cards=items.map((item,i)=>`<div class="reveal-card" data-rarity="${rarityOf(item)}" style="--i:${i}">${card(item.id,kind,item,count===1)}${item.pity?'<span class="pity-tag">천장 확정</span>':''}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join(''),fresh=items.filter(i=>i.fresh).length;
-  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage ${lucky?'lucky':''}" data-top="${top}" data-count="${count}">${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?' · 별빛 퀴즈 UR 2배':''}`}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
+  clearRevealTimers();spotItems=[];spotAt=0;spotToken++;
+  const rank=item=>RARITIES.indexOf(rarityOfId(item.id));
+  const best=items.reduce((a,b)=>rank(b)>rank(a)?b:a),top=rarityOfId(best.id),kind=banner==='relic'?'relic':'hero',price=banner==='relic'?T.relicDrawCost:T.heroDrawCost;
+  const still=motionOff();
+  const cards=items.map((item,i)=>`<div class="reveal-card" data-rarity="${rarityOfId(item.id)}" style="--i:${i}">${pullCard(item,kind,count===1)}${item.pity?'<span class="pity-tag">천장 확정</span>':''}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join('');
+  const fresh=items.filter(i=>i.fresh).length;
+  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage${lucky?' lucky':''}${still?' skip':' hold'}" data-top="${top}" data-count="${count}"><div class="reveal-spot" hidden></div>${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?' · 별빛 퀴즈 UR 2배':''}`}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
     bonusItems&&!lucky?`<button class="primary wide shine lucky-next" data-action="bonus-reveal">${icon('summon')}<b>행운이 찾아왔어요!</b></button>`
       :`<div class="dialog-buttons"><button class="secondary" data-draw-again="${count}"><b>${count}회 더</b>${gem(price*count,p().dreams<price*count)}</button><button class="primary" data-action="close">확인</button></div>`,'draw');
   sound.reveal?.(top);
-  // Sparkle bursts follow each high-rarity flip (timings mirror the CSS).
-  const flipAt=i=>(count===1?1250:1150+i*120);
-  document.querySelectorAll('#sheet .reveal-card').forEach((node,i)=>{const r=node.dataset.rarity;if(r==='SR'||r==='UR')revealTimers.push(setTimeout(()=>{if(modal!=='draw'||!node.isConnected||node.closest('.skip'))return;const c=centerOf(node);burst(c.x,c.y,{count:r==='UR'?18:11,spread:r==='UR'?110:70,size:r==='UR'?14:11,duration:900,color:r==='UR'?'#ffe08a':'#d4b4ff'});},flipAt(i)+180));});
+  if(still)return;
+  spotItems=items.filter(spotlightItem);
+  // Meteor 0–0.62s, flash from 0.55s. Spotlights (or the deal, if nothing qualifies) start as the flash peaks.
+  revealTimers.push(setTimeout(()=>{if(modal==='draw')beginSpotlights();},900));
 }
-function skipReveal(){const stage=document.querySelector('#sheet .reveal-stage');if(stage)stage.classList.add('skip');for(const t of revealTimers)clearTimeout(t);revealTimers=[];}
+function revealStage(){return document.querySelector('#sheet .reveal-stage');}
+function setSpotting(on){const stage=revealStage();$('sheet').classList.toggle('spotting',on);stage?.classList.toggle('spotting',on);}
+function releaseGrid(){
+  if(modal!=='draw')return;
+  const stage=revealStage();if(!stage||stage.classList.contains('show-grid')||stage.classList.contains('skip'))return;
+  setSpotting(false);stage.classList.remove('hold');stage.classList.add('show-grid');
+  const spot=stage.querySelector('.reveal-spot');if(spot){spot.hidden=true;spot.replaceChildren();}
+  stage.querySelectorAll('.reveal-card').forEach((node,i)=>{
+    const r=node.dataset.rarity;if(r!=='SR'&&r!=='UR')return;
+    const at=Math.round((.5+i*.1+.22)*1000);
+    revealTimers.push(setTimeout(()=>{if(modal!=='draw'||!node.isConnected||node.closest('.skip'))return;const c=centerOf(node);burst(c.x,c.y,{count:r==='UR'?18:11,spread:r==='UR'?110:70,size:r==='UR'?14:11,duration:900,color:r==='UR'?'#ffe08a':'#d4b4ff'});},at));
+  });
+}
+function beginSpotlights(){
+  const stage=revealStage();if(!stage||stage.classList.contains('skip')||modal!=='draw')return;
+  if(!spotItems.length){releaseGrid();return;}
+  spotAt=0;renderSpotlight();
+}
+function renderSpotlight(){
+  const stage=revealStage(),item=spotItems[spotAt];if(!stage||!item||modal!=='draw')return;
+  const token=++spotToken,relic=banner==='relic',h=relic?ARTIFACT[item.id]:HERO[item.id],r=h.rarity;
+  const spot=stage.querySelector('.reveal-spot');if(!spot)return;
+  setSpotting(true);spot.hidden=false;spot.dataset.rarity=r;spot.classList.toggle('is-ur',r==='UR');
+  const line=relic?'':joinLine(item.id);
+  spot.innerHTML=`<div class="spot-rays" aria-hidden="true"></div><div class="spot-flash" aria-hidden="true"></div><div class="spot-figure${relic?' relic':''}">${image(item.id,!relic)}${item.fresh?'<span class="spot-new">NEW</span>':''}</div><div class="spot-copy"><p class="spot-rar">${r} · ${escapeText(RARITY[r].name)}</p><h3>${escapeText(h.name)}</h3><p class="spot-role">${escapeText(relic?'유물':h.role)}</p>${line?`<p class="spot-line">${escapeText(line)}</p>`:''}</div><button class="spot-skip" data-action="spot-skip">건너뛰기</button>`;
+  if(r==='UR')revealTimers.push(setTimeout(()=>{
+    if(modal!=='draw'||token!==spotToken)return;
+    burst(innerWidth*.5,innerHeight*.4,{count:26,spread:160,size:15,duration:1100,color:'#ffe08a'});
+    burst(innerWidth*.28,innerHeight*.3,{count:12,spread:80,size:11,duration:900,color:'#fff6cf'});
+    burst(innerWidth*.74,innerHeight*.33,{count:12,spread:80,size:11,duration:900,color:'#ffd36a'});
+  },680));
+}
+function advanceSpotlight(){
+  if(modal!=='draw')return;
+  const stage=revealStage();if(!stage||stage.classList.contains('skip')||stage.classList.contains('show-grid'))return;
+  if(!stage.classList.contains('spotting')){skipReveal();return;}
+  if(spotAt+1>=spotItems.length){spotItems=[];releaseGrid();return;}
+  spotAt++;renderSpotlight();
+}
+function skipSpots(){if(modal!=='draw')return;spotItems=[];spotToken++;releaseGrid();}
+function skipReveal(){
+  const stage=revealStage();spotItems=[];spotToken++;clearRevealTimers();
+  if(!stage)return;setSpotting(false);stage.classList.remove('hold');stage.classList.add('skip','show-grid');
+  const spot=stage.querySelector('.reveal-spot');if(spot){spot.hidden=true;spot.replaceChildren();}
+}
 function duration(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return `${String(Math.floor(seconds/3600)).padStart(2,'0')}:${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;}
 function timerText(end){return end<=now()?'귀환 완료':duration(end-now());}
 let editingDeck=[],teamReturn=null;
@@ -421,8 +487,8 @@ function showSettings(){
     <p class="fineprint">진행 데이터는 이 기기의 브라우저에 저장됩니다. 기기를 옮길 때는 백업 파일을 사용하세요.</p>
     <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
-function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
-function close(){if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late';releaseMemorial();modal=null;modalInfo=null;if(wasLeave&&!saveBlocked)paused=false;$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);}
+function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').classList.remove('spotting');$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
+function close(){if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
@@ -1113,7 +1179,7 @@ document.addEventListener('click',e=>{
   const actions={close:()=>{if(modal==='reward')return;if(modal==='draw'&&bonusItems){showBonus();return;}close();},settings:showSettings,partner:partners,team:()=>team(),'relic-team':()=>relicTeam(),'save-relics':()=>{if(act('relics',{ids:editingRelics}).ok){const back=relicReturn;relicReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
     'daily-all':()=>claimDaily(DAILY_MISSIONS.filter(m=>missionDone(todayDaily(),m.id)&&!todayDaily().claimed.includes(m.id)).map(m=>m.id)),
     bond:()=>bondSheet(d.id||p().partner),'gift-tray':()=>toggleTray(button),talk,'lobby-view':()=>setLobbyView(!lobbyView),idle:collectStars,'idle-shard':collectStars,
-    'memorial-story':()=>toggleStory(button),fullscreen:toggleFullscreen,'unit-info':unitInfo,'reveal-skip':skipReveal,
+    'memorial-story':()=>toggleStory(button),fullscreen:toggleFullscreen,'unit-info':unitInfo,'reveal-skip':skipReveal,'spot-skip':skipSpots,
     season:()=>{banner='season';screen='summon';render();},prepare:()=>prepare(Number(d.stage)),'prepare-mode':()=>prepare(Math.min(MAIN_STAGES,p().cleared+1),mode),resume,
     'save-team':()=>{if(act('deck',{ids:editingDeck}).ok){const back=teamReturn;teamReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
@@ -1139,7 +1205,10 @@ document.addEventListener('click',e=>{
 document.addEventListener('pointerdown',e=>{
   const b=e.target.closest?.('.primary,.secondary,.nav-item,.lb-btn,.cc,.skill-button,.tabbar button,.slot,.frame,.tray-gift');
   if(b&&!b.disabled)tapSpark(e.clientX,e.clientY,b.classList.contains('primary')?'#ffe39a':'#cfe2ff');
-  if(e.target.closest?.('.reveal-stage')&&!e.target.closest('button'))skipReveal();
+  if(e.target.closest?.('button'))return;
+  // A spotlight tap advances one result. Anywhere else on the summon stage, including the meteor, opens every card.
+  if(modal==='draw'&&$('sheet').classList.contains('spotting')){advanceSpotlight();return;}
+  if(e.target.closest?.('.reveal-stage'))skipReveal();
 },{passive:true});
 document.addEventListener('change',e=>{if(e.target.id==='quality-select')act('setting',{id:'quality',value:e.target.value},false);});
 $('backup-input').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>2*1024*1024){toast('백업 파일은 2MB 이하만 가능합니다.');return;}try{const raw=await file.text();if(!JSON.parse(raw)){toast('올바른 백업 파일이 아닙니다.');return;}show('백업을 복원할까요?','데이터',`<p class="subtext">현재 진행 데이터가 선택한 백업으로 교체됩니다. 필요하면 먼저 현재 데이터를 백업하세요.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="export">현재 데이터 백업</button><button id="confirm-import" class="primary">복원</button></div>`,'import');$('confirm-import').onclick=()=>{const result=store.import(raw);toast(result.ok?'백업을 복원했습니다.':result.message);if(result.ok){close();screen='home';run=null;render();}};}catch{toast('백업 파일을 읽을 수 없습니다.');}});

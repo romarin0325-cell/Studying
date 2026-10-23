@@ -289,7 +289,7 @@ em{font-style:normal}
 .overlay:has(.sheet[data-kind=draw]){backdrop-filter:none;background:#05071a}
 /* Anything behind an open sheet holds still: no hidden work while a sheet is up. */
 .app[aria-hidden=true] *,.app[aria-hidden=true]::before{animation-play-state:paused!important}
-.sheet[data-kind=draw]{height:100dvh;max-height:100dvh;border-radius:0;border:0;background:#05071a;animation:none}
+.sheet[data-kind=draw]{height:100dvh;max-height:100dvh;border-radius:0;border:0;background:#05071a;animation:none;overflow:hidden}
 .sheet[data-kind=draw]::before{display:none}
 .sheet[data-kind=draw] .sheet-top{position:absolute;left:0;right:0;top:0;z-index:6;border:0;background:linear-gradient(180deg,rgba(4,6,20,.85),transparent)}
 .sheet[data-kind=draw] .sheet-body{flex:1;padding:0;position:relative;background:var(--altar) 50% 70%/cover}
@@ -326,8 +326,96 @@ em{font-style:normal}
 .reveal-grid.single .reveal-card .card-back i{width:34%}
 .reveal-caption{margin:0;text-align:center;font-size:13px;color:var(--text2);text-shadow:0 1px 6px #000;animation:fade-in .4s 2.2s both}
 .reveal-stage[data-count="1"] .reveal-caption{animation-delay:1.7s}
-.reveal-skip{position:absolute;right:12px;top:64px;z-index:5;min-height:32px;padding:4px 12px;border-radius:16px;font-size:12px;font-weight:700;color:var(--text2);background:rgba(6,9,28,.7);border:1px solid var(--line2);animation:fade-out .3s 2.6s both}
+.reveal-skip{position:absolute;right:12px;top:66px;z-index:45;min-height:32px;padding:4px 12px;border-radius:16px;font-size:12px;font-weight:700;color:var(--text2);background:rgba(6,9,28,.7);border:1px solid var(--line2);animation:fade-out .3s 2.6s both}
 .reveal-stage.skip *,.reveal-stage.skip::before{animation-delay:0s!important;animation-duration:.01s!important;animation-iteration-count:1!important}
+
+/* Summon result. The meteor plays, then each new or SR/UR result gets a full-screen spotlight.
+   The 5×2 cards deal only after that. Delays below are from the moment .hold is removed;
+   arrival keeps the meteor-offset timing above. Face crops use the portrait box (--px/--py/--ps
+   of the 512 figure) so every card shares one face size and one eye line. */
+.sheet[data-kind=draw] .sheet-body{display:flex;flex-direction:column;overflow:hidden}
+.sheet[data-kind=draw] .sheet-top{z-index:70}
+.sheet[data-kind=draw] .reveal-stage{flex:1;min-height:0;width:100%;height:auto;justify-content:center;gap:8px;padding:72px 16px 8px}
+.sheet[data-kind=draw] .reveal-stage::before{background:radial-gradient(ellipse 78% 46% at 50% 46%,color-mix(in srgb,var(--c) 40%,transparent),transparent 68%),linear-gradient(180deg,rgba(4,6,20,.2),rgba(4,6,20,.62))}
+.sheet[data-kind=draw].spotting .sheet-body{z-index:8;overflow:visible}
+.sheet[data-kind=draw].spotting .sheet-footer{visibility:hidden}
+.sheet[data-kind=draw] .reveal-caption{min-height:2.7em;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1.4}
+.reveal-stage:not(.arrival) .reveal-card{animation-delay:calc(var(--i)*.05s)}
+.reveal-stage:not(.arrival) .reveal-card .hero-card{animation-delay:calc(.5s + var(--i)*.1s)}
+.reveal-stage:not(.arrival) .reveal-card .card-back{animation:flip-back .48s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}
+.reveal-stage:not(.arrival) .reveal-card[data-rarity=SR] .card-back,.reveal-stage:not(.arrival) .reveal-card[data-rarity=UR] .card-back{animation:flip-back .48s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}
+.reveal-stage:not(.arrival) .reveal-card[data-rarity=SR]::after,.reveal-stage:not(.arrival) .reveal-card[data-rarity=UR]::after{animation-delay:calc(.55s + var(--i)*.1s)}
+.reveal-stage:not(.arrival) .reveal-caption{animation-delay:1.7s}
+.reveal-stage:not(.arrival)[data-count="1"] .reveal-caption{animation-delay:.7s}
+.reveal-stage:not(.arrival) .reveal-skip{animation-delay:2.15s}
+.reveal-stage:not(.arrival) .pity-tag{bottom:26px;font-size:8px;padding:0 4px;animation-delay:calc(.72s + var(--i)*.1s)}
+.reveal-stage.hold .reveal-grid{visibility:hidden}
+.reveal-stage.hold .reveal-card,.reveal-stage.hold .reveal-card .hero-card,.reveal-stage.hold .card-back,.reveal-stage.hold .card-back::before,.reveal-stage.hold .reveal-card::after,.reveal-stage.hold .pity-tag,.reveal-stage.hold .reveal-caption,.reveal-stage.hold .reveal-skip,.reveal-stage.hold .lucky-banner,.reveal-stage.hold .pull-card::after{animation-play-state:paused}
+.reveal-stage.spotting{overflow:visible}
+.reveal-card[data-rarity=SR] .card-back::before,.reveal-card[data-rarity=UR] .card-back::before{content:'';position:absolute;inset:-5px;border-radius:16px;box-shadow:0 0 14px var(--g),0 0 28px var(--g);opacity:0;pointer-events:none}
+.reveal-stage:not(.arrival) .reveal-card[data-rarity=SR] .card-back::before,.reveal-stage:not(.arrival) .reveal-card[data-rarity=UR] .card-back::before{animation:back-glow .32s calc(var(--i)*.08s) ease-out forwards}
+@keyframes back-glow{to{opacity:1}}
+
+.sheet[data-kind=draw] .reveal-grid:not(.single){gap:6px;align-content:center}
+.reveal-grid:not(.single) .pull-card{--eye:37%;--zoom:1.06;aspect-ratio:3/6.35;width:100%;height:auto;min-height:0;padding:0;border-radius:11px;display:block}
+.reveal-grid:not(.single) .pull-card .art:before{display:none}
+.reveal-grid:not(.single) .pull-card .pull-shade{position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 26%),radial-gradient(ellipse 110% 62% at 50% 30%,color-mix(in srgb,var(--r) 58%,transparent),transparent 72%)}
+.reveal-grid:not(.single) .pull-card .face-art{position:absolute;inset:0;z-index:1;margin:0;height:auto;overflow:hidden;display:block}
+.reveal-grid:not(.single) .pull-card .face-art img{position:absolute;width:calc(100% * var(--zoom) / var(--ps));max-width:none;max-height:none;height:auto;left:50%;top:var(--eye);transform:translate(calc(var(--px) * -100%),calc(var(--py) * -100%));object-fit:fill}
+.reveal-grid:not(.single) .pull-card .relic-art{position:absolute;inset:12px 5px 28px;z-index:1;margin:0;height:auto;display:grid;place-items:center}
+.reveal-grid:not(.single) .pull-card .relic-art img{width:100%;max-width:none;max-height:100%;height:auto;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
+.reveal-grid:not(.single) .pull-card .badge{top:3px;left:3px;z-index:3;font-size:8px;min-width:0;padding:0 3px}
+.reveal-grid:not(.single) .pull-card .tag{z-index:3;margin:0;width:auto;height:auto}
+.reveal-grid:not(.single) .pull-card .tag.new{top:0;right:0;padding:2px 5px 1px;border-radius:0 9px 0 7px;font-size:8px;letter-spacing:.04em;background:linear-gradient(180deg,#ffe1c4,#ff7a62);color:#3a120c;box-shadow:0 2px 5px rgba(0,0,0,.35)}
+.reveal-grid:not(.single) .pull-card .tag.plus{top:3px;right:3px;padding:0 3px;border-radius:5px;font-size:8px;font-weight:800;color:var(--text2);background:rgba(8,12,28,.72)}
+.reveal-grid:not(.single) .pull-card .plate{position:absolute;left:0;right:0;bottom:0;z-index:2;height:26px;display:flex;align-items:flex-end;justify-content:center;padding:0 2px 3px;background:linear-gradient(180deg,transparent,rgba(5,7,18,.92) 55%)}
+.reveal-grid:not(.single) .pull-card .plate strong{font-size:8px;font-weight:800;line-height:1.15;letter-spacing:-.03em;white-space:normal;text-overflow:unset;overflow:hidden;max-height:2.3em;text-shadow:0 1px 2px #000}
+.pull-card[data-rarity=C]{box-shadow:0 5px 12px rgba(0,0,0,.4)}
+.pull-card[data-rarity=R]{box-shadow:0 0 10px rgba(80,168,255,.5),0 6px 12px rgba(0,0,0,.42)}
+.pull-card[data-rarity=SR]{box-shadow:0 0 12px rgba(176,120,255,.6),0 6px 14px rgba(0,0,0,.42)}
+.pull-card[data-rarity=UR]{box-shadow:0 0 14px rgba(255,207,90,.7),0 6px 14px rgba(0,0,0,.45)}
+.pull-card[data-rarity=UR]::after{animation-duration:5.5s}
+.reveal-grid.single .pull-card{width:min(78vw,300px);aspect-ratio:3/4.5;min-height:0;padding:0;border-radius:22px;display:block}
+.sheet[data-kind=draw] .reveal-grid.single{grid-template-columns:min(78vw,300px);justify-content:center}
+.reveal-grid.single .pull-card .art:before{display:none}
+.reveal-grid.single .pull-card .pull-shade{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 72% 50% at 50% 46%,color-mix(in srgb,var(--r) 64%,transparent),transparent 70%)}
+.reveal-grid.single .pull-card .figure-art,.reveal-grid.single .pull-card .relic-art{position:absolute;inset:8px 0 62px;z-index:1;margin:0;height:auto;display:grid;overflow:hidden}
+.reveal-grid.single .pull-card .figure-art{place-items:end center}
+.reveal-grid.single .pull-card .figure-art img{width:122%;height:auto;max-width:none;max-height:none;object-fit:fill;object-position:center bottom;filter:drop-shadow(0 12px 16px rgba(0,0,0,.45))}
+.reveal-grid.single .pull-card .relic-art{place-items:center;inset:48px 36px 84px}
+.reveal-grid.single .pull-card .relic-art img{width:100%;height:auto;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.45))}
+.reveal-grid.single .pull-card .badge{top:10px;left:10px;z-index:3;font-size:12px}
+.reveal-grid.single .pull-card .tag.new{top:12px;right:12px;z-index:3;padding:3px 8px;border-radius:8px;font-size:12px;background:linear-gradient(180deg,#ffe1c4,#ff7a62);color:#3a120c}
+.reveal-grid.single .pull-card .tag.plus{top:12px;right:12px;z-index:3;font-size:12px}
+.reveal-grid.single .pull-card .plate{position:absolute;left:0;right:0;bottom:0;z-index:2;height:64px;display:flex;align-items:flex-end;justify-content:center;padding:0 10px 12px;background:linear-gradient(180deg,transparent,rgba(5,7,18,.9) 48%)}
+.reveal-grid.single .pull-card .plate strong{font-family:var(--display);font-weight:400;font-size:28px;line-height:1.15;white-space:normal;text-overflow:unset;overflow:hidden}
+.reveal-grid.single .pity-tag{bottom:58px;font-size:11px}
+
+.reveal-spot{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;padding:64px 20px 16px;overflow:hidden;background:radial-gradient(ellipse 90% 55% at 50% 38%,color-mix(in srgb,var(--r) 48%,transparent),transparent 72%),linear-gradient(180deg,#090c1e 0%,#121736 46%,#07091a 100%)}
+.reveal-stage.spotting .reveal-spot{bottom:-80px}
+.reveal-spot[data-rarity=C]{--spot:#9eb0c4}.reveal-spot[data-rarity=R]{--spot:#6fc0ff}.reveal-spot[data-rarity=SR]{--spot:#c7a0ff}.reveal-spot[data-rarity=UR]{--spot:#ffd36a}
+.reveal-spot.is-ur{background:radial-gradient(ellipse 70% 46% at 50% 34%,rgba(255,214,120,.62),transparent 68%),linear-gradient(180deg,#241a0c 0%,#161022 48%,#07060f 100%)}
+.spot-rays{position:absolute;left:50%;top:36%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,transparent 0 14deg,color-mix(in srgb,var(--spot) 32%,transparent) 16deg 20deg,transparent 22deg 36deg);-webkit-mask:radial-gradient(closest-side,#000 0%,transparent 70%);mask:radial-gradient(closest-side,#000 0%,transparent 70%);opacity:.9;animation:spot-rays 14s linear infinite;pointer-events:none}
+@keyframes spot-rays{to{transform:translate(-50%,-50%) rotate(18deg)}}
+.spot-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,#fff 0,color-mix(in srgb,var(--spot) 80%,#fff) 16%,transparent 58%);opacity:0;animation:flash .45s ease-out both;pointer-events:none}
+.reveal-spot.is-ur .spot-flash{background:radial-gradient(circle at 50% 38%,#fff 0,#ffe9a8 18%,transparent 60%);animation-duration:.85s}
+.spot-figure{position:relative;z-index:1;flex:none;width:100%;height:58vh;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;animation:spot-in .48s cubic-bezier(.2,.85,.2,1) both}
+.spot-figure::after{content:'';position:absolute;left:18%;right:18%;bottom:0;height:22px;background:radial-gradient(ellipse,rgba(0,0,0,.45),transparent 70%);pointer-events:none}
+.spot-figure img{position:relative;z-index:1;height:112%;width:auto;max-width:none;max-height:none;flex:none;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 16px 18px rgba(0,0,0,.5))}
+.spot-figure.relic{height:42vh}
+.spot-figure.relic img{height:auto;width:min(52vw,220px);max-height:40vh}
+.reveal-spot.is-ur .spot-figure{animation-delay:.4s}
+@keyframes spot-in{from{opacity:0;transform:translateY(26px) scale(.9)}}
+.spot-new{position:absolute;right:8%;top:10%;z-index:2;padding:4px 12px 2px;border-radius:8px;font-family:var(--display);font-size:26px;font-weight:400;letter-spacing:.08em;color:#fff8f2;background:linear-gradient(180deg,#ffb7a4,#e23d3d);box-shadow:0 8px 16px rgba(140,20,20,.4);transform:rotate(-8deg);animation:spot-stamp .4s .2s cubic-bezier(.2,1.3,.3,1) both}
+.reveal-spot.is-ur .spot-new{animation-delay:.55s}
+@keyframes spot-stamp{from{opacity:0;transform:rotate(-8deg) scale(1.5)}}
+.spot-copy{position:relative;z-index:1;width:min(100%,34em);margin-top:auto;text-align:center;animation:fade-in .35s .12s both}
+.reveal-spot.is-ur .spot-copy{animation-delay:.55s}
+.spot-rar{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--spot);text-shadow:0 0 12px color-mix(in srgb,var(--spot) 70%,transparent)}
+.spot-copy h3{font-family:var(--display);font-weight:400;font-size:32px;line-height:1.15;margin-top:1px;background:linear-gradient(180deg,#fff,#f6e2b0);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.spot-role{margin-top:2px;font-size:13px;font-weight:700;color:var(--text2)}
+.spot-line{margin-top:8px;font-size:14px;line-height:1.5;color:#f4f6ff;text-shadow:0 1px 6px #000}
+.spot-skip{position:relative;z-index:2;align-self:flex-end;min-height:40px;margin-top:6px;padding:6px 14px;border-radius:16px;font-size:13px;font-weight:800;color:var(--text2);background:rgba(6,9,28,.72);border:1px solid var(--line2)}
 
 /* ───────── Dispatch ───────── */
 
@@ -1057,8 +1145,8 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .reveal-stage.lucky{--c:#ffb3e0}
 .reveal-stage.lucky::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;transform:scale(1.6);background:conic-gradient(from 0deg at 50% 46%,rgba(255,179,224,0),rgba(255,226,140,.22),rgba(160,220,255,.18),rgba(255,179,224,.22),rgba(255,179,224,0));animation:lucky-spin 6s linear infinite,fade-in .8s .3s both}
 @keyframes lucky-spin{to{transform:scale(1.6) rotate(1turn)}}
-.lucky-banner{position:absolute;left:50%;top:15%;z-index:5;transform:translateX(-50%);white-space:nowrap;font-family:var(--display);font-size:30px;letter-spacing:.04em;background:linear-gradient(180deg,#fff,#ffd36a 55%,#ff9ecf);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 12px rgba(255,179,224,.8));animation:lucky-pop 1.6s cubic-bezier(.2,.9,.3,1.3) both;pointer-events:none}
-@keyframes lucky-pop{0%{opacity:0;transform:translateX(-50%) scale(.4)}25%{opacity:1;transform:translateX(-50%) scale(1.15)}40%{transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-14px)}}
+.lucky-banner{position:absolute;left:50%;top:15%;z-index:5;transform:translateX(-50%);white-space:nowrap;font-family:var(--display);font-size:30px;letter-spacing:.04em;background:linear-gradient(180deg,#fff,#ffd36a 55%,#ff9ecf);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 12px rgba(255,179,224,.8));animation:lucky-pop 3.2s cubic-bezier(.2,.9,.3,1.3) both;pointer-events:none}
+@keyframes lucky-pop{0%{opacity:0;transform:translateX(-50%) scale(.4)}12%{opacity:1;transform:translateX(-50%) scale(1.12)}20%{transform:translateX(-50%) scale(1)}78%{opacity:1;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-14px)}}
 .reveal-stage.lucky .reveal-card .hero-card{box-shadow:0 0 14px rgba(255,179,224,.55)}
 
 /* ═════════ Final UI (2026-10-14) ═════════
