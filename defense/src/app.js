@@ -739,20 +739,20 @@ function tierPicker(kind,withAction=true){
   return `<div class="tier-picker" role="radiogroup" aria-label="난이도">${TIER_IDS.map(id=>{const t=TIERS[id],open=cleared>=t.unlock,on=challengeTier===id;return `<button class="tier ${id}" ${withAction?`data-tier="${id}"`:''} role="radio" aria-checked="${on}" ${open?'':'disabled'}><b>${t.name}</b><small>${open?`보상 ×${t.reward}`:`${icon('lock')}${t.unlock}`}</small></button>`;}).join('')}</div>`;
 }
 function modeCard(kind){
-  const profile=p(),unlocked=profile.cleared>=3,t=TIERS[challengeTier]||TIERS.easy;
+  const profile=p(),unlocked=profile.cleared>=TIERS.easy.unlock,t=TIERS[challengeTier]||TIERS.easy;
   if(kind==='monthly'){
     const record=currentRecord(profile,now()),claimed=profile.monthly===calendar(now()).month;
     return `<div class="mode monthly"><div class="mode-top"><span class="mode-tag">${monthNo(calendar(now()))} · 입장 무제한</span><button class="info-btn" data-action="mode-info" data-kind="monthly" aria-label="규칙">${icon('info')}</button></div>
       <h2>월간 보스전</h2><p>${CHALLENGE_WAVES}연전으로 이어지는 보스와 싸워 이번 달 최고 기록을 남겨요.</p>${tierPicker('monthly')}
       <div class="mode-record"><div><small>이번 달 최고</small><b>${record?`${record.round}<em>/${CHALLENGE_WAVES}</em>`:'—'}</b>${record?`<span>${tierName(record)}</span>`:''}</div>${claimed?`<span class="mode-claimed">${icon('check')}보상 받음</span>`:record?`<button class="secondary" data-action="monthly-claim">${gem(monthlyReward(record))}<span>받기</span></button>`:`<span class="mode-hint">완주 ${gem(monthlyReward({round:CHALLENGE_WAVES,tier:challengeTier}))}</span>`}</div>
-      <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||profile.active?'disabled':''}>${!unlocked?'스테이지 3 클리어 후 열려요':`${t.name} 도전`}</button></div>`;
+      <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||profile.active?'disabled':''}>${!unlocked?`스테이지 ${TIERS.easy.unlock} 클리어 후 열려요`:`${t.name} 도전`}</button></div>`;
   }
   const used=profile.weekly===calendar(now()).week;
   return `<div class="mode weekly"><div class="mode-top"><span class="mode-tag">주 1회 · 월요일 초기화</span><button class="info-btn" data-action="mode-info" data-kind="weekly" aria-label="규칙">${icon('info')}</button></div>
     <h2>주간 드래프트</h2><p>둘 중 한 명을 ${TEAM_SIZE}번 골라 팀을 꾸리고 ${CHALLENGE_WAVES}웨이브를 넘어요.</p>${tierPicker('weekly')}
     <div class="boss-route">${weeklyBosses().map((id,i)=>`<span><em>${(i+1)*3}</em>${BOSSES[id].name.replace('의 여신 ','의 ')}</span>`).join('')}</div>
     <div class="mode-record"><div><small>완주 보상</small><b>${gem(weeklyReward(challengeTier,CHALLENGE_WAVES,true))}</b></div><span class="mode-hint">${used?'이번 주 입장 완료':'이번 주 1회 남음'}</span></div>
-    <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||used||profile.active?'disabled':''}>${!unlocked?'스테이지 3 클리어 후 열려요':used?'다음 주에 다시 열려요':`${t.name} 드래프트 시작`}</button></div>`;
+    <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||used||profile.active?'disabled':''}>${!unlocked?`스테이지 ${TIERS.easy.unlock} 클리어 후 열려요`:used?'다음 주에 다시 열려요':`${t.name} 드래프트 시작`}</button></div>`;
 }
 function modeInfo(kind){
   const t=TIERS[challengeTier]||TIERS.easy;

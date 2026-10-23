@@ -55,9 +55,11 @@ export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple'
 // late waves add `late` extra health (quadratic in run progress). Rewards scale with `reward`.
 export const CHALLENGE_WAVES=18;
 export const TIERS=Object.freeze({
-  easy:{name:'쉬움',unlock:3,from:4,to:14,late:1.2,boss:1,monthly:1.3,reward:1},
-  hard:{name:'어려움',unlock:18,from:15,to:30,late:2,boss:1.15,monthly:.57,reward:1.5},
-  abyss:{name:'심연',unlock:36,from:28,to:48,late:3.4,boss:1.3,monthly:.39,reward:2.2},
+  // Retuned for the 90-stage story (2026-10-24). from/to are main-stage equivalents.
+  // See docs/archive/CHALLENGE_90_RETUNE.md.
+  easy:{name:'쉬움',unlock:3,from:4,to:34,late:1.6,boss:1,monthly:.20,reward:1.3},
+  hard:{name:'어려움',unlock:36,from:28,to:62,late:2.2,boss:1.15,monthly:.20,reward:2.3},
+  abyss:{name:'심연',unlock:72,from:56,to:86,late:3,boss:1.3,monthly:.23,reward:3.4},
 });
 export const TIER_IDS=Object.keys(TIERS);
 export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;
