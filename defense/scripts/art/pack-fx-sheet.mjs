@@ -5,7 +5,7 @@
 // Usage: node defense/scripts/art/pack-fx-sheet.mjs <nodeModulesDir> <in.png> <out.webp> <report.json> [columns rows]
 import {createRequire} from 'node:module';
 import fs from 'node:fs/promises';
-const [modDir,input,output,reportFile,colArg='4',rowArg='2']=process.argv.slice(2),COLS=Number(colArg),ROWS=Number(rowArg),CELL=256,INNER=236;
+const [modDir,input,output,reportFile,colArg='4',rowArg='2']=process.argv.slice(2),COLS=Number(colArg),ROWS=Number(rowArg),CELL=256,INNER=228;
 const sharp=createRequire(modDir+'/x.js')('sharp');
 const base=sharp(input).removeAlpha();const {width,height}=await base.metadata();
 const raw=await base.raw().toBuffer(),LUM=30;

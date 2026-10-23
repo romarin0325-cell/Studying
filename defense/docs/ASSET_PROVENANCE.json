@@ -17,6 +17,34 @@
       "height": 512
     },
     {
+      "id": "effects-companion-sweet",
+      "source": "defense/assets/merge/effects-companion-sweet.webp",
+      "sha256": "8c994c86550e4f1b0f02113d447ec205e1e5d8b7c11edfc40d5a7cfe00cb67db",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "effects-companion-twilight",
+      "source": "defense/assets/merge/effects-companion-twilight.webp",
+      "sha256": "82b8ed9b08ab332e90679aad86fe4b23a08cc6fb1a9b7154b96425ca1f3a5e3b",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "ultimates-extra-a",
+      "source": "defense/assets/merge/ultimates-extra-a.webp",
+      "sha256": "09989e11e29fb07202f3e3256f1c164b0bc6124ee672a64f0c99ad2f0e24e58e",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "ultimates-extra-b",
+      "source": "defense/assets/merge/ultimates-extra-b.webp",
+      "sha256": "b211393672c5a73f47c7e0b4b22b3054e99db9492a3c7e34d6c3ceb1995fe9fa",
+      "width": 768,
+      "height": 512
+    },
+    {
       "id": "unit-zeke",
       "source": "defense/assets/cast-v2/zeke.webp",
       "sha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",

@@ -50,9 +50,9 @@
     }
   },
   "totals": {
-    "sourceBytes": 23450750,
-    "deployableSourceBytes": 21852208,
-    "outputBytes": 12916320,
+    "sourceBytes": 23299108,
+    "deployableSourceBytes": 21700566,
+    "outputBytes": 12838122,
     "optimizedFiles": 150,
     "derivedFiles": 144,
     "derivedOutputBytes": 3418204
@@ -109,8 +109,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 583920,
-        "sha256": "cee530aadc237c97264975d84381260d75d467947c5d8feed6232b798387cd7b",
+        "bytes": 548480,
+        "sha256": "8c994c86550e4f1b0f02113d447ec205e1e5d8b7c11edfc40d5a7cfe00cb67db",
         "metadata": {
           "width": 1024,
           "height": 512,
@@ -120,8 +120,8 @@
       },
       "output": {
         "path": "./assets/optimized/merge/effects-companion-sweet.webp",
-        "bytes": 320616,
-        "sha256": "214db13d073a18ed985cca56beaf80be6422be29b88662a0ce14d0b8ff5b89b8",
+        "bytes": 301972,
+        "sha256": "f4f2a60236ddf97a493bf74f6c86ad037171729b7b5ea0cdc6f56b975dc81779",
         "metadata": {
           "width": 1024,
           "height": 512,
@@ -140,8 +140,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 546186,
-        "sha256": "2661f4fe79e5099b4f894463635a7d6305d7fb3c8f5f3d89535b07ca540b65de",
+        "bytes": 514596,
+        "sha256": "82b8ed9b08ab332e90679aad86fe4b23a08cc6fb1a9b7154b96425ca1f3a5e3b",
         "metadata": {
           "width": 1024,
           "height": 512,
@@ -151,8 +151,8 @@
       },
       "output": {
         "path": "./assets/optimized/merge/effects-companion-twilight.webp",
-        "bytes": 269418,
-        "sha256": "535fdb515ca9113b19af4cf2f835e410e74c298b662823379a928aec400164b9",
+        "bytes": 254214,
+        "sha256": "46682d85c74ce35573da2817ec89469efa42ae4448567ec19b0156cceae4f79c",
         "metadata": {
           "width": 1024,
           "height": 512,
@@ -171,8 +171,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 740816,
-        "sha256": "c6b2990086a2cd89ba2e781d6b2a4a9305cf16bca153eb0c0327c3c6d9fed1c2",
+        "bytes": 697720,
+        "sha256": "09989e11e29fb07202f3e3256f1c164b0bc6124ee672a64f0c99ad2f0e24e58e",
         "metadata": {
           "width": 1024,
           "height": 512,
@@ -182,8 +182,8 @@
       },
       "output": {
         "path": "./assets/optimized/merge/ultimates-extra-a.webp",
-        "bytes": 418010,
-        "sha256": "b84d2b8dc8e7a13c59aeedbf3b4c798889eedda5aa318e45e5489697a6f4f127",
+        "bytes": 394112,
+        "sha256": "4406ba71a9c689b5ec1232d1e9be097bd35dadcbdb73ff2c4ea770b5e71b3570",
         "metadata": {
           "width": 1024,
           "height": 512,
@@ -202,8 +202,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 615538,
-        "sha256": "3f788ce34f61b0a7c152d99a3ee4af480309e053e884fefee609f544b8e493af",
+        "bytes": 574022,
+        "sha256": "b211393672c5a73f47c7e0b4b22b3054e99db9492a3c7e34d6c3ceb1995fe9fa",
         "metadata": {
           "width": 768,
           "height": 512,
@@ -213,8 +213,8 @@
       },
       "output": {
         "path": "./assets/optimized/merge/ultimates-extra-b.webp",
-        "bytes": 337252,
-        "sha256": "1b58772afddbcf7f3c8c35df259ceee864a1acaf35914e211cde0888f8cbf930",
+        "bytes": 316800,
+        "sha256": "017142b1444c2b93e923c9f8cb56141bb5f3edd55b8ba738ed1cee535ae7380f",
         "metadata": {
           "width": 768,
           "height": 512,
