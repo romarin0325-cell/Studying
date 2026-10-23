@@ -87,7 +87,7 @@ card/
   DESIGN.md           레퍼런스와 확정한 디자인 원칙
 ```
 
-`card/game/`의 데이터·로직을 직접 읽어 빌드합니다. 학습 데이터를 별도 리마스터 복사본이나 런타임 오버레이로 관리하지 않습니다. 기존 컨트롤러와 보조 모드·다이얼로그는 기존 DOM ID를 유지하고, 주요 화면은 새 마크업과 렌더러를 사용합니다. 게임 소스의 스크립트 또는 화면 경계가 달라지면 빌드가 명시적으로 실패하게 해 계약 변경을 발견합니다. `card_legacy/`는 승격 시점의 보존본이며 활성 소스가 아닙니다.
+`card/game/`의 데이터·로직을 직접 읽어 빌드합니다. 학습 데이터를 별도 리마스터 복사본이나 런타임 오버레이로 관리하지 않습니다. 기존 컨트롤러와 보조 모드·다이얼로그는 기존 DOM ID를 유지하고, 주요 화면은 새 마크업과 렌더러를 사용합니다. 게임 소스의 스크립트 또는 화면 경계가 달라지면 빌드가 명시적으로 실패하게 해 계약 변경을 발견합니다.
 
 규칙 재구현은 [GAME_MANUAL.md](./GAME_MANUAL.md), 모듈 연결은 [card_game_structure.md](./card_game_structure.md)와 [card_game_structure_visual.html](./card_game_structure_visual.html), 수정 위치는 [CODING_GUIDE.md](./CODING_GUIDE.md)를 봅니다.
 

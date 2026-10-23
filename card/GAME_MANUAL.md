@@ -12,13 +12,11 @@
 - 모듈 구조: [card_game_structure.md](./card_game_structure.md)
 - 수정 위치: [CODING_GUIDE.md](./CODING_GUIDE.md)
 
-`card_legacy/`는 승격 시점 스냅샷이며 활성 소스가 아닙니다.
-
 ---
 
 ## 0. 코드 동기화 정오표 (필독)
 
-레거시 `card_legacy/GAME_MANUAL.md` 대비 현재 코드에서 바로잡아야 하는 점입니다.
+현재 코드에서 바로잡아 둔 점입니다.
 
 - 경로: 예전 `card/index.html`, `card/logic.js` 등은 이제 `card/game/` 아래에 있습니다.
 - 배포물: 플레이어가 여는 파일은 `card/dist/DREAMWEAVER.html` 한 장입니다. `card/game/index.html`은 빌드 계약·레거시 DOM ID의 소스입니다.

@@ -34,98 +34,91 @@ test('Astra edition builds before its focused browser check and never selects un
   assert.deepEqual(createPlan(changes('card_astra/README.md')).steps, []);
 });
 
-test('Star Garden is an isolated target with one build and no existing Defense commands', () => {
-  const plan = createPlan(changes('defense_test/src/content.js', 'defense_test/src/app.js', 'defense_test/src/combat/engine.js', 'defense_test/dist/StarGardenDefense.html', 'scripts/verify_plan.js'));
+test('Star Garden is an isolated target with one build and no commands for other games', () => {
+  const plan = createPlan(changes('defense/src/content.js', 'defense/src/app.js', 'defense/src/combat/engine.js', 'defense/dist/StarGardenDefense.html', 'scripts/verify_plan.js'));
   assert.deepEqual(plan.blocked, []);
-  assert.deepEqual([...games(plan)], ['defense_test', 'verification']);
-  assert.equal(plan.steps.filter(s => s.id === 'defense_test:build').length, 1);
-  assert.doesNotMatch(plan.steps.map(s => s.args.join(' ')).join('\n'), /lint:defense|test:defense|defense\/tests|shooter\/|card\/tests|survivor\/|idle\//);
-  const dedicated = createPlan(changes('defense_test/src/app.js', 'scripts/verify_plan.js'), { onlyGame: 'defense' });
+  assert.deepEqual([...games(plan)], ['defense', 'verification']);
+  assert.equal(plan.steps.filter(s => s.id === 'defense:build').length, 1);
+  assert.doesNotMatch(plan.steps.map(s => s.args.join(' ')).join('\n'), /lint:defense|test:defense|shooter\/|card\/tests|survivor\//);
+  const dedicated = createPlan(changes('defense/src/app.js', 'scripts/verify_plan.js'), { onlyGame: 'shooter' });
   assert.deepEqual(dedicated.steps, []);
   assert.deepEqual(dedicated.blocked, []);
 });
 
 test('Star Garden compression inventory and imported build helpers are deployment inputs', () => {
-  for (const file of ['defense_test/docs/ASSET_OPTIMIZATION.json','defense_test/scripts/image-policy.mjs','defense_test/scripts/image-pack.mjs','defense_test/scripts/theme-bright.mjs','defense_test/assets/optimized/merge/units/luna.webp']) {
+  for (const file of ['defense/docs/ASSET_OPTIMIZATION.json','defense/scripts/image-policy.mjs','defense/scripts/image-pack.mjs','defense/scripts/theme-bright.mjs','defense/assets/optimized/merge/units/luna.webp']) {
     const plan = createPlan(changes(file));
-    assert.deepEqual([...games(plan)], ['defense_test'], file);
-    assert.equal(plan.steps.filter(s => s.id === 'defense_test:build').length, 1, file);
+    assert.deepEqual([...games(plan)], ['defense'], file);
+    assert.equal(plan.steps.filter(s => s.id === 'defense:build').length, 1, file);
     assert.ok(!plan.browsers.length, file);
   }
 });
 
 test('Star Garden docs, test-only and unknown paths keep the smallest safe boundary', () => {
-  const docs = createPlan(changes('defense_test/README.md', 'defense_test/docs/UI_ASSET_RESEARCH.md'));
+  const docs = createPlan(changes('defense/README.md', 'defense/docs/archive/UI_ASSET_RESEARCH.md'));
   assert.deepEqual(docs.steps, []);
   assert.equal(docs.needsInstall, false);
-  const tests = createPlan(changes('defense_test/tests/profile.test.mjs'));
+  const tests = createPlan(changes('defense/tests/profile.test.mjs'));
   assert.ok(tests.steps.some(s => s.args.includes('--test')));
   assert.ok(!ids(tests).some(id => id.includes(':build')));
   assert.deepEqual(tests.browsers, []);
-  const browser = createPlan(changes('defense_test/tests/browser.mjs'));
-  assert.ok(ids(browser).includes('defense_test:offline-browser'));
-  assert.ok(!ids(browser).includes('defense_test:build'));
-  assert.deepEqual(createPlan(changes('defense_test/dist/StarGardenDefense.html')).blocked, []);
-  assert.deepEqual(createPlan(changes('defense_test/scripts/unknown.mjs')).blocked, []);
-  assert.deepEqual(createPlan(changes('defense_test/tests/unmapped-helper.mjs')).blocked, []);
+  const browser = createPlan(changes('defense/tests/browser.mjs'));
+  assert.ok(ids(browser).includes('defense:offline-browser'));
+  assert.ok(!ids(browser).includes('defense:build'));
+  assert.deepEqual(createPlan(changes('defense/dist/StarGardenDefense.html')).blocked, []);
+  assert.deepEqual(createPlan(changes('defense/scripts/unknown.mjs')).blocked, []);
+  assert.deepEqual(createPlan(changes('defense/tests/unmapped-helper.mjs')).blocked, []);
 });
 
 test('Star Garden presentation-only changes select build without economy or combat tests', () => {
-  const plan = createPlan(changes('defense_test/src/style.css'));
+  const plan = createPlan(changes('defense/src/style.css'));
   assert.deepEqual(plan.blocked, []);
-  assert.ok(ids(plan).includes('defense_test:build'));
+  assert.ok(ids(plan).includes('defense:build'));
   assert.ok(!plan.steps.some(s => s.args.includes('--test')));
 });
 
 test('Star Garden monthly and render/save helpers select their own contracts without unrelated game commands', () => {
   for (const [file, required] of [['monthly', ['monthly']], ['runtime', ['runtime']]]) {
-    const plan = createPlan(changes('defense_test/src/' + file + '.js'));
+    const plan = createPlan(changes('defense/src/' + file + '.js'));
     assert.deepEqual(plan.blocked, []);
-    assert.deepEqual([...games(plan)], ['defense_test']);
-    const units = plan.steps.find(s => s.id === 'defense_test:contracts-and-regressions');
-    for (const name of required) assert.ok(units.args.includes('defense_test/tests/' + name + '.test.mjs'));
-    assert.doesNotMatch(plan.steps.map(s => s.args.join(' ')).join('\n'), /lint:defense|test:defense|defense\/tests|shooter\/|card\/tests|survivor\/|idle\//);
+    assert.deepEqual([...games(plan)], ['defense']);
+    const units = plan.steps.find(s => s.id === 'defense:contracts-and-regressions');
+    for (const name of required) assert.ok(units.args.includes('defense/tests/' + name + '.test.mjs'));
+    assert.doesNotMatch(plan.steps.map(s => s.args.join(' ')).join('\n'), /lint:defense|test:defense|shooter\/|card\/tests|survivor\//);
   }
 });
 
 test('Star Garden local data, copied images, font and font license each validate their own consumer', () => {
-  for (const file of ['defense_test/src/data.js', 'defense_test/assets/merge/units/luna.webp', 'defense_test/assets/moonlit/realm-bosses.webp', 'defense_test/assets/Jua-Regular.ttf', 'defense_test/assets/Jua-OFL.txt', 'defense_test/scripts/local-inputs.mjs']) {
+  for (const file of ['defense/src/data.js', 'defense/assets/merge/units/luna.webp', 'defense/assets/moonlit/realm-bosses.webp', 'defense/assets/Jua-Regular.ttf', 'defense/assets/Jua-OFL.txt', 'defense/scripts/local-inputs.mjs']) {
     const plan = createPlan(changes(file));
     assert.deepEqual(plan.blocked, [], file);
-    assert.deepEqual([...games(plan)], ['defense_test'], file);
-    assert.ok(ids(plan).includes('defense_test:build'), file + ' build');
-    assert.equal(plan.steps.filter(s => s.id === 'defense_test:build').length, 1);
+    assert.deepEqual([...games(plan)], ['defense'], file);
+    assert.ok(ids(plan).includes('defense:build'), file + ' build');
+    assert.equal(plan.steps.filter(s => s.id === 'defense:build').length, 1);
     assert.doesNotMatch(plan.steps.map(s => s.id).join(' '), /generated-reports|offline-webkit/);
   }
 });
 
-test('Star Garden no longer consumes active Defense content, art or Card fonts', () => {
-  for (const file of ['defense/merge/content.js', 'defense/assets/merge/units/luna.webp', 'card/assets/Jua-Regular.ttf']) {
-    const plan = createPlan(changes(file));
-    assert.ok(!games(plan).has('defense_test'), file);
-  }
-});
-
 test('Star Garden generated JSON alone selects 0 checks without a build or browser', () => {
-  for (const file of ['defense_test/docs/BALANCE_SNAPSHOT.json', 'defense_test/docs/ASSET_PROVENANCE.json']) {
+  for (const file of ['defense/docs/BALANCE_SNAPSHOT.json', 'defense/docs/ASSET_PROVENANCE.json']) {
     const plan = createPlan(changes(file));
     assert.deepEqual(plan.blocked, []);
     assert.deepEqual(plan.steps, []);
     const deleted = createPlan([{ status: 'D', paths: [file] }]);
     assert.deepEqual(deleted.steps, []);
-    const renamed = createPlan([{ status: 'R100', paths: [file, 'defense_test/docs/moved.json'] }]);
+    const renamed = createPlan([{ status: 'R100', paths: [file, 'defense/docs/moved.json'] }]);
     assert.deepEqual(renamed.steps, []);
   }
 });
 
 test('Star Garden report generator changes run unit test only', () => {
-  for (const file of ['defense_test/scripts/generated-reports.mjs', 'defense_test/scripts/report-data.mjs']) {
+  for (const file of ['defense/scripts/generated-reports.mjs', 'defense/scripts/report-data.mjs']) {
     const plan = createPlan(changes(file));
     assert.deepEqual(plan.blocked, []);
     assert.deepEqual(plan.browsers, []);
-    assert.ok(plan.steps.some(s => s.args.includes('defense_test/tests/generated-reports.test.mjs')));
-    assert.equal(ids(plan).includes('defense_test:build'), false);
-    assert.equal(ids(plan).includes('defense_test:generated-reports'), false);
+    assert.ok(plan.steps.some(s => s.args.includes('defense/tests/generated-reports.test.mjs')));
+    assert.equal(ids(plan).includes('defense:build'), false);
+    assert.equal(ids(plan).includes('defense:generated-reports'), false);
   }
 });
 
@@ -135,7 +128,7 @@ test('Nocturne runtime builds once and never selects existing game suites', () =
   assert.deepEqual([...games(plan)], ['survivor', 'verification']);
   assert.equal(plan.steps.filter(s => s.id === 'survivor:build').length, 1);
   assert.ok(ids(plan).includes('survivor:contracts-and-regressions'));
-  assert.doesNotMatch(plan.steps.map(s => s.args.join(' ')).join('\n'), /lint:defense|test:defense|shooter\/|card\/|idle\//);
+  assert.doesNotMatch(plan.steps.map(s => s.args.join(' ')).join('\n'), /lint:defense|test:defense|shooter\/|card\//);
 });
 
 test('Nocturne documentation and selector-only edits never run a game; dist-only and unknown paths do not block', () => {
@@ -168,30 +161,6 @@ test('Nocturne anatomical processor is a build input; review viewer checks synta
   assert.equal(ids(viewer).includes('survivor:offline-browser'), false);
 });
 
-test('Idle runtime selects its focused checks and build only', () => {
-  const plan = createPlan(changes('idle/src/core/commands.js', 'idle/src/combat/engine.js', 'idle/assets/memories/bond_lumi_01.webp'));
-  assert.deepEqual([...games(plan)], ['idle']);
-  assert.deepEqual(plan.blocked, []);
-  assert.ok(ids(plan).includes('idle:build'));
-  const commands = plan.steps.map(s => s.args.join(' ')).join('\n');
-  assert.match(commands, /idle\/tests\/combat.test.mjs/);
-  assert.doesNotMatch(commands, /defense|shooter|card\/|simulate.mjs/);
-});
-
-test('Idle documentation and test-only changes never rebuild or run unrelated games', () => {
-  assert.deepEqual(createPlan(changes('idle/docs/ART_REVIEW.md')).steps, []);
-  const plan = createPlan(changes('idle/tests/rewards.test.mjs'));
-  assert.deepEqual([...games(plan)], ['idle']);
-  assert.equal(ids(plan).includes('idle:build'), false);
-  assert.equal(plan.needsInstall, false);
-});
-
-test('Idle unknown executable and dist-only updates do not block; selector-only updates stay fixtures', () => {
-  assert.deepEqual(createPlan(changes('idle/unknown-runtime.js')).blocked, []);
-  assert.deepEqual(createPlan(changes('idle/dist/AstralCompanions.html')).blocked, []);
-  assert.deepEqual([...games(createPlan(changes('scripts/verify_plan.js', 'package.json')))], ['verification']);
-});
-
 test('Card-only changes never select Shooter or Defense commands', () => {
   const plan = createPlan(changes('card/game/logic.js'));
   assert.ok(games(plan).has('card'));
@@ -210,69 +179,12 @@ test('Shooter-only changes select direct build and combat checks without bundle 
   assert.equal(ids(plan).includes('shooter:bundle-smoke'), false);
 });
 
-test('Defense-only changes are handled by the minimal verifier with build-local', () => {
-  const plan = createPlan(changes('defense/js/battle/DamageSystem.js'));
-  assert.deepEqual([...games(plan)], ['defense']);
-  assert.ok(ids(plan).includes('defense:build-local'));
-  assert.equal(ids(plan).some(id => id.includes('simulation-balance')), false);
-  assert.equal(ids(plan).includes('defense:lint'), false);
-});
-
-test('Defense legacy snapshot changes select no runtime and are fully mapped', () => {
-  const rootPlan = createPlan(changes(
-    'defense_legacy/js/main.js',
-    'defense_legacy/tests/unit/core.test.mjs',
-    'defense_legacy/index.html'
-  ));
-  assert.deepEqual(rootPlan.steps, []);
-  assert.deepEqual(rootPlan.blocked, []);
-  assert.deepEqual(rootPlan.detectedGames, []);
-
-  const defensePlan = createPlan(
-    changes('defense_legacy/js/main.js'),
-    { onlyGame: 'defense' }
-  );
-  assert.deepEqual(defensePlan.steps, []);
-  assert.deepEqual(defensePlan.blocked, []);
-});
-
-test('moving removed Defense files to legacy never syntax-checks missing paths', () => {
-  const plan = createPlan([{
-    status: 'R100',
-    paths: ['defense/js/main.js', 'defense_legacy/js/main.js']
-  }]);
-  const commands = plan.steps.map(step => [step.command, ...step.args].join(' ')).join('\n');
-  assert.doesNotMatch(commands, /node --check defense\/js\/main\.js/);
-  assert.ok(ids(plan).includes('defense:build-local'));
-  assert.deepEqual(plan.blocked, []);
-});
-
 test('non-deployment documentation and AGENTS instructions install and run no game tooling or tests', () => {
   const plan = createPlan(changes('shooter/README.md', 'docs/notes.md', 'AGENTS.md', 'card/AGENTS.override.md', 'docs/verification-policy.md'));
   assert.equal(plan.steps.length, 0);
   assert.equal(plan.needsInstall, false);
   assert.deepEqual(plan.browsers, []);
   assert.match(plan.skipped.join('\n'), /documentation/);
-});
-
-test('Confluence source and art select focused Defense checks without lint:defense or full browser', () => {
-  const files = changes('defense/merge/engine.js', 'defense/merge/render.js', 'defense/docs/art/ANATOMICAL_LANDMARKS.json');
-  const plan = createPlan(files);
-  assert.deepEqual(plan.blocked, []);
-  assert.deepEqual([...games(plan)], ['defense']);
-  assert.ok(plan.steps.some(s => s.args.includes('defense/tests/unit/confluence.test.mjs')));
-  assert.ok(plan.steps.some(s => s.args.includes('defense/tests/integration/confluence-art.test.mjs')));
-  assert.ok(ids(plan).includes('defense:build-local'));
-  assert.equal(ids(plan).includes('defense:lint'), false);
-});
-
-test('authoring research stays documentation while active profile JSON is a deployment input', () => {
-  const docs = createPlan(changes('defense/docs/art/HEAD_CONSISTENCY_RESEARCH.md'));
-  assert.equal(docs.steps.length, 0);
-  const input = createPlan(changes('defense/docs/art/HEAD_PROFILE.json'));
-  assert.ok(ids(input).includes('defense:build-local'));
-  const toolsOnly = createPlan(changes('scripts/pack_defense_directions.mjs'));
-  assert.equal(toolsOnly.steps.length, 0);
 });
 
 test('root package script changes do not select every game', () => {
@@ -404,8 +316,8 @@ test('the PR workflow installs only the browsers the selector requests', () => {
   const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/verify.yml'), 'utf8');
   assert.match(workflow, /needs_chromium == 'true'[\s\S]*npx playwright install --with-deps chromium/);
   assert.match(workflow, /needs_webkit == 'true'[\s\S]*npx playwright install --with-deps webkit/);
-  assert.equal(createPlan(changes('defense_test/tests/browser.mjs')).browsers.includes('chromium'), true);
-  assert.equal(createPlan(changes('defense_test/docs/MEMORIAL_MEDIA.md')).browsers.includes('chromium'), false);
+  assert.equal(createPlan(changes('defense/tests/browser.mjs')).browsers.includes('chromium'), true);
+  assert.equal(createPlan(changes('defense/docs/archive/MEMORIAL_MEDIA.md')).browsers.includes('chromium'), false);
 });
 
 test('missing refs fail as BLOCKED_SCOPE rather than selecting zero tests', () => {
