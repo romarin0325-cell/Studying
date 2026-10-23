@@ -4,7 +4,7 @@
 
 2026-10-23 추가: 사용자 승인 Sol SD 8명과 새 VFX를 적용했다. [적용·판단·확장 기록](SOL_ASSET_AND_VFX.md), [실제 렌더러 전후 비교](review/sol-vfx/index.html)를 함께 본다. 이 작업은 내장 `image_gen`과 native alpha를 사용했다. 아래의 나노바나나·자홍 키 배경 절차를 Sol 승인본에 소급 적용하거나, 이미 검수한 SD를 다시 생성하지 않는다.
 
-새 동료, 메모리얼, 이펙트, 배경, 음악·효과음을 만들 때 따르는 절차와 지금까지의 시행착오를 정리한 문서다(2026-10-18, 9차에서 작성). 도구는 `defense/scripts/art`, `defense/scripts/sound`에 있다. 머리 기준 원칙의 배경은 `defense/docs/art/HEAD_CONSISTENCY_RESEARCH.md`와 `HEAD_PROFILE.json`을 본다.
+새 동료, 메모리얼, 이펙트, 배경, 음악·효과음을 만들 때 따르는 절차와 지금까지의 시행착오를 정리한 문서다(2026-10-18, 9차에서 작성). 도구는 `defense/scripts/art`, `defense/scripts/sound`에 있다. 머리 기준값은 `defense/docs/art/HEAD_PROFILE.json`에 있다. 배경 연구 문서 `HEAD_CONSISTENCY_RESEARCH.md`는 옛 Defense 정리(#626) 때 삭제되어 `45dedc6` 이전 Git 기록에서만 볼 수 있다.
 
 ## 0. 원칙 (중요한 순서)
 
@@ -62,6 +62,7 @@
    - 측정용 얼굴 특징(눈 위치, 눈~턱, 눈 폭)도 적는다.
 5. **패킹.**
    - 명령: `node defense/scripts/art/pack-sd.mjs <시트> <작업폴더> <id> l,t,r,chin`
+   - 작업폴더는 `defense/assets` 밖에 둔다(예: `defense/test-results/sd-pack/<id>`). 패커는 `<id>.webp`, `manifest.json`, 미리보기 PNG를 고정 이름으로 쓰므로, `defense/assets` 안쪽이나 그곳을 가리키는 링크를 출력·미리보기 폴더로 주면 파일을 만들기 전에 거부한다. `units`로는 8단계 `--install`로만 복사한다.
    - 균일 배율로 맞추고 발을 정렬한다. 자동 맞춤은 없다. 장식이 칸을 넘으면 거부되는데, 몸을 줄이지 말고 장식만 고친다.
    - 외곽 테두리의 자홍색 번짐은 이 단계에서 걷어 낸다.
 6. **검수.**
