@@ -234,6 +234,8 @@
 - `ultimates.webp` / `effects-trio.webp`를 검은 배경에 펼친 그림을 화풍 기준으로 준다. 완전한 검은 배경 위에 하나씩 생성한다.
 - 명령: `node defense/scripts/art/fx-atlas.mjs <공격> <필살기 문양> <바닥 장식> <out.webp>`. 밝기로 알파를 만든다.
 - 어두운 바위 같은 부분은 반투명해진다. 밝은 바탕에서도 확인한다.
+- 여러 칸을 한 장으로 받는 GPT 이미지 시트(2026-10-24 15차): 위의 화풍 기준을 참조 1, 해당 동료 SD 줄을 참조 2로 주고 4×2(또는 3×2) 칸을 검은 배경에 그리게 한다. GPT는 격자를 정확히 지키지 않으므로 `node defense/scripts/art/pack-fx-sheet.mjs <node_modules> <원본.png> <out.webp> <기록.json> [열 행]`으로 문양 사이 가장 어두운 틈을 따라 자르고, 칸마다 다시 가운데 맞춘 뒤 밝기로 알파를 만든다(256px 칸, 14px 투명 여백). 원본·프롬프트·자르기 기록은 `docs/art/companion-fx-20261024/`에 둔다.
+- 필살기 문양은 동료마다 하나씩 따로 둔다. 다른 동료의 문양이나 공용 시전 빛만으로 필살기를 표현하지 않는다. `node defense/scripts/review-ult-sheet.mjs`가 쓰는 공유 문양 표가 비어 있어야 한다.
 
 ## 7. 같은 구도의 낮 배경 (맑은 정원)
 

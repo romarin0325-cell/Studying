@@ -132,7 +132,7 @@ try{
     const deck=['lightning_sage','aurora','star_boy','cinderella','zeke'];
     const t=await boot(width,height,traitFixture(deck,[[6,deck[0]],[7,deck[0]],[11,deck[0]],[12,deck[0]],[8,deck[1]],[13,deck[1]],[16,deck[2]],[17,deck[3],2],[18,deck[3],2],[21,deck[4]]]));
     await t.page.locator('[data-action="resume"]').click();
-    await inspectCell(t.page,6);assert.match(await t.page.locator('.unit-trait-line').innerText(),/4연결.*50%.*80%.*대상 \+1/);
+    await inspectCell(t.page,6);assert.match(await t.page.locator('.unit-trait-line').innerText(),/4연결.*60%.*80%.*대상 \+1/);
     await shot(t.page,'trait-lightning',width,height);
     await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait-line').innerText(),/아우로라 2기.*50%/);
     await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait-line').innerText(),/등장 웨이브.*150%/);
@@ -332,10 +332,10 @@ try{
   assert.equal((await profile(monthly.page)).monthly,null);assert.ok((await profile(monthly.page)).monthlyBest);
   await shot(monthly.page,'monthly-record',390,844);await monthly.page.locator('#sheet-body [data-action="monthly-claim"]').click();
   assert.match(await monthly.page.locator('#sheet-body').innerText(),/한 번/);await monthly.page.locator('[data-confirm-monthly]').click();
-  assert.equal((await profile(monthly.page)).dreams,700);assert.ok((await profile(monthly.page)).monthly);
+  assert.equal((await profile(monthly.page)).dreams,730);assert.ok((await profile(monthly.page)).monthly);
   await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
-  assert.equal((await profile(monthly.page)).dreams,700,'a second attempt cannot pay again');await monthly.context.close();
+  assert.equal((await profile(monthly.page)).dreams,730,'a second attempt cannot pay again');await monthly.context.close();
 
   // Live duration UI uses restored engine state, then a real cast and pause.
   const sustained=createProfile(NOW);sustained.settings.auto=false;sustained.settings.sound=false;command(sustained,'begin',{mode:'main',stage:1},NOW);const buffRun=createBattle(sustained);
@@ -357,7 +357,7 @@ try{
 
   const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
   const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);assert.equal((await profile(record.page)).dreams,600);
-  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,910);await record.context.close();
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,1003);await record.context.close();
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.
