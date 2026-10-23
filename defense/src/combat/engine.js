@@ -297,7 +297,7 @@ export function givenEffects(s,u,index){
 export function unitEconomy(s,u){
   const level=s.upgrades[u.hero]||0;
   if(u.hero==='doom')return `합성 시 ${doomRefund(u.rank)}G 즉시 환급`;
-  if(u.hero==='queen')return `이번 물결 종료 시 ${queenIncome(u.rank,s.wave,level)}G 배당 · 모든 여왕 합계 최대 ${QUEEN_CAP}G`;
+  if(u.hero==='queen')return `이번 웨이브 종료 시 ${queenIncome(u.rank,s.wave,level)}G 배당 · 모든 여왕 합계 최대 ${QUEEN_CAP}G`;
   return HERO[u.hero].trait.text;
 }
 // The Stardew Spring raises a run's starlight ceiling; older saves keep 120.

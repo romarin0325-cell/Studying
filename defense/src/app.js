@@ -773,7 +773,7 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const c=CHAPTERS[stage-1],boss=BOSSES[c.bosses[0]],t=TIERS[challengeTier]||TIERS.easy;
   const perf=kind==='main'&&(p().perfect||[]).includes(stage);
-  const rewardChip=kind==='main'?`<div class="prep-rewards"><span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루'}</span>${perf?`<span class="prep-reward perfect done">${icon('crown')}퍼펙트 달성</span>`:`<span class="prep-reward perfect">${icon('crown')}퍼펙트 ${gem(PERFECT_REWARD)}</span>`}</div>${perf?'':`<small class="perfect-rule">코어 체력을 잃지 않고 클리어하면 퍼펙트</small>`}`:'';
+  const rewardChip=kind==='main'?`<div class="prep-rewards"><span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루'}</span>${perf?`<span class="prep-reward perfect done">${icon('crown')}퍼펙트 달성</span>`:`<span class="prep-reward perfect">${icon('crown')}퍼펙트 ${gem(PERFECT_REWARD)}</span>`}</div>${perf?'':`<small class="perfect-rule">코어 생명력을 잃지 않고 클리어하면 퍼펙트</small>`}`:'';
   const head=kind==='main'?`<div class="prep-boss"><small>${c.name} · 6웨이브</small><h2>${boss.name}</h2>${boss.trait?`<p>${boss.trait}</p>`:''}${rewardChip}</div>`
     :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'주간 드래프트':'월간 보스전'}</h2><p>${kind==='weekly'?`보유 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'주간 드래프트':'월간 보스전','출격 준비',`${head}
