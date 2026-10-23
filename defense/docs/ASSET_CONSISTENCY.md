@@ -1,5 +1,7 @@
 # 동료 에셋 일관성 평가 (2026-10-20 갱신)
 
+> **2026-10-24:** 아래는 교체 전 캐스트의 날짜 기록이다. 현재 Sol Cast V2 40종은 [설치·성장 규칙](CAST_V2_AND_BALANCE.md), [실제 통합 검수](art/sol-cast-v2/REVIEW.md), [방향별 해부학적 기준점·불확실성](art/sol-cast-v2/manifest.json)을 따른다. 아래 과거 측정치를 새 설치본의 검증값으로 사용하지 않는다.
+
 현재 있는 동료 39명의 SD 아틀라스(전투·카드·초상)와 메모리얼 일러스트를 숫자로 재고, 그림을 나란히 놓고 눈으로 확인한 결과입니다. 측정은 `node defense/scripts/art/consistency-report.mjs`, 아래 표는 `node defense/scripts/art/consistency-table.mjs`로 다시 만듭니다. 원자료는 `ASSET_CONSISTENCY_DATA.json`, 대조 그림은 `test-results/consistency/`(`sd-contact.png`, `sd-heads.png`, `memorial-contact.png`, `lineup-battle-scale.png`, `zoom-outline.png`)에 생깁니다.
 
 ## 1. 결론

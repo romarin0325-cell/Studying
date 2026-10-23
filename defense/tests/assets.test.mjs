@@ -5,12 +5,32 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
-import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
+import {HEROES,ARTIFACTS,ASSET_PATHS,TRANSFORM_ART} from '../src/content.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
 import {loadImagePack} from '../scripts/image-pack.mjs';
 import {BUILD_ONLY_ATLASES,RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
 import {Art} from '../src/combat/render.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+
+test('installed cast v2 matches the 40 approved masters and uses anatomical face crops and one floor scale',async()=>{
+  const manifest=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/sol-cast-v2/manifest.json'),'utf8'));
+  assert.equal(manifest.assets.length,40);
+  const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
+  assert.equal(art.size,40);
+  for(const entry of manifest.assets){
+    const frame=entry.frames.find(f=>f.direction==='down'),installed=art.get(entry.id);assert.ok(installed,entry.id);
+    assert.deepEqual(entry.frames.map(f=>f.direction),['down','up','left','right']);
+    assert.equal(installed.foot,.9375);assert.equal(installed.scale,1);assert.equal(installed.columns,2);assert.equal(installed.directional,true);
+    assert.equal(installed.portrait.x,Math.round(frame.ellipse[0]));assert.equal(installed.portrait.y,Math.round(frame.ellipse[1]));
+    assert.equal(ASSET_PATHS[installed.atlas],'./assets/cast-v2/'+entry.id+'.webp');
+    for(const record of [entry.sourcePng,entry.sourceWebp]){
+      const bytes=await fs.readFile(path.join(root,record.file));
+      assert.equal(bytes.length,record.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256,record.file);
+    }
+    for(const view of entry.frames){assert.deepEqual(view.sole,[256,480]);assert.equal(view.commonScale,entry.commonScale);assert.equal(view.paintedClipping,0);}
+    assert.ok(entry.measurementUncertaintyPacked>0,'covered head estimates must not imply exact ground truth');
+  }
+});
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
   assert.equal(Object.keys(ASSET_PATHS).length,70);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.

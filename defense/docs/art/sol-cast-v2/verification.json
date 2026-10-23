@@ -1,0 +1,553 @@
+{
+  "environment": "Windows Chromium, offline file://, 390x844 touch viewport, DPR 2",
+  "scenes": 36,
+  "assertions": 402,
+  "pageErrors": 0,
+  "externalRequests": 0,
+  "sections": [
+    {
+      "scenes": 20,
+      "assertions": 316
+    },
+    {
+      "scenes": 14,
+      "assertions": 76
+    },
+    {
+      "scenes": 2,
+      "assertions": 10
+    }
+  ],
+  "embedded": [
+    {
+      "theme": "night",
+      "unitAtlases": 40,
+      "uiImages": 78
+    },
+    {
+      "theme": "bright",
+      "unitAtlases": 40,
+      "uiImages": 78
+    }
+  ],
+  "release": {
+    "nightBytes": 18696759,
+    "brightBytes": 18772230,
+    "unitAtlases": 40,
+    "unitSourceWebpBytes": 8477396,
+    "unitRuntimeWebpBytes": 3163282
+  },
+  "sceneRecords": [
+    {
+      "name": "night-home",
+      "partner": "star_boy",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-1",
+      "characters": [
+        "star_boy",
+        "snow_rabbit",
+        "silver_rabbit",
+        "night_rabbit",
+        "siren"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-2",
+      "characters": [
+        "mushroom_king",
+        "underdog",
+        "joker",
+        "sunflower",
+        "great_detective"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-3",
+      "characters": [
+        "guardian",
+        "avalanche_maid",
+        "santa",
+        "red_dragon",
+        "aurora"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-4",
+      "characters": [
+        "toffee_apple",
+        "antropy",
+        "storm_sage",
+        "flame_sage",
+        "lightning_sage"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-5",
+      "characters": [
+        "time_magician",
+        "ancient_dragon",
+        "phantom",
+        "cure_master",
+        "ash"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-6",
+      "characters": [
+        "zeke",
+        "luna",
+        "jasmine",
+        "queen",
+        "rumi"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-7",
+      "characters": [
+        "cherry_prince",
+        "venom",
+        "time_ruler",
+        "galaxy_whale",
+        "doom"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-field-8",
+      "characters": [
+        "cinderella",
+        "harmonious",
+        "frost_witch",
+        "behemoth"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-trauma",
+      "transformation": "trauma",
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-home",
+      "partner": "star_boy",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-1",
+      "characters": [
+        "star_boy",
+        "snow_rabbit",
+        "silver_rabbit",
+        "night_rabbit",
+        "siren"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-2",
+      "characters": [
+        "mushroom_king",
+        "underdog",
+        "joker",
+        "sunflower",
+        "great_detective"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-3",
+      "characters": [
+        "guardian",
+        "avalanche_maid",
+        "santa",
+        "red_dragon",
+        "aurora"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-4",
+      "characters": [
+        "toffee_apple",
+        "antropy",
+        "storm_sage",
+        "flame_sage",
+        "lightning_sage"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-5",
+      "characters": [
+        "time_magician",
+        "ancient_dragon",
+        "phantom",
+        "cure_master",
+        "ash"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-6",
+      "characters": [
+        "zeke",
+        "luna",
+        "jasmine",
+        "queen",
+        "rumi"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-7",
+      "characters": [
+        "cherry_prince",
+        "venom",
+        "time_ruler",
+        "galaxy_whale",
+        "doom"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-field-8",
+      "characters": [
+        "cinderella",
+        "harmonious",
+        "frost_witch",
+        "behemoth"
+      ],
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-trauma",
+      "transformation": "trauma",
+      "directions": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-stats-snow_rabbit",
+      "expected": [
+        "감속 66.2%",
+        "2.9초",
+        "72%"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-stats-storm_sage",
+      "expected": [
+        "즉사 1.4%"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-stats-lightning_sage",
+      "expected": [
+        "위력 +60%",
+        "체인 80%",
+        "추가 대상 +1"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-stats-frost_witch",
+      "expected": [
+        "8.6초",
+        "72%",
+        "0.8초"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-stats-behemoth",
+      "expected": [
+        "반경 129.375",
+        "0.5초 간격으로 3번"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-training",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "night-stats-ash",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-stats-snow_rabbit",
+      "expected": [
+        "감속 66.2%",
+        "2.9초",
+        "72%"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-stats-storm_sage",
+      "expected": [
+        "즉사 1.4%"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-stats-lightning_sage",
+      "expected": [
+        "위력 +60%",
+        "체인 80%",
+        "추가 대상 +1"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-stats-frost_witch",
+      "expected": [
+        "8.6초",
+        "72%",
+        "0.8초"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-stats-behemoth",
+      "expected": [
+        "반경 129.375",
+        "0.5초 간격으로 3번"
+      ],
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-training",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "bright-stats-ash",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "attack-left",
+      "direction": "left",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    },
+    {
+      "name": "attack-right",
+      "direction": "right",
+      "width": 390,
+      "loaded": true,
+      "fallback": 0
+    }
+  ],
+  "curatedImages": [
+    "night-field-1.webp",
+    "night-field-2.webp",
+    "night-field-3.webp",
+    "night-field-4.webp",
+    "night-field-5.webp",
+    "night-field-6.webp",
+    "night-field-7.webp",
+    "night-field-8.webp",
+    "bright-field-6.webp",
+    "bright-field-8.webp",
+    "night-home.webp",
+    "night-trauma.webp",
+    "night-stats-snow_rabbit.webp",
+    "night-stats-storm_sage.webp",
+    "night-stats-lightning_sage.webp",
+    "night-stats-frost_witch.webp",
+    "night-stats-behemoth.webp",
+    "night-stats-ash.webp",
+    "bright-training.webp",
+    "attack-left.webp",
+    "attack-right.webp"
+  ],
+  "faceComparison": {
+    "old": "Frozen prior portrait coordinates from catalog.json, each old atlas SHA-256 verified. No new skull coordinates reused for old art.",
+    "new": "Actual prepared UI portrait bytes in the release, same display size."
+  }
+}

@@ -30,6 +30,7 @@ docs/
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.
 - [SINGLE_HTML_OPTIMIZATION.md](SINGLE_HTML_OPTIMIZATION.md): 지금의 빌드·압축·원본 보존·검증 범위.
 - [ASSET_PIPELINE.md](ASSET_PIPELINE.md): 에셋·사운드 제작과 검수 절차.
+- [CAST_V2_AND_BALANCE.md](CAST_V2_AND_BALANCE.md): 승인된 전체 40종 SD 설치, 성급·훈련·강화 변경과 통합 검증.
 - [SOL_ASSET_AND_VFX.md](SOL_ASSET_AND_VFX.md): Sol 최종 SD 8명 설치, 역할에 따른 공격·필살기 판단표, 실제 렌더러 전후 비교와 확장 규칙.
 - [GPT_IMAGE_SD_BRIEF.md](GPT_IMAGE_SD_BRIEF.md): 나노바나나로 만든 동료 6명의 SD를 GPT Image 2.5(Manus)로 다시 그리는 지시서. 참조·프롬프트·거르기·패킹 순서.
 - [ASSET_CONSISTENCY.md](ASSET_CONSISTENCY.md): 동료 SD·메모리얼 일관성 평가표. 측정 도구는 `scripts/art/consistency-report.mjs`, `consistency-table.mjs`.

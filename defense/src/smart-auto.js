@@ -123,7 +123,7 @@ function ultValue(s,m,id,gv){
     case 'combust':return list.reduce((n,e)=>n+hit(e.burnTime>0?10:4,e),0)+strike(.6)*1.5;
     case 'plague':return strike(3)+list.reduce((n,e)=>n+Math.min(e.hp,8*P*.1*12),0);
     case 'thunder':return strike(7)+control(1.2*scale)+thunderCancel();
-    case 'ice_court':{const have=list.reduce((n,e)=>Math.max(n,e.takenBonus||0),0);return strike(9)+control(3)+buff(Math.max(0,E.WINTER_EXPOSURE-have),6);}
+    case 'ice_court':{const have=list.reduce((n,e)=>Math.max(n,e.takenBonus||0),0),seconds=E.winterDuration(s,u);return strike(9)+control(E.WINTER_COURT.slow*scale*seconds)+buff(Math.max(0,E.WINTER_EXPOSURE-have),seconds);}
     // The shared sunlight stack is worth saving: below two stacks the burst is not worth the starlight, at two only a
     // crisis (the danger rule above) pays for it, at three it is a full 11x. Casting also drops the wider burst.
     case 'solarflare':{
@@ -154,8 +154,8 @@ function ultValue(s,m,id,gv){
       return best.reduce((n,e)=>n+hit(E.ARMAGEDDON.factor,e),0)-lost;
     }
     case 'venomplague':return strike(E.VENOM_PLAGUE.factor)+list.reduce((n,e)=>{const st=E.statusState(s,e);return n+Math.min(e.hp,((e.burn||0)+st.poisonDps)*E.VENOM_PLAGUE.seconds*E.VENOM_PLAGUE.amp);},0);
-    case 'crush':{if(!list.length)return 0;let sum=0;for(const e of list){const p=E.pathPoint(e.progress);sum+=list.reduce((n,t)=>{const q=E.pathPoint(t.progress);return n+(Math.hypot(q.x-p.x,q.y-p.y)<=E.CRUSH.radius?hit(E.CRUSH.factor,t):0);},0);}return sum/list.length*E.CRUSH.hits;}
-    case 'freeze':return strike(3)+control(2*scale+3)+thunderCancel();
+    case 'crush':{if(!list.length)return 0;let sum=0;for(const e of list){const p=E.pathPoint(e.progress);sum+=list.reduce((n,t)=>{const q=E.pathPoint(t.progress);return n+(Math.hypot(q.x-p.x,q.y-p.y)<=E.crushRadius(s)?hit(E.CRUSH.factor,t):0);},0);}return sum/list.length*E.CRUSH.hits;}
+    case 'freeze':return strike(3)+control(E.SNOW_RABBIT.freeze*scale+E.SNOW_RABBIT.skillSlow*scale*E.SNOW_RABBIT.seconds)+thunderCancel();
     case 'avalanche':return list.reduce((n,e)=>n+hit(e.controlTime>0?12:4,e),0)+control(2);
     case 'dragon':{let best=[];for(const e of list){const p=E.pathPoint(e.progress),near=list.filter(t=>{const q=E.pathPoint(t.progress);return Math.hypot(q.x-p.x,q.y-p.y)<=180;});if(near.length>best.length)best=near;}return best.reduce((n,e)=>n+hit(14,e)+hit(.6*5*.5,e),0);}
     case 'flurry':return [...list].sort((a,b)=>b.progress-a.progress).slice(0,9+2*new Set(s.board.filter(a=>a&&a.hero!=='night_rabbit'&&a.hero.endsWith('_rabbit')).map(a=>a.hero)).size).reduce((n,e)=>n+hit(9,e),0);
