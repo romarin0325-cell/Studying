@@ -253,6 +253,30 @@ export function scaledTokens(id,k){
     luna:[['40%',pctText(executeThresholdFor(k))]],phantom:[['25%',pctText(Math.min(DAMAGE_TAKEN_CAP,.25*k))]],cure_master:[['4초',sec(4)]],venom:[['10초',sec(10)]]}[id]||[];
   return {trait,skill};
 }
+// The trait text's growing numbers as this unit has them now (rank, training, enhancement), for the battle ⓘ sheet.
+// Same formulas as the attack code; the text keeps every condition and only the numbers change.
+export function liveTraitTokens(s,u){
+  const level=s.upgrades[u.hero]||0,k=special(s,u.hero),sup=rankSupport(u.rank),ctl=rankControl(u.rank);
+  const slow=v=>pctText(Math.min(.8,v)),taken=v=>pctText(Math.min(DAMAGE_TAKEN_CAP,v)),num=v=>Number(v.toFixed(2));
+  return ({
+    snow_rabbit:[['40%',slow((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*ctl*k)]],
+    siren:[['15%',pctText((.15+level*.03)*k*sup)]],
+    great_detective:[['8%',taken((.08+level*.02)*k*ctl)],['15%',taken((.15+level*.02)*k*ctl)]],
+    guardian:[['0.7초',secText((.7+level*.05)*k*ctl)]],
+    ancient_dragon:[['20%',pctText((.2+level*.03)*k*sup)]],
+    phantom:[['25%',slow(.25*ctl*k)]],
+    luna:[['40%',pctText(executeThreshold(null,s))]],
+    time_magician:[['60%',pctText((.6+level*.05)*sup*k)]],
+    time_ruler:[['25%',slow((.25+level*.03)*ctl*k)]],
+    galaxy_whale:[['40%',slow(.4*ctl*k)]],
+    harmonious:[['+6%','+'+pctText((.06+level*.005)*k*sup)],['+5%','+'+pctText((.05+level*.002)*k*sup)]],
+    frost_witch:[['40%',slow(.4*ctl*k)],['0.6초',secText((.6+level*.06)*k*ctl)]],
+    storm_sage:[['1%',pctText(stormExecuteChance(s,u.rank))]],
+    joker:[['20%',slow(JOKER.slow*k)]],
+    aurora:[['75%',pctText(.75+level*.03)]],
+    santa:[['범위와 위력이 두 배','범위가 두 배, 위력이 '+num(2+level*.2)+'배']],
+  })[u.hero]||[];
+}
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
 export function givenEffects(s,u,index){
   const level=s.upgrades[u.hero]||0,k=special(s,u.hero),near=neighbors(index).filter(i=>s.board[i]&&!s.board[i].cursed).length,out=[];if(u.cursed)return ['저주받아 효과 없음'];
