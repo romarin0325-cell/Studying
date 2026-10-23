@@ -137,6 +137,16 @@ test('Star Garden report generator changes run unit test only', () => {
   }
 });
 
+test('Star Garden packer changes run the dependency-free guard test without a build or install', () => {
+  for (const file of ['defense/scripts/art/output-guard.mjs', 'defense/scripts/art/pack_defense_directions.mjs', 'defense/scripts/art/pack-sd.mjs']) {
+    const plan = createPlan(changes(file));
+    const units = plan.steps.find(s => s.id === 'defense:contracts-and-regressions');
+    assert.ok(units && units.args.includes('defense/tests/packer-guard.test.mjs'), file);
+    assert.equal(units.needsInstall, false, file);
+    assert.equal(ids(plan).includes('defense:build'), false, file);
+  }
+});
+
 test('Nocturne runtime builds once and never selects existing game suites', () => {
   const plan = createPlan(changes('survivor/src/engine.js', 'survivor/assets/jasmine.webp', 'scripts/verify_plan.js'));
   assert.deepEqual(plan.blocked, []);

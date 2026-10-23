@@ -62,6 +62,7 @@
    - 측정용 얼굴 특징(눈 위치, 눈~턱, 눈 폭)도 적는다.
 5. **패킹.**
    - 명령: `node defense/scripts/art/pack-sd.mjs <시트> <작업폴더> <id> l,t,r,chin`
+   - 작업폴더는 `defense/assets` 밖에 둔다(예: `defense/test-results/sd-pack/<id>`). 패커는 `<id>.webp`, `manifest.json`, 미리보기 PNG를 고정 이름으로 쓰므로, `defense/assets` 안쪽이나 그곳을 가리키는 링크를 출력·미리보기 폴더로 주면 파일을 만들기 전에 거부한다. `units`로는 8단계 `--install`로만 복사한다.
    - 균일 배율로 맞추고 발을 정렬한다. 자동 맞춤은 없다. 장식이 칸을 넘으면 거부되는데, 몸을 줄이지 말고 장식만 고친다.
    - 외곽 테두리의 자홍색 번짐은 이 단계에서 걷어 낸다.
 6. **검수.**

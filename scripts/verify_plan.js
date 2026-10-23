@@ -359,6 +359,8 @@ function planDefense(plan, files, currentFiles) {
   if (inputs.includes('defense/src/monthly.js')) add('monthly');
   if (inputs.includes('defense/src/runtime.js')) add('runtime');
   if (reportScripts) add('generated-reports');
+  // The packer guard test imports only output-guard.mjs (no sharp), so it needs no install.
+  if (product.some(file => /^defense\/scripts\/art\/(?:output-guard|pack_defense_directions|pack-sd)\.mjs$/.test(file))) add('packer-guard');
 
   addNodeTest(plan, 'defense', 'defense:contracts-and-regressions', 'Check Star Garden collection, growth, tickets and actual combat regressions', [...checks]);
   if (checks.has('defense/tests/generated-reports.test.mjs') || checks.has('defense/tests/assets.test.mjs') || checks.has('defense/tests/build.test.mjs')) {

@@ -11,11 +11,12 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..');
-const {packDirections,assertSafeOutputDir}=await import('./pack_defense_directions.mjs');
+const {packDirections}=await import('./pack_defense_directions.mjs');
 const {keySpritePixels}=await import('./import_defense_sprite.mjs');
+const {assertSafeOutputDir}=await import('./output-guard.mjs');
 const [src,outDir,id,skullArg]=process.argv.slice(2);
 if(!src||!outDir||!id||!skullArg)throw new Error('Usage: pack-sd.mjs <sheet> <outDir> <id> <left,top,right,chin> [--install]');
-assertSafeOutputDir(outDir); // before any write: outDir must not be the committed units directory
+assertSafeOutputDir(outDir); // before any write: outDir (also the proof dir) must stay outside defense/assets
 await fs.mkdir(outDir,{recursive:true});
 // Exact magenta corners: the packer refuses painted checkerboards and JPEG noise breaks its corner test.
 const {data,info}=await sharp(src).removeAlpha().raw().toBuffer({resolveWithObject:true});

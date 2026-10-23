@@ -4,20 +4,15 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {keySpritePixels} from './import_defense_sprite.mjs';
+import {assertSafeOutputDir} from './output-guard.mjs';
 
 // Game root (defense/). The packer stays inside the game, like every other module under defense/.
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 export const DIRECTIONS=['down','up','left','right'];
 
-// Committed Star Garden atlases and their manifest. Packing writes <id>.webp and manifest.json into its
-// output directory, so pointing it here would overwrite the originals. Pack elsewhere, review, then copy
-// (pack-sd.mjs --install does this for a single unit).
-const PROTECTED_UNITS_DIR=path.join(ROOT,'assets/merge/units');
-export function assertSafeOutputDir(outputDir){
-  const rel=path.relative(PROTECTED_UNITS_DIR,path.resolve(outputDir));
-  if(rel===''||(!rel.startsWith('..')&&!path.isAbsolute(rel)))throw new Error(`Refusing to write into ${PROTECTED_UNITS_DIR}: it holds the committed unit atlases and manifest.json. Pack into a separate directory and review before copying.`);
-}
+// The output and proof directories must stay outside defense/assets (see output-guard.mjs).
+export {assertSafeOutputDir};
 
 export function anatomicalScale(skull,profile,id){
   if(!Array.isArray(skull)||skull.length!==4||skull.some(n=>!Number.isFinite(n)))throw new Error('Four anatomical skull coordinates are required');
@@ -34,7 +29,8 @@ export function anatomicalScale(skull,profile,id){
 // They are not an automatic anatomy detector or a claim of author approval.
 // Silhouette bounds are used only to detect clipping, never to derive scale.
 export async function packDirections({sourceDir,entries,outputDir,proofDir}){
-  assertSafeOutputDir(outputDir);
+  assertSafeOutputDir(outputDir,'output');
+  if(proofDir)assertSafeOutputDir(proofDir,'proof');
   await mkdir(outputDir,{recursive:true});
   if(proofDir)await mkdir(proofDir,{recursive:true});
   const manifest=[];
