@@ -1,5 +1,7 @@
 # 별빛 정원 에셋 제작·검증 파이프라인
 
+2026-10-24 추가: 사용자 검토가 끝난 Sol Cast V2의 39명·트라우마 변신, 총 40개 실제 4방향 아틀라스를 설치했다. [현재 설치·성장 규칙](CAST_V2_AND_BALANCE.md), [제작 원칙](art/sol-cast-v2/ART_PIPELINE.md), [최종 PNG/WebP 해시·방향별 해부학적 기준점](art/sol-cast-v2/manifest.json)을 사용한다. 승인본을 예전 성별별 포즈·후보 제작 규칙으로 다시 해석하지 않는다. 자연스러운 서기/가벼운 전투 준비, 같은 두개골·얼굴 기준, 고정된 물리적 장비의 손을 우선한다.
+
 현재 배포 가공 규칙은 [단일 HTML 최적화](SINGLE_HTML_OPTIMIZATION.md)와 [경로·용도·원본/압축본 해시 목록](ASSET_OPTIMIZATION.json)을 따른다. 아래 제작 절차로 얻은 보관본은 덮어쓰지 않고 `assets/optimized/`에 배포 압축본을 별도 생성한다. 일반판과 Bright는 공통 빌드 한 번으로 갱신한다. 초상화·전신·유물 아이콘·앨범 썸네일은 `assets/optimized/ui/`에서 재사용하며, 일반 빌드에서 재압축하지 않는다. UI 설정/자르기만 바꾸면 `node defense/scripts/optimize-images.mjs --derived-only`로 갱신하고 원본 해시·사용처·출력 목록을 함께 커밋한다.
 
 2026-10-23 추가: 사용자 승인 Sol SD 8명과 새 VFX를 적용했다. [적용·판단·확장 기록](SOL_ASSET_AND_VFX.md), [실제 렌더러 전후 비교](review/sol-vfx/index.html)를 함께 본다. 이 작업은 내장 `image_gen`과 native alpha를 사용했다. 아래의 나노바나나·자홍 키 배경 절차를 Sol 승인본에 소급 적용하거나, 이미 검수한 SD를 다시 생성하지 않는다.

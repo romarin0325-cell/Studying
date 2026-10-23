@@ -20,8 +20,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 209,
+        "x": 247,
+        "y": 194,
         "size": 250
       }
     },
@@ -57,8 +57,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 232,
+        "x": 261,
+        "y": 213,
         "size": 250
       }
     },
@@ -94,8 +94,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 211,
+        "x": 242,
+        "y": 220,
         "size": 250
       }
     },
@@ -132,8 +132,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 252,
-        "y": 190,
+        "x": 253,
+        "y": 204,
         "size": 250
       }
     },
@@ -169,8 +169,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 228,
+        "x": 240,
+        "y": 234,
         "size": 250
       }
     },
@@ -185,7 +185,7 @@ export const HEROES = [
       "name": "하얀 숨결",
       "cost": 65,
       "type": "freeze",
-      "text": "적 전체에게 위력 3배 피해를 주고 2초 동안 얼립니다. 이어서 6초간 50% 느리게 합니다."
+      "text": "적 전체에게 위력 3배 피해를 주고 2초 동안 얼리며, 6초간 50% 느리게 합니다. 성급이 오를 때마다 빙결시간과 감속률이 기본값의 10%씩 늘어납니다."
     },
     "heightGroup": "short",
     "role": "감속 · 작은 폭발",
@@ -206,8 +206,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 217,
+        "x": 247,
+        "y": 215,
         "size": 250
       }
     },
@@ -243,8 +243,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 221,
+        "x": 257,
+        "y": 224,
         "size": 250
       }
     },
@@ -280,8 +280,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 210,
+        "x": 249,
+        "y": 236,
         "size": 250
       }
     },
@@ -317,8 +317,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 195,
+        "x": 258,
+        "y": 214,
         "size": 250
       }
     },
@@ -327,7 +327,7 @@ export const HEROES = [
     "attack": "wind",
     "trait": {
       "type": "gust",
-      "text": "바람이 일직선으로 관통한 뒤 근처 적에게 한 번 더 튑니다. 일반 적은 맞을 때마다 1% 확률로 즉사합니다."
+      "text": "바람이 일직선으로 관통한 뒤 근처 적에게 한 번 더 튑니다. 일반 적은 맞을 때마다 1% 확률로 즉사합니다. 성급이 오를 때와 강화 5단계마다 즉사율이 0.1%p씩 늘어납니다."
     },
     "skill": {
       "name": "태풍의 눈",
@@ -354,8 +354,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 204,
+        "x": 234,
+        "y": 227,
         "size": 250
       }
     },
@@ -364,7 +364,7 @@ export const HEROES = [
     "attack": "lightning",
     "trait": {
       "type": "chain",
-      "text": "가까운 적 2명에게 번개가 이어집니다. 상하좌우로 붙어 있는 번개의현자가 많을수록 강해집니다(2기 +15%, 3기 +30%, 4기 이상 +50%)."
+      "text": "가까운 적 2명에게 번개가 이어집니다. 상하좌우로 붙어 있는 번개의현자가 많을수록 강해집니다(2기 +20%, 3기 +40%, 4기 이상 +60%)."
     },
     "skill": {
       "name": "천둥의 연쇄",
@@ -391,8 +391,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 199,
+        "x": 268,
+        "y": 204,
         "size": 250
       }
     },
@@ -428,8 +428,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 207,
+        "x": 249,
+        "y": 217,
         "size": 250
       }
     },
@@ -465,8 +465,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 263,
+        "x": 266,
+        "y": 224,
         "size": 250
       }
     },
@@ -502,8 +502,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 214,
+        "x": 263,
+        "y": 229,
         "size": 250
       }
     },
@@ -540,8 +540,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 229,
+        "x": 246,
+        "y": 226,
         "size": 250
       }
     },
@@ -577,8 +577,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 231,
+        "x": 242,
+        "y": 221,
         "size": 250
       }
     },
@@ -614,8 +614,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 211,
+        "x": 253,
+        "y": 223,
         "size": 250
       }
     },
@@ -651,8 +651,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 203,
+        "x": 277,
+        "y": 217,
         "size": 250
       }
     },
@@ -688,8 +688,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 249,
+        "x": 247,
+        "y": 240,
         "size": 250
       }
     },
@@ -725,8 +725,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 185,
+        "x": 252,
+        "y": 215,
         "size": 250
       }
     },
@@ -763,7 +763,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 256,
-        "y": 208,
+        "y": 204,
         "size": 250
       }
     },
@@ -799,8 +799,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 251,
-        "y": 237,
+        "x": 253,
+        "y": 207,
         "size": 250
       }
     },
@@ -837,8 +837,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 223,
+        "x": 253,
+        "y": 210,
         "size": 250
       }
     },
@@ -874,8 +874,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 253,
-        "y": 198,
+        "x": 257,
+        "y": 221,
         "size": 250
       }
     },
@@ -911,8 +911,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 248,
-        "y": 229,
+        "x": 246,
+        "y": 226,
         "size": 250
       }
     },
@@ -949,7 +949,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 255,
-        "y": 194,
+        "y": 207,
         "size": 250
       }
     },
@@ -985,8 +985,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 257,
-        "y": 223,
+        "x": 250,
+        "y": 206,
         "size": 250
       }
     },
@@ -1023,8 +1023,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 251,
-        "y": 211,
+        "x": 241,
+        "y": 208,
         "size": 250
       }
     },
@@ -1039,7 +1039,7 @@ export const HEROES = [
       "name": "빙궁의 칙령",
       "cost": 80,
       "type": "ice_court",
-      "text": "적 전체에게 위력 9배 피해를 줍니다. 6초 동안 겨울 왕국이 되어 모든 적이 50% 느려지고 받는 피해가 15% 늘어나며, 쓰러진 적이 주변 적을 0.8초 얼립니다."
+      "text": "적 전체에게 위력 9배 피해를 줍니다. 6초 동안 겨울 왕국이 되어 모든 적이 50% 느려지고 받는 피해가 15% 늘어나며, 쓰러진 적이 주변 적을 0.8초 얼립니다. 성급이 오를 때마다 감속률과 겨울 지속시간이 기본값의 10%씩 늘어납니다."
     },
     "heightGroup": "tall",
     "role": "냉기 확산 · 얼음창",
@@ -1060,7 +1060,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 254,
+        "x": 262,
         "y": 225,
         "size": 250
       }
@@ -1097,8 +1097,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 256,
-        "y": 219,
+        "x": 258,
+        "y": 224,
         "size": 250
       }
     },
@@ -1134,8 +1134,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 245,
-        "y": 191,
+        "x": 257,
+        "y": 222,
         "size": 250
       }
     },
@@ -1150,7 +1150,7 @@ export const HEROES = [
       "name": "대지분쇄",
       "cost": 70,
       "type": "crush",
-      "text": "무작위 적을 노려 주변(반경 150)에 위력 6배 충격을 0.5초 간격으로 3번 줍니다."
+      "text": "무작위 적을 노려 주변(반경 112.5)에 위력 6배 충격을 0.5초 간격으로 3번 줍니다. 훈련마다 기본 반경의 5%가 더해집니다."
     },
     "heightGroup": "tall",
     "role": "오라 증폭 · 대지 분쇄",
@@ -1171,8 +1171,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 238,
-        "y": 219,
+        "x": 259,
+        "y": 226,
         "size": 250
       }
     },
@@ -1208,8 +1208,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 267,
-        "y": 215,
+        "x": 261,
+        "y": 227,
         "size": 250
       }
     },
@@ -1245,8 +1245,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 266,
-        "y": 220,
+        "x": 237,
+        "y": 215,
         "size": 250
       }
     },
@@ -1282,8 +1282,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 251,
-        "y": 208,
+        "x": 255,
+        "y": 230,
         "size": 250
       }
     },
@@ -1319,7 +1319,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 247,
+        "x": 246,
         "y": 219,
         "size": 250
       }
@@ -1356,8 +1356,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 257,
-        "y": 208,
+        "x": 255,
+        "y": 213,
         "size": 250
       }
     },
@@ -1393,8 +1393,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 263,
-        "y": 222,
+        "x": 261,
+        "y": 198,
         "size": 250
       }
     },
@@ -1409,7 +1409,7 @@ export const HEROES = [
       "name": "아마겟돈",
       "cost": 70,
       "type": "armageddon",
-      "text": "가장 성급이 낮은 동료 한 명을 불태워 소멸시키고(무적이면 소멸하지 않습니다), 가장 밀집한 반경 180의 적에게 위력 15배 피해를 줍니다."
+      "text": "가장 성급이 낮은 동료 한 명을 불태워 소멸시키고(무적이면 소멸하지 않습니다), 가장 밀집한 반경 180의 적에게 위력 18배 피해를 줍니다."
     },
     "heightGroup": "medium",
     "role": "화상 · 환원",
@@ -1430,8 +1430,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 262,
-        "y": 208,
+        "x": 251,
+        "y": 228,
         "size": 250
       }
     },
@@ -1869,8 +1869,8 @@ export const TRANSFORM_ART = {
     "scale": 1,
     "directional": true,
     "portrait": {
-      "x": 250,
-      "y": 212,
+      "x": 252,
+      "y": 204,
       "size": 250
     }
   }
@@ -1879,45 +1879,45 @@ export const TRANSFORM_ART = {
 export const ASSET_PATHS = {
   "effects-sol-sweet": "./assets/merge/effects-sol-sweet.webp",
   "effects-sol-twilight": "./assets/merge/effects-sol-twilight.webp",
-  "unit-zeke": "./assets/merge/units/zeke.webp",
-  "unit-rumi": "./assets/merge/units/rumi.webp",
-  "unit-luna": "./assets/merge/units/luna.webp",
-  "unit-cinderella": "./assets/merge/units/cinderella.webp",
-  "unit-snow_rabbit": "./assets/merge/units/snow_rabbit.webp",
-  "unit-avalanche_maid": "./assets/merge/units/avalanche_maid.webp",
-  "unit-night_rabbit": "./assets/merge/units/night_rabbit.webp",
-  "unit-guardian": "./assets/merge/units/guardian.webp",
-  "unit-storm_sage": "./assets/merge/units/storm_sage.webp",
-  "unit-lightning_sage": "./assets/merge/units/lightning_sage.webp",
-  "unit-red_dragon": "./assets/merge/units/red_dragon.webp",
-  "unit-flame_sage": "./assets/merge/units/flame_sage.webp",
-  "unit-mushroom_king": "./assets/merge/units/mushroom_king.webp",
-  "unit-great_detective": "./assets/merge/units/great_detective.webp",
-  "unit-siren": "./assets/merge/units/siren.webp",
-  "unit-phantom": "./assets/merge/units/phantom.webp",
-  "unit-queen": "./assets/merge/units/queen.webp",
-  "unit-galaxy_whale": "./assets/merge/units/galaxy_whale.webp",
-  "unit-silver_rabbit": "./assets/merge/units/silver_rabbit.webp",
-  "unit-ancient_dragon": "./assets/merge/units/ancient_dragon.webp",
-  "unit-time_ruler": "./assets/merge/units/time_ruler.webp",
-  "unit-doom": "./assets/merge/units/doom.webp",
-  "unit-santa": "./assets/merge/units/santa.webp",
-  "unit-jasmine": "./assets/merge/units/jasmine.webp",
-  "unit-star_boy": "./assets/merge/units/star_boy.webp",
-  "unit-time_magician": "./assets/merge/units/time_magician.webp",
-  "unit-cherry_prince": "./assets/merge/units/cherry_prince.webp",
-  "unit-frost_witch": "./assets/merge/units/frost_witch.webp",
-  "unit-harmonious": "./assets/merge/units/harmonious.webp",
-  "unit-aurora": "./assets/merge/units/aurora.webp",
-  "unit-behemoth": "./assets/merge/units/behemoth.webp",
-  "unit-underdog": "./assets/merge/units/underdog.webp",
-  "unit-toffee_apple": "./assets/merge/units/toffee_apple.webp",
-  "unit-joker": "./assets/merge/units/joker.webp",
-  "unit-sunflower": "./assets/merge/units/sunflower.webp",
-  "unit-antropy": "./assets/merge/units/antropy.webp",
-  "unit-cure_master": "./assets/merge/units/cure_master.webp",
-  "unit-ash": "./assets/merge/units/ash.webp",
-  "unit-venom": "./assets/merge/units/venom.webp",
+  "unit-zeke": "./assets/cast-v2/zeke.webp",
+  "unit-rumi": "./assets/cast-v2/rumi.webp",
+  "unit-luna": "./assets/cast-v2/luna.webp",
+  "unit-cinderella": "./assets/cast-v2/cinderella.webp",
+  "unit-snow_rabbit": "./assets/cast-v2/snow_rabbit.webp",
+  "unit-avalanche_maid": "./assets/cast-v2/avalanche_maid.webp",
+  "unit-night_rabbit": "./assets/cast-v2/night_rabbit.webp",
+  "unit-guardian": "./assets/cast-v2/guardian.webp",
+  "unit-storm_sage": "./assets/cast-v2/storm_sage.webp",
+  "unit-lightning_sage": "./assets/cast-v2/lightning_sage.webp",
+  "unit-red_dragon": "./assets/cast-v2/red_dragon.webp",
+  "unit-flame_sage": "./assets/cast-v2/flame_sage.webp",
+  "unit-mushroom_king": "./assets/cast-v2/mushroom_king.webp",
+  "unit-great_detective": "./assets/cast-v2/great_detective.webp",
+  "unit-siren": "./assets/cast-v2/siren.webp",
+  "unit-phantom": "./assets/cast-v2/phantom.webp",
+  "unit-queen": "./assets/cast-v2/queen.webp",
+  "unit-galaxy_whale": "./assets/cast-v2/galaxy_whale.webp",
+  "unit-silver_rabbit": "./assets/cast-v2/silver_rabbit.webp",
+  "unit-ancient_dragon": "./assets/cast-v2/ancient_dragon.webp",
+  "unit-time_ruler": "./assets/cast-v2/time_ruler.webp",
+  "unit-doom": "./assets/cast-v2/doom.webp",
+  "unit-santa": "./assets/cast-v2/santa.webp",
+  "unit-jasmine": "./assets/cast-v2/jasmine.webp",
+  "unit-star_boy": "./assets/cast-v2/star_boy.webp",
+  "unit-time_magician": "./assets/cast-v2/time_magician.webp",
+  "unit-cherry_prince": "./assets/cast-v2/cherry_prince.webp",
+  "unit-frost_witch": "./assets/cast-v2/frost_witch.webp",
+  "unit-harmonious": "./assets/cast-v2/harmonious.webp",
+  "unit-aurora": "./assets/cast-v2/aurora.webp",
+  "unit-behemoth": "./assets/cast-v2/behemoth.webp",
+  "unit-underdog": "./assets/cast-v2/underdog.webp",
+  "unit-toffee_apple": "./assets/cast-v2/toffee_apple.webp",
+  "unit-joker": "./assets/cast-v2/joker.webp",
+  "unit-sunflower": "./assets/cast-v2/sunflower.webp",
+  "unit-antropy": "./assets/cast-v2/antropy.webp",
+  "unit-cure_master": "./assets/cast-v2/cure_master.webp",
+  "unit-ash": "./assets/cast-v2/ash.webp",
+  "unit-venom": "./assets/cast-v2/venom.webp",
   "garden": "./assets/merge/garden.webp",
   "summon-altar": "./assets/merge/summon-altar.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",
@@ -1931,7 +1931,7 @@ export const ASSET_PATHS = {
   "relics": "./assets/merge/relics.webp",
   "blessings": "./assets/merge/blessings.webp",
   "effects": "./assets/merge/effects.webp",
-  "unit-trauma": "./assets/merge/units/trauma.webp",
+  "unit-trauma": "./assets/cast-v2/trauma.webp",
   "effects-expansion": "./assets/merge/effects-expansion.webp",
   "finishers": "./assets/merge/finishers.webp",
   "relics-expansion": "./assets/merge/relics-expansion.webp",

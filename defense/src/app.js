@@ -288,16 +288,16 @@ for(const type of ['pointerup','pointercancel'])document.addEventListener(type,(
 // ⓘ on the unit card: every number and text for the selected companion.
 function unitInfo(){
   const u=run?.board[selected];if(!u)return;const given=E.givenEffects(run,u,selected),detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
+  const preview=E.castPreview(run,u.hero),liveTrait=given.length?given.join(' · '):u.hero==='lightning_sage'?`${trait.label} · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:trait.label||h.trait.text;
   show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${SHAPE_TEXT[h.shape]||''}</b></span></div>
-    <div class="ability"><span class="ability-tag">특성</span><p>${h.trait.text}</p></div><div class="ability"><span class="ability-tag skill">필살기 · ${h.skill.name}</span><p>${h.skill.text}</p></div>
-    ${given.length?`<div class="unit-buffs given"><em>이 동료가 주는 효과</em>${given.map(b=>`<span class="chip">${b}</span>`).join('')}</div>`:''}
+    <div class="ability"><span class="ability-tag">특성</span><p>${escapeText(liveTrait)}</p></div><div class="ability"><span class="ability-tag skill">필살기 · ${h.skill.name}${preview?` · ${preview.rank}성 사용`:''}</span>${(preview?.lines||[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>
     <div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.length?bonuses.map(b=>`<span class="chip">${b}</span>`).join(''):'<span class="unit-none">없음</span>'}</div><p class="fineprint">훈련 ${run.upgrades[u.hero]}/5 · ${h.role}</p>`,
     `<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'unit-info',u.uid);
 }
 // The unit card's ultimate row opens the full detail sheet.
 function skillInfo(id){
   const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat'&&!E.castLock(run,id);
-  show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span><p>${h.skill.text}</p><small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><div class="skill-now-head"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${boostChip(preview.boost)}</div>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}${boostHint(preview.boost)}</div>`:''}`,
+  show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span>${preview?'':`<p>${h.skill.text}</p>`}<small>${caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><div class="skill-now-head"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${boostChip(preview.boost)}</div>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}${boostHint(preview.boost)}</div>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">돌아가기</button><button class="primary" data-cast-now="${id}" ${ready?'':'disabled'}>바로 사용</button></div>`,'skill-info',id);
 }
 // Ultimate cut-in: a slanted band with the companion and the skill name over the top of the
@@ -349,7 +349,7 @@ const topRank=id=>run?run.board.reduce((n,u)=>u?.hero===id?Math.max(n,u.rank):n,
 // One training row: name with the field's top rank, five pips for the training count, and the trained values
 // on their own line (wraps to two lines; never cut off).
 function trainRow(id){
-  const lv=run.upgrades[id],max=lv>=5,cost=E.upgradeCost(run,id),top=topRank(id),role=E.trainingBonus(id,lv);
+  const lv=run.upgrades[id],max=lv>=5,cost=E.upgradeCost(run,id),top=topRank(id),caster=E.bestUnit(run,id),role=['snow_rabbit','frost_witch'].includes(id)&&caster?E.givenEffects(run,caster,run.board.indexOf(caster)).join(' · '):E.trainingBonus(id,lv);
   return `<button class="choose-row train-row" data-train="${id}" ${max||run.gold<cost?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${top?`<span class="rank" aria-label="최고 ${top}성">${icon('star')}${top}</span>`:'<span class="train-away">미배치</span>'}<span class="train-pips" aria-label="훈련 ${lv}/5">${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></strong><small class="train-effect">${[lv?`위력 +${lv*25}%`:'',...(role?role.split(' · '):[])].filter(Boolean).map(part=>`<span>${part}</span>`).join(' · ')||'훈련 전'}</small></div><b>${max?'최대':cost+' G'}</b></button>`;
 }
 function training(){
@@ -619,7 +619,7 @@ function heroDetail(id){
     <div class="hd-skill trait"><span class="hd-tag">특성</span><p>${liveText(h.trait.text,scaled.trait)}</p></div>
     ${e.owned?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story.title)}</strong></span>${icon('chevron')}</button>`:''}
     <details class="more"><summary>능력치 자세히</summary><div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>${e.owned?powerBreakdown(id):''}
-      <p class="fineprint">${scaled.trait.length+scaled.skill.length?'강화마다 기본 위력 +5%, 5단계마다 색으로 표시된 수치 +10%.':'강화마다 기본 위력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
+      <p class="fineprint">${id==='storm_sage'?'강화마다 기본 위력 +5%, 5단계마다 즉사율 +0.1%p.':scaled.trait.length+scaled.skill.length?'강화마다 기본 위력 +5%, 5단계마다 색으로 표시된 수치 +10%.':'강화마다 기본 위력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
     e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}" ${p().partner===id?'disabled':''}>${p().partner===id?'지금 파트너':'파트너로'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>${isAway?'파견 중':'편성'}</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
 }
 function powerBreakdown(id){

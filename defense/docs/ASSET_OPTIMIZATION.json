@@ -1,7 +1,6 @@
 {
   "schema": 1,
   "pass": "2026-10-23 single-HTML optimization",
-  "policy": "Preserve every pre-pass source. Commit smaller static encodings and fixed-path UI crops; normal builds validate/read them without encoding or cache repair.",
   "encoder": {
     "sharp": "0.35.4",
     "vips": "8.18.6",
@@ -50,43 +49,13 @@
       "smartSubsample": true
     }
   },
-  "derivedProfiles": {
-    "portrait": {
-      "width": 240,
-      "height": 240,
-      "quality": 84,
-      "alphaQuality": 100,
-      "effort": 6
-    },
-    "figure": {
-      "width": 512,
-      "height": 512,
-      "quality": 85,
-      "alphaQuality": 100,
-      "effort": 6
-    },
-    "relic": {
-      "width": 240,
-      "height": 240,
-      "quality": 82,
-      "alphaQuality": 100,
-      "effort": 6
-    },
-    "memorialThumb": {
-      "width": 240,
-      "height": 360,
-      "quality": 68,
-      "alphaQuality": 100,
-      "effort": 6
-    }
-  },
   "totals": {
-    "sourceBytes": 20717714,
-    "deployableSourceBytes": 19542844,
-    "outputBytes": 11880364,
+    "sourceBytes": 20964290,
+    "deployableSourceBytes": 19789420,
+    "outputBytes": 11900818,
     "optimizedFiles": 148,
     "derivedFiles": 144,
-    "derivedOutputBytes": 3245812
+    "derivedOutputBytes": 3418174
   },
   "images": [
     {
@@ -153,7 +122,7 @@
     },
     {
       "id": "atlas:unit-zeke",
-      "source": "./assets/merge/units/zeke.webp",
+      "source": "./assets/cast-v2/zeke.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-zeke; combat renderer / stage UI",
@@ -162,8 +131,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 200004,
-        "sha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+        "bytes": 289752,
+        "sha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -172,9 +141,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/zeke.webp",
-        "bytes": 79490,
-        "sha256": "723e4b1ef9961be12124c56d9da57f15faede5cfc034568998bf866fd2fa6f63",
+        "path": "./assets/optimized/cast-v2/zeke.webp",
+        "bytes": 108708,
+        "sha256": "95884f94bb1ce99a6f53620f65821a69e6e0984ccf9ff9c82e86cdfac4c69a19",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -186,7 +155,7 @@
     },
     {
       "id": "atlas:unit-rumi",
-      "source": "./assets/merge/units/rumi.webp",
+      "source": "./assets/cast-v2/rumi.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-rumi; combat renderer / stage UI",
@@ -195,8 +164,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 188632,
-        "sha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+        "bytes": 199714,
+        "sha256": "a52e14daa819efb8eafd850b4b1693c8884db8887828bbb9d544f8efd3d5d647",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -205,9 +174,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/rumi.webp",
-        "bytes": 73840,
-        "sha256": "8d9e3ffabef8f8973dab8b389a13f595d64422d301ee75eebfedf2e00c1a361a",
+        "path": "./assets/optimized/cast-v2/rumi.webp",
+        "bytes": 75392,
+        "sha256": "9dc96f350695a00e683670e1892accf9a98617de3409618464d0aee1204781dd",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -219,7 +188,7 @@
     },
     {
       "id": "atlas:unit-luna",
-      "source": "./assets/merge/units/luna.webp",
+      "source": "./assets/cast-v2/luna.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-luna; combat renderer / stage UI",
@@ -228,8 +197,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 170962,
-        "sha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+        "bytes": 201764,
+        "sha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -238,9 +207,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/luna.webp",
-        "bytes": 63108,
-        "sha256": "142e6da5338a1504225ed491b75b4df25f24eacef7c8956a0a0e34592e734c8a",
+        "path": "./assets/optimized/cast-v2/luna.webp",
+        "bytes": 72064,
+        "sha256": "7b08e79ecedf30653689cff7c507c80353d1945484f51dee82957fd89b7de207",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -252,7 +221,7 @@
     },
     {
       "id": "atlas:unit-cinderella",
-      "source": "./assets/merge/units/cinderella.webp",
+      "source": "./assets/cast-v2/cinderella.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-cinderella; combat renderer / stage UI",
@@ -261,8 +230,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 291576,
-        "sha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+        "bytes": 245428,
+        "sha256": "f138c02f97feb8adbfafd3b79b38eed978393bde418ed94df97283df2069bd2a",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -271,9 +240,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/cinderella.webp",
-        "bytes": 109036,
-        "sha256": "5857f9648cf4bb8e71aa54f6f083263078f01b82d614c7ad2c8e2776f5c9e612",
+        "path": "./assets/optimized/cast-v2/cinderella.webp",
+        "bytes": 91954,
+        "sha256": "2f56e42eacd74fbecc10084b0288b248124851d50ecba7f42ff3bc3af566f8d2",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -285,7 +254,7 @@
     },
     {
       "id": "atlas:unit-snow_rabbit",
-      "source": "./assets/merge/units/snow_rabbit.webp",
+      "source": "./assets/cast-v2/snow_rabbit.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-snow_rabbit; combat renderer / stage UI",
@@ -294,8 +263,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 155114,
-        "sha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+        "bytes": 149804,
+        "sha256": "1612e7955b779d32f9662809f1cdd518d9723a059817105ff7a6d0144f841ac0",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -304,9 +273,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/snow_rabbit.webp",
-        "bytes": 63410,
-        "sha256": "fbfafe025d8b510a67b0efa6c8506dd0b1cbff464e32063b7100098c6069d4c8",
+        "path": "./assets/optimized/cast-v2/snow_rabbit.webp",
+        "bytes": 58190,
+        "sha256": "ea433e7cd71a69318d0da615fafbe6c7a10f2d8cdcaa67ac2d2f98735f1d703a",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -318,7 +287,7 @@
     },
     {
       "id": "atlas:unit-avalanche_maid",
-      "source": "./assets/merge/units/avalanche_maid.webp",
+      "source": "./assets/cast-v2/avalanche_maid.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-avalanche_maid; combat renderer / stage UI",
@@ -327,8 +296,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 219884,
-        "sha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+        "bytes": 247316,
+        "sha256": "9af06e744efc79308dc92209bef04c019288804eacea831f70a8a3edebd5d9f5",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -337,9 +306,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/avalanche_maid.webp",
-        "bytes": 87856,
-        "sha256": "a3907cfe40ec9b5cb113e669f16a283ae30985f96578ea05adbfa247ddac35cd",
+        "path": "./assets/optimized/cast-v2/avalanche_maid.webp",
+        "bytes": 92574,
+        "sha256": "6b0d5d2b4fcfea2f2f844a7d3672bbe78a903dbf892e26c2820d8e754ba6a40e",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -351,7 +320,7 @@
     },
     {
       "id": "atlas:unit-night_rabbit",
-      "source": "./assets/merge/units/night_rabbit.webp",
+      "source": "./assets/cast-v2/night_rabbit.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-night_rabbit; combat renderer / stage UI",
@@ -360,8 +329,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 145456,
-        "sha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+        "bytes": 161602,
+        "sha256": "86c70648fd97c84e3a7a0da5df8c63aca215d47ab5f710270ff9b12834a9d1d2",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -370,9 +339,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/night_rabbit.webp",
-        "bytes": 59242,
-        "sha256": "0e631d83279b04896aa3d0af5b0f187dd4ea35341da8fe99eda4e1fe72c44b15",
+        "path": "./assets/optimized/cast-v2/night_rabbit.webp",
+        "bytes": 61004,
+        "sha256": "3e62c0dd4213571a2cbeb99c6f5758d68d43e5481360da70425eda64ec8971da",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -384,7 +353,7 @@
     },
     {
       "id": "atlas:unit-guardian",
-      "source": "./assets/merge/units/guardian.webp",
+      "source": "./assets/cast-v2/guardian.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-guardian; combat renderer / stage UI",
@@ -393,8 +362,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 184556,
-        "sha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+        "bytes": 205470,
+        "sha256": "8597b93584a18eac628dd47e6b7439cefcb27bd537235ce1b7f09be182c1c994",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -403,9 +372,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/guardian.webp",
-        "bytes": 72906,
-        "sha256": "6dc1124372cb700ebf0845fab8c59f9590b1bc810666cf623677d579212e85c5",
+        "path": "./assets/optimized/cast-v2/guardian.webp",
+        "bytes": 76952,
+        "sha256": "ae478af38c2995bb55638b728c5d27359e7745b17f719ffb2b5d29b88e05c25d",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -417,7 +386,7 @@
     },
     {
       "id": "atlas:unit-storm_sage",
-      "source": "./assets/merge/units/storm_sage.webp",
+      "source": "./assets/cast-v2/storm_sage.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-storm_sage; combat renderer / stage UI",
@@ -426,8 +395,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 200144,
-        "sha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+        "bytes": 198786,
+        "sha256": "e783a0dc632fad89d767033faee1d775c59671aebf2c44f898ee98f26275fd23",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -436,9 +405,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/storm_sage.webp",
-        "bytes": 79830,
-        "sha256": "833ea0662afba4fdd82d4fae93c2bec157213532fb3e8253d872ce352c63a4dc",
+        "path": "./assets/optimized/cast-v2/storm_sage.webp",
+        "bytes": 73530,
+        "sha256": "a2aec6207865010b895e5d950366d0633894e88c1c0b79dc67f95816fc8c7199",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -450,7 +419,7 @@
     },
     {
       "id": "atlas:unit-lightning_sage",
-      "source": "./assets/merge/units/lightning_sage.webp",
+      "source": "./assets/cast-v2/lightning_sage.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-lightning_sage; combat renderer / stage UI",
@@ -459,8 +428,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 159458,
-        "sha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+        "bytes": 182914,
+        "sha256": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -469,9 +438,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/lightning_sage.webp",
-        "bytes": 66248,
-        "sha256": "04f6a07993408098b410ff017fcb3ef211a186e93b57f68908542ea233e439f1",
+        "path": "./assets/optimized/cast-v2/lightning_sage.webp",
+        "bytes": 69514,
+        "sha256": "006e58485083b37e43b20e97cf6b29b681bbcd8e06ada46a8c5408e80309e913",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -483,7 +452,7 @@
     },
     {
       "id": "atlas:unit-red_dragon",
-      "source": "./assets/merge/units/red_dragon.webp",
+      "source": "./assets/cast-v2/red_dragon.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-red_dragon; combat renderer / stage UI",
@@ -492,8 +461,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 206106,
-        "sha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+        "bytes": 240986,
+        "sha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -502,9 +471,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/red_dragon.webp",
-        "bytes": 84196,
-        "sha256": "982ee66f134da05e3637fa5bd5471f735bfb9fa3d366b2c1ce595726e14358cf",
+        "path": "./assets/optimized/cast-v2/red_dragon.webp",
+        "bytes": 91376,
+        "sha256": "92c862e3f6e9aea70548fe1cc4760edda9cfd33d9550833ec876d5fc8a8bb2ae",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -516,7 +485,7 @@
     },
     {
       "id": "atlas:unit-flame_sage",
-      "source": "./assets/merge/units/flame_sage.webp",
+      "source": "./assets/cast-v2/flame_sage.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-flame_sage; combat renderer / stage UI",
@@ -525,8 +494,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 154210,
-        "sha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+        "bytes": 206334,
+        "sha256": "c0ca2f5cb7a277c0b04fb9260e86d01e9f8df8c2779c431c2c8cc1125317f412",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -535,9 +504,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/flame_sage.webp",
-        "bytes": 61012,
-        "sha256": "bcd6e17172c55f597b25cee27b8ace7427ce54ca41574f115dade15de2bab166",
+        "path": "./assets/optimized/cast-v2/flame_sage.webp",
+        "bytes": 78614,
+        "sha256": "203f5aa0be1b60f958b5425cafa67bf853330a5e94b6c4ba1b7a9c202a71e6cd",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -549,7 +518,7 @@
     },
     {
       "id": "atlas:unit-mushroom_king",
-      "source": "./assets/merge/units/mushroom_king.webp",
+      "source": "./assets/cast-v2/mushroom_king.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-mushroom_king; combat renderer / stage UI",
@@ -558,8 +527,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 145734,
-        "sha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+        "bytes": 200526,
+        "sha256": "8dfc0139066fd74e398f26afdbb560a79082f826717cc12faa45c94de25e4cfe",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -568,9 +537,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/mushroom_king.webp",
-        "bytes": 55816,
-        "sha256": "3855d77a4b0dd76a1140cd1d2175a3cdda0849ef3458038606283c7cb3c8fd14",
+        "path": "./assets/optimized/cast-v2/mushroom_king.webp",
+        "bytes": 73282,
+        "sha256": "712f0eec2f45c268183f1ec5062b61eef21458fc70d703b44330eec7e4f94dff",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -582,7 +551,7 @@
     },
     {
       "id": "atlas:unit-great_detective",
-      "source": "./assets/merge/units/great_detective.webp",
+      "source": "./assets/cast-v2/great_detective.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-great_detective; combat renderer / stage UI",
@@ -591,8 +560,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 148530,
-        "sha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+        "bytes": 172124,
+        "sha256": "c69ce1b7670195b181801afa62ebc6449e0c4080ae683ffa1cd3b66715b384f2",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -601,9 +570,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/great_detective.webp",
-        "bytes": 57194,
-        "sha256": "7c95c3d6ef32e4353af45a080f8398d4b7e40338aac1bfcb011c96781555cdd4",
+        "path": "./assets/optimized/cast-v2/great_detective.webp",
+        "bytes": 63326,
+        "sha256": "49430d9b0bf8c63ded2441117a54051ff80658a1c13da5ec330fd37db39462b4",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -615,7 +584,7 @@
     },
     {
       "id": "atlas:unit-siren",
-      "source": "./assets/merge/units/siren.webp",
+      "source": "./assets/cast-v2/siren.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-siren; combat renderer / stage UI",
@@ -624,8 +593,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 179986,
-        "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+        "bytes": 189274,
+        "sha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -634,9 +603,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/siren.webp",
-        "bytes": 71504,
-        "sha256": "e0c0d33766b5e77ff89ee6778f21e1c55eadd20f55f3739b769f0cc0882fd83e",
+        "path": "./assets/optimized/cast-v2/siren.webp",
+        "bytes": 72786,
+        "sha256": "24a60c1fd4d2675f43cabf6faff9feb043cc4fd778c115c8f65c128ac015b084",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -648,7 +617,7 @@
     },
     {
       "id": "atlas:unit-phantom",
-      "source": "./assets/merge/units/phantom.webp",
+      "source": "./assets/cast-v2/phantom.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-phantom; combat renderer / stage UI",
@@ -657,8 +626,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 117342,
-        "sha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+        "bytes": 173198,
+        "sha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -667,9 +636,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/phantom.webp",
-        "bytes": 45710,
-        "sha256": "b6ee303fa55b7a5b473ac14daa7b1143a756d174f8599d4a8bf5cc3d4928ac10",
+        "path": "./assets/optimized/cast-v2/phantom.webp",
+        "bytes": 64432,
+        "sha256": "0bd078e5f13d4b1bc72d80042a9017fb604ca3beffeedcd1cd74199f27cade96",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -681,7 +650,7 @@
     },
     {
       "id": "atlas:unit-queen",
-      "source": "./assets/merge/units/queen.webp",
+      "source": "./assets/cast-v2/queen.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-queen; combat renderer / stage UI",
@@ -690,8 +659,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 238544,
-        "sha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+        "bytes": 250298,
+        "sha256": "528168417d8df90ac96abb2be96ccee2b0d073002fef7b8f90f5fa5f9b2d2db1",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -700,9 +669,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/queen.webp",
-        "bytes": 94294,
-        "sha256": "483bbb3bae5459ab1799829a8914a5ebb22bd2b835388be03401c0164c1631b2",
+        "path": "./assets/optimized/cast-v2/queen.webp",
+        "bytes": 92524,
+        "sha256": "4004d49d9d945e8282c2470a7c290b4389b388d8ecfabc758f0c9b008be3d3d2",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -714,7 +683,7 @@
     },
     {
       "id": "atlas:unit-galaxy_whale",
-      "source": "./assets/merge/units/galaxy_whale.webp",
+      "source": "./assets/cast-v2/galaxy_whale.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-galaxy_whale; combat renderer / stage UI",
@@ -723,8 +692,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 250328,
-        "sha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+        "bytes": 228478,
+        "sha256": "cdf44e0c0aed8b7f01824fccfda62ed21e0ce71c1cd7a7004a425302ad36d45a",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -733,9 +702,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/galaxy_whale.webp",
-        "bytes": 96724,
-        "sha256": "f6c9bfb320323d6d5f7451e6687f946ce7b0a9103ed72f0de1eaf6b9d819220f",
+        "path": "./assets/optimized/cast-v2/galaxy_whale.webp",
+        "bytes": 83500,
+        "sha256": "86c31c5be2ecaa5c2ef574cd5b7da38eb764bc8f30c2713c4b9772a572dbf3cb",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -747,7 +716,7 @@
     },
     {
       "id": "atlas:unit-silver_rabbit",
-      "source": "./assets/merge/units/silver_rabbit.webp",
+      "source": "./assets/cast-v2/silver_rabbit.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-silver_rabbit; combat renderer / stage UI",
@@ -756,8 +725,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 207210,
-        "sha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+        "bytes": 168384,
+        "sha256": "5a015814e1e3b3ff09b4b4f9b4a5eb9ee6c6d8f5b2f07eebd9a5495c64e666a3",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -766,9 +735,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/silver_rabbit.webp",
-        "bytes": 80726,
-        "sha256": "4cf3085f6f10d6c19342970913cc86a93845924a000b6503c58ddeb46ba37c4a",
+        "path": "./assets/optimized/cast-v2/silver_rabbit.webp",
+        "bytes": 63210,
+        "sha256": "24322c22e11672391d3deecf5fcda279aa236cbc08287b408857a061a0f4bf1a",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -780,7 +749,7 @@
     },
     {
       "id": "atlas:unit-ancient_dragon",
-      "source": "./assets/merge/units/ancient_dragon.webp",
+      "source": "./assets/cast-v2/ancient_dragon.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-ancient_dragon; combat renderer / stage UI",
@@ -789,8 +758,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 245244,
-        "sha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+        "bytes": 229998,
+        "sha256": "5956408bcccec92a35d6a3c07994d9751a0979438baee8d255da2d9a89ef93f8",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -799,9 +768,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/ancient_dragon.webp",
-        "bytes": 95758,
-        "sha256": "759c7949debd167c10b65e28412fa1ef2e18f67e706a6d12c7184622f500214f",
+        "path": "./assets/optimized/cast-v2/ancient_dragon.webp",
+        "bytes": 84216,
+        "sha256": "2058ce87350473aca012adc79c2b51a6ac9c74bd3a959f781cf623f33dfadff0",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -813,7 +782,7 @@
     },
     {
       "id": "atlas:unit-time_ruler",
-      "source": "./assets/merge/units/time_ruler.webp",
+      "source": "./assets/cast-v2/time_ruler.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-time_ruler; combat renderer / stage UI",
@@ -822,8 +791,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 150752,
-        "sha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+        "bytes": 215390,
+        "sha256": "5fe7746dc51b4c2eac0b2b92605450405ce258dc04a60e46f78e9166256df4af",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -832,9 +801,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/time_ruler.webp",
-        "bytes": 59552,
-        "sha256": "f3244bde35bc2e58ad3e18a7b4adeb9d22008d626c28667cbae799ade08f0169",
+        "path": "./assets/optimized/cast-v2/time_ruler.webp",
+        "bytes": 79036,
+        "sha256": "62ecba151b107b1310769c8c0d8f5813c94e8061d7182cc144101eb19a72355e",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -846,7 +815,7 @@
     },
     {
       "id": "atlas:unit-doom",
-      "source": "./assets/merge/units/doom.webp",
+      "source": "./assets/cast-v2/doom.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-doom; combat renderer / stage UI",
@@ -855,8 +824,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 159392,
-        "sha256": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+        "bytes": 171594,
+        "sha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -865,9 +834,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/doom.webp",
-        "bytes": 57574,
-        "sha256": "921b44c3ca067aa9d832e69dd2d21bbe6ddc188df6bdd39a2707b093e9d2a08a",
+        "path": "./assets/optimized/cast-v2/doom.webp",
+        "bytes": 63506,
+        "sha256": "1727475afec918e657906dc3c728228c84c482091f8533a39d5e61d77c3957ee",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -879,7 +848,7 @@
     },
     {
       "id": "atlas:unit-santa",
-      "source": "./assets/merge/units/santa.webp",
+      "source": "./assets/cast-v2/santa.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-santa; combat renderer / stage UI",
@@ -888,8 +857,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 176876,
-        "sha256": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+        "bytes": 189196,
+        "sha256": "3d2da49116fa36d1a0b39c60ab36404ab81f3917c07a9d1c2d91d9917f5f713f",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -898,9 +867,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/santa.webp",
-        "bytes": 68152,
-        "sha256": "c21086ee62ec312560aaef77951554417cb0ffc4046554165a9ceb4bf171bb10",
+        "path": "./assets/optimized/cast-v2/santa.webp",
+        "bytes": 73292,
+        "sha256": "9f0c8419508ba0ffdcf0189644eecd3c839decc717ef60ead4bec8974364ecb6",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -912,7 +881,7 @@
     },
     {
       "id": "atlas:unit-jasmine",
-      "source": "./assets/merge/units/jasmine.webp",
+      "source": "./assets/cast-v2/jasmine.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-jasmine; combat renderer / stage UI",
@@ -921,8 +890,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 280370,
-        "sha256": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+        "bytes": 250346,
+        "sha256": "f4bd3e144f12d71119544b441d5223ff8490a4dd681df5af2edc32fd17548a41",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -931,9 +900,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/jasmine.webp",
-        "bytes": 100480,
-        "sha256": "786c7b0a9f231601f5f0f325dda92174dae959c0f89aa7407fb5ae30a223d527",
+        "path": "./assets/optimized/cast-v2/jasmine.webp",
+        "bytes": 91286,
+        "sha256": "ac9b3a1f8d8f53dd1a76b8259f5860f0a4c3e0a051a4d349086c04b1733c2add",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -945,7 +914,7 @@
     },
     {
       "id": "atlas:unit-star_boy",
-      "source": "./assets/merge/units/star_boy.webp",
+      "source": "./assets/cast-v2/star_boy.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-star_boy; combat renderer / stage UI",
@@ -954,8 +923,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 187298,
-        "sha256": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+        "bytes": 187128,
+        "sha256": "480422c1164246ce283fe7b00af1f4a3496b237916b987a553342ddece22b0b3",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -964,9 +933,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/star_boy.webp",
-        "bytes": 70794,
-        "sha256": "c4beed8c8d65664baaff52deba5b949b29f4a68f05b34afa298f875d0d094b1b",
+        "path": "./assets/optimized/cast-v2/star_boy.webp",
+        "bytes": 71286,
+        "sha256": "a39e687f2b33ea3f7a0ddef6b32452c2438c483157614ce7b7de21cbdadac29c",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -978,7 +947,7 @@
     },
     {
       "id": "atlas:unit-time_magician",
-      "source": "./assets/merge/units/time_magician.webp",
+      "source": "./assets/cast-v2/time_magician.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-time_magician; combat renderer / stage UI",
@@ -987,8 +956,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 190902,
-        "sha256": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+        "bytes": 194502,
+        "sha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -997,9 +966,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/time_magician.webp",
-        "bytes": 70518,
-        "sha256": "a9b82905e7d9aea4cd0061197b812f996df0ee53c8d54a0d4fd6f31c26da33d4",
+        "path": "./assets/optimized/cast-v2/time_magician.webp",
+        "bytes": 74150,
+        "sha256": "b597d6da2d6683f9f11fda792e354001ce30654438cb6e61aa8f3935caf971e8",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1011,7 +980,7 @@
     },
     {
       "id": "atlas:unit-cherry_prince",
-      "source": "./assets/merge/units/cherry_prince.webp",
+      "source": "./assets/cast-v2/cherry_prince.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-cherry_prince; combat renderer / stage UI",
@@ -1020,8 +989,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 185572,
-        "sha256": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+        "bytes": 180310,
+        "sha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1030,9 +999,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/cherry_prince.webp",
-        "bytes": 67776,
-        "sha256": "b0e15d9dd5f6654fee3f5e860d723b925b928e2936a731701df3d564c0ce897a",
+        "path": "./assets/optimized/cast-v2/cherry_prince.webp",
+        "bytes": 67392,
+        "sha256": "e13facd9c17d9066fb900d7661f4580b8e55c498959f6f73e2f559a41cd1560a",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1044,7 +1013,7 @@
     },
     {
       "id": "atlas:unit-frost_witch",
-      "source": "./assets/merge/units/frost_witch.webp",
+      "source": "./assets/cast-v2/frost_witch.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-frost_witch; combat renderer / stage UI",
@@ -1053,8 +1022,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 230260,
-        "sha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+        "bytes": 231598,
+        "sha256": "8b17e2ada96ad451afca1082ee1f832a5cbb1207a6bfd7e0e523d53b4537e6e8",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1063,9 +1032,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/frost_witch.webp",
-        "bytes": 83940,
-        "sha256": "8ad5bac353607aad4a4095634963ec972decd788c6a05282e726167707e2fbb8",
+        "path": "./assets/optimized/cast-v2/frost_witch.webp",
+        "bytes": 84012,
+        "sha256": "3af14457cb4bb7557346f1d50e16abff62f381a42474417533628b89ee1c7a17",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1077,7 +1046,7 @@
     },
     {
       "id": "atlas:unit-harmonious",
-      "source": "./assets/merge/units/harmonious.webp",
+      "source": "./assets/cast-v2/harmonious.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-harmonious; combat renderer / stage UI",
@@ -1086,8 +1055,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 307090,
-        "sha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+        "bytes": 263224,
+        "sha256": "779f238b18fcb66cd0eafc8dc32a57027fc426da7ac0141f81d5838f294712d2",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1096,9 +1065,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/harmonious.webp",
-        "bytes": 114670,
-        "sha256": "87b72fc8c111e7654ab5fbbd962a362895d130ed0035d902582954dfe067bbd7",
+        "path": "./assets/optimized/cast-v2/harmonious.webp",
+        "bytes": 100756,
+        "sha256": "55a0918c5b037b1c11118c4c166db09209a5ab040b99ab4b28988f3ebab18ac8",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1110,7 +1079,7 @@
     },
     {
       "id": "atlas:unit-aurora",
-      "source": "./assets/merge/units/aurora.webp",
+      "source": "./assets/cast-v2/aurora.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-aurora; combat renderer / stage UI",
@@ -1119,8 +1088,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 204778,
-        "sha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+        "bytes": 240360,
+        "sha256": "56ed62f8a9bafc4da1baeadadc833c945406c0e3347d8ea51cd98a17043d12f7",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1129,9 +1098,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/aurora.webp",
-        "bytes": 75304,
-        "sha256": "dbd80824f328551d803dafeda7479cdcd4aa5b83e2d1f60c497690448b333c6f",
+        "path": "./assets/optimized/cast-v2/aurora.webp",
+        "bytes": 87448,
+        "sha256": "94d52832f6c37fe30377b5e6bd0674503676026dacf9cd87b31ae06bbed7b4bc",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1143,7 +1112,7 @@
     },
     {
       "id": "atlas:unit-behemoth",
-      "source": "./assets/merge/units/behemoth.webp",
+      "source": "./assets/cast-v2/behemoth.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-behemoth; combat renderer / stage UI",
@@ -1152,8 +1121,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 259676,
-        "sha256": "b51bf716bbbaec063072fa9bf4c9c0aca30121bb83ccd6dfece4fd55495d428e",
+        "bytes": 221252,
+        "sha256": "65e0a97d519022d76b8a0f1be594548255fd381088f2e5b7a77040e9cd1288aa",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1162,9 +1131,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/behemoth.webp",
-        "bytes": 101212,
-        "sha256": "e751dbaedd115a0b12e1de0a11be7d6cebd27ce173a1f57f3ff5babaea79d76f",
+        "path": "./assets/optimized/cast-v2/behemoth.webp",
+        "bytes": 82558,
+        "sha256": "6a32497d381e69cf15e59c2f68317c8b1838803d2a10865a2f4320ed5e9cfd7f",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1176,7 +1145,7 @@
     },
     {
       "id": "atlas:unit-underdog",
-      "source": "./assets/merge/units/underdog.webp",
+      "source": "./assets/cast-v2/underdog.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-underdog; combat renderer / stage UI",
@@ -1185,8 +1154,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 162898,
-        "sha256": "fc95c5c763cea99fe8af5e7b8e3d4b9fc61e531a23d890304d71bc546d18bb48",
+        "bytes": 168630,
+        "sha256": "45f8515d380a0bb685836a7191b51e260415fc109d7b55bfc843d1af4ec72905",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1195,9 +1164,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/underdog.webp",
-        "bytes": 60534,
-        "sha256": "a314036022b1dbeeb48643c868d7e270810bef677dcad07c87faea8328f15033",
+        "path": "./assets/optimized/cast-v2/underdog.webp",
+        "bytes": 61922,
+        "sha256": "edfe01a6fe7af7bcca67223f054ebfc3980d60177492aa42988aa1a24d7296cd",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1209,7 +1178,7 @@
     },
     {
       "id": "atlas:unit-toffee_apple",
-      "source": "./assets/merge/units/toffee_apple.webp",
+      "source": "./assets/cast-v2/toffee_apple.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-toffee_apple; combat renderer / stage UI",
@@ -1218,8 +1187,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 208264,
-        "sha256": "c841329e1d3ce16053ce88918653750544d1944c410a880d0b9473d58bd51145",
+        "bytes": 210182,
+        "sha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1228,9 +1197,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/toffee_apple.webp",
-        "bytes": 78392,
-        "sha256": "4e282f42670de11031de24124542e4e75e1d4b537a5bc98dc6463c9a11a2adcc",
+        "path": "./assets/optimized/cast-v2/toffee_apple.webp",
+        "bytes": 78984,
+        "sha256": "541661a23f2253c404961e8af98dc8abd14cd6850cafec1a41f69ef4dfcbd00f",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1242,7 +1211,7 @@
     },
     {
       "id": "atlas:unit-joker",
-      "source": "./assets/merge/units/joker.webp",
+      "source": "./assets/cast-v2/joker.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-joker; combat renderer / stage UI",
@@ -1251,8 +1220,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 243686,
-        "sha256": "fae67c2179bf0b304d171304129ff0152193426f4b61a6b4a922632ab0d5911f",
+        "bytes": 251484,
+        "sha256": "a327775a61b76f476e5f11c935c9339740a1e731d8d12981b615b3ebdfe67d0e",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1261,9 +1230,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/joker.webp",
-        "bytes": 93380,
-        "sha256": "1eeb1cf345f63a15cfc8a52ec21a271f9c6451af3ac39aaa06339ab7299623e6",
+        "path": "./assets/optimized/cast-v2/joker.webp",
+        "bytes": 96572,
+        "sha256": "18b6bfead7113ad7026077cff8c688fb1d323f1606a06f571140a23491a1125e",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1275,7 +1244,7 @@
     },
     {
       "id": "atlas:unit-sunflower",
-      "source": "./assets/merge/units/sunflower.webp",
+      "source": "./assets/cast-v2/sunflower.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-sunflower; combat renderer / stage UI",
@@ -1284,8 +1253,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 180400,
-        "sha256": "e755a9547b6a719139210b07fc48ca7ab4a834156426ffa8184a6fcf108448a1",
+        "bytes": 169450,
+        "sha256": "9c6ea13d6745c19d1ae3b69482c241cb789eef8d61d62d4bce7c80188fd2436e",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1294,9 +1263,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/sunflower.webp",
-        "bytes": 69116,
-        "sha256": "754e615e457b6b82b3c25716c79cf86d5c2106ddf93dc83efafbc0514402fd7a",
+        "path": "./assets/optimized/cast-v2/sunflower.webp",
+        "bytes": 63958,
+        "sha256": "0f402ca6e95ad05601dfc947e910ff57f8ae4cf29ab17c083cfc339b5a7317ea",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1308,7 +1277,7 @@
     },
     {
       "id": "atlas:unit-antropy",
-      "source": "./assets/merge/units/antropy.webp",
+      "source": "./assets/cast-v2/antropy.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-antropy; combat renderer / stage UI",
@@ -1317,8 +1286,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 213376,
-        "sha256": "b88eafca07b51487dd88a960b42f8d8192949ca2aa848a2a423c7c1d0910ef92",
+        "bytes": 200670,
+        "sha256": "8cefac05d0f6a45fac56740da51c525294784afec6387e04795af7ac41642f1b",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1327,9 +1296,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/antropy.webp",
-        "bytes": 81046,
-        "sha256": "a2aab996f85d7ba719855488be94e27c744534d68376ad74e5046876b5205ead",
+        "path": "./assets/optimized/cast-v2/antropy.webp",
+        "bytes": 73718,
+        "sha256": "302009877c0654654286f8a937dc075a08454616a60637ca81e17014d0eeddbd",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1341,7 +1310,7 @@
     },
     {
       "id": "atlas:unit-cure_master",
-      "source": "./assets/merge/units/cure_master.webp",
+      "source": "./assets/cast-v2/cure_master.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-cure_master; combat renderer / stage UI",
@@ -1350,8 +1319,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 275484,
-        "sha256": "897e3527b970bf4371d503fd7f1bdd588e3b113f220be50d8597ccec6deae42e",
+        "bytes": 228962,
+        "sha256": "1d9615e6369d1ce26eb34e7cc066cd23cd5d7c5e93e8e4b9fb0cc30e1225deac",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1360,9 +1329,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/cure_master.webp",
-        "bytes": 103934,
-        "sha256": "6989d82a7512864c0cfbaf50f650cbed0cf31dccf4bd272c08b4896582db7cc7",
+        "path": "./assets/optimized/cast-v2/cure_master.webp",
+        "bytes": 84394,
+        "sha256": "e1f5d27033e7e1c2667400ed5299e928753735f6f634616b8711c1c7f10fe80a",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1374,7 +1343,7 @@
     },
     {
       "id": "atlas:unit-ash",
-      "source": "./assets/merge/units/ash.webp",
+      "source": "./assets/cast-v2/ash.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-ash; combat renderer / stage UI",
@@ -1383,8 +1352,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 239152,
-        "sha256": "090901a0f1f503dbf5ec4a65e309039f01afd94b7b9320e672327623e7dfb1e8",
+        "bytes": 230884,
+        "sha256": "e7a7aca49cf3eaf0f6c8f36c3fb9bacafeb6da0288996867ca7e7c30852c61ee",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1393,9 +1362,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/ash.webp",
-        "bytes": 85062,
-        "sha256": "75b1c2e0357b5eed655f6da59fb4800906eb059468b2196cf940910eb811cae1",
+        "path": "./assets/optimized/cast-v2/ash.webp",
+        "bytes": 85224,
+        "sha256": "b701501dd525f53ae6e4bc597a2885a8470741f9165d007ce202e33bd793e686",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1407,7 +1376,7 @@
     },
     {
       "id": "atlas:unit-venom",
-      "source": "./assets/merge/units/venom.webp",
+      "source": "./assets/cast-v2/venom.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-venom; combat renderer / stage UI",
@@ -1416,8 +1385,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 284650,
-        "sha256": "071bedcc87f3bd4e34233ee65e42e2cfe9b25a49191f4373be542b7011d93606",
+        "bytes": 286618,
+        "sha256": "01de3e2feb0966232398ae5482eb1563b5a553af8a44a96f2f007218c8b130ec",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1426,9 +1395,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/venom.webp",
-        "bytes": 102888,
-        "sha256": "16a8c49e76f4371e1b8e72f261ada168dde4df7ec01b30dd5c409f44e05e4cba",
+        "path": "./assets/optimized/cast-v2/venom.webp",
+        "bytes": 106200,
+        "sha256": "3eb84935434a3b96650129ec097d9794585ffe30b9760ccafcd41cdd4ba4b23a",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1843,15 +1812,15 @@
     },
     {
       "id": "atlas:unit-trauma",
-      "source": "./assets/merge/units/trauma.webp",
+      "source": "./assets/cast-v2/trauma.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-trauma; combat renderer / stage UI"
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 280924,
-        "sha256": "a342de6a9b249f3115995392d42c87a03e6b6ec8abcf6a9cf4132ca72a93e3eb",
+        "bytes": 243466,
+        "sha256": "9ff8732a18ef9e7e8000149c5166840b14e40380fc81256bad9f02f077204f81",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1860,9 +1829,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/merge/units/trauma.webp",
-        "bytes": 100604,
-        "sha256": "3039dd6fc64cd51893f9b593b9c845f562d5a95c253d49189f4de1ebf5d7e82d",
+        "path": "./assets/optimized/cast-v2/trauma.webp",
+        "bytes": 90440,
+        "sha256": "30175add41d044d63d9b85a49513f68a9a7e34683ddc04a849f799bbdec03a04",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -5004,6 +4973,37 @@
       "decision": "Separate smaller encoding; source preserved."
     }
   ],
+  "policy": "Preserve every pre-pass source. Commit smaller static encodings and fixed-path UI crops; normal builds validate/read them without encoding or cache repair.",
+  "derivedProfiles": {
+    "portrait": {
+      "width": 240,
+      "height": 240,
+      "quality": 84,
+      "alphaQuality": 100,
+      "effort": 6
+    },
+    "figure": {
+      "width": 512,
+      "height": 512,
+      "quality": 85,
+      "alphaQuality": 100,
+      "effort": 6
+    },
+    "relic": {
+      "width": 240,
+      "height": 240,
+      "quality": 82,
+      "alphaQuality": 100,
+      "effort": 6
+    },
+    "memorialThumb": {
+      "width": 240,
+      "height": 360,
+      "quality": 68,
+      "alphaQuality": 100,
+      "effort": 6
+    }
+  },
   "derivedEncoder": {
     "sharp": "0.35.4",
     "vips": "8.18.6",
@@ -5012,11 +5012,11 @@
   "derived": [
     {
       "id": "portrait:star_boy",
-      "source": "./assets/merge/units/star_boy.webp",
+      "source": "./assets/cast-v2/star_boy.webp",
       "profile": "portrait",
       "crop": {
-        "left": 123,
-        "top": 104,
+        "left": 121,
+        "top": 101,
         "width": 250,
         "height": 250
       },
@@ -5024,11 +5024,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+      "sourceSha256": "480422c1164246ce283fe7b00af1f4a3496b237916b987a553342ddece22b0b3",
       "output": {
         "path": "./assets/optimized/ui/portraits/star_boy.webp",
-        "bytes": 23346,
-        "sha256": "caa13cc2edff8bc66686218270302d2d50d7d9fa92ed03e91168ef2bd334cf34",
+        "bytes": 22192,
+        "sha256": "7d38889863a7b1e859fcddbebe718132ab39415e0ee2e591f184e2a9bb280481",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5039,7 +5039,7 @@
     },
     {
       "id": "figure:star_boy",
-      "source": "./assets/merge/units/star_boy.webp",
+      "source": "./assets/cast-v2/star_boy.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5051,11 +5051,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "37f0308d3512a601be638f0ca764bbc17e615e1827a5161c77e92e6af5d0c995",
+      "sourceSha256": "480422c1164246ce283fe7b00af1f4a3496b237916b987a553342ddece22b0b3",
       "output": {
         "path": "./assets/optimized/ui/figures/star_boy.webp",
-        "bytes": 39500,
-        "sha256": "a7e89f5b0f921067beb4e2e0b3cbf8a953940e0ecbe80976c2007ed75db80396",
+        "bytes": 36766,
+        "sha256": "fb6fda679b97041faa17bdaaf065505142307329730d981826a907c0f9f79c36",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5066,11 +5066,11 @@
     },
     {
       "id": "portrait:snow_rabbit",
-      "source": "./assets/merge/units/snow_rabbit.webp",
+      "source": "./assets/cast-v2/snow_rabbit.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 103,
+        "left": 115,
+        "top": 109,
         "width": 250,
         "height": 250
       },
@@ -5078,11 +5078,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "sourceSha256": "1612e7955b779d32f9662809f1cdd518d9723a059817105ff7a6d0144f841ac0",
       "output": {
         "path": "./assets/optimized/ui/portraits/snow_rabbit.webp",
-        "bytes": 19236,
-        "sha256": "74b57e9f5d9601325bbb086e5a8b4359188cf463cb3e1359108995c3fa5e5b67",
+        "bytes": 19774,
+        "sha256": "42e42bb92a49d54737664664a90eef819e03c97ac9f7e7fc4c3944f75ec21222",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5093,7 +5093,7 @@
     },
     {
       "id": "figure:snow_rabbit",
-      "source": "./assets/merge/units/snow_rabbit.webp",
+      "source": "./assets/cast-v2/snow_rabbit.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5105,11 +5105,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "339d4a04a2d1403d81808875397758987d56646567ba622bdbba686a6fd4e393",
+      "sourceSha256": "1612e7955b779d32f9662809f1cdd518d9723a059817105ff7a6d0144f841ac0",
       "output": {
         "path": "./assets/optimized/ui/figures/snow_rabbit.webp",
-        "bytes": 29992,
-        "sha256": "bb5dfdff3c942d8ae2a4e2e8bad9f898c427b0835e2d90ff01864d2f4387151f",
+        "bytes": 28998,
+        "sha256": "158c2eb8cb1c0340b3d9a773ef349a9d643b0a92ff623985e2bc03453f12518c",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5120,11 +5120,11 @@
     },
     {
       "id": "portrait:silver_rabbit",
-      "source": "./assets/merge/units/silver_rabbit.webp",
+      "source": "./assets/cast-v2/silver_rabbit.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 124,
+        "left": 122,
+        "top": 115,
         "width": 250,
         "height": 250
       },
@@ -5132,11 +5132,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "sourceSha256": "5a015814e1e3b3ff09b4b4f9b4a5eb9ee6c6d8f5b2f07eebd9a5495c64e666a3",
       "output": {
         "path": "./assets/optimized/ui/portraits/silver_rabbit.webp",
-        "bytes": 23456,
-        "sha256": "cf5bf76750c73c29b3adb77ff244f027ddf4638e8b9ae51bd56fb12662d6b1a8",
+        "bytes": 18658,
+        "sha256": "476881801ac50ebef71b0a89bb0c053641d2e1c71bfcbd51cf755986e61cda38",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5147,7 +5147,7 @@
     },
     {
       "id": "figure:silver_rabbit",
-      "source": "./assets/merge/units/silver_rabbit.webp",
+      "source": "./assets/cast-v2/silver_rabbit.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5159,11 +5159,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "69162a4bb16c4d64aede71cabdecee22e6aa5116136c457ff4889654cc3535fc",
+      "sourceSha256": "5a015814e1e3b3ff09b4b4f9b4a5eb9ee6c6d8f5b2f07eebd9a5495c64e666a3",
       "output": {
         "path": "./assets/optimized/ui/figures/silver_rabbit.webp",
-        "bytes": 43722,
-        "sha256": "0f6491c73e318ef668499ccfb476fadc277bf682f692447ae2d3d690b76de3c7",
+        "bytes": 32204,
+        "sha256": "1cf9d1dc9a2511b98c35ce5548fb85132f7bcd1b2b5ee6eeb2980b1ff3b60578",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5174,11 +5174,11 @@
     },
     {
       "id": "portrait:night_rabbit",
-      "source": "./assets/merge/units/night_rabbit.webp",
+      "source": "./assets/cast-v2/night_rabbit.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 96,
+        "left": 132,
+        "top": 99,
         "width": 250,
         "height": 250
       },
@@ -5186,11 +5186,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "sourceSha256": "86c70648fd97c84e3a7a0da5df8c63aca215d47ab5f710270ff9b12834a9d1d2",
       "output": {
         "path": "./assets/optimized/ui/portraits/night_rabbit.webp",
-        "bytes": 19858,
-        "sha256": "3dc252570e3a5b869b056cf520963bacabe61e1fda7507ef8678a74bd7b43cdc",
+        "bytes": 20746,
+        "sha256": "3233890c4c02ca99bbcdcd3b11c99fa77f2e863c3a76eb1caa75c9854ab44fbd",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5201,7 +5201,7 @@
     },
     {
       "id": "figure:night_rabbit",
-      "source": "./assets/merge/units/night_rabbit.webp",
+      "source": "./assets/cast-v2/night_rabbit.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5213,11 +5213,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "ea7bbd31338b8ccb6d916483a612f3c6c189ec120cabf4c492a8dcef6b4e045f",
+      "sourceSha256": "86c70648fd97c84e3a7a0da5df8c63aca215d47ab5f710270ff9b12834a9d1d2",
       "output": {
         "path": "./assets/optimized/ui/figures/night_rabbit.webp",
-        "bytes": 28636,
-        "sha256": "44cd6ba4291c39ba4cda4268de7cdf26b468a6118bd8dfbbbc1076a49af98fde",
+        "bytes": 32312,
+        "sha256": "34801bd6005d34e443a60a54522263c04feae9635d35ee66100975677c81200a",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5228,11 +5228,11 @@
     },
     {
       "id": "portrait:siren",
-      "source": "./assets/merge/units/siren.webp",
+      "source": "./assets/cast-v2/siren.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 104,
+        "left": 121,
+        "top": 101,
         "width": 250,
         "height": 250
       },
@@ -5240,11 +5240,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "sourceSha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
       "output": {
         "path": "./assets/optimized/ui/portraits/siren.webp",
-        "bytes": 18680,
-        "sha256": "be6213dbe3ae115d5f68996e1b08e02aae14c96b91f325e9beb58c8b0e92586f",
+        "bytes": 19904,
+        "sha256": "2b48ef787de60837a3e0b92494c53452bbd876fecb824977cb6e1f966cf959a5",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5255,7 +5255,7 @@
     },
     {
       "id": "figure:siren",
-      "source": "./assets/merge/units/siren.webp",
+      "source": "./assets/cast-v2/siren.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5267,11 +5267,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "sourceSha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
       "output": {
         "path": "./assets/optimized/ui/figures/siren.webp",
-        "bytes": 33854,
-        "sha256": "0dbea278dd65dff5b77963e6c83307b4acf80020a8944be01600585afb2a4951",
+        "bytes": 39836,
+        "sha256": "f19e24df95b89919f474dd7bf745ee28721fdbef64e583264bd248c1947aa081",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5282,11 +5282,11 @@
     },
     {
       "id": "portrait:mushroom_king",
-      "source": "./assets/merge/units/mushroom_king.webp",
+      "source": "./assets/cast-v2/mushroom_king.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 138,
+        "left": 141,
+        "top": 99,
         "width": 250,
         "height": 250
       },
@@ -5294,11 +5294,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "sourceSha256": "8dfc0139066fd74e398f26afdbb560a79082f826717cc12faa45c94de25e4cfe",
       "output": {
         "path": "./assets/optimized/ui/portraits/mushroom_king.webp",
-        "bytes": 15004,
-        "sha256": "245321b0d332798228d34c150838787d47a3b678697a8660f84017e3acb68535",
+        "bytes": 16360,
+        "sha256": "1397bfd005688d3098c086edaa9d9a1a1ffe8716ccba2b00815005edfe8f679f",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5309,7 +5309,7 @@
     },
     {
       "id": "figure:mushroom_king",
-      "source": "./assets/merge/units/mushroom_king.webp",
+      "source": "./assets/cast-v2/mushroom_king.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5321,11 +5321,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "9c2f3571088609ac7df23f0875aed31a3da77517ffaf07c34ee8e8f1179c7621",
+      "sourceSha256": "8dfc0139066fd74e398f26afdbb560a79082f826717cc12faa45c94de25e4cfe",
       "output": {
         "path": "./assets/optimized/ui/figures/mushroom_king.webp",
-        "bytes": 26126,
-        "sha256": "38457de49c345246e71fd196f01d31a9c95f064ad2bdd47850f7bdf99902f1ee",
+        "bytes": 37746,
+        "sha256": "fee9977abb6218c5e567a328c1e11b2ee7f9af2dcd0e07bb421c48e0e0d85310",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5336,11 +5336,11 @@
     },
     {
       "id": "portrait:underdog",
-      "source": "./assets/merge/units/underdog.webp",
+      "source": "./assets/cast-v2/underdog.webp",
       "profile": "portrait",
       "crop": {
-        "left": 113,
-        "top": 94,
+        "left": 134,
+        "top": 101,
         "width": 250,
         "height": 250
       },
@@ -5348,11 +5348,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "fc95c5c763cea99fe8af5e7b8e3d4b9fc61e531a23d890304d71bc546d18bb48",
+      "sourceSha256": "45f8515d380a0bb685836a7191b51e260415fc109d7b55bfc843d1af4ec72905",
       "output": {
         "path": "./assets/optimized/ui/portraits/underdog.webp",
-        "bytes": 17994,
-        "sha256": "b366f490fef1ed8035df7d9e217e26011d6f9c4765fb6e5c0eaefa909e448658",
+        "bytes": 19442,
+        "sha256": "78994a135f8670864077a81d3f6effa9e0c5c43ddb37228640a5769362ce6846",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5363,7 +5363,7 @@
     },
     {
       "id": "figure:underdog",
-      "source": "./assets/merge/units/underdog.webp",
+      "source": "./assets/cast-v2/underdog.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5375,11 +5375,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "fc95c5c763cea99fe8af5e7b8e3d4b9fc61e531a23d890304d71bc546d18bb48",
+      "sourceSha256": "45f8515d380a0bb685836a7191b51e260415fc109d7b55bfc843d1af4ec72905",
       "output": {
         "path": "./assets/optimized/ui/figures/underdog.webp",
-        "bytes": 29986,
-        "sha256": "483cc82af1556934673b0a4d0954d5956cf7985221cf9a684e9a97eeb0e65f9f",
+        "bytes": 32962,
+        "sha256": "599ebed0336fb36ae7f96d25585f27b116b9416edf6bcc82f85ae2675bd10b68",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5390,11 +5390,11 @@
     },
     {
       "id": "portrait:joker",
-      "source": "./assets/merge/units/joker.webp",
+      "source": "./assets/cast-v2/joker.webp",
       "profile": "portrait",
       "crop": {
-        "left": 141,
-        "top": 95,
+        "left": 112,
+        "top": 90,
         "width": 250,
         "height": 250
       },
@@ -5402,11 +5402,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "fae67c2179bf0b304d171304129ff0152193426f4b61a6b4a922632ab0d5911f",
+      "sourceSha256": "a327775a61b76f476e5f11c935c9339740a1e731d8d12981b615b3ebdfe67d0e",
       "output": {
         "path": "./assets/optimized/ui/portraits/joker.webp",
-        "bytes": 22644,
-        "sha256": "29e7e2e2d9c46f8af33306dda0953ac504753b3c8f73155f7f77891498a0fef6",
+        "bytes": 23074,
+        "sha256": "e20920921cee47d5fee07ca23ca3dfc18178f16308331b9764f4dc8bf20be26e",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5417,7 +5417,7 @@
     },
     {
       "id": "figure:joker",
-      "source": "./assets/merge/units/joker.webp",
+      "source": "./assets/cast-v2/joker.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5429,11 +5429,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "fae67c2179bf0b304d171304129ff0152193426f4b61a6b4a922632ab0d5911f",
+      "sourceSha256": "a327775a61b76f476e5f11c935c9339740a1e731d8d12981b615b3ebdfe67d0e",
       "output": {
         "path": "./assets/optimized/ui/figures/joker.webp",
-        "bytes": 48688,
-        "sha256": "ec864178b6a5294ea5c2d8aa1897139ab2a2ce8205b9889972ed13a195cebeec",
+        "bytes": 51590,
+        "sha256": "307f9c95ecf71020e354b72917911e8170be4714a6283e67a3b8a5f9746d9c7b",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5444,11 +5444,11 @@
     },
     {
       "id": "portrait:sunflower",
-      "source": "./assets/merge/units/sunflower.webp",
+      "source": "./assets/cast-v2/sunflower.webp",
       "profile": "portrait",
       "crop": {
-        "left": 126,
-        "top": 83,
+        "left": 130,
+        "top": 105,
         "width": 250,
         "height": 250
       },
@@ -5456,11 +5456,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "e755a9547b6a719139210b07fc48ca7ab4a834156426ffa8184a6fcf108448a1",
+      "sourceSha256": "9c6ea13d6745c19d1ae3b69482c241cb789eef8d61d62d4bce7c80188fd2436e",
       "output": {
         "path": "./assets/optimized/ui/portraits/sunflower.webp",
-        "bytes": 24134,
-        "sha256": "123432043ddca122c4d69d10e4bb02ca12276b7240d30b6fa5790f08e3490097",
+        "bytes": 24046,
+        "sha256": "c0b8cc5610c37f305174a0c73cafec1fcb744394a23b3b59eb9645579416a8ca",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5471,7 +5471,7 @@
     },
     {
       "id": "figure:sunflower",
-      "source": "./assets/merge/units/sunflower.webp",
+      "source": "./assets/cast-v2/sunflower.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5483,11 +5483,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "e755a9547b6a719139210b07fc48ca7ab4a834156426ffa8184a6fcf108448a1",
+      "sourceSha256": "9c6ea13d6745c19d1ae3b69482c241cb789eef8d61d62d4bce7c80188fd2436e",
       "output": {
         "path": "./assets/optimized/ui/figures/sunflower.webp",
-        "bytes": 37902,
-        "sha256": "81130a0999e784e843318a720b7afc9d73c739e38483214a453af9279dc969ec",
+        "bytes": 37170,
+        "sha256": "10cf6583dca4452ea1d9869582f0e10eab814fae18b6f23594d20cce0b52ca17",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5498,11 +5498,11 @@
     },
     {
       "id": "portrait:great_detective",
-      "source": "./assets/merge/units/great_detective.webp",
+      "source": "./assets/cast-v2/great_detective.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 89,
+        "left": 138,
+        "top": 104,
         "width": 250,
         "height": 250
       },
@@ -5510,11 +5510,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "sourceSha256": "c69ce1b7670195b181801afa62ebc6449e0c4080ae683ffa1cd3b66715b384f2",
       "output": {
         "path": "./assets/optimized/ui/portraits/great_detective.webp",
-        "bytes": 17866,
-        "sha256": "fd02eb8deefe1566997d525bb5d86c20ab218b54faab83eab30fadc53c8fb0a7",
+        "bytes": 22260,
+        "sha256": "5139349df5e364c333ae38e340b0f1c268e20ff47926e7101567c0130b1d4e2b",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5525,7 +5525,7 @@
     },
     {
       "id": "figure:great_detective",
-      "source": "./assets/merge/units/great_detective.webp",
+      "source": "./assets/cast-v2/great_detective.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5537,11 +5537,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "2376478173fd52891ec63aa5a864e5375d25100abe7e7607c1ad17b14188142d",
+      "sourceSha256": "c69ce1b7670195b181801afa62ebc6449e0c4080ae683ffa1cd3b66715b384f2",
       "output": {
         "path": "./assets/optimized/ui/figures/great_detective.webp",
-        "bytes": 29026,
-        "sha256": "6d214785c7f3b6fd01bd5d31610608aa8a1e591fe10ced3731f1e537a66dd963",
+        "bytes": 33662,
+        "sha256": "b12baaa545fb6024b7970a308c163da183ac8540518941d4eb7f58c0425fd95b",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5552,11 +5552,11 @@
     },
     {
       "id": "portrait:guardian",
-      "source": "./assets/merge/units/guardian.webp",
+      "source": "./assets/cast-v2/guardian.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 85,
+        "left": 124,
+        "top": 111,
         "width": 250,
         "height": 250
       },
@@ -5564,11 +5564,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "sourceSha256": "8597b93584a18eac628dd47e6b7439cefcb27bd537235ce1b7f09be182c1c994",
       "output": {
         "path": "./assets/optimized/ui/portraits/guardian.webp",
-        "bytes": 18194,
-        "sha256": "e7348c1d6fd3cb5fdd44fcf684b3d8584dd75e0f41c0112cf86e6105f18dabdb",
+        "bytes": 18820,
+        "sha256": "c850906c5e5fefb5c211f2443d89378e51a6d877d4de36da53a5fcf88776b512",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5579,7 +5579,7 @@
     },
     {
       "id": "figure:guardian",
-      "source": "./assets/merge/units/guardian.webp",
+      "source": "./assets/cast-v2/guardian.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5591,11 +5591,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "3162f736e46cb261df2dd134f2f62bfec6dc6d0d0d3d71c3d004a35f8dd63105",
+      "sourceSha256": "8597b93584a18eac628dd47e6b7439cefcb27bd537235ce1b7f09be182c1c994",
       "output": {
         "path": "./assets/optimized/ui/figures/guardian.webp",
-        "bytes": 32572,
-        "sha256": "9bce700a89479ff751e15379ea20f11cca51219129ad5b4ef580b5eb1cc168d2",
+        "bytes": 38592,
+        "sha256": "b6ef836b8e3acc383f078a52a224d4624684c780089bdf370c418dd78321ffa2",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5606,11 +5606,11 @@
     },
     {
       "id": "portrait:avalanche_maid",
-      "source": "./assets/merge/units/avalanche_maid.webp",
+      "source": "./assets/cast-v2/avalanche_maid.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 92,
+        "left": 122,
+        "top": 90,
         "width": 250,
         "height": 250
       },
@@ -5618,11 +5618,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "sourceSha256": "9af06e744efc79308dc92209bef04c019288804eacea831f70a8a3edebd5d9f5",
       "output": {
         "path": "./assets/optimized/ui/portraits/avalanche_maid.webp",
-        "bytes": 21216,
-        "sha256": "bab06b84bf3842d79fad50de210f95463d703e738995c306bd1aa154fabb140a",
+        "bytes": 22124,
+        "sha256": "c63c17d270deda5a7d18904384622a69f67debe03dcd3cf46d9ee614219e3546",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5633,7 +5633,7 @@
     },
     {
       "id": "figure:avalanche_maid",
-      "source": "./assets/merge/units/avalanche_maid.webp",
+      "source": "./assets/cast-v2/avalanche_maid.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5645,11 +5645,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "3448fbb626df7f6ef5b98702e1398086458382e3656559f8e0b49f93556e68cc",
+      "sourceSha256": "9af06e744efc79308dc92209bef04c019288804eacea831f70a8a3edebd5d9f5",
       "output": {
         "path": "./assets/optimized/ui/figures/avalanche_maid.webp",
-        "bytes": 44542,
-        "sha256": "4d6914ffc016689595e91a9e5b532ee85159577ee3a98637e169a879a3d37118",
+        "bytes": 53272,
+        "sha256": "9ab9f8f15d8e84a2759b5776ba41ba26f9ff0dadce55bbef3c314127b553869b",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5660,11 +5660,11 @@
     },
     {
       "id": "portrait:santa",
-      "source": "./assets/merge/units/santa.webp",
+      "source": "./assets/cast-v2/santa.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 98,
+        "left": 128,
+        "top": 85,
         "width": 250,
         "height": 250
       },
@@ -5672,11 +5672,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+      "sourceSha256": "3d2da49116fa36d1a0b39c60ab36404ab81f3917c07a9d1c2d91d9917f5f713f",
       "output": {
         "path": "./assets/optimized/ui/portraits/santa.webp",
-        "bytes": 19672,
-        "sha256": "d30de45f9e0d7f65d9958ed85de338313e301fdd5f99aad01de30f5ebb14d83f",
+        "bytes": 19804,
+        "sha256": "a480294384001c0e028e3a7502a5d260ce7280b637e32a043ba9840ea341e8c1",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5687,7 +5687,7 @@
     },
     {
       "id": "figure:santa",
-      "source": "./assets/merge/units/santa.webp",
+      "source": "./assets/cast-v2/santa.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5699,11 +5699,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "db9f90f9a3912fac5f393e295f838391ac40d371be30d23f39717fe18cb34374",
+      "sourceSha256": "3d2da49116fa36d1a0b39c60ab36404ab81f3917c07a9d1c2d91d9917f5f713f",
       "output": {
         "path": "./assets/optimized/ui/figures/santa.webp",
-        "bytes": 35978,
-        "sha256": "d7ade65a218a66233ae1443ffc9f7cf2d1e5cc954f6dd3cd8957da77bd31900e",
+        "bytes": 37390,
+        "sha256": "c9f5aeb90fe4490ba2912f60c43e4832ecfa9104571b3b1df6d44f8ae04d6e21",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5714,11 +5714,11 @@
     },
     {
       "id": "portrait:red_dragon",
-      "source": "./assets/merge/units/red_dragon.webp",
+      "source": "./assets/cast-v2/red_dragon.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 74,
+        "left": 143,
+        "top": 79,
         "width": 250,
         "height": 250
       },
@@ -5726,11 +5726,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "sourceSha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
       "output": {
         "path": "./assets/optimized/ui/portraits/red_dragon.webp",
-        "bytes": 21168,
-        "sha256": "6778ead60a3c062626a566860e58800dff0421b152a0aa01783da5547c836ae6",
+        "bytes": 24986,
+        "sha256": "6269d9d965ca4c0cb0eee30dafd3309d4fb65f2495f54b4515aaaec1dec09ad5",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5741,7 +5741,7 @@
     },
     {
       "id": "figure:red_dragon",
-      "source": "./assets/merge/units/red_dragon.webp",
+      "source": "./assets/cast-v2/red_dragon.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5753,11 +5753,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "cc459f254558a859bc86672cfcf7d63e2c7ec018ece9d8b13a90480a5dea07dc",
+      "sourceSha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
       "output": {
         "path": "./assets/optimized/ui/figures/red_dragon.webp",
-        "bytes": 38294,
-        "sha256": "c951e98c00ba9073e01e02a6e2ef30015f65e3fc3ea7b3ed7964993e7f05aabb",
+        "bytes": 52712,
+        "sha256": "d1b8a9187c9fec205b97412aba2219654e53a170b7923d8f9196d4e6a1d00c24",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5768,11 +5768,11 @@
     },
     {
       "id": "portrait:aurora",
-      "source": "./assets/merge/units/aurora.webp",
+      "source": "./assets/cast-v2/aurora.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 94,
+        "left": 133,
+        "top": 99,
         "width": 250,
         "height": 250
       },
@@ -5780,11 +5780,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "sourceSha256": "56ed62f8a9bafc4da1baeadadc833c945406c0e3347d8ea51cd98a17043d12f7",
       "output": {
         "path": "./assets/optimized/ui/portraits/aurora.webp",
-        "bytes": 18970,
-        "sha256": "23cb5481b9092ebafc29a6a211c0e8036fbcd681af2872fc716dec2d1c2873c6",
+        "bytes": 21468,
+        "sha256": "203bdfdc13529cd85d00632ee76f06e87e5ce8fa6b4282f30f3f0fb1cd182b32",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5795,7 +5795,7 @@
     },
     {
       "id": "figure:aurora",
-      "source": "./assets/merge/units/aurora.webp",
+      "source": "./assets/cast-v2/aurora.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5807,11 +5807,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "18a49c7f60487afcb8695629fe567f849a65e7c91e09acc16c6d8c9830086419",
+      "sourceSha256": "56ed62f8a9bafc4da1baeadadc833c945406c0e3347d8ea51cd98a17043d12f7",
       "output": {
         "path": "./assets/optimized/ui/figures/aurora.webp",
-        "bytes": 39094,
-        "sha256": "699e3c0255a3c49b4bc8be1e836fc69f6ee27c1cb05e9ec886b222d8796a7475",
+        "bytes": 44086,
+        "sha256": "b53f463edb48ba6b86ed1147cf9c1b990e3f684d654f3ddb960834e3159ea3ca",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5822,11 +5822,11 @@
     },
     {
       "id": "portrait:toffee_apple",
-      "source": "./assets/merge/units/toffee_apple.webp",
+      "source": "./assets/cast-v2/toffee_apple.webp",
       "profile": "portrait",
       "crop": {
-        "left": 142,
-        "top": 90,
+        "left": 136,
+        "top": 102,
         "width": 250,
         "height": 250
       },
@@ -5834,11 +5834,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "c841329e1d3ce16053ce88918653750544d1944c410a880d0b9473d58bd51145",
+      "sourceSha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
       "output": {
         "path": "./assets/optimized/ui/portraits/toffee_apple.webp",
-        "bytes": 22832,
-        "sha256": "a0d8635f3850475cb490748401593b22e2a498a3621295e2f4bd61505cedef0a",
+        "bytes": 24310,
+        "sha256": "7cd514438c34ca1eaeb7c8cefa169eae0d0a13279b783b88003f0a83d489cfee",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5849,7 +5849,7 @@
     },
     {
       "id": "figure:toffee_apple",
-      "source": "./assets/merge/units/toffee_apple.webp",
+      "source": "./assets/cast-v2/toffee_apple.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5861,11 +5861,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "c841329e1d3ce16053ce88918653750544d1944c410a880d0b9473d58bd51145",
+      "sourceSha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
       "output": {
         "path": "./assets/optimized/ui/figures/toffee_apple.webp",
-        "bytes": 39384,
-        "sha256": "fafe5dc3d8ecd0a0bb114ab3f3d2a5e845108387f138fd2fe717404157efb92e",
+        "bytes": 43838,
+        "sha256": "81aca8d5435057abc6de700cd745625a958df8958821e8838ac5da7242413373",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5876,10 +5876,10 @@
     },
     {
       "id": "portrait:antropy",
-      "source": "./assets/merge/units/antropy.webp",
+      "source": "./assets/cast-v2/antropy.webp",
       "profile": "portrait",
       "crop": {
-        "left": 122,
+        "left": 121,
         "top": 94,
         "width": 250,
         "height": 250
@@ -5888,11 +5888,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "b88eafca07b51487dd88a960b42f8d8192949ca2aa848a2a423c7c1d0910ef92",
+      "sourceSha256": "8cefac05d0f6a45fac56740da51c525294784afec6387e04795af7ac41642f1b",
       "output": {
         "path": "./assets/optimized/ui/portraits/antropy.webp",
-        "bytes": 20564,
-        "sha256": "6e648721275931ef40c238c5e7064bc4a8d91e57229bd6b002b6b72487255350",
+        "bytes": 19638,
+        "sha256": "beb70e2cb7e2dc449ddf0eadf4ec2bbb99e14cc09ab18f74c7f74b389336f38b",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5903,7 +5903,7 @@
     },
     {
       "id": "figure:antropy",
-      "source": "./assets/merge/units/antropy.webp",
+      "source": "./assets/cast-v2/antropy.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5915,11 +5915,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "b88eafca07b51487dd88a960b42f8d8192949ca2aa848a2a423c7c1d0910ef92",
+      "sourceSha256": "8cefac05d0f6a45fac56740da51c525294784afec6387e04795af7ac41642f1b",
       "output": {
         "path": "./assets/optimized/ui/figures/antropy.webp",
-        "bytes": 41828,
-        "sha256": "cfcaf6af5dd2ffa3029a577b385fc815099ac9c59eaa76074b704d1e7aa0cdfc",
+        "bytes": 40738,
+        "sha256": "f2bbd05f21a706d862ec972d92d94b3d2949e932f15a2c754ecb451086c75de5",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5930,11 +5930,11 @@
     },
     {
       "id": "portrait:storm_sage",
-      "source": "./assets/merge/units/storm_sage.webp",
+      "source": "./assets/cast-v2/storm_sage.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 70,
+        "left": 133,
+        "top": 89,
         "width": 250,
         "height": 250
       },
@@ -5942,11 +5942,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "sourceSha256": "e783a0dc632fad89d767033faee1d775c59671aebf2c44f898ee98f26275fd23",
       "output": {
         "path": "./assets/optimized/ui/portraits/storm_sage.webp",
-        "bytes": 20902,
-        "sha256": "6063a96fdcad4c7da7392ffcba3fc05d25f3855e24bbe90ca4d131d655ecb058",
+        "bytes": 22080,
+        "sha256": "dcb42967466f03935b3d3256d62290a5fa338454225237edab6f3f5cefa8b9ad",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -5957,7 +5957,7 @@
     },
     {
       "id": "figure:storm_sage",
-      "source": "./assets/merge/units/storm_sage.webp",
+      "source": "./assets/cast-v2/storm_sage.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -5969,11 +5969,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "f4890106d19f65c4449b0e8df083108e53cfa875b4907b921ec3e70e58832e01",
+      "sourceSha256": "e783a0dc632fad89d767033faee1d775c59671aebf2c44f898ee98f26275fd23",
       "output": {
         "path": "./assets/optimized/ui/figures/storm_sage.webp",
-        "bytes": 37156,
-        "sha256": "b6330d3fbe0c29c9ade223f8bb1b9a9144003a87dba6fede3444d33ee51f1c34",
+        "bytes": 37918,
+        "sha256": "ebcfa3bb5a9838f9dcc51aaa16f33648fb7b8c9ebe754e592272089a2fb3bcce",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -5984,11 +5984,11 @@
     },
     {
       "id": "portrait:flame_sage",
-      "source": "./assets/merge/units/flame_sage.webp",
+      "source": "./assets/cast-v2/flame_sage.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 82,
+        "left": 124,
+        "top": 92,
         "width": 250,
         "height": 250
       },
@@ -5996,11 +5996,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "sourceSha256": "c0ca2f5cb7a277c0b04fb9260e86d01e9f8df8c2779c431c2c8cc1125317f412",
       "output": {
         "path": "./assets/optimized/ui/portraits/flame_sage.webp",
-        "bytes": 16730,
-        "sha256": "8a657d7547f5a8948ab18f225267de2197fd4c9bd806a1c31ea727069b29ef6a",
+        "bytes": 23626,
+        "sha256": "643d94dab4705cbbb8d2f242f03feda39ed30f6e42a73c1040d7e6c58dd457bc",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6011,7 +6011,7 @@
     },
     {
       "id": "figure:flame_sage",
-      "source": "./assets/merge/units/flame_sage.webp",
+      "source": "./assets/cast-v2/flame_sage.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6023,11 +6023,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "44aa34e1ff8058f44cfe3f5fe93bd76be6e7fc6cb73a41025b6963154d455504",
+      "sourceSha256": "c0ca2f5cb7a277c0b04fb9260e86d01e9f8df8c2779c431c2c8cc1125317f412",
       "output": {
         "path": "./assets/optimized/ui/figures/flame_sage.webp",
-        "bytes": 27822,
-        "sha256": "797937571e6c2127091d025cdcfebc8a0852eb4d9b5966747bf6dde4400086f6",
+        "bytes": 39324,
+        "sha256": "a484f185fe7f7632428a40f1c97a3d48f5055225901fb48347e8a5b48b323f0f",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6038,11 +6038,11 @@
     },
     {
       "id": "portrait:lightning_sage",
-      "source": "./assets/merge/units/lightning_sage.webp",
+      "source": "./assets/cast-v2/lightning_sage.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 79,
+        "left": 109,
+        "top": 102,
         "width": 250,
         "height": 250
       },
@@ -6050,11 +6050,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "sourceSha256": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
       "output": {
         "path": "./assets/optimized/ui/portraits/lightning_sage.webp",
-        "bytes": 18784,
-        "sha256": "09cb53d9766a3ee136e49266a0e69d3658e4a8b5de57a34355b4b486f3174ed0",
+        "bytes": 21684,
+        "sha256": "4595240d5a55e75ca696338570c27d381ff6bf3784c7a219a19ee2421cdb8c47",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6065,7 +6065,7 @@
     },
     {
       "id": "figure:lightning_sage",
-      "source": "./assets/merge/units/lightning_sage.webp",
+      "source": "./assets/cast-v2/lightning_sage.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6077,11 +6077,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "b9b85e1b770d99216f00676ac4f287359b266483e3b424ee255332dea8c8f73c",
+      "sourceSha256": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
       "output": {
         "path": "./assets/optimized/ui/figures/lightning_sage.webp",
-        "bytes": 30250,
-        "sha256": "6d64efa842ba6c84043aa0717e6c98a47d0f0fe5b6945084dd52f9952227bf48",
+        "bytes": 36300,
+        "sha256": "68234cb156cd414fd1aafd6adde623fd7b09d81cf747c5a9f0631442a4376de8",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6092,11 +6092,11 @@
     },
     {
       "id": "portrait:time_magician",
-      "source": "./assets/merge/units/time_magician.webp",
+      "source": "./assets/cast-v2/time_magician.webp",
       "profile": "portrait",
       "crop": {
         "left": 130,
-        "top": 69,
+        "top": 82,
         "width": 250,
         "height": 250
       },
@@ -6104,11 +6104,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+      "sourceSha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
       "output": {
         "path": "./assets/optimized/ui/portraits/time_magician.webp",
-        "bytes": 18260,
-        "sha256": "f688c46d1250c56e9b9096e9abc2f93add9bb4d25d9dc17f24cd398a6b71548b",
+        "bytes": 19512,
+        "sha256": "d346852af5a270bb4d0a54099c3202c73363f2ea55d3c877eb93a2f93c81583c",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6119,7 +6119,7 @@
     },
     {
       "id": "figure:time_magician",
-      "source": "./assets/merge/units/time_magician.webp",
+      "source": "./assets/cast-v2/time_magician.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6131,11 +6131,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "7910ac19ecf5af9fefe911476f5458337a3477174b873d91ad8ce3123af8addc",
+      "sourceSha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
       "output": {
         "path": "./assets/optimized/ui/figures/time_magician.webp",
-        "bytes": 37748,
-        "sha256": "3d1977ffb77ce800fcd93625979af785cb875eeb5928b1d4e7305c9f02240d96",
+        "bytes": 41198,
+        "sha256": "5dbcf01f8f0905bef45815cbefbd151e140ae4a1b3ba153c4ed861b89314c845",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6146,11 +6146,11 @@
     },
     {
       "id": "portrait:ancient_dragon",
-      "source": "./assets/merge/units/ancient_dragon.webp",
+      "source": "./assets/cast-v2/ancient_dragon.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 60,
+        "left": 127,
+        "top": 90,
         "width": 250,
         "height": 250
       },
@@ -6158,11 +6158,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "sourceSha256": "5956408bcccec92a35d6a3c07994d9751a0979438baee8d255da2d9a89ef93f8",
       "output": {
         "path": "./assets/optimized/ui/portraits/ancient_dragon.webp",
-        "bytes": 20698,
-        "sha256": "dddd9791a97996fffc7e15b585333329a72295464b4590a6184992f60f87639f",
+        "bytes": 22150,
+        "sha256": "0b3391a1537fea03f2200290e2d31c9a588aab9b165775c6a6814a8534144fb7",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6173,7 +6173,7 @@
     },
     {
       "id": "figure:ancient_dragon",
-      "source": "./assets/merge/units/ancient_dragon.webp",
+      "source": "./assets/cast-v2/ancient_dragon.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6185,11 +6185,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "5a4eef0b518f4140c5cb2f120071193146c8384a8ac7d19e4f19e93d87ba9f62",
+      "sourceSha256": "5956408bcccec92a35d6a3c07994d9751a0979438baee8d255da2d9a89ef93f8",
       "output": {
         "path": "./assets/optimized/ui/figures/ancient_dragon.webp",
-        "bytes": 46798,
-        "sha256": "f562a939e283c2e80af80245173a7567d6a226f76d8b9aed88a1eccc2ed3ca25",
+        "bytes": 47010,
+        "sha256": "e1bea75cc0dc424a3d7b629960310c6d79a25a7061859c0b19367d1e1778996c",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6200,11 +6200,11 @@
     },
     {
       "id": "portrait:phantom",
-      "source": "./assets/merge/units/phantom.webp",
+      "source": "./assets/cast-v2/phantom.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 106,
+        "left": 117,
+        "top": 96,
         "width": 250,
         "height": 250
       },
@@ -6212,11 +6212,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "sourceSha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a",
       "output": {
         "path": "./assets/optimized/ui/portraits/phantom.webp",
-        "bytes": 15588,
-        "sha256": "bfd36540341944e840a2c43c86e508f227f43cd3b6c21fe72df6f4a3fd769862",
+        "bytes": 19502,
+        "sha256": "432e31ba5d087d1ff95154dfec350759bba60378dffe08f442f37181cc3b70b9",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6227,7 +6227,7 @@
     },
     {
       "id": "figure:phantom",
-      "source": "./assets/merge/units/phantom.webp",
+      "source": "./assets/cast-v2/phantom.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6239,11 +6239,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902",
+      "sourceSha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a",
       "output": {
         "path": "./assets/optimized/ui/figures/phantom.webp",
-        "bytes": 21966,
-        "sha256": "d61b6f08388e98bd57ec626e9b0310d531fd31d0f482da5e2ced4c177df03a7e",
+        "bytes": 34186,
+        "sha256": "5bdb18495103603cf819dd140eaa43154a47567f36afd20a122f4f766a43497d",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6254,11 +6254,11 @@
     },
     {
       "id": "portrait:cure_master",
-      "source": "./assets/merge/units/cure_master.webp",
+      "source": "./assets/cast-v2/cure_master.webp",
       "profile": "portrait",
       "crop": {
-        "left": 132,
-        "top": 83,
+        "left": 130,
+        "top": 88,
         "width": 250,
         "height": 250
       },
@@ -6266,11 +6266,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "897e3527b970bf4371d503fd7f1bdd588e3b113f220be50d8597ccec6deae42e",
+      "sourceSha256": "1d9615e6369d1ce26eb34e7cc066cd23cd5d7c5e93e8e4b9fb0cc30e1225deac",
       "output": {
         "path": "./assets/optimized/ui/portraits/cure_master.webp",
-        "bytes": 19558,
-        "sha256": "1c384c5499c8e702a7d3d18fefe52d06ebeea708d5cbc181b5e0e8ae95cbe963",
+        "bytes": 20686,
+        "sha256": "216b4f0675442b5a3af2e3fdde2335ffaf28202ac003d20e030044fa4678ae9b",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6281,7 +6281,7 @@
     },
     {
       "id": "figure:cure_master",
-      "source": "./assets/merge/units/cure_master.webp",
+      "source": "./assets/cast-v2/cure_master.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6293,11 +6293,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "897e3527b970bf4371d503fd7f1bdd588e3b113f220be50d8597ccec6deae42e",
+      "sourceSha256": "1d9615e6369d1ce26eb34e7cc066cd23cd5d7c5e93e8e4b9fb0cc30e1225deac",
       "output": {
         "path": "./assets/optimized/ui/figures/cure_master.webp",
-        "bytes": 57088,
-        "sha256": "3fdffc9863503179eadf5bf19a4789753799d0c1c468d4f7886234576c272a14",
+        "bytes": 48024,
+        "sha256": "543b12de72d32aca7b10e09ec5b42fd66372d4ec94b9f930a6d45081a6e669a3",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6308,11 +6308,11 @@
     },
     {
       "id": "portrait:ash",
-      "source": "./assets/merge/units/ash.webp",
+      "source": "./assets/cast-v2/ash.webp",
       "profile": "portrait",
       "crop": {
-        "left": 138,
-        "top": 97,
+        "left": 136,
+        "top": 73,
         "width": 250,
         "height": 250
       },
@@ -6320,11 +6320,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "090901a0f1f503dbf5ec4a65e309039f01afd94b7b9320e672327623e7dfb1e8",
+      "sourceSha256": "e7a7aca49cf3eaf0f6c8f36c3fb9bacafeb6da0288996867ca7e7c30852c61ee",
       "output": {
         "path": "./assets/optimized/ui/portraits/ash.webp",
-        "bytes": 17804,
-        "sha256": "eb0849ddb74bce0b414b2360a4ec196d623d68706639669ca3dc69354a20b0d1",
+        "bytes": 20114,
+        "sha256": "9e60377de4b6859938c9066d413d067b419554b13cd01eff8925e325aeb4150a",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6335,7 +6335,7 @@
     },
     {
       "id": "figure:ash",
-      "source": "./assets/merge/units/ash.webp",
+      "source": "./assets/cast-v2/ash.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6347,11 +6347,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "090901a0f1f503dbf5ec4a65e309039f01afd94b7b9320e672327623e7dfb1e8",
+      "sourceSha256": "e7a7aca49cf3eaf0f6c8f36c3fb9bacafeb6da0288996867ca7e7c30852c61ee",
       "output": {
         "path": "./assets/optimized/ui/figures/ash.webp",
-        "bytes": 44976,
-        "sha256": "a72f72ce4f8f8aa07fabdfe60f115ba07dc36dc34452be049c2985f84e824cb4",
+        "bytes": 48910,
+        "sha256": "45f74c35d450f6cf8b0d523857fb61d01bef3897916d134490e7d3ce3418ac78",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6362,11 +6362,11 @@
     },
     {
       "id": "portrait:zeke",
-      "source": "./assets/merge/units/zeke.webp",
+      "source": "./assets/cast-v2/zeke.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 84,
+        "left": 122,
+        "top": 69,
         "width": 250,
         "height": 250
       },
@@ -6374,11 +6374,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "sourceSha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",
       "output": {
         "path": "./assets/optimized/ui/portraits/zeke.webp",
-        "bytes": 18882,
-        "sha256": "63f0dbba1e6a315b4304e5859e3027bde6215098b08491c0d90bdb842bb23f02",
+        "bytes": 22160,
+        "sha256": "4c5cb8a3c6efa5cc25ff82fd65a5a8cf35a16373090dc0ceead2f2fa333b96d6",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6389,7 +6389,7 @@
     },
     {
       "id": "figure:zeke",
-      "source": "./assets/merge/units/zeke.webp",
+      "source": "./assets/cast-v2/zeke.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6401,11 +6401,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "baf3895fd1c023c9d4a1493d87c2447e3dab4ef9c662be977578e6ce3c2e7bae",
+      "sourceSha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",
       "output": {
         "path": "./assets/optimized/ui/figures/zeke.webp",
-        "bytes": 35514,
-        "sha256": "92d13ba28a900672a4de0687a56b2686f8c24f8c15cfc1fdb05f9eaf1b7b9fbd",
+        "bytes": 54076,
+        "sha256": "4967a3db66f228b2633f30b79133f18f2fa4947140377fa479d09980daf64fc3",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6416,11 +6416,11 @@
     },
     {
       "id": "portrait:luna",
-      "source": "./assets/merge/units/luna.webp",
+      "source": "./assets/cast-v2/luna.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 86,
+        "left": 117,
+        "top": 95,
         "width": 250,
         "height": 250
       },
@@ -6428,11 +6428,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "sourceSha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
       "output": {
         "path": "./assets/optimized/ui/portraits/luna.webp",
-        "bytes": 17446,
-        "sha256": "faa7551ee18516dc300cb89c72202986d6697ffbff49cc39dc3087ad5a147028",
+        "bytes": 20120,
+        "sha256": "cf2cbd8b67963eda52c87261510952141667256a9db277b393300e2ba3cc08fe",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6443,7 +6443,7 @@
     },
     {
       "id": "figure:luna",
-      "source": "./assets/merge/units/luna.webp",
+      "source": "./assets/cast-v2/luna.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6455,11 +6455,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "9b11e4efce927fd3dc3bf6fe31a434e7cc9bf92abd6a98a8b827dbd6a3faa843",
+      "sourceSha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
       "output": {
         "path": "./assets/optimized/ui/figures/luna.webp",
-        "bytes": 30174,
-        "sha256": "50c03279d3c4f4623fc48e8ec5719b5bfa00c540b18e4d787eab5897eb984aff",
+        "bytes": 37290,
+        "sha256": "cce7f7896d790bbcfe29e4af1ac458c4f84ad79a719cbb60acf0323a165abee6",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6470,11 +6470,11 @@
     },
     {
       "id": "portrait:jasmine",
-      "source": "./assets/merge/units/jasmine.webp",
+      "source": "./assets/cast-v2/jasmine.webp",
       "profile": "portrait",
       "crop": {
-        "left": 128,
-        "top": 73,
+        "left": 132,
+        "top": 96,
         "width": 250,
         "height": 250
       },
@@ -6482,11 +6482,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+      "sourceSha256": "f4bd3e144f12d71119544b441d5223ff8490a4dd681df5af2edc32fd17548a41",
       "output": {
         "path": "./assets/optimized/ui/portraits/jasmine.webp",
-        "bytes": 21650,
-        "sha256": "6fbada5f3d42fa51dba4361a23035ee87d98f48e8b5cacbc18a6f4d6f4a5eaba",
+        "bytes": 23804,
+        "sha256": "966b44312ccd91950d0a520eaad3e63f0495b33689d0fc380bf536eeeb1d2b64",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6497,7 +6497,7 @@
     },
     {
       "id": "figure:jasmine",
-      "source": "./assets/merge/units/jasmine.webp",
+      "source": "./assets/cast-v2/jasmine.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6509,11 +6509,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "8761aff39dbe4b90a3674a5dec0f4753c00087bb6e9c081f61bae4e081feda2a",
+      "sourceSha256": "f4bd3e144f12d71119544b441d5223ff8490a4dd681df5af2edc32fd17548a41",
       "output": {
         "path": "./assets/optimized/ui/figures/jasmine.webp",
-        "bytes": 54514,
-        "sha256": "92d8aab75e963a71979e2285afe8069590d8147e282e1c31da4af0f2baa997dd",
+        "bytes": 47280,
+        "sha256": "a0b552180a7d945ff1c38695a44de38ddecd3ad1e6e73a3dc34aa1bbcce2b02a",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6524,11 +6524,11 @@
     },
     {
       "id": "portrait:queen",
-      "source": "./assets/merge/units/queen.webp",
+      "source": "./assets/cast-v2/queen.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 86,
+        "left": 128,
+        "top": 98,
         "width": 250,
         "height": 250
       },
@@ -6536,11 +6536,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "sourceSha256": "528168417d8df90ac96abb2be96ccee2b0d073002fef7b8f90f5fa5f9b2d2db1",
       "output": {
         "path": "./assets/optimized/ui/portraits/queen.webp",
-        "bytes": 26560,
-        "sha256": "d2a7265014d0b7c5492dcc3d1fb900693da7fee97ec2a247d6e71381fe03f741",
+        "bytes": 32452,
+        "sha256": "f8de7279106742d3192644ae326b98b2b68192dddec0b31bff1d150e6514eb9b",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6551,7 +6551,7 @@
     },
     {
       "id": "figure:queen",
-      "source": "./assets/merge/units/queen.webp",
+      "source": "./assets/cast-v2/queen.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6563,11 +6563,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "1c66ea184bda028175bd92417613a4e5c31ac3158460e9f0c63c78907157d50b",
+      "sourceSha256": "528168417d8df90ac96abb2be96ccee2b0d073002fef7b8f90f5fa5f9b2d2db1",
       "output": {
         "path": "./assets/optimized/ui/figures/queen.webp",
-        "bytes": 44448,
-        "sha256": "aeaeede7756e5339f848621aa66aa0a0ccfdab9e87b7389a4b122cfc4e54225d",
+        "bytes": 50406,
+        "sha256": "db6c47a4e1e14151a9472fed0ffc2fcd7c58ce74244897236a7b350f97eda113",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6578,11 +6578,11 @@
     },
     {
       "id": "portrait:rumi",
-      "source": "./assets/merge/units/rumi.webp",
+      "source": "./assets/cast-v2/rumi.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 107,
+        "left": 136,
+        "top": 88,
         "width": 250,
         "height": 250
       },
@@ -6590,11 +6590,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "sourceSha256": "a52e14daa819efb8eafd850b4b1693c8884db8887828bbb9d544f8efd3d5d647",
       "output": {
         "path": "./assets/optimized/ui/portraits/rumi.webp",
-        "bytes": 21258,
-        "sha256": "afdab986666eaad5ce0729fa6ab0ebdf87652e02c71a9e0679555f4b6bb0e939",
+        "bytes": 20784,
+        "sha256": "acbb2be4ae5529df79ba63007fd9ee81b042143377a7bd20b3725772979e5874",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6605,7 +6605,7 @@
     },
     {
       "id": "figure:rumi",
-      "source": "./assets/merge/units/rumi.webp",
+      "source": "./assets/cast-v2/rumi.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6617,11 +6617,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "8599c1e5f5c9435812331176dcb1ff58d4317a3f4c84a187f6c5ba2b466e3acb",
+      "sourceSha256": "a52e14daa819efb8eafd850b4b1693c8884db8887828bbb9d544f8efd3d5d647",
       "output": {
         "path": "./assets/optimized/ui/figures/rumi.webp",
-        "bytes": 35372,
-        "sha256": "67a4c9af6e36779e3b3483f6c4b2242401f7aa51bf8445c72e2c95c508deeb8b",
+        "bytes": 40750,
+        "sha256": "82b8ffdeaadaff351249ca08840e89dbb2ca4fdbfddfb38972a4fbfe768bbbb2",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6632,11 +6632,11 @@
     },
     {
       "id": "portrait:cherry_prince",
-      "source": "./assets/merge/units/cherry_prince.webp",
+      "source": "./assets/cast-v2/cherry_prince.webp",
       "profile": "portrait",
       "crop": {
-        "left": 132,
-        "top": 98,
+        "left": 125,
+        "top": 81,
         "width": 250,
         "height": 250
       },
@@ -6644,11 +6644,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+      "sourceSha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
       "output": {
         "path": "./assets/optimized/ui/portraits/cherry_prince.webp",
-        "bytes": 20458,
-        "sha256": "da5eb8d1bbbf388e8daf0df2c94bd77acb37f0c46516bc793e0ba92b7425a63f",
+        "bytes": 20140,
+        "sha256": "c691d66a7bfedf7d4fe208b56afb1f692175a010689ed9f94a0651ec1110f6ad",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6659,7 +6659,7 @@
     },
     {
       "id": "figure:cherry_prince",
-      "source": "./assets/merge/units/cherry_prince.webp",
+      "source": "./assets/cast-v2/cherry_prince.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6671,11 +6671,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "f4e630745f887a1507b4f7a9f8d3a468e6fb758868a98a721a0c64a014259252",
+      "sourceSha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
       "output": {
         "path": "./assets/optimized/ui/figures/cherry_prince.webp",
-        "bytes": 38106,
-        "sha256": "4d92bbed4805f220f1ab695feafdb561a3fbc52cf9b3ab619acc3c9ca70ccb80",
+        "bytes": 36486,
+        "sha256": "9b1630da7c7f8cef863ba8e0691b03c7a56bc8992773898e9c56024ed34529fd",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6686,11 +6686,11 @@
     },
     {
       "id": "portrait:venom",
-      "source": "./assets/merge/units/venom.webp",
+      "source": "./assets/cast-v2/venom.webp",
       "profile": "portrait",
       "crop": {
-        "left": 137,
-        "top": 83,
+        "left": 126,
+        "top": 103,
         "width": 250,
         "height": 250
       },
@@ -6698,11 +6698,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "071bedcc87f3bd4e34233ee65e42e2cfe9b25a49191f4373be542b7011d93606",
+      "sourceSha256": "01de3e2feb0966232398ae5482eb1563b5a553af8a44a96f2f007218c8b130ec",
       "output": {
         "path": "./assets/optimized/ui/portraits/venom.webp",
-        "bytes": 19624,
-        "sha256": "7bd273ded2e003bf1a4df5fbd75cce85f0ea3d372e6cf7d05df000ff672eef33",
+        "bytes": 31394,
+        "sha256": "06e67b0bb2dc23a731fdeb53012da088b945b02d613260f667dc7e6426d0317b",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6713,7 +6713,7 @@
     },
     {
       "id": "figure:venom",
-      "source": "./assets/merge/units/venom.webp",
+      "source": "./assets/cast-v2/venom.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6725,11 +6725,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "071bedcc87f3bd4e34233ee65e42e2cfe9b25a49191f4373be542b7011d93606",
+      "sourceSha256": "01de3e2feb0966232398ae5482eb1563b5a553af8a44a96f2f007218c8b130ec",
       "output": {
         "path": "./assets/optimized/ui/figures/venom.webp",
-        "bytes": 51474,
-        "sha256": "1a9038c8fd71eff4dc701393bea9ba81d3bbf9e5dbf73c13a042cb31af955078",
+        "bytes": 58790,
+        "sha256": "30d765aed0313ca62e58766fca0d0045024819370b1092fa45f5e4acbdac30cf",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6740,11 +6740,11 @@
     },
     {
       "id": "portrait:time_ruler",
-      "source": "./assets/merge/units/time_ruler.webp",
+      "source": "./assets/cast-v2/time_ruler.webp",
       "profile": "portrait",
       "crop": {
         "left": 131,
-        "top": 83,
+        "top": 79,
         "width": 250,
         "height": 250
       },
@@ -6752,11 +6752,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "sourceSha256": "5fe7746dc51b4c2eac0b2b92605450405ce258dc04a60e46f78e9166256df4af",
       "output": {
         "path": "./assets/optimized/ui/portraits/time_ruler.webp",
-        "bytes": 15656,
-        "sha256": "404deb65eaa8908405f5e07fb1032237e77e629869d4c824598dcce42d2ecaa3",
+        "bytes": 19460,
+        "sha256": "c4628f5c6d9ca14c17867a34fe25bf75c4f05fdb31ffb8ff2777cf7ea19e0f9e",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6767,7 +6767,7 @@
     },
     {
       "id": "figure:time_ruler",
-      "source": "./assets/merge/units/time_ruler.webp",
+      "source": "./assets/cast-v2/time_ruler.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6779,11 +6779,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "aab8862caca88b7e84fb109dc7e229ca4d67b529f0d3d2ad51790add504c156f",
+      "sourceSha256": "5fe7746dc51b4c2eac0b2b92605450405ce258dc04a60e46f78e9166256df4af",
       "output": {
         "path": "./assets/optimized/ui/figures/time_ruler.webp",
-        "bytes": 29100,
-        "sha256": "d347867686d42e0d9fc8a3dc3692f5cbb88fba6cc567b74b7a10b504637172fa",
+        "bytes": 39918,
+        "sha256": "b5e52715b33a1bb1c0ce74b13b3211af0625d9db2678104a47f5d31be02b2889",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6794,11 +6794,11 @@
     },
     {
       "id": "portrait:galaxy_whale",
-      "source": "./assets/merge/units/galaxy_whale.webp",
+      "source": "./assets/cast-v2/galaxy_whale.webp",
       "profile": "portrait",
       "crop": {
-        "left": 131,
-        "top": 78,
+        "left": 152,
+        "top": 92,
         "width": 250,
         "height": 250
       },
@@ -6806,11 +6806,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "sourceSha256": "cdf44e0c0aed8b7f01824fccfda62ed21e0ce71c1cd7a7004a425302ad36d45a",
       "output": {
         "path": "./assets/optimized/ui/portraits/galaxy_whale.webp",
-        "bytes": 26054,
-        "sha256": "72078c1643ac25d908acdd3109961f35e3825c348935b23897d66eda08a820ec",
+        "bytes": 19792,
+        "sha256": "77059e43c2d380b97f77acb1ef8c7e454245f46eb8941eb1366ffaca8b1d22bd",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6821,7 +6821,7 @@
     },
     {
       "id": "figure:galaxy_whale",
-      "source": "./assets/merge/units/galaxy_whale.webp",
+      "source": "./assets/cast-v2/galaxy_whale.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6833,11 +6833,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "55ba940c513f9b59eb01fc47f9ad89199c1242705243f7c65c9098a4df156cfb",
+      "sourceSha256": "cdf44e0c0aed8b7f01824fccfda62ed21e0ce71c1cd7a7004a425302ad36d45a",
       "output": {
         "path": "./assets/optimized/ui/figures/galaxy_whale.webp",
-        "bytes": 46668,
-        "sha256": "07d5569ac0104b456342c8c979368bfd77e974521f6d90c051ccded17f401e3d",
+        "bytes": 43454,
+        "sha256": "c0dae4faf843cec9e280a9a821cbaa8f8ba9f910868d93c8c9cfd01c855f3cf0",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6848,11 +6848,11 @@
     },
     {
       "id": "portrait:doom",
-      "source": "./assets/merge/units/doom.webp",
+      "source": "./assets/cast-v2/doom.webp",
       "profile": "portrait",
       "crop": {
-        "left": 126,
-        "top": 112,
+        "left": 128,
+        "top": 82,
         "width": 250,
         "height": 250
       },
@@ -6860,11 +6860,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+      "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
       "output": {
         "path": "./assets/optimized/ui/portraits/doom.webp",
-        "bytes": 16040,
-        "sha256": "03dd5a0703ebd6f22a0e02661ce5165e8f456fe66cc32e3308726a13e7606a26",
+        "bytes": 17658,
+        "sha256": "c9053433e1461e675cc49307e602b0bb915f8db94e1306752a0847733839587d",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6875,7 +6875,7 @@
     },
     {
       "id": "figure:doom",
-      "source": "./assets/merge/units/doom.webp",
+      "source": "./assets/cast-v2/doom.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6887,11 +6887,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "d8b027a4f60999069aa0e145febc1c63e4e4ce1804c128d6f0400b173100edd2",
+      "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
       "output": {
         "path": "./assets/optimized/ui/figures/doom.webp",
-        "bytes": 30798,
-        "sha256": "bd55012b57bf0609c9fd6292b2b9b53cd9af43b5ac90c1d83a2c2f50eea88de8",
+        "bytes": 33446,
+        "sha256": "ffd3dc4eb510ca04abf79626133aac5d91806885a7243f6c71c2530ecd620f28",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6902,11 +6902,11 @@
     },
     {
       "id": "portrait:cinderella",
-      "source": "./assets/merge/units/cinderella.webp",
+      "source": "./assets/cast-v2/cinderella.webp",
       "profile": "portrait",
       "crop": {
-        "left": 127,
-        "top": 65,
+        "left": 128,
+        "top": 79,
         "width": 250,
         "height": 250
       },
@@ -6914,11 +6914,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "sourceSha256": "f138c02f97feb8adbfafd3b79b38eed978393bde418ed94df97283df2069bd2a",
       "output": {
         "path": "./assets/optimized/ui/portraits/cinderella.webp",
-        "bytes": 24244,
-        "sha256": "d375749c2e7c53355a89791bcd43ddc275d3f8f8696f038f292d396ecb2cbb59",
+        "bytes": 21558,
+        "sha256": "a898d21bc981460eae0c4b1b13f2e58357bb7f5f195fc4f5f84c02dc9493cfee",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6929,7 +6929,7 @@
     },
     {
       "id": "figure:cinderella",
-      "source": "./assets/merge/units/cinderella.webp",
+      "source": "./assets/cast-v2/cinderella.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6941,11 +6941,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "b6efcf1ceee85547d216636648c69c440e59d9ba1cea6478bae76aece8074601",
+      "sourceSha256": "f138c02f97feb8adbfafd3b79b38eed978393bde418ed94df97283df2069bd2a",
       "output": {
         "path": "./assets/optimized/ui/figures/cinderella.webp",
-        "bytes": 60550,
-        "sha256": "6247ba4741a756be6ccf7b6521800922300dcf42d9e5638e7ce9b806988ac2dc",
+        "bytes": 50946,
+        "sha256": "326f365f72106feed92adeabfd21b2687cc9f56e1363e074289b184027ce4bed",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6956,10 +6956,10 @@
     },
     {
       "id": "portrait:harmonious",
-      "source": "./assets/merge/units/harmonious.webp",
+      "source": "./assets/cast-v2/harmonious.webp",
       "profile": "portrait",
       "crop": {
-        "left": 129,
+        "left": 137,
         "top": 100,
         "width": 250,
         "height": 250
@@ -6968,11 +6968,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "sourceSha256": "779f238b18fcb66cd0eafc8dc32a57027fc426da7ac0141f81d5838f294712d2",
       "output": {
         "path": "./assets/optimized/ui/portraits/harmonious.webp",
-        "bytes": 23298,
-        "sha256": "44d1b581c50c7071290a8327097d1ff5bc8f00a11d9d26e9a8762a9e0c315c8a",
+        "bytes": 23642,
+        "sha256": "1fefe53a20c3b28f0d1f88796ff97fdac93afb3a97f4aff5125693244f5e1285",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6983,7 +6983,7 @@
     },
     {
       "id": "figure:harmonious",
-      "source": "./assets/merge/units/harmonious.webp",
+      "source": "./assets/cast-v2/harmonious.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6995,11 +6995,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "47772cd88e7ce05ee4dea6ebcd4254231afc55ed280d88f2fde901936199c90d",
+      "sourceSha256": "779f238b18fcb66cd0eafc8dc32a57027fc426da7ac0141f81d5838f294712d2",
       "output": {
         "path": "./assets/optimized/ui/figures/harmonious.webp",
-        "bytes": 64358,
-        "sha256": "341f29a55013e770e2b85bc14829fc692c222b94263a7a5b91ead492dfd61c86",
+        "bytes": 55424,
+        "sha256": "9b9122ca936db48889141581749ea773a81e7071932d4a2f31bc8524e5b06bdb",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -7010,11 +7010,11 @@
     },
     {
       "id": "portrait:frost_witch",
-      "source": "./assets/merge/units/frost_witch.webp",
+      "source": "./assets/cast-v2/frost_witch.webp",
       "profile": "portrait",
       "crop": {
-        "left": 126,
-        "top": 86,
+        "left": 116,
+        "top": 83,
         "width": 250,
         "height": 250
       },
@@ -7022,11 +7022,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "sourceSha256": "8b17e2ada96ad451afca1082ee1f832a5cbb1207a6bfd7e0e523d53b4537e6e8",
       "output": {
         "path": "./assets/optimized/ui/portraits/frost_witch.webp",
-        "bytes": 21566,
-        "sha256": "9d4178ef637b74259543936bfbdc4593d316223277cee7f4e245178f5470dba1",
+        "bytes": 22100,
+        "sha256": "8b954b9a6b3096587a834e2daa6659f1f6b527a8099165768c8f26ff5f5463a5",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -7037,7 +7037,7 @@
     },
     {
       "id": "figure:frost_witch",
-      "source": "./assets/merge/units/frost_witch.webp",
+      "source": "./assets/cast-v2/frost_witch.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7049,11 +7049,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "831847af07ac61ce0da32675eb8d3561dc46a4583cd0cc6d1a3e16faaaccd5fe",
+      "sourceSha256": "8b17e2ada96ad451afca1082ee1f832a5cbb1207a6bfd7e0e523d53b4537e6e8",
       "output": {
         "path": "./assets/optimized/ui/figures/frost_witch.webp",
-        "bytes": 45630,
-        "sha256": "56ba3c185da9246575ce9caa681b9a5d45a813ea635442dada146a6d4005d21e",
+        "bytes": 43520,
+        "sha256": "ddaf919bc95be490723cc7a4efab1806373a44a97ee72a36718773a521455de2",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -7064,11 +7064,11 @@
     },
     {
       "id": "portrait:behemoth",
-      "source": "./assets/merge/units/behemoth.webp",
+      "source": "./assets/cast-v2/behemoth.webp",
       "profile": "portrait",
       "crop": {
-        "left": 120,
-        "top": 66,
+        "left": 132,
+        "top": 97,
         "width": 250,
         "height": 250
       },
@@ -7076,11 +7076,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "b51bf716bbbaec063072fa9bf4c9c0aca30121bb83ccd6dfece4fd55495d428e",
+      "sourceSha256": "65e0a97d519022d76b8a0f1be594548255fd381088f2e5b7a77040e9cd1288aa",
       "output": {
         "path": "./assets/optimized/ui/portraits/behemoth.webp",
-        "bytes": 19236,
-        "sha256": "af5f75454de9e78131423897570d9097dd1b5397b20a2a2b97c28fdefdd26b02",
+        "bytes": 23856,
+        "sha256": "576786397a9a7fa79c87d1ccb83b6d40610a4d9b6fcb601989055172fe3d0362",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -7091,7 +7091,7 @@
     },
     {
       "id": "figure:behemoth",
-      "source": "./assets/merge/units/behemoth.webp",
+      "source": "./assets/cast-v2/behemoth.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7103,11 +7103,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "b51bf716bbbaec063072fa9bf4c9c0aca30121bb83ccd6dfece4fd55495d428e",
+      "sourceSha256": "65e0a97d519022d76b8a0f1be594548255fd381088f2e5b7a77040e9cd1288aa",
       "output": {
         "path": "./assets/optimized/ui/figures/behemoth.webp",
-        "bytes": 46934,
-        "sha256": "d74c7042a257cd5a09f8e89060a82460355d901132645fb5d7f40362ca84a638",
+        "bytes": 49650,
+        "sha256": "b23897062f78529ac52556cce69bf8482e553f939fb6e234a04ec16a7712e4c1",
         "metadata": {
           "width": 512,
           "height": 512,

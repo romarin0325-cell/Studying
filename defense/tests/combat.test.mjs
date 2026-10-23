@@ -86,6 +86,96 @@ function soloWinner(s){
   return boosted[0];
 }
 
+test('snow training adds two percentage points and the displayed slow includes rank and enhancement',()=>{
+  for(let level=0;level<=5;level++){
+    const s=traitArena([{hero:'snow_rabbit',index:12,rank:3}]),[e]=enemiesFor(s,[{}]),u=s.board[12];
+    s.upgrades.snow_rabbit=level;s.meta.snow_rabbit={power:1,special:1.1};
+    resolveNormal(s,launchNormal(s,u));
+    const expected=Math.min(.8,(.4+level*.02)*1.2*1.1);
+    close(e.slow,expected,'trained snow slow');
+    assert.equal(E.trainingBonus('snow_rabbit',level),`감속 ${40+level*2}%`);
+    assert.deepEqual(E.givenEffects(s,u,12),[`감속 ${Number((expected*100).toFixed(1))}%`]);
+  }
+});
+
+test('snow ultimate grows freeze duration and slow strength per rank while its slow still expires independently',()=>{
+  for(const rank of [1,3,6])for(const k of [1,1.2]){
+    const s=traitArena([{hero:'snow_rabbit',index:12,rank}]),enemies=enemiesFor(s,[{}, {kind:'boss'}]),u=s.board[12];quiet(s);
+    s.meta.snow_rabbit={power:1,special:k};const at=s.time;readyCast(s,'snow_rabbit');
+    const seconds=2*k*(1+.1*(rank-1)),slow=Math.min(.8,.5*k*(1+.1*(rank-1)));
+    close(enemies[0].freeze,seconds);close(enemies[1].freeze,seconds*.5);
+    for(const e of enemies){close(e.slow,slow);close(e.slowTime,6);}
+    const preview=E.castPreview(s,'snow_rabbit');
+    assert.ok(preview.lines.some(line=>line.includes(`${Number((slow*100).toFixed(1))}%`)&&line.includes(`${Number(seconds.toFixed(1))}초`)));
+    const restored=E.restore(E.serialize(s));assert.ok(restored);advanceTo(s,at+6);advanceTo(restored,at+6);
+    for(const e of s.enemies){close(e.slow,0);close(e.slowTime,0);}
+    assert.equal(E.serialize(restored),E.serialize(s));
+  }
+});
+
+test('a snow normal attack cannot shorten winter court and repeated witch attacks cannot prolong its stronger slow',()=>{
+  const s=traitArena([{hero:'frost_witch',index:12},{hero:'snow_rabbit',index:13}]),[e]=enemiesFor(s,[{}]);
+  const at=s.time;readyCast(s,'frost_witch');
+  const skill=e.slowEffects.find(a=>a.source.startsWith('skill:frost_witch:'));close(skill.until,at+6);
+  advanceTo(s,at+.2);resolveNormal(s,launchNormal(s,s.board[13]));
+  close(skill.until,at+6);close(e.slow,.5);close(e.slowTime,at+6-s.time,'support does not truncate winter');
+  for(let second=1;second<=5;second++){advanceTo(s,at+second);resolveNormal(s,launchNormal(s,s.board[12]));close(skill.until,at+6);}
+  quiet(s);const restored=E.restore(E.serialize(s));assert.ok(restored);
+  advanceTo(s,at+6);advanceTo(restored,at+6);
+  close(s.buffs.winter,0);close(e.slow,.4,'witch normal slow resumes at the actual winter deadline');
+  assert.equal(e.slowEffects.some(a=>a.source.startsWith('skill:frost_witch:')),false);
+  assert.equal(E.serialize(restored),E.serialize(s));
+});
+
+test('winter slow, exposure and winter share rank-scaled duration, while kill freeze stays 0.8 seconds',()=>{
+  const s=traitArena([{hero:'frost_witch',index:12,rank:3},{hero:'star_boy',index:13}]);
+  const [near,victim]=enemiesFor(s,[{progress:1200},{progress:1280}]);s.meta.frost_witch={power:1,special:1.2};
+  const at=s.time;readyCast(s,'frost_witch');const seconds=6*1.2*1.2;
+  close(s.buffs.winter,seconds);close(s.buffTotals.winter,seconds);
+  for(const e of s.enemies){close(e.slowTime,seconds);close(e.exposeTime,seconds);close(e.slow,.72);}
+  const preview=E.castPreview(s,'frost_witch');
+  assert.ok(preview.lines.some(line=>line.startsWith('적은 8.6초')&&line.includes('72%')));
+  assert.ok(preview.lines.some(line=>line.startsWith('겨울은 8.6초')&&line.includes('0.8초')));
+  victim.hp=1;resolveNormal(s,launchNormal(s,s.board[13]));assert.ok(victim.hp<=0);close(near.freeze,.8,'rank no longer extends the kill follow-up');
+  quiet(s);const restored=E.restore(E.serialize(s));assert.ok(restored);
+  advanceTo(s,at+seconds);advanceTo(restored,at+seconds);
+  close(s.buffs.winter,0);close(near.slow,0);close(near.exposeTime,0);
+  assert.equal(E.serialize(restored),E.serialize(s));
+});
+
+test('storm execute adds 0.1 percentage point per rank and enhancement milestone on real hit rolls',()=>{
+  const seedFor=roll=>{for(let seed=1;seed<100000;seed++){const r=E.random({rng:seed});if(r>=roll&&r<roll+.00005)return seed;}assert.fail('missing roll seed');};
+  for(const [rank,k,roll,kills] of [[1,1,.0104,false],[2,1,.0104,true],[1,1.1,.0104,true],[3,1.2,.0134,true],[3,1.2,.0144,false]]){
+    const s=traitArena([{hero:'storm_sage',index:12,rank}]),[e]=enemiesFor(s,[{shield:50}]),u=s.board[12];
+    s.meta.storm_sage={power:1,special:k};const shot=launchNormal(s,u);s.rng=seedFor(roll);resolveNormal(s,shot);
+    assert.equal(e.hp<=0,kills,`rank ${rank}, special ${k}, roll ${roll}`);
+    close(E.personalTrait(s,u).executeChance,.01+.001*(rank-1)+.01*(k-1));
+    assert.equal(s.events.filter(a=>a.type==='instantKill').length,kills?1:0);
+  }
+  const s=traitArena([{hero:'storm_sage',index:12,rank:2}]),[e]=enemiesFor(s,[{}]),u=s.board[12];
+  const shot=launchNormal(s,u);u.rank=6;s.rng=seedFor(.0124);resolveNormal(s,shot);
+  assert.ok(e.hp>0,'a launched attack retains its original rank');
+  assert.deepEqual(E.scaledTokens('storm_sage',1.2).trait,[['1%','1.2%']]);
+});
+
+test('crush uses the reduced trained radius for hit boundaries, previews, effects and saved queued shocks',()=>{
+  for(const level of [0,1,5]){
+    const s=traitArena([{hero:'behemoth',index:12}]);s.upgrades.behemoth=level;
+    const radius=112.5*(1+level*.05),enemies=enemiesFor(s,[{progress:300},{progress:300+radius-.001},{progress:300+radius+.001}]);quiet(s);
+    close(E.crushRadius(s),radius);assert.ok(E.castPreview(s,'behemoth').lines[0].includes(`반경 ${radius}`));
+    const at=s.time,hp=enemies.map(e=>e.hp),hit=E.combatStats(s,s.board[12]).damage*6;readyCast(s,'behemoth');
+    assert.ok(s.volleys.every(v=>v.radius===radius));
+    const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(E.serialize(saved),E.serialize(s));
+    s.upgrades.behemoth=5;s.rng=1;advanceTo(s,at+.25);
+    close(hp[0]-enemies[0].hp,hit);close(hp[1]-enemies[1].hp,hit);close(hp[2]-enemies[2].hp,0);
+    close(s.events.find(e=>e.type==='crushPhase').radius,radius,'effect reports the actual snapshotted radius');
+  }
+  const s=traitArena([{hero:'behemoth',index:12}]);enemiesFor(s,[{}]);readyCast(s,'behemoth');
+  const legacy=JSON.parse(E.serialize(s));for(const v of legacy.volleys)delete v.radius;
+  const migrated=E.restore(legacy);assert.ok(migrated);assert.ok(migrated.volleys.every(v=>v.radius===150));
+  const bad=JSON.parse(E.serialize(s));bad.volleys[0].radius=900;assert.equal(E.restore(bad),null);
+});
+
 test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
   assert.equal(HEROES.length,39);assert.equal(new Set(HEROES.map(h=>h.id)).size,39);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
@@ -225,8 +315,8 @@ test('sustained skill timers, total durations and numeric attack stats survive r
 
 test('cardinal Lightning components use the exact 2, 3 and 4+ power and chain thresholds',()=>{
   for(const [cells,multiplier,ratio,extra] of [
-    [[6],1,.65,0],[[6,7],1.15,.70,0],[[6,7,12],1.30,.75,0],
-    [[6,7,12,11],1.50,.80,1],[[6,7,12,11,16],1.50,.80,1],
+    [[6],1,.65,0],[[6,7],1.20,.70,0],[[6,7,12],1.40,.75,0],
+    [[6,7,12,11],1.60,.80,1],[[6,7,12,11,16],1.60,.80,1],
   ]){
     const s=traitArena(cells.map(index=>({hero:'lightning_sage',index})));
     for(const index of cells){
@@ -248,7 +338,7 @@ test('Lightning adjacency rejects diagonal and row-wrap links and immediately fo
   const moved=s.board[13],uid=moved.uid;
   assert.equal(E.personalTrait(s,s.board[6]).size,4);
   assert.ok(E.move(s,13,24).ok);assert.equal(s.board[24].uid,uid);
-  for(const index of [6,7,12]){assert.equal(E.personalTrait(s,s.board[index]).size,3);close(E.power(s,s.board[index]),HERO.lightning_sage.damage*1.30);}
+  for(const index of [6,7,12]){assert.equal(E.personalTrait(s,s.board[index]).size,3);close(E.power(s,s.board[index]),HERO.lightning_sage.damage*1.40);}
   assert.equal(E.personalTrait(s,s.board[24]).size,1);
   assert.ok(E.move(s,24,13).ok);
   for(const index of [6,7,12,13])assert.equal(E.personalTrait(s,s.board[index]).size,4);
@@ -258,7 +348,7 @@ test('Lightning adjacency rejects diagonal and row-wrap links and immediately fo
 
 test('Lightning normal hits apply the enhanced chain ratio and only the 4+ component gets another recipient',()=>{
   for(const [cells,ratio,extra,multiplier] of [
-    [[12,13],.70,0,1.15],[[12,13,18],.75,0,1.30],[[12,13,18,17],.80,1,1.50],
+    [[12,13],.70,0,1.20],[[12,13,18],.75,0,1.40],[[12,13,18,17],.80,1,1.60],
   ]){
     const s=traitArena(cells.map(index=>({hero:'lightning_sage',index})));
     const enemies=enemiesFor(s,[1200,1220,1240,1260,1280].map(progress=>({progress})));
@@ -1517,7 +1607,7 @@ test('crush hits three times around a seeded enemy, echoes on the last hit, and 
   const [boss]=enemiesFor(bossRun,[{kind:'boss',hp:1e9,progress:1200}]);quiet(bossRun);
   const bossHp=boss.hp,b0=bossRun.time;readyCast(bossRun,'behemoth');
   const alone=E.castPreview(bossRun,'behemoth');
-  assert.match(alone.lines[0],/반경 150/);assert.match(alone.lines[0],/0\.5초 간격으로 3번/);
+  assert.match(alone.lines[0],/반경 112\.5/);assert.match(alone.lines[0],/0\.5초 간격으로 3번/);
   assert.ok(alone.lines.some(line=>line.includes('하나뿐')&&line.includes(Math.round(E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits).toLocaleString('ko-KR'))));
   advanceTo(bossRun,b0+1.3);close(bossHp-boss.hp,E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits);
   const crowd=traitArena([{hero:'behemoth',index:12}]);enemiesFor(crowd,[{hp:1e9,progress:1200},{hp:1e9,progress:1800}]);quiet(crowd);
@@ -1871,7 +1961,7 @@ test('smart auto holds lemonade until someone needs it and spends requiem on liv
 });
 
 test('ash: armageddon burns the lowest other ally, spares an invincible one (not Antropy), and still blasts when she is alone',()=>{
-  assert.deepEqual(E.ARMAGEDDON,{factor:15,radius:180});assert.equal(HERO.ash.damage,31);
+  assert.deepEqual(E.ARMAGEDDON,{factor:18,radius:180});assert.equal(HERO.ash.damage,31);
   const dist=(a,b)=>Math.hypot(E.pathPoint(a.progress).x-E.pathPoint(b.progress).x,E.pathPoint(a.progress).y-E.pathPoint(b.progress).y);
   const hitLine=base=>`가장 밀집한 반경 ${E.ARMAGEDDON.radius}의 적에게 위력 ${E.ARMAGEDDON.factor}배, ${Math.round(base*E.ARMAGEDDON.factor).toLocaleString('ko-KR')} 피해를 줍니다.`;
   const s=traitArena([{index:12,hero:'ash',rank:1},{index:0,hero:'star_boy',rank:1},{index:24,hero:'snow_rabbit',rank:3}]);

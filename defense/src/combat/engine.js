@@ -46,10 +46,16 @@ export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CA
 // strike the whole field in turn, then imagination becomes real. Not in the hero sheet; the battle peek shows it.
 export const QUAKE_FACTOR=2.4;
 export const WINTER_EXPOSURE=.15;
+export const SNOW_RABBIT=Object.freeze({slow:.4,trainingSlow:.02,freeze:2,skillSlow:.5,seconds:6});
+export const WINTER_COURT=Object.freeze({slow:.5,seconds:6,killFreeze:.8});
+// Both additions are percentage points: +0.1% per rank after 1★ and per enhancement milestone.
+export const stormExecuteChance=(s,rank=1)=>Math.min(1,.01+.001*(rank-1)+.01*(special(s,'storm_sage')-1));
+export const winterDuration=(s,u)=>skillDuration(s,WINTER_COURT.seconds*special(s,'frost_witch')*rankControl(u.rank));
 // Behemoth: three 6x shocks, half a second apart, around one random enemy.
 // queue: how many casts' worth of pending shocks a save may hold (each cast queues three). Casting is not locked,
 // so plenty of starlight (high spring bed, test builds, smart auto) can stack several casts inside 1.25 s.
-export const CRUSH=Object.freeze({factor:6,radius:150,hits:3,first:.25,gap:.5,queue:24});
+export const CRUSH=Object.freeze({factor:6,radius:112.5,trainingRadius:.05,hits:3,first:.25,gap:.5,queue:24});
+export const crushRadius=s=>CRUSH.radius*(1+(s.upgrades.behemoth||0)*CRUSH.trainingRadius);
 // Galaxy whale harvests divine marks into the blast (8x, +100% per mark, 3 marks = 32x) and does not stun.
 export const WHALE=Object.freeze({factor:8,perMark:1});
 export const RUMI_DREAM=Object.freeze({rank:5,name:'꿈의 형태',phases:Object.freeze([{at:.45,factor:12},{at:1,factor:12},{at:1.55,factor:12},{at:2.3,factor:14}])});
@@ -174,7 +180,7 @@ export const pickJokerColor=(s,color)=>{const others=JOKER.colors.filter(c=>c!==
 export const REQUIEM=Object.freeze({factor:7});
 export const LEMONADE=Object.freeze({seconds:4});
 // Ash burns the lowest other ally (an immune pick is guarded, not skipped), then hits the densest pack inside the radius.
-export const ARMAGEDDON=Object.freeze({factor:15,radius:180});
+export const ARMAGEDDON=Object.freeze({factor:18,radius:180});
 // Venom Plague strikes for 3x, stacks poison, then burn and poison ticks deal double (1+amp) for the buff.
 export const VENOM_PLAGUE=Object.freeze({factor:3,stacks:3,seconds:10,amp:1});
 export function personalTrait(s,u,index=s.board.indexOf(u)){
@@ -182,8 +188,8 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   if(u.hero==='lightning_sage'){
     const seen=new Set(),pending=index>=0&&s.board[index]?.uid===u.uid?[index]:[];
     while(pending.length){const cell=pending.pop();if(seen.has(cell)||s.board[cell]?.hero!=='lightning_sage')continue;seen.add(cell);for(const n of neighbors(cell))if(!seen.has(n)&&s.board[n]?.hero==='lightning_sage')pending.push(n);}
-    const size=seen.size;Object.assign(trait,{key:'lightning',size,active:size>=2,label:size>=2?`번개 연결 ${size}기 · 위력 +${size===2?15:size===3?30:50}%`:'번개 연결 대기'});
-    if(size>=2){trait.damageMultiplier=size===2?1.15:size===3?1.30:1.50;trait.chainRatio=size===2?.70:size===3?.75:.80;trait.extraChain=size>=4?1:0;}
+    const size=seen.size;Object.assign(trait,{key:'lightning',size,active:size>=2,label:size>=2?`번개 연결 ${size}기 · 위력 +${size===2?20:size===3?40:60}%`:'번개 연결 대기'});
+    if(size>=2){trait.damageMultiplier=size===2?1.20:size===3?1.40:1.60;trait.chainRatio=size===2?.70:size===3?.75:.80;trait.extraChain=size>=4?1:0;}
   }else if(u.hero==='star_boy'||u.hero==='time_ruler'){
     const age=Math.max(0,s.wave-(u.birthWave??s.wave)),star=u.hero==='star_boy';
     trait.damageMultiplier=star?(age===0?1.5:age===1?1:.75):(age===0?.75:age===1?1:1.25);
@@ -199,7 +205,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
     Object.assign(trait,{key:'last-quarter',active,speedBonus:active?.4:0,label:active?'마지막 구간 · 공속 +40%':'마지막 구간 대기'});
   }else if(u.hero==='flame_sage')Object.assign(trait,{key:'wildfire',active:true,zoneDamageMultiplier:1.3,zoneRadiusMultiplier:1.3,zoneDurationMultiplier:1.3,label:'경로 위 무작위 · 화염장 +30%'});
   else if(u.hero==='avalanche_maid')Object.assign(trait,{key:'random-target',active:true,label:'무작위 표적 고정 · 기본 위력 +50%'});
-  else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,label:'일반 적 명중마다 즉사 1%'});
+  else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,executeChance:stormExecuteChance(s,u.rank),label:`일반 적 명중마다 즉사 ${pctText(stormExecuteChance(s,u.rank))}`});
   else if(u.hero==='underdog'){const active=s.deck.every(id=>HERO[id].rarity==='C'&&!HERO[id].hidden);Object.assign(trait,{key:'underdog',active,damageMultiplier:active?1+UNDERDOG.bonus:1,label:active?`노멀 덱 · 위력 +${Math.round(UNDERDOG.bonus*100)}%`:'노멀 덱 대기'});}
   else if(u.hero==='sunflower'){const n=Math.min(SUNFLOWER.max,s.sunlight||0);Object.assign(trait,{key:'sunlight',active:n>0,sunlight:n,radius:SUNFLOWER.radius[n],label:n?`햇빛 ${n}/${SUNFLOWER.max} · 폭발 반경 ${SUNFLOWER.radius[n]}`:`햇빛 0/${SUNFLOWER.max} · 폭발 없음`});}
   else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:`${JOKER_NAMES[color]} · 필살기로 무작위 변경`});}
@@ -228,7 +234,7 @@ export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*3}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`,behemoth:`오라 2배`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*2}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 반경 ${Number((CRUSH.radius*(1+level*CRUSH.trainingRadius)).toFixed(3))}`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -240,7 +246,7 @@ const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed
 export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
   const trait={snow_rabbit:[['40%',slow(.4)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
-    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],joker:[['20%',slow(.2)]]}[id]||[];
+    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
     siren:[['10초',sec(10)]],ancient_dragon:[['10초',sec(10)]],silver_rabbit:[['8초',sec(8)]],santa:[['8초',sec(8)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(10)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]],
@@ -257,7 +263,8 @@ export function givenEffects(s,u,index){
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
   else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText((.7+level*.05)*k*rankControl(u.rank))}`);
   else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
-  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?.4+level*.03:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
+  else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
+  else if(u.hero==='storm_sage')out.push(`일반 적 명중마다 즉사 ${pctText(stormExecuteChance(s,u.rank))}`);
   else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
   else if(u.hero==='luna')out.push(`처형 기준 체력 ${pctText(executeThreshold(null,s))}`);
   else if(u.hero==='behemoth')out.push('오라 2배');
@@ -513,7 +520,7 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
     addGauge(s,(e.boss?15:1.3)+e.divine*(e.boss?DIVINE_BOSS_GAUGE:DIVINE_GAUGE));
     // A frozen enemy that falls spreads the witch's cold; Winter Court freezes nearby foes.
     if(e.freeze>0&&s.board.some(u=>u?.hero==='frost_witch'))for(const t of around(s,e,90))addSlow(s,t,sourceKey('attack','frost_witch',e.uid),.4,2);
-    if(s.buffs.winter>0)for(const t of around(s,e,120))if(!t.boss)addControl(s,t,'freeze',sourceKey('skill','frost_witch',e.uid),'frost_witch',.8*buffScale(s,'winter'));
+    if(s.buffs.winter>0)for(const t of around(s,e,120))if(!t.boss)addControl(s,t,'freeze',sourceKey('skill','frost_witch',e.uid),'frost_witch',WINTER_COURT.killFreeze);
     if(has(s,'ember')&&e.burn>0&&!freshSpreads(s).has(e.uid))spreadBurn(s,e);
     event(s,'kill',{...pathPoint(e.progress),kind:e.kind,boss:e.boss,color:HERO[hero]?.color,divine:e.divine});
   }
@@ -523,7 +530,7 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
 function normalHit(s,e,value,shot,options={},seen){
   if(shot.hero==='storm_sage'&&shot.proc!==false&&e.hp>0&&!e.boss&&e.kind!=='boss'&&!seen.has(e.uid)){
     seen.add(e.uid);
-    if(random(s)<.01){
+    if(random(s)<stormExecuteChance(s,shot.rank)){
       const shieldDamage=e.shield||0,actual=damage(s,e,0,shot.hero,{instant:true});
       event(s,'instantKill',{uid:e.uid,hero:shot.hero,...pathPoint(e.progress),damage:actual,shieldDamage});return actual;
     }
@@ -557,7 +564,7 @@ function addSlow(s,e,source,amount,duration){
   syncSlows(s,e);
 }
 function slowTargets(s,targets,hero,amount,point,source,rank=1){
-  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?.4+level*.03:.4,slow=base*rankControl(rank);
+  const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow:.4,slow=base*rankControl(rank);
   for(const t of targets)addSlow(s,t,source,slow,2.4);
   if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*RV.tide.splash*relicScaleIn(s,'tide'),hero.id);event(s,'tide',{...point});}
 }
@@ -762,7 +769,7 @@ export function cast(s,id){
   else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,8*control,'festive');}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control,'radiance');for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control,'trauma');}
-  else if(type==='ice_court'){const winter=skillDuration(s,6*control);strike(9);for(const e of targets)if(e.hp>0){addSlow(s,e,source,.5,6);addStatus(s,e,'exposure',source,id,WINTER_EXPOSURE,winter);}s.buffs.winter=winter;}
+  else if(type==='ice_court'){const winter=winterDuration(s,u);strike(9);for(const e of targets)if(e.hp>0){addSlow(s,e,source,WINTER_COURT.slow*scale,winter);addStatus(s,e,'exposure',source,id,WINTER_EXPOSURE,winter);}s.buffs.winter=winter;}
   else if(type==='harmony')s.buffs.harmony=skillDuration(s,ULT_BUFF.harmony.seconds*control,'harmony');
   else if(type==='royal'||type==='starfall'||type==='mirror'){
     const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?5:FINISHER_DELAY;
@@ -770,7 +777,7 @@ export function cast(s,id){
     s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?12:.4*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,ratio:mirrorRatio(s,u)}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
-  else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,2*control*scale);addSlow(s,e,source,.5,6);}}
+  else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,SNOW_RABBIT.freeze*control*scale);addSlow(s,e,source,SNOW_RABBIT.skillSlow*scale,SNOW_RABBIT.seconds);}}
   else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.controlTime>0?12:4),id);addSlow(s,e,source,.5,4);}}
   else if(type==='dragon'){
     // Dragon Breath lands on the densest pack (radius 180) instead of the whole field.
@@ -822,7 +829,7 @@ export function cast(s,id){
     s.bombs.push(bomb);event(s,'bombSet',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress)});
     stunUnit(s,s.board.indexOf(u),APPLEBOMB.stun);
   }
-  else if(type==='crush'){visualTargets=[];for(let i=0;i<CRUSH.hits;i++){const life=CRUSH.first+i*CRUSH.gap;s.volleys.push({uid:s.nextId++,source:u.uid,hero:id,kind:'crush',phase:i,rank:u.rank,damage:base*CRUSH.factor,life,total:life,...(i===CRUSH.hits-1?{echo:{}}:{})});}}
+  else if(type==='crush'){visualTargets=[];const radius=crushRadius(s);for(let i=0;i<CRUSH.hits;i++){const life=CRUSH.first+i*CRUSH.gap;s.volleys.push({uid:s.nextId++,source:u.uid,hero:id,kind:'crush',phase:i,rank:u.rank,radius,damage:base*CRUSH.factor,life,total:life,...(i===CRUSH.hits-1?{echo:{}}:{})});}}
   else if(type==='requiem'){
     const points=targets.filter(e=>e.hp>0).map(e=>({...pathPoint(e.progress),uid:e.uid,cleared:clearEnemyDebuffs(s,e)}));
     strike(REQUIEM.factor);
@@ -927,9 +934,9 @@ export function castPreview(s,id){
     lines.push(`${dur(10,'trauma')} 동안 시간의마술사가 변신해 위력 110%, 공격 속도 35%가 오릅니다.`);
   }else if(type==='ice_court'){
     lines.push(`적 전체에게 위력 9배, ${hit(9)}를 줍니다.`);
-    lines.push(`적은 6초 동안 ${pct(slowOf(.5))}% 느려집니다.`);
+    lines.push(`적은 ${sec(winterDuration(s,u))} 동안 ${pctText(slowOf(WINTER_COURT.slow*scale))} 느려집니다.`);
     lines.push(`겨울 동안 적이 받는 피해가 ${pct(WINTER_EXPOSURE)}% 늘어납니다.`);
-    lines.push(`겨울은 ${dur(6)} 동안 이어지고, 쓰러진 적 주변 120 안의 일반 적이 ${sec(.8*scale)} 동안 얼어붙습니다.`);
+    lines.push(`겨울은 ${sec(winterDuration(s,u))} 동안 이어지고, 쓰러진 적 주변 120 안의 일반 적이 ${sec(WINTER_COURT.killFreeze)} 동안 얼어붙습니다.`);
   }else if(type==='harmony'){
     const level=s.upgrades.harmonious||0,field=control*scale;
     lines.push(`${dur(ULT_BUFF.harmony.seconds,'harmony')} 동안 모든 동료의 위력 ${pct((ULT_BUFF.harmony.power+level*.02)*field)}%, 공격 속도 ${pct((ULT_BUFF.harmony.speed+level*.02)*field)}%가 오릅니다.`);
@@ -948,7 +955,7 @@ export function castPreview(s,id){
   }else if(type==='freeze'){
     const freeze=2*control*scale;
     lines.push(`적 전체에게 위력 3배, ${hit(3)}를 줍니다.`);
-    lines.push(`일반 적은 ${sec(freeze)} 동안 얼고 6초간 ${pct(slowOf(.5))}% 느려집니다. 보스는 ${sec(freeze*BOSS_CONTROL_SCALE)} 동안 얼습니다.`);
+    lines.push(`일반 적은 ${sec(freeze)} 동안 얼고 6초간 ${pctText(slowOf(SNOW_RABBIT.skillSlow*scale))} 느려집니다. 보스는 ${sec(freeze*BOSS_CONTROL_SCALE)} 동안 얼습니다.`);
   }else if(type==='avalanche'){
     const on=targets.filter(e=>snapshot(e).controlTime>0).length;
     if(!targets.length||on===0)lines.push(`적에게 위력 4배, ${hit(4)}를 줍니다. 기절하거나 얼어 있으면 ${hit(12)}입니다.`);
@@ -1049,7 +1056,7 @@ export function castPreview(s,id){
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
     lines.push(s.edictWave===s.wave?'이번 웨이브의 수입 증가는 이미 적용됐습니다.':'이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다.');
   }else if(type==='crush'){
-    lines.push(`무작위 적 주변(반경 ${CRUSH.radius})에 ${hit(CRUSH.factor)}를 ${CRUSH.gap}초 간격으로 ${CRUSH.hits}번 줍니다.`);
+    lines.push(`무작위 적 주변(반경 ${Number(crushRadius(s).toFixed(3))})에 ${hit(CRUSH.factor)}를 ${CRUSH.gap}초 간격으로 ${CRUSH.hits}번 줍니다.`);
     if(targets.length===1)lines.push(`적이 하나뿐이면 모두 그 적에게 들어갑니다(합계 ${hit(CRUSH.factor*CRUSH.hits)}).`);
   }else if(type==='bigshow'){
     lines.push(`적 전체에게 위력 ${UNDERDOG.factor}배, ${hit(UNDERDOG.factor)}를 줍니다.`);
@@ -1279,8 +1286,8 @@ export function step(s,dt){
       const alive=s.enemies.filter(e=>e.hp>0);
       if(alive.length){
         const centre=alive[Math.floor(random(s)*alive.length)],at=pathPoint(centre.progress),echo=s.volleys.find(x=>x.kind==='crush'&&x.source===v.source&&x.echo&&(x===v||x.life>0)),points=[];
-        for(const e of alive){const p=pathPoint(e.progress);if(Math.hypot(p.x-at.x,p.y-at.y)>CRUSH.radius)continue;const dealt=damage(s,e,v.damage,v.hero);points.push({...p,uid:e.uid});if(echo&&dealt>0)echo.echo[e.uid]=(echo.echo[e.uid]||0)+dealt;}
-        event(s,'crushPhase',{hero:v.hero,phase:v.phase,rank:v.rank,x:at.x,y:at.y,radius:CRUSH.radius,targets:points});
+        for(const e of alive){const p=pathPoint(e.progress);if(Math.hypot(p.x-at.x,p.y-at.y)>v.radius)continue;const dealt=damage(s,e,v.damage,v.hero);points.push({...p,uid:e.uid});if(echo&&dealt>0)echo.echo[e.uid]=(echo.echo[e.uid]||0)+dealt;}
+        event(s,'crushPhase',{hero:v.hero,phase:v.phase,rank:v.rank,x:at.x,y:at.y,radius:v.radius,targets:points});
       }
       if(v.echo&&has(s,'twin'))for(const [uid,dealt] of Object.entries(v.echo))echoFinisher(uid,dealt);
     }else{
@@ -1398,7 +1405,9 @@ export function restore(raw){
     if(!Array.isArray(s.zones)||s.zones.length>ZONE_CAP||s.zones.some(z=>!id(z?.uid)||!id(z.source)||z.source>=s.nextId||!s.deck.includes(z.hero)||!numeric(z,['rank','damage','x','y','radius','life','total','tick'])||!Number.isInteger(z.rank)||z.rank<1||z.rank>MAX_RANK||z.damage<0||z.x<GROUND_BOUNDS.left||z.x>GROUND_BOUNDS.right||z.y<GROUND_BOUNDS.top||z.y>GROUND_BOUNDS.bottom||z.radius<=0||z.radius>720||z.total<=0||z.total>30||z.life<=0||z.life>z.total||z.tick<-.05||z.tick>.5+1e-9||typeof z.orbit!=='boolean'))return null;
     const echoOk=v=>v.echo===undefined||!!(v.echo&&typeof v.echo==='object'&&!Array.isArray(v.echo)&&Object.keys(v.echo).length<=200&&Object.entries(v.echo).every(([k,d])=>id(Number(k))&&Number.isFinite(d)&&d>=0));
     const dreamOk=v=>v.hero==='rumi'&&v.kind==='dream'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<RUMI_DREAM.phases.length&&Number.isInteger(v.rank)&&v.rank>=RUMI_DREAM.rank&&v.rank<=MAX_RANK&&v.total<=3;
-    const crushOk=v=>v.hero==='behemoth'&&v.kind==='crush'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<CRUSH.hits&&Number.isInteger(v.rank)&&v.rank>=1&&v.rank<=MAX_RANK&&v.total<=CRUSH.first+2*CRUSH.gap+.01;
+    // Pending pre-patch shocks already committed to their old radius; do not shrink them on resume.
+    for(const v of s.volleys||[])if(v?.kind==='crush'&&v.radius===undefined)v.radius=150;
+    const crushOk=v=>v.hero==='behemoth'&&v.kind==='crush'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<CRUSH.hits&&Number.isInteger(v.rank)&&v.rank>=1&&v.rank<=MAX_RANK&&v.total<=CRUSH.first+2*CRUSH.gap+.01&&[150,...Array.from({length:6},(_,level)=>CRUSH.radius*(1+level*CRUSH.trainingRadius))].some(radius=>Number.isFinite(v.radius)&&Math.abs(radius-v.radius)<1e-8);
     if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length+CRUSH.hits*CRUSH.queue||s.volleys.filter(v=>v?.kind==='dream').length>RUMI_DREAM.phases.length||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.life<=0||v.life>v.total||!echoOk(v)||!(dreamOk(v)||crushOk(v))))return null;
     if(!Array.isArray(s.bombs)||s.bombs.length>16||s.bombs.some(b=>!id(b?.uid)||!numeric(b,['progress','damage'])||b.progress<0||b.progress>PATH_LENGTH||b.damage<0))return null;
     const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.volleys,...s.zones,...s.bombs].map(o=>o.uid);

@@ -12,13 +12,16 @@ sharp.cache(false); // Windows keeps cached files open and the rename then fails
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {ASSET_PATHS} from '../../src/content.js';
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..');
-const UNITS=path.join(repo,'defense/assets/merge/units');
+// Follow the actual game's atlas inventory, including transformations. Retained
+// pre-pass paintings may no longer be the installed art and must not be checked instead.
+const UNIT_FILES=new Map(Object.entries(ASSET_PATHS).filter(([id])=>id.startsWith('unit-')).map(([id,source])=>[id.slice(5),path.resolve(repo,'defense',source)]));
 export const CHECKED_BY_EYE=Object.freeze(['behemoth','queen','toffee_apple','venom']);
 const skin=(r,g,b)=>r>190&&g>130&&b>100&&r-b>28&&r-b<110&&r>=g&&g>=b-12;
 const cell=n=>({left:(n%2)*512,top:Math.floor(n/2)*512,width:512,height:512});
-const ids=()=>fs.readdirSync(UNITS).filter(f=>f.endsWith('.webp')).map(f=>f.replace('.webp','')).sort();
-const rgba=async(id,n)=>sharp(path.join(UNITS,id+'.webp')).extract(cell(n)).ensureAlpha().raw().toBuffer();
+const ids=()=>[...UNIT_FILES.keys()].sort();
+const rgba=async(id,n)=>sharp(UNIT_FILES.get(id)).extract(cell(n)).ensureAlpha().raw().toBuffer();
 export async function facingScore(id,n){
   const data=await rgba(id,n);
   let top=512,bottom=0;
@@ -42,11 +45,11 @@ export async function notMirrored(){
   return out;
 }
 async function rebuild(id,cells){
-  const file=path.join(UNITS,id+'.webp');
+  const file=UNIT_FILES.get(id);if(!file)throw new Error('Unknown installed unit '+id);
   const base=await sharp({create:{width:1024,height:1024,channels:4,background:{r:0,g:0,b:0,alpha:0}}}).composite(cells.map((input,n)=>({input,left:(n%2)*512,top:Math.floor(n/2)*512}))).png().toBuffer();
   await sharp(base).webp({quality:95,alphaQuality:100,effort:6}).toFile(file+'.tmp');fs.renameSync(file+'.tmp',file);
 }
-const parts=async id=>Promise.all([0,1,2,3].map(n=>sharp(path.join(UNITS,id+'.webp')).extract(cell(n)).png().toBuffer()));
+const parts=async id=>Promise.all([0,1,2,3].map(n=>sharp(UNIT_FILES.get(id)).extract(cell(n)).png().toBuffer()));
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const arg=name=>process.argv.includes(name)?process.argv[process.argv.indexOf(name)+1].split(','):[];
   for(const id of arg('--fix')){const [c0,c1,c2,c3]=await parts(id);await rebuild(id,[c0,c1,c3,c2]);console.log('swapped left/right cells of',id);}
