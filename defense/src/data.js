@@ -58,7 +58,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 261,
-        "y": 205,
+        "y": 213,
         "size": 250
       }
     },
@@ -800,7 +800,7 @@ export const HEROES = [
       "directional": true,
       "portrait": {
         "x": 253,
-        "y": 199,
+        "y": 207,
         "size": 250
       }
     },
@@ -948,7 +948,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 248,
+        "x": 255,
         "y": 207,
         "size": 250
       }
@@ -1060,7 +1060,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 255,
+        "x": 262,
         "y": 225,
         "size": 250
       }
@@ -1208,7 +1208,7 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 254,
+        "x": 261,
         "y": 227,
         "size": 250
       }
