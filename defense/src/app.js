@@ -295,10 +295,12 @@ function hideSkillTip(){tipFor=null;document.getElementById('skill-tip')?.remove
 // sees its own pointerup, so a release anywhere closes the peek too.
 for(const type of ['pointerup','pointercancel'])document.addEventListener(type,()=>{clearTimeout(skillHold);document.querySelector('.skill-button.holding')?.classList.remove('holding');hideSkillTip();},true);
 // ⓘ on the unit card: every number and text for the selected companion.
+// Companions whose given effect is only the live number already coloured in the trait text (no neighbour count or gold).
+const TRAIT_TOKEN_ONLY=new Set(['luna','storm_sage','snow_rabbit','time_ruler','phantom','galaxy_whale','frost_witch','great_detective','guardian','behemoth']);
 function unitInfo(){
   const u=run?.board[selected];if(!u)return;const given=E.givenEffects(run,u,selected),detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=HERO[u.hero],flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
   // The trait keeps its full text (every condition) with this unit's live numbers; what it does right now follows as chips.
-  const preview=E.castPreview(run,u.hero),now=[...(trait.label?[u.hero==='lightning_sage'&&trait.active?`${trait.label} · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:trait.label]:[]),...given.filter(g=>g!==trait.label)];
+  const preview=E.castPreview(run,u.hero),now=[...(trait.label?[u.hero==='lightning_sage'&&trait.active?`${trait.label} · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:trait.label]:[]),...(u.cursed||!TRAIT_TOKEN_ONLY.has(u.hero)?given.filter(g=>g!==trait.label):[])];
   show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${SHAPE_TEXT[h.shape]||''}</b></span></div>
     <div class="ability"><span class="ability-tag">특성</span><p>${liveText(h.trait.text,E.liveTraitTokens(run,u))}</p>${now.length?`<div class="unit-buffs given"><em>지금</em>${now.map(b=>`<span class="chip">${escapeText(b)}</span>`).join('')}</div>`:''}</div><div class="ability"><span class="ability-tag skill">필살기 · ${h.skill.name}${preview?` · ${preview.rank}성 사용`:''}</span>${(preview?.lines||[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>
     <div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.length?bonuses.map(b=>`<span class="chip">${b}</span>`).join(''):'<span class="unit-none">없음</span>'}</div><p class="fineprint">훈련 ${run.upgrades[u.hero]}/5 · ${h.role}</p>`,
