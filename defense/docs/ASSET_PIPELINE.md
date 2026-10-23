@@ -4,7 +4,7 @@
 
 2026-10-23 추가: 사용자 승인 Sol SD 8명과 새 VFX를 적용했다. [적용·판단·확장 기록](SOL_ASSET_AND_VFX.md), [실제 렌더러 전후 비교](review/sol-vfx/index.html)를 함께 본다. 이 작업은 내장 `image_gen`과 native alpha를 사용했다. 아래의 나노바나나·자홍 키 배경 절차를 Sol 승인본에 소급 적용하거나, 이미 검수한 SD를 다시 생성하지 않는다.
 
-새 동료, 메모리얼, 이펙트, 배경, 음악·효과음을 만들 때 따르는 절차와 지금까지의 시행착오를 정리한 문서다(2026-10-18, 9차에서 작성). 도구는 `defense/scripts/art`, `defense/scripts/sound`에 있다. 머리 기준 원칙의 배경은 `defense/docs/art/HEAD_CONSISTENCY_RESEARCH.md`와 `HEAD_PROFILE.json`을 본다.
+새 동료, 메모리얼, 이펙트, 배경, 음악·효과음을 만들 때 따르는 절차와 지금까지의 시행착오를 정리한 문서다(2026-10-18, 9차에서 작성). 도구는 `defense/scripts/art`, `defense/scripts/sound`에 있다. 머리 기준값은 `defense/docs/art/HEAD_PROFILE.json`에 있다. 배경 연구 문서 `HEAD_CONSISTENCY_RESEARCH.md`는 옛 Defense 정리(#626) 때 삭제되어 `45dedc6` 이전 Git 기록에서만 볼 수 있다.
 
 ## 0. 원칙 (중요한 순서)
 

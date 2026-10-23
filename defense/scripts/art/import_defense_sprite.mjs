@@ -46,6 +46,6 @@ export async function importSprite(input, output) {
   return { width: info.width, height: info.height };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  if (process.argv.length !== 4) throw new Error('Usage: node scripts/import_defense_sprite.mjs input.png output.webp');
+  if (process.argv.length !== 4) throw new Error('Usage: node defense/scripts/art/import_defense_sprite.mjs input.png output.webp');
   console.log(await importSprite(process.argv[2], process.argv[3]));
 }
