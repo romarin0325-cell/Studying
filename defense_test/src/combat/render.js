@@ -2,10 +2,11 @@ import {HERO,ASSET_PATHS,BOSSES,CHAPTERS,TRANSFORM_ART} from '../content.js';
 import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm,topCinderella} from './engine.js';
 import {CombatFX,drawAttackRange,isUR} from './effects.js';
 import {COMPANION_VISUALS} from './companion-vfx.js';
+import {RUNTIME_ASSET_PATHS} from '../asset-policy.js';
 
 export class Art {
   constructor(){this.images={};this.failed=[];this.ready=this.load();}
-  async load(){await Promise.all(Object.entries(ASSET_PATHS).map(([id,path])=>new Promise(resolve=>{
+  async load(){await Promise.all(Object.entries(RUNTIME_ASSET_PATHS).map(([id,path])=>new Promise(resolve=>{
     const image=new Image();let finished=false;
     const done=(ok)=>{if(finished)return;finished=true;clearTimeout(timer);if(ok)this.images[id]=image;else this.failed.push(id);resolve();};
     const timer=setTimeout(()=>done(false),4500);image.onload=()=>done(image.naturalWidth>0);image.onerror=()=>done(false);

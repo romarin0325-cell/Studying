@@ -7,6 +7,9 @@ import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
+import {loadImagePack} from '../scripts/image-pack.mjs';
+import {BUILD_ONLY_ATLASES,RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
+import {Art} from '../src/combat/render.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
   assert.equal(Object.keys(ASSET_PATHS).length,70);
@@ -34,4 +37,36 @@ test('every unit faces outward: the left cell looks left, the right cell is its 
   const {reversedUnits,notMirrored}=await import('../scripts/art/check-facing.mjs');
   assert.deepEqual(await reversedUnits(),[],'a left/right cell pair that faces the wrong way');
   assert.deepEqual(await notMirrored(),[],'a right cell that is not the mirror view of the left cell');
+});
+
+test('optimized images preserve the source pack, codec, alpha and sprite geometry',async()=>{
+  const {manifest,read}=await loadImagePack();
+  assert.ok(manifest.totals.outputBytes<manifest.totals.deployableSourceBytes);
+  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','relics','relics-expansion','relics-new']);
+  for(const image of manifest.images){
+    if(image.id.startsWith('atlas:unit-')){
+      const m=await sharp(read(image.source)).metadata();
+      assert.equal(m.width,640,image.id);assert.equal(m.height,640,image.id);assert.equal(m.hasAlpha,true,image.id);
+      assert.notEqual(image.output.path,image.source,'both pre-pass and optimized files must exist');
+    }
+    if(image.profile===null)assert.equal(image.output,null,'build-only atlases must not gain a deployed copy');
+  }
+});
+
+test('battle preload requests exactly the runtime pack, without build-only file fallbacks',async()=>{
+  const requests=[],previousWindow=globalThis.window,previousImage=globalThis.Image;
+  try{
+    globalThis.window={__ASTRA_ASSETS__:Object.fromEntries(Object.keys(RUNTIME_ASSET_PATHS).map(id=>[id,'embedded:'+id]))};
+    globalThis.Image=class{
+      naturalWidth=640;
+      set src(value){requests.push(value);queueMicrotask(()=>this.onload());}
+    };
+    const art=new Art();await art.ready;
+    assert.deepEqual(requests.sort(),Object.keys(RUNTIME_ASSET_PATHS).map(id=>'embedded:'+id).sort());
+    assert.deepEqual(art.failed,[]);
+    for(const id of Object.keys(BUILD_ONLY_ATLASES))assert.equal(art.images[id],undefined);
+  }finally{
+    if(previousWindow===undefined)delete globalThis.window;else globalThis.window=previousWindow;
+    if(previousImage===undefined)delete globalThis.Image;else globalThis.Image=previousImage;
+  }
 });

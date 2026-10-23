@@ -11,8 +11,11 @@ import {createBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {COMPANION_VISUALS} from '../src/combat/companion-vfx.js';
 import {gameRoot} from './local-inputs.mjs';
+import {loadImagePack} from './image-pack.mjs';
+import {RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
 const out=path.join(gameRoot,'test-results/sol-release');await fs.mkdir(out,{recursive:true});
 const ids=Object.keys(COMPANION_VISUALS),selection=JSON.parse(await fs.readFile(path.join(gameRoot,'docs/art/sol-20261023/selection.json')));
+const optimized=await loadImagePack();
 const filterAt=process.argv.indexOf('--heroes'),filter=filterAt>=0?process.argv[filterAt+1].split(','):null;
 const browser=await chromium.launch(),errors=[],network=[],cases=[],NOW=Date.now();
 function profile(deck,active=false){
@@ -47,7 +50,7 @@ try{
   for(const [theme,name] of [['night','StarGardenDefense.html'],['bright','StarGardenDefenseBright.html']]){
     const file=path.join(gameRoot,'dist',name),html=await fs.readFile(file,'utf8');
     const begin=html.indexOf('window.__ASTRA_ASSETS__=')+'window.__ASTRA_ASSETS__='.length,end=html.indexOf(';window.__GARDEN_MEDIA__=',begin),embedded=JSON.parse(html.slice(begin,end));
-    assert.equal(Object.keys(embedded).length,70);for(const a of selection.assets)assert.equal(createHash('sha256').update(Buffer.from(embedded['unit-'+a.id].split(',')[1],'base64')).digest('hex'),a.sha256,theme+' '+a.id+' embedded selection');
+    assert.equal(Object.keys(embedded).length,Object.keys(RUNTIME_ASSET_PATHS).length);for(const a of selection.assets){const source='./assets/merge/units/'+a.id+'.webp',entry=optimized.manifest.images.find(i=>i.source===source);assert.equal(entry.original.sha256,a.sha256,a.id+' preserved selection');assert.equal(createHash('sha256').update(Buffer.from(embedded['unit-'+a.id].split(',')[1],'base64')).digest('hex'),entry.output.sha256,theme+' '+a.id+' optimized selection');}
     if(!filter){const deck=[...ids.slice(0,4),'zeke'],lobby=await boot(file,profile(deck));
     await capture(lobby.page,theme+'-home');await lobby.page.locator('[data-nav="collection"]').click();
     for(const id of ids){
