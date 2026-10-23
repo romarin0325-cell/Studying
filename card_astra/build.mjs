@@ -1,0 +1,67 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.dirname(fileURLToPath(import.meta.url));
+const shared = path.join(root, '../card');
+const game = path.join(shared, 'game');
+const readShared = name => fs.readFile(path.join(shared, name), 'utf8');
+const read = name => fs.readFile(path.join(root, name), 'utf8');
+const source = await fs.readFile(path.join(game, 'index.html'), 'utf8');
+// The original data and mechanics remain the single source of truth. No runtime
+// fetch, dynamic loader, CDN or ES module is required by the exported file.
+function between(start, end) {
+  const a = source.indexOf(start);
+  const b = source.indexOf(end, a + start.length);
+  if (a < 0 || b < 0) throw new Error(`Card view contract changed: ${start}`);
+  return source.slice(a, b);
+}
+const scripts = [...source.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+if (scripts.length !== 2 || !scripts[1][1].includes('const RPG =')) {
+  throw new Error('Card controller contract changed; review the DREAMWEAVER builder.');
+}
+const dependencies = ['data.js', 'vocab_data.js', 'collocation_data.js', 'grammar_data.js',
+  'toeic.js', 'toeic_explanations.js', 'api.js', 'logic.js', 'skill_display.js', 'card_pool_rules.js', 'battle_runtime.js',
+  'rpg_features.js', 'card_pool_view.js', 'listening_data.js', 'fortune_cookie.js', 'music_data.js', 'music_player.js'];
+const inline = code => `<script>${code.replace(/<\/script/gi, '<\\/script')}</script>`;
+const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(game, name), 'utf8')));
+const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
+const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
+const cardPoolCSS = await fs.readFile(path.join(game, 'card_pool_editor.css'), 'utf8');
+let theme = await readShared('src/astra.css') + '\n' + await readShared('src/mobile.css') + '\n' + await readShared('src/themes.css') + '\n' + await readShared('src/polish.css') + '\n' + await read('src/edition.css');
+// Replace the decorative Jua face with the local, licensed variable body face.
+theme = theme.replace(/@font-face\s*\{[^}]*DreamJua[^}]*\}/g, '');
+const themeCards = {};
+const assetTypes = {'.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf','.webp':'image/webp','.woff2':'font/woff2'};
+const encodeAsset = async file => {
+  file = ({'observatory.png':'observatory.webp','magical-sanctuary.png':'magical-sanctuary.webp','magical-card.png':'magical-card.webp'})[file] || file;
+  const mime = assetTypes[path.extname(file)];
+  if (!mime || path.basename(file) !== file) throw new Error(`Unsupported inline asset: ${file}`);
+  const bytes = await fs.readFile(path.join(root, 'assets', file)).catch(error => {
+    if (error.code !== 'ENOENT') throw error;
+    return fs.readFile(path.join(shared, 'assets', file));
+  });
+  // Git may check out SVG text with CRLF on Windows; normalize before encoding.
+  const stableBytes = mime === 'image/svg+xml' ? Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n')) : bytes;
+  return `data:${mime};base64,${stableBytes.toString('base64')}`;
+};
+for (const [key,file] of [['astra','card-back-astra.svg'],['strawberry','magical-card.png'],['dreamsky','dreamsky-card.svg']]) themeCards[key] = await encodeAsset(file);
+for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+)"\)/g)) {
+  theme = theme.replaceAll(reference, `url("${await encodeAsset(file)}")`);
+}
+const parts = {
+  STYLES: `<style>/* Bundled Noto Sans KR font license:\n${await read('assets/NotoSansKR-OFL.txt')}\n*/\n${css}\n${musicCSS}\n${cardPoolCSS}\n${theme}</style>`,
+  OTHER_SCREENS: between('<div id="screen-factory-draft"', '<div id="screen-collection"')
+    + between('<div id="screen-chaos-roulette"', '<div id="screen-battle"'),
+  MODALS: between('<div id="modal-mode-select"', '<script>').replace(between('<div id="modal-card"', '<div id="modal-form-choice"'), '')
+    + between('<!-- Fortune Cookie Modal -->', '</body>'),
+  SCRIPTS: inline(`window._scriptLoadErrors=[];window._scriptLoadComplete=true;window.DREAMWEAVER_THEME_CARDS=${JSON.stringify(themeCards)};`)
+    + code.map(inline).join('\n') + inline(scripts[1][1]) + inline(await readShared('src/astra.js')) + inline(await read('src/edition.js'))
+};
+let html = await read('src/shell.html');
+for (const [key, value] of Object.entries(parts)) html = html.replace(`{{${key}}}`, () => value);
+if (/\{\{[A-Z_]+\}\}/.test(html)) throw new Error('Unresolved build placeholder');
+await fs.mkdir(path.join(root, 'dist'), { recursive: true });
+html = html.replace(/[ \t]+$/gm, '');
+await fs.writeFile(path.join(root, 'dist/DREAMWEAVER-Astra.html'), html);
+console.log(`DREAMWEAVER: ${(Buffer.byteLength(html) / 1024 / 1024).toFixed(2)} MiB. Open dist/DREAMWEAVER-Astra.html; portraits/audio stay beside the HTML.`);

@@ -30,7 +30,9 @@
     "test:idle:combat": "node --test idle/tests/combat.test.mjs",
     "test:idle:analysis": "node --test idle/tests/analysis.test.mjs",
     "test:idle:browser": "node idle/tests/browser.mjs",
-    "simulate:idle": "node idle/scripts/simulate.mjs"
+    "simulate:idle": "node idle/scripts/simulate.mjs",
+    "build:card-astra": "node card_astra/build.mjs",
+    "test:card-astra": "node card_astra/tests/smoke.mjs"
   },
   "dependencies": {
     "playwright": "^1.59.1"

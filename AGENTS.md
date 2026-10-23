@@ -14,6 +14,7 @@ Functional correctness of the browser app is more important than refactoring or 
 
 ## Targets
 - `card/`: Card game (`card/dist/DREAMWEAVER.html`)
+- `card_astra/`: Refined Astra UI; shares `card/game`, `card/src/astra.js` and base styles (`card_astra/dist/DREAMWEAVER-Astra.html`). Build with `npm run build:card-astra`; focused browser check: `npm run test:card-astra`.
 - `card_claude/`: Claude UI comparison build of the card game; reads `card/game` and `card/assets` (`card_claude/dist/DREAMWEAVER-Claude.html`)
 - `shooter/`: Astral Bloom shooter (`shooter/dist/AstralBloom.html`)
 - `idle/`: Astral Companions idle game (`idle/dist/AstralCompanions.html`)

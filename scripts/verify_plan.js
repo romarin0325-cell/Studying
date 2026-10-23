@@ -236,6 +236,18 @@ function planCard(plan, files) {
   }
 }
 
+function planCardAstra(plan, files, currentFiles) {
+  const product = currentFiles.filter(file => file.startsWith('card_astra/') && !isDocumentation(file));
+  const inputs = product.filter(file => /^(?:card_astra\/(?:src|assets)\/|card_astra\/(?:build\.mjs|package\.json)$)/.test(file));
+  for (const file of product.filter(file => /\.(?:js|mjs)$/.test(file))) addNodeCheck(plan, 'card', file);
+  if (inputs.length) {
+    addStep(plan, makeStep('card:astra:build', 'card', 'Build the standalone Astra presentation', 'node', ['card_astra/build.mjs']));
+  }
+  if (inputs.length || product.some(file => file.startsWith('card_astra/tests/'))) {
+    addBrowserScript(plan, 'card', 'card:astra:smoke', 'Check Astra navigation, card paging, formation and combat', 'card_astra/tests/smoke.mjs');
+  }
+}
+
 function planShooter(plan, files, currentFiles) {
   const current = new Set(currentFiles);
   const shooterFiles = files.filter(file => file.startsWith('shooter/'));
@@ -517,7 +529,10 @@ function createPlan(changes, options = {}) {
   }
 
   const shouldPlan = game => !onlyGame ? ACTIVE_ROOT_GAMES.includes(game) : onlyGame === game;
-  if (shouldPlan('card')) planCard(plan, files);
+  if (shouldPlan('card')) {
+    planCard(plan, files);
+    planCardAstra(plan, files, currentFiles);
+  }
   if (shouldPlan('shooter')) planShooter(plan, files, currentFiles);
   if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
   if (shouldPlan('idle')) planIdle(plan, files, currentFiles);
@@ -538,6 +553,8 @@ function createPlan(changes, options = {}) {
   const mapped = new Set([
     ...files.filter(isVerificationPath),
     ...files.filter(file => ALL_GAMES.some(game => file.startsWith(game + '/'))),
+    ...files.filter(file => file.startsWith('card_astra/')),
+    ...files.filter(file => file.startsWith('card_deepseek/') && !currentFiles.includes(file)),
     ...files.filter(file => file.startsWith('scripts/verify_card_')),
     ...files.filter(file => file === 'scripts/verify_gemini_api_models.js'),
     ...files.filter(file => DEFENSE_TOOLS.has(file)),
