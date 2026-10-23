@@ -50,10 +50,10 @@
     }
   },
   "totals": {
-    "sourceBytes": 20964290,
-    "deployableSourceBytes": 19789420,
-    "outputBytes": 11900818,
-    "optimizedFiles": 148,
+    "sourceBytes": 23450750,
+    "deployableSourceBytes": 21852208,
+    "outputBytes": 12916320,
+    "optimizedFiles": 150,
     "derivedFiles": 144,
     "derivedOutputBytes": 3418204
   },
@@ -61,9 +61,9 @@
     {
       "id": "atlas:effects-sol-sweet",
       "source": "./assets/merge/effects-sol-sweet.webp",
-      "profile": "atlas",
+      "profile": null,
       "uses": [
-        "window.__ASTRA_ASSETS__.effects-sol-sweet; combat renderer / stage UI"
+        "Opaque Sol effect sprites, replaced in pass 15 by effects-companion-sweet; kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -76,25 +76,15 @@
           "codec": "webp"
         }
       },
-      "output": {
-        "path": "./assets/optimized/merge/effects-sol-sweet.webp",
-        "bytes": 165882,
-        "sha256": "4fbd6069824a8ecc3ca5a3e3ae2593c400bbd7939840f8376e661d3ab22fefeb",
-        "metadata": {
-          "width": 1024,
-          "height": 512,
-          "hasAlpha": true,
-          "codec": "webp"
-        }
-      },
-      "decision": "Separate smaller encoding; source preserved."
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
     },
     {
       "id": "atlas:effects-sol-twilight",
       "source": "./assets/merge/effects-sol-twilight.webp",
-      "profile": "atlas",
+      "profile": null,
       "uses": [
-        "window.__ASTRA_ASSETS__.effects-sol-twilight; combat renderer / stage UI"
+        "Opaque Sol effect sprites, replaced in pass 15 by effects-companion-twilight; kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -107,12 +97,126 @@
           "codec": "webp"
         }
       },
-      "output": {
-        "path": "./assets/optimized/merge/effects-sol-twilight.webp",
-        "bytes": 163912,
-        "sha256": "6d66e91a1a6a57d38b05e61ec88156268290c4b650070e60aac83d170aa1aaba",
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
+    },
+    {
+      "id": "atlas:effects-companion-sweet",
+      "source": "./assets/merge/effects-companion-sweet.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-companion-sweet; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 583920,
+        "sha256": "cee530aadc237c97264975d84381260d75d467947c5d8feed6232b798387cd7b",
         "metadata": {
           "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-companion-sweet.webp",
+        "bytes": 320616,
+        "sha256": "214db13d073a18ed985cca56beaf80be6422be29b88662a0ce14d0b8ff5b89b8",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:effects-companion-twilight",
+      "source": "./assets/merge/effects-companion-twilight.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-companion-twilight; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 546186,
+        "sha256": "2661f4fe79e5099b4f894463635a7d6305d7fb3c8f5f3d89535b07ca540b65de",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-companion-twilight.webp",
+        "bytes": 269418,
+        "sha256": "535fdb515ca9113b19af4cf2f835e410e74c298b662823379a928aec400164b9",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ultimates-extra-a",
+      "source": "./assets/merge/ultimates-extra-a.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ultimates-extra-a; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 740816,
+        "sha256": "c6b2990086a2cd89ba2e781d6b2a4a9305cf16bca153eb0c0327c3c6d9fed1c2",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ultimates-extra-a.webp",
+        "bytes": 418010,
+        "sha256": "b84d2b8dc8e7a13c59aeedbf3b4c798889eedda5aa318e45e5489697a6f4f127",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ultimates-extra-b",
+      "source": "./assets/merge/ultimates-extra-b.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ultimates-extra-b; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 615538,
+        "sha256": "3f788ce34f61b0a7c152d99a3ee4af480309e053e884fefee609f544b8e493af",
+        "metadata": {
+          "width": 768,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ultimates-extra-b.webp",
+        "bytes": 337252,
+        "sha256": "1b58772afddbcf7f3c8c35df259ceee864a1acaf35914e211cde0888f8cbf930",
+        "metadata": {
+          "width": 768,
           "height": 512,
           "hasAlpha": true,
           "codec": "webp"

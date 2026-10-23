@@ -1879,6 +1879,10 @@ export const TRANSFORM_ART = {
 export const ASSET_PATHS = {
   "effects-sol-sweet": "./assets/merge/effects-sol-sweet.webp",
   "effects-sol-twilight": "./assets/merge/effects-sol-twilight.webp",
+  "effects-companion-sweet": "./assets/merge/effects-companion-sweet.webp",
+  "effects-companion-twilight": "./assets/merge/effects-companion-twilight.webp",
+  "ultimates-extra-a": "./assets/merge/ultimates-extra-a.webp",
+  "ultimates-extra-b": "./assets/merge/ultimates-extra-b.webp",
   "unit-zeke": "./assets/cast-v2/zeke.webp",
   "unit-rumi": "./assets/cast-v2/rumi.webp",
   "unit-luna": "./assets/cast-v2/luna.webp",
