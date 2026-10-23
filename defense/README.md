@@ -31,9 +31,11 @@ node defense/scripts/serve.mjs
 
 루트 검증(`npm run verify`)은 이 게임의 관련 계약·브라우저 검증만 선택하고 다른 게임의 런타임 검증을 호출하지 않습니다. 캐릭터·유물·보스·그림 영역의 정의는 `src/data.js`, 원본 그림은 `assets/merge`와 `assets/moonlit`, 폰트와 SIL OFL 라이선스는 `assets/Jua-Regular.ttf`와 `assets/Jua-OFL.txt`에 있습니다. 빌드·보고서·테스트에서 다른 게임 폴더를 읽지 않습니다.
 
-선택기는 변경한 게임의 필요한 검사와 빌드만 수행합니다. 직접 빌드할 때는 `node defense/scripts/build.mjs` 한 번으로 일반판과 Bright를 함께 생성합니다. 이미 빌드했다면 같은 입력을 다시 빌드하지 않습니다. `--check` 또는 CI는 커밋한 두 파일과 현재 입력을 비교합니다.
+선택기는 변경한 게임의 필요한 검사와 빌드만 수행합니다. 직접 빌드할 때는 `node defense/scripts/build.mjs` 한 번으로 일반판과 Bright를 함께 생성합니다. 이미 빌드했다면 같은 입력을 다시 빌드하지 않습니다. CI는 정식 두 파일과 현재 입력을 비교합니다. `--solo`, `--compat`, `--web`, `--unlocked` 테스트 출력은 CI에서도 생성합니다. 명시적 `--check`는 지정한 출력의 비교 검사입니다.
 
-이미지나 압축 설정을 바꿀 때만 먼저 `node defense/scripts/optimize-images.mjs`를 실행해 별도 압축본과 경로·용도 목록을 갱신합니다. 원본 그림은 보존합니다. `build.mjs`는 압축본을 읽고 HTML과 `test-results/build-size-*.json`을 출력합니다. 일반 코드를 수정할 때 압축 팩을 다시 생성하지 않습니다.
+이미지나 압축 설정을 바꿀 때만 먼저 `node defense/scripts/optimize-images.mjs`를 실행해 별도 압축본과 경로·용도 목록을 갱신합니다. 원본 그림은 보존합니다. `build.mjs`는 정적 압축본과 `assets/optimized/ui/`의 초상화·전신·유물 아이콘·앨범 썸네일을 검증해 읽고 HTML과 `test-results/build-size-*.json`을 출력합니다. 일반 코드를 수정할 때 압축 팩을 다시 생성하지 않습니다. UI 자르기 좌표나 UI 프로필만 바꾸면 `node defense/scripts/optimize-images.mjs --derived-only`를 실행합니다.
+
+자동화에서 `node defense/scripts/build.mjs --solo --outdir <임시폴더>`처럼 출력 위치를 격리할 수 있습니다. `node --test defense/tests/build.test.mjs`는 빈 출력 폴더의 CI 테스트 빌드, 일반/Bright 비교 검사, 이미지 재인코딩 금지를 확인합니다.
 
 원본 수치·데이터·그림이 실제로 바뀔 때만 해당 `generated-reports.mjs` 보고서를 갱신합니다. 배포 압축만 바뀌는 작업에 밸런스 보고서 재생성을 요구하지 않습니다.
 
@@ -42,7 +44,7 @@ node defense/scripts/serve.mjs
 | 규칙·캐릭터·유물 | `src/content.js`, `src/data.js`, `src/combat/engine.js` |
 | 화면·테마 | `src/app.js`, `src/style.css`, `src/theme-bright.css`, `scripts/theme-bright.mjs` |
 | 원본·압축본 경로/용도/해시 | [ASSET_OPTIMIZATION.json](docs/ASSET_OPTIMIZATION.json) |
-| 압축 설정·대상 | `scripts/image-policy.mjs`, `scripts/optimize-images.mjs` |
+| 압축 설정·대상·UI 자르기/사용처 | `scripts/image-policy.mjs`, `scripts/optimize-images.mjs` |
 | 내장/preload 대상 | `src/asset-policy.js` |
 | 단일 HTML·용량 보고서 | `scripts/build.mjs` |
 | 메모리얼 선택/스토리 | `src/memorial-media.js`, `src/memorial.js` |
