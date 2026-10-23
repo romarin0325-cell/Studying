@@ -12,8 +12,8 @@ const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const fail=message=>{throw new Error(message);};
 const sameIds=(actual,expected)=>actual.length===expected.length&&actual.every((id,i)=>id===expected[i]);
 const heroIds=HEROES.map(hero=>hero.id).sort();
-if(heroIds.length!==31||!sameIds(Object.keys(catalog).sort(),heroIds))fail('The canonical media catalog must select exactly the thirty-one active heroes.');
-if(new Set(Object.values(catalog).map(media=>media.sourceFilename)).size!==31)fail('Each hero must select a distinct PNG original.');
+if(!sameIds(Object.keys(catalog).sort(),heroIds))fail('The canonical media catalog must match the active heroes.');
+if(new Set(Object.values(catalog).map(media=>media.sourceFilename)).size!==heroIds.length)fail('Each hero must select a distinct PNG original.');
 if(format.width*3!==format.height*2)fail('Memorial output must retain the full 2:3 portrait ratio.');
 
 const reproduce=new Set();let candidate=false;

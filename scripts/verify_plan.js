@@ -54,6 +54,7 @@ function currentChangePaths(changes) {
 }
 
 function isDocumentation(file) {
+  if (file === 'defense_test/docs/ASSET_OPTIMIZATION.json') return false;
   if (DEFENSE_ART_INPUTS.has(file)
     || file === 'survivor/assets/Jua-OFL.txt' || file === 'defense_test/assets/Jua-OFL.txt') return false;
   const lower = file.toLowerCase();
@@ -446,7 +447,7 @@ function planSurvivor(plan, files, currentFiles) {
 function planDefenseTest(plan, files, currentFiles) {
   const product = files.filter(file => file.startsWith('defense_test/') && !isDocumentation(file));
   if (!product.length) return;
-  const inputs = product.filter(file => /^defense_test\/(?:src\/|assets\/|index\.html$|package\.json$|scripts\/(?:build|local-inputs)\.mjs$)/.test(file));
+  const inputs = product.filter(file => /^defense_test\/(?:src\/|assets\/|index\.html$|package\.json$|docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|local-inputs|image-pack|image-policy|theme-bright)\.mjs$)/.test(file));
   const current = new Set(currentFiles);
   const direct = product.filter(file => current.has(file) && /^defense_test\/tests\/.*\.test\.mjs$/.test(file));
   const reportScripts = product.some(file => /^defense_test\/scripts\/(?:analyze|report-data|generated-reports)\.mjs$/.test(file));

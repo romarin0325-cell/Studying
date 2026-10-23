@@ -32,6 +32,15 @@ test('Star Garden is an isolated target with one build and no existing Defense c
   assert.deepEqual(dedicated.blocked, []);
 });
 
+test('Star Garden compression inventory and imported build helpers are deployment inputs', () => {
+  for (const file of ['defense_test/docs/ASSET_OPTIMIZATION.json','defense_test/scripts/image-policy.mjs','defense_test/scripts/image-pack.mjs','defense_test/scripts/theme-bright.mjs','defense_test/assets/optimized/merge/units/luna.webp']) {
+    const plan = createPlan(changes(file));
+    assert.deepEqual([...games(plan)], ['defense_test'], file);
+    assert.equal(plan.steps.filter(s => s.id === 'defense_test:build').length, 1, file);
+    assert.ok(!plan.browsers.length, file);
+  }
+});
+
 test('Star Garden docs, test-only and unknown paths keep the smallest safe boundary', () => {
   const docs = createPlan(changes('defense_test/README.md', 'defense_test/docs/UI_ASSET_RESEARCH.md'));
   assert.deepEqual(docs.steps, []);

@@ -1,10 +1,10 @@
 # 드림위버: 별빛 정원 — DREAMWEAVER 외전 디펜스 (Defense collection test)
 
-기존 Defense에서 필요한 30명 캐릭터, 9종 보스, 공격 형태, 배치·합성 전투와 그림을 한 번 복사해 시작한 독립 수집/성장 테스트 게임입니다. 데이터·에셋·폰트·전투 코드가 모두 이 폴더에 있으며, 향후 밸런스와 방향은 이 소스 트리에서 별도로 관리합니다.
+기존 Defense에서 출발해 현재 동료 39명과 보스 9종을 독립 관리하는 수집/성장 게임입니다. 데이터·에셋·폰트·전투 코드는 이 폴더에 있습니다. 현재 배포·압축·원본 보존 안내는 [단일 HTML 빌드](docs/SINGLE_HTML_OPTIMIZATION.md), 작업 규칙은 [AGENTS.md](AGENTS.md)를 봅니다.
 
 ## 바로 실행
 
-- `dist/StarGardenDefense.html`을 브라우저로 엽니다. 그림·음악 생성 코드·폰트·게임 코드가 포함된 오프라인 단일 파일입니다.
+- `dist/StarGardenDefense.html`(일반판) 또는 `dist/StarGardenDefenseBright.html`(Bright)를 브라우저로 엽니다. 그림·BGM·폰트·게임 코드가 포함된 오프라인 단일 파일입니다.
 - 초기 동료는 별똥별소년·눈토끼·밤토끼·세이렌·명탐정 각 1명이며 항상 5명을 편성합니다.
 - 새 전투는 그중 랜덤 3명으로 시작합니다. 위치 이동·교환·합성은 드래그로만 하며, 탭은 동료 정보를 표시합니다. 별빛 기본 최대치는 120이고, 별이슬 샘 레벨마다 1씩 늘어납니다.
 - 하단 메뉴: 홈 / 동료 / 모험 / 소환 / 파견.
@@ -20,20 +20,34 @@
 
 ```powershell
 npm ci
-node defense_test/scripts/generated-reports.mjs
-node defense_test/scripts/build.mjs
-node defense_test/scripts/serve.mjs
 npm run verify:plan
 npm run verify
+node defense_test/scripts/serve.mjs
 ```
 
 빌드 서버: http://127.0.0.1:4178/ . 폴더의 원본 `index.html`은 빌드 템플릿이므로 완성된 HTML로 실행합니다.
 
 루트 검증은 이 신규 게임의 관련 계약·브라우저 검증만 선택합니다. 활성 Defense나 다른 게임의 런타임 검증을 호출하지 않습니다. 캐릭터·유물·보스·그림 영역의 정의는 `src/data.js`, 원본 그림은 `assets/merge`와 `assets/moonlit`, 폰트와 SIL OFL 라이선스는 `assets/Jua-Regular.ttf`와 `assets/Jua-OFL.txt`에 있습니다. 빌드·보고서·테스트에서 다른 게임 폴더를 읽지 않습니다.
 
-`build.mjs`는 HTML만 생성합니다. 수치나 데이터·에셋을 바꾸면 `generated-reports.mjs`로 두 JSON 보고서를 재생성하고 함께 커밋합니다. `node defense_test/scripts/generated-reports.mjs --check`는 현재 구현·이미지·폰트에서 결과를 다시 계산해 저장된 JSON과 비교하며 파일을 덮어쓰지 않습니다. JSON 단독 변경·삭제·이름 변경도 루트 검증에서 비교 검사를 선택합니다.
+선택기는 변경한 게임의 필요한 검사와 빌드만 수행합니다. 직접 빌드할 때는 `node defense_test/scripts/build.mjs` 한 번으로 일반판과 Bright를 함께 생성합니다. 이미 빌드했다면 같은 입력을 다시 빌드하지 않습니다. `--check` 또는 CI는 커밋한 두 파일과 현재 입력을 비교합니다.
+
+이미지나 압축 설정을 바꿀 때만 먼저 `node defense_test/scripts/optimize-images.mjs`를 실행해 별도 압축본과 경로·용도 목록을 갱신합니다. 원본 그림은 보존합니다. `build.mjs`는 압축본을 읽고 HTML과 `test-results/build-size-*.json`을 출력합니다. 일반 코드를 수정할 때 압축 팩을 다시 생성하지 않습니다.
+
+원본 수치·데이터·그림이 실제로 바뀔 때만 해당 `generated-reports.mjs` 보고서를 갱신합니다. 배포 압축만 바뀌는 작업에 밸런스 보고서 재생성을 요구하지 않습니다.
+
+| 작업 | 소스/기록 |
+| --- | --- |
+| 규칙·캐릭터·유물 | `src/content.js`, `src/data.js`, `src/combat/engine.js` |
+| 화면·테마 | `src/app.js`, `src/style.css`, `src/theme-bright.css`, `scripts/theme-bright.mjs` |
+| 원본·압축본 경로/용도/해시 | [ASSET_OPTIMIZATION.json](docs/ASSET_OPTIMIZATION.json) |
+| 압축 설정·대상 | `scripts/image-policy.mjs`, `scripts/optimize-images.mjs` |
+| 내장/preload 대상 | `src/asset-policy.js` |
+| 단일 HTML·용량 보고서 | `scripts/build.mjs` |
+| 메모리얼 선택/스토리 | `src/memorial-media.js`, `src/memorial.js` |
 
 ## 설계와 검증 자료
+
+- [현재 빌드·압축 패스·원본 보존·검증 범위](docs/SINGLE_HTML_OPTIMIZATION.md)
 
 - [UI·에셋 조사와 화면별 설계](docs/UI_ASSET_RESEARCH.md)
 - [UI 리뉴얼: 디자인 방향과 1부 구현 기록](docs/UI_RENEWAL.md)
