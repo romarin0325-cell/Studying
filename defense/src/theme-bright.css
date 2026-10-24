@@ -742,3 +742,9 @@ body::before{background:var(--lobby,var(--garden) center/cover);filter:blur(30px
 .memory-text{color:var(--ink)!important}
 .memory-text p.dialogue{color:var(--ink)!important;border-left-color:var(--heart)}
 .mv-story{background:var(--grid),rgba(251,247,240,.94)!important;border-top:3px solid var(--navy)!important}
+/* Pull cards: the whole name plate is the navy ribbon and the name wraps to two lines (the trading-card ribbon above is for
+   collection cards and clipped names on a 66px pull card). */
+.reveal-grid .pull-card .plate{background:linear-gradient(100deg,var(--navy-d),var(--navy))!important}
+.reveal-grid:not(.single) .pull-card .plate{height:30px!important;padding:3px 3px 4px!important;align-items:center!important}
+.reveal-grid .pull-card .plate strong{display:block;align-self:auto;margin:0!important;padding:0!important;background:none!important;clip-path:none!important;color:#fff!important;-webkit-text-fill-color:#fff!important;max-height:none!important;overflow:visible!important;white-space:normal!important;word-break:keep-all;text-align:center}
+.reveal-grid:not(.single) .pull-card .plate strong{font-size:8px!important;line-height:1.15}

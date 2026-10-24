@@ -600,7 +600,9 @@ function render(){
   const title=$('screen-title');if(title)title.textContent=TITLES[screen]||'';
   if(screen==='battle')return renderBattle();if(screen==='draft')return renderDraft();
   const templates={home,collection:renderCollection,adventure,summon:renderSummon,garden:renderGarden,library:renderLibrary};
-  const c=$('content');if(entering){c.scrollTop=0;lobbyView=false;giftTray=false;}
+  // The enter class stays on #content after a screen change; an in-place refresh must drop it first, or the new children
+  // replay the fade from blank (tier, tab and filter taps flashed the whole page).
+  const c=$('content');if(entering){c.scrollTop=0;lobbyView=false;giftTray=false;}else c.classList.remove('enter');
   c.innerHTML=(templates[screen]||home)();
   const lobbyArt=$('lobby-memorial');if(lobbyArt)lobbyArt.onerror=()=>{const id=p().lobby,fallback=window.__MEMORIAL_FALLBACK__?.[id];if(fallback&&lobbyArt.src!==fallback)lobbyArt.src=fallback;else lobbyArt.remove();};
   // Only a change of screen fades in; refreshes in place stay still.
