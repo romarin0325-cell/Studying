@@ -1,0 +1,156 @@
+{
+  "date": "2026-10-25",
+  "tool": "built-in image_gen; backend model version not exposed",
+  "jobs": [
+    {
+      "id": "demon_king",
+      "name": "마왕",
+      "group": "neutral-medium",
+      "file": "마왕.png",
+      "spec": "Androgynous slender medium height. Porcelain skin, relaxed half-lidded narrow lavender eyes and small knowing smug closed smile, not angry. Long layered silver-white hair, two small black demon horns and black diamond hairclips, gold dangling four-point earring on anatomical left. Black fitted coat with thin gold piping/buttons, black feather-fur shoulder collar, purple neck bow with faceted violet gem, black short bottom, strapped thigh garter and short black lace boots from original. Keep coat open enough to read purple lining. No throne, no floating flames. Both hands comfortably low and open in a small regal gesture. Clothing exactly the original, compact SD silhouette, not new armour.",
+      "prompt": "Use case: stylized-concept. Asset: final transparent 2x2 four-direction sprite atlas for Star Garden mobile defense. Image 1 is ONLY the approved polished cel-shaded SD STYLE; Image 2 is the actual 3D BODY STRUCTURE and orthographic four-direction layout; Image 3 is ONLY CHARACTER IDENTITY, costume and facial expression. Produce ONE atlas with four separate full figures: upper-left FRONT facing viewer, upper-right BACK, lower-left TRUE LEFT PROFILE facing screen left, lower-right TRUE RIGHT PROFILE facing screen right. Same quiet natural standing pose rotated in 3D, no attack windup; tiny light readiness is fine. Deeply super-deformed TWO-HEAD-TALL figure: huge anatomical cranium and face, tiny compact body below chin only a little longer than the head. Match image 2 closely. Thin definite dark navy exterior contour, fine coloured interior lines, crisp cel shadows, selective glossy highlights, clear expressive eyes exactly like image 1. Style reference's blue hair, star ornaments and clothes must NOT leak into this character. Mild overhead12deg orthographic game camera. Side views truly profile with one eye visible, keep hands and asymmetric accessories on the same anatomical side. Anatomical head excludes hair volume, horns, antennae, wings and earrings. Do not shrink body to fit accessories; keep wings compactly folded/relaxed to fit each quadrant with transparent margins and separated figures. Each figure centered in its cell with feet at94% of cell height. No labels, grid, diagram, background, ground, shadow, glow, aura or particles. Native transparent alpha. Preserve original costume and skin colour. Final commercial game sprite art.\nCharacter identity specification: Androgynous slender medium height. Porcelain skin, relaxed half-lidded narrow lavender eyes and small knowing smug closed smile, not angry. Long layered silver-white hair, two small black demon horns and black diamond hairclips, gold dangling four-point earring on anatomical left. Black fitted coat with thin gold piping/buttons, black feather-fur shoulder collar, purple neck bow with faceted violet gem, black short bottom, strapped thigh garter and short black lace boots from original. Keep coat open enough to read purple lining. No throne, no floating flames. Both hands comfortably low and open in a small regal gesture. Clothing exactly the original, compact SD silhouette, not new armour.",
+      "refs": [
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/neutral-medium.png",
+        "C:/Users/romar/Downloads/캐릭터/마왕.png"
+      ],
+      "inputs": [
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "role": "frozen-style",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/neutral-medium.png",
+          "role": "structure-guide",
+          "sha256": "c913ee97a8414e1ab0cb8948797ea4e928da60c6ea5b470d06da08e5ae6687fd"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/마왕.png",
+          "role": "original-identity",
+          "sha256": "983095f9b595fc72d62cbbee2bda7baa43413f0cf21212a508841bbb9e5992d6"
+        }
+      ]
+    },
+    {
+      "id": "miracle_larva",
+      "name": "미라클라바",
+      "group": "neutral-short",
+      "file": "미라클라바.png",
+      "spec": "Small androgynous larval fairy, rounded gentle face, very large green irises with dark pupils, rosy cheeks and small soft smile. Short ash-silver bob with mint-green hair tips, two long thin curved insect antennae, pink winged-heart and star-chain hair clips on anatomical right, mint butterfly and twin yellow pin on anatomical left. Oversized pale yellow and mint hooded jacket zipped in front, slipped a little off one shoulder over white top, little green shorts and mint striped socks/boots as original. One little yellow leaf held comfortably low by anatomical right hand, keep same hand in all views. No wings. Keep body very short and cozy.",
+      "prompt": "Use case: stylized-concept. Asset: final transparent 2x2 four-direction sprite atlas for Star Garden mobile defense. Image 1 is ONLY the approved polished cel-shaded SD STYLE; Image 2 is the actual 3D BODY STRUCTURE and orthographic four-direction layout; Image 3 is ONLY CHARACTER IDENTITY, costume and facial expression. Produce ONE atlas with four separate full figures: upper-left FRONT facing viewer, upper-right BACK, lower-left TRUE LEFT PROFILE facing screen left, lower-right TRUE RIGHT PROFILE facing screen right. Same quiet natural standing pose rotated in 3D, no attack windup; tiny light readiness is fine. Deeply super-deformed TWO-HEAD-TALL figure: huge anatomical cranium and face, tiny compact body below chin only a little longer than the head. Match image 2 closely. Thin definite dark navy exterior contour, fine coloured interior lines, crisp cel shadows, selective glossy highlights, clear expressive eyes exactly like image 1. Style reference's blue hair, star ornaments and clothes must NOT leak into this character. Mild overhead12deg orthographic game camera. Side views truly profile with one eye visible, keep hands and asymmetric accessories on the same anatomical side. Anatomical head excludes hair volume, horns, antennae, wings and earrings. Do not shrink body to fit accessories; keep wings compactly folded/relaxed to fit each quadrant with transparent margins and separated figures. Each figure centered in its cell with feet at94% of cell height. No labels, grid, diagram, background, ground, shadow, glow, aura or particles. Native transparent alpha. Preserve original costume and skin colour. Final commercial game sprite art.\nCharacter identity specification: Small androgynous larval fairy, rounded gentle face, very large green irises with dark pupils, rosy cheeks and small soft smile. Short ash-silver bob with mint-green hair tips, two long thin curved insect antennae, pink winged-heart and star-chain hair clips on anatomical right, mint butterfly and twin yellow pin on anatomical left. Oversized pale yellow and mint hooded jacket zipped in front, slipped a little off one shoulder over white top, little green shorts and mint striped socks/boots as original. One little yellow leaf held comfortably low by anatomical right hand, keep same hand in all views. No wings. Keep body very short and cozy.",
+      "refs": [
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/neutral-short.png",
+        "C:/Users/romar/Downloads/캐릭터/미라클라바.png"
+      ],
+      "inputs": [
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "role": "frozen-style",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/neutral-short.png",
+          "role": "structure-guide",
+          "sha256": "32b5a4f4a169b24c43aae55cb8197f0ed53151e5ec235aab5517292eb191b072"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/미라클라바.png",
+          "role": "original-identity",
+          "sha256": "dc56bcee06ae68f98800f5e28f47df09bdcd9f3474f099bb2de1a95e2658038e"
+        }
+      ]
+    },
+    {
+      "id": "miracle_cocoon",
+      "name": "미라클코쿤",
+      "group": "feminine-medium",
+      "file": "미라클코쿤.png",
+      "spec": "Medium feminine silk-cocoon fairy, light silver long hair with antenna-like wisps, soft green eyes and calm little closed smile. White silk headband, body modestly wrapped in layered opaque white silk bands like original, small faceted lavender diamond at chest. Legs fully bundled together into one tapered cocoon tail, not visible separate legs/boots, hands gently open at waist. An oval small white crystalline open cocoon frame sits behind her body, no hanging tree, no full-scene cocoon, no feathers, no fire, no aura. Adapt geometry master to the bundled tapered lower body while retaining the same huge face/cranium and compact below-chin length. It is the intermediate form of same silver-haired fairy.",
+      "prompt": "Use case: stylized-concept. Asset: final transparent 2x2 four-direction sprite atlas for Star Garden mobile defense. Image 1 is ONLY the approved polished cel-shaded SD STYLE; Image 2 is the actual 3D BODY STRUCTURE and orthographic four-direction layout; Image 3 is ONLY CHARACTER IDENTITY, costume and facial expression. Produce ONE atlas with four separate full figures: upper-left FRONT facing viewer, upper-right BACK, lower-left TRUE LEFT PROFILE facing screen left, lower-right TRUE RIGHT PROFILE facing screen right. Same quiet natural standing pose rotated in 3D, no attack windup; tiny light readiness is fine. Deeply super-deformed TWO-HEAD-TALL figure: huge anatomical cranium and face, tiny compact body below chin only a little longer than the head. Match image 2 closely. Thin definite dark navy exterior contour, fine coloured interior lines, crisp cel shadows, selective glossy highlights, clear expressive eyes exactly like image 1. Style reference's blue hair, star ornaments and clothes must NOT leak into this character. Mild overhead12deg orthographic game camera. Side views truly profile with one eye visible, keep hands and asymmetric accessories on the same anatomical side. Anatomical head excludes hair volume, horns, antennae, wings and earrings. Do not shrink body to fit accessories; keep wings compactly folded/relaxed to fit each quadrant with transparent margins and separated figures. Each figure centered in its cell with feet at94% of cell height. No labels, grid, diagram, background, ground, shadow, glow, aura or particles. Native transparent alpha. Preserve original costume and skin colour. Final commercial game sprite art.\nCharacter identity specification: Medium feminine silk-cocoon fairy, light silver long hair with antenna-like wisps, soft green eyes and calm little closed smile. White silk headband, body modestly wrapped in layered opaque white silk bands like original, small faceted lavender diamond at chest. Legs fully bundled together into one tapered cocoon tail, not visible separate legs/boots, hands gently open at waist. An oval small white crystalline open cocoon frame sits behind her body, no hanging tree, no full-scene cocoon, no feathers, no fire, no aura. Adapt geometry master to the bundled tapered lower body while retaining the same huge face/cranium and compact below-chin length. It is the intermediate form of same silver-haired fairy.",
+      "refs": [
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/feminine-medium.png",
+        "C:/Users/romar/Downloads/캐릭터/미라클코쿤.png"
+      ],
+      "inputs": [
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "role": "frozen-style",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/feminine-medium.png",
+          "role": "structure-guide",
+          "sha256": "fda26a1d652e6a7ebd0c76949983c2a46aedc41d88e42fed8a769b41754caff6"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/미라클코쿤.png",
+          "role": "original-identity",
+          "sha256": "b5428ba2d2d82cd3423f82c94c94935753a1c99442a9bd6809c3fe036295381d"
+        }
+      ]
+    },
+    {
+      "id": "miracle_wing",
+      "name": "미라클윙",
+      "group": "feminine-medium",
+      "file": "미라클윙.png",
+      "spec": "Medium feminine luminous butterfly fairy. Pale skin, long flowing silver-white hair, two thin curved antennae, golden irises and warm open smile. White and gold fitted fantasy dress with little gold-edged shoulder pieces and white gloves, white split draped skirt compactly simplified from original, gold ankle shoes. Pastel rainbow translucent butterfly wings with black outline and gold speckles; relaxed compact wings remain behind body, no crop. GOLD staff topped with faceted iridescent diamond held naturally in anatomical LEFT hand, preserve that hand across all views, no floating diamond above head. No halo, no sky, no rays, no glow. Huge SD cranium, tiny mature-styled but highly compact body matching structure; avoid elongated fashion doll.",
+      "prompt": "Use case: stylized-concept. Asset: final transparent 2x2 four-direction sprite atlas for Star Garden mobile defense. Image 1 is ONLY the approved polished cel-shaded SD STYLE; Image 2 is the actual 3D BODY STRUCTURE and orthographic four-direction layout; Image 3 is ONLY CHARACTER IDENTITY, costume and facial expression. Produce ONE atlas with four separate full figures: upper-left FRONT facing viewer, upper-right BACK, lower-left TRUE LEFT PROFILE facing screen left, lower-right TRUE RIGHT PROFILE facing screen right. Same quiet natural standing pose rotated in 3D, no attack windup; tiny light readiness is fine. Deeply super-deformed TWO-HEAD-TALL figure: huge anatomical cranium and face, tiny compact body below chin only a little longer than the head. Match image 2 closely. Thin definite dark navy exterior contour, fine coloured interior lines, crisp cel shadows, selective glossy highlights, clear expressive eyes exactly like image 1. Style reference's blue hair, star ornaments and clothes must NOT leak into this character. Mild overhead12deg orthographic game camera. Side views truly profile with one eye visible, keep hands and asymmetric accessories on the same anatomical side. Anatomical head excludes hair volume, horns, antennae, wings and earrings. Do not shrink body to fit accessories; keep wings compactly folded/relaxed to fit each quadrant with transparent margins and separated figures. Each figure centered in its cell with feet at94% of cell height. No labels, grid, diagram, background, ground, shadow, glow, aura or particles. Native transparent alpha. Preserve original costume and skin colour. Final commercial game sprite art.\nCharacter identity specification: Medium feminine luminous butterfly fairy. Pale skin, long flowing silver-white hair, two thin curved antennae, golden irises and warm open smile. White and gold fitted fantasy dress with little gold-edged shoulder pieces and white gloves, white split draped skirt compactly simplified from original, gold ankle shoes. Pastel rainbow translucent butterfly wings with black outline and gold speckles; relaxed compact wings remain behind body, no crop. GOLD staff topped with faceted iridescent diamond held naturally in anatomical LEFT hand, preserve that hand across all views, no floating diamond above head. No halo, no sky, no rays, no glow. Huge SD cranium, tiny mature-styled but highly compact body matching structure; avoid elongated fashion doll.",
+      "refs": [
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/feminine-medium.png",
+        "C:/Users/romar/Downloads/캐릭터/미라클윙.png"
+      ],
+      "inputs": [
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "role": "frozen-style",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/feminine-medium.png",
+          "role": "structure-guide",
+          "sha256": "fda26a1d652e6a7ebd0c76949983c2a46aedc41d88e42fed8a769b41754caff6"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/미라클윙.png",
+          "role": "original-identity",
+          "sha256": "08deee1ff5b56892317a2d515eaa71b4bf128fc0643a9d8c316afe401a2733a8"
+        }
+      ]
+    },
+    {
+      "id": "abyss_wing",
+      "name": "어비스윙",
+      "group": "feminine-medium",
+      "file": "어비스윙.png",
+      "spec": "Medium feminine abyss butterfly fairy, same silver hair family but silver-violet with magenta inner streak, two thin insect antennae, narrow magenta-red eyes, confident sharp sly grin, small beauty mark. Black lace and violet fitted corset dress with shoulder straps and black choker, long black gloves, black thigh-high lace stockings and small black shoes; keep covered compact styling. Dark purple-black butterfly wings with magenta eyespots and small orange ember-colour outer edge pattern, folded/relaxed within quadrant. No literal fire or aura. Empty hands at ease, one palm gently raised low. No staff. Preserve original short swooping bangs, hair to lower back and playful dangerous expression. Tiny compact SD body, full wings remain clear behind face.",
+      "prompt": "Use case: stylized-concept. Asset: final transparent 2x2 four-direction sprite atlas for Star Garden mobile defense. Image 1 is ONLY the approved polished cel-shaded SD STYLE; Image 2 is the actual 3D BODY STRUCTURE and orthographic four-direction layout; Image 3 is ONLY CHARACTER IDENTITY, costume and facial expression. Produce ONE atlas with four separate full figures: upper-left FRONT facing viewer, upper-right BACK, lower-left TRUE LEFT PROFILE facing screen left, lower-right TRUE RIGHT PROFILE facing screen right. Same quiet natural standing pose rotated in 3D, no attack windup; tiny light readiness is fine. Deeply super-deformed TWO-HEAD-TALL figure: huge anatomical cranium and face, tiny compact body below chin only a little longer than the head. Match image 2 closely. Thin definite dark navy exterior contour, fine coloured interior lines, crisp cel shadows, selective glossy highlights, clear expressive eyes exactly like image 1. Style reference's blue hair, star ornaments and clothes must NOT leak into this character. Mild overhead12deg orthographic game camera. Side views truly profile with one eye visible, keep hands and asymmetric accessories on the same anatomical side. Anatomical head excludes hair volume, horns, antennae, wings and earrings. Do not shrink body to fit accessories; keep wings compactly folded/relaxed to fit each quadrant with transparent margins and separated figures. Each figure centered in its cell with feet at94% of cell height. No labels, grid, diagram, background, ground, shadow, glow, aura or particles. Native transparent alpha. Preserve original costume and skin colour. Final commercial game sprite art.\nCharacter identity specification: Medium feminine abyss butterfly fairy, same silver hair family but silver-violet with magenta inner streak, two thin insect antennae, narrow magenta-red eyes, confident sharp sly grin, small beauty mark. Black lace and violet fitted corset dress with shoulder straps and black choker, long black gloves, black thigh-high lace stockings and small black shoes; keep covered compact styling. Dark purple-black butterfly wings with magenta eyespots and small orange ember-colour outer edge pattern, folded/relaxed within quadrant. No literal fire or aura. Empty hands at ease, one palm gently raised low. No staff. Preserve original short swooping bangs, hair to lower back and playful dangerous expression. Tiny compact SD body, full wings remain clear behind face.",
+      "refs": [
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/feminine-medium.png",
+        "C:/Users/romar/Downloads/캐릭터/어비스윙.png"
+      ],
+      "inputs": [
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "role": "frozen-style",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/feminine-medium.png",
+          "role": "structure-guide",
+          "sha256": "fda26a1d652e6a7ebd0c76949983c2a46aedc41d88e42fed8a769b41754caff6"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/어비스윙.png",
+          "role": "original-identity",
+          "sha256": "02871c9b321633ecf829cd7fcccb2908574c12836b042ccba80c090c102a2f24"
+        }
+      ]
+    }
+  ]
+}

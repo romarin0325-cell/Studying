@@ -32,7 +32,7 @@ export function currentValues(){
     const total=Array.from({length:cap},(_,l)=>bedCost(id,l)).reduce((a,c)=>a+c,0);
     return `| ${g.id==='dream'?'꿈의 온실':'새벽 온실'} | ${name} | 스테이지 ${b.unlock} | ${effect[0]} | ${effect[1](0)} | ${effect[1](cap)} (레벨 ${cap}) | ${bedCost(id,0)} | ${total} |`;}));
   lines.push('## 정원','',
-    '두 정원에 화단이 셋씩 있다. 여섯 화단 모두 레벨 상한은 없고, 가격이 소프트캡을 만든다. 효과는 그 뒤에도 이어진다. 치명타는 직접 타격·지속 피해·필살기 모두에 적용되며 즉사와 고정 피해는 제외한다. 별똥별 가속은 방치 보상과 파견 보상을 받는 순간에 곱한다.','',
+    '두 정원에 화단이 셋씩 있다. 기본 치명타는 확률 5%, 대미지 150%다. 여명의 엉겅퀴는 레벨당 +0.5%p로 30레벨에서 20%가 된다. 여기까지 비용은 이전 38레벨 예산을 30구간으로 재배분하며, 이후 효과는 +0.5%p를 유지하고 이전 대응 구간 비용의 절반을 쓴다. 기존 투자 레벨은 보존한다. 치명타는 직접 타격·지속 피해·필살기 모두에 적용되며 즉사와 고정 피해는 제외한다. 공격 당시의 치명타 확률과 대미지를 저장한다. 별똥별 가속은 방치 보상과 파견 보상을 받는 순간에 곱한다.','',
     '| 정원 | 화단 | 열리는 곳 | 효과 | 시작 | 소프트캡 | 첫 레벨 별가루 | 소프트캡까지 합계 |','|---|---|---|---|---|---|---:|---:|',
     ...bedRows,'');
   lines.push('## 필살기 상수','',
@@ -42,6 +42,8 @@ export function currentValues(){
     `| 은하고래 수확 | 위력 ${E.WHALE.factor}배 + 성광 중첩당 +${E.WHALE.perMark*100}% |`,
     `| 베히모스 대지분쇄 | 위력 ${E.CRUSH.factor}배 × ${E.CRUSH.hits}회, 기본 반경 ${E.CRUSH.radius}, 훈련마다 기본 반경 +${E.CRUSH.trainingRadius*100}%, 간격 ${E.CRUSH.gap}초, 저장 한도 ${E.CRUSH.queue}회분 |`,
     `| 애쉬 아마겟돈 | 위력 ${E.ARMAGEDDON.factor}배, 반경 ${E.ARMAGEDDON.radius} |`,
+    `| 마왕 데스핸드 | 위력 ${E.DEATHHAND.base}배 + 대상별 디버프 1종당 ${E.DEATHHAND.perDebuff}배, 반경 ${E.DEATHHAND.radius}. 감속·노출·기절·빙결·성광·중독·화상 7종, 소모 없음 |`,
+    '| 기적의우화 | 별빛 50, 전장의 라바·코쿤 전부를 각각 50%/50%로 미라클윙/어비스윙으로 전환. 합성 결과는 코쿤. 대상이 없으면 사용 불가 |',
     `| 신데렐라 자정의 기적 | 위력 ${E.CINDERELLA.ult}배 |`,
     `| 화상 | 일반 공격 위력 ${num(E.BURN.attack*100)}% · ${E.BURN.attackSeconds}초, 필살기 위력 ${num(E.BURN.skill*100)}% · ${E.BURN.skillSeconds}초 (초당) |`,
     `| 시간의마술사 트라우마 | 위력 +${num(E.TRAUMA.power*100)}% · 공속 +${num(E.TRAUMA.speed*100)}% |`,
@@ -60,6 +62,10 @@ export function currentValues(){
     '공격력·공격 주기는 1성 기준 기본값이다. 키는 HEAD_PROFILE의 키 그룹이다.','',
     '| 동료 | 등급 | 공격력 | 주기 | 방식 | 사거리 | 키 | 특성 | 필살기 | 별빛 |','|---|---|---:|---:|---|---:|---|---|---|---:|',
     ...heroes.map(h=>`| ${cell(h.name)} | ${kind(h)} | ${h.damage} | ${h.interval} | ${SHAPE[h.shape]||h.shape} | ${h.range}${h.radius?'/'+h.radius:''} | ${CLASS[h.heightGroup]||'-'} | ${cell(h.trait.text)} | **${cell(h.skill.name)}**: ${cell(h.skill.text)} | ${h.skill.cost} |`),'');
+  lines.push('## 미라클 개체의 형태','',
+    '네 형태는 슈퍼레어 미라클라바 한 수집 슬롯을 공유한다. 소환은 라바, 같은 성급의 형태 간 합성·루미 합성은 코쿤이다. 성급·훈련·강화는 공통이며 형태는 개체마다 저장한다. 미라클윙의 오라는 자신을 제외한 상하좌우에 적용하고 같은 종류는 가장 큰 값 하나만 쓴다. 1성 +20%p에 성급 지원 배율과 강화 특수 배율을 적용한다.','',
+    '| 형태 | 공격력 | 주기 | 공격 | 사거리/반경 | 특성 |','|---|---:|---:|---|---|---|',
+    ...Object.values(E.MIRACLE_FORMS).map(h=>`| ${cell(h.name)} | ${h.damage} | ${h.interval} | ${SHAPE[h.shape]} | ${h.range}/${h.radius} | ${cell(h.trait.text)} |`),'');
   lines.push('## 유물','',
     '| 유물 | 등급 | 효과 |','|---|---|---|',
     ...ARTIFACTS.map(a=>`| ${cell(a.name)} | ${a.rarity} | ${cell(a.text)} |`),'',

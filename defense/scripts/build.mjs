@@ -10,7 +10,7 @@ import {LIBRARY_ART} from '../src/library.js';
 import {brightCss} from './theme-bright.mjs';
 import {MUSIC} from '../src/audio-tracks.js';
 import {RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
-import {BRIGHT_ART} from './image-policy.mjs';
+import {BRIGHT_ART,VISUAL_HEROES} from './image-policy.mjs';
 import {loadImagePack} from './image-pack.mjs';
 
 const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),unlocked=process.argv.includes('--unlocked'),bright=process.argv.includes('--bright');
@@ -36,7 +36,7 @@ for(const [id,relative] of Object.entries(RUNTIME_ASSET_PATHS)){
   if(!metadata.width||!metadata.height)throw new Error('Invalid canonical art: '+id);
   sizes.battle+=bytes.length;assets[id]='data:image/webp;base64,'+bytes.toString('base64');
 }
-for(const h of HEROES){
+for(const h of VISUAL_HEROES){
   const portrait=pack.readDerived('portrait:'+h.id),figure=pack.readDerived('figure:'+h.id);
   sizes.portraits+=portrait.length;sizes.figures+=figure.length;
   media['portrait:'+h.id]='data:image/webp;base64,'+portrait.toString('base64');

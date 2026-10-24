@@ -8,6 +8,7 @@ import {createProfile} from '../src/profile.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial-media.js';
 import {LIBRARY_ART} from '../src/library.js';
+import {MIRACLE_FORMS,DEATHHAND} from '../src/combat/engine.js';
 
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const sourcePath=file=>'defense/'+path.relative(gameRoot,file).replaceAll('\\','/');
@@ -32,7 +33,8 @@ export function balanceSnapshot(){
     },
     stages:[1,9,18,27,36,45].map(stage=>({stage,hp:CHAPTERS[stage-1].hp,slots:dispatchSlots(stage),dispatchMultiplier:1+TUNING.dispatchStageStep*stage,firstClear:stageReward(stage),totalFirstClear:Array.from({length:stage},(_,i)=>stageReward(i+1)).reduce((a,b)=>a+b,0)})),
     starter:DEFAULT_DECK.map(id=>({id,power:combatPower(id,p.heroes[id]),dispatchAt9:dispatchReward(combatPower(id,p.heroes[id]),9)})),
-    roster:HEROES.map(h=>({id:h.id,name:h.name,rarity:h.rarity,hidden:h.hidden}))
+    roster:HEROES.map(h=>({id:h.id,name:h.name,rarity:h.rarity,hidden:h.hidden})),
+    newCompanions:{deathhand:DEATHHAND,miracleForms:Object.fromEntries(Object.entries(MIRACLE_FORMS).map(([id,h])=>[id,{damage:h.damage,interval:h.interval,range:h.range,radius:h.radius,shape:h.shape,trait:h.trait.type}]))}
   };
 }
 

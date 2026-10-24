@@ -2,6 +2,7 @@ import {HERO,HEROES} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
+import {drawNewShot,drawNewImpact} from './new-companion-vfx.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 // Emblems added in pass 15 for companions whose ultimate only had the shared cast flash, and for the Queen, who borrowed
 // Cherry Prince's finisher ring (GPT image, docs/art/companion-fx-20261024): [atlas, frame, columns, rows].
@@ -41,6 +42,8 @@ FX_PROFILES.cure_master={motion:'syringe',frame:11,offset:0};
 const APPLE_TRIGGER=80;
 FX_PROFILES.ash={motion:'blackfire',frame:11,offset:0};
 FX_PROFILES.venom={motion:'venomdrop',frame:11,offset:0};
+FX_PROFILES.demon_king={motion:'deathbolt',frame:15,offset:0};
+FX_PROFILES.miracle_larva={motion:'metamorphosis',frame:1,offset:0};
 export const JOKER_HEX=Object.freeze({red:'#ff5a5a',blue:'#4aa8ff',green:'#5fd36a',white:'#f6f4ff',black:'#241a36'});
 
 function stroke(ctx,points,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
@@ -120,6 +123,8 @@ export class CombatFX{
     this.impacts.push(effect);if(this.impacts.length>128)this.impacts.shift();
   }
   event(e){
+    if(e.type==='deathhandBlast')this.add({...e,life:.85,total:.85});
+    if(e.type==='eclose')for(const p of e.points)this.add({...p,type:'miracleEclose',life:1,total:1});
     if(e.type==='attack'&&['zeke','guardian','ancient_dragon','behemoth'].includes(e.hero)){const life=e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='meteor')this.add({...e,seed:this.clock*7+e.x,life:.7,total:.7});
@@ -148,6 +153,7 @@ export class CombatFX{
     if(e.type==='bombBlast')this.add({...e,life:.9,total:.9});
     if(companionSkillEvents(this,e))return;
     if(e.type==='skill'){
+      if(e.kind==='deathhand'||e.kind==='miracle_eclose')return;
       if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
@@ -248,6 +254,7 @@ export class CombatFX{
   }
   drawSkillField(skill){
     if(!skill||skill.life<=0)return;
+    if(skill.kind==='deathhand'||skill.kind==='miracle_eclose')return;
     if(drawCompanionSkill(this,skill))return;
     this.drawCast(skill);
     const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero],age=skill.total-skill.life;
@@ -667,6 +674,7 @@ export class CombatFX{
     const t=Math.max(0,Math.min(1,1-shot.life/shot.total)),to={x:p.x,y:p.y-18},angle=Math.atan2(to.y-shot.from.y,to.x-shot.from.x),size=4+Math.min(5,shot.rank)*.65;
     const arc=['icicles','dragon','planet'].includes(f.motion)?34:f.motion==='leap'?20:7;
     const x=shot.from.x+(to.x-shot.from.x)*t,y=shot.from.y+(to.y-shot.from.y)*t-Math.sin(t*Math.PI)*arc;
+    if(drawNewShot(this,shot,s,{x,y,angle,t}))return;
     if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(h.id==='lightning_sage'){drawLightningShot(this,shot,s,p);return;}
     if(['zeke','guardian','ancient_dragon','behemoth'].includes(h.id))return;
@@ -816,6 +824,7 @@ export class CombatFX{
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
+      if(drawNewImpact(this,e,t))continue;
       if(drawCompanionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(drawLightningImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(e.type==='reduce'){

@@ -1,0 +1,23 @@
+{
+  "retracts": "The earlier square-prism/flat-square interpretation was wrong and is not an approved master.",
+  "refs": [
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/originals/miracle_wing.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/original-staff-detail.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp"
+  ],
+  "prompt": "Use case: identity-preserve. Asset: one ISOLATED SIMPLIFIED STAFF REFERENCE for the exact original character. Images1 and2 are authoritative ORIGINAL DESIGN, image3 ONLY approved crisp SD line/cel shading style. Remove the character/background and make ONE isolated whole straight staff in the SAME THREE-QUARTER VIEW and same apparent orientation of its head as original image2, with no attempt to 'unrotate' or reinterpret its crystal. Preserve the original THREE-DIMENSIONAL IRIDESCENT DIAMOND GEM: its sharp projected silhouette, raised central apex, sloping triangular facets, depth and asymmetry due to the original camera projection. It is a volumetric cut diamond; NOT a flat square tile, framed square picture, planar four-colour window, rectangular tablet or flat sticker. Do not impose a square/diamond shape from a verbal geometry label: COPY THE VISIBLE ORIGINAL GEM'S SHAPE AND FACETS. Original flowing gold feather/scroll frame wraps around the 3D stone, with original swept pointed corners and two gold leaf/wing scrolls around tiny green inset at lower junction. Simplify only fine veins and repeated tiny spikes, keep original main outline and ornament positions. Keep one clean STRAIGHT shaft, held upright, with gem volume centre seated over shaft's extended axis and no sideways elbow at neck. The whole staff may have original slight tilt as ONE rigid object, but head must not bend sideways relative to straight shaft. Preserve gold colour, white-gold highlights, mint/lilac/yellow iridescent facets. One object only, large readable isolated prop, transparent margins all sides, native alpha. No labels, grid, character, hands, background, shadows, glow, generic replacement shapes or invented extra decorations. This is faithful simplification of the original artwork, NOT redesign, not a newly normalized flat geometric symbol.",
+  "inputs": [
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/originals/miracle_wing.png",
+      "sha256": "08deee1ff5b56892317a2d515eaa71b4bf128fc0643a9d8c316afe401a2733a8"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/original-staff-detail.png",
+      "sha256": "caba071952aabb70bf880538428610d803d7bbd57dec0439743fde086235396d"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    }
+  ]
+}

@@ -3,6 +3,41 @@
   "policy": "independently maintained local atlases; build-time authored portrait crops; no runtime pixel processing",
   "assets": [
     {
+      "id": "unit-demon_king",
+      "source": "defense/assets/cast-v2/demon_king.webp",
+      "sha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-miracle_larva",
+      "source": "defense/assets/cast-v2/miracle_larva.webp",
+      "sha256": "6d84246dc296c31fe115971ce4bdb722ef9cf71f324331313afd84c14ebf41a5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-miracle_cocoon",
+      "source": "defense/assets/cast-v2/miracle_cocoon.webp",
+      "sha256": "84ceeaaeab76d7106addd29b32ad6aab1f5b4a424fbb5c1e270a8c71d86c871a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-miracle_wing",
+      "source": "defense/assets/cast-v2/miracle_wing.webp",
+      "sha256": "bf08ab159d9efc12db5d9f327beb9c9b34045577cc4e7885b6b4768cdd32c6de",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "unit-abyss_wing",
+      "source": "defense/assets/cast-v2/abyss_wing.webp",
+      "sha256": "8cdf06809c6171ded03ffa006d8cf50f9dfa08d37e2feac5f8ba73a07ec026d9",
+      "width": 1024,
+      "height": 1024
+    },
+    {
       "id": "effects-sol-sweet",
       "source": "defense/assets/merge/effects-sol-sweet.webp",
       "sha256": "b12c695409fbac3439cbb3ea126618bb6d4db4373a9480b404a25d6a61830054",
@@ -529,7 +564,7 @@
       "sha256": "37c7903f9c06b3c7935ea3f28f1dbf01f2fe45696da6b7eef5942ec61f4c1c09"
     }
   },
-  "portraits": 39,
+  "portraits": 41,
   "relics": 27,
   "memorial": [
     {
@@ -822,6 +857,23 @@
       }
     },
     {
+      "id": "demon_king",
+      "source": "defense/assets/memorial/demon_king.avif",
+      "sha256": "f3dd5875a9966c2081a16a0929a85fdb7fbe09fd577a69c88f06215020994b60",
+      "width": 720,
+      "height": 1080,
+      "bytes": 45783,
+      "sourceSha256": "983095f9b595fc72d62cbbee2bda7baa43413f0cf21212a508841bbb9e5992d6",
+      "webp": {
+        "source": "defense/assets/memorial-webp/demon_king.webp",
+        "sha256": "677442b0fd18cef04313f10546e7c1088fba487a6a2971bd881aab078f290792",
+        "width": 720,
+        "height": 1080,
+        "bytes": 88714,
+        "quality": 82
+      }
+    },
+    {
       "id": "storm_sage",
       "source": "defense/assets/memorial/storm_sage.avif",
       "sha256": "f60dffacb1e12b4234c48088d306e346896e1f3500abdf421a0ba19b92a8d004",
@@ -955,6 +1007,23 @@
         "height": 1080,
         "bytes": 91756,
         "quality": 78
+      }
+    },
+    {
+      "id": "miracle_larva",
+      "source": "defense/assets/memorial/miracle_larva.avif",
+      "sha256": "5ab2e36132b7e9686c52eedf88e1d247e93803c3f1c5c9bcb5b7d18c1b0d6f15",
+      "width": 720,
+      "height": 1080,
+      "bytes": 50551,
+      "sourceSha256": "dc56bcee06ae68f98800f5e28f47df09bdcd9f3474f099bb2de1a95e2658038e",
+      "webp": {
+        "source": "defense/assets/memorial-webp/miracle_larva.webp",
+        "sha256": "6f5877b341977230ebc7cfadb9a22c15ccda99abfd9d7ca79e8e8dab8bd567f5",
+        "width": 720,
+        "height": 1080,
+        "bytes": 92622,
+        "quality": 82
       }
     },
     {

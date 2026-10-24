@@ -11,8 +11,8 @@ export const RARITY = {
 };
 export const ROSTER = {
   C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog','joker','sunflower'],
-  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple','antropy'],
-  SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom','cure_master','ash'],
+  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple','antropy','demon_king'],
+  SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom','cure_master','ash','miracle_larva'],
   UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','venom'],
 };
 // Season guardians in rotation order (one per month). Behemoth joined as the seventh; see guardianOf().
@@ -49,7 +49,7 @@ export const CLEAR_UNLOCKS=Object.freeze({45:['behemoth']});
 // has been cleared (before that the summon pool and the collection are exactly what they were). Every new
 // companion goes on this list.
 export const LATE_UNLOCK_STAGE=45;
-export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom']);
+export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva']);
 // Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
 // from/to are main-stage equivalents of the first and last wave; long runs also grow the board, so
 // late waves add `late` extra health (quadratic in run progress). Rewards scale with `reward`.
@@ -83,7 +83,7 @@ export const TUNING=Object.freeze({
     // Second garden (opens with part two): price grows by `growth` to `rise` (70% of the soft-cap level), by `steep`
     // from there to `knee2` (the soft-cap level), by `steep2` after; effects are linear and unbounded, so the soft cap
     // comes from price. See docs/archive/DAWN_GARDEN.md for the pacing model.
-    crit:{unlock:45,base:400,growth:1.09,rise:27,knee:27,steep:1.15,knee2:38,steep2:1.2},
+    crit:{unlock:45,base:400,growth:1.09,rise:21,knee:21,steep:1.15,knee2:30,steep2:1.2,resampleFrom:38,afterSoftCapPrice:.5},
     critDamage:{unlock:45,base:500,growth:1.13,rise:18,knee:18,steep:1.19,knee2:25,steep2:1.2},
     stardust:{unlock:60,base:1200,growth:1.05,rise:34,knee:34,steep:1.11,knee2:49,steep2:1.2}},
   // Relic tiers (pass 17): steps at 10, 25, 48, 82, 132, 208, 322, 493 ... draws. The first step is one 10-pull, and the

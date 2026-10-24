@@ -1,0 +1,17 @@
+{
+  "refs": [
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/original-staff-detail.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp"
+  ],
+  "prompt": "Use case: stylized-concept. Asset type: ISOLATED simplified weapon MASTER REFERENCE, not a character sheet. Image1 is the ORIGINAL STAFF HEAD DESIGN; image2 is only the thin navy outline/crisp cel-shadow/glossy SD game rendering STYLE. Make one clean transparent 2x2 orthographic turnaround of ONE rigid staff, top-left FRONT, top-right BACK, bottom-left LEFT EDGE, bottom-right RIGHT EDGE. No character, hands, wings, background or text. Every staff stands PERFECTLY VERTICAL, upright, unbent, with generous space and equal length. CRITICAL GEOMETRIC REQUIREMENT: shaft bottom, grip, neck, prism centre and top centre lie on ONE STRAIGHT VERTICAL AXIS. The shaft must be a single straight taper; no bend, offset, elbow, S-curve or sideways neck. Gold decoration can curl around it but the stem's straight axis stays visible through the neck. Keep original identity: a BIG SQUARE (not diamond/rhombus) pastel rainbow faceted crystal with straight equal sides, enclosed by a few elegant flowing GOLD SCROLLS/FEATHERS whose swept upper corners recall original image1. The lower head junction retains TWO GOLD LEAF/WING SCROLLS opening left and right, and a tiny GREEN emerald inset centered over the shaft. Simplify only tiny engraved veins, extra overlapping curls and microscopic spines. Do not replace with plain diamond outline, four bolts, a ring staff, flower wand, extra jewels or a new silhouette. The square gemstone is symmetrical and solid, 4 clean pastel facets meet centrally; gold framing has calm clean curves, constant clean thickness, no melted clutter. Main ornament masses balanced around shaft axis so the staff does not look crooked. Thin elegant gold shaft, small original-style pointed gold end. Front and back are opposite faces of SAME physical design. True side views show thin edge of the crystal and scrollwork, not full frontal square again. Keep the same exact shape and positions of all major parts. Production-ready polished anime SD prop reference, native transparent alpha, sharp clean regular outline, no glow, no floor, no shadows, no guides, no labels.",
+  "inputs": [
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/original-staff-detail.png",
+      "sha256": "caba071952aabb70bf880538428610d803d7bbd57dec0439743fde086235396d"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "refs": [
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png"
+  ],
+  "prompt": "Use case: precise-object-edit. This transparent 2x2 SD atlas is the exact edit target. REMOVE ONLY THE GOLD STAFF, its jewel and its gold head ornaments from every view, cleanly reconstructing the small hair/wing/clothing regions that were behind the staff. Leave the LEFT HAND in exactly the SAME POSITION and keep its curved gripping fingers (it will receive the corrected staff later). Do not move hands, arms, shoulders, head, wings, feet or bodies. Preserve every other pixel as closely as possible: character faces, golden eyes, hair, silver antennae, all hairpins, costume, white sleeves, GOLD COSTUME/TRIM ornaments, white dress and proper CLOSED REAR SKIRT, pastel rainbow wings and black margins, pose and proportions, atlas layout and figure sizes. Distinguish the staff's gold from costume gold: only remove the staff. Back already has arms occluded by wings; do not reveal hidden arms. This is preparation for replacing one rigid prop outside the image generator. No replacement prop, no magic, no new accessory, no empty-hand pose change, no face redraw. Four full figures, crisp matching outlines and cel shading, original transparent background, no shadows or glow. Preserve all figures with transparent margins.",
+  "inputs": [
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png",
+      "sha256": "5564cca9b065422e6b8a2e4efcf3a129101709876218ceaea3ce449e1d46702d"
+    }
+  ]
+}

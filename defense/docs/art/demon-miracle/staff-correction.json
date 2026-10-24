@@ -1,0 +1,32 @@
+{
+  "refs": [
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/staff-structure-guide.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+    "C:/Users/romar/Downloads/캐릭터/미라클윙.png"
+  ],
+  "prompt": "Use case: precise-object-edit. Image1 is the existing transparent four-view SD ATLAS EDIT TARGET. Image2 is one ACTUAL RIGID 3D STAFF, same physical object rendered through four cameras. Image3 is actual body, LEFT ARM, staff and wings rendered through same four cameras with depth buffering. Image4 frozen STYLE, image5 original IDENTITY. Correct ONLY the STAFF AND ITS FINGER GRIP in image1; preserve faces, hair, body proportions, clothes, wings, posture and correct back skirt. User points out the current gemstone and gold ornament are CRUMPLED, asymmetrically warped and different objects in each view. Rebuild as ONE crisp, rigid faceted pastel prism jewel with a regular equal-sided diamond silhouette in FRONT/BACK, seated inside a matching gold geometric frame with clean consistent thickness, four small symmetrical leaf-shaped corner ornaments. Simplify the original ornament into the same four stable corners; do not invent crooked melted curls. Straight shaft, jewel centred on shaft's axis, mirror-regular gem facets with clean straight edges. Preserve identical jewel/frame geometry in all views as image2: rear sees back of same gem, side views see a NARROW EDGE PROFILE of the SAME CRYSTAL AND FRAME, not another full frontal square pasted into profile. Angle shaft naturally outward like the actual3D guide, no bent shaft. Keep held in anatomical LEFT HAND at original shoulder height in every view. Rear: wing must OCCLUDE hand, forearm and shaft wherever they cross, as established by image3; do not put staff/arm on top of rear wing. Only the top gem above wing and lower shaft below wing show. Native transparent alpha, no floor, no shadow, no text or layout changes. Four full figures retain their original cell positions. A clean rigid regular jewel is more important than decorative complexity.",
+  "inputs": [
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png",
+      "sha256": "5564cca9b065422e6b8a2e4efcf3a129101709876218ceaea3ce449e1d46702d"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/staff-structure-guide.png",
+      "sha256": "c609358fc1c8e58e90c6e4825b6e9e605f196205431dca3d269e4c243ac870a3"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+      "sha256": "ca40e555b8f671e52fff4cffe5c0f30fe6c8552f44b2dba6ece470013b6d966d"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    },
+    {
+      "path": "C:/Users/romar/Downloads/캐릭터/미라클윙.png",
+      "sha256": "08deee1ff5b56892317a2d515eaa71b4bf128fc0643a9d8c316afe401a2733a8"
+    }
+  ]
+}

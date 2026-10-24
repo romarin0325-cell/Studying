@@ -14,10 +14,13 @@ import {portraitFrame} from '../src/portrait-layout.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 
 test('installed cast v2 matches the 40 selected masters and keeps anatomy separate from optical crops',async()=>{
-  const manifest=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/sol-cast-v2/manifest.json'),'utf8'));
-  assert.equal(manifest.assets.length,40);
+  const original=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/sol-cast-v2/manifest.json'),'utf8'));
+  const additions=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/demon-miracle/packing.json'),'utf8'));
+  assert.equal(original.assets.length,40);
+  assert.equal(additions.assets.length,5);
+  const manifest={assets:[...original.assets,...additions.assets]};
   const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
-  assert.equal(art.size,40);
+  assert.equal(art.size,45);
   for(const entry of manifest.assets){
     const frame=entry.frames.find(f=>f.direction==='down'),installed=art.get(entry.id);assert.ok(installed,entry.id);
     assert.deepEqual(entry.frames.map(f=>f.direction),['down','up','left','right']);
@@ -47,7 +50,7 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,74);
+  assert.equal(Object.keys(ASSET_PATHS).length,79);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.

@@ -22,9 +22,9 @@ test('dawn garden: beds, caps and unlock stages',()=>{
   assert.deepEqual(GARDENS.map(g=>g.beds),[['rose','spring','seed'],['crit','critDamage','stardust']]);
   assert.deepEqual([...BED_IDS],['rose','spring','seed','crit','critDamage','stardust']);
   assert.equal(TUNING.beds.crit.unlock,45);assert.equal(TUNING.beds.critDamage.unlock,45);assert.equal(TUNING.beds.stardust.unlock,60);
-  assert.equal(bedCost('crit',0),400);assert.equal(bedCost('critDamage',0),500);assert.equal(bedCost('stardust',0),1200);
+  assert.equal(bedCost('crit',0),517);assert.equal(bedCost('critDamage',0),500);assert.equal(bedCost('stardust',0),1200);
   // start values and soft-cap values from the design; effects keep growing linearly past the cap
-  assert.ok(Math.abs(critChance(0)-.01)<1e-12);assert.ok(Math.abs(critChance(38)-.2)<1e-12);assert.ok(critChance(39)>critChance(38));
+  assert.ok(Math.abs(critChance(0)-.05)<1e-12);assert.ok(Math.abs(critChance(30)-.2)<1e-12);assert.ok(critChance(31)>critChance(30));
   assert.ok(Math.abs(critDamage(0)-1.5)<1e-12);assert.ok(Math.abs(critDamage(25)-2)<1e-12);assert.ok(critDamage(26)>critDamage(25));
   assert.ok(Math.abs(stardustRate(0)-.01)<1e-12);assert.ok(Math.abs(stardustRate(49)-.5)<1e-12);assert.ok(stardustRate(50)>stardustRate(49));
   assert.ok(Math.abs((critChance(1)-critChance(0))-(critChance(39)-critChance(38)))<1e-12);
@@ -32,15 +32,15 @@ test('dawn garden: beds, caps and unlock stages',()=>{
   // prices are strictly increasing; the first levels are cheap; after the soft cap the slope is much steeper
   for(const id of ['crit','critDamage','stardust']){
     const cap=TUNING.beds[id].knee2;let last=0,total=0;
-    for(let l=0;l<cap+5;l++){const c=bedCost(id,l);assert.ok(c>last,id+' '+l);last=c;if(l<cap)total+=c;}
+    for(let l=0;l<cap+5;l++){const c=bedCost(id,l);if(!(id==='crit'&&l===cap))assert.ok(c>last,id+' '+l);last=c;if(l<cap)total+=c;}
     assert.ok(total>80000,id+' total '+total);
     assert.ok(bedCost(id,cap+1)/bedCost(id,cap)>bedCost(id,1)/bedCost(id,0),id+' steep after soft cap');
   }
 });
 
-test('the dawn effects exist only after their beds open, so stages 1-45 are unchanged',()=>{
-  assert.equal(critStats({crit:9,critDamage:9},44),null);
-  assert.deepEqual(critStats({crit:0,critDamage:0},45),{chance:.01,damage:1.5});
+test('base critical hits exist from the start; garden levels apply after unlocking',()=>{
+  assert.deepEqual(critStats({crit:9,critDamage:9},44),{chance:.05,damage:1.5});
+  assert.deepEqual(critStats({crit:0,critDamage:0},45),{chance:.05,damage:1.5});
   assert.equal(stardustBonus({stardust:10},59),0);assert.ok(Math.abs(stardustBonus({stardust:10},60)-.11)<1e-12);
   const p=createProfile(NOW);p.cleared=44;p.beds.stardust=34;p.idleAt=NOW-20*HOUR;
   assert.equal(idleReward(p,NOW),Math.floor(20*(TUNING.idleDustPerHour+44*2)),'no bonus before the bed opens');
@@ -89,7 +89,7 @@ test('the stardust bed is paid out when a dispatch is collected',()=>{
   const base=q.dispatches[0].dust;assert.equal(ok(q,'claimDispatch',{slot:0},collected).dust,Math.floor(base*1.01));
 });
 
-const fresh=(crit,seed=11)=>E.newRun({seed,crit});
+const fresh=(crit=null,seed=11)=>E.newRun({seed,crit});
 function play(run,seconds){const hits=[];for(let t=0;t<seconds;t+=.05){E.step(run,.05);for(const e of run.events)if(e.type==='hit')hits.push(e);run.events.length=0;autoPlay(run);}return hits;}
 
 test('critical hits: no effect without a crit setting, always with chance 1, on a stream of their own',()=>{
@@ -127,14 +127,14 @@ test('a battle takes its crit setting from the profile and resumes only with the
   p.beds.crit=11;assert.equal(resumeBattle(p),null,'a different crit setting cannot resume the old run');
   // a run from before crits existed still resumes
   p.beds.crit=10;const legacy=JSON.parse(p.active.run);delete legacy.crit;delete legacy.critRng;p.active.run=JSON.stringify(legacy);assert.ok(resumeBattle(p));
-  const early=createProfile(NOW);early.cleared=10;ok(early,'begin',{mode:'main',stage:10},NOW);assert.equal(createBattle(early).crit,null);
+  const early=createProfile(NOW);early.cleared=10;ok(early,'begin',{mode:'main',stage:10},NOW);assert.deepEqual(createBattle(early).crit,{chance:.05,damage:1.5});
 });
 
 test('test tools of the unlocked build',()=>{
   const p=createProfile(NOW);p.dreams=0;p.dust=0;
   assert.ok(testGrant(p,'wallet'));assert.equal(p.dreams,10000);assert.equal(p.dust,10000);
   testGrant(p,'dreams');testGrant(p,'dust');assert.equal(p.dreams,110000);assert.equal(p.dust,1010000);
-  testGrant(p,'stage60');assert.equal(p.cleared,60);testGrant(p,'dawn-max');assert.deepEqual([p.beds.crit,p.beds.critDamage,p.beds.stardust],[38,25,49]);assert.equal(validateProfile(p),true);
+  testGrant(p,'stage60');assert.equal(p.cleared,60);testGrant(p,'dawn-max');assert.deepEqual([p.beds.crit,p.beds.critDamage,p.beds.stardust],[30,25,49]);assert.equal(validateProfile(p),true);
   testGrant(p,'dawn-reset');assert.deepEqual([p.beds.crit,p.beds.critDamage,p.beds.stardust],[0,0,0]);
   assert.equal(testGrant(p,'nope'),'');assert.ok(TEST_TOOLS.every(t=>t.label&&t.kind));
   const q=createProfile(NOW);assert.equal(command(q,'testGrant',{kind:'dust'},NOW).ok,false,'the normal build refuses test tools');

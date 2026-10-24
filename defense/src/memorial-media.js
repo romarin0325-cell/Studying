@@ -1,3 +1,4 @@
+import {NEW_MEMORIAL_MEDIA} from './new-memorial-media.js';
 // Canonical memorial source selection and measured output records.
 // The PNG originals stay outside Git; normal builds read only committed encodings.
 
@@ -35,6 +36,7 @@ export const MEMORIAL_MEDIA_FORMATS = {
 };
 
 export const MEMORIAL_MEDIA_MANIFEST = {
+  ...NEW_MEMORIAL_MEDIA,
   "star_boy": {
     "sourceFilename": "18B_별똥별소년_쉬어 가고 싶은 핑계.png",
     "sourceSha256": "215c78af955b7378bd61f4524f4396c56e189dc488c1ed0f2365f8c91568e8a1",

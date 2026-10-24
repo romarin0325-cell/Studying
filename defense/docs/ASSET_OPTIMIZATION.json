@@ -50,14 +50,173 @@
     }
   },
   "totals": {
-    "sourceBytes": 23429830,
-    "deployableSourceBytes": 21831288,
-    "outputBytes": 12917762,
-    "optimizedFiles": 151,
-    "derivedFiles": 144,
-    "derivedOutputBytes": 3410496
+    "sourceBytes": 24752242,
+    "deployableSourceBytes": 23153700,
+    "outputBytes": 13539770,
+    "optimizedFiles": 160,
+    "derivedFiles": 156,
+    "derivedOutputBytes": 3765670
   },
   "images": [
+    {
+      "id": "atlas:unit-demon_king",
+      "source": "./assets/cast-v2/demon_king.webp",
+      "profile": "unit",
+      "uses": [
+        "window.__ASTRA_ASSETS__.unit-demon_king; combat renderer / stage UI",
+        "portrait:demon_king; collection / party / summon",
+        "figure:demon_king; home / details / cut-in / results"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 192504,
+        "sha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/cast-v2/demon_king.webp",
+        "bytes": 72144,
+        "sha256": "b74a2508f584e0231a15e321a736c7b9b6be887a0a0456d6c3756e834b355553",
+        "metadata": {
+          "width": 640,
+          "height": 640,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:unit-miracle_larva",
+      "source": "./assets/cast-v2/miracle_larva.webp",
+      "profile": "unit",
+      "uses": [
+        "window.__ASTRA_ASSETS__.unit-miracle_larva; combat renderer / stage UI",
+        "portrait:miracle_larva; collection / party / summon",
+        "figure:miracle_larva; home / details / cut-in / results"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 179030,
+        "sha256": "6d84246dc296c31fe115971ce4bdb722ef9cf71f324331313afd84c14ebf41a5",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/cast-v2/miracle_larva.webp",
+        "bytes": 68706,
+        "sha256": "3017501da2de9fa14c5d692e1b0cbfff96b93dc37431465c4ee7aa7ee820ec65",
+        "metadata": {
+          "width": 640,
+          "height": 640,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:unit-miracle_cocoon",
+      "source": "./assets/cast-v2/miracle_cocoon.webp",
+      "profile": "unit",
+      "uses": [
+        "window.__ASTRA_ASSETS__.unit-miracle_cocoon; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 235962,
+        "sha256": "84ceeaaeab76d7106addd29b32ad6aab1f5b4a424fbb5c1e270a8c71d86c871a",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/cast-v2/miracle_cocoon.webp",
+        "bytes": 88400,
+        "sha256": "22c1816ce30edeae237f9f50f9e61a398aebe1015c8fa2bbf46c4799f29af3cb",
+        "metadata": {
+          "width": 640,
+          "height": 640,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:unit-miracle_wing",
+      "source": "./assets/cast-v2/miracle_wing.webp",
+      "profile": "unit",
+      "uses": [
+        "window.__ASTRA_ASSETS__.unit-miracle_wing; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 217726,
+        "sha256": "bf08ab159d9efc12db5d9f327beb9c9b34045577cc4e7885b6b4768cdd32c6de",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/cast-v2/miracle_wing.webp",
+        "bytes": 81608,
+        "sha256": "80f12ae4431dc4fddff52f7540c8d36ead71cdc27f207cca2290516b98b45cca",
+        "metadata": {
+          "width": 640,
+          "height": 640,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:unit-abyss_wing",
+      "source": "./assets/cast-v2/abyss_wing.webp",
+      "profile": "unit",
+      "uses": [
+        "window.__ASTRA_ASSETS__.unit-abyss_wing; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 219520,
+        "sha256": "8cdf06809c6171ded03ffa006d8cf50f9dfa08d37e2feac5f8ba73a07ec026d9",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/cast-v2/abyss_wing.webp",
+        "bytes": 82580,
+        "sha256": "1ac0bf266e837b92a65b07aef67fff6ea289717dec55d2b09b96950019bf2ba9",
+        "metadata": {
+          "width": 640,
+          "height": 640,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
     {
       "id": "atlas:effects-sol-sweet",
       "source": "./assets/merge/effects-sol-sweet.webp",
@@ -3765,6 +3924,67 @@
       "decision": "Separate smaller encoding; source preserved."
     },
     {
+      "id": "memorial:demon_king",
+      "source": "./assets/memorial/demon_king.avif",
+      "profile": "memorialAvif",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.demon_king; standalone painting / web primary"
+      ],
+      "original": {
+        "bytes": 45783,
+        "sha256": "f3dd5875a9966c2081a16a0929a85fdb7fbe09fd577a69c88f06215020994b60",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial/demon_king.avif",
+        "bytes": 36057,
+        "sha256": "8b3d2e473ae923d63b5b78e010d7018cc96a6a5339972f465d8338f31f7ad6b7",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "memorial-webp:demon_king",
+      "source": "./assets/memorial-webp/demon_king.webp",
+      "profile": "memorialWebp",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.demon_king; compat painting / web fallback",
+        "memorialThumb:demon_king; album thumbnail cropped from preserved source"
+      ],
+      "original": {
+        "bytes": 88714,
+        "sha256": "677442b0fd18cef04313f10546e7c1088fba487a6a2971bd881aab078f290792",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial-webp/demon_king.webp",
+        "bytes": 73922,
+        "sha256": "06b257ca442d33f61ecf29a271a9de9faa85ee1bc9b73b28f73a1722af64a0e2",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
       "id": "memorial:storm_sage",
       "source": "./assets/memorial/storm_sage.avif",
       "profile": "memorialAvif",
@@ -4243,6 +4463,67 @@
         "path": "./assets/optimized/memorial-webp/ash.webp",
         "bytes": 82384,
         "sha256": "bcb0a87af22c5298652201987570331ab4318c4eb4f7c5c22b21c525a4807c66",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "memorial:miracle_larva",
+      "source": "./assets/memorial/miracle_larva.avif",
+      "profile": "memorialAvif",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.miracle_larva; standalone painting / web primary"
+      ],
+      "original": {
+        "bytes": 50551,
+        "sha256": "5ab2e36132b7e9686c52eedf88e1d247e93803c3f1c5c9bcb5b7d18c1b0d6f15",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial/miracle_larva.avif",
+        "bytes": 39661,
+        "sha256": "b8ae0b04d84fcef4140ffc5df92424eaac9b847c2a0e7edcdfe8c97999dfbba6",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "memorial-webp:miracle_larva",
+      "source": "./assets/memorial-webp/miracle_larva.webp",
+      "profile": "memorialWebp",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.miracle_larva; compat painting / web fallback",
+        "memorialThumb:miracle_larva; album thumbnail cropped from preserved source"
+      ],
+      "original": {
+        "bytes": 92622,
+        "sha256": "6f5877b341977230ebc7cfadb9a22c15ccda99abfd9d7ca79e8e8dab8bd567f5",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial-webp/miracle_larva.webp",
+        "bytes": 78930,
+        "sha256": "e5e72fde6ad5741afced70c065240fd7e210480a3769f52467e8ed84863f2d8f",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -6063,6 +6344,60 @@
       }
     },
     {
+      "id": "portrait:demon_king",
+      "source": "./assets/cast-v2/demon_king.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 130,
+        "top": 95,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/demon_king.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/demon_king.webp",
+        "bytes": 21300,
+        "sha256": "c3b415adde1f3644c001ed320ebf7331713e0ec9e3240a63de5bf501b428f435",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:demon_king",
+      "source": "./assets/cast-v2/demon_king.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/demon_king.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f",
+      "output": {
+        "path": "./assets/optimized/ui/figures/demon_king.webp",
+        "bytes": 37246,
+        "sha256": "1e5dd5dc3dbde68a6c2078318a837d0649bc926d57baee81fbf9515fcaf44576",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
       "id": "portrait:storm_sage",
       "source": "./assets/cast-v2/storm_sage.webp",
       "profile": "portrait",
@@ -6486,6 +6821,60 @@
         "path": "./assets/optimized/ui/figures/ash.webp",
         "bytes": 48910,
         "sha256": "45f74c35d450f6cf8b0d523857fb61d01bef3897916d134490e7d3ce3418ac78",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:miracle_larva",
+      "source": "./assets/cast-v2/miracle_larva.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 130,
+        "top": 97,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/miracle_larva.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "6d84246dc296c31fe115971ce4bdb722ef9cf71f324331313afd84c14ebf41a5",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/miracle_larva.webp",
+        "bytes": 22502,
+        "sha256": "a44146c79be817c11ccca7494fb86f6c19a650254f1183728423e93ef04dc127",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:miracle_larva",
+      "source": "./assets/cast-v2/miracle_larva.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/miracle_larva.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "6d84246dc296c31fe115971ce4bdb722ef9cf71f324331313afd84c14ebf41a5",
+      "output": {
+        "path": "./assets/optimized/ui/figures/miracle_larva.webp",
+        "bytes": 36070,
+        "sha256": "02aab1b5e969decb519401e919270a1348268abcc54c1918a46d254364ff0b2a",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -7242,6 +7631,168 @@
         "path": "./assets/optimized/ui/figures/behemoth.webp",
         "bytes": 49650,
         "sha256": "b23897062f78529ac52556cce69bf8482e553f939fb6e234a04ec16a7712e4c1",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:miracle_cocoon",
+      "source": "./assets/cast-v2/miracle_cocoon.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 131,
+        "top": 89,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/miracle_cocoon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "84ceeaaeab76d7106addd29b32ad6aab1f5b4a424fbb5c1e270a8c71d86c871a",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/miracle_cocoon.webp",
+        "bytes": 26288,
+        "sha256": "fa814f76f1b5ab5adacf6aceb4cabb37031f1239d892d2ff1be07c41688ccc5a",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:miracle_cocoon",
+      "source": "./assets/cast-v2/miracle_cocoon.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/miracle_cocoon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "84ceeaaeab76d7106addd29b32ad6aab1f5b4a424fbb5c1e270a8c71d86c871a",
+      "output": {
+        "path": "./assets/optimized/ui/figures/miracle_cocoon.webp",
+        "bytes": 47136,
+        "sha256": "2a49c520edbe106fc5c85e67a53bbb9875226b49172335d145360febc55d5dfe",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:miracle_wing",
+      "source": "./assets/cast-v2/miracle_wing.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 130,
+        "top": 85,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/miracle_wing.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "bf08ab159d9efc12db5d9f327beb9c9b34045577cc4e7885b6b4768cdd32c6de",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/miracle_wing.webp",
+        "bytes": 21360,
+        "sha256": "7d16e9057c39f2bfa4a9d6dbbe357ab619f5eec812076c79cb479ff6293afd22",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:miracle_wing",
+      "source": "./assets/cast-v2/miracle_wing.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/miracle_wing.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "bf08ab159d9efc12db5d9f327beb9c9b34045577cc4e7885b6b4768cdd32c6de",
+      "output": {
+        "path": "./assets/optimized/ui/figures/miracle_wing.webp",
+        "bytes": 44670,
+        "sha256": "7f875534d20f6e81abd5cb15a46170b918fc05464534dc3548133407084654dd",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "portrait:abyss_wing",
+      "source": "./assets/cast-v2/abyss_wing.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 130,
+        "top": 92,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/abyss_wing.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "8cdf06809c6171ded03ffa006d8cf50f9dfa08d37e2feac5f8ba73a07ec026d9",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/abyss_wing.webp",
+        "bytes": 24058,
+        "sha256": "50be0347f16a514dc8049d472d8e9f4bd6433d8449a6ab100213aa72a9cde13c",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:abyss_wing",
+      "source": "./assets/cast-v2/abyss_wing.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/abyss_wing.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "8cdf06809c6171ded03ffa006d8cf50f9dfa08d37e2feac5f8ba73a07ec026d9",
+      "output": {
+        "path": "./assets/optimized/ui/figures/abyss_wing.webp",
+        "bytes": 45208,
+        "sha256": "f1b15c7089815f83561ba9e1324fd4f79d32275230ad2d8de43751d57e5f2b7f",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -8327,6 +8878,28 @@
       }
     },
     {
+      "id": "memorialThumb:demon_king",
+      "source": "./assets/memorial-webp/demon_king.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/demon_king.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "677442b0fd18cef04313f10546e7c1088fba487a6a2971bd881aab078f290792",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/demon_king.webp",
+        "bytes": 15364,
+        "sha256": "faffd0f732ce5009d0262b96e37ad19de113442cce908f0ae0135eda1320f2a2",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
       "id": "memorialThumb:storm_sage",
       "source": "./assets/memorial-webp/storm_sage.webp",
       "profile": "memorialThumb",
@@ -8494,6 +9067,28 @@
         "path": "./assets/optimized/ui/memorial-thumbs/ash.webp",
         "bytes": 13544,
         "sha256": "82afef64f7d5e5571de737127cdcaba4f80ab624c0d4fd6f186252d69d6d8b7f",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:miracle_larva",
+      "source": "./assets/memorial-webp/miracle_larva.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/miracle_larva.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "6f5877b341977230ebc7cfadb9a22c15ccda99abfd9d7ca79e8e8dab8bd567f5",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/miracle_larva.webp",
+        "bytes": 13972,
+        "sha256": "533779c1daabc093d7e23f3056331d0a2f62b8e0bf15c4e69671c270cac4e63d",
         "metadata": {
           "width": 240,
           "height": 360,

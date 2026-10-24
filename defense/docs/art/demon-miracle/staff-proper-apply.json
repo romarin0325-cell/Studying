@@ -1,0 +1,22 @@
+{
+  "refs": [
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png",
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-67a21f50-aad2-4cda-814f-49f4c5ed3f4b.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png"
+  ],
+  "prompt": "Use case: precise-object-edit / identity-preserve. Image1 is the existing transparent 2x2 SD character ATLAS target. Preserve exactly the character faces, bodies, hair, clothes, wings and proper closed BACK skirt. Replace only the failed staffs with the NEW authoritative simplified prop in image2. Image2 preserves the ORIGINAL THREE-DIMENSIONAL DIAMOND crystal, its raised central apex, sloping facets, original apparent silhouette, swept gold feather scroll frame, lower gold leaves and tiny green inset. Do NOT flatten it into a square panel, unrotate its crystal or redesign a geometric frame. Copy its volumetric design literally, uniformly scaled to SD, rigidly rotated as one object. Shaft is a clean straight gold stem; shaft, grip and neck align without bending or sideways elbow. Keep the head mounted rigidly at same angle as master image2; no melting/crooked curls or separately rotated head. Front view should display the master's 3/4 diamond volume, not a flat frontal square. Back is the reverse face of that same rigid prop, genuine profile views show its narrow side thickness; do not stamp the frontal gemstone into sides. Image3 is ONLY the 3D BODY/LEFT-HAND/WING OCCLUSION GUIDE, not a staff design source: BACK wings must hide overlapping left hand/forearm/shaft; the staffhead above and lower shaft tip may remain visible. Grip stays in anatomical LEFT hand. Do not copy the crude gold prop geometry in image3. Keep gold frame intricacy readable but use the exact large curves from master image2, not extra coils. No changes to ANY other character element or atlas layout. All four full figures, native TRANSPARENT alpha, no glow/background/particles/shadows. The golden haze behind the reference is NOT part of the prop and must not be transferred. Final crisp commercial SD game asset.",
+  "inputs": [
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png",
+      "sha256": "5564cca9b065422e6b8a2e4efcf3a129101709876218ceaea3ce449e1d46702d"
+    },
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-67a21f50-aad2-4cda-814f-49f4c5ed3f4b.png",
+      "sha256": "309f9d585dfa2704a70b3cdf19c44caf3a5069b64ba6647817e788a40a1ce157"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+      "sha256": "32778ce6ed2cc8826669df89d23408347475dbfcb0ba17e4a0818081bf385aaf"
+    }
+  ]
+}

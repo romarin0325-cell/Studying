@@ -1,0 +1,231 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "cases": [
+    {
+      "theme": "night",
+      "before": {
+        "gauge": 120,
+        "forms": [
+          {
+            "uid": 7,
+            "form": "miracle_larva",
+            "rank": 1
+          },
+          {
+            "uid": 8,
+            "form": "miracle_cocoon",
+            "rank": 2
+          },
+          {
+            "uid": 9,
+            "form": "miracle_wing",
+            "rank": 3
+          },
+          {
+            "uid": 10,
+            "form": "abyss_wing",
+            "rank": 3
+          }
+        ]
+      },
+      "after": {
+        "gauge": 70.075,
+        "forms": [
+          {
+            "uid": 7,
+            "form": "abyss_wing",
+            "rank": 1
+          },
+          {
+            "uid": 8,
+            "form": "miracle_wing",
+            "rank": 2
+          },
+          {
+            "uid": 9,
+            "form": "miracle_wing",
+            "rank": 3
+          },
+          {
+            "uid": 10,
+            "form": "abyss_wing",
+            "rank": 3
+          }
+        ]
+      },
+      "blocked": "미라클라바의 기적의우화 · 우화할 개체 없음",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "images": [],
+        "buttons": [
+          {
+            "x": 8,
+            "y": 702.25,
+            "right": 78.796875,
+            "bottom": 766.25
+          },
+          {
+            "x": 83.796875,
+            "y": 702.25,
+            "right": 154.59375,
+            "bottom": 766.25
+          },
+          {
+            "x": 159.59375,
+            "y": 702.25,
+            "right": 230.390625,
+            "bottom": 766.25
+          },
+          {
+            "x": 235.390625,
+            "y": 702.25,
+            "right": 306.1875,
+            "bottom": 766.25
+          },
+          {
+            "x": 311.1875,
+            "y": 702.25,
+            "right": 382,
+            "bottom": 766.25
+          },
+          {
+            "x": 8,
+            "y": 771.25,
+            "right": 168.875,
+            "bottom": 814
+          },
+          {
+            "x": 174.875,
+            "y": 771.25,
+            "right": 275.4375,
+            "bottom": 814
+          },
+          {
+            "x": 281.4375,
+            "y": 771.25,
+            "right": 382,
+            "bottom": 814
+          }
+        ]
+      }
+    },
+    {
+      "theme": "bright",
+      "before": {
+        "gauge": 120,
+        "forms": [
+          {
+            "uid": 7,
+            "form": "miracle_larva",
+            "rank": 1
+          },
+          {
+            "uid": 8,
+            "form": "miracle_cocoon",
+            "rank": 2
+          },
+          {
+            "uid": 9,
+            "form": "miracle_wing",
+            "rank": 3
+          },
+          {
+            "uid": 10,
+            "form": "abyss_wing",
+            "rank": 3
+          }
+        ]
+      },
+      "after": {
+        "gauge": 70.075,
+        "forms": [
+          {
+            "uid": 7,
+            "form": "abyss_wing",
+            "rank": 1
+          },
+          {
+            "uid": 8,
+            "form": "miracle_wing",
+            "rank": 2
+          },
+          {
+            "uid": 9,
+            "form": "miracle_wing",
+            "rank": 3
+          },
+          {
+            "uid": 10,
+            "form": "abyss_wing",
+            "rank": 3
+          }
+        ]
+      },
+      "blocked": "미라클라바의 기적의우화 · 우화할 개체 없음",
+      "geometry": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "images": [],
+        "buttons": [
+          {
+            "x": 8,
+            "y": 702.25,
+            "right": 78.796875,
+            "bottom": 766.25
+          },
+          {
+            "x": 83.796875,
+            "y": 702.25,
+            "right": 154.59375,
+            "bottom": 766.25
+          },
+          {
+            "x": 159.59375,
+            "y": 702.25,
+            "right": 230.390625,
+            "bottom": 766.25
+          },
+          {
+            "x": 235.390625,
+            "y": 702.25,
+            "right": 306.1875,
+            "bottom": 766.25
+          },
+          {
+            "x": 311.1875,
+            "y": 702.25,
+            "right": 382,
+            "bottom": 766.25
+          },
+          {
+            "x": 8,
+            "y": 771.25,
+            "right": 168.875,
+            "bottom": 814
+          },
+          {
+            "x": 174.875,
+            "y": 771.25,
+            "right": 275.4375,
+            "bottom": 814
+          },
+          {
+            "x": 281.4375,
+            "y": 771.25,
+            "right": 382,
+            "bottom": 814
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "limits": "Offline desktop Chromium at mobile viewport; no physical-device FPS or long-run win-rate claim."
+}

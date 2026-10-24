@@ -20,7 +20,7 @@ export function resumeBattle(profile){
   const a=profile.active;if(!a?.run)return null;
   const s=engine.restore(a.run);if(!s||s.mode!==a.mode||s.chapter!==a.stage-1||s.deck.join()!==a.deck.join())return null;
   const expected=createBattle(profile);
-  if(!expected||JSON.stringify(s.meta)!==JSON.stringify(expected.meta)||s.relicAttack!==expected.relicAttack||JSON.stringify(s.relicLevels||{})!==JSON.stringify(expected.relicLevels)||(s.gaugeMax||engine.GAUGE_MAX)!==expected.gaugeMax||s.crit!==undefined&&JSON.stringify(s.crit)!==JSON.stringify(expected.crit)||s.artifacts.join()!==expected.artifacts.join()||s.boon!==a.boon||s.seed!==a.seed||(s.tier||'easy')!==(a.tier||'easy'))return null;
+  if(!expected||JSON.stringify(s.meta)!==JSON.stringify(expected.meta)||s.relicAttack!==expected.relicAttack||JSON.stringify(s.relicLevels||{})!==JSON.stringify(expected.relicLevels)||(s.gaugeMax||engine.GAUGE_MAX)!==expected.gaugeMax||s.critRevision===2&&s.crit!==undefined&&JSON.stringify(s.crit)!==JSON.stringify(expected.crit)||s.artifacts.join()!==expected.artifacts.join()||s.boon!==a.boon||s.seed!==a.seed||(s.tier||'easy')!==(a.tier||'easy'))return null;
   return s;
 }
 // Optional helper keeps idle play moving; it never changes targets or placement.
@@ -32,7 +32,7 @@ export function autoPlay(s){
   for(const from of occupied){const to=occupied.find(i=>engine.canMerge(s.board[from],s.board[i]));if(to!==undefined){engine.move(s,from,to);return;}}
   if(s.board.filter(Boolean).length<23&&s.gold>=engine.summonCost(s)){engine.summon(s);return;}
   if(s.enemies.some(e=>e.boss)&&s.gauge>=60){
-    const best=s.deck.filter(id=>engine.bestUnit(s,id)&&s.gauge>=HERO[id].skill.cost&&s.gold>=engine.skillGoldCost(id)).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));
+    const best=s.deck.filter(id=>engine.bestUnit(s,id)&&!engine.castLock(s,id)&&s.gauge>=HERO[id].skill.cost&&s.gold>=engine.skillGoldCost(id)).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));
     if(best.length){engine.cast(s,best[0]);return;}
   }
   const id=s.deck.find(id=>s.upgrades[id]<5&&s.gold>=engine.upgradeCost(s,id));if(id)engine.upgrade(s,id);

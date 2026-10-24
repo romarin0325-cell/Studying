@@ -1,0 +1,17 @@
+{
+  "refs": [
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-45522e2e-b86a-46ba-9aab-ba36cad34fd2.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp"
+  ],
+  "prompt": "Use case: style-transfer with identity preservation. Image1 is a faithfully isolated ORIGINAL STAFF, authoritative physical geometry. Image2 is SD GAME STYLE ONLY. Make ONE simplified production prop reference of image1, preserving the original camera angle and projected shape. This is a THREE-DIMENSIONAL DIAMOND GEM with a raised central apex and multiple sloping crystal faces, not a flat four-colour square tile; KEEP its exact outline, centre peak, facet slopes, thickness and mount from image1. Do not geometrically 'correct', flatten, unrotate or normalize the stone into a new shape. Keep flowing gold frame outline, major scrolls, feather sweeps and the two gold leaves around green inset. Simplify micro-engraved parallel gold veins to just one highlight on each main leaf, reduce repeated little feather tips to 2-3 broad tips per main sweep, simplify internal crystal glints to 6-8 clear facet planes so volume remains obvious. Match image2's crisp narrow navy contour, clean cel shadows and small polished highlights, not detailed painterly metal. Keep the SAME straight shaft and same whole-object angle as image1; staff head centre, neck and shaft form one coherent rigid object, do not bend or stretch. Only remove tiny decorative clutter and change rendering style. No new outline, no ornament redesign, no extra jewel, no flat framed panel, no fantasy replacement staff. Full isolated object, GENEROUS TRANSPARENT MARGINS with no glow, vignette, coloured smoke, ground, lighting aura or shadow at all. No text, labels, background or multiple views. Native transparent alpha. Delicate, simple, readable at small sprite scale while unmistakably the original staff.",
+  "inputs": [
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-45522e2e-b86a-46ba-9aab-ba36cad34fd2.png",
+      "sha256": "a832feb7b627aac948ed9b5e05fc56b048b8c9856245e477f41de19c96c06e8d"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    }
+  ]
+}
