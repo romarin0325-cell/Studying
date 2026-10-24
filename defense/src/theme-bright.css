@@ -79,11 +79,19 @@ body{color:var(--text)}
 .chap.all-perfect[aria-pressed=true] small{color:#fff3c0}
 
 /* Summon spotlight is mapped onto daylight, so the night cream title would vanish. Navy (UR amber) on the light stage. */
+.spot-veil{background:radial-gradient(ellipse 80% 50% at 50% 38%,color-mix(in srgb,var(--spot) 28%,#fff),transparent 70%),linear-gradient(180deg,rgba(255,255,255,.35),rgba(214,230,255,.94) 48%,#e4f0ff 100%)}
+.reveal-spot.is-ur .spot-veil{background:radial-gradient(ellipse 72% 48% at 50% 34%,rgba(255,196,80,.48),transparent 68%),linear-gradient(180deg,#fff6e4 0%,#f6e8ff 48%,#e7f1ff 100%)}
+.spot-plate{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--spot) 14%,rgba(255,255,255,.94)) 14%,color-mix(in srgb,var(--spot) 14%,rgba(255,255,255,.94)) 86%,transparent)}
 .spot-copy h3{background:linear-gradient(180deg,#2f86f6,#16336e);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 1px 0 #fff)}
+.reveal-spot[data-rarity=R] .spot-copy h3{background:linear-gradient(180deg,#1b6fd0,#16336e);-webkit-background-clip:text;background-clip:text}
+.reveal-spot[data-rarity=SR] .spot-copy h3{background:linear-gradient(180deg,#7a45c4,#3a1868);-webkit-background-clip:text;background-clip:text}
 .reveal-spot.is-ur .spot-copy h3{background:linear-gradient(180deg,#e39b14,#8a5600);-webkit-background-clip:text;background-clip:text}
 .reveal-spot[data-rarity=C]{--spot:#4d5d78}
 .reveal-spot[data-rarity=R]{--spot:#1b6fd0}
 .reveal-spot[data-rarity=SR]{--spot:#7a45c4}
 .reveal-spot[data-rarity=UR]{--spot:#a86c00}
 .spot-line{color:#1d2a47;text-shadow:0 0 6px rgba(255,255,255,.95),0 0 2px #fff}
+.spot-role{color:#3d4e72}
+.spot-figure img,.reveal-spot.is-settled .spot-figure img{filter:drop-shadow(0 12px 14px rgba(46,78,140,.35))}
+.spot-skip{color:#1d2a47;background:rgba(255,255,255,.9);border-color:rgba(58,96,168,.28)}
 .lucky-banner{background:linear-gradient(180deg,#e39b14,#d94a80);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 1px 0 #fff) drop-shadow(0 0 8px rgba(255,255,255,.9))}
