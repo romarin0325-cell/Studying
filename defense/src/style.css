@@ -1453,11 +1453,15 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .mode-record small{display:block;font-size:11px;color:var(--text3)}
 .mode-record b{font-family:var(--display);font-weight:400;font-size:22px}
 .mode-record b em{font-style:normal;font-size:13px;color:var(--text3)}
-.mode-record>div>span{font-size:11px;color:var(--text2)}
+.mode-record>div>span{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:8px;vertical-align:4px;font-size:11px;font-weight:700;color:var(--text2);background:rgba(255,255,255,.08)}
 .mode-record .secondary{gap:6px}
-.mode-hint{font-size:12px;color:var(--text2)}
-.mode-claimed{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;color:var(--teal)}
-.mode-claimed .ic{width:14px;height:14px}
+.mode-reward{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:none;min-height:42px;justify-content:center}
+.mode-reward small{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--text3)}
+.mode-reward small .ic{width:12px;height:12px}
+.mode-record .mode-reward .cost b,.mode-record .mode-claim .cost b{font-family:var(--display);font-weight:400;font-size:19px;font-variant-numeric:tabular-nums;color:var(--gem)}
+.mode-reward .cost .ic,.mode-claim .cost .ic{width:18px;height:18px}
+.mode-reward.preview .cost{opacity:.78}
+.mode-reward.paid small{color:var(--teal);font-weight:800}
 .prep-boss{position:relative;padding:14px;border-radius:16px;margin-bottom:12px;background:linear-gradient(160deg,rgba(110,40,70,.5),rgba(20,24,60,.9)) padding-box,var(--frame) border-box;border:1px solid transparent}
 .prep-boss small{font-size:11px;color:var(--text3)}
 .prep-boss h2{font-family:var(--display);font-weight:400;font-size:26px}

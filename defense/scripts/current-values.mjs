@@ -43,6 +43,8 @@ export function currentValues(){
     `| 베히모스 대지분쇄 | 위력 ${E.CRUSH.factor}배 × ${E.CRUSH.hits}회, 기본 반경 ${E.CRUSH.radius}, 훈련마다 기본 반경 +${E.CRUSH.trainingRadius*100}%, 간격 ${E.CRUSH.gap}초, 저장 한도 ${E.CRUSH.queue}회분 |`,
     `| 애쉬 아마겟돈 | 위력 ${E.ARMAGEDDON.factor}배, 반경 ${E.ARMAGEDDON.radius} |`,
     `| 신데렐라 자정의 기적 | 위력 ${E.CINDERELLA.ult}배 |`,
+    `| 화상 | 일반 공격 위력 ${num(E.BURN.attack*100)}% · ${E.BURN.attackSeconds}초, 필살기 위력 ${num(E.BURN.skill*100)}% · ${E.BURN.skillSeconds}초 (초당) |`,
+    `| 시간의마술사 트라우마 | 위력 +${num(E.TRAUMA.power*100)}% · 공속 +${num(E.TRAUMA.speed*100)}% |`,
     `| 루미 꿈의 형태 | ${E.RUMI_DREAM.phases.map(p=>p.factor+'배').join(' · ')} |`,'',
     '| 필살기 버프 | 위력 | 공속 | 지속 |','|---|---|---|---|',
     ...Object.entries(E.ULT_BUFF).map(([id,b])=>`| ${id} | ${b.power!==undefined?'+'+num(b.power*100)+'%':b.ratio!==undefined?'평타 반복 '+num(b.ratio*100)+'%':'-'} | ${b.speed!==undefined?'+'+num(b.speed*100)+'%':'-'} | ${b.seconds}초 |`),'');

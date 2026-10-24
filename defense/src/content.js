@@ -75,7 +75,7 @@ export const TUNING=Object.freeze({
   specialStep:.10,specialEvery:5,dispatchHours:24,dispatchStageStep:.05,
   // Dispatch pays mostly dust; a small crystal share keeps it worth sending once dust is spare.
   dispatchDust:1.5,dispatchDreams:.3,
-  idleHours:20,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
+  idleHours:24,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
   // Dream greenhouse beds (docs/GARDEN_BALANCE.md): a steady slope to the knee, a firmer one to knee2, then a soft cap.
   // Each bed's knee meets the next bed's opening (rose 25 ≈ stage 15, spring 18 ≈ stage 30). Later beds start at the
   // price of that stage's income and meet the earlier beds' prices in the soft cap. knee is the bloom (만개) stage.
