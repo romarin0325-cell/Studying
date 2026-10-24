@@ -151,8 +151,8 @@
     },
     {
       "id": "unit-phantom",
-      "source": "defense/assets/cast-v2/phantom.webp",
-      "sha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a",
+      "source": "defense/assets/cast-v2/phantom-pajamas-guided.webp",
+      "sha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
       "width": 1024,
       "height": 1024
     },

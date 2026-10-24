@@ -1,0 +1,27 @@
+{
+  "mode": "built-in image_gen",
+  "roles": [
+    "current Phantom edit target",
+    "original costume authority",
+    "older SD costume cross-check",
+    "current cast rendering reference"
+  ],
+  "refs": [
+    {
+      "file": "defense/assets/cast-v2/phantom.png",
+      "sha256": "c398022d3ca7d98e584eb0d0f2a5f811574364534d6ccc79f6413d486eedc52c"
+    },
+    {
+      "file": "C:/Users/romar/Downloads/캐릭터/팬텀.png",
+      "sha256": "c12dc373eca65c8301bed054247ecd485c9d4cea852bc2299e040580393afd6d"
+    },
+    {
+      "file": "defense/assets/merge/units/phantom.webp",
+      "sha256": "cab961eaafdf42655c2f72e6812ff01565d7860c07310d33b6b9952aba087902"
+    },
+    {
+      "file": "defense/assets/cast-v2/siren.png",
+      "sha256": "c5add9bf92e25aa9f84edca63a0a56e6ee175a7b131614965f42afb6246237ed"
+    }
+  ]
+}

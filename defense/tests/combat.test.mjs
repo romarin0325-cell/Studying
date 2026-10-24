@@ -1395,10 +1395,13 @@ test('twin echoes royal, starfall and mirror finishers 1.5s after they land, and
 test('alchemy bonuses a merged unit for its wave window starting on the merge wave, and older saves have no bonus',()=>{
   const ratio=(s,u)=>E.combatStats(s,u).damage/E.power(s,u);
   const {power,waves}=E.RELIC_VALUES.alchemy;
+  assert.equal(waves,2,'the merge wave and the next wave only');
   const s=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{artifacts:['alchemy'],wave:2});
   s.relicLevels={alchemy:5};const bonus=1+power*relicScale(5);
   assert.ok(E.move(s,0,1).merged);const u=s.board[1];assert.equal(u.mergedWave,2);
   for(let wave=2;wave<2+waves;wave++){s.wave=wave;close(ratio(s,u),bonus);}
+  s.wave=3;const continued=E.restore(E.serialize(s));assert.ok(continued);close(ratio(continued,continued.board[1]),bonus);
+  continued.wave=4;close(ratio(continued,continued.board[1]),1,'restoring cannot grant a third wave');
   s.wave=2+waves;close(ratio(s,u),1);
   const bare=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1}],{wave:2});
   assert.ok(E.move(bare,0,1).merged);assert.equal(bare.board[1].mergedWave,2);close(ratio(bare,bare.board[1]),1);

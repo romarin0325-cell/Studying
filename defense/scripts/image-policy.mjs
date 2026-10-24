@@ -2,6 +2,8 @@ import {HEROES,ARTIFACTS,ASSET_PATHS} from '../src/content.js';
 import {BUILD_ONLY_ATLASES} from '../src/asset-policy.js';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS} from '../src/memorial-media.js';
 import {LIBRARY_ART} from '../src/library.js';
+import {portraitFrame} from '../src/portrait-layout.js';
+export {PORTRAIT_NUDGE} from '../src/portrait-layout.js';
 
 export const BRIGHT_ART=Object.freeze({garden:'./assets/bright/garden.webp','summon-altar':'./assets/bright/summon-altar.webp',greenhouse:'./assets/bright/greenhouse.webp'});
 export const IMAGE_PROFILES=Object.freeze({
@@ -43,14 +45,13 @@ export function imageInputs(){
 // so changes to portraits, relic grid positions or crop sizes invalidate old files.
 // Owner-requested visual centring for collection portraits (2026-10-24), applied on top of the measured face centre
 // in art.portrait: hair mass and held props made these read slightly left or high. Offsets are in the 512 frame.
-export const PORTRAIT_NUDGE=Object.freeze({toffee_apple:[-7,0],harmonious:[-7,0],time_magician:[-7,0],doom:[0,-8],rumi:[0,-8]});
 export function derivedImageInputs(){
   const inputs=[];
   for(const h of HEROES){
-    const source=ASSET_PATHS[h.art.atlas],p=h.art.portrait;
+    const source=ASSET_PATHS[h.art.atlas],p=portraitFrame(h);
     if(!p)throw new Error('Missing reviewed portrait frame: '+h.id);
     inputs.push({id:'portrait:'+h.id,source,profile:'portrait',
-      crop:{left:Math.round(p.x+(PORTRAIT_NUDGE[h.id]?.[0]||0)-p.size/2),top:Math.round(p.y+(PORTRAIT_NUDGE[h.id]?.[1]||0)-p.size/2),width:p.size,height:p.size},
+      crop:{left:Math.round(p.x-p.size/2),top:Math.round(p.y-p.size/2),width:p.size,height:p.size},
       destination:'./assets/optimized/ui/portraits/'+h.id+'.webp',uses:['window.__GARDEN_MEDIA__; collection / party / summon']});
     inputs.push({id:'figure:'+h.id,source,profile:'figure',crop:{left:0,top:0,width:512,height:512},
       destination:'./assets/optimized/ui/figures/'+h.id+'.webp',uses:['window.__GARDEN_MEDIA__; home / details / cut-in / results']});

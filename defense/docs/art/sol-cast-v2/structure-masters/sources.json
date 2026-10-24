@@ -1,0 +1,151 @@
+{
+  "archive": "C:/Users/romar/Downloads/캐릭터/에셋/gpt/cast-v2-20261024",
+  "retainedAt": "2026-10-24",
+  "purpose": "Preserve the existing nine 3D structure masters, actual Phantom guide and frozen Siren style reference. Candidate pajamas-v1 did not use these as inputs; final guided generation records its actual reference order in ../../phantom-20261024/inputs.json.",
+  "records": [
+    {
+      "file": "feminine-medium.json",
+      "source": "masters/feminine-medium.json",
+      "bytes": 2653,
+      "sha256": "d28af0e28a99b024dc8035e5c657e16130d8ea3c22437b386440684c96505167",
+      "normalizedLfSha256": "d28af0e28a99b024dc8035e5c657e16130d8ea3c22437b386440684c96505167"
+    },
+    {
+      "file": "feminine-medium.png",
+      "source": "masters/feminine-medium.png",
+      "bytes": 144070,
+      "sha256": "fda26a1d652e6a7ebd0c76949983c2a46aedc41d88e42fed8a769b41754caff6"
+    },
+    {
+      "file": "feminine-short.json",
+      "source": "masters/feminine-short.json",
+      "bytes": 2644,
+      "sha256": "4f38bdb9912612cd19e2189979a2c62a62b39502cd30219ad53c44e9713b6ebe",
+      "normalizedLfSha256": "4f38bdb9912612cd19e2189979a2c62a62b39502cd30219ad53c44e9713b6ebe"
+    },
+    {
+      "file": "feminine-short.png",
+      "source": "masters/feminine-short.png",
+      "bytes": 141095,
+      "sha256": "2a044242bfcc4e600185927656610512c5f131f700bd52de052517726c067e19"
+    },
+    {
+      "file": "feminine-tall.json",
+      "source": "masters/feminine-tall.json",
+      "bytes": 2640,
+      "sha256": "405186953f08fa3ece140654805aaf1fe322b0de2e0288c2d32344a962032963",
+      "normalizedLfSha256": "405186953f08fa3ece140654805aaf1fe322b0de2e0288c2d32344a962032963"
+    },
+    {
+      "file": "feminine-tall.png",
+      "source": "masters/feminine-tall.png",
+      "bytes": 146988,
+      "sha256": "30c2e1536702512fd0bf05100b5058d37e8f572f128f14e93f58ceb74f3d3db4"
+    },
+    {
+      "file": "masculine-medium.json",
+      "source": "masters/masculine-medium.json",
+      "bytes": 2648,
+      "sha256": "3dd02646351223e8be298501b1a18e7c5782a2d787c8a062395c5ba4d223d61e",
+      "normalizedLfSha256": "3dd02646351223e8be298501b1a18e7c5782a2d787c8a062395c5ba4d223d61e"
+    },
+    {
+      "file": "masculine-medium.png",
+      "source": "masters/masculine-medium.png",
+      "bytes": 155375,
+      "sha256": "3164faea32753f8449a49ee886c1052f980e36648deb1ba887e57fc72c468b07"
+    },
+    {
+      "file": "masculine-short.json",
+      "source": "masters/masculine-short.json",
+      "bytes": 2639,
+      "sha256": "02eac597298b9e5ad8975f6b316f3c30fd18557bf6db9911114fff4a2fa91446",
+      "normalizedLfSha256": "02eac597298b9e5ad8975f6b316f3c30fd18557bf6db9911114fff4a2fa91446"
+    },
+    {
+      "file": "masculine-short.png",
+      "source": "masters/masculine-short.png",
+      "bytes": 151616,
+      "sha256": "c2508f8f5b245a316f8deb86706418a21a9faf81043e030e80ccf7ae82be8cdf"
+    },
+    {
+      "file": "masculine-tall.json",
+      "source": "masters/masculine-tall.json",
+      "bytes": 2635,
+      "sha256": "fc6690775d82d909bf5342746fef9f03657d0e1dc249626724e03f77d33651b8",
+      "normalizedLfSha256": "fc6690775d82d909bf5342746fef9f03657d0e1dc249626724e03f77d33651b8"
+    },
+    {
+      "file": "masculine-tall.png",
+      "source": "masters/masculine-tall.png",
+      "bytes": 159006,
+      "sha256": "d3c6e8c09673e39407a85cd6a60f1d3155b546ddbd2eac894631423107fd03f2"
+    },
+    {
+      "file": "neutral-medium.json",
+      "source": "masters/neutral-medium.json",
+      "bytes": 2652,
+      "sha256": "6f00f40d2b9042fbc18828cd174d8db3f8c13250215e853859e37995eed8f092",
+      "normalizedLfSha256": "6f00f40d2b9042fbc18828cd174d8db3f8c13250215e853859e37995eed8f092"
+    },
+    {
+      "file": "neutral-medium.png",
+      "source": "masters/neutral-medium.png",
+      "bytes": 146790,
+      "sha256": "c913ee97a8414e1ab0cb8948797ea4e928da60c6ea5b470d06da08e5ae6687fd"
+    },
+    {
+      "file": "neutral-short.json",
+      "source": "masters/neutral-short.json",
+      "bytes": 2643,
+      "sha256": "e0530a03371601dca4da8304a45dd5b6bf589dadf614ac263f4b2b5dcdb2be4e",
+      "normalizedLfSha256": "e0530a03371601dca4da8304a45dd5b6bf589dadf614ac263f4b2b5dcdb2be4e"
+    },
+    {
+      "file": "neutral-short.png",
+      "source": "masters/neutral-short.png",
+      "bytes": 143904,
+      "sha256": "32b5a4f4a169b24c43aae55cb8197f0ed53151e5ec235aab5517292eb191b072"
+    },
+    {
+      "file": "neutral-tall.json",
+      "source": "masters/neutral-tall.json",
+      "bytes": 2639,
+      "sha256": "1df05594c00a4e8487ccca694e1f93163a9a60901dcd070d213b4fbb0d6be449",
+      "normalizedLfSha256": "1df05594c00a4e8487ccca694e1f93163a9a60901dcd070d213b4fbb0d6be449"
+    },
+    {
+      "file": "neutral-tall.png",
+      "source": "masters/neutral-tall.png",
+      "bytes": 149583,
+      "sha256": "1e1f2df598e2efdbff64498c35df960223e425e9602f6471c392390d714dd228"
+    },
+    {
+      "file": "phantom.png",
+      "source": "guides/phantom.png",
+      "bytes": 201562,
+      "sha256": "712051caa5711b73bcde664bbad2afa0adbc5f6d035f0102ce61a22451ae570f"
+    },
+    {
+      "file": "phantom.json",
+      "source": "guides/phantom.json",
+      "bytes": 2652,
+      "sha256": "3dfd7cfacb187fac29806bf4c74042321c0737f291bb85688bd61cfdddb9a2b7",
+      "normalizedLfSha256": "3dfd7cfacb187fac29806bf4c74042321c0737f291bb85688bd61cfdddb9a2b7"
+    },
+    {
+      "file": "style-siren.webp",
+      "source": "baseline/siren.webp",
+      "bytes": 179986,
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    },
+    {
+      "file": "common-prompt-v2-natural-idle.txt",
+      "source": "common-prompt-v2-natural-idle.txt",
+      "bytes": 3095,
+      "sha256": "57780e5e933f15946a8cfca6a7192c28571f6d66afe76e349b6cad9d1df546b9",
+      "normalizedLfSha256": "57780e5e933f15946a8cfca6a7192c28571f6d66afe76e349b6cad9d1df546b9"
+    }
+  ],
+  "hashPolicy": "sha256 records exact bytes copied from the original archive. Git can normalize text line endings; for JSON/TXT compare normalizedLfSha256. PNG/WebP hashes remain byte-exact."
+}

@@ -1,0 +1,101 @@
+{
+  "method": "Actual archived Phantom neutral-short 3D guide and frozen Siren style were generation inputs. Manual anatomical skull/face estimates exclude hair spikes, hood and bear. Back skull inferred under hair. Separate facial landmarks are reviewed; not a 3D ground-truth measurement.",
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "ellipses": [
+    [
+      350,
+      264,
+      250,
+      236,
+      -7
+    ],
+    [
+      908,
+      265,
+      250,
+      236,
+      0
+    ],
+    [
+      362,
+      829,
+      228,
+      232,
+      0
+    ],
+    [
+      895,
+      829,
+      228,
+      232,
+      0
+    ]
+  ],
+  "chins": [
+    [
+      347,
+      382
+    ],
+    [
+      908,
+      383
+    ],
+    [
+      314,
+      949
+    ],
+    [
+      940,
+      949
+    ]
+  ],
+  "feet": [
+    [
+      367,
+      645
+    ],
+    [
+      900,
+      648
+    ],
+    [
+      362,
+      1208
+    ],
+    [
+      899,
+      1208
+    ]
+  ],
+  "rects": [
+    {
+      "left": 0,
+      "top": 0,
+      "width": 627,
+      "height": 660
+    },
+    {
+      "left": 627,
+      "top": 0,
+      "width": 627,
+      "height": 660
+    },
+    {
+      "left": 0,
+      "top": 660,
+      "width": 627,
+      "height": 594
+    },
+    {
+      "left": 627,
+      "top": 660,
+      "width": 627,
+      "height": 594
+    }
+  ]
+}

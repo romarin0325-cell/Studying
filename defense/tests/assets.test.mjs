@@ -10,9 +10,10 @@ import {assetFile} from '../scripts/local-inputs.mjs';
 import {loadImagePack} from '../scripts/image-pack.mjs';
 import {BUILD_ONLY_ATLASES,RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
 import {Art} from '../src/combat/render.js';
+import {portraitFrame} from '../src/portrait-layout.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 
-test('installed cast v2 matches the 40 approved masters and uses anatomical face crops and one floor scale',async()=>{
+test('installed cast v2 matches the 40 selected masters and keeps anatomy separate from optical crops',async()=>{
   const manifest=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/sol-cast-v2/manifest.json'),'utf8'));
   assert.equal(manifest.assets.length,40);
   const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
@@ -22,7 +23,7 @@ test('installed cast v2 matches the 40 approved masters and uses anatomical face
     assert.deepEqual(entry.frames.map(f=>f.direction),['down','up','left','right']);
     assert.equal(installed.foot,.9375);assert.equal(installed.scale,1);assert.equal(installed.columns,2);assert.equal(installed.directional,true);
     assert.equal(installed.portrait.x,Math.round(frame.ellipse[0]));assert.equal(installed.portrait.y,Math.round(frame.ellipse[1]));
-    assert.equal(ASSET_PATHS[installed.atlas],'./assets/cast-v2/'+entry.id+'.webp');
+    assert.equal(ASSET_PATHS[installed.atlas],'./'+entry.sourceWebp.file.replace(/^defense\//,''));
     for(const record of [entry.sourcePng,entry.sourceWebp]){
       const bytes=await fs.readFile(path.join(root,record.file));
       assert.equal(bytes.length,record.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256,record.file);
@@ -31,6 +32,20 @@ test('installed cast v2 matches the 40 approved masters and uses anatomical face
     assert.ok(entry.measurementUncertaintyPacked>0,'covered head estimates must not imply exact ground truth');
   }
 });
+test('summon face crops and prepared portraits share optical framing without moving anatomy',async()=>{
+  const {derivedImageInputs}=await import('../scripts/image-policy.mjs');
+  const crops=new Map(derivedImageInputs().filter(x=>x.id.startsWith('portrait:')).map(x=>[x.id.slice(9),x]));
+  for(const hero of HEROES){
+    const anatomy={...hero.art.portrait},frame=portraitFrame(hero),prepared=crops.get(hero.id);
+    assert.ok(prepared,hero.id);
+    assert.equal(frame.size,anatomy.size,'optical centering cannot rescale the face');
+    assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=8,'only small optical translations');
+    assert.deepEqual(hero.art.portrait,anatomy,'anatomical measurement is preserved');
+    assert.deepEqual(prepared.crop,{left:Math.round(frame.x-frame.size/2),top:Math.round(frame.y-frame.size/2),width:frame.size,height:frame.size},hero.id);
+  }
+  assert.equal(portraitFrame(HEROES.find(h=>h.id==='toffee_apple')).x, HEROES.find(h=>h.id==='toffee_apple').art.portrait.x-7);
+});
+
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
   assert.equal(Object.keys(ASSET_PATHS).length,74);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
