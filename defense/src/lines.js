@@ -2,6 +2,10 @@
 // talk: tapping the partner cycles these. close: added from six hearts. greet: the daily greeting (인사).
 const L=(talk,close,greet)=>({talk,close,greet});
 export const PARTNER_LINES=Object.freeze({
+  demon_king:L(['마왕성의 주인이 직접 왔는데, 차 한 잔쯤은 내어야 하지 않겠느냐?','왕국도 제국도 시끄럽기는 매한가지로군. 여기는 마음에 든다.','데스핸드로 화분을 옮겨 달라고? …흥, 깨뜨리면 안 된다는 말이지.'],
+    '오늘은 옥좌보다 이 자리가 편하구나. 네가 옆에 있으니 말이다.',['왔느냐. 마침 네 자리를 비워 두었다.','이 마왕을 기다리게 하다니. …차는 아직 따뜻하구나.']),
+  miracle_larva:L(['이 잎, 햇빛에 비추면 길이 보여. 신기하지?','날개가 생기면 어디부터 가 볼까? 아직 천천히 정해도 되겠지.','잠깐만, 후드 끈이 가지에 걸렸어. 헤헤, 풀어 줄래?'],
+    '어떤 날개가 돋아도 나인 건 똑같아. 그러니까… 그때도 알아봐 줘.',['안녕! 오늘은 이 나뭇가지 옆에 같이 앉자.','일찍 왔네. 햇볕 드는 자리 하나 남겨 뒀어!']),
   star_boy:L(['야호-! 오늘의 배달 경로도 정원 한 바퀴 완료!','별똥별은 떨어지는 게 아니라 배달하러 오는 거야!','잠깐, 이거 형아 앞으로 온 소포였나? 헤헤, 농담!'],
     '어디로 배달을 가도… 마지막 도착지는 늘 형아한테야.',['띵동! 오늘 첫 배달은 형아한테 인사부터!','1초 만에 날아왔어! 오늘도 잘 부탁해, 형아!']),
   snow_rabbit:L(['차를 내 올까요? 이번엔 꼭 따뜻할 거예요.','삐익?! 귀, 귀는 만지시면 안 돼요…!','메이드 님이 또 뭘 얼리지 않았는지 얼른 보고 올게요.'],
@@ -89,6 +93,8 @@ export const greetLine=(id,day='')=>{const g=PARTNER_LINES[id]?.greet||['…'];l
 // The first-meeting line on the summon spotlight (a new companion joins), in each companion's own voice.
 // A companion without one falls back to the first daily greeting.
 export const JOIN_LINES=Object.freeze({
+  demon_king:'짐을 불렀느냐. 좋다, 이 정원까지는 친히 지켜 주도록 하지.',
+  miracle_larva:'여기가 네 정원이야? 따뜻하다… 나도 여기서 자라도 돼?',
   star_boy:'띵동! 별똥별 특급 배달, 오늘부터 형아 전담이야!',
   snow_rabbit:'처음 뵙겠습니다! 오늘부터 이 정원의 차는 제가 끓일게요.',
   silver_rabbit:'기도가 닿았나 봐요. …당신을 만나게 해 달라고 빌었거든요.',

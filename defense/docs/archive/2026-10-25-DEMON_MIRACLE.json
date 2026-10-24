@@ -1,0 +1,2107 @@
+{
+  "date": "2026-10-25",
+  "budgets": {
+    "oldTo20": 140892,
+    "newTo20": 140904
+  },
+  "results": {
+    "base": {
+      "method": "Actual engine, simulate.mjs reference-board method; 30-second crowd/moving boss/stationary boss; candidate at centre/edge, better placement. Reference teams are explicit and include typical two-status and rich-status lineups. Only candidate ultimate is cast. Fixed-form rows deliberately exclude evolution cost; collector row includes its50-starlight evolution but no merges, so it is a high-wing-uptime bound, not a full-run tier list.",
+      "rank": 3,
+      "teams": 3,
+      "crit": {
+        "chance": 0.05,
+        "damage": 1.5
+      },
+      "references": [
+        [
+          "snow_rabbit",
+          "great_detective",
+          "silver_rabbit",
+          "red_dragon"
+        ],
+        [
+          "mushroom_king",
+          "guardian",
+          "siren",
+          "ash"
+        ],
+        [
+          "phantom",
+          "frost_witch",
+          "venom",
+          "jasmine"
+        ]
+      ],
+      "normalizers": {
+        "crowd": 18327.571912524123,
+        "boss": 8013.247225751175,
+        "long": 6785.901066170944
+      },
+      "rows": [
+        {
+          "id": "star_boy",
+          "hero": "star_boy",
+          "name": "별똥별소년",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 8425.223480493636,
+            "boss": 12568.234107310462,
+            "long": 11976.15123522737
+          },
+          "index": {
+            "crowd": 0.4597021100616318,
+            "boss": 1.568432091664599,
+            "long": 1.764857919154001
+          },
+          "mean": 1.2643307069600773
+        },
+        {
+          "id": "snow_rabbit",
+          "hero": "snow_rabbit",
+          "name": "눈토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 35172.635569886814,
+            "boss": 1625.500348030216,
+            "long": 1890.1407235606202
+          },
+          "index": {
+            "crowd": 1.9191104930736427,
+            "boss": 0.20285164081878665,
+            "long": 0.278539387051094
+          },
+          "mean": 0.8001671736478412
+        },
+        {
+          "id": "silver_rabbit",
+          "hero": "silver_rabbit",
+          "name": "은토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 13415.487438863853,
+            "boss": 9328.307613560395,
+            "long": 8072.511864772785
+          },
+          "index": {
+            "crowd": 0.7319838930598546,
+            "boss": 1.1641107968793443,
+            "long": 1.1896005830406
+          },
+          "mean": 1.0285650909932664
+        },
+        {
+          "id": "night_rabbit",
+          "hero": "night_rabbit",
+          "name": "밤토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 22256.49216265248,
+            "boss": 8621.714532537708,
+            "long": 9761.241741856142
+          },
+          "index": {
+            "crowd": 1.2143721093487314,
+            "boss": 1.0759326761854018,
+            "long": 1.4384591886430318
+          },
+          "mean": 1.2429213247257216
+        },
+        {
+          "id": "siren",
+          "hero": "siren",
+          "name": "세이렌",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 23732.467727235264,
+            "boss": 13829.266692234793,
+            "long": 7203.063438371075
+          },
+          "index": {
+            "crowd": 1.2949051756832946,
+            "boss": 1.7258005777974001,
+            "long": 1.0614748679847055
+          },
+          "mean": 1.3607268738218001
+        },
+        {
+          "id": "mushroom_king",
+          "hero": "mushroom_king",
+          "name": "머쉬룸킹",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 25805.229245402774,
+            "boss": 8293.5948519737,
+            "long": 7234.959306515362
+          },
+          "index": {
+            "crowd": 1.4080004360953458,
+            "boss": 1.0349855206415703,
+            "long": 1.0661751823325367
+          },
+          "mean": 1.1697203796898175
+        },
+        {
+          "id": "underdog",
+          "hero": "underdog",
+          "name": "언더독",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 4806.916205302694,
+            "boss": 3974.587095302913,
+            "long": 2944.4045492424557
+          },
+          "index": {
+            "crowd": 0.2622778526389463,
+            "boss": 0.4960020555125614,
+            "long": 0.4339003060213909
+          },
+          "mean": 0.3973934047242995
+        },
+        {
+          "id": "joker",
+          "hero": "joker",
+          "name": "조커",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 17699.751817613917,
+            "boss": 8575.490169977145,
+            "long": 5751.023459818386
+          },
+          "index": {
+            "crowd": 0.9657445024410906,
+            "boss": 1.070164182931878,
+            "long": 0.8474959189264301
+          },
+          "mean": 0.9611348680997995
+        },
+        {
+          "id": "sunflower",
+          "hero": "sunflower",
+          "name": "해바라기",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 13633.943565265683,
+            "boss": 5302.529620833247,
+            "long": 6239.613276174308
+          },
+          "index": {
+            "crowd": 0.7439034275974629,
+            "boss": 0.6617204575684582,
+            "long": 0.9194966468462106
+          },
+          "mean": 0.7750401773373773
+        },
+        {
+          "id": "great_detective",
+          "hero": "great_detective",
+          "name": "명탐정",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 24528.00257853001,
+            "boss": 9893.963820354631,
+            "long": 10955.055198133872
+          },
+          "index": {
+            "crowd": 1.3383116266355408,
+            "boss": 1.2347009322961646,
+            "long": 1.6143847502798094
+          },
+          "mean": 1.395799103070505
+        },
+        {
+          "id": "guardian",
+          "hero": "guardian",
+          "name": "가디언",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 34307.39537215899,
+            "boss": 578.7561591666769,
+            "long": 5867.94919352263
+          },
+          "index": {
+            "crowd": 1.8719007370919154,
+            "boss": 0.07222492241432416,
+            "long": 0.8647266053988782
+          },
+          "mean": 0.936284088301706
+        },
+        {
+          "id": "avalanche_maid",
+          "hero": "avalanche_maid",
+          "name": "메이드",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 23826.590874357527,
+            "boss": 5370.604808939299,
+            "long": 5657.349325416719
+          },
+          "index": {
+            "crowd": 1.3000407794376547,
+            "boss": 0.670215788635655,
+            "long": 0.833691689615064
+          },
+          "mean": 0.934649419229458
+        },
+        {
+          "id": "santa",
+          "hero": "santa",
+          "name": "산타",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 10939.439851440251,
+            "boss": 6685.267524734697,
+            "long": 4887.219698447062
+          },
+          "index": {
+            "crowd": 0.596884295620458,
+            "boss": 0.83427695869049,
+            "long": 0.7202020263470708
+          },
+          "mean": 0.7171210935526728
+        },
+        {
+          "id": "red_dragon",
+          "hero": "red_dragon",
+          "name": "레드드래곤",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 19491.623335341847,
+            "boss": 11237.555802219575,
+            "long": 8651.173639394076
+          },
+          "index": {
+            "crowd": 1.0635136737355957,
+            "boss": 1.402372282500762,
+            "long": 1.2748747078736355
+          },
+          "mean": 1.246920221369998
+        },
+        {
+          "id": "aurora",
+          "hero": "aurora",
+          "name": "아우로라",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 9660.331818769479,
+            "boss": 11498.829803996035,
+            "long": 13538.970525475848
+          },
+          "index": {
+            "crowd": 0.5270928339486205,
+            "boss": 1.4349775415693748,
+            "long": 1.995161791109848
+          },
+          "mean": 1.3190773888759477
+        },
+        {
+          "id": "toffee_apple",
+          "hero": "toffee_apple",
+          "name": "토피애플",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 42732.58069719593,
+            "boss": 5090.913863749927,
+            "long": 3603.2695076894393
+          },
+          "index": {
+            "crowd": 2.331600765292574,
+            "boss": 0.6353122174229058,
+            "long": 0.5309935220913327
+          },
+          "mean": 1.1659688349356043
+        },
+        {
+          "id": "antropy",
+          "hero": "antropy",
+          "name": "앤트로피",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 29297.477756705033,
+            "boss": 7066.936574621097,
+            "long": 4092.7011538637344
+          },
+          "index": {
+            "crowd": 1.5985465994371375,
+            "boss": 0.8819067196517989,
+            "long": 0.603118305727541
+          },
+          "mean": 1.027857208272159
+        },
+        {
+          "id": "demon_king",
+          "hero": "demon_king",
+          "name": "마왕",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 32465.814576818768,
+            "boss": 11100.45568988625,
+            "long": 5517.671410492488
+          },
+          "index": {
+            "crowd": 1.7714192982995907,
+            "boss": 1.3852630996101178,
+            "long": 0.8131081424100284
+          },
+          "mean": 1.3232635134399124
+        },
+        {
+          "id": "storm_sage",
+          "hero": "storm_sage",
+          "name": "폭풍의현자",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 38049.76778537965,
+            "boss": 11616.147241931658,
+            "long": 7032.739664810677
+          },
+          "index": {
+            "crowd": 2.076094311182508,
+            "boss": 1.4496179781652425,
+            "long": 1.0363752132889574
+          },
+          "mean": 1.520695834212236
+        },
+        {
+          "id": "flame_sage",
+          "hero": "flame_sage",
+          "name": "화염의현자",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 83290.00292296539,
+            "boss": 6472.895445793391,
+            "long": 2383.3943581061626
+          },
+          "index": {
+            "crowd": 4.544519226032842,
+            "boss": 0.8077743346033619,
+            "long": 0.35122739557578486
+          },
+          "mean": 1.9011736520706632
+        },
+        {
+          "id": "lightning_sage",
+          "hero": "lightning_sage",
+          "name": "번개의현자",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 33295.644002500885,
+            "boss": 5063.328725227104,
+            "long": 6874.827793674318
+          },
+          "index": {
+            "crowd": 1.816696950442647,
+            "boss": 0.6318697754582829,
+            "long": 1.0131046307095002
+          },
+          "mean": 1.1538904522034767
+        },
+        {
+          "id": "time_magician",
+          "hero": "time_magician",
+          "name": "시간의마술사",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 28355.522754319223,
+            "boss": 13569.387615386113,
+            "long": 9965.36535747734
+          },
+          "index": {
+            "crowd": 1.5471510841511151,
+            "boss": 1.693369396089498,
+            "long": 1.4685397355933543
+          },
+          "mean": 1.5696867386113225
+        },
+        {
+          "id": "ancient_dragon",
+          "hero": "ancient_dragon",
+          "name": "에인션트드래곤",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 22745.92005807743,
+            "boss": 11855.216770382714,
+            "long": 12134.332016501696
+          },
+          "index": {
+            "crowd": 1.2410765684969995,
+            "boss": 1.479452266527492,
+            "long": 1.7881681295051197
+          },
+          "mean": 1.502898988176537
+        },
+        {
+          "id": "phantom",
+          "hero": "phantom",
+          "name": "팬텀",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 29204.305483665972,
+            "boss": 9116.935992814273,
+            "long": 4545.969503693168
+          },
+          "index": {
+            "crowd": 1.5934628778463145,
+            "boss": 1.1377330233262128,
+            "long": 0.6699139081699441
+          },
+          "mean": 1.1337032697808238
+        },
+        {
+          "id": "cure_master",
+          "hero": "cure_master",
+          "name": "큐어마스터",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 14992.168552198133,
+            "boss": 5127.406727833133,
+            "long": 5870.794251643976
+          },
+          "index": {
+            "crowd": 0.8180117161048078,
+            "boss": 0.6398662843392406,
+            "long": 0.8651458655816607
+          },
+          "mean": 0.7743412886752363
+        },
+        {
+          "id": "ash",
+          "hero": "ash",
+          "name": "애쉬",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 42485.7387333666,
+            "boss": 11421.683315552933,
+            "long": 6188.173305632731
+          },
+          "index": {
+            "crowd": 2.3181324256233866,
+            "boss": 1.4253501725054096,
+            "long": 0.9119162282636267
+          },
+          "mean": 1.5517996087974744
+        },
+        {
+          "id": "miracle_larva",
+          "hero": "miracle_larva",
+          "name": "미라클라바",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 23429.246748332767,
+            "boss": 11573.871165643763,
+            "long": 9314.648128181952
+          },
+          "index": {
+            "crowd": 1.2783606502900922,
+            "boss": 1.4443422047993544,
+            "long": 1.3726472044541456
+          },
+          "mean": 1.3651166865145308
+        },
+        {
+          "id": "jasmine",
+          "hero": "jasmine",
+          "name": "자스민",
+          "rarity": "UR",
+          "cast": true,
+          "gain": {
+            "crowd": 27631.815479265308,
+            "boss": 14370.651273893607,
+            "long": 11616.906418333409
+          },
+          "index": {
+            "crowd": 1.507663732607326,
+            "boss": 1.7933617756996731,
+            "long": 1.7119180349159493
+          },
+          "mean": 1.670981181074316
+        },
+        {
+          "id": "venom",
+          "hero": "venom",
+          "name": "베놈",
+          "rarity": "UR",
+          "cast": true,
+          "gain": {
+            "crowd": 29438.884910297835,
+            "boss": 13397.281044946338,
+            "long": 15595.150847833054
+          },
+          "index": {
+            "crowd": 1.606262141586841,
+            "boss": 1.6718916398701844,
+            "long": 2.298169498164062
+          },
+          "mean": 1.8587744265403625
+        },
+        {
+          "id": "galaxy_whale",
+          "hero": "galaxy_whale",
+          "name": "은하고래",
+          "rarity": "UR",
+          "cast": true,
+          "gain": {
+            "crowd": 33365.21285950773,
+            "boss": 9735.321630389295,
+            "long": 4957.146319103096
+          },
+          "index": {
+            "crowd": 1.8204928082539757,
+            "boss": 1.214903441279598,
+            "long": 0.730506718380474
+          },
+          "mean": 1.2553009893046825
+        },
+        {
+          "id": "harmonious",
+          "hero": "harmonious",
+          "name": "하모니어스",
+          "rarity": "UR",
+          "cast": true,
+          "gain": {
+            "crowd": 48141.29788884992,
+            "boss": 24511.02588801327,
+            "long": 18025.277235722824
+          },
+          "index": {
+            "crowd": 2.626714445242614,
+            "boss": 3.0588131374812995,
+            "long": 2.6562835296232636
+          },
+          "mean": 2.7806037041157254
+        },
+        {
+          "id": "behemoth",
+          "hero": "behemoth",
+          "name": "베히모스",
+          "rarity": "UR",
+          "cast": true,
+          "gain": {
+            "crowd": 42129.54813007687,
+            "boss": 9869.110558825672,
+            "long": 7603.331728144047
+          },
+          "index": {
+            "crowd": 2.298697739731017,
+            "boss": 1.2315994104250945,
+            "long": 1.1204601502441813
+          },
+          "mean": 1.5502524334667642
+        },
+        {
+          "id": "miracle_larva_waiting",
+          "hero": "miracle_larva",
+          "name": "미라클라바 대기",
+          "rarity": "R",
+          "form": "miracle_larva",
+          "cast": false,
+          "gain": {
+            "crowd": 21826.691383713507,
+            "boss": 9074.391179961971,
+            "long": 6279.842094772805
+          },
+          "index": {
+            "crowd": 1.1909210607870138,
+            "boss": 1.132423713423034,
+            "long": 0.925424941144376
+          },
+          "mean": 1.0829232384514746
+        },
+        {
+          "id": "miracle_cocoon",
+          "hero": "miracle_larva",
+          "name": "미라클코쿤",
+          "rarity": "R",
+          "form": "miracle_cocoon",
+          "cast": false,
+          "gain": {
+            "crowd": 30660.856825947747,
+            "boss": 846.1419702650965,
+            "long": 7616.162838522809
+          },
+          "index": {
+            "crowd": 1.6729361080829093,
+            "boss": 0.10559289466896207,
+            "long": 1.1223509986744256
+          },
+          "mean": 0.9669600004754324
+        },
+        {
+          "id": "miracle_wing",
+          "hero": "miracle_larva",
+          "name": "미라클윙",
+          "rarity": "UR",
+          "form": "miracle_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 28502.083043031205,
+            "boss": 10900.747530567423,
+            "long": 8948.121309318045
+          },
+          "index": {
+            "crowd": 1.5551477947580357,
+            "boss": 1.3603408485310484,
+            "long": 1.3186342126215478
+          },
+          "mean": 1.411374285303544
+        },
+        {
+          "id": "abyss_wing",
+          "hero": "miracle_larva",
+          "name": "어비스윙",
+          "rarity": "UR",
+          "form": "abyss_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 23507.869677149953,
+            "boss": 13101.133016287873,
+            "long": 9625.931873409223
+          },
+          "index": {
+            "crowd": 1.2826505218122146,
+            "boss": 1.6349343340096125,
+            "long": 1.418519335832406
+          },
+          "mean": 1.4453680638847446
+        }
+      ],
+      "burstInputs": [
+        {
+          "id": "great_detective",
+          "name": "명탐정",
+          "damage": 20,
+          "cost": 70,
+          "skill": "완벽한 추리"
+        },
+        {
+          "id": "guardian",
+          "name": "가디언",
+          "damage": 60,
+          "cost": 75,
+          "skill": "대륙의 맥동"
+        },
+        {
+          "id": "avalanche_maid",
+          "name": "메이드",
+          "damage": 32,
+          "cost": 85,
+          "skill": "백야의 눈사태"
+        },
+        {
+          "id": "santa",
+          "name": "산타",
+          "damage": 13,
+          "cost": 80,
+          "skill": "한밤의 선물"
+        },
+        {
+          "id": "red_dragon",
+          "name": "레드드래곤",
+          "damage": 36,
+          "cost": 90,
+          "skill": "용의 숨결"
+        },
+        {
+          "id": "aurora",
+          "name": "아우로라",
+          "damage": 30,
+          "cost": 75,
+          "skill": "천면경"
+        },
+        {
+          "id": "toffee_apple",
+          "name": "토피애플",
+          "damage": 36,
+          "cost": 95,
+          "skill": "애플봄"
+        },
+        {
+          "id": "antropy",
+          "name": "앤트로피",
+          "damage": 24,
+          "cost": 50,
+          "skill": "노바레퀴엠"
+        },
+        {
+          "id": "demon_king",
+          "name": "마왕",
+          "damage": 38,
+          "cost": 70,
+          "skill": "데스핸드"
+        },
+        {
+          "id": "flame_sage",
+          "name": "화염의현자",
+          "damage": 38,
+          "cost": 75,
+          "skill": "작열의 문장"
+        },
+        {
+          "id": "ash",
+          "name": "애쉬",
+          "damage": 31,
+          "cost": 70,
+          "skill": "아마겟돈"
+        },
+        {
+          "id": "jasmine",
+          "name": "자스민",
+          "damage": 20,
+          "cost": 80,
+          "skill": "여신강림"
+        },
+        {
+          "id": "galaxy_whale",
+          "name": "은하고래",
+          "damage": 18,
+          "cost": 80,
+          "skill": "별바다의 중심"
+        }
+      ]
+    },
+    "rank1": {
+      "method": "Actual engine, simulate.mjs reference-board method; 30-second crowd/moving boss/stationary boss; candidate at centre/edge, better placement. Reference teams are explicit and include typical two-status and rich-status lineups. Only candidate ultimate is cast. Fixed-form rows deliberately exclude evolution cost; collector row includes its50-starlight evolution but no merges, so it is a high-wing-uptime bound, not a full-run tier list.",
+      "rank": 1,
+      "teams": 3,
+      "crit": {
+        "chance": 0.05,
+        "damage": 1.5
+      },
+      "references": [
+        [
+          "snow_rabbit",
+          "great_detective",
+          "silver_rabbit",
+          "red_dragon"
+        ],
+        [
+          "mushroom_king",
+          "guardian",
+          "siren",
+          "ash"
+        ],
+        [
+          "phantom",
+          "frost_witch",
+          "venom",
+          "jasmine"
+        ]
+      ],
+      "normalizers": {
+        "crowd": 3961.0314760941724,
+        "boss": 1455.6514466329872,
+        "long": 1192.5155599326658
+      },
+      "rows": [
+        {
+          "id": "star_boy",
+          "hero": "star_boy",
+          "name": "별똥별소년",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 2555.702954545326,
+            "boss": 2566.5773484848633,
+            "long": 2123.3325757575963
+          },
+          "index": {
+            "crowd": 0.6452114733168974,
+            "boss": 1.763181257725891,
+            "long": 1.7805491576793246
+          },
+          "mean": 1.3963139629073709
+        },
+        {
+          "id": "snow_rabbit",
+          "hero": "snow_rabbit",
+          "name": "눈토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 5820.378939393923,
+            "boss": 76.97060606061557,
+            "long": 348.9910606060648
+          },
+          "index": {
+            "crowd": 1.469409918734901,
+            "boss": 0.052877085540397314,
+            "long": 0.29265115888783055
+          },
+          "mean": 0.604979387721043
+        },
+        {
+          "id": "silver_rabbit",
+          "hero": "silver_rabbit",
+          "name": "은토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 3922.2437878786036,
+            "boss": 1504.71303030304,
+            "long": 1398.9703030303149
+          },
+          "index": {
+            "crowd": 0.9902076798809446,
+            "boss": 1.033704211116978,
+            "long": 1.1731254081995428
+          },
+          "mean": 1.0656790997324885
+        },
+        {
+          "id": "night_rabbit",
+          "hero": "night_rabbit",
+          "name": "밤토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 4637.0756060605145,
+            "boss": 1848.930075757571,
+            "long": 1761.4301515151606
+          },
+          "index": {
+            "crowd": 1.1706737586021316,
+            "boss": 1.2701736257221892,
+            "long": 1.4770710007462022
+          },
+          "mean": 1.3059727950235076
+        },
+        {
+          "id": "siren",
+          "hero": "siren",
+          "name": "세이렌",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 3808.6346969696633,
+            "boss": 2142.185378787874,
+            "long": 1076.8306818181873
+          },
+          "index": {
+            "crowd": 0.9615259863385933,
+            "boss": 1.4716334626279406,
+            "long": 0.9029908858203824
+          },
+          "mean": 1.1120501115956387
+        },
+        {
+          "id": "mushroom_king",
+          "hero": "mushroom_king",
+          "name": "머쉬룸킹",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 5531.565936363533,
+            "boss": 1588.888499999911,
+            "long": 1322.9223484848333
+          },
+          "index": {
+            "crowd": 1.3964963342876555,
+            "boss": 1.091530876897151,
+            "long": 1.1093543706545268
+          },
+          "mean": 1.1991271939464443
+        },
+        {
+          "id": "underdog",
+          "hero": "underdog",
+          "name": "언더독",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 2571.413712121125,
+            "boss": 657.7612878787913,
+            "long": 537.4043939393956
+          },
+          "index": {
+            "crowd": 0.6491778032162223,
+            "boss": 0.4518672992770586,
+            "long": 0.45064769969939816
+          },
+          "mean": 0.5172309340642264
+        },
+        {
+          "id": "joker",
+          "hero": "joker",
+          "name": "조커",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 4672.218409090638,
+            "boss": 1629.8638378787705,
+            "long": 1048.4320090909184
+          },
+          "index": {
+            "crowd": 1.1795458928535807,
+            "boss": 1.1196800179388735,
+            "long": 0.8791767959406056
+          },
+          "mean": 1.05946756891102
+        },
+        {
+          "id": "sunflower",
+          "hero": "sunflower",
+          "name": "해바라기",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 2130.049242424222,
+            "boss": 1084.9729545454475,
+            "long": 1114.3265151515225
+          },
+          "index": {
+            "crowd": 0.5377511527690725,
+            "boss": 0.7453521631535198,
+            "long": 0.9344335223721876
+          },
+          "mean": 0.73917894609826
+        },
+        {
+          "id": "demon_king",
+          "hero": "demon_king",
+          "name": "마왕",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 5875.912954545096,
+            "boss": 1975.5031818181842,
+            "long": 1037.6354545454642
+          },
+          "index": {
+            "crowd": 1.4834300080692915,
+            "boss": 1.3571265198050306,
+            "long": 0.8701231995698683
+          },
+          "mean": 1.2368932424813968
+        },
+        {
+          "id": "miracle_larva",
+          "hero": "miracle_larva",
+          "name": "미라클라바",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 4934.990606060401,
+            "boss": 2429.288484848537,
+            "long": 1677.9704545454774
+          },
+          "index": {
+            "crowd": 1.245885228593693,
+            "boss": 1.6688668777595301,
+            "long": 1.4070847466679783
+          },
+          "mean": 1.4406122843404006
+        },
+        {
+          "id": "miracle_larva_waiting",
+          "hero": "miracle_larva",
+          "name": "미라클라바 대기",
+          "rarity": "R",
+          "form": "miracle_larva",
+          "cast": false,
+          "gain": {
+            "crowd": 3680.007878787716,
+            "boss": 1910.1582575757511,
+            "long": 1154.7609090909152
+          },
+          "index": {
+            "crowd": 0.9290529249761066,
+            "boss": 1.3122360177596544,
+            "long": 0.9683403285371954
+          },
+          "mean": 1.0698764237576521
+        },
+        {
+          "id": "miracle_cocoon",
+          "hero": "miracle_larva",
+          "name": "미라클코쿤",
+          "rarity": "R",
+          "form": "miracle_cocoon",
+          "cast": false,
+          "gain": {
+            "crowd": 6504.719621212056,
+            "boss": 223.679621212122,
+            "long": 1357.0343181818248
+          },
+          "index": {
+            "crowd": 1.6421782206149296,
+            "boss": 0.15366289899241123,
+            "long": 1.1379594227336105
+          },
+          "mean": 0.9779335141136505
+        },
+        {
+          "id": "miracle_wing",
+          "hero": "miracle_larva",
+          "name": "미라클윙",
+          "rarity": "UR",
+          "form": "miracle_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 4189.785681817948,
+            "boss": 2363.0562878786586,
+            "long": 1480.4103787878616
+          },
+          "index": {
+            "crowd": 1.057751170901914,
+            "boss": 1.6233668391870564,
+            "long": 1.2414180816822646
+          },
+          "mean": 1.3075120305904118
+        },
+        {
+          "id": "abyss_wing",
+          "hero": "miracle_larva",
+          "name": "어비스윙",
+          "rarity": "UR",
+          "form": "abyss_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 5248.170909090789,
+            "boss": 2540.533409090973,
+            "long": 1762.4205303030644
+          },
+          "index": {
+            "crowd": 1.3249505692557175,
+            "boss": 1.7452896536237335,
+            "long": 1.4779014962308565
+          },
+          "mean": 1.516047239703436
+        }
+      ],
+      "burstInputs": [
+        {
+          "id": "great_detective",
+          "name": "명탐정",
+          "damage": 20,
+          "cost": 70,
+          "skill": "완벽한 추리"
+        },
+        {
+          "id": "guardian",
+          "name": "가디언",
+          "damage": 60,
+          "cost": 75,
+          "skill": "대륙의 맥동"
+        },
+        {
+          "id": "avalanche_maid",
+          "name": "메이드",
+          "damage": 32,
+          "cost": 85,
+          "skill": "백야의 눈사태"
+        },
+        {
+          "id": "santa",
+          "name": "산타",
+          "damage": 13,
+          "cost": 80,
+          "skill": "한밤의 선물"
+        },
+        {
+          "id": "red_dragon",
+          "name": "레드드래곤",
+          "damage": 36,
+          "cost": 90,
+          "skill": "용의 숨결"
+        },
+        {
+          "id": "aurora",
+          "name": "아우로라",
+          "damage": 30,
+          "cost": 75,
+          "skill": "천면경"
+        },
+        {
+          "id": "toffee_apple",
+          "name": "토피애플",
+          "damage": 36,
+          "cost": 95,
+          "skill": "애플봄"
+        },
+        {
+          "id": "antropy",
+          "name": "앤트로피",
+          "damage": 24,
+          "cost": 50,
+          "skill": "노바레퀴엠"
+        },
+        {
+          "id": "demon_king",
+          "name": "마왕",
+          "damage": 38,
+          "cost": 70,
+          "skill": "데스핸드"
+        },
+        {
+          "id": "flame_sage",
+          "name": "화염의현자",
+          "damage": 38,
+          "cost": 75,
+          "skill": "작열의 문장"
+        },
+        {
+          "id": "ash",
+          "name": "애쉬",
+          "damage": 31,
+          "cost": 70,
+          "skill": "아마겟돈"
+        },
+        {
+          "id": "jasmine",
+          "name": "자스민",
+          "damage": 20,
+          "cost": 80,
+          "skill": "여신강림"
+        },
+        {
+          "id": "galaxy_whale",
+          "name": "은하고래",
+          "damage": 18,
+          "cost": 80,
+          "skill": "별바다의 중심"
+        }
+      ]
+    },
+    "rank5": {
+      "method": "Actual engine, simulate.mjs reference-board method; 30-second crowd/moving boss/stationary boss; candidate at centre/edge, better placement. Reference teams are explicit and include typical two-status and rich-status lineups. Only candidate ultimate is cast. Fixed-form rows deliberately exclude evolution cost; collector row includes its50-starlight evolution but no merges, so it is a high-wing-uptime bound, not a full-run tier list.",
+      "rank": 5,
+      "teams": 3,
+      "crit": {
+        "chance": 0.05,
+        "damage": 1.5
+      },
+      "references": [
+        [
+          "snow_rabbit",
+          "great_detective",
+          "silver_rabbit",
+          "red_dragon"
+        ],
+        [
+          "mushroom_king",
+          "guardian",
+          "siren",
+          "ash"
+        ],
+        [
+          "phantom",
+          "frost_witch",
+          "venom",
+          "jasmine"
+        ]
+      ],
+      "normalizers": {
+        "crowd": 142357.9628031043,
+        "boss": 45331.936392697484,
+        "long": 38377.01763323508
+      },
+      "rows": [
+        {
+          "id": "star_boy",
+          "hero": "star_boy",
+          "name": "별똥별소년",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 82288.58695451778,
+            "boss": 76213.11933137076,
+            "long": 66134.25005189405
+          },
+          "index": {
+            "crowd": 0.5780399307085572,
+            "boss": 1.681223556636948,
+            "long": 1.7232774751788107
+          },
+          "mean": 1.3275136541747719
+        },
+        {
+          "id": "snow_rabbit",
+          "hero": "snow_rabbit",
+          "name": "눈토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 291743.54702451604,
+            "boss": 11421.624408468546,
+            "long": 9667.131870280855
+          },
+          "index": {
+            "crowd": 2.049365847051544,
+            "boss": 0.25195536121656725,
+            "long": 0.25189898711433406
+          },
+          "mean": 0.851073398460815
+        },
+        {
+          "id": "silver_rabbit",
+          "hero": "silver_rabbit",
+          "name": "은토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 139589.10428301772,
+            "boss": 60630.378372339546,
+            "long": 47040.15348964116
+          },
+          "index": {
+            "crowd": 0.980550027089695,
+            "boss": 1.3374760311828746,
+            "long": 1.225737600018811
+          },
+          "mean": 1.1812545527637937
+        },
+        {
+          "id": "night_rabbit",
+          "hero": "night_rabbit",
+          "name": "밤토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 115908.28502371153,
+            "boss": 41998.20599902357,
+            "long": 53564.452415220614
+          },
+          "index": {
+            "crowd": 0.8142030325625311,
+            "boss": 0.9264595634125407,
+            "long": 1.3957429659368055
+          },
+          "mean": 1.0454685206372925
+        },
+        {
+          "id": "siren",
+          "hero": "siren",
+          "name": "세이렌",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 210963.83737694751,
+            "boss": 86270.48566807705,
+            "long": 46711.3808234466
+          },
+          "index": {
+            "crowd": 1.4819250937773827,
+            "boss": 1.9030840624309697,
+            "long": 1.2171706845451646
+          },
+          "mean": 1.534059946917839
+        },
+        {
+          "id": "mushroom_king",
+          "hero": "mushroom_king",
+          "name": "머쉬룸킹",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 149685.0190275673,
+            "boss": 41268.73550875927,
+            "long": 39962.336082628775
+          },
+          "index": {
+            "crowd": 1.0514692404990162,
+            "boss": 0.9103678067325456,
+            "long": 1.0413090580551205
+          },
+          "mean": 1.0010487017622276
+        },
+        {
+          "id": "underdog",
+          "hero": "underdog",
+          "name": "언더독",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 74104.45852960648,
+            "boss": 19963.7037739164,
+            "long": 15622.96182209037
+          },
+          "index": {
+            "crowd": 0.5205501474624258,
+            "boss": 0.4403893890827119,
+            "long": 0.40709160809204326
+          },
+          "mean": 0.456010381545727
+        },
+        {
+          "id": "joker",
+          "hero": "joker",
+          "name": "조커",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 133018.59256034053,
+            "boss": 38377.7602288794,
+            "long": 32211.379666423232
+          },
+          "index": {
+            "crowd": 0.934395167935347,
+            "boss": 0.8465943280345216,
+            "long": 0.839340356623431
+          },
+          "mean": 0.8734432841977666
+        },
+        {
+          "id": "sunflower",
+          "hero": "sunflower",
+          "name": "해바라기",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 83920.23444771384,
+            "boss": 31843.414243442814,
+            "long": 34479.11247749007
+          },
+          "index": {
+            "crowd": 0.5895015129135006,
+            "boss": 0.7024499012703209,
+            "long": 0.8984312644354789
+          },
+          "mean": 0.7301275595397668
+        },
+        {
+          "id": "demon_king",
+          "hero": "demon_king",
+          "name": "마왕",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 200485.97885489522,
+            "boss": 53060.12167277547,
+            "long": 30522.172685315938
+          },
+          "index": {
+            "crowd": 1.4083228988896668,
+            "boss": 1.1704799286121588,
+            "long": 0.7953242478874458
+          },
+          "mean": 1.1247090251297571
+        },
+        {
+          "id": "miracle_larva",
+          "hero": "miracle_larva",
+          "name": "미라클라바",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 170077.63859162078,
+            "boss": 61252.147232941,
+            "long": 53165.953913282916
+          },
+          "index": {
+            "crowd": 1.1947181263534632,
+            "boss": 1.351191943408976,
+            "long": 1.385359186098932
+          },
+          "mean": 1.310423085287124
+        },
+        {
+          "id": "miracle_larva_waiting",
+          "hero": "miracle_larva",
+          "name": "미라클라바 대기",
+          "rarity": "R",
+          "form": "miracle_larva",
+          "cast": false,
+          "gain": {
+            "crowd": 133252.71466413277,
+            "boss": 41541.17258127205,
+            "long": 35629.380364215875
+          },
+          "index": {
+            "crowd": 0.9360397693273749,
+            "boss": 0.9163776332299784,
+            "long": 0.9284040960327331
+          },
+          "mean": 0.9269404995300287
+        },
+        {
+          "id": "miracle_cocoon",
+          "hero": "miracle_larva",
+          "name": "미라클코쿤",
+          "rarity": "R",
+          "form": "miracle_cocoon",
+          "cast": false,
+          "gain": {
+            "crowd": 132226.5427027421,
+            "boss": 5295.994958497623,
+            "long": 41449.76358726789
+          },
+          "index": {
+            "crowd": 0.9288313776000363,
+            "boss": 0.1168270182111778,
+            "long": 1.0800673461236279
+          },
+          "mean": 0.7085752473116139
+        },
+        {
+          "id": "miracle_wing",
+          "hero": "miracle_larva",
+          "name": "미라클윙",
+          "rarity": "UR",
+          "form": "miracle_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 188914.15684864347,
+            "boss": 53946.84011430954,
+            "long": 54111.52981014972
+          },
+          "index": {
+            "crowd": 1.327036107631936,
+            "boss": 1.1900404969905463,
+            "long": 1.4099983049044518
+          },
+          "mean": 1.3090249698423113
+        },
+        {
+          "id": "abyss_wing",
+          "hero": "miracle_larva",
+          "name": "어비스윙",
+          "rarity": "UR",
+          "form": "abyss_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 192885.27220653213,
+            "boss": 71693.41161318403,
+            "long": 53833.946661175294
+          },
+          "index": {
+            "crowd": 1.3549313885118761,
+            "boss": 1.5815210493574483,
+            "long": 1.4027652480883317
+          },
+          "mean": 1.446405895319219
+        }
+      ],
+      "burstInputs": [
+        {
+          "id": "great_detective",
+          "name": "명탐정",
+          "damage": 20,
+          "cost": 70,
+          "skill": "완벽한 추리"
+        },
+        {
+          "id": "guardian",
+          "name": "가디언",
+          "damage": 60,
+          "cost": 75,
+          "skill": "대륙의 맥동"
+        },
+        {
+          "id": "avalanche_maid",
+          "name": "메이드",
+          "damage": 32,
+          "cost": 85,
+          "skill": "백야의 눈사태"
+        },
+        {
+          "id": "santa",
+          "name": "산타",
+          "damage": 13,
+          "cost": 80,
+          "skill": "한밤의 선물"
+        },
+        {
+          "id": "red_dragon",
+          "name": "레드드래곤",
+          "damage": 36,
+          "cost": 90,
+          "skill": "용의 숨결"
+        },
+        {
+          "id": "aurora",
+          "name": "아우로라",
+          "damage": 30,
+          "cost": 75,
+          "skill": "천면경"
+        },
+        {
+          "id": "toffee_apple",
+          "name": "토피애플",
+          "damage": 36,
+          "cost": 95,
+          "skill": "애플봄"
+        },
+        {
+          "id": "antropy",
+          "name": "앤트로피",
+          "damage": 24,
+          "cost": 50,
+          "skill": "노바레퀴엠"
+        },
+        {
+          "id": "demon_king",
+          "name": "마왕",
+          "damage": 38,
+          "cost": 70,
+          "skill": "데스핸드"
+        },
+        {
+          "id": "flame_sage",
+          "name": "화염의현자",
+          "damage": 38,
+          "cost": 75,
+          "skill": "작열의 문장"
+        },
+        {
+          "id": "ash",
+          "name": "애쉬",
+          "damage": 31,
+          "cost": 70,
+          "skill": "아마겟돈"
+        },
+        {
+          "id": "jasmine",
+          "name": "자스민",
+          "damage": 20,
+          "cost": 80,
+          "skill": "여신강림"
+        },
+        {
+          "id": "galaxy_whale",
+          "name": "은하고래",
+          "damage": 18,
+          "cost": 80,
+          "skill": "별바다의 중심"
+        }
+      ]
+    },
+    "garden": {
+      "method": "Actual engine, simulate.mjs reference-board method; 30-second crowd/moving boss/stationary boss; candidate at centre/edge, better placement. Reference teams are explicit and include typical two-status and rich-status lineups. Only candidate ultimate is cast. Fixed-form rows deliberately exclude evolution cost; collector row includes its50-starlight evolution but no merges, so it is a high-wing-uptime bound, not a full-run tier list.",
+      "rank": 3,
+      "teams": 3,
+      "crit": {
+        "chance": 0.2,
+        "damage": 2
+      },
+      "references": [
+        [
+          "snow_rabbit",
+          "great_detective",
+          "silver_rabbit",
+          "red_dragon"
+        ],
+        [
+          "mushroom_king",
+          "guardian",
+          "siren",
+          "ash"
+        ],
+        [
+          "phantom",
+          "frost_witch",
+          "venom",
+          "jasmine"
+        ]
+      ],
+      "normalizers": {
+        "crowd": 22008.356131291715,
+        "boss": 10631.309467357787,
+        "long": 7242.85811520831
+      },
+      "rows": [
+        {
+          "id": "star_boy",
+          "hero": "star_boy",
+          "name": "별똥별소년",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 11642.633402955526,
+            "boss": 17471.810546439447,
+            "long": 12715.689626742484
+          },
+          "index": {
+            "crowd": 0.5290096785739442,
+            "boss": 1.6434297769324306,
+            "long": 1.7556176614922923
+          },
+          "mean": 1.3093523723328888
+        },
+        {
+          "id": "snow_rabbit",
+          "hero": "snow_rabbit",
+          "name": "눈토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 40017.3645837123,
+            "boss": -599.3092306818386,
+            "long": 2016.19061462119
+          },
+          "index": {
+            "crowd": 1.818280490600349,
+            "boss": -0.05637209908355585,
+            "long": 0.2783694754958213
+          },
+          "mean": 0.6800926223375381
+        },
+        {
+          "id": "silver_rabbit",
+          "hero": "silver_rabbit",
+          "name": "은토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 18895.254501211435,
+            "boss": 13087.133144090763,
+            "long": 9168.049851363698
+          },
+          "index": {
+            "crowd": 0.8585491069160754,
+            "boss": 1.2309991712943076,
+            "long": 1.265805529465355
+          },
+          "mean": 1.118451269225246
+        },
+        {
+          "id": "night_rabbit",
+          "hero": "night_rabbit",
+          "name": "밤토끼",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 19518.983557500578,
+            "boss": 12891.28738780296,
+            "long": 10538.894336515186
+          },
+          "index": {
+            "crowd": 0.8868896632287897,
+            "boss": 1.2125775688671443,
+            "long": 1.4550739734064333
+          },
+          "mean": 1.1848470685007892
+        },
+        {
+          "id": "siren",
+          "hero": "siren",
+          "name": "세이렌",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 26228.10263045433,
+            "boss": 16785.73313454559,
+            "long": 7682.519608712049
+          },
+          "index": {
+            "crowd": 1.1917338339124264,
+            "boss": 1.5788961073971417,
+            "long": 1.0607027621569105
+          },
+          "mean": 1.2771109011554929
+        },
+        {
+          "id": "mushroom_king",
+          "hero": "mushroom_king",
+          "name": "머쉬룸킹",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 24913.158309427192,
+            "boss": 11242.506271629169,
+            "long": 7703.719883757785
+          },
+          "index": {
+            "crowd": 1.1319863310465699,
+            "boss": 1.0574902655357734,
+            "long": 1.0636298214349627
+          },
+          "mean": 1.0843688060057686
+        },
+        {
+          "id": "underdog",
+          "hero": "underdog",
+          "name": "언더독",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 15495.102459848433,
+            "boss": 6629.878226590922,
+            "long": 2875.0340838636635
+          },
+          "index": {
+            "crowd": 0.7040554218321345,
+            "boss": 0.6236182143833928,
+            "long": 0.39694745335777926
+          },
+          "mean": 0.5748736965244355
+        },
+        {
+          "id": "joker",
+          "hero": "joker",
+          "name": "조커",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 26063.683078787846,
+            "boss": 10113.541245197033,
+            "long": 5595.519910768371
+          },
+          "index": {
+            "crowd": 1.18426305550964,
+            "boss": 0.9512977941475129,
+            "long": 0.7725568859369324
+          },
+          "mean": 0.9693725785313618
+        },
+        {
+          "id": "sunflower",
+          "hero": "sunflower",
+          "name": "해바라기",
+          "rarity": "C",
+          "cast": true,
+          "gain": {
+            "crowd": 15300.922657727808,
+            "boss": 8059.204480606031,
+            "long": 6890.105120530348
+          },
+          "index": {
+            "crowd": 0.6952324183800712,
+            "boss": 0.7580632005258516,
+            "long": 0.9512964372535115
+          },
+          "mean": 0.8015306853864782
+        },
+        {
+          "id": "avalanche_maid",
+          "hero": "avalanche_maid",
+          "name": "메이드",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 37057.9768225764,
+            "boss": 7310.61805856062,
+            "long": 6112.524736742439
+          },
+          "index": {
+            "crowd": 1.6838139387378857,
+            "boss": 0.6876498215960162,
+            "long": 0.8439382132735094
+          },
+          "mean": 1.0718006578691373
+        },
+        {
+          "id": "red_dragon",
+          "hero": "red_dragon",
+          "name": "레드드래곤",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 39501.15056969806,
+            "boss": 13643.551326272694,
+            "long": 9117.767990909164
+          },
+          "index": {
+            "crowd": 1.794825126149922,
+            "boss": 1.2833368615751097,
+            "long": 1.2588632616955426
+          },
+          "mean": 1.4456750831401914
+        },
+        {
+          "id": "demon_king",
+          "hero": "demon_king",
+          "name": "마왕",
+          "rarity": "R",
+          "cast": true,
+          "gain": {
+            "crowd": 35081.083983257646,
+            "boss": 12730.518710681688,
+            "long": 5391.2952735606605
+          },
+          "index": {
+            "crowd": 1.593989290884792,
+            "boss": 1.1974553792991618,
+            "long": 0.7443601942498639
+          },
+          "mean": 1.1786016214779391
+        },
+        {
+          "id": "flame_sage",
+          "hero": "flame_sage",
+          "name": "화염의현자",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 79478.98720700612,
+            "boss": 9073.316066356283,
+            "long": 1959.371703977302
+          },
+          "index": {
+            "crowd": 3.6113095740940895,
+            "boss": 0.8534523516801816,
+            "long": 0.2705246565389814
+          },
+          "mean": 1.5784288607710841
+        },
+        {
+          "id": "ash",
+          "hero": "ash",
+          "name": "애쉬",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 50814.06210606032,
+            "boss": 15458.753164030195,
+            "long": 6442.443020250054
+          },
+          "index": {
+            "crowd": 2.308853137550439,
+            "boss": 1.4540779958945338,
+            "long": 0.8894890549798883
+          },
+          "mean": 1.5508067294749537
+        },
+        {
+          "id": "miracle_larva",
+          "hero": "miracle_larva",
+          "name": "미라클라바",
+          "rarity": "SR",
+          "cast": true,
+          "gain": {
+            "crowd": 29412.005788255847,
+            "boss": 14655.303080833099,
+            "long": 10864.02349128794
+          },
+          "index": {
+            "crowd": 1.336401756350968,
+            "boss": 1.3785040427833017,
+            "long": 1.4999635942717184
+          },
+          "mean": 1.4049564644686627
+        },
+        {
+          "id": "jasmine",
+          "hero": "jasmine",
+          "name": "자스민",
+          "rarity": "UR",
+          "cast": true,
+          "gain": {
+            "crowd": 33127.800166136534,
+            "boss": 17619.732415893704,
+            "long": 13552.467796621251
+          },
+          "index": {
+            "crowd": 1.5052373729555872,
+            "boss": 1.6573435727737083,
+            "long": 1.8711491487268315
+          },
+          "mean": 1.6779100314853757
+        },
+        {
+          "id": "venom",
+          "hero": "venom",
+          "name": "베놈",
+          "rarity": "UR",
+          "cast": true,
+          "gain": {
+            "crowd": 24976.09615340818,
+            "boss": 16919.48801760562,
+            "long": 16956.074245408894
+          },
+          "index": {
+            "crowd": 1.1348460559440376,
+            "boss": 1.591477331137332,
+            "long": 2.341075025314261
+          },
+          "mean": 1.6891328041318767
+        },
+        {
+          "id": "miracle_larva_waiting",
+          "hero": "miracle_larva",
+          "name": "미라클라바 대기",
+          "rarity": "R",
+          "form": "miracle_larva",
+          "cast": false,
+          "gain": {
+            "crowd": 18726.845696364107,
+            "boss": 10381.264614924254,
+            "long": 7123.203988333379
+          },
+          "index": {
+            "crowd": 0.8508970676704962,
+            "boss": 0.9764803335655624,
+            "long": 0.9834797085664726
+          },
+          "mean": 0.936952369934177
+        },
+        {
+          "id": "miracle_cocoon",
+          "hero": "miracle_larva",
+          "name": "미라클코쿤",
+          "rarity": "R",
+          "form": "miracle_cocoon",
+          "cast": false,
+          "gain": {
+            "crowd": 24163.732889091258,
+            "boss": 1227.7621999999585,
+            "long": 9386.391595075818
+          },
+          "index": {
+            "crowd": 1.0979344729311702,
+            "boss": 0.11548551039452488,
+            "long": 1.295951328297677
+          },
+          "mean": 0.8364571038744574
+        },
+        {
+          "id": "miracle_wing",
+          "hero": "miracle_larva",
+          "name": "미라클윙",
+          "rarity": "UR",
+          "form": "miracle_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 25929.8846181821,
+            "boss": 15845.023790605706,
+            "long": 10738.949576590878
+          },
+          "index": {
+            "crowd": 1.178183616418071,
+            "boss": 1.4904113025075632,
+            "long": 1.4826950087620234
+          },
+          "mean": 1.3837633092292192
+        },
+        {
+          "id": "abyss_wing",
+          "hero": "miracle_larva",
+          "name": "어비스윙",
+          "rarity": "UR",
+          "form": "abyss_wing",
+          "cast": false,
+          "gain": {
+            "crowd": 25329.99729889077,
+            "boss": 15195.497295984744,
+            "long": 10572.388131666768
+          },
+          "index": {
+            "crowd": 1.1509263639584744,
+            "boss": 1.4293156776821114,
+            "long": 1.4596983626487483
+          },
+          "mean": 1.346646801429778
+        }
+      ],
+      "burstInputs": [
+        {
+          "id": "great_detective",
+          "name": "명탐정",
+          "damage": 20,
+          "cost": 70,
+          "skill": "완벽한 추리"
+        },
+        {
+          "id": "guardian",
+          "name": "가디언",
+          "damage": 60,
+          "cost": 75,
+          "skill": "대륙의 맥동"
+        },
+        {
+          "id": "avalanche_maid",
+          "name": "메이드",
+          "damage": 32,
+          "cost": 85,
+          "skill": "백야의 눈사태"
+        },
+        {
+          "id": "santa",
+          "name": "산타",
+          "damage": 13,
+          "cost": 80,
+          "skill": "한밤의 선물"
+        },
+        {
+          "id": "red_dragon",
+          "name": "레드드래곤",
+          "damage": 36,
+          "cost": 90,
+          "skill": "용의 숨결"
+        },
+        {
+          "id": "aurora",
+          "name": "아우로라",
+          "damage": 30,
+          "cost": 75,
+          "skill": "천면경"
+        },
+        {
+          "id": "toffee_apple",
+          "name": "토피애플",
+          "damage": 36,
+          "cost": 95,
+          "skill": "애플봄"
+        },
+        {
+          "id": "antropy",
+          "name": "앤트로피",
+          "damage": 24,
+          "cost": 50,
+          "skill": "노바레퀴엠"
+        },
+        {
+          "id": "demon_king",
+          "name": "마왕",
+          "damage": 38,
+          "cost": 70,
+          "skill": "데스핸드"
+        },
+        {
+          "id": "flame_sage",
+          "name": "화염의현자",
+          "damage": 38,
+          "cost": 75,
+          "skill": "작열의 문장"
+        },
+        {
+          "id": "ash",
+          "name": "애쉬",
+          "damage": 31,
+          "cost": 70,
+          "skill": "아마겟돈"
+        },
+        {
+          "id": "jasmine",
+          "name": "자스민",
+          "damage": 20,
+          "cost": 80,
+          "skill": "여신강림"
+        },
+        {
+          "id": "galaxy_whale",
+          "name": "은하고래",
+          "damage": 18,
+          "cost": 80,
+          "skill": "별바다의 중심"
+        }
+      ]
+    }
+  }
+}

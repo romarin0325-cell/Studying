@@ -39,7 +39,7 @@ function distanceToPath(point){
 function traitArena(placements,{artifacts=[],seed=1234,wave=1}={}){
   const ids=[...new Set(placements.map(p=>p.hero))];
   const deck=[...ids,...DEFAULT_DECK.filter(id=>!ids.includes(id))].slice(0,5);
-  const s=E.newRun({deck,artifacts,seed}),template=s.board.find(Boolean);
+  const s=E.newRun({deck,artifacts,seed,crit:null}),template=s.board.find(Boolean);
   s.board.fill(null);s.wave=wave;s.events=[];s.queue=[{kind:'grunt',hp:1e9}];s.spawnIn=1e6;
   for(const p of placements)s.board[p.index]={
     ...template,uid:s.nextId++,hero:p.hero,rank:p.rank||1,birthWave:p.birthWave||wave,
@@ -177,9 +177,9 @@ test('crush uses the reduced trained radius for hit boundaries, previews, effect
 });
 
 test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
-  assert.equal(HEROES.length,39);assert.equal(new Set(HEROES.map(h=>h.id)).size,39);
+  assert.equal(HEROES.length,41);assert.equal(new Set(HEROES.map(h=>h.id)).size,41);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','앤트로피']);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','앤트로피','마왕']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
   assert.equal(CHAPTERS.length,90);assert.equal(CHAPTERS[8].hp,3.5);assert.equal(CHAPTERS[44].part,1);assert.equal(CHAPTERS[45].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}

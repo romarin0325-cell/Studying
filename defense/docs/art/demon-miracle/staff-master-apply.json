@@ -1,0 +1,22 @@
+{
+  "refs": [
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-b5591972-0f87-4bdf-b808-e53892099463.png",
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-ddd30557-49d6-45ff-953e-930328676c1a.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png"
+  ],
+  "prompt": "Use case: precise-object-edit. Image1 is existing ATLAS to edit; preserve ALL character anatomy, faces, hair, clothing, wings, body pose, cell positions and closed rear skirt. Change only staff and tiny finger grip needed. Image2 is the NEW ISOLATED SIMPLIFIED STAFF MASTER, made specifically to fix the crooked/warped prop. REPLACE image1's old staff with THIS EXACT RIGID PROP; use the matching front/back/side view from image2. Do not re-interpret its design, reconstruct from memory, add curls, bend the head, offset the stem or redesign the jewel. Think of placing the actual cutout of image2 into each hand: apply ONE UNIFORM SCALE AND WHOLE-OBJECT ROTATION, with no deformation of individual parts. Preserve straight shaft, square crystal, swept gold feathers and lower gold leaves/green inset exactly as master. CRITICAL AXIS: the straight shaft continues from pointed bottom through the grip and centre of neck to EXACT CENTRE OF THE SQUARE JEWEL; the jewel centre MUST lie on extension of shaft. Tilt the entire staff slightly outwards if needed but NEVER bend or curve the prop, turn jewel separately or displace head to the right. Shaft is one simple straight line clearly visible below the ornamental head. Gold scrolls must not appear to bend the shaft. Side views use the THIN EDGE VERSION of the SAME exact master prop, NOT frontal jewel. Every staff has matching length, grip location and gem scale. Same anatomical LEFT hand. Image3 is actual3D occlusion: in BACK view wing must cover forearm, hand and staff where silhouettes overlap. Only staffhead above wing and lower tip below wing may show. Front staff in front of torso/wings, fingers wrap its straight shaft. No other redraws, no added objects, no background/shadow/text. Preserve transparent alpha and four-view atlas format. This is precise asset replacement using the supplied simplified prop master, not creative illustration.",
+  "inputs": [
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-b5591972-0f87-4bdf-b808-e53892099463.png",
+      "sha256": "f6ec87b6df6ae86109f8b23e454ce9055ab3b5522fa86f70787686a11bee1384"
+    },
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-ddd30557-49d6-45ff-953e-930328676c1a.png",
+      "sha256": "70d5d5679e20e9616cd7da5eca7a435877a64f25e1c17e5d7f7aecd2baa4857a"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+      "sha256": "32778ce6ed2cc8826669df89d23408347475dbfcb0ba17e4a0818081bf385aaf"
+    }
+  ]
+}

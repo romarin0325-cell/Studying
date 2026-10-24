@@ -10,9 +10,9 @@ const L=E.PATH_LENGTH,CELLS=[...Array(25).keys()];
 // Later path segments matter more: an enemy there is closer to leaking.
 const SAMPLES=Array.from({length:120},(_,i)=>{const d=(i+.5)*L/120;return {...E.pathPoint(d),w:.6+.8*d/L};}),SAMPLE_W=SAMPLES.reduce((n,p)=>n+p.w,0);
 const coverCache=new Map();
-function coverage(id,cell){
-  const key=id+':'+cell;let v=coverCache.get(key);if(v!==undefined)return v;
-  const h=HERO[id],at=E.cellPoint(cell);
+function coverage(id,cell,h=HERO[id]){
+  const key=id+':'+h.shape+':'+h.range+':'+h.radius+':'+cell;let v=coverCache.get(key);if(v!==undefined)return v;
+  const at=E.cellPoint(cell);
   if(id==='flame_sage')v=1;
   else{let w=0;for(const p of SAMPLES){const dx=p.x-at.x,dy=p.y-at.y;if(Math.hypot(dx,dy)>h.range)continue;if(h.shape==='cross'&&Math.abs(dx)>h.radius/2&&Math.abs(dy)>h.radius/2)continue;w+=p.w;}v=w/SAMPLE_W;}
   coverCache.set(key,v);return v;
@@ -24,7 +24,8 @@ const ROLE={snow_rabbit:1.9,time_ruler:1.6,frost_witch:1.4,galaxy_whale:1.35,pha
 
 function unitValue(s,u,i){
   if(!u||u.cursed)return 0;
-  const h=HERO[u.hero],st=E.combatStats(s,u,i);let v=st.damage/st.interval*aoe(h)*coverage(u.hero,i)*(ROLE[u.hero]||1);
+  const h=E.unitHero(s,u),st=E.combatStats(s,u,i),crit=E.unitCrit(s,u,i);let v=st.damage/st.interval*aoe(h)*coverage(u.hero,i,h)*(ROLE[u.hero]||1)*(crit?1+crit.chance*(crit.damage-1):1);
+  if(E.miracleForm(u)==='abyss_wing')v*=1.4; // control and accumulated poison are outside the direct-hit estimate
   const aura=new Set(['siren','ancient_dragon','harmonious']);
   if(u.hero==='behemoth'&&E.neighbors(i).some(n=>{const a=s.board[n];return a&&!a.cursed&&aura.has(a.hero);}))v*=1.12;
   if(aura.has(u.hero)&&E.neighbors(i).some(n=>s.board[n]?.hero==='behemoth'&&!s.board[n].cursed))v*=1.08;
@@ -69,7 +70,7 @@ const litCells=s=>new Set(telegraphCells(s).filter(c=>!(s.board[c]&&safeFrom(s,c
 function goldValue(s,m){const cost=Math.max(8,E.summonCost(s)||10);return summonValue(s)*m.scale*timeLeft(s)/cost;}
 function bestCell(s,unit,exclude=new Set()){let best=-1,bv=-Infinity;for(const c of CELLS){if(s.board[c]||exclude.has(c))continue;const v=placeDelta(s,unit,c);if(v>bv){bv=v;best=c;}}return {cell:best,value:bv};}
 function summonValue(s){
-  const m=mem(s),key=s.board.map(u=>u?u.uid+':'+u.rank:'').join(',')+'|'+s.deck.map(id=>s.upgrades[id]).join()+'|'+s.wave+'|'+Object.keys(s.buffs).filter(k=>s.buffs[k]>0).join();
+  const m=mem(s),key=s.board.map(u=>u?u.uid+':'+u.rank+':'+(u.form||''):'').join(',')+'|'+s.deck.map(id=>s.upgrades[id]).join()+'|'+s.wave+'|'+Object.keys(s.buffs).filter(k=>s.buffs[k]>0).join();
   if(m.svKey===key)return m.sv;
   const free=CELLS.filter(c=>!s.board[c]);m.svKey=key;
   const units=s.board.filter(Boolean).length;
@@ -100,8 +101,16 @@ function ultValue(s,m,id,gv){
   const scale=E.rankControl(u.rank),boss=list.find(e=>e.boss),strongest=list.reduce((a,b)=>!a||b.maxHp>a.maxHp?b:a,null);
   const thunderCancel=()=>s.telegraph?.pattern==='thunder'&&list.some(e=>e.judging)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
   // A big damage ultimate that could follow a setup (exposure, mirror) right after.
-  const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-h.skill.cost>=HERO[o].skill.cost&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','crush','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
+  const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-h.skill.cost>=HERO[o].skill.cost&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['deathhand','royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','crush','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
   switch(type){
+    case 'deathhand':return E.deathhandTargets(s).targets.reduce((n,e)=>n+hit(E.deathhandFactor(s,e),e),0);
+    case 'miracle_eclose':{
+      const pending=E.pendingMiracles(s);if(!pending.length)return 0;
+      const before=boardValue(s),saved=pending.map(a=>a.form);let projected=0;
+      try{for(let sample=0;sample<4;sample++){pending.forEach((a,i)=>{a.form=(i+sample)%4<2?'miracle_wing':'abyss_wing';});projected+=boardValue(s)/4;}}
+      finally{pending.forEach((a,i)=>{a.form=saved[i];});}
+      return Math.max(0,projected-before)*m.scale*Math.min(30,Math.max(8,rem),timeLeft(s));
+    }
     case 'echo':return E.rumiDream(s,u)?strike(E.RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)):buff(E.ULT_BUFF.echo.ratio*scale,8);
     case 'haste':return buff(fam('haste','speed',E.ULT_BUFF.haste.speed*scale),E.ULT_BUFF.haste.seconds);
     case 'march':return buff(fam('march','speed',E.ULT_BUFF.march.speed*scale),E.ULT_BUFF.march.seconds)+dps*.04*Math.min(8,rem);
@@ -215,7 +224,7 @@ function bestMerge(s,m,gv){
   for(let x=0;x<cells.length;x++)for(let y=0;y<cells.length;y++){
     const a=cells[x],b=cells[y];if(a===b||!E.canMerge(s.board[a],s.board[b]))continue;
     const A=s.board[a],B=s.board[b],hero=B.hero==='rumi'?A.hero:B.hero,rank=B.rank+1;
-    const d=delta(s,[a,b],()=>{s.board[b]={...tempUnit(s,hero,rank),priority:B.priority};s.board[a]=null;},()=>{s.board[a]=A;s.board[b]=B;});
+    const d=delta(s,[a,b],()=>{s.board[b]={...tempUnit(s,hero,rank),...(hero==='miracle_larva'?{form:'miracle_cocoon'}:{}),priority:B.priority};s.board[a]=null;},()=>{s.board[a]=A;s.board[b]=B;});
     let v=d+12*Math.max(1,m.dps)*.06/Math.max(1e-9,m.scale);
     if(hero==='queen')v+=(E.queenIncome(rank,s.wave)-2*E.queenIncome(B.rank,s.wave))*Math.max(0,6-s.wave)*gv/Math.max(1e-9,m.scale)/Math.max(1,timeLeft(s));
     if(HERO[hero].trait.type==='sacrifice')v+=E.doomRefund(A.rank)*gv/Math.max(1e-9,m.scale)/Math.max(1,timeLeft(s));
@@ -272,6 +281,6 @@ export function smartAutoPlay(s){
   const gv=goldValue(s,m),merge=bestMerge(s,m,gv);if(merge){E.move(s,merge.from,merge.to);return;}
   const ult=pickUltimate(s,m);if(ult&&E.cast(s,ult).ok)return;
   if(spendGold(s,m))return;
-  const sig=s.board.map(u=>u?u.uid+':'+u.rank:'').join(',');
+  const sig=s.board.map(u=>u?u.uid+':'+u.rank+':'+(u.form||''):'').join(',');
   if(sig!==m.sig||s.time>=m.nextOpt){m.sig=sig;m.nextOpt=s.time+4;optimize(s,m);}
 }

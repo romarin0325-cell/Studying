@@ -1,0 +1,37 @@
+{
+  "miracleWing": {
+    "staff": "Omitted following explicit user suggestion2026-10-25",
+    "views": [
+      "natural-candidate front",
+      "back-source with correct wing/arm occlusion",
+      "natural-candidate true-left",
+      "natural-candidate true-right"
+    ],
+    "sourceHashes": {
+      "natural": "ad891dd56bb891037015f8963cae592f14b86f5003eb1a18a6de2e8cd3d1a298",
+      "back": "18d757d5a9a5dc8dbea7d3472b19df9cf1ff0fdf3328665d4a4dfd3937455216"
+    },
+    "method": "Connected-component ownership from source-views.mjs; views retain original full-frame coordinates, RGB and scale, including antennae crossing the mid-row. Front/left/right from natural candidate and back from back-source; no warping. Common anatomical packing scale follows."
+  },
+  "rejected": [
+    "crooked/warped staff",
+    "flat-square staff reinterpretation",
+    "back skirt gap",
+    "rear arms in front of wings"
+  ],
+  "finalSha256": "bd7035c1b90915d04e087282832d7aeceaf4b3b5ca5bd2a31d4f5b8719ee09d7",
+  "larva": {
+    "views": [
+      "upright-source front",
+      "candidate-v1 back",
+      "candidate-v1 left",
+      "candidate-v1 right"
+    ],
+    "method": "Same connected-component ownership; no quadrant crop or rescale.",
+    "sourceHashes": {
+      "front": "fb31a536b278ffa3fd17bc8bf8e07d34ebf6b045e3a03a70a8590f270ae34a57",
+      "others": "af7ef77e2589a74f1c319390312715d33b1385b93414cf7473a04d7b04b2e221"
+    },
+    "finalSha256": "82d2c276a3b9033963793107cbf34403fd2af01919e6fd012e75d6363f5ed420"
+  }
+}

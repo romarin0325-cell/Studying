@@ -1,0 +1,77 @@
+{
+  "reason": "User identified front tilt and physically inconsistent wing/skirt construction; parent also audited Abyss wing attachment.",
+  "fixes": [
+    {
+      "id": "miracle_larva",
+      "source": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6f230f76-65fb-43e3-99ea-9b388280964e.png",
+      "prompt": "Use case: precise-object-edit. Image1 is the EXISTING ATLAS TO CORRECT. Image2 is the original design for identity only; image3 is approved frozen style. Preserve the transparent2x2 atlas, layout, compact two-head SD proportions, face identity, matching crisp navy contours and cel rendering. EDIT ONLY THE TOP-LEFT FRONT FIGURE of image1. The user noticed it leans while the back stands straight. Make the front anatomical body upright: eye line horizontal, shoulder line level, centre of cranium/sternum/pelvis midway between planted feet vertically aligned. Feet level, jacket hem level, no sideways hip thrust or tilted head. Keep face expression, green eyes, same asymmetrical hairpins and same leaf hand. Keep all other three figures pixel-identical in their existing positions. Do not redesign clothes, redraw sides or replace original style. Native transparent alpha; no floor, shadows, text or extra objects.",
+      "refs": [
+        "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6f230f76-65fb-43e3-99ea-9b388280964e.png",
+        "C:/Users/romar/Downloads/캐릭터/미라클라바.png",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp"
+      ],
+      "inputs": [
+        {
+          "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6f230f76-65fb-43e3-99ea-9b388280964e.png",
+          "sha256": "af7ef77e2589a74f1c319390312715d33b1385b93414cf7473a04d7b04b2e221"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/미라클라바.png",
+          "sha256": "dc56bcee06ae68f98800f5e28f47df09bdcd9f3474f099bb2de1a95e2658038e"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        }
+      ]
+    },
+    {
+      "id": "miracle_wing",
+      "source": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-9c99b683-0eb5-4dd0-adbb-375d57626500.png",
+      "prompt": "Use case: precise-object-edit. Image1 is the EXISTING ATLAS TO CORRECT. Image2 is the original design for identity only; image3 is approved frozen style. Preserve the transparent2x2 atlas, layout, compact two-head SD proportions, face identity, matching crisp navy contours and cel rendering. Correct image1's garment construction and wing anatomy in ALL FOUR VIEWS. User found the REAR SKIRT incorrectly open: BACK VIEW MUST HAVE A CLOSED OPAQUE WHITE SKIRT PANEL from waist to near ankles, covering buttocks and backs of legs continuously; NO rear thigh gap, no slit at back. Front side slit remains as original, front and back garment edges connect logically. BOTH BUTTERFLY WINGS must root symmetrically at upper BACK BETWEEN SHOULDER BLADES BELOW NECK/SHOULDER LINE. They must not look attached behind skull, ears or hair. Root points at torso level below hair; allow hair to part a little at upper back to show connection. Lower wings on back, top tips no higher than lower cheek level, compact spread. On side profiles, project wing planes edge-on or gently foreshortened, attached at same back position; NOT a full broadside wing copied behind head. Preserve tiny natural standing body, face, golden eyes, gold ornaments, WHITE clothing, left-hand diamond staff in same anatomical hand, exact sprite style, whole figure per cell. Native transparent alpha; no floor, shadows, text or extra objects.",
+      "refs": [
+        "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-9c99b683-0eb5-4dd0-adbb-375d57626500.png",
+        "C:/Users/romar/Downloads/캐릭터/미라클윙.png",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp"
+      ],
+      "inputs": [
+        {
+          "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-9c99b683-0eb5-4dd0-adbb-375d57626500.png",
+          "sha256": "4058d066330a52197910a9b432723cbe56143b4d604bcb38e65cae8fb8121e5c"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/미라클윙.png",
+          "sha256": "08deee1ff5b56892317a2d515eaa71b4bf128fc0643a9d8c316afe401a2733a8"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        }
+      ]
+    },
+    {
+      "id": "abyss_wing",
+      "source": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-db2c05fc-47ef-4958-96e0-e91e70487248.png",
+      "prompt": "Use case: precise-object-edit. Image1 is the EXISTING ATLAS TO CORRECT. Image2 is the original design for identity only; image3 is approved frozen style. Preserve the transparent2x2 atlas, layout, compact two-head SD proportions, face identity, matching crisp navy contours and cel rendering. Correct ONLY wing attachment and side-view geometry in image1, preserving face, expression, hair, outfit and quiet stance. BOTH butterfly wings originate at upper BACK BETWEEN SHOULDER BLADES BELOW NECK AND SHOULDER LINE, NOT skull or ears. Have tips start no higher than lower cheek and the roots visibly reach torso under hair. Wings broadside from front/back, strongly foreshortened/edge-on in true side profiles, no full broadside wings pasted behind head. Keep black-purple wings, magenta eyespots, orange edge pattern and body shape. Keep four distinct orthographic views; no action effects. Keep black corset's opaque posterior coverage coherent, no unnecessary new openings. Native transparent alpha; no floor, shadows, text or extra objects.",
+      "refs": [
+        "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-db2c05fc-47ef-4958-96e0-e91e70487248.png",
+        "C:/Users/romar/Downloads/캐릭터/어비스윙.png",
+        "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp"
+      ],
+      "inputs": [
+        {
+          "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-db2c05fc-47ef-4958-96e0-e91e70487248.png",
+          "sha256": "605842f6ef4f13cc3d6188b1956139eaf63d08374c78aa6a6aff6ab182e693b2"
+        },
+        {
+          "path": "C:/Users/romar/Downloads/캐릭터/어비스윙.png",
+          "sha256": "02871c9b321633ecf829cd7fcccb2908574c12836b042ccba80c090c102a2f24"
+        },
+        {
+          "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        }
+      ]
+    }
+  ]
+}

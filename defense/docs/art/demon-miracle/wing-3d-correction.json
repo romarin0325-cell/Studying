@@ -1,0 +1,28 @@
+{
+  "id": "miracle_wing",
+  "refs": [
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+    "C:/Users/romar/Downloads/캐릭터/미라클윙.png",
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-7182d3eb-cf59-4537-b079-657d55f121fd.png"
+  ],
+  "prompt": "Use case: precise-object-edit. Asset: corrected final transparent 2x2 SD sprite atlas. Image1 is the frozen STYLE ONLY. Image2 is an ACTUAL 3D MESH SCENE rendered through four cameras with a depth buffer: it contains body, arms, left-hand staff, CLOSED BACK SKIRT and wings, and its 3D DEPTH/OVERLAP IS MANDATORY. Image3 is the original character costume/identity. Image4 is the failed existing atlas: preserve its lovely face, colours, tiny SD body and garment motifs but REPLACE the incorrect spatial structure. Image2 top-left FRONT, top-right BACK, bottom-left TRUE LEFT side, bottom-right TRUE RIGHT side. Follow this exact camera orientation in output. CRITICAL: wings are physical appendages at the upper back, at torso level BELOW THE CHIN. No wing lobe behind cranium or ears. Behind-camera REAR VIEW: both wings are closer to the viewer than the arms and staff, so THE WINGS OCCLUDE THE FOREARMS AND STAFF wherever their silhouettes cross. The left hand and lower staff shaft MUST disappear BEHIND the wing, just as image2 actually renders: do not draw arms or staff on top of wing membranes; only the staff's diamond/top sticking ABOVE the wing and a little shaft below can remain visible. In front view the arms/staff are in front of the wings, like the 3D guide. In side views the wings are narrow foreshortened planes behind torso, not broadside pasted decals. Keep the staff in anatomical LEFT hand through every view. BACK OF THE DRESS is a continuous opaque white skirt near ankles with gold seam trim, no back slit/no visible rear thighs. At the back only simple white bodice and subtle gold back seams, no breasts/chest cutout, no giant new gold waist bow or newly invented wing-shaped brooches. Long hair drapes down centre back naturally but does NOT reverse which arm/staff is in front of a wing. Keep original golden eyes, silver-white hair, curved antennae, white/gold gown, gold shoes, pastel rainbow wings with black margins. Relaxed upright TWO-HEAD-TALL chibi with big anatomical cranium and tiny body exactly like style1 and guide2. Transparent margins, all four entire figures, no labels, no shadows, no aura, no background. Produce actual alpha. Inspect rear physical layering before finishing.",
+  "inputs": [
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+      "sha256": "dfdffe2ac87f6070f54f4d3006fcd83cba3ed6a3b5782764aa5334d96341c5e6"
+    },
+    {
+      "path": "C:/Users/romar/Downloads/캐릭터/미라클윙.png",
+      "sha256": "08deee1ff5b56892317a2d515eaa71b4bf128fc0643a9d8c316afe401a2733a8"
+    },
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-7182d3eb-cf59-4537-b079-657d55f121fd.png",
+      "sha256": "56259d680da2e65e96e86cbee426efbec656d037630f84696e5a8d3fc8a083ba"
+    }
+  ]
+}

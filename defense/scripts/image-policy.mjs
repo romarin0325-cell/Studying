@@ -3,6 +3,9 @@ import {BUILD_ONLY_ATLASES} from '../src/asset-policy.js';
 import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS} from '../src/memorial-media.js';
 import {LIBRARY_ART} from '../src/library.js';
 import {portraitFrame} from '../src/portrait-layout.js';
+import {MIRACLE_FORMS} from '../src/new-companions.js';
+// Form UI media is prepared exactly like collectible media, without entering collection or summon pools.
+export const VISUAL_HEROES=[...HEROES,...Object.entries(MIRACLE_FORMS).filter(([id])=>id!=='miracle_larva').map(([id,form])=>({id,...form}))];
 export {PORTRAIT_NUDGE} from '../src/portrait-layout.js';
 
 export const BRIGHT_ART=Object.freeze({garden:'./assets/bright/garden.webp','summon-altar':'./assets/bright/summon-altar.webp',greenhouse:'./assets/bright/greenhouse.webp',lobby:'./assets/bright/lobby.webp'});
@@ -47,7 +50,7 @@ export function imageInputs(){
 // in art.portrait: hair mass and held props made these read slightly left or high. Offsets are in the 512 frame.
 export function derivedImageInputs(){
   const inputs=[];
-  for(const h of HEROES){
+  for(const h of VISUAL_HEROES){
     const source=ASSET_PATHS[h.art.atlas],p=portraitFrame(h);
     if(!p)throw new Error('Missing reviewed portrait frame: '+h.id);
     inputs.push({id:'portrait:'+h.id,source,profile:'portrait',

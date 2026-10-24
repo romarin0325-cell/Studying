@@ -62,11 +62,13 @@
         "unlock": 45,
         "base": 400,
         "growth": 1.09,
-        "rise": 27,
-        "knee": 27,
+        "rise": 21,
+        "knee": 21,
         "steep": 1.15,
-        "knee2": 38,
-        "steep2": 1.2
+        "knee2": 30,
+        "steep2": 1.2,
+        "resampleFrom": 38,
+        "afterSoftCapPrice": 0.5
       },
       "critDamage": {
         "unlock": 45,
@@ -106,13 +108,13 @@
     },
     {
       "name": "specific SR",
-      "perDraw": 0.006,
-      "meanDraws": 166.66666666666666,
-      "medianDraws": 116,
-      "p90Draws": 383,
-      "at20": 0.11340007965220833,
-      "at50": 0.2598508923653916,
-      "at100": 0.4521792984676929
+      "perDraw": 0.005333333333333333,
+      "meanDraws": 187.5,
+      "medianDraws": 130,
+      "p90Draws": 431,
+      "at20": 0.10143131043988785,
+      "at50": 0.23461807114031052,
+      "at100": 0.41419050297502125
     },
     {
       "name": "any normal UR",
@@ -464,51 +466,45 @@
       "levels": [
         {
           "level": 0,
-          "nextDust": 400,
-          "value": 0.01,
+          "nextDust": 517,
+          "value": 0.05,
           "cumulativeDust": 0
         },
         {
           "level": 5,
-          "nextDust": 616,
-          "value": 0.035,
-          "cumulativeDust": 2397
+          "nextDust": 887,
+          "value": 0.07500000000000001,
+          "cumulativeDust": 3239
         },
         {
           "level": 10,
-          "nextDust": 947,
-          "value": 0.060000000000000005,
-          "cumulativeDust": 6083
+          "nextDust": 1521,
+          "value": 0.1,
+          "cumulativeDust": 8818
         },
         {
           "level": 15,
-          "nextDust": 1457,
-          "value": 0.08499999999999999,
-          "cumulativeDust": 11753
+          "nextDust": 2655,
+          "value": 0.125,
+          "cumulativeDust": 18425
         },
         {
           "level": 20,
-          "nextDust": 2242,
-          "value": 0.11,
-          "cumulativeDust": 20475
+          "nextDust": 4556,
+          "value": 0.15000000000000002,
+          "cumulativeDust": 35052
         },
         {
           "level": 25,
-          "nextDust": 3450,
-          "value": 0.135,
-          "cumulativeDust": 33894
+          "nextDust": 10083,
+          "value": 0.175,
+          "cumulativeDust": 66358
         },
         {
           "level": 30,
-          "nextDust": 6233,
-          "value": 0.16,
-          "cumulativeDust": 55336
-        },
-        {
-          "level": 38,
-          "nextDust": 19066,
+          "nextDust": 9533,
           "value": 0.2,
-          "cumulativeDust": 140892
+          "cumulativeDust": 140904
         }
       ]
     },
@@ -1656,6 +1652,12 @@
       "hidden": false
     },
     {
+      "id": "demon_king",
+      "name": "마왕",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
       "id": "storm_sage",
       "name": "폭풍의현자",
       "rarity": "SR",
@@ -1700,6 +1702,12 @@
     {
       "id": "ash",
       "name": "애쉬",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "miracle_larva",
+      "name": "미라클라바",
       "rarity": "SR",
       "hidden": false
     },
@@ -1787,5 +1795,47 @@
       "rarity": "UR",
       "hidden": true
     }
-  ]
+  ],
+  "newCompanions": {
+    "deathhand": {
+      "base": 5,
+      "perDebuff": 3,
+      "radius": 180,
+      "critDamage": 0.5
+    },
+    "miracleForms": {
+      "miracle_larva": {
+        "damage": 48,
+        "interval": 1.3,
+        "range": 490,
+        "radius": 64,
+        "shape": "splash",
+        "trait": "eclose"
+      },
+      "miracle_cocoon": {
+        "damage": 78,
+        "interval": 1.8,
+        "range": 230,
+        "radius": 230,
+        "shape": "pulse",
+        "trait": "eclose"
+      },
+      "miracle_wing": {
+        "damage": 52,
+        "interval": 1.25,
+        "range": 520,
+        "radius": 72,
+        "shape": "splash",
+        "trait": "critAura"
+      },
+      "abyss_wing": {
+        "damage": 38,
+        "interval": 1.25,
+        "range": 520,
+        "radius": 72,
+        "shape": "splash",
+        "trait": "abyss"
+      }
+    }
+  }
 }

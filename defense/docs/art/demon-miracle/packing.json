@@ -1,0 +1,1266 @@
+{
+  "method": "Manual anatomical cranium estimates after viewing original illustrations, frozen Siren style and actual structure inputs. Hair, horns, antennae, wings and cocoon frame are excluded. Back skulls are inferred under hair. One isotropic full-body scale per character, translations only per direction. These are estimates, not a reconstructed 3D rig.",
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "assets": [
+    {
+      "id": "demon_king",
+      "group": "neutral-medium",
+      "sourceSha256": "6ea45bb99b36e818d6e486d19e97cc977d9c704670f1e41ad2856ddbe419b54c",
+      "commonScale": 0.674199862463242,
+      "alphaCleaned": 41900,
+      "segmentation": {
+        "source": [
+          1254,
+          1254
+        ],
+        "alphaCleaned": 41900,
+        "unmatchedAlphaPixels": 0,
+        "majorComponents": [
+          {
+            "pixels": 141600,
+            "centroid": [
+              347.03371468926554,
+              341.59343220338985
+            ],
+            "bounds": [
+              155,
+              37,
+              553,
+              614
+            ]
+          },
+          {
+            "pixels": 142625,
+            "centroid": [
+              909.0046345311131,
+              340.2268185801928
+            ],
+            "bounds": [
+              707,
+              36,
+              1085,
+              613
+            ]
+          },
+          {
+            "pixels": 128150,
+            "centroid": [
+              373.5420834959032,
+              921.6240421381194
+            ],
+            "bounds": [
+              193,
+              638,
+              577,
+              1216
+            ]
+          },
+          {
+            "pixels": 129619,
+            "centroid": [
+              890.5879925010994,
+              923.0317777486325
+            ],
+            "bounds": [
+              689,
+              638,
+              1066,
+              1216
+            ]
+          }
+        ],
+        "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+      },
+      "measurementUncertaintyPacked": 12.135597524338356,
+      "sourcePng": {
+        "file": "defense/assets/cast-v2/demon_king.png",
+        "bytes": 739356,
+        "sha256": "a119bb6b13ced91bf94bf78673a2e44b24b3f63197a0ee07a7f715e0622420ca"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-v2/demon_king.webp",
+        "bytes": 192504,
+        "sha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f"
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "sourceRect": {
+            "left": 154,
+            "top": 37,
+            "width": 401,
+            "height": 578
+          },
+          "sourceEllipse": [
+            345,
+            230,
+            240,
+            220,
+            0
+          ],
+          "sourceChin": [
+            345,
+            340
+          ],
+          "sourceSole": [
+            346,
+            615
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            255.33,
+            220.43,
+            161.81,
+            148.32,
+            0
+          ],
+          "chin": [
+            255.33,
+            294.6
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 185.4,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "sourceRect": {
+            "left": 706,
+            "top": 36,
+            "width": 381,
+            "height": 578
+          },
+          "sourceEllipse": [
+            918,
+            230,
+            240,
+            220,
+            0
+          ],
+          "sourceChin": [
+            918,
+            340
+          ],
+          "sourceSole": [
+            918,
+            615
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            256,
+            220.43,
+            161.81,
+            148.32,
+            0
+          ],
+          "chin": [
+            256,
+            294.6
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 185.4,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": {
+            "left": 192,
+            "top": 637,
+            "width": 386,
+            "height": 581
+          },
+          "sourceEllipse": [
+            350,
+            829,
+            220,
+            220,
+            0
+          ],
+          "sourceChin": [
+            316,
+            939
+          ],
+          "sourceSole": [
+            339,
+            1217
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            263.42,
+            218.41,
+            148.32,
+            148.32,
+            0
+          ],
+          "chin": [
+            240.49,
+            292.57
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 187.43,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": {
+            "left": 689,
+            "top": 637,
+            "width": 379,
+            "height": 580
+          },
+          "sourceEllipse": [
+            905,
+            829,
+            220,
+            220,
+            0
+          ],
+          "sourceChin": [
+            940,
+            939
+          ],
+          "sourceSole": [
+            905,
+            1217
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            256,
+            218.41,
+            148.32,
+            148.32,
+            0
+          ],
+          "chin": [
+            279.6,
+            292.57
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 187.43,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "miracle_larva",
+      "group": "neutral-short",
+      "sourceSha256": "82d2c276a3b9033963793107cbf34403fd2af01919e6fd012e75d6363f5ed420",
+      "commonScale": 0.6488856845230502,
+      "alphaCleaned": 0,
+      "segmentation": {
+        "source": [
+          1254,
+          1254
+        ],
+        "alphaCleaned": 0,
+        "unmatchedAlphaPixels": 0,
+        "majorComponents": [
+          {
+            "pixels": 141440,
+            "centroid": [
+              351.108957861991,
+              311.60959417420815
+            ],
+            "bounds": [
+              115,
+              15,
+              528,
+              626
+            ]
+          },
+          {
+            "pixels": 129449,
+            "centroid": [
+              917.6137938493151,
+              315.80672697355715
+            ],
+            "bounds": [
+              756,
+              29,
+              1143,
+              620
+            ]
+          },
+          {
+            "pixels": 121615,
+            "centroid": [
+              347.66236072852854,
+              900.3675780125807
+            ],
+            "bounds": [
+              119,
+              628,
+              520,
+              1239
+            ]
+          },
+          {
+            "pixels": 118350,
+            "centroid": [
+              911.579780312632,
+              899.365914659907
+            ],
+            "bounds": [
+              733,
+              634,
+              1135,
+              1240
+            ]
+          }
+        ],
+        "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+      },
+      "measurementUncertaintyPacked": 11.679942321414902,
+      "sourcePng": {
+        "file": "defense/assets/cast-v2/miracle_larva.png",
+        "bytes": 640986,
+        "sha256": "36ba8433aa28c2fa41b73a40478bb8fd938cd11c985630a6c07ac63e2618c150"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-v2/miracle_larva.webp",
+        "bytes": 179030,
+        "sha256": "6d84246dc296c31fe115971ce4bdb722ef9cf71f324331313afd84c14ebf41a5"
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "sourceRect": {
+            "left": 115,
+            "top": 14,
+            "width": 414,
+            "height": 614
+          },
+          "sourceEllipse": [
+            345,
+            228,
+            250,
+            228,
+            0
+          ],
+          "sourceChin": [
+            345,
+            342
+          ],
+          "sourceSole": [
+            346,
+            626
+          ],
+          "commonScale": 0.6488856845230502,
+          "ellipse": [
+            255.35,
+            221.74,
+            162.22,
+            147.95,
+            0
+          ],
+          "chin": [
+            255.35,
+            295.72
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 184.28,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "sourceRect": {
+            "left": 755,
+            "top": 28,
+            "width": 390,
+            "height": 593
+          },
+          "sourceEllipse": [
+            925,
+            228,
+            250,
+            228,
+            0
+          ],
+          "sourceChin": [
+            925,
+            342
+          ],
+          "sourceSole": [
+            925,
+            622
+          ],
+          "commonScale": 0.6488856845230502,
+          "ellipse": [
+            256,
+            224.34,
+            162.22,
+            147.95,
+            0
+          ],
+          "chin": [
+            256,
+            298.31
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 181.69,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": {
+            "left": 118,
+            "top": 628,
+            "width": 404,
+            "height": 612
+          },
+          "sourceEllipse": [
+            348,
+            837,
+            230,
+            228,
+            0
+          ],
+          "sourceChin": [
+            310,
+            951
+          ],
+          "sourceSole": [
+            341,
+            1217
+          ],
+          "commonScale": 0.6488856845230502,
+          "ellipse": [
+            260.54,
+            233.42,
+            149.24,
+            147.95,
+            0
+          ],
+          "chin": [
+            235.88,
+            307.4
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 172.6,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": {
+            "left": 732,
+            "top": 633,
+            "width": 405,
+            "height": 609
+          },
+          "sourceEllipse": [
+            920,
+            837,
+            230,
+            228,
+            0
+          ],
+          "sourceChin": [
+            955,
+            951
+          ],
+          "sourceSole": [
+            923,
+            1217
+          ],
+          "commonScale": 0.6488856845230502,
+          "ellipse": [
+            254.05,
+            233.42,
+            149.24,
+            147.95,
+            0
+          ],
+          "chin": [
+            276.76,
+            307.4
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 172.6,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "miracle_cocoon",
+      "group": "feminine-medium",
+      "sourceSha256": "93a117ea73c2f4fdca2eb5e8780b7aa75c108df8a16debc059e7239df540f0b3",
+      "commonScale": 0.674199862463242,
+      "alphaCleaned": 65428,
+      "segmentation": {
+        "source": [
+          1254,
+          1254
+        ],
+        "alphaCleaned": 65428,
+        "unmatchedAlphaPixels": 0,
+        "majorComponents": [
+          {
+            "pixels": 156235,
+            "centroid": [
+              330.93818926616956,
+              323.5591192754504
+            ],
+            "bounds": [
+              119,
+              8,
+              566,
+              597
+            ]
+          },
+          {
+            "pixels": 156750,
+            "centroid": [
+              923.4120510366827,
+              324.9944114832536
+            ],
+            "bounds": [
+              688,
+              8,
+              1135,
+              597
+            ]
+          },
+          {
+            "pixels": 135772,
+            "centroid": [
+              346.9587691129246,
+              932.71913207436
+            ],
+            "bounds": [
+              155,
+              636,
+              561,
+              1233
+            ]
+          },
+          {
+            "pixels": 134794,
+            "centroid": [
+              908.4692790480289,
+              934.3499042984109
+            ],
+            "bounds": [
+              693,
+              636,
+              1100,
+              1233
+            ]
+          }
+        ],
+        "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+      },
+      "measurementUncertaintyPacked": 12.135597524338356,
+      "sourcePng": {
+        "file": "defense/assets/cast-v2/miracle_cocoon.png",
+        "bytes": 832961,
+        "sha256": "e00c31f4d7d2aafc793a3ca1f361ef942f42882c32e5f85d3f57f20fb173a570"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-v2/miracle_cocoon.webp",
+        "bytes": 235962,
+        "sha256": "84ceeaaeab76d7106addd29b32ad6aab1f5b4a424fbb5c1e270a8c71d86c871a"
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "sourceRect": {
+            "left": 118,
+            "top": 8,
+            "width": 449,
+            "height": 590
+          },
+          "sourceEllipse": [
+            337,
+            198,
+            240,
+            220,
+            0
+          ],
+          "sourceChin": [
+            337,
+            308
+          ],
+          "sourceSole": [
+            337,
+            592
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            256,
+            214.37,
+            161.81,
+            148.32,
+            0
+          ],
+          "chin": [
+            256,
+            288.53
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 191.47,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "sourceRect": {
+            "left": 688,
+            "top": 8,
+            "width": 449,
+            "height": 590
+          },
+          "sourceEllipse": [
+            921,
+            198,
+            240,
+            220,
+            0
+          ],
+          "sourceChin": [
+            921,
+            308
+          ],
+          "sourceSole": [
+            921,
+            592
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            256,
+            214.37,
+            161.81,
+            148.32,
+            0
+          ],
+          "chin": [
+            256,
+            288.53
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 191.47,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": {
+            "left": 155,
+            "top": 635,
+            "width": 407,
+            "height": 599
+          },
+          "sourceEllipse": [
+            339,
+            824,
+            220,
+            220,
+            0
+          ],
+          "sourceChin": [
+            300,
+            934
+          ],
+          "sourceSole": [
+            337,
+            1233
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            257.35,
+            204.25,
+            148.32,
+            148.32,
+            0
+          ],
+          "chin": [
+            231.05,
+            278.41
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 201.59,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": {
+            "left": 693,
+            "top": 635,
+            "width": 409,
+            "height": 599
+          },
+          "sourceEllipse": [
+            914,
+            824,
+            220,
+            220,
+            0
+          ],
+          "sourceChin": [
+            952,
+            934
+          ],
+          "sourceSole": [
+            914,
+            1233
+          ],
+          "commonScale": 0.674199862463242,
+          "ellipse": [
+            256,
+            204.25,
+            148.32,
+            148.32,
+            0
+          ],
+          "chin": [
+            281.62,
+            278.41
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 201.59,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "miracle_wing",
+      "group": "feminine-medium",
+      "sourceSha256": "bd7035c1b90915d04e087282832d7aeceaf4b3b5ca5bd2a31d4f5b8719ee09d7",
+      "commonScale": 0.6605782590758164,
+      "alphaCleaned": 0,
+      "segmentation": {
+        "source": [
+          1254,
+          1254
+        ],
+        "alphaCleaned": 0,
+        "unmatchedAlphaPixels": 0,
+        "majorComponents": [
+          {
+            "pixels": 191854,
+            "centroid": [
+              376.01482377224346,
+              346.8472901268673
+            ],
+            "bounds": [
+              137,
+              11,
+              618,
+              612
+            ]
+          },
+          {
+            "pixels": 182026,
+            "centroid": [
+              953.3806434245657,
+              345.59587641325965
+            ],
+            "bounds": [
+              698,
+              15,
+              1185,
+              613
+            ]
+          },
+          {
+            "pixels": 133630,
+            "centroid": [
+              421.4757314974182,
+              943.0211254957719
+            ],
+            "bounds": [
+              239,
+              626,
+              599,
+              1209
+            ]
+          },
+          {
+            "pixels": 133354,
+            "centroid": [
+              884.1349190875414,
+              942.4619958906369
+            ],
+            "bounds": [
+              710,
+              624,
+              1066,
+              1209
+            ]
+          }
+        ],
+        "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+      },
+      "measurementUncertaintyPacked": 11.890408663364694,
+      "sourcePng": {
+        "file": "defense/assets/cast-v2/miracle_wing.png",
+        "bytes": 835198,
+        "sha256": "c2a685223d43592c1648b347aabf2ee376f2f9e282aaaaac42cddd3a9ab5109e"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-v2/miracle_wing.webp",
+        "bytes": 217726,
+        "sha256": "bf08ab159d9efc12db5d9f327beb9c9b34045577cc4e7885b6b4768cdd32c6de"
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "sourceRect": {
+            "left": 137,
+            "top": 10,
+            "width": 482,
+            "height": 604
+          },
+          "sourceEllipse": [
+            375,
+            204,
+            250,
+            220,
+            0
+          ],
+          "sourceChin": [
+            375,
+            314
+          ],
+          "sourceSole": [
+            376,
+            612
+          ],
+          "commonScale": 0.6605782590758164,
+          "ellipse": [
+            255.34,
+            210.48,
+            165.14,
+            145.33,
+            0
+          ],
+          "chin": [
+            255.34,
+            283.15
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 196.85,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "sourceRect": {
+            "left": 698,
+            "top": 14,
+            "width": 488,
+            "height": 601
+          },
+          "sourceEllipse": [
+            925,
+            204,
+            250,
+            220,
+            0
+          ],
+          "sourceChin": [
+            925,
+            314
+          ],
+          "sourceSole": [
+            925,
+            615
+          ],
+          "commonScale": 0.6605782590758164,
+          "ellipse": [
+            256,
+            208.5,
+            165.14,
+            145.33,
+            0
+          ],
+          "chin": [
+            256,
+            281.17
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 198.83,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": {
+            "left": 239,
+            "top": 625,
+            "width": 362,
+            "height": 586
+          },
+          "sourceEllipse": [
+            378,
+            802,
+            226,
+            220,
+            0
+          ],
+          "sourceChin": [
+            340,
+            912
+          ],
+          "sourceSole": [
+            358,
+            1209
+          ],
+          "commonScale": 0.6605782590758164,
+          "ellipse": [
+            269.21,
+            211.14,
+            149.29,
+            145.33,
+            0
+          ],
+          "chin": [
+            244.11,
+            283.81
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 196.19,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": {
+            "left": 709,
+            "top": 624,
+            "width": 359,
+            "height": 587
+          },
+          "sourceEllipse": [
+            935,
+            802,
+            226,
+            220,
+            0
+          ],
+          "sourceChin": [
+            970,
+            912
+          ],
+          "sourceSole": [
+            936,
+            1209
+          ],
+          "commonScale": 0.6605782590758164,
+          "ellipse": [
+            255.34,
+            211.14,
+            149.29,
+            145.33,
+            0
+          ],
+          "chin": [
+            278.46,
+            283.81
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 196.19,
+          "paintedClipping": 0
+        }
+      ]
+    },
+    {
+      "id": "abyss_wing",
+      "group": "feminine-medium",
+      "sourceSha256": "72eca282f6d31677b8d93e69c3b5c0ab7e3b156284943c4f0159a11974d1a672",
+      "commonScale": 0.659715196453987,
+      "alphaCleaned": 35206,
+      "segmentation": {
+        "source": [
+          1254,
+          1254
+        ],
+        "alphaCleaned": 35206,
+        "unmatchedAlphaPixels": 0,
+        "majorComponents": [
+          {
+            "pixels": 179852,
+            "centroid": [
+              336.5667993683696,
+              362.4807119186887
+            ],
+            "bounds": [
+              67,
+              50,
+              597,
+              644
+            ]
+          },
+          {
+            "pixels": 170548,
+            "centroid": [
+              931.9255634777306,
+              361.8992541689143
+            ],
+            "bounds": [
+              688,
+              48,
+              1184,
+              644
+            ]
+          },
+          {
+            "pixels": 127844,
+            "centroid": [
+              351.5659788492225,
+              923.4957604580583
+            ],
+            "bounds": [
+              135,
+              653,
+              537,
+              1211
+            ]
+          },
+          {
+            "pixels": 128146,
+            "centroid": [
+              902.4940146395518,
+              922.3957985422877
+            ],
+            "bounds": [
+              719,
+              652,
+              1117,
+              1211
+            ]
+          }
+        ],
+        "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+      },
+      "measurementUncertaintyPacked": 11.874873536171766,
+      "sourcePng": {
+        "file": "defense/assets/cast-v2/abyss_wing.png",
+        "bytes": 845486,
+        "sha256": "7b2ac937c08989721cbd3149d2ce58d1fd78edcb462afceee0af157878805162"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-v2/abyss_wing.webp",
+        "bytes": 219520,
+        "sha256": "8cdf06809c6171ded03ffa006d8cf50f9dfa08d37e2feac5f8ba73a07ec026d9"
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "sourceRect": {
+            "left": 67,
+            "top": 49,
+            "width": 532,
+            "height": 597
+          },
+          "sourceEllipse": [
+            339,
+            248,
+            244,
+            226,
+            0
+          ],
+          "sourceChin": [
+            339,
+            361
+          ],
+          "sourceSole": [
+            340,
+            646
+          ],
+          "commonScale": 0.659715196453987,
+          "ellipse": [
+            255.34,
+            217.43,
+            160.97,
+            149.1,
+            0
+          ],
+          "chin": [
+            255.34,
+            291.98
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 188.02,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "sourceRect": {
+            "left": 687,
+            "top": 48,
+            "width": 498,
+            "height": 598
+          },
+          "sourceEllipse": [
+            921,
+            248,
+            244,
+            226,
+            0
+          ],
+          "sourceChin": [
+            921,
+            361
+          ],
+          "sourceSole": [
+            921,
+            646
+          ],
+          "commonScale": 0.659715196453987,
+          "ellipse": [
+            256,
+            217.43,
+            160.97,
+            149.1,
+            0
+          ],
+          "chin": [
+            256,
+            291.98
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 188.02,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": {
+            "left": 135,
+            "top": 653,
+            "width": 403,
+            "height": 560
+          },
+          "sourceEllipse": [
+            333,
+            834,
+            224,
+            226,
+            0
+          ],
+          "sourceChin": [
+            296,
+            947
+          ],
+          "sourceSole": [
+            336,
+            1213
+          ],
+          "commonScale": 0.659715196453987,
+          "ellipse": [
+            254.02,
+            229.97,
+            147.78,
+            149.1,
+            0
+          ],
+          "chin": [
+            229.61,
+            304.52
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 175.48,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": {
+            "left": 718,
+            "top": 652,
+            "width": 401,
+            "height": 561
+          },
+          "sourceEllipse": [
+            927,
+            834,
+            224,
+            226,
+            0
+          ],
+          "sourceChin": [
+            964,
+            947
+          ],
+          "sourceSole": [
+            927,
+            1213
+          ],
+          "commonScale": 0.659715196453987,
+          "ellipse": [
+            256,
+            229.97,
+            147.78,
+            149.1,
+            0
+          ],
+          "chin": [
+            280.41,
+            304.52
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 175.48,
+          "paintedClipping": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "method": "Manual anatomical cranium estimates after viewing original illustrations, frozen Siren style and actual structure inputs. Hair, horns, antennae, wings and cocoon frame are excluded. Back skulls are inferred under hair. One isotropic full-body scale per character, translations only per direction. These are estimates, not a reconstructed 3D rig.",
+  "uncertaintySourcePixels": {"front":18,"back":26,"profile":18,"sole":5},
+  "assets": [
+    {"id":"demon_king","group":"neutral-medium","ellipses":[[345,230,240,220,0],[918,230,240,220,0],[350,829,220,220,0],[905,829,220,220,0]],"chins":[[345,340],[918,340],[316,939],[940,939]],"feet":[[346,615],[918,615],[339,1217],[905,1217]]},
+    {"id":"miracle_larva","group":"neutral-short","ellipses":[[345,228,250,228,0],[925,228,250,228,0],[348,837,230,228,0],[920,837,230,228,0]],"chins":[[345,342],[925,342],[310,951],[955,951]],"feet":[[346,626],[925,622],[341,1217],[923,1217]]},
+    {"id":"miracle_cocoon","group":"feminine-medium","ellipses":[[337,198,240,220,0],[921,198,240,220,0],[339,824,220,220,0],[914,824,220,220,0]],"chins":[[337,308],[921,308],[300,934],[952,934]],"feet":[[337,592],[921,592],[337,1233],[914,1233]]},
+    {"id":"miracle_wing","group":"feminine-medium","ellipses":[[375,204,250,220,0],[925,204,250,220,0],[378,802,226,220,0],[935,802,226,220,0]],"chins":[[375,314],[925,314],[340,912],[970,912]],"feet":[[376,612],[925,615],[358,1209],[936,1209]]},
+    {"id":"abyss_wing","group":"feminine-medium","ellipses":[[339,248,244,226,0],[921,248,244,226,0],[333,834,224,226,0],[927,834,224,226,0]],"chins":[[339,361],[921,361],[296,947],[964,947]],"feet":[[340,646],[921,646],[336,1213],[927,1213]]}
+  ]
+}

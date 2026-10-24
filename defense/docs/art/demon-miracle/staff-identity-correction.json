@@ -1,0 +1,32 @@
+{
+  "refs": [
+    "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/original-staff-detail.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/staff-structure-guide.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+    "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp"
+  ],
+  "prompt": "Use case: precise-object-edit. Image1 is EDIT TARGET four-view transparent SD atlas; keep its face, clothes, hair, wings, poses, closed rear skirt and correct rear wing occlusion. ONLY REPAIR THE STAFF. Image2 is the enlarged ORIGINAL STAFF DESIGN and is the authoritative identity. It is a large SQUARE iridescent faceted prism, slightly tilted with the shaft, enclosed by flowing gold S-curves with feather-like swept points; at the LOWER JUNCTION two broad gold LEAF/WING scrolls wrap the stem around a tiny GREEN inset. These signatures MUST be kept. Do not replace it with a generic diamond outline, a plain rhombus with four knobs or a new wand design. Simplify only fine engravings and the number of tiny veins, keep the original outer outline and main scroll locations. Image3 is one actual 3D prop loosely matching that square prism/scroll/green inset; use it ONLY for rigidity, same number of main parts, front-back consistency and narrow side thickness. Do NOT copy its crude unshaded gold silhouette. Image4 is the actual body+staff+wings 3D depth-buffer guide: correct arm attachment, anatomical LEFT hand and correct overlap are mandatory. Image5 is frozen SD rendering style. Staff frame must look clean, solid, gold metal with crisp curving edges, not melted/collapsed. Gem has straight square edges and four clean pastel triangular facets meeting in the middle. Gold scrolls are firmly joined at corners, not crooked loose twigs. Exact same rigid prop through 4 cameras: front and back see opposite faces, TRUE profiles see a thinner edge of crystal/frame; do not paint the frontal jewel into both side views. In BACK view wings hide hand, forearm and overlapping staff shaft; only top staffhead above wing and lower shaft below it are visible. Full character positions, transparent margins and crisp polished contour unchanged. Native alpha, no backdrop, text or shadows. This is restoration of the original staff identity with correct geometry, not a redesign.",
+  "inputs": [
+    {
+      "path": "C:\\Users\\romar\\.codex\\generated_images\\01a16f16-e850-75d1-b2f0-ed7662562596\\exec-6df6ad01-27cd-44ae-bc01-11bd836f9e07.png",
+      "sha256": "5564cca9b065422e6b8a2e4efcf3a129101709876218ceaea3ce449e1d46702d"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/original-staff-detail.png",
+      "sha256": "caba071952aabb70bf880538428610d803d7bbd57dec0439743fde086235396d"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/staff-structure-guide.png",
+      "sha256": "1fabbeff49225fa9a97570060dee0d29d417eb38f3caba0c3b35a6b2672b32b0"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/demon-miracle/wing-structure-guide.png",
+      "sha256": "32778ce6ed2cc8826669df89d23408347475dbfcb0ba17e4a0818081bf385aaf"
+    },
+    {
+      "path": "C:/Users/romar/git/Studying/.codex-worktrees/star-garden-demon-miracle/defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    }
+  ]
+}

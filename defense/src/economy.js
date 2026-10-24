@@ -43,15 +43,24 @@ export const collectionBonus=relics=>collectionPoints(relics)/COLLECTION_POINTS_
 export const BED_IDS=Object.freeze(['rose','spring','seed','crit','critDamage','stardust']);
 // Two gardens of three beds each: the dream greenhouse (from the start) and the dawn greenhouse (opens at stage 45).
 export const GARDENS=Object.freeze([{id:'dream',beds:['rose','spring','seed']},{id:'dawn',beds:['crit','critDamage','stardust']}]);
-export const bedCost=(id,level)=>{const b=T.beds[id],rise=b.rise??b.knee,k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,rise)*b.steep**Math.max(0,Math.min(level,k2)-rise)*(b.steep2??b.steep)**Math.max(0,level-k2));};
+// Retained old price for one +0.5%p purchase. Thirty new purchases cover the same
+// dust intervals as all 38 old purchases, then each corresponding old upgrade is half price.
+export const legacyCritCost=level=>Math.ceil(400*1.09**Math.min(level,27)*1.15**Math.max(0,Math.min(level,38)-27)*1.2**Math.max(0,level-38));
+export function critBedCost(level){
+  if(level>=30)return Math.ceil(legacyCritCost(38+level-30)/2);
+  const from=level*38/30,to=(level+1)*38/30;let price=0;
+  for(let i=Math.floor(from);i<Math.ceil(to);i++)price+=Math.max(0,Math.min(to,i+1)-Math.max(from,i))*legacyCritCost(i);
+  return Math.ceil(price-1e-8);
+}
+export const bedCost=(id,level)=>{if(id==='crit')return critBedCost(level);const b=T.beds[id],rise=b.rise??b.knee,k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,rise)*b.steep**Math.max(0,Math.min(level,k2)-rise)*(b.steep2??b.steep)**Math.max(0,level-k2));};
 export const bedOpen=(id,cleared)=>cleared>=T.beds[id].unlock;
-// Dawn garden effects. Linear and unbounded: crit chance +0.5%/level (20% at 38), crit damage +2%/level (200% at 25),
+// Dawn garden effects. Linear and unbounded: crit chance +0.5%p/level (20% at 30), crit damage +2%/level (200% at 25),
 // stardust +1%/level (+50% at 49). The soft cap is the price, not a hard max.
-export const critChance=level=>.01+.005*level;
+export const critChance=level=>.05+.005*level;
 export const critDamage=level=>1.5+.02*level;
 export const stardustRate=level=>.01+.01*level;
-// Effects only exist once their bed has opened, so stages 1-45 are exactly what they were before part two.
-export const critStats=(beds,cleared)=>bedOpen('crit',cleared)?{chance:critChance(beds?.crit||0),damage:critDamage(beds?.critDamage||0)}:null;
+// Garden bonuses require their bed unlock; the base5%/150% critical applies before the dawn garden too.
+export const critStats=(beds,cleared)=>({chance:critChance(bedOpen('crit',cleared)?beds?.crit||0:0),damage:critDamage(bedOpen('critDamage',cleared)?beds?.critDamage||0:0)});
 export const stardustBonus=(beds,cleared)=>bedOpen('stardust',cleared)?stardustRate(beds?.stardust||0):0;
 // Rose: +1% power per level. Spring: +1 max starlight per level. Seed: +2 starting gold per level.
 export const roseAttack=level=>.01*level;

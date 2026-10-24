@@ -1,5 +1,5 @@
 import {HERO,ASSET_PATHS,BOSSES,CHAPTERS,TRANSFORM_ART} from '../content.js';
-import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm,topCinderella} from './engine.js';
+import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm,unitHero,topCinderella} from './engine.js';
 import {CombatFX,drawAttackRange,isUR} from './effects.js';
 import {COMPANION_VISUALS} from './companion-vfx.js';
 import {drawLightningChain,LIGHTNING_CHAIN_LIFE} from './lightning-vfx.js';
@@ -107,9 +107,9 @@ export class Renderer {
     for(const i of this.mergeable){const p=cellPoint(i);ctx.fillStyle='#e2eac912';rounded(ctx,p.x-40,p.y-40,80,80,7);ctx.fill();for(const [dx,dy] of [[-1,-1],[1,1]])line(ctx,[[p.x+dx*27,p.y+dy*40],[p.x+dx*40,p.y+dy*40],[p.x+dx*40,p.y+dy*27]],'#ede4adbb',2.5);star(ctx,p.x+32,p.y-31,5,'#fff1b9',Math.PI/4);}
     if(this.selected>=0&&s.board[this.selected]){
       const a=s.board[this.selected];
-      const at=cellPoint(this.selected);drawAttackRange(ctx,HERO[a.hero],at,a.aim);
+      const at=cellPoint(this.selected);drawAttackRange(ctx,unitHero(s,a),at,a.aim);
       for(let i=0;i<25;i++)if(i===this.selected||canMerge(a,s.board[i])){const p=cellPoint(i);rounded(ctx,p.x-42,p.y-42,84,82,8);ctx.strokeStyle=i===this.selected?'#fff1b9':'#baf6df';ctx.lineWidth=i===this.selected?3:4;ctx.stroke();if(i!==this.selected){ctx.fillStyle=`rgba(164,246,208,${.1+Math.sin(this.clock*5)*.035})`;ctx.fill();star(ctx,p.x,p.y-30,9,'#daffe4',Math.PI/4);}}
-      if(['hasteAura','powerAura','harmonyAura'].includes(HERO[a.hero].trait.type)){
+      if(['hasteAura','powerAura','harmonyAura','critAura'].includes(unitHero(s,a).trait.type)){
         const i=this.selected,p=cellPoint(i);for(const j of [i%5>0?i-1:-1,i%5<4?i+1:-1,i>=5?i-5:-1,i<20?i+5:-1])if(j>=0&&s.board[j]){const b=cellPoint(j);line(ctx,[[p.x,p.y],[b.x,b.y]],HERO[a.hero].color+'aa',3);}
       }
     }
