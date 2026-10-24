@@ -50,10 +50,10 @@
     }
   },
   "totals": {
-    "sourceBytes": 23270926,
-    "deployableSourceBytes": 21672384,
-    "outputBytes": 12827314,
-    "optimizedFiles": 150,
+    "sourceBytes": 23751210,
+    "deployableSourceBytes": 22152668,
+    "outputBytes": 13151732,
+    "optimizedFiles": 151,
     "derivedFiles": 144,
     "derivedOutputBytes": 3410496
   },
@@ -2481,6 +2481,36 @@
         "metadata": {
           "width": 720,
           "height": 1290,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "bright:lobby",
+      "source": "./assets/bright/lobby.webp",
+      "profile": "atlas",
+      "uses": [
+        "Bright window.__ASTRA_ASSETS__.lobby; home lobby (Bright only)"
+      ],
+      "original": {
+        "bytes": 480284,
+        "sha256": "8d01d20e43a89671780c4c1337dea825b4b29f46017b2105040601c3da6f89d5",
+        "metadata": {
+          "width": 1024,
+          "height": 1536,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/bright/lobby.webp",
+        "bytes": 324418,
+        "sha256": "352bb52ebe72b0db91e9f1034aeb11dc786e22fe1c2c3bb5f6c97d588266fcbf",
+        "metadata": {
+          "width": 1024,
+          "height": 1536,
           "hasAlpha": false,
           "codec": "webp"
         }

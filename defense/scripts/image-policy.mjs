@@ -5,7 +5,7 @@ import {LIBRARY_ART} from '../src/library.js';
 import {portraitFrame} from '../src/portrait-layout.js';
 export {PORTRAIT_NUDGE} from '../src/portrait-layout.js';
 
-export const BRIGHT_ART=Object.freeze({garden:'./assets/bright/garden.webp','summon-altar':'./assets/bright/summon-altar.webp',greenhouse:'./assets/bright/greenhouse.webp'});
+export const BRIGHT_ART=Object.freeze({garden:'./assets/bright/garden.webp','summon-altar':'./assets/bright/summon-altar.webp',greenhouse:'./assets/bright/greenhouse.webp',lobby:'./assets/bright/lobby.webp'});
 export const IMAGE_PROFILES=Object.freeze({
   unit:{codec:'webp',width:640,height:640,quality:90,alphaQuality:100,effort:6},
   atlas:{codec:'webp',quality:85,alphaQuality:100,effort:6},
@@ -32,7 +32,7 @@ export function imageInputs(){
         ...relics.map(relic=>'relic:'+relic+'; collection / summon / equipment'),
         ...(buildOnly?[BUILD_ONLY_ATLASES[id]]:[])],retention:'Preserve source bytes at this path; optimized output is separate.'});
   }
-  for(const [id,source] of Object.entries(BRIGHT_ART))inputs.push({id:'bright:'+id,source,profile:'atlas',uses:['Bright window.__ASTRA_ASSETS__.'+id+'; home / summon / greenhouse']});
+  for(const [id,source] of Object.entries(BRIGHT_ART))inputs.push({id:'bright:'+id,source,profile:'atlas',uses:['Bright window.__ASTRA_ASSETS__.'+id+'; '+(id==='lobby'?'home lobby (Bright only)':'home / summon / greenhouse')]});
   for(const [id,source] of Object.entries(LIBRARY_ART))inputs.push({id:'library:'+id,source,profile:'illustration',uses:['window.__LIBRARY_MEDIA__.'+id+'; completed constellation illustration']});
   for(const h of HEROES){
     inputs.push({id:'memorial:'+h.id,source:MEMORIAL_MEDIA_PATHS[h.id],profile:'memorialAvif',uses:['window.__MEMORIAL_MEDIA__.'+h.id+'; standalone painting / web primary']});

@@ -1332,6 +1332,8 @@ setInterval(()=>{
 },1000);
 for(const img of document.querySelectorAll('img'))img.onerror=()=>{img.src=fallback('star_boy');};
 document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&!e.target.dataset.memorial&&!e.target.dataset.fallback){e.target.dataset.fallback='1';e.target.src=fallback('star_boy');}},true);
+// Bright ships its own portrait lobby room; the night lobby keeps the garden.
+if(window.__ASTRA_ASSETS__?.lobby)document.documentElement.style.setProperty('--lobby',`url("${window.__ASTRA_ASSETS__.lobby}") 50% 82%/cover`);
 document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASSETS__?.garden||'./assets/merge/garden.webp'}")`);
 for(const [name,id,path] of [['--greenhouse','greenhouse','./assets/merge/greenhouse.webp'],['--beds','greenhouse-beds','./assets/merge/greenhouse-beds.webp'],['--greenhouse-dawn','greenhouse-dawn','./assets/merge/greenhouse-dawn.webp'],['--beds-dawn','greenhouse-beds-dawn','./assets/merge/greenhouse-beds-dawn.webp'],['--gifts','gifts','./assets/merge/gifts.webp']])document.documentElement.style.setProperty(name,`url("${window.__ASTRA_ASSETS__?.[id]||path}")`);
 document.documentElement.style.setProperty('--altar',`url("${window.__ASTRA_ASSETS__?.['summon-altar']||'./assets/merge/summon-altar.webp'}")`);
