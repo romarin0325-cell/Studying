@@ -225,8 +225,8 @@ test('sustained skill timers, total durations and numeric attack stats survive r
 
 test('cardinal Lightning components use the exact 2, 3 and 4+ power and chain thresholds',()=>{
   for(const [cells,multiplier,ratio,extra] of [
-    [[6],1,.65,0],[[6,7],1.15,.70,0],[[6,7,12],1.30,.75,0],
-    [[6,7,12,11],1.50,.80,1],[[6,7,12,11,16],1.50,.80,1],
+    [[6],1,.65,0],[[6,7],1.20,.70,0],[[6,7,12],1.40,.75,0],
+    [[6,7,12,11],1.60,.80,1],[[6,7,12,11,16],1.60,.80,1],
   ]){
     const s=traitArena(cells.map(index=>({hero:'lightning_sage',index})));
     for(const index of cells){
@@ -248,7 +248,7 @@ test('Lightning adjacency rejects diagonal and row-wrap links and immediately fo
   const moved=s.board[13],uid=moved.uid;
   assert.equal(E.personalTrait(s,s.board[6]).size,4);
   assert.ok(E.move(s,13,24).ok);assert.equal(s.board[24].uid,uid);
-  for(const index of [6,7,12]){assert.equal(E.personalTrait(s,s.board[index]).size,3);close(E.power(s,s.board[index]),HERO.lightning_sage.damage*1.30);}
+  for(const index of [6,7,12]){assert.equal(E.personalTrait(s,s.board[index]).size,3);close(E.power(s,s.board[index]),HERO.lightning_sage.damage*1.40);}
   assert.equal(E.personalTrait(s,s.board[24]).size,1);
   assert.ok(E.move(s,24,13).ok);
   for(const index of [6,7,12,13])assert.equal(E.personalTrait(s,s.board[index]).size,4);
@@ -1517,7 +1517,7 @@ test('crush hits three times around a seeded enemy, echoes on the last hit, and 
   const [boss]=enemiesFor(bossRun,[{kind:'boss',hp:1e9,progress:1200}]);quiet(bossRun);
   const bossHp=boss.hp,b0=bossRun.time;readyCast(bossRun,'behemoth');
   const alone=E.castPreview(bossRun,'behemoth');
-  assert.match(alone.lines[0],/반경 150/);assert.match(alone.lines[0],/0\.5초 간격으로 3번/);
+  assert.match(alone.lines[0],/반경 112.5/);assert.match(alone.lines[0],/0\.5초 간격으로 3번/);
   assert.ok(alone.lines.some(line=>line.includes('하나뿐')&&line.includes(Math.round(E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits).toLocaleString('ko-KR'))));
   advanceTo(bossRun,b0+1.3);close(bossHp-boss.hp,E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits);
   const crowd=traitArena([{hero:'behemoth',index:12}]);enemiesFor(crowd,[{hp:1e9,progress:1200},{hp:1e9,progress:1800}]);quiet(crowd);
@@ -1871,7 +1871,7 @@ test('smart auto holds lemonade until someone needs it and spends requiem on liv
 });
 
 test('ash: armageddon burns the lowest other ally, spares an invincible one (not Antropy), and still blasts when she is alone',()=>{
-  assert.deepEqual(E.ARMAGEDDON,{factor:15,radius:180});assert.equal(HERO.ash.damage,31);
+  assert.deepEqual(E.ARMAGEDDON,{factor:18,radius:180});assert.equal(HERO.ash.damage,31);
   const dist=(a,b)=>Math.hypot(E.pathPoint(a.progress).x-E.pathPoint(b.progress).x,E.pathPoint(a.progress).y-E.pathPoint(b.progress).y);
   const hitLine=base=>`가장 밀집한 반경 ${E.ARMAGEDDON.radius}의 적에게 위력 ${E.ARMAGEDDON.factor}배, ${Math.round(base*E.ARMAGEDDON.factor).toLocaleString('ko-KR')} 피해를 줍니다.`;
   const s=traitArena([{index:12,hero:'ash',rank:1},{index:0,hero:'star_boy',rank:1},{index:24,hero:'snow_rabbit',rank:3}]);
