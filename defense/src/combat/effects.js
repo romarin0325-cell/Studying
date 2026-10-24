@@ -1,6 +1,7 @@
 import {HERO,HEROES} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
+import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 // Emblems added in pass 15 for companions whose ultimate only had the shared cast flash, and for the Queen, who borrowed
 // Cherry Prince's finisher ring (GPT image, docs/art/companion-fx-20261024): [atlas, frame, columns, rows].
@@ -129,8 +130,8 @@ export class CombatFX{
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
-    if(e.type==='impact')this.add({...e,life:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3,total:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3});
-    if(e.type==='chain')this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life:.24,total:.24,rank:1});
+    if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3;this.add({...e,life,total:life});}
+    if(e.type==='chain'){const lightning=e.hero==='lightning_sage',life=lightning?LIGHTNING_IMPACT_LIFE:.24;this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life,total:life,rank:1,...(lightning?{hop:true}:{})});}
     if(e.type==='dreamPhase')for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});
     if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
     if(e.type==='sunCharge'){this.bloomAt=this.clock;for(const p of e.points||[])this.add({type:'sunCharge',x:p.x+28,y:p.y+21,sunlight:e.sunlight,life:.9,total:.9});}
@@ -667,6 +668,7 @@ export class CombatFX{
     const arc=['icicles','dragon','planet'].includes(f.motion)?34:f.motion==='leap'?20:7;
     const x=shot.from.x+(to.x-shot.from.x)*t,y=shot.from.y+(to.y-shot.from.y)*t-Math.sin(t*Math.PI)*arc;
     if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
+    if(h.id==='lightning_sage'){drawLightningShot(this,shot,s,p);return;}
     if(['zeke','guardian','ancient_dragon','behemoth'].includes(h.id))return;
     if(h.shape==='beam'&&f.motion==='candy'){
       const len=64+shot.rank*4;ctx.save();ctx.translate(x,y);ctx.rotate(angle);
@@ -815,6 +817,7 @@ export class CombatFX{
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
       if(drawCompanionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
+      if(drawLightningImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(e.type==='reduce'){
         // The reduced ally dissolves into starlight embers that rise toward the gauge at the top.
         const k=easeOut(window01(t,0,.9)),fade=1-window01(t,.6,1),tint=HERO[e.hero]?.color||'#ffd0a0';
