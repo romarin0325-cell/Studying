@@ -154,11 +154,22 @@ function confirmMonthlyClaim(){
     `<div class="dialog-buttons"><button class="secondary" data-action="close">더 도전하기</button><button class="primary" data-confirm-monthly="${record.token}">보상 확정</button></div>`,'monthly-claim');
 }
 // Summon reveal. A falling star opens it. Each new result, and every SR/UR, then
-// gets a full-screen spotlight in pull order. The tall cards deal and flip after
-// that. Tap a spotlight for the next one. 건너뛰기 drops the remaining spotlights
-// into the deal; 모두 보기 (and a tap during the meteor) opens every card at once.
+// gets a full-screen spotlight in pull order. A NEW companion builds for about 2.7s
+// (gate, silhouette, flash, title). Duplicate SR/UR stay near 1s with no silhouette;
+// a new relic is the shorter gate between them. The first tap settles that spotlight;
+// the next tap advances. 건너뛰기 drops the remaining spotlights into the deal;
+// 모두 보기 (and a tap during the meteor) opens every card at once.
 // A correct star quiz boosts a 10-pull (UR ×2); a lucky one adds a bonus 10-pull.
 let bonusItems=null,spotItems=[],spotAt=0,spotToken=0;
+// CSS variables on .reveal-spot use the same millisecond marks.
+const SPOT_BEAT={
+  acquire:{sil:600,silDur:700,pop:1300,title:1480,stamp:1980,line:2160,settle:2720,gate:480},
+  relic:{sil:320,silDur:420,pop:800,title:920,stamp:1180,line:1320,settle:1720,gate:420},
+  dupe:{sil:0,silDur:400,pop:400,title:480,stamp:480,line:680,settle:1040,gate:0},
+};
+const SPOT_STARS={C:1,R:2,SR:3,UR:4};
+const SPOT_BURST={C:'#d5e2ee',R:'#8ec8ff',SR:'#d7b6ff',UR:'#ffe08a'};
+const spotKind=(item,relic)=>relic?item.fresh?'relic':'dupe':item.fresh?'acquire':'dupe';
 const motionOff=()=>$('app').dataset.reduced==='true'||!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const rarityOfId=id=>(HERO[id]||ARTIFACT[id]).rarity;
 function clearRevealTimers(){for(const t of revealTimers)clearTimeout(t);revealTimers=[];}
@@ -190,15 +201,15 @@ function reveal(items,{count,cost=0,boost=false,lucky=false}){
   clearRevealTimers();spotItems=[];spotAt=0;spotToken++;
   const rank=item=>RARITIES.indexOf(rarityOfId(item.id));
   const best=items.reduce((a,b)=>rank(b)>rank(a)?b:a),top=rarityOfId(best.id),kind=banner==='relic'?'relic':'hero',price=banner==='relic'?T.relicDrawCost:T.heroDrawCost;
-  const still=motionOff();
+  const still=motionOff(),spots=items.filter(spotlightItem);
   const cards=items.map((item,i)=>`<div class="reveal-card" data-rarity="${rarityOfId(item.id)}" style="--i:${i}">${pullCard(item,kind,count===1)}${item.pity?'<span class="pity-tag">천장 확정</span>':''}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join('');
   const fresh=items.filter(i=>i.fresh).length;
-  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage${lucky?' lucky':''}${still?' skip':' hold'}" data-top="${top}" data-count="${count}"><div class="reveal-spot" hidden></div>${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?' · 별빛 퀴즈 UR 2배':''}`}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
+  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage${lucky?' lucky':''}${still&&!spots.length?' skip':' hold'}" data-top="${top}" data-count="${count}"><div class="reveal-spot" hidden></div>${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?' · 별빛 퀴즈 UR 2배':''}`}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
     bonusItems&&!lucky?`<button class="primary wide shine lucky-next" data-action="bonus-reveal">${icon('summon')}<b>행운이 찾아왔어요!</b></button>`
       :`<div class="dialog-buttons"><button class="secondary" data-draw-again="${count}"><b>${count}회 더</b>${gem(price*count,p().dreams<price*count)}</button><button class="primary" data-action="close">확인</button></div>`,'draw');
   sound.reveal?.(top);
-  if(still)return;
-  spotItems=items.filter(spotlightItem);
+  spotItems=spots;
+  if(still){if(spots.length)beginSpotlights();return;}
   // Meteor 0–0.62s, flash from 0.55s. Spotlights (or the deal, if nothing qualifies) start as the flash peaks.
   revealTimers.push(setTimeout(()=>{if(modal==='draw')beginSpotlights();},900));
 }
@@ -220,28 +231,95 @@ function beginSpotlights(){
   if(!spotItems.length){releaseGrid();return;}
   spotAt=0;renderSpotlight();
 }
+function applySpotBeat(spot,beat){
+  spot.style.setProperty('--sil',beat.sil+'ms');
+  spot.style.setProperty('--sil-dur',beat.silDur+'ms');
+  spot.style.setProperty('--pop',beat.pop+'ms');
+  spot.style.setProperty('--title',beat.title+'ms');
+  spot.style.setProperty('--stamp',beat.stamp+'ms');
+  spot.style.setProperty('--line',beat.line+'ms');
+}
+function playSpotSound(spot,r){if(!spot||spot.dataset.cued==='1')return;spot.dataset.cued='1';sound.reveal?.(r);}
+function finishReveal(spot,r){
+  if(!spot||spot.classList.contains('is-revealed'))return;
+  spot.classList.add('is-revealed');
+  playSpotSound(spot,r);
+  if(motionOff())return;
+  const fig=spot.querySelector('.spot-figure'),c=fig?centerOf(fig):{x:innerWidth*.5,y:innerHeight*.4},ur=r==='UR';
+  burst(c.x,c.y,{count:ur?30:r==='SR'?18:12,spread:ur?160:110,size:ur?15:12,duration:ur?1100:900,color:SPOT_BURST[r]||'#ffe08a'});
+  if(ur){
+    burst(c.x-64,c.y-36,{count:12,spread:80,size:11,duration:900,color:'#fff6cf'});
+    burst(c.x+72,c.y-28,{count:12,spread:80,size:11,duration:900,color:'#ffd36a'});
+  }
+}
+function typeSpotLine(node,token,beat){
+  const full=node?.dataset.full||'';if(!full)return;
+  const step=Math.max(8,Math.min(24,Math.floor((beat.settle-beat.line-30)/full.length)));
+  let i=0;
+  const tick=()=>{
+    if(modal!=='draw'||token!==spotToken||!node.isConnected)return;
+    node.textContent=full.slice(0,++i);
+    if(i<full.length)revealTimers.push(setTimeout(tick,step));
+  };
+  revealTimers.push(setTimeout(tick,beat.line));
+}
+function spotlightMarkup(item,relic,h,r,kind,line){
+  const ur=r==='UR',fresh=!!item.fresh,rush=kind!=='dupe';
+  const stars=Array.from({length:SPOT_STARS[r]||1},(_,i)=>`<i style="--i:${i}"></i>`).join('');
+  const shards=ur&&rush?`<div class="spot-shards" aria-hidden="true">${Array.from({length:8},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>`:'';
+  const motes=rush?`<div class="spot-inrush" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>`:'';
+  const quote=line?`<p class="spot-line" data-full="${escapeText(line)}">${motionOff()?escapeText(line):''}</p>`:'';
+  return `<div class="spot-veil" aria-hidden="true"></div><div class="spot-streak" aria-hidden="true"></div><div class="spot-portal" aria-hidden="true"><i class="spot-ring"></i>${ur?'<i class="spot-ring spot-ring-2"></i>':''}<div class="spot-circle" aria-hidden="true"><i></i></div><i class="spot-rays"></i>${ur?'<i class="spot-rays spot-rays-back"></i>':''}</div>${shards}${motes}<div class="spot-flash" aria-hidden="true"></div><div class="spot-shock" aria-hidden="true"></div><div class="spot-canvas"><div class="spot-figure${relic?' relic':''}">${image(item.id,!relic)}${fresh?'<span class="spot-new">NEW</span>':''}</div></div><div class="spot-copy"><p class="spot-stars" aria-hidden="true">${stars}</p><div class="spot-plate"><p class="spot-rar">${r} · ${escapeText(RARITY[r].name)}</p><h3>${escapeText(h.name)}</h3><p class="spot-role">${escapeText(relic?'유물':h.role)}</p></div>${quote}</div><button class="spot-skip" data-action="spot-skip">건너뛰기</button>`;
+}
 function renderSpotlight(){
   const stage=revealStage(),item=spotItems[spotAt];if(!stage||!item||modal!=='draw')return;
-  const token=++spotToken,relic=banner==='relic',h=relic?ARTIFACT[item.id]:HERO[item.id],r=h.rarity;
+  clearRevealTimers();
+  const token=++spotToken,relic=banner==='relic',h=relic?ARTIFACT[item.id]:HERO[item.id],r=h.rarity,kind=spotKind(item,relic),beat=SPOT_BEAT[kind];
   const spot=stage.querySelector('.reveal-spot');if(!spot)return;
-  setSpotting(true);spot.hidden=false;spot.dataset.rarity=r;spot.classList.toggle('is-ur',r==='UR');
+  setSpotting(true);spot.hidden=false;delete spot.dataset.cued;
+  spot.className='reveal-spot'+(r==='UR'?' is-ur':'');
+  spot.dataset.rarity=r;spot.dataset.kind=kind;spot.dataset.fresh=item.fresh?'1':'0';
+  applySpotBeat(spot,beat);
   const line=relic?'':joinLine(item.id);
-  spot.innerHTML=`<div class="spot-rays" aria-hidden="true"></div><div class="spot-flash" aria-hidden="true"></div><div class="spot-figure${relic?' relic':''}">${image(item.id,!relic)}${item.fresh?'<span class="spot-new">NEW</span>':''}</div><div class="spot-copy"><p class="spot-rar">${r} · ${escapeText(RARITY[r].name)}</p><h3>${escapeText(h.name)}</h3><p class="spot-role">${escapeText(relic?'유물':h.role)}</p>${line?`<p class="spot-line">${escapeText(line)}</p>`:''}</div><button class="spot-skip" data-action="spot-skip">건너뛰기</button>`;
-  if(r==='UR')revealTimers.push(setTimeout(()=>{
+  spot.innerHTML=spotlightMarkup(item,relic,h,r,kind,line);
+  const lineEl=spot.querySelector('.spot-line');
+  if(motionOff()){
+    if(lineEl?.dataset.full)lineEl.textContent=lineEl.dataset.full;
+    finishReveal(spot,r);spot.classList.add('is-settled');return;
+  }
+  if(beat.gate&&r==='UR')revealTimers.push(setTimeout(()=>{
     if(modal!=='draw'||token!==spotToken)return;
-    burst(innerWidth*.5,innerHeight*.4,{count:26,spread:160,size:15,duration:1100,color:'#ffe08a'});
-    burst(innerWidth*.28,innerHeight*.3,{count:12,spread:80,size:11,duration:900,color:'#fff6cf'});
-    burst(innerWidth*.74,innerHeight*.33,{count:12,spread:80,size:11,duration:900,color:'#ffd36a'});
-  },680));
+    burst(innerWidth*.5,innerHeight*.36,{count:16,spread:130,size:12,duration:800,color:'#ffe9a8'});
+  },beat.gate));
+  // The reveal sting's impact sits ~0.58s into sound.reveal, so the sweep plays under the silhouette.
+  revealTimers.push(setTimeout(()=>{if(modal!=='draw'||token!==spotToken)return;playSpotSound(spot,r);},Math.max(0,beat.pop-580)));
+  revealTimers.push(setTimeout(()=>{if(modal!=='draw'||token!==spotToken)return;finishReveal(spot,r);},beat.pop));
+  if(lineEl)typeSpotLine(lineEl,token,beat);
+  revealTimers.push(setTimeout(()=>{
+    if(modal!=='draw'||token!==spotToken)return;
+    if(lineEl?.dataset.full)lineEl.textContent=lineEl.dataset.full;
+    spot.classList.add('is-settled');
+  },beat.settle));
+}
+function settleSpotlight(){
+  const stage=revealStage(),spot=stage?.querySelector('.reveal-spot'),item=spotItems[spotAt];
+  if(!spot||!item||spot.classList.contains('is-settled'))return;
+  spotToken++;clearRevealTimers();
+  const lineEl=spot.querySelector('.spot-line');
+  if(lineEl?.dataset.full)lineEl.textContent=lineEl.dataset.full;
+  finishReveal(spot,rarityOfId(item.id));
+  spot.classList.add('is-settled');
 }
 function advanceSpotlight(){
   if(modal!=='draw')return;
   const stage=revealStage();if(!stage||stage.classList.contains('skip')||stage.classList.contains('show-grid'))return;
   if(!stage.classList.contains('spotting')){skipReveal();return;}
+  const spot=stage.querySelector('.reveal-spot');
+  if(spot&&!spot.classList.contains('is-settled')){settleSpotlight();return;}
   if(spotAt+1>=spotItems.length){spotItems=[];releaseGrid();return;}
   spotAt++;renderSpotlight();
 }
-function skipSpots(){if(modal!=='draw')return;spotItems=[];spotToken++;releaseGrid();}
+function skipSpots(){if(modal!=='draw')return;spotItems=[];spotToken++;clearRevealTimers();releaseGrid();}
 function skipReveal(){
   const stage=revealStage();spotItems=[];spotToken++;clearRevealTimers();
   if(!stage)return;setSpotting(false);stage.classList.remove('hold');stage.classList.add('skip','show-grid');
@@ -1214,7 +1292,8 @@ document.addEventListener('pointerdown',e=>{
   const b=e.target.closest?.('.primary,.secondary,.nav-item,.lb-btn,.cc,.skill-button,.tabbar button,.slot,.frame,.tray-gift');
   if(b&&!b.disabled)tapSpark(e.clientX,e.clientY,b.classList.contains('primary')?'#ffe39a':'#cfe2ff');
   if(e.target.closest?.('button'))return;
-  // A spotlight tap advances one result. Anywhere else on the summon stage, including the meteor, opens every card.
+  // The first spotlight tap settles the sequence. The next tap advances one result.
+  // Anywhere else on the summon stage, including the meteor, opens every card.
   if(modal==='draw'&&$('sheet').classList.contains('spotting')){advanceSpotlight();return;}
   if(e.target.closest?.('.reveal-stage'))skipReveal();
 },{passive:true});
