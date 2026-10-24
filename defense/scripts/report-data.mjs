@@ -20,7 +20,7 @@ export function balanceSnapshot(){
     probability:[probability('any SR',TUNING.heroRates[2]),probability('specific SR',TUNING.heroRates[2]/ROSTER.SR.length),probability('any normal UR',TUNING.heroRates[3]),probability('current season guardian',TUNING.heroRates[3]/2)],
     enhancement:Array.from({length:21},(_,e)=>{const cost=duplicateCost(e);const row={current:e,nextCopies:cost,spentCopies:total,power:enhanceMultiplier(e),special:specialMultiplier(e),gainPerCopy:TUNING.enhanceStep/cost};total+=cost;return row;}),
     beds:Object.fromEntries(BED_IDS.map(id=>[id,{unlockStage:TUNING.beds[id].unlock,levels:[...new Set([0,5,10,15,20,25,30,TUNING.beds[id].knee2])].sort((a,b)=>a-b).map(level=>({level,nextDust:bedCost(id,level),value:id==='rose'?1+roseAttack(level):id==='spring'?springGauge(level):id==='seed'?seedGold(level):id==='crit'?critChance(level):id==='critDamage'?critDamage(level):stardustRate(level),cumulativeDust:Array.from({length:level},(_,i)=>bedCost(id,i)).reduce((a,b)=>a+b,0)}))}])),
-    relics:Array.from({length:9},(_,tier)=>({tier,threshold:relicThreshold(tier),nextThreshold:relicThreshold(tier+1),rates:relicRates(relicThreshold(tier))})),
+    relics:Array.from({length:13},(_,tier)=>({tier,threshold:relicThreshold(tier),nextThreshold:relicThreshold(tier+1),rates:relicRates(relicThreshold(tier))})),
     relicEnhancement:{
       levelStep:RELIC_LEVEL_STEP,costStep:[...RELIC_COST_STEP],costMult:RELIC_COST_MULT,
       collection:{weight:COLLECTION_WEIGHT,ownBonus:COLLECTION_OWN_BONUS,pointsPerPercent:COLLECTION_POINTS_PER_PERCENT},

@@ -339,7 +339,12 @@ em{font-style:normal}
 .sheet[data-kind=draw] .reveal-stage::before{background:radial-gradient(ellipse 78% 46% at 50% 46%,color-mix(in srgb,var(--c) 40%,transparent),transparent 68%),linear-gradient(180deg,rgba(4,6,20,.2),rgba(4,6,20,.62))}
 .sheet[data-kind=draw].spotting .sheet-body{z-index:8;overflow:visible}
 .sheet[data-kind=draw].spotting .sheet-footer{visibility:hidden}
-.sheet[data-kind=draw] .reveal-caption{min-height:2.7em;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1.4}
+.sheet[data-kind=draw] .reveal-caption{min-height:2.7em;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;font-size:12px;line-height:1.4}
+/* Relic tier up: the reward for an unlucky pull is watching the odds climb. */
+.reveal-caption .tier-up{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-weight:800;color:#3a2306;background:linear-gradient(180deg,#ffe9a8,#f6c453);box-shadow:0 0 14px rgba(255,211,106,.55);text-shadow:none;animation:tier-pop .5s cubic-bezier(.2,1.5,.3,1) both;animation-delay:inherit}
+.reveal-caption .tier-up .ic{width:13px;height:13px}
+.reveal-caption .tier-up b{font-family:var(--display);font-weight:400;font-size:14px}
+@keyframes tier-pop{from{opacity:0;transform:scale(.6)}}
 .reveal-stage:not(.arrival) .reveal-card{animation-delay:calc(var(--i)*.05s)}
 .reveal-stage:not(.arrival) .reveal-card .hero-card{animation-delay:calc(.5s + var(--i)*.1s)}
 .reveal-stage:not(.arrival) .reveal-card .card-back{animation:flip-back .48s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}

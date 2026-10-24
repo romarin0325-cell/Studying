@@ -188,23 +188,25 @@ function pullCard(item,kind,single){
 }
 const spotlightItem=item=>{const r=rarityOfId(item.id);return !!(item.fresh||r==='SR'||r==='UR');};
 function draw(count,free=false,boost=false){
+  const tierFrom=banner==='relic'?relicTier(p().relicDraws):0;
   const result=act('draw',{banner,count,free,...(boost?{boost:true}:{})},false);if(!result.ok)return false;render();
+  const tierTo=banner==='relic'?relicTier(p().relicDraws):0;
   bonusItems=result.bonus?.length?result.bonus:null;
-  reveal(result.items,{count,cost:result.cost,boost});return true;
+  reveal(result.items,{count,cost:result.cost,boost,tierUp:tierTo>tierFrom?[tierFrom,tierTo]:null});return true;
 }
 function showBonus(){
   const items=bonusItems;bonusItems=null;if(!items)return;reveal(items,{count:items.length,lucky:true});
   // Luck confetti: pink and gold bursts around the stage before the cards deal.
   if(!motionOff())[[.2,.3],[.8,.26],[.5,.18],[.3,.62],[.72,.6]].forEach(([x,y],i)=>revealTimers.push(setTimeout(()=>{if(modal==='draw')burst(innerWidth*x,innerHeight*y,{count:14,spread:90,size:12,duration:1000,color:i%2?'#ffe08a':'#ffb3e0'});},250+i*140)));
 }
-function reveal(items,{count,cost=0,boost=false,lucky=false}){
+function reveal(items,{count,cost=0,boost=false,lucky=false,tierUp=null}){
   clearRevealTimers();spotItems=[];spotAt=0;spotToken++;
   const rank=item=>RARITIES.indexOf(rarityOfId(item.id));
   const best=items.reduce((a,b)=>rank(b)>rank(a)?b:a),top=rarityOfId(best.id),kind=banner==='relic'?'relic':'hero',price=banner==='relic'?T.relicDrawCost:T.heroDrawCost;
   const still=motionOff(),spots=items.filter(spotlightItem);
   const cards=items.map((item,i)=>`<div class="reveal-card" data-rarity="${rarityOfId(item.id)}" style="--i:${i}">${pullCard(item,kind,count===1)}${item.pity?'<span class="pity-tag">천장 확정</span>':''}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join('');
   const fresh=items.filter(i=>i.fresh).length;
-  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage${lucky?' lucky':''}${still&&!spots.length?' skip':' hold'}" data-top="${top}" data-count="${count}"><div class="reveal-spot" hidden></div>${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?' · 별빛 퀴즈 UR 2배':''}`}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
+  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage${lucky?' lucky':''}${still&&!spots.length?' skip':' hold'}" data-top="${top}" data-count="${count}"><div class="reveal-spot" hidden></div>${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?' · 별빛 퀴즈 UR 2배':''}`}${tierUp?`<span class="tier-up">${icon('star')}유물 단계 ${tierUp[0]} → <b>${tierUp[1]}</b></span>`:''}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
     bonusItems&&!lucky?`<button class="primary wide shine lucky-next" data-action="bonus-reveal">${icon('summon')}<b>행운이 찾아왔어요!</b></button>`
       :`<div class="dialog-buttons"><button class="secondary" data-draw-again="${count}"><b>${count}회 더</b>${gem(price*count,p().dreams<price*count)}</button><button class="primary" data-action="close">확인</button></div>`,'draw');
   sound.reveal?.(top);
