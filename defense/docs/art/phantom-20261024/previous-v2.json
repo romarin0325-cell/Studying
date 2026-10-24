@@ -1,0 +1,230 @@
+{
+  "id": "phantom",
+  "version": "v1",
+  "generationSourceSha256": "25dfc7fc8bc98a55707e9d7c6284c84a2dc81adc09728c1b63a23f955c539ce5",
+  "commonScale": 0.6514969050713036,
+  "measurementUncertaintyPacked": 11.726944291283466,
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "sourcePng": {
+    "file": "defense/assets/cast-v2/phantom.png",
+    "bytes": 706114,
+    "sha256": "c398022d3ca7d98e584eb0d0f2a5f811574364534d6ccc79f6413d486eedc52c"
+  },
+  "sourceWebp": {
+    "file": "defense/assets/cast-v2/phantom.webp",
+    "bytes": 173198,
+    "sha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a"
+  },
+  "portrait": {
+    "x": 242,
+    "y": 221,
+    "size": 250
+  },
+  "frames": [
+    {
+      "direction": "down",
+      "sourceRect": {
+        "left": 140,
+        "top": 24,
+        "width": 388,
+        "height": 595
+      },
+      "sourceEllipse": [
+        338,
+        220,
+        248,
+        228,
+        -1
+      ],
+      "sourceChin": [
+        338,
+        334
+      ],
+      "sourceSole": [
+        359,
+        617
+      ],
+      "commonScale": 0.6514969050713036,
+      "resampledDimensions": [
+        253,
+        388
+      ],
+      "placement": [
+        113,
+        94
+      ],
+      "ellipse": [
+        242.32,
+        221.36,
+        161.57,
+        148.54,
+        -1
+      ],
+      "chin": [
+        242.32,
+        295.63
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 184.37,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "up",
+      "sourceRect": {
+        "left": 728,
+        "top": 24,
+        "width": 384,
+        "height": 594
+      },
+      "sourceEllipse": [
+        918,
+        220,
+        248,
+        228,
+        1
+      ],
+      "sourceChin": [
+        918,
+        334
+      ],
+      "sourceSole": [
+        910,
+        617
+      ],
+      "commonScale": 0.6514969050713036,
+      "resampledDimensions": [
+        250,
+        387
+      ],
+      "placement": [
+        137,
+        94
+      ],
+      "ellipse": [
+        261.21,
+        221.36,
+        161.57,
+        148.54,
+        1
+      ],
+      "chin": [
+        261.21,
+        295.63
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 184.37,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "left",
+      "sourceRect": {
+        "left": 173,
+        "top": 634,
+        "width": 356,
+        "height": 575
+      },
+      "sourceEllipse": [
+        333,
+        812,
+        226,
+        222,
+        0
+      ],
+      "sourceChin": [
+        286,
+        923
+      ],
+      "sourceSole": [
+        320,
+        1207
+      ],
+      "commonScale": 0.6514969050713036,
+      "resampledDimensions": [
+        232,
+        375
+      ],
+      "placement": [
+        160,
+        107
+      ],
+      "ellipse": [
+        264.47,
+        222.66,
+        147.24,
+        144.63,
+        0
+      ],
+      "chin": [
+        233.85,
+        294.97
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 185.03,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "right",
+      "sourceRect": {
+        "left": 725,
+        "top": 634,
+        "width": 358,
+        "height": 575
+      },
+      "sourceEllipse": [
+        943,
+        812,
+        226,
+        222,
+        0
+      ],
+      "sourceChin": [
+        990,
+        923
+      ],
+      "sourceSole": [
+        934,
+        1208
+      ],
+      "commonScale": 0.6514969050713036,
+      "resampledDimensions": [
+        233,
+        374
+      ],
+      "placement": [
+        120,
+        106
+      ],
+      "ellipse": [
+        261.86,
+        222.01,
+        147.24,
+        144.63,
+        0
+      ],
+      "chin": [
+        292.48,
+        294.32
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 185.68,
+      "paintedClipping": 0
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "browser": "Chromium",
+  "viewport": [
+    390,
+    844
+  ],
+  "dpr": 2,
+  "errors": [],
+  "requests": [],
+  "captures": [
+    "night-home-season",
+    "night-collection",
+    "night-phantom-detail",
+    "night-team",
+    "night-summon",
+    "night-history",
+    "night-battle-left",
+    "night-battle-right",
+    "night-unit-portrait",
+    "night-skill-portrait",
+    "night-training",
+    "bright-home-season",
+    "bright-collection",
+    "bright-phantom-detail",
+    "bright-team",
+    "bright-summon",
+    "bright-history",
+    "bright-battle-left",
+    "bright-battle-right",
+    "bright-unit-portrait",
+    "bright-skill-portrait",
+    "bright-training"
+  ],
+  "checks": [
+    {
+      "skin": "night",
+      "summonCards": [
+        {
+          "name": "가디언",
+          "x": 0.4863,
+          "y": 0.4609,
+          "size": 0.4883
+        },
+        {
+          "name": "조커",
+          "x": 0.4629,
+          "y": 0.4199,
+          "size": 0.4883
+        },
+        {
+          "name": "해바라기",
+          "x": 0.498,
+          "y": 0.4492,
+          "size": 0.4883
+        },
+        {
+          "name": "언더독",
+          "x": 0.5059,
+          "y": 0.4414,
+          "size": 0.4883
+        },
+        {
+          "name": "메이드",
+          "x": 0.4824,
+          "y": 0.4199,
+          "size": 0.4883
+        },
+        {
+          "name": "머쉬룸킹",
+          "x": 0.5195,
+          "y": 0.4375,
+          "size": 0.4883
+        },
+        {
+          "name": "앤트로피",
+          "x": 0.4805,
+          "y": 0.4277,
+          "size": 0.4883
+        },
+        {
+          "name": "은토끼",
+          "x": 0.4824,
+          "y": 0.4688,
+          "size": 0.4883
+        },
+        {
+          "name": "머쉬룸킹",
+          "x": 0.5195,
+          "y": 0.4375,
+          "size": 0.4883
+        },
+        {
+          "name": "산타",
+          "x": 0.4941,
+          "y": 0.4102,
+          "size": 0.4883
+        }
+      ]
+    },
+    {
+      "skin": "night",
+      "side": "left",
+      "facing": "left"
+    },
+    {
+      "skin": "night",
+      "side": "right",
+      "facing": "right"
+    },
+    {
+      "skin": "bright",
+      "summonCards": [
+        {
+          "name": "가디언",
+          "x": 0.4863,
+          "y": 0.4609,
+          "size": 0.4883
+        },
+        {
+          "name": "조커",
+          "x": 0.4629,
+          "y": 0.4199,
+          "size": 0.4883
+        },
+        {
+          "name": "해바라기",
+          "x": 0.498,
+          "y": 0.4492,
+          "size": 0.4883
+        },
+        {
+          "name": "언더독",
+          "x": 0.5059,
+          "y": 0.4414,
+          "size": 0.4883
+        },
+        {
+          "name": "메이드",
+          "x": 0.4824,
+          "y": 0.4199,
+          "size": 0.4883
+        },
+        {
+          "name": "머쉬룸킹",
+          "x": 0.5195,
+          "y": 0.4375,
+          "size": 0.4883
+        },
+        {
+          "name": "앤트로피",
+          "x": 0.4805,
+          "y": 0.4277,
+          "size": 0.4883
+        },
+        {
+          "name": "은토끼",
+          "x": 0.4824,
+          "y": 0.4688,
+          "size": 0.4883
+        },
+        {
+          "name": "머쉬룸킹",
+          "x": 0.5195,
+          "y": 0.4375,
+          "size": 0.4883
+        },
+        {
+          "name": "산타",
+          "x": 0.4941,
+          "y": 0.4102,
+          "size": 0.4883
+        }
+      ]
+    },
+    {
+      "skin": "bright",
+      "side": "left",
+      "facing": "left"
+    },
+    {
+      "skin": "bright",
+      "side": "right",
+      "facing": "right"
+    }
+  ],
+  "verification": {
+    "scopedCommand": "npm run verify -- --only defense",
+    "tests": 123,
+    "passed": 123,
+    "facing": "node defense/scripts/art/check-facing.mjs: outward, both cells pass"
+  },
+  "limits": [
+    "Chromium mobile viewport, not a physical phone FPS test",
+    "Manual inferred skull/face landmarks, not exact anatomical or 3D-rig ground truth"
+  ]
+}

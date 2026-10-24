@@ -1,0 +1,32 @@
+{
+  "mode": "built-in image_gen",
+  "pipeline": "Existing common-prompt-v2-natural-idle plus original-costume correction; actual archived structure guide supplied.",
+  "roles": [
+    "approved frozen style/proportion reference",
+    "actual neutral-short Phantom 3D structure/pose guide",
+    "original character costume authority",
+    "candidate v1 costume continuity only"
+  ],
+  "inputs": [
+    {
+      "file": "C:/Users/romar/Downloads/캐릭터/에셋/gpt/cast-v2-20261024/baseline/siren.webp",
+      "bytes": 179986,
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    },
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\phantom.png",
+      "bytes": 201562,
+      "sha256": "712051caa5711b73bcde664bbad2afa0adbc5f6d035f0102ce61a22451ae570f"
+    },
+    {
+      "file": "C:/Users/romar/Downloads/캐릭터/팬텀.png",
+      "bytes": 1988941,
+      "sha256": "c12dc373eca65c8301bed054247ecd485c9d4cea852bc2299e040580393afd6d"
+    },
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\assets\\cast-v2\\phantom-pajamas.png",
+      "bytes": 489131,
+      "sha256": "41e7085797f4f6a2ebecdabd91c1c897c5ac59578f3711aa054713ae26d8fb78"
+    }
+  ]
+}

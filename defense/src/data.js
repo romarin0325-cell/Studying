@@ -577,8 +577,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 242,
-        "y": 221,
+        "x": 245,
+        "y": 237,
         "size": 250
       }
     },
@@ -1660,7 +1660,7 @@ export const ARTIFACTS = [
   {
     "id": "alchemy",
     "name": "별빛 연금술",
-    "text": "합성으로 생긴 동료는 그 웨이브부터 3웨이브 동안 위력이 50% 오릅니다.",
+    "text": "합성으로 생긴 동료는 그 웨이브부터 2웨이브 동안 위력이 50% 오릅니다.",
     "scale": ["50%"],
     "icon": 18,
     "atlas": "relics",
@@ -1898,7 +1898,7 @@ export const ASSET_PATHS = {
   "unit-mushroom_king": "./assets/cast-v2/mushroom_king.webp",
   "unit-great_detective": "./assets/cast-v2/great_detective.webp",
   "unit-siren": "./assets/cast-v2/siren.webp",
-  "unit-phantom": "./assets/cast-v2/phantom.webp",
+  "unit-phantom": "./assets/cast-v2/phantom-pajamas-guided.webp",
   "unit-queen": "./assets/cast-v2/queen.webp",
   "unit-galaxy_whale": "./assets/cast-v2/galaxy_whale.webp",
   "unit-silver_rabbit": "./assets/cast-v2/silver_rabbit.webp",

@@ -1,0 +1,7 @@
+{
+  "method": "Manual anatomical skull/face estimates in the native 1254px generated image. Hair volume, hood and teddy excluded. Back skull inferred under hair; not a 3D measurement.",
+  "uncertaintySourcePixels": {"front":18,"back":26,"profile":18,"sole":5},
+  "ellipses": [[313,235,248,228,-2],[930,237,248,228,2],[330,837,228,224,0],[930,837,228,224,0]],
+  "chins": [[313,348],[930,351],[282,949],[973,949]],
+  "feet": [[314,616],[930,616],[330,1207],[930,1207]]
+}

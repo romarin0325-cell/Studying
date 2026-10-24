@@ -130,7 +130,7 @@
 | 돌아오는 새벽 | R | 원정마다 한 번, 코어에 닿은 보스를 경로 절반 지점으로 되돌리고, 그 보스가 받는 피해를 20% 늘립니다. |
 | 쌍성의 거울 | SR | 필살기 피해가 적중하고 1.5초 뒤 100%로 한 번 더 들어갑니다. 버프와 소환은 반복되지 않습니다. |
 | 삼중 성좌 | SR | 상하좌우에 서로 다른 동료가 3종 있으면 위력이 32%, 4종이면 50% 오릅니다. |
-| 별빛 연금술 | SR | 합성으로 생긴 동료는 그 웨이브부터 3웨이브 동안 위력이 50% 오릅니다. |
+| 별빛 연금술 | SR | 합성으로 생긴 동료는 그 웨이브부터 2웨이브 동안 위력이 50% 오릅니다. |
 | 별바다의 궤도 | SR | 3성 이상 동료의 공격이 명중 지점에 2초 동안 별장판을 남깁니다. 별장판은 0.5초마다 그 공격 피해의 5%를 줍니다. |
 | 이어지는 종 | SR | 웨이브를 넘길 때마다 모든 동료의 공격 속도가 4% 오릅니다(최대 36%). |
 | 독화의 성배 | SR | 불타면서 독이 5중첩 이상 쌓인 적이 받는 피해가 60% 늘어납니다. |
@@ -141,6 +141,6 @@
 유물 효과 수치 원본(`RELIC_VALUES`, 레벨당 +5%가 곱해진다):
 
 ```json
-{"hourglass":{"starlight":10,"store":60},"ember":{"burn":0.7},"frost":{"slowed":0.22},"banner":{"power":0.21},"chorus":{"speed":0.35,"count":3},"lantern":{"refund":0.2},"lens":{"boss":0.3},"seed":{"poison":0.4},"feather":{"base":6,"perWave":3,"cap":60},"crown":{"power":0.16},"sprout":{"power":0.2,"discount":2},"amulet":{"near":0.35,"starlight":15,"uses":1},"meteor":{"hit":1.1},"prism":{"chain":0.7},"tide":{"splash":0.22},"roots":{"life":0.15,"radius":0.06},"guild":{"power":0.25},"phoenix":{"taken":0.2,"uses":1},"twin":{"echo":1},"constellation":{"three":0.32,"four":0.5},"alchemy":{"power":0.5,"waves":3},"orbit":{"tick":0.05},"tempo_bell":{"perWave":0.04,"cap":0.36},"chalice":{"taken":0.6,"poison":5},"royal_seal":{"starlight":30,"boss":0.4},"gift_ribbon":{"chance":0.25},"broken_clock":{"duration":1}}
+{"hourglass":{"starlight":10,"store":60},"ember":{"burn":0.7},"frost":{"slowed":0.22},"banner":{"power":0.21},"chorus":{"speed":0.35,"count":3},"lantern":{"refund":0.2},"lens":{"boss":0.3},"seed":{"poison":0.4},"feather":{"base":6,"perWave":3,"cap":60},"crown":{"power":0.16},"sprout":{"power":0.2,"discount":2},"amulet":{"near":0.35,"starlight":15,"uses":1},"meteor":{"hit":1.1},"prism":{"chain":0.7},"tide":{"splash":0.22},"roots":{"life":0.15,"radius":0.06},"guild":{"power":0.25},"phoenix":{"taken":0.2,"uses":1},"twin":{"echo":1},"constellation":{"three":0.32,"four":0.5},"alchemy":{"power":0.5,"waves":2},"orbit":{"tick":0.05},"tempo_bell":{"perWave":0.04,"cap":0.36},"chalice":{"taken":0.6,"poison":5},"royal_seal":{"starlight":30,"boss":0.4},"gift_ribbon":{"chance":0.25},"broken_clock":{"duration":1}}
 ```
 

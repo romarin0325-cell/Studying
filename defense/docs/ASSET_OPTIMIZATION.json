@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 23299108,
-    "deployableSourceBytes": 21700566,
-    "outputBytes": 12838122,
+    "sourceBytes": 23270926,
+    "deployableSourceBytes": 21672384,
+    "outputBytes": 12827314,
     "optimizedFiles": 150,
     "derivedFiles": 144,
-    "derivedOutputBytes": 3418204
+    "derivedOutputBytes": 3410496
   },
   "images": [
     {
@@ -721,7 +721,7 @@
     },
     {
       "id": "atlas:unit-phantom",
-      "source": "./assets/cast-v2/phantom.webp",
+      "source": "./assets/cast-v2/phantom-pajamas-guided.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-phantom; combat renderer / stage UI",
@@ -730,8 +730,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 173198,
-        "sha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a",
+        "bytes": 145016,
+        "sha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -740,9 +740,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/phantom.webp",
-        "bytes": 64432,
-        "sha256": "0bd078e5f13d4b1bc72d80042a9017fb604ca3beffeedcd1cd74199f27cade96",
+        "path": "./assets/optimized/cast-v2/phantom-pajamas-guided.webp",
+        "bytes": 53624,
+        "sha256": "f22359e0992f9db1fd08e8408b783b73fb7625c063e68207bf412357b1545282",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -6304,11 +6304,11 @@
     },
     {
       "id": "portrait:phantom",
-      "source": "./assets/cast-v2/phantom.webp",
+      "source": "./assets/cast-v2/phantom-pajamas-guided.webp",
       "profile": "portrait",
       "crop": {
-        "left": 117,
-        "top": 96,
+        "left": 120,
+        "top": 120,
         "width": 250,
         "height": 250
       },
@@ -6316,11 +6316,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a",
+      "sourceSha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
       "output": {
         "path": "./assets/optimized/ui/portraits/phantom.webp",
-        "bytes": 19502,
-        "sha256": "432e31ba5d087d1ff95154dfec350759bba60378dffe08f442f37181cc3b70b9",
+        "bytes": 18744,
+        "sha256": "deaeb269b73cd9d22577029d54fe9af2aa2e5a03ff7ef98f2ef921927d4bf3f3",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6331,7 +6331,7 @@
     },
     {
       "id": "figure:phantom",
-      "source": "./assets/cast-v2/phantom.webp",
+      "source": "./assets/cast-v2/phantom-pajamas-guided.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6343,11 +6343,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "6af8f27716f3caaa102420a067f5b5312603b6371288ab62142604181f7abb5a",
+      "sourceSha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
       "output": {
         "path": "./assets/optimized/ui/figures/phantom.webp",
-        "bytes": 34186,
-        "sha256": "5bdb18495103603cf819dd140eaa43154a47567f36afd20a122f4f766a43497d",
+        "bytes": 27236,
+        "sha256": "0ed3da12945de435597934ace54cea577c0ac8d8a04208ba99f425dbbf3d14c1",
         "metadata": {
           "width": 512,
           "height": 512,

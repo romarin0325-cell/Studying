@@ -1,0 +1,211 @@
+{
+  "id": "phantom",
+  "version": "pajamas-v1",
+  "sourceSha256": "c8d435f400f7f3cfff5572fe9bf24b69f593b9432d7aa37985cbc3c1b377e7dd",
+  "commonScale": 0.6514969050713036,
+  "method": "Manual anatomical skull/face estimates in the native 1254px generated image. Hair volume, hood and teddy excluded. Back skull inferred under hair; not a 3D measurement.",
+  "alphaCleaned": 34187,
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "measurementUncertaintyPacked": 11.726944291283466,
+  "sourcePng": {
+    "file": "defense/assets/cast-v2/phantom-pajamas.png",
+    "bytes": 489131,
+    "sha256": "41e7085797f4f6a2ebecdabd91c1c897c5ac59578f3711aa054713ae26d8fb78"
+  },
+  "sourceWebp": {
+    "file": "defense/assets/cast-v2/phantom-pajamas.webp",
+    "bytes": 128838,
+    "sha256": "53cfdb2a8a090d4881c01c1448eec93ad11e6f9a289b65c34703f8c505fe0b4a"
+  },
+  "frames": [
+    {
+      "direction": "down",
+      "sourceEllipse": [
+        313,
+        235,
+        248,
+        228,
+        -2
+      ],
+      "sourceChin": [
+        313,
+        348
+      ],
+      "sourceSole": [
+        314,
+        616
+      ],
+      "sourceRect": {
+        "left": 0,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "commonScale": 0.6514969050713036,
+      "placement": [
+        51,
+        79
+      ],
+      "ellipse": [
+        255.35,
+        231.78,
+        161.57,
+        148.54,
+        -2
+      ],
+      "chin": [
+        255.35,
+        305.4
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 174.6,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "up",
+      "sourceEllipse": [
+        930,
+        237,
+        248,
+        228,
+        2
+      ],
+      "sourceChin": [
+        930,
+        351
+      ],
+      "sourceSole": [
+        930,
+        616
+      ],
+      "sourceRect": {
+        "left": 627,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "commonScale": 0.6514969050713036,
+      "placement": [
+        59,
+        79
+      ],
+      "ellipse": [
+        256,
+        233.08,
+        161.57,
+        148.54,
+        2
+      ],
+      "chin": [
+        256,
+        307.35
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 172.65,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "left",
+      "sourceEllipse": [
+        330,
+        837,
+        228,
+        224,
+        0
+      ],
+      "sourceChin": [
+        282,
+        949
+      ],
+      "sourceSole": [
+        330,
+        1207
+      ],
+      "sourceRect": {
+        "left": 0,
+        "top": 627,
+        "width": 627,
+        "height": 627
+      },
+      "commonScale": 0.6514969050713036,
+      "placement": [
+        41,
+        102
+      ],
+      "ellipse": [
+        256,
+        238.95,
+        148.54,
+        145.94,
+        0
+      ],
+      "chin": [
+        224.73,
+        311.91
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 168.09,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "right",
+      "sourceEllipse": [
+        930,
+        837,
+        228,
+        224,
+        0
+      ],
+      "sourceChin": [
+        973,
+        949
+      ],
+      "sourceSole": [
+        930,
+        1207
+      ],
+      "sourceRect": {
+        "left": 627,
+        "top": 627,
+        "width": 627,
+        "height": 627
+      },
+      "commonScale": 0.6514969050713036,
+      "placement": [
+        59,
+        102
+      ],
+      "ellipse": [
+        256,
+        238.95,
+        148.54,
+        145.94,
+        0
+      ],
+      "chin": [
+        284.01,
+        311.91
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 168.09,
+      "paintedClipping": 0
+    }
+  ]
+}

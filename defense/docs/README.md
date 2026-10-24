@@ -25,6 +25,8 @@ docs/
 
 ## 2. 규칙·절차 (코드와 같이 고친다)
 
+- [SD_CAST_GUIDE.md](SD_CAST_GUIDE.md): Sol Cast V2 현행 제작 기준, 이전 일괄 교체의 기록, 실제 구조 마스터·화풍 참조, 머리/얼굴 검수와 보존 경로.
+
 - [STATUS_RULES.md](STATUS_RULES.md): 독·노출·화상·제어 규칙.
 - [CHARACTER_TRAITS.md](CHARACTER_TRAITS.md): 위력 계산 경로와 특성 판정 기준.
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.
@@ -48,6 +50,8 @@ docs/
 캐릭터 밸런스는 사용자가 의도와 수치를 검증한 뒤 지시할 때만 바꾼다. 그 전의 안은 여기에 제안서로 둔다.
 
 ## 4. 날짜 기록 (archive/)
+
+- [팬텀 의상 복원과 초상화 검수](art/phantom-20261024/README.md): 2026-10-24 원화·이전 SD·수정 전후 비교, 생성 프롬프트, 기준점과 실제 UI 검증.
 
 그날의 설계·측정·검수 기록이다. 구현이 끝난 기능의 설계(제2부 새벽 온실, 능력치 리뉴얼, 합리 오토, 메모리얼, 단일 HTML 압축 등), 밸런스 차수별 기록(5·8·9·14차, 유물 7차), 미디어·성능·UI 조사가 들어 있다.
 

@@ -11,6 +11,7 @@ import {TUTOR_MODELS,tutorSettings,saveTutorSettings,explainWithRumi,tutorHtml} 
 import {createBattle,resumeBattle,autoPlay as helperAuto,clearedRounds} from './battle.js';
 import {smartAutoPlay} from './smart-auto.js';
 import * as E from './combat/engine.js';
+import {portraitFrame} from './portrait-layout.js';
 import {Art,Renderer} from './combat/render.js';
 import {Sound} from './combat/audio.js';
 import {icon} from './icons.js';
@@ -163,7 +164,7 @@ const rarityOfId=id=>(HERO[id]||ARTIFACT[id]).rarity;
 function clearRevealTimers(){for(const t of revealTimers)clearTimeout(t);revealTimers=[];}
 // Portrait box in the 512 figure: same face size and eye line on every card.
 function faceVars(id){
-  const box=HERO[id]?.art?.portrait;
+  const box=portraitFrame(HERO[id]);
   if(!box?.size)return '--px:.5;--py:.4;--ps:.49';
   return `--px:${(box.x/512).toFixed(4)};--py:${(box.y/512).toFixed(4)};--ps:${(box.size/512).toFixed(4)}`;
 }
