@@ -2,6 +2,7 @@ import {HERO,ASSET_PATHS,BOSSES,CHAPTERS,TRANSFORM_ART} from '../content.js';
 import {BOARD,cellPoint,pathPoint,PATH,canMerge,unitForm,topCinderella} from './engine.js';
 import {CombatFX,drawAttackRange,isUR} from './effects.js';
 import {COMPANION_VISUALS} from './companion-vfx.js';
+import {drawLightningChain,LIGHTNING_CHAIN_LIFE} from './lightning-vfx.js';
 import {RUNTIME_ASSET_PATHS} from '../asset-policy.js';
 
 export class Art {
@@ -29,7 +30,7 @@ function shadow(ctx,x,y,r,alpha=.28){ctx.fillStyle=`rgba(9,21,24,${alpha})`;ctx.
 
 export class Renderer {
   constructor(canvas,art){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.art=art;this.fx=new CombatFX(this.ctx,art);this.effects=[];this.particles=[];this.floats=[];this.skills=[];this.entities=[];this.mergeable=[];this.boardSignature='';this.clock=0;this.shake=0;this.skill=null;this.skillSeq=0;this.selected=-1;this.hover=-1;this.drag=null;this.press=-1;this.reduced=false;this.background=null;this.bgReady=false;this.setQuality('standard');}
-  setQuality(quality){if(this.quality===quality)return;this.quality=quality;const q={high:{dpr:1.75,particles:240,impacts:80,effects:76},standard:{dpr:1.5,particles:180,impacts:64,effects:64},low:{dpr:1.25,particles:100,impacts:40,effects:44}}[quality];this.budget=q;this.fx.budget=q.impacts;this.resize();}
+  setQuality(quality){this.fx.quality=quality;if(this.quality===quality)return;this.quality=quality;const q={high:{dpr:1.75,particles:240,impacts:80,effects:76},standard:{dpr:1.5,particles:180,impacts:64,effects:64},low:{dpr:1.25,particles:100,impacts:40,effects:44}}[quality];this.budget=q;this.fx.budget=q.impacts;this.resize();}
   resize(){const dpr=Math.min(window.devicePixelRatio||1,this.budget.dpr);this.canvas.width=Math.round(720*dpr);this.canvas.height=Math.round(780*dpr);this.dpr=dpr;}
   bursts(x,y,color,n=12,power=1){if(this.reduced)n=Math.min(5,n);n=Math.min(n,this.budget.particles-this.particles.length);for(let i=0;i<n;i++){const angle=Math.random()*Math.PI*2,speed=(35+Math.random()*130)*power;this.particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-40,life:.25+Math.random()*.45,total:.7,r:1.5+Math.random()*3,color,star:i%4===0});}}
   float(text,x,y,color='#fff2cb',size=24){this.floats.push({text,x,y,color,size,life:1.1,total:1.1});if(this.floats.length>20)this.floats.shift();}
@@ -54,7 +55,7 @@ export class Renderer {
     if(e.type==='skill'){const life=e.kind==='dream'?2.9:e.kind==='bigshow'?2.4:1.6;this.skill={...e,uid:++this.skillSeq,life,total:life};this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!e.locked)this.shake=COMPANION_VISUALS[e.hero]?(e.hero==='underdog'?6:e.hero==='ash'?4:2):isUR(e.hero)?7:4;}
     if(e.type==='finisherImpact'){this.shake=3;if(e.kind==='mirror')this.float(`천만경 ${Math.round(e.damage)}`,e.x,e.y-85,'#f0c9ff',22);}
     if(e.type==='income')this.float(`+${e.gold} G`,e.x,e.y-40,'#f2d596',17);
-    if(e.type==='chain')this.effects.push({...e,life:.24,total:.24});
+    if(e.type==='chain'){const life=e.hero==='lightning_sage'?LIGHTNING_CHAIN_LIFE:.24;this.effects.push({...e,life,total:life});}
     if(e.type==='leak'){this.shake=6;this.effects.push({type:'leak',x:76,y:142,color:'#ef8c80',life:.8,total:.8});}
     if(e.type==='seal')for(const i of e.cells){const p=cellPoint(i);this.effects.push({type:'seal',...p,color:'#d09bfd',life:.8,total:.8});}
     if(e.type==='interrupt')this.float('시전 저지',360,175,'#c8f4ee',30);
@@ -186,7 +187,8 @@ export class Renderer {
   drawShot(shot,s){this.fx.drawShot(shot,s);}
   drawEffect(e){const ctx=this.ctx,t=1-e.life/e.total;ctx.save();ctx.globalAlpha=Math.max(0,1-t);
     if(e.type==='chain'){
-      if(e.hero==='night_rabbit'){ctx.strokeStyle=e.color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(e.from.x,e.from.y-20);ctx.quadraticCurveTo((e.from.x+e.to.x)/2,(e.from.y+e.to.y)/2-52,e.to.x,e.to.y-20);ctx.stroke();}
+      if(e.hero==='lightning_sage')drawLightningChain(ctx,e,{reduced:this.reduced,low:this.fx.quality==='low'});
+      else if(e.hero==='night_rabbit'){ctx.strokeStyle=e.color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(e.from.x,e.from.y-20);ctx.quadraticCurveTo((e.from.x+e.to.x)/2,(e.from.y+e.to.y)/2-52,e.to.x,e.to.y-20);ctx.stroke();}
       else if(e.hero==='storm_sage'){const dx=e.to.x-e.from.x,dy=e.to.y-e.from.y,len=Math.max(1,Math.hypot(dx,dy));line(ctx,Array.from({length:9},(_,i)=>{const f=i/8,w=Math.sin(f*Math.PI*3)*7;return [e.from.x+dx*f-dy/len*w,e.from.y-20+dy*f+dx/len*w];}),e.color,2.5);}
       else{line(ctx,[[e.from.x,e.from.y-20],[(e.from.x+e.to.x)/2+12,(e.from.y+e.to.y)/2-29],[e.to.x,e.to.y-20]],e.color,5);line(ctx,[[e.from.x,e.from.y-20],[e.to.x,e.to.y-20]],'#fff5d6',1);}
     }
