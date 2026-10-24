@@ -46,7 +46,11 @@ export const zoneCadence=id=>HERO[id]?.shape==='zone'&&id!=='flame_sage'?ZONE_CA
 // strike the whole field in turn, then imagination becomes real. Not in the hero sheet; the battle peek shows it.
 export const QUAKE_FACTOR=2.4;
 export const WINTER_EXPOSURE=.15;
-export const SNOW_RABBIT=Object.freeze({slow:.4,trainingSlow:.02,freeze:2,skillSlow:.5,seconds:6});
+// Burn from basic attacks (trait, venom, red joker, flame floor) and from ultimates. The ember relic spread keeps its own 3 s.
+export const BURN=Object.freeze({attack:.3,attackSeconds:4,skill:.7,skillSeconds:7});
+// Time Magician trauma form: fixed power and speed while the buff lasts.
+export const TRAUMA=Object.freeze({power:1.5,speed:.35});
+export const SNOW_RABBIT=Object.freeze({slow:.4,trainingSlow:.01,freeze:2,skillSlow:.5,seconds:6});
 export const WINTER_COURT=Object.freeze({slow:.5,seconds:6,killFreeze:.8});
 // Both additions are percentage points: +0.1% per rank after 1★ and per enhancement milestone.
 export const stormExecuteChance=(s,rank=1)=>Math.min(1,.01+.001*(rank-1)+.01*(special(s,'storm_sage')-1));
@@ -173,7 +177,7 @@ export const APPLEBOMB=Object.freeze({factor:9,max:5,trigger:80,stun:3});
 export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:4});
 export const sunRadius=s=>SUNFLOWER.radius[Math.min(SUNFLOWER.max,s.sunlight||0)];
 // Joker: the colour changes with every ultimate (in this order) and tints the basic attack's status.
-export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','white','black']),roulette:3,burn:.23,slow:.2,exposure:.06});
+export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','white','black']),roulette:3,burn:.3,slow:.2,exposure:.06});
 export const JOKER_NAMES=Object.freeze({red:'빨강 · 화상',blue:'파랑 · 감속',green:'초록 · 중독',white:'하양 · 성광',black:'검정 · 노출'});
 // The roulette picks a new colour at random among the four it is not showing, so every cast changes the colour.
 export const pickJokerColor=(s,color)=>{const others=JOKER.colors.filter(c=>c!==color);return others[Math.min(others.length-1,Math.floor(random(s)*others.length))];};
@@ -234,7 +238,7 @@ export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 위력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 위력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${40+level*2}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 위력 ${200+level*20}%`,time_magician:`인접 추가 공격 위력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -596,7 +600,7 @@ function applyHit(s,shot){
   if(shot.ground){
     const point=shot.to,hero=HERO[shot.hero];makeZone(s,shot,point);
     if(has(s,'orbit')&&shot.rank>=3)makeZone(s,shot,point,true);
-    if(has(s,'meteor')&&shot.count%12===0){for(const target of s.enemies)if(target.hp>0&&Math.hypot(pathPoint(target.progress).x-point.x,pathPoint(target.progress).y-point.y)<=100)damage(s,target,shot.damage*RV.meteor.hit*relicScaleIn(s,'meteor'),shot.hero);event(s,'meteor',{...point,color:'#f6c888'});}
+    if(has(s,'meteor')&&shot.proc!==false&&shot.count%12===0){for(const target of s.enemies)if(target.hp>0&&Math.hypot(pathPoint(target.progress).x-point.x,pathPoint(target.progress).y-point.y)<=100)damage(s,target,shot.damage*RV.meteor.hit*relicScaleIn(s,'meteor'),shot.hero);event(s,'meteor',{...point,color:'#f6c888'});}
     event(s,'impact',{...point,hero:shot.hero,form:shot.form,angle:Math.atan2(point.y-shot.origin.y,point.x-shot.origin.x),rank:shot.rank,shape:hero.shape,origin:shot.origin,ground:true});return;
   }
   const e=s.enemies.find(x=>x.uid===shot.target&&x.hp>0);if(!e)return;
@@ -646,12 +650,12 @@ function applyHit(s,shot){
     const prismHit=has(s,'prism')?1+RV.prism.chain*relicScaleIn(s,'prism'):1;
     let from=point;for(const target of others){normalHit(s,target,amount*ratio*prismHit,shot,{},procTargets);const to=pathPoint(target.progress);event(s,'chain',{from,to,color:hero.color,hero:hero.id});from=to;}
   }
-  if(type==='burn')for(const t of area)addStatus(s,t,'burn',sourceKey('attack',hero.id,shot.uid),hero.id,amount*.23,3);
-  if(type==='venom'&&shot.proc!==false){const src=sourceKey('attack',hero.id,shot.uid);for(const t of area){addPoison(s,t,src,hero.id,1,7,amount);addStatus(s,t,'burn',src,hero.id,amount*.23,3);}}
+  if(type==='burn')for(const t of area)addStatus(s,t,'burn',sourceKey('attack',hero.id,shot.uid),hero.id,amount*BURN.attack,BURN.attackSeconds);
+  if(type==='venom'&&shot.proc!==false){const src=sourceKey('attack',hero.id,shot.uid);for(const t of area){addPoison(s,t,src,hero.id,1,7,amount);addStatus(s,t,'burn',src,hero.id,amount*BURN.attack,BURN.attackSeconds);}}
   if(type==='joker'&&shot.proc!==false){
     const color=s.jokerColor||'red',src=sourceKey('attack',hero.id,shot.uid);
     for(const t of area){
-      if(color==='red')addStatus(s,t,'burn',src,hero.id,amount*JOKER.burn,3);
+      if(color==='red')addStatus(s,t,'burn',src,hero.id,amount*JOKER.burn,BURN.attackSeconds);
       else if(color==='blue')addSlow(s,t,src,JOKER.slow,2.4);
       else if(color==='green')addPoison(s,t,src,hero.id,1,7,amount);
       else if(color==='white')addStatus(s,t,'divine',src,hero.id,1,6);
@@ -667,29 +671,37 @@ function applyHit(s,shot){
   }
   if(hero.shape==='zone')makeZone(s,shot,point);
   if(has(s,'orbit')&&shot.rank>=3)makeZone(s,shot,point,true);
-  if(has(s,'meteor')&&shot.count%12===0){for(const t of around(s,e,100))damage(s,t,amount*RV.meteor.hit*relicScaleIn(s,'meteor'),hero.id);event(s,'meteor',{...pathPoint(e.progress),color:'#f6c888'});}
+  if(has(s,'meteor')&&shot.proc!==false&&shot.count%12===0){for(const t of around(s,e,100))damage(s,t,amount*RV.meteor.hit*relicScaleIn(s,'meteor'),hero.id);event(s,'meteor',{...pathPoint(e.progress),color:'#f6c888'});}
 }
-// extra>0 fires one additional shot at that power ratio without advancing
-// the unit's attack count (Time Magician); it never triggers further procs.
+// Every shot a unit fires is a basic attack, including Rumi's echo and the Time Magician's extra shot
+// (extra>0 is its power ratio): each advances the attack count (Guardian's stun, Santa's gift, Cinderella's
+// clock, the meteor relic) and triggers on-hit traits. The exception is the Time Magician itself: an echo or
+// extra shot of a magician neither advances its count nor procs, so magicians never feed each other's rhythm.
 function attack(s,u,index,extra=0){
-  const hero=HERO[u.hero],ground=u.hero==='flame_sage';
+  const ground=u.hero==='flame_sage';
   if(ground&&!s.enemies.some(e=>e.hp>0))return false;
-  let e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(hero,cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return false;
-  const clockStep=u.hero==='cinderella'&&!extra&&topCinderella(s)?.uid===u.uid?(s.buffs.midnight>0?3:1):0,bell=clockStep>0&&(u.clock||0)+clockStep>=12;
-  if(bell)e=s.enemies.find(x=>x.boss&&x.hp>0)||e;
-  const at=cellPoint(index),to=ground?pathPoint(random(s)*PATH_LENGTH):pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
-  u.aim=angle;u.facing=attackDirection(at,to);
-  const from={x:at.x+Math.cos(angle)*9,y:at.y+5+Math.sin(angle)*6};
-  if(!extra){u.attacks++;u.pose=.3;}
-  if(clockStep)u.clock=((u.clock||0)+clockStep)%12;
-  const stats=combatStats(s,u,index),value=stats.damage*(extra||1);
-  const travel=['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650);
-  const gift=!extra&&u.hero==='santa'&&u.attacks%4===0;
-  const shot={uid:s.nextId++,source:u.uid,target:e?.uid??null,hero:u.hero,form:unitForm(s,u),proc:!extra,damage:value,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel,...(ground?{ground:true}:{}),...(u.hero==='lightning_sage'?{chainRatio:stats.chainRatio,extraChain:stats.extraChain}:{}),...(gift?{gift:true}:{}),...(bell?{bell:true}:{})};
-  s.shots.push(shot);event(s,'attack',{index,hero:u.hero,rank:u.rank,from,to,origin:at,shape:hero.shape,form:shot.form,attackType:hero.attack,...(gift?{gift:true}:{}),...(extra?{extra:true}:{})});
-  if(extra)return true;
-  if(s.buffs.echo>0){s.shots.push({...shot,uid:s.nextId++,proc:false,gift:undefined,bell:undefined,damage:value*.65*buffScale(s,'echo'),life:shot.life+.14,total:shot.life+.14});}
+  const e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(HERO[u.hero],cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return false;
+  const stats=combatStats(s,u,index),ratio=extra||1;
+  const shot=fire(s,u,index,e,ground?pathPoint(random(s)*PATH_LENGTH):null,stats,ratio,extra>0,false);
+  event(s,'attack',{index,hero:u.hero,rank:u.rank,from:shot.from,to:shot.to,origin:shot.origin,shape:HERO[u.hero].shape,form:shot.form,attackType:HERO[u.hero].attack,...(shot.gift?{gift:true}:{}),...(extra?{extra:true}:{})});
+  if(s.buffs.echo>0)fire(s,u,index,ground?null:s.enemies.find(x=>x.uid===shot.target)||e,ground?shot.to:null,stats,ratio*.65*buffScale(s,'echo'),true,true);
   return true;
+}
+function fire(s,u,index,e,ground,stats,ratio,bonus,echo){
+  const hero=HERO[u.hero],counts=!(bonus&&u.hero==='time_magician');
+  const clockStep=counts&&u.hero==='cinderella'&&topCinderella(s)?.uid===u.uid?(s.buffs.midnight>0?3:1):0,bell=clockStep>0&&(u.clock||0)+clockStep>=12;
+  if(bell)e=s.enemies.find(x=>x.boss&&x.hp>0)||e;
+  const at=cellPoint(index),to=ground||pathPoint(e.progress),angle=Math.atan2(to.y-at.y,to.x-at.x);
+  if(!echo){u.aim=angle;u.facing=attackDirection(at,to);}
+  const from={x:at.x+Math.cos(angle)*9,y:at.y+5+Math.sin(angle)*6};
+  if(counts)u.attacks++;
+  if(!bonus)u.pose=.3;
+  if(clockStep)u.clock=((u.clock||0)+clockStep)%12;
+  const travel=(['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650))+(echo?.14:0);
+  const gift=counts&&u.hero==='santa'&&u.attacks%4===0;
+  const shot={uid:s.nextId++,source:u.uid,target:e?.uid??null,hero:u.hero,form:unitForm(s,u),proc:counts,damage:stats.damage*ratio,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel,...(ground?{ground:true}:{}),...(u.hero==='lightning_sage'?{chainRatio:stats.chainRatio,extraChain:stats.extraChain}:{}),...(gift?{gift:true}:{}),...(bell?{bell:true}:{})};
+  s.shots.push(shot);
+  return shot;
 }
 // One source for outgoing attack power, cadence and the live inspection UI.
 // Enemy armor/exposure and conditional hit bonuses are applied at impact.
@@ -718,7 +730,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(has(s,'alchemy')&&Number.isInteger(u.mergedWave)&&u.mergedWave<=s.wave&&s.wave<u.mergedWave+RV.alchemy.waves)damageBonus('relic','연금',RV.alchemy.power*relicScaleIn(s,'alchemy'));
   if(s.buffs.awaken>0)damageBonus('ult','각성',ULT_BUFF.awaken.power*buffScale(s,'awaken'));
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',.5*buffScale(s,'radiance'));
-  if(unitForm(s,u)){damageBonus('ult','트라우마',1.1);speedBonus('ult','트라우마',.35);}
+  if(unitForm(s,u)){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
   if(u.hero==='cinderella'&&s.buffs.midnight>0&&topCinderella(s)?.uid===u.uid)speedBonus('ult','자정의 기적',CINDERELLA.haste);
   if(sirenRank)speedBonus('aura','세이렌의 노래',(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank));
   // Placement auras only (dragon, harmony, siren). Ultimate buffs and relics stay single.
@@ -807,10 +819,10 @@ export function cast(s,id){
     // Dragon Breath lands on the densest pack (radius 180) instead of the whole field.
     const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=180);
     const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
-    visualTargets=centre?near(centre):[];for(const e of visualTargets){damage(s,e,base*14,id);addStatus(s,e,'burn',source,id,base*.6,5);}
+    visualTargets=centre?near(centre):[];for(const e of visualTargets){damage(s,e,base*14,id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
   }
-  else if(type==='inferno'){strike(7*(coreCrisis(s)?2:1));for(const e of targets)addStatus(s,e,'burn',source,id,base*.6,5);}
-  else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*.6,6);}}
+  else if(type==='inferno'){strike(7*(coreCrisis(s)?2:1));for(const e of targets)addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
+  else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}}
   else if(type==='plague'){
     // Enemies already carrying 20+ poison take 30% of the remaining poison at once.
     for(const e of targets){const active=activePoison(e);if(active.reduce((n,a)=>n+a.stacks,0)>=20)damage(s,e,.3*active.reduce((n,{effect,stacks})=>n+stacks*effect.power*POISON_POWER_RATIO*Math.max(0,effect.until-s.time),0)*poisonAmp(s),id);}
@@ -933,7 +945,7 @@ export function castPreview(s,id){
     }
     return select(e.statusEffects.filter(effect=>effect.until-s.time>1e-9));
   };
-  const burnPerSecond=num(base*.6*(has(s,'ember')?1+RV.ember.burn*relicScaleIn(s,'ember'):1));
+  const burnPerSecond=num(base*BURN.skill*(has(s,'ember')?1+RV.ember.burn*relicScaleIn(s,'ember'):1));
   const repeat=e=>!!e.boss&&(e.ultControl||0)-s.time>1e-9;
 
   if(dream){const [sun,,,last]=RUMI_DREAM.phases;lines.push(`해·달·별의 마법이 차례로 적 전체를 칩니다. 한 번에 위력 ${sun.factor}배, ${hit(sun.factor)}입니다.`);lines.push(`마지막에 상상이 현실이 되어 위력 ${last.factor}배, ${hit(last.factor)}를 줍니다. 모두 합쳐 위력 ${RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)}배입니다.`);}
@@ -954,8 +966,8 @@ export function castPreview(s,id){
     lines.push('기절과 저주를 한 번 풉니다.');
   }else if(type==='trauma'){
     lines.push(`적 전체에게 위력 4배, ${hit(4)}를 줍니다.`);
-    // +110% damage and +35% speed are fixed. buffScale is stored and not applied.
-    lines.push(`${dur(10,'trauma')} 동안 시간의마술사가 변신해 위력 110%, 공격 속도 35%가 오릅니다.`);
+    // TRAUMA power and speed are fixed. buffScale is stored and not applied.
+    lines.push(`${dur(10,'trauma')} 동안 시간의마술사가 변신해 위력 ${pct(TRAUMA.power)}%, 공격 속도 ${pct(TRAUMA.speed)}%가 오릅니다.`);
   }else if(type==='ice_court'){
     lines.push(`적 전체에게 위력 9배, ${hit(9)}를 줍니다.`);
     lines.push(`적은 ${sec(winterDuration(s,u))} 동안 ${pctText(slowOf(WINTER_COURT.slow*scale))} 느려집니다.`);
@@ -991,17 +1003,17 @@ export function castPreview(s,id){
     const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
     const pack=centre?near(centre):[];
     lines.push(pack.length?`가장 밀집한 반경 180 안의 적 ${pack.length}명에게 위력 14배, ${hit(14)}를 줍니다.`:`반경 180 안에서 가장 밀집한 적에게 위력 14배, ${hit(14)}를 줍니다.`);
-    lines.push(`맞은 적은 5초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
+    lines.push(`맞은 적은 ${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='inferno'){
     const crisis=coreCrisis(s),factor=7*(crisis?2:1);boost={on:crisis,label:crisis?'강화 · 코어 위기':'강화 대기',hint:crisis?'':`코어 생명력이 절반 아래로 내려가면 강화되어 ${hit(14)}가 됩니다.`};
     lines.push(`적 전체에게 위력 ${factor}배, ${hit(factor)}를 줍니다.`);
-    lines.push(`5초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
+    lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='combust'){
     const burning=targets.filter(e=>snapshot(e).burnTime>0).length;
     if(!targets.length||burning===0)lines.push(`적에게 위력 4배, ${hit(4)}를 줍니다. 이미 불타면 ${hit(10)}입니다.`);
     else if(burning===targets.length)lines.push(`지금 불타는 적에게 위력 10배, ${hit(10)}를 줍니다.`);
     else lines.push(`불타는 적 ${burning}명에게 ${hit(10)}, 나머지에게 ${hit(4)}를 줍니다.`);
-    lines.push(`6초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
+    lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='plague'){
     const stacks=8,ready=targets.filter(e=>poisonNow(e).reduce((n,a)=>n+a.stacks,0)>=20);
     lines.push(`적 전체에게 위력 3배, ${hit(3)}와 12초 동안 독 ${stacks}중첩을 줍니다.`);
@@ -1270,7 +1282,7 @@ export function step(s,dt){
       // Gravity fields deal +30% per divine stack on the enemy.
       if(z.hero==='galaxy_whale'&&!z.orbit)syncStatuses(s,e);
       damage(s,e,z.damage*(z.orbit?RV.orbit.tick*relicScaleIn(s,'orbit'):.22)*(z.hero==='galaxy_whale'&&!z.orbit?1+.3*e.divine:1),z.hero,{dot:true});if(z.orbit)continue;
-      if(z.hero==='flame_sage')addStatus(s,e,'burn',sourceKey('zone',z.hero,z.uid),z.hero,z.damage*.23,3);
+      if(z.hero==='flame_sage')addStatus(s,e,'burn',sourceKey('zone',z.hero,z.uid),z.hero,z.damage*BURN.attack,BURN.attackSeconds);
       if(z.hero==='mushroom_king')addPoison(s,e,sourceKey('zone',z.hero,z.uid),z.hero,1,7,z.damage);
     }
     if(!z.orbit&&['phantom','galaxy_whale','time_ruler'].includes(z.hero))slowTargets(s,targets,h,z.damage,z,sourceKey('zone',z.hero,z.uid),z.rank);

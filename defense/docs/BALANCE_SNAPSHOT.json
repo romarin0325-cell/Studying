@@ -26,7 +26,7 @@
     "dispatchStageStep": 0.05,
     "dispatchDust": 1.5,
     "dispatchDreams": 0.3,
-    "idleHours": 20,
+    "idleHours": 24,
     "idleDustPerHour": 14,
     "firstClearBase": 160,
     "firstClearStep": 10,

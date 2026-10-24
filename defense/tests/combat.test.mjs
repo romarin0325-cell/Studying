@@ -86,14 +86,14 @@ function soloWinner(s){
   return boosted[0];
 }
 
-test('snow training adds two percentage points and the displayed slow includes rank and enhancement',()=>{
+test('snow training adds one percentage point and the displayed slow includes rank and enhancement',()=>{
   for(let level=0;level<=5;level++){
     const s=traitArena([{hero:'snow_rabbit',index:12,rank:3}]),[e]=enemiesFor(s,[{}]),u=s.board[12];
     s.upgrades.snow_rabbit=level;s.meta.snow_rabbit={power:1,special:1.1};
     resolveNormal(s,launchNormal(s,u));
-    const expected=Math.min(.8,(.4+level*.02)*1.2*1.1);
+    const expected=Math.min(.8,(.4+level*.01)*1.2*1.1);
     close(e.slow,expected,'trained snow slow');
-    assert.equal(E.trainingBonus('snow_rabbit',level),`감속 ${40+level*2}%`);
+    assert.equal(E.trainingBonus('snow_rabbit',level),`감속 ${40+level}%`);
     assert.deepEqual(E.givenEffects(s,u,12),[`감속 ${Number((expected*100).toFixed(1))}%`]);
   }
 });
@@ -615,7 +615,7 @@ test('Storm uses a strict 1% boundary and an instant kill accounts for shield an
   }
 });
 
-test('Storm instant kill never triggers on bosses, damage over time, ultimate attacks, echoes or a vanished target',()=>{
+test('Storm instant kill never triggers on bosses, damage over time, ultimate attacks or a vanished target, and an echo rolls like a basic attack',()=>{
   {
     const s=traitArena([{hero:'storm_sage',index:12}]),[boss]=enemiesFor(s,[{kind:'boss',progress:1200}]);
     const shot=launchNormal(s,s.board[12]);s.rng=1;resolveNormal(s,shot);
@@ -630,9 +630,9 @@ test('Storm instant kill never triggers on bosses, damage over time, ultimate at
   }
   {
     const s=traitArena([{hero:'storm_sage',index:12}]);enemiesFor(s,[{progress:1200}]);s.buffs.echo=8;s.buffTotals.echo=8;
-    launchNormal(s,s.board[12]);const echo=s.shots.find(shot=>shot.proc===false);assert.ok(echo);
+    const first=launchNormal(s,s.board[12]),echo=s.shots.find(shot=>shot!==first);assert.ok(echo);assert.equal(echo.proc,true);assert.equal(echo.count,first.count+1);
     s.shots=[echo];echo.life=.001;s.rng=1;assert.ok(E.restore(E.serialize(s)));E.step(s,.001);
-    assert.ok(s.enemies[0].hp>0);assert.equal(s.events.some(e=>e.type==='instantKill'),false);assert.equal(s.rng,1);
+    assert.notEqual(s.rng,1,'the echo rolls the instant kill like a basic attack');
   }
   {
     const s=traitArena([{hero:'storm_sage',index:12}]),[enemy]=enemiesFor(s,[{progress:1200}]);
@@ -964,14 +964,14 @@ test('exposure independently expires from Detective ultimate to Phantom to Detec
 
 test('burn selects the strongest live owner, reveals a weaker live skill on expiry and cannot resurrect stale strong fire',()=>{
   const s=traitArena([{hero:'zeke',index:0,rank:3},{hero:'red_dragon',index:4},{hero:'flame_sage',index:12}]),[e]=enemiesFor(s,[{}]),start=s.time;
-  const strong=E.power(s,s.board[0])*.6,weak=E.power(s,s.board[4])*.6;
+  const strong=E.power(s,s.board[0])*E.BURN.skill,weak=E.power(s,s.board[4])*E.BURN.skill;
   assert.ok(strong>weak);readyCast(s,'zeke');quiet(s);advanceTo(s,start+1);readyCast(s,'red_dragon');
   close(e.burn,strong);assert.equal(e.burnOwner,'zeke');quiet(s);
   const restored=E.restore(E.serialize(s));assert.ok(restored);
-  advanceTo(s,start+5);advanceTo(restored,start+5);close(e.burn,weak);assert.equal(e.burnOwner,'red_dragon');assert.equal(E.serialize(restored),E.serialize(s));
-  advanceTo(s,start+6);assert.equal(e.burn,0);assert.equal(e.burnOwner,null);
+  advanceTo(s,start+E.BURN.skillSeconds);advanceTo(restored,start+E.BURN.skillSeconds);close(e.burn,weak);assert.equal(e.burnOwner,'red_dragon');assert.equal(E.serialize(restored),E.serialize(s));
+  advanceTo(s,start+1+E.BURN.skillSeconds);assert.equal(e.burn,0);assert.equal(e.burnOwner,null);
   const shot=landZone(s,s.board[12],e);E.step(s,.001);
-  close(e.burn,shot.damage*1.3*.23);assert.equal(e.burnOwner,'flame_sage');assert.ok(e.burn<strong);
+  close(e.burn,shot.damage*1.3*E.BURN.attack);assert.equal(e.burnOwner,'flame_sage');assert.ok(e.burn<strong);
   assert.ok(e.statusEffects.filter(effect=>effect.type==='burn').every(effect=>effect.owner==='flame_sage'));
 });
 
@@ -2014,7 +2014,7 @@ test('ash: armageddon burns the lowest other ally, spares an invincible one (not
   assert.equal(alone.events.some(e=>e.type==='reduce'),false);assert.equal(alone.events.find(e=>e.type==='armageddonBlast').radius,E.ARMAGEDDON.radius);
   const burn=traitArena([{index:12,hero:'ash'}]);const [target]=enemiesFor(burn,[{hp:1e9,progress:1200}]);
   const shot=launchNormal(burn,burn.board[12]);resolveNormal(burn,shot);
-  close(target.burn,shot.damage*.23);close(target.burnTime,3);assert.equal(target.burnOwner,'ash');
+  close(target.burn,shot.damage*E.BURN.attack);close(target.burnTime,E.BURN.attackSeconds);assert.equal(target.burnOwner,'ash');
 });
 
 test('venom: a normal hit applies poison and burn, and the plague doubles those ticks for about 10 seconds',()=>{
@@ -2022,12 +2022,12 @@ test('venom: a normal hit applies poison and burn, and the plague doubles those 
   assert.equal(E.ACTIVE_SKILLS.venom,'venom');assert.equal(E.PURE_BUFFS.has('venomplague'),false);
   const s=traitArena([{index:12,hero:'venom'}]);const [e]=enemiesFor(s,[{hp:1e9,progress:1200}]);
   s.buffs.echo=5;s.buffTotals.echo=5;s.buffScale.echo=1;
-  const shot=launchNormal(s,s.board[12]),echo=s.shots.find(x=>x.proc===false);assert.ok(echo);
+  const shot=launchNormal(s,s.board[12]),echo=s.shots.find(x=>x!==shot);assert.ok(echo);
   resolveNormal(s,shot);
-  assert.equal(E.statusState(s,e).poison,1);close(e.burn,shot.damage*.23);close(e.burnTime,3);
+  assert.equal(E.statusState(s,e).poison,1);close(e.burn,shot.damage*E.BURN.attack);close(e.burnTime,E.BURN.attackSeconds);
   const applied=e.statusEffects.find(x=>x.type==='poison');assert.equal(applied.amount,1);close(applied.until-s.time,7);close(applied.power,shot.damage);
   const stacks=E.statusState(s,e).poison,burned=e.burn;s.shots=[echo];echo.life=.001;E.step(s,.001);
-  assert.equal(E.statusState(s,e).poison,stacks,'an echo is not a normal hit');close(e.burn,burned);
+  assert.equal(E.statusState(s,e).poison,stacks+1,'an echo is a basic attack');close(e.burn,burned,'the weaker echo burn does not replace the stronger one');
   const field=traitArena([{index:12,hero:'venom'}]);
   const pack=enemiesFor(field,[100,900].map(progress=>({hp:1e9,progress})));
   const base=E.combatStats(field,field.board[12]).damage,preview=E.castPreview(field,'venom');
@@ -2074,4 +2074,27 @@ test('smart auto holds armageddon for a straggler and spends it on a cluster, an
   const v=traitArena([{index:12,hero:'venom'}]);const [foe]=enemiesFor(v,[{hp:1e9,progress:1200}]);
   v.gauge=120;v.gold=0;v.board[12].cooldown=100;const vh=foe.hp;
   smartAutoPlay(v);assert.equal(v.stats.skills,1);assert.ok(foe.hp<vh);assert.ok(v.buffs.venom>0);
+});
+
+test('echoes and Time Magician extra shots are basic attacks for every trait except the magician rhythm',()=>{
+  {
+    const s=traitArena([{hero:'guardian',index:0}]);enemiesFor(s,[{hp:1e9,progress:100}]);s.buffs.echo=8;s.buffTotals.echo=8;
+    const u=s.board[0],first=launchNormal(s,u),echo=s.shots.find(x=>x!==first&&x.source===u.uid);
+    assert.equal(u.attacks,2,'the echo advances the guardian count');assert.equal(first.count,1);assert.equal(echo.count,2);assert.equal(echo.proc,true);
+    close(echo.damage,first.damage*.65);
+  }
+  {
+    const s=traitArena([{hero:'time_magician',index:12},{hero:'cinderella',index:13},{hero:'time_magician',index:11}]);enemiesFor(s,[{hp:1e9,progress:1200}]);
+    const mage=s.board[12],knight=s.board[13],other=s.board[11];mage.attacks=2;
+    resolveNormal(s,launchNormal(s,mage));
+    assert.equal(knight.attacks,1,'the extra shot counts for Cinderella');assert.equal(knight.clock,1,'and moves her clock');
+    assert.ok(s.shots.some(x=>x.source===knight.uid&&x.proc===true));
+    assert.equal(other.attacks,0,'a magician never advances another magician');
+    assert.ok(s.shots.some(x=>x.source===other.uid&&x.proc===false));
+  }
+  {
+    const s=traitArena([{hero:'time_magician',index:12}]);enemiesFor(s,[{hp:1e9,progress:1200}]);s.buffs.echo=8;s.buffTotals.echo=8;
+    const mage=s.board[12],first=launchNormal(s,mage),echo=s.shots.find(x=>x!==first&&x.source===mage.uid);
+    assert.equal(mage.attacks,1,'an echo does not advance the magician rhythm');assert.equal(echo.proc,false);
+  }
 });
