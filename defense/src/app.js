@@ -984,10 +984,9 @@ function claimPity(){
   render();bonusItems=null;reveal([result.item],{count:1,cost:0});
 }
 function rates(){
-  const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates;
+  const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates,urCount=heroPool('UR',lateOpen(p().cleared)).length;
   let rows=RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
-  if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%",closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<PART_STAGES;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${PART_STAGES} 클리어 후</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR 6종 합계</span><b>${half}</b></div>`;}
-  const urCount=heroPool('UR',lateOpen(p().cleared)).length;
+  if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%",closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<PART_STAGES;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${PART_STAGES} 클리어 후</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${half}</b></div>`;}
   if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/urCount)}</b></div><div class="rate-row"><span>UR · 나머지 ${urCount-1}종 각각</span><b>${pct(T.heroRates[3]*.5/urCount)}</b></div>`;
   if(banner!=='relic'){
     const open=p().cleared>=PART_STAGES;
@@ -1252,7 +1251,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=rarity===d.filter?'all':d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}if(d.part){focusPart(Number(d.part));return;}
   if(d.garden){gardenTab=d.garden;bedFocus=GARDENS.find(g=>g.id===gardenTab).beds[0];refreshGarden();return;}
-  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:['behemoth']});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const r=act('testGrant',{kind:d.testTool});if(r.ok){cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
+  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const r=act('testGrant',{kind:d.testTool});if(r.ok){cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
   if(d.bed){bedFocus=d.bed;refreshGarden();return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
   if(d.libraryTab){close();libraryTab=d.libraryTab;if(screen!=='library'){screen='library';render();}else{render();$('content').scrollTop=0;}return;}

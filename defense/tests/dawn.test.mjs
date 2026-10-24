@@ -57,21 +57,22 @@ test('growing a dawn bed: stage lock and cost',()=>{
   assert.equal(validateProfile(p),true);p.beds.crit=100;assert.equal(validateProfile(p),true);
 });
 
-test('save migration: revision 3 saves gain the dawn beds, and a cleared stage 45 brings Behemoth',()=>{
+test('save migration: revision 3 saves gain the dawn beds without a new Behemoth grant',()=>{
   const old=createProfile(NOW);old.bedRev=3;old.beds={rose:7,spring:3,seed:1};old.cleared=50;
   assert.equal(old.heroes.behemoth.owned,false);
   const moved=parseProfile(JSON.stringify(old));assert.ok(moved);assert.equal(moved.bedRev,4);
   assert.deepEqual(moved.beds,{rose:7,spring:3,seed:1,crit:0,critDamage:0,stardust:0});
-  assert.equal(moved.heroes.behemoth.owned,true,'a save that already cleared stage 45 receives the companion');
+  assert.equal(moved.heroes.behemoth.owned,false,'stage45 now opens the regular pool without a free grant');
+  old.heroes.behemoth.owned=true;old.heroes.behemoth.copies=3;const owned=parseProfile(JSON.stringify(old));assert.equal(owned.heroes.behemoth.owned,true);assert.equal(owned.heroes.behemoth.copies,3);
   const young=createProfile(NOW);young.bedRev=3;young.beds={rose:0,spring:0,seed:0};young.cleared=44;
   assert.equal(parseProfile(JSON.stringify(young)).heroes.behemoth.owned,false);
 });
 
-test('clearing stage 45 for the first time opens part two and brings Behemoth',()=>{
-  assert.deepEqual(CLEAR_UNLOCKS,{45:['behemoth']});
+test('clearing stage 45 for the first time opens part two without a companion grant',()=>{
+  assert.deepEqual(CLEAR_UNLOCKS,{});
   const p=createProfile(NOW);p.cleared=44;ok(p,'begin',{mode:'main',stage:45},NOW);
   const r=ok(p,'settle',{token:p.active.token,won:true,round:6},NOW+1000);
-  assert.equal(p.cleared,45);assert.equal(r.partOpened,true);assert.deepEqual(r.unlocked,['behemoth']);assert.equal(p.heroes.behemoth.owned,true);
+  assert.equal(p.cleared,45);assert.equal(r.partOpened,true);assert.deepEqual(r.unlocked,[]);assert.equal(p.heroes.behemoth.owned,false);
   ok(p,'begin',{mode:'main',stage:46},NOW+2000);assert.equal(p.active.stage,46);
   const again=ok(p,'settle',{token:p.active.token,won:true,round:6},NOW+3000);assert.equal(again.partOpened,false);assert.deepEqual(again.unlocked,[]);
   assert.deepEqual(grantClearUnlocks(p),[],'already owned');

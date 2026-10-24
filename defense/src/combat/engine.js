@@ -207,7 +207,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   if(u.hero==='demon_king')Object.assign(trait,{key:'critDamage',active:!u.cursed,label:u.cursed?'저주 · 특성 무효':'치명타 대미지 +50%p'});
   if(u.hero==='miracle_larva'){
     const form=miracleForm(u),wing=form==='miracle_wing',abyss=form==='abyss_wing';
-    Object.assign(trait,{key:'evolution',form,active:!u.cursed&&(wing||abyss),label:u.cursed?'저주 · 특성 무효':wing?`인접 치명타 +${pctText(.2*rankSupport(u.rank)*special(s,u.hero))}p`:abyss?'감속 25% · 중독 1중첩':'우화 대기'});
+    Object.assign(trait,{key:'evolution',form,active:!u.cursed&&(wing||abyss),label:u.cursed?'저주 · 특성 무효':wing?`인접 치명타 +${pctText(.2*rankSupport(u.rank)*special(s,u.hero))}p`:abyss?`감속 ${pctText(Math.min(.8,.25*rankControl(u.rank)*special(s,u.hero)))} · 중독 1중첩`:'우화 대기'});
   }
   if(u.hero==='lightning_sage'){
     const seen=new Set(),pending=index>=0&&s.board[index]?.uid===u.uid?[index]:[];
@@ -687,7 +687,7 @@ function applyHit(s,shot){
   }
   if(['slow','chrono','gravity','permafrost'].includes(type))slowTargets(s,area,hero,amount,point,sourceKey('attack',hero.id,shot.uid),shot.rank);
   if(type==='poison')addPoison(s,e,sourceKey('attack',hero.id,shot.uid),hero.id,1,7,amount,shot.crit);
-  if(type==='abyss'&&shot.proc!==false){const source=sourceKey('attack',hero.id,shot.uid);for(const t of area){addSlow(s,t,source,Math.min(.8,.25*special(s,hero.id)*rankControl(shot.rank)),2);addPoison(s,t,source,hero.id,1,8,amount,shot.crit);}}
+  if(type==='abyss'&&shot.proc!==false){const source=sourceKey('attack',hero.id,shot.uid);for(const t of area){addSlow(s,t,source,.25*rankControl(shot.rank),2);addPoison(s,t,source,hero.id,1,8,amount,shot.crit);}}
   if(type==='stun'&&shot.count%3===0)for(const t of area)addControl(s,t,'stun',sourceKey('attack',hero.id,shot.uid),hero.id,(.7+(s.upgrades[hero.id]||0)*.05)*special(s,hero.id)*rankControl(shot.rank));
   if(type==='expose'){
     const exposure=((e.boss ? .15 : .08)+s.upgrades[hero.id]*.02)*special(s,hero.id)*rankControl(shot.rank);

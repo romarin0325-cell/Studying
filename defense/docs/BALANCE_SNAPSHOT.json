@@ -68,7 +68,8 @@
         "knee2": 30,
         "steep2": 1.2,
         "resampleFrom": 38,
-        "afterSoftCapPrice": 0.5
+        "afterSoftCapPrice": 0.5,
+        "priceTransition": 12
       },
       "critDamage": {
         "unlock": 45,
@@ -502,7 +503,7 @@
         },
         {
           "level": 30,
-          "nextDust": 9533,
+          "nextDust": 23075,
           "value": 0.2,
           "cumulativeDust": 140904
         }
@@ -1754,6 +1755,12 @@
       "hidden": false
     },
     {
+      "id": "behemoth",
+      "name": "베히모스",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
       "id": "time_ruler",
       "name": "시간의지배자",
       "rarity": "UR",
@@ -1786,12 +1793,6 @@
     {
       "id": "frost_witch",
       "name": "혹한의마녀",
-      "rarity": "UR",
-      "hidden": true
-    },
-    {
-      "id": "behemoth",
-      "name": "베히모스",
       "rarity": "UR",
       "hidden": true
     }

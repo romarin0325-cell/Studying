@@ -4961,6 +4961,67 @@
       "decision": "Separate smaller encoding; source preserved."
     },
     {
+      "id": "memorial:behemoth",
+      "source": "./assets/memorial/behemoth.avif",
+      "profile": "memorialAvif",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.behemoth; standalone painting / web primary"
+      ],
+      "original": {
+        "bytes": 65110,
+        "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial/behemoth.avif",
+        "bytes": 50244,
+        "sha256": "e9d2c726b2533282620723f588647cde9184bba1b442ea5d4073e1c1ca6fff07",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "memorial-webp:behemoth",
+      "source": "./assets/memorial-webp/behemoth.webp",
+      "profile": "memorialWebp",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.behemoth; compat painting / web fallback",
+        "memorialThumb:behemoth; album thumbnail cropped from preserved source"
+      ],
+      "original": {
+        "bytes": 95826,
+        "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial-webp/behemoth.webp",
+        "bytes": 93898,
+        "sha256": "c0d38e50c10b92157fcf323e0cb5acbae49b40c239c118a731dea4326cf4890a",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
       "id": "memorial:time_ruler",
       "source": "./assets/memorial/time_ruler.avif",
       "profile": "memorialAvif",
@@ -5317,67 +5378,6 @@
         "path": "./assets/optimized/memorial-webp/frost_witch.webp",
         "bytes": 89896,
         "sha256": "796da41b2936a34016a907c08244ee269f18e56b58413c2b4250805f6f2f5785",
-        "metadata": {
-          "width": 720,
-          "height": 1080,
-          "hasAlpha": false,
-          "codec": "webp"
-        }
-      },
-      "decision": "Separate smaller encoding; source preserved."
-    },
-    {
-      "id": "memorial:behemoth",
-      "source": "./assets/memorial/behemoth.avif",
-      "profile": "memorialAvif",
-      "uses": [
-        "window.__MEMORIAL_MEDIA__.behemoth; standalone painting / web primary"
-      ],
-      "original": {
-        "bytes": 65110,
-        "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
-        "metadata": {
-          "width": 720,
-          "height": 1080,
-          "hasAlpha": false,
-          "codec": "avif"
-        }
-      },
-      "output": {
-        "path": "./assets/optimized/memorial/behemoth.avif",
-        "bytes": 50244,
-        "sha256": "e9d2c726b2533282620723f588647cde9184bba1b442ea5d4073e1c1ca6fff07",
-        "metadata": {
-          "width": 720,
-          "height": 1080,
-          "hasAlpha": false,
-          "codec": "avif"
-        }
-      },
-      "decision": "Separate smaller encoding; source preserved."
-    },
-    {
-      "id": "memorial-webp:behemoth",
-      "source": "./assets/memorial-webp/behemoth.webp",
-      "profile": "memorialWebp",
-      "uses": [
-        "window.__MEMORIAL_MEDIA__.behemoth; compat painting / web fallback",
-        "memorialThumb:behemoth; album thumbnail cropped from preserved source"
-      ],
-      "original": {
-        "bytes": 95826,
-        "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
-        "metadata": {
-          "width": 720,
-          "height": 1080,
-          "hasAlpha": false,
-          "codec": "webp"
-        }
-      },
-      "output": {
-        "path": "./assets/optimized/memorial-webp/behemoth.webp",
-        "bytes": 93898,
-        "sha256": "c0d38e50c10b92157fcf323e0cb5acbae49b40c239c118a731dea4326cf4890a",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -7262,6 +7262,60 @@
       }
     },
     {
+      "id": "portrait:behemoth",
+      "source": "./assets/cast-v2/behemoth.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 132,
+        "top": 97,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/behemoth.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "65e0a97d519022d76b8a0f1be594548255fd381088f2e5b7a77040e9cd1288aa",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/behemoth.webp",
+        "bytes": 23856,
+        "sha256": "576786397a9a7fa79c87d1ccb83b6d40610a4d9b6fcb601989055172fe3d0362",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:behemoth",
+      "source": "./assets/cast-v2/behemoth.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/behemoth.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "65e0a97d519022d76b8a0f1be594548255fd381088f2e5b7a77040e9cd1288aa",
+      "output": {
+        "path": "./assets/optimized/ui/figures/behemoth.webp",
+        "bytes": 49650,
+        "sha256": "b23897062f78529ac52556cce69bf8482e553f939fb6e234a04ec16a7712e4c1",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
       "id": "portrait:time_ruler",
       "source": "./assets/cast-v2/time_ruler.webp",
       "profile": "portrait",
@@ -7577,60 +7631,6 @@
         "path": "./assets/optimized/ui/figures/frost_witch.webp",
         "bytes": 43520,
         "sha256": "ddaf919bc95be490723cc7a4efab1806373a44a97ee72a36718773a521455de2",
-        "metadata": {
-          "width": 512,
-          "height": 512,
-          "hasAlpha": true,
-          "codec": "webp"
-        }
-      }
-    },
-    {
-      "id": "portrait:behemoth",
-      "source": "./assets/cast-v2/behemoth.webp",
-      "profile": "portrait",
-      "crop": {
-        "left": 132,
-        "top": 97,
-        "width": 250,
-        "height": 250
-      },
-      "destination": "./assets/optimized/ui/portraits/behemoth.webp",
-      "uses": [
-        "window.__GARDEN_MEDIA__; collection / party / summon"
-      ],
-      "sourceSha256": "65e0a97d519022d76b8a0f1be594548255fd381088f2e5b7a77040e9cd1288aa",
-      "output": {
-        "path": "./assets/optimized/ui/portraits/behemoth.webp",
-        "bytes": 23856,
-        "sha256": "576786397a9a7fa79c87d1ccb83b6d40610a4d9b6fcb601989055172fe3d0362",
-        "metadata": {
-          "width": 240,
-          "height": 240,
-          "hasAlpha": true,
-          "codec": "webp"
-        }
-      }
-    },
-    {
-      "id": "figure:behemoth",
-      "source": "./assets/cast-v2/behemoth.webp",
-      "profile": "figure",
-      "crop": {
-        "left": 0,
-        "top": 0,
-        "width": 512,
-        "height": 512
-      },
-      "destination": "./assets/optimized/ui/figures/behemoth.webp",
-      "uses": [
-        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
-      ],
-      "sourceSha256": "65e0a97d519022d76b8a0f1be594548255fd381088f2e5b7a77040e9cd1288aa",
-      "output": {
-        "path": "./assets/optimized/ui/figures/behemoth.webp",
-        "bytes": 49650,
-        "sha256": "b23897062f78529ac52556cce69bf8482e553f939fb6e234a04ec16a7712e4c1",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -9252,6 +9252,28 @@
       }
     },
     {
+      "id": "memorialThumb:behemoth",
+      "source": "./assets/memorial-webp/behemoth.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
+        "bytes": 15892,
+        "sha256": "f93c0ed05650ade6e48dc676c8cf3683adab426744043a8d2b2a21f1673e5649",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
       "id": "memorialThumb:time_ruler",
       "source": "./assets/memorial-webp/time_ruler.webp",
       "profile": "memorialThumb",
@@ -9375,28 +9397,6 @@
         "path": "./assets/optimized/ui/memorial-thumbs/frost_witch.webp",
         "bytes": 16160,
         "sha256": "7f53a257627ea76268bf02b32658acb224597c0b55de74495f203d512bf08abc",
-        "metadata": {
-          "width": 240,
-          "height": 360,
-          "hasAlpha": false,
-          "codec": "webp"
-        }
-      }
-    },
-    {
-      "id": "memorialThumb:behemoth",
-      "source": "./assets/memorial-webp/behemoth.webp",
-      "profile": "memorialThumb",
-      "crop": null,
-      "destination": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
-      "uses": [
-        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
-      ],
-      "sourceSha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
-      "output": {
-        "path": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
-        "bytes": 15892,
-        "sha256": "f93c0ed05650ade6e48dc676c8cf3683adab426744043a8d2b2a21f1673e5649",
         "metadata": {
           "width": 240,
           "height": 360,
