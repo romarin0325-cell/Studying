@@ -1,7 +1,7 @@
 # Bright lobby background (2026-10-25, pass 17)
 
-GPT image (Codex `image_gen`, `codex exec -i`), 1024x1536 PNG. References for style only: `assets/bright/garden.webp`,
-`assets/bright/summon-altar.webp`. The adopted file is `lobby-greenhouse-lounge.png`; `assets/bright/lobby.webp` is that PNG at
+GPT image (Codex `image_gen`, `codex exec -i`), 1024x1536 PNG. **Adopted (pass 17 Postcard skin): `lobby-calm.png`** — a repaint of the lounge at ~25% detail, low contrast, soft far windows, so the partner and the UI lead (owner feedback on GPT over-detail). `lobby-calm-alt.png` is the ~40% detail variant. References for style only: `assets/bright/garden.webp`,
+`assets/bright/summon-altar.webp`. The first version was `lobby-greenhouse-lounge.png` (kept for comparison); `assets/bright/lobby.webp` is now `lobby-calm.png` at
 WebP q92 (the build input; `scripts/optimize-images.mjs` makes the deployed copy). `lobby-sky-terrace-alt.png` is the unused
 alternative, kept for comparison.
 

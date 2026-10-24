@@ -50,9 +50,9 @@
     }
   },
   "totals": {
-    "sourceBytes": 23751210,
-    "deployableSourceBytes": 22152668,
-    "outputBytes": 13151732,
+    "sourceBytes": 23429830,
+    "deployableSourceBytes": 21831288,
+    "outputBytes": 12917762,
     "optimizedFiles": 151,
     "derivedFiles": 144,
     "derivedOutputBytes": 3410496
@@ -2495,8 +2495,8 @@
         "Bright window.__ASTRA_ASSETS__.lobby; home lobby (Bright only)"
       ],
       "original": {
-        "bytes": 480284,
-        "sha256": "8d01d20e43a89671780c4c1337dea825b4b29f46017b2105040601c3da6f89d5",
+        "bytes": 158904,
+        "sha256": "ec635978195ca7d23a03eb933f4e9986ecdbc3c2170581522c59e6079b201333",
         "metadata": {
           "width": 1024,
           "height": 1536,
@@ -2506,8 +2506,8 @@
       },
       "output": {
         "path": "./assets/optimized/bright/lobby.webp",
-        "bytes": 324418,
-        "sha256": "352bb52ebe72b0db91e9f1034aeb11dc786e22fe1c2c3bb5f6c97d588266fcbf",
+        "bytes": 90448,
+        "sha256": "59c3fe340e4da595efb774d723cf49dbc79ab86660478ef582ff150768ec70ae",
         "metadata": {
           "width": 1024,
           "height": 1536,

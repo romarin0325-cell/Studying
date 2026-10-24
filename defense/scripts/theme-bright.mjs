@@ -1,4 +1,4 @@
-// Bright skin ("맑은 정원") for the comparison build: node scripts/build.mjs --bright.
+// Bright skin ("별빛 정원 · Postcard") for the comparison build: node scripts/build.mjs --bright.
 // The night skin stays the source of truth. This pass reads every colour in style.css by the role it plays
 // (surface, ink, line, shadow) and maps it onto a daylight palette; src/theme-bright.css then adds the
 // component decisions a mapping cannot make (selection, navigation, titles, panels over art).
@@ -31,10 +31,11 @@ const ROLE={
   surface(c){const x=hsl(c);
     if(x.l>.62||isAccent(c))return out(c,c.a);                        // light fills and accent fills stay
     if(c.r+c.g+c.b<40&&c.a<.95)return out({r:24,g:44,b:86},c.a*.55);    // black veils become a soft navy veil
-    return out(rgb(x.h||220,clamp(x.s*.55,.08,.45),clamp(.985-x.l*.16,.9,.99)),c.a<1?Math.min(.94,c.a*1.05+.08):1);},
+    // Dark navy becomes warm paper (Postcard skin), never a cold white.
+    return out(rgb(40,.42,clamp(.975-x.l*.08,.92,.975)),c.a<1?Math.min(.95,c.a*1.05+.08):1);},
   ink(c,keep){const x=hsl(c);
     if(keep||x.l<.36)return out(c,c.a);                               // text on an accent fill, or already dark
-    if(x.s<.42||x.l>.9)return out(rgb(222,.34,clamp(.15+(1-x.l)*.5,.15,.48)),Math.max(c.a,.85));
+    if(x.s<.42||x.l>.9)return out(rgb(223,.5,clamp(.17+(1-x.l)*.42,.17,.46)),Math.max(c.a,.85));
     return out(accentInk(x),Math.max(c.a,.9));},
   line(c){const x=hsl(c);
     if(isAccent(c)&&x.l>.35)return out(rgb(x.h,clamp(x.s,.5,.9),clamp(x.l*.8,.32,.62)),Math.min(1,c.a*1.1));
