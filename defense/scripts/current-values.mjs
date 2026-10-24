@@ -4,7 +4,7 @@
 // when one of their numbers disagrees with this file, this file is right.
 import {HEROES,ARTIFACTS,ROSTER,HIDDEN,TUNING,MAIN_STAGES,PART_STAGES,PARTS,CLEAR_UNLOCKS} from '../src/content.js';
 import * as E from '../src/combat/engine.js';
-import {PERFECT_REWARD,guardianOf,critChance,critDamage,stardustRate,bedCost,GARDENS,roseAttack,springGauge,seedGold} from '../src/economy.js';
+import {relicThreshold,relicRates,PERFECT_REWARD,guardianOf,critChance,critDamage,stardustRate,bedCost,GARDENS,roseAttack,springGauge,seedGold} from '../src/economy.js';
 
 const SHAPE={single:'단일',pulse:'원형(자기 칸)',beam:'관통',splash:'범위',cleave:'부채꼴',zone:'장판',cross:'십자',bounce:'도약',chain:'연쇄'};
 const CLASS={tall:'큼',medium:'보통',short:'작음'};
@@ -63,6 +63,8 @@ export function currentValues(){
   lines.push('## 유물','',
     '| 유물 | 등급 | 효과 |','|---|---|---|',
     ...ARTIFACTS.map(a=>`| ${cell(a.name)} | ${a.rarity} | ${cell(a.text)} |`),'',
-    '유물 효과 수치 원본(`RELIC_VALUES`, 레벨당 +5%가 곱해진다):','','```json',JSON.stringify(E.RELIC_VALUES),'```','');
+    '유물 효과 수치 원본(`RELIC_VALUES`, 레벨당 +5%가 곱해진다):','','```json',JSON.stringify(E.RELIC_VALUES),'```','',
+    `유물 소환 단계: 누적 소환 횟수가 경계에 닿으면 다음 1회부터 오른다 (1회 ${TUNING.relicDrawCost} 꿈의결정).`,'','| 단계 | 누적 소환 | C / R / SR / UR |','|---|---|---|',
+    ...Array.from({length:13},(_,t)=>`| ${t} | ${relicThreshold(t)} | ${relicRates(relicThreshold(t)).map(x=>(x*100).toFixed(2)+'%').join(' / ')} |`),'');
   return lines.join('\n');
 }

@@ -105,7 +105,7 @@ for(const light of themes){
 const filename=light?unlocked?'StarGardenDefenseUnlockedBright.html':'StarGardenDefenseBright.html':unlocked?'StarGardenDefenseUnlocked.html':solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
 const themeAssets={...assets};let battleBytes=sizes.battle;
 if(light)for(const [id,relative] of Object.entries(BRIGHT_ART)){
-  const bytes=pack.read(relative);battleBytes+=bytes.length-Buffer.from(assets[id].split(',')[1],'base64').length;
+  const bytes=pack.read(relative);battleBytes+=bytes.length-(assets[id]?Buffer.from(assets[id].split(',')[1],'base64').length:0);
   themeAssets[id]='data:image/webp;base64,'+bytes.toString('base64');
 }
 const cssSource=light?brightCss(night,await readText(path.join(game,'src/theme-bright.css'))):night;

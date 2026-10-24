@@ -303,12 +303,12 @@ em{font-style:normal}
 .reveal-grid{display:grid;gap:7px;width:100%;grid-template-columns:repeat(5,minmax(0,1fr));perspective:900px}
 .reveal-grid.single{grid-template-columns:minmax(0,230px);justify-content:center}
 .reveal-card{position:relative;transform-style:preserve-3d;animation:deal .42s calc(.75s + var(--i)*.05s) cubic-bezier(.2,.9,.3,1.2) both}
-.reveal-card .hero-card{width:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;animation:flip-front .5s calc(1.15s + var(--i)*.12s) cubic-bezier(.3,.7,.3,1) both}
+.reveal-card .hero-card{width:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;animation:deal-fade .42s calc(.75s + var(--i)*.05s) both,flip-front .5s calc(1.15s + var(--i)*.12s) cubic-bezier(.3,.7,.3,1) both}
 .reveal-card .card-back{position:absolute;inset:0;border-radius:14px;display:grid;place-items:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;
   background:radial-gradient(circle at 50% 42%,rgba(255,236,170,.24),transparent 55%),repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 6px,transparent 6px 12px),linear-gradient(165deg,#2c3a82,#111842);
-  border:1.5px solid var(--hair2);box-shadow:inset 0 0 0 3px rgba(8,11,31,.6),inset 0 0 0 4px var(--hair),0 6px 14px rgba(0,0,0,.5);animation:flip-back .5s calc(1.15s + var(--i)*.12s) cubic-bezier(.3,.7,.3,1) both}
+  border:1.5px solid var(--hair2);box-shadow:inset 0 0 0 3px rgba(8,11,31,.6),inset 0 0 0 4px var(--hair),0 6px 14px rgba(0,0,0,.5);animation:deal-fade .42s calc(.75s + var(--i)*.05s) both,flip-back .5s calc(1.15s + var(--i)*.12s) cubic-bezier(.3,.7,.3,1) both}
 .card-back i{width:42%;aspect-ratio:1;background:linear-gradient(135deg,#fff5d0,#e2a94a);-webkit-mask:var(--star-mask) center/contain no-repeat;mask:var(--star-mask) center/contain no-repeat;filter:drop-shadow(0 0 8px rgba(246,210,122,.8))}
-.reveal-card[data-rarity=SR] .card-back,.reveal-card[data-rarity=UR] .card-back{animation:glow-back .45s calc(.75s + var(--i)*.12s) ease-in-out 2 alternate,flip-back .5s calc(1.15s + var(--i)*.12s) cubic-bezier(.3,.7,.3,1) both}
+.reveal-card[data-rarity=SR] .card-back,.reveal-card[data-rarity=UR] .card-back{animation:deal-fade .42s calc(.75s + var(--i)*.05s) both,glow-back .45s calc(.75s + var(--i)*.12s) ease-in-out 2 alternate,flip-back .5s calc(1.15s + var(--i)*.12s) cubic-bezier(.3,.7,.3,1) both}
 .reveal-card[data-rarity=SR]{--g:#c69cff}.reveal-card[data-rarity=UR]{--g:#ffd36a}
 .reveal-card[data-rarity=SR]::after,.reveal-card[data-rarity=UR]::after{content:'';position:absolute;left:8%;right:8%;top:-55%;bottom:-8%;z-index:-1;border-radius:40%;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--g) 70%,transparent) 55%,transparent);opacity:0;animation:pillar 1.4s calc(1.3s + var(--i)*.12s) ease-out both;pointer-events:none}
 .reveal-grid:not(.single) .hero-card{min-height:0;padding:5px 3px 6px;border-radius:12px}
@@ -339,11 +339,16 @@ em{font-style:normal}
 .sheet[data-kind=draw] .reveal-stage::before{background:radial-gradient(ellipse 78% 46% at 50% 46%,color-mix(in srgb,var(--c) 40%,transparent),transparent 68%),linear-gradient(180deg,rgba(4,6,20,.2),rgba(4,6,20,.62))}
 .sheet[data-kind=draw].spotting .sheet-body{z-index:8;overflow:visible}
 .sheet[data-kind=draw].spotting .sheet-footer{visibility:hidden}
-.sheet[data-kind=draw] .reveal-caption{min-height:2.7em;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1.4}
+.sheet[data-kind=draw] .reveal-caption{min-height:2.7em;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;font-size:12px;line-height:1.4}
+/* Relic tier up: the reward for an unlucky pull is watching the odds climb. */
+.reveal-caption .tier-up{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-weight:800;color:#3a2306;background:linear-gradient(180deg,#ffe9a8,#f6c453);box-shadow:0 0 14px rgba(255,211,106,.55);text-shadow:none;animation:tier-pop .5s cubic-bezier(.2,1.5,.3,1) both;animation-delay:inherit}
+.reveal-caption .tier-up .ic{width:13px;height:13px}
+.reveal-caption .tier-up b{font-family:var(--display);font-weight:400;font-size:14px}
+@keyframes tier-pop{from{opacity:0;transform:scale(.6)}}
 .reveal-stage:not(.arrival) .reveal-card{animation-delay:calc(var(--i)*.05s)}
-.reveal-stage:not(.arrival) .reveal-card .hero-card{animation-delay:calc(.5s + var(--i)*.1s)}
-.reveal-stage:not(.arrival) .reveal-card .card-back{animation:flip-back .48s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}
-.reveal-stage:not(.arrival) .reveal-card[data-rarity=SR] .card-back,.reveal-stage:not(.arrival) .reveal-card[data-rarity=UR] .card-back{animation:flip-back .48s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}
+.reveal-stage:not(.arrival) .reveal-card .hero-card{animation:deal-fade .42s calc(var(--i)*.05s) both,flip-front .5s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}
+.reveal-stage:not(.arrival) .reveal-card .card-back{animation:deal-fade .42s calc(var(--i)*.05s) both,flip-back .48s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}
+.reveal-stage:not(.arrival) .reveal-card[data-rarity=SR] .card-back,.reveal-stage:not(.arrival) .reveal-card[data-rarity=UR] .card-back{animation:deal-fade .42s calc(var(--i)*.05s) both,flip-back .48s calc(.5s + var(--i)*.1s) cubic-bezier(.3,.7,.3,1) both}
 .reveal-stage:not(.arrival) .reveal-card[data-rarity=SR]::after,.reveal-stage:not(.arrival) .reveal-card[data-rarity=UR]::after{animation-delay:calc(.55s + var(--i)*.1s)}
 .reveal-stage:not(.arrival) .reveal-caption{animation-delay:1.7s}
 .reveal-stage:not(.arrival)[data-count="1"] .reveal-caption{animation-delay:.7s}
@@ -351,6 +356,9 @@ em{font-style:normal}
 .reveal-stage:not(.arrival) .pity-tag{bottom:26px;font-size:8px;padding:0 4px;animation-delay:calc(.72s + var(--i)*.1s)}
 .reveal-stage.hold .reveal-grid{visibility:hidden}
 .reveal-stage.hold .reveal-card,.reveal-stage.hold .reveal-card .hero-card,.reveal-stage.hold .card-back,.reveal-stage.hold .card-back::before,.reveal-stage.hold .reveal-card::after,.reveal-stage.hold .pity-tag,.reveal-stage.hold .reveal-caption,.reveal-stage.hold .reveal-skip,.reveal-stage.hold .lucky-banner,.reveal-stage.hold .pull-card::after{animation-play-state:paused}
+/* Hold must win over the per-stage animation shorthands (they reset play-state): otherwise the card faces flip behind the
+   hidden grid during the meteor and the last cards flash half-turned when the grid appears. */
+.reveal-stage.hold .reveal-card,.reveal-stage.hold .reveal-card *,.reveal-stage.hold .reveal-card::after{animation-play-state:paused!important}
 .reveal-stage.spotting{overflow:visible}
 .reveal-card[data-rarity=SR] .card-back::before,.reveal-card[data-rarity=UR] .card-back::before{content:'';position:absolute;inset:-5px;border-radius:16px;box-shadow:0 0 14px var(--g),0 0 28px var(--g);opacity:0;pointer-events:none}
 .reveal-stage:not(.arrival) .reveal-card[data-rarity=SR] .card-back::before,.reveal-stage:not(.arrival) .reveal-card[data-rarity=UR] .card-back::before{animation:back-glow .32s calc(var(--i)*.08s) ease-out forwards}
@@ -362,14 +370,14 @@ em{font-style:normal}
 .reveal-grid:not(.single) .pull-card .pull-shade{position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 26%),radial-gradient(ellipse 110% 62% at 50% 30%,color-mix(in srgb,var(--r) 58%,transparent),transparent 72%)}
 .reveal-grid:not(.single) .pull-card .face-art{position:absolute;inset:0;z-index:1;margin:0;height:auto;overflow:hidden;display:block}
 .reveal-grid:not(.single) .pull-card .face-art img{position:absolute;width:calc(100% * var(--zoom) / var(--ps));max-width:none;max-height:none;height:auto;left:50%;top:var(--eye);transform:translate(calc(var(--px) * -100%),calc(var(--py) * -100%));object-fit:fill}
-.reveal-grid:not(.single) .pull-card .relic-art{position:absolute;inset:12px 5px 28px;z-index:1;margin:0;height:auto;display:grid;place-items:center}
+.reveal-grid:not(.single) .pull-card .relic-art{position:absolute;inset:12px 5px 28px;z-index:1;margin:0;width:auto;height:auto;display:grid;place-items:center}
 .reveal-grid:not(.single) .pull-card .relic-art img{width:100%;max-width:none;max-height:100%;height:auto;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
 .reveal-grid:not(.single) .pull-card .badge{top:3px;left:3px;z-index:3;font-size:8px;min-width:0;padding:0 3px}
 .reveal-grid:not(.single) .pull-card .tag{z-index:3;margin:0;width:auto;height:auto}
 .reveal-grid:not(.single) .pull-card .tag.new{top:0;right:0;padding:2px 5px 1px;border-radius:0 9px 0 7px;font-size:8px;letter-spacing:.04em;background:linear-gradient(180deg,#ffe1c4,#ff7a62);color:#3a120c;box-shadow:0 2px 5px rgba(0,0,0,.35)}
 .reveal-grid:not(.single) .pull-card .tag.plus{top:3px;right:3px;padding:0 3px;border-radius:5px;font-size:8px;font-weight:800;color:var(--text2);background:rgba(8,12,28,.72)}
 .reveal-grid:not(.single) .pull-card .plate{position:absolute;left:0;right:0;bottom:0;z-index:2;height:26px;display:flex;align-items:flex-end;justify-content:center;padding:0 2px 3px;background:linear-gradient(180deg,transparent,rgba(5,7,18,.92) 55%)}
-.reveal-grid:not(.single) .pull-card .plate strong{font-size:8px;font-weight:800;line-height:1.15;letter-spacing:-.03em;white-space:normal;text-overflow:unset;overflow:hidden;max-height:2.3em;text-shadow:0 1px 2px #000}
+.reveal-grid:not(.single) .pull-card .plate strong{font-size:8px;font-weight:800;line-height:1.15;letter-spacing:-.03em;white-space:normal;word-break:keep-all;text-align:center;text-overflow:unset;overflow:hidden;max-height:2.3em;text-shadow:0 1px 2px #000}
 .pull-card[data-rarity=C]{box-shadow:0 5px 12px rgba(0,0,0,.4)}
 .pull-card[data-rarity=R]{box-shadow:0 0 10px rgba(80,168,255,.5),0 6px 12px rgba(0,0,0,.42)}
 .pull-card[data-rarity=SR]{box-shadow:0 0 12px rgba(176,120,255,.6),0 6px 14px rgba(0,0,0,.42)}
@@ -379,7 +387,7 @@ em{font-style:normal}
 .sheet[data-kind=draw] .reveal-grid.single{grid-template-columns:min(78vw,300px);justify-content:center}
 .reveal-grid.single .pull-card .art:before{display:none}
 .reveal-grid.single .pull-card .pull-shade{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 72% 50% at 50% 46%,color-mix(in srgb,var(--r) 64%,transparent),transparent 70%)}
-.reveal-grid.single .pull-card .figure-art,.reveal-grid.single .pull-card .relic-art{position:absolute;inset:8px 0 62px;z-index:1;margin:0;height:auto;display:grid;overflow:hidden}
+.reveal-grid.single .pull-card .figure-art,.reveal-grid.single .pull-card .relic-art{position:absolute;inset:8px 0 62px;z-index:1;margin:0;width:auto;height:auto;display:grid;overflow:hidden}
 .reveal-grid.single .pull-card .figure-art{place-items:end center}
 .reveal-grid.single .pull-card .figure-art img{width:122%;height:auto;max-width:none;max-height:none;object-fit:fill;object-position:center bottom;filter:drop-shadow(0 12px 16px rgba(0,0,0,.45))}
 .reveal-grid.single .pull-card .relic-art{place-items:center;inset:48px 36px 84px}
@@ -703,6 +711,8 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 @keyframes flash{0%{opacity:0}18%{opacity:.95}100%{opacity:0}}
 @keyframes ring{0%{transform:scale(.2);opacity:1}100%{transform:scale(16);opacity:0}}
 @keyframes deal{from{opacity:0;transform:translateY(40px) scale(.6) rotate(-6deg)}}
+/* The faces of a 3D card do not inherit the parent's fade reliably (preserve-3d), so each face fades in with its card. */
+@keyframes deal-fade{from{opacity:0}}
 @keyframes flip-front{from{transform:rotateY(-180deg)}to{transform:rotateY(0)}}
 @keyframes flip-back{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
 @keyframes glow-back{to{box-shadow:inset 0 0 0 3px rgba(8,11,31,.6),inset 0 0 0 4px var(--g),0 0 26px var(--g),0 0 50px var(--g);transform:scale(1.06)}}
@@ -1231,7 +1241,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 /* ───────── Home ───────── */
 .app[data-screen=home] #content{overflow:hidden;padding-bottom:0}
 .home{display:flex;flex-direction:column;height:100%;min-height:0}
-.lb{position:relative;flex:1;min-height:0;overflow:hidden;isolation:isolate;background:var(--garden) 50% 30%/cover}
+.lb{position:relative;flex:1;min-height:0;overflow:hidden;isolation:isolate;background:var(--lobby,var(--garden) 50% 30%/cover)}
 .lb::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(5,7,22,.55),rgba(5,7,22,0) 22%,rgba(5,7,22,0) 62%,rgba(5,7,22,.75))}
 .lb-memorial{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;z-index:0}
 .lb-sky{position:absolute;inset:0;z-index:1;pointer-events:none}
@@ -1324,7 +1334,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .cc-art{width:100%;aspect-ratio:1;display:grid;place-items:center}
 .cc-art img{width:90%;height:90%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
 .cc .badge{position:absolute;top:6px;left:6px}
-.cc strong{max-width:100%;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc strong{max-width:100%;font-size:12px;line-height:1.25;text-align:center;word-break:keep-all}
 .cc-plus{position:absolute;top:6px;right:6px;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:800;color:var(--gold);background:rgba(8,11,31,.78)}
 .cc-up{position:absolute;right:6px;top:28px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--teal);color:#06231f;box-shadow:0 0 10px var(--teal);animation:float 1.8s ease-in-out infinite}
 .cc-up .ic{width:14px;height:14px;stroke-width:3}

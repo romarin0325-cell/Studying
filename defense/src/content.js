@@ -86,5 +86,7 @@ export const TUNING=Object.freeze({
     crit:{unlock:45,base:400,growth:1.09,rise:27,knee:27,steep:1.15,knee2:38,steep2:1.2},
     critDamage:{unlock:45,base:500,growth:1.13,rise:18,knee:18,steep:1.19,knee2:25,steep2:1.2},
     stardust:{unlock:60,base:1200,growth:1.05,rise:34,knee:34,steep:1.11,knee2:49,steep2:1.2}},
-  relicThresholdBase:30,relicThresholdGrowth:2.2,relicProbabilityHalf:3,
+  // Relic tiers (pass 17): steps at 10, 25, 48, 82, 132, 208, 322, 493 ... draws. The first step is one 10-pull, and the
+  // early tiers raise the odds faster than before; from about 500 draws the UR rate stays within 0.1%p of the old curve.
+  relicThresholdBase:10,relicThresholdGrowth:1.5,relicProbabilityHalf:5,
 });
