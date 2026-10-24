@@ -216,6 +216,9 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='deck'){
     const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 서로 다른 동료 ${TEAM_SIZE}명을 선택하세요.`);p.deck=[...ids];return {ok:true,message:'편성을 저장했습니다.'};
   }
+  if(action==='relics'){
+    const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length>3||new Set(ids).size!==ids.length||ids.some(id=>!p.relics[id]?.owned))return no('보유한 서로 다른 유물을 3개까지 장착할 수 있습니다.');p.equipped=[...ids];return {ok:true,message:'유물 장착을 저장했습니다.'};
+  }
   if(action==='equip'){
     if(p.active||!p.relics[args.id]?.owned)return no('보유한 유물만 장착할 수 있습니다.');const at=p.equipped.indexOf(args.id);if(at>=0)p.equipped.splice(at,1);else if(p.equipped.length<3)p.equipped.push(args.id);else return no('유물은 최대 3개까지 장착할 수 있습니다.');return {ok:true};
   }
@@ -258,9 +261,9 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='begin'){
     if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
     const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 동료 ${TEAM_SIZE}명이 필요합니다.`);
-    const c=calendar(now),stage=mode==='weekly'&&p.cleared>=3?weeklyStage(p,now):args.stage||Math.min(MAIN_STAGES,p.cleared+1);if(!integer(stage,MAIN_STAGES)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
-    if(mode!=='main'&&p.cleared<3)return no('스테이지 3 클리어 시 해금됩니다.');
-    const tier=mode==='main'?null:args.tier||'easy';if(mode!=='main'&&(!TIERS[tier]||p.cleared<TIERS[tier].unlock))return no(`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock||3} 클리어 후 열립니다.`);
+    const c=calendar(now),stage=mode==='weekly'&&p.cleared>=TIERS.easy.unlock?weeklyStage(p,now):args.stage||Math.min(MAIN_STAGES,p.cleared+1);if(!integer(stage,MAIN_STAGES)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
+    if(mode!=='main'&&p.cleared<TIERS.easy.unlock)return no(`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`);
+    const tier=mode==='main'?null:args.tier||'easy';if(mode!=='main'&&(!TIERS[tier]||p.cleared<TIERS[tier].unlock))return no(`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`);
     if(mode==='weekly'&&p.weekly===c.week)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
     if(mode==='weekly')p.weekly=c.week;
     random(p);

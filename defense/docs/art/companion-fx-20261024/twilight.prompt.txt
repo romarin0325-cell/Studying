@@ -1,0 +1,19 @@
+Use your built-in image generation tool to create ONE image, then save that image file as fx-twilight.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create a game VFX sprite atlas for an existing mobile fantasy tower-defense game. Reference image 1 (style-ref.png) is the game's established effect language: luminous neon / crystalline motifs glowing on a PURE BLACK background (the game draws them with screen blending, so black becomes transparent). Match that language exactly: translucent glowing glass-crystal facets, bright hot cores, saturated rim light, crisp readable silhouettes, a few small sparkles. Do NOT paint opaque solid objects, flat stickers, cel-shaded props or black ink outlines. Reference image 2 shows four characters (left to right as listed below) for palette and motif ONLY; never draw the characters themselves.
+
+Layout: EXACTLY 4 columns x 2 rows of equal square cells on a wide 2:1 canvas. Pure black (#000000) background everywhere. Each motif centered in its cell with at least 12% black margin; nothing crosses a cell border. No grid lines, frames, labels, letters, numbers, faces, people or UI.
+Top row = BASIC ATTACK projectiles: compact, pointing RIGHT, like the neon attack motifs in the lower part of reference image 1.
+Bottom row = ULTIMATE signature emblems: ornate glowing crystal emblems in exactly the manner of the 4x4 emblem grid in the upper part of reference image 1. Visual complexity follows the companion's rarity: C simplest, R a little richer, SR rich, UR the grandest and most ornate (gold accents). Every cell must have a clearly different silhouette; the ultimate emblem must never look like the same companion's attack motif. Glow stays close to the shapes (no big haze).
+
+Characters in reference image 2, left to right: Cure Master, Venom, Ash, Antropy.
+TOP ROW (attacks), left to right:
+1. Cure Master: a slim syringe made of pale pink and lemon light with a small heart-shaped plunger, short pink-yellow light streak behind it.
+2. Venom: a toxic green venom droplet with a dark violet core and a thin ember-orange rim (poison and burn together), one small glowing spider-lily petal curling behind.
+3. Ash: a compact crimson-orange fireball with ONE black feather silhouette rim-lit by ember light, short angular ember streak.
+4. Antropy: a small white-lilac four-point star with ONE thin tilted orbit arc, faint violet trail to the left.
+BOTTOM ROW (ultimates), left to right:
+1. Cure Master (SR) "Lemonade", protects allies: a glowing crystal heart shield with a lemon-slice core, two small wings of light and a curling cyan ribbon; healing, pastel pink, gold and cyan.
+2. Venom (UR) "Plague", the grandest emblem: a crystalline spider lily in full bloom, petals of dark violet glass glowing toxic green with ember-orange tips, a halo of green poison droplets and small orange embers, gold crown-like filigree at the base.
+3. Ash (SR) "Armageddon", heavy destruction: a deep crimson eclipse core inside a ring of fire, framed by two black-feather wings rendered as rim-lit ember-edged crystal feathers, falling meteor sparks.
+4. Antropy (R) "Nova Requiem", cleansing: a bright white-lilac nova, a four-point star bursting outward through a broken halo ring, shattered glass fragments scattering away. Clearly different from the small Antropy attack star above it.

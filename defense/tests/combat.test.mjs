@@ -162,7 +162,7 @@ test('crush uses the reduced trained radius for hit boundaries, previews, effect
   for(const level of [0,1,5]){
     const s=traitArena([{hero:'behemoth',index:12}]);s.upgrades.behemoth=level;
     const radius=112.5*(1+level*.05),enemies=enemiesFor(s,[{progress:300},{progress:300+radius-.001},{progress:300+radius+.001}]);quiet(s);
-    close(E.crushRadius(s),radius);assert.ok(E.castPreview(s,'behemoth').lines[0].includes(`반경 ${radius}`));
+    close(E.crushRadius(s),radius);{const line=E.castPreview(s,'behemoth').lines[0];assert.equal(line.includes('반경'),false);assert.equal(line.includes(`범위 +${level*5}%`),level>0);}
     const at=s.time,hp=enemies.map(e=>e.hp),hit=E.combatStats(s,s.board[12]).damage*6;readyCast(s,'behemoth');
     assert.ok(s.volleys.every(v=>v.radius===radius));
     const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(E.serialize(saved),E.serialize(s));
@@ -1607,7 +1607,7 @@ test('crush hits three times around a seeded enemy, echoes on the last hit, and 
   const [boss]=enemiesFor(bossRun,[{kind:'boss',hp:1e9,progress:1200}]);quiet(bossRun);
   const bossHp=boss.hp,b0=bossRun.time;readyCast(bossRun,'behemoth');
   const alone=E.castPreview(bossRun,'behemoth');
-  assert.match(alone.lines[0],/반경 112\.5/);assert.match(alone.lines[0],/0\.5초 간격으로 3번/);
+  assert.doesNotMatch(alone.lines[0],/반경|범위 \+/);assert.match(alone.lines[0],/0\.5초 간격으로 3번/);
   assert.ok(alone.lines.some(line=>line.includes('하나뿐')&&line.includes(Math.round(E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits).toLocaleString('ko-KR'))));
   advanceTo(bossRun,b0+1.3);close(bossHp-boss.hp,E.power(bossRun,bossRun.board[12])*E.CRUSH.factor*E.CRUSH.hits);
   const crowd=traitArena([{hero:'behemoth',index:12}]);enemiesFor(crowd,[{hp:1e9,progress:1200},{hp:1e9,progress:1800}]);quiet(crowd);

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pass 15 Review</title>
+<style>
+:root{--bg:#0b1020;--panel:#151c34;--ink:#eef1ff;--muted:#a8b0cc;--line:#2a3458;--accent:#f4c95d}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:2;background:#0b1020ee;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+h1{font-size:16px;margin:0 12px 0 0}
+button,select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+main{padding:16px;max-width:1200px;margin:auto}
+section[hidden]{display:none}
+.row{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;margin:0 0 14px}
+.row h2{font-size:15px;margin:0 0 6px}
+.row small{color:var(--muted)}
+img{max-width:100%;display:block;border-radius:6px}
+.pair{display:grid;gap:6px}
+.lab{font-size:12px;color:var(--muted);margin:4px 0 2px}
+.phones{display:flex;flex-wrap:wrap;gap:12px}
+.phones figure{margin:0;width:min(46%,260px)}
+.phones figcaption{font-size:12px;color:var(--muted)}
+.note{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Star Garden 15차 검토</h1>
+  <button data-tab="ult" aria-pressed="true">필살기 전후</button>
+  <button data-tab="gacha" aria-pressed="false">뽑기 전후</button>
+  <button data-tab="portrait" aria-pressed="false">도감 초상화</button>
+  <select id="filter">
+    <option value="all">모든 동료</option>
+    <option value="new">문양을 새로 받은 21명</option>
+    <option value="C">C</option><option value="R">R</option><option value="SR">SR</option><option value="UR">UR</option>
+  </select>
+  <label class="note"><input type="checkbox" id="after-only"> 변경 후만</label>
+</header>
+<main>
+<section id="ult">
+  <p class="note">실제 엔진 이벤트를 운영 렌더러로 그린 장면이다(밤 테마, 시전 후 0.12·0.3·0.5·0.8·1.2·1.8초). 동료마다 위 줄이 변경 전(main), 아래 줄이 변경 후다. 소리, 컷인 띠(DOM), 실제 기기 프레임률은 이 페이지가 확인하지 않는다. 재생·속도·테마를 바꿔 보려면 <code>node defense/scripts/review-ult-sheet.mjs</code>가 만드는 <code>test-results/ult-sheet/index.html</code>을 연다.</p>
+  <div id="list"></div>
+</section>
+<section id="gacha" hidden>
+  <p class="note">전체 해금 빌드에서 동료 6명을 미보유로 두고 10연차와 1회 소환을 캡처했다(390×844). 왼쪽이 변경 전, 오른쪽이 변경 후.</p>
+  <div id="gachaList"></div>
+</section>
+<section id="portrait" hidden>
+  <div class="row">
+    <h2>도감 초상화 소폭 이동</h2>
+    <p class="note">왼쪽이 원래 위치, 오른쪽이 이동 후다. 토피애플·하모니어스·시간의마술사는 오른쪽으로, 둠·루미는 아래로 7~8px(512 기준 약 3%) 옮겼다. 얼굴 중심 측정값은 그대로 두고 이미지 정책의 오프셋으로 적용했다.</p>
+    <img src="img/portrait-nudge.webp" alt="초상화 이동 전후" style="max-width:420px">
+  </div>
+</section>
+</main>
+<script>
+const heroes=[{"id":"star_boy","name":"별똥별소년","rarity":"C","skill":"소원을 담은 별","cost":60},{"id":"snow_rabbit","name":"눈토끼","rarity":"C","skill":"하얀 숨결","cost":65},{"id":"silver_rabbit","name":"은토끼","rarity":"C","skill":"은빛 행진","cost":60},{"id":"night_rabbit","name":"밤토끼","rarity":"C","skill":"달그림자 도약","cost":65},{"id":"siren","name":"세이렌","rarity":"C","skill":"공명의 아리아","cost":65},{"id":"mushroom_king","name":"머쉬룸킹","rarity":"C","skill":"왕의 마지막 포자","cost":70},{"id":"underdog","name":"언더독","rarity":"C","skill":"빅쇼","cost":80},{"id":"joker","name":"조커","rarity":"C","skill":"레인보우 룰렛","cost":50},{"id":"sunflower","name":"해바라기","rarity":"C","skill":"솔라플레어","cost":90},{"id":"great_detective","name":"명탐정","rarity":"R","skill":"완벽한 추리","cost":70},{"id":"guardian","name":"가디언","rarity":"R","skill":"대륙의 맥동","cost":75},{"id":"avalanche_maid","name":"메이드","rarity":"R","skill":"백야의 눈사태","cost":85},{"id":"santa","name":"산타","rarity":"R","skill":"한밤의 선물","cost":80},{"id":"red_dragon","name":"레드드래곤","rarity":"R","skill":"용의 숨결","cost":90},{"id":"aurora","name":"아우로라","rarity":"R","skill":"천면경","cost":75},{"id":"toffee_apple","name":"토피애플","rarity":"R","skill":"애플봄","cost":95},{"id":"antropy","name":"앤트로피","rarity":"R","skill":"노바레퀴엠","cost":50},{"id":"storm_sage","name":"폭풍의현자","rarity":"SR","skill":"태풍의 눈","cost":75},{"id":"flame_sage","name":"화염의현자","rarity":"SR","skill":"작열의 문장","cost":75},{"id":"lightning_sage","name":"번개의현자","rarity":"SR","skill":"천둥의 연쇄","cost":80},{"id":"time_magician","name":"시간의마술사","rarity":"SR","skill":"트라우마 · 어둠의 신데렐라","cost":80},{"id":"ancient_dragon","name":"에인션트드래곤","rarity":"SR","skill":"태고의 약속","cost":75},{"id":"phantom","name":"팬텀","rarity":"SR","skill":"깨어나지 않는 밤","cost":75},{"id":"cure_master","name":"큐어마스터","rarity":"SR","skill":"레모네이드","cost":50},{"id":"ash","name":"애쉬","rarity":"SR","skill":"아마겟돈","cost":70},{"id":"zeke","name":"지크","rarity":"UR","skill":"용의 맹세","cost":70},{"id":"luna","name":"루나","rarity":"UR","skill":"제노사이드 스텝","cost":80},{"id":"jasmine","name":"자스민","rarity":"UR","skill":"여신강림","cost":80},{"id":"queen","name":"여왕","rarity":"UR","skill":"장미의 세금","cost":60},{"id":"rumi","name":"루미","rarity":"UR","skill":"꿈의 메아리","cost":60},{"id":"cherry_prince","name":"체리프린스","rarity":"UR","skill":"체리 블로섬 · 왕자의 일격","cost":85},{"id":"venom","name":"베놈","rarity":"UR","skill":"플래이그","cost":80},{"id":"time_ruler","name":"시간의지배자","rarity":"UR","skill":"아직 오지 않은 순간","cost":90},{"id":"galaxy_whale","name":"은하고래","rarity":"UR","skill":"별바다의 중심","cost":80},{"id":"doom","name":"둠","rarity":"UR","skill":"왕궁의 암거래","cost":60},{"id":"cinderella","name":"신데렐라","rarity":"UR","skill":"자정의 기적","cost":65},{"id":"harmonious","name":"하모니어스","rarity":"UR","skill":"디저트 앙상블","cost":70},{"id":"frost_witch","name":"혹한의마녀","rarity":"UR","skill":"빙궁의 칙령","cost":80},{"id":"behemoth","name":"베히모스","rarity":"UR","skill":"대지분쇄","cost":70}];
+const fresh=new Set(['toffee_apple','joker','sunflower','underdog','cure_master','venom','ash','antropy','star_boy','snow_rabbit','night_rabbit','mushroom_king','great_detective','guardian','avalanche_maid','red_dragon','aurora','storm_sage','flame_sage','lightning_sage','queen']);
+const $=id=>document.getElementById(id);
+function row(h,only){
+  return '<div class="row"><h2>'+h.name+' <small>'+h.rarity+' · '+h.skill+' · 별빛 '+h.cost+(fresh.has(h.id)?' · 새 문양':'')+'</small></h2><div class="pair">'
+    +(only?'':'<div class="lab">변경 전</div><img loading="lazy" src="img/'+h.id+'-before.webp" alt="">')
+    +'<div class="lab">변경 후</div><img loading="lazy" src="img/'+h.id+'-after.webp" alt=""></div></div>';
+}
+function render(){
+  const f=$('filter').value,only=$('after-only').checked;
+  $('list').innerHTML=heroes.filter(h=>f==='all'||(f==='new'?fresh.has(h.id):h.rarity===f)).map(h=>row(h,only)).join('');
+}
+const shots=[['ten-1100','10연차 · 첫 스포트라이트'],['ten-2600','10연차 · 다음 스포트라이트'],['ten-grid','10연차 · 결과 카드'],['one-2600','1회 소환 · 결과']];
+$('gachaList').innerHTML=shots.map(([n,t])=>'<div class="row"><h2>'+t+'</h2><div class="phones"><figure><img loading="lazy" src="img/gacha-'+n+'-before.webp" alt=""><figcaption>변경 전</figcaption></figure><figure><img loading="lazy" src="img/gacha-'+n+'-after.webp" alt=""><figcaption>변경 후</figcaption></figure></div></div>').join('');
+for(const b of document.querySelectorAll('[data-tab]'))b.onclick=()=>{
+  for(const x of document.querySelectorAll('[data-tab]'))x.setAttribute('aria-pressed',String(x===b));
+  for(const s of ['ult','gacha','portrait'])$(s).hidden=s!==b.dataset.tab;
+};
+$('filter').onchange=render;$('after-only').onchange=render;render();
+</script>
+</body>
+</html>

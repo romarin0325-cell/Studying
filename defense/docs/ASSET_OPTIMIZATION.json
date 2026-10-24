@@ -50,20 +50,20 @@
     }
   },
   "totals": {
-    "sourceBytes": 20964290,
-    "deployableSourceBytes": 19789420,
-    "outputBytes": 11900818,
-    "optimizedFiles": 148,
+    "sourceBytes": 23299108,
+    "deployableSourceBytes": 21700566,
+    "outputBytes": 12838122,
+    "optimizedFiles": 150,
     "derivedFiles": 144,
-    "derivedOutputBytes": 3418174
+    "derivedOutputBytes": 3418204
   },
   "images": [
     {
       "id": "atlas:effects-sol-sweet",
       "source": "./assets/merge/effects-sol-sweet.webp",
-      "profile": "atlas",
+      "profile": null,
       "uses": [
-        "window.__ASTRA_ASSETS__.effects-sol-sweet; combat renderer / stage UI"
+        "Opaque Sol effect sprites, replaced in pass 15 by effects-companion-sweet; kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -76,25 +76,15 @@
           "codec": "webp"
         }
       },
-      "output": {
-        "path": "./assets/optimized/merge/effects-sol-sweet.webp",
-        "bytes": 165882,
-        "sha256": "4fbd6069824a8ecc3ca5a3e3ae2593c400bbd7939840f8376e661d3ab22fefeb",
-        "metadata": {
-          "width": 1024,
-          "height": 512,
-          "hasAlpha": true,
-          "codec": "webp"
-        }
-      },
-      "decision": "Separate smaller encoding; source preserved."
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
     },
     {
       "id": "atlas:effects-sol-twilight",
       "source": "./assets/merge/effects-sol-twilight.webp",
-      "profile": "atlas",
+      "profile": null,
       "uses": [
-        "window.__ASTRA_ASSETS__.effects-sol-twilight; combat renderer / stage UI"
+        "Opaque Sol effect sprites, replaced in pass 15 by effects-companion-twilight; kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -107,12 +97,126 @@
           "codec": "webp"
         }
       },
-      "output": {
-        "path": "./assets/optimized/merge/effects-sol-twilight.webp",
-        "bytes": 163912,
-        "sha256": "6d66e91a1a6a57d38b05e61ec88156268290c4b650070e60aac83d170aa1aaba",
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
+    },
+    {
+      "id": "atlas:effects-companion-sweet",
+      "source": "./assets/merge/effects-companion-sweet.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-companion-sweet; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 548480,
+        "sha256": "8c994c86550e4f1b0f02113d447ec205e1e5d8b7c11edfc40d5a7cfe00cb67db",
         "metadata": {
           "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-companion-sweet.webp",
+        "bytes": 301972,
+        "sha256": "f4f2a60236ddf97a493bf74f6c86ad037171729b7b5ea0cdc6f56b975dc81779",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:effects-companion-twilight",
+      "source": "./assets/merge/effects-companion-twilight.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-companion-twilight; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 514596,
+        "sha256": "82b8ed9b08ab332e90679aad86fe4b23a08cc6fb1a9b7154b96425ca1f3a5e3b",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-companion-twilight.webp",
+        "bytes": 254214,
+        "sha256": "46682d85c74ce35573da2817ec89469efa42ae4448567ec19b0156cceae4f79c",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ultimates-extra-a",
+      "source": "./assets/merge/ultimates-extra-a.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ultimates-extra-a; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 697720,
+        "sha256": "09989e11e29fb07202f3e3256f1c164b0bc6124ee672a64f0c99ad2f0e24e58e",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ultimates-extra-a.webp",
+        "bytes": 394112,
+        "sha256": "4406ba71a9c689b5ec1232d1e9be097bd35dadcbdb73ff2c4ea770b5e71b3570",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ultimates-extra-b",
+      "source": "./assets/merge/ultimates-extra-b.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ultimates-extra-b; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 574022,
+        "sha256": "b211393672c5a73f47c7e0b4b22b3054e99db9492a3c7e34d6c3ceb1995fe9fa",
+        "metadata": {
+          "width": 768,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ultimates-extra-b.webp",
+        "bytes": 316800,
+        "sha256": "017142b1444c2b93e923c9f8cb56141bb5f3edd55b8ba738ed1cee535ae7380f",
+        "metadata": {
+          "width": 768,
           "height": 512,
           "hasAlpha": true,
           "codec": "webp"
@@ -5825,7 +5929,7 @@
       "source": "./assets/cast-v2/toffee_apple.webp",
       "profile": "portrait",
       "crop": {
-        "left": 136,
+        "left": 129,
         "top": 102,
         "width": 250,
         "height": 250
@@ -5837,8 +5941,8 @@
       "sourceSha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
       "output": {
         "path": "./assets/optimized/ui/portraits/toffee_apple.webp",
-        "bytes": 24310,
-        "sha256": "7cd514438c34ca1eaeb7c8cefa169eae0d0a13279b783b88003f0a83d489cfee",
+        "bytes": 24162,
+        "sha256": "069b22831380e57fa742976495c66a24947f602a913d02aab60d4d9eb4d8cdd8",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6095,7 +6199,7 @@
       "source": "./assets/cast-v2/time_magician.webp",
       "profile": "portrait",
       "crop": {
-        "left": 130,
+        "left": 123,
         "top": 82,
         "width": 250,
         "height": 250
@@ -6107,8 +6211,8 @@
       "sourceSha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
       "output": {
         "path": "./assets/optimized/ui/portraits/time_magician.webp",
-        "bytes": 19512,
-        "sha256": "d346852af5a270bb4d0a54099c3202c73363f2ea55d3c877eb93a2f93c81583c",
+        "bytes": 20272,
+        "sha256": "a74b378004109c02359c39eb1eea6b45e7aa6c0e6889fb190cd28133ec274ebc",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6582,7 +6686,7 @@
       "profile": "portrait",
       "crop": {
         "left": 136,
-        "top": 88,
+        "top": 80,
         "width": 250,
         "height": 250
       },
@@ -6593,8 +6697,8 @@
       "sourceSha256": "a52e14daa819efb8eafd850b4b1693c8884db8887828bbb9d544f8efd3d5d647",
       "output": {
         "path": "./assets/optimized/ui/portraits/rumi.webp",
-        "bytes": 20784,
-        "sha256": "acbb2be4ae5529df79ba63007fd9ee81b042143377a7bd20b3725772979e5874",
+        "bytes": 20516,
+        "sha256": "d5d4f3643aa059508fd7eb10536566744063b815a8e6adb7ff796e0148ccecf0",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6852,7 +6956,7 @@
       "profile": "portrait",
       "crop": {
         "left": 128,
-        "top": 82,
+        "top": 74,
         "width": 250,
         "height": 250
       },
@@ -6863,8 +6967,8 @@
       "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
       "output": {
         "path": "./assets/optimized/ui/portraits/doom.webp",
-        "bytes": 17658,
-        "sha256": "c9053433e1461e675cc49307e602b0bb915f8db94e1306752a0847733839587d",
+        "bytes": 17400,
+        "sha256": "18a09f33aae41f747fa58ddce68630bf462020d34f8713c3cce11ef98cc295cf",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6959,7 +7063,7 @@
       "source": "./assets/cast-v2/harmonious.webp",
       "profile": "portrait",
       "crop": {
-        "left": 137,
+        "left": 130,
         "top": 100,
         "width": 250,
         "height": 250
@@ -6971,8 +7075,8 @@
       "sourceSha256": "779f238b18fcb66cd0eafc8dc32a57027fc426da7ac0141f81d5838f294712d2",
       "output": {
         "path": "./assets/optimized/ui/portraits/harmonious.webp",
-        "bytes": 23642,
-        "sha256": "1fefe53a20c3b28f0d1f88796ff97fdac93afb3a97f4aff5125693244f5e1285",
+        "bytes": 23586,
+        "sha256": "3dc533fbf69ff64342ff11b259488dbfbe9893b33353972313683f51088c520e",
         "metadata": {
           "width": 240,
           "height": 240,

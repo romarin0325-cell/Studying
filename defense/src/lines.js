@@ -86,3 +86,47 @@ export const CLOSE_BOND=6;
 export const talkLines=(id,bond=0)=>{const l=PARTNER_LINES[id];return l?bond>=CLOSE_BOND?[...l.talk,l.close]:[...l.talk]:['…'];};
 // The day's greeting alternates between the two by calendar day.
 export const greetLine=(id,day='')=>{const g=PARTNER_LINES[id]?.greet||['…'];let n=0;for(const ch of day)n+=ch.charCodeAt(0);return g[n%g.length];};
+// The first-meeting line on the summon spotlight (a new companion joins), in each companion's own voice.
+// A companion without one falls back to the first daily greeting.
+export const JOIN_LINES=Object.freeze({
+  star_boy:'띵동! 별똥별 특급 배달, 오늘부터 형아 전담이야!',
+  snow_rabbit:'처음 뵙겠습니다! 오늘부터 이 정원의 차는 제가 끓일게요.',
+  silver_rabbit:'기도가 닿았나 봐요. …당신을 만나게 해 달라고 빌었거든요.',
+  night_rabbit:'…너야? 불러서 온 거 아니야. 그냥… 옆에 있을게.',
+  siren:'안녕하세요! 저 안 잡아먹어요-! 대신 노래 한 곡 들려 드릴게요, 라-♪',
+  mushroom_king:'인간이 나를 깨웠느냐. …좋다, 숲의 왕이 잠시 곁에 서 주마.',
+  great_detective:'흥미롭군요. 저를 찾아낸 의뢰인은 당신이 처음입니다.',
+  guardian:'우웅… 새 여행자다. 길은 내가 지킬게.',
+  avalanche_maid:'주인님, 처음 뵙겠습니다! 앗, 인사하다가 바닥이 얼었…!',
+  santa:'산타 도착! 첫 선물은 바로 저예요! 에헤헤.',
+  red_dragon:'흥, 네가 날 부른 거냐? …좋아, 특별히 같이 날아 주지!',
+  aurora:'짠! 천재 아우로라 님 등장~ 운이 정말 좋으시네요?',
+  storm_sage:'후아암… 날 깨운 바람이 너였어? 그럼 일 좀 해 볼까.',
+  flame_sage:'꼬맹이가 날 불렀나. …좋다, 불은 내가 맡지.',
+  lightning_sage:'합류 시각 기록 완료. 지금부터 네 전력은 최적화된다.',
+  time_magician:'처음 보는 시간이군. …이번엔 네 곁에서 초침을 돌려 볼까.',
+  ancient_dragon:'어린 나그네여, 오랜 잠에서 깨웠구나. 이 늙은 용이 함께하마.',
+  phantom:'크하하! 악몽의 지배자가 너의 부름에 응했다!',
+  zeke:'하하! 오늘부터 이 지크가 네 선봉이다!',
+  luna:'…네가 날 부른 거야? 흥, 실망시키지 마.',
+  jasmine:'불러 주셔서 고마워요. 당신 곁에서는 조금 쉬어도 되겠죠?',
+  queen:'짐을 부른 것이 그대인가. 좋다, 짐의 정원에 들이도록 하지.',
+  rumi:'형아다! 루미가 왔어! 이제 매일 같이 꿈꾸자!',
+  cherry_prince:'나의 친우여, 드디어 만났군요. 이 검을 당신께 바칩니다.',
+  time_ruler:'필멸자가 시간의 지배자를 불렀는가. …흥미롭구나, 함께해 주지.',
+  galaxy_whale:'수억 년의 성운을 건너, 마침내 당신에게 닿았습니다.',
+  doom:'…네가 날 부른 녀석이냐. 귀찮게 하지 마라. 뒤는 내가 봐 주지.',
+  cinderella:'자정이 오기 전에 만났네요! 우리, 기적을 만들어 봐요!',
+  harmonious:'스위트-! 당신을 위한 디저트, 오늘부터 매일 구워 드릴게요!',
+  frost_witch:'짐을 부른 자가 너냐, 인간. …좋다. 곁에 서는 것을 허락하마.',
+  ash:'날 불러낸 게 너야? 좋아, 계약 성립. 대가는… 나중에 받을게.',
+  venom:'…저를 부르셨나요. 가까이 오지는 마세요. 그래도… 곁에는 있을게요.',
+  antropy:'…여기는 아직 끝나지 않았네요. 당신이 있어서일까요.',
+  cure_master:'새 환자… 아니, 새 친구다! 오늘부터 건강은 제가 책임질게요♡',
+  joker:'짜잔! 네가 뽑은 패는 조커야. 최고의 패지, 안 그래?',
+  sunflower:'…날 불렀어? 좋아, 햇볕 잘 드는 자리라면 같이 있어 줄게.',
+  toffee_apple:'앗, 날 뽑았어? 헤헤, 달콤한 거 좋아하지? 나도 네가 좋아질 것 같아!',
+  underdog:'날 뽑았다고? 마력은 없어. 대신 주먹은 확실하지.',
+  behemoth:'흐하하! 봉인을 풀어 준 게 너냐? 좋아, 이 베히모스가 함께해 주마!',
+});
+export const joinLine=id=>JOIN_LINES[id]||PARTNER_LINES[id]?.greet?.[0]||'…';

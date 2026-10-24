@@ -77,3 +77,13 @@ body{color:var(--text)}
 .stage-state.perfect,.stage-state.perfect .ic,.stage.done .stage-state.perfect .ic{color:#e0a114}
 .chap.all-perfect small{color:#c98a12}
 .chap.all-perfect[aria-pressed=true] small{color:#fff3c0}
+
+/* Summon spotlight is mapped onto daylight, so the night cream title would vanish. Navy (UR amber) on the light stage. */
+.spot-copy h3{background:linear-gradient(180deg,#2f86f6,#16336e);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 1px 0 #fff)}
+.reveal-spot.is-ur .spot-copy h3{background:linear-gradient(180deg,#e39b14,#8a5600);-webkit-background-clip:text;background-clip:text}
+.reveal-spot[data-rarity=C]{--spot:#4d5d78}
+.reveal-spot[data-rarity=R]{--spot:#1b6fd0}
+.reveal-spot[data-rarity=SR]{--spot:#7a45c4}
+.reveal-spot[data-rarity=UR]{--spot:#a86c00}
+.spot-line{color:#1d2a47;text-shadow:0 0 6px rgba(255,255,255,.95),0 0 2px #fff}
+.lucky-banner{background:linear-gradient(180deg,#e39b14,#d94a80);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 1px 0 #fff) drop-shadow(0 0 8px rgba(255,255,255,.9))}

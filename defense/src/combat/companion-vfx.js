@@ -1,18 +1,21 @@
-// Painted motifs use the same short trails / crisp focal points as the original
-// cast. These functions only draw: damage, collision, costs and clocks stay in engine.js.
+// Luminous crystal motifs in the original cast's language (glow keyed to alpha, drawn like the ultimates atlas; pass 15
+// replaced the opaque Sol sprites). These functions only draw: damage, collision, costs and clocks stay in engine.js.
 import {HERO} from '../content.js';
 import {pathPoint} from './engine.js';
 
 export const COMPANION_VISUALS=Object.freeze(Object.fromEntries([
-  ['toffee_apple','effects-sol-sweet',0,'#f26040'],
-  ['joker','effects-sol-sweet',1,'#f06aa8'],
-  ['sunflower','effects-sol-sweet',2,'#ffd05b'],
-  ['underdog','effects-sol-sweet',3,'#d8bea0'],
-  ['cure_master','effects-sol-twilight',0,'#ffafd5'],
-  ['venom','effects-sol-twilight',1,'#a1db6d'],
-  ['ash','effects-sol-twilight',2,'#ff995b'],
-  ['antropy','effects-sol-twilight',3,'#e2d8ff'],
+  ['toffee_apple','effects-companion-sweet',0,'#f26040'],
+  ['joker','effects-companion-sweet',1,'#f06aa8'],
+  ['sunflower','effects-companion-sweet',2,'#ffd05b'],
+  ['underdog','effects-companion-sweet',3,'#d8bea0'],
+  ['cure_master','effects-companion-twilight',0,'#ffafd5'],
+  ['venom','effects-companion-twilight',1,'#a1db6d'],
+  ['ash','effects-companion-twilight',2,'#ff995b'],
+  ['antropy','effects-companion-twilight',3,'#e2d8ff'],
 ].map(([id,atlas,frame,color])=>[id,Object.freeze({atlas,frame,color})])));
+// Ultimates that hit every enemy, and the emblem scale per rarity (C smallest, UR grandest).
+const FIELD_ULTIMATES=new Set(['joker','sunflower','antropy','venom']);
+const RARITY_WEIGHT=Object.freeze({C:.82,R:.9,SR:1,UR:1.12});
 const clamp=t=>Math.max(0,Math.min(1,t));
 const ease=t=>1-(1-clamp(t))**3;
 const fade=(t,start=.3)=>1-clamp((t-start)/(1-start));
@@ -97,8 +100,11 @@ export function drawCompanionSkill(fx,skill){
     return true;
   }
   if(id==='underdog'){
-    // No conjured sky fist: a short physical strike at the brawler, then grit
-    // racing into the lanes. The actual stun remains visible on allied units.
+    // A short physical strike at the brawler, then grit racing into the lanes. The whole-field hit raises the
+    // stone-burst emblem over the board like every field ultimate. The actual stun remains visible on allied units.
+    const k=RARITY_WEIGHT[HERO[id].rarity]||1,size=400*k;
+    fx.glow('rays','#e0c9a6',360,405,size*1.2*pop,out*.45,age*.4);
+    painted(fx,id,true,360,405,size*(.55+.45*pop),undefined,0,out*.85);
     dustHit(fx,o.x,o.y+18,t,2.2,.95);
     floorArc(fx,o.x,o.y+24,440,t,'#ddc5a5',.7);
     ctx.save();ctx.globalAlpha=out*.58;
@@ -112,13 +118,14 @@ export function drawCompanionSkill(fx,skill){
       painted(fx,id,false,px,py,32+i%3*5,undefined,Math.atan2(q.y-o.y,q.x-o.x)+age*3,(1-travel)*.8);
     }return true;
   }
-  let size={joker:204,sunflower:232,cure_master:176,venom:166,ash:132,antropy:180}[id];
-  let x=o.x,y=o.y-40;
-  // Solarflare has a single sun above the formation, not repeated flowers on
-  // every tile. It is a field hit even with no stored sunlight.
-  if(id==='sunflower'){x=360;y=205;size=230;}
-  if(id==='ash'){size=112;y=o.y-24;} // the real blast is at the densest enemy pack
-  painted(fx,id,true,x,y,size*(.55+.45*pop),undefined,id==='antropy'?-.12+age*.15:0,out*(id==='venom'?.76:.86));
+  // Same weight scale as the original cast's ultimates: a field-wide hit raises its emblem over the middle of the board
+  // with a ray burst and two edge seals, a support burst stays at the caster; the emblem grows with rarity.
+  // Ash only readies here: the real blast is drawn at the densest enemy pack (armageddon event).
+  const field=FIELD_ULTIMATES.has(id),k=RARITY_WEIGHT[HERO[id].hidden?'UR':HERO[id].rarity]||1;
+  const size=(field?400:id==='cure_master'?300:112)*k,x=field?360:o.x,y=field?405:o.y-(id==='ash'?24:40);
+  if(field)fx.glow('rays',p.color,x,y,size*1.25*pop,out*.5,age*.4);
+  painted(fx,id,true,x,y,size*(.55+.45*pop),undefined,id==='antropy'?-.12+age*.15:0,out*(field?.8:.86));
+  if(field&&!fx.reduced)for(const [sx,sy] of [[42,345],[678,485]])painted(fx,id,true,sx,sy,104*k,undefined,0,out*.6);
   if(id==='joker'){
     const color=JOKER_COLORS[fx.companionJoker||'red'];
     fx.glow('glow',color,x,y+12,92,out*.38);chips(fx,id,x,y,t,80,5,.7);
@@ -210,12 +217,12 @@ export function drawCompanionImpact(fx,e,t,clarity=1){
 }
 
 export function drawCompanionBomb(fx,b){
-  if(!fx.art.images['effects-applebomb'])return false;
+  if(!fx.art.images[COMPANION_VISUALS.toffee_apple.atlas])return false;
   const p=pathPoint(b.progress),ctx=fx.ctx,pulse=.5+Math.sin(fx.clock*4+b.uid)*.5;
-  // Reuse the good, readable mine silhouette. Its fuse and small shadow signal
+  // The waiting mine is Toffee Apple's own crystal apple-bomb emblem: its lit fuse and small shadow signal
   // "waiting"; no fake 170px damage radius (this bomb strikes the whole field).
   ctx.save();ctx.fillStyle='#24152655';ctx.beginPath();ctx.ellipse(p.x,p.y+5,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  fx.atlasStamp('effects-applebomb',0,2,1,p.x,p.y-29,70+pulse*3,70+pulse*3,0,.94,'source-over');
-  if(!fx.reduced){fx.glow('glow','#ffcb79',p.x,p.y-61,19+pulse*9,.7);}
+  painted(fx,'toffee_apple',true,p.x,p.y-30,76+pulse*3,undefined,0,.95);
+  if(!fx.reduced){fx.glow('glow','#ffcb79',p.x+16,p.y-58,16+pulse*8,.6);}
   return true;
 }

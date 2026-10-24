@@ -1,0 +1,141 @@
+{
+  "input": "docs/art/companion-fx-20261024/gpt-emblems-b.png",
+  "width": 1536,
+  "height": 1024,
+  "columns": 3,
+  "rows": 2,
+  "rowCuts": [
+    [
+      512,
+      0
+    ]
+  ],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        106,
+        91,
+        327,
+        336
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "box": [
+        611,
+        107,
+        315,
+        312
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1097,
+        108,
+        331,
+        312
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 3,
+      "cut": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "box": [
+        108,
+        540,
+        330,
+        329
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 4,
+      "cut": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "box": [
+        598,
+        526,
+        340,
+        356
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 5,
+      "cut": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "box": [
+        1092,
+        531,
+        339,
+        349
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

@@ -2,7 +2,15 @@ import {HERO,HEROES} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
-const dedicated=hero=>hero==='queen'||ULTIMATE_FRAMES[hero]!==undefined;
+// Emblems added in pass 15 for companions whose ultimate only had the shared cast flash, and for the Queen, who borrowed
+// Cherry Prince's finisher ring (GPT image, docs/art/companion-fx-20261024): [atlas, frame, columns, rows].
+export const EXTRA_EMBLEMS=Object.freeze(Object.fromEntries([
+  ...['star_boy','snow_rabbit','night_rabbit','mushroom_king','great_detective','guardian','avalanche_maid','red_dragon'].map((id,i)=>[id,['ultimates-extra-a',i,4,2]]),
+  ...['aurora','storm_sage','flame_sage','lightning_sage','queen'].map((id,i)=>[id,['ultimates-extra-b',i,3,2]]),
+]));
+const dedicated=hero=>ULTIMATE_FRAMES[hero]!==undefined||!!EXTRA_EMBLEMS[hero];
+// Emblem scale per rarity for the dedicated support and field templates (UR keeps its original sizes).
+const RARITY_SCALE=Object.freeze({C:.82,R:.9,SR:1,UR:1});
 export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field'; // crush is a field ultimate
 export function impactSize(hero,rank=1){const h=HERO[hero],area=['cleave','pulse','beam','cross','splash','zone'].includes(h.shape);return (area?82:62)+Math.min(5,rank)*4+(hero==='red_dragon'?22:hero==='santa'?10:0);}
 
@@ -88,7 +96,7 @@ export class CombatFX{
   // Big signature art for a field ultimate: dedicated emblem when one exists, else the ultimate frame.
   centerArt(hero,x,y,size,angle,alpha){if(!this.emblem(hero,x,y,size,angle,alpha))this.ultimate(hero,x,y,size,size,angle,alpha);}
   point(uid,fallback){return this.enemies.get(uid)?.point||fallback;}
-  ultimate(hero,x,y,width,height=width,angle=0,alpha=1){const own=COMPANION_VISUALS[hero];if(own&&this.art.images[own.atlas]){this.atlasStamp(own.atlas,own.frame+4,4,2,x,y,width,height,angle,alpha,'source-over');return;}const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
+  ultimate(hero,x,y,width,height=width,angle=0,alpha=1){const own=COMPANION_VISUALS[hero];if(own&&this.art.images[own.atlas]){this.atlasStamp(own.atlas,own.frame+4,4,2,x,y,width,height,angle,alpha,'source-over');return;}const extra=EXTRA_EMBLEMS[hero];if(extra&&this.art.images[extra[0]]){this.atlasStamp(extra[0],extra[1],extra[2],extra[3],x,y,width,height,angle,alpha,'source-over');return;}const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
   atlasStamp(atlas,frame,columns,rows,x,y,width,height=width,angle=0,alpha=1,blend='screen'){
     const ctx=this.ctx,img=this.art.images[atlas];if(!img||alpha<=0)return;
     const w=img.naturalWidth/columns,h=img.naturalHeight/rows;
@@ -244,7 +252,9 @@ export class CombatFX{
     const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero],age=skill.total-skill.life;
     const t=Math.max(0,Math.min(1,1-skill.life/skill.total)),fade=Math.min(1,t*12)*(1-t),motion=this.reduced?.28:t;
     const layout=ultimateLayout(skill.kind),ur=isUR(skill.hero);
-    if(ur&&dedicated(skill.hero)&&(skill.locked||layout==='target'||layout==='pull')){const pop=easeBack(window01(age,.04,.38)),a=1-window01(age,.7,1.3);this.glow('rays',h.color,skill.origin.x,skill.origin.y-40,380*pop,a*.6,age*.6);this.ultimate(skill.hero,skill.origin.x,skill.origin.y-44,300*pop,300*pop,0,a*.95);}
+    const k=ur?1:RARITY_SCALE[h.rarity]||1;
+    // Directed ultimates show the caster's emblem before the strike; non-UR casts get a smaller one by rarity.
+    if(dedicated(skill.hero)&&(skill.locked||layout==='target'||layout==='pull')){const pop=easeBack(window01(age,.04,.38)),a=1-window01(age,.7,1.3),e=ur?300:260*k;this.glow('rays',h.color,skill.origin.x,skill.origin.y-40,e*1.27*pop,a*.6,age*.6);this.ultimate(skill.hero,skill.origin.x,skill.origin.y-44,e*pop,e*pop,0,a*.95);}
     if(skill.locked||skill.kind==='trauma')return;
     if(skill.kind==='bigshow'){this.drawBigShow(skill,age);return;}
     if(ur&&layout!=='support')this.drawStarRain(skill,age);
@@ -253,14 +263,14 @@ export class CombatFX{
     if(dedicated(skill.hero)){
       if(layout==='support'){
         // Support: the emblem bursts out of the caster, then a soft wave rolls over the allies.
-        const pop=easeBack(window01(age,.05,.4)),a=1-window01(age,.75,1.5),size=(ur?380:320)*pop;
+        const pop=easeBack(window01(age,.05,.4)),a=1-window01(age,.75,1.5),size=(ur?380:320*k)*pop;
         this.ultimate(skill.hero,skill.origin.x,skill.origin.y-40,size,size,0,a);
         for(const p of (skill.targets||[]).slice(0,10))this.ultimate(skill.hero,p.x,p.y+18,70,32,0,a*.4);
       }else{
-        const pop=easeBack(window01(age,.08,.45)),a=1-window01(age,.85,1.5),size=(skill.hero==='frost_witch'?500:470)*(ur?1.08:1)*pop;
+        const pop=easeBack(window01(age,.08,.45)),a=1-window01(age,.85,1.5),size=(skill.hero==='frost_witch'?500:470)*(ur?1.08:k)*pop;
         this.glow('rays',h.color,360,405,size*1.25,a*.55,age*.4);
         this.ultimate(skill.hero,360,405,size,size,skill.hero==='time_ruler'?motion*.3:(1-pop)*-.25,a*.75);
-        for(const [x,y] of [[42,345],[678,485]])this.ultimate(skill.hero,x,y,112,112,0,a*.72);
+        for(const [x,y] of [[42,345],[678,485]])this.ultimate(skill.hero,x,y,112*k,112*k,0,a*.72);
       }
       return;
     }

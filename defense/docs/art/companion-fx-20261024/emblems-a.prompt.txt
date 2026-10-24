@@ -1,0 +1,17 @@
+Use your built-in image generation tool to create ONE image, then save that image file as fx-emblemA.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create ULTIMATE SKILL EMBLEMS for an existing mobile fantasy tower-defense game. Reference image 1 (style-ref.png) is the game's established effect language; the 4x4 grid in its upper part is the exact target: ornate signature emblems made of translucent glowing glass-crystal facets with bright hot cores, saturated rim light, crisp readable silhouettes and a few small sparkles, glowing on a PURE BLACK background (the game draws them with screen blending, so black becomes transparent). Do NOT paint opaque solid objects, flat stickers, cel-shaded props or black ink outlines. Reference image 2 shows the companions (in the order listed below) for palette and motif ONLY; never draw the characters, faces or people.
+
+Every cell is one ultimate emblem, centered, with at least 12% black margin; nothing crosses a cell border. Pure black (#000000) background everywhere. No grid lines, frames, labels, letters, numbers or UI. Visual complexity follows rarity: C simplest (one clear motif, few shards), R a little richer, SR rich, UR the grandest with gold filigree. Every emblem must have a clearly different silhouette from the others and from the reference emblems. Glow stays close to the shapes (no big haze).
+
+Layout: EXACTLY 4 columns x 2 rows of equal square cells on a wide 2:1 canvas. Companions in reference image 2 are in the same order.
+TOP ROW (rarity C), left to right:
+1. Star Boy "A Star Holding a Wish": one big crystalline shooting star falling diagonally down-right, a long luminous tail with a small trailing wish ribbon; sky blue and white gold.
+2. Snow Rabbit "White Breath": a crystal snowflake whose top two arms are long rabbit ears, wrapped in a soft curl of frosty breath; icy cyan and white.
+3. Night Rabbit "Moonshadow Leap": a thin crescent moon with two violet blade-slash arcs leaping across it like rabbit ears, tiny star chips; violet and silver.
+4. Mushroom King "The King's Last Spore": a small crystal mushroom wearing a tiny crown, bursting a ring of glowing green spores; spring green and teal.
+BOTTOM ROW (rarity R), left to right:
+5. Great Detective "Perfect Deduction": a crystal magnifying glass whose lens shows a golden targeting reticle, with thin clockwork arcs around it; amber gold and pale cyan.
+6. Guardian "Pulse of the Continent": a cracked earth-crystal shield in the center of a radial shockwave ring of floating stone shards; warm sand, moss green and gold.
+7. Avalanche Maid "Avalanche of the White Night": a tumbling arc of big ice-crystal shards crashing down around a frozen core, a white lace-ribbon swirl; pale blue and white.
+8. Red Dragon "Dragon's Breath": a crimson crystal dragon head in profile breathing a cone of fire to the right; crimson, orange and gold.

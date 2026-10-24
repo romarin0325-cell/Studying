@@ -185,7 +185,7 @@ export const HEROES = [
       "name": "하얀 숨결",
       "cost": 65,
       "type": "freeze",
-      "text": "적 전체에게 위력 3배 피해를 주고 2초 동안 얼리며, 6초간 50% 느리게 합니다. 성급이 오를 때마다 빙결시간과 감속률이 기본값의 10%씩 늘어납니다."
+      "text": "적 전체에게 위력 3배 피해를 주고 2초 동안 얼리며, 6초간 50% 느리게 합니다."
     },
     "heightGroup": "short",
     "role": "감속 · 작은 폭발",
@@ -327,7 +327,7 @@ export const HEROES = [
     "attack": "wind",
     "trait": {
       "type": "gust",
-      "text": "바람이 일직선으로 관통한 뒤 근처 적에게 한 번 더 튑니다. 일반 적은 맞을 때마다 1% 확률로 즉사합니다. 성급이 오를 때와 강화 5단계마다 즉사율이 0.1%p씩 늘어납니다."
+      "text": "바람이 일직선으로 관통한 뒤 근처 적에게 한 번 더 튑니다. 일반 적은 맞을 때마다 1% 확률로 즉사합니다."
     },
     "skill": {
       "name": "태풍의 눈",
@@ -633,7 +633,7 @@ export const HEROES = [
       "text": "적 전체에 위력 4배 피해를 주고 즉시 20G를 받습니다. 이번 웨이브를 마칠 때 웨이브 수입이 50% 늘어납니다. 늘어나는 수입은 웨이브당 한 번만 적용됩니다."
     },
     "heightGroup": "medium",
-    "role": "물결 경제 · 장미",
+    "role": "배당 경제 · 장미",
     "shape": "single",
     "range": 440,
     "radius": 0
@@ -1039,7 +1039,7 @@ export const HEROES = [
       "name": "빙궁의 칙령",
       "cost": 80,
       "type": "ice_court",
-      "text": "적 전체에게 위력 9배 피해를 줍니다. 6초 동안 겨울 왕국이 되어 모든 적이 50% 느려지고 받는 피해가 15% 늘어나며, 쓰러진 적이 주변 적을 0.8초 얼립니다. 성급이 오를 때마다 감속률과 겨울 지속시간이 기본값의 10%씩 늘어납니다."
+      "text": "적 전체에게 위력 9배 피해를 줍니다. 6초 동안 겨울 왕국이 되어 모든 적이 50% 느려지고 받는 피해가 15% 늘어나며, 쓰러진 적이 주변 적을 0.8초 얼립니다."
     },
     "heightGroup": "tall",
     "role": "냉기 확산 · 얼음창",
@@ -1150,7 +1150,7 @@ export const HEROES = [
       "name": "대지분쇄",
       "cost": 70,
       "type": "crush",
-      "text": "무작위 적을 노려 주변(반경 112.5)에 위력 6배 충격을 0.5초 간격으로 3번 줍니다. 훈련마다 기본 반경의 5%가 더해집니다."
+      "text": "무작위 적을 노려 주변에 위력 6배 충격을 0.5초 간격으로 3번 줍니다. 훈련마다 범위 +5%."
     },
     "heightGroup": "tall",
     "role": "오라 증폭 · 대지 분쇄",
@@ -1338,7 +1338,7 @@ export const HEROES = [
       "text": "적의 모든 디버프를 지우고 전체 7배 피해를 줍니다."
     },
     "heightGroup": "short",
-    "role": "오라 덱 · 범위",
+    "role": "디버프 무효 · 범위",
     "shape": "splash",
     "range": 480,
     "radius": 70
@@ -1412,7 +1412,7 @@ export const HEROES = [
       "text": "가장 성급이 낮은 동료 한 명을 불태워 소멸시키고(무적이면 소멸하지 않습니다), 가장 밀집한 반경 180의 적에게 위력 18배 피해를 줍니다."
     },
     "heightGroup": "medium",
-    "role": "화상 · 환원",
+    "role": "화상 · 범위",
     "shape": "splash",
     "range": 470,
     "radius": 64
@@ -1449,7 +1449,7 @@ export const HEROES = [
       "text": "적 전체에게 위력 3배 피해와 중독 3중첩을 주고, 10초 동안 적이 받는 화상·중독 피해가 2배가 됩니다."
     },
     "heightGroup": "medium",
-    "role": "지속 단일",
+    "role": "지속 피해 · 단일",
     "shape": "single",
     "range": 520,
     "radius": 0
@@ -1734,42 +1734,42 @@ export const BLESSINGS = [
     "id": "arrival",
     "name": "빛나는 초대장",
     "category": "즉시",
-    "text": "편성 동료 한 명이 2등급으로 합류. 빈칸이 없으면 자리가 날 때 합류합니다.",
+    "text": "편성 동료 한 명이 2성으로 합류합니다. 빈칸이 없으면 자리가 날 때 합류합니다.",
     "icon": 0
   },
   {
     "id": "surge",
     "name": "내일의 새벽검",
-    "category": "다음 물결",
-    "text": "다음 한 물결 동안 모든 공격력 +25%.",
+    "category": "다음 웨이브",
+    "text": "다음 웨이브 동안 모든 동료의 위력이 25% 오릅니다.",
     "icon": 1
   },
   {
     "id": "training",
     "name": "동행의 지혜",
     "category": "성장",
-    "text": "이 원정의 동행 강화 비용 -10%p. 최대 50% 할인.",
+    "text": "이번 원정의 훈련 비용이 10%p 줄어듭니다(최대 50%).",
     "icon": 2
   },
   {
     "id": "oath",
     "name": "별들의 약속",
     "category": "영구",
-    "text": "이번 원정의 모든 공격력 +6%p.",
+    "text": "이번 원정 동안 모든 동료의 위력이 6%p 오릅니다.",
     "icon": 3
   },
   {
     "id": "purse",
     "name": "여행자의 보급",
     "category": "즉시",
-    "text": "35골드를 즉시 얻습니다.",
+    "text": "골드 35를 즉시 얻습니다.",
     "icon": 4
   },
   {
     "id": "mend",
     "name": "다시 피는 꽃",
     "category": "회복",
-    "text": "결계 체력 3 회복, 별빛 20 충전.",
+    "text": "코어 생명력 3을 회복하고 별빛을 20 채웁니다.",
     "icon": 5
   }
 ];
@@ -1879,6 +1879,10 @@ export const TRANSFORM_ART = {
 export const ASSET_PATHS = {
   "effects-sol-sweet": "./assets/merge/effects-sol-sweet.webp",
   "effects-sol-twilight": "./assets/merge/effects-sol-twilight.webp",
+  "effects-companion-sweet": "./assets/merge/effects-companion-sweet.webp",
+  "effects-companion-twilight": "./assets/merge/effects-companion-twilight.webp",
+  "ultimates-extra-a": "./assets/merge/ultimates-extra-a.webp",
+  "ultimates-extra-b": "./assets/merge/ultimates-extra-b.webp",
   "unit-zeke": "./assets/cast-v2/zeke.webp",
   "unit-rumi": "./assets/cast-v2/rumi.webp",
   "unit-luna": "./assets/cast-v2/luna.webp",

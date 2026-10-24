@@ -1,5 +1,7 @@
 # Sol 신규 8명 SD·전투 표현 적용 (2026-10-23)
 
+> **2026-10-24 변경(15차):** 신규 8명의 공격·필살기 그림은 원래 동료들의 발광 크리스탈 양식으로 다시 만든 `effects-companion-sweet`·`effects-companion-twilight`(GPT 이미지, 밝기 알파, source-over)로 바뀌었다. 아래 판단표의 소재와 연출 위치는 그대로다. 전체 타격 필살기(조커·해바라기·앤트로피·베놈·언더독)는 다른 동료의 전장 필살기처럼 전장 가운데에 등급별 크기로 문양을 띄운다. Sol 원본 아틀라스는 빌드 전용 보관본이다. 기록: [archive/PASS15_EFFECTS_SUMMON_UI.md](archive/PASS15_EFFECTS_SUMMON_UI.md).
+
 변경 기준: main `e3999265dc38a9087b525c29cf77bba7c5551df7`. 사용자 검토를 마친 Sol 4방향 SD를 그대로 설치하고, 공격의 실제 역할·캐릭터·비용을 함께 고려해 신규 8명의 VFX를 구성했다.
 
 ## 직접 비교
