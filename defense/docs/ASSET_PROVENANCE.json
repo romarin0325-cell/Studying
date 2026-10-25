@@ -1146,6 +1146,23 @@
       }
     },
     {
+      "id": "behemoth",
+      "source": "defense/assets/memorial/behemoth.avif",
+      "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
+      "width": 720,
+      "height": 1080,
+      "bytes": 65110,
+      "sourceSha256": "8fd07b182c3432d04ffda78e5f49bcfad76bf38e227bcd7271d98eb801499526",
+      "webp": {
+        "source": "defense/assets/memorial-webp/behemoth.webp",
+        "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+        "width": 720,
+        "height": 1080,
+        "bytes": 95826,
+        "quality": 76
+      }
+    },
+    {
       "id": "time_ruler",
       "source": "defense/assets/memorial/time_ruler.avif",
       "sha256": "e07725d08765d6267143901ac94953e22d562824b04a76bfd3fa6e64a2ff9de6",
@@ -1245,23 +1262,6 @@
         "height": 1080,
         "bytes": 95448,
         "quality": 78
-      }
-    },
-    {
-      "id": "behemoth",
-      "source": "defense/assets/memorial/behemoth.avif",
-      "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
-      "width": 720,
-      "height": 1080,
-      "bytes": 65110,
-      "sourceSha256": "8fd07b182c3432d04ffda78e5f49bcfad76bf38e227bcd7271d98eb801499526",
-      "webp": {
-        "source": "defense/assets/memorial-webp/behemoth.webp",
-        "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
-        "width": 720,
-        "height": 1080,
-        "bytes": 95826,
-        "quality": 76
       }
     }
   ],

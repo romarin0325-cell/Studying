@@ -5,8 +5,21 @@ import {createRequire} from 'node:module';
 import {COURSE} from '../src/course.js';
 import {conceptQuestion,termQuestion,questionOf,pickQuestion,lectureById,lectureQuestions,termQuestions,allQuestions} from '../src/quiz.js';
 import {CONSTELLATIONS,LIBRARY_ART,LIBRARY_STARS,constellationAt} from '../src/library.js';
-import {tutorPrompt,tutorHtml} from '../src/tutor.js';
+import {tutorPrompt,tutorHtml,saveTutorSettings,explainWithRumi} from '../src/tutor.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
+
+test('wrong-answer API sends the requested Rumi persona as the system instruction',async t=>{
+  const request=JSON.parse(await fs.readFile(new URL('../docs/archive/2026-10-25-DIALOGUE_REQUEST.json',import.meta.url),'utf8'));
+  const oldStorage=Object.getOwnPropertyDescriptor(globalThis,'localStorage'),oldFetch=globalThis.fetch,items=new Map();let sent;
+  t.after(()=>{if(oldStorage===undefined)delete globalThis.localStorage;else Object.defineProperty(globalThis,'localStorage',oldStorage);globalThis.fetch=oldFetch;});
+  Object.defineProperty(globalThis,'localStorage',{configurable:true,writable:true,value:{getItem:key=>items.get(key)??null,setItem:(key,value)=>items.set(key,value)}});
+  saveTutorSettings({key:'unit-test-placeholder',model:'gemini-3.8-flash'});
+  globalThis.fetch=async(url,options)=>{sent=JSON.parse(options.body);return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:'형아, 같이 확인해 보자! (헤헤)'}]}}]})};};
+  const question={prompt:'검증용 문제',choices:['정답','오답'],answer:0,explain:'검증용 해설'};
+  assert.equal(await explainWithRumi(question,1),'형아, 같이 확인해 보자! (헤헤)');
+  const expected=request.personaTemplate.replaceAll('\\`','`').replace('${COURSE.subject}',COURSE.subject);
+  assert.equal(sent.systemInstruction.parts[0].text,expected);assert.match(sent.contents[0].parts[0].text,/형아가 고른 답/);
+});
 
 const sharp=createRequire(import.meta.url)('sharp');
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

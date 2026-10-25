@@ -13,10 +13,10 @@ export const ROSTER = {
   C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog','joker','sunflower'],
   R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple','antropy','demon_king'],
   SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom','cure_master','ash','miracle_larva'],
-  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','venom'],
+  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','venom','behemoth'],
 };
-// Season guardians in rotation order (one per month). Behemoth joined as the seventh; see guardianOf().
-export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch','behemoth'];
+// Season guardians in rotation order (one per month). Behemoth is a regular late-unlock UR.
+export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch'];
 export const DEFAULT_DECK = ['star_boy','snow_rabbit','night_rabbit','siren','great_detective'];
 export const HEROES = [...Object.entries(ROSTER).flatMap(([rarity,ids])=>ids.map(id=>({
   ...source.HERO[id],rarity,hidden:false,name:id==='avalanche_maid'?'메이드':source.HERO[id].name,
@@ -42,9 +42,8 @@ export const CHAPTERS=Array.from({length:MAIN_STAGES},(_,id)=>{
   return {...base,id,name:part===1?`${base.name}`:DAWN_NAMES[themeAt],caption:`${cycle}번째 별길 · ${BOSSES[boss].name}`,bosses:[boss,boss,boss],
     hp:1+2.5*id/8,cycle,stage:id+1,part};
 });
-// Companions that join the garden the first time a stage is cleared (a temporary arrangement: Behemoth is
-// still a guardian-rotation hidden companion as well).
-export const CLEAR_UNLOCKS=Object.freeze({45:['behemoth']});
+// The former temporary Behemoth clear grant is retired. Already owned companions stay owned.
+export const CLEAR_UNLOCKS=Object.freeze({});
 // Companions added after the first 45 stages open to the normal summon and the collection only once stage 45
 // has been cleared (before that the summon pool and the collection are exactly what they were). Every new
 // companion goes on this list.
@@ -83,7 +82,7 @@ export const TUNING=Object.freeze({
     // Second garden (opens with part two): price grows by `growth` to `rise` (70% of the soft-cap level), by `steep`
     // from there to `knee2` (the soft-cap level), by `steep2` after; effects are linear and unbounded, so the soft cap
     // comes from price. See docs/archive/DAWN_GARDEN.md for the pacing model.
-    crit:{unlock:45,base:400,growth:1.09,rise:21,knee:21,steep:1.15,knee2:30,steep2:1.2,resampleFrom:38,afterSoftCapPrice:.5},
+    crit:{unlock:45,base:400,growth:1.09,rise:21,knee:21,steep:1.15,knee2:30,steep2:1.2,resampleFrom:38,afterSoftCapPrice:.5,priceTransition:12},
     critDamage:{unlock:45,base:500,growth:1.13,rise:18,knee:18,steep:1.19,knee2:25,steep2:1.2},
     stardust:{unlock:60,base:1200,growth:1.05,rise:34,knee:34,steep:1.11,knee2:49,steep2:1.2}},
   // Relic tiers (pass 17): steps at 10, 25, 48, 82, 132, 208, 322, 493 ... draws. The first step is one 10-pull, and the

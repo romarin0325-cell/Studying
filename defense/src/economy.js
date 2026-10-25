@@ -1,9 +1,8 @@
 import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,LATE_UNLOCK_STAGE,LATE_COMPANIONS,TUNING as T} from './content.js';
 
 export const HOUR=3600000;
-// Season guardian of a calendar month (UTC+9). Counted from year 0 so that, with seven guardians, October to
-// December 2026 keep the guardians the six-month cycle gave them (cinderella, harmonious, frost witch) and
-// Behemoth first guards January 2027; from then on the seven rotate in HIDDEN order.
+// Season guardian of a calendar month (UTC+9). The six guardians retain the original rotation;
+// Behemoth joins the regular summon pool after stage45, alongside Venom.
 export const guardianOf=(year,month)=>HIDDEN[((year*12+month)%HIDDEN.length+HIDDEN.length)%HIDDEN.length];
 // The next months (as {year,month}) in which a hidden hero is the guardian, starting with this month.
 export function guardianMonths(id,now=Date.now(),count=2){
@@ -44,13 +43,19 @@ export const BED_IDS=Object.freeze(['rose','spring','seed','crit','critDamage','
 // Two gardens of three beds each: the dream greenhouse (from the start) and the dawn greenhouse (opens at stage 45).
 export const GARDENS=Object.freeze([{id:'dream',beds:['rose','spring','seed']},{id:'dawn',beds:['crit','critDamage','stardust']}]);
 // Retained old price for one +0.5%p purchase. Thirty new purchases cover the same
-// dust intervals as all 38 old purchases, then each corresponding old upgrade is half price.
+// dust intervals as all38 old purchases. A smooth log-price bridge then joins the half-price tail.
 export const legacyCritCost=level=>Math.ceil(400*1.09**Math.min(level,27)*1.15**Math.max(0,Math.min(level,38)-27)*1.2**Math.max(0,level-38));
-export function critBedCost(level){
-  if(level>=30)return Math.ceil(legacyCritCost(38+level-30)/2);
+function resampledCritCost(level){
   const from=level*38/30,to=(level+1)*38/30;let price=0;
   for(let i=Math.floor(from);i<Math.ceil(to);i++)price+=Math.max(0,Math.min(to,i+1)-Math.max(from,i))*legacyCritCost(i);
   return Math.ceil(price-1e-8);
+}
+export function critBedCost(level){
+  if(level<30)return resampledCritCost(level);
+  const b=T.beds.crit,tail=legacyCritCost(b.resampleFrom+level-b.knee2)*b.afterSoftCapPrice;
+  const t=Math.min(1,(level-b.knee2+1)/b.priceTransition),smooth=t*t*(3-2*t);
+  const anchor=resampledCritCost(b.knee2-1)/(legacyCritCost(b.resampleFrom-1)*b.afterSoftCapPrice);
+  return Math.ceil(tail*anchor**(1-smooth)-1e-8);
 }
 export const bedCost=(id,level)=>{if(id==='crit')return critBedCost(level);const b=T.beds[id],rise=b.rise??b.knee,k2=b.knee2??Infinity;return Math.ceil(b.base*b.growth**Math.min(level,rise)*b.steep**Math.max(0,Math.min(level,k2)-rise)*(b.steep2??b.steep)**Math.max(0,level-k2));};
 export const bedOpen=(id,cleared)=>cleared>=T.beds[id].unlock;

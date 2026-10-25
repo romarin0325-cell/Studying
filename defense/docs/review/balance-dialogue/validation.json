@@ -1,0 +1,129 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "cases": [
+    {
+      "theme": "night",
+      "kind": "long favorite line",
+      "length": 86,
+      "subtitle": {
+        "client": 87,
+        "scroll": 87,
+        "rect": {
+          "x": 27,
+          "right": 363,
+          "y": 439,
+          "bottom": 526
+        }
+      },
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    },
+    {
+      "theme": "night",
+      "kind": "regular Behemoth and8 ordinary URs",
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    },
+    {
+      "theme": "night",
+      "kind": "story",
+      "id": "underdog",
+      "title": "가장 우아한 복수",
+      "storyGeometry": {
+        "client": 354,
+        "scroll": 354
+      },
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    },
+    {
+      "theme": "night",
+      "kind": "story",
+      "id": "sunflower",
+      "title": "창가의 나른한 오후와 한 짝의 부츠",
+      "storyGeometry": {
+        "client": 354,
+        "scroll": 354
+      },
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    },
+    {
+      "theme": "bright",
+      "kind": "long favorite line",
+      "length": 86,
+      "subtitle": {
+        "client": 87,
+        "scroll": 87,
+        "rect": {
+          "x": 27,
+          "right": 363,
+          "y": 439.828125,
+          "bottom": 526.828125
+        }
+      },
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    },
+    {
+      "theme": "bright",
+      "kind": "regular Behemoth and8 ordinary URs",
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    },
+    {
+      "theme": "bright",
+      "kind": "story",
+      "id": "underdog",
+      "title": "가장 우아한 복수",
+      "storyGeometry": {
+        "client": 354,
+        "scroll": 354
+      },
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    },
+    {
+      "theme": "bright",
+      "kind": "story",
+      "id": "sunflower",
+      "title": "창가의 나른한 오후와 한 짝의 부츠",
+      "storyGeometry": {
+        "client": 354,
+        "scroll": 354
+      },
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "broken": []
+      }
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "limits": "Desktop Chromium mobile viewport; actual paid API responses were not requested."
+}

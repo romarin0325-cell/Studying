@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../src/combat/engine.js';
 import {HERO,HEROES,ROSTER} from '../src/content.js';
-import {bedCost,legacyCritCost,critChance,critStats} from '../src/economy.js';
+import {bedCost,legacyCritCost,critChance,critStats,specialMultiplier} from '../src/economy.js';
 import {createProfile,parseProfile} from '../src/profile.js';
 import {autoPlay} from '../src/battle.js';
 const deck=['demon_king','miracle_larva','rumi','snow_rabbit','great_detective'];
@@ -72,6 +72,14 @@ test('Abyss attacks add slow and poison with canonical ownership; in-flight form
   u.form='miracle_cocoon';for(let i=0;i<20;i++)E.step(s,.05);
   assert.ok(enemy.slowTime>0&&enemy.slow>=.25);assert.ok(enemy.poison>0);assert.ok(enemy.statusEffects.some(e=>e.type==='poison'&&e.owner==='miracle_larva'));
 });
+test('enhanced Abyss hit slow matches its live description, applies special once and caps at80%',()=>{
+  for(const [rank,enhance,expected] of [[1,0,.25],[1,10,.3],[3,10,.36],[5,50,.7],[7,150,.8]]){
+    const {s,enemy,unit}=setup(),u=unit('miracle_larva',14,rank,'abyss_wing');s.meta.miracle_larva={special:specialMultiplier(enhance)};
+    for(let i=0;i<28;i++)E.step(s,.05);
+    assert.ok(enemy.slowTime>0);assert.ok(Math.abs(enemy.slow-expected)<1e-9,`rank${rank}, enhance${enhance}: ${enemy.slow}`);
+    assert.equal(E.liveTraitTokens(s,u)[0][1],`${expected*100}%`);assert.match(E.personalTrait(s,u).label,new RegExp(`${expected*100}%`));
+  }
+});
 test('wing aura is orthogonal, strongest-only, curse-aware and doubled for Behemoth',()=>{
   const {s,unit}=setup({chance:.05,damage:1.5});const d=unit('demon_king',12),w=unit('miracle_larva',11,1,'miracle_wing');unit('miracle_larva',13,1,'miracle_wing');
   assert.deepEqual(E.unitCrit(s,d),{chance:.25,damage:2});const far=unit('demon_king',0);assert.deepEqual(E.unitCrit(s,far),{chance:.05,damage:2});
@@ -91,8 +99,9 @@ test('new runs have base5% crits and a separate random stream; explicit legacy n
   const a=E.newRun({deck,seed:55}),b=E.newRun({deck,seed:55,crit:null});assert.deepEqual(a.crit,{chance:.05,damage:1.5});assert.equal(b.crit,null);assert.equal(a.rng,b.rng);assert.deepEqual(a.board.map(u=>u?.hero),b.board.map(u=>u?.hero));
   assert.deepEqual(critStats({crit:30,critDamage:20},44),{chance:.05,damage:1.5});assert.ok(Math.abs(critChance(30)-.2)<1e-12);
 });
-test('crit budget to20% matches the old budget, then half price per0.5%p, without resetting investments',()=>{
+test('crit budget to20% matches the old budget, then joins the half-price tail without resetting investments',()=>{
   const old=Array.from({length:38},(_,i)=>legacyCritCost(i)).reduce((a,b)=>a+b),now=Array.from({length:30},(_,i)=>bedCost('crit',i)).reduce((a,b)=>a+b);
-  assert.ok(now>=old&&now-old<=30);for(const n of [30,31,40,60])assert.equal(bedCost('crit',n),Math.ceil(legacyCritCost(38+n-30)/2));
+  assert.ok(now>=old&&now-old<=30);for(let n=1;n<250;n++)assert.ok(bedCost('crit',n)>=bedCost('crit',n-1),'no price reversal at '+n);
+  for(const n of [41,42,60,100])assert.equal(bedCost('crit',n),Math.ceil(legacyCritCost(38+n-30)/2));
   const p=createProfile();p.cleared=45;p.beds.crit=38;const next=parseProfile(JSON.stringify(p));assert.equal(next.beds.crit,38);assert.equal(next.bedRev,p.bedRev);assert.ok(Math.abs(critStats(next.beds,45).chance-.24)<1e-12);
 });

@@ -125,7 +125,7 @@ test('a normal-banner UR is the weekly pickup half the time',()=>{
   assert.ok(pick/n>.55&&pick/n<.62,'pickup share '+pick/n);
 });
 
-test('calendar uses UTC+9, Monday weeks and seven guardians independently of host locale',()=>{
+test('calendar uses UTC+9, Monday weeks and six guardians independently of host locale',()=>{
   const sunday=Date.parse('2026-10-04T14:59:59Z'),monday=sunday+1000;
   const {pickup,weekNo,...rest}=calendar(sunday);assert.deepEqual(rest,{day:'2026-10-04',month:'2026-10',week:'2026-09-28',guardian:HIDDEN[3]});assert.equal(calendar(monday).weekNo,weekNo+1,'weekly chapter turns with the week');
   assert.equal(calendar(monday).week,'2026-10-05');
@@ -133,18 +133,20 @@ test('calendar uses UTC+9, Monday weeks and seven guardians independently of hos
   assert.ok(ROSTER.UR.includes(pickup));assert.notEqual(calendar(monday).pickup,pickup);assert.equal(calendar(monday+6*24*HOUR).pickup,calendar(monday).pickup);
   assert.equal(new Set(Array.from({length:6},(_,i)=>calendar(monday+i*7*24*HOUR).pickup)).size,6);
   assert.equal(calendar(Date.parse('2026-10-31T15:00:00Z')).guardian,HIDDEN[4]);
-  // Seven guardians: October to December 2026 keep the six-month cycle's guardians; Behemoth first guards January 2027.
+  // Behemoth moves to regular late summons; the original six guardians rotate.
   assert.equal(calendar(Date.parse('2026-11-30T15:00:00Z')).guardian,'frost_witch');
-  assert.equal(calendar(Date.parse('2027-01-01T00:00:00Z')).guardian,'behemoth');
-  assert.equal(calendar(Date.parse('2027-02-01T00:00:00Z')).guardian,'time_ruler');
-  assert.deepEqual(new Set(Array.from({length:7},(_,i)=>guardianOf(2027,i))),new Set(HIDDEN));
-  assert.deepEqual(guardianMonths('behemoth',Date.parse('2026-10-18T00:00:00Z')),[{year:2027,month:1},{year:2027,month:8}]);
+  assert.equal(calendar(Date.parse('2027-01-01T00:00:00Z')).guardian,'time_ruler');
+  assert.equal(calendar(Date.parse('2027-02-01T00:00:00Z')).guardian,'galaxy_whale');
+  assert.deepEqual(new Set(Array.from({length:6},(_,i)=>guardianOf(2027,i))),new Set(HIDDEN));
+  assert.deepEqual(guardianMonths('behemoth',Date.parse('2026-10-18T00:00:00Z')),[]);
   assert.deepEqual(guardianMonths('cinderella',Date.parse('2026-10-18T00:00:00Z'),1),[{year:2026,month:10}]);
   assert.equal(calendar(monday-HOUR).day,'2026-10-04');
 });
 
 test('companions added after the first 45 stages join the summon pool only once stage 45 is cleared',()=>{
   assert.equal(LATE_UNLOCK_STAGE,45);assert.equal(lateOpen(44),false);assert.equal(lateOpen(45),true);
+  assert.equal(HERO.behemoth.hidden,false);assert.equal(HERO.behemoth.rarity,'UR');assert.ok(!HIDDEN.includes('behemoth'));
+  assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
   for(const id of LATE_COMPANIONS)assert.ok(HEROES.some(h=>h.id===id),id);
   for(const rarity of Object.keys(ROSTER)){
     const closed=heroPool(rarity,false),open=heroPool(rarity,true);

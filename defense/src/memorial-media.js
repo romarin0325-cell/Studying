@@ -515,7 +515,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 521,
     "bodyStartLine": 522,
     "bodyEndLine": 530,
-    "bodySha256": "b81d9d687ad9601c4b9294d4be20a58d1ec25d6dec4484ced46ca20f36a2fdaa",
+    "bodySha256": "f1c1f85ec3af297eaae98f85f5a188aa70a18108998e71b81f5e4f943861f069",
     "avifPath": "./assets/memorial/red_dragon.avif",
     "webp": {
       "path": "./assets/memorial-webp/red_dragon.webp",
@@ -1235,7 +1235,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 505,
     "bodyStartLine": 506,
     "bodyEndLine": 513,
-    "bodySha256": "9d07476dea9e49ea93867ff1a2a781e54b985be2003a6f1655ec41e590590b36",
+    "bodySha256": "eb7b44b88f0542fbdb2fe754811912619deb4b00e430c76cdf4179025cbc05dd",
     "avifPath": "./assets/memorial/doom.avif",
     "webp": {
       "path": "./assets/memorial-webp/doom.webp",
@@ -1415,7 +1415,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "dc91a3866165821d082bead6487519703a0ce0b32539ee2b054706d44d1eafad",
+    "bodySha256": "aa09eff8ed8a4ea087c090d7f2fbba6d4815b07ae6168e57cd2de5df0700d97a",
     "avifPath": "./assets/memorial/behemoth.avif",
     "webp": {
       "path": "./assets/memorial-webp/behemoth.webp",
@@ -1460,7 +1460,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "ee46651523aeade7feab900754a482d02a2113b7d1df672c13d6be7e8b670f34",
+    "bodySha256": "1addaf4819eebf4c807abbbe88cfc77a342b5db46924ebcf71210562fbd77742",
     "avifPath": "./assets/memorial/toffee_apple.avif",
     "webp": {
       "path": "./assets/memorial-webp/toffee_apple.webp",
@@ -1505,7 +1505,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "e605b0c82abfab8c029285a088cb2babff2aa8a98f00456aba65004f984cea43",
+    "bodySha256": "261ca920578d10e63bc815b98995ebf3e113ba2bc5f1125d277baee77a49ee32",
     "avifPath": "./assets/memorial/underdog.avif",
     "webp": {
       "path": "./assets/memorial-webp/underdog.webp",
@@ -1550,7 +1550,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "72ed4cee154b2c1bffa7b575c13e1251ba699a8daa252f025cffc94b1b34f7c8",
+    "bodySha256": "6bf1b89aa563f34510cf4daed9a12bb9cc085d2a6caf9588b240d86f6731f27c",
     "avifPath": "./assets/memorial/joker.avif",
     "webp": {
       "path": "./assets/memorial-webp/joker.webp",
@@ -1595,7 +1595,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "3694559562775a8ce6fdbd007e80b37b4ff580e78fa66e47f97c4431c720a795",
+    "bodySha256": "923cce44e21a95d944fbfb732cac644c0e3a7a6887c3906d6cad549a71209aa5",
     "avifPath": "./assets/memorial/sunflower.avif",
     "webp": {
       "path": "./assets/memorial-webp/sunflower.webp",
@@ -1640,7 +1640,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "8f4dda25aa2f064c0d03d583a144730bf3be7864ac458dcc13b250fd4c532bad",
+    "bodySha256": "55ac1eb407bacf8258e08b1d0e5b4662754620445d0faba4727e074cdc720c71",
     "avifPath": "./assets/memorial/antropy.avif",
     "webp": {
       "path": "./assets/memorial-webp/antropy.webp",
@@ -1685,7 +1685,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "2c3a1ec84e119834b5da85797dc2fbc2389abf6551ba713880655df5688f8abd",
+    "bodySha256": "8154bcd7c0ca555a1ec5f8afb7484f5bfd2aa080c1f241f554f7102242c75d96",
     "avifPath": "./assets/memorial/cure_master.avif",
     "webp": {
       "path": "./assets/memorial-webp/cure_master.webp",
@@ -1730,7 +1730,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "5045d4d20deace4a081d68457dca75c6c0e7274be41356a722f568d398e20915",
+    "bodySha256": "b96ac32922974b5e79a67ec594d0d31635b608d30111d4904d3ffd9589972b85",
     "avifPath": "./assets/memorial/ash.avif",
     "webp": {
       "path": "./assets/memorial-webp/ash.webp",
@@ -1775,7 +1775,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "fc5ba2f4bc73a7a3d036b1fc950333957f2664f61e88cdb5d48bf8db2ebd5ada",
+    "bodySha256": "9583945c86015bd59e4b2375382b33ce375a60e5c0b05c87d69a69a7f60e38ea",
     "avifPath": "./assets/memorial/venom.avif",
     "webp": {
       "path": "./assets/memorial-webp/venom.webp",
