@@ -451,6 +451,8 @@ em{font-style:normal}
 @keyframes spot-sil{0%{opacity:0;transform:translateY(48px) scale(.86);filter:brightness(0) drop-shadow(0 0 0 transparent)}30%{opacity:1;filter:brightness(0) drop-shadow(0 0 14px var(--spot))}100%{opacity:1;transform:translateY(0) scale(1);filter:brightness(0) drop-shadow(0 0 22px var(--spot))}}
 @keyframes spot-color{0%{filter:brightness(0) drop-shadow(0 0 24px var(--spot));transform:scale(.98)}38%{filter:brightness(1.7) drop-shadow(0 0 26px #fff);transform:scale(1.06)}100%{filter:drop-shadow(0 16px 18px rgba(0,0,0,.5));transform:scale(1)}}
 @keyframes spot-dupe{from{opacity:0;transform:translateY(20px) scale(.94)}}
+.spot-figure .fig-shift{position:relative;z-index:1;display:flex;flex:none;height:100%;align-items:flex-end;justify-content:center;transform:translateX(var(--fx,0%))}
+.figure-art .fig-shift{display:grid;place-items:end center;width:100%;height:100%;transform:translateX(calc(var(--fx,0%) * 1.22))}
 .spot-figure.relic{align-self:center;width:min(68vw,260px);height:min(68vw,260px);margin-bottom:4vh}
 .spot-figure.relic img{width:78%;height:auto;max-height:none}
 .spot-figure.relic .spot-new{top:0;right:-4px}
@@ -513,6 +515,15 @@ em{font-style:normal}
 .switch[aria-pressed=true]:after{transform:translateX(20px)}
 .settings-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
 .danger-link{display:block;margin:12px auto 0;font-size:13px;color:var(--danger);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+/* Pause sheet: retiring is a real, deliberately quieter destructive control (pass 18), not an underlined link. */
+.retire-row{display:flex;align-items:center;gap:12px;width:100%;margin:16px 0 2px;padding:10px 12px 10px 10px;border-radius:14px;text-align:left;color:#ffdcd6;border:1px solid rgba(255,138,122,.36);background:linear-gradient(180deg,rgba(128,44,60,.34),rgba(62,18,32,.56));box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.retire-row .retire-ic{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:11px;background:linear-gradient(180deg,rgba(255,128,116,.28),rgba(200,60,70,.18));border:1px solid rgba(255,150,136,.5)}
+.retire-row .retire-ic .ic{width:18px;height:18px;color:#ffab9e;stroke-width:2.2}
+.retire-row span{flex:1;min-width:0;display:grid;gap:1px}
+.retire-row b{font-size:14px;font-weight:800;color:#ffe3de}
+.retire-row small{font-size:11.5px;color:rgba(255,214,207,.72)}
+.retire-row>.ic{width:15px;height:15px;color:rgba(255,184,172,.75);flex-shrink:0}
+.retire-row:active{transform:translateY(1px)}
 .reward-options{display:grid;gap:9px}
 .reward-option{text-align:left;padding:14px;border:1px solid var(--line2);border-radius:14px;background:var(--panel2)}
 .reward-option:hover{border-color:var(--gold)}
@@ -1752,7 +1763,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .arrival-line{font-size:14px;font-weight:800;color:#ffe3cf;text-shadow:0 2px 10px rgba(0,0,0,.7);animation:fade-in .6s .3s both}
 
 /* ───────── Late companions: the stage 45 announcement, summon strip, rates block, collection note ───────── */
-.late-notice{position:relative;display:flex;flex-direction:column;gap:12px;padding:2px 0 4px;overflow:hidden}
+.late-notice{position:relative;display:flex;flex-direction:column;gap:12px;padding:2px 3px 4px;overflow:hidden}
 .late-flash{position:absolute;left:50%;top:-30px;width:420px;height:260px;transform:translateX(-50%);pointer-events:none;background:radial-gradient(ellipse at 50% 30%,rgba(255,226,150,.5),rgba(255,226,150,0) 68%);animation:late-flash 1.4s ease-out both}
 .late-lede{margin:0;text-align:center;font-size:15px;color:var(--text2);animation:late-fade .5s .1s both}
 .late-lede b{display:block;font-family:var(--display);font-weight:400;font-size:23px;color:var(--gold);text-shadow:0 0 14px rgba(246,210,122,.5)}
@@ -1778,6 +1789,38 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 @keyframes late-flash{from{opacity:0;transform:translateX(-50%) scale(.5)}40%{opacity:1}to{opacity:.35;transform:translateX(-50%) scale(1.1)}}
 @keyframes late-sheen{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 #sheet[data-kind=late] #sheet-footer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:10px}
+/* Pass 18: the announcement header (kicker, big count, rarity chips) and turning light behind it. */
+.late-rays{position:absolute;left:50%;top:-150px;width:520px;height:520px;margin-left:-260px;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,226,150,.13) 0 5deg,transparent 5deg 20deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 58%);mask:radial-gradient(circle,#000 8%,transparent 58%);animation:fade-in 1s .2s both,spin 48s linear infinite}
+.late-head{position:relative;display:grid;justify-items:center;gap:4px;text-align:center}
+.late-kicker{margin:0;padding:2px 14px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.3em;color:#2a1a04;background:linear-gradient(90deg,#ffe9a6,#f6c35e);box-shadow:0 0 16px rgba(246,195,94,.45);animation:late-fade .5s .05s both}
+.late-lede{font-size:14px;font-weight:700;color:var(--text2)}
+.late-lede b{display:inline;font-size:34px;line-height:1;margin-right:2px;vertical-align:-3px}
+.late-counts{display:flex;justify-content:center;gap:6px;margin:2px 0 0;animation:late-fade .5s .2s both}
+.late-counts span{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 3px;border-radius:999px;font-size:12px;font-weight:800;color:var(--text);background:rgba(8,11,31,.55);border:1px solid color-mix(in srgb,var(--r) 60%,transparent)}
+.late-counts i{font-style:normal;font-size:9.5px;padding:1px 6px;border-radius:999px;color:#10142e;background:linear-gradient(180deg,var(--r),var(--r2))}
+.late-notes li{text-align:left}
+/* Pass 18: part two opening, the dawn sky over the dawn greenhouse. */
+.sheet[data-kind=arrival] .sheet-body:has(.part-open){display:flex}
+.part-open{position:relative;flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:18px;padding:110px 20px 16px;overflow:hidden;isolation:isolate}
+.part-open::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(30,10,36,.25),rgba(30,10,36,.05) 30%,rgba(26,8,32,.62) 60%,rgba(20,8,28,.95))}
+.po-sky{position:absolute;left:0;right:0;top:0;height:64%;z-index:-1;pointer-events:none;overflow:hidden}
+.po-sun{position:absolute;left:50%;top:46%;width:240px;height:240px;margin:-120px 0 0 -120px;border-radius:50%;background:radial-gradient(circle,rgba(255,240,214,.95),rgba(255,196,160,.55) 30%,rgba(255,150,170,0) 68%);mix-blend-mode:screen;animation:po-rise 1.8s cubic-bezier(.2,.8,.2,1) both}
+.po-rays{position:absolute;left:50%;top:46%;width:680px;height:680px;margin:-340px 0 0 -340px;background:repeating-conic-gradient(from 0deg,rgba(255,226,196,.2) 0 4deg,transparent 4deg 16deg);-webkit-mask:radial-gradient(circle,#000 12%,transparent 60%);mask:radial-gradient(circle,#000 12%,transparent 60%);mix-blend-mode:screen;animation:fade-in 1.4s .6s both,spin 80s linear infinite}
+.po-spark{position:absolute;left:var(--x);top:var(--y);width:6px;height:6px;border-radius:50%;background:#fff3e6;box-shadow:0 0 10px #ffc9b4;animation:twinkle 2.6s calc(var(--i)*.23s) ease-in-out infinite}
+.po-head{display:grid;justify-items:center;gap:2px;text-align:center;animation:po-up .8s .7s both}
+.po-kicker{margin:0;padding:3px 16px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.34em;color:#3a1830;background:linear-gradient(90deg,#ffe4c8,#ffb6c6);box-shadow:0 0 20px rgba(255,180,170,.5)}
+.po-title{margin:4px 0 0;font-family:var(--display);font-size:44px;line-height:1.08;background:linear-gradient(180deg,#fff8ee 12%,#ffd7b6 55%,#ff9fb8);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 16px rgba(255,130,150,.5))}
+.po-sub{margin:0;font-size:12px;font-weight:800;letter-spacing:.24em;color:#ffd9c6}
+.po-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.po-list li{display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border-radius:14px;background:linear-gradient(100deg,rgba(255,214,190,.18),rgba(255,214,190,.05));border:1px solid rgba(255,214,190,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:po-row .55s calc(1.2s + var(--i)*.16s) cubic-bezier(.2,.9,.25,1.1) both}
+.po-ic{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:12px;color:#3a1430;background:linear-gradient(180deg,#ffdcbc,#ff9fb4);box-shadow:0 4px 12px rgba(255,140,150,.35)}
+.po-ic .ic{width:21px;height:21px}
+.po-list b{display:block;font-size:15px;color:#fff3ea}
+.po-list small{display:block;font-size:12px;color:rgba(255,226,210,.82)}
+@keyframes po-rise{from{opacity:0;transform:translateY(70px) scale(.6)}}
+@keyframes po-up{from{opacity:0;transform:translateY(16px)}}
+@keyframes po-row{from{opacity:0;transform:translateX(-26px)}}
+@media (prefers-reduced-motion:reduce){.part-open *,.late-rays{animation:none!important}}
 .sm-late{display:flex;align-items:center;gap:8px;width:100%;min-height:38px;margin:0 0 10px;padding:6px 12px;border-radius:14px;text-align:left;font-size:12px;color:var(--text2);background:rgba(8,11,31,.62);border:1px dashed var(--line2)}
 .sm-late .ic{flex:none;width:16px;height:16px}
 .sm-late span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

@@ -5,15 +5,17 @@ import * as E from '../../../src/combat/engine.js';
 const PACK=[600,690,770,840,905,980,1060,1150];
 export const ENTRIES=Object.freeze([
   {key:'zeke',hero:'zeke',modes:['attack']},
+  {key:'behemoth',hero:'behemoth',modes:['attack']},
   {key:'demon_king',hero:'demon_king',modes:['attack','skill']},
   {key:'miracle_larva',hero:'miracle_larva',form:'miracle_larva',modes:['attack','skill']},
   {key:'miracle_cocoon',hero:'miracle_larva',form:'miracle_cocoon',modes:['attack','skill']},
   {key:'miracle_wing',hero:'miracle_larva',form:'miracle_wing',modes:['attack']},
   {key:'abyss_wing',hero:'miracle_larva',form:'abyss_wing',modes:['attack']},
+  {key:'orbit',hero:'star_boy',artifacts:['orbit'],label:'별바다의 궤도',modes:['attack']},
 ]);
 export function reviewScene(entry,{mode='attack',chapter=0,debuffs=true}={}){
   const id=entry.hero,deck=[id,...['siren','queen','storm_sage','great_detective','zeke'].filter(x=>x!==id)].slice(0,5);
-  const s=E.newRun({deck,chapter,seed:261026});
+  const s=E.newRun({deck,chapter,seed:261026,artifacts:entry.artifacts||[]});
   const template={...s.board.find(Boolean)};s.board.fill(null);
   const place=(i,hero,rank,form)=>{s.board[i]={...template,uid:s.nextId++,hero,rank,cooldown:99,windup:0,pose:0,disabled:0,cursed:false,aim:0,facing:'down',...(hero==='miracle_larva'?{form:form||'miracle_larva'}:{})};if(hero!=='miracle_larva')delete s.board[i].form;};
   place(14,id,3,entry.form);place(6,'siren',1);place(16,'queen',1);

@@ -1799,8 +1799,8 @@
   ],
   "newCompanions": {
     "deathhand": {
-      "base": 5,
-      "perDebuff": 3,
+      "base": 4,
+      "perDebuff": 4,
       "radius": 180,
       "critDamage": 0.5
     },

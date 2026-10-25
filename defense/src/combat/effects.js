@@ -132,7 +132,7 @@ export class CombatFX{
     }
     if(e.type==='eclose')for(const [i,p] of e.points.entries()){const delay=Math.min(.48,i*.12),life=1.25+delay;this.add({...p,type:'miracleEclose',delay,life,total:life});this.add({...p,type:'ecloseGround',delay,life,total:life});}
     const cocoon=e.hero==='miracle_larva'&&e.form==='miracle_cocoon';
-    if(e.type==='attack'&&(cocoon||['zeke','guardian','ancient_dragon','behemoth'].includes(e.hero))){const life=cocoon?.5:e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='ancient_dragon'?.3:.42;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
+    if(e.type==='attack'&&(cocoon||['zeke','guardian','ancient_dragon','behemoth'].includes(e.hero))){const life=cocoon?.44:e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='ancient_dragon'?.3:.34;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='meteor')this.add({...e,seed:this.clock*7+e.x,life:.7,total:.7});
     if(e.type==='judgement')this.add({...e,life:.9,total:.9});
@@ -532,7 +532,11 @@ export class CombatFX{
   drawZones(s){
     const ctx=this.ctx;for(const z of s.zones){ctx.save();const fade=Math.min(1,z.life*2),pulse=.65+Math.sin(this.clock*4+z.uid)*.1;ctx.globalAlpha=fade;
       // Star Orbit relic: its own small star-ring decal (the ring is the real radius), nothing else.
-      if(z.orbit){this.atlasStamp('orbit-zone',0,1,1,z.x,z.y,z.radius*2.3,z.radius*2.3,0,fade*(.55+pulse*.3),'screen');ctx.restore();continue;}
+      // Star Orbit relic (pass 18): a small round patch of the star sea, seen from above, its slow golden orbit riding the
+      // rim. Both painted rims sit on the real radius (orbit-sea: 0 pool, 1 ring); the pool turns slowly like a galaxy.
+      if(z.orbit){const size=2*z.radius/.78,open=Math.min(1,(z.total-z.life)*6);
+        this.atlasStamp('orbit-sea',0,2,1,z.x,z.y,size*(.8+.2*open),size*(.8+.2*open),this.reduced?0:this.clock*.35+z.uid,fade*.62,'source-over');
+        this.atlasStamp('orbit-sea',1,2,1,z.x,z.y,size,size,this.reduced?0:-this.clock*1.1-z.uid,fade*(.7+pulse*.2),'source-over');ctx.restore();continue;}
       if(z.hero==='cure_master'){
         // Lemonade fizz: a pale lemon pool with rising bubbles, three lemon slices and two hearts circling. The edge is the real radius.
         const R=z.radius,t=this.clock;

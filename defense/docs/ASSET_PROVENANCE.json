@@ -542,10 +542,45 @@
       "height": 320
     },
     {
+      "id": "zeke-spin",
+      "source": "defense/assets/merge/zeke-spin.webp",
+      "sha256": "34dc0802b014e056f18cd8a3dc8ef28f4e4a098bf8c8ba52c7d726c598eb5b9a",
+      "width": 1152,
+      "height": 384
+    },
+    {
+      "id": "effects-demon-miracle",
+      "source": "defense/assets/merge/effects-demon-miracle.webp",
+      "sha256": "8d504c6d702d95761aa53f72f8fe9dfcf30727ce85d0a3baa704aedc544634d0",
+      "width": 1536,
+      "height": 768
+    },
+    {
+      "id": "effects-deathhand",
+      "source": "defense/assets/merge/effects-deathhand.webp",
+      "sha256": "fa7cb9d8d55f4adfc33242fd66d007d11da56dcbb1907f1c7224444a37facdd7",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "effects-eclose",
+      "source": "defense/assets/merge/effects-eclose.webp",
+      "sha256": "a174760aae47ee1c33fc6262f86f590647afae70e88b73fbbcd150f8e83d8f61",
+      "width": 768,
+      "height": 768
+    },
+    {
       "id": "orbit-zone",
       "source": "defense/assets/merge/orbit-zone.webp",
       "sha256": "8315be3a83dd1b99f15ba76ec888c8e489400dcb829df64750e01b39c17b46bf",
       "width": 256,
+      "height": 256
+    },
+    {
+      "id": "orbit-sea",
+      "source": "defense/assets/merge/orbit-sea.webp",
+      "sha256": "65cb6d00cbc12bb87fad44e050c11d0055b94302402f0dbfaf31c518646aed3a",
+      "width": 512,
       "height": 256
     },
     {
@@ -672,51 +707,51 @@
     {
       "id": "underdog",
       "source": "defense/assets/memorial/underdog.avif",
-      "sha256": "fdbfd85df162a7ba2dd772babdd1f12dc8cfee1384579543196e0d0b6b792b98",
+      "sha256": "ec5e3347e27e2f5b24c8fe00df054c9644faea90c55fe39955577ec24d37cd97",
       "width": 720,
       "height": 1080,
-      "bytes": 50711,
-      "sourceSha256": "f0f3c1f91e1bc8559863e59eccbe1039c2768c7743b1b9a2a572e04b7e54ca3f",
+      "bytes": 41558,
+      "sourceSha256": "4aa6da0136ef1b234f9da20d92ac37a04cefc37869ac8a0bf6b36dc26156ea14",
       "webp": {
         "source": "defense/assets/memorial-webp/underdog.webp",
-        "sha256": "21a6b9fda98a072cd09b1626de09326d59234dd3b8caa9756fee55bcb45e1593",
+        "sha256": "30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391",
         "width": 720,
         "height": 1080,
-        "bytes": 90712,
+        "bytes": 73230,
         "quality": 82
       }
     },
     {
       "id": "joker",
       "source": "defense/assets/memorial/joker.avif",
-      "sha256": "c44e7cb3df26b4c395574ca1412da539cc52a7a27d17f97a77a41f4271d1ec69",
+      "sha256": "728fda8789e08c2286edb52c386f6d6c8662f9a9054750a96423c98afe19587e",
       "width": 720,
       "height": 1080,
-      "bytes": 69520,
-      "sourceSha256": "2878cd737daf2e2a4480d8071259678b2896682ecaa82b8f7b4568e0b369be4e",
+      "bytes": 48320,
+      "sourceSha256": "107c4bc2794c537e4c253980ac2b4e8cb701deec62beadd7fd21987e52872c9e",
       "webp": {
         "source": "defense/assets/memorial-webp/joker.webp",
-        "sha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
+        "sha256": "48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642",
         "width": 720,
         "height": 1080,
-        "bytes": 97802,
-        "quality": 62
+        "bytes": 94456,
+        "quality": 82
       }
     },
     {
       "id": "sunflower",
       "source": "defense/assets/memorial/sunflower.avif",
-      "sha256": "d866554c5f33b3b407d595e898d3cfb5dc1ccae2bb7ddf6dd806940bd2a05ee9",
+      "sha256": "22ad0f0d04a59eae36cec44e56cb2183ec745839226b5e93eaddd2d507e703bf",
       "width": 720,
       "height": 1080,
-      "bytes": 45001,
-      "sourceSha256": "aeecb33e413ade6feb4db259684e33d84b57c9125e3a735faa7b83e391c74300",
+      "bytes": 37147,
+      "sourceSha256": "2aba744ed4e21853841c69c25f86d851d5bb64de3ed29ca72f1ecac5c82693a5",
       "webp": {
         "source": "defense/assets/memorial-webp/sunflower.webp",
-        "sha256": "c985bcab237ac96dbfaf7771236a7021b84432b0d22125daa0dc418f0a9ca3ec",
+        "sha256": "bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51",
         "width": 720,
         "height": 1080,
-        "bytes": 82690,
+        "bytes": 63930,
         "quality": 82
       }
     },
@@ -825,35 +860,35 @@
     {
       "id": "toffee_apple",
       "source": "defense/assets/memorial/toffee_apple.avif",
-      "sha256": "890afc5fd42999683cac280c290941b3bd76c41ab6297ae1a8485e3023d8b0c6",
+      "sha256": "59383b8cf127252dc623537c15cabefd5635922727999bc1f891b43977c69d2a",
       "width": 720,
       "height": 1080,
-      "bytes": 64253,
-      "sourceSha256": "59719a74d0b7ef15b84a3cada6d2f881053e7b33706f51805cd7f78e585db9b0",
+      "bytes": 55172,
+      "sourceSha256": "94b029b01464f9c83bb34cda9c49ea705a15ea44c83e1c8d945d38687281a464",
       "webp": {
         "source": "defense/assets/memorial-webp/toffee_apple.webp",
-        "sha256": "7c6aeb757cf6849760ae70165cd06185cb373d12ce1af7206b8e928489cb2099",
+        "sha256": "772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff",
         "width": 720,
         "height": 1080,
-        "bytes": 95362,
-        "quality": 74
+        "bytes": 94796,
+        "quality": 80
       }
     },
     {
       "id": "antropy",
       "source": "defense/assets/memorial/antropy.avif",
-      "sha256": "36898a42c64d252416fe74b87a03759cd5a99f203e74538d3112027699fce254",
+      "sha256": "ec6d3726ad7fc298ff10411a248c8122c83009aef678b0baa9caacd2114f3013",
       "width": 720,
       "height": 1080,
-      "bytes": 55041,
-      "sourceSha256": "5035ae2405f5d2e4f0cc1c3bc3ed7a3ef3e25c9ff7a196601fd1e6b6ea1cc7e5",
+      "bytes": 33671,
+      "sourceSha256": "438de12efc679863bafb5b23b895764662511bf2bc7a5256314edac18485962f",
       "webp": {
         "source": "defense/assets/memorial-webp/antropy.webp",
-        "sha256": "ce7bcaedd4f5d9011dd1ed30b6990b23f01eeafeda1dd4dd639ab16e977dbee9",
+        "sha256": "4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7",
         "width": 720,
         "height": 1080,
-        "bytes": 96462,
-        "quality": 80
+        "bytes": 60042,
+        "quality": 82
       }
     },
     {
@@ -978,17 +1013,17 @@
     {
       "id": "cure_master",
       "source": "defense/assets/memorial/cure_master.avif",
-      "sha256": "1529f210d9ea3d8e45982fc52a2b3f4eb987177b3f1fcbd4ef1ed451f7883027",
+      "sha256": "4405fd596aa312c04d310b4d66c7ca95292b0a85e677ea0f774e7ac1bb3e80a3",
       "width": 720,
       "height": 1080,
-      "bytes": 40913,
-      "sourceSha256": "e1118907c66ed80980c86bffa6ad8e398d6b52ec4234c16e0d8ef4d44f878213",
+      "bytes": 42389,
+      "sourceSha256": "7a6795a954395fb022e258b315ee367e1fdd465bfc7e0564eecdceb4cdfeb9e2",
       "webp": {
         "source": "defense/assets/memorial-webp/cure_master.webp",
-        "sha256": "290ad3f07b21400ee61eb7de42365a3d6652e62e95b79bb027fcf92eaab94a94",
+        "sha256": "45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f",
         "width": 720,
         "height": 1080,
-        "bytes": 80192,
+        "bytes": 79578,
         "quality": 82
       }
     },
@@ -1131,35 +1166,35 @@
     {
       "id": "venom",
       "source": "defense/assets/memorial/venom.avif",
-      "sha256": "4f43b04fda3ef9b42acb59e3a7a861c36ec47dba80df6df06198669d2c3d5c4a",
+      "sha256": "e3a6e8e7eeee3bfc6b659f7c7e225faded20cbbc4558e0f3f2c84940d1fc0f2c",
       "width": 720,
       "height": 1080,
-      "bytes": 50916,
-      "sourceSha256": "bc4129d1c49fbf2e69dc0dc352cf5d7d613fa7f7ca0f5ab67e004d5d17140c62",
+      "bytes": 61493,
+      "sourceSha256": "092daf6ec9268f50d63b31ac97226e5199585e9598740409cd6cf36bab4d8e9e",
       "webp": {
         "source": "defense/assets/memorial-webp/venom.webp",
-        "sha256": "07e404ddc5ecf352585dd3e9b193244359b17edef5f8a5e899a3143b3c468942",
+        "sha256": "0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a",
         "width": 720,
         "height": 1080,
-        "bytes": 95150,
-        "quality": 82
+        "bytes": 96896,
+        "quality": 74
       }
     },
     {
       "id": "behemoth",
       "source": "defense/assets/memorial/behemoth.avif",
-      "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
+      "sha256": "2009945576703373175c003471a9ffa56a1dc4557a626b4c0c75046eeddfbdea",
       "width": 720,
       "height": 1080,
-      "bytes": 65110,
-      "sourceSha256": "8fd07b182c3432d04ffda78e5f49bcfad76bf38e227bcd7271d98eb801499526",
+      "bytes": 43276,
+      "sourceSha256": "e986326ec77ee714df44533764101ae76a0983c1a70c01753de46561258280b4",
       "webp": {
         "source": "defense/assets/memorial-webp/behemoth.webp",
-        "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+        "sha256": "9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61",
         "width": 720,
         "height": 1080,
-        "bytes": 95826,
-        "quality": 76
+        "bytes": 77464,
+        "quality": 82
       }
     },
     {

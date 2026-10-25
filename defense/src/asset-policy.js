@@ -8,6 +8,7 @@ export const BUILD_ONLY_ATLASES=Object.freeze({
   'relics-new':'Source for collection relic icon crops.',
   'effects-sol-sweet':'Opaque Sol effect sprites, replaced in pass 15 by effects-companion-sweet; kept as the approved source.',
   'effects-sol-twilight':'Opaque Sol effect sprites, replaced in pass 15 by effects-companion-twilight; kept as the approved source.',
+  'orbit-zone':'Star Orbit zone drawn as a tilted opaque ellipse, replaced in pass 18 by the round orbit-sea; kept as the approved source.',
   'zeke-slash':'Zeke cleave slash, replaced in pass 18 by zeke-spin when his attack became a circle; kept as the approved source.',
 });
 export const RUNTIME_ASSET_PATHS=Object.freeze(Object.fromEntries(

@@ -179,10 +179,13 @@ function faceVars(id){
   if(!box?.size)return '--px:.5;--py:.4;--ps:.49';
   return `--px:${(box.x/512).toFixed(4)};--py:${(box.y/512).toFixed(4)};--ps:${(box.size/512).toFixed(4)}`;
 }
+// Head-centring for full figures (pass 18): the 512 frame is centred, but some casts stand off the frame centre
+// (galaxy whale +21px, lightning sage -22px...). Shift the figure so the reviewed face centre sits on the axis.
+function headShift(id){const box=HERO[id]&&portraitFrame(HERO[id]);return box?.size?`--fx:${((256-box.x)/512*100).toFixed(2)}%`:'--fx:0%';}
 function pullCard(item,kind,single){
   const relic=kind==='relic',h=relic?ARTIFACT[item.id]:HERO[item.id];
   const art=relic?`<span class="art relic-art">${image(item.id)}</span>`
-    :single?`<span class="art figure-art">${image(item.id,true)}</span>`
+    :single?`<span class="art figure-art"><span class="fig-shift" style="${headShift(item.id)}">${image(item.id,true)}</span></span>`
     :`<span class="art face-art" style="${faceVars(item.id)}">${image(item.id,true)}</span>`;
   return `<button class="hero-card pull-card" data-${relic?'relic':'hero'}="${item.id}" data-rarity="${h.rarity}" aria-label="${h.name}, ${h.rarity}, ${item.fresh?'신규 획득':'중복'}"><span class="pull-shade" aria-hidden="true"></span>${badge(h.rarity)}<span class="tag ${item.fresh?'new':'plus'}">${item.fresh?'NEW':'+1'}</span>${art}<span class="plate"><strong>${escapeText(h.name)}</strong></span></button>`;
 }
@@ -271,7 +274,7 @@ function spotlightMarkup(item,relic,h,r,kind,line){
   const shards=ur&&rush?`<div class="spot-shards" aria-hidden="true">${Array.from({length:8},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>`:'';
   const motes=rush?`<div class="spot-inrush" aria-hidden="true">${Array.from({length:10},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>`:'';
   const quote=line?`<p class="spot-line" data-full="${escapeText(line)}">${motionOff()?escapeText(line):''}</p>`:'';
-  return `<div class="spot-veil" aria-hidden="true"></div><div class="spot-streak" aria-hidden="true"></div><div class="spot-portal" aria-hidden="true"><i class="spot-ring"></i>${ur?'<i class="spot-ring spot-ring-2"></i>':''}<div class="spot-circle" aria-hidden="true"><i></i></div><i class="spot-rays"></i>${ur?'<i class="spot-rays spot-rays-back"></i>':''}</div>${shards}${motes}<div class="spot-flash" aria-hidden="true"></div><div class="spot-shock" aria-hidden="true"></div><div class="spot-canvas"><div class="spot-figure${relic?' relic':''}">${image(item.id,!relic)}${fresh?'<span class="spot-new">NEW</span>':''}</div></div><div class="spot-copy"><p class="spot-stars" aria-hidden="true">${stars}</p><div class="spot-plate"><p class="spot-rar">${r} · ${escapeText(RARITY[r].name)}</p><h3>${escapeText(h.name)}</h3><p class="spot-role">${escapeText(relic?'유물':h.role)}</p></div>${quote}</div><button class="spot-skip" data-action="spot-skip">건너뛰기</button>`;
+  return `<div class="spot-veil" aria-hidden="true"></div><div class="spot-streak" aria-hidden="true"></div><div class="spot-portal" aria-hidden="true"><i class="spot-ring"></i>${ur?'<i class="spot-ring spot-ring-2"></i>':''}<div class="spot-circle" aria-hidden="true"><i></i></div><i class="spot-rays"></i>${ur?'<i class="spot-rays spot-rays-back"></i>':''}</div>${shards}${motes}<div class="spot-flash" aria-hidden="true"></div><div class="spot-shock" aria-hidden="true"></div><div class="spot-canvas"><div class="spot-figure${relic?' relic':''}">${relic?image(item.id,false):`<span class="fig-shift" style="${headShift(item.id)}">${image(item.id,true)}</span>`}${fresh?'<span class="spot-new">NEW</span>':''}</div></div><div class="spot-copy"><p class="spot-stars" aria-hidden="true">${stars}</p><div class="spot-plate"><p class="spot-rar">${r} · ${escapeText(RARITY[r].name)}</p><h3>${escapeText(h.name)}</h3><p class="spot-role">${escapeText(relic?'유물':h.role)}</p></div>${quote}</div><button class="spot-skip" data-action="spot-skip">건너뛰기</button>`;
 }
 function renderSpotlight(){
   const stage=revealStage(),item=spotItems[spotAt];if(!stage||!item||modal!=='draw')return;
@@ -553,7 +556,7 @@ function releaseMemorial(){
 }
 function resumeCombat(){if(saveBlocked){saves.mark();if(!saves.flush())return;saveBlocked=false;}paused=false;syncBattlePhase();updateBattle();}
 function leave(){
-  paused=true;show('전투를 중단할까요?','일시정지',`<p class="subtext">현재 배치와 웨이브를 저장하고 홈으로 나갑니다. 주간·월간 원정은 같은 입장으로 이어할 수 있습니다.</p><button class="danger-link" data-action="retire">이번 원정 포기</button>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="save-leave">저장 후 나가기</button></div>`,'leave');
+  paused=true;show('전투를 중단할까요?','일시정지',`<p class="subtext">현재 배치와 웨이브를 저장하고 홈으로 나갑니다. 주간·월간 원정은 같은 입장으로 이어할 수 있습니다.</p><button class="retire-row" data-action="retire"><i class="retire-ic">${icon('flag')}</i><span><b>이번 원정 포기</b><small>${run.mode==='monthly'?'완료한 라운드까지 기록':'완료한 라운드까지 정산'}</small></span>${icon('chevron')}</button>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="save-leave">저장 후 나가기</button></div>`,'leave');
 }
 function retireSheet(){
   show('도전을 종료할까요?','확인',`<p class="subtext">완료한 ${clearedRounds(run)}라운드까지 ${run.mode==='monthly'?'기록합니다. 월간 보상은 기록 화면에서 직접 확정하며, 언제든 다시 도전할 수 있습니다.':run.mode==='weekly'?'정산합니다. 이번 주 입장 횟수는 돌아오지 않습니다.':'정산합니다. 첫 클리어 보상은 받을 수 없습니다.'}</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="confirm-retire">종료하고 ${run.mode==='monthly'?'기록':'정산'}</button></div>`,'retire');
@@ -874,11 +877,14 @@ const subjectOf=name=>{const c=name.charCodeAt(name.length-1)-0xAC00;return name
 const lateNew=()=>LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id));
 const lateRarityLine=()=>RARITIES.map(r=>({r,n:lateNew().filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n).map(x=>`${RARITY[x.r].name} ${x.n}`).join(' · ');
 function maybeLateNotice(){if(modal||screen==='battle'||screen==='draft'||!lateNoticeIds(p()).length)return;showLateNotice();}
+// Highest rarity first; inside one rarity the announced order is kept.
+const byRarity=ids=>ids.map((id,i)=>[id,i]).sort((a,b)=>RARITIES.indexOf(HERO[b[0]].rarity)-RARITIES.indexOf(HERO[a[0]].rarity)||a[1]-b[1]).map(([id])=>id);
 function showLateNotice(){
-  const ids=lateNoticeIds(p()).length?lateNoticeIds(p()):lateNew();
+  const ids=byRarity(lateNoticeIds(p()).length?lateNoticeIds(p()):lateNew());
+  const counts=[...RARITIES].reverse().map(r=>({r,n:ids.filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n);
   const tiles=ids.map((id,i)=>`<div class="late-card" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>${HERO[id].name}</b><small>${HERO[id].role.split(' · ')[0]}</small></div>`).join('');
-  show('새 동료가 합류했어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="late-notice"><span class="late-flash" aria-hidden="true"></span><p class="late-lede"><b>신규 동료 ${ids.length}명</b>이 별빛 소환에 합류했어요</p><div class="late-grid">${tiles}</div>
-    <ul class="late-notes"><li>일반 소환과 시즌 소환의 <b>같은 등급 안에서 똑같은 확률</b>로 나와요(${lateRarityLine()}).</li><li>도감에도 모두 추가됐어요. 정확한 확률은 소환 화면의 <b>확률</b>에서 볼 수 있어요.</li></ul></div>`,
+  show('새 동료가 합류했어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="late-notice"><span class="late-flash" aria-hidden="true"></span><span class="late-rays" aria-hidden="true"></span><div class="late-head"><p class="late-kicker">NEW COMPANIONS</p><p class="late-lede"><b>${ids.length}</b>명의 새 동료</p><p class="late-counts">${counts.map(({r,n})=>`<span data-rarity="${r}"><i>${r}</i>${n}</span>`).join('')}</p></div><div class="late-grid">${tiles}</div>
+    <ul class="late-notes"><li>일반·시즌 소환에서 <b>같은 등급과 똑같은 확률</b>로 나오고, 도감에도 추가됐어요.</li></ul></div>`,
     `<button class="secondary" data-action="late-close">나중에</button><button class="primary shine" data-action="late-summon">소환하러 가기</button>`,'late');
   sound.reveal?.('SR');
   act('noticeLate',{},false);
@@ -895,10 +901,19 @@ function heroChance(id){
 }
 function showArrival({part=false,unlocked=[]}={}){
   const ids=unlocked.filter(id=>HERO[id]),cards=ids.map((id,i)=>`<div class="reveal-card" data-rarity="${HERO[id].rarity}" style="--i:${i}">${card(id,'hero',{id,fresh:true},ids.length===1)}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join('');
+  if(part&&!ids.length){showPartOpen();return;}
   show(part?'새벽의 별길이 열렸어요':'새 동료',`스테이지 ${PART_STAGES} 클리어`,`<div class="reveal-stage arrival" data-top="UR" data-count="${ids.length||1}">${part?'<p class="arrival-line">스테이지 46–90과 새벽 온실이 열렸어요</p>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span>${ids.length?`<div class="reveal-grid ${ids.length===1?'single':''}">${cards}</div><p class="reveal-caption">${subjectOf(ids.map(id=>HERO[id].name).join(', '))} 정원을 찾아왔어요</p><button class="reveal-skip" data-action="reveal-skip">바로 보기</button>`:''}</div>`,
     `<div class="dialog-buttons">${part?'<button class="secondary" data-action="close">확인</button><button class="primary" data-action="go-dawn">새벽 온실 보기</button>':'<button class="primary wide" data-action="close">확인</button>'}</div>`,'arrival');
   sound.reveal?.('UR');
   document.querySelectorAll('#sheet .reveal-card').forEach((node,i)=>revealTimers.push(setTimeout(()=>{if(modal!=='arrival'||!node.isConnected||node.closest('.skip'))return;const c=centerOf(node);burst(c.x,c.y,{count:18,spread:110,size:14,duration:900,color:'#ffe08a'});},(ids.length===1?1250:1150+i*120)+180)));
+}
+// Part two opens at stage 45: the dawn sky rises over the dawn greenhouse and each newly opened thing is dealt in as a row.
+function showPartOpen(){
+  const late=lateNew().length,sparks=Array.from({length:14},(_,i)=>`<i class="po-spark" style="--i:${i};--x:${(i*37+11)%100}%;--y:${(i*53+7)%62}%"></i>`).join('');
+  const rows=[['adventure','새벽의 별길',`스테이지 ${PART_STAGES+1}–${MAIN_STAGES}`],['garden','새벽 온실','치명타 · 치명타 대미지 화단'],...(late?[['summon',`신규 동료 ${late}명`,'별빛 소환에 합류']]:[])];
+  show('새벽의 별길이 열렸어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="part-open"><div class="po-sky" aria-hidden="true"><i class="po-rays"></i><i class="po-sun"></i>${sparks}</div><div class="po-head"><p class="po-kicker">PART 2</p><p class="po-title">새벽의 별길</p><p class="po-sub">STAGE ${PART_STAGES+1} – ${MAIN_STAGES}</p></div><ul class="po-list">${rows.map(([ic,b,s],i)=>`<li style="--i:${i}"><span class="po-ic">${icon(ic)}</span><span><b>${b}</b><small>${s}</small></span></li>`).join('')}</ul></div>`,
+    '<div class="dialog-buttons"><button class="secondary" data-action="close">확인</button><button class="primary" data-action="go-dawn">새벽 온실 보기</button></div>','arrival');
+  sound.reveal?.('UR');
 }
 // Tier picker shared by both challenges: locked tiers show their stage requirement.
 function tierPicker(kind,withAction=true){
@@ -1280,7 +1295,7 @@ document.addEventListener('click',e=>{
     'save-team':()=>{if(act('deck',{ids:editingDeck}).ok){const back=teamReturn;teamReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
     'go-collection':()=>{close();screen='collection';collection='hero';render();},'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},
-    'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=PART_STAGES)showLateNotice();else show('신규 동료',`스테이지 ${PART_STAGES} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${lateNew().map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${PART_STAGES}을(를) 처음 클리어하면 일반 소환과 시즌 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
+    'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=PART_STAGES)showLateNotice();else show('신규 동료',`스테이지 ${PART_STAGES} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${PART_STAGES}을(를) 처음 클리어하면 일반 소환과 시즌 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
     'go-garden':()=>{close();screen='garden';render();},'go-dawn':()=>{close();screen='garden';gardenTab='dawn';bedFocus='crit';render();},'go-home-gift':()=>{close();screen='home';giftTray=true;render();giftTray=true;const t=$('gift-tray');if(t){t.innerHTML=trayMarkup(p().partner);t.hidden=false;}},
     'monthly-claim':confirmMonthlyClaim,'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},
     speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},

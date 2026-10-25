@@ -1958,6 +1958,7 @@ export const ASSET_PATHS = {
   "effects-deathhand": "./assets/merge/effects-deathhand.webp",
   "effects-eclose": "./assets/merge/effects-eclose.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
+  "orbit-sea": "./assets/merge/orbit-sea.webp",
   "relics-new": "./assets/merge/relics-new.webp"
 };
 

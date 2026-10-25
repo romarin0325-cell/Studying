@@ -10,7 +10,7 @@ test('every enhancement-scaled number in the hero sheet is written in that hero 
       let pos=0;for(const [from,to] of tokens[kind]){const at=text.indexOf(from,pos);assert.ok(at>=0,`${h.id} ${kind}: ${from}`);assert.equal(to,from,`${h.id} ${kind}: base value matches the text`);pos=at+from.length;}
     }
   }
-  assert.equal(E.scaledTokens('snow_rabbit',1.3).trait[0][1],'52%');assert.equal(E.scaledTokens('luna',1.5).trait[0][1],'50%');
+  assert.equal(E.scaledTokens('snow_rabbit',1.3).trait[0][1],'45.5%');assert.equal(E.scaledTokens('luna',1.5).trait[0][1],'50%');
   assert.equal(E.scaledTokens('cure_master',1).skill[0][0],'4초');assert.equal(E.scaledTokens('cure_master',1.5).skill[0][1],'6초');
   assert.equal(E.scaledTokens('venom',1).skill[0][0],'10초');assert.equal(E.scaledTokens('joker',1).trait[0][0],'20%');
 });

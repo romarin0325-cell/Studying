@@ -137,13 +137,14 @@ export class Renderer {
     if(this.drag){this.art.hero(ctx,this.drag.hero,this.drag.x,this.drag.y+35,145,{alpha:.9,form:this.drag.form});}
     this.fx.drawAuraFrame(s);
     for(const f of this.floats){f.life-=dt;f.y-=dt*31;ctx.globalAlpha=Math.min(1,f.life*3);ctx.font=`700 ${f.size}px Georgia,serif`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#172632';ctx.strokeText(f.text,f.x,f.y);ctx.fillStyle=f.color;ctx.fillText(f.text,f.x,f.y);}ctx.globalAlpha=1;this.floats=this.floats.filter(f=>f.life>0);
-    if(s.phase==='intermission'){ctx.textAlign='center';ctx.font='600 21px system-ui';ctx.fillStyle='#f4e5c0';ctx.fillText(`다음 웨이브까지 ${Math.max(1,Math.ceil(s.breakTime))}초`,360,737);}
+    if(s.phase==='intermission'){const text=`다음 웨이브까지 ${Math.max(1,Math.ceil(s.breakTime))}초`;ctx.textAlign='center';ctx.font='600 21px system-ui';ctx.lineJoin='round';ctx.lineWidth=4;ctx.strokeStyle='rgba(18,26,44,.6)';ctx.strokeText(text,360,737);ctx.fillStyle='#f4e5c0';ctx.fillText(text,360,737);}
     ctx.restore();
   }
   drawDecor(s){const ctx=this.ctx,t=this.clock,dawn=CHAPTERS[s.chapter]?.part===2;
     shadow(ctx,76,144,42,.35);if(!this.art.creature(ctx,15,76,156,112)){star(ctx,76,126,32,'#b597e5',t*.1);}
     if(!this.decorGlow){this.decorGlow=ctx.createRadialGradient(76,136,4,76,136,55);this.decorGlow.addColorStop(0,'#bcd0ff44');this.decorGlow.addColorStop(1,'#bcd0ff00');}ctx.fillStyle=this.decorGlow;ctx.fillRect(21,81,110,110);
-    ctx.textAlign='center';ctx.fillStyle=dawn?'#ffe6d2':'#f0e3c5';ctx.font='600 18px system-ui';ctx.fillText(CHAPTERS[s.chapter].name,360,85);ctx.fillStyle=dawn?'#e8c4c8':'#b8d0d5';ctx.font='13px Georgia,serif';ctx.fillText('✦  D R E A M W E A V E R  ✦',360,59);
+    // A soft dark outline keeps the stage name readable on the bright and dawn gardens as well as the night one.
+    ctx.textAlign='center';ctx.lineJoin='round';ctx.strokeStyle='rgba(18,26,44,.5)';ctx.lineWidth=4;ctx.font='600 18px system-ui';ctx.strokeText(CHAPTERS[s.chapter].name,360,85);ctx.fillStyle=dawn?'#ffe6d2':'#f0e3c5';ctx.fillText(CHAPTERS[s.chapter].name,360,85);ctx.lineWidth=3;ctx.strokeStyle='rgba(18,26,44,.35)';ctx.font='13px Georgia,serif';ctx.strokeText('✦  D R E A M W E A V E R  ✦',360,59);ctx.fillStyle=dawn?'#e8c4c8':'#b8d0d5';ctx.fillText('✦  D R E A M W E A V E R  ✦',360,59);
     for(let i=0;i<(dawn?14:9);i++){const x=(i*103+Math.sin(t*.2+i)*20)%720,y=(i*83-t*7+7800)%780;star(ctx,x,y,1.8+Math.sin(t+i),dawn?(i%2?'#ffd2b4b0':'#ffc4d6b0'):(i%2?'#c7dfc580':'#e5d7a380'),t*.2);}
   }
   drawHero(s,index){const ctx=this.ctx,u=s.board[index],p=cellPoint(index);if(this.drag?.uid===u.uid){shadow(ctx,p.x,p.y+24,20,.2);return;}

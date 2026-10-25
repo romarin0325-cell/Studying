@@ -50,9 +50,9 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,83);
+  assert.equal(Object.keys(ASSET_PATHS).length,84);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
-  for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
+  for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.
   const altar=await sharp(assetFile(ASSET_PATHS['summon-altar'])).metadata();
   assert.equal(altar.format,'webp');assert.equal(altar.width,720);assert.equal(altar.height,1290);
@@ -80,7 +80,7 @@ test('every unit faces outward: the left cell looks left, the right cell is its 
 test('optimized images preserve the source pack, codec, alpha and sprite geometry',async()=>{
   const {manifest,read}=await loadImagePack();
   assert.ok(manifest.totals.outputBytes<manifest.totals.deployableSourceBytes);
-  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','relics','relics-expansion','relics-new','zeke-slash']);
+  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','zeke-slash']);
   for(const image of manifest.images){
     if(image.id.startsWith('atlas:unit-')){
       const m=await sharp(read(image.source)).metadata();

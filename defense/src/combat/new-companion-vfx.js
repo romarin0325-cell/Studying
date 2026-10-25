@@ -1,4 +1,4 @@
-// Demon King, the four Miracle forms and Zeke's spin slash (pass 18). Painted GPT sheets in the cast's luminous crystal
+// Demon King, the four Miracle forms, Zeke's spin slash and Behemoth's ground pound (pass 18). Painted GPT sheets in the cast's luminous crystal
 // language (docs/art/pass18-fx-20261026); dark fire keeps a baked dark body so it reads as darkness on either theme.
 // Every ring is drawn at the engine's real hit radius. These functions only draw: damage and timing stay in engine.js.
 import {HERO} from '../content.js';
@@ -59,8 +59,8 @@ export function drawNewShot(fx,shot,s,{x,y,angle,t}){
     // line along the whole pierce range is left by the impact (drawn there, at the beam's real width).
     const o=shot.origin,dir=Math.atan2(shot.to.y-o.y,shot.to.x-o.x),d=Math.hypot(shot.to.x-o.x,shot.to.y-o.y),len=(d+30)*ease(t);
     const hx=o.x+Math.cos(dir)*len,hy=o.y-16+Math.sin(dir)*len;
-    darkLine(ctx,o.x+Math.cos(dir)*Math.min(40,len*.3),o.y-16+Math.sin(dir)*Math.min(40,len*.3),hx,hy,HERO.demon_king.radius,1);
-    const w=170+rank*6;fx.glow('glow','#b45cff',hx,hy,96,.6);sheet(fx,0,hx-Math.cos(dir)*w*.34,hy-Math.sin(dir)*w*.34,w,w*.64,dir,1);
+    darkLine(ctx,o.x+Math.cos(dir)*Math.max(40,len*.45),o.y-16+Math.sin(dir)*Math.max(40,len*.45),hx,hy,HERO.demon_king.radius*.55,.75);
+    const w=112+rank*4;fx.glow('glow','#b45cff',hx,hy,54,.35);sheet(fx,0,hx-Math.cos(dir)*w*.34,hy-Math.sin(dir)*w*.34,w,w*.6,dir,.9);
     return true;
   }
   if(form==='miracle_wing'||form==='abyss_wing'){
@@ -83,27 +83,36 @@ export function drawNewAttackShape(fx,e,t,clarity=1){
     // One full swing of the flame sword around Zeke. The white-hot head of the painted trail (about 235 degrees on the
     // sheet) is carried round from behind the target, so it crosses the target when the hit lands (0.12 s); the swept
     // wedge reveals the trail. Then the ring breaks into flame and embers. The outer flame edge is the real radius.
-    const R=HERO.zeke.range,size=2*R/SPIN_EDGE,side=e.swing?-1:1,sweep=ease(span(t,0,.42)),a0=side*e.angle-1.55*Math.PI,head=a0+sweep*Math.PI*2;
-    const rot=head-235*Math.PI/180+(t>.42?(t-.42)*.5:0),peak=1-span(t,.38,.7),broke=Math.sin(Math.PI*span(t,.3,.85)),embers=Math.sin(Math.PI*span(t,.55,1));
-    fx.glow('glow','#ff8a3a',e.origin.x,e.origin.y,R*.9,(1-t)*.28*clarity);
+    const R=HERO.zeke.range,size=2*R/SPIN_EDGE,side=e.swing?-1:1,sweep=ease(span(t,0,.36)),a0=side*e.angle-1.55*Math.PI,head=a0+sweep*Math.PI*2;
+    const rot=head-235*Math.PI/180+(t>.36?(t-.36)*.5:0),peak=1-span(t,.3,.58),broke=Math.sin(Math.PI*span(t,.26,.72))*.8,embers=Math.sin(Math.PI*span(t,.5,1))*.7;
+    fx.glow('glow','#ff8a3a',e.origin.x,e.origin.y,R*.7,(1-t)*.16*clarity);
     ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.scale(1,side);
     if(peak>0){ctx.save();if(sweep<1){ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,size*.6,a0,head);ctx.closePath();ctx.clip();}
-      fx.atlasStamp(SPIN,0,3,1,0,0,size,size,rot,peak*.85*clarity,'screen');ctx.restore();}
+      fx.atlasStamp(SPIN,0,3,1,0,0,size,size,rot,peak*.72*clarity,'screen');ctx.restore();}
     if(broke>0)fx.atlasStamp(SPIN,1,3,1,0,0,size*1.03,size*1.03,rot+.12,broke*.85*clarity,'screen');
     if(embers>0)fx.atlasStamp(SPIN,2,3,1,0,0,size*1.06,size*1.06,rot+.2,embers*.8*clarity,'screen');
     ctx.restore();
     // The sword's head: a hot spark riding the edge while it sweeps.
-    if(sweep<1&&!fx.reduced){const hx=e.origin.x+Math.cos(side*head)*R*.86,hy=e.origin.y+Math.sin(side*head)*R*.86;fx.glow('glow','#ffd27a',hx,hy,110,.85*clarity);fx.glow('rays','#ffb04a',hx,hy,120,.5*clarity,t*4);}
+    if(sweep<1&&!fx.reduced){const hx=e.origin.x+Math.cos(side*head)*R*.86,hy=e.origin.y+Math.sin(side*head)*R*.86;fx.glow('glow','#ffd27a',hx,hy,80,.7*clarity);}
+    return true;
+  }
+  if(e.hero==='behemoth'){
+    if(!has(fx,'effects-behemoth'))return false;
+    // Ground pound, kept quiet like the Guardian's ring: the cracked-earth disc of his ultimate sheet thuds down faintly
+    // to the real radius (its glowing rim is the edge), a moss ring runs out and a few stone chips hop at his fist.
+    const R=HERO.behemoth.range,k=ease(span(t,0,.2)),fade=1-span(t,.15,.85),size=2*R/.9*(.9+.1*k);
+    fx.atlasStamp('effects-behemoth',2,3,1,e.origin.x,e.origin.y,size,size,0,fade*.2,'source-over');
+    ring(ctx,e.origin.x,e.origin.y,R*(.4+.6*k),'#cfe98a',2.4*fade+.6,fade*.55);
+    if(!fx.reduced){const hop=Math.sin(Math.PI*span(t,0,.7));for(let i=0;i<5;i++){const a=i/5*Math.PI*2+.4,r=18+span(t,0,.7)*26;ctx.save();ctx.globalAlpha=1-span(t,.5,.9);diamond(ctx,e.origin.x+Math.cos(a)*r,e.origin.y+8+Math.sin(a)*r*.45-hop*(10+i%3*5),3.6,i%2?'#8c7a5e':'#c9e58a');ctx.restore();}}
     return true;
   }
   if(e.hero==='miracle_larva'&&e.form==='miracle_cocoon'){
     if(!has(fx,SHEET))return false;
     // Silk shockwave: the woven ring opens from the cocoon to the real radius and fades there; pearls ride the ring.
     const R=MIRACLE_FORMS.miracle_cocoon.range,grow=ease(span(t,0,.55)),r=R*(.42+.58*grow),fade=1-span(t,.45,1),size=2*r/SILK_RING;
-    fx.glow('glow','#d9ccff',e.origin.x,e.origin.y-10,140*(1-t*.4),fade*.55);
-    sheet(fx,5,e.origin.x,e.origin.y,size,size,t*.6,fade*.95,'screen');
-    ring(ctx,e.origin.x,e.origin.y,r,'#f3edff',2.2*fade+.6,fade*.55);
-    if(!fx.reduced){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<6;i++){const a=i/6*Math.PI*2+t*1.4;ctx.globalAlpha=fade;diamond(ctx,e.origin.x+Math.cos(a)*r,e.origin.y+Math.sin(a)*r,4.2*fade+1.4,i%2?'#ffffff':SILK);}ctx.restore();}
+    sheet(fx,5,e.origin.x,e.origin.y,size,size,t*.6,fade*.5,'screen');
+    ring(ctx,e.origin.x,e.origin.y,r,'#f3edff',1.6*fade+.5,fade*.4);
+    if(!fx.reduced){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){const a=i/3*Math.PI*2+t*1.4;ctx.globalAlpha=fade*.7;diamond(ctx,e.origin.x+Math.cos(a)*r,e.origin.y+Math.sin(a)*r,3*fade+1.2,i%2?'#ffffff':SILK);}ctx.restore();}
     return true;
   }
   return false;
@@ -194,13 +203,13 @@ export function drawNewImpact(fx,e,t){
     const rank=Math.min(5,e.rank||1),fade=1-span(t,.35,1);
     if(e.hero==='demon_king'){
       // The lance burns its whole pierce line (real range and width) and black fire bursts up from the struck enemy.
-      if(e.origin){const a=e.angle,o=e.origin,R=HERO.demon_king.range,burn=1-span(t,.3,1),k=ease(span(t,0,.25));
-        darkLine(ctx,o.x+Math.cos(a)*36,o.y-16+Math.sin(a)*36,o.x+Math.cos(a)*R*(.55+.45*k),o.y-16+Math.sin(a)*R*(.55+.45*k),HERO.demon_king.radius*(.6+.4*burn),burn*.9);
-        if(!fx.reduced){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<7;i++){const f=.15+i*.12,px=o.x+Math.cos(a)*R*f,py=o.y-16+Math.sin(a)*R*f-ease(t)*(10+hash(i,e.x)*18);ctx.globalAlpha=burn;diamond(ctx,px,py,3.2,i%2?'#e7a6ff':'#9c4dff');}ctx.restore();}}
-      const s=(96+rank*5),h=s*(.45+.55*easeBack(span(t,0,.35)));
-      sheet(fx,4,e.x,e.y+4-h/2,s,h,0,fade);fx.glow('glow','#a04dff',e.x,e.y-22,s*.8,fade*.4);return true;
+      if(e.origin){const a=e.angle,o=e.origin,R=HERO.demon_king.range,burn=1-span(t,0,.7),k=ease(span(t,0,.25));
+        darkLine(ctx,o.x+Math.cos(a)*36,o.y-16+Math.sin(a)*36,o.x+Math.cos(a)*R*(.55+.45*k),o.y-16+Math.sin(a)*R*(.55+.45*k),HERO.demon_king.radius*.45*(.6+.4*burn),burn*.5);
+        if(!fx.reduced){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<4;i++){const f=.2+i*.2,px=o.x+Math.cos(a)*R*f,py=o.y-16+Math.sin(a)*R*f-ease(t)*(10+hash(i,e.x)*18);ctx.globalAlpha=burn;diamond(ctx,px,py,3.2,i%2?'#e7a6ff':'#9c4dff');}ctx.restore();}}
+      const s=(66+rank*4),h=s*(.45+.55*easeBack(span(t,0,.3)));
+      sheet(fx,4,e.x,e.y+4-h/2,s,h,0,fade*.85);return true;
     }
-    if(form==='miracle_cocoon'){fx.glow('glow',SILK,e.x,e.y-18,70,fade*.6);return true;}
+    if(form==='miracle_cocoon'){fx.glow('glow',SILK,e.x,e.y-18,48,fade*.4);return true;}
     // Splash forms: the painted burst plus a ring at the real splash radius.
     const R=e.form==='miracle_wing'||e.form==='abyss_wing'?72:64;
     if(form==='miracle_wing'){const pop=easeBack(span(t,0,.3)),s=R*2.6*pop;sheet(fx,6,e.x,e.y-14,s,s,t*.5,fade);

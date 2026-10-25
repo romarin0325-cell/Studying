@@ -26,7 +26,7 @@ function runnersFor(c,targets=canvases){
   });
 }
 function advance(items,dt){for(const item of items)asBefore(item.entry,item.before,()=>{const events=item.fixture.advance(dt);seeded(++item.frames,()=>events.forEach(e=>item.renderer.event(e)));item.renderer.draw(item.fixture.state,dt);});}
-const nameOf=entry=>entry.form?MIRACLE_FORMS[entry.form].name:HERO[entry.hero].name;
+const nameOf=entry=>entry.label||(entry.form?MIRACLE_FORMS[entry.form].name:HERO[entry.hero].name);
 function report(){
   const entry=entries[config.key],h=HERO[entry.hero];
   $('clock').textContent=time.toFixed(2)+'초';$('seek').value=time;$('hero-name').textContent=nameOf(entry);

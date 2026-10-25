@@ -50,9 +50,9 @@
     }
   },
   "totals": {
-    "sourceBytes": 28031359,
-    "deployableSourceBytes": 26411143,
-    "outputBytes": 14886212,
+    "sourceBytes": 28143173,
+    "deployableSourceBytes": 26518205,
+    "outputBytes": 14954092,
     "optimizedFiles": 164,
     "derivedFiles": 156,
     "derivedOutputBytes": 3747268
@@ -2618,9 +2618,9 @@
     {
       "id": "atlas:orbit-zone",
       "source": "./assets/merge/orbit-zone.webp",
-      "profile": "atlas",
+      "profile": null,
       "uses": [
-        "window.__ASTRA_ASSETS__.orbit-zone; combat renderer / stage UI"
+        "Star Orbit zone drawn as a tilted opaque ellipse, replaced in pass 18 by the round orbit-sea; kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -2633,14 +2633,35 @@
           "codec": "webp"
         }
       },
-      "output": {
-        "path": "./assets/optimized/merge/orbit-zone.webp",
-        "bytes": 4444,
-        "sha256": "475f212b7ae5a6766a4b4776758f7423292b50879480dddbc05b4265fb33a6af",
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
+    },
+    {
+      "id": "atlas:orbit-sea",
+      "source": "./assets/merge/orbit-sea.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.orbit-sea; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 111814,
+        "sha256": "65cb6d00cbc12bb87fad44e050c11d0055b94302402f0dbfaf31c518646aed3a",
         "metadata": {
-          "width": 256,
+          "width": 512,
           "height": 256,
-          "hasAlpha": false,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/orbit-sea.webp",
+        "bytes": 72324,
+        "sha256": "4fab5784919c8752c2c215043f359262b0575bcdf4d0518a8b04e8c342aac3a3",
+        "metadata": {
+          "width": 512,
+          "height": 256,
+          "hasAlpha": true,
           "codec": "webp"
         }
       },

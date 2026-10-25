@@ -43,6 +43,7 @@ docs/
 ## 3. 기획 (plans/)
 
 - [UPCOMING_COMPANIONS.md](plans/UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
+- [FINAL_UR_AND_RELIC_IDEAS.md](plans/FINAL_UR_AND_RELIC_IDEAS.md): 마지막 UR 동료와 신규 유물 아이디어(2026-10-26). GPT 안 평가, Claude 안, Grok 답. 구현 전 제안.
 - [SUNFLOWER_SUNMOON_PLAN.md](plans/SUNFLOWER_SUNMOON_PLAN.md): 해바라기·일월검희 구현 계획(2026-10-19). 해바라기는 구현됨, 일월검희는 구현 전.
 - [UPCOMING_BALANCE.md](plans/UPCOMING_BALANCE.md): 추가 예정 동료의 더미 구현 측정과 수치 제안서(2026-10-18). 확정 전이며, 측정 도구는 브랜치 `claude/upcoming-dummy-bench`에 있다(옛 폴더명 `defense_test/` 기준).
 - [CHARACTER_BALANCE_PROPOSAL.md](plans/CHARACTER_BALANCE_PROPOSAL.md): 캐릭터 밸런스 종합 제안서(2026-10-16). 일부는 8차에서 지시를 받아 반영됐다.
@@ -51,6 +52,7 @@ docs/
 
 ## 4. 날짜 기록 (archive/)
 
+- [18차: 눈토끼·데스핸드·지크 원형과 이펙트·메모리얼·밝은 테마](archive/2026-10-26-PASS18.md): 지크 원형 측정, 마왕·미라클·지크·베히모스·별바다 장판 이펙트, 메모리얼 8편 교체, 원정 포기·신규 동료·새벽 개방 화면. 전후 재생기는 [review/pass18-vfx](review/pass18-vfx/index.html).
 - [감속·가격·베히모스 소환과 대사 수정](archive/2026-10-25-BALANCE_DIALOGUE_FIXES.md): 어비스윙 강화 중복 제거, 가격 역전 없는 연결, 베히모스 정규 UR 전환, 첨부 대사 71개·메모리얼 11편·루미 프롬프트 적용.
 - [마왕 R·미라클라바 SR 구현과 비교](archive/2026-10-25-DEMON_MIRACLE.md): 네 형태·디버프 7종·별빛 기회비용·기본 치명타 5%/정원 곡선의 판단, 실제 엔진의 동일 등급 비교와 한계.
 - [마왕·미라클 에셋 제작과 검수](art/demon-miracle/README.md): 원화·3D 구조 참조·2D 최종본의 구분, 지팡이 없는 자세, 후면 가림 순서와 같은 크기 비교.
