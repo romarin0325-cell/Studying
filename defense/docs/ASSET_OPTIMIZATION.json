@@ -3389,7 +3389,7 @@
     },
     {
       "id": "memorial:underdog",
-      "source": "./assets/memorial/underdog.avif",
+      "source": "./assets/memorial/replacements/underdog/ec5e3347e27e2f5b24c8fe00df054c9644faea90c55fe39955577ec24d37cd97.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.underdog; standalone painting / web primary"
@@ -3405,7 +3405,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/underdog.avif",
+        "path": "./assets/optimized/memorial/replacements/underdog/ec5e3347e27e2f5b24c8fe00df054c9644faea90c55fe39955577ec24d37cd97.avif",
         "bytes": 31959,
         "sha256": "0f1b98a2a1e85db6c8f911e1516b3344cce8abde9684ac82c622b2f1f796cb13",
         "metadata": {
@@ -3419,7 +3419,7 @@
     },
     {
       "id": "memorial-webp:underdog",
-      "source": "./assets/memorial-webp/underdog.webp",
+      "source": "./assets/memorial-webp/replacements/underdog/30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.underdog; compat painting / web fallback",
@@ -3436,7 +3436,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/underdog.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/underdog/30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391.webp",
         "bytes": 60970,
         "sha256": "3bc76b9671948c104a7ceb9ca44c7fa9027445cdd3748e9e38bd5b2ae318567f",
         "metadata": {
@@ -3450,7 +3450,7 @@
     },
     {
       "id": "memorial:joker",
-      "source": "./assets/memorial/joker.avif",
+      "source": "./assets/memorial/replacements/joker/728fda8789e08c2286edb52c386f6d6c8662f9a9054750a96423c98afe19587e.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.joker; standalone painting / web primary"
@@ -3466,7 +3466,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/joker.avif",
+        "path": "./assets/optimized/memorial/replacements/joker/728fda8789e08c2286edb52c386f6d6c8662f9a9054750a96423c98afe19587e.avif",
         "bytes": 37957,
         "sha256": "59084a8e5f789847669ae1e7a68ba9892d475c81151a0cd11694a883cdb50b72",
         "metadata": {
@@ -3480,7 +3480,7 @@
     },
     {
       "id": "memorial-webp:joker",
-      "source": "./assets/memorial-webp/joker.webp",
+      "source": "./assets/memorial-webp/replacements/joker/48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.joker; compat painting / web fallback",
@@ -3497,7 +3497,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/joker.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/joker/48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642.webp",
         "bytes": 80010,
         "sha256": "84a21e7bf1a5d8904771426cf0e991c989ebe19c08a776b554de1d098818f392",
         "metadata": {
@@ -3511,7 +3511,7 @@
     },
     {
       "id": "memorial:sunflower",
-      "source": "./assets/memorial/sunflower.avif",
+      "source": "./assets/memorial/replacements/sunflower/22ad0f0d04a59eae36cec44e56cb2183ec745839226b5e93eaddd2d507e703bf.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.sunflower; standalone painting / web primary"
@@ -3527,7 +3527,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/sunflower.avif",
+        "path": "./assets/optimized/memorial/replacements/sunflower/22ad0f0d04a59eae36cec44e56cb2183ec745839226b5e93eaddd2d507e703bf.avif",
         "bytes": 28444,
         "sha256": "35646eecfd3a26ad32790a27d5440a591505cf0e27691ddcaa96af7fdb2a634c",
         "metadata": {
@@ -3541,7 +3541,7 @@
     },
     {
       "id": "memorial-webp:sunflower",
-      "source": "./assets/memorial-webp/sunflower.webp",
+      "source": "./assets/memorial-webp/replacements/sunflower/bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.sunflower; compat painting / web fallback",
@@ -3558,7 +3558,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/sunflower.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/sunflower/bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51.webp",
         "bytes": 50668,
         "sha256": "efcb520c8a036c8a65bd1f2b97d8a354e6c6b8367975e25d4b907815df04b486",
         "metadata": {
@@ -3938,7 +3938,7 @@
     },
     {
       "id": "memorial:toffee_apple",
-      "source": "./assets/memorial/toffee_apple.avif",
+      "source": "./assets/memorial/replacements/toffee_apple/59383b8cf127252dc623537c15cabefd5635922727999bc1f891b43977c69d2a.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.toffee_apple; standalone painting / web primary"
@@ -3954,7 +3954,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/toffee_apple.avif",
+        "path": "./assets/optimized/memorial/replacements/toffee_apple/59383b8cf127252dc623537c15cabefd5635922727999bc1f891b43977c69d2a.avif",
         "bytes": 43342,
         "sha256": "ffa624f9f144b80a84ae6a6b986bbf07ad56dfebb3f96c100f9f2ac1a0c2bc49",
         "metadata": {
@@ -3968,7 +3968,7 @@
     },
     {
       "id": "memorial-webp:toffee_apple",
-      "source": "./assets/memorial-webp/toffee_apple.webp",
+      "source": "./assets/memorial-webp/replacements/toffee_apple/772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.toffee_apple; compat painting / web fallback",
@@ -3985,7 +3985,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/toffee_apple.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/toffee_apple/772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff.webp",
         "bytes": 86072,
         "sha256": "1bade2464f5a42c0cfd78086b42e32f0fd9de66c45a73f36c6032ac4ef21acad",
         "metadata": {
@@ -3999,7 +3999,7 @@
     },
     {
       "id": "memorial:antropy",
-      "source": "./assets/memorial/antropy.avif",
+      "source": "./assets/memorial/replacements/antropy/ec6d3726ad7fc298ff10411a248c8122c83009aef678b0baa9caacd2114f3013.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.antropy; standalone painting / web primary"
@@ -4015,7 +4015,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/antropy.avif",
+        "path": "./assets/optimized/memorial/replacements/antropy/ec6d3726ad7fc298ff10411a248c8122c83009aef678b0baa9caacd2114f3013.avif",
         "bytes": 25787,
         "sha256": "5fa4598b8d08758cbeb32939310fd0a9b57b456aa1ab5ae0c19d511d97ed7000",
         "metadata": {
@@ -4029,7 +4029,7 @@
     },
     {
       "id": "memorial-webp:antropy",
-      "source": "./assets/memorial-webp/antropy.webp",
+      "source": "./assets/memorial-webp/replacements/antropy/4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.antropy; compat painting / web fallback",
@@ -4046,7 +4046,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/antropy.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/antropy/4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7.webp",
         "bytes": 47736,
         "sha256": "ec99bdebfa103871196bd0fd20e17377fa7aa88abc2e2a76f2c239f2a3cb34d9",
         "metadata": {
@@ -4487,7 +4487,7 @@
     },
     {
       "id": "memorial:cure_master",
-      "source": "./assets/memorial/cure_master.avif",
+      "source": "./assets/memorial/replacements/cure_master/4405fd596aa312c04d310b4d66c7ca95292b0a85e677ea0f774e7ac1bb3e80a3.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.cure_master; standalone painting / web primary"
@@ -4503,7 +4503,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/cure_master.avif",
+        "path": "./assets/optimized/memorial/replacements/cure_master/4405fd596aa312c04d310b4d66c7ca95292b0a85e677ea0f774e7ac1bb3e80a3.avif",
         "bytes": 32789,
         "sha256": "2bbb4f0e3b56d63cc2ee14346dedc4b11271eafa675517e84d5041389d3d3e3c",
         "metadata": {
@@ -4517,7 +4517,7 @@
     },
     {
       "id": "memorial-webp:cure_master",
-      "source": "./assets/memorial-webp/cure_master.webp",
+      "source": "./assets/memorial-webp/replacements/cure_master/45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.cure_master; compat painting / web fallback",
@@ -4534,7 +4534,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/cure_master.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/cure_master/45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f.webp",
         "bytes": 65708,
         "sha256": "667d1cd0992f5969275c0ffe8eba64fcd482aecba0094b6b74d6918cc698c725",
         "metadata": {
@@ -5036,7 +5036,7 @@
     },
     {
       "id": "memorial:venom",
-      "source": "./assets/memorial/venom.avif",
+      "source": "./assets/memorial/replacements/venom/e3a6e8e7eeee3bfc6b659f7c7e225faded20cbbc4558e0f3f2c84940d1fc0f2c.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.venom; standalone painting / web primary"
@@ -5052,7 +5052,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/venom.avif",
+        "path": "./assets/optimized/memorial/replacements/venom/e3a6e8e7eeee3bfc6b659f7c7e225faded20cbbc4558e0f3f2c84940d1fc0f2c.avif",
         "bytes": 48022,
         "sha256": "84ea55d87465588a3731f05e4638188fcb6f8f0287d4cbfcfdaa365506e71864",
         "metadata": {
@@ -5066,7 +5066,7 @@
     },
     {
       "id": "memorial-webp:venom",
-      "source": "./assets/memorial-webp/venom.webp",
+      "source": "./assets/memorial-webp/replacements/venom/0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.venom; compat painting / web fallback",
@@ -5083,7 +5083,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/venom.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/venom/0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a.webp",
         "bytes": 96178,
         "sha256": "4ffad2bd02d8ab92496a4e30ca54dd3921ec59148e932257f283e546181cae37",
         "metadata": {
@@ -5097,7 +5097,7 @@
     },
     {
       "id": "memorial:behemoth",
-      "source": "./assets/memorial/behemoth.avif",
+      "source": "./assets/memorial/replacements/behemoth/2009945576703373175c003471a9ffa56a1dc4557a626b4c0c75046eeddfbdea.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.behemoth; standalone painting / web primary"
@@ -5113,7 +5113,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/behemoth.avif",
+        "path": "./assets/optimized/memorial/replacements/behemoth/2009945576703373175c003471a9ffa56a1dc4557a626b4c0c75046eeddfbdea.avif",
         "bytes": 33068,
         "sha256": "e98e62c772f3a86f5cc9b8769b5d988787a1cae11fe9d149b6baa3d28ec7188b",
         "metadata": {
@@ -5127,7 +5127,7 @@
     },
     {
       "id": "memorial-webp:behemoth",
-      "source": "./assets/memorial-webp/behemoth.webp",
+      "source": "./assets/memorial-webp/replacements/behemoth/9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.behemoth; compat painting / web fallback",
@@ -5144,7 +5144,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/behemoth.webp",
+        "path": "./assets/optimized/memorial-webp/replacements/behemoth/9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61.webp",
         "bytes": 63072,
         "sha256": "5027bcaa831d784bda8e114c3267299dc9f10941b51459b86d545a58d258fb55",
         "metadata": {
@@ -8772,7 +8772,7 @@
     },
     {
       "id": "memorialThumb:underdog",
-      "source": "./assets/memorial-webp/underdog.webp",
+      "source": "./assets/memorial-webp/replacements/underdog/30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/underdog.webp",
@@ -8794,7 +8794,7 @@
     },
     {
       "id": "memorialThumb:joker",
-      "source": "./assets/memorial-webp/joker.webp",
+      "source": "./assets/memorial-webp/replacements/joker/48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/joker.webp",
@@ -8816,7 +8816,7 @@
     },
     {
       "id": "memorialThumb:sunflower",
-      "source": "./assets/memorial-webp/sunflower.webp",
+      "source": "./assets/memorial-webp/replacements/sunflower/bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/sunflower.webp",
@@ -8970,7 +8970,7 @@
     },
     {
       "id": "memorialThumb:toffee_apple",
-      "source": "./assets/memorial-webp/toffee_apple.webp",
+      "source": "./assets/memorial-webp/replacements/toffee_apple/772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/toffee_apple.webp",
@@ -8992,7 +8992,7 @@
     },
     {
       "id": "memorialThumb:antropy",
-      "source": "./assets/memorial-webp/antropy.webp",
+      "source": "./assets/memorial-webp/replacements/antropy/4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/antropy.webp",
@@ -9168,7 +9168,7 @@
     },
     {
       "id": "memorialThumb:cure_master",
-      "source": "./assets/memorial-webp/cure_master.webp",
+      "source": "./assets/memorial-webp/replacements/cure_master/45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/cure_master.webp",
@@ -9366,7 +9366,7 @@
     },
     {
       "id": "memorialThumb:venom",
-      "source": "./assets/memorial-webp/venom.webp",
+      "source": "./assets/memorial-webp/replacements/venom/0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/venom.webp",
@@ -9388,7 +9388,7 @@
     },
     {
       "id": "memorialThumb:behemoth",
-      "source": "./assets/memorial-webp/behemoth.webp",
+      "source": "./assets/memorial-webp/replacements/behemoth/9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
