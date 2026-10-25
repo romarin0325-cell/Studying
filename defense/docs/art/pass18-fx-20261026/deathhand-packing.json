@@ -1,0 +1,113 @@
+{
+  "input": "C:/Users/romar/AppData/Local/Temp/claude/C--Users-romar-git-Studying/7636718d-2552-48de-93ae-f0c2e27f534f/scratchpad/gen-hand/fx-deathhand.png",
+  "width": 1254,
+  "height": 1254,
+  "columns": 2,
+  "rows": 2,
+  "rowCuts": [
+    [
+      626,
+      0
+    ]
+  ],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        627,
+        626
+      ],
+      "box": [
+        85,
+        25,
+        509,
+        555
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        627,
+        0,
+        1254,
+        626
+      ],
+      "box": [
+        702,
+        52,
+        474,
+        514
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        0,
+        626,
+        626,
+        1254
+      ],
+      "box": [
+        58,
+        636,
+        536,
+        541
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 3,
+      "cut": [
+        626,
+        626,
+        1254,
+        1254
+      ],
+      "box": [
+        627,
+        627,
+        608,
+        555
+      ],
+      "touchesCut": [
+        true,
+        true,
+        false,
+        false
+      ]
+    }
+  ],
+  "shadow": {
+    "gain": 5,
+    "frames": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "color": [
+      14,
+      6,
+      24
+    ]
+  }
+}

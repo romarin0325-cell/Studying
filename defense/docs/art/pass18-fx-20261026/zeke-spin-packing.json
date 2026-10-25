@@ -1,0 +1,73 @@
+{
+  "input": "defense/docs/art/pass18-fx-20261026/gpt-zeke-spin.png",
+  "width": 2172,
+  "height": 724,
+  "columns": 3,
+  "rows": 1,
+  "rowCuts": [],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        724,
+        724
+      ],
+      "box": [
+        9,
+        31,
+        692,
+        637
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        724,
+        0,
+        1448,
+        724
+      ],
+      "box": [
+        757,
+        45,
+        662,
+        614
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        1448,
+        0,
+        2172,
+        724
+      ],
+      "box": [
+        1504,
+        55,
+        634,
+        582
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

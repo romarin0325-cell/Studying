@@ -46,6 +46,7 @@ export class Renderer {
     if(e.type==='skill'&&e.kind==='bigshow'){this.shake=Math.max(this.shake||0,16);this.float('빅쇼!',360,330,'#ffe3b0',58);}
     if(e.type==='reduce')this.float('환원',e.x,e.y-58,'#ffd6a0',22);
     if(e.type==='armageddonBlast')this.shake=Math.max(this.shake||0,10);
+    if(e.type==='deathhandBlast')this.float('데스핸드',Math.min(600,Math.max(120,e.x)),Math.max(140,e.y-250),'#e7b6ff',30);
     if(e.type==='skill'&&e.kind==='venomplague')this.float('플래이그',e.origin.x,e.origin.y-74,'#b8f08a',24);
     if(e.type==='ward')this.float('무효',e.x,e.y-52,e.hero==='antropy'?'#e0d4ff':'#ffd3ec',20);
     if(e.type==='skill'&&e.kind==='lemonade')this.float('굿나잇 ♡',e.origin.x,e.origin.y-74,'#ffd3ec',24);
@@ -130,6 +131,8 @@ export class Renderer {
     this.effects=this.effects.filter(e=>e.life>0);
     for(const p of this.particles){p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=110*dt;ctx.globalAlpha=Math.max(0,p.life/p.total);if(p.star)star(ctx,p.x,p.y,p.r*1.7,p.color,this.clock*2);else{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}}ctx.globalAlpha=1;this.particles=this.particles.filter(p=>p.life>0);
     this.fx.draw(dt);
+    // Effects whose impact comes after the cast (the Death Hand's grip) ask for their shake when it lands.
+    if(this.fx.shake){this.shake=Math.max(this.shake||0,this.fx.shake);this.fx.shake=0;}
     for(const skill of this.skills)skill.life-=dt;this.skills=this.skills.filter(skill=>skill.life>0);this.skill=this.skills.at(-1)||null;
     if(this.drag){this.art.hero(ctx,this.drag.hero,this.drag.x,this.drag.y+35,145,{alpha:.9,form:this.drag.form});}
     this.fx.drawAuraFrame(s);

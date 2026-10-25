@@ -1,0 +1,197 @@
+{
+  "input": "C:/Users/romar/AppData/Local/Temp/claude/C--Users-romar-git-Studying/7636718d-2552-48de-93ae-f0c2e27f534f/scratchpad/gen-attacks/fx-demon-miracle.png",
+  "width": 1774,
+  "height": 887,
+  "columns": 4,
+  "rows": 2,
+  "rowCuts": [
+    [
+      429,
+      0
+    ]
+  ],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        454,
+        429
+      ],
+      "box": [
+        10,
+        107,
+        444,
+        227
+      ],
+      "touchesCut": [
+        false,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        454,
+        0,
+        887,
+        429
+      ],
+      "box": [
+        481,
+        174,
+        380,
+        102
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        887,
+        0,
+        1331,
+        429
+      ],
+      "box": [
+        902,
+        60,
+        413,
+        299
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 3,
+      "cut": [
+        1331,
+        0,
+        1774,
+        429
+      ],
+      "box": [
+        1349,
+        64,
+        382,
+        306
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 4,
+      "cut": [
+        0,
+        429,
+        444,
+        887
+      ],
+      "box": [
+        23,
+        430,
+        406,
+        399
+      ],
+      "touchesCut": [
+        false,
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 5,
+      "cut": [
+        444,
+        429,
+        887,
+        887
+      ],
+      "box": [
+        467,
+        447,
+        388,
+        377
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 6,
+      "cut": [
+        887,
+        429,
+        1331,
+        887
+      ],
+      "box": [
+        908,
+        431,
+        404,
+        405
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 7,
+      "cut": [
+        1331,
+        429,
+        1774,
+        887
+      ],
+      "box": [
+        1344,
+        434,
+        400,
+        407
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ],
+  "shadow": {
+    "gain": 3,
+    "frames": [
+      0,
+      3,
+      4,
+      7
+    ],
+    "color": [
+      14,
+      6,
+      24
+    ]
+  }
+}

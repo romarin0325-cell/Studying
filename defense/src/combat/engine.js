@@ -7,7 +7,7 @@ export const miracleForm=u=>u?.hero==='miracle_larva'?(u.form||'miracle_larva'):
 export const unitHero=(s,u)=>u.hero==='miracle_larva'?{...HERO[u.hero],...MIRACLE_FORMS[miracleForm(u)]}:HERO[u.hero];
 const shotHero=shot=>shot.hero==='miracle_larva'?{...HERO[shot.hero],...MIRACLE_FORMS[shot.form||'miracle_larva']}:HERO[shot.hero];
 export const pendingMiracles=s=>s.board.filter(u=>u?.hero==='miracle_larva'&&!u.cursed&&['miracle_larva','miracle_cocoon'].includes(miracleForm(u)));
-export const DEATHHAND=Object.freeze({base:5,perDebuff:3,radius:180,critDamage:.5});
+export const DEATHHAND=Object.freeze({base:4,perDebuff:4,radius:180,critDamage:.5});
 const castCrits=new WeakMap();
 export function unitCrit(s,u,index=s.board.indexOf(u)){
   if(!s.crit)return null;
@@ -64,7 +64,7 @@ export const WINTER_EXPOSURE=.15;
 export const BURN=Object.freeze({attack:.3,attackSeconds:4,skill:.7,skillSeconds:7});
 // Time Magician trauma form: fixed power and speed while the buff lasts.
 export const TRAUMA=Object.freeze({power:1.5,speed:.35});
-export const SNOW_RABBIT=Object.freeze({slow:.4,trainingSlow:.01,freeze:2,skillSlow:.5,seconds:6});
+export const SNOW_RABBIT=Object.freeze({slow:.35,trainingSlow:.02,freeze:2,skillSlow:.5,seconds:6});
 export const WINTER_COURT=Object.freeze({slow:.5,seconds:6,killFreeze:.8});
 // Both additions are percentage points: +0.1% per rank after 1★ and per enhancement milestone.
 export const stormExecuteChance=(s,rank=1)=>Math.min(1,.01+.001*(rank-1)+.01*(special(s,'storm_sage')-1));
@@ -269,7 +269,7 @@ const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed
 // Ultimate durations, control times and ultimate slows grow too.
 export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
-  const trait={snow_rabbit:[['40%',slow(.4)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
+  const trait={snow_rabbit:[['35%',slow(SNOW_RABBIT.slow)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
     luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
@@ -285,7 +285,7 @@ export function liveTraitTokens(s,u){
   if(miracleForm(u)==='abyss_wing')return [['25%',pctText(Math.min(.8,.25*k*ctl))]];
   const slow=v=>pctText(Math.min(.8,v)),taken=v=>pctText(Math.min(DAMAGE_TAKEN_CAP,v)),num=v=>Number(v.toFixed(2));
   return ({
-    snow_rabbit:[['40%',slow((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*ctl*k)]],
+    snow_rabbit:[['35%',slow((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*ctl*k)]],
     siren:[['15%',pctText((.15+level*.03)*k*sup)]],
     great_detective:[['8%',taken((.08+level*.02)*k*ctl)],['15%',taken((.15+level*.02)*k*ctl)]],
     guardian:[['0.7초',secText((.7+level*.05)*k*ctl)]],
@@ -518,7 +518,7 @@ export function geometryContains(g,p){
   const dx=p.x-g.from.x,dy=p.y-g.from.y,d=Math.hypot(dx,dy),forward=dx*Math.cos(g.angle)+dy*Math.sin(g.angle),side=-dx*Math.sin(g.angle)+dy*Math.cos(g.angle);
   if(g.kind==='cross')return d<=g.range&&Math.min(Math.abs(dx),Math.abs(dy))<=g.radius/2;
   if(g.kind==='beam')return forward>=0&&forward<=g.range&&Math.abs(side)<=g.radius/2;
-  // Zeke's sweep: a 90-degree arc band, radius deep, centred on the target's distance (not the whole cone).
+  // Cleave: a 90-degree arc band, radius deep, centred on the target's distance (Zeke's attack until pass 18; unused now).
   if(g.kind==='cleave')return d<=g.range&&forward>=0&&Math.abs(side)<=forward&&Math.abs(d-Math.hypot(g.to.x-g.from.x,g.to.y-g.from.y))<=g.radius/2;
   if(g.kind==='pulse')return d<=g.range;
   return Math.hypot(p.x-g.to.x,p.y-g.to.y)<=g.radius;
@@ -965,8 +965,8 @@ export function castPreview(s,id){
   const u=bestUnit(s,id);if(!u)return null;
   if(id==='miracle_larva'){const count=pendingMiracles(s).length;return {name:HERO[id].skill.name,rank:u.rank,lines:count?[`라바·코쿤 ${count}기 전부가 각각 우화합니다.`,`미라클윙 50% · 어비스윙 50%. 성급과 훈련은 유지됩니다.`]:['우화할 라바·코쿤이 없습니다.'],boost:{on:count>0,label:count?`우화 ${count}기`:'우화 없음',hint:''}};}
   if(id==='demon_king'){
-    const {targets}=deathhandTargets(s),base=combatStats(s,u).damage,counts=targets.map(e=>demonDebuffTypes(s,e).length),min=counts.length?Math.min(...counts):0,max=counts.length?Math.max(...counts):0;
-    return {name:HERO[id].skill.name,rank:u.rank,lines:[`반경 ${DEATHHAND.radius}의 적 ${targets.length}명 · 디버프 ${min===max?min:`${min}~${max}`}종.`,`위력 ${5+3*min}${min===max?'':`~${5+3*max}`}배 · ${Math.round(base*(5+3*min))}${min===max?'':`~${Math.round(base*(5+3*max))}`} 피해. 디버프는 유지됩니다.`],boost:{on:max>0,label:max?`강화 ${min===max?min:`${min}~${max}`}종`:'강화 대기',hint:max?'':'감속·노출·기절·빙결·성광·중독·화상 각각 1종당 +3배.'}};
+    const {targets}=deathhandTargets(s),base=combatStats(s,u).damage,hand=n=>DEATHHAND.base+DEATHHAND.perDebuff*n,counts=targets.map(e=>demonDebuffTypes(s,e).length),min=counts.length?Math.min(...counts):0,max=counts.length?Math.max(...counts):0;
+    return {name:HERO[id].skill.name,rank:u.rank,lines:[`반경 ${DEATHHAND.radius}의 적 ${targets.length}명 · 디버프 ${min===max?min:`${min}~${max}`}종.`,`위력 ${hand(min)}${min===max?'':`~${hand(max)}`}배 · ${Math.round(base*hand(min))}${min===max?'':`~${Math.round(base*hand(max))}`} 피해. 디버프는 유지됩니다.`],boost:{on:max>0,label:max?`강화 ${min===max?min:`${min}~${max}`}종`:'강화 대기',hint:max?'':`감속·노출·기절·빙결·성광·중독·화상 각각 1종당 +${DEATHHAND.perDebuff}배.`}};
   }
   const hero=HERO[id],type=hero.skill.type,base=combatStats(s,u).damage,control=special(s,id),scale=rankControl(u.rank),dream=rumiDream(s,u);
   const targets=s.enemies.filter(e=>e.hp>0),lines=[];

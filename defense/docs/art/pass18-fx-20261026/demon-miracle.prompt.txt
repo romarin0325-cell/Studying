@@ -1,0 +1,17 @@
+Use your built-in image generation tool to create ONE image, then save that image file as fx-demon-miracle.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create a game VFX sprite atlas for an existing mobile fantasy tower-defense game. Reference image 1 (style-ref.png) is the game's established effect language: luminous neon / crystalline motifs glowing on a PURE BLACK background (the game draws them with screen blending, so black becomes transparent). Match that language exactly: translucent glowing glass-crystal facets, bright hot cores, saturated rim light, crisp readable silhouettes, a few small sparkles. Do NOT paint opaque solid objects, flat stickers, cel-shaded props or black ink outlines. Reference image 2 (characters.png) shows four characters, left to right: Demon King, Miracle Larva, Miracle Wing, Abyss Wing. Use them for palette and motif ONLY; never draw the characters, faces or people.
+
+Layout: EXACTLY 4 columns x 2 rows of equal square cells on a wide 2:1 canvas. Pure black (#000000) background everywhere. Each motif centered in its cell with at least 12% black margin; nothing crosses a cell border. No grid lines, frames, labels, letters, numbers, faces, people or UI. Every cell must have a clearly different silhouette. Glow stays close to the shapes (no big haze).
+
+TOP ROW = BASIC ATTACK projectiles, compact, all pointing RIGHT, like the small neon attack motifs in the lower part of reference image 1:
+1. Demon King "black flame lance": a long narrow piercing lance of BLACK FIRE pointing right. Its body is dark violet-black flame (visible deep violet, not pure black) wrapped in a bright violet-magenta rim fire, with a white-violet hot point at the right tip; ragged black-flame tongues trail to the left; a few small amethyst ember sparks. It must read as dark fire outlined by violet light.
+2. Miracle Larva: a small spring-green crystal leaf dart with a pale gold vein, one fine shining silk thread trailing to the left, three tiny pollen sparkles. The simplest motif of the row.
+3. Miracle Wing: a radiant butterfly of white-gold prism glass flying right, wings swept back, a short rainbow refraction streak (pale blue, pink, mint, gold) behind it, gold sparkles. Elegant and the most luminous motif of the row.
+4. Abyss Wing: a dark violet glass butterfly flying right, glowing magenta wing veins and two crimson-orange eye spots, trailing violet poison droplets and a few dark wing scales.
+
+BOTTOM ROW = HIT BURSTS shown on the struck enemy, roughly round and non-directional:
+5. Demon King hit: a compact upward burst of black fire (deep violet body, bright violet-magenta rim), cracked amethyst shards flying outward.
+6. Miracle Cocoon pulse: a THIN perfect circular RING seen exactly from above (a circle, not an ellipse) woven from glowing lavender-white silk threads, with pearl beads of light and a few tiny butterfly-scale sparkles along it. The ring fills most of the cell and its middle is empty black: a shockwave ring, not a disc.
+7. Miracle Wing hit: a golden-white prism flare: a sharp four-point star with rainbow refraction shards radiating outward and a faint pair of butterfly-wing light shapes behind the star.
+8. Abyss Wing hit: a violet miasma bloom: a round burst of dark violet poison mist with glowing magenta edges, crimson butterfly scales and violet droplets scattering outward.
