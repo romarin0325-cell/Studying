@@ -65,7 +65,7 @@ export const NEW_MEMORIAL_MEDIA = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "cdd2ec738642860a41634062447246954234f43b63efdb5127825f07b6d09079",
+    "bodySha256": "fb41bbd28e5631f4747cebbc33a38cbe003ebae9460d11b52e22f800f9eae1bf",
     "avifPath": "./assets/memorial/miracle_larva.avif",
     "webp": {
       "path": "./assets/memorial-webp/miracle_larva.webp",

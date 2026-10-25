@@ -15,7 +15,7 @@ const want=name=>!only||only.has(name);
 const browser=await chromium.launch({headless:true}),errors=[],report={};
 function fixture({cleared=60,owned=true,auto=true,late=true,wrong=true,dreams=50000}={}){
   const p=createProfile();p.cleared=cleared;p.noticeLate=late?[...LATE_COMPANIONS]:[];p.settings={sound:false,auto,reduced:false,quality:'standard'};p.dreams=dreams;
-  for(const h of HEROES)if(owned){p.heroes[h.id].owned=true;p.heroes[h.id].bond=3;}
+  for(const h of HEROES)if(owned){p.heroes[h.id].owned=true;p.heroes[h.id].bond=['behemoth','cure_master','antropy','sunflower'].includes(h.id)?10:3;}
   if(wrong){const qs=['lecture','term'].flatMap(k=>allQuestions(k).slice(0,3));p.study.wrong=qs.map((q,i)=>({kind:q.kind,id:q.id,choice:0,at:Date.now()-i*1000}));}
   return JSON.stringify(p);
 }
@@ -57,6 +57,17 @@ try{
     if(want('home')){const {context,page}=await open(theme);await shot(page,theme+'-home');await lowContrast(page,theme+'-home');await context.close();}
     if(want('late')){const {context,page}=await open(theme,{cleared:45,late:false});await page.locator('.late-notice').waitFor({timeout:5000}).catch(()=>{});await page.waitForTimeout(1600);await shot(page,theme+'-late');await lowContrast(page,theme+'-late');await context.close();}
     if(want('arrival')){const {context,page}=await open(theme,{unlocked:true});await page.locator('[data-action="settings"]').first().click();await page.locator('[data-test-tool="arrival"]').click();await page.waitForTimeout(500);await shot(page,theme+'-arrival-0.5');await page.waitForTimeout(2200);await shot(page,theme+'-arrival');await lowContrast(page,theme+'-arrival');await page.locator('#sheet-footer [data-action="close"]').click();await page.waitForTimeout(1600);await shot(page,theme+'-arrival-late');await context.close();}
+    if(want('memorial')){
+      const {context,page}=await open(theme);await page.evaluate(()=>{});
+      for(const id of ['behemoth','cure_master','antropy','sunflower']){
+        await page.evaluate(id=>{const p=window.STAR_GARDEN.profile;p.heroes[id].bond=10;},id);
+        await page.getByRole('button',{name:'동료',exact:true}).click();await page.locator('[data-collection="album"]').click();
+        await page.locator(`[data-memorial="${id}"]`).click();await page.waitForSelector('#memory-art[aria-busy="false"]',{timeout:8000}).catch(()=>{});
+        await page.locator('[data-action="memorial-story"]').click();await page.waitForTimeout(500);await shot(page,`${theme}-memorial-${id}`);
+        await page.locator('.mv-controls [data-action="close"]').click();await page.waitForTimeout(300);
+      }
+      await context.close();
+    }
     if(want('battle')){
       const {context,page}=await open(theme);await page.getByRole('button',{name:'모험',exact:true}).click();await page.waitForTimeout(300);
       await page.locator('[data-prepare-stage]').first().click();await page.locator('[data-begin="main"]').first().click();await page.locator('#arena').waitFor();await page.waitForTimeout(2500);

@@ -784,3 +784,5 @@ body::before{background:var(--lobby,var(--garden) center/cover);filter:blur(30px
    sits on the screen centre under the figure. */
 .reveal-spot .spot-plate{margin:0 5%!important;transform-origin:50% 100%}
 .reveal-spot .spot-line{margin:0 5%!important;padding-top:4px!important;transform-origin:50% 0}
+/* Pass 18: speech is coloured inside the paragraph; narration keeps the ink colour. */
+.memory-text .say{color:#B8336A!important}

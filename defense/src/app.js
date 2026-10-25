@@ -816,7 +816,7 @@ function openMemorial(id){
       e.owned?`<button class="primary wide" data-action="bond" data-id="${id}">선물하러 가기</button>`:'<button class="secondary wide" data-action="close">닫기</button>','memorial-locked',id);return;
   }
   show(h.name,story.title,`<div class="mv"><div class="mv-art" id="memory-art" aria-busy="true"><div class="memory-loading" id="memory-loading" role="status">기억을 펼치는 중…</div></div>
-      <div class="mv-story" id="memory-narrative"><div class="memory-reading-progress"><span id="memory-progress">0%</span><i id="memory-progress-fill"></i></div><div class="memory-text" id="memory-text" tabindex="0">${story.paragraphs.map(t=>`<p${/^["“]/.test(t)?' class="dialogue"':''}>${escapeText(t)}</p>`).join('')}</div></div></div>`,
+      <div class="mv-story" id="memory-narrative"><div class="memory-reading-progress"><span id="memory-progress">0%</span><i id="memory-progress-fill"></i></div><div class="memory-text" id="memory-text" tabindex="0">${story.paragraphs.map(storyParagraph).join('')}</div></div></div>`,
     `<div class="mv-controls"><button class="secondary" data-action="memorial-story" aria-pressed="false">${icon('book')}<span>이야기</span></button><button class="secondary" data-lobby="${id}" aria-pressed="${p().lobby===id}">${icon('home')}<span>${p().lobby===id?'로비에서 내리기':'로비에 걸기'}</span></button><button class="primary" data-action="close">닫기</button></div>`,'memorial',id);
   memorialHero=id;memorialPage=p().memories[id]?.page||0;bindMemorialScroll();
   const generation=memorialGeneration,img=new Image();memorialImage=img;img.dataset.memorial='1';img.decoding='async';img.width=720;img.height=1080;img.alt=`${h.name} · ${story.title}`;
@@ -827,6 +827,19 @@ function openMemorial(id){
       if(generation!==memorialGeneration||modal!=='memorial'||memorialHero!==id)return;$('memory-art').replaceChildren(img);$('memory-art').setAttribute('aria-busy','false');
     }catch{if(generation!==memorialGeneration||modal!=='memorial')return;$('memory-loading').textContent='그림을 불러오지 못했습니다.';$('memory-art').setAttribute('aria-busy','false');}
   })();
+}
+// Speech inside "..." is coloured as speech; narration around it keeps the narration colour. A paragraph that opens with
+// speech also gets the speech rule on its left edge.
+function storyParagraph(text){
+  let html='',open=false,buf='';
+  const flush=say=>{if(buf)html+=say?`<span class="say">${escapeText(buf)}</span>`:escapeText(buf);buf='';};
+  for(const ch of text){
+    if(!open&&(ch==='"'||ch==='“')){flush(false);open=true;buf=ch;}
+    else if(open&&(ch==='"'||ch==='”')){buf+=ch;flush(true);open=false;}
+    else buf+=ch;
+  }
+  flush(open);
+  return `<p${/^["“]/.test(text)?' class="dialogue"':''}>${html}</p>`;
 }
 function bindMemorialScroll(){
   const story=MEMORIAL_STORIES[memorialHero],text=$('memory-text');if(!story||!text||modal!=='memorial')return;
