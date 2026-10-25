@@ -29,16 +29,16 @@ test('only two new collectible identities, with requested rarities',()=>{
 test('Deathhand counts distinct live types, including separate stun/freeze, without a five-type cap',()=>{
   const {s,enemy}=setup();for(const type of ['slow','exposure','stun','freeze','divine','poison','burn'])effect(s,enemy,type);
   effect(s,enemy,'poison',15);effect(s,enemy,'slow',.5);effect(s,enemy,'unrelated');effect(s,enemy,'burn',1,s.time);
-  assert.equal(E.demonDebuffTypes(s,enemy).length,7);assert.equal(E.deathhandFactor(s,enemy),26);
-  enemy.statusEffects=[];enemy.slowEffects=[];assert.equal(E.deathhandFactor(s,enemy),5);
-  effect(s,enemy,'slow',.25);effect(s,enemy,'freeze');assert.equal(E.deathhandFactor(s,enemy),11);
+  assert.equal(E.demonDebuffTypes(s,enemy).length,7);assert.equal(E.deathhandFactor(s,enemy),32);
+  enemy.statusEffects=[];enemy.slowEffects=[];assert.equal(E.deathhandFactor(s,enemy),4);
+  effect(s,enemy,'slow',.25);effect(s,enemy,'freeze');assert.equal(E.deathhandFactor(s,enemy),12);
 });
 test('Deathhand applies each target factor independently and preserves its debuffs',()=>{
   const {s,enemy,unit}=setup();unit('demon_king',12);effect(s,enemy,'slow',.25);effect(s,enemy,'freeze');
   const second=structuredClone(enemy);second.uid=s.nextId++;second.progress+=30;second.statusEffects=[];second.slowEffects=[];s.enemies.push(second);
   const before=JSON.stringify([enemy.statusEffects,enemy.slowEffects]);const preview=E.castPreview(s,'demon_king'),rng=s.rng;
-  assert.match(preview.lines.join(' '),/5~11배/);assert.equal(s.rng,rng);assert.equal(E.cast(s,'demon_king').ok,true);
-  assert.equal(1e8-enemy.hp,38*11);assert.equal(1e8-second.hp,38*5);assert.equal(s.gauge,50);assert.equal(JSON.stringify([enemy.statusEffects,enemy.slowEffects]),before);
+  assert.match(preview.lines.join(' '),/4~12배/);assert.equal(s.rng,rng);assert.equal(E.cast(s,'demon_king').ok,true);
+  assert.equal(1e8-enemy.hp,38*12);assert.equal(1e8-second.hp,38*4);assert.equal(s.gauge,50);assert.equal(JSON.stringify([enemy.statusEffects,enemy.slowEffects]),before);
 });
 test('Deathhand selects densest radius with deterministic forward tie break',()=>{
   const {s,enemy}=setup();enemy.progress=100;

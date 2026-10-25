@@ -27,12 +27,12 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 25,
+    "damage": 31,
     "interval": 1.2,
     "attack": "slash",
     "trait": {
       "type": "burn",
-      "text": "앞쪽 부채꼴 범위를 베고, 맞은 적을 4초간 불태웁니다. 적이 코어 가까이(경로 마지막 4분의 1) 오면 공격 속도가 40% 빨라집니다."
+      "text": "자기 칸 주변(반경 250)의 적을 모두 베고, 맞은 적을 4초간 불태웁니다. 적이 코어 가까이(경로 마지막 4분의 1) 오면 공격 속도가 40% 빨라집니다."
     },
     "skill": {
       "name": "용의 맹세",
@@ -41,10 +41,10 @@ export const HEROES = [
       "text": "적 전체에게 위력 7배 피해를 주고 7초간 강하게 불태웁니다. 코어 생명력이 절반 아래로 내려가면 강화되어 위력 14배가 됩니다."
     },
     "heightGroup": "tall",
-    "role": "선봉 · 부채꼴",
-    "shape": "cleave",
-    "range": 345,
-    "radius": 90
+    "role": "선봉 · 회전 베기",
+    "shape": "pulse",
+    "range": 250,
+    "radius": 250
   },
   {
     "id": "rumi",
@@ -181,7 +181,7 @@ export const HEROES = [
     "attack": "ice",
     "trait": {
       "type": "slow",
-      "text": "작은 눈보라로 맞은 적들을 40% 느리게 합니다."
+      "text": "작은 눈보라로 맞은 적들을 35% 느리게 합니다."
     },
     "skill": {
       "name": "하얀 숨결",
@@ -1953,7 +1953,12 @@ export const ASSET_PATHS = {
   "ancient-cross": "./assets/merge/ancient-cross.webp",
   "zeke-cone": "./assets/merge/zeke-cone.webp",
   "zeke-slash": "./assets/merge/zeke-slash.webp",
+  "zeke-spin": "./assets/merge/zeke-spin.webp",
+  "effects-demon-miracle": "./assets/merge/effects-demon-miracle.webp",
+  "effects-deathhand": "./assets/merge/effects-deathhand.webp",
+  "effects-eclose": "./assets/merge/effects-eclose.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
+  "orbit-sea": "./assets/merge/orbit-sea.webp",
   "relics-new": "./assets/merge/relics-new.webp"
 };
 

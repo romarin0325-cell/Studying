@@ -3,9 +3,15 @@
 // bright-pixel box. The black ground becomes alpha (alpha = brightest channel, colour un-premultiplied), so the atlas
 // draws with source-over like the original ultimates atlas and reads like a screen blend on dark ground.
 // Usage: node defense/scripts/art/pack-fx-sheet.mjs <nodeModulesDir> <in.png> <out.webp> <report.json> [columns rows]
+//   [--cell 512] [--shadow <gain> --shadow-frames 0,1 --shadow-color 14,6,24]
+// --shadow keeps "black" fire visible (pass 18, Demon King): on the listed frames a dark body is laid under the glow,
+// its alpha = (brightest channel - 12) x gain, softly blurred, so dark violet flame stays a dark mass on any ground.
 import {createRequire} from 'node:module';
 import fs from 'node:fs/promises';
-const [modDir,input,output,reportFile,colArg='4',rowArg='2']=process.argv.slice(2),COLS=Number(colArg),ROWS=Number(rowArg),CELL=256,INNER=228;
+const argv=process.argv.slice(2),flag=(key,fallback)=>{const i=argv.indexOf('--'+key);return i<0?fallback:argv[i+1];};
+const positional=argv.filter((a,i)=>!a.startsWith('--')&&!(i&&argv[i-1].startsWith('--')));
+const [modDir,input,output,reportFile,colArg='4',rowArg='2']=positional,COLS=Number(colArg),ROWS=Number(rowArg),CELL=Number(flag('cell',256)),INNER=Math.round(CELL*228/256);
+const SHADOW=Number(flag('shadow',0)),SHADOW_FRAMES=new Set(String(flag('shadow-frames','')).split(',').filter(Boolean).map(Number)),SHADOW_COLOR=String(flag('shadow-color','14,6,24')).split(',').map(Number);
 const sharp=createRequire(modDir+'/x.js')('sharp');
 const base=sharp(input).removeAlpha();const {width,height}=await base.metadata();
 const raw=await base.raw().toBuffer(),LUM=30;
@@ -36,9 +42,19 @@ for(let r=0;r<ROWS;r++){
 const W=COLS*CELL,H=ROWS*CELL;
 const {data:black,info}=await sharp({create:{width:W,height:H,channels:3,background:'#000000'}}).composite(tiles).removeAlpha().raw().toBuffer({resolveWithObject:true});
 const rgba=Buffer.alloc(W*H*4),step=info.channels;
-for(let i=0,j=0;i<black.length;i+=step,j+=4){
-  const a=Math.max(black[i],black[i+1],black[i+2]);rgba[j+3]=a;
-  if(a){rgba[j]=Math.min(255,Math.round(black[i]*255/a));rgba[j+1]=Math.min(255,Math.round(black[i+1]*255/a));rgba[j+2]=Math.min(255,Math.round(black[i+2]*255/a));}
+let shade=null;
+if(SHADOW>0){
+  const mask=Buffer.alloc(W*H);
+  for(let p=0;p<W*H;p++){const frame=Math.floor(Math.floor(p/W)/CELL)*COLS+Math.floor(p%W/CELL);if(SHADOW_FRAMES.has(frame))mask[p]=Math.min(255,Math.round(Math.max(0,Math.max(black[p*step],black[p*step+1],black[p*step+2])-12)*SHADOW));}
+  // A wide blur closes the near-black holes GPT leaves inside the body (they would read as see-through patches).
+  const blur=async sigma=>{const out=await sharp(mask,{raw:{width:W,height:H,channels:1}}).blur(sigma).raw().toBuffer({resolveWithObject:true});return p=>out.data[p*out.info.channels];};
+  const fine=await blur(Math.max(.3,CELL/200)),wide=await blur(CELL/40);
+  shade=Buffer.alloc(W*H);for(let p=0;p<W*H;p++)shade[p]=Math.max(fine(p),Math.min(255,Math.round(wide(p)*1.6)));
+  report.shadow={gain:SHADOW,frames:[...SHADOW_FRAMES],color:SHADOW_COLOR};
+}
+for(let i=0,j=0,p=0;i<black.length;i+=step,j+=4,p++){
+  const glow=Math.max(black[i],black[i+1],black[i+2])/255,body=shade?shade[p]/255*(1-glow):0,a=glow+body;rgba[j+3]=Math.round(a*255);
+  if(a>0)for(let c=0;c<3;c++)rgba[j+c]=Math.min(255,Math.round((black[i+c]+SHADOW_COLOR[c]*body)/a));
 }
 await sharp(rgba,{raw:{width:W,height:H,channels:4}}).webp({lossless:true}).toFile(output);
 await fs.writeFile(reportFile,JSON.stringify(report,null,2)+'\n');

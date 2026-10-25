@@ -86,14 +86,14 @@ function soloWinner(s){
   return boosted[0];
 }
 
-test('snow training adds one percentage point and the displayed slow includes rank and enhancement',()=>{
+test('snow training adds two percentage points and the displayed slow includes rank and enhancement',()=>{
   for(let level=0;level<=5;level++){
     const s=traitArena([{hero:'snow_rabbit',index:12,rank:3}]),[e]=enemiesFor(s,[{}]),u=s.board[12];
     s.upgrades.snow_rabbit=level;s.meta.snow_rabbit={power:1,special:1.1};
     resolveNormal(s,launchNormal(s,u));
-    const expected=Math.min(.8,(.4+level*.01)*1.2*1.1);
+    const expected=Math.min(.8,(.35+level*.02)*1.2*1.1);
     close(e.slow,expected,'trained snow slow');
-    assert.equal(E.trainingBonus('snow_rabbit',level),`감속 ${40+level}%`);
+    assert.equal(E.trainingBonus('snow_rabbit',level),`감속 ${35+level*2}%`);
     assert.deepEqual(E.givenEffects(s,u,12),[`감속 ${Number((expected*100).toFixed(1))}%`]);
   }
 });

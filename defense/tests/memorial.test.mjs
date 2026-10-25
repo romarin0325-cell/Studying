@@ -37,3 +37,18 @@ test('bond ten gates reading, progress survives old-save migration, and no readi
   assert.ok(command(p,'memory',{id:'star_boy',page:MEMORIAL_STORIES.star_boy.paragraphs.length-1}).ok);assert.equal(p.memories.star_boy.read,true);assert.ok(command(p,'memory',{id:'star_boy',page:0}).ok);assert.equal(p.memories.star_boy.read,true);
   p.memories.star_boy.page=9999;assert.equal(validateProfile(p),false);delete p.memories;assert.ok(parseProfile(p));
 });
+test('reading paragraphs: no paragraph splits a quote or ends mid-sentence, and pre-pass-18 progress keeps its place',()=>{
+  for(const [id,s] of Object.entries(MEMORIAL_STORIES))for(const [i,t] of s.paragraphs.entries()){
+    assert.equal((t.match(/["“”]/g)||[]).length%2,0,`${id} ${i}: balanced quotes`);
+    assert.equal(t,t.trim(),`${id} ${i}: trimmed`);
+    assert.match(t,/[.!?…~♡♪"”)\-—]$/,`${id} ${i}: ends a sentence`);
+  }
+  const p=createProfile(1791198000000);p.heroes.behemoth.owned=true;p.heroes.behemoth.bond=10;p.heroes.venom.owned=true;p.heroes.venom.bond=10;
+  // Saved before pass 18: Behemoth had 13 hard-wrapped lines, Venom 12 paragraphs; no "of".
+  p.memories={behemoth:{page:12,read:true},venom:{page:6,read:false}};
+  const back=parseProfile(JSON.stringify(p));assert.ok(back,'old progress is migrated, not rejected');
+  assert.deepEqual(back.memories.behemoth,{page:MEMORIAL_STORIES.behemoth.paragraphs.length-1,read:true,of:MEMORIAL_STORIES.behemoth.paragraphs.length});
+  assert.equal(back.memories.venom.page,Math.round(6/11*(MEMORIAL_STORIES.venom.paragraphs.length-1)));
+  assert.deepEqual(parseProfile(JSON.stringify(back)).memories,back.memories,'migration runs once');
+  assert.ok(command(back,'memory',{id:'venom',page:2}).ok);assert.equal(back.memories.venom.of,MEMORIAL_STORIES.venom.paragraphs.length);
+});

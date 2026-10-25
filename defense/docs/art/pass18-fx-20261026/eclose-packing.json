@@ -1,0 +1,99 @@
+{
+  "input": "defense/docs/art/pass18-fx-20261026/gpt-eclose.png",
+  "width": 1254,
+  "height": 1254,
+  "columns": 2,
+  "rows": 2,
+  "rowCuts": [
+    [
+      627,
+      0
+    ]
+  ],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "box": [
+        20,
+        13,
+        582,
+        609
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "box": [
+        639,
+        18,
+        602,
+        601
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        0,
+        627,
+        627,
+        1254
+      ],
+      "box": [
+        44,
+        642,
+        550,
+        592
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 3,
+      "cut": [
+        627,
+        627,
+        1254,
+        1254
+      ],
+      "box": [
+        635,
+        640,
+        608,
+        599
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

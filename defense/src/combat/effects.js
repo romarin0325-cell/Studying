@@ -2,7 +2,9 @@ import {HERO,HEROES} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
-import {drawNewShot,drawNewImpact} from './new-companion-vfx.js';
+import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
+// Effects drawn under the units (attack circles and ultimate ground marks); draw() only ages them.
+const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround']);
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 // Emblems added in pass 15 for companions whose ultimate only had the shared cast flash, and for the Queen, who borrowed
 // Cherry Prince's finisher ring (GPT image, docs/art/companion-fx-20261024): [atlas, frame, columns, rows].
@@ -123,9 +125,14 @@ export class CombatFX{
     this.impacts.push(effect);if(this.impacts.length>128)this.impacts.shift();
   }
   event(e){
-    if(e.type==='deathhandBlast')this.add({...e,life:.85,total:.85});
-    if(e.type==='eclose')for(const p of e.points)this.add({...p,type:'miracleEclose',life:1,total:1});
-    if(e.type==='attack'&&['zeke','guardian','ancient_dragon','behemoth'].includes(e.hero)){const life=e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='ancient_dragon'?.3:.36;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
+    if(e.type==='deathhandBlast'){
+      // Positions of the counted targets as they stood when the hand closed (the dead ones are already gone).
+      const points=(e.targets||[]).map(r=>{const at=this.enemies.get(r.uid);return {...r,...(at?.point||{x:e.x,y:e.y}),boss:!!at?.enemy?.boss};});
+      this.add({...e,points,life:1.4,total:1.4});this.add({type:'deathhandGround',x:e.x,y:e.y,radius:e.radius,life:1.4,total:1.4});
+    }
+    if(e.type==='eclose')for(const [i,p] of e.points.entries()){const delay=Math.min(.48,i*.12),life=1.25+delay;this.add({...p,type:'miracleEclose',delay,life,total:life});this.add({...p,type:'ecloseGround',delay,life,total:life});}
+    const cocoon=e.hero==='miracle_larva'&&e.form==='miracle_cocoon';
+    if(e.type==='attack'&&(cocoon||['zeke','guardian','ancient_dragon','behemoth'].includes(e.hero))){const life=cocoon?.44:e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='ancient_dragon'?.3:.34;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='meteor')this.add({...e,seed:this.clock*7+e.x,life:.7,total:.7});
     if(e.type==='judgement')this.add({...e,life:.9,total:.9});
@@ -135,7 +142,7 @@ export class CombatFX{
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
-    if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:.3;this.add({...e,life,total:life});}
+    if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:['demon_king','miracle_larva'].includes(e.hero)?.45:.3;this.add({...e,life,total:life});}
     if(e.type==='chain'){const lightning=e.hero==='lightning_sage',life=lightning?LIGHTNING_IMPACT_LIFE:.24;this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life,total:life,rank:1,...(lightning?{hop:true}:{})});}
     if(e.type==='dreamPhase')for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});
     if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
@@ -167,7 +174,8 @@ export class CombatFX{
     const age=skill.total-skill.life;if(age<0||age>1.1||!skill.origin)return;
     const ctx=this.ctx,h=HERO[skill.hero],o=skill.origin,ur=isUR(skill.hero),k=ur?1.3:1,fade=1-window01(age,.55,1.1),reduced=this.reduced?.55:1;
     // Screen-edge flash in the hero colour (UR: brighter and gold-tinted).
-    if(age<.4){ctx.save();ctx.globalAlpha=(1-age/.4)*(ur?.38:.22)*reduced;ctx.globalCompositeOperation='lighter';ctx.fillStyle=(ur?'#ffd36a':h.color)+'55';ctx.fillRect(0,0,720,780);ctx.restore();}
+    // The Death Hand darkens the field instead of flashing it.
+    if(age<.4&&skill.kind!=='deathhand'){ctx.save();ctx.globalAlpha=(1-age/.4)*(ur?.38:.22)*reduced;ctx.globalCompositeOperation='lighter';ctx.fillStyle=(ur?'#ffd36a':h.color)+'55';ctx.fillRect(0,0,720,780);ctx.restore();}
     ctx.save();ctx.globalCompositeOperation='lighter';
     // Pillar of light from the caster.
     const pillar=(1-window01(age,.05,.75))*reduced;
@@ -254,7 +262,8 @@ export class CombatFX{
   }
   drawSkillField(skill){
     if(!skill||skill.life<=0)return;
-    if(skill.kind==='deathhand'||skill.kind==='miracle_eclose')return;
+    // Their signatures are drawn from their own events (hand over the pack, each cocoon hatching); the cast beat stays.
+    if(skill.kind==='deathhand'||skill.kind==='miracle_eclose'){this.drawCast(skill);return;}
     if(drawCompanionSkill(this,skill))return;
     this.drawCast(skill);
     const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero],age=skill.total-skill.life;
@@ -523,7 +532,11 @@ export class CombatFX{
   drawZones(s){
     const ctx=this.ctx;for(const z of s.zones){ctx.save();const fade=Math.min(1,z.life*2),pulse=.65+Math.sin(this.clock*4+z.uid)*.1;ctx.globalAlpha=fade;
       // Star Orbit relic: its own small star-ring decal (the ring is the real radius), nothing else.
-      if(z.orbit){this.atlasStamp('orbit-zone',0,1,1,z.x,z.y,z.radius*2.3,z.radius*2.3,0,fade*(.55+pulse*.3),'screen');ctx.restore();continue;}
+      // Star Orbit relic (pass 18): a small round patch of the star sea, seen from above, its slow golden orbit riding the
+      // rim. Both painted rims sit on the real radius (orbit-sea: 0 pool, 1 ring); the pool turns slowly like a galaxy.
+      if(z.orbit){const size=2*z.radius/.78,open=Math.min(1,(z.total-z.life)*6);
+        this.atlasStamp('orbit-sea',0,2,1,z.x,z.y,size*(.8+.2*open),size*(.8+.2*open),this.reduced?0:this.clock*.35+z.uid,fade*.62,'source-over');
+        this.atlasStamp('orbit-sea',1,2,1,z.x,z.y,size,size,this.reduced?0:-this.clock*1.1-z.uid,fade*(.7+pulse*.2),'source-over');ctx.restore();continue;}
       if(z.hero==='cure_master'){
         // Lemonade fizz: a pale lemon pool with rising bubbles, three lemon slices and two hearts circling. The edge is the real radius.
         const R=z.radius,t=this.clock;
@@ -788,26 +801,14 @@ export class CombatFX{
     const flames=this.impacts.filter(e=>e.type==='attackShape'&&e.life>0&&['zeke','ancient_dragon'].includes(e.hero)).length;
     const fireClarity=Math.min(1,2/Math.max(1,flames));
     for(const e of this.impacts){
-      if(e.type!=='attackShape'||e.life<=0)continue;
+      if(!GROUND_TYPES.has(e.type)||e.life<=0)continue;
       const t=Math.max(0,1-e.life/e.total);
+      if(e.type!=='attackShape'){drawNewGround(this,e,t);continue;}
         const h=HERO[e.hero],fade=Math.sin(Math.PI*t);
-        if(e.hero==='zeke'){
-          // Basic attack as a sword-beam slash (zeke-slash atlas: 0 peak crescent, 1 breaking apart, 2 embers).
-          // (1) At Zeke the blade passes: the peak crescent is revealed tip to tip, then breaks apart.
-          // (2) The same crescent flies out as a sword beam and lands on the engine's hit band (90 degrees at the
-          //     target's distance, radius deep) in the shot's 0.12 s travel, then scatters into embers there.
-          // (3) Every enemy actually hit shows its own spark (impact events). Nothing paints the area itself.
-          const reach=Math.min(h.range,Math.hypot(e.to.x-e.origin.x,e.to.y-e.origin.y)),side=e.swing?-1:1,a=fireClarity;
-          const slash=(frame,x,w,hgt,alpha)=>this.atlasStamp('zeke-slash',frame,3,1,x,0,w,hgt,0,alpha,'screen');
-          ctx.save();ctx.translate(e.origin.x,e.origin.y);ctx.rotate(e.angle);ctx.scale(1,side);
-          const pass=window01(t,0,.28),broke=window01(t,.24,.62),near=1-window01(t,.5,.9);
-          if(near>0){ctx.save();ctx.beginPath();ctx.rect(-80,60-150*easeOut(pass),160,160);ctx.clip();slash(0,30,92,92,a*(1-broke)*near);ctx.restore();slash(1,30,92,92,a*broke*near);}
-          // Beam: tile height spans the 90-degree chord (crescent fills ~82% of the tile), width stays slim.
-          const run=easeOut(window01(t,.1,.36)),r=40+(reach-40)*run,hgt=Math.min(1.45*reach,300)/.82*(.55+.45*run),w=Math.max(70,Math.min(130,reach*.42)),land=window01(t,.36,1);
-          if(t>.1){const cx=r-w*.44;slash(0,cx,w,hgt,a*(1-land)*Math.min(1,run*3));slash(land<.5?1:2,cx,w,hgt,a*Math.sin(Math.PI*land)*.9);}
-          ctx.restore();
-        }else if(e.hero==='guardian'||e.hero==='behemoth'){
-          ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,h.range*(.32+t*.68),h.range*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();this.stamp(e.hero,e.origin.x,e.origin.y,90+t*30,0,fade*.46);
+        if(drawNewAttackShape(this,e,t,e.hero==='zeke'?fireClarity:1))continue;
+        if(['guardian','behemoth','zeke','miracle_larva'].includes(e.hero)){
+          const R=e.hero==='miracle_larva'?230:h.range;
+          ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,R*(.32+t*.68),R*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();if(e.hero!=='miracle_larva')this.stamp(e.hero,e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
           // Basic attack, not an ultimate: a small cross at the dragon and four thin flame arms.
           const reach=h.range*Math.min(1,t*2.4),a=fade*fireClarity;
@@ -823,7 +824,7 @@ export class CombatFX{
     // boss tells and execution receipts keep their own independent emphasis.
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
-    for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||e.type==='attackShape')continue;
+    for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||GROUND_TYPES.has(e.type))continue;
       if(drawNewImpact(this,e,t))continue;
       if(drawCompanionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(drawLightningImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;

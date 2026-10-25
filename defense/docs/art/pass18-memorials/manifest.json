@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "baseCommit": "fce92ff62514a8c9559f64a8e897298435fcbdd2",
+  "policy": "Previous paintings remain byte-identical at their original paths. Replacement PNGs and encodings have separate content-addressed paths in the active media catalog.",
+  "paintings": [
+    {
+      "id": "venom",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/venom.avif",
+          "sha256": "4f43b04fda3ef9b42acb59e3a7a861c36ec47dba80df6df06198669d2c3d5c4a",
+          "bytes": 50916
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/venom.webp",
+          "sha256": "07e404ddc5ecf352585dd3e9b193244359b17edef5f8a5e899a3143b3c468942",
+          "bytes": 95150
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/venom/092daf6ec9268f50d63b31ac97226e5199585e9598740409cd6cf36bab4d8e9e.png",
+      "sourceSha256": "092daf6ec9268f50d63b31ac97226e5199585e9598740409cd6cf36bab4d8e9e"
+    },
+    {
+      "id": "antropy",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/antropy.avif",
+          "sha256": "36898a42c64d252416fe74b87a03759cd5a99f203e74538d3112027699fce254",
+          "bytes": 55041
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/antropy.webp",
+          "sha256": "ce7bcaedd4f5d9011dd1ed30b6990b23f01eeafeda1dd4dd639ab16e977dbee9",
+          "bytes": 96462
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/antropy/438de12efc679863bafb5b23b895764662511bf2bc7a5256314edac18485962f.png",
+      "sourceSha256": "438de12efc679863bafb5b23b895764662511bf2bc7a5256314edac18485962f"
+    },
+    {
+      "id": "toffee_apple",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/toffee_apple.avif",
+          "sha256": "890afc5fd42999683cac280c290941b3bd76c41ab6297ae1a8485e3023d8b0c6",
+          "bytes": 64253
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/toffee_apple.webp",
+          "sha256": "7c6aeb757cf6849760ae70165cd06185cb373d12ce1af7206b8e928489cb2099",
+          "bytes": 95362
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/toffee_apple/94b029b01464f9c83bb34cda9c49ea705a15ea44c83e1c8d945d38687281a464.png",
+      "sourceSha256": "94b029b01464f9c83bb34cda9c49ea705a15ea44c83e1c8d945d38687281a464"
+    },
+    {
+      "id": "sunflower",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/sunflower.avif",
+          "sha256": "d866554c5f33b3b407d595e898d3cfb5dc1ccae2bb7ddf6dd806940bd2a05ee9",
+          "bytes": 45001
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/sunflower.webp",
+          "sha256": "c985bcab237ac96dbfaf7771236a7021b84432b0d22125daa0dc418f0a9ca3ec",
+          "bytes": 82690
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/sunflower/2aba744ed4e21853841c69c25f86d851d5bb64de3ed29ca72f1ecac5c82693a5.png",
+      "sourceSha256": "2aba744ed4e21853841c69c25f86d851d5bb64de3ed29ca72f1ecac5c82693a5"
+    },
+    {
+      "id": "underdog",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/underdog.avif",
+          "sha256": "fdbfd85df162a7ba2dd772babdd1f12dc8cfee1384579543196e0d0b6b792b98",
+          "bytes": 50711
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/underdog.webp",
+          "sha256": "21a6b9fda98a072cd09b1626de09326d59234dd3b8caa9756fee55bcb45e1593",
+          "bytes": 90712
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/underdog/4aa6da0136ef1b234f9da20d92ac37a04cefc37869ac8a0bf6b36dc26156ea14.png",
+      "sourceSha256": "4aa6da0136ef1b234f9da20d92ac37a04cefc37869ac8a0bf6b36dc26156ea14"
+    },
+    {
+      "id": "behemoth",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/behemoth.avif",
+          "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
+          "bytes": 65110
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/behemoth.webp",
+          "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+          "bytes": 95826
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/behemoth/e986326ec77ee714df44533764101ae76a0983c1a70c01753de46561258280b4.png",
+      "sourceSha256": "e986326ec77ee714df44533764101ae76a0983c1a70c01753de46561258280b4"
+    },
+    {
+      "id": "joker",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/joker.avif",
+          "sha256": "c44e7cb3df26b4c395574ca1412da539cc52a7a27d17f97a77a41f4271d1ec69",
+          "bytes": 69520
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/joker.webp",
+          "sha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
+          "bytes": 97802
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/joker/107c4bc2794c537e4c253980ac2b4e8cb701deec62beadd7fd21987e52872c9e.png",
+      "sourceSha256": "107c4bc2794c537e4c253980ac2b4e8cb701deec62beadd7fd21987e52872c9e"
+    },
+    {
+      "id": "cure_master",
+      "previous": {
+        "avif": {
+          "path": "./assets/memorial/cure_master.avif",
+          "sha256": "1529f210d9ea3d8e45982fc52a2b3f4eb987177b3f1fcbd4ef1ed451f7883027",
+          "bytes": 40913
+        },
+        "webp": {
+          "path": "./assets/memorial-webp/cure_master.webp",
+          "sha256": "290ad3f07b21400ee61eb7de42365a3d6652e62e95b79bb027fcf92eaab94a94",
+          "bytes": 80192
+        }
+      },
+      "sourcePath": "./assets/memorial-sources/cure_master/7a6795a954395fb022e258b315ee367e1fdd465bfc7e0564eecdceb4cdfeb9e2.png",
+      "sourceSha256": "7a6795a954395fb022e258b315ee367e1fdd465bfc7e0564eecdceb4cdfeb9e2"
+    }
+  ]
+}

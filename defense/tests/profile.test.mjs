@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING} from '../src/content.js';
+import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN} from '../src/content.js';
 import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away,command} from '../src/profile.js';
 import {monthlyReward,weeklyReward} from '../src/monthly.js';
-import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel} from '../src/economy.js';
+import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
@@ -435,33 +435,38 @@ test('an old active run without a relic snapshot copies the saved run, and bad s
   check.active.relicLevels={hourglass:2};assert.equal(validateProfile(check),true);
 });
 
-test('Behemoth cannot be exchanged for before stage 45 in its guardian month, and can after',()=>{
-  const JAN=Date.UTC(2027,0,15,3);
-  const p=createProfile(JAN);assert.equal(calendar(JAN).guardian,'behemoth');
-  p.pity.season=TUNING.pity.season;p.dreams=100000;
-  const early=command(p,'pityClaim',{banner:'season',id:'behemoth'},JAN);
-  assert.equal(early.ok,false);assert.match(early.message,/스테이지 45/);assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.pity.season,TUNING.pity.season,'the gauge is kept');
-  p.cleared=44;assert.equal(command(p,'pityClaim',{banner:'season',id:'behemoth'},JAN).ok,false);
-  // A season pull in that month never hands out Behemoth before 45 (it falls back to the normal URs).
-  const draws=command(p,'draw',{banner:'season',count:10},JAN);assert.equal(draws.ok,true);assert.ok(!draws.items.some(i=>i.id==='behemoth'));
+test('Behemoth joins the normal UR pool and exchange only after stage 45, never the guardian rotation',()=>{
+  const p=createProfile(NOW);assert.equal(HERO.behemoth.hidden,false);assert.ok(!HIDDEN.includes('behemoth'));
+  for(let month=0;month<12;month++)assert.notEqual(calendar(Date.UTC(2027,month,15,3)).guardian,'behemoth');
+  assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
+  // Force a normal UR and its last pool slot: Behemoth is selectable only after the gate.
+  const lastUr=open=>{const rolls=[.999999,.999999];return drawCharacter(()=>rolls.shift(),false,calendar(NOW).guardian,null,1,open);};
+  assert.notEqual(lastUr(false),'behemoth');assert.equal(lastUr(true),'behemoth');
+  p.pity.normal=TUNING.pity.normal;p.pity.season=TUNING.pity.season;p.dreams=100000;
+  for(const stage of [0,44]){
+    p.cleared=stage;assert.equal(command(p,'pityClaim',{banner:'normal',id:'behemoth'},NOW).ok,false);
+    assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.pity.normal,TUNING.pity.normal,'the gauge is kept');
+  }
+  const draws=command(p,'draw',{banner:'normal',count:10},NOW);assert.equal(draws.ok,true);assert.ok(!draws.items.some(i=>i.id==='behemoth'));
   p.cleared=45;
-  const late=command(p,'pityClaim',{banner:'season',id:'behemoth'},JAN);
-  assert.equal(late.ok,true);assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.pity.season,10,'200 spent, the 10 pulls above stay');
+  assert.equal(command(p,'pityClaim',{banner:'season',id:'behemoth'},NOW).ok,false);assert.equal(p.pity.season,TUNING.pity.season);
+  const late=command(p,'pityClaim',{banner:'normal',id:'behemoth'},NOW);
+  assert.equal(late.ok,true);assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.pity.normal,10,'the exchange spends only the normal gauge');
 });
 
 test('the stage 45 announcement covers the late companions once: not before 45, never twice, old saves get an empty list',()=>{
   const fresh=createProfile(NOW),announced=LATE_COMPANIONS.filter(id=>!HERO[id].hidden);
   assert.deepEqual(lateNoticeIds(fresh),[],'nothing to announce before stage 45');
   fresh.cleared=44;assert.deepEqual(lateNoticeIds(fresh),[]);
-  fresh.cleared=45;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, behemoth excluded');
-  assert.equal(announced.length,8);assert.ok(!announced.includes('behemoth'));
+  fresh.cleared=45;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, including Behemoth');
+  assert.deepEqual(announced.slice().sort(),['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva'].sort());
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);
   assert.deepEqual(lateNoticeIds(fresh),[]);assert.deepEqual(fresh.noticeLate.slice().sort(),announced.slice().sort());
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);assert.equal(fresh.noticeLate.length,announced.length,'marking twice adds nothing');
   assert.equal(validateProfile(fresh),true);
   // a save from before the announcement has no field: it migrates to an empty list and is told once
   const old=JSON.parse(JSON.stringify(createProfile(NOW)));delete old.noticeLate;old.cleared=60;
-  const loaded=parseProfile(JSON.stringify(old));assert.ok(loaded);assert.deepEqual(loaded.noticeLate,[]);assert.equal(lateNoticeIds(loaded).length,8);
+  const loaded=parseProfile(JSON.stringify(old));assert.ok(loaded);assert.deepEqual(loaded.noticeLate,[]);assert.deepEqual(lateNoticeIds(loaded),announced);
   // bad data is rejected
   const bad=createProfile(NOW);bad.noticeLate=['no_such_hero'];assert.equal(validateProfile(bad),false);
   const bad2=createProfile(NOW);bad2.noticeLate='all';assert.equal(validateProfile(bad2),false);

@@ -1,0 +1,52 @@
+{
+  "input": "defense/docs/art/pass18-fx-20261026/gpt-orbit-sea.png",
+  "width": 1774,
+  "height": 887,
+  "columns": 2,
+  "rows": 1,
+  "rowCuts": [],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        887,
+        887
+      ],
+      "box": [
+        27,
+        33,
+        835,
+        814
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        887,
+        0,
+        1774,
+        887
+      ],
+      "box": [
+        927,
+        6,
+        793,
+        813
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

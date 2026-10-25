@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 24752242,
-    "deployableSourceBytes": 23153700,
-    "outputBytes": 13539770,
-    "optimizedFiles": 160,
+    "sourceBytes": 28143173,
+    "deployableSourceBytes": 26518205,
+    "outputBytes": 14954092,
+    "optimizedFiles": 164,
     "derivedFiles": 156,
-    "derivedOutputBytes": 3765670
+    "derivedOutputBytes": 3747268
   },
   "images": [
     {
@@ -2473,9 +2473,9 @@
     {
       "id": "atlas:zeke-slash",
       "source": "./assets/merge/zeke-slash.webp",
-      "profile": "atlas",
+      "profile": null,
       "uses": [
-        "window.__ASTRA_ASSETS__.zeke-slash; combat renderer / stage UI"
+        "Zeke cleave slash, replaced in pass 18 by zeke-spin when his attack became a circle; kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -2488,14 +2488,128 @@
           "codec": "webp"
         }
       },
-      "output": {
-        "path": "./assets/optimized/merge/zeke-slash.webp",
-        "bytes": 18344,
-        "sha256": "4cce8bc8c2488885b91e13cb5f0c198806303fa763e6884a5e64b72c6a8f4438",
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
+    },
+    {
+      "id": "atlas:zeke-spin",
+      "source": "./assets/merge/zeke-spin.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.zeke-spin; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 257000,
+        "sha256": "34dc0802b014e056f18cd8a3dc8ef28f4e4a098bf8c8ba52c7d726c598eb5b9a",
         "metadata": {
-          "width": 960,
-          "height": 320,
-          "hasAlpha": false,
+          "width": 1152,
+          "height": 384,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/zeke-spin.webp",
+        "bytes": 210722,
+        "sha256": "3e7316345d8ad1c6cf145a0e15497e9e4f5fcede3eee9ef1fb2693c1052c3e70",
+        "metadata": {
+          "width": 1152,
+          "height": 384,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:effects-demon-miracle",
+      "source": "./assets/merge/effects-demon-miracle.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-demon-miracle; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 1189502,
+        "sha256": "8d504c6d702d95761aa53f72f8fe9dfcf30727ce85d0a3baa704aedc544634d0",
+        "metadata": {
+          "width": 1536,
+          "height": 768,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-demon-miracle.webp",
+        "bytes": 504858,
+        "sha256": "bdd4f27730fcfa979e0acbc52f43e446adf68b3129ce858620847a57b9a1c714",
+        "metadata": {
+          "width": 1536,
+          "height": 768,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:effects-deathhand",
+      "source": "./assets/merge/effects-deathhand.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-deathhand; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 1147392,
+        "sha256": "fa7cb9d8d55f4adfc33242fd66d007d11da56dcbb1907f1c7224444a37facdd7",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-deathhand.webp",
+        "bytes": 378862,
+        "sha256": "e9c6ee43e9b5568d897520acac7b1de81bd0b7ff82ce30844794cd1c882ea87e",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:effects-eclose",
+      "source": "./assets/merge/effects-eclose.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-eclose; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 857466,
+        "sha256": "a174760aae47ee1c33fc6262f86f590647afae70e88b73fbbcd150f8e83d8f61",
+        "metadata": {
+          "width": 768,
+          "height": 768,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-eclose.webp",
+        "bytes": 446802,
+        "sha256": "ad03593be53f5cda08dd246e6345e362193c4f53055338183a7e3bbc0ef6cbad",
+        "metadata": {
+          "width": 768,
+          "height": 768,
+          "hasAlpha": true,
           "codec": "webp"
         }
       },
@@ -2504,9 +2618,9 @@
     {
       "id": "atlas:orbit-zone",
       "source": "./assets/merge/orbit-zone.webp",
-      "profile": "atlas",
+      "profile": null,
       "uses": [
-        "window.__ASTRA_ASSETS__.orbit-zone; combat renderer / stage UI"
+        "Star Orbit zone drawn as a tilted opaque ellipse, replaced in pass 18 by the round orbit-sea; kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -2519,14 +2633,35 @@
           "codec": "webp"
         }
       },
-      "output": {
-        "path": "./assets/optimized/merge/orbit-zone.webp",
-        "bytes": 4444,
-        "sha256": "475f212b7ae5a6766a4b4776758f7423292b50879480dddbc05b4265fb33a6af",
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
+    },
+    {
+      "id": "atlas:orbit-sea",
+      "source": "./assets/merge/orbit-sea.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.orbit-sea; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 111814,
+        "sha256": "65cb6d00cbc12bb87fad44e050c11d0055b94302402f0dbfaf31c518646aed3a",
         "metadata": {
-          "width": 256,
+          "width": 512,
           "height": 256,
-          "hasAlpha": false,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/orbit-sea.webp",
+        "bytes": 72324,
+        "sha256": "4fab5784919c8752c2c215043f359262b0575bcdf4d0518a8b04e8c342aac3a3",
+        "metadata": {
+          "width": 512,
+          "height": 256,
+          "hasAlpha": true,
           "codec": "webp"
         }
       },
@@ -3254,14 +3389,14 @@
     },
     {
       "id": "memorial:underdog",
-      "source": "./assets/memorial/underdog.avif",
+      "source": "./assets/memorial/replacements/underdog/ec5e3347e27e2f5b24c8fe00df054c9644faea90c55fe39955577ec24d37cd97.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.underdog; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 50711,
-        "sha256": "fdbfd85df162a7ba2dd772babdd1f12dc8cfee1384579543196e0d0b6b792b98",
+        "bytes": 41558,
+        "sha256": "ec5e3347e27e2f5b24c8fe00df054c9644faea90c55fe39955577ec24d37cd97",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3270,9 +3405,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/underdog.avif",
-        "bytes": 39741,
-        "sha256": "59e30f2735ed1161888fe5a7cd6399d64ecfc30264a838b10e52770a0ccfdcd3",
+        "path": "./assets/optimized/memorial/replacements/underdog/ec5e3347e27e2f5b24c8fe00df054c9644faea90c55fe39955577ec24d37cd97.avif",
+        "bytes": 31959,
+        "sha256": "0f1b98a2a1e85db6c8f911e1516b3344cce8abde9684ac82c622b2f1f796cb13",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3284,15 +3419,15 @@
     },
     {
       "id": "memorial-webp:underdog",
-      "source": "./assets/memorial-webp/underdog.webp",
+      "source": "./assets/memorial-webp/replacements/underdog/30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.underdog; compat painting / web fallback",
         "memorialThumb:underdog; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 90712,
-        "sha256": "21a6b9fda98a072cd09b1626de09326d59234dd3b8caa9756fee55bcb45e1593",
+        "bytes": 73230,
+        "sha256": "30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3301,9 +3436,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/underdog.webp",
-        "bytes": 75246,
-        "sha256": "a4d00a0dee22ef38a967427502d25136fa2254d1d9f17ebd54a35571a3d86121",
+        "path": "./assets/optimized/memorial-webp/replacements/underdog/30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391.webp",
+        "bytes": 60970,
+        "sha256": "3bc76b9671948c104a7ceb9ca44c7fa9027445cdd3748e9e38bd5b2ae318567f",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3315,14 +3450,14 @@
     },
     {
       "id": "memorial:joker",
-      "source": "./assets/memorial/joker.avif",
+      "source": "./assets/memorial/replacements/joker/728fda8789e08c2286edb52c386f6d6c8662f9a9054750a96423c98afe19587e.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.joker; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 69520,
-        "sha256": "c44e7cb3df26b4c395574ca1412da539cc52a7a27d17f97a77a41f4271d1ec69",
+        "bytes": 48320,
+        "sha256": "728fda8789e08c2286edb52c386f6d6c8662f9a9054750a96423c98afe19587e",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3331,9 +3466,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/joker.avif",
-        "bytes": 54835,
-        "sha256": "25cffe245ff8b70f53c3a68e22d548b4ffe35cd215e1407385ccaeebce2a976d",
+        "path": "./assets/optimized/memorial/replacements/joker/728fda8789e08c2286edb52c386f6d6c8662f9a9054750a96423c98afe19587e.avif",
+        "bytes": 37957,
+        "sha256": "59084a8e5f789847669ae1e7a68ba9892d475c81151a0cd11694a883cdb50b72",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3345,15 +3480,15 @@
     },
     {
       "id": "memorial-webp:joker",
-      "source": "./assets/memorial-webp/joker.webp",
+      "source": "./assets/memorial-webp/replacements/joker/48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.joker; compat painting / web fallback",
         "memorialThumb:joker; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 97802,
-        "sha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
+        "bytes": 94456,
+        "sha256": "48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3362,9 +3497,9 @@
         }
       },
       "output": {
-        "path": "./assets/memorial-webp/joker.webp",
-        "bytes": 97802,
-        "sha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
+        "path": "./assets/optimized/memorial-webp/replacements/joker/48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642.webp",
+        "bytes": 80010,
+        "sha256": "84a21e7bf1a5d8904771426cf0e991c989ebe19c08a776b554de1d098818f392",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3372,18 +3507,18 @@
           "codec": "webp"
         }
       },
-      "decision": "Candidate was not smaller; retained source bytes."
+      "decision": "Separate smaller encoding; source preserved."
     },
     {
       "id": "memorial:sunflower",
-      "source": "./assets/memorial/sunflower.avif",
+      "source": "./assets/memorial/replacements/sunflower/22ad0f0d04a59eae36cec44e56cb2183ec745839226b5e93eaddd2d507e703bf.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.sunflower; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 45001,
-        "sha256": "d866554c5f33b3b407d595e898d3cfb5dc1ccae2bb7ddf6dd806940bd2a05ee9",
+        "bytes": 37147,
+        "sha256": "22ad0f0d04a59eae36cec44e56cb2183ec745839226b5e93eaddd2d507e703bf",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3392,9 +3527,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/sunflower.avif",
-        "bytes": 35660,
-        "sha256": "fdfce0c04ee675936af9e84bd7bac34b51e5aaa5b80dbe8f6b1da14baebcfbea",
+        "path": "./assets/optimized/memorial/replacements/sunflower/22ad0f0d04a59eae36cec44e56cb2183ec745839226b5e93eaddd2d507e703bf.avif",
+        "bytes": 28444,
+        "sha256": "35646eecfd3a26ad32790a27d5440a591505cf0e27691ddcaa96af7fdb2a634c",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3406,15 +3541,15 @@
     },
     {
       "id": "memorial-webp:sunflower",
-      "source": "./assets/memorial-webp/sunflower.webp",
+      "source": "./assets/memorial-webp/replacements/sunflower/bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.sunflower; compat painting / web fallback",
         "memorialThumb:sunflower; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 82690,
-        "sha256": "c985bcab237ac96dbfaf7771236a7021b84432b0d22125daa0dc418f0a9ca3ec",
+        "bytes": 63930,
+        "sha256": "bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3423,9 +3558,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/sunflower.webp",
-        "bytes": 68834,
-        "sha256": "198622309f1d21749b61bd0b17e8c614bbfd75aa4097b2bc2c360dc485d7441b",
+        "path": "./assets/optimized/memorial-webp/replacements/sunflower/bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51.webp",
+        "bytes": 50668,
+        "sha256": "efcb520c8a036c8a65bd1f2b97d8a354e6c6b8367975e25d4b907815df04b486",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3803,14 +3938,14 @@
     },
     {
       "id": "memorial:toffee_apple",
-      "source": "./assets/memorial/toffee_apple.avif",
+      "source": "./assets/memorial/replacements/toffee_apple/59383b8cf127252dc623537c15cabefd5635922727999bc1f891b43977c69d2a.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.toffee_apple; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 64253,
-        "sha256": "890afc5fd42999683cac280c290941b3bd76c41ab6297ae1a8485e3023d8b0c6",
+        "bytes": 55172,
+        "sha256": "59383b8cf127252dc623537c15cabefd5635922727999bc1f891b43977c69d2a",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3819,9 +3954,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/toffee_apple.avif",
-        "bytes": 50884,
-        "sha256": "8c49d4e711bec338bfc194e3aa49a0188a524f707997a5004ea640c4292ea9b0",
+        "path": "./assets/optimized/memorial/replacements/toffee_apple/59383b8cf127252dc623537c15cabefd5635922727999bc1f891b43977c69d2a.avif",
+        "bytes": 43342,
+        "sha256": "ffa624f9f144b80a84ae6a6b986bbf07ad56dfebb3f96c100f9f2ac1a0c2bc49",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3833,15 +3968,15 @@
     },
     {
       "id": "memorial-webp:toffee_apple",
-      "source": "./assets/memorial-webp/toffee_apple.webp",
+      "source": "./assets/memorial-webp/replacements/toffee_apple/772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.toffee_apple; compat painting / web fallback",
         "memorialThumb:toffee_apple; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 95362,
-        "sha256": "7c6aeb757cf6849760ae70165cd06185cb373d12ce1af7206b8e928489cb2099",
+        "bytes": 94796,
+        "sha256": "772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3850,9 +3985,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/toffee_apple.webp",
-        "bytes": 94594,
-        "sha256": "c5a4ca60c0eeea3610cc426e32ee51b547b03da43fc8c66e371f88088c67f594",
+        "path": "./assets/optimized/memorial-webp/replacements/toffee_apple/772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff.webp",
+        "bytes": 86072,
+        "sha256": "1bade2464f5a42c0cfd78086b42e32f0fd9de66c45a73f36c6032ac4ef21acad",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3864,14 +3999,14 @@
     },
     {
       "id": "memorial:antropy",
-      "source": "./assets/memorial/antropy.avif",
+      "source": "./assets/memorial/replacements/antropy/ec6d3726ad7fc298ff10411a248c8122c83009aef678b0baa9caacd2114f3013.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.antropy; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 55041,
-        "sha256": "36898a42c64d252416fe74b87a03759cd5a99f203e74538d3112027699fce254",
+        "bytes": 33671,
+        "sha256": "ec6d3726ad7fc298ff10411a248c8122c83009aef678b0baa9caacd2114f3013",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3880,9 +4015,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/antropy.avif",
-        "bytes": 42951,
-        "sha256": "aefdff76590490042bd1ada83d1fba94a965daafab1c9e95265fc5ec25538f09",
+        "path": "./assets/optimized/memorial/replacements/antropy/ec6d3726ad7fc298ff10411a248c8122c83009aef678b0baa9caacd2114f3013.avif",
+        "bytes": 25787,
+        "sha256": "5fa4598b8d08758cbeb32939310fd0a9b57b456aa1ab5ae0c19d511d97ed7000",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3894,15 +4029,15 @@
     },
     {
       "id": "memorial-webp:antropy",
-      "source": "./assets/memorial-webp/antropy.webp",
+      "source": "./assets/memorial-webp/replacements/antropy/4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.antropy; compat painting / web fallback",
         "memorialThumb:antropy; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 96462,
-        "sha256": "ce7bcaedd4f5d9011dd1ed30b6990b23f01eeafeda1dd4dd639ab16e977dbee9",
+        "bytes": 60042,
+        "sha256": "4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -3911,9 +4046,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/antropy.webp",
-        "bytes": 84764,
-        "sha256": "aae9da6de71170d5e89137716835116a23db0560cbda795cb499b73c7e85194b",
+        "path": "./assets/optimized/memorial-webp/replacements/antropy/4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7.webp",
+        "bytes": 47736,
+        "sha256": "ec99bdebfa103871196bd0fd20e17377fa7aa88abc2e2a76f2c239f2a3cb34d9",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4352,14 +4487,14 @@
     },
     {
       "id": "memorial:cure_master",
-      "source": "./assets/memorial/cure_master.avif",
+      "source": "./assets/memorial/replacements/cure_master/4405fd596aa312c04d310b4d66c7ca95292b0a85e677ea0f774e7ac1bb3e80a3.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.cure_master; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 40913,
-        "sha256": "1529f210d9ea3d8e45982fc52a2b3f4eb987177b3f1fcbd4ef1ed451f7883027",
+        "bytes": 42389,
+        "sha256": "4405fd596aa312c04d310b4d66c7ca95292b0a85e677ea0f774e7ac1bb3e80a3",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4368,9 +4503,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/cure_master.avif",
-        "bytes": 32585,
-        "sha256": "0aa9807413a186dc76a6201e0d2d909d8b382fcdd1cc417724adca9e0d630f1d",
+        "path": "./assets/optimized/memorial/replacements/cure_master/4405fd596aa312c04d310b4d66c7ca95292b0a85e677ea0f774e7ac1bb3e80a3.avif",
+        "bytes": 32789,
+        "sha256": "2bbb4f0e3b56d63cc2ee14346dedc4b11271eafa675517e84d5041389d3d3e3c",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4382,15 +4517,15 @@
     },
     {
       "id": "memorial-webp:cure_master",
-      "source": "./assets/memorial-webp/cure_master.webp",
+      "source": "./assets/memorial-webp/replacements/cure_master/45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.cure_master; compat painting / web fallback",
         "memorialThumb:cure_master; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 80192,
-        "sha256": "290ad3f07b21400ee61eb7de42365a3d6652e62e95b79bb027fcf92eaab94a94",
+        "bytes": 79578,
+        "sha256": "45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4399,9 +4534,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/cure_master.webp",
-        "bytes": 68846,
-        "sha256": "4d8dfe9c3999b1c360ce9a28eea90148ac43e9b55605f85fdcb3b63e20ee5552",
+        "path": "./assets/optimized/memorial-webp/replacements/cure_master/45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f.webp",
+        "bytes": 65708,
+        "sha256": "667d1cd0992f5969275c0ffe8eba64fcd482aecba0094b6b74d6918cc698c725",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4901,14 +5036,14 @@
     },
     {
       "id": "memorial:venom",
-      "source": "./assets/memorial/venom.avif",
+      "source": "./assets/memorial/replacements/venom/e3a6e8e7eeee3bfc6b659f7c7e225faded20cbbc4558e0f3f2c84940d1fc0f2c.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.venom; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 50916,
-        "sha256": "4f43b04fda3ef9b42acb59e3a7a861c36ec47dba80df6df06198669d2c3d5c4a",
+        "bytes": 61493,
+        "sha256": "e3a6e8e7eeee3bfc6b659f7c7e225faded20cbbc4558e0f3f2c84940d1fc0f2c",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4917,9 +5052,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/venom.avif",
-        "bytes": 39288,
-        "sha256": "7ad0e3a882ee0740bbecf158d21ec0b069a5e9d10b4d4e7ffe92c74a3058632a",
+        "path": "./assets/optimized/memorial/replacements/venom/e3a6e8e7eeee3bfc6b659f7c7e225faded20cbbc4558e0f3f2c84940d1fc0f2c.avif",
+        "bytes": 48022,
+        "sha256": "84ea55d87465588a3731f05e4638188fcb6f8f0287d4cbfcfdaa365506e71864",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4931,15 +5066,15 @@
     },
     {
       "id": "memorial-webp:venom",
-      "source": "./assets/memorial-webp/venom.webp",
+      "source": "./assets/memorial-webp/replacements/venom/0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.venom; compat painting / web fallback",
         "memorialThumb:venom; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 95150,
-        "sha256": "07e404ddc5ecf352585dd3e9b193244359b17edef5f8a5e899a3143b3c468942",
+        "bytes": 96896,
+        "sha256": "0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4948,9 +5083,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/venom.webp",
-        "bytes": 78068,
-        "sha256": "98d85c2c724245061daff09e3dbc8af4037e2ce5de59eb0e645c44ed05d1c785",
+        "path": "./assets/optimized/memorial-webp/replacements/venom/0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a.webp",
+        "bytes": 96178,
+        "sha256": "4ffad2bd02d8ab92496a4e30ca54dd3921ec59148e932257f283e546181cae37",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4962,14 +5097,14 @@
     },
     {
       "id": "memorial:behemoth",
-      "source": "./assets/memorial/behemoth.avif",
+      "source": "./assets/memorial/replacements/behemoth/2009945576703373175c003471a9ffa56a1dc4557a626b4c0c75046eeddfbdea.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.behemoth; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 65110,
-        "sha256": "6f22545c7463d3cb0ec0ca172cf7297450a1ae0c7f82fb23436adc6d368ac138",
+        "bytes": 43276,
+        "sha256": "2009945576703373175c003471a9ffa56a1dc4557a626b4c0c75046eeddfbdea",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4978,9 +5113,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/behemoth.avif",
-        "bytes": 50244,
-        "sha256": "e9d2c726b2533282620723f588647cde9184bba1b442ea5d4073e1c1ca6fff07",
+        "path": "./assets/optimized/memorial/replacements/behemoth/2009945576703373175c003471a9ffa56a1dc4557a626b4c0c75046eeddfbdea.avif",
+        "bytes": 33068,
+        "sha256": "e98e62c772f3a86f5cc9b8769b5d988787a1cae11fe9d149b6baa3d28ec7188b",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4992,15 +5127,15 @@
     },
     {
       "id": "memorial-webp:behemoth",
-      "source": "./assets/memorial-webp/behemoth.webp",
+      "source": "./assets/memorial-webp/replacements/behemoth/9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.behemoth; compat painting / web fallback",
         "memorialThumb:behemoth; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 95826,
-        "sha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+        "bytes": 77464,
+        "sha256": "9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -5009,9 +5144,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/behemoth.webp",
-        "bytes": 93898,
-        "sha256": "c0d38e50c10b92157fcf323e0cb5acbae49b40c239c118a731dea4326cf4890a",
+        "path": "./assets/optimized/memorial-webp/replacements/behemoth/9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61.webp",
+        "bytes": 63072,
+        "sha256": "5027bcaa831d784bda8e114c3267299dc9f10941b51459b86d545a58d258fb55",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -8637,18 +8772,18 @@
     },
     {
       "id": "memorialThumb:underdog",
-      "source": "./assets/memorial-webp/underdog.webp",
+      "source": "./assets/memorial-webp/replacements/underdog/30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/underdog.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "21a6b9fda98a072cd09b1626de09326d59234dd3b8caa9756fee55bcb45e1593",
+      "sourceSha256": "30a17c3ac55a38caf3935b39b2dcc3e3596c97059fa8e4155ba7efb1e8f33391",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/underdog.webp",
-        "bytes": 13064,
-        "sha256": "773a382ace08e27da91e06b27dbec0e39ac647ad69cbe4da355f4300a97f707e",
+        "bytes": 10384,
+        "sha256": "01ffc4c7f2e8f52eecf47f534e8b89647af45e03276e37a271af74c253a63ceb",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -8659,18 +8794,18 @@
     },
     {
       "id": "memorialThumb:joker",
-      "source": "./assets/memorial-webp/joker.webp",
+      "source": "./assets/memorial-webp/replacements/joker/48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/joker.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "35b081ca41de575b8baa42a7debd235c2c1d5059a3bc3fbbb9824ca7dfab5dd9",
+      "sourceSha256": "48e03b204978b5cf8bd1f05122f65dbea78bc448b4bb19086e92cd3324a79642",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/joker.webp",
-        "bytes": 18722,
-        "sha256": "e6ecb00b647b8ef3f5eae50d1f03b4eb6bcb7629e55ee2ed615ad50b62ed12a2",
+        "bytes": 14666,
+        "sha256": "b16e1ce8dbc0a603c708bca84d15a13c444f350b1c0ed1b8cf63ef312a8fa35d",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -8681,18 +8816,18 @@
     },
     {
       "id": "memorialThumb:sunflower",
-      "source": "./assets/memorial-webp/sunflower.webp",
+      "source": "./assets/memorial-webp/replacements/sunflower/bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/sunflower.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "c985bcab237ac96dbfaf7771236a7021b84432b0d22125daa0dc418f0a9ca3ec",
+      "sourceSha256": "bd028ae28d20a2e9ad1e86bceb803287af4563083828ff050db9bf67bcc03c51",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/sunflower.webp",
-        "bytes": 10554,
-        "sha256": "68e0081df395b54e255f5a5f61c3d9f103472b1f0f2c2a65e738d1b3573afe6a",
+        "bytes": 9282,
+        "sha256": "5e75d5ff0d00f84999ec990f69ea916f7972ef9deda29103770510c367bbafc1",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -8835,18 +8970,18 @@
     },
     {
       "id": "memorialThumb:toffee_apple",
-      "source": "./assets/memorial-webp/toffee_apple.webp",
+      "source": "./assets/memorial-webp/replacements/toffee_apple/772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/toffee_apple.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "7c6aeb757cf6849760ae70165cd06185cb373d12ce1af7206b8e928489cb2099",
+      "sourceSha256": "772325ece449efe9e81d312780d46dfd4fa0f86f79720600cc94fc844621eeff",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/toffee_apple.webp",
-        "bytes": 17288,
-        "sha256": "60b4806ff180d0902fc95106f74d507cea12171e3fab0925e1cbcf40719cacf1",
+        "bytes": 14978,
+        "sha256": "d17efd005797a3257fa54bcd3210dc4d53f7045b4d830952d10abe6304105284",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -8857,18 +8992,18 @@
     },
     {
       "id": "memorialThumb:antropy",
-      "source": "./assets/memorial-webp/antropy.webp",
+      "source": "./assets/memorial-webp/replacements/antropy/4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/antropy.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "ce7bcaedd4f5d9011dd1ed30b6990b23f01eeafeda1dd4dd639ab16e977dbee9",
+      "sourceSha256": "4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/antropy.webp",
-        "bytes": 13400,
-        "sha256": "71310684e222a53f64f932d808f6eb7103e16f9321ab82f7f2e3eccec620f1d6",
+        "bytes": 8236,
+        "sha256": "fdc428b04096265c003753b6666b9997815198c9641b77a233fbd9e9f76869d8",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -9033,18 +9168,18 @@
     },
     {
       "id": "memorialThumb:cure_master",
-      "source": "./assets/memorial-webp/cure_master.webp",
+      "source": "./assets/memorial-webp/replacements/cure_master/45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/cure_master.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "290ad3f07b21400ee61eb7de42365a3d6652e62e95b79bb027fcf92eaab94a94",
+      "sourceSha256": "45efba625479d4a1b2bac57bbac37c2aa7bf19d772f33688ee4a59449af41d9f",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/cure_master.webp",
-        "bytes": 11816,
-        "sha256": "cd3792671561fb846e95f7934daa6bf2f91f8e240cb58334dc095fbd892e02e4",
+        "bytes": 10338,
+        "sha256": "d85186675ecafb9afd3dfa66b78582cf9ecd4e287b00d8e5c0418a6fb57f2114",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -9231,18 +9366,18 @@
     },
     {
       "id": "memorialThumb:venom",
-      "source": "./assets/memorial-webp/venom.webp",
+      "source": "./assets/memorial-webp/replacements/venom/0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/venom.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "07e404ddc5ecf352585dd3e9b193244359b17edef5f8a5e899a3143b3c468942",
+      "sourceSha256": "0d1f748a8b7e6a43370e683f02b27b30859ddf3c867448e3d62d224033db3e1a",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/venom.webp",
-        "bytes": 12868,
-        "sha256": "c4711d6ae892fa9156a359d4b38abfa01626cbf7dd33fe582c5d843db52ff2c9",
+        "bytes": 17036,
+        "sha256": "e73bc8a0c611ea5b82b11fa27bb74e60fd566c426ae1e6633beff76dda879f9d",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -9253,18 +9388,18 @@
     },
     {
       "id": "memorialThumb:behemoth",
-      "source": "./assets/memorial-webp/behemoth.webp",
+      "source": "./assets/memorial-webp/replacements/behemoth/9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "b6dc3c817277f160e818b2f9ba535437ba0d7733d39c16f842c54d4d444047e0",
+      "sourceSha256": "9187e426d5cddf3b6f20022cd05a5f0bbfe499b7a5daea7ea0b5e33457c0bc61",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
-        "bytes": 15892,
-        "sha256": "f93c0ed05650ade6e48dc676c8cf3683adab426744043a8d2b2a21f1673e5649",
+        "bytes": 10282,
+        "sha256": "b92d8d54447d354c88cc93fcee8cf1da16bbde647af29d864a096a33ac6678ea",
         "metadata": {
           "width": 240,
           "height": 360,
