@@ -24,7 +24,7 @@ export const NEW_MEMORIAL_MEDIA = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "7d8808564540801d961c1be8b9931bb4e788a8ad4a1adede68557be7b2417145",
+    "bodySha256": "ea18337c55296221c38b778b9c8faf624842fcefbf5bededc4af098a3dfaf0a7",
     "avifPath": "./assets/memorial/demon_king.avif",
     "webp": {
       "path": "./assets/memorial-webp/demon_king.webp",
@@ -65,7 +65,7 @@ export const NEW_MEMORIAL_MEDIA = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "fb41bbd28e5631f4747cebbc33a38cbe003ebae9460d11b52e22f800f9eae1bf",
+    "bodySha256": "7a8f6f60a83cf25622ff4ee21b1fd1069e2b12324602bf46ccab0e415012f776",
     "avifPath": "./assets/memorial/miracle_larva.avif",
     "webp": {
       "path": "./assets/memorial-webp/miracle_larva.webp",
