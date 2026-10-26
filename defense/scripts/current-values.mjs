@@ -19,7 +19,7 @@ export function currentValues(){
   lines.push('# 현재 수치 (자동 생성)','',
     '> 이 파일은 `node defense/scripts/generated-reports.mjs`가 코드에서 만든다. 직접 고치지 말고, 숫자가 이 파일과 다른 문서는 그날의 기록으로 읽는다. 코드와 다르면 테스트가 실패한다.','');
   lines.push('## 규칙','',
-    '- **필살기 피해:** 필살기는 시전 순간 동료 정보에 보이는 위력(`combatStats().damage`)에 배율을 곱한다. 성급·훈련·강화·온실·수집 보너스에 더해 배치 오라, 켜져 있는 필살기 버프, 유물 위력 보너스가 모두 들어간다. 같은 종류 안에서는 가장 센 것 하나(유물은 합산)이고 종류끼리는 곱한다. 그 시전이 거는 버프·노출은 그 시전의 피해에 들어가지 않는다.',
+    '- **필살기 피해:** 필살기는 시전 순간 동료 정보에 보이는 공격력(`combatStats().damage`)에 배율을 곱한다. 성급·훈련·강화·온실·수집 보너스에 더해 배치 오라, 켜져 있는 필살기 버프, 유물 공격력 보너스가 모두 들어간다. 같은 종류 안에서는 가장 센 것 하나(유물은 합산)이고 종류끼리는 곱한다. 그 시전이 거는 버프·노출은 그 시전의 피해에 들어가지 않는다.',
     '- **받는 피해 증가 효과(노출, 확대경, 왕의 인장 등):** 위와 별개로 적에게 걸려 필살기와 일반 공격 모두에 적용된다.',
     `- **메인 스테이지:** ${MAIN_STAGES}개. ${PARTS.map(x=>`제${x.id}부 「${x.name}」`).join(', ')} 각 ${PART_STAGES}개(5개 장 × 9). 적 체력은 두 부 모두 같은 기울기로 이어진다. 제2부는 스테이지 ${PART_STAGES}를 클리어하면 열린다.`,
     `- **스테이지 ${PART_STAGES} 첫 클리어:** 제2부와 새벽 온실이 열리고 베히모스·베놈 등 신규 동료가 정규 소환 풀에 합류한다. 동료를 확정 지급하지 않으며 기존 보유 개체는 유지한다.`,
@@ -28,27 +28,32 @@ export function currentValues(){
     `- **이달의 수호자(히든 ${HIDDEN.length}명, 시즌 소환에서만):** ${HIDDEN.map(id=>HEROES.find(h=>h.id===id).name).join(' → ')} 순서로 월마다 한 명. 월 번호는 (연도×12+월 인덱스) % ${HIDDEN.length}이고 지금 2026년 10월은 ${HEROES.find(h=>h.id===guardianOf(2026,9)).name}, 2027년 1월은 ${HEROES.find(h=>h.id===guardianOf(2027,0)).name}.`,
     `- **소환 확률:** C/R/SR/UR = ${TUNING.heroRates.map(r=>(r*100).toFixed(1).replace(/\.0$/,'')+'%').join(' / ')}, 천장 ${TUNING.pity.normal}/${TUNING.pity.season}.`,'');
   const bedRows=GARDENS.flatMap(g=>g.beds.map(id=>{const b=TUNING.beds[id],cap=b.knee2,name={rose:'용기의 장미',spring:'별이슬 샘',seed:'황금 씨앗',crit:'여명의 엉겅퀴',critDamage:'노을빛 불꽃나리',stardust:'유성우 은방울'}[id];
-    const effect={rose:['위력',l=>'+'+num(roseAttack(l)*100)+'%'],spring:['최대 별빛',l=>String(springGauge(l))],seed:['시작 골드',l=>'+'+seedGold(l)],crit:['치명타 확률',l=>num(critChance(l)*100)+'%'],critDamage:['치명타 대미지',l=>num(critDamage(l)*100)+'%'],stardust:['별똥별 가속(방치·파견 별가루)',l=>'+'+num(stardustRate(l)*100)+'%']}[id];
+    const effect={rose:['공격력',l=>'+'+num(roseAttack(l)*100)+'%'],spring:['최대 별빛',l=>String(springGauge(l))],seed:['시작 골드',l=>'+'+seedGold(l)],crit:['치명타 확률',l=>num(critChance(l)*100)+'%'],critDamage:['치명타 피해',l=>num(critDamage(l)*100)+'%'],stardust:['별똥별 가속(방치·파견 별가루)',l=>'+'+num(stardustRate(l)*100)+'%']}[id];
     const total=Array.from({length:cap},(_,l)=>bedCost(id,l)).reduce((a,c)=>a+c,0);
     return `| ${g.id==='dream'?'꿈의 온실':'새벽 온실'} | ${name} | 스테이지 ${b.unlock} | ${effect[0]} | ${effect[1](0)} | ${effect[1](cap)} (레벨 ${cap}) | ${bedCost(id,0)} | ${total} |`;}));
   lines.push('## 정원','',
-    `두 정원에 화단이 셋씩 있다. 기본 치명타는 확률 5%, 대미지 150%다. 여명의 엉겅퀴는 레벨당 +0.5%p로 30레벨에서 20%가 된다. 여기까지 비용은 이전38레벨 예산을30구간으로 재배분한다. 이후 ${TUNING.beds.crit.priceTransition}개 가격 구간을 로그 가격의 완만한 보간으로 이어 역전을 없애고, 레벨${TUNING.beds.crit.knee2+TUNING.beds.crit.priceTransition-1}부터 이전 대응 구간 비용의 절반과 일치한다. 효과는 계속 +0.5%p, 기존 투자 레벨은 보존한다. 치명타는 직접 타격·지속 피해·필살기 모두에 적용되며 즉사와 고정 피해는 제외한다. 공격 당시의 치명타 확률과 대미지를 저장한다. 별똥별 가속은 방치 보상과 파견 보상을 받는 순간에 곱한다.`,'',
+    `두 정원에 화단이 셋씩 있다. 기본 치명타는 확률 5%, 피해 150%다. 여명의 엉겅퀴는 레벨당 +0.5%p로 30레벨에서 20%가 된다. 여기까지 비용은 이전38레벨 예산을30구간으로 재배분한다. 이후 ${TUNING.beds.crit.priceTransition}개 가격 구간을 로그 가격의 완만한 보간으로 이어 역전을 없애고, 레벨${TUNING.beds.crit.knee2+TUNING.beds.crit.priceTransition-1}부터 이전 대응 구간 비용의 절반과 일치한다. 효과는 계속 +0.5%p, 기존 투자 레벨은 보존한다. 치명타는 직접 타격·지속 피해·필살기 모두에 적용되며 즉사와 고정 피해는 제외한다. 공격 당시의 치명타 확률과 피해를 저장한다. 별똥별 가속은 방치 보상과 파견 보상을 받는 순간에 곱한다.`,'',
     '| 정원 | 화단 | 열리는 곳 | 효과 | 시작 | 소프트캡 | 첫 레벨 별가루 | 소프트캡까지 합계 |','|---|---|---|---|---|---|---:|---:|',
     ...bedRows,'');
   lines.push('## 필살기 상수','',
     '| 항목 | 값 |','|---|---|',
-    `| 가디언 대륙의 맥동 | 위력 ${E.QUAKE_FACTOR}배 |`,
+    `| 가디언 대륙의 맥동 | 공격력 ${E.QUAKE_FACTOR}배 |`,
     `| 혹한의마녀 겨울 노출 | ${E.WINTER_EXPOSURE*100}% (겨울이 이어지는 동안) |`,
-    `| 은하고래 수확 | 위력 ${E.WHALE.factor}배 + 성광 중첩당 +${E.WHALE.perMark*100}% |`,
-    `| 베히모스 대지분쇄 | 위력 ${E.CRUSH.factor}배 × ${E.CRUSH.hits}회, 기본 반경 ${E.CRUSH.radius}, 훈련마다 기본 반경 +${E.CRUSH.trainingRadius*100}%, 간격 ${E.CRUSH.gap}초, 저장 한도 ${E.CRUSH.queue}회분 |`,
-    `| 애쉬 아마겟돈 | 위력 ${E.ARMAGEDDON.factor}배, 반경 ${E.ARMAGEDDON.radius} |`,
-    `| 마왕 데스핸드 | 위력 ${E.DEATHHAND.base}배 + 대상별 디버프 1종당 ${E.DEATHHAND.perDebuff}배, 반경 ${E.DEATHHAND.radius}. 감속·노출·기절·빙결·성광·중독·화상 7종, 소모 없음 |`,
+    `| 은하고래 수확 | 공격력 ${E.WHALE.factor}배 + 성광 중첩당 +${E.WHALE.perMark*100}% |`,
+    `| 베히모스 대지분쇄 | 공격력 ${E.CRUSH.factor}배 × ${E.CRUSH.hits}회, 기본 반경 ${E.CRUSH.radius}, 훈련마다 기본 반경 +${E.CRUSH.trainingRadius*100}%, 간격 ${E.CRUSH.gap}초, 저장 한도 ${E.CRUSH.queue}회분 |`,
+    `| 애쉬 아마겟돈 | 공격력 ${E.ARMAGEDDON.factor}배, 반경 ${E.ARMAGEDDON.radius} |`,
+    `| 별똥별소년 유성 | 사용 별빛당 공격력 ${E.STARFALL_FACTOR}배 |`,
+    `| 번개의현자 천둥의 연쇄 | 공격력 ${E.THUNDER_FACTOR}배 |`,
+    `| 앤트로피 노바레퀴엠 | 공격력 ${E.REQUIEM.factor}배 |`,
+    `| 토피애플 사과 | 폭발 시점 최고 성급 토피애플의 현재 공격력 ${E.APPLEBOMB.factor}배. 전장에 없으면 마지막 유효 값, 무작위 경로·접근 ${E.APPLEBOMB.trigger} 이내 발동, 최대 ${E.APPLEBOMB.max}개 |`,
+    `| 조커 카오스 룰렛 | 시작 빨강 포함 5색 수집 후 전투 종료까지 유지. 필살기 별빛 ${E.JOKER.chaosCost}·전체 공격력 ${E.JOKER.roulette}배. 일반 공격 시 화상·중독·성광·노출·감속 모두 부여 |`,
+    `| 마왕 데스핸드 | 공격력 ${E.DEATHHAND.base}배 + 대상별 디버프 1종당 ${E.DEATHHAND.perDebuff}배, 반경 ${E.DEATHHAND.radius}. 감속·노출·기절·빙결·성광·중독·화상 7종, 소모 없음 |`,
     '| 기적의우화 | 별빛 50, 전장의 라바·코쿤 전부를 각각 50%/50%로 미라클윙/어비스윙으로 전환. 합성 결과는 코쿤. 대상이 없으면 사용 불가 |',
-    `| 신데렐라 자정의 기적 | 위력 ${E.CINDERELLA.ult}배 |`,
-    `| 화상 | 일반 공격 위력 ${num(E.BURN.attack*100)}% · ${E.BURN.attackSeconds}초, 필살기 위력 ${num(E.BURN.skill*100)}% · ${E.BURN.skillSeconds}초 (초당) |`,
-    `| 시간의마술사 트라우마 | 위력 +${num(E.TRAUMA.power*100)}% · 공속 +${num(E.TRAUMA.speed*100)}% |`,
+    `| 신데렐라 자정의 기적 | 공격력 ${E.CINDERELLA.ult}배 |`,
+    `| 화상 | 일반 공격 공격력 ${num(E.BURN.attack*100)}% · ${E.BURN.attackSeconds}초, 필살기 공격력 ${num(E.BURN.skill*100)}% · ${E.BURN.skillSeconds}초 (초당) |`,
+    `| 시간의마술사 트라우마 | 공격력 +${num(E.TRAUMA.power*100)}% · 공속 +${num(E.TRAUMA.speed*100)}% |`,
     `| 루미 꿈의 형태 | ${E.RUMI_DREAM.phases.map(p=>p.factor+'배').join(' · ')} |`,'',
-    '| 필살기 버프 | 위력 | 공속 | 지속 |','|---|---|---|---|',
+    '| 필살기 버프 | 공격력 | 공속 | 지속 |','|---|---|---|---|',
     ...Object.entries(E.ULT_BUFF).map(([id,b])=>`| ${id} | ${b.power!==undefined?'+'+num(b.power*100)+'%':b.ratio!==undefined?'평타 반복 '+num(b.ratio*100)+'%':'-'} | ${b.speed!==undefined?'+'+num(b.speed*100)+'%':'-'} | ${b.seconds}초 |`),'');
   lines.push('## 이번 성장 규칙','',
     '성급 보너스는 1성을 기준으로 `1 + 0.1 × (성급 - 1)`이다. 강화 5단계마다의 기존 특수 배율과는 곱하며, 감속률의 공통 상한은 80%다.','',

@@ -20,7 +20,7 @@ const clamp=t=>Math.max(0,Math.min(1,t));
 const ease=t=>1-(1-clamp(t))**3;
 const fade=(t,start=.3)=>1-clamp((t-start)/(1-start));
 const hash=(seed,i)=>{const n=Math.sin(seed*12.9898+i*78.233)*43758.5453;return n-Math.floor(n);};
-const JOKER_COLORS={red:'#ff665f',blue:'#73bfff',green:'#8bdf8b',white:'#fff2df',black:'#ad8ad9'};
+const JOKER_COLORS={red:'#ff665f',blue:'#73bfff',green:'#8bdf8b',white:'#fff2df',black:'#ad8ad9',chaos:'#d9b8ff'};
 function line(ctx,points,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
 function point(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
 function shard(ctx,x,y,r,color,a=0){ctx.save();ctx.translate(x,y);ctx.rotate(a);ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(r,0);ctx.lineTo(0,r*.34);ctx.lineTo(-r,0);ctx.lineTo(0,-r*.34);ctx.closePath();ctx.fill();ctx.restore();}

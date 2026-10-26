@@ -893,18 +893,18 @@
     },
     {
       "id": "demon_king",
-      "source": "defense/assets/memorial/demon_king.avif",
-      "sha256": "f3dd5875a9966c2081a16a0929a85fdb7fbe09fd577a69c88f06215020994b60",
+      "source": "defense/assets/memorial/replacements/demon_king/456374580ef86787dd2158c9d3d30e1913ac284c9ee9c5b303c1cbecc015a215.avif",
+      "sha256": "456374580ef86787dd2158c9d3d30e1913ac284c9ee9c5b303c1cbecc015a215",
       "width": 720,
       "height": 1080,
-      "bytes": 45783,
-      "sourceSha256": "983095f9b595fc72d62cbbee2bda7baa43413f0cf21212a508841bbb9e5992d6",
+      "bytes": 42433,
+      "sourceSha256": "dfa30635752d9b0ceac70083dad1b07fae071037edd6506380694a36d02c4519",
       "webp": {
-        "source": "defense/assets/memorial-webp/demon_king.webp",
-        "sha256": "677442b0fd18cef04313f10546e7c1088fba487a6a2971bd881aab078f290792",
+        "source": "defense/assets/memorial-webp/replacements/demon_king/e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17.webp",
+        "sha256": "e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17",
         "width": 720,
         "height": 1080,
-        "bytes": 88714,
+        "bytes": 81560,
         "quality": 82
       }
     },
@@ -1046,18 +1046,18 @@
     },
     {
       "id": "miracle_larva",
-      "source": "defense/assets/memorial/miracle_larva.avif",
-      "sha256": "5ab2e36132b7e9686c52eedf88e1d247e93803c3f1c5c9bcb5b7d18c1b0d6f15",
+      "source": "defense/assets/memorial/replacements/miracle_larva/d14d31263d2565ca46440cd90ae180ba38b3910578f60d59c42eabfae36b1b3b.avif",
+      "sha256": "d14d31263d2565ca46440cd90ae180ba38b3910578f60d59c42eabfae36b1b3b",
       "width": 720,
       "height": 1080,
-      "bytes": 50551,
-      "sourceSha256": "dc56bcee06ae68f98800f5e28f47df09bdcd9f3474f099bb2de1a95e2658038e",
+      "bytes": 50490,
+      "sourceSha256": "674d4cdd255c808ebd16e2b7a8710da4ff2b5f9d66df44e7a847b2b493bd6f54",
       "webp": {
-        "source": "defense/assets/memorial-webp/miracle_larva.webp",
-        "sha256": "6f5877b341977230ebc7cfadb9a22c15ccda99abfd9d7ca79e8e8dab8bd567f5",
+        "source": "defense/assets/memorial-webp/replacements/miracle_larva/af904744a3e69f1a26b7fc82fb0337d11f8e127bbfdc0fdc77441f8f60e426cf.webp",
+        "sha256": "af904744a3e69f1a26b7fc82fb0337d11f8e127bbfdc0fdc77441f8f60e426cf",
         "width": 720,
         "height": 1080,
-        "bytes": 92622,
+        "bytes": 93670,
         "quality": 82
       }
     },

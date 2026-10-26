@@ -29,7 +29,7 @@ function bench(v,team,cell,scenario,seed){
   for(let t=0;t<scenario.seconds;t+=.05){
     s.health=1e9;if(s.queue.length)s.spawnIn=Math.min(s.spawnIn,scenario.interval);E.step(s,.05);
     for(const e of s.enemies)if(!seen.has(e.uid)){seen.add(e.uid);if(scenario.start)e.progress=scenario.start;if(e.boss){e.skillIn=1e9;if(scenario.freeze)e.speed=0;}}
-    if(cell>=0&&v.cast&&s.gauge>=HERO[v.hero].skill.cost&&s.enemies.some(e=>e.hp>0))E.cast(s,v.hero);
+    if(cell>=0&&v.cast&&s.gauge>=E.skillCost(s,v.hero)&&s.enemies.some(e=>e.hp>0))E.cast(s,v.hero);
     s.events=[];if(!s.enemies.length&&!s.queue.length)break;
   }
   return {damage:s.stats.damage,heroDamage:s.stats.byHero[v.hero]||0,casts:s.stats.skills,form:s.board[cell]?.form||null};

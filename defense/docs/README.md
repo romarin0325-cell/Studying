@@ -27,6 +27,7 @@ docs/
 
 - [SD_CAST_GUIDE.md](SD_CAST_GUIDE.md): Sol Cast V2 현행 제작 기준, 이전 일괄 교체의 기록, 실제 구조 마스터·화풍 참조, 머리/얼굴 검수와 보존 경로.
 
+- [2026-10-27 확정 밸런스 패치](archive/2026-10-27-BALANCE_FINAL.md): 수치·카오스·사과·보호·문구·측정 도구 반영.
 - [STATUS_RULES.md](STATUS_RULES.md): 독·노출·화상·제어 규칙.
 - [CHARACTER_TRAITS.md](CHARACTER_TRAITS.md): 위력 계산 경로와 특성 판정 기준.
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.

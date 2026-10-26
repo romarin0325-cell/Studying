@@ -16,7 +16,7 @@
 
 ## 밸런스·모션 비교
 
-[밸런스 랩](docs/BALANCE_LAB.md): `dist/StarGardenBalanceLab.html`을 직접 열거나 개발 서버의 `/balance`로 접속합니다. 일반공격·필살기·디버프·실제 모션·제안 패치를 비교하고 조정안을 저장할 수 있습니다. 랩만 빌드: `npm run build:defense:lab`.
+[밸런스 랩](docs/BALANCE_LAB.md): `dist/StarGardenBalanceLab.html`을 직접 열거나 개발 서버의 `/balance`로 접속합니다. 일반공격·필살기·디버프·실제 모션·확정 패치 내역을 확인하고 개별 조정안을 비교하며 조정안을 저장할 수 있습니다. 랩만 빌드: `npm run build:defense:lab`.
 
 ## 개발
 

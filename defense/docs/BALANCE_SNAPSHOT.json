@@ -1814,7 +1814,7 @@
         "trait": "eclose"
       },
       "miracle_cocoon": {
-        "damage": 78,
+        "damage": 40,
         "interval": 1.8,
         "range": 230,
         "radius": 230,

@@ -393,10 +393,10 @@ test('Star Boy and Time Ruler use birth-wave age for exact power, displayed powe
       close(E.combatStats(s,u).damage,HERO[id].damage*factor);
       s.gauge=120;const before=enemy.hp;assert.ok(E.cast(s,id).ok);
       if(id==='star_boy'){
-        // A full 120 gauge is spent at 0.4× power per point.
-        assert.equal(s.gauge,0);close(s.finishers[0].damage,HERO[id].damage*factor*48);
+        // A full 120 gauge is spent at 0.5× power per point.
+        assert.equal(s.gauge,0);close(s.finishers[0].damage,HERO[id].damage*factor*60);
         for(let i=0;i<6;i++)E.step(s,.05);
-        close(before-enemy.hp,HERO[id].damage*factor*48);
+        close(before-enemy.hp,HERO[id].damage*factor*60);
       }else close(before-enemy.hp,HERO[id].damage*factor*3);
     }
   }
@@ -651,7 +651,7 @@ test('skill preview names the highest-rank caster, matches cast() factors and ne
   assert.equal(E.castPreview(s,'aurora').rank,3);assert.match(E.castPreview(s,'aurora').lines.join(' '),/70%/);
   const amount=(id,factor)=>Math.round(E.power(s,E.bestUnit(s,id))*factor).toLocaleString('ko-KR');
   assert.ok(E.castPreview(s,'doom').lines[0].includes(amount('doom',E.fortuneFactor(s.gold-E.skillGoldCost('doom')))));
-  assert.ok(E.castPreview(s,'lightning_sage').lines[0].includes(amount('lightning_sage',7)));
+  assert.ok(E.castPreview(s,'lightning_sage').lines[0].includes(amount('lightning_sage',8)));
   assert.ok(E.castPreview(s,'cherry_prince').lines[0].includes(amount('cherry_prince',24)));
   assert.equal(E.castPreview(s,'star_boy'),null,'absent companions have no preview');
 });
@@ -843,13 +843,13 @@ test('Cinderella hands off after its current winner is merged or sold; only the 
   assert.ok(E.restore(E.serialize(s)));
 });
 
-test('Zeke gains 40% haste exactly when a living enemy reaches the last quarter of the path',()=>{
+test('Zeke gains 40% attack power exactly when a living enemy reaches the last quarter of the path',()=>{
   const s=traitArena([{hero:'zeke',index:12}]),[enemy]=enemiesFor(s,[{progress:E.PATH_LENGTH*.75-1e-6}]),u=s.board[12];
-  close(E.personalTrait(s,u).speedBonus,0);close(E.combatStats(s,u).cooldown,HERO.zeke.interval);
+  close(E.personalTrait(s,u).damageMultiplier,1);close(E.combatStats(s,u).cooldown,HERO.zeke.interval);
   enemy.progress=E.PATH_LENGTH*.75;
-  close(E.personalTrait(s,u).speedBonus,.4);close(E.combatStats(s,u).cooldown,HERO.zeke.interval/1.4);
-  close(E.combatStats(s,u).interval,HERO.zeke.interval/1.4+E.ATTACK_WINDUP);
-  enemy.hp=0;close(E.personalTrait(s,u).speedBonus,0);
+  close(E.personalTrait(s,u).damageMultiplier,1.4);close(E.combatStats(s,u).damage,HERO.zeke.damage*1.4);close(E.combatStats(s,u).cooldown,HERO.zeke.interval);
+  close(E.combatStats(s,u).interval,HERO.zeke.interval+E.ATTACK_WINDUP);
+  enemy.hp=0;close(E.personalTrait(s,u).damageMultiplier,1);
 });
 
 test('Zeke ultimate deals seven times power and doubles only below ten health',()=>{
@@ -902,7 +902,7 @@ test('autoPlay skips unaffordable Doom and still casts another ready ultimate ag
   assert.equal(s.paidSummons,100);assert.equal(s.stats.merges,0);assert.equal(s.board.filter(Boolean).length,2);
   assert.equal(s.finishers.length,1);assert.equal(s.finishers[0].source,s.board[12].uid);
   for(let i=0;i<6;i++)E.step(s,.05);
-  close(hp-boss.hp,E.power(s,s.board[12])*48);assert.equal(s.stats.byHero.doom,undefined);
+  close(hp-boss.hp,E.power(s,s.board[12])*60);assert.equal(s.stats.byHero.doom,undefined);
 });
 
 test('poison uses one 40-stack cap and an ordinary shot or overlapping field cannot truncate the ultimate contribution',()=>{
@@ -1553,7 +1553,7 @@ test('the dream form and pure buff ultimates cannot be recast while they run, so
 test('conditional ultimates report their live boost: lit with the boosted numbers, a hint while waiting',()=>{
   const s=traitArena([{hero:'guardian',index:12,rank:1},{hero:'zeke',index:13,rank:1}]);const [e]=enemiesFor(s,[{hp:1e9,progress:300}]);quiet(s);
   let g=E.castPreview(s,'guardian');assert.equal(g.boost.on,false);assert.equal(g.boost.label,'강화 대기');assert.match(g.boost.hint,/320/);assert.match(g.lines[0],/160만큼 밀어내며/);
-  assert.ok(g.lines[0].includes(`위력 ${E.QUAKE_FACTOR}배`)&&g.lines[0].includes(Math.round(E.power(s,s.board[12])*E.QUAKE_FACTOR).toLocaleString('ko-KR')+' 피해'),g.lines[0]);
+  assert.ok(g.lines[0].includes(`공격력 ${E.QUAKE_FACTOR}배`)&&g.lines[0].includes(Math.round(E.power(s,s.board[12])*E.QUAKE_FACTOR).toLocaleString('ko-KR')+' 피해'),g.lines[0]);
   e.progress=E.PATH_LENGTH*.9;g=E.castPreview(s,'guardian');assert.equal(g.boost.on,true);assert.equal(g.boost.label,'강화');assert.equal(g.boost.hint,'');assert.match(g.lines[0],/320만큼 밀어내며 3초/);
   const mixed=traitArena([{hero:'guardian',index:12,rank:1}]);enemiesFor(mixed,[{hp:1e9,progress:300},{hp:1e9,progress:E.PATH_LENGTH*.9}]);quiet(mixed);
   g=E.castPreview(mixed,'guardian');assert.equal(g.boost.label,'강화 1명');assert.match(g.lines[1],/강화된 1명/);
@@ -1680,35 +1680,54 @@ test('underdog: +80% power only while the whole deck is plain normal-rarity hero
   const s=traitArena([{index:12,hero:'underdog'},{index:13,hero:'snow_rabbit'}]);
   enemiesFor(s,[{hp:1e6},{hp:1e6}]);
   const before=s.enemies.map(e=>e.hp),base=E.combatStats(s,s.board[12]).damage;
-  const preview=E.castPreview(s,'underdog');assert.ok(preview.lines[0].includes(`위력 ${E.UNDERDOG.factor}배`));
+  const preview=E.castPreview(s,'underdog');assert.ok(preview.lines[0].includes(`공격력 ${E.UNDERDOG.factor}배`));
   readyCast(s,'underdog');
   for(const [i,e] of s.enemies.entries())close(before[i]-e.hp,base*E.UNDERDOG.factor);
   assert.ok(s.board.filter(Boolean).every(u=>u.disabled>=2),'the whole board is stunned');
   assert.ok(E.restore(E.serialize(s)));
 });
-test('toffee apple: places up to five bombs ahead of the lead enemy; one nearby enemy sets one off; a sixth is refused',()=>{
-  assert.deepEqual(E.APPLEBOMB,{factor:9,max:5,trigger:80,stun:3});
-  const s=traitArena([{index:12,hero:'toffee_apple'}]);
-  const [lead]=enemiesFor(s,[{hp:1e9,progress:400}]);
-  const base=E.combatStats(s,s.board[12]).damage,preview=E.castPreview(s,'toffee_apple');
-  assert.deepEqual(preview.lines,[
-    `경로 앞쪽에 폭탄을 설치합니다(최대 ${E.APPLEBOMB.max}개, 지금 0개).`,
-    `적이 가까이 오면 바로 터져 적 전체에게 위력 ${E.APPLEBOMB.factor}배, ${Math.round(base*E.APPLEBOMB.factor).toLocaleString('ko-KR')} 피해를 줍니다.`,
-    `설치한 토피애플은 ${E.APPLEBOMB.stun}초 동안 기절합니다.`,
-  ]);
-  readyCast(s,'toffee_apple');
-  assert.equal(s.bombs.length,1);assert.ok(s.bombs[0].progress>=lead.progress+140);assert.ok(s.bombs[0].progress>=E.PATH_LENGTH*.12);assert.ok(s.bombs[0].progress<=E.PATH_LENGTH*.9);
-  close(s.bombs[0].damage,base*E.APPLEBOMB.factor);assert.ok(s.board[12].disabled>=3);
-  const placed=s.bombs[0],far=placed.progress-E.APPLEBOMB.trigger-1;lead.progress=far;lead.speed=0;
-  const hpFar=lead.hp;E.step(s,.05);assert.equal(s.bombs.length,1);assert.equal(lead.hp,hpFar);
+test('toffee apple: random route positions, proximity-only global blast, five-apple cap and saved apples',()=>{
+  assert.deepEqual(E.APPLEBOMB,{factor:10,max:5,trigger:80,stun:3});
+  const s=traitArena([{index:12,hero:'toffee_apple'}]);const [lead]=enemiesFor(s,[{hp:1e9,progress:400}]);
+  const base=E.combatStats(s,s.board[12]).damage;s.rng=1;readyCast(s,'toffee_apple');
+  assert.ok(s.bombs[0].progress<lead.progress,'a random apple can appear behind the leading enemy');
+  assert.ok(s.bombs[0].progress>=0&&s.bombs[0].progress<E.PATH_LENGTH);close(s.bombs[0].damage,base*10);
+  assert.ok(s.board[12].disabled>=3);const placed=s.bombs[0];placed.progress=1000;lead.speed=0;
+  for(const progress of [400,1300]){lead.progress=progress;const hp=lead.hp;E.step(s,.05);assert.equal(s.bombs.length,1);assert.equal(lead.hp,hp,'far ahead or behind does not trigger');}
   lead.progress=placed.progress-E.APPLEBOMB.trigger;const hp=lead.hp;E.step(s,.05);
-  assert.equal(s.bombs.length,0,'one enemy inside the trigger sets the bomb off');close(hp-lead.hp,placed.damage);
+  assert.equal(s.bombs.length,0);close(hp-lead.hp,base*10);
   const pack=traitArena([{index:12,hero:'toffee_apple'}]);enemiesFor(pack,[{hp:1e9,progress:200}]);
   for(let i=0;i<5;i++){pack.board[12].disabled=0;readyCast(pack,'toffee_apple');}
-  assert.equal(pack.bombs.length,5);
-  pack.board[12].disabled=0;pack.gauge=120;assert.equal(E.cast(pack,'toffee_apple').ok,false,'a sixth bomb is refused');
-  assert.equal(E.cast(pack,'toffee_apple').reason,'폭탄이 가득 찼습니다.');
-  assert.equal(E.restore(E.serialize(pack)).bombs.length,5,'bombs survive save and restore');
+  assert.equal(pack.bombs.length,5);pack.board[12].disabled=0;pack.gauge=120;
+  assert.equal(E.cast(pack,'toffee_apple').reason,'폭탄이 가득 찼습니다.');assert.equal(E.restore(E.serialize(pack)).bombs.length,5);
+});
+
+test('waiting apples follow the current top Toffee rank, training and buffs, then retain the last power after sale',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple'},{index:0,hero:'siren'}]);const [foe]=enemiesFor(s,[{hp:1e9,progress:1800}]);foe.speed=0;
+  readyCast(s,'toffee_apple');s.bombs[0].progress=1000;
+  s.board[12].rank=3;s.upgrades.toffee_apple=2;s.buffs.radiance=8;hold(s);E.step(s,.05);
+  const expected=E.combatStats(s,s.board[12]).damage*10;close(s.bombs[0].damage,expected);
+  const restored=E.restore(E.serialize(s));assert.ok(restored);assert.ok(E.sell(restored,12).ok);assert.equal(restored.board.some(u=>u?.hero==='toffee_apple'),false);
+  close(restored.bombs[0].damage,expected);const enemy=restored.enemies[0];enemy.progress=1000+E.APPLEBOMB.trigger;const hp=enemy.hp;
+  hold(restored);E.step(restored,.05);assert.equal(restored.bombs.length,0);close(hp-enemy.hp,expected);
+});
+
+test('apples use the highest current Toffee, then a remaining lower rank, and keep the last value before Ash removes her',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple',rank:1},{index:13,hero:'toffee_apple',rank:3},{index:0,hero:'ash',rank:2}]);
+  const [foe]=enemiesFor(s,[{hp:1e9,progress:1800}]);foe.speed=0;readyCast(s,'toffee_apple');s.bombs[0].progress=1000;
+  assert.ok(E.sell(s,13).ok);s.upgrades.toffee_apple=2;hold(s);E.step(s,.05);
+  close(s.bombs[0].damage,E.combatStats(s,s.board[12]).damage*10,'remaining lower rank becomes the source');
+  s.buffs.radiance=8;const expected=E.combatStats(s,s.board[12]).damage*10;readyCast(s,'ash');
+  assert.equal(s.board.some(u=>u?.hero==='toffee_apple'),false);close(s.bombs[0].damage,expected,'last value sampled before sacrifice');
+  foe.progress=1000;const hp=foe.hp;hold(s);E.step(s,.05);close(hp-foe.hp,expected);assert.equal(s.bombs.length,0);
+});
+
+test('Zeke approach power multiplies both normal and crisis ultimate while leaving attack cadence unchanged',()=>{
+  for(const health of [20,9]){
+    const s=traitArena([{hero:'zeke',index:12}]);const [foe]=enemiesFor(s,[{hp:1e9,progress:E.PATH_LENGTH*.75}]);s.health=health;
+    const before=foe.hp;readyCast(s,'zeke');close(before-foe.hp,31*1.4*(health===9?14:7));
+    close(E.combatStats(s,s.board[12]).interval,HERO.zeke.interval+E.ATTACK_WINDUP);
+  }
 });
 
 test('sunflower: one shared sunlight stack that fills only while a sunflower stands, widens the burst 30/60/90 and is spent by Solar Flare',()=>{
@@ -1734,7 +1753,7 @@ test('sunflower: one shared sunlight stack that fills only while a sunflower sta
   for(const n of [0,1,3]){
     const a=traitArena([{index:12,hero:'sunflower'}]);a.sunlight=n;
     const [foe]=enemiesFor(a,[{hp:1e9}]),base=E.combatStats(a,a.board[12]).damage,hp=foe.hp;
-    const preview=E.castPreview(a,'sunflower');assert.ok(preview.lines[0].includes(`햇빛 ${n}개`)&&preview.lines[0].includes(`위력 ${2+4*n}배`));
+    const preview=E.castPreview(a,'sunflower');assert.ok(preview.lines[0].includes(`햇빛 ${n}개`)&&preview.lines[0].includes(`공격력 ${2+4*n}배`));
     readyCast(a,'sunflower');close(hp-foe.hp,base*(2+4*n),'solar flare damage at stack '+n);assert.equal(a.sunlight,0);
   }
   const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(saved.sunlight,s.sunlight);
@@ -1750,18 +1769,22 @@ test('joker: every ultimate turns the colour to a random different one and the b
     for(const other of Object.keys(expected))if(other!==color&&other!=='red'&&color!=='red')assert.ok(!expected[other](foe)||other===color,color+' does not also apply '+other);
   }
   const s=traitArena([{index:12,hero:'joker'}]);
-  const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage,seen=new Set();
-  assert.equal(s.jokerColor,'red');
-  for(let i=0;i<40;i++){
-    const hp=foe.hp,from=s.jokerColor;s.board[12].disabled=0;const preview=E.castPreview(s,'joker');
-    assert.ok(preview.lines[0].includes('무작위')&&preview.lines[0].includes(E.JOKER_NAMES[from].split(' · ')[0]));
-    readyCast(s,'joker');close(hp-foe.hp,base*3,'roulette strikes 3x');assert.notEqual(s.jokerColor,from,'the colour always changes');
-    assert.ok(E.JOKER.colors.includes(s.jokerColor));seen.add(s.jokerColor);
+  const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage;
+  assert.equal(s.jokerSeen,1);assert.equal(s.jokerColor,'red');
+  for(let i=0;i<100&&!E.jokerChaos(s);i++){
+    const hp=foe.hp,from=s.jokerColor,seen=s.jokerSeen;assert.equal(E.skillCost(s,'joker'),50);
+    const preview=E.castPreview(s,'joker');assert.ok(preview.lines[0].includes('무작위'));
+    readyCast(s,'joker');close(hp-foe.hp,base*3);assert.notEqual(s.jokerColor,from);assert.equal(s.jokerSeen&seen,seen);
   }
-  assert.equal(seen.size,5,'every colour comes up eventually, in no fixed order');
-  const twin=E.restore(E.serialize(s));assert.equal(E.pickJokerColor(twin,twin.jokerColor),E.pickJokerColor(s,s.jokerColor),'the pick follows the saved random stream');
-  assert.equal(E.restore(E.serialize(s)).jokerColor,s.jokerColor);
+  assert.equal(s.jokerSeen,31);assert.equal(s.jokerColor,'chaos');assert.equal(E.skillName(s,'joker'),'카오스 룰렛');assert.equal(E.skillCost(s,'joker'),100);
+  const hp=foe.hp;s.gauge=99;assert.equal(E.cast(s,'joker').ok,false);assert.equal(s.gauge,99);s.gauge=120;assert.equal(E.cast(s,'joker').ok,true);assert.equal(s.gauge,20);
+  close(hp-foe.hp,base*3);assert.equal(s.jokerColor,'chaos');assert.equal(foe.statusEffects.length,0,'Chaos ultimate itself does not apply the five statuses');
+  const shot=launchNormal(s,s.board[12]);resolveNormal(s,shot);E.statusState(s,foe);
+  for(const check of Object.values(expected))assert.ok(check(foe),'Chaos basic attack applies every colour');
+  const restored=E.restore(E.serialize(s));assert.ok(restored);assert.equal(restored.jokerColor,'chaos');assert.equal(restored.jokerSeen,31);
+  for(const value of [0,32,1.5]){const bad=JSON.parse(E.serialize(s));bad.jokerSeen=value;assert.equal(E.restore(bad),null);}
   const bad=JSON.parse(E.serialize(s));bad.jokerColor='pink';assert.equal(E.restore(bad),null);
+  const legacy=JSON.parse(E.serialize(s));legacy.jokerColor='blue';delete legacy.jokerSeen;assert.equal(E.restore(legacy).jokerSeen,3,'legacy saves retain only provable colours');
 });
 
 function hold(s){for(const u of s.board)if(u){u.cooldown=100;u.windup=0;}}
@@ -1779,7 +1802,7 @@ function armBoss(placements,chapter,progress=400){
 }
 
 test('immunity: antropy, an orthogonal cure aura, and the invincible timer',()=>{
-  assert.equal(E.REQUIEM.factor,7);assert.ok(Object.isFrozen(E.REQUIEM));
+  assert.equal(E.REQUIEM.factor,8);assert.ok(Object.isFrozen(E.REQUIEM));
   assert.equal(E.LEMONADE.seconds,4);assert.ok(Object.isFrozen(E.LEMONADE));
   const s=traitArena([
     {index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:7,hero:'snow_rabbit'},{index:11,hero:'siren'},{index:17,hero:'guardian'},
@@ -1787,18 +1810,18 @@ test('immunity: antropy, an orthogonal cure aura, and the invincible timer',()=>
   ]);
   assert.equal(E.immune(s,1),false,'empty cell');
   assert.equal(E.immune(s,24),true,'antropy');
-  assert.equal(E.immune(s,12),false,'a cure master does not protect herself');
+  assert.equal(E.immune(s,12),true,'Cure Master has innate invincibility');
   for(const i of [13,7,11,17])assert.equal(E.immune(s,i),true,'orthogonal '+i);
   assert.equal(E.immune(s,6),false,'diagonal');assert.equal(E.immune(s,18),false,'diagonal');assert.equal(E.immune(s,0),false);
   assert.deepEqual({key:E.personalTrait(s,s.board[24]).key,active:E.personalTrait(s,s.board[24]).active,label:E.personalTrait(s,s.board[24]).label},{key:'antropy',active:true,label:'디버프 무효'});
-  assert.equal(E.personalTrait(s,s.board[12]).label,'무적 오라 · 아군 4명');assert.equal(E.personalTrait(s,s.board[12]).active,true);
+  assert.equal(E.personalTrait(s,s.board[12]).label,'자체 무적 · 오라 4명');assert.equal(E.personalTrait(s,s.board[12]).active,true);
   const alone=traitArena([{index:4,hero:'cure_master'}]);
-  assert.equal(E.personalTrait(alone,alone.board[4]).label,'무적 오라 · 곁에 아군 없음');
+  assert.equal(E.personalTrait(alone,alone.board[4]).label,'자체 무적');
   s.board[24].cursed=true;s.board[24].disabled=5;assert.equal(E.immune(s,24),true,'antropy stays immune while cursed or disabled');
   s.board[12].cursed=true;for(const i of [13,7,11,17])assert.equal(E.immune(s,i),false,'a cursed cure grants nothing');
-  assert.equal(E.personalTrait(s,s.board[12]).active,false);assert.equal(E.personalTrait(s,s.board[12]).label,'무적 오라 · 아군 4명');
+  assert.equal(E.personalTrait(s,s.board[12]).active,true);assert.equal(E.personalTrait(s,s.board[12]).label,'자체 무적');assert.equal(E.invincible(s,12),true);
   s.board[12].cursed=false;s.board[12].disabled=2;for(const i of [13,7,11,17])assert.equal(E.immune(s,i),false,'a disabled cure grants nothing');
-  assert.equal(E.personalTrait(s,s.board[12]).active,false);
+  assert.equal(E.personalTrait(s,s.board[12]).active,true);assert.equal(E.invincible(s,12),true);
   s.board[12].disabled=0;s.board[12].invincible=1;assert.equal(E.immune(s,12),true,'invincible covers the cure master herself');
   const t=traitArena([{index:12,hero:'star_boy'}]),u=t.board[12];
   assert.equal(E.immune(t,12),false);u.invincible=.12;assert.equal(E.immune(t,12),true);
@@ -1817,9 +1840,9 @@ test('boss patterns skip immune units: seal, storm, stun, thunder and curse; jud
   const [s,boss]=seal;boss.skillIn=0;hold(s);E.step(s,.05);assert.equal(s.telegraph.pattern,'seal');
   const cells=s.telegraph.cells,uid=id=>s.board.find(u=>u?.hero===id).uid;
   relocate(s,uid('cure_master'),cells[2]);relocate(s,uid('star_boy'),cells[1]);relocate(s,uid('snow_rabbit'),cells[3]);relocate(s,uid('siren'),cells[0]);relocate(s,uid('antropy'),cells[4]);
-  assert.equal(E.immune(s,cells[2]),false);assert.equal(E.immune(s,cells[1]),true);assert.equal(E.immune(s,cells[3]),true);assert.equal(E.immune(s,cells[0]),false);assert.equal(E.immune(s,cells[4]),true);
+  assert.equal(E.immune(s,cells[2]),true);assert.equal(E.immune(s,cells[1]),true);assert.equal(E.immune(s,cells[3]),true);assert.equal(E.immune(s,cells[0]),false);assert.equal(E.immune(s,cells[4]),true);
   finishTelegraph(s);
-  assert.ok(s.board[cells[2]].disabled>0,'the cure master herself is stunned');
+  assert.equal(s.board[cells[2]].disabled,0,'Cure Master blocks her own stun independently of the aura');
   assert.equal(s.board[cells[1]].disabled,0);assert.equal(s.board[cells[3]].disabled,0,'aura is sampled before she is stunned');
   assert.ok(s.board[cells[0]].disabled>0,'a unit two cells away is not covered');
   assert.equal(s.board[cells[4]].disabled,0);assert.ok(s.events.some(e=>e.type==='seal'));
@@ -1854,8 +1877,8 @@ test('boss patterns skip immune units: seal, storm, stun, thunder and curse; jud
   const markedPlain=plain.telegraph.cells[0];finishTelegraph(plain);
   assert.equal(plain.board[markedPlain],null);assert.equal(plain.events.filter(e=>e.type==='judgement').pop().hit,true);
   const [curse,curseBoss]=armBoss([{index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:0,hero:'antropy'},{index:24,hero:'snow_rabbit'}],3);
-  curse.board[12].invincible=5;curseBoss.skillIn=0;hold(curse);E.step(curse,.05);
-  assert.equal(curse.board[24].cursed,true);assert.ok(curse.board.every((u,i)=>i===24||!u?.cursed),'curse never picks an immune unit');
+  curse.rng=1;curseBoss.skillIn=0;hold(curse);E.step(curse,.05);
+  assert.ok(curse.board.every(u=>!u?.cursed),'the random Antropy pick is blocked without redirecting the curse');assert.ok(curse.events.some(e=>e.type==='ward'&&e.hero==='antropy'));
   const [safe,safeBoss]=armBoss([{index:0,hero:'antropy'},{index:6,hero:'antropy'}],3);safeBoss.skillIn=0;hold(safe);E.step(safe,.05);
   assert.equal(safe.board.some(u=>u?.cursed),false);assert.equal(safe.events.some(e=>e.type==='curse'),false);
 });
@@ -1863,7 +1886,7 @@ test('boss patterns skip immune units: seal, storm, stun, thunder and curse; jud
 test('bigshow and applebomb do not stun an immune ally',()=>{
   const s=traitArena([{index:7,hero:'cure_master'},{index:12,hero:'underdog'},{index:18,hero:'snow_rabbit'},{index:24,hero:'antropy'}]);
   enemiesFor(s,[{hp:1e9}]);readyCast(s,'underdog');
-  assert.ok(s.board[7].disabled>0,'the cure master is not immune to her own show');
+  assert.equal(s.board[7].disabled,0,'Cure Master innately blocks the show stun');
   assert.equal(s.board[12].disabled,0,'the ally beside her was immune when the stun was sampled');
   assert.ok(s.board[18].disabled>=2);assert.equal(s.board[24].disabled,0);
   const beside=traitArena([{index:12,hero:'cure_master'},{index:13,hero:'toffee_apple'}]);
@@ -1906,7 +1929,7 @@ test('lemonade clears disables and curses, grants invincible, and round-trips th
   for(const bad of [-1,NaN,11]){const raw=JSON.parse(E.serialize(s));raw.board[12].invincible=bad;assert.equal(E.restore(raw),null,'invincible '+bad);}
 });
 
-test('requiem wipes debuffs before the 7x hit, so exposure does not amplify it',()=>{
+test('requiem wipes debuffs before the 8x hit, so exposure does not amplify it',()=>{
   const s=traitArena([{index:12,hero:'antropy'}]);
   const [foe,clean]=enemiesFor(s,[{hp:1e9,progress:600},{hp:1e9,progress:800}]);
   const until=s.time+5;
@@ -1919,13 +1942,13 @@ test('requiem wipes debuffs before the 7x hit, so exposure does not amplify it',
   ];
   foe.slowEffects=[{source:'t:slow',owner:'antropy',amount:.4,until}];
   foe.ccImmune=s.time+9;foe.frostLock=s.time+4;foe.shield=0;foe.rage=0;
-  const base=E.combatStats(s,s.board[12]).damage,hit=`${Math.round(base*7).toLocaleString('ko-KR')} 피해`;
+  const base=E.combatStats(s,s.board[12]).damage,hit=`${Math.round(base*8).toLocaleString('ko-KR')} 피해`;
   const preview=E.castPreview(s,'antropy');
-  assert.equal(preview.lines[0],`적의 모든 디버프를 지우고 적 전체에게 위력 7배, ${hit}를 줍니다.`);
+  assert.equal(preview.lines[0],`적의 모든 디버프를 지우고 적 전체에게 공격력 8배, ${hit}를 줍니다.`);
   assert.equal(preview.lines[1],'지금 지워지는 디버프가 걸린 적 1기.');
   const saved=E.serialize(s);E.castPreview(s,'antropy');assert.equal(E.serialize(s),saved);
   const hp=foe.hp,hp2=clean.hp,lock=foe.ccImmune,frost=foe.frostLock;readyCast(s,'antropy');
-  close(hp-foe.hp,base*7,'debuffed enemy');close(hp2-clean.hp,base*7,'clean enemy takes the same hit');
+  close(hp-foe.hp,base*8,'debuffed enemy');close(hp2-clean.hp,base*8,'clean enemy takes the same hit');
   const st=E.statusState(s,foe);
   assert.equal(st.burn,0);assert.equal(st.poison,0);assert.equal(st.exposure,0);assert.equal(st.divine,0);assert.equal(st.stun,0);assert.equal(st.slow,0);
   assert.equal(foe.controlTime,0);assert.equal(foe.slowTime,0);assert.equal(foe.statusEffects.length,0);assert.equal(foe.slowEffects.length,0);
@@ -1935,7 +1958,7 @@ test('requiem wipes debuffs before the 7x hit, so exposure does not amplify it',
   assert.ok(s.events.some(e=>e.type==='skill'&&e.kind==='requiem'));
   const bare=traitArena([{index:12,hero:'antropy'}]);enemiesFor(bare,[{hp:1e9}]);
   const bareBase=E.combatStats(bare,bare.board[12]).damage;
-  assert.deepEqual(E.castPreview(bare,'antropy').lines,[`적의 모든 디버프를 지우고 적 전체에게 위력 7배, ${Math.round(bareBase*7).toLocaleString('ko-KR')} 피해를 줍니다.`]);
+  assert.deepEqual(E.castPreview(bare,'antropy').lines,[`적의 모든 디버프를 지우고 적 전체에게 공격력 8배, ${Math.round(bareBase*8).toLocaleString('ko-KR')} 피해를 줍니다.`]);
 });
 
 test('cure master basic attack leaves a zone that damages a nearby enemy',()=>{
@@ -1964,9 +1987,9 @@ test('smart auto holds lemonade until someone needs it and spends requiem on liv
 });
 
 test('ash: armageddon burns the lowest other ally, spares an invincible one (not Antropy), and still blasts when she is alone',()=>{
-  assert.deepEqual(E.ARMAGEDDON,{factor:18,radius:180});assert.equal(HERO.ash.damage,31);
+  assert.deepEqual(E.ARMAGEDDON,{factor:22,radius:180});assert.equal(HERO.ash.damage,28);
   const dist=(a,b)=>Math.hypot(E.pathPoint(a.progress).x-E.pathPoint(b.progress).x,E.pathPoint(a.progress).y-E.pathPoint(b.progress).y);
-  const hitLine=base=>`가장 밀집한 반경 ${E.ARMAGEDDON.radius}의 적에게 위력 ${E.ARMAGEDDON.factor}배, ${Math.round(base*E.ARMAGEDDON.factor).toLocaleString('ko-KR')} 피해를 줍니다.`;
+  const hitLine=base=>`가장 밀집한 반경 ${E.ARMAGEDDON.radius}의 적에게 공격력 ${E.ARMAGEDDON.factor}배, ${Math.round(base*E.ARMAGEDDON.factor).toLocaleString('ko-KR')} 피해를 줍니다.`;
   const s=traitArena([{index:12,hero:'ash',rank:1},{index:0,hero:'star_boy',rank:1},{index:24,hero:'snow_rabbit',rank:3}]);
   const enemies=enemiesFor(s,[100,130,160,1200].map(progress=>({hp:1e9,progress})));
   assert.deepEqual(enemies.map(e=>e.progress),[100,130,160,1200]);
@@ -2032,7 +2055,7 @@ test('venom: a normal hit applies poison and burn, and the plague doubles those 
   const pack=enemiesFor(field,[100,900].map(progress=>({hp:1e9,progress})));
   const base=E.combatStats(field,field.board[12]).damage,preview=E.castPreview(field,'venom');
   assert.deepEqual(preview.lines,[
-    `적 전체에게 위력 ${E.VENOM_PLAGUE.factor}배, ${Math.round(base*E.VENOM_PLAGUE.factor).toLocaleString('ko-KR')} 피해를 주고 중독을 ${E.VENOM_PLAGUE.stacks}중첩 쌓습니다.`,
+    `적 전체에게 공격력 ${E.VENOM_PLAGUE.factor}배, ${Math.round(base*E.VENOM_PLAGUE.factor).toLocaleString('ko-KR')} 피해를 주고 중독을 ${E.VENOM_PLAGUE.stacks}중첩 쌓습니다.`,
     '10초 동안 적이 받는 화상·중독 피해가 2배가 됩니다.',
   ]);
   const before=E.serialize(field);E.castPreview(field,'venom');assert.equal(E.serialize(field),before);
