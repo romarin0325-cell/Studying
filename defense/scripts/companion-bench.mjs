@@ -1,5 +1,5 @@
 // Contribution bench for companions whose strength depends on a state the bench never reaches by itself:
-// Joker's colour (5) and Sunflower's sunlight stack (0..3). It reuses the scenarios, reference teams and index of
+// Joker's five colours and Chaos, and Sunflower's sunlight stack (0..3). It reuses the scenarios, reference teams and index of
 // scripts/simulate.mjs (C average = 1.00) and measures every state on its own.
 //   node defense/scripts/companion-bench.mjs [--teams 10] [--ranks 1,3,5] [--ult on|off]
 // --ult on : the candidate casts its ultimate whenever it can; Joker's colour and Sunflower's stack are put back
@@ -35,14 +35,14 @@ function bench(deck,candidateCell,rank,scenario,castId,seed,state){
     engine.step(s,DT);t+=DT;
     for(const e of s.enemies)if(!seen.has(e.uid)){seen.add(e.uid);if(scenario.start)e.progress=scenario.start;if(e.boss){e.skillIn=1e9;if(scenario.freeze)e.speed=0;}}
     if(castId&&s.enemies.some(e=>e.hp>0)){
-      if(s.gauge>=HERO[castId].skill.cost){engine.cast(s,castId);if(state)state.apply(s);}
+      if(s.gauge>=engine.skillCost(s,castId)){engine.cast(s,castId);if(state)state.apply(s);}
     }
   }
   return s.stats.damage;
 }
 const ONLY=opt('only',null);
 const VARIANTS=[
-  ...['red','blue','green','white','black'].map(c=>({id:'joker',label:'조커 '+engine.JOKER_NAMES[c],apply:s=>{s.jokerColor=c;}})),
+  ...[...engine.JOKER.colors,'chaos'].map(c=>({id:'joker',label:'조커 '+engine.JOKER_NAMES[c],apply:s=>{s.jokerColor=c;s.jokerSeen=c==='chaos'?engine.JOKER.all:1|(1<<engine.JOKER.colors.indexOf(c));}})),
   ...[0,1,2,3].map(n=>({id:'sunflower',label:`해바라기 햇빛 ${n}`,apply:s=>{s.sunlight=n;}})),
   // Stateless companions are measured as they are.
   ...['antropy','cure_master','ash','venom'].map(id=>({id,label:HERO[id].name,apply:()=>{}})),

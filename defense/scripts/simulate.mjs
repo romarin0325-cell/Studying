@@ -52,7 +52,7 @@ function bench(deck,candidateCell,rank,scenario,castId,seed){
     engine.step(s,DT);t+=DT;
     for(const e of s.enemies)if(!seen.has(e.uid)){seen.add(e.uid);if(scenario.start)e.progress=scenario.start;if(e.boss){e.skillIn=1e9;if(scenario.freeze)e.speed=0;}}
     if(castId&&s.enemies.some(e=>e.hp>0)){
-      const cost=HERO[castId].skill.cost,wait=HERO[castId].skill.type==='starfall'?Math.max(cost,engine.GAUGE_MAX):cost;
+      const cost=engine.skillCost(s,castId),wait=HERO[castId].skill.type==='starfall'?Math.max(cost,engine.GAUGE_MAX):cost;
       if(s.gauge>=wait)engine.cast(s,castId);
     }
   }

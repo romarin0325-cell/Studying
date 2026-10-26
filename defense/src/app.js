@@ -77,12 +77,12 @@ const roseBonus=level=>Math.round(roseAttack(level)*100);
 // Dream greenhouse: each bed is a plant whose art grows through four stages.
 const pct1=x=>`${+(x*100).toFixed(1)}%`;
 const BED_UI={
-  rose:{name:'용기의 장미',effect:'모든 동료 위력',row:0,order:2,color:'#ff9aae',value:l=>`+${roseBonus(l)}%`,line:'보유한 모든 동료의 위력이 오릅니다.'},
+  rose:{name:'용기의 장미',effect:'모든 동료 공격력',row:0,order:2,color:'#ff9aae',value:l=>`+${roseBonus(l)}%`,line:'보유한 모든 동료의 공격력이 오릅니다.'},
   spring:{name:'별이슬 샘',effect:'최대 별빛',row:1,order:1,color:'#8fdcff',value:l=>String(springGauge(l)),line:'전투에서 모을 수 있는 별빛이 늘어납니다.'},
   seed:{name:'황금 씨앗',effect:'시작 골드',row:2,order:3,color:'#ffd36a',value:l=>`+${seedGold(l)}`,line:'모든 원정을 더 많은 골드로 시작합니다.'},
   // Dawn greenhouse (second garden): same art language, rows of the dawn sheet.
   crit:{name:'여명의 엉겅퀴',effect:'치명타 확률',row:0,order:2,color:'#d68cff',value:l=>pct1(critChance(l)),line:''},
-  critDamage:{name:'노을빛 불꽃나리',effect:'치명타 대미지',row:1,order:1,color:'#ff9a5c',value:l=>`${Math.round(critDamage(l)*100)}%`,line:''},
+  critDamage:{name:'노을빛 불꽃나리',effect:'치명타 피해',row:1,order:1,color:'#ff9a5c',value:l=>`${Math.round(critDamage(l)*100)}%`,line:''},
   stardust:{name:'유성우 은방울',effect:'별똥별 가속',row:2,order:3,color:'#bfe6ff',value:l=>`+${Math.round(stardustRate(l)*100)}%`,line:''},
 };
 // Art stage only (sprout → bud → bloom → starlit); it follows the cost knees without saying so.
@@ -352,8 +352,8 @@ function renderDraft(){
   const a=p().active;if(a?.mode!=='weekly'){screen='home';render();return;}if(a.draft.length===TEAM_SIZE){startBattle();return;}
   $('content').innerHTML=`<section class="page">${heading('주간 드래프트',`<span class="count"><b>${a.draft.length+1}</b> / ${TEAM_SIZE}</span>`,'둘 중 한 명을 선택하세요.')}
     <div class="draft-selected">${Array.from({length:TEAM_SIZE},(_,i)=>a.draft[i]?image(a.draft[i]):`<span class="draft-dot">${i+1}</span>`).join('')}</div>
-    <div class="draft-options">${a.offers.map((o,i)=>`<button class="draft-card" data-draft="${i}" data-rarity="${HERO[o.id].rarity}">${badge(HERO[o.id].rarity)}<span class="art">${image(o.id,true)}</span><h3>${HERO[o.id].name}</h3><small>${HERO[o.id].role}</small><span class="cpline">전투력 ${cpOf(o.id)}</span><span class="boon">${o.boon==='focus'?'집중 전술 · 위력 +5%':'별빛 전술 · 시작 별빛 +4'}</span></button>`).join('')}</div>
-    <p class="draft-help">선택은 자동 저장되어 나중에 이어할 수 있습니다.<br>후보가 한 명뿐이면 같은 동료의 전술 2종 중에서 고릅니다.</p></section>`;
+    <div class="draft-options">${a.offers.map((o,i)=>`<button class="draft-card" data-draft="${i}" data-rarity="${HERO[o.id].rarity}">${badge(HERO[o.id].rarity)}<span class="art">${image(o.id,true)}</span><h3>${HERO[o.id].name}</h3><small>${HERO[o.id].role}</small><span class="cpline">전투력 ${cpOf(o.id)}</span><span class="boon">${o.boon==='focus'?'집중 전술 · 공격력 +5%':'별빛 전술 · 시작 별빛 +4'}</span></button>`).join('')}</div>
+    <p class="draft-help">선택은 자동 저장되어 나중에 이어할 수 있습니다.</p></section>`;
 }
 function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&a.draft.length<TEAM_SIZE){screen='draft';render();}else startBattle(true);}
 function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();}
@@ -366,7 +366,7 @@ function renderBattle(){
     <div class="battle-stage"><div class="arena-wrap"><div class="aura-chips" id="aura-chips" aria-label="지속 중인 필살기"></div><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div></div>
     <div class="battle-dock">
     <div class="battle-slot" id="battle-slot"><div class="wave-strip"><div class="wave-row"><span class="wave-pips" id="wave-pips"></span><span class="wave-left" id="wave-left"></span></div><div class="boss-line" id="boss-line" hidden><span class="boss-mark">${icon('crown')}</span><div class="boss-main"><div class="boss-head"><b id="boss-name"></b><em id="boss-state"></em></div><span class="boss-bar"><i id="boss-fill"></i></span><small id="boss-trait"></small></div></div>${p().cleared<3?'<p class="battle-hint">드래그: 이동·합성 · 탭: 동료 정보 · 필살기 길게: 설명</p>':''}</div><div id="unit-panel" class="unit-panel" hidden></div></div>
-    <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${HERO[id].skill.name}">${image(id)}<small>${icon('star')}${HERO[id].skill.cost}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span><span class="skill-rank" hidden></span></button>`).join('')}</div>
+    <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${E.skillName(run,id)}">${image(id)}<small>${icon('star')}${E.skillCost(run,id)}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span><span class="skill-rank" hidden></span></button>`).join('')}</div>
     <div class="battle-controls"><button class="primary" data-action="summon-battle">${icon('plus')}<span>동료 소환</span><b id="summon-cost"></b></button><button class="secondary" data-action="training">${icon('up')}훈련</button><button class="secondary toggle-auto" data-action="auto" aria-pressed="${p().settings.auto}"><span>자동</span><b>${p().settings.auto?'ON':'OFF'}</b></button></div>
     </div></section>`;
   hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice','battle','battle-slot','wave-pips','wave-left','boss-line','boss-name','boss-state','boss-fill','boss-trait'].map(id=>[id,$(id)]));
@@ -394,7 +394,7 @@ function updateBattle(){
   changedText(hud['summon-cost'],E.summonCost(run)?E.summonCost(run)+' G':'무료');
   const pauseButton=$('pause-button'),pauseState=paused?'play':'pause';if(pauseButton.dataset.state!==pauseState){pauseButton.dataset.state=pauseState;pauseButton.innerHTML=icon(pauseState);pauseButton.setAttribute('aria-label',paused?'전투 재개':'전투 일시정지');}
   updateAuraChips();
-  for(const {node:b,id,timer,rank} of hud.skills){const top=topRank(id);if(rank.dataset.rank!==String(top)){rank.dataset.rank=String(top);rank.hidden=!top;rank.textContent=top?`${top}성`:'';}const {cost,goldCost=0}=HERO[id].skill,lock=E.castLock(run,id),active=(lock?.kind==='evolution'?null:lock)||E.activeSkill(run,id),ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id)&&!lock;const off=!ready||paused||run.phase!=='combat';if(b.classList.contains('unavailable')!==off){b.classList.toggle('unavailable',off);b.setAttribute('aria-disabled',String(off));}b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${HERO[id].skill.name}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${lock?.kind==='evolution'?' · 우화할 개체 없음':active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
+  for(const {node:b,id,timer,rank} of hud.skills){const top=topRank(id);if(rank.dataset.rank!==String(top)){rank.dataset.rank=String(top);rank.hidden=!top;rank.textContent=top?`${top}성`:'';}const cost=E.skillCost(run,id),{goldCost=0}=HERO[id].skill,lock=E.castLock(run,id),active=(lock?.kind==='evolution'?null:lock)||E.activeSkill(run,id),ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id)&&!lock;const costNode=b.querySelector('small');if(costNode.dataset.cost!==String(cost)){costNode.dataset.cost=String(cost);costNode.innerHTML=icon('star')+cost+(goldCost?` · ${goldCost}G`:'');}const off=!ready||paused||run.phase!=='combat';if(b.classList.contains('unavailable')!==off){b.classList.toggle('unavailable',off);b.setAttribute('aria-disabled',String(off));}b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${E.skillName(run,id)}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${lock?.kind==='evolution'?' · 우화할 개체 없음':active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
   const notice=hud['battle-notice'],boss=run.enemies.find(e=>e.boss&&e.hp>0),compact=hud.battle.classList.contains('compact');notice.hidden=!run.telegraph&&!(compact&&boss);notice.classList.toggle('warn',!!run.telegraph);changedText(notice,run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:''));
   if(!compact)updateStrip(boss);updateUnit();
 }
@@ -413,8 +413,8 @@ function updateStrip(boss){
 function updateUnit(){
   const panel=$('unit-panel');if(!panel)return;const u=run.board[selected];panel.hidden=!u;hud['battle-slot']?.classList.toggle('inspecting',!!u);renderer.selected=u?selected:-1;
   if(!u){delete panel.dataset.sig;return;}
-  const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=E.unitHero(run,u),flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 위력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`경로 화염장 · 0.5초당 ${(detail.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${detail.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label;
-  const caster=E.bestUnit(run,u.hero),casts=caster?.uid===u.uid,{cost,goldCost=0}=h.skill,ready=run.gauge>=cost&&run.gold>=goldCost&&!E.castLock(run,u.hero),bonuses=detail.bonuses.filter(b=>b!==trait.label);
+  const detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=E.unitHero(run,u),flame=u.hero==='flame_sage',traitText=u.hero==='lightning_sage'?`${trait.size}연결 · 공격력 +${Math.round((trait.damageMultiplier-1)*100)}% · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:flame?`경로 화염장 · 0.5초당 ${(detail.damage*trait.zoneDamageMultiplier*.22).toFixed(1)} · 반경 ${detail.radius.toFixed(1)} · ${(3*trait.zoneDurationMultiplier*(E.has(run,'roots')?1.5:1)).toFixed(2).replace(/0$/,'')}초`:trait.label;
+  const caster=E.bestUnit(run,u.hero),casts=caster?.uid===u.uid,cost=E.skillCost(run,u.hero),{goldCost=0}=h.skill,ready=run.gauge>=cost&&run.gold>=goldCost&&!E.castLock(run,u.hero),bonuses=detail.bonuses.filter(b=>b!==trait.label);
   const sig=`${u.uid}:${u.form||''}:${u.rank}:${u.priority}:${detail.damage.toFixed(1)}:${detail.interval.toFixed(2)}:${selected}:${traitText}:${casts}:${caster?.rank}:${ready}:${run.upgrades[u.hero]}:${bonuses.join('|')}`;
   if(panel.dataset.sig===sig)return;
   panel.dataset.sig=sig;panel.dataset.rarity=h.rarity;
@@ -422,15 +422,15 @@ function updateUnit(){
   // who (name, stats and the live trait as three short lines beside the portrait) and what to do
   // (ultimate, target, sell). Everything else lives behind the ⓘ sheet.
   const line=traitText||h.role;
-  panel.innerHTML=`<div class="unit-card-head"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(E.miracleForm(u)||u.hero)}</span><div class="unit-id"><span class="unit-name"><strong>${h.name}</strong><span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></span><small class="unit-stats-line">${flame?'장판':'위력'} <b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b><i></i><b>${detail.interval.toFixed(2)}</b>초${run.upgrades[u.hero]?`<i></i>훈련 <b>${run.upgrades[u.hero]}</b>`:''}</small><small class="unit-trait-line ${trait.active?'active':''}" title="${escapeText(line)}">${escapeText(line)}</small></div><div class="unit-head-actions"><button class="unit-icon" data-action="unit-info" aria-label="${h.name} 자세히">i</button><button class="unit-icon" data-action="deselect" aria-label="선택 해제">${icon('close')}</button></div></div>
-    <div class="unit-card-row"><button class="unit-skill ${casts?'casts':''} ${ready?'ready':''}" data-skill-info="${u.hero}"><span class="unit-skill-tag">${icon('star')}${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${h.skill.name}</b><small>${u.hero==='miracle_larva'?'전장 전체 우화':casts?'이 동료가 씁니다':`${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small></button>
+  panel.innerHTML=`<div class="unit-card-head"><span class="unit-face portrait" data-rarity="${h.rarity}">${image(E.miracleForm(u)||u.hero)}</span><div class="unit-id"><span class="unit-name"><strong>${h.name}</strong><span class="rank" aria-label="${u.rank}성">${icon('star')}${u.rank}</span></span><small class="unit-stats-line">${flame?'장판':'공격력'} <b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b><i></i><b>${detail.interval.toFixed(2)}</b>초${run.upgrades[u.hero]?`<i></i>훈련 <b>${run.upgrades[u.hero]}</b>`:''}</small><small class="unit-trait-line ${trait.active?'active':''}" title="${escapeText(line)}">${escapeText(line)}</small></div><div class="unit-head-actions"><button class="unit-icon" data-action="unit-info" aria-label="${h.name} 자세히">i</button><button class="unit-icon" data-action="deselect" aria-label="선택 해제">${icon('close')}</button></div></div>
+    <div class="unit-card-row"><button class="unit-skill ${casts?'casts':''} ${ready?'ready':''}" data-skill-info="${u.hero}"><span class="unit-skill-tag">${icon('star')}${cost}${goldCost?` · ${goldCost}G`:''}</span><b>${E.skillName(run,u.hero)}</b><small>${u.hero==='miracle_larva'?'전장 전체 우화':casts?'이 동료가 씁니다':`${icon('star')}${caster?.rank??u.rank} 동료가 씁니다`}</small></button>
     <div class="unit-actions">${E.targetingLocked(u.hero)?`<span class="fixed-target">목표: ${u.hero==='flame_sage'?'경로 위':'무작위 적'}</span>`:`<button data-action="target">목표: ${RANK_TEXT[u.priority]}</button>`}<button data-sell="${selected}">회수 +${Math.round(6*Math.pow(1.7,u.rank-1))} G</button></div></div>`;
 }
 // Holding an ultimate button peeks at it: a small card above the button with the live numbers.
 // Releasing closes it and does not cast. The full sheet stays one tap away in the unit panel.
 function skillTip(node,id){
   hideSkillTip();if(!run)return;tipFor=id;
-  const h=HERO[id],caster=E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ur=h.hidden||h.rarity==='UR';
+  const h=HERO[id],caster=E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),cost=E.skillCost(run,id),{goldCost=0}=h.skill,ur=h.hidden||h.rarity==='UR';
   const tip=document.createElement('div');tip.className='skill-tip';tip.id='skill-tip';tip.dataset.rarity=ur?'UR':h.rarity;tip.style.setProperty('--c',h.color);tip.setAttribute('role','tooltip');
   tip.innerHTML=`<div class="skill-tip-head"><b>${preview?.name||h.skill.name}</b>${boostChip(preview?.boost)}<span>${icon('star')}${h.skill.type==='starfall'?`${cost}+`:cost}${goldCost?` · ${goldCost}G`:''}</span></div>${(preview?preview.lines.slice(0,2):[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}${boostHint(preview?.boost)}<small>${id==='miracle_larva'?'전장 라바·코쿤 전체 · 놓으면 닫힘':caster?`${icon('star')}${caster.rank} ${h.name}이(가) 발동 · 놓으면 닫힘`:'전장에 이 동료가 없어 쓸 수 없어요'}</small>`;
   document.body.appendChild(tip);
@@ -451,15 +451,15 @@ function unitInfo(){
   const u=run?.board[selected];if(!u)return;const given=E.givenEffects(run,u,selected),detail=E.combatStats(run,u,selected,true),trait=E.personalTrait(run,u,selected),h=E.unitHero(run,u),flame=u.hero==='flame_sage',bonuses=detail.bonuses.filter(b=>b!==trait.label);
   // The trait keeps its full text (every condition) with this unit's live numbers; what it does right now follows as chips.
   const preview=E.castPreview(run,u.hero),now=[...(trait.label?[u.hero==='lightning_sage'&&trait.active?`${trait.label} · 체인 ${Math.round(trait.chainRatio*100)}%${trait.extraChain?' · 추가 대상 +1':''}`:trait.label]:[]),...(u.cursed||!TRAIT_TOKEN_ONLY.has(u.hero)?given.filter(g=>g!==trait.label):[])];
-  show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 위력':'위력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${SHAPE_TEXT[h.shape]||''}</b></span></div>
-    <div class="ability"><span class="ability-tag">특성</span><p>${liveText(h.trait.text,E.liveTraitTokens(run,u))}</p>${now.length?`<div class="unit-buffs given"><em>지금</em>${now.map(b=>`<span class="chip">${escapeText(b)}</span>`).join('')}</div>`:''}</div><div class="ability"><span class="ability-tag skill">필살기 · ${h.skill.name}${preview?` · ${preview.rank}성 사용`:''}</span>${(preview?.lines||[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>
+  show(h.name,`${u.rank}성 · 전투 정보`,`<div class="unit-stats"><span><small>${flame?'장판 공격력':'공격력'}</small><b>${flame?(detail.damage*trait.zoneDamageMultiplier).toFixed(1):fmt(detail.damage)}</b></span><span><small>공격 주기</small><b>${detail.interval.toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>방식</small><b>${SHAPE_TEXT[h.shape]||''}</b></span></div>
+    <div class="ability"><span class="ability-tag">특성</span><p>${liveText(h.trait.text,E.liveTraitTokens(run,u))}</p>${now.length?`<div class="unit-buffs given"><em>지금</em>${now.map(b=>`<span class="chip">${escapeText(b)}</span>`).join('')}</div>`:''}</div><div class="ability"><span class="ability-tag skill">필살기 · ${preview?.name||E.skillName(run,u.hero)}${preview?` · ${preview.rank}성 사용`:''}</span>${(preview?.lines||[h.skill.text]).map(line=>`<p>${escapeText(line)}</p>`).join('')}</div>
     <div class="unit-buffs"><em>지금 받는 효과</em>${bonuses.length?bonuses.map(b=>`<span class="chip">${b}</span>`).join(''):'<span class="unit-none">없음</span>'}</div><p class="fineprint">훈련 ${run.upgrades[u.hero]}/5 · ${h.role}</p>`,
     `<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'unit-info',u.uid);
 }
 // The unit card's ultimate row opens the full detail sheet.
 function skillInfo(id){
-  const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),{cost,goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat'&&!E.castLock(run,id);
-  show(h.skill.name,`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span>${preview?'':`<p>${h.skill.text}</p>`}<small>${id==='miracle_larva'?'전장의 라바·코쿤 전부에 적용됩니다.':caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><div class="skill-now-head"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${boostChip(preview.boost)}</div>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}${boostHint(preview.boost)}</div>`:''}`,
+  const h=HERO[id],caster=run&&E.bestUnit(run,id),preview=caster&&E.castPreview(run,id),cost=run?E.skillCost(run,id):h.skill.cost,{goldCost=0}=h.skill,ready=!!run&&!!caster&&run.gauge>=cost&&run.gold>=goldCost&&run.phase==='combat'&&!E.castLock(run,id);
+  show(preview?.name||(run?E.skillName(run,id):h.skill.name),`${h.name} · 필살기`,`<div class="skill-sheet" data-rarity="${h.rarity}"><span class="portrait" data-rarity="${h.rarity}">${image(id)}</span><div><span class="ability-tag skill">별빛 ${h.skill.type==='starfall'?`${cost} 이상`:cost}${goldCost?` · 골드 ${goldCost}`:''}</span>${preview?'':`<p>${h.skill.text}</p>`}<small>${id==='miracle_larva'?'전장의 라바·코쿤 전부에 적용됩니다.':caster?`가장 높은 ${caster.rank}성 ${h.name}이(가) 사용합니다.`:'전장에 이 동료가 없어 사용할 수 없습니다.'}</small></div></div>${preview?`<div class="skill-now"><div class="skill-now-head"><span class="ability-tag skill">지금 누르면 · ${icon('star')}${preview.rank}</span>${boostChip(preview.boost)}</div>${preview.lines.map(line=>`<p>${escapeText(line)}</p>`).join('')}${boostHint(preview.boost)}</div>`:''}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">돌아가기</button><button class="primary" data-cast-now="${id}" ${ready?'':'disabled'}>바로 사용</button></div>`,'skill-info',id);
 }
 // Ultimate cut-in: a slanted band with the companion and the skill name over the top of the
@@ -512,10 +512,10 @@ const topRank=id=>run?run.board.reduce((n,u)=>u?.hero===id?Math.max(n,u.rank):n,
 // on their own line (wraps to two lines; never cut off).
 function trainRow(id){
   const lv=run.upgrades[id],max=lv>=5,cost=E.upgradeCost(run,id),top=topRank(id),caster=E.bestUnit(run,id),role=['snow_rabbit','frost_witch'].includes(id)&&caster?E.givenEffects(run,caster,run.board.indexOf(caster)).join(' · '):E.trainingBonus(id,lv);
-  return `<button class="choose-row train-row" data-train="${id}" ${max||run.gold<cost?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${top?`<span class="rank" aria-label="최고 ${top}성">${icon('star')}${top}</span>`:'<span class="train-away">미배치</span>'}<span class="train-pips" aria-label="훈련 ${lv}/5">${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></strong><small class="train-effect">${[lv?`위력 +${lv*25}%`:'',...(role?role.split(' · '):[])].filter(Boolean).map(part=>`<span>${part}</span>`).join(' · ')||'훈련 전'}</small></div><b>${max?'최대':cost+' G'}</b></button>`;
+  return `<button class="choose-row train-row" data-train="${id}" ${max||run.gold<cost?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${top?`<span class="rank" aria-label="최고 ${top}성">${icon('star')}${top}</span>`:'<span class="train-away">미배치</span>'}<span class="train-pips" aria-label="훈련 ${lv}/5">${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></strong><small class="train-effect">${[lv?`공격력 +${lv*25}%`:'',...(role?role.split(' · '):[])].filter(Boolean).map(part=>`<span>${part}</span>`).join(' · ')||'훈련 전'}</small></div><b>${max?'최대':cost+' G'}</b></button>`;
 }
 function training(){
-  show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. 1회당 위력 +25%, 최대 5회. 일부 동료는 오라·감속 같은 역할 수치도 함께 오릅니다.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(trainRow).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
+  show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. 1회당 공격력 +25%, 최대 5회. 일부 동료는 오라·감속 같은 역할 수치도 함께 오릅니다.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(trainRow).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
 }
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
@@ -753,12 +753,12 @@ function heroView(){
 function relicView(){
   const worn=p().equipped,bonus=collectionBonus(p().relics),list=ARTIFACTS.filter(a=>rarity==='all'||a.rarity===rarity).sort((a,b)=>Number(p().relics[b.id].owned)-Number(p().relics[a.id].owned)||RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
   return `<div class="relic-top"><div class="equip-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="equip-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<small>${ARTIFACT[id].name}</small></button>`:`<button class="equip-slot" data-action="relic-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div>
-    <button class="relic-bonus" data-action="relic-info"><small>수집 보너스</small><b>+${(bonus*100).toFixed(1)}%</b><span>모든 동료 위력 ${icon('info')}</span></button></div>
+    <button class="relic-bonus" data-action="relic-info"><small>수집 보너스</small><b>+${(bonus*100).toFixed(1)}%</b><span>모든 동료 공격력 ${icon('info')}</span></button></div>
     ${rarityFilter(ARTIFACTS,p().relics)}<div class="cards relics">${list.map(a=>relicCard(a.id)).join('')}</div>`;
 }
 function relicInfo(){
   const relics=p().relics,points=collectionPoints(relics);
-  show('유물 수집 보너스','유물',`<div class="info-hero"><b>+${(collectionBonus(relics)*100).toFixed(1)}%</b><span>모든 동료 위력 · 장착하지 않아도 적용</span></div>
+  show('유물 수집 보너스','유물',`<div class="info-hero"><b>+${(collectionBonus(relics)*100).toFixed(1)}%</b><span>모든 동료 공격력 · 장착하지 않아도 적용</span></div>
     <ul class="notes"><li>유물을 모으고 레벨을 올릴수록 보너스가 커져요.</li><li>높은 등급일수록 많이 올라요.</li><li>장착한 3개는 고유 효과도 원정에 더해요.</li></ul>
     <details class="more"><summary>계산 방식</summary><p>유물 1개의 점수 = 등급 가중(C ${COLLECTION_WEIGHT.C} · R ${COLLECTION_WEIGHT.R} · SR ${COLLECTION_WEIGHT.SR} · UR ${COLLECTION_WEIGHT.UR}) × (레벨 + ${COLLECTION_OWN_BONUS}). 전체 ${fmt(points)}점, ${COLLECTION_POINTS_PER_PERCENT}점마다 +1%.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'info');
 }
@@ -776,7 +776,7 @@ function albumView(){
 function miracleFormsMarkup(mult=1,k=1){
   return `<details class="more miracle-forms"><summary>네 가지 형태</summary><div class="miracle-form-grid">${Object.entries(E.MIRACLE_FORMS).map(([id,h])=>{
     const text=id==='miracle_wing'?h.trait.text.replace('20%p',`<em class="scaled">${Number((20*k).toFixed(1))}%p</em>`):id==='abyss_wing'?h.trait.text.replace('25%',`<em class="scaled">${Number((Math.min(.8,.25*k)*100).toFixed(1))}%</em>`):h.trait.text;
-    return `<div class="miracle-form"><div class="form-art">${image(id,true)}</div><b>${h.name}</b><small>위력 ${(h.damage*mult).toFixed(1)} · ${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초<br>${SHAPE_TEXT[h.shape]} · 사거리 ${h.range}</small><p>${text}</p></div>`;
+    return `<div class="miracle-form"><div class="form-art">${image(id,true)}</div><b>${h.name}</b><small>공격력 ${(h.damage*mult).toFixed(1)} · ${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초<br>${SHAPE_TEXT[h.shape]} · 사거리 ${h.range}</small><p>${text}</p></div>`;
   }).join('')}</div></details>`;
 }
 function heroDetail(id){
@@ -789,14 +789,14 @@ function heroDetail(id){
     <div class="hd-skill trait"><span class="hd-tag">특성</span><p>${liveText(h.trait.text,scaled.trait)}</p></div>
     ${id==='miracle_larva'?miracleFormsMarkup(mult*(1+collectionBonus(p().relics)),e.owned?specialMultiplier(e.enhance):1):''}
     ${e.owned?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story.title)}</strong></span>${icon('chevron')}</button>`:''}
-    <details class="more"><summary>능력치 자세히</summary><div class="stat-line"><span><small>위력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>${e.owned?powerBreakdown(id):''}
-      <p class="fineprint">${id==='storm_sage'?'강화마다 기본 위력 +5%, 5단계마다 즉사율 +0.1%p.':scaled.trait.length+scaled.skill.length?'강화마다 기본 위력 +5%, 5단계마다 색으로 표시된 수치 +10%.':'강화마다 기본 위력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
+    <details class="more"><summary>능력치 자세히</summary><div class="stat-line"><span><small>공격력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>${e.owned?powerBreakdown(id):''}
+      <p class="fineprint">${id==='storm_sage'?'강화마다 기본 공격력 +5%, 5단계마다 즉사율 +0.1%p.':scaled.trait.length+scaled.skill.length?'강화마다 기본 공격력 +5%, 5단계마다 색으로 표시된 수치 +10%.':'강화마다 기본 공격력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
     e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}" ${p().partner===id?'disabled':''}>${p().partner===id?'지금 파트너':'파트너로'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>${isAway?'파견 중':'편성'}</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
 }
 function powerBreakdown(id){
   const h=HERO[id],e=p().heroes[id],beds=p().beds,bonus=collectionBonus(p().relics),enh=enhanceMultiplier(e.enhance),rose=1+roseAttack(beds.rose);
   const row=(label,value)=>`<div class="pb-row"><span>${label}</span><em>${value}</em></div>`;
-  return `<div class="power-break">${row('기본 위력',h.damage)}${row(`강화 +${e.enhance}`,`×${enh.toFixed(2)}`)}${row(`용기의 장미 Lv.${beds.rose}`,`×${rose.toFixed(2)}`)}${row('유물 수집 보너스',`×${(1+bonus).toFixed(3)}`)}<div class="pb-row total"><span>원정 시작 위력</span><b>${(h.damage*enh*rose*(1+bonus)).toFixed(1)}</b></div></div>`;
+  return `<div class="power-break">${row('기본 공격력',h.damage)}${row(`강화 +${e.enhance}`,`×${enh.toFixed(2)}`)}${row(`용기의 장미 Lv.${beds.rose}`,`×${rose.toFixed(2)}`)}${row('유물 수집 보너스',`×${(1+bonus).toFixed(3)}`)}<div class="pb-row total"><span>원정 시작 공격력</span><b>${(h.damage*enh*rose*(1+bonus)).toFixed(1)}</b></div></div>`;
 }
 function relicDetail(id){
   const a=ARTIFACT[id],e=p().relics[id],L=e.owned?relicLevel(e):1,equipped=p().equipped.includes(id);
@@ -923,7 +923,7 @@ function showArrival({part=false,unlocked=[]}={}){
 // Part two opens at stage 45: the dawn sky rises over the dawn greenhouse and each newly opened thing is dealt in as a row.
 function showPartOpen(){
   const late=lateNew().length,sparks=Array.from({length:14},(_,i)=>`<i class="po-spark" style="--i:${i};--x:${(i*37+11)%100}%;--y:${(i*53+7)%62}%"></i>`).join('');
-  const rows=[['adventure','새벽의 별길',`스테이지 ${PART_STAGES+1}–${MAIN_STAGES}`],['garden','새벽 온실','치명타 · 치명타 대미지 화단'],...(late?[['summon',`신규 동료 ${late}명`,'별빛 소환에 합류']]:[])];
+  const rows=[['adventure','새벽의 별길',`스테이지 ${PART_STAGES+1}–${MAIN_STAGES}`],['garden','새벽 온실','치명타 · 치명타 피해 화단'],...(late?[['summon',`신규 동료 ${late}명`,'별빛 소환에 합류']]:[])];
   show('새벽의 별길이 열렸어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="part-open"><div class="po-sky" aria-hidden="true"><i class="po-rays"></i><i class="po-sun"></i>${sparks}</div><div class="po-head"><p class="po-kicker">PART 2</p><p class="po-title">새벽의 별길</p><p class="po-sub">STAGE ${PART_STAGES+1} – ${MAIN_STAGES}</p></div><ul class="po-list">${rows.map(([ic,b,s],i)=>`<li style="--i:${i}"><span class="po-ic">${icon(ic)}</span><span><b>${b}</b><small>${s}</small></span></li>`).join('')}</ul></div>`,
     '<div class="dialog-buttons"><button class="secondary" data-action="close">확인</button><button class="primary" data-action="go-dawn">새벽 온실 보기</button></div>','arrival');
   sound.reveal?.('UR');

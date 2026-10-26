@@ -4,18 +4,29 @@ import {roster,measure,arena,castArena,defaults} from '../src/lab/model.js';
 const hero=id=>roster.find(h=>h.id===id);
 test('all collectible identities and forms have finite real-engine results',()=>{for(const h of roster){const r=measure(h);assert.ok(Number.isFinite(r.dps)&&r.dps>=0,h.id);assert.ok(Number.isFinite(r.value),h.id);}});
 test('burn and poison contribute to measured DPS, external conditional effects change hits',()=>{const h=hero('luna');assert.ok(measure(h,{low:true,boss:true}).dps>measure(h,{boss:true}).dps*1.9);const v=measure(hero('venom'));assert.ok(v.dps>v.direct);});
-test('proposed power reductions and buffs are isolated from canonical content',()=>{for(const [id,factor]of [['underdog',1.15],['miracle_larva',.8],['miracle_cocoon',.4]]){const h=hero(id),base=h.damage,a=measure(h),b=measure(h,{patch:true});assert.ok(Math.abs(b.dps/a.dps-factor)<.015,id);assert.equal(h.damage,base);}});
-test('mana scenario changes efficiency without changing damage',()=>{const h=hero('avalanche_maid'),a=measure(h),b=measure(h,{patch:true});assert.equal(a.gain,b.gain);assert.equal(b.cost,80);assert.ok(Math.abs(b.value/a.value-85/80)<1e-8);});
-test('Ash 20x scenario only raises ultimate direct damage',()=>{const h=hero('ash'),a=measure(h),b=measure(h,{patch:true});assert.equal(a.dps,b.dps);assert.ok(Math.abs(b.skill/a.skill-20/18)<.01);});
+test('final patch uses canonical stats without the old scenario being applied twice',()=>{
+ for(const [id,power] of [['underdog',25],['miracle_larva',48],['miracle_cocoon',40],['ash',28],['guardian',55],['joker',20],['cure_master',21]]){
+  const h=hero(id);assert.equal(h.damage,power);assert.equal(measure(h).dps,measure(h,{patch:true}).dps,id);
+ }
+ const maid=measure(hero('avalanche_maid'));assert.equal(maid.cost,80);assert.equal(measure(hero('avalanche_maid'),{patch:true}).cost,80);
+ const ash=measure(hero('ash'));assert.ok(Math.abs(ash.skill-28*22*5)<.01);assert.equal(hero('cure_master').skill.name,'퍼스트키스');
+});
+
+test('Chaos, apple contact and prism compare actual canonical engine conditions',()=>{
+ const j=measure(hero('joker'),{joker:5});assert.equal(j.cost,100);assert.equal(j.preview.name,'카오스 룰렛');assert.ok(j.dps>measure(hero('joker')).dps);
+ assert.ok(measure(hero('toffee_apple'),{appleApproach:true}).skillDamage>0);
+ assert.ok(measure(hero('lightning_sage'),{prism:true}).dps>measure(hero('lightning_sage')).dps);
+});
+
 test('draft speed can both raise and lower cadence',()=>{const h=hero('luna'),a=measure(h);assert.ok(measure(h,{}, {interval:2.5}).dps<a.dps);assert.ok(measure(h,{}, {interval:.5}).dps>a.dps);});
 test('support and transformation skills retain real cast restrictions',()=>{const a=arena(hero('miracle_wing'),defaults);assert.equal(castArena(a).ok,false);});
 
 import * as E from '../src/combat/engine.js';
 import {baselineOptions,sortRows} from '../src/lab/model.js';
-test('Zeke position haste and core crisis are independent real-engine conditions',()=>{
+test('Zeke position attack power and core crisis are independent real-engine conditions',()=>{
  const h=hero('zeke'),a=arena(h),near=arena(h,{coreNear:true});
  assert.equal(E.personalTrait(a.s,a.u).active,false);assert.equal(E.personalTrait(near.s,near.u).active,true);
- assert.ok(E.combatStats(near.s,near.u).interval<E.combatStats(a.s,a.u).interval);
+ assert.equal(E.combatStats(near.s,near.u).interval,E.combatStats(a.s,a.u).interval);assert.equal(E.combatStats(near.s,near.u).damage/E.combatStats(a.s,a.u).damage,1.4);
  const normal=measure(h),crisis=measure(h,{coreCrisis:true});
  assert.equal(normal.dps,crisis.dps);assert.equal(crisis.skill/normal.skill,2);
 });

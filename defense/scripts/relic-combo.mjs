@@ -95,8 +95,9 @@ function sample(raw,relics,level){
   for(const e of s.queue){e.hp*=40;e.sponge=1;}for(const e of s.enemies){e.hp*=40;e.maxHp*=40;e.sponge=1;}
   const flow=blank(),casts={},slices=[{casts:0,sec:0},{casts:0,sec:0},{casts:0,sec:0}];
   const g0=s.gauge,gold0=s.gold,sand0=s.sandStore||0,dmg0=s.stats.damage,merges0=s.stats.merges,paid0=s.paidSummons,free0=s.freeSummons,units0=s.board.filter(Boolean).length,inc0={...s.stats.income};
-  const cheap=Math.min(...s.deck.map(id=>HERO[id].skill.cost));
-  let sim=0,autoIn=0,pick=false,minG=Infinity;
+  const cheap=Math.min(...s.deck.map(id=>E.skillCost(s,id)));
+  let sim=0,autoIn=0,pick=false,minG=Infinity,minReadyMargin=Infinity;
+  const sampleGauge=()=>{minG=Math.min(minG,s.gauge);minReadyMargin=Math.min(minReadyMargin,s.gauge-Math.min(...s.deck.map(id=>E.skillCost(s,id))));};
   while(s.phase!=='victory'&&s.phase!=='defeat'&&sim<60-1e-9){
     const before=s.phase;sim+=.05;const slice=slices[Math.min(2,Math.floor((sim-.001)/20))];slice.sec+=.05;
     if(before==='combat'||before==='intermission'){
@@ -106,19 +107,19 @@ function sample(raw,relics,level){
       for(const e of s.events){if(e.type==='kill')g=pour(flow,g,cap,'kill',(e.boss?15:1.3)+(e.divine||0)*(e.boss?E.DIVINE_BOSS_GAUGE:E.DIVINE_GAUGE));else if(e.type==='clear')g=pour(flow,g,cap,'wave',8);}
       note(flow,g,s.gauge);s.events.length=0;
     }else{E.step(s,.05);s.events.length=0;}
-    if(sim>20)minG=Math.min(minG,s.gauge);
+    if(sim>20)sampleGauge();
     let acted=false;
     if(pick){acted=true;pick=false;}else if(before!=='reward'&&s.phase==='reward')pick=true;else if(s.phase==='combat'||s.phase==='intermission'){autoIn+=.05;if(autoIn>=.32){acted=true;autoIn=0;}}
     if(acted){
       const snap={gauge:s.gauge,sand:s.sandStore||0,skills:s.stats.skills,merges:s.stats.merges};
-      smartAutoPlay(s);attributeAuto(s,flow,snap,casts,()=>{slice.casts++;});s.events.length=0;if(sim>20)minG=Math.min(minG,s.gauge);
+      smartAutoPlay(s);attributeAuto(s,flow,snap,casts,()=>{slice.casts++;});s.events.length=0;if(sim>20)sampleGauge();
     }
   }
   let gold=0;const income={};for(const [k,v] of Object.entries(s.stats.income)){const d=v-(inc0[k]||0);if(d){income[k]=d;gold+=d;}}
   const castN=Object.entries(casts).reduce((n,[k,v])=>n+(k==='gift'?0:v),0),cpm=castN*60/sim,units=s.board.filter(Boolean).length,merges=s.stats.merges-merges0,gifts=casts.gift||0;
   const sliceCpm=slices.map(x=>x.sec>0?x.casts*60/x.sec:0),reasons=[],tags=[];
   if(sim>=55&&sliceCpm[0]<sliceCpm[1]&&sliceCpm[1]<sliceCpm[2]&&cpm>6){tags.push('rising');reasons.push(`casts/min rising ${sliceCpm.map(v=>v.toFixed(1)).join('<')}`);}
-  if(sim>20&&minG>=cheap-1e-6&&cpm>6){tags.push('gauge floor');reasons.push(`gauge stayed >= ${cheap} after 20s at ${cpm.toFixed(1)}/min`);}
+  if(sim>20&&minReadyMargin>=-1e-6&&cpm>6){tags.push('gauge floor');reasons.push(`gauge stayed above the current cheapest ultimate after 20s at ${cpm.toFixed(1)}/min`);}
   if(s.paidSummons===paid0&&merges>=3&&units>=units0){tags.push('unpaid merges');reasons.push(`merges ${merges}, units ${units0}->${units}, paid summons 0`);}
   else if(s.paidSummons===paid0&&gifts>=3&&units>units0){tags.push('gift growth');reasons.push(`gifts ${gifts} grew the board ${units0}->${units}, paid summons 0`);}
   const held=slices.filter(x=>x.sec>=10),sliceFloor=held.length?Math.min(...held.map(x=>x.casts*60/x.sec)):0;

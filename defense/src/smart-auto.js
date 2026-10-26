@@ -101,7 +101,7 @@ function ultValue(s,m,id,gv){
   const scale=E.rankControl(u.rank),boss=list.find(e=>e.boss),strongest=list.reduce((a,b)=>!a||b.maxHp>a.maxHp?b:a,null);
   const thunderCancel=()=>s.telegraph?.pattern==='thunder'&&list.some(e=>e.judging)?[...litCells(s)].reduce((n,c)=>n+(s.board[c]?unitValue(s,s.board[c],c):0),0)*m.scale*4:0;
   // A big damage ultimate that could follow a setup (exposure, mirror) right after.
-  const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-h.skill.cost>=HERO[o].skill.cost&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['deathhand','royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','crush','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
+  const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-E.skillCost(s,id)>=E.skillCost(s,o)&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['deathhand','royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','crush','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
   switch(type){
     case 'deathhand':return E.deathhandTargets(s).targets.reduce((n,e)=>n+hit(E.deathhandFactor(s,e),e),0);
     case 'miracle_eclose':{
@@ -120,18 +120,18 @@ function ultValue(s,m,id,gv){
       return strike(5)+buff(fam('radiance','power',E.ULT_BUFF.radiance.power*scale),8)+freed;}
     case 'trauma':{const mags=CELLS.filter(c=>s.board[c]?.hero==='time_magician');return strike(4)+mags.reduce((n,c)=>n+unitValue(s,s.board[c],c)*m.scale*(2.1*1.35-1)*Math.min(10,rem),0);}
     case 'glassfall':{const top=E.topCinderella(s),i=top?s.board.indexOf(top):-1;return strike(E.CINDERELLA.ult)+(top?unitValue(s,top,i)*m.scale*1.9*Math.min(10,rem):0);}
-    case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),8);
+    case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),E.ULT_BUFF.festive.seconds);
     case 'dividend':return strike(4)+(E.QUEEN_TAX+(s.edictWave!==s.wave?E.waveIncome(s.wave)*.5:0))*gv;
     case 'fortune':return strike(E.fortuneFactor(s.gold-E.skillGoldCost(id),s.upgrades[id]||0))-E.skillGoldCost(id)*gv;
     case 'expose':{const ex=E.detectiveExposure(s,u),lasting=list.reduce((n,e)=>n+e.hp,0)>dps*4;return strike(3)+(lasting?dps*ex*Math.min(10,rem):0)+follow()*ex;}
     case 'mirror':{if(!strongest)return 0;const share=strongest.boss?.75:1/Math.max(1,list.length);return Math.min(strongest.hp,12*P+E.mirrorRatio(s,u)*(dps*5*share+follow()*share));}
     case 'royal':return strongest?hit(24*(strongest.burnTime>0||strongest.divine>=3&&strongest.divineTime>0?2:1),strongest):0;
-    case 'starfall':return s.gauge>=cap-2&&strongest?hit(.4*s.gauge,strongest):0;
+    case 'starfall':return s.gauge>=cap-2&&strongest?hit(E.STARFALL_FACTOR*s.gauge,strongest):0;
     case 'execute':{const order=[...list].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp).slice(0,5);return order.reduce((n,e)=>n+hit(e.hp/e.maxHp<=E.executeThreshold(e,s)?30:16,e),0);}
     case 'inferno':return strike(7*(E.coreCrisis(s)?2:1))+strike(.6)*1.5;
     case 'combust':return list.reduce((n,e)=>n+hit(e.burnTime>0?10:4,e),0)+strike(.6)*1.5;
     case 'plague':return strike(3)+list.reduce((n,e)=>n+Math.min(e.hp,8*P*.1*12),0);
-    case 'thunder':return strike(7)+control(1.2*scale)+thunderCancel();
+    case 'thunder':return strike(E.THUNDER_FACTOR)+control(1.2*scale)+thunderCancel();
     case 'ice_court':{const have=list.reduce((n,e)=>Math.max(n,e.takenBonus||0),0),seconds=E.winterDuration(s,u);return strike(9)+control(E.WINTER_COURT.slow*scale*seconds)+buff(Math.max(0,E.WINTER_EXPOSURE-have),seconds);}
     // The shared sunlight stack is worth saving: below two stacks the burst is not worth the starlight, at two only a
     // crisis (the danger rule above) pays for it, at three it is a full 11x. Casting also drops the wider burst.
@@ -179,8 +179,8 @@ function ultValue(s,m,id,gv){
 function pickUltimate(s,m){
   if(s.phase!=='combat')return null;const list=alive(s);if(!list.length)return null;
   const gv=goldValue(s,m),cap=E.gaugeCap(s),dps=Math.max(1,m.dps);
-  const ready=s.deck.filter(id=>E.bestUnit(s,id)&&s.gauge>=HERO[id].skill.cost&&s.gold>=E.skillGoldCost(id)&&!E.castLock(s,id));if(!ready.length)return null;
-  const options=ready.map(id=>({id,value:ultValue(s,m,id,gv),cost:HERO[id].skill.type==='starfall'?s.gauge:HERO[id].skill.cost})).filter(o=>o.value>0);
+  const ready=s.deck.filter(id=>E.bestUnit(s,id)&&s.gauge>=E.skillCost(s,id)&&s.gold>=E.skillGoldCost(id)&&!E.castLock(s,id));if(!ready.length)return null;
+  const options=ready.map(id=>({id,value:ultValue(s,m,id,gv),cost:HERO[id].skill.type==='starfall'?s.gauge:E.skillCost(s,id)})).filter(o=>o.value>0);
   if(!options.length)return null;
   const byRate=[...options].sort((a,b)=>b.value/b.cost-a.value/a.cost),byValue=[...options].sort((a,b)=>b.value-a.value);
   const boss=list.some(e=>e.boss),bossWave=boss||s.queue.some(q=>q.kind==='boss'),nextBoss=s.mode==='main'&&(s.wave+1)%3===0;

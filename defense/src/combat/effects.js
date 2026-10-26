@@ -46,7 +46,7 @@ FX_PROFILES.ash={motion:'blackfire',frame:11,offset:0};
 FX_PROFILES.venom={motion:'venomdrop',frame:11,offset:0};
 FX_PROFILES.demon_king={motion:'deathbolt',frame:15,offset:0};
 FX_PROFILES.miracle_larva={motion:'metamorphosis',frame:1,offset:0};
-export const JOKER_HEX=Object.freeze({red:'#ff5a5a',blue:'#4aa8ff',green:'#5fd36a',white:'#f6f4ff',black:'#241a36'});
+export const JOKER_HEX=Object.freeze({red:'#ff5a5a',blue:'#4aa8ff',green:'#5fd36a',white:'#f6f4ff',black:'#241a36',chaos:'#d9b8ff'});
 
 function stroke(ctx,points,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
 function disk(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
@@ -613,7 +613,7 @@ export class CombatFX{
     const ctx=this.ctx;
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u)continue;
-      const carer=neighbors(i).some(n=>{const a=s.board[n];return a&&a.hero==='cure_master'&&!a.cursed&&!(a.disabled>0);});
+      const carer=u.hero==='cure_master'||neighbors(i).some(n=>{const a=s.board[n];return a&&a.hero==='cure_master'&&!a.cursed&&!(a.disabled>0);});
       const inv=u.invincible||0;if(!carer&&inv<=0)continue;
       const p=cellPoint(i),gold=inv>0,pulse=this.reduced?0:Math.sin(this.clock*2.2+u.uid)*.06;
       const g=ctx.createRadialGradient(p.x,p.y+4,10,p.x,p.y+4,40);g.addColorStop(0,gold?'#fff3a800':'#ffd3ec00');g.addColorStop(1,gold?'#ffe27a'+(inv>0?'55':'33'):'#ffb6da38');
@@ -644,20 +644,21 @@ export class CombatFX{
   // Joker: a small roulette. Five colours sit on a ring in cast order; the current one is always at the top and lit,
   // the others are dimmed. A cast spins the wheel and settles on the colour the roulette picked.
   drawJokerWheels(s){
-    const ctx=this.ctx,names=['red','blue','green','white','black'],idx=Math.max(0,names.indexOf(s.jokerColor||'red')),since=this.clock-(this.wheelAt??-9),offset=since<.7?(1-easeOut(since/.7))*Math.PI*2/5:0;
+    const ctx=this.ctx,names=['red','blue','green','white','black'],chaos=s.jokerColor==='chaos',idx=Math.max(0,names.indexOf(s.jokerColor||'red')),since=this.clock-(this.wheelAt??-9),offset=since<.7?(1-easeOut(since/.7))*Math.PI*2/5:0;
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u||u.hero!=='joker')continue;
-      const p=cellPoint(i),cx=p.x+28,cy=p.y+21,tint=JOKER_HEX[names[idx]];
+      const p=cellPoint(i),cx=p.x+28,cy=p.y+21,tint=chaos?JOKER_HEX.chaos:JOKER_HEX[names[idx]];
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=.8;ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
       for(let j=0;j<5;j++){
-        const a=-Math.PI/2+(j-idx)*Math.PI*2/5+offset,x=cx+Math.cos(a)*10.2,y=cy+Math.sin(a)*10.2,cur=j===idx;
+        const a=-Math.PI/2+(j-idx)*Math.PI*2/5+offset,x=cx+Math.cos(a)*10.2,y=cy+Math.sin(a)*10.2,cur=chaos||j===idx;
         ctx.save();ctx.globalAlpha=cur?1:.42;ctx.translate(x,y);ctx.rotate(Math.PI/4);
         ctx.fillStyle=JOKER_HEX[names[j]];ctx.strokeStyle=names[j]==='black'?'#d9c8ff':'#1a1240';ctx.lineWidth=cur?1.5:1;const r=cur?4.6:3.2;ctx.fillRect(-r,-r,r*2,r*2);ctx.strokeRect(-r,-r,r*2,r*2);ctx.restore();
       }
       // pointer at the top
-      ctx.save();ctx.fillStyle='#ffe27a';ctx.beginPath();ctx.moveTo(cx,cy-15.5);ctx.lineTo(cx-2.6,cy-19.5);ctx.lineTo(cx+2.6,cy-19.5);ctx.closePath();ctx.fill();ctx.restore();
+      if(!chaos){ctx.save();ctx.fillStyle='#ffe27a';ctx.beginPath();ctx.moveTo(cx,cy-15.5);ctx.lineTo(cx-2.6,cy-19.5);ctx.lineTo(cx+2.6,cy-19.5);ctx.closePath();ctx.fill();ctx.restore();}
       star(ctx,2.6,'#ffe9a0');
       ctx.save();ctx.translate(cx,cy);star(ctx,3.2,tint==='#241a36'?'#d9c8ff':tint);ctx.restore();
+      if(chaos){ctx.save();ctx.font='700 11px system-ui';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#0b1e2b';ctx.fillStyle='#f1dcff';ctx.strokeText('카오스',cx,cy+29);ctx.fillText('카오스',cx,cy+29);ctx.restore();}
     }
   }
   drawPlague(s){
