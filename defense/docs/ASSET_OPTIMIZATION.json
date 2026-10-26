@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 28143173,
-    "deployableSourceBytes": 26518205,
-    "outputBytes": 14954092,
+    "sourceBytes": 28133656,
+    "deployableSourceBytes": 26508688,
+    "outputBytes": 14947685,
     "optimizedFiles": 164,
     "derivedFiles": 156,
-    "derivedOutputBytes": 3747268
+    "derivedOutputBytes": 3745258
   },
   "images": [
     {
@@ -4060,14 +4060,14 @@
     },
     {
       "id": "memorial:demon_king",
-      "source": "./assets/memorial/demon_king.avif",
+      "source": "./assets/memorial/replacements/demon_king/456374580ef86787dd2158c9d3d30e1913ac284c9ee9c5b303c1cbecc015a215.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.demon_king; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 45783,
-        "sha256": "f3dd5875a9966c2081a16a0929a85fdb7fbe09fd577a69c88f06215020994b60",
+        "bytes": 42433,
+        "sha256": "456374580ef86787dd2158c9d3d30e1913ac284c9ee9c5b303c1cbecc015a215",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4076,9 +4076,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/demon_king.avif",
-        "bytes": 36057,
-        "sha256": "8b3d2e473ae923d63b5b78e010d7018cc96a6a5339972f465d8338f31f7ad6b7",
+        "path": "./assets/optimized/memorial/replacements/demon_king/456374580ef86787dd2158c9d3d30e1913ac284c9ee9c5b303c1cbecc015a215.avif",
+        "bytes": 33534,
+        "sha256": "429ffaa8c795f6d9301e9d2ee1fd8b36262234c0e3d5e511198f553f7c1e50c6",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4090,15 +4090,15 @@
     },
     {
       "id": "memorial-webp:demon_king",
-      "source": "./assets/memorial-webp/demon_king.webp",
+      "source": "./assets/memorial-webp/replacements/demon_king/e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.demon_king; compat painting / web fallback",
         "memorialThumb:demon_king; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 88714,
-        "sha256": "677442b0fd18cef04313f10546e7c1088fba487a6a2971bd881aab078f290792",
+        "bytes": 81560,
+        "sha256": "e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4107,9 +4107,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/demon_king.webp",
-        "bytes": 73922,
-        "sha256": "06b257ca442d33f61ecf29a271a9de9faa85ee1bc9b73b28f73a1722af64a0e2",
+        "path": "./assets/optimized/memorial-webp/replacements/demon_king/e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17.webp",
+        "bytes": 69386,
+        "sha256": "409553086ad2cd107600d41827f01acef76ac3b5f942dc73b499533192453196",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4609,14 +4609,14 @@
     },
     {
       "id": "memorial:miracle_larva",
-      "source": "./assets/memorial/miracle_larva.avif",
+      "source": "./assets/memorial/replacements/miracle_larva/d14d31263d2565ca46440cd90ae180ba38b3910578f60d59c42eabfae36b1b3b.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.miracle_larva; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 50551,
-        "sha256": "5ab2e36132b7e9686c52eedf88e1d247e93803c3f1c5c9bcb5b7d18c1b0d6f15",
+        "bytes": 50490,
+        "sha256": "d14d31263d2565ca46440cd90ae180ba38b3910578f60d59c42eabfae36b1b3b",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4625,9 +4625,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/miracle_larva.avif",
-        "bytes": 39661,
-        "sha256": "b8ae0b04d84fcef4140ffc5df92424eaac9b847c2a0e7edcdfe8c97999dfbba6",
+        "path": "./assets/optimized/memorial/replacements/miracle_larva/d14d31263d2565ca46440cd90ae180ba38b3910578f60d59c42eabfae36b1b3b.avif",
+        "bytes": 39741,
+        "sha256": "52103912e0edbe01a69e9345e491219f1e08b57ef4c0ca3b63eaf8b85bfb9e18",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4639,15 +4639,15 @@
     },
     {
       "id": "memorial-webp:miracle_larva",
-      "source": "./assets/memorial-webp/miracle_larva.webp",
+      "source": "./assets/memorial-webp/replacements/miracle_larva/af904744a3e69f1a26b7fc82fb0337d11f8e127bbfdc0fdc77441f8f60e426cf.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.miracle_larva; compat painting / web fallback",
         "memorialThumb:miracle_larva; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 92622,
-        "sha256": "6f5877b341977230ebc7cfadb9a22c15ccda99abfd9d7ca79e8e8dab8bd567f5",
+        "bytes": 93670,
+        "sha256": "af904744a3e69f1a26b7fc82fb0337d11f8e127bbfdc0fdc77441f8f60e426cf",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -4656,9 +4656,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/miracle_larva.webp",
-        "bytes": 78930,
-        "sha256": "e5e72fde6ad5741afced70c065240fd7e210480a3769f52467e8ed84863f2d8f",
+        "path": "./assets/optimized/memorial-webp/replacements/miracle_larva/af904744a3e69f1a26b7fc82fb0337d11f8e127bbfdc0fdc77441f8f60e426cf.webp",
+        "bytes": 79502,
+        "sha256": "8242e82575e90d08708ec45aae8fb04811249c5d412512b5288938e87a81ca44",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -9014,18 +9014,18 @@
     },
     {
       "id": "memorialThumb:demon_king",
-      "source": "./assets/memorial-webp/demon_king.webp",
+      "source": "./assets/memorial-webp/replacements/demon_king/e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/demon_king.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "677442b0fd18cef04313f10546e7c1088fba487a6a2971bd881aab078f290792",
+      "sourceSha256": "e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/demon_king.webp",
-        "bytes": 15364,
-        "sha256": "faffd0f732ce5009d0262b96e37ad19de113442cce908f0ae0135eda1320f2a2",
+        "bytes": 12942,
+        "sha256": "6b67af2eb80d4bab2e1615ab194cbe2c79a82b29c13014c94b7db9679aab4dc4",
         "metadata": {
           "width": 240,
           "height": 360,
@@ -9212,18 +9212,18 @@
     },
     {
       "id": "memorialThumb:miracle_larva",
-      "source": "./assets/memorial-webp/miracle_larva.webp",
+      "source": "./assets/memorial-webp/replacements/miracle_larva/af904744a3e69f1a26b7fc82fb0337d11f8e127bbfdc0fdc77441f8f60e426cf.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/miracle_larva.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "6f5877b341977230ebc7cfadb9a22c15ccda99abfd9d7ca79e8e8dab8bd567f5",
+      "sourceSha256": "af904744a3e69f1a26b7fc82fb0337d11f8e127bbfdc0fdc77441f8f60e426cf",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/miracle_larva.webp",
-        "bytes": 13972,
-        "sha256": "533779c1daabc093d7e23f3056331d0a2f62b8e0bf15c4e69671c270cac4e63d",
+        "bytes": 14384,
+        "sha256": "484b4b5a1ca147855a9e556218461b4203813d1fb0dc337e631713bfd5f2ac74",
         "metadata": {
           "width": 240,
           "height": 360,

@@ -59,6 +59,16 @@ test('invalid batches and conflicting preserved files fail before changing the c
   await assert.rejects(fs.access(path.join(root,'assets/memorial/replacements')),{code:'ENOENT'});
 });
 
+test('a separate companion catalog can be updated without changing the main catalog',async t=>{
+  const {root,dir,png}=await fixture(t),main=path.join(root,'src/memorial-media.js');
+  const before=await fs.readFile(main),separate='src/new-memorial-media.js';
+  await fs.writeFile(path.join(root,separate),catalog({sample:record}));
+  await replaceMemorials(dir,['sample=new.png'],{root,catalog:separate});
+  const next=JSON.parse((await fs.readFile(path.join(root,separate),'utf8')).split(' = ')[1].slice(0,-2)).sample;
+  assert.equal(next.sourceSha256,hash(png));assert.equal(next.bodySha256,record.bodySha256);
+  assert.deepEqual(await fs.readFile(main),before);
+});
+
 test('all eight installed replacements retain their PNG sources and the paintings from before pass 18',async()=>{
   const preservation=JSON.parse(await fs.readFile(path.join(gameRoot,'docs/art/pass18-memorials/manifest.json'),'utf8'));
   assert.deepEqual(preservation.paintings.map(p=>p.id).sort(),['venom','antropy','toffee_apple','sunflower','underdog','behemoth','joker','cure_master'].sort());
