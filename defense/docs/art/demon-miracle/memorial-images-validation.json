@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "theme": "night",
+      "id": "demon_king",
+      "title": "그림자 극장의 군주",
+      "geometry": {
+        "natural": [
+          720,
+          1080
+        ],
+        "objectFit": "contain",
+        "bounds": [
+          0,
+          0,
+          390,
+          770
+        ],
+        "document": 390,
+        "viewport": 390,
+        "broken": 0
+      },
+      "embeddedHashes": {
+        "art": "429ffaa8c795f6d9301e9d2ee1fd8b36262234c0e3d5e511198f553f7c1e50c6",
+        "thumb": "6b67af2eb80d4bab2e1615ab194cbe2c79a82b29c13014c94b7db9679aab4dc4"
+      },
+      "storyPreserved": true
+    },
+    {
+      "theme": "night",
+      "id": "miracle_larva",
+      "title": "꽃을 모아 두는 이유",
+      "geometry": {
+        "natural": [
+          720,
+          1080
+        ],
+        "objectFit": "contain",
+        "bounds": [
+          0,
+          0,
+          390,
+          770
+        ],
+        "document": 390,
+        "viewport": 390,
+        "broken": 0
+      },
+      "embeddedHashes": {
+        "art": "52103912e0edbe01a69e9345e491219f1e08b57ef4c0ca3b63eaf8b85bfb9e18",
+        "thumb": "484b4b5a1ca147855a9e556218461b4203813d1fb0dc337e631713bfd5f2ac74"
+      },
+      "storyPreserved": true
+    },
+    {
+      "theme": "bright",
+      "id": "demon_king",
+      "title": "그림자 극장의 군주",
+      "geometry": {
+        "natural": [
+          720,
+          1080
+        ],
+        "objectFit": "contain",
+        "bounds": [
+          0,
+          3,
+          390,
+          766
+        ],
+        "document": 390,
+        "viewport": 390,
+        "broken": 0
+      },
+      "embeddedHashes": {
+        "art": "429ffaa8c795f6d9301e9d2ee1fd8b36262234c0e3d5e511198f553f7c1e50c6",
+        "thumb": "6b67af2eb80d4bab2e1615ab194cbe2c79a82b29c13014c94b7db9679aab4dc4"
+      },
+      "storyPreserved": true
+    },
+    {
+      "theme": "bright",
+      "id": "miracle_larva",
+      "title": "꽃을 모아 두는 이유",
+      "geometry": {
+        "natural": [
+          720,
+          1080
+        ],
+        "objectFit": "contain",
+        "bounds": [
+          0,
+          3,
+          390,
+          766
+        ],
+        "document": 390,
+        "viewport": 390,
+        "broken": 0
+      },
+      "embeddedHashes": {
+        "art": "52103912e0edbe01a69e9345e491219f1e08b57ef4c0ca3b63eaf8b85bfb9e18",
+        "thumb": "484b4b5a1ca147855a9e556218461b4203813d1fb0dc337e631713bfd5f2ac74"
+      },
+      "storyPreserved": true
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "suppliedOriginalsByteIdentical": true
+}

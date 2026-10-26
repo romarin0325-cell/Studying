@@ -26,9 +26,10 @@ async function preserve(file,bytes){
   catch(error){if(error.code!=='EEXIST')throw error;await checkExisting(file,bytes);}
 }
 
-export async function replaceMemorials(dir,pairs,{root=gameRoot}={}){
+// The two newer companions keep their selected records in a separate catalog.
+export async function replaceMemorials(dir,pairs,{root=gameRoot,catalog='src/memorial-media.js'}={}){
   if(!dir||!pairs?.length)throw new Error(usage);
-  const manifestFile=path.join(root,'src/memorial-media.js');
+  const manifestFile=path.join(root,catalog);
   let text=await fs.readFile(manifestFile,'utf8');
   const newline=text.includes('\r\n')?'\r\n':'\n';
   const files=[],results={},seen=new Set();
