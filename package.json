@@ -20,7 +20,8 @@
     "test:defense": "node --test defense/tests/*.test.mjs",
     "test:defense:browser": "node defense/tests/browser.mjs",
     "reports:defense": "node defense/scripts/generated-reports.mjs",
-    "serve:defense": "node defense/scripts/serve.mjs"
+    "serve:defense": "node defense/scripts/serve.mjs",
+    "build:defense:lab": "node defense/scripts/build-lab.mjs"
   },
   "dependencies": {
     "playwright": "^1.59.1"
