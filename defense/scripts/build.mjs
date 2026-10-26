@@ -145,3 +145,6 @@ for(const [name,value] of Object.entries(categories)){
 }
 console.log(`HTML, license and object glue: ${mib(report.htmlAndObjectGlueBytes)}`);
 }
+
+// The review workspace shares combat code but never writes game/profile state.
+if(!check&&!solo&&!web&&!compat&&!unlocked&&!bright){const {buildLab}=await import('./build-lab.mjs');await buildLab(output);}

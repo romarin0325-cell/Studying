@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {roster,measure,arena,castArena,defaults} from '../src/lab/model.js';
+const hero=id=>roster.find(h=>h.id===id);
+test('all collectible identities and forms have finite real-engine results',()=>{for(const h of roster){const r=measure(h);assert.ok(Number.isFinite(r.dps)&&r.dps>=0,h.id);assert.ok(Number.isFinite(r.value),h.id);}});
+test('burn and poison contribute to measured DPS, external conditional effects change hits',()=>{const h=hero('luna');assert.ok(measure(h,{low:true,boss:true}).dps>measure(h,{boss:true}).dps*1.9);const v=measure(hero('venom'));assert.ok(v.dps>v.direct);});
+test('proposed power reductions and buffs are isolated from canonical content',()=>{for(const [id,factor]of [['underdog',1.15],['miracle_larva',.8],['miracle_cocoon',.4]]){const h=hero(id),base=h.damage,a=measure(h),b=measure(h,{patch:true});assert.ok(Math.abs(b.dps/a.dps-factor)<.015,id);assert.equal(h.damage,base);}});
+test('mana scenario changes efficiency without changing damage',()=>{const h=hero('avalanche_maid'),a=measure(h),b=measure(h,{patch:true});assert.equal(a.gain,b.gain);assert.equal(b.cost,80);assert.ok(Math.abs(b.value/a.value-85/80)<1e-8);});
+test('Ash 20x scenario only raises ultimate direct damage',()=>{const h=hero('ash'),a=measure(h),b=measure(h,{patch:true});assert.equal(a.dps,b.dps);assert.ok(Math.abs(b.skill/a.skill-20/18)<.01);});
+test('draft speed can both raise and lower cadence',()=>{const h=hero('luna'),a=measure(h);assert.ok(measure(h,{}, {interval:2.5}).dps<a.dps);assert.ok(measure(h,{}, {interval:.5}).dps>a.dps);});
+test('support and transformation skills retain real cast restrictions',()=>{const a=arena(hero('miracle_wing'),defaults);assert.equal(castArena(a).ok,false);});
