@@ -1,0 +1,9 @@
+{
+  "method": "Manual anatomical skull/face ellipses under the hair, excluding twin tails, forelock, ribbons and clips. Chin and sole landmarks separately observed on native 1254px grid. Rear skull and chin inferred under hair; not 3D or detector ground truth.",
+  "uncertaintySourcePixels": {"front":18,"back":26,"profile":18,"sole":5},
+  "ellipses": [[337,211,248,230,-1],[941,213,248,230,0],[350,806,228,230,0],[950,807,228,230,0]],
+  "chins": [[334,326],[941,328],[287,922],[1021,924]],
+  "feet": [[345,616],[951,617],[337,1222],[944,1225]],
+  "eyeCentersFront": [[280,264],[380,261]],
+  "notes": "Keep the common head; tapering hair, sleeve and hip silhouettes is the intended change. Normalized head-area equality is not independent anatomical proof. Different side-view facial and hem occlusion is reviewed visually."
+}

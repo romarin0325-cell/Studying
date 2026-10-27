@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-28",
+  "intent": "Preview-only new candidate; no runtime installation, asset replacement or PR.",
+  "pipeline": "Existing Sol Cast V2 common prompt, actual character-specific 3D guide, frozen Siren style, original design, anatomical skull normalization and same-ground review.",
+  "mode": "built-in image_gen; native alpha",
+  "inputs": [
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\toffee-apple-candidate-20261028/references/style-siren.webp",
+      "originalSource": "C:/Users/romar/Downloads/캐릭터/에셋/gpt/cast-v2-20261024/baseline/siren.webp",
+      "role": "approved frozen style and SD proportion reference",
+      "bytes": 179986,
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    },
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\toffee-apple-candidate-20261028/references/mannequin.png",
+      "originalSource": "C:/Users/romar/Downloads/캐릭터/에셋/gpt/cast-v2-20261024/guides/toffee_apple.png",
+      "role": "actual existing Toffee Apple feminine-medium 3D structure guide",
+      "bytes": 207145,
+      "sha256": "3aaf0642ec08ec0b9c8adb2b1ff01d4f1d87b1a5bf5f867893f11d29feb0368e"
+    },
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\toffee-apple-candidate-20261028/references/original.jpg",
+      "originalSource": "C:/Users/romar/Downloads/캐릭터/토피애플.jpg",
+      "role": "original design, costume, identity and expression authority",
+      "bytes": 558750,
+      "sha256": "0c1827fa0b33b2a53715168b5e3735f5d489abed5537523dbec88b3e75c200af"
+    },
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\toffee-apple-candidate-20261028/references/current.png",
+      "originalSource": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\assets\\cast-v2\\toffee_apple.png",
+      "role": "current approved cast asset, continuity and before comparison, not the desired bulk",
+      "bytes": 792733,
+      "sha256": "ddcfec161d96f9597def2b9dd23240124beff390c14544ff73749dfaa89968d6"
+    }
+  ]
+}

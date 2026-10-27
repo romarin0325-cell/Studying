@@ -1,0 +1,89 @@
+{
+  "source": [
+    1254,
+    1254
+  ],
+  "alphaCleaned": 59971,
+  "unmatchedAlphaPixels": 0,
+  "majorComponents": [
+    {
+      "pixels": 144783,
+      "centroid": [
+        341.08760697043164,
+        289.36318490430506
+      ],
+      "bounds": [
+        117,
+        26,
+        575,
+        616
+      ]
+    },
+    {
+      "pixels": 145108,
+      "centroid": [
+        943.7026559528076,
+        289.76729746120134
+      ],
+      "bounds": [
+        704,
+        35,
+        1171,
+        616
+      ]
+    },
+    {
+      "pixels": 117435,
+      "centroid": [
+        344.79682377485415,
+        890.1887086473369
+      ],
+      "bounds": [
+        170,
+        643,
+        547,
+        1225
+      ]
+    },
+    {
+      "pixels": 114621,
+      "centroid": [
+        956.94961656241,
+        888.2354716849443
+      ],
+      "bounds": [
+        753,
+        651,
+        1135,
+        1228
+      ]
+    }
+  ],
+  "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale.",
+  "bounds": [
+    [
+      117,
+      25,
+      575,
+      617
+    ],
+    [
+      704,
+      34,
+      1172,
+      617
+    ],
+    [
+      169,
+      643,
+      547,
+      1225
+    ],
+    [
+      752,
+      650,
+      1136,
+      1228
+    ]
+  ]
+}

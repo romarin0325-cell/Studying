@@ -3473,10 +3473,10 @@
     },
     {
       "id": "toffee_apple",
-      "version": "v1",
-      "generationSourceSha256": "13cfca187797dcdbd2ea13e3924814b55c50e98b886bb6c147daf183f2df2794",
-      "commonScale": 0.6460582824697986,
-      "measurementUncertaintyPacked": 11.629049084456375,
+      "version": "lean-guided-v1-20261028",
+      "generationSourceSha256": "1a45a0d126391ab6327eddbd5ee61e3d3e74e1c2460b554eec863e6c976d4ab8",
+      "commonScale": 0.6486581250966158,
+      "measurementUncertaintyPacked": 11.675846251739085,
       "uncertaintySourcePixels": {
         "front": 18,
         "back": 26,
@@ -3484,219 +3484,219 @@
         "sole": 5
       },
       "sourcePng": {
-        "file": "defense/assets/cast-v2/toffee_apple.png",
-        "bytes": 792733,
-        "sha256": "ddcfec161d96f9597def2b9dd23240124beff390c14544ff73749dfaa89968d6"
+        "file": "defense/assets/cast-v2/toffee-apple-lean.png",
+        "bytes": 727808,
+        "sha256": "99dcd643135744929683ea2d3ec65be9297c069ecd0293147622134af774f6dd"
       },
       "sourceWebp": {
-        "file": "defense/assets/cast-v2/toffee_apple.webp",
-        "bytes": 210182,
-        "sha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1"
+        "file": "defense/assets/cast-v2/toffee-apple-lean.webp",
+        "bytes": 206170,
+        "sha256": "37f3eec5ea1b132656202edb2d467514336a36a7c485b4eb23d34a2414f3445a"
       },
       "portrait": {
-        "x": 261,
-        "y": 227,
+        "x": 251,
+        "y": 217,
         "size": 250
       },
       "frames": [
         {
           "direction": "down",
           "sourceRect": {
-            "left": 102,
-            "top": 21,
-            "width": 507,
-            "height": 600
+            "left": 117,
+            "top": 25,
+            "width": 459,
+            "height": 593
           },
           "sourceEllipse": [
-            351,
-            228,
-            250,
+            337,
+            211,
+            248,
             230,
             -1
           ],
           "sourceChin": [
-            351,
-            343
+            334,
+            326
           ],
           "sourceSole": [
-            344,
-            620
+            345,
+            616
           ],
-          "commonScale": 0.6460582824697986,
+          "commonScale": 0.6486581250966158,
           "resampledDimensions": [
-            328,
-            388
+            298,
+            385
           ],
           "placement": [
-            100,
-            93
+            108,
+            97
           ],
           "ellipse": [
-            260.52,
-            226.75,
-            161.51,
-            148.59,
+            250.81,
+            217.29,
+            160.87,
+            149.19,
             -1
           ],
           "chin": [
-            260.52,
-            301.04
+            248.86,
+            291.89
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 178.96,
+          "belowChin": 188.11,
           "paintedClipping": 0
         },
         {
           "direction": "up",
           "sourceRect": {
-            "left": 652,
-            "top": 39,
-            "width": 515,
-            "height": 583
+            "left": 704,
+            "top": 34,
+            "width": 469,
+            "height": 584
           },
           "sourceEllipse": [
-            922,
-            228,
-            250,
+            941,
+            213,
+            248,
             230,
-            1
+            0
           ],
           "sourceChin": [
-            922,
-            343
+            941,
+            328
           ],
           "sourceSole": [
-            918,
-            621
+            951,
+            617
           ],
-          "commonScale": 0.6460582824697986,
+          "commonScale": 0.6486581250966158,
           "resampledDimensions": [
-            333,
-            377
+            304,
+            379
           ],
           "placement": [
-            84,
-            104
+            96,
+            102
           ],
           "ellipse": [
-            258.58,
-            226.1,
-            161.51,
-            148.59,
-            1
+            249.51,
+            217.94,
+            160.87,
+            149.19,
+            0
           ],
           "chin": [
-            258.58,
-            300.4
+            249.51,
+            292.54
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 179.6,
+          "belowChin": 187.46,
           "paintedClipping": 0
         },
         {
           "direction": "left",
           "sourceRect": {
-            "left": 166,
-            "top": 645,
-            "width": 414,
-            "height": 568
+            "left": 169,
+            "top": 643,
+            "width": 379,
+            "height": 583
           },
           "sourceEllipse": [
-            349,
-            823,
-            224,
-            226,
+            350,
+            806,
+            228,
+            230,
             0
           ],
           "sourceChin": [
-            302,
-            936
+            287,
+            922
           ],
           "sourceSole": [
-            353,
-            1211
+            337,
+            1222
           ],
-          "commonScale": 0.6460582824697986,
+          "commonScale": 0.6486581250966158,
           "resampledDimensions": [
-            267,
-            366
+            246,
+            378
           ],
           "placement": [
-            135,
-            114
+            147,
+            104
           ],
           "ellipse": [
-            253.42,
-            229.33,
-            144.72,
-            146.01,
+            264.43,
+            210.16,
+            147.89,
+            149.19,
             0
           ],
           "chin": [
-            223.05,
-            302.33
+            223.57,
+            285.4
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 177.67,
+          "belowChin": 194.6,
           "paintedClipping": 0
         },
         {
           "direction": "right",
           "sourceRect": {
-            "left": 671,
-            "top": 647,
-            "width": 406,
-            "height": 566
+            "left": 752,
+            "top": 650,
+            "width": 385,
+            "height": 579
           },
           "sourceEllipse": [
-            941,
-            823,
-            224,
-            226,
+            950,
+            807,
+            228,
+            230,
             0
           ],
           "sourceChin": [
-            988,
-            936
+            1021,
+            924
           ],
           "sourceSole": [
-            898,
-            1211
+            944,
+            1225
           ],
-          "commonScale": 0.6460582824697986,
+          "commonScale": 0.6486581250966158,
           "resampledDimensions": [
-            262,
-            365
+            250,
+            376
           ],
           "placement": [
-            109,
-            116
+            131,
+            107
           ],
           "ellipse": [
-            283.78,
-            229.33,
-            144.72,
-            146.01,
+            259.89,
+            208.86,
+            147.89,
+            149.19,
             0
           ],
           "chin": [
-            314.15,
-            302.33
+            305.95,
+            284.75
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 177.67,
+          "belowChin": 195.25,
           "paintedClipping": 0
         }
       ]
