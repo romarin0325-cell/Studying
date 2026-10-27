@@ -149,7 +149,8 @@ function ultValue(s,m,id,gv){
         const p=E.pathPoint(e.progress);
         sum+=list.reduce((n,t)=>{const q=E.pathPoint(t.progress);return n+(Math.hypot(q.x-p.x,q.y-p.y)<=E.APPLEBOMB.radius?hit(E.APPLEBOMB.factor,t):0);},0);
       }
-      return sum/list.length-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
+      // The apple waits on the road, so its value is discounted as before (x0.75).
+      return sum/list.length*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
     }
     case 'requiem':{
       const marked=list.filter(e=>(e.statusEffects||[]).some(x=>x&&x.until-s.time>1e-9)||(e.slowEffects||[]).some(x=>x&&x.until-s.time>1e-9)).length;
