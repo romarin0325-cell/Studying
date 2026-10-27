@@ -50,15 +50,18 @@ export const CLEAR_UNLOCKS=Object.freeze({});
 export const LATE_UNLOCK_STAGE=45;
 export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva']);
 // Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
-// from/to are main-stage equivalents of the first and last wave; long runs also grow the board, so
-// late waves add `late` extra health (quadratic in run progress). Rewards scale with `reward`.
+// from/to are main-stage equivalents of the first and last wave. challengeBase bends
+// that climb forward, and `late` is the extra health at the last wave (not a wave-17 cliff).
+// A full clear is meant to be a stretch near the next tier's unlock. Rewards scale with `reward`.
+// See docs/archive/2026-10-28-CHALLENGE_RETUNE.md.
 export const CHALLENGE_WAVES=18;
 export const TIERS=Object.freeze({
-  // Retuned for the 90-stage story (2026-10-24). from/to are main-stage equivalents.
-  // See docs/archive/CHALLENGE_90_RETUNE.md.
-  easy:{name:'쉬움',unlock:3,from:4,to:34,late:1.6,boss:1,monthly:.20,reward:1.3},
-  hard:{name:'어려움',unlock:36,from:28,to:62,late:2.2,boss:1.15,monthly:.20,reward:2.3},
-  abyss:{name:'심연',unlock:72,from:56,to:86,late:3,boss:1.3,monthly:.23,reward:3.4},
+  // lateAt parks the late add-on on the last waves. weeklyLate (see wavePlan) raises every
+  // weekly enemy the same way, so a full clear stays a stretch after the board has snowballed.
+  // It is small enough that hard stays above easy without a weeklyLate of its own.
+  easy:{name:'쉬움',unlock:3,from:12,to:42,late:1,lateAt:6,boss:1.05,weeklyLate:.4,monthly:.30,reward:1.3},
+  hard:{name:'어려움',unlock:36,from:40,to:70,late:.9,boss:1.15,monthly:.30,reward:2.3},
+  abyss:{name:'심연',unlock:72,from:68,to:88,late:1,boss:1.25,monthly:.35,reward:3.4},
 });
 export const TIER_IDS=Object.keys(TIERS);
 export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;

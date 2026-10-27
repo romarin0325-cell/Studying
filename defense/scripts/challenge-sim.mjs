@@ -87,7 +87,7 @@ function runDeck(job){
     if(job.useAnchors)powers.push({deck:deckKey(job.deck),stage,power,crit:critName(stage)});
     for(const mode of job.modes){
       const runs=Array.from({length:job.seeds},(_,k)=>playChallenge(job.deck,tier,stage,k+1,mode,power));
-      rows.push({mode,tier,growth:stage,deck:deckKey(job.deck),power,clear:runs.filter(r=>r.won).length/runs.length,rounds:runs.reduce((n,r)=>n+r.rounds,0)/runs.length,min:Math.min(...runs.map(r=>r.rounds)),max:Math.max(...runs.map(r=>r.rounds))});
+      rows.push({mode,tier,growth:stage,deck:deckKey(job.deck),power,clear:runs.filter(r=>r.won).length/runs.length,rounds:runs.reduce((n,r)=>n+r.rounds,0)/runs.length,min:Math.min(...runs.map(r=>r.rounds)),max:Math.max(...runs.map(r=>r.rounds)),samples:runs.map(r=>({won:r.won,rounds:r.rounds}))});
     }
   }
   return {powers,rows};
