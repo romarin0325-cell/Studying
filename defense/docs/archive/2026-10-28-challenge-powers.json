@@ -1,0 +1,352 @@
+{
+  "anchors": [
+    3,
+    18,
+    36,
+    54,
+    72,
+    81,
+    90
+  ],
+  "seeds": 4,
+  "target": 0.75,
+  "note": "challenge-sim.mjs --load-powers 용 P(G). 덱이 메인 스테이지 G를 시드 4개 중 75% 깨는 가장 작은 영웅 배율. 도전 난이도와 무관. 2026-10-28.",
+  "powers": [
+    {
+      "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+      "stage": 18,
+      "power": 1.8044541678066237,
+      "crit": "none"
+    },
+    {
+      "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+      "stage": 36,
+      "power": 3.3635856610148585,
+      "crit": "none"
+    },
+    {
+      "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+      "stage": 54,
+      "power": 4.65489943511031,
+      "crit": "mid"
+    },
+    {
+      "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+      "stage": 72,
+      "power": 5.565697503087705,
+      "crit": "full"
+    },
+    {
+      "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+      "stage": 81,
+      "power": 6.441961327797018,
+      "crit": "full"
+    },
+    {
+      "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+      "stage": 90,
+      "power": 7.375866275834503,
+      "crit": "full"
+    },
+    {
+      "deck": "zeke,luna,jasmine,ancient_dragon,great_detective",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "zeke,luna,jasmine,ancient_dragon,great_detective",
+      "stage": 18,
+      "power": 2.0998881716013744,
+      "crit": "none"
+    },
+    {
+      "deck": "zeke,luna,jasmine,ancient_dragon,great_detective",
+      "stage": 36,
+      "power": 3.8512118872722496,
+      "crit": "none"
+    },
+    {
+      "deck": "zeke,luna,jasmine,ancient_dragon,great_detective",
+      "stage": 54,
+      "power": 4.756828460010884,
+      "crit": "mid"
+    },
+    {
+      "deck": "zeke,luna,jasmine,ancient_dragon,great_detective",
+      "stage": 72,
+      "power": 6.547469799067859,
+      "crit": "full"
+    },
+    {
+      "deck": "zeke,luna,jasmine,ancient_dragon,great_detective",
+      "stage": 81,
+      "power": 6.91180492384735,
+      "crit": "full"
+    },
+    {
+      "deck": "zeke,luna,jasmine,ancient_dragon,great_detective",
+      "stage": 90,
+      "power": 8.131026519287625,
+      "crit": "full"
+    },
+    {
+      "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+      "stage": 18,
+      "power": 2.0437942973082333,
+      "crit": "none"
+    },
+    {
+      "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+      "stage": 36,
+      "power": 3.7686883580646686,
+      "crit": "none"
+    },
+    {
+      "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+      "stage": 54,
+      "power": 5.215525060767743,
+      "crit": "mid"
+    },
+    {
+      "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+      "stage": 72,
+      "power": 6.476940540779456,
+      "crit": "full"
+    },
+    {
+      "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+      "stage": 81,
+      "power": 5.656854249492381,
+      "crit": "full"
+    },
+    {
+      "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+      "stage": 90,
+      "power": 7.660826245588589,
+      "crit": "full"
+    },
+    {
+      "deck": "silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora",
+      "stage": 18,
+      "power": 1.492907728291265,
+      "crit": "none"
+    },
+    {
+      "deck": "silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora",
+      "stage": 36,
+      "power": 2.813151987638031,
+      "crit": "none"
+    },
+    {
+      "deck": "silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora",
+      "stage": 54,
+      "power": 4.021719604451211,
+      "crit": "mid"
+    },
+    {
+      "deck": "silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora",
+      "stage": 72,
+      "power": 4.481751009638426,
+      "crit": "full"
+    },
+    {
+      "deck": "silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora",
+      "stage": 81,
+      "power": 4.530554078394877,
+      "crit": "full"
+    },
+    {
+      "deck": "silver_rabbit,jasmine,galaxy_whale,cherry_prince,aurora",
+      "stage": 90,
+      "power": 5.300946572638965,
+      "crit": "full"
+    },
+    {
+      "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+      "stage": 18,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+      "stage": 36,
+      "power": 1.2351510639369332,
+      "crit": "none"
+    },
+    {
+      "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+      "stage": 54,
+      "power": 1.2898358734066657,
+      "crit": "mid"
+    },
+    {
+      "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+      "stage": 72,
+      "power": 1.4142135623730951,
+      "crit": "full"
+    },
+    {
+      "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+      "stage": 81,
+      "power": 1.7657884359332727,
+      "crit": "full"
+    },
+    {
+      "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+      "stage": 90,
+      "power": 1.9152065613971472,
+      "crit": "full"
+    },
+    {
+      "deck": "joker,sunflower,underdog,star_boy,siren",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "joker,sunflower,underdog,star_boy,siren",
+      "stage": 18,
+      "power": 3.10116975537,
+      "crit": "none"
+    },
+    {
+      "deck": "joker,sunflower,underdog,star_boy,siren",
+      "stage": 36,
+      "power": 6.168843301631764,
+      "crit": "none"
+    },
+    {
+      "deck": "joker,sunflower,underdog,star_boy,siren",
+      "stage": 54,
+      "power": 7.578303926347862,
+      "crit": "mid"
+    },
+    {
+      "deck": "joker,sunflower,underdog,star_boy,siren",
+      "stage": 72,
+      "power": 9.988807817513639,
+      "crit": "full"
+    },
+    {
+      "deck": "joker,sunflower,underdog,star_boy,siren",
+      "stage": 81,
+      "power": 10.60189314527793,
+      "crit": "full"
+    },
+    {
+      "deck": "joker,sunflower,underdog,star_boy,siren",
+      "stage": 90,
+      "power": 11.624223966792423,
+      "crit": "full"
+    },
+    {
+      "deck": "venom,ash,cure_master,antropy,luna",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "venom,ash,cure_master,antropy,luna",
+      "stage": 18,
+      "power": 3.10116975537,
+      "crit": "none"
+    },
+    {
+      "deck": "venom,ash,cure_master,antropy,luna",
+      "stage": 36,
+      "power": 4.756828460010884,
+      "crit": "none"
+    },
+    {
+      "deck": "venom,ash,cure_master,antropy,luna",
+      "stage": 54,
+      "power": 7.063153743733091,
+      "crit": "mid"
+    },
+    {
+      "deck": "venom,ash,cure_master,antropy,luna",
+      "stage": 72,
+      "power": 9.565315136318619,
+      "crit": "full"
+    },
+    {
+      "deck": "venom,ash,cure_master,antropy,luna",
+      "stage": 81,
+      "power": 9.41117593320225,
+      "crit": "full"
+    },
+    {
+      "deck": "venom,ash,cure_master,antropy,luna",
+      "stage": 90,
+      "power": 11.43690670713576,
+      "crit": "full"
+    },
+    {
+      "deck": "behemoth,zeke,queen,ancient_dragon,great_detective",
+      "stage": 3,
+      "power": 1,
+      "crit": "none"
+    },
+    {
+      "deck": "behemoth,zeke,queen,ancient_dragon,great_detective",
+      "stage": 18,
+      "power": 2.032756629821906,
+      "crit": "none"
+    },
+    {
+      "deck": "behemoth,zeke,queen,ancient_dragon,great_detective",
+      "stage": 36,
+      "power": 3.8512118872722496,
+      "crit": "none"
+    },
+    {
+      "deck": "behemoth,zeke,queen,ancient_dragon,great_detective",
+      "stage": 54,
+      "power": 6.004056278505703,
+      "crit": "mid"
+    },
+    {
+      "deck": "behemoth,zeke,queen,ancient_dragon,great_detective",
+      "stage": 72,
+      "power": 4.268561602707294,
+      "crit": "full"
+    },
+    {
+      "deck": "behemoth,zeke,queen,ancient_dragon,great_detective",
+      "stage": 81,
+      "power": 8.21956759295011,
+      "crit": "full"
+    },
+    {
+      "deck": "behemoth,zeke,queen,ancient_dragon,great_detective",
+      "stage": 90,
+      "power": 6.727171322029717,
+      "crit": "full"
+    }
+  ]
+}

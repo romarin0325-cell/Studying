@@ -477,11 +477,20 @@ export function cycleTarget(s,index){const u=s.board[index];if(!u||targetingLock
 const enemyWeight={grunt:1,armor:3.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
 // Challenge curve: wave w of 18 maps onto the main twelve-wave curve (old waves 2..12) at a stage that
-// climbs through the tier band, plus extra health late in the run for the bigger board.
+// climbs through the tier band, plus extra health as the board grows.
+// Bend below 1 pulls that climb forward. The old linear stage and quadratic late term (k²)
+// left waves 1–15 easy and killed almost every run on wave 17. `lateAt` (default: the bend)
+// can park that add-on on the last waves. `weeklyLate` in wavePlan raises a whole weekly wave the same way.
+// See docs/archive/2026-10-28-CHALLENGE_RETUNE.md.
+const CHALLENGE_BEND=.33;
 export function challengeBase(wave,tier='easy'){
   const t=TIERS[tier]||TIERS.easy,k=(Math.min(wave,CHALLENGE_WAVES)-1)/(CHALLENGE_WAVES-1),over=Math.max(0,wave-CHALLENGE_WAVES);
-  const stage=t.from+(t.to-t.from)*k,oldWave=2+10*k;
-  return {base:WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*(1+2.5*(stage-1)/8)*(1+t.late*k*k)*Math.pow(1.25,over),oldWave};
+  const bend=Math.pow(k,CHALLENGE_BEND);
+  // `lateAt` (default: the same bend) is when the late add-on arrives.
+  // A higher power leaves the middle waves alone and raises only the clear.
+  const lateK=Math.pow(k,t.lateAt??CHALLENGE_BEND);
+  const stage=t.from+(t.to-t.from)*bend,oldWave=2+10*bend;
+  return {base:WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*(1+2.5*(stage-1)/8)*(1+t.late*lateK)*Math.pow(1.25,over),oldWave};
 }
 export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
   if(mode==='monthly'){
@@ -492,7 +501,12 @@ export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
   if(mode==='weekly'){
     const {base,oldWave}=challengeBase(wave,tier),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
     const sequence=Array.from({length:count},(_,i)=>{const kind=enemyKind(i,Math.ceil(oldWave/2));return {kind,hp:Math.round(base*enemyWeight[kind])};});
-    if(wave%3===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32*BOSS_HEALTH_SCALE*(TIERS[tier]||TIERS.easy).boss)});
+    const t=TIERS[tier]||TIERS.easy;
+    if(wave%3===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32*BOSS_HEALTH_SCALE*t.boss)});
+    // weeklyLate (power 6) raises the whole weekly wave near the end only.
+    // It does not change the monthly boss. Early weekly waves stay on the bend.
+    const k=(Math.min(wave,CHALLENGE_WAVES)-1)/(CHALLENGE_WAVES-1),grow=1+(t.weeklyLate||0)*Math.pow(k,6);
+    if(grow!==1)for(const e of sequence)e.hp=Math.round(e.hp*grow);
     return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:sequence.reduce((n,e)=>n+e.hp,0)};
   }
   // Six waves sample the original twelve-wave curve at 2,4,...,12.
