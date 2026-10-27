@@ -1,0 +1,18 @@
+Use your built-in image generation tool to create ONE image, then save that image file as fx-pieces.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create a game VFX sprite atlas of effect PIECES for an existing mobile fantasy tower-defense game. Reference image 1 (style-ref.png) is the game's established effect language: luminous translucent glass-crystal / neon light motifs with bright hot cores, saturated rim light, crisp readable shapes and a few small sparkles, glowing on a PURE BLACK background (the game draws them with screen blending, so black becomes transparent). Match that language. Do NOT paint opaque solid objects, flat stickers, cel-shaded props or black ink outlines. Reference image 2 shows three characters (left to right: Joker, Sunflower, Toffee Apple) for palette and motif ONLY; never draw the characters, faces or people.
+
+These pieces are layered over a crowded battlefield, so RING pieces must be HOLLOW: a thin bright band with a fully black (empty) center, so the characters underneath stay visible.
+
+Layout: EXACTLY 4 columns x 2 rows of equal square cells on a wide 2:1 canvas. Pure black (#000000) background everywhere. Each piece centered in its cell with at least 12% black margin; nothing crosses a cell border. No grid lines, frames, labels, letters, numbers, faces or UI. Glow stays close to the shapes (no big haze, no filled discs).
+
+TOP ROW, left to right:
+1. Toffee Apple "sugar glitter ring": a thin hollow circular ring (seen from the front, perfectly round) made of sparkling caramel-gold and candy-red sugar glitter and tiny star glints; the band is thin, the center is completely empty black.
+2. Toffee Apple "sugar sparkle cluster": a small cluster of three or four crisp four-point star glints in white gold and candy red, with tiny glitter dots. Small and delicate.
+3. Joker "chaos card": ONE playing card of glowing light, slightly tilted, its face split into five color bands (red, blue, green, ivory white, violet-black) with a central four-point star suit; magenta rim.
+4. Joker "chaos hit burst": a compact starburst of five-color prismatic shards (red, blue, green, white, violet) flying out from a small bright center. Compact, about half the cell.
+BOTTOM ROW, left to right:
+5. Joker "chaos vortex ring": a thin hollow ring of swirling five-color prismatic light with small card-suit sparkles, center completely empty black.
+6. Sunflower "sun petal": ONE single wide golden sunflower petal made of sunlight, teardrop shaped with a rounded tip, bright warm core, pointing up.
+7. Sunflower "sun ray ring": a thin hollow ring of short golden petals of light radiating outward like a sunflower's petal crown, center completely empty black.
+8. Sunflower "pollen sparkle cluster": a small cluster of soft round golden pollen motes and two or three small warm star glints.

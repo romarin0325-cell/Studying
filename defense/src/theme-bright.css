@@ -786,3 +786,6 @@ body::before{background:var(--lobby,var(--garden) center/cover);filter:blur(30px
 .reveal-spot .spot-line{margin:0 5%!important;padding-top:4px!important;transform-origin:50% 0}
 /* Pass 18: speech is coloured inside the paragraph; narration keeps the ink colour. */
 .memory-text .say{color:#B8336A!important}
+/* Pass 19: the night theme's --gold-hi emphasis is white here; Rumi's wrong-answer explanation keeps ink-coloured emphasis. */
+.rumi-head b{color:var(--navy)}
+.rumi-text b,.rumi-text h4{color:#9A6A10}

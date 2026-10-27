@@ -1079,11 +1079,20 @@ function dispatchTap(slot){
   claimDispatches([slot]);
 }
 function claimDispatches(slots){
-  let dust=0,dreams=0;const points=slots.map(s=>{const n=document.querySelector(`[data-dispatch-slot="${s}"]`);return n?centerOf(n):null;});
-  for(const slot of slots){const r=act('claimDispatch',{slot},false);if(!r.ok){toast(r.message);break;}dust+=r.dust||0;dreams+=r.reward;}
+  let dust=0,dreams=0;const heroes=[],points=slots.map(s=>{const n=document.querySelector(`[data-dispatch-slot="${s}"]`);return n?centerOf(n):null;});
+  for(const slot of slots){const hero=p().dispatches.find(x=>x.slot===slot)?.hero,r=act('claimDispatch',{slot},false);if(!r.ok){toast(r.message);break;}dust+=r.dust||0;dreams+=r.reward;if(hero)heroes.push(hero);}
   points.forEach(c=>{if(c)burst(c.x,c.y,{count:10,spread:60,size:9,color:'#ffe39a'});});
-  if(dust||dreams){const c=points.find(Boolean)||{x:innerWidth/2,y:innerHeight/2};floatText(c.x,c.y-30,`${dust?`별가루 +${fmt(dust)} `:''}꿈의결정 +${fmt(dreams)}`,'#ffe39a');}
   refreshGarden();
+  if(heroes.length)dispatchReceipt(heroes,dust,dreams);
+}
+// What came back: the returning companions and the total haul, counted up once (static under reduced motion).
+function dispatchReceipt(heroes,dust,dreams){
+  const tile=(kind,name,n)=>`<div class="dr-gain ${kind}">${icon(kind==='dust'?'dust':'gem')}<b data-count="${n}">+${fmt(n)}</b><small>${name}</small></div>`;
+  show('파견 귀환','정원',`<div class="dispatch-receipt"><div class="dr-heroes">${heroes.map(id=>`<span class="dr-hero">${portrait(id)}<small>${HERO[id].name}</small></span>`).join('')}</div><div class="dr-gains">${dust?tile('dust','별가루',dust):''}${tile('gem','꿈의결정',dreams)}</div></div>`,`<button class="primary wide" data-action="close">확인</button>`,'dispatch-receipt');
+  if(motionOff())return;
+  const nodes=[...document.querySelectorAll('#sheet .dr-gain b[data-count]')],start=performance.now(),length=700;
+  const tick=at=>{const k=Math.min(1,(at-start)/length),e=1-(1-k)**3;for(const b of nodes)if(b.isConnected)b.textContent=`+${fmt(Math.round(Number(b.dataset.count)*e))}`;if(k<1&&nodes.some(b=>b.isConnected))requestAnimationFrame(tick);};
+  requestAnimationFrame(tick);
 }
 function chooseDispatch(slot){
   const free=available(p()),few=free.length<=TEAM_SIZE;

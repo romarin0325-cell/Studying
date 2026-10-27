@@ -1,0 +1,52 @@
+{
+  "input": "defense/docs/art/companion-fx-20261028/gpt-emblems.png",
+  "width": 1195,
+  "height": 724,
+  "columns": 2,
+  "rows": 1,
+  "rowCuts": [],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        609,
+        724
+      ],
+      "box": [
+        1,
+        50,
+        608,
+        640
+      ],
+      "touchesCut": [
+        true,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        609,
+        0,
+        1195,
+        724
+      ],
+      "box": [
+        609,
+        24,
+        576,
+        671
+      ],
+      "touchesCut": [
+        true,
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

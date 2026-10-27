@@ -86,6 +86,8 @@ const buffScale=(s,key)=>s.buffScale?.[key]||1;
 export const MONTHLY_HEALTH=7;
 export const coreHealthMax=s=>s.mode==='monthly'?MONTHLY_HEALTH:20;
 export const coreCrisis=s=>s.health<coreHealthMax(s)/2;
+// Zeke's trait: an enemy alive in the last quarter of the path (next to the core) raises his attack by 40%.
+export const zekeFury=s=>s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 // Running ultimates that refuse a second press: a pure buff would only restart its timer, and the
 // dream form keeps one sequence of phases. Damage-and-buff hybrids
@@ -187,7 +189,7 @@ function syncTimeRuler(s){
 }
 // Underdog (노멀 덱 다크호스) and Toffee Apple (저축 폭탄): numbers from docs/plans/UPCOMING_BALANCE.md.
 export const UNDERDOG=Object.freeze({bonus:.8,factor:10,stun:2});
-export const APPLEBOMB=Object.freeze({factor:10,max:5,trigger:80,stun:3});
+export const APPLEBOMB=Object.freeze({factor:18,max:5,trigger:80,stun:3,radius:200});
 // Sunflower: one shared stack (0..3) of sunlight, +1 when a wave ends while a sunflower stands on the board. Its basic
 // attack bursts around the target with the radius of the current stack; Solar Flare spends the whole stack.
 export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:4});
@@ -230,14 +232,14 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
     const top=topCinderella(s),active=top?.uid===u.uid,clock=u.clock||0,step=s.buffs.midnight>0?3:1;
     Object.assign(trait,{key:'cinderella',uid:top?.uid??null,active,clock,damageMultiplier:active?CINDERELLA.top:1,label:active?`진짜 신데렐라 · 공격력 +50% · 자정의 종까지 ${Math.ceil((12-clock)/step)}회`:`진짜 신데렐라 ${top?.rank??''}성이 따로 있어요`});
   }else if(u.hero==='zeke'){
-    const active=s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
-    Object.assign(trait,{key:'last-quarter',active,damageMultiplier:active?1.4:1,label:active?'마지막 구간 · 공격력 +40%':'마지막 구간 대기'});
+    const active=zekeFury(s);
+    Object.assign(trait,{key:'last-quarter',active,damageMultiplier:active?1.4:1,label:active?'광폭 · 공격력 +40%':'광폭 대기'});
   }else if(u.hero==='flame_sage')Object.assign(trait,{key:'wildfire',active:true,zoneDamageMultiplier:1.3,zoneRadiusMultiplier:1.3,zoneDurationMultiplier:1.3,label:'경로 위 무작위 · 화염장 +30%'});
   else if(u.hero==='avalanche_maid')Object.assign(trait,{key:'random-target',active:true,label:'무작위 표적 고정 · 기본 공격력 +50%'});
   else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,executeChance:stormExecuteChance(s,u.rank),label:`일반 적 명중마다 즉사 ${pctText(stormExecuteChance(s,u.rank))}`});
   else if(u.hero==='underdog'){const active=s.deck.every(id=>HERO[id].rarity==='C'&&!HERO[id].hidden);Object.assign(trait,{key:'underdog',active,damageMultiplier:active?1+UNDERDOG.bonus:1,label:active?`노멀 덱 · 공격력 +${Math.round(UNDERDOG.bonus*100)}%`:'노멀 덱 대기'});}
   else if(u.hero==='sunflower'){const n=Math.min(SUNFLOWER.max,s.sunlight||0);Object.assign(trait,{key:'sunlight',active:n>0,sunlight:n,radius:SUNFLOWER.radius[n],label:n?`햇빛 ${n}/${SUNFLOWER.max} · 폭발 반경 ${SUNFLOWER.radius[n]}`:`햇빛 0/${SUNFLOWER.max} · 폭발 없음`});}
-  else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:jokerChaos(s)?'카오스 룰렛 · 일반 공격 시 상태 이상 5종':`${JOKER_NAMES[color]} · ${JOKER.colors.filter(c=>(s.jokerSeen||1)&jokerBit(c)).length}/5색`});}
+  else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:jokerChaos(s)?'카오스 · 일반 공격 시 화상·감속·중독·성광·노출':`${JOKER_NAMES[color]} · ${JOKER.colors.filter(c=>(s.jokerSeen||1)&jokerBit(c)).length}/5색`});}
   else if(u.hero==='antropy')Object.assign(trait,{key:'antropy',active:true,label:'디버프 무효'});
   else if(u.hero==='cure_master'){
     const n=index<0?0:neighbors(index).filter(i=>s.board[i]).length,active=!u.cursed&&!(u.disabled>0);
@@ -475,11 +477,20 @@ export function cycleTarget(s,index){const u=s.board[index];if(!u||targetingLock
 const enemyWeight={grunt:1,armor:3.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
 // Challenge curve: wave w of 18 maps onto the main twelve-wave curve (old waves 2..12) at a stage that
-// climbs through the tier band, plus extra health late in the run for the bigger board.
+// climbs through the tier band, plus extra health as the board grows.
+// Bend below 1 pulls that climb forward. The old linear stage and quadratic late term (k²)
+// left waves 1–15 easy and killed almost every run on wave 17. `lateAt` (default: the bend)
+// can park that add-on on the last waves. `weeklyLate` in wavePlan raises a whole weekly wave the same way.
+// See docs/archive/2026-10-28-CHALLENGE_RETUNE.md.
+const CHALLENGE_BEND=.33;
 export function challengeBase(wave,tier='easy'){
   const t=TIERS[tier]||TIERS.easy,k=(Math.min(wave,CHALLENGE_WAVES)-1)/(CHALLENGE_WAVES-1),over=Math.max(0,wave-CHALLENGE_WAVES);
-  const stage=t.from+(t.to-t.from)*k,oldWave=2+10*k;
-  return {base:WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*(1+2.5*(stage-1)/8)*(1+t.late*k*k)*Math.pow(1.25,over),oldWave};
+  const bend=Math.pow(k,CHALLENGE_BEND);
+  // `lateAt` (default: the same bend) is when the late add-on arrives.
+  // A higher power leaves the middle waves alone and raises only the clear.
+  const lateK=Math.pow(k,t.lateAt??CHALLENGE_BEND);
+  const stage=t.from+(t.to-t.from)*bend,oldWave=2+10*bend;
+  return {base:WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*(1+2.5*(stage-1)/8)*(1+t.late*lateK)*Math.pow(1.25,over),oldWave};
 }
 export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
   if(mode==='monthly'){
@@ -490,7 +501,12 @@ export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
   if(mode==='weekly'){
     const {base,oldWave}=challengeBase(wave,tier),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
     const sequence=Array.from({length:count},(_,i)=>{const kind=enemyKind(i,Math.ceil(oldWave/2));return {kind,hp:Math.round(base*enemyWeight[kind])};});
-    if(wave%3===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32*BOSS_HEALTH_SCALE*(TIERS[tier]||TIERS.easy).boss)});
+    const t=TIERS[tier]||TIERS.easy;
+    if(wave%3===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32*BOSS_HEALTH_SCALE*t.boss)});
+    // weeklyLate (power 6) raises the whole weekly wave near the end only.
+    // It does not change the monthly boss. Early weekly waves stay on the bend.
+    const k=(Math.min(wave,CHALLENGE_WAVES)-1)/(CHALLENGE_WAVES-1),grow=1+(t.weeklyLate||0)*Math.pow(k,6);
+    if(grow!==1)for(const e of sequence)e.hp=Math.round(e.hp*grow);
     return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:sequence.reduce((n,e)=>n+e.hp,0)};
   }
   // Six waves sample the original twelve-wave curve at 2,4,...,12.
@@ -714,7 +730,7 @@ function attack(s,u,index,extra=0){
   const e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(unitHero(s,u),cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return false;
   const stats=combatStats(s,u,index),ratio=extra||1;
   const shot=fire(s,u,index,e,ground?pathPoint(random(s)*PATH_LENGTH):null,stats,ratio,extra>0,false);
-  event(s,'attack',{index,hero:u.hero,rank:u.rank,from:shot.from,to:shot.to,origin:shot.origin,shape:unitHero(s,u).shape,form:shot.form,attackType:unitHero(s,u).attack,...(shot.gift?{gift:true}:{}),...(extra?{extra:true}:{})});
+  event(s,'attack',{index,hero:u.hero,rank:u.rank,from:shot.from,to:shot.to,origin:shot.origin,shape:unitHero(s,u).shape,form:shot.form,attackType:unitHero(s,u).attack,...(shot.gift?{gift:true}:{}),...(extra?{extra:true}:{}),...(u.hero==='zeke'&&zekeFury(s)?{fury:true}:{})});
   if(s.buffs.echo>0)fire(s,u,index,ground?null:s.enemies.find(x=>x.uid===shot.target)||e,ground?shot.to:null,stats,ratio*.65*buffScale(s,'echo'),true,true);
   return true;
 }
@@ -852,7 +868,7 @@ export function cast(s,id){
   castCrits.set(s,unitCrit(s,u));const castStart=s.nextId;
   const source=sourceKey('skill',id,s.nextId++);
   for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
-  let visualTargets=targets,gift;
+  let visualTargets=targets,gift,look;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
   const strike=factor=>targets.forEach(e=>damage(s,e,base*factor,id));
   if(type==='miracle_eclose'){
@@ -919,10 +935,11 @@ export function cast(s,id){
   else if(type==='bigshow'){strike(UNDERDOG.factor);const victims=s.board.map((ally,i)=>!!ally&&!immune(s,i));victims.forEach((on,i)=>{if(on)stunUnit(s,i,UNDERDOG.stun);});}
   else if(type==='solarflare'){
     // Spends the whole shared stack: 2x with none, +3x per sunlight (11x at three).
-    const n=Math.min(SUNFLOWER.max,s.sunlight||0);strike(SUNFLOWER.base+SUNFLOWER.per*n);s.sunlight=0;
+    const n=Math.min(SUNFLOWER.max,s.sunlight||0);strike(SUNFLOWER.base+SUNFLOWER.per*n);s.sunlight=0;look={sunlight:n};
     event(s,'sunSpend',{sunlight:n,points:s.board.flatMap((a,i)=>a?.hero==='sunflower'?[cellPoint(i)]:[])});
   }
   else if(type==='roulette'){
+    if(jokerChaos(s))look={chaos:true};
     strike(JOKER.roulette);
     if(!jokerChaos(s)){
       const from=s.jokerColor||'red',color=pickJokerColor(s,from);
@@ -974,7 +991,7 @@ export function cast(s,id){
   const support=!dream&&['echo','haste','awaken','march','gift','trauma','harmony','lemonade','miracle_eclose'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key&&!dream){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
-  castCrits.delete(s);event(s,'skill',{hero:id,name:dream?RUMI_DREAM.name:name,kind:dream?'dream':type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{})});return {ok:true};
+  castCrits.delete(s);event(s,'skill',{hero:id,name:dream?RUMI_DREAM.name:name,kind:dream?'dream':type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{}),...look});return {ok:true};
 }
 // Describes what pressing the ultimate would do right now, with the numbers cast() uses. No side effects.
 // The detective's ultimate scales with training and rank like his basic attack, so it never falls behind it.
@@ -1186,7 +1203,7 @@ export function castPreview(s,id){
   }else if(type==='applebomb'){
     const set=(s.bombs||[]).length;
     lines.push(`경로의 무작위 위치에 사과를 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);
-    lines.push(`적이 가까이 오면 바로 터져 적 전체에게 공격력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}를 줍니다.`);
+    lines.push(`적이 가까이 오면 바로 터져 반경 ${APPLEBOMB.radius} 안의 적에게 공격력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}를 줍니다.`);
     lines.push(`피해는 폭발 순간 최고 성급 토피애플의 현재 공격력으로 계산합니다. 토피애플이 없으면 마지막 유효 공격력을 사용합니다.`);
     lines.push(`설치한 토피애플은 ${APPLEBOMB.stun}초 동안 기절합니다.`);
   }else if(type==='requiem'){
@@ -1352,10 +1369,12 @@ export function step(s,dt){
   if(s.bombs.length)s.bombs=s.bombs.filter(bomb=>{
     const alive=s.enemies.filter(e=>e.hp>0);
     if(!alive.some(e=>Math.abs(e.progress-bomb.progress)<=APPLEBOMB.trigger))return true;
-    for(const e of alive)damage(s,e,bomb.damage,'toffee_apple',{crit:bomb.crit});
-    // Visual receipts must retain even lethal hits after dead enemies leave the
-    // renderer's map. This is a global bomb, not a local circular splash.
-    event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress),targets:alive.map(e=>({uid:e.uid,...pathPoint(e.progress)}))});
+    const origin=pathPoint(bomb.progress);
+    const hit=alive.filter(e=>{const p=pathPoint(e.progress);return Math.hypot(p.x-origin.x,p.y-origin.y)<=APPLEBOMB.radius;});
+    for(const e of hit)damage(s,e,bomb.damage,'toffee_apple',{crit:bomb.crit});
+    // Receipts keep lethal hits after those enemies leave the renderer map.
+    // Only enemies inside the blast radius are targets.
+    event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...origin,radius:APPLEBOMB.radius,targets:hit.map(e=>({uid:e.uid,...pathPoint(e.progress)}))});
     return false;
   });
   for(const z of s.zones){

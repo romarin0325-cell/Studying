@@ -1686,27 +1686,58 @@ test('underdog: +80% power only while the whole deck is plain normal-rarity hero
   assert.ok(s.board.filter(Boolean).every(u=>u.disabled>=2),'the whole board is stunned');
   assert.ok(E.restore(E.serialize(s)));
 });
-test('toffee apple: random route positions, proximity-only global blast, five-apple cap and saved apples',()=>{
-  assert.deepEqual(E.APPLEBOMB,{factor:10,max:5,trigger:80,stun:3});
+test('toffee apple: random route positions, proximity trigger, five-apple cap and saved apples',()=>{
+  assert.deepEqual(E.APPLEBOMB,{factor:18,max:5,trigger:80,stun:3,radius:200});
   const s=traitArena([{index:12,hero:'toffee_apple'}]);const [lead]=enemiesFor(s,[{hp:1e9,progress:400}]);
   const base=E.combatStats(s,s.board[12]).damage;s.rng=1;readyCast(s,'toffee_apple');
+  const preview=E.castPreview(s,'toffee_apple');
+  assert.ok(preview.lines.some(line=>line.includes(`반경 ${E.APPLEBOMB.radius}`)&&line.includes(`공격력 ${E.APPLEBOMB.factor}배`)));
   assert.ok(s.bombs[0].progress<lead.progress,'a random apple can appear behind the leading enemy');
-  assert.ok(s.bombs[0].progress>=0&&s.bombs[0].progress<E.PATH_LENGTH);close(s.bombs[0].damage,base*10);
+  assert.ok(s.bombs[0].progress>=0&&s.bombs[0].progress<E.PATH_LENGTH);close(s.bombs[0].damage,base*E.APPLEBOMB.factor);
   assert.ok(s.board[12].disabled>=3);const placed=s.bombs[0];placed.progress=1000;lead.speed=0;
   for(const progress of [400,1300]){lead.progress=progress;const hp=lead.hp;E.step(s,.05);assert.equal(s.bombs.length,1);assert.equal(lead.hp,hp,'far ahead or behind does not trigger');}
   lead.progress=placed.progress-E.APPLEBOMB.trigger;const hp=lead.hp;E.step(s,.05);
-  assert.equal(s.bombs.length,0);close(hp-lead.hp,base*10);
+  assert.equal(s.bombs.length,0);close(hp-lead.hp,base*E.APPLEBOMB.factor);
   const pack=traitArena([{index:12,hero:'toffee_apple'}]);enemiesFor(pack,[{hp:1e9,progress:200}]);
   for(let i=0;i<5;i++){pack.board[12].disabled=0;readyCast(pack,'toffee_apple');}
   assert.equal(pack.bombs.length,5);pack.board[12].disabled=0;pack.gauge=120;
   assert.equal(E.cast(pack,'toffee_apple').reason,'폭탄이 가득 찼습니다.');assert.equal(E.restore(E.serialize(pack)).bombs.length,5);
 });
 
+test('toffee apple blast hits enemies inside radius 200 for 18x and leaves enemies outside untouched',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple'}]);
+  const [edge,far,lead]=enemiesFor(s,[{hp:1e9,progress:400},{hp:1e9,progress:450},{hp:1e9,progress:1800}]);
+  const base=E.combatStats(s,s.board[12]).damage;
+  readyCast(s,'toffee_apple');
+  const bomb=s.bombs[0];bomb.progress=200;
+  // Straight top edge: path distance equals pixels. 400 is exactly the radius, 450 is outside, 1800 cannot trigger.
+  const origin=E.pathPoint(bomb.progress);
+  const gap=e=>Math.hypot(E.pathPoint(e.progress).x-origin.x,E.pathPoint(e.progress).y-origin.y);
+  assert.equal(gap(edge),E.APPLEBOMB.radius);
+  assert.ok(gap(far)>E.APPLEBOMB.radius);
+  const quietHp=[edge.hp,far.hp,lead.hp];
+  s.events=[];E.step(s,.05);
+  assert.equal(s.bombs.length,1,'path gaps of 200, 250 and 1600 do not satisfy trigger 80');
+  assert.deepEqual([edge.hp,far.hp,lead.hp],quietHp);
+  lead.progress=bomb.progress+E.APPLEBOMB.trigger;
+  assert.ok(gap(lead)<=E.APPLEBOMB.radius);
+  const edgeHp=edge.hp,farHp=far.hp,leadHp=lead.hp;
+  s.events=[];E.step(s,.05);
+  assert.equal(s.bombs.length,0);
+  close(edgeHp-edge.hp,base*E.APPLEBOMB.factor);
+  close(leadHp-lead.hp,base*E.APPLEBOMB.factor);
+  assert.equal(far.hp,farHp);
+  const blast=s.events.find(e=>e.type==='bombBlast');
+  assert.equal(blast.radius,E.APPLEBOMB.radius);
+  assert.deepEqual(blast.targets.map(t=>t.uid).sort((a,b)=>a-b),[edge.uid,lead.uid].sort((a,b)=>a-b));
+  assert.ok(blast.targets.every(t=>Math.hypot(t.x-blast.x,t.y-blast.y)<=E.APPLEBOMB.radius));
+});
+
 test('waiting apples follow the current top Toffee rank, training and buffs, then retain the last power after sale',()=>{
   const s=traitArena([{index:12,hero:'toffee_apple'},{index:0,hero:'siren'}]);const [foe]=enemiesFor(s,[{hp:1e9,progress:1800}]);foe.speed=0;
   readyCast(s,'toffee_apple');s.bombs[0].progress=1000;
   s.board[12].rank=3;s.upgrades.toffee_apple=2;s.buffs.radiance=8;hold(s);E.step(s,.05);
-  const expected=E.combatStats(s,s.board[12]).damage*10;close(s.bombs[0].damage,expected);
+  const expected=E.combatStats(s,s.board[12]).damage*E.APPLEBOMB.factor;close(s.bombs[0].damage,expected);
   const restored=E.restore(E.serialize(s));assert.ok(restored);assert.ok(E.sell(restored,12).ok);assert.equal(restored.board.some(u=>u?.hero==='toffee_apple'),false);
   close(restored.bombs[0].damage,expected);const enemy=restored.enemies[0];enemy.progress=1000+E.APPLEBOMB.trigger;const hp=enemy.hp;
   hold(restored);E.step(restored,.05);assert.equal(restored.bombs.length,0);close(hp-enemy.hp,expected);
@@ -1716,8 +1747,8 @@ test('apples use the highest current Toffee, then a remaining lower rank, and ke
   const s=traitArena([{index:12,hero:'toffee_apple',rank:1},{index:13,hero:'toffee_apple',rank:3},{index:0,hero:'ash',rank:2}]);
   const [foe]=enemiesFor(s,[{hp:1e9,progress:1800}]);foe.speed=0;readyCast(s,'toffee_apple');s.bombs[0].progress=1000;
   assert.ok(E.sell(s,13).ok);s.upgrades.toffee_apple=2;hold(s);E.step(s,.05);
-  close(s.bombs[0].damage,E.combatStats(s,s.board[12]).damage*10,'remaining lower rank becomes the source');
-  s.buffs.radiance=8;const expected=E.combatStats(s,s.board[12]).damage*10;readyCast(s,'ash');
+  close(s.bombs[0].damage,E.combatStats(s,s.board[12]).damage*E.APPLEBOMB.factor,'remaining lower rank becomes the source');
+  s.buffs.radiance=8;const expected=E.combatStats(s,s.board[12]).damage*E.APPLEBOMB.factor;readyCast(s,'ash');
   assert.equal(s.board.some(u=>u?.hero==='toffee_apple'),false);close(s.bombs[0].damage,expected,'last value sampled before sacrifice');
   foe.progress=1000;const hp=foe.hp;hold(s);E.step(s,.05);close(hp-foe.hp,expected);assert.equal(s.bombs.length,0);
 });
