@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import sharp from 'sharp';
 import {HERO,ASSET_PATHS} from '../src/content.js';
 import {COMPANION_VISUALS,drawCompanionShot} from '../src/combat/companion-vfx.js';
-import {attackGeometry} from '../src/combat/engine.js';
+import {attackGeometry,pathPoint,APPLEBOMB} from '../src/combat/engine.js';
 import {CombatFX} from '../src/combat/effects.js';
 import {reviewScene} from '../scripts/sol-review-scene.mjs';
 import {assetFile} from '../scripts/local-inputs.mjs';
@@ -45,14 +45,22 @@ test('the piercing glaze follows the live collision axis when an enemy moves',()
   assert.ok(Math.abs(calls[0][8]-attackGeometry(HERO.toffee_apple,origin,target).angle)<1e-10);
   assert.equal(calls[0][6],HERO.toffee_apple.range);
 });
-test('global candy-bomb receipts include distant and lethal hits after the mine detonates',()=>{
-  const fixture=reviewScene('toffee_apple',{mode:'skill'}),s=fixture.state,ids=s.enemies.map(e=>e.uid);
-  // One lethal target is far outside the old decorative 170px circle.
-  const lethal=s.enemies.at(-1).uid;s.enemies.at(-1).hp=1;
+test('candy-bomb receipts include in-radius and lethal hits after the mine detonates',()=>{
+  const fixture=reviewScene('toffee_apple',{mode:'skill'}),s=fixture.state,bomb=s.bombs[0];
+  const origin=pathPoint(bomb.progress);
+  const early=s.enemies.some(e=>Math.abs(e.progress-bomb.progress)<=APPLEBOMB.trigger);
+  const at=e=>!early&&e===s.enemies[0]?bomb.progress-70:e.progress;
+  const near=e=>Math.hypot(pathPoint(at(e)).x-origin.x,pathPoint(at(e)).y-origin.y)<=APPLEBOMB.radius;
+  const inside=s.enemies.filter(near),outside=s.enemies.filter(e=>!near(e));
+  assert.ok(inside.length>=1);assert.ok(outside.length>=1,'the review pack has enemies outside the blast');
+  const lethal=inside[inside.length-1];lethal.hp=1;
+  const outsideHp=outside.map(e=>e.hp);
   let events=[];for(let i=0;i<90;i++)events.push(...fixture.advance(1/60));
   const blast=events.find(e=>e.type==='bombBlast');assert.ok(blast);
-  assert.deepEqual(blast.targets.map(p=>p.uid).sort((a,b)=>a-b),[...ids].sort((a,b)=>a-b));
-  assert.ok(blast.targets.some(p=>Math.hypot(p.x-blast.x,p.y-blast.y)>170));
+  assert.equal(blast.radius,APPLEBOMB.radius);
+  assert.deepEqual(blast.targets.map(p=>p.uid).sort((a,b)=>a-b),inside.map(e=>e.uid).sort((a,b)=>a-b));
+  assert.ok(blast.targets.every(p=>Math.hypot(p.x-blast.x,p.y-blast.y)<=APPLEBOMB.radius));
   assert.ok(events.some(e=>e.type==='kill'&&e.color===HERO.toffee_apple.color),'lethal damage still resolves');
-  assert.ok(!s.enemies.some(e=>e.uid===lethal),'receipt survives the removal of a dead target');
+  assert.ok(!s.enemies.some(e=>e.uid===lethal.uid),'receipt survives the removal of a dead target');
+  for(const [i,e] of outside.entries()){const still=s.enemies.find(x=>x.uid===e.uid);assert.ok(still);assert.equal(still.hp,outsideHp[i]);}
 });

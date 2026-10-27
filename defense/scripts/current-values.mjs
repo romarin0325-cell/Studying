@@ -45,7 +45,7 @@ export function currentValues(){
     `| 별똥별소년 유성 | 사용 별빛당 공격력 ${E.STARFALL_FACTOR}배 |`,
     `| 번개의현자 천둥의 연쇄 | 공격력 ${E.THUNDER_FACTOR}배 |`,
     `| 앤트로피 노바레퀴엠 | 공격력 ${E.REQUIEM.factor}배 |`,
-    `| 토피애플 사과 | 폭발 시점 최고 성급 토피애플의 현재 공격력 ${E.APPLEBOMB.factor}배. 전장에 없으면 마지막 유효 값, 무작위 경로·접근 ${E.APPLEBOMB.trigger} 이내 발동, 최대 ${E.APPLEBOMB.max}개 |`,
+    `| 토피애플 사과 | 폭발 시점 최고 성급 토피애플의 현재 공격력 ${E.APPLEBOMB.factor}배, 반경 ${E.APPLEBOMB.radius}. 전장에 없으면 마지막 유효 값, 무작위 경로·접근 ${E.APPLEBOMB.trigger} 이내 발동, 최대 ${E.APPLEBOMB.max}개 |`,
     `| 조커 카오스 룰렛 | 시작 빨강 포함 5색 수집 후 전투 종료까지 유지. 필살기 별빛 ${E.JOKER.chaosCost}·전체 공격력 ${E.JOKER.roulette}배. 일반 공격 시 화상·중독·성광·노출·감속 모두 부여 |`,
     `| 마왕 데스핸드 | 공격력 ${E.DEATHHAND.base}배 + 대상별 디버프 1종당 ${E.DEATHHAND.perDebuff}배, 반경 ${E.DEATHHAND.radius}. 감속·노출·기절·빙결·성광·중독·화상 7종, 소모 없음 |`,
     '| 기적의우화 | 별빛 50, 전장의 라바·코쿤 전부를 각각 50%/50%로 미라클윙/어비스윙으로 전환. 합성 결과는 코쿤. 대상이 없으면 사용 불가 |',
