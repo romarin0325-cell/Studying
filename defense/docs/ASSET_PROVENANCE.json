@@ -570,6 +570,20 @@
       "height": 768
     },
     {
+      "id": "effects-joker-sun",
+      "source": "defense/assets/merge/effects-joker-sun.webp",
+      "sha256": "fd265e6b09cd6af4271460858829958f7120ee6db209de5247c39bb28a44f315",
+      "width": 768,
+      "height": 384
+    },
+    {
+      "id": "effects-chaos-sun",
+      "source": "defense/assets/merge/effects-chaos-sun.webp",
+      "sha256": "61c644bb5c794afaa10eeba490d32e6e03960d1ad3b2e12d980b4786cd1ec118",
+      "width": 1024,
+      "height": 512
+    },
+    {
       "id": "orbit-zone",
       "source": "defense/assets/merge/orbit-zone.webp",
       "sha256": "8315be3a83dd1b99f15ba76ec888c8e489400dcb829df64750e01b39c17b46bf",

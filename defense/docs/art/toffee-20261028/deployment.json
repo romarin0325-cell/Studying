@@ -1,6 +1,6 @@
 {
   "date": "2026-10-28",
-  "base": "6989ce49d3df27ff09bda25cacb072facf05935c",
+  "base": "ca55cb08aec555b9f1b46b87677175fda9384f07",
   "status": "User selected the previously unapplied candidate for installation; generation history remains unchanged.",
   "selectedPng": {
     "file": "defense/assets/cast-v2/toffee-apple-lean.png",
@@ -50,5 +50,6 @@
     "defense/assets/cast-v2/toffee_apple.webp",
     "defense/assets/optimized/cast-v2/toffee_apple.webp"
   ],
-  "scope": "SD four directions and their UI derivatives. No combat/balance/VFX/memorial changes."
+  "scope": "SD four directions and their UI derivatives. No combat/balance/VFX/memorial changes.",
+  "initialBase": "6989ce49d3df27ff09bda25cacb072facf05935c"
 }

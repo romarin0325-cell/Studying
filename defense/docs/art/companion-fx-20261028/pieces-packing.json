@@ -1,0 +1,183 @@
+{
+  "input": "defense/docs/art/companion-fx-20261028/gpt-pieces.png",
+  "width": 1774,
+  "height": 887,
+  "columns": 4,
+  "rows": 2,
+  "rowCuts": [
+    [
+      444,
+      0
+    ]
+  ],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "box": [
+        18,
+        19,
+        410,
+        403
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "box": [
+        514,
+        55,
+        300,
+        324
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        887,
+        0,
+        1331,
+        444
+      ],
+      "box": [
+        911,
+        33,
+        398,
+        384
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 3,
+      "cut": [
+        1331,
+        0,
+        1774,
+        444
+      ],
+      "box": [
+        1369,
+        23,
+        368,
+        390
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 4,
+      "cut": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "box": [
+        18,
+        458,
+        404,
+        391
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 5,
+      "cut": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "box": [
+        546,
+        456,
+        243,
+        383
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 6,
+      "cut": [
+        887,
+        444,
+        1331,
+        887
+      ],
+      "box": [
+        906,
+        459,
+        405,
+        384
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 7,
+      "cut": [
+        1331,
+        444,
+        1774,
+        887
+      ],
+      "box": [
+        1403,
+        518,
+        290,
+        279
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

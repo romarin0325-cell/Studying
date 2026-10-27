@@ -64,9 +64,10 @@
     "figure": "6359ea974ccc819c3ee568786c395af7f9a4d271daff47e9fb2888ac9bf7a6d1"
   },
   "scope": "Short focused art-display review; actual engine attacks face enemies left/right. Not physical-device or FPS certification.",
+  "testedMain": "ca55cb08aec555b9f1b46b87677175fda9384f07",
   "localValidation": {
-    "selectedDefenseVerification": "PASS: build + 3 build contract tests",
-    "focusedAssetTests": "4/4 PASS",
+    "selectedDefenseVerification": "PASS: latest-main build and 132 selected asset/build/combat/VFX tests",
+    "initialFocusedAssetTests": "4/4 PASS",
     "facingChecker": "PASS",
     "uiPreparation": {
       "encoded": 2,
@@ -82,5 +83,9 @@
   "integrity": {
     "selectedCandidateSha256": "99dcd643135744929683ea2d3ec65be9297c069ecd0293147622134af774f6dd",
     "previousPngSha256": "ddcfec161d96f9597def2b9dd23240124beff390c14544ff73749dfaa89968d6"
+  },
+  "releaseSha256": {
+    "StarGardenDefense.html": "88e43232d9f124b66614a9d23172b4c451153dfff26123ffe4a7ee520e0609bc",
+    "StarGardenDefenseBright.html": "f96b8b31dcf91a4a17a997b4b4b6d222dde50380e753f8d7dd1e846d32e0ca32"
   }
 }

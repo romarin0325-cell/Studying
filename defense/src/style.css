@@ -1611,6 +1611,22 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .chip-btn.gold{color:var(--gold-ink);background:linear-gradient(180deg,#fff0bf,#e2a94a);border-color:#ffe7a0}
 .chip-btn:disabled{opacity:.45}
 .slot-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+/* Dispatch receipt: who came back, then the haul as two large tiles. */
+.dispatch-receipt{display:grid;gap:16px;padding:4px 0 2px}
+.dr-heroes{display:flex;justify-content:center;gap:12px}
+.dr-hero{display:grid;justify-items:center;gap:5px;width:64px}
+.dr-hero .portrait{width:60px;height:60px;border-radius:16px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--r) 26%,var(--panel2)),var(--panel));border:1.5px solid var(--r);overflow:hidden;animation:dr-rise .42s cubic-bezier(.2,.8,.3,1.2) both}
+.dr-hero:nth-child(2) .portrait{animation-delay:.06s}.dr-hero:nth-child(3) .portrait{animation-delay:.12s}.dr-hero:nth-child(4) .portrait{animation-delay:.18s}
+.dr-hero .portrait img{width:100%;height:100%;object-fit:contain}
+.dr-hero small{font-size:11px;color:var(--text2);white-space:nowrap}
+.dr-gains{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:10px}
+.dr-gain{display:grid;justify-items:center;gap:4px;padding:14px 8px 12px;border-radius:16px;border:1px solid var(--hair);background:var(--glass)}
+.dr-gain .ic{width:30px;height:30px}
+.dr-gain.dust .ic{color:var(--dust);fill:var(--dust)}.dr-gain.gem .ic{color:var(--gem)}
+.dr-gain b{font-family:var(--display);font-weight:400;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--gold)}
+.dr-gain small{font-size:11.5px;color:var(--text3)}
+@keyframes dr-rise{from{opacity:0;transform:translateY(10px) scale(.9)}}
+@media (prefers-reduced-motion:reduce){.dr-hero .portrait{animation:none}}
 .slot{min-width:0;min-height:0;aspect-ratio:.8;padding:6px 2px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:11px;background:rgba(8,12,34,.55);border:1px solid var(--line2)}
 .slot small{font-size:10.5px;font-weight:700;white-space:nowrap}
 .slot.empty{border-style:dashed;color:var(--gold)}

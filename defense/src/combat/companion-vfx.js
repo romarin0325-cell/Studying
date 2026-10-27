@@ -49,19 +49,62 @@ function dustHit(fx,x,y,t,scale=1,alpha=1){
     line(ctx,[[x+sign*4,y+4],[x+sign*(15+k*19)*scale,y-(3+i*3)*scale]],i%2?'#e7cfab':'#9c8270',1.8*(1-t)+.5);
   }ctx.restore();chips(fx,'underdog',x,y,t,24*scale,4,alpha);
 }
-function shatteredApple(fx,x,y,t){
-  const p=COMPANION_VISUALS.toffee_apple;if(!fx.art.images[p.atlas])return;
-  const ctx=fx.ctx,k=ease(t/.4),size=145+ease(t/.18)*28,a=fade(t,.14);
-  // Six angular painted shell pieces separate immediately. No intact giant apple
-  // hangs over the target after the bomb has already detonated.
-  for(let i=0;i<6;i++){
-    const angle=i*Math.PI/3,lo=angle-Math.PI/6,hi=angle+Math.PI/6;
-    ctx.save();ctx.globalAlpha*=a*.9;ctx.translate(x+Math.cos(angle)*k*62,y+Math.sin(angle)*k*48+t*t*55);ctx.rotate((i%2?1:-1)*t*.4);
-    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(lo)*size,Math.sin(lo)*size);ctx.lineTo(Math.cos(hi)*size,Math.sin(hi)*size);ctx.closePath();ctx.clip();
-    painted(fx,'toffee_apple',true,0,0,size,undefined,0,1);ctx.restore();
+// Pass 19 GPT sheets (docs/art/companion-fx-20261028). EMBLEMS 2x1: 0 Chaos Roulette, 1 full-bloom Solar Flare; the
+// board's trait badges stay flat glyphs like every other trait badge (effects.js), the painted art is for these finales.
+// PIECES 4x2: 0 sugar glitter ring, 1 sugar sparkles, 2 chaos card, 3 chaos hit burst, 4 chaos vortex ring,
+// 5 sun petal (tip down), 6 sun petal ring, 7 pollen.
+export const EMBLEMS='effects-joker-sun',PIECES='effects-chaos-sun';
+// A hollow ring motif's outer edge sits at this share of the stamp width (228/256 inner cell, 1.08 packing margin).
+export const RING_EDGE=228/256/1.08/2;
+const piece=(fx,frame,x,y,w,angle=0,alpha=1)=>fx.art.images[PIECES]&&alpha>0&&fx.atlasStamp(PIECES,frame,4,2,x,y,w,w,angle,alpha,'source-over');
+const emblem=(fx,frame,x,y,w,angle=0,alpha=1)=>fx.art.images[EMBLEMS]&&alpha>0&&fx.atlasStamp(EMBLEMS,frame,2,1,x,y,w,w,angle,alpha,'source-over');
+// Apple bomb blast (radius 200): a thin ring of sugar glitter opens to the real radius and sparkles wink inside it.
+// The centre stays open and nothing larger than a sparkle sits on an enemy, so units and HP bars stay readable.
+function sugarBurst(fx,e,t){
+  const ctx=fx.ctx,R=e.radius||200,open=ease(span(t,0,.42)),a=fade(t,.38);
+  fx.glow('glow','#ffe0a8',e.x,e.y,70*(1-open*.5),(1-span(t,0,.25))*.55);
+  piece(fx,0,e.x,e.y,R/RING_EDGE*(.35+.65*open),t*.5,a*.7);
+  ctx.save();ctx.globalAlpha*=a*.35;ctx.strokeStyle='#ffd7a8';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(e.x,e.y,R*(.35+.65*open),0,Math.PI*2);ctx.stroke();ctx.restore();
+  const spots=fx.reduced?3:7;
+  for(let i=0;i<spots;i++){
+    const at=.08+hash(e.x,i)*.4,k=span(t,at,at+.4),theta=hash(e.y,i)*Math.PI*2,r=R*(.25+hash(e.x+e.y,i)*.65);
+    if(k>0&&k<1)piece(fx,1,e.x+Math.cos(theta)*r,e.y+Math.sin(theta)*r,(34+hash(i,e.x)*22)*Math.sin(Math.PI*k),k*.8,.95);
   }
-  fx.glow('glow','#ffd69d',x,y,74*(1-k*.3),a*.4*(1-k));
+  for(const [i,q] of (e.targets||[]).slice(0,fx.reduced?3:8).entries()){const k=span(t,.12+i*.03,.6+i*.03);if(k>0&&k<1)piece(fx,1,q.x,q.y-14,30*Math.sin(Math.PI*k),i,.9);}
 }
+const span=(t,a,b)=>clamp((t-a)/(b-a));
+
+// Chaos Roulette (Joker after five colours): the jester's wheel spins in over the field inside a five-colour vortex,
+// cards fly from it to the struck enemies and burst there in five colours. Same centre and weight as the field ultimates.
+function chaosRoulette(fx,skill,age){
+  const t=clamp(age/1.5),out=fade(t,.5),pop=easeBack(span(age,0,.32)),x=360,y=405,size=340;
+  fx.glow('rays','#d9b8ff',x,y,size*1.3*Math.min(1,age*4),out*.5,age*.5);
+  piece(fx,4,x,y,size*1.6*(.7+.3*ease(age/.4)),-age*2.4,out*.6);
+  emblem(fx,0,x,y,size*(.5+.5*pop),(1-ease(age/.45))*-1.2,out*.92);
+  if(!fx.reduced)for(const [i,[sx,sy]] of [[42,345],[678,485]].entries())emblem(fx,0,sx,sy,104,(i?1:-1)*age*.8,out*.6);
+  if(age>.22&&age<.85)for(const [i,q] of (skill.targets||[]).slice(0,fx.reduced?3:8).entries()){
+    const k=ease(span(age,.22+i*.03,.6+i*.03));if(k<=0||k>=1)continue;
+    piece(fx,2,x+(q.x-x)*k,y+(q.y-y)*k-Math.sin(k*Math.PI)*40,46,age*7+i,(1-k*.6)*.9);
+  }
+}
+// Solar Flare at three sunlight: a sunflower in full bloom rises over the field, a crown of petals opens outward and a few
+// sun petals drift down. The plain flare (zero to two sunlight) keeps the smaller common emblem.
+function fullBloom(fx,skill,age){
+  const ctx=fx.ctx,t=clamp(age/1.5),out=fade(t,.5),pop=easeBack(span(age,0,.36)),x=360,y=405-20*ease(age/.5),size=360;
+  fx.glow('rays','#ffe9a0',x,y,size*1.4*Math.min(1,age*3.5),out*.62,age*.35);
+  fx.glow('glow','#fff3c8',x,y,size*.7,out*.35);
+  const ring=ease(span(age,.08,.7));piece(fx,6,x,y,size*(.8+1.05*ring),age*.25,(1-span(age,.3,.85))*.5);
+  emblem(fx,1,x,y,size*(.45+.55*pop),age*.12,out*.95);
+  if(!fx.reduced){
+    for(let i=0;i<12;i++){
+      const at=.15+hash(i,7)*.5,k=span(age,at,at+1.1);if(k<=0||k>=1)continue;
+      const px=60+hash(i,3)*600+Math.sin(k*5+i)*26,py=40+k*560,spin=Math.sin(k*4+i)*.8;
+      ctx.save();ctx.globalAlpha*=Math.sin(Math.PI*k)*.85;piece(fx,5,px,py,22+hash(i,5)*14,Math.PI+spin,1);ctx.restore();
+    }
+    for(const [i,q] of (skill.targets||[]).slice(0,8).entries()){const k=span(age,.3+i*.04,.9+i*.04);if(k>0&&k<1)piece(fx,7,q.x,q.y-16,44*Math.sin(Math.PI*k),0,.85);}
+  }
+}
+const easeBack=t=>{const c=1.70158,u=clamp(t)-1;return 1+(c+1)*u*u*u+c*u*u;};
 
 export function drawCompanionShot(fx,shot,s,{x,y,angle,t,target=shot.to}){
   const id=shot.hero,p=COMPANION_VISUALS[id];if(!p||!fx.art.images[p.atlas])return false;
@@ -94,6 +137,8 @@ export function drawCompanionSkill(fx,skill){
   // A restrained, local ready beat. No screen wash, gold rain, generic flame or
   // star emblem borrowed from another hero. The heavy slam is the attack below.
   if(!physical){fx.glow('glow',p.color,o.x,o.y-12,95*pop,out*.35);floorArc(fx,o.x,o.y+22,63,t,p.color,.45);}
+  if(id==='joker'&&skill.chaos&&fx.art.images[EMBLEMS]&&fx.art.images[PIECES]){chaosRoulette(fx,skill,age);return true;}
+  if(id==='sunflower'&&skill.sunlight>=3&&fx.art.images[EMBLEMS]&&fx.art.images[PIECES]){fullBloom(fx,skill,age);return true;}
   if(id==='toffee_apple'){
     // Casting installs a mine; it does not detonate it or hit every enemy yet.
     painted(fx,id,true,o.x+24,o.y-30,95*(.75+.25*pop),undefined,-.15*(1-pop),out*.62);
@@ -149,7 +194,8 @@ export function companionSkillEvents(fx,e){
   // Dedicated events already confirm these casts (bombSet, requiem,
   // armageddonBlast, lemonPop, plagueBloom). Never also draw generic impacts.
   if(!['applebomb','requiem','armageddon','lemonade','venomplague'].includes(e.kind))
-    for(const p of e.targets||[])fx.add({...p,type:'companionReceipt',hero:e.hero,life:.52,total:.52});
+    // The full-bloom flare drops pollen on its targets itself (fullBloom); Chaos Roulette receipts burst in five colours.
+    if(!(e.hero==='sunflower'&&e.sunlight>=3&&fx.art.images[PIECES]))for(const p of e.targets||[])fx.add({...p,type:'companionReceipt',hero:e.hero,...(e.chaos?{chaos:true,life:.7,total:.7}:{life:.52,total:.52})});
   return true;
 }
 
@@ -168,6 +214,7 @@ export function drawCompanionImpact(fx,e,t,clarity=1){
   if(e.type==='companionReceipt'&&p){
     const physical=id==='underdog',a=fade(t,.12)*clarity;
     if(physical){dustHit(fx,e.x,e.y,t,1.25,clarity);return true;}
+    if(e.chaos&&fx.art.images[PIECES]){const k=span(t,.35,1);if(k>0)piece(fx,3,e.x,e.y-10,64*(.6+.4*ease(k/.4)),k,fade(k,.3)*clarity*.9);return true;}
     painted(fx,id,false,e.x,e.y-5,48*(.75+.25*ease(t/.3)),undefined,id==='joker'?t*1.3:0,a*.8);
     floorArc(fx,e.x,e.y+6,physical?38:28,t,p.color,.6);chips(fx,id,e.x,e.y-10,t,physical?32:24,4,.65);return true;
   }
@@ -204,13 +251,8 @@ export function drawCompanionImpact(fx,e,t,clarity=1){
   }
   if(e.type==='novaRing'||e.type==='sunSpend')return true; // one field sequence, no second oversized wave
   if(e.type==='bombBlast'){
-    // A stored, expensive candy mine ruptures into glossy sugar, not a fire
-    // spell. The local shatter is decorative: every actual global hit gets its
-    // own small receipt, including enemies outside this drawing.
-    shatteredApple(fx,e.x,e.y-14,t);
-    chips(fx,'toffee_apple',e.x,e.y-10,t,135,fx.reduced?4:12,.95);
-    const targets=e.targets||[];
-    for(const q of targets){const b=fade(t,.16);painted(fx,'toffee_apple',false,q.x,q.y-16,62,24,0,b*.7);}
+    if(fx.art.images[PIECES])sugarBurst(fx,e,t);
+    else{chips(fx,'toffee_apple',e.x,e.y-10,t,(e.radius||200)*.7,fx.reduced?4:12,.95);floorArc(fx,e.x,e.y,e.radius||200,t,'#ffd7a8',.6);}
     return true;
   }
   return false;
@@ -220,7 +262,7 @@ export function drawCompanionBomb(fx,b){
   if(!fx.art.images[COMPANION_VISUALS.toffee_apple.atlas])return false;
   const p=pathPoint(b.progress),ctx=fx.ctx,pulse=.5+Math.sin(fx.clock*4+b.uid)*.5;
   // The waiting mine is Toffee Apple's own crystal apple-bomb emblem: its lit fuse and small shadow signal
-  // "waiting"; no fake 170px damage radius (this bomb strikes the whole field).
+  // "waiting". Five waiting 200px blast rings would cover the road, so the radius shows only when it goes off.
   ctx.save();ctx.fillStyle='#24152655';ctx.beginPath();ctx.ellipse(p.x,p.y+5,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
   painted(fx,'toffee_apple',true,p.x,p.y-30,76+pulse*3,undefined,0,.95);
   if(!fx.reduced){fx.glow('glow','#ffcb79',p.x+16,p.y-58,16+pulse*8,.6);}

@@ -142,7 +142,16 @@ function ultValue(s,m,id,gv){
     }
     case 'roulette':return strike(E.JOKER.roulette);
     case 'bigshow':return Math.max(0,strike(E.UNDERDOG.factor)-dps*E.UNDERDOG.stun);
-    case 'applebomb':return (s.bombs||[]).length>=E.APPLEBOMB.max?0:strike(E.APPLEBOMB.factor)*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
+    case 'applebomb':{
+      if((s.bombs||[]).length>=E.APPLEBOMB.max||!list.length)return 0;
+      let sum=0;
+      for(const e of list){
+        const p=E.pathPoint(e.progress);
+        sum+=list.reduce((n,t)=>{const q=E.pathPoint(t.progress);return n+(Math.hypot(q.x-p.x,q.y-p.y)<=E.APPLEBOMB.radius?hit(E.APPLEBOMB.factor,t):0);},0);
+      }
+      // The apple waits on the road, so its value is discounted as before (x0.75).
+      return sum/list.length*.75-unitValue(s,u,s.board.indexOf(u))*m.scale*E.APPLEBOMB.stun;
+    }
     case 'requiem':{
       const marked=list.filter(e=>(e.statusEffects||[]).some(x=>x&&x.until-s.time>1e-9)||(e.slowEffects||[]).some(x=>x&&x.until-s.time>1e-9)).length;
       return Math.max(0,strike(E.REQUIEM.factor)-Math.min(dps*1.2,dps*.12*marked));

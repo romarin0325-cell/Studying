@@ -67,7 +67,7 @@ export const GLOBAL_AURAS=Object.freeze(['echo','haste','awaken','march','festiv
 export const PARTIAL_AURAS=Object.freeze(['trauma','midnight','venom']);
 
 // Same logical shape and dimensions as hit testing; no role labels on empty tiles.
-export function drawAttackRange(ctx,hero,from,aim){
+export function drawAttackRange(ctx,hero,from,aim,clock=0){
   if(hero.id==='flame_sage'){
     ctx.save();ctx.globalAlpha=.7;ctx.strokeStyle=hero.color;ctx.lineWidth=3;ctx.setLineDash([6,8]);ctx.beginPath();
     PATH.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.restore();return;
@@ -77,7 +77,21 @@ export function drawAttackRange(ctx,hero,from,aim){
   if(g.kind==='cross'){
     ctx.rect(-g.range,-g.radius/2,g.range*2,g.radius);ctx.rect(-g.radius/2,-g.range,g.radius,g.range*2);
     ctx.save();ctx.beginPath();ctx.arc(0,0,g.range,0,Math.PI*2);ctx.clip();ctx.beginPath();ctx.rect(-g.range,-g.radius/2,g.range*2,g.radius);ctx.rect(-g.radius/2,-g.range,g.radius,g.range*2);ctx.fill();ctx.stroke();ctx.restore();
-  }else if(g.kind==='beam'){ctx.rotate(g.angle);ctx.rect(0,-g.radius/2,g.range,g.radius);ctx.fill();ctx.stroke();}
+  }else if(g.kind==='beam'){
+    // A pierce picks any enemy within its range and then fires the whole line through it. Show both: the stretch of
+    // road it can pick from (the path inside the range, plus a faint range edge) and the line it fires now.
+    ctx.save();ctx.setLineDash([]);ctx.beginPath();ctx.arc(0,0,g.range,0,Math.PI*2);ctx.clip();
+    ctx.translate(-from.x,-from.y);ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();PATH.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+    ctx.strokeStyle='#a5ddeb2e';ctx.lineWidth=30;ctx.stroke();ctx.strokeStyle='#d5f1e866';ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    ctx.save();ctx.globalAlpha=.55;ctx.lineWidth=1.5;ctx.setLineDash([3,9]);ctx.beginPath();ctx.arc(0,0,g.range,0,Math.PI*2);ctx.stroke();ctx.restore();
+    ctx.rotate(g.angle);ctx.setLineDash([]);
+    const lane=ctx.createLinearGradient(0,0,g.range,0);lane.addColorStop(0,'#d5f1e855');lane.addColorStop(.85,'#a5ddeb30');lane.addColorStop(1,'#a5ddeb00');
+    ctx.fillStyle=lane;ctx.fillRect(0,-g.radius/2,g.range,g.radius);
+    ctx.strokeStyle='#d5f1e8aa';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,-g.radius/2);ctx.lineTo(g.range,-g.radius/2);ctx.moveTo(0,g.radius/2);ctx.lineTo(g.range,g.radius/2);ctx.stroke();
+    // Chevrons drift outward along the line: the shot keeps going through every enemy to the end of its range.
+    const h=Math.min(g.radius*.32,9),gap=56,shift=((clock*70)%gap+gap)%gap;ctx.strokeStyle='#eefcf6';ctx.lineWidth=2;ctx.lineCap='round';
+    for(let x=28+shift;x<g.range-8;x+=gap){ctx.globalAlpha=.75*Math.min(1,(g.range-x)/90);ctx.beginPath();ctx.moveTo(x-h*.7,-h);ctx.lineTo(x,0);ctx.lineTo(x-h*.7,h);ctx.stroke();}
+  }
   else if(g.kind==='cleave'){ctx.moveTo(0,0);ctx.arc(0,0,g.range,g.angle-Math.PI/4,g.angle+Math.PI/4);ctx.closePath();ctx.fill();ctx.stroke();}
   else{ctx.arc(0,0,g.range,0,Math.PI*2);ctx.fill();ctx.stroke();}
   ctx.restore();
@@ -588,23 +602,24 @@ export class CombatFX{
       }
     }
   }
-  // Sunflower: one shared stack shown as a flower that blooms ring by ring. Ring radii keep the 1:2:3 ratio of the
-  // real 30/60/90 burst, so a full bloom reads as "the burst is at its widest".
+  // Sunflower: one shared stack on the same small badge as the other traits (dark disc, thin rim, one flat glyph).
+  // The glyph is a plain sunflower: ten broad rounded petals around a seed disc, dim with no sunlight. Three pips on
+  // the lower rim count the stack; the newest pip pops, and at three the rim and petals turn warm (no glow, like the others).
   drawSunBlooms(s){
     const ctx=this.ctx,n=Math.min(3,s.sunlight||0),since=this.clock-(this.bloomAt??-9),pop=since<.6?easeBack(since/.6):1;
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u||u.hero!=='sunflower')continue;
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,ready=n>=3,pulse=ready&&!this.reduced?.5+Math.sin(this.clock*3+u.uid)*.5:0;
-      if(ready)this.glow('glow','#ffd45a',cx,cy,58+pulse*14,.5+pulse*.15);
-      ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=ready?1:.75;ctx.strokeStyle=ready?'#ffe27a':'#c99a3a';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
-      for(let k=3;k>=1;k--){
-        const R=k*4.8+.8,count=k===1?6:k===2?9:12,len=2.5+k*.7,lit=k<=n,grow=k===n?pop:1,r=R*(lit?grow:1);
-        if(!lit){ctx.save();ctx.globalAlpha=.4;ctx.strokeStyle='#e8cf8a';ctx.lineWidth=1;ctx.setLineDash([1.6,2.8]);ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();ctx.restore();continue;}
-        ctx.save();ctx.translate(cx,cy);ctx.rotate(k*.35);
-        for(let j=0;j<count;j++){ctx.save();ctx.rotate(j/count*Math.PI*2);ctx.translate(r,0);ctx.fillStyle=k===3?'#ffd23c':k===2?'#ffc92e':'#ffe27a';ctx.strokeStyle='#a86b10';ctx.lineWidth=.6;ctx.beginPath();ctx.ellipse(0,0,len*grow,1.45,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();}
-        ctx.restore();
+      ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=ready?.85+pulse*.15:.8;ctx.strokeStyle=ready?'#ffe27a':'#c99a3a';ctx.lineWidth=ready?2:1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
+      const lit=n>0,grow=lit&&since<.6?1+(pop-1)*.4:1;
+      ctx.save();ctx.translate(cx,cy-1.5);ctx.scale(grow,grow);ctx.globalAlpha=lit?1:.5;ctx.fillStyle=ready?'#ffd23c':lit?'#f3c94a':'#b9a46a';
+      for(let j=0;j<10;j++){ctx.save();ctx.rotate(j/10*Math.PI*2);ctx.beginPath();ctx.ellipse(7.2,0,4,2.15,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+      disk(ctx,0,0,4.4,lit?'#7a4a14':'#5a4630');ctx.globalAlpha*=.75;for(const [dx,dy] of [[-1.5,-1],[1.4,-1.3],[0,1.6],[-1.6,1.3],[1.6,1]])disk(ctx,dx,dy,.65,lit?'#d99a3c':'#8a7450');
+      ctx.restore();
+      for(let k=1;k<=3;k++){
+        const a=Math.PI/2+(2-k)*.5,on=k<=n,r=(on&&k===n?pop:1)*(on?2.3:1.7);
+        ctx.save();ctx.globalAlpha=on?1:.6;ctx.translate(cx+Math.cos(a)*17,cy+Math.sin(a)*17);ctx.rotate(Math.PI/4);ctx.fillStyle=on?'#ffe27a':'#0b1e2b';ctx.strokeStyle=on?'#fff3c0':'#8a7450';ctx.lineWidth=1;ctx.fillRect(-r,-r,r*2,r*2);ctx.strokeRect(-r,-r,r*2,r*2);ctx.restore();
       }
-      disk(ctx,cx,cy,3.4,'#7a4a14');disk(ctx,cx,cy,1.5,n>0?'#b9c93a':'#6f7a2e');
     }
   }
   // Cure Master's aura: a faint heart bubble around every protected ally; while Lemonade runs the bubble turns lemon
@@ -649,6 +664,15 @@ export class CombatFX{
       const u=s.board[i];if(!u||u.hero!=='joker')continue;
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,tint=chaos?JOKER_HEX.chaos:JOKER_HEX[names[idx]];
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=.8;ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
+      if(chaos){
+        // Chaos: the colour ring closes into a flat five-wedge roulette that turns slowly (pops in when chaos begins).
+        const k=since<.7?easeBack(since/.7):1,turn=this.reduced?0:this.clock*.5+u.uid;
+        ctx.save();ctx.translate(cx,cy);ctx.scale(k,k);ctx.rotate(turn);
+        for(let j=0;j<5;j++){const a0=-Math.PI/2+j*Math.PI*2/5;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,12.5,a0,a0+Math.PI*2/5);ctx.closePath();ctx.globalAlpha=.9;ctx.fillStyle=names[j]==='black'?'#5a4380':JOKER_HEX[names[j]];ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#0b1e2b';ctx.lineWidth=1.2;ctx.stroke();}
+        ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(0,0,12.5,0,Math.PI*2);ctx.stroke();ctx.rotate(-turn);disk(ctx,0,0,4.2,'#0b1e2b');star(ctx,3.4,'#ffe9a0');ctx.restore();
+        if(since<.9&&!this.reduced)this.glow('glow',JOKER_HEX.chaos,cx,cy,48,(1-since/.9)*.6);
+        continue;
+      }
       for(let j=0;j<5;j++){
         const a=-Math.PI/2+(j-idx)*Math.PI*2/5+offset,x=cx+Math.cos(a)*10.2,y=cy+Math.sin(a)*10.2,cur=chaos||j===idx;
         ctx.save();ctx.globalAlpha=cur?1:.42;ctx.translate(x,y);ctx.rotate(Math.PI/4);
@@ -658,7 +682,6 @@ export class CombatFX{
       if(!chaos){ctx.save();ctx.fillStyle='#ffe27a';ctx.beginPath();ctx.moveTo(cx,cy-15.5);ctx.lineTo(cx-2.6,cy-19.5);ctx.lineTo(cx+2.6,cy-19.5);ctx.closePath();ctx.fill();ctx.restore();}
       star(ctx,2.6,'#ffe9a0');
       ctx.save();ctx.translate(cx,cy);star(ctx,3.2,tint==='#241a36'?'#d9c8ff':tint);ctx.restore();
-      if(chaos){ctx.save();ctx.font='700 11px system-ui';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#0b1e2b';ctx.fillStyle='#f1dcff';ctx.strokeText('카오스',cx,cy+29);ctx.fillText('카오스',cx,cy+29);ctx.restore();}
     }
   }
   drawPlague(s){
@@ -905,19 +928,6 @@ export class CombatFX{
         if(open>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-open)*.9;ctx.strokeStyle='#ffe27a';ctx.lineWidth=2.5*(1-open)+.8;ctx.beginPath();ctx.arc(e.x,e.y,17+open*20,0,Math.PI*2);ctx.stroke();ctx.restore();this.glow('glow','#ffd45a',e.x,e.y,70*(1-open*.4),(1-open)*.8);}
         continue;
       }
-      if(e.type==='sunSpend'){
-        // The bloom lets go: sparks rise to the sky and the sun flares over the field.
-        const rise=easeOut(window01(t,0,.5)),flare=window01(t,.35,1),fade=1-window01(t,.55,1);
-        ctx.save();ctx.globalCompositeOperation='lighter';
-        if(!this.reduced)for(const [pi,p] of e.points.entries())for(let i=0;i<e.sunlight*3;i++){const sx=p.x+(hash(pi+e.sunlight,i)-.5)*30,k=Math.min(1,rise+hash(i,pi)*.05),x=sx+(360-sx)*k*.7,y=p.y+(150-p.y)*k;ctx.globalAlpha=(1-window01(t,.4,.6))*.9;diamond(ctx,x,y,3.4,i%2?'#fff3c0':'#ffd45a');}
-        ctx.restore();
-        if(flare>0){
-          const r=(120+e.sunlight*150)*easeOut(flare);
-          this.glow('rays','#ffe9a0',360,200,(260+e.sunlight*120)*Math.min(1,flare*2.5),fade*.9,t*1.4);this.glow('glow','#fff6d8',360,200,150+e.sunlight*70,fade);
-          ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.8;ctx.strokeStyle='#ffd45a';ctx.lineWidth=7*fade+2;ctx.beginPath();ctx.arc(360,200,r,0,Math.PI*2);ctx.stroke();ctx.restore();
-        }
-        continue;
-      }
       if(e.type==='jokerFlip'){
         const k=easeOut(window01(t,0,.8)),fade=1-window01(t,.5,1);
         this.glow('glow',JOKER_HEX[e.color]==='#241a36'?'#b69cff':JOKER_HEX[e.color],e.x,e.y,64*(.6+k*.5),fade*.85);
@@ -948,23 +958,6 @@ export class CombatFX{
       if(e.type==='bombSet'){
         const fade=1-t,ring=easeOut(t);this.glow('glow','#ff7a62',e.x,e.y-10,90+ring*50,fade*.7);
         ctx.save();ctx.globalAlpha=fade*.9;ctx.strokeStyle='#ffd9c8';ctx.lineWidth=3*fade+1;ctx.beginPath();ctx.ellipse(e.x,e.y+4,10+ring*38,5+ring*16,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
-      }
-      if(e.type==='bombBlast'&&this.art.images['effects-applebomb']){
-        // Painted burst: it slams out to the real radius (about a field wide), spins a little, then falls away in sugar sparks.
-        const rad=170,pop=easeOut(window01(t,0,.28)),fade=1-window01(t,.42,1),size=rad*2.15*(.4+.6*pop);
-        ctx.save();ctx.globalAlpha=Math.min(1,fade*1.25)*.16*(1-window01(t,.2,.6));ctx.globalCompositeOperation='lighter';ctx.fillStyle='#fff2d0';ctx.fillRect(0,0,720,780);ctx.restore();
-        this.glow('glow','#ff7a3a',e.x,e.y-10,rad*2.6*(.6+.4*pop),fade*.8);
-        this.atlasStamp('effects-applebomb',1,2,1,e.x,e.y-8,size,size,t*.4,Math.max(0,fade)*.82,'screen');
-        const ring=easeOut(window01(t,0,.6));ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-ring)*.9;ctx.strokeStyle='#ffd7a8';ctx.lineWidth=8*(1-ring)+2;ctx.beginPath();ctx.ellipse(e.x,e.y+6,Math.max(10,rad*ring*1.05),Math.max(5,rad*ring*.46),0,0,Math.PI*2);ctx.stroke();ctx.restore();
-        if(!this.reduced)for(let i=0;i<18;i++){const a=hash(e.x,i)*Math.PI*2,v=70+hash(e.y,i+3)*150,k=easeOut(t);ctx.save();ctx.globalAlpha=fade;ctx.translate(e.x+Math.cos(a)*v*k,e.y+Math.sin(a)*v*k*.62+k*k*30);ctx.rotate(a+k*6);diamond(ctx,0,0,4+hash(e.x,i+7)*5,['#ff5a46','#ffd27a','#fff1d6','#c44a2a'][i%4]);ctx.restore();}
-        continue;
-      }
-      if(e.type==='bombBlast'){
-        const fade=1-window01(t,.25,.9),ring=easeOut(window01(t,0,.65)),rad=170;
-        this.glow('rays','#ffd2b0',e.x,e.y-10,300*Math.min(1,t*3),fade*.85,t);this.glow('glow','#ff6a50',e.x,e.y-10,240,fade*.9);
-        ctx.save();ctx.globalAlpha=(1-ring)*.9;ctx.strokeStyle='#ff7a62';ctx.lineWidth=7*(1-ring)+2;ctx.beginPath();ctx.ellipse(e.x,e.y+6,Math.max(10,rad*ring),Math.max(5,rad*ring*.45),0,0,Math.PI*2);ctx.stroke();ctx.restore();
-        if(!this.reduced)for(let i=0;i<10;i++){const a=hash(e.x,i)*Math.PI*2,v=50+hash(e.y,i+3)*90,k=easeOut(t);ctx.save();ctx.globalAlpha=fade;ctx.translate(e.x+Math.cos(a)*v*k,e.y+Math.sin(a)*v*k*.55);diamond(ctx,0,0,4+hash(e.x,i+7)*4,i%2?'#ff6a50':'#fff0d8');ctx.restore();}
-        continue;
       }
       if(e.type==='crushPhase'){
         const fade=1-window01(t,.35,.9),radius=e.radius||150,color=HERO.behemoth.color,pop=t<.4?.6+easeBack(t/.4)*.55:1.15,emblem=1-window01(t,.45,.9),ring=easeOut(window01(t,0,.7));
