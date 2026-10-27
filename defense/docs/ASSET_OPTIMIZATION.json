@@ -50,10 +50,10 @@
     }
   },
   "totals": {
-    "sourceBytes": 28133656,
-    "deployableSourceBytes": 26508688,
-    "outputBytes": 14947685,
-    "optimizedFiles": 164,
+    "sourceBytes": 29089602,
+    "deployableSourceBytes": 27464634,
+    "outputBytes": 15483791,
+    "optimizedFiles": 166,
     "derivedFiles": 156,
     "derivedOutputBytes": 3745258
   },
@@ -2609,6 +2609,68 @@
         "metadata": {
           "width": 768,
           "height": 768,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:effects-joker-sun",
+      "source": "./assets/merge/effects-joker-sun.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-joker-sun; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 350766,
+        "sha256": "fd265e6b09cd6af4271460858829958f7120ee6db209de5247c39bb28a44f315",
+        "metadata": {
+          "width": 768,
+          "height": 384,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-joker-sun.webp",
+        "bytes": 174554,
+        "sha256": "5c84739fcb77379875cf3efcfbf378f3e6b28731e8af3e46f5ad998edd8ae0a4",
+        "metadata": {
+          "width": 768,
+          "height": 384,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:effects-chaos-sun",
+      "source": "./assets/merge/effects-chaos-sun.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.effects-chaos-sun; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 605180,
+        "sha256": "61c644bb5c794afaa10eeba490d32e6e03960d1ad3b2e12d980b4786cd1ec118",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/effects-chaos-sun.webp",
+        "bytes": 361552,
+        "sha256": "ae55ddfd4bf625210df96d10230e825fd8ab13c477257717738113fc25c6f4b4",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
           "hasAlpha": true,
           "codec": "webp"
         }

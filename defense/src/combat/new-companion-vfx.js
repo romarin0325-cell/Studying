@@ -80,7 +80,15 @@ export function drawNewAttackShape(fx,e,t,clarity=1){
   const ctx=fx.ctx;
   if(e.hero==='zeke'){
     if(!has(fx,SPIN))return false;
-    // One full swing of the flame sword around Zeke. The white-hot head of the painted trail (about 235 degrees on the
+    if(!e.fury){
+      // Ordinary swing, as quiet as the Guardian and Behemoth rings: a thin ember ring runs out to the real radius over
+      // the faint ember frame of the spin sheet. The full flame spin below is kept for his berserk (an enemy near the core).
+      const R=HERO.zeke.range,k=ease(span(t,0,.3)),fade=1-span(t,.2,.9),size=2*R/SPIN_EDGE;
+      fx.atlasStamp(SPIN,2,3,1,e.origin.x,e.origin.y,size*(.92+.08*k),size*(.92+.08*k),(e.swing?-1:1)*(e.angle+t*.6),fade*.24*clarity,'screen');
+      ring(ctx,e.origin.x,e.origin.y,R*(.4+.6*k),'#ffab5e',2.2*fade+.6,fade*.5*clarity);
+      return true;
+    }
+    // Berserk: one full swing of the flame sword around Zeke. The white-hot head of the painted trail (about 235 degrees on the
     // sheet) is carried round from behind the target, so it crosses the target when the hit lands (0.12 s); the swept
     // wedge reveals the trail. Then the ring breaks into flame and embers. The outer flame edge is the real radius.
     const R=HERO.zeke.range,size=2*R/SPIN_EDGE,side=e.swing?-1:1,sweep=ease(span(t,0,.36)),a0=side*e.angle-1.55*Math.PI,head=a0+sweep*Math.PI*2;

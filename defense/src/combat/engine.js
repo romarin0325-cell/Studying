@@ -86,6 +86,8 @@ const buffScale=(s,key)=>s.buffScale?.[key]||1;
 export const MONTHLY_HEALTH=7;
 export const coreHealthMax=s=>s.mode==='monthly'?MONTHLY_HEALTH:20;
 export const coreCrisis=s=>s.health<coreHealthMax(s)/2;
+// Zeke's trait: an enemy alive in the last quarter of the path (next to the core) raises his attack by 40%.
+export const zekeFury=s=>s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
 export function activeSkill(s,id){const key=ACTIVE_SKILLS[id],remaining=s.buffs[key]||0;return remaining>0?{key,remaining,total:Math.max(remaining,s.buffTotals?.[key]||remaining)}:null;}
 // Running ultimates that refuse a second press: a pure buff would only restart its timer, and the
 // dream form keeps one sequence of phases. Damage-and-buff hybrids
@@ -230,14 +232,14 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
     const top=topCinderella(s),active=top?.uid===u.uid,clock=u.clock||0,step=s.buffs.midnight>0?3:1;
     Object.assign(trait,{key:'cinderella',uid:top?.uid??null,active,clock,damageMultiplier:active?CINDERELLA.top:1,label:active?`진짜 신데렐라 · 공격력 +50% · 자정의 종까지 ${Math.ceil((12-clock)/step)}회`:`진짜 신데렐라 ${top?.rank??''}성이 따로 있어요`});
   }else if(u.hero==='zeke'){
-    const active=s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
-    Object.assign(trait,{key:'last-quarter',active,damageMultiplier:active?1.4:1,label:active?'마지막 구간 · 공격력 +40%':'마지막 구간 대기'});
+    const active=zekeFury(s);
+    Object.assign(trait,{key:'last-quarter',active,damageMultiplier:active?1.4:1,label:active?'광폭 · 공격력 +40%':'광폭 대기'});
   }else if(u.hero==='flame_sage')Object.assign(trait,{key:'wildfire',active:true,zoneDamageMultiplier:1.3,zoneRadiusMultiplier:1.3,zoneDurationMultiplier:1.3,label:'경로 위 무작위 · 화염장 +30%'});
   else if(u.hero==='avalanche_maid')Object.assign(trait,{key:'random-target',active:true,label:'무작위 표적 고정 · 기본 공격력 +50%'});
   else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,executeChance:stormExecuteChance(s,u.rank),label:`일반 적 명중마다 즉사 ${pctText(stormExecuteChance(s,u.rank))}`});
   else if(u.hero==='underdog'){const active=s.deck.every(id=>HERO[id].rarity==='C'&&!HERO[id].hidden);Object.assign(trait,{key:'underdog',active,damageMultiplier:active?1+UNDERDOG.bonus:1,label:active?`노멀 덱 · 공격력 +${Math.round(UNDERDOG.bonus*100)}%`:'노멀 덱 대기'});}
   else if(u.hero==='sunflower'){const n=Math.min(SUNFLOWER.max,s.sunlight||0);Object.assign(trait,{key:'sunlight',active:n>0,sunlight:n,radius:SUNFLOWER.radius[n],label:n?`햇빛 ${n}/${SUNFLOWER.max} · 폭발 반경 ${SUNFLOWER.radius[n]}`:`햇빛 0/${SUNFLOWER.max} · 폭발 없음`});}
-  else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:jokerChaos(s)?'카오스 룰렛 · 일반 공격 시 상태 이상 5종':`${JOKER_NAMES[color]} · ${JOKER.colors.filter(c=>(s.jokerSeen||1)&jokerBit(c)).length}/5색`});}
+  else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:jokerChaos(s)?'카오스 · 일반 공격 시 화상·감속·중독·성광·노출':`${JOKER_NAMES[color]} · ${JOKER.colors.filter(c=>(s.jokerSeen||1)&jokerBit(c)).length}/5색`});}
   else if(u.hero==='antropy')Object.assign(trait,{key:'antropy',active:true,label:'디버프 무효'});
   else if(u.hero==='cure_master'){
     const n=index<0?0:neighbors(index).filter(i=>s.board[i]).length,active=!u.cursed&&!(u.disabled>0);
@@ -714,7 +716,7 @@ function attack(s,u,index,extra=0){
   const e=ground?null:u.hero==='avalanche_maid'?chooseTarget(s,u):s.enemies.find(x=>x.uid===u.target&&x.hp>0&&canTarget(unitHero(s,u),cellPoint(index),pathPoint(x.progress)))||chooseTarget(s,u);if(!ground&&!e)return false;
   const stats=combatStats(s,u,index),ratio=extra||1;
   const shot=fire(s,u,index,e,ground?pathPoint(random(s)*PATH_LENGTH):null,stats,ratio,extra>0,false);
-  event(s,'attack',{index,hero:u.hero,rank:u.rank,from:shot.from,to:shot.to,origin:shot.origin,shape:unitHero(s,u).shape,form:shot.form,attackType:unitHero(s,u).attack,...(shot.gift?{gift:true}:{}),...(extra?{extra:true}:{})});
+  event(s,'attack',{index,hero:u.hero,rank:u.rank,from:shot.from,to:shot.to,origin:shot.origin,shape:unitHero(s,u).shape,form:shot.form,attackType:unitHero(s,u).attack,...(shot.gift?{gift:true}:{}),...(extra?{extra:true}:{}),...(u.hero==='zeke'&&zekeFury(s)?{fury:true}:{})});
   if(s.buffs.echo>0)fire(s,u,index,ground?null:s.enemies.find(x=>x.uid===shot.target)||e,ground?shot.to:null,stats,ratio*.65*buffScale(s,'echo'),true,true);
   return true;
 }
@@ -852,7 +854,7 @@ export function cast(s,id){
   castCrits.set(s,unitCrit(s,u));const castStart=s.nextId;
   const source=sourceKey('skill',id,s.nextId++);
   for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
-  let visualTargets=targets,gift;
+  let visualTargets=targets,gift,look;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
   const strike=factor=>targets.forEach(e=>damage(s,e,base*factor,id));
   if(type==='miracle_eclose'){
@@ -919,10 +921,11 @@ export function cast(s,id){
   else if(type==='bigshow'){strike(UNDERDOG.factor);const victims=s.board.map((ally,i)=>!!ally&&!immune(s,i));victims.forEach((on,i)=>{if(on)stunUnit(s,i,UNDERDOG.stun);});}
   else if(type==='solarflare'){
     // Spends the whole shared stack: 2x with none, +3x per sunlight (11x at three).
-    const n=Math.min(SUNFLOWER.max,s.sunlight||0);strike(SUNFLOWER.base+SUNFLOWER.per*n);s.sunlight=0;
+    const n=Math.min(SUNFLOWER.max,s.sunlight||0);strike(SUNFLOWER.base+SUNFLOWER.per*n);s.sunlight=0;look={sunlight:n};
     event(s,'sunSpend',{sunlight:n,points:s.board.flatMap((a,i)=>a?.hero==='sunflower'?[cellPoint(i)]:[])});
   }
   else if(type==='roulette'){
+    if(jokerChaos(s))look={chaos:true};
     strike(JOKER.roulette);
     if(!jokerChaos(s)){
       const from=s.jokerColor||'red',color=pickJokerColor(s,from);
@@ -974,7 +977,7 @@ export function cast(s,id){
   const support=!dream&&['echo','haste','awaken','march','gift','trauma','harmony','lemonade','miracle_eclose'].includes(type);
   const key=ACTIVE_SKILLS[id];if(key&&!dream){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
-  castCrits.delete(s);event(s,'skill',{hero:id,name:dream?RUMI_DREAM.name:name,kind:dream?'dream':type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{})});return {ok:true};
+  castCrits.delete(s);event(s,'skill',{hero:id,name:dream?RUMI_DREAM.name:name,kind:dream?'dream':type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{}),...look});return {ok:true};
 }
 // Describes what pressing the ultimate would do right now, with the numbers cast() uses. No side effects.
 // The detective's ultimate scales with training and rank like his basic attack, so it never falls behind it.

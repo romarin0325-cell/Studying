@@ -1257,13 +1257,13 @@ export const HEROES = [
     "attack": "cards",
     "trait": {
       "type": "joker",
-      "text": "일반 공격 시 현재 색의 상태 이상을 겁니다. 빨강 화상, 파랑 감속 20%, 초록 중독, 하양 성광, 검정 노출. 시작 빨강을 포함해 5색을 모으면 전투가 끝날 때까지 카오스가 되어 일반 공격 시 5종을 모두 겁니다."
+      "text": "일반 공격 시 현재 색의 상태 이상을 겁니다. 빨강 화상, 파랑 감속 20%, 초록 중독, 하양 성광, 검정 노출."
     },
     "skill": {
       "name": "레인보우 룰렛",
       "cost": 50,
       "type": "roulette",
-      "text": "적 전체에게 공격력 3배 피해를 주고 색을 지금과 다른 무작위 색으로 바꿉니다. 5색을 모은 뒤에는 별빛 100의 카오스 룰렛으로 바뀌고 카오스를 유지합니다."
+      "text": "적 전체에게 공격력 3배 피해를 주고 색을 지금과 다른 무작위 색으로 바꿉니다."
     },
     "heightGroup": "medium",
     "role": "상태 부여 · 범위",
@@ -1957,6 +1957,8 @@ export const ASSET_PATHS = {
   "effects-demon-miracle": "./assets/merge/effects-demon-miracle.webp",
   "effects-deathhand": "./assets/merge/effects-deathhand.webp",
   "effects-eclose": "./assets/merge/effects-eclose.webp",
+  "effects-joker-sun": "./assets/merge/effects-joker-sun.webp",
+  "effects-chaos-sun": "./assets/merge/effects-chaos-sun.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
   "orbit-sea": "./assets/merge/orbit-sea.webp",
   "relics-new": "./assets/merge/relics-new.webp"
