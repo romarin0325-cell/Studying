@@ -604,14 +604,13 @@ export class CombatFX{
   }
   // Sunflower: one shared stack on the same small badge as the other traits (dark disc, thin rim, one flat glyph).
   // The glyph is a plain sunflower: ten broad rounded petals around a seed disc, dim with no sunlight. Three pips on
-  // the lower rim count the stack; the newest pip pops, and at three the rim and petals turn warm and the disc glows.
+  // the lower rim count the stack; the newest pip pops, and at three the rim and petals turn warm (no glow, like the others).
   drawSunBlooms(s){
     const ctx=this.ctx,n=Math.min(3,s.sunlight||0),since=this.clock-(this.bloomAt??-9),pop=since<.6?easeBack(since/.6):1;
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u||u.hero!=='sunflower')continue;
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,ready=n>=3,pulse=ready&&!this.reduced?.5+Math.sin(this.clock*3+u.uid)*.5:0;
-      if(ready)this.glow('glow','#ffd45a',cx,cy,44+pulse*8,.32+pulse*.1);
-      ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=ready?1:.8;ctx.strokeStyle=ready?'#ffe27a':'#c99a3a';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
+      ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=ready?.85+pulse*.15:.8;ctx.strokeStyle=ready?'#ffe27a':'#c99a3a';ctx.lineWidth=ready?2:1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
       const lit=n>0,grow=lit&&since<.6?1+(pop-1)*.4:1;
       ctx.save();ctx.translate(cx,cy-1.5);ctx.scale(grow,grow);ctx.globalAlpha=lit?1:.5;ctx.fillStyle=ready?'#ffd23c':lit?'#f3c94a':'#b9a46a';
       for(let j=0;j<10;j++){ctx.save();ctx.rotate(j/10*Math.PI*2);ctx.beginPath();ctx.ellipse(7.2,0,4,2.15,0,0,Math.PI*2);ctx.fill();ctx.restore();}

@@ -63,7 +63,7 @@ const emblem=(fx,frame,x,y,w,angle=0,alpha=1)=>fx.art.images[EMBLEMS]&&alpha>0&&
 function sugarBurst(fx,e,t){
   const ctx=fx.ctx,R=e.radius||200,open=ease(span(t,0,.42)),a=fade(t,.38);
   fx.glow('glow','#ffe0a8',e.x,e.y,70*(1-open*.5),(1-span(t,0,.25))*.55);
-  piece(fx,0,e.x,e.y,R/RING_EDGE*(.35+.65*open),t*.5,a*.9);
+  piece(fx,0,e.x,e.y,R/RING_EDGE*(.35+.65*open),t*.5,a*.7);
   ctx.save();ctx.globalAlpha*=a*.35;ctx.strokeStyle='#ffd7a8';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(e.x,e.y,R*(.35+.65*open),0,Math.PI*2);ctx.stroke();ctx.restore();
   const spots=fx.reduced?3:7;
   for(let i=0;i<spots;i++){
@@ -93,7 +93,7 @@ function fullBloom(fx,skill,age){
   const ctx=fx.ctx,t=clamp(age/1.5),out=fade(t,.5),pop=easeBack(span(age,0,.36)),x=360,y=405-20*ease(age/.5),size=360;
   fx.glow('rays','#ffe9a0',x,y,size*1.4*Math.min(1,age*3.5),out*.62,age*.35);
   fx.glow('glow','#fff3c8',x,y,size*.7,out*.35);
-  const ring=ease(span(age,.1,.9));piece(fx,6,x,y,size*(.9+1.5*ring),age*.25,(1-span(age,.5,1.05))*.75);
+  const ring=ease(span(age,.08,.7));piece(fx,6,x,y,size*(.8+1.05*ring),age*.25,(1-span(age,.3,.85))*.5);
   emblem(fx,1,x,y,size*(.45+.55*pop),age*.12,out*.95);
   if(!fx.reduced){
     for(let i=0;i<12;i++){
