@@ -187,7 +187,7 @@ function syncTimeRuler(s){
 }
 // Underdog (노멀 덱 다크호스) and Toffee Apple (저축 폭탄): numbers from docs/plans/UPCOMING_BALANCE.md.
 export const UNDERDOG=Object.freeze({bonus:.8,factor:10,stun:2});
-export const APPLEBOMB=Object.freeze({factor:10,max:5,trigger:80,stun:3});
+export const APPLEBOMB=Object.freeze({factor:18,max:5,trigger:80,stun:3,radius:200});
 // Sunflower: one shared stack (0..3) of sunlight, +1 when a wave ends while a sunflower stands on the board. Its basic
 // attack bursts around the target with the radius of the current stack; Solar Flare spends the whole stack.
 export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:4});
@@ -1186,7 +1186,7 @@ export function castPreview(s,id){
   }else if(type==='applebomb'){
     const set=(s.bombs||[]).length;
     lines.push(`경로의 무작위 위치에 사과를 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);
-    lines.push(`적이 가까이 오면 바로 터져 적 전체에게 공격력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}를 줍니다.`);
+    lines.push(`적이 가까이 오면 바로 터져 반경 ${APPLEBOMB.radius} 안의 적에게 공격력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}를 줍니다.`);
     lines.push(`피해는 폭발 순간 최고 성급 토피애플의 현재 공격력으로 계산합니다. 토피애플이 없으면 마지막 유효 공격력을 사용합니다.`);
     lines.push(`설치한 토피애플은 ${APPLEBOMB.stun}초 동안 기절합니다.`);
   }else if(type==='requiem'){
@@ -1352,10 +1352,12 @@ export function step(s,dt){
   if(s.bombs.length)s.bombs=s.bombs.filter(bomb=>{
     const alive=s.enemies.filter(e=>e.hp>0);
     if(!alive.some(e=>Math.abs(e.progress-bomb.progress)<=APPLEBOMB.trigger))return true;
-    for(const e of alive)damage(s,e,bomb.damage,'toffee_apple',{crit:bomb.crit});
-    // Visual receipts must retain even lethal hits after dead enemies leave the
-    // renderer's map. This is a global bomb, not a local circular splash.
-    event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress),targets:alive.map(e=>({uid:e.uid,...pathPoint(e.progress)}))});
+    const origin=pathPoint(bomb.progress);
+    const hit=alive.filter(e=>{const p=pathPoint(e.progress);return Math.hypot(p.x-origin.x,p.y-origin.y)<=APPLEBOMB.radius;});
+    for(const e of hit)damage(s,e,bomb.damage,'toffee_apple',{crit:bomb.crit});
+    // Receipts keep lethal hits after those enemies leave the renderer map.
+    // Only enemies inside the blast radius are targets.
+    event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...origin,radius:APPLEBOMB.radius,targets:hit.map(e=>({uid:e.uid,...pathPoint(e.progress)}))});
     return false;
   });
   for(const z of s.zones){
