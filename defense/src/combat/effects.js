@@ -3,6 +3,7 @@ import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,p
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
+import {drawRagnarok,drawMoonShot,drawMoonCut,MOON_CUT_LIFE} from './blade-vfx.js';
 // Effects drawn under the units (attack circles and ultimate ground marks); draw() only ages them.
 const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround']);
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
@@ -156,7 +157,7 @@ export class CombatFX{
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
-    if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:['demon_king','miracle_larva'].includes(e.hero)?.45:.3;this.add({...e,life,total:life});}
+    if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:['demon_king','miracle_larva'].includes(e.hero)?.45:e.hero==='luna'?MOON_CUT_LIFE:.3;this.add({...e,life,total:life});}
     if(e.type==='chain'){const lightning=e.hero==='lightning_sage',life=lightning?LIGHTNING_IMPACT_LIFE:.24;this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life,total:life,rank:1,...(lightning?{hop:true}:{})});}
     if(e.type==='dreamPhase')for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});
     if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
@@ -178,6 +179,8 @@ export class CombatFX{
       if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
+      // Ragnarok draws its own eruption under each enemy when its shockwave arrives (blade-vfx.js).
+      if(e.kind==='inferno'&&this.art.images['zeke-ragnarok'])return;
       for(const [i,p] of targets.entries())this.add({type:e.support?'support':ultimateLayout(e.kind)==='pull'?'pullImpact':'ultimate',hero:e.hero,...p,origin:e.origin,angle:Math.atan2(p.y-e.origin.y,p.x-e.origin.x),life:.65+(e.support?i*.04:0),total:.65+(e.support?i*.04:0),rank:e.rank,skill:h.skill.type});
       if(!targets.length)this.add({type:'ultimate',hero:e.hero,...e.origin,origin:e.origin,angle:0,life:.65,total:.65,rank:e.rank});
     }
@@ -417,6 +420,8 @@ export class CombatFX{
       return true;
     }
     if(skill.hero==='zeke'){
+      if(drawRagnarok(this,skill,age))return true;
+      // Fallback when the Ragnarok sheet fails to load: the pass 15 dragon oath.
       // Dragon oath: the crest rises, one giant flame slash crosses the board, then pillars erupt under enemies.
       const rise=easeBack(window01(age,0,.35)),out=1-window01(age,.95,1.5),slash=window01(age,.18,.62);
       ctx.save();ctx.globalAlpha=out*.5*(this.reduced?.5:1);const tint=this.zekeWash||(this.zekeWash=(()=>{const g=ctx.createRadialGradient(360,400,120,360,400,560);g.addColorStop(0,'#ff6a2000');g.addColorStop(1,'#ff3a1a88');return g;})());ctx.fillStyle=tint;ctx.fillRect(0,0,720,780);ctx.restore();
@@ -714,6 +719,7 @@ export class CombatFX{
     if(drawNewShot(this,shot,s,{x,y,angle,t}))return;
     if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(h.id==='lightning_sage'){drawLightningShot(this,shot,s,p);return;}
+    if(h.id==='luna'&&drawMoonShot(this,shot,{from:shot.from,to,t}))return;
     if(['zeke','guardian','ancient_dragon','behemoth'].includes(h.id))return;
     if(h.shape==='beam'&&f.motion==='candy'){
       const len=64+shot.rank*4;ctx.save();ctx.translate(x,y);ctx.rotate(angle);
@@ -1013,6 +1019,7 @@ export class CombatFX{
         ctx.save();ctx.globalAlpha=(1-t)*.5;ctx.strokeStyle=HERO[e.hero].color;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y+25,23+t*10,8+t*3,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
       const large=e.type==='ultimate',size=large?118+Math.min(5,e.rank||1)*8:impactSize(e.hero,e.rank||1),hitClarity=e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1,alpha=Math.max(0,(1-t)*(large?.83:.9)*hitClarity);
+      if(e.type==='impact'&&e.hero==='luna'&&drawMoonCut(this,e,t,hitClarity))continue;
       if(e.type==='impact'&&e.hero==='ancient_dragon'){this.atlasStamp('ancient-cross',0,1,1,e.x,e.y-18,size*.46,size*.46,0,alpha*.6,'source-over');continue;}
       if(large&&dedicated(e.hero)){this.ultimate(e.hero,e.x,e.y-22,size*(1+t*.35),size*(1+t*.35),0,alpha);continue;}
       if(FX_PROFILES[e.hero]?.atlas==='effects-trio'){

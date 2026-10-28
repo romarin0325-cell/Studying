@@ -789,3 +789,5 @@ body::before{background:var(--lobby,var(--garden) center/cover);filter:blur(30px
 /* Pass 19: the night theme's --gold-hi emphasis is white here; Rumi's wrong-answer explanation keeps ink-coloured emphasis. */
 .rumi-head b{color:var(--navy)}
 .rumi-text b,.rumi-text h4{color:#9A6A10}
+/* Pass 20: enhancement numbers are the dark teal ink on paper, without the night glow. */
+em.scaled{text-shadow:none}

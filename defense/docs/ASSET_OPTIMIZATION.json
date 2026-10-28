@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 29085590,
-    "deployableSourceBytes": 27460622,
-    "outputBytes": 15481327,
-    "optimizedFiles": 166,
+    "sourceBytes": 30482926,
+    "deployableSourceBytes": 28857958,
+    "outputBytes": 16139859,
+    "optimizedFiles": 169,
     "derivedFiles": 156,
-    "derivedOutputBytes": 3745404
+    "derivedOutputBytes": 3743948
   },
   "images": [
     {
@@ -2671,6 +2671,99 @@
         "metadata": {
           "width": 1024,
           "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:zeke-ragnarok",
+      "source": "./assets/merge/zeke-ragnarok.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.zeke-ragnarok; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 685286,
+        "sha256": "87ecd911feb0ae5456b4587b8f683be4d102b9ca2fb41ce953382da6ff7a2518",
+        "metadata": {
+          "width": 1536,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/zeke-ragnarok.webp",
+        "bytes": 324424,
+        "sha256": "4f5ff473f0470d535f906495fa45f532a4ce960430b6cc4687fe276bb4edba91",
+        "metadata": {
+          "width": 1536,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ash-armageddon",
+      "source": "./assets/merge/ash-armageddon.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ash-armageddon; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 576320,
+        "sha256": "24b7bc1ee1051e2d216376ba759f12a3822f53dfb7130183ae1c5d7d005d171a",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ash-armageddon.webp",
+        "bytes": 245274,
+        "sha256": "8f6f1449d6689b578c050bceafb8a0f539339980df128b98515a8e2d0ee4a15d",
+        "metadata": {
+          "width": 1024,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:luna-blade",
+      "source": "./assets/merge/luna-blade.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.luna-blade; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 135730,
+        "sha256": "275823077c9eb318a0a47ea63322cc2d6518f7193a359afd5e9c4c2991721f77",
+        "metadata": {
+          "width": 768,
+          "height": 256,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/luna-blade.webp",
+        "bytes": 88834,
+        "sha256": "5573a330122c3c12e5e436e5ca2388f0ea61e0febc12380b195372c7c8ea2bd1",
+        "metadata": {
+          "width": 768,
+          "height": 256,
           "hasAlpha": true,
           "codec": "webp"
         }
@@ -6546,7 +6639,7 @@
       "profile": "portrait",
       "crop": {
         "left": 130,
-        "top": 95,
+        "top": 79,
         "width": 250,
         "height": 250
       },
@@ -6557,8 +6650,8 @@
       "sourceSha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f",
       "output": {
         "path": "./assets/optimized/ui/portraits/demon_king.webp",
-        "bytes": 21300,
-        "sha256": "c3b415adde1f3644c001ed320ebf7331713e0ec9e3240a63de5bf501b428f435",
+        "bytes": 19844,
+        "sha256": "21e9cd3a90f84c346251f65321ae8669e9aafbca06a6d2ff8d95fa7b06b2aaa2",
         "metadata": {
           "width": 240,
           "height": 240,

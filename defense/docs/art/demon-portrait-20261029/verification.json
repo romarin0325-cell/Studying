@@ -1,0 +1,541 @@
+{
+  "date": "2026-10-29",
+  "targetPr": 645,
+  "beforeHead": "6e6dc59f1022cc7c9c68c6cbfec1b869d7d04a20",
+  "offsetSourcePixels": [
+    0,
+    -16
+  ],
+  "crop": {
+    "before": {
+      "left": 130,
+      "top": 95,
+      "width": 250,
+      "height": 250
+    },
+    "after": {
+      "left": 130,
+      "top": 79,
+      "width": 250,
+      "height": 250
+    }
+  },
+  "derivedImageTranslationY": 15.36,
+  "localTests": {
+    "command": "VERIFY_BASE_SHA=<original PR head> npm run verify -- --only defense",
+    "passed": 9,
+    "failed": 0
+  },
+  "assets": {
+    "staticImagesUnchanged": 181,
+    "derivedChanged": [
+      "portrait:demon_king"
+    ],
+    "derivedReused": 155,
+    "sourceArtAndBattleScaleUnchanged": true
+  },
+  "browser": {
+    "viewport": [
+      390,
+      844
+    ],
+    "dpr": 2,
+    "offline": true,
+    "before": [
+      {
+        "skin": "night",
+        "geometry": [
+          {
+            "id": "demon_king",
+            "image": {
+              "width": 94.78125,
+              "height": 94.78125,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.328125,
+              "height": 105.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "c3b415adde1f3644c001ed320ebf7331713e0ec9e3240a63de5bf501b428f435",
+            "matchesPrepared": true
+          },
+          {
+            "id": "star_boy",
+            "image": {
+              "width": 94.796875,
+              "height": 94.796875,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.34375,
+              "height": 105.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "7d38889863a7b1e859fcddbebe718132ab39415e0ee2e591f184e2a9bb280481",
+            "matchesPrepared": true
+          },
+          {
+            "id": "siren",
+            "image": {
+              "width": 94.78125,
+              "height": 94.78125,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.328125,
+              "height": 105.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "2b48ef787de60837a3e0b92494c53452bbd876fecb824977cb6e1f966cf959a5",
+            "matchesPrepared": true
+          },
+          {
+            "id": "great_detective",
+            "image": {
+              "width": 94.796875,
+              "height": 94.796875,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.34375,
+              "height": 105.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "5139349df5e364c333ae38e340b0f1c268e20ff47926e7101567c0130b1d4e2b",
+            "matchesPrepared": true
+          },
+          {
+            "id": "aurora",
+            "image": {
+              "width": 94.78125,
+              "height": 94.78125,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.328125,
+              "height": 105.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "203bdfdc13529cd85d00632ee76f06e87e5ce8fa6b4282f30f3f0fb1cd182b32",
+            "matchesPrepared": true
+          }
+        ]
+      },
+      {
+        "skin": "bright",
+        "geometry": [
+          {
+            "id": "demon_king",
+            "image": {
+              "width": 98.390625,
+              "height": 98.390625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.328125,
+              "height": 109.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "c3b415adde1f3644c001ed320ebf7331713e0ec9e3240a63de5bf501b428f435",
+            "matchesPrepared": true
+          },
+          {
+            "id": "star_boy",
+            "image": {
+              "width": 98.40625,
+              "height": 98.40625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.34375,
+              "height": 109.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "7d38889863a7b1e859fcddbebe718132ab39415e0ee2e591f184e2a9bb280481",
+            "matchesPrepared": true
+          },
+          {
+            "id": "siren",
+            "image": {
+              "width": 98.390625,
+              "height": 98.390625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.328125,
+              "height": 109.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "2b48ef787de60837a3e0b92494c53452bbd876fecb824977cb6e1f966cf959a5",
+            "matchesPrepared": true
+          },
+          {
+            "id": "great_detective",
+            "image": {
+              "width": 98.40625,
+              "height": 98.40625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.34375,
+              "height": 109.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "5139349df5e364c333ae38e340b0f1c268e20ff47926e7101567c0130b1d4e2b",
+            "matchesPrepared": true
+          },
+          {
+            "id": "aurora",
+            "image": {
+              "width": 98.390625,
+              "height": 98.390625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.328125,
+              "height": 109.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "203bdfdc13529cd85d00632ee76f06e87e5ce8fa6b4282f30f3f0fb1cd182b32",
+            "matchesPrepared": true
+          }
+        ]
+      }
+    ],
+    "after": [
+      {
+        "skin": "night",
+        "geometry": [
+          {
+            "id": "demon_king",
+            "image": {
+              "width": 94.78125,
+              "height": 94.78125,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.328125,
+              "height": 105.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "21e9cd3a90f84c346251f65321ae8669e9aafbca06a6d2ff8d95fa7b06b2aaa2",
+            "matchesPrepared": true
+          },
+          {
+            "id": "star_boy",
+            "image": {
+              "width": 94.796875,
+              "height": 94.796875,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.34375,
+              "height": 105.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "7d38889863a7b1e859fcddbebe718132ab39415e0ee2e591f184e2a9bb280481",
+            "matchesPrepared": true
+          },
+          {
+            "id": "siren",
+            "image": {
+              "width": 94.78125,
+              "height": 94.78125,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.328125,
+              "height": 105.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "2b48ef787de60837a3e0b92494c53452bbd876fecb824977cb6e1f966cf959a5",
+            "matchesPrepared": true
+          },
+          {
+            "id": "great_detective",
+            "image": {
+              "width": 94.796875,
+              "height": 94.796875,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.34375,
+              "height": 105.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "5139349df5e364c333ae38e340b0f1c268e20ff47926e7101567c0130b1d4e2b",
+            "matchesPrepared": true
+          },
+          {
+            "id": "aurora",
+            "image": {
+              "width": 94.78125,
+              "height": 94.78125,
+              "relativeTop": 5.265625,
+              "relativeLeft": 5.265625
+            },
+            "art": {
+              "width": 105.328125,
+              "height": 105.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "203bdfdc13529cd85d00632ee76f06e87e5ce8fa6b4282f30f3f0fb1cd182b32",
+            "matchesPrepared": true
+          }
+        ]
+      },
+      {
+        "skin": "bright",
+        "geometry": [
+          {
+            "id": "demon_king",
+            "image": {
+              "width": 98.390625,
+              "height": 98.390625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.328125,
+              "height": 109.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "21e9cd3a90f84c346251f65321ae8669e9aafbca06a6d2ff8d95fa7b06b2aaa2",
+            "matchesPrepared": true
+          },
+          {
+            "id": "star_boy",
+            "image": {
+              "width": 98.40625,
+              "height": 98.40625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.34375,
+              "height": 109.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "7d38889863a7b1e859fcddbebe718132ab39415e0ee2e591f184e2a9bb280481",
+            "matchesPrepared": true
+          },
+          {
+            "id": "siren",
+            "image": {
+              "width": 98.390625,
+              "height": 98.390625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.328125,
+              "height": 109.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "2b48ef787de60837a3e0b92494c53452bbd876fecb824977cb6e1f966cf959a5",
+            "matchesPrepared": true
+          },
+          {
+            "id": "great_detective",
+            "image": {
+              "width": 98.40625,
+              "height": 98.40625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.34375,
+              "height": 109.34375
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "5139349df5e364c333ae38e340b0f1c268e20ff47926e7101567c0130b1d4e2b",
+            "matchesPrepared": true
+          },
+          {
+            "id": "aurora",
+            "image": {
+              "width": 98.390625,
+              "height": 98.390625,
+              "relativeTop": 5.46875,
+              "relativeLeft": 5.46875
+            },
+            "art": {
+              "width": 109.328125,
+              "height": 109.328125
+            },
+            "style": {
+              "transform": "none",
+              "objectFit": "contain"
+            },
+            "natural": [
+              240,
+              240
+            ],
+            "embeddedSha256": "203bdfdc13529cd85d00632ee76f06e87e5ce8fa6b4282f30f3f0fb1cd182b32",
+            "matchesPrepared": true
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "translationCss": [
+    {
+      "skin": "night",
+      "down": 6.066
+    },
+    {
+      "skin": "bright",
+      "down": 6.297
+    }
+  ],
+  "limitations": "Browser display check, not physical-device or FPS measurement."
+}

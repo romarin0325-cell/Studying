@@ -9,7 +9,7 @@ test('final patch uses canonical stats without the old scenario being applied tw
   const h=hero(id);assert.equal(h.damage,power);assert.equal(measure(h).dps,measure(h,{patch:true}).dps,id);
  }
  const maid=measure(hero('avalanche_maid'));assert.equal(maid.cost,80);assert.equal(measure(hero('avalanche_maid'),{patch:true}).cost,80);
- const ash=measure(hero('ash'));assert.ok(Math.abs(ash.skill-28*22*5)<.01);assert.equal(hero('cure_master').skill.name,'퍼스트키스');
+ const ash=measure(hero('ash'));assert.ok(Math.abs(ash.skill-28*22*5)<.01);assert.equal(hero('cure_master').skill.name,'레몬 배리어');
 });
 
 test('Chaos, apple contact and prism compare actual canonical engine conditions',()=>{

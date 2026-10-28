@@ -35,7 +35,7 @@ export const HEROES = [
       "text": "자기 칸 주변(반경 250)의 적을 모두 베고, 맞은 적을 4초간 불태웁니다. 적이 코어 가까이(경로 마지막 4분의 1) 오면 공격력이 40% 오릅니다."
     },
     "skill": {
-      "name": "용의 맹세",
+      "name": "라그나로크",
       "cost": 70,
       "type": "inferno",
       "text": "적 전체에게 공격력 7배 피해를 주고 7초간 강하게 불태웁니다. 코어 생명력이 절반 아래로 내려가면 강화되어 공격력 14배가 됩니다."
@@ -1371,7 +1371,7 @@ export const HEROES = [
       "text": "자신은 항상 무적이며 상하좌우 아군에게 무적 오라를 줍니다. 무적은 기절·저주·소멸을 막습니다."
     },
     "skill": {
-      "name": "퍼스트키스",
+      "name": "레몬 배리어",
       "cost": 50,
       "type": "lemonade",
       "text": "아군 전체의 기절과 저주를 풀고 4초 동안 무적으로 만듭니다."
@@ -1856,7 +1856,8 @@ export const BOSSES = {
     "pattern": "judgement",
     "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",
     "basicScale": 0.5,
-    "trait": "일반 공격 피해 절반 · 예고된 칸에 천벌",
+    "deathWard": 180,
+    "trait": "일반 공격 피해 절반 · 주변 180 즉사 면역 · 예고된 칸에 천벌",
     "atlas": "bosses-expansion",
     "frame": 2
   }
@@ -1959,6 +1960,9 @@ export const ASSET_PATHS = {
   "effects-eclose": "./assets/merge/effects-eclose.webp",
   "effects-joker-sun": "./assets/merge/effects-joker-sun.webp",
   "effects-chaos-sun": "./assets/merge/effects-chaos-sun.webp",
+  "zeke-ragnarok": "./assets/merge/zeke-ragnarok.webp",
+  "ash-armageddon": "./assets/merge/ash-armageddon.webp",
+  "luna-blade": "./assets/merge/luna-blade.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
   "orbit-sea": "./assets/merge/orbit-sea.webp",
   "relics-new": "./assets/merge/relics-new.webp"

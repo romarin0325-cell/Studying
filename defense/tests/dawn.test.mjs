@@ -141,3 +141,16 @@ test('test tools of the unlocked build',()=>{
   const q=createProfile(NOW);assert.equal(command(q,'testGrant',{kind:'dust'},NOW).ok,false,'the normal build refuses test tools');
   p.dust=9500000;testGrant(p,'dust');assert.equal(p.dust,9999999,'currencies are capped');
 });
+
+test('challenge reset tools clear the current challenge while preserving history and lifetime',()=>{
+  const p=createProfile(NOW);p.cleared=3;
+  ok(p,'begin',{mode:'monthly'});
+  ok(p,'settle',{token:p.active.token,round:2,damage:1200,seconds:32});ok(p,'claimMonthly',{token:p.monthlyBest.token});
+  const results=structuredClone(p.results),lifetime=structuredClone(p.monthlyLifetime);
+  ok(p,'begin',{mode:'weekly'});assert.ok(validateProfile(p));
+  assert.equal(testGrant(p,'weekly-reset'),'주간 드래프트를 다시 입장할 수 있게 했어요');assert.equal(p.weekly,null);assert.equal(p.active,null);assert.deepEqual(p.results,results);assert.ok(validateProfile(p));
+  ok(p,'begin',{mode:'weekly'});assert.equal(testGrant(p,'monthly-reset'),'월간 보스전 기록과 보상을 초기화했어요');assert.equal(p.active.mode,'weekly');assert.ok(validateProfile(p));
+  testGrant(p,'weekly-reset');ok(p,'begin',{mode:'monthly'});ok(p,'settle',{token:p.active.token,round:2,damage:1200,seconds:32});ok(p,'claimMonthly',{token:p.monthlyBest.token});ok(p,'begin',{mode:'monthly'});assert.ok(validateProfile(p));testGrant(p,'monthly-reset');
+  assert.equal(p.active,null);assert.equal(p.monthly,null);assert.equal(p.monthlyBest,null);assert.equal(p.monthlyClaim,null);assert.deepEqual(p.monthlyLifetime,lifetime);assert.deepEqual(p.results.slice(1),results);assert.ok(validateProfile(p));
+  ok(p,'begin',{mode:'monthly'});ok(p,'settle',{token:p.active.token,round:1});assert.ok(command(p,'claimMonthly',{token:p.monthlyBest.token},NOW).ok);
+});
