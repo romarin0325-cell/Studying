@@ -467,7 +467,7 @@ function skillInfo(id){
 // the simulation itself is unchanged). Transform and opacity animations only.
 let cutinTimer=0,slowmo=0;
 function cutIn(e){
-  const wrap=document.querySelector('.arena-wrap'),h=HERO[e.hero];if(!wrap||!h)return;
+  const wrap=document.querySelector('.arena-wrap'),h=HERO[e.hero];if(!p().settings.cutin){document.querySelector('.cutin')?.remove();clearTimeout(cutinTimer);return;}if(!wrap||!h)return;
   const ur=h.hidden||h.rarity==='UR',reduced=p().settings.reduced;
   wrap.querySelector('.cutin')?.remove();clearTimeout(cutinTimer);
   const el=document.createElement('div');el.className='cutin';el.dataset.rarity=ur?'UR':h.rarity;el.dataset.reduced=String(reduced);el.style.setProperty('--c',h.color);el.setAttribute('aria-hidden','true');
@@ -563,7 +563,7 @@ function retireSheet(){
 }
 const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${TEST_TOOLS.map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button><button class="secondary" data-test-tool="late-notice">신규 동료 안내 보기</button></div>`;
 function showSettings(){
-  show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·스킬을 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
+  show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·스킬을 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.'],['cutin','필살기 컷인','필살기 이름 띠를 전장 위에 띄웁니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
     <div class="settings-row"><div><strong>전장 화질</strong><small>기본은 선명도와 전력 사용의 균형을 맞춥니다.</small></div><select id="quality-select" aria-label="전장 화질">${[['standard','기본'],['high','고화질'],['low','절전']].map(([id,text])=>`<option value="${id}" ${p().settings.quality===id?'selected':''}>${text}</option>`).join('')}</select></div>
     ${tutorPanel()}
     ${UNLOCKED?testToolsPanel():''}
@@ -1296,7 +1296,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=rarity===d.filter?'all':d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}if(d.part){focusPart(Number(d.part));return;}
   if(d.garden){gardenTab=d.garden;bedFocus=GARDENS.find(g=>g.id===gardenTab).beds[0];refreshGarden();return;}
-  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const r=act('testGrant',{kind:d.testTool});if(r.ok){cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
+  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
   if(d.bed){bedFocus=d.bed;refreshGarden();return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
   if(d.libraryTab){close();libraryTab=d.libraryTab;if(screen!=='library'){screen='library';render();}else{render();$('content').scrollTop=0;}return;}
