@@ -10,8 +10,11 @@ import {MIRACLE_FORMS} from '../new-companions.js';
 // 3 scale ring. zeke-spin (3x1): 0 full ring, 1 breaking, 2 embers.
 const SHEET='effects-demon-miracle',HAND='effects-deathhand',ECLOSE='effects-eclose',SPIN='zeke-spin';
 const WING_GOLD='#ffe7a6',ABYSS='#d07cff',SILK='#e6dcff',LEAF='#bfe88a';
-// Painted ring radii as a fraction of the drawn half-size (measured on the packed sheets).
-const SPIN_EDGE=.8,SILK_RING=.66,SEAL_EDGE=.8;
+// Painted ring radii as a fraction of the drawn half-size (measured on the packed sheets). Pass 20: the owner read Zeke and the
+// cocoon as slightly larger than their hit and Behemoth as right (its disc sits at 0.7 of the radius, its outer glow at 1.0).
+// The spin sheet's outer embers (0.82 of the half-size) now end at 0.96 of the radius; the silk band (brightest at 0.69,
+// outer fuzz 0.79) peaks at 0.9 of the radius instead of 1.05, its fuzz ending at 1.03 instead of 1.2.
+const SPIN_EDGE=.85,SILK_RING=.77,SEAL_EDGE=.8;
 const clamp=t=>Math.max(0,Math.min(1,t));
 const ease=t=>1-(1-clamp(t))**3;
 const easeIn=t=>clamp(t)**2;
@@ -83,9 +86,11 @@ export function drawNewAttackShape(fx,e,t,clarity=1){
     if(!e.fury){
       // Ordinary swing, as quiet as the Guardian and Behemoth rings: a thin ember ring runs out to the real radius over
       // the faint ember frame of the spin sheet. The full flame spin below is kept for his berserk (an enemy near the core).
+      // Pass 20: a touch more presence than Guardian or the old swing (embers .24 to .32, ring .5 to .6 and a little thicker),
+      // still far below the berserk spin; the ring stops at 0.95 of the radius.
       const R=HERO.zeke.range,k=ease(span(t,0,.3)),fade=1-span(t,.2,.9),size=2*R/SPIN_EDGE;
-      fx.atlasStamp(SPIN,2,3,1,e.origin.x,e.origin.y,size*(.92+.08*k),size*(.92+.08*k),(e.swing?-1:1)*(e.angle+t*.6),fade*.24*clarity,'screen');
-      ring(ctx,e.origin.x,e.origin.y,R*(.4+.6*k),'#ffab5e',2.2*fade+.6,fade*.5*clarity);
+      fx.atlasStamp(SPIN,2,3,1,e.origin.x,e.origin.y,size*(.92+.08*k),size*(.92+.08*k),(e.swing?-1:1)*(e.angle+t*.6),fade*.32*clarity,'screen');
+      ring(ctx,e.origin.x,e.origin.y,R*(.4+.55*k),'#ffab5e',2.8*fade+.8,fade*.6*clarity);
       return true;
     }
     // Berserk: one full swing of the flame sword around Zeke. The white-hot head of the painted trail (about 235 degrees on the
@@ -117,7 +122,7 @@ export function drawNewAttackShape(fx,e,t,clarity=1){
   if(e.hero==='miracle_larva'&&e.form==='miracle_cocoon'){
     if(!has(fx,SHEET))return false;
     // Silk shockwave: the woven ring opens from the cocoon to the real radius and fades there; pearls ride the ring.
-    const R=MIRACLE_FORMS.miracle_cocoon.range,grow=ease(span(t,0,.55)),r=R*(.42+.58*grow),fade=1-span(t,.45,1),size=2*r/SILK_RING;
+    const R=MIRACLE_FORMS.miracle_cocoon.range,grow=ease(span(t,0,.55)),r=R*(.4+.55*grow),fade=1-span(t,.45,1),size=2*r/(SILK_RING*.95);
     sheet(fx,5,e.origin.x,e.origin.y,size,size,t*.6,fade*.5,'screen');
     ring(ctx,e.origin.x,e.origin.y,r,'#f3edff',1.6*fade+.5,fade*.4);
     if(!fx.reduced){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<3;i++){const a=i/3*Math.PI*2+t*1.4;ctx.globalAlpha=fade*.7;diamond(ctx,e.origin.x+Math.cos(a)*r,e.origin.y+Math.sin(a)*r,3*fade+1.2,i%2?'#ffffff':SILK);}ctx.restore();}

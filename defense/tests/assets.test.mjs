@@ -42,17 +42,21 @@ test('summon face crops and prepared portraits share optical framing without mov
     const anatomy={...hero.art.portrait},frame=portraitFrame(hero),prepared=crops.get(hero.id);
     assert.ok(prepared,hero.id);
     assert.equal(frame.size,anatomy.size,'optical centering cannot rescale the face');
-    assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=8,'only small optical translations');
+    const verticalLimit=hero.id==='demon_king'?16:8;
+    assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=verticalLimit,'only reviewed optical translations');
     assert.deepEqual(hero.art.portrait,anatomy,'anatomical measurement is preserved');
     assert.deepEqual(prepared.crop,{left:Math.round(frame.x-frame.size/2),top:Math.round(frame.y-frame.size/2),width:frame.size,height:frame.size},hero.id);
   }
   assert.equal(portraitFrame(HEROES.find(h=>h.id==='toffee_apple')).x, HEROES.find(h=>h.id==='toffee_apple').art.portrait.x-7);
+  const demon=HEROES.find(h=>h.id==='demon_king');
+  assert.deepEqual(portraitFrame(demon),{...demon.art.portrait,y:demon.art.portrait.y-16},'lower the visible face without resizing it or changing anatomy');
+  assert.deepEqual(crops.get('demon_king').crop,{left:130,top:79,width:250,height:250},'the collection and summon use the reviewed higher crop');
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,86);
+  assert.equal(Object.keys(ASSET_PATHS).length,89);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
-  for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['effects-joker-sun',768,384],['effects-chaos-sun',1024,512],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
+  for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['effects-joker-sun',768,384],['zeke-ragnarok',1536,512],['luna-blade',768,256],['ash-armageddon',1024,512],['effects-chaos-sun',1024,512],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.
   const altar=await sharp(assetFile(ASSET_PATHS['summon-altar'])).metadata();
   assert.equal(altar.format,'webp');assert.equal(altar.width,720);assert.equal(altar.height,1290);

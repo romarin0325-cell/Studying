@@ -584,6 +584,27 @@
       "height": 512
     },
     {
+      "id": "zeke-ragnarok",
+      "source": "defense/assets/merge/zeke-ragnarok.webp",
+      "sha256": "87ecd911feb0ae5456b4587b8f683be4d102b9ca2fb41ce953382da6ff7a2518",
+      "width": 1536,
+      "height": 512
+    },
+    {
+      "id": "ash-armageddon",
+      "source": "defense/assets/merge/ash-armageddon.webp",
+      "sha256": "24b7bc1ee1051e2d216376ba759f12a3822f53dfb7130183ae1c5d7d005d171a",
+      "width": 1024,
+      "height": 512
+    },
+    {
+      "id": "luna-blade",
+      "source": "defense/assets/merge/luna-blade.webp",
+      "sha256": "275823077c9eb318a0a47ea63322cc2d6518f7193a359afd5e9c4c2991721f77",
+      "width": 768,
+      "height": 256
+    },
+    {
       "id": "orbit-zone",
       "source": "defense/assets/merge/orbit-zone.webp",
       "sha256": "8315be3a83dd1b99f15ba76ec888c8e489400dcb829df64750e01b39c17b46bf",

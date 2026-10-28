@@ -1,0 +1,64 @@
+{
+  "input": "defense/docs/art/pass20-fx-20261028/gpt-armageddon.png",
+  "width": 1774,
+  "height": 887,
+  "columns": 2,
+  "rows": 1,
+  "rowCuts": [],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        886,
+        887
+      ],
+      "box": [
+        32,
+        20,
+        827,
+        825
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        886,
+        0,
+        1774,
+        887
+      ],
+      "box": [
+        887,
+        65,
+        873,
+        769
+      ],
+      "touchesCut": [
+        true,
+        false,
+        false,
+        false
+      ]
+    }
+  ],
+  "shadow": {
+    "gain": 1.2,
+    "frames": [
+      0,
+      1
+    ],
+    "color": [
+      26,
+      6,
+      10
+    ]
+  }
+}

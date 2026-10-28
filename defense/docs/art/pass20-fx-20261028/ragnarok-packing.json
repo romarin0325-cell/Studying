@@ -1,0 +1,85 @@
+{
+  "input": "defense/docs/art/pass20-fx-20261028/gpt-ragnarok.png",
+  "width": 2172,
+  "height": 724,
+  "columns": 3,
+  "rows": 1,
+  "rowCuts": [],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        723,
+        724
+      ],
+      "box": [
+        148,
+        15,
+        410,
+        696
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        723,
+        0,
+        1448,
+        724
+      ],
+      "box": [
+        724,
+        40,
+        724,
+        662
+      ],
+      "touchesCut": [
+        true,
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        1448,
+        0,
+        2172,
+        724
+      ],
+      "box": [
+        1486,
+        40,
+        655,
+        640
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ],
+  "shadow": {
+    "gain": 1.2,
+    "frames": [
+      0,
+      1
+    ],
+    "color": [
+      22,
+      10,
+      8
+    ]
+  }
+}

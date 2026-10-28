@@ -604,13 +604,14 @@ function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,status
 function normalHit(s,e,value,shot,options={},seen){
   if(shot.hero==='storm_sage'&&shot.proc!==false&&e.hp>0&&!e.boss&&e.kind!=='boss'&&!seen.has(e.uid)){
     seen.add(e.uid);
-    if(random(s)<stormExecuteChance(s,shot.rank)){
+    if(!deathWarded(s,e)&&random(s)<stormExecuteChance(s,shot.rank)){
       const shieldDamage=e.shield||0,actual=damage(s,e,0,shot.hero,{instant:true});
       event(s,'instantKill',{uid:e.uid,hero:shot.hero,...pathPoint(e.progress),damage:actual,shieldDamage});return actual;
     }
   }
   return damage(s,e,value,shot.hero,{...options,basic:true,crit:shot.crit});
 }
+function deathWarded(s,e){const p=pathPoint(e.progress);return s.enemies.some(x=>x!==e&&x.hp>0&&BOSSES[x.boss]?.deathWard&&Math.hypot(pathPoint(x.progress).x-p.x,pathPoint(x.progress).y-p.y)<=BOSSES[x.boss].deathWard);}
 function around(s,e,radius){const p=pathPoint(e.progress);return s.enemies.filter(x=>x.hp>0&&Math.hypot(pathPoint(x.progress).x-p.x,pathPoint(x.progress).y-p.y)<=radius);}
 function makeZone(s,shot,p,orbit=false){
   const h=HERO[shot.hero],flame=shot.hero==='flame_sage'&&!orbit,boost=flame?1.3:1;

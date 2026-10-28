@@ -73,6 +73,62 @@ function sugarBurst(fx,e,t){
   for(const [i,q] of (e.targets||[]).slice(0,fx.reduced?3:8).entries()){const k=span(t,.12+i*.03,.6+i*.03);if(k>0&&k<1)piece(fx,1,q.x,q.y-14,30*Math.sin(Math.PI*k),i,.9);}
 }
 const span=(t,a,b)=>clamp((t-a)/(b-a));
+const easeIn=t=>clamp(t)**2.2;
+
+// Pass 20 Armageddon sheet ash-armageddon (2x1, GPT image, docs/art/pass20-fx-20261028): 0 the black sun falling down-left,
+// its sphere centre 0.22 left of and 0.27 below the stamp centre; 1 the hellfire crown, its open middle 0.07 left of and
+// 0.08 below the centre, flames out to 0.41 of the stamp size.
+const ASH_SHEET='ash-armageddon';
+const ashStamp=(fx,frame,x,y,w,alpha)=>alpha>0&&fx.atlasStamp(ASH_SHEET,frame,2,1,x,y,w,w,0,alpha,'source-over');
+// The sun always falls from the board side, so a pack on the right lane still sees it come in (mirrored art).
+function fallingSun(fx,x,y,S,side,alpha){if(alpha<=0)return;const ctx=fx.ctx;ctx.save();ctx.translate(x,y);ctx.scale(side,1);ashStamp(fx,0,.22*S,-.27*S,S,alpha);ctx.restore();}
+export const ARMAGEDDON_FALL=.3;
+// The black sun falls on the densest pack (0.3 s), then a crown of hellfire opens around it at the real radius and the
+// sun's emblem rises out of the blast. The open middle of the crown keeps the struck enemies visible.
+function blackSun(fx,e,t){
+  const ctx=fx.ctx,age=t*e.total,R=e.radius,hit=ARMAGEDDON_FALL;
+  if(age<hit+.05){
+    const side=e.x>400?-1:1,k=easeIn(span(age,0,hit)),S=250*(.78+.22*k),px=e.x+side*280*(1-k),py=e.y-14-470*(1-k),a=Math.min(1,age*8)*(1-span(age,hit,hit+.05));
+    ctx.save();ctx.globalAlpha=.4*k;ctx.fillStyle='#14040a';ctx.beginPath();ctx.ellipse(e.x,e.y+6,R*.55*k+8,R*.2*k+3,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    fx.glow('glow','#ff3a22',px,py,S*.8,a*.55);fallingSun(fx,px,py,S,side,a);
+  }
+  if(age<hit)return;
+  const since=age-hit,out=1-span(since,.45,e.total-hit);
+  if(!e.slammed){e.slammed=true;if(!fx.reduced)fx.shake=Math.max(fx.shake||0,10);}
+  const flash=1-span(since,0,.25);
+  if(flash>0){fx.glow('rays','#ff6a3c',e.x,e.y-10,R*2.6*ease(since/.2),flash*.85,since*1.4);fx.glow('glow','#ffe0c0',e.x,e.y-10,R*.9,flash*.8);}
+  const W=R*2.2*(.82+.18*ease(since/.22)),crown=1-span(since,.2,.6);
+  ashStamp(fx,1,e.x+.07*W,e.y-.08*W,W,crown*.72);
+  painted(fx,'ash',true,e.x,e.y-40-since*36,R*1.25*(.7+.3*ease(since/.3)),undefined,0,out*.85);
+  ctx.save();ctx.globalAlpha=out*.6;ctx.strokeStyle='#ffac68';ctx.lineWidth=3*out+.7;ctx.beginPath();ctx.arc(e.x,e.y,R,0,Math.PI*2);ctx.stroke();ctx.restore();
+  chips(fx,'ash',e.x,e.y,span(since,0,e.total-hit),R*.8,fx.reduced?3:8,.9);
+}
+// The ally Armageddon pays burns away from the feet up. The cut follows the sprite's own silhouette (drawn on a small
+// offscreen canvas): above it the body chars, at it a thin ember edge glows, and a few sparks and ash flakes rise from it.
+const BURN_W=160,BURN_H=160,BURN_FEET=146,BURN_SIZE=126,BURN_TALL=.8;
+const burnLine=(t)=>BURN_FEET-BURN_SIZE*BURN_TALL*smooth(span(t,.05,.8));
+const smooth=u=>u*u*(3-2*u);
+function burnAway(fx,e,t){
+  const ctx=fx.ctx;if(typeof document==='undefined')return;
+  const c=fx.burnCanvas||(fx.burnCanvas=Object.assign(document.createElement('canvas'),{width:BURN_W*2,height:BURN_H*2})),o=c.getContext('2d');
+  const line=burnLine(t),k=span(t,.05,.8),fadeOut=1-span(t,.8,1),wave=x=>line+Math.sin(x*.19+t*9)*2.2+Math.sin(x*.47+e.x)*1.4;
+  o.setTransform(2,0,0,2,0,0);o.globalCompositeOperation='source-over';o.globalAlpha=1;o.clearRect(0,0,BURN_W,BURN_H);
+  fx.art.hero(o,e.hero,BURN_W/2,BURN_FEET,BURN_SIZE,{});
+  const edgePath=()=>{o.beginPath();for(let x=0;x<=BURN_W;x+=6)x?o.lineTo(x,wave(x)):o.moveTo(x,wave(x));};
+  o.globalCompositeOperation='source-atop';
+  const g=o.createLinearGradient(0,line-22,0,line);g.addColorStop(0,'rgba(36,8,14,0)');g.addColorStop(1,'rgba(52,12,14,.55)');o.fillStyle=g;o.fillRect(0,line-22,BURN_W,22);
+  edgePath();o.strokeStyle='rgba(255,110,50,.95)';o.lineWidth=4;o.stroke();edgePath();o.strokeStyle='rgba(255,236,190,1)';o.lineWidth=1.4;o.stroke();
+  o.globalCompositeOperation='destination-out';o.fillStyle='#000';edgePath();o.lineTo(BURN_W,BURN_H);o.lineTo(0,BURN_H);o.closePath();o.fill();
+  const top=e.y+28-BURN_FEET,edge=top+line;
+  ctx.save();ctx.globalAlpha*=fadeOut;ctx.drawImage(c,e.x-BURN_W/2,top,BURN_W,BURN_H);ctx.restore();
+  if(k>0&&k<1)fx.glow('glow','#ff7a3a',e.x,edge,64,.3*Math.sin(Math.PI*k));
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<(fx.reduced?3:6);i++){const at=.1+i*.11,s=span(t,at,at+.45);if(s<=0||s>=1)continue;
+    const x=e.x+(hash(e.x,i)-.5)*46+Math.sin(s*5+i)*5,y=e.y+28-BURN_FEET+burnLine(at)-s*(26+hash(e.y,i)*28);ctx.globalAlpha=Math.sin(Math.PI*s)*.9;shard(ctx,x,y,1.6+hash(i,3)*1.4,i%2?'#ffb466':'#ffe2b0',s*4+i);}
+  ctx.restore();
+  for(let i=0;i<(fx.reduced?1:2);i++){const s=span(t,.3+i*.2,1);if(s<=0||s>=1)continue;ctx.save();ctx.globalAlpha=Math.sin(Math.PI*s)*.7;
+    shard(ctx,e.x+(i?14:-12)+Math.sin(s*4+i)*8,e.y-20-i*18-s*40,3.2,'#2b1a22',s*3+i);ctx.restore();}
+}
 
 // Chaos Roulette (Joker after five colours): the jester's wheel spins in over the field inside a five-colour vortex,
 // cards fly from it to the struck enemies and burst there in five colours. Same centre and weight as the field ultimates.
@@ -204,12 +260,7 @@ export function drawCompanionImpact(fx,e,t,clarity=1){
   if(e.type==='reduce'&&e.by==='ash'){
     // A sacrificed ally burns away here. No gold stream toward the gauge:
     // Armageddon pays a unit and does not award starlight or gold for it.
-    const a=fade(t,.05);fx.art.hero(ctx,e.hero,e.x,e.y+28,126,{alpha:a*a*.65});
-    ctx.save();ctx.globalAlpha=a;
-    for(let i=0;i<(fx.reduced?3:9);i++){
-      const x=e.x+(hash(e.x,i)-.5)*42,y=e.y+8-t*(30+hash(e.y,i)*55);
-      shard(ctx,x,y,2+hash(i,9)*3,i%3?'#f3a264':'#39222f',t*3+i);
-    }ctx.restore();return true;
+    burnAway(fx,e,t);return true;
   }
   if(e.type==='companionReceipt'&&p){
     const physical=id==='underdog',a=fade(t,.12)*clarity;
@@ -230,6 +281,8 @@ export function drawCompanionImpact(fx,e,t,clarity=1){
     }return true;
   }
   if(e.type==='armageddon'){
+    if(fx.art.images[ASH_SHEET]){blackSun(fx,e,t);return true;}
+    if(!e.slammed){e.slammed=true;if(!fx.reduced)fx.shake=Math.max(fx.shake||0,10);}
     const k=ease(t/.23),a=fade(t,.3),r=e.radius;
     painted(fx,'ash',true,e.x,e.y-12,r*1.72*(.55+.45*k),undefined,0,a*.86);
     // Only Armageddon really selects a disc here. Its thin, unflooded boundary

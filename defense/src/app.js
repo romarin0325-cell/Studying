@@ -1,7 +1,7 @@
 import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
+import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,relicTierRates,relicRatesAt,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
@@ -467,7 +467,7 @@ function skillInfo(id){
 // the simulation itself is unchanged). Transform and opacity animations only.
 let cutinTimer=0,slowmo=0;
 function cutIn(e){
-  const wrap=document.querySelector('.arena-wrap'),h=HERO[e.hero];if(!wrap||!h)return;
+  const wrap=document.querySelector('.arena-wrap'),h=HERO[e.hero];if(!p().settings.cutin){document.querySelector('.cutin')?.remove();clearTimeout(cutinTimer);return;}if(!wrap||!h)return;
   const ur=h.hidden||h.rarity==='UR',reduced=p().settings.reduced;
   wrap.querySelector('.cutin')?.remove();clearTimeout(cutinTimer);
   const el=document.createElement('div');el.className='cutin';el.dataset.rarity=ur?'UR':h.rarity;el.dataset.reduced=String(reduced);el.style.setProperty('--c',h.color);el.setAttribute('aria-hidden','true');
@@ -563,7 +563,7 @@ function retireSheet(){
 }
 const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${TEST_TOOLS.map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button><button class="secondary" data-test-tool="late-notice">신규 동료 안내 보기</button></div>`;
 function showSettings(){
-  show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·스킬을 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
+  show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·스킬을 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.'],['cutin','필살기 컷인','필살기 이름 띠를 전장 위에 띄웁니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
     <div class="settings-row"><div><strong>전장 화질</strong><small>기본은 선명도와 전력 사용의 균형을 맞춥니다.</small></div><select id="quality-select" aria-label="전장 화질">${[['standard','기본'],['high','고화질'],['low','절전']].map(([id,text])=>`<option value="${id}" ${p().settings.quality===id?'selected':''}>${text}</option>`).join('')}</select></div>
     ${tutorPanel()}
     ${UNLOCKED?testToolsPanel():''}
@@ -583,7 +583,7 @@ function exportBackup(){const blob=new Blob([JSON.stringify(p(),null,2)],{type:'
 // ───────── Shell ─────────
 // Five tabs. The garden gathers the idle loops (greenhouse, dispatch, gift basket); the library opens from home.
 const NAV=[['home','홈'],['collection','동료'],['adventure','모험'],['summon','소환'],['garden','정원']];
-const TITLES={home:'별빛 정원',collection:'동료',adventure:'모험',summon:'소환',garden:'정원',library:'별의 서재',draft:'주간 드래프트'};
+const TITLES={home:'별빛 정원',collection:'동료',adventure:'모험',summon:'소환',garden:'정원',library:'별의 서재',draft:'드래프트'};
 const greetOpen=()=>p().petDay!==calendar(now()).day;
 const gardenDot=()=>p().dispatches.some(d=>d.end<=now())||basketState(p(),now()).ready>0;
 const summonDot=()=>!todayDaily().free||['normal','season'].some(b=>p().pity[b]>=T.pity[b]);
@@ -790,7 +790,7 @@ function heroDetail(id){
     ${id==='miracle_larva'?miracleFormsMarkup(mult*(1+collectionBonus(p().relics)),e.owned?specialMultiplier(e.enhance):1):''}
     ${e.owned?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story.title)}</strong></span>${icon('chevron')}</button>`:''}
     <details class="more"><summary>능력치 자세히</summary><div class="stat-line"><span><small>공격력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>${e.owned?powerBreakdown(id):''}
-      <p class="fineprint">${id==='storm_sage'?'강화마다 기본 공격력 +5%, 5단계마다 즉사율 +0.1%p.':scaled.trait.length+scaled.skill.length?'강화마다 기본 공격력 +5%, 5단계마다 색으로 표시된 수치 +10%.':'강화마다 기본 공격력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
+      <p class="fineprint">${id==='storm_sage'?'강화마다 기본 공격력 +5%, 5단계마다 즉사율 +0.1%p.':scaled.trait.length+scaled.skill.length?'강화마다 기본 공격력 +5%, 5단계마다 <em class="scaled">색으로 표시된 수치</em> +10%.':'강화마다 기본 공격력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
     e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}" ${p().partner===id?'disabled':''}>${p().partner===id?'지금 파트너':'파트너로'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>${isAway?'파견 중':'편성'}</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
 }
 function powerBreakdown(id){
@@ -1011,9 +1011,17 @@ function claimPity(){
   const which=banner==='relic'?'normal':banner,result=act('pityClaim',{banner:which,id:pityPick},false);if(!result.ok){toast(result.message);return;}
   render();bonusItems=null;reveal([result.item],{count:1,cost:0});
 }
+// Relic rates as a step ladder from the current tier: each step lists its four rates, the line from the current node to
+// the next fills with this tier's progress, and the last row is the limit the steps approach.
+function relicLadder(){
+  const draws=p().relicDraws,tier=relicTier(draws),to=relicThreshold(tier+1),fill=Math.min(1,Math.max(0,(draws-relicThreshold(tier))/(to-relicThreshold(tier))));
+  const cells=list=>list.map((v,i)=>`<em${i===3?' class="ur"':''}>${pct(v)}</em>`).join('');
+  const steps=[0,1,2,3].map(i=>{const t=tier+i;return `<div class="rl-row ${['now','next','later','later last'][i]}"${i?'':` style="--fill:${fill.toFixed(3)}"`}><span class="rl-step"><i>${t}</i><span><b>${t}단계</b><small>${i===0?'지금':i===1?`${fmt(to-draws)}회 남음`:`누적 ${fmt(relicThreshold(t))}회`}</small></span></span>${cells(relicTierRates(t))}</div>`;}).join('');
+  return `<div class="relic-ladder"><div class="rl-row rl-cols"><span></span>${RARITIES.map(r=>`<span>${badge(r)}</span>`).join('')}</div>${steps}<div class="rl-row max"><span class="rl-step"><i>∞</i><span><b>한계</b></span></span>${cells(relicRatesAt(1))}</div></div>`;
+}
 function rates(){
   const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates,urCount=heroPool('UR',lateOpen(p().cleared)).length;
-  let rows=RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
+  let rows=banner==='relic'?relicLadder():RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
   if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%",closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<PART_STAGES;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${PART_STAGES} 클리어 후</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${half}</b></div>`;}
   if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/urCount)}</b></div><div class="rate-row"><span>UR · 나머지 ${urCount-1}종 각각</span><b>${pct(T.heroRates[3]*.5/urCount)}</b></div>`;
   if(banner!=='relic'){
@@ -1021,7 +1029,7 @@ function rates(){
     rows+=`<div class="rate-head">신규 동료${open?'':` <small>스테이지 ${PART_STAGES} 클리어 후 합류</small>`}</div>`+(open?lateNew().map(id=>`<div class="rate-row"><span>${badge(HERO[id].rarity)} ${HERO[id].name}</span><b>${pct(heroChance(id))}</b></div>`).join(''):`<div class="rate-row late-closed"><span>${icon('lock')} ${lateRarityLine()}</span><b>${lateNew().length}명</b></div>`);
   }
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'시즌':'일반',`${rows}
-    <ul class="notes">${banner==='relic'?`<li>누적 ${fmt(p().relicDraws)}회. 단계가 오를수록 높은 등급 확률이 올라가고, 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
+    <ul class="notes">${banner==='relic'?`<li>단계는 누적 소환 횟수로 올라요. 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
       :`<li>${banner==='season'?'UR의 절반은 이달의 수호자예요. 다른 달 수호자는 나오지 않아요.':`UR의 절반은 이번 주 픽업, 절반은 일반 UR ${urCount}종(픽업 포함) 중 하나예요. 픽업은 매주 월요일에 바뀌어요.`}</li><li>교환: 유료 소환 ${T.pity[banner]}회마다 ${banner==='season'?'이달의 수호자':`일반 UR ${urCount}종 중 원하는 한 명`}을(를) 데려올 수 있어요. UR이 나와도 초기화되지 않고 시즌이 바뀌어도 이어져요.</li><li>10회 소환 전 별빛 퀴즈를 맞히면 그 10회의 UR 확률이 2배가 돼요. 가끔 행운이 찾아올 수도 있어요.</li>`}<li>1회와 10회의 확률은 같아요. 중복은 강화 재료가 돼요.</li></ul>
     <details class="more"><summary>얻을 수 있는 대상</summary>${(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES))).map(h=>`<div class="rate-row"><span>${h.name}</span>${badge(h.rarity)}</div>`).join('')}</details>`,`<button class="primary wide" data-action="close">확인</button>`,'rates');
 }
@@ -1288,7 +1296,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=rarity===d.filter?'all':d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}if(d.part){focusPart(Number(d.part));return;}
   if(d.garden){gardenTab=d.garden;bedFocus=GARDENS.find(g=>g.id===gardenTab).beds[0];refreshGarden();return;}
-  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const r=act('testGrant',{kind:d.testTool});if(r.ok){cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
+  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
   if(d.prepareStage){prepare(Number(d.prepareStage));return;}if(d.begin){begin(d.begin,Number(d.stage));return;}
   if(d.bed){bedFocus=d.bed;refreshGarden();return;}if(d.bedGrow){if(bedHold?.held){bedHold=null;return;}growBed(d.bedGrow);return;}
   if(d.libraryTab){close();libraryTab=d.libraryTab;if(screen!=='library'){screen='library';render();}else{render();$('content').scrollTop=0;}return;}
