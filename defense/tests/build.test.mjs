@@ -106,5 +106,13 @@ test('CI creates fresh temporary variants without image encoding and still check
   const staleRelease=build(['--outdir',release]);
   assert.notEqual(staleRelease.status,0);assert.match(staleRelease.stderr,/Committed StarGardenDefenseBright.html is stale/);
   assert.ok((await fs.readFile(brightFile,'utf8')).endsWith('<!-- stale -->'),'CI overwrote the stale release');
+  // ...and the balance lab, which bundles the same content and combat code.
+  await fs.copyFile(path.join(game,'dist','StarGardenDefenseBright.html'),brightFile);
+  const labFile=path.join(release,'StarGardenBalanceLab.html');
+  await fs.copyFile(path.join(game,'dist','StarGardenBalanceLab.html'),labFile);
+  await fs.appendFile(labFile,'\n<!-- stale -->');
+  const staleLab=build(['--outdir',release]);
+  assert.notEqual(staleLab.status,0);assert.match(staleLab.stderr,/Committed StarGardenBalanceLab.html is stale/);
+  assert.ok((await fs.readFile(labFile,'utf8')).endsWith('<!-- stale -->'),'CI overwrote the stale lab');
   console.log('CI build contracts: '+JSON.stringify({encodingCalls:0,variants:results}));
 });

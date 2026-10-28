@@ -146,5 +146,6 @@ for(const [name,value] of Object.entries(categories)){
 console.log(`HTML, license and object glue: ${mib(report.htmlAndObjectGlueBytes)}`);
 }
 
-// The review workspace shares combat code but never writes game/profile state.
-if(!check&&!solo&&!web&&!compat&&!unlocked&&!bright){const {buildLab}=await import('./build-lab.mjs');await buildLab(output);}
+// The review workspace shares combat code but never writes game/profile state. It bundles content and
+// combat, so a release build rewrites it and the release check compares it like the two skins.
+if(release&&!bright){const {buildLab}=await import('./build-lab.mjs');await buildLab(output,{check});}

@@ -103,6 +103,33 @@ test('Star Garden monthly and render/save helpers select their own contracts wit
   }
 });
 
+test('Star Garden sources select the existing tests that pin their contracts', () => {
+  const contracts = file => createPlan(changes(file)).steps.find(s => s.id === 'defense:contracts-and-regressions');
+  const selected = file => (contracts(file)?.args || []).filter(a => a.endsWith('.test.mjs')).map(a => a.slice('defense/tests/'.length, -'.test.mjs'.length));
+  const content = ['assets', 'bond', 'combat', 'economy', 'generated-reports', 'independence', 'lines', 'text'];
+  for (const [file, expected] of [
+    ['defense/src/data.js', content],
+    ['defense/src/content.js', content],
+    ['defense/src/combat/engine.js', ['combat', 'generated-reports', 'text']],
+    ['defense/src/bond.js', ['bond']],
+    ['defense/src/smart-auto.js', ['combat']],
+    ['defense/src/combat/effects.js', ['companion-vfx', 'lightning-vfx']],
+    ['defense/src/lab/model.js', ['lab']],
+    ['defense/lab.html', ['lab']],
+    ['defense/scripts/build-lab.mjs', ['lab']],
+    ['defense/src/memorial.js', ['memorial']],
+    ['defense/src/course.js', ['study']],
+    ['defense/scripts/current-values.mjs', ['generated-reports']],
+    ['defense/src/app.js', []]
+  ]) assert.deepEqual(selected(file), expected, file);
+  // The lab inputs rebuild the committed lab (CI compares it); tests that load sharp install dependencies.
+  for (const file of ['defense/lab.html', 'defense/scripts/build-lab.mjs']) {
+    assert.equal(createPlan(changes(file)).steps.filter(s => s.id === 'defense:build').length, 1, file);
+  }
+  for (const file of ['defense/src/memorial.js', 'defense/src/course.js', 'defense/src/data.js']) assert.equal(contracts(file).needsInstall, true, file);
+  assert.equal(contracts('defense/src/bond.js').needsInstall, false);
+});
+
 test('Star Garden local data, copied images, font and font license each validate their own consumer', () => {
   for (const file of ['defense/src/data.js', 'defense/assets/merge/units/luna.webp', 'defense/assets/moonlit/realm-bosses.webp', 'defense/assets/Jua-Regular.ttf', 'defense/assets/Jua-OFL.txt', 'defense/scripts/local-inputs.mjs']) {
     const plan = createPlan(changes(file));

@@ -22,8 +22,12 @@ export const HEROES = [...Object.entries(ROSTER).flatMap(([rarity,ids])=>ids.map
   ...source.HERO[id],rarity,hidden:false,name:id==='avalanche_maid'?'메이드':source.HERO[id].name,
 }))),...HIDDEN.map(id=>({...source.HERO[id],rarity:'UR',hidden:true}))];
 export const HERO = Object.fromEntries(HEROES.map(h=>[h.id,h]));
-// Relic rarity follows the data order: 12 C, 6 R, 6 SR, 3 UR (rows of three in the collection).
-export const ARTIFACTS = source.ARTIFACTS.map((a,i)=>({...a,rarity:i<12?'C':i<18?'R':i<24?'SR':'UR'}));
+// Each relic states its rarity in data.js (12 C, 6 R, 6 SR, 3 UR). The list stays grouped C → R → SR → UR
+// for the collection and the draw pools, so a relic added anywhere in the data keeps its own rarity.
+export const ARTIFACTS = source.ARTIFACTS.map(a=>{
+  if(!RARITIES.includes(a.rarity))throw new Error(`Relic ${a.id} needs a rarity: C, R, SR or UR.`);
+  return {...a};
+}).sort((a,b)=>RARITIES.indexOf(a.rarity)-RARITIES.indexOf(b.rarity));
 export const ARTIFACT = Object.fromEntries(ARTIFACTS.map(a=>[a.id,a]));
 export const validArtifacts = ids=>Array.isArray(ids)&&ids.length<=3&&new Set(ids).size===ids.length&&ids.every(id=>ARTIFACT[id]);
 export const BOSS_ORDER = ['artificial_demon','flora','love_iris','curse_iris','thor','poseidon','ares','beelzebub','astea'];

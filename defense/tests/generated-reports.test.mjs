@@ -15,6 +15,9 @@ async function fixture(t){
   await writeGeneratedReports(directory);return directory;
 }
 
+// A change to numbers, texts or relics must regenerate the committed reports in the same change.
+test('the committed reports match the current local inputs',async()=>{await checkGeneratedReports();});
+
 test('both generated reports match local inputs and CRLF checkouts compare consistently',async t=>{
   const directory=await fixture(t),reports=await renderReports();
   for(const [name,text] of reports)await fs.writeFile(path.join(directory,name),text.replaceAll('\n','\r\n'));
