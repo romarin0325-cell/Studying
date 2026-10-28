@@ -5,7 +5,7 @@ export const shapes={single:'단일',splash:'범위',pulse:'주변 범위',beam:
 export const roster=[...HEROES,...Object.entries(MIRACLE_FORMS).filter(([id])=>id!=='miracle_larva').map(([id,f])=>({...HERO.miracle_larva,...f,id,owner:'miracle_larva'}))];
 export const effects=['감속','노출','기절','빙결','성광','중독','화상'];
 export function tags(h){const text=h.trait.text+' '+h.skill.text;return effects.filter(t=>text.includes(t)||t==='중독'&&/독 \d|독이|독 피해/.test(text)||t==='화상'&&/불태|불타|불타는/.test(text)||t==='빙결'&&/얼리|얼어|얼립/.test(text)||t==='성광'&&h.trait.type==='battery');}
-export function skillType(h){const t=h.skill.type;if(['echo','haste','awaken','march','harmony','gift','lemonade','miracle_eclose'].includes(t))return '보조';if(['execute','royal','starfall','mirror'].includes(t))return '단일';if(['avalanche','dragon','deathhand','armageddon','crush','singularity','applebomb','ultimate_breath'].includes(t))return '범위';return '전체';}
+export function skillType(h){const t=h.skill.type;if(['echo','haste','awaken','march','harmony','gift','lemonade','miracle_eclose'].includes(t))return '보조';if(['execute','royal','starfall','mirror'].includes(t))return '단일';if(['dragon','deathhand','armageddon','crush','singularity','applebomb','ultimate_breath'].includes(t))return '범위';return '전체';}
 export const conditionDefaults={coreNear:false,coreCrisis:false,auroraEven:false,normalDeck:false,lightningTeam:false,rabbitTeam:false,powerAura:false,speedAura:false,harmonyTeam:false,falseCinderella:false,supportTeam:false,goldOpening:false,appleApproach:false,prism:false,heroMax:false,age:1,joker:0,gold:200,gauge:120};
 const nativeConditions={
  gold_dragon:{goldOpening:true},zeke:{coreNear:true,coreCrisis:true},aurora:{auroraEven:true},underdog:{normalDeck:true},lightning_sage:{lightningTeam:true},night_rabbit:{rabbitTeam:true},sunflower:{sun:3},star_boy:{age:0},time_ruler:{age:2},behemoth:{powerAura:true,speedAura:true},harmonious:{harmonyTeam:true},time_magician:{supportTeam:true},doom:{gold:240},cinderella:{falseCinderella:false},joker:{joker:5},toffee_apple:{appleApproach:true},
@@ -39,7 +39,7 @@ export function arena(h,opt={},draft={}){
  s.queue=Array.from({length:o.targets},()=>({kind:(o.boss||h.id==='storm_sage')?'boss':'grunt',hp:1e12}));
  for(let i=0;i<o.targets;i++){s.spawnIn=0;E.step(s,.001);}
  s.queue=[{kind:'grunt',hp:1e12}];s.spawnIn=1e8;s.events=[];s.shots=[];s.stats.damage=0;s.stats.byHero={};
- s.enemies.forEach((e,i)=>{Object.assign(e,{progress:(h.shape==='cross'?(o.coreNear?1925:284):(o.coreNear?1970:250))+(i-(o.targets-1)/2)*24,speed:0,skillIn:1e8,hp:1e12,maxHp:o.low?4e12:1e12});
+ s.enemies.forEach((e,i)=>{Object.assign(e,{progress:(o.coreNear?1925:284)+(i-(o.targets-1)/2)*24,speed:0,skillIn:1e8,hp:1e12,maxHp:o.low?4e12:1e12});
  const add=(type,amount,power=0)=>e.statusEffects.push({type,amount,power,until:1e6,source:'lab:'+type,owner:'lab'});
  if(o.burn)add('burn',.001);if(o.divine)add('divine',3);if(o.poison){add('poison',20,E.power(s,u));e.statusEffects.at(-1).until=s.time+12;}if(o.exposure)add('exposure',.35);if(o.stun)add('stun',1);if(o.freeze)add('freeze',1);if(o.slow)e.slowEffects.push({source:'lab',owner:'lab',amount:.35,until:1e6});
  E.statusState(s,e);});

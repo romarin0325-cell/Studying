@@ -57,7 +57,7 @@ node defense/docs/art/gold-dragon-20261029/verify-review.mjs <출력 HTML 절대
 
 [검증 요약과 배포 파일 해시](verification.json), [실제 통합 HTML 검수](evidence/browser-verification.json), [실제 렌더러 비교 검수](evidence/review-verification.json)를 보관한다.
 
-- 디펜스 전용 최소 선택 검증236개 통과. 이 중 골드드래곤 회귀는17개다.
+- 디펜스 전용 최소 선택 검증238개 통과. 이 중 골드드래곤 회귀는17개다.
 - 일반판·Bright 통합 HTML을 file:// 오프라인 Chromium390×844에서 확인했다. 홈·동료 목록·정보·메모리얼·이야기·좌우 전장·차지·저장/이어하기·착탄을 실제 UI로 검사했다.
 - 두 테마20캡처에서 가로 넘침과 누락 이미지가 없었고 외부 네트워크 요청0·JS 오류0이었다.
 - 일반 공격 금색 변환의 알파 변경0픽셀, 붉은 공격은 원래 이미지 객체 재사용이다.

@@ -1,11 +1,11 @@
 {
   "scope": "Gold Dragon integration; exact supplied SD selection retained",
-  "base": "b97de8771eb5870b10ff30bdfb2378f3ec759d79",
+  "base": "f997209ce2e7a2989dcdb04e4171ae30730c08bf",
   "branch": "codex/gold-dragon-20261029",
   "selectedVerification": {
     "command": "npm run verify -- --only defense",
-    "tests": 236,
-    "pass": 236,
+    "tests": 238,
+    "pass": 238,
     "fail": 0,
     "localTemporaryDirectory": "defense/test-results/gold-dragon/tmp",
     "note": "Windows sandbox temp rename is avoided using a workspace-local process TEMP/TMP; runtime behavior and CI scripts unchanged."
@@ -28,8 +28,8 @@
       "sha256": "36780293348f1361af39446498ced4338de3bcd3cdd9823340e30e82292a828e"
     },
     "StarGardenBalanceLab.html": {
-      "bytes": 16025304,
-      "sha256": "c3ed733c36825c47ab5ac8dbe711bc0801817c9a936ffcd3226c6b2ce390af1a"
+      "bytes": 16025254,
+      "sha256": "16dbcdc2898b8247d3d34273ee06cd8e3aa6e9ec3d57c345d36e7c2bbe297ac5"
     }
   },
   "limitations": [
@@ -37,5 +37,7 @@
     "Combat visual comparisons use explicitly stationary targets.",
     "Chromium390x844 offline smoke tests do not measure physical-mobile FPS."
   ],
-  "futureWork": "docs/plans/COMPANION_REQUESTS_AUTO_STRATEGY_MISSIONS.md (planning only)"
+  "futureWork": "docs/plans/COMPANION_REQUESTS_AUTO_STRATEGY_MISSIONS.md (planning only)",
+  "integratedMain": "PR #646: aligned lab targets and Maid global-skill classification retained",
+  "gameplayHtmlUnchangedByMainMerge": true
 }
