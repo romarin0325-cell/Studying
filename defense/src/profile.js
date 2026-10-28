@@ -17,7 +17,7 @@ export function createProfile(now=Date.now()){
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
     monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
-    daily:freshDaily(now),study:freshStudy(),settings:{sound:true,auto:true,reduced:false,quality:'standard'},active:null,results:[]});
+    daily:freshDaily(now),study:freshStudy(),settings:{sound:true,auto:true,reduced:false,cutin:true,quality:'standard'},active:null,results:[]});
 }
 const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<=max;
 // Daily missions are things any player does just by playing (UI part 2):
@@ -68,7 +68,7 @@ export function validateProfile(p){
   if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)||d.dust!==undefined&&!integer(d.dust)))return false;
   if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
   if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
-  if(['combat','idle','free','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced'].some(k=>typeof p.settings[k]!=='boolean'))return false;
+  if(['combat','idle','free','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced','cutin'].some(k=>typeof p.settings[k]!=='boolean'))return false;
   if(!validStudy(p.study))return false;
   if(!p.basket||!integer(p.basket.at)||!integer(p.basket.next,GIFT_IDS.length-1))return false;
   if(!Array.isArray(p.perfect)||p.perfect.length>MAIN_STAGES||new Set(p.perfect).size!==p.perfect.length||p.perfect.some((n,i)=>(i&&n<=p.perfect[i-1])||!integer(n,MAIN_STAGES)||n<1||n>p.cleared))return false;
@@ -142,7 +142,7 @@ export function migrateMemories(p){
     m.of=now;
   }
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
@@ -326,7 +326,7 @@ export function command(p,action,args={},now=Date.now()){
     if(l.stars>=c.stars.length){l.unlocked.push(c.id);l.index++;l.stars=0;completed=c.id;}
     return {ok:true,completed,message:completed?`${c.name} 완성! 루미의 그림이 열렸어요.`:`별 하나가 켜졌어요 · ${c.name} ${l.stars}/${c.stars.length}`};
   }
-  if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
+  if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced','cutin'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
   if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}
   return no('사용할 수 없는 동작입니다.');
 }

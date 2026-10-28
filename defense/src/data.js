@@ -1856,7 +1856,8 @@ export const BOSSES = {
     "pattern": "judgement",
     "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",
     "basicScale": 0.5,
-    "trait": "일반 공격 피해 절반 · 예고된 칸에 천벌",
+    "deathWard": 180,
+    "trait": "일반 공격 피해 절반 · 주변 180 즉사 면역 · 예고된 칸에 천벌",
     "atlas": "bosses-expansion",
     "frame": 2
   }

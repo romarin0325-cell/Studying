@@ -615,6 +615,16 @@ test('Storm uses a strict 1% boundary and an instant kill accounts for shield an
   }
 });
 
+test('Astea wards nearby enemies from Storm executes without consuming a roll',()=>{
+  const s=traitArena([{hero:'storm_sage',index:12}]),[boss,near,far]=enemiesFor(s,[{kind:'boss',progress:1100},{progress:1200},{progress:1500}]);boss.boss='astea';
+  s.enemies=[boss,near];let shot=launchNormal(s,s.board[12]);shot.target=near.uid;s.rng=1;resolveNormal(s,shot);
+  assert.ok(near.hp>0&&near.hp<near.maxHp);assert.equal(s.rng,1);assert.equal(s.events.some(e=>e.type==='instantKill'),false);
+  s.enemies=[boss,far];shot=launchNormal(s,s.board[12]);shot.target=far.uid;s.rng=1;resolveNormal(s,shot);
+  assert.ok(far.hp<=0);assert.deepEqual(s.events.filter(e=>e.type==='instantKill').map(e=>e.uid),[far.uid]);
+  s.enemies=[near];shot=launchNormal(s,s.board[12]);shot.target=near.uid;s.rng=1;resolveNormal(s,shot);
+  assert.ok(near.hp<=0);assert.deepEqual(s.events.filter(e=>e.type==='instantKill').map(e=>e.uid),[far.uid,near.uid]);
+});
+
 test('Storm instant kill never triggers on bosses, damage over time, ultimate attacks or a vanished target, and an echo rolls like a basic attack',()=>{
   {
     const s=traitArena([{hero:'storm_sage',index:12}]),[boss]=enemiesFor(s,[{kind:'boss',progress:1200}]);

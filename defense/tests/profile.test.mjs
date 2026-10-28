@@ -14,6 +14,13 @@ function memory(p=null){let raw=p?JSON.stringify(p):null;return {fail:false,getI
 const storeFor=p=>new ProfileStore(memory(p),NOW);
 const call=(s,a,args={},now=NOW)=>{const r=s.transact(a,args,now);assert.ok(r.ok,r.message);return r;};
 
+test('cut-in setting defaults on, migrates old saves and accepts only booleans',()=>{
+  const p=createProfile(NOW);assert.equal(p.settings.cutin,true);assert.ok(validateProfile(p));
+  delete p.settings.cutin;const migrated=parseProfile(p);assert.equal(migrated.settings.cutin,true);assert.ok(validateProfile(migrated));
+  for(const value of [false,true]){assert.ok(command(migrated,'setting',{id:'cutin',value},NOW).ok);assert.equal(migrated.settings.cutin,value);}
+  assert.equal(command(migrated,'setting',{id:'cutin',value:0},NOW).ok,false);migrated.settings.cutin=0;assert.equal(validateProfile(migrated),false);
+});
+
 test('greenhouse beds are shared, unlock at stages 15 and 30, and soft-cap by cost',()=>{
   const p=createProfile(NOW);assert.deepEqual(p.beds,{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0});assert.equal(p.bedRev,4);p.dust=100000;const s=storeFor(p);
   call(s,'bed',{id:'rose'});assert.equal(s.value.beds.rose,1);assert.equal(s.value.dust,100000-bedCost('rose',0));assert.equal(bedCost('rose',0),120);
