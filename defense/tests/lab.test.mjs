@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {roster,measure,arena,castArena,defaults} from '../src/lab/model.js';
+import {roster,measure,arena,castArena,defaults,skillType} from '../src/lab/model.js';
 const hero=id=>roster.find(h=>h.id===id);
 test('all collectible identities and forms have finite real-engine results',()=>{for(const h of roster){const r=measure(h);assert.ok(Number.isFinite(r.dps)&&r.dps>=0,h.id);assert.ok(Number.isFinite(r.value),h.id);}});
 test('burn and poison contribute to measured DPS, external conditional effects change hits',()=>{const h=hero('luna');assert.ok(measure(h,{low:true,boss:true}).dps>measure(h,{boss:true}).dps*1.9);const v=measure(hero('venom'));assert.ok(v.dps>v.direct);});
@@ -62,4 +62,8 @@ test('character presets activate each native condition and starlight/gold contro
 
 test('one stationary target is within the Ancient Dragon cross and takes normal attack damage',()=>{
  const h=hero('ancient_dragon');for(const coreNear of [false,true]){const a=arena(h,{targets:1,coreNear});const p=E.pathPoint(a.s.enemies[0].progress),origin=E.cellPoint(a.index);assert.ok(E.geometryContains(E.attackGeometry(h,origin,p),p));const m=measure(h,{targets:1,coreNear});assert.ok(m.dps>0);assert.ok(Math.abs(m.dps-m.direct)<2);}
+});
+
+test('Maid ultimate is classified as global and hits widely separated enemies',()=>{
+ const h=hero('avalanche_maid'),a=arena(h,{targets:2});assert.equal(skillType(h),'전체');a.s.enemies[0].progress=100;a.s.enemies[1].progress=1200;const before=a.s.enemies.map(e=>e.hp);assert.equal(castArena(a).ok,true);assert.ok(a.s.enemies.every((e,i)=>e.hp<before[i]));
 });
