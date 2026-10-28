@@ -3,9 +3,10 @@ import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,p
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
+import {drawGoldAttack,drawGoldPersistent,goldEvent,drawGoldGround,drawGoldImpact} from './gold-dragon-vfx.js';
 import {drawRagnarok,drawMoonShot,drawMoonCut,MOON_CUT_LIFE} from './blade-vfx.js';
 // Effects drawn under the units (attack circles and ultimate ground marks); draw() only ages them.
-const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround']);
+const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround','goldBreathGround']);
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
 // Emblems added in pass 15 for companions whose ultimate only had the shared cast flash, and for the Queen, who borrowed
 // Cherry Prince's finisher ring (GPT image, docs/art/companion-fx-20261024): [atlas, frame, columns, rows].
@@ -27,7 +28,7 @@ export const FX_PROFILES=Object.fromEntries([
   ['lightning_sage','bolt',9,0],['red_dragon','dragon',10,0],['flame_sage','embers',11,0],
   ['mushroom_king','spores',12,0],['great_detective','needle',13,0],['siren','song',14,0],
   ['phantom','claws',15,Math.PI/4],['queen','petals',16,0],['galaxy_whale','planet',17,0],
-  ['silver_rabbit','comets',18,.18],['ancient_dragon','cross',19,0],['time_ruler','clock',20,0],
+  ['silver_rabbit','comets',18,.18],['ancient_dragon','cross',19,0],['gold_dragon','cross',19,0],['time_ruler','clock',20,0],
 ].map(([id,motion,frame,offset])=>[id,{motion,frame,offset}]));
 for(const [frame,[id,motion]] of [['doom','contract'],['santa','present'],['jasmine','halo'],['star_boy','falling_star'],['time_magician','time_needle'],['cherry_prince','royal_blade']].entries())FX_PROFILES[id]={motion,frame,offset:0,atlas:'effects-expansion',columns:4,rows:3};
 for(const [frame,[id,motion]] of [['frost_witch','ice_lance'],['harmonious','harmony_bell'],['aurora','mirror_shard']].entries())FX_PROFILES[id]={motion,frame,offset:0,atlas:'effects-trio',columns:3,rows:2};
@@ -146,8 +147,9 @@ export class CombatFX{
       this.add({...e,points,life:1.4,total:1.4});this.add({type:'deathhandGround',x:e.x,y:e.y,radius:e.radius,life:1.4,total:1.4});
     }
     if(e.type==='eclose')for(const [i,p] of e.points.entries()){const delay=Math.min(.48,i*.12),life=1.25+delay;this.add({...p,type:'miracleEclose',delay,life,total:life});this.add({...p,type:'ecloseGround',delay,life,total:life});}
+    goldEvent(this,e);
     const cocoon=e.hero==='miracle_larva'&&e.form==='miracle_cocoon';
-    if(e.type==='attack'&&(cocoon||['zeke','guardian','ancient_dragon','behemoth'].includes(e.hero))){const life=cocoon?.44:e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='ancient_dragon'?.3:.34;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
+    if(e.type==='attack'&&(cocoon||['zeke','guardian','ancient_dragon','gold_dragon','behemoth'].includes(e.hero))){const life=cocoon?.44:e.hero==='guardian'||e.hero==='behemoth'?.44:['ancient_dragon','gold_dragon'].includes(e.hero)?.3:.34;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='meteor')this.add({...e,seed:this.clock*7+e.x,life:.7,total:.7});
     if(e.type==='judgement')this.add({...e,life:.9,total:.9});
@@ -175,7 +177,7 @@ export class CombatFX{
     if(e.type==='bombBlast')this.add({...e,life:.9,total:.9});
     if(companionSkillEvents(this,e))return;
     if(e.type==='skill'){
-      if(e.kind==='deathhand'||e.kind==='miracle_eclose')return;
+      if(e.kind==='deathhand'||e.kind==='miracle_eclose'||e.kind==='ultimate_breath')return;
       if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
@@ -278,7 +280,7 @@ export class CombatFX{
       ctx.restore();}
   }
   drawSkillField(skill){
-    if(!skill||skill.life<=0)return;
+    if(!skill||skill.life<=0||skill.kind==='ultimate_breath')return;
     // Their signatures are drawn from their own events (hand over the pack, each cocoon hatching); the cast beat stays.
     if(skill.kind==='deathhand'||skill.kind==='miracle_eclose'){this.drawCast(skill);return;}
     if(drawCompanionSkill(this,skill))return;
@@ -581,6 +583,7 @@ export class CombatFX{
     // Reuse each companion's painted combat emblem. The foot seal conveys a
     // live condition without painting over faces, ranks, enemies or HP bars.
     const ctx=this.ctx;
+    drawGoldPersistent(this,s,foreground);
     if(foreground){this.drawPlague(s);this.drawSunBlooms(s);this.drawJokerWheels(s);this.drawAntropyBadges(s);}else{this.drawSunHalo(s);this.drawWards(s);}
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u)continue;
@@ -720,7 +723,7 @@ export class CombatFX{
     if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(h.id==='lightning_sage'){drawLightningShot(this,shot,s,p);return;}
     if(h.id==='luna'&&drawMoonShot(this,shot,{from:shot.from,to,t}))return;
-    if(['zeke','guardian','ancient_dragon','behemoth'].includes(h.id))return;
+    if(['zeke','guardian','ancient_dragon','gold_dragon','behemoth'].includes(h.id))return;
     if(h.shape==='beam'&&f.motion==='candy'){
       const len=64+shot.rank*4;ctx.save();ctx.translate(x,y);ctx.rotate(angle);
       const g=ctx.createLinearGradient(-len,0,12,0);g.addColorStop(0,'#e5604a00');g.addColorStop(.65,'#e5604acc');g.addColorStop(1,'#ffe3d6');
@@ -828,13 +831,14 @@ export class CombatFX{
     const ctx=this.ctx;
     // Twenty simultaneous basic attacks must not paint the entire grid red.
     // Keep a two-attack brightness budget; every real strike still has a shape.
-    const flames=this.impacts.filter(e=>e.type==='attackShape'&&e.life>0&&['zeke','ancient_dragon'].includes(e.hero)).length;
+    const flames=this.impacts.filter(e=>e.type==='attackShape'&&e.life>0&&['zeke','ancient_dragon','gold_dragon'].includes(e.hero)).length;
     const fireClarity=Math.min(1,2/Math.max(1,flames));
     for(const e of this.impacts){
       if(!GROUND_TYPES.has(e.type)||e.life<=0)continue;
       const t=Math.max(0,1-e.life/e.total);
-      if(e.type!=='attackShape'){drawNewGround(this,e,t);continue;}
+      if(e.type!=='attackShape'){if(!drawGoldGround(this,e,t))drawNewGround(this,e,t);continue;}
         const h=HERO[e.hero],fade=Math.sin(Math.PI*t);
+        if(drawGoldAttack(this,e,t,fireClarity))continue;
         if(drawNewAttackShape(this,e,t,e.hero==='zeke'?fireClarity:1))continue;
         if(['guardian','behemoth','zeke','miracle_larva'].includes(e.hero)){
           const R=e.hero==='miracle_larva'?230:h.range;
@@ -855,6 +859,7 @@ export class CombatFX{
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||GROUND_TYPES.has(e.type))continue;
+      if(drawGoldImpact(this,e,t))continue;
       if(drawNewImpact(this,e,t))continue;
       if(drawCompanionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(drawLightningImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;

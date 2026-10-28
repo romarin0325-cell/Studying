@@ -103,6 +103,13 @@ function ultValue(s,m,id,gv){
   // A big damage ultimate that could follow a setup (exposure, mirror) right after.
   const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-E.skillCost(s,id)>=E.skillCost(s,o)&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['deathhand','royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','crush','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
   switch(type){
+    case 'ultimate_breath':{
+      if(rem<E.GOLD_DRAGON.charge+E.GOLD_DRAGON.flight)return 0;
+      const target=E.goldBreathTarget(s,u);if(!target)return 0;
+      const centre=E.pathPoint(target.progress),factor=E.goldBreathPower(s,u)/Math.max(1e-9,P)*E.GOLD_DRAGON.factor;
+      const group=list.filter(e=>{const p=E.pathPoint(e.progress);return Math.hypot(p.x-centre.x,p.y-centre.y)<=E.GOLD_DRAGON.radius;});
+      return Math.max(0,group.reduce((n,e)=>n+hit(factor,e),0)-unitValue(s,u,s.board.indexOf(u))*m.scale*E.GOLD_DRAGON.charge);
+    }
     case 'deathhand':return E.deathhandTargets(s).targets.reduce((n,e)=>n+hit(E.deathhandFactor(s,e),e),0);
     case 'miracle_eclose':{
       const pending=E.pendingMiracles(s);if(!pending.length)return 0;
@@ -223,7 +230,7 @@ function dodge(s,m){
     const u=s.board[c];s.board[c]=null;const free=bestCell(s,u,danger);s.board[c]=u;
     if(free.cell>=0){E.move(s,c,free.cell);m.dodged++;return true;}
     // No safe empty cell: swap with the weakest unit outside the light.
-    const weak=CELLS.filter(i=>!danger.has(i)&&s.board[i]).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
+    const weak=CELLS.filter(i=>!danger.has(i)&&s.board[i]&&!E.charging(s,s.board[i])).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
     if(weak!==undefined&&unitValue(s,s.board[weak],weak)<unitValue(s,u,c)*.6){E.move(s,c,weak);m.dodged++;return true;}
   }
   return false;
@@ -231,7 +238,7 @@ function dodge(s,m){
 function bestMerge(s,m,gv){
   let best=null;const cells=CELLS.filter(c=>s.board[c]);
   for(let x=0;x<cells.length;x++)for(let y=0;y<cells.length;y++){
-    const a=cells[x],b=cells[y];if(a===b||!E.canMerge(s.board[a],s.board[b]))continue;
+    const a=cells[x],b=cells[y];if(a===b||!E.canMerge(s.board[a],s.board[b],s))continue;
     const A=s.board[a],B=s.board[b],hero=B.hero==='rumi'?A.hero:B.hero,rank=B.rank+1;
     const d=delta(s,[a,b],()=>{s.board[b]={...tempUnit(s,hero,rank),...(hero==='miracle_larva'?{form:'miracle_cocoon'}:{}),priority:B.priority};s.board[a]=null;},()=>{s.board[a]=A;s.board[b]=B;});
     let v=d+12*Math.max(1,m.dps)*.06/Math.max(1e-9,m.scale);
@@ -270,7 +277,7 @@ function optimize(s,m){
   const units=CELLS.filter(c=>s.board[c]&&!s.board[c].cursed).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
   const support=new Set(['siren','ancient_dragon','harmonious','time_magician','lightning_sage','behemoth']);
   const pick=[...new Set([...units.slice(0,10),...units.filter(c=>support.has(s.board[c].hero))])];
-  for(const a of pick)for(const b of CELLS){if(a===b||lit.has(b))continue;const d=swapDelta(s,a,b);if(!best||d>best.d)best={a,b,d};}
+  for(const a of pick)for(const b of CELLS){if(a===b||lit.has(b)||E.charging(s,s.board[a])||E.charging(s,s.board[b]))continue;const d=swapDelta(s,a,b);if(!best||d>best.d)best={a,b,d};}
   if(best&&best.d>total*.03){E.move(s,best.a,best.b);return true;}
   return false;
 }
@@ -286,7 +293,7 @@ export function smartAutoPlay(s){
   m.dps=Math.max(m.dps||0,bv*m.scale*.7);
   if(dodge(s,m))return;
   // A cursed low-rank unit with no partner only blocks a cell.
-  for(const c of CELLS){const u=s.board[c];if(u?.cursed&&u.rank<=2&&!CELLS.some(o=>o!==c&&E.canMerge(u,s.board[o]))&&s.board.filter(Boolean).length>1){E.sell(s,c);return;}}
+  for(const c of CELLS){const u=s.board[c];if(u?.cursed&&u.rank<=2&&!CELLS.some(o=>o!==c&&E.canMerge(u,s.board[o],s))&&s.board.filter(Boolean).length>1){E.sell(s,c);return;}}
   const gv=goldValue(s,m),merge=bestMerge(s,m,gv);if(merge){E.move(s,merge.from,merge.to);return;}
   const ult=pickUltimate(s,m);if(ult&&E.cast(s,ult).ok)return;
   if(spendGold(s,m))return;

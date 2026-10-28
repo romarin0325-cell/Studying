@@ -177,7 +177,7 @@ test('crush uses the reduced trained radius for hit boundaries, previews, effect
 });
 
 test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
-  assert.equal(HEROES.length,41);assert.equal(new Set(HEROES.map(h=>h.id)).size,41);
+  assert.equal(HEROES.length,42);assert.equal(new Set(HEROES.map(h=>h.id)).size,42);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','앤트로피','마왕']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
@@ -478,7 +478,7 @@ test('Doom refunds once in either Rumi merge direction and a merge records its w
     const [enemy]=enemiesFor(s,[{progress:1200}]);s.gold=100;s.gauge=30;s.upgrades.doom=2;
     const before=enemy.hp,refund=E.doomRefund(2,2),result=E.move(s,0,1);
     assert.ok(result.ok&&result.merged);assert.equal(result.refund,refund);assert.equal(s.gold,100+refund);
-    assert.equal(s.stats.income['합성 환급'],refund);assert.equal(s.stats.merges,1);assert.equal(s.gauge,36);
+    assert.equal(s.stats.income['합성 환급'],refund);assert.equal(s.stats.merges,1);assert.equal(s.gauge,34);
     assert.equal(s.board[1].hero,'doom');assert.equal(s.board[1].rank,3);assert.equal(s.board[1].mergedWave,s.wave);
     assert.equal(enemy.hp,before);assert.equal(s.stats.byHero.doom,undefined);
   }

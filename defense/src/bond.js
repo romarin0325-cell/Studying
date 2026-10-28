@@ -13,13 +13,14 @@ export const GIFTS=Object.freeze({
 const group=(gift,ids)=>ids.map(id=>[id,gift]);
 export const FAVORITE=Object.freeze(Object.fromEntries([
   ...group('letter',['demon_king']),
-  ...group('bouquet',['miracle_larva']),
+  ...group('bouquet',['miracle_larva','gold_dragon']),
   ...group('candy',['star_boy','siren','guardian','red_dragon','storm_sage','phantom','rumi','galaxy_whale','harmonious','time_ruler','toffee_apple','sunflower','cure_master','venom']),
   ...group('letter',['snow_rabbit','night_rabbit','great_detective','santa','flame_sage','lightning_sage','zeke','luna','jasmine','doom','behemoth','joker']),
   ...group('bouquet',['silver_rabbit','mushroom_king','avalanche_maid','aurora','time_magician','ancient_dragon','queen','cherry_prince','cinderella','frost_witch','underdog','antropy','ash']),
 ]));
 // What each companion says to the gift they love.
 export const FAVORITE_LINES=Object.freeze({
+  gold_dragon:'용의 둥지에도 없는 꽃이로구나. 그래, 그대가 골랐으니 더 귀한 것이겠지. 가까이서 함께 보자꾸나.',
   demon_king:'짐에게 직접 쓴 서신이라… 격식을 따질 생각은 없다. 한 글자도 빠짐없이 읽어 주마.',
   miracle_larva:'내 머리핀하고 닮은 꽃이다! 시들기 전에 네 옆에 놓아도 돼?',
   star_boy:'우와, 별사탕이다! 배달만 하다가 받으니까 엄청 신기해… 헤헤, 고마워!',
@@ -64,6 +65,7 @@ export const FAVORITE_LINES=Object.freeze({
 });
 // What each companion says to the other two gifts, in that companion's own voice.
 export const GIFT_LINES=Object.freeze({
+  gold_dragon:'나를 떠올리며 골랐단 말이지? 고맙구나. 보물의 주인이 되는 것도 제법 기쁜 일이야.',
   demon_king:'헌상품… 이 아니라 선물이라고? 좋다. 이번에는 네 뜻대로 불러 주지.',
   miracle_larva:'나한테 주는 거야? 고마워! 나뭇가지 위 보물함에 넣어 둘게.',
   star_boy:'헤헤, 선물 배달받았다! 형아한테 받으니까 날아갈 것 같아!',

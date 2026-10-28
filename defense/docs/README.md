@@ -30,6 +30,7 @@ docs/
 - [2026-10-27 확정 밸런스 패치](archive/2026-10-27-BALANCE_FINAL.md): 수치·카오스·사과·보호·문구·측정 도구 반영.
 - [STATUS_RULES.md](STATUS_RULES.md): 독·노출·화상·제어 규칙.
 - [CHARACTER_TRAITS.md](CHARACTER_TRAITS.md): 위력 계산 경로와 특성 판정 기준.
+- [골드드래곤 편입·별빛 수급](archive/2026-10-29-GOLD_DRAGON.md):45해금 UR,5초 차지·개전 강화·고정 십자. [아트·재현 도구](art/gold-dragon-20261029/README.md).
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.
 - [SINGLE_HTML_OPTIMIZATION.md](SINGLE_HTML_OPTIMIZATION.md): 지금의 빌드·압축·원본 보존·검증 범위.
 - [ASSET_PIPELINE.md](ASSET_PIPELINE.md): 에셋·사운드 제작과 검수 절차.
@@ -43,6 +44,7 @@ docs/
 
 ## 3. 기획 (plans/)
 
+- [동료 의뢰·오토 전략·미션](plans/COMPANION_REQUESTS_AUTO_STRATEGY_MISSIONS.md):2026-10-29 사용자 요청. 선호 선물·전용 대화,5인 사전 전략과 최고 기록의 시간당 효율, 조합/상황 미션. 후속 구현 과제.
 - [UPCOMING_COMPANIONS.md](plans/UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
 - [FINAL_UR_AND_RELIC_IDEAS.md](plans/FINAL_UR_AND_RELIC_IDEAS.md): 마지막 UR 동료와 신규 유물 아이디어(2026-10-26). GPT 안 평가, Claude 안, Grok 답. 구현 전 제안.
 - [SUNFLOWER_SUNMOON_PLAN.md](plans/SUNFLOWER_SUNMOON_PLAN.md): 해바라기·일월검희 구현 계획(2026-10-19). 해바라기는 구현됨, 일월검희는 구현 전.

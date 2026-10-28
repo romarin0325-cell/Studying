@@ -29,7 +29,7 @@ export function autoPlay(s){
   if(s.phase==='reward')return engine.chooseReward(s,s.reward.includes('oath')?'oath':s.reward[0]);
   if(!['combat','intermission'].includes(s.phase))return;
   const occupied=s.board.flatMap((u,i)=>u?[i]:[]);
-  for(const from of occupied){const to=occupied.find(i=>engine.canMerge(s.board[from],s.board[i]));if(to!==undefined){engine.move(s,from,to);return;}}
+  for(const from of occupied){const to=occupied.find(i=>engine.canMerge(s.board[from],s.board[i],s));if(to!==undefined){engine.move(s,from,to);return;}}
   if(s.board.filter(Boolean).length<23&&s.gold>=engine.summonCost(s)){engine.summon(s);return;}
   if(s.enemies.some(e=>e.boss)&&s.gauge>=60){
     const best=s.deck.filter(id=>engine.bestUnit(s,id)&&!engine.castLock(s,id)&&s.gauge>=engine.skillCost(s,id)&&s.gold>=engine.skillGoldCost(id)).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));

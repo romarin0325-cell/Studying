@@ -1761,6 +1761,12 @@
       "hidden": false
     },
     {
+      "id": "gold_dragon",
+      "name": "골드드래곤",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
       "id": "time_ruler",
       "name": "시간의지배자",
       "rarity": "UR",
@@ -1797,7 +1803,19 @@
       "hidden": true
     }
   ],
+  "starlight": {
+    "perMerge": 4,
+    "perCombatSecond": 2
+  },
   "newCompanions": {
+    "goldDragon": {
+      "opening": 10,
+      "bonus": 1,
+      "charge": 5,
+      "factor": 22,
+      "radius": 180,
+      "flight": 0.62
+    },
     "deathhand": {
       "base": 4,
       "perDebuff": 4,

@@ -1,0 +1,21 @@
+{
+  "selected": "generation.png",
+  "selectedSha256": "b967708811806c3077ad749c310e257cdb58d8d931192b6dcabbbb1f6cb9107a",
+  "v1": {
+    "file": "generation-v1.png",
+    "sha256": "ddc280d2c7f293716ebbc122d01a99e1f9f328cb87980b7771689bee911c6e70",
+    "prompt": "prompt-v1.txt",
+    "reason": "Front tail appeared on a different anatomical side from the back view."
+  },
+  "v2": {
+    "file": "generation.png",
+    "prompt": "refinement-prompt-v2.txt",
+    "target": "generation-v1.png",
+    "targetSha256": "ddc280d2c7f293716ebbc122d01a99e1f9f328cb87980b7771689bee911c6e70",
+    "note": "Target file preserved before editing; this SHA recorded after the edit. V2 corrects the front tail to screen-left; back stays screen-right. No frame-level manual art repainting or equipment mirroring."
+  },
+  "limitations": [
+    "Rear costume construction is inferred from the frontal original.",
+    "Separate 2D views from a structural reference, not a fully rigged 3D character."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "columns": 3,
+  "rows": 2,
+  "cell": 512,
+  "padding": 20,
+  "scale": 0.921875,
+  "sourceSha256": "aafc70725c4e8e45995cd99ea0a2a9c6d6ecb922a1c9ee8f0e8a802059e6c45d",
+  "outputSha256": "aeb0480954dd19eb2ad8770f7472a92763a389526613dde0ef8d99574ebccb3a",
+  "bytes": 672218,
+  "frames": [
+    "gather-gold",
+    "rise-gold",
+    "fall-gold",
+    "impact-gold",
+    "seal-gold",
+    "gather-crimson"
+  ]
+}

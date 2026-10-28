@@ -1,0 +1,33 @@
+{
+  "tool": "Built-in image_gen; backend model/version was not returned",
+  "transparentBackground": true,
+  "inputs": [
+    {
+      "role": "Style reference only: current Ragnarok painting; no sword/composition copying",
+      "file": "defense/assets/merge/zeke-ragnarok.webp",
+      "bytes": 685286,
+      "sha256": "87ecd911feb0ae5456b4587b8f683be4d102b9ca2fb41ce953382da6ff7a2518"
+    }
+  ],
+  "prompt": {
+    "file": "defense/docs/art/gold-dragon-20261029/vfx/prompt.txt",
+    "bytes": 2460,
+    "sha256": "03caaa35d4fff3c2cdaeb4b5f9de339536ed34899535af26af3148be2ead3c37"
+  },
+  "raw": {
+    "file": "defense/docs/art/gold-dragon-20261029/vfx/generation.png",
+    "bytes": 2449171,
+    "sha256": "aafc70725c4e8e45995cd99ea0a2a9c6d6ecb922a1c9ee8f0e8a802059e6c45d"
+  },
+  "selected": {
+    "file": "defense/assets/merge/gold-breath.webp",
+    "bytes": 672218,
+    "sha256": "aeb0480954dd19eb2ad8770f7472a92763a389526613dde0ef8d99574ebccb3a"
+  },
+  "normalAttack": {
+    "kind": "Direct reuse of existing ancient-cross texture; no generated replacement",
+    "file": "defense/assets/merge/ancient-cross.webp",
+    "bytes": 134992,
+    "sha256": "3ade30167b6bf2ab88ebc7f07a2a0b4e22cd03ed9e2e9e194d1e130fee101239"
+  }
+}

@@ -18,12 +18,26 @@ const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..')
 // pre-pass paintings may no longer be the installed art and must not be checked instead.
 const UNIT_FILES=new Map(Object.entries(ASSET_PATHS).filter(([id])=>id.startsWith('unit-')).map(([id,source])=>[id.slice(5),path.resolve(repo,'defense',source)]));
 export const CHECKED_BY_EYE=Object.freeze(['behemoth','queen','toffee_apple','venom']);
+// Gold horns/wings satisfy the skin colour threshold. Measure inside the reviewed anatomical
+// head ellipses, and sample cheeks below the horn line, not the top-half alpha silhouette.
+// Coordinates are frozen in docs/art/gold-dragon-20261029/sd/packing.json; no image is resized.
+export const FACE_REGIONS=Object.freeze({gold_dragon:{2:[268.47,221.53,152.45,142.75],3:[244.91,221.53,152.45,142.75]}});
+export function faceRegionScore(data,[cx,cy,w,h]){
+  let sx=0,sn=0,hx=0,hn=0;
+  for(let y=Math.ceil(cy-h/2);y<cy+h/2;y++)for(let x=Math.ceil(cx-w/2);x<cx+w/2;x++){
+    if(((x-cx)/(w/2))**2+((y-cy)/(h/2))**2>1)continue;
+    const i=(y*512+x)*4;if(data[i+3]<40)continue;hx+=x;hn++;
+    if(y>=cy+h*.08&&y<cy+h*.45&&skin(data[i],data[i+1],data[i+2])){sx+=x;sn++;}
+  }
+  return sn>60?sx/sn-hx/hn:null;
+}
 const skin=(r,g,b)=>r>190&&g>130&&b>100&&r-b>28&&r-b<110&&r>=g&&g>=b-12;
 const cell=n=>({left:(n%2)*512,top:Math.floor(n/2)*512,width:512,height:512});
 const ids=()=>[...UNIT_FILES.keys()].sort();
 const rgba=async(id,n)=>sharp(UNIT_FILES.get(id)).extract(cell(n)).ensureAlpha().raw().toBuffer();
 export async function facingScore(id,n){
   const data=await rgba(id,n);
+  if(FACE_REGIONS[id]?.[n])return faceRegionScore(data,FACE_REGIONS[id][n]);
   let top=512,bottom=0;
   for(let y=0;y<512;y++)for(let x=0;x<512;x++)if(data[(y*512+x)*4+3]>40){top=Math.min(top,y);bottom=Math.max(bottom,y);}
   const limit=top+Math.round((bottom-top)*.5);let sx=0,sn=0,hx=0,hn=0;

@@ -1,0 +1,45 @@
+{
+  "browser": "Chromium desktop automation, not physical-device performance",
+  "source": "Actual combat engine, actual renderer, selected prepared deployment textures",
+  "captures": [
+    "normal-comparison.webp",
+    "opening-comparison.webp",
+    "ultimate-charge.webp",
+    "ultimate-charge-ready.webp",
+    "ultimate-launch.webp",
+    "ultimate-beam.webp",
+    "ultimate-impact.webp",
+    "ultimate-aftermath.webp",
+    "ultimate-after-opening.webp",
+    "dense-comparison.webp",
+    "mobile-comparison.webp"
+  ],
+  "reuse": {
+    "differences": 0,
+    "redReusesOriginal": true
+  },
+  "overflow": {
+    "width": 390,
+    "scroll": 390
+  },
+  "errors": [],
+  "network": [],
+  "skill": [
+    {
+      "charge": null,
+      "damage": 4972
+    },
+    {
+      "charge": null,
+      "damage": 9944
+    }
+  ],
+  "late": {
+    "waveTime": 11.100000000000147,
+    "beam": 968
+  },
+  "early": {
+    "waveTime": 10.000000000000089,
+    "beam": 1936
+  }
+}

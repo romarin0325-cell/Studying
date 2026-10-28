@@ -1,0 +1,325 @@
+{
+  "assets": [
+    {
+      "id": "gold_dragon",
+      "status": "Installed on user request 2026-10-29; selected art bytes unchanged",
+      "version": "guided-gold-v2-20261028",
+      "sourceSha256": "b967708811806c3077ad749c310e257cdb58d8d931192b6dcabbbb1f6cb9107a",
+      "commonScale": 0.692958928675237,
+      "uncertaintySourcePixels": {
+        "front": 18,
+        "back": 26,
+        "profile": 18,
+        "sole": 5
+      },
+      "measurementUncertaintyPacked": 12.473260716154266,
+      "structure": {
+        "type": "feminine",
+        "height": "tall",
+        "targetSkull": [
+          160,
+          150
+        ],
+        "targetBelowChin": 200
+      },
+      "portrait": {
+        "x": 250,
+        "y": 209,
+        "size": 250
+      },
+      "alpha": {
+        "source": [
+          1254,
+          1254
+        ],
+        "alphaCleaned": 40580,
+        "unmatchedAlphaPixels": 0,
+        "majorComponents": [
+          {
+            "pixels": 185157,
+            "centroid": [
+              330.90218571266547,
+              390.06062962782937
+            ],
+            "bounds": [
+              58,
+              58,
+              610,
+              641
+            ]
+          },
+          {
+            "pixels": 179781,
+            "centroid": [
+              936.9686729965903,
+              388.87634955862967
+            ],
+            "bounds": [
+              670,
+              58,
+              1208,
+              639
+            ]
+          },
+          {
+            "pixels": 127340,
+            "centroid": [
+              366.9659023087796,
+              964.585118580179
+            ],
+            "bounds": [
+              184,
+              652,
+              557,
+              1217
+            ]
+          },
+          {
+            "pixels": 127782,
+            "centroid": [
+              902.6410136012897,
+              968.028298195364
+            ],
+            "bounds": [
+              708,
+              652,
+              1079,
+              1218
+            ]
+          }
+        ],
+        "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "sourceRect": {
+            "left": 57,
+            "top": 57,
+            "width": 555,
+            "height": 586
+          },
+          "sourceEllipse": [
+            337,
+            249,
+            238,
+            210,
+            -3
+          ],
+          "sourceChin": [
+            341,
+            352
+          ],
+          "sourceSole": [
+            345,
+            640
+          ],
+          "commonScale": 0.692958928675237,
+          "placement": [
+            56,
+            76
+          ],
+          "resampledDimensions": [
+            385,
+            407
+          ],
+          "ellipse": [
+            250.46,
+            209.05,
+            164.92,
+            145.52,
+            -3
+          ],
+          "chin": [
+            253.23,
+            280.43
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 199.57,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "sourceRect": {
+            "left": 669,
+            "top": 57,
+            "width": 540,
+            "height": 584
+          },
+          "sourceEllipse": [
+            930,
+            249,
+            238,
+            210,
+            0
+          ],
+          "sourceChin": [
+            930,
+            353
+          ],
+          "sourceSole": [
+            932,
+            638
+          ],
+          "commonScale": 0.692958928675237,
+          "placement": [
+            74,
+            77
+          ],
+          "resampledDimensions": [
+            374,
+            404
+          ],
+          "ellipse": [
+            254.61,
+            210.44,
+            164.92,
+            145.52,
+            0
+          ],
+          "chin": [
+            254.61,
+            282.51
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 197.49,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": {
+            "left": 184,
+            "top": 652,
+            "width": 375,
+            "height": 567
+          },
+          "sourceEllipse": [
+            347,
+            844,
+            220,
+            206,
+            0
+          ],
+          "sourceChin": [
+            288,
+            942
+          ],
+          "sourceSole": [
+            329,
+            1217
+          ],
+          "commonScale": 0.692958928675237,
+          "placement": [
+            156,
+            88
+          ],
+          "resampledDimensions": [
+            260,
+            393
+          ],
+          "ellipse": [
+            268.47,
+            221.53,
+            152.45,
+            142.75,
+            0
+          ],
+          "chin": [
+            227.59,
+            289.44
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 190.56,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": {
+            "left": 707,
+            "top": 651,
+            "width": 374,
+            "height": 568
+          },
+          "sourceEllipse": [
+            941,
+            844,
+            220,
+            206,
+            0
+          ],
+          "sourceChin": [
+            1007,
+            941
+          ],
+          "sourceSole": [
+            957,
+            1217
+          ],
+          "commonScale": 0.692958928675237,
+          "placement": [
+            83,
+            88
+          ],
+          "resampledDimensions": [
+            259,
+            393
+          ],
+          "ellipse": [
+            244.91,
+            221.53,
+            152.45,
+            142.75,
+            0
+          ],
+          "chin": [
+            290.65,
+            288.74
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 191.26,
+          "paintedClipping": 0
+        }
+      ],
+      "files": {
+        "gold_dragon.png": {
+          "bytes": 941691,
+          "sha256": "dfc6eff672c67173c852e3d56e35f5fe096e129c3774928b6499fa65714a1b7e"
+        },
+        "gold_dragon.webp": {
+          "bytes": 244274,
+          "sha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52"
+        },
+        "gold_dragon-mobile.webp": {
+          "bytes": 80752,
+          "sha256": "35a2ae55ebf3f0ebf7ceeec764c379bc8c4e25cd5b5e434ac2e3faab8d8d1bf4"
+        },
+        "gold_dragon-runtime.webp": {
+          "bytes": 99866,
+          "sha256": "b465752854fcdca6600a1ecd6dccf0520719cb28b04023ecdb560aec9ee10176"
+        }
+      },
+      "sourcePng": {
+        "file": "defense/docs/art/gold-dragon-20261029/sd/gold_dragon.png",
+        "bytes": 941691,
+        "sha256": "dfc6eff672c67173c852e3d56e35f5fe096e129c3774928b6499fa65714a1b7e"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-v2/gold_dragon.webp",
+        "bytes": 244274,
+        "sha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52"
+      }
+    }
+  ]
+}
