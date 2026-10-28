@@ -88,7 +88,10 @@ export const stageReward=stage=>T.firstClearBase+T.firstClearStep*stage;
 export const PERFECT_REWARD=100;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
 export const relicThreshold=tier=>Math.ceil(T.relicThresholdBase*(T.relicThresholdGrowth**tier-1)/(T.relicThresholdGrowth-1));
-export function relicRates(draws){const t=relicTier(draws),q=t/(t+T.relicProbabilityHalf),ur=.0005+.0195*q,sr=.0045+.1355*q,r=.035+.255*q;return [1-r-sr-ur,r,sr,ur];}
+// Rates by tier share q=t/(t+half): 0 at tier 0, approaching 1 (the limit row of the rates ladder) as the tier grows.
+export function relicRatesAt(q){const ur=.0005+.0195*q,sr=.0045+.1355*q,r=.035+.255*q;return [1-r-sr-ur,r,sr,ur];}
+export const relicTierRates=t=>relicRatesAt(t/(t+T.relicProbabilityHalf));
+export function relicRates(draws){return relicTierRates(relicTier(draws));}
 export function rollIndex(rates,value){let sum=0;for(let i=0;i<rates.length;i++){sum+=rates[i];if(value<sum)return i;}return rates.length-1;}
 export const lateOpen=cleared=>cleared>=LATE_UNLOCK_STAGE;
 export function heroPool(rarity,open=true){return (ROSTER[rarity]||[]).filter(id=>open||!LATE_COMPANIONS.includes(id));}

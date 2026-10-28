@@ -49,7 +49,7 @@ export class Renderer {
     if(e.type==='deathhandBlast')this.float('데스핸드',Math.min(600,Math.max(120,e.x)),Math.max(140,e.y-250),'#e7b6ff',30);
     if(e.type==='skill'&&e.kind==='venomplague')this.float('플래이그',e.origin.x,e.origin.y-74,'#b8f08a',24);
     if(e.type==='ward')this.float('무효',e.x,e.y-52,e.hero==='antropy'?'#e0d4ff':'#ffd3ec',20);
-    if(e.type==='skill'&&e.kind==='lemonade')this.float('퍼스트키스 ♡',e.origin.x,e.origin.y-74,'#ffd3ec',24);
+    if(e.type==='skill'&&e.kind==='lemonade')this.float('레몬 배리어 ♡',e.origin.x,e.origin.y-74,'#ffd3ec',24);
     if(e.type==='bombBlast'){this.shake=7;this.bursts(e.x,e.y,'#ff6a50',20,1.1);}
     if(e.type==='bombSet')this.bursts(e.x,e.y-8,'#ffd9c8',8,.6);
     if(e.type==='crushPhase'){this.shake=4;this.bursts(e.x,e.y,HERO.behemoth.color,8,.7);}
