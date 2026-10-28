@@ -1016,7 +1016,7 @@ function claimPity(){
 function relicLadder(){
   const draws=p().relicDraws,tier=relicTier(draws),to=relicThreshold(tier+1),fill=Math.min(1,Math.max(0,(draws-relicThreshold(tier))/(to-relicThreshold(tier))));
   const cells=list=>list.map((v,i)=>`<em${i===3?' class="ur"':''}>${pct(v)}</em>`).join('');
-  const steps=[0,1,2,3].map(i=>{const t=tier+i;return `<div class="rl-row ${['now','next','later','later last'][i]}"${i?'':` style="--fill:${fill.toFixed(3)}"`}><span class="rl-step"><i>${t}</i><span><b>${t}단계</b><small>${i===0?`지금 · 누적 ${fmt(draws)}회`:i===1?`${fmt(to-draws)}회 남음`:`누적 ${fmt(relicThreshold(t))}회`}</small></span></span>${cells(relicTierRates(t))}</div>`;}).join('');
+  const steps=[0,1,2,3].map(i=>{const t=tier+i;return `<div class="rl-row ${['now','next','later','later last'][i]}"${i?'':` style="--fill:${fill.toFixed(3)}"`}><span class="rl-step"><i>${t}</i><span><b>${t}단계</b><small>${i===0?'지금':i===1?`${fmt(to-draws)}회 남음`:`누적 ${fmt(relicThreshold(t))}회`}</small></span></span>${cells(relicTierRates(t))}</div>`;}).join('');
   return `<div class="relic-ladder"><div class="rl-row rl-cols"><span></span>${RARITIES.map(r=>`<span>${badge(r)}</span>`).join('')}</div>${steps}<div class="rl-row max"><span class="rl-step"><i>∞</i><span><b>한계</b></span></span>${cells(relicRatesAt(1))}</div></div>`;
 }
 function rates(){

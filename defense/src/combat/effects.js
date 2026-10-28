@@ -3,6 +3,7 @@ import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,p
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
+import {drawRagnarok,drawMoonShot,drawMoonCut,MOON_CUT_LIFE} from './blade-vfx.js';
 // Effects drawn under the units (attack circles and ultimate ground marks); draw() only ages them.
 const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround']);
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
@@ -46,6 +47,8 @@ FX_PROFILES.ash={motion:'blackfire',frame:11,offset:0};
 FX_PROFILES.venom={motion:'venomdrop',frame:11,offset:0};
 FX_PROFILES.demon_king={motion:'deathbolt',frame:15,offset:0};
 FX_PROFILES.miracle_larva={motion:'metamorphosis',frame:1,offset:0};
+// White gems set in the chaos wheel's black wedge: [radius, share of the wedge angle].
+const JOKER_GEMS=Object.freeze([[5.2,.32],[5.4,.72],[8.2,.17],[8.4,.5],[8.2,.84],[11,.3],[11,.7]]);
 export const JOKER_HEX=Object.freeze({red:'#ff5a5a',blue:'#4aa8ff',green:'#5fd36a',white:'#f6f4ff',black:'#241a36',chaos:'#d9b8ff'});
 
 function stroke(ctx,points,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
@@ -156,7 +159,7 @@ export class CombatFX{
     if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
-    if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:['demon_king','miracle_larva'].includes(e.hero)?.45:.3;this.add({...e,life,total:life});}
+    if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:['demon_king','miracle_larva'].includes(e.hero)?.45:e.hero==='luna'?MOON_CUT_LIFE:.3;this.add({...e,life,total:life});}
     if(e.type==='chain'){const lightning=e.hero==='lightning_sage',life=lightning?LIGHTNING_IMPACT_LIFE:.24;this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life,total:life,rank:1,...(lightning?{hop:true}:{})});}
     if(e.type==='dreamPhase')for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});
     if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
@@ -178,6 +181,8 @@ export class CombatFX{
       if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
+      // Ragnarok draws its own eruption under each enemy when its shockwave arrives (blade-vfx.js).
+      if(e.kind==='inferno'&&this.art.images['zeke-ragnarok'])return;
       for(const [i,p] of targets.entries())this.add({type:e.support?'support':ultimateLayout(e.kind)==='pull'?'pullImpact':'ultimate',hero:e.hero,...p,origin:e.origin,angle:Math.atan2(p.y-e.origin.y,p.x-e.origin.x),life:.65+(e.support?i*.04:0),total:.65+(e.support?i*.04:0),rank:e.rank,skill:h.skill.type});
       if(!targets.length)this.add({type:'ultimate',hero:e.hero,...e.origin,origin:e.origin,angle:0,life:.65,total:.65,rank:e.rank});
     }
@@ -417,6 +422,8 @@ export class CombatFX{
       return true;
     }
     if(skill.hero==='zeke'){
+      if(drawRagnarok(this,skill,age))return true;
+      // Fallback when the Ragnarok sheet fails to load: the pass 15 dragon oath.
       // Dragon oath: the crest rises, one giant flame slash crosses the board, then pillars erupt under enemies.
       const rise=easeBack(window01(age,0,.35)),out=1-window01(age,.95,1.5),slash=window01(age,.18,.62);
       ctx.save();ctx.globalAlpha=out*.5*(this.reduced?.5:1);const tint=this.zekeWash||(this.zekeWash=(()=>{const g=ctx.createRadialGradient(360,400,120,360,400,560);g.addColorStop(0,'#ff6a2000');g.addColorStop(1,'#ff3a1a88');return g;})());ctx.fillStyle=tint;ctx.fillRect(0,0,720,780);ctx.restore();
@@ -665,10 +672,12 @@ export class CombatFX{
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,tint=chaos?JOKER_HEX.chaos:JOKER_HEX[names[idx]];
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=.8;ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
       if(chaos){
-        // Chaos: the colour ring closes into a flat five-wedge roulette that turns slowly (pops in when chaos begins).
-        const k=since<.7?easeBack(since/.7):1,turn=this.reduced?0:this.clock*.5+u.uid;
+        // Chaos: the colour ring closes into a flat five-wedge roulette that turns (pops in when chaos begins). Pass 20 (owner):
+        // the black wedge is set with white gems and the wheel visibly turns, about once every 4.5 s.
+        const k=since<.7?easeBack(since/.7):1,turn=this.reduced?0:this.clock*1.4+u.uid;
         ctx.save();ctx.translate(cx,cy);ctx.scale(k,k);ctx.rotate(turn);
-        for(let j=0;j<5;j++){const a0=-Math.PI/2+j*Math.PI*2/5;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,12.5,a0,a0+Math.PI*2/5);ctx.closePath();ctx.globalAlpha=.9;ctx.fillStyle=names[j]==='black'?'#5a4380':JOKER_HEX[names[j]];ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#0b1e2b';ctx.lineWidth=1.2;ctx.stroke();}
+        for(let j=0;j<5;j++){const a0=-Math.PI/2+j*Math.PI*2/5;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,12.5,a0,a0+Math.PI*2/5);ctx.closePath();ctx.globalAlpha=.9;ctx.fillStyle=names[j]==='black'?'#17102a':JOKER_HEX[names[j]];ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#0b1e2b';ctx.lineWidth=1.2;ctx.stroke();
+          if(names[j]==='black')for(const [i,[r,f]] of JOKER_GEMS.entries()){const a=a0+f*Math.PI*2/5;ctx.save();ctx.globalAlpha=this.reduced?.95:.65+.35*Math.sin(this.clock*5+i*1.7+u.uid);ctx.translate(Math.cos(a)*r,Math.sin(a)*r);star(ctx,1.9,'#ffffff');ctx.restore();}}
         ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(0,0,12.5,0,Math.PI*2);ctx.stroke();ctx.rotate(-turn);disk(ctx,0,0,4.2,'#0b1e2b');star(ctx,3.4,'#ffe9a0');ctx.restore();
         if(since<.9&&!this.reduced)this.glow('glow',JOKER_HEX.chaos,cx,cy,48,(1-since/.9)*.6);
         continue;
@@ -714,6 +723,7 @@ export class CombatFX{
     if(drawNewShot(this,shot,s,{x,y,angle,t}))return;
     if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(h.id==='lightning_sage'){drawLightningShot(this,shot,s,p);return;}
+    if(h.id==='luna'){drawMoonShot(this,shot,{from:shot.from,to,t});return;}
     if(['zeke','guardian','ancient_dragon','behemoth'].includes(h.id))return;
     if(h.shape==='beam'&&f.motion==='candy'){
       const len=64+shot.rank*4;ctx.save();ctx.translate(x,y);ctx.rotate(angle);
@@ -830,7 +840,13 @@ export class CombatFX{
       if(e.type!=='attackShape'){drawNewGround(this,e,t);continue;}
         const h=HERO[e.hero],fade=Math.sin(Math.PI*t);
         if(drawNewAttackShape(this,e,t,e.hero==='zeke'?fireClarity:1))continue;
-        if(['guardian','behemoth','zeke','miracle_larva'].includes(e.hero)){
+        if(e.hero==='guardian'){
+          // Pass 20: the ring used to reach the real radius only as it faded (at peak alpha it sat near two thirds of it), so the
+          // hit read smaller than it is. It now opens to the radius while bright, with Behemoth's timing.
+          const R=h.range,k=easeOut(window01(t,0,.24)),bright=1-window01(t,.18,.9);
+          ctx.save();ctx.globalAlpha=bright*.62;ctx.strokeStyle=h.color;ctx.lineWidth=3.4*bright+1.2;ctx.beginPath();ctx.arc(e.origin.x,e.origin.y,R*(.4+.58*k),0,Math.PI*2);ctx.stroke();ctx.restore();
+          this.stamp(e.hero,e.origin.x,e.origin.y,90+k*30,0,bright*.46);
+        }else if(['behemoth','zeke','miracle_larva'].includes(e.hero)){
           const R=e.hero==='miracle_larva'?230:h.range;
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,R*(.32+t*.68),R*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();if(e.hero!=='miracle_larva')this.stamp(e.hero,e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
@@ -1013,6 +1029,7 @@ export class CombatFX{
         ctx.save();ctx.globalAlpha=(1-t)*.5;ctx.strokeStyle=HERO[e.hero].color;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(e.x,e.y+25,23+t*10,8+t*3,0,0,Math.PI*2);ctx.stroke();ctx.restore();continue;
       }
       const large=e.type==='ultimate',size=large?118+Math.min(5,e.rank||1)*8:impactSize(e.hero,e.rank||1),hitClarity=e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1,alpha=Math.max(0,(1-t)*(large?.83:.9)*hitClarity);
+      if(e.type==='impact'&&e.hero==='luna'){drawMoonCut(this,e,t,hitClarity);continue;}
       if(e.type==='impact'&&e.hero==='ancient_dragon'){this.atlasStamp('ancient-cross',0,1,1,e.x,e.y-18,size*.46,size*.46,0,alpha*.6,'source-over');continue;}
       if(large&&dedicated(e.hero)){this.ultimate(e.hero,e.x,e.y-22,size*(1+t*.35),size*(1+t*.35),0,alpha);continue;}
       if(FX_PROFILES[e.hero]?.atlas==='effects-trio'){

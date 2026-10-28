@@ -1960,6 +1960,8 @@ export const ASSET_PATHS = {
   "effects-eclose": "./assets/merge/effects-eclose.webp",
   "effects-joker-sun": "./assets/merge/effects-joker-sun.webp",
   "effects-chaos-sun": "./assets/merge/effects-chaos-sun.webp",
+  "zeke-ragnarok": "./assets/merge/zeke-ragnarok.webp",
+  "ash-armageddon": "./assets/merge/ash-armageddon.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
   "orbit-sea": "./assets/merge/orbit-sea.webp",
   "relics-new": "./assets/merge/relics-new.webp"
