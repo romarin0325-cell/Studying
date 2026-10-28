@@ -1,0 +1,47 @@
+{
+  "method": "Alpha>=128 front-view silhouette envelopes above/below the reviewed chin. Upper silhouette includes hair and ornaments; lower envelope includes hair ends, sleeves and held apple. These describe visual mass, not anatomical head size or biological body measurements.",
+  "rows": [
+    {
+      "id": "before",
+      "skull": [
+        260.52,
+        226.75,
+        161.51,
+        148.59,
+        -1
+      ],
+      "belowChin": 178.96,
+      "hairSilhouette": {
+        "left": 101,
+        "right": 427,
+        "width": 327
+      },
+      "lowerFigureEnvelope": {
+        "left": 133,
+        "right": 398,
+        "width": 266
+      }
+    },
+    {
+      "id": "candidate",
+      "skull": [
+        250.81,
+        217.29,
+        160.87,
+        149.19,
+        -1
+      ],
+      "belowChin": 188.11,
+      "hairSilhouette": {
+        "left": 108,
+        "right": 405,
+        "width": 298
+      },
+      "lowerFigureEnvelope": {
+        "left": 132,
+        "right": 388,
+        "width": 257
+      }
+    }
+  ]
+}

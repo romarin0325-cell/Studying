@@ -1,0 +1,91 @@
+{
+  "browser": "Chromium",
+  "viewport": [
+    390,
+    844
+  ],
+  "dpr": 2,
+  "offline": true,
+  "skins": [
+    "night",
+    "bright"
+  ],
+  "errors": [],
+  "requests": [],
+  "captures": [
+    "night-home",
+    "night-detail",
+    "night-team",
+    "night-battle-left",
+    "night-battle-right",
+    "night-unit-portrait",
+    "night-skill-portrait",
+    "bright-home",
+    "bright-detail",
+    "bright-team",
+    "bright-battle-left",
+    "bright-battle-right",
+    "bright-unit-portrait",
+    "bright-skill-portrait"
+  ],
+  "checks": [
+    {
+      "skin": "night",
+      "side": "left",
+      "facing": "left",
+      "hero": "toffee_apple",
+      "enemyProgress": 1740
+    },
+    {
+      "skin": "night",
+      "side": "right",
+      "facing": "right",
+      "hero": "toffee_apple",
+      "enemyProgress": 700
+    },
+    {
+      "skin": "bright",
+      "side": "left",
+      "facing": "left",
+      "hero": "toffee_apple",
+      "enemyProgress": 1740
+    },
+    {
+      "skin": "bright",
+      "side": "right",
+      "facing": "right",
+      "hero": "toffee_apple",
+      "enemyProgress": 700
+    }
+  ],
+  "embeddedHashes": {
+    "atlas": "0f56bb45c7835b83935164f87f43845c5a73647e445cdc5e0319228ed10c20b7",
+    "portrait": "9afb32602a4418a45db302126c1a8fbd82fd5d1c1f30ebcd1ac7a82223cfce69",
+    "figure": "6359ea974ccc819c3ee568786c395af7f9a4d271daff47e9fb2888ac9bf7a6d1"
+  },
+  "scope": "Short focused art-display review; actual engine attacks face enemies left/right. Not physical-device or FPS certification.",
+  "testedMain": "ca55cb08aec555b9f1b46b87677175fda9384f07",
+  "localValidation": {
+    "selectedDefenseVerification": "PASS: latest-main build and 132 selected asset/build/combat/VFX tests",
+    "initialFocusedAssetTests": "4/4 PASS",
+    "facingChecker": "PASS",
+    "uiPreparation": {
+      "encoded": 2,
+      "reused": 154
+    }
+  },
+  "reviewScreens": [
+    "night-home.webp",
+    "bright-team.webp",
+    "night-battle-left.webp",
+    "bright-battle-right.webp"
+  ],
+  "integrity": {
+    "selectedCandidateSha256": "99dcd643135744929683ea2d3ec65be9297c069ecd0293147622134af774f6dd",
+    "previousPngSha256": "ddcfec161d96f9597def2b9dd23240124beff390c14544ff73749dfaa89968d6"
+  },
+  "releaseSha256": {
+    "StarGardenDefense.html": "88e43232d9f124b66614a9d23172b4c451153dfff26123ffe4a7ee520e0609bc",
+    "StarGardenDefenseBright.html": "f96b8b31dcf91a4a17a997b4b4b6d222dde50380e753f8d7dd1e846d32e0ca32"
+  }
+}

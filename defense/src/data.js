@@ -1210,8 +1210,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 261,
-        "y": 227,
+        "x": 251,
+        "y": 217,
         "size": 250
       }
     },
@@ -1919,7 +1919,7 @@ export const ASSET_PATHS = {
   "unit-aurora": "./assets/cast-v2/aurora.webp",
   "unit-behemoth": "./assets/cast-v2/behemoth.webp",
   "unit-underdog": "./assets/cast-v2/underdog.webp",
-  "unit-toffee_apple": "./assets/cast-v2/toffee_apple.webp",
+  "unit-toffee_apple": "./assets/cast-v2/toffee-apple-lean.webp",
   "unit-joker": "./assets/cast-v2/joker.webp",
   "unit-sunflower": "./assets/cast-v2/sunflower.webp",
   "unit-antropy": "./assets/cast-v2/antropy.webp",

@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-28",
+  "base": "ca55cb08aec555b9f1b46b87677175fda9384f07",
+  "status": "User selected the previously unapplied candidate for installation; generation history remains unchanged.",
+  "selectedPng": {
+    "file": "defense/assets/cast-v2/toffee-apple-lean.png",
+    "bytes": 727808,
+    "sha256": "99dcd643135744929683ea2d3ec65be9297c069ecd0293147622134af774f6dd"
+  },
+  "selectedWebp": {
+    "file": "defense/assets/cast-v2/toffee-apple-lean.webp",
+    "bytes": 206170,
+    "sha256": "37f3eec5ea1b132656202edb2d467514336a36a7c485b4eb23d34a2414f3445a"
+  },
+  "runtime": {
+    "path": "./assets/optimized/cast-v2/toffee-apple-lean.webp",
+    "bytes": 76520,
+    "sha256": "0f56bb45c7835b83935164f87f43845c5a73647e445cdc5e0319228ed10c20b7",
+    "metadata": {
+      "width": 640,
+      "height": 640,
+      "hasAlpha": true,
+      "codec": "webp"
+    }
+  },
+  "sourceArchive": {
+    "generation": "generation.png",
+    "actualInputs": "inputs.json",
+    "prompt": "prompt.txt",
+    "references": {
+      "style": "../sol-cast-v2/structure-masters/style-siren.webp",
+      "structure": "references/mannequin.png",
+      "original": "references/original.jpg",
+      "previous": "../../../assets/cast-v2/toffee_apple.png"
+    }
+  },
+  "portrait": {
+    "anatomical": {
+      "x": 251,
+      "y": 217,
+      "size": 250
+    },
+    "retainedOpticalNudge": [
+      -7,
+      0
+    ]
+  },
+  "preservedPrevious": [
+    "defense/assets/cast-v2/toffee_apple.png",
+    "defense/assets/cast-v2/toffee_apple.webp",
+    "defense/assets/optimized/cast-v2/toffee_apple.webp"
+  ],
+  "scope": "SD four directions and their UI derivatives. No combat/balance/VFX/memorial changes.",
+  "initialBase": "6989ce49d3df27ff09bda25cacb072facf05935c"
+}

@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 29089602,
-    "deployableSourceBytes": 27464634,
-    "outputBytes": 15483791,
+    "sourceBytes": 29085590,
+    "deployableSourceBytes": 27460622,
+    "outputBytes": 15481327,
     "optimizedFiles": 166,
     "derivedFiles": 156,
-    "derivedOutputBytes": 3745258
+    "derivedOutputBytes": 3745404
   },
   "images": [
     {
@@ -1441,7 +1441,7 @@
     },
     {
       "id": "atlas:unit-toffee_apple",
-      "source": "./assets/cast-v2/toffee_apple.webp",
+      "source": "./assets/cast-v2/toffee-apple-lean.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-toffee_apple; combat renderer / stage UI",
@@ -1450,8 +1450,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 210182,
-        "sha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
+        "bytes": 206170,
+        "sha256": "37f3eec5ea1b132656202edb2d467514336a36a7c485b4eb23d34a2414f3445a",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1460,9 +1460,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/toffee_apple.webp",
-        "bytes": 78984,
-        "sha256": "541661a23f2253c404961e8af98dc8abd14cd6850cafec1a41f69ef4dfcbd00f",
+        "path": "./assets/optimized/cast-v2/toffee-apple-lean.webp",
+        "bytes": 76520,
+        "sha256": "0f56bb45c7835b83935164f87f43845c5a73647e445cdc5e0319228ed10c20b7",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -6434,11 +6434,11 @@
     },
     {
       "id": "portrait:toffee_apple",
-      "source": "./assets/cast-v2/toffee_apple.webp",
+      "source": "./assets/cast-v2/toffee-apple-lean.webp",
       "profile": "portrait",
       "crop": {
-        "left": 129,
-        "top": 102,
+        "left": 119,
+        "top": 92,
         "width": 250,
         "height": 250
       },
@@ -6446,11 +6446,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
+      "sourceSha256": "37f3eec5ea1b132656202edb2d467514336a36a7c485b4eb23d34a2414f3445a",
       "output": {
         "path": "./assets/optimized/ui/portraits/toffee_apple.webp",
-        "bytes": 24162,
-        "sha256": "069b22831380e57fa742976495c66a24947f602a913d02aab60d4d9eb4d8cdd8",
+        "bytes": 25674,
+        "sha256": "9afb32602a4418a45db302126c1a8fbd82fd5d1c1f30ebcd1ac7a82223cfce69",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6461,7 +6461,7 @@
     },
     {
       "id": "figure:toffee_apple",
-      "source": "./assets/cast-v2/toffee_apple.webp",
+      "source": "./assets/cast-v2/toffee-apple-lean.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6473,11 +6473,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
+      "sourceSha256": "37f3eec5ea1b132656202edb2d467514336a36a7c485b4eb23d34a2414f3445a",
       "output": {
         "path": "./assets/optimized/ui/figures/toffee_apple.webp",
-        "bytes": 43838,
-        "sha256": "81aca8d5435057abc6de700cd745625a958df8958821e8838ac5da7242413373",
+        "bytes": 42472,
+        "sha256": "6359ea974ccc819c3ee568786c395af7f9a4d271daff47e9fb2888ac9bf7a6d1",
         "metadata": {
           "width": 512,
           "height": 512,

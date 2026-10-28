@@ -1,0 +1,292 @@
+{
+  "id": "toffee_apple",
+  "version": "lean-candidate-v1-20261028",
+  "status": "unapplied preview",
+  "pipeline": "Existing source-views.mjs segmentation and same whole-figure skull-area normalization; no separate head/body warping or silhouette auto-fit.",
+  "commonScale": 0.6486581250966158,
+  "sourceSha256": "1a45a0d126391ab6327eddbd5ee61e3d3e74e1c2460b554eec863e6c976d4ab8",
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "measurementUncertaintyPacked": 11.675846251739085,
+  "alpha": {
+    "source": [
+      1254,
+      1254
+    ],
+    "alphaCleaned": 59971,
+    "unmatchedAlphaPixels": 0,
+    "majorComponents": [
+      {
+        "pixels": 144783,
+        "centroid": [
+          341.08760697043164,
+          289.36318490430506
+        ],
+        "bounds": [
+          117,
+          26,
+          575,
+          616
+        ]
+      },
+      {
+        "pixels": 145108,
+        "centroid": [
+          943.7026559528076,
+          289.76729746120134
+        ],
+        "bounds": [
+          704,
+          35,
+          1171,
+          616
+        ]
+      },
+      {
+        "pixels": 117435,
+        "centroid": [
+          344.79682377485415,
+          890.1887086473369
+        ],
+        "bounds": [
+          170,
+          643,
+          547,
+          1225
+        ]
+      },
+      {
+        "pixels": 114621,
+        "centroid": [
+          956.94961656241,
+          888.2354716849443
+        ],
+        "bounds": [
+          753,
+          651,
+          1135,
+          1228
+        ]
+      }
+    ],
+    "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+  },
+  "files": {
+    "png": {
+      "file": "toffee-apple-candidate.png",
+      "bytes": 727808,
+      "sha256": "99dcd643135744929683ea2d3ec65be9297c069ecd0293147622134af774f6dd"
+    },
+    "webp": {
+      "file": "toffee-apple-candidate.webp",
+      "bytes": 206170,
+      "sha256": "37f3eec5ea1b132656202edb2d467514336a36a7c485b4eb23d34a2414f3445a"
+    }
+  },
+  "frames": [
+    {
+      "direction": "down",
+      "sourceRect": {
+        "left": 117,
+        "top": 25,
+        "width": 459,
+        "height": 593
+      },
+      "sourceEllipse": [
+        337,
+        211,
+        248,
+        230,
+        -1
+      ],
+      "sourceChin": [
+        334,
+        326
+      ],
+      "sourceSole": [
+        345,
+        616
+      ],
+      "commonScale": 0.6486581250966158,
+      "resampledDimensions": [
+        298,
+        385
+      ],
+      "placement": [
+        108,
+        97
+      ],
+      "ellipse": [
+        250.81,
+        217.29,
+        160.87,
+        149.19,
+        -1
+      ],
+      "chin": [
+        248.86,
+        291.89
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 188.11,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "up",
+      "sourceRect": {
+        "left": 704,
+        "top": 34,
+        "width": 469,
+        "height": 584
+      },
+      "sourceEllipse": [
+        941,
+        213,
+        248,
+        230,
+        0
+      ],
+      "sourceChin": [
+        941,
+        328
+      ],
+      "sourceSole": [
+        951,
+        617
+      ],
+      "commonScale": 0.6486581250966158,
+      "resampledDimensions": [
+        304,
+        379
+      ],
+      "placement": [
+        96,
+        102
+      ],
+      "ellipse": [
+        249.51,
+        217.94,
+        160.87,
+        149.19,
+        0
+      ],
+      "chin": [
+        249.51,
+        292.54
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 187.46,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "left",
+      "sourceRect": {
+        "left": 169,
+        "top": 643,
+        "width": 379,
+        "height": 583
+      },
+      "sourceEllipse": [
+        350,
+        806,
+        228,
+        230,
+        0
+      ],
+      "sourceChin": [
+        287,
+        922
+      ],
+      "sourceSole": [
+        337,
+        1222
+      ],
+      "commonScale": 0.6486581250966158,
+      "resampledDimensions": [
+        246,
+        378
+      ],
+      "placement": [
+        147,
+        104
+      ],
+      "ellipse": [
+        264.43,
+        210.16,
+        147.89,
+        149.19,
+        0
+      ],
+      "chin": [
+        223.57,
+        285.4
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 194.6,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "right",
+      "sourceRect": {
+        "left": 752,
+        "top": 650,
+        "width": 385,
+        "height": 579
+      },
+      "sourceEllipse": [
+        950,
+        807,
+        228,
+        230,
+        0
+      ],
+      "sourceChin": [
+        1021,
+        924
+      ],
+      "sourceSole": [
+        944,
+        1225
+      ],
+      "commonScale": 0.6486581250966158,
+      "resampledDimensions": [
+        250,
+        376
+      ],
+      "placement": [
+        131,
+        107
+      ],
+      "ellipse": [
+        259.89,
+        208.86,
+        147.89,
+        149.19,
+        0
+      ],
+      "chin": [
+        305.95,
+        284.75
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 195.25,
+      "paintedClipping": 0
+    }
+  ]
+}

@@ -305,8 +305,8 @@
     },
     {
       "id": "unit-toffee_apple",
-      "source": "defense/assets/cast-v2/toffee_apple.webp",
-      "sha256": "445a0553a568d857f71410afcd4c09eb402c50444bec2f07950ab163818c26f1",
+      "source": "defense/assets/cast-v2/toffee-apple-lean.webp",
+      "sha256": "37f3eec5ea1b132656202edb2d467514336a36a7c485b4eb23d34a2414f3445a",
       "width": 1024,
       "height": 1024
     },
