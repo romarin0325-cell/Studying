@@ -1466,7 +1466,7 @@ export const ARTIFACTS = [
     "scale": ["10"],
     "icon": 0,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1476,7 +1476,7 @@ export const ARTIFACTS = [
     "scale": ["70%"],
     "icon": 1,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1486,7 +1486,7 @@ export const ARTIFACTS = [
     "scale": ["22%"],
     "icon": 2,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1496,7 +1496,7 @@ export const ARTIFACTS = [
     "scale": ["21%"],
     "icon": 3,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1506,7 +1506,7 @@ export const ARTIFACTS = [
     "scale": ["35%"],
     "icon": 4,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1516,7 +1516,7 @@ export const ARTIFACTS = [
     "scale": ["20%"],
     "icon": 5,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1526,7 +1526,7 @@ export const ARTIFACTS = [
     "scale": ["30%"],
     "icon": 6,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1536,7 +1536,7 @@ export const ARTIFACTS = [
     "scale": ["40%"],
     "icon": 7,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1546,7 +1546,7 @@ export const ARTIFACTS = [
     "scale": [{"t":"9G", "int":true}, {"t":"3G", "int":true}, {"t":"60G", "int":true}],
     "icon": 8,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1556,7 +1556,7 @@ export const ARTIFACTS = [
     "scale": ["16%"],
     "icon": 9,
     "atlas": "relics",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1566,7 +1566,7 @@ export const ARTIFACTS = [
     "scale": ["20%"],
     "icon": 0,
     "atlas": "relics-new",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1576,7 +1576,7 @@ export const ARTIFACTS = [
     "scale": ["35%", "15"],
     "icon": 1,
     "atlas": "relics-new",
-    "rarity": "common",
+    "rarity": "C",
     "color": "#bbd5cc"
   },
   {
@@ -1586,7 +1586,7 @@ export const ARTIFACTS = [
     "scale": ["110%"],
     "icon": 10,
     "atlas": "relics",
-    "rarity": "rare",
+    "rarity": "R",
     "color": "#86c8ee"
   },
   {
@@ -1596,7 +1596,7 @@ export const ARTIFACTS = [
     "scale": ["90%"],
     "icon": 11,
     "atlas": "relics",
-    "rarity": "rare",
+    "rarity": "R",
     "color": "#86c8ee"
   },
   {
@@ -1606,7 +1606,7 @@ export const ARTIFACTS = [
     "scale": ["22%"],
     "icon": 12,
     "atlas": "relics",
-    "rarity": "rare",
+    "rarity": "R",
     "color": "#86c8ee"
   },
   {
@@ -1616,7 +1616,7 @@ export const ARTIFACTS = [
     "scale": ["15%", "6%"],
     "icon": 13,
     "atlas": "relics",
-    "rarity": "rare",
+    "rarity": "R",
     "color": "#86c8ee"
   },
   {
@@ -1626,7 +1626,7 @@ export const ARTIFACTS = [
     "scale": ["25%"],
     "icon": 14,
     "atlas": "relics",
-    "rarity": "rare",
+    "rarity": "R",
     "color": "#86c8ee"
   },
   {
@@ -1636,7 +1636,7 @@ export const ARTIFACTS = [
     "scale": ["20%"],
     "icon": 15,
     "atlas": "relics",
-    "rarity": "rare",
+    "rarity": "R",
     "color": "#86c8ee"
   },
   {
@@ -1646,7 +1646,7 @@ export const ARTIFACTS = [
     "scale": ["100%"],
     "icon": 16,
     "atlas": "relics",
-    "rarity": "epic",
+    "rarity": "SR",
     "color": "#c9a0f5"
   },
   {
@@ -1656,7 +1656,7 @@ export const ARTIFACTS = [
     "scale": ["32%", "50%"],
     "icon": 17,
     "atlas": "relics",
-    "rarity": "epic",
+    "rarity": "SR",
     "color": "#c9a0f5"
   },
   {
@@ -1666,7 +1666,7 @@ export const ARTIFACTS = [
     "scale": ["50%"],
     "icon": 18,
     "atlas": "relics",
-    "rarity": "epic",
+    "rarity": "SR",
     "color": "#c9a0f5"
   },
   {
@@ -1676,7 +1676,7 @@ export const ARTIFACTS = [
     "scale": ["5%"],
     "icon": 19,
     "atlas": "relics",
-    "rarity": "epic",
+    "rarity": "SR",
     "color": "#c9a0f5"
   },
   {
@@ -1686,7 +1686,7 @@ export const ARTIFACTS = [
     "scale": ["4%", "36%"],
     "icon": 0,
     "atlas": "relics-expansion",
-    "rarity": "rare",
+    "rarity": "SR",
     "color": "#86c8ee"
   },
   {
@@ -1696,7 +1696,7 @@ export const ARTIFACTS = [
     "scale": ["60%"],
     "icon": 2,
     "atlas": "relics-new",
-    "rarity": "epic",
+    "rarity": "SR",
     "color": "#c9a0f5"
   },
   {
@@ -1706,7 +1706,7 @@ export const ARTIFACTS = [
     "scale": ["30", "40%"],
     "icon": 1,
     "atlas": "relics-expansion",
-    "rarity": "rare",
+    "rarity": "UR",
     "color": "#86c8ee"
   },
   {
@@ -1716,7 +1716,7 @@ export const ARTIFACTS = [
     "scale": ["25%"],
     "icon": 2,
     "atlas": "relics-expansion",
-    "rarity": "epic",
+    "rarity": "UR",
     "color": "#c9a0f5"
   },
   {
@@ -1726,7 +1726,7 @@ export const ARTIFACTS = [
     "scale": ["100%"],
     "icon": 3,
     "atlas": "relics-expansion",
-    "rarity": "epic",
+    "rarity": "UR",
     "color": "#c9a0f5"
   }
 ];

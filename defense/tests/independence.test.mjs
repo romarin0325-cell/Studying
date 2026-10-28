@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {gameRoot,assetFile} from '../scripts/local-inputs.mjs';
-import {ASSET_PATHS} from '../src/content.js';
+import {ASSET_PATHS,HEROES} from '../src/content.js';
 
 async function filesIn(directory){
   const files=[];
@@ -50,7 +50,8 @@ test('copied combat, collection and growth sources load with every other game ab
   await fs.copyFile(path.join(gameRoot,'package.json'),path.join(local,'package.json'));
   const load=relative=>import(pathToFileURL(path.join(local,relative)).href);
   const [content,profile,battle,engine]=await Promise.all([load('src/content.js'),load('src/profile.js'),load('src/battle.js'),load('src/combat/engine.js')]);
-  assert.equal(content.HEROES.length,39);assert.equal(content.CHAPTERS.length,90);
+  // The copy loads the same roster as the game (combat.test pins its size).
+  assert.deepEqual(content.HEROES.map(h=>h.id),HEROES.map(h=>h.id));assert.equal(content.CHAPTERS.length,90);
   const player=profile.createProfile(1791082800000);
   assert.ok(profile.command(player,'begin',{mode:'main',stage:1},1791082800000).ok);
   const run=battle.createBattle(player);

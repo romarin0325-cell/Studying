@@ -85,6 +85,19 @@ test('collection bonus sums every owned relic and is a power fraction',()=>{
   assert.ok(Math.abs(collectionBonus(allC)-12*3/30/100)<1e-12);
 });
 
+test('relics keep the rarity written on them, not their place in the list',()=>{
+  // Rarity sets draw odds, duplicate cost and collection weight of relics players already own.
+  const approved={
+    C:['hourglass','ember','frost','banner','chorus','lantern','lens','seed','feather','crown','sprout','amulet'],
+    R:['meteor','prism','tide','roots','guild','phoenix'],
+    SR:['twin','constellation','alchemy','orbit','tempo_bell','chalice'],
+    UR:['royal_seal','gift_ribbon','broken_clock'],
+  };
+  for(const [rarity,ids] of Object.entries(approved))for(const id of ids)assert.equal(ARTIFACTS.find(a=>a.id===id)?.rarity,rarity,id);
+  const order=['C','R','SR','UR'],ranks=ARTIFACTS.map(a=>order.indexOf(a.rarity));
+  assert.ok(ranks.every((r,i)=>r>=0&&(!i||r>=ranks[i-1])),'the list stays grouped C → R → SR → UR');
+});
+
 test('dispatch uses four story gates and a logarithmic CP return with additive stage bonuses',()=>{
   for(const [clear,count] of [[0,0],[8,0],[9,1],[18,2],[27,3],[36,4],[45,4]])assert.equal(dispatchSlots(clear),count);
   for(const kind of ['dust','dreams']){

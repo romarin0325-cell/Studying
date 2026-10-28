@@ -340,10 +340,10 @@ function planSurvivor(plan, files, currentFiles) {
 function planDefense(plan, files, currentFiles) {
   const product = files.filter(file => file.startsWith('defense/') && !isDocumentation(file));
   if (!product.length) return;
-  const inputs = product.filter(file => /^defense\/(?:src\/|assets\/|index\.html$|package\.json$|docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|local-inputs|image-pack|image-policy|theme-bright)\.mjs$)/.test(file));
+  // lab.html and build-lab.mjs are inputs of the committed balance lab, which build.mjs writes and checks with the release.
+  const inputs = product.filter(file => /^defense\/(?:src\/|assets\/|index\.html$|lab\.html$|package\.json$|docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|build-lab|local-inputs|image-pack|image-policy|theme-bright)\.mjs$)/.test(file));
   const current = new Set(currentFiles);
   const direct = product.filter(file => current.has(file) && /^defense\/tests\/.*\.test\.mjs$/.test(file));
-  const reportScripts = product.some(file => /^defense\/scripts\/(?:analyze|report-data|generated-reports)\.mjs$/.test(file));
 
   // Standalone scripts outside build
   const standaloneScripts = product.filter(file => current.has(file) && file.startsWith('defense/scripts/') && !inputs.includes(file) && /\.(?:js|mjs|cjs)$/.test(file));
@@ -353,17 +353,41 @@ function planDefense(plan, files, currentFiles) {
   const add = name => checks.add('defense/tests/' + name + '.test.mjs');
 
   if (inputs.some(file => /^defense\/(?:docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|image-pack|image-policy|local-inputs)\.mjs$|assets\/optimized\/ui\/)/.test(file))) add('build');
-  if (inputs.some(file => file.endsWith('/economy.js'))) add('economy');
-  if (inputs.some(file => /(?:src\/battle\.js|src\/combat\/engine\.js)$/.test(file))) add('combat');
-  if (inputs.includes('defense/src/profile.js')) add('profile');
-  if (inputs.includes('defense/src/monthly.js')) add('monthly');
-  if (inputs.includes('defense/src/runtime.js')) add('runtime');
-  if (reportScripts) add('generated-reports');
+  // Each source selects the existing tests that pin its contract. data.js and content.js hold every number,
+  // text, roster entry and relic, so they select the text/number, economy, combat, roster and report checks.
+  // Sources read by the generated reports select generated-reports, which compares the committed
+  // CURRENT_VALUES.md and JSON reports with them.
+  for (const [pattern, names] of [
+    [/^defense\/src\/(?:data|content)\.js$/, ['text', 'economy', 'combat', 'assets', 'independence', 'lines', 'bond', 'generated-reports']],
+    [/^defense\/src\/economy\.js$/, ['economy', 'generated-reports']],
+    [/^defense\/src\/combat\/engine\.js$/, ['combat', 'text', 'generated-reports']],
+    [/^defense\/src\/(?:battle|smart-auto)\.js$/, ['combat']],
+    [/^defense\/src\/profile\.js$/, ['profile', 'generated-reports']],
+    [/^defense\/src\/monthly\.js$/, ['monthly']],
+    [/^defense\/src\/runtime\.js$/, ['runtime']],
+    [/^defense\/src\/bond\.js$/, ['bond']],
+    [/^defense\/src\/lines\.js$/, ['lines']],
+    [/^defense\/src\/test-unlock\.js$/, ['dawn']],
+    [/^defense\/src\/memorial\.js$/, ['memorial']],
+    [/^defense\/src\/(?:new-)?memorial-media\.js$/, ['replace-memorials', 'generated-reports']],
+    [/^defense\/src\/library\.js$/, ['study', 'generated-reports']],
+    [/^defense\/src\/(?:course|quiz|tutor)\.js$/, ['study']],
+    [/^defense\/src\/(?:asset-policy|portrait-layout|combat\/render)\.js$/, ['assets']],
+    [/^defense\/src\/combat\/effects\.js$/, ['companion-vfx', 'lightning-vfx']],
+    [/^defense\/src\/combat\/(?:new-)?companion-vfx\.js$/, ['companion-vfx']],
+    [/^defense\/src\/combat\/lightning-vfx\.js$/, ['lightning-vfx']],
+    [/^defense\/(?:src\/lab\/|lab\.html$|scripts\/build-lab\.mjs$)/, ['lab']],
+    [/^defense\/scripts\/requested-stage-sim\.mjs$/, ['requested-stage-sim']],
+    [/^defense\/scripts\/(?:analyze|report-data|current-values|generated-reports)\.mjs$/, ['generated-reports']]
+  ]) {
+    if (product.some(file => pattern.test(file))) names.forEach(add);
+  }
   // The packer guard test imports only output-guard.mjs (no sharp), so it needs no install.
   if (product.some(file => /^defense\/scripts\/art\/(?:output-guard|pack_defense_directions|pack-sd)\.mjs$/.test(file))) add('packer-guard');
 
   addNodeTest(plan, 'defense', 'defense:contracts-and-regressions', 'Check Star Garden collection, growth, tickets and actual combat regressions', [...checks]);
-  if (checks.has('defense/tests/generated-reports.test.mjs') || checks.has('defense/tests/assets.test.mjs') || checks.has('defense/tests/build.test.mjs')) {
+  // These tests load sharp or esbuild.
+  if (['assets', 'build', 'companion-vfx', 'generated-reports', 'memorial', 'replace-memorials', 'solo', 'study'].some(name => checks.has('defense/tests/' + name + '.test.mjs'))) {
     const step = plan.steps.find(s => s.id === 'defense:contracts-and-regressions');
     if (step) step.needsInstall = true;
   }

@@ -1,6 +1,6 @@
 # 밸런스 랩
 
-`dist/StarGardenBalanceLab.html`을 직접 열거나 `npm run serve:defense` 후 http://127.0.0.1:4178/balance 로 접속한다. `npm run build:defense:lab`은 랩만, `npm run build:defense`는 게임 두 테마와 랩을 함께 빌드한다.
+`dist/StarGardenBalanceLab.html`을 직접 열거나 `npm run serve:defense` 후 http://127.0.0.1:4178/balance 로 접속한다. `npm run build:defense:lab`은 랩만, `npm run build:defense`는 게임 두 테마와 랩을 함께 빌드하고, CI는 커밋된 랩도 두 테마처럼 소스와 비교한다.
 
 일반 공격·필살기·디버프·실제 모션·확정 패치 내역을 비교한다. 공격 형태·필살기 유형·등급·효과·이름으로 필터링하고 성급·훈련·표적 수·외부 상태를 조정한다. 기본 공격력과 현재 공격력을 구분하며, 필살기는 통상/조건 피해·순증 피해·별빛 100당 순증으로 정렬한다. 개별 공격력 배율·공격 주기·소모량 초안은 별도 저장하고 JSON으로 교환한다.
 

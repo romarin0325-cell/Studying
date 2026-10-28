@@ -57,7 +57,7 @@
 - 배포 압축본은 `assets/optimized/`, 설정·용도는 `scripts/image-policy.mjs`, 실제 경로·해시·해상도·용량·보존 판단은 `docs/ASSET_OPTIMIZATION.json`에서 관리한다. 이전 압축 결과를 재압축하지 않는다.
 - `docs/ASSET_OPTIMIZATION.json`은 배포 입력이다. 일반 문서로 취급해 빌드를 생략하지 않는다. 압축 정책/검증 도구 및 Bright CSS 변환 도구 변경도 해당 게임 빌드를 선택한다.
 - 이미지/압축 설정을 바꿀 때만 `node defense/scripts/optimize-images.mjs`를 실행한다. UI 자르기 좌표·UI 압축 설정만 바꾸면 `--derived-only`로 해당 파생본만 갱신한다. `assets/optimized/ui/`와 같은 매니페스트를 함께 커밋한다. 일반 빌드는 이미지 인코딩이나 누락 파일 자동 복구를 하지 않는다.
-- `node defense/scripts/build.mjs` 한 번으로 일반판과 Bright를 함께 갱신하고 둘 다 커밋한다. `--bright`나 `--unlocked` 출력은 정식 두 파일 갱신을 대신하지 않는다. CI의 자동 비교는 정식 일반/Bright 출력에만 적용한다. `--solo`, `--compat`, `--web`, `--unlocked`는 CI에서도 생성하며, 명시한 `--check`는 해당 출력의 비교 검사로 유지한다.
+- `node defense/scripts/build.mjs` 한 번으로 일반판·Bright·밸런스 랩을 함께 갱신하고 모두 커밋한다. 랩은 콘텐츠와 전투 코드를 함께 묶으므로 수치만 바꿔도 다시 만들어진다. `--bright`나 `--unlocked` 출력은 정식 파일 갱신을 대신하지 않는다. CI의 자동 비교는 정식 일반/Bright 출력과 밸런스 랩에만 적용한다. `--solo`, `--compat`, `--web`, `--unlocked`는 CI에서도 생성하며, 명시한 `--check`는 해당 출력의 비교 검사로 유지한다.
 - 초상화·전신·유물 아이콘·메모리얼 썸네일은 수동 준비 단계에서 보관한 원본으로부터 만들고 `assets/optimized/ui/`의 고정 경로에 재사용한다. 원본 해시·자르기/그리드 좌표·압축 설정·출력 해시가 맞아야 빌드가 통과한다. 축소 전투용 압축본에서 다시 자르지 않는다. 단일 HTML에는 메모리얼 본편 한 코덱만 넣고 작은 앨범 썸네일을 유지한다.
 - `src/asset-policy.js`의 런타임/빌드 전용 구분을 내장과 preload에 같이 적용한다. 내장 제외 파일의 오프라인 상대 경로 요청을 만들지 않는다.
 - 배포 압축만 바뀌면 밸런스·원본 provenance 보고서를 재생성하지 않는다. 원본 데이터나 그림이 바뀌었을 때만 해당 보고서를 갱신한다. 현재 안내는 `docs/SINGLE_HTML_OPTIMIZATION.md`; 과거 측정은 날짜가 있는 기록으로 유지한다.
