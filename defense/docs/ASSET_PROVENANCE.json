@@ -598,6 +598,13 @@
       "height": 512
     },
     {
+      "id": "luna-blade",
+      "source": "defense/assets/merge/luna-blade.webp",
+      "sha256": "275823077c9eb318a0a47ea63322cc2d6518f7193a359afd5e9c4c2991721f77",
+      "width": 768,
+      "height": 256
+    },
+    {
       "id": "orbit-zone",
       "source": "defense/assets/merge/orbit-zone.webp",
       "sha256": "8315be3a83dd1b99f15ba76ec888c8e489400dcb829df64750e01b39c17b46bf",

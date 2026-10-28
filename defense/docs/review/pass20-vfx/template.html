@@ -18,7 +18,7 @@ details{margin-top:24px;color:#c9c3da}
 <select id="mode" aria-label="장면 종류"><option value="attack">평타</option><option value="skill">필살기</option><option value="badge">배지</option><option value="range">사거리</option></select>
 <select id="theme" aria-label="전장"><option value="night">밤 정원</option><option value="bright">Bright 정원</option><option value="dawn">새벽(2부)</option></select>
 <select id="speed" aria-label="재생 속도"><option value="1">1배속</option><option value="0.5">0.5배속</option><option value="0.25">0.25배속</option></select>
-<label><input type="checkbox" id="reduced">연출 줄이기</label><label><input type="checkbox" id="ring" checked>판정 반경</label></div>
+<label><input type="checkbox" id="reduced">연출 줄이기</label><label><input type="checkbox" id="ring" checked>판정 반경</label><label><input type="checkbox" id="cutin" checked>컷인 띠</label></div>
 <h2 id="hero-name"></h2><p id="role"></p><p id="reason"></p>
 <div class="stage"><figure><figcaption>기존 · main 렌더러</figcaption><canvas id="before" aria-label="변경 전 전장"></canvas></figure><figure id="after-figure"><figcaption>적용 후 · 20차 렌더러</figcaption><canvas id="after" aria-label="변경 후 전장"></canvas></figure></div>
 <div class="timeline"><button id="play">일시정지</button><button id="restart">처음부터</button><input id="seek" type="range" min="0" max="4" step="0.0166667" value="0" aria-label="재생 시각"><output id="clock">0.00초</output></div>

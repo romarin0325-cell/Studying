@@ -1,0 +1,73 @@
+{
+  "input": "defense/docs/art/pass20-fx-20261028/gpt-luna.png",
+  "width": 2172,
+  "height": 724,
+  "columns": 3,
+  "rows": 1,
+  "rowCuts": [],
+  "cells": [
+    {
+      "cell": 0,
+      "cut": [
+        0,
+        0,
+        724,
+        724
+      ],
+      "box": [
+        149,
+        281,
+        463,
+        146
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 1,
+      "cut": [
+        724,
+        0,
+        1448,
+        724
+      ],
+      "box": [
+        849,
+        127,
+        486,
+        461
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "cell": 2,
+      "cut": [
+        1448,
+        0,
+        2172,
+        724
+      ],
+      "box": [
+        1581,
+        137,
+        483,
+        405
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

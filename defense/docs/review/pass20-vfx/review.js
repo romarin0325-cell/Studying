@@ -8,7 +8,7 @@ const images={};
 await Promise.all(Object.entries(DATA.images).map(([id,src])=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{images[id]=image;resolve();};image.onerror=()=>reject(Error('Missing review texture: '+id));image.src=src;})));
 const makeArt=()=>{const a=Object.create(Art.prototype);a.images={...images};a.failed=[];a.ready=Promise.resolve();return a;};
 const canvases=[$('before'),$('after')];
-let config={key:'zeke-calm',mode:'attack',theme:'night',reduced:false,ring:true},runners=[],time=0,playhead=0,playing=true,last=0;
+let config={key:'zeke-calm',mode:'attack',theme:'night',reduced:false,ring:true,cutin:true},runners=[],time=0,playhead=0,playing=true,last=0;
 function seeded(seed,fn){const old=Math.random;let n=seed>>>0||1;Math.random=()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296;};try{return fn();}finally{Math.random=old;}}
 function runnersFor(c,targets=canvases){
   const entry=entries[c.key];
@@ -20,10 +20,16 @@ function runnersFor(c,targets=canvases){
     renderer.reduced=c.reduced;renderer.shake=0;
     if(c.mode==='range')renderer.selected=fixture.cell;
     const initial=fixture.state.events.splice(0);seeded(1,()=>initial.forEach(e=>renderer.event(e)));
-    return {renderer,fixture,frames:0,entry,before,ring:c.ring};
+    return {renderer,fixture,frames:0,entry,before,ring:c.ring,cutin:c.cutin&&c.mode==='skill'};
   });
 }
-function advance(items,dt){for(const item of items){const events=item.fixture.advance(dt);seeded(++item.frames,()=>events.forEach(e=>item.renderer.event(e)));item.renderer.draw(item.fixture.state,dt);if(item.ring && item.entry.ring){const ctx=item.renderer.ctx,p=E.cellPoint(item.fixture.cell),unit=item.fixture.state.board[item.fixture.cell];const radius=item.entry.key==='cocoon'?E.unitHero(item.fixture.state,unit).range:HERO[item.entry.hero].range;ctx.save();ctx.setTransform(item.renderer.dpr,0,0,item.renderer.dpr,0,0);ctx.globalAlpha=.55;ctx.strokeStyle="white";ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.stroke();ctx.restore();}}}
+function advance(items,dt){for(const item of items){const events=item.fixture.advance(dt);seeded(++item.frames,()=>events.forEach(e=>item.renderer.event(e)));item.renderer.draw(item.fixture.state,dt);if(item.ring && item.entry.ring){const ctx=item.renderer.ctx,p=E.cellPoint(item.fixture.cell),unit=item.fixture.state.board[item.fixture.cell];const radius=item.entry.key==='cocoon'?E.unitHero(item.fixture.state,unit).range:HERO[item.entry.hero].range;ctx.save();ctx.setTransform(item.renderer.dpr,0,0,item.renderer.dpr,0,0);ctx.globalAlpha=.55;ctx.strokeStyle="white";ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.stroke();ctx.restore();}if(item.cutin)cutinBand(item);}}
+// The game's cut-in is a DOM band over the board (app.js cutIn, style.css .cutin): UR top 5% and 26% tall for 1.6 s, other
+// rarities top 7% and 22% (C/R 18%) for 1.1 s, skewed -7 degrees, 88% opaque, sliding in by 16% and out after 80% of its time.
+// It is simulated here so the review shows what it hides.
+function cutinBand(item){const h=HERO[item.entry.hero],ur=h.hidden||h.rarity==='UR',dur=ur?1.6:1.1,top=ur?.05:.07,tall=ur?.26:['C','R'].includes(h.rarity)?.18:.22,age=item.frames/60;if(age>dur)return;
+  const k=age<dur*.16?age/(dur*.16):age>dur*.8?1-(age-dur*.8)/(dur*.2):1,ctx=item.renderer.ctx,y0=780*top,y1=780*(top+tall),sk=Math.tan(7*Math.PI/180);
+  ctx.save();ctx.setTransform(item.renderer.dpr,0,0,item.renderer.dpr,0,0);ctx.globalAlpha=.88*k;ctx.fillStyle='#080a1e';ctx.beginPath();ctx.moveTo(-90,y0+sk*450);ctx.lineTo(810,y0-sk*450);ctx.lineTo(810,y1-sk*450);ctx.lineTo(-90,y1+sk*450);ctx.closePath();ctx.fill();ctx.globalAlpha=k;ctx.strokeStyle=h.color;ctx.lineWidth=2;ctx.stroke();ctx.restore();}
 function playTo(items,t){advance(items,0);let at=0;while(at+1/60<=t+1e-8){advance(items,1/60);at+=1/60;}return at;}
 const skillLine=(entry,h)=>`${h.skill.name} · 별빛 ${h.skill.cost}`;
 function report(){
@@ -37,12 +43,13 @@ function report(){
 function reset(){runners=runnersFor(config);time=0;playhead=0;advance(runners,0);report();}
 function seek(t){if(t<time-.0001)reset();while(time+1/60<=t+1e-8){advance(runners,1/60);time+=1/60;}report();}
 function syncModes(){const entry=entries[config.key];if(!entry.modes.includes(config.mode))config.mode=entry.modes[0];for(const o of $('mode').options)o.disabled=!entry.modes.includes(o.value);$('mode').value=config.mode;}
-function choose(c){config={...config,...c};syncModes();$('hero').value=config.key;$('mode').value=config.mode;$('theme').value=config.theme;$('reduced').checked=config.reduced;$('ring').checked=config.ring;reset();}
+function choose(c){config={...config,...c};syncModes();$('hero').value=config.key;$('mode').value=config.mode;$('theme').value=config.theme;$('reduced').checked=config.reduced;$('ring').checked=config.ring;$('cutin').checked=config.cutin;reset();}
 for(const entry of ENTRIES){const option=document.createElement('option');option.value=entry.key;option.textContent=entry.label;$('hero').append(option);}
 $('hero').addEventListener('change',()=>choose({key:$('hero').value}));
 for(const id of ['mode','theme'])$(id).addEventListener('change',()=>choose({[id]:$(id).value}));
 $('reduced').addEventListener('change',()=>choose({reduced:$('reduced').checked}));
 $('ring').addEventListener('change',()=>choose({ring:$('ring').checked}));
+$('cutin').addEventListener('change',()=>choose({cutin:$('cutin').checked}));
 $('play').onclick=()=>{playing=!playing;playhead=time;report();};$('restart').onclick=reset;
 $('seek').oninput=()=>{playing=false;seek(Number($('seek').value));playhead=time;};
 const keys=ENTRIES.map(e=>e.key);
@@ -62,7 +69,7 @@ for(const entry of ENTRIES){
     const cell=document.createElement('td'),strip=document.createElement('div');strip.className='strip';
     for(const moment of entry.moments){
       const canvas=document.createElement('canvas'),made=[document.createElement('canvas'),document.createElement('canvas')];made[column]=canvas;
-      const item=runnersFor({key:entry.key,mode:entry.modes[0],theme:'night',reduced:false,ring:true},made)[column];
+      const item=runnersFor({key:entry.key,mode:entry.modes[0],theme:'night',reduced:false,ring:true,cutin:true},made)[column];
       playTo([item],moment);
       const fig=document.createElement('figure'),cap=document.createElement('figcaption'),img=document.createElement('img');
       cap.textContent=`${labels[column]} · ${moment.toFixed(2)}초`;img.src=canvas.toDataURL('image/webp',.8);img.alt=`${entry.label} ${labels[column]} ${moment}초`;img.loading='lazy';

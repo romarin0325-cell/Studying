@@ -50,10 +50,10 @@
     }
   },
   "totals": {
-    "sourceBytes": 30347196,
-    "deployableSourceBytes": 28722228,
-    "outputBytes": 16051025,
-    "optimizedFiles": 168,
+    "sourceBytes": 30482926,
+    "deployableSourceBytes": 28857958,
+    "outputBytes": 16139859,
+    "optimizedFiles": 169,
     "derivedFiles": 156,
     "derivedOutputBytes": 3745404
   },
@@ -2733,6 +2733,37 @@
         "metadata": {
           "width": 1024,
           "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:luna-blade",
+      "source": "./assets/merge/luna-blade.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.luna-blade; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 135730,
+        "sha256": "275823077c9eb318a0a47ea63322cc2d6518f7193a359afd5e9c4c2991721f77",
+        "metadata": {
+          "width": 768,
+          "height": 256,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/luna-blade.webp",
+        "bytes": 88834,
+        "sha256": "5573a330122c3c12e5e436e5ca2388f0ea61e0febc12380b195372c7c8ea2bd1",
+        "metadata": {
+          "width": 768,
+          "height": 256,
           "hasAlpha": true,
           "codec": "webp"
         }

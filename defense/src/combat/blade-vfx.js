@@ -3,46 +3,60 @@
 // Measured on the packed cells (share of the stamp size from its centre): the sword tip sits 0.41 below the centre, the
 // eruption's white-hot point 0.20 below it, and the ring's outer flame at 0.83 of the half-size.
 const RAGNAROK='zeke-ragnarok',TIP=.412,ERUPT=.2,SEAL_EDGE=.83;
-export const RAGNAROK_LIFE=2;
+export const RAGNAROK_LIFE=2.2;
 const clamp=t=>Math.max(0,Math.min(1,t));
 const span=(t,a,b)=>clamp((t-a)/(b-a));
 const ease=t=>1-(1-clamp(t))**3;
-const easeIn=t=>clamp(t)**2.2;
 const hash=(seed,i)=>{const n=Math.sin(seed*12.9898+i*78.233)*43758.5453;return n-Math.floor(n);};
 const stamp=(fx,frame,x,y,w,angle=0,alpha=1,blend='source-over')=>alpha>0&&fx.atlasStamp(RAGNAROK,frame,3,1,x,y,w,w,angle,alpha,blend);
 function diamond(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x,y+r*.42);ctx.lineTo(x-r,y);ctx.lineTo(x,y-r*.42);ctx.closePath();ctx.fill();}
 
-// Ragnarok: a fire seal opens on the board, the greatsword drops out of the sky and stabs the centre, a flame shockwave runs
-// out across the field and fire erupts under each enemy as the wave reaches it (all enemies are hit, like the engine).
-// The sword then stands in the ground, glowing, and burns away into embers. Same centre as the other field ultimates.
+// Ragnarok. The UR cut-in band covers the top of the board (5-31% of its height) for 1.6 s, so a sword dropping from the
+// top edge was hidden and seemed to appear in the centre. Now a gate of fire opens in the air just below the band and a
+// target seal on the ground; the greatsword slides down out of the gate (drawn only below it, so it visibly emerges and
+// travels), stabs the centre at 0.62 s, the gate bursts and the whole blade stands in the ground. A flame shockwave runs out
+// and fire erupts under each enemy as the wave reaches it (the engine hits all enemies at the cast, as before). The sword
+// glows, then burns away into embers.
 export function drawRagnarok(fx,skill,age){
   if(!fx.art.images[RAGNAROK])return false;
-  const ctx=fx.ctx,X=360,TY=440,S=480,hit=.42,reduced=fx.reduced,end=1-span(age,1.45,RAGNAROK_LIFE);
-  // A warm dusk over the field while the sword is out (lighter than the old wash; units stay readable).
+  const ctx=fx.ctx,X=360,TY=440,GATE=262,S=500,hit=.62,reduced=fx.reduced,end=1-span(age,1.6,RAGNAROK_LIFE);
+  // A warm dusk over the field while the sword is out (units stay readable).
   ctx.save();ctx.globalAlpha=Math.min(1,age*4)*end*(reduced?.25:.4);
   const wash=fx.ragnarokWash||(fx.ragnarokWash=(()=>{const g=ctx.createRadialGradient(X,TY,140,X,TY,600);g.addColorStop(0,'#ff6a2000');g.addColorStop(1,'#5a0e0699');return g;})());
   ctx.fillStyle=wash;ctx.fillRect(0,0,720,780);ctx.restore();
-  // The seal marks where it will land, then flares as the blade arrives.
-  const open=ease(span(age,0,.3)),seal=1-span(age,hit+.1,hit+.5);
-  if(seal>0){const r=150*open;stamp(fx,2,X,TY,2*r/SEAL_EDGE,-age*.6,seal*.9);fx.glow('glow','#ff7a2a',X,TY,r*1.4,seal*.35);}
-  // The sword falls, gathering speed, with a short afterimage; it lands at the hit.
-  const fall=easeIn(span(age,.1,hit)),tipY=-80+(TY+80)*fall,landed=age>=hit;
-  if(age>=.1){
-    if(!landed&&!reduced)for(const [i,back] of [[1,70],[2,150]])stamp(fx,0,X,tipY-TIP*S-back*fall,S,0,(.35-.12*i)*fall);
-    const glowPulse=landed?.15*Math.sin(age*9):0,embedded=landed?ease(span(age,hit,hit+.12)):0;
-    // Once it stands in the ground it softens so the units around the centre stay visible, then burns away upward.
-    const alpha=landed?(1-.3*embedded)*end:Math.min(1,fall*3),rise=(1-end)*40;
-    stamp(fx,0,X,TY-TIP*S-rise+(landed?6*embedded:0),S,0,alpha);
-    if(landed)fx.glow('glow','#ff9a3a',X,TY-120,260,(.3+glowPulse)*end);
-    if(landed&&end<1&&!reduced){ctx.save();ctx.globalCompositeOperation='lighter';const k=1-end;
-      for(let i=0;i<14;i++){const y=TY-hash(i,3)*S*.8-k*(60+hash(i,5)*90),x=X+(hash(i,7)-.5)*60+Math.sin(k*6+i)*10;ctx.globalAlpha=Math.sin(Math.PI*clamp(k*1.3-hash(i,9)*.3))*.9;diamond(ctx,x,y,2.6+hash(i,11)*2.4,i%3?'#ffb35a':'#fff0c8');}ctx.restore();}
+  const flat=(y,w,ratio,spin,alpha)=>alpha>0&&fx.atlasStamp(RAGNAROK,2,3,1,X,y,w,w*ratio,spin,alpha,'source-over');
+  // The target seal lies on the ground; the gate hangs in the air above it. Both open first, then the gate bursts on impact.
+  const open=ease(span(age,0,.28)),seal=1-span(age,hit+.1,hit+.5),gate=1-span(age,hit,hit+.12);
+  if(seal>0){flat(TY,330*open,.42,-age*.4,seal*.85);fx.glow('glow','#ff7a2a',X,TY,200*open,seal*.3);}
+  if(gate>0){flat(GATE,300*open,.3,age*.6,gate*.95);fx.glow('glow','#ffb060',X,GATE,240*open,gate*.45);}
+  // The sword: its tip leaves the gate at 0.22 s and reaches the ground at the hit, gathering speed; until then only the part
+  // below the gate is drawn, with a hot seam where the blade passes through and a short streak under the tip.
+  const fall=clamp((age-.22)/(hit-.22))**1.6,tipY=GATE+(TY-GATE)*fall,landed=age>=hit;
+  if(age>=.22){
+    const sink=landed?7*ease(span(age,hit,hit+.1)):0,cy=tipY+sink-TIP*S-(1-end)*40;
+    if(!landed){
+      ctx.save();ctx.beginPath();ctx.rect(0,GATE,720,780-GATE);ctx.clip();
+      if(!reduced)for(const [i,back] of [[1,26],[2,58]])stamp(fx,0,X,cy-back,S,0,.3/i);
+      stamp(fx,0,X,cy,S,0,1);
+      // The near half of the gate passes in front of the blade, so the sword reads as coming through it.
+      flat(GATE,300*open,.3,age*.6,gate*.95);ctx.restore();
+      fx.glow('glow','#fff0c8',X,GATE,120,.7);
+      if(!reduced){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#ffd7a0';ctx.lineCap='round';
+        for(const [i,dx] of [-34,34,-14,14].entries()){const len=40+i*12;ctx.globalAlpha=.5;ctx.lineWidth=i<2?2:1.4;ctx.beginPath();ctx.moveTo(X+dx,tipY-len-10);ctx.lineTo(X+dx,tipY-10);ctx.stroke();}ctx.restore();}
+    }else{
+      // Standing in the ground it softens so the units around the centre stay visible, then burns away upward.
+      stamp(fx,0,X,cy,S,0,(1-.28*ease(span(age,hit,hit+.3)))*end);
+      fx.glow('glow','#ff9a3a',X,TY-120,260,(.3+.15*Math.sin(age*9))*end);
+      if(end<1&&!reduced){ctx.save();ctx.globalCompositeOperation='lighter';const k=1-end;
+        for(let i=0;i<14;i++){const y=TY-hash(i,3)*S*.8-k*(60+hash(i,5)*90),x=X+(hash(i,7)-.5)*60+Math.sin(k*6+i)*10;ctx.globalAlpha=Math.sin(Math.PI*clamp(k*1.3-hash(i,9)*.3))*.9;diamond(ctx,x,y,2.6+hash(i,11)*2.4,i%3?'#ffb35a':'#fff0c8');}ctx.restore();}
+    }
   }
   if(!landed)return true;
   const since=age-hit;
-  // Impact: white-hot flash, a short screen flash and one shake for the renderer.
+  // Impact: white-hot flash, a short screen flash and one shake for the renderer; the gate bursts into sparks.
   if(!skill.slammed){skill.slammed=true;if(!reduced)fx.shake=Math.max(fx.shake||0,11);}
   const flash=1-span(since,0,.28);
-  if(flash>0){fx.glow('rays','#ffd08a',X,TY,620*ease(since/.22),flash*.8,since*1.5);fx.glow('glow','#fff3d6',X,TY,260,flash*.85);
+  if(flash>0){fx.glow('rays','#ffd08a',X,TY,620*ease(since/.22),flash*.8,since*1.5);fx.glow('glow','#fff3d6',X,TY,260,flash*.85);fx.glow('glow','#ffcf8a',X,GATE,200*(1+since*2),flash*.5);
     if(!reduced){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=flash*.16;ctx.fillStyle='#ff9a50';ctx.fillRect(0,0,720,780);ctx.restore();}}
   // The eruption at the tip.
   const burst=span(since,0,.45);if(burst<1){const w=280+110*ease(burst/.5);stamp(fx,1,X,TY-ERUPT*w,w,0,(1-span(burst,.35,1))*.92);}
@@ -60,40 +74,23 @@ export function drawRagnarok(fx,skill,age){
   return true;
 }
 
-// Luna's basic attack. A thrown moon-silver blade flies straight (it is straight, so it no longer looks like a curved slash
-// sliding across the board); where it lands a thin crescent cut is drawn across the target, then a second, finer cut
-// crosses it. Small, short and low alpha like the cast's basic attacks; no painted frame is needed.
+// Luna's basic attack, at the same finish as the other companions' painted shots. luna-blade (3x1, GPT image,
+// docs/art/pass20-fx-20261028): 0 moon dagger pointing right (its ribbon trails left), 1 crossed crescent cuts, 2 one crescent
+// cut. The dagger flies straight to the target (the old curved three-claw frame slid along a straight line); where it lands
+// one of the two cuts flashes across the enemy, alternating, and fades in a third of a second.
+const LUNA='luna-blade';
+export const MOON_CUT_LIFE=.34;
 export function drawMoonShot(fx,shot,{from,to,t}){
-  const ctx=fx.ctx,a=Math.atan2(to.y-from.y,to.x-from.x),x=from.x+(to.x-from.x)*t,y=from.y+(to.y-from.y)*t,len=20+Math.min(5,shot.rank||1)*1.2;
-  ctx.save();ctx.translate(x,y);ctx.rotate(a);
-  if(!fx.reduced)for(const [i,back] of [[1,12],[2,24]]){ctx.globalAlpha=.32/i;blade(ctx,-back,len,'#b48cff');}
-  ctx.globalAlpha=.95;blade(ctx,0,len,'#e9ddff');ctx.restore();
-  fx.glow('glow','#c5a0ff',x,y,26,.35);
+  if(!fx.art.images[LUNA])return false;
+  const a=Math.atan2(to.y-from.y,to.x-from.x),x=from.x+(to.x-from.x)*t,y=from.y+(to.y-from.y)*t,w=64+Math.min(5,shot.rank||1)*1.5;
+  fx.glow('glow','#b48cff',x,y,30,.32);fx.atlasStamp(LUNA,0,3,1,x,y,w,w,a,.96,'source-over');
   return true;
 }
-function blade(ctx,x,len,color){
-  ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x+len*.55,0);ctx.lineTo(x-len*.15,-2.6);ctx.lineTo(x-len*.45,-1.2);ctx.lineTo(x-len*.45,1.2);ctx.lineTo(x-len*.15,2.6);ctx.closePath();ctx.fill();
-  ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(x+len*.55,0);ctx.lineTo(x-len*.1,-.8);ctx.lineTo(x-len*.1,.8);ctx.closePath();ctx.fill();
-}
-// A tapered crescent along an arc of radius r from angle a0, revealed up to `head` and trailing from `tail` (0..1 of the sweep).
-function crescent(ctx,cx,cy,r,a0,sweep,tail,head,width,fill,core){
-  if(head<=tail)return;const n=18,pts=[],inner=[];
-  for(let i=0;i<=n;i++){const u=tail+(head-tail)*i/n,ang=a0+sweep*u,w=width*Math.sin(Math.PI*(i/n))**.8;pts.push([cx+Math.cos(ang)*r,cy+Math.sin(ang)*r]);inner.push([cx+Math.cos(ang)*(r-w),cy+Math.sin(ang)*(r-w)]);}
-  ctx.fillStyle=fill;ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));for(const [x,y] of inner.reverse())ctx.lineTo(x,y);ctx.closePath();ctx.fill();
-  ctx.strokeStyle=core;ctx.lineWidth=1.2;ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
-}
-export const MOON_CUT_LIFE=.34;
 export function drawMoonCut(fx,e,t,clarity=1){
-  const ctx=fx.ctx,age=t*MOON_CUT_LIFE,x=e.x,y=e.y-18,n=(e.angle||0)+Math.PI/2,fade=(1-span(age,.14,MOON_CUT_LIFE))*clarity;
-  if(fade<=0)return true;
-  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.9;
-  // Each cut is an arc whose centre sits off to one side, so the middle of the arc crosses the target diagonally (a slash
-  // through it, not a ring around it). First cut, then a finer one from the other side, crossing it.
-  const cut=(r,side,width,fill,core,t0)=>{const c=n+side,cx=x+Math.cos(c)*r,cy=y+Math.sin(c)*r,mid=c+Math.PI;
-    crescent(ctx,cx,cy,r,mid-.62,1.24,ease(span(age,t0+.04,t0+.18)),ease(span(age,t0,t0+.09)),width,fill,core);};
-  cut(44,.55,6.5,'#a77cf0cc','#f6f0ff',0);
-  if(!fx.reduced){ctx.globalAlpha=fade*.65;cut(36,Math.PI-.55,4,'#c9a8ffbb','#ffffff',.06);}
-  ctx.restore();
-  const glint=Math.sin(Math.PI*span(age,.05,.22));if(glint>0)fx.glow('glow','#d8c4ff',x,y,40,glint*.35*clarity);
+  if(!fx.art.images[LUNA])return false;
+  const age=t*MOON_CUT_LIFE,cross=Math.round(e.x*7+e.y*13)%2===0,a=(e.angle||0)+(cross?0:-.35),pop=ease(span(age,0,.07)),fade=(1-span(age,.12,MOON_CUT_LIFE))*clarity;
+  const w=(64+Math.min(5,e.rank||1)*4)*(.72+.28*pop);
+  fx.atlasStamp(LUNA,cross?1:2,3,1,e.x,e.y-18,w,w,a,fade*.92,'source-over');
+  const glint=Math.sin(Math.PI*span(age,0,.16));if(glint>0)fx.glow('glow','#d8c4ff',e.x,e.y-18,44,glint*.4*clarity);
   return true;
 }
