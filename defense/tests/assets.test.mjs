@@ -42,11 +42,15 @@ test('summon face crops and prepared portraits share optical framing without mov
     const anatomy={...hero.art.portrait},frame=portraitFrame(hero),prepared=crops.get(hero.id);
     assert.ok(prepared,hero.id);
     assert.equal(frame.size,anatomy.size,'optical centering cannot rescale the face');
-    assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=8,'only small optical translations');
+    const verticalLimit=hero.id==='demon_king'?16:8;
+    assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=verticalLimit,'only reviewed optical translations');
     assert.deepEqual(hero.art.portrait,anatomy,'anatomical measurement is preserved');
     assert.deepEqual(prepared.crop,{left:Math.round(frame.x-frame.size/2),top:Math.round(frame.y-frame.size/2),width:frame.size,height:frame.size},hero.id);
   }
   assert.equal(portraitFrame(HEROES.find(h=>h.id==='toffee_apple')).x, HEROES.find(h=>h.id==='toffee_apple').art.portrait.x-7);
+  const demon=HEROES.find(h=>h.id==='demon_king');
+  assert.deepEqual(portraitFrame(demon),{...demon.art.portrait,y:demon.art.portrait.y-16},'lower the visible face without resizing it or changing anatomy');
+  assert.deepEqual(crops.get('demon_king').crop,{left:130,top:79,width:250,height:250},'the collection and summon use the reviewed higher crop');
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{

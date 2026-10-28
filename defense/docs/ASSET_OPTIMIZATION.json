@@ -55,7 +55,7 @@
     "outputBytes": 16139859,
     "optimizedFiles": 169,
     "derivedFiles": 156,
-    "derivedOutputBytes": 3745404
+    "derivedOutputBytes": 3743948
   },
   "images": [
     {
@@ -6639,7 +6639,7 @@
       "profile": "portrait",
       "crop": {
         "left": 130,
-        "top": 95,
+        "top": 79,
         "width": 250,
         "height": 250
       },
@@ -6650,8 +6650,8 @@
       "sourceSha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f",
       "output": {
         "path": "./assets/optimized/ui/portraits/demon_king.webp",
-        "bytes": 21300,
-        "sha256": "c3b415adde1f3644c001ed320ebf7331713e0ec9e3240a63de5bf501b428f435",
+        "bytes": 19844,
+        "sha256": "21e9cd3a90f84c346251f65321ae8669e9aafbca06a6d2ff8d95fa7b06b2aaa2",
         "metadata": {
           "width": 240,
           "height": 240,
