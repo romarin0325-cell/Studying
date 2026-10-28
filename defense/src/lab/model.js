@@ -39,7 +39,7 @@ export function arena(h,opt={},draft={}){
  s.queue=Array.from({length:o.targets},()=>({kind:(o.boss||h.id==='storm_sage')?'boss':'grunt',hp:1e12}));
  for(let i=0;i<o.targets;i++){s.spawnIn=0;E.step(s,.001);}
  s.queue=[{kind:'grunt',hp:1e12}];s.spawnIn=1e8;s.events=[];s.shots=[];s.stats.damage=0;s.stats.byHero={};
- s.enemies.forEach((e,i)=>{Object.assign(e,{progress:(o.coreNear?1970:250)+(i-(o.targets-1)/2)*24,speed:0,skillIn:1e8,hp:1e12,maxHp:o.low?4e12:1e12});
+ s.enemies.forEach((e,i)=>{Object.assign(e,{progress:(o.coreNear?1925:284)+(i-(o.targets-1)/2)*24,speed:0,skillIn:1e8,hp:1e12,maxHp:o.low?4e12:1e12});
  const add=(type,amount,power=0)=>e.statusEffects.push({type,amount,power,until:1e6,source:'lab:'+type,owner:'lab'});
  if(o.burn)add('burn',.001);if(o.divine)add('divine',3);if(o.poison){add('poison',20,E.power(s,u));e.statusEffects.at(-1).until=s.time+12;}if(o.exposure)add('exposure',.35);if(o.stun)add('stun',1);if(o.freeze)add('freeze',1);if(o.slow)e.slowEffects.push({source:'lab',owner:'lab',amount:.35,until:1e6});
  E.statusState(s,e);});

@@ -59,3 +59,7 @@ test('character presets activate each native condition and starlight/gold contro
  assert.equal(measure(hero('star_boy'),{gauge:120}).skillDamage/measure(hero('star_boy'),{gauge:60}).skillDamage,2);
  assert.ok(measure(hero('doom'),{gold:240}).skillDamage>measure(hero('doom'),{gold:40}).skillDamage);
 });
+
+test('one stationary target is within the Ancient Dragon cross and takes normal attack damage',()=>{
+ const h=hero('ancient_dragon');for(const coreNear of [false,true]){const a=arena(h,{targets:1,coreNear});const p=E.pathPoint(a.s.enemies[0].progress),origin=E.cellPoint(a.index);assert.ok(E.geometryContains(E.attackGeometry(h,origin,p),p));const m=measure(h,{targets:1,coreNear});assert.ok(m.dps>0);assert.ok(Math.abs(m.dps-m.direct)<2);}
+});
