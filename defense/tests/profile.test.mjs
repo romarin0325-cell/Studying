@@ -446,9 +446,9 @@ test('Behemoth joins the normal UR pool and exchange only after stage 45, never 
   const p=createProfile(NOW);assert.equal(HERO.behemoth.hidden,false);assert.ok(!HIDDEN.includes('behemoth'));
   for(let month=0;month<12;month++)assert.notEqual(calendar(Date.UTC(2027,month,15,3)).guardian,'behemoth');
   assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
-  // Force a normal UR and its last pool slot: Behemoth is selectable only after the gate.
-  const lastUr=open=>{const rolls=[.999999,.999999];return drawCharacter(()=>rolls.shift(),false,calendar(NOW).guardian,null,1,open);};
-  assert.notEqual(lastUr(false),'behemoth');assert.equal(lastUr(true),'behemoth');
+  // Force a normal UR and Behemoth's actual slot; later additions need not leave it last.
+  const behemothUr=open=>{const pool=heroPool('UR',open),at=pool.indexOf('behemoth'),rolls=[.999999,at<0?.999999:(at+.5)/pool.length];return drawCharacter(()=>rolls.shift(),false,calendar(NOW).guardian,null,1,open);};
+  assert.notEqual(behemothUr(false),'behemoth');assert.equal(behemothUr(true),'behemoth');
   p.pity.normal=TUNING.pity.normal;p.pity.season=TUNING.pity.season;p.dreams=100000;
   for(const stage of [0,44]){
     p.cleared=stage;assert.equal(command(p,'pityClaim',{banner:'normal',id:'behemoth'},NOW).ok,false);
@@ -466,7 +466,7 @@ test('the stage 45 announcement covers the late companions once: not before 45, 
   assert.deepEqual(lateNoticeIds(fresh),[],'nothing to announce before stage 45');
   fresh.cleared=44;assert.deepEqual(lateNoticeIds(fresh),[]);
   fresh.cleared=45;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, including Behemoth');
-  assert.deepEqual(announced.slice().sort(),['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva'].sort());
+  assert.deepEqual(announced.slice().sort(),['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon'].sort());
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);
   assert.deepEqual(lateNoticeIds(fresh),[]);assert.deepEqual(fresh.noticeLate.slice().sort(),announced.slice().sort());
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);assert.equal(fresh.noticeLate.length,announced.length,'marking twice adds nothing');

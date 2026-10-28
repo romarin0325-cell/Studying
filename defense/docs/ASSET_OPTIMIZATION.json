@@ -50,14 +50,47 @@
     }
   },
   "totals": {
-    "sourceBytes": 30482926,
-    "deployableSourceBytes": 28857958,
-    "outputBytes": 16139859,
-    "optimizedFiles": 169,
-    "derivedFiles": 156,
-    "derivedOutputBytes": 3743948
+    "sourceBytes": 31557115,
+    "deployableSourceBytes": 29932147,
+    "outputBytes": 16881624,
+    "optimizedFiles": 173,
+    "derivedFiles": 159,
+    "derivedOutputBytes": 3839310
   },
   "images": [
+    {
+      "id": "atlas:unit-gold_dragon",
+      "source": "./assets/cast-v2/gold_dragon.webp",
+      "profile": "unit",
+      "uses": [
+        "window.__ASTRA_ASSETS__.unit-gold_dragon; combat renderer / stage UI",
+        "portrait:gold_dragon; collection / party / summon",
+        "figure:gold_dragon; home / details / cut-in / results"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 244274,
+        "sha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/cast-v2/gold_dragon.webp",
+        "bytes": 90054,
+        "sha256": "7c5b931ac19ec284f39d4986ed890d7ba80672adaecfe3ca9145c60a77d4a51d",
+        "metadata": {
+          "width": 640,
+          "height": 640,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
     {
       "id": "atlas:unit-demon_king",
       "source": "./assets/cast-v2/demon_king.webp",
@@ -211,6 +244,37 @@
         "metadata": {
           "width": 640,
           "height": 640,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:gold-breath",
+      "source": "./assets/merge/gold-breath.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.gold-breath; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 672218,
+        "sha256": "aeb0480954dd19eb2ad8770f7472a92763a389526613dde0ef8d99574ebccb3a",
+        "metadata": {
+          "width": 1536,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/gold-breath.webp",
+        "bytes": 509144,
+        "sha256": "9f545b6a1fc7f137c75fc9de80b7dff1cf385414141eac60c72bea88204f5a11",
+        "metadata": {
+          "width": 1536,
+          "height": 1024,
           "hasAlpha": true,
           "codec": "webp"
         }
@@ -5312,6 +5376,67 @@
       "decision": "Separate smaller encoding; source preserved."
     },
     {
+      "id": "memorial:gold_dragon",
+      "source": "./assets/memorial/replacements/gold_dragon/4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555.avif",
+      "profile": "memorialAvif",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.gold_dragon; standalone painting / web primary"
+      ],
+      "original": {
+        "bytes": 58403,
+        "sha256": "4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial/replacements/gold_dragon/4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555.avif",
+        "bytes": 45855,
+        "sha256": "5378f02e3bc131cc937891aaa17cfb77426007bd925e8a5aa811744d6d6960d1",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "avif"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "memorial-webp:gold_dragon",
+      "source": "./assets/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
+      "profile": "memorialWebp",
+      "uses": [
+        "window.__MEMORIAL_MEDIA__.gold_dragon; compat painting / web fallback",
+        "memorialThumb:gold_dragon; album thumbnail cropped from preserved source"
+      ],
+      "original": {
+        "bytes": 99294,
+        "sha256": "d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
+        "bytes": 96712,
+        "sha256": "7699be4bfc21818bfc04194368ad2fd637fdb4ae4d5f936ca87aa4484c2498b1",
+        "metadata": {
+          "width": 720,
+          "height": 1080,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
       "id": "memorial:time_ruler",
       "source": "./assets/memorial/time_ruler.avif",
       "profile": "memorialAvif",
@@ -7606,6 +7731,60 @@
       }
     },
     {
+      "id": "portrait:gold_dragon",
+      "source": "./assets/cast-v2/gold_dragon.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 125,
+        "top": 84,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/gold_dragon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/gold_dragon.webp",
+        "bytes": 24778,
+        "sha256": "846f1ec2fa781557dc217d985a5528d366681517e75a16b8614018d3fa077f46",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:gold_dragon",
+      "source": "./assets/cast-v2/gold_dragon.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/gold_dragon.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52",
+      "output": {
+        "path": "./assets/optimized/ui/figures/gold_dragon.webp",
+        "bytes": 52378,
+        "sha256": "e7cba7f822f1d64a15fd8b1bb9df5820ebd2fe847e05d97e6c96a174d7dfb030",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
       "id": "portrait:time_ruler",
       "source": "./assets/cast-v2/time_ruler.webp",
       "profile": "portrait",
@@ -9555,6 +9734,28 @@
         "path": "./assets/optimized/ui/memorial-thumbs/behemoth.webp",
         "bytes": 10282,
         "sha256": "b92d8d54447d354c88cc93fcee8cf1da16bbde647af29d864a096a33ac6678ea",
+        "metadata": {
+          "width": 240,
+          "height": 360,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "memorialThumb:gold_dragon",
+      "source": "./assets/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
+      "profile": "memorialThumb",
+      "crop": null,
+      "destination": "./assets/optimized/ui/memorial-thumbs/gold_dragon.webp",
+      "uses": [
+        "window.__MEMORIAL_THUMBS__; album without full-painting decode"
+      ],
+      "sourceSha256": "d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c",
+      "output": {
+        "path": "./assets/optimized/ui/memorial-thumbs/gold_dragon.webp",
+        "bytes": 18206,
+        "sha256": "803408b62ae11a3ad2fd50b8c636ebfc3d0b32fffe98501c56846eeb3432b78a",
         "metadata": {
           "width": 240,
           "height": 360,

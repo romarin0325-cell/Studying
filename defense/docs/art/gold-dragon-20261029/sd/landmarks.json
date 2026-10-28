@@ -1,0 +1,9 @@
+{
+  "method": "Manual anatomical skull/face ellipses under silver hair; horns, horn pendants, hair volume, wings and tail excluded. Hidden rear skull is inferred. Coordinates refer to the native selected 1254px generation. Ellipses are review estimates, not an anatomical detector or 3D ground truth.",
+  "ellipses": [[337,249,238,210,-3],[930,249,238,210,0],[347,844,220,206,0],[941,844,220,206,0]],
+  "chins": [[341,352],[930,353],[288,942],[1007,941]],
+  "feet": [[345,640],[932,638],[329,1217],[957,1217]],
+  "eyeCentersFront": [[299,300],[381,289]],
+  "uncertaintySourcePixels": {"front":18,"back":26,"profile":18,"sole":5},
+  "notes": "The source frontal skull is a little wider than the 160:150 target aspect. Area normalization does not prove equal anatomy. Check visible cheeks, eye spacing, chin and body next to the approved dragons. Profile below-chin estimates are slightly shorter than the frontal view; no direction-specific scaling is used. Sole anchors are reviewed ankle/body-support points, not alpha-envelope centroids contaminated by trailing cloth or tail."
+}

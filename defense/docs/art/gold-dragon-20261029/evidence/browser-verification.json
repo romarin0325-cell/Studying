@@ -1,0 +1,289 @@
+{
+  "scope": "Actual normal/Bright standalone file:// builds, offline Chromium390x844; isolated preboot fixtures and real UI actions; no physical-device FPS claim",
+  "errors": [],
+  "network": [],
+  "results": [
+    {
+      "theme": "night",
+      "side": "left",
+      "opening": false,
+      "begin": {
+        "charge": {
+          "source": 5,
+          "wave": 1,
+          "started": 0.41,
+          "ends": 5.41
+        },
+        "attacks": 1,
+        "board": [
+          6,
+          null,
+          null,
+          null,
+          7,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          5,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          8,
+          null,
+          null,
+          null,
+          9
+        ],
+        "damage": 132
+      },
+      "checkpointRemaining": 4.65,
+      "resumedRemaining": 4.55,
+      "final": {
+        "charge": null,
+        "damage": 5104,
+        "stats": {
+          "renders": 332,
+          "steps": 112,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1,
+          "particles": 41,
+          "impacts": 2
+        }
+      },
+      "captures": [
+        {
+          "file": "night-home.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-collection.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-detail.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-memorial.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-story.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-battle-left.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-charge-cutin.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-charge-resumed.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-beam.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "night-impact.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        }
+      ]
+    },
+    {
+      "theme": "bright",
+      "side": "right",
+      "opening": true,
+      "begin": {
+        "charge": {
+          "source": 5,
+          "wave": 1,
+          "started": 0.41,
+          "ends": 5.41
+        },
+        "attacks": 1,
+        "board": [
+          6,
+          null,
+          null,
+          null,
+          7,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          5,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          8,
+          null,
+          null,
+          null,
+          9
+        ],
+        "damage": 264
+      },
+      "checkpointRemaining": 4.65,
+      "resumedRemaining": 4.55,
+      "final": {
+        "charge": null,
+        "damage": 10208,
+        "stats": {
+          "renders": 336,
+          "steps": 113,
+          "saveWrites": 2,
+          "saveFailures": 0,
+          "savePending": false,
+          "quality": "standard",
+          "dpr": 1,
+          "particles": 33,
+          "impacts": 2
+        }
+      },
+      "captures": [
+        {
+          "file": "bright-home.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-collection.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-detail.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-memorial.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-story.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-battle-right.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-charge-cutin.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-charge-resumed.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-beam.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "file": "bright-impact.webp",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        }
+      ]
+    }
+  ]
+}

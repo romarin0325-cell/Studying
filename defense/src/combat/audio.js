@@ -98,7 +98,9 @@ export class Sound {
       case 'move':this.tone(520,t,.06,.025,'sine',380);return;
       case 'sell':this.tone(1320,t,.08,.03,'triangle',990);this.tone(990,t+.06,.1,.025,'triangle',700);return;
       case 'income':this.tone(1568,t,.07,.02,'square',null,.1);this.tone(2093,t+.05,.12,.018,'triangle',null,.2);return;
-      case 'skill':{if(e.kind==='bigshow'){
+      case 'skill':{if(e.kind==='ultimate_breath'){
+        this.chord([60,67,74],t,.9,.032,'sine',.04,.35);this.noise(t,.55,.018,450,'bandpass',1800,.8);return;}
+        if(e.kind==='bigshow'){
         // The fist falls (rising whoosh), lands (deep thump plus a crack of stone), and the board rings.
         this.noise(t,.26,.07,300,'bandpass',3200,1.1);this.tone(52,t+.3,.9,.34,'sine',24);this.noise(t+.3,.6,.22,2200,'lowpass',180,.9,.3);
         this.tone(130,t+.3,.35,.12,'square',60);this.chord([55,62,69],t+.32,.8,.05,'sawtooth',.01,.5);return;}
@@ -106,6 +108,8 @@ export class Sound {
         // Wind-up, impact, then a bright chord: every ultimate lands like a moment.
         this.noise(t,.3,.05,300,'bandpass',4200,1.2);this.tone(70,t+.26,.6,.22,'sine',32);this.noise(t+.26,.45,.12,2800,'lowpass',400,.7,.25);
         this.chord(e.support?[72,76,79,84]:[69,73,76,81],t+.3,.9,.045,'sawtooth',.012,.45);this.chord([84,88,91],t+.34,.7,.02,'triangle',.02,.5);return;}
+      case 'goldBreathRelease':this.tone(400,t,.32,.07,'sine',1900,.35);this.noise(t,.3,.055,800,'bandpass',6500,1.2);return;
+      case 'goldBreathImpact':this.tone(64,t,.7,.22,'sine',28);this.noise(t,.5,.15,2600,'lowpass',260,.8,.25);this.chord([60,67,74,79],t+.04,.75,.035,'triangle',.012,.45);return;
       case 'crushPhase':this.tone(58*j,t,.6,.4,'sine',30);this.tone(116*j,t,.25,.12,'triangle',50);this.noise(t,.55,.24,1400,'lowpass',180,.9,.2);for(let i=0;i<4;i++)this.noise(t+.04+i*.05,.07,.08,3000+i*600,'bandpass',null,2);return;
       case 'dreamPhase':this.chord([e.phase%2?74:72,79,86],t,.5,.03,'sine',.03,.6);this.noise(t,.35,.03,2000,'bandpass',8000,.8,.5);return;
       case 'finisherImpact':this.tone(e.kind==='royal'?110:62,t,.5,.32,'sine',30);this.noise(t,e.kind==='royal'?.2:.34,.18,e.kind==='royal'?5200:1900,'lowpass',300);this.tone(e.kind==='royal'?1320:880,t,.45,.06,'triangle',440,.5);return;

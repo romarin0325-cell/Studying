@@ -18,9 +18,10 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
   const additions=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/demon-miracle/packing.json'),'utf8'));
   assert.equal(original.assets.length,40);
   assert.equal(additions.assets.length,5);
-  const manifest={assets:[...original.assets,...additions.assets]};
+  const gold=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/gold-dragon-20261029/installation.json'),'utf8'));
+  const manifest={assets:[...original.assets,...additions.assets,...gold.assets]};
   const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
-  assert.equal(art.size,45);
+  assert.equal(art.size,46);
   for(const entry of manifest.assets){
     const frame=entry.frames.find(f=>f.direction==='down'),installed=art.get(entry.id);assert.ok(installed,entry.id);
     assert.deepEqual(entry.frames.map(f=>f.direction),['down','up','left','right']);
@@ -54,7 +55,7 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,89);
+  assert.equal(Object.keys(ASSET_PATHS).length,91);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['effects-joker-sun',768,384],['zeke-ragnarok',1536,512],['luna-blade',768,256],['ash-armageddon',1024,512],['effects-chaos-sun',1024,512],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.
@@ -79,6 +80,15 @@ test('every unit faces outward: the left cell looks left, the right cell is its 
   const {reversedUnits,notMirrored}=await import('../scripts/art/check-facing.mjs');
   assert.deepEqual(await reversedUnits(),[],'a left/right cell pair that faces the wrong way');
   assert.deepEqual(await notMirrored(),[],'a right cell that is not the mirror view of the left cell');
+});
+test('Gold facing uses anatomical cheek regions, excludes gold horns, and still detects swapped views',async()=>{
+  const {FACE_REGIONS,faceRegionScore}=await import('../scripts/art/check-facing.mjs');
+  const file=assetFile(ASSET_PATHS['unit-gold_dragon']);
+  const [left,right]=await Promise.all([2,3].map(n=>sharp(file).extract({left:n%2*512,top:512,width:512,height:512}).ensureAlpha().raw().toBuffer()));
+  assert.ok(faceRegionScore(left,FACE_REGIONS.gold_dragon[2])<-1.5);
+  assert.ok(faceRegionScore(right,FACE_REGIONS.gold_dragon[3])>1.5);
+  assert.ok(faceRegionScore(right,FACE_REGIONS.gold_dragon[2])>1.5,'swapped right in left slot must fail');
+  assert.ok(faceRegionScore(left,FACE_REGIONS.gold_dragon[3])<-1.5,'swapped left in right slot must fail');
 });
 
 test('optimized images preserve the source pack, codec, alpha and sprite geometry',async()=>{

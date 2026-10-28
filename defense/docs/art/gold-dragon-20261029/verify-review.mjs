@@ -1,0 +1,41 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import assert from 'node:assert/strict';
+import sharp from 'sharp';
+if(process.platform==='win32'&&!process.env.PLAYWRIGHT_BROWSERS_PATH)process.env.PLAYWRIGHT_BROWSERS_PATH=path.join(os.homedir(),'AppData/Local/ms-playwright');
+const {chromium}=await import('playwright');
+const dir=path.dirname(fileURLToPath(import.meta.url)),out=path.resolve(dir,'../../../test-results/gold-dragon');
+await fs.mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true}),page=await browser.newPage({viewport:{width:1000,height:880}});
+const errors=[],network=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))network.push(r.url());});
+await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
+await page.goto(pathToFileURL(path.resolve(process.argv[2])).href);await page.waitForFunction(()=>!!window.GOLD_REVIEW);await page.evaluate(()=>GOLD_REVIEW.pause());
+const captures=[];
+async function shot(file,quality=88){await sharp(await page.screenshot({fullPage:true})).webp({quality}).toFile(file);}
+async function capture(mode,at,name){
+  await page.evaluate(({mode,at})=>{GOLD_REVIEW.setMode(mode);GOLD_REVIEW.seek(at);},{mode,at});
+  const file=path.join(out,name+'.webp');await shot(file);captures.push(name+'.webp');
+}
+await capture('normal',.48,'normal-comparison');
+const reuse=await page.evaluate(()=>GOLD_REVIEW.alphaPreserved());assert.equal(reuse.differences,0);assert.equal(reuse.redReusesOriginal,true);
+await capture('opening',.48,'opening-comparison');
+for(const [at,name] of [[2.2,'charge'],[4.85,'charge-ready'],[5.2,'launch'],[5.48,'beam'],[5.72,'impact'],[6.28,'aftermath']])await capture('ultimate',at,'ultimate-'+name);
+const skill=await page.evaluate(()=>GOLD_REVIEW.panels.map(({s})=>({charge:s.goldCharge,damage:s.stats.byHero.gold_dragon})));
+assert.ok(skill[0].damage>0&&skill[1].damage>skill[0].damage*1.9);
+await page.evaluate(()=>{GOLD_REVIEW.setMode('ultimate');GOLD_REVIEW.setCastAt(6);GOLD_REVIEW.seek(5.1);});
+const late=await page.evaluate(()=>({waveTime:GOLD_REVIEW.panels[1].s.waveTime,beam:GOLD_REVIEW.panels[1].s.volleys.find(v=>v.kind==='gold_breath')?.damage}));
+assert.equal(late.beam,968);await shot(path.join(out,'ultimate-after-opening.webp'));captures.push('ultimate-after-opening.webp');
+await page.evaluate(()=>{GOLD_REVIEW.setCastAt(4.9);GOLD_REVIEW.seek(5.1);});
+const early=await page.evaluate(()=>({waveTime:GOLD_REVIEW.panels[1].s.waveTime,beam:GOLD_REVIEW.panels[1].s.volleys.find(v=>v.kind==='gold_breath')?.damage}));
+assert.ok(early.waveTime>10);assert.equal(early.beam,1936);
+await page.selectOption('#mode','normal');await page.check('#dense');await page.evaluate(()=>{GOLD_REVIEW.pause();GOLD_REVIEW.seek(.48);});
+await shot(path.join(out,'dense-comparison.webp'),87);captures.push('dense-comparison.webp');
+await page.setViewportSize({width:390,height:844});await page.uncheck('#dense');await page.evaluate(()=>{GOLD_REVIEW.pause();GOLD_REVIEW.seek(.48);});
+const overflow=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));assert.ok(overflow.scroll<=overflow.width);
+await shot(path.join(out,'mobile-comparison.webp'),87);captures.push('mobile-comparison.webp');
+assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
+const report={browser:'Chromium desktop automation, not physical-device performance',source:'Actual combat engine, actual renderer, selected prepared deployment textures',captures,reuse,overflow,errors,network,skill,late,early};
+await fs.writeFile(path.join(out,'review-verification.json'),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify(report));await browser.close();

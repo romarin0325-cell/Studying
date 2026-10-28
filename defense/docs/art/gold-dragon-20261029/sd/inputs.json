@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-28",
+  "id": "gold_dragon",
+  "mode": "built-in image_gen; native transparent alpha",
+  "status": "New art candidate; no runtime installation requested",
+  "inputs": [
+    {
+      "index": 1,
+      "source": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\style-siren.webp",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\gold-dragon-20261028\\references\\style-siren.webp",
+      "role": "Frozen approved Sol style, head proportions, contour, cel shadows; not character identity",
+      "bytes": 179986,
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    },
+    {
+      "index": 2,
+      "source": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\feminine-tall.png",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\gold-dragon-20261028\\references\\feminine-tall.png",
+      "role": "Actual existing feminine-tall 3D structural master, 160x150 common skull and 200px below-chin target",
+      "bytes": 146988,
+      "sha256": "30c2e1536702512fd0bf05100b5058d37e8f572f128f14e93f58ceb74f3d3db4"
+    },
+    {
+      "index": 3,
+      "source": "C:/Users/romar/Downloads/캐릭터/골드드래곤.png",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\gold-dragon-20261028\\references\\original.png",
+      "role": "User original Gold Dragon design; identity/costume/palette/expression authority",
+      "bytes": 1883617,
+      "sha256": "8644f560115f835e6b5c5d7700b5b0cc81cd3a6a9953c61490e33579ffa721d3"
+    },
+    {
+      "index": 4,
+      "source": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\assets\\cast-v2\\ancient_dragon.png",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\gold-dragon-20261028\\references\\approved-ancient-dragon.png",
+      "role": "Approved Sol dragon-family rendering and wing/ground readability; no identity transfer",
+      "bytes": 976569,
+      "sha256": "2c72691d1f4fde3d65ef624fb34d8dc120282fa71f59ea751cfec6f42eb9d781"
+    }
+  ],
+  "concept": {
+    "source": "C:/Users/romar/Downloads/캐릭터/컨셉.txt",
+    "sha256": "8e646cbad9ae26a205cf4d1fc1e07b7ef7406de5f81127d7d13f534cfdd12785",
+    "facts": [
+      "female",
+      "tall",
+      "strongest Dragon Nest dragon and their sovereign",
+      "gave Zeke dragon power",
+      "benevolent"
+    ]
+  },
+  "structure": {
+    "type": "feminine",
+    "height": "tall",
+    "skull": [
+      160,
+      150
+    ],
+    "belowChin": 200,
+    "sole": [
+      256,
+      480
+    ]
+  }
+}

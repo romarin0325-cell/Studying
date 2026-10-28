@@ -3,6 +3,13 @@
   "policy": "independently maintained local atlases; build-time authored portrait crops; no runtime pixel processing",
   "assets": [
     {
+      "id": "unit-gold_dragon",
+      "source": "defense/assets/cast-v2/gold_dragon.webp",
+      "sha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52",
+      "width": 1024,
+      "height": 1024
+    },
+    {
       "id": "unit-demon_king",
       "source": "defense/assets/cast-v2/demon_king.webp",
       "sha256": "414830e03726699969a270d16d06412252b57ac826023635abc156498d70f10f",
@@ -35,6 +42,13 @@
       "source": "defense/assets/cast-v2/abyss_wing.webp",
       "sha256": "8cdf06809c6171ded03ffa006d8cf50f9dfa08d37e2feac5f8ba73a07ec026d9",
       "width": 1024,
+      "height": 1024
+    },
+    {
+      "id": "gold-breath",
+      "source": "defense/assets/merge/gold-breath.webp",
+      "sha256": "aeb0480954dd19eb2ad8770f7472a92763a389526613dde0ef8d99574ebccb3a",
+      "width": 1536,
       "height": 1024
     },
     {
@@ -634,7 +648,7 @@
       "sha256": "37c7903f9c06b3c7935ea3f28f1dbf01f2fe45696da6b7eef5942ec61f4c1c09"
     }
   },
-  "portraits": 41,
+  "portraits": 42,
   "relics": 27,
   "memorial": [
     {
@@ -1230,6 +1244,23 @@
         "height": 1080,
         "bytes": 77464,
         "quality": 82
+      }
+    },
+    {
+      "id": "gold_dragon",
+      "source": "defense/assets/memorial/replacements/gold_dragon/4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555.avif",
+      "sha256": "4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555",
+      "width": 720,
+      "height": 1080,
+      "bytes": 58403,
+      "sourceSha256": "8644f560115f835e6b5c5d7700b5b0cc81cd3a6a9953c61490e33579ffa721d3",
+      "webp": {
+        "source": "defense/assets/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
+        "sha256": "d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c",
+        "width": 720,
+        "height": 1080,
+        "bytes": 99294,
+        "quality": 76
       }
     },
     {

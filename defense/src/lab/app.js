@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id),n=x=>Number.isFinite(x)?x.toLocaleString
 $('advanced').open=innerWidth>650;
 let view='attack',drafts={},rows=[],generation=0,frame=0,art;
 try{drafts=JSON.parse(localStorage.getItem('garden.balance-drafts.v1')||'{}');}catch{}
-const heroLabels={heroMax:'동료별 대표 조건',appleApproach:'사과 접근',prism:'프리즘 Lv.1',coreNear:'적 코어 접근',coreCrisis:'코어 체력 50% 미만',auroraEven:'아우로라 2기',normalDeck:'노멀 전용 편성',lightningTeam:'번개 연결 4기',rabbitTeam:'다른 토끼 2종',powerAura:'인접 공격력 오라',speedAura:'인접 공속 오라',harmonyTeam:'조화 인접 4종',falseCinderella:'가짜 신데렐라',supportTeam:'마술사 인접 4기'};
+const heroLabels={goldOpening:'골드드래곤 개전 10초',heroMax:'동료별 대표 조건',appleApproach:'사과 접근',prism:'프리즘 Lv.1',coreNear:'적 코어 접근',coreCrisis:'코어 체력 50% 미만',auroraEven:'아우로라 2기',normalDeck:'노멀 전용 편성',lightningTeam:'번개 연결 4기',rabbitTeam:'다른 토끼 2종',powerAura:'인접 공격력 오라',speedAura:'인접 공속 오라',harmonyTeam:'조화 인접 4종',falseCinderella:'가짜 신데렐라',supportTeam:'마술사 인접 4기'};
 const conditionLabels={boss:'보스',low:'체력 40% 이하',slow:'감속',burn:'화상',divine:'성광 3',poison:'독 20 · 12초',exposure:'노출 35%',stun:'기절',freeze:'빙결'};
 $('heroConditions').innerHTML=Object.entries(heroLabels).map(([id,label])=>`<label class="check"><input type="checkbox" id="${id}">${label}</label>`).join('');
 $('conditions').innerHTML=Object.entries(conditionLabels).map(([id,label])=>`<label class="check"><input type="checkbox" id="${id}">${label}</label>`).join('');
