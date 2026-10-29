@@ -1954,7 +1954,7 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .lb-visit-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
 .lb-visit-text small{font-size:10px;color:#e8d6a8;white-space:nowrap}
 .lb-visit-text b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lb-visit-icon{position:absolute;top:-4px;right:-2px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--rose);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.lb-visit-icon{position:absolute;left:28px;top:28px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--rose);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .lb-visit-icon .ic{width:12px;height:12px}
 .lb-visit.thanks .lb-visit-icon{animation:visit-beat 1.4s ease-in-out infinite}
 @keyframes visit-in{from{opacity:0;transform:translateX(16px)}}

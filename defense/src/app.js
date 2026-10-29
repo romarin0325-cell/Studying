@@ -989,7 +989,7 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind=
 let oathPick=[],twinDraft=null,twinFocus='left',twinTab='hero',requestTrack=null;
 const seasonTag=()=>`격주 시즌 · ${season(now()).daysLeft}일 남음`;
 const bossRoute=(ids,step=3)=>`<div class="boss-route">${ids.map((id,i)=>`<span><em>${(i+1)*step}</em>${BOSSES[id].name.replace('의 여신 ','의 ')}</span>`).join('')}</div>`;
-const deckPower=ids=>ids.reduce((n,id)=>n+cpOf(id),0);
+const deckPower=ids=>ids.reduce((n,id)=>n+combatPower(id,p().heroes[id],p().beds,collectionBonus(p().relics)),0);
 const keepScroll=fn=>{const body=$('sheet-body'),y=body?.scrollTop||0;fn();const next=$('sheet-body');if(next)next.scrollTop=y;};
 const relicRow=ids=>`<div class="relic-slot-row compact">${[0,1,2].map(i=>{const id=ids[i];return id?`<button class="relic-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<span><b>${ARTIFACT[id].name}</b></span></button>`:`<span class="relic-slot empty">${icon('plus')}<small>빈 칸</small></span>`;}).join('')}</div>`;
 // One ladder shape for both modes: ticks at each band, filled to the season best, a marker at the planned score.
@@ -1049,7 +1049,7 @@ function twinFormation(edit=false){
       <button class="twin-panel-head" data-twin-focus="${side}" aria-pressed="${twinFocus===side}"><span class="twin-sigil" aria-hidden="true"></span><b>${TWIN_SIDE[side].name}</b><small>${d[side].deck.length}/${TEAM_SIZE}</small><span class="power">전투력 <b>${fmt(deckPower(d[side].deck))}</b></span></button>
       <div class="twin-slots">${Array.from({length:TEAM_SIZE},(_,i)=>{const id=d[side].deck[i];return id?`<button class="twin-slot" data-twin-drop="${side}:deck:${id}" data-rarity="${HERO[id].rarity}" aria-label="${HERO[id].name} 빼기">${image(id)}</button>`:`<button class="twin-slot empty" data-twin-focus="${side}" aria-label="빈 칸">${icon('plus')}</button>`;}).join('')}<i class="twin-split" aria-hidden="true"></i>${[0,1,2].map(i=>{const id=d[side].relics[i];return id?`<button class="twin-slot relic" data-twin-drop="${side}:relics:${id}" data-rarity="${ARTIFACT[id].rarity}" aria-label="${ARTIFACT[id].name} 빼기">${image(id)}</button>`:`<button class="twin-slot relic empty" data-twin-focus="${side}" data-twin-tab="relic" aria-label="유물 빈 칸">${icon('plus')}</button>`;}).join('')}</div></div>`;
   const tile=(kind,id,info)=>{const at=where(kind,id),gone=kind==='deck'&&away(profile,id);return `<button class="twin-tile" data-twin-pick="${kind}:${id}" data-rarity="${info.rarity}" ${at?`data-side="${at}"`:''} ${gone?'disabled':''} aria-label="${info.name}${at?` · ${TWIN_SIDE[at].short}`:''}"><span class="twin-tile-art">${image(id)}${at?`<i class="twin-mark">${TWIN_SIDE[at].short}</i>`:''}</span><small>${gone?'파견 중':info.name}</small></button>`;};
-  const heroes=HEROES.filter(h=>profile.heroes[h.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity)||cpOf(b.id)-cpOf(a.id));
+  const heroes=HEROES.filter(h=>profile.heroes[h.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity)||deckPower([b.id])-deckPower([a.id]));
   const relics=ARTIFACTS.filter(a=>profile.relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
   show('쌍성 편성',`${TWIN_SIDE.left.short} ${d.left.deck.length} · ${TWIN_SIDE.right.short} ${d.right.deck.length}`,`<div class="twin-panels">${panel('left')}${panel('right')}</div>
     <div class="tabbar twin-tabs"><button data-twin-tab="hero" aria-pressed="${twinTab==='hero'}"><b>동료</b></button><button data-twin-tab="relic" aria-pressed="${twinTab==='relic'}"><b>유물</b></button></div>
@@ -1105,7 +1105,7 @@ function thankRequest(id,button){
 function requestRows(){
   if(!PREVIEW)return '';const st=requestState(p(),now());
   const wait=Math.max(0,st.next-now()),days=Math.floor(wait/(24*HOUR)),hours=Math.ceil((wait%(24*HOUR))/HOUR);
-  const rows=st.active.map(e=>{const r=REQUEST[e.id],goal=r.goal.n;return `<button class="req-row ${e.done?'ready':''}" data-request="${e.id}"><span class="req-face" data-rarity="${HERO[r.hero].rarity}">${image(r.hero)}</span><span class="req-row-copy"><strong>${escapeText(r.title)}</strong><small>${HERO[r.hero].name} · ${escapeText(r.hint)}</small></span><span class="req-state">${e.done?'감사 받기':!e.seen?'새 부탁':`${Math.min(e.count,goal)}/${goal}`}</span></button>`;}).join('');
+  const rows=st.active.map(e=>{const r=REQUEST[e.id],goal=r.goal.n;return `<button class="req-row ${e.done?'ready':''}" data-request="${e.id}"><span class="req-face" data-rarity="${HERO[r.hero].rarity}">${image(r.hero)}</span><span class="req-row-copy"><strong>${escapeText(r.title)}</strong><small>${escapeText(r.hint)}</small></span><span class="req-state">${e.done?'감사 받기':!e.seen?'새 부탁':`${Math.min(e.count,goal)}/${goal}`}</span></button>`;}).join('');
   return `<section class="req-section"><div class="panel-head"><h3>동료의 부탁</h3><small>${st.active.length}/${REQUEST_MAX}</small></div>${rows}${st.active.length<REQUEST_MAX?`<p class="req-next">${icon('clock')}다음 부탁까지 ${wait<=0?'곧':days?`${days}일 ${hours}시간`:`${Math.max(1,hours)}시간`}</p>`:''}</section>`;
 }
 function requestChips(deck){
