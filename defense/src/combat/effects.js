@@ -149,7 +149,7 @@ export class CombatFX{
     if(e.type==='eclose')for(const [i,p] of e.points.entries()){const delay=Math.min(.48,i*.12),life=1.25+delay;this.add({...p,type:'miracleEclose',delay,life,total:life});this.add({...p,type:'ecloseGround',delay,life,total:life});}
     goldEvent(this,e);
     const cocoon=e.hero==='miracle_larva'&&e.form==='miracle_cocoon';
-    if(e.type==='attack'&&(cocoon||['zeke','guardian','ancient_dragon','gold_dragon','behemoth'].includes(e.hero))){const life=cocoon?.44:e.hero==='guardian'||e.hero==='behemoth'?.44:['ancient_dragon','gold_dragon'].includes(e.hero)?.3:.34;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
+    if(e.type==='attack'&&(cocoon||['zeke','guardian','ancient_dragon','gold_dragon','behemoth'].includes(e.hero))){const life=cocoon?.44:e.hero==='guardian'||e.hero==='behemoth'?.44:e.hero==='gold_dragon'?.45:e.hero==='ancient_dragon'?.3:.34;this.add({...e,...e.origin,type:'attackShape',angle:Math.atan2(e.to.y-e.origin.y,e.to.x-e.origin.x),life,total:life,...(e.hero==='zeke'?{swing:this.swing=!this.swing}:{})});}
     if(e.type==='frostBreak')this.add({...e,life:.42,total:.42});
     if(e.type==='meteor')this.add({...e,seed:this.clock*7+e.x,life:.7,total:.7});
     if(e.type==='judgement')this.add({...e,life:.9,total:.9});
@@ -844,11 +844,11 @@ export class CombatFX{
           const R=e.hero==='miracle_larva'?230:h.range;
           ctx.save();ctx.globalAlpha=fade*.62;ctx.strokeStyle=h.color;ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(e.origin.x,e.origin.y,R*(.32+t*.68),R*(.32+t*.68),0,0,Math.PI*2);ctx.stroke();ctx.restore();if(e.hero!=='miracle_larva')this.stamp(e.hero,e.origin.x,e.origin.y,90+t*30,0,fade*.46);
         }else{
-          // Basic attack, not an ultimate: a small cross at the dragon and four thin flame arms.
+          // Basic attack, not an ultimate: four thin flame arms along its row and column, no centre stamp.
           const reach=h.range*Math.min(1,t*2.4),a=fade*fireClarity;
           ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
           for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const g=ctx.createLinearGradient(e.origin.x,e.origin.y,e.origin.x+dx*reach,e.origin.y+dy*reach);g.addColorStop(0,'#ffb35acc');g.addColorStop(1,'#ff6a3000');ctx.strokeStyle=g;ctx.globalAlpha=a*.55;ctx.lineWidth=10*(1-t)+2;ctx.beginPath();ctx.moveTo(e.origin.x,e.origin.y);ctx.lineTo(e.origin.x+dx*reach,e.origin.y+dy*reach);ctx.stroke();}
-          ctx.restore();this.atlasStamp('ancient-cross',0,1,1,e.origin.x,e.origin.y-8,150,150,0,a*.5,'source-over');
+          ctx.restore();
         }
     }
   }
