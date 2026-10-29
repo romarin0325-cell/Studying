@@ -69,7 +69,8 @@ test('every relic scale token is written in that relic text',()=>{
     constellation:[pct(RV.constellation.three),pct(RV.constellation.four)],
     alchemy:[pct(RV.alchemy.power)],
     orbit:[pct(RV.orbit.tick)],
-    tempo_bell:[pct(RV.tempo_bell.perWave),pct(RV.tempo_bell.cap)],
+    // The 36% cap is fixed; only the per-wave step grows with the relic level.
+    tempo_bell:[pct(RV.tempo_bell.perWave)],
     chalice:[pct(RV.chalice.taken)],
     royal_seal:[num(RV.royal_seal.starlight),pct(RV.royal_seal.boss)],
     gift_ribbon:[pct(RV.gift_ribbon.chance)],

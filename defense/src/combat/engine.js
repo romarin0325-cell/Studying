@@ -947,7 +947,7 @@ export function cast(s,id){
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,ULT_BUFF.awaken.seconds*control,'awaken');
   else if(type==='march')s.buffs.march=skillDuration(s,ULT_BUFF.march.seconds*control,'march');
   else if(type==='glassfall'){strike(CINDERELLA.ult);s.buffs.midnight=skillDuration(s,10*control);u.clock=0;}
-  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push(hero);s.buffs.festive=skillDuration(s,ULT_BUFF.festive.seconds*control,'festive');}
+  else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push({hero,rank:1});s.buffs.festive=skillDuration(s,ULT_BUFF.festive.seconds*control,'festive');}
   else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control,'radiance');for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
   else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control,'trauma');}
   else if(type==='ice_court'){const winter=winterDuration(s,u);strike(9);for(const e of targets)if(e.hp>0){addSlow(s,e,source,WINTER_COURT.slow*scale,winter);addStatus(s,e,'exposure',source,id,WINTER_EXPOSURE,winter);}s.buffs.winter=winter;}
@@ -1444,7 +1444,8 @@ export function step(s,dt){
   // A short challenge measures how far this collection can push, without
   // waiting for a nearly invulnerable late-round enemy to circle the arena.
   for(const key of Object.keys(s.buffs))s.buffs[key]=Math.max(0,s.buffs[key]-dt);
-  while(s.reserves.length&&freeCell(s)>=0)place(s,s.reserves.shift(),2);
+  // Queued joins keep their rank: a plain id (the arrival blessing, older saves) is 2 stars, Santa's gift keeps its own.
+  while(s.reserves.length&&freeCell(s)>=0){const r=s.reserves.shift();place(s,typeof r==='string'?r:r.hero,typeof r==='string'?2:r.rank);}
   if(s.phase==='intermission'){s.breakTime-=dt;if(s.breakTime<=0)beginWave(s,s.wave+1);return;}
   s.waveTime+=dt;addGauge(s,dt*STARLIGHT_PER_SECOND*(s.oathMods?.regen??1));
   s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter,s.mode).interval;}
@@ -1672,7 +1673,7 @@ export function restore(raw){
     const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.volleys,...s.zones,...s.bombs].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;
-    if(!validArtifacts(s.artifacts)||!Array.isArray(s.reserves)||s.reserves.length>1000||s.reserves.some(h=>!s.deck.includes(h))||!Array.isArray(s.blessings)||s.blessings.length>1000||s.blessings.some(b=>!BLESSING[b]))return null;
+    if(!validArtifacts(s.artifacts)||!Array.isArray(s.reserves)||s.reserves.length>1000||s.reserves.some(h=>typeof h==='string'?!s.deck.includes(h):!h||!s.deck.includes(h.hero)||![1,2].includes(h.rank))||!Array.isArray(s.blessings)||s.blessings.length>1000||s.blessings.some(b=>!BLESSING[b]))return null;
     if(s.relicLevels===undefined)s.relicLevels={};
     if(!record(s.relicLevels)||Object.entries(s.relicLevels).some(([id,n])=>!s.artifacts.includes(id)||!Number.isInteger(n)||n<1||n>999))return null;
     if(!record(s.upgrades)||s.deck.some(h=>!Number.isInteger(s.upgrades[h])||s.upgrades[h]<0||s.upgrades[h]>5)||!record(s.buffs)||Object.values(s.buffs).some(n=>!Number.isFinite(n)))return null;

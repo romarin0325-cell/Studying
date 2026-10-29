@@ -1867,6 +1867,14 @@ test('joker: five colours unlock the Chaos Roulette, and casting it is what ente
   const legacyChaos=JSON.parse(E.serialize(s));delete legacyChaos.jokerSeen;assert.equal(E.restore(legacyChaos),null);
 });
 
+test('queued joins keep their rank: Santa gifts stay 1 star, the arrival blessing and old saves arrive at 2 stars',()=>{
+  const s=E.newRun({deck:['santa','star_boy','siren','snow_rabbit','great_detective'],seed:31});s.board.fill(null);
+  s.reserves=[{hero:'santa',rank:1},'star_boy'];E.step(s,.05);
+  const placed=s.board.filter(Boolean);assert.equal(placed.length,2);
+  assert.equal(placed.find(u=>u.hero==='santa').rank,1);assert.equal(placed.find(u=>u.hero==='star_boy').rank,2);
+  s.reserves=[{hero:'siren',rank:1}];const back=E.restore(E.serialize(s));assert.ok(back);assert.deepEqual(back.reserves,[{hero:'siren',rank:1}]);
+  const bad=JSON.parse(E.serialize(s));bad.reserves=[{hero:'siren',rank:3}];assert.equal(E.restore(bad),null);
+});
 test('spotlight also reaches all-enemy ultimates that do not go through the shared strike (maid, flame sage)',()=>{
   const s=traitArena([{hero:'avalanche_maid',index:12},{hero:'flame_sage',index:6}],{artifacts:['spotlight'],wave:2});
   s.relicLevels={spotlight:1};const [foe]=enemiesFor(s,[{hp:1e9}]);quiet(s);

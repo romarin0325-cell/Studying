@@ -1683,7 +1683,7 @@ export const ARTIFACTS = [
     "id": "tempo_bell",
     "name": "이어지는 종",
     "text": "웨이브를 넘길 때마다 모든 동료의 공격 속도가 4% 오릅니다(최대 36%).",
-    "scale": ["4%", "36%"],
+    "scale": ["4%"],
     "icon": 0,
     "atlas": "relics-expansion",
     "rarity": "SR",
