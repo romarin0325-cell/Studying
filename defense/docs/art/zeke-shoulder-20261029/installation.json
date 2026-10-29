@@ -1,0 +1,245 @@
+{
+  "base": "152b502fa79161e1e343e6541e0b7fd30fbaaf3b",
+  "selectedPose": "User selected A, right-shoulder supported carry",
+  "selectedGeneration": "generation.png",
+  "sourceSha256": "9e9e9081bf1418dfc01e08a44103f507af4c95153f36665a070e6783312d674e",
+  "assets": [
+    {
+      "id": "zeke",
+      "version": "shoulder-guided-v3-20261029",
+      "generationSourceSha256": "9e9e9081bf1418dfc01e08a44103f507af4c95153f36665a070e6783312d674e",
+      "commonScale": 0.7595545253127499,
+      "measurementUncertaintyPacked": 13.6719814556295,
+      "uncertaintySourcePixels": {
+        "front": 18,
+        "back": 26,
+        "profile": 18,
+        "sole": 5
+      },
+      "sourcePng": {
+        "file": "defense/assets/cast-v2/zeke-shoulder.png",
+        "bytes": 1137059,
+        "sha256": "0bf9ea60600851e4b78fddb097c15ea9b0b8bf71b29689502cac2f40c48c8ea9"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-v2/zeke-shoulder.webp",
+        "bytes": 285326,
+        "sha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60"
+      },
+      "portrait": {
+        "x": 255,
+        "y": 198,
+        "size": 250
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "sourceRect": {
+            "left": 36,
+            "top": 48,
+            "width": 542,
+            "height": 562
+          },
+          "sourceEllipse": [
+            285,
+            234,
+            208,
+            200,
+            -2
+          ],
+          "sourceChin": [
+            285,
+            334
+          ],
+          "sourceSole": [
+            286,
+            605
+          ],
+          "commonScale": 0.7595545253127499,
+          "resampledDimensions": [
+            412,
+            427
+          ],
+          "placement": [
+            66,
+            57
+          ],
+          "ellipse": [
+            255.24,
+            198.21,
+            157.99,
+            151.91,
+            -2
+          ],
+          "chin": [
+            255.24,
+            274.16
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 205.84,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "sourceRect": {
+            "left": 683,
+            "top": 47,
+            "width": 535,
+            "height": 563
+          },
+          "sourceEllipse": [
+            965,
+            238,
+            210,
+            202,
+            0
+          ],
+          "sourceChin": [
+            968,
+            339
+          ],
+          "sourceSole": [
+            969,
+            605
+          ],
+          "commonScale": 0.7595545253127499,
+          "resampledDimensions": [
+            406,
+            427
+          ],
+          "placement": [
+            39,
+            56
+          ],
+          "ellipse": [
+            252.96,
+            201.24,
+            159.51,
+            153.43,
+            0
+          ],
+          "chin": [
+            255.24,
+            277.96
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 202.04,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "sourceRect": {
+            "left": 72,
+            "top": 653,
+            "width": 514,
+            "height": 539
+          },
+          "sourceEllipse": [
+            270,
+            824,
+            190,
+            200,
+            0
+          ],
+          "sourceChin": [
+            243,
+            921
+          ],
+          "sourceSole": [
+            253,
+            1188
+          ],
+          "commonScale": 0.7595545253127499,
+          "resampledDimensions": [
+            390,
+            409
+          ],
+          "placement": [
+            119,
+            74
+          ],
+          "ellipse": [
+            268.91,
+            203.52,
+            144.32,
+            151.91,
+            0
+          ],
+          "chin": [
+            248.4,
+            277.2
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 202.8,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "sourceRect": {
+            "left": 682,
+            "top": 650,
+            "width": 508,
+            "height": 542
+          },
+          "sourceEllipse": [
+            980,
+            824,
+            190,
+            200,
+            0
+          ],
+          "sourceChin": [
+            1008,
+            921
+          ],
+          "sourceSole": [
+            997,
+            1188
+          ],
+          "commonScale": 0.7595545253127499,
+          "resampledDimensions": [
+            386,
+            412
+          ],
+          "placement": [
+            17,
+            71
+          ],
+          "ellipse": [
+            243.09,
+            203.52,
+            144.32,
+            151.91,
+            0
+          ],
+          "chin": [
+            264.36,
+            277.2
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "belowChin": 202.8,
+          "paintedClipping": 0
+        }
+      ]
+    }
+  ],
+  "preservedOld": [
+    "defense/assets/cast-v2/zeke.png",
+    "defense/assets/cast-v2/zeke.webp",
+    "defense/assets/optimized/cast-v2/zeke.webp"
+  ],
+  "scope": "Only Zeke SD and portrait/figure derived media; existing gameplay, attack and ultimate effects preserved",
+  "provenance": "Frozen actual references/prompts retained. Guide is procedural geometry; final character remains separately painted 2D, not a full 3D rig."
+}

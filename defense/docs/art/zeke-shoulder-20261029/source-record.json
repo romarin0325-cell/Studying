@@ -1,0 +1,42 @@
+{
+  "base": "152b502fa79161e1e343e6541e0b7fd30fbaaf3b",
+  "scope": "Zeke selected shoulder carry; no gameplay changes",
+  "inputs": [
+    {
+      "name": "previous-atlas.png",
+      "role": "Previous selected SD: body proportions, identity, costume; original pose is being replaced",
+      "source": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\assets\\cast-v2\\zeke.png",
+      "sha256": "7543e10ecc8c3295567b18d95033e62cbf2fc256ee828f17729e3cfc8b1f8eb3"
+    },
+    {
+      "name": "selected-a.png",
+      "role": "User-selected pose only; reduce long body and restore undecorated original guard",
+      "source": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\zeke-idle-studies-20261029\\sample-a-shoulder.png",
+      "sha256": "a70dbe46181dd1c1afb4cb248978aaa653a0d38227e9abcdca16ad26ec6a7709"
+    },
+    {
+      "name": "original-zeke.png",
+      "role": "Original design, weapon and clothing only; not adult proportions",
+      "source": "C:\\Users\\romar\\Downloads\\캐릭터\\지크.png",
+      "sha256": "642e15372ae42c0a892175ae010ec2ca8e7fb363e64a7a1be4a1bec7038229bf"
+    },
+    {
+      "name": "style-siren.webp",
+      "role": "Frozen cast line, cel, material rendering reference",
+      "source": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    },
+    {
+      "name": "masculine-tall.png",
+      "role": "Existing actual common head/body geometry",
+      "source": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-cast-balance-20261024\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\masculine-tall.png",
+      "sha256": "d3c6e8c09673e39407a85cd6a60f1d3155b546ddbd2eac894631423107fd03f2"
+    }
+  ],
+  "guideSource": {
+    "source": "C:/Users/romar/Downloads/캐릭터/에셋/gpt/cast-v2-20261024/make-mannequins.mjs",
+    "sha256": "dca6d8a175d1e8e2aaa01ea404f1783044e5360f9a1033f5c457174a2a402f66",
+    "changes": "fixed anatomical right hand at shoulder; supported greatsword; common masculine tall geometry unchanged"
+  },
+  "anatomyRule": "Skull and face exclude hair and sword. One uniform body scale across all views."
+}

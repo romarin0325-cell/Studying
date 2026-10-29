@@ -1,0 +1,114 @@
+{
+  "method": "Manual anatomical cranium ellipses excluding hair and weapon; front/back/true profiles. Shared body scale, no axis stretching or silhouette fit.",
+  "ellipses": [
+    [
+      285,
+      234,
+      208,
+      200,
+      -2
+    ],
+    [
+      965,
+      238,
+      210,
+      202,
+      0
+    ],
+    [
+      270,
+      824,
+      190,
+      200,
+      0
+    ],
+    [
+      980,
+      824,
+      190,
+      200,
+      0
+    ]
+  ],
+  "chins": [
+    [
+      285,
+      334
+    ],
+    [
+      968,
+      339
+    ],
+    [
+      243,
+      921
+    ],
+    [
+      1008,
+      921
+    ]
+  ],
+  "feet": [
+    [
+      286,
+      605
+    ],
+    [
+      969,
+      605
+    ],
+    [
+      253,
+      1188
+    ],
+    [
+      997,
+      1188
+    ]
+  ],
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "frontFaceFeatures": {
+    "leftEye": [
+      246,
+      274
+    ],
+    "rightEye": [
+      326,
+      260
+    ],
+    "chin": [
+      285,
+      334
+    ],
+    "uncertainty": 3
+  },
+  "previousPackedFaceFeatures": {
+    "leftEye": [
+      219,
+      224
+    ],
+    "rightEye": [
+      280,
+      215
+    ],
+    "chin": [
+      247.31,
+      270.03
+    ],
+    "uncertainty": 2
+  },
+  "equipment": {
+    "hand": "anatomical right",
+    "support": "anatomical right shoulder",
+    "leftArm": "free and relaxed at side",
+    "leftProfile": "right weapon arm far, empty left arm near",
+    "rightProfile": "right weapon arm near",
+    "guard": "Original orange-red central facet exists; previous first-sample report calling it invented was incorrect."
+  },
+  "sourceSha256": "9e9e9081bf1418dfc01e08a44103f507af4c95153f36665a070e6783312d674e"
+}

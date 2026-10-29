@@ -1,0 +1,27 @@
+{
+  "createdBeforeGeneration": true,
+  "inputs": [
+    {
+      "order": 1,
+      "file": "generation-v1.png",
+      "sha256": "f4eb29a9a71c467aef4b7f32946c15722a146d2a2cdbad6077024adfb85cd9e7"
+    },
+    {
+      "order": 2,
+      "file": "references/previous-atlas.png",
+      "sha256": "7543e10ecc8c3295567b18d95033e62cbf2fc256ee828f17729e3cfc8b1f8eb3"
+    },
+    {
+      "order": 3,
+      "file": "references/shoulder-guide-v3.png",
+      "sha256": "c8af246d4b201d76de84a58308ea6c37e0e58b03a28b5d8f9225a0734ece80e4"
+    },
+    {
+      "order": 4,
+      "file": "references/original-weapon.png",
+      "sha256": "dc9704ef5b0218939052fec8acc9a8dc70a40472b8496a2ae99d1dae42554688"
+    }
+  ],
+  "prompt": "prompt-atlas-v2.txt",
+  "correction": "Redraw body below chin shorter; keep face scale and right-shoulder pose. Original sword red facet confirmed by enlarged source."
+}

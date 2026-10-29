@@ -1,0 +1,181 @@
+{
+  "scope": "Actual offline normal/Bright builds390x844 and comparison tool; preboot stationary-target fixture; no physical-mobile FPS measurement",
+  "errors": [],
+  "network": [],
+  "results": [
+    {
+      "theme": "night",
+      "facing": [
+        {
+          "index": 7,
+          "hero": "zeke",
+          "facing": "up",
+          "attacks": 1
+        },
+        {
+          "index": 11,
+          "hero": "zeke",
+          "facing": "left",
+          "attacks": 1
+        },
+        {
+          "index": 13,
+          "hero": "zeke",
+          "facing": "right",
+          "attacks": 1
+        },
+        {
+          "index": 17,
+          "hero": "zeke",
+          "facing": "down",
+          "attacks": 1
+        }
+      ],
+      "captures": [
+        {
+          "name": "night-home",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "night-collection",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "night-detail",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "night-team",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "night-four-directions",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "night-unit-left",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "night-unit-right",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        }
+      ]
+    },
+    {
+      "theme": "bright",
+      "facing": [
+        {
+          "index": 7,
+          "hero": "zeke",
+          "facing": "up",
+          "attacks": 1
+        },
+        {
+          "index": 11,
+          "hero": "zeke",
+          "facing": "left",
+          "attacks": 1
+        },
+        {
+          "index": 13,
+          "hero": "zeke",
+          "facing": "right",
+          "attacks": 1
+        },
+        {
+          "index": 17,
+          "hero": "zeke",
+          "facing": "down",
+          "attacks": 1
+        }
+      ],
+      "captures": [
+        {
+          "name": "bright-home",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "bright-collection",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "bright-detail",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "bright-team",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "bright-four-directions",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "bright-unit-left",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        },
+        {
+          "name": "bright-unit-right",
+          "geometry": {
+            "width": 390,
+            "scroll": 390,
+            "missing": []
+          }
+        }
+      ]
+    }
+  ]
+}

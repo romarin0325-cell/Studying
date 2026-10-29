@@ -1,0 +1,351 @@
+{
+  "base": "152b502fa79161e1e343e6541e0b7fd30fbaaf3b",
+  "branch": "codex/zeke-shoulder-idle-20261029",
+  "selectedPose": "A: supported right-shoulder carry",
+  "verification": {
+    "command": "npm run verify -- --only defense",
+    "tests": 162,
+    "pass": 162,
+    "fail": 0,
+    "facing": "node defense/scripts/art/check-facing.mjs: every checked unit faces outward"
+  },
+  "runtime": {
+    "id": "atlas:unit-zeke",
+    "source": "./assets/cast-v2/zeke-shoulder.webp",
+    "profile": "unit",
+    "uses": [
+      "window.__ASTRA_ASSETS__.unit-zeke; combat renderer / stage UI",
+      "portrait:zeke; collection / party / summon",
+      "figure:zeke; home / details / cut-in / results"
+    ],
+    "retention": "Preserve source bytes at this path; optimized output is separate.",
+    "original": {
+      "bytes": 285326,
+      "sha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60",
+      "metadata": {
+        "width": 1024,
+        "height": 1024,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "output": {
+      "path": "./assets/optimized/cast-v2/zeke-shoulder.webp",
+      "bytes": 108172,
+      "sha256": "6fb9abbf86c5748cf4060fdde0c8fcd8a9fdef6848ec9ef97d3ac7f79403d86d",
+      "metadata": {
+        "width": 640,
+        "height": 640,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "decision": "Separate smaller encoding; source preserved."
+  },
+  "ui": [
+    {
+      "id": "portrait:zeke",
+      "source": "./assets/cast-v2/zeke-shoulder.webp",
+      "profile": "portrait",
+      "crop": {
+        "left": 130,
+        "top": 73,
+        "width": 250,
+        "height": 250
+      },
+      "destination": "./assets/optimized/ui/portraits/zeke.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / party / summon"
+      ],
+      "sourceSha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60",
+      "output": {
+        "path": "./assets/optimized/ui/portraits/zeke.webp",
+        "bytes": 22940,
+        "sha256": "013bb273daf2d195cb07f34f0b77ff43ae2b1a580929a025991051b351d3644e",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "figure:zeke",
+      "source": "./assets/cast-v2/zeke-shoulder.webp",
+      "profile": "figure",
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "destination": "./assets/optimized/ui/figures/zeke.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; home / details / cut-in / results"
+      ],
+      "sourceSha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60",
+      "output": {
+        "path": "./assets/optimized/ui/figures/zeke.webp",
+        "bytes": 54840,
+        "sha256": "23a66a5004150d6d8fa5e2dc93e742509db2c740bccd0593b2967b04b5ea3b43",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    }
+  ],
+  "unrelatedStaticEntriesUnchanged": 185,
+  "unrelatedUiEntriesUnchanged": 157,
+  "otherOriginalCastEntriesUnchanged": 39,
+  "skull": [
+    {
+      "direction": "down",
+      "ellipse": [
+        255.24,
+        198.21,
+        157.99,
+        151.91,
+        -2
+      ],
+      "belowChin": 205.84,
+      "sole": [
+        256,
+        480
+      ],
+      "clipping": 0
+    },
+    {
+      "direction": "up",
+      "ellipse": [
+        252.96,
+        201.24,
+        159.51,
+        153.43,
+        0
+      ],
+      "belowChin": 202.04,
+      "sole": [
+        256,
+        480
+      ],
+      "clipping": 0
+    },
+    {
+      "direction": "left",
+      "ellipse": [
+        268.91,
+        203.52,
+        144.32,
+        151.91,
+        0
+      ],
+      "belowChin": 202.8,
+      "sole": [
+        256,
+        480
+      ],
+      "clipping": 0
+    },
+    {
+      "direction": "right",
+      "ellipse": [
+        243.09,
+        203.52,
+        144.32,
+        151.91,
+        0
+      ],
+      "belowChin": 202.8,
+      "sole": [
+        256,
+        480
+      ],
+      "clipping": 0
+    }
+  ],
+  "independentFaceLandmarks": {
+    "eyeDistance": 0.044501084388093304,
+    "eyeToChin": 0.7127512288823912
+  },
+  "browser": {
+    "errors": [],
+    "network": [],
+    "captures": 14,
+    "directions": [
+      {
+        "theme": "night",
+        "facing": [
+          {
+            "index": 7,
+            "hero": "zeke",
+            "facing": "up",
+            "attacks": 1
+          },
+          {
+            "index": 11,
+            "hero": "zeke",
+            "facing": "left",
+            "attacks": 1
+          },
+          {
+            "index": 13,
+            "hero": "zeke",
+            "facing": "right",
+            "attacks": 1
+          },
+          {
+            "index": 17,
+            "hero": "zeke",
+            "facing": "down",
+            "attacks": 1
+          }
+        ]
+      },
+      {
+        "theme": "bright",
+        "facing": [
+          {
+            "index": 7,
+            "hero": "zeke",
+            "facing": "up",
+            "attacks": 1
+          },
+          {
+            "index": 11,
+            "hero": "zeke",
+            "facing": "left",
+            "attacks": 1
+          },
+          {
+            "index": 13,
+            "hero": "zeke",
+            "facing": "right",
+            "attacks": 1
+          },
+          {
+            "index": 17,
+            "hero": "zeke",
+            "facing": "down",
+            "attacks": 1
+          }
+        ]
+      }
+    ]
+  },
+  "builds": {
+    "StarGardenDefense.html": {
+      "bytes": 25760296,
+      "sha256": "15f6b70f3558a6aa0c77a25286c4e65c81e200284aadc84f1bbd59b0ed989d92"
+    },
+    "StarGardenDefenseBright.html": {
+      "bytes": 26015494,
+      "sha256": "943a9c6c97be9aa378288c441ca0d3c58c64bdf6320a55aac576ac6ef5bf1b4c"
+    },
+    "StarGardenBalanceLab.html": {
+      "bytes": 16025198,
+      "sha256": "ec2bb7a40a23a0fc0d3f402f62912c2e697846675859e72a1900535b276c44d5"
+    }
+  },
+  "limitations": [
+    "Manual anatomical/eye landmarks are estimates with recorded uncertainty.",
+    "Four separately painted2D views; not a rigged3D character.",
+    "Chromium390x844 does not measure physical-mobile FPS."
+  ],
+  "initialBuilds": {
+    "StarGardenDefense.html": {
+      "bytes": 25759651,
+      "sha256": "9c71fbd29efde7ef01b9e701cbe2d7f6ce4716edb7fd54baf3b06b6e326bb120"
+    },
+    "StarGardenDefenseBright.html": {
+      "bytes": 26014849,
+      "sha256": "61c4692ac57d428c3fefb3eecf14438c4a5946515f008e96c24def32006de744"
+    },
+    "StarGardenBalanceLab.html": {
+      "bytes": 16024551,
+      "sha256": "8112a4956f1e8d9ed5ced2f83f907cb0009873144d2c4a44bc9f75cd3486c717"
+    }
+  },
+  "latestMergeVerification": {
+    "integratedMain": "5b533d3ff0fbde5aefb7538df4bed96ceda3b2e3",
+    "resolvedFiles": [
+      "defense/dist/StarGardenDefense.html",
+      "defense/dist/StarGardenDefenseBright.html",
+      "defense/dist/StarGardenBalanceLab.html"
+    ],
+    "command": "npm run verify -- --only defense",
+    "localTests": 169,
+    "pass": 169,
+    "fail": 0,
+    "unresolvedFiles": 0,
+    "sourceCheck": "Current dragon effects equal origin/main; Zeke source/static/UI images equal the selected PR head.",
+    "browser": {
+      "errors": [],
+      "network": [],
+      "captures": 14,
+      "directions": [
+        {
+          "theme": "night",
+          "facing": [
+            {
+              "index": 7,
+              "hero": "zeke",
+              "facing": "up",
+              "attacks": 1
+            },
+            {
+              "index": 11,
+              "hero": "zeke",
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "index": 13,
+              "hero": "zeke",
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "index": 17,
+              "hero": "zeke",
+              "facing": "down",
+              "attacks": 1
+            }
+          ]
+        },
+        {
+          "theme": "bright",
+          "facing": [
+            {
+              "index": 7,
+              "hero": "zeke",
+              "facing": "up",
+              "attacks": 1
+            },
+            {
+              "index": 11,
+              "hero": "zeke",
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "index": 13,
+              "hero": "zeke",
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "index": 17,
+              "hero": "zeke",
+              "facing": "down",
+              "attacks": 1
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

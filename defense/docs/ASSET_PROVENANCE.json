@@ -95,8 +95,8 @@
     },
     {
       "id": "unit-zeke",
-      "source": "defense/assets/cast-v2/zeke.webp",
-      "sha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",
+      "source": "defense/assets/cast-v2/zeke-shoulder.webp",
+      "sha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60",
       "width": 1024,
       "height": 1024
     },

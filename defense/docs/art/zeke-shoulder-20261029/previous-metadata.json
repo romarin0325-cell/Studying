@@ -1,0 +1,230 @@
+{
+  "id": "zeke",
+  "version": "v3",
+  "generationSourceSha256": "18de4e64089be4a5902175d03963aa2ce4a109bab19b631f0c740ae9454046d5",
+  "commonScale": 0.7240486142559965,
+  "measurementUncertaintyPacked": 13.032875056607939,
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "sourcePng": {
+    "file": "defense/assets/cast-v2/zeke.png",
+    "bytes": 1038291,
+    "sha256": "7543e10ecc8c3295567b18d95033e62cbf2fc256ee828f17729e3cfc8b1f8eb3"
+  },
+  "sourceWebp": {
+    "file": "defense/assets/cast-v2/zeke.webp",
+    "bytes": 289752,
+    "sha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803"
+  },
+  "portrait": {
+    "x": 247,
+    "y": 194,
+    "size": 250
+  },
+  "frames": [
+    {
+      "direction": "down",
+      "sourceRect": {
+        "left": 62,
+        "top": 20,
+        "width": 547,
+        "height": 599
+      },
+      "sourceEllipse": [
+        331,
+        217,
+        218,
+        210,
+        -2
+      ],
+      "sourceChin": [
+        332,
+        322
+      ],
+      "sourceSole": [
+        344,
+        612
+      ],
+      "commonScale": 0.7240486142559965,
+      "resampledDimensions": [
+        396,
+        434
+      ],
+      "placement": [
+        52,
+        51
+      ],
+      "ellipse": [
+        246.59,
+        194,
+        157.84,
+        152.05,
+        -2
+      ],
+      "chin": [
+        247.31,
+        270.03
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 209.97,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "up",
+      "sourceRect": {
+        "left": 674,
+        "top": 20,
+        "width": 523,
+        "height": 596
+      },
+      "sourceEllipse": [
+        930,
+        217,
+        218,
+        210,
+        2
+      ],
+      "sourceChin": [
+        930,
+        322
+      ],
+      "sourceSole": [
+        929,
+        615
+      ],
+      "commonScale": 0.7240486142559965,
+      "resampledDimensions": [
+        379,
+        432
+      ],
+      "placement": [
+        71,
+        49
+      ],
+      "ellipse": [
+        256.72,
+        191.83,
+        157.84,
+        152.05,
+        2
+      ],
+      "chin": [
+        256.72,
+        267.85
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 212.15,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "left",
+      "sourceRect": {
+        "left": 49,
+        "top": 636,
+        "width": 576,
+        "height": 578
+      },
+      "sourceEllipse": [
+        334,
+        817,
+        204,
+        210,
+        0
+      ],
+      "sourceChin": [
+        286,
+        923
+      ],
+      "sourceSole": [
+        345,
+        1213
+      ],
+      "commonScale": 0.7240486142559965,
+      "resampledDimensions": [
+        417,
+        418
+      ],
+      "placement": [
+        42,
+        62
+      ],
+      "ellipse": [
+        248.04,
+        193.28,
+        147.71,
+        152.05,
+        0
+      ],
+      "chin": [
+        213.28,
+        270.03
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 209.97,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "right",
+      "sourceRect": {
+        "left": 653,
+        "top": 642,
+        "width": 555,
+        "height": 573
+      },
+      "sourceEllipse": [
+        935,
+        817,
+        204,
+        210,
+        0
+      ],
+      "sourceChin": [
+        992,
+        923
+      ],
+      "sourceSole": [
+        936,
+        1214
+      ],
+      "commonScale": 0.7240486142559965,
+      "resampledDimensions": [
+        402,
+        415
+      ],
+      "placement": [
+        51,
+        66
+      ],
+      "ellipse": [
+        255.28,
+        192.55,
+        147.71,
+        152.05,
+        0
+      ],
+      "chin": [
+        296.55,
+        269.3
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 210.7,
+      "paintedClipping": 0
+    }
+  ]
+}
