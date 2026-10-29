@@ -42,7 +42,7 @@ test('summon face crops and prepared portraits share optical framing without mov
   for(const hero of HEROES){
     const anatomy={...hero.art.portrait},frame=portraitFrame(hero),prepared=crops.get(hero.id);
     assert.ok(prepared,hero.id);
-    assert.equal(frame.size,anatomy.size,'optical centering cannot rescale the face');
+    assert.equal(frame.size,hero.id==='gold_dragon'?240:anatomy.size,'only Gold Dragon has the reviewed 4.17% portrait zoom');
     const verticalLimit=hero.id==='demon_king'?16:8;
     assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=verticalLimit,'only reviewed optical translations');
     assert.deepEqual(hero.art.portrait,anatomy,'anatomical measurement is preserved');
