@@ -1,0 +1,22 @@
+{
+  "createdBeforeGeneration": true,
+  "inputs": [
+    {
+      "order": 1,
+      "file": "generation-v2.png",
+      "sha256": "044a9b8646630199fa66ada0ee4a659059f181f4ea71fe3156f6fe2468b1955a"
+    },
+    {
+      "order": 2,
+      "file": "references/shoulder-guide-v3.png",
+      "sha256": "c8af246d4b201d76de84a58308ea6c37e0e58b03a28b5d8f9225a0734ece80e4"
+    },
+    {
+      "order": 3,
+      "file": "references/original-weapon.png",
+      "sha256": "dc9704ef5b0218939052fec8acc9a8dc70a40472b8496a2ae99d1dae42554688"
+    }
+  ],
+  "prompt": "prompt-atlas-v3.txt",
+  "correction": "Blade-only 15% length reduction; prior normalization rejected because left sword tip clipped. No body shrink."
+}

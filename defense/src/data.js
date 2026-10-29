@@ -22,8 +22,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 247,
-        "y": 194,
+        "x": 255,
+        "y": 198,
         "size": 250
       }
     },
@@ -1888,7 +1888,7 @@ export const ASSET_PATHS = {
   "effects-companion-twilight": "./assets/merge/effects-companion-twilight.webp",
   "ultimates-extra-a": "./assets/merge/ultimates-extra-a.webp",
   "ultimates-extra-b": "./assets/merge/ultimates-extra-b.webp",
-  "unit-zeke": "./assets/cast-v2/zeke.webp",
+  "unit-zeke": "./assets/cast-v2/zeke-shoulder.webp",
   "unit-rumi": "./assets/cast-v2/rumi.webp",
   "unit-luna": "./assets/cast-v2/luna.webp",
   "unit-cinderella": "./assets/cast-v2/cinderella.webp",

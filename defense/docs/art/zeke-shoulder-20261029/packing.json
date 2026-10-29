@@ -1,0 +1,292 @@
+{
+  "id": "zeke",
+  "version": "shoulder-guided-v3-20261029",
+  "status": "selected for installation",
+  "pipeline": "Existing source-views.mjs segmentation and same whole-figure skull-area normalization; no separate head/body warping or silhouette auto-fit.",
+  "commonScale": 0.7595545253127499,
+  "sourceSha256": "9e9e9081bf1418dfc01e08a44103f507af4c95153f36665a070e6783312d674e",
+  "uncertaintySourcePixels": {
+    "front": 18,
+    "back": 26,
+    "profile": 18,
+    "sole": 5
+  },
+  "measurementUncertaintyPacked": 13.6719814556295,
+  "alpha": {
+    "source": [
+      1254,
+      1254
+    ],
+    "alphaCleaned": 39408,
+    "unmatchedAlphaPixels": 0,
+    "majorComponents": [
+      {
+        "pixels": 166257,
+        "centroid": [
+          322.735295355985,
+          342.9182109625459
+        ],
+        "bounds": [
+          37,
+          48,
+          576,
+          609
+        ]
+      },
+      {
+        "pixels": 159818,
+        "centroid": [
+          939.7391345155114,
+          342.9635460336132
+        ],
+        "bounds": [
+          684,
+          48,
+          1216,
+          608
+        ]
+      },
+      {
+        "pixels": 152728,
+        "centroid": [
+          325.3367948247865,
+          922.8954939500288
+        ],
+        "bounds": [
+          72,
+          653,
+          584,
+          1190
+        ]
+      },
+      {
+        "pixels": 151613,
+        "centroid": [
+          935.5449136947359,
+          923.1168501381808
+        ],
+        "bounds": [
+          683,
+          650,
+          1188,
+          1190
+        ]
+      }
+    ],
+    "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+  },
+  "files": {
+    "png": {
+      "file": "zeke-shoulder.png",
+      "bytes": 1137059,
+      "sha256": "0bf9ea60600851e4b78fddb097c15ea9b0b8bf71b29689502cac2f40c48c8ea9"
+    },
+    "webp": {
+      "file": "zeke-shoulder.webp",
+      "bytes": 285326,
+      "sha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60"
+    }
+  },
+  "frames": [
+    {
+      "direction": "down",
+      "sourceRect": {
+        "left": 36,
+        "top": 48,
+        "width": 542,
+        "height": 562
+      },
+      "sourceEllipse": [
+        285,
+        234,
+        208,
+        200,
+        -2
+      ],
+      "sourceChin": [
+        285,
+        334
+      ],
+      "sourceSole": [
+        286,
+        605
+      ],
+      "commonScale": 0.7595545253127499,
+      "resampledDimensions": [
+        412,
+        427
+      ],
+      "placement": [
+        66,
+        57
+      ],
+      "ellipse": [
+        255.24,
+        198.21,
+        157.99,
+        151.91,
+        -2
+      ],
+      "chin": [
+        255.24,
+        274.16
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 205.84,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "up",
+      "sourceRect": {
+        "left": 683,
+        "top": 47,
+        "width": 535,
+        "height": 563
+      },
+      "sourceEllipse": [
+        965,
+        238,
+        210,
+        202,
+        0
+      ],
+      "sourceChin": [
+        968,
+        339
+      ],
+      "sourceSole": [
+        969,
+        605
+      ],
+      "commonScale": 0.7595545253127499,
+      "resampledDimensions": [
+        406,
+        427
+      ],
+      "placement": [
+        39,
+        56
+      ],
+      "ellipse": [
+        252.96,
+        201.24,
+        159.51,
+        153.43,
+        0
+      ],
+      "chin": [
+        255.24,
+        277.96
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 202.04,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "left",
+      "sourceRect": {
+        "left": 72,
+        "top": 653,
+        "width": 514,
+        "height": 539
+      },
+      "sourceEllipse": [
+        270,
+        824,
+        190,
+        200,
+        0
+      ],
+      "sourceChin": [
+        243,
+        921
+      ],
+      "sourceSole": [
+        253,
+        1188
+      ],
+      "commonScale": 0.7595545253127499,
+      "resampledDimensions": [
+        390,
+        409
+      ],
+      "placement": [
+        119,
+        74
+      ],
+      "ellipse": [
+        268.91,
+        203.52,
+        144.32,
+        151.91,
+        0
+      ],
+      "chin": [
+        248.4,
+        277.2
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 202.8,
+      "paintedClipping": 0
+    },
+    {
+      "direction": "right",
+      "sourceRect": {
+        "left": 682,
+        "top": 650,
+        "width": 508,
+        "height": 542
+      },
+      "sourceEllipse": [
+        980,
+        824,
+        190,
+        200,
+        0
+      ],
+      "sourceChin": [
+        1008,
+        921
+      ],
+      "sourceSole": [
+        997,
+        1188
+      ],
+      "commonScale": 0.7595545253127499,
+      "resampledDimensions": [
+        386,
+        412
+      ],
+      "placement": [
+        17,
+        71
+      ],
+      "ellipse": [
+        243.09,
+        203.52,
+        144.32,
+        151.91,
+        0
+      ],
+      "chin": [
+        264.36,
+        277.2
+      ],
+      "sole": [
+        256,
+        480
+      ],
+      "belowChin": 202.8,
+      "paintedClipping": 0
+    }
+  ]
+}

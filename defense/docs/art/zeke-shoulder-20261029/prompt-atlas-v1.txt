@@ -1,0 +1,28 @@
+Use case: identity-preserve, game sprite turnaround.
+Produce exactly ONE transparent 2x2 atlas of Zeke, FOUR complete views of ONE quiet shoulder-carry pose, matching the existing mobile defense cast. Do not make a presentation board or concept painting.
+
+INPUT ROLES, in this exact order:
+1 previous-atlas.png is the APPROVED CHARACTER and COMPACT SD PROPORTION target. Keep this exact small body length, skull size, warm toothy grin, amber-red eyes, flame-red spiky long hair with yellow-gold ends, and original red/black/silver outfit. Replace its old low-held sword pose only.
+2 selected-a.png is the USER-SELECTED SHOULDER CARRY POSE and personality reference ONLY. It has an overlong body and a newly invented guard jewel: CORRECT those defects, do not inherit them.
+3 shoulder-guide-v3.png is an ACTUAL 3D GEOMETRY GUIDE of ONE fixed right-handed pose rotated to front/back/left/right. Follow the shared cranium/body size, orthographic camera, compact anatomy, raised anatomical RIGHT arm (cyan), hanging anatomical LEFT arm (pink), grip location and near/far occlusion. Its simplified gray sword is placement only, not a weapon design.
+4 original-zeke.png is original DESIGN and WEAPON construction only; never adopt the adult anatomy.
+5 style-siren.webp is the FROZEN SHARED RENDER reference, not palette, costume, gender or expression.
+
+PROPORTIONS ARE CRITICAL:
+Match reference1 and the actual3D guide, about TWO heads tall and deliberately super-deformed. In a512px cell, cranium/face approximately160x150, chin-to-sole about200-210, sole at256,480. Spiky hair and the large sword do NOT count as head or body height. The body below the chin is only about1.3x the anatomical head height. Tiny compact torso, short broad armored legs, small gloved hands/boots; NOT the long torso, long thighs/shins or heroic juvenile proportions of selected-a. Do not make it a3-head figure. Preserve the same scale across all four views. Do not shrink the character to fit the large sword. Entire hair, cloak and sword must fit with transparent margins; do not crop them.
+
+ONE CALM POSE, rotated:
+The sword is physically resting across/behind Zeke's anatomical RIGHT armored shoulder. The RIGHT hand closes around the wrapped hilt, thumb and fingers clearly visible ON THE HILT, with the crossguard separating glove from blade. Right elbow is bent but relaxed, lowered naturally. The anatomical LEFT arm hangs beside the hip in a relaxed loose fist. He stands comfortably with only a slight weight shift and smiles warmly; no attack windup, lunge or dramatic twist. The sword blade extends backward behind the head/shoulder and modestly upward like reference2, but is offset behind the cranium, never through the face or head. Keep face fully readable.
+TOP LEFT: true FRONT face/torso looking at viewer. Right-hand grip is screen LEFT, blade toward screen upper-right behind head/hair.
+TOP RIGHT: true BACK. The SAME right-hand grip is screen RIGHT, blade extends toward screen LEFT behind the nape. Back of hair/armor, no back face. Same right shoulder, not left.
+BOTTOM LEFT: true LEFT profile, nose points screen LEFT, one visible eye. Right raised hand/shoulder is the FAR side; the empty anatomical left arm is NEAR and hangs down. Blade extends backward toward screen RIGHT. Do not move the sword to the near/left hand just for visibility; allow correct far-hand occlusion.
+BOTTOM RIGHT: true RIGHT profile, nose points screen RIGHT, one visible eye. Raised right weapon arm is NEAR and visible; empty left arm FAR. Blade extends backward toward screen LEFT. Same grip and sword orientation in the character's local coordinates.
+Respect near/far foreshortening. Physical hand consistency takes precedence over making the two profiles simple mirrored duplicates. No extra hand or duplicated swords.
+
+DESIGN LOCK:
+Original dark red-black broad straight tapering greatsword with orange-gold branching crack inlays along blade, original angular dark bat-wing crossguard, long wrapped reddish-brown leather grip and pointed dark pommel. There is NO star jewel or gem in the crossguard: remove the invented star from selected-a. The orange small chest light belongs only to his breastplate.
+Original gunmetal-black faceted plate armor with silver bevels, black high collar, red sleeved split-tail coat, black fitted gloves, thigh/knee plates and small black armored boots. No new cape, crown, ornaments, flame aura, extra ribbons or costume redesign.
+
+STYLE:
+Match reference1/5 polished2D anime SD: thin definite dark-navy outer contour, fine colored inner lines, crisp controlled cel shadows, selective clean metal highlights, expressive clear eyes. Front head roll <=2deg, steady skull size; left/right true profiles. Mild overhead12deg orthographic game view. No3D plastic, thick sticker outline, photorealism or adult musculature.
+Same feet/baseline for each row and generous separation between the four figures. Exactly four complete sprites, no extra view or duplicate. Truly transparent background; no floor, shadow, checkerboard painted in, particles, text, labels, borders or diagrams.

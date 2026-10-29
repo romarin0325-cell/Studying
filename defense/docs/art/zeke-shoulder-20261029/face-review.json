@@ -1,0 +1,51 @@
+{
+  "method": "Separate manually estimated eye centers and chin, not a skull-area normalization claim",
+  "before": {
+    "points": {
+      "leftEye": [
+        219,
+        224
+      ],
+      "rightEye": [
+        280,
+        215
+      ],
+      "chin": [
+        247.31,
+        270.03
+      ],
+      "uncertainty": 2
+    },
+    "metrics": {
+      "eyeDistance": 61.66036003787198,
+      "eyeToChin": 50.52999999999997
+    }
+  },
+  "after": {
+    "rawPoints": {
+      "leftEye": [
+        246,
+        274
+      ],
+      "rightEye": [
+        326,
+        260
+      ],
+      "chin": [
+        285,
+        334
+      ],
+      "uncertainty": 3
+    },
+    "commonScale": 0.7595545253127499,
+    "metrics": {
+      "eyeDistance": 61.68779956672644,
+      "eyeToChin": 50.89015319595424
+    }
+  },
+  "relativePercent": {
+    "eyeDistance": 0.044501084388093304,
+    "eyeToChin": 0.7127512288823912
+  },
+  "limitations": "Manual point uncertainty2px before/3px in generated source. Approximate agreement, not exact anatomy."
+}

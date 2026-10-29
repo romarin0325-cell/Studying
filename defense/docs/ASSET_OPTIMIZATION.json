@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 31557115,
-    "deployableSourceBytes": 29932147,
-    "outputBytes": 16881624,
+    "sourceBytes": 31552689,
+    "deployableSourceBytes": 29927721,
+    "outputBytes": 16881088,
     "optimizedFiles": 173,
     "derivedFiles": 159,
-    "derivedOutputBytes": 3839310
+    "derivedOutputBytes": 3840854
   },
   "images": [
     {
@@ -449,7 +449,7 @@
     },
     {
       "id": "atlas:unit-zeke",
-      "source": "./assets/cast-v2/zeke.webp",
+      "source": "./assets/cast-v2/zeke-shoulder.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-zeke; combat renderer / stage UI",
@@ -458,8 +458,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 289752,
-        "sha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",
+        "bytes": 285326,
+        "sha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -468,9 +468,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/zeke.webp",
-        "bytes": 108708,
-        "sha256": "95884f94bb1ce99a6f53620f65821a69e6e0984ccf9ff9c82e86cdfac4c69a19",
+        "path": "./assets/optimized/cast-v2/zeke-shoulder.webp",
+        "bytes": 108172,
+        "sha256": "6fb9abbf86c5748cf4060fdde0c8fcd8a9fdef6848ec9ef97d3ac7f79403d86d",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -7300,11 +7300,11 @@
     },
     {
       "id": "portrait:zeke",
-      "source": "./assets/cast-v2/zeke.webp",
+      "source": "./assets/cast-v2/zeke-shoulder.webp",
       "profile": "portrait",
       "crop": {
-        "left": 122,
-        "top": 69,
+        "left": 130,
+        "top": 73,
         "width": 250,
         "height": 250
       },
@@ -7312,11 +7312,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",
+      "sourceSha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60",
       "output": {
         "path": "./assets/optimized/ui/portraits/zeke.webp",
-        "bytes": 22160,
-        "sha256": "4c5cb8a3c6efa5cc25ff82fd65a5a8cf35a16373090dc0ceead2f2fa333b96d6",
+        "bytes": 22940,
+        "sha256": "013bb273daf2d195cb07f34f0b77ff43ae2b1a580929a025991051b351d3644e",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -7327,7 +7327,7 @@
     },
     {
       "id": "figure:zeke",
-      "source": "./assets/cast-v2/zeke.webp",
+      "source": "./assets/cast-v2/zeke-shoulder.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7339,11 +7339,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "6ad8f979fc76f2a0a3114b73987adae66ee0e877dedd78d4ffc7849b11a23803",
+      "sourceSha256": "86171c1306c1fbe7b4ac6a504c9d3bcf45ea20a559e6164d9f596085ff2e8d60",
       "output": {
         "path": "./assets/optimized/ui/figures/zeke.webp",
-        "bytes": 54076,
-        "sha256": "4967a3db66f228b2633f30b79133f18f2fa4947140377fa479d09980daf64fc3",
+        "bytes": 54840,
+        "sha256": "23a66a5004150d6d8fa5e2dc93e742509db2c740bccd0593b2967b04b5ea3b43",
         "metadata": {
           "width": 512,
           "height": 512,
