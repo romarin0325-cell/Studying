@@ -9,12 +9,13 @@
 | `defense/` | 드림위버: 별빛 정원 · Star Garden (정식 Defense) | [README](defense/README.md) · [AGENTS](defense/AGENTS.md) · [docs](defense/docs/README.md) | `defense/dist/StarGardenDefense.html` (Bright: `StarGardenDefenseBright.html`) |
 | `card/` | DREAMWEAVER · Card | [card/README](card/README.md) · [doc](card/doc/README.md) | `card/dist/DREAMWEAVER.html` |
 | `card_astra/` | DREAMWEAVER · Astra (Card의 새 화면) | [README](card_astra/README.md) | `card_astra/dist/DREAMWEAVER-Astra.html` |
+| `card_lumen/` | DREAMWEAVER · Lumen (Card의 밝은 Postcard 화면) | [README](card_lumen/README.md) · [설계](card_lumen/docs/DESIGN.md) | `card_lumen/dist/DREAMWEAVER-Lumen.html` |
 | `card_claude/` | DREAMWEAVER · Claude UI 비교 빌드 | [README](card_claude/README.md) | `card_claude/dist/DREAMWEAVER-Claude.html` |
 | `shooter/` | 별의 잔향 · ASTRAL BLOOM | [README](shooter/README.md) · [doc](shooter/doc/README.md) | `shooter/dist/AstralBloom.html` |
 | `survivor/` | ASTRA: NOCTURNE | [README](survivor/README.md) · [doc](survivor/doc/README.md) | `survivor/dist/AstraNocturne.html` |
 | `rpg/` | Turn RPG: Legend Edition v9.5 | [README](rpg/README.md) | `rpg/new.html` (빌드 없음) |
 
-`card_astra/`와 `card_claude/`는 `card/`의 규칙(`card/game/`)과 에셋을 읽습니다. `card_manual/`은 Card의 플레이어용 매뉴얼입니다.
+`card_astra/`, `card_lumen/`, `card_claude/`는 `card/`의 규칙(`card/game/`)과 에셋을 읽습니다. `card_manual/`은 Card의 플레이어용 매뉴얼입니다.
 
 ## 명령
 
@@ -27,6 +28,7 @@ npm run build:defense      # Star Garden 일반판 + Bright
 npm run test:defense       # Star Garden 단위·계약 테스트
 npm run build:card         # Card
 npm run build:card-astra   # Astra
+npm run build:card-lumen   # Lumen
 npm run build:survivor     # Nocturne
 ```
 

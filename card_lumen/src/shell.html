@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3ede2">
+  <title>DREAMWEAVER — Card RPG</title>
+  {{STYLES}}
+</head>
+<body class="lumen" data-screen="title" data-theme="dreamsky">
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2.5 2.4 7.1 7.1 2.4-7.1 2.4L12 21.5l-2.4-7.1L2.5 12l7.1-2.4Z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="7.5" y="4" width="11" height="16" rx="2"/><path d="M5 7.5 3.5 8l3 12.5 2-.5"/><path d="m13 9 1 2.2 2.3.3-1.7 1.6.5 2.3-2.1-1.2-2.1 1.2.5-2.3-1.7-1.6 2.3-.3Z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.5C9.5 4.6 6.4 4.3 3 5v14c3.4-.7 6.5-.4 9 1.5 2.5-1.9 5.6-2.2 9-1.5V5c-3.4-.7-6.5-.4-9 1.5Z"/><path d="M12 6.5v14"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/><circle cx="12" cy="12" r="6.6"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5.5l11-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+    <symbol id="i-shrink" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h14a1.5 1.5 0 0 1 1.5 1.5V10a2 2 0 0 0 0 4v2.5A1.5 1.5 0 0 1 19 18H5a1.5 1.5 0 0 1-1.5-1.5V14a2 2 0 0 0 0-4Z"/><path d="M15 6.5v11" stroke-dasharray="1.6 2"/></symbol>
+    <symbol id="i-summon" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/><path d="m18.5 15 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z"/><path d="M4.5 18.5h6"/></symbol>
+    <symbol id="i-quiz" viewBox="0 0 24 24"><path d="M5 4.5h14a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-6l-4.5 3.5v-3.5H5A1.5 1.5 0 0 1 3.5 15V6A1.5 1.5 0 0 1 5 4.5Z"/><path d="M10 9a2 2 0 1 1 2.6 1.9c-.4.2-.6.5-.6.9v.4M12 13.8v.2"/></symbol>
+    <symbol id="i-bless" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="5" ry="1.8"/><path d="M12 9.5c-3 0-5 2.2-5 5.5h10c0-3.3-2-5.5-5-5.5Z"/><path d="M4 13.5c-1.2 1.6-1.2 4 .5 5.5 1.3-1.6 1.6-3.6.8-5.5M20 13.5c1.2 1.6 1.2 4-.5 5.5-1.3-1.6-1.6-3.6-.8-5.5M8.5 19.5h7"/></symbol>
+    <symbol id="i-mission" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="16" rx="2"/><path d="M9 3v3h6V3M8 11l1.5 1.5L12 10M8 16l1.5 1.5L12 15M14.5 11.5H16M14.5 16.5H16"/></symbol>
+    <symbol id="i-sword" viewBox="0 0 24 24"><path d="M14.5 4H20v5.5L10 19.5 4.5 14Z"/><path d="m3.5 20.5 3-3M7 13l4 4M17 7l-6 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13.5 6l6 6-6 6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/></symbol>
+    <symbol id="i-cookie" viewBox="0 0 24 24"><path d="M3.5 13.5C4 8 8.5 4.5 13.5 5c-1 2.5.8 4.8 3.2 4.7-.3 2.4 1.7 4.2 3.8 3.6-.6 4.4-4.4 7.2-8.5 7.2-4.6 0-8.8-3-8.5-7Z"/><path d="M8.5 11v.2M12 15v.2M8 16v.2M15.5 15.5v.2"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5Z"/><path d="M8.5 10h.1M12 10h.1M15.5 10h.1"/></symbol>
+    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4 20 10-10M12.5 8.5l3 3"/><path d="m17 3 .8 2.2 2.2.8-2.2.8L17 9l-.8-2.2L14 6l2.2-.8ZM8 4.5l.5 1.4 1.4.5-1.4.5L8 8.3l-.5-1.4-1.4-.5 1.4-.5ZM19 13.5l.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5Z"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M15.5 4.5l4 4L9 19H5v-4Z"/><path d="m13.5 6.5 4 4"/></symbol>
+    <symbol id="i-letters" viewBox="0 0 24 24"><path d="M3.5 18 7.5 6l4 12M5 14h5"/><path d="M14 9.5c.8-1 1.8-1.5 3-1.5 2 0 3 1.2 3 3V18M20 13c-3.5 0-6 .5-6 2.6 0 1.4 1 2.4 2.6 2.4 1.7 0 3.4-1.2 3.4-3"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6Z"/><path d="M12 16.5s-3.5-2-3.5-4.4a1.9 1.9 0 0 1 3.5-1 1.9 1.9 0 0 1 3.5 1c0 2.4-3.5 4.4-3.5 4.4Z"/></symbol>
+    <symbol id="i-gem" viewBox="0 0 24 24"><path d="M7 4h10l4 5-9 11L3 9Z"/><path d="M3 9h18M9.5 4 8 9l4 11 4-11-1.5-5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </defs></svg>
+  <div class="world-backdrop" aria-hidden="true"><i class="lm-art"></i><i class="lm-shade"></i></div>
+
+  <header class="astra-header lm-top">
+    <div class="lm-top-lead">
+      <button id="lm-back" class="lm-icon-btn lm-back" type="button" aria-label="뒤로" hidden><svg><use href="#i-back"/></svg></button>
+      <a class="brand lm-place" href="#" onclick="Astra.home(); return false" aria-label="로비로"><span class="lm-place-medal"><svg><use href="#i-star"/></svg></span><span class="lm-place-text"><small id="lm-place-kicker">LOBBY</small><h1 class="header-status lm-top-title" aria-live="polite"></h1></span></a>
+    </div>
+    <div class="header-tools lm-top-tools">
+      <div class="lm-ticket" id="lm-ticket" role="status" aria-label="소환 티켓"><svg><use href="#i-ticket"/></svg><span id="ui-tickets">0</span></div>
+      <button class="lm-icon-btn lm-music-btn" type="button" onclick="MusicPlayer.open()" aria-label="음악 재생"><svg><use href="#i-music"/></svg></button>
+      <button id="btn-game-fullscreen" class="lm-icon-btn fullscreen-shortcut" type="button" onclick="RPG.toggleGameFullscreen()" aria-label="전체화면" aria-pressed="false"><svg><use href="#i-expand"/></svg></button>
+      <button class="lm-icon-btn lm-settings-btn" type="button" onclick="Astra.settings()" aria-label="설정"><svg><use href="#i-gear"/></svg></button>
+    </div>
+  </header>
+
+  <main class="container" id="main-content">
+    <section id="screen-title" class="screen active" aria-label="타이틀">
+      <div class="lm-title-mark">
+        <p class="lm-title-kicker">CARD RPG</p>
+        <h1 class="lm-wordmark">DREAM<span>WEAVER</span></h1>
+        <p class="lm-title-line">말이 마법이 되는 카드 여정</p>
+      </div>
+      <div class="lm-title-dock">
+        <div id="title-loading" class="title-loading" role="status">기록실을 여는 중…</div>
+        <div class="title-screen-actions">
+          <button id="btn-start-load" class="lm-cta" type="button" onclick="RPG.startGame('load')" disabled><span class="lm-cta-label">여정 이어가기</span><svg><use href="#i-arrow"/></svg></button>
+          <button id="btn-start-new" class="lm-btn lm-btn-glass" type="button" onclick="RPG.startGame('new')" disabled>새로운 여정</button>
+        </div>
+        <nav class="lm-title-utils" aria-label="타이틀 메뉴">
+          <button id="btn-fortune-cookie" type="button" disabled><span class="lm-util-icon"><svg><use href="#i-cookie"/></svg></span><span>포춘쿠키</span></button>
+          <button id="btn-title-question" type="button" onclick="RPG.openLumiQuestion()" disabled><span class="lm-util-icon"><svg><use href="#i-chat"/></svg></span><span>루미 질문</span></button>
+          <button id="btn-title-mission" type="button" onclick="RPG.openMissionHub()" disabled><span class="lm-util-icon"><svg><use href="#i-mission"/></svg></span><span>미션</span></button>
+          <button id="btn-title-music" type="button" onclick="MusicPlayer.open()" disabled><span class="lm-util-icon"><svg><use href="#i-music"/></svg></span><span>음악</span></button>
+        </nav>
+      </div>
+    </section>
+
+    <section id="screen-menu" class="screen" aria-label="로비">
+      <section class="lm-party" aria-label="출전 파티">
+        <div class="lm-section-head"><h2>출전 파티</h2><button class="lm-link" type="button" onclick="RPG.openDeck()">편성<svg><use href="#i-next"/></svg></button></div>
+        <div id="astra-party" class="lm-party-row"></div>
+        <p id="astra-party-note" class="lm-party-note"></p>
+      </section>
+      <section class="lm-lobby-actions" aria-label="준비">
+        <div class="lm-section-head"><h2>소환</h2><button class="lm-link" type="button" onclick="RPG.openCardPoolViewer()">카드풀<svg><use href="#i-next"/></svg></button></div>
+        <div class="recruit-block lm-recruit">
+          <div id="menu-gacha-area"><button id="btn-normal-gacha" class="menu-btn" type="button" onclick="RPG.openGacha()">일반 뽑기 (1장)</button><button id="btn-challenge-gacha" class="menu-btn" type="button" onclick="RPG.openChallengeGacha()">도전 뽑기</button><button id="lm-chain-gacha" class="menu-btn lm-chain-btn" type="button" onclick="LumenUI.startChain()" hidden>연속 도전</button></div>
+          <div id="menu-draft-area" style="display:none"><button class="menu-btn" type="button" onclick="RPG.startDraft()">드래프트 시작</button></div>
+          <div id="menu-chaos-area" style="display:none"><button id="btn-menu-artifact-check" class="menu-btn" type="button" style="display:none" onclick="RPG.openArtifactCheck()">아티팩트 확인</button><button class="menu-btn" type="button" onclick="RPG.reshuffleChaosPool()">카오스 셔플</button></div>
+        </div>
+        <div class="lm-prep">
+          <button id="lm-blessing" class="lm-prep-btn" type="button" onclick="RPG.openChaosBlessing()"><svg><use href="#i-bless"/></svg><span>축복</span><b id="lm-blessing-count"></b></button>
+          <button id="lm-mission" class="lm-prep-btn" type="button" onclick="RPG.openMissionHub()"><svg><use href="#i-mission"/></svg><span>미션</span></button>
+        </div>
+        <button id="astra-depart" class="lm-cta lm-depart" type="button" onclick="RPG.startBattleInit()"><span class="lm-medal" id="next-enemy-preview"><b id="astra-stage">01</b><small id="lm-stage-goal"></small></span><span class="lm-depart-copy"><small>SORTIE<i id="astra-mode" hidden></i></small><strong>전투 출전</strong><span class="lm-depart-foe"><span id="next-enemy-text">다음 상대</span><span id="lm-encounter-tag"></span></span></span><svg><use href="#i-arrow"/></svg><span class="lm-hidden-contract"><img id="next-enemy-img" alt=""></span></button>
+        <p id="astra-depart-help" class="lm-depart-help"></p>
+      </section>
+    </section>
+
+    <section id="screen-collection" class="screen" aria-label="카드 도감">
+      <div class="lm-page-head">
+        <div class="lm-segment" role="group" aria-label="도감 범위"><button id="lm-scope-run" type="button" aria-pressed="true">이번 여정</button><button id="lm-scope-all" type="button" aria-pressed="false">전체 도감</button></div>
+        <span id="collection-count" class="lm-count"></span>
+      </div>
+      <div id="collection-toolbar" class="lm-toolbar">
+        <label class="lm-search"><svg><use href="#i-search"/></svg><input id="card-search" type="search" placeholder="이름 · 속성 · 역할" aria-label="카드 검색"></label>
+        <div id="lm-grade-chips" class="lm-chips" role="group" aria-label="등급"></div>
+        <select id="card-grade" aria-label="카드 등급" hidden><option value="all">모든 등급</option><option value="legend">전설</option><option value="epic">에픽</option><option value="rare">레어</option><option value="normal">노멀</option><option value="transcendence">초월</option><option value="event">이벤트</option><option value="special">스페셜</option></select>
+      </div>
+      <p id="lm-collection-note" class="lm-note"></p>
+      <div id="collection-grid" class="card-grid lm-grid"></div>
+      <p id="collection-empty" class="lm-empty" hidden>조건에 맞는 카드가 없습니다.</p>
+      <div class="lm-hidden-contract" hidden><span id="collection-title">카드 도감</span><button id="collection-back" type="button">로비로</button><button id="collection-scope" type="button" aria-pressed="false">보유 카드</button><button id="grade-picker-open" type="button">모든 등급</button></div>
+    </section>
+
+    <section id="screen-deck" class="screen" aria-label="파티 편성">
+      <div class="deck-formation lm-slots"><button id="slot-0" class="deck-slot" type="button" onclick="RPG.selectDeckSlot(0)">선봉</button><button id="slot-1" class="deck-slot" type="button" onclick="RPG.selectDeckSlot(1)">중견</button><button id="slot-2" class="deck-slot" type="button" onclick="RPG.selectDeckSlot(2)">대장</button></div>
+      <p id="deck-hint" class="lm-deck-hint" role="status">자리를 선택하세요</p>
+      <div class="lm-deck-bar"><div id="lm-deck-filter" class="lm-chips" role="group" aria-label="속성"></div></div>
+      <div id="deck-card-list" class="card-grid lm-grid"></div>
+      <div class="lm-dock deck-confirm"><button class="lm-btn lm-btn-ghost" type="button" onclick="RPG.toMenu()">취소</button><button class="lm-cta lm-cta-compact" type="button" onclick="RPG.confirmDeck()"><span class="lm-cta-label">편성 완료</span></button></div>
+    </section>
+
+    <section id="screen-study" class="screen" aria-label="학습">
+      <div class="lm-study-hero">
+        <div class="lm-study-copy"><small>LUMI'S STUDY</small><h2>루미의 배움터</h2><p id="lm-study-stat">오늘도 한 문제씩.</p></div>
+      </div>
+      <button class="lm-feature" type="button" onclick="RPG.openToeicMenu()"><span class="lm-feature-icon"><svg><use href="#i-target"/></svg></span><span class="lm-feature-copy"><small>실전 마법연습</small><strong>TOEIC 연습</strong><span>Part 5 · 6 · 7 예상 문제</span></span><svg class="lm-feature-go"><use href="#i-arrow"/></svg></button>
+      <div class="lm-list">
+        <button type="button" onclick="RPG.openMagicClass()"><span class="lm-list-icon"><svg><use href="#i-wand"/></svg></span><span><strong>루미의 마법교실</strong><small>문법 강의</small></span><svg><use href="#i-next"/></svg></button>
+        <button type="button" onclick="RPG.openWordbook()"><span class="lm-list-icon"><svg><use href="#i-letters"/></svg></span><span><strong>나의 단어장</strong><small>단어 · 연어 · 오답</small></span><svg><use href="#i-next"/></svg></button>
+        <button type="button" onclick="RPG.openPrivateTutoring()"><span class="lm-list-icon"><svg><use href="#i-pen"/></svg></span><span><strong>루미의 개인과외</strong><small>오답 복습 수업</small></span><svg><use href="#i-next"/></svg></button>
+        <button type="button" onclick="RPG.openLumiQuestion()"><span class="lm-list-icon"><svg><use href="#i-chat"/></svg></span><span><strong>루미에게 질문</strong><small>무엇이든 영어 질문</small></span><svg><use href="#i-next"/></svg></button>
+        <button id="lm-study-fortune" type="button" onclick="FortuneCookie.open()"><span class="lm-list-icon"><svg><use href="#i-cookie"/></svg></span><span><strong>오늘의 포춘쿠키</strong><small>하루 한 번 리스닝</small></span><svg><use href="#i-next"/></svg></button>
+      </div>
+    </section>
+
+    <section id="screen-battle" class="screen" aria-label="전투">
+      <div class="battle-header lm-battle-bar">
+        <div class="battle-header-left"><span class="lm-turn">TURN <b id="bt-turn">1</b></span><div id="lm-roster" class="lm-roster" aria-label="파티 순서"></div><button id="btn-battle-artifact-check" class="battle-artifact-btn" type="button" onclick="RPG.openArtifactCheck()">아티팩트</button></div>
+        <div id="field-buff-box" class="field-buffs" role="button" tabindex="0" aria-label="필드 버프" onclick="RPG.showFieldBuffInfo()"></div>
+      </div>
+      <div class="visual-stage lm-stage">
+        <button id="player-actor-box" class="battle-actor player" type="button" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)">
+          <div class="portrait lm-actor-art"><img id="p-img" alt="출전 카드"></div>
+          <div class="lm-actor-plate"><small id="lm-p-slot">선봉</small><strong id="p-name">Player</strong></div>
+          <div class="lm-gauge lm-gauge-hp"><div class="actor-hp-bar"><i class="lm-ghost"></i><div id="p-hp-bar" class="actor-hp-fill"></div></div><span class="lm-gauge-num" id="lm-p-hp"></span></div>
+          <div class="lm-gauge lm-gauge-mp"><div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div><span class="lm-gauge-num" id="lm-p-mp"></span></div>
+          <div id="p-buffs" class="actor-buffs"></div>
+        </button>
+        <button id="enemy-actor-box" class="battle-actor enemy" type="button" onclick="RPG.showBattleStat('enemy', 0)">
+          <div class="portrait lm-actor-art"><img id="e-img" alt="상대"></div>
+          <div class="lm-actor-plate"><small id="lm-e-tag">ENEMY</small><strong id="e-name">Enemy</strong></div>
+          <div class="lm-gauge lm-gauge-hp"><div class="actor-hp-bar"><i class="lm-ghost"></i><div id="e-hp-bar" class="actor-hp-fill"></div></div><span class="lm-gauge-num" id="lm-e-hp"></span></div>
+          <div class="lm-gauge lm-gauge-mp lm-gauge-blank" aria-hidden="true"></div>
+          <div id="e-buffs" class="actor-buffs"></div>
+        </button>
+        <div id="lm-banner" class="lm-banner" aria-hidden="true"></div>
+      </div>
+      <div id="battle-log" class="log-container" role="log" aria-label="전투 기록"></div>
+      <div id="battle-controls" class="control-panel"></div>
+    </section>
+    {{OTHER_SCREENS}}
+  </main>
+
+  <nav class="astra-nav lm-nav" aria-label="주 메뉴">
+    <button data-nav="menu" type="button" onclick="RPG.toMenu()"><svg><use href="#i-home"/></svg><span>로비</span></button>
+    <button data-nav="deck" type="button" onclick="RPG.openDeck()"><svg><use href="#i-cards"/></svg><span>편성</span></button>
+    <button data-nav="collection" type="button" onclick="RPG.openCollection()"><svg><use href="#i-grid"/></svg><span>도감</span></button>
+    <button data-nav="study" type="button" onclick="Astra.learn()"><svg><use href="#i-book"/></svg><span>학습</span></button>
+  </nav>
+
+  {{MODALS}}
+
+  <div id="modal-card" class="modal lm-sheet-modal" style="z-index: 120;" aria-labelledby="md-name">
+    <div class="modal-content lm-detail">
+      <div class="lm-detail-bar"><button id="lm-detail-prev" class="lm-icon-btn" type="button" aria-label="이전 카드"><svg><use href="#i-back"/></svg></button><span id="lm-detail-pos" class="lm-detail-pos"></span><button id="lm-detail-next" class="lm-icon-btn" type="button" aria-label="다음 카드"><svg><use href="#i-next"/></svg></button><button class="lm-icon-btn lm-detail-close" type="button" onclick="RPG.closeModal()" aria-label="닫기"><svg><use href="#i-close"/></svg></button></div>
+      <div class="modal-scroll lm-detail-scroll">
+        <div class="lm-detail-hero">
+          <div class="portrait lm-detail-art"><img id="md-img" alt=""></div>
+          <div class="lm-detail-id">
+            <p id="md-grade" class="lm-detail-grade"></p>
+            <h3 id="md-name">Name</h3>
+            <p id="lm-detail-own" class="lm-detail-own"></p>
+            <div id="md-stats" class="lm-stats"></div>
+          </div>
+        </div>
+        <div id="md-skills" class="lm-skills"></div>
+      </div>
+      <button class="lm-btn lm-btn-ghost lm-detail-done" type="button" onclick="RPG.closeModal()">닫기</button>
+    </div>
+  </div>
+
+  <div id="modal-astra-settings" class="modal lm-sheet-modal" role="dialog" aria-modal="true" aria-labelledby="astra-settings-title">
+    <div class="modal-content lm-settings">
+      <div class="lm-sheet-head"><h2 id="astra-settings-title">설정</h2><button class="lm-icon-btn" type="button" onclick="Astra.closeSettings()" aria-label="닫기"><svg><use href="#i-close"/></svg></button></div>
+      <div class="modal-scroll lm-settings-body">
+        <section class="lm-set-group" id="lm-set-run">
+          <h3>여정</h3>
+          <div class="settings-grid lm-set-rows">
+            <button class="lm-row-btn" type="button" data-run-only onclick="Astra.closeSettings(); RPG.saveGame()">저장하기<small>현재 여정을 기기에 저장</small></button>
+            <button class="lm-row-btn" type="button" onclick="Astra.closeSettings(); RPG.showRecords()">기록 확인<small>엔드리스 최고 기록</small></button>
+            <button class="lm-row-btn" type="button" data-run-only onclick="Astra.closeSettings(); RPG.openCardPoolViewer()">카드풀 확인<small>이번 모드에서 나올 수 있는 카드</small></button>
+            <button id="lm-tutoring-toggle" class="lm-row-btn lm-switch" type="button" onclick="RPG.toggleTutoringEvent(); LumenUI.syncSettings()">개인과외 이벤트<small>학습 후 루미의 수업 제안</small><i aria-hidden="true"></i></button>
+            <button class="lm-row-btn lm-row-danger" type="button" data-run-only onclick="Astra.closeSettings(); RPG.toTitle()">타이틀로<small>저장하지 않은 진행은 남지 않습니다</small></button>
+          </div>
+        </section>
+        <section class="lm-set-group">
+          <h3>화면</h3>
+          <div class="theme-choices lm-theme-choices" role="group" aria-label="화면 테마"><button type="button" data-theme-choice="astra" onclick="Astra.setTheme('astra')"><i></i>아스트라</button><button type="button" data-theme-choice="strawberry" onclick="Astra.setTheme('strawberry')"><i></i>마법소녀</button><button type="button" data-theme-choice="dreamsky" onclick="Astra.setTheme('dreamsky')"><i></i>드림스카이</button></div>
+        </section>
+        <section class="lm-set-group">
+          <h3>기록 파일</h3>
+          <div class="lm-set-pair"><button class="lm-btn lm-btn-soft" type="button" onclick="Astra.exportSave()">내보내기</button><label class="lm-btn lm-btn-soft file-label">가져오기<input id="astra-import" type="file" accept="application/json,.json"></label></div>
+          <p class="settings-note">진행 중인 여정은 먼저 저장한 뒤 내보내세요. API 키는 포함하지 않습니다.</p>
+        </section>
+        <section class="lm-set-group">
+          <h3>로컬 초상화</h3>
+          <p class="settings-note">PNG와 음원은 HTML 옆에 두면 자동으로 불러옵니다.</p>
+          <form id="asset-path-form" class="lm-path"><label for="asset-path">초상화 폴더 경로</label><div class="path-row"><input id="asset-path" placeholder="예: portraits/" autocomplete="off"><button class="lm-btn lm-btn-soft" type="submit">적용</button></div></form>
+          <button class="lm-btn lm-btn-soft lm-wide" type="button" onclick="document.getElementById('portrait-files').click()">기기에서 폴더 선택</button><input id="portrait-files" type="file" accept="image/*" multiple webkitdirectory hidden>
+          <p id="asset-status" class="settings-note" role="status">폴더 선택은 현재 실행 중에만 유지됩니다.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div id="modal-grade-picker" class="modal" hidden><div class="modal-content"><h3 id="grade-picker-title">카드 등급</h3><div id="grade-options"></div></div></div>
+  <div id="astra-toast" role="status" aria-live="polite"></div>
+  {{SCRIPTS}}
+</body>
+</html>

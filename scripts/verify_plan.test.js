@@ -34,6 +34,15 @@ test('Astra edition builds before its focused browser check and never selects un
   assert.deepEqual(createPlan(changes('card_astra/README.md')).steps, []);
 });
 
+test('Lumen edition builds before its own browser check and leaves Astra alone', () => {
+  const plan = createPlan(changes('card_lumen/src/lumen.js', 'card_lumen/src/lumen.css', 'card_lumen/tests/smoke.mjs'));
+  assert.deepEqual([...games(plan)], ['card']);
+  assert.ok(ids(plan).indexOf('card:lumen:build') < ids(plan).indexOf('card:lumen:smoke'));
+  assert.equal(ids(plan).some(id => id.startsWith('card:astra:')), false);
+  assert.deepEqual(plan.warnings, []);
+  assert.deepEqual(createPlan(changes('card_lumen/README.md')).steps, []);
+});
+
 test('Star Garden is an isolated target with one build and no commands for other games', () => {
   const plan = createPlan(changes('defense/src/content.js', 'defense/src/app.js', 'defense/src/combat/engine.js', 'defense/dist/StarGardenDefense.html', 'scripts/verify_plan.js'));
   assert.deepEqual(plan.blocked, []);
