@@ -13,13 +13,14 @@ import {RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
 import {BRIGHT_ART,VISUAL_HEROES} from './image-policy.mjs';
 import {loadImagePack} from './image-pack.mjs';
 
-const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),unlocked=process.argv.includes('--unlocked'),bright=process.argv.includes('--bright');
+const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),preview=process.argv.includes('--preview'),unlocked=preview||process.argv.includes('--unlocked'),bright=preview||process.argv.includes('--bright');
+// --preview: the bright unlocked content test build (dist-test/), with the preview modes switched on.
 if(unlocked&&(solo||web||compat))throw new Error('--unlocked cannot be combined with --solo, --web or --compat.');
 if(web&&(solo||compat))throw new Error('Choose folder or standalone distribution.');
 if(bright&&(solo||web||compat))throw new Error('--bright combines only with --unlocked.');
 const outAt=process.argv.indexOf('--outdir');
 if(outAt>=0&&(!process.argv[outAt+1]||process.argv[outAt+1].startsWith('--')))throw new Error('--outdir requires a directory.');
-const output=outAt>=0?path.resolve(process.argv[outAt+1]):path.join(game,unlocked?'test-results/unlocked':compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
+const output=outAt>=0?path.resolve(process.argv[outAt+1]):path.join(game,preview?'dist-test':unlocked?'test-results/unlocked':compat?'test-results/compat':solo?'test-results/solo':web?'test-results/web':'dist');
 // Every normal release builds both skins from one shared media/JS pass. Explicit
 // --bright and the optional distribution flags retain their single-output mode.
 const themes=!solo&&!web&&!compat&&!bright?[false,true]:[bright];
@@ -93,7 +94,7 @@ for(const [id,track] of Object.entries(MUSIC)){const bytes=await fs.readFile(ass
 const font=await fs.readFile(assetFile('./assets/Jua-Regular.woff2')),license=await readText(assetFile('./assets/Jua-OFL.txt'));
 const fontUri='data:font/woff2;base64,'+font.toString('base64');
 const night=await readText(path.join(game,'src/style.css'));
-const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo),__GARDEN_UNLOCKED__:String(unlocked)}});
+const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo),__GARDEN_UNLOCKED__:String(unlocked),__GARDEN_PREVIEW__:String(preview)}});
 for(const input of Object.keys(js.metafile.inputs)){
   const relative=path.relative(game,path.resolve(input));
   if(relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw new Error('External game source in Star Garden bundle: '+input);
@@ -102,7 +103,7 @@ const bundle=js.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
 const template=await readText(path.join(game,'index.html'));
 const sharedInjected=`window.__GARDEN_MEDIA__=${JSON.stringify(media)};window.__MEMORIAL_MEDIA__=${JSON.stringify(memorial)};window.__LIBRARY_MEDIA__=${JSON.stringify(library)};window.__MEMORIAL_THUMBS__=${JSON.stringify(memorialThumbs)};window.__GARDEN_AUDIO__=${JSON.stringify(audio)};${web?`window.__MEMORIAL_FALLBACK__=${JSON.stringify(memorialFallback)};`:''}`;
 for(const light of themes){
-const filename=light?unlocked?'StarGardenDefenseUnlockedBright.html':'StarGardenDefenseBright.html':unlocked?'StarGardenDefenseUnlocked.html':solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
+const filename=preview?'StarGardenDefenseBrightTest.html':light?unlocked?'StarGardenDefenseUnlockedBright.html':'StarGardenDefenseBright.html':unlocked?'StarGardenDefenseUnlocked.html':solo?compat?'StarGardenDefenseSoloCompat.html':'StarGardenDefenseSolo.html':compat?'StarGardenDefenseCompat.html':'StarGardenDefense.html';
 const themeAssets={...assets};let battleBytes=sizes.battle;
 if(light)for(const [id,relative] of Object.entries(BRIGHT_ART)){
   const bytes=pack.read(relative);battleBytes+=bytes.length-(assets[id]?Buffer.from(assets[id].split(',')[1],'base64').length:0);
@@ -110,7 +111,7 @@ if(light)for(const [id,relative] of Object.entries(BRIGHT_ART)){
 }
 const cssSource=light?brightCss(night,await readText(path.join(game,'src/theme-bright.css'))):night;
 const css=(await transform(cssSource,{loader:'css',minify:true})).code.replace('__FONT__',fontUri);
-const source=template.replace('<title>드림위버: 별빛 정원</title>',`<title>드림위버: 별빛 정원${light?' · 맑음':''}${unlocked?' · 전체 해금 테스트':solo?' · 1인 편성 테스트':''}</title>`).replace('content="#0a1020"',light?'content="#eaf4ff"':'content="#0a1020"');
+const source=template.replace('<title>드림위버: 별빛 정원</title>',`<title>드림위버: 별빛 정원${light?' · 맑음':''}${preview?' · 신규 콘텐츠 테스트':unlocked?' · 전체 해금 테스트':solo?' · 1인 편성 테스트':''}</title>`).replace('content="#0a1020"',light?'content="#eaf4ff"':'content="#0a1020"');
 for(const token of ['/*__STYLE__*/','/*__ASSETS__*/','/*__SCRIPT__*/'])if(source.split(token).length!==2)throw new Error('Build token mismatch: '+token);
 const injected=`window.__ASTRA_ASSETS__=${JSON.stringify(themeAssets)};`+sharedInjected;
 const html=source.replace('/*__STYLE__*/',()=>css).replace('/*__ASSETS__*/',()=>injected).replace('/*__SCRIPT__*/',()=>bundle).replace('</head>',()=>`<!-- Jua font, SIL OFL 1.1\n${license.replaceAll('--','—')}\n-->\n</head>`);
@@ -135,7 +136,7 @@ const categories={
 const categorized=categories.css+categories.javascript+Object.values(categories).filter(v=>typeof v==='object').reduce((sum,v)=>sum+v.embeddedBytes,0);
 const report={mode,solo,unlocked,bright:light,filename,htmlBytes:byteLength(html),categories,htmlAndObjectGlueBytes:byteLength(html)-categorized};
 await fs.mkdir(path.join(game,'test-results'),{recursive:true});
-await fs.writeFile(path.join(game,'test-results',`build-size-${mode}${solo?'-solo':''}${unlocked?'-unlocked':''}${light?'-bright':''}.json`),JSON.stringify(report,null,2)+'\n');
+await fs.writeFile(path.join(game,'test-results',`build-size-${mode}${solo?'-solo':''}${preview?'-preview':unlocked?'-unlocked':''}${light?'-bright':''}.json`),JSON.stringify(report,null,2)+'\n');
 const mib=n=>(n/1024/1024).toFixed(3)+' MiB';
 console.log(`${filename} · ${mib(report.htmlBytes)} · ${mode} · ${solo?'one-person':'five-person'} deck${unlocked?' · unlocked':''}${check?' · committed output verified':''}`);
 for(const [name,value] of Object.entries(categories)){

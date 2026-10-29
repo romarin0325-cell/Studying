@@ -78,7 +78,7 @@ function summonValue(s){
   return m.sv=free.length?s.deck.reduce((n,id)=>n+per(id),0)/s.deck.length*(units<10?1.3:1):0;
 }
 function trainValue(s,id){
-  if(s.upgrades[id]>=5)return 0;const cells=CELLS.filter(c=>s.board[c]?.hero===id);if(!cells.length)return 0;
+  if(s.upgrades[id]>=E.trainCap(s))return 0;const cells=CELLS.filter(c=>s.board[c]?.hero===id);if(!cells.length)return 0;
   const all=affected(s,cells),v0=valueAt(s,all);s.upgrades[id]++;const v1=valueAt(s,all);s.upgrades[id]--;
   let extra=0;if(id==='queen')extra=cells.length*3*Math.max(0,6-s.wave)*0; // queen training gold is small next to her power
   return v1-v0+extra;

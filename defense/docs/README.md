@@ -44,6 +44,7 @@ docs/
 
 ## 3. 기획 (plans/)
 
+- [신규 콘텐츠 테스트 빌드](plans/CONTENT_PREVIEW_TEST.md): 2026-10-29. 별빛 서약·쌍성 원정·동료의 부탁(3명분). `build.mjs --preview`의 밝음 테스트본에만 들어간다.
 - [동료 의뢰·오토 전략·미션](plans/COMPANION_REQUESTS_AUTO_STRATEGY_MISSIONS.md):2026-10-29 사용자 요청. 선호 선물·전용 대화,5인 사전 전략과 최고 기록의 시간당 효율, 조합/상황 미션. 후속 구현 과제.
 - [UPCOMING_COMPANIONS.md](plans/UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
 - [FINAL_UR_AND_RELIC_IDEAS.md](plans/FINAL_UR_AND_RELIC_IDEAS.md): 마지막 UR 동료와 신규 유물 아이디어(2026-10-26). GPT 안 평가, Claude 안, Grok 답. 구현 전 제안.

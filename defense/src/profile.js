@@ -1,13 +1,18 @@
-import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from './content.js';
+import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from './content.js';
 import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
-import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
+import {TEAM_SIZE,SAVE_KEY,UNLOCKED,PREVIEW} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
 import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
 import {questionOf} from './quiz.js';
 import {CONSTELLATIONS} from './library.js';
+import {season} from './preview/season.js';
+import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,OATH_BANDS} from './preview/oath.js';
+import {twinParty,twinPartyProblem,twinSetKey,twinState,twinBandReward,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES} from './preview/twin.js';
+import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState} from './preview/requests.js';
+import {REQUEST_HEROES,REQUEST_REWARD} from './preview/requests-data.js';
 
 export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0,bondXp:0});
@@ -75,9 +80,9 @@ export function validateProfile(p){
   if(!['standard','high','low'].includes(p.settings.quality)||!['monthlyBest','monthlyLifetime','monthlyClaim'].every(k=>validRecord(p[k])))return false;
   if(p.monthlyClaim&&p.monthlyClaim.period!==p.monthly)return false;
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
-  if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly'].includes(r.mode)||!integer(r.stage,MAIN_STAGES)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
+  if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly','oath','twin'].includes(r.mode)||!integer(r.stage,MAIN_STAGES)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
   for(const k of ['weekly','monthly'])if(p[k]!==null&&(typeof p[k]!=='string'||!/^\d{4}-\d{2}(?:-\d{2})?$/.test(p[k])))return false;
-  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
+  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly','oath','twin'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
   const a=p.active;
   if(a){
     if(a.stage>p.cleared+1||!integer(a.seed,0xffffffff)||!a.seed||a.token.length>100||a.run!==null&&(typeof a.run!=='string'||a.run.length>2*1024*1024))return false;
@@ -88,11 +93,15 @@ export function validateProfile(p){
       if(a.draft.length<TEAM_SIZE&&a.draftPool.length-a.draft.length>1&&a.offers[0].id===a.offers[1].id)return false;
       if(a.draft.length===TEAM_SIZE&&a.deck.join()!==a.draft.join()||a.draft.length<TEAM_SIZE&&a.run!==null||p.weekly!==calendar(a.started).week)return false;
     }else if(a.boon!==0)return false;
+    if(a.mode==='oath'&&(oathConflict(a.oaths)||oathDeckProblem(a.oaths,a.deck)||!TIERS[a.tier]))return false;
+    if(a.mode==='twin'&&(!TWIN_SIDES.includes(a.side)||!TIERS[a.tier]||!Array.isArray(a.relics)||a.relics.length>3||new Set(a.relics).size!==a.relics.length||a.relics.some(id=>!p.relics[id]?.owned)))return false;
     if(a.mode!=='main'&&a.tier!==undefined&&!TIERS[a.tier])return false;
     if(a.relicAttack!==undefined&&!(Number.isFinite(a.relicAttack)&&a.relicAttack>=0&&a.relicAttack<=10))return false;
-    if(a.relicLevels!==undefined&&(!a.relicLevels||typeof a.relicLevels!=='object'||Array.isArray(a.relicLevels)||Object.keys(a.relicLevels).length!==p.equipped.length||Object.keys(a.relicLevels).some(id=>!p.equipped.includes(id)||!integer(a.relicLevels[id])||a.relicLevels[id]<1)))return false;
+    const relicKeys=a.mode==='twin'?a.relics||[]:p.equipped;
+    if(a.relicLevels!==undefined&&(!a.relicLevels||typeof a.relicLevels!=='object'||Array.isArray(a.relicLevels)||Object.keys(a.relicLevels).length!==relicKeys.length||Object.keys(a.relicLevels).some(id=>!relicKeys.includes(id)||!integer(a.relicLevels[id])||a.relicLevels[id]<1)))return false;
     if(a.run!==null&&!resumeBattle(p))return false;
   }
+  if(!validOath(p)||!validTwin(p)||!validRequests(p))return false;
   return true;
 }
 // Stat renewal: per-companion levels become one shared garden level. Dust
@@ -185,6 +194,133 @@ export function migrateBond(p){
 }
 // Bosses a player has met: the weekly and monthly lineups only use these (stage k has boss k).
 export const metBosses=p=>Math.min(9,p.cleared);
+const refused=()=>({ok:false,message:'사용할 수 없는 동작입니다.'});
+function validOathRecord(r){
+  if(!r||typeof r!=='object'||typeof r.period!=='string'||!/^S-?\d+$/.test(r.period)||typeof r.token!=='string'||!r.token||r.token.length>100||!integer(r.at)||season(r.at).id!==r.period||!TIERS[r.tier])return false;
+  return !oathConflict(r.oaths)&&Array.isArray(r.deck)&&r.deck.length===TEAM_SIZE&&new Set(r.deck).size===r.deck.length&&r.deck.every(id=>HERO[id])&&!oathDeckProblem(r.oaths,r.deck)&&r.score===oathScore(r.tier,r.oaths);
+}
+function validOath(p){
+  if(p.oath===undefined)return true;
+  const o=p.oath;if(!o||typeof o!=='object'||Array.isArray(o)||typeof o.period!=='string'||!/^S-?\d+$/.test(o.period))return false;
+  if(o.best!==null&&!validOathRecord(o.best))return false;
+  if(o.best===null){if(o.paid!==0)return false;}else if(o.best.period!==o.period||!integer(o.paid,OATH_BANDS.length)||o.paid>oathBandsReached(o.best.score))return false;
+  if(o.lifetime!==null&&!validOathRecord(o.lifetime))return false;
+  return !(o.best&&o.lifetime&&o.lifetime.score<o.best.score);
+}
+function validTwinResult(s){return !!s&&typeof s==='object'&&integer(s.round,TWIN_WAVES)&&Number.isFinite(s.damage)&&s.damage>=0&&s.damage<1e15;}
+function validTwinEntry(e){return !!e&&validTwinResult(e.left)&&validTwinResult(e.right)&&e.total===e.left.round+e.right.round&&typeof e.key==='string'&&e.key.length<=1000&&integer(e.at);}
+function validTwin(p){
+  if(p.twin===undefined)return true;
+  const t=p.twin;if(!t||typeof t!=='object'||Array.isArray(t))return false;
+  if(t.period!==undefined&&(typeof t.period!=='string'||!/^S-?\d+$/.test(t.period)))return false;
+  if(t.party!==undefined){
+    if(!t.party||typeof t.party!=='object')return false;
+    for(const side of TWIN_SIDES){
+      const deck=t.party[side]?.deck,relics=t.party[side]?.relics;
+      if(!Array.isArray(deck)||deck.length!==TEAM_SIZE||new Set(deck).size!==deck.length||deck.some(id=>!p.heroes[id]?.owned))return false;
+      if(!Array.isArray(relics)||relics.length>3||new Set(relics).size!==relics.length||relics.some(id=>!p.relics[id]?.owned))return false;
+    }
+    const heroes=[...t.party.left.deck,...t.party.right.deck],relics=[...t.party.left.relics,...t.party.right.relics];
+    if(new Set(heroes).size!==heroes.length||new Set(relics).size!==relics.length)return false;
+  }
+  const progress=t.set||t.lifetime||t.best&&TIER_IDS.some(id=>t.best[id])||t.paid&&TIER_IDS.some(id=>t.paid[id]);
+  if(progress&&!/^S-?\d+$/.test(t.period||''))return false;
+  if(t.set!==undefined&&t.set!==null){
+    if(!t.party||!TIERS[t.set.tier]||typeof t.set.key!=='string'||t.set.key!==twinSetKey(twinParty({twin:{party:t.party}}),t.set.tier))return false;
+    for(const side of TWIN_SIDES)if(t.set[side]!==null&&!validTwinResult(t.set[side]))return false;
+  }
+  if(t.best!==undefined&&t.best!==null){if(typeof t.best!=='object')return false;for(const tier of TIER_IDS)if(t.best[tier]!=null&&!validTwinEntry(t.best[tier]))return false;}
+  if(t.paid!==undefined&&t.paid!==null){
+    if(typeof t.paid!=='object')return false;
+    for(const tier of TIER_IDS){
+      if(t.paid[tier]===undefined)continue;
+      if(!integer(t.paid[tier],TWIN_BANDS.length))return false;
+      const best=t.best?.[tier],reached=best?TWIN_BANDS.filter(b=>best.total>=b.total).length:0;
+      if(t.paid[tier]>reached)return false;
+    }
+  }
+  return !(t.lifetime!==undefined&&t.lifetime!==null&&(!TIERS[t.lifetime.tier]||!integer(t.lifetime.total,TWIN_WAVES*2)||!integer(t.lifetime.at)));
+}
+function validRequests(p){
+  if(p.requests===undefined)return true;
+  const r=p.requests;if(!r||typeof r!=='object'||Array.isArray(r)||!integer(r.next)||!Array.isArray(r.active)||r.active.length>REQUEST_MAX||!Array.isArray(r.claimed)||!Array.isArray(r.after)||!Array.isArray(r.read))return false;
+  const heroes=new Set(),ids=new Set(),orders={};
+  for(const e of r.active){
+    const req=REQUEST[e?.id];if(!req||ids.has(e.id)||heroes.has(req.hero)||!integer(e.at)||typeof e.seen!=='boolean'||!integer(e.count,req.goal.n)||typeof e.done!=='boolean'||e.done!==(e.count>=req.goal.n))return false;
+    ids.add(e.id);heroes.add(req.hero);
+  }
+  for(const id of r.claimed){const req=REQUEST[id];if(!req||ids.has(id))return false;(orders[req.hero]||=[]).push(req.order);}
+  for(const list of Object.values(orders)){const sorted=[...list].sort((a,b)=>a-b);if(new Set(sorted).size!==sorted.length||sorted.some((n,i)=>n!==i+1))return false;}
+  for(const e of r.active)if(REQUEST[e.id].order!==(orders[REQUEST[e.id].hero]?.length||0)+1)return false;
+  if(new Set(r.after).size!==r.after.length||r.after.some(id=>!REQUEST_HEROES.includes(id)))return false;
+  for(const hero of REQUEST_HEROES){const all=Object.values(REQUEST).filter(q=>q.hero===hero);if(r.after.includes(hero)!==all.every(q=>r.claimed.includes(q.id)))return false;}
+  return new Set(r.read).size===r.read.length&&r.read.every(id=>r.after.includes(id));
+}
+function validFeats(feats){
+  if(!feats||typeof feats!=='object'||Array.isArray(feats)||typeof feats.won!=='boolean'||!feats.casts||typeof feats.casts!=='object'||Array.isArray(feats.casts)||!integer(feats.bosses)||!Array.isArray(feats.flags))return false;
+  if(Object.entries(feats.casts).some(([id,n])=>!HERO[id]||!integer(n))||feats.flags.some(f=>!REQUEST_FLAGS.includes(f)))return false;
+  return true;
+}
+function applyRequestProgress(p,deck,feats){
+  const list=p.requests?.active;if(!Array.isArray(list))return [];
+  const done=[];
+  for(const e of list){
+    if(!e||e.done||!REQUEST[e.id])continue;
+    const goal=REQUEST[e.id].goal;let add=0;
+    if(goal.type==='clear'){if(feats.won&&(!goal.with||deck.includes(goal.with))&&(!goal.rarities||deck.every(id=>goal.rarities.includes(HERO[id]?.rarity))))add=1;}
+    else if(goal.type==='casts')add=feats.casts[goal.hero]||0;
+    else if(goal.type==='bosses'){if(deck.includes(goal.with))add=feats.bosses;}
+    else if(goal.type==='flag'&&feats.flags.includes(goal.flag))add=1;
+    if(!add)continue;
+    e.count=Math.min(goal.n,e.count+add);if(e.count>=goal.n){e.done=true;done.push(e.id);}
+  }
+  return done;
+}
+function settleOath(p,a,args,now){
+  const st=oathState(p,now);
+  if(!args.won){p.oath={period:st.period,best:st.best,paid:st.best?st.paid:0,lifetime:st.lifetime};return {record:null,newBest:false,score:0,bands:[],pay:0};}
+  const tier=a.tier||'easy',oaths=[...(a.oaths||[])],score=oathScore(tier,oaths);
+  const record={period:st.period,token:a.token,score,tier,oaths,deck:[...a.deck],at:now};
+  const newBest=!st.best||score>st.best.score,best=newBest?record:st.best,reached=oathBandsReached(best.score),bands=[];
+  for(let i=st.paid;i<reached;i++)bands.push({score:OATH_BANDS[i].score,reward:OATH_BANDS[i].reward});
+  p.oath={period:st.period,best,paid:reached,lifetime:!st.lifetime||score>st.lifetime.score?record:st.lifetime};
+  return {record,newBest,score,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
+}
+function settleTwin(p,a,args,now){
+  const st=twinState(p,now),tier=a.tier||'easy',side=a.side,round=Math.max(0,Math.min(TWIN_WAVES,args.round));
+  const raw=args.damage??0,damage=Number.isFinite(raw)&&raw>0?raw:0,key=twinSetKey(st.party,tier);
+  const set=st.set&&st.set.key===key&&st.set.tier===tier?{key,tier,left:st.set.left?{...st.set.left}:null,right:st.set.right?{...st.set.right}:null}:{key,tier,left:null,right:null};
+  const prev=set[side],better=!prev||round>prev.round||round===prev.round&&damage>prev.damage;
+  set[side]=better?{round,damage}:{round:prev.round,damage:prev.damage};
+  const left=set.left||{round:0,damage:0},right=set.right||{round:0,damage:0},total=left.round+right.round,prevBest=st.best[tier];
+  const newBest=!prevBest||total>prevBest.total;
+  const entry=newBest?{total,left:{round:left.round,damage:left.damage},right:{round:right.round,damage:right.damage},key,at:now}:prevBest;
+  const reached=TWIN_BANDS.filter(b=>(entry?.total||0)>=b.total).length,bands=[];
+  for(let i=st.paid[tier]||0;i<reached;i++)bands.push({total:TWIN_BANDS[i].total,reward:twinBandReward(tier,i)});
+  const rank=id=>TIER_IDS.indexOf(id);let lifetime=st.lifetime;
+  if(!lifetime||rank(tier)>rank(lifetime.tier)||rank(tier)===rank(lifetime.tier)&&total>lifetime.total)lifetime={tier,total,at:now};
+  p.twin={period:st.period,party:st.party,set,best:{...st.best,[tier]:entry},paid:{...st.paid,[tier]:reached},lifetime};
+  return {newBest,side,round,setTotal:total,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
+}
+function beginPreview(p,mode,args,now){
+  if(!PREVIEW)return refused();
+  if(p.cleared<TIERS.easy.unlock)return {ok:false,message:`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`};
+  const tier=args.tier||'easy';if(!TIERS[tier]||p.cleared<TIERS[tier].unlock)return {ok:false,message:`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`};
+  const stage=oathChapter(season(now).index,p.cleared)+1;
+  if(mode==='oath'){
+    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return {ok:false,message:`파견 중이 아닌 동료 ${TEAM_SIZE}명이 필요합니다.`};
+    const conflict=oathConflict(args.oaths);if(conflict)return {ok:false,message:conflict};
+    const problem=oathDeckProblem(args.oaths,ids);if(problem)return {ok:false,message:problem};
+    random(p);
+    p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(p.equipped.map(id=>[id,relicLevel(p.relics[id])])),tier,oaths:[...args.oaths]};
+    return {ok:true};
+  }
+  if(!TWIN_SIDES.includes(args.side))return {ok:false,message:'별길을 확인하세요.'};
+  const party=twinParty(p),problem=twinPartyProblem(p,party);if(problem)return {ok:false,message:problem};
+  const relics=party[args.side].relics;random(p);
+  p.active={mode,stage,deck:[...party[args.side].deck],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(relics.map(id=>[id,relicLevel(p.relics[id])])),tier,side:args.side,relics:[...relics]};
+  return {ok:true};
+}
 export const weeklyStage=(p,now)=>calendar(now).weekNo%Math.max(1,metBosses(p))+1;
 function receive(table,id){const e=table[id],fresh=!e.owned;if(fresh)e.owned=true;else e.copies++;return fresh;}
 export function command(p,action,args={},now=Date.now()){
@@ -271,7 +407,9 @@ export function command(p,action,args={},now=Date.now()){
     const mission=DAILY_MISSIONS.find(m=>m.id===args.id);if(!mission||!missionDone(p.daily,mission.id)||p.daily.claimed.includes(mission.id))return no('아직 받을 수 없는 보상입니다.');p.daily.claimed.push(mission.id);const all=p.daily.claimed.length===DAILY_MISSIONS.length,reward=mission.reward+(all?TUNING.dailyBonus:0);p.dreams+=reward;return {ok:true,all,reward,message:`꿈의결정 +${reward}${all?' · 모두 완료 보너스 포함':''}`};
   }
   if(action==='begin'){
-    if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
+    if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;
+    if(mode==='oath'||mode==='twin')return beginPreview(p,mode,args,now);
+    if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
     const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 동료 ${TEAM_SIZE}명이 필요합니다.`);
     const c=calendar(now),stage=mode==='weekly'&&p.cleared>=TIERS.easy.unlock?weeklyStage(p,now):args.stage||Math.min(MAIN_STAGES,p.cleared+1);if(!integer(stage,MAIN_STAGES)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
     if(mode!=='main'&&p.cleared<TIERS.easy.unlock)return no(`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`);
@@ -294,16 +432,20 @@ export function command(p,action,args={},now=Date.now()){
       if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
       p.dust+=args.won?40+a.stage*8:12;
     }else if(a.mode==='weekly')reward=weeklyReward(a.tier||'easy',Math.min(CHALLENGE_WAVES,args.round),!!args.won);
-    let record=null,newBest=false;
+    let record=null,newBest=false,score=0,bands=[],side=null,setTotal=0,shownRound=0;
     if(a.mode==='monthly'){
       record={period:calendar(now).month,token:a.token,round:args.round,damage:args.damage??0,seconds:args.seconds??0,at:now,deck:[...a.deck],tier:a.tier||'easy'};
       if(!validRecord(record))return no('전투 기록을 확인하세요.');
       newBest=betterRecord(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
       if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
     }
+    if(a.mode==='oath'){const out=settleOath(p,a,args,now);record=out.record;newBest=out.newBest;score=out.score;bands=out.bands;reward+=out.pay;}
+    if(a.mode==='twin'){const out=settleTwin(p,a,args,now);newBest=out.newBest;side=out.side;setTotal=out.setTotal;shownRound=out.round;bands=out.bands;reward+=out.pay;}
     const perfect=a.mode==='main'&&!!args.won&&args.perfect===true;
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
-    p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened};
+    const requestsDone=PREVIEW&&args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
+    p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;
+    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,setTotal,bands}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
   }
   if(action==='claimMonthly'){
     const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 월간 최고 기록을 확인하세요.');
@@ -327,6 +469,48 @@ export function command(p,action,args={},now=Date.now()){
     return {ok:true,completed,message:completed?`${c.name} 완성! 루미의 그림이 열렸어요.`:`별 하나가 켜졌어요 · ${c.name} ${l.stars}/${c.stars.length}`};
   }
   if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced','cutin'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
+  if(action==='twinParty'){
+    if(!PREVIEW)return refused();if(p.active?.mode==='twin')return no('진행 중인 쌍성 원정을 먼저 마치세요.');
+    const party={left:{deck:args.left?.deck,relics:args.left?.relics},right:{deck:args.right?.deck,relics:args.right?.relics}};
+    const problem=twinPartyProblem(p,party);if(problem)return no(problem);
+    const next={left:{deck:[...party.left.deck],relics:[...party.left.relics]},right:{deck:[...party.right.deck],relics:[...party.right.relics]}};
+    const cur=p.twin&&typeof p.twin==='object'&&!Array.isArray(p.twin)?p.twin:{};
+    p.twin={...cur,party:next,set:cur.set&&twinSetKey(next,cur.set.tier)===cur.set.key?cur.set:null};
+    return {ok:true};
+  }
+  if(action==='requestArrive'){
+    if(!PREVIEW)return refused();
+    const state=requestState(p,now);if(!(now>=state.next)||state.active.length>=REQUEST_MAX)return {ok:true,arrived:[]};
+    const claimed=new Set(state.claimed),busy=new Set(state.active.map(e=>REQUEST[e.id]?.hero)),candidates=[];
+    for(const hero of REQUEST_HEROES){
+      if(!p.heroes[hero]?.owned||busy.has(hero))continue;
+      const next=Object.values(REQUEST).filter(r=>r.hero===hero&&!claimed.has(r.id)).sort((a,b)=>a.order-b.order)[0];
+      if(next)candidates.push(next.id);
+    }
+    if(!candidates.length)return {ok:true,arrived:[]};
+    const id=candidates[Math.floor(random(p)*candidates.length)];
+    p.requests={next:now+REQUEST_GAP_MIN+Math.floor(random(p)*REQUEST_GAP_SPAN),active:[...state.active,{id,at:now,seen:false,count:0,done:false}],claimed:state.claimed,after:state.after,read:state.read};
+    return {ok:true,arrived:[id]};
+  }
+  if(action==='requestSeen'){
+    if(!PREVIEW)return refused();const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');e.seen=true;return {ok:true};
+  }
+  if(action==='requestDecline'){
+    if(!PREVIEW)return refused();const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');if(e.done)return no('이미 끝낸 부탁은 거절할 수 없습니다.');
+    p.requests.active=p.requests.active.filter(x=>x!==e);return {ok:true};
+  }
+  if(action==='requestThank'){
+    if(!PREVIEW)return refused();const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');if(!e.done)return no('아직 끝나지 않은 부탁입니다.');
+    const hero=REQUEST[e.id].hero,gift=FAVORITE[hero];p.gifts[gift]=Math.min(999,p.gifts[gift]+REQUEST_REWARD.gifts);addBond(p.heroes[hero],REQUEST_REWARD.bond);
+    p.requests.active=p.requests.active.filter(x=>x!==e);p.requests.claimed.push(e.id);
+    const afterword=Object.values(REQUEST).filter(r=>r.hero===hero).every(r=>p.requests.claimed.includes(r.id));
+    if(afterword&&!p.requests.after.includes(hero))p.requests.after.push(hero);
+    return {ok:true,hero,gift,points:REQUEST_REWARD.bond,afterword};
+  }
+  if(action==='requestAfterRead'){
+    if(!PREVIEW)return refused();if(!Array.isArray(p.requests?.after)||!p.requests.after.includes(args.hero))return no('아직 후기를 볼 수 없습니다.');
+    if(!p.requests.read.includes(args.hero))p.requests.read.push(args.hero);return {ok:true};
+  }
   if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}
   return no('사용할 수 없는 동작입니다.');
 }
