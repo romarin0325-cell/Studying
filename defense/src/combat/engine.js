@@ -1,7 +1,7 @@
 import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK ,TIERS,CHALLENGE_WAVES} from '../content.js';
 import { TEAM_SIZE } from '../team-config.js';
 import {oathMods,oathConflict,OATH_WAVES} from '../preview/oath.js';
-import {TWIN_WAVES} from '../preview/twin.js';
+import {TWIN_WAVES,TWIN_STAGE} from '../preview/twin.js';
 import { RELIC_LEVEL_STEP } from '../economy.js';
 import {MIRACLE_FORMS} from '../new-companions.js';
 export {MIRACLE_FORMS} from '../new-companions.js';
@@ -489,9 +489,11 @@ export function sell(s,index){
   refreshAppleBombs(s);
   const gold=Math.round(6*Math.pow(1.7,u.rank-1));s.board[index]=null;syncTimeRuler(s);giveGold(s,gold,'회수');event(s,'sell',{index,gold});return {ok:true,gold};
 }
+// Training per companion: 5, or the starlight oath's cap.
+export const trainCap=s=>s?.oathMods?.trainCap??5;
 export function upgrade(s,id){
   if(!s.deck.includes(id)||!['combat','intermission'].includes(s.phase))return {ok:false};
-  if(s.oathMods?.noTraining)return {ok:false,reason:'별빛 서약: 이번 원정에서는 훈련할 수 없습니다.'};
+  if(s.upgrades[id]>=trainCap(s)&&trainCap(s)<5)return {ok:false,reason:trainCap(s)?`별빛 서약: 동료마다 훈련은 ${trainCap(s)}회까지입니다.`:'별빛 서약: 이번 원정에서는 훈련할 수 없습니다.'};
   if(s.upgrades[id]>=5)return {ok:false,reason:'훈련을 모두 마쳤습니다.'};
   const cost=upgradeCost(s,id);if(s.gold<cost)return {ok:false,reason:`골드가 부족합니다. (${cost} 필요)`};
   s.gold-=cost;s.upgrades[id]++;event(s,'upgrade',{hero:id,level:s.upgrades[id]});return {ok:true};
@@ -523,8 +525,9 @@ export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
     const {base}=challengeBase(wave,tier),hp=Math.round(base*30*(TIERS[tier]||TIERS.easy).monthly);
     return {sequence:[{kind:'boss',hp}],interval:.65,healthBudget:hp};
   }
-  if(mode==='oath'||mode==='twin'){
-    const cw=mode==='oath'?1+(wave-1)*11/8:12+wave;
+  if(mode==='twin')return wavePlan(wave,(TWIN_STAGE[tier]||TWIN_STAGE.easy)-1,'main');
+  if(mode==='oath'){
+    const cw=1+(wave-1)*11/8;
     const {base,oldWave}=challengeBase(cw,tier),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
     const sequence=Array.from({length:count},(_,i)=>{const kind=enemyKind(i,Math.ceil(oldWave/2));return {kind,hp:Math.round(base*enemyWeight[kind])};});
     const t=TIERS[tier]||TIERS.easy;
@@ -1353,7 +1356,7 @@ function completeWave(s){
   const payout={base:waveIncome(s.wave),dividend:dividend(s),edict:s.edictWave===s.wave?Math.round(waveIncome(s.wave)*.5):0};
   giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');if(payout.edict)giveGold(s,payout.edict,'여왕의 칙령');
   if(has(s,'feather'))giveGold(s,Math.round(Math.min(RV.feather.cap,RV.feather.base+RV.feather.perWave*s.wave)*relicScaleIn(s,'feather')),'첫새벽의 깃털');
-  s.settlement=payout;s.amuletUsed=0;addGauge(s,8);s.shots=[];s.finishers=[];s.volleys=[];s.zones=[];s.telegraph=null;s.goldCharge=null;
+  s.settlement=payout;s.amuletUsed=0;addGauge(s,8);if(s.oathMods?.carry!==undefined)s.gauge=Math.min(s.gauge,s.oathMods.carry);s.shots=[];s.finishers=[];s.volleys=[];s.zones=[];s.telegraph=null;s.goldCharge=null;
   if((s.sunlight||0)<SUNFLOWER.max&&s.board.some(u=>u?.hero==='sunflower')){s.sunlight=(s.sunlight||0)+1;event(s,'sunCharge',{sunlight:s.sunlight,points:s.board.flatMap((u,i)=>u?.hero==='sunflower'?[cellPoint(i)]:[])});}
   event(s,'clear',{wave:s.wave,...payout});
   if(s.wave===lastWave(s)&&!s.endless){s.reward=null;s.phase='victory';s.won=true;return;}
@@ -1417,7 +1420,7 @@ export function step(s,dt){
   for(const key of Object.keys(s.buffs))s.buffs[key]=Math.max(0,s.buffs[key]-dt);
   while(s.reserves.length&&freeCell(s)>=0)place(s,s.reserves.shift(),2);
   if(s.phase==='intermission'){s.breakTime-=dt;if(s.breakTime<=0)beginWave(s,s.wave+1);return;}
-  s.waveTime+=dt;addGauge(s,dt*STARLIGHT_PER_SECOND);
+  s.waveTime+=dt;addGauge(s,dt*STARLIGHT_PER_SECOND*(s.oathMods?.regen??1));
   s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter,s.mode).interval;}
   for(const e of s.enemies){
     if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);e.dotFlash-=dt;

@@ -21,7 +21,7 @@ import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED,PREVIEW} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
 import {season} from './preview/season.js';
 import {OATHS,OATH,OATH_GROUPS,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
-import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinSetKey,twinState} from './preview/twin.js';
+import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinSetKey,twinState} from './preview/twin.js';
 import {REQUEST,REQUEST_MAX,requestState,requestTracker} from './preview/requests.js';
 import {REQUESTS,REQUEST_HEROES,REQUEST_REWARD,AFTERWORDS} from './preview/requests-data.js';
 // The unlocked test build plays auto with the simulation player model; the release keeps the light helper.
@@ -518,11 +518,11 @@ const topRank=id=>run?run.board.reduce((n,u)=>u?.hero===id?Math.max(n,u.rank):n,
 // One training row: name with the field's top rank, five pips for the training count, and the trained values
 // on their own line (wraps to two lines; never cut off).
 function trainRow(id){
-  const lv=run.upgrades[id],max=lv>=5,cost=E.upgradeCost(run,id),top=topRank(id),caster=E.bestUnit(run,id),role=['snow_rabbit','frost_witch'].includes(id)&&caster?E.givenEffects(run,caster,run.board.indexOf(caster)).join(' · '):E.trainingBonus(id,lv);
-  return `<button class="choose-row train-row" data-train="${id}" ${max||run.gold<cost?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${top?`<span class="rank" aria-label="최고 ${top}성">${icon('star')}${top}</span>`:'<span class="train-away">미배치</span>'}<span class="train-pips" aria-label="훈련 ${lv}/5">${[0,1,2,3,4].map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></strong><small class="train-effect">${[lv?`공격력 +${lv*25}%`:'',...(role?role.split(' · '):[])].filter(Boolean).map(part=>`<span>${part}</span>`).join(' · ')||'훈련 전'}</small></div><b>${max?'최대':cost+' G'}</b></button>`;
+  const lv=run.upgrades[id],cap=E.trainCap(run),max=lv>=cap,cost=E.upgradeCost(run,id),top=topRank(id),caster=E.bestUnit(run,id),role=['snow_rabbit','frost_witch'].includes(id)&&caster?E.givenEffects(run,caster,run.board.indexOf(caster)).join(' · '):E.trainingBonus(id,lv);
+  return `<button class="choose-row train-row" data-train="${id}" ${max||run.gold<cost?'disabled':''}>${portrait(id)}<div><strong>${HERO[id].name}${top?`<span class="rank" aria-label="최고 ${top}성">${icon('star')}${top}</span>`:'<span class="train-away">미배치</span>'}<span class="train-pips" aria-label="훈련 ${lv}/${cap}">${[0,1,2,3,4].slice(0,cap).map(i=>`<i class="${i<lv?'on':''}"></i>`).join('')}</span></strong><small class="train-effect">${[lv?`공격력 +${lv*25}%`:'',...(role?role.split(' · '):[])].filter(Boolean).map(part=>`<span>${part}</span>`).join(' · ')||'훈련 전'}</small></div><b>${max?'최대':cost+' G'}</b></button>`;
 }
 function training(){
-  show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. 1회당 공격력 +25%, 최대 5회. 일부 동료는 오라·감속 같은 역할 수치도 함께 오릅니다.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(trainRow).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
+  show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. ${E.trainCap(run)?`1회당 공격력 +25%, 최대 ${E.trainCap(run)}회.`:'별빛 서약으로 이번 원정에서는 훈련할 수 없습니다.'} 일부 동료는 오라·감속 같은 역할 수치도 함께 오릅니다.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(trainRow).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
 }
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
@@ -1067,7 +1067,7 @@ function twinPick(kind,id){
 function twinPrepare(side){
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const party=twinParty(p())[side];
-  show(TWIN_SIDE[side].name,'출격 준비',`<div class="prep-boss twin-${side}"><small>${TIERS[challengeTier].name} · ${TWIN_WAVES}웨이브</small><h2>${TWIN_SIDE[side].name}</h2>${bossRoute(twinBosses(season(now()).index,side,metBosses(p())))}</div>
+  show(TWIN_SIDE[side].name,'출격 준비',`<div class="prep-boss twin-${side}"><small>${TIERS[challengeTier].name} · ${TWIN_WAVES}웨이브 · 스테이지 ${TWIN_STAGE[challengeTier]} 수준</small><h2>${TWIN_SIDE[side].name}</h2>${bossRoute(twinBosses(season(now()).index,side,metBosses(p())))}</div>
     <div class="panel-head"><h3>${TWIN_SIDE[side].short} 편성</h3><span class="power">전투력 <b>${fmt(deckPower(party.deck))}</b></span></div>${five(party.deck)}
     <div class="panel-head"><h3>유물</h3></div>${relicRow(party.relics)}${requestChips(party.deck)}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="twin-party">편성</button><button class="primary shine" data-twin-begin="${side}">입장</button></div>`,'prepare',{stage:0,kind:'twin',side});

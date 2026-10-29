@@ -4,12 +4,16 @@
 import {ARTIFACT,ARTIFACTS,HEROES} from './content.js';
 import {COURSE} from './course.js';
 import {questionOf} from './quiz.js';
+import {PREVIEW} from './team-config.js';
 export const UNLOCKED_STAGE=90;
 export function unlockProfile(p){
   for(const [id,entry] of Object.entries(p.heroes)){entry.owned=true;entry.bond={star_boy:6,siren:3,snow_rabbit:8}[id]??10;entry.bondXp=0;}
   // Relics at a mid-game spread (C Lv.7, R Lv.5, SR Lv.4, UR Lv.2) with spare duplicates to try levelling.
   for(const [id,entry] of Object.entries(p.relics)){const r=ARTIFACT[id].rarity;entry.owned=true;entry.enhance={C:6,R:4,SR:3,UR:1}[r];entry.copies={C:20,R:8,SR:5,UR:3}[r];}
   p.cleared=UNLOCKED_STAGE;p.dreams=99999;p.dust=99999;
+  // Content preview: a late-game account (greenhouse beds at their soft caps, every companion +15) so the challenge tiers
+  // read as they would for a player near stage 90, and the three request companions below max hearts.
+  if(PREVIEW){Object.assign(p.beds,{rose:45,spring:30,seed:20,crit:30,critDamage:25,stardust:49});for(const e of Object.values(p.heroes))e.enhance=15;Object.assign(p.heroes.night_rabbit,{bond:9,bondXp:0});Object.assign(p.heroes.underdog,{bond:9,bondXp:0});}
   return topUpUnlocked(p);
 }
 // Test tools of the unlocked build (settings → 테스트 도구; a wallet tap still gives 10,000 of each).

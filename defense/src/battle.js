@@ -40,6 +40,6 @@ export function autoPlay(s){
     const best=s.deck.filter(id=>engine.bestUnit(s,id)&&!engine.castLock(s,id)&&s.gauge>=engine.skillCost(s,id)&&s.gold>=engine.skillGoldCost(id)).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));
     if(best.length){engine.cast(s,best[0]);return;}
   }
-  const id=s.deck.find(id=>s.upgrades[id]<5&&s.gold>=engine.upgradeCost(s,id));if(id)engine.upgrade(s,id);
+  const id=s.deck.find(id=>s.upgrades[id]<engine.trainCap(s)&&s.gold>=engine.upgradeCost(s,id));if(id)engine.upgrade(s,id);
 }
 export const clearedRounds=s=>Math.max(0,s.wave-(s.phase==='reward'||s.phase==='victory'?0:1));

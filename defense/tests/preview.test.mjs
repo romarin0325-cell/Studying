@@ -12,7 +12,7 @@ const {HOUR,calendar}=await import('../src/economy.js');
 const {weeklyReward,monthlyReward}=await import('../src/monthly.js');
 const {season}=await import('../src/preview/season.js');
 const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
-const {twinBosses,twinBandReward,twinState,TWIN_WAVES,TWIN_BANDS,twinSetKey}=await import('../src/preview/twin.js');
+const {twinBosses,twinBandReward,twinState,TWIN_WAVES,TWIN_BANDS,twinSetKey,TWIN_STAGE}=await import('../src/preview/twin.js');
 const {requestTracker,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
 const {FAVORITE}=await import('../src/bond.js');
 const {REQUEST_REWARD:REQUEST_PAY}=await import('../src/preview/requests-data.js');
@@ -93,8 +93,7 @@ test('oath and twin waves sample the challenge curve and leave main, weekly and 
   for(let wave=1;wave<=TWIN_WAVES;wave++){
     const plan=E.wavePlan(wave,0,'twin','abyss');
     assert.equal(plan.sequence.filter(e=>e.kind==='boss').length,wave%3===0?1:0);
-    const {base}=E.challengeBase(12+wave,'abyss');
-    assert.equal(plan.sequence.find(e=>e.kind==='grunt').hp,Math.round(base*enemyWeight.grunt));
+    assert.deepEqual(plan,E.wavePlan(wave,TWIN_STAGE.abyss-1,'main'));
   }
   assert.equal(E.lastWave({mode:'oath'}),9);
   assert.equal(E.lastWave({mode:'twin'}),6);
@@ -142,14 +141,18 @@ test('each starlight oath changes only its own combat rule',()=>{
   const base=wet.board.find(Boolean);wet.board.fill(null);
   wet.board[0]=unit(base,'star_boy',wet.nextId++);wet.board[1]=unit(base,'star_boy',wet.nextId++);
   wet.gauge=wet.gaugeMax;assert.equal(E.move(wet,0,1).merged,true);assert.ok(wet.sandStore>sand);
-  const blocked=E.newRun({oaths:['untrained'],seed:7});blocked.gold=0;
-  assert.deepEqual(E.upgrade(blocked,blocked.deck[0]),{ok:false,reason:'별빛 서약: 이번 원정에서는 훈련할 수 없습니다.'});
-  assert.equal(blocked.upgrades[blocked.deck[0]],0);
+  const capped=E.newRun({oaths:['untrained'],seed:7});capped.gold=99999;assert.equal(E.trainCap(capped),0);assert.equal(E.trainCap(E.newRun({seed:7})),5);
+  assert.deepEqual(E.upgrade(capped,capped.deck[0]),{ok:false,reason:'별빛 서약: 이번 원정에서는 훈련할 수 없습니다.'});
+  assert.equal(capped.upgrades[capped.deck[0]],0);
+  const sun=E.newRun({seed:11}),dusk=E.newRun({oaths:['drought'],seed:11});sun.gauge=dusk.gauge=0;E.step(sun,.05);E.step(dusk,.05);
+  assert.ok(sun.gauge>0);assert.ok(Math.abs(dusk.gauge-sun.gauge/2)<1e-9);
+  const glow=E.newRun({oaths:['afterglow'],seed:12});glow.queue=[];glow.enemies=[];glow.spawnIn=1e9;glow.gauge=glow.gaugeMax;E.step(glow,.05);assert.equal(glow.phase,'reward');assert.equal(glow.gauge,30);
+  const kept=E.newRun({seed:12});kept.queue=[];kept.enemies=[];kept.spawnIn=1e9;kept.gauge=kept.gaugeMax;E.step(kept,.05);assert.ok(kept.gauge>30);
   assert.equal(E.newRun({seed:8}).gold,70);
   assert.equal(E.newRun({oaths:['purse'],seed:8}).gold,35);
   assert.equal(E.newRun({oaths:['purse'],startGold:1,seed:8}).gold,Math.round(71*.5));
-  const glass=E.newRun({oaths:['glass'],seed:9});assert.equal(glass.health,1);assert.equal(E.coreHealthMax(glass),1);
-  const leaked=spawn(glass,'grunt',1e9);leaked.progress=E.PATH_LENGTH;leaked.speed=0;E.step(glass,.05);assert.equal(glass.phase,'defeat');
+  const glass=E.newRun({oaths:['glass'],seed:9});assert.equal(glass.health,10);assert.equal(E.coreHealthMax(glass),10);
+  const leaked=spawn(glass,'grunt',1e9);leaked.progress=E.PATH_LENGTH;leaked.speed=0;E.step(glass,.05);assert.ok(glass.health<10);assert.notEqual(glass.phase,'defeat');
   const aura=E.newRun({oaths:['scatter'],deck:['ancient_dragon','siren','behemoth','star_boy','luna'],seed:10});
   const plainAura=E.newRun({deck:aura.deck,seed:10});
   const sample=aura.board.find(Boolean);
@@ -212,10 +215,10 @@ test('starlight oath pays each band once, ignores a failed run and keeps an olde
   const more=['lowstar','nobeam','drought','heavy','untrained','purse'];
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:more});
   const better=ok(p,'settle',{token:p.active.token,round:9,won:true});
-  assert.equal(better.score,17);assert.deepEqual(better.bands,[{score:15,reward:60}]);assert.equal(p.dreams,dreams+160);assert.equal(p.oath.lifetime.score,17);
+  assert.equal(better.score,19);assert.deepEqual(better.bands,[{score:15,reward:60}]);assert.equal(p.dreams,dreams+160);assert.equal(p.oath.lifetime.score,19);
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:first});
   const lost=ok(p,'settle',{token:p.active.token,round:1,won:false});
-  assert.equal(lost.score,0);assert.equal(p.oath.best.score,17);assert.equal(p.dreams,dreams+160);
+  assert.equal(lost.score,0);assert.equal(p.oath.best.score,19);assert.equal(p.dreams,dreams+160);
   const frozen=JSON.stringify(p);oathState(p,NOW);assert.equal(JSON.stringify(p),frozen);
 });
 
@@ -337,16 +340,16 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   assert.ok(TEST_TOOLS.some(t=>t.kind==='season-reset'&&t.label==='서약·쌍성 시즌 초기화'));
 });
 
-test('a stored oath and twin expedition still validates inside the profile store',()=>{
+test('a stored oath and twin expedition still validates inside the profile store',async()=>{
   let raw=null;const storage={getItem:()=>raw,setItem:(k,v)=>{assert.equal(k,SAVE_KEY);raw=v;}};
   const store=new ProfileStore(storage,NOW);const p=store.value;
   const call=(action,args,now=NOW)=>{const r=store.transact(action,args,now);assert.equal(r.ok,true,r.message);return r;};
   call('twinParty',partyOf());
   call('begin',{mode:'oath',tier:'abyss',oaths:['glass','purse']});
-  const battle=createBattle(store.value);assert.equal(battle.health,1);assert.equal(battle.gold,35);
+  const battle=createBattle(store.value);assert.equal(battle.health,10);const {seedGold}=await import('../src/economy.js');assert.equal(battle.gold,Math.round((70+seedGold(store.value.beds.seed))*.5));
   store.saveRun(E.serialize(battle));assert.equal(validateProfile(store.value),true);
   call('settle',{token:store.value.active.token,round:9,won:true});
-  assert.equal(store.value.oath.best.score,25);assert.equal(store.value.oath.paid,5);
+  assert.equal(store.value.oath.best.score,27);assert.equal(store.value.oath.paid,5);
   call('begin',{mode:'twin',tier:'easy',side:'right'});
   call('settle',{token:store.value.active.token,round:4,damage:Number.POSITIVE_INFINITY});
   assert.equal(store.value.twin.set.right.damage,0);assert.equal(store.value.twin.best.easy.total,4);
