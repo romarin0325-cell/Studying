@@ -941,7 +941,7 @@ export function cast(s,id){
     visualTargets=cluster.targets;for(const [i,e] of cluster.targets.entries())damage(s,e,base*receipts[i].factor,id);
     if(cluster.centre)event(s,'deathhandBlast',{...pathPoint(cluster.centre.progress),radius:DEATHHAND.radius,targets:receipts});
   }
-  else if(dream)s.volleys.push(...RUMI_DREAM.phases.map((p,phase)=>({uid:s.nextId++,source:u.uid,hero:id,kind:'dream',phase,rank:u.rank,damage:base*p.factor,life:p.at,total:p.at,...(phase===RUMI_DREAM.phases.length-1?{echo:{}}:{})})));
+  else if(dream)s.volleys.push(...RUMI_DREAM.phases.map((p,phase)=>({uid:s.nextId++,source:u.uid,hero:id,kind:'dream',phase,rank:u.rank,damage:base*spot*p.factor,life:p.at,total:p.at,...(phase===RUMI_DREAM.phases.length-1?{echo:{}}:{})})));
   else if(type==='echo')s.buffs.echo=skillDuration(s,ULT_BUFF.echo.seconds*control,'echo');
   else if(type==='haste')s.buffs.haste=skillDuration(s,ULT_BUFF.haste.seconds*control,'haste');
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,ULT_BUFF.awaken.seconds*control,'awaken');
@@ -959,7 +959,7 @@ export function cast(s,id){
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
   else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,SNOW_RABBIT.freeze*control*scale);addSlow(s,e,source,SNOW_RABBIT.skillSlow*scale,SNOW_RABBIT.seconds);}}
-  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.controlTime>0?12:4),id);addSlow(s,e,source,.5,4);}}
+  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*spot*(e.controlTime>0?12:4),id);addSlow(s,e,source,.5,4);}}
   else if(type==='dragon'){
     // Dragon Breath lands on the densest pack (radius 180) instead of the whole field.
     const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=180);
@@ -967,7 +967,7 @@ export function cast(s,id){
     visualTargets=centre?near(centre):[];for(const e of visualTargets){damage(s,e,base*14,id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
   }
   else if(type==='inferno'){strike(7*(coreCrisis(s)?2:1));for(const e of targets)addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
-  else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}}
+  else if(type==='combust'){for(const e of targets){damage(s,e,base*spot*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}}
   else if(type==='plague'){
     // Enemies already carrying 20+ poison take 30% of the remaining poison at once.
     for(const e of targets){const active=activePoison(e);if(active.reduce((n,a)=>n+a.stacks,0)>=20)damage(s,e,.3*active.reduce((n,{effect,stacks})=>n+stacks*effect.power*POISON_POWER_RATIO*Math.max(0,effect.until-s.time),0)*poisonAmp(s),id);}
@@ -982,7 +982,7 @@ export function cast(s,id){
     for(const e of targets){const pull=Math.min(.9,.65*control)*(e.boss?BOSS_PUSH_SCALE:1);e.progress=e.progress*(1-pull)+point*pull;if(type==='vortex')addControl(s,e,'stun',source,id,1.5*control*scale);addSlow(s,e,source,.6,4);}
     if(type==='vortex')strike(5);
     // Harvest spends every divine mark on that enemy before the blast. Singularity does not stun.
-    else for(const e of targets){const marks=e.divine;e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='divine');syncStatuses(s,e);damage(s,e,base*WHALE.factor*(1+WHALE.perMark*marks),id);}
+    else for(const e of targets){const marks=e.divine;e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='divine');syncStatuses(s,e);damage(s,e,base*spot*WHALE.factor*(1+WHALE.perMark*marks),id);}
   }else if(type==='execute'){
     // Each execution kill carries the step to the next target (up to five more).
     const order=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp);visualTargets=[];
@@ -1109,7 +1109,7 @@ export function castPreview(s,id){
   const burnPerSecond=num(base*BURN.skill*(has(s,'ember')?1+RV.ember.burn*relicScaleIn(s,'ember'):1));
   const repeat=e=>!!e.boss&&(e.ultControl||0)-s.time>1e-9;
 
-  if(dream){const [sun,,,last]=RUMI_DREAM.phases;lines.push(`해·달·별의 마법이 차례로 적 전체를 칩니다. 한 번에 공격력 ${sun.factor}배, ${hit(sun.factor)}입니다.`);lines.push(`마지막에 상상이 현실이 되어 공격력 ${last.factor}배, ${hit(last.factor)}를 줍니다. 모두 합쳐 공격력 ${RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)}배입니다.`);}
+  if(dream){const [sun,,,last]=RUMI_DREAM.phases;lines.push(`해·달·별의 마법이 차례로 적 전체를 칩니다. 한 번에 공격력 ${sun.factor}배, ${allHit(sun.factor)}입니다.`);lines.push(`마지막에 상상이 현실이 되어 공격력 ${last.factor}배, ${hit(last.factor)}를 줍니다. 모두 합쳐 공격력 ${RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)}배입니다.`);}
   else if(type==='echo')lines.push(`${dur(8,'echo')} 동안 모든 동료의 공격마다 공격력 ${pct(.65*scale)}%의 추가 공격이 한 번 더 나갑니다.`);
   else if(type==='haste')lines.push(`${dur(ULT_BUFF.haste.seconds,'haste')} 동안 모든 동료의 공격 속도가 ${pct(ULT_BUFF.haste.speed*scale)}% 오릅니다.`);
   else if(type==='awaken')lines.push(`${dur(ULT_BUFF.awaken.seconds,'awaken')} 동안 모든 동료의 공격력이 ${pct(ULT_BUFF.awaken.power*scale)}% 오릅니다.`);
@@ -1155,9 +1155,9 @@ export function castPreview(s,id){
     lines.push(`일반 적은 ${sec(freeze)} 동안 얼고 6초간 ${pctText(slowOf(SNOW_RABBIT.skillSlow*scale))} 느려집니다. 보스는 ${sec(freeze*BOSS_CONTROL_SCALE)} 동안 얼습니다.`);
   }else if(type==='avalanche'){
     const on=targets.filter(e=>snapshot(e).controlTime>0).length;
-    if(!targets.length||on===0)lines.push(`적에게 공격력 4배, ${hit(4)}를 줍니다. 기절하거나 얼어 있으면 ${hit(12)}입니다.`);
-    else if(on===targets.length)lines.push(`지금 기절·빙결 중인 적에게 공격력 12배, ${hit(12)}를 줍니다.`);
-    else lines.push(`기절·빙결 ${on}명에게 ${hit(12)}, 나머지에게 ${hit(4)}를 줍니다.`);
+    if(!targets.length||on===0)lines.push(`적에게 공격력 4배, ${allHit(4)}를 줍니다. 기절하거나 얼어 있으면 ${allHit(12)}입니다.`);
+    else if(on===targets.length)lines.push(`지금 기절·빙결 중인 적에게 공격력 12배, ${allHit(12)}를 줍니다.`);
+    else lines.push(`기절·빙결 ${on}명에게 ${allHit(12)}, 나머지에게 ${allHit(4)}를 줍니다.`);
     lines.push(`4초 동안 ${pct(slowOf(.5))}% 느려집니다.`);
   }else if(type==='dragon'){
     const near=e=>targets.filter(t=>Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=180);
@@ -1171,9 +1171,9 @@ export function castPreview(s,id){
     lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='combust'){
     const burning=targets.filter(e=>snapshot(e).burnTime>0).length;
-    if(!targets.length||burning===0)lines.push(`적에게 공격력 4배, ${hit(4)}를 줍니다. 이미 불타면 ${hit(10)}입니다.`);
-    else if(burning===targets.length)lines.push(`지금 불타는 적에게 공격력 10배, ${hit(10)}를 줍니다.`);
-    else lines.push(`불타는 적 ${burning}명에게 ${hit(10)}, 나머지에게 ${hit(4)}를 줍니다.`);
+    if(!targets.length||burning===0)lines.push(`적에게 공격력 4배, ${allHit(4)}를 줍니다. 이미 불타면 ${allHit(10)}입니다.`);
+    else if(burning===targets.length)lines.push(`지금 불타는 적에게 공격력 10배, ${allHit(10)}를 줍니다.`);
+    else lines.push(`불타는 적 ${burning}명에게 ${allHit(10)}, 나머지에게 ${allHit(4)}를 줍니다.`);
     lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='plague'){
     const stacks=8,ready=targets.filter(e=>poisonNow(e).reduce((n,a)=>n+a.stacks,0)>=20);
@@ -1219,8 +1219,8 @@ export function castPreview(s,id){
       lines.push(`일반 적은 ${sec(stunSec)}, 보스는 ${sec(stunSec*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
     }else{
       const marks=targets.map(e=>snapshot(e).divine),f=m=>WHALE.factor*(1+WHALE.perMark*m);
-      if(!marks.length||marks.every(m=>m===0))lines.push(`성광이 없으면 공격력 ${WHALE.factor}배, ${hit(WHALE.factor)}를 줍니다. 중첩 하나당 ${pct(WHALE.perMark)}%가 더해집니다.`);
-      else if(marks.every(m=>m===marks[0]))lines.push(`성광 ${marks[0]}중첩을 모두 거둬 공격력 ${num(f(marks[0]))}배, ${hit(f(marks[0]))}를 줍니다.`);
+      if(!marks.length||marks.every(m=>m===0))lines.push(`성광이 없으면 공격력 ${WHALE.factor}배, ${allHit(WHALE.factor)}를 줍니다. 중첩 하나당 ${pct(WHALE.perMark)}%가 더해집니다.`);
+      else if(marks.every(m=>m===marks[0]))lines.push(`성광 ${marks[0]}중첩을 모두 거둬 공격력 ${num(f(marks[0]))}배, ${allHit(f(marks[0]))}를 줍니다.`);
       else lines.push(`성광을 모두 거둬 공격력 ${WHALE.factor}배에 중첩당 ${pct(WHALE.perMark)}%를 더합니다.`);
       lines.push(`4초 동안 ${slow}% 느려집니다.`);
     }

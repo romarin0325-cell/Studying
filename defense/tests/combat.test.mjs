@@ -1867,6 +1867,13 @@ test('joker: five colours unlock the Chaos Roulette, and casting it is what ente
   const legacyChaos=JSON.parse(E.serialize(s));delete legacyChaos.jokerSeen;assert.equal(E.restore(legacyChaos),null);
 });
 
+test('spotlight also reaches all-enemy ultimates that do not go through the shared strike (maid, flame sage)',()=>{
+  const s=traitArena([{hero:'avalanche_maid',index:12},{hero:'flame_sage',index:6}],{artifacts:['spotlight'],wave:2});
+  s.relicLevels={spotlight:1};const [foe]=enemiesFor(s,[{hp:1e9}]);quiet(s);
+  const power=i=>E.combatStats(s,s.board[i],i).damage,topIsMaid=power(12)>power(6),factor=top=>top?1+E.RELIC_VALUES.spotlight.top:E.RELIC_VALUES.spotlight.rest;
+  const maidBase=power(12),maidHp=foe.hp;readyCast(s,'avalanche_maid');close(maidHp-foe.hp,maidBase*4*factor(topIsMaid));
+  const sageBase=power(6),sageHp=foe.hp;readyCast(s,'flame_sage');close(sageHp-foe.hp,sageBase*4*factor(!topIsMaid));
+});
 test('spotlight multiplies all-enemy ultimates for the top companion and leaves other ultimates alone',()=>{
   const shown=n=>Math.round(n).toLocaleString('ko-KR');
   const s=traitArena([
