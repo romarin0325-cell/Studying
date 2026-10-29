@@ -1331,20 +1331,29 @@ test('relic pass 7: no ultimate or merge loop, and the three new relics',()=>{
   const sprout=traitArena([{hero:'star_boy',index:12,rank:2},{hero:'siren',index:6,rank:3}],{artifacts:['sprout']});sprout.relicLevels={sprout:1};
   close(E.combatStats(sprout,sprout.board[12]).damage/E.power(sprout,sprout.board[12]),1+E.RELIC_VALUES.sprout.power);
   sprout.freeSummons=0;sprout.paidSummons=3;assert.equal(E.summonCost(sprout),10+6-E.RELIC_VALUES.sprout.discount);
-  // Guardian amulet: +25% near the core; a leak refunds starlight twice per wave.
+  // Guardian amulet: +35% near the core; every leak that damages the core pays starlight. amuletUsed stays in the save and is not a limit.
   const amulet=traitArena([{hero:'star_boy',index:12}],{artifacts:['amulet']});amulet.relicLevels={amulet:1};quiet(amulet);
   const [close1,far1]=enemiesFor(amulet,[{progress:E.PATH_LENGTH*.8,hp:1e6},{progress:300,hp:1e6}]);
   const shotNear=launchNormal(amulet,amulet.board[12]);shotNear.target=close1.uid;const a0=close1.hp;resolveNormal(amulet,shotNear);assert.ok(Math.abs((a0-close1.hp)/(shotNear.damage*(1+E.RELIC_VALUES.amulet.near))-1)<1e-3,'near-core bonus');
-  amulet.enemies=[];amulet.gauge=0;for(let i=0;i<3;i++){enemiesFor(amulet,[{progress:E.PATH_LENGTH,hp:10}]);E.step(amulet,.05);}
-  assert.ok(Math.abs(amulet.gauge-E.RELIC_VALUES.amulet.uses*E.RELIC_VALUES.amulet.starlight)<4,`one refund per wave, gauge ${amulet.gauge}`);assert.ok(E.restore(E.serialize(amulet)));
-  // Venomfire chalice: burning AND at least 5 poison stacks.
+  amulet.enemies=[];amulet.gauge=0;amulet.health=20;amulet.amuletUsed=0;
+  for(let i=0;i<3;i++){
+    enemiesFor(amulet,[{progress:E.PATH_LENGTH,hp:10}]);
+    const before=amulet.gauge;E.step(amulet,.05);
+    close(amulet.gauge-before,E.STARLIGHT_PER_SECOND*.05+E.RELIC_VALUES.amulet.starlight);
+  }
+  assert.equal(amulet.amuletUsed,0);assert.equal(amulet.stats.leaks,3);assert.equal(amulet.health,17);assert.ok(E.restore(E.serialize(amulet)));
+  const kept=JSON.parse(E.serialize(amulet));kept.amuletUsed=3;const resumed=E.restore(kept);assert.ok(resumed);assert.equal(resumed.amuletUsed,3);
+  // Venomfire chalice: burning AND at least 3 poison stacks.
   const cup=traitArena([{hero:'star_boy',index:12}],{artifacts:['chalice']});cup.relicLevels={chalice:1};quiet(cup);
-  const [both,burnOnly]=enemiesFor(cup,[{hp:1e7},{hp:1e7}]);
-  both.statusEffects=[{type:'burn',source:'attack:zeke:1',owner:'zeke',amount:1,until:cup.time+9},{type:'poison',source:'attack:mushroom_king:2',owner:'mushroom_king',amount:5,until:cup.time+9,power:1}];
-  burnOnly.statusEffects=[{type:'burn',source:'attack:zeke:3',owner:'zeke',amount:1,until:cup.time+9}];
-  for(const e of [both,burnOnly])E.statusState(cup,e);
-  const sb=launchNormal(cup,cup.board[12]);sb.target=both.uid;const b0=both.hp;resolveNormal(cup,sb);assert.ok(Math.abs((b0-both.hp)/(sb.damage*(1+E.RELIC_VALUES.chalice.taken))-1)<1e-3,'burning and poisoned');
+  const [both,thin,burnOnly,poisonOnly]=enemiesFor(cup,[{hp:1e7},{hp:1e7},{hp:1e7},{hp:1e7}]);
+  const burn=n=>({type:'burn',source:'attack:zeke:'+n,owner:'zeke',amount:1,until:cup.time+9});
+  const poison=(n,amount)=>({type:'poison',source:'attack:mushroom_king:'+n,owner:'mushroom_king',amount,until:cup.time+9,power:1});
+  both.statusEffects=[burn(1),poison(2,3)];thin.statusEffects=[burn(3),poison(4,2)];burnOnly.statusEffects=[burn(5)];poisonOnly.statusEffects=[poison(6,3)];
+  for(const e of [both,thin,burnOnly,poisonOnly])E.statusState(cup,e);
+  const sb=launchNormal(cup,cup.board[12]);sb.target=both.uid;const b0=both.hp;resolveNormal(cup,sb);assert.ok(Math.abs((b0-both.hp)/(sb.damage*(1+E.RELIC_VALUES.chalice.taken))-1)<1e-3,'burning and 3 poison');
+  const st=launchNormal(cup,cup.board[12]);st.target=thin.uid;const t0=thin.hp;resolveNormal(cup,st);assert.ok(Math.abs((t0-thin.hp)/st.damage-1)<1e-3,'burning and 2 poison');
   const so=launchNormal(cup,cup.board[12]);so.target=burnOnly.uid;const o0=burnOnly.hp;resolveNormal(cup,so);assert.ok(Math.abs((o0-burnOnly.hp)/so.damage-1)<1e-3,'burning only');
+  const sp=launchNormal(cup,cup.board[12]);sp.target=poisonOnly.uid;const p0=poisonOnly.hp;resolveNormal(cup,sp);assert.ok(Math.abs((p0-poisonOnly.hp)/sp.damage-1)<1e-3,'poison only');
 });
 
 test('twin echoes ultimate direct damage after 1.5s, including save and restore, and skips buffs, summons and later finishers',()=>{
@@ -1503,8 +1512,15 @@ test('renewed relic rates: frost, banner, guild, constellation, meteor, tide, pr
   const before=[hit.hp,near.hp,far.hp];resolveNormal(meteor,meteorShot);
   close(before[0]-hit.hp,meteorShot.damage*(1+E.RELIC_VALUES.meteor.hit*meteorM));close(before[1]-near.hp,meteorShot.damage*E.RELIC_VALUES.meteor.hit*meteorM);assert.equal(far.hp,before[2]);
   const tide=traitArena([{hero:'snow_rabbit',index:12}],{artifacts:['tide']});tide.relicLevels={tide:3};
-  const [wet]=enemiesFor(tide,[{progress:1200}]);const tideShot=launchNormal(tide,tide.board[12]),wetHp=wet.hp;resolveNormal(tide,tideShot);
-  close(wetHp-wet.hp,tideShot.damage*(1+E.RELIC_VALUES.tide.splash*relicScale(3)));assert.ok(tide.events.some(event=>event.type==='tide'));
+  const [wet]=enemiesFor(tide,[{progress:1200}]);
+  const tideRatio=()=>E.combatStats(tide,tide.board[12]).damage/E.power(tide,tide.board[12]);
+  tide.gauge=99;close(tideRatio(),1);assert.ok(!E.combatStats(tide,tide.board[12],12,true).bonuses.some(line=>line.includes('파도의 소라')));
+  tide.gauge=90;const tideShot=launchNormal(tide,tide.board[12]),wetHp=wet.hp;resolveNormal(tide,tideShot);
+  close(wetHp-wet.hp,tideShot.damage);assert.ok(!tide.events.some(event=>event.type==='tide'));
+  tide.gauge=100;close(tideRatio(),1+E.RELIC_VALUES.tide.power*relicScale(3));
+  assert.ok(E.combatStats(tide,tide.board[12],12,true).bonuses.some(line=>line.includes('파도의 소라')));
+  const soaked=launchNormal(tide,tide.board[12]);soaked.target=wet.uid;const soakedHp=wet.hp;resolveNormal(tide,soaked);
+  close(soakedHp-wet.hp,soaked.damage);assert.ok(!tide.events.some(event=>event.type==='tide'));
   const prism=traitArena([{hero:'storm_sage',index:12}],{artifacts:['prism']});prism.relicLevels={prism:5};
   const gust=enemiesFor(prism,[{progress:1200},{progress:1201}]);const prismShot=launchNormal(prism,prism.board[12]);
   assert.equal(prismShot.target,gust[1].uid);const gustHp=gust.map(e=>e.hp);prism.rng=160;resolveNormal(prism,prismShot);
@@ -1800,7 +1816,7 @@ test('sunflower: one shared sunlight stack that fills only while a sunflower sta
   const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(saved.sunlight,s.sunlight);
   const bad=JSON.parse(E.serialize(s));bad.sunlight=4;assert.equal(E.restore(bad),null);
 });
-test('joker: every ultimate turns the colour to a random different one and the basic attack applies that colour\'s status',()=>{
+test('joker: five colours unlock the Chaos Roulette, and casting it is what enters Chaos',()=>{
   const expected={red:e=>e.burnTime>0,blue:e=>e.slowTime>0,green:e=>e.poison>0,white:e=>e.divine>=1,black:e=>e.exposeTime>0};
   for(const [color,test] of Object.entries(expected)){
     const s=traitArena([{index:12,hero:'joker'}]);s.jokerColor=color;
@@ -1811,21 +1827,147 @@ test('joker: every ultimate turns the colour to a random different one and the b
   }
   const s=traitArena([{index:12,hero:'joker'}]);
   const [foe]=enemiesFor(s,[{hp:1e9}]),base=E.combatStats(s,s.board[12]).damage;
-  assert.equal(s.jokerSeen,1);assert.equal(s.jokerColor,'red');
-  for(let i=0;i<100&&!E.jokerChaos(s);i++){
-    const hp=foe.hp,from=s.jokerColor,seen=s.jokerSeen;assert.equal(E.skillCost(s,'joker'),50);
-    const preview=E.castPreview(s,'joker');assert.ok(preview.lines[0].includes('무작위'));
-    readyCast(s,'joker');close(hp-foe.hp,base*3);assert.notEqual(s.jokerColor,from);assert.equal(s.jokerSeen&seen,seen);
+  assert.equal(s.jokerSeen,1);assert.equal(s.jokerColor,'red');assert.equal(E.jokerReady(s),false);
+  for(let i=0;i<100&&s.jokerSeen!==E.JOKER.all;i++){
+    const hp=foe.hp,from=s.jokerColor,seen=s.jokerSeen;
+    assert.equal(E.skillCost(s,'joker'),50);assert.equal(E.skillName(s,'joker'),'레인보우 룰렛');
+    const preview=E.castPreview(s,'joker');
+    assert.ok(preview.lines[0].includes('무작위')&&preview.lines[0].includes('3배'));assert.equal(preview.name,undefined);
+    readyCast(s,'joker');close(hp-foe.hp,base*E.JOKER.roulette);
+    assert.notEqual(s.jokerColor,from);assert.notEqual(s.jokerColor,'chaos');assert.equal(s.jokerSeen&seen,seen);assert.equal(E.jokerChaos(s),false);
   }
-  assert.equal(s.jokerSeen,31);assert.equal(s.jokerColor,'chaos');assert.equal(E.skillName(s,'joker'),'카오스 룰렛');assert.equal(E.skillCost(s,'joker'),100);
-  const hp=foe.hp;s.gauge=99;assert.equal(E.cast(s,'joker').ok,false);assert.equal(s.gauge,99);s.gauge=120;assert.equal(E.cast(s,'joker').ok,true);assert.equal(s.gauge,20);
-  close(hp-foe.hp,base*3);assert.equal(s.jokerColor,'chaos');assert.equal(foe.statusEffects.length,0,'Chaos ultimate itself does not apply the five statuses');
+  assert.equal(s.jokerSeen,E.JOKER.all);assert.notEqual(s.jokerColor,'chaos');assert.equal(E.jokerReady(s),true);
+  assert.equal(E.skillName(s,'joker'),'카오스 룰렛');assert.equal(E.skillCost(s,'joker'),E.JOKER.chaosCost);
+  const readyPreview=E.castPreview(s,'joker');
+  assert.equal(readyPreview.name,'카오스 룰렛');assert.equal(readyPreview.cost,E.JOKER.chaosCost);
+  assert.ok(readyPreview.lines[0].includes('6배')&&readyPreview.lines[0].includes('카오스가 됩니다.'));
+  assert.ok(!readyPreview.lines.some(line=>line.includes('일반 공격 시')));
+  const readySaved=E.restore(E.serialize(s));
+  assert.ok(readySaved);assert.equal(readySaved.jokerSeen,E.JOKER.all);assert.notEqual(readySaved.jokerColor,'chaos');assert.equal(E.jokerReady(readySaved),true);
+  const from=s.jokerColor,hp=foe.hp;
+  s.gauge=99;assert.equal(E.cast(s,'joker').ok,false);assert.equal(s.gauge,99);assert.equal(s.jokerColor,from);
+  s.gauge=120;assert.equal(E.cast(s,'joker').ok,true);assert.equal(s.gauge,20);
+  close(hp-foe.hp,base*E.JOKER.chaosRoulette);assert.equal(s.jokerColor,'chaos');assert.equal(E.jokerChaos(s),true);assert.equal(E.jokerReady(s),false);
+  const entered=s.events.filter(event=>event.type==='jokerColor').at(-1);
+  assert.equal(entered.from,from);assert.equal(entered.color,'chaos');
+  assert.equal(foe.statusEffects.length,0,'Chaos ultimate itself does not apply the five statuses');
+  const chaosPreview=E.castPreview(s,'joker');
+  assert.ok(chaosPreview.lines[0].includes('6배')&&chaosPreview.lines[0].includes('카오스를 유지합니다.'));
+  assert.ok(chaosPreview.lines.some(line=>line==='일반 공격 시 화상·중독·성광·노출·감속을 모두 겁니다.'));
+  assert.equal(chaosPreview.name,'카오스 룰렛');assert.equal(chaosPreview.cost,E.JOKER.chaosCost);
+  const again=foe.hp;s.gauge=120;assert.equal(E.cast(s,'joker').ok,true);close(again-foe.hp,base*E.JOKER.chaosRoulette);
+  assert.equal(s.jokerColor,'chaos');assert.equal(s.events.filter(event=>event.type==='jokerColor'&&event.color==='chaos').length,1);
   const shot=launchNormal(s,s.board[12]);resolveNormal(s,shot);E.statusState(s,foe);
   for(const check of Object.values(expected))assert.ok(check(foe),'Chaos basic attack applies every colour');
-  const restored=E.restore(E.serialize(s));assert.ok(restored);assert.equal(restored.jokerColor,'chaos');assert.equal(restored.jokerSeen,31);
+  const restored=E.restore(E.serialize(s));assert.ok(restored);assert.equal(restored.jokerColor,'chaos');assert.equal(restored.jokerSeen,E.JOKER.all);
   for(const value of [0,32,1.5]){const bad=JSON.parse(E.serialize(s));bad.jokerSeen=value;assert.equal(E.restore(bad),null);}
   const bad=JSON.parse(E.serialize(s));bad.jokerColor='pink';assert.equal(E.restore(bad),null);
+  const partial=JSON.parse(E.serialize(s));partial.jokerSeen=15;assert.equal(E.restore(partial),null,'chaos requires every colour');
   const legacy=JSON.parse(E.serialize(s));legacy.jokerColor='blue';delete legacy.jokerSeen;assert.equal(E.restore(legacy).jokerSeen,3,'legacy saves retain only provable colours');
+  const legacyChaos=JSON.parse(E.serialize(s));delete legacyChaos.jokerSeen;assert.equal(E.restore(legacyChaos),null);
+});
+
+test('spotlight multiplies all-enemy ultimates for the top companion and leaves other ultimates alone',()=>{
+  const shown=n=>Math.round(n).toLocaleString('ko-KR');
+  const s=traitArena([
+    {hero:'queen',index:12},
+    {hero:'snow_rabbit',index:6},
+    {hero:'star_boy',index:0,birthWave:1},
+  ],{artifacts:['spotlight'],wave:2});
+  s.relicLevels={spotlight:1};
+  const [foe]=enemiesFor(s,[{hp:1e9}]);quiet(s);
+  const damage=index=>E.combatStats(s,s.board[index],index).damage;
+  assert.ok(damage(12)>damage(6)&&damage(12)>damage(0));
+  const queenBase=damage(12),spot=1+E.RELIC_VALUES.spotlight.top;
+  const queenPreview=E.castPreview(s,'queen');
+  assert.ok(queenPreview.lines[0].includes(shown(queenBase*4*spot)));
+  const queenHp=foe.hp;readyCast(s,'queen');close(queenHp-foe.hp,queenBase*4*spot);
+  const rabbitBase=E.combatStats(s,s.board[6]).damage;
+  const rabbitPreview=E.castPreview(s,'snow_rabbit');
+  assert.ok(rabbitPreview.lines[0].includes(shown(rabbitBase*3*E.RELIC_VALUES.spotlight.rest)));
+  const rabbitHp=foe.hp;readyCast(s,'snow_rabbit');close(rabbitHp-foe.hp,rabbitBase*3*E.RELIC_VALUES.spotlight.rest);
+  s.gauge=80;const starBase=E.combatStats(s,s.board[0]).damage;
+  const starPreview=E.castPreview(s,'star_boy');
+  assert.ok(starPreview.lines[0].includes(shown(starBase*E.STARFALL_FACTOR*80)));
+  assert.equal(E.cast(s,'star_boy').ok,true);
+  close(s.finishers.find(item=>item.kind==='starfall').damage,starBase*E.STARFALL_FACTOR*80);
+  const grown=traitArena([{hero:'queen',index:12},{hero:'snow_rabbit',index:6}],{artifacts:['spotlight']});
+  grown.relicLevels={spotlight:5};const grownScale=relicScale(5);
+  const [grownFoe]=enemiesFor(grown,[{hp:1e9}]);quiet(grown);
+  const grownTop=1+E.RELIC_VALUES.spotlight.top*grownScale,grownQueen=E.combatStats(grown,grown.board[12]).damage,grownHp=grownFoe.hp;
+  readyCast(grown,'queen');close(grownHp-grownFoe.hp,grownQueen*4*grownTop);
+  const grownRest=E.combatStats(grown,grown.board[6]).damage,restHp=grownFoe.hp;
+  readyCast(grown,'snow_rabbit');close(restHp-grownFoe.hp,grownRest*3*E.RELIC_VALUES.spotlight.rest);
+  const tie=traitArena([{hero:'snow_rabbit',index:3},{hero:'guardian',index:18}],{artifacts:['spotlight']});
+  tie.meta={snow_rabbit:{power:11,special:1},guardian:{power:2,special:1}};
+  const [tieFoe]=enemiesFor(tie,[{hp:1e9}]);quiet(tie);
+  assert.equal(E.combatStats(tie,tie.board[3]).damage,E.combatStats(tie,tie.board[18]).damage);
+  const low=E.combatStats(tie,tie.board[3]).damage,high=E.combatStats(tie,tie.board[18]).damage,lowHp=tieFoe.hp;
+  readyCast(tie,'snow_rabbit');close(lowHp-tieFoe.hp,low*3*(1+E.RELIC_VALUES.spotlight.top));
+  const highHp=tieFoe.hp;readyCast(tie,'guardian');close(highHp-tieFoe.hp,high*E.QUAKE_FACTOR*E.RELIC_VALUES.spotlight.rest);
+});
+
+test('royal crown triples every leak and pays flat gold at the end of the wave',()=>{
+  const scale=relicScale(4),pay=Math.round(E.RELIC_VALUES.royal_crown.gold*scale),core=E.RELIC_VALUES.royal_crown.core;
+  const leak=(kind)=>{
+    const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_crown']});s.relicLevels={royal_crown:4};quiet(s);s.health=20;
+    enemiesFor(s,[{kind,progress:E.PATH_LENGTH,hp:10}]);E.step(s,.05);return s;
+  };
+  assert.equal(leak('armor').health,20-2*core);assert.equal(leak('grunt').health,20-core);
+  const boss=leak('boss');assert.equal(boss.events.find(event=>event.type==='leak').health,20-7*core);assert.equal(boss.health,0);
+  const finish=s=>{s.enemies=[];s.queue=[];s.phase='combat';E.step(s,.05);assert.equal(s.phase,'reward');};
+  for(const gold of [10,99999]){
+    const s=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_crown'],wave:4});s.relicLevels={royal_crown:4};s.gold=gold;s.gauge=gold===10?0:120;
+    finish(s);assert.equal(s.stats.income['로열 크라운'],pay);
+  }
+  const plain=traitArena([{hero:'star_boy',index:12}]);finish(plain);assert.equal(plain.stats.income['로열 크라운'],undefined);
+  const saved=traitArena([{hero:'star_boy',index:12}],{artifacts:['phoenix','royal_crown']});saved.health=20;
+  enemiesFor(saved,[{kind:'boss',progress:E.PATH_LENGTH,hp:800}]);const health=saved.health;E.step(saved,.05);
+  assert.equal(saved.health,health);assert.equal(saved.events.some(event=>event.type==='leak'),false);
+});
+
+test('dream crystal adds starting starlight once and raises only Rumi',()=>{
+  assert.equal(E.newRun({seed:1}).gauge,90);
+  const s=E.newRun({artifacts:['dream_crystal'],seed:1,relicLevels:{dream_crystal:1}});
+  assert.equal(s.gauge,90+Math.round(E.RELIC_VALUES.dream_crystal.starlight));
+  const high=E.newRun({artifacts:['dream_crystal'],seed:1,relicLevels:{dream_crystal:99}});
+  assert.equal(high.gauge,E.gaugeCap(high));
+  const resumed=E.restore(E.serialize(s));assert.ok(resumed);assert.equal(resumed.gauge,s.gauge);
+  const run=traitArena([{hero:'rumi',index:12},{hero:'star_boy',index:0,birthWave:1}],{artifacts:['dream_crystal'],wave:2});
+  run.relicLevels={dream_crystal:3};const m=relicScale(3);
+  close(E.combatStats(run,run.board[12]).damage/E.power(run,run.board[12]),1+E.RELIC_VALUES.dream_crystal.rumi*m);
+  assert.ok(E.combatStats(run,run.board[12],12,true).bonuses.some(line=>line.includes('꿈의 결정')));
+  close(E.combatStats(run,run.board[0]).damage/E.power(run,run.board[0]),1);
+  assert.ok(!E.combatStats(run,run.board[0],0,true).bonuses.some(line=>line.includes('꿈의 결정')));
+});
+
+test('no relic feeds starlight or gold back into itself',()=>{
+  for(const start of [0,80]){
+    const amulet=traitArena([{hero:'star_boy',index:12}],{artifacts:['amulet']});quiet(amulet);amulet.health=20;amulet.gauge=start;
+    enemiesFor(amulet,[{progress:E.PATH_LENGTH,hp:10}]);
+    const before=amulet.gauge;E.step(amulet,.05);
+    close(amulet.gauge-before,E.STARLIGHT_PER_SECOND*.05+E.RELIC_VALUES.amulet.starlight);
+    assert.equal(amulet.amuletUsed,0);
+  }
+  const bounded=traitArena([{hero:'star_boy',index:12}],{artifacts:['amulet']});quiet(bounded);bounded.health=20;bounded.gauge=0;
+  for(let i=0;i<30&&bounded.phase==='combat';i++){enemiesFor(bounded,[{progress:E.PATH_LENGTH,hp:10}]);E.step(bounded,.05);}
+  assert.equal(bounded.phase,'defeat');assert.equal(bounded.health,0);assert.ok(bounded.stats.leaks<=20);
+  const stopped=bounded.gauge;E.step(bounded,.05);assert.equal(bounded.gauge,stopped);
+  const crown=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_crown']});crown.gold=10;
+  crown.enemies=[];crown.queue=[];crown.phase='combat';E.step(crown,.05);
+  const rich=traitArena([{hero:'star_boy',index:12}],{artifacts:['royal_crown']});rich.gold=99999;
+  rich.enemies=[];rich.queue=[];rich.phase='combat';E.step(rich,.05);
+  assert.equal(crown.stats.income['로열 크라운'],E.RELIC_VALUES.royal_crown.gold);
+  assert.equal(rich.stats.income['로열 크라운'],crown.stats.income['로열 크라운']);
+  const fight=traitArena([{hero:'snow_rabbit',index:12},{hero:'rumi',index:0}],{artifacts:['spotlight','tide','dream_crystal']});
+  fight.relicLevels={spotlight:4,tide:4,dream_crystal:4};quiet(fight);fight.gauge=110;fight.gold=500;
+  const [foe]=enemiesFor(fight,[{hp:1e9}]);foe.speed=0;
+  const gold=fight.gold,gauge=fight.gauge,mark=fight.time;
+  const shot=launchNormal(fight,fight.board[12]);shot.target=foe.uid;resolveNormal(fight,shot);
+  assert.equal(fight.gold,gold);
+  close(fight.gauge-gauge,E.STARLIGHT_PER_SECOND*(fight.time-mark));
+  fight.gauge=120;const held=fight.gold;readyCast(fight,'snow_rabbit');assert.equal(fight.gold,held);
+  assert.equal(fight.gauge,120-E.skillCost(fight,'snow_rabbit'));
 });
 
 function hold(s){for(const u of s.board)if(u){u.cooldown=100;u.windup=0;}}

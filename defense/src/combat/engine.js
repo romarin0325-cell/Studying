@@ -145,10 +145,11 @@ export const RELIC_VALUES=Object.freeze({
   // Relic pass 7 (docs/archive/RELIC_PASS7.md): lantern refunds a share and hourglass adds a little per merge, so no ultimate
   // or merge loop can feed itself; outliers above ~1.3x of their budget came down; constellation rewards a real mosaic.
   hourglass:{starlight:10,store:60},ember:{burn:.7},frost:{slowed:.22},banner:{power:.21},chorus:{speed:.35,count:3},lantern:{refund:.2},lens:{boss:.3},seed:{poison:.4},
-  feather:{base:6,perWave:3,cap:60},crown:{power:.16},sprout:{power:.2,discount:2},amulet:{near:.35,starlight:15,uses:1},
-  meteor:{hit:1.1},prism:{chain:.9},tide:{splash:.22},roots:{life:.15,radius:.06},guild:{power:.25},phoenix:{taken:.2,uses:1},
-  twin:{echo:1},constellation:{three:.32,four:.5},alchemy:{power:.5,waves:2},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.6,poison:5},
+  feather:{base:6,perWave:3,cap:60},crown:{power:.16},sprout:{power:.2,discount:2},amulet:{near:.35,starlight:5},
+  meteor:{hit:1.1},prism:{chain:.9},tide:{power:.3,gauge:100},roots:{life:.2,radius:.08},guild:{power:.25},phoenix:{taken:.2,uses:1},
+  twin:{echo:1.2},constellation:{three:.32,four:.5},alchemy:{power:.6,waves:2},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.6,poison:3},
   royal_seal:{starlight:30,boss:.4},gift_ribbon:{chance:.25},broken_clock:{duration:1},
+  spotlight:{top:1,rest:.25},royal_crown:{core:3,gold:30},dream_crystal:{starlight:10,rumi:1},
 });
 const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
@@ -211,12 +212,13 @@ export const APPLEBOMB=Object.freeze({factor:18,max:5,trigger:80,stun:3,radius:2
 // attack bursts around the target with the radius of the current stack; Solar Flare spends the whole stack.
 export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:4});
 export const sunRadius=s=>SUNFLOWER.radius[Math.min(SUNFLOWER.max,s.sunlight||0)];
-// Five colours, including the initial red, unlock Chaos for the rest of this run.
-export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','white','black']),all:31,chaosCost:100,roulette:3,burn:.3,slow:.2,exposure:.06});
+// Five colours, including the initial red, unlock the Chaos Roulette. Casting it is what enters Chaos.
+export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','white','black']),all:31,chaosCost:100,roulette:3,chaosRoulette:6,burn:.3,slow:.2,exposure:.06});
 export const JOKER_NAMES=Object.freeze({red:'빨강 · 화상',blue:'파랑 · 감속',green:'초록 · 중독',white:'하양 · 성광',black:'검정 · 노출',chaos:'카오스 룰렛'});
 export const jokerChaos=s=>s.jokerColor==='chaos';
-export const skillCost=(s,id)=>(id==='joker'&&jokerChaos(s)?JOKER.chaosCost:HERO[id]?.skill.cost||0)+(s?.oathMods?.skillCost||0);
-export const skillName=(s,id)=>id==='joker'&&jokerChaos(s)?JOKER_NAMES.chaos:HERO[id]?.skill.name;
+export const jokerReady=s=>!jokerChaos(s)&&s.jokerSeen===JOKER.all;
+export const skillCost=(s,id)=>(id==='joker'&&(jokerChaos(s)||jokerReady(s))?JOKER.chaosCost:HERO[id]?.skill.cost||0)+(s?.oathMods?.skillCost||0);
+export const skillName=(s,id)=>id==='joker'&&(jokerChaos(s)||jokerReady(s))?JOKER_NAMES.chaos:HERO[id]?.skill.name;
 const jokerBit=color=>1<<JOKER.colors.indexOf(color);
 // The roulette picks a new colour at random among the four it is not showing, so every cast changes the colour.
 export const pickJokerColor=(s,color)=>{const others=JOKER.colors.filter(c=>c!==color);return others[Math.min(others.length-1,Math.floor(random(s)*others.length))];};
@@ -448,7 +450,7 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const opening=shuffle(s,chosen).slice(0,3);
   const openingCells=TEAM_SIZE===1?[12]:[7,16,18];
   for(const [i,hero] of opening.entries())place(s,hero,1,openingCells[i]);
-  beginWave(s,1);if(s.oathMods.gold)s.gold=Math.round(s.gold*s.oathMods.gold);s.health=coreHealthMax(s);return s;
+  beginWave(s,1);if(has(s,'dream_crystal'))addGauge(s,Math.round(RV.dream_crystal.starlight*relicScaleIn(s,'dream_crystal')));if(s.oathMods.gold)s.gold=Math.round(s.gold*s.oathMods.gold);s.health=coreHealthMax(s);return s;
 }
 // The opening is three distinct random companions from the selected five.
 // Later summons sample with replacement: every companion remains 1/5.
@@ -678,7 +680,6 @@ function addSlow(s,e,source,amount,duration){
 function slowTargets(s,targets,hero,amount,point,source,rank=1){
   const level=s.upgrades[hero.id]||0,base=hero.trait.type==='chrono'?.25+level*.03:hero.id==='phantom'?.25:hero.id==='snow_rabbit'?SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow:.4,slow=base*rankControl(rank);
   for(const t of targets)addSlow(s,t,source,slow,2.4);
-  if(targets.length&&has(s,'tide')){for(const t of s.enemies)if(t.hp>0&&Math.hypot(pathPoint(t.progress).x-point.x,pathPoint(t.progress).y-point.y)<=80)damage(s,t,amount*RV.tide.splash*relicScaleIn(s,'tide'),hero.id);event(s,'tide',{...point});}
 }
 function applyHit(s,shot){
   if(shot.ground){
@@ -814,6 +815,8 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(has(s,'crown')&&u.rank>=3)damageBonus('relic','왕관',RV.crown.power*relicScaleIn(s,'crown'));
   if(has(s,'sprout')&&u.rank<=2)damageBonus('relic','풋내기 훈장',RV.sprout.power*relicScaleIn(s,'sprout'));
   if(has(s,'alchemy')&&Number.isInteger(u.mergedWave)&&u.mergedWave<=s.wave&&s.wave<u.mergedWave+RV.alchemy.waves)damageBonus('relic','연금',RV.alchemy.power*relicScaleIn(s,'alchemy'));
+  if(has(s,'tide')&&s.gauge>=RV.tide.gauge)damageBonus('relic','파도의 소라',RV.tide.power*relicScaleIn(s,'tide'));
+  if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic','꿈의 결정',RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
   if(s.buffs.awaken>0)damageBonus('ult','각성',ULT_BUFF.awaken.power*buffScale(s,'awaken'));
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',.5*buffScale(s,'radiance'));
   if(unitForm(s,u)==='trauma'){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
@@ -889,6 +892,19 @@ function refreshAppleBombs(s){
   const amount=combatStats(s,u).damage*APPLEBOMB.factor,crit=unitCrit(s,u);
   for(const bomb of s.bombs){bomb.damage=amount;if(crit)bomb.crit={...crit};else delete bomb.crit;}
 }
+function topCompanion(s){
+  let best=null;
+  for(let i=0;i<s.board.length;i++){
+    const u=s.board[i];if(!u)continue;
+    const damage=combatStats(s,u,i).damage;
+    if(!best||damage>best.damage||damage===best.damage&&i<best.index)best={hero:u.hero,damage,index:i};
+  }
+  return best?.hero??null;
+}
+function spotlightFactor(s,id){
+  if(!has(s,'spotlight'))return 1;
+  return id===topCompanion(s)?1+RV.spotlight.top*relicScaleIn(s,'spotlight'):RV.spotlight.rest;
+}
 export function cast(s,id){
   if(s.phase!=='combat'||!s.enemies.some(e=>e.hp>0))return {ok:false,reason:'적이 나타나면 사용할 수 있습니다.'};
   const u=bestUnit(s,id),hero=HERO[id];if(!u||!s.deck.includes(id))return {ok:false,reason:'전장에 이 영웅이 있어야 합니다.'};
@@ -910,7 +926,7 @@ export function cast(s,id){
   for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
   let visualTargets=targets,gift,look;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
-  const strike=factor=>targets.forEach(e=>damage(s,e,base*factor,id));
+  const spot=spotlightFactor(s,id),strike=factor=>targets.forEach(e=>damage(s,e,base*factor*spot,id));
   if(type==='ultimate_breath'){
     u.windup=0;u.target=null;u.pose=0;
     s.goldCharge={source:u.uid,wave:s.wave,started:s.time,ends:s.time+GOLD_DRAGON.charge};
@@ -984,13 +1000,18 @@ export function cast(s,id){
     event(s,'sunSpend',{sunlight:n,points:s.board.flatMap((a,i)=>a?.hero==='sunflower'?[cellPoint(i)]:[])});
   }
   else if(type==='roulette'){
-    if(jokerChaos(s))look={chaos:true};
-    strike(JOKER.roulette);
-    if(!jokerChaos(s)){
+    const points=()=>s.board.flatMap((a,i)=>a?.hero==='joker'?[cellPoint(i)]:[]);
+    if(jokerChaos(s)){look={chaos:true};strike(JOKER.chaosRoulette);}
+    else if(jokerReady(s)){
+      look={chaos:true};strike(JOKER.chaosRoulette);
+      const from=s.jokerColor||'red';s.jokerColor='chaos';
+      event(s,'jokerColor',{from,color:'chaos',points:points()});
+    }else{
+      strike(JOKER.roulette);
       const from=s.jokerColor||'red',color=pickJokerColor(s,from);
       s.jokerSeen=(s.jokerSeen||1)|jokerBit(from)|jokerBit(color);
-      s.jokerColor=s.jokerSeen===JOKER.all?'chaos':color;
-      event(s,'jokerColor',{from,color:s.jokerColor,points:s.board.flatMap((a,i)=>a?.hero==='joker'?[cellPoint(i)]:[])});
+      s.jokerColor=color;
+      event(s,'jokerColor',{from,color,points:points()});
     }
   }
   else if(type==='applebomb'){
@@ -1060,6 +1081,7 @@ export function castPreview(s,id){
   const pct=v=>Math.round(v*100).toLocaleString('ko-KR');
   const dur=(seconds,key)=>sec(skillDuration(s,seconds*control,key));
   const hit=factor=>`${num(base*factor)} 피해`;
+  const allHit=factor=>hit(factor*spotlightFactor(s,id));
   const slowOf=amount=>Math.min(.8,amount*control);
   // Same fields cast() sees after syncStatuses, read from a copy of the effects.
   const snapshot=e=>{
@@ -1093,22 +1115,22 @@ export function castPreview(s,id){
   else if(type==='awaken')lines.push(`${dur(ULT_BUFF.awaken.seconds,'awaken')} 동안 모든 동료의 공격력이 ${pct(ULT_BUFF.awaken.power*scale)}% 오릅니다.`);
   else if(type==='march')lines.push(`${dur(ULT_BUFF.march.seconds,'march')} 동안 모든 동료의 공격이 성광 1중첩을 6초간 남기고, 공격 속도가 ${pct(ULT_BUFF.march.speed*scale)}% 오릅니다.`);
   else if(type==='glassfall'){
-    lines.push(`적 전체에게 공격력 ${CINDERELLA.ult}배, ${hit(CINDERELLA.ult)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 ${CINDERELLA.ult}배, ${allHit(CINDERELLA.ult)}를 줍니다.`);
     // The haste and the three-hour step are fixed. cast() stores buffScale but never reads it back.
     lines.push(`${dur(10)} 동안 진짜 신데렐라의 공격 속도가 ${pct(CINDERELLA.haste)}% 오르고, 4번째 공격마다 자정의 종이 울립니다.`);
   }else if(type==='gift'){
     lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 1성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 1성으로 전장에 합류합니다.');
     lines.push(`${dur(ULT_BUFF.festive.seconds,'festive')} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
   }else if(type==='goddess'){
-    lines.push(`적 전체에게 공격력 5배, ${hit(5)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 5배, ${allHit(5)}를 줍니다.`);
     lines.push(`${dur(8,'radiance')} 동안 모든 동료의 공격력이 ${pct(.5*scale)}% 오릅니다.`);
     lines.push('기절과 저주를 한 번 풉니다.');
   }else if(type==='trauma'){
-    lines.push(`적 전체에게 공격력 4배, ${hit(4)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 4배, ${allHit(4)}를 줍니다.`);
     // TRAUMA power and speed are fixed. buffScale is stored and not applied.
     lines.push(`${dur(10,'trauma')} 동안 시간의마술사가 변신해 공격력 ${pct(TRAUMA.power)}%, 공격 속도 ${pct(TRAUMA.speed)}%가 오릅니다.`);
   }else if(type==='ice_court'){
-    lines.push(`적 전체에게 공격력 9배, ${hit(9)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 9배, ${allHit(9)}를 줍니다.`);
     lines.push(`적은 ${sec(winterDuration(s,u))} 동안 ${pctText(slowOf(WINTER_COURT.slow*scale))} 느려집니다.`);
     lines.push(`겨울 동안 적이 받는 피해가 ${pct(WINTER_EXPOSURE)}% 늘어납니다.`);
     lines.push(`겨울은 ${sec(winterDuration(s,u))} 동안 이어지고, 쓰러진 적 주변의 일반 적이 ${sec(WINTER_COURT.killFreeze)} 동안 얼어붙습니다.`);
@@ -1129,7 +1151,7 @@ export function castPreview(s,id){
     }
   }else if(type==='freeze'){
     const freeze=2*control*scale;
-    lines.push(`적 전체에게 공격력 3배, ${hit(3)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 3배, ${allHit(3)}를 줍니다.`);
     lines.push(`일반 적은 ${sec(freeze)} 동안 얼고 6초간 ${pctText(slowOf(SNOW_RABBIT.skillSlow*scale))} 느려집니다. 보스는 ${sec(freeze*BOSS_CONTROL_SCALE)} 동안 얼습니다.`);
   }else if(type==='avalanche'){
     const on=targets.filter(e=>snapshot(e).controlTime>0).length;
@@ -1144,8 +1166,8 @@ export function castPreview(s,id){
     lines.push(pack.length?`가장 밀집한 반경 180 안의 적 ${pack.length}명에게 공격력 14배, ${hit(14)}를 줍니다.`:`반경 180 안에서 가장 밀집한 적에게 공격력 14배, ${hit(14)}를 줍니다.`);
     lines.push(`맞은 적은 ${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='inferno'){
-    const crisis=coreCrisis(s),factor=7*(crisis?2:1);boost={on:crisis,label:crisis?'강화 · 코어 위기':'강화 대기',hint:crisis?'':`코어 생명력이 절반 아래로 내려가면 강화되어 ${hit(14)}가 됩니다.`};
-    lines.push(`적 전체에게 공격력 ${factor}배, ${hit(factor)}를 줍니다.`);
+    const crisis=coreCrisis(s),factor=7*(crisis?2:1);boost={on:crisis,label:crisis?'강화 · 코어 위기':'강화 대기',hint:crisis?'':`코어 생명력이 절반 아래로 내려가면 강화되어 ${allHit(14)}가 됩니다.`};
+    lines.push(`적 전체에게 공격력 ${factor}배, ${allHit(factor)}를 줍니다.`);
     lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='combust'){
     const burning=targets.filter(e=>snapshot(e).burnTime>0).length;
@@ -1155,7 +1177,7 @@ export function castPreview(s,id){
     lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='plague'){
     const stacks=8,ready=targets.filter(e=>poisonNow(e).reduce((n,a)=>n+a.stacks,0)>=20);
-    lines.push(`적 전체에게 공격력 3배, ${hit(3)}와 12초 동안 독 ${stacks}중첩을 줍니다.`);
+    lines.push(`적 전체에게 공격력 3배, ${allHit(3)}와 12초 동안 독 ${stacks}중첩을 줍니다.`);
     lines.push(`이 독은 중첩당 초당 ${num(base*POISON_POWER_RATIO*poisonAmp(s))} 피해입니다.`);
     if(!ready.length)lines.push('이미 독이 20중첩 이상인 적은 남은 독 피해의 30%를 먼저 받습니다.');
     else{
@@ -1165,27 +1187,27 @@ export function castPreview(s,id){
     }
   }else if(type==='expose'){
     const raw=(.35+(s.upgrades.great_detective||0)*.02)*control*rankControl(u.rank),expose=Math.min(DAMAGE_TAKEN_CAP,raw);
-    lines.push(`적 전체에게 공격력 3배, ${hit(3)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 3배, ${allHit(3)}를 줍니다.`);
     lines.push(`10초 동안 받는 피해가 ${pct(expose)}% 늘어납니다.`+(raw>DAMAGE_TAKEN_CAP?' 상한까지 늘어납니다.':''));
   }else if(type==='quake'){
     const late=e=>e.progress>=PATH_LENGTH*2/3,lateN=targets.filter(late).length,all=lateN>0&&lateN===targets.length;
     const push=crisis=>num((crisis?320:160)*control)+'만큼',stun=crisis=>sec((crisis?3:1.5)*control*scale);
     boost={on:lateN>0,label:all?'강화':lateN?`강화 ${lateN}명`:'강화 대기',hint:lateN?'':`코어 가까이(경로 마지막 3분의 1) 온 적은 강화되어 ${push(true)} 밀려나고 ${stun(true)} 기절합니다.`};
-    if(lateN&&!all){lines.push(`적 전체에게 공격력 ${QUAKE_FACTOR}배, ${hit(QUAKE_FACTOR)}를 줍니다.`);lines.push(`강화된 ${lateN}명은 ${push(true)} 밀려나고 ${stun(true)}, 나머지는 ${push(false)} 밀려나고 ${stun(false)} 기절합니다.`);}
-    else lines.push(`적 전체에게 공격력 ${QUAKE_FACTOR}배, ${hit(QUAKE_FACTOR)}를 주고 ${push(all)} 밀어내며 ${stun(all)} 기절시킵니다.`);
+    if(lateN&&!all){lines.push(`적 전체에게 공격력 ${QUAKE_FACTOR}배, ${allHit(QUAKE_FACTOR)}를 줍니다.`);lines.push(`강화된 ${lateN}명은 ${push(true)} 밀려나고 ${stun(true)}, 나머지는 ${push(false)} 밀려나고 ${stun(false)} 기절합니다.`);}
+    else lines.push(`적 전체에게 공격력 ${QUAKE_FACTOR}배, ${allHit(QUAKE_FACTOR)}를 주고 ${push(all)} 밀어내며 ${stun(all)} 기절시킵니다.`);
     lines.push('보스는 절반만 밀려나고 절반 동안 기절합니다.');
   }else if(type==='nightmare'){
     const expose=Math.min(DAMAGE_TAKEN_CAP,.25*control*scale),stacks=4;
-    lines.push(`적 전체에게 공격력 4배, ${hit(4)}를 주고 ${num(220*control)}만큼 밀어냅니다.`);
+    lines.push(`적 전체에게 공격력 4배, ${allHit(4)}를 주고 ${num(220*control)}만큼 밀어냅니다.`);
     lines.push(`6초 동안 받는 피해가 ${pct(expose)}% 늘고, 12초 동안 독 ${stacks}중첩이 걸립니다.`);
     lines.push(`독은 중첩당 초당 ${num(base*POISON_POWER_RATIO*poisonAmp(s))} 피해입니다.`);
   }else if(type==='rewind'){
     const stun=2*control*scale;
     if(targets.length===1){
       const e=targets[0],boss=!!e.boss,held=stun*(boss?BOSS_CONTROL_SCALE:1)*(repeat(e)?ULT_CONTROL_REPEAT:1),dist=e.speed*6*control*(boss?BOSS_PUSH_SCALE:1);
-      lines.push(`적을 ${num(dist)}만큼 되돌리고 ${sec(held)} 동안 멈춘 뒤 공격력 3배, ${hit(3)}를 줍니다.`);
+      lines.push(`적을 ${num(dist)}만큼 되돌리고 ${sec(held)} 동안 멈춘 뒤 공격력 3배, ${allHit(3)}를 줍니다.`);
     }else{
-      lines.push(`각 적을 이동 속도로 ${sec(6*control)} 동안 간 거리만큼 되돌리고 공격력 3배, ${hit(3)}를 줍니다.`);
+      lines.push(`각 적을 이동 속도로 ${sec(6*control)} 동안 간 거리만큼 되돌리고 공격력 3배, ${allHit(3)}를 줍니다.`);
       lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 멈춥니다.`);
     }
   }else if(type==='vortex'||type==='singularity'){
@@ -1193,7 +1215,7 @@ export function castPreview(s,id){
     const stunSec=1.5*control*scale,slow=pct(slowOf(.6));
     lines.push(`적들을 경로 ${num(point)} 쪽으로 ${pct(pull)}% 끌어당깁니다.`);
     if(type==='vortex'){
-      lines.push(`공격력 5배, ${hit(5)}를 주고 4초 동안 ${slow}% 느려집니다.`);
+      lines.push(`공격력 5배, ${allHit(5)}를 주고 4초 동안 ${slow}% 느려집니다.`);
       lines.push(`일반 적은 ${sec(stunSec)}, 보스는 ${sec(stunSec*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
     }else{
       const marks=targets.map(e=>snapshot(e).divine),f=m=>WHALE.factor*(1+WHALE.perMark*m);
@@ -1224,11 +1246,11 @@ export function castPreview(s,id){
     lines.push(targets.length?`가장 앞선 적 ${aimed}명에게 공격력 9배, ${hit(9)}를 줍니다. 최대 ${count}명입니다.`:`가장 앞선 적에게 공격력 9배, ${hit(9)}를 줍니다. 최대 ${count}명입니다.`);
   }else if(type==='thunder'){
     const stun=1.2*control*scale;
-    lines.push(`적 전체에게 공격력 ${THUNDER_FACTOR}배, ${hit(THUNDER_FACTOR)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 ${THUNDER_FACTOR}배, ${allHit(THUNDER_FACTOR)}를 줍니다.`);
     lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
-  }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 공격력 ${factor}배, ${hit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 40마다 +1배 (최대 ${12+level}배).`);}
+  }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 공격력 ${factor}배, ${allHit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 40마다 +1배 (최대 ${12+level}배).`);}
   else if(type==='dividend'){
-    lines.push(`적 전체에게 공격력 4배, ${hit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
+    lines.push(`적 전체에게 공격력 4배, ${allHit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
     // The edict pays half of this wave's base income once; a second cast in the same wave only adds the tax.
     const edict=Math.round(waveIncome(s.wave)*.5);lines.push(`이번 웨이브 종료 시 추가 골드 +${edict}${s.edictWave===s.wave?' · 적용 중':''}`);
   }else if(type==='crush'){
@@ -1236,15 +1258,18 @@ export function castPreview(s,id){
     lines.push(`무작위 적 주변에 ${hit(CRUSH.factor)}를 ${CRUSH.gap}초 간격으로 ${CRUSH.hits}번 줍니다.${grow?` 훈련으로 범위 +${grow}%.`:''}`);
     if(targets.length===1)lines.push(`적이 하나뿐이면 모두 그 적에게 들어갑니다(합계 ${hit(CRUSH.factor*CRUSH.hits)}).`);
   }else if(type==='bigshow'){
-    lines.push(`적 전체에게 공격력 ${UNDERDOG.factor}배, ${hit(UNDERDOG.factor)}를 줍니다.`);
+    lines.push(`적 전체에게 공격력 ${UNDERDOG.factor}배, ${allHit(UNDERDOG.factor)}를 줍니다.`);
     lines.push(`쓰고 나면 아군 전체가 ${UNDERDOG.stun}초 동안 기절합니다.`);
   }else if(type==='solarflare'){
     const n=Math.min(SUNFLOWER.max,s.sunlight||0),f=SUNFLOWER.base+SUNFLOWER.per*n;
-    lines.push(`햇빛 ${n}개를 모두 써서 적 전체에게 공격력 ${f}배, ${hit(f)}를 줍니다.`);
+    lines.push(`햇빛 ${n}개를 모두 써서 적 전체에게 공격력 ${f}배, ${allHit(f)}를 줍니다.`);
   }else if(type==='roulette'){
     const color=s.jokerColor||'red';
-    lines.push(jokerChaos(s)?`적 전체에게 공격력 ${JOKER.roulette}배, ${hit(JOKER.roulette)}를 주고 카오스를 유지합니다.`:`적 전체에게 공격력 ${JOKER.roulette}배, ${hit(JOKER.roulette)}를 주고 지금 ${JOKER_NAMES[color].split(' · ')[0]}을 뺀 네 색 중 하나로 무작위로 바꿉니다.`);
-    if(jokerChaos(s))lines.push('일반 공격 시 화상·중독·성광·노출·감속을 모두 겁니다.');
+    if(jokerChaos(s)){
+      lines.push(`적 전체에게 공격력 ${JOKER.chaosRoulette}배, ${allHit(JOKER.chaosRoulette)}를 주고 카오스를 유지합니다.`);
+      lines.push('일반 공격 시 화상·중독·성광·노출·감속을 모두 겁니다.');
+    }else if(jokerReady(s))lines.push(`적 전체에게 공격력 ${JOKER.chaosRoulette}배, ${allHit(JOKER.chaosRoulette)}를 주고 카오스가 됩니다.`);
+    else lines.push(`적 전체에게 공격력 ${JOKER.roulette}배, ${allHit(JOKER.roulette)}를 주고 지금 ${JOKER_NAMES[color].split(' · ')[0]}을 뺀 네 색 중 하나로 무작위로 바꿉니다.`);
   }else if(type==='applebomb'){
     const set=(s.bombs||[]).length;
     lines.push(`경로의 무작위 위치에 사과를 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);
@@ -1252,7 +1277,7 @@ export function castPreview(s,id){
     lines.push(`피해는 폭발 순간 최고 성급 토피애플의 현재 공격력으로 계산합니다. 토피애플이 없으면 마지막 유효 공격력을 사용합니다.`);
     lines.push(`설치한 토피애플은 ${APPLEBOMB.stun}초 동안 기절합니다.`);
   }else if(type==='requiem'){
-    lines.push(`적의 모든 디버프를 지우고 적 전체에게 공격력 ${REQUIEM.factor}배, ${hit(REQUIEM.factor)}를 줍니다.`);
+    lines.push(`적의 모든 디버프를 지우고 적 전체에게 공격력 ${REQUIEM.factor}배, ${allHit(REQUIEM.factor)}를 줍니다.`);
     const n=targets.filter(e=>debuffCount(s,e)>0).length;
     if(n)lines.push(`지금 지워지는 디버프가 걸린 적 ${n}기.`);
   }else if(type==='lemonade'){
@@ -1270,13 +1295,13 @@ export function castPreview(s,id){
     lines.push(`현재 배치로 발사 예상 ${num(projected*GOLD_DRAGON.factor)} 피해. 실제 피해는 발사 순간에 정해집니다.`);
     boost={on:opening,label:opening?'강화 발사 예상':'일반 발사 예상',hint:''};
   }else if(type==='venomplague'){
-    lines.push(`적 전체에게 공격력 ${VENOM_PLAGUE.factor}배, ${hit(VENOM_PLAGUE.factor)}를 주고 중독을 ${VENOM_PLAGUE.stacks}중첩 쌓습니다.`);
+    lines.push(`적 전체에게 공격력 ${VENOM_PLAGUE.factor}배, ${allHit(VENOM_PLAGUE.factor)}를 주고 중독을 ${VENOM_PLAGUE.stacks}중첩 쌓습니다.`);
     lines.push(`${dur(VENOM_PLAGUE.seconds)} 동안 적이 받는 화상·중독 피해가 ${1+VENOM_PLAGUE.amp}배가 됩니다.`);
   }else lines.push(hero.skill.text);
 
   const gold=skillGoldCost(id);
   if(gold>0)lines.push(`골드 ${num(gold)}을 사용합니다.`);
-  return {rank:u.rank,lines,...(id==='joker'&&jokerChaos(s)?{name:skillName(s,id),cost:skillCost(s,id)}:{}),...(boost?{boost}:{}),...(dream?{name:RUMI_DREAM.name}:{})};
+  return {rank:u.rank,lines,...(id==='joker'&&(jokerReady(s)||jokerChaos(s))?{name:skillName(s,id),cost:skillCost(s,id)}:{}),...(boost?{boost}:{}),...(dream?{name:RUMI_DREAM.name}:{})};
 }
 
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
@@ -1356,6 +1381,7 @@ function completeWave(s){
   const payout={base:waveIncome(s.wave),dividend:dividend(s),edict:s.edictWave===s.wave?Math.round(waveIncome(s.wave)*.5):0};
   giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');if(payout.edict)giveGold(s,payout.edict,'여왕의 칙령');
   if(has(s,'feather'))giveGold(s,Math.round(Math.min(RV.feather.cap,RV.feather.base+RV.feather.perWave*s.wave)*relicScaleIn(s,'feather')),'첫새벽의 깃털');
+  if(has(s,'royal_crown'))giveGold(s,Math.round(RV.royal_crown.gold*relicScaleIn(s,'royal_crown')),'로열 크라운');
   s.settlement=payout;s.amuletUsed=0;addGauge(s,8);if(s.oathMods?.carry!==undefined)s.gauge=Math.min(s.gauge,s.oathMods.carry);s.shots=[];s.finishers=[];s.volleys=[];s.zones=[];s.telegraph=null;s.goldCharge=null;
   if((s.sunlight||0)<SUNFLOWER.max&&s.board.some(u=>u?.hero==='sunflower')){s.sunlight=(s.sunlight||0)+1;event(s,'sunCharge',{sunlight:s.sunlight,points:s.board.flatMap((u,i)=>u?.hero==='sunflower'?[cellPoint(i)]:[])});}
   event(s,'clear',{wave:s.wave,...payout});
@@ -1430,7 +1456,7 @@ export function step(s,dt){
     if(e.progress>=PATH_LENGTH&&e.hp>0){
       // Returning Dawn: once per run the boss walks back to the middle of the path and takes more damage from then on.
       if((e.boss||e.kind==='boss')&&has(s,'phoenix')&&(s.phoenixUses||0)<RV.phoenix.uses){s.phoenixUses=(s.phoenixUses||0)+1;s.phoenixUsed=true;e.progress=PATH_LENGTH/2;e.dawn=RV.phoenix.taken*relicScaleIn(s,'phoenix');event(s,'phoenix');}
-      else{e.hp=0;s.health-=e.boss?7:e.kind==='armor'?2:1;s.stats.leaks=(s.stats.leaks||0)+1;event(s,'leak',{boss:e.boss,health:s.health});if(has(s,'amulet')&&(s.amuletUsed||0)<RV.amulet.uses){s.amuletUsed=(s.amuletUsed||0)+1;addGauge(s,RV.amulet.starlight*relicScaleIn(s,'amulet'));}}
+      else{e.hp=0;s.health-=(e.boss?7:e.kind==='armor'?2:1)*(has(s,'royal_crown')?RV.royal_crown.core:1);s.stats.leaks=(s.stats.leaks||0)+1;event(s,'leak',{boss:e.boss,health:s.health});if(has(s,'amulet'))addGauge(s,RV.amulet.starlight*relicScaleIn(s,'amulet'));}
     }
   }
   refreshAppleBombs(s);
@@ -1549,7 +1575,7 @@ export function restore(raw){
     if(!Number.isInteger(s.sunlight)||s.sunlight<0||s.sunlight>SUNFLOWER.max||![...JOKER.colors,'chaos'].includes(s.jokerColor))return null;
     // Older saves can prove only the initial red and the currently displayed colour.
     if(s.jokerSeen===undefined){if(jokerChaos(s))return null;s.jokerSeen=1|jokerBit(s.jokerColor);}
-    if(!Number.isInteger(s.jokerSeen)||s.jokerSeen<1||s.jokerSeen>JOKER.all||!(s.jokerSeen&1)||jokerChaos(s)!==(s.jokerSeen===JOKER.all)||!jokerChaos(s)&&!(s.jokerSeen&jokerBit(s.jokerColor)))return null;
+    if(!Number.isInteger(s.jokerSeen)||s.jokerSeen<1||s.jokerSeen>JOKER.all||!(s.jokerSeen&1)||(jokerChaos(s)&&s.jokerSeen!==JOKER.all)||!jokerChaos(s)&&!(s.jokerSeen&jokerBit(s.jokerColor)))return null;
     if(s.bombs===undefined)s.bombs=[];if(s.sandStore===undefined)s.sandStore=0;if(s.amuletUsed===undefined)s.amuletUsed=0;delete s.clockBank;if(!Number.isInteger(s.amuletUsed)||s.amuletUsed<0||s.amuletUsed>9)return null;if(!Number.isFinite(s.sandStore)||s.sandStore<0||s.sandStore>1000)return null;
     for(const e of s.enemies)if(e){for(const key of ['divine','divineTime','frostStacks','frostTime','rage','shield','ccImmune','frostLock','dawn','ultControl'])if(e[key]===undefined)e[key]=0;}
     // Frost stacks were retired by the stat renewal; an in-progress run drops them.

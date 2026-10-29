@@ -153,6 +153,14 @@ test('older saves gain relicRev 2 and an in-progress run still resumes',()=>{
   const bad=structuredClone(createProfile(NOW));bad.relicRev=1;assert.equal(validateProfile(bad),false);
 });
 
+test('older saves gain the relic patch entries',()=>{
+  const raw=createProfile(NOW);
+  for(const id of ['spotlight','royal_crown','dream_crystal'])delete raw.relics[id];
+  const loaded=parseProfile(JSON.stringify(raw));
+  assert.ok(loaded);
+  for(const id of ['spotlight','royal_crown','dream_crystal'])assert.deepEqual(loaded.relics[id],{owned:false,enhance:0,copies:0});
+});
+
 test('a dispatch cannot consume the last five battle heroes and has a fixed 24-hour receipt',()=>{
   const p=createProfile(NOW);p.cleared=9;const s=storeFor(p);
   assert.equal(s.transact('dispatch',{slot:0,id:'star_boy'},NOW).ok,false);

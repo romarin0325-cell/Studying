@@ -147,7 +147,7 @@ function ultValue(s,m,id,gv){
       const i=s.board.indexOf(u),lost=(i>=0?unitValue(s,u,i):0)*m.scale*Math.min(rem,24)*.1*n;
       return Math.max(0,strike(E.SUNFLOWER.base+E.SUNFLOWER.per*n)*(n>=3?1:.6)-lost);
     }
-    case 'roulette':return strike(E.JOKER.roulette);
+    case 'roulette':return strike((E.jokerReady(s)||E.jokerChaos(s))?E.JOKER.chaosRoulette:E.JOKER.roulette);
     case 'bigshow':return Math.max(0,strike(E.UNDERDOG.factor)-dps*E.UNDERDOG.stun);
     case 'applebomb':{
       if((s.bombs||[]).length>=E.APPLEBOMB.max||!list.length)return 0;
