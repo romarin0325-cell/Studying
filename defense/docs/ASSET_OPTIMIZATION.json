@@ -55,7 +55,7 @@
     "outputBytes": 16881088,
     "optimizedFiles": 173,
     "derivedFiles": 159,
-    "derivedOutputBytes": 3840854
+    "derivedOutputBytes": 3841028
   },
   "images": [
     {
@@ -7735,10 +7735,10 @@
       "source": "./assets/cast-v2/gold_dragon.webp",
       "profile": "portrait",
       "crop": {
-        "left": 125,
-        "top": 84,
-        "width": 250,
-        "height": 250
+        "left": 130,
+        "top": 95,
+        "width": 240,
+        "height": 240
       },
       "destination": "./assets/optimized/ui/portraits/gold_dragon.webp",
       "uses": [
@@ -7747,8 +7747,8 @@
       "sourceSha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52",
       "output": {
         "path": "./assets/optimized/ui/portraits/gold_dragon.webp",
-        "bytes": 24778,
-        "sha256": "846f1ec2fa781557dc217d985a5528d366681517e75a16b8614018d3fa077f46",
+        "bytes": 24952,
+        "sha256": "54ff1b69b43297634890ce36bff7506eac086741b1e12dc82a88ae7223cef210",
         "metadata": {
           "width": 240,
           "height": 240,
