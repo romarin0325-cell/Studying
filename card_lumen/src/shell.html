@@ -39,6 +39,8 @@
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6Z"/><path d="M12 16.5s-3.5-2-3.5-4.4a1.9 1.9 0 0 1 3.5-1 1.9 1.9 0 0 1 3.5 1c0 2.4-3.5 4.4-3.5 4.4Z"/></symbol>
     <symbol id="i-gem" viewBox="0 0 24 24"><path d="M7 4h10l4 5-9 11L3 9Z"/><path d="M3 9h18M9.5 4 8 9l4 11 4-11-1.5-5"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="1.5"/><path d="M2.5 9h19v-3h-19ZM12 6v14"/><path d="M12 6C10.5 3 7 3 7.5 5.2 8 7 12 6 12 6s4 1 4.5-.8C17 3 13.5 3 12 6Z"/></symbol>
   </defs></svg>
   <div class="world-backdrop" aria-hidden="true"><i class="lm-art"></i><i class="lm-shade"></i></div>
 
@@ -62,6 +64,7 @@
         <h1 class="lm-wordmark">DREAM<span>WEAVER</span></h1>
         <p class="lm-title-line">말이 마법이 되는 카드 여정</p>
       </div>
+      <div id="lm-title-fan" class="lm-title-fan" aria-hidden="true"></div>
       <div class="lm-title-dock">
         <div id="title-loading" class="title-loading" role="status">기록실을 여는 중…</div>
         <div class="title-screen-actions">
@@ -78,6 +81,18 @@
     </section>
 
     <section id="screen-menu" class="screen" aria-label="로비">
+      <section id="lm-journey" class="lm-journey" aria-label="다음 상대">
+        <button id="lm-foe" class="lm-foe" type="button" onclick="LumenUI.showFoe()">
+          <span class="lm-foe-copy">
+            <small id="lm-foe-kicker" class="lm-foe-kicker">NEXT ENCOUNTER</small>
+            <strong id="lm-foe-name" class="lm-foe-name"></strong>
+            <span id="lm-foe-meta" class="lm-foe-meta"></span>
+            <span id="lm-foe-skills" class="lm-foe-skills"></span>
+            <span class="lm-foe-route"><span id="lm-route" class="lm-route" aria-hidden="true"></span><small id="lm-route-note" class="lm-route-note"></small></span>
+          </span>
+          <span id="lm-foe-art" class="lm-foe-art"></span>
+        </button>
+      </section>
       <section class="lm-party" aria-label="출전 파티">
         <div class="lm-section-head"><h2>출전 파티</h2><button class="lm-link" type="button" onclick="RPG.openDeck()">편성<svg><use href="#i-next"/></svg></button></div>
         <div id="astra-party" class="lm-party-row"></div>
@@ -144,20 +159,19 @@
       </div>
       <div class="visual-stage lm-stage">
         <button id="player-actor-box" class="battle-actor player" type="button" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)">
-          <div class="portrait lm-actor-art"><img id="p-img" alt="출전 카드"></div>
+          <div class="portrait lm-actor-art"><img id="p-img" alt="출전 카드"><div id="p-buffs" class="actor-buffs"></div></div>
           <div class="lm-actor-plate"><small id="lm-p-slot">선봉</small><strong id="p-name">Player</strong></div>
           <div class="lm-gauge lm-gauge-hp"><div class="actor-hp-bar"><i class="lm-ghost"></i><div id="p-hp-bar" class="actor-hp-fill"></div></div><span class="lm-gauge-num" id="lm-p-hp"></span></div>
           <div class="lm-gauge lm-gauge-mp"><div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div><span class="lm-gauge-num" id="lm-p-mp"></span></div>
-          <div id="p-buffs" class="actor-buffs"></div>
         </button>
         <button id="enemy-actor-box" class="battle-actor enemy" type="button" onclick="RPG.showBattleStat('enemy', 0)">
-          <div class="portrait lm-actor-art"><img id="e-img" alt="상대"></div>
+          <div class="portrait lm-actor-art"><img id="e-img" alt="상대"><div id="e-buffs" class="actor-buffs"></div></div>
           <div class="lm-actor-plate"><small id="lm-e-tag">ENEMY</small><strong id="e-name">Enemy</strong></div>
           <div class="lm-gauge lm-gauge-hp"><div class="actor-hp-bar"><i class="lm-ghost"></i><div id="e-hp-bar" class="actor-hp-fill"></div></div><span class="lm-gauge-num" id="lm-e-hp"></span></div>
           <div class="lm-gauge lm-gauge-mp lm-gauge-blank" aria-hidden="true"></div>
-          <div id="e-buffs" class="actor-buffs"></div>
         </button>
         <div id="lm-banner" class="lm-banner" aria-hidden="true"></div>
+        <div id="lm-cutin" class="lm-cutin" hidden></div>
       </div>
       <div id="battle-log" class="log-container" role="log" aria-label="전투 기록"></div>
       <div id="battle-controls" class="control-panel"></div>
@@ -204,6 +218,7 @@
             <button class="lm-row-btn" type="button" onclick="Astra.closeSettings(); RPG.showRecords()">기록 확인<small>엔드리스 최고 기록</small></button>
             <button class="lm-row-btn" type="button" data-run-only onclick="Astra.closeSettings(); RPG.openCardPoolViewer()">카드풀 확인<small>이번 모드에서 나올 수 있는 카드</small></button>
             <button id="lm-tutoring-toggle" class="lm-row-btn lm-switch" type="button" onclick="RPG.toggleTutoringEvent(); LumenUI.syncSettings()">개인과외 이벤트<small>학습 후 루미의 수업 제안</small><i aria-hidden="true"></i></button>
+            <button id="lm-cutin-toggle" class="lm-row-btn lm-switch" type="button" onclick="LumenUI.toggleCutin()">스킬 컷인<small>3단계 스킬과 상대의 대기술 연출 · 화면을 누르면 건너뜀</small><i aria-hidden="true"></i></button>
             <button class="lm-row-btn lm-row-danger" type="button" data-run-only onclick="Astra.closeSettings(); RPG.toTitle()">타이틀로<small>저장하지 않은 진행은 남지 않습니다</small></button>
           </div>
         </section>
