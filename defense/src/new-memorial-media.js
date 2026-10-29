@@ -25,7 +25,7 @@ export const NEW_MEMORIAL_MEDIA = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "fd19a27158dcd2b223cdd91ca49d0aba5d76fa91e3501f687c20fe0d63d8a65c",
+    "bodySha256": "8d315c13f09b4a184d4707142002239456f9631c437e50b47155e6be873f3bb1",
     "avifPath": "./assets/memorial/replacements/gold_dragon/4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555.avif",
     "webp": {
       "path": "./assets/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
