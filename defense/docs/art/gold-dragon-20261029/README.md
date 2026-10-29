@@ -9,7 +9,7 @@
 - sd/gold_dragon.png: 선택한 손실 없는1024×1024 패킹. 게임 보관본은 assets/cast-v2/gold_dragon.webp.
 - installation.json: 설치 PNG/WebP 경로·해시와 방향별 기준점. 보관 WebP SHA-256은 e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52.
 - 구조 입력은 여성형·큰 키 가이드, 화풍은 동결된 세이렌, 정체성은 제공된 원화다. 승인된 에인션트 드래곤을 용족 장식·재질 비교로 함께 사용했다.
-- 제공 원화는 assets/memorial-sources/gold_dragon/8644f560115f835e6b5c5d7700b5b0cc81cd3a6a9953c61490e33579ffa721d3.png에 보존한다.
+- 제공 원화는 assets/memorial-sources/gold_dragon/8644f560115f835e6b5c5d7700b5b0cc81cd3a6a9953c61490e33579ffa721d3.png에 보존한다. 메모리얼 그림은 2026-10-30 사용자가 고른 장면 그림(assets/memorial-sources/gold_dragon/1e395f8c….png)으로 바뀌었고, 원화는 SD 정체성 입력으로만 남는다.
 - vfx/generation.png, prompt.txt, packing.json: 필살기6요소의 생성 원본·프롬프트·20px 셀 여백·출력 해시. 배경 키잉 없이 native alpha를 사용한다.
 - 일반 공격은 이미지 없이 그린다: 네 갈래 빔(따뜻한 금색 몸통 + 가는 밝은 심), 빔 머리를 따라 흩어지는 별가루, 적중 지점의 작은 별 반짝임. 처음 설치한 ancient-cross.webp 중앙 도장은 캐릭터 뒤에 깔려 네 끝만 몸 밖으로 삐져나와 2026-10-29에 뺐다(에인션트 드래곤도 함께). 그 이미지는 에인션트 드래곤의 적중 표시로만 남는다.
 

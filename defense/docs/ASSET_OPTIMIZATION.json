@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 31751995,
-    "deployableSourceBytes": 29927721,
-    "outputBytes": 16881088,
+    "sourceBytes": 31736757,
+    "deployableSourceBytes": 29912483,
+    "outputBytes": 16861440,
     "optimizedFiles": 173,
     "derivedFiles": 162,
-    "derivedOutputBytes": 3899494
+    "derivedOutputBytes": 3894640
   },
   "images": [
     {
@@ -5401,14 +5401,14 @@
     },
     {
       "id": "memorial:gold_dragon",
-      "source": "./assets/memorial/replacements/gold_dragon/4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555.avif",
+      "source": "./assets/memorial/replacements/gold_dragon/446efdbf954dcfe8d22b4406c1535aad1e3a92176c948358e6aea8be604d245e.avif",
       "profile": "memorialAvif",
       "uses": [
         "window.__MEMORIAL_MEDIA__.gold_dragon; standalone painting / web primary"
       ],
       "original": {
-        "bytes": 58403,
-        "sha256": "4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555",
+        "bytes": 50063,
+        "sha256": "446efdbf954dcfe8d22b4406c1535aad1e3a92176c948358e6aea8be604d245e",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -5417,9 +5417,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial/replacements/gold_dragon/4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555.avif",
-        "bytes": 45855,
-        "sha256": "5378f02e3bc131cc937891aaa17cfb77426007bd925e8a5aa811744d6d6960d1",
+        "path": "./assets/optimized/memorial/replacements/gold_dragon/446efdbf954dcfe8d22b4406c1535aad1e3a92176c948358e6aea8be604d245e.avif",
+        "bytes": 38785,
+        "sha256": "8a2a1896c46e9c3925529901e79e30aca731332adb78e010d6ba1e4b86f2d294",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -5431,15 +5431,15 @@
     },
     {
       "id": "memorial-webp:gold_dragon",
-      "source": "./assets/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
+      "source": "./assets/memorial-webp/replacements/gold_dragon/3c97b88aeecd123594789af85b9a138ddc7257db83608d7a122249c180ecaff2.webp",
       "profile": "memorialWebp",
       "uses": [
         "window.__MEMORIAL_MEDIA__.gold_dragon; compat painting / web fallback",
         "memorialThumb:gold_dragon; album thumbnail cropped from preserved source"
       ],
       "original": {
-        "bytes": 99294,
-        "sha256": "d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c",
+        "bytes": 92396,
+        "sha256": "3c97b88aeecd123594789af85b9a138ddc7257db83608d7a122249c180ecaff2",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -5448,9 +5448,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
-        "bytes": 96712,
-        "sha256": "7699be4bfc21818bfc04194368ad2fd637fdb4ae4d5f936ca87aa4484c2498b1",
+        "path": "./assets/optimized/memorial-webp/replacements/gold_dragon/3c97b88aeecd123594789af85b9a138ddc7257db83608d7a122249c180ecaff2.webp",
+        "bytes": 84134,
+        "sha256": "9d82b419ed59ebd14c163d1662935afaa3c57d8d9340f901efe6fd0903a10f84",
         "metadata": {
           "width": 720,
           "height": 1080,
@@ -9846,18 +9846,18 @@
     },
     {
       "id": "memorialThumb:gold_dragon",
-      "source": "./assets/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
+      "source": "./assets/memorial-webp/replacements/gold_dragon/3c97b88aeecd123594789af85b9a138ddc7257db83608d7a122249c180ecaff2.webp",
       "profile": "memorialThumb",
       "crop": null,
       "destination": "./assets/optimized/ui/memorial-thumbs/gold_dragon.webp",
       "uses": [
         "window.__MEMORIAL_THUMBS__; album without full-painting decode"
       ],
-      "sourceSha256": "d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c",
+      "sourceSha256": "3c97b88aeecd123594789af85b9a138ddc7257db83608d7a122249c180ecaff2",
       "output": {
         "path": "./assets/optimized/ui/memorial-thumbs/gold_dragon.webp",
-        "bytes": 18206,
-        "sha256": "803408b62ae11a3ad2fd50b8c636ebfc3d0b32fffe98501c56846eeb3432b78a",
+        "bytes": 13352,
+        "sha256": "f7f925d29eae9e6218345e27463a1e5037779010fe595baa53ba495ea28b201f",
         "metadata": {
           "width": 240,
           "height": 360,
