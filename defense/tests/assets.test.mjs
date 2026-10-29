@@ -55,7 +55,7 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,91);
+  assert.equal(Object.keys(ASSET_PATHS).length,92);
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['effects-joker-sun',768,384],['zeke-ragnarok',1536,512],['luna-blade',768,256],['ash-armageddon',1024,512],['effects-chaos-sun',1024,512],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.
@@ -71,9 +71,9 @@ test('all collection, boss and battle textures resolve to local art with valid a
     const bytes=await fs.readFile(path.join(root,a.source));
     assert.equal(createHash('sha256').update(bytes).digest('hex'),a.sha256,a.id);
   }
-  assert.equal(ARTIFACTS.length,27);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,27);
-  // Rows of three in the collection: 12 C, 6 R, 6 SR, 3 UR.
-  assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,3]);
+  assert.equal(ARTIFACTS.length,30);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,30);
+  // Rows of three in the collection: 12 C, 6 R, 6 SR, 6 UR.
+  assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,6]);
 });
 
 test('every unit faces outward: the left cell looks left, the right cell is its mirror view and looks right',async()=>{
@@ -94,7 +94,7 @@ test('Gold facing uses anatomical cheek regions, excludes gold horns, and still 
 test('optimized images preserve the source pack, codec, alpha and sprite geometry',async()=>{
   const {manifest,read}=await loadImagePack();
   assert.ok(manifest.totals.outputBytes<manifest.totals.deployableSourceBytes);
-  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','zeke-slash']);
+  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','relics-patch','zeke-slash']);
   for(const image of manifest.images){
     if(image.id.startsWith('atlas:unit-')){
       const m=await sharp(read(image.source)).metadata();

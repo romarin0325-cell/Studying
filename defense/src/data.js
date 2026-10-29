@@ -1516,7 +1516,7 @@ export const ARTIFACTS = [
     "scale": ["20%"],
     "icon": 5,
     "atlas": "relics",
-    "rarity": "C",
+    "rarity": "SR",
     "color": "#bbd5cc"
   },
   {
@@ -1572,8 +1572,8 @@ export const ARTIFACTS = [
   {
     "id": "amulet",
     "name": "수호자의 부적",
-    "text": "코어 가까이(경로 마지막 3분의 1) 온 적에게 주는 피해가 35% 늘어납니다. 코어가 피해를 입으면 별빛을 15 얻습니다(웨이브마다 한 번).",
-    "scale": ["35%", "15"],
+    "text": "코어 가까이(경로 마지막 3분의 1) 온 적에게 주는 피해가 35% 늘어납니다. 코어가 피해를 입을 때마다 별빛을 5 얻습니다.",
+    "scale": ["35%", "5"],
     "icon": 1,
     "atlas": "relics-new",
     "rarity": "C",
@@ -1602,8 +1602,8 @@ export const ARTIFACTS = [
   {
     "id": "tide",
     "name": "파도의 소라",
-    "text": "감속을 거는 공격이 맞으면 반경 80 안의 적에게 그 공격 피해의 22%를 주는 물보라가 일어납니다. 장판은 0.5초마다 일어납니다.",
-    "scale": ["22%"],
+    "text": "별빛을 100 이상 지니고 있으면 모든 동료의 공격력이 30% 오릅니다.",
+    "scale": ["30%"],
     "icon": 12,
     "atlas": "relics",
     "rarity": "R",
@@ -1612,8 +1612,8 @@ export const ARTIFACTS = [
   {
     "id": "roots",
     "name": "영원의 뿌리",
-    "text": "장판의 지속 시간이 15%, 범위가 6% 늘어납니다.",
-    "scale": ["15%", "6%"],
+    "text": "장판의 지속 시간이 20%, 범위가 8% 늘어납니다.",
+    "scale": ["20%", "8%"],
     "icon": 13,
     "atlas": "relics",
     "rarity": "R",
@@ -1642,11 +1642,11 @@ export const ARTIFACTS = [
   {
     "id": "twin",
     "name": "쌍성의 거울",
-    "text": "필살기 피해가 적중하고 1.5초 뒤 100%로 한 번 더 들어갑니다. 버프와 소환은 반복되지 않습니다.",
-    "scale": ["100%"],
+    "text": "필살기 피해가 적중하고 1.5초 뒤 120%로 한 번 더 들어갑니다. 버프와 소환은 반복되지 않습니다.",
+    "scale": ["120%"],
     "icon": 16,
     "atlas": "relics",
-    "rarity": "SR",
+    "rarity": "UR",
     "color": "#c9a0f5"
   },
   {
@@ -1662,11 +1662,11 @@ export const ARTIFACTS = [
   {
     "id": "alchemy",
     "name": "별빛 연금술",
-    "text": "합성으로 생긴 동료는 그 웨이브부터 2웨이브 동안 공격력이 50% 오릅니다.",
-    "scale": ["50%"],
+    "text": "합성으로 생긴 동료는 그 웨이브부터 2웨이브 동안 공격력이 60% 오릅니다.",
+    "scale": ["60%"],
     "icon": 18,
     "atlas": "relics",
-    "rarity": "SR",
+    "rarity": "UR",
     "color": "#c9a0f5"
   },
   {
@@ -1683,7 +1683,7 @@ export const ARTIFACTS = [
     "id": "tempo_bell",
     "name": "이어지는 종",
     "text": "웨이브를 넘길 때마다 모든 동료의 공격 속도가 4% 오릅니다(최대 36%).",
-    "scale": ["4%", "36%"],
+    "scale": ["4%"],
     "icon": 0,
     "atlas": "relics-expansion",
     "rarity": "SR",
@@ -1692,11 +1692,11 @@ export const ARTIFACTS = [
   {
     "id": "chalice",
     "name": "독화의 성배",
-    "text": "불타면서 독이 5중첩 이상 쌓인 적이 받는 피해가 60% 늘어납니다.",
+    "text": "불타면서 독이 3중첩 이상 쌓인 적이 받는 피해가 60% 늘어납니다.",
     "scale": ["60%"],
     "icon": 2,
     "atlas": "relics-new",
-    "rarity": "SR",
+    "rarity": "UR",
     "color": "#c9a0f5"
   },
   {
@@ -1728,6 +1728,36 @@ export const ARTIFACTS = [
     "atlas": "relics-expansion",
     "rarity": "UR",
     "color": "#c9a0f5"
+  },
+  {
+    "id": "spotlight",
+    "name": "스포트라이트",
+    "text": "적 전체를 치는 필살기의 피해가 공격력이 가장 높은 동료라면 100% 늘고, 다른 동료라면 25%만 들어갑니다.",
+    "scale": ["100%"],
+    "icon": 0,
+    "atlas": "relics-patch",
+    "rarity": "SR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "royal_crown",
+    "name": "로열 크라운",
+    "text": "코어가 받는 피해가 3배가 되고, 웨이브를 마칠 때마다 골드 30을 받습니다.",
+    "scale": [{"t":"30", "int":true}],
+    "icon": 1,
+    "atlas": "relics-patch",
+    "rarity": "SR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "dream_crystal",
+    "name": "꿈의 결정",
+    "text": "원정을 시작할 때 별빛을 10 더 얻고, 루미의 공격력이 100% 오릅니다.",
+    "scale": [{"t":"10", "int":true}, "100%"],
+    "icon": 2,
+    "atlas": "relics-patch",
+    "rarity": "C",
+    "color": "#bbd5cc"
   }
 ];
 
@@ -1965,7 +1995,8 @@ export const ASSET_PATHS = {
   "luna-blade": "./assets/merge/luna-blade.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
   "orbit-sea": "./assets/merge/orbit-sea.webp",
-  "relics-new": "./assets/merge/relics-new.webp"
+  "relics-new": "./assets/merge/relics-new.webp",
+  "relics-patch": "./assets/merge/relics-patch.webp"
 };
 
 export const STAGE_THEMES = [

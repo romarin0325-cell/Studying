@@ -22,7 +22,7 @@ export const HEROES = [...Object.entries(ROSTER).flatMap(([rarity,ids])=>ids.map
   ...source.HERO[id],rarity,hidden:false,name:id==='avalanche_maid'?'메이드':source.HERO[id].name,
 }))),...HIDDEN.map(id=>({...source.HERO[id],rarity:'UR',hidden:true}))];
 export const HERO = Object.fromEntries(HEROES.map(h=>[h.id,h]));
-// Each relic states its rarity in data.js (12 C, 6 R, 6 SR, 3 UR). The list stays grouped C → R → SR → UR
+// Each relic states its rarity in data.js (12 C, 6 R, 6 SR, 6 UR). The list stays grouped C → R → SR → UR
 // for the collection and the draw pools, so a relic added anywhere in the data keeps its own rarity.
 export const ARTIFACTS = source.ARTIFACTS.map(a=>{
   if(!RARITIES.includes(a.rarity))throw new Error(`Relic ${a.id} needs a rarity: C, R, SR or UR.`);

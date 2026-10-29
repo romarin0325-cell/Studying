@@ -124,7 +124,8 @@ export class Renderer {
       if(tele.pattern==='judgement'){const p=cellPoint(tele.cells[0]),g=ctx.createLinearGradient(0,0,0,p.y);g.addColorStop(0,'#fff2c000');g.addColorStop(1,`rgba(255,236,170,${.25+(1-left/(tele.total||2.6))*.35})`);ctx.fillStyle=g;ctx.fillRect(p.x-14-(1-left/(tele.total||2.6))*10,0,28+(1-left/(tele.total||2.6))*20,p.y);}}
     const entities=this.entities;entities.length=0;for(let i=0;i<25;i++)if(s.board[i])entities.push({kind:'hero',i,y:cellPoint(i).y+20});for(const e of s.enemies)entities.push({kind:'enemy',e,y:this.fx.point(e.uid).y});entities.sort((a,b)=>a.y-b.y);
     for(const ent of entities)ent.kind==='hero'?this.drawHero(s,ent.i):this.drawEnemy(ent.e,s.chapter);
-    this.fx.drawPersonalTraits(s,true);
+    // A unit being dragged hides its status panel (Joker wheel, Aurora count...) until it is dropped.
+    {const held=this.drag?s.board.findIndex(u=>u?.uid===this.drag.uid):-1,unit=held>=0?s.board[held]:null;if(unit)s.board[held]=null;this.fx.drawPersonalTraits(s,true);if(unit)s.board[held]=unit;}
     this.fx.drawFinisherLocks(s);
     for(const shot of s.shots)this.drawShot(shot,s);
     this.fx.drawFinishers(s);

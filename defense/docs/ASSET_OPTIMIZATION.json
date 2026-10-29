@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 31552689,
+    "sourceBytes": 31751995,
     "deployableSourceBytes": 29927721,
     "outputBytes": 16881088,
     "optimizedFiles": 173,
-    "derivedFiles": 159,
-    "derivedOutputBytes": 3841028
+    "derivedFiles": 162,
+    "derivedOutputBytes": 3899668
   },
   "images": [
     {
@@ -2054,7 +2054,6 @@
         "relic:frost; collection / summon / equipment",
         "relic:banner; collection / summon / equipment",
         "relic:chorus; collection / summon / equipment",
-        "relic:lantern; collection / summon / equipment",
         "relic:lens; collection / summon / equipment",
         "relic:seed; collection / summon / equipment",
         "relic:feather; collection / summon / equipment",
@@ -2065,10 +2064,11 @@
         "relic:roots; collection / summon / equipment",
         "relic:guild; collection / summon / equipment",
         "relic:phoenix; collection / summon / equipment",
-        "relic:twin; collection / summon / equipment",
+        "relic:lantern; collection / summon / equipment",
         "relic:constellation; collection / summon / equipment",
-        "relic:alchemy; collection / summon / equipment",
         "relic:orbit; collection / summon / equipment",
+        "relic:twin; collection / summon / equipment",
+        "relic:alchemy; collection / summon / equipment",
         "Source for collection relic icon crops."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
@@ -2900,6 +2900,30 @@
       "original": {
         "bytes": 51010,
         "sha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+        "metadata": {
+          "width": 512,
+          "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
+    },
+    {
+      "id": "atlas:relics-patch",
+      "source": "./assets/merge/relics-patch.webp",
+      "profile": null,
+      "uses": [
+        "relic:dream_crystal; collection / summon / equipment",
+        "relic:spotlight; collection / summon / equipment",
+        "relic:royal_crown; collection / summon / equipment",
+        "Source for collection relic icon crops."
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 199306,
+        "sha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -8401,32 +8425,6 @@
       }
     },
     {
-      "id": "relic:lantern",
-      "source": "./assets/merge/relics.webp",
-      "profile": "relic",
-      "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 5
-      },
-      "destination": "./assets/optimized/ui/relics/lantern.webp",
-      "uses": [
-        "window.__GARDEN_MEDIA__; collection / summon / equipment"
-      ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
-      "output": {
-        "path": "./assets/optimized/ui/relics/lantern.webp",
-        "bytes": 13678,
-        "sha256": "a3bdebc87f176aa777e5d1b780a6d48c656df7fc23d5929f51e5c65c879ba356",
-        "metadata": {
-          "width": 240,
-          "height": 240,
-          "hasAlpha": true,
-          "codec": "webp"
-        }
-      }
-    },
-    {
       "id": "relic:lens",
       "source": "./assets/merge/relics.webp",
       "profile": "relic",
@@ -8574,6 +8572,32 @@
         "path": "./assets/optimized/ui/relics/amulet.webp",
         "bytes": 14362,
         "sha256": "20c76c7c457b1253c3f353ae83b521851b992ef0731174d7daafb68007dc5b61",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:dream_crystal",
+      "source": "./assets/merge/relics-patch.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 2
+      },
+      "destination": "./assets/optimized/ui/relics/dream_crystal.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
+      "output": {
+        "path": "./assets/optimized/ui/relics/dream_crystal.webp",
+        "bytes": 24874,
+        "sha256": "9adb1d0a85ef37f9fb53fc4d9a272d17354605da41ca5880ffb89ca799cd588f",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8739,23 +8763,23 @@
       }
     },
     {
-      "id": "relic:twin",
+      "id": "relic:lantern",
       "source": "./assets/merge/relics.webp",
       "profile": "relic",
       "crop": {
         "columns": 5,
         "rows": 4,
-        "index": 16
+        "index": 5
       },
-      "destination": "./assets/optimized/ui/relics/twin.webp",
+      "destination": "./assets/optimized/ui/relics/lantern.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
       "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
       "output": {
-        "path": "./assets/optimized/ui/relics/twin.webp",
-        "bytes": 25566,
-        "sha256": "8be9f2fcc32ad2da4dbd2c90079912aa737912f887861f5851df6cb6a964c3f5",
+        "path": "./assets/optimized/ui/relics/lantern.webp",
+        "bytes": 13678,
+        "sha256": "a3bdebc87f176aa777e5d1b780a6d48c656df7fc23d5929f51e5c65c879ba356",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8782,32 +8806,6 @@
         "path": "./assets/optimized/ui/relics/constellation.webp",
         "bytes": 23242,
         "sha256": "ecdda70748eb022e6fb468faef0b25ec43b33a5c2db35f4406c3c50bd3b3eefd",
-        "metadata": {
-          "width": 240,
-          "height": 240,
-          "hasAlpha": true,
-          "codec": "webp"
-        }
-      }
-    },
-    {
-      "id": "relic:alchemy",
-      "source": "./assets/merge/relics.webp",
-      "profile": "relic",
-      "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 18
-      },
-      "destination": "./assets/optimized/ui/relics/alchemy.webp",
-      "uses": [
-        "window.__GARDEN_MEDIA__; collection / summon / equipment"
-      ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
-      "output": {
-        "path": "./assets/optimized/ui/relics/alchemy.webp",
-        "bytes": 17296,
-        "sha256": "27286a73b3a8fa017c68f71664bbe0f920bfc4b379c37113148c426a8ad5c4ff",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8860,6 +8858,110 @@
         "path": "./assets/optimized/ui/relics/tempo_bell.webp",
         "bytes": 15426,
         "sha256": "f0c8302b3cc73505b12ce5446b7fed8372196ddfac650c5bd3264c0643944e8e",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:spotlight",
+      "source": "./assets/merge/relics-patch.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 0
+      },
+      "destination": "./assets/optimized/ui/relics/spotlight.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
+      "output": {
+        "path": "./assets/optimized/ui/relics/spotlight.webp",
+        "bytes": 13024,
+        "sha256": "9b6a7dbabb831b10c36d4f5ac0e6a6aca971c851450fb970d59c68cd118035a1",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:royal_crown",
+      "source": "./assets/merge/relics-patch.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 2,
+        "rows": 2,
+        "index": 1
+      },
+      "destination": "./assets/optimized/ui/relics/royal_crown.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
+      "output": {
+        "path": "./assets/optimized/ui/relics/royal_crown.webp",
+        "bytes": 20742,
+        "sha256": "55f1275d38264c54509b36bb6ea1b99dad6594d982cfc57a791b4dd49a04e89a",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:twin",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 16
+      },
+      "destination": "./assets/optimized/ui/relics/twin.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/twin.webp",
+        "bytes": 25566,
+        "sha256": "8be9f2fcc32ad2da4dbd2c90079912aa737912f887861f5851df6cb6a964c3f5",
+        "metadata": {
+          "width": 240,
+          "height": 240,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      }
+    },
+    {
+      "id": "relic:alchemy",
+      "source": "./assets/merge/relics.webp",
+      "profile": "relic",
+      "crop": {
+        "columns": 5,
+        "rows": 4,
+        "index": 18
+      },
+      "destination": "./assets/optimized/ui/relics/alchemy.webp",
+      "uses": [
+        "window.__GARDEN_MEDIA__; collection / summon / equipment"
+      ],
+      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "output": {
+        "path": "./assets/optimized/ui/relics/alchemy.webp",
+        "bytes": 17296,
+        "sha256": "27286a73b3a8fa017c68f71664bbe0f920bfc4b379c37113148c426a8ad5c4ff",
         "metadata": {
           "width": 240,
           "height": 240,
