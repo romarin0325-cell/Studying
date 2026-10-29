@@ -13,7 +13,7 @@
 | `card_claude/` | DREAMWEAVER · Claude UI 비교 빌드 | [README](card_claude/README.md) | `card_claude/dist/DREAMWEAVER-Claude.html` |
 | `shooter/` | 별의 잔향 · ASTRAL BLOOM | [README](shooter/README.md) · [doc](shooter/doc/README.md) | `shooter/dist/AstralBloom.html` |
 | `survivor/` | ASTRA: NOCTURNE | [README](survivor/README.md) · [doc](survivor/doc/README.md) | `survivor/dist/AstraNocturne.html` |
-| `rpg/` | Turn RPG: Legend Edition v9.5 | [README](rpg/README.md) | `rpg/new.html` (빌드 없음) |
+| `rpg/` | Turn RPG: Legend Edition | [README](rpg/README.md) | `rpg/new.html` (단일 파일, 빌드 없음) |
 
 `card_astra/`, `card_lumen/`, `card_claude/`는 `card/`의 규칙(`card/game/`)과 에셋을 읽습니다. `card_manual/`은 Card의 플레이어용 매뉴얼입니다.
 
