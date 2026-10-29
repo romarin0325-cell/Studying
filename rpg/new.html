@@ -165,26 +165,33 @@ main { position: relative; flex: 1; min-height: 0; }
 #scr-town[data-tab=home] #page-home { display: flex; }
 .home-bg { position: absolute; inset: 0; }
 .home-bg .scenery { width: 100%; height: 100%; }
-.home-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(238, 241, 247, 0) 30%, rgba(238, 241, 247, .95) 70%); }
-.home-hero { position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 47%) 1fr; gap: 14px; padding: 12px 14px 0; align-items: start; }
-.home-art { position: relative; }
-.home-art .frame { width: 100%; }
-.hero-name { position: absolute; z-index: 3; left: -14px; bottom: 7%; display: flex; flex-direction: column; padding: 6px 24px 6px 18px; background: var(--navy); color: #fff; clip-path: var(--slant); }
-.hero-name b { font-size: 20px; font-weight: 900; line-height: 1.1; }
+.home-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(238, 241, 247, 0) 45%, rgba(238, 241, 247, .96) 72%); }
+/* Lobby: the hero card takes whatever height is left, so the art fills the middle on every screen. */
+.home { position: relative; z-index: 1; flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; gap: 10px; padding: 12px 14px 22px; }
+.home-stage { position: relative; min-height: 0; display: flex; justify-content: center; }
+.home-glow { position: absolute; left: 50%; top: 50%; width: 120%; aspect-ratio: 1; transform: translate(-50%, -50%); background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, .55) 0 6deg, transparent 6deg 18deg); -webkit-mask-image: radial-gradient(circle, #000 0, transparent 62%); mask-image: radial-gradient(circle, #000 0, transparent 62%); pointer-events: none; }
+.home-card { position: relative; height: 100%; max-height: calc((min(100vw, 480px) - 28px) * 1.15); aspect-ratio: 3 / 5; }
+.home-card .frame { width: 100%; height: 100%; }
+.lv-medal { position: absolute; z-index: 3; top: -8px; right: -18px; display: grid; place-content: center; width: 60px; height: 60px; border-radius: 50%; text-align: center; background: #fff; color: var(--navy); box-shadow: 0 0 0 3px var(--gold), var(--shadow); }
+.lv-medal small { font-size: 9px; font-weight: 900; letter-spacing: .22em; color: var(--ink-3); }
+.lv-medal b { font-size: 23px; font-weight: 900; font-style: italic; line-height: 1; }
+.hero-name { position: absolute; z-index: 3; left: -18px; bottom: 7%; display: flex; flex-direction: column; padding: 6px 26px 6px 18px; background: var(--navy); color: #fff; clip-path: var(--slant); }
+.hero-name b { font-size: 21px; font-weight: 900; line-height: 1.1; }
 .hero-name small { font-size: 11px; font-weight: 800; color: #CFE0FF; }
-.hero-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.lv { display: flex; align-items: baseline; gap: 6px; }
-.lv b { font-size: 36px; font-weight: 900; font-style: italic; line-height: 1; color: var(--navy); }
-.lv span { font-size: 12px; font-weight: 900; color: var(--ink-3); }
-.lv-sub { margin-top: 5px; font-size: 11px; font-weight: 800; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.statlist { padding: 6px 12px; }
-.statlist div { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; font-size: 11px; font-weight: 900; letter-spacing: .06em; color: var(--ink-3); border-bottom: 1px dashed var(--line); }
-.statlist div:last-child { border-bottom: 0; }
-.statlist b { font-size: 14.5px; letter-spacing: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
-.home-dock { position: relative; z-index: 2; flex-shrink: 0; display: grid; gap: 10px; padding: 12px 14px 14px; }
-.hint { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #fff; border-left: 4px solid var(--gold); font-size: 12.5px; font-weight: 800; color: var(--ink-2); box-shadow: 0 2px 6px rgba(27, 42, 94, .06); }
-.hint b { color: var(--ink); }
-.hint svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--gold); }
+.home-stats { display: grid; gap: 8px; padding: 10px 12px; }
+.xp-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; font-size: 11px; font-weight: 900; color: var(--ink-3); }
+.xp-row .num { color: var(--ink-2); }
+.stat6 { display: grid; grid-template-columns: repeat(6, 1fr); }
+.stat6 div { padding: 0 2px; text-align: center; font-size: 9.5px; font-weight: 900; letter-spacing: .06em; color: var(--ink-3); border-left: 1px solid var(--line); }
+.stat6 div:first-child { border-left: 0; }
+.stat6 b { display: block; margin-top: 1px; font-size: 14.5px; letter-spacing: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sub4 { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.notices { display: flex; flex-wrap: wrap; gap: 6px; }
+.notice { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 16px 4px 12px; background: #fff; border: 1.5px solid var(--line-2); font-size: 12.5px; font-weight: 900; color: var(--ink); clip-path: var(--para); }
+.notice svg { width: 15px; height: 15px; color: var(--gold); }
+.notice.go { border-color: var(--coral); }
+.notice.go::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--coral); }
+.notice b { color: var(--aqua-text); }
 .sortie { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 8px 20px 8px 14px; text-align: left; }
 .sortie .medal { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: #fff; color: var(--navy); font-size: 20px; font-weight: 900; font-style: italic; box-shadow: 0 0 0 3px var(--gold); text-shadow: none; }
 .sortie .s-top { display: block; font-size: 10.5px; letter-spacing: .2em; opacity: .92; }
@@ -236,13 +243,13 @@ main { position: relative; flex: 1; min-height: 0; }
 .nav button[aria-selected=true]:not(.medal-tab) { color: #fff; }
 .nav button[aria-selected=true]:not(.medal-tab)::before { content: ""; position: absolute; inset: 6px 3px; z-index: -1; background: var(--navy); clip-path: var(--para); }
 .medal-tab { color: var(--navy) !important; }
-.medal-tab .disc { display: grid; place-items: center; width: 56px; height: 56px; margin-top: -28px; border-radius: 50%; background: var(--aqua); color: #fff; box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--navy), 0 6px 14px rgba(27, 42, 94, .3); }
-.medal-tab .disc svg { width: 26px; height: 26px; }
+.medal-tab .disc { display: grid; place-items: center; width: 46px; height: 46px; margin-top: -14px; border-radius: 50%; background: var(--aqua); color: #fff; box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--navy), 0 6px 14px rgba(27, 42, 94, .3); }
+.medal-tab .disc svg { width: 22px; height: 22px; }
 .medal-tab[aria-selected=true] .disc { box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--gold), 0 6px 14px rgba(27, 42, 94, .3); }
 
 /* ---------- Battle ---------- */
 #scr-battle { background: #fff; }
-.stage { --stage-h: clamp(244px, 41dvh, 352px); position: relative; flex-shrink: 0; height: var(--stage-h); overflow: hidden; }
+.stage { --stage-h: clamp(228px, 37dvh, 330px); position: relative; flex-shrink: 0; height: var(--stage-h); overflow: hidden; }
 .stage-bg { position: absolute; inset: 0; }
 .stage-bg .scenery { width: 100%; height: 100%; }
 .stage::before { content: ""; position: absolute; z-index: 1; left: -10%; right: -10%; top: 50%; height: 38px; background: linear-gradient(90deg, rgba(255, 183, 211, .5), rgba(255, 229, 156, .5), rgba(158, 223, 255, .5)); transform: rotate(-12deg); pointer-events: none; }
@@ -301,15 +308,16 @@ main { position: relative; flex: 1; min-height: 0; }
 @keyframes art-in { 0% { transform: translateX(-60%); opacity: 0; } 20% { transform: none; opacity: 1; } 84% { transform: translateX(4%); opacity: 1; } 100% { transform: translateX(18%); opacity: 0; } }
 @keyframes art-in-r { 0% { transform: translateX(60%); opacity: 0; } 20% { transform: none; opacity: 1; } 84% { transform: translateX(-4%); opacity: 1; } 100% { transform: translateX(-18%); opacity: 0; } }
 @keyframes text-in { 0% { transform: translateY(-50%) translateX(30%); opacity: 0; } 26% { transform: translateY(-50%); opacity: 1; } 84% { opacity: 1; } 100% { transform: translateY(-50%) translateX(-10%); opacity: 0; } }
-.log { position: relative; flex-shrink: 0; height: 50px; padding: 5px 50px 5px 14px; overflow: hidden; background: var(--paper-2); border-top: 2px solid var(--navy); border-bottom: 1px solid var(--line); font-size: 12.5px; line-height: 20px; }
-.log-lines { position: absolute; left: 14px; right: 50px; bottom: 4px; -webkit-mask-image: linear-gradient(transparent, #000 45%); mask-image: linear-gradient(transparent, #000 45%); }
+.log { position: relative; flex-shrink: 0; height: clamp(80px, 12dvh, 104px); padding: 6px 50px 6px 14px; overflow: hidden; background: var(--paper-2); border-top: 2px solid var(--navy); border-bottom: 1px solid var(--line); font-size: 12.5px; line-height: 19px; }
+.log-lines { position: absolute; left: 14px; right: 50px; bottom: 6px; -webkit-mask-image: linear-gradient(transparent, #000 18%); mask-image: linear-gradient(transparent, #000 18%); }
 .log.open { position: absolute; z-index: 30; inset: 0; height: auto; padding: 52px 16px 16px; overflow-y: auto; background: rgba(255, 255, 255, .98); }
 .log.open .log-lines { position: static; -webkit-mask-image: none; mask-image: none; }
 .log-line { color: var(--ink-2); }
 .log-line b { color: var(--ink); }
 .log-line .dmg { color: var(--coral-text); font-weight: 900; }
 .log-line .heal { color: var(--aqua-text); font-weight: 900; }
-.log-line.l-turn { margin-top: 6px; font-size: 10px; font-weight: 900; letter-spacing: .2em; color: var(--ink-3); }
+.log-line.l-turn { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 9.5px; line-height: 15px; font-weight: 900; letter-spacing: .2em; color: var(--ink-3); }
+.log-line.l-turn::after { content: ""; flex: 1; height: 1px; background: var(--line-2); }
 .log-line.l-dmg, .log-line.l-rose, .log-line.l-lose { color: var(--coral-text); }
 .log-line.l-heal, .log-line.l-star, .log-line.l-mag { color: var(--aqua-text); }
 .log-line.l-holy, .log-line.l-fire, .log-line.l-win { color: var(--gold-text); }
@@ -339,16 +347,14 @@ main { position: relative; flex: 1; min-height: 0; }
 .sk.ult .sk-cost { color: var(--ink); background: var(--gold); }
 .sk.ult .sk-desc { color: #D5DEF7; }
 .ult-mark { font-size: 9.5px; font-weight: 900; letter-spacing: .2em; color: var(--gold); }
-.sk .reason { position: absolute; right: 8px; bottom: 4px; font-size: 10px; font-weight: 900; color: var(--coral-text); }
 .sk:disabled { background: var(--paper-2); border-color: var(--line); box-shadow: none; }
 .sk:disabled .sk-name, .sk:disabled .sk-desc { color: var(--ink-3); }
 .sk:disabled .sk-cost { color: var(--ink-3); background: var(--track); }
+.sk:disabled .sk-cost.short { color: var(--coral-text); background: #FFE6EB; }
 .sk.ult:disabled { background: #4A5683; border-color: #4A5683; }
 .sk.ult:disabled .sk-name { color: #DCE3F7; }
-.sk.ult:disabled .reason { color: #FFD3DB; }
+.sk.ult:disabled .sk-cost.short { color: #fff; background: var(--coral-fill); }
 .sk.ready { box-shadow: 0 0 0 2px var(--gold), 0 2px 0 var(--line); }
-.sk.ready .reason { color: var(--gold-text); }
-.sk.ult.ready .reason { color: var(--gold); }
 .sk:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
 .pass { grid-column: span 2; min-height: 56px; background: #FFF2F4; border: 1.5px solid var(--coral); color: var(--coral-text); font-weight: 900; }
 #scr-battle[aria-busy=true] .sk, #scr-battle[aria-busy=true] .pass { pointer-events: none; }
@@ -3532,29 +3538,41 @@ const UI = (() => {
         const next = nextArtifactLevel();
         const target = (gameState.lastDungeon && dungeonById(gameState.lastDungeon)) || recommended();
         const stats = [['HP', player.maxHp], ['MP', player.maxMp], ['ATK', player.atk], ['MATK', player.matk], ['DEF', player.def], ['MDEF', player.mdef]];
+        // What can be done right now, each a shortcut to its tab.
+        const costs = [equipCost('weapon'), equipCost('armor'), manaCost()].filter(c => c !== null);
+        const canForge = costs.length && gameState.gold >= Math.min(...costs);
+        const learnable = Object.keys(player.skills).filter(k => !gameState.learnedSkills.includes(k) && player.skills[k].price <= gameState.gold).length;
+        const notices = [];
+        if (canForge) notices.push(`<button class="notice go" type="button" data-to="forge">${icon('anvil')}강화 가능</button>`);
+        if (learnable) notices.push(`<button class="notice go" type="button" data-to="skills">${icon('book')}배울 수 있는 스킬 <b>${learnable}</b></button>`);
+        notices.push(`<button class="notice" type="button" data-to="relics">${icon('relic')}${next ? `다음 유물 <b>Lv.${next}</b> · ${next - player.level}레벨 남음` : `유물 <b>${player.artifacts.length}</b>개`}</button>`);
         $('page-home').innerHTML = `
             <div class="home-bg">${Art.scenery('town', 'town')}</div>
-            <div class="home-hero">
-                <div class="home-art"><div class="frame edge" id="home-art"></div><div class="hero-name"><b>${player.name}</b><small>${info.role} · ${info.en}</small></div></div>
-                <div class="hero-side">
-                    <div><div class="lv"><b>Lv.${player.level}</b><span>/ ${maxLevel}</span></div>
-                        <div class="gauge xp" style="--v:${atMax ? 100 : Math.min(100, player.exp / need * 100)}%;margin-top:8px"><i></i></div>
-                        <div class="lv-sub">${atMax ? '최대 레벨' : `EXP ${fmt(player.exp)} / ${fmt(need)}`}</div></div>
-                    <div class="panel-card statlist">${stats.map(([k, v]) => `<div>${k}<b>${fmt(v)}</b></div>`).join('')}</div>
-                    <div class="chips"><span class="chip">치명 ${pct(player.baseCrit)}</span><span class="chip">치명 피해 ${pct(player.baseCritDmg)}</span><span class="chip">회피 ${pct(player.baseEva)}</span><span class="chip">MP 회복 +${player.mpRegen}</span></div>
+            <div class="home">
+                <div class="home-stage"><div class="home-glow"></div>
+                    <div class="home-card"><div class="frame edge" id="home-art"></div>
+                        <div class="lv-medal"><small>LV</small><b>${player.level}</b></div>
+                        <div class="hero-name"><b>${player.name}</b><small>${info.role} · ${info.en}</small></div>
+                    </div>
                 </div>
-            </div>
-            <div class="home-dock">
-                ${gameState.clearedCreator ? `<button class="cycle-card edge" id="btn-next-cycle" type="button"><b>창조신을 쓰러뜨렸습니다 · 다음 회차로</b><span>적 능력치 +10% · 최대 레벨 +1 · 해금한 유물 유지</span></button>` : ''}
-                ${next ? `<p class="hint" style="margin:0">${icon('star')}<span><b>Lv.${next}</b>에 새 유물 · ${next - player.level}레벨 남음 · 보유 ${player.artifacts.length}개</span></p>` : ''}
-                <button class="cta sortie" id="btn-sortie" type="button">
-                    <span class="medal">${target.lv ? String(target.tier).padStart(2, '0') : target.hidden ? '??' : 'EV'}</span>
-                    <span><span class="s-top">${gameState.lastDungeon ? 'AGAIN' : 'SORTIE'}</span><span class="s-main">${gameState.lastDungeon ? '다시 탐험' : '탐험 출발'}</span><span class="s-sub">${target.name}${target.lv ? ` · Lv.${target.lv[0]}–${target.lv[1]}` : ''}</span></span>
-                    ${icon('go')}
-                </button>
+                <div class="panel-card home-stats">
+                    <div class="xp-row"><span>EXP</span><div class="gauge xp" style="--v:${atMax ? 100 : Math.min(100, player.exp / need * 100)}%"><i></i></div><span class="num">${atMax ? `MAX · Lv.${maxLevel}` : `${fmt(player.exp)} / ${fmt(need)} · 최대 Lv.${maxLevel}`}</span></div>
+                    <div class="stat6">${stats.map(([k, v]) => `<div>${k}<b>${fmt(v)}</b></div>`).join('')}</div>
+                    <div class="sub4"><span class="chip">치명 ${pct(player.baseCrit)}</span><span class="chip">치명 피해 ${pct(player.baseCritDmg)}</span><span class="chip">회피 ${pct(player.baseEva)}</span><span class="chip">MP 회복 +${player.mpRegen}</span></div>
+                </div>
+                <div class="notices">${notices.join('')}</div>
+                <div style="display:grid;gap:10px">
+                    ${gameState.clearedCreator ? `<button class="cycle-card edge" id="btn-next-cycle" type="button"><b>창조신을 쓰러뜨렸습니다 · 다음 회차로</b><span>적 능력치 +10% · 최대 레벨 +1 · 해금한 유물 유지</span></button>` : ''}
+                    <button class="cta sortie" id="btn-sortie" type="button">
+                        <span class="medal">${target.lv ? String(target.tier).padStart(2, '0') : target.hidden ? '??' : 'EV'}</span>
+                        <span><span class="s-top">${gameState.lastDungeon ? 'AGAIN' : 'SORTIE'}</span><span class="s-main">${gameState.lastDungeon ? '다시 탐험' : '탐험 출발'}</span><span class="s-sub">${target.name}${target.lv ? ` · Lv.${target.lv[0]}–${target.lv[1]}` : ''}</span></span>
+                        ${icon('go')}
+                    </button>
+                </div>
             </div>`;
         Art.heroArt($('home-art'), player.charKey);
         $('btn-sortie').onclick = () => enterDungeon(target);
+        $('page-home').querySelectorAll('[data-to]').forEach(button => button.onclick = () => { tab = button.dataset.to; renderTown(); });
         const cycle = $('btn-next-cycle');
         if (cycle) cycle.onclick = nextCycle;
     }
@@ -3818,10 +3836,10 @@ const UI = (() => {
         const ordered = keys.filter(k => !player.skills[k].isUlt).concat(keys.filter(k => player.skills[k].isUlt));
         grid.innerHTML = ordered.map(k => {
             const s = player.skills[k], blocked = skillBlocker(k), ready = isCharged(s);
-            return `<button class="sk t-${s.type}${s.isUlt ? ' ult' : ''}${ready ? ' ready' : ''}" type="button" data-skill="${k}" ${blocked ? 'disabled' : ''}>
+            return `<button class="sk t-${s.type}${s.isUlt ? ' ult' : ''}${ready ? ' ready' : ''}" type="button" data-skill="${k}" ${blocked ? `disabled aria-label="${s.name}, ${blocked}"` : ''}>
                 ${s.isUlt ? '<span class="ult-mark">ULTIMATE</span>' : ''}
-                <span class="sk-top"><span class="ico">${Art.typeIcon(s.type)}</span><span class="sk-name">${s.name}</span><span class="sk-cost">${ready ? '발동' : skillCost(s)}</span></span>
-                <span class="sk-desc">${s.desc}</span>${blocked ? `<span class="reason">${blocked}</span>` : ready ? '<span class="reason">차지 완료</span>' : ''}</button>`;
+                <span class="sk-top"><span class="ico">${Art.typeIcon(s.type)}</span><span class="sk-name">${s.name}</span><span class="sk-cost${blocked ? ' short' : ''}">${ready ? '발동' : skillCost(s)}</span></span>
+                <span class="sk-desc">${s.desc}</span></button>`;
         }).join('');
         grid.querySelectorAll('[data-skill]').forEach(button => button.onclick = () => act(button.dataset.skill));
     }
