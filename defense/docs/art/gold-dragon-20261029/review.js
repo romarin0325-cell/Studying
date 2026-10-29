@@ -1,7 +1,6 @@
 import * as E from '../../../src/combat/engine.js';
 import {Art,Renderer} from '../../../src/combat/render.js';
 import {HERO} from '../../../src/content.js';
-import {ancientCrossTexture} from '../../../src/combat/gold-dragon-vfx.js';
 const $=id=>document.getElementById(id);
 const art=Object.create(Art.prototype);art.images={};art.failed=[];
 await Promise.all(Object.entries(window.__ASTRA_ASSETS__).map(async([id,url])=>{
@@ -49,7 +48,4 @@ const hash=new URLSearchParams(location.hash.slice(1));$('mode').value=hash.get(
 reset();if(Number(hash.get('time'))>0){playing=false;seek(Number(hash.get('time')));}
 let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(playing){const total=dt*Number($('rate').value);for(let t=0;t<total;t+=.05)draw(Math.min(.05,total-t));if(time>8)reset();}requestAnimationFrame(frame);}requestAnimationFrame(frame);
 // Read-only diagnostics and deterministic visual stepping for the verification script.
-window.GOLD_REVIEW={get panels(){return panels;},get time(){return time;},pause:()=>{playing=false;},seek,reset,setMode:value=>{$('mode').value=value;reset();},setCastAt:value=>{$('castAt').value=value;reset();},alphaPreserved:()=>{
-  const fx=panels[1].renderer.fx,source=art.images['ancient-cross'],normal=ancientCrossTexture(fx,false),c=document.createElement('canvas');c.width=source.naturalWidth;c.height=source.naturalHeight;const g=c.getContext('2d');g.drawImage(source,0,0);const a=g.getImageData(0,0,c.width,c.height).data,b=normal.getContext('2d').getImageData(0,0,c.width,c.height).data;let differences=0;
-  for(let i=3;i<a.length;i+=4)if(a[i]!==b[i])differences++;return {differences,redReusesOriginal:ancientCrossTexture(fx,true)===source};
-}};
+window.GOLD_REVIEW={get panels(){return panels;},get time(){return time;},pause:()=>{playing=false;},seek,reset,setMode:value=>{$('mode').value=value;reset();},setCastAt:value=>{$('castAt').value=value;reset();}};

@@ -238,6 +238,25 @@
   },
   "builds": {
     "StarGardenDefense.html": {
+      "bytes": 25760296,
+      "sha256": "15f6b70f3558a6aa0c77a25286c4e65c81e200284aadc84f1bbd59b0ed989d92"
+    },
+    "StarGardenDefenseBright.html": {
+      "bytes": 26015494,
+      "sha256": "943a9c6c97be9aa378288c441ca0d3c58c64bdf6320a55aac576ac6ef5bf1b4c"
+    },
+    "StarGardenBalanceLab.html": {
+      "bytes": 16025198,
+      "sha256": "ec2bb7a40a23a0fc0d3f402f62912c2e697846675859e72a1900535b276c44d5"
+    }
+  },
+  "limitations": [
+    "Manual anatomical/eye landmarks are estimates with recorded uncertainty.",
+    "Four separately painted2D views; not a rigged3D character.",
+    "Chromium390x844 does not measure physical-mobile FPS."
+  ],
+  "initialBuilds": {
+    "StarGardenDefense.html": {
       "bytes": 25759651,
       "sha256": "9c71fbd29efde7ef01b9e701cbe2d7f6ce4716edb7fd54baf3b06b6e326bb120"
     },
@@ -250,9 +269,83 @@
       "sha256": "8112a4956f1e8d9ed5ced2f83f907cb0009873144d2c4a44bc9f75cd3486c717"
     }
   },
-  "limitations": [
-    "Manual anatomical/eye landmarks are estimates with recorded uncertainty.",
-    "Four separately painted2D views; not a rigged3D character.",
-    "Chromium390x844 does not measure physical-mobile FPS."
-  ]
+  "latestMergeVerification": {
+    "integratedMain": "5b533d3ff0fbde5aefb7538df4bed96ceda3b2e3",
+    "resolvedFiles": [
+      "defense/dist/StarGardenDefense.html",
+      "defense/dist/StarGardenDefenseBright.html",
+      "defense/dist/StarGardenBalanceLab.html"
+    ],
+    "command": "npm run verify -- --only defense",
+    "localTests": 169,
+    "pass": 169,
+    "fail": 0,
+    "unresolvedFiles": 0,
+    "sourceCheck": "Current dragon effects equal origin/main; Zeke source/static/UI images equal the selected PR head.",
+    "browser": {
+      "errors": [],
+      "network": [],
+      "captures": 14,
+      "directions": [
+        {
+          "theme": "night",
+          "facing": [
+            {
+              "index": 7,
+              "hero": "zeke",
+              "facing": "up",
+              "attacks": 1
+            },
+            {
+              "index": 11,
+              "hero": "zeke",
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "index": 13,
+              "hero": "zeke",
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "index": 17,
+              "hero": "zeke",
+              "facing": "down",
+              "attacks": 1
+            }
+          ]
+        },
+        {
+          "theme": "bright",
+          "facing": [
+            {
+              "index": 7,
+              "hero": "zeke",
+              "facing": "up",
+              "attacks": 1
+            },
+            {
+              "index": 11,
+              "hero": "zeke",
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "index": 13,
+              "hero": "zeke",
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "index": 17,
+              "hero": "zeke",
+              "facing": "down",
+              "attacks": 1
+            }
+          ]
+        }
+      ]
+    }
+  }
 }
