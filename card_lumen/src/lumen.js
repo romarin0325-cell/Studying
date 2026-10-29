@@ -901,7 +901,8 @@ const LumenUI = {
       item.onclick = event => {
         if (!scene.classList.contains('is-done')) return;
         event.stopPropagation();
-        this.detailIds = ids;
+        // A chain can draw the same card twice; paging walks each card once.
+        this.detailIds = [...new Set(ids)];
         RPG.showCardInfo(card.id);
       };
       grid.append(item);
