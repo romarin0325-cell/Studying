@@ -88,10 +88,10 @@ test('collection bonus sums every owned relic and is a power fraction',()=>{
 test('relics keep the rarity written on them, not their place in the list',()=>{
   // Rarity sets draw odds, duplicate cost and collection weight of relics players already own.
   const approved={
-    C:['hourglass','ember','frost','banner','chorus','lantern','lens','seed','feather','crown','sprout','amulet'],
+    C:['hourglass','ember','frost','banner','chorus','lens','seed','feather','crown','sprout','amulet','dream_crystal'],
     R:['meteor','prism','tide','roots','guild','phoenix'],
-    SR:['twin','constellation','alchemy','orbit','tempo_bell','chalice'],
-    UR:['royal_seal','gift_ribbon','broken_clock'],
+    SR:['lantern','constellation','orbit','tempo_bell','spotlight','royal_crown'],
+    UR:['twin','alchemy','chalice','royal_seal','gift_ribbon','broken_clock'],
   };
   for(const [rarity,ids] of Object.entries(approved))for(const id of ids)assert.equal(ARTIFACTS.find(a=>a.id===id)?.rarity,rarity,id);
   const order=['C','R','SR','UR'],ranks=ARTIFACTS.map(a=>order.indexOf(a.rarity));

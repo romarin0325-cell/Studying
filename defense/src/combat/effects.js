@@ -1,5 +1,5 @@
 import {HERO,HEROES} from '../content.js';
-import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella} from './engine.js';
+import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella,JOKER} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
@@ -667,18 +667,18 @@ export class CombatFX{
   // Joker: a small roulette. Five colours sit on a ring in cast order; the current one is always at the top and lit,
   // the others are dimmed. A cast spins the wheel and settles on the colour the roulette picked.
   drawJokerWheels(s){
-    const ctx=this.ctx,names=['red','blue','green','white','black'],chaos=s.jokerColor==='chaos',idx=Math.max(0,names.indexOf(s.jokerColor||'red')),since=this.clock-(this.wheelAt??-9),offset=since<.7?(1-easeOut(since/.7))*Math.PI*2/5:0;
+    const ctx=this.ctx,names=['red','blue','green','white','black'],chaos=s.jokerColor==='chaos',closed=(s.jokerSeen||0)===JOKER.all,idx=Math.max(0,names.indexOf(s.jokerColor||'red')),since=this.clock-(this.wheelAt??-9),offset=since<.7?(1-easeOut(since/.7))*Math.PI*2/5:0;
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u||u.hero!=='joker')continue;
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,tint=chaos?JOKER_HEX.chaos:JOKER_HEX[names[idx]];
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=.8;ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
-      if(chaos){
-        // Chaos: the colour ring closes into a flat five-wedge roulette that turns slowly (pops in when chaos begins).
-        const k=since<.7?easeBack(since/.7):1,turn=this.reduced?0:this.clock*.5+u.uid;
+      if(closed){
+        // Ready or Chaos: the colour ring closes. It pops and glows only when the cast enters Chaos.
+        const popping=chaos&&since<.7,k=popping?easeBack(since/.7):1,turn=this.reduced?0:this.clock*.5+u.uid;
         ctx.save();ctx.translate(cx,cy);ctx.scale(k,k);ctx.rotate(turn);
         for(let j=0;j<5;j++){const a0=-Math.PI/2+j*Math.PI*2/5;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,12.5,a0,a0+Math.PI*2/5);ctx.closePath();ctx.globalAlpha=.9;ctx.fillStyle=names[j]==='black'?'#5a4380':JOKER_HEX[names[j]];ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#0b1e2b';ctx.lineWidth=1.2;ctx.stroke();}
         ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(0,0,12.5,0,Math.PI*2);ctx.stroke();ctx.rotate(-turn);disk(ctx,0,0,4.2,'#0b1e2b');star(ctx,3.4,'#ffe9a0');ctx.restore();
-        if(since<.9&&!this.reduced)this.glow('glow',JOKER_HEX.chaos,cx,cy,48,(1-since/.9)*.6);
+        if(chaos&&since<.9&&!this.reduced)this.glow('glow',JOKER_HEX.chaos,cx,cy,48,(1-since/.9)*.6);
         continue;
       }
       for(let j=0;j<5;j++){

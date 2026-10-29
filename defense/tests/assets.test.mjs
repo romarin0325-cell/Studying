@@ -71,9 +71,9 @@ test('all collection, boss and battle textures resolve to local art with valid a
     const bytes=await fs.readFile(path.join(root,a.source));
     assert.equal(createHash('sha256').update(bytes).digest('hex'),a.sha256,a.id);
   }
-  assert.equal(ARTIFACTS.length,27);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,27);
-  // Rows of three in the collection: 12 C, 6 R, 6 SR, 3 UR.
-  assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,3]);
+  assert.equal(ARTIFACTS.length,30);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,30);
+  // Rows of three in the collection: 12 C, 6 R, 6 SR, 6 UR.
+  assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,6]);
 });
 
 test('every unit faces outward: the left cell looks left, the right cell is its mirror view and looks right',async()=>{

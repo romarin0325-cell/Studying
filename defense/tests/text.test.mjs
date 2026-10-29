@@ -61,7 +61,7 @@ test('every relic scale token is written in that relic text',()=>{
     amulet:[pct(RV.amulet.near),num(RV.amulet.starlight)],
     meteor:[pct(RV.meteor.hit)],
     prism:[pct(RV.prism.chain)],
-    tide:[pct(RV.tide.splash)],
+    tide:[pct(RV.tide.power)],
     roots:[pct(RV.roots.life),pct(RV.roots.radius)],
     guild:[pct(RV.guild.power)],
     phoenix:[pct(RV.phoenix.taken)],
@@ -74,8 +74,11 @@ test('every relic scale token is written in that relic text',()=>{
     royal_seal:[num(RV.royal_seal.starlight),pct(RV.royal_seal.boss)],
     gift_ribbon:[pct(RV.gift_ribbon.chance)],
     broken_clock:[pct(RV.broken_clock.duration)],
+    spotlight:[pct(RV.spotlight.top)],
+    royal_crown:[{t:num(RV.royal_crown.gold),int:true}],
+    dream_crystal:[{t:num(RV.dream_crystal.starlight),int:true},pct(RV.dream_crystal.rumi)],
   };
-  assert.equal(ARTIFACTS.length,27);
+  assert.equal(ARTIFACTS.length,30);
   assert.deepEqual(ARTIFACTS.map(relic=>relic.id).sort(),Object.keys(expected).sort());
   for(const relic of ARTIFACTS){
     assert.deepEqual(relic.scale,expected[relic.id],relic.id);
