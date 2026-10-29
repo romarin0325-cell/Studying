@@ -20,7 +20,7 @@ Functional correctness of the browser app is more important than refactoring or 
 - `shooter/`: Astral Bloom shooter (`shooter/dist/AstralBloom.html`)
 - `defense/`: Star Garden defense (`defense/dist/StarGardenDefense.html`, Bright skin `defense/dist/StarGardenDefenseBright.html`). Build both with `npm run build:defense`; rules for this game are in `defense/AGENTS.md`.
 - `survivor/`: Astra Nocturne survivor game (`survivor/dist/AstraNocturne.html`)
-- `rpg/`: Turn RPG: Legend Edition v9.5, a standalone page (`rpg/new.html` + `rpg/data.js`); no build or tests.
+- `rpg/`: Turn RPG: Legend Edition, one self-contained page (`rpg/new.html`: UI, rules, data, SVG art and WebAudio music); no build or tests.
 
 The former `card_legacy/`, `defense_legacy/`, `idle/`, `english_vocab_version/` and the old Hero Core Defense were removed; recover them from Git history if ever needed. `defense/` was promoted from `defense_test/` (Star Garden) and is the only Defense.
 
