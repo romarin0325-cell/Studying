@@ -4,12 +4,16 @@
 import {ARTIFACT,ARTIFACTS,HEROES} from './content.js';
 import {COURSE} from './course.js';
 import {questionOf} from './quiz.js';
+import {PREVIEW} from './team-config.js';
 export const UNLOCKED_STAGE=90;
 export function unlockProfile(p){
   for(const [id,entry] of Object.entries(p.heroes)){entry.owned=true;entry.bond={star_boy:6,siren:3,snow_rabbit:8}[id]??10;entry.bondXp=0;}
   // Relics at a mid-game spread (C Lv.7, R Lv.5, SR Lv.4, UR Lv.2) with spare duplicates to try levelling.
   for(const [id,entry] of Object.entries(p.relics)){const r=ARTIFACT[id].rarity;entry.owned=true;entry.enhance={C:6,R:4,SR:3,UR:1}[r];entry.copies={C:20,R:8,SR:5,UR:3}[r];}
   p.cleared=UNLOCKED_STAGE;p.dreams=99999;p.dust=99999;
+  // Content preview: a late-game account (greenhouse beds at their soft caps, every companion +15) so the challenge tiers
+  // read as they would for a player near stage 90, and the three request companions below max hearts.
+  if(PREVIEW){Object.assign(p.beds,{rose:45,spring:30,seed:20,crit:30,critDamage:25,stardust:49});for(const e of Object.values(p.heroes))e.enhance=15;Object.assign(p.heroes.night_rabbit,{bond:9,bondXp:0});Object.assign(p.heroes.underdog,{bond:9,bondXp:0});}
   return topUpUnlocked(p);
 }
 // Test tools of the unlocked build (settings → 테스트 도구; a wallet tap still gives 10,000 of each).
@@ -25,6 +29,8 @@ export const TEST_TOOLS=Object.freeze([
   {kind:'dawn-reset',label:'제2정원 처음으로'},
   {kind:'weekly-reset',label:'주간 드래프트 초기화'},
   {kind:'monthly-reset',label:'월간 보스전 초기화'},
+  {kind:'request-now',label:'부탁 바로 도착'},
+  {kind:'season-reset',label:'서약·쌍성 시즌 초기화'},
 ]);
 export function testGrant(p,kind='wallet'){
   const add=(key,n)=>{p[key]=Math.min(TEST_CAP,p[key]+n);};
@@ -38,6 +44,16 @@ export function testGrant(p,kind='wallet'){
     case 'dawn-reset':Object.assign(p.beds,{crit:0,critDamage:0,stardust:0});return '제2정원을 처음 상태로 되돌렸어요';
     case 'weekly-reset':if(p.active?.mode==='weekly')p.active=null;p.weekly=null;return '주간 드래프트를 다시 입장할 수 있게 했어요';
     case 'monthly-reset':if(p.active?.mode==='monthly')p.active=null;p.monthly=null;p.monthlyBest=null;p.monthlyClaim=null;return '월간 보스전 기록과 보상을 초기화했어요';
+    case 'request-now':
+      if(!p.requests||typeof p.requests!=='object'||Array.isArray(p.requests))p.requests={next:0,active:[],claimed:[],after:[],read:[]};
+      else p.requests.next=0;
+      return '동료의 부탁이 바로 도착할 수 있게 했어요';
+    case 'season-reset':{
+      delete p.oath;
+      if(p.twin&&typeof p.twin==='object'){const party=p.twin.party;if(party)p.twin={party};else delete p.twin;}
+      if(p.active?.mode==='oath'||p.active?.mode==='twin')p.active=null;
+      return '서약·쌍성 시즌 기록을 초기화했어요';
+    }
     default:return '';
   }
 }

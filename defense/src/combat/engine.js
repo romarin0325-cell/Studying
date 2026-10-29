@@ -1,5 +1,7 @@
 import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK ,TIERS,CHALLENGE_WAVES} from '../content.js';
 import { TEAM_SIZE } from '../team-config.js';
+import {oathMods,oathConflict,OATH_WAVES} from '../preview/oath.js';
+import {TWIN_WAVES,TWIN_STAGE} from '../preview/twin.js';
 import { RELIC_LEVEL_STEP } from '../economy.js';
 import {MIRACLE_FORMS} from '../new-companions.js';
 export {MIRACLE_FORMS} from '../new-companions.js';
@@ -98,7 +100,7 @@ const buffScale=(s,key)=>s.buffScale?.[key]||1;
 // Core health: 20 in stages and drafts, 7 in the monthly boss rush (one boss leak ends it).
 // Zeke's crisis reads "below half" of that, so a full monthly core is never a crisis.
 export const MONTHLY_HEALTH=7;
-export const coreHealthMax=s=>s.mode==='monthly'?MONTHLY_HEALTH:20;
+export const coreHealthMax=s=>s.mode==='monthly'?MONTHLY_HEALTH:(s.oathMods?.core||20);
 export const coreCrisis=s=>s.health<coreHealthMax(s)/2;
 // Zeke's trait: an enemy alive in the last quarter of the path (next to the core) raises his attack by 40%.
 export const zekeFury=s=>s.enemies.some(e=>e.hp>0&&e.progress>=PATH_LENGTH*.75);
@@ -213,7 +215,7 @@ export const sunRadius=s=>SUNFLOWER.radius[Math.min(SUNFLOWER.max,s.sunlight||0)
 export const JOKER=Object.freeze({colors:Object.freeze(['red','blue','green','white','black']),all:31,chaosCost:100,roulette:3,burn:.3,slow:.2,exposure:.06});
 export const JOKER_NAMES=Object.freeze({red:'빨강 · 화상',blue:'파랑 · 감속',green:'초록 · 중독',white:'하양 · 성광',black:'검정 · 노출',chaos:'카오스 룰렛'});
 export const jokerChaos=s=>s.jokerColor==='chaos';
-export const skillCost=(s,id)=>id==='joker'&&jokerChaos(s)?JOKER.chaosCost:HERO[id]?.skill.cost||0;
+export const skillCost=(s,id)=>(id==='joker'&&jokerChaos(s)?JOKER.chaosCost:HERO[id]?.skill.cost||0)+(s?.oathMods?.skillCost||0);
 export const skillName=(s,id)=>id==='joker'&&jokerChaos(s)?JOKER_NAMES.chaos:HERO[id]?.skill.name;
 const jokerBit=color=>1<<JOKER.colors.indexOf(color);
 // The roulette picks a new colour at random among the four it is not showing, so every cast changes the colour.
@@ -435,17 +437,18 @@ function makeUnit(s,hero,rank=1){return {uid:s.nextId++,hero,rank,...(hero==='mi
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i])??-1;}
 function place(s,id,rank=1,index=-1){const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
-export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,relicLevels={},mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy',met=BOSS_ORDER.length,crit={chance:.05,damage:1.5}}={}){
+export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,relicLevels={},mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy',met=BOSS_ORDER.length,crit={chance:.05,damage:1.5},oaths=[],side=null,lineup=null}={}){
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE),arts=validArtifacts(artifacts)?[...artifacts]:[];
   const levels=Object.fromEntries(arts.filter(id=>Number.isInteger(relicLevels?.[id])&&relicLevels[id]>=1&&relicLevels[id]<=999).map(id=>[id,relicLevels[id]]));
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],critRevision:2,crit:cleanCrit(crit),critRng:critSeed(seed),bombs:[],sunlight:0,jokerColor:'red',jokerSeen:1,gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
     buffs:{},buffTotals:{},buffScale:{},goldCharge:null,queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{},leaks:0},tutorial:0,won:false};
+  s.oaths=Array.isArray(oaths)?[...oaths]:[];s.oathMods=oathMods(s.oaths);s.side=side??null;s.lineup=Array.isArray(lineup)?[...lineup]:null;
   const opening=shuffle(s,chosen).slice(0,3);
   const openingCells=TEAM_SIZE===1?[12]:[7,16,18];
   for(const [i,hero] of opening.entries())place(s,hero,1,openingCells[i]);
-  beginWave(s,1);return s;
+  beginWave(s,1);if(s.oathMods.gold)s.gold=Math.round(s.gold*s.oathMods.gold);s.health=coreHealthMax(s);return s;
 }
 // The opening is three distinct random companions from the selected five.
 // Later summons sample with replacement: every companion remains 1/5.
@@ -474,7 +477,7 @@ export function move(s,from,to){
     if(refund)giveGold(s,refund,'합성 환급');
     const unit=makeUnit(s,id,rank);if(id==='miracle_larva')unit.form='miracle_cocoon';unit.priority=targetingLocked(id)?'random':(b.hero==='rumi'?a:b).priority;unit.cooldown=.06;unit.mergedWave=s.wave+(['reward','intermission'].includes(s.phase)?1:0);s.board[to]=unit;s.board[from]=null;syncTimeRuler(s);
     if(a.hero==='mushroom_king'||b.hero==='mushroom_king')for(const e of s.enemies)addPoison(s,e,sourceKey('merge',id,unit.uid),id,2,8,power(s,unit));
-    s.stats.merges++;{const gain=MERGE_STARLIGHT+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0);if(has(s,'hourglass'))s.sandStore=Math.min(RV.hourglass.store,(s.sandStore||0)+Math.max(0,s.gauge+gain-gaugeCap(s)));addGauge(s,gain);}s.tutorial=Math.max(s.tutorial,2);
+    s.stats.merges++;if(!s.oathMods?.noMergeStar){const gain=MERGE_STARLIGHT+(has(s,'hourglass')?RV.hourglass.starlight*relicScaleIn(s,'hourglass'):0);if(has(s,'hourglass'))s.sandStore=Math.min(RV.hourglass.store,(s.sandStore||0)+Math.max(0,s.gauge+gain-gaugeCap(s)));addGauge(s,gain);}s.tutorial=Math.max(s.tutorial,2);
     event(s,'merge',{from,to,hero:id,rank,refund});return {ok:true,merged:true,index:to,refund};
   }
   s.board[to]=a;s.board[from]=b;syncTimeRuler(s);event(s,'move',{from,to});return {ok:true,index:to};
@@ -486,8 +489,11 @@ export function sell(s,index){
   refreshAppleBombs(s);
   const gold=Math.round(6*Math.pow(1.7,u.rank-1));s.board[index]=null;syncTimeRuler(s);giveGold(s,gold,'회수');event(s,'sell',{index,gold});return {ok:true,gold};
 }
+// Training per companion: 5, or the starlight oath's cap.
+export const trainCap=s=>s?.oathMods?.trainCap??5;
 export function upgrade(s,id){
   if(!s.deck.includes(id)||!['combat','intermission'].includes(s.phase))return {ok:false};
+  if(s.upgrades[id]>=trainCap(s)&&trainCap(s)<5)return {ok:false,reason:trainCap(s)?`별빛 서약: 동료마다 훈련은 ${trainCap(s)}회까지입니다.`:'별빛 서약: 이번 원정에서는 훈련할 수 없습니다.'};
   if(s.upgrades[id]>=5)return {ok:false,reason:'훈련을 모두 마쳤습니다.'};
   const cost=upgradeCost(s,id);if(s.gold<cost)return {ok:false,reason:`골드가 부족합니다. (${cost} 필요)`};
   s.gold-=cost;s.upgrades[id]++;event(s,'upgrade',{hero:id,level:s.upgrades[id]});return {ok:true};
@@ -519,6 +525,15 @@ export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
     const {base}=challengeBase(wave,tier),hp=Math.round(base*30*(TIERS[tier]||TIERS.easy).monthly);
     return {sequence:[{kind:'boss',hp}],interval:.65,healthBudget:hp};
   }
+  if(mode==='twin')return wavePlan(wave,(TWIN_STAGE[tier]||TWIN_STAGE.easy)-1,'main');
+  if(mode==='oath'){
+    const cw=1+(wave-1)*11/8;
+    const {base,oldWave}=challengeBase(cw,tier),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
+    const sequence=Array.from({length:count},(_,i)=>{const kind=enemyKind(i,Math.ceil(oldWave/2));return {kind,hp:Math.round(base*enemyWeight[kind])};});
+    const t=TIERS[tier]||TIERS.easy;
+    if(wave%3===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32*BOSS_HEALTH_SCALE*t.boss)});
+    return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:sequence.reduce((n,e)=>n+e.hp,0)};
+  }
   if(mode==='weekly'){
     const {base,oldWave}=challengeBase(wave,tier),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
     const sequence=Array.from({length:count},(_,i)=>{const kind=enemyKind(i,Math.ceil(oldWave/2));return {kind,hp:Math.round(base*enemyWeight[kind])};});
@@ -544,7 +559,7 @@ export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
 // Challenge lineups only use bosses the player has met (`met` = first N of BOSS_ORDER).
 export const weeklyBoss=(chapter,wave,met=BOSS_ORDER.length)=>BOSS_ORDER[(chapter+Math.floor(wave/3)-1+BOSS_ORDER.length*9)%Math.max(1,Math.min(met,BOSS_ORDER.length))];
 export const monthlyBoss=(wave,met=BOSS_ORDER.length)=>BOSS_ORDER[(wave-1)%Math.max(1,Math.min(met,BOSS_ORDER.length))];
-export const lastWave=s=>s.mode==='main'?MAIN_WAVES:CHALLENGE_WAVES;
+export const lastWave=s=>s.mode==='oath'?OATH_WAVES:s.mode==='twin'?TWIN_WAVES:s.mode==='main'?MAIN_WAVES:CHALLENGE_WAVES;
 function beginWave(s,wave){
   s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?.65:.4;s.settlement=null;s.telegraph=null;s.zones=[];
   s.queue=wavePlan(wave,s.chapter,s.mode,s.tier).sequence;s.waveTotal=s.queue.length;
@@ -552,10 +567,11 @@ function beginWave(s,wave){
 }
 function spawnEnemy(s,{kind,hp}){
   const wave=s.wave,chapter=CHAPTERS[s.chapter];
-  const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?monthlyBoss(wave,s.met):s.mode==='weekly'?weeklyBoss(s.chapter,wave,s.met):chapter.bosses[0]):null;
+  const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?monthlyBoss(wave,s.met):s.mode==='weekly'?weeklyBoss(s.chapter,wave,s.met):(s.mode==='oath'||s.mode==='twin')&&s.lineup?.[Math.floor(wave/3)-1]||chapter.bosses[0]):null;
+  hp=Math.round(hp*(s.oathMods?.hp||1)*(isBoss?s.oathMods?.bossHp||1:1));
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
     slow:0,slowTime:0,slowEffects:[],statusEffects:[],stun:0,freeze:0,controlTime:0,burn:0,burnTime:0,burnOwner:null,poison:0,poisonTime:0,exposed:0,exposeTime:0,takenBonus:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0,ccImmune:0,frostLock:0,dawn:0,ultControl:0};
-  e.speed*=1.1;s.enemies.push(e);if(isBoss){event(s,'boss',{id:bossId,name:BOSSES[bossId].name});if(has(s,'royal_seal'))addGauge(s,RV.royal_seal.starlight*relicScaleIn(s,'royal_seal'));}return e;
+  e.speed*=1.1;if(s.oathMods?.speed)e.speed*=s.oathMods.speed;s.enemies.push(e);if(isBoss){event(s,'boss',{id:bossId,name:BOSSES[bossId].name});if(has(s,'royal_seal'))addGauge(s,RV.royal_seal.starlight*relicScaleIn(s,'royal_seal'));}return e;
 }
 export function attackGeometry(hero,from,to){return {kind:hero.shape,from,to,range:hero.range,radius:hero.radius,angle:Math.atan2(to.y-from.y,to.x-from.x)};}
 export function geometryContains(g,p){
@@ -805,6 +821,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(sirenRank)speedBonus('aura','세이렌의 노래',(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank));
   // Placement auras only (dragon, harmony, siren). Ultimate buffs and relics stay single.
   if(u.hero==='behemoth'&&!u.cursed&&!(u.disabled>0)){power_.aura*=2;speed_.aura*=2;if(detail)bonuses.push('오라 2배');}
+  if(s.oathMods?.aura){power_.aura*=s.oathMods.aura;speed_.aura*=s.oathMods.aura;}
   if(s.buffs.haste>0)speedBonus('ult','가속',ULT_BUFF.haste.speed*buffScale(s,'haste'));
   if(s.buffs.march>0)speedBonus('ult','은빛 행진',ULT_BUFF.march.speed*buffScale(s,'march'));
   if(s.buffs.festive>0)speedBonus('ult','성야의 선물',.2*buffScale(s,'festive'));
@@ -1318,7 +1335,7 @@ function bossStep(s,e,dt){
     e.channel=3.5;e.judging=true;e.channelHp=e.hp+(e.shield||0);
     s.telegraph={uid:e.uid,pattern:'thunder',text:boss.judgement,cells:bossCells(s,'thunder'),ends:s.time+3.5,total:3.5};event(s,'warning',{text:boss.judgement,cells:s.telegraph.cells,pattern:'thunder'});return;
   }
-  e.skillIn-=dt;if(e.skillIn>0)return;
+  e.skillIn-=dt*(s.oathMods?.bossHaste||1);if(e.skillIn>0)return;
   const casts=e.casts||0,pattern=Array.isArray(boss.pattern)?boss.pattern[casts%boss.pattern.length]:boss.pattern;
   if(BOSS_LIMIT[pattern]!==undefined&&casts>=BOSS_LIMIT[pattern]){e.skillIn=99;return;}
   e.casts=casts+1;
@@ -1339,7 +1356,7 @@ function completeWave(s){
   const payout={base:waveIncome(s.wave),dividend:dividend(s),edict:s.edictWave===s.wave?Math.round(waveIncome(s.wave)*.5):0};
   giveGold(s,payout.base,'웨이브');giveGold(s,payout.dividend,'배당');if(payout.edict)giveGold(s,payout.edict,'여왕의 칙령');
   if(has(s,'feather'))giveGold(s,Math.round(Math.min(RV.feather.cap,RV.feather.base+RV.feather.perWave*s.wave)*relicScaleIn(s,'feather')),'첫새벽의 깃털');
-  s.settlement=payout;s.amuletUsed=0;addGauge(s,8);s.shots=[];s.finishers=[];s.volleys=[];s.zones=[];s.telegraph=null;s.goldCharge=null;
+  s.settlement=payout;s.amuletUsed=0;addGauge(s,8);if(s.oathMods?.carry!==undefined)s.gauge=Math.min(s.gauge,s.oathMods.carry);s.shots=[];s.finishers=[];s.volleys=[];s.zones=[];s.telegraph=null;s.goldCharge=null;
   if((s.sunlight||0)<SUNFLOWER.max&&s.board.some(u=>u?.hero==='sunflower')){s.sunlight=(s.sunlight||0)+1;event(s,'sunCharge',{sunlight:s.sunlight,points:s.board.flatMap((u,i)=>u?.hero==='sunflower'?[cellPoint(i)]:[])});}
   event(s,'clear',{wave:s.wave,...payout});
   if(s.wave===lastWave(s)&&!s.endless){s.reward=null;s.phase='victory';s.won=true;return;}
@@ -1403,7 +1420,7 @@ export function step(s,dt){
   for(const key of Object.keys(s.buffs))s.buffs[key]=Math.max(0,s.buffs[key]-dt);
   while(s.reserves.length&&freeCell(s)>=0)place(s,s.reserves.shift(),2);
   if(s.phase==='intermission'){s.breakTime-=dt;if(s.breakTime<=0)beginWave(s,s.wave+1);return;}
-  s.waveTime+=dt;addGauge(s,dt*STARLIGHT_PER_SECOND);
+  s.waveTime+=dt;addGauge(s,dt*STARLIGHT_PER_SECOND*(s.oathMods?.regen??1));
   s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter,s.mode).interval;}
   for(const e of s.enemies){
     if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);e.dotFlash-=dt;
@@ -1635,6 +1652,13 @@ export function restore(raw){
     if(!record(s.upgrades)||s.deck.some(h=>!Number.isInteger(s.upgrades[h])||s.upgrades[h]<0||s.upgrades[h]>5)||!record(s.buffs)||Object.values(s.buffs).some(n=>!Number.isFinite(n)))return null;
     if(!record(s.buffTotals)||Object.entries(s.buffTotals).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<0||n>60))return null;
     if(!record(s.buffScale)||Object.entries(s.buffScale).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<1||n>rankControl(MAX_RANK)+1e-9))return null;
+    if(s.oaths===undefined)s.oaths=[];
+    if(!Array.isArray(s.oaths)||oathConflict(s.oaths))return null;
+    s.oathMods=oathMods(s.oaths);
+    if(s.side===undefined)s.side=null;
+    if(!(s.side===null||s.side==='left'||s.side==='right'))return null;
+    if(s.lineup===undefined)s.lineup=null;
+    if(!(s.lineup===null||Array.isArray(s.lineup)&&s.lineup.every(id=>typeof id==='string'&&BOSSES[id])))return null;
     if(s.stats&&s.stats.leaks===undefined)s.stats.leaks=s.health<coreHealthMax(s)?1:0;
     if(!numeric(s.stats,['kills','merges','summons','skills','damage'])||!Number.isInteger(s.stats.leaks)||s.stats.leaks<0||!record(s.stats.income)||!record(s.stats.byHero)||Object.values(s.stats.income).some(n=>!Number.isFinite(n))||Object.entries(s.stats.byHero).some(([h,n])=>!HERO[h]||!Number.isFinite(n)))return null;
     if(s.telegraph&&(!id(s.telegraph.uid)||!numeric(s.telegraph,['ends'])||!['seal','heal','drain','rush','storm','duel','creation','stun1','starlust','thunder','shuffle','warp','judgement'].includes(s.telegraph.pattern)||!Array.isArray(s.telegraph.cells)||s.telegraph.cells.some(n=>!Number.isInteger(n)||n<0||n>24)))return null;
