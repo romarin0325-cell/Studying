@@ -410,9 +410,25 @@ function capStacks(e,type,cap){
   for(const effect of effects){effect.amount=Math.min(remaining,effect.amount);remaining-=effect.amount;}
   e.statusEffects=e.statusEffects.filter(effect=>effect.amount>0);
 }
+// Living bosses share their aura with every living enemy within `aura` path-distance, themselves included.
+// Immunities union. A scale keeps the highest value, so two of the same aura do not multiply.
+function auraMods(s,e){
+  const p=pathPoint(e.progress),immune=new Set(),control=new Set(),dotScale={};let exposeScale=1;
+  for(const x of s.enemies){
+    if(x.hp<=0)continue;
+    const b=BOSSES[x.boss];if(!b?.aura)continue;
+    const q=pathPoint(x.progress);
+    if(Math.hypot(q.x-p.x,q.y-p.y)>b.aura)continue;
+    if(b.immune)immune.add(b.immune);
+    if(b.auraImmuneControl)control.add(b.auraImmuneControl);
+    if(b.dotScale)for(const [k,v] of Object.entries(b.dotScale))if(v>(dotScale[k]||0))dotScale[k]=v;
+    if(b.exposeScale>exposeScale)exposeScale=b.exposeScale;
+  }
+  return {immune,control,dotScale,exposeScale};
+}
 function addStatus(s,e,type,source,owner,amount,duration,power,crit=castCrits.get(s)){
   if(e.hp<=0||amount<=0||duration<=0)return;
-  if(e.boss&&BOSSES[e.boss]?.immune===type)return;
+  if(auraMods(s,e).immune.has(type))return;
   syncStatuses(s,e);
   const existing=e.statusEffects.find(effect=>effect.type===type&&effect.source===source),until=s.time+duration;
   if(existing){existing.amount=['poison','divine'].includes(type)?existing.amount+amount:amount;if(type==='poison')existing.amount=Math.min(POISON_CAP,existing.amount);existing.until=until;if(power!==undefined)existing.power=power;if(crit!==undefined)existing.crit=crit;}
@@ -426,6 +442,7 @@ const poisonAmp=s=>has(s,'seed')?1+RV.seed.poison*relicScaleIn(s,'seed'):1;
 // wasted by a basic attack's stun); a second ultimate control within 2 s after the last one ended lasts half again.
 export const ULT_CONTROL_REPEAT=.5;
 function addControl(s,e,type,source,owner,duration){
+  if(auraMods(s,e).control.has(type))return;
   if(e.boss&&!source.startsWith('interrupt:')){
     const ult=source.startsWith('skill:');
     if(!ult&&(e.ccImmune||0)-s.time>1e-9)return;
@@ -611,8 +628,8 @@ function noteEcho(s,e,actual,dot,instant){
 function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,statusAt=s.time,gift=false,basic=false,dotType=null,flat=false,crit=undefined}={}){
   if(!e||e.hp<=0)return 0;
   syncStatuses(s,e,statusAt);syncSlows(s,e,statusAt);
-  const passive=e.boss?BOSSES[e.boss]:null;
-  let amount=instant?e.hp+(e.shield||0):flat?value:value*(1+e.takenBonus*(passive?.exposeScale||1))*(passive?.dotScale?.[dotType]||1)*(basic?passive?.basicScale||1:1)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1+RV.lens.boss*relicScaleIn(s,'lens'):1)*(e.boss&&has(s,'royal_seal')?1+RV.royal_seal.boss*relicScaleIn(s,'royal_seal'):1)*(e.slowTime>0&&has(s,'frost')?1+RV.frost.slowed*relicScaleIn(s,'frost'):1)*(has(s,'amulet')&&e.progress>=PATH_LENGTH*2/3?1+RV.amulet.near*relicScaleIn(s,'amulet'):1)*(has(s,'chalice')&&e.burn>0&&e.poison>=RV.chalice.poison?1+RV.chalice.taken*relicScaleIn(s,'chalice'):1)*(1+(e.dawn||0));
+  const aura=auraMods(s,e),own=e.boss?BOSSES[e.boss]:null;
+  let amount=instant?e.hp+(e.shield||0):flat?value:value*(1+e.takenBonus*aura.exposeScale)*(aura.dotScale[dotType]||1)*(basic?own?.basicScale||1:1)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1+RV.lens.boss*relicScaleIn(s,'lens'):1)*(e.boss&&has(s,'royal_seal')?1+RV.royal_seal.boss*relicScaleIn(s,'royal_seal'):1)*(e.slowTime>0&&has(s,'frost')?1+RV.frost.slowed*relicScaleIn(s,'frost'):1)*(has(s,'amulet')&&e.progress>=PATH_LENGTH*2/3?1+RV.amulet.near*relicScaleIn(s,'amulet'):1)*(has(s,'chalice')&&e.burn>0&&e.poison>=RV.chalice.poison?1+RV.chalice.taken*relicScaleIn(s,'chalice'):1)*(1+(e.dawn||0));
   if(!instant&&!flat){
     if(e.rage>0&&!dot)amount*=.75;
     if((dotType==='burn'||dotType==='poison')&&s.buffs.venom>0)amount*=1+VENOM_PLAGUE.amp;
@@ -816,7 +833,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(has(s,'sprout')&&u.rank<=2)damageBonus('relic','풋내기 훈장',RV.sprout.power*relicScaleIn(s,'sprout'));
   if(has(s,'alchemy')&&Number.isInteger(u.mergedWave)&&u.mergedWave<=s.wave&&s.wave<u.mergedWave+RV.alchemy.waves)damageBonus('relic','연금',RV.alchemy.power*relicScaleIn(s,'alchemy'));
   if(has(s,'tide')&&s.gauge>=RV.tide.gauge)damageBonus('relic','파도의 소라',RV.tide.power*relicScaleIn(s,'tide'));
-  if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic','꿈의 결정',RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
+  if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic','꿈의 조각',RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
   if(s.buffs.awaken>0)damageBonus('ult','각성',ULT_BUFF.awaken.power*buffScale(s,'awaken'));
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',.5*buffScale(s,'radiance'));
   if(unitForm(s,u)==='trauma'){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
@@ -1306,9 +1323,9 @@ export function castPreview(s,id){
 
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
 // Targets are random: a random row, random occupied cells, or a random companion for the curse.
-// Repeat-limited patterns (curse, shuffle) count per boss so one appearance never spams them.
+// Repeat-limited patterns (shuffle) count per boss so one appearance never spams them. Curse keeps firing.
 // BOSS_LIMIT.judgement is Astea's judgement (max 2), not Thor's column stun.
-const BOSS_LIMIT={curse:1,shuffle:2,judgement:2};
+const BOSS_LIMIT={shuffle:3,judgement:2};
 // Targeted patterns (lit cells) give longer to drag the unit out; board-wide ones stay at 2.6 s.
 export const TELEGRAPH_TIME=Object.freeze({seal:3.5,storm:3.5,stun1:3.5,judgement:3.5});
 function bossCells(s,pattern){
@@ -1365,7 +1382,7 @@ function bossStep(s,e,dt){
   if(BOSS_LIMIT[pattern]!==undefined&&casts>=BOSS_LIMIT[pattern]){e.skillIn=99;return;}
   e.casts=casts+1;
   if(pattern==='curse'){
-    // Unannounced, once per appearance: one random active companion is sealed until it is merged, sold or cleansed.
+    // Unannounced: one random active companion is sealed until it is merged, sold or cleansed.
     const pool=s.board.flatMap((u,i)=>u&&!u.cursed?[i]:[]);e.skillIn=boss.every||9;
     if(!pool.length)return;
     const i=pool[Math.floor(random(s)*pool.length)];

@@ -702,11 +702,85 @@ test('boss passives: immunities, doubled DoT, doubled exposure and halved basic 
   close(hit(0,.2)/hit(2,.2),1.4/1.2,'the artificial demon doubles exposure');close(hit(8,0)/hit(2,0),.5,'Astea halves basic attacks');
 });
 
+test('flora, poseidon and the artificial demon share their aura with living enemies within 180',()=>{
+  const gap=(a,b)=>{const p=E.pathPoint(a),q=E.pathPoint(b);return Math.hypot(p.x-q.x,p.y-q.y);};
+  assert.ok(gap(1100,1200)<=180);assert.ok(gap(1100,1500)>180);
+  let edge=1200,past=1500;
+  for(let i=0;i<40;i++){const mid=(edge+past)/2;if(gap(1100,mid)>180)past=mid;else edge=mid;}
+  assert.ok(gap(1100,edge)<=180);assert.ok(gap(1100,past)>180);
+  const burnOf=(place)=>{
+    const s=traitArena([{hero:'star_boy',index:12}]);
+    const foes=place(s);const foe=foes.at(-1);
+    foe.statusEffects.push({type:'burn',source:'t:burn',owner:'star_boy',amount:10,until:s.time+5});
+    const hp=foe.hp;E.step(s,.05);return hp-foe.hp;
+  };
+  const floraNear=progress=>s=>{
+    const [boss,foe]=enemiesFor(s,[{kind:'boss',progress:1100},{progress}]);
+    boss.boss='flora';boss.speed=0;boss.skillIn=99;foe.speed=0;return [boss,foe];
+  };
+  const plain=burnOf(s=>{const [foe]=enemiesFor(s,[{progress:1200}]);foe.speed=0;return [foe];});
+  close(burnOf(floraNear(1200))/plain,2,'a nearby enemy takes Flora burn');
+  close(burnOf(floraNear(edge))/plain,2,'the aura radius is inclusive');
+  close(burnOf(floraNear(past))/plain,1,'outside the aura, burn is unchanged');
+  close(burnOf(floraNear(1500))/plain,1);
+  close(burnOf(s=>{
+    const [a,b,foe]=enemiesFor(s,[{kind:'boss',progress:1100},{kind:'boss',progress:1120},{progress:1160}]);
+    a.boss=b.boss='flora';a.speed=b.speed=0;a.skillIn=b.skillIn=99;foe.speed=0;return [a,b,foe];
+  })/plain,2,'two Flora auras do not multiply');
+  close(burnOf(s=>{
+    const [boss,foe]=enemiesFor(s,[{kind:'boss',progress:1100},{progress:1200}]);
+    boss.boss='flora';boss.hp=0;foe.speed=0;return [boss,foe];
+  })/plain,1,'a dead boss does not share its aura');
+  // Nightmare shoves bosses 110 and everyone else 220 before the poison lands, one enemy at a time.
+  // After that shove the two bosses stay more than 180 apart, and the neighbour still sits inside both auras.
+  const poison=traitArena([{hero:'phantom',index:12},{hero:'ash',index:0}]);
+  const [flora,poseidon,near,far]=enemiesFor(poison,[{kind:'boss',progress:1300},{kind:'boss',progress:1600},{progress:1560},{progress:1670}]);
+  flora.boss='flora';poseidon.boss='poseidon';
+  for(const e of [flora,poseidon,near,far]){e.speed=0;e.skillIn=99;}
+  readyCast(poison,'phantom');
+  assert.equal(near.poison,0,'overlapping auras union their immunities');assert.equal(flora.poison,0);assert.ok(far.poison>0);assert.ok(poseidon.poison>0);
+  const shot=launchNormal(poison,poison.board[0]);shot.target=near.uid;resolveNormal(poison,shot);
+  assert.equal(near.burn,0,'Poseidon burn immunity covers a neighbour');
+  const exposed=(ids,progress)=>{
+    const s=traitArena([{hero:'star_boy',index:12}]);
+    const specs=ids.map((id,i)=>({kind:'boss',progress:1100+i*20}));specs.push({progress});
+    const foes=enemiesFor(s,specs);
+    foes.forEach((e,i)=>{if(i<ids.length)e.boss=ids[i];e.speed=0;e.skillIn=99;});
+    const foe=foes.at(-1);
+    foe.statusEffects.push({type:'exposure',source:'t:x',owner:null,amount:.2,until:s.time+5});
+    const attack=launchNormal(s,s.board[12]);attack.target=foe.uid;const hp=foe.hp;resolveNormal(s,attack);return hp-foe.hp;
+  };
+  const open=exposed([],1200);
+  close(exposed(['artificial_demon'],1200)/open,1.4/1.2,'a neighbour takes doubled exposure');
+  close(exposed(['artificial_demon','artificial_demon'],1160)/open,1.4/1.2,'two exposure auras do not multiply');
+  close(exposed(['artificial_demon'],1500)/open,1,'exposure aura ends at 180');
+  const basic=(boss)=>{
+    const s=traitArena([{hero:'star_boy',index:12}]);
+    const specs=boss?[{kind:'boss',progress:1100},{progress:1200}]:[{progress:1200}];
+    const foes=enemiesFor(s,specs);if(boss)foes[0].boss=boss;
+    for(const e of foes){e.speed=0;e.skillIn=99;}
+    const foe=foes.at(-1);const attack=launchNormal(s,s.board[12]);attack.target=foe.uid;const hp=foe.hp;resolveNormal(s,attack);return hp-foe.hp;
+  };
+  close(basic('astea')/basic(null),1,'Astea basicScale stays on the boss');
+  const stun=traitArena([{hero:'lightning_sage',index:12}]);
+  const [demon,closeFoe,farFoe]=enemiesFor(stun,[{kind:'boss',progress:1100},{progress:1200},{progress:1500}]);
+  demon.boss='artificial_demon';
+  for(const e of [demon,closeFoe,farFoe]){e.speed=0;e.skillIn=99;}
+  readyCast(stun,'lightning_sage');
+  assert.equal(demon.stun,0);assert.equal(closeFoe.stun,0);assert.ok(farFoe.stun>0);
+  const gone=traitArena([{hero:'lightning_sage',index:12}]);
+  const [dead,victim]=enemiesFor(gone,[{kind:'boss',progress:1100},{progress:1200}]);
+  dead.boss='artificial_demon';dead.hp=0;victim.speed=0;
+  readyCast(gone,'lightning_sage');
+  assert.ok(victim.stun>0,'a dead artificial demon no longer blocks stun');
+});
+
 test('curse seals a random unit once per boss appearance; merging, selling or Jasmine clears it',()=>{
   const s=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1},{hero:'jasmine',index:12}]);s.chapter=3;
   const [boss]=enemiesFor(s,[{kind:'boss',progress:400}]);assert.equal(boss.boss,'curse_iris');boss.speed=0;
   for(let i=0;i<4;i++){boss.skillIn=0;E.step(s,.05);}
-  assert.equal(s.board.filter(u=>u?.cursed).length,1,'one curse per appearance');assert.equal(s.events.filter(e=>e.type==='warning').length,0,'no warning');
+  assert.equal(s.board.filter(u=>u?.cursed).length,3,'the curse keeps sealing until every companion is cursed');
+  assert.equal(s.events.filter(e=>e.type==='curse').length,3);assert.equal(s.events.filter(e=>e.type==='warning').length,0,'no warning');
   const cursed=s.board.findIndex(u=>u?.cursed);assert.ok(E.restore(E.serialize(s)),'cursed units save and restore');
   if(s.board[0]?.hero==='star_boy'&&s.board[1]?.hero==='star_boy'&&(s.board[0].cursed||s.board[1].cursed)){assert.ok(E.move(s,0,1).merged);assert.equal(s.board[1].cursed,undefined,'a merge makes a fresh unit');}
   for(const u of s.board)if(u)u.cursed=true;s.board[12].cursed=false;s.gauge=120;assert.ok(E.cast(s,'jasmine').ok);assert.ok(s.board.every(u=>!u?.cursed),'Jasmine cleanses');
@@ -749,10 +823,10 @@ test('stunning Thor during the thunder channel cancels the judgement; resolving 
   void cells;
 });
 
-test('Ares reshuffles the board at most twice; love Iris drains only a full gauge',()=>{
+test('Ares reshuffles the board at most three times; love Iris drains only a full gauge',()=>{
   const s=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:0},{hero:'snow_rabbit',index:6}]);s.chapter=6;const [boss]=enemiesFor(s,[{kind:'boss',progress:400}]);boss.speed=0;
-  let casts=0;for(let k=0;k<4;k++){boss.skillIn=0;E.step(s,.05);if(s.telegraph?.pattern==='shuffle')casts++;for(let i=0;i<60&&s.telegraph;i++)E.step(s,.05);}
-  assert.equal(casts,2);assert.equal(s.board.filter(Boolean).length,3);
+  let casts=0;for(let k=0;k<5;k++){boss.skillIn=0;E.step(s,.05);if(s.telegraph?.pattern==='shuffle')casts++;for(let i=0;i<60&&s.telegraph;i++)E.step(s,.05);}
+  assert.equal(casts,3);assert.equal(s.board.filter(Boolean).length,3);
   for(const full of [true,false]){
     const r=traitArena([{hero:'star_boy',index:12}]);r.chapter=2;const [iris]=enemiesFor(r,[{kind:'boss',progress:400}]);iris.speed=0;iris.skillIn=0;r.board[12].cooldown=99;
     E.step(r,.05);assert.equal(r.telegraph?.pattern,'starlust');r.gauge=full?120:100;
@@ -1310,10 +1384,11 @@ test('galaxy whale harvests divine marks for factor*(1+marks) and does not stun 
 
 test('ultimate control ignores a boss\'s control immunity; a second ultimate control right after lasts half',()=>{
   const s=traitArena([{hero:'guardian',index:12,rank:1},{hero:'lightning_sage',index:13,rank:1}]);const [boss]=enemiesFor(s,[{kind:'boss',hp:1e9,progress:300}]);quiet(s);
-  boss.ccImmune=s.time+5;readyCast(s,'guardian');
+  boss.boss='love_iris';boss.ccImmune=s.time+5;readyCast(s,'guardian');
   close(E.statusState(s,boss).stun,1.5*E.BOSS_CONTROL_SCALE,'lands through the basic-attack immunity');
   readyCast(s,'lightning_sage');close(E.statusState(s,boss).stun,Math.max(1.5,1.2*E.ULT_CONTROL_REPEAT)*E.BOSS_CONTROL_SCALE,'the longer stun still holds');
   const t=traitArena([{hero:'lightning_sage',index:13,rank:1}]);const [b2]=enemiesFor(t,[{kind:'boss',hp:1e9,progress:300}]);quiet(t);
+  b2.boss='love_iris';
   readyCast(t,'lightning_sage');const first=E.statusState(t,b2).stun;advanceTo(t,t.time+first+.1);readyCast(t,'lightning_sage');
   close(E.statusState(t,b2).stun,first*E.ULT_CONTROL_REPEAT,'a chained ultimate control lasts half');assert.ok(E.restore(E.serialize(t)));
 });
@@ -1951,9 +2026,9 @@ test('dream crystal adds starting starlight once and raises only Rumi',()=>{
   const run=traitArena([{hero:'rumi',index:12},{hero:'star_boy',index:0,birthWave:1}],{artifacts:['dream_crystal'],wave:2});
   run.relicLevels={dream_crystal:3};const m=relicScale(3);
   close(E.combatStats(run,run.board[12]).damage/E.power(run,run.board[12]),1+E.RELIC_VALUES.dream_crystal.rumi*m);
-  assert.ok(E.combatStats(run,run.board[12],12,true).bonuses.some(line=>line.includes('꿈의 결정')));
+  assert.ok(E.combatStats(run,run.board[12],12,true).bonuses.some(line=>line.includes('꿈의 조각')));
   close(E.combatStats(run,run.board[0]).damage/E.power(run,run.board[0]),1);
-  assert.ok(!E.combatStats(run,run.board[0],0,true).bonuses.some(line=>line.includes('꿈의 결정')));
+  assert.ok(!E.combatStats(run,run.board[0],0,true).bonuses.some(line=>line.includes('꿈의 조각')));
 });
 
 test('no relic feeds starlight or gold back into itself',()=>{
