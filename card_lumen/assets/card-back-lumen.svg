@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 500">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2=".35" y2="1"><stop stop-color="#1c2b52"/><stop offset=".55" stop-color="#121d3b"/><stop offset="1" stop-color="#0b1329"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".46" r=".5"><stop stop-color="#ffd98a" stop-opacity=".18"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe3a3"/><stop offset="1" stop-color="#d9a24c"/></linearGradient>
+</defs>
+<rect width="300" height="500" rx="18" fill="url(#bg)"/>
+<rect width="300" height="500" rx="18" fill="url(#glow)"/>
+<g fill="none" stroke="#9fb8ff" stroke-opacity=".09">
+<path d="M-20 120 320 380M-20 200 320 460M-20 40 320 300M-20 -40 320 220M-20 280 320 540"/>
+<path d="M320 120-20 380M320 200-20 460M320 40-20 300M320 -40-20 220M320 280-20 540"/>
+</g>
+<rect x="12" y="12" width="276" height="476" rx="11" fill="none" stroke="url(#gold)" stroke-opacity=".55"/>
+<rect x="19" y="19" width="262" height="462" rx="7" fill="none" stroke="#ffe3a3" stroke-opacity=".16"/>
+<g fill="none" stroke="url(#gold)">
+<circle cx="150" cy="230" r="86" stroke-opacity=".28"/>
+<circle cx="150" cy="230" r="64" stroke-opacity=".5" stroke-dasharray="2 6"/>
+<ellipse cx="150" cy="230" rx="108" ry="30" transform="rotate(-24 150 230)" stroke-opacity=".38"/>
+</g>
+<path fill="url(#gold)" d="m150 168 12 50 50 12-50 12-12 50-12-50-50-12 50-12Z"/>
+<path fill="#121d3b" fill-opacity=".55" d="m150 196 6 28 28 6-28 6-6 28-6-28-28-6 28-6Z"/>
+<g fill="#ffe3a3"><circle cx="150" cy="58" r="2.2"/><circle cx="150" cy="442" r="2.2"/><circle cx="70" cy="130" r="1.4" fill-opacity=".6"/><circle cx="236" cy="342" r="1.6" fill-opacity=".6"/><circle cx="228" cy="110" r="1" fill-opacity=".5"/><circle cx="82" cy="356" r="1" fill-opacity=".5"/></g>
+<g fill="none" stroke="#ffe3a3" stroke-opacity=".45" stroke-linecap="round"><path d="M128 58h-30M172 58h30M128 442h-30M172 442h30"/></g>
+<text x="150" y="410" text-anchor="middle" font-family="Georgia,serif" font-size="13" letter-spacing="5" fill="#ffe3a3" fill-opacity=".55">DREAMWEAVER</text>
+</svg>

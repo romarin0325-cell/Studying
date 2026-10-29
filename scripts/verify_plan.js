@@ -220,16 +220,22 @@ function planCard(plan, files) {
   }
 }
 
-function planCardAstra(plan, files, currentFiles) {
-  const product = currentFiles.filter(file => file.startsWith('card_astra/') && !isDocumentation(file));
-  const inputs = product.filter(file => /^(?:card_astra\/(?:src|assets)\/|card_astra\/(?:build\.mjs|package\.json)$)/.test(file));
+// Standalone Card presentations (Astra, Lumen) share card/game and each build their own single HTML.
+function planCardEdition(plan, currentFiles, folder, id, name, smoke) {
+  const product = currentFiles.filter(file => file.startsWith(folder + '/') && !isDocumentation(file));
+  const inputs = product.filter(file => /^[^/]+\/(?:(?:src|assets)\/|(?:build\.mjs|package\.json)$)/.test(file));
   for (const file of product.filter(file => /\.(?:js|mjs)$/.test(file))) addNodeCheck(plan, 'card', file);
   if (inputs.length) {
-    addStep(plan, makeStep('card:astra:build', 'card', 'Build the standalone Astra presentation', 'node', ['card_astra/build.mjs']));
+    addStep(plan, makeStep(`card:${id}:build`, 'card', `Build the standalone ${name} presentation`, 'node', [`${folder}/build.mjs`]));
   }
-  if (inputs.length || product.some(file => file.startsWith('card_astra/tests/'))) {
-    addBrowserScript(plan, 'card', 'card:astra:smoke', 'Check Astra navigation, card paging, formation and combat', 'card_astra/tests/smoke.mjs');
+  if (inputs.length || product.some(file => file.startsWith(folder + '/tests/'))) {
+    addBrowserScript(plan, 'card', `card:${id}:smoke`, smoke, `${folder}/tests/smoke.mjs`);
   }
+}
+
+function planCardAstra(plan, files, currentFiles) {
+  planCardEdition(plan, currentFiles, 'card_astra', 'astra', 'Astra', 'Check Astra navigation, card paging, formation and combat');
+  planCardEdition(plan, currentFiles, 'card_lumen', 'lumen', 'Lumen', 'Check Lumen journey, formation, chain challenge, combat and themes');
 }
 
 function planShooter(plan, files, currentFiles) {
@@ -460,7 +466,7 @@ function createPlan(changes, options = {}) {
   const mapped = new Set([
     ...files.filter(isVerificationPath),
     ...files.filter(file => ALL_GAMES.some(game => file.startsWith(game + '/'))),
-    ...files.filter(file => file.startsWith('card_astra/')),
+    ...files.filter(file => file.startsWith('card_astra/') || file.startsWith('card_lumen/')),
     ...files.filter(file => file.startsWith('card_deepseek/') && !currentFiles.includes(file)),
     ...files.filter(file => file.startsWith('scripts/verify_card_')),
     ...files.filter(file => file === 'scripts/verify_gemini_api_models.js'),

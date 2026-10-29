@@ -1,0 +1,10 @@
+{
+  "name": "dreamweaver-lumen-edition",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node serve.mjs",
+    "verify": "node --check src/lumen.js && node build.mjs && node tests/smoke.mjs"
+  }
+}
