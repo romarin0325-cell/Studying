@@ -132,10 +132,10 @@ test('drawCharacter urMult doubles the UR rate and takes that share from C',()=>
 });
 
 test('a normal-banner UR is the weekly pickup half the time',()=>{
-  // First roll lands on UR; expected pickup share is 1/2 + 1/2 x 1/6.
-  let n=0,pick=0;
+  // First roll lands on UR; expected pickup share is 1/2 + 1/2 x 1/(normal UR pool). The pool grows with new URs, so derive it.
+  const expected=.5+.5/heroPool('UR',true).length;let n=0,pick=0;
   for(let i=0;i<20000;i++){const r=[.9999,Math.random(),Math.random()];let k=0;const id=drawCharacter(()=>r[k++]??Math.random(),false,'doom','luna');n++;if(id==='luna')pick++;assert.ok(ROSTER.UR.includes(id));}
-  assert.ok(pick/n>.55&&pick/n<.62,'pickup share '+pick/n);
+  assert.ok(Math.abs(pick/n-expected)<.02,'pickup share '+pick/n+' expected '+expected);
 });
 
 test('calendar uses UTC+9, Monday weeks and six guardians independently of host locale',()=>{
