@@ -344,7 +344,7 @@ function beginPreview(p,mode,args,now){
   const locked=twinLocks(p,now,tier,args.side),mine=party[args.side];
   if(mine.deck.some(id=>locked.heroes.includes(id))||mine.relics.some(id=>locked.relics.includes(id))){
     const name=TWIN_SIDE[args.side==='left'?'right':'left'].name;
-    return {ok:false,message:`${name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${name}을 다시 도전하면 풀려요.`};
+    return {ok:false,message:`${name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${name}에 다시 도전하면 풀려요.`};
   }
   const relics=party[args.side].relics;random(p);
   p.active={mode,stage,deck:[...party[args.side].deck],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(relics.map(id=>[id,relicLevel(p.relics[id])])),tier,side:args.side,relics:[...relics]};

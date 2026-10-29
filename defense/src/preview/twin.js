@@ -30,8 +30,6 @@ export function twinPartyProblem(p,party){
   if(new Set(relics).size!==relics.length)return '같은 유물을 두 별길에 장착할 수 없습니다.';
   return '';
 }
-// app.js still imports the old set key until its twin screen reads records. Profile code does not use it.
-export const twinSetKey=(party,tier)=>JSON.stringify([tier,party?.left?.deck,party?.left?.relics,party?.right?.deck,party?.right?.relics]);
 const blankRecords=()=>({easy:{left:null,right:null},hard:{left:null,right:null},abyss:{left:null,right:null}});
 const copyRecord=r=>r?{round:r.round,damage:r.damage,deck:[...r.deck],relics:[...r.relics],at:r.at}:null;
 const copyRecords=records=>{

@@ -15,7 +15,7 @@ const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_WAVES,oathState}=await impo
 const {twinBosses,twinBandReward,twinState,twinLocks,TWIN_WAVES,TWIN_STAGE,TWIN_SIDE}=await import('../src/preview/twin.js');
 const {requestTracker,requestGoal,REQUEST,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
 const {FAVORITE}=await import('../src/bond.js');
-const {REQUEST_REWARD:REQUEST_PAY,REQUEST_HEROES}=await import('../src/preview/requests-data.js');
+const {REQUEST_REWARD:REQUEST_PAY,REQUEST_HEROES,REQUESTS,AFTERWORDS}=await import('../src/preview/requests-data.js');
 const {testGrant,TEST_TOOLS}=await import('../src/test-unlock.js');
 
 const NOW=Date.parse('2026-10-04T03:00:00Z');
@@ -276,7 +276,7 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   ok(fresh,'twinParty',overlap);
   const denied=command(fresh,'begin',{mode:'twin',tier:'easy',side:'right'},NOW);
   assert.equal(denied.ok,false);
-  assert.equal(denied.message,`${TWIN_SIDE.left.name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${TWIN_SIDE.left.name}을 다시 도전하면 풀려요.`);
+  assert.equal(denied.message,`${TWIN_SIDE.left.name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${TWIN_SIDE.left.name}에 다시 도전하면 풀려요.`);
   assert.deepEqual(twinLocks(fresh,NOW,'easy','right').heroes,fresh.twin.records.easy.left.deck);
   assert.deepEqual(twinLocks(fresh,NOW,'easy','left').heroes,fresh.twin.records.easy.right.deck);
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
@@ -289,13 +289,28 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   assert.equal(JSON.stringify(fresh),before);assert.equal(validateProfile(fresh),true);
 });
 
+test('every companion has three requests in order, real goal heroes, three lines each way and an afterword',()=>{
+  assert.deepEqual([...REQUEST_HEROES].sort(),Object.keys(HERO).sort());
+  for(const id of REQUEST_HEROES){
+    const list=REQUESTS.filter(r=>r.hero===id);assert.deepEqual(list.map(r=>r.order),[1,2,3],id);
+    for(const r of list){
+      assert.equal(r.id,id+'-'+r.order);assert.equal(r.arrive.length,3,r.id);assert.equal(r.thanks.length,3,r.id);assert.ok(r.title&&r.hint,r.id);
+      for(const h of [].concat(r.goal.with||[],r.goal.hero||[]))assert.ok(HERO[h],r.id+' '+h);
+      assert.ok(['clear','casts','bosses','rank','flag'].includes(r.goal.type),r.id);assert.ok(requestGoal(r.id)>=1,r.id);
+    }
+    assert.ok(AFTERWORDS[id]?.title&&AFTERWORDS[id].paragraphs.length>=4,id);
+  }
+  assert.equal(new Set(REQUESTS.map(r=>r.title)).size,REQUESTS.length,'titles are unique');
+});
 test('companion requests arrive on a cadence, progress from the active deck, and pay a thank-you once',()=>{
   const tracker=requestTracker();
   tracker.observe({board:[{hero:'silver_rabbit'},{hero:'snow_rabbit'}]},[{type:'skill',hero:'night_rabbit'},{type:'kill',boss:'flora'},{type:'kill',boss:null}]);
   tracker.observe({board:[]},[{type:'reduce',by:'ash'},{type:'skill',hero:'ash'}]);
   const feats=tracker.feats(true);assert.equal(feats.casts.night_rabbit,1);assert.equal(feats.bosses,1);assert.deepEqual(feats.flags,['moonlit']);
   const spared=requestTracker();spared.observe({board:[]},[{type:'skill',hero:'ash'}]);assert.deepEqual(spared.feats(false).flags,['spared']);
-  const p=profile();p.heroes.underdog.owned=false;p.heroes.ash.owned=false;
+  // Every companion has requests now; only Night Rabbit may visit first, Underdog and Ash join for the next two.
+  const p=profile(),owned=Object.fromEntries(Object.entries(p.heroes).map(([id,h])=>[id,h.owned]));
+  for(const id of Object.keys(p.heroes))if(id!=='night_rabbit')p.heroes[id].owned=false;
   const first=ok(p,'requestArrive');assert.deepEqual(first.arrived,['night_rabbit-1']);
   assert.ok(p.requests.next>=NOW+REQUEST_GAP_MIN&&p.requests.next<NOW+REQUEST_GAP_MIN+REQUEST_GAP_SPAN);
   const rng=p.rng,next=p.requests.next;assert.deepEqual(command(p,'requestArrive',{},next-1).arrived,[]);assert.equal(p.rng,rng);assert.equal(p.requests.next,next);
@@ -308,6 +323,7 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   const capped=p.rng,full=p.requests.next;assert.deepEqual(ok(p,'requestArrive',{},full).arrived,[]);assert.equal(p.rng,capped);assert.equal(p.requests.next,full);
   ok(p,'requestSeen',{id:'night_rabbit-1'});assert.equal(p.requests.active.find(e=>e.id==='night_rabbit-1').seen,true);
   assert.equal(command(p,'requestSeen',{id:'missing'},NOW).message,'부탁을 찾을 수 없습니다.');
+  for(const [id,o] of Object.entries(owned))p.heroes[id].owned=o;
   const deck=['star_boy','snow_rabbit','night_rabbit','siren','mushroom_king'];
   p.requests={next:NOW+REQUEST_GAP_MIN,active:[
     {id:'night_rabbit-1',at:NOW,seen:true,count:0,done:false},
