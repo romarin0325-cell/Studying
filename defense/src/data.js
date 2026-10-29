@@ -1751,7 +1751,7 @@ export const ARTIFACTS = [
   },
   {
     "id": "dream_crystal",
-    "name": "꿈의 결정",
+    "name": "꿈의 조각",
     "text": "원정을 시작할 때 별빛을 10 더 얻고, 루미의 공격력이 100% 오릅니다.",
     "scale": [{"t":"10", "int":true}, "100%"],
     "icon": 2,
@@ -1813,7 +1813,9 @@ export const BOSSES = {
     "pattern": "seal",
     "warning": "기절 · 빛나는 한 행 2.4초",
     "exposeScale": 2,
-    "trait": "받는 노출 효과 2배",
+    "aura": 180,
+    "auraImmuneControl": "stun",
+    "trait": "행 기절 · 보스 주변 기절 무효 · 노출 2배",
     "frame": 0
   },
   "love_iris": {
@@ -1821,7 +1823,7 @@ export const BOSSES = {
     "color": "#f7b6d4",
     "pattern": "starlust",
     "warning": "사랑의 시험 · 별빛이 가득 차 있으면 별빛 −60",
-    "trait": "별빛을 가득 채워 두면 빼앗습니다",
+    "trait": "가득 찬 별빛 강탈",
     "frame": 1
   },
   "curse_iris": {
@@ -1829,7 +1831,7 @@ export const BOSSES = {
     "color": "#bc8be0",
     "pattern": "curse",
     "warning": "저주 · 동료 한 명이 해제될 때까지 행동하지 못합니다",
-    "trait": "예고 없는 저주 (등장마다 1회) · 합성·회수·자스민으로 해제",
+    "trait": "예고 없는 저주 · 합성·회수·자스민으로 해제",
     "frame": 2
   },
   "flora": {
@@ -1839,7 +1841,8 @@ export const BOSSES = {
     "warning": "꽃가루 폭풍 · 빛나는 1칸 2초 기절",
     "immune": "poison",
     "dotScale": {"burn":2},
-    "trait": "중독 무효 · 화상 피해 2배",
+    "aura": 180,
+    "trait": "보스 주변 중독 무효 · 화상 피해 2배",
     "frame": 3
   },
   "poseidon": {
@@ -1849,7 +1852,8 @@ export const BOSSES = {
     "warning": "해일의 일격 · 빛나는 1칸 2초 기절",
     "immune": "burn",
     "dotScale": {"poison":2},
-    "trait": "화상 무효 · 중독 피해 2배",
+    "aura": 180,
+    "trait": "보스 주변 화상 무효 · 중독 피해 2배",
     "frame": 4
   },
   "beelzebub": {
@@ -1876,7 +1880,7 @@ export const BOSSES = {
     "color": "#ffa88b",
     "pattern": "shuffle",
     "warning": "투신의 난무 · 2.6초 뒤 모든 동료의 자리가 뒤섞입니다",
-    "trait": "등장마다 최대 2회 전체 재배치",
+    "trait": "전체 재배치",
     "atlas": "bosses-expansion",
     "frame": 1
   },
@@ -1887,7 +1891,7 @@ export const BOSSES = {
     "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",
     "basicScale": 0.5,
     "deathWard": 180,
-    "trait": "일반 공격 피해 절반 · 주변 180 즉사 면역 · 예고된 칸에 천벌",
+    "trait": "일반 공격 피해 절반 · 보스 주변 즉사 면역 · 예고된 칸에 천벌",
     "atlas": "bosses-expansion",
     "frame": 2
   }

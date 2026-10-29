@@ -3,9 +3,8 @@ import {TEAM_SIZE} from '../team-config.js';
 import {season} from './season.js';
 
 export const TWIN_WAVES=6;
-// Each road is a main-stage wave plan (6 waves, bosses on 3 and 6) at the upper section of the tier's stage range
-// (TIERS from→to: easy 12→42, hard 40→70, abyss 68→88; 80% of the way).
-export const TWIN_STAGE=Object.freeze({easy:36,hard:64,abyss:84});
+// Each road is a main-stage wave plan (6 waves, bosses on 3 and 6) at the highest stage of that tier's band.
+export const TWIN_STAGE=Object.freeze({easy:42,hard:70,abyss:90});
 export const TWIN_SIDES=Object.freeze(['left','right']);
 export const TWIN_SIDE=Object.freeze({left:{name:'은빛 별길',short:'은빛'},right:{name:'금빛 별길',short:'금빛'}});
 export const TWIN_BANDS=Object.freeze([{total:4,base:60},{total:8,base:80},{total:12,base:120}]);
@@ -31,17 +30,32 @@ export function twinPartyProblem(p,party){
   if(new Set(relics).size!==relics.length)return '같은 유물을 두 별길에 장착할 수 없습니다.';
   return '';
 }
-export const twinSetKey=(party,tier)=>JSON.stringify([tier,party.left.deck,party.left.relics,party.right.deck,party.right.relics]);
-const copyResult=s=>s?{round:s.round,damage:s.damage}:null;
-const copyEntry=e=>e?{total:e.total,left:{round:e.left.round,damage:e.left.damage},right:{round:e.right.round,damage:e.right.damage},key:e.key,at:e.at}:null;
+// app.js still imports the old set key until its twin screen reads records. Profile code does not use it.
+export const twinSetKey=(party,tier)=>JSON.stringify([tier,party?.left?.deck,party?.left?.relics,party?.right?.deck,party?.right?.relics]);
+const blankRecords=()=>({easy:{left:null,right:null},hard:{left:null,right:null},abyss:{left:null,right:null}});
+const copyRecord=r=>r?{round:r.round,damage:r.damage,deck:[...r.deck],relics:[...r.relics],at:r.at}:null;
+const copyRecords=records=>{
+  const out=blankRecords();
+  if(!records||typeof records!=='object')return out;
+  for(const tier of Object.keys(out))out[tier]={left:copyRecord(records[tier]?.left),right:copyRecord(records[tier]?.right)};
+  return out;
+};
+const copyEntry=e=>e?{total:e.total,left:{round:e.left.round,damage:e.left.damage},right:{round:e.right.round,damage:e.right.damage},at:e.at}:null;
 export function twinState(p,now){
   const period=season(now).id,t=p?.twin,fresh=!t||t.period!==period,party=twinParty(p);
   const blank={easy:null,hard:null,abyss:null};
   return {
     period,party,
-    set:fresh||!t.set?null:{key:t.set.key,tier:t.set.tier,left:copyResult(t.set.left),right:copyResult(t.set.right)},
+    records:fresh?blankRecords():copyRecords(t.records),
     best:fresh?{...blank}:{easy:copyEntry(t.best?.easy),hard:copyEntry(t.best?.hard),abyss:copyEntry(t.best?.abyss)},
     paid:fresh?{easy:0,hard:0,abyss:0}:{easy:t.paid?.easy|0,hard:t.paid?.hard|0,abyss:t.paid?.abyss|0},
     lifetime:t?.lifetime?{tier:t.lifetime.tier,total:t.lifetime.total,at:t.lifetime.at}:null,
   };
+}
+// Heroes and relics locked by the other side's record this season. Re-challenging that side replaces the record and releases them.
+export function twinLocks(p,now,tier,side){
+  const other=side==='left'?'right':side==='right'?'left':null;
+  if(!other||!TIERS[tier])return {heroes:[],relics:[]};
+  const rec=twinState(p,now).records?.[tier]?.[other];
+  return {heroes:rec?[...rec.deck]:[],relics:rec?[...rec.relics]:[]};
 }
