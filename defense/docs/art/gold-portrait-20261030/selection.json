@@ -1,0 +1,45 @@
+{
+  "baseline": "d2d2d763e84cf4311202a76efb72cd327875d1ab",
+  "scope": "Optical UI framing only; no regeneration or warping of the original SD",
+  "before": {
+    "x": 250,
+    "y": 209,
+    "size": 250
+  },
+  "after": {
+    "x": 250,
+    "y": 215,
+    "size": 240
+  },
+  "zoom": 1.0416666666666667,
+  "candidates": [
+    {
+      "x": 250,
+      "y": 209,
+      "size": 250
+    },
+    {
+      "x": 250,
+      "y": 209,
+      "size": 240
+    },
+    {
+      "x": 250,
+      "y": 215,
+      "size": 240
+    },
+    {
+      "x": 250,
+      "y": 215,
+      "size": 235
+    }
+  ],
+  "selected": 2,
+  "reason": "4.17% enlargement plus a small upward optical shift in the displayed portrait. The 6.38% option was less subtle. Preserve the compact draconic facial design rather than forcing the eye-to-chin ratio to match Doom.",
+  "input": "defense/assets/cast-v2/gold_dragon.webp",
+  "inputSha256": "e7083366c6abc9e35d789625415e212380e98b231293fadfd03f7768acb3ba52",
+  "beforePortraitSha256": "846f1ec2fa781557dc217d985a5528d366681517e75a16b8614018d3fa077f46",
+  "afterPortraitSha256": "54ff1b69b43297634890ce36bff7506eac086741b1e12dc82a88ae7223cef210",
+  "sourceAnatomyRecord": "defense/docs/art/gold-dragon-20261029/sd/packing.json",
+  "sourceAnatomyChanged": false
+}

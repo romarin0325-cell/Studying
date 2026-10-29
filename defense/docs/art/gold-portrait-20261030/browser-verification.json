@@ -1,0 +1,478 @@
+{
+  "scope": "Actual standalone normal/Bright releases and the Bright twin preview; isolated preboot saves, no in-page state mutation",
+  "viewport": [
+    390,
+    844
+  ],
+  "dpr": 2,
+  "portraitFrame": {
+    "x": 250,
+    "y": 215,
+    "size": 240
+  },
+  "errors": [],
+  "network": [],
+  "embeddedPortraitHashesVerified": true,
+  "captures": [
+    "bright-card-gold_dragon.webp",
+    "bright-card-doom.webp",
+    "bright-collection.webp",
+    "bright-team.webp",
+    "bright-team-row.webp",
+    "bright-team-choice.webp",
+    "bright-twin.webp",
+    "bright-twin-formation.webp",
+    "bright-twin-panels.webp",
+    "bright-twin-choice.webp",
+    "bright-twin-prepare.webp",
+    "night-card-gold_dragon.webp",
+    "night-card-doom.webp",
+    "night-collection.webp",
+    "night-team.webp",
+    "night-team-row.webp",
+    "night-team-choice.webp",
+    "bright-unit-panel.webp",
+    "bright-skill-sheet.webp"
+  ],
+  "checks": [
+    {
+      "name": "bright-card-gold_dragon",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 98.40625,
+          "h": 98.40625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        }
+      ]
+    },
+    {
+      "name": "bright-card-doom",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 98.40625,
+          "h": 98.40625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        }
+      ]
+    },
+    {
+      "name": "bright-collection",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 98.40625,
+          "h": 98.40625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        }
+      ]
+    },
+    {
+      "name": "bright-team",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 98.40625,
+          "h": 98.40625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        },
+        {
+          "w": 62.390625,
+          "h": 62.390625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait"
+        },
+        {
+          "w": 44,
+          "h": 44,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait "
+        }
+      ]
+    },
+    {
+      "name": "bright-team-row",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 98.40625,
+          "h": 98.40625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        },
+        {
+          "w": 62.390625,
+          "h": 62.390625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait"
+        },
+        {
+          "w": 44,
+          "h": 44,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait "
+        }
+      ]
+    },
+    {
+      "name": "bright-team-choice",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 98.40625,
+          "h": 98.40625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        },
+        {
+          "w": 62.390625,
+          "h": 62.390625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait"
+        },
+        {
+          "w": 44,
+          "h": 44,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait "
+        }
+      ]
+    },
+    {
+      "name": "bright-twin",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 23.1875,
+          "h": 23.1875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-face"
+        }
+      ]
+    },
+    {
+      "name": "bright-twin-formation",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 23.1875,
+          "h": 23.1875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-face"
+        },
+        {
+          "w": 38.21875,
+          "h": 38.21875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-slot"
+        },
+        {
+          "w": 63.203125,
+          "h": 63.203125,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-tile-art"
+        }
+      ]
+    },
+    {
+      "name": "bright-twin-panels",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 23.1875,
+          "h": 23.1875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-face"
+        },
+        {
+          "w": 38.21875,
+          "h": 38.21875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-slot"
+        },
+        {
+          "w": 63.203125,
+          "h": 63.203125,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-tile-art"
+        }
+      ]
+    },
+    {
+      "name": "bright-twin-choice",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 23.1875,
+          "h": 23.1875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-face"
+        },
+        {
+          "w": 38.21875,
+          "h": 38.21875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-slot"
+        },
+        {
+          "w": 63.203125,
+          "h": 63.203125,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-tile-art"
+        }
+      ]
+    },
+    {
+      "name": "bright-twin-prepare",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 23.1875,
+          "h": 23.1875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "twin-face"
+        },
+        {
+          "w": 62.390625,
+          "h": 62.390625,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait"
+        }
+      ]
+    },
+    {
+      "name": "night-card-gold_dragon",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 94.796875,
+          "h": 94.796875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        }
+      ]
+    },
+    {
+      "name": "night-card-doom",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 94.796875,
+          "h": 94.796875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        }
+      ]
+    },
+    {
+      "name": "night-collection",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 94.796875,
+          "h": 94.796875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        }
+      ]
+    },
+    {
+      "name": "night-team",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 94.796875,
+          "h": 94.796875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        },
+        {
+          "w": 62,
+          "h": 62,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait"
+        },
+        {
+          "w": 44,
+          "h": 44,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait "
+        }
+      ]
+    },
+    {
+      "name": "night-team-row",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 94.796875,
+          "h": 94.796875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        },
+        {
+          "w": 62,
+          "h": 62,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait"
+        },
+        {
+          "w": 44,
+          "h": 44,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait "
+        }
+      ]
+    },
+    {
+      "name": "night-team-choice",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 94.796875,
+          "h": 94.796875,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "cc-art"
+        },
+        {
+          "w": 62,
+          "h": 62,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait"
+        },
+        {
+          "w": 44,
+          "h": 44,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "portrait "
+        }
+      ]
+    },
+    {
+      "name": "bright-unit-panel",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 57.19999694824219,
+          "h": 57.20001220703125,
+          "fit": "cover",
+          "transform": "matrix(1.3, 0, 0, 1.3, 0, 4.004)",
+          "parent": "unit-face portrait"
+        },
+        {
+          "w": 36,
+          "h": 34,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "skill-button ready unavailable"
+        }
+      ]
+    },
+    {
+      "name": "bright-skill-sheet",
+      "width": 390,
+      "scroll": 390,
+      "missing": [],
+      "gold": [
+        {
+          "w": 57.19999694824219,
+          "h": 57.20001220703125,
+          "fit": "cover",
+          "transform": "matrix(1.3, 0, 0, 1.3, 0, 4.004)",
+          "parent": "unit-face portrait"
+        },
+        {
+          "w": 36,
+          "h": 34,
+          "fit": "contain",
+          "transform": "none",
+          "parent": "skill-button ready unavailable"
+        },
+        {
+          "w": 85,
+          "h": 85,
+          "fit": "cover",
+          "transform": "matrix(1.25, 0, 0, 1.25, 0, 5.1)",
+          "parent": "portrait"
+        }
+      ]
+    }
+  ]
+}

@@ -12,6 +12,8 @@ const LumenUI = {
   finishing: false,
   pendingResult: null,
   summonTimers: [],
+  statusSeen: new WeakMap(),
+  heldFx: null,
 
   $(id) { return document.getElementById(id); },
   el(tag, className, text) {
@@ -35,6 +37,36 @@ const LumenUI = {
   role(card) { return DISPLAY_NAMES.role[card.role] || card.role || ''; },
   modeName(mode) { return DISPLAY_NAMES.mode[mode] || mode || ''; },
   pad(value) { return String(value).padStart(2, '0'); },
+  // Foil for the grades worth chasing: a slow light sweep, and for legend and above a few twinkling stars.
+  foil(card) {
+    const grade = card?.grade;
+    if (!['epic', 'legend', 'transcendence', 'special', 'event'].includes(grade)) return null;
+    const layer = this.el('i', `lm-foil${grade === 'epic' ? ' is-soft' : ''}`);
+    layer.setAttribute('aria-hidden', 'true');
+    return layer;
+  },
+  // Long names shrink to one line first and only wrap when even the smallest size does not fit.
+  fitName(node, min = 8) {
+    node.classList.remove('is-wrap');
+    node.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(node).fontSize) || 12;
+    while (node.scrollWidth > node.clientWidth + 1 && size > min) {
+      size -= 0.5;
+      node.style.fontSize = `${size}px`;
+    }
+    if (node.scrollWidth > node.clientWidth + 1) node.classList.add('is-wrap');
+  },
+  // Challenge summons roll the same pools with a better top grade; say so where the choice is made.
+  challengeEdge() {
+    try {
+      const table = GACHA_RATES[RPG.state.mode] || GACHA_RATES.default;
+      const top = table.challenge[0];
+      const base = table.normal.find(entry => entry.grade === top.grade);
+      if (!top || !base || !(base.threshold > 0)) return null;
+      const ratio = Math.round(top.threshold / base.threshold * 10) / 10;
+      return ratio > 1 ? `${DISPLAY_NAMES.grade[top.grade] || top.grade} ${ratio}배` : null;
+    } catch { return null; }
+  },
   restart(node, className) {
     node.classList.remove(className);
     void node.offsetWidth;
@@ -102,7 +134,41 @@ const LumenUI = {
     if (summary) label.append(this.el('small', '', summary));
     start.onclick = () => RPG.startGame(hasSave ? 'load' : 'new');
     this.$('btn-start-new').hidden = !hasSave;
+    this.renderTitleFan(hasSave);
     this.refreshDots();
+  },
+  // The title's key visual is a hand of five cards: the saved party first, else the game's leading cast with Lumi in front.
+  renderTitleFan(hasSave) {
+    const fan = this.$('lm-title-fan');
+    let ids = [];
+    if (hasSave) {
+      try {
+        const save = Storage.load(Storage.keys.SAVE) || {};
+        const order = ['transcendence', 'special', 'event', 'legend', 'epic', 'rare', 'normal'];
+        const owned = [...new Set(save.inventory || [])].filter(id => GameUtils.getCardById(id))
+          .sort((a, b) => order.indexOf(GameUtils.getCardById(a).grade) - order.indexOf(GameUtils.getCardById(b).grade));
+        ids = [...new Set([...(save.deck || []).filter(Boolean), ...owned])];
+      } catch { /* Damaged saves fall back to the cast. */ }
+    }
+    for (const id of ['rumi', 'luna', 'queen', 'jasmine', 'zeke']) if (!ids.includes(id)) ids.push(id);
+    const cards = ids.map(id => GameUtils.getCardById(id)).filter(Boolean).slice(0, 5);
+    const key = cards.map(card => card.id).join();
+    if (fan.dataset.cards === key) return;
+    fan.dataset.cards = key;
+    fan.replaceChildren();
+    // Front card in the middle, then alternating outward.
+    const slots = [2, 1, 3, 0, 4];
+    cards.forEach((card, index) => {
+      const slot = this.el('span', 'lm-fan-card');
+      slot.dataset.grade = card.grade;
+      slot.style.setProperty('--slot', slots[index] - 2);
+      slot.style.zIndex = String(10 - index);
+      const art = ImageAssets.createPortrait(card);
+      const foil = this.foil(card);
+      if (foil) art.append(foil);
+      slot.append(art);
+      fan.append(slot);
+    });
   },
   syncFullscreen() {
     const button = this.$('btn-game-fullscreen');
@@ -134,6 +200,7 @@ const LumenUI = {
     const on = RPG.global && RPG.global.tutoringEventEnabled !== false;
     const toggle = this.$('lm-tutoring-toggle');
     toggle.setAttribute('aria-pressed', String(!!on));
+    this.$('lm-cutin-toggle').setAttribute('aria-pressed', String(this.cutinOn()));
   },
   hasClaimableMission() {
     try {
@@ -169,6 +236,8 @@ const LumenUI = {
       if (card) {
         const art = ImageAssets.createPortrait(card);
         art.classList.add('lm-party-art');
+        const foil = this.foil(card);
+        if (foil) art.append(foil);
         button.append(art, tag);
         const plate = this.el('span', 'lm-party-plate');
         plate.append(this.el('strong', '', card.name));
@@ -210,10 +279,64 @@ const LumenUI = {
     if (tag) tagNode.append(this.el('b', 'lm-boss', tag));
     if (!tag) tagNode.append(document.createTextNode(DISPLAY_NAMES.element[enemy.element] || ''));
     this.$('next-enemy-preview').dataset.boss = tag ? 'true' : 'false';
+    this.renderJourney(enemy, tag);
     this.decorateRecruit();
     const uses = Number.isFinite(RPG.state.chaosBlessingUses) ? RPG.state.chaosBlessingUses : '';
     this.$('lm-blessing-count').textContent = uses === '' ? '' : String(uses);
     this.refreshDots();
+  },
+  // The lobby's free height shows who comes next and where the run stands in the six-stage rotation.
+  renderJourney(enemy, tag) {
+    const journey = this.$('lm-journey');
+    journey.dataset.boss = tag ? 'true' : 'false';
+    this.$('lm-foe-kicker').textContent = tag ? 'BOSS ENCOUNTER' : 'NEXT ENCOUNTER';
+    this.$('lm-foe-name').textContent = enemy.name;
+    const meta = this.$('lm-foe-meta');
+    const element = this.el('span', 'lm-meta-chip');
+    element.append(this.el('i', `lm-el lm-el-${enemy.element}`), document.createTextNode(DISPLAY_NAMES.element[enemy.element] || enemy.element || ''));
+    meta.replaceChildren(element);
+    if (tag) meta.append(this.el('b', 'lm-boss', tag));
+    const types = { phy:['sword', '물리'], mag:['wand', '마법'], sup:['shield', '보조'] };
+    const skills = this.$('lm-foe-skills');
+    skills.replaceChildren();
+    for (const skill of (enemy.skills || []).slice(0, 3)) {
+      const chip = this.el('span', `lm-foe-skill is-${skill.type}`);
+      chip.append(this.icon((types[skill.type] || types.phy)[0]), document.createTextNode(skill.name));
+      chip.title = `${(types[skill.type] || types.phy)[1]} 스킬`;
+      skills.append(chip);
+    }
+    const art = this.$('lm-foe-art');
+    if (art.dataset.enemy !== enemy.id) {
+      art.dataset.enemy = enemy.id;
+      art.replaceChildren(ImageAssets.createPortrait(enemy), this.el('span', 'lm-foe-info'));
+      art.lastChild.append(this.icon('info'));
+    }
+    const rotation = typeof ENDLESS_ENEMY_ROTATION !== 'undefined' && ENDLESS_ENEMY_ROTATION.length ? ENDLESS_ENEMY_ROTATION : [];
+    const route = this.$('lm-route');
+    route.replaceChildren();
+    const now = RPG.state.enemyScale || 0;
+    const size = rotation.length || 6;
+    const start = Math.floor(now / size) * size;
+    let toBoss = -1;
+    for (let index = start; index < start + size; index++) {
+      const id = index === now ? enemy.id : rotation[index % size];
+      const dot = this.el('i', 'lm-route-dot');
+      if (index < now) dot.classList.add('is-past');
+      if (index === now) dot.classList.add('is-now');
+      const boss = index === now ? !!tag : id === 'creator_god';
+      if (boss) dot.classList.add('is-boss');
+      if (boss && index >= now && toBoss < 0) toBoss = index - now;
+      route.append(dot);
+    }
+    this.$('lm-route-note').textContent = toBoss === 0 ? '보스 스테이지' : toBoss > 0 ? `보스까지 ${toBoss}` : '';
+    this.$('lm-foe').setAttribute('aria-label', `다음 상대 ${enemy.name}${tag ? `, ${tag}` : ''}, 스킬 보기`);
+  },
+  showFoe() {
+    const enemy = RPG.getCurrentStageEnemyData();
+    const options = { entity: enemy, enemy: true };
+    const element = DISPLAY_NAMES.element[enemy.element] || enemy.element || '';
+    const skills = (enemy.skills || []).map(skill => SkillDisplay.html(skill, options)).join('');
+    RPG.openInfoModal(enemy.name, `<p class="lm-foe-sheet">STAGE ${this.pad((RPG.state.enemyScale || 0) + 1)} · ${element} 속성</p><b>[스킬]</b>${skills}`);
   },
   decorateRecruit() {
     const recipe = {
@@ -238,6 +361,8 @@ const LumenUI = {
       }
       const subs = { '일반 뽑기 (1장)':'티켓 1장', '도전 뽑기':'티켓 1장 · 퀴즈' };
       if (subs[raw]) button.append(this.el('span', 'lm-recruit-sub', subs[raw]));
+      const edge = raw === '도전 뽑기' ? this.challengeEdge() : null;
+      if (edge) button.append(this.el('span', 'lm-recruit-tag', edge));
       button.setAttribute('aria-label', raw === '도전 뽑기' ? '도전 소환, 티켓 1장, 퀴즈 정답 시 높은 등급' : plan[2] ? `${plan[0]}, 티켓 ${plan[2]}장` : plan[0]);
     });
     this.syncChainButton();
@@ -308,6 +433,8 @@ const LumenUI = {
     button.setAttribute('aria-label', `${card.name}, ${this.grade(card)}, ${this.element(card)} ${this.role(card)}, ${availability}`);
     const art = ImageAssets.createPortrait(card);
     art.classList.add('lm-tile-art');
+    const foil = count === 0 ? null : this.foil(card);
+    if (foil) art.append(foil);
     button.append(art);
     button.append(this.el('span', 'lm-tile-grade', this.grade(card)));
     const element = this.el('span', 'lm-tile-el');
@@ -355,6 +482,7 @@ const LumenUI = {
     const ids = RPG.sortCardIdsByGrade([...byId.keys()]);
     for (const id of ids) box.append(this.tile(byId.get(id), counts.get(id) || 0, () => { this.detailIds = ids; RPG.showCardInfo(id); }, { quiet: !all }));
     this.$('collection-empty').hidden = filtered.length !== 0;
+    this.$('collection-empty').textContent = '조건에 맞는 카드가 없습니다.';
     this.$('collection-count').textContent = `${filtered.length}종`;
     this.$('collection-scope').textContent = all ? '전체 도감' : '보유 카드';
     this.$('collection-scope').setAttribute('aria-pressed', String(all));
@@ -395,7 +523,13 @@ const LumenUI = {
       slot.style.borderColor = '';
       slot.replaceChildren();
       slot.classList.toggle('is-empty', !card);
-      if (card) { slot.dataset.grade = card.grade; slot.append(ImageAssets.createPortrait(card)); }
+      if (card) {
+        slot.dataset.grade = card.grade;
+        const art = ImageAssets.createPortrait(card);
+        const foil = this.foil(card);
+        if (foil) art.append(foil);
+        slot.append(art);
+      }
       else { delete slot.dataset.grade; const hole = this.el('span', 'lm-slot-hole'); hole.append(this.icon('plus')); slot.append(hole); }
       const text = this.el('span', 'slot-text');
       text.append(this.el('small', '', `${index + 1} ${role}`), this.el('strong', '', card ? card.name : '비어 있음'));
@@ -490,6 +624,10 @@ const LumenUI = {
     const modal = this.$('modal-card');
     modal.dataset.grade = card.grade;
     modal.dataset.element = card.element;
+    const art = modal.querySelector('.lm-detail-art');
+    art.querySelector('.lm-foil')?.remove();
+    const foil = this.foil(card);
+    if (foil) art.append(foil);
     const chips = this.$('md-grade');
     chips.className = 'lm-detail-grade';
     chips.replaceChildren(this.el('span', 'lm-grade-chip', this.grade(card)));
@@ -547,6 +685,29 @@ const LumenUI = {
     this.refreshDots();
   },
 
+  // Lumi's whole 3:5 card stands beside the title in lecture, tutoring and date; a speech line fills the space under the title.
+  installLumiLines() {
+    const lines = {
+      'modal-lecture-view': ['루미의 마법교실', '천천히 읽고 마지막에 퀴즈로 확인해요.'],
+      'modal-tutoring': ['루미의 개인과외', '틀렸던 문제를 루미가 다시 풀어 줘요.'],
+      'modal-date': ['루미와의 데이트', '오늘은 공부 말고 둘이서 시간을 보내요.']
+    };
+    for (const [id, [kicker, text]] of Object.entries(lines)) {
+      const content = this.$(id)?.querySelector('.modal-content');
+      if (!content || content.querySelector('.lm-lumi-line')) continue;
+      const line = this.el('p', 'lm-lumi-line');
+      line.append(this.el('small', '', kicker), this.el('span', '', text));
+      content.firstElementChild.after(line);
+    }
+  },
+  syncLecture(id) {
+    const lecture = typeof GRAMMAR_DATA !== 'undefined' ? GRAMMAR_DATA.find(item => item.id === id) : null;
+    const line = this.$('modal-lecture-view')?.querySelector('.lm-lumi-line span');
+    if (!lecture || !line) return;
+    const minutes = Math.max(1, Math.round((lecture.content || '').length / 500));
+    line.textContent = `${GRAMMAR_DATA.indexOf(lecture) + 1} / ${GRAMMAR_DATA.length}강 · 읽는 데 약 ${minutes}분`;
+  },
+
   // ---------- Battle ----------
   enterBattle() {
     this.track = { player: null, enemy: null, playerHp: 0, enemyHp: 0 };
@@ -559,9 +720,10 @@ const LumenUI = {
     this.setPlace(`STAGE ${this.pad(RPG.state.enemyScale + 1)}`, this.modeName(RPG.state.mode));
   },
   renderStatuses() {
-    const render = (id, actor) => {
+    const render = (id, side, actor) => {
       const box = this.$(id);
       box.replaceChildren();
+      const fresh = [];
       for (const [key, value] of Object.entries(actor?.buffs || {})) {
         if (!value) continue;
         const negative = StatusRules.isNegative(key);
@@ -569,11 +731,38 @@ const LumenUI = {
         const badge = this.el('span', `status-badge ${negative ? 'status-negative' : 'status-positive'}`, text);
         badge.title = `${negative ? '디버프' : '버프'}: ${BUFF_NAMES[key] || key}`;
         box.append(badge);
+        fresh.push([key, text, negative]);
       }
+      // Some foes change raw defence by turn (Beelzebuth's power, the artificial god's protocol); show it as a status too.
+      if (side === 'enemy' && actor) {
+        for (const [stat, base, label] of [['def', 'baseDef', '물리방어'], ['mdef', 'baseMdef', '마법방어']]) {
+          if (!(actor[base] > 0) || !(actor[stat] > actor[base])) continue;
+          const text = `${label} +${Math.round((actor[stat] / actor[base] - 1) * 100)}%`;
+          const badge = this.el('span', 'status-badge status-positive is-power', text);
+          badge.title = `이번 턴 ${label}력 증가`;
+          box.append(badge);
+          fresh.push([`raw-${stat}`, text, false]);
+        }
+      }
+      this.statusPops(side, actor, fresh);
     };
     if (!RPG.battle) return;
-    render('p-buffs', RPG.battle.players[RPG.battle.currentPlayerIdx]);
-    render('e-buffs', RPG.battle.enemy);
+    render('p-buffs', 'player', RPG.battle.players[RPG.battle.currentPlayerIdx]);
+    render('e-buffs', 'enemy', RPG.battle.enemy);
+  },
+  // A status that was not on the card a moment ago rises once as a small chip; the badge itself stays on the card.
+  statusPops(side, actor, list) {
+    if (!actor) return;
+    const seen = this.statusSeen.get(actor);
+    this.statusSeen.set(actor, new Set(list.map(([key]) => key)));
+    if (!seen || this.reduced()) return;
+    const added = list.filter(([key]) => !seen.has(key)).slice(0, 3);
+    if (!added.length) return;
+    const fire = () => added.forEach(([, text, negative], index) => {
+      setTimeout(() => this.pop(side, text, negative ? 'debuff' : 'buff'), 120 + index * 220);
+    });
+    if (this.heldFx) this.heldFx.push(fire);
+    else fire();
   },
   gauge(fill, numberId, value, max) {
     const pct = Math.max(0, Math.min(100, value / Math.max(1, max) * 100));
@@ -637,12 +826,18 @@ const LumenUI = {
     }
   },
   hit(side, amount, crit) {
+    if (this.heldFx) { this.heldFx.push(() => this.hit(side, amount, crit)); return; }
     const box = this.$(side === 'enemy' ? 'enemy-actor-box' : 'player-actor-box');
     this.restart(box, 'is-hit');
     this.pop(side, String(amount), crit ? 'crit' : 'dmg');
   },
+  lunge(side) {
+    if (this.reduced()) return;
+    this.restart(this.$(side === 'enemy' ? 'enemy-actor-box' : 'player-actor-box'), 'is-lunge');
+  },
   pop(side, text, kind) {
     if (this.reduced()) return;
+    if (this.heldFx) { this.heldFx.push(() => this.pop(side, text, kind)); return; }
     const art = this.$(side === 'enemy' ? 'enemy-actor-box' : 'player-actor-box').querySelector('.lm-actor-art');
     const layer = art.querySelector('.lm-pop-layer') || art.appendChild(this.el('span', 'lm-pop-layer'));
     const number = this.el('span', `lm-pop lm-pop-${kind}`);
@@ -716,29 +911,114 @@ const LumenUI = {
       if (cost && cost.textContent.trim() === 'MP 0') cost.classList.add('is-free');
     });
   },
+  cutinOn() {
+    try { return localStorage.getItem('lumenCutin') !== 'off'; } catch { return true; }
+  },
+  toggleCutin() {
+    const next = !this.cutinOn();
+    try { localStorage.setItem('lumenCutin', next ? 'on' : 'off'); } catch { /* Session only. */ }
+    this.syncSettings();
+  },
+  // A tier-3 skill (or a foe's heavy move) gets the RPG edition's cut-in: the actor's 3:5 art on a slanted band.
+  // It is presentation only; the turn resolves exactly as before, once the cut-in ends or is tapped away.
+  cutin(side, actor, kicker, title) {
+    const layer = this.$('lm-cutin');
+    if (!actor || !this.cutinOn() || this.reduced() || document.body.dataset.screen !== 'battle') return Promise.resolve();
+    clearTimeout(this._bannerTimer);
+    this.$('lm-banner').replaceChildren();
+    layer.dataset.side = side;
+    const art = this.el('span', 'lm-cutin-art');
+    art.append(ImageAssets.createPortrait(actor.proto || actor));
+    const text = this.el('span', 'lm-cutin-text');
+    text.append(this.el('small', '', kicker), this.el('b', '', title));
+    const inner = this.el('span', 'lm-cutin-inner');
+    inner.append(art, text);
+    layer.replaceChildren(this.el('i', 'lm-cutin-band'), this.el('i', 'lm-cutin-edge is-a'), this.el('i', 'lm-cutin-edge is-b'), inner);
+    if (side === 'player' && actor.proto) layer.dataset.grade = actor.proto.grade || '';
+    else delete layer.dataset.grade;
+    layer.hidden = false;
+    document.body.classList.add('lm-cutting');
+    return new Promise(resolve => {
+      const done = () => {
+        clearTimeout(timer);
+        layer.onclick = null;
+        layer.hidden = true;
+        layer.replaceChildren();
+        document.body.classList.remove('lm-cutting');
+        resolve();
+      };
+      const timer = setTimeout(done, 980);
+      layer.onclick = done;
+    });
+  },
+  bigEnemySkill(skill) {
+    return !!skill && (skill.type === 'phy' || skill.type === 'mag') && ((skill.val || 0) >= 3 || skill.rate === 0);
+  },
   wrapBattle() {
     const ui = this;
+    const typeNames = { phy:'물리', mag:'마법', sup:'보조' };
     const execute = RPG.executeSkill;
     RPG.executeSkill = function (source, target, skill, isDelayed = false) {
-      const isPlayer = source && RPG.battle && RPG.battle.players.includes(source);
-      if (isPlayer && skill && skill.name !== RPG.NORMAL_ATTACK.name && RPG.battle.phase === 'player-ready') {
-        const typeNames = { phy:'물리', mag:'마법', sup:'보조' };
+      const battle = RPG.battle;
+      const isPlayer = source && battle && battle.players.includes(source);
+      const fresh = isPlayer && !isDelayed && battle.phase === 'player-ready' && skill;
+      if (fresh && !ui._cutinDone && skill.name !== RPG.NORMAL_ATTACK.name && (skill.tier || 0) >= 3 && ui.cutinOn() && !ui.reduced()) {
+        const self = this;
+        const args = arguments;
+        ui.cutin('player', source, `${source.name} · ${typeNames[skill.type] || '스킬'}`, skill.name).then(() => {
+          ui._cutinDone = true;
+          try { RPG.executeSkill.apply(self, args); } finally { ui._cutinDone = false; }
+        });
+        return true;
+      }
+      if (fresh && skill.name !== RPG.NORMAL_ATTACK.name && !ui._cutinDone) {
         ui.showBanner('player', `${source.name} · ${typeNames[skill.type] || '스킬'}`, skill.name, skill.type);
       }
+      if (fresh && skill.type !== 'sup') ui.lunge('player');
       const result = execute.apply(this, arguments);
       ui.syncBattle();
       return result;
+    };
+    const decide = Logic.decideEnemyAction;
+    Logic.decideEnemyAction = function (...args) {
+      const action = decide.apply(this, args);
+      ui.enemyAction = action;
+      return action;
     };
     const enemyTurn = BattleRuntime.TurnManager.startEnemyTurn;
     BattleRuntime.TurnManager.startEnemyTurn = function (rpg) {
       const box = ui.$('battle-log');
       const before = box.childElementCount;
-      const result = enemyTurn.apply(this, arguments);
-      const lines = [...box.children].slice(before).map(line => line.textContent);
-      const name = rpg.battle?.enemy?.name || '';
-      for (const line of lines) {
-        const named = line.match(/・・(.+)!$/) || (name && line.startsWith(`${name}의 `) ? line.slice(name.length + 2).match(/^(.+?)!/) : null);
-        if (named) { ui.showBanner('enemy', name, named[1], 'enemy'); break; }
+      ui.enemyAction = null;
+      // Numbers and recoils from the foe's move wait for its lunge (and cut-in), then play in order.
+      ui.heldFx = [];
+      let result;
+      try {
+        result = enemyTurn.apply(this, arguments);
+      } finally {
+        const held = ui.heldFx;
+        ui.heldFx = null;
+        const enemy = rpg.battle?.enemy;
+        const action = ui.enemyAction;
+        const attacked = action && (action.type === 'phy' || action.type === 'mag') && !action.isChargeStart;
+        const play = () => {
+          if (attacked) ui.lunge('enemy');
+          setTimeout(() => held.forEach(fn => fn()), attacked && !ui.reduced() ? 150 : 0);
+        };
+        const lines = [...box.children].slice(before).map(line => line.textContent);
+        const name = enemy?.name || '';
+        // The chosen action names the move even when the log only reports an evasion.
+        let move = attacked && action.name ? action.name : null;
+        for (const line of move ? [] : lines) {
+          const named = line.match(/・・(.+)!$/) || (name && line.startsWith(`${name}의 `) ? line.slice(name.length + 2).match(/^(.+?)!/) : null);
+          if (named) { move = named[1]; break; }
+        }
+        if (move && ui.bigEnemySkill(action) && !ui.finishing && ui.cutinOn() && !ui.reduced()) {
+          ui.cutin('enemy', enemy, `${name} · ${typeNames[action.type] || ''}`, move).then(play);
+        } else {
+          if (move) ui.showBanner('enemy', name, move, 'enemy');
+          play();
+        }
       }
       return result;
     };
@@ -823,6 +1103,8 @@ const LumenUI = {
     const flip = this.el('div', 'lm-summon-card');
     const back = this.el('div', 'lm-summon-face lm-summon-back');
     const front = this.el('div', 'lm-summon-face lm-summon-front');
+    const foil = this.foil(card);
+    if (foil) portrait.append(foil);
     front.append(portrait, this.el('span', 'lm-summon-frame'));
     flip.append(back, front);
     const info = this.el('div', 'lm-summon-info');
@@ -843,13 +1125,19 @@ const LumenUI = {
     const again = this.$('lm-summon-again');
     const canAgain = (kind === 'normal' || kind === 'challenge') && RPG.state.mode !== 'puzzle';
     again.hidden = !canAgain;
+    again.querySelector('.lm-again-edge')?.remove();
+    again.classList.remove('is-challenge');
     if (canAgain) {
+      // The follow-up after any summon is the quiz summon: the better odds sit on the learning path.
       again.disabled = (RPG.state.tickets || 0) < GAME_CONSTANTS.COSTS.GACHA_SINGLE;
-      again.querySelector('.lm-again-label').textContent = kind === 'challenge' ? '다시 도전' : '한 번 더';
+      again.classList.add('is-challenge');
+      again.querySelector('.lm-again-label').textContent = kind === 'challenge' ? '다시 도전' : '도전 소환';
       again.querySelector('.lm-cost').lastChild.textContent = '1';
+      const edge = this.challengeEdge();
+      if (edge) again.querySelector('.lm-again-label').append(this.el('small', 'lm-again-edge', edge));
       again.onclick = () => {
         RPG.closeGachaModal();
-        if (kind === 'challenge') RPG.openChallengeGacha(); else RPG.openGacha();
+        RPG.openChallengeGacha();
       };
     }
     const reveal = () => {
@@ -893,11 +1181,16 @@ const LumenUI = {
       const flip = this.el('span', 'lm-batch-flip');
       const back = this.el('span', 'lm-batch-face lm-batch-back');
       const front = this.el('span', 'lm-batch-face lm-batch-front');
-      front.append(ImageAssets.createPortrait(card));
+      const art = ImageAssets.createPortrait(card);
+      const foil = this.foil(card);
+      if (foil) art.append(foil);
+      front.append(art);
       if (!seen.has(card.id)) front.append(this.el('span', 'lm-new', 'NEW'));
       seen.add(card.id);
+      // The name rides on the card's lower edge like every other card in the game, one line unless it truly cannot fit.
+      front.append(this.el('span', 'lm-batch-name', card.name));
       flip.append(back, front);
-      item.append(flip, this.el('span', 'lm-batch-name', card.name));
+      item.append(flip);
       item.onclick = event => {
         if (!scene.classList.contains('is-done')) return;
         event.stopPropagation();
@@ -919,10 +1212,13 @@ const LumenUI = {
     scene.append(grid, tally);
     result.replaceChildren(scene);
     result.dataset.grade = best.grade;
+    requestAnimationFrame(() => grid.querySelectorAll('.lm-batch-name').forEach(node => this.fitName(node, 7.5)));
     const again = this.$('lm-summon-again');
     const next = this.chainCount();
     again.hidden = next < 1;
     again.disabled = false;
+    again.querySelector('.lm-again-edge')?.remove();
+    again.classList.add('is-challenge');
     again.querySelector('.lm-again-label').textContent = next >= 2 ? `연속 도전 ×${next}` : '다시 도전';
     again.querySelector('.lm-cost').lastChild.textContent = String(next >= 2 ? next : 1);
     again.onclick = () => { RPG.closeGachaModal(); if (next >= 2) this.startChain(); else RPG.openChallengeGacha(); };
@@ -984,9 +1280,11 @@ const LumenUI = {
       [...button.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
       button.prepend(this.el('span', 'lm-mode-name', name));
       const goal = GameUtils.getClearStage(mode, RPG.tempGameType);
-      const meta = this.el('span', 'lm-mode-meta', Number.isFinite(goal) ? `${goal} 스테이지` : '기록 도전');
-      button.insertBefore(meta, badge || null);
-      if (cleared.has(mode) && !badge) button.append(this.el('small', 'lm-mode-clear', 'CLEAR'));
+      const foot = this.el('span', 'lm-mode-foot');
+      foot.append(this.el('span', 'lm-mode-meta', Number.isFinite(goal) ? `${goal} 스테이지` : '기록 도전'));
+      if (badge) { badge.textContent = 'HARD CLEAR'; foot.append(badge); }
+      else if (cleared.has(mode)) foot.append(this.el('small', 'lm-mode-clear', 'CLEAR'));
+      button.append(foot);
       button.removeAttribute('style');
     }
     const desc = this.$('mode-desc');
@@ -1010,26 +1308,299 @@ const LumenUI = {
     challenge.after(tools);
   },
 
+  // ---------- Factory draft ----------
+  // Two bundles of four as rows of real cards (grade frame, name plate), a ten-step round track and the deck count.
+  decorateFactory() {
+    const draft = RPG.state.factoryDraft;
+    if (!draft) return;
+    const title = document.querySelector('#screen-factory-draft .factory-draft-title');
+    let track = this.$('lm-factory-track');
+    if (!track) {
+      track = this.el('div', 'lm-factory-track');
+      track.id = 'lm-factory-track';
+      title.after(track);
+    }
+    const steps = this.el('span', 'lm-factory-steps');
+    for (let round = 1; round <= draft.maxRounds; round++) steps.append(this.el('i', round < draft.round ? 'is-done' : round === draft.round ? 'is-now' : ''));
+    const count = this.el('button', 'lm-factory-count');
+    count.type = 'button';
+    count.onclick = () => RPG.openFactoryViewDeck();
+    count.append(this.icon('cards'), this.el('b', '', String((draft.pool || []).length)), document.createTextNode(`/ ${draft.maxRounds * 4}`));
+    count.setAttribute('aria-label', `구성 중인 덱 ${(draft.pool || []).length}장 보기`);
+    track.replaceChildren(steps, count);
+    const order = ['transcendence', 'special', 'event', 'legend', 'epic', 'rare', 'normal'];
+    [0, 1].forEach(index => {
+      const bundle = this.$(`factory-bundle-${index}`);
+      if (!bundle) return;
+      const cards = [];
+      bundle.querySelectorAll('.factory-card-row').forEach(row => {
+        const card = RPG.getCardData(row.dataset.cardId);
+        if (!card) return;
+        cards.push(card);
+        if (row.dataset.lumen) return;
+        row.dataset.lumen = 'true';
+        row.dataset.element = card.element;
+        const portrait = row.querySelector('.portrait');
+        const foil = this.foil(card);
+        if (portrait && foil) portrait.append(foil);
+        row.append(this.el('span', 'lm-tile-grade', this.grade(card)));
+        const element = this.el('span', 'lm-tile-el');
+        element.append(this.el('i', `lm-el lm-el-${card.element}`));
+        row.append(element);
+      });
+      const head = bundle.querySelector('.factory-bundle-title');
+      if (!head.querySelector('.lm-bundle-name')) {
+        const label = [...head.childNodes].filter(node => node.nodeType === 3).map(node => node.textContent).join('').trim();
+        [...head.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
+        head.prepend(this.el('span', 'lm-bundle-name', label));
+      }
+      head.querySelector('.lm-bundle-tally')?.remove();
+      const tally = this.el('span', 'lm-bundle-tally');
+      for (const grade of order) {
+        const n = cards.filter(card => card.grade === grade).length;
+        if (!n) continue;
+        const chip = this.el('span', 'lm-grade-chip', `${DISPLAY_NAMES.grade[grade] || grade} ${n}`);
+        chip.dataset.grade = grade;
+        tally.append(chip);
+      }
+      head.append(tally);
+    });
+    requestAnimationFrame(() => document.querySelectorAll('#screen-factory-draft .factory-card-name').forEach(node => this.fitName(node, 8)));
+  },
+
+  // ---------- Card pool and special card editors ----------
+  // Both editors read like the party screen: app-style header band, chips, framed cards with name plates, a docked footer.
+  // CardPoolView re-renders on every action and restores focus by button class, so only non-button nodes are added here.
+  decoratePoolEditor() {
+    const body = this.$('card-pool-editor-body');
+    if (!body) return;
+    body.querySelectorAll('.card-pool-card-row').forEach(row => {
+      if (row.querySelector('.lm-foil, .lm-tile-el')) return;
+      const card = RPG.getCardData(row.dataset.cardId);
+      if (!card) return;
+      const portrait = row.querySelector('.portrait');
+      const foil = this.foil(card);
+      if (portrait && foil) portrait.append(foil);
+      const element = this.el('span', 'lm-tile-el');
+      element.append(this.el('i', `lm-el lm-el-${card.element}`));
+      row.append(element);
+    });
+    body.querySelectorAll('.card-pool-set-row').forEach(row => {
+      const link = row.querySelector('.card-pool-actions > button');
+      const match = link?.textContent.match(/(\d+)\s*\/\s*(\d+)/);
+      if (!match || link.querySelector('.lm-set-bar')) return;
+      const bar = this.el('i', 'lm-set-bar');
+      bar.style.setProperty('--p', `${Math.min(100, match[1] / Math.max(1, match[2]) * 100)}%`);
+      link.append(bar);
+      row.classList.toggle('is-complete', match[1] === match[2]);
+    });
+    requestAnimationFrame(() => body.querySelectorAll('.is-compact .card-pool-card-name').forEach(node => this.fitName(node, 8)));
+  },
+  decorateSpecialEditor() {
+    const groups = RPG.getSpecialCardGroups ? RPG.getSpecialCardGroups() : [];
+    const owned = RPG.getUnlockedSpecialCards ? RPG.getUnlockedSpecialCards() : [];
+    const groupList = this.$('special-card-group-list');
+    [...groupList.children].forEach((button, index) => {
+      const group = groups[index];
+      const base = group && RPG.getCardData(group.baseId);
+      if (!base) return;
+      button.removeAttribute('style');
+      button.classList.add('lm-special-group');
+      const count = owned.filter(card => card.specialBaseId === group.baseId).length;
+      const avatar = this.el('span', 'lm-special-avatar');
+      avatar.append(ImageAssets.createPortrait(base));
+      const text = this.el('span', 'lm-special-label');
+      text.append(this.el('strong', '', group.label), this.el('small', '', count ? `스페셜 ${count}` : '미획득'));
+      button.replaceChildren(avatar, text);
+      button.classList.toggle('is-empty', !count);
+    });
+    const active = groups.find(group => group.baseId === RPG.selectedSpecialCardGroup) || groups[0];
+    const list = this.$('special-card-editor-list');
+    if (!active || !list) return;
+    const base = RPG.getCardData(active.baseId);
+    const specials = owned.filter(card => card.specialBaseId === active.baseId).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    const cards = [base, ...specials].filter(Boolean);
+    const selections = RPG.getActiveSpecialCardSelections('global');
+    const current = selections[active.baseId] || active.baseId;
+    const grid = this.el('div', 'lm-versions');
+    for (const card of cards) {
+      const using = card.id === current;
+      const item = this.el('div', `lm-version${using ? ' is-current' : ''}`);
+      item.dataset.grade = card.grade;
+      const art = this.el('button', 'lm-version-art');
+      art.type = 'button';
+      art.setAttribute('aria-label', `${card.name} 상세`);
+      const portrait = ImageAssets.createPortrait(card);
+      const foil = this.foil(card);
+      if (foil) portrait.append(foil);
+      const info = this.el('span', 'lm-tile-info');
+      info.append(this.icon('info'));
+      art.append(portrait, this.el('span', 'lm-version-kind', card.id === active.baseId ? '기본' : '스페셜'), info);
+      art.onclick = () => { this.detailIds = cards.map(entry => entry.id); RPG.showCardInfo(card.id); };
+      if (using) art.append(this.el('span', 'lm-version-using', '사용 중'));
+      const name = this.el('strong', 'lm-version-name', card.name);
+      const meta = this.el('small', 'lm-version-meta', `${this.grade(card)} · ${this.element(card)} · ${this.role(card)}`);
+      const use = this.el('button', using ? 'lm-btn lm-version-use is-current' : 'lm-btn lm-version-use', using ? '사용 중' : '이 버전 사용');
+      use.type = 'button';
+      use.disabled = using;
+      use.onclick = () => RPG.activateSpecialCardVersion(active.baseId, card.id);
+      item.append(art, name, meta, use);
+      grid.append(item);
+    }
+    list.replaceChildren(grid);
+  },
+
+  // ---------- Chaos roulette ----------
+  // A real altar instead of three stacked buttons: what can still be drawn, how many tickets, and where pulls are kept.
+  decorateRoulette() {
+    const screen = this.$('screen-chaos-roulette');
+    const wrap = screen?.firstElementChild;
+    if (!wrap) return;
+    wrap.classList.add('lm-roulette');
+    let hero = wrap.querySelector('.lm-roulette-hero');
+    if (!hero) {
+      hero = this.el('div', 'lm-roulette-hero');
+      const fan = this.el('div', 'lm-roulette-fan');
+      for (let index = 0; index < 3; index++) fan.append(this.el('i', 'lm-roulette-back'));
+      const copy = this.el('div', 'lm-roulette-copy');
+      copy.append(this.el('small', '', 'TRANSCEND SUMMON'), this.el('strong', '', '초월 카드 소환'), this.el('p', '', '카오스 티켓 1장으로 아직 없는 초월 카드 한 장을 얻습니다. 얻은 카드는 다음 오리진 여정의 전설 풀에 들어갑니다.'));
+      hero.append(fan, copy);
+      wrap.prepend(hero);
+      const pool = this.el('section', 'lm-roulette-pool');
+      pool.append(this.el('h3', 'lm-roulette-pool-head'), this.el('div', 'lm-roulette-strip'));
+      hero.after(pool);
+      wrap.querySelector('[onclick*="spinChaosRoulette"]')?.classList.add('lm-roulette-spin');
+      wrap.querySelector('[onclick*="openTranscendenceCheck"]')?.classList.add('lm-roulette-box');
+      wrap.querySelector('[onclick*="openModeSelect"]')?.classList.add('lm-roulette-back-btn');
+    }
+    let cards = [];
+    try { cards = RPG.buildChaosRoulettePool() || []; } catch { cards = []; }
+    const pending = (RPG.global?.pendingTranscendenceCards || []).length;
+    wrap.querySelector('.lm-roulette-pool-head').textContent = cards.length ? `소환 가능한 초월 카드 ${cards.length}종` : '모든 초월 카드를 얻었습니다';
+    const strip = wrap.querySelector('.lm-roulette-strip');
+    strip.replaceChildren();
+    for (const card of cards) {
+      const item = this.el('button', 'lm-roulette-card');
+      item.type = 'button';
+      item.dataset.grade = card.grade;
+      item.setAttribute('aria-label', `${card.name} 상세`);
+      item.append(ImageAssets.createPortrait(card), this.el('span', '', card.name));
+      item.onclick = () => { this.detailIds = cards.map(entry => entry.id); RPG.showCardInfo(card.id); };
+      strip.append(item);
+    }
+    const tickets = RPG.global?.chaosTickets || 0;
+    const spin = wrap.querySelector('.lm-roulette-spin');
+    if (spin) {
+      spin.disabled = tickets < 1 || !cards.length;
+      spin.innerHTML = '';
+      spin.append(this.el('span', '', tickets < 1 ? '카오스 티켓이 없습니다' : '초월 소환'));
+      const cost = this.el('span', 'lm-cost');
+      cost.append(this.icon('ticket'), document.createTextNode('1'));
+      spin.append(cost);
+    }
+    const box = wrap.querySelector('.lm-roulette-box');
+    if (box) box.textContent = pending ? `보관함 ${pending}장` : '보관함';
+  },
+
   // ---------- Missions ----------
+  missionState(type) {
+    const g = RPG.global || {};
+    const mission = g[`${type}Mission`];
+    const items = mission && mission.missions ? Object.values(mission.missions) : [];
+    const done = items.filter(item => (item.progress || 0) >= item.target).length;
+    return { mission, items, done, ready: !!mission && !mission.claimed && items.length > 0 && done === items.length };
+  },
+  rewardCard(type) {
+    const g = RPG.global || {};
+    if (type === 'monthly') return RPG.getCardData(g.monthlyMission?.rewardCardId);
+    if (type === 'special') return RPG.getCardData(g.specialMission?.rewardCardId);
+    return null;
+  },
+  // Each hub row leads with the prize itself and a progress bar, so the reward is what pulls you in.
   decorateMissionHub() {
     const list = this.$('mission-hub-list');
-    const g = RPG.global || {};
-    const states = [
-      [g.monthlyMission, () => RPG.areAllMonthlyMissionsCleared()],
-      [g.weeklyMission, () => RPG.areAllWeeklyMissionsCleared()],
-      [g.specialMission, () => RPG.areAllSpecialMissionsCleared()]
-    ];
+    const types = ['monthly', 'weekly', 'special'];
     [...list.children].forEach((button, index) => {
       button.removeAttribute('style');
       button.classList.add('lm-mission-row');
-      const [mission, cleared] = states[index] || [];
-      if (!mission || !mission.missions) return;
-      const items = Object.values(mission.missions);
-      const done = items.filter(item => (item.progress || 0) >= item.target).length;
+      const title = [...button.childNodes].filter(node => node.nodeType === 3).map(node => node.textContent).join('').trim();
+      const desc = button.querySelector('span')?.textContent || '';
+      const copy = this.el('span', 'lm-mission-copy');
+      copy.append(this.el('strong', '', title), this.el('small', '', desc));
+      button.replaceChildren(copy);
+      const type = types[index];
+      const { mission, items, done, ready } = this.missionState(type);
+      const thumb = this.el('span', 'lm-mission-thumb');
+      const card = this.rewardCard(type);
+      if (card) {
+        thumb.dataset.grade = card.grade;
+        const art = ImageAssets.createPortrait(card);
+        const foil = this.foil(card);
+        if (foil) art.append(foil);
+        thumb.append(art);
+      } else {
+        thumb.classList.add('is-ticket');
+        thumb.append(this.icon(type === 'weekly' ? 'ticket' : 'gift'));
+      }
+      button.prepend(thumb);
+      if (!mission || !items.length) return;
+      const meter = this.el('i', 'lm-mission-meter');
+      meter.style.setProperty('--p', `${done / items.length * 100}%`);
+      copy.append(meter);
       const status = this.el('span', 'lm-mission-state', mission.claimed ? '수령 완료' : `${done} / ${items.length}`);
-      if (!mission.claimed && cleared()) { status.textContent = '보상 수령'; status.classList.add('is-ready'); }
+      if (ready) { status.textContent = '보상 수령'; status.classList.add('is-ready'); }
+      if (mission.claimed) status.classList.add('is-claimed');
       button.append(status);
     });
+  },
+  decorateMissionView() {
+    const type = RPG.missionViewType || 'monthly';
+    const { mission, items, done, ready } = this.missionState(type);
+    const section = this.$(`${type}-mission-section`);
+    const list = this.$(`${type}-mission-list`);
+    if (!section || !list) return;
+    list.removeAttribute('style');
+    list.classList.add('lm-mission-list');
+    [...list.querySelectorAll('.mission-item')].forEach((row, index) => {
+      const item = items[index];
+      if (!item) return;
+      const progress = Math.min(item.target, item.progress || 0);
+      const complete = progress >= item.target;
+      row.removeAttribute('style');
+      row.classList.add('lm-mission-item');
+      const mark = this.el('span', 'lm-mission-mark');
+      if (complete) mark.append(this.icon('check'));
+      else mark.style.setProperty('--p', `${progress / item.target * 100}%`);
+      const body = this.el('span', 'lm-mission-body');
+      body.append(this.el('strong', '', item.label));
+      const bar = this.el('i', 'lm-mission-bar');
+      bar.style.setProperty('--p', `${progress / item.target * 100}%`);
+      body.append(bar);
+      row.replaceChildren(mark, body, this.el('b', 'lm-mission-count', `${progress} / ${item.target}`));
+      row.setAttribute('aria-label', `${item.label}, ${progress} / ${item.target}${complete ? ', 완료' : ''}`);
+    });
+    const panel = section.children[1];
+    if (panel) {
+      panel.classList.add('lm-reward-panel');
+      panel.querySelector('.lm-reward-ticket')?.remove();
+      if (type === 'weekly') {
+        const ticket = this.el('span', 'lm-reward-ticket');
+        ticket.append(this.icon('ticket'), this.el('b', '', `×${RPG.getWeeklyChaosTicketRewardAmount()}`));
+        panel.prepend(ticket);
+      }
+      const preview = panel.querySelector('.reward-card-preview');
+      if (preview && !preview.querySelector('.lm-foil')) {
+        const card = this.rewardCard(type);
+        const foil = this.foil(card);
+        if (foil) preview.querySelector('.portrait')?.append(foil);
+        if (card) preview.dataset.grade = card.grade;
+      }
+    }
+    const claim = this.$(`btn-claim-${type}-mission`);
+    if (claim) {
+      claim.classList.toggle('is-ready', ready);
+      if (mission && !mission.claimed && !ready && items.length && (type !== 'special' || mission.unlocked)) claim.textContent = `미션 ${items.length - done}개 남음`;
+    }
   },
 
   // ---------- Install ----------
@@ -1093,10 +1664,23 @@ const LumenUI = {
       return showAlert.call(this, message, ...rest);
     };
     this.installChainBar();
-    this.after('spinChaosRoulette', () => this.presentSummon(RPG.getCardData((RPG.global.pendingTranscendenceCards || []).at(-1)), 'roulette'));
+    this.installLumiLines();
+    this.after('showLecture', id => this.syncLecture(id));
+    this.after('spinChaosRoulette', () => {
+      this.decorateRoulette();
+      this.presentSummon(RPG.getCardData((RPG.global.pendingTranscendenceCards || []).at(-1)), 'roulette');
+    });
     this.after('openModeSelect', () => this.decorateModes());
     this.after('openTypeSelect', () => this.decorateTypeSelect());
+    this.after('renderFactoryDraftScreen', () => this.decorateFactory());
+    this.after('renderCardPoolEditor', () => this.decoratePoolEditor());
+    this.after('renderSpecialCardEditor', () => this.decorateSpecialEditor());
+    this.after('openChaosRoulette', () => this.decorateRoulette());
+    this.after('openFactoryViewDeck', () => {
+      this.$('collection-empty').textContent = '아직 고른 카드가 없습니다. 묶음을 고르면 여기에 쌓입니다.';
+    });
     this.after('renderMissionHub', () => this.decorateMissionHub());
+    this.after('renderMissionView', () => this.decorateMissionView());
     this.after('closeMissionView', () => this.refreshDots());
     this.after('closeMissionHub', () => this.refreshDots());
     this.after('updateSystemMenuUI', () => this.syncSettings());
@@ -1110,6 +1694,7 @@ const LumenUI = {
     this.themeReady = true;
     this.setThemeColor();
     this.syncFullscreen();
+    try { this.renderTitleFan(false); } catch { /* The title fills in once the save is read. */ }
     document.body.classList.add('lm-ready');
     this.ready = true;
   }

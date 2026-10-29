@@ -1,0 +1,301 @@
+{
+  "checks": [
+    {
+      "size": "64",
+      "width": 1280,
+      "scroll": 1280,
+      "frames": [
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "size": "96",
+      "width": 1280,
+      "scroll": 1280,
+      "frames": [
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "size": "160",
+      "width": 1280,
+      "scroll": 1280,
+      "frames": [
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "size": "240",
+      "width": 1280,
+      "scroll": 1280,
+      "frames": [
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "size": "64",
+      "width": 390,
+      "scroll": 390,
+      "frames": [
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        },
+        {
+          "w": 64,
+          "h": 64,
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "size": "96",
+      "width": 390,
+      "scroll": 390,
+      "frames": [
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        },
+        {
+          "w": 96,
+          "h": 96,
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "size": "160",
+      "width": 390,
+      "scroll": 390,
+      "frames": [
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        },
+        {
+          "w": 160,
+          "h": 160,
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "size": "240",
+      "width": 390,
+      "scroll": 390,
+      "frames": [
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        },
+        {
+          "w": 240,
+          "h": 240,
+          "loaded": true
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -1739,6 +1739,7 @@ body.lumen, body.lumen[data-theme=dreamsky] {
   --wash-battle:linear-gradient(180deg,rgba(243,237,226,.84),rgba(239,232,218,.95));
   --wash-lobby:linear-gradient(180deg,rgba(251,247,240,.1) 0%,rgba(251,247,240,0) 18%,rgba(251,247,240,.25) 36%,rgba(251,247,240,.86) 56%,rgba(243,237,226,.97) 74%);
   --title-ink:#1B3266; --title-glow:rgba(255,255,255,.75);
+  --stat-up:#167A55; --stat-down:#C8303D; --stat-neutral:var(--ink); --charge-wash:rgba(22,48,106,.4);
 }
 body.lumen[data-theme=astra] {
   color-scheme:dark;
@@ -1760,6 +1761,7 @@ body.lumen[data-theme=astra] {
   --wash-battle:linear-gradient(180deg,rgba(10,17,36,.86),rgba(8,14,30,.96));
   --wash-lobby:linear-gradient(180deg,rgba(10,17,36,.35) 0%,rgba(10,17,36,.1) 18%,rgba(10,17,36,.4) 38%,rgba(10,17,36,.88) 58%,rgba(10,17,36,.97) 76%);
   --title-ink:#ffffff; --title-glow:rgba(4,10,30,.4);
+  --stat-up:#7BE0B0; --stat-down:#FF8A95; --stat-neutral:var(--ink); --charge-wash:rgba(4,8,20,.55);
 }
 body.lumen[data-theme=strawberry] {
   color-scheme:light;
@@ -1779,6 +1781,7 @@ body.lumen[data-theme=strawberry] {
   --wash-battle:linear-gradient(180deg,rgba(255,243,248,.86),rgba(255,236,244,.96));
   --wash-lobby:linear-gradient(180deg,rgba(255,248,251,.1) 0%,rgba(255,248,251,0) 18%,rgba(255,248,251,.3) 36%,rgba(255,248,251,.88) 56%,rgba(255,239,245,.97) 74%);
   --title-ink:#8A2457; --title-glow:rgba(255,255,255,.8);
+  --stat-up:#167452; --stat-down:#C02A55; --stat-neutral:var(--ink); --charge-wash:rgba(150,30,90,.26);
 }
 :where(.lm-tile, .lm-party-card, .deck-slot, .lm-batch-card, #modal-card, .lm-summon) { --gc:var(--gc-normal); --fr:linear-gradient(160deg,#F4F1EA,#D9D2C3 50%,#F1ECE2); --bd:var(--bd-normal); --bd-ink:#fff; }
 [data-grade=normal] { --gc:var(--gc-normal); --fr:var(--fr-normal); --bd:var(--bd-normal); }
@@ -1848,7 +1851,7 @@ body[data-screen=title] .lm-music-btn, body[data-screen=battle] .lm-settings-btn
 
 /* ---------- Main column ---------- */
 .lumen .container { flex:1; min-height:0; display:flex; flex-direction:column; padding:0; gap:0; overflow:hidden; position:relative; max-width:none; margin:0; }
-.lumen .screen { min-height:0; height:100%; overflow-y:auto; overflow-x:hidden; padding:10px 16px 16px; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+.lumen .screen { min-height:0; height:100%; overflow-y:auto; overflow-x:hidden; padding:10px 16px 20px; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 .lumen .screen.active { animation:lm-arrive .3s var(--ease-out); }
 @keyframes lm-arrive { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 /* Section band: a slanted cobalt label with a star, flush to the screen edge. */
@@ -1957,7 +1960,7 @@ body[data-theme=astra] .lm-cta:disabled { background:#2A3658; color:#8D97B2; box
 .lm-empty-card strong { color:var(--ink); font-size:15px; }
 
 /* ---------- Title ---------- */
-.lumen #screen-title { display:none; padding:0 20px calc(16px + var(--safe-b)); overflow:hidden; }
+.lumen #screen-title { display:none; padding:0 20px calc(24px + var(--safe-b)); overflow:hidden; }
 .lumen #screen-title.active { display:flex; flex-direction:column; justify-content:space-between; animation:lm-fade .6s var(--ease-out); }
 @keyframes lm-fade { from { opacity:0; } to { opacity:1; } }
 .lm-title-mark { display:flex; flex-direction:column; align-items:center; margin-top:clamp(6px,4dvh,48px); text-align:center; color:var(--title-ink); text-shadow:0 1px 16px var(--title-glow); }
@@ -1966,6 +1969,16 @@ body[data-theme=astra] .lm-cta:disabled { background:#2A3658; color:#8D97B2; box
 .lm-wordmark span { display:block; font-size:.6em; letter-spacing:.4em; margin-top:.2em; padding-left:.4em; }
 .lm-title-line { display:flex; align-items:center; justify-content:center; gap:8px; margin:14px 0 0; font-size:13px; font-weight:800; letter-spacing:.12em; }
 .lm-title-line::before, .lm-title-line::after { content:""; width:12px; height:12px; background:var(--star-svg) center/contain no-repeat; }
+/* Key visual: a hand of five 3:5 cards fanned between the wordmark and the start dock. */
+.lm-title-fan { position:relative; flex:1 1 0; align-self:stretch; min-height:0; margin:6px -20px 10px; container:fan / size; pointer-events:none; }
+.lm-fan-card { --w:min(28cqw, calc(80cqh * .6), 160px); position:absolute; left:50%; top:50%; width:var(--w); aspect-ratio:3/5; border:3px solid transparent; border-radius:12px; overflow:hidden;
+  background:var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box; box-shadow:0 14px 30px rgba(30,47,92,.26);
+  transform:translate(calc(-50% + var(--slot) * var(--w) * .6), calc(-50% + var(--slot) * var(--slot) * 3.4cqh)) rotate(calc(var(--slot) * 8deg)) scale(calc(1 - var(--slot) * var(--slot) * .035));
+  animation:lm-fan-in .7s var(--ease-out) backwards; animation-delay:calc((2 - var(--slot) * var(--slot)) * -60ms + 120ms); }
+.lumen .lm-fan-card .portrait { position:absolute; inset:0; height:100%; aspect-ratio:auto; border-radius:9px; background:transparent; }
+.lumen .lm-fan-card .portrait img[data-fallback=true] { object-fit:cover; }
+@keyframes lm-fan-in { from { opacity:0; transform:translate(-50%,-38%) rotate(0deg) scale(.9); } }
+@container fan (max-height:120px) { .lm-fan-card { display:none; } }
 .lm-title-dock { display:flex; flex-direction:column; gap:12px; width:100%; max-width:420px; margin:0 auto; }
 .lumen .title-loading { margin:0; padding:10px 14px; border-radius:8px; background:var(--paper-glass); border:1px solid var(--line-2); color:var(--ink-2); font-size:13px; text-align:center; max-width:none; }
 .lumen .title-loading.hidden { display:none; }
@@ -2024,6 +2037,7 @@ body[data-theme=astra] .lm-recruit .menu-btn { border-color:var(--hair); }
 .lumen .lm-recruit .menu-btn .lm-recruit-name { grid-column:2; grid-row:1/3; line-height:1.2; }
 .lumen .lm-recruit .menu-btn:has(.lm-recruit-sub) .lm-recruit-name { grid-row:1; align-self:end; }
 .lm-recruit-sub { grid-column:2; grid-row:2; align-self:start; font-size:11px; font-weight:700; color:var(--ink-3); line-height:1.35; }
+.lm-recruit-tag { position:absolute; top:-8px; right:-2px; z-index:1; padding:1px 9px 2px 10px; font-size:10px; font-weight:900; line-height:1.5; color:#fff; background:linear-gradient(100deg,#5530B8,#7448D6); clip-path:var(--para-s); white-space:nowrap; box-shadow:0 2px 4px rgba(60,30,120,.25); }
 .lumen .lm-recruit .menu-btn .lm-cost { display:none; }
 .lumen .lm-recruit .menu-btn:active:not(:disabled) { transform:translateY(1px); box-shadow:none; }
 .lumen #menu-draft-area[style*="block"] .menu-btn { grid-template-columns:auto 1fr; }
@@ -2053,6 +2067,40 @@ body[data-theme=astra] .lm-recruit .menu-btn { border-color:var(--hair); }
 .lumen .lm-depart:disabled .lm-depart-copy > small { color:#6A7491; }
 .lm-depart-help { margin:-2px 0 0; font-size:12px; font-weight:700; color:var(--ink-3); text-align:center; }
 .lm-depart-help:empty { display:none; }
+/* Next encounter: fills the lobby's free height with the foe's 3:5 card and the six-stage route. Shrinks, then hides, on short screens. */
+.lm-journey { flex:1 1 0; min-height:0; display:flex; container:journey / size; }
+.lumen .lm-foe { position:relative; flex:1; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:10px; margin:0; padding:0; border:0; background:none; color:var(--ink); text-align:left; font:inherit; }
+.lumen .lm-foe:active .lm-foe-art { transform:scale(.98); }
+.lm-foe-art { position:relative; display:block; height:min(100cqh, calc(50cqw / .6), 340px); aspect-ratio:3/5; border:3px solid transparent; border-radius:12px; overflow:hidden; transition:transform .14s var(--ease);
+  background:var(--card-in) padding-box, linear-gradient(160deg,#FFD3D8,#E8546A 50%,#FFC9D0) border-box; box-shadow:0 8px 20px rgba(30,47,92,.22); }
+.lm-journey[data-boss=true] .lm-foe-art { background:var(--card-in) padding-box, var(--fr-legend) border-box; }
+.lumen .lm-foe-art .portrait { position:absolute; inset:0; height:100%; aspect-ratio:auto; border-radius:9px; background:transparent; }
+.lumen .lm-foe-art .portrait img[data-fallback=true] { object-fit:cover; }
+.lm-foe-info { position:absolute; top:5px; right:5px; z-index:2; width:24px; height:24px; display:grid; place-items:center; border-radius:50%; background:rgba(255,255,255,.92); color:#1F3F86; box-shadow:0 1px 3px rgba(30,47,92,.25); }
+.lm-foe-info svg { width:16px; height:16px; }
+.lm-foe-copy { min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-bottom:10px; padding:0 14px 12px; border-radius:12px; background:var(--paper-glass); border:1px solid var(--line-2); box-shadow:var(--shadow); overflow:hidden; }
+.lm-foe-kicker { margin:0 0 2px -14px; padding:3px 22px 3px 14px; font-size:9px; font-weight:900; letter-spacing:.18em; color:#fff; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--slant); }
+.lm-journey[data-boss=true] .lm-foe-kicker { background:linear-gradient(100deg,#9C2B44,var(--coral-fill)); }
+.lm-foe-name { max-width:100%; font-size:clamp(17px,5.4cqw,22px); font-weight:900; font-style:italic; letter-spacing:-.03em; line-height:1.15; color:var(--ink); }
+.lm-foe-meta { display:flex; flex-wrap:wrap; gap:5px; }
+.lm-foe-meta .lm-boss { height:20px; line-height:20px; }
+.lm-foe-skills { display:flex; flex-wrap:wrap; gap:4px; max-width:100%; }
+.lm-foe-skill { display:inline-flex; align-items:center; gap:3px; height:22px; padding:0 8px 0 6px; border-radius:11px; background:var(--paper); border:1px solid var(--line-2); color:var(--ink-2); font-size:11px; font-weight:800; white-space:nowrap; }
+.lm-foe-skill svg { width:13px; height:13px; color:var(--tc,var(--ink-3)); }
+.lm-foe-skill.is-phy { --tc:#F0855C; } .lm-foe-skill.is-mag { --tc:#8A5CE6; } .lm-foe-skill.is-sup { --tc:var(--mint); }
+.lm-foe-route { display:flex; align-items:center; gap:8px; width:100%; margin-top:2px; }
+.lm-route { position:relative; display:flex; align-items:center; justify-content:space-between; flex:1; min-width:0; max-width:150px; height:16px; }
+.lm-route::before { content:""; position:absolute; left:5px; right:5px; top:7px; height:2px; background:var(--line-2); }
+.lm-route-dot { position:relative; z-index:1; flex:none; width:10px; height:10px; border-radius:50%; background:var(--paper); box-shadow:inset 0 0 0 2px var(--hair); }
+.lm-route-dot.is-past { background:var(--struct); box-shadow:none; }
+.lm-route-dot.is-now { width:14px; height:14px; background:var(--coral-fill); box-shadow:0 0 0 3px color-mix(in srgb,var(--coral) 28%,transparent); }
+.lm-route-dot.is-boss { width:14px; height:14px; border-radius:0; background:var(--star-svg) center/contain no-repeat; box-shadow:none; }
+.lm-route-dot.is-boss.is-now { filter:drop-shadow(0 0 4px var(--coral)); }
+.lm-route-note { flex-shrink:0; font-size:11px; font-weight:900; color:var(--coral-text); white-space:nowrap; }
+.lm-foe-sheet { margin:0 0 10px !important; font-size:12px; font-weight:800; color:var(--ink-2) !important; }
+@container journey (max-height:190px) { .lm-foe-skills { display:none; } }
+@container journey (max-height:140px) { .lm-foe-route { display:none; } .lm-foe-copy { gap:4px; padding-bottom:10px; } }
+@container journey (max-height:104px) { .lumen .lm-foe { display:none; } }
 
 /* ---------- Deck ---------- */
 .lumen #screen-deck { display:none; padding-bottom:0; }
@@ -2077,7 +2125,7 @@ body[data-theme=astra] .lm-recruit .menu-btn { border-color:var(--hair); }
 .lm-deck-bar { display:flex; align-items:center; gap:10px; flex-shrink:0; min-width:0; }
 .lm-deck-bar .lm-chips { flex:1; }
 .lumen #deck-card-list { flex:1; min-height:0; overflow-y:auto; margin:0 -16px; padding:4px 16px 14px; }
-.lumen .lm-dock { flex-shrink:0; display:grid; grid-template-columns:1fr 2fr; gap:10px; margin:0 -16px; padding:10px 16px calc(10px + var(--safe-b)); border-top:2px solid var(--struct);
+.lumen .lm-dock { flex-shrink:0; display:grid; grid-template-columns:1fr 2fr; gap:10px; margin:0 -16px; padding:12px 16px calc(18px + var(--safe-b)); border-top:2px solid var(--struct);
   background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper); box-shadow:0 -4px 14px rgba(30,47,92,.1); }
 .lumen .lm-dock .lm-btn, .lumen .lm-dock .lm-cta { min-height:50px; }
 
@@ -2095,16 +2143,18 @@ body[data-collection-context=factory] .lm-page-head, body[data-collection-contex
 .lm-detail-pos { flex:1; text-align:center; font-size:12px; font-weight:900; color:var(--ink-2); font-variant-numeric:tabular-nums; }
 .lumen .lm-detail-bar .lm-icon-btn { border-radius:50%; }
 .lumen .lm-detail-scroll { flex:1; min-height:0; overflow-y:auto; padding:0 16px 12px; margin:0; }
-.lm-detail-hero { position:relative; display:grid; grid-template-columns:minmax(0,43%) minmax(0,1fr); gap:14px; align-items:start; padding:12px; border-radius:12px; border:3px solid transparent;
-  background:radial-gradient(60% 80% at 22% 46%,color-mix(in srgb,var(--gc,var(--gc-normal)) 22%,transparent),transparent 62%) padding-box, var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box; }
-.lm-detail-hero::after { content:""; position:absolute; right:12px; top:10px; width:16px; height:16px; background:var(--star-svg) center/contain no-repeat; }
-.lumen .lm-detail-art { border-radius:8px; box-shadow:0 4px 12px rgba(30,47,92,.22); }
-.lm-detail-id { display:flex; flex-direction:column; gap:6px; min-width:0; padding-top:2px; }
-.lumen .lm-detail-grade { display:flex; flex-wrap:wrap; gap:4px; margin:0; font-size:11px; }
-.lumen #modal-card #md-name { margin:2px 0 0 !important; padding:0 !important; font-size:22px !important; font-weight:900; line-height:1.2; letter-spacing:-.03em; color:var(--ink) !important; text-align:left; background:none; clip-path:none; display:block; }
+/* Card detail: the card stands centred and large on a rarity glow (the usual card-zoom grammar), name and stats below. */
+.lm-detail-hero { position:relative; display:flex; flex-direction:column; align-items:center; gap:12px; padding:14px 14px 16px; border-radius:14px; border:1px solid var(--line-2);
+  background:radial-gradient(56% 46% at 50% 34%,color-mix(in srgb,var(--gc,var(--gc-normal)) 30%,transparent),transparent 72%), linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper); }
+.lumen .lm-detail-art { width:min(58%,232px); flex:none; border:4px solid transparent; border-radius:14px; background:var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box; box-shadow:0 12px 28px rgba(30,47,92,.24); }
+.lumen .lm-detail-art img { border-radius:10px; }
+.lm-detail-id { display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; min-width:0; text-align:center; }
+.lumen .lm-detail-grade { display:flex; flex-wrap:wrap; justify-content:center; gap:4px; margin:0; font-size:11px; }
+.lumen #modal-card #md-name { margin:0 !important; padding:4px 30px 5px !important; font-size:22px !important; font-weight:900; font-style:italic; line-height:1.2; letter-spacing:-.03em; color:#fff !important; text-align:center; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%); display:block; max-width:100%; }
 .lumen #modal-card #md-name::before { display:none; }
 .lm-detail-own { margin:0; font-size:12px; font-weight:700; color:var(--ink-2); }
-.lm-stats { display:flex; flex-direction:column; gap:7px; margin-top:6px; padding:0; background:none; font-size:12px; text-align:left; }
+.lm-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; width:100%; margin-top:4px; padding:12px 14px; border-radius:10px; background:var(--paper); border:1px solid var(--line); font-size:12px; text-align:left; }
+.lm-stats .lm-stat-hp { grid-column:1 / -1; }
 .lm-stat { display:grid; grid-template-columns:1fr auto; align-items:center; column-gap:6px; row-gap:3px; }
 .lm-stat span { color:var(--ink-2); font-weight:800; }
 .lm-stat b { font-size:13px; font-weight:900; font-style:italic; font-variant-numeric:tabular-nums; color:var(--ink); }
@@ -2120,7 +2170,7 @@ body[data-collection-context=factory] .lm-page-head, body[data-collection-contex
 .lumen .skill-detail[data-type=phy] { --tc:#F0855C; } .lumen .skill-detail[data-type=mag] { --tc:#8A5CE6; } .lumen .skill-detail[data-type=sup] { --tc:var(--mint); }
 .lumen .lm-skills .skill-detail-heading { display:block; font-size:13px; font-weight:900; color:var(--ink); margin-bottom:3px; }
 .lumen .lm-skills .skill-detail-body { color:var(--ink-2); line-height:1.55; white-space:pre-line; }
-.lumen .modal-content .lm-detail-done { width:auto !important; margin:6px 16px calc(14px + var(--safe-b)) !important; flex-shrink:0; }
+.lumen .modal-content .lm-detail-done { width:auto !important; margin:8px 16px calc(20px + var(--safe-b)) !important; flex-shrink:0; }
 
 /* ---------- Study ---------- */
 .lumen #screen-study { display:none; }
@@ -2154,7 +2204,7 @@ body[data-collection-context=factory] .lm-page-head, body[data-collection-contex
 .lumen .lm-list button.has-dot .lm-list-icon::before { content:""; position:absolute; top:-2px; right:-2px; width:10px; height:10px; border-radius:50%; background:var(--coral); box-shadow:0 0 0 2px var(--paper); }
 
 /* ---------- Battle ---------- */
-.lumen #screen-battle { display:none; padding:8px 12px calc(10px + var(--safe-b)); }
+.lumen #screen-battle { display:none; padding:8px 12px calc(28px + var(--safe-b)); }
 .lumen #screen-battle.active { display:flex; flex-direction:column; gap:8px; overflow:hidden; }
 .lumen .lm-battle-bar { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:32px; padding:0; background:none; border:0; border-radius:0; font-size:12px; flex-shrink:0; }
 .lumen .battle-header-left { display:flex; align-items:center; gap:8px; flex-shrink:0; }
@@ -2203,10 +2253,14 @@ body[data-theme=astra] .battle-artifact-btn { color:var(--star); }
 .lm-gauge-num { min-width:64px; text-align:right; font-size:11px; font-weight:900; font-style:italic; font-variant-numeric:tabular-nums; color:var(--ink-2); }
 .lm-gauge-mp .lm-gauge-num { color:var(--mp); }
 .lm-gauge-blank { visibility:hidden; }
-.lumen .actor-buffs { display:flex; flex-wrap:wrap; align-content:flex-start; gap:3px; height:44px; margin-top:6px; overflow-y:auto; font-size:10px; color:var(--ink-2); }
+/* Statuses sit on the lower edge of the card they belong to (stacking upward), so the log keeps the height they used to reserve. */
+.lumen .lm-actor-art .actor-buffs { position:absolute; left:4px; right:4px; bottom:15px; z-index:2; display:flex; flex-wrap:wrap-reverse; align-content:flex-start; gap:3px; height:auto; max-height:64%; margin:0; overflow:hidden; pointer-events:none; font-size:10px; }
+.lumen .battle-actor.enemy .actor-buffs { justify-content:flex-end; }
 .lumen .status-badge { display:inline-flex; align-items:center; height:19px; padding:0 6px; border-radius:4px; font-size:10.5px; font-weight:900; white-space:nowrap; }
-.lumen .status-positive { background:color-mix(in srgb,var(--good) 14%,var(--paper)); color:var(--good); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 30%,transparent); }
-.lumen .status-negative { background:color-mix(in srgb,var(--bad) 12%,var(--paper)); color:var(--bad); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bad) 30%,transparent); }
+.lumen .status-positive { background:color-mix(in srgb,var(--good) 14%,var(--paper)); color:var(--good); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 30%,transparent), 0 1px 3px rgba(20,30,60,.2); }
+.lumen .status-negative { background:color-mix(in srgb,var(--bad) 12%,var(--paper)); color:var(--bad); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bad) 30%,transparent), 0 1px 3px rgba(20,30,60,.2); }
+.lumen .status-badge.is-power { background:color-mix(in srgb,var(--star) 26%,var(--paper)); color:var(--gold-text); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--star) 60%,transparent), 0 1px 3px rgba(20,30,60,.2); }
+.lumen .stat-value { font-weight:900; }
 .lumen .log-container { flex:1; min-height:76px; height:auto; margin:0; padding:8px 12px; border-radius:10px; border:1px solid var(--line-2); overflow-y:auto; font-size:12.5px; line-height:1.55; color:var(--ink-2); user-select:text; box-shadow:inset 0 1px 3px rgba(30,47,92,.06);
   background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper-glass); }
 .lumen .log-line { margin:0; padding:2px 0; border:0; }
@@ -2253,6 +2307,11 @@ body[data-theme=astra] .skill-btn { border-color:var(--hair); }
 @keyframes lm-recoil { 0% { transform:none; } 25% { transform:translateX(var(--rx,6px)) scale(.985); } 60% { transform:translateX(calc(var(--rx,6px) * -.35)); } 100% { transform:none; } }
 @keyframes lm-flash { 0% { opacity:.7; } 100% { opacity:0; } }
 .battle-actor.is-entering .lm-actor-art { animation:lm-enter .45s var(--ease-out); }
+/* The attacker leans into the foe before the numbers land (from the RPG edition). */
+.battle-actor.player.is-lunge .lm-actor-art { animation:lm-lunge-p .34s var(--ease-out); }
+.battle-actor.enemy.is-lunge .lm-actor-art { animation:lm-lunge-e .34s var(--ease-out); }
+@keyframes lm-lunge-p { 40% { transform:translate(16px,-10px) rotate(1.5deg); } }
+@keyframes lm-lunge-e { 40% { transform:translate(-16px,10px) rotate(-1.5deg); } }
 @keyframes lm-enter { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:none; } }
 .battle-actor.is-defeated .lm-actor-art { transition:filter .6s, opacity .6s, transform .6s; filter:grayscale(1) brightness(.8); opacity:.6; transform:scale(.97); }
 .lm-pop-layer { position:absolute; inset:0; z-index:3; pointer-events:none; overflow:visible; }
@@ -2262,6 +2321,11 @@ body[data-theme=astra] .skill-btn { border-color:var(--hair); }
 .lm-pop-crit small { margin-bottom:2px; padding:1px 10px; font-size:10px; font-weight:900; letter-spacing:.18em; color:#fff; background:var(--coral-fill); clip-path:var(--para-s); }
 .lm-pop-heal b { color:#7EF0BE; -webkit-text-stroke:5px #0D5A43; font-size:28px; }
 .lm-pop-miss b { font-size:20px; font-style:normal; color:#fff; -webkit-text-stroke:4px #4F5D80; letter-spacing:.04em; }
+.lm-pop-buff, .lm-pop-debuff { top:58%; }
+.lm-pop-buff b, .lm-pop-debuff b { padding:2px 9px; font-size:12px; font-style:normal; letter-spacing:0; line-height:1.4; -webkit-text-stroke:0; text-shadow:none; border-radius:5px; box-shadow:0 3px 8px rgba(20,30,60,.25); }
+.lm-pop-buff b { background:var(--good); color:#fff; }
+.lm-pop-debuff b { background:var(--bad); color:#fff; }
+.lm-pop-buff b::before { content:"▲ "; } .lm-pop-debuff b::before { content:"▼ "; }
 @keyframes lm-pop { 0% { opacity:0; transform:translate(calc(-50% + var(--dx,0px)),10px) scale(.7); } 14% { opacity:1; transform:translate(calc(-50% + var(--dx,0px)),-6px) scale(1.08); } 28% { transform:translate(calc(-50% + var(--dx,0px)),-10px) scale(1); } 75% { opacity:1; } 100% { opacity:0; transform:translate(calc(-50% + var(--dx,0px)),-38px) scale(.96); } }
 .lm-banner { position:absolute; left:-12px; right:-12px; top:calc(var(--actor-h,236px) * .38); z-index:6; pointer-events:none; height:0; }
 .lm-banner-inner { position:absolute; top:0; display:flex; flex-direction:column; min-width:60%; max-width:88%; padding:7px 40px 8px 16px; color:#fff; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--slant); box-shadow:0 8px 18px rgba(22,48,106,.25); animation:lm-banner-l 1.25s var(--ease-out) forwards; }
@@ -2274,14 +2338,42 @@ body[data-theme=astra] .skill-btn { border-color:var(--hair); }
 @keyframes lm-banner-l { 0% { opacity:0; transform:translateX(-30px); } 16% { opacity:1; transform:none; } 78% { opacity:1; transform:none; } 100% { opacity:0; transform:translateX(12px); } }
 @keyframes lm-banner-r { 0% { opacity:0; transform:translateX(30px); } 16% { opacity:1; transform:none; } 78% { opacity:1; transform:none; } 100% { opacity:0; transform:translateX(-12px); } }
 body.lm-finishing #screen-battle { pointer-events:none; }
+body.lm-cutting #battle-controls { pointer-events:none; }
+/* Cut-in: the RPG edition's slanted band with the actor's whole 3:5 card. Tap to skip; never blocks longer than a second. */
+.lm-cutin { position:absolute; inset:-6px -12px; z-index:8; overflow:hidden; cursor:pointer; --cut-t:.98s; }
+.lm-cutin::before { content:""; position:absolute; inset:0; background:color-mix(in srgb,var(--paper) 62%,transparent); animation:lm-veil var(--cut-t) linear forwards; }
+.lm-cutin-band { position:absolute; left:-12%; right:-12%; top:50%; height:48%; transform:translateY(-50%) skewY(-7deg); background:linear-gradient(100deg,var(--struct-d),var(--struct)); animation:lm-band var(--cut-t) var(--ease-out) forwards; }
+.lm-cutin[data-side=enemy] .lm-cutin-band { transform:translateY(-50%) skewY(7deg); background:linear-gradient(260deg,#7E1F36,#C8405A); }
+.lm-cutin-band::after { content:""; position:absolute; inset:0; background:repeating-linear-gradient(100deg,transparent 0 22px,rgba(255,255,255,.07) 22px 24px); }
+.lm-cutin-edge { position:absolute; left:-12%; right:-12%; top:50%; height:4px; background:var(--fr,var(--fr-legend)); transform:skewY(-7deg); animation:lm-band var(--cut-t) var(--ease-out) forwards; }
+.lm-cutin-edge.is-a { margin-top:calc(-24% - 4px); } .lm-cutin-edge.is-b { margin-top:24%; }
+.lm-cutin[data-side=player]:not([data-grade]) .lm-cutin-edge { background:var(--act); }
+.lm-cutin[data-side=enemy] .lm-cutin-edge { background:linear-gradient(90deg,#FFC9D0,var(--coral),#FFC9D0); transform:skewY(7deg); }
+.lm-cutin-inner { position:absolute; inset:0; z-index:1; display:flex; align-items:center; gap:14px; padding:0 6%; }
+.lm-cutin[data-side=enemy] .lm-cutin-inner { flex-direction:row-reverse; }
+.lm-cutin-art { position:relative; flex:none; height:88%; aspect-ratio:3/5; border:3px solid #fff; border-radius:10px; overflow:hidden; background:var(--paper-3); box-shadow:0 10px 24px rgba(10,20,50,.35); animation:lm-cut-art var(--cut-t) var(--ease-out) forwards; }
+.lm-cutin[data-side=enemy] .lm-cutin-art { animation-name:lm-cut-art-r; }
+.lumen .lm-cutin-art .portrait { position:absolute; inset:0; height:100%; aspect-ratio:auto; background:transparent; }
+.lumen .lm-cutin-art .portrait img[data-fallback=true] { object-fit:cover; }
+.lm-cutin-text { min-width:0; display:flex; flex-direction:column; color:#fff; animation:lm-cut-text var(--cut-t) var(--ease-out) forwards; }
+.lm-cutin[data-side=enemy] .lm-cutin-text { align-items:flex-end; text-align:right; animation-name:lm-cut-text-r; }
+.lm-cutin-text small { display:flex; align-items:center; gap:5px; margin-bottom:4px; font-size:11px; font-weight:900; letter-spacing:.08em; color:#FFE29A; }
+.lm-cutin-text small::before { content:""; width:11px; height:11px; background:var(--star-svg) center/contain no-repeat; }
+.lm-cutin-text b { font-size:clamp(22px,7.4vw,32px); font-weight:900; font-style:italic; letter-spacing:-.03em; line-height:1.12; word-break:keep-all; text-shadow:0 3px 12px rgba(0,0,0,.35); }
+@keyframes lm-veil { 0%,100% { opacity:0; } 14%,84% { opacity:1; } }
+@keyframes lm-band { 0% { opacity:0; clip-path:inset(0 100% 0 0); } 16% { opacity:1; clip-path:inset(0 0 0 0); } 84% { opacity:1; clip-path:inset(0 0 0 0); } 100% { opacity:0; clip-path:inset(0 0 0 100%); } }
+@keyframes lm-cut-art { 0% { opacity:0; transform:translateX(-60%); } 20% { opacity:1; transform:none; } 84% { opacity:1; transform:translateX(5%); } 100% { opacity:0; transform:translateX(18%); } }
+@keyframes lm-cut-art-r { 0% { opacity:0; transform:translateX(60%); } 20% { opacity:1; transform:none; } 84% { opacity:1; transform:translateX(-5%); } 100% { opacity:0; transform:translateX(-18%); } }
+@keyframes lm-cut-text { 0% { opacity:0; transform:translateX(30%); } 26% { opacity:1; transform:none; } 84% { opacity:1; } 100% { opacity:0; transform:translateX(-10%); } }
+@keyframes lm-cut-text-r { 0% { opacity:0; transform:translateX(-30%); } 26% { opacity:1; transform:none; } 84% { opacity:1; } 100% { opacity:0; transform:translateX(10%); } }
 
 /* ---------- Dialogs: paper with a grid, a cobalt top rule, the title as a cobalt band ---------- */
-.lumen .modal { position:fixed; inset:0; width:auto; height:auto; z-index:100; padding:12px; padding-bottom:calc(12px + var(--safe-b)); background:var(--overlay); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); align-items:center; justify-content:center; }
+.lumen .modal { position:fixed; inset:0; width:auto; height:auto; z-index:100; padding:12px 12px calc(16px + var(--safe-b)); background:var(--overlay); align-items:center; justify-content:center; }
 .lumen .modal.active { display:flex; animation:lm-overlay .2s ease-out; }
 @keyframes lm-overlay { from { opacity:0; } to { opacity:1; } }
 .lumen .modal .modal-content {
   position:relative; display:flex; flex-direction:column; width:min(440px,100%) !important; max-width:min(440px,100%) !important; min-height:0 !important; max-height:min(88dvh,820px) !important; height:auto;
-  padding:18px 18px 16px !important; border-radius:12px; border:0; border-top:3px solid var(--struct); color:var(--ink); text-align:left; overflow-y:auto; overflow-x:hidden;
+  padding:18px 18px 20px !important; border-radius:12px; border:0; border-top:3px solid var(--struct); color:var(--ink); text-align:left; overflow-y:auto; overflow-x:hidden;
   background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper);
   box-shadow:0 18px 44px rgba(22,48,106,.28); animation:lm-pop-in .24s var(--ease-out);
 }
@@ -2310,8 +2402,11 @@ body[data-theme=astra] .modal-content .menu-btn { border-color:var(--hair) !impo
 .lumen .modal-content input:not([type=checkbox]):not([type=range]):not([type=file]), .lumen .modal-content textarea, .lumen .modal-content select { border-radius:8px; border:1px solid var(--line-2); background:var(--paper); color:var(--ink); padding:10px 12px; }
 .lumen .modal-content input[type=checkbox] { accent-color:var(--struct); }
 .lumen .lm-sheet-modal { padding:0; align-items:flex-end; }
-.lumen .lm-sheet-modal .modal-content { width:100% !important; max-width:var(--col) !important; border-radius:14px 14px 0 0; animation:lm-sheet-in .3s var(--ease-out); }
-@keyframes lm-sheet-in { from { transform:translateY(40px); opacity:.4; } to { transform:none; opacity:1; } }
+/* Sheets slide in opaque over a separately fading veil, so a sheet opened over another full-height view never cross-fades. */
+.lumen .lm-sheet-modal.active { background:none; animation:none; }
+.lumen .lm-sheet-modal.active::before { content:""; position:fixed; inset:0; background:var(--overlay); animation:lm-overlay .2s ease-out; }
+.lumen .lm-sheet-modal .modal-content { width:100% !important; max-width:var(--col) !important; border-radius:14px 14px 0 0; animation:lm-sheet-in .28s var(--ease-out); }
+@keyframes lm-sheet-in { from { transform:translateY(100%); } to { transform:none; } }
 .lm-sheet-head { display:flex; align-items:center; justify-content:space-between; margin:0 0 10px; flex-shrink:0; }
 .lumen .lm-sheet-head h2 { margin:0 0 0 -16px !important; }
 .lumen .lm-sheet-head .lm-icon-btn { border-radius:50%; }
@@ -2379,36 +2474,68 @@ body[data-theme=astra] .modal-content .menu-btn { border-color:var(--hair) !impo
 .lumen #mode-list .menu-btn { position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1px; min-height:58px; margin:0; padding:9px 12px 9px 16px !important; text-align:left; font-size:14px !important; color:var(--ink) !important; border-width:1px !important; border-color:var(--line-2) !important; overflow:hidden; }
 .lumen #mode-list .menu-btn::before { content:""; position:absolute; left:0; top:0; width:14px; height:14px; background:var(--struct); clip-path:polygon(0 0,100% 0,0 100%); opacity:.85; }
 .lm-mode-name { font-weight:900; line-height:1.25; color:var(--ink); }
-.lm-mode-meta { font-size:11px; font-weight:800; font-style:italic; color:var(--ink-2); }
-.lm-mode-clear, .lumen .hard-clear-badge { position:absolute; top:6px; right:7px; padding:0 6px; border-radius:4px; font-size:9px; font-weight:900; letter-spacing:.06em; line-height:16px; color:#fff; background:var(--mint); }
-.lumen .hard-clear-badge { background:var(--coral); }
+.lm-mode-meta { font-size:11px; font-weight:800; font-style:italic; color:var(--ink-2); white-space:nowrap; }
+/* The name owns the first line; stage goal and clear stamp share the second, so a stamp never covers a long name. */
+.lm-mode-foot { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:3px 6px; width:100%; min-width:0; }
+.lm-mode-clear, .lumen .hard-clear-badge { flex-shrink:0; display:inline-flex; align-items:center; gap:3px; height:17px; padding:0 6px 0 5px; border-radius:4px; font-size:9px; font-weight:900; letter-spacing:.05em; line-height:17px; color:#fff; background:var(--mint); white-space:nowrap; }
+.lm-mode-clear::before, .lumen .hard-clear-badge::before { content:""; width:8px; height:8px; background:var(--star-svg) center/contain no-repeat; filter:brightness(0) invert(1); }
+.lm-mode-clear { background:#17775A; }
+.lumen .hard-clear-badge { background:var(--coral-fill); }
 .lumen #mode-list .menu-btn[aria-pressed=true] { border-color:var(--coral) !important; background:color-mix(in srgb,var(--coral) 7%,var(--paper)) !important; box-shadow:0 0 0 2px var(--coral) !important; }
 .lumen #mode-list .menu-btn[aria-pressed=true]::before { background:var(--coral); }
-.lumen #mode-desc { height:auto !important; min-height:92px; max-height:26dvh; margin:0 0 12px; padding:12px 14px !important; border-radius:8px !important; background:var(--paper-2) !important; border:1px solid var(--line) !important; color:var(--ink) !important; font-size:13px !important; line-height:1.6; white-space:pre-line; }
+/* A fixed-height description keeps the dialog from jumping when a mode with a longer text is picked. */
+.lumen #mode-desc { flex-shrink:0; height:clamp(118px,21dvh,168px) !important; min-height:0; max-height:none; overflow-y:auto; margin:0 0 12px; padding:12px 14px !important; border-radius:8px !important; background:var(--paper-2) !important; border:1px solid var(--line) !important; color:var(--ink) !important; font-size:13px !important; line-height:1.6; white-space:pre-line; }
+.lumen #mode-desc::first-line { font-weight:900; color:var(--struct-text); }
 .lumen #mode-desc.is-empty { display:flex; align-items:center; justify-content:center; color:var(--ink-3) !important; }
 .lumen #btn-enter-mode { position:sticky; bottom:0; margin:0 0 4px !important; min-height:54px; font-size:17px; }
 
-/* Missions */
+/* Missions: the prize leads (card art with its foil, or the ticket), progress is a bar, and the claim button glows when ready. */
 .lumen #mission-hub-list { gap:8px !important; }
-.lumen #mission-hub-list .lm-mission-row { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left; padding:13px 16px !important; margin:0 !important; border-width:1px !important; border-color:var(--line-2) !important; color:var(--ink) !important; }
-.lumen #mission-hub-list .lm-mission-row br { display:none; }
-.lm-mission-state { position:absolute; right:14px; top:50%; transform:translateY(-50%); height:24px; padding:0 10px; border-radius:12px; background:var(--paper-2); border:1px solid var(--line); color:var(--ink-2) !important; font-size:12px !important; font-weight:900 !important; line-height:22px; font-variant-numeric:tabular-nums; }
-.lm-mission-state.is-ready { background:var(--coral); border-color:var(--coral); color:#fff !important; }
-.lumen #mission-hub-list .lm-mission-row > span:not(.lm-mission-state) { font-size:12px !important; padding-right:76px; }
-.lumen #weekly-mission-status, .lumen #monthly-mission-status, .lumen #special-mission-status { color:var(--ink-2) !important; font-size:13px !important; font-weight:700; }
-.lumen :is(#weekly-mission-section,#monthly-mission-section,#special-mission-section) > div:nth-child(2) { padding:14px !important; border-radius:10px !important; border:1px solid var(--line-2) !important; background:var(--paper) !important; }
-.lumen :is(#weekly-mission-section,#monthly-mission-section,#special-mission-section) > div:nth-child(2) > div:first-child, .lumen .mission-reward-showcase > div:not(.reward-progress) { color:var(--ink-2) !important; font-size:12px; font-weight:800; }
-.lumen .mission-reward-showcase > [id$=reward-name] { color:var(--ink) !important; font-size:16px; }
-.lumen #weekly-mission-reward-name, .lumen #monthly-mission-reward-name, .lumen #special-mission-reward-name { color:var(--ink) !important; font-size:16px; }
-.lumen :is(#weekly-mission-list,#monthly-mission-list,#special-mission-list) > div { padding:10px 12px !important; margin-bottom:6px !important; border-radius:8px !important; border:1px solid var(--line) !important; background:var(--paper) !important; color:var(--ink) !important; }
-.lumen :is(#weekly-mission-list,#monthly-mission-list,#special-mission-list) > div * { color:inherit; }
-.lumen .mission-reward-showcase { display:grid; grid-template-columns:72px minmax(0,1fr); gap:4px 12px; align-items:start; }
+.lumen #mission-hub-list .lm-mission-row { position:relative; display:grid; grid-template-columns:48px minmax(0,1fr) auto; align-items:center; gap:12px; text-align:left; min-height:84px; padding:10px 14px 10px 10px !important; margin:0 !important; border-width:1px !important; border-color:var(--line-2) !important; color:var(--ink) !important; }
+.lm-mission-thumb { position:relative; width:48px; aspect-ratio:3/5; border:2px solid transparent; border-radius:7px; overflow:hidden; background:var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box; box-shadow:0 3px 8px rgba(30,47,92,.18); }
+.lumen .lm-mission-thumb .portrait { position:absolute; inset:0; height:100%; aspect-ratio:auto; background:transparent; }
+.lm-mission-thumb.is-ticket { display:grid; place-items:center; background:linear-gradient(160deg,#FFF6D8,#F2C14E) padding-box, var(--fr-legend) border-box; color:#8A5A00; }
+.lm-mission-thumb.is-ticket svg { width:26px; height:26px; }
+.lm-mission-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.lm-mission-copy strong { font-size:15px; font-weight:900; color:var(--ink); }
+.lm-mission-copy small { font-size:12px; font-weight:700; color:var(--ink-2); line-height:1.4; }
+.lm-mission-meter, .lm-mission-bar { position:relative; display:block; height:6px; margin-top:4px; border-radius:3px; background:var(--track); overflow:hidden; }
+.lm-mission-meter::after, .lm-mission-bar::after { content:""; position:absolute; inset:0 auto 0 0; width:var(--p,0%); border-radius:inherit; background:var(--act-solid); }
+.lm-mission-state { flex-shrink:0; height:26px; padding:0 11px; border-radius:13px; background:var(--paper-2); border:1px solid var(--line); color:var(--ink-2) !important; font-size:12px !important; font-weight:900 !important; line-height:24px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.lm-mission-state.is-ready { background:var(--coral-fill); border-color:var(--coral-fill); color:#fff !important; animation:lm-ready-pulse 1.8s ease-in-out infinite; }
+.lm-mission-state.is-claimed { color:var(--good) !important; }
+@keyframes lm-ready-pulse { 50% { box-shadow:0 0 0 5px color-mix(in srgb,var(--coral) 22%,transparent); } }
+.lumen #weekly-mission-status, .lumen #monthly-mission-status, .lumen #special-mission-status { color:var(--ink-2) !important; font-size:13px !important; font-weight:800; }
+.lumen .lm-reward-panel { position:relative; padding:14px !important; border-radius:12px !important; border:1px solid var(--line-2) !important; overflow:hidden;
+  background:radial-gradient(70% 90% at 12% 50%,color-mix(in srgb,var(--gc,var(--star)) 22%,transparent),transparent 70%), linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper) !important; }
+.lumen .lm-reward-panel > div:not([id]):not(.reward-progress) { display:inline-block; justify-self:start; margin:0 0 4px -14px !important; padding:2px 16px 2px 14px; color:#fff !important; font-size:10px !important; font-weight:900; letter-spacing:.08em; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--slant); }
+.lumen #weekly-mission-reward-name, .lumen #monthly-mission-reward-name, .lumen #special-mission-reward-name { color:var(--ink) !important; font-size:18px; font-weight:900; font-style:italic; }
+.lumen .mission-reward-showcase { display:grid; grid-template-columns:96px minmax(0,1fr); gap:6px 14px; align-items:center; }
 .lumen .mission-reward-showcase > :not(.reward-card-preview) { grid-column:2; }
-.lumen .reward-card-preview { grid-row:1/6; width:72px; padding:0; border:2px solid #fff; border-radius:6px; background:none; overflow:hidden; box-shadow:0 0 0 1px var(--line-2), var(--shadow); }
+.lumen .reward-card-preview { grid-row:1/6; width:96px; padding:0; border:3px solid transparent; border-radius:10px; overflow:hidden; background:var(--card-in) padding-box, var(--fr,var(--fr-legend)) border-box; box-shadow:0 8px 18px rgba(30,47,92,.24); }
+.lumen .reward-card-preview .portrait { aspect-ratio:3/5; }
+.lumen .mission-reward-showcase .menu-btn { min-height:38px !important; padding:6px 12px !important; font-size:13px !important; }
 .lumen .reward-progress { display:flex; flex-direction:column; gap:4px; margin-top:6px; font-size:12px; font-weight:800; color:var(--ink-2); }
-.lumen .reward-progress progress { width:100%; height:7px; appearance:none; border:0; border-radius:4px; background:var(--track); overflow:hidden; }
+.lumen .reward-progress progress { width:100%; height:8px; appearance:none; border:0; border-radius:4px; background:var(--track); overflow:hidden; }
 .lumen .reward-progress progress::-webkit-progress-bar { background:var(--track); }
 .lumen .reward-progress progress::-webkit-progress-value { background:var(--act-solid); }
+.lumen .reward-progress progress::-moz-progress-bar { background:var(--act-solid); }
+.lm-reward-ticket { float:right; display:grid; place-items:center; width:72px; height:72px; margin:-2px -2px 0 10px; border-radius:50%; background:radial-gradient(circle,#FFF6D8,#F2C14E 70%); border:3px solid #fff; box-shadow:0 0 0 1px color-mix(in srgb,var(--star) 70%,transparent), 0 6px 14px rgba(160,110,0,.25); color:#8A5A00; }
+.lm-reward-ticket svg { width:28px; height:28px; margin-top:6px; }
+.lm-reward-ticket b { margin-top:-10px; font-size:15px; font-weight:900; font-style:italic; }
+.lumen .lm-mission-list { clear:both; max-height:none !important; overflow:visible; margin:12px 0 !important; }
+.lumen .lm-mission-list .lm-mission-item { display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:10px; padding:10px 12px !important; margin:0 0 6px !important; border-radius:10px !important; border:1px solid var(--line) !important; background:var(--paper) !important; color:var(--ink) !important; }
+.lm-mission-mark { width:26px; height:26px; display:grid; place-items:center; border-radius:50%; background:conic-gradient(var(--act-solid) var(--p,0%),var(--track) 0); -webkit-mask:radial-gradient(circle,transparent 8px,#000 8.5px); mask:radial-gradient(circle,transparent 8px,#000 8.5px); }
+.lm-mission-item.complete .lm-mission-mark { background:var(--mint); -webkit-mask:none; mask:none; color:#fff; }
+.lm-mission-mark svg { width:16px; height:16px; stroke-width:2.6; }
+.lm-mission-body { display:flex; flex-direction:column; min-width:0; }
+.lm-mission-body strong { font-size:13px; font-weight:900; line-height:1.35; }
+.lm-mission-count { font-size:13px; font-weight:900; font-style:italic; font-variant-numeric:tabular-nums; color:var(--ink-2); white-space:nowrap; }
+.lm-mission-item.complete .lm-mission-count { color:var(--good); }
+.lm-mission-item.complete .lm-mission-bar::after { background:var(--mint); }
+.lumen :is(#btn-claim-weekly-mission,#btn-claim-monthly-mission,#btn-claim-special-mission):disabled { opacity:1 !important; background:var(--paper-2) !important; color:var(--ink-3) !important; border-color:var(--line-2) !important; }
+.lumen :is(#btn-claim-weekly-mission,#btn-claim-monthly-mission,#btn-claim-special-mission).is-ready { animation:lm-ready-glow 1.8s ease-in-out infinite; }
+@keyframes lm-ready-glow { 50% { filter:brightness(1.08) drop-shadow(0 0 8px color-mix(in srgb,var(--act-solid) 60%,transparent)); } }
 
 /* ---------- Summon ---------- */
 .lumen #modal-gacha { padding:0; background:#EFE8DA; -webkit-backdrop-filter:none; backdrop-filter:none; }
@@ -2416,8 +2543,8 @@ body[data-theme=astra] .modal-content .menu-btn { border-color:var(--hair) !impo
 .lumen #modal-gacha::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(251,247,240,.35),rgba(251,247,240,0) 26%,rgba(251,247,240,0) 60%,rgba(243,237,226,.92)); pointer-events:none; transition:background-color .6s; }
 body[data-theme=astra] #modal-gacha::after { background:linear-gradient(180deg,rgba(6,12,30,.55),rgba(6,12,30,.12) 30%,rgba(6,12,30,.2) 62%,rgba(6,12,30,.88)); }
 body[data-theme=strawberry] #modal-gacha::after { background:linear-gradient(180deg,rgba(255,235,244,.35),rgba(255,235,244,0) 28%,rgba(255,235,244,0) 60%,rgba(255,239,245,.94)); }
-.lumen #modal-gacha.is-rare.is-charging::after { background-color:rgba(14,26,60,.5); }
-.lumen #modal-gacha .modal-content { position:relative; z-index:1; width:100% !important; max-width:var(--col) !important; height:100% !important; max-height:none !important; padding:calc(16px + var(--safe-t)) 18px calc(18px + var(--safe-b)) !important; border:0; border-radius:0; background:none !important; box-shadow:none; justify-content:space-between; overflow:hidden; animation:none; }
+.lumen #modal-gacha.is-rare.is-charging::after { background-color:var(--charge-wash); }
+.lumen #modal-gacha .modal-content { position:relative; z-index:1; width:100% !important; max-width:var(--col) !important; height:100% !important; max-height:none !important; padding:calc(16px + var(--safe-t)) 18px calc(26px + var(--safe-b)) !important; border:0; border-radius:0; background:none !important; box-shadow:none; justify-content:space-between; overflow:hidden; animation:none; }
 .lumen #modal-gacha #gacha-title { margin:0 0 0 -18px !important; font-size:15px !important; }
 .lumen #gacha-result { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; padding:0; margin:0; background:none; border:0; animation:none; }
 .lumen #gacha-result::before, .lumen #gacha-result::after { display:none; }
@@ -2460,6 +2587,10 @@ body[data-theme=strawberry] .lm-summon-back { --card-back:url("data:image/webp;b
 .lm-summon-actions { display:grid; grid-template-columns:1fr 1.25fr; gap:10px; width:100%; max-width:420px; margin:0 auto; }
 .lumen #modal-gacha .lm-summon-actions .lm-btn { min-height:54px; margin:0 !important; padding:0 12px !important; gap:6px; white-space:nowrap; border:1.5px solid var(--struct) !important; background:var(--paper) !important; color:var(--struct-text) !important; box-shadow:0 2px 0 var(--line-2) !important; font-weight:900; }
 .lm-summon-actions:has(#lm-summon-again[hidden]) { grid-template-columns:1fr; }
+.lumen #modal-gacha .lm-summon-actions .lm-btn.is-challenge { border-color:var(--gc-epic) !important; color:var(--ink) !important; background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, color-mix(in srgb,var(--gc-epic) 9%,var(--paper)) !important; }
+#lm-summon-again.is-challenge > svg { color:var(--gc-epic); }
+#lm-summon-again .lm-again-label { display:flex; flex-direction:column; align-items:flex-start; line-height:1.15; }
+.lm-again-edge { font-size:10px; font-weight:900; color:color-mix(in srgb,var(--gc-epic) 75%,var(--ink)); }
 .lumen #modal-gacha .lm-summon-actions .lm-cta { margin:0 !important; min-height:54px; width:100% !important; }
 
 .lumen .lm-recruit #menu-gacha-area:has(.lm-chain-btn:not([hidden])) .menu-btn { grid-template-columns:minmax(0,1fr); padding:8px 10px; }
@@ -2489,12 +2620,23 @@ body[data-theme=strawberry] .lm-batch-back { --card-back:url("data:image/webp;ba
 .lumen .lm-batch-front .portrait img[data-fallback=true] { object-fit:contain; opacity:.3; }
 .lm-batch-card[data-rare=true] .lm-batch-front { box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 0 18px color-mix(in srgb,var(--gc) 75%,transparent), 0 6px 14px rgba(22,48,106,.3); }
 .lm-batch-front .lm-new { top:0; right:0; padding:2px 6px 2px 9px; font-size:8.5px; letter-spacing:.04em; }
-.lm-batch-name { display:block; min-height:2.5em; padding:3px 7px 4px; font-size:10.5px; font-weight:900; line-height:1.2; text-align:center; color:#fff; background:linear-gradient(100deg,#16306A,#1F3F86); clip-path:var(--para-s); opacity:0; transition:opacity .3s; transition-delay:calc(var(--i) * 90ms + 380ms); word-break:keep-all; overflow-wrap:anywhere; }
+/* Foil: high grades catch the light. Epic gets the sweep only; legend and above add twinkling gold stars. */
+.lm-foil { position:absolute; inset:0; z-index:1; overflow:hidden; border-radius:inherit; pointer-events:none; }
+.lm-foil::before { content:""; position:absolute; inset:-20% -60%; background:linear-gradient(112deg,transparent 38%,rgba(255,244,214,.0) 42%,rgba(255,240,200,.42) 47%,rgba(255,255,255,.62) 50%,rgba(200,236,255,.4) 53%,transparent 60%); transform:translateX(-70%); animation:lm-foil 6.5s ease-in-out infinite; }
+.lm-foil::after { content:""; position:absolute; inset:0; opacity:.9; animation:lm-twinkle 2.6s ease-in-out infinite alternate;
+  background:var(--star-svg) 14% 18%/10px 10px no-repeat, var(--star-svg) 84% 30%/7px 7px no-repeat, var(--star-svg) 74% 74%/11px 11px no-repeat, var(--star-svg) 22% 62%/6px 6px no-repeat; }
+.lm-foil.is-soft::before { animation-duration:9s; opacity:.7; }
+.lm-foil.is-soft::after { display:none; }
+[data-grade=transcendence] .lm-foil::before { background:linear-gradient(112deg,transparent 36%,rgba(140,230,255,.4) 44%,rgba(255,255,255,.6) 50%,rgba(250,170,230,.42) 55%,rgba(255,226,140,.36) 59%,transparent 64%); }
+[data-grade=special] .lm-foil::before, [data-grade=event] .lm-foil::before { background:linear-gradient(112deg,transparent 38%,rgba(255,200,220,.42) 46%,rgba(255,255,255,.6) 50%,rgba(255,226,170,.4) 54%,transparent 60%); }
+@keyframes lm-foil { 0%,55% { transform:translateX(-70%); } 85%,100% { transform:translateX(70%); } }
+@keyframes lm-twinkle { 0% { opacity:.25; transform:scale(.92); } 100% { opacity:.95; transform:none; } }
+.lm-batch-name { position:absolute; left:-2px; right:-2px; bottom:0; z-index:2; display:block; padding:3px 7px 4px; font-size:10.5px; font-weight:900; line-height:1.25; text-align:center; white-space:nowrap; overflow:hidden; color:#fff; background:linear-gradient(100deg,#16306A,#1F3F86); clip-path:var(--para-s); }
+.lm-batch-name.is-wrap { white-space:normal; line-height:1.12; word-break:keep-all; overflow-wrap:anywhere; }
 .lm-batch-card[data-rare=true] .lm-batch-name { background:var(--bd); color:var(--bd-ink,#fff); }
-.lm-batch.is-revealed .lm-batch-name { opacity:1; }
 .lm-batch-tally { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; opacity:0; transition:opacity .3s; }
 .lm-batch.is-done .lm-batch-tally { opacity:1; }
-.lumen #modal-gacha.is-batch.is-rare::after { background-color:rgba(14,26,60,.18); }
+.lumen #modal-gacha.is-batch.is-rare::after { background-color:color-mix(in srgb,var(--charge-wash) 45%,transparent); }
 
 /* Card pool, artifacts, blessing, form choice */
 .lumen #modal-card-pool .modal-content { height:min(88dvh,820px) !important; }
@@ -2519,9 +2661,22 @@ body[data-theme=strawberry] .lm-batch-back { --card-back:url("data:image/webp;ba
 .lumen #lecture-list button:active { transform:translateY(1px); }
 .lumen .study-text { color:var(--ink) !important; }
 .lumen #lecture-content, .lumen #tutoring-content, .lumen #date-content, .lumen #wordbook-list { border-radius:10px !important; border:1px solid var(--line-2) !important; background:var(--paper) !important; color:var(--ink) !important; font-size:15px !important; line-height:1.75 !important; user-select:text; }
-.lumen .lumi-modal-portrait { width:64px !important; aspect-ratio:3/4; border-radius:6px; border:2px solid #fff !important; box-shadow:0 0 0 1px var(--line-2), var(--shadow); }
-.lumen .lumi-modal-portrait img { object-position:50% 10%; }
-.lumen #modal-lecture-view .modal-content > div:nth-child(2) { margin-bottom:8px !important; }
+/* Lumi stands beside the title as a whole 3:5 card instead of a cropped thumbnail. */
+.lumen .lumi-modal-portrait { width:var(--lumi-w,84px) !important; height:auto !important; aspect-ratio:3/5; margin:0 !important; border-radius:10px; border:3px solid transparent !important; overflow:hidden;
+  background:var(--card-in) padding-box, var(--fr-transcendence) border-box !important; box-shadow:0 6px 16px rgba(30,47,92,.18); }
+.lumen .lumi-modal-portrait img { object-fit:cover; object-position:50% 0; border-radius:7px; }
+.lumen .lumi-modal-portrait img[data-fallback=true] { object-fit:contain; object-position:50% 50%; }
+.lumen :is(#modal-lecture-view,#modal-tutoring,#modal-date) .modal-content { display:grid !important; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:auto auto minmax(0,1fr) auto; column-gap:12px; align-items:start; }
+.lumen :is(#modal-lecture-view,#modal-tutoring,#modal-date) .modal-content > :first-child { grid-column:1; grid-row:1; }
+.lumen :is(#modal-lecture-view,#modal-tutoring,#modal-date) .modal-content > :is(.lumi-modal-portrait, div:has(> .lumi-modal-portrait)) { grid-column:2; grid-row:1 / 3; margin:0 !important; display:block !important; }
+.lumen :is(#modal-lecture-view,#modal-tutoring,#modal-date) .lm-lumi-line { grid-column:1; grid-row:2; align-self:end; }
+.lumen :is(#lecture-content,#tutoring-content,#date-content) { grid-column:1 / -1; grid-row:3; min-height:0 !important; height:100%; margin:12px 0 0 !important; }
+.lumen :is(#modal-lecture-view,#modal-tutoring,#modal-date) .modal-content > :last-child { grid-column:1 / -1; grid-row:4; }
+.lumen #modal-tutoring .modal-content > div:first-child { align-self:start; }
+.lumen #modal-date { --lumi-w:100px; }
+.lm-lumi-line { position:relative; display:flex; flex-direction:column; gap:4px; margin:0 0 2px; padding:10px 12px; border-radius:10px 10px 2px 10px; background:var(--paper); border:1px solid var(--line-2); box-shadow:var(--shadow-2); color:var(--ink); font-size:13px; font-weight:700; line-height:1.5; }
+.lm-lumi-line::after { content:""; position:absolute; right:-7px; bottom:8px; width:12px; height:12px; background:var(--paper); border-right:1px solid var(--line-2); border-top:1px solid var(--line-2); transform:rotate(45deg); }
+.lm-lumi-line small { font-size:11px; font-weight:800; color:var(--ink-3); letter-spacing:.02em; }
 .lumen .wordbook-toolbar { gap:8px !important; }
 .lumen .wordbook-help, .lumen .wordbook-toolbar label { color:var(--ink-2) !important; font-size:12px !important; }
 .lumen .wordbook-toolbar .menu-btn { width:auto !important; min-height:32px !important; margin:0 !important; padding:4px 12px !important; font-size:12px !important; }
@@ -2549,8 +2704,10 @@ body[data-theme=strawberry] .lm-batch-back { --card-back:url("data:image/webp;ba
 .lumen #modal-toeic-result .menu-btn { margin:0 !important; }
 
 /* Lumi chat */
-.lumen #modal-lumi-question { top:var(--chat-top,0px); height:var(--chat-height,100dvh); bottom:auto; padding:8px; }
-.lumen #modal-lumi-question .modal-content { height:100% !important; max-height:100% !important; width:min(600px,100%) !important; max-width:min(600px,100%) !important; padding:12px !important; gap:8px; }
+/* The chat dialog itself never resizes: it stays a full opaque layer, and only the panel follows the visible viewport.
+   A resizing translucent layer made the page behind it show through for a frame whenever the keyboard opened. */
+.lumen #modal-lumi-question { inset:0; height:auto; padding:0; align-items:flex-start; background:var(--paper-2); }
+.lumen #modal-lumi-question .modal-content { height:calc(var(--chat-height,100dvh) - 16px) !important; max-height:none !important; margin:calc(var(--chat-top,0px) + 8px) auto 0; width:min(600px,calc(100% - 16px)) !important; max-width:min(600px,calc(100% - 16px)) !important; padding:12px !important; gap:8px; animation:none; }
 .lumen .lumi-chat-top { border-bottom:1px solid var(--line); padding-bottom:8px; }
 .lumen .lumi-chat-title { align-self:flex-start; margin:0 0 0 -12px !important; padding:5px 26px 5px 12px; color:#fff !important; font-size:15px !important; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--slant); }
 .lumen .lumi-chat-controls { gap:5px; }
@@ -2574,7 +2731,8 @@ body[data-theme=strawberry] .lm-batch-back { --card-back:url("data:image/webp;ba
 .lumen #fortune-result-grade { color:#C4840A !important; }
 .lumen #fortune-result-date { color:var(--ink-3) !important; }
 .lumen #fortune-result-message { color:var(--ink) !important; }
-.lumen #modal-fortune-cookie .portrait { width:72px !important; height:auto !important; aspect-ratio:3/4; border-radius:6px; border:2px solid #fff !important; box-shadow:0 0 0 1px var(--line-2); }
+.lumen #modal-fortune-cookie .portrait { width:76px !important; height:auto !important; aspect-ratio:3/5; border-radius:8px; border:2px solid #fff !important; box-shadow:0 0 0 1px var(--line-2), var(--shadow); }
+.lumen #modal-fortune-cookie .portrait img { object-fit:cover; object-position:50% 0; }
 
 /* Music player: keep the module's layout, adopt the palette. */
 .lumen #modal-music-player .music-player-panel { max-height:min(90dvh,860px) !important; }
@@ -2592,19 +2750,8 @@ body[data-theme=strawberry] .lm-batch-back { --card-back:url("data:image/webp;ba
 .lumen .music-track-row.is-current { background:var(--struct-soft); }
 .lumen .music-track-row button { color:inherit; }
 
-/* Card pool editor */
-.lumen .card-pool-editor-summary, .lumen .card-pool-editor-note { color:var(--ink-2) !important; }
-.lumen .card-pool-tabs button { color:var(--ink-2) !important; }
-.lumen .card-pool-tabs button[aria-selected=true] { background:linear-gradient(100deg,var(--struct-d),var(--struct)) !important; color:#fff !important; border-color:var(--struct) !important; }
-.lumen .card-pool-icon-btn { border-radius:15px; border:1px solid var(--line-2); background:var(--paper); color:var(--ink); }
-.lumen .bonus-preset-btn { border-color:var(--line-2); background:var(--paper); color:var(--ink); border-radius:8px; }
-.lumen .bonus-preset-btn span { color:var(--ink-2); }
-.lumen .bonus-preset-btn.is-active { border-color:var(--coral); background:color-mix(in srgb,var(--coral) 8%,var(--paper)); color:var(--ink); }
-.lumen .bonus-pool-item { border-radius:8px; border-color:var(--line-2); background:var(--paper); color:var(--ink); }
-.lumen #special-card-editor-summary { color:var(--ink-2) !important; }
-
 /* Settings */
-.lumen #modal-astra-settings .lm-settings { text-align:left; height:auto; max-height:min(90dvh,820px) !important; padding:16px 16px calc(14px + var(--safe-b)) !important; }
+.lumen #modal-astra-settings .lm-settings { text-align:left; height:auto; max-height:min(90dvh,820px) !important; padding:16px 16px calc(20px + var(--safe-b)) !important; }
 .lm-settings-body { margin:0 !important; padding-right:2px; }
 .lm-set-group { margin-bottom:18px; }
 .lumen .lm-settings .lm-set-group h3 { margin:0 0 8px !important; padding:0 !important; font-size:12px !important; font-weight:900; color:var(--ink-2) !important; letter-spacing:.04em; text-align:left; background:none; clip-path:none; display:block; }
@@ -2658,22 +2805,75 @@ body[data-theme=strawberry] .lm-batch-back { --card-back:url("data:image/webp;ba
   min-height:48px; margin:0 0 8px; border-radius:8px; border:1.5px solid var(--struct) !important; background:var(--paper) !important; color:var(--struct-text) !important; font-weight:900; box-shadow:0 2px 0 var(--line-2);
 }
 .lumen #screen-draft .menu-btn[onclick*="reroll"] { color:var(--coral-text) !important; border-color:var(--coral) !important; }
-.lumen .factory-draft-body { padding:0 !important; gap:12px !important; }
-.lumen .factory-bundle { border-radius:12px !important; border:1px solid var(--line-2) !important; background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper) !important; }
-.lumen .factory-bundle-title { color:var(--ink) !important; }
-.lumen .factory-card-row { border:1px solid var(--line) !important; background:var(--paper-2) !important; color:var(--ink) !important; }
-.lumen .factory-card-row .portrait { width:60px !important; aspect-ratio:3/5; height:auto !important; border-radius:6px; }
-.lumen .factory-select-btn { min-height:48px; }
-.lumen .factory-draft-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.lumen .factory-draft-actions .menu-btn { margin:0 !important; }
+/* Factory draft: a round track, two bundles as rows of four framed cards with a grade tally, an aqua pick under each, and a docked footer. */
+.lumen #screen-factory-draft.active { gap:8px; padding-bottom:0; overflow:hidden; }
+.lumen #screen-factory-draft .factory-draft-help { margin:0 !important; font-size:12px !important; line-height:1.5; }
+.lumen #screen-factory-draft .factory-draft-help br { display:none; }
+.lm-factory-track { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.lm-factory-steps { flex:1; display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:3px; }
+.lm-factory-steps i { height:6px; border-radius:2px; background:var(--track); transform:skewX(-20deg); }
+.lm-factory-steps i.is-done { background:var(--struct); }
+.lm-factory-steps i.is-now { background:var(--coral-fill); }
+.lumen .lm-factory-count { display:inline-flex; align-items:center; gap:4px; height:30px; padding:0 12px 0 9px; border-radius:15px; border:1px solid var(--line-2); background:var(--paper); color:var(--ink-2); font-size:12px; font-weight:800; box-shadow:var(--shadow-2); font-variant-numeric:tabular-nums; }
+.lm-factory-count svg { width:17px; height:17px; color:var(--struct-text); }
+.lm-factory-count b { font-size:15px; font-weight:900; font-style:italic; color:var(--ink); }
+.lumen .factory-draft-body { flex:1; min-height:0; display:flex !important; flex-direction:column; gap:12px !important; margin:0 -16px; padding:2px 16px 12px !important; overflow-y:auto; }
+.lumen .factory-bundle { flex-shrink:0; display:flex !important; flex-direction:column; gap:10px; padding:0 12px 12px !important; border-radius:12px !important; border:1px solid var(--line-2) !important; background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper) !important; box-shadow:var(--shadow); overflow:hidden; }
+.lumen .factory-bundle-title { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 -12px; padding:8px 10px 0 0; color:var(--ink) !important; text-align:left !important; }
+.lm-bundle-name { display:inline-flex; align-items:center; gap:6px; padding:4px 24px 4px 12px; font-size:14px; font-weight:900; color:#fff; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--slant); white-space:nowrap; }
+.lm-bundle-name::before { content:""; width:11px; height:11px; background:var(--star-svg) center/contain no-repeat; }
+.lm-bundle-tally { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px; }
+.lumen .factory-bundle-cards { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:0 !important; }
+.lumen .factory-card-row { position:relative; display:block !important; width:100%; min-width:0; margin:0 !important; padding:0 !important; border:3px solid transparent !important; border-radius:10px !important; overflow:hidden; color:#fff !important; text-align:center;
+  background:var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box !important; box-shadow:0 3px 8px rgba(30,47,92,.16) !important; }
+.lumen .factory-card-row:active { transform:scale(.97); }
+.lumen .factory-card-row .portrait { width:100% !important; height:auto !important; aspect-ratio:3/5; margin:0 !important; border-radius:7px 7px 0 0; background:transparent; }
+.lumen .factory-card-text { position:absolute; left:-3px; right:-3px; bottom:0; z-index:2; padding:3px 7px 4px; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--para-s); }
+.lumen .factory-card-name { display:block; color:#fff !important; font-size:11px; font-weight:900; line-height:1.25; white-space:nowrap; overflow:hidden; }
+.lumen .factory-card-name.is-wrap { white-space:normal; line-height:1.1; }
+.lumen .factory-card-meta { display:none !important; }
+.lumen .factory-card-row .lm-tile-grade { top:4px; left:4px; height:16px; padding:0 5px; font-size:9px; line-height:16px; }
+.lumen .factory-card-row .lm-tile-el { top:4px; right:4px; width:15px; height:15px; }
+.lumen .factory-select-btn { width:100%; min-height:48px; margin:0 !important; font-size:15px; }
+.lumen .factory-draft-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; flex-shrink:0; margin:0 -16px; padding:12px 16px calc(18px + var(--safe-b)); border-top:2px solid var(--struct);
+  background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper); box-shadow:0 -4px 14px rgba(30,47,92,.1); }
+.lumen .factory-draft-actions .menu-btn { margin:0 !important; min-height:48px; font-size:14px; }
+body[data-collection-context=factory] .lm-ticket { display:none !important; }
 .lumen [id^=artifact-reserve-bundle-] { border-radius:12px !important; border:1px solid color-mix(in srgb,var(--star) 70%,transparent) !important; background:var(--paper) !important; }
 .lumen [id^=artifact-reserve-bundle-] > div:first-child { color:var(--gold-text) !important; }
 .lumen [id^=artifact-reserve-bundle-][id$=-items] > div { border-radius:8px !important; background:var(--paper-2) !important; color:var(--ink) !important; border-color:var(--line) !important; }
 .lumen #perfect-plan-grid { gap:8px !important; }
-.lumen #screen-chaos-roulette > div { padding-top:10dvh !important; }
-.lumen #screen-chaos-roulette h2 { color:var(--ink) !important; font-size:24px; }
-.lumen #screen-chaos-roulette p { color:var(--ink-2); }
-.lumen #ui-chaos-tickets { color:var(--struct-text) !important; }
+/* Chaos roulette as a transcend altar: fanned prism card backs, the drawable cards, the ticket count and one aqua action. */
+.lumen #screen-chaos-roulette.active { padding-bottom:calc(22px + var(--safe-b)); }
+.lumen .lm-roulette { flex:1; display:grid !important; grid-template-columns:1fr 1fr; grid-auto-rows:min-content; align-content:start; gap:12px 10px !important; padding:4px 0 0 !important; min-height:0; }
+.lm-roulette-hero { position:relative; display:flex; flex-direction:column; align-items:center; gap:12px; padding:18px 16px 16px; border-radius:14px; overflow:hidden; border:1px solid var(--line-2); text-align:center;
+  background:radial-gradient(60% 70% at 50% 30%,rgba(127,231,255,.32),rgba(245,185,230,.22) 45%,transparent 75%), linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper); box-shadow:var(--shadow); }
+.lm-roulette-fan { position:relative; width:100%; height:clamp(120px,22dvh,190px); }
+.lm-roulette-back { position:absolute; left:50%; top:50%; height:100%; aspect-ratio:3/5; border:3px solid transparent; border-radius:10px; background:var(--card-back,url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgNTAwIj4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9Ii4zNSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiMxYzJiNTIiLz48c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iIzEyMWQzYiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBiMTMyOSIvPjwvbGluZWFyR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0iZ2xvdyIgY3g9Ii41IiBjeT0iLjQ2IiByPSIuNSI+PHN0b3Agc3RvcC1jb2xvcj0iI2ZmZDk4YSIgc3RvcC1vcGFjaXR5PSIuMTgiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmZmQ5OGEiIHN0b3Atb3BhY2l0eT0iMCIvPjwvcmFkaWFsR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ29sZCIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIHN0b3AtY29sb3I9IiNmZmUzYTMiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkOWEyNGMiLz48L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNTAwIiByeD0iMTgiIGZpbGw9InVybCgjYmcpIi8+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNTAwIiByeD0iMTgiIGZpbGw9InVybCgjZ2xvdykiLz4KPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOWZiOGZmIiBzdHJva2Utb3BhY2l0eT0iLjA5Ij4KPHBhdGggZD0iTS0yMCAxMjAgMzIwIDM4ME0tMjAgMjAwIDMyMCA0NjBNLTIwIDQwIDMyMCAzMDBNLTIwIC00MCAzMjAgMjIwTS0yMCAyODAgMzIwIDU0MCIvPgo8cGF0aCBkPSJNMzIwIDEyMC0yMCAzODBNMzIwIDIwMC0yMCA0NjBNMzIwIDQwLTIwIDMwME0zMjAgLTQwLTIwIDIyME0zMjAgMjgwLTIwIDU0MCIvPgo8L2c+CjxyZWN0IHg9IjEyIiB5PSIxMiIgd2lkdGg9IjI3NiIgaGVpZ2h0PSI0NzYiIHJ4PSIxMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2dvbGQpIiBzdHJva2Utb3BhY2l0eT0iLjU1Ii8+CjxyZWN0IHg9IjE5IiB5PSIxOSIgd2lkdGg9IjI2MiIgaGVpZ2h0PSI0NjIiIHJ4PSI3IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmUzYTMiIHN0cm9rZS1vcGFjaXR5PSIuMTYiLz4KPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ1cmwoI2dvbGQpIj4KPGNpcmNsZSBjeD0iMTUwIiBjeT0iMjMwIiByPSI4NiIgc3Ryb2tlLW9wYWNpdHk9Ii4yOCIvPgo8Y2lyY2xlIGN4PSIxNTAiIGN5PSIyMzAiIHI9IjY0IiBzdHJva2Utb3BhY2l0eT0iLjUiIHN0cm9rZS1kYXNoYXJyYXk9IjIgNiIvPgo8ZWxsaXBzZSBjeD0iMTUwIiBjeT0iMjMwIiByeD0iMTA4IiByeT0iMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNCAxNTAgMjMwKSIgc3Ryb2tlLW9wYWNpdHk9Ii4zOCIvPgo8L2c+CjxwYXRoIGZpbGw9InVybCgjZ29sZCkiIGQ9Im0xNTAgMTY4IDEyIDUwIDUwIDEyLTUwIDEyLTEyIDUwLTEyLTUwLTUwLTEyIDUwLTEyWiIvPgo8cGF0aCBmaWxsPSIjMTIxZDNiIiBmaWxsLW9wYWNpdHk9Ii41NSIgZD0ibTE1MCAxOTYgNiAyOCAyOCA2LTI4IDYtNiAyOC02LTI4LTI4LTYgMjgtNloiLz4KPGcgZmlsbD0iI2ZmZTNhMyI+PGNpcmNsZSBjeD0iMTUwIiBjeT0iNTgiIHI9IjIuMiIvPjxjaXJjbGUgY3g9IjE1MCIgY3k9IjQ0MiIgcj0iMi4yIi8+PGNpcmNsZSBjeD0iNzAiIGN5PSIxMzAiIHI9IjEuNCIgZmlsbC1vcGFjaXR5PSIuNiIvPjxjaXJjbGUgY3g9IjIzNiIgY3k9IjM0MiIgcj0iMS42IiBmaWxsLW9wYWNpdHk9Ii42Ii8+PGNpcmNsZSBjeD0iMjI4IiBjeT0iMTEwIiByPSIxIiBmaWxsLW9wYWNpdHk9Ii41Ii8+PGNpcmNsZSBjeD0iODIiIGN5PSIzNTYiIHI9IjEiIGZpbGwtb3BhY2l0eT0iLjUiLz48L2c+CjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZTNhMyIgc3Ryb2tlLW9wYWNpdHk9Ii40NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNMTI4IDU4aC0zME0xNzIgNThoMzBNMTI4IDQ0MmgtMzBNMTcyIDQ0MmgzMCIvPjwvZz4KPHRleHQgeD0iMTUwIiB5PSI0MTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjEzIiBsZXR0ZXItc3BhY2luZz0iNSIgZmlsbD0iI2ZmZTNhMyIgZmlsbC1vcGFjaXR5PSIuNTUiPkRSRUFNV0VBVkVSPC90ZXh0Pgo8L3N2Zz4K")) center/cover no-repeat padding-box, var(--fr-transcendence) border-box; box-shadow:0 10px 24px rgba(30,47,92,.26); }
+body[data-theme=strawberry] .lm-roulette-back { --card-back:url("data:image/webp;base64,UklGRnRfAABXRUJQVlA4IGhfAACw2AGdASrgASADPmEuk0akIqGhJnJq4IAMCWVu/F+qiUZZgm7Kptsu90VGMfqmfH1i6wxnfsP6Rdk+ZX0r52P976tf6d/q/YF/v3lgft97uf3K9Q/7lfuV7yP/b9aH98+wD5Cv7N/z+tH/zf/u9hL92vTx9mz+zf+7qAP//7c/SH9uv+d6avnv9NrsGYPtv1RPn/6Cz3f5Hfv+w/0voHZJdg70vmF4T/5nnh/N+oL52eEPQJ8pbwM/s//Q9hzpZeliYZgjQy8urxouFqF2o7VYMfN3d3YzYubD2zmLIX3EBW93RhSx/z4xoGVuusueL5tzWcgVsgyT8A6PnNp98kO3sg1MmlieztkxyH9xhcT/zQabImyFjzthRWlDiK9jpL4pD/kbqEsQo2RfsaWuQgrynDOF7v2ND+EF9HkUsdKD5WnMzkBN41+oPBmtqE1TU0/YVYemZzQrCbG09KzrijQIhVZf2ItWKki8ZxmxrjMKaB28xk90WgcRrspvl3dNAoE+GxB7ev94jJz9GsqkApfK6+i6CFqd5lMXRMnYOepz9j6Z00UEkwJTrmdszFiVJO+SVEAsaDFodVuVPFfzWhjf62L7X62wMAK3SsKDVd1rOLgequATDqaFyLrITbK2NuvyM7mCyxp3z2pJwO/PhLjxGjSVjzHoVqc6YN6lNb7/Pt1U4fr7ogb5h64toGlqnrV/h1jXFtpp8ZLCnZ8UTZgMef/xq6uvjhcN4lPakxnTZQReIlK51JsQLxdY6oUMOMoeHAnklonZTpshQ+jnsw1f/3AWuKSN0+w4x7ioSigM2sB1pNAxKwGaseZpMB5BAbQqRUHXveov/4MDt+mlPF2IZZvLr93mm3y4mCr3zKBVFnbw8ogtizVdQ199bLS5yduKaTOi/gAN/iTRtyQT9GEUOztxupFmefav6Yj8ihWoVw1jv2WlOyFI4KbVc42r1KOfD4ptqFt/gsk9zgEfLzMgGCWM63F4oCLcFoSCwG4Zv7rCBe+AW3LZH0CfgBLS3SXzNgMn/D42/xToofbu3yeQ+J/wxOqozG0fyNiMh26sLqwyX0wJvdri46rv/vg0+xI/zIYeH9QYWSK3C5LA14QEYwoeMBtNo8FOECtTJszzZj7Dipj1pRJYXOn0AQwu80Aj17fp62P8Z4Vyf3PsspwYYrfkV7MQ8v5/9kmhgKZJ62QZz30vbI//pmurOnqo3fA3MjqDoE4llBeaVSJCZa3UwOYQVfcCE1Db9D0cMMKBF+BD+Zk/k1lSpqsaJjtgJ1MHkF1j2AUiz/ldzXNvMPVrpBiRxjh20GovRA8hGaTuXC4tbru3yajc2pbJEK4w3icHV9YwrjanzMlkjMpizAlj9pVPLP3iNVL6319wo0snHzcXPNk5S1LLbOD/Y95aDT9ClthcFGZYwkAACMrIPowwuqwf+N4rCHQKhM5DMYzSlH3rvjoUqjSpa1iis7BSJWKVxTlJoyOe+mIAWOG1FGq8lhknqJ17CuUdjf10K2yCmgZaQ4eeY4i+NGwFXixVPJHalQVOagP0HqRI5mrUgQ9ff0F0EjSEi//+DC9lReNJ0X6Ll6jy4moEPAkd7EvQet7ZOKR1y0Di8vdXLOtCKUUMSB0+OrZkjSGB4guhf84CW0cGtX8MCVkALRaQ7layqVB+5K9HHge8oyCmwygXToMcfo9+lbRyCqPxTDHXeQOtWhF1hEURARuBNUwFhDTaew84jEZuWwCtFg/bNlaGuawFSLn9Og410bwNgwJrUyhXBsO0HwcLvjtlUwt+HdkO3wwp97//XWRv39QvMMiiIjgTam/yv4SmeE1OYl7VXwq7hvbSGXhMrfiWIoMaPH4gMMeIqN65FOVWfGnIMILbWE+43qzXQ7yGYHMFePBstgsRUwiuzDGWkeeM6L84+nR60Gao21JW6MNIwAETGNCbS2GaDb+6EVU4pu9iFe8e5cDLdbd7RZ0pLMu85E71fh/fDp+3J+bOYMXYPKEzmKezPhzAspgUeg/tcE+fBkV6Kg3nkmFMJ5ytZriG78hvXaSt1sEAS8sfMnc5aPI40SVkT3Qy+9kDJJGm6NYSwVmFi7G1Puqj8mr5MqubdaVUfuDZ/iomQ30D8p7FiWFTz4w0MskZQnW6/HlpKsAaPfGDHstzbnD/k/WtzZiyEds6knblUZfNlw+IPSbqhUyywuuh3uFSfE5FC6pU8HM9T7hm1K+xGg3I04l5ndIUSr3tJZYiEdgakn4ZvXKNSmoAZzGu3oTljHmVQzB3rdIV2lq8Q5d3ZgPN6PBmAechRf32sGCPhAewiIpuBvmMydKysN58qsX9J/v6hYbVBrfz03Xjc4WFEONmETbbQoIMGZw27HfrMDGy9aCtK7QbCU+VfV46v5KHA4PbTH17TeNFXolwygf+FRaW/S8bbYDmt6OcUy/aIDUN76ZkC51a+/edQygzlV3983COMNGqQXkjlkZ7dHksqaa/7nhsPbIJ1aklObnJjHXtln+MRMw2lqdTrx8K20GcRLLscvWsDOy5tqb+/MbuhdL1T1OIHHo1fhqiMNBoYip6sdvsi057Vt/F4KVl/7ycNzGbGjFfxZkgakz6X+9lxTTsbxh4LcSueAGoJ2IDSjQdzhEsnWKya3MwWLAS/6wBB+bKM93uvG4rLLVXQhi/s6As232bYsxyA01xZ89iGVFH6tTXq15VMSuRZ+2ZWGbZWYLUX7/0qFtFWmptUDlDIynO2NsdiV9fdRwJOTNrlhYDUeVAiPo+d8evJif/HVFawS95TzUxjVu6P4U2kmuTGI6FVz1xt2ylYXUM18wMZk0H/yebSpKnpl0XWwuLLlnlokL/KhUca4s8ROgZ/4Y2Pu3roZcZz/WzwFOZOatRAlHx6DfGjppI2/ZBa61GQCQacwxo2zFkEt0VadMO00y45hNVQB47MkY3ySyafzJWtklLlPHRmhsEI7anJ+9zrcB2R+RoIO46C1gAFCkXJkqAMbi4WsfSqQuB67LlKP+OlnFX9jMuGEvt3wbV92/3qRVkeyIKkg/NgwZ0AsiQlwwEDCKYclbiKsgiJxVfmc829c1+TjvjX3jAARIdIedrxzTs0RpLD2Qwyj/iw1aDw0cDG7hlizH41jBzATAvfuA4cdvq3uPJBy0+gKHMNotx1TbfdrzL1MyxV4Gtlr22ps+nhURJ7ztpsY+8P63Cqw93ce95DRNjQ0uL29wjyXaEtu+TSqnIu0v623e955LT6qOwZBaVRcfclYkWDhP9pX2Fbt8ngZVStLy/1DvaR49Jek2kE+5tzkLbMPeav4D4tZ3bZwB1nE+17okCWD7MMFpugRRwkm+MRt2mLp1czqfhX4sBoOaqWNPkfrSxX2FGFEgJrShr6TqN6NLxjcd0VeQVnIzOyVQ1RUi4L1kI2Q3wm1CALE1R2+m1wiVBUJ6Vq3mtPNqzCAgPNj8y/+Xa6ayWdc8Vv9j+Fhma9qLmfu4XAi9RjIRJact1cEizHEiPTJnqPSAROCol//+j3HbkU5AfxRT2mkU/UWECs9QWuQ7gJLIJKcHYBzxSk5MIgJ5qoztCyWqVNtJPlg7sTc4gPj3/yaNVVl4Tnn65L7aCOQv8oLVJwME4CM6DHfU0SZkDa0L6OjG6grSOls7nNHrYYFJo5ySswtbaoyWjopot+14iRnYITSMSU+N3PTgVu+P6sJ5lwYoNEqCjIW/Wpv2kZIX3AhVDXNimxucUcsC2eq8bkOpEXLdNXChlTHaIr6yrh/jKN+NmfPlGXP8KnQkIWZ5D9D1fwNv7X+N3tYHM8J3TCVedyKAi+WyCGqnTQ3V9Dl+nOqUEXrt2hOpcse/VPS5Y0wu1skTUyW8dSb7FYYZozw5UAyOVSA/GpPVmnHUV1qNnVdjWFsF4A8//S2vm3s9XKpLO9aYbWVTBpUCVF2JCV372U0bHu7jW+ON7Yo+WUShyQyXk6CrCqztDsQnFsbhIb0TAwmlew7eWWK8/7HKVqYFv7m3W29A3PZSpOorZcntPJnsLqHz2Q1P6XLr/PQILZHr+U9g78DgYGitgeVc2+3A4IMHpFMDQ4B8AzZOgMV89lzDomLOTKO02lCqiDE34hCejaT1iADYQiwikT9nm4W03OK4JokvyakO/+DLTN/y8g9uT///igJDPbUCeOi+iVgPcRTnuZDMeUK3Zns+WRSTM9dOahZZCN7ORO9+NQlWo9xawWc/oDmjD34BgwT8nPLt9gcs/u6WgcaYJupyKfXJcHbK8jmnKn9ca3tF/t4I0BHeIsMpMkFsP9wOk9gB9l3H7iFNbYPNtxvewwH0OS+2gVJScMUo1yVEgSWGNX7uBfa4fJ+sXTHy9ZxFOwj+tsfZWaW1d3Yi0TNuY6zaPONNY/idLPXsWua0FueUgalvP8qL/fTgmq+cveUGttabuzq2PHiN0j6dcdoIBKoIWgBP81v5/r5z7bSMVMBVDSrmdK/R8kgq9AgOxbg3aJs1fc0qs0JvBYe3CYkpVJVGWQV//5FGWEOETe/3edar0pypJsuWmYJxMuOleKLXij8tI5OT/gRUJIcNZdIP7RCwQlQ3PMDhHv2lE88gdp4wLxnCZxly9HuAQGUfeL5jZqa1TkWWumy65H62qFSgzeYz0+mL1rK7Q2DTAy7LAyS56AZGgBlzrzLG7zbcIrRrKEJvBbe1XBOX9IwJmMVqeduD7cv3bCKsXJsagao48/2jQ+2/XGbxK9HSK0r9qxppZTrsiOQ4rMr9trS4Ufc8qNDQgylkYEwC5CdGy9NlrrsHV78bQOBUxEiKl5TPQ7ce+IUmFLaeVEMtiWIaSv76MW1io8b24B1DSFn/xy6lWbxQrVk3OMgMty6iv7sDJp8jC1nnO4vwL8KyhA6tExIyc/gPeXW9yyYLqBppq+vOV+Dxh7lm7LxE15j0uairurivoyMvDznIaHHJdJfc85X6b9wZPnWaFLDPEe92LTB10aq3MA/or4aa9lWPRmiP/GMPSRRZ5+cSDr5dskz/l+yVuW/tEi34u+ycpOX+DXtOoRqdYyXppfQLiavkz3IQ284BiigBAAP7siYFWa//4zz/QZ/jW3HK8X8sySKsc5LSqvNN2Ql8+cD8bLCjSnD7w8vKWMbsHRN6T72LtHgWlz+2Wq/CNriH4l8W7fbe0y/XS0HUKLMfZ6aYyWMMw6Xsx1QXN9icah5k/LdlDsiJ78Fh/T3Em5a/2efRyR5BQJ21gp1FyXAgNaBcnWDYlmxprC+rvgvyyeEr7eSlFRioXJmEhaa64GuoMsEwrFpWsm/yFvI8jbtGdupd09+CGwb0lzvye4yeHXexAlZj8gX4TY1HP8/nnWz2V4KGn/2mFtUGuQfX8RteH0talfCt6EDDlW+iNoz1DSJSF1zTicBAhbFHUlWdn9dsmNx5NToQimRR0xJ+C2PIQwMONlHy3uviZymJ/midNo23hY/XyIkjH6O4BDnGh5EtS7ZCuW4T4oBzBs6x1SEXfkp8QgGBxC+pzyAlgZi6Jxlba5QUTYiDWkXjzcs9j20YhMnlezJ6VJPNk+8b9kzdB1EsYUStZ/q6zxKGC94yeFjxlH5OmgQ8o9Py+MDSQzGH8iUMyAyR5N33Hup90Kkf4QsPB54udYDcXsbUK+R4JkhvVjmOX3dpROwUCacDpxAMxtPAfZDiDOzFgwoPx5gjMMnj9KtXitukbj8KF4YP8kBbuxoTjrhCJaBST4TIY1gdf8lywW/Mt4x1m3uZsgdvBjRtqdh9z0286oxBQkA9ha15faGCRLtSmNMG6DgNEPxD/kEj5ma2g0mTpd3ZBm84C1c9fYlYodhks6WTAJMuPNsoPhtLI7ki111h33vtvoB+RJl7I3KBUxcYB0k6vtHl3wB8GhbX89N/F0VWFltZeFpaonhAPQ6ItF1saTUzCUVc+deZKpvirGqQEZcbvmSDeCLC8y2PKobbpwoluLaH3VDHXBGPbOl8bqMI42T61UvAZUg6d8njEGG4f972pX99rhhjW7suvLmEKMtyHWP04fnjQYs/e/0D9if09/nIMCBTy2D7frGy7orFgmFKE3gl/DjVAhDsj26NPNhrJ1AqLTKCeds6eSr4Ch7fdLq6kDaVNpF4IHvaxSebR1HbZvJcITuNs46TM6Yemlo6Xwj/zGYU5JCvkD2evNidZ5uRsEWGG11uoR7JtmWY7fAdCFFOAkqfUDgzXrFCnzB0hFoHGAPaU3ljIgbhMajRuaujAH/km9ooqY15R/YtCbeirsU/wTvJHDEL5pRSBHbVQpPEzB1rQCx1M24SokC/Du36sefpNs7+DYKYskzrFRDhjkZoilh41bsCWA8vLe5Zm3IHrESYHBOtfoBmCOX/ltFlJYBiVGsDFCG8bqZfjwvwO00BfYrTc6MMuFtGEOUJ2FmRIqlJIFXzlsoq4ib6IBQnR1R63hqkun5To0XryY/sBPbrWeoSLo+bFa92U/1rsriFKRhBUGYyfn1Wga9XBLc1ixmNcTeLfeIW/bkS77B4egDPahMPfZZsaFJrKh55pC7Km6gxUgsYxRJnBYbV1ImZ454ZERMVOwXHy02hu4s7Rjxqg4vtQNJ0Ifzpc5BmX2j4tZaMMkB3vithH92nMtPnJrceYPJGlNRA6HyJYZFabcsnGI6FWmpnjGdA/TbOFQhYZ6m9Vl+sEDrKgVAVZMOaWR3tBXL9ZYMJyIyIkxu+M4q4JyAuDEa4dg8HlPPa/m2chh/OtaJxKsq9LjPus6LPG26lmD7PsJ7J3miQyyX0bttqhy+AWGnCcK61uEPEMxaCTGRsweTC+kfEF5WqeM1UVoZ8i0EZvdvK6ZxqJ/9WpSoTug4wqMK8FVUX21etP79upVnDaoMyCJXWWn7l2dHsLoWSylxKMnQULHWgC7x7anD5/72NJ+/A1fZBXV7AGTw+uaaTT0Ugy8ljt/Ha6hPpaimm+xdqhWMQjbFgmb7yYZOcMtFzMXla38fChLfgGiAWDrxRlfU0l6UOHj5wmMHLWBmwiEys8GlAXg6EW14GsohkBeWlwHcj96nV+tUg4Dj6cZHkqqqhk0Zx/4a6j/jJTHsAclEVeV86hWXxZJTYMnEJkdTO/LybBaYUfnfe9ysQK1YMkzRWaDr1xnse/H24o7NejOH/OWgAkQ8L0usKfihuz7jQiA2Bsi5lGXr/Ez85XIirgiAbFui1Di/uItsuSsduEhRnsWPWJpzItHszHZyhhBbHPcBj3yNq9JnI9elK9RX3Evim0eNtc06TsEE/zaiUL6juAqdaMgus8HCseIwnedBL9VRwnu87mi9vnzp6UQqf6CPKSpfX5/i1QexwquRBBLT58+Xwo/1bxWTWPoMaBMjl4enYBVpW60I0kGmG2nGtMPRkLoUXnASwy5S/0GD6zqykk1fQdKMyXUeY9sS2uXmMjJw0lnVVau+JAFvB/JkFAdLTWATETfdhruxfL9UVl0eQcSaQwY3I6TQzL4vvD9JLAB+ZpZWAA923wHFo6PT/bM2+KmbNZHwBZIcUwAfrFCnwNmkEdfWQIGNeokmz4oeT04agXLGsfd16HMv15Dy4p5YpfHczp+B/Jx0laCT5Rn7oYqrwsOFE5xc5Z1a7Hk3c2GsA3isU92Juv+okk7gWI2FxrffGwiYV377y6+VEmGzUCYez69zqwEAO4/KsRwnFNIyLRlBWO7s1EgSQPu8KK1AIFK+osCnVXG/JVScetenNV/IKBp7q5wsXBTdwYQ6/yk/ezFR8Btvjp7nmsHAhD5D1h3gu+U+SM7uqa5kzAlrE1ZJUufEEfGvqF19yxM+Y8InpKZcfwzoKuGGDrLEOD6YFac/7I0204XGU55GFidH04Og1PjAOWMgmYdZ+N/QH1OYegTZadGhGxQfxmNcumpBVqqB/rrthlfI380kaDqt2HD1LsQlaCJMUeDC3IssutPHTTx8NaJzATo5/1aGkX0YkQ0zX3RxLjG6Lq8/jaa6Ol7yLFbqOcSs0eQRpaXT5lhA8AnKWaf/t14goIoSF/4kMxhm5BtUY28aNVzm1efekVcohSO8C7zO0zmzUuctTXqYNHEo/OztAsHQaiKA6WErCtDRSyxFiCj+1XZ5CifIqM1lfT88dN/qI/dPpDoTFD1j5/L+NDPEQQx7HrZgCpm3XUAUs3+zd2so5kdL7VQMTRQN2KlPL475H8zxx3oGgFGsqOGC1sSYYUaluLyrl51B9LAjuJx1r+LfUOwbhbOqv1nYFBqVlYMHXFbtupXHWESd8ZCrxXRtkIh9YzYSs+aBR7zaXSwQs4D6iBTiF5/jAeDggSiZps8Sxm7omOaLQeYCE8GCJZek/T34exycioUQiZnyLlrNw1zMY/yP7znB+gaYnQUtm0Z7UbZFdnUjjX6rUZaEjIvCf31hudR/45CfbPLsV2jRQ2Dwlo+x4BW8DRydWiPYwRhkwVQQ7HytplkKzFbiyYBzFIt88ZrxqEvI80e6dnsnvb6W62/kyjfBl82Fw9ThpB1/dAUF1Sv3yUgk3AwmoP2Vj0lstcbJHD3DwDkEW8QQWE63ZKYEO9J0J7uvThTssy58POg1aW9m3nz+pQr8iJyra+SQgF8h846nfULHTEMQTDIMwlYJjm8u/v56b1csKijoAAiztSdgY9AM0wZdPct0pf4Zm7HD2DhjtbX/y66Yv+Oj/hc133utprCx59ZkTUdVI36pBcTWqM6BmwYj9iVwDG22uhvndey5BQ800+F+vN56Tyz0L+dar8o6pzkl5KrqXUZ5wd8b6015py9YM/ncmivQGDGuf46xcwA/d/IvUCJkmHtnj5s76Ub4/3eTDpb2vvJVyEjP1Coan6kAKapimkuEUHXhzTtAWtk7JV2ZxmbOiwyIl48XXpJEGSTjoQfoPfTYm1hkicIrmWcH9Ett08IuZzRvVUT7LPBSVPtJI82kcgNtEgYXwpTsC/PTN2JVGOuiX+f0Bu5hNI/UzIM+K5EnlM2uJhbhZlTnzfnTrbm4L7RMwlEHFmQAT/sXYSH+PyU8PL83JuYXXb9Bbjt8ewzmcMLRfuekVXW9VNthNCaL/JFDQZKZ4AIHuQ2NBpolioWp916ebsij72eCaOJCQWpe0xdacsTnJ00sKT7RXrYjDCu4VchkKfZwHAovBf14g3q+YhZ2U1cFvnGbhnWcj8XcoHUQDXOKpnM5MK2ZiOFfzsvCfD4iLekqy/m+j3Sq5I4hLtXpzLzP9TrdulUyFH6G7tZZ3s2Y1odA691L0ZyNuDAh+a/5a+PVtK/rC7FHQi6EwlR1EH9tR22O3nNNmMxquzQl1Ap7qor5kKc3sPDkMPhXkyqxbhf5so4ZDZlMV1jFDodLAylo08FtOMZrbnnkuylegRUYJznZ0YIa9Zww6PbVnIPSUi2IjHj4jnIStenEGDCr19p8X8ugsnwr7fLBTEEdLs3JtWxiMZ/KDnyrHyvrD/tFF0z/virDyMtNlBgWUdETqQBDzG8ammpAD8yZB0XrhKTxFP0Hlf2IRcss2QRALkmbRT/kM4LyDoDZSSQCjB6doABqD9lPFxZmhuTnxP+tgfy5a957cAXABPs08XnKcnEq7VK8rqEkGQobAmj1xie16gEBKeqOhwim6LTPaQDNn4Sj2CxC4BWbtPjJ7dyIl/rXapMT/AViUtdE2SiPLLv9snO73dldTcn3doOremQYKg9l2ca1irB384a68A0H1rI5JhiWTNdQPEshpnYJ5zG5B4OhbPddJaewx12SaIiH5T+YtpugXMgI9FXtZ1DmBye5izSjs565gz6/gd9NwbdUoqZefKl487/kJHF+OIamE1eoPPepYJ+pi9fpk8SQKu70EZumoFyfG8BIF0uwCm7wAc14k9TYHbX8Rd4C6FSyJVAhTSbWS1s7bDYCQI5OVj9RYWHcUrQ43UOEv+QStNVxW0JmWwLkNVj4PL7ouxE7+l6N1C7vDryiJPQVrCQDadzcc055gCnsdXEa5Smqpv5qP1Y/QoY0WGW3lu3apsjumgFTUXVjBXyZZB0vAO+dIrWq8dmecdGUD36zE4gurHo3DOgCJ3Fe3BVGbroWD+V8gLrQaFJl5ueciXWPyUHsJ5CKPb6tM5h6vd0iFWiLOa12twwUuNjy/eSnW4zc8EwF2VvgXIDpoGzE4IpMWJ4/2LYQahzSn49QMFkWvIJIGBHjSSw/OTtmx+TSZQerfQNZDjYtIy3EhdIRMUZjb+C8H/eXAJ7ZBO2ApobNwTJrhfWj9ccOIl64aiwXkUiwIEmbjZdyKuuMN8JDdZ3KWAbMlnuTe+q4+uy7EInmMs+vMu3cK6E1qj4XY4Je9LWcRhISOtPQjB3nSvb+mKcnD9wV2ZAIv+gmBLN+WWxZdg1iu0M4S5mIAQ0Cy6H98GUVxv2kmkjYUuSIJIfKeTj6BiQJgmt9KTOrsmPAjotz+v68z1eEen68CtWCGp6jTrjd63LGtk0HQv78H9WYK+EvV4NeDV0kB8r51rg9j610KmzrMddFGbOKrwFTZwfCUUdAXU8qbXWn4CUNRpae5kcOQ0dVip20kslfRFyqrutrtCRWHV5TqSLJhZqhbkIQqEIzkCxh62eo+QuCsW3ZV6vudSPCoFtmfXjtOrRoutLdzbB66odZhQQSV0GUvgBeH+ishgaQ/yfV1wqFYGQwc6QisxyVF1FHrkO2EOEdOBqIYNzQqfs7bTDR+PFoiGuRFHgXwKRpuQFZlMPDg69vNwiRQk252stE4J6cIXsueYdvyDKkpGzocYWKAlIo0CE/zlCxhHGw4R2mC1x4LSkKBVmukBDHIkWIoExoqcv54mT01+0K18gKM6x8RvU2rhyFlAE1KKxnsDY26yavcCCAFo7E+xsTLbft9K/ns/yDTJb6bjKrwU/ilL4ylqe5DQWGz2NduuDsouzMkNtJ07SG8uhMiccpIugFJmnFUER4JQn8zP8Jd803Z6dHm3YgjZk9IsExxofMP8OF7zpQJntdDWZlmJSpiI8Dquj7LD+IIPxXlLo56f+LFGLXf535Gxi0Iip49d8GJiZbWJxlEW13DTXCW+L15sNIK/GS2aKHibXrcpV47cUUf71LxBC/chhMqrKU/pvWc5SHiMXXlC/WxJxA13Tp0WCDNOTvWJ+ECEuQ0GbKhOohbDGezrTX+P7jOYxmpIkv7FdfszKVJl7v8SxwUgexNH0fJzxHPtay/QSa9iSPV8baPU2iPPS9TTD5Wm9ab2sCiNhMXhUM4NrpS00xasRBzPVJO864AroR3v58Y9WCuMEyWFiP20n3UJzlk0Vz/bT01K15UFMJl90jEPl2pgMsWnRfOnBCj3JHg8b+q2X9hev9PQ/XmNYLoTEluZygiKjT8o2JiDAM4DAv+pe9TmEYnXq35YXo1Zk1vQ5QsCy6Uv0GKBkuJnK1WEkpzQPZ9J7BTSp3RvdQCGzxcu0gdN0FWr9Qe7Iz1SRrITwUqfm5UEnCdXW7/csFU3UKB0y4gX0TuYrynBIz/FpFPlfK3HrkeI5zNUJO2wXiXj/HnLOF8z4zjUt6CbPjJndUV5LCtPKyLoL9c2SO2Ot8C3Vg3K/GOgCOJsVIxtW3tAjdJxWnRtLv4esV/GznU+4HnrFAX/eMxEsZnjok+/vaQ0Hv+ItB/unSSG6yU+sfCWxNnDYPBLWYum2vQ+w5EvbS0GjCscWAQvp5IB/YwNdDL2OMIbi14Jfw0GKLexyr3VdwOYJjD/RzFszKFAdr2Oy/iw59gcxxRsVu8pfrSAewRhlhpzyfPJQ5dWhm6oZ29714fkiS59eHwsU92cAisIPIiy3B8oXwHTE4dAdujl3jVg9WA/Ao3qZHqsXXiTSHMce7z3Q4dpKBA3OP88Y4aILxRYUwsL2W6S9y/qSjIdCW8CI7z1YHm8zLHYBkWG1+PU1mcNV6f13Wy1DbQsOUjCr/oOXnPRsT7/0t3vAsICD9nmIKVxrtkuldIxr/DrxSUErTdjg8s3LaP0ZfOsEnxGQFexLj3FUNJfk1rXNLEE2QrAggK3BvowqDh4rGf2PklQ2yALkYGH4t33G2GIJn85Mlc1d6blXGw21jwQAdCGWOEKMfPyibP6irU4rsAjDFx9nv1b9ehuaCJD9GfrLfBskGo+eO0z/I5OZrw+J2qANSX51236ZX4rtvWfXpEYVq1a1L7ujbVZbLRvG4j1NH1Jh6VBqOneCoTOuL2sqMHXEhxf7p0K44DVc5en9gcDmPZEWfFXTum5UBdMx5u48B0UKnIamcNaV0zuOs4d9XTP+DdXTam9l4Vp/VRzoLI9nKdbK7uockZfYxJbKaHUCCv9jiqm0iRMdhsDFcT1k4WyHh/6H+jZqA9kyAsYHqMkbsRI/rtEtpZ8wa+PgNbMkn7gFFaSTHuU8RosXFNTnnxbbD+XtjhEnsCOYHkAhEHrwmAI/vFcID9a1e7h211gF3VUOocEut5EjFdQ+Nb2hiDpCmtNoFSdoI3LwY07yBpvA1pRzK40lIXFedkBsPsb5uTF1ja+WXqhaoMLh/ZZLKhhSHUDhbJd7xFExyRop7pCwDpWhw0ntXBR/LLdbk1ECnL+Jl8j/Koz9bJdhsfBmA5VP3gdvvcl3qWCCMFD2SGAZc10U4aXRV80+kMPgqjQiAsmLqtmPUf5rVVl5NjO3SIuYisWugKo0fYW7kAaV+ONuz2L8JwO+cxpR7tkkHB9bDIE2RkosU9Nb7tFiIaSQ2mP4hpeQ0rVu+7Nbhz550jnkqTp1yHStt9h8b6g1UqK6MMbdaS1O8ApAS3IlNUr3s1pd7msFxKgsfLvdTacdzZs1XUqo+4Q9fpnCKL+iYbRvpjXf9ZWxZTzoIpJDtOm8WOI54+k4nUXucedbWzwz8mK9NkdC8TTOAXruy8Bhj4VZ5Qp5tO9553JM4locESWEPoGVGVEJRc75oaACCFG/JoUcSBkyyDHlLU9GUhEih1w9kNGk/35jfovIi8lpAqpL5Uki01RxLB6bM6tks62xtgMITssauVg+ewQ4ajO1PMBN/8JUXpHreqwZ9Py1K9K2iLS76jsuvBeJ6zg3i6t/hZxuRr8w5DB9mX1Sqp3msybiLsQOUP7XGxlRQ0mUQHil7R0qzAVLPCK4RqZmdTf1SCMRbJflx7HQqgvBdEoCdV4el1bDxS0ldQfS0CtUq0jf3qlUMXI8DNzp9PAcmuEgbaomxTkPFdOXb1PtK0nLDgfSvtwJui+19P69rUpfZkWDEuTJrypUM4nxED5k/mPNKneqTXh5sTxKDRHnfVFVGAim/rBg3Q5eDPzB169pkKPolZy2b+cTP2GBRjiIdaADEHfaQrNoV5O55MwweaOHyvAttpgBxNLnj4aPVKf9VjHbNcttgIrqv3ViQ1ZS7JKR2K+UOkEcDz3N+MsIq2fm2ruHb6hMUhVsQ8tRNacDYoqEvP6inWz8vSwzT2GkxIr8lNMdWeALAkx6y+DzLjh5xX1j1itCF5s+LrS5Z9x/d0FRZ/A6itS8M8RKmQGtjjQstAy76OKZM4HQ2d8VeEoD1npUyvtXlJQHEwkD1qjWPwqP8P1eUH0JM4LfMsXd4oH1EJiA9L/skQZBQMWMwy1+tWgbjfxy/jwNQdmDzPCOs1nlF+oIqBOpJA0BuuduuQ/iJINYRt0zuiyAllihK1k/SUakuaPatEDLu5qw79+bc900kVNtQeUyurPF00Q5YaYN7X7WEQlfcpqO308YXoRS4ONxG09zXojrvmr0+qsjN9KdhnxwctfWTG4dCeyW2mK6NmxpQtj5VYENPUfNf7nZqz6IAbq3K+CSxzA+fYBU9Rl6k+llGOyknhn2Gh551e35ypgeeG41MgoEFDCMHW5xS1fl5IWltwzrY8Tgi4okgsuRRl//BNPeW2PK+cMQNgksXrtatMPOhwJH5JjuIKCIim4XfryBd2qDTt9MkrjfiYYmIzVB3KiopIoxAqGRHtiSFgbiGvJbUf5KjmfSNUsgQKWGSGGNCbYFMzdsTabEbvWD7cg0YbkQqqD8QnmxV4qtBaSRL9Yu7m+u0nHsw1gnCmFHy7C64t5HvLhBs09bQ6oKgZTC2EdORttzv6CRMF6tbA7hSIC2HLbyOif88n8n0OtXM0MKkchHEdnbmWUYnAfWpuKuvjbZ/wKSMbtIN4ONwzSLSoWa20+u+eRWZ1No0np0bgqzLMpMc8lat95Svd4tSoVKkp/sK9qbH6e1XpdoI9mui8hriyf/9IyHXOR17LOs+zcSyHe5qcwoiSF4ejnEUjTj00lsyvvW/Nxi/AH7bNQ0fbipKYyAGP/eLJsqA38a/sm8HQplIVMoApbNFfilltSf5ApGJcumxsBCg77zIW5I5KYJ2aOP2eBDZk4Adr4aps63HI/Exm216Xj9+DxpnVELt2fGlFyKmg6ztBZfTiLThGlDZmdZ0t1gwYC6i3sTP6/tt47QvH9OafoSJ17zvXX45oNtlJROpblHNUX8bRqd1K89rxvJglSSPA1WjIyeNonBF/jDsolrX1BYiD82gVy+Y7XBrLgBcYgcnrakfYnY8blQL6R8Vpk6QHgLzoa83Hx+KPwbTwTPFUDvR5m/4oBb8b794m0KljgLQ2d2KkRi/yvP0jLzDzqiffgnslYnJLQPCimJF0PR8L1ongY43W4O8vfkDSsPAScrJ02bumzw6JAibTjChpTkOcMB8dbomuUit1A8sZOESmg19XfBU+Gb8eAFEIO1vaCEj57/NtNgMHbowGIeZruVGIAiRsgJ/BDwl9peNhETu6UIkejoJ0MfnaRcaE7TmaoNQ/56lS/ZlZ73LX/5sLy+tFbrJzYyBd5wS9wtYkN2bHX4nDLW5ukuK9plPfLw3uowYezMIxiaoeStGoTTeCRWpaPjjhepTIUHORVIFqd+VoPZlwpL6AFzoWJLiVh4Frj9MPWDge1zilG+hajBTuO54UTWCm7Z6Prui78u9U+7o+FtsDMo/A/LNsHs/ir6p6N+mb/E42WNvnDI31dMtEDcBHOiHM3gLLbuXrRHfCQjH+57lT0SdBy0UK373fHt+dZ0mdg/Ue8b+XhSMTZBWPOP+ZoSfP10boVAjetHtg4bbheernyt+ZeHHov8IuoJUigfPdVCMtIIaJcPywh5zgxNYoWu/nPemYdLbZg7596Yx06XGxy3swF3OlxTrLGbnwBCNxsVJ96C8XM5XCt5hBpec48Bf8CZS7Ude0Mml24QJZYlUje1VR3eLX5UIxTJ8OEW1t7WUUqtNI9YRCslp9wiKmmUjaSTlS5sKWIYTi17dVEBms31zFpNnDoDN6MCap2DISxv4YABKQan7dsq1Ci9tmxDYRMYuu9t8FOIVUeJK6J+szkkeOmhLUFz/AcmgJ2gG1TXyyF8yPrXqe7yaoIERb8RtB8GygdjdZ6xRBo8SXyRyOV5m5oLgwqh6i/hM0U5Gyxnqe6/2y2XoSo/CIfC6oplYYcYnjWcNHfv2XiWYzCNDsStRA+xZ3y9Nxan8aJ+aIMOl3y2+Qj69Wgls6CMIBBBBpvP5RWAQ0U4XVe4AS1Glu1mS2wktrb66Z3UeiP/ewaQfxOk67w1ReQEKJ2b4dm3FbleLLe2QrjhZwBTA9P4Of6s9B2K8rZkw6fLoBpMq+sqt3GSjRFtS1bgMY6k//DUiOTEB1BEJ8emkkUSkj2tchmNnJ4mXW4kwK6oV8Tz7W867HGigke1LTr6L6NqRGLItN3GQth54hAJIHn2HCCDg2UltSBbtZ8gUOCBrLr1e8YLTy8TZPEWIeBHSRpjQ6sGwfuRZVrnh/RrgZgsyREZxaEWlBzFLuYENJtLNE8U9PdjKXY64sXR0I4ixXgY3WqaCVqrI2dFFnzK4DUpAZuWwKDcQEY83WrX468OPl3koMZ89q9jzTOlxDQXUcbIYoULzA+RN4sNogxO/3+UO1Wiad2Bm0lEfezBakftol6icf3TX29fAcvd72chFxtGOQ7E4oVSOK23RH454muCqg02i65tU935pGeHsTqvPDHuHdIzSLB9+JkukDb1J5ZLasDlkIoiB1mK3E++ypW2t28jGg1ujcLKvLB6lwHTlBWpqfwuluUcH2BigIxShsD1O6xZd3fFkNmlpYuGw/c28cq4yimbe5V9Xc/jzhCGakDy6r1ihnHPnFNo7vdrWKv4s40gzdUdueY0iLqa8A7FdF3KXWmw3LaJ0fp8JOmdMzt6UZK6o6Vsan86lDCdzJ/q5Dq16o3zRYY2ngYywlnRzlHrfoNNzhRj6xrrNEcBvD6P+UGpsqZfGs63pLdt0xP+wsVpfWfgFerHzfffKbRV7HTXv9nz55WasRPJggfzrFURO5kiOjtTzoHRh0IoVbdUHc9ht9L6fNdvu4RjAhxxd+QW7gbAUPV3djv1/OCHFbVky2HqAem9LTvFdFHXLeS26ueqE4jk+t02JrTG/soZHALPnGphFCgrmxtNWWvh3IB/CgIoqNZrUNjI2EFDvTsFJhph9KT3CcYs4L5jGbiGizOPBpLn376HcIcT1x2H/88Vl3EuOUF81V9c2EhYlx7HhdQlRVlA3mniOwOVOLCm3zdbSx8Ekd3rF2dqJLx2vEDblYAi0qj9a+YDeHm3rrXjxUBeqBXSnY4xj7CC8v63ddR5w2xALSUDxncLjlZY7t5fXfuoTg1Qn83X+OAZheMnpo5SHJnjSTmSJUziJcNK/YS8NEyMQd+nrCxfxCzJUKFeDQ+E+hp4arbb3PJPNpPLGt7DZ8aL/54UIl/vJ+0sLfGDiiXXngE1jJbAq6g5ghTfq/zaviu8zMHfwBwFluNRk56n7fdSDpNE73Y51qSky5VYgD3sNlqThc8+T+3QalgFRg/aKiP51Bik7UjVSWUj22yzbRKu3h14MaCvJh9MNSpuGJj6B2FH2LQpUr4Q01u78+fd5guwZI4gfqN4MyoZh3CKgqCFe/poaFNNAKpKdfWeNCSJd2P1kGEtFCeg4aVZa634yrTwLVwmGt/9rTxRPLY0C1rQZsP47coB/AOuYJWrROnormNP9IJZhRiASmS/zcjC+OAGjAylososSWI/TrMMQyrk5UCnX9JnDX10GA3+ywZspdAriMGRZ472HS1b6AJBo+jZ8JQo3Dtd+L5pysG04Jurhi4Akf2l7EpCm8t0Gsq3kqZLls/N43IyYoGWD009GWUAKJZYIfgi6hlgWVacH21hFJVTQoRvUATlvIt6usrA9FAY+L4iUzZbX7Qi92yEnfcKFsxTXVgU+9QduDvKs5Ou7WR8LfI0ZpUnGbBzhmntHy8IL4fU0tWKmdvRsN28aa2sOtI3Vta9KsIiFIchepmc6eweCAwnAiXxxuqFKyJvuM7rheIGeEFFmaBPKkDPGLXVHNMelX40uVIgPRdp36kbQlppMaqXR/z440uWB7YJeHM4aBbSdIj+dhlUsqGOgwiz8HNw7auTzp5T4Yg+xzyGLzkTQ9aHjotx08ep/6EXG+n9JXG0kR5crPLHOJFlReuRL4+9+FmKAgykMXea/m0fUsu8U6SCG/wjsOHcdgi44onbBKYfR23Z1s1KIwCtHaxGzEdqczQIP8ST6aLzv2aCAH+Jofsjpdh5O/n7wk5a/S0rW/kwcqIf48jeXtjLrAm4L4Kg4UoU21AkOwved7AkYRnP8nIR80XXBHHN+8B4zLKBRg5XDmej/Nxeo82OBJDzzSgsYg/gksR6mKN5yAOii8DyMC5dN118OeZXhd6ne2jUjjf7Um5J3I/s3vMxq/YpURRLpR1glDg7fA5/n0fj2f1t1rDlMT5wz9xY3tBPg6Y3femWaAUCvjLyRs+Bv1y6t1Z8LCmUI9y1khC1frM22a1Ehxg7m5KWkM8E7craz6Zh+btwH6QTWjHFPNOwVVKEmIvNIxYFtsVilw00ZDR2gsCz6naZ0qDuyoIGgY3oe+WcwbKNQmUSJcN+gO888L79L6z8IyiXVuhY8GO/9i82uwulqtOF9Ob/rxFxX06kvLdBImokt0CFjC3cguD1i5vQ5wAu6X/h6Fg8hepPzB9XVBDkaULvcpU2uN51KepiXgT3P4s0GQs4bT8yT1No9A58tvRQI83clWxoDy7smNNI0b0XCF/9J/uE5IpiIdMjr4YGwanHzRsJYzfR7Li3WUz8n198kPZHbWkXGELb88dqNIPl/Q2CCSFwSAUxAX6PYbZOZGh1UvIGAuEi/vNbbjlfVs4NmNZKXWsi1zEku0wPS+efFqq2wcp9/VGYfMP/C7LSb8FDlciAfFisQssJ8cZUoooc0M7YM4qWRORIEiOQUt/dgt5DVav2WUUsR9MhEnfYCz6aF1CWPvWIV+DvtIm9BDVRCJNwcATQ/YoWa8kiv9keCWu3mu7dixg+42NxNc0Oxr9Zo741eVVPSHYQyR9BCohtw6G6C0UyPTAHXv9XQBwKbmDjavgt7olmnv30Du4ZPVSGyOdqqyPzBRp6UWsptDOkK3B3Wk458W2pfG5aJfU9BF/n/rj3nA+fQ1Aiy+RFTKBnHnu+Zu+Z+sG+dc3prIoHLBd6h6JHS6HqXP57zsqjB4Dm/fPGEMOCcqWe9ehed2jd2rnwLwOdSZzgcAFtkeOPCzdN2C1kVK1+ccfSqLAMlBYrr9AEOz3udlhrhfiTdJwjV4x3I9M5vGpSe2JF9IS6nebLmJUzz8K+jAj/rRzjbiqcYSv5RQeu8ZsnlPwkqc0dNnHW8aTCsshD5dQU6mKDErb9EqgiDZY+Q6CsSvSotPzepnLCMrbshQiVgfTxWeK4nNONDF7b6foRHW0OeKRYFSVsF2l0MI2dV7ZuXl/OgOhwedOd3zL8XBAw0HDsffFccoQlNezw+JSOGWPZ9YhjAhx/X+2jqjCIsBAPaCFdidhQHAIJmyAs/JXv6pu4ZBDYcBYboLT8rrp5YZIXNwIHfi5afxEUIBZ+iV6bbhoDvvBYTpJLH7bTE0bBlTPW7NA10BKolPRi51DG0OP4h4VX/ztioip64qHd+L/uhMWpq/dlIKkyta5f0Fejgnx0zDEmP7TTHygGRRBlVirGSLNxnyC1jQKO9+n58aoykfvFgicKHQMmk6THYg+neXklJp0AzXcNEasCRh+4RcBAa5qS4AgafKZ2iDFZD6v9lj6srscp4X01D9znV/W9l2855eQurlqzEFaMXnEfYkwlcEvE+W6sPCfmJesIV/d0gfKjy+jt04rAc5TTjHlAbd3DrEtcEu1VdCBMhx7g0udrEEYL5dt+os13XWrWNN3XjSH52etT15Te9hMAMs3YqbDOw6OfHxhVYPn9AEYTqh146kfvbe7R0QY2F8HRlCsqOJxydpMvCwTONhcSvGUn5IVXqwHXcOaWl5bsXmWxig4QWxXeYO2lP8vBG2x66j9E4GrnhllJNryi0HPZ8gerVDPR4RK1mjC0T/mTHKIUeEcH50IbxIiBww5Fta14Px9ZZlII92eFmuFhGtulgya/mChS6uQ51nNkL4Hr6/vbH/bHXcqG/cNIHLjyYrdqj3ecmt+sbEIIympzNFkiKvFDFHarauBqt5upa0P5qOPFlw0VtQnkAknqyYuAR9f5UPsktTD+wOLEkHy2fWtlIDd446L2lIdlUx9yucL/5WJZ62Lm+JMpWGlpvwog2wNicXgP6tLwwu4r1ZbsWbS/2BdIy04sjO5wum+qpCA88Rtta25eV+fzl0XVkFgvRQoaFA70tv4pP4EcFDbO2dGhw5Dn5tkzAdym+QDF7IQbTljVv4hluhvPUmXe6wOwx93h5YT45IcbNpqhKOEtJRzgfdUGgc85dbgfxeQfOkqpCWzTnuRyTK9/D4BQfC+Rjmhs2skr8I38gOte89c2kH1tEKyxo/1ofjm2kn5LN00w1Rw/D4Nx39yn2mTh3/07pt8SgSPunSKVE9NWySGC7INA89W7UH7TfBoi5GJa+Wyi/HYnwWuraln8CYoq92W6ICvj8TvgIwX0IPoaB9c5FiZvXN/xkDuIw7r91kxHyMLyXgMHqzDLYuydPT32MAf8jzihaG1pUZF7qwlYC7O9Jjeg6KQvxM2U9Uspv3Hjao39QqMeIPOfnWzCkzW6QKfhqNMlY+4yqGeGKOAva8VVbDStbj9uOKxdImxoZcFSe7qn+hRgCrqp187MAXB1SS9pvhlR3KM8pPuUB976WKYuBauotdUrKXt1fKCleIiEqGE0jvHi1AezcMm/oq3BDdOUi/31ycp7O7CVRPkkRwlDvSdeW2C6PPs+ciN35SQJzfplWQqYM8dQXL/jAfFyaYiDbkY61kmwYG/oRxWDEa5Y1GG3PSfRTlSKpZtvmxy+NUD/HSqwKANFhaABgAyrobonAk7Ae+h/9/bjgZmQ/SLSeG6jAd6WEwjSK6wQLh9VBjNJh6L8xTBsN2YibD+7wlR/3VNxx4XlKMvVjf+1bBbsopAVoFCgqj0UbpTvu3i9xs/h4DOow/5QJupEGL/u8WE6LeooGOG0pgqzonHgCGVqk6rfsB57uWQ9BaJhXAny24bubU39DRxXsEsI7G9V6uBdlB0gC9zn+8ZlGMyk6CAl2eS9YQ3dTS0FZjayyNi3vmDjBltwkQ0f/eOtmUirvkHTLhmMVMAGOgHTbfhnpVIb6vsIj3nCx8nmPC/gKzGcGmP83JPcFbDvT4/D2GGmWxbCBEbTfnexO7AeZM7skr2H481XeU0Os8dBeZ/X0E6n2wwI8AwUROvwS1wWmTzbUtIyTHgq5j6Gi93nR5WEc6mgPDzed3uR/xhyPC3wSg8/rTadkTV9lQZ68QrhqWMHdMluwuUu7+mYszOTDw1pe9VGEP0tgP3RRN1tF8Wf2BRNu9KsDRNHCl6CsiiWxTg6d4dgqcjlBgRp+I6jXRh64noRZeKrLy7NhB0mXkBpkII9g96tfjfh19gmD1QkKAlyUrUCfTKDfGhpwkXVsL1Fcd1FRGPuwC4n/3+QWhAq+v8gcxzXVn4sVEhoQwcTVrfB2mHlH+6WliO0oBTahzW6qPIIB6AcG6pcPrmw02j0YvyaN/BN5jNY82kqi70eeRJXVaeTRs4VmjuQs7ecaI6Pc+FXoIq2pPwZ7CSW5NDSM5E3O56Z2+2kk90zfR78M3EF4T/oFiIYKw4r3PQviSyePUVST4m8062l+cq+3F3xH3YX2VAwTeXOGnNBGu/azWH12qdrn5qMyuipUbQfYnbJssoBDOroGPoP/dUqVWuGny7FwQc//qV9KL9CToD02jNPPGuHzqYElNozSCZzmoLQUraVQg33gA+2fFQyNoViB+DAEKH+mVIGN2+StmE9Rm4L5IrnXgwVGqWzctG16cEWvuB7iXPmXvaie2cHGottHjhZkqxRq/HZm3qTCz57rn+p3A1tsuUuTcSCDV6eVSCkW/QPy6xrS3YQouUdhgokwyWDaZqzuclUg5NEzxrySlZJhbcuy37mJFa6DezFGhypu7U+gwG+skuLyg8vTrXFRu4H1SVNMI9RxYMObv1FEMa9qZ5lriHItS5Mot+EMasxPSnF7DO2QqH5lSzx4g6jcLx2uzalhRaDNFj9Saiq6PoOpqf6rAHcmW+4hVOu0aUjI87bTrt2Exu3rSKtsD2tyoVTFSmLxgjF9ruCB1APBgxtClxBzAMWpujTllO46lu7mc3tDNfu2a22FHLxWL0GHmkBlIjsnJLCY5bXVlLMYVzp3TjCQ2vdGDjUNs8x2K0piVbTgDt+XVY56K//CQw2lZPutk+TToh64WdCuxQ6vTq7nEWpOuq/c8izUYj+CVG8+ci5KuP3InroRzzCEbGETRaROefOX++QJ8NVSHiiuOnWDAQ6alaBu9IHD2LeZVEnX2Rh0KfNhuII2Bb01wT70oHr66TqK75SrBj/rT0qBa01p7Adv5cxz98K5EzpmxHefnxc+TluAPOCtlbnvphsZOa++j7JJ0cJRa5H2BMuVA1lvfxxNMt7nAl0vvINDyA55NjuzMusdyoPLX71YgMxBUV+EmKtiWRqDPkHoLITjQ8GTLT+WDOuY0TygCqWGu0H2XiVQrnp/gbWxCmUzauUKilK9rahFsKOqs3t4dsbcHAAwGL+1twhapCQ/u8tfja2d12LQ7H+InYYwofvpYnPjL74E4orsveaFhgE5+vG7CUhXq0rPIGep2b/KRJ36lfjVBQyQtDQpmVEO0OHa9kQVo11XYaj+Ebkf/lCaEAepWQbRA7KTUbn00JaiasA0U0A0ABz9Xc2MA9O721t0dFxv+6KWXukq5LPmTf9XhffN/s2AKAvD6ZnRB6LvYvPDzSZqayTNIBdYqdr49VgJY4ksdR2J0uiUTarn2k58zBxzt1LGl5kbf84Yx5GZ7LWwGGcEpZbdg3tH6cjBc6j+T78TwU9k2Ek64AqDa9t8CUPDhGGcYD2esu9RvG7Ry7ZezkhqXWVDn96PArkT0A3kSQvBy1raxNSAvwA39p2I59q7wAUhMYAL0CmD/CMB6KQtPGKKzMZf0mvCLxuJll8y2VicBT+OWhfsk9dWELFsqbJ5zQGc1q7g2FqqKzFeZE7J0HoZQytZNrIJ0ov/xPZ0xJFF9Pl5eqsCO0UWAKUtj8IcSlfpSaKQI1o1NGpcQkcruLMYNo89BnEoDtlbUGGflZKoLs0+ydolw3AyM41QNBPtCjUqJhAeSQzag4zzouYY1LKLGCEy8D1JLMNRfrTQGkBH/vw26tYf8mP2SsyfWP/WRmLXjLkE6FzLW2Nx/Yuzg+5bIR6C5FKmZekV12nPj718N9muGE7XyE+7TxGMRWYXkaXe6ObHdqFOO+/tCO9VwzWHMbIa8XcZTDBEwy2Q+0gQhGcgMAdyJWnHVeCBVnTakDLqCL5nlVwC0aalDPyd9IKG7xoZJgD3f8aD2Ne08d7IBOeLKeDRVoy88/OGjPAKF/01/jUA4LlzSbLOr3h603dfr8WIcoB4l1JVUdiF/Cgn+M0mo3s4dNpAc/2EA58/lIRWmIf5s7HpvXJCsxJTE8F9wp23tY8eMlZMOk9g/f5JMIkRP4A+3q/Z3v8e2UgKLNeVTVtWOB7Wpz2/iG5ba9ulJp6FC3mWlA/R6ip5iETGiew2Ru0AmA+X21sHioeS1OYGbrltGy4GkLeNCRZGqMidMzHULelMkzk2ohlbKOiXlOohDfGdgGeC9pMsqhSd+LHd5rqu6Zv7BePowG4Aeg8CKycoLX8O32P3slZpDVNc3OL3yF3EsrL3fMYw89f7afHBoKyh882+NCk2YQBtRFtZrhv++SRoIr2Ks8KpIctIhp6NoegMtI0aQutcvGYPVOvxf9dE7ATFd0oEPhILQuUxd9xHFRvCZeyCMS/dSVaVX5UozTEjPq14+9GL1bvovBLxhbzysxpxa+oP0P4+XHfYvnxihLPXTgRCeSOxf5iIqCmpcc7xYZMMLYkLcjaE1MaBD1gtScXQj9Z5+iAImPbNE1LHy4iTXWDrnpXc1Zu4uPLkkMkLyPUMuPjLk3hubO9N89RQQu0boqt+TgQ7OaTQJYaKRDCkIjqoarm53r9pOcZa5zMO5qjxSTT0XI0VUz/bb064KrXr5dig013YTtMOzSzqX3oagKcashlUXUYqwEqI2nl2s6U93JrBg7gksRU3oHB8EGFWu1+kGgeYC8VguuXztgtt10lzsLfsUoAuXsWG8ITlyizpQ60MJJkkXYh50OpOvYLoFJ+40OEezWLpIS9n4mEi11Te66+e5lmNnoddj382lQSUe23JduFGceOw8ak/4B3SW956c4DHWYfiiVIdc7LpyN7gqZ+0K6D2RB8BU9BtCF6dyIz30wMedq6pUve+x4A/EPaKfHl4C1xm6wTNwkDeK8mxRHtzyaPEVVkggvGvtXUt61yzxPT1kvSm+byJgi9Gcso/0RkTT9GTvxcC5HRE9nF9cjpzbkiiwGy4LztuQjMlRGUYUnT1eM2O5iXyTn4g1YBqB97oKiBzxkDVSr925h+dOmUwl2/e91VJFHsYMJaSUi4C28rnPaBYXB9jy1zz6rPZG4IoUDfN8TZ7biaKjEEP7pDmtc841xsOiqp9o5b5WoU9M7V+r/7KUsWUvYUVZi0lI0Uv5vUNW3srguhx1ZrA4DEa1K6/69IpVIsgQQ/YBYUXAuvBi8clOX8AOhGJa+AyanbtgA+MLnP5DjqxtXqeKmumiYP8boJXbk8woJ8OOiH4p8RjLQlpPYkYUKseUALo9H6S3BwhwZf6rqPLVqCOw3odAPLee9vbHV0wpfHGYsPGXtTkXlWDOmez3EEqEJbQqYxVmWyUhHf8QtNLLgpblzY5ELzq/qQ2KKaFHZfHJJGaIXoW2C9EmpgV9RNK8Tboy3eFYQnZaVeZee0SaU4ArAxlvyjCcK+C6JT3ywIrH4+y34bOO/dw30X3iiSFaQclC/AQ90vXQSyKNOzESmXLUyiFMVbTnaP4d29FQHj7LETV17xONYz6yj5oDUWCNQQ/UDxJCPSPCxqmw0pvQFWaefRGFpd8T6lj3QTeo1sbMmU9f2n90csfqfpGriejsiEHrmMKHHyl3ibfLUx/VhXn1Kt76wbaHAeti+5MlOw8V4aR0WvS5euCd9itY7V6ntALn225Hirne3zLWKe+5TOy+0S6SDzhGXe3xwfKZVpcOPjscUfzXe2wxkecsNdve4vF4oEoopEg/GyktTqT9sKbfVbcPgIDsEn/BsfT+hkgf5QnEzKoOVroC/oP5mIty4OjXg8xVDbmrVqFhaxci+rZ24DTujaBC8+Tk9bVTkIgr9Wd2AEVtFQxnoyGJ3pEyvumxFUIb5V+FRfqz485anqabu5yLKrYJ8CdvWtkZdOhujUjvizBkNEr/xxmmxJehHSkvHchZb+75XREaphUE74hj03a7TdA4eJbkNCooPw5OSBt91Rbpefc8rCNZtfCyiA0kZNZ7CLDNBgfTorr3fYl3ElhunTbUdmcNZcMMesrG1UtZAzFLk80/5r641jFVn+Pffe9nsRSlMgchTnDH+E3YrW9daQWyRw2oksxkOwBrTDadZuH6xM8irJICRuuhCylE9SWqoA4TD4q1/hv8pQsLbkaAg7tgw784hkHA5BK3TJOqqp5mg6eNlxwRjmosHkHVbYJUAbso6LPsTZdhmsPip5CKpETNQtG+oz+FpRVckkG22uRMyRIz9a20QWeuoRMCiQI49eRBU+0gcFFCOjQkQfW57wt/jgxIVdmUvjF1JXk3cR5VWzDgAmna9VGfyMxev4WH9XefvZ8y0N6MNMdyafU/Pu1O7COs56rcWWSeCv4lE+0n3He7QegJVqDoL3LKX3VFJz3dZOgpic+B5ImfNTQopNrPV2uITo7mydiT2R9KuKu76oaeFIZIikxCTb9Wy3+T9YIopczZRg0fGkBGzLmaBaGfCcFZj7VFEdrdJnYWkFoGJXp1kxQnR18e4qiPneMB6iNyhlYt8QalF7MoDXZ/1XGzbVF+SxYKXsx5bnjYp2YKpoZ/4WIqt4XSt4wKx095KUJMnuRH1ojVghY2Lwr7CWl3HlWkeFk1Y3Ch3cS/OCvDKJUyxmkyrwUlP0tw32/ZyrBmmIGAXSioWQelg43HcpajnO0yCLLqMdikwmUaMwMI6uLhUsu/5iDozdyY95kOC6wu66R6S43pI3zCWkvN0l6bIs+D79sgokNOHYt0QlHuW4TiT3PmU4BjYrGlcTxOHBjed8DvYbUxDMTQJ2Q+OsYym3psaAprfIG27IDw/mRxr5h/zSuuFp1unqzM3exDPfH6kwN472EUwSZ/7OohrDHAqu+Mqq+BSjbdQnBA9agXTKcAaNKa+84IgmeevKyQd8RqemwVPtecvRXuil0Hv3oVbbxl++6WXwJEaaczqEOW4qoRYCPgSw2Oq1oulWpHIiJDE/+KaO/rMALw1H10gp23Qni9alvEEutiGKTNAF6/zIw3WUK5qBgZvomWMx/lDihbXPEvt/MkQAOozseky5HSGxsw0B7wEWsHq2JrAxBWcoPrDLAHO5ohq9x6zd23Yd7eKhx3cMZ7fz7LIen4RbhLJzSpn+rbkwPLDQEWOAMtEPCCi8Q+CRf1w0csUHgQwXp1cwAXPXnbsV1s3sSaVZZOgmHQmdPH57AJsYQ7GS09gozX+9v3VRK9UqCj/5NNPI7b77cNDS2cv6OpXrY7+PbuY0YTc7MTRtjzshwa79pmth7EVZcseY5gOwPhOTxefLEGgqZKFvd5G3i4wb/Qn8p1NO+KI9TdmpWNGq1yTWhD36mNKr3ZkVcuhr7SUrHeBR4u+Ap23fnOYs/ewnDgXHu8M2PhjVMrLHuxwuZc+dSNjaByNwI43FEhm5yd6E4ls7AMxZ4bPCwQr8u9EUF8+N8ZKZbXSujG6V3L9Re+S9pVCdv8G104lsS9zjP1mpp+xFFeKYZgnqcwJmJ71UJ+iRHO3hx/XtAbHJCdFIvSdLRLMzyPSS9+H0dEjgwxNkar29jqZTLrlTLJuHnWjiN4H9Bvbar8uoxnWiDUvk3zd4HQpm/gGbO8Pz6Io9ZGJIHS7mhnWaMiCxvC0krFrBUvsaSWKNZl4fFOm4gPc8rCDnYeXKZX68lUrH+WbcVc5/oye/e0mnPacJcphJ35oOHT/9gZrS4idcUneqdMbsn07gOJMe9m3oR3Wce5gztS0OHQ//yETctFZqAzWZ7qli9BB68m1QlzcGBZv+MDp9jLQiid5z4aeE0ttTiNGciH1Qvw2ifmrOAG9ysjNSvJiOCphput6Wxmec+r9u3DgKbKxv0SAEgM4AjrD2agJzwKXkVbWi5pluelFcmcMqRXnl4OBVcUByS+liZ7PMZNUbwArNoykuPr1URVSXLHbN9PhSxIj0Hprjhw7/3RMO+VUBcMuscpgW8kcvDst74yX4eDrR/fLlgguogWjuWF/bWMBj8GV1mI39cxo74hjQB0fa1MkE8LozTfCIY8p4nN+35uKMdES2FdqfIqxARj4vSdxWudOLcfFPYHzZk3GyVvL7/EQuBMO430AU2VeY2jDjFcFR+jpZO3CDNCMveXwDJ8JuWjLWbhw3HTqZZhGr5qBm+CJZFew8Z1ZvtLZm1A7uAONUogvjN5qjEUEh2cM5EpuIDkXn43ZnsaP787193xrzq8rcPTQCupMsny83xc9mLJKltOAEDQtiiqk+xzhbUm+xiIkyU6KdAFG7tmt4UjoKylt4XnpxB2JlSUcTqSwBfeMpjQxK/neiLoDcK1Hdp62Kq6+BG/EIP0/Rpnx5jsup2ZmAbpkijTQVGbEkDKI+kSWUjLv36rHjTzwd0E9A5gRPg5e6Lvc5Bk+DKGui1LREvm8aYdEKnY23rF9RILPE2MK7P9rqidbvH48pon04I0Le5aUMkGDQ6VBMCUwiCQ3dzL68/OL5/sJ3eamxpAWppfpgGTsw2vzzSmH9cf36Ttbjfi3WLLRQY1sas2fFgDnPyP0exn0yxD20w20jiM3JF8Mgs/CtlTamHbBAyM3+hjn3RqfUUpwHRXa8jq3WfAhdgB5BLmvuv3MqNBSaAoBUCxOG4/OW2tMEq/AzYVZZ+hLCr23dLEcpKMOzACtO1PSul75SkD14FqCEuSk5vEciTXOgGqRhzL2V28drcNApzGSgWN8P9m13XsXBylQDUofW6rYeU8EmxJH7wucbQBx+DTNg0bYm354AZo9Xg+XK+FLVOVyMGbKzBBhWEjBF3d1YTzCgcpswOuOhXPAT9aAcosSWxZ9OOYXlKfsCWJFgYIPFFR3sbR9sLlYq17cye1+J2Favxu77pzfPi7mmL1Qwsx9bzhmKgLFxEjAcyMxazv/ZC92rSongZdChMSM9pqS0qafAbxW5CSBG+jUmu8DzvpXq1YNFpwFhkL6TLioM1SAytnO7QROEivPgDcLSMrmogXhzgGPtQsTgKcfmaqouWICXRqOqITBMQc6S75wawiH903/OoDuJ8VP4jpEAkDbvpmiRv25yKfJ5+gMSH0Zm/bSvVAx1Orymo4lTHz50Ud9gVU1BZLIP5CQ3xnCCPQGdgSNdc6d/6O9OiPbEEL8/zKGTzutTD9XWOpaUz+2r7ggw0BIpcuoSjzwntd8NChZtNjD84ZRZkxqUH662wl/h3brzdUYa6dS90uwXP/WvokhXmk2JpolQTLgVhGfbxULKpAvByDbE/0ZGbW42wTBQKV2qzrRVkul7PIgPCBlJ9YM69T/K7X0+3+SVRqw1XGbMoYQ2aPXROZLFmvLIex+ZAYLUmZgGrW5fvTtjNfuYF8SaiqSNYgDxU7eUN/hyNkjc6yLI/8cSXIxcuePwiQ48u9q3kLuS696WOx40famUj1HWUZ7PH4VE08JOtQ1xKKYVuHCsiArtT64TN6Ws/zMRYax105lkoLDn+MoSEdrTO+CeSKT10xBc/o/q5Wdq28rZnn0OxoyWkelrOhnKBwfDX7EYfWRkhhJhi38IVFs944KppixYvfpaDQOSPA9pP0xUiNaLpQlWPFqL0SKjlRG2vun/jlqwtmnsv4nvjT/chhaYQcyIRFIxX0lubelVzYYExp0+VOTwVmOmbLZ8jreY4nAPx43qadwMh6/tQ655i1M0ekXBNldPREBWRXGa4YNhPlsasfwDm47eZGv8ACaIYU79BdDZYttzrpfQeHhOiIxI4uIHEL9Q5AnkhpAvqIN6LJVvkeT234ZPtH7EF+iJpKztqUD0JFTFviXc+yr5Ie8HxO55bWwX810kxoxd1UTvBbDoTYFNkpIcYWmpKNUdTazR7GTUuobtauq0HH5KMUzJug5Q06fMGsG9dHJzBT7AiSIpKd32ibQeBRIN/MVUvZJTrRM04Vj6PMZHUb+gtFdbSxkWlC0T3G23IWPb3Y6gNlRCJcvtp15lq5digxD7fujpYQfZIiC/sjnh4aYCydDifGLywij5EntrAwgTThXXMFaezAFxHCZEVDY4QCZd30N54B2PY5a6VQUNnjEVJeqkiGWsGS8sTOssYWKRiWG/5BoU9mQYfN8+PIfxXLr1agZiuUtXwVRTXQQrkfXibkSfLLoDVcYDaMxaAZMNiGbs2EKeArSdpNjzuE+6eNxhGAaaP6ua7CBgub8e7J81Dr8jXeqAgMgc7C+WcD8rAYF3cjBWnyDcktS4sPLVEFCBOFHUhsRJ3GTEZX6PfeRkzkbTUEanKES2H/8C4/bTmuyO195bTt6/S54CSBgwTPpraBZYSuRMXWP/6EAEphH4zPXoaAp4pBcei8MRu2OTxT5Otf9QHuX1P01/8lYytiszDnarypE7EB5m6e+z4sHaVpLPmadXumTUxTg98rq2U0W+IdruFy6suFgx72io2efdH1BjReN8utR8toqWdNmkvT6Q/EYgyrrFu510OQiB4/xdASuf4stwpFVS3Sd6L/bkfGVzsDMn4Rbj2+MMzmnDFDvH01BHYFw7Yru2e8t2kHBcYnQ8jTaZwT3GyOjhND05+j5WiZL7avMC69gNC8pg6gTBB5NDXr/O2MxhpherOIy3rinwuSVdqFhLmqo8wW7fTl+gZlGuE1ymRVB87eBiCvanTdJi2RECCcAP5BWBBVTqY8cHu+cTbTH6lMdHTXgzcEEIqGN7rvwX4zPUjkP8EyBJTxaqZ4IbuOSDbTpU38ddAv3WbwWVuUi7b12QgkM7HEIewOL/S17rdEH4ZNxTQHkQ97DzROqfSyUXM/AT009bSFFi6P/zQ+7PUAriD7sITHjofi8JRP+5LeLb8ZZFFzD0Wz4seyCmWpbr5TZkPPYjSN1bj/iRr0/CoPC7cTubhozIwWJz97vyl17zYHEeSVdtDwWhqZ1XC8KQuO/GNyBp3HOJOjsTxu+dO52laFTtH+n8sEQzDhaZC5gNvggW7M2tF8Ci8QUKlERSm9FZ7f5BuLRDPJVjhM3tzzXY1Dqbd7PI/IpXDNcUQjO+Qa7Gz2awSNXAzYm85kxSRkYqD6Fe7UpXK8gViiOvxlVCHuLGSC1aL5885eFNk/hMoYHqzpr7IwT2OksRcqXi6emqD+rHF0dQAuEkMyKsR8r/AGXBqnIvGSBI1Q3Cj1QnF7Jpv6uGH1RDKvcb3sW9v2kB228MdFb1wMvD2KVqNK7AeAAWiHht+Xw3P6TRakPvzl8XfavP8vA0dutNX58btoeeWq+V3WKyfZkCFy/jQQr7y7SyFdxiCA0AZjiMXsucRPLl6HG+zO0BEfG5ksnVRRCsL8YF5MrYbKmdzK9A5MaasJFxWJw3FiPEFVtTLILXSPMFhp0CavI03/773MK3TvgcKc7vsrpDYBZNHxjN0/7xpYSUjaPGitflvZLiXgGVW7iHCztqxIyEFNhEiB01+qIe+Kudypo8VMPXj0FprQCslNgDNfSmqAAutXY1Fqz2Han4oTGruaS1NHKkkbzy7yKKdIKdC+EMrT4FX1esR+8baLjES1Qe1jT/jwM0us3a3DaFkQ5OpZ3EGTw8Q9OmuPllbcnJKWZBF8ieTn5iQD3bxMBuqWR2ot7HYfoHnHzinrmeP/CcszCPmAuO91t721jfLjNZqmYNUb/12tpd4coIIlyKQehrrnGnebQXQZV23CZGaytJYparKfSLtx1fix4SUSDweJj9sSTVnanUz5igoBsZm5EpwPjbLrF0+LJ0kwTZBndoV3Oen5eTe6u1uPQBfYIxhOqiOyf1gsvFyPjiHdFmu9akW+EE/NA8xn2lKPMAEeUgQg8Cbc6xHjjOmxM5GGFzV7mraAZwqB8BBk7bcEQj19NYYH8s5/U/qk2p/6lcrLvyOshxxeZ9xuieg1FUm5KS17E3hDYzklLN7ZjK6yhgHwAoM3NptYU6zd2aCn0mBqt8JlgDGEVMicwFJDkgoI2/ZzwK25cTYYHAt3xBMgLpShxI8UsE4rJ1K3xgyaDx7e2dVDyqmlpBAHYy3SFlnQw0wUxdw54i3KXK+tLIJTJDp+L4KgTXNUdrOGNykhtouYIZMzDqME2dZZ0WgWqdltqbAt+epS8l5sjikn6FTOXShJ+Q0cNPYQUZtoPg11xHsaCmbFml8GU7pw062TTD4XNgZIvWXcIC0lVEQKBie3Whse4jxDacWaJMCXryqAf2NAEtCECqzqzt0mN2xhW16qmgoY0WgrruX7UgoUKk7bvIhnTN9y3Cr15Ex6OtwiwFJIt81m3Od8/dbBT/pT9AFMQCtzIPx1FE34nnqv81R95KyA4vlxfmFpUPk/gxZkKn10ZjfnN4tJfnH0Thq0sPD9ewPoHFM6KLE2DBA6wy/uufjVWS0ZzRwacBLMmO5y3H7458kbxnRJzUZPnVou16/rIgY2GuISx0xDDp0OAOx+ZL8k3J6qcvMJPGmmbIFA/4A/IDlIc8wzDkPttOx1sgCIuHYrBX0CzGK7zBUah+pMvJ4suvW/k22dFVVr3fwrO3mk1MZVZMSwl/gqBxUCu+4br0klrw7OU5fhS8mlI6mSusWKe8KKr+Gfz6Nzshpz1GxHLfAbwLMH2xhsQgKI4vN7eviZR4L/5qwWeBoTSFp9IzFtnoOPKiWcmAos+A4dxl5yIMVz98rpbTEo9G5Ygh7sqTQf5ECjZbtxJ0EgEuWoCOsDKbeKo6Hk0fFQ+XCLTTab4+0gSl+WCWoYyHniMKQZcAGCPHktdkDTnN6pbcPem/g2PAubkG6BWsRvk89f73rGHppnSQdTLXcdMM8DZc/9Fl81+jStCFHFTKBXga6oH2oDgWI2v82qHLCVdIe+mAM/8V9tBt8KLu0cRaWZaZB6kV0PEuoC0EI80ixDwBZzYYv8V6L6mP6uGSe6LjgkSpVDAxh5KzcKZ7KGU9xV1DiXVelBxmb6N2vnusozN2QeK7QB9FyWXTwVMCdpMw+fA591P4maZhZKVLOL6KYfFC3pBRT+bxtM641auj/2AkSpk1YyxB//eY3hnb+QwH21rMFOuse19XtaN6/g5wV//uIHoY3zvqZsd3q72yTAI2fJ+HvnTMd0tIVA0fdkjnVOFWoKqZvn5YscHYzW/2AXDEBOn3eMy379QelVZm+aHgLl+WlaC7jt4DkBdRHnCahjedFoSSkRsbtd217m/ZHRlfXcSY+KeVH2b38gcTif+cMYu6r4Wq8+B0ukEzhoxsJ7lb0krofW0u22AbHkWnb53ZYy+WVy2xk641av9I9d1WOVSZpYfBP+2uElJ6CKDmEFAaaaZhuXHDYFFUv/PbHuzesQwyKgheqVLJLg5CzLUBib5MJkluzbFAgIK5fYFK82bLeOuq1gb5Nd4HK86XQRamJerfwBVOHq3wLoTZk9bhzlxVgNK9TcjLlE1Kvqe3Fu+deCy8XHiBx9GnGiLnu9vkAjFF/QXm2rDbGIfDcepcjc33vG3TETu90oU9o2cxzS1lfWxle401mWvLF/UaZZOFg6qqvnffcLFdyioKiajyo1vVSivDdv9NOxMJZr+VKqlg31+wzLAsowqMDuOyExSsV1G4NKCvvHce6Zqd3jfHcAPT0v3IsIVk11GJ9TEZeI7Iou5hxIOMsi/lrE6GPa27l3TJ/FutsmlqRG6+cvuugP03U5PwQHV1fXVJB6V4y1nJTrQbU6XxKWbD2xYMiYFr6nUPdGe1DSH3BDn3wz+RXpM+7nrhRVntGn9GwlmsINqwYT3NBLHBHtjhEpnsSoAm204QdXcykbxnzQQACIJUwPEAEnxBrth2GBhkcuo+9mdCAAA"); }
+.lm-roulette-back:nth-child(1) { transform:translate(-112%,-46%) rotate(-12deg) scale(.88); }
+.lm-roulette-back:nth-child(2) { z-index:1; transform:translate(-50%,-50%); animation:lm-float 3.6s ease-in-out infinite; }
+.lm-roulette-back:nth-child(3) { transform:translate(12%,-46%) rotate(12deg) scale(.88); }
+@keyframes lm-float { 50% { transform:translate(-50%,-54%); } }
+.lm-roulette-copy { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.lm-roulette-copy small { padding:2px 16px; font-size:9px; font-weight:900; letter-spacing:.2em; color:#fff; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--para-s); }
+.lm-roulette-copy strong { font-size:21px; font-weight:900; font-style:italic; letter-spacing:-.03em; color:var(--ink); }
+.lumen .lm-roulette-copy p { margin:0; max-width:300px; font-size:12px; line-height:1.55; color:var(--ink-2); }
+.lumen .lm-roulette > div:not([class]) { display:flex; align-items:center; justify-content:center; gap:10px; }
+.lumen .lm-roulette > div:not([class]) h2 { display:none; }
+.lumen .lm-roulette > div:not([class]) p { display:inline-flex; align-items:center; gap:4px; margin:0; height:32px; padding:0 14px; border-radius:16px; background:var(--paper); border:1px solid var(--line-2); box-shadow:var(--shadow-2); color:var(--ink-2); font-size:13px; font-weight:800; }
+.lumen #ui-chaos-tickets { color:var(--ink) !important; font-size:16px !important; font-style:italic; }
+.lm-roulette-pool { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.lumen .lm-roulette-pool-head { margin:0; font-size:12px; font-weight:900; color:var(--ink-2); }
+.lm-roulette-strip { display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; padding:2px 2px 4px; margin:0 -16px; padding-left:16px; padding-right:16px; }
+.lm-roulette-strip::-webkit-scrollbar { display:none; }
+.lumen .lm-roulette-card { flex:none; width:64px; display:flex; flex-direction:column; gap:3px; padding:0; border:0; background:none; color:var(--ink-2); font-size:10px; font-weight:800; text-align:center; }
+.lumen .lm-roulette-card .portrait { border:2px solid transparent; border-radius:8px; background:var(--card-in) padding-box, var(--fr) border-box; box-shadow:0 3px 8px rgba(30,47,92,.16); }
+.lm-roulette-card span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lumen #screen-chaos-roulette .lm-roulette-spin { display:flex !important; align-items:center; justify-content:center; gap:10px; width:100% !important; max-width:none !important; min-height:58px; margin:4px 0 0 !important; padding:0 20px !important; font-size:17px; }
+.lumen #screen-chaos-roulette .lm-roulette-spin:disabled { background:#CDD3DD !important; color:#5F6A84 !important; text-shadow:none; box-shadow:inset 0 -4px 0 #B3BBC8 !important; }
+.lumen #screen-chaos-roulette :is(.lm-roulette-box,.lm-roulette-back-btn) { width:100% !important; max-width:none !important; margin:0 !important; }
+.lumen .lm-roulette > :not(.lm-roulette-box):not(.lm-roulette-back-btn) { grid-column:1 / -1; }
 .lumen #screen-transcendence-check > div:first-child { display:none !important; }
 
 /* ---------- Legacy content painted inline for the old dark UI, re-inked for paper ---------- */
@@ -2716,29 +2916,125 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
 .lumen #modal-toeic-practice .modal-content { background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper) !important; color:var(--ink) !important; }
 .lumen #toeic-hub > p, .lumen #toeic-review-hub p { color:var(--ink-2) !important; }
 .lumen #toeic-feedback { color:var(--ink); }
-.lumen #modal-bonus-pool-editor.card-pool-editor-modal .card-pool-editor { color:var(--ink); }
-.lumen .card-pool-editor-header { margin-bottom:4px; }
-.lumen .card-pool-editor-header h3 { align-self:flex-start; display:inline-flex; align-items:center; gap:7px; margin:0 0 0 -14px !important; padding:6px 30px 6px 14px !important; color:#fff !important; font-size:16px !important; font-weight:900; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--slant); }
-.lumen .card-pool-editor-header h3::before { content:""; width:12px; height:12px; background:var(--star-svg) center/contain no-repeat; }
-.lumen #card-pool-editor-close { min-height:34px; padding:0 14px; border-radius:17px; border:1px solid var(--line-2); background:var(--paper); color:var(--ink); font-weight:800; }
-.lumen #modal-bonus-pool-editor .card-pool-card-name { color:var(--ink) !important; }
-.lumen .card-pool-grade-heading { color:var(--ink); border-bottom-color:var(--line-2); font-weight:900; }
-.lumen .card-pool-set-row, .lumen .card-pool-card-row { background:var(--paper) !important; border-color:var(--line-2) !important; color:var(--ink); }
-.lumen .card-pool-set-name { color:var(--ink); font-weight:900; }
-.lumen .card-pool-set-status, .lumen .card-pool-card-meta { color:var(--ink-2) !important; }
-.lumen .card-pool-card-status { color:var(--struct-text) !important; }
-.lumen #modal-bonus-pool-editor button:not(#card-pool-editor-save):not(#card-pool-editor-close) { border-radius:8px; border:1px solid var(--line-2); background:var(--paper); color:var(--ink); font-weight:800; }
-.lumen #modal-bonus-pool-editor [aria-selected=true], .lumen #modal-bonus-pool-editor [aria-pressed=true], .lumen #modal-bonus-pool-editor .bonus-preset-btn.is-active { background:linear-gradient(100deg,var(--struct-d),var(--struct)) !important; color:#fff !important; border-color:var(--struct) !important; box-shadow:none !important; }
-.lumen #modal-bonus-pool-editor [aria-pressed=true] span, .lumen #modal-bonus-pool-editor .bonus-preset-btn.is-active span { color:rgba(255,255,255,.85) !important; }
-.lumen #modal-bonus-pool-editor .is-selected { border-color:var(--coral) !important; box-shadow:inset 0 0 0 1px var(--coral) !important; }
-.lumen #modal-bonus-pool-editor .card-pool-search { border-radius:8px; border:1px solid var(--line-2); background:var(--paper); color:var(--ink); padding:0 12px; }
-.lumen .card-pool-card-row.is-compact .portrait { background:var(--paper-3); border-radius:6px; }
-.lumen .card-pool-base-label { color:var(--ink-2); }
+/* ---------- Deck pool, set and special card editors: one language with the party screen ---------- */
+/* Full-height pages with the app's back button and slanted title band, segment tabs, chips, framed cards and a docked footer. */
+.lumen :is(#modal-bonus-pool-editor,#modal-special-card-editor) { padding:0; background:var(--paper-2); align-items:stretch; }
+.lumen #modal-bonus-pool-editor .card-pool-editor, .lumen #modal-special-card-editor .modal-content {
+  width:100% !important; max-width:var(--col) !important; height:100% !important; max-height:none !important; min-height:0 !important; margin:0 auto; padding:0 !important; border:0; border-radius:0; color:var(--ink); overflow:hidden; animation:lm-arrive .26s var(--ease-out);
+  display:flex !important; flex-direction:column; background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper-2) !important; box-shadow:none; }
+.lumen .card-pool-editor-header { display:flex; align-items:center; justify-content:flex-start; gap:0; height:calc(var(--top-h) + var(--safe-t)); margin:0; padding:var(--safe-t) 12px 0 0; flex-shrink:0; }
+.lumen .card-pool-editor-header h3, .lumen #modal-special-card-editor .modal-content > h3 { display:inline-flex; align-items:center; gap:8px; height:44px; margin:0 !important; padding:0 30px 0 12px !important; color:#fff !important; font-size:17px !important; font-weight:900; background:linear-gradient(100deg,var(--struct-d),var(--struct) 72%,var(--struct-hi)); clip-path:var(--slant); }
+.lumen .card-pool-editor-header h3::before, .lumen #modal-special-card-editor .modal-content > h3::before { content:""; width:30px; height:30px; flex-shrink:0; border-radius:50%; background:var(--star-svg) center/18px no-repeat, #fff; }
+.lumen #modal-special-card-editor .modal-content > h3 { align-self:flex-start; margin:calc(6px + var(--safe-t)) 0 0 !important; flex-shrink:0; }
+.lumen #card-pool-editor-close { order:-1; flex-shrink:0; width:40px; min-width:40px; height:44px; min-height:44px; margin:0 -1px 0 0; padding:0; border:0 !important; border-radius:0 !important; font-size:0; color:transparent;
+  background:var(--struct-d) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 5 8 12l7 7'/%3E%3C/svg%3E") center/20px no-repeat !important; box-shadow:none; }
+.lumen .card-pool-editor-summary, .lumen #special-card-editor-summary { margin:8px 16px 0 !important; color:var(--ink) !important; font-size:13px !important; font-weight:800; white-space:normal; flex-shrink:0; }
+.lumen .card-pool-editor-note { margin:2px 16px 8px !important; color:var(--ink-3) !important; font-size:11px; flex-shrink:0; }
+.lumen .card-pool-tabs { display:grid; grid-template-columns:1fr 1fr; gap:0; margin:0 16px 8px; padding:3px; border-radius:10px; background:var(--paper); border:1px solid var(--line-2); box-shadow:var(--shadow-2); flex-shrink:0; }
+.lumen .card-pool-tabs button { min-height:36px; border:0 !important; border-radius:0 !important; background:transparent !important; color:var(--ink-2) !important; font-size:14px; font-weight:800; box-shadow:none !important; }
+.lumen .card-pool-tabs button[aria-selected=true] { background:linear-gradient(100deg,var(--struct-d),var(--struct)) !important; color:#fff !important; clip-path:var(--para); }
+.lumen #modal-bonus-pool-editor .bonus-preset-row { display:flex; gap:6px; margin:0 16px 6px; overflow-x:auto; scrollbar-width:none; flex-shrink:0; }
+.lumen #modal-bonus-pool-editor .bonus-preset-btn { flex:1 0 auto; display:inline-flex; align-items:center; justify-content:center; gap:6px; height:32px; min-height:32px; padding:0 12px; border-radius:16px !important; border:1px solid var(--line-2) !important; background:var(--paper) !important; color:var(--ink-2) !important; font-size:12px; font-weight:800; box-shadow:var(--shadow-2) !important; }
+.lumen #modal-bonus-pool-editor .bonus-preset-btn.is-active { background:linear-gradient(100deg,var(--struct-d),var(--struct)) !important; border-color:var(--struct) !important; color:#fff !important; box-shadow:none !important; }
+.lumen #modal-bonus-pool-editor .bonus-preset-btn span { color:inherit !important; opacity:.8; font-variant-numeric:tabular-nums; }
+.lumen .card-pool-editor-body { flex:1 1 0; min-height:0; overflow-y:auto; padding:4px 16px 16px !important; }
+.lumen #modal-bonus-pool-editor .card-pool-search { width:100%; height:40px; min-height:40px; margin:0 0 8px; padding:0 12px 0 36px !important; border-radius:8px !important; border:1px solid var(--line-2) !important; color:var(--ink) !important; font-size:15px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23586181' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6'/%3E%3Cpath d='m15 15 5 5'/%3E%3C/svg%3E") 11px 50%/18px no-repeat, var(--paper) !important; box-shadow:inset 0 1px 2px rgba(30,47,92,.06); }
+.lumen #modal-bonus-pool-editor .card-pool-search:focus { border-color:var(--struct) !important; outline:none; }
+/* Filters and bulk tools share one chip row. */
+.lumen .card-pool-editor-body > .card-pool-filter { display:inline-flex; flex-wrap:nowrap; gap:6px; margin:0 6px 6px 0; vertical-align:top; }
+.lumen .card-pool-editor-body > .card-pool-actions { display:inline-flex; gap:6px; margin:0 0 6px; vertical-align:top; }
+.lumen #modal-bonus-pool-editor :is(.card-pool-filter button, .card-pool-editor-body > .card-pool-actions button) { min-width:0; height:30px; min-height:30px; padding:0 11px; border-radius:15px !important; border:1px solid var(--line-2) !important; background:var(--paper) !important; color:var(--ink-2) !important; font-size:12px; font-weight:800; box-shadow:var(--shadow-2) !important; white-space:nowrap; }
+.lumen #modal-bonus-pool-editor .card-pool-filter button[aria-pressed=true] { background:linear-gradient(100deg,var(--struct-d),var(--struct)) !important; border-color:var(--struct) !important; color:#fff !important; box-shadow:none !important; }
+.lumen .card-pool-editor-body > .card-pool-actions button { color:var(--struct-text) !important; border-style:dashed !important; }
+.lumen .card-pool-grade-heading { grid-column:1/-1; display:flex; align-items:center; gap:6px; margin:8px 0 0; padding:0 0 4px; border:0; border-bottom:1px solid var(--line-2); color:var(--ink); font-size:12px; font-weight:900; letter-spacing:.02em; }
+.lumen .card-pool-grade-heading::before { content:""; width:9px; height:9px; border-radius:2px; transform:rotate(45deg); background:var(--gc); }
+/* Card tiles: tap the card to add or remove it, tap the name plate for details. */
+.lumen .card-pool-extra-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px 7px; margin-top:4px; }
+.lumen .card-pool-card-row.is-compact { position:relative; display:block; margin:0; padding:0 !important; border:3px solid transparent !important; border-radius:10px; overflow:hidden; color:#fff;
+  background:var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box !important; box-shadow:0 3px 8px rgba(30,47,92,.14) !important; }
+.lumen .card-pool-card-row.is-compact .portrait { width:100%; height:auto; aspect-ratio:3/5; margin:0; border-radius:7px 7px 0 0; background:transparent; }
+.lumen .card-pool-card-row.is-compact .portrait img { object-fit:cover; object-position:50% 0; }
+.lumen .card-pool-card-row.is-compact .portrait img[data-fallback=true] { object-position:50% 50%; }
+.lumen .is-compact .card-pool-card-text { position:static; }
+.lumen #modal-bonus-pool-editor .is-compact .card-pool-card-name { position:absolute; left:-3px; right:-3px; bottom:0; z-index:3; display:block; width:auto; height:auto; min-height:0; padding:3px 18px 4px 7px !important; border-radius:0 !important; font-size:11px; font-weight:900; line-height:1.25; text-align:center; white-space:nowrap; overflow:hidden;
+  color:#fff !important; background:linear-gradient(100deg,var(--struct-d),var(--struct)) !important; clip-path:var(--para-s); box-shadow:none; }
+.lumen #modal-bonus-pool-editor .is-compact .card-pool-card-name.is-wrap { white-space:normal; line-height:1.1; }
+.lumen #modal-bonus-pool-editor .is-compact .card-pool-card-name::after { content:"i"; position:absolute; right:7px; top:50%; width:12px; height:12px; margin-top:-6px; border-radius:50%; background:rgba(255,255,255,.88); color:#1F3F86; font:900 9px/12px var(--serif); text-align:center; }
+.lumen .is-compact .card-pool-card-meta { display:none; }
+.lumen #modal-bonus-pool-editor .is-compact .card-pool-row-action { position:absolute; inset:0; z-index:2; width:auto; height:auto; min-height:0; margin:0; padding:0; border:0 !important; border-radius:0 !important; background:transparent !important; font-size:0; color:transparent !important; box-shadow:none !important; }
+.lumen #modal-bonus-pool-editor .is-compact .card-pool-row-action::after { content:""; position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231F3F86' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E") center/14px no-repeat; box-shadow:0 1px 3px rgba(30,47,92,.3); }
+.lumen #modal-bonus-pool-editor .is-compact .card-pool-row-action[aria-pressed=true]::after { background:var(--coral-fill) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/15px no-repeat; }
+.lumen #modal-bonus-pool-editor .is-compact .card-pool-row-action:disabled::after { opacity:.45; }
+.lumen #modal-bonus-pool-editor .card-pool-card-row.is-compact.is-selected { box-shadow:0 0 0 2px var(--coral), 0 3px 10px rgba(30,47,92,.16) !important; border-color:transparent !important; }
+.lumen .card-pool-card-row .lm-tile-el { top:5px; left:5px; right:auto; z-index:3; }
+.lumen .card-pool-base-label { position:absolute; top:4px; right:4px; z-index:3; width:auto; height:18px; padding:0 6px; border-radius:5px; background:rgba(30,47,92,.72); color:#fff !important; font-size:10px; font-weight:900; line-height:18px; display:block; }
+/* Set list: name and state, a link with the unlock progress bar, and the choice. */
+.lumen .card-pool-set-row { position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 10px; padding:12px 12px 12px 16px !important; margin:0 0 8px; border-radius:12px; border:1px solid var(--line-2) !important; background:var(--paper) !important; overflow:hidden; box-shadow:var(--shadow-2); }
+.lumen .card-pool-set-row::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--line-2); }
+.lumen .card-pool-set-row.is-complete::before { background:var(--mint); }
+.lumen .card-pool-set-row.is-selected { border-color:var(--coral) !important; box-shadow:0 0 0 1px var(--coral) !important; }
+.lumen .card-pool-set-row.is-selected::before { background:var(--coral-fill); }
+.lumen .card-pool-set-heading { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0; }
+.lumen .card-pool-set-name { font-size:15px; font-weight:900; color:var(--ink); }
+.lumen .card-pool-set-status { height:20px; padding:0 8px; border-radius:10px; background:var(--paper-2); border:1px solid var(--line); color:var(--ink-2) !important; font-size:11px; font-weight:800; line-height:18px; }
+.lumen .card-pool-set-row .card-pool-actions { grid-column:1 / -1; display:grid; grid-template-columns:minmax(0,1fr) 84px; gap:8px; }
+.lumen #modal-bonus-pool-editor .card-pool-set-row .card-pool-actions > button:first-child { position:relative; display:flex; flex-direction:column; justify-content:center; gap:5px; min-height:44px; padding:6px 12px 8px !important; text-align:left; border-radius:8px !important; border:1px solid var(--line-2) !important; background:var(--paper-2) !important; color:var(--ink-2) !important; font-size:12px; font-weight:800; }
+.lm-set-bar { position:relative; display:block; width:100%; height:5px; border-radius:3px; background:var(--track); overflow:hidden; }
+.lm-set-bar::after { content:""; position:absolute; inset:0 auto 0 0; width:var(--p,0%); border-radius:inherit; background:var(--act-solid); }
+.lumen .card-pool-set-row.is-complete .lm-set-bar::after { background:var(--mint); }
+.lumen #modal-bonus-pool-editor .card-pool-set-row .card-pool-actions > button:last-child { min-height:44px; border-radius:8px !important; border:1.5px solid var(--struct) !important; background:var(--paper) !important; color:var(--struct-text) !important; font-size:13px; font-weight:900; }
+.lumen #modal-bonus-pool-editor .card-pool-set-row .card-pool-actions > button:last-child:disabled { border-color:var(--line-2) !important; color:var(--ink-3) !important; background:var(--paper-2) !important; }
+.lumen #modal-bonus-pool-editor .card-pool-set-row .card-pool-actions > button[aria-pressed=true] { background:var(--coral-fill) !important; border-color:var(--coral-fill) !important; color:#fff !important; }
+/* Set detail list: compact rows. */
+.lumen .card-pool-set-detail > .card-pool-row-action { height:32px; min-height:32px; padding:0 12px; border-radius:16px !important; font-size:12px; }
+.lumen .card-pool-detail-title { margin:10px 0 8px; font-size:17px; font-weight:900; color:var(--ink); }
+.lumen .card-pool-set-detail .card-pool-card-row:not(.is-compact) { grid-template-columns:44px minmax(0,1fr); gap:10px; padding:7px 10px !important; margin:0 0 6px; border-radius:10px; border:1px solid var(--line) !important; background:var(--paper) !important; }
+.lumen .card-pool-set-detail .card-pool-card-row:not(.is-compact) .portrait { width:44px; height:auto; aspect-ratio:3/5; border:2px solid transparent; border-radius:6px; background:var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box; }
+.lumen .card-pool-set-detail .card-pool-card-row:not(.is-compact) .lm-tile-el { display:none; }
+.lumen #modal-bonus-pool-editor .card-pool-card-name { color:var(--ink) !important; font-weight:900; text-align:left; padding:0; background:none !important; border:0 !important; }
+.lumen .card-pool-card-meta { color:var(--ink-2) !important; }
+.lumen .card-pool-card-status { color:var(--struct-text) !important; font-weight:800; }
 .lumen .card-pool-empty { color:var(--ink-3); }
-.lumen #modal-special-card-editor .modal-content button:not(.menu-btn):not([onclick*="close"]) { border-radius:8px; border:1px solid var(--line-2); background:var(--paper); color:var(--ink); }
+/* Docked footer, same as the party screen. */
+.lumen .card-pool-editor-footer { display:grid; grid-template-columns:1fr 2fr; gap:10px; flex-shrink:0; margin:0; padding:12px 16px calc(18px + var(--safe-b)); border-top:2px solid var(--struct);
+  background:linear-gradient(var(--gridline) 1px,transparent 1px) 0 0/12px 12px, linear-gradient(90deg,var(--gridline) 1px,transparent 1px) 0 0/12px 12px, var(--paper); box-shadow:0 -4px 14px rgba(30,47,92,.1); }
+.lumen .card-pool-editor-footer .menu-btn { min-height:50px; margin:0 !important; }
+.lumen #card-pool-editor-cancel { border:1.5px solid var(--struct) !important; background:var(--paper) !important; color:var(--struct-text) !important; }
+/* Special card editor: the base card's people as avatar chips, versions side by side as large cards. */
+.lumen #special-card-group-list { display:flex !important; gap:8px !important; margin:10px 0 4px !important; padding:2px 16px 6px; overflow-x:auto; scrollbar-width:none; flex-shrink:0; }
+.lumen #special-card-group-list::-webkit-scrollbar { display:none; }
+.lumen #special-card-group-list .lm-special-group { flex:none; display:flex; align-items:center; gap:8px; width:auto; min-height:46px; margin:0; padding:4px 14px 4px 4px !important; border-radius:24px; border:1px solid var(--line-2) !important; background:var(--paper) !important; color:var(--ink) !important; text-align:left; box-shadow:var(--shadow-2); }
+.lumen #special-card-group-list .lm-special-group[aria-pressed=true] { background:linear-gradient(100deg,var(--struct-d),var(--struct)) !important; border-color:var(--struct) !important; color:#fff !important; }
+.lumen #special-card-group-list .lm-special-group.is-empty { opacity:.6; }
+.lm-special-avatar { position:relative; width:38px; height:38px; border-radius:50%; overflow:hidden; background:var(--paper-3); box-shadow:0 0 0 2px #fff; }
+.lumen .lm-special-avatar .portrait { position:absolute; inset:0; height:100%; aspect-ratio:auto; }
+.lumen .lm-special-avatar .portrait img { object-position:50% 8%; }
+.lm-special-label { display:flex; flex-direction:column; line-height:1.2; }
+.lumen .lm-special-group .lm-special-label strong { color:var(--ink); }
+.lumen .lm-special-group[aria-pressed=true] .lm-special-label strong { color:#fff; }
+.lm-special-label strong { font-size:14px; font-weight:900; }
+.lumen .lm-special-group .lm-special-label small { font-size:11px; font-weight:800; color:var(--ink-2) !important; }
+.lumen .lm-special-group[aria-pressed=true] .lm-special-label small { color:rgba(255,255,255,.85) !important; }
+.lumen #special-card-editor-list { flex:1; min-height:0; max-height:none !important; overflow-y:auto; margin:0 !important; padding:6px 16px 16px; }
+.lm-versions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 12px; }
+.lm-version { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; text-align:center; }
+.lumen .lm-version-art { position:relative; width:100%; padding:0; border:3px solid transparent; border-radius:12px; overflow:hidden; background:var(--card-in) padding-box, var(--fr,var(--fr-normal)) border-box; box-shadow:0 4px 12px rgba(30,47,92,.16); }
+.lm-version.is-current .lm-version-art { box-shadow:0 0 0 3px var(--coral), 0 6px 16px rgba(30,47,92,.2); }
+.lm-version-kind { position:absolute; top:0; left:0; z-index:3; padding:2px 14px 3px 7px; font-size:10px; font-weight:900; color:#fff; background:linear-gradient(100deg,var(--struct-d),var(--struct)); clip-path:var(--slant); }
+.lm-version-art .lm-tile-info { top:5px; right:5px; pointer-events:none; }
+.lm-version-using { position:absolute; left:-3px; right:-3px; bottom:0; z-index:3; padding:4px 0 5px; font-size:12px; font-weight:900; color:#fff; background:var(--coral-fill); clip-path:var(--para-s); }
+.lm-version-name { margin-top:4px; font-size:15px; font-weight:900; color:var(--ink); }
+.lm-version-meta { font-size:11px; font-weight:700; color:var(--ink-2); }
+.lumen #modal-special-card-editor .lm-version-use { width:100% !important; min-height:42px; margin-top:4px !important; font-size:14px !important; }
+.lumen #modal-special-card-editor .lm-version-use:not(:disabled) { border:0 !important; background:var(--act) !important; color:#fff !important; text-shadow:0 1px 0 rgba(6,62,92,.55), 0 0 6px rgba(6,62,92,.35); box-shadow:inset 0 -3px 0 var(--act-edge) !important; }
+.lumen #modal-special-card-editor .lm-version-use.is-current { opacity:1; background:var(--paper) !important; color:var(--coral-text) !important; border:1.5px solid var(--coral) !important; }
+.lumen #modal-special-card-editor .modal-content > button:last-child { flex-shrink:0; width:auto !important; min-height:50px; margin:0 !important; border-radius:8px !important; border:1.5px solid var(--struct) !important; background:var(--paper) !important; color:var(--struct-text) !important; }
+.lumen #modal-special-card-editor .modal-content::after { content:""; display:block; flex-shrink:0; height:calc(18px + var(--safe-b)); }
+.lumen #modal-special-card-editor .modal-content > button:last-child { margin:0 16px !important; width:calc(100% - 32px) !important; }
 
 /* ---------- Height and width adaptations ---------- */
-#screen-battle { --actor-h:clamp(140px, calc(100dvh - 512px), 290px); }
+#screen-battle { --actor-h:clamp(140px, calc(100dvh - 576px), 280px); }
 @media (min-width:521px) { body.lumen { box-shadow:0 0 0 1px var(--line), 0 0 60px rgba(30,47,92,.18); } }
 @media (max-height:700px) {
   :root { --top-h:50px; --nav-h:56px; }
@@ -2797,6 +3093,8 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6Z"/><path d="M12 16.5s-3.5-2-3.5-4.4a1.9 1.9 0 0 1 3.5-1 1.9 1.9 0 0 1 3.5 1c0 2.4-3.5 4.4-3.5 4.4Z"/></symbol>
     <symbol id="i-gem" viewBox="0 0 24 24"><path d="M7 4h10l4 5-9 11L3 9Z"/><path d="M3 9h18M9.5 4 8 9l4 11 4-11-1.5-5"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="1.5"/><path d="M2.5 9h19v-3h-19ZM12 6v14"/><path d="M12 6C10.5 3 7 3 7.5 5.2 8 7 12 6 12 6s4 1 4.5-.8C17 3 13.5 3 12 6Z"/></symbol>
   </defs></svg>
   <div class="world-backdrop" aria-hidden="true"><i class="lm-art"></i><i class="lm-shade"></i></div>
 
@@ -2820,6 +3118,7 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
         <h1 class="lm-wordmark">DREAM<span>WEAVER</span></h1>
         <p class="lm-title-line">말이 마법이 되는 카드 여정</p>
       </div>
+      <div id="lm-title-fan" class="lm-title-fan" aria-hidden="true"></div>
       <div class="lm-title-dock">
         <div id="title-loading" class="title-loading" role="status">기록실을 여는 중…</div>
         <div class="title-screen-actions">
@@ -2836,6 +3135,18 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
     </section>
 
     <section id="screen-menu" class="screen" aria-label="로비">
+      <section id="lm-journey" class="lm-journey" aria-label="다음 상대">
+        <button id="lm-foe" class="lm-foe" type="button" onclick="LumenUI.showFoe()">
+          <span class="lm-foe-copy">
+            <small id="lm-foe-kicker" class="lm-foe-kicker">NEXT ENCOUNTER</small>
+            <strong id="lm-foe-name" class="lm-foe-name"></strong>
+            <span id="lm-foe-meta" class="lm-foe-meta"></span>
+            <span id="lm-foe-skills" class="lm-foe-skills"></span>
+            <span class="lm-foe-route"><span id="lm-route" class="lm-route" aria-hidden="true"></span><small id="lm-route-note" class="lm-route-note"></small></span>
+          </span>
+          <span id="lm-foe-art" class="lm-foe-art"></span>
+        </button>
+      </section>
       <section class="lm-party" aria-label="출전 파티">
         <div class="lm-section-head"><h2>출전 파티</h2><button class="lm-link" type="button" onclick="RPG.openDeck()">편성<svg><use href="#i-next"/></svg></button></div>
         <div id="astra-party" class="lm-party-row"></div>
@@ -2902,20 +3213,19 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
       </div>
       <div class="visual-stage lm-stage">
         <button id="player-actor-box" class="battle-actor player" type="button" onclick="RPG.showBattleStat('player', RPG.battle.currentPlayerIdx)">
-          <div class="portrait lm-actor-art"><img id="p-img" alt="출전 카드"></div>
+          <div class="portrait lm-actor-art"><img id="p-img" alt="출전 카드"><div id="p-buffs" class="actor-buffs"></div></div>
           <div class="lm-actor-plate"><small id="lm-p-slot">선봉</small><strong id="p-name">Player</strong></div>
           <div class="lm-gauge lm-gauge-hp"><div class="actor-hp-bar"><i class="lm-ghost"></i><div id="p-hp-bar" class="actor-hp-fill"></div></div><span class="lm-gauge-num" id="lm-p-hp"></span></div>
           <div class="lm-gauge lm-gauge-mp"><div class="actor-mp-bar"><div id="p-mp-bar" class="actor-mp-fill"></div></div><span class="lm-gauge-num" id="lm-p-mp"></span></div>
-          <div id="p-buffs" class="actor-buffs"></div>
         </button>
         <button id="enemy-actor-box" class="battle-actor enemy" type="button" onclick="RPG.showBattleStat('enemy', 0)">
-          <div class="portrait lm-actor-art"><img id="e-img" alt="상대"></div>
+          <div class="portrait lm-actor-art"><img id="e-img" alt="상대"><div id="e-buffs" class="actor-buffs"></div></div>
           <div class="lm-actor-plate"><small id="lm-e-tag">ENEMY</small><strong id="e-name">Enemy</strong></div>
           <div class="lm-gauge lm-gauge-hp"><div class="actor-hp-bar"><i class="lm-ghost"></i><div id="e-hp-bar" class="actor-hp-fill"></div></div><span class="lm-gauge-num" id="lm-e-hp"></span></div>
           <div class="lm-gauge lm-gauge-mp lm-gauge-blank" aria-hidden="true"></div>
-          <div id="e-buffs" class="actor-buffs"></div>
         </button>
         <div id="lm-banner" class="lm-banner" aria-hidden="true"></div>
+        <div id="lm-cutin" class="lm-cutin" hidden></div>
       </div>
       <div id="battle-log" class="log-container" role="log" aria-label="전투 기록"></div>
       <div id="battle-controls" class="control-panel"></div>
@@ -2941,7 +3251,7 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
 
             <div class="factory-draft-actions">
                 <button type="button" class="menu-btn factory-aux-btn" onclick="RPG.openFactoryViewDeck()">
-                    현재 구성 중인 덱 보기
+                    구성 중인 덱
                 </button>
                 <button type="button" class="menu-btn factory-aux-btn" onclick="RPG.toMenu()">나가기</button>
             </div>
@@ -3667,6 +3977,7 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
             <button class="lm-row-btn" type="button" onclick="Astra.closeSettings(); RPG.showRecords()">기록 확인<small>엔드리스 최고 기록</small></button>
             <button class="lm-row-btn" type="button" data-run-only onclick="Astra.closeSettings(); RPG.openCardPoolViewer()">카드풀 확인<small>이번 모드에서 나올 수 있는 카드</small></button>
             <button id="lm-tutoring-toggle" class="lm-row-btn lm-switch" type="button" onclick="RPG.toggleTutoringEvent(); LumenUI.syncSettings()">개인과외 이벤트<small>학습 후 루미의 수업 제안</small><i aria-hidden="true"></i></button>
+            <button id="lm-cutin-toggle" class="lm-row-btn lm-switch" type="button" onclick="LumenUI.toggleCutin()">스킬 컷인<small>3단계 스킬과 상대의 대기술 연출 · 화면을 누르면 건너뜀</small><i aria-hidden="true"></i></button>
             <button class="lm-row-btn lm-row-danger" type="button" data-run-only onclick="Astra.closeSettings(); RPG.toTitle()">타이틀로<small>저장하지 않은 진행은 남지 않습니다</small></button>
           </div>
         </section>
@@ -38218,6 +38529,8 @@ const LumenUI = {
   finishing: false,
   pendingResult: null,
   summonTimers: [],
+  statusSeen: new WeakMap(),
+  heldFx: null,
 
   $(id) { return document.getElementById(id); },
   el(tag, className, text) {
@@ -38241,6 +38554,36 @@ const LumenUI = {
   role(card) { return DISPLAY_NAMES.role[card.role] || card.role || ''; },
   modeName(mode) { return DISPLAY_NAMES.mode[mode] || mode || ''; },
   pad(value) { return String(value).padStart(2, '0'); },
+  // Foil for the grades worth chasing: a slow light sweep, and for legend and above a few twinkling stars.
+  foil(card) {
+    const grade = card?.grade;
+    if (!['epic', 'legend', 'transcendence', 'special', 'event'].includes(grade)) return null;
+    const layer = this.el('i', `lm-foil${grade === 'epic' ? ' is-soft' : ''}`);
+    layer.setAttribute('aria-hidden', 'true');
+    return layer;
+  },
+  // Long names shrink to one line first and only wrap when even the smallest size does not fit.
+  fitName(node, min = 8) {
+    node.classList.remove('is-wrap');
+    node.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(node).fontSize) || 12;
+    while (node.scrollWidth > node.clientWidth + 1 && size > min) {
+      size -= 0.5;
+      node.style.fontSize = `${size}px`;
+    }
+    if (node.scrollWidth > node.clientWidth + 1) node.classList.add('is-wrap');
+  },
+  // Challenge summons roll the same pools with a better top grade; say so where the choice is made.
+  challengeEdge() {
+    try {
+      const table = GACHA_RATES[RPG.state.mode] || GACHA_RATES.default;
+      const top = table.challenge[0];
+      const base = table.normal.find(entry => entry.grade === top.grade);
+      if (!top || !base || !(base.threshold > 0)) return null;
+      const ratio = Math.round(top.threshold / base.threshold * 10) / 10;
+      return ratio > 1 ? `${DISPLAY_NAMES.grade[top.grade] || top.grade} ${ratio}배` : null;
+    } catch { return null; }
+  },
   restart(node, className) {
     node.classList.remove(className);
     void node.offsetWidth;
@@ -38308,7 +38651,41 @@ const LumenUI = {
     if (summary) label.append(this.el('small', '', summary));
     start.onclick = () => RPG.startGame(hasSave ? 'load' : 'new');
     this.$('btn-start-new').hidden = !hasSave;
+    this.renderTitleFan(hasSave);
     this.refreshDots();
+  },
+  // The title's key visual is a hand of five cards: the saved party first, else the game's leading cast with Lumi in front.
+  renderTitleFan(hasSave) {
+    const fan = this.$('lm-title-fan');
+    let ids = [];
+    if (hasSave) {
+      try {
+        const save = Storage.load(Storage.keys.SAVE) || {};
+        const order = ['transcendence', 'special', 'event', 'legend', 'epic', 'rare', 'normal'];
+        const owned = [...new Set(save.inventory || [])].filter(id => GameUtils.getCardById(id))
+          .sort((a, b) => order.indexOf(GameUtils.getCardById(a).grade) - order.indexOf(GameUtils.getCardById(b).grade));
+        ids = [...new Set([...(save.deck || []).filter(Boolean), ...owned])];
+      } catch { /* Damaged saves fall back to the cast. */ }
+    }
+    for (const id of ['rumi', 'luna', 'queen', 'jasmine', 'zeke']) if (!ids.includes(id)) ids.push(id);
+    const cards = ids.map(id => GameUtils.getCardById(id)).filter(Boolean).slice(0, 5);
+    const key = cards.map(card => card.id).join();
+    if (fan.dataset.cards === key) return;
+    fan.dataset.cards = key;
+    fan.replaceChildren();
+    // Front card in the middle, then alternating outward.
+    const slots = [2, 1, 3, 0, 4];
+    cards.forEach((card, index) => {
+      const slot = this.el('span', 'lm-fan-card');
+      slot.dataset.grade = card.grade;
+      slot.style.setProperty('--slot', slots[index] - 2);
+      slot.style.zIndex = String(10 - index);
+      const art = ImageAssets.createPortrait(card);
+      const foil = this.foil(card);
+      if (foil) art.append(foil);
+      slot.append(art);
+      fan.append(slot);
+    });
   },
   syncFullscreen() {
     const button = this.$('btn-game-fullscreen');
@@ -38340,6 +38717,7 @@ const LumenUI = {
     const on = RPG.global && RPG.global.tutoringEventEnabled !== false;
     const toggle = this.$('lm-tutoring-toggle');
     toggle.setAttribute('aria-pressed', String(!!on));
+    this.$('lm-cutin-toggle').setAttribute('aria-pressed', String(this.cutinOn()));
   },
   hasClaimableMission() {
     try {
@@ -38375,6 +38753,8 @@ const LumenUI = {
       if (card) {
         const art = ImageAssets.createPortrait(card);
         art.classList.add('lm-party-art');
+        const foil = this.foil(card);
+        if (foil) art.append(foil);
         button.append(art, tag);
         const plate = this.el('span', 'lm-party-plate');
         plate.append(this.el('strong', '', card.name));
@@ -38416,10 +38796,64 @@ const LumenUI = {
     if (tag) tagNode.append(this.el('b', 'lm-boss', tag));
     if (!tag) tagNode.append(document.createTextNode(DISPLAY_NAMES.element[enemy.element] || ''));
     this.$('next-enemy-preview').dataset.boss = tag ? 'true' : 'false';
+    this.renderJourney(enemy, tag);
     this.decorateRecruit();
     const uses = Number.isFinite(RPG.state.chaosBlessingUses) ? RPG.state.chaosBlessingUses : '';
     this.$('lm-blessing-count').textContent = uses === '' ? '' : String(uses);
     this.refreshDots();
+  },
+  // The lobby's free height shows who comes next and where the run stands in the six-stage rotation.
+  renderJourney(enemy, tag) {
+    const journey = this.$('lm-journey');
+    journey.dataset.boss = tag ? 'true' : 'false';
+    this.$('lm-foe-kicker').textContent = tag ? 'BOSS ENCOUNTER' : 'NEXT ENCOUNTER';
+    this.$('lm-foe-name').textContent = enemy.name;
+    const meta = this.$('lm-foe-meta');
+    const element = this.el('span', 'lm-meta-chip');
+    element.append(this.el('i', `lm-el lm-el-${enemy.element}`), document.createTextNode(DISPLAY_NAMES.element[enemy.element] || enemy.element || ''));
+    meta.replaceChildren(element);
+    if (tag) meta.append(this.el('b', 'lm-boss', tag));
+    const types = { phy:['sword', '물리'], mag:['wand', '마법'], sup:['shield', '보조'] };
+    const skills = this.$('lm-foe-skills');
+    skills.replaceChildren();
+    for (const skill of (enemy.skills || []).slice(0, 3)) {
+      const chip = this.el('span', `lm-foe-skill is-${skill.type}`);
+      chip.append(this.icon((types[skill.type] || types.phy)[0]), document.createTextNode(skill.name));
+      chip.title = `${(types[skill.type] || types.phy)[1]} 스킬`;
+      skills.append(chip);
+    }
+    const art = this.$('lm-foe-art');
+    if (art.dataset.enemy !== enemy.id) {
+      art.dataset.enemy = enemy.id;
+      art.replaceChildren(ImageAssets.createPortrait(enemy), this.el('span', 'lm-foe-info'));
+      art.lastChild.append(this.icon('info'));
+    }
+    const rotation = typeof ENDLESS_ENEMY_ROTATION !== 'undefined' && ENDLESS_ENEMY_ROTATION.length ? ENDLESS_ENEMY_ROTATION : [];
+    const route = this.$('lm-route');
+    route.replaceChildren();
+    const now = RPG.state.enemyScale || 0;
+    const size = rotation.length || 6;
+    const start = Math.floor(now / size) * size;
+    let toBoss = -1;
+    for (let index = start; index < start + size; index++) {
+      const id = index === now ? enemy.id : rotation[index % size];
+      const dot = this.el('i', 'lm-route-dot');
+      if (index < now) dot.classList.add('is-past');
+      if (index === now) dot.classList.add('is-now');
+      const boss = index === now ? !!tag : id === 'creator_god';
+      if (boss) dot.classList.add('is-boss');
+      if (boss && index >= now && toBoss < 0) toBoss = index - now;
+      route.append(dot);
+    }
+    this.$('lm-route-note').textContent = toBoss === 0 ? '보스 스테이지' : toBoss > 0 ? `보스까지 ${toBoss}` : '';
+    this.$('lm-foe').setAttribute('aria-label', `다음 상대 ${enemy.name}${tag ? `, ${tag}` : ''}, 스킬 보기`);
+  },
+  showFoe() {
+    const enemy = RPG.getCurrentStageEnemyData();
+    const options = { entity: enemy, enemy: true };
+    const element = DISPLAY_NAMES.element[enemy.element] || enemy.element || '';
+    const skills = (enemy.skills || []).map(skill => SkillDisplay.html(skill, options)).join('');
+    RPG.openInfoModal(enemy.name, `<p class="lm-foe-sheet">STAGE ${this.pad((RPG.state.enemyScale || 0) + 1)} · ${element} 속성</p><b>[스킬]</b>${skills}`);
   },
   decorateRecruit() {
     const recipe = {
@@ -38444,6 +38878,8 @@ const LumenUI = {
       }
       const subs = { '일반 뽑기 (1장)':'티켓 1장', '도전 뽑기':'티켓 1장 · 퀴즈' };
       if (subs[raw]) button.append(this.el('span', 'lm-recruit-sub', subs[raw]));
+      const edge = raw === '도전 뽑기' ? this.challengeEdge() : null;
+      if (edge) button.append(this.el('span', 'lm-recruit-tag', edge));
       button.setAttribute('aria-label', raw === '도전 뽑기' ? '도전 소환, 티켓 1장, 퀴즈 정답 시 높은 등급' : plan[2] ? `${plan[0]}, 티켓 ${plan[2]}장` : plan[0]);
     });
     this.syncChainButton();
@@ -38514,6 +38950,8 @@ const LumenUI = {
     button.setAttribute('aria-label', `${card.name}, ${this.grade(card)}, ${this.element(card)} ${this.role(card)}, ${availability}`);
     const art = ImageAssets.createPortrait(card);
     art.classList.add('lm-tile-art');
+    const foil = count === 0 ? null : this.foil(card);
+    if (foil) art.append(foil);
     button.append(art);
     button.append(this.el('span', 'lm-tile-grade', this.grade(card)));
     const element = this.el('span', 'lm-tile-el');
@@ -38561,6 +38999,7 @@ const LumenUI = {
     const ids = RPG.sortCardIdsByGrade([...byId.keys()]);
     for (const id of ids) box.append(this.tile(byId.get(id), counts.get(id) || 0, () => { this.detailIds = ids; RPG.showCardInfo(id); }, { quiet: !all }));
     this.$('collection-empty').hidden = filtered.length !== 0;
+    this.$('collection-empty').textContent = '조건에 맞는 카드가 없습니다.';
     this.$('collection-count').textContent = `${filtered.length}종`;
     this.$('collection-scope').textContent = all ? '전체 도감' : '보유 카드';
     this.$('collection-scope').setAttribute('aria-pressed', String(all));
@@ -38601,7 +39040,13 @@ const LumenUI = {
       slot.style.borderColor = '';
       slot.replaceChildren();
       slot.classList.toggle('is-empty', !card);
-      if (card) { slot.dataset.grade = card.grade; slot.append(ImageAssets.createPortrait(card)); }
+      if (card) {
+        slot.dataset.grade = card.grade;
+        const art = ImageAssets.createPortrait(card);
+        const foil = this.foil(card);
+        if (foil) art.append(foil);
+        slot.append(art);
+      }
       else { delete slot.dataset.grade; const hole = this.el('span', 'lm-slot-hole'); hole.append(this.icon('plus')); slot.append(hole); }
       const text = this.el('span', 'slot-text');
       text.append(this.el('small', '', `${index + 1} ${role}`), this.el('strong', '', card ? card.name : '비어 있음'));
@@ -38696,6 +39141,10 @@ const LumenUI = {
     const modal = this.$('modal-card');
     modal.dataset.grade = card.grade;
     modal.dataset.element = card.element;
+    const art = modal.querySelector('.lm-detail-art');
+    art.querySelector('.lm-foil')?.remove();
+    const foil = this.foil(card);
+    if (foil) art.append(foil);
     const chips = this.$('md-grade');
     chips.className = 'lm-detail-grade';
     chips.replaceChildren(this.el('span', 'lm-grade-chip', this.grade(card)));
@@ -38753,6 +39202,29 @@ const LumenUI = {
     this.refreshDots();
   },
 
+  // Lumi's whole 3:5 card stands beside the title in lecture, tutoring and date; a speech line fills the space under the title.
+  installLumiLines() {
+    const lines = {
+      'modal-lecture-view': ['루미의 마법교실', '천천히 읽고 마지막에 퀴즈로 확인해요.'],
+      'modal-tutoring': ['루미의 개인과외', '틀렸던 문제를 루미가 다시 풀어 줘요.'],
+      'modal-date': ['루미와의 데이트', '오늘은 공부 말고 둘이서 시간을 보내요.']
+    };
+    for (const [id, [kicker, text]] of Object.entries(lines)) {
+      const content = this.$(id)?.querySelector('.modal-content');
+      if (!content || content.querySelector('.lm-lumi-line')) continue;
+      const line = this.el('p', 'lm-lumi-line');
+      line.append(this.el('small', '', kicker), this.el('span', '', text));
+      content.firstElementChild.after(line);
+    }
+  },
+  syncLecture(id) {
+    const lecture = typeof GRAMMAR_DATA !== 'undefined' ? GRAMMAR_DATA.find(item => item.id === id) : null;
+    const line = this.$('modal-lecture-view')?.querySelector('.lm-lumi-line span');
+    if (!lecture || !line) return;
+    const minutes = Math.max(1, Math.round((lecture.content || '').length / 500));
+    line.textContent = `${GRAMMAR_DATA.indexOf(lecture) + 1} / ${GRAMMAR_DATA.length}강 · 읽는 데 약 ${minutes}분`;
+  },
+
   // ---------- Battle ----------
   enterBattle() {
     this.track = { player: null, enemy: null, playerHp: 0, enemyHp: 0 };
@@ -38765,9 +39237,10 @@ const LumenUI = {
     this.setPlace(`STAGE ${this.pad(RPG.state.enemyScale + 1)}`, this.modeName(RPG.state.mode));
   },
   renderStatuses() {
-    const render = (id, actor) => {
+    const render = (id, side, actor) => {
       const box = this.$(id);
       box.replaceChildren();
+      const fresh = [];
       for (const [key, value] of Object.entries(actor?.buffs || {})) {
         if (!value) continue;
         const negative = StatusRules.isNegative(key);
@@ -38775,11 +39248,38 @@ const LumenUI = {
         const badge = this.el('span', `status-badge ${negative ? 'status-negative' : 'status-positive'}`, text);
         badge.title = `${negative ? '디버프' : '버프'}: ${BUFF_NAMES[key] || key}`;
         box.append(badge);
+        fresh.push([key, text, negative]);
       }
+      // Some foes change raw defence by turn (Beelzebuth's power, the artificial god's protocol); show it as a status too.
+      if (side === 'enemy' && actor) {
+        for (const [stat, base, label] of [['def', 'baseDef', '물리방어'], ['mdef', 'baseMdef', '마법방어']]) {
+          if (!(actor[base] > 0) || !(actor[stat] > actor[base])) continue;
+          const text = `${label} +${Math.round((actor[stat] / actor[base] - 1) * 100)}%`;
+          const badge = this.el('span', 'status-badge status-positive is-power', text);
+          badge.title = `이번 턴 ${label}력 증가`;
+          box.append(badge);
+          fresh.push([`raw-${stat}`, text, false]);
+        }
+      }
+      this.statusPops(side, actor, fresh);
     };
     if (!RPG.battle) return;
-    render('p-buffs', RPG.battle.players[RPG.battle.currentPlayerIdx]);
-    render('e-buffs', RPG.battle.enemy);
+    render('p-buffs', 'player', RPG.battle.players[RPG.battle.currentPlayerIdx]);
+    render('e-buffs', 'enemy', RPG.battle.enemy);
+  },
+  // A status that was not on the card a moment ago rises once as a small chip; the badge itself stays on the card.
+  statusPops(side, actor, list) {
+    if (!actor) return;
+    const seen = this.statusSeen.get(actor);
+    this.statusSeen.set(actor, new Set(list.map(([key]) => key)));
+    if (!seen || this.reduced()) return;
+    const added = list.filter(([key]) => !seen.has(key)).slice(0, 3);
+    if (!added.length) return;
+    const fire = () => added.forEach(([, text, negative], index) => {
+      setTimeout(() => this.pop(side, text, negative ? 'debuff' : 'buff'), 120 + index * 220);
+    });
+    if (this.heldFx) this.heldFx.push(fire);
+    else fire();
   },
   gauge(fill, numberId, value, max) {
     const pct = Math.max(0, Math.min(100, value / Math.max(1, max) * 100));
@@ -38843,12 +39343,18 @@ const LumenUI = {
     }
   },
   hit(side, amount, crit) {
+    if (this.heldFx) { this.heldFx.push(() => this.hit(side, amount, crit)); return; }
     const box = this.$(side === 'enemy' ? 'enemy-actor-box' : 'player-actor-box');
     this.restart(box, 'is-hit');
     this.pop(side, String(amount), crit ? 'crit' : 'dmg');
   },
+  lunge(side) {
+    if (this.reduced()) return;
+    this.restart(this.$(side === 'enemy' ? 'enemy-actor-box' : 'player-actor-box'), 'is-lunge');
+  },
   pop(side, text, kind) {
     if (this.reduced()) return;
+    if (this.heldFx) { this.heldFx.push(() => this.pop(side, text, kind)); return; }
     const art = this.$(side === 'enemy' ? 'enemy-actor-box' : 'player-actor-box').querySelector('.lm-actor-art');
     const layer = art.querySelector('.lm-pop-layer') || art.appendChild(this.el('span', 'lm-pop-layer'));
     const number = this.el('span', `lm-pop lm-pop-${kind}`);
@@ -38922,29 +39428,114 @@ const LumenUI = {
       if (cost && cost.textContent.trim() === 'MP 0') cost.classList.add('is-free');
     });
   },
+  cutinOn() {
+    try { return localStorage.getItem('lumenCutin') !== 'off'; } catch { return true; }
+  },
+  toggleCutin() {
+    const next = !this.cutinOn();
+    try { localStorage.setItem('lumenCutin', next ? 'on' : 'off'); } catch { /* Session only. */ }
+    this.syncSettings();
+  },
+  // A tier-3 skill (or a foe's heavy move) gets the RPG edition's cut-in: the actor's 3:5 art on a slanted band.
+  // It is presentation only; the turn resolves exactly as before, once the cut-in ends or is tapped away.
+  cutin(side, actor, kicker, title) {
+    const layer = this.$('lm-cutin');
+    if (!actor || !this.cutinOn() || this.reduced() || document.body.dataset.screen !== 'battle') return Promise.resolve();
+    clearTimeout(this._bannerTimer);
+    this.$('lm-banner').replaceChildren();
+    layer.dataset.side = side;
+    const art = this.el('span', 'lm-cutin-art');
+    art.append(ImageAssets.createPortrait(actor.proto || actor));
+    const text = this.el('span', 'lm-cutin-text');
+    text.append(this.el('small', '', kicker), this.el('b', '', title));
+    const inner = this.el('span', 'lm-cutin-inner');
+    inner.append(art, text);
+    layer.replaceChildren(this.el('i', 'lm-cutin-band'), this.el('i', 'lm-cutin-edge is-a'), this.el('i', 'lm-cutin-edge is-b'), inner);
+    if (side === 'player' && actor.proto) layer.dataset.grade = actor.proto.grade || '';
+    else delete layer.dataset.grade;
+    layer.hidden = false;
+    document.body.classList.add('lm-cutting');
+    return new Promise(resolve => {
+      const done = () => {
+        clearTimeout(timer);
+        layer.onclick = null;
+        layer.hidden = true;
+        layer.replaceChildren();
+        document.body.classList.remove('lm-cutting');
+        resolve();
+      };
+      const timer = setTimeout(done, 980);
+      layer.onclick = done;
+    });
+  },
+  bigEnemySkill(skill) {
+    return !!skill && (skill.type === 'phy' || skill.type === 'mag') && ((skill.val || 0) >= 3 || skill.rate === 0);
+  },
   wrapBattle() {
     const ui = this;
+    const typeNames = { phy:'물리', mag:'마법', sup:'보조' };
     const execute = RPG.executeSkill;
     RPG.executeSkill = function (source, target, skill, isDelayed = false) {
-      const isPlayer = source && RPG.battle && RPG.battle.players.includes(source);
-      if (isPlayer && skill && skill.name !== RPG.NORMAL_ATTACK.name && RPG.battle.phase === 'player-ready') {
-        const typeNames = { phy:'물리', mag:'마법', sup:'보조' };
+      const battle = RPG.battle;
+      const isPlayer = source && battle && battle.players.includes(source);
+      const fresh = isPlayer && !isDelayed && battle.phase === 'player-ready' && skill;
+      if (fresh && !ui._cutinDone && skill.name !== RPG.NORMAL_ATTACK.name && (skill.tier || 0) >= 3 && ui.cutinOn() && !ui.reduced()) {
+        const self = this;
+        const args = arguments;
+        ui.cutin('player', source, `${source.name} · ${typeNames[skill.type] || '스킬'}`, skill.name).then(() => {
+          ui._cutinDone = true;
+          try { RPG.executeSkill.apply(self, args); } finally { ui._cutinDone = false; }
+        });
+        return true;
+      }
+      if (fresh && skill.name !== RPG.NORMAL_ATTACK.name && !ui._cutinDone) {
         ui.showBanner('player', `${source.name} · ${typeNames[skill.type] || '스킬'}`, skill.name, skill.type);
       }
+      if (fresh && skill.type !== 'sup') ui.lunge('player');
       const result = execute.apply(this, arguments);
       ui.syncBattle();
       return result;
+    };
+    const decide = Logic.decideEnemyAction;
+    Logic.decideEnemyAction = function (...args) {
+      const action = decide.apply(this, args);
+      ui.enemyAction = action;
+      return action;
     };
     const enemyTurn = BattleRuntime.TurnManager.startEnemyTurn;
     BattleRuntime.TurnManager.startEnemyTurn = function (rpg) {
       const box = ui.$('battle-log');
       const before = box.childElementCount;
-      const result = enemyTurn.apply(this, arguments);
-      const lines = [...box.children].slice(before).map(line => line.textContent);
-      const name = rpg.battle?.enemy?.name || '';
-      for (const line of lines) {
-        const named = line.match(/・・(.+)!$/) || (name && line.startsWith(`${name}의 `) ? line.slice(name.length + 2).match(/^(.+?)!/) : null);
-        if (named) { ui.showBanner('enemy', name, named[1], 'enemy'); break; }
+      ui.enemyAction = null;
+      // Numbers and recoils from the foe's move wait for its lunge (and cut-in), then play in order.
+      ui.heldFx = [];
+      let result;
+      try {
+        result = enemyTurn.apply(this, arguments);
+      } finally {
+        const held = ui.heldFx;
+        ui.heldFx = null;
+        const enemy = rpg.battle?.enemy;
+        const action = ui.enemyAction;
+        const attacked = action && (action.type === 'phy' || action.type === 'mag') && !action.isChargeStart;
+        const play = () => {
+          if (attacked) ui.lunge('enemy');
+          setTimeout(() => held.forEach(fn => fn()), attacked && !ui.reduced() ? 150 : 0);
+        };
+        const lines = [...box.children].slice(before).map(line => line.textContent);
+        const name = enemy?.name || '';
+        // The chosen action names the move even when the log only reports an evasion.
+        let move = attacked && action.name ? action.name : null;
+        for (const line of move ? [] : lines) {
+          const named = line.match(/・・(.+)!$/) || (name && line.startsWith(`${name}의 `) ? line.slice(name.length + 2).match(/^(.+?)!/) : null);
+          if (named) { move = named[1]; break; }
+        }
+        if (move && ui.bigEnemySkill(action) && !ui.finishing && ui.cutinOn() && !ui.reduced()) {
+          ui.cutin('enemy', enemy, `${name} · ${typeNames[action.type] || ''}`, move).then(play);
+        } else {
+          if (move) ui.showBanner('enemy', name, move, 'enemy');
+          play();
+        }
       }
       return result;
     };
@@ -39029,6 +39620,8 @@ const LumenUI = {
     const flip = this.el('div', 'lm-summon-card');
     const back = this.el('div', 'lm-summon-face lm-summon-back');
     const front = this.el('div', 'lm-summon-face lm-summon-front');
+    const foil = this.foil(card);
+    if (foil) portrait.append(foil);
     front.append(portrait, this.el('span', 'lm-summon-frame'));
     flip.append(back, front);
     const info = this.el('div', 'lm-summon-info');
@@ -39049,13 +39642,19 @@ const LumenUI = {
     const again = this.$('lm-summon-again');
     const canAgain = (kind === 'normal' || kind === 'challenge') && RPG.state.mode !== 'puzzle';
     again.hidden = !canAgain;
+    again.querySelector('.lm-again-edge')?.remove();
+    again.classList.remove('is-challenge');
     if (canAgain) {
+      // The follow-up after any summon is the quiz summon: the better odds sit on the learning path.
       again.disabled = (RPG.state.tickets || 0) < GAME_CONSTANTS.COSTS.GACHA_SINGLE;
-      again.querySelector('.lm-again-label').textContent = kind === 'challenge' ? '다시 도전' : '한 번 더';
+      again.classList.add('is-challenge');
+      again.querySelector('.lm-again-label').textContent = kind === 'challenge' ? '다시 도전' : '도전 소환';
       again.querySelector('.lm-cost').lastChild.textContent = '1';
+      const edge = this.challengeEdge();
+      if (edge) again.querySelector('.lm-again-label').append(this.el('small', 'lm-again-edge', edge));
       again.onclick = () => {
         RPG.closeGachaModal();
-        if (kind === 'challenge') RPG.openChallengeGacha(); else RPG.openGacha();
+        RPG.openChallengeGacha();
       };
     }
     const reveal = () => {
@@ -39099,11 +39698,16 @@ const LumenUI = {
       const flip = this.el('span', 'lm-batch-flip');
       const back = this.el('span', 'lm-batch-face lm-batch-back');
       const front = this.el('span', 'lm-batch-face lm-batch-front');
-      front.append(ImageAssets.createPortrait(card));
+      const art = ImageAssets.createPortrait(card);
+      const foil = this.foil(card);
+      if (foil) art.append(foil);
+      front.append(art);
       if (!seen.has(card.id)) front.append(this.el('span', 'lm-new', 'NEW'));
       seen.add(card.id);
+      // The name rides on the card's lower edge like every other card in the game, one line unless it truly cannot fit.
+      front.append(this.el('span', 'lm-batch-name', card.name));
       flip.append(back, front);
-      item.append(flip, this.el('span', 'lm-batch-name', card.name));
+      item.append(flip);
       item.onclick = event => {
         if (!scene.classList.contains('is-done')) return;
         event.stopPropagation();
@@ -39125,10 +39729,13 @@ const LumenUI = {
     scene.append(grid, tally);
     result.replaceChildren(scene);
     result.dataset.grade = best.grade;
+    requestAnimationFrame(() => grid.querySelectorAll('.lm-batch-name').forEach(node => this.fitName(node, 7.5)));
     const again = this.$('lm-summon-again');
     const next = this.chainCount();
     again.hidden = next < 1;
     again.disabled = false;
+    again.querySelector('.lm-again-edge')?.remove();
+    again.classList.add('is-challenge');
     again.querySelector('.lm-again-label').textContent = next >= 2 ? `연속 도전 ×${next}` : '다시 도전';
     again.querySelector('.lm-cost').lastChild.textContent = String(next >= 2 ? next : 1);
     again.onclick = () => { RPG.closeGachaModal(); if (next >= 2) this.startChain(); else RPG.openChallengeGacha(); };
@@ -39190,9 +39797,11 @@ const LumenUI = {
       [...button.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
       button.prepend(this.el('span', 'lm-mode-name', name));
       const goal = GameUtils.getClearStage(mode, RPG.tempGameType);
-      const meta = this.el('span', 'lm-mode-meta', Number.isFinite(goal) ? `${goal} 스테이지` : '기록 도전');
-      button.insertBefore(meta, badge || null);
-      if (cleared.has(mode) && !badge) button.append(this.el('small', 'lm-mode-clear', 'CLEAR'));
+      const foot = this.el('span', 'lm-mode-foot');
+      foot.append(this.el('span', 'lm-mode-meta', Number.isFinite(goal) ? `${goal} 스테이지` : '기록 도전'));
+      if (badge) { badge.textContent = 'HARD CLEAR'; foot.append(badge); }
+      else if (cleared.has(mode)) foot.append(this.el('small', 'lm-mode-clear', 'CLEAR'));
+      button.append(foot);
       button.removeAttribute('style');
     }
     const desc = this.$('mode-desc');
@@ -39216,26 +39825,299 @@ const LumenUI = {
     challenge.after(tools);
   },
 
+  // ---------- Factory draft ----------
+  // Two bundles of four as rows of real cards (grade frame, name plate), a ten-step round track and the deck count.
+  decorateFactory() {
+    const draft = RPG.state.factoryDraft;
+    if (!draft) return;
+    const title = document.querySelector('#screen-factory-draft .factory-draft-title');
+    let track = this.$('lm-factory-track');
+    if (!track) {
+      track = this.el('div', 'lm-factory-track');
+      track.id = 'lm-factory-track';
+      title.after(track);
+    }
+    const steps = this.el('span', 'lm-factory-steps');
+    for (let round = 1; round <= draft.maxRounds; round++) steps.append(this.el('i', round < draft.round ? 'is-done' : round === draft.round ? 'is-now' : ''));
+    const count = this.el('button', 'lm-factory-count');
+    count.type = 'button';
+    count.onclick = () => RPG.openFactoryViewDeck();
+    count.append(this.icon('cards'), this.el('b', '', String((draft.pool || []).length)), document.createTextNode(`/ ${draft.maxRounds * 4}`));
+    count.setAttribute('aria-label', `구성 중인 덱 ${(draft.pool || []).length}장 보기`);
+    track.replaceChildren(steps, count);
+    const order = ['transcendence', 'special', 'event', 'legend', 'epic', 'rare', 'normal'];
+    [0, 1].forEach(index => {
+      const bundle = this.$(`factory-bundle-${index}`);
+      if (!bundle) return;
+      const cards = [];
+      bundle.querySelectorAll('.factory-card-row').forEach(row => {
+        const card = RPG.getCardData(row.dataset.cardId);
+        if (!card) return;
+        cards.push(card);
+        if (row.dataset.lumen) return;
+        row.dataset.lumen = 'true';
+        row.dataset.element = card.element;
+        const portrait = row.querySelector('.portrait');
+        const foil = this.foil(card);
+        if (portrait && foil) portrait.append(foil);
+        row.append(this.el('span', 'lm-tile-grade', this.grade(card)));
+        const element = this.el('span', 'lm-tile-el');
+        element.append(this.el('i', `lm-el lm-el-${card.element}`));
+        row.append(element);
+      });
+      const head = bundle.querySelector('.factory-bundle-title');
+      if (!head.querySelector('.lm-bundle-name')) {
+        const label = [...head.childNodes].filter(node => node.nodeType === 3).map(node => node.textContent).join('').trim();
+        [...head.childNodes].filter(node => node.nodeType === 3).forEach(node => node.remove());
+        head.prepend(this.el('span', 'lm-bundle-name', label));
+      }
+      head.querySelector('.lm-bundle-tally')?.remove();
+      const tally = this.el('span', 'lm-bundle-tally');
+      for (const grade of order) {
+        const n = cards.filter(card => card.grade === grade).length;
+        if (!n) continue;
+        const chip = this.el('span', 'lm-grade-chip', `${DISPLAY_NAMES.grade[grade] || grade} ${n}`);
+        chip.dataset.grade = grade;
+        tally.append(chip);
+      }
+      head.append(tally);
+    });
+    requestAnimationFrame(() => document.querySelectorAll('#screen-factory-draft .factory-card-name').forEach(node => this.fitName(node, 8)));
+  },
+
+  // ---------- Card pool and special card editors ----------
+  // Both editors read like the party screen: app-style header band, chips, framed cards with name plates, a docked footer.
+  // CardPoolView re-renders on every action and restores focus by button class, so only non-button nodes are added here.
+  decoratePoolEditor() {
+    const body = this.$('card-pool-editor-body');
+    if (!body) return;
+    body.querySelectorAll('.card-pool-card-row').forEach(row => {
+      if (row.querySelector('.lm-foil, .lm-tile-el')) return;
+      const card = RPG.getCardData(row.dataset.cardId);
+      if (!card) return;
+      const portrait = row.querySelector('.portrait');
+      const foil = this.foil(card);
+      if (portrait && foil) portrait.append(foil);
+      const element = this.el('span', 'lm-tile-el');
+      element.append(this.el('i', `lm-el lm-el-${card.element}`));
+      row.append(element);
+    });
+    body.querySelectorAll('.card-pool-set-row').forEach(row => {
+      const link = row.querySelector('.card-pool-actions > button');
+      const match = link?.textContent.match(/(\d+)\s*\/\s*(\d+)/);
+      if (!match || link.querySelector('.lm-set-bar')) return;
+      const bar = this.el('i', 'lm-set-bar');
+      bar.style.setProperty('--p', `${Math.min(100, match[1] / Math.max(1, match[2]) * 100)}%`);
+      link.append(bar);
+      row.classList.toggle('is-complete', match[1] === match[2]);
+    });
+    requestAnimationFrame(() => body.querySelectorAll('.is-compact .card-pool-card-name').forEach(node => this.fitName(node, 8)));
+  },
+  decorateSpecialEditor() {
+    const groups = RPG.getSpecialCardGroups ? RPG.getSpecialCardGroups() : [];
+    const owned = RPG.getUnlockedSpecialCards ? RPG.getUnlockedSpecialCards() : [];
+    const groupList = this.$('special-card-group-list');
+    [...groupList.children].forEach((button, index) => {
+      const group = groups[index];
+      const base = group && RPG.getCardData(group.baseId);
+      if (!base) return;
+      button.removeAttribute('style');
+      button.classList.add('lm-special-group');
+      const count = owned.filter(card => card.specialBaseId === group.baseId).length;
+      const avatar = this.el('span', 'lm-special-avatar');
+      avatar.append(ImageAssets.createPortrait(base));
+      const text = this.el('span', 'lm-special-label');
+      text.append(this.el('strong', '', group.label), this.el('small', '', count ? `스페셜 ${count}` : '미획득'));
+      button.replaceChildren(avatar, text);
+      button.classList.toggle('is-empty', !count);
+    });
+    const active = groups.find(group => group.baseId === RPG.selectedSpecialCardGroup) || groups[0];
+    const list = this.$('special-card-editor-list');
+    if (!active || !list) return;
+    const base = RPG.getCardData(active.baseId);
+    const specials = owned.filter(card => card.specialBaseId === active.baseId).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    const cards = [base, ...specials].filter(Boolean);
+    const selections = RPG.getActiveSpecialCardSelections('global');
+    const current = selections[active.baseId] || active.baseId;
+    const grid = this.el('div', 'lm-versions');
+    for (const card of cards) {
+      const using = card.id === current;
+      const item = this.el('div', `lm-version${using ? ' is-current' : ''}`);
+      item.dataset.grade = card.grade;
+      const art = this.el('button', 'lm-version-art');
+      art.type = 'button';
+      art.setAttribute('aria-label', `${card.name} 상세`);
+      const portrait = ImageAssets.createPortrait(card);
+      const foil = this.foil(card);
+      if (foil) portrait.append(foil);
+      const info = this.el('span', 'lm-tile-info');
+      info.append(this.icon('info'));
+      art.append(portrait, this.el('span', 'lm-version-kind', card.id === active.baseId ? '기본' : '스페셜'), info);
+      art.onclick = () => { this.detailIds = cards.map(entry => entry.id); RPG.showCardInfo(card.id); };
+      if (using) art.append(this.el('span', 'lm-version-using', '사용 중'));
+      const name = this.el('strong', 'lm-version-name', card.name);
+      const meta = this.el('small', 'lm-version-meta', `${this.grade(card)} · ${this.element(card)} · ${this.role(card)}`);
+      const use = this.el('button', using ? 'lm-btn lm-version-use is-current' : 'lm-btn lm-version-use', using ? '사용 중' : '이 버전 사용');
+      use.type = 'button';
+      use.disabled = using;
+      use.onclick = () => RPG.activateSpecialCardVersion(active.baseId, card.id);
+      item.append(art, name, meta, use);
+      grid.append(item);
+    }
+    list.replaceChildren(grid);
+  },
+
+  // ---------- Chaos roulette ----------
+  // A real altar instead of three stacked buttons: what can still be drawn, how many tickets, and where pulls are kept.
+  decorateRoulette() {
+    const screen = this.$('screen-chaos-roulette');
+    const wrap = screen?.firstElementChild;
+    if (!wrap) return;
+    wrap.classList.add('lm-roulette');
+    let hero = wrap.querySelector('.lm-roulette-hero');
+    if (!hero) {
+      hero = this.el('div', 'lm-roulette-hero');
+      const fan = this.el('div', 'lm-roulette-fan');
+      for (let index = 0; index < 3; index++) fan.append(this.el('i', 'lm-roulette-back'));
+      const copy = this.el('div', 'lm-roulette-copy');
+      copy.append(this.el('small', '', 'TRANSCEND SUMMON'), this.el('strong', '', '초월 카드 소환'), this.el('p', '', '카오스 티켓 1장으로 아직 없는 초월 카드 한 장을 얻습니다. 얻은 카드는 다음 오리진 여정의 전설 풀에 들어갑니다.'));
+      hero.append(fan, copy);
+      wrap.prepend(hero);
+      const pool = this.el('section', 'lm-roulette-pool');
+      pool.append(this.el('h3', 'lm-roulette-pool-head'), this.el('div', 'lm-roulette-strip'));
+      hero.after(pool);
+      wrap.querySelector('[onclick*="spinChaosRoulette"]')?.classList.add('lm-roulette-spin');
+      wrap.querySelector('[onclick*="openTranscendenceCheck"]')?.classList.add('lm-roulette-box');
+      wrap.querySelector('[onclick*="openModeSelect"]')?.classList.add('lm-roulette-back-btn');
+    }
+    let cards = [];
+    try { cards = RPG.buildChaosRoulettePool() || []; } catch { cards = []; }
+    const pending = (RPG.global?.pendingTranscendenceCards || []).length;
+    wrap.querySelector('.lm-roulette-pool-head').textContent = cards.length ? `소환 가능한 초월 카드 ${cards.length}종` : '모든 초월 카드를 얻었습니다';
+    const strip = wrap.querySelector('.lm-roulette-strip');
+    strip.replaceChildren();
+    for (const card of cards) {
+      const item = this.el('button', 'lm-roulette-card');
+      item.type = 'button';
+      item.dataset.grade = card.grade;
+      item.setAttribute('aria-label', `${card.name} 상세`);
+      item.append(ImageAssets.createPortrait(card), this.el('span', '', card.name));
+      item.onclick = () => { this.detailIds = cards.map(entry => entry.id); RPG.showCardInfo(card.id); };
+      strip.append(item);
+    }
+    const tickets = RPG.global?.chaosTickets || 0;
+    const spin = wrap.querySelector('.lm-roulette-spin');
+    if (spin) {
+      spin.disabled = tickets < 1 || !cards.length;
+      spin.innerHTML = '';
+      spin.append(this.el('span', '', tickets < 1 ? '카오스 티켓이 없습니다' : '초월 소환'));
+      const cost = this.el('span', 'lm-cost');
+      cost.append(this.icon('ticket'), document.createTextNode('1'));
+      spin.append(cost);
+    }
+    const box = wrap.querySelector('.lm-roulette-box');
+    if (box) box.textContent = pending ? `보관함 ${pending}장` : '보관함';
+  },
+
   // ---------- Missions ----------
+  missionState(type) {
+    const g = RPG.global || {};
+    const mission = g[`${type}Mission`];
+    const items = mission && mission.missions ? Object.values(mission.missions) : [];
+    const done = items.filter(item => (item.progress || 0) >= item.target).length;
+    return { mission, items, done, ready: !!mission && !mission.claimed && items.length > 0 && done === items.length };
+  },
+  rewardCard(type) {
+    const g = RPG.global || {};
+    if (type === 'monthly') return RPG.getCardData(g.monthlyMission?.rewardCardId);
+    if (type === 'special') return RPG.getCardData(g.specialMission?.rewardCardId);
+    return null;
+  },
+  // Each hub row leads with the prize itself and a progress bar, so the reward is what pulls you in.
   decorateMissionHub() {
     const list = this.$('mission-hub-list');
-    const g = RPG.global || {};
-    const states = [
-      [g.monthlyMission, () => RPG.areAllMonthlyMissionsCleared()],
-      [g.weeklyMission, () => RPG.areAllWeeklyMissionsCleared()],
-      [g.specialMission, () => RPG.areAllSpecialMissionsCleared()]
-    ];
+    const types = ['monthly', 'weekly', 'special'];
     [...list.children].forEach((button, index) => {
       button.removeAttribute('style');
       button.classList.add('lm-mission-row');
-      const [mission, cleared] = states[index] || [];
-      if (!mission || !mission.missions) return;
-      const items = Object.values(mission.missions);
-      const done = items.filter(item => (item.progress || 0) >= item.target).length;
+      const title = [...button.childNodes].filter(node => node.nodeType === 3).map(node => node.textContent).join('').trim();
+      const desc = button.querySelector('span')?.textContent || '';
+      const copy = this.el('span', 'lm-mission-copy');
+      copy.append(this.el('strong', '', title), this.el('small', '', desc));
+      button.replaceChildren(copy);
+      const type = types[index];
+      const { mission, items, done, ready } = this.missionState(type);
+      const thumb = this.el('span', 'lm-mission-thumb');
+      const card = this.rewardCard(type);
+      if (card) {
+        thumb.dataset.grade = card.grade;
+        const art = ImageAssets.createPortrait(card);
+        const foil = this.foil(card);
+        if (foil) art.append(foil);
+        thumb.append(art);
+      } else {
+        thumb.classList.add('is-ticket');
+        thumb.append(this.icon(type === 'weekly' ? 'ticket' : 'gift'));
+      }
+      button.prepend(thumb);
+      if (!mission || !items.length) return;
+      const meter = this.el('i', 'lm-mission-meter');
+      meter.style.setProperty('--p', `${done / items.length * 100}%`);
+      copy.append(meter);
       const status = this.el('span', 'lm-mission-state', mission.claimed ? '수령 완료' : `${done} / ${items.length}`);
-      if (!mission.claimed && cleared()) { status.textContent = '보상 수령'; status.classList.add('is-ready'); }
+      if (ready) { status.textContent = '보상 수령'; status.classList.add('is-ready'); }
+      if (mission.claimed) status.classList.add('is-claimed');
       button.append(status);
     });
+  },
+  decorateMissionView() {
+    const type = RPG.missionViewType || 'monthly';
+    const { mission, items, done, ready } = this.missionState(type);
+    const section = this.$(`${type}-mission-section`);
+    const list = this.$(`${type}-mission-list`);
+    if (!section || !list) return;
+    list.removeAttribute('style');
+    list.classList.add('lm-mission-list');
+    [...list.querySelectorAll('.mission-item')].forEach((row, index) => {
+      const item = items[index];
+      if (!item) return;
+      const progress = Math.min(item.target, item.progress || 0);
+      const complete = progress >= item.target;
+      row.removeAttribute('style');
+      row.classList.add('lm-mission-item');
+      const mark = this.el('span', 'lm-mission-mark');
+      if (complete) mark.append(this.icon('check'));
+      else mark.style.setProperty('--p', `${progress / item.target * 100}%`);
+      const body = this.el('span', 'lm-mission-body');
+      body.append(this.el('strong', '', item.label));
+      const bar = this.el('i', 'lm-mission-bar');
+      bar.style.setProperty('--p', `${progress / item.target * 100}%`);
+      body.append(bar);
+      row.replaceChildren(mark, body, this.el('b', 'lm-mission-count', `${progress} / ${item.target}`));
+      row.setAttribute('aria-label', `${item.label}, ${progress} / ${item.target}${complete ? ', 완료' : ''}`);
+    });
+    const panel = section.children[1];
+    if (panel) {
+      panel.classList.add('lm-reward-panel');
+      panel.querySelector('.lm-reward-ticket')?.remove();
+      if (type === 'weekly') {
+        const ticket = this.el('span', 'lm-reward-ticket');
+        ticket.append(this.icon('ticket'), this.el('b', '', `×${RPG.getWeeklyChaosTicketRewardAmount()}`));
+        panel.prepend(ticket);
+      }
+      const preview = panel.querySelector('.reward-card-preview');
+      if (preview && !preview.querySelector('.lm-foil')) {
+        const card = this.rewardCard(type);
+        const foil = this.foil(card);
+        if (foil) preview.querySelector('.portrait')?.append(foil);
+        if (card) preview.dataset.grade = card.grade;
+      }
+    }
+    const claim = this.$(`btn-claim-${type}-mission`);
+    if (claim) {
+      claim.classList.toggle('is-ready', ready);
+      if (mission && !mission.claimed && !ready && items.length && (type !== 'special' || mission.unlocked)) claim.textContent = `미션 ${items.length - done}개 남음`;
+    }
   },
 
   // ---------- Install ----------
@@ -39299,10 +40181,23 @@ const LumenUI = {
       return showAlert.call(this, message, ...rest);
     };
     this.installChainBar();
-    this.after('spinChaosRoulette', () => this.presentSummon(RPG.getCardData((RPG.global.pendingTranscendenceCards || []).at(-1)), 'roulette'));
+    this.installLumiLines();
+    this.after('showLecture', id => this.syncLecture(id));
+    this.after('spinChaosRoulette', () => {
+      this.decorateRoulette();
+      this.presentSummon(RPG.getCardData((RPG.global.pendingTranscendenceCards || []).at(-1)), 'roulette');
+    });
     this.after('openModeSelect', () => this.decorateModes());
     this.after('openTypeSelect', () => this.decorateTypeSelect());
+    this.after('renderFactoryDraftScreen', () => this.decorateFactory());
+    this.after('renderCardPoolEditor', () => this.decoratePoolEditor());
+    this.after('renderSpecialCardEditor', () => this.decorateSpecialEditor());
+    this.after('openChaosRoulette', () => this.decorateRoulette());
+    this.after('openFactoryViewDeck', () => {
+      this.$('collection-empty').textContent = '아직 고른 카드가 없습니다. 묶음을 고르면 여기에 쌓입니다.';
+    });
     this.after('renderMissionHub', () => this.decorateMissionHub());
+    this.after('renderMissionView', () => this.decorateMissionView());
     this.after('closeMissionView', () => this.refreshDots());
     this.after('closeMissionHub', () => this.refreshDots());
     this.after('updateSystemMenuUI', () => this.syncSettings());
@@ -39316,6 +40211,7 @@ const LumenUI = {
     this.themeReady = true;
     this.setThemeColor();
     this.syncFullscreen();
+    try { this.renderTitleFan(false); } catch { /* The title fills in once the save is read. */ }
     document.body.classList.add('lm-ready');
     this.ready = true;
   }

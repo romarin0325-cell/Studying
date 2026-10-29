@@ -1,0 +1,9 @@
+import fs from'node:fs/promises';import path from'node:path';import os from'node:os';import{fileURLToPath,pathToFileURL}from'node:url';import assert from'node:assert/strict';
+const dir=path.dirname(fileURLToPath(import.meta.url)),out=path.resolve(dir,'../../../test-results/gold-portrait');
+if(process.platform==='win32')process.env.PLAYWRIGHT_BROWSERS_PATH=path.join(os.homedir(),'AppData/Local/ms-playwright');
+const{chromium}=await import('playwright'),browser=await chromium.launch({headless:true}),errors=[],checks=[];
+try{for(const width of[1280,390]){const page=await browser.newPage({viewport:{width,height:844}});page.on('pageerror',e=>errors.push(e.message));await page.goto(pathToFileURL(path.resolve(process.argv[2])).href);await page.waitForFunction(()=>window.__goldPortraitReviewReady);await page.evaluate(()=>document.fonts.ready);
+ for(const size of['64','96','160','240']){await page.selectOption('#size',size);const g=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,frames:[...document.querySelectorAll('.frame img')].map(e=>{const r=e.getBoundingClientRect();return{w:r.width,h:r.height,loaded:e.complete&&e.naturalWidth>0}})}));assert.equal(g.scroll,width);assert.equal(g.frames.length,6);for(const f of g.frames){assert.ok(Math.abs(f.w-f.h)<.1);assert.ok(f.loaded)}checks.push({size,...g})}
+ await page.selectOption('#size','160');await page.locator('#cast').screenshot({path:path.join(out,'review-'+width+'.png')});await page.click('#background');assert.ok(await page.locator('body').evaluate(e=>e.classList.contains('dark')));await page.close();}
+}finally{await browser.close()}
+assert.deepEqual(errors,[]);await fs.writeFile(path.join(dir,'review-verification.json'),JSON.stringify({checks,errors},null,2)+'\n');console.log(JSON.stringify({checks:checks.length,errors}));
