@@ -25,6 +25,8 @@ export const TEST_TOOLS=Object.freeze([
   {kind:'dawn-reset',label:'제2정원 처음으로'},
   {kind:'weekly-reset',label:'주간 드래프트 초기화'},
   {kind:'monthly-reset',label:'월간 보스전 초기화'},
+  {kind:'request-now',label:'부탁 바로 도착'},
+  {kind:'season-reset',label:'서약·쌍성 시즌 초기화'},
 ]);
 export function testGrant(p,kind='wallet'){
   const add=(key,n)=>{p[key]=Math.min(TEST_CAP,p[key]+n);};
@@ -38,6 +40,16 @@ export function testGrant(p,kind='wallet'){
     case 'dawn-reset':Object.assign(p.beds,{crit:0,critDamage:0,stardust:0});return '제2정원을 처음 상태로 되돌렸어요';
     case 'weekly-reset':if(p.active?.mode==='weekly')p.active=null;p.weekly=null;return '주간 드래프트를 다시 입장할 수 있게 했어요';
     case 'monthly-reset':if(p.active?.mode==='monthly')p.active=null;p.monthly=null;p.monthlyBest=null;p.monthlyClaim=null;return '월간 보스전 기록과 보상을 초기화했어요';
+    case 'request-now':
+      if(!p.requests||typeof p.requests!=='object'||Array.isArray(p.requests))p.requests={next:0,active:[],claimed:[],after:[],read:[]};
+      else p.requests.next=0;
+      return '동료의 부탁이 바로 도착할 수 있게 했어요';
+    case 'season-reset':{
+      delete p.oath;
+      if(p.twin&&typeof p.twin==='object'){const party=p.twin.party;if(party)p.twin={party};else delete p.twin;}
+      if(p.active?.mode==='oath'||p.active?.mode==='twin')p.active=null;
+      return '서약·쌍성 시즌 기록을 초기화했어요';
+    }
     default:return '';
   }
 }
