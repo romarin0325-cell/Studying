@@ -14,10 +14,6 @@
     "dense-comparison.webp",
     "mobile-comparison.webp"
   ],
-  "reuse": {
-    "differences": 0,
-    "redReusesOriginal": true
-  },
   "overflow": {
     "width": 390,
     "scroll": 390

@@ -21,41 +21,56 @@ function star(ctx,x,y,r,color,alpha=1){
   ctx.moveTo(x,y-r);ctx.lineTo(x+r*.25,y-r*.23);ctx.lineTo(x+r,y);ctx.lineTo(x+r*.25,y+r*.23);
   ctx.lineTo(x,y+r);ctx.lineTo(x-r*.25,y+r*.23);ctx.lineTo(x-r,y);ctx.lineTo(x-r*.25,y-r*.23);ctx.closePath();ctx.fill();ctx.restore();
 }
-// Reuse the EXISTING Ancient Dragon texture. Red is the original image, pixel for pixel.
-// The normal variant changes only RGB, once per loaded image; its alpha/silhouette is identical.
-export function ancientCrossTexture(fx,opening){
-  const original=fx.art.images['ancient-cross'];if(!original||opening)return original;
-  if(fx.goldCrossOriginal===original)return fx.goldCrossTint;
-  const c=document.createElement('canvas');c.width=original.naturalWidth;c.height=original.naturalHeight;
-  const g=c.getContext('2d');g.drawImage(original,0,0);
-  const pixels=g.getImageData(0,0,c.width,c.height);
-  for(let i=0;i<pixels.data.length;i+=4){
-    const red=Math.max(0,pixels.data[i]-pixels.data[i+1]);
-    pixels.data[i+1]+=red*.68;pixels.data[i+2]+=red*.12;
-  }
-  g.putImageData(pixels,0,0);fx.goldCrossOriginal=original;fx.goldCrossTint=c;return c;
+// Basic attack: four beams and a stream of star dust shed by each beam head. No centre texture: a cross
+// stamped behind the unit only showed its tips around the body. Opening (first 10 s) is the warm red palette.
+const ARMS=[[1,0],[-1,0],[0,1],[0,-1]],REACH=620,HEAD=.125,BEAM=.3,END=.45,TAU=.12;
+const palette=opening=>opening?{hot:'#ff7a3c',light:'#ffd9bf',core:'#ffe2c8',halo:'#ff9a5c'}:{hot:'#f0b040',light:'#fff3cf',core:'#fff4d2',halo:'#ffd77a'};
+function sparks(e,clarity){
+  if(e.sparks)return e.sparks;
+  let seed=(Math.round(e.origin.x*7+e.origin.y*13+(e.count||0)*101)>>>0)||1;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+  // Most grains leave the head while it travels and keep flying outward, slowing; a few leave the finished
+  // beam. All drift sideways and twinkle out. Fewer grains when many dragons fire at once.
+  const per=Math.max(10,Math.round(30*clarity));
+  e.sparks=ARMS.flatMap(([dx,dy])=>Array.from({length:per},()=>{
+    const head=rnd()<.8,ts=head?rnd()*HEAD:HEAD+rnd()*.08,big=rnd()<.3;
+    return {dx,dy,ts,d0:head?REACH*ts/HEAD-rnd()*25:60+rnd()*540,v:head?260+rnd()*560:30+rnd()*110,
+      side:rnd()<.5?-1:1,off0:rnd()*5,drift:18+rnd()*60,life:Math.min(.2+rnd()*.14,END-ts),r:big?3+rnd()*1.6:1.5+rnd(),big,ph:rnd()*6.3,spin:rnd()*.8};
+  }));
+  return e.sparks;
 }
-function crossStamp(fx,opening,x,y,size,alpha){
-  const img=ancientCrossTexture(fx,opening);if(!img)return;
-  const ctx=fx.ctx;ctx.save();ctx.globalAlpha*=alpha;ctx.drawImage(img,x-size/2,y-size/2,size,size);ctx.restore();
+function glint(fx,x,y,r,core,halo,alpha,angle=0){
+  if(alpha<=0)return;const ctx=fx.ctx;
+  fx.glow('glow',halo,x,y,r*7,alpha*.55);
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalCompositeOperation='lighter';star(ctx,0,0,r*2.1,core,alpha);star(ctx,0,0,r*1.1,'#ffffff',alpha*.9);ctx.restore();
 }
 export function drawGoldAttack(fx,e,t,clarity=1){
   if(e.hero!=='gold_dragon')return false;
-  const ctx=fx.ctx,fade=Math.sin(Math.PI*t)*clarity,reach=620*Math.min(1,t*2.4),color=e.opening?'#ff8850':'#efd078';
-  // Same four narrow beams and same 150px centre texture as Ancient Dragon.
-  ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.globalAlpha=fade*.55;
-  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
-    const g=ctx.createLinearGradient(e.origin.x,e.origin.y,e.origin.x+dx*reach,e.origin.y+dy*reach);
-    g.addColorStop(0,color+'cc');g.addColorStop(1,color+'00');ctx.strokeStyle=g;ctx.lineWidth=10*(1-t)+2;
-    ctx.beginPath();ctx.moveTo(e.origin.x,e.origin.y);ctx.lineTo(e.origin.x+dx*reach,e.origin.y+dy*reach);ctx.stroke();
+  const ctx=fx.ctx,age=t*e.total,tb=Math.min(1,age/BEAM),fade=Math.sin(Math.PI*tb)*clarity,reach=REACH*Math.min(1,tb*2.4),c=palette(e.opening);
+  if(tb<1){
+    ctx.save();ctx.lineCap='round';
+    for(const [dx,dy] of ARMS){
+      const x2=e.origin.x+dx*reach,y2=e.origin.y+dy*reach;
+      // Warm body painted normally (additive gold over the teal floor reads olive), thin light core added on top.
+      const g=ctx.createLinearGradient(e.origin.x,e.origin.y,x2,y2);g.addColorStop(0,c.hot+'aa');g.addColorStop(1,c.hot+'00');
+      ctx.globalCompositeOperation='source-over';ctx.globalAlpha=fade*.5;ctx.strokeStyle=g;ctx.lineWidth=8*(1-tb)+2.5;
+      ctx.beginPath();ctx.moveTo(e.origin.x,e.origin.y);ctx.lineTo(x2,y2);ctx.stroke();
+      const k=ctx.createLinearGradient(e.origin.x,e.origin.y,x2,y2);k.addColorStop(0,c.light+'ee');k.addColorStop(1,c.light+'00');
+      ctx.globalCompositeOperation='lighter';ctx.globalAlpha=fade*.55;ctx.strokeStyle=k;ctx.lineWidth=1.8;
+      ctx.beginPath();ctx.moveTo(e.origin.x,e.origin.y);ctx.lineTo(x2,y2);ctx.stroke();
+    }
+    ctx.restore();
   }
-  ctx.restore();crossStamp(fx,e.opening,e.origin.x,e.origin.y-8,150,fade*.5);
-  // Two fine curling strokes and only FOUR glints; no replacement painted cross or star cloud.
-  ctx.save();ctx.translate(e.origin.x,e.origin.y-8);ctx.globalCompositeOperation='lighter';
-  ctx.globalAlpha=fade*.64;ctx.strokeStyle=e.opening?'#ffc18d':'#ffe9ad';ctx.lineWidth=1.2;
-  for(let arm=0;arm<2;arm++){ctx.beginPath();for(let i=0;i<=16;i++){const k=i/16,a=arm*Math.PI+t*1.4+k*1.9,r=18+k*40;const x=Math.cos(a)*r,y=Math.sin(a)*r*.55;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();}
-  for(let i=0;i<4;i++){const a=i*Math.PI/2+t*.8,r=38+i%2*17;star(ctx,Math.cos(a)*r,Math.sin(a)*r*.55,2.8+i%2,'#fff1c8');}
-  ctx.restore();return true;
+  // A bright tip rides each beam head out to the end of its reach, shedding the dust behind it.
+  if(age<HEAD+.04){const k=Math.min(1,age/HEAD),tip=1-Math.max(0,(age-HEAD)/.04);for(const [dx,dy] of ARMS)glint(fx,e.origin.x+dx*REACH*k,e.origin.y+dy*REACH*k,4.2,c.core,c.halo,tip*clarity*.9,age*6);}
+  for(const p of sparks(e,clarity)){
+    const a=age-p.ts,u=a/p.life;if(u<=0||u>=1)continue;
+    const slow=TAU*(1-Math.exp(-a/TAU)),d=p.d0+p.v*slow,off=p.side*(p.off0+p.drift*slow);
+    const x=e.origin.x+p.dx*d+p.dy*off,y=e.origin.y+p.dy*d+p.dx*off;
+    const env=Math.min(1,u/.15)*(1-u)**.8,flick=.55+.45*Math.sin(p.ph+a*38),alpha=env*flick*clarity;
+    if(p.big)glint(fx,x,y,p.r*(.7+.3*flick),c.core,c.halo,alpha,p.spin+a*3);
+    else{fx.glow('glow',c.halo,x,y,p.r*8,alpha*.6);ctx.save();ctx.globalCompositeOperation='lighter';star(ctx,x,y,p.r*1.7,c.core,alpha);ctx.restore();}
+  }
+  return true;
 }
 export function drawGoldPersistent(fx,s,foreground){
   const ctx=fx.ctx;
@@ -131,7 +146,7 @@ export function drawGoldImpact(fx,e,t){
     return true;
   }
   if(e.type==='impact'&&e.hero==='gold_dragon'){
-    crossStamp(fx,e.opening,e.x,e.y-18,58,(1-t)*.55);return true;
+    const c=palette(e.opening);glint(fx,e.x,e.y-18,4.2*(1-t*.35),c.core,c.halo,(1-t)*.85,t*.6);return true;
   }
   if(e.type==='ward'&&e.hero==='gold_dragon'){stamp(fx,4,e.x,e.y-25,65,65,(1-t)*.6,true);return true;}
   return false;

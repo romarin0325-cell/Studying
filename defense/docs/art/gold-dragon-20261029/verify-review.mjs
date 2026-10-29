@@ -19,7 +19,6 @@ async function capture(mode,at,name){
   const file=path.join(out,name+'.webp');await shot(file);captures.push(name+'.webp');
 }
 await capture('normal',.48,'normal-comparison');
-const reuse=await page.evaluate(()=>GOLD_REVIEW.alphaPreserved());assert.equal(reuse.differences,0);assert.equal(reuse.redReusesOriginal,true);
 await capture('opening',.48,'opening-comparison');
 for(const [at,name] of [[2.2,'charge'],[4.85,'charge-ready'],[5.2,'launch'],[5.48,'beam'],[5.72,'impact'],[6.28,'aftermath']])await capture('ultimate',at,'ultimate-'+name);
 const skill=await page.evaluate(()=>GOLD_REVIEW.panels.map(({s})=>({charge:s.goldCharge,damage:s.stats.byHero.gold_dragon})));
@@ -36,6 +35,6 @@ await page.setViewportSize({width:390,height:844});await page.uncheck('#dense');
 const overflow=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));assert.ok(overflow.scroll<=overflow.width);
 await shot(path.join(out,'mobile-comparison.webp'),87);captures.push('mobile-comparison.webp');
 assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
-const report={browser:'Chromium desktop automation, not physical-device performance',source:'Actual combat engine, actual renderer, selected prepared deployment textures',captures,reuse,overflow,errors,network,skill,late,early};
+const report={browser:'Chromium desktop automation, not physical-device performance',source:'Actual combat engine, actual renderer, selected prepared deployment textures',captures,overflow,errors,network,skill,late,early};
 await fs.writeFile(path.join(out,'review-verification.json'),JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report));await browser.close();
