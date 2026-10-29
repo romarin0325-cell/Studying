@@ -638,6 +638,13 @@
       "sha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
       "width": 512,
       "height": 512
+    },
+    {
+      "id": "relics-patch",
+      "source": "defense/assets/merge/relics-patch.webp",
+      "sha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
+      "width": 512,
+      "height": 512
     }
   ],
   "font": {

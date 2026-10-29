@@ -1995,7 +1995,8 @@ export const ASSET_PATHS = {
   "luna-blade": "./assets/merge/luna-blade.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
   "orbit-sea": "./assets/merge/orbit-sea.webp",
-  "relics-new": "./assets/merge/relics-new.webp"
+  "relics-new": "./assets/merge/relics-new.webp",
+  "relics-patch": "./assets/merge/relics-patch.webp"
 };
 
 export const STAGE_THEMES = [
