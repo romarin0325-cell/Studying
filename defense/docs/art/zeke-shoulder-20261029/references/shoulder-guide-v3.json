@@ -1,0 +1,188 @@
+{
+  "headC": [
+    0,
+    281.14366358788305,
+    0
+  ],
+  "pivot": [
+    0,
+    206.5128001627359,
+    0
+  ],
+  "skeleton": {
+    "1": {
+      "hip": [
+        18.2,
+        92.01065353785263,
+        0
+      ],
+      "knee": [
+        20.1,
+        52.00532676892632,
+        12.66535854509082
+      ],
+      "ankle": [
+        22,
+        12,
+        0
+      ],
+      "shoulder": [
+        45,
+        180.95428529111018,
+        0
+      ],
+      "elbow": [
+        62.75661752343332,
+        141.162515079117,
+        5.818583784920263
+      ],
+      "hand": [
+        55,
+        100.01065353785263,
+        4
+      ],
+      "legBones": [
+        42.00532676892632,
+        42.00532676892632
+      ],
+      "armBones": [
+        43.96064557919625,
+        41.9159643894662
+      ]
+    },
+    "-1": {
+      "hip": [
+        -18.2,
+        92.01065353785263,
+        0
+      ],
+      "knee": [
+        -20.1,
+        52.00532676892632,
+        12.66535854509082
+      ],
+      "ankle": [
+        -22,
+        12,
+        0
+      ],
+      "shoulder": [
+        -45,
+        180.95428529111018,
+        0
+      ],
+      "elbow": [
+        -81.88419647072348,
+        157.05876533302722,
+        1.048110863237488
+      ],
+      "hand": [
+        -85,
+        195.26705361922058,
+        18
+      ],
+      "legBones": [
+        42.00532676892632,
+        42.00532676892632
+      ],
+      "armBones": [
+        43.96064557919625,
+        41.9159643894662
+      ]
+    }
+  },
+  "parameters": {
+    "type": "masculine",
+    "height": "tall",
+    "pose": "shoulder",
+    "headRoll": 0,
+    "prop": {
+      "kind": "greatsword",
+      "hand": "right"
+    },
+    "colorArms": true
+  },
+  "anatomicalAxes": {
+    "right": "negativeX",
+    "left": "positiveX",
+    "front": "positiveZ",
+    "rightArmGuide": "cyan",
+    "leftArmGuide": "pink"
+  },
+  "projectedHeadNeutral": [
+    160,
+    150
+  ],
+  "groundOrigin": [
+    0,
+    0,
+    0
+  ],
+  "camera": {
+    "projection": "orthographic",
+    "elevationDegrees": 12,
+    "scale": 1
+  },
+  "headGeometry": {
+    "radii": [
+      80,
+      75.13271264057927,
+      72
+    ],
+    "sharedAcrossEveryType": true
+  },
+  "frames": [
+    {
+      "direction": "down",
+      "skull": [
+        176,
+        130.07,
+        336,
+        279.93
+      ],
+      "groundAnchor": [
+        256,
+        480
+      ]
+    },
+    {
+      "direction": "up",
+      "skull": [
+        176,
+        130.07,
+        336,
+        279.93
+      ],
+      "groundAnchor": [
+        256,
+        480
+      ]
+    },
+    {
+      "direction": "left",
+      "skull": [
+        184,
+        129.81,
+        328,
+        280.19
+      ],
+      "groundAnchor": [
+        256,
+        480
+      ]
+    },
+    {
+      "direction": "right",
+      "skull": [
+        184,
+        129.81,
+        328,
+        280.19
+      ],
+      "groundAnchor": [
+        256,
+        480
+      ]
+    }
+  ]
+}

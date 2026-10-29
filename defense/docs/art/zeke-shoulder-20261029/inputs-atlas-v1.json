@@ -1,0 +1,32 @@
+{
+  "createdBeforeGeneration": true,
+  "inputs": [
+    {
+      "order": 1,
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\zeke-shoulder-20261029\\references\\previous-atlas.png",
+      "sha256": "7543e10ecc8c3295567b18d95033e62cbf2fc256ee828f17729e3cfc8b1f8eb3"
+    },
+    {
+      "order": 2,
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\zeke-shoulder-20261029\\references\\selected-a.png",
+      "sha256": "a70dbe46181dd1c1afb4cb248978aaa653a0d38227e9abcdca16ad26ec6a7709"
+    },
+    {
+      "order": 3,
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\zeke-shoulder-20261029\\references\\shoulder-guide-v3.png",
+      "sha256": "c8af246d4b201d76de84a58308ea6c37e0e58b03a28b5d8f9225a0734ece80e4"
+    },
+    {
+      "order": 4,
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\zeke-shoulder-20261029\\references\\original-zeke.png",
+      "sha256": "642e15372ae42c0a892175ae010ec2ca8e7fb363e64a7a1be4a1bec7038229bf"
+    },
+    {
+      "order": 5,
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\zeke-shoulder-20261029\\references\\style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+    }
+  ],
+  "prompt": "prompt-atlas-v1.txt",
+  "pose": "Right-handed right-shoulder supported greatsword; all four views"
+}
