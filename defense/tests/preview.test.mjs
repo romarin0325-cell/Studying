@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 globalThis.__GARDEN_PREVIEW__=true;
 globalThis.__GARDEN_UNLOCKED__=true;
 
-const {createProfile,command,validateProfile,ProfileStore,SAVE_KEY}=await import('../src/profile.js');
+const {createProfile,command,validateProfile,parseProfile,ProfileStore,SAVE_KEY}=await import('../src/profile.js');
 const E=await import('../src/combat/engine.js');
 const {createBattle,resumeBattle}=await import('../src/battle.js');
 const {HERO,HEROES,CHAPTERS,TIERS,TIER_IDS,BOSS_ORDER,CHALLENGE_WAVES,ARTIFACTS,DEFAULT_DECK,MAIN_STAGES}=await import('../src/content.js');
@@ -12,10 +12,10 @@ const {HOUR,calendar}=await import('../src/economy.js');
 const {weeklyReward,monthlyReward}=await import('../src/monthly.js');
 const {season}=await import('../src/preview/season.js');
 const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
-const {twinBosses,twinBandReward,twinState,TWIN_WAVES,TWIN_BANDS,twinSetKey,TWIN_STAGE}=await import('../src/preview/twin.js');
-const {requestTracker,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
+const {twinBosses,twinBandReward,twinState,twinLocks,TWIN_WAVES,TWIN_STAGE,TWIN_SIDE}=await import('../src/preview/twin.js');
+const {requestTracker,requestGoal,REQUEST,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
 const {FAVORITE}=await import('../src/bond.js');
-const {REQUEST_REWARD:REQUEST_PAY}=await import('../src/preview/requests-data.js');
+const {REQUEST_REWARD:REQUEST_PAY,REQUEST_HEROES,REQUESTS,AFTERWORDS}=await import('../src/preview/requests-data.js');
 const {testGrant,TEST_TOOLS}=await import('../src/test-unlock.js');
 
 const NOW=Date.parse('2026-10-04T03:00:00Z');
@@ -222,7 +222,7 @@ test('starlight oath pays each band once, ignores a failed run and keeps an olde
   const frozen=JSON.stringify(p);oathState(p,NOW);assert.equal(JSON.stringify(p),frozen);
 });
 
-test('twin parties stay disjoint, a changed party starts a new set, and each tier pays its own bands',()=>{
+test('twin parties stay disjoint, the latest run replaces that side, and each tier pays its own bands',()=>{
   const fresh=profile();const deck=[...fresh.deck],equipped=[...fresh.equipped];
   assert.match(command(fresh,'twinParty',partyOf(LEFT,[...LEFT]),NOW).message,/같은 동료/);
   assert.match(command(fresh,'twinParty',partyOf(LEFT,RIGHT,['hourglass'],['hourglass']),NOW).message,/같은 유물/);
@@ -242,42 +242,75 @@ test('twin parties stay disjoint, a changed party starts a new set, and each tie
   fresh.active.run=E.serialize(battle);assert.equal(validateProfile(fresh),true);assert.ok(resumeBattle(fresh));
   fresh.active.run=null;
   const zero=ok(fresh,'settle',{token:fresh.active.token,round:0,damage:0,won:false});
-  assert.equal(zero.newBest,true);assert.equal(zero.setTotal,0);assert.deepEqual(zero.bands,[]);assert.equal(fresh.twin.best.easy.total,0);
+  assert.equal(zero.newBest,true);assert.equal(zero.total,0);assert.deepEqual(zero.bands,[]);assert.equal(fresh.twin.best.easy.total,0);
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
   const left=ok(fresh,'settle',{token:fresh.active.token,round:9,damage:-5,won:true});
-  assert.equal(left.round,TWIN_WAVES);assert.equal(left.side,'left');assert.equal(fresh.twin.set.left.damage,0);assert.equal(fresh.results[0].round,9);
+  assert.equal(left.round,TWIN_WAVES);assert.equal(left.side,'left');assert.equal(left.total,TWIN_WAVES);
+  assert.equal(fresh.twin.records.easy.left.damage,0);assert.deepEqual(fresh.twin.records.easy.left.deck,LEFT);assert.equal(fresh.results[0].round,9);
   assert.deepEqual(left.bands,[{total:4,reward:twinBandReward('easy',0)}]);
   const beforePay=fresh.dreams;
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'right'});
   const right=ok(fresh,'settle',{token:fresh.active.token,round:2,damage:4});
-  assert.equal(fresh.twin.set.left.round,6);assert.equal(fresh.twin.best.easy.total,8);
+  assert.equal(fresh.twin.records.easy.left.round,6);assert.equal(fresh.twin.records.easy.right.round,2);assert.equal(right.total,8);
+  assert.equal(fresh.twin.best.easy.total,8);
   assert.deepEqual(right.bands,[{total:8,reward:twinBandReward('easy',1)}]);
   assert.equal(fresh.dreams,beforePay+twinBandReward('easy',1));
-  const dreams=fresh.dreams;
+  const dreams=fresh.dreams,lifetimeTotal=fresh.twin.lifetime.total;
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
   const replay=ok(fresh,'settle',{token:fresh.active.token,round:1,damage:100});
-  assert.equal(fresh.twin.set.left.round,6);assert.equal(replay.newBest,false);assert.deepEqual(replay.bands,[]);
+  assert.equal(fresh.twin.records.easy.left.round,1);assert.equal(fresh.twin.records.easy.left.damage,100);assert.equal(replay.total,3);
+  assert.equal(replay.newBest,false);assert.deepEqual(replay.bands,[]);
+  assert.equal(fresh.twin.best.easy.total,8);assert.equal(fresh.twin.paid.easy,2);assert.equal(fresh.twin.lifetime.total,lifetimeTotal);
   assert.equal(fresh.dreams,dreams);
   assert.equal(twinBandReward('easy',0),Math.round(60*1.3));
-  const key=fresh.twin.set.key;ok(fresh,'twinParty',partyOf());assert.equal(fresh.twin.set.key,key);
+  ok(fresh,'twinParty',partyOf());assert.equal(fresh.twin.records.easy.left.round,1);assert.equal(fresh.twin.best.easy.total,8);
   const shifted={left:{deck:['guardian',...LEFT.slice(1)],relics:RELIC.slice(0,2)},right:{deck:RIGHT,relics:RELIC.slice(2,4)}};
-  ok(fresh,'twinParty',shifted);assert.equal(fresh.twin.set,null);assert.equal(fresh.twin.best.easy.total,8);assert.equal(fresh.twin.paid.easy,2);
+  ok(fresh,'twinParty',shifted);assert.equal(fresh.twin.records.easy.left.round,1);assert.equal(fresh.twin.best.easy.total,8);assert.equal(fresh.twin.paid.easy,2);
   ok(fresh,'twinParty',partyOf());
   ok(fresh,'begin',{mode:'twin',tier:'hard',side:'left'});
   const hard=ok(fresh,'settle',{token:fresh.active.token,round:4,damage:1});
-  assert.equal(hard.setTotal,4);assert.deepEqual(hard.bands,[{total:4,reward:twinBandReward('hard',0)}]);
+  assert.equal(hard.total,4);assert.deepEqual(hard.bands,[{total:4,reward:twinBandReward('hard',0)}]);
   assert.equal(twinBandReward('hard',0),Math.round(60*2.3));assert.equal(fresh.twin.paid.easy,2);assert.equal(fresh.twin.paid.hard,1);
   assert.equal(fresh.twin.lifetime.tier,'hard');assert.equal(fresh.twin.lifetime.total,4);
-  const before=JSON.stringify(fresh);twinState(fresh,NOW);assert.equal(JSON.stringify(fresh),before);assert.equal(validateProfile(fresh),true);
+  const overlap={left:{deck:['guardian',...LEFT.slice(1)],relics:RELIC.slice(4,6)},right:{deck:['star_boy',...RIGHT.slice(1)],relics:RELIC.slice(6,8)}};
+  ok(fresh,'twinParty',overlap);
+  const denied=command(fresh,'begin',{mode:'twin',tier:'easy',side:'right'},NOW);
+  assert.equal(denied.ok,false);
+  assert.equal(denied.message,`${TWIN_SIDE.left.name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${TWIN_SIDE.left.name}에 다시 도전하면 풀려요.`);
+  assert.deepEqual(twinLocks(fresh,NOW,'easy','right').heroes,fresh.twin.records.easy.left.deck);
+  assert.deepEqual(twinLocks(fresh,NOW,'easy','left').heroes,fresh.twin.records.easy.right.deck);
+  ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
+  ok(fresh,'settle',{token:fresh.active.token,round:1,damage:1});
+  assert.deepEqual(fresh.twin.records.easy.left.deck,overlap.left.deck);
+  ok(fresh,'begin',{mode:'twin',tier:'easy',side:'right'});
+  const later=season(NOW).end,before=JSON.stringify(fresh),view=twinState(fresh,later);
+  assert.equal(view.records.easy.left,null);assert.equal(view.best.hard,null);assert.equal(view.paid.hard,0);
+  assert.equal(view.lifetime.tier,'hard');assert.deepEqual(view.party.left.deck,overlap.left.deck);
+  assert.equal(JSON.stringify(fresh),before);assert.equal(validateProfile(fresh),true);
 });
 
+test('every companion has three requests in order, real goal heroes, three lines each way and an afterword',()=>{
+  assert.deepEqual([...REQUEST_HEROES].sort(),Object.keys(HERO).sort());
+  for(const id of REQUEST_HEROES){
+    const list=REQUESTS.filter(r=>r.hero===id);assert.deepEqual(list.map(r=>r.order),[1,2,3],id);
+    for(const r of list){
+      assert.equal(r.id,id+'-'+r.order);assert.equal(r.arrive.length,3,r.id);assert.equal(r.thanks.length,3,r.id);assert.ok(r.title&&r.hint,r.id);
+      for(const h of [].concat(r.goal.with||[],r.goal.hero||[]))assert.ok(HERO[h],r.id+' '+h);
+      assert.ok(['clear','casts','bosses','rank','flag'].includes(r.goal.type),r.id);assert.ok(requestGoal(r.id)>=1,r.id);
+    }
+    assert.ok(AFTERWORDS[id]?.title&&AFTERWORDS[id].paragraphs.length>=4,id);
+  }
+  assert.equal(new Set(REQUESTS.map(r=>r.title)).size,REQUESTS.length,'titles are unique');
+});
 test('companion requests arrive on a cadence, progress from the active deck, and pay a thank-you once',()=>{
   const tracker=requestTracker();
   tracker.observe({board:[{hero:'silver_rabbit'},{hero:'snow_rabbit'}]},[{type:'skill',hero:'night_rabbit'},{type:'kill',boss:'flora'},{type:'kill',boss:null}]);
   tracker.observe({board:[]},[{type:'reduce',by:'ash'},{type:'skill',hero:'ash'}]);
   const feats=tracker.feats(true);assert.equal(feats.casts.night_rabbit,1);assert.equal(feats.bosses,1);assert.deepEqual(feats.flags,['moonlit']);
   const spared=requestTracker();spared.observe({board:[]},[{type:'skill',hero:'ash'}]);assert.deepEqual(spared.feats(false).flags,['spared']);
-  const p=profile();p.heroes.underdog.owned=false;p.heroes.ash.owned=false;
+  // Every companion has requests now; only Night Rabbit may visit first, Underdog and Ash join for the next two.
+  const p=profile(),owned=Object.fromEntries(Object.entries(p.heroes).map(([id,h])=>[id,h.owned]));
+  for(const id of Object.keys(p.heroes))if(id!=='night_rabbit')p.heroes[id].owned=false;
   const first=ok(p,'requestArrive');assert.deepEqual(first.arrived,['night_rabbit-1']);
   assert.ok(p.requests.next>=NOW+REQUEST_GAP_MIN&&p.requests.next<NOW+REQUEST_GAP_MIN+REQUEST_GAP_SPAN);
   const rng=p.rng,next=p.requests.next;assert.deepEqual(command(p,'requestArrive',{},next-1).arrived,[]);assert.equal(p.rng,rng);assert.equal(p.requests.next,next);
@@ -290,6 +323,7 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   const capped=p.rng,full=p.requests.next;assert.deepEqual(ok(p,'requestArrive',{},full).arrived,[]);assert.equal(p.rng,capped);assert.equal(p.requests.next,full);
   ok(p,'requestSeen',{id:'night_rabbit-1'});assert.equal(p.requests.active.find(e=>e.id==='night_rabbit-1').seen,true);
   assert.equal(command(p,'requestSeen',{id:'missing'},NOW).message,'부탁을 찾을 수 없습니다.');
+  for(const [id,o] of Object.entries(owned))p.heroes[id].owned=o;
   const deck=['star_boy','snow_rabbit','night_rabbit','siren','mushroom_king'];
   p.requests={next:NOW+REQUEST_GAP_MIN,active:[
     {id:'night_rabbit-1',at:NOW,seen:true,count:0,done:false},
@@ -352,7 +386,81 @@ test('a stored oath and twin expedition still validates inside the profile store
   assert.equal(store.value.oath.best.score,27);assert.equal(store.value.oath.paid,5);
   call('begin',{mode:'twin',tier:'easy',side:'right'});
   call('settle',{token:store.value.active.token,round:4,damage:Number.POSITIVE_INFINITY});
-  assert.equal(store.value.twin.set.right.damage,0);assert.equal(store.value.twin.best.easy.total,4);
+  assert.equal(store.value.twin.records.easy.right.damage,0);assert.equal(store.value.twin.best.easy.total,4);
   assert.equal(monthlyReward({round:1,tier:'easy'})>0,true);
   assert.equal(HEROES.length,42);
+});
+
+test('an old twin set is dropped on load and overlapping side records are rejected',()=>{
+  const p=profile();
+  ok(p,'twinParty',partyOf());
+  p.twin.period=season(NOW).id;
+  p.twin.set={key:'old',tier:'easy',left:{round:2,damage:1},right:null};
+  p.twin.best={easy:{total:2,left:{round:2,damage:1},right:{round:0,damage:0},key:'legacy',at:NOW},hard:null,abyss:null};
+  p.twin.paid={easy:0,hard:0,abyss:0};
+  p.twin.lifetime={tier:'easy',total:2,at:NOW};
+  const loaded=parseProfile(JSON.stringify(p));
+  assert.ok(loaded);
+  assert.equal(loaded.twin.set,undefined);
+  assert.equal(loaded.twin.best.easy.total,2);
+  assert.equal(loaded.twin.best.easy.key,'legacy');
+  assert.equal(loaded.twin.paid.easy,0);
+  assert.deepEqual(loaded.twin.party.left.deck,LEFT);
+  assert.equal(validateProfile(loaded),true);
+  loaded.twin.records={
+    easy:{left:{round:1,damage:0,deck:[...LEFT],relics:[],at:NOW},right:{round:1,damage:0,deck:[...LEFT],relics:[],at:NOW}},
+    hard:{left:null,right:null},abyss:{left:null,right:null},
+  };
+  assert.equal(validateProfile(loaded),false);
+});
+
+test('a rank goal counts once, a clear goal can require every listed hero, and arrivals span the request heroes',()=>{
+  REQUEST['star_boy-rank']={id:'star_boy-rank',hero:'star_boy',order:1,goal:{type:'rank',hero:'star_boy',n:4}};
+  REQUEST['siren-clear']={id:'siren-clear',hero:'siren',order:1,goal:{type:'clear',with:['siren','star_boy'],n:1}};
+  try{
+    assert.equal(requestGoal('star_boy-rank'),1);
+    assert.equal(requestGoal('siren-clear'),1);
+    const tracker=requestTracker();
+    tracker.observe({board:[{hero:'star_boy',rank:3},{hero:'siren',rank:1},null,{rank:6}]},[]);
+    tracker.observe({board:[{hero:'star_boy',rank:2},{hero:'star_boy',rank:4}]},[]);
+    const feats=tracker.feats(true);
+    assert.equal(feats.ranks.star_boy,4);assert.equal(feats.ranks.siren,1);assert.equal(feats.ranks.undefined,undefined);
+    const p=profile();
+    p.requests={next:NOW+REQUEST_GAP_MIN,active:[
+      {id:'star_boy-rank',at:NOW,seen:false,count:0,done:false},
+      {id:'siren-clear',at:NOW,seen:false,count:0,done:false},
+    ],claimed:[],after:[],read:[]};
+    ok(p,'begin',{mode:'main',deck:LEFT});
+    const low=ok(p,'settle',{token:p.active.token,round:1,won:true,feats:{won:true,casts:{},bosses:0,flags:[],ranks:{star_boy:3,siren:1}}});
+    assert.deepEqual(low.requestsDone,['siren-clear']);
+    assert.equal(p.requests.active.find(e=>e.id==='star_boy-rank').done,false);
+    p.requests={next:NOW+REQUEST_GAP_MIN,active:[{id:'star_boy-rank',at:NOW,seen:false,count:0,done:false}],claimed:[],after:[],read:[]};
+    ok(p,'begin',{mode:'main',deck:LEFT});
+    const ranked=ok(p,'settle',{token:p.active.token,round:1,won:false,feats});
+    assert.deepEqual(ranked.requestsDone,['star_boy-rank']);
+    assert.equal(p.requests.active[0].count,1);assert.equal(p.requests.active[0].done,true);assert.equal(validateProfile(p),true);
+    p.requests={next:NOW+REQUEST_GAP_MIN,active:[{id:'siren-clear',at:NOW,seen:false,count:0,done:false}],claimed:[],after:[],read:[]};
+    ok(p,'begin',{mode:'main',deck:['star_boy','snow_rabbit','night_rabbit','guardian','great_detective']});
+    const missed=ok(p,'settle',{token:p.active.token,round:1,won:true,feats:{won:true,casts:{},bosses:0,flags:[]}});
+    assert.deepEqual(missed.requestsDone,[]);assert.equal(p.requests.active[0].count,0);
+    p.requests={next:NOW+REQUEST_GAP_MIN,active:[{id:'star_boy-rank',at:NOW,seen:false,count:0,done:false}],claimed:[],after:[],read:[]};
+    ok(p,'begin',{mode:'main',deck:LEFT});
+    const bad=ok(p,'settle',{token:p.active.token,round:1,won:true,feats:{won:true,casts:{},bosses:0,flags:[],ranks:{star_boy:9}}});
+    assert.deepEqual(bad.requestsDone,[]);assert.equal(p.requests.active[0].count,0);assert.equal(validateProfile(p),true);
+    const q=profile();
+    for(const id of REQUEST_HEROES)q.heroes[id].owned=true;
+    const seen=[];let t=NOW;
+    for(let i=0;i<REQUEST_HEROES.length+1;i++){
+      const r=ok(q,'requestArrive',{},t);
+      if(!r.arrived.length)break;
+      seen.push(r.arrived[0]);t=q.requests.next;
+    }
+    assert.equal(seen.length,Math.min(REQUEST_MAX,REQUEST_HEROES.length));
+    const heroes=seen.map(id=>REQUEST[id].hero);
+    assert.equal(new Set(heroes).size,heroes.length);
+    assert.ok(heroes.every(id=>REQUEST_HEROES.includes(id)));
+    assert.equal(validateProfile(q),true);
+  }finally{
+    delete REQUEST['star_boy-rank'];delete REQUEST['siren-clear'];
+  }
 });

@@ -32,13 +32,13 @@ export const HEROES = [
     "attack": "slash",
     "trait": {
       "type": "burn",
-      "text": "자기 칸 주변(반경 250)의 적을 모두 베고, 맞은 적을 4초간 불태웁니다. 적이 코어 가까이(경로 마지막 4분의 1) 오면 공격력이 40% 오릅니다."
+      "text": "자기 칸 주변(반경 250)의 적을 모두 베고, 맞은 적에게 4초간 화상을 입힙니다. 적이 코어 가까이(경로 마지막 4분의 1) 오면 공격력이 40% 오릅니다."
     },
     "skill": {
       "name": "라그나로크",
       "cost": 70,
       "type": "inferno",
-      "text": "적 전체에게 공격력 7배 피해를 주고 7초간 강하게 불태웁니다. 코어 생명력이 절반 아래로 내려가면 강화되어 공격력 14배가 됩니다."
+      "text": "적 전체에게 공격력 7배 피해를 주고 7초간 강한 화상을 입힙니다. 코어 생명력이 절반 아래로 내려가면 강화되어 공격력 14배가 됩니다."
     },
     "heightGroup": "tall",
     "role": "선봉 · 회전 베기",
@@ -403,13 +403,13 @@ export const HEROES = [
     "attack": "fire",
     "trait": {
       "type": "splash",
-      "text": "멀리서 넓은 폭발로 공격합니다. 일반 공격 시 불타는 적에게 피해 +40%."
+      "text": "멀리서 넓은 폭발로 공격합니다. 일반 공격 시 화상 입은 적에게 피해 +40%."
     },
     "skill": {
       "name": "용의 숨결",
       "cost": 90,
       "type": "dragon",
-      "text": "적이 가장 많이 모인 곳(반경 180)에 공격력 14배 화염을 뿜고 7초간 강하게 불태웁니다."
+      "text": "적이 가장 많이 모인 곳(반경 180)에 공격력 14배 화염을 뿜고 7초간 강한 화상을 입힙니다."
     },
     "heightGroup": "tall",
     "role": "화상 연계 · 폭격",
@@ -440,16 +440,16 @@ export const HEROES = [
     "attack": "fire",
     "trait": {
       "type": "burn",
-      "text": "적이 지나는 길 위 무작위 위치에 3.9초 동안 타는 불바닥을 깔아, 지나가는 적을 불태웁니다. 목표를 바꿀 수 없습니다."
+      "text": "적이 지나는 길 위 무작위 위치에 3.9초 동안 타는 불바닥을 깔아, 지나가는 적에게 화상을 입힙니다. 목표를 바꿀 수 없습니다."
     },
     "skill": {
       "name": "작열의 문장",
       "cost": 75,
       "type": "combust",
-      "text": "적 전체에게 공격력 4배 피해를 줍니다. 이미 불타는 적은 10배로 폭발합니다. 이후 7초간 강하게 불태웁니다."
+      "text": "적 전체에게 공격력 4배 피해를 줍니다. 이미 화상 입은 적은 10배로 폭발합니다. 이후 7초간 강한 화상을 입힙니다."
     },
     "heightGroup": "tall",
-    "role": "지속 화력 · 불바닥",
+    "role": "지속 피해 · 불바닥",
     "shape": "zone",
     "range": 430,
     "radius": 64
@@ -477,16 +477,16 @@ export const HEROES = [
     "attack": "spore",
     "trait": {
       "type": "poison",
-      "text": "포자밭을 깔아 적에게 독을 쌓습니다. 독은 최대 40중첩까지 쌓이며 시간이 지날수록 피해를 줍니다. 합성할 때 모든 적에게 독 2중첩."
+      "text": "포자밭을 깔아 적에게 중독을 쌓습니다. 중독은 최대 40중첩까지 쌓이며 시간이 지날수록 피해를 줍니다. 합성할 때 모든 적에게 중독 2중첩."
     },
     "skill": {
       "name": "왕의 마지막 포자",
       "cost": 70,
       "type": "plague",
-      "text": "적 전체에게 공격력 3배 피해와 독 8중첩(12초)을 줍니다. 이미 독이 20중첩 이상인 적은 남은 독 피해의 30%를 즉시 받습니다."
+      "text": "적 전체에게 공격력 3배 피해와 중독 8중첩(12초)을 줍니다. 이미 중독이 20중첩 이상인 적은 남은 중독 피해의 30%를 즉시 받습니다."
     },
     "heightGroup": "medium",
-    "role": "독 · 포자밭",
+    "role": "중독 · 포자밭",
     "shape": "zone",
     "range": 370,
     "radius": 66
@@ -595,7 +595,7 @@ export const HEROES = [
       "name": "깨어나지 않는 밤",
       "cost": 75,
       "type": "nightmare",
-      "text": "적 전체에게 공격력 4배 피해를 주고 뒤로 밀칩니다. 6초간 받는 피해 +25%, 12초간 독 4중첩을 겁니다."
+      "text": "적 전체에게 공격력 4배 피해를 주고 뒤로 밀칩니다. 6초간 받는 피해 +25%, 12초간 중독 4중첩을 겁니다."
     },
     "heightGroup": "short",
     "role": "견제 · 악몽 덫",
@@ -855,7 +855,7 @@ export const HEROES = [
       "name": "한밤의 선물",
       "cost": 80,
       "type": "gift",
-      "text": "편성된 동료 한 명이 1성으로 합류하고, 6초 동안 모든 동료의 공격 속도가 20% 오릅니다."
+      "text": "편성된 동료 한 명을 1성으로 전장에 소환하고, 6초 동안 모든 동료의 공격 속도가 20% 오릅니다."
     },
     "heightGroup": "medium",
     "role": "선물 · 포격",
@@ -997,13 +997,13 @@ export const HEROES = [
     "attack": "blade",
     "trait": {
       "type": "regal",
-      "text": "보스에게 피해 +25%. 일반 공격 시 불타거나 성광이 3중첩인 적에게 피해 +60%."
+      "text": "보스에게 피해 +25%. 일반 공격 시 화상 입었거나 성광이 3중첩인 적에게 피해 +60%."
     },
     "skill": {
       "name": "체리 블로섬 · 왕자의 일격",
       "cost": 85,
       "type": "royal",
-      "text": "체력이 가장 높은 적 한 명에게 공격력 24배 검격을 날립니다. 대상이 불타거나 성광 3중첩이면 강화되어 공격력 48배가 됩니다."
+      "text": "체력이 가장 높은 적 한 명에게 공격력 24배 검격을 날립니다. 대상이 화상 입었거나 성광 3중첩이면 강화되어 공격력 48배가 됩니다."
     },
     "heightGroup": "tall",
     "role": "강적 결전 · 검광",
@@ -1183,7 +1183,7 @@ export const HEROES = [
     "attack": "stone",
     "trait": {
       "type": "underdog",
-      "text": "덱이 전부 노멀이면 공격력이 80% 오릅니다."
+      "text": "편성이 전부 노멀이면 공격력이 80% 오릅니다."
     },
     "skill": {
       "name": "빅쇼",
@@ -1192,7 +1192,7 @@ export const HEROES = [
       "text": "적 전체에게 공격력 10배 피해를 주고, 아군 전체가 2초 기절합니다."
     },
     "heightGroup": "tall",
-    "role": "노멀 덱 · 단일",
+    "role": "노멀 편성 · 단일",
     "shape": "single",
     "range": 560,
     "radius": 0
@@ -1472,7 +1472,7 @@ export const ARTIFACTS = [
   {
     "id": "ember",
     "name": "불씨의 심장",
-    "text": "화상 피해가 70% 늘어납니다. 불타는 적이 쓰러지면 반경 90 안의 적에게 화상이 옮겨 붙습니다.",
+    "text": "화상 피해가 70% 늘어납니다. 화상 입은 적이 쓰러지면 반경 90 안의 적에게 화상이 옮겨 붙습니다.",
     "scale": ["70%"],
     "icon": 1,
     "atlas": "relics",
@@ -1532,7 +1532,7 @@ export const ARTIFACTS = [
   {
     "id": "seed",
     "name": "숨 쉬는 씨앗",
-    "text": "독 피해가 40% 늘어납니다.",
+    "text": "중독 피해가 40% 늘어납니다.",
     "scale": ["40%"],
     "icon": 7,
     "atlas": "relics",
@@ -1692,7 +1692,7 @@ export const ARTIFACTS = [
   {
     "id": "chalice",
     "name": "독화의 성배",
-    "text": "불타면서 독이 3중첩 이상 쌓인 적이 받는 피해가 60% 늘어납니다.",
+    "text": "화상과 중독 3중첩을 함께 가진 적이 받는 피해가 60% 늘어납니다.",
     "scale": ["60%"],
     "icon": 2,
     "atlas": "relics-new",
@@ -1751,7 +1751,7 @@ export const ARTIFACTS = [
   },
   {
     "id": "dream_crystal",
-    "name": "꿈의 결정",
+    "name": "꿈의 조각",
     "text": "원정을 시작할 때 별빛을 10 더 얻고, 루미의 공격력이 100% 오릅니다.",
     "scale": [{"t":"10", "int":true}, "100%"],
     "icon": 2,
@@ -1813,7 +1813,9 @@ export const BOSSES = {
     "pattern": "seal",
     "warning": "기절 · 빛나는 한 행 2.4초",
     "exposeScale": 2,
-    "trait": "받는 노출 효과 2배",
+    "aura": 180,
+    "auraImmuneControl": "stun",
+    "trait": "행 기절 · 보스 주변 기절 무효 · 노출 2배",
     "frame": 0
   },
   "love_iris": {
@@ -1821,7 +1823,7 @@ export const BOSSES = {
     "color": "#f7b6d4",
     "pattern": "starlust",
     "warning": "사랑의 시험 · 별빛이 가득 차 있으면 별빛 −60",
-    "trait": "별빛을 가득 채워 두면 빼앗습니다",
+    "trait": "가득 찬 별빛 강탈",
     "frame": 1
   },
   "curse_iris": {
@@ -1829,7 +1831,7 @@ export const BOSSES = {
     "color": "#bc8be0",
     "pattern": "curse",
     "warning": "저주 · 동료 한 명이 해제될 때까지 행동하지 못합니다",
-    "trait": "예고 없는 저주 (등장마다 1회) · 합성·회수·자스민으로 해제",
+    "trait": "예고 없는 저주 · 합성·회수·자스민으로 해제",
     "frame": 2
   },
   "flora": {
@@ -1839,7 +1841,8 @@ export const BOSSES = {
     "warning": "꽃가루 폭풍 · 빛나는 1칸 2초 기절",
     "immune": "poison",
     "dotScale": {"burn":2},
-    "trait": "중독 무효 · 화상 피해 2배",
+    "aura": 180,
+    "trait": "보스 주변 중독 무효 · 화상 피해 2배",
     "frame": 3
   },
   "poseidon": {
@@ -1849,7 +1852,8 @@ export const BOSSES = {
     "warning": "해일의 일격 · 빛나는 1칸 2초 기절",
     "immune": "burn",
     "dotScale": {"poison":2},
-    "trait": "화상 무효 · 중독 피해 2배",
+    "aura": 180,
+    "trait": "보스 주변 화상 무효 · 중독 피해 2배",
     "frame": 4
   },
   "beelzebub": {
@@ -1876,7 +1880,7 @@ export const BOSSES = {
     "color": "#ffa88b",
     "pattern": "shuffle",
     "warning": "투신의 난무 · 2.6초 뒤 모든 동료의 자리가 뒤섞입니다",
-    "trait": "등장마다 최대 2회 전체 재배치",
+    "trait": "전체 재배치",
     "atlas": "bosses-expansion",
     "frame": 1
   },
@@ -1887,7 +1891,7 @@ export const BOSSES = {
     "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",
     "basicScale": 0.5,
     "deathWard": 180,
-    "trait": "일반 공격 피해 절반 · 주변 180 즉사 면역 · 예고된 칸에 천벌",
+    "trait": "일반 공격 피해 절반 · 보스 주변 즉사 면역 · 예고된 칸에 천벌",
     "atlas": "bosses-expansion",
     "frame": 2
   }
