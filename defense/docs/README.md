@@ -28,8 +28,9 @@ docs/
 - [SD_CAST_GUIDE.md](SD_CAST_GUIDE.md): Sol Cast V2 현행 제작 기준, 이전 일괄 교체의 기록, 실제 구조 마스터·화풍 참조, 머리/얼굴 검수와 보존 경로.
 
 - [2026-10-27 확정 밸런스 패치](archive/2026-10-27-BALANCE_FINAL.md): 수치·카오스·사과·보호·문구·측정 도구 반영.
-- [STATUS_RULES.md](STATUS_RULES.md): 독·노출·화상·제어 규칙.
-- [CHARACTER_TRAITS.md](CHARACTER_TRAITS.md): 위력 계산 경로와 특성 판정 기준.
+- [SEASON_CONTENT.md](SEASON_CONTENT.md): 유성 드래프트·별빛 서약·쌍성 원정·만월 토벌전·동료의 부탁(42명) 규칙과 측정. 2026-10-30 정식 편입.
+- [STATUS_RULES.md](STATUS_RULES.md): 중독·노출·화상·제어 규칙.
+- [CHARACTER_TRAITS.md](CHARACTER_TRAITS.md): 공격력 계산 경로와 특성 판정 기준.
 - [골드드래곤 편입·별빛 수급](archive/2026-10-29-GOLD_DRAGON.md):45해금 UR,5초 차지·개전 강화·고정 십자. [아트·재현 도구](art/gold-dragon-20261029/README.md).
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.
 - [SINGLE_HTML_OPTIMIZATION.md](SINGLE_HTML_OPTIMIZATION.md): 지금의 빌드·압축·원본 보존·검증 범위.
@@ -44,7 +45,7 @@ docs/
 
 ## 3. 기획 (plans/)
 
-- [신규 콘텐츠 테스트 빌드](plans/CONTENT_PREVIEW_TEST.md): 2026-10-29. 별빛 서약·쌍성 원정·동료의 부탁(3명분). `build.mjs --preview`의 밝음 테스트본에만 들어간다.
+- [RELIC_BALANCE_PROPOSAL.md](plans/RELIC_BALANCE_PROPOSAL.md): 2026-10-30 유물 패치 직후 GPT·Grok 정적 분석 대조와 수치 제안. 코드 미반영, 사용자 확정 전.
 - [동료 의뢰·오토 전략·미션](plans/COMPANION_REQUESTS_AUTO_STRATEGY_MISSIONS.md):2026-10-29 사용자 요청. 선호 선물·전용 대화,5인 사전 전략과 최고 기록의 시간당 효율, 조합/상황 미션. 후속 구현 과제.
 - [UPCOMING_COMPANIONS.md](plans/UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
 - [FINAL_UR_AND_RELIC_IDEAS.md](plans/FINAL_UR_AND_RELIC_IDEAS.md): 마지막 UR 동료와 신규 유물 아이디어(2026-10-26). GPT 안 평가, Claude 안, Grok 답. 구현 전 제안.

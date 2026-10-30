@@ -234,7 +234,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   if(u.hero==='demon_king')Object.assign(trait,{key:'critDamage',active:!u.cursed,label:u.cursed?'저주 · 특성 무효':'치명타 피해 +50%p'});
   if(u.hero==='miracle_larva'){
     const form=miracleForm(u),wing=form==='miracle_wing',abyss=form==='abyss_wing';
-    Object.assign(trait,{key:'evolution',form,active:!u.cursed&&(wing||abyss),label:u.cursed?'저주 · 특성 무효':wing?`인접 치명타 +${pctText(.2*rankSupport(u.rank)*special(s,u.hero))}p`:abyss?`감속 ${pctText(Math.min(.8,.25*rankControl(u.rank)*special(s,u.hero)))} · 중독 1중첩`:'우화 대기'});
+    Object.assign(trait,{key:'evolution',form,active:!u.cursed&&(wing||abyss),label:u.cursed?'저주 · 특성 무효':wing?`인접 치명타 확률 +${pctText(.2*rankSupport(u.rank)*special(s,u.hero))}p`:abyss?`감속 ${pctText(Math.min(.8,.25*rankControl(u.rank)*special(s,u.hero)))} · 중독 1중첩`:'우화 대기'});
   }
   if(u.hero==='lightning_sage'){
     const seen=new Set(),pending=index>=0&&s.board[index]?.uid===u.uid?[index]:[];
@@ -286,9 +286,9 @@ export function bestUnit(s,id){
 export function power(s,u){return unitHero(s,u).damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*TRAINING_STEP)*(s.meta?.[u.hero]?.power||1)*(1+(s.relicAttack||0))*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1)*personalTrait(s,u).damageMultiplier;}
 export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
-  if(id==='harmonious')return `조화 1종당 공격력 +${6+level*.5}% · 공속 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
+  if(id==='harmonious')return `조화 1종당 공격력 +${6+level*.5}% · 공격 속도 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 공격력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공속 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -336,9 +336,9 @@ export function liveTraitTokens(s,u){
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
 export function givenEffects(s,u,index){
   const level=s.upgrades[u.hero]||0,k=special(s,u.hero),near=neighbors(index).filter(i=>s.board[i]&&!s.board[i].cursed).length,out=[];if(u.cursed)return ['저주받아 효과 없음'];
-  if(u.hero==='siren')out.push(`인접 ${near}명 공속 +${pctText((.15+level*.03)*k*rankSupport(u.rank))}`);
+  if(u.hero==='siren')out.push(`인접 ${near}명 공격 속도 +${pctText((.15+level*.03)*k*rankSupport(u.rank))}`);
   else if(u.hero==='ancient_dragon')out.push(`인접 ${near}명 공격력 +${pctText((.2+level*.03)*k*rankSupport(u.rank))}`);
-  else if(u.hero==='harmonious'){const h=harmonyStrength(s,index);out.push(`인접 ${near}명 · 조화 ${h.count}종 · 공격력 +${pctText(h.damage)} · 공속 +${pctText(h.speed)}`);}
+  else if(u.hero==='harmonious'){const h=harmonyStrength(s,index);out.push(`인접 ${near}명 · 조화 ${h.count}종 · 공격력 +${pctText(h.damage)} · 공격 속도 +${pctText(h.speed)}`);}
   else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText((.6+level*.05)*rankSupport(u.rank)*k)}`);
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
   else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText((.7+level*.05)*k*rankControl(u.rank))}`);
@@ -410,9 +410,35 @@ function capStacks(e,type,cap){
   for(const effect of effects){effect.amount=Math.min(remaining,effect.amount);remaining-=effect.amount;}
   e.statusEffects=e.statusEffects.filter(effect=>effect.amount>0);
 }
+// Living bosses share their aura with every living enemy within `aura` path-distance, themselves included.
+// Immunities union. A scale keeps the highest value, so two of the same aura do not multiply.
+// damage() asks for this on every hit and tick, so the aura bosses are listed once per step (new spawns change the list length);
+// their life and position are still read live.
+const auraLists=new WeakMap(),NO_AURA=Object.freeze({immune:new Set(),control:new Set(),dotScale:Object.freeze({}),exposeScale:1});
+function auraBosses(s){
+  const c=auraLists.get(s);
+  if(c&&c.time===s.time&&c.enemies===s.enemies&&c.count===s.enemies.length)return c.list;
+  const list=s.enemies.filter(x=>BOSSES[x.boss]?.aura);
+  auraLists.set(s,{time:s.time,enemies:s.enemies,count:s.enemies.length,list});return list;
+}
+function auraMods(s,e){
+  const bosses=auraBosses(s);if(!bosses.some(x=>x.hp>0))return NO_AURA;
+  const p=pathPoint(e.progress),immune=new Set(),control=new Set(),dotScale={};let exposeScale=1;
+  for(const x of bosses){
+    if(x.hp<=0)continue;
+    const b=BOSSES[x.boss];
+    const q=pathPoint(x.progress);
+    if(Math.hypot(q.x-p.x,q.y-p.y)>b.aura)continue;
+    if(b.immune)immune.add(b.immune);
+    if(b.auraImmuneControl)control.add(b.auraImmuneControl);
+    if(b.dotScale)for(const [k,v] of Object.entries(b.dotScale))if(v>(dotScale[k]||0))dotScale[k]=v;
+    if(b.exposeScale>exposeScale)exposeScale=b.exposeScale;
+  }
+  return {immune,control,dotScale,exposeScale};
+}
 function addStatus(s,e,type,source,owner,amount,duration,power,crit=castCrits.get(s)){
   if(e.hp<=0||amount<=0||duration<=0)return;
-  if(e.boss&&BOSSES[e.boss]?.immune===type)return;
+  if(auraMods(s,e).immune.has(type))return;
   syncStatuses(s,e);
   const existing=e.statusEffects.find(effect=>effect.type===type&&effect.source===source),until=s.time+duration;
   if(existing){existing.amount=['poison','divine'].includes(type)?existing.amount+amount:amount;if(type==='poison')existing.amount=Math.min(POISON_CAP,existing.amount);existing.until=until;if(power!==undefined)existing.power=power;if(crit!==undefined)existing.crit=crit;}
@@ -426,6 +452,7 @@ const poisonAmp=s=>has(s,'seed')?1+RV.seed.poison*relicScaleIn(s,'seed'):1;
 // wasted by a basic attack's stun); a second ultimate control within 2 s after the last one ended lasts half again.
 export const ULT_CONTROL_REPEAT=.5;
 function addControl(s,e,type,source,owner,duration){
+  if(auraMods(s,e).control.has(type))return;
   if(e.boss&&!source.startsWith('interrupt:')){
     const ult=source.startsWith('skill:');
     if(!ult&&(e.ccImmune||0)-s.time>1e-9)return;
@@ -611,8 +638,8 @@ function noteEcho(s,e,actual,dot,instant){
 function damage(s,e,value,hero,{dot=false,recordMirror=true,instant=false,statusAt=s.time,gift=false,basic=false,dotType=null,flat=false,crit=undefined}={}){
   if(!e||e.hp<=0)return 0;
   syncStatuses(s,e,statusAt);syncSlows(s,e,statusAt);
-  const passive=e.boss?BOSSES[e.boss]:null;
-  let amount=instant?e.hp+(e.shield||0):flat?value:value*(1+e.takenBonus*(passive?.exposeScale||1))*(passive?.dotScale?.[dotType]||1)*(basic?passive?.basicScale||1:1)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1+RV.lens.boss*relicScaleIn(s,'lens'):1)*(e.boss&&has(s,'royal_seal')?1+RV.royal_seal.boss*relicScaleIn(s,'royal_seal'):1)*(e.slowTime>0&&has(s,'frost')?1+RV.frost.slowed*relicScaleIn(s,'frost'):1)*(has(s,'amulet')&&e.progress>=PATH_LENGTH*2/3?1+RV.amulet.near*relicScaleIn(s,'amulet'):1)*(has(s,'chalice')&&e.burn>0&&e.poison>=RV.chalice.poison?1+RV.chalice.taken*relicScaleIn(s,'chalice'):1)*(1+(e.dawn||0));
+  const aura=auraMods(s,e),own=e.boss?BOSSES[e.boss]:null;
+  let amount=instant?e.hp+(e.shield||0):flat?value:value*(1+e.takenBonus*aura.exposeScale)*(aura.dotScale[dotType]||1)*(basic?own?.basicScale||1:1)*(e.boss?(HERO[hero]?.bossDamage||1):1)*(e.boss&&has(s,'lens')?1+RV.lens.boss*relicScaleIn(s,'lens'):1)*(e.boss&&has(s,'royal_seal')?1+RV.royal_seal.boss*relicScaleIn(s,'royal_seal'):1)*(e.slowTime>0&&has(s,'frost')?1+RV.frost.slowed*relicScaleIn(s,'frost'):1)*(has(s,'amulet')&&e.progress>=PATH_LENGTH*2/3?1+RV.amulet.near*relicScaleIn(s,'amulet'):1)*(has(s,'chalice')&&e.burn>0&&e.poison>=RV.chalice.poison?1+RV.chalice.taken*relicScaleIn(s,'chalice'):1)*(1+(e.dawn||0));
   if(!instant&&!flat){
     if(e.rage>0&&!dot)amount*=.75;
     if((dotType==='burn'||dotType==='poison')&&s.buffs.venom>0)amount*=1+VENOM_PLAGUE.amp;
@@ -798,7 +825,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   // strongest counts (relic bonuses add up); the families multiply. Speed follows the same rule.
   const power_={aura:0,ult:0,relic:0},speed_={aura:0,ult:0,other:trait.speedBonus};
   const damageBonus=(family,name,value)=>{if(family==='relic')power_.relic+=value;else power_[family]=Math.max(power_[family],value);if(detail)bonuses.push(`${name} +${Math.round(value*100)}% 공격력`);};
-  const speedBonus=(family,name,value)=>{if(family==='other')speed_.other+=value;else speed_[family]=Math.max(speed_[family],value);if(detail)bonuses.push(`${name} +${Math.round(value*100)}% 공속`);};
+  const speedBonus=(family,name,value)=>{if(family==='other')speed_.other+=value;else speed_[family]=Math.max(speed_[family],value);if(detail)bonuses.push(`${name} +${Math.round(value*100)}% 공격 속도`);};
   if(detail&&trait.label)bonuses.push(trait.label);
   if(detail&&s.globalAttack)bonuses.push(`원정 축복 +${Math.round(s.globalAttack*100)}% 공격력`);
   if(detail&&s.surgeWave===s.wave)bonuses.push('새벽검 +25% 공격력');
@@ -816,7 +843,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(has(s,'sprout')&&u.rank<=2)damageBonus('relic','풋내기 훈장',RV.sprout.power*relicScaleIn(s,'sprout'));
   if(has(s,'alchemy')&&Number.isInteger(u.mergedWave)&&u.mergedWave<=s.wave&&s.wave<u.mergedWave+RV.alchemy.waves)damageBonus('relic','연금',RV.alchemy.power*relicScaleIn(s,'alchemy'));
   if(has(s,'tide')&&s.gauge>=RV.tide.gauge)damageBonus('relic','파도의 소라',RV.tide.power*relicScaleIn(s,'tide'));
-  if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic','꿈의 결정',RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
+  if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic','꿈의 조각',RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
   if(s.buffs.awaken>0)damageBonus('ult','각성',ULT_BUFF.awaken.power*buffScale(s,'awaken'));
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',.5*buffScale(s,'radiance'));
   if(unitForm(s,u)==='trauma'){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
@@ -1145,7 +1172,7 @@ export function castPreview(s,id){
       lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해집니다.`);
     }else{
       const target=highestMaxHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
-      const factor=hot?48:24;boost={on:hot,label:hot?'강화':'강화 대기',hint:hot?'':`대상이 불타거나 성광 3중첩이면 강화되어 ${hit(48)}가 됩니다.`};
+      const factor=hot?48:24;boost={on:hot,label:hot?'강화':'강화 대기',hint:hot?'':`대상이 화상 입었거나 성광 3중첩이면 강화되어 ${hit(48)}가 됩니다.`};
       lines.push(`체력이 가장 높은 적에게 공격력 ${factor}배, ${hit(factor)}를 줍니다.`);
       if(hot)lines.push('불이 꺼지거나 성광이 흩어지기 전에 맞아야 강화가 유지됩니다.');
     }
@@ -1171,19 +1198,19 @@ export function castPreview(s,id){
     lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='combust'){
     const burning=targets.filter(e=>snapshot(e).burnTime>0).length;
-    if(!targets.length||burning===0)lines.push(`적에게 공격력 4배, ${allHit(4)}를 줍니다. 이미 불타면 ${allHit(10)}입니다.`);
-    else if(burning===targets.length)lines.push(`지금 불타는 적에게 공격력 10배, ${allHit(10)}를 줍니다.`);
-    else lines.push(`불타는 적 ${burning}명에게 ${allHit(10)}, 나머지에게 ${allHit(4)}를 줍니다.`);
+    if(!targets.length||burning===0)lines.push(`적에게 공격력 4배, ${allHit(4)}를 줍니다. 이미 화상 입은 적은 ${allHit(10)}입니다.`);
+    else if(burning===targets.length)lines.push(`지금 화상 입은 적에게 공격력 10배, ${allHit(10)}를 줍니다.`);
+    else lines.push(`화상 입은 적 ${burning}명에게 ${allHit(10)}, 나머지에게 ${allHit(4)}를 줍니다.`);
     lines.push(`${BURN.skillSeconds}초 동안 초당 ${burnPerSecond}의 화상을 입습니다.`);
   }else if(type==='plague'){
     const stacks=8,ready=targets.filter(e=>poisonNow(e).reduce((n,a)=>n+a.stacks,0)>=20);
     lines.push(`적 전체에게 공격력 3배, ${allHit(3)}와 12초 동안 독 ${stacks}중첩을 줍니다.`);
     lines.push(`이 독은 중첩당 초당 ${num(base*POISON_POWER_RATIO*poisonAmp(s))} 피해입니다.`);
-    if(!ready.length)lines.push('이미 독이 20중첩 이상인 적은 남은 독 피해의 30%를 먼저 받습니다.');
+    if(!ready.length)lines.push('이미 중독이 20중첩 이상인 적은 남은 중독 피해의 30%를 먼저 받습니다.');
     else{
       const burst=e=>.3*poisonNow(e).reduce((n,{effect,stacks:count})=>n+count*effect.power*POISON_POWER_RATIO*Math.max(0,effect.until-s.time),0)*poisonAmp(s);
       const amounts=ready.map(burst),same=amounts.every(v=>Math.round(v)===Math.round(amounts[0]));
-      lines.push(same?`독이 20중첩 이상인 적 ${ready.length}명은 먼저 남은 독의 30%인 ${num(amounts[0])} 피해를 받습니다.`:`독이 20중첩 이상인 적 ${ready.length}명은 각자 남은 독 피해의 30%를 먼저 받습니다.`);
+      lines.push(same?`중독이 20중첩 이상인 적 ${ready.length}명은 먼저 남은 중독의 30%인 ${num(amounts[0])} 피해를 받습니다.`:`중독이 20중첩 이상인 적 ${ready.length}명은 각자 남은 중독 피해의 30%를 먼저 받습니다.`);
     }
   }else if(type==='expose'){
     const raw=(.35+(s.upgrades.great_detective||0)*.02)*control*rankControl(u.rank),expose=Math.min(DAMAGE_TAKEN_CAP,raw);
@@ -1306,9 +1333,9 @@ export function castPreview(s,id){
 
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
 // Targets are random: a random row, random occupied cells, or a random companion for the curse.
-// Repeat-limited patterns (curse, shuffle) count per boss so one appearance never spams them.
+// Repeat-limited patterns (shuffle) count per boss so one appearance never spams them. Curse keeps firing.
 // BOSS_LIMIT.judgement is Astea's judgement (max 2), not Thor's column stun.
-const BOSS_LIMIT={curse:1,shuffle:2,judgement:2};
+const BOSS_LIMIT={shuffle:3,judgement:2};
 // Targeted patterns (lit cells) give longer to drag the unit out; board-wide ones stay at 2.6 s.
 export const TELEGRAPH_TIME=Object.freeze({seal:3.5,storm:3.5,stun1:3.5,judgement:3.5});
 function bossCells(s,pattern){
@@ -1365,7 +1392,7 @@ function bossStep(s,e,dt){
   if(BOSS_LIMIT[pattern]!==undefined&&casts>=BOSS_LIMIT[pattern]){e.skillIn=99;return;}
   e.casts=casts+1;
   if(pattern==='curse'){
-    // Unannounced, once per appearance: one random active companion is sealed until it is merged, sold or cleansed.
+    // Unannounced: one random active companion is sealed until it is merged, sold or cleansed.
     const pool=s.board.flatMap((u,i)=>u&&!u.cursed?[i]:[]);e.skillIn=boss.every||9;
     if(!pool.length)return;
     const i=pool[Math.floor(random(s)*pool.length)];

@@ -2008,3 +2008,10 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .afterword{margin-top:22px;padding-top:16px;border-top:1px dashed var(--hair)}
 .afterword h4{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;font-family:var(--display);font-weight:400;font-size:19px}
 .afterword h4 small{font-family:var(--body);font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--rose)}
+/* Twin-star records: a hero kept in one road's record is locked for the other road. */
+.twin-face[data-locked=true]{opacity:.45;filter:grayscale(.6)}
+.twin-lock{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--danger)}
+.twin-lock .ic{width:12px;height:12px}
+.twin-rec{position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:rgba(8,12,34,.75);color:var(--side,#cfdcff)}
+.twin-rec.left{--side:#cfdcff}.twin-rec.right{--side:#ffd98a}
+.twin-rec .ic{width:11px;height:11px}

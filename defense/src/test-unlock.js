@@ -27,8 +27,8 @@ export const TEST_TOOLS=Object.freeze([
   {kind:'stage90',label:'스테이지 90까지 클리어'},
   {kind:'dawn-max',label:'제2정원 소프트캡까지'},
   {kind:'dawn-reset',label:'제2정원 처음으로'},
-  {kind:'weekly-reset',label:'주간 드래프트 초기화'},
-  {kind:'monthly-reset',label:'월간 보스전 초기화'},
+  {kind:'weekly-reset',label:'유성 드래프트 초기화'},
+  {kind:'monthly-reset',label:'만월 토벌전 초기화'},
   {kind:'request-now',label:'부탁 바로 도착'},
   {kind:'season-reset',label:'서약·쌍성 시즌 초기화'},
 ]);
@@ -42,8 +42,8 @@ export function testGrant(p,kind='wallet'){
     case 'stage90':p.cleared=Math.max(p.cleared,90);return '스테이지 90까지 클리어한 상태로 바꿨어요';
     case 'dawn-max':Object.assign(p.beds,{crit:30,critDamage:25,stardust:49});p.cleared=Math.max(p.cleared,60);return '제2정원을 소프트캡까지 키웠어요';
     case 'dawn-reset':Object.assign(p.beds,{crit:0,critDamage:0,stardust:0});return '제2정원을 처음 상태로 되돌렸어요';
-    case 'weekly-reset':if(p.active?.mode==='weekly')p.active=null;p.weekly=null;return '주간 드래프트를 다시 입장할 수 있게 했어요';
-    case 'monthly-reset':if(p.active?.mode==='monthly')p.active=null;p.monthly=null;p.monthlyBest=null;p.monthlyClaim=null;return '월간 보스전 기록과 보상을 초기화했어요';
+    case 'weekly-reset':if(p.active?.mode==='weekly')p.active=null;p.weekly=null;return '유성 드래프트를 다시 입장할 수 있게 했어요';
+    case 'monthly-reset':if(p.active?.mode==='monthly')p.active=null;p.monthly=null;p.monthlyBest=null;p.monthlyClaim=null;return '만월 토벌전 기록과 보상을 초기화했어요';
     case 'request-now':
       if(!p.requests||typeof p.requests!=='object'||Array.isArray(p.requests))p.requests={next:0,active:[],claimed:[],after:[],read:[]};
       else p.requests.next=0;
