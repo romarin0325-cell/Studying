@@ -1255,19 +1255,19 @@
     },
     {
       "id": "gold_dragon",
-      "source": "defense/assets/memorial/replacements/gold_dragon/4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555.avif",
-      "sha256": "4a8b9cb2c89b4a9768a3ef788dc528448dd48e00b859f1723bfe09f8f47f4555",
+      "source": "defense/assets/memorial/replacements/gold_dragon/446efdbf954dcfe8d22b4406c1535aad1e3a92176c948358e6aea8be604d245e.avif",
+      "sha256": "446efdbf954dcfe8d22b4406c1535aad1e3a92176c948358e6aea8be604d245e",
       "width": 720,
       "height": 1080,
-      "bytes": 58403,
-      "sourceSha256": "8644f560115f835e6b5c5d7700b5b0cc81cd3a6a9953c61490e33579ffa721d3",
+      "bytes": 50063,
+      "sourceSha256": "1e395f8cf33cc79c7723e5d91a194a05be9a0486d0c6bf54d711ce15cfb39e89",
       "webp": {
-        "source": "defense/assets/memorial-webp/replacements/gold_dragon/d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c.webp",
-        "sha256": "d0b78bf65b5a88bf91a47b0ca1ea74203b7d17c968bc904ca1e76b54b000338c",
+        "source": "defense/assets/memorial-webp/replacements/gold_dragon/3c97b88aeecd123594789af85b9a138ddc7257db83608d7a122249c180ecaff2.webp",
+        "sha256": "3c97b88aeecd123594789af85b9a138ddc7257db83608d7a122249c180ecaff2",
         "width": 720,
         "height": 1080,
-        "bytes": 99294,
-        "quality": 76
+        "bytes": 92396,
+        "quality": 80
       }
     },
     {

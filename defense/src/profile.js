@@ -1,8 +1,8 @@
-import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from './content.js';
+import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN,MAX_RANK} from './content.js';
 import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
-import {TEAM_SIZE,SAVE_KEY,UNLOCKED,PREVIEW} from './team-config.js';
+import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
 import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
@@ -10,8 +10,8 @@ import {questionOf} from './quiz.js';
 import {CONSTELLATIONS} from './library.js';
 import {season} from './preview/season.js';
 import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,OATH_BANDS} from './preview/oath.js';
-import {twinParty,twinPartyProblem,twinSetKey,twinState,twinBandReward,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES} from './preview/twin.js';
-import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState} from './preview/requests.js';
+import {twinParty,twinPartyProblem,twinLocks,twinState,twinBandReward,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES,TWIN_SIDE} from './preview/twin.js';
+import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState,requestGoal} from './preview/requests.js';
 import {REQUEST_HEROES,REQUEST_REWARD} from './preview/requests-data.js';
 
 export {SAVE_KEY};
@@ -151,7 +151,11 @@ export function migrateMemories(p){
     m.of=now;
   }
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
+// Twin-star used to keep one shared "set" for the current party. Records are per side now; the old field cannot be read.
+export function migrateTwin(p){
+  if(p?.twin&&typeof p.twin==='object'&&!Array.isArray(p.twin)&&Object.hasOwn(p.twin,'set'))delete p.twin.set;
+}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
@@ -194,7 +198,6 @@ export function migrateBond(p){
 }
 // Bosses a player has met: the weekly and monthly lineups only use these (stage k has boss k).
 export const metBosses=p=>Math.min(9,p.cleared);
-const refused=()=>({ok:false,message:'사용할 수 없는 동작입니다.'});
 function validOathRecord(r){
   if(!r||typeof r!=='object'||typeof r.period!=='string'||!/^S-?\d+$/.test(r.period)||typeof r.token!=='string'||!r.token||r.token.length>100||!integer(r.at)||season(r.at).id!==r.period||!TIERS[r.tier])return false;
   return !oathConflict(r.oaths)&&Array.isArray(r.deck)&&r.deck.length===TEAM_SIZE&&new Set(r.deck).size===r.deck.length&&r.deck.every(id=>HERO[id])&&!oathDeckProblem(r.oaths,r.deck)&&r.score===oathScore(r.tier,r.oaths);
@@ -208,7 +211,17 @@ function validOath(p){
   return !(o.best&&o.lifetime&&o.lifetime.score<o.best.score);
 }
 function validTwinResult(s){return !!s&&typeof s==='object'&&integer(s.round,TWIN_WAVES)&&Number.isFinite(s.damage)&&s.damage>=0&&s.damage<1e15;}
-function validTwinEntry(e){return !!e&&validTwinResult(e.left)&&validTwinResult(e.right)&&e.total===e.left.round+e.right.round&&typeof e.key==='string'&&e.key.length<=1000&&integer(e.at);}
+function validTwinEntry(e){return !!e&&validTwinResult(e.left)&&validTwinResult(e.right)&&e.total===e.left.round+e.right.round&&integer(e.at);}
+function validTwinRecord(p,r){
+  if(!r||typeof r!=='object'||Array.isArray(r)||!integer(r.round,TWIN_WAVES)||!Number.isFinite(r.damage)||r.damage<0||r.damage>=1e15||!integer(r.at))return false;
+  if(!Array.isArray(r.deck)||r.deck.length!==TEAM_SIZE||new Set(r.deck).size!==r.deck.length||r.deck.some(id=>!p.heroes?.[id]?.owned))return false;
+  return Array.isArray(r.relics)&&r.relics.length<=3&&new Set(r.relics).size===r.relics.length&&r.relics.every(id=>p.relics?.[id]?.owned);
+}
+function twinRecordsDisjoint(a,b){
+  if(!a||!b)return true;
+  const heroes=[...a.deck,...b.deck],relics=[...a.relics,...b.relics];
+  return new Set(heroes).size===heroes.length&&new Set(relics).size===relics.length;
+}
 function validTwin(p){
   if(p.twin===undefined)return true;
   const t=p.twin;if(!t||typeof t!=='object'||Array.isArray(t))return false;
@@ -223,11 +236,15 @@ function validTwin(p){
     const heroes=[...t.party.left.deck,...t.party.right.deck],relics=[...t.party.left.relics,...t.party.right.relics];
     if(new Set(heroes).size!==heroes.length||new Set(relics).size!==relics.length)return false;
   }
-  const progress=t.set||t.lifetime||t.best&&TIER_IDS.some(id=>t.best[id])||t.paid&&TIER_IDS.some(id=>t.paid[id]);
+  const progress=t.records||t.lifetime||t.best&&TIER_IDS.some(id=>t.best[id])||t.paid&&TIER_IDS.some(id=>t.paid[id]);
   if(progress&&!/^S-?\d+$/.test(t.period||''))return false;
-  if(t.set!==undefined&&t.set!==null){
-    if(!t.party||!TIERS[t.set.tier]||typeof t.set.key!=='string'||t.set.key!==twinSetKey(twinParty({twin:{party:t.party}}),t.set.tier))return false;
-    for(const side of TWIN_SIDES)if(t.set[side]!==null&&!validTwinResult(t.set[side]))return false;
+  if(t.records!==undefined&&t.records!==null){
+    if(typeof t.records!=='object'||Array.isArray(t.records))return false;
+    for(const tier of TIER_IDS){
+      const row=t.records[tier];if(!row||typeof row!=='object'||Array.isArray(row))return false;
+      for(const side of TWIN_SIDES)if(row[side]!=null&&!validTwinRecord(p,row[side]))return false;
+      if(!twinRecordsDisjoint(row.left,row.right))return false;
+    }
   }
   if(t.best!==undefined&&t.best!==null){if(typeof t.best!=='object')return false;for(const tier of TIER_IDS)if(t.best[tier]!=null&&!validTwinEntry(t.best[tier]))return false;}
   if(t.paid!==undefined&&t.paid!==null){
@@ -246,7 +263,7 @@ function validRequests(p){
   const r=p.requests;if(!r||typeof r!=='object'||Array.isArray(r)||!integer(r.next)||!Array.isArray(r.active)||r.active.length>REQUEST_MAX||!Array.isArray(r.claimed)||!Array.isArray(r.after)||!Array.isArray(r.read))return false;
   const heroes=new Set(),ids=new Set(),orders={};
   for(const e of r.active){
-    const req=REQUEST[e?.id];if(!req||ids.has(e.id)||heroes.has(req.hero)||!integer(e.at)||typeof e.seen!=='boolean'||!integer(e.count,req.goal.n)||typeof e.done!=='boolean'||e.done!==(e.count>=req.goal.n))return false;
+    const req=REQUEST[e?.id],target=requestGoal(e?.id);if(!req||ids.has(e.id)||heroes.has(req.hero)||!integer(e.at)||typeof e.seen!=='boolean'||!integer(e.count,target)||typeof e.done!=='boolean'||e.done!==(e.count>=target))return false;
     ids.add(e.id);heroes.add(req.hero);
   }
   for(const id of r.claimed){const req=REQUEST[id];if(!req||ids.has(id))return false;(orders[req.hero]||=[]).push(req.order);}
@@ -259,6 +276,10 @@ function validRequests(p){
 function validFeats(feats){
   if(!feats||typeof feats!=='object'||Array.isArray(feats)||typeof feats.won!=='boolean'||!feats.casts||typeof feats.casts!=='object'||Array.isArray(feats.casts)||!integer(feats.bosses)||!Array.isArray(feats.flags))return false;
   if(Object.entries(feats.casts).some(([id,n])=>!HERO[id]||!integer(n))||feats.flags.some(f=>!REQUEST_FLAGS.includes(f)))return false;
+  if(feats.ranks!==undefined){
+    if(!feats.ranks||typeof feats.ranks!=='object'||Array.isArray(feats.ranks))return false;
+    if(Object.entries(feats.ranks).some(([id,n])=>!HERO[id]||!integer(n,MAX_RANK)||n<1))return false;
+  }
   return true;
 }
 function applyRequestProgress(p,deck,feats){
@@ -266,13 +287,17 @@ function applyRequestProgress(p,deck,feats){
   const done=[];
   for(const e of list){
     if(!e||e.done||!REQUEST[e.id])continue;
-    const goal=REQUEST[e.id].goal;let add=0;
-    if(goal.type==='clear'){if(feats.won&&(!goal.with||deck.includes(goal.with))&&(!goal.rarities||deck.every(id=>goal.rarities.includes(HERO[id]?.rarity))))add=1;}
+    const goal=REQUEST[e.id].goal,target=requestGoal(e.id);let add=0;
+    if(goal.type==='clear'){
+      const withIds=goal.with==null?[]:Array.isArray(goal.with)?goal.with:[goal.with];
+      if(feats.won&&withIds.every(id=>deck.includes(id))&&(!goal.rarities||deck.every(id=>goal.rarities.includes(HERO[id]?.rarity))))add=1;
+    }
     else if(goal.type==='casts')add=feats.casts[goal.hero]||0;
     else if(goal.type==='bosses'){if(deck.includes(goal.with))add=feats.bosses;}
     else if(goal.type==='flag'&&feats.flags.includes(goal.flag))add=1;
+    else if(goal.type==='rank'&&(feats.ranks?.[goal.hero]||0)>=goal.n)add=1;
     if(!add)continue;
-    e.count=Math.min(goal.n,e.count+add);if(e.count>=goal.n){e.done=true;done.push(e.id);}
+    e.count=Math.min(target,e.count+add);if(e.count>=target){e.done=true;done.push(e.id);}
   }
   return done;
 }
@@ -288,22 +313,21 @@ function settleOath(p,a,args,now){
 }
 function settleTwin(p,a,args,now){
   const st=twinState(p,now),tier=a.tier||'easy',side=a.side,round=Math.max(0,Math.min(TWIN_WAVES,args.round));
-  const raw=args.damage??0,damage=Number.isFinite(raw)&&raw>0?raw:0,key=twinSetKey(st.party,tier);
-  const set=st.set&&st.set.key===key&&st.set.tier===tier?{key,tier,left:st.set.left?{...st.set.left}:null,right:st.set.right?{...st.set.right}:null}:{key,tier,left:null,right:null};
-  const prev=set[side],better=!prev||round>prev.round||round===prev.round&&damage>prev.damage;
-  set[side]=better?{round,damage}:{round:prev.round,damage:prev.damage};
-  const left=set.left||{round:0,damage:0},right=set.right||{round:0,damage:0},total=left.round+right.round,prevBest=st.best[tier];
+  const raw=args.damage??0,damage=Number.isFinite(raw)&&raw>0?raw:0,records=st.records;
+  const deck=[...a.deck],relics=[...(a.relics||[])];
+  records[tier]={...records[tier],[side]:{round,damage,deck,relics,at:now}};
+  const total=(records[tier].left?.round||0)+(records[tier].right?.round||0),prevBest=st.best[tier];
   const newBest=!prevBest||total>prevBest.total;
-  const entry=newBest?{total,left:{round:left.round,damage:left.damage},right:{round:right.round,damage:right.damage},key,at:now}:prevBest;
+  const snap=name=>({round:records[tier][name]?.round||0,damage:records[tier][name]?.damage||0});
+  const entry=newBest?{total,left:snap('left'),right:snap('right'),at:now}:prevBest;
   const reached=TWIN_BANDS.filter(b=>(entry?.total||0)>=b.total).length,bands=[];
   for(let i=st.paid[tier]||0;i<reached;i++)bands.push({total:TWIN_BANDS[i].total,reward:twinBandReward(tier,i)});
   const rank=id=>TIER_IDS.indexOf(id);let lifetime=st.lifetime;
   if(!lifetime||rank(tier)>rank(lifetime.tier)||rank(tier)===rank(lifetime.tier)&&total>lifetime.total)lifetime={tier,total,at:now};
-  p.twin={period:st.period,party:st.party,set,best:{...st.best,[tier]:entry},paid:{...st.paid,[tier]:reached},lifetime};
-  return {newBest,side,round,setTotal:total,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
+  p.twin={period:st.period,party:st.party,records,best:{...st.best,[tier]:entry},paid:{...st.paid,[tier]:reached},lifetime};
+  return {newBest,side,round,total,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
 }
 function beginPreview(p,mode,args,now){
-  if(!PREVIEW)return refused();
   if(p.cleared<TIERS.easy.unlock)return {ok:false,message:`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`};
   const tier=args.tier||'easy';if(!TIERS[tier]||p.cleared<TIERS[tier].unlock)return {ok:false,message:`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`};
   const stage=oathChapter(season(now).index,p.cleared)+1;
@@ -317,6 +341,11 @@ function beginPreview(p,mode,args,now){
   }
   if(!TWIN_SIDES.includes(args.side))return {ok:false,message:'별길을 확인하세요.'};
   const party=twinParty(p),problem=twinPartyProblem(p,party);if(problem)return {ok:false,message:problem};
+  const locked=twinLocks(p,now,tier,args.side),mine=party[args.side];
+  if(mine.deck.some(id=>locked.heroes.includes(id))||mine.relics.some(id=>locked.relics.includes(id))){
+    const name=TWIN_SIDE[args.side==='left'?'right':'left'].name;
+    return {ok:false,message:`${name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${name}에 다시 도전하면 풀려요.`};
+  }
   const relics=party[args.side].relics;random(p);
   p.active={mode,stage,deck:[...party[args.side].deck],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(relics.map(id=>[id,relicLevel(p.relics[id])])),tier,side:args.side,relics:[...relics]};
   return {ok:true};
@@ -432,7 +461,7 @@ export function command(p,action,args={},now=Date.now()){
       if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
       p.dust+=args.won?40+a.stage*8:12;
     }else if(a.mode==='weekly')reward=weeklyReward(a.tier||'easy',Math.min(CHALLENGE_WAVES,args.round),!!args.won);
-    let record=null,newBest=false,score=0,bands=[],side=null,setTotal=0,shownRound=0;
+    let record=null,newBest=false,score=0,bands=[],side=null,total=0,shownRound=0;
     if(a.mode==='monthly'){
       record={period:calendar(now).month,token:a.token,round:args.round,damage:args.damage??0,seconds:args.seconds??0,at:now,deck:[...a.deck],tier:a.tier||'easy'};
       if(!validRecord(record))return no('전투 기록을 확인하세요.');
@@ -440,18 +469,18 @@ export function command(p,action,args={},now=Date.now()){
       if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
     }
     if(a.mode==='oath'){const out=settleOath(p,a,args,now);record=out.record;newBest=out.newBest;score=out.score;bands=out.bands;reward+=out.pay;}
-    if(a.mode==='twin'){const out=settleTwin(p,a,args,now);newBest=out.newBest;side=out.side;setTotal=out.setTotal;shownRound=out.round;bands=out.bands;reward+=out.pay;}
+    if(a.mode==='twin'){const out=settleTwin(p,a,args,now);newBest=out.newBest;side=out.side;total=out.total;shownRound=out.round;bands=out.bands;reward+=out.pay;}
     const perfect=a.mode==='main'&&!!args.won&&args.perfect===true;
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
-    const requestsDone=PREVIEW&&args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
+    const requestsDone=args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
     p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;
-    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,setTotal,bands}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
+    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
   }
   if(action==='claimMonthly'){
-    const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 월간 최고 기록을 확인하세요.');
+    const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 만월 토벌전 최고 기록을 확인하세요.');
     if(p.monthly===record.period)return no('이번 달 기록 보상은 이미 확정했습니다.');
     const reward=monthlyReward(record);p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
-    return {ok:true,reward,message:`월간 기록 보상 확정 · 꿈의결정 +${reward}`};
+    return {ok:true,reward,message:`만월 토벌전 기록 보상 확정 · 꿈의결정 +${reward}`};
   }
   if(action==='answer'){
     const q=questionOf(args.kind,args.id);if(!q||!integer(args.choice,q.choices.length-1))return no('문제를 확인하세요.');
@@ -470,16 +499,15 @@ export function command(p,action,args={},now=Date.now()){
   }
   if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced','cutin'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
   if(action==='twinParty'){
-    if(!PREVIEW)return refused();if(p.active?.mode==='twin')return no('진행 중인 쌍성 원정을 먼저 마치세요.');
+    if(p.active?.mode==='twin')return no('진행 중인 쌍성 원정을 먼저 마치세요.');
     const party={left:{deck:args.left?.deck,relics:args.left?.relics},right:{deck:args.right?.deck,relics:args.right?.relics}};
     const problem=twinPartyProblem(p,party);if(problem)return no(problem);
     const next={left:{deck:[...party.left.deck],relics:[...party.left.relics]},right:{deck:[...party.right.deck],relics:[...party.right.relics]}};
     const cur=p.twin&&typeof p.twin==='object'&&!Array.isArray(p.twin)?p.twin:{};
-    p.twin={...cur,party:next,set:cur.set&&twinSetKey(next,cur.set.tier)===cur.set.key?cur.set:null};
+    const nextTwin={...cur,party:next};delete nextTwin.set;p.twin=nextTwin;
     return {ok:true};
   }
   if(action==='requestArrive'){
-    if(!PREVIEW)return refused();
     const state=requestState(p,now);if(!(now>=state.next)||state.active.length>=REQUEST_MAX)return {ok:true,arrived:[]};
     const claimed=new Set(state.claimed),busy=new Set(state.active.map(e=>REQUEST[e.id]?.hero)),candidates=[];
     for(const hero of REQUEST_HEROES){
@@ -493,14 +521,14 @@ export function command(p,action,args={},now=Date.now()){
     return {ok:true,arrived:[id]};
   }
   if(action==='requestSeen'){
-    if(!PREVIEW)return refused();const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');e.seen=true;return {ok:true};
+    const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');e.seen=true;return {ok:true};
   }
   if(action==='requestDecline'){
-    if(!PREVIEW)return refused();const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');if(e.done)return no('이미 끝낸 부탁은 거절할 수 없습니다.');
+    const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');if(e.done)return no('이미 끝낸 부탁은 거절할 수 없습니다.');
     p.requests.active=p.requests.active.filter(x=>x!==e);return {ok:true};
   }
   if(action==='requestThank'){
-    if(!PREVIEW)return refused();const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');if(!e.done)return no('아직 끝나지 않은 부탁입니다.');
+    const e=p.requests?.active?.find(x=>x.id===args.id);if(!e)return no('부탁을 찾을 수 없습니다.');if(!e.done)return no('아직 끝나지 않은 부탁입니다.');
     const hero=REQUEST[e.id].hero,gift=FAVORITE[hero];p.gifts[gift]=Math.min(999,p.gifts[gift]+REQUEST_REWARD.gifts);addBond(p.heroes[hero],REQUEST_REWARD.bond);
     p.requests.active=p.requests.active.filter(x=>x!==e);p.requests.claimed.push(e.id);
     const afterword=Object.values(REQUEST).filter(r=>r.hero===hero).every(r=>p.requests.claimed.includes(r.id));
@@ -508,7 +536,7 @@ export function command(p,action,args={},now=Date.now()){
     return {ok:true,hero,gift,points:REQUEST_REWARD.bond,afterword};
   }
   if(action==='requestAfterRead'){
-    if(!PREVIEW)return refused();if(!Array.isArray(p.requests?.after)||!p.requests.after.includes(args.hero))return no('아직 후기를 볼 수 없습니다.');
+    if(!Array.isArray(p.requests?.after)||!p.requests.after.includes(args.hero))return no('아직 후기를 볼 수 없습니다.');
     if(!p.requests.read.includes(args.hero))p.requests.read.push(args.hero);return {ok:true};
   }
   if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}

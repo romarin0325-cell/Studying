@@ -11,11 +11,13 @@ export function requestState(p,now){
     claimed:Array.isArray(r.claimed)?[...r.claimed]:[],after:Array.isArray(r.after)?[...r.after]:[],read:Array.isArray(r.read)?[...r.read]:[],
   };
 }
-export function requestGoal(id){return REQUEST[id]?.goal.n;}
+// Rank goals are done once (the star count lives on the goal). Every other goal counts to goal.n.
+export function requestGoal(id){const goal=REQUEST[id]?.goal;if(!goal)return undefined;return goal.type==='rank'?1:goal.n;}
 export function requestTracker(){
-  const casts={},flags=new Set();let bosses=0;
+  const casts={},ranks={},flags=new Set();let bosses=0;
   return {
     observe(run,events){
+      if(Array.isArray(run?.board))for(const u of run.board)if(u?.hero&&Number.isInteger(u.rank)&&u.rank>0)ranks[u.hero]=Math.max(ranks[u.hero]||0,u.rank);
       const batch=Array.isArray(events)?events:[];
       for(const e of batch){
         if(!e||typeof e!=='object')continue;
@@ -26,6 +28,6 @@ export function requestTracker(){
       }
       if(batch.some(e=>e?.type==='skill'&&e.hero==='ash')&&!batch.some(e=>e?.type==='reduce'&&e.by==='ash'))flags.add('spared');
     },
-    feats(won){return {won:!!won,casts:{...casts},bosses,flags:[...flags]};},
+    feats(won){return {won:!!won,casts:{...casts},bosses,flags:[...flags],ranks:{...ranks}};},
   };
 }
