@@ -20,14 +20,17 @@ const scripts = [...source.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 if (scripts.length !== 2 || !scripts[1][1].includes('const RPG =')) {
   throw new Error('Card controller contract changed; review the DREAMWEAVER builder.');
 }
-const dependencies = ['data.js', 'vocab_data.js', 'collocation_data.js', 'grammar_data.js',
-  'toeic.js', 'toeic_explanations.js', 'api.js', 'logic.js', 'skill_display.js', 'card_pool_rules.js', 'battle_runtime.js',
-  'rpg_features.js', 'card_pool_view.js', 'listening_data.js', 'fortune_cookie.js', 'music_data.js', 'music_player.js'];
+// Use the same ordered manifest as the original UI, including future datasets.
+const dependencies = [...scripts[0][1].matchAll(/\{\s*src:\s*'([^']+)'/g)].map(match => match[1]);
+if (!dependencies.length || dependencies.some(file => path.basename(file) !== file || !file.endsWith('.js'))) {
+  throw new Error('Invalid shared game dependency list.');
+}
 const inline = code => `<script>${code.replace(/<\/script/gi, '<\\/script')}</script>`;
 const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(game, name), 'utf8')));
 const css = source.match(/<style>([\s\S]*?)<\/style>/)[1];
 const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
 const cardPoolCSS = await fs.readFile(path.join(game, 'card_pool_editor.css'), 'utf8');
+const chainCSS = await fs.readFile(path.join(game, 'chain_challenge.css'), 'utf8');
 let theme = await readShared('src/astra.css') + '\n' + await readShared('src/mobile.css') + '\n' + await readShared('src/themes.css') + '\n' + await readShared('src/polish.css') + '\n' + await read('src/edition.css');
 // Replace the decorative Jua face with the local, licensed variable body face.
 theme = theme.replace(/@font-face\s*\{[^}]*DreamJua[^}]*\}/g, '');
@@ -50,7 +53,7 @@ for (const [reference,file] of theme.matchAll(/url\("\.\.\/assets\/([^"]+)"\)/g)
   theme = theme.replaceAll(reference, `url("${await encodeAsset(file)}")`);
 }
 const parts = {
-  STYLES: `<style>/* Bundled Noto Sans KR font license:\n${await read('assets/NotoSansKR-OFL.txt')}\n*/\n${css}\n${musicCSS}\n${cardPoolCSS}\n${theme}</style>`,
+  STYLES: `<style>/* Bundled Noto Sans KR font license:\n${await read('assets/NotoSansKR-OFL.txt')}\n*/\n${css}\n${musicCSS}\n${cardPoolCSS}\n${chainCSS}\n${theme}</style>`,
   OTHER_SCREENS: between('<div id="screen-factory-draft"', '<div id="screen-collection"')
     + between('<div id="screen-chaos-roulette"', '<div id="screen-battle"'),
   MODALS: between('<div id="modal-mode-select"', '<script>').replace(between('<div id="modal-card"', '<div id="modal-form-choice"'), '')

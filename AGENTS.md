@@ -14,6 +14,7 @@ Functional correctness of the browser app is more important than refactoring or 
 
 ## Targets
 - `card/`: Card game (`card/dist/DREAMWEAVER.html`)
+- `card_legacy/`: Original dark UI using the current `card/game` source and loader manifest (`card_legacy/dist/DREAMWEAVER-Legacy.html`). Build with `npm run build:card-legacy`; focused three-UI check: `npm run test:card-uis`.
 - `card_astra/`: Refined Astra UI; shares `card/game`, `card/src/astra.js` and base styles (`card_astra/dist/DREAMWEAVER-Astra.html`). Build with `npm run build:card-astra`; focused browser check: `npm run test:card-astra`.
 - `card_lumen/`: Lumen UI (bright Postcard language shared with Star Garden Bright, chain challenge summons); shares `card/game` and `card/src/astra.js` but not the `card/src` base styles (`card_lumen/dist/DREAMWEAVER-Lumen.html`). Build with `npm run build:card-lumen`; focused browser check: `npm run test:card-lumen`.
 - `card_claude/`: Claude UI comparison build of the card game; reads `card/game` and `card/assets` (`card_claude/dist/DREAMWEAVER-Claude.html`)
@@ -22,9 +23,11 @@ Functional correctness of the browser app is more important than refactoring or 
 - `survivor/`: Astra Nocturne survivor game (`survivor/dist/AstraNocturne.html`)
 - `rpg/`: Turn RPG: Legend Edition, one self-contained page (`rpg/new.html`: UI, rules, data, SVG fallbacks and WebAudio music; character/enemy art is the card game's 3:5 PNGs placed beside it); no build or tests.
 
-The former `card_legacy/`, `defense_legacy/`, `idle/`, `english_vocab_version/` and the old Hero Core Defense were removed; recover them from Git history if ever needed. `defense/` was promoted from `defense_test/` (Star Garden) and is the only Defense.
+The former `defense_legacy/`, `idle/`, `english_vocab_version/` and the old Hero Core Defense were removed; recover them from Git history if ever needed. `defense/` was promoted from `defense_test/` (Star Garden) and is the only Defense.
 
 ## Core guidelines
 - Prefer the smallest diff that restores working behavior (bug fixes). Design, UI and effect work in `defense/` follows `defense/AGENTS.md` instead (read it first when working there).
 - If UI behavior cannot be fully verified, state exactly what remains unverified.
 - For frontend tasks, use image inputs/output when helpful and compare against the requested behavior.
+
+`card_legacy/` now provides a fresh comparison build of the current `card/game/index.html`; do not restore its former outdated data or rules. All three comparison builds use the shared ordered loader manifest.

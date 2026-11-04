@@ -43,6 +43,59 @@ test('Lumen edition builds before its own browser check and leaves Astra alone',
   assert.deepEqual(createPlan(changes('card_lumen/README.md')).steps, []);
 });
 
+test('Legacy inputs and the cross-UI scenario build all consumed outputs before one browser check', () => {
+  for (const file of ['card_legacy/src/legacy.css', 'card_legacy/build.mjs', 'scripts/verify_card_uis.mjs']) {
+    const plan = createPlan(changes(file));
+    assert.deepEqual([...games(plan)], ['card'], file);
+    const smoke = ids(plan).indexOf('card:uis:smoke');
+    for (const edition of ['legacy', 'astra', 'lumen']) {
+      const build = ids(plan).indexOf(`card:${edition}:build`);
+      assert.ok(build >= 0 && build < smoke, file + ' ' + edition);
+    }
+    assert.equal(plan.steps.filter(step => step.args.includes('scripts/verify_card_uis.mjs')).length, 1, file);
+    assert.deepEqual(plan.browsers, ['chromium'], file);
+    assert.deepEqual(plan.warnings, [], file);
+  }
+  const legacy = createPlan(changes('card_legacy/src/legacy.js'));
+  assert.deepEqual(legacy.detectedGames, ['card']);
+  assert.ok(ids(legacy).includes('card:syntax:card_legacy/src/legacy.js'));
+  assert.deepEqual(createPlan(changes('card_legacy/README.md', 'card_legacy/dist/DREAMWEAVER-Legacy.html')).steps, []);
+});
+
+test('shared Card data rebuilds all consumers without selecting unrelated browser scenarios', () => {
+  const plan = createPlan(changes('card/game/data.js'));
+  for (const id of ['card:build', 'card:legacy:build', 'card:astra:build', 'card:lumen:build']) {
+    assert.equal(ids(plan).filter(candidate => candidate === id).length, 1, id);
+  }
+  assert.deepEqual([...games(plan)], ['card']);
+  assert.deepEqual(plan.browsers, []);
+  assert.deepEqual(plan.warnings, []);
+});
+
+test('shared chain and transfer behavior select the cross-UI check after fresh builds', () => {
+  const plan = createPlan(changes('card/game/progress_transfer.js', 'card/game/chain_challenge.js', 'card/game/chain_challenge.css', 'scripts/verify_card_uis.mjs'));
+  for (const id of ['card:build', 'card:legacy:build', 'card:astra:build', 'card:lumen:build']) {
+    assert.ok(ids(plan).indexOf(id) < ids(plan).indexOf('card:uis:smoke'), id);
+    assert.equal(ids(plan).filter(candidate => candidate === id).length, 1, id);
+  }
+  assert.equal(plan.steps.filter(step => step.args.includes('scripts/verify_card_uis.mjs')).length, 1);
+  assert.equal(ids(plan).some(id => id.endsWith(':smoke') && id !== 'card:uis:smoke'), false);
+  assert.deepEqual([...games(plan)], ['card']);
+});
+
+test('shared Astra controller rebuilds only its presentations and shared CSS leaves Lumen alone', () => {
+  const controller = createPlan(changes('card/src/astra.js'));
+  assert.ok(ids(controller).includes('card:build'));
+  assert.ok(ids(controller).includes('card:astra:build'));
+  assert.ok(ids(controller).includes('card:lumen:build'));
+  assert.equal(ids(controller).includes('card:legacy:build'), false);
+  assert.deepEqual(controller.browsers, []);
+  const styles = createPlan(changes('card/src/mobile.css'));
+  assert.ok(ids(styles).includes('card:astra:build'));
+  assert.equal(ids(styles).includes('card:lumen:build'), false);
+  assert.equal(ids(styles).includes('card:legacy:build'), false);
+});
+
 test('Star Garden is an isolated target with one build and no commands for other games', () => {
   const plan = createPlan(changes('defense/src/content.js', 'defense/src/app.js', 'defense/src/combat/engine.js', 'defense/dist/StarGardenDefense.html', 'scripts/verify_plan.js'));
   assert.deepEqual(plan.blocked, []);

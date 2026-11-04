@@ -139,7 +139,7 @@ body[data-screen=menu] .world-backdrop .lm-shade { background:var(--wash-lobby);
 body[data-screen=menu] .world-backdrop .lm-shade::after { -webkit-mask:linear-gradient(180deg,transparent 30%,#000 62%); mask:linear-gradient(180deg,transparent 30%,#000 62%); }
 
 /* ---------- Header: a cobalt band from the left edge with a medallion ---------- */
-.lumen .lm-top { position:relative; z-index:20; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:8px; height:calc(var(--top-h) + var(--safe-t)); padding:var(--safe-t) 10px 0 0; margin:0; background:none; border:0; }
+.lumen .lm-top { position:relative; z-index:20; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:8px; height:calc(var(--top-h) + var(--safe-t)); padding:var(--safe-t) max(10px,env(safe-area-inset-right)) 0 0; margin:0; background:none; border:0; }
 .lm-top-lead { display:flex; align-items:center; min-width:0; flex:1; }
 .lumen .lm-place { display:flex; align-items:center; gap:8px; min-width:0; max-width:100%; height:44px; padding:0 28px 0 10px; text-decoration:none; color:var(--struct-ink); background:linear-gradient(100deg,var(--struct-d),var(--struct) 72%,var(--struct-hi)); clip-path:var(--slant); }
 .lm-place-medal { width:30px; height:30px; flex-shrink:0; display:grid; place-items:center; border-radius:50%; background:#fff; box-shadow:inset 0 0 0 2px rgba(31,63,134,.15); }
@@ -379,8 +379,8 @@ body[data-theme=astra] .lm-recruit .menu-btn { border-color:var(--hair); }
 .lumen .lm-depart:disabled .lm-depart-copy > small { color:#6A7491; }
 .lm-depart-help { margin:-2px 0 0; font-size:12px; font-weight:700; color:var(--ink-3); text-align:center; }
 .lm-depart-help:empty { display:none; }
-/* Next encounter: fills the lobby's free height with the foe's 3:5 card and the six-stage route. Shrinks, then hides, on short screens. */
-.lm-journey { flex:1 1 0; min-height:0; display:flex; container:journey / size; }
+/* Keep the next opponent and route reachable even when the lobby needs to scroll. */
+.lm-journey { flex:1 0 96px; min-height:96px; display:flex; container:journey / size; }
 .lumen .lm-foe { position:relative; flex:1; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:10px; margin:0; padding:0; border:0; background:none; color:var(--ink); text-align:left; font:inherit; }
 .lumen .lm-foe:active .lm-foe-art { transform:scale(.98); }
 .lm-foe-art { position:relative; display:block; height:min(100cqh, calc(50cqw / .6), 340px); aspect-ratio:3/5; border:3px solid transparent; border-radius:12px; overflow:hidden; transition:transform .14s var(--ease);
@@ -411,8 +411,11 @@ body[data-theme=astra] .lm-recruit .menu-btn { border-color:var(--hair); }
 .lm-route-note { flex-shrink:0; font-size:11px; font-weight:900; color:var(--coral-text); white-space:nowrap; }
 .lm-foe-sheet { margin:0 0 10px !important; font-size:12px; font-weight:800; color:var(--ink-2) !important; }
 @container journey (max-height:190px) { .lm-foe-skills { display:none; } }
-@container journey (max-height:140px) { .lm-foe-route { display:none; } .lm-foe-copy { gap:4px; padding-bottom:10px; } }
-@container journey (max-height:104px) { .lumen .lm-foe { display:none; } }
+@container journey (max-height:140px) {
+  .lm-foe-copy { gap:3px; margin-bottom:0; padding-bottom:6px; }
+  .lm-foe-name { font-size:16px; }
+  .lm-foe-kicker { margin-bottom:0; letter-spacing:.08em; }
+}
 
 /* ---------- Deck ---------- */
 .lumen #screen-deck { display:none; padding-bottom:0; }
@@ -1354,6 +1357,8 @@ body[data-theme=astra] #artifact-check-list > div b, body[data-theme=astra] [id^
   .lumen .lm-recruit .menu-btn { min-height:50px; }
   .lumen .lm-prep-btn { height:40px; }
   .lumen .lm-depart { min-height:58px; }
+  .lumen .lm-party-card .lm-party-art { width:auto; max-width:100%; height:clamp(72px,16dvh,104px); align-self:center; }
+  .lumen .lm-party-card.is-empty { min-height:142px; aspect-ratio:auto; }
   .lm-medal { width:40px; height:40px; }
   .lm-title-utils { margin-top:0; }
   .lm-util-icon { width:44px; height:44px; }
