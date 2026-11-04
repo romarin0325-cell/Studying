@@ -2,3 +2,7 @@ node_modules/
 survivor/test-results/
 defense/test-results/
 defense/.media-review/
+card/test-results/
+card_astra/test-results/
+card_lumen/test-results/
+test-results/card-uis/

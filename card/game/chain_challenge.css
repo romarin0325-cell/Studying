@@ -1,0 +1,16 @@
+/* Shared challenge convenience; keep the original two summons on the same row. */
+#cc-chain-gacha[hidden], #cc-chain[hidden] { display:none!important; }
+#cc-chain-gacha { flex:1; min-width:0; min-height:44px; white-space:normal; line-height:1.25; }
+#cc-chain-gacha small { display:block; font-size:10px; margin-top:2px; opacity:.8; }
+.cc-chain { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; flex-shrink:0; margin-bottom:10px; font-size:12px; }
+.cc-chain span { flex:1; min-width:120px; overflow-wrap:anywhere; }
+.cc-chain button { flex-shrink:0; min-height:44px; padding:8px 10px; font-size:12px; }
+#modal-gacha.cc-result-active .modal-content { max-height:calc(100dvh - 24px); overflow:hidden; }
+#modal-gacha.cc-result-active #gacha-result { min-height:0; overflow:auto; }
+.cc-summary { font-size:14px; line-height:1.5; }
+.cc-results { display:flex; flex-direction:column; gap:8px; width:100%; text-align:left; }
+.cc-result-card { display:flex; align-items:center; gap:12px; min-width:0; padding:8px; border:1px solid var(--line,#555); border-radius:8px; }
+.cc-result-card>span { min-width:0; overflow-wrap:anywhere; }
+.cc-result-card small, .cc-result-card strong { display:block; }
+.cc-result-card small { margin-bottom:4px; font-size:11px; opacity:.8; }
+.cc-result-card strong { font-size:14px; }

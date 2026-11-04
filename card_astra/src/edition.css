@@ -214,7 +214,7 @@ body.ae #battle-controls .skill-btn:disabled { opacity:.5; }
   .ae .study-feature { margin-top:12px; }
 }
 @media(max-width:760px) {
-  .ae .astra-header { height:60px; padding:9px 16px; gap:8px; }
+  .ae .astra-header { height:calc(60px + env(safe-area-inset-top)); padding:calc(9px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 9px max(16px,env(safe-area-inset-left)); gap:8px; }
   .ae .brand>svg { width:20px; height:20px; }
   .ae .brand>span { font-size:11px; letter-spacing:.09em; }
   .ae .brand small { font-size:7px; letter-spacing:.2em; }

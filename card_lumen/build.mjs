@@ -20,14 +20,17 @@ const scripts = [...source.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 if (scripts.length !== 2 || !scripts[1][1].includes('const RPG =')) {
   throw new Error('Card controller contract changed; review the Lumen builder.');
 }
-const dependencies = ['data.js', 'vocab_data.js', 'collocation_data.js', 'grammar_data.js',
-  'toeic.js', 'toeic_explanations.js', 'api.js', 'logic.js', 'skill_display.js', 'card_pool_rules.js', 'battle_runtime.js',
-  'rpg_features.js', 'card_pool_view.js', 'listening_data.js', 'fortune_cookie.js', 'music_data.js', 'music_player.js'];
+// Use the same ordered manifest as the original UI, including future datasets.
+const dependencies = [...scripts[0][1].matchAll(/\{\s*src:\s*'([^']+)'/g)].map(match => match[1]);
+if (!dependencies.length || dependencies.some(file => path.basename(file) !== file || !file.endsWith('.js'))) {
+  throw new Error('Invalid shared game dependency list.');
+}
 const inline = code => `<script>${code.replace(/<\/script/gi, '<\\/script')}</script>`;
 const code = await Promise.all(dependencies.map(name => fs.readFile(path.join(game, name), 'utf8')));
 const legacyCSS = source.match(/<style>([\s\S]*?)<\/style>/)[1];
 const musicCSS = await fs.readFile(path.join(game, 'music_player.css'), 'utf8');
 const cardPoolCSS = await fs.readFile(path.join(game, 'card_pool_editor.css'), 'utf8');
+const chainCSS = await fs.readFile(path.join(game, 'chain_challenge.css'), 'utf8');
 let theme = await read('src/lumen.css');
 
 const assetTypes = { '.svg':'image/svg+xml', '.png':'image/png', '.webp':'image/webp', '.woff2':'font/woff2' };
@@ -63,7 +66,7 @@ const copy = [
 const tidy = html => copy.reduce((text, [from, to]) => text.replaceAll(from, to), html);
 
 const parts = {
-  STYLES: `<style>/* Bundled Noto Sans KR font license:\n${await read('assets/NotoSansKR-OFL.txt')}\n*/\n${legacyCSS}\n${musicCSS}\n${cardPoolCSS}\n${theme}</style>`,
+  STYLES: `<style>/* Bundled Noto Sans KR font license:\n${await read('assets/NotoSansKR-OFL.txt')}\n*/\n${legacyCSS}\n${musicCSS}\n${cardPoolCSS}\n${chainCSS}\n${theme}</style>`,
   OTHER_SCREENS: tidy(between('<div id="screen-factory-draft"', '<div id="screen-collection"')
     + between('<div id="screen-chaos-roulette"', '<div id="screen-battle"')),
   // The card detail dialog is rebuilt in the shell with the same ids.

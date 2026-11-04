@@ -8,6 +8,7 @@
 | --- | --- | --- | --- |
 | `defense/` | 드림위버: 별빛 정원 · Star Garden (정식 Defense) | [README](defense/README.md) · [AGENTS](defense/AGENTS.md) · [docs](defense/docs/README.md) | `defense/dist/StarGardenDefense.html` (Bright: `StarGardenDefenseBright.html`) |
 | `card/` | DREAMWEAVER · Card | [card/README](card/README.md) · [doc](card/doc/README.md) | `card/dist/DREAMWEAVER.html` |
+| `card_legacy/` | DREAMWEAVER · Legacy (기존 어두운 화면, 최신 공통 기능) | [README](card_legacy/README.md) | `card_legacy/dist/DREAMWEAVER-Legacy.html` |
 | `card_astra/` | DREAMWEAVER · Astra (Card의 새 화면) | [README](card_astra/README.md) | `card_astra/dist/DREAMWEAVER-Astra.html` |
 | `card_lumen/` | DREAMWEAVER · Lumen (Card의 밝은 Postcard 화면) | [README](card_lumen/README.md) · [설계](card_lumen/docs/DESIGN.md) | `card_lumen/dist/DREAMWEAVER-Lumen.html` |
 | `card_claude/` | DREAMWEAVER · Claude UI 비교 빌드 | [README](card_claude/README.md) | `card_claude/dist/DREAMWEAVER-Claude.html` |
@@ -15,7 +16,7 @@
 | `survivor/` | ASTRA: NOCTURNE | [README](survivor/README.md) · [doc](survivor/doc/README.md) | `survivor/dist/AstraNocturne.html` |
 | `rpg/` | Turn RPG: Legend Edition | [README](rpg/README.md) | `rpg/new.html` (단일 파일, 빌드 없음) |
 
-`card_astra/`, `card_lumen/`, `card_claude/`는 `card/`의 규칙(`card/game/`)과 에셋을 읽습니다. `card_manual/`은 Card의 플레이어용 매뉴얼입니다.
+`card_legacy/`, `card_astra/`, `card_lumen/`, `card_claude/`는 `card/`의 규칙(`card/game/`)과 에셋을 읽습니다. `card_manual/`은 Card의 플레이어용 매뉴얼입니다.
 
 ## 명령
 
@@ -29,6 +30,9 @@ npm run test:defense       # Star Garden 단위·계약 테스트
 npm run build:card         # Card
 npm run build:card-astra   # Astra
 npm run build:card-lumen   # Lumen
+npm run build:card-legacy  # Legacy
+npm run build:card-uis     # Legacy + Astra + Lumen 단일 HTML 세 개
+npm run test:card-uis      # 세 UI 데이터·기록 호환·모바일 신규 기능
 npm run build:survivor     # Nocturne
 ```
 
@@ -43,3 +47,9 @@ npm run build:survivor     # Nocturne
 ## 정리 이력
 
 2026-10에 `defense_test/`를 `defense/`로 승격하고, 옛 Hero Core Defense(`defense/`), `defense_legacy/`, `card_legacy/`, `idle/`(Astral Companions), `english_vocab_version/`을 삭제했습니다. 필요하면 Git 기록에서 복구합니다. 루트의 `new.html`과 `data.js`는 `rpg/`로 옮겼습니다.
+
+## Card UI 비교
+
+`npm run build:card-uis`로 레거시·아스트라·루멘 HTML을 만들 수 있습니다. 각 HTML은 게임 코드·학습 데이터·스타일을 포함하며, 기존 초상화와 음원은 HTML 옆에 두거나 UI에서 연결합니다. 세 파일의 저장소가 자동으로 동기화되는 것은 아닙니다. 게임을 저장한 뒤 레거시의 **기록 옮기기**, 아스트라·루멘의 **설정 → 기록 파일**에서 같은 JSON을 가져와 비교하세요. API 키는 옮기지 않습니다.
+
+세 UI 모두 최대 10문제 연속 도전 소환과 빈 편성 자리 자동 이동을 제공합니다. 확률·티켓 비용·보상은 기존 한 문제 도전과 같습니다. UI 개선 후 흥미 저하의 원인과 비교 방법은 [기능·흥미 분석](docs/card-ui-review.md)에 정리했습니다.

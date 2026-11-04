@@ -1,7 +1,7 @@
 {
   "scripts": {
     "lint": "npm run lint:card",
-    "lint:card": "node --check card/game/logic.js && node --check card/game/data.js && node --check card/game/vocab_data.js && node --check card/game/collocation_data.js && node --check card/game/toeic.js && node --check card/game/toeic_explanations.js && node --check card/game/api.js && node --check card/game/battle_runtime.js && node --check card/game/rpg_features.js && node --check card/game/card_pool_rules.js && node --check card/game/card_pool_view.js && node --check card/game/fortune_cookie.js && node --check card/game/music_data.js && node --check card/game/music_player.js && node --check card/src/astra.js",
+    "lint:card": "node --check card/game/logic.js && node --check card/game/data.js && node --check card/game/vocab_data.js && node --check card/game/collocation_data.js && node --check card/game/toeic.js && node --check card/game/toeic_explanations.js && node --check card/game/api.js && node --check card/game/battle_runtime.js && node --check card/game/rpg_features.js && node --check card/game/card_pool_rules.js && node --check card/game/card_pool_view.js && node --check card/game/fortune_cookie.js && node --check card/game/music_data.js && node --check card/game/music_player.js && node --check card/src/astra.js && node --check card/game/progress_transfer.js && node --check card/game/chain_challenge.js",
     "test:card:smoke": "node scripts/verify_card_smoke.js && node scripts/verify_card_refactor.js && node scripts/verify_card_music_player.js && node scripts/verify_card_learning_data.js && node scripts/verify_card_combat_regressions.js && node scripts/verify_card_basic_sets.js && node scripts/verify_gemini_api_models.js",
     "test:card:browser": "node scripts/verify_card_mobile.js && node scripts/verify_card_special_flow.js",
     "verify:shooter": "npm run verify --prefix shooter",
@@ -23,7 +23,10 @@
     "test:defense:browser": "node defense/tests/browser.mjs",
     "reports:defense": "node defense/scripts/generated-reports.mjs",
     "serve:defense": "node defense/scripts/serve.mjs",
-    "build:defense:lab": "node defense/scripts/build-lab.mjs"
+    "build:defense:lab": "node defense/scripts/build-lab.mjs",
+    "build:card-legacy": "node card_legacy/build.mjs",
+    "build:card-uis": "npm run build:card-legacy && npm run build:card-astra && npm run build:card-lumen",
+    "test:card-uis": "node scripts/verify_card_uis.mjs"
   },
   "dependencies": {
     "playwright": "^1.59.1"
