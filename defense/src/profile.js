@@ -1,7 +1,7 @@
 import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN,MAX_RANK} from './content.js';
 import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
-import {migrateMonthly,validRecord,betterRecord,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
+import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
@@ -9,8 +9,8 @@ import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIF
 import {questionOf} from './quiz.js';
 import {CONSTELLATIONS} from './library.js';
 import {season} from './preview/season.js';
-import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,OATH_BANDS} from './preview/oath.js';
-import {twinParty,twinPartyProblem,twinLocks,twinState,twinBandReward,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES,TWIN_SIDE} from './preview/twin.js';
+import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,validOathRules,OATH_BANDS,OATH_RULES} from './preview/oath.js';
+import {twinParty,twinPartyProblem,twinState,twinBandReward,twinCredit,twinBandsReached,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES} from './preview/twin.js';
 import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState,requestGoal} from './preview/requests.js';
 import {REQUEST_HEROES,REQUEST_REWARD} from './preview/requests-data.js';
 
@@ -200,7 +200,7 @@ export function migrateBond(p){
 export const metBosses=p=>Math.min(9,p.cleared);
 function validOathRecord(r){
   if(!r||typeof r!=='object'||typeof r.period!=='string'||!/^S-?\d+$/.test(r.period)||typeof r.token!=='string'||!r.token||r.token.length>100||!integer(r.at)||season(r.at).id!==r.period||!TIERS[r.tier])return false;
-  return !oathConflict(r.oaths)&&Array.isArray(r.deck)&&r.deck.length===TEAM_SIZE&&new Set(r.deck).size===r.deck.length&&r.deck.every(id=>HERO[id])&&!oathDeckProblem(r.oaths,r.deck)&&r.score===oathScore(r.tier,r.oaths);
+  return !oathConflict(r.oaths)&&Array.isArray(r.deck)&&r.deck.length===TEAM_SIZE&&new Set(r.deck).size===r.deck.length&&r.deck.every(id=>HERO[id])&&!oathDeckProblem(r.oaths,r.deck)&&(r.rules===undefined||validOathRules(r.rules))&&r.score===oathScore(r.tier,r.oaths,r.rules??1);
 }
 function validOath(p){
   if(p.oath===undefined)return true;
@@ -252,8 +252,7 @@ function validTwin(p){
     for(const tier of TIER_IDS){
       if(t.paid[tier]===undefined)continue;
       if(!integer(t.paid[tier],TWIN_BANDS.length))return false;
-      const best=t.best?.[tier],reached=best?TWIN_BANDS.filter(b=>best.total>=b.total).length:0;
-      if(t.paid[tier]>reached)return false;
+      if(t.paid[tier]>twinBandsReached(twinCredit(t.best,tier)))return false;
     }
   }
   return !(t.lifetime!==undefined&&t.lifetime!==null&&(!TIERS[t.lifetime.tier]||!integer(t.lifetime.total,TWIN_WAVES*2)||!integer(t.lifetime.at)));
@@ -305,7 +304,7 @@ function settleOath(p,a,args,now){
   const st=oathState(p,now);
   if(!args.won){p.oath={period:st.period,best:st.best,paid:st.best?st.paid:0,lifetime:st.lifetime};return {record:null,newBest:false,score:0,bands:[],pay:0};}
   const tier=a.tier||'easy',oaths=[...(a.oaths||[])],score=oathScore(tier,oaths);
-  const record={period:st.period,token:a.token,score,tier,oaths,deck:[...a.deck],at:now};
+  const record={period:st.period,token:a.token,score,tier,oaths,deck:[...a.deck],at:now,rules:OATH_RULES};
   const newBest=!st.best||score>st.best.score,best=newBest?record:st.best,reached=oathBandsReached(best.score),bands=[];
   for(let i=st.paid;i<reached;i++)bands.push({score:OATH_BANDS[i].score,reward:OATH_BANDS[i].reward});
   p.oath={period:st.period,best,paid:reached,lifetime:!st.lifetime||score>st.lifetime.score?record:st.lifetime};
@@ -316,15 +315,22 @@ function settleTwin(p,a,args,now){
   const raw=args.damage??0,damage=Number.isFinite(raw)&&raw>0?raw:0,records=st.records;
   const deck=[...a.deck],relics=[...(a.relics||[])];
   records[tier]={...records[tier],[side]:{round,damage,deck,relics,at:now}};
+  // A record that shares a companion or relic with the new one is cleared, so the two counted records never overlap.
+  const other=side==='left'?'right':'left';if(!twinRecordsDisjoint(records[tier][side],records[tier][other]))records[tier][other]=null;
   const total=(records[tier].left?.round||0)+(records[tier].right?.round||0),prevBest=st.best[tier];
   const newBest=!prevBest||total>prevBest.total;
   const snap=name=>({round:records[tier][name]?.round||0,damage:records[tier][name]?.damage||0});
   const entry=newBest?{total,left:snap('left'),right:snap('right'),at:now}:prevBest;
-  const reached=TWIN_BANDS.filter(b=>(entry?.total||0)>=b.total).length,bands=[];
-  for(let i=st.paid[tier]||0;i<reached;i++)bands.push({total:TWIN_BANDS[i].total,reward:twinBandReward(tier,i)});
+  const best={...st.best,[tier]:entry},paid={...st.paid},bands=[];
+  // This tier and every lower one pay the bands the new best reaches.
+  for(const id of TIER_IDS.slice(0,TIER_IDS.indexOf(tier)+1)){
+    const reached=twinBandsReached(twinCredit(best,id));
+    for(let i=paid[id]||0;i<reached;i++)bands.push({tier:id,total:TWIN_BANDS[i].total,reward:twinBandReward(id,i)});
+    paid[id]=Math.max(paid[id]||0,reached);
+  }
   const rank=id=>TIER_IDS.indexOf(id);let lifetime=st.lifetime;
   if(!lifetime||rank(tier)>rank(lifetime.tier)||rank(tier)===rank(lifetime.tier)&&total>lifetime.total)lifetime={tier,total,at:now};
-  p.twin={period:st.period,party:st.party,records,best:{...st.best,[tier]:entry},paid:{...st.paid,[tier]:reached},lifetime};
+  p.twin={period:st.period,party:st.party,records,best,paid,lifetime};
   return {newBest,side,round,total,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
 }
 function beginPreview(p,mode,args,now){
@@ -341,11 +347,6 @@ function beginPreview(p,mode,args,now){
   }
   if(!TWIN_SIDES.includes(args.side))return {ok:false,message:'별길을 확인하세요.'};
   const party=twinParty(p),problem=twinPartyProblem(p,party);if(problem)return {ok:false,message:problem};
-  const locked=twinLocks(p,now,tier,args.side),mine=party[args.side];
-  if(mine.deck.some(id=>locked.heroes.includes(id))||mine.relics.some(id=>locked.relics.includes(id))){
-    const name=TWIN_SIDE[args.side==='left'?'right':'left'].name;
-    return {ok:false,message:`${name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${name}에 다시 도전하면 풀려요.`};
-  }
   const relics=party[args.side].relics;random(p);
   p.active={mode,stage,deck:[...party[args.side].deck],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(relics.map(id=>[id,relicLevel(p.relics[id])])),tier,side:args.side,relics:[...relics]};
   return {ok:true};
@@ -465,7 +466,7 @@ export function command(p,action,args={},now=Date.now()){
     if(a.mode==='monthly'){
       record={period:calendar(now).month,token:a.token,round:args.round,damage:args.damage??0,seconds:args.seconds??0,at:now,deck:[...a.deck],tier:a.tier||'easy'};
       if(!validRecord(record))return no('전투 기록을 확인하세요.');
-      newBest=betterRecord(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
+      newBest=betterMonth(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
       if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
     }
     if(a.mode==='oath'){const out=settleOath(p,a,args,now);record=out.record;newBest=out.newBest;score=out.score;bands=out.bands;reward+=out.pay;}

@@ -1,4 +1,4 @@
-import { HERO, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK ,TIERS,CHALLENGE_WAVES} from '../content.js';
+import { HERO, ARTIFACT, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK ,TIERS,CHALLENGE_WAVES} from '../content.js';
 import { TEAM_SIZE } from '../team-config.js';
 import {oathMods,oathConflict,OATH_WAVES} from '../preview/oath.js';
 import {TWIN_WAVES,TWIN_STAGE} from '../preview/twin.js';
@@ -163,7 +163,10 @@ export const MERGE_STARLIGHT=4,STARLIGHT_PER_SECOND=2,BOSS_GOLD=30;
 const CLOCK_BUFFS=['haste','awaken','march','festive','radiance','harmony','echo','trauma'];
 export const skillDuration=(s,seconds,key)=>seconds*(CLOCK_BUFFS.includes(key)&&has(s,'broken_clock')?1+RV.broken_clock.duration*relicScaleIn(s,'broken_clock'):1);
 export const unitForm=(s,u)=>miracleForm(u)||(u.hero==='time_magician'&&s.buffs.trauma>0?'trauma':null);
-export function highestMaxHp(s){return s.enemies.filter(e=>e.hp>0).reduce((a,b)=>!a||b.maxHp>a.maxHp||b.maxHp===a.maxHp&&b.uid<a.uid?b:a,null);}
+// Finishers (Star Boy, Cherry Prince, Aurora) lock the enemy with the most health left now; ties keep the oldest.
+// Lightning Sage link bonus by the size of the connected group (itself included): 2/3/4/5+ → +20/40/60/80%.
+export const LIGHTNING_LINK=Object.freeze({2:.2,3:.4,4:.6,5:.8});
+export function highestHp(s){return s.enemies.filter(e=>e.hp>0).reduce((a,b)=>!a||b.hp>a.hp||b.hp===a.hp&&b.uid<a.uid?b:a,null);}
 export const queenIncome=(rank,wave,level=0)=>6+rank*6+Math.floor((wave-1)/3)+level*3;
 export const QUEEN_CAP=90;
 // Immediate gold from the Queen's ultimate. +50% of this wave's base income is edictWave, once per wave.
@@ -239,8 +242,8 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   if(u.hero==='lightning_sage'){
     const seen=new Set(),pending=index>=0&&s.board[index]?.uid===u.uid?[index]:[];
     while(pending.length){const cell=pending.pop();if(seen.has(cell)||s.board[cell]?.hero!=='lightning_sage')continue;seen.add(cell);for(const n of neighbors(cell))if(!seen.has(n)&&s.board[n]?.hero==='lightning_sage')pending.push(n);}
-    const size=seen.size;Object.assign(trait,{key:'lightning',size,active:size>=2,label:size>=2?`번개 연결 ${size}기 · 공격력 +${size===2?20:size===3?40:60}%`:'번개 연결 대기'});
-    if(size>=2){trait.damageMultiplier=size===2?1.20:size===3?1.40:1.60;trait.chainRatio=size===2?.70:size===3?.75:.80;trait.extraChain=size>=4?1:0;}
+    const size=seen.size;Object.assign(trait,{key:'lightning',size,active:size>=2,label:size>=2?`번개 연결 ${size}기 · 공격력 +${LIGHTNING_LINK[Math.min(size,5)]*100}%`:'번개 연결 대기'});
+    if(size>=2){trait.damageMultiplier=1+LIGHTNING_LINK[Math.min(size,5)];trait.chainRatio=size===2?.70:size===3?.75:.80;trait.extraChain=size>=4?1:0;}
   }else if(u.hero==='star_boy'||u.hero==='time_ruler'){
     const age=Math.max(0,s.wave-(u.birthWave??s.wave)),star=u.hero==='star_boy';
     trait.damageMultiplier=star?(age===0?1.5:age===1?1:.75):(age===0?.75:age===1?1:1.25);
@@ -817,6 +820,15 @@ function fire(s,u,index,e,ground,stats,ratio,bonus,echo){
   shot.crit=unitCrit(s,u,index);s.shots.push(shot);
   return shot;
 }
+// 동행의 악수: any placement aura a neighbour gives this cell counts — Ancient Dragon (power), Siren (speed),
+// Harmonious (harmony), Miracle Wing (crit) and Cure Master (invincibility). A cursed source gives none; a stunned
+// Cure Master gives no invincibility either.
+export function supportAura(s,index){
+  if(index<0)return false;
+  return neighbors(index).some(i=>{const a=s.board[i];if(!a||a.cursed)return false;
+    const type=HERO[a.hero].trait.type;return type==='powerAura'||type==='hasteAura'||a.hero==='harmonious'||miracleForm(a)==='miracle_wing'||a.hero==='cure_master'&&!(a.disabled>0);});
+}
+const relicName=id=>ARTIFACT[id]?.name||id;
 // One source for outgoing attack power, cadence and the live inspection UI.
 // Enemy armor/exposure and conditional hit bonuses are applied at impact.
 export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
@@ -836,14 +848,14 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   const harmony=harmonySources.reduce((best,value)=>value.damage>best.damage?value:best,{count:0,damage:0,speed:0});
   if(harmony.count){damageBonus('aura',`조화 ${harmony.count}종`,harmony.damage);speedBonus('aura',`조화 ${harmony.count}종`,harmony.speed);}
   const ensemble=harmonyField(s),ensembleSpot=spotlightBuffFactor(s,'harmony',u);if(ensemble.damage){damageBonus('ult','디저트 앙상블',ensemble.damage*ensembleSpot);speedBonus('ult','디저트 앙상블',ensemble.speed*ensembleSpot);}
-  if(has(s,'guild')&&(harmony.count||adjacent.some(a=>['powerAura','hasteAura'].includes(HERO[a.hero].trait.type))))damageBonus('relic','연대',RV.guild.power*relicScaleIn(s,'guild'));
-  {const kinds=new Set(adjacent.map(a=>a.hero)).size;if(has(s,'constellation')&&kinds>=3)damageBonus('relic','별자리',(kinds>=4?RV.constellation.four:RV.constellation.three)*relicScaleIn(s,'constellation'));}
-  if(has(s,'banner')&&!adjacent.length&&index>=0)damageBonus('relic','고독한 깃발',RV.banner.power*relicScaleIn(s,'banner'));
-  if(has(s,'crown')&&u.rank>=3)damageBonus('relic','왕관',RV.crown.power*relicScaleIn(s,'crown'));
-  if(has(s,'sprout')&&u.rank<=2)damageBonus('relic','풋내기 훈장',RV.sprout.power*relicScaleIn(s,'sprout'));
-  if(has(s,'alchemy')&&Number.isInteger(u.mergedWave)&&u.mergedWave<=s.wave&&s.wave<u.mergedWave+RV.alchemy.waves)damageBonus('relic','연금',RV.alchemy.power*relicScaleIn(s,'alchemy'));
-  if(has(s,'tide')&&s.gauge>=RV.tide.gauge)damageBonus('relic','파도의 소라',RV.tide.power*relicScaleIn(s,'tide'));
-  if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic','꿈의 조각',RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
+  if(has(s,'guild')&&supportAura(s,index))damageBonus('relic',relicName('guild'),RV.guild.power*relicScaleIn(s,'guild'));
+  {const kinds=new Set(adjacent.map(a=>a.hero)).size;if(has(s,'constellation')&&kinds>=3)damageBonus('relic',relicName('constellation'),(kinds>=4?RV.constellation.four:RV.constellation.three)*relicScaleIn(s,'constellation'));}
+  if(has(s,'banner')&&!adjacent.length&&index>=0)damageBonus('relic',relicName('banner'),RV.banner.power*relicScaleIn(s,'banner'));
+  if(has(s,'crown')&&u.rank>=3)damageBonus('relic',relicName('crown'),RV.crown.power*relicScaleIn(s,'crown'));
+  if(has(s,'sprout')&&u.rank<=2)damageBonus('relic',relicName('sprout'),RV.sprout.power*relicScaleIn(s,'sprout'));
+  if(has(s,'alchemy')&&Number.isInteger(u.mergedWave)&&u.mergedWave<=s.wave&&s.wave<u.mergedWave+RV.alchemy.waves)damageBonus('relic',relicName('alchemy'),RV.alchemy.power*relicScaleIn(s,'alchemy'));
+  if(has(s,'tide')&&s.gauge>=RV.tide.gauge)damageBonus('relic',relicName('tide'),RV.tide.power*relicScaleIn(s,'tide'));
+  if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic',relicName('dream_crystal'),RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
   if(s.buffs.awaken>0)damageBonus('ult','각성',ULT_BUFF.awaken.power*buffScale(s,'awaken')*spotlightBuffFactor(s,'awaken',u));
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',ULT_BUFF.radiance.power*buffScale(s,'radiance')*spotlightBuffFactor(s,'radiance',u));
   if(unitForm(s,u)==='trauma'){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
@@ -856,8 +868,8 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(s.buffs.march>0)speedBonus('ult','은빛 행진',ULT_BUFF.march.speed*buffScale(s,'march')*spotlightBuffFactor(s,'march',u));
   if(s.buffs.festive>0)speedBonus('ult','성야의 선물',ULT_BUFF.festive.speed*buffScale(s,'festive')*spotlightBuffFactor(s,'festive',u));
   const tempo=has(s,'tempo_bell')?Math.min(RV.tempo_bell.cap,RV.tempo_bell.perWave*(s.wave-1)*relicScaleIn(s,'tempo_bell')):0;
-  if(tempo)speedBonus('other','이어지는 종',tempo);
-  if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=RV.chorus.count)speedBonus('other','합창',RV.chorus.speed*relicScaleIn(s,'chorus'));
+  if(tempo)speedBonus('other',relicName('tempo_bell'),tempo);
+  if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=RV.chorus.count)speedBonus('other',relicName('chorus'),RV.chorus.speed*relicScaleIn(s,'chorus'));
   if(u.hero==='night_rabbit'){
     const kinds=new Set(s.board.filter(a=>a?.hero.endsWith('_rabbit')).map(a=>a.hero));kinds.delete(u.hero);
     if(kinds.size)speedBonus('other','토끼 연계',kinds.size*.2);
@@ -984,7 +996,7 @@ export function cast(s,id){
   else if(type==='ice_court'){const winter=winterDuration(s,u);strike(9);for(const e of targets)if(e.hp>0){addSlow(s,e,source,WINTER_COURT.slow*scale,winter);addStatus(s,e,'exposure',source,id,WINTER_EXPOSURE,winter);}s.buffs.winter=winter;}
   else if(type==='harmony')s.buffs.harmony=skillDuration(s,ULT_BUFF.harmony.seconds*control,'harmony');
   else if(type==='royal'||type==='starfall'||type==='mirror'){
-    const target=highestMaxHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?5:FINISHER_DELAY;
+    const target=highestHp(s),origin=cellPoint(s.board.indexOf(u)),total=type==='mirror'?5:FINISHER_DELAY;
     visualTargets=[target];
     s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?12:STARFALL_FACTOR*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,ratio:mirrorRatio(s,u)}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
@@ -1177,7 +1189,7 @@ export function castPreview(s,id){
       lines.push(`체력이 가장 높은 적에게 5초 동안 거울을 걸고, 끝날 때 공격력 12배인 ${hit(12)}를 줍니다.`);
       lines.push(`그 사이 그 적이 받은 피해의 ${pct(mirrorRatio(s,u))}%가 더해집니다.`);
     }else{
-      const target=highestMaxHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
+      const target=highestHp(s),view=target?snapshot(target):null,hot=!!view&&(view.burnTime>0||view.divine>=3&&view.divineTime>0);
       const factor=hot?48:24;boost={on:hot,label:hot?'강화':'강화 대기',hint:hot?'':`대상이 화상 입었거나 성광 3중첩이면 강화되어 ${hit(48)}가 됩니다.`};
       lines.push(`체력이 가장 높은 적에게 공격력 ${factor}배, ${hit(factor)}를 줍니다.`);
       if(hot)lines.push('불이 꺼지거나 성광이 흩어지기 전에 맞아야 강화가 유지됩니다.');
@@ -1339,9 +1351,9 @@ export function castPreview(s,id){
 
 // Boss patterns. Every action is telegraphed (2.6 s, targeted 3.5 s) except the curse, which the user wants unannounced.
 // Targets are random: a random row, random occupied cells, or a random companion for the curse.
-// Repeat-limited patterns (shuffle) count per boss so one appearance never spams them. Curse keeps firing.
+// Repeat-limited patterns count per boss so one appearance never spams them: shuffle 3, curse 2.
 // BOSS_LIMIT.judgement is Astea's judgement (max 2), not Thor's column stun.
-const BOSS_LIMIT={shuffle:3,judgement:2};
+const BOSS_LIMIT={shuffle:3,curse:2,judgement:2};
 // Targeted patterns (lit cells) give longer to drag the unit out; board-wide ones stay at 2.6 s.
 export const TELEGRAPH_TIME=Object.freeze({seal:3.5,storm:3.5,stun1:3.5,judgement:3.5});
 function bossCells(s,pattern){

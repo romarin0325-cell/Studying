@@ -43,3 +43,12 @@ test('reward confirmation is an atomic cross-window receipt and malformed record
   assert.ok(a.transact('claimMonthly',{token:p.monthlyBest.token},NOW).ok);assert.equal(b.transact('claimMonthly',{token:p.monthlyBest.token},NOW).ok,false);assert.ok(b.conflict);
   for(const mutate of [r=>r.damage=NaN,r=>r.round=1001,r=>r.deck=['missing'],r=>r.seconds=-1]){const bad=structuredClone(p);mutate(bad.monthlyBest);assert.equal(parseProfile(bad),null);}
 });
+
+test('this month keeps the record that pays most; a short try at a higher tier does not lower the claim',async()=>{
+  const {betterMonth,betterRecord,monthlyReward}=await import('../src/monthly.js');
+  const easy={tier:'easy',round:18,damage:1},hard={tier:'hard',round:0,damage:9};
+  assert.ok(monthlyReward(easy)>monthlyReward(hard));
+  assert.equal(betterMonth(hard,easy),false);assert.equal(betterMonth(easy,hard),true);
+  assert.equal(betterRecord(hard,easy),true,'the lifetime order still ranks the tier first');
+  const hard9={tier:'hard',round:9,damage:1};assert.equal(betterMonth(hard9,easy),monthlyReward(hard9)>monthlyReward(easy));
+});

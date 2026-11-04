@@ -102,6 +102,8 @@ export class Renderer {
     if(this.shake>0&&!this.reduced){ctx.translate(Math.sin(this.clock*97)*this.shake,Math.cos(this.clock*83)*this.shake*.65);this.shake=Math.max(0,this.shake-dt*40);}else this.shake=0;
     ctx.drawImage(this.background,0,0);
     this.drawDecor(s);
+    // 닫힌 중심: closed cells are dim, recessed tiles with a faint seal, drawn under everything that moves.
+    for(const i of s.oathMods?.closed||[]){const p=cellPoint(i);ctx.save();rounded(ctx,p.x-41,p.y-41,82,82,8);ctx.fillStyle='rgba(6,9,26,.5)';ctx.fill();ctx.setLineDash([5,6]);ctx.strokeStyle='rgba(196,206,255,.2)';ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([]);line(ctx,[[p.x-12,p.y-12],[p.x+12,p.y+12]],'rgba(196,206,255,.16)',2);line(ctx,[[p.x+12,p.y-12],[p.x-12,p.y+12]],'rgba(196,206,255,.16)',2);ctx.restore();}
     this.fx.enemies.clear();for(const e of s.enemies)this.fx.enemies.set(e.uid,{enemy:e,point:pathPoint(e.progress)});
     this.fx.reduced=this.reduced;this.fx.drawZones(s);for(const skill of this.skills)this.fx.drawSkillField(skill);this.fx.drawPersistent(s);this.fx.drawPersonalTraits(s);this.fx.drawAttackShapes();
     const field=this.skill?.life>0?this.skill.hero:'';if(this.canvas.dataset.skillField!==field)this.canvas.dataset.skillField=field;

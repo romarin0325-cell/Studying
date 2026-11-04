@@ -313,10 +313,10 @@ test('sustained skill timers, total durations and numeric attack stats survive r
   }
 });
 
-test('cardinal Lightning components use the exact 2, 3 and 4+ power and chain thresholds',()=>{
+test('cardinal Lightning components use the exact 2, 3, 4 and 5+ power and 2, 3, 4+ chain thresholds',()=>{
   for(const [cells,multiplier,ratio,extra] of [
     [[6],1,.65,0],[[6,7],1.20,.70,0],[[6,7,12],1.40,.75,0],
-    [[6,7,12,11],1.60,.80,1],[[6,7,12,11,16],1.60,.80,1],
+    [[6,7,12,11],1.60,.80,1],[[6,7,12,11,16],1.80,.80,1],[[6,7,12,11,16,17],1.80,.80,1],
   ]){
     const s=traitArena(cells.map(index=>({hero:'lightning_sage',index})));
     for(const index of cells){
@@ -775,12 +775,12 @@ test('flora, poseidon and the artificial demon share their aura with living enem
   assert.ok(victim.stun>0,'a dead artificial demon no longer blocks stun');
 });
 
-test('curse seals a random unit once per boss appearance; merging, selling or Jasmine clears it',()=>{
+test('curse seals a random unit twice per boss appearance; merging, selling or Jasmine clears it',()=>{
   const s=traitArena([{hero:'star_boy',index:0},{hero:'star_boy',index:1},{hero:'jasmine',index:12}]);s.chapter=3;
   const [boss]=enemiesFor(s,[{kind:'boss',progress:400}]);assert.equal(boss.boss,'curse_iris');boss.speed=0;
   for(let i=0;i<4;i++){boss.skillIn=0;E.step(s,.05);}
-  assert.equal(s.board.filter(u=>u?.cursed).length,3,'the curse keeps sealing until every companion is cursed');
-  assert.equal(s.events.filter(e=>e.type==='curse').length,3);assert.equal(s.events.filter(e=>e.type==='warning').length,0,'no warning');
+  assert.equal(s.board.filter(u=>u?.cursed).length,2,'two curses per appearance, then the boss stops');
+  assert.equal(s.events.filter(e=>e.type==='curse').length,2);assert.equal(s.events.filter(e=>e.type==='warning').length,0,'no warning');
   const cursed=s.board.findIndex(u=>u?.cursed);assert.ok(E.restore(E.serialize(s)),'cursed units save and restore');
   if(s.board[0]?.hero==='star_boy'&&s.board[1]?.hero==='star_boy'&&(s.board[0].cursed||s.board[1].cursed)){assert.ok(E.move(s,0,1).merged);assert.equal(s.board[1].cursed,undefined,'a merge makes a fresh unit');}
   for(const u of s.board)if(u)u.cursed=true;s.board[12].cursed=false;s.gauge=120;assert.ok(E.cast(s,'jasmine').ok);assert.ok(s.board.every(u=>!u?.cursed),'Jasmine cleanses');
@@ -2435,4 +2435,23 @@ test('echoes and Time Magician extra shots are basic attacks for every trait exc
     const mage=s.board[12],first=launchNormal(s,mage),echo=s.shots.find(x=>x!==first&&x.source===mage.uid);
     assert.equal(mage.attacks,1,'an echo does not advance the magician rhythm');assert.equal(echo.proc,false);
   }
+});
+
+test('동행의 악수 counts every support aura (Miracle Wing, Cure Master too) and the chips use the relic names',()=>{
+  const ratio=s=>E.combatStats(s,s.board[12]).damage/E.power(s,s.board[12]),bonus=1+E.RELIC_VALUES.guild.power;
+  const wing=traitArena([{hero:'star_boy',index:12},{hero:'miracle_larva',index:13}],{artifacts:['guild']});wing.board[13].form='miracle_wing';
+  close(ratio(wing),bonus);assert.ok(E.combatStats(wing,wing.board[12],12,true).bonuses.includes('동행의 악수 +25% 공격력'));
+  const larva=traitArena([{hero:'star_boy',index:12},{hero:'miracle_larva',index:13}],{artifacts:['guild']});close(ratio(larva),1,'a larva gives no aura');
+  const cure=traitArena([{hero:'star_boy',index:12},{hero:'cure_master',index:7}],{artifacts:['guild']});close(ratio(cure),bonus);
+  cure.board[7].disabled=2;close(ratio(cure),1,'a stunned Cure Master protects nobody');
+  const cursed=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:13}],{artifacts:['guild']});cursed.board[13].cursed=true;close(ratio(cursed),1);
+  const crown=traitArena([{hero:'star_boy',index:12,rank:3}],{artifacts:['crown']});
+  assert.ok(E.combatStats(crown,crown.board[12],12,true).bonuses.some(b=>b.startsWith('작은 왕관 +')));
+});
+
+test('finishers lock the enemy with the most health left, not the biggest maximum',()=>{
+  const s=traitArena([{hero:'star_boy',index:12}]);
+  const [big,full]=enemiesFor(s,[{hp:2000,progress:600},{hp:1000,progress:500}]);big.hp=1;
+  assert.equal(E.highestHp(s).uid,full.uid);
+  big.hp=1000;assert.equal(E.highestHp(s).uid,big.uid,'ties keep the oldest');
 });

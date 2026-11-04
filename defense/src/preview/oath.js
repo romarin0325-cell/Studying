@@ -2,7 +2,11 @@ import {HERO,BOSS_ORDER,MAIN_STAGES} from '../content.js';
 import {season} from './season.js';
 
 export const OATH_WAVES=9;
-export const OATH_TIER_BASE=Object.freeze({easy:0,hard:10,abyss:20});
+// Scoring rules carry a version so a retune never invalidates a stored record: v1 (2026-10-29) used 0/10/20,
+// v2 (2026-11-05) raises hard to 12 (the promotion from easy measured about 13 pressure points, see docs/SEASON_CONTENT.md).
+export const OATH_RULES=2;
+const TIER_BASE_BY_RULES=Object.freeze({1:Object.freeze({easy:0,hard:10,abyss:20}),2:Object.freeze({easy:0,hard:12,abyss:20})});
+export const OATH_TIER_BASE=TIER_BASE_BY_RULES[OATH_RULES];
 export const OATH_GROUPS=Object.freeze({deck:'편성',tempo:'운영',board:'배치',pressure:'압박'});
 export const OATHS=Object.freeze([
   {id:'lowstar',group:'deck',points:5,name:'낮은 별의 맹세',text:'C·R 동료만 편성할 수 있습니다.'},
@@ -18,12 +22,13 @@ export const OATHS=Object.freeze([
   {id:'tough1',group:'pressure',points:2,name:'단단한 밤',text:'적 체력 +25%',exclusive:'tough'},
   {id:'tough2',group:'pressure',points:4,name:'더 단단한 밤',text:'적 체력 +50%',exclusive:'tough'},
   {id:'haste',group:'pressure',points:2,name:'서두르는 발걸음',text:'적 이동 속도 +15%'},
-  {id:'tyrant',group:'pressure',points:3,name:'깨어난 군주',text:'보스 체력 +50%, 보스 패턴이 30% 더 자주 옵니다.'},
+  {id:'tyrant',group:'pressure',points:3,name:'깨어난 군주',text:'보스 체력 +50%. 보스 패턴 대기 시간이 30% 줄어듭니다.'},
   {id:'glass',group:'pressure',points:4,name:'유리 코어',text:'코어 생명력이 10입니다.'},
 ]);
 export const OATH=Object.fromEntries(OATHS.map(o=>[o.id,o]));
-export const OATH_BANDS=Object.freeze([{score:5,reward:50},{score:10,reward:50},{score:15,reward:60},{score:20,reward:60},{score:25,reward:80},{score:30,reward:80},{score:35,reward:100},{score:40,reward:120}]);
-export const oathScore=(tier,ids)=>OATH_TIER_BASE[tier]+(Array.isArray(ids)?ids.reduce((n,id)=>n+(OATH[id]?.points||0),0):0);
+export const OATH_BANDS=Object.freeze([{score:5,reward:50},{score:10,reward:50},{score:15,reward:60},{score:20,reward:60},{score:25,reward:80},{score:30,reward:80},{score:35,reward:100},{score:40,reward:120},{score:45,reward:120},{score:50,reward:150}]);
+export const validOathRules=rules=>Object.hasOwn(TIER_BASE_BY_RULES,rules);
+export const oathScore=(tier,ids,rules=OATH_RULES)=>TIER_BASE_BY_RULES[rules][tier]+(Array.isArray(ids)?ids.reduce((n,id)=>n+(OATH[id]?.points||0),0):0);
 export function oathConflict(ids){
   if(!Array.isArray(ids))return '서약을 확인하세요.';
   const seen=new Set(),excl=new Map();
@@ -63,7 +68,7 @@ export function oathBosses(seasonIndex,met){
 }
 export function oathChapter(seasonIndex,cleared){return seasonIndex%Math.max(1,Math.min(cleared,MAIN_STAGES));}
 export const oathBandsReached=score=>OATH_BANDS.filter(b=>score>=b.score).length;
-const copyRecord=r=>r?{period:r.period,token:r.token,score:r.score,tier:r.tier,oaths:[...r.oaths],deck:[...r.deck],at:r.at}:null;
+const copyRecord=r=>r?{period:r.period,token:r.token,score:r.score,tier:r.tier,oaths:[...r.oaths],deck:[...r.deck],at:r.at,...(r.rules!==undefined?{rules:r.rules}:{})}:null;
 export function oathState(p,now){
   const period=season(now).id,o=p?.oath,fresh=!o||o.period!==period;
   return {period,best:fresh?null:copyRecord(o.best),paid:fresh?0:o.paid|0,lifetime:copyRecord(o?.lifetime)};
