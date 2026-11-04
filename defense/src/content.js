@@ -3,6 +3,9 @@ import * as source from './data.js';
 // This game's copied definitions and art are maintained independently.
 // Rarity deliberately carries no stat multiplier; the author will balance it.
 export const RARITIES = ['C','R','SR','UR'];
+// Display order is independent of content insertion order; keep sampling indices in RARITIES.
+const RARITY_ORDER=Object.freeze(Object.fromEntries(RARITIES.map((rarity,i)=>[rarity,i])));
+export const compareRarity=(a,b)=>RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity];
 export const RARITY = {
   C:{name:'커먼',color:'#88aaa3',motif:'잎'},
   R:{name:'레어',color:'#68b8dd',motif:'물결'},
@@ -18,7 +21,7 @@ export const ROSTER = {
 // Season guardians in rotation order (one per month). Behemoth is a regular late-unlock UR.
 export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch'];
 export const DEFAULT_DECK = ['star_boy','snow_rabbit','night_rabbit','siren','great_detective'];
-export const HEROES = [...Object.entries(ROSTER).flatMap(([rarity,ids])=>ids.map(id=>({
+export const HEROES = [...RARITIES.flatMap(rarity=>ROSTER[rarity].map(id=>({
   ...source.HERO[id],rarity,hidden:false,name:id==='avalanche_maid'?'메이드':source.HERO[id].name,
 }))),...HIDDEN.map(id=>({...source.HERO[id],rarity:'UR',hidden:true}))];
 export const HERO = Object.fromEntries(HEROES.map(h=>[h.id,h]));
@@ -27,7 +30,7 @@ export const HERO = Object.fromEntries(HEROES.map(h=>[h.id,h]));
 export const ARTIFACTS = source.ARTIFACTS.map(a=>{
   if(!RARITIES.includes(a.rarity))throw new Error(`Relic ${a.id} needs a rarity: C, R, SR or UR.`);
   return {...a};
-}).sort((a,b)=>RARITIES.indexOf(a.rarity)-RARITIES.indexOf(b.rarity));
+}).sort(compareRarity);
 export const ARTIFACT = Object.fromEntries(ARTIFACTS.map(a=>[a.id,a]));
 export const validArtifacts = ids=>Array.isArray(ids)&&ids.length<=3&&new Set(ids).size===ids.length&&ids.every(id=>ARTIFACT[id]);
 export const BOSS_ORDER = ['artificial_demon','flora','love_iris','curse_iris','thor','poseidon','ares','beelzebub','astea'];

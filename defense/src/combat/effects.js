@@ -620,7 +620,7 @@ export class CombatFX{
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,ready=n>=3,pulse=ready&&!this.reduced?.5+Math.sin(this.clock*3+u.uid)*.5:0;
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=ready?.85+pulse*.15:.8;ctx.strokeStyle=ready?'#ffe27a':'#c99a3a';ctx.lineWidth=ready?2:1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
       const lit=n>0,grow=lit&&since<.6?1+(pop-1)*.4:1;
-      ctx.save();ctx.translate(cx,cy-1.5);ctx.scale(grow,grow);ctx.globalAlpha=lit?1:.5;ctx.fillStyle=ready?'#ffd23c':lit?'#f3c94a':'#b9a46a';
+      ctx.save();ctx.translate(cx,cy);ctx.scale(grow,grow);ctx.globalAlpha=lit?1:.5;ctx.fillStyle=ready?'#ffd23c':lit?'#f3c94a':'#b9a46a';
       for(let j=0;j<10;j++){ctx.save();ctx.rotate(j/10*Math.PI*2);ctx.beginPath();ctx.ellipse(7.2,0,4,2.15,0,0,Math.PI*2);ctx.fill();ctx.restore();}
       disk(ctx,0,0,4.4,lit?'#7a4a14':'#5a4630');ctx.globalAlpha*=.75;for(const [dx,dy] of [[-1.5,-1],[1.4,-1.3],[0,1.6],[-1.6,1.3],[1.6,1]])disk(ctx,dx,dy,.65,lit?'#d99a3c':'#8a7450');
       ctx.restore();

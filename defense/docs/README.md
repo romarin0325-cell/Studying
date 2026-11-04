@@ -45,6 +45,8 @@ docs/
 
 ## 3. 기획 (plans/)
 
+- [디펜스 설계 검토·서약 10안](plans/DEFENSE_REVIEW_AND_PROPOSALS.md): 2026-11-04. 아이리스 저주 이력, 쌍성 난이도별 입장, 용어, 서약 점수, 드래프트·월간 비교와 후속 제안. [원본 수치](archive/2026-11-04-REVIEW-EVIDENCE.json)는 과거 캐시 재사용과 현재 재보정을 구분한다.
+
 - [RELIC_BALANCE_PROPOSAL.md](plans/RELIC_BALANCE_PROPOSAL.md): 2026-10-30 유물 패치 직후 GPT·Grok 정적 분석 대조와 수치 제안. 코드 미반영, 사용자 확정 전.
 - [동료 의뢰·오토 전략·미션](plans/COMPANION_REQUESTS_AUTO_STRATEGY_MISSIONS.md):2026-10-29 사용자 요청. 선호 선물·전용 대화,5인 사전 전략과 최고 기록의 시간당 효율, 조합/상황 미션. 후속 구현 과제.
 - [UPCOMING_COMPANIONS.md](plans/UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
@@ -81,6 +83,8 @@ docs/
 - 파일 목록은 폴더를 직접 본다. 새 기록은 날짜를 적어 이 폴더에 더한다.
 
 ## 고칠 때 순서
+
+등급 표시 순서는 `src/content.js`의 `RARITIES`·`compareRarity`를 공유한다. `ROSTER`는 등급별 동료 ID, `HIDDEN`은 월별 수호자 순환, `LATE_COMPANIONS`는 후반 해금 대상을 관리한다. 화면 정렬 때문에 월별 순환이나 소환 후보 순서를 바꾸지 않는다. 미라클 형태 수치는 `src/new-companions.js`의 `MIRACLE_FORMS`에서 전투·밸런스 랩·생성 문서가 함께 읽는다.
 
 1. 코드의 수치·규칙을 바꾼다.
 2. `generated-reports.mjs`로 1장 문서를 다시 만든다(안 하면 테스트가 실패한다).

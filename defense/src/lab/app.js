@@ -31,7 +31,7 @@ function patch(){
  $('status').textContent='확정 패치 반영 완료 · 모든 측정은 현재 게임 엔진 기준';
  const h=id=>roster.find(x=>x.id===id);
  const cards=[
- ['일반 공격력',`언더독 ${h('underdog').damage}, 애쉬 ${h('ash').damage}, 가디언 ${h('guardian').damage}, 미라클코쿤 ${h('miracle_cocoon').damage}, 조커 ${h('joker').damage}, 큐어마스터 ${h('cure_master').damage}. 라바와 두 윙은 기존 수치를 유지합니다.`],
+ ['일반 공격력',`언더독 ${h('underdog').damage}, 애쉬 ${h('ash').damage}, 가디언 ${h('guardian').damage}, 미라클라바 ${h('miracle_larva').damage}, 미라클코쿤 ${h('miracle_cocoon').damage}, 조커 ${h('joker').damage}, 큐어마스터 ${h('cure_master').damage}. 두 윙은 기존 수치를 유지합니다.`],
  ['필살기',`아마겟돈 공격력 ${E.ARMAGEDDON.factor}배, 노바레퀴엠 ${E.REQUIEM.factor}배, 천둥의 연쇄 ${E.THUNDER_FACTOR}배. 유성은 사용 별빛당 공격력 ${E.STARFALL_FACTOR}배입니다. 산타의 공속 버프는 기본 ${E.ULT_BUFF.festive.seconds}초, 메이드 소모량은 ${h('avalanche_maid').skill.cost}별빛입니다.`],
  ['조커 카오스 룰렛',`시작 빨강을 포함해 5색을 모으면 해당 전투가 끝날 때까지 카오스를 유지합니다. 이후 필살기는 ${E.JOKER.chaosCost}별빛·전체 공격력 ${E.JOKER.roulette}배이며, 일반 공격이 기존 색상별 수치로 화상·중독·성광·노출·감속을 모두 겁니다. 측정 조건의 조커 색상에서 카오스를 선택할 수 있습니다.`],
  ['사과',`경로 전체에서 무작위로 설치되고 적이 가까이 접근할 때만 폭발합니다. 폭발은 반경 ${E.APPLEBOMB.radius} 안의 적에게 폭발 순간 최고 성급 토피애플의 현재 공격력 ${E.APPLEBOMB.factor}배입니다. 토피애플이 없으면 마지막 유효 공격력을 사용합니다. ‘사과 접근’ 조건은 표적 무리를 접촉 적과 함께 옮겨 반경 안의 폭발을 측정합니다.`],

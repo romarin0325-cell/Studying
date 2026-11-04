@@ -1950,51 +1950,93 @@ test('queued joins keep their rank: Santa gifts stay 1 star, the arrival blessin
   s.reserves=[{hero:'siren',rank:1}];const back=E.restore(E.serialize(s));assert.ok(back);assert.deepEqual(back.reserves,[{hero:'siren',rank:1}]);
   const bad=JSON.parse(E.serialize(s));bad.reserves=[{hero:'siren',rank:3}];assert.equal(E.restore(bad),null);
 });
-test('spotlight also reaches all-enemy ultimates that do not go through the shared strike (maid, flame sage)',()=>{
-  const s=traitArena([{hero:'avalanche_maid',index:12},{hero:'flame_sage',index:6}],{artifacts:['spotlight'],wave:2});
-  s.relicLevels={spotlight:1};const [foe]=enemiesFor(s,[{hp:1e9}]);quiet(s);
-  const power=i=>E.combatStats(s,s.board[i],i).damage,topIsMaid=power(12)>power(6),factor=top=>top?1+E.RELIC_VALUES.spotlight.top:E.RELIC_VALUES.spotlight.rest;
-  const maidBase=power(12),maidHp=foe.hp;readyCast(s,'avalanche_maid');close(maidHp-foe.hp,maidBase*4*factor(topIsMaid));
-  const sageBase=power(6),sageHp=foe.hp;readyCast(s,'flame_sage');close(sageHp-foe.hp,sageBase*4*factor(!topIsMaid));
+test('spotlight scales each global attack buff for one strongest recipient and halves the rest',()=>{
+  for(const hero of ['siren','ancient_dragon','silver_rabbit','santa','jasmine','harmonious']){
+    const s=traitArena([{hero:'queen',index:0,rank:3},{hero:'queen',index:24},{hero,index:12,rank:2}],{artifacts:['spotlight']});
+    s.relicLevels={spotlight:3};const [foe]=enemiesFor(s,[{hp:1e9}]);quiet(s);
+    const before=s.board.map(u=>u&&E.combatStats(s,u)),key=E.ACTIVE_SKILLS[hero],scale=E.rankControl(2),top=1+E.RELIC_VALUES.spotlight.top*relicScale(3);
+    assert.ok(before[0].damage>before[12].damage&&before[0].damage>before[24].damage,hero+' strongest is a recipient, not the caster');
+    const preview=E.castPreview(s,hero).lines.join(' ');assert.ok(preview.includes('여왕 1기')&&preview.includes('(나머지)'),hero+' preview recipients');
+    const hp=foe.hp;readyCast(s,hero);assert.equal(s.buffSpotlight[key],s.board[0].uid);
+    if(hero==='jasmine')close(hp-foe.hp,before[12].damage*5,'hybrid damage is not scaled by spotlight');
+    for(const index of [0,12,24]){
+      const after=E.combatStats(s,s.board[index]),factor=index===0?top:E.RELIC_VALUES.spotlight.rest;
+      const strength=key==='harmony'?E.harmonyField(s):E.ULT_BUFF[key];
+      close(after.damage/before[index].damage,1+(strength.damage??(strength.power||0)*scale)*factor,hero+' attack '+index);
+      close(before[index].cooldown/after.cooldown,1+(strength.speed||0)*(key==='harmony'?1:scale)*factor,hero+' speed '+index);
+    }
+    const duration=E.skillDuration(s,E.ULT_BUFF[key].seconds,key);close(s.buffs[key],duration,'duration unchanged');
+    if(hero==='santa')assert.equal(s.board.filter(Boolean).length,4,'summon still joins');
+  }
 });
-test('spotlight multiplies all-enemy ultimates for the top companion and leaves other ultimates alone',()=>{
-  const shown=n=>Math.round(n).toLocaleString('ko-KR');
-  const s=traitArena([
-    {hero:'queen',index:12},
-    {hero:'snow_rabbit',index:6},
-    {hero:'star_boy',index:0,birthWave:1},
-  ],{artifacts:['spotlight'],wave:2});
-  s.relicLevels={spotlight:1};
-  const [foe]=enemiesFor(s,[{hp:1e9}]);quiet(s);
-  const damage=index=>E.combatStats(s,s.board[index],index).damage;
-  assert.ok(damage(12)>damage(6)&&damage(12)>damage(0));
-  const queenBase=damage(12),spot=1+E.RELIC_VALUES.spotlight.top;
-  const queenPreview=E.castPreview(s,'queen');
-  assert.ok(queenPreview.lines[0].includes(shown(queenBase*4*spot)));
-  const queenHp=foe.hp;readyCast(s,'queen');close(queenHp-foe.hp,queenBase*4*spot);
-  const rabbitBase=E.combatStats(s,s.board[6]).damage;
-  const rabbitPreview=E.castPreview(s,'snow_rabbit');
-  assert.ok(rabbitPreview.lines[0].includes(shown(rabbitBase*3*E.RELIC_VALUES.spotlight.rest)));
-  const rabbitHp=foe.hp;readyCast(s,'snow_rabbit');close(rabbitHp-foe.hp,rabbitBase*3*E.RELIC_VALUES.spotlight.rest);
-  s.gauge=80;const starBase=E.combatStats(s,s.board[0]).damage;
-  const starPreview=E.castPreview(s,'star_boy');
-  assert.ok(starPreview.lines[0].includes(shown(starBase*E.STARFALL_FACTOR*80)));
-  assert.equal(E.cast(s,'star_boy').ok,true);
-  close(s.finishers.find(item=>item.kind==='starfall').damage,starBase*E.STARFALL_FACTOR*80);
-  const grown=traitArena([{hero:'queen',index:12},{hero:'snow_rabbit',index:6}],{artifacts:['spotlight']});
-  grown.relicLevels={spotlight:5};const grownScale=relicScale(5);
-  const [grownFoe]=enemiesFor(grown,[{hp:1e9}]);quiet(grown);
-  const grownTop=1+E.RELIC_VALUES.spotlight.top*grownScale,grownQueen=E.combatStats(grown,grown.board[12]).damage,grownHp=grownFoe.hp;
-  readyCast(grown,'queen');close(grownHp-grownFoe.hp,grownQueen*4*grownTop);
-  const grownRest=E.combatStats(grown,grown.board[6]).damage,restHp=grownFoe.hp;
-  readyCast(grown,'snow_rabbit');close(restHp-grownFoe.hp,grownRest*3*E.RELIC_VALUES.spotlight.rest);
-  const tie=traitArena([{hero:'snow_rabbit',index:3},{hero:'guardian',index:18}],{artifacts:['spotlight']});
-  tie.meta={snow_rabbit:{power:11,special:1},guardian:{power:2,special:1}};
-  const [tieFoe]=enemiesFor(tie,[{hp:1e9}]);quiet(tie);
-  assert.equal(E.combatStats(tie,tie.board[3]).damage,E.combatStats(tie,tie.board[18]).damage);
-  const low=E.combatStats(tie,tie.board[3]).damage,high=E.combatStats(tie,tie.board[18]).damage,lowHp=tieFoe.hp;
-  readyCast(tie,'snow_rabbit');close(lowHp-tieFoe.hp,low*3*(1+E.RELIC_VALUES.spotlight.top));
-  const highHp=tieFoe.hp;readyCast(tie,'guardian');close(highHp-tieFoe.hp,high*E.QUAKE_FACTOR*E.RELIC_VALUES.spotlight.rest);
+
+test('spotlight snapshots live attack power per buff, resolves duplicate ties by board order and survives resume',()=>{
+  const s=traitArena([{hero:'queen',index:0},{hero:'queen',index:24},{hero:'ancient_dragon',index:12}],{artifacts:['spotlight']});
+  enemiesFor(s,[{hp:1e9}]);quiet(s);const target=s.board[0],other=s.board[24];
+  // Make both queens stronger than the caster, with an exact tie between the two individuals.
+  s.meta={queen:{power:10,special:1}};
+  close(E.combatStats(s,target).damage,E.combatStats(s,other).damage);
+  readyCast(s,'ancient_dragon');assert.equal(s.buffSpotlight.awaken,target.uid);
+  const base=E.power(s,target);close(E.combatStats(s,target).damage/base,1+.35*2);close(E.combatStats(s,other).damage/base,1+.35*.5);
+  const saved=E.restore(E.serialize(s));assert.ok(saved);assert.deepEqual(saved.buffSpotlight,s.buffSpotlight);
+  const legacy=JSON.parse(E.serialize(s));delete legacy.buffSpotlight;const back=E.restore(legacy);assert.ok(back);assert.equal(back.buffSpotlight.awaken,target.uid);
+  for(const invalid of [{awaken:0},{haste:s.nextId},{trauma:target.uid},{unknown:target.uid}]){
+    const bad=JSON.parse(E.serialize(s));bad.buffSpotlight=invalid;assert.equal(E.restore(bad),null);
+  }
+  // A rank change makes the other queen strongest; an already running buff keeps its recipient.
+  other.rank=5;assert.ok(E.combatStats(s,other).damage>E.combatStats(s,target).damage);
+  assert.equal(s.buffSpotlight.awaken,target.uid);close(E.combatStats(s,other).damage/E.power(s,other),1+.35*.5);
+  s.board[0]=null;close(E.combatStats(s,other).damage/E.power(s,other),1+.35*.5,'removed target does not promote another unit');
+  const removed=E.restore(E.serialize(s));assert.ok(removed);assert.equal(removed.buffSpotlight.awaken,target.uid);
+  s.buffs.awaken=0;readyCast(s,'ancient_dragon');assert.equal(s.buffSpotlight.awaken,other.uid,'a later cast chooses the new strongest');
+});
+
+test('spotlight previews and captures the strongest recipient before spending starlight turns off Tide',()=>{
+  const s=traitArena([{hero:'queen',index:0,rank:3},{hero:'snow_rabbit',index:24},{hero:'siren',index:12}],{artifacts:['spotlight','tide','crown']});
+  s.meta={queen:{power:105/(HERO.queen.damage*2.35**2),special:1},snow_rabbit:{power:120/HERO.snow_rabbit.damage,special:1}};
+  enemiesFor(s,[{hp:1e9}]);quiet(s);s.gauge=110;
+  assert.ok(E.combatStats(s,s.board[24]).damage>E.combatStats(s,s.board[0]).damage,'Tide makes Snow Rabbit strongest');
+  const preview=E.castPreview(s,'siren').lines.join(' ');assert.ok(preview.includes('최고 공격력 눈토끼 1기'));
+  assert.equal(E.cast(s,'siren').ok,true);assert.ok(s.gauge<100);
+  assert.ok(E.combatStats(s,s.board[0]).damage>E.combatStats(s,s.board[24]).damage,'after paying the skill, crown makes Queen strongest');
+  assert.equal(s.buffSpotlight.haste,s.board[24].uid,'the cast still targets the previewed recipient');
+});
+
+test('spotlight keeps separate recipients for overlapping global buffs before applying the family maximum',()=>{
+  const s=traitArena([{hero:'queen',index:0,rank:3},{hero:'queen',index:24},{hero:'ancient_dragon',index:12},{hero:'jasmine',index:6}],{artifacts:['spotlight']});
+  enemiesFor(s,[{hp:1e9}]);quiet(s);readyCast(s,'ancient_dragon');
+  const first=s.board[0],second=s.board[24];assert.equal(s.buffSpotlight.awaken,first.uid);
+  second.rank=5;readyCast(s,'jasmine');assert.equal(s.buffSpotlight.radiance,second.uid);
+  close(E.combatStats(s,first).damage/E.power(s,first),1+.35*2,'first keeps stronger awaken over half radiance');
+  close(E.combatStats(s,second).damage/E.power(s,second),1+.5*2,'second receives radiance over half awaken');
+});
+
+test('spotlight scales Rumi echo damage per attacker, with ranks and matching live preview',()=>{
+  const s=traitArena([{hero:'queen',index:0,rank:3},{hero:'queen',index:24},{hero:'rumi',index:12,rank:2}],{artifacts:['spotlight']});
+  enemiesFor(s,[{hp:1e9,progress:1200}]);quiet(s);
+  const preview=E.castPreview(s,'rumi').lines.join(' ');assert.ok(preview.includes('143%(최고 공격력 여왕 1기)')&&preview.includes('36%(나머지)'));
+  readyCast(s,'rumi');assert.equal(s.buffSpotlight.echo,s.board[0].uid);
+  // Put each queen in range without changing its identity or the captured target.
+  for(const index of [0,24]){
+    const u=s.board[index];s.board[index]=null;s.board[12]=u;s.shots=[];
+    const shot=launchNormal(s,u),extra=s.shots.find(a=>a.source===u.uid&&a!==shot);
+    assert.ok(extra);close(extra.damage/shot.damage,E.ULT_BUFF.echo.ratio*E.rankControl(2)*(index===0?2:.5));
+    s.board[12]=null;s.board[index]=u;quiet(s);
+  }
+});
+
+test('spotlight leaves direct ultimate damage, self transformation and cleanses unchanged',()=>{
+  for(const hero of ['avalanche_maid','flame_sage','queen','snow_rabbit','time_magician']){
+    const s=traitArena([{hero,index:12},{hero:'rumi',index:0}],{artifacts:['spotlight']});
+    const [foe]=enemiesFor(s,[{hp:1e9}]);quiet(s);const base=E.combatStats(s,s.board[12]).damage,hp=foe.hp;
+    readyCast(s,hero);const factor={avalanche_maid:4,flame_sage:4,queen:4,snow_rabbit:3,time_magician:4}[hero];close(hp-foe.hp,base*factor);
+    if(hero==='time_magician'){
+      close(E.combatStats(s,s.board[12]).damage/E.power(s,s.board[12]),1+E.TRAUMA.power);
+      assert.equal(s.buffSpotlight.trauma,undefined);
+    }
+  }
+  const clear=traitArena([{hero:'cure_master',index:12},{hero:'queen',index:0}],{artifacts:['spotlight']});enemiesFor(clear,[{hp:1e9}]);quiet(clear);
+  clear.board[0].cursed=true;readyCast(clear,'cure_master');assert.equal(clear.board[0].cursed,false);close(clear.board[0].invincible,4);assert.deepEqual(clear.buffSpotlight,{});
 });
 
 test('royal crown triples every leak and pays flat gold at the end of the wave',()=>{
