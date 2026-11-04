@@ -40,11 +40,15 @@ docs/
 - [GPT_IMAGE_SD_BRIEF.md](GPT_IMAGE_SD_BRIEF.md): 나노바나나로 만든 동료 6명의 SD를 GPT Image 2.5(Manus)로 다시 그리는 지시서. 참조·프롬프트·거르기·패킹 순서.
 - [ASSET_CONSISTENCY.md](ASSET_CONSISTENCY.md): 동료 SD·메모리얼 일관성 평가표. 측정 도구는 `scripts/art/consistency-report.mjs`, `consistency-table.mjs`.
 - [PARTNER_LINES.md](PARTNER_LINES.md): 대사.
+- [CHARACTER_BIBLE.md](CHARACTER_BIBLE.md): 동료 42명의 외모·성격·말투·관계(메모리얼·대사·원화에서 정리). 이벤트·대사를 쓰기 전에 본다.
 
 `art/HEAD_PROFILE.json`은 키 그룹(tall·medium·short)별 머리 크기 기준이고, `art/units-manifest.json`은 `scripts/art/review-sd.mjs`가 읽는 아틀라스 프레임 목록이다. 둘 다 에셋 제작 도구의 입력이며 게임 빌드에는 들어가지 않는다.
 
 ## 3. 기획 (plans/)
 
+- [VFX_REVIEW_AND_PIPELINE.md](plans/VFX_REVIEW_AND_PIPELINE.md): 2026-11-04 동료 42명의 일반 공격·필살기 연출 점검(실제 렌더러 시트와 지표는 [review/vfx-audit-20261104](review/vfx-audit-20261104/)), 등급 예산·모션 템플릿·측정 게이트로 된 에셋 일관성 파이프라인. 미반영.
+- [VFX_CHARACTER_PROPOSALS.md](plans/VFX_CHARACTER_PROPOSALS.md): 동료별 일반 공격 변경안과 필살기 2안(박자·이펙트·움직임). 미반영.
+- [VOICE_OVERLAP_PROPOSAL.md](plans/VOICE_OVERLAP_PROPOSAL.md): 말투·성격 중복 14묶음, 서브컬쳐 문법에 따른 조정안과 말투 예약표. 미반영.
 - [RELIC_BALANCE_PROPOSAL.md](plans/RELIC_BALANCE_PROPOSAL.md): 2026-10-30 유물 패치 직후 GPT·Grok 정적 분석 대조와 수치 제안. 코드 미반영, 사용자 확정 전.
 - [동료 의뢰·오토 전략·미션](plans/COMPANION_REQUESTS_AUTO_STRATEGY_MISSIONS.md):2026-10-29 사용자 요청. 선호 선물·전용 대화,5인 사전 전략과 최고 기록의 시간당 효율, 조합/상황 미션. 후속 구현 과제.
 - [UPCOMING_COMPANIONS.md](plans/UPCOMING_COMPANIONS.md): 추가 예정 동료. 구현되면 해당 항목에 구현 날짜와 확정 수치를 적는다.
