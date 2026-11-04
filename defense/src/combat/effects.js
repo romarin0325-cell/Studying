@@ -579,14 +579,14 @@ export class CombatFX{
       ctx.restore();
     }
   }
-  drawPersonalTraits(s,foreground=false){
+  drawPersonalTraits(s,foreground=false,hiddenUid=null){
     // Reuse each companion's painted combat emblem. The foot seal conveys a
     // live condition without painting over faces, ranks, enemies or HP bars.
     const ctx=this.ctx;
-    drawGoldPersistent(this,s,foreground);
-    if(foreground){this.drawPlague(s);this.drawSunBlooms(s);this.drawJokerWheels(s);this.drawAntropyBadges(s);}else{this.drawSunHalo(s);this.drawWards(s);}
+    drawGoldPersistent(this,s,foreground,hiddenUid);
+    if(foreground){this.drawPlague(s);this.drawSunBlooms(s,hiddenUid);this.drawJokerWheels(s,hiddenUid);this.drawAntropyBadges(s,hiddenUid);}else{this.drawSunHalo(s);this.drawWards(s);}
     for(let i=0;i<s.board.length;i++){
-      const u=s.board[i];if(!u)continue;
+      const u=s.board[i];if(!u||u.uid===hiddenUid)continue;
       if(!['lightning_sage','star_boy','aurora','zeke','time_ruler'].includes(u.hero))continue;
       const state=personalTrait(s,u,i),aged=state.key==='wave-age';
       if(!state.active&&!aged)continue;
@@ -613,14 +613,14 @@ export class CombatFX{
   // Sunflower: one shared stack on the same small badge as the other traits (dark disc, thin rim, one flat glyph).
   // The glyph is a plain sunflower: ten broad rounded petals around a seed disc, dim with no sunlight. Three pips on
   // the lower rim count the stack; the newest pip pops, and at three the rim and petals turn warm (no glow, like the others).
-  drawSunBlooms(s){
+  drawSunBlooms(s,hiddenUid=null){
     const ctx=this.ctx,n=Math.min(3,s.sunlight||0),since=this.clock-(this.bloomAt??-9),pop=since<.6?easeBack(since/.6):1;
     for(let i=0;i<s.board.length;i++){
-      const u=s.board[i];if(!u||u.hero!=='sunflower')continue;
+      const u=s.board[i];if(!u||u.uid===hiddenUid||u.hero!=='sunflower')continue;
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,ready=n>=3,pulse=ready&&!this.reduced?.5+Math.sin(this.clock*3+u.uid)*.5:0;
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=ready?.85+pulse*.15:.8;ctx.strokeStyle=ready?'#ffe27a':'#c99a3a';ctx.lineWidth=ready?2:1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
       const lit=n>0,grow=lit&&since<.6?1+(pop-1)*.4:1;
-      ctx.save();ctx.translate(cx,cy-1.5);ctx.scale(grow,grow);ctx.globalAlpha=lit?1:.5;ctx.fillStyle=ready?'#ffd23c':lit?'#f3c94a':'#b9a46a';
+      ctx.save();ctx.translate(cx,cy);ctx.scale(grow,grow);ctx.globalAlpha=lit?1:.5;ctx.fillStyle=ready?'#ffd23c':lit?'#f3c94a':'#b9a46a';
       for(let j=0;j<10;j++){ctx.save();ctx.rotate(j/10*Math.PI*2);ctx.beginPath();ctx.ellipse(7.2,0,4,2.15,0,0,Math.PI*2);ctx.fill();ctx.restore();}
       disk(ctx,0,0,4.4,lit?'#7a4a14':'#5a4630');ctx.globalAlpha*=.75;for(const [dx,dy] of [[-1.5,-1],[1.4,-1.3],[0,1.6],[-1.6,1.3],[1.6,1]])disk(ctx,dx,dy,.65,lit?'#d99a3c':'#8a7450');
       ctx.restore();
@@ -648,10 +648,10 @@ export class CombatFX{
       ctx.restore();
     }
   }
-  drawAntropyBadges(s){
+  drawAntropyBadges(s,hiddenUid=null){
     const ctx=this.ctx;
     for(let i=0;i<s.board.length;i++){
-      const u=s.board[i];if(!u||u.hero!=='antropy')continue;
+      const u=s.board[i];if(!u||u.uid===hiddenUid||u.hero!=='antropy')continue;
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21;
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=.9;ctx.strokeStyle='#c9b4f0';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();
       ctx.strokeStyle='#efe6ff';ctx.lineWidth=2.2;for(const [a0,a1] of [[.3,2.0],[2.5,4.1],[4.6,5.9]]){ctx.beginPath();ctx.arc(cx,cy,10.5,a0,a1);ctx.stroke();}
@@ -666,10 +666,10 @@ export class CombatFX{
   }
   // Joker: a small roulette. Five colours sit on a ring in cast order; the current one is always at the top and lit,
   // the others are dimmed. A cast spins the wheel and settles on the colour the roulette picked.
-  drawJokerWheels(s){
+  drawJokerWheels(s,hiddenUid=null){
     const ctx=this.ctx,names=['red','blue','green','white','black'],chaos=s.jokerColor==='chaos',closed=(s.jokerSeen||0)===JOKER.all,idx=Math.max(0,names.indexOf(s.jokerColor||'red')),since=this.clock-(this.wheelAt??-9),offset=since<.7?(1-easeOut(since/.7))*Math.PI*2/5:0;
     for(let i=0;i<s.board.length;i++){
-      const u=s.board[i];if(!u||u.hero!=='joker')continue;
+      const u=s.board[i];if(!u||u.uid===hiddenUid||u.hero!=='joker')continue;
       const p=cellPoint(i),cx=p.x+28,cy=p.y+21,tint=chaos?JOKER_HEX.chaos:JOKER_HEX[names[idx]];
       ctx.save();ctx.globalAlpha=.85;disk(ctx,cx,cy,17,'#0b1e2b');ctx.globalAlpha=.8;ctx.strokeStyle='#e5b84a';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx,cy,17,0,Math.PI*2);ctx.stroke();ctx.restore();
       if(closed){

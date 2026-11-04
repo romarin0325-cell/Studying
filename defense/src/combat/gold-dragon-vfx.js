@@ -72,7 +72,7 @@ export function drawGoldAttack(fx,e,t,clarity=1){
   }
   return true;
 }
-export function drawGoldPersistent(fx,s,foreground){
+export function drawGoldPersistent(fx,s,foreground,hiddenUid=null){
   const ctx=fx.ctx;
   // Read the flight from saved combat state, so pause, resume and wave cancellation stay in sync.
   for(const v of s.volleys||[])if(v.kind==='gold_breath'){
@@ -80,7 +80,7 @@ export function drawGoldPersistent(fx,s,foreground){
     else drawGoldGround(fx,{...v,type:'goldBreathGround',flight:v.total,total:v.total+.9},(v.total-v.life)/(v.total+.9));
   }
   for(let i=0;i<s.board.length;i++){
-    const u=s.board[i];if(u?.hero!=='gold_dragon')continue;const p=cellPoint(i),on=charging(s,u),opening=goldOpening(s)&&(!u.cursed||on);
+    const u=s.board[i];if(!u||u.uid===hiddenUid||u.hero!=='gold_dragon')continue;const p=cellPoint(i),on=charging(s,u),opening=goldOpening(s)&&(!u.cursed||on);
     if(!foreground){
       if(!opening&&!on)continue;
       ctx.save();ctx.globalAlpha=on?.6:.36;ctx.strokeStyle=opening?'#ff9363':'#eed18c';ctx.lineWidth=on?2:1.5;

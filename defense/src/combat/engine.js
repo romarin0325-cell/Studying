@@ -149,7 +149,7 @@ export const RELIC_VALUES=Object.freeze({
   meteor:{hit:1.1},prism:{chain:.9},tide:{power:.3,gauge:100},roots:{life:.2,radius:.08},guild:{power:.25},phoenix:{taken:.2,uses:1},
   twin:{echo:1.2},constellation:{three:.32,four:.5},alchemy:{power:.6,waves:2},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.6,poison:3},
   royal_seal:{starlight:30,boss:.4},gift_ribbon:{chance:.25},broken_clock:{duration:1},
-  spotlight:{top:1,rest:.25},royal_crown:{core:3,gold:30},dream_crystal:{starlight:10,rumi:1},
+  spotlight:{top:1,rest:.5},royal_crown:{core:3,gold:30},dream_crystal:{starlight:10,rumi:1},
 });
 const RV=RELIC_VALUES;
 export const relicScaleIn=(s,id)=>1+RELIC_LEVEL_STEP*((s.relicLevels?.[id]||1)-1);
@@ -471,7 +471,7 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const levels=Object.fromEntries(arts.filter(id=>Number.isInteger(relicLevels?.[id])&&relicLevels[id]>=1&&relicLevels[id]<=999).map(id=>[id,relicLevels[id]]));
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],critRevision:2,crit:cleanCrit(crit),critRng:critSeed(seed),bombs:[],sunlight:0,jokerColor:'red',jokerSeen:1,gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
-    buffs:{},buffTotals:{},buffScale:{},goldCharge:null,queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,
+    buffs:{},buffTotals:{},buffScale:{},buffSpotlight:{},goldCharge:null,queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{},leaks:0},tutorial:0,won:false};
   s.oaths=Array.isArray(oaths)?[...oaths]:[];s.oathMods=oathMods(s.oaths);s.side=side??null;s.lineup=Array.isArray(lineup)?[...lineup]:null;
   const opening=shuffle(s,chosen).slice(0,3);
@@ -798,7 +798,7 @@ function attack(s,u,index,extra=0){
   const stats=combatStats(s,u,index),ratio=extra||1;
   const shot=fire(s,u,index,e,ground?pathPoint(random(s)*PATH_LENGTH):null,stats,ratio,extra>0,false);
   event(s,'attack',{index,hero:u.hero,rank:u.rank,from:shot.from,to:shot.to,origin:shot.origin,shape:unitHero(s,u).shape,form:shot.form,attackType:unitHero(s,u).attack,...(shot.gift?{gift:true}:{}),...(extra?{extra:true}:{}),...(u.hero==='gold_dragon'?{opening:goldOpening(s)}:{}),...(u.hero==='zeke'&&zekeFury(s)?{fury:true}:{})});
-  if(s.buffs.echo>0)fire(s,u,index,ground?null:s.enemies.find(x=>x.uid===shot.target)||e,ground?shot.to:null,stats,ratio*.65*buffScale(s,'echo'),true,true);
+  if(s.buffs.echo>0)fire(s,u,index,ground?null:s.enemies.find(x=>x.uid===shot.target)||e,ground?shot.to:null,stats,ratio*ULT_BUFF.echo.ratio*buffScale(s,'echo')*spotlightBuffFactor(s,'echo',u),true,true);
   return true;
 }
 function fire(s,u,index,e,ground,stats,ratio,bonus,echo){
@@ -835,7 +835,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   const harmonySources=index<0?[]:neighbors(index).filter(i=>s.board[i]?.hero==='harmonious'&&!s.board[i].cursed).map(i=>harmonyStrength(s,i));
   const harmony=harmonySources.reduce((best,value)=>value.damage>best.damage?value:best,{count:0,damage:0,speed:0});
   if(harmony.count){damageBonus('aura',`조화 ${harmony.count}종`,harmony.damage);speedBonus('aura',`조화 ${harmony.count}종`,harmony.speed);}
-  const ensemble=harmonyField(s);if(ensemble.damage){damageBonus('ult','디저트 앙상블',ensemble.damage);speedBonus('ult','디저트 앙상블',ensemble.speed);}
+  const ensemble=harmonyField(s),ensembleSpot=spotlightBuffFactor(s,'harmony',u);if(ensemble.damage){damageBonus('ult','디저트 앙상블',ensemble.damage*ensembleSpot);speedBonus('ult','디저트 앙상블',ensemble.speed*ensembleSpot);}
   if(has(s,'guild')&&(harmony.count||adjacent.some(a=>['powerAura','hasteAura'].includes(HERO[a.hero].trait.type))))damageBonus('relic','연대',RV.guild.power*relicScaleIn(s,'guild'));
   {const kinds=new Set(adjacent.map(a=>a.hero)).size;if(has(s,'constellation')&&kinds>=3)damageBonus('relic','별자리',(kinds>=4?RV.constellation.four:RV.constellation.three)*relicScaleIn(s,'constellation'));}
   if(has(s,'banner')&&!adjacent.length&&index>=0)damageBonus('relic','고독한 깃발',RV.banner.power*relicScaleIn(s,'banner'));
@@ -844,17 +844,17 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(has(s,'alchemy')&&Number.isInteger(u.mergedWave)&&u.mergedWave<=s.wave&&s.wave<u.mergedWave+RV.alchemy.waves)damageBonus('relic','연금',RV.alchemy.power*relicScaleIn(s,'alchemy'));
   if(has(s,'tide')&&s.gauge>=RV.tide.gauge)damageBonus('relic','파도의 소라',RV.tide.power*relicScaleIn(s,'tide'));
   if(has(s,'dream_crystal')&&u.hero==='rumi')damageBonus('relic','꿈의 조각',RV.dream_crystal.rumi*relicScaleIn(s,'dream_crystal'));
-  if(s.buffs.awaken>0)damageBonus('ult','각성',ULT_BUFF.awaken.power*buffScale(s,'awaken'));
-  if(s.buffs.radiance>0)damageBonus('ult','여신강림',.5*buffScale(s,'radiance'));
+  if(s.buffs.awaken>0)damageBonus('ult','각성',ULT_BUFF.awaken.power*buffScale(s,'awaken')*spotlightBuffFactor(s,'awaken',u));
+  if(s.buffs.radiance>0)damageBonus('ult','여신강림',ULT_BUFF.radiance.power*buffScale(s,'radiance')*spotlightBuffFactor(s,'radiance',u));
   if(unitForm(s,u)==='trauma'){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
   if(u.hero==='cinderella'&&s.buffs.midnight>0&&topCinderella(s)?.uid===u.uid)speedBonus('ult','자정의 기적',CINDERELLA.haste);
   if(sirenRank)speedBonus('aura','세이렌의 노래',(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank));
   // Placement auras only (dragon, harmony, siren). Ultimate buffs and relics stay single.
   if(u.hero==='behemoth'&&!u.cursed&&!(u.disabled>0)){power_.aura*=2;speed_.aura*=2;if(detail)bonuses.push('오라 2배');}
   if(s.oathMods?.aura){power_.aura*=s.oathMods.aura;speed_.aura*=s.oathMods.aura;}
-  if(s.buffs.haste>0)speedBonus('ult','가속',ULT_BUFF.haste.speed*buffScale(s,'haste'));
-  if(s.buffs.march>0)speedBonus('ult','은빛 행진',ULT_BUFF.march.speed*buffScale(s,'march'));
-  if(s.buffs.festive>0)speedBonus('ult','성야의 선물',.2*buffScale(s,'festive'));
+  if(s.buffs.haste>0)speedBonus('ult','가속',ULT_BUFF.haste.speed*buffScale(s,'haste')*spotlightBuffFactor(s,'haste',u));
+  if(s.buffs.march>0)speedBonus('ult','은빛 행진',ULT_BUFF.march.speed*buffScale(s,'march')*spotlightBuffFactor(s,'march',u));
+  if(s.buffs.festive>0)speedBonus('ult','성야의 선물',ULT_BUFF.festive.speed*buffScale(s,'festive')*spotlightBuffFactor(s,'festive',u));
   const tempo=has(s,'tempo_bell')?Math.min(RV.tempo_bell.cap,RV.tempo_bell.perWave*(s.wave-1)*relicScaleIn(s,'tempo_bell')):0;
   if(tempo)speedBonus('other','이어지는 종',tempo);
   if(has(s,'chorus')&&s.board.filter(a=>a?.hero===u.hero).length>=RV.chorus.count)speedBonus('other','합창',RV.chorus.speed*relicScaleIn(s,'chorus'));
@@ -919,18 +919,21 @@ function refreshAppleBombs(s){
   const amount=combatStats(s,u).damage*APPLEBOMB.factor,crit=unitCrit(s,u);
   for(const bomb of s.bombs){bomb.damage=amount;if(crit)bomb.crit={...crit};else delete bomb.crit;}
 }
-function topCompanion(s){
+// Pick an individual, not a hero type. Board order resolves equal live attack power.
+// Each global buff records this uid at cast time so its own power boost cannot change the winner.
+function spotlightTarget(s){
   let best=null;
   for(let i=0;i<s.board.length;i++){
     const u=s.board[i];if(!u)continue;
     const damage=combatStats(s,u,i).damage;
-    if(!best||damage>best.damage||damage===best.damage&&i<best.index)best={hero:u.hero,damage,index:i};
+    if(!best||damage>best.damage)best={unit:u,damage};
   }
-  return best?.hero??null;
+  return best?.unit??null;
 }
-function spotlightFactor(s,id){
-  if(!has(s,'spotlight'))return 1;
-  return id===topCompanion(s)?1+RV.spotlight.top*relicScaleIn(s,'spotlight'):RV.spotlight.rest;
+function spotlightBuffFactor(s,key,u){
+  const target=s.buffSpotlight?.[key];
+  if(!has(s,'spotlight')||target===undefined)return 1;
+  return u.uid===target?1+RV.spotlight.top*relicScaleIn(s,'spotlight'):RV.spotlight.rest;
 }
 export function cast(s,id){
   if(s.phase!=='combat'||!s.enemies.some(e=>e.hp>0))return {ok:false,reason:'적이 나타나면 사용할 수 있습니다.'};
@@ -940,6 +943,7 @@ export function cast(s,id){
   const goldCost=skillGoldCost(id);if(s.gold<goldCost)return {ok:false,reason:`골드가 부족합니다. (${goldCost} 필요)`};
   const cost=skillCost(s,id),name=skillName(s,id);
   if(s.gauge<cost)return {ok:false,reason:`별빛이 부족합니다. (${cost} 필요)`};
+  const buffTarget=!rumiDream(s,u)&&Object.hasOwn(ULT_BUFF,ACTIVE_SKILLS[id])&&has(s,'spotlight')?spotlightTarget(s)?.uid:null;
   refreshAppleBombs(s);
   // Wish upon a Star spends the whole gauge; every other skill pays its cost.
   const spent=hero.skill.type==='starfall'?s.gauge:cost;
@@ -953,7 +957,7 @@ export function cast(s,id){
   for(const e of targets){syncStatuses(s,e);syncSlows(s,e);}
   let visualTargets=targets,gift,look;
   const before=new Map(targets.map(e=>[e.uid,pathPoint(e.progress)]));
-  const spot=spotlightFactor(s,id),strike=factor=>targets.forEach(e=>damage(s,e,base*factor*spot,id));
+  const strike=factor=>targets.forEach(e=>damage(s,e,base*factor,id));
   if(type==='ultimate_breath'){
     u.windup=0;u.target=null;u.pose=0;
     s.goldCharge={source:u.uid,wave:s.wave,started:s.time,ends:s.time+GOLD_DRAGON.charge};
@@ -968,7 +972,7 @@ export function cast(s,id){
     visualTargets=cluster.targets;for(const [i,e] of cluster.targets.entries())damage(s,e,base*receipts[i].factor,id);
     if(cluster.centre)event(s,'deathhandBlast',{...pathPoint(cluster.centre.progress),radius:DEATHHAND.radius,targets:receipts});
   }
-  else if(dream)s.volleys.push(...RUMI_DREAM.phases.map((p,phase)=>({uid:s.nextId++,source:u.uid,hero:id,kind:'dream',phase,rank:u.rank,damage:base*spot*p.factor,life:p.at,total:p.at,...(phase===RUMI_DREAM.phases.length-1?{echo:{}}:{})})));
+  else if(dream)s.volleys.push(...RUMI_DREAM.phases.map((p,phase)=>({uid:s.nextId++,source:u.uid,hero:id,kind:'dream',phase,rank:u.rank,damage:base*p.factor,life:p.at,total:p.at,...(phase===RUMI_DREAM.phases.length-1?{echo:{}}:{})})));
   else if(type==='echo')s.buffs.echo=skillDuration(s,ULT_BUFF.echo.seconds*control,'echo');
   else if(type==='haste')s.buffs.haste=skillDuration(s,ULT_BUFF.haste.seconds*control,'haste');
   else if(type==='awaken')s.buffs.awaken=skillDuration(s,ULT_BUFF.awaken.seconds*control,'awaken');
@@ -986,7 +990,7 @@ export function cast(s,id){
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
   }
   else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,SNOW_RABBIT.freeze*control*scale);addSlow(s,e,source,SNOW_RABBIT.skillSlow*scale,SNOW_RABBIT.seconds);}}
-  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*spot*(e.controlTime>0?12:4),id);addSlow(s,e,source,.5,4);}}
+  else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.controlTime>0?12:4),id);addSlow(s,e,source,.5,4);}}
   else if(type==='dragon'){
     // Dragon Breath lands on the densest pack (radius 180) instead of the whole field.
     const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=180);
@@ -994,7 +998,7 @@ export function cast(s,id){
     visualTargets=centre?near(centre):[];for(const e of visualTargets){damage(s,e,base*14,id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
   }
   else if(type==='inferno'){strike(7*(coreCrisis(s)?2:1));for(const e of targets)addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
-  else if(type==='combust'){for(const e of targets){damage(s,e,base*spot*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}}
+  else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}}
   else if(type==='plague'){
     // Enemies already carrying 20+ poison take 30% of the remaining poison at once.
     for(const e of targets){const active=activePoison(e);if(active.reduce((n,a)=>n+a.stacks,0)>=20)damage(s,e,.3*active.reduce((n,{effect,stacks})=>n+stacks*effect.power*POISON_POWER_RATIO*Math.max(0,effect.until-s.time),0)*poisonAmp(s),id);}
@@ -1009,7 +1013,7 @@ export function cast(s,id){
     for(const e of targets){const pull=Math.min(.9,.65*control)*(e.boss?BOSS_PUSH_SCALE:1);e.progress=e.progress*(1-pull)+point*pull;if(type==='vortex')addControl(s,e,'stun',source,id,1.5*control*scale);addSlow(s,e,source,.6,4);}
     if(type==='vortex')strike(5);
     // Harvest spends every divine mark on that enemy before the blast. Singularity does not stun.
-    else for(const e of targets){const marks=e.divine;e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='divine');syncStatuses(s,e);damage(s,e,base*spot*WHALE.factor*(1+WHALE.perMark*marks),id);}
+    else for(const e of targets){const marks=e.divine;e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='divine');syncStatuses(s,e);damage(s,e,base*WHALE.factor*(1+WHALE.perMark*marks),id);}
   }else if(type==='execute'){
     // Each execution kill carries the step to the next target (up to five more).
     const order=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp);visualTargets=[];
@@ -1082,7 +1086,7 @@ export function cast(s,id){
   }
   for(const delayed of [...s.finishers,...s.volleys,...s.bombs])if(delayed.uid>=castStart)delayed.crit=castCrits.get(s);
   const support=!dream&&['echo','haste','awaken','march','gift','trauma','harmony','lemonade','miracle_eclose'].includes(type);
-  const key=ACTIVE_SKILLS[id];if(key&&!dream){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;}
+  const key=ACTIVE_SKILLS[id];if(key&&!dream){s.buffTotals[key]=s.buffs[key];if(!s.buffScale)s.buffScale={};s.buffScale[key]=scale;if(Object.hasOwn(ULT_BUFF,key)){s.buffSpotlight??={};if(buffTarget!==null)s.buffSpotlight[key]=buffTarget;else delete s.buffSpotlight[key];}}
   const points=support?s.board.flatMap((ally,index)=>ally&&(type!=='trauma'||ally.hero==='time_magician')?[{...cellPoint(index),uid:ally.uid}]:[]):visualTargets.map(e=>({...pathPoint(e.progress),uid:e.uid,from:before.get(e.uid)}));
   castCrits.delete(s);event(s,'skill',{hero:id,name:dream?RUMI_DREAM.name:name,kind:dream?'dream':type,rank:u.rank,goldCost,origin:cellPoint(s.board.indexOf(u)),support,locked:['royal','starfall','mirror'].includes(type),targets:points,...(gift!==undefined?{gift}:{}),...look});return {ok:true};
 }
@@ -1108,7 +1112,9 @@ export function castPreview(s,id){
   const pct=v=>Math.round(v*100).toLocaleString('ko-KR');
   const dur=(seconds,key)=>sec(skillDuration(s,seconds*control,key));
   const hit=factor=>`${num(base*factor)} 피해`;
-  const allHit=factor=>hit(factor*spotlightFactor(s,id));
+  const allHit=hit;
+  const buffTarget=!dream&&Object.hasOwn(ULT_BUFF,ACTIVE_SKILLS[id])&&has(s,'spotlight')?spotlightTarget(s):null;
+  const buffAmount=value=>buffTarget?`${pct(value*(1+RV.spotlight.top*relicScaleIn(s,'spotlight')))}%(최고 공격력 ${HERO[buffTarget.hero].name} 1기), ${pct(value*RV.spotlight.rest)}%(나머지)`:`${pct(value)}%`;
   const slowOf=amount=>Math.min(.8,amount*control);
   // Same fields cast() sees after syncStatuses, read from a copy of the effects.
   const snapshot=e=>{
@@ -1137,20 +1143,20 @@ export function castPreview(s,id){
   const repeat=e=>!!e.boss&&(e.ultControl||0)-s.time>1e-9;
 
   if(dream){const [sun,,,last]=RUMI_DREAM.phases;lines.push(`해·달·별의 마법이 차례로 적 전체를 칩니다. 한 번에 공격력 ${sun.factor}배, ${allHit(sun.factor)}입니다.`);lines.push(`마지막에 상상이 현실이 되어 공격력 ${last.factor}배, ${hit(last.factor)}를 줍니다. 모두 합쳐 공격력 ${RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)}배입니다.`);}
-  else if(type==='echo')lines.push(`${dur(8,'echo')} 동안 모든 동료의 공격마다 공격력 ${pct(.65*scale)}%의 추가 공격이 한 번 더 나갑니다.`);
-  else if(type==='haste')lines.push(`${dur(ULT_BUFF.haste.seconds,'haste')} 동안 모든 동료의 공격 속도가 ${pct(ULT_BUFF.haste.speed*scale)}% 오릅니다.`);
-  else if(type==='awaken')lines.push(`${dur(ULT_BUFF.awaken.seconds,'awaken')} 동안 모든 동료의 공격력이 ${pct(ULT_BUFF.awaken.power*scale)}% 오릅니다.`);
-  else if(type==='march')lines.push(`${dur(ULT_BUFF.march.seconds,'march')} 동안 모든 동료의 공격이 성광 1중첩을 6초간 남기고, 공격 속도가 ${pct(ULT_BUFF.march.speed*scale)}% 오릅니다.`);
+  else if(type==='echo')lines.push(`${dur(ULT_BUFF.echo.seconds,'echo')} 동안 모든 동료의 공격마다 공격력 ${buffAmount(ULT_BUFF.echo.ratio*scale)}의 추가 공격이 한 번 더 나갑니다.`);
+  else if(type==='haste')lines.push(`${dur(ULT_BUFF.haste.seconds,'haste')} 동안 모든 동료의 공격 속도가 ${buffAmount(ULT_BUFF.haste.speed*scale)} 오릅니다.`);
+  else if(type==='awaken')lines.push(`${dur(ULT_BUFF.awaken.seconds,'awaken')} 동안 모든 동료의 공격력이 ${buffAmount(ULT_BUFF.awaken.power*scale)} 오릅니다.`);
+  else if(type==='march')lines.push(`${dur(ULT_BUFF.march.seconds,'march')} 동안 모든 동료의 공격이 성광 1중첩을 6초간 남기고, 공격 속도가 ${buffAmount(ULT_BUFF.march.speed*scale)} 오릅니다.`);
   else if(type==='glassfall'){
     lines.push(`적 전체에게 공격력 ${CINDERELLA.ult}배, ${allHit(CINDERELLA.ult)}를 줍니다.`);
     // The haste and the three-hour step are fixed. cast() stores buffScale but never reads it back.
     lines.push(`${dur(10)} 동안 진짜 신데렐라의 공격 속도가 ${pct(CINDERELLA.haste)}% 오르고, 4번째 공격마다 자정의 종이 울립니다.`);
   }else if(type==='gift'){
     lines.push(freeCell(s)<0?'전장이 가득 차 편성된 동료 한 명이 1성으로 대기열에 들어갑니다.':'편성된 동료 한 명이 1성으로 전장에 합류합니다.');
-    lines.push(`${dur(ULT_BUFF.festive.seconds,'festive')} 동안 모든 동료의 공격 속도가 ${pct(.2*scale)}% 오릅니다.`);
+    lines.push(`${dur(ULT_BUFF.festive.seconds,'festive')} 동안 모든 동료의 공격 속도가 ${buffAmount(ULT_BUFF.festive.speed*scale)} 오릅니다.`);
   }else if(type==='goddess'){
     lines.push(`적 전체에게 공격력 5배, ${allHit(5)}를 줍니다.`);
-    lines.push(`${dur(8,'radiance')} 동안 모든 동료의 공격력이 ${pct(.5*scale)}% 오릅니다.`);
+    lines.push(`${dur(ULT_BUFF.radiance.seconds,'radiance')} 동안 모든 동료의 공격력이 ${buffAmount(ULT_BUFF.radiance.power*scale)} 오릅니다.`);
     lines.push('기절과 저주를 한 번 풉니다.');
   }else if(type==='trauma'){
     lines.push(`적 전체에게 공격력 4배, ${allHit(4)}를 줍니다.`);
@@ -1163,7 +1169,7 @@ export function castPreview(s,id){
     lines.push(`겨울은 ${sec(winterDuration(s,u))} 동안 이어지고, 쓰러진 적 주변의 일반 적이 ${sec(WINTER_COURT.killFreeze)} 동안 얼어붙습니다.`);
   }else if(type==='harmony'){
     const level=s.upgrades.harmonious||0,field=control*scale;
-    lines.push(`${dur(ULT_BUFF.harmony.seconds,'harmony')} 동안 모든 동료의 공격력 ${pct((ULT_BUFF.harmony.power+level*.02)*field)}%, 공격 속도 ${pct((ULT_BUFF.harmony.speed+level*.02)*field)}%가 오릅니다.`);
+    lines.push(`${dur(ULT_BUFF.harmony.seconds,'harmony')} 동안 모든 동료의 공격력 ${buffAmount((ULT_BUFF.harmony.power+level*.02)*field)}, 공격 속도 ${buffAmount((ULT_BUFF.harmony.speed+level*.02)*field)}가 오릅니다.`);
     lines.push('각성·가속 같은 다른 필살기 버프와 겹치면 큰 쪽만 적용됩니다.');
   }else if(type==='royal'||type==='starfall'||type==='mirror'){
     if(type==='starfall')lines.push(`별빛 ${Math.floor(s.gauge)}을 모두 써 체력이 가장 높은 적에게 ${hit(STARFALL_FACTOR*s.gauge)}를 줍니다.`);
@@ -1595,6 +1601,7 @@ export function restore(raw){
     if(s.goldCharge===undefined)s.goldCharge=null;
     if(s.buffTotals===undefined)s.buffTotals={...s.buffs};
     if(s.buffScale===undefined)s.buffScale={};
+    if(s.buffSpotlight===undefined)s.buffSpotlight={};
     if(s.buffs&&s.buffs.tax!==undefined)delete s.buffs.tax;
     if(s.buffTotals&&s.buffTotals.tax!==undefined)delete s.buffTotals.tax;
     if(s.buffScale&&s.buffScale.tax!==undefined)delete s.buffScale.tax;
@@ -1706,6 +1713,7 @@ export function restore(raw){
     if(!record(s.upgrades)||s.deck.some(h=>!Number.isInteger(s.upgrades[h])||s.upgrades[h]<0||s.upgrades[h]>5)||!record(s.buffs)||Object.values(s.buffs).some(n=>!Number.isFinite(n)))return null;
     if(!record(s.buffTotals)||Object.entries(s.buffTotals).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<0||n>60))return null;
     if(!record(s.buffScale)||Object.entries(s.buffScale).some(([k,n])=>!Object.values(ACTIVE_SKILLS).includes(k)||!Number.isFinite(n)||n<1||n>rankControl(MAX_RANK)+1e-9))return null;
+    if(!record(s.buffSpotlight)||Object.entries(s.buffSpotlight).some(([key,uid])=>!Object.hasOwn(ULT_BUFF,key)||!id(uid)||uid>=s.nextId))return null;
     if(s.oaths===undefined)s.oaths=[];
     if(!Array.isArray(s.oaths)||oathConflict(s.oaths))return null;
     s.oathMods=oathMods(s.oaths);
@@ -1730,6 +1738,11 @@ export function restore(raw){
     }
     s.balanceRevision=BALANCE_REVISION;
     s.statusRevision=STATUS_REVISION;
+    // Old runs had no recipient snapshots. Choose once when resuming, then preserve each buff's target.
+    if(has(s,'spotlight')){
+      const target=spotlightTarget(s);
+      if(target)for(const key of Object.keys(ULT_BUFF))if(s.buffs[key]>0&&s.buffSpotlight[key]===undefined)s.buffSpotlight[key]=target.uid;
+    }
     s.events=[];return s;
   }catch{return null;}
 }

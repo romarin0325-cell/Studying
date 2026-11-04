@@ -2,8 +2,8 @@
 const portraitCenters={gold_dragon:[250,209],demon_king:[255,220],miracle_larva:[255,222],miracle_cocoon:[256,214],miracle_wing:[255,210],abyss_wing:[255,217]};
 const art=id=>({atlas:'unit-'+id,row:0,columns:2,foot:.9375,scale:1,directional:true,portrait:{x:portraitCenters[id][0],y:portraitCenters[id][1],size:250}});
 export const MIRACLE_FORMS=Object.freeze({
-  miracle_larva:{name:'미라클라바',damage:48,interval:1.3,range:490,radius:64,shape:'splash',attack:'leaf',color:'#a9df9b',art:art('miracle_larva'),trait:{type:'eclose',text:'필살기로 미라클윙 또는 어비스윙으로 우화합니다. 합성하면 미라클코쿤으로 돌아갑니다.'}},
-  miracle_cocoon:{name:'미라클코쿤',damage:40,interval:1.8,range:230,radius:230,shape:'pulse',attack:'silk',color:'#d9d1f2',art:art('miracle_cocoon'),trait:{type:'eclose',text:'자기 주변을 원형으로 공격합니다. 필살기로 미라클윙 또는 어비스윙으로 우화합니다.'}},
+  miracle_larva:{name:'미라클라바',damage:43.2,interval:1.3,range:490,radius:64,shape:'splash',attack:'leaf',color:'#a9df9b',art:art('miracle_larva'),trait:{type:'eclose',text:'필살기로 미라클윙 또는 어비스윙으로 우화합니다. 합성하면 미라클코쿤으로 돌아갑니다.'}},
+  miracle_cocoon:{name:'미라클코쿤',damage:36,interval:1.8,range:230,radius:230,shape:'pulse',attack:'silk',color:'#d9d1f2',art:art('miracle_cocoon'),trait:{type:'eclose',text:'자기 주변을 원형으로 공격합니다. 필살기로 미라클윙 또는 어비스윙으로 우화합니다.'}},
   miracle_wing:{name:'미라클윙',damage:52,interval:1.25,range:520,radius:72,shape:'splash',attack:'prism',color:'#f4d883',art:art('miracle_wing'),trait:{type:'critAura',text:'상하좌우 아군의 치명타 확률 +20%p. 합성하면 미라클코쿤으로 돌아갑니다.'}},
   abyss_wing:{name:'어비스윙',damage:38,interval:1.25,range:520,radius:72,shape:'splash',attack:'venom',color:'#d28ee9',art:art('abyss_wing'),trait:{type:'abyss',text:'공격한 적에게 2초간 감속 25%와 8초간 중독 1중첩을 줍니다. 합성하면 미라클코쿤으로 돌아갑니다.'}},
 });

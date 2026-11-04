@@ -1,0 +1,754 @@
+{
+  "date": "2026-11-04",
+  "baseline": "bfb5b8c888b835d6e10af06903c68d8c18d4daa0",
+  "scope": "Focused diagnostic evidence, not population win rates; see report assumptions.",
+  "oathRepresentative": {
+    "note": "대표 2덱, 각 시드 2 한 판. 통계적 클리어율 아님. 유물·유물 수집 보너스·특수 강화 없음. 2026-10-28 P(G) 캐시 재사용.",
+    "rows": [
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 54,
+        "tier": "easy",
+        "oaths": [
+          "untrained",
+          "purse",
+          "heavy",
+          "scatter"
+        ],
+        "score": 10,
+        "power": 4.65489943511031,
+        "phase": "victory",
+        "round": 9,
+        "health": 13,
+        "time": 448.30000000006766,
+        "skills": 15,
+        "merges": 30
+      },
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 54,
+        "tier": "hard",
+        "oaths": [],
+        "score": 10,
+        "power": 4.65489943511031,
+        "phase": "victory",
+        "round": 9,
+        "health": 8,
+        "time": 672.4499999999362,
+        "skills": 27,
+        "merges": 25
+      },
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 90,
+        "tier": "hard",
+        "oaths": [
+          "untrained",
+          "purse",
+          "heavy",
+          "scatter"
+        ],
+        "score": 20,
+        "power": 7.375866275834503,
+        "phase": "victory",
+        "round": 9,
+        "health": 3,
+        "time": 577.5500000000225,
+        "skills": 19,
+        "merges": 31
+      },
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 90,
+        "tier": "abyss",
+        "oaths": [],
+        "score": 20,
+        "power": 7.375866275834503,
+        "phase": "victory",
+        "round": 9,
+        "health": 5,
+        "time": 641.8999999999639,
+        "skills": 25,
+        "merges": 25
+      },
+      {
+        "deck": "venom,ash,cure_master,antropy,luna",
+        "stage": 54,
+        "tier": "easy",
+        "oaths": [
+          "untrained",
+          "purse",
+          "heavy",
+          "scatter"
+        ],
+        "score": 10,
+        "power": 7.063153743733091,
+        "phase": "victory",
+        "round": 9,
+        "health": 20,
+        "time": 288.15000000003124,
+        "skills": 12,
+        "merges": 24
+      },
+      {
+        "deck": "venom,ash,cure_master,antropy,luna",
+        "stage": 54,
+        "tier": "hard",
+        "oaths": [],
+        "score": 10,
+        "power": 7.063153743733091,
+        "phase": "victory",
+        "round": 9,
+        "health": 5,
+        "time": 398.4500000000563,
+        "skills": 19,
+        "merges": 18
+      },
+      {
+        "deck": "venom,ash,cure_master,antropy,luna",
+        "stage": 90,
+        "tier": "hard",
+        "oaths": [
+          "untrained",
+          "purse",
+          "heavy",
+          "scatter"
+        ],
+        "score": 20,
+        "power": 11.43690670713576,
+        "phase": "victory",
+        "round": 9,
+        "health": 4,
+        "time": 372.55000000005043,
+        "skills": 14,
+        "merges": 27
+      },
+      {
+        "deck": "venom,ash,cure_master,antropy,luna",
+        "stage": 90,
+        "tier": "abyss",
+        "oaths": [],
+        "score": 20,
+        "power": 11.43690670713576,
+        "phase": "victory",
+        "round": 9,
+        "health": 7,
+        "time": 379.25000000005195,
+        "skills": 18,
+        "merges": 16
+      }
+    ]
+  },
+  "modesCurrentHardRecalibration": {
+    "mode": "both",
+    "useAnchors": true,
+    "target": 0.75,
+    "tiers": [
+      "hard"
+    ],
+    "stages": [
+      72
+    ],
+    "seeds": 2,
+    "powers": [
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 72,
+        "power": 5.656854249492381,
+        "crit": "full"
+      },
+      {
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "stage": 72,
+        "power": 7.063153743733091,
+        "crit": "full"
+      },
+      {
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "stage": 72,
+        "power": 2.3913287840796547,
+        "crit": "full"
+      }
+    ],
+    "rows": [
+      {
+        "mode": "weekly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 5.656854249492381,
+        "clear": 0,
+        "rounds": 7.5,
+        "min": 6,
+        "max": 9,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 9
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 5.656854249492381,
+        "clear": 0.5,
+        "rounds": 11,
+        "min": 4,
+        "max": 18,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 4
+          },
+          {
+            "won": true,
+            "rounds": 18
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 7.063153743733091,
+        "clear": 0.5,
+        "rounds": 14.5,
+        "min": 11,
+        "max": 18,
+        "samples": [
+          {
+            "won": true,
+            "rounds": 18
+          },
+          {
+            "won": false,
+            "rounds": 11
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 7.063153743733091,
+        "clear": 0.5,
+        "rounds": 11.5,
+        "min": 5,
+        "max": 18,
+        "samples": [
+          {
+            "won": true,
+            "rounds": 18
+          },
+          {
+            "won": false,
+            "rounds": 5
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 2.3913287840796547,
+        "clear": 0,
+        "rounds": 7,
+        "min": 6,
+        "max": 8,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 8
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 2.3913287840796547,
+        "clear": 0,
+        "rounds": 3,
+        "min": 3,
+        "max": 3,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 3
+          },
+          {
+            "won": false,
+            "rounds": 3
+          }
+        ]
+      }
+    ]
+  },
+  "modesHistoricalPowerCacheProbe": {
+    "mode": "both",
+    "useAnchors": true,
+    "target": 0.75,
+    "tiers": [
+      "easy",
+      "hard",
+      "abyss"
+    ],
+    "stages": [
+      36,
+      72,
+      90
+    ],
+    "seeds": 2,
+    "powers": [
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 36,
+        "power": 3.3635856610148585,
+        "crit": "none"
+      },
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 72,
+        "power": 5.565697503087705,
+        "crit": "full"
+      },
+      {
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "stage": 90,
+        "power": 7.375866275834503,
+        "crit": "full"
+      },
+      {
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "stage": 36,
+        "power": 3.7686883580646686,
+        "crit": "none"
+      },
+      {
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "stage": 72,
+        "power": 6.476940540779456,
+        "crit": "full"
+      },
+      {
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "stage": 90,
+        "power": 7.660826245588589,
+        "crit": "full"
+      },
+      {
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "stage": 36,
+        "power": 1.2351510639369332,
+        "crit": "none"
+      },
+      {
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "stage": 72,
+        "power": 1.4142135623730951,
+        "crit": "full"
+      },
+      {
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "stage": 90,
+        "power": 1.9152065613971472,
+        "crit": "full"
+      }
+    ],
+    "rows": [
+      {
+        "mode": "weekly",
+        "tier": "easy",
+        "growth": 36,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 3.3635856610148585,
+        "clear": 0.5,
+        "rounds": 12,
+        "min": 6,
+        "max": 18,
+        "samples": [
+          {
+            "won": true,
+            "rounds": 18
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "easy",
+        "growth": 36,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 3.3635856610148585,
+        "clear": 0,
+        "rounds": 15,
+        "min": 13,
+        "max": 17,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 13
+          },
+          {
+            "won": false,
+            "rounds": 17
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 5.565697503087705,
+        "clear": 0,
+        "rounds": 7.5,
+        "min": 6,
+        "max": 9,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 9
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 5.565697503087705,
+        "clear": 0.5,
+        "rounds": 11,
+        "min": 4,
+        "max": 18,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 4
+          },
+          {
+            "won": true,
+            "rounds": 18
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "abyss",
+        "growth": 90,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 7.375866275834503,
+        "clear": 0.5,
+        "rounds": 12.5,
+        "min": 7,
+        "max": 18,
+        "samples": [
+          {
+            "won": true,
+            "rounds": 18
+          },
+          {
+            "won": false,
+            "rounds": 7
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "abyss",
+        "growth": 90,
+        "deck": "star_boy,snow_rabbit,night_rabbit,siren,santa",
+        "power": 7.375866275834503,
+        "clear": 0,
+        "rounds": 8,
+        "min": 8,
+        "max": 8,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 8
+          },
+          {
+            "won": false,
+            "rounds": 8
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "easy",
+        "growth": 36,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 3.7686883580646686,
+        "clear": 0,
+        "rounds": 14,
+        "min": 11,
+        "max": 17,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 17
+          },
+          {
+            "won": false,
+            "rounds": 11
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "easy",
+        "growth": 36,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 3.7686883580646686,
+        "clear": 0,
+        "rounds": 15.5,
+        "min": 14,
+        "max": 17,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 17
+          },
+          {
+            "won": false,
+            "rounds": 14
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 6.476940540779456,
+        "clear": 0,
+        "rounds": 8,
+        "min": 6,
+        "max": 10,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 10
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 6.476940540779456,
+        "clear": 0,
+        "rounds": 4.5,
+        "min": 4,
+        "max": 5,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 5
+          },
+          {
+            "won": false,
+            "rounds": 4
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "abyss",
+        "growth": 90,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 7.660826245588589,
+        "clear": 0,
+        "rounds": 8.5,
+        "min": 6,
+        "max": 11,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 11
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "abyss",
+        "growth": 90,
+        "deck": "flame_sage,red_dragon,zeke,cherry_prince,siren",
+        "power": 7.660826245588589,
+        "clear": 0,
+        "rounds": 4,
+        "min": 3,
+        "max": 5,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 5
+          },
+          {
+            "won": false,
+            "rounds": 3
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "easy",
+        "growth": 36,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 1.2351510639369332,
+        "clear": 0,
+        "rounds": 7.5,
+        "min": 6,
+        "max": 9,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 9
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "easy",
+        "growth": 36,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 1.2351510639369332,
+        "clear": 0,
+        "rounds": 7.5,
+        "min": 3,
+        "max": 12,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 3
+          },
+          {
+            "won": false,
+            "rounds": 12
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 1.4142135623730951,
+        "clear": 0,
+        "rounds": 5.5,
+        "min": 5,
+        "max": 6,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 5
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "hard",
+        "growth": 72,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 1.4142135623730951,
+        "clear": 0,
+        "rounds": 2.5,
+        "min": 2,
+        "max": 3,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 2
+          },
+          {
+            "won": false,
+            "rounds": 3
+          }
+        ]
+      },
+      {
+        "mode": "weekly",
+        "tier": "abyss",
+        "growth": 90,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 1.9152065613971472,
+        "clear": 0,
+        "rounds": 7,
+        "min": 6,
+        "max": 8,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 8
+          },
+          {
+            "won": false,
+            "rounds": 6
+          }
+        ]
+      },
+      {
+        "mode": "monthly",
+        "tier": "abyss",
+        "growth": 90,
+        "deck": "snow_rabbit,avalanche_maid,frost_witch,guardian,storm_sage",
+        "power": 1.9152065613971472,
+        "clear": 0,
+        "rounds": 2,
+        "min": 1,
+        "max": 3,
+        "samples": [
+          {
+            "won": false,
+            "rounds": 1
+          },
+          {
+            "won": false,
+            "rounds": 3
+          }
+        ]
+      }
+    ]
+  }
+}
