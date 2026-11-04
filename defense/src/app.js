@@ -20,8 +20,8 @@ import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
 import {season} from './preview/season.js';
-import {OATHS,OATH,OATH_GROUPS,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
-import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinState} from './preview/twin.js';
+import {OATHS,OATH,OATH_GROUPS,OATH_CLOSED,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
+import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
 import {REQUEST,REQUEST_MAX,requestState,requestTracker,requestGoal} from './preview/requests.js';
 import {REQUESTS,REQUEST_HEROES,REQUEST_REWARD,AFTERWORDS} from './preview/requests-data.js';
 // The unlocked test build plays auto with the simulation player model; the release keeps the light helper.
@@ -400,7 +400,7 @@ function updateBattle(){
   changedText(hud['summon-cost'],E.summonCost(run)?E.summonCost(run)+' G':'무료');
   const pauseButton=$('pause-button'),pauseState=paused?'play':'pause';if(pauseButton.dataset.state!==pauseState){pauseButton.dataset.state=pauseState;pauseButton.innerHTML=icon(pauseState);pauseButton.setAttribute('aria-label',paused?'전투 재개':'전투 일시정지');}
   updateAuraChips();
-  for(const {node:b,id,timer,rank} of hud.skills){const top=topRank(id);if(rank.dataset.rank!==String(top)){rank.dataset.rank=String(top);rank.hidden=!top;rank.textContent=top?`${top}성`:'';}const cost=E.skillCost(run,id),{goldCost=0}=HERO[id].skill,lock=E.castLock(run,id),active=(lock?.kind==='evolution'?null:lock)||E.activeSkill(run,id),ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id)&&!lock;const costNode=b.querySelector('small');if(costNode.dataset.cost!==String(cost)){costNode.dataset.cost=String(cost);costNode.innerHTML=icon('star')+cost+(goldCost?` · ${goldCost}G`:'');}const off=!ready||paused||run.phase!=='combat';if(b.classList.contains('unavailable')!==off){b.classList.toggle('unavailable',off);b.setAttribute('aria-disabled',String(off));}b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);timer.hidden=!active;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${E.skillName(run,id)}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${lock?.kind==='evolution'?' · 우화할 개체 없음':active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
+  for(const {node:b,id,timer,rank} of hud.skills){const top=topRank(id);if(rank.dataset.rank!==String(top)){rank.dataset.rank=String(top);rank.hidden=!top;rank.textContent=top?`${top}성`:'';}const cost=E.skillCost(run,id),{goldCost=0}=HERO[id].skill,lock=E.castLock(run,id),spent=lock?.kind==='spent',active=(lock?.kind==='evolution'||spent?null:lock)||E.activeSkill(run,id),ready=run.gauge>=cost&&run.gold>=goldCost&&!!E.bestUnit(run,id)&&!lock;const costNode=b.querySelector('small');if(costNode.dataset.cost!==String(cost)){costNode.dataset.cost=String(cost);costNode.innerHTML=icon('star')+cost+(goldCost?` · ${goldCost}G`:'');}const off=!ready||paused||run.phase!=='combat';if(b.classList.contains('unavailable')!==off){b.classList.toggle('unavailable',off);b.setAttribute('aria-disabled',String(off));}b.classList.toggle('ready',ready);b.classList.toggle('active-skill',!!active);b.classList.toggle('spent',spent);timer.classList.toggle('spent',spent);timer.hidden=!active&&!spent;if(active)changedText(timer,`${active.remaining.toFixed(1)}초`);else if(spent)changedText(timer,'사용');const fill=Math.min(1,run.gauge/cost).toFixed(2);if(b.style.getPropertyValue('--fill')!==fill)b.style.setProperty('--fill',fill);b.setAttribute('aria-label',`${HERO[id].name}의 ${E.skillName(run,id)}${goldCost?` · ${goldCost}골드 소모${run.gold<goldCost?' · 골드 부족':''}`:''}${lock?.kind==='evolution'?' · 우화할 개체 없음':spent?' · 이번 웨이브에 사용함':active?` · 발동 중 ${active.remaining.toFixed(1)}초`:''}`);}
   const notice=hud['battle-notice'],boss=run.enemies.find(e=>e.boss&&e.hp>0),compact=hud.battle.classList.contains('compact');notice.hidden=!run.telegraph&&!(compact&&boss);notice.classList.toggle('warn',!!run.telegraph);changedText(notice,run.telegraph?.text||(boss?`${BOSSES[boss.boss].name} · 체력 ${Math.ceil(boss.hp/boss.maxHp*100)}%`:''));
   if(!compact)updateStrip(boss);updateUnit();
 }
@@ -486,9 +486,10 @@ function cutIn(e){
 function updateAuraChips(){
   const box=$('aura-chips');if(!box)return;
   const live=Object.entries(E.ACTIVE_SKILLS).flatMap(([id])=>{const a=run.deck.includes(id)&&E.activeSkill(run,id);return a?[[id,a]]:[];});
+  const wait=E.moveWait(run);if(wait>0)live.push(['stiff',{remaining:wait,total:run.oathMods.moveCooldown}]);
   for(const node of [...box.children])if(!live.some(([id])=>id===node.dataset.aura))node.remove();
   for(const [id,a] of live){let node=box.querySelector(`[data-aura="${id}"]`);
-    if(!node){node=document.createElement('span');node.className='aura-chip';node.dataset.aura=id;node.style.setProperty('--c',HERO[id].color);node.innerHTML=`${image(id)}<b></b>`;box.appendChild(node);}
+    if(!node){node=document.createElement('span');node.className=`aura-chip${id==='stiff'?' move-wait':''}`;node.dataset.aura=id;node.style.setProperty('--c',id==='stiff'?'#b9c3e6':HERO[id].color);node.innerHTML=`${id==='stiff'?`<i>${icon('swap')}</i>`:image(id)}<b></b>`;if(id==='stiff')node.setAttribute('aria-label','굳은 발걸음 · 이동 대기');box.appendChild(node);}
     node.style.setProperty('--p',(a.remaining/a.total).toFixed(3));node.classList.toggle('ending',a.remaining<2);changedText(node.querySelector('b'),Math.ceil(a.remaining));}
 }
 // Fullscreen for quick phone testing in Chrome. iOS Safari has no page fullscreen API.
@@ -939,7 +940,7 @@ function showPartOpen(){
 // Tier picker shared by both challenges: locked tiers show their stage requirement.
 function tierPicker(kind,withAction=true){
   const cleared=p().cleared;if(!TIERS[challengeTier]||cleared<TIERS[challengeTier].unlock)challengeTier='easy';
-  return `<div class="tier-picker" role="radiogroup" aria-label="난이도">${TIER_IDS.map(id=>{const t=TIERS[id],open=cleared>=t.unlock,on=challengeTier===id;return `<button class="tier ${id}" ${withAction?`data-tier="${id}"`:''} role="radio" aria-checked="${on}" ${open?'':'disabled'}><b>${t.name}</b><small>${open?`보상 ×${t.reward}`:`${icon('lock')}${t.unlock}`}</small></button>`;}).join('')}</div>`;
+  return `<div class="tier-picker" role="radiogroup" aria-label="난이도">${TIER_IDS.map(id=>{const t=TIERS[id],open=cleared>=t.unlock,on=challengeTier===id;return `<button class="tier ${id}" ${withAction?`data-tier="${id}"`:''} role="radio" aria-checked="${on}" ${open?'':'disabled'}><b>${t.name}</b><small>${open?kind==='oath'?`기본 ${OATH_TIER_BASE[id]}점`:`보상 ×${t.reward}`:`${icon('lock')}${t.unlock}`}</small></button>`;}).join('')}</div>`;
 }
 // Both challenge cards end in the same row: this period's record on the left, its gems on the right. The right side
 // is a preview before a record (완주 시), the claim button for an unclaimed monthly record, and the paid amount after.
@@ -986,7 +987,7 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind=
 // ───────── Content preview (bright test build only) ─────────
 // Starlight oath and the twin-star expedition sit beside the other challenges in 모험. Companion requests arrive in the
 // lobby as a visit, are tracked in 임무 and on the sortie sheet, and are thanked in person. Rules: preview/*.js, profile.js.
-let oathPick=[],twinDraft=null,twinFocus='left',twinTab='hero',requestTrack=null;
+let oathPick=[],twinDraft=null,twinDraftBase='',twinFocus='left',twinTab='hero',requestTrack=null;
 const seasonTag=()=>`격주 시즌 · ${season(now()).daysLeft}일 남음`;
 const bossRoute=(ids,step=3)=>`<div class="boss-route">${ids.map((id,i)=>`<span><em>${(i+1)*step}</em>${BOSSES[id].name.replace('의 여신 ','의 ')}</span>`).join('')}</div>`;
 const deckPower=ids=>ids.reduce((n,id)=>n+combatPower(id,p().heroes[id],p().beds,collectionBonus(p().relics)),0);
@@ -1014,13 +1015,15 @@ function oathCard(){
 function oathPrepare(){
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const profile=p(),tier=challengeTier,score=oathScore(tier,oathPick),base=OATH_TIER_BASE[tier],deck=profile.deck,problem=oathConflict(oathPick)||oathDeckProblem(oathPick,deck);
-  const groups=Object.keys(OATH_GROUPS).map(g=>`<section class="oath-group"><h4>${OATH_GROUPS[g]}</h4>${OATHS.filter(o=>o.group===g).map(o=>`<button class="oath-chip" data-oath="${o.id}" aria-pressed="${oathPick.includes(o.id)}"><span class="oath-pt">+${o.points}</span><span class="oath-copy"><b>${o.name}</b><small>${o.text}</small></span></button>`).join('')}</section>`).join('');
+  const groups=Object.keys(OATH_GROUPS).map(g=>`<section class="oath-group"><h4>${OATH_GROUPS[g]}</h4>${OATHS.filter(o=>o.group===g).map(o=>`<button class="oath-chip" data-oath="${o.id}" aria-pressed="${oathPick.includes(o.id)}"><span class="oath-pt">+${o.points}</span><span class="oath-copy"><b>${o.name}</b><small>${o.text}</small></span>${o.id==='hollow'?oathBoardGlyph():''}</button>`).join('')}</section>`).join('');
   show('별빛 서약','출격 준비',`<div class="oath-head"><div class="oath-score"><small>${TIERS[tier].name} ${base} · 서약 ${score-base}</small><b>${score}</b><em>점</em></div>${bossRoute(oathBosses(season(now()).index,metBosses(profile)))}</div>
     <div class="oath-groups">${groups}</div>
     <div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(profile))}</b></span></div>${five(deck)}${problem?`<p class="oath-problem">${icon('info')}<span>${escapeText(problem)}</span></p>`:''}
     <div class="panel-head"><h3>장착 유물</h3><button class="link" data-action="relic-team">변경</button></div>${relicSlots(true)}${requestChips(deck)}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="team">편성</button><button class="primary shine" data-begin="oath" data-stage="0" ${problem?'disabled':''}>${score}점 서약 입장</button></div>`,'prepare',{stage:0,kind:'oath'});
 }
+// The closed board, drawn small in its chip so the cells are known before entering.
+const oathBoardGlyph=()=>`<span class="oath-board" aria-hidden="true">${Array.from({length:25},(_,i)=>`<i class="${OATH_CLOSED.includes(i)?'off':''}"></i>`).join('')}</span>`;
 function toggleOath(id){
   const o=OATH[id];if(!o)return;
   oathPick=oathPick.includes(id)?oathPick.filter(x=>x!==id):[...oathPick.filter(x=>!o.exclusive||OATH[x].exclusive!==o.exclusive),id].sort((a,b)=>OATHS.indexOf(OATH[a])-OATHS.indexOf(OATH[b]));
@@ -1030,37 +1033,39 @@ function toggleOath(id){
 // Twin-star expedition: two doors on one card. Each door shows its bosses, its party and this pair's result.
 function twinCard(){
   const profile=p(),unlocked=profile.cleared>=TIERS.easy.unlock,s=season(now()),st=twinState(profile,now()),party=st.party,tier=challengeTier,rec=st.records[tier],best=st.best[tier],ready=!twinPartyProblem(profile,party);
-  const total=(rec.left?.round||0)+(rec.right?.round||0);
-  const door=side=>{const r=rec[side],other=side==='left'?'right':'left',locks=twinLocks(profile,now(),tier,side),blocked=ready&&(party[side].deck.some(id=>locks.heroes.includes(id))||party[side].relics.some(id=>locks.relics.includes(id)));
+  const total=(rec.left?.round||0)+(rec.right?.round||0),credit=twinCredit(st.best,tier),from=TIER_IDS.slice(TIER_IDS.indexOf(tier)+1).find(id=>(st.best[id]?.total||0)===credit&&credit>(best?.total||0));
+  const door=side=>{const r=rec[side],other=side==='left'?'right':'left',locks=twinLocks(profile,now(),tier,side),overlap=ready&&twinOverlap(profile,now(),tier,side);
     return `<div class="twin-door ${side}"><div class="twin-door-head"><span class="twin-sigil" aria-hidden="true"></span><b>${TWIN_SIDE[side].name}</b></div>${bossRoute(twinBosses(s.index,side,metBosses(profile)))}
-      <div class="twin-faces">${party[side].deck.length?party[side].deck.map(id=>`<span class="twin-face" data-rarity="${HERO[id].rarity}" ${locks.heroes.includes(id)?'data-locked="true"':''}>${image(id)}</span>`).join(''):'<span class="twin-empty">편성 전</span>'}</div>
-      <div class="twin-door-foot"><span class="twin-result"><b>${r?r.round:'—'}</b><em>/${TWIN_WAVES}</em></span><button class="primary" data-twin-enter="${side}" ${!unlocked||!ready||blocked||profile.active?'disabled':''}>${blocked?'잠김':'입장'}</button></div>
-      ${blocked?`<small class="twin-lock">${icon('lock')}${TWIN_SIDE[other].short} 기록과 겹쳐요</small>`:''}</div>`;};
+      ${overlap?`<small class="twin-note">${icon('info')}입장 시 ${TWIN_SIDE[other].short} 기록 비움</small>`:''}<div class="twin-faces">${party[side].deck.length?party[side].deck.map(id=>`<span class="twin-face" data-rarity="${HERO[id].rarity}" ${overlap&&locks.heroes.includes(id)?'data-locked="true"':''}>${image(id)}</span>`).join(''):'<span class="twin-empty">편성 전</span>'}</div>
+      <div class="twin-door-foot"><span class="twin-result"><b>${r?r.round:'—'}</b><em>/${TWIN_WAVES}</em></span><button class="primary" data-twin-enter="${side}" ${!unlocked||!ready||profile.active?'disabled':''}>입장</button></div></div>`;};
   return `<div class="mode twin"><div class="mode-top"><span class="mode-tag">${seasonTag()}</span><button class="info-btn" data-action="mode-info" data-kind="twin" aria-label="규칙">${icon('info')}</button></div>
-    <h2>쌍성 원정</h2><p>두 편성으로 좌우 별길을 하나씩 넘어요. 한쪽 기록에 남은 동료·유물은 반대쪽에 쓸 수 없어요.</p>${tierPicker('twin')}
-    <div class="twin-doors">${door('left')}${door('right')}</div>${bandLadder(twinBands(tier),best?.total||0,st.paid[tier])}
-    <div class="mode-record"><div><small>지금 합계</small><b>${rec.left||rec.right?total:'—'}<em>/${TWIN_WAVES*2}</em></b><span>시즌 최고 ${best?best.total:0}</span></div>${nextBand(twinBands(tier),best?.total||0,st.paid[tier])}</div>
+    <h2>쌍성 원정</h2><p>두 편성으로 좌우 별길을 하나씩 넘어요. 같은 동료·유물은 한쪽 기록에만 남아요.</p>${tierPicker('twin')}
+    <div class="twin-doors">${door('left')}${door('right')}</div>${bandLadder(twinBands(tier),credit,st.paid[tier])}
+    <div class="mode-record"><div><small>지금 합계</small><b>${rec.left||rec.right?total:'—'}<em>/${TWIN_WAVES*2}</em></b><span>시즌 최고 ${credit}${from?` · ${TIERS[from].name}`:''}</span></div>${nextBand(twinBands(tier),credit,st.paid[tier])}</div>
     <button class="${ready?'secondary':'primary shine'} wide" data-action="twin-party" ${!unlocked||profile.active?'disabled':''}>${ready?'편성 바꾸기':'두 편성 짜기'}</button></div>`;
 }
 // The pair is edited on one sheet: two party panels (tap one to fill it) over one roster where each tile wears its side.
 function twinFormation(edit=false){
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
-  if(!edit){twinDraft=structuredClone(twinParty(p()));twinFocus=twinDraft.left.deck.length<TEAM_SIZE||twinDraft.right.deck.length>=TEAM_SIZE?'left':'right';}
-  const profile=p(),d=twinDraft,full=side=>d[side].deck.length===TEAM_SIZE,where=(kind,id)=>TWIN_SIDES.find(s=>d[s][kind].includes(id)),rec=twinState(profile,now()).records[challengeTier],recorded=(kind,id)=>TWIN_SIDES.find(s=>rec[s]?.[kind==='deck'?'deck':'relics'].includes(id));
+  // An unsaved pair survives a trip to another sheet (the relic book, a companion card) and comes back as it was left.
+  const saved=JSON.stringify(twinParty(p()));
+  if(!edit&&(!twinDraft||twinDraftBase!==saved)){twinDraft=structuredClone(twinParty(p()));twinDraftBase=saved;twinFocus=twinDraft.left.deck.length<TEAM_SIZE||twinDraft.right.deck.length>=TEAM_SIZE?'left':'right';}
+  const profile=p(),d=twinDraft,full=side=>d[side].deck.length===TEAM_SIZE,where=(kind,id)=>TWIN_SIDES.find(s=>d[s][kind].includes(id));
   const panel=side=>`<div class="twin-panel ${side}" aria-current="${twinFocus===side}">
       <button class="twin-panel-head" data-twin-focus="${side}" aria-pressed="${twinFocus===side}"><span class="twin-sigil" aria-hidden="true"></span><b>${TWIN_SIDE[side].name}</b><small>${d[side].deck.length}/${TEAM_SIZE}</small><span class="power">전투력 <b>${fmt(deckPower(d[side].deck))}</b></span></button>
       <div class="twin-slots">${Array.from({length:TEAM_SIZE},(_,i)=>{const id=d[side].deck[i];return id?`<button class="twin-slot" data-twin-drop="${side}:deck:${id}" data-rarity="${HERO[id].rarity}" aria-label="${HERO[id].name} 빼기">${image(id)}</button>`:`<button class="twin-slot empty" data-twin-focus="${side}" aria-label="빈 칸">${icon('plus')}</button>`;}).join('')}<i class="twin-split" aria-hidden="true"></i>${[0,1,2].map(i=>{const id=d[side].relics[i];return id?`<button class="twin-slot relic" data-twin-drop="${side}:relics:${id}" data-rarity="${ARTIFACT[id].rarity}" aria-label="${ARTIFACT[id].name} 빼기">${image(id)}</button>`:`<button class="twin-slot relic empty" data-twin-focus="${side}" data-twin-tab="relic" aria-label="유물 빈 칸">${icon('plus')}</button>`;}).join('')}</div></div>`;
-  const tile=(kind,id,info)=>{const at=where(kind,id),gone=kind==='deck'&&away(profile,id);return `<button class="twin-tile" data-twin-pick="${kind}:${id}" data-rarity="${info.rarity}" ${at?`data-side="${at}"`:''} ${gone?'disabled':''} aria-label="${info.name}${at?` · ${TWIN_SIDE[at].short}`:''}"><span class="twin-tile-art">${image(id)}${at?`<i class="twin-mark">${TWIN_SIDE[at].short}</i>`:''}${recorded(kind,id)?`<i class="twin-rec ${recorded(kind,id)}" aria-label="${TWIN_SIDE[recorded(kind,id)].short} 기록">${icon('lock')}</i>`:''}</span><small>${gone?'파견 중':info.name}</small></button>`;};
+  const tile=(kind,id,info)=>{const at=where(kind,id),gone=kind==='deck'&&away(profile,id);return `<button class="twin-tile" data-twin-pick="${kind}:${id}" data-rarity="${info.rarity}" ${at?`data-side="${at}"`:''} ${gone?'disabled':''} aria-label="${info.name}${at?` · ${TWIN_SIDE[at].short}`:''}"><span class="twin-tile-art">${image(id)}${at?`<i class="twin-mark">${TWIN_SIDE[at].short}</i>`:''}</span><small>${gone?'파견 중':info.name}</small></button>`;};
   const heroes=HEROES.filter(h=>profile.heroes[h.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity)||deckPower([b.id])-deckPower([a.id]));
   const relics=ARTIFACTS.filter(a=>profile.relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
+  // Relics are rows with their effect (the same rows as the relic loadout), each wearing the side that holds it.
+  const relicItem=a=>{const at=where('relics',a.id),lv=relicLevel(profile.relics[a.id]);return `<button class="choose-row relic-row twin-relic" data-twin-pick="relics:${a.id}" ${at?`data-side="${at}"`:''} aria-pressed="${at===twinFocus}"><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${lv}</span></strong><small class="relic-effect">${relicText(a.id,lv)}</small></div><span class="mark">${at?`<i class="twin-mark">${TWIN_SIDE[at].short}</i>`:icon('plus')}</span></button>`;};
   show('쌍성 편성',`${TWIN_SIDE.left.short} ${d.left.deck.length} · ${TWIN_SIDE.right.short} ${d.right.deck.length}`,`<div class="twin-panels">${panel('left')}${panel('right')}</div>
     <div class="tabbar twin-tabs"><button data-twin-tab="hero" aria-pressed="${twinTab==='hero'}"><b>동료</b></button><button data-twin-tab="relic" aria-pressed="${twinTab==='relic'}"><b>유물</b></button></div>
-    <div class="twin-grid">${twinTab==='hero'?heroes.map(h=>tile('deck',h.id,h)).join(''):relics.map(a=>tile('relics',a.id,a)).join('')}</div>`,
+    ${twinTab==='hero'?`<div class="twin-grid">${heroes.map(h=>tile('deck',h.id,h)).join('')}</div>`:`<div class="choose-list twin-relics">${relics.map(relicItem).join('')}</div>`}`,
     `<button class="primary wide" data-action="save-twin" ${full('left')&&full('right')?'':'disabled'}>편성 확정</button>`,'twin-party');
 }
 function twinPick(kind,id){
   const d=twinDraft,cap=kind==='deck'?TEAM_SIZE:3,at=TWIN_SIDES.find(s=>d[s][kind].includes(id)),other=twinFocus==='left'?'right':'left';
-  const locks=twinLocks(p(),now(),challengeTier,twinFocus);if(at!==twinFocus&&locks[kind==='deck'?'heroes':'relics'].includes(id)){toast(`${TWIN_SIDE[other].name} 기록에 쓴 ${kind==='deck'?'동료':'유물'}예요. ${TWIN_SIDE[other].name}에 다시 도전하면 풀려요.`);return;}
   if(at===twinFocus)d[at][kind]=d[at][kind].filter(x=>x!==id);
   else if(d[twinFocus][kind].length>=cap){toast(`${TWIN_SIDE[twinFocus].name}이 가득 찼어요. 다른 쪽을 눌러 채우세요.`);return;}
   else{if(at)d[at][kind]=d[at][kind].filter(x=>x!==id);d[twinFocus][kind].push(id);
@@ -1072,7 +1077,7 @@ function twinPrepare(side){
   const party=twinParty(p())[side];
   show(TWIN_SIDE[side].name,'출격 준비',`<div class="prep-boss twin-${side}"><small>${TIERS[challengeTier].name} · ${TWIN_WAVES}웨이브 · 스테이지 ${TWIN_STAGE[challengeTier]} 수준</small><h2>${TWIN_SIDE[side].name}</h2>${bossRoute(twinBosses(season(now()).index,side,metBosses(p())))}</div>
     <div class="panel-head"><h3>${TWIN_SIDE[side].short} 편성</h3><span class="power">전투력 <b>${fmt(deckPower(party.deck))}</b></span></div>${five(party.deck)}
-    <div class="panel-head"><h3>유물</h3></div>${relicRow(party.relics)}${requestChips(party.deck)}`,
+    <div class="panel-head"><h3>유물</h3></div>${relicRow(party.relics)}${twinOverlap(p(),now(),challengeTier,side)?`<p class="oath-problem">${icon('info')}<span>${TWIN_SIDE[side==='left'?'right':'left'].name} 기록과 겹치는 동료·유물이 있어요. 이번 결과가 남고 ${TWIN_SIDE[side==='left'?'right':'left'].short} 기록은 비워져요.</span></p>`:''}${requestChips(party.deck)}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="twin-party">편성</button><button class="primary shine" data-twin-begin="${side}">입장</button></div>`,'prepare',{stage:0,kind:'twin',side});
 }
 
@@ -1129,13 +1134,18 @@ function afterwordMarkup(id){
 
 function previewInfo(kind){
   const body=kind==='oath'?`<ul class="notes"><li>${OATH_WAVES}웨이브, 3웨이브마다 보스가 나와요. 클리어해야 점수가 남아요.</li><li>점수는 난이도(쉬움 ${OATH_TIER_BASE.easy} · 어려움 ${OATH_TIER_BASE.hard} · 심연 ${OATH_TIER_BASE.abyss})와 고른 서약 점수의 합이에요.</li><li>시즌 최고 점수가 구간에 닿을 때마다 보상을 바로 받아요. 시즌은 2주마다 바뀌고 역대 최고 기록은 남아요.</li><li>파견 중인 동료는 참여할 수 없어요.</li></ul>`
-    :`<ul class="notes"><li>좌우 별길은 각각 ${TWIN_WAVES}웨이브, 3웨이브마다 보스가 나와요. 난이도마다 그 구간 최고 메인 스테이지 수준이에요.</li><li>두 편성은 동료와 유물을 나눠 가져요. 같은 동료나 유물을 양쪽에 둘 수 없어요.</li><li>별길마다 마지막 기록이 남고, 좌우 기록을 합산해요. 한쪽 기록에 쓴 동료·유물은 반대쪽에 쓸 수 없고, 그 별길에 다시 도전해 기록이 바뀌면 풀려요.</li><li>시즌 최고 합계는 남아요.</li><li>난이도마다 합계 구간 보상을 한 번씩 받아요. 시즌은 2주마다 바뀌어요.</li></ul>`;
+    :`<ul class="notes"><li>좌우 별길은 각각 ${TWIN_WAVES}웨이브, 3웨이브마다 보스가 나와요. 난이도마다 그 구간 최고 메인 스테이지 수준이에요.</li><li>두 편성은 동료와 유물을 나눠 가져요. 같은 동료나 유물을 양쪽에 둘 수 없어요.</li><li>별길마다 마지막 기록이 남고, 좌우 기록을 합산해요. 반대쪽 기록과 겹치는 동료·유물로 도전하면 이번 결과가 남고 반대쪽 기록은 비워져요.</li><li>시즌 최고 합계는 남고, 이미 받은 보상도 그대로예요.</li><li>난이도마다 합계 구간 보상을 한 번씩 받아요. 높은 난이도의 합계는 낮은 난이도에도 인정돼요. 시즌은 2주마다 바뀌어요.</li></ul>`;
   show(kind==='oath'?'별빛 서약':'쌍성 원정','규칙',body,`<button class="primary wide" data-action="close">확인</button>`,'info');
+}
+// Bands a higher tier paid for the tiers below it in the same settle.
+function twinLowerPaid(r){
+  const tiers=[...new Set((r.bands||[]).map(b=>b.tier).filter(id=>id&&id!==r.tier))];
+  return tiers.length?`<p class="record-result">${tiers.map(id=>TIERS[id].name).join('·')} 구간 보상도 함께 받았어요</p>`:'';
 }
 function previewResult(r){
   const done=(r.requestsDone||[]).filter(id=>REQUEST[id]).map(id=>`<span class="req-chip done" data-rarity="${HERO[REQUEST[id].hero].rarity}"><span class="req-chip-face">${image(REQUEST[id].hero)}</span><b>${escapeText(REQUEST[id].title)}</b><em>${icon('check')}</em></span>`).join('');
   const head=r.mode==='oath'?`<p class="record-result">${r.won?`${r.newBest?'시즌 최고 · ':''}서약 점수 ${r.score}점`:'클리어하지 못해 점수가 남지 않았어요'}</p>`
-    :r.mode==='twin'?`<p class="record-result">${TWIN_SIDE[r.side]?.name||''} ${r.round}/${TWIN_WAVES} · 지금 합계 ${r.total??r.round}/${TWIN_WAVES*2}${r.newBest?' · 시즌 최고':''}</p>`:'';
+    :r.mode==='twin'?`<p class="record-result">${TWIN_SIDE[r.side]?.name||''} ${r.round}/${TWIN_WAVES} · 지금 합계 ${r.total??r.round}/${TWIN_WAVES*2}${r.newBest?' · 시즌 최고':''}</p>${twinLowerPaid(r)}`:'';
   return head+(done?`<div class="req-chips result">${done}<small>홈에서 감사 인사를 받아요</small></div>`:'');
 }
 
@@ -1499,7 +1509,7 @@ document.addEventListener('click',e=>{
     'go-collection':()=>{close();screen='collection';collection='hero';render();},'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},
     'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=PART_STAGES)showLateNotice();else show('신규 동료',`스테이지 ${PART_STAGES} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${PART_STAGES}을(를) 처음 클리어하면 일반 소환과 시즌 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
     'go-garden':()=>{close();screen='garden';render();},'go-dawn':()=>{close();screen='garden';gardenTab='dawn';bedFocus='crit';render();},'go-home-gift':()=>{close();screen='home';giftTray=true;render();giftTray=true;const t=$('gift-tray');if(t){t.innerHTML=trayMarkup(p().partner);t.hidden=false;}},
-    'monthly-claim':confirmMonthlyClaim,'twin-party':()=>twinFormation(),'save-twin':()=>{if(act('twinParty',twinDraft).ok){close();render();}},'oath-retry':()=>{close();oathPrepare();},'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},
+    'monthly-claim':confirmMonthlyClaim,'twin-party':()=>twinFormation(),'save-twin':()=>{if(act('twinParty',twinDraft).ok){twinDraft=null;close();render();}},'oath-retry':()=>{close();oathPrepare();},'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},
     speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},
     'summon-battle':()=>battleCommand(E.summon(run)),training,auto:()=>{if(act('setting',{id:'auto',value:!p().settings.auto},false).ok){button.querySelector('b').textContent=p().settings.auto?'ON':'OFF';button.setAttribute('aria-pressed',p().settings.auto);syncBattlePhase();}},
     target:()=>{E.cycleTarget(run,selected);battleCommand({ok:true});},deselect:()=>{selected=-1;updateUnit();},leave,

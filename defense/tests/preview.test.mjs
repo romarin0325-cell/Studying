@@ -247,13 +247,13 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   const left=ok(fresh,'settle',{token:fresh.active.token,round:9,damage:-5,won:true});
   assert.equal(left.round,TWIN_WAVES);assert.equal(left.side,'left');assert.equal(left.total,TWIN_WAVES);
   assert.equal(fresh.twin.records.easy.left.damage,0);assert.deepEqual(fresh.twin.records.easy.left.deck,LEFT);assert.equal(fresh.results[0].round,9);
-  assert.deepEqual(left.bands,[{total:4,reward:twinBandReward('easy',0)}]);
+  assert.deepEqual(left.bands,[{tier:'easy',total:4,reward:twinBandReward('easy',0)}]);
   const beforePay=fresh.dreams;
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'right'});
   const right=ok(fresh,'settle',{token:fresh.active.token,round:2,damage:4});
   assert.equal(fresh.twin.records.easy.left.round,6);assert.equal(fresh.twin.records.easy.right.round,2);assert.equal(right.total,8);
   assert.equal(fresh.twin.best.easy.total,8);
-  assert.deepEqual(right.bands,[{total:8,reward:twinBandReward('easy',1)}]);
+  assert.deepEqual(right.bands,[{tier:'easy',total:8,reward:twinBandReward('easy',1)}]);
   assert.equal(fresh.dreams,beforePay+twinBandReward('easy',1));
   const dreams=fresh.dreams,lifetimeTotal=fresh.twin.lifetime.total;
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
@@ -269,16 +269,18 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   ok(fresh,'twinParty',partyOf());
   ok(fresh,'begin',{mode:'twin',tier:'hard',side:'left'});
   const hard=ok(fresh,'settle',{token:fresh.active.token,round:4,damage:1});
-  assert.equal(hard.total,4);assert.deepEqual(hard.bands,[{total:4,reward:twinBandReward('hard',0)}]);
+  assert.equal(hard.total,4);assert.deepEqual(hard.bands,[{tier:'hard',total:4,reward:twinBandReward('hard',0)}]);
   assert.equal(twinBandReward('hard',0),Math.round(60*2.3));assert.equal(fresh.twin.paid.easy,2);assert.equal(fresh.twin.paid.hard,1);
   assert.equal(fresh.twin.lifetime.tier,'hard');assert.equal(fresh.twin.lifetime.total,4);
   const overlap={left:{deck:['guardian',...LEFT.slice(1)],relics:RELIC.slice(4,6)},right:{deck:['star_boy',...RIGHT.slice(1)],relics:RELIC.slice(6,8)}};
   ok(fresh,'twinParty',overlap);
-  const denied=command(fresh,'begin',{mode:'twin',tier:'easy',side:'right'},NOW);
-  assert.equal(denied.ok,false);
-  assert.equal(denied.message,`${TWIN_SIDE.left.name} 기록에 쓴 동료·유물은 이 별길에 쓸 수 없어요. ${TWIN_SIDE.left.name}에 다시 도전하면 풀려요.`);
   assert.deepEqual(twinLocks(fresh,NOW,'easy','right').heroes,fresh.twin.records.easy.left.deck);
   assert.deepEqual(twinLocks(fresh,NOW,'easy','left').heroes,fresh.twin.records.easy.right.deck);
+  // The new right party shares a companion with the left record: entering is allowed, its result stays and the left record is cleared.
+  ok(fresh,'begin',{mode:'twin',tier:'easy',side:'right'},NOW);
+  const swap=ok(fresh,'settle',{token:fresh.active.token,round:3,damage:1});
+  assert.equal(fresh.twin.records.easy.left,null);assert.equal(fresh.twin.records.easy.right.round,3);assert.equal(swap.total,3);
+  assert.equal(fresh.twin.best.easy.total,8);assert.equal(fresh.twin.paid.easy,2);assert.deepEqual(swap.bands,[]);assert.equal(validateProfile(fresh),true);
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
   ok(fresh,'settle',{token:fresh.active.token,round:1,damage:1});
   assert.deepEqual(fresh.twin.records.easy.left.deck,overlap.left.deck);
@@ -287,6 +289,21 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   assert.equal(view.records.easy.left,null);assert.equal(view.best.hard,null);assert.equal(view.paid.hard,0);
   assert.equal(view.lifetime.tier,'hard');assert.deepEqual(view.party.left.deck,overlap.left.deck);
   assert.equal(JSON.stringify(fresh),before);assert.equal(validateProfile(fresh),true);
+});
+
+test('a twin total at a higher tier also pays the lower tiers once, and the old pay still counts',()=>{
+  const fresh=profile();ok(fresh,'twinParty',partyOf());
+  ok(fresh,'begin',{mode:'twin',tier:'abyss',side:'left'});
+  const left=ok(fresh,'settle',{token:fresh.active.token,round:6,damage:1,won:true});
+  assert.deepEqual(left.bands.map(b=>b.tier),['easy','hard','abyss']);
+  assert.equal(left.bands.reduce((n,b)=>n+b.reward,0),twinBandReward('easy',0)+twinBandReward('hard',0)+twinBandReward('abyss',0));
+  assert.deepEqual(fresh.twin.paid,{easy:1,hard:1,abyss:1});assert.equal(fresh.twin.best.easy,null);assert.equal(validateProfile(fresh),true);
+  // Easy itself: a lower result pays nothing new, a higher one pays only the bands above the credit.
+  ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
+  assert.deepEqual(ok(fresh,'settle',{token:fresh.active.token,round:5,damage:1}).bands,[]);
+  ok(fresh,'begin',{mode:'twin',tier:'easy',side:'right'});
+  assert.deepEqual(ok(fresh,'settle',{token:fresh.active.token,round:6,damage:1,won:true}).bands,[{tier:'easy',total:8,reward:twinBandReward('easy',1)}]);
+  assert.deepEqual(fresh.twin.paid,{easy:2,hard:1,abyss:1});assert.equal(validateProfile(fresh),true);
 });
 
 test('every companion has three requests in order, real goal heroes, three lines each way and an afterword',()=>{
@@ -463,4 +480,21 @@ test('a rank goal counts once, a clear goal can require every listed hero, and a
   }finally{
     delete REQUEST['star_boy-rank'];delete REQUEST['siren-clear'];
   }
+});
+
+test('oath scores carry their rules version: an old hard record keeps 10 points, a new one scores 12',()=>{
+  const p=profile(),period=season(NOW).id,deck=[...p.deck];
+  const old={period,token:'old',score:10+2,tier:'hard',oaths:['haste'],deck,at:NOW};
+  p.oath={period,best:old,paid:2,lifetime:old};assert.equal(validateProfile(p),true,'a v1 record (no rules) validates with the 10-point base');
+  p.oath={period,best:{...old,score:14},paid:2,lifetime:{...old,score:14}};assert.equal(validateProfile(p),false,'a v1 record cannot claim the v2 base');
+  p.oath={period,best:{...old,score:14,rules:2},paid:2,lifetime:{...old,score:14,rules:2}};assert.equal(validateProfile(p),true);
+  assert.equal(oathScore('hard',['haste']),14);assert.equal(oathScore('hard',['haste'],1),12);
+  assert.deepEqual(OATH_BANDS.map(b=>b.score),[5,10,15,20,25,30,35,40,45,50]);
+});
+
+test('a v1 record keeps the 3 points 깨어난 군주 had; v2 scores it 2',()=>{
+  const p=profile(),period=season(NOW).id,deck=[...p.deck];
+  const old={period,token:'old',score:3,tier:'easy',oaths:['tyrant'],deck,at:NOW};
+  p.oath={period,best:old,paid:0,lifetime:old};assert.equal(validateProfile(p),true);
+  assert.equal(oathScore('easy',['tyrant']),2);assert.equal(oathScore('easy',['tyrant'],1),3);
 });

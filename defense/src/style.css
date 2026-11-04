@@ -2015,3 +2015,21 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .twin-rec{position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:rgba(8,12,34,.75);color:var(--side,#cfdcff)}
 .twin-rec.left{--side:#cfdcff}.twin-rec.right{--side:#ffd98a}
 .twin-rec .ic{width:11px;height:11px}
+/* Starlight oath rules in battle: an ultimate already answered this wave, the team's move wait. */
+.skill-button.spent{filter:saturate(.35) brightness(.8)}
+.skill-duration.spent{background:#1b2146eb;color:#c9cfee;border-color:#8d97c870}
+.aura-chip.move-wait i{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#121a40;color:#dfe5ff}
+.aura-chip.move-wait .ic{width:17px;height:17px}
+.oath-board{flex:none;margin-left:auto;display:grid;grid-template-columns:repeat(5,5px);gap:1.5px;padding:3px;border-radius:5px;background:rgba(255,255,255,.04)}
+.oath-board i{width:5px;height:5px;border-radius:1.5px;background:currentColor;opacity:.75}
+.oath-board i.off{background:none;box-shadow:inset 0 0 0 1px currentColor;opacity:.4}
+/* Twin doors: the entry row sits at the bottom of both doors; an overlap note is a quiet line, not an error. */
+.twin-door{grid-template-rows:auto auto auto 1fr auto}
+.twin-door-foot{align-self:end}
+.twin-note{display:flex;align-items:center;gap:4px;font-size:11px;line-height:1.2;color:var(--text2);white-space:nowrap}
+.twin-note .ic{width:12px;height:12px;flex:none;color:var(--side,#cfdcff)}
+/* Twin relic rows: the side that holds a relic is a pill in the row's mark slot, in that side's colour. */
+.twin-relic[data-side=left]{--side:#cfdcff}.twin-relic[data-side=right]{--side:#ffd98a}
+.twin-relic[data-side] .mark{width:auto;min-width:38px;height:22px;padding:0 8px;border-radius:11px;border:none;background:var(--side);color:#141a3a}
+.twin-relic[data-side]:not([aria-pressed=true]){border-color:color-mix(in srgb,var(--side) 60%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--side) 10%,transparent),rgba(18,24,58,.8))}
+.twin-relic .mark .twin-mark{position:static;padding:0;background:none;color:inherit;font-size:11px}

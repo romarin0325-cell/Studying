@@ -1,4 +1,4 @@
-import {BOSS_ORDER,TIERS} from '../content.js';
+import {BOSS_ORDER,TIERS,TIER_IDS} from '../content.js';
 import {TEAM_SIZE} from '../team-config.js';
 import {season} from './season.js';
 
@@ -50,10 +50,21 @@ export function twinState(p,now){
     lifetime:t?.lifetime?{tier:t.lifetime.tier,total:t.lifetime.total,at:t.lifetime.at}:null,
   };
 }
-// Heroes and relics locked by the other side's record this season. Re-challenging that side replaces the record and releases them.
+// A higher tier's season best also counts for every lower tier's bands, so a player who clears hard never has to replay easy.
+export function twinCredit(best,tier){
+  const from=TIER_IDS.indexOf(tier);
+  return TIER_IDS.slice(Math.max(0,from)).reduce((n,id)=>Math.max(n,best?.[id]?.total||0),0);
+}
+export const twinBandsReached=total=>TWIN_BANDS.filter(b=>total>=b.total).length;
+// The other side's record that shares a companion or relic with this side's party. Entering this side then replaces both:
+// the new record is kept and the overlapping one is cleared (the season best and paid bands stay).
 export function twinLocks(p,now,tier,side){
   const other=side==='left'?'right':side==='right'?'left':null;
   if(!other||!TIERS[tier])return {heroes:[],relics:[]};
   const rec=twinState(p,now).records?.[tier]?.[other];
   return {heroes:rec?[...rec.deck]:[],relics:rec?[...rec.relics]:[]};
+}
+export function twinOverlap(p,now,tier,side){
+  const party=twinParty(p)[side],locks=twinLocks(p,now,tier,side);
+  return party.deck.some(id=>locks.heroes.includes(id))||party.relics.some(id=>locks.relics.includes(id));
 }

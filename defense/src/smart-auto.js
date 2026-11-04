@@ -68,11 +68,11 @@ const litCells=s=>new Set(telegraphCells(s).filter(c=>!(s.board[c]&&safeFrom(s,c
 
 // Damage-equivalent of one gold: a fresh summon's value over the rest of the stage, per gold.
 function goldValue(s,m){const cost=Math.max(8,E.summonCost(s)||10);return summonValue(s)*m.scale*timeLeft(s)/cost;}
-function bestCell(s,unit,exclude=new Set()){let best=-1,bv=-Infinity;for(const c of CELLS){if(s.board[c]||exclude.has(c))continue;const v=placeDelta(s,unit,c);if(v>bv){bv=v;best=c;}}return {cell:best,value:bv};}
+function bestCell(s,unit,exclude=new Set()){let best=-1,bv=-Infinity;for(const c of CELLS){if(s.board[c]||exclude.has(c)||E.closedCell(s,c))continue;const v=placeDelta(s,unit,c);if(v>bv){bv=v;best=c;}}return {cell:best,value:bv};}
 function summonValue(s){
   const m=mem(s),key=s.board.map(u=>u?u.uid+':'+u.rank+':'+(u.form||''):'').join(',')+'|'+s.deck.map(id=>s.upgrades[id]).join()+'|'+s.wave+'|'+Object.keys(s.buffs).filter(k=>s.buffs[k]>0).join();
   if(m.svKey===key)return m.sv;
-  const free=CELLS.filter(c=>!s.board[c]);m.svKey=key;
+  const free=CELLS.filter(c=>!s.board[c]&&!E.closedCell(s,c));m.svKey=key;
   const units=s.board.filter(Boolean).length;
   const per=id=>{const v=Math.max(0,bestCell(s,tempUnit(s,id,1)).value),partner=s.board.some(u=>u&&!u.cursed&&u.rank===1&&(u.hero===id||u.hero==='rumi'||id==='rumi'));return v*(partner?1.6:1);};
   return m.sv=free.length?s.deck.reduce((n,id)=>n+per(id),0)/s.deck.length*(units<10?1.3:1):0;
@@ -220,6 +220,7 @@ function chooseBlessing(s,m){
 }
 
 function dodge(s,m){
+  if(E.moveWait(s)>0)return false;
   const danger=dangerCells(s);if(!danger.size)return false;
   const lit=litCells(s);
   // A person moves the key units out, not the whole board: two per stun, every unit for the judgement.
@@ -230,7 +231,7 @@ function dodge(s,m){
     const u=s.board[c];s.board[c]=null;const free=bestCell(s,u,danger);s.board[c]=u;
     if(free.cell>=0){E.move(s,c,free.cell);m.dodged++;return true;}
     // No safe empty cell: swap with the weakest unit outside the light.
-    const weak=CELLS.filter(i=>!danger.has(i)&&s.board[i]&&!E.charging(s,s.board[i])).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
+    const weak=CELLS.filter(i=>!danger.has(i)&&!E.closedCell(s,i)&&s.board[i]&&!E.charging(s,s.board[i])).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
     if(weak!==undefined&&unitValue(s,s.board[weak],weak)<unitValue(s,u,c)*.6){E.move(s,c,weak);m.dodged++;return true;}
   }
   return false;
@@ -247,12 +248,12 @@ function bestMerge(s,m,gv){
     if(A.cursed||B.cursed)v+=Math.abs(d)+1;
     if(!best||v>best.v)best={from:a,to:b,v};
   }
-  const free=CELLS.filter(c=>!s.board[c]).length;
+  const free=CELLS.filter(c=>!s.board[c]&&!E.closedCell(s,c)).length;
   return best&&(best.v>0||free<=2)?best:null;
 }
 function spendGold(s,m){
   const reserve=s.deck.includes('doom')&&E.bestUnit(s,'doom')&&(s.enemies.some(e=>e.boss)||s.queue.some(q=>q.kind==='boss'))&&s.gauge>=HERO.doom.skill.cost-20?85:0;
-  const budget=s.gold-reserve,free=CELLS.filter(c=>!s.board[c]).length,options=[];
+  const budget=s.gold-reserve,free=CELLS.filter(c=>!s.board[c]&&!E.closedCell(s,c)).length,options=[];
   const sc=E.summonCost(s);if(free>0)options.push({kind:'summon',cost:sc,value:summonValue(s)*(free<=2?.6:1)});
   for(const id of s.deck){const c=E.upgradeCost(s,id),v=trainValue(s,id);if(v>0)options.push({kind:'train',id,cost:c,value:v});}
   if(!options.length)return false;
@@ -269,15 +270,17 @@ function act(s,o){
   return E.upgrade(s,o.id).ok;
 }
 function placeNew(s,index){
+  if(E.moveWait(s)>0)return;
   const u=s.board[index];if(!u)return;s.board[index]=null;const {cell}=bestCell(s,u,dangerCells(s));s.board[index]=u;
-  if(cell>=0&&cell!==index&&placeDelta(s,u,cell)>0)E.move(s,index,cell);
+  if(cell>=0&&cell!==index&&!E.closedCell(s,cell)&&placeDelta(s,u,cell)>0)E.move(s,index,cell);
 }
 function optimize(s,m){
+  if(E.moveWait(s)>0)return false;
   const lit=dangerCells(s),total=Math.max(1e-9,boardValue(s));let best=null;
   const units=CELLS.filter(c=>s.board[c]&&!s.board[c].cursed).sort((a,b)=>unitValue(s,s.board[b],b)-unitValue(s,s.board[a],a));
   const support=new Set(['siren','ancient_dragon','harmonious','time_magician','lightning_sage','behemoth']);
   const pick=[...new Set([...units.slice(0,10),...units.filter(c=>support.has(s.board[c].hero))])];
-  for(const a of pick)for(const b of CELLS){if(a===b||lit.has(b)||E.charging(s,s.board[a])||E.charging(s,s.board[b]))continue;const d=swapDelta(s,a,b);if(!best||d>best.d)best={a,b,d};}
+  for(const a of pick)for(const b of CELLS){if(a===b||lit.has(b)||E.closedCell(s,a)||E.closedCell(s,b)||E.charging(s,s.board[a])||E.charging(s,s.board[b]))continue;const d=swapDelta(s,a,b);if(!best||d>best.d)best={a,b,d};}
   if(best&&best.d>total*.03){E.move(s,best.a,best.b);return true;}
   return false;
 }

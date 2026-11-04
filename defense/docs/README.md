@@ -45,6 +45,7 @@ docs/
 
 ## 3. 기획 (plans/)
 
+- [다음 패치 제안](plans/2026-11-05-NEXT_PROPOSALS.md): 2026-11-05. 한 번의 큰 필살기 유물(성급을 빌려 쓰는 안), 문구 기준과 금지어 검사, 서약·쌍성 통합(쌍성 서약), 비전투 일일 미션(5개 중 3개)과 손편지 "별빛 우편". 구현 전.
 - [디펜스 설계 검토·서약 10안](plans/DEFENSE_REVIEW_AND_PROPOSALS.md): 2026-11-04. 아이리스 저주 이력, 쌍성 난이도별 입장, 용어, 서약 점수, 드래프트·월간 비교와 후속 제안. [원본 수치](archive/2026-11-04-REVIEW-EVIDENCE.json)는 과거 캐시 재사용과 현재 재보정을 구분한다.
 
 - [RELIC_BALANCE_PROPOSAL.md](plans/RELIC_BALANCE_PROPOSAL.md): 2026-10-30 유물 패치 직후 GPT·Grok 정적 분석 대조와 수치 제안. 코드 미반영, 사용자 확정 전.
