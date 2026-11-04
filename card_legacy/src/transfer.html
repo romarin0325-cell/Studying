@@ -1,0 +1,10 @@
+<div id="modal-legacy-transfer" class="modal" role="dialog" aria-modal="true" aria-labelledby="legacy-transfer-title">
+  <div class="modal-content">
+    <h3 id="legacy-transfer-title">기록 옮기기</h3>
+    <p class="legacy-transfer-note">레거시·루멘·아스트라 사이에서 같은 기록 파일을 사용할 수 있습니다. 진행 중인 게임은 메뉴에서 먼저 저장하세요.</p>
+    <button id="legacy-export" class="menu-btn" type="button" onclick="Legacy.exportSave()">기록 파일 내보내기</button>
+    <label class="menu-btn legacy-transfer-file">기록 파일 가져오기<input id="legacy-import" type="file" accept=".json,application/json"></label>
+    <p class="legacy-transfer-note">게임 진행, 해금, 학습·전투 기록을 옮깁니다. API 키는 포함하지 않습니다.</p>
+    <button class="menu-btn" type="button" onclick="Legacy.closeTransfer()">닫기</button>
+  </div>
+</div>

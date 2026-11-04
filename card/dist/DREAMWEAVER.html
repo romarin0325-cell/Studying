@@ -1683,6 +1683,23 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 .card-pool-grade-heading { grid-column:1/-1; margin:10px 0 2px; padding:4px 2px 7px; border-bottom:1px solid var(--line); color:var(--paper); font-size:13px; letter-spacing:.04em; }
 
+/* Shared challenge convenience; keep the original two summons on the same row. */
+#cc-chain-gacha[hidden], #cc-chain[hidden] { display:none!important; }
+#cc-chain-gacha { flex:1; min-width:0; min-height:44px; white-space:normal; line-height:1.25; }
+#cc-chain-gacha small { display:block; font-size:10px; margin-top:2px; opacity:.8; }
+.cc-chain { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; flex-shrink:0; margin-bottom:10px; font-size:12px; }
+.cc-chain span { flex:1; min-width:120px; overflow-wrap:anywhere; }
+.cc-chain button { flex-shrink:0; min-height:44px; padding:8px 10px; font-size:12px; }
+#modal-gacha.cc-result-active .modal-content { max-height:calc(100dvh - 24px); overflow:hidden; }
+#modal-gacha.cc-result-active #gacha-result { min-height:0; overflow:auto; }
+.cc-summary { font-size:14px; line-height:1.5; }
+.cc-results { display:flex; flex-direction:column; gap:8px; width:100%; text-align:left; }
+.cc-result-card { display:flex; align-items:center; gap:12px; min-width:0; padding:8px; border:1px solid var(--line,#555); border-radius:8px; }
+.cc-result-card>span { min-width:0; overflow-wrap:anywhere; }
+.cc-result-card small, .cc-result-card strong { display:block; }
+.cc-result-card small { margin-bottom:4px; font-size:11px; opacity:.8; }
+.cc-result-card strong { font-size:14px; }
+
 /* ASTRA: sky, paper, ink. Shared mechanics use the legacy layout rules above;
    this design system owns the shell, navigation, cards and responsive surfaces. */
 :root { --ink:#0d2235; --panel:#142d42; --panel-soft:#1b384f; --sky:#a5dfff; --sky-bright:#cceeff; --paper:#f2f8fb; --muted:#a9becd; --line:#a5dfff29; --gold:#e7ca94; --radius:18px; color-scheme:dark; }
@@ -2513,8 +2530,8 @@ body[data-theme=dreamsky] .skill-btn.sup { --button-art:url("data:image/svg+xml;
     <div class="header header-status" aria-live="polite">타이틀</div>
     <div class="header-tools">
       <button class="icon-button" onclick="MusicPlayer.open()" aria-label="음악 재생"><svg><use href="#i-music"/></svg></button>
-      <button id="btn-game-fullscreen" class="icon-button fullscreen-shortcut" onclick="RPG.toggleGameFullscreen()" aria-label="전체화면" aria-pressed="false">⛶</button>
       <button class="icon-button" onclick="Astra.settings()" aria-label="설정"><svg><use href="#i-settings"/></svg></button>
+      <button id="btn-game-fullscreen" class="icon-button fullscreen-shortcut" onclick="RPG.toggleGameFullscreen()" aria-label="전체화면" aria-pressed="false">⛶</button>
     </div>
   </header>
   <main class="container" id="main-content">
@@ -32701,6 +32718,282 @@ window.CARD_MUSIC_TRACKS = Object.freeze([
     window.MusicPlayer = MusicPlayer;
     MusicPlayer.init();
 }());
+</script>
+<script>/* Shared, validated record transfer for every Card UI. API keys are excluded. */
+'use strict';
+
+const CardProgressTransfer = {
+  // Backup only the documented game progress keys, never API credentials.
+  backupKeys() { return Object.values(Storage.keys).filter(key => key !== Storage.keys.API_KEY); },
+  exportSave(notify = message => RPG.showAlert(message)) {
+    const values = {};
+    try {
+      for (const key of this.backupKeys()) {
+        const raw = localStorage.getItem(key);
+        if (raw !== null) values[key] = key === Storage.keys.FORTUNE_LAST_USED ? raw : JSON.parse(raw);
+      }
+      const payload = { format:'astra-progress', version:1, exportedAt:new Date().toISOString(), values };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)], {type:'application/json'}));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Dreamweaver-progress-${new Date().toISOString().slice(0,10)}.json`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      notify('저장된 기록을 내보냈습니다. 진행 중인 여정은 게임 메뉴에서 먼저 저장하세요.');
+    } catch { notify('기록을 읽지 못했습니다. 현재 저장은 변경하지 않았습니다.'); }
+  },
+  validateImport(payload) {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('올바른 기록 파일이 아닙니다.');
+    let values;
+    if (payload.format === 'astra-progress') {
+      if (payload.version !== 1 || !payload.values || typeof payload.values !== 'object' || Array.isArray(payload.values)) throw new Error('지원하지 않는 기록 버전입니다.');
+      values = payload.values;
+    } else { values = { [Storage.keys.SAVE]:payload }; }
+    const allowed = new Set(this.backupKeys());
+    const safe = Object.fromEntries(Object.entries(values).filter(([key]) => allowed.has(key)));
+    if (!Object.keys(safe).length) throw new Error('게임 기록이 들어 있지 않습니다.');
+    const hasOwn = key => Object.prototype.hasOwnProperty.call(safe, key);
+    if (hasOwn(Storage.keys.GLOBAL) && !RPG.validateGlobalData(safe[Storage.keys.GLOBAL])) {
+      throw new Error('전역 기록 형식이 잘못되었습니다.');
+    }
+    if (hasOwn(Storage.keys.SAVE)) {
+      const normalized = SaveDataMigrator.normalizeRunState(safe[Storage.keys.SAVE], RPG.state, {
+        defaultBlessingUses:GAME_CONSTANTS.DEFAULT_BLESSING_USES,
+        defaultDraftRerolls:GAME_CONSTANTS.DRAFT.INITIAL_REROLLS,
+        normalizeBonusPoolIds:ids => RPG.normalizeActiveBonusPoolIds(ids),
+        normalizeSpecialSelections:items => RPG.normalizeSpecialCardSelections(items),
+        defaultSpecialSelections:RPG.global.activeSpecialCardSelections
+      });
+      if (!normalized) throw new Error('불러올 수 없는 여정 기록입니다.');
+    }
+    if (hasOwn(Storage.keys.MODE_RECORDS) && !ModeRecords.validate(safe[Storage.keys.MODE_RECORDS])) throw new Error('모드별 최고 기록 형식 또는 버전이 잘못되었습니다.');
+    for (const [key,value] of Object.entries(safe)) {
+      if ([Storage.keys.VOCAB,Storage.keys.COLLOCATION,Storage.keys.RECORDS].includes(key) && !Array.isArray(value)) throw new Error('학습 또는 전투 기록 형식이 잘못되었습니다.');
+      if (key === Storage.keys.FORTUNE_LAST_USED && (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value))) throw new Error('포춘쿠키 기록 형식이 잘못되었습니다.');
+    }
+    return safe;
+  },
+  async importFile(file, { notify = message => RPG.showAlert(message), reset = () => {} } = {}) {
+    if (!file) return;
+    try {
+      if (file.size > 5 * 1024 * 1024) throw new Error('기록 파일은 5MB 이하여야 합니다.');
+      const safe = this.validateImport(JSON.parse(await file.text()));
+      const recordNotice = Object.prototype.hasOwnProperty.call(safe, Storage.keys.MODE_RECORDS) ? '' : '<br>파일에 없는 모드별 최고 기록은 현재 기록을 유지합니다.';
+      RPG.showConfirm('이 파일의 기록을 가져올까요?<br>같은 항목의 현재 저장 기록이 교체됩니다.' + recordNotice, () => {
+        const previous = new Map();
+        try {
+          for (const key of this.backupKeys()) previous.set(key,localStorage.getItem(key));
+          const writes = new Map(Object.entries(safe).map(([key,value]) => [key,key === Storage.keys.FORTUNE_LAST_USED ? value : JSON.stringify(value)]));
+          for (const [key,raw] of writes) localStorage.setItem(key,raw);
+          for (const [key,raw] of writes) {
+            if (localStorage.getItem(key) !== raw) throw new Error(`Failed to verify imported key: ${key}`);
+          }
+          try { sessionStorage.setItem('astraImportNotice','기록을 가져왔습니다. 메모리를 새 기록으로 다시 불러왔어요. 직접 선택한 초상화 파일은 다시 연결해주세요.'); } catch { /* Reload still protects in-memory state. */ }
+          location.reload();
+        } catch {
+          for (const [key,raw] of previous) {
+            try { if (raw === null) localStorage.removeItem(key); else localStorage.setItem(key,raw); } catch { /* Report failure below. */ }
+          }
+          notify('저장 공간에 기록을 쓰지 못했습니다. 기록 가져오기를 중단했습니다.');
+        }
+      });
+    } catch (error) { notify(error.message || '기록을 가져오지 못했습니다.'); }
+    reset();
+  }
+};
+</script>
+<script>/* Shared convenience actions; every quiz, ticket charge and reward uses RPG. */
+'use strict';
+const CardChainChallenge = {
+  ready: false,
+  chain: null,
+  $(id) { return document.getElementById(id); },
+  count() {
+    if (!RPG.state || RPG.state.mode === 'puzzle') return 0;
+    return Math.min(10, Math.floor((RPG.state.tickets || 0) / GAME_CONSTANTS.COSTS.GACHA_SINGLE));
+  },
+  available() {
+    const area = this.$('menu-gacha-area');
+    return this.$('screen-menu').classList.contains('active') && area && getComputedStyle(area).display !== 'none' && this.count() >= 2;
+  },
+  sync() {
+    const button = this.$('cc-chain-gacha');
+    if (!button) return;
+    button.hidden = !this.available();
+    const count = this.count();
+    button.querySelector('small').textContent = `${count}문제`;
+    button.setAttribute('aria-label', `연속 도전, 퀴즈 ${count}문제, 티켓 ${count}장, 정답마다 도전 소환`);
+    const bar = this.$('cc-chain');
+    bar.hidden = !this.chain;
+    if (this.chain) {
+      bar.querySelector('span').textContent = `연속 도전 ${this.chain.done} / ${this.chain.total} · 소환 ${this.chain.picks.length}`;
+      const stop = bar.querySelector('button');
+      stop.disabled = this.chain.left <= 0;
+      stop.textContent = this.chain.left > 0 ? '그만하기' : '이번 문제까지';
+    }
+  },
+  start() {
+    if (this.chain || !this.available()) return;
+    const total = this.count();
+    this.chain = {total, left:total, done:0, fails:0, picks:[], phase:'next'};
+    this.next(this.chain);
+  },
+  next(chain) {
+    if (this.chain !== chain) return;
+    if (!this.$('screen-menu').classList.contains('active')) return this.cancel();
+    if (chain.left <= 0 || (RPG.state.tickets || 0) < GAME_CONSTANTS.COSTS.GACHA_SINGLE) return this.finish(chain);
+    chain.left--;
+    chain.done++;
+    chain.phase = 'question';
+    this.opening = chain;
+    try { RPG.openChallengeGacha(); } finally { this.opening = null; }
+    this.sync();
+    // A data error must never consume the rest of the tickets in a loop.
+    if (!this.$('modal-quiz').classList.contains('active')) this.finish(chain);
+  },
+  cancel() {
+    const chain = this.chain;
+    if (!chain) return;
+    chain.cancelled = true;
+    this.chain = null;
+    clearTimeout(this.timer);
+    this.sync();
+  },
+  finish(chain) {
+    if (this.chain !== chain) return;
+    this.chain = null;
+    clearTimeout(this.timer);
+    this.sync();
+    const result = this.$('gacha-result');
+    result.replaceChildren();
+    delete result.dataset.grade;
+    this.$('gacha-title').textContent = '연속 도전 결과';
+    const summary = document.createElement('p');
+    summary.className = 'cc-summary';
+    summary.textContent = `${chain.done}문제 · 정답 ${chain.picks.length} · 오답 ${chain.fails}`;
+    const list = document.createElement('div');
+    list.className = 'cc-results';
+    for (const id of chain.picks) {
+      const card = RPG.getCardData(id);
+      const row = document.createElement('div');
+      row.className = 'cc-result-card';
+      row.append(ImageAssets.createPortrait(card, {wrapperStyle:'width:54px;height:72px;flex-shrink:0;'}));
+      const label = document.createElement('span');
+      const grade = document.createElement('small');
+      grade.textContent = DISPLAY_NAMES.grade[card.grade] || card.grade;
+      const name = document.createElement('strong');
+      name.textContent = card.name;
+      label.append(grade, name);
+      row.append(label);
+      list.append(row);
+    }
+    if (!chain.picks.length) {
+      const empty = document.createElement('p');
+      empty.textContent = '이번에는 소환한 카드가 없습니다. 다음 도전을 응원합니다.';
+      list.append(empty);
+    }
+    result.append(summary, list);
+    this.$('modal-gacha').classList.add('cc-result-active', 'active');
+  },
+  after(name, callback) {
+    const original = RPG[name];
+    RPG[name] = function (...args) {
+      const result = original.apply(this, args);
+      callback(...args);
+      return result;
+    };
+  },
+  install() {
+    if (this.ready || typeof LumenUI !== 'undefined') return;
+    // The source page loads feature modules sequentially after DOMContentLoaded.
+    if (window._scriptLoadComplete && window._scriptLoadErrors?.length) return;
+    if (typeof RPG === 'undefined' || !RPG._featuresInstalled || typeof RPG.startQuiz !== 'function') {
+      setTimeout(() => this.install(), 100);
+      return;
+    }
+    const area = this.$('menu-gacha-area');
+    if (!area) return;
+    const button = document.createElement('button');
+    button.id = 'cc-chain-gacha';
+    button.type = 'button';
+    button.className = 'menu-btn cc-chain-start';
+    button.hidden = true;
+    const title = document.createElement('span');
+    title.textContent = '연속 도전';
+    button.append(title, document.createElement('small'));
+    button.onclick = () => this.start();
+    area.append(button);
+    const bar = document.createElement('div');
+    bar.id = 'cc-chain';
+    bar.className = 'cc-chain';
+    bar.hidden = true;
+    bar.setAttribute('role', 'status');
+    const stop = document.createElement('button');
+    stop.type = 'button';
+    stop.onclick = () => { if (this.chain) { this.chain.left = 0; this.sync(); } };
+    bar.append(document.createElement('span'), stop);
+    this.$('modal-quiz').querySelector('.modal-content').prepend(bar);
+
+    const startQuiz = RPG.startQuiz;
+    RPG.startQuiz = (callback, ...args) => {
+      const chain = this.opening;
+      if (!chain) return startQuiz.call(RPG, callback, ...args);
+      return startQuiz.call(RPG, success => {
+        chain.phase = 'settling';
+        const before = RPG.state.inventory.length;
+        this.settling = chain;
+        try { callback(success); } finally { this.settling = null; }
+        if (success && RPG.state.inventory.length > before) chain.picks.push(RPG.state.inventory.at(-1));
+        if (!success) chain.fails++;
+        // Single-card presentation has already granted its reward; only defer the reveal.
+        this.$('modal-gacha').classList.remove('active');
+        if (this.chain !== chain || chain.cancelled) return;
+        chain.phase = 'next';
+        this.sync();
+        this.timer = setTimeout(() => this.next(chain), 120);
+      }, ...args);
+    };
+    const showAlert = RPG.showAlert;
+    RPG.showAlert = (message, ...args) => {
+      if (this.settling && /퀴즈 실패/.test(String(message))) return;
+      return showAlert.call(RPG, message, ...args);
+    };
+    this.after('toMenu', () => this.sync());
+    this.after('showScreen', id => { if (id !== 'screen-menu') this.cancel(); });
+    this.after('closeGachaModal', () => this.$('modal-gacha').classList.remove('cc-result-active'));
+    this.after('runGacha', () => {
+      if (!this.settling) this.$('modal-gacha').classList.remove('cc-result-active');
+    });
+    // An escaped/dismissed quiz cancels the sequence; it never starts hidden quizzes.
+    new MutationObserver(() => {
+      if (this.chain?.phase === 'question' && !this.$('modal-quiz').classList.contains('active')) this.cancel();
+    }).observe(this.$('modal-quiz'), {attributes:true, attributeFilter:['class']});
+
+    // Advancing an empty slot avoids overwriting the card just placed. Explicit
+    // replacement of an occupied slot preserves the player's chosen position.
+    const render = RPG.renderCardList;
+    RPG.renderCardList = function (target, cards, handler, ...args) {
+      if (target !== 'deck-card-list' || typeof handler !== 'function') return render.call(this, target, cards, handler, ...args);
+      return render.call(this, target, cards, id => {
+        const slot = this.selectedSlot >= 0 ? this.selectedSlot : this.state.deck.findIndex(value => !value);
+        const wasEmpty = slot >= 0 && !this.state.deck[slot];
+        handler(id);
+        if (wasEmpty && this.state.deck[slot] === id) {
+          const next = this.state.deck.findIndex(value => !value);
+          if (next >= 0) this.selectDeckSlot(next);
+        }
+      }, ...args);
+    };
+    this.after('openDeck', () => {
+      const next = RPG.state.deck.findIndex(value => !value);
+      if (next >= 0) RPG.selectDeckSlot(next);
+    });
+    this.ready = true;
+    this.sync();
+  }
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(() => CardChainChallenge.install(), 0));
+else setTimeout(() => CardChainChallenge.install(), 0);
 </script><script>
         /**
          * QuizEngine — Unified quiz rendering system for Card RPG.
@@ -37606,82 +37899,15 @@ const Astra = {
     this.$('deck-hint').textContent = `${['선봉','중견','대장'][index]}에 배치할 카드를 선택하세요`;
   },
 
-  // Backup only the documented game progress keys, never API credentials.
-  backupKeys() { return Object.values(Storage.keys).filter(key => key !== Storage.keys.API_KEY); },
-  exportSave() {
-    const values = {};
-    try {
-      for (const key of this.backupKeys()) {
-        const raw = localStorage.getItem(key);
-        if (raw !== null) values[key] = key === Storage.keys.FORTUNE_LAST_USED ? raw : JSON.parse(raw);
-      }
-      const payload = { format:'astra-progress', version:1, exportedAt:new Date().toISOString(), values };
-      const url = URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)], {type:'application/json'}));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Dreamweaver-progress-${new Date().toISOString().slice(0,10)}.json`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      this.toast('저장된 기록을 내보냈습니다. 진행 중인 여정은 게임 메뉴에서 먼저 저장하세요.');
-    } catch { this.toast('기록을 읽지 못했습니다. 현재 저장은 변경하지 않았습니다.'); }
-  },
-  validateImport(payload) {
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('올바른 기록 파일이 아닙니다.');
-    let values;
-    if (payload.format === 'astra-progress') {
-      if (payload.version !== 1 || !payload.values || typeof payload.values !== 'object' || Array.isArray(payload.values)) throw new Error('지원하지 않는 기록 버전입니다.');
-      values = payload.values;
-    } else { values = { [Storage.keys.SAVE]:payload }; }
-    const allowed = new Set(this.backupKeys());
-    const safe = Object.fromEntries(Object.entries(values).filter(([key]) => allowed.has(key)));
-    if (!Object.keys(safe).length) throw new Error('게임 기록이 들어 있지 않습니다.');
-    const hasOwn = key => Object.prototype.hasOwnProperty.call(safe, key);
-    if (hasOwn(Storage.keys.GLOBAL) && !RPG.validateGlobalData(safe[Storage.keys.GLOBAL])) {
-      throw new Error('전역 기록 형식이 잘못되었습니다.');
-    }
-    if (hasOwn(Storage.keys.SAVE)) {
-      const normalized = SaveDataMigrator.normalizeRunState(safe[Storage.keys.SAVE], RPG.state, {
-        defaultBlessingUses:GAME_CONSTANTS.DEFAULT_BLESSING_USES,
-        defaultDraftRerolls:GAME_CONSTANTS.DRAFT.INITIAL_REROLLS,
-        normalizeBonusPoolIds:ids => RPG.normalizeActiveBonusPoolIds(ids),
-        normalizeSpecialSelections:items => RPG.normalizeSpecialCardSelections(items),
-        defaultSpecialSelections:RPG.global.activeSpecialCardSelections
-      });
-      if (!normalized) throw new Error('불러올 수 없는 여정 기록입니다.');
-    }
-    if (hasOwn(Storage.keys.MODE_RECORDS) && !ModeRecords.validate(safe[Storage.keys.MODE_RECORDS])) throw new Error('모드별 최고 기록 형식 또는 버전이 잘못되었습니다.');
-    for (const [key,value] of Object.entries(safe)) {
-      if ([Storage.keys.VOCAB,Storage.keys.COLLOCATION,Storage.keys.RECORDS].includes(key) && !Array.isArray(value)) throw new Error('학습 또는 전투 기록 형식이 잘못되었습니다.');
-      if (key === Storage.keys.FORTUNE_LAST_USED && (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value))) throw new Error('포춘쿠키 기록 형식이 잘못되었습니다.');
-    }
-    return safe;
-  },
-  async importFile(file) {
-    if (!file) return;
-    try {
-      if (file.size > 5 * 1024 * 1024) throw new Error('기록 파일은 5MB 이하여야 합니다.');
-      const safe = this.validateImport(JSON.parse(await file.text()));
-      const recordNotice = Object.prototype.hasOwnProperty.call(safe, Storage.keys.MODE_RECORDS) ? '' : '<br>파일에 없는 모드별 최고 기록은 현재 기록을 유지합니다.';
-      RPG.showConfirm('이 파일의 기록을 가져올까요?<br>같은 항목의 현재 저장 기록이 교체됩니다.' + recordNotice, () => {
-        const previous = new Map();
-        try {
-          for (const key of this.backupKeys()) previous.set(key,localStorage.getItem(key));
-          const writes = new Map(Object.entries(safe).map(([key,value]) => [key,key === Storage.keys.FORTUNE_LAST_USED ? value : JSON.stringify(value)]));
-          for (const [key,raw] of writes) localStorage.setItem(key,raw);
-          for (const [key,raw] of writes) {
-            if (localStorage.getItem(key) !== raw) throw new Error(`Failed to verify imported key: ${key}`);
-          }
-          try { sessionStorage.setItem('astraImportNotice','기록을 가져왔습니다. 메모리를 새 기록으로 다시 불러왔어요. 직접 선택한 초상화 파일은 다시 연결해주세요.'); } catch { /* Reload still protects in-memory state. */ }
-          location.reload();
-        } catch {
-          for (const [key,raw] of previous) {
-            try { if (raw === null) localStorage.removeItem(key); else localStorage.setItem(key,raw); } catch { /* Report failure below. */ }
-          }
-          this.toast('저장 공간에 기록을 쓰지 못했습니다. 기록 가져오기를 중단했습니다.');
-        }
-      });
-    } catch (error) { this.toast(error.message || '기록을 가져오지 못했습니다.'); }
-    this.$('astra-import').value = '';
+  // All UIs share validation, allowlisted keys and rollback on failed writes.
+  backupKeys() { return CardProgressTransfer.backupKeys(); },
+  exportSave() { return CardProgressTransfer.exportSave(message => this.toast(message)); },
+  validateImport(payload) { return CardProgressTransfer.validateImport(payload); },
+  importFile(file) {
+    return CardProgressTransfer.importFile(file, {
+      notify: message => this.toast(message),
+      reset: () => { this.$('astra-import').value = ''; }
+    });
   },
 
   installDialogs() {
