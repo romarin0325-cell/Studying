@@ -35,7 +35,8 @@ export function autoPlay(s){
   if(!['combat','intermission'].includes(s.phase))return;
   const occupied=s.board.flatMap((u,i)=>u?[i]:[]);
   for(const from of occupied){const to=occupied.find(i=>engine.canMerge(s.board[from],s.board[i],s));if(to!==undefined){engine.move(s,from,to);return;}}
-  if(s.board.filter(Boolean).length<23&&s.gold>=engine.summonCost(s)){engine.summon(s);return;}
+  const room=s.board.some((u,i)=>!u&&!engine.closedCell(s,i));
+  if(room&&s.board.filter(Boolean).length<23&&s.gold>=engine.summonCost(s)){engine.summon(s);return;}
   if(s.enemies.some(e=>e.boss)&&s.gauge>=60){
     const best=s.deck.filter(id=>engine.bestUnit(s,id)&&!engine.castLock(s,id)&&s.gauge>=engine.skillCost(s,id)&&s.gold>=engine.skillGoldCost(id)).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));
     if(best.length){engine.cast(s,best[0]);return;}

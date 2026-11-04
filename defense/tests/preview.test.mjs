@@ -491,3 +491,10 @@ test('oath scores carry their rules version: an old hard record keeps 10 points,
   assert.equal(oathScore('hard',['haste']),14);assert.equal(oathScore('hard',['haste'],1),12);
   assert.deepEqual(OATH_BANDS.map(b=>b.score),[5,10,15,20,25,30,35,40,45,50]);
 });
+
+test('a v1 record keeps the 3 points 깨어난 군주 had; v2 scores it 2',()=>{
+  const p=profile(),period=season(NOW).id,deck=[...p.deck];
+  const old={period,token:'old',score:3,tier:'easy',oaths:['tyrant'],deck,at:NOW};
+  p.oath={period,best:old,paid:0,lifetime:old};assert.equal(validateProfile(p),true);
+  assert.equal(oathScore('easy',['tyrant']),2);assert.equal(oathScore('easy',['tyrant'],1),3);
+});

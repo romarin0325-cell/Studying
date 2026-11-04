@@ -1036,9 +1036,8 @@ function twinCard(){
   const total=(rec.left?.round||0)+(rec.right?.round||0),credit=twinCredit(st.best,tier),from=TIER_IDS.slice(TIER_IDS.indexOf(tier)+1).find(id=>(st.best[id]?.total||0)===credit&&credit>(best?.total||0));
   const door=side=>{const r=rec[side],other=side==='left'?'right':'left',locks=twinLocks(profile,now(),tier,side),overlap=ready&&twinOverlap(profile,now(),tier,side);
     return `<div class="twin-door ${side}"><div class="twin-door-head"><span class="twin-sigil" aria-hidden="true"></span><b>${TWIN_SIDE[side].name}</b></div>${bossRoute(twinBosses(s.index,side,metBosses(profile)))}
-      <div class="twin-faces">${party[side].deck.length?party[side].deck.map(id=>`<span class="twin-face" data-rarity="${HERO[id].rarity}" ${overlap&&locks.heroes.includes(id)?'data-locked="true"':''}>${image(id)}</span>`).join(''):'<span class="twin-empty">편성 전</span>'}</div>
-      <div class="twin-door-foot"><span class="twin-result"><b>${r?r.round:'—'}</b><em>/${TWIN_WAVES}</em></span><button class="primary" data-twin-enter="${side}" ${!unlocked||!ready||profile.active?'disabled':''}>입장</button></div>
-      ${overlap?`<small class="twin-lock">${icon('info')}입장하면 ${TWIN_SIDE[other].short} 기록을 비워요</small>`:''}</div>`;};
+      ${overlap?`<small class="twin-note">${icon('info')}입장 시 ${TWIN_SIDE[other].short} 기록 비움</small>`:''}<div class="twin-faces">${party[side].deck.length?party[side].deck.map(id=>`<span class="twin-face" data-rarity="${HERO[id].rarity}" ${overlap&&locks.heroes.includes(id)?'data-locked="true"':''}>${image(id)}</span>`).join(''):'<span class="twin-empty">편성 전</span>'}</div>
+      <div class="twin-door-foot"><span class="twin-result"><b>${r?r.round:'—'}</b><em>/${TWIN_WAVES}</em></span><button class="primary" data-twin-enter="${side}" ${!unlocked||!ready||profile.active?'disabled':''}>입장</button></div></div>`;};
   return `<div class="mode twin"><div class="mode-top"><span class="mode-tag">${seasonTag()}</span><button class="info-btn" data-action="mode-info" data-kind="twin" aria-label="규칙">${icon('info')}</button></div>
     <h2>쌍성 원정</h2><p>두 편성으로 좌우 별길을 하나씩 넘어요. 같은 동료·유물은 한쪽 기록에만 남아요.</p>${tierPicker('twin')}
     <div class="twin-doors">${door('left')}${door('right')}</div>${bandLadder(twinBands(tier),credit,st.paid[tier])}
