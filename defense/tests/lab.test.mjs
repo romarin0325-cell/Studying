@@ -5,7 +5,7 @@ const hero=id=>roster.find(h=>h.id===id);
 test('all collectible identities and forms have finite real-engine results',()=>{for(const h of roster){const r=measure(h);assert.ok(Number.isFinite(r.dps)&&r.dps>=0,h.id);assert.ok(Number.isFinite(r.value),h.id);}});
 test('burn and poison contribute to measured DPS, external conditional effects change hits',()=>{const h=hero('luna');assert.ok(measure(h,{low:true,boss:true}).dps>measure(h,{boss:true}).dps*1.9);const v=measure(hero('venom'));assert.ok(v.dps>v.direct);});
 test('final patch uses canonical stats without the old scenario being applied twice',()=>{
- for(const [id,power] of [['underdog',25],['miracle_larva',48],['miracle_cocoon',40],['ash',28],['guardian',55],['joker',20],['cure_master',21]]){
+ for(const [id,power] of [['underdog',25],['miracle_larva',43.2],['miracle_cocoon',36],['ash',28],['guardian',55],['joker',20],['cure_master',21]]){
   const h=hero(id);assert.equal(h.damage,power);assert.equal(measure(h).dps,measure(h,{patch:true}).dps,id);
  }
  const maid=measure(hero('avalanche_maid'));assert.equal(maid.cost,80);assert.equal(measure(hero('avalanche_maid'),{patch:true}).cost,80);

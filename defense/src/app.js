@@ -1,4 +1,4 @@
-import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
+import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
 import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,relicTierRates,relicRatesAt,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
@@ -755,11 +755,11 @@ function rarityFilter(list,table){
   return `<div class="rare-filter">${RARITIES.map(r=>{const all=list.filter(x=>x.rarity===r),have=all.filter(x=>table[x.id].owned).length;return `<button data-filter="${r}" data-rarity="${r}" aria-pressed="${rarity===r}">${badge(r)}<span>${have}/${all.length}</span>${have===all.length?`<i class="done">${icon('check')}</i>`:''}</button>`;}).join('')}</div>`;
 }
 function heroView(){
-  const list=shown().filter(h=>rarity==='all'||h.rarity===rarity).sort((a,b)=>Number(p().heroes[b.id].owned)-Number(p().heroes[a.id].owned)||RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
+  const list=shown().filter(h=>rarity==='all'||h.rarity===rarity).sort((a,b)=>Number(p().heroes[b.id].owned)-Number(p().heroes[a.id].owned)||compareRarity(b,a));
   return `${rarityFilter(shown(),p().heroes)}<div class="cards">${list.map(h=>bookCard(h.id)).join('')}</div>`;
 }
 function relicView(){
-  const worn=p().equipped,bonus=collectionBonus(p().relics),list=ARTIFACTS.filter(a=>rarity==='all'||a.rarity===rarity).sort((a,b)=>Number(p().relics[b.id].owned)-Number(p().relics[a.id].owned)||RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
+  const worn=p().equipped,bonus=collectionBonus(p().relics),list=ARTIFACTS.filter(a=>rarity==='all'||a.rarity===rarity).sort((a,b)=>Number(p().relics[b.id].owned)-Number(p().relics[a.id].owned)||compareRarity(b,a));
   return `<div class="relic-top"><div class="equip-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="equip-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<small>${ARTIFACT[id].name}</small></button>`:`<button class="equip-slot" data-action="relic-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div>
     <button class="relic-bonus" data-action="relic-info"><small>수집 보너스</small><b>+${(bonus*100).toFixed(1)}%</b><span>모든 동료 공격력 ${icon('info')}</span></button></div>
     ${rarityFilter(ARTIFACTS,p().relics)}<div class="cards relics">${list.map(a=>relicCard(a.id)).join('')}</div>`;
@@ -895,11 +895,11 @@ const subjectOf=name=>{const c=name.charCodeAt(name.length-1)-0xAC00;return name
 // ───────── Late companions: the stage 45 announcement ─────────
 // Every companion on LATE_COMPANIONS joins the normal summon and the collection once stage 45 is cleared. Cleared saves that were never told
 // see the announcement once, after the stage 45 reveal or on the next home screen.
-const lateNew=()=>LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id));
+const lateNew=()=>LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).sort((a,b)=>compareRarity(HERO[a],HERO[b]));
 const lateRarityLine=()=>RARITIES.map(r=>({r,n:lateNew().filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n).map(x=>`${RARITY[x.r].name} ${x.n}`).join(' · ');
 function maybeLateNotice(){if(modal||screen==='battle'||screen==='draft'||!lateNoticeIds(p()).length)return;showLateNotice();}
 // Highest rarity first; inside one rarity the announced order is kept.
-const byRarity=ids=>ids.map((id,i)=>[id,i]).sort((a,b)=>RARITIES.indexOf(HERO[b[0]].rarity)-RARITIES.indexOf(HERO[a[0]].rarity)||a[1]-b[1]).map(([id])=>id);
+const byRarity=ids=>[...ids].sort((a,b)=>compareRarity(HERO[b],HERO[a]));
 function showLateNotice(){
   const ids=byRarity(lateNoticeIds(p()).length?lateNoticeIds(p()):lateNew());
   const counts=[...RARITIES].reverse().map(r=>({r,n:ids.filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n);
@@ -1185,6 +1185,7 @@ function relicLadder(){
 }
 function rates(){
   const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates,urCount=heroPool('UR',lateOpen(p().cleared)).length;
+  const targets=[...(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES)))].sort(compareRarity);
   let rows=banner==='relic'?relicLadder():RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct(list[i])}</b></div>`).join('');
   if(banner==='season'){const half=(T.heroRates[3]/2*100).toFixed(3)+"%",closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<PART_STAGES;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${PART_STAGES} 클리어 후</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${half}</b></div>`;}
   if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/urCount)}</b></div><div class="rate-row"><span>UR · 나머지 ${urCount-1}종 각각</span><b>${pct(T.heroRates[3]*.5/urCount)}</b></div>`;
@@ -1195,7 +1196,7 @@ function rates(){
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'시즌':'일반',`${rows}
     <ul class="notes">${banner==='relic'?`<li>단계는 누적 소환 횟수로 올라요. 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
       :`<li>${banner==='season'?'UR의 절반은 이달의 수호자예요. 다른 달 수호자는 나오지 않아요.':`UR의 절반은 이번 주 픽업, 절반은 일반 UR ${urCount}종(픽업 포함) 중 하나예요. 픽업은 매주 월요일에 바뀌어요.`}</li><li>교환: 유료 소환 ${T.pity[banner]}회마다 ${banner==='season'?'이달의 수호자':`일반 UR ${urCount}종 중 원하는 한 명`}을(를) 데려올 수 있어요. UR이 나와도 초기화되지 않고 시즌이 바뀌어도 이어져요.</li><li>10회 소환 전 별빛 퀴즈를 맞히면 그 10회의 UR 확률이 2배가 돼요. 가끔 행운이 찾아올 수도 있어요.</li>`}<li>1회와 10회의 확률은 같아요. 중복은 강화 재료가 돼요.</li></ul>
-    <details class="more"><summary>얻을 수 있는 대상</summary>${(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES))).map(h=>`<div class="rate-row"><span>${h.name}</span>${badge(h.rarity)}</div>`).join('')}</details>`,`<button class="primary wide" data-action="close">확인</button>`,'rates');
+    <details class="more"><summary>얻을 수 있는 대상</summary>${targets.map(h=>`<div class="rate-row"><span>${h.name}</span>${badge(h.rarity)}</div>`).join('')}</details>`,`<button class="primary wide" data-action="close">확인</button>`,'rates');
 }
 
 // ───────── Garden: greenhouse, dispatch, gift basket ─────────
