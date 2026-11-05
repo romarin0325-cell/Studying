@@ -8,6 +8,7 @@ docs/
 ├── CURRENT_VALUES.md         지금 값 (자동 생성)
 ├── STATUS_RULES.md           전투 상태 효과 규칙
 ├── ASSET_PIPELINE.md         에셋·사운드 제작 절차
+├── VFX_SEQUENCE_GUIDE.md     필살기 연출 제작 절차(재사용)
 ├── (규칙·절차 문서)           아래 2장
 ├── *.json                    생성 보고서·배포 입력 (아래 1장)
 ├── plans/                    아직 구현하지 않은 기획·제안
@@ -35,6 +36,7 @@ docs/
 - [BOSS_AND_BUFF_RENEWAL.md](BOSS_AND_BUFF_RENEWAL.md): 버프 종류별 중첩 규칙, 보스 패턴.
 - [SINGLE_HTML_OPTIMIZATION.md](SINGLE_HTML_OPTIMIZATION.md): 지금의 빌드·압축·원본 보존·검증 범위.
 - [ASSET_PIPELINE.md](ASSET_PIPELINE.md): 에셋·사운드 제작과 검수 절차.
+- [VFX_SEQUENCE_GUIDE.md](VFX_SEQUENCE_GUIDE.md): 필살기 연출을 만드는 재사용 절차(정체성 확인, 공용 키트와 색 지도, GPT 이미지 생성·칸 고르기·패킹, ur-vfx.js 시퀀스 항목, 비교 도구와 캡처, 마무리).
 - [CAST_V2_AND_BALANCE.md](CAST_V2_AND_BALANCE.md): 승인된 전체 40종 SD 설치, 성급·훈련·강화 변경과 통합 검증.
 - [SOL_ASSET_AND_VFX.md](SOL_ASSET_AND_VFX.md): Sol 최종 SD 8명 설치, 역할에 따른 공격·필살기 판단표, 실제 렌더러 전후 비교와 확장 규칙. 신규 8명의 이펙트 그림은 15차에 GPT 발광 아틀라스로 바뀌었다(맨 위 변경 블록).
 - [GPT_IMAGE_SD_BRIEF.md](GPT_IMAGE_SD_BRIEF.md): 나노바나나로 만든 동료 6명의 SD를 GPT Image 2.5(Manus)로 다시 그리는 지시서. 참조·프롬프트·거르기·패킹 순서.
@@ -46,7 +48,7 @@ docs/
 ## 3. 기획 (plans/)
 
 - [동료 연출 제작 파이프라인](plans/VFX_PRODUCTION_PIPELINE.md): 2026-11-05. Claude·GPT 연출 검토의 사실 대조, 임팩트 동기화(판정은 그대로, 화면은 보류), 시퀀서·위치 보간·몸 동작·컷인 표정, 에셋 재질·용량(덱 기준 디코딩), 제작 순서와 검수 도구. 2026-11-06 변경 블록: 공용 흑백 키트+색 지도, 투명 배경 사물, 보류·히트스톱 구현, 전역 버프 원칙, 일반 공격 공통 타격감.
-- [동료 연출 기획서](plans/VFX_DIRECTION_PLAN.md): 2026-11-05. 연출 문법 4요소, 엔진 판정 기준 템플릿 배정, 대표 4명(체리프린스·레드드래곤·눈토끼·세이렌) 박자표, 나머지 38명 방향표. 2026-11-06 1차 구현(UR 4명), UR 외 보정 대상 순위.
+- [동료 연출 기획서](plans/VFX_DIRECTION_PLAN.md): 2026-11-05. 연출 문법 4요소, 엔진 판정 기준 템플릿 배정, 대표 4명(체리프린스·레드드래곤·눈토끼·세이렌) 박자표, 나머지 38명 방향표. 2026-11-06 1차 구현(UR 4명), UR 외 보정 대상 순위. 2026-11-06 2차 구현(자스민·여왕·시간의마술사·은하고래·시간의지배자), 색 정체성 판단(팔레트 v2), 예정 작업(레드드래곤·아우로라·토피애플·명탐정 평타).
 - [다음 패치 제안](plans/2026-11-05-NEXT_PROPOSALS.md): 2026-11-05. 한 번의 큰 필살기 유물(성급을 빌려 쓰는 안), 문구 기준과 금지어 검사, 서약·쌍성 통합(쌍성 서약), 비전투 일일 미션(5개 중 3개)과 손편지 "별빛 우편". 구현 전.
 - [디펜스 설계 검토·서약 10안](plans/DEFENSE_REVIEW_AND_PROPOSALS.md): 2026-11-04. 아이리스 저주 이력, 쌍성 난이도별 입장, 용어, 서약 점수, 드래프트·월간 비교와 후속 제안. [원본 수치](archive/2026-11-04-REVIEW-EVIDENCE.json)는 과거 캐시 재사용과 현재 재보정을 구분한다.
 

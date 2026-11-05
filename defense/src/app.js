@@ -394,7 +394,9 @@ let fitFrame=0;window.addEventListener('resize',()=>{if(screen!=='battle')return
 const changedText=(node,value)=>{value=String(value);if(node.textContent!==value)node.textContent=value;};
 function updateBattle(){
   if(screen!=='battle'||!run)return;
-  changedText(hud.health,run.health);changedText(hud.gold,fmt(run.gold));changedText(hud.gauge,Math.floor(run.gauge));changedText(hud['battle-time'],duration(run.time*1000));
+  // Gold a sequenced ultimate is still carrying to the HUD (the Queen's coins) joins the total when it arrives, with one pulse.
+  changedText(hud.health,run.health);changedText(hud.gold,fmt(run.gold-(renderer?.heldGold?.()||0)));changedText(hud.gauge,Math.floor(run.gauge));changedText(hud['battle-time'],duration(run.time*1000));
+  if(renderer?.takeGoldPulse?.()){const item=hud.gold.parentElement;item.classList.remove('gain');void item.offsetWidth;item.classList.add('gain');}
   const fill=`scaleX(${Math.min(1,run.gauge/E.gaugeCap(run)).toFixed(3)})`;if(hud['gauge-fill'].style.transform!==fill)hud['gauge-fill'].style.transform=fill;
   changedText(hud['wave-label'],run.mode==='main'?`웨이브 ${run.wave}/6${run.wave===3||run.wave===6?' · 보스 웨이브':''}`:run.mode==='monthly'?`보스 ${Math.min(run.wave,CHALLENGE_WAVES)}/${CHALLENGE_WAVES} · 코어에 닿으면 종료`:`웨이브 ${Math.min(run.wave,E.lastWave(run))}/${E.lastWave(run)}${run.wave%3===0?' · 보스 웨이브':''}`);
   changedText(hud['summon-cost'],E.summonCost(run)?E.summonCost(run)+' G':'무료');

@@ -5,7 +5,7 @@ import {COMPANION_VISUALS} from './companion-vfx.js';
 import {RAGNAROK_LIFE} from './blade-vfx.js';
 import {drawLightningChain,LIGHTNING_CHAIN_LIFE} from './lightning-vfx.js';
 import {RUNTIME_ASSET_PATHS} from '../asset-policy.js';
-import {UR_SPECS,urSpec,urReady} from './ur-vfx.js';
+import {UR_SPECS,urSpec,urReady,formChange} from './ur-vfx.js';
 
 export class Art {
   constructor(){this.images={};this.failed=[];this.ready=this.load();}
@@ -33,7 +33,13 @@ function shadow(ctx,x,y,r,alpha=.28){ctx.fillStyle=`rgba(9,21,24,${alpha})`;ctx.
 export class Renderer {
   constructor(canvas,art){this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});this.art=art;this.fx=new CombatFX(this.ctx,art);this.effects=[];this.particles=[];this.floats=[];this.skills=[];this.entities=[];this.mergeable=[];this.boardSignature='';this.clock=0;this.shake=0;this.skill=null;this.skillSeq=0;this.selected=-1;this.hover=-1;this.drag=null;this.press=-1;this.reduced=false;this.background=null;this.bgReady=false;
     // Impact sync (pass 21): hits and kills of a sequenced ultimate wait for its on-screen impact; hitstop pauses the simulation only.
-    this.pending=[];this.holds=[];this.releases=[];this.ghosts=[];this.flash=new Map();this.whites=new Map();this.hold=true;this.hitstop=0;this.setQuality('standard');}
+    this.pending=[];this.holds=[];this.releases=[];this.ghosts=[];this.flash=new Map();this.whites=new Map();this.hold=true;this.hitstop=0;
+    // Pass 22: gold a sequence delivers on screen (the Queen's coins) and each unit's last drawn form (a transformation ending).
+    this.goldHolds=[];this.goldPulse=false;this.forms=new Map();
+    // An ultimate that moves enemies along the road (the Galaxy Whale's pull, the Time Ruler's rewind) shows the move as a slide:
+    // until it ends, each moved enemy is drawn from its old road position toward the one the engine gave it.
+    this.moves=new Map();this.setQuality('standard');}
+  movedProgress(uid,progress){const m=this.moves?.get(uid);if(!m)return progress;const k=(this.clock-m.start)/m.dur;return k>=1?progress:k<=0?m.from:m.from+(progress-m.from)*m.ease(k);}
   setQuality(quality){this.fx.quality=quality;if(this.quality===quality)return;this.quality=quality;const q={high:{dpr:1.75,particles:240,impacts:80,effects:76},standard:{dpr:1.5,particles:180,impacts:64,effects:64},low:{dpr:1.25,particles:100,impacts:40,effects:44}}[quality];this.budget=q;this.fx.budget=q.impacts;this.resize();}
   resize(){const dpr=Math.min(window.devicePixelRatio||1,this.budget.dpr);this.canvas.width=Math.round(720*dpr);this.canvas.height=Math.round(780*dpr);this.dpr=dpr;}
   bursts(x,y,color,n=12,power=1){if(this.reduced)n=Math.min(5,n);n=Math.min(n,this.budget.particles-this.particles.length);for(let i=0;i<n;i++){const angle=Math.random()*Math.PI*2,speed=(35+Math.random()*130)*power;this.particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-40,life:.25+Math.random()*.45,total:.7,r:1.5+Math.random()*3,color,star:i%4===0});}}
@@ -63,6 +69,12 @@ export class Renderer {
   }
   // The HP bar of a held target keeps its value from before the cast until the hit lands on screen.
   heldHp(uid){for(const h of this.holds||[])if(h.at.get(uid)>this.clock&&h.pre.has(uid))return h.pre.get(uid);return undefined;}
+  // Gold still flying to the HUD (the HUD shows the total without it); when it lands the HUD gives one pulse.
+  heldGold(){
+    const now=this.clock;let held=0;for(const g of this.goldHolds||[])if(g.until>now)held+=g.amount;else if(!g.landed){g.landed=true;this.goldPulse=true;}
+    if(this.goldHolds?.length)this.goldHolds=this.goldHolds.filter(g=>g.until>now);return held;
+  }
+  takeGoldPulse(){const pulse=this.goldPulse;this.goldPulse=false;return pulse;}
   // White silhouette of an enemy frame, for the hit flash (cached per atlas cell).
   white(img,sx,sy,sw,sh){
     if(typeof document==='undefined')return null;const key=img.src.length+':'+sx+':'+sy;let c=this.whites?.get(key);if(c)return c;
@@ -93,7 +105,9 @@ export class Renderer {
       // Sequenced ultimates (ur-vfx.js) set their own length and say when each target is struck on screen.
       const spec=e.kind==='dream'?null:urSpec(this.fx,this.skill);
       if(spec){const impacts=spec.plan(this.fx,this.skill);this.skill.life=this.skill.total=spec.life(this.skill);
-        if(impacts&&this.hold&&this.holds){const pre=new Map();for(const uid of impacts.keys()){const at=this.fx.enemies.get(uid);if(at?.hp!==undefined)pre.set(uid,at.hp);}this.holds.push({hero:e.hero,at:new Map([...impacts].map(([uid,t])=>[uid,this.clock+t])),pre});}}
+        if(impacts&&this.hold&&this.holds){const pre=new Map();for(const uid of impacts.keys()){const at=this.fx.enemies.get(uid);if(at?.hp!==undefined)pre.set(uid,at.hp);}this.holds.push({hero:e.hero,at:new Map([...impacts].map(([uid,t])=>[uid,this.clock+t])),pre});}
+        const gold=this.skill.ur?.gold;if(gold&&this.hold&&this.goldHolds)this.goldHolds.push({amount:gold.amount,until:this.clock+gold.at});
+        if(this.hold&&this.moves)for(const m of this.skill.ur?.moves||[])this.moves.set(m.uid,{from:m.from,start:this.clock+(m.delay||0),dur:m.dur,ease:m.ease||(t=>t)});}
       this.skills.push(this.skill);if(this.skills.length>4)this.skills.shift();if(!spec&&!e.locked&&e.kind!=='ultimate_breath')this.shake=COMPANION_VISUALS[e.hero]?(e.hero==='underdog'?6:e.hero==='ash'?4:2):isUR(e.hero)?7:4;}
     if(e.type==='finisherImpact'){this.shake=3;if(e.kind==='mirror')this.float(`천만경 ${Math.round(e.damage)}`,e.x,e.y-85,'#f0c9ff',22);}
     if(e.type==='income')this.float(`+${e.gold} G`,e.x,e.y-40,'#f2d596',17);
@@ -144,7 +158,8 @@ export class Renderer {
     this.drawDecor(s);
     // 닫힌 중심: closed cells are dim, recessed tiles with a faint seal, drawn under everything that moves.
     for(const i of s.oathMods?.closed||[]){const p=cellPoint(i);ctx.save();rounded(ctx,p.x-41,p.y-41,82,82,8);ctx.fillStyle='rgba(6,9,26,.5)';ctx.fill();ctx.setLineDash([5,6]);ctx.strokeStyle='rgba(196,206,255,.2)';ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([]);line(ctx,[[p.x-12,p.y-12],[p.x+12,p.y+12]],'rgba(196,206,255,.16)',2);line(ctx,[[p.x+12,p.y-12],[p.x-12,p.y+12]],'rgba(196,206,255,.16)',2);ctx.restore();}
-    this.fx.enemies.clear();for(const e of s.enemies)this.fx.enemies.set(e.uid,{enemy:e,point:pathPoint(e.progress),hp:e.hp});
+    if(this.moves?.size)for(const [uid,m] of this.moves)if(this.clock-m.start>=m.dur)this.moves.delete(uid);
+    this.fx.enemies.clear();for(const e of s.enemies)this.fx.enemies.set(e.uid,{enemy:e,point:pathPoint(this.movedProgress(e.uid,e.progress)),hp:e.hp});
     this.fx.reduced=this.reduced;this.fx.drawZones(s);for(const skill of this.skills)this.fx.drawSkillField(skill);this.fx.drawPersistent(s);this.fx.drawPersonalTraits(s);this.fx.drawAttackShapes();
     const field=this.skill?.life>0?this.skill.hero:'';if(this.canvas.dataset.skillField!==field)this.canvas.dataset.skillField=field;
     const signature=(s.goldCharge?.source||'')+'|'+s.board.map(u=>u?`${u.uid}:${u.hero}:${u.rank}`:'').join('|');if(signature!==this.boardSignature){this.boardSignature=signature;this.mergeable=s.board.flatMap((u,i)=>u&&s.board.some(b=>canMerge(u,b,s))?[i]:[]);}
@@ -197,7 +212,12 @@ export class Renderer {
     for(let i=0;i<(dawn?14:9);i++){const x=(i*103+Math.sin(t*.2+i)*20)%720,y=(i*83-t*7+7800)%780;star(ctx,x,y,1.8+Math.sin(t+i),dawn?(i%2?'#ffd2b4b0':'#ffc4d6b0'):(i%2?'#c7dfc580':'#e5d7a380'),t*.2);}
   }
   drawHero(s,index){const ctx=this.ctx,u=s.board[index],p=cellPoint(index);if(this.drag?.uid===u.uid){shadow(ctx,p.x,p.y+24,20,.2);return;}
-    let body=null;for(const skill of this.skills){if(skill.hero!==u.hero||skill.origin?.x!==p.x||skill.origin?.y!==p.y||!skill.ur)continue;const spec=urSpec(this.fx,skill);if(spec?.body)body=spec.body(this.fx,skill,skill.total-skill.life)||body;}
+    // A sequenced ultimate moves its caster (body), or every unit it names (unitBody: each transforming magician). It may also
+    // keep showing the old form until its reveal (body.form).
+    let body=null;for(const skill of this.skills){if(!skill.ur)continue;const spec=urSpec(this.fx,skill);if(!spec)continue;const age=skill.total-skill.life;
+      if(spec.unitBody){body=spec.unitBody(this.fx,skill,age,u)||body;continue;}
+      if(spec.body&&skill.hero===u.hero&&skill.origin?.x===p.x&&skill.origin?.y===p.y)body=spec.body(this.fx,skill,age)||body;}
+    const form=unitForm(s,u),was=this.forms?.get(u.uid);if(this.forms&&was!==form){this.forms.set(u.uid,form);if(was!==undefined)formChange(this.fx,u,p,was,form);}
     shadow(ctx,p.x,p.y+29,26,.28*(.4+.6*(body?.alpha??1)));
     if(u.hero==='cinderella'&&!u.cursed&&topCinderella(s)?.uid===u.uid)this.drawClock(s,u,p);
     const born=Math.min(1,(s.time-u.born)/.32),ease=1-Math.pow(1-born,3),idle=Math.sin(this.clock*2.5+u.uid)*1.6;
@@ -207,7 +227,7 @@ export class Renderer {
     if(u.pose>0){const t=1-u.pose/.3,pulse=Math.sin(t*Math.PI);dx+=Math.cos(aim)*pulse*4;dy+=Math.sin(aim)*pulse*4;angle+=Math.cos(aim)*pulse*.025;squash*=1+pulse*.035;}
     const slam=u.hero==='underdog'&&this.skills.find(skill=>skill.hero===u.hero&&skill.origin?.x===p.x&&skill.origin?.y===p.y&&skill.total-skill.life<.24);
     if(slam&&!this.reduced){const t=(slam.total-slam.life)/.24,pulse=Math.sin(t*Math.PI);dy+=pulse*8;dx+=pulse*4;angle+=pulse*.12;}
-    this.art.hero(ctx,u.hero,p.x+dx,p.y+31+dy+(1-ease)*15,126*(.8+.2*ease)*(pressed?1.05:1),{direction:u.facing||'down',alpha:(charging(s,u)?1:u.disabled>0||u.cursed?.52:1)*(body?.alpha??1),angle,squash,form:unitForm(s,u)});
+    this.art.hero(ctx,u.hero,p.x+dx,p.y+31+dy+(1-ease)*15,126*(.8+.2*ease)*(pressed?1.05:1),{direction:u.facing||'down',alpha:(charging(s,u)?1:u.disabled>0||u.cursed?.52:1)*(body?.alpha??1),angle,squash,form:body&&'form' in body?body.form:form});
     if(u.windup>0){star(ctx,p.x+Math.cos(aim)*14,p.y+5+Math.sin(aim)*10,4,HERO[u.hero].color,this.clock*3);}
     const start=p.x-(u.rank-1)*6;
     for(let i=0;i<u.rank;i++)star(ctx,start+i*12,p.y+36,4.8,u.rank>=4?'#fff3c7':'#efd295');
@@ -228,7 +248,7 @@ export class Renderer {
     const a=-Math.PI/2+hour*Math.PI/6;ctx.globalAlpha=.8;ctx.strokeStyle=midnight?'#ffb3e2':'#ffe3f5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*rx*.72,cy+Math.sin(a)*ry*.72);ctx.stroke();
     ctx.restore();
   }
-  drawEnemy(e,chapter,ghost=null){const ctx=this.ctx,p=ghost?ghost.point:this.fx.point(e.uid),boss=e.boss?BOSSES[e.boss]:null,bob=ghost?0:Math.sin(this.clock*(e.kind==='runner'?15:8)+e.uid)*2;
+  drawEnemy(e,chapter,ghost=null){const ctx=this.ctx,p=ghost?(this.moves?.has(e.uid)?pathPoint(this.movedProgress(e.uid,e.progress)):ghost.point):this.fx.point(e.uid),boss=e.boss?BOSSES[e.boss]:null,bob=ghost?0:Math.sin(this.clock*(e.kind==='runner'?15:8)+e.uid)*2;
     // Hit feel shared by every attack: a white flash for 0.12 s and a 2.5 px recoil back along the road.
     const lit=this.flash?.get(e.uid),k=lit===undefined?(ghost?.5:0):Math.max(0,1-(this.clock-lit)/.12),recoil=this.reduced?0:k*2.5,rx=-Math.cos(p.angle||0)*recoil,ry=-Math.sin(p.angle||0)*recoil;
     const size=boss?116:e.kind==='armor'?66:e.kind==='runner'?52:58;shadow(ctx,p.x,p.y+7,size*.31,.32);

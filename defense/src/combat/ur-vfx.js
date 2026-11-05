@@ -1,15 +1,19 @@
-// UR ultimate sequences (Cherry Prince, Luna, Frost Witch, Harmonious) and the shared basic-attack contact layer, pass 21
-// (2026-11-06, docs/plans/VFX_DIRECTION_PLAN.md §2 and docs/art/ur-vfx-20261106).
+// Sequenced ultimates and the shared basic-attack contact layer. Pass 21: Cherry Prince, Luna, Frost Witch, Harmonious. Pass 22:
+// Jasmine, Queen, Time Magician, Galaxy Whale, Time Ruler (2026-11-06; docs/plans/VFX_DIRECTION_PLAN.md, how to add one:
+// docs/VFX_SEQUENCE_GUIDE.md, art: docs/art/ur-vfx-20261106 and ur-vfx2-20261106).
 //
 // Assets are one small library, not a sheet per hero:
 //   ur-kit    12 monochrome luminance pieces (blade flash, crescent, ring, mist, shard, flare, petal, ice spikes, spike, moon,
 //             rime, shatter). Each is recoloured at runtime by a gradient map (white core -> hero colour -> dark rim), so the same
 //             256-px cell is a sakura cut for Cherry Prince, a moon cut for Luna and a frost spike for the Frost Witch.
+//   ur-kit2   16 pieces (KIT2): ten luminance pieces (holy circle, wing, feather, clock face, clock hand, light pillar, star whale,
+//             galaxy, gear, hourglass) and six gray objects with their own alpha (glass slipper, rose, rose petal, thorn vine, coin,
+//             crown), recoloured by the same maps.
 //   ur-sweets Harmonious's painted desserts, cake stand and sugar dust (colour cannot come from a ramp).
 // The engine still resolves damage at its own moment (instantly at the cast, or at the finisher's impact). These sequences say
 // when each target is struck on screen (plan); Renderer holds the cast's numbers, deaths and HP bars until then.
-import {HERO} from '../content.js';
-import {cellPoint,cellAt,pathPoint,PATH_LENGTH} from './engine.js';
+import {HERO,TRANSFORM_ART} from '../content.js';
+import {cellPoint,cellAt,pathPoint,PATH_LENGTH,unitForm} from './engine.js';
 
 export const KIT=Object.freeze({blade:0,crescent:1,ring:2,mist:3,shard:4,flare:5,petal:6,spikes:7,spike:8,moon:9,rime:10,shatter:11});
 export const SWEET=Object.freeze({shortcake:0,macarons:1,pudding:2,parfait:3,donut:4,cupcake:5,stand:6,strawberry:7,bow:8,cotton:9,macaron:10,stardust:11});
@@ -26,8 +30,12 @@ const easeBack=t=>{t=clamp01(t);const c=1.7;return 1+(c+1)*Math.pow(t-1,3)+c*Mat
 const hash=(seed,i)=>{const x=Math.sin(seed*12.9898+i*78.233)*43758.5453;return x-Math.floor(x);};
 const bell=t=>Math.sin(Math.PI*clamp01(t));
 
-// Gradient maps: brightness 0..1 -> colour. The white top keeps the hot cores of the established crystal look.
-const RAMPS=Object.freeze({
+// Gradient maps: brightness 0..1 -> colour.
+// Palette v2 (owner review of pass 1: the ultimates read as "translucent silver"). The generated pieces are mostly bright, so a
+// straight brightness ramp dropped most of their pixels into its pale top. A tone curve now moves the body of each light piece into
+// the hero's saturated band, the ramps are deeper, and white is kept for the hottest core. Silver stays only where it is the
+// concept (Luna's full moon, the Frost Witch's rime). v1 is kept for the review page's comparison (fx.palette='v1').
+const RAMPS_V1=Object.freeze({
   sakura:[[0,'#5a1036'],[.28,'#e0408a'],[.55,'#ff9cc8'],[.8,'#ffe0ee'],[1,'#ffffff']],
   gold:[[0,'#4a2a00'],[.28,'#d99a1c'],[.55,'#ffd25e'],[.8,'#fff2c4'],[1,'#ffffff']],
   moon:[[0,'#24104a'],[.28,'#7448d6'],[.55,'#b08cff'],[.8,'#e8deff'],[1,'#ffffff']],
@@ -35,7 +43,30 @@ const RAMPS=Object.freeze({
   ice:[[0,'#0a2440'],[.28,'#2a86d6'],[.55,'#6fd0ff'],[.8,'#d8f4ff'],[1,'#ffffff']],
   frost:[[0,'#1a3048'],[.4,'#9fd8f4'],[.75,'#eaf8ff'],[1,'#ffffff']],
   sugar:[[0,'#4a1028'],[.28,'#ff6aa6'],[.55,'#ffb6d4'],[.8,'#fff0c8'],[1,'#ffffff']],
+  holy:[[0,'#4a3008'],[.3,'#d9a83c'],[.6,'#ffe6a5'],[.85,'#fffaf0'],[1,'#ffffff']],
+  midnight:[[0,'#16062c'],[.3,'#7a2ab0'],[.55,'#d86ad8'],[.8,'#ffd0f4'],[1,'#ffffff']],
+  cosmos:[[0,'#0a0a30'],[.28,'#3a4ab8'],[.5,'#7a8cf0'],[.72,'#c8b8ff'],[.9,'#f4f0ff'],[1,'#ffffff']],
+  chrono:[[0,'#1a1440'],[.3,'#6a5cc8'],[.55,'#c4bcf4'],[.8,'#efeaff'],[1,'#ffffff']],
 });
+const RAMPS=Object.freeze({
+  sakura:[[0,'#3a0420'],[.3,'#c8125e'],[.55,'#ff4f9a'],[.78,'#ff9cc8'],[.93,'#ffe0ee'],[1,'#ffffff']],
+  gold:[[0,'#3a1e00'],[.3,'#c07a08'],[.55,'#ffb72e'],[.78,'#ffdc7a'],[.93,'#fff4cc'],[1,'#ffffff']],
+  moon:[[0,'#1a0838'],[.3,'#5a2ac0'],[.55,'#9b6bff'],[.78,'#cdb4ff'],[.93,'#efe6ff'],[1,'#ffffff']],
+  pale:RAMPS_V1.pale,
+  ice:[[0,'#06203a'],[.3,'#1a6cd0'],[.55,'#3fb4ff'],[.78,'#a8e4ff'],[.93,'#e6f8ff'],[1,'#ffffff']],
+  frost:RAMPS_V1.frost,
+  sugar:[[0,'#4a0a28'],[.3,'#ff4f96'],[.55,'#ff8fc0'],[.78,'#ffc8e0'],[.93,'#fff2c8'],[1,'#ffffff']],
+  // Pass 22. Object pieces read these by their gray shading: the dark end is the shadow, the top the highlight.
+  holy:[[0,'#3a2204'],[.3,'#c88a1c'],[.55,'#ffcc4a'],[.78,'#ffe9a8'],[.93,'#fffaf0'],[1,'#ffffff']],
+  rose:[[0,'#2a0410'],[.25,'#8a0c26'],[.5,'#e01c44'],[.72,'#ff6a86'],[.9,'#ffd0d8'],[1,'#ffffff']],
+  thorn:[[0,'#120206'],[.35,'#3e0a18'],[.6,'#8a1a32'],[.82,'#e0607a'],[1,'#ffd8e0']],
+  midnight:[[0,'#16042c'],[.3,'#8a1ab0'],[.55,'#e04ad8'],[.78,'#ff9ef0'],[.93,'#ffe0f8'],[1,'#ffffff']],
+  glass:[[0,'#1a1040'],[.35,'#7a5ae0'],[.65,'#d8c8ff'],[.88,'#f6f0ff'],[1,'#ffffff']],
+  cosmos:[[0,'#04062a'],[.3,'#2a3ab8'],[.55,'#5a78f0'],[.78,'#a8b4ff'],[.93,'#e8ecff'],[1,'#ffffff']],
+  chrono:[[0,'#140e3a'],[.3,'#5040c0'],[.55,'#9a8cf0'],[.78,'#d4ccff'],[.93,'#f2f0ff'],[1,'#ffffff']],
+});
+// v2 tone curve for light pieces (brightness -> ramp position); objects keep their own shading.
+const TONE=Uint8Array.from({length:256},(_,i)=>Math.round(255*Math.pow(i/255,2)));
 const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 const toHex=c=>'#'+c.map(v=>Math.round(Math.min(255,Math.max(0,v))).toString(16).padStart(2,'0')).join('');
 const mixHex=(a,b,t)=>{const x=hex(a),y=hex(b);return toHex(x.map((v,i)=>v+(y[i]-v)*t));};
@@ -49,42 +80,62 @@ function lutOf(stops){
   return out;
 }
 const SMALL=new Set([KIT.petal,KIT.shard,KIT.flare,KIT.spikes,KIT.spike,KIT.rime]);
-// One recoloured canvas per (piece, ramp), built once.
-function kitCanvas(fx,frame,ramp){
-  const img=fx.art?.images?.['ur-kit'];if(!img||typeof document==='undefined')return null;
-  const cache=fx.urCache||(fx.urCache=new Map()),key=frame+'|'+ramp;let c=cache.get(key);if(c)return c;
-  const stops=RAMPS[ramp]||(ramp.startsWith('hero:')?heroStops(ramp.slice(5)):null);if(!stops)return null;
-  const size=SMALL.has(frame)?128:256,cw=img.naturalWidth/4,ch=img.naturalHeight/3;
+// Pass 22 kit (ur-kit2, 256-px cells 4x4). Light pieces are white with alpha = brightness like ur-kit; the six objects carry their
+// shading as gray with the image tool's own alpha, and the same gradient maps colour that gray (a rose turns crimson, a coin gold).
+export const KIT2=Object.freeze({circle:0,wing:1,feather:2,clock:3,hand:4,pillar:5,slipper:6,rose:7,petal:8,vine:9,coin:10,crown:11,whale:12,galaxy:13,gear:14,hourglass:15});
+const KIT2_OBJECT=new Set([KIT2.slipper,KIT2.rose,KIT2.petal,KIT2.vine,KIT2.coin,KIT2.crown]);
+const KIT2_SMALL=new Set([KIT2.feather,KIT2.petal,KIT2.coin,KIT2.hourglass]);
+// The clock hand's hub sits this far down its cell and the hand reaches this far above the hub (measured on the packed cell).
+const HAND_PIVOT=.836,HAND_REACH=.785;
+// One recoloured canvas per (sheet, piece, ramp), built once.
+function kitCanvas(fx,frame,ramp,sheet='ur-kit'){
+  const img=fx.art?.images?.[sheet];if(!img||typeof document==='undefined')return null;
+  const v1=fx.palette==='v1',cache=fx.urCache||(fx.urCache=new Map()),key=(v1?'v1|':'')+sheet+'|'+frame+'|'+ramp;let c=cache.get(key);if(c)return c;
+  const stops=(v1?RAMPS_V1[ramp]:null)||RAMPS[ramp]||(ramp.startsWith('hero:')?heroStops(ramp.slice(5)):null);if(!stops)return null;
+  const two=sheet==='ur-kit2',object=two&&KIT2_OBJECT.has(frame),size=(two?KIT2_SMALL:SMALL).has(frame)?128:256,cw=img.naturalWidth/4;
   c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d',{willReadFrequently:true});
-  g.drawImage(img,frame%4*cw,Math.floor(frame/4)*ch,cw,ch,0,0,size,size);
-  try{const d=g.getImageData(0,0,size,size),p=d.data,l=lutOf(stops);for(let i=0;i<p.length;i+=4){const a=p[i+3];if(!a)continue;p[i]=l[a*3];p[i+1]=l[a*3+1];p[i+2]=l[a*3+2];}g.putImageData(d,0,0);}
+  g.drawImage(img,frame%4*cw,Math.floor(frame/4)*cw,cw,cw,0,0,size,size);
+  try{const d=g.getImageData(0,0,size,size),p=d.data,l=lutOf(stops);for(let i=0;i<p.length;i+=4){const a=p[i+3];if(!a)continue;const v=object?p[i]:v1?a:TONE[a];p[i]=l[v*3];p[i+1]=l[v*3+1];p[i+2]=l[v*3+2];}g.putImageData(d,0,0);}
   catch{g.globalCompositeOperation='source-atop';g.fillStyle=stops[Math.min(2,stops.length-1)][1];g.fillRect(0,0,size,size);}
   cache.set(key,c);return c;
 }
-export function kit(fx,frame,ramp,x,y,w,h=w,angle=0,alpha=1,blend='lighter'){
-  if(!(alpha>.004)||!(w>0)||!(h>0))return;const c=kitCanvas(fx,frame,ramp);if(!c)return;const ctx=fx.ctx;
-  ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation=blend;ctx.translate(x,y);if(angle)ctx.rotate(angle);ctx.drawImage(c,-w/2,-h/2,w,h);ctx.restore();
+function drawPiece(fx,sheet,frame,ramp,x,y,w,h,angle,alpha,blend,flip=1){
+  if(!(alpha>.004)||!(w>0)||!(h>0))return;const c=kitCanvas(fx,frame,ramp,sheet);if(!c)return;const ctx=fx.ctx;
+  ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation=blend;ctx.translate(x,y);if(angle)ctx.rotate(angle);if(flip!==1)ctx.scale(flip,1);ctx.drawImage(c,-w/2,-h/2,w,h);ctx.restore();
 }
+export function kit(fx,frame,ramp,x,y,w,h=w,angle=0,alpha=1,blend='lighter'){drawPiece(fx,'ur-kit',frame,ramp,x,y,w,h,angle,alpha,blend);}
+export function kit2(fx,frame,ramp,x,y,w,h=w,angle=0,alpha=1,blend='lighter',flip=1){drawPiece(fx,'ur-kit2',frame,ramp,x,y,w,h,angle,alpha,blend,flip);}
 // A piece whose base sits on the cell floor, drawn standing on (x, y) and stretched upward by `rise` (0..1).
-function kitStanding(fx,frame,ramp,x,y,w,rise=1,flip=1,lean=0,alpha=1,blend='lighter'){
-  if(!(rise>0))return;const c=kitCanvas(fx,frame,ramp);if(!c||!(alpha>.004))return;const ctx=fx.ctx;
+function kitStanding(fx,frame,ramp,x,y,w,rise=1,flip=1,lean=0,alpha=1,blend='lighter',sheet='ur-kit'){
+  if(!(rise>0))return;const c=kitCanvas(fx,frame,ramp,sheet);if(!c||!(alpha>.004))return;const ctx=fx.ctx;
   ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation=blend;ctx.translate(x,y);if(lean)ctx.rotate(lean);ctx.scale(flip,rise);ctx.drawImage(c,-w/2,-w*KIT_FLOOR,w,w);ctx.restore();
+}
+// A round piece lying flat on the board (perspective squash), turning in its own plane.
+function disc(fx,frame,ramp,x,y,w,squash,spin,alpha,blend='lighter'){
+  if(!(alpha>.004)||!(w>0))return;const c=kitCanvas(fx,frame,ramp,'ur-kit2');if(!c)return;const ctx=fx.ctx;
+  ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation=blend;ctx.translate(x,y);ctx.scale(1,squash);ctx.rotate(spin);ctx.drawImage(c,-w/2,-w/2,w,w);ctx.restore();
+}
+// A clock hand turning on its hub at (x, y); angle 0 points to twelve.
+function clockHand(fx,ramp,x,y,reach,angle,alpha=1,blend='lighter'){
+  if(!(alpha>.004))return;const c=kitCanvas(fx,KIT2.hand,ramp,'ur-kit2');if(!c)return;const w=reach/HAND_REACH,ctx=fx.ctx;
+  ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation=blend;ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(c,-w/2,-w*HAND_PIVOT,w,w);ctx.restore();
 }
 function sweet(fx,frame,x,y,w,angle=0,alpha=1,sx=1,sy=1){
   const img=fx.art?.images?.['ur-sweets'];if(!img||!(alpha>.004)||!(w>0))return;const cw=img.naturalWidth/4,ch=img.naturalHeight/3,ctx=fx.ctx;
   ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.translate(x,y);if(angle)ctx.rotate(angle);ctx.scale(sx,sy);ctx.drawImage(img,frame%4*cw,Math.floor(frame/4)*ch,cw,ch,-w/2,-w/2,w,w);ctx.restore();
 }
 // The hero's own SD, tinted, for afterimages (re-drawn original pixels; nothing is painted onto the character).
-function ghostSprite(fx,hero,direction,color){
-  const h=HERO[hero],img=fx.art?.images?.[h?.art?.atlas];if(!img||typeof document==='undefined')return null;
-  const cache=fx.urCache||(fx.urCache=new Map()),key=`ghost|${hero}|${direction}|${color}`;let c=cache.get(key);if(c)return c;
-  const cols=h.art.columns,cell=img.naturalWidth/cols,index=h.art.directional?({down:0,up:1,left:2,right:3}[direction]??0):0,col=index%cols,row=h.art.directional?Math.floor(index/cols):h.art.row,size=192;
+function ghostSprite(fx,hero,direction,color,form=null){
+  const art=form&&TRANSFORM_ART[form]||HERO[hero]?.art,img=fx.art?.images?.[art?.atlas];if(!img||typeof document==='undefined')return null;
+  const cache=fx.urCache||(fx.urCache=new Map()),key=`ghost|${hero}|${form||''}|${direction}|${color}`;let c=cache.get(key);if(c)return c;
+  const cols=art.columns,cell=img.naturalWidth/cols,index=art.directional?({down:0,up:1,left:2,right:3}[direction]??0):0,col=index%cols,row=art.directional?Math.floor(index/cols):art.row,size=192;
   c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d');
   g.drawImage(img,col*cell,row*cell,cell,cell,0,0,size,size);g.globalCompositeOperation='source-atop';g.globalAlpha=.74;g.fillStyle=color;g.fillRect(0,0,size,size);
-  c.foot=h.art.foot;c.scale=h.art.scale||1;cache.set(key,c);return c;
+  c.foot=art.foot;c.scale=art.scale||1;cache.set(key,c);return c;
 }
-function drawGhost(fx,hero,x,baseY,direction,color,alpha,size=126){
-  const c=ghostSprite(fx,hero,direction,color);if(!c||!(alpha>.004))return;const sz=size*c.scale,ctx=fx.ctx;
+// baseY is the unit's foot line as render.js draws it (cell point + 31). A form draws that transformation's art instead.
+function drawGhost(fx,hero,x,baseY,direction,color,alpha,size=126,form=null){
+  const c=ghostSprite(fx,hero,direction,color,form);if(!c||!(alpha>.004))return;const sz=size*c.scale,ctx=fx.ctx;
   ctx.save();ctx.globalAlpha*=alpha;ctx.drawImage(c,x-sz/2,baseY-sz*c.foot,sz,sz);ctx.globalCompositeOperation='lighter';ctx.globalAlpha*=.4;ctx.drawImage(c,x-sz/2,baseY-sz*c.foot,sz,sz);ctx.restore();
 }
 function line(ctx,a,b,color,width,alpha){if(!(alpha>.004))return;ctx.save();ctx.globalAlpha*=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore();}
@@ -152,7 +203,7 @@ const cherry={
     const dash=a<0?(p>=.55?1-span(p,.55,.85):0):0;
     if(dash>0){const ctx=fx.ctx;ctx.save();ctx.globalCompositeOperation='lighter';line(ctx,o,A,'#ff5fa0',24,.38*dash);line(ctx,o,A,'#ffc8e0',8,.85*dash);line(ctx,o,A,'#ffffff',3.2,dash);ctx.restore();
       if(!R)for(const k of [.3,.55,.8])drawGhost(fx,'cherry_prince',lerp(o.x,A.x,k),lerp(o.y+40,A.y+36,k),u.dir>0?'right':'left','#ff9cc8',.3*dash*k);
-      fx.glow('glow','#ffffff',cx,cy,170*big,.6*span(p,.55,.6)*(1-span(p,.6,.75)));}
+      fx.glow('glow','#ffb3d6',cx,cy,170*big,.6*span(p,.55,.6)*(1-span(p,.6,.75)));}
     // The cut mark on the target: a hairline that waits for the engine's impact.
     const L=320*big,w=L/1.27;
     const drawLine=(alpha,stretch=1,spread=0,width=1)=>{const ctx=fx.ctx,c=kitCanvas(fx,KIT.blade,ramp);if(!c||!(alpha>.004))return;for(const side of spread?[-1,1]:[0]){ctx.save();ctx.translate(cx-Math.sin(theta)*spread*side,cy+Math.cos(theta)*spread*side);ctx.rotate(theta);ctx.scale(stretch,width);ctx.rotate(Math.PI/4);
@@ -168,7 +219,7 @@ const cherry={
       drawLine(1.2*(1-span(a,0,.34)),1.12,2+14*easeOut(span(a,0,.3)),1.3);
       if(u.empowered)drawLine(.95*(1-span(a,0,.3)),1.04,9+16*easeOut(span(a,0,.3)),.8);
       kit(fx,KIT.flare,ramp,cx,cy,300*big*easeOut(span(a,0,.06)),undefined,theta,1-span(a,.05,.32));
-      if(!R)fx.glow('glow','#ffffff',cx,cy,260*big,.6*(1-span(a,0,.14)));
+      if(!R)fx.glow('glow',u.empowered?'#ffe08a':'#ff9cc8',cx,cy,260*big,.6*(1-span(a,0,.14)));
       const ring=easeOut(span(a,0,.4));kit(fx,KIT.ring,ramp,cx,T.y+6,(90+290*ring)*big,(90+290*ring)*.42*big,0,.85*(1-ring));
       const n=R?10:32;for(let i=0;i<n;i++){const ang=hash(u.seed,i+40)*6.283,v=(170+hash(u.seed,i+80)*260)*big,k=span(a,0,1.1),d=v*(1-Math.exp(-k*3))/3;
         kit(fx,KIT.petal,u.empowered&&i%2?'gold':'sakura',cx+Math.cos(ang)*d,cy+Math.sin(ang)*d*.8+110*k*k,16+hash(u.seed,i)*9,undefined,ang*2+k*7,(1-k),'source-over');}
@@ -348,11 +399,354 @@ const harmony={
   body(fx,skill,age){if(fx.reduced)return null;const a=bell(span(age,0,.13)),b=bell(span(age,.14,.27));return {dy:-(a*7+b*5),squash:1+.05*(a+b)};},
 };
 
-export const UR_SPECS=Object.freeze({cherry_prince:cherry,luna,frost_witch:frost,harmonious:harmony});
-const NEEDS=Object.freeze({harmonious:['ur-kit','ur-sweets']});
+// =====================================================================================================================
+// Pass 22 (2026-11-06): Jasmine, Queen, Time Magician, Galaxy Whale and Time Ruler, with ur-kit2 (docs/art/ur-vfx2-20261106).
+// Each one's main identity leads (the instant strike rides along): Jasmine's blessing of the whole team, the Queen's tax, the
+// Time Magician's transformation, the Galaxy Whale's pull and harvest, the Time Ruler's rewind and stop.
+const easeInOut=t=>{t=clamp01(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const BOARD_CENTRE=cellPoint(12);
+// Light pouring from the top of the board (screen blend).
+function skyLight(fx,color,alpha,reach=700){
+  if(!(alpha>.004)||fx.reduced)return;const ctx=fx.ctx,g=ctx.createLinearGradient(0,0,0,reach);g.addColorStop(0,color);g.addColorStop(1,color+'00');
+  ctx.save();ctx.globalAlpha=Math.min(1,alpha);ctx.globalCompositeOperation='screen';ctx.fillStyle=g;ctx.fillRect(0,0,720,reach);ctx.restore();
+}
+// The light pillar spans [top, bottom] at a visible width (the painted column fills .27 of its cell's width and .9 of its height).
+function pillar(fx,ramp,x,top,bottom,width,alpha){if(bottom>top)kit2(fx,KIT2.pillar,ramp,x,(top+bottom)/2,width/.27,(bottom-top)/.9,0,alpha);}
+// The unit standing on a cell point (read at draw time, when render.js has set fx.s).
+const unitAt=(fx,q)=>{const i=cellAt(q.x,q.y);return i>=0?fx.s?.board?.[i]||null:null;};
+// A short label in the style of render.js floats, for gold the player receives.
+function label(fx,text,x,y,alpha,size=24,color='#ffe08a'){
+  if(!(alpha>.004))return;const ctx=fx.ctx;ctx.save();ctx.globalAlpha=Math.min(1,alpha);ctx.font=`800 ${size}px system-ui`;ctx.textAlign='center';ctx.lineJoin='round';
+  ctx.lineWidth=5;ctx.strokeStyle='rgba(40,16,8,.75)';ctx.strokeText(text,x,y);ctx.fillStyle=color;ctx.fillText(text,x,y);ctx.restore();
+}
+const bossOf=(fx,q)=>!!fx.enemies?.get(q.uid)?.enemy?.boss;
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Jasmine · Goddess Descent. The engine strikes every enemy x5 at the cast, frees stunned and cursed allies and gives every ally
+// +50% power for 8 s (the HUD timer shows the duration; nothing lingers on the units). The cut-in band covers the top of the board
+// for 1.6 s, so heaven sits behind it: the board holds its breath while she gathers light, her prayer rises into the band, light
+// pours down from under it (a pillar of judgement on every enemy, nearest the middle first, and a wave of blessing over the
+// formation: a gold column on each ally, a burst of dark shards off an ally that was stunned or cursed), and as the band lifts the
+// goddess's two wings of light open over the board around a halo, then fold away into falling feathers.
+const HALO={x:360,y:300};
+const jasmine={
+  life:()=>2.9,
+  plan(fx,skill){
+    const t=skill.targets||[],seed=(skill.uid||1)*4.21,far=Math.max(1,...t.map(q=>dist(q,BOARD_CENTRE)));
+    const at=new Map(t.map((q,i)=>[q.uid,.78+.3*dist(q,BOARD_CENTRE)/far+.05*hash(seed,i)]));
+    const freed=new Set((skill.freed||[]).map(q=>q.uid));
+    const allies=(skill.allies||[]).map(q=>({...q,at:.9+dist(q,BOARD_CENTRE)/700,freed:freed.has(q.uid)}));
+    skill.ur={seed,at,allies,last:Math.max(0,...at.values())};return at;
+  },
+  field(fx,skill,age){
+    const u=skill.ur,o=skill.origin,R=fx.reduced;
+    vignette(fx,o.x,o.y-40,90,580,'#120a22',R?0:.36*span(age,0,.25)*(1-span(age,.55,.95)));
+    skyLight(fx,'#ffd36a',.45*bell(span(age,.5,2.4)));
+    // The blessing circle opens under the formation as the blessing passes.
+    const ring=span(age,.85,1.4);if(ring>0)disc(fx,KIT2.circle,'holy',BOARD_CENTRE.x,BOARD_CENTRE.y+10,lerp(220,620,easeOut(ring)),.36,age*.25,.55*(1-span(age,1.9,2.6)));
+    for(const q of skill.targets||[]){const c=age-u.at.get(q.uid);if(c<0||c>.5)continue;const P=fx.point(q.uid,q),big=bossOf(fx,q)?1.4:1,k=easeOut(span(c,0,.4));kit(fx,KIT.ring,'holy',P.x,P.y+6,(44+120*k)*big,(44+120*k)*.42*big,0,.9*(1-k));}
+  },
+  over(fx,skill,age){
+    const u=skill.ur,o=skill.origin,R=fx.reduced,staff={x:o.x+12,y:o.y-58},spot=fx.s?.buffSpotlight?.radiance;
+    // She gathers light: motes stream into her staff.
+    if(age<.5)for(let i=0;i<(R?4:14);i++){const t0=hash(u.seed,i)*.15,k=span(age,t0,t0+.32);if(k<=0||k>=1)continue;const ang=hash(u.seed,i+20)*6.283,r=lerp(170,6,easeIn(k));kit(fx,KIT.flare,'holy',staff.x+Math.cos(ang)*r,staff.y+Math.sin(ang)*r*.8,16,undefined,ang,bell(k));}
+    // Her prayer rises into the sky.
+    const rise=span(age,.3,.55),beam=rise*(1-span(age,.6,.95));if(beam>0)pillar(fx,'holy',staff.x,lerp(staff.y,-40,easeOut(rise)),staff.y+10,28,beam);
+    // Light pours down from above: god rays fan over the board.
+    const pour=span(age,.5,.8)*(1-span(age,1.6,2.3));if(pour>0&&!R)fx.glow('rays','#ffd36a',360,190,920,.35*pour,age*.12);
+    // Judgement: a pillar of light falls on every enemy, nearest the middle first.
+    for(const q of skill.targets||[]){
+      const at=u.at.get(q.uid),c=age-at;if(c<-.1||c>.5)continue;const P=fx.point(q.uid,q),big=bossOf(fx,q)?1.4:1,head=P.y-34*big;
+      if(c<0){pillar(fx,'holy',P.x,-40,lerp(-20,head,easeIn(span(c,-.1,0))),22*big,.9);continue;}
+      pillar(fx,'holy',P.x,-40,P.y+8,lerp(42,12,easeOut(span(c,0,.4)))*big,1-span(c,.12,.5));
+      kit(fx,KIT.flare,'holy',P.x,head+8,170*big*(1-span(c,0,.2)),undefined,0,1-span(c,.04,.25));
+      if(!q.hit){q.hit=true;const last=at>=u.last-.001;stun(fx,last?5:1.2,last?.06:0);}
+    }
+    // Blessing: the wave crosses the formation; each ally gets a gold column and a faint rim; freed allies shed dark shards.
+    for(const q of u.allies){
+      const c=age-q.at;if(c<0||c>.6)continue;const lead=spot!==undefined&&q.uid===spot,k=bell(span(c,0,.5)),unit=unitAt(fx,q);
+      pillar(fx,lead?'gold':'holy',q.x,q.y-(lead?160:118),q.y+22,lead?24:15,.75*k);
+      if(unit&&!R)drawGhost(fx,unit.hero,q.x,q.y+31,unit.facing||'down','#ffcf66',.16*k,126,unitForm(fx.s,unit));
+      if(q.freed){kit(fx,KIT.shatter,'moon',q.x,q.y-30,lerp(50,150,easeOut(span(c,0,.35))),undefined,hash(u.seed,q.uid||1)*6,1-span(c,.1,.45));kit(fx,KIT.flare,'pale',q.x,q.y-34,130*(1-span(c,0,.25)),undefined,0,1-span(c,.05,.3));}
+      if(lead)kit(fx,KIT.flare,'gold',q.x,q.y-56,110*k,undefined,.3,k);
+    }
+    // As the band lifts, the goddess's wings open over the board around her halo, then fold away.
+    const open=easeBack(span(age,1.3,1.7)),wings=span(age,1.3,1.5)*(1-span(age,2.15,2.8));
+    if(wings>0){
+      const w=380*open,flap=R?0:Math.sin(age*4)*.06;
+      for(const side of [-1,1])kit2(fx,KIT2.wing,'holy',HALO.x+side*(46+w*.36),HALO.y+10-w*.3,w,w,side*flap,.42*wings,'lighter',side<0?1:-1);
+      disc(fx,KIT2.circle,'holy',HALO.x,HALO.y-60,250*open,.36,age*.5,.9*wings);
+      if(!R)fx.glow('glow','#ffe6a5',HALO.x,HALO.y-40,340*open,.32*wings);
+    }
+    // Feathers drift down from the wings.
+    if(!R)for(let i=0;i<20;i++){const t0=1.35+hash(u.seed,i+60)*.6,k=span(age,t0,t0+1.4);if(k<=0||k>=1)continue;const x=30+hash(u.seed,i+80)*660+Math.sin(age*1.6+i)*26,y=120+k*(520+hash(u.seed,i+90)*160);
+      kit2(fx,KIT2.feather,'holy',x,y,26+hash(u.seed,i+100)*14,undefined,Math.sin(age*2+i)*.6+.4,bell(k)*.9,'source-over');}
+    wash(fx,'#ffd36a',.2*bell(span(age,.75,1.35))+.1*bell(span(age,1.35,2)));
+  },
+  body(fx,skill,age){if(fx.reduced)return null;const k=bell(span(age,0,1.1));return {dy:-8*k,squash:1+.03*k};},
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Queen · Rose Tax. The engine strikes every enemy x4, pays 20G at once and, the first time in a wave, raises this wave's income by
+// 50% (the edict). The tax is one payment from the crown, not a coin per enemy: a crown shines over her, her rose bursts into a
+// storm of petals spiralling over the board, thorns snap up around every enemy (nearest first) and a rose blooms on each as it is
+// struck; then the treasury answers with one fountain of coins that flies into the gold counter, which counts up as they land
+// (render.js holds the HUD total until then). A fresh edict also stamps the royal seal on the middle of the board.
+const QUEEN_GOLD_AT=1.75,HUD_GOLD={x:150,y:-30};
+const queen={
+  life:()=>2.4,
+  plan(fx,skill){
+    const t=skill.targets||[],o=skill.origin,seed=(skill.uid||1)*6.07,far=Math.max(1,...t.map(q=>dist(q,o)));
+    const at=new Map(t.map(q=>[q.uid,.52+.42*dist(q,o)/far]));
+    skill.ur={seed,at,last:Math.max(0,...at.values()),edict:skill.edict||0,...(skill.tax>0?{gold:{amount:skill.tax,at:QUEEN_GOLD_AT}}:{})};return at;
+  },
+  field(fx,skill,age){
+    const u=skill.ur,o=skill.origin,R=fx.reduced,mood=span(age,.12,.4)*(1-span(age,1.3,2.1));
+    vignette(fx,o.x,o.y-30,110,620,'#2a0410',R?0:.5*mood);wash(fx,'#3a0614',.2*mood,'source-over');
+    // Her crest under her feet; a fresh edict stamps the royal seal on the middle of the board.
+    disc(fx,KIT2.circle,'rose',o.x,o.y+24,lerp(90,170,easeOut(span(age,0,.3))),.38,age*.8,.75*(1-span(age,1.2,1.8)));
+    if(u.edict){const land=age-.34;if(land>=-.2){const s=land<0?lerp(1.5,1,easeIn(span(land,-.2,0))):1+.05*bell(span(land,0,.15));
+      disc(fx,KIT2.circle,'gold',BOARD_CENTRE.x,BOARD_CENTRE.y,480*s,.4,0,(land<0?span(land,-.2,0):1-span(land,.6,1.4))*.7);
+      if(land>=0)kit(fx,KIT.ring,'gold',BOARD_CENTRE.x,BOARD_CENTRE.y,lerp(200,660,easeOut(span(land,0,.5))),lerp(80,264,easeOut(span(land,0,.5))),0,.8*(1-span(land,0,.5)));}}
+    // Thorns snap up around every enemy just before its rose blooms, then sink back.
+    for(const q of skill.targets||[]){const c=age-u.at.get(q.uid);if(c<-.14||c>.75)continue;const P=fx.point(q.uid,q),boss=bossOf(fx,q),grow=easeBack(span(c,-.14,0))*(1-span(c,.45,.75));
+      for(const side of [-1,1])kitStanding(fx,KIT2.vine,'thorn',P.x+side*(boss?26:16),P.y+8,boss?124:86,grow,side,side*.22,1,'source-over','ur-kit2');}
+  },
+  over(fx,skill,age){
+    const u=skill.ur,o=skill.origin,R=fx.reduced,rose={x:o.x+14,y:o.y-44};
+    if(!u.sealed&&u.edict&&age>=.34){u.sealed=true;stun(fx,3,0);}
+    // The crown shines over her head; her rose flares.
+    const crown=easeBack(span(age,.02,.25))*(1-span(age,1.5,2));if(crown>0){if(!R)fx.glow('rays','#ffd36a',o.x,o.y-100,240*crown,.5*bell(span(age,.05,.7)),age);kit2(fx,KIT2.crown,'gold',o.x,o.y-100,84*crown,undefined,0,1,'source-over');kit(fx,KIT.flare,'gold',o.x+20,o.y-122,80*bell(span(age,.12,.4)),undefined,.4,bell(span(age,.12,.4)));}
+    if(age<.4)kit(fx,KIT.flare,'rose',rose.x,rose.y,90*bell(span(age,.05,.35)),undefined,age*3,bell(span(age,.05,.35)));
+    // The rose storm spirals out over the board.
+    for(let i=0;i<(R?14:56);i++){const t0=.22+hash(u.seed,i)*.14,k=span(age,t0,t0+1);if(k<=0||k>=1)continue;const a0=hash(u.seed,i+40)*6.283,r=lerp(20,580,easeOut(k)),a=a0+2.4*easeOut(k);
+      kit2(fx,KIT2.petal,'rose',rose.x+Math.cos(a)*r,rose.y+Math.sin(a)*r*.78+60*k*k,22+hash(u.seed,i+70)*14,undefined,a*2+k*5,bell(k)*.95,'source-over');}
+    // A rose blooms on every enemy as it is struck, then falls apart.
+    for(const q of skill.targets||[]){
+      const at=u.at.get(q.uid),c=age-at;if(c<0||c>.8)continue;const P=fx.point(q.uid,q),boss=bossOf(fx,q),big=boss?1.5:1,cy=P.y-(boss?46:26),gone=span(c,.36,.6);
+      const bloom=easeBack(span(c,0,.16));if(gone<1){if(!R)fx.glow('glow','#ff4f6a',P.x,cy,120*big,.55*(1-gone)*Math.min(1,bloom));kit2(fx,KIT2.rose,'rose',P.x,cy,66*big*lerp(.35,1,bloom),undefined,hash(u.seed,q.uid||1)*6.28,1-gone,'source-over');}
+      kit(fx,KIT.flare,'rose',P.x,cy,120*big*(1-span(c,0,.18)),undefined,.5,1-span(c,.03,.25));
+      if(c>.36)for(let j=0;j<(R?2:6);j++){const k=span(c,.36,.8),ang=hash(q.uid||1,j)*6.283;kit2(fx,KIT2.petal,'rose',P.x+Math.cos(ang)*40*k,cy+Math.sin(ang)*26*k+50*k*k,14,undefined,ang+k*6,1-k,'source-over');}
+      if(!q.hit){q.hit=true;const last=at>=u.last-.001;stun(fx,last?5:1,last?.05:0);}
+    }
+    // The treasury answers: one fountain of coins from her, into the gold counter above the board.
+    if(u.gold){
+      for(let i=0;i<18;i++){const s0=1.02+i*.016,arrive=QUEEN_GOLD_AT-(17-i)*.022,k=span(age,s0,arrive);if(k<=0||k>=1)continue;
+        const start={x:o.x,y:o.y-56},peak={x:o.x+(hash(u.seed,i+120)-.5)*150,y:o.y-90-hash(u.seed,i+140)*70},fly=easeIn(span(k,.32,1)),burst=easeOut(span(k,0,.32));
+        const x=k<.32?lerp(start.x,peak.x,burst):lerp(peak.x,HUD_GOLD.x,fly),y=k<.32?lerp(start.y,peak.y,burst):lerp(peak.y,HUD_GOLD.y,fly),size=lerp(28,18,span(k,.5,1)),spin=Math.abs(Math.cos(age*11+i));
+        kit2(fx,KIT2.coin,'gold',x,y,size*lerp(.25,1,spin),size,0,1,'source-over');if(!R)kit(fx,KIT.flare,'gold',x,y,16,undefined,age*4+i,.7);}
+      label(fx,`+${u.gold.amount} G`,o.x,o.y-96-30*easeOut(span(age,1.05,1.6)),1.4*bell(span(age,1.02,1.9)),28);
+      wash(fx,'#ffd36a',.14*span(age,1,1.04)*(1-span(age,1.04,1.5)));
+    }
+    if(!R)for(let i=0;i<18;i++){const t0=.95+hash(u.seed,i+200)*.5,k=span(age,t0,t0+.9);if(k<=0||k>=1)continue;kit(fx,KIT.flare,'gold',20+hash(u.seed,i+230)*680,-20+k*700,10+hash(u.seed,i+260)*10,undefined,k*4,bell(k)*.9);}
+  },
+  body(fx,skill,age){if(fx.reduced)return null;const k=bell(span(age,0,.7));return {dy:-5*k,squash:1+.03*k};},
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Time Magician · Trauma, the dark Cinderella (SR). The engine strikes every enemy x4 and turns every Time Magician on the board into
+// Trauma for 10 s (the HUD timer shows the duration; the form itself shows who). The transformation is the point: midnight falls;
+// a clock rises over each magician, its hands race backwards and strike twelve; the glass cracks while ribbons wind up around the
+// boy's silhouette; the clock shatters and Trauma steps out (render.js keeps the old form on screen until then), a glass slipper
+// glinting at her feet. The midnight toll then rings out from the caster and strikes each enemy as it passes.
+const TRAUMA_REVEAL=.8,TRAUMA_TOLL=.86,TOLL_SPEED=1100;
+// Two ribbons winding up around a unit (strokes, so they stay sharp at any size); `burst` throws them outward.
+function ribbons(fx,M,grow,age,alpha,burst=0){
+  if(!(alpha>.01))return;const ctx=fx.ctx;ctx.save();ctx.globalAlpha=Math.min(1,alpha);ctx.lineCap='round';ctx.lineJoin='round';
+  for(const [j,color] of ['#ff7eb6','#ffd0e6'].entries()){ctx.strokeStyle=color;ctx.lineWidth=5;ctx.beginPath();
+    for(let s=0;s<=16;s++){const f=s/16;if(f>grow)break;const a=f*4*Math.PI+j*Math.PI+age*6,r=(26-f*8)*(1+burst*2.5),x=M.x+Math.cos(a)*r,y=M.y+26-f*112-burst*20;s?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();}
+  ctx.restore();
+}
+// The spell runs out (render.js sees the form change): the glass breaks outward, Trauma's afterimage fades and the boy stands in a flash.
+function traumaEnd(fx,e,t){
+  const C={x:e.x,y:e.y-40};
+  if(t<.45)drawGhost(fx,e.hero,e.x,e.y+31,e.facing,'#ff9ad8',.7*(1-t/.45),126,'trauma');
+  kit(fx,KIT.flare,'midnight',C.x,C.y,170*(1-span(t,0,.3)),undefined,0,1-span(t,0,.35));
+  kit(fx,KIT.shatter,'glass',C.x,C.y,lerp(70,190,easeOut(span(t,0,.4))),undefined,e.seed,1-span(t,.1,.55));
+  if(!fx.reduced)for(let j=0;j<12;j++){const k=span(t,0,.8);if(k>=1)break;const ang=hash(e.seed,j)*6.283,v=60+hash(e.seed,j+20)*90;kit(fx,KIT.shard,'glass',C.x+Math.cos(ang)*v*easeOut(k),C.y+Math.sin(ang)*v*easeOut(k)*.8+70*k*k,12,undefined,ang+k*6,1-k);}
+  kit(fx,KIT.mist,'midnight',C.x,C.y+10,lerp(70,170,easeOut(span(t,0,.6))),undefined,t*2,.55*(1-span(t,.1,.8)));
+  drawGhost(fx,e.hero,e.x,e.y+31,e.facing,'#ffffff',.6*(1-span(t,.05,.6)));
+}
+const trauma={
+  life:()=>2,
+  plan(fx,skill){
+    const o=skill.origin,seed=(skill.uid||1)*8.11,mags=(skill.targets||[]).map(q=>({...q}));
+    const at=new Map((skill.struck||[]).map(q=>[q.uid,TRAUMA_TOLL+dist(q,o)/TOLL_SPEED]));
+    skill.ur={seed,at,mags,uids:new Set(mags.map(q=>q.uid)),last:Math.max(0,...at.values())};return at;
+  },
+  field(fx,skill,age){
+    const o=skill.origin,R=fx.reduced,night=span(age,.04,.3)*(1-span(age,1.05,1.7));
+    vignette(fx,o.x,o.y-40,80,600,'#0c0418',R?0:.5*night);wash(fx,'#1a0630',.2*night,'source-over');
+    // The toll: a clock-face ring sweeps the board from the caster.
+    const r=TOLL_SPEED*(age-TRAUMA_TOLL);if(r>0&&r<900){const k=r/900;kit(fx,KIT.ring,'midnight',o.x,o.y,2*r,1.24*r,0,.9*(1-k));kit2(fx,KIT2.clock,'midnight',o.x,o.y,2.2*r,1.36*r,0,.3*(1-k));}
+  },
+  over(fx,skill,age){
+    const u=skill.ur,R=fx.reduced,ctx=fx.ctx;
+    for(const [n,M] of u.mags.entries()){
+      const unit=unitAt(fx,M),dir=unit?.facing||'down',C={x:M.x,y:M.y-62},c=age-TRAUMA_REVEAL;
+      if(c<0){
+        // The clock rises; its hands race backwards and strike twelve at 0.44 s.
+        const pop=easeBack(span(age,0,.22)),spin=1-easeOut(span(age,0,.44));kit2(fx,KIT2.clock,'midnight',C.x,C.y,176*pop,undefined,0,1);
+        clockHand(fx,'midnight',C.x,C.y,60*pop,-spin*Math.PI*6,1);clockHand(fx,'midnight',C.x,C.y,42*pop,-spin*Math.PI*2,1);
+        const dong=span(age,.44,.74);if(dong>0&&dong<1){kit(fx,KIT.flare,'midnight',C.x,C.y-52,150*bell(dong),undefined,0,bell(dong));kit(fx,KIT.ring,'midnight',C.x,C.y,lerp(90,240,easeOut(dong)),undefined,0,.8*(1-dong));if(!M.dong&&n===0){M.dong=true;stun(fx,2,0);}}
+        // The glass cracks.
+        const crack=span(age,.5,.78);if(crack>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#ffe2f6';ctx.lineWidth=2;ctx.lineCap='round';
+          for(let j=0;j<7;j++){const a0=hash(u.seed+n,j)*6.283;let x=C.x,y=C.y;ctx.beginPath();ctx.moveTo(x,y);for(let s=1;s<=4;s++){const a=a0+(hash(u.seed+n,j*9+s)-.5)*.8,len=72*crack/4;x+=Math.cos(a)*len;y+=Math.sin(a)*len;ctx.lineTo(x,y);}ctx.stroke();}ctx.restore();}
+        // Ribbons wind up around the boy's silhouette.
+        const glow=span(age,.45,.78);if(unit&&glow>0&&!R)drawGhost(fx,'time_magician',M.x,M.y+31,dir,'#ffd6f6',.85*glow);
+        const wind=span(age,.45,.8);if(wind>0)ribbons(fx,M,wind,age,1);
+        continue;
+      }
+      // The clock shatters and Trauma steps out.
+      if(!M.revealed){M.revealed=true;if(n===0)stun(fx,4,.05);}
+      if(c<.5){kit(fx,KIT.shatter,'glass',C.x,C.y,lerp(120,280,easeOut(span(c,0,.3))),undefined,hash(u.seed,n)*6,1-span(c,.06,.42));kit(fx,KIT.flare,'midnight',C.x,C.y+20,240*(1-span(c,0,.25)),undefined,.3,1-span(c,0,.3));}
+      if(!R)for(let j=0;j<14;j++){const k=span(c,0,.7);if(k>=1)break;const ang=hash(u.seed+n,j+30)*6.283,v=90+hash(u.seed+n,j+50)*140;kit(fx,KIT.shard,'glass',C.x+Math.cos(ang)*v*k,C.y+Math.sin(ang)*v*k+120*k*k,12,undefined,ang+k*8,1-k);}
+      if(unit&&c<.4)drawGhost(fx,'time_magician',M.x,M.y+31,dir,'#ffc2e6',.9*(1-span(c,0,.4)),126,'trauma');
+      if(c<.55)ribbons(fx,M,1,age,1-span(c,0,.55),easeOut(span(c,0,.55)));
+      const shoe=easeBack(span(c,.05,.25));if(shoe>0&&c<.9){kit2(fx,KIT2.slipper,'glass',M.x+22,M.y+22,36*shoe,undefined,-.15,1-span(c,.6,.9),'source-over');kit(fx,KIT.flare,'pale',M.x+12,M.y+18,44*bell(span(c,.15,.45)),undefined,.4,bell(span(c,.15,.45)));}
+    }
+    wash(fx,'#ff9ad8',.12*span(age,TRAUMA_REVEAL,TRAUMA_REVEAL+.02)*(1-span(age,TRAUMA_REVEAL+.02,TRAUMA_REVEAL+.3)));
+    // The toll strikes each enemy: two clock hands cross on it and its glass breaks.
+    for(const q of skill.struck||[]){const at=u.at.get(q.uid),c=age-at;if(c<0||c>.42)continue;const P=fx.point(q.uid,q),y=P.y-26,k=1-span(c,.15,.42);
+      clockHand(fx,'midnight',P.x,y+16,40,-.6+c*2,k);clockHand(fx,'midnight',P.x,y+16,30,.7-c*3,k);
+      kit(fx,KIT.shatter,'glass',P.x,y,lerp(40,110,easeOut(span(c,0,.3))),undefined,hash(q.uid||1,3)*6,k);kit(fx,KIT.flare,'midnight',P.x,y,90*(1-span(c,0,.2)),undefined,.3,1-span(c,0,.25));
+      if(!q.hit){q.hit=true;if(at>=u.last-.001)stun(fx,3,0);}}
+  },
+  // Every transforming magician: a small lift, the old form until the reveal, then a pop.
+  unitBody(fx,skill,age,unit){
+    if(!skill.ur?.uids?.has(unit.uid))return null;
+    if(age<TRAUMA_REVEAL)return {dy:fx.reduced?0:-5*bell(span(age,.3,1.1)),form:null};
+    const c=age-TRAUMA_REVEAL;return fx.reduced?null:{dy:-5*(1-span(c,0,.3)),squash:1+.07*(1-span(c,0,.22))};
+  },
+  // For the 10 s, a soft glow under Trauma and two glass shards circling her (no timer ring: the HUD has it).
+  persistent(fx,s){if(!(s.buffs?.trauma>0))return;for(const [i,unit] of (s.board||[]).entries()){if(unit?.hero!=='time_magician'||unitForm(s,unit)!=='trauma')continue;const p=cellPoint(i);fx.glow('glow','#ff5c9a',p.x,p.y+22,110*(.8+Math.sin((fx.clock||0)*4+unit.uid)*.2),.3);}},
+  persistentOver(fx,s){if(!(s.buffs?.trauma>0)||fx.reduced)return;const t=fx.clock||0;for(const [i,unit] of (s.board||[]).entries()){if(unit?.hero!=='time_magician'||unitForm(s,unit)!=='trauma')continue;const p=cellPoint(i);for(let j=0;j<2;j++){const a=t*1.8+j*Math.PI+unit.uid;kit(fx,KIT.shard,'glass',p.x+Math.cos(a)*30,p.y-26+Math.sin(a)*10,12,undefined,a,.75);}}},
+  formChange(fx,unit,p,from,to){if(from==='trauma'&&to!=='trauma')fx.add?.({type:'urFx',x:p.x,y:p.y,hero:unit.hero,facing:unit.facing||'down',seed:unit.uid,life:.7,total:.7,draw:traumaEnd});},
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Galaxy Whale · Heart of the Star Sea. The engine pulls every enemy along the road toward one point near the front (80 behind the
+// leader), slows them and strikes each x8, plus 100% per divine mark it harvests. The board turns to deep space; the star whale swims
+// in over the board and dives into a galaxy opening at the gathering point; the enemies slide along the road into it (render.js
+// draws the slide); each enemy's divine marks are torn off as gold stars and spiral into the core; the galaxy collapses and bursts
+// like a supernova, striking everyone at once (a harvested enemy burns gold).
+const WHALE_PULL=.45,WHALE_BLAST=1.2;
+const bez=(a,b,c,t)=>(1-t)*(1-t)*a+2*(1-t)*t*b+t*t*c;
+const whale={
+  life:()=>2.6,
+  plan(fx,skill){
+    const t=skill.targets||[],seed=(skill.uid||1)*2.71,W=pathPoint(skill.well??0);
+    const at=new Map(t.map(q=>[q.uid,WHALE_BLAST+.03+dist(q,W)/2000]));
+    const moves=t.filter(q=>q.p0!==undefined).map(q=>({uid:q.uid,from:q.p0,delay:WHALE_PULL,dur:.6,ease:easeInOut}));
+    skill.ur={seed,W:{x:W.x,y:W.y},at,moves,dir:W.x<360?-1:1};return at;
+  },
+  field(fx,skill,age){
+    const u=skill.ur,W=u.W,R=fx.reduced,space=span(age,0,.3)*(1-span(age,1.7,2.5));
+    vignette(fx,W.x,W.y,60,640,'#03051a',R?0:.55*space);wash(fx,'#0a0c34',.24*space,'source-over');
+    // The galaxy opens at the gathering point, turning fast, and falls into its core just before the blast.
+    const open=easeOut(span(age,.38,.75)),fall=span(age,WHALE_BLAST-.12,WHALE_BLAST);
+    if(age<WHALE_BLAST)disc(fx,KIT2.galaxy,'cosmos',W.x,W.y,340*open*lerp(1,.18,easeIn(fall)),.56,-age*4.2,.95);
+    // Gravity: short streaks from every enemy toward the core while they slide.
+    if(age>WHALE_PULL&&age<WHALE_BLAST){const ctx=fx.ctx;ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#b8c4ff';ctx.lineWidth=2;ctx.lineCap='round';ctx.globalAlpha=.6*bell(span(age,WHALE_PULL,WHALE_BLAST));
+      for(const q of skill.targets||[]){const P=fx.point(q.uid,q),dx=W.x-P.x,dy=W.y-P.y,len=Math.hypot(dx,dy)||1;ctx.beginPath();ctx.moveTo(P.x,P.y-16);ctx.lineTo(P.x+dx/len*46,P.y-16+dy/len*46);ctx.stroke();}ctx.restore();}
+  },
+  over(fx,skill,age){
+    const u=skill.ur,W=u.W,R=fx.reduced,o=skill.origin;
+    stars(fx,u.seed,span(age,.05,.3)*(1-span(age,1.7,2.5))*.9,18);
+    if(age<.45)kit(fx,KIT.flare,'gold',o.x+14,o.y-60,80*bell(span(age,.02,.4)),undefined,age*3,bell(span(age,.02,.4)));
+    // The star whale swims in over the board and dives into the galaxy.
+    const swim=span(age,.05,.9);
+    if(swim>0&&swim<1){
+      const S={x:u.dir<0?880:-160,y:330},C={x:(S.x+W.x)/2,y:Math.min(S.y,W.y)-200},q=easeInOut(swim),q2=Math.min(1,q+.02);
+      const x=bez(S.x,C.x,W.x,q),y=bez(S.y,C.y,W.y,q),heading=Math.atan2(bez(S.y,C.y,W.y,q2)-y,bez(S.x,C.x,W.x,q2)-x),dive=span(swim,.72,1);
+      for(let j=1;j<=(R?3:10);j++){const qq=Math.max(0,q-j*.025);kit(fx,KIT.flare,'cosmos',bez(S.x,C.x,W.x,qq),bez(S.y,C.y,W.y,qq),16-j,undefined,j,(1-j/11)*.8);}
+      const w=420*lerp(1,.25,easeIn(dive));kit2(fx,KIT2.whale,'cosmos',x,y,w,w,u.dir<0?heading+Math.PI:heading,(1-span(dive,.6,1))*.95,'lighter',u.dir<0?1:-1);
+    }
+    // Harvest: each enemy's divine marks are torn off as gold stars and spiral into the core.
+    for(const q of skill.targets||[]){if(!(q.harvest>0))continue;const P=fx.point(q.uid,q);for(let m=0;m<Math.min(3,q.harvest);m++){const k=span(age,.55+m*.07,1.05+m*.04);if(k<=0||k>=1)continue;
+      const sp=k*5+m*2.1,r=(1-k)*26;kit(fx,KIT.flare,'gold',lerp(P.x,W.x,easeIn(k))+Math.cos(sp)*r,lerp(P.y-40,W.y,easeIn(k))+Math.sin(sp)*r*.7,26,undefined,sp,bell(k*.9+.1));}}
+    // The core blazes, then the supernova: a flash over the board, rings and star shards.
+    const pre=span(age,WHALE_BLAST-.12,WHALE_BLAST);if(pre>0&&age<WHALE_BLAST)kit(fx,KIT.flare,'pale',W.x,W.y,lerp(60,220,easeIn(pre)),undefined,age*3,pre);
+    const c=age-WHALE_BLAST;
+    if(c>=0){
+      if(!u.blasted){u.blasted=true;stun(fx,9,.09);}
+      wash(fx,'#c8d4ff',.45*(1-span(c,0,.45)));
+      if(!R){fx.glow('glow','#e8eeff',W.x,W.y,720,.85*(1-span(c,0,.3)));fx.glow('rays','#c8d4ff',W.x,W.y,760*easeOut(span(c,0,.3)),.6*(1-span(c,0,.55)),c);}
+      kit(fx,KIT.flare,'pale',W.x,W.y,420*(1-span(c,0,.25)),undefined,0,1-span(c,0,.3));
+      kit2(fx,KIT2.galaxy,'cosmos',W.x,W.y,lerp(300,980,easeOut(span(c,0,.6))),lerp(170,560,easeOut(span(c,0,.6))),c*2,.85*(1-span(c,0,.6)));
+      for(const [d,max] of [[0,800],[.08,560]]){const k=easeOut(span(c-d,0,.55));if(c>=d&&k<1)kit(fx,KIT.ring,'cosmos',W.x,W.y,lerp(80,max,k),lerp(44,max*.56,k),0,.9*(1-k));}
+      if(!R)for(let i=0;i<30;i++){const k=span(c,0,.9);if(k>=1)break;const ang=hash(u.seed,i+300)*6.283,v=220+hash(u.seed,i+330)*360;kit(fx,KIT.flare,i%4?'cosmos':'gold',W.x+Math.cos(ang)*v*easeOut(k),W.y+Math.sin(ang)*v*easeOut(k)*.62,14+hash(u.seed,i)*12,undefined,ang,1-k);}
+      if(!R)for(let i=0;i<20;i++){const t0=hash(u.seed,i+400)*.4,k=span(c,t0+.1,t0+1.3);if(k<=0||k>=1)continue;kit(fx,KIT.flare,'cosmos',W.x+(hash(u.seed,i+430)-.5)*600,W.y-200+k*320,8+hash(u.seed,i+460)*8,undefined,k*3,bell(k)*.8);}
+    }
+    for(const q of skill.targets||[]){const cc=age-u.at.get(q.uid);if(cc<0||cc>.35)continue;const P=fx.point(q.uid,q);kit(fx,KIT.flare,q.harvest>0?'gold':'cosmos',P.x,P.y-24,(q.harvest>0?150:100)*(1-span(cc,0,.25)),undefined,.4,1-span(cc,.03,.3));}
+  },
+  body(fx,skill,age){if(fx.reduced)return null;const k=bell(span(age,0,.9));return {dy:-6*k,squash:1+.03*k};},
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Time Ruler · The Moment Not Yet Come. The engine sends every enemy back to where it stood 6 s ago (the faster, the farther), stops
+// it for 2 s and strikes it x3. Time stops: the board loses its colour except for her; her great clock fills the board behind the
+// units with its gears; the hands race backwards and every enemy slides back along the road the same way (render.js draws the
+// slide), the road it gave back glowing behind it. At twelve the clock strikes: every enemy is hit and stopped, and an hourglass
+// turns over its head for as long as it stays stopped (drawTimeStop, instead of the generic stun stars).
+const REWIND_AT=.35,REWIND_STOP=.95;
+const chrono={
+  life:()=>2.1,
+  plan(fx,skill){
+    const t=skill.targets||[],seed=(skill.uid||1)*3.33,at=new Map(t.map((q,i)=>[q.uid,REWIND_STOP+.01*Math.min(i,12)]));
+    const moves=t.filter(q=>q.p0!==undefined).map(q=>({uid:q.uid,from:q.p0,delay:REWIND_AT,dur:REWIND_STOP-REWIND_AT,ease:easeInOut}));
+    skill.ur={seed,at,moves,t0:hash(seed,1)*Math.PI*2};return at;
+  },
+  // The hands tick slowly, race backwards with the rewind, then stand at twelve.
+  hands(skill,age){const u=skill.ur,back=easeInOut(span(age,REWIND_AT,REWIND_STOP));return age<REWIND_STOP?[u.t0+age*.6-back*Math.PI*4,u.t0*.3+age*.05-back*Math.PI*.6]:[0,0];},
+  field(fx,skill,age){
+    const C=BOARD_CENTRE,k=span(age,.04,.3)*(1-span(age,1.15,1.7));if(!(k>0))return;const [m,h]=this.hands(skill,age);
+    fx.glow('rays','#c4bcf4',C.x,C.y,700,.25*k,age*.1);
+    kit2(fx,KIT2.clock,'chrono',C.x,C.y,640,undefined,0,.55*k);
+    for(const [x,y,s,turn] of [[C.x-250,C.y-190,150,1],[C.x+255,C.y-175,120,-1.25],[C.x+235,C.y+215,170,.9]])kit2(fx,KIT2.gear,'gold',x,y,s,undefined,m*turn*.5,.5*k);
+    clockHand(fx,'chrono',C.x,C.y,250,m,.85*k);clockHand(fx,'chrono',C.x,C.y,170,h,.85*k);
+  },
+  over(fx,skill,age){
+    const u=skill.ur,ctx=fx.ctx,o=skill.origin,C=BOARD_CENTRE,stop=span(age,.04,.24)*(1-span(age,1.15,1.7));
+    // Time stops: everything loses its colour; she alone keeps hers (drawn again on top).
+    if(stop>0){
+      ctx.save();ctx.globalCompositeOperation='saturation';ctx.globalAlpha=.85*stop;ctx.fillStyle='#808080';ctx.fillRect(0,0,720,780);ctx.globalCompositeOperation='color';ctx.globalAlpha=.3*stop;ctx.fillStyle='#8f84e8';ctx.fillRect(0,0,720,780);ctx.restore();
+      const me=unitAt(fx,o);if(me&&fx.art?.hero){const dy=Math.sin((fx.clock||0)*2.5+me.uid)*1.6+(this.body(fx,skill,age)?.dy||0);fx.art.hero(ctx,me.hero,o.x,o.y+31+dy,126,{direction:me.facing||'down',form:unitForm(fx.s,me)});}
+    }
+    // Every enemy slides back; the stretch of road it gave back glows behind it.
+    const back=span(age,REWIND_AT,REWIND_STOP),trail=back>0?(age<REWIND_STOP?1:1-span(age,REWIND_STOP,REWIND_STOP+.35)):0;
+    if(trail>0){ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.lineJoin='round';
+      for(const q of skill.targets||[]){const live=fx.enemies?.get(q.uid)?.enemy;if(q.p0===undefined||!live)continue;const p1=lerp(q.p0,live.progress,easeInOut(back));if(Math.abs(q.p0-p1)<4)continue;
+        ctx.beginPath();for(let s=0;s<=10;s++){const P=pathPoint(lerp(p1,q.p0,s/10));s?ctx.lineTo(P.x,P.y-14):ctx.moveTo(P.x,P.y-14);}
+        ctx.globalAlpha=.45*trail;ctx.strokeStyle='#8f84e8';ctx.lineWidth=10;ctx.stroke();ctx.globalAlpha=.9*trail;ctx.strokeStyle='#efeaff';ctx.lineWidth=2.5;ctx.stroke();}
+      ctx.restore();}
+    // Twelve: the clock strikes; every enemy is hit and stopped.
+    const c=age-REWIND_STOP;
+    if(c>=0&&c<.6){if(!u.struck){u.struck=true;stun(fx,6,.07);}kit(fx,KIT.flare,'chrono',C.x,C.y,420*(1-span(c,0,.3)),undefined,0,1-span(c,0,.35));kit(fx,KIT.ring,'chrono',C.x,C.y,lerp(160,900,easeOut(span(c,0,.5))),lerp(70,400,easeOut(span(c,0,.5))),0,.85*(1-span(c,0,.5)));wash(fx,'#efeaff',.2*(1-span(c,0,.3)));}
+    for(const q of skill.targets||[]){const cc=age-u.at.get(q.uid);if(cc<0||cc>.5)continue;const P=fx.point(q.uid,q),y=P.y-30,a=1-span(cc,.25,.5);
+      kit2(fx,KIT2.clock,'chrono',P.x,y,lerp(30,64,easeBack(span(cc,0,.2))),undefined,0,a);clockHand(fx,'chrono',P.x,y,22,0,a);kit(fx,KIT.flare,'chrono',P.x,y,90*(1-span(cc,0,.2)),undefined,0,1-span(cc,0,.25));}
+  },
+  body(fx,skill,age){if(fx.reduced)return null;return {dy:-4*bell(span(age,0,1))};},
+};
+// While the Time Ruler's stop holds an enemy, an hourglass turns over its head instead of the generic stun stars (effects.js).
+export function drawTimeStop(fx,e,p,size){
+  if(!(e.stun>0)||!e.statusEffects?.some(x=>x.type==='stun'&&x.owner==='time_ruler')||!urReady(fx,'time_ruler'))return false;
+  const a=Math.min(1,e.stun/.25);
+  const tilt=fx.reduced?0:Math.sin((fx.clock||0)*3+e.uid)*.14,hs=e.boss?40:30;kit2(fx,KIT2.hourglass,'chrono',p.x,p.y-size*.7-10,hs,undefined,tilt,a,'source-over');kit2(fx,KIT2.hourglass,'chrono',p.x,p.y-size*.7-10,hs,undefined,tilt,.5*a);
+  kit(fx,KIT.ring,'chrono',p.x,p.y+6,size*.9,size*.38,0,.45*a);
+  return true;
+}
+
+export const UR_SPECS=Object.freeze({cherry_prince:cherry,luna,frost_witch:frost,harmonious:harmony,jasmine,queen,time_magician:trauma,galaxy_whale:whale,time_ruler:chrono});
+const KIT_BOTH=['ur-kit','ur-kit2'];
+const NEEDS=Object.freeze({harmonious:['ur-kit','ur-sweets'],jasmine:KIT_BOTH,queen:KIT_BOTH,time_magician:KIT_BOTH,galaxy_whale:KIT_BOTH,time_ruler:KIT_BOTH});
 // A sequence runs only with its art loaded; otherwise the previous visuals stay (same fallback rule as Ragnarok).
 export function urReady(fx,hero){const spec=UR_SPECS[hero];return !!spec&&(NEEDS[hero]||['ur-kit']).every(id=>fx.art?.images?.[id]);}
 export function urSpec(fx,skill){return skill&&skill.kind!=='dream'&&urReady(fx,skill.hero)?UR_SPECS[skill.hero]:null;}
+// A unit's form changed between two frames (render.js): its hero's sequence may mark the moment (a transformation ending).
+export function formChange(fx,u,p,from,to){const spec=UR_SPECS[u.hero];if(spec?.formChange&&urReady(fx,u.hero))spec.formChange(fx,u,p,from,to);}
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Basic-attack contact layer, shared by every companion. One small flash where the hit lands, in the hero's own ramp; rarity

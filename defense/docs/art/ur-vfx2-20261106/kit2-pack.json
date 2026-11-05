@@ -1,0 +1,26 @@
+{
+ "nodeModules": "C:/Users/romar/git/Studying/node_modules",
+ "out": "defense/assets/merge/ur-kit2.webp",
+ "cell": 256,
+ "columns": 4,
+ "rows": 4,
+ "mode": "kit",
+ "cells": [
+  {"name": "circle", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-c.webp", "grid": [3,2], "at": [0,0], "source": "light"},
+  {"name": "wing", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-a.webp", "grid": [3,2], "at": [1,0], "source": "light"},
+  {"name": "feather", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-a.webp", "grid": [3,2], "at": [2,0], "source": "light"},
+  {"name": "clock", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-b.webp", "grid": [3,2], "at": [0,1], "source": "light"},
+  {"name": "hand", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-a.webp", "grid": [3,2], "at": [1,1], "source": "light", "anchor": "bottom"},
+  {"name": "pillar", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-b.webp", "grid": [3,2], "at": [2,1], "source": "light"},
+  {"name": "slipper", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-a.webp", "grid": [3,2], "at": [0,0], "solo": true},
+  {"name": "rose", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-c.webp", "grid": [3,2], "at": [1,0], "solo": true},
+  {"name": "petal", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-a.webp", "grid": [3,2], "at": [2,0], "solo": true},
+  {"name": "vine", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-c.webp", "grid": [3,2], "at": [0,1], "solo": true, "anchor": "bottom"},
+  {"name": "coin", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-c.webp", "grid": [3,2], "at": [1,1], "solo": true},
+  {"name": "crown", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-a.webp", "grid": [3,2], "at": [2,1], "solo": true},
+  {"name": "whale", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-b.webp", "grid": [2,2], "at": [0,0], "source": "light"},
+  {"name": "galaxy", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-a.webp", "grid": [2,2], "at": [1,0], "source": "light"},
+  {"name": "gear", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-b.webp", "grid": [2,2], "at": [0,1], "source": "light"},
+  {"name": "hourglass", "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-b.webp", "grid": [2,2], "at": [1,1], "source": "light"}
+ ]
+}

@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>별빛 정원 · UR 연출 비교</title>
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>별빛 정원 · 필살기 연출 비교</title>
 <style>
 *{box-sizing:border-box}body{margin:0;color:#e8e4f2;background:#15151e;font:15px/1.65 system-ui,sans-serif}main{max-width:1180px;margin:auto;padding:24px 16px 80px}
 h1{font-size:24px;margin:0 0 6px;letter-spacing:-.6px}h2{font-size:19px;margin:22px 0 6px}.muted{color:#a9a3bb}
@@ -12,14 +12,15 @@ body.phone .stage{grid-template-columns:repeat(2,368px)}
 .strip{display:flex;gap:4px}.strip figure{margin:0;flex:1}.strip img{width:100%;border-radius:6px;display:block}.strip figcaption{font-size:12px;color:#a9a3bb;text-align:center}
 details{margin-top:24px;color:#c9c3da}
 @media (max-width:760px){.stage{grid-template-columns:1fr}}
-</style><main><h1>별빛 정원 · UR 연출 1차 비교</h1>
-<p class="muted">체리프린스·루나·혹한의마녀·하모니어스 필살기와 일반 공격 타격감을, 같은 엔진 이벤트로 main 렌더러(왼쪽)와 이번 렌더러(오른쪽)에 동시에 재생한다. "휴대폰 크기"는 390×844 화면에서 전장이 그려지는 폭(약 368px)으로 줄여 보여 준다.</p>
+</style><main><h1>별빛 정원 · 필살기 연출 비교 (1차·2차)</h1>
+<p class="muted">1차(체리프린스·루나·혹한의마녀·하모니어스, 일반 공격 타격감)와 2차(자스민·여왕·시간의마술사·은하고래·시간의지배자) 필살기를, 같은 엔진 이벤트로 main 렌더러(왼쪽)와 이번 렌더러(오른쪽)에 동시에 재생한다. "휴대폰 크기"는 390×844 화면에서 전장이 그려지는 폭(약 368px)으로 줄여 보여 준다.</p>
 <section id="player"><div class="controls"><button id="previous" aria-label="이전">←</button><select id="hero" aria-label="장면"></select><button id="next" aria-label="다음">→</button>
 <select id="theme" aria-label="전장"><option value="night">밤 정원</option><option value="bright">Bright 정원</option><option value="dawn">새벽(2부)</option></select>
 <select id="speed" aria-label="게임 배속"><option value="1">게임 1배속</option><option value="2">게임 2배속</option></select>
+<select id="palette" aria-label="적용 후 색"><option value="v2">색: 컨셉 색(적용)</option><option value="v1">색: 은빛(1차 원안)</option></select>
 <select id="rate" aria-label="보기 속도"><option value="1">보기 1배</option><option value="0.5">보기 0.5배</option><option value="0.25">보기 0.25배</option></select>
 <label><input type="checkbox" id="cutin" checked>컷인 띠·UR 슬로</label><label><input type="checkbox" id="hold" checked>타격 보류</label><label><input type="checkbox" id="hitstop" checked>히트스톱</label>
-<label><input type="checkbox" id="kills" checked>처치 포함</label><label><input type="checkbox" id="empowered">강화(48배)</label><label><input type="checkbox" id="spotlight">스포트라이트 유물</label><label><input type="checkbox" id="moving" checked>적 이동</label>
+<label><input type="checkbox" id="kills" checked>처치 포함</label><label><input type="checkbox" id="empowered">강화(48배)</label><label><input type="checkbox" id="spotlight">스포트라이트 유물</label><label><input type="checkbox" id="moving" checked>적 이동</label><label><input type="checkbox" id="freed" checked>기절·저주된 아군</label><label><input type="checkbox" id="repeat">같은 웨이브 재시전</label><label><input type="checkbox" id="twin">마술사 2명</label><label><input type="checkbox" id="marks" checked>성광 표식</label>
 <label><input type="checkbox" id="reduced">연출 줄이기</label><label><input type="checkbox" id="phone">휴대폰 크기</label></div>
 <h2 id="hero-name"></h2><p id="role"></p><p id="reason"></p><p id="stop"></p>
 <div class="stage"><figure><figcaption>기존 · main 렌더러</figcaption><canvas id="before" aria-label="변경 전 전장"></canvas></figure><figure><figcaption>적용 후 · 이번 렌더러</figcaption><canvas id="after" aria-label="변경 후 전장"></canvas></figure></div>

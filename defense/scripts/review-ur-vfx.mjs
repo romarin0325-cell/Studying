@@ -4,13 +4,15 @@
 //   node defense/scripts/review-ur-vfx.mjs [--base origin/main]
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {build} from 'esbuild';
-import {ASSET_PATHS,HERO} from '../src/content.js';
+import {ASSET_PATHS,HERO,TRANSFORM_ART} from '../src/content.js';
 import {RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
-const args=process.argv.slice(2),base=args.includes('--base')?args[args.indexOf('--base')+1]:'origin/main';
-const dir=path.join(gameRoot,'docs/review/ur-vfx-20261106'),beforeDir=path.join(dir,'before');
+const args=process.argv.slice(2),base=args.includes('--base')?args[args.indexOf('--base')+1]:'origin/main',page=args.includes('--page')?args[args.indexOf('--page')+1]:'ur-vfx-20261106';
+if(!page||page==='.'||page==='..'||/[/\\]/.test(page))throw new Error('Invalid review page folder');
+const dir=path.join(gameRoot,'docs/review',page),beforeDir=path.join(dir,'before');
 await fs.mkdir(beforeDir,{recursive:true});
 // main's renderer files, with every import except each other resolved to the shared src/ copy.
 const repoRoot=execFileSync('git',['rev-parse','--show-toplevel'],{cwd:gameRoot}).toString().trim();
@@ -24,8 +26,12 @@ for(const name of ['render.js','effects.js']){
 const manifest=JSON.parse(await fs.readFile(path.join(gameRoot,'docs/ASSET_OPTIMIZATION.json'),'utf8'));
 const runtimePath=source=>{const mirrored=source.replace('./assets/','./assets/optimized/'),hit=manifest.images.find(i=>i.source===source&&i.output?.path===mirrored);return hit?hit.output.path:source;};
 // Every runtime atlas except unit sheets, plus the units the fixtures place.
-const UNITS=['cherry_prince','luna','frost_witch','harmonious','jasmine','siren','queen','zeke','snow_rabbit','great_detective','flame_sage','guardian','storm_sage'];
-const ids=Object.keys(RUNTIME_ASSET_PATHS).filter(id=>!id.startsWith('unit-')||UNITS.some(h=>HERO[h].art.atlas===id));
+const {ROSTERS}=await import(pathToFileURL(path.join(dir,'scene.js')).href);
+const heroes=new Set(Object.values(ROSTERS).flatMap(roster=>[...roster.deck,...roster.units.map(unit=>unit[1])]));
+const unitAtlases=new Set([...Array.from(heroes,id=>{if(!HERO[id])throw new Error('Unknown roster hero: '+id);return HERO[id].art.atlas;}),...Object.values(TRANSFORM_ART).map(art=>art.atlas)]);
+const ids=Object.keys(RUNTIME_ASSET_PATHS).filter(id=>!id.startsWith('unit-')||unitAtlases.has(id));
+for(const id of unitAtlases)if(!ids.includes(id)){if(!ASSET_PATHS[id])throw new Error('Unknown unit atlas: '+id);ids.push(id);}
+if(args.includes('--list'))console.log(ids.join('\n'));
 const images={};
 for(const id of ids){const file=assetFile(runtimePath(ASSET_PATHS[id]));images[id]='data:image/webp;base64,'+(await fs.readFile(file)).toString('base64');}
 images['bright-garden']='data:image/webp;base64,'+(await fs.readFile(assetFile(runtimePath('./assets/bright/garden.webp')))).toString('base64');

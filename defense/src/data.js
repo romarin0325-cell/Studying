@@ -1999,6 +1999,7 @@ export const ASSET_PATHS = {
   "luna-blade": "./assets/merge/luna-blade.webp",
   "ur-kit": "./assets/merge/ur-kit.webp",
   "ur-sweets": "./assets/merge/ur-sweets.webp",
+  "ur-kit2": "./assets/merge/ur-kit2.webp",
   "orbit-zone": "./assets/merge/orbit-zone.webp",
   "orbit-sea": "./assets/merge/orbit-sea.webp",
   "relics-new": "./assets/merge/relics-new.webp",

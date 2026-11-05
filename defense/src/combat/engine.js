@@ -1002,8 +1002,13 @@ export function cast(s,id){
   else if(type==='march')s.buffs.march=skillDuration(s,ULT_BUFF.march.seconds*control,'march');
   else if(type==='glassfall'){strike(CINDERELLA.ult);s.buffs.midnight=skillDuration(s,10*control);u.clock=0;}
   else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push({hero,rank:1});s.buffs.festive=skillDuration(s,ULT_BUFF.festive.seconds*control,'festive');}
-  else if(type==='goddess'){strike(5);s.buffs.radiance=skillDuration(s,8*control,'radiance');for(const ally of s.board)if(ally){ally.disabled=0;ally.cursed=false;}}
-  else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control,'trauma');}
+  else if(type==='goddess'){
+    strike(5);s.buffs.radiance=skillDuration(s,8*control,'radiance');const freed=[];
+    for(const [i,ally] of s.board.entries())if(ally){if(ally.disabled>0||ally.cursed)freed.push({...cellPoint(i),uid:ally.uid});ally.disabled=0;ally.cursed=false;}
+    look={freed,allies:s.board.flatMap((ally,i)=>ally?[{...cellPoint(i),uid:ally.uid}]:[])};
+  }
+  // The event lists the transforming magicians (support points); the enemies struck at the cast ride along for the presentation.
+  else if(type==='trauma'){strike(4);s.buffs.trauma=skillDuration(s,10*control,'trauma');look={struck:targets.map(e=>({...pathPoint(e.progress),uid:e.uid}))};}
   else if(type==='ice_court'){const winter=winterDuration(s,u);strike(9);for(const e of targets)if(e.hp>0){addSlow(s,e,source,WINTER_COURT.slow*scale,winter);addStatus(s,e,'exposure',source,id,WINTER_EXPOSURE,winter);}s.buffs.winter=winter;}
   else if(type==='harmony')s.buffs.harmony=skillDuration(s,ULT_BUFF.harmony.seconds*control,'harmony');
   else if(type==='royal'||type==='starfall'||type==='mirror'){
@@ -1030,13 +1035,14 @@ export function cast(s,id){
   else if(type==='expose'){strike(3);for(const e of targets)addStatus(s,e,'exposure',source,id,detectiveExposure(s,u),10);}
   else if(type==='quake'){strike(QUAKE_FACTOR);for(const e of targets){const crisis=e.progress>=PATH_LENGTH*2/3;pushBack(e,(crisis?320:160)*control);addControl(s,e,'stun',source,id,(crisis?3:1.5)*control*scale);}}
   else if(type==='nightmare'){strike(4);for(const e of targets){pushBack(e,220*control);addStatus(s,e,'exposure',source,id,Math.min(DAMAGE_TAKEN_CAP,.25*control*scale),6);addPoison(s,e,source,id,4,12,base);}}
-  else if(type==='rewind'){for(const e of targets){pushBack(e,e.speed*6*control);addControl(s,e,'stun',source,id,2*control*scale);}strike(3);}
+  // p0 (the road position before the move) and the harvested marks only feed the presentation's slide and harvest.
+  else if(type==='rewind'){for(const e of targets){marks.set(e.uid,{p0:e.progress});pushBack(e,e.speed*6*control);addControl(s,e,'stun',source,id,2*control*scale);}strike(3);}
   else if(type==='vortex'||type==='singularity'){
-    const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80);
-    for(const e of targets){const pull=Math.min(.9,.65*control)*(e.boss?BOSS_PUSH_SCALE:1);e.progress=e.progress*(1-pull)+point*pull;if(type==='vortex')addControl(s,e,'stun',source,id,1.5*control*scale);addSlow(s,e,source,.6,4);}
+    const front=targets.reduce((max,e)=>Math.max(max,e.progress),0),point=Math.max(120,front-80);look={well:point};
+    for(const e of targets){marks.set(e.uid,{p0:e.progress});const pull=Math.min(.9,.65*control)*(e.boss?BOSS_PUSH_SCALE:1);e.progress=e.progress*(1-pull)+point*pull;if(type==='vortex')addControl(s,e,'stun',source,id,1.5*control*scale);addSlow(s,e,source,.6,4);}
     if(type==='vortex')strike(5);
     // Harvest spends every divine mark on that enemy before the blast. Singularity does not stun.
-    else for(const e of targets){const marks=e.divine;e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='divine');syncStatuses(s,e);damage(s,e,base*WHALE.factor*(1+WHALE.perMark*marks),id);}
+    else for(const e of targets){const held=e.divine;e.statusEffects=e.statusEffects.filter(effect=>effect.type!=='divine');syncStatuses(s,e);if(held)marks.get(e.uid).harvest=held;damage(s,e,base*WHALE.factor*(1+WHALE.perMark*held),id);}
   }else if(type==='execute'){
     // Each execution kill carries the step to the next target (up to five more).
     const order=[...targets].sort((a,b)=>Number(!!b.boss)-Number(!!a.boss)||b.maxHp-a.maxHp);visualTargets=[];
@@ -1045,7 +1051,7 @@ export function cast(s,id){
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,nightRabbitTargetCount(s));for(const e of visualTargets)damage(s,e,base*9,id);}
   else if(type==='thunder'){strike(THUNDER_FACTOR);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control*scale);}
   else if(type==='fortune')strike(fortuneFactor(s.gold,s.upgrades[id]||0));
-  else if(type==='dividend'){strike(4);giveGold(s,QUEEN_TAX,'필살기');s.edictWave=s.wave;}
+  else if(type==='dividend'){const edict=s.edictWave!==s.wave?Math.round(waveIncome(s.wave)*.5):0;strike(4);giveGold(s,QUEEN_TAX,'필살기');s.edictWave=s.wave;look={tax:QUEEN_TAX,edict};}
   // Immunity is sampled first: stunning the protector must not strip the aura from allies in the same cast.
   else if(type==='bigshow'){strike(UNDERDOG.factor);const victims=s.board.map((ally,i)=>!!ally&&!immune(s,i));victims.forEach((on,i)=>{if(on)stunUnit(s,i,UNDERDOG.stun);});}
   else if(type==='solarflare'){
