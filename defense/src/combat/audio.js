@@ -9,7 +9,7 @@ const midi=n=>440*Math.pow(2,(n-69)/12),RANK=['C','R','SR','UR'],MAX_VOICES=28;
 // Attack families by motion: blades swish, impacts thud, everything else is a light magic chime.
 const BLADE=new Set(['crescent','daggers','claws','needle','royal_blade','leap','ice_lance']),IMPACT=new Set(['quake','dragon','planet','cross','present','contract']);
 export class Sound {
-  constructor(){this.ctx=null;this.enabled=true;this.music=true;this.volume=.35;this.next=0;this.beat=0;this.timer=null;this.battle=false;this.boss=false;this.lastHit=-1;this.lastAttack=-1;this.lastKill=-1;this.voices=0;this.tracks={};this.playing=null;this.failed=false;}
+  constructor(){this.ctx=null;this.enabled=true;this.music=true;this.volume=.35;this.next=0;this.beat=0;this.timer=null;this.battle=false;this.boss=false;this.lastHit=-1;this.lastAttack=-1;this.lastKill=-1;this.lastPilotImpact=-1;this.voices=0;this.tracks={};this.playing=null;this.failed=false;}
   unlock(){
     if(!this.ctx){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;try{this.build(new Audio());this.timer=setInterval(()=>this.schedule(),120);}catch{this.ctx=null;return;}}
     if(this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});
@@ -86,6 +86,17 @@ export class Sound {
   event(e){if(!this.ctx||!this.enabled)return;const t=this.ctx.currentTime,j=1+(Math.random()-.5)*.08;
     switch(e.type){
       case 'attack':{if(t-this.lastAttack<.07)return;this.lastAttack=t;const f=FX_PROFILES[e.hero],m=f?.motion,k=(f?.frame||0)%8;
+        if(e.hero==='cherry_prince'){
+          this.noise(t,.095,.095,1900*j,'bandpass',7300,1.3);return;
+        }
+        if(e.hero==='red_dragon'){
+          this.noise(t,.13,.10,1150*j,'bandpass',480,.85);
+          this.tone(135*j,t,.105,.058,'triangle',73);return;
+        }
+        if(e.hero==='siren'){
+          this.tone(587.33,t,.115,.06,'sine',730,.25);
+          this.tone(880,t+.022,.10,.024,'sine',940,.3);return;
+        }
         if(BLADE.has(m)){this.noise(t,.09,.15,2600*j,'bandpass',6500,1.2);this.tone(900*j+k*30,t+.01,.06,.03,'triangle',600);}
         else if(IMPACT.has(m)){this.tone(120*j,t,.12,.11,'sine',55);this.noise(t,.07,.06,900,'lowpass');}
         else{this.tone((700+k*60)*j,t,.12,.05,'triangle',(1000+k*70)*j,.25);this.tone((1400+k*90)*j,t+.03,.09,.016,'sine',null,.3);}
@@ -98,7 +109,21 @@ export class Sound {
       case 'move':this.tone(520,t,.06,.025,'sine',380);return;
       case 'sell':this.tone(1320,t,.08,.03,'triangle',990);this.tone(990,t+.06,.1,.025,'triangle',700);return;
       case 'income':this.tone(1568,t,.07,.02,'square',null,.1);this.tone(2093,t+.05,.12,.018,'triangle',null,.2);return;
-      case 'skill':{if(e.kind==='ultimate_breath'){
+      case 'skill':{
+        if(e.kind==='royal'){
+          this.noise(t,.07,.09,3900,'bandpass',6800,2.6);
+          this.tone(1400,t+.02,.075,.041,'triangle',1050,.15);return;
+        }
+        if(e.kind==='dragon'&&e.blast){
+          this.tone(89,t,.29,.22,'sine',35);
+          this.noise(t,.27,.21,2600,'lowpass',320,.9,.12);
+          this.noise(t+.08,.25,.075,720,'bandpass',1600,.75,.16);return;
+        }
+        if(e.kind==='haste'){
+          this.tone(midi(74),t,.26,.085,'sine',null,.44,.015);
+          this.chord([69,74,78],t+.12,.45,.046,'triangle',.034,.5);return;
+        }
+        if(e.kind==='ultimate_breath'){
         this.chord([60,67,74],t,.9,.032,'sine',.04,.35);this.noise(t,.55,.018,450,'bandpass',1800,.8);return;}
         if(e.kind==='bigshow'){
         // The fist falls (rising whoosh), lands (deep thump plus a crack of stone), and the board rings.
@@ -112,7 +137,17 @@ export class Sound {
       case 'goldBreathImpact':this.tone(64,t,.7,.22,'sine',28);this.noise(t,.5,.15,2600,'lowpass',260,.8,.25);this.chord([60,67,74,79],t+.04,.75,.035,'triangle',.012,.45);return;
       case 'crushPhase':this.tone(58*j,t,.6,.4,'sine',30);this.tone(116*j,t,.25,.12,'triangle',50);this.noise(t,.55,.24,1400,'lowpass',180,.9,.2);for(let i=0;i<4;i++)this.noise(t+.04+i*.05,.07,.08,3000+i*600,'bandpass',null,2);return;
       case 'dreamPhase':this.chord([e.phase%2?74:72,79,86],t,.5,.03,'sine',.03,.6);this.noise(t,.35,.03,2000,'bandpass',8000,.8,.5);return;
-      case 'finisherImpact':this.tone(e.kind==='royal'?110:62,t,.5,.32,'sine',30);this.noise(t,e.kind==='royal'?.2:.34,.18,e.kind==='royal'?5200:1900,'lowpass',300);this.tone(e.kind==='royal'?1320:880,t,.45,.06,'triangle',440,.5);return;
+      case 'finisherImpact':{
+        if(e.kind==='royal'){
+          this.noise(t,.16,.24,6700,'bandpass',1800,1.6);
+          this.tone(154,t,.15,.11,'sine',48,.12);
+          if(e.enhanced)this.tone(1720,t+.035,.23,.05,'triangle',1280,.44);
+          return;
+        }
+        this.tone(62,t,.5,.32,'sine',30);
+        this.noise(t,.34,.18,1900,'lowpass',300);
+        this.tone(880,t,.45,.06,'triangle',440,.5);return;
+      }
       case 'finisherFizzle':this.tone(440,t,.3,.03,'sine',220);return;
       case 'meteor':this.noise(t,.4,.06,600,'bandpass',3000,1);this.tone(90,t+.35,.4,.16,'sine',40);return;
       case 'reduce':this.tone(300,t,.5,.06,'sine',900);this.chord([392,523,659],t+.05,.5,.03,'triangle',.02,.5);return;
@@ -124,7 +159,19 @@ export class Sound {
       case 'jokerColor':for(let i=0;i<5;i++)this.tone(600+i*110,t+i*.045,.06,.05,'square');this.tone(1320,t+.26,.2,.05,'triangle');return;
       case 'bombSet':this.tone(520,t,.14,.07,'triangle',760);this.tone(1040,t+.05,.1,.04,'sine',null,.4);return;
       case 'bombBlast':this.tone(80,t,.5,.26,'sine',32);this.noise(t,.45,.16,1500,'lowpass',260,.8);this.chord([72,76,79],t+.02,.4,.03,'triangle',.01,.4);return;
-      case 'impact':this.tone(95,t,.25,.1,'sine',45);this.noise(t,.18,.05,1500,'lowpass');return;
+      case 'impact':{
+        if(e.hitTargets){
+          if(!e.hitTargets.length||t-this.lastPilotImpact<.09)return;
+          this.lastPilotImpact=t;
+          if(e.hero==='cherry_prince')this.noise(t,.075,.12,5100,'bandpass',2500,1.8);
+          else if(e.hero==='red_dragon'){
+            this.tone(102,t,.14,.09,'sine',47);
+            this.noise(t,.11,.11,1500,'lowpass',340);
+          }else this.tone(780,t,.125,.055,'sine',510,.24);
+          return;
+        }
+        this.tone(95,t,.25,.1,'sine',45);this.noise(t,.18,.05,1500,'lowpass');return;
+      }
       case 'chain':this.noise(t,.12,.03,4000,'bandpass',7000,3);return;
       case 'frostBreak':[96,100,103].forEach((n,i)=>this.tone(midi(n),t+i*.03,.18,.012,'sine',null,.5));this.noise(t,.15,.03,7000,'highpass');return;
       case 'phoenix':this.chord([69,76,81,88],t,1.1,.04,'triangle',.06,.6);this.noise(t,.8,.04,900,'bandpass',6000,.8,.4);return;

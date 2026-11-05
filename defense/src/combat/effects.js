@@ -5,6 +5,7 @@ import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lig
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
 import {drawGoldAttack,drawGoldPersistent,goldEvent,drawGoldGround,drawGoldImpact} from './gold-dragon-vfx.js';
 import {drawRagnarok,drawMoonShot,drawMoonCut,MOON_CUT_LIFE} from './blade-vfx.js';
+import {drawPilotAttackFloor,drawPilotCast,drawPilotImpact,drawPilotShot,drawRoyalLock,drawRoyalReady,drawSirenSupport,isPilotSkill} from './pilot-vfx.js';
 // Effects drawn under the units (attack circles and ultimate ground marks); draw() only ages them.
 const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround','goldBreathGround']);
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
@@ -156,7 +157,10 @@ export class CombatFX{
     if(e.type==='bell')this.add({...e,life:.85,total:.85});
     if(e.type==='bossCast'&&e.pattern==='thunder')for(const i of e.cells||[])this.add({type:'thunderStrike',...cellPoint(i),seed:i,life:.6,total:.6});
     if(e.type==='instantKill')this.add({...e,life:.48,total:.48});
-    if(e.type==='finisherImpact'||e.type==='finisherFizzle')this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
+    if(e.type==='finisherImpact'||e.type==='finisherFizzle'){
+      const life=e.type==='finisherFizzle'?.25:e.kind==='royal'?.35:.55;
+      this.add({...e,life,total:life});
+    }
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
     if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:['demon_king','miracle_larva'].includes(e.hero)?.45:e.hero==='luna'?MOON_CUT_LIFE:.3;this.add({...e,life,total:life});}
@@ -177,7 +181,7 @@ export class CombatFX{
     if(e.type==='bombBlast')this.add({...e,life:.9,total:.9});
     if(companionSkillEvents(this,e))return;
     if(e.type==='skill'){
-      if(e.kind==='deathhand'||e.kind==='miracle_eclose'||e.kind==='ultimate_breath')return;
+      if(e.kind==='deathhand'||e.kind==='miracle_eclose'||e.kind==='ultimate_breath'||isPilotSkill(e))return;
       if(e.locked||e.kind==='dream')return;
       const targets=e.targets||[],h=HERO[e.hero];
       if(e.kind==='trauma'){for(const p of targets)this.add({...p,type:'transform',hero:e.hero,life:.8,total:.8});return;}
@@ -281,6 +285,7 @@ export class CombatFX{
   }
   drawSkillField(skill){
     if(!skill||skill.life<=0||skill.kind==='ultimate_breath')return;
+    if(drawPilotCast(this,skill,skill.total-skill.life))return;
     // Their signatures are drawn from their own events (hand over the pack, each cocoon hatching); the cast beat stays.
     if(skill.kind==='deathhand'||skill.kind==='miracle_eclose'){this.drawCast(skill);return;}
     if(drawCompanionSkill(this,skill))return;
@@ -476,7 +481,7 @@ export class CombatFX{
   // Board edge glow for global auras (one ring per active aura, newest outside) and a
   // strong mark on units that hold a partial aura. Durations are on the HUD chips.
   drawAuraFrame(s){
-    const ctx=this.ctx,auras=Object.entries(ACTIVE_SKILLS).filter(([id,key])=>GLOBAL_AURAS.includes(key)&&s.buffs[key]>0).slice(0,3);if(!auras.length)return;
+    const ctx=this.ctx,auras=Object.entries(ACTIVE_SKILLS).filter(([id,key])=>id!=='siren'&&GLOBAL_AURAS.includes(key)&&s.buffs[key]>0).slice(0,3);if(!auras.length)return;
     ctx.save();ctx.globalCompositeOperation='lighter';
     auras.forEach(([id,key],i)=>{const h=HERO[id],active=activeSkill(s,id),ending=active&&active.remaining<2?.5+Math.sin(this.clock*14)*.5:1,pulse=(.55+Math.sin(this.clock*3+i)*.15)*ending,inset=4+i*9;
       ctx.globalAlpha=pulse*.35;ctx.strokeStyle=h.color;ctx.lineWidth=14;ctx.strokeRect(inset,inset,720-inset*2,780-inset*2);
@@ -534,6 +539,7 @@ export class CombatFX{
       ctx.restore();
       this.glow('glow','#ffe39a',x+3,y-r-9,16+pulse*10,.8);
     }
+    drawSirenSupport(this,s);
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u)continue;const own=activeSkill(s,u.hero),p=cellPoint(i),ctx=this.ctx;
       const partial=own&&PARTIAL_AURAS.includes(own.key)&&(own.key!=='midnight'||topCinderella(s)?.uid===u.uid);
@@ -544,8 +550,8 @@ export class CombatFX{
         if(!this.reduced)for(let j=0;j<3;j++){const k=(this.clock*.8+j/3+u.uid*.13)%1;ctx.save();ctx.globalAlpha=(1-k)*.8;ctx.translate(p.x+Math.sin(j*2.1+u.uid)*22,p.y+20-k*70);star(ctx,4,h.color);ctx.restore();}
         continue;
       }
-      let owner=own?u.hero:null,active=own;
-      if(!active){owner=Object.keys(ACTIVE_SKILLS).find(id=>!PARTIAL_AURAS.includes(ACTIVE_SKILLS[id])&&s.buffs[ACTIVE_SKILLS[id]]>0&&(id!=='harmonious'||neighbors(i).some(n=>s.board[n]?.hero==='harmonious')));active=owner?activeSkill(s,owner):null;}
+      let owner=own&&u.hero!=='siren'?u.hero:null,active=owner?own:null;
+      if(!active){owner=Object.keys(ACTIVE_SKILLS).find(id=>id!=='siren'&&!PARTIAL_AURAS.includes(ACTIVE_SKILLS[id])&&s.buffs[ACTIVE_SKILLS[id]]>0&&(id!=='harmonious'||neighbors(i).some(n=>s.board[n]?.hero==='harmonious')));active=owner?activeSkill(s,owner):null;}
       if(!active||PARTIAL_AURAS.includes(active.key))continue;
       this.ultimate(owner,p.x,p.y+22,70,26,0,.16+Math.sin(this.clock*4+u.uid)*.05);
     }
@@ -719,6 +725,7 @@ export class CombatFX{
     const t=Math.max(0,Math.min(1,1-shot.life/shot.total)),to={x:p.x,y:p.y-18},angle=Math.atan2(to.y-shot.from.y,to.x-shot.from.x),size=4+Math.min(5,shot.rank)*.65;
     const arc=['icicles','dragon','planet'].includes(f.motion)?34:f.motion==='leap'?20:7;
     const x=shot.from.x+(to.x-shot.from.x)*t,y=shot.from.y+(to.y-shot.from.y)*t-Math.sin(t*Math.PI)*arc;
+    if(drawPilotShot(this,shot,{x,y,angle,t}))return;
     if(drawNewShot(this,shot,s,{x,y,angle,t}))return;
     if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(h.id==='lightning_sage'){drawLightningShot(this,shot,s,p);return;}
@@ -801,14 +808,16 @@ export class CombatFX{
     ctx.restore();
   }
   drawFinisherLocks(s){
-    for(const f of s.finishers){const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);if(!target)continue;const p=pathPoint(target.progress),row=f.kind==='royal'?0:4;
+    for(const f of s.finishers){const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);if(!target)continue;const p=pathPoint(target.progress);
+      if(f.kind==='royal'){drawRoyalLock(this,p);continue;}
       if(f.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,p.x-(target.boss?38:15),p.y-(target.boss?27:18),target.boss?88:56,target.boss?104:68,0,.78);continue;}
-      this.atlasStamp('finishers',row,4,3,p.x,p.y-(target.boss?35:16),target.boss?148:84,undefined,0,.88);
+      this.atlasStamp('finishers',4,4,3,p.x,p.y-(target.boss?35:16),target.boss?148:84,undefined,0,.88);
     }
   }
   drawFinishers(s){
     for(const f of s.finishers){const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);if(!target)continue;
-      const to=pathPoint(target.progress),p=1-f.life/f.total,row=f.kind==='royal'?0:4;
+      const to=pathPoint(target.progress),p=1-f.life/f.total;
+      if(f.kind==='royal'){drawRoyalReady(this,f,to,p);continue;}
       if(f.kind==='mirror'){
         // The lock follows its original enemy. Small shards fill from damage,
         // while the timer line conveys a fixed three-second detonation.
@@ -818,11 +827,10 @@ export class CombatFX{
         for(let i=0;i<Math.ceil(fill*3);i++)diamond(ctx,to.x-8+i*8,y+7,2.5,'#ceb2ff');
         continue;
       }
-      const from=f.kind==='royal'?{x:f.origin.x,y:f.origin.y-18}:{x:Math.max(30,to.x-100),y:Math.max(30,to.y-190)},end={x:to.x,y:to.y-(target.boss?35:18)},angle=Math.atan2(end.y-from.y,end.x-from.x);
-      if(p<.58){this.atlasStamp('finishers',row+1,4,3,from.x,from.y,38+p*28,undefined,angle,.35+p*.65);continue;}
+      const from={x:Math.max(30,to.x-100),y:Math.max(30,to.y-190)},end={x:to.x,y:to.y-(target.boss?35:18)},angle=Math.atan2(end.y-from.y,end.x-from.x);
+      if(p<.58){this.atlasStamp('finishers',5,4,3,from.x,from.y,38+p*28,undefined,angle,.35+p*.65);continue;}
       const t=Math.pow(Math.min(1,(p-.58)/.42),.8),x=from.x+(end.x-from.x)*t,y=from.y+(end.y-from.y)*t;
-      if(f.kind==='royal')this.ultimate('cherry_prince',x,y,170,142,angle,.95);
-      else this.atlasStamp('finishers',row+1,4,3,x,y,175,undefined,angle,.95);
+      this.atlasStamp('finishers',5,4,3,x,y,175,undefined,angle,.95);
     }
   }
   // Large attack silhouettes belong below units and HP, with hit stamps above.
@@ -833,7 +841,10 @@ export class CombatFX{
     // Keep a two-attack brightness budget; every real strike still has a shape.
     const flames=this.impacts.filter(e=>e.type==='attackShape'&&e.life>0&&['zeke','ancient_dragon','gold_dragon'].includes(e.hero)).length;
     const fireClarity=Math.min(1,2/Math.max(1,flames));
+    const pilotRings=this.impacts.filter(e=>e.type==='impact'&&e.life>0&&e.radius&&e.hitTargets).length;
+    const ringClarity=Math.min(1,2/Math.max(1,pilotRings));
     for(const e of this.impacts){
+      if(e.type==='impact'&&e.life>0&&e.radius&&e.hitTargets)drawPilotAttackFloor(this,e,1-e.life/e.total,ringClarity);
       if(!GROUND_TYPES.has(e.type)||e.life<=0)continue;
       const t=Math.max(0,1-e.life/e.total);
       if(e.type!=='attackShape'){if(!drawGoldGround(this,e,t))drawNewGround(this,e,t);continue;}
@@ -859,6 +870,7 @@ export class CombatFX{
     const hitKey=e=>`${Math.round(e.x/24)}:${Math.round(e.y/24)}`,hitCounts=new Map();
     for(const e of this.impacts)if(e.type==='impact'&&e.life>dt){const key=hitKey(e);hitCounts.set(key,(hitCounts.get(key)||0)+1);}
     for(const e of this.impacts){e.life-=dt;const t=1-e.life/e.total;if(t>=1||GROUND_TYPES.has(e.type))continue;
+      if(drawPilotImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(drawGoldImpact(this,e,t))continue;
       if(drawNewImpact(this,e,t))continue;
       if(drawCompanionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
@@ -1010,10 +1022,9 @@ export class CombatFX{
       }
       if(e.type==='finisherImpact'||e.type==='finisherFizzle'){
         if(e.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,e.x,e.y-(e.targetBoss?29:18),280+t*70,320+t*50,0,(1-t)*(e.type==='finisherImpact'?.95:.3));if(e.type==='finisherImpact')for(const side of [-1,1])this.stamp('aurora',e.x+side*t*90,e.y-18,88,side<0?Math.PI:0,(1-t)*.85);continue;}
-        const row=e.kind==='royal'?0:4,hit=e.type==='finisherImpact',angle=Math.atan2(e.y-(e.origin?.y||e.y),e.x-(e.origin?.x||e.x));
-        if(hit&&e.kind==='royal')this.ultimate('cherry_prince',e.x,e.y-(e.targetBoss?35:18),210+t*44,180+t*35,angle,(1-t)*.94);
-        else if(hit&&t<.75)this.atlasStamp('finishers',row+2,4,3,e.x,e.y-(e.targetBoss?35:18),220+t*35,undefined,angle,(1-t)*(this.reduced?.65:.95));
-        this.atlasStamp('finishers',row+3,4,3,e.x,e.y-(e.targetBoss?35:18),190+t*65,undefined,0,(1-t)*.55);continue;
+        const hit=e.type==='finisherImpact',angle=Math.atan2(e.y-(e.origin?.y||e.y),e.x-(e.origin?.x||e.x));
+        if(hit&&t<.75)this.atlasStamp('finishers',6,4,3,e.x,e.y-(e.targetBoss?35:18),220+t*35,undefined,angle,(1-t)*(this.reduced?.65:.95));
+        this.atlasStamp('finishers',7,4,3,e.x,e.y-(e.targetBoss?35:18),190+t*65,undefined,0,(1-t)*.55);continue;
       }
       if(e.type==='transform'){this.atlasStamp('finishers',8+Math.min(3,Math.floor(t*4)),4,3,e.x,e.y-8,100,undefined,0,(1-t)*.85);continue;}
       if(e.type==='bossMagic'){this.atlasStamp('effects-expansion',{storm:7,duel:8,creation:9}[e.pattern],4,3,e.x,e.y-20,112+t*18,undefined,0,(1-t)*.85);continue;}

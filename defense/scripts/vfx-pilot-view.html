@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>별의 정원 · 전투 연출 비교</title>
+<style>
+:root{color-scheme:dark;--bg:#111723;--panel:#1b2332;--edge:#344157;--ink:#f6eee1;--muted:#afbed2;--mint:#95e0d8;--warm:#f4c687;--display:system-ui,sans-serif}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:radial-gradient(ellipse at 50% 0,#243044 0,transparent 570px),var(--bg);color:var(--ink);font:14px/1.5 system-ui,"Malgun Gothic",sans-serif}
+main{max-width:1050px;margin:auto;padding:24px 22px 40px}
+h1,h2,p{margin:0}
+header{display:flex;justify-content:space-between;gap:12px;align-items:end;margin-bottom:14px}
+.eyebrow{color:var(--warm);font-size:11px;font-weight:800;letter-spacing:.12em}
+h1{font-size:clamp(25px,5vw,38px);letter-spacing:-.045em;line-height:1.2}
+.revision{color:var(--muted);font-size:11px;white-space:nowrap;padding-bottom:2px}
+button,select{font:inherit;color:inherit;border:1px solid var(--edge);border-radius:9px;background:#222c3d;min-height:40px;padding:7px 10px}
+button{cursor:pointer}
+button:hover,select:hover{border-color:#76949d}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+button[aria-pressed=true]{border-color:var(--mint);color:var(--mint);background:#20343f}
+button:disabled{opacity:.42;cursor:default}
+.hero-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}
+.hero-list button{display:flex;gap:8px;align-items:center;justify-content:center;white-space:nowrap;font-size:13px;font-weight:800}
+.hero-list img{display:block;width:28px;height:28px;border-radius:7px;object-fit:cover;background:#30394d}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:9px 0 8px}
+.controls label{display:flex;align-items:center;gap:6px;color:var(--muted);min-width:0}
+.controls select{min-width:0;color:var(--ink)}
+.scene-select{flex:1 1 245px}
+.scene-select select{flex:1;width:100%}
+#scene-details{min-height:21px;color:var(--muted);margin-bottom:8px;font-size:12px}
+.arenas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pane{min-width:0;border:1px solid var(--edge);border-radius:14px;background:var(--panel);overflow:hidden}
+.pane.after{border-color:#598381}
+.pane h2{font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:6px 10px;color:var(--muted);gap:8px}
+.pane h2 span{color:var(--ink);font-weight:800}
+.pane.after h2 span{color:var(--mint)}
+.pane h2 small{font-size:10px;font-weight:500}
+.battle-stage{position:relative;isolation:isolate;aspect-ratio:12/13;background:#263b48}
+.battle-stage canvas{display:block;width:100%;height:100%}
+.battle-stage .guide{position:absolute;inset:0;z-index:3;pointer-events:none}
+.transport{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:9px}
+#play{min-width:68px;background:#274a4c;color:#e8fff5;border-color:#619992;font-weight:800}
+#restart{min-width:80px}
+.scrub{display:flex;align-items:center;gap:8px;flex:1 1 190px;min-width:0}
+.scrub input{flex:1;min-width:0;accent-color:var(--mint)}
+output{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted);font-size:12px}
+.marks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.marks button{min-height:33px;font-size:12px;padding:4px 9px}
+.marks button[data-current=true]{border-color:var(--warm);color:var(--warm)}
+.extras{margin:12px 0;color:var(--muted);border-block:1px solid var(--edge)}
+.extras summary{cursor:pointer;padding:8px 0;font-weight:700}
+.toggle{display:inline-flex;align-items:center;gap:5px;color:var(--muted);padding:6px 3px;min-height:36px}
+.toggle input{accent-color:var(--mint);width:16px;height:16px}
+#metrics{margin-top:8px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+#status{padding:14px 0;color:var(--warm)}
+.mobile-views{display:none}
+@media(max-width:650px){
+  main{padding:12px 10px 22px}
+  header{margin-bottom:9px}
+  .eyebrow{font-size:10px}
+  .hero-list{gap:5px;margin-bottom:6px}
+  .hero-list button{gap:4px;padding-inline:4px;font-size:12px}
+  .hero-list img{width:23px;height:23px}
+  .controls{gap:5px;margin:6px 0}
+  .scene-select{flex-basis:100%}
+  .mobile-views{display:flex;gap:4px;margin-left:auto}
+  .mobile-views button{font-size:12px;padding:5px 8px}
+  #scene-details{margin-bottom:5px}
+  .arenas{position:relative;grid-template-columns:1fr;gap:5px}
+  .arenas[data-view=after] .before,.arenas[data-view=before] .after{position:absolute;inset:0;visibility:hidden;pointer-events:none}
+  .arenas[data-view=both]{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pane h2{padding:4px 8px;font-size:12px}
+  .arenas[data-view=both] h2 small{display:none}
+  .transport{gap:5px}
+}
+</style>
+<style>/*__CUTIN__*/</style>
+</head>
+<body>
+<main>
+  <header><div><p class="eyebrow">별의 정원 · 첫 제작 묶음</p><h1>전투 연출 비교</h1></div><span id="revision" class="revision"></span></header>
+  <p id="status" role="status">전투 장면을 준비하는 중…</p>
+  <div id="viewer" hidden>
+    <nav id="heroes" class="hero-list" aria-label="동료"></nav>
+    <div class="controls">
+      <label class="scene-select">장면 <select id="scene" aria-label="장면"></select></label>
+      <label><span>정원</span><select id="theme" aria-label="정원"><option value="night">일반</option><option value="bright">Bright</option></select></label>
+      <div class="mobile-views" role="group" aria-label="비교 화면">
+        <button type="button" data-view="before" aria-pressed="false">기존</button>
+        <button type="button" data-view="after" aria-pressed="true">개선</button>
+        <button type="button" data-view="both" aria-pressed="false">나란히</button>
+      </div>
+    </div>
+    <p id="scene-details"></p>
+    <section id="arenas" class="arenas" data-view="after" aria-label="전투 비교">
+      <article class="pane before"><h2><span>기존</span><small>기준 연출</small></h2><div class="battle-stage"><canvas aria-label="기존 전투"></canvas><canvas class="guide" width="720" height="780" aria-hidden="true" hidden></canvas></div></article>
+      <article class="pane after"><h2><span>개선</span><small>첫 제작 묶음</small></h2><div class="battle-stage"><canvas aria-label="개선 전투"></canvas><canvas class="guide" width="720" height="780" aria-hidden="true" hidden></canvas></div></article>
+    </section>
+    <div class="transport" aria-label="재생 제어">
+      <button type="button" id="play">재생</button>
+      <button type="button" id="restart">처음부터</button>
+      <button type="button" id="prev" aria-label="이전 프레임">−1</button>
+      <button type="button" id="next" aria-label="다음 프레임">+1</button>
+      <label class="scrub"><input type="range" id="seek" min="0" max="0" value="0" step="1" aria-label="재생 위치"><output id="time" for="seek">0.00초</output></label>
+    </div>
+    <div id="marks" class="marks" aria-label="주요 순간"></div>
+    <p id="metrics"></p>
+    <details class="extras" id="options">
+      <summary>비교 설정</summary>
+      <div class="controls">
+        <label>전투 배속 <select id="speed"><option value=".5">0.5배</option><option value="1" selected>1배</option><option value="2">2배</option></select></label>
+        <label>효과음 <select id="sound"><option value="off">끔</option><option value="before">기존</option><option value="after">개선</option></select></label>
+        <label class="toggle"><input type="checkbox" id="cutin">컷인</label>
+        <label class="toggle"><input type="checkbox" id="reduced">연출 줄이기</label>
+        <label class="toggle"><input type="checkbox" id="guide">판정 안내</label>
+      </div>
+    </details>
+  </div>
+</main>
+<script>/*__DATA__*/</script>
+<script>/*__VIEW__*/</script>
+</body>
+</html>

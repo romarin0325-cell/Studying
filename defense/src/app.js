@@ -14,6 +14,7 @@ import * as E from './combat/engine.js';
 import {portraitFrame} from './portrait-layout.js';
 import {Art,Renderer} from './combat/render.js';
 import {Sound} from './combat/audio.js';
+import {isPilotSkill} from './combat/pilot-vfx.js';
 import {icon} from './icons.js';
 import {currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
@@ -478,6 +479,7 @@ function cutIn(e){
   const ur=h.hidden||h.rarity==='UR',reduced=p().settings.reduced;
   wrap.querySelector('.cutin')?.remove();clearTimeout(cutinTimer);
   const el=document.createElement('div');el.className='cutin';el.dataset.rarity=ur?'UR':h.rarity;el.dataset.reduced=String(reduced);el.style.setProperty('--c',h.color);el.setAttribute('aria-hidden','true');
+  if(isPilotSkill(e))el.dataset.layout='footer';
   el.innerHTML=`<div class="cutin-band"><span class="cutin-lines"></span><span class="cutin-art">${image(e.hero,true)}</span><span class="cutin-text"><small>${ur?'ULTIMATE':'필살기'} · ${h.name}</small><b>${e.name||h.skill.name}</b></span></div>`;
   wrap.appendChild(el);cutinTimer=setTimeout(()=>el.remove(),reduced?700:ur?1600:1100);
   if(ur&&!reduced)slowmo=.5;

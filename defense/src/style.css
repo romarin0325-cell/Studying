@@ -886,6 +886,20 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 @keyframes cutin-lines{to{background-position:-60px 0}}
 @keyframes cutin-sheen{from{background-position:120% 0}to{background-position:-60% 0}}
 @keyframes cutin-fade{0%,100%{opacity:0}20%,75%{opacity:1}}
+.cutin[data-layout=footer]{--cutin-ms:1100ms}
+.cutin[data-layout=footer][data-rarity=UR]{--cutin-ms:1600ms}
+.cutin[data-layout=footer][data-reduced=true]{--cutin-ms:700ms}
+.cutin[data-layout=footer] .cutin-band{
+  inset:auto 9% 1.4%;height:7%;transform:none;border:1px solid var(--c);border-radius:9px;
+  background:linear-gradient(105deg,color-mix(in srgb,var(--c) 23%,#142030),#142030 80%);
+  box-shadow:0 1px 8px #09142080;animation:cutin-footer var(--cutin-ms) ease both;
+}
+.cutin[data-layout=footer] .cutin-band::after,.cutin[data-layout=footer] .cutin-lines{display:none}
+.cutin[data-layout=footer] .cutin-art{left:5%;height:118%;bottom:-8%;transform:none;animation:none}
+.cutin[data-layout=footer] .cutin-text{left:19%;right:3%;transform:translateY(-50%);animation:none}
+.cutin[data-layout=footer] .cutin-text small{display:none}
+.cutin[data-layout=footer] .cutin-text b{font-size:clamp(11px,3.45vw,17px);font-weight:800}
+@keyframes cutin-footer{0%,100%{opacity:0}8%,79%{opacity:1}}
 .aura-chips{position:absolute;top:8px;right:8px;z-index:3;display:flex;flex-direction:row-reverse;gap:6px;pointer-events:none}
 .aura-chip{position:relative;width:36px;height:36px;border-radius:50%;padding:3px;background:conic-gradient(var(--c) calc(var(--p)*360deg),rgba(20,26,60,.85) 0);box-shadow:0 0 10px color-mix(in srgb,var(--c) 55%,transparent);animation:chip-in .3s cubic-bezier(.3,1.6,.5,1)}
 .aura-chip img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:#121a40;border:1px solid rgba(0,0,0,.4)}

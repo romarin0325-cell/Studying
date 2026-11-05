@@ -734,6 +734,7 @@ function applyHit(s,shot){
   const geometry={...attackGeometry(hero,shot.origin,point),...(sunR?{kind:'splash',radius:sunR*(shot.gift?2:1)}:shot.gift?{radius:hero.radius*2}:{})};
   const area=sunR||['cleave','pulse','beam','cross','splash'].includes(hero.shape)?s.enemies.filter(t=>t.hp>0&&geometryContains(geometry,pathPoint(t.progress))):shot.bell?[e,...around(s,e,CINDERELLA.radius).filter(t=>t.uid!==e.uid)]:[e];
   const divineMark=type==='divine'||type==='battery'||s.buffs.march>0&&shot.proc!==false;
+  const hitTargets=['cherry_prince','red_dragon','siren'].includes(hero.id)?[]:null;
   for(const target of area){
     syncStatuses(s,target);syncSlows(s,target);
     let factor=1;
@@ -745,7 +746,8 @@ function applyHit(s,shot){
     if(shot.gift)factor*=2+(s.upgrades[hero.id]||0)*.2;
     if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
     if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
-    normalHit(s,target,amount*factor,shot,{gift:!!shot.gift},procTargets);
+    const dealt=normalHit(s,target,amount*factor,shot,{gift:!!shot.gift},procTargets);
+    if(hitTargets&&dealt>0)hitTargets.push({uid:target.uid,...pathPoint(target.progress),boss:!!target.boss,enhanced:factor>1});
     if(divineMark&&target.hp>0)addStatus(s,target,'divine',sourceKey('attack',hero.id,shot.uid),hero.id,1,6);
     // The witch freezes enemies that are already slowed; each foe re-locks after 3s.
     if(type==='permafrost'&&shot.proc!==false&&target.hp>0&&target.slowTime>0&&(target.frostLock||0)-s.time<=1e-9){
@@ -759,7 +761,7 @@ function applyHit(s,shot){
     const from={x:clamp(point.x+dx*k,24,696),y:clamp(point.y+dy*k,72,734)};
     s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*(.75+(s.upgrades[hero.id]||0)*.03),origin:from,from,to:point,delay:.06,life:.24,total:.24});
   }
-  event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin,...(shot.hero==='gold_dragon'?{opening:shot.opening}:{}),...(sunR?{sunR}:{})});
+  event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin,...(shot.hero==='gold_dragon'?{opening:shot.opening}:{}),...(sunR?{sunR}:{}),...(hitTargets?{hitTargets,radius:hero.shape==='splash'?geometry.radius:0}:{})});
   if(shot.bell)event(s,'bell',{...point,rank:shot.rank,boss:!!e.boss,radius:CINDERELLA.radius});
   // Time Magician: every third pierce lets each neighbour fire one extra shot.
   if(type==='accelerate'&&shot.proc!==false&&shot.count%3===0){
@@ -869,11 +871,14 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',ULT_BUFF.radiance.power*buffScale(s,'radiance')*spotlightBuffFactor(s,'radiance',u));
   if(unitForm(s,u)==='trauma'){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
   if(u.hero==='cinderella'&&s.buffs.midnight>0&&topCinderella(s)?.uid===u.uid)speedBonus('ult','자정의 기적',CINDERELLA.haste);
-  if(sirenRank)speedBonus('aura','세이렌의 노래',(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank));
+  const sirenSpeed=sirenRank?(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank):0;
+  if(sirenSpeed)speedBonus('aura','세이렌의 노래',sirenSpeed);
+  const sirenAura=sirenSpeed>0&&sirenSpeed===speed_.aura;
   // Placement auras only (dragon, harmony, siren). Ultimate buffs and relics stay single.
   if(u.hero==='behemoth'&&!u.cursed&&!(u.disabled>0)){power_.aura*=2;speed_.aura*=2;if(detail)bonuses.push('오라 2배');}
   if(s.oathMods?.aura){power_.aura*=s.oathMods.aura;speed_.aura*=s.oathMods.aura;}
-  if(s.buffs.haste>0)speedBonus('ult','가속',ULT_BUFF.haste.speed*buffScale(s,'haste')*spotlightBuffFactor(s,'haste',u));
+  const hasteSpeed=s.buffs.haste>0?ULT_BUFF.haste.speed*buffScale(s,'haste')*spotlightBuffFactor(s,'haste',u):0;
+  if(hasteSpeed)speedBonus('ult','가속',hasteSpeed);
   if(s.buffs.march>0)speedBonus('ult','은빛 행진',ULT_BUFF.march.speed*buffScale(s,'march')*spotlightBuffFactor(s,'march',u));
   if(s.buffs.festive>0)speedBonus('ult','성야의 선물',ULT_BUFF.festive.speed*buffScale(s,'festive')*spotlightBuffFactor(s,'festive',u));
   const tempo=has(s,'tempo_bell')?Math.min(RV.tempo_bell.cap,RV.tempo_bell.perWave*(s.wave-1)*relicScaleIn(s,'tempo_bell')):0;
@@ -886,7 +891,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   const multiplier=(1+power_.aura)*(1+power_.ult)*(1+power_.relic),speed=(1+speed_.other)*(1+speed_.aura)*(1+speed_.ult);
   const cooldown=h.interval*zoneCadence(u.hero)/speed;
   if(detail){const crit=unitCrit(s,u,index);if(crit)bonuses.push(`치명타 ${pctText(crit.chance)} · 피해 ${pctText(crit.damage)}`);}
-  return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,range:h.range,radius:h.radius*(trait.zoneRadiusMultiplier||1),chainRatio:trait.chainRatio,extraChain:trait.extraChain,bonuses};
+  return {damage:power(s,u)*multiplier,interval:cooldown+ATTACK_WINDUP,cooldown,range:h.range,radius:h.radius*(trait.zoneRadiusMultiplier||1),chainRatio:trait.chainRatio,extraChain:trait.extraChain,bonuses,sirenAura,sirenHaste:hasteSpeed>0&&hasteSpeed===speed_.ult};
 }
 
 export function demonDebuffTypes(s,e){
@@ -1014,9 +1019,11 @@ export function cast(s,id){
   else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,SNOW_RABBIT.freeze*control*scale);addSlow(s,e,source,SNOW_RABBIT.skillSlow*scale,SNOW_RABBIT.seconds);}}
   else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.controlTime>0?12:4),id);addSlow(s,e,source,.5,4);}}
   else if(type==='dragon'){
-    // Dragon Breath lands on the densest pack (radius 180) instead of the whole field.
-    const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=180);
+    // Use the same centre and radius for the damage query and its visual receipt.
+    const radius=180;
+    const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=radius);
     const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
+    if(centre)look={blast:{...pathPoint(centre.progress),radius},source:u.uid};
     visualTargets=centre?near(centre):[];for(const e of visualTargets){damage(s,e,base*14,id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
   }
   else if(type==='inferno'){strike(7*(coreCrisis(s)?2:1));for(const e of targets)addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
@@ -1566,7 +1573,7 @@ export function step(s,dt){
       // Thousand Mirrors has no ceiling; only checkpoints from before the change keep one.
       const echoDamage=f.kind==='mirror'?(f.cap!==undefined?Math.min(f.cap,f.stored*(f.ratio??.45)):f.stored*(f.ratio??.45)):0,before=s.stats.damage;
       const dealt=f.kind==='echo'?damage(s,target,f.damage,f.hero,{flat:true}):damage(s,target,f.damage*factor+echoDamage,f.hero,{recordMirror:f.kind!=='mirror',crit:f.crit});
-      event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank,damage:s.stats.damage-before,echoDamage});
+      event(s,'finisherImpact',{hero:f.hero,kind:f.kind,target:f.target,targetBoss:!!target.boss,...f.to,origin:f.origin,rank:f.rank,damage:s.stats.damage-before,echoDamage,...(f.kind==='royal'?{enhanced:factor>1}:{})});
       if(dealt>0&&target.hp>0&&has(s,'twin')&&(f.kind==='royal'||f.kind==='starfall'||f.kind==='mirror'))twinEchoes.push({uid:s.nextId++,source:f.source,hero:f.hero,kind:'echo',target:target.uid,origin:f.origin,to:pathPoint(target.progress),damage:dealt*RV.twin.echo*relicScaleIn(s,'twin'),rank:f.rank,life:1.5,total:1.5});
     }
   }
