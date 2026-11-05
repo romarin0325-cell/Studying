@@ -1,0 +1,31 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>별빛 정원 · UR 연출 비교</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#e8e4f2;background:#15151e;font:15px/1.65 system-ui,sans-serif}main{max-width:1180px;margin:auto;padding:24px 16px 80px}
+h1{font-size:24px;margin:0 0 6px;letter-spacing:-.6px}h2{font-size:19px;margin:22px 0 6px}.muted{color:#a9a3bb}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}select,button{font:inherit;color:#f1edf9;background:#262435;border:1px solid #47425e;border-radius:8px;padding:6px 10px}button{cursor:pointer}label{display:flex;gap:6px;align-items:center}label[hidden]{display:none}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,520px));gap:14px;justify-content:center}.stage figure{margin:0}.stage figcaption{font-weight:700;margin-bottom:4px}
+canvas{width:100%;aspect-ratio:720/780;display:block;border-radius:10px;background:#000}
+body.phone .stage{grid-template-columns:repeat(2,368px)}
+.timeline{display:flex;gap:8px;align-items:center;justify-content:center;margin:10px 0;flex-wrap:wrap}.timeline input{width:min(520px,60vw)}
+#role{color:#d9c8ff;margin:0}#reason{margin:4px 0 0;max-width:900px}#stop{color:#9fd8f4;margin:0;font-size:13px}
+.table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:1000px}th,td{border-top:1px solid #34304a;padding:10px 6px;vertical-align:top;text-align:left}th{width:220px}th p{font-weight:400;color:#bdb6d2;font-size:13px}
+.strip{display:flex;gap:4px}.strip figure{margin:0;flex:1}.strip img{width:100%;border-radius:6px;display:block}.strip figcaption{font-size:12px;color:#a9a3bb;text-align:center}
+details{margin-top:24px;color:#c9c3da}
+@media (max-width:760px){.stage{grid-template-columns:1fr}}
+</style><main><h1>별빛 정원 · UR 연출 1차 비교</h1>
+<p class="muted">체리프린스·루나·혹한의마녀·하모니어스 필살기와 일반 공격 타격감을, 같은 엔진 이벤트로 main 렌더러(왼쪽)와 이번 렌더러(오른쪽)에 동시에 재생한다. "휴대폰 크기"는 390×844 화면에서 전장이 그려지는 폭(약 368px)으로 줄여 보여 준다.</p>
+<section id="player"><div class="controls"><button id="previous" aria-label="이전">←</button><select id="hero" aria-label="장면"></select><button id="next" aria-label="다음">→</button>
+<select id="theme" aria-label="전장"><option value="night">밤 정원</option><option value="bright">Bright 정원</option><option value="dawn">새벽(2부)</option></select>
+<select id="speed" aria-label="게임 배속"><option value="1">게임 1배속</option><option value="2">게임 2배속</option></select>
+<select id="rate" aria-label="보기 속도"><option value="1">보기 1배</option><option value="0.5">보기 0.5배</option><option value="0.25">보기 0.25배</option></select>
+<label><input type="checkbox" id="cutin" checked>컷인 띠·UR 슬로</label><label><input type="checkbox" id="hold" checked>타격 보류</label><label><input type="checkbox" id="hitstop" checked>히트스톱</label>
+<label><input type="checkbox" id="kills" checked>처치 포함</label><label><input type="checkbox" id="empowered">강화(48배)</label><label><input type="checkbox" id="spotlight">스포트라이트 유물</label><label><input type="checkbox" id="moving" checked>적 이동</label>
+<label><input type="checkbox" id="reduced">연출 줄이기</label><label><input type="checkbox" id="phone">휴대폰 크기</label></div>
+<h2 id="hero-name"></h2><p id="role"></p><p id="reason"></p><p id="stop"></p>
+<div class="stage"><figure><figcaption>기존 · main 렌더러</figcaption><canvas id="before" aria-label="변경 전 전장"></canvas></figure><figure><figcaption>적용 후 · 이번 렌더러</figcaption><canvas id="after" aria-label="변경 후 전장"></canvas></figure></div>
+<div class="timeline"><button id="play">일시정지</button><button id="restart">처음부터</button><input id="seek" type="range" min="0" max="4" step="0.0166667" value="0" aria-label="재생 시각"><output id="clock">0.00초</output></div>
+</section>
+<h2>장면 비교표</h2><p id="loading">실제 렌더러로 비교표를 만드는 중…</p><p class="muted">왼쪽이 기존, 오른쪽이 적용 후. 밤 정원·컷인 띠·게임 1배속·보류와 히트스톱 켬. 이름을 누르면 위에서 재생한다.</p>
+<div class="table-scroll"><table><thead><tr><th>장면 · 의도</th><th>기존</th><th>적용 후</th></tr></thead><tbody id="rows"></tbody></table></div>
+<details><summary>비교 조건과 한계</summary><p>시드 261106, 치명타 없음. 필살기 장면은 시전 시각을 0초로 두고, 컷인 띠는 게임의 DOM 띠를 같은 위치·투명도로 흉내 낸다(그림·글자는 단순화). 두 열은 각자 같은 엔진 상태로 시작하며, 오른쪽만 히트스톱으로 시뮬레이션이 잠깐 멈춘다. 확인하지 않은 것: 실제 기기 FPS·발열, 소리, 컷인의 캐릭터 그림.</p></details>
+</main><script>/*__DATA__*/</script><script type="module">/*__SCRIPT__*/</script></html>

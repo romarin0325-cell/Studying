@@ -1,0 +1,14 @@
+Use your built-in image generation tool to create ONE image, then save that image file as kit1.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create a MONOCHROME game VFX element sheet for an existing mobile fantasy tower-defense game. Reference image 1 (style-ref.png) shows the game's established effect language: luminous translucent glass-crystal light with bright hot cores, crisp readable silhouettes, fine facets and a few small sparkles, glowing on a PURE BLACK background. Match that finish and level of detail exactly, BUT paint everything in pure white, silver and gray light only: absolutely no hue or colour (no blue, pink, violet or gold). These are luminance maps: the game recolours them at runtime with each hero's palette, so the brightness alone must carry all the form: a white-hot core, a light-gray body with crisp facet highlights, and a soft dark-gray glow that fades into pure black. Do NOT paint opaque solid objects, flat stickers, cel shading or black ink outlines.
+
+Layout: EXACTLY 3 columns x 2 rows of equal square cells on a 3:2 canvas. Pure black (#000000) background everywhere. Each element centred in its cell with at least 10% black margin; nothing crosses a cell border. No grid lines, frames, labels, letters, numbers, faces, people or UI.
+
+Top row:
+1. "blade flash": ONE long, very thin straight streak of light running diagonally from the lower-left corner area to the upper-right corner area of the cell, like a single katana flash: needle-sharp tapered ends, a razor-thin white-hot core line, a narrow soft glow, and two or three faint hair-thin parallel speed lines beside it. About 90% of the cell diagonal. Perfectly straight, not curved.
+2. "crescent cut": ONE thin crescent slash arc opening toward the lower right, tapering to needle-sharp points at both ends, a white-hot outer edge, a faint inner glow and two tiny glints. About 75% of the cell.
+3. "energy ring": ONE thin circular ring seen exactly from above (a circle, not an ellipse), drawn like a quick brush stroke of light with slightly uneven thickness, three or four small bright nodes on it and a faint outer haze; the middle is completely empty black. About 85% of the cell.
+Bottom row:
+4. "mist burst": soft translucent wisps of mist curling outward from the centre in a loose ring, layered veils with a few spiral curls at their ends, brightest along the outer curls, the centre mostly dark. About 80% of the cell.
+5. "crystal shard": ONE single elongated faceted crystal shard (a long sharp diamond) pointing to the upper right, with crisp facet planes, bright edge highlights and a white-hot tip glint. About 60% of the cell.
+6. "impact flare": a bright point of light with a crisp four-point star cross, eight thinner rays of different lengths and a soft round halo, like the instant a blade strikes. About 80% of the cell.

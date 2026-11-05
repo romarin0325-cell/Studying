@@ -50,10 +50,10 @@
     }
   },
   "totals": {
-    "sourceBytes": 31736757,
-    "deployableSourceBytes": 29912483,
-    "outputBytes": 16861440,
-    "optimizedFiles": 173,
+    "sourceBytes": 32608627,
+    "deployableSourceBytes": 30784353,
+    "outputBytes": 17217066,
+    "optimizedFiles": 175,
     "derivedFiles": 162,
     "derivedOutputBytes": 3894814
   },
@@ -2828,6 +2828,68 @@
         "metadata": {
           "width": 768,
           "height": 256,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ur-kit",
+      "source": "./assets/merge/ur-kit.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ur-kit; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 202530,
+        "sha256": "d76b194810f8692d3efb4305dd44927dd5e4e40e9d1854c232f7abcab5a257dc",
+        "metadata": {
+          "width": 1024,
+          "height": 768,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ur-kit.webp",
+        "bytes": 153414,
+        "sha256": "19ff414c2080fe13f9bfca3d4c42db7a9f792fd6905ccc045d024dd730953e72",
+        "metadata": {
+          "width": 1024,
+          "height": 768,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ur-sweets",
+      "source": "./assets/merge/ur-sweets.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ur-sweets; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 669340,
+        "sha256": "33b666514a79a2b5f05fae39ee408455548e07c199b87bbbf084cbf5937d221d",
+        "metadata": {
+          "width": 1024,
+          "height": 768,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ur-sweets.webp",
+        "bytes": 202212,
+        "sha256": "c2998b9e9dbef65b45cfa126cbe4ae49f4ecd0e59870051909c6ef4ea2889cdf",
+        "metadata": {
+          "width": 1024,
+          "height": 768,
           "hasAlpha": true,
           "codec": "webp"
         }

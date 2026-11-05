@@ -1544,7 +1544,7 @@ function frame(time){
   const dt=lastFrame?Math.min(.1,(time-lastFrame)/1000):0;lastFrame=time;
   if(run&&screen==='battle'&&!document.hidden){
     if(!paused&&!modal){
-      accumulator+=dt*speed*(slowmo>0?.3:1);slowmo=Math.max(0,slowmo-dt);let ticks=0;
+      if(renderer.hitstop>0)renderer.hitstop=Math.max(0,renderer.hitstop-dt);else accumulator+=dt*speed*(slowmo>0?.3:1);slowmo=Math.max(0,slowmo-dt);let ticks=0;
       while(accumulator>=.05&&ticks++<5){const before=run.phase;E.step(run,.05);performanceStats.steps++;if(before!=='reward'&&run.phase==='reward')autoIn=-.5;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);autoIn=0;}accumulator-=.05;}
       if(ticks)saves.mark();uiIn+=dt;
       const batch=run.events.splice(0);requestTrack?.observe(run,batch);for(const e of batch){renderer.event(e);sound.event(e);if(e.type==='skill')cutIn(e);}

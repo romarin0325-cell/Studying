@@ -1,0 +1,156 @@
+{
+ "nodeModules": "C:/Users/romar/git/Studying/node_modules",
+ "out": "defense/assets/merge/ur-kit.webp",
+ "cell": 256,
+ "columns": 4,
+ "rows": 3,
+ "mode": "luma",
+ "cells": [
+  {
+   "name": "blade",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-a.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "crescent",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    0
+   ]
+  },
+  {
+   "name": "ring",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    0
+   ]
+  },
+  {
+   "name": "mist",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    1
+   ]
+  },
+  {
+   "name": "shard",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    1
+   ]
+  },
+  {
+   "name": "flare",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    1
+   ]
+  },
+  {
+   "name": "petal",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-b.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "spikes",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    0
+   ],
+   "anchor": "bottom"
+  },
+  {
+   "name": "spike",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    0
+   ],
+   "anchor": "bottom"
+  },
+  {
+   "name": "moon",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    1
+   ]
+  },
+  {
+   "name": "rime",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    1
+   ]
+  },
+  {
+   "name": "shatter",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-b.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    1
+   ]
+  }
+ ]
+}

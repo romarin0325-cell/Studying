@@ -1,0 +1,14 @@
+Use your built-in image generation tool to create ONE image with a TRANSPARENT background (set the tool's transparent background option), then save that image file as d2.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create a game VFX sprite sheet of desserts for an existing mobile fantasy tower-defense game. They belong to Harmonious, a guardian goddess of sweet harmony (reference image 2, character.png: mint-and-yellow twin tails, strawberry ornaments, a pink-and-white strawberry dress, cotton candy, a mallet wand and gold dust); use her for palette and motif ONLY and never draw her, faces or people. Her ultimate "Dessert Ensemble" sends a different magical dessert to every ally. Reference image 1 (style-ref.png) shows her established effect art: glossy painted sweets (a gold bell, strawberries, pink bows, mint ribbons, musical notes) glowing with bright rim light and small gold sparkles. Match that finish exactly: glossy, luminous pastel desserts with bright highlights, a soft magical glow along their edges and a few tiny gold sparkles, crisp readable silhouettes even at small size. Keep every dessert bright and pastel: pink, cream, white, strawberry red, mint and lemon yellow with gold accents. No plates under single desserts, no tables, no text.
+
+Layout: EXACTLY 3 columns x 2 rows of equal square cells on a 3:2 canvas. TRANSPARENT background everywhere: set the image tool's transparent background option so the PNG has a real alpha channel (no black, white or checkerboard ground). Soft glow and sparkles may be semi-transparent. Each item centred in its cell, seen from a slight three-quarter front view, with at least 12% black margin; nothing crosses a cell border. No grid lines, frames, labels, letters, numbers or UI. All items share the same light direction (upper left) and the same painting style.
+
+Top row:
+1. "cake stand": an elegant three-tier dessert stand made of glowing pink sugar-glass plates with gold filigree rims and a slender gold central pole topped by a small pink bow; the three plates are EMPTY (nothing on them); slight front view; about 85% of the cell height.
+2. a single glossy strawberry with a small green leaf crown, about 45% of the cell.
+3. a pink ribbon bow with gold edges and two short tails, about 60% of the cell.
+Bottom row:
+4. a fluffy pastel pink-and-mint cotton candy puff on a short stick, about 65% of the cell.
+5. a single pink macaron, about 45% of the cell.
+6. a burst of gold dust and tiny pastel sugar stars spraying outward from the centre, about 80% of the cell.

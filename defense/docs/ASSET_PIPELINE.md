@@ -237,6 +237,7 @@ Sol Cast V2를 새로 만들거나 수정하기 전에 [현행 SD 캐스트 기�
 - 명령: `node defense/scripts/art/fx-atlas.mjs <공격> <필살기 문양> <바닥 장식> <out.webp>`. 밝기로 알파를 만든다.
 - 어두운 바위 같은 부분은 반투명해진다. 밝은 바탕에서도 확인한다.
 - 여러 칸을 한 장으로 받는 GPT 이미지 시트(2026-10-24 15차): 위의 화풍 기준을 참조 1, 해당 동료 SD 줄을 참조 2로 주고 4×2(또는 3×2) 칸을 검은 배경에 그리게 한다. GPT는 격자를 정확히 지키지 않으므로 `node defense/scripts/art/pack-fx-sheet.mjs <node_modules> <원본.png> <out.webp> <기록.json> [열 행]`으로 문양 사이 가장 어두운 틈을 따라 자르고, 칸마다 다시 가운데 맞춘 뒤 밝기로 알파를 만든다(256px 칸, 14px 투명 여백). 원본·프롬프트·자르기 기록은 `docs/art/companion-fx-20261024/`에 둔다.
+- 2026-11-06(UR 1차): 여러 동료가 함께 쓰는 빛 조각은 흑백 밝기 그림 한 장(`ur-kit`)으로 만들고 실행 중 색 지도로 물들인다. 단단한 사물(디저트 등)은 이미지 도구의 투명 배경(`transparent_background`)으로 받아 원본 알파를 쓴다. 검은 배경을 지우면 밝은 바탕에서 어두운 테두리가 남는다. 후보 여러 장에서 칸을 골라 묶는 도구: `node defense/scripts/art/pack-pick-sheet.mjs <spec.json> <report.json>`. 기록: `docs/art/ur-vfx-20261106/`.
 - 필살기 문양은 동료마다 하나씩 따로 둔다. 다른 동료의 문양이나 공용 시전 빛만으로 필살기를 표현하지 않는다. `node defense/scripts/review-ult-sheet.mjs`가 쓰는 공유 문양 표가 비어 있어야 한다.
 
 ## 7. 같은 구도의 낮 배경 (맑은 정원)
