@@ -6,7 +6,7 @@ import {COMPANION_VISUALS} from '../../../../src/combat/companion-vfx.js';
 import {RAGNAROK_LIFE} from '../../../../src/combat/blade-vfx.js';
 import {drawLightningChain,LIGHTNING_CHAIN_LIFE} from '../../../../src/combat/lightning-vfx.js';
 import {RUNTIME_ASSET_PATHS} from '../../../../src/asset-policy.js';
-import {UR_SPECS,urSpec,urReady,formChange} from '../../../../src/combat/ur-vfx.js';
+import {UR_SPECS,urSpec,urReady,formChange} from './ur-vfx.js';
 
 export class Art {
   constructor(){this.images={};this.failed=[];this.ready=this.load();}

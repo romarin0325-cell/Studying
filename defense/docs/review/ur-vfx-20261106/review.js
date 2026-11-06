@@ -15,7 +15,7 @@ function runnersFor(c,targets=canvases){
   return targets.map((canvas,i)=>{
     const before=i===0,renderer=new (before?BeforeRenderer:Renderer)(canvas,makeArt(c.theme));
     const fixture=reviewScene(entry,{kills:c.kills,empowered:c.empowered,spotlight:c.spotlight,moving:c.moving,freed:c.freed,repeat:c.repeat,twin:c.twin,marks:c.marks,rich:c.rich,chapter:c.theme==='dawn'?45:0});
-    renderer.reduced=c.reduced;renderer.shake=0;if(!before){renderer.hold=c.hold;renderer.fx.palette=c.palette;}
+    renderer.reduced=c.reduced;renderer.shake=0;renderer.hold=c.hold;renderer.fx.palette=c.palette;
     const item={renderer,fixture,frames:0,entry,before,slowmo:0,stopped:0};
     seeded(1,()=>renderer.draw(fixture.state,0));
     const initial=fixture.cast();
@@ -25,14 +25,14 @@ function runnersFor(c,targets=canvases){
     return item;
   });
 }
-// One real-time frame: the simulation advances by speed x slow motion, unless the new renderer asked for a hitstop.
+// One real-time frame: main and this branch both pause simulation during renderer hitstop.
 function advance(items,dt,c=config){
   for(const item of items){
     const r=item.renderer;let sim=dt*c.speed*(item.slowmo>0?.3:1);item.slowmo=Math.max(0,item.slowmo-dt);
-    if(!item.before&&c.hitstop&&r.hitstop>0){r.hitstop=Math.max(0,r.hitstop-dt);sim=0;item.stopped+=dt;}else if(!item.before)r.hitstop=0;
+    if(c.hitstop&&r.hitstop>0){r.hitstop=Math.max(0,r.hitstop-dt);sim=0;item.stopped+=dt;}else if(!c.hitstop)r.hitstop=0;
     const events=sim>0?item.fixture.advance(sim):[];
     seeded(++item.frames,()=>events.forEach(e=>r.event(e)));
-    r.draw(item.fixture.state,dt);
+    seeded(item.frames,()=>r.draw(item.fixture.state,dt));
     if(c.cutin&&item.entry.mode==='skill')cutinBand(item);
   }
 }

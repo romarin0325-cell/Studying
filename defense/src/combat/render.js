@@ -236,7 +236,7 @@ export class Renderer {
     if(u.pose>0){const t=1-u.pose/.3,pulse=Math.sin(t*Math.PI);dx+=Math.cos(aim)*pulse*4;dy+=Math.sin(aim)*pulse*4;angle+=Math.cos(aim)*pulse*.025;squash*=1+pulse*.035;}
     const slam=u.hero==='underdog'&&this.skills.find(skill=>skill.hero===u.hero&&skill.origin?.x===p.x&&skill.origin?.y===p.y&&skill.total-skill.life<.24);
     if(slam&&!this.reduced){const t=(slam.total-slam.life)/.24,pulse=Math.sin(t*Math.PI);dy+=pulse*8;dx+=pulse*4;angle+=pulse*.12;}
-    this.art.hero(ctx,u.hero,p.x+dx,p.y+31+dy+(1-ease)*15,126*(.8+.2*ease)*(pressed?1.05:1),{direction:u.facing||'down',alpha:(charging(s,u)?1:u.disabled>0||u.cursed?.52:1)*(body?.alpha??1),angle,squash,form:body&&'form' in body?body.form:form});
+    this.art.hero(ctx,u.hero,p.x+dx,p.y+31+dy+(1-ease)*15,126*(.8+.2*ease)*(pressed?1.05:1),{direction:body?.direction||u.facing||'down',alpha:(charging(s,u)?1:u.disabled>0||u.cursed?.52:1)*(body?.alpha??1),angle,squash,form:body&&'form' in body?body.form:form});
     if(u.windup>0){star(ctx,p.x+Math.cos(aim)*14,p.y+5+Math.sin(aim)*10,4,HERO[u.hero].color,this.clock*3);}
     const start=p.x-(u.rank-1)*6;
     for(let i=0;i<u.rank;i++)star(ctx,start+i*12,p.y+36,4.8,u.rank>=4?'#fff3c7':'#efd295');

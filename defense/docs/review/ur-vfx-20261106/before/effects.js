@@ -6,7 +6,7 @@ import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from '../..
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from '../../../../src/combat/new-companion-vfx.js';
 import {drawGoldAttack,drawGoldPersistent,goldEvent,drawGoldGround,drawGoldImpact} from '../../../../src/combat/gold-dragon-vfx.js';
 import {drawRagnarok,drawMoonShot,drawMoonCut,MOON_CUT_LIFE} from '../../../../src/combat/blade-vfx.js';
-import {UR_SPECS,urSpec,urReady,contactEffect,drawContact,drawTimeStop} from '../../../../src/combat/ur-vfx.js';
+import {UR_SPECS,urSpec,urReady,contactEffect,drawContact,drawTimeStop} from './ur-vfx.js';
 // Effects drawn under the units (attack circles and ultimate ground marks); draw() only ages them.
 const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround','goldBreathGround']);
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});

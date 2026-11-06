@@ -11,12 +11,13 @@
 //             galaxy, gear, hourglass) and six gray objects with their own alpha (glass slipper, rose, rose petal, thorn vine, coin,
 //             crown), recoloured by the same maps.
 //   ur-kit3   14 pieces (KIT3): ten luminance pieces (butterfly, flame, fire breath, shooting star, hand mirror, glass cracks, sun,
-//             crescent moon, star, bell) and four gray objects (spider lily, envelope, dagger, root).
+//             crescent moon, star, bell) and four gray objects (spider lily, envelope, dagger, root). The envelope cell is unused
+//             since Doom's deal became a coin toss (owner review, 2026-11-07).
 //   ur-sweets Harmonious's painted desserts, cake stand and sugar dust (colour cannot come from a ramp).
 // The engine still resolves damage at its own moment (instantly at the cast, or at the finisher's impact). These sequences say
 // when each target is struck on screen (plan); Renderer holds the cast's numbers, deaths and HP bars until then.
 import {HERO,TRANSFORM_ART} from '../content.js';
-import {cellPoint,cellAt,pathPoint,PATH_LENGTH,unitForm} from './engine.js';
+import {cellPoint,cellAt,pathPoint,PATH_LENGTH,unitForm,attackDirection} from './engine.js';
 
 export const KIT=Object.freeze({blade:0,crescent:1,ring:2,mist:3,shard:4,flare:5,petal:6,spikes:7,spike:8,moon:9,rime:10,shatter:11});
 export const SWEET=Object.freeze({shortcake:0,macarons:1,pudding:2,parfait:3,donut:4,cupcake:5,stand:6,strawberry:7,bow:8,cotton:9,macaron:10,stardust:11});
@@ -892,15 +893,27 @@ const venom={
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Doom · Black Market of the Palace. The engine takes 40 gold and strikes every enemy x7, +1 per training and +1 for every 40 gold
-// kept after paying (up to +5). The deal is the point: coins leave the gold counter for a black envelope in his hand and the seal
-// flares crimson; a fan of shadow daggers opens over him, one for the deal and one more for every 40 gold he kept (the bonus); a
-// dagger stands over every enemy at once, and one crimson X cuts them all together.
-const DOOM_CUT=1.02;
+// kept after paying (up to +5). The deal is the point, told the way a rapier spy would seal it: he flicks up a crown coin (the
+// game's own coin, as in the Queen's fountain), it spins to a stop over his head and one thrust cuts it in two; from the cut a fan
+// of shadow daggers opens, one for the deal and one more for every 40 gold he kept (the bonus); a dagger stands over every enemy
+// at once, and one crimson X cuts them all together. Owner review, 2026-11-07: the black envelope read as a leather wallet, out
+// of place for a rapier spy, so the envelope and the coins from the gold counter are gone.
+const DOOM_SPLIT=.56,DOOM_CUT=1.02;
+// The crown coin cut in two along `cut`: each half slides `apart` px off the cut line and turns by `turn`, opposite ways.
+function halves(fx,x,y,size,cut,apart,turn,alpha){
+  if(!(alpha>.004))return;const ctx=fx.ctx,nx=-Math.sin(cut),ny=Math.cos(cut);
+  for(const s of [-1,1]){ctx.save();ctx.translate(x+nx*apart*s,y+ny*apart*s);ctx.rotate(turn*s+cut);ctx.beginPath();ctx.rect(-size,s<0?-size:0,size*2,size);ctx.clip();ctx.rotate(-cut);kit2(fx,KIT2.coin,'gold',0,0,size,size,0,alpha,'source-over');ctx.restore();}
+}
 // One cut along `angle` (the kit blade line stretched and thickened), centred on (x, y).
 function slash(fx,ramp,x,y,len,angle,thick,alpha){const c=kitCanvas(fx,KIT.blade,ramp);if(!c||!(alpha>.004))return;const w=len/1.27,ctx=fx.ctx;ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation='lighter';ctx.translate(x,y);ctx.rotate(angle);ctx.scale(1,thick);ctx.rotate(Math.PI/4);ctx.drawImage(c,-w/2,-w/2,w,w);ctx.restore();}
 const doom={
   life:()=>2.3,
-  plan(fx,skill){const at=new Map((skill.targets||[]).map(q=>[q.uid,DOOM_CUT+.02]));skill.ur={seed:(skill.uid||1)*9.17,at,blades:1+Math.max(0,Math.min(5,skill.bonus|0))};return at;},
+  plan(fx,skill){
+    const o=skill.origin,at=new Map((skill.targets||[]).map(q=>[q.uid,DOOM_CUT+.02]));
+    // The coin stops over his head, or beside it on the top two rows, where over his head would be under the cut-in band.
+    const P=o.y-112>=262?{x:o.x,y:o.y-112}:{x:o.x+(o.x<360?84:-84),y:Math.max(262,o.y-40)};
+    skill.ur={seed:(skill.uid||1)*9.17,at,P,blades:1+Math.max(0,Math.min(5,skill.bonus|0))};return at;
+  },
   field(fx,skill,age){
     const o=skill.origin,R=fx.reduced,mood=span(age,.1,.4)*(1-span(age,1.5,2.2));
     vignette(fx,o.x,o.y-30,90,600,'#0a0206',R?0:.55*mood);wash(fx,'#1a0208',.25*mood,'source-over');
@@ -908,16 +921,24 @@ const doom={
     const c=age-(DOOM_CUT-.4);if(c>0&&c<1.2)for(const q of skill.targets||[]){const T=fx.point(q.uid,q),k=easeOut(span(c,0,.3)),big=bossOf(fx,q)?1.4:1;kit(fx,KIT.mist,'shadow',T.x,T.y+8,lerp(30,96,k)*big,lerp(12,36,k)*big,0,.85*(1-span(c,.7,1.2)),'source-over');}
   },
   over(fx,skill,age){
-    const u=skill.ur,o=skill.origin,R=fx.reduced,hand={x:o.x+34,y:o.y-12};
-    // The coins leave the gold counter for the envelope in his hand.
-    for(let i=0;i<(R?4:10);i++){const k=span(age,.06+i*.028,.44+i*.028);if(k<=0||k>=1)continue;const fly=easeIn(k),spin=Math.abs(Math.cos(age*10+i));
-      kit2(fx,KIT2.coin,'gold',lerp(HUD_GOLD.x+(hash(u.seed,i)-.5)*70,hand.x,fly),lerp(HUD_GOLD.y,hand.y,fly)-Math.sin(Math.PI*k)*50,22*lerp(.25,1,spin),22,0,1,'source-over');}
-    const env=easeBack(span(age,.05,.25))*(1-span(age,.98,1.15));
-    if(env>0){if(!R)fx.glow('glow','#5a0a1e',hand.x,hand.y,130*env,.55*env);kit3(fx,KIT3.envelope,'shadow',hand.x,hand.y,58*env,undefined,-.12,1,'source-over');
-      const seal=span(age,.58,.7);if(seal>0){if(!u.sealed){u.sealed=true;stun(fx,2,0);}kit(fx,KIT.flare,'blood',hand.x,hand.y+4,90*bell(seal*.7+.3),undefined,.3,1-span(age,.7,1));}}
-    // A fan of shadow daggers over him: one for the deal and one more for every 40 gold he kept.
-    const fan=easeBack(span(age,.62,.8))*(1-span(age,.86,.98));
-    if(fan>0){if(!R)fx.glow('glow','#c01a30',o.x,o.y-110,260*fan,.4*fan);for(let i=0;i<u.blades;i++){const a=(i-(u.blades-1)/2)*.32;kit3(fx,KIT3.dagger,'blade',o.x+Math.sin(a)*96*fan,o.y-50-Math.cos(a)*80*fan,72*fan,undefined,a,1,'source-over');}}
+    const u=skill.ur,o=skill.origin,R=fx.reduced,P=u.P;
+    // He flicks up a crown coin: it spins to a stop at P, glinting each time it turns face-on, and hangs there for a beat.
+    const up=span(age,.04,.44);
+    if(up>0&&age<DOOM_SPLIT){const k=easeOut(up),x=lerp(o.x+8,P.x,k),y=lerp(o.y-16,P.y,k),turn=R?0:age*lerp(30,4,k),face=Math.abs(Math.cos(turn)),s=lerp(20,40,k);
+      if(!R)fx.glow('glow','#ffb030',x,y,s*3,.4*k);kit2(fx,KIT2.coin,'gold',x,y,s*lerp(.16,1,face),s,0,1,'source-over');
+      if(face>.96)glint(fx,x-s*.24,y-s*.24,s*.13,'#fff3c4','#ffb020',.9);}
+    // One rapier thrust cuts it in two: the halves tumble apart, gold scatters and the seal of the deal flares crimson.
+    const cut=age-DOOM_SPLIT;
+    if(cut>=0&&cut<.5){if(!u.sealed){u.sealed=true;stun(fx,2,0);}
+      slash(fx,'blood',P.x,P.y,lerp(50,170,easeOut(span(cut,0,.06))),-.5,lerp(2.2,1.2,span(cut,0,.2)),1-span(cut,.12,.3));
+      halves(fx,P.x,P.y+90*cut*cut,40,-.5,lerp(2,30,easeOut(span(cut,0,.35))),cut*3,1-span(cut,.1,.3));
+      kit(fx,KIT.flare,'gold',P.x,P.y,lerp(56,110,easeOut(span(cut,0,.12))),undefined,.2,1-span(cut,0,.25));
+      kit(fx,KIT.flare,'blood',P.x,P.y,90*bell(span(cut,0,.32)),undefined,.6,.9);
+      if(!R)for(let i=0;i<10;i++){const k=span(cut,0,.45),ang=hash(u.seed,i+20)*6.283,v=30+hash(u.seed,i+40)*50;kit(fx,KIT.shard,'gold',P.x+Math.cos(ang)*v*easeOut(k),P.y+Math.sin(ang)*v*.7*easeOut(k)+30*k*k,9,undefined,ang+k*6,1-k);}}
+    // From the cut a fan of shadow daggers opens: one for the deal and one more for every 40 gold he kept. Six stay inside about
+    // his own column, clear of the faces beside him.
+    const fan=easeBack(span(age,DOOM_SPLIT+.04,DOOM_SPLIT+.22))*(1-span(age,.86,.98)),step=Math.min(.32,1/Math.max(1,u.blades-1));
+    if(fan>0){if(!R)fx.glow('glow','#c01a30',P.x,P.y,240*fan,.4*fan);for(let i=0;i<u.blades;i++){const a=(i-(u.blades-1)/2)*step;kit3(fx,KIT3.dagger,'blade',P.x+Math.sin(a)*96*fan,P.y+66-Math.cos(a)*84*fan,72*fan,undefined,a,1,'source-over');}}
     // A dagger stands over every enemy at once, falls, and one crimson X cuts them all.
     const c=age-DOOM_CUT;
     for(const q of skill.targets||[]){const T=fx.point(q.uid,q),big=bossOf(fx,q)?1.4:1,y=T.y-(big>1?34:20),side=T.x<360?-1:1;
@@ -1020,30 +1041,48 @@ export const DREAM={
 // ---------------------------------------------------------------------------------------------------------------------
 // Red Dragon · Dragon Breath (R). The engine burns the densest pack: every enemy within 180 of the most crowded enemy takes x14 and a
 // strong burn. The area is the point, at an R's weight (about Ash's Armageddon or less): a ring of heat marks the real radius on the
-// floor while she breathes in and an ember swells at her mouth; one jet of fire crosses to the pack; the pack goes up in one burst,
-// the ring flaring at its true edge, a column of flame at the centre and a tongue of fire under each enemy, the centre first.
+// floor while she breathes in; one jet of fire crosses to the pack; the pack goes up in one burst, the ring flaring at its true
+// edge, a column of flame at the centre and a tongue of fire under each enemy, the centre first.
+// Her art is four fixed views (front, back, two profiles) whose mouth never opens, and the first jet left the top of her head
+// (owner review, 2026-11-07). Now she turns to the pack for the cast (body.direction, as the Gold Dragon turns for her breath),
+// the ember and the jet start just past the lips of that view, and a flash at the lips hides that they do not open. Facing away,
+// the breath is drawn under her, so it comes out in front of her and rises past her head, which lights from behind.
 const BREATH_AT=.3,BREATH_HIT=.46;
+// The mouth in each view, from the unit art (512 cell, foot .9375, drawn 126 px with the foot at cellPoint + 31): the front grin,
+// each profile's lips, and the hidden mouth behind her head when she faces away.
+const RED_MOUTH={down:{x:0,y:-21},left:{x:-13,y:-18},right:{x:11,y:-19},up:{x:0,y:-21}};
+// She breathes in (sparks drawn into an ember just past her lips), the lips flash, and one jet of fire runs to the pack. The jet
+// piece is narrow at its left end, so that end is pinned to the lips while the jet grows.
+function redBreath(fx,skill,age){
+  const u=skill.ur,M=u.mouth,C=u.C,ang=u.ang,red=fx.reduced;
+  if(age<BREATH_AT+.1){const k=span(age,.04,BREATH_AT),out=1-span(age,BREATH_AT,BREATH_AT+.1);
+    if(u.under)fx.glow('glow','#ff6a20',M.x,M.y-24,lerp(40,110,k),.5*k*out);
+    if(!u.under)fx.glow('glow','#ff5a18',M.x,M.y,lerp(24,64,k),.35*k*out);
+    kit(fx,KIT.flare,'fire',M.x,M.y,lerp(10,30,easeIn(k)),undefined,age*4,Math.min(1,k*3)*out);
+    if(!red)for(let i=0;i<8;i++){const f=(hash(u.seed,i)+age*2.4)%1,a=hash(u.seed,i+9)*6.283,r=lerp(60,4,f);kit(fx,KIT.shard,'fire',M.x+Math.cos(a)*r,M.y+Math.sin(a)*r*.8,9,undefined,a,bell(f)*k*out);}}
+  if(age>BREATH_AT&&age<BREATH_HIT+.08){const L=dist(M,C)*easeOut(span(age,BREATH_AT,BREATH_HIT)),a=1-span(age,BREATH_HIT,BREATH_HIT+.08),w=Math.max(40,L/.83),mid=w*.43;
+    kit3(fx,KIT3.breath,'fire',M.x+Math.cos(ang)*mid,M.y+Math.sin(ang)*mid,w,Math.min(w,150)*.9,ang,a);
+    kit(fx,KIT.flare,'fire',M.x,M.y,lerp(44,26,span(age,BREATH_AT,BREATH_HIT)),undefined,age*3,a);
+    kit(fx,KIT.flare,'fire',M.x+Math.cos(ang)*L,M.y+Math.sin(ang)*L,100,undefined,0,a);}
+}
 const redDragon={
   life:()=>1.5,
   plan(fx,skill){
-    const o=skill.origin,C=skill.blast||skill.targets?.[0]||o,R=skill.radius||180,dir=C.x>=o.x?1:-1;
+    const o=skill.origin,C=skill.blast||skill.targets?.[0]||o,R=skill.radius||180,face=attackDirection(o,C),m=RED_MOUTH[face];
+    const ang=Math.atan2(C.y-o.y-m.y,C.x-o.x-m.x),mouth={x:o.x+m.x+Math.cos(ang)*7,y:o.y+m.y+Math.sin(ang)*7};
     const at=new Map((skill.targets||[]).map(q=>[q.uid,BREATH_HIT+.08*dist(q,C)/R]));
-    skill.ur={seed:(skill.uid||1)*4.47,C,R,at,dir,mouth:{x:o.x+dir*8,y:o.y-50}};return at;
+    skill.ur={seed:(skill.uid||1)*4.47,C,R,at,face,dir:C.x>=o.x?1:-1,ang,mouth,under:face==='up'};return at;
   },
   field(fx,skill,age){
     const u=skill.ur,{C,R}=u,ring=2*R/.9,mark=span(age,0,.12)*(1-span(age,1,1.5));
     if(mark>0){fx.glow('glow','#ff4a10',C.x,C.y+6,R*2.2,.2*mark);kit(fx,KIT.ring,'fire',C.x,C.y+6,ring,ring*.42,0,.7*mark);
       if(age<BREATH_HIT)for(let i=0;i<2;i++){const k=(age*2.4+i/2)%1;kit(fx,KIT.ring,'fire',C.x,C.y+6,ring*lerp(1,.3,k),ring*.42*lerp(1,.3,k),0,.5*bell(k));}}
     const c=age-BREATH_HIT;if(c>0){const ctx=fx.ctx;ctx.save();ctx.globalAlpha=.28*(1-span(c,.3,1));ctx.fillStyle='#1a0602';ctx.beginPath();ctx.ellipse(C.x,C.y+8,R*.72,R*.3,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+    if(u.under)redBreath(fx,skill,age);
   },
   over(fx,skill,age){
-    const u=skill.ur,{C,R}=u,M=u.mouth,red=fx.reduced;
-    // She breathes in: an ember swells at her mouth while sparks are drawn into it.
-    if(age<BREATH_AT+.1){const k=span(age,0,BREATH_AT),out=1-span(age,BREATH_AT,BREATH_AT+.1);kit(fx,KIT.flare,'fire',M.x,M.y,lerp(16,48,easeIn(k)),undefined,age*4,Math.min(1,k*3)*out);
-      if(!red)for(let i=0;i<8;i++){const f=(hash(u.seed,i)+age*2.4)%1,ang=hash(u.seed,i+9)*6.283,r=lerp(80,6,f);kit(fx,KIT.shard,'fire',M.x+Math.cos(ang)*r,M.y+Math.sin(ang)*r*.8,10,undefined,ang,bell(f)*k*out);}}
-    // One jet of fire from her mouth to the middle of the pack.
-    if(age>BREATH_AT&&age<BREATH_HIT+.08){const len=dist(M,C),ang=Math.atan2(C.y-M.y,C.x-M.x),L=len*easeOut(span(age,BREATH_AT,BREATH_HIT)),a=1-span(age,BREATH_HIT,BREATH_HIT+.08),w=Math.max(60,L/.9);
-      kit3(fx,KIT3.breath,'fire',M.x+Math.cos(ang)*L/2,M.y+Math.sin(ang)*L/2,w,Math.min(w,150)*.9,ang,a);kit(fx,KIT.flare,'fire',M.x+Math.cos(ang)*L,M.y+Math.sin(ang)*L,100,undefined,0,a);}
+    const u=skill.ur,{C,R}=u,red=fx.reduced;
+    if(!u.under)redBreath(fx,skill,age);
     // The burst: the ring flares at its true edge, a column of flame at the centre and a tongue of fire under each enemy.
     const c=age-BREATH_HIT;if(c<0)return;
     if(!u.burst){u.burst=true;stun(fx,4,.03);}
@@ -1053,7 +1092,8 @@ const redDragon={
       kitStanding(fx,KIT3.flame,'fire',T.x,T.y+10,76*big,easeOut(span(cc,0,.1))*(1-span(cc,.3,.6)),hash(u.seed,q.uid||1)<.5?1:-1,0,1-span(cc,.35,.6),'lighter','ur-kit3');}
     if(!red)for(let i=0;i<14;i++){const k=span(c,0,.9);if(k>=1)break;const ang=hash(u.seed,i+30)*6.283,v=R*(.4+hash(u.seed,i+50)*.7);kit(fx,KIT.shard,'fire',C.x+Math.cos(ang)*v*easeOut(k),C.y-10+Math.sin(ang)*v*.45*easeOut(k)-60*k,11,undefined,ang+k*5,1-k);}
   },
-  body(fx,skill,age){if(fx.reduced)return null;const a=bell(span(age,0,BREATH_AT)),b=bell(span(age,BREATH_AT,BREATH_HIT+.1));return {dy:2*a,squash:1-.05*a+.05*b,angle:skill.ur.dir*.06*b};},
+  // She faces the pack for the whole cast, also with reduced motion (a turn is not motion); the rear-back and lunge are motion.
+  body(fx,skill,age){const face=skill.ur.face;if(fx.reduced)return {direction:face};const a=bell(span(age,0,BREATH_AT)),b=bell(span(age,BREATH_AT,BREATH_HIT+.1));return {direction:face,dy:2*a,squash:1-.05*a+.05*b,angle:skill.ur.dir*.06*b};},
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
