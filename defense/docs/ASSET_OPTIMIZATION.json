@@ -55,7 +55,7 @@
     "outputBytes": 17617174,
     "optimizedFiles": 177,
     "derivedFiles": 162,
-    "derivedOutputBytes": 3894814
+    "derivedOutputBytes": 3893680
   },
   "images": [
     {
@@ -7505,10 +7505,10 @@
       "source": "./assets/cast-v2/luna.webp",
       "profile": "portrait",
       "crop": {
-        "left": 117,
-        "top": 95,
-        "width": 250,
-        "height": 250
+        "left": 107,
+        "top": 71,
+        "width": 272,
+        "height": 272
       },
       "destination": "./assets/optimized/ui/portraits/luna.webp",
       "uses": [
@@ -7517,8 +7517,8 @@
       "sourceSha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
       "output": {
         "path": "./assets/optimized/ui/portraits/luna.webp",
-        "bytes": 20120,
-        "sha256": "cf2cbd8b67963eda52c87261510952141667256a9db277b393300e2ba3cc08fe",
+        "bytes": 19564,
+        "sha256": "51e6152a810c3abab5ea4c73322659008515c1a85b7242bad9d6952ba63bd7eb",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8045,10 +8045,10 @@
       "source": "./assets/cast-v2/doom.webp",
       "profile": "portrait",
       "crop": {
-        "left": 128,
-        "top": 74,
-        "width": 250,
-        "height": 250
+        "left": 123,
+        "top": 67,
+        "width": 258,
+        "height": 258
       },
       "destination": "./assets/optimized/ui/portraits/doom.webp",
       "uses": [
@@ -8057,8 +8057,8 @@
       "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
       "output": {
         "path": "./assets/optimized/ui/portraits/doom.webp",
-        "bytes": 17400,
-        "sha256": "18a09f33aae41f747fa58ddce68630bf462020d34f8713c3cce11ef98cc295cf",
+        "bytes": 16822,
+        "sha256": "b3efecb3626cb27cb891f93185c176ff38bc085db330b1aeb51cf12269198524",
         "metadata": {
           "width": 240,
           "height": 240,
