@@ -30,7 +30,7 @@ for(const [hero,spec] of Object.entries(UR_SPECS))test(`${hero}: real cast plans
   const skill={...e,uid:1};let impacts;checked(fx.ctx,()=>{impacts=spec.plan(fx,skill);},'plan');
   const life=spec.life(skill);assert.ok(Number.isFinite(life)&&life>0,'life');skill.life=skill.total=life;
   // Delayed strikes land on a later engine event (Cherry Prince, Aurora, Shooting Star Boy); support casts (Harmonious, Rumi) deal no damage.
-  if(impacts==null)assert.ok(['cherry_prince','harmonious','rumi','aurora','star_boy'].includes(hero),'unexpected missing impact map');
+  if(impacts==null)assert.ok(['cherry_prince','harmonious','rumi','aurora','star_boy','behemoth'].includes(hero),'unexpected missing impact map');
   else{assert.ok(impacts instanceof Map);for(const [uid,at] of impacts){assert.ok(Number.isFinite(uid));assert.ok(Number.isFinite(at)&&at>=0&&at<=life,`${uid}: ${at} / ${life}`);}}
   for(let frame=0;frame<=Math.ceil(life*60);frame++){
     const age=Math.min(life,frame/60);fx.clock=age;skill.life=life-age;
@@ -101,6 +101,23 @@ test('warm-up yields between idle slices, preserves RNG and stops for an old ren
   const r=view(),old=globalThis.requestIdleCallback,random=Math.random,marker=()=>.123,queue=[];globalThis.requestIdleCallback=fn=>queue.push(fn);Math.random=marker;
   try{let active=true;warmUltimates(r,['queen','luna','queen','siren'],()=>active);for(let i=0;i<6;i++){assert.equal(queue.length,1);queue.shift()({timeRemaining:()=>0});assert.equal(Math.random,marker);}assert.ok(r.fx.urCache.size>0);const n=r.fx.urCache.size;active=false;queue.shift()({timeRemaining:()=>0});assert.equal(r.fx.urCache.size,n);assert.equal(queue.length,0);}
   finally{Math.random=random;if(old===undefined)delete globalThis.requestIdleCallback;else globalThis.requestIdleCallback=old;}
+});
+
+test('behemoth: the three engine blows land in order, the finale reaches every crater, and the warm-up covers them',()=>{
+  const entry=ENTRIES.find(e=>e.key==='behemoth'),scene=reviewScene(entry,{kills:false}),fx=new CombatFX(canvas().getContext('2d'),art()),r=view();fx.s=scene.state;snapshot(fx,scene.state.enemies);
+  warmHero(r,'behemoth',scene.state.deck);fx.urCache=r.fx.urCache;const warmed=new Set(fx.urCache.keys()),spec=UR_SPECS.behemoth;
+  const events=scene.cast(),cast=events.find(e=>e.type==='skill'&&e.hero==='behemoth');assert.equal(cast?.kind,'crush');
+  const skill={...cast,uid:1,life:2.4,total:2.4};checked(fx.ctx,()=>spec.plan(fx,skill),'plan');for(const e of events)fx.event(e);
+  const phases=[];let finale=null;
+  for(let frame=0;frame<=200;frame++){
+    const age=frame/60;fx.clock=age;skill.life=Math.max(0,2.4-age);
+    for(const e of scene.advance(1/60)){if(e.type==='crushPhase')phases.push(e.phase);fx.event(e);}snapshot(fx,scene.state.enemies);
+    finale=finale||fx.impacts?.find?.(e=>e.type==='urFx'&&e.phase===2)||null;
+    checked(fx.ctx,()=>{for(const name of ['field','over','body'])spec[name]?.(fx,skill,age);fx.draw(1/60);},'behemoth '+age);
+  }
+  assert.deepEqual(phases,[0,1,2]);assert.equal(fx.crushHits.filter(Boolean).length,3);
+  if(finale)assert.equal(finale.prev.length,2);
+  assert.deepEqual([...fx.urCache.keys()].filter(key=>!warmed.has(key)),[],'behemoth created an unwarmed canvas');
 });
 
 test('rumi dream form: the four engine volleys rise and strike in order and every layer draws cleanly',()=>{

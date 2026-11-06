@@ -28,7 +28,7 @@ try{
   browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1300,height:1000}});
   await page.goto(`http://127.0.0.1:${server.address().port}/docs/review/${encodeURIComponent(pageName)}/index.html`);await page.waitForFunction(()=>window.UR_REVIEW?.state?.ready);
   if(pairs){
-    const keys=['cinderella','venom','doom','rumi','rumi-dream','red-dragon','aurora','star-boy','jasmine','trauma','trauma-end','whale'];
+    const keys=['cinderella','venom','doom','rumi','rumi-dream','red-dragon','aurora','star-boy','behemoth','jasmine','trauma','trauma-end','whale'];
     const entries=await page.evaluate(()=>window.UR_REVIEW.entries),selected=keys.map(key=>{const entry=entries.find(e=>e.key===key);if(!entry)throw Error('Unknown scene: '+key);return entry;});
     const W=250,H=271,caption=38,gap=4,cols=Math.max(...selected.map(e=>e.moments.length))*2,tiles=[];
     const escape=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
