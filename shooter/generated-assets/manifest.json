@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sourceHash": "d31533c940b745ce9471ec5cd32bc51c237bc8edfd1d59d3ec8572cb8e77227b",
-  "processorHash": "3655ef36c282ae3da3a946065e43de9c50e63ae8dcd88d38a65f2ecfee373f63",
+  "processorHash": "2a590e146cf4cb0e8b29b522583c0d0801c4bc21188a04e6e719758e25785460",
   "report": {
     "source": {
       "fileCount": 45,
@@ -236,7 +236,7 @@
     },
     "output": {
       "fileCount": 121,
-      "bytes": 6503048,
+      "bytes": 6741942,
       "format": "webp",
       "files": [
         {
@@ -409,115 +409,115 @@
         },
         {
           "file": "relics/0.webp",
-          "bytes": 36742,
+          "bytes": 40348,
           "width": 384,
           "height": 384,
-          "sha256": "27c039137585157ab0fa67c7d4d3026d431e8ee7378b2b353947c64b0e2212db"
+          "sha256": "79a88e82f8f1d619cd982ddbda70cfd21acc79dc18d8bcc0c253dd73353941c5"
         },
         {
           "file": "relics/1.webp",
-          "bytes": 29332,
+          "bytes": 32356,
           "width": 384,
           "height": 384,
-          "sha256": "722edbb11ab276300295121208554181240b73c308bdef58dbc9307ca23b2007"
+          "sha256": "16e08603b102e0a8f9cfe3a1d7df98e95159d069cd993f0858fcf893866d2b16"
         },
         {
           "file": "relics/2.webp",
-          "bytes": 33928,
+          "bytes": 40530,
           "width": 384,
           "height": 384,
-          "sha256": "1554780f426113a9ca8ebcdc93e889062debcf0defa3d7cec78a529299f1d268"
+          "sha256": "7ba3b7efd1f7bb396375fb1b386bae566d37d5f1edad3af879ff3bdfa85bc0ab"
         },
         {
           "file": "relics/3.webp",
-          "bytes": 22060,
+          "bytes": 28548,
           "width": 384,
           "height": 384,
-          "sha256": "033ae94c02b9abbe4640ac719abbcb0ab62c458d57629680c3312a42ba76bdc0"
+          "sha256": "950b0ea4ad7136aadb595c9a9d521d977262b68968693eede96d95187c906083"
         },
         {
           "file": "relics/4.webp",
-          "bytes": 32806,
+          "bytes": 37204,
           "width": 384,
           "height": 384,
-          "sha256": "14af6468bc4c138f473877655b521b57d86b246f76587934f3ce749f410fdb39"
+          "sha256": "2fcdbb3ea2aaf45a01f96a8482dbdedbd916907f3135631e0525fecf5a774fdc"
         },
         {
           "file": "relics/5.webp",
-          "bytes": 38434,
+          "bytes": 40534,
           "width": 384,
           "height": 384,
-          "sha256": "f0cadd19719a92f93e295fe7f90cbf26800236d578e0af194e5ef06a16801e99"
+          "sha256": "89d05c8b842f9dc1561c751e160a82ab96c1b7b70f110e0f1d01c588407898c1"
         },
         {
           "file": "relics/6.webp",
-          "bytes": 35574,
+          "bytes": 41644,
           "width": 384,
           "height": 384,
-          "sha256": "792db25f2f1a93220661a45df349b5c7f72170bc0ebb7556820858372d45adbf"
+          "sha256": "c97ddccd723bd12e65c5b155fae9f2776c1e5c7dcbabec290480226707bfbb77"
         },
         {
           "file": "relics/7.webp",
-          "bytes": 28434,
+          "bytes": 30094,
           "width": 384,
           "height": 384,
-          "sha256": "6b319348d0135580a9fe5fb89041f4dabea260dd6156d1abecdd59d3dd7a3452"
+          "sha256": "be0d51c4b3ecf34fbb3957b30eefa287059f24997a4da44f2c559f83649f69fd"
         },
         {
           "file": "relics/8.webp",
-          "bytes": 29110,
+          "bytes": 35822,
           "width": 384,
           "height": 384,
-          "sha256": "9137ff2c29373d76d37118ed1beda1ef76ff3961d3b94a583bab427bca071bb5"
+          "sha256": "a3a9f47772ecf1f654e8a03a13a23722fd66c1273112508b7ae253ef32e8c3c8"
         },
         {
           "file": "relics/9.webp",
-          "bytes": 20924,
+          "bytes": 22720,
           "width": 384,
           "height": 384,
-          "sha256": "4f413a44e89aaee884492b69818c6e01328394aa5d65bf64444cca4323cb59d0"
+          "sha256": "0b5e92e07e2ef264211cbf1ca86b217003a77a4fb6f7fd3a55514890475b4285"
         },
         {
           "file": "relics/10.webp",
-          "bytes": 30812,
+          "bytes": 35860,
           "width": 384,
           "height": 384,
-          "sha256": "913c451f5dc25737f5b226a9dbea2651737612939b4a7407051e6571e62fc27e"
+          "sha256": "eaffaa16d1f5d57ee9523c6de1d8027d8ccf3ab3f44730785558ff8a7719ed17"
         },
         {
           "file": "relics/11.webp",
-          "bytes": 43804,
+          "bytes": 49526,
           "width": 384,
           "height": 384,
-          "sha256": "be8a250f48190a7fc07d74e145dc932c095323278e5e23cd6db018345a4de449"
+          "sha256": "e4e99b7b540e5b17fefea6b4928f5333b610085346f3869e74e7d14725d2ce45"
         },
         {
           "file": "relics/12.webp",
-          "bytes": 40084,
+          "bytes": 41602,
           "width": 384,
           "height": 384,
-          "sha256": "019f850b78f83f0b0e62bf4c550b8b982c335480086b57768b546fe5b11ef0a0"
+          "sha256": "596c26c8ea3b872e5511c1c2cbf48041b6306c8c855506db7f77c409d00af85c"
         },
         {
           "file": "relics/13.webp",
-          "bytes": 29402,
+          "bytes": 32518,
           "width": 384,
           "height": 384,
-          "sha256": "7b0a5b13f6bde6430f82b244d160f05a0ed51841007d4466931bb19e3cd6e6b4"
+          "sha256": "a0311fca420e0213c2e0d2ec57cf3ca0fe6d88eeb8672c6e1e55c128a3b02c76"
         },
         {
           "file": "relics/14.webp",
-          "bytes": 31024,
+          "bytes": 35086,
           "width": 384,
           "height": 384,
-          "sha256": "a603df32b48cbf16a0b76cedf7a2f0bb85ddf9d790a2c178252c394329316811"
+          "sha256": "8507832a8503d83ee7db92fb564c7baeba08d6b57cd84a7b142e667134bc0c86"
         },
         {
           "file": "relics/15.webp",
-          "bytes": 29686,
+          "bytes": 30884,
           "width": 384,
           "height": 384,
-          "sha256": "880d969d87e49cd98a9d42f07142460b01e8c5bfef7189e52a58c5d173f2b322"
+          "sha256": "1ec17184d3b9d464dcd8d6326e72387f7c9be1f12a3147c292cd8dc531e07b26"
         },
         {
           "file": "tides/0.webp",
@@ -1046,192 +1046,192 @@
         },
         {
           "file": "tide-relics/0.webp",
-          "bytes": 52208,
+          "bytes": 47874,
           "width": 384,
           "height": 384,
-          "sha256": "e9d0012d23a8a9923bd22023e744eada22a0419b63209c624e24f5e32b7367c7"
+          "sha256": "dc0973c762540c08c971ed05cf175ce25c11460fd4546fb751428a8ed09859a1"
         },
         {
           "file": "tide-relics/1.webp",
-          "bytes": 55682,
+          "bytes": 58810,
           "width": 384,
           "height": 384,
-          "sha256": "bae620a9dfcd4aa281e097cc463cfefb9b09c76775c2f53378fbe90e5273ec4a"
+          "sha256": "869d65d098beaebf0007af935ee5dd7a82ffd926de58ce78b375c92852fda26a"
         },
         {
           "file": "tide-relics/2.webp",
-          "bytes": 53480,
+          "bytes": 57252,
           "width": 384,
           "height": 384,
-          "sha256": "fa962bcea5b5a51453c7e274fe510884e83cf3b85a5b480969d4ebfd8bf6ff97"
+          "sha256": "083ebc1513fd13450d50335e7d5e5e3f7bdfbfd7b164840428947e10c853929a"
         },
         {
           "file": "tide-relics/3.webp",
-          "bytes": 51548,
+          "bytes": 56386,
           "width": 384,
           "height": 384,
-          "sha256": "b8ff6aac384f8e6caf3ac67f61b9bf3a264b4fe8bbbbad456a993ce52d015502"
+          "sha256": "7a670bed46be7ca1ab798d6667a255892ddfb2a5fe54e7e7c24caec747d21899"
         },
         {
           "file": "tide-relics/4.webp",
-          "bytes": 36620,
+          "bytes": 35610,
           "width": 384,
           "height": 384,
-          "sha256": "2a8db5bc8024eb4dcb05225c2c9df2e73336d2a7075c7fcdb8638eaf091c02f6"
+          "sha256": "fa04c8fa4e6ca6c2f3fd0637bb88172843003de211226965d3516aa4001b8e9a"
         },
         {
           "file": "tide-relics/5.webp",
-          "bytes": 54112,
+          "bytes": 55710,
           "width": 384,
           "height": 384,
-          "sha256": "f91279873ec786616ea73fbadde9237e02d547d76c9628a190e460a75947b328"
+          "sha256": "17a610203947e4918a8c4dbdcebd06092c3bccae8d566933277d3f2a37ffc524"
         },
         {
           "file": "shield-relics/0.webp",
-          "bytes": 11990,
+          "bytes": 20680,
           "width": 192,
           "height": 192,
-          "sha256": "311ef9fe8d940e9b50c221ea69df772897235a45793219f0c4ec132de5d8ea0d"
+          "sha256": "336a53826c153e50a6e180b56e6c66f9c5a1f0e84fde6cf6c8352a743ac8703a"
         },
         {
           "file": "shield-relics/1.webp",
-          "bytes": 12256,
+          "bytes": 15176,
           "width": 192,
           "height": 192,
-          "sha256": "6d30095fa97755dbd6d2878f5c4d54d9d16607a5f4960c230c5fc60b00d3ab81"
+          "sha256": "ef514c4fd8429ba7a1cc21c4e9799abb2076097d6473697edbf84100deec4786"
         },
         {
           "file": "shield-relics/2.webp",
-          "bytes": 9946,
+          "bytes": 19624,
           "width": 192,
           "height": 192,
-          "sha256": "a3b063e4dbe6d7e8c1d260053bab98213dabb0b5b42a3355deac71e1b01febeb"
+          "sha256": "5e67f2e5f464c4f95793ca58ebb6d49dafe571fb5a7175a109b2d6ea39b00eb8"
         },
         {
           "file": "shield-relics/3.webp",
-          "bytes": 6630,
+          "bytes": 11230,
           "width": 192,
           "height": 192,
-          "sha256": "8d6cdc9f23a71474fe0bcc12acd6c0aac424a38a7e4a59a387b09795f8e9ae05"
+          "sha256": "6b3440f6ddab3efb8cd149c36731a57de9d6a7d5c0064772891fc208c9b15f94"
         },
         {
           "file": "shield-relics/4.webp",
-          "bytes": 9318,
+          "bytes": 15546,
           "width": 192,
           "height": 192,
-          "sha256": "097110f781ea3670a2125abbbd42845f26482ff63c5e316a2ee344cb26b74b0f"
+          "sha256": "a3c1ad44dc0bce164a57731f1af82a71fb6cb4f92454d2c8a7ceea6b992aae91"
         },
         {
           "file": "shield-relics/5.webp",
-          "bytes": 8724,
+          "bytes": 15124,
           "width": 192,
           "height": 192,
-          "sha256": "6c00f3255bb73f6f00f924cd34dca0f98a4e077a02a590b41ec8909bafbbf61c"
+          "sha256": "1997a047e3ecda0f3d7fd045f8ae8abe8a6c4fabdf29adae7ed84c56865da961"
         },
         {
           "file": "shield-relics/6.webp",
-          "bytes": 9330,
+          "bytes": 15644,
           "width": 192,
           "height": 192,
-          "sha256": "0a38dc898856fbad174e888db7b98727f9881253c42678ac0ce93602d8dad2e7"
+          "sha256": "2741ac4548592fe20884e2139e250be373181202869d0ebe60f9eb048ff802c4"
         },
         {
           "file": "shield-relics/7.webp",
-          "bytes": 9876,
+          "bytes": 15804,
           "width": 192,
           "height": 192,
-          "sha256": "ff4cf87b3f00f6030abf47ba0492e0e5767045f0d2290f7f5eb9417d4bd755da"
+          "sha256": "113570b63749e253c76a12ab47e297b874c0cd767d57dc8df61c166f97c5bad7"
         },
         {
           "file": "shield-relics/8.webp",
-          "bytes": 13762,
+          "bytes": 23952,
           "width": 192,
           "height": 192,
-          "sha256": "00f9d3d82a7d800101320ef6d500c090ef907412eb8c45c7a4b2f2f6f38730df"
+          "sha256": "2d3bfcee4da17761fe293ef69c8ec01503128e8ab185581c720271a49a920dfa"
         },
         {
           "file": "shield-relics/9.webp",
-          "bytes": 10436,
+          "bytes": 18128,
           "width": 192,
           "height": 192,
-          "sha256": "a68ed00f63bb9b1efb67c79817fd9c94dd07256ed7f808fdf7f5603465fa10ef"
+          "sha256": "c2e196123e5e3fd86b6c49604852be092d8decc8cd069c8598de4b6697d092b5"
         },
         {
           "file": "shield-relics/10.webp",
-          "bytes": 11746,
+          "bytes": 19792,
           "width": 192,
           "height": 192,
-          "sha256": "5f840d51c23cba73a54d99fe19951f736d6c0a6e2a8dc4fa13e5c1dc92a7bb83"
+          "sha256": "90e3113635e9f06013d5d183a1c68a5aee2fb0487dd9fd6a504b00ff66593fea"
         },
         {
           "file": "celestial-relics/0.webp",
-          "bytes": 9102,
+          "bytes": 16576,
           "width": 192,
           "height": 192,
-          "sha256": "50af1589662fa4aee664a429dde6bd5120678fb8a97320b3682a43d87ba8b4fb"
+          "sha256": "fa456b2a43122d3a03bf9d6eb8e24d17b744125b68906089255d9126095eef73"
         },
         {
           "file": "celestial-relics/1.webp",
-          "bytes": 8776,
+          "bytes": 14912,
           "width": 192,
           "height": 192,
-          "sha256": "21a4120edcedff13357ac94c40ba5db1cb57da731d072ebcdfe823ceeda71b60"
+          "sha256": "afd0045cf2b8b0cfe4a6984bef2a5e68f8b988a18cdd70d7518483d61fe022f4"
         },
         {
           "file": "celestial-relics/2.webp",
-          "bytes": 9400,
+          "bytes": 15230,
           "width": 192,
           "height": 192,
-          "sha256": "d249ce52ea2ac5f8a3d22f15852b87aa8546cbeb4e3474255216c96edf938af5"
+          "sha256": "148f859565b533c9646c4cb78bfa89acb786852e4a47007965ac36e2ee0cb3d6"
         },
         {
           "file": "celestial-relics/3.webp",
-          "bytes": 10046,
+          "bytes": 14336,
           "width": 192,
           "height": 192,
-          "sha256": "a946fb1764b60d1eabd9088139f2ffb7ee7a9f6c1133f23a2863d0c4d68310ab"
+          "sha256": "d48e68b0826b1c6b4e45087d4586276b3ef09dc1f7245ed6d51323699467a2fd"
         },
         {
           "file": "balance-relics/0.webp",
-          "bytes": 9882,
+          "bytes": 19116,
           "width": 192,
           "height": 192,
-          "sha256": "46fb92fb236aa3a73c817dadd40eff68c2d6baa9d794bb9e3cfb117b3f52d70f"
+          "sha256": "85b8c8d7ee1932b7e19c0a80bcd76ed576bdfd3ff9d624f320661dc362d274e5"
         },
         {
           "file": "balance-relics/1.webp",
-          "bytes": 7848,
+          "bytes": 15316,
           "width": 192,
           "height": 192,
-          "sha256": "13d46987520ce164cfc1675de92cd477ccbc037ffe344d21b38ad402ac47d16c"
+          "sha256": "bbae30d241b2c4022257523baedb59b0c72c4e4b9ba524b3811cccbcbabf48a6"
         },
         {
           "file": "balance-relics/2.webp",
-          "bytes": 12276,
+          "bytes": 22198,
           "width": 192,
           "height": 192,
-          "sha256": "37b91235f5b30ee722c6ad8abca942a523232f4dc09a99b7a86ff98493e04c91"
+          "sha256": "b90273972dc159575f3dfe9ef256fc4969a7dbe97985f6f70a88d43bd4b98ca3"
         },
         {
           "file": "balance-relics/3.webp",
-          "bytes": 10858,
+          "bytes": 19322,
           "width": 192,
           "height": 192,
-          "sha256": "58a430a0e9fbed625f02387e2adecfe45787f7b48a420ee8063453ce9fef7815"
+          "sha256": "6dc5e005f55727975379180d59acbd64460131f3912cc6286e2b84140901db0c"
         },
         {
           "file": "balance-relics/4.webp",
-          "bytes": 10564,
+          "bytes": 20474,
           "width": 192,
           "height": 192,
-          "sha256": "8aebf7cf12aeeefe9a38cf04a45b67550474344b2b449ca7e15b1fee085640ed"
+          "sha256": "441966d2197899688d1f40518c4e61a3975c9ce1c361b75c0e75f6c7e0cb9489"
         },
         {
           "file": "balance-relics/5.webp",
-          "bytes": 14448,
+          "bytes": 28562,
           "width": 192,
           "height": 192,
-          "sha256": "ffe73d8f3bb0a91243b44df2c80500f397ab6d4e2700acea8662b177ff50383c"
+          "sha256": "496a22e6945881fc4d308e37c0b99e79721f7b606d8656800079a5d0b5b11e6a"
         },
         {
           "file": "shop-items/0.webp",
@@ -1284,45 +1284,45 @@
         },
         {
           "file": "astral-relics/0.webp",
-          "bytes": 15376,
+          "bytes": 20224,
           "width": 192,
           "height": 192,
-          "sha256": "ac37926539da5930097b79534d70ca9a6fd37b63e6c7e350287e952899743612"
+          "sha256": "712057faf01267f842131b727b74dfbeb5a816453a26169e72a5f7263eb05506"
         },
         {
           "file": "astral-relics/1.webp",
-          "bytes": 20710,
+          "bytes": 23302,
           "width": 192,
           "height": 192,
-          "sha256": "2e6b582176e6b94a9aba959bdb48f26d4b3d77d7f466d96fae15f3d6bc3bf043"
+          "sha256": "5d0aba126468dbf5f9e96a9f9e364eb083cc2bafd0d962d302e771732139d965"
         },
         {
           "file": "astral-relics/2.webp",
-          "bytes": 17732,
+          "bytes": 17868,
           "width": 192,
           "height": 192,
-          "sha256": "feca3931e082d8dd0fbfdc194a761f4f1f570d75f0fad22b87b7cc9bde11152e"
+          "sha256": "7d6e07ca13132676e03cfdf9ed7df89f48bdd7f153c95a11a4557bc2aa9fcce5"
         },
         {
           "file": "astral-relics/3.webp",
-          "bytes": 27082,
+          "bytes": 27292,
           "width": 192,
           "height": 192,
-          "sha256": "e201206a7e064bdf3c5361a06715b5b6b2222f3d99c107627454af69de47d2cb"
+          "sha256": "93cb1b36aec559be647bdbc9e0ecaac5ec188e833c83f2dc3744ddefbb538b2a"
         },
         {
           "file": "astral-relics/4.webp",
-          "bytes": 10718,
+          "bytes": 10840,
           "width": 192,
           "height": 192,
-          "sha256": "3b191d9f93e1aa226d3810d4b26c00d665227f7a7804bd7a204830674729df02"
+          "sha256": "1883d495e28d7557abbae07365173baf1e399afc4d0bc84933ce2c9f8994c15e"
         },
         {
           "file": "astral-relics/5.webp",
-          "bytes": 16032,
+          "bytes": 16378,
           "width": 192,
           "height": 192,
-          "sha256": "be2ed10dc2c6544af0cc5cd482f8aefc7ad45510591a131924c6e5e50c5fd55b"
+          "sha256": "17f3147b4aaea747005a547033f5346b72baed3bbe2a15a89505dfb536391df0"
         },
         {
           "file": "holy-flame/0.webp",
@@ -1341,8 +1341,8 @@
       ]
     },
     "reduction": {
-      "bytes": 72826193,
-      "percent": 91.8
+      "bytes": 72587299,
+      "percent": 91.5
     },
     "qualityProbes": [
       {

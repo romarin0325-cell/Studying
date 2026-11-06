@@ -175,7 +175,7 @@ function handleEvent(event) {
     announce(`STAGE ${event.room+1} / 3`, DUNGEONS[event.stage].rooms[event.room], '');
   }
   if (event.type === 'warning') { audio.boss = true; announce('GUARDIAN APPROACHING', STAGES[game.stageIndex].boss, `“${game.stage.intro}”`, 2900); }
-  if (event.type === 'pattern') { $('pattern-name').textContent = event.name; if (event.phase > 0) toast(`✧ ${event.name}`); }
+  if (event.type === 'pattern' && event.phase > 0) toast(`✧ ${event.name}`);
   if (event.type === 'bomb') announce('ASTRAL BLOOM', event.holyflame?'홀리플레임':event.corona?'코로나':HEROES[event.hero].bomb, '', 1800, true);
   if (event.type === 'powerup') toast(`✦ SHOT POWER ${game.power}`);
   if (event.type === 'heal') toast('♡ 생명 회복');
@@ -200,6 +200,7 @@ function renderHud() {
   $('combo-hud').style.opacity = game.combo > 1 ? '1' : '0'; $('combo').textContent = `${game.combo} COMBO`; $('multiplier').textContent = `SCORE ×${game.multiplier}`;
   $('combo-meter').style.transform = `scaleX(${Math.max(0, game.comboTime / game.comboDuration)})`;
   const bossVisible = ['warning', 'boss'].includes(game.phase) && game.boss;
+  $('pattern-name').textContent = bossVisible ? game.stage.pattern[Math.max(0, game.bossPattern)] : '';
   $('boss-hud').hidden = !bossVisible;
   if (bossVisible) { $('boss-name').textContent = game.stage.boss; $('boss-phase').textContent = `PHASE ${Math.max(1, game.bossPattern + 1)} / 3`; $('boss-health').style.width = `${Math.max(0, game.boss.hp / game.boss.maxHp) * 100}%`; }
 }
