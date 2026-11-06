@@ -8,6 +8,7 @@ import { BOARD, cellPoint } from '../../../src/combat/engine.js';
 import { VISUAL_HEROES } from '../../../scripts/image-policy.mjs';
 import { imageHash, loadImagePack } from '../../../scripts/image-pack.mjs';
 import { assetFile, gameRoot } from '../../../scripts/local-inputs.mjs';
+import { CELL, MAX_SCALE, TOLERANCE, scaleReview } from './scale-review.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const out = path.resolve(process.argv[2] ?? path.join(gameRoot, 'test-results/cast-comparison/index.html'));
@@ -19,31 +20,39 @@ const roster = [...HEROES, ...Object.entries(TRANSFORM_ART)
 const atlases = {};
 const atlasRecords = new Map(pack.manifest.images.map(entry => [entry.id, entry]));
 const portraits = new Set(pack.manifest.derived.filter(row => row.id.startsWith('portrait:')).map(row => row.id));
+const read = async file => JSON.parse(await fs.readFile(file,'utf8'));
+const artDocs = path.dirname(here);
+const landmarkManifests = await Promise.all([
+  'sol-cast-v2/manifest.json','demon-miracle/packing.json','gold-dragon-20261029/installation.json'
+].map(file => read(path.join(artDocs,file))));
+const landmarks = new Map(landmarkManifests.flatMap(m=>m.assets.map(entry=>[entry.id,entry])));
+const visible = await read(path.join(here,'visible-landmarks.json'));
 
-async function frameHeights(bytes, art) {
+async function frameBounds(bytes, art) {
   const { width, height } = await sharp(bytes).metadata();
   const size = width / art.columns;
   assert.ok(Number.isInteger(size), art.atlas);
-  const heights = [];
+  const bounds = [];
   for (let index = 0; index < 4; index++) {
     const left = (art.directional ? index % art.columns : 0) * size;
     const top = (art.directional ? Math.floor(index / art.columns) : art.row) * size;
     assert.ok(top + size <= height, art.atlas);
     const pixels = await sharp(bytes).extract({ left, top, width: size, height: size })
       .ensureAlpha().raw().toBuffer();
-    let first = size, last = -1;
+    let x0 = size, y0 = size, x1 = -1, y1 = -1;
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         if (pixels[(y * size + x) * 4 + 3] < 40) continue;
-        first = Math.min(first, y);
-        last = y;
-        break;
+        x0 = Math.min(x0,x);
+        y0 = Math.min(y0,y);
+        x1 = Math.max(x1,x);
+        y1 = y;
       }
     }
-    assert.ok(last >= first, art.atlas + ' has an empty direction');
-    heights.push(Math.round((last - first + 1) * 512 / size));
+    assert.ok(y1 >= y0, art.atlas + ' has an empty direction');
+    bounds.push([x0,y0,x1+1,y1+1].map(value=>value*CELL/size));
   }
-  return heights;
+  return bounds;
 }
 
 const units = [];
@@ -56,9 +65,16 @@ for (const { id, name, rarity, art } of roster) {
   atlases[art.atlas] ??= { bytes: battle.toString('base64'), rows: height / (width / art.columns),
     sha256: record.output.sha256 };
   const portrait = portraits.has('portrait:' + id) ? pack.readDerived('portrait:' + id) : null;
+  const bounds = await frameBounds(await fs.readFile(assetFile(source)),art);
+  const anchor = [CELL/2,CELL*art.foot];
+  const entry = landmarks.get(id), marks = visible.units[id];
+  const measured = entry?.sourceWebp?.sha256 === record.original.sha256
+    && entry.frames.length === 4 && entry.frames.every(f=>f.sole[0]===anchor[0] && f.sole[1]===anchor[1]);
+  const review = scaleReview(bounds,anchor,measured ? entry : null,
+    marks?.sha256===record.original.sha256 ? marks : null,visible.uncertainty);
   units.push({ id, name, rarity, atlas: art.atlas, columns: art.columns, row: art.row,
     directional: art.directional, foot: art.foot, scale: art.scale,
-    heights: await frameHeights(await fs.readFile(assetFile(source)), art),
+    heights: bounds.map(([,top,,bottom])=>Math.round(bottom-top)), review,
     portrait: portrait?.toString('base64') ?? null, portraitSha256: portrait && imageHash(portrait) });
 }
 
@@ -76,7 +92,8 @@ const board = { dimension, pitch: BOARD.cell,
 const assetHash = imageHash(Buffer.from(JSON.stringify(units.map(({ id, atlas, portraitSha256 }) => [
   id, atlases[atlas].sha256, portraitSha256
 ]))));
-const data = { units, atlases, board, collectibleCount: HEROES.length, assetHash };
+const data = { units, atlases, board, collectibleCount: HEROES.length, assetHash,
+  reviewPolicy:{ cell:CELL, tolerance:TOLERANCE, maxScale:MAX_SCALE } };
 const template = await fs.readFile(path.join(here, 'template.html'), 'utf8');
 const html = template.replace('/*__CAST_DATA__*/', () => JSON.stringify(data).replaceAll('<', '\\u003c'));
 await fs.mkdir(path.dirname(out), { recursive: true });

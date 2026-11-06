@@ -71,6 +71,40 @@
     .lineup { display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
     .lineup span { padding:2px 6px; border-radius:5px; background:var(--active); color:#1b4955; font-size:11px; }
     .empty { padding:16px; }
+    .turn-title button { margin-left:auto; font-size:11px; min-height:28px; }
+    .judge { display:grid; gap:10px; }
+    .judge-head, .judge-scene, .judge-table, .judge-summary, .judge-reason { padding:10px; }
+    .judge-head { display:grid; gap:8px; }
+    .judge-head select { max-width:100%; }
+    .judge-head input[type=number] { width:76px; min-height:34px; border:1px solid var(--line);
+      border-radius:7px; background:var(--paper); padding:3px 5px; }
+    .verdict { display:inline-block; background:#e0eeed; color:#214b55; border-radius:6px;
+      font-weight:720; padding:2px 7px; font-size:12px; }
+    .verdict[data-result=shape], .verdict[data-result=outline], .verdict[data-result=rear] {
+      background:#f5e6d5; color:#6e462a;
+    }
+    .judge-pair { display:grid; gap:8px; }
+    .judge-scene h3 { margin-bottom:5px; }
+    .judge-caption { min-height:34px; }
+    .landmarks { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:hidden; }
+    .landmarks path, .landmarks line, .landmarks ellipse, .landmarks circle { vector-effect:non-scaling-stroke; }
+    .landmarks .reference { stroke:#398ba1; stroke-width:1; stroke-dasharray:4 3; opacity:.82; }
+    .landmarks .outline-guide { stroke:#647068; stroke-width:1; stroke-dasharray:2 4; }
+    .landmarks .measured { stroke:#b95829; stroke-width:1; }
+    .landmarks .center { opacity:.55; }
+    .judge-table { overflow:hidden; }
+    .judge-table table, .judge-summary table { width:100%; border-collapse:collapse; font-size:12px; }
+    .judge-table th, .judge-table td, .judge-summary th, .judge-summary td {
+      text-align:left; padding:5px 6px; border-bottom:1px solid var(--line); vertical-align:top;
+    }
+    .judge-table td span { display:block; font-variant-numeric:tabular-nums; }
+    .miss { color:#83422c; font-weight:650; }
+    .judge-note { margin-top:5px; }
+    .judge-summary summary, .judge-reason summary { cursor:pointer; font-weight:700; }
+    .judge-reason p { margin-top:4px; }
+    .judge-summary button { font-size:12px; min-height:28px; }
+    .table-scroll { overflow-x:auto; }
+    @media (min-width:1000px) { .judge-pair { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     footer { margin-top:15px; display:grid; gap:4px; }
     [hidden] { display:none !important; }
     @media (min-width:770px) { .board-layout { grid-template-columns:minmax(0,540px) minmax(240px,1fr); } }
@@ -89,6 +123,7 @@
       <button data-mode="all">전체 캐스트</button>
       <button data-mode="board">5×5 배치 <span id="count"></span></button>
       <button data-mode="turn">상하좌우</button>
+      <button data-mode="judge">배율 판정</button>
     </div>
     <div class="line">
       <label id="medium-control">그림 <select id="medium"><option value="body">전신</option><option value="portrait">초상화</option></select></label>
@@ -141,6 +176,23 @@
       ? sample[i - board.dimension * 2] : '');
   const state = { slots:makeSample(), focus:-1, pending:'' };
   const labels = { form:'변신' };
+  const { cell, tolerance, maxScale } = data.reviewPolicy;
+  const sideDifference = ({heights:h}) => Math.max(Math.abs(h[0]-h[2]),Math.abs(h[0]-h[3]));
+  const reviewOrder = [...data.units].sort((a,b)=>sideDifference(b)-sideDifference(a));
+  const outcomes = {
+    missing:['기준점 확인','현재 원본에 대응하는 해부 기준점이 필요합니다. 겉윤곽 확대만 비교할 수 있습니다.'],
+    original:['기존 배율 후보','현재 배율이 기록된 좌우 기준점과 겉윤곽의 검토선 안에 있습니다.'],
+    scale:['공통 확대 후보','좌우에 같은 배율을 적용해 기록된 해부 기준점과 겉윤곽을 검토선 안에 놓을 수 있습니다.'],
+    rear:['후면 재확인','좌우는 같은 확대율로 맞출 수 있고, 후면은 별도 확인이 필요합니다.'],
+    outline:['겉윤곽 다시 그리기 검토','좌우 해부 기준점은 맞출 수 있지만, 겉윤곽 높이까지 함께 맞추는 배율은 없습니다.'],
+    shape:['측면 다시 그리기 검토','머리와 몸 기준점을 함께 맞추는 공통 확대율이 검토선 안에 없습니다.']
+  };
+  const presetNames = { balanced:'균형 시안', head:'머리 높이 맞춤', chin:'턱~발 맞춤',
+    outline:'겉윤곽 맞춤', original:'100%' };
+  const number = n => n.toFixed(1);
+  const percent = n => number(100*n) + '%';
+  const rangeText = range => range ? percent(range[0]) + '–' + percent(range[1]) : '범위 없음';
+  const signed = n => Math.abs(n)<.05 ? '0.0' : (n>0?'+':'')+number(n);
   let search = '';
 
   function imageUrl(key, base64) {
@@ -153,7 +205,7 @@
 
   function readState() {
     const query = new URLSearchParams(location.hash.slice(1));
-    state.mode = ['all','board','turn'].includes(query.get('mode')) ? query.get('mode') : 'all';
+    state.mode = ['all','board','turn','judge'].includes(query.get('mode')) ? query.get('mode') : 'all';
     for (const [key, fallback] of Object.entries({
       medium:'body', direction:'0', size:'96', theme:'light', scope:'selected', rarity:'all', sort:'roster'
     })) {
@@ -166,12 +218,21 @@
       units.has(ids[i]) && ids.indexOf(ids[i]) === i ? ids[i] : '') : makeSample();
     state.focus = -1;
     state.pending = '';
+    state.subject = units.has(query.get('subject')) ? query.get('subject') : reviewOrder[0].id;
+    const preset = query.get('preset');
+    state.preset = preset === 'manual' || Object.hasOwn(presetNames,preset) ? preset : 'balanced';
+    state.zoom = query.has('zoom') && Number.isFinite(Number(query.get('zoom')))
+      ? Math.min(maxScale,Math.max(.8,Number(query.get('zoom')))) : 1;
+    state.marks = query.get('marks') !== '0';
   }
 
   function writeState() {
-    const { mode, medium, direction, size, theme, scope, rarity, sort, feet, slots } = state;
+    const { mode, medium, direction, size, theme, scope, rarity, sort, feet, slots, subject, preset, zoom, marks } = state;
     const query = new URLSearchParams({ mode, medium, direction, size, theme, scope, rarity, sort,
       feet:Number(feet), slots:slots.join(',') });
+    if (mode === 'judge') {
+      for (const [key,value] of Object.entries({subject,preset,zoom,marks:Number(marks)})) query.set(key,value);
+    }
     history.replaceState(null,'','#' + query);
   }
 
@@ -184,16 +245,16 @@
     </div>`;
   }
 
-  function tile(unit, direction, portrait = false) {
+  function tile(unit, direction, portrait = false, zoom = 1, overlay = '') {
     if (portrait) {
       return unit.portrait ? `<div class="tile"><img class="face" alt="${unit.name}" src="${imageUrl(unit.id,unit.portrait)}"></div>`
         : '<div class="tile missing">전용 초상화 없음</div>';
     }
     const baseline = state.feet ? `<span class="baseline" style="top:${unit.foot*100}%"></span>` : '';
-    const scale = unit.scale || 1;
+    const scale = (unit.scale || 1)*zoom;
     return `<div class="tile" role="img" aria-label="${unit.name} ${directions[direction]}">
       ${baseline}${sprite(unit, direction,
-      `width:${scale*100}%;left:${(1-scale)*50}%;top:${unit.foot*(1-scale)*100}%`)}
+      `width:${scale*100}%;left:${(1-scale)*50}%;top:${unit.foot*(1-scale)*100}%`)}${overlay}
     </div>`;
   }
 
@@ -202,8 +263,7 @@
     const phrase = search.trim().toLowerCase();
     const filtered = list.filter(unit => (state.rarity === 'all' || state.rarity === unit.rarity)
       && (unit.name + ' ' + unit.id).toLowerCase().includes(phrase));
-    const difference = ({heights:h}) => Math.max(Math.abs(h[0] - h[2]), Math.abs(h[0] - h[3]));
-    return state.sort === 'side' ? filtered.sort((a,b) => difference(b) - difference(a)) : filtered;
+    return state.sort === 'side' ? filtered.sort((a,b) => sideDifference(b) - sideDifference(a)) : filtered;
   }
 
   function rosterView(list) {
@@ -222,10 +282,112 @@
 
   function turnView(list) {
     return list.map(unit => `<section class="turn panel" data-unit="${unit.id}">
-      <div class="turn-title"><h3>${unit.name}</h3><small>${labels[unit.rarity] ?? unit.rarity}</small></div>
+      <div class="turn-title"><h3>${unit.name}</h3><small>${labels[unit.rarity] ?? unit.rarity}</small>
+        <button data-judge="${unit.id}" aria-label="${unit.name} 배율 판정">배율 판정</button></div>
       <div class="turn-grid">${directions.map((name,i) => `<figure>
         ${tile(unit,i)}<figcaption><span>${name}</span><small>${unit.heights[i]}px</small></figcaption></figure>`).join('')}</div>
     </section>`).join('');
+  }
+
+  function geometryOverlay(review, index, scale) {
+    if (!state.marks) return '';
+    const [x, y] = review.anchor;
+    const front = review.directions[0].points, points = review.directions[index].points;
+    const reference = front ? [front.crown,front.eye,front.chin,front.shoulder,front.hip] : [];
+    const guides = reference.filter(Boolean).map(([,height]) =>
+      `<path class="reference" d="M0 ${height}h${cell}"/>`).join('');
+    const outline = `<path class="outline-guide" d="M0 ${review.directions[0].rect[1]}h${cell}"/>`;
+    let marks = '';
+    if (points) {
+      const [cx,cy,w,h,roll] = points.ellipse;
+      const px = n => x+(n-x)*scale, py = n => y+(n-y)*scale;
+      marks = `<ellipse class="measured" cx="${px(cx)}" cy="${py(cy)}" rx="${w*scale/2}" ry="${h*scale/2}"
+        transform="rotate(${roll} ${px(cx)} ${py(cy)})" fill="none"/>`;
+      marks += [points.eye,points.chin,points.shoulder,points.hip].filter(Boolean)
+        .map(([mx,my])=>`<circle class="measured" cx="${px(mx)}" cy="${py(my)}" r="7" fill="#fff4df"/>`).join('');
+    }
+    return `<svg class="landmarks" viewBox="0 0 ${cell} ${cell}" aria-hidden="true">
+      <path class="reference center" d="M${x} 0v${cell}"/>${outline}${guides}${marks}</svg>`;
+  }
+
+  function judgeScene(unit, preview, scale) {
+    return `<section class="panel judge-scene"><h3>${preview?'가상 배율':'현재 에셋'}</h3>
+      <div class="turn-grid">${directions.map((direction,i)=>{
+        const zoom = preview && i>=2 ? scale : 1;
+        return `<figure data-direction="${i}">${tile(unit,i,false,zoom,geometryOverlay(unit.review,i,zoom))}
+          <figcaption class="judge-caption"><span>${direction}</span><small>${percent(zoom)}</small></figcaption></figure>`;
+      }).join('')}</div></section>`;
+  }
+
+  function judgeTable(review, scale) {
+    const left = review.directions[2].rows, right = review.directions[3].rows;
+    const cells = row => {
+      if (!row) return '<td>—</td>';
+      const delta = row.value*scale-row.target;
+      return `<td><span>${number(row.value)} → ${number(row.value*scale)}</span>
+        <span class="${Math.abs(delta)>tolerance+1e-7?'miss':''}">${signed(delta)}px</span></td>`;
+    };
+    const rows = left.map(row=>`<tr><th scope="row">${row.label}</th><td>${number(row.target)}px</td>
+      ${cells(row)}${cells(right.find(r=>r.key===row.key))}</tr>`).join('');
+    const proportions = review.directions.map(({points:p})=>p?.chin ? (review.anchor[1]-p.chin[1])/p.height : null);
+    const ratios = [0,2,3].every(i=>proportions[i]!==null)
+      ? `<p class="note judge-note">턱~발 ÷ 머리 높이 · 정면 ${proportions[0].toFixed(2)}배 · 왼쪽 ${proportions[2].toFixed(2)}배 · 오른쪽 ${proportions[3].toFixed(2)}배. 이 비율은 전신을 같은 배율로 확대해도 같습니다.</p>` : '';
+    return `<section class="panel judge-table"><h3>정면과의 차이</h3>
+      <div class="table-scroll"><table>
+      <thead><tr><th>기준점</th><th>목표</th><th>왼쪽</th><th>오른쪽</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <p class="note judge-note">512px 원본 셀 기준입니다. 각 칸에 현재 → 가상 확대 수치와 목표 대비 오차를 표시합니다. 높이는 발선 위 거리입니다.</p>
+      ${ratios}</section>`;
+  }
+
+  function judgeView() {
+    const unit = units.get(state.subject), review = unit.review;
+    const scale = state.preset==='manual' ? state.zoom : Math.min(maxScale,Math.max(.8,review.presets[state.preset] ?? review.presets.balanced));
+    const [label,description] = outcomes[review.verdict];
+    const note = review.reread ? '원본에서 다시 표시한 눈·턱·몸 기준점을 포함합니다.'
+      : '보존된 두개골·턱·발 기준을 사용합니다. 어깨·골반은 화면에서 확인합니다.';
+    const profiles = review.directions.slice(2);
+    const outline = profiles.map(({rows})=>{
+      const r = rows.find(r=>r.key==='outline');
+      return percent(r.target/r.value);
+    });
+    const rear = review.directions[1].rows.filter(r=>review.rearMisses.includes(r.key)).map(r=>r.label);
+    const liveRows = profiles.flatMap(direction=>direction.rows);
+    const anatomyRows = liveRows.filter(r=>r.key!=='outline');
+    const inBand = r => Math.abs(r.value*scale-r.target)<=tolerance+1e-7;
+    const live = [anatomyRows.length ? `해부 ${anatomyRows.filter(inBand).length}/${anatomyRows.length}` : '',
+      `겉윤곽 ${liveRows.filter(r=>r.key==='outline'&&inBand(r)).length}/2`].filter(Boolean).join(' · ');
+    const summary = reviewOrder.map(u=>`<tr><th><button data-judge="${u.id}">${u.name}</button></th>
+      <td>${sideDifference(u)}px</td><td>${outcomes[u.review.verdict][0]}</td></tr>`).join('');
+    return `<div class="judge">
+      <section class="judge-head panel">
+        <div class="line"><label>동료 <select id="judge-unit">
+          ${reviewOrder.map(u=>`<option value="${u.id}" ${u===unit?'selected':''}>${u.name} · 측면 차이 ${sideDifference(u)}px</option>`).join('')}
+        </select></label><span class="verdict" data-result="${review.verdict}">${label}</span></div>
+        <p>${description}</p>
+        <div class="line">${Object.entries(presetNames).filter(([key])=>review.presets[key]!==null)
+          .map(([key,name])=>`<button data-preset="${key}" aria-pressed="${state.preset===key}">${name}</button>`).join('')}</div>
+        <div class="line"><label>좌우 공통 배율 <input id="judge-zoom" type="number" min="80" max="${maxScale*100}" step=".1" value="${number(scale*100)}"> %</label>
+          <label><input id="judge-marks" type="checkbox" ${state.marks?'checked':''}> 기준점 표시</label>
+          ${scale>review.maxScale+1e-7 ? '<strong class="miss">셀 밖 잘림</strong>' : ''}</div>
+        <p class="note" id="judge-fit">현재 시안에서 검토선 안에 드는 항목 · ${live}</p>
+      </section>
+      <div class="judge-pair">${judgeScene(unit,false,1)}${judgeScene(unit,true,scale)}</div>
+      ${state.marks ? '<p class="note">파란 선 · 정면 기준점　회색 선 · 정면 겉윤곽　주황 표시 · 해당 방향 기준점</p>' : ''}
+      <details class="panel judge-reason" ${state.reasonOpen?'open':''}><summary>판정 근거와 배율 범위</summary>
+        <p class="note">해부 기준 ${review.structural ? rangeText(review.structural.range) : '기준점 확인'} · 해부 + 겉윤곽 ${review.structural ? rangeText(review.includingOutline.range) : '기준점 확인'}</p>
+        <p class="note">겉윤곽만 각각 맞출 때 왼쪽 ${outline[0]}, 오른쪽 ${outline[1]} · 잘림 없는 시험 배율 100%–${percent(review.maxScale)}</p>
+        ${review.structural && !review.structural.range && review.uncertain.range
+          ? '<p class="note">수동 기준점의 추정 오차를 넓게 보면 범위가 겹칩니다. 확대 후보를 확정하기 전에 기준점을 다시 볼 수 있습니다.</p>' : ''}
+        ${review.structural ? `<p class="note">${rear.length ? '후면 확인 항목 · ' + rear.join(' · ') : '후면의 기록된 항목은 검토선 안입니다.'}</p>` : ''}
+        <p class="note">${note}</p>
+      </details>
+      ${judgeTable(review,scale)}
+      <details class="panel judge-summary" ${state.summaryOpen?'open':''}><summary>전체 판정 요약 · ${data.units.length}종</summary>
+        <div class="table-scroll"><table><thead><tr><th>동료</th><th>정면 대비 측면 차이</th><th>판정</th></tr></thead><tbody>${summary}</tbody></table></div>
+      </details>
+      <p class="note">검토선은 ±${tolerance}px입니다. 측면 두개골 폭 목표는 정면의 90%이며, 머리카락과 장비는 겉윤곽에만 포함합니다. 수동 추정점을 대조하는 판정이며, 가림·자세와 모든 관절의 정합은 그림에서 확인합니다.</p>
+    </div>`;
   }
 
   function boardView() {
@@ -268,7 +430,7 @@
   }
 
   function render() {
-    const onBoard = state.mode === 'board', turn = state.mode === 'turn';
+    const onBoard = state.mode === 'board', turn = state.mode === 'turn', judge = state.mode === 'judge';
     const faces = state.mode === 'all' && state.medium === 'portrait';
     const [ground, tileColor, rule] = themes[state.theme];
     const style = document.documentElement.style;
@@ -277,19 +439,23 @@
     for (const key of ['medium','direction','size','theme','scope','rarity','sort']) $(key).value = state[key];
     $('feet').checked = state.feet;
     $('medium-control').hidden = state.mode !== 'all';
-    $('direction-control').hidden = turn || faces;
+    $('direction-control').hidden = turn || faces || judge;
     $('size-control').hidden = onBoard;
     $('feet-control').hidden = faces;
-    $('filters').hidden = onBoard;
+    $('filters').hidden = onBoard || judge;
     $('scope-control').hidden = !turn;
-    const list = onBoard ? [] : selectUnits();
+    const list = onBoard || judge ? [] : selectUnits();
     const placed = state.slots.filter(Boolean).length;
     $('count').textContent = placed ? `(${placed})` : '';
     $('results').textContent = onBoard
       ? state.pending ? `${units.get(state.pending).name}을 놓을 칸을 선택하세요.` : `${placed}종 배치 · ${directions[Number(state.direction)]}`
-      : `${list.length}종 표시${turn&&state.scope==='selected'?' · 배치한 동료':''}`;
-    $('view').innerHTML = onBoard ? boardView() : list.length ? (turn ? turnView(list) : rosterView(list)) :
+      : judge ? '정면·후면을 기준으로 좌우 확대를 미리 봅니다.' : `${list.length}종 표시${turn&&state.scope==='selected'?' · 배치한 동료':''}`;
+    $('view').innerHTML = onBoard ? boardView() : judge ? judgeView() : list.length ? (turn ? turnView(list) : rosterView(list)) :
       '<p class="empty panel">표시할 동료가 없습니다. 검색과 등급 또는 배치 선택을 확인하세요.</p>';
+    const summary = document.querySelector('.judge-summary');
+    if (summary) summary.ontoggle = () => { state.summaryOpen = summary.open; };
+    const reason = document.querySelector('.judge-reason');
+    if (reason) reason.ontoggle = () => { state.reasonOpen = reason.open; };
     writeState();
   }
 
@@ -311,7 +477,7 @@
   document.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button) return;
-    const { mode, pick, slot, action } = button.dataset;
+    const { mode, pick, slot, action, judge, preset } = button.dataset;
     if (mode) { state.mode = mode; render(); }
     else if (pick) {
       const previous = state.slots.indexOf(pick), vacant = state.slots.indexOf('');
@@ -319,6 +485,16 @@
       state.slots[previous >= 0 ? previous : vacant] = previous >= 0 ? '' : pick;
       render();
       document.querySelector(`[data-pick="${pick}"]`)?.focus({preventScroll:true});
+    } else if (judge) {
+      state.mode = 'judge';
+      state.subject = judge;
+      state.preset = 'balanced';
+      render();
+      $('judge-unit').focus({preventScroll:true});
+    } else if (preset) {
+      state.preset = preset;
+      render();
+      document.querySelector(`[data-preset="${preset}"]`)?.focus({preventScroll:true});
     } else if (slot !== undefined) onSlot(Number(slot));
     else if (action) {
       if (action === 'clear') state.slots = Array(capacity).fill('');
@@ -332,6 +508,14 @@
   document.addEventListener('change', event => {
     const control = event.target;
     if (control.id === 'pending') { state.pending = control.value; render(); $('pending').focus(); }
+    if (control.id === 'judge-unit') { state.subject = control.value; state.preset = 'balanced'; render(); $('judge-unit').focus(); }
+    if (control.id === 'judge-marks') { state.marks = control.checked; render(); $('judge-marks').focus(); }
+    if (control.id === 'judge-zoom') {
+      state.zoom = Number.isFinite(control.valueAsNumber) ? Math.min(maxScale,Math.max(.8,control.valueAsNumber/100)) : 1;
+      state.preset = 'manual';
+      render();
+      $('judge-zoom').focus({preventScroll:true});
+    }
     if (['medium','direction','size','theme','scope','rarity','sort','feet'].includes(control.id)) {
       state[control.id] = control.id === 'feet' ? control.checked : control.value;
       render();
