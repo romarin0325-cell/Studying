@@ -1,0 +1,378 @@
+{
+  "spec": "defense/docs/art/ur-vfx-20261106/kit-pack.json",
+  "mode": "luma",
+  "cells": [
+    {
+      "index": 0,
+      "name": "blade",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-a.png",
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        56,
+        49,
+        417,
+        411
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        13,
+        15,
+        230,
+        227
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 1,
+      "name": "crescent",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+      "cut": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "box": [
+        583,
+        59,
+        353,
+        379
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        277,
+        13,
+        215,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 2,
+      "name": "ring",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1081,
+        54,
+        378,
+        375
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        14,
+        230,
+        228
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 3,
+      "name": "mist",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+      "cut": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "box": [
+        70,
+        558,
+        380,
+        357
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        781,
+        20,
+        230,
+        217
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 4,
+      "name": "shard",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+      "cut": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "box": [
+        619,
+        576,
+        313,
+        321
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        16,
+        269,
+        225,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 5,
+      "name": "flare",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit1-b.png",
+      "cut": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "box": [
+        1068,
+        532,
+        405,
+        397
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        271,
+        230,
+        226
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 6,
+      "name": "petal",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-b.png",
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        169,
+        159,
+        180,
+        199
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        535,
+        269,
+        210,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 7,
+      "name": "spikes",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+      "cut": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "box": [
+        586,
+        38,
+        339,
+        390
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        795,
+        269,
+        202,
+        230
+      ],
+      "anchor": "bottom"
+    },
+    {
+      "index": 8,
+      "name": "spike",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1191,
+        34,
+        174,
+        396
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        73,
+        525,
+        111,
+        230
+      ],
+      "anchor": "bottom"
+    },
+    {
+      "index": 9,
+      "name": "moon",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+      "cut": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "box": [
+        55,
+        536,
+        403,
+        378
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        532,
+        230,
+        217
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 10,
+      "name": "rime",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-a.png",
+      "cut": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "box": [
+        563,
+        532,
+        397,
+        390
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        527,
+        230,
+        226
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 11,
+      "name": "shatter",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-kit2-b.png",
+      "cut": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "box": [
+        1083,
+        565,
+        394,
+        361
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        781,
+        534,
+        230,
+        212
+      ],
+      "anchor": "center"
+    }
+  ]
+}

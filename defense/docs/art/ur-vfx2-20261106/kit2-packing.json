@@ -1,0 +1,508 @@
+{
+  "spec": "defense/docs/art/ur-vfx2-20261106/kit2-pack.json",
+  "mode": "kit",
+  "cells": [
+    {
+      "index": 0,
+      "name": "circle",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-c.webp",
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        52,
+        29,
+        411,
+        411
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        13,
+        13,
+        230,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 1,
+      "name": "wing",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-a.webp",
+      "cut": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "box": [
+        538,
+        23,
+        456,
+        450
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        15,
+        230,
+        227
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 2,
+      "name": "feather",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-a.webp",
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1117,
+        36,
+        340,
+        396
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        540,
+        13,
+        200,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 3,
+      "name": "clock",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-b.webp",
+      "cut": [
+        0,
+        501,
+        512,
+        1024
+      ],
+      "box": [
+        61,
+        502,
+        437,
+        431
+      ],
+      "touchesCut": [
+        false,
+        true,
+        false,
+        false
+      ],
+      "placed": [
+        781,
+        18,
+        230,
+        221
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 4,
+      "name": "hand",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-a.webp",
+      "cut": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "box": [
+        731,
+        526,
+        76,
+        413
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        100,
+        269,
+        57,
+        230
+      ],
+      "anchor": "bottom"
+    },
+    {
+      "index": 5,
+      "name": "pillar",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitL-b.webp",
+      "cut": [
+        1024,
+        501,
+        1536,
+        1024
+      ],
+      "box": [
+        1223,
+        505,
+        101,
+        439
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        350,
+        269,
+        68,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 6,
+      "name": "slipper",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-a.webp",
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        75,
+        81,
+        385,
+        346
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        280,
+        230,
+        208
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 7,
+      "name": "rose",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-c.webp",
+      "cut": [
+        512,
+        0,
+        1024,
+        494
+      ],
+      "box": [
+        555,
+        57,
+        420,
+        378
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        781,
+        280,
+        230,
+        209
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 8,
+      "name": "petal",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-a.webp",
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1147,
+        131,
+        261,
+        242
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        13,
+        533,
+        230,
+        214
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 9,
+      "name": "vine",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-c.webp",
+      "cut": [
+        0,
+        494,
+        512,
+        1024
+      ],
+      "box": [
+        119,
+        495,
+        340,
+        494
+      ],
+      "touchesCut": [
+        false,
+        true,
+        false,
+        false
+      ],
+      "placed": [
+        299,
+        525,
+        170,
+        230
+      ],
+      "anchor": "bottom",
+      "solo": true
+    },
+    {
+      "index": 10,
+      "name": "coin",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-c.webp",
+      "cut": [
+        512,
+        494,
+        1024,
+        1024
+      ],
+      "box": [
+        589,
+        583,
+        346,
+        346
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        525,
+        230,
+        230
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 11,
+      "name": "crown",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitO-a.webp",
+      "cut": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "box": [
+        1069,
+        567,
+        426,
+        344
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        781,
+        546,
+        230,
+        189
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 12,
+      "name": "whale",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-b.webp",
+      "cut": [
+        0,
+        0,
+        627,
+        618
+      ],
+      "box": [
+        57,
+        97,
+        543,
+        376
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        13,
+        814,
+        230,
+        165
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 13,
+      "name": "galaxy",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-a.webp",
+      "cut": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "box": [
+        706,
+        75,
+        466,
+        442
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        787,
+        230,
+        219
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 14,
+      "name": "gear",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-b.webp",
+      "cut": [
+        0,
+        618,
+        627,
+        1254
+      ],
+      "box": [
+        80,
+        655,
+        470,
+        458
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        784,
+        230,
+        225
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 15,
+      "name": "hourglass",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx2-20261106/gpt-kitC-b.webp",
+      "cut": [
+        627,
+        618,
+        1254,
+        1254
+      ],
+      "box": [
+        779,
+        619,
+        322,
+        522
+      ],
+      "touchesCut": [
+        false,
+        true,
+        false,
+        false
+      ],
+      "placed": [
+        819,
+        781,
+        154,
+        230
+      ],
+      "anchor": "center"
+    }
+  ]
+}

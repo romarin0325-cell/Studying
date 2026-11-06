@@ -1,0 +1,14 @@
+Use your built-in image generation tool to create ONE image, then save that image file as kit2.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create a MONOCHROME game VFX element sheet for an existing mobile fantasy tower-defense game. Reference image 1 (style-ref.png) shows the game's established effect language: luminous translucent glass-crystal light with bright hot cores, crisp readable silhouettes, fine facets and a few small sparkles, glowing on a PURE BLACK background. Match that finish and level of detail exactly, BUT paint everything in pure white, silver and gray light only: absolutely no hue or colour (no blue, pink, violet or gold). These are luminance maps: the game recolours them at runtime with each hero's palette, so the brightness alone must carry all the form: a white-hot core, a light-gray body with crisp facet highlights, and a soft dark-gray glow that fades into pure black. Do NOT paint opaque solid objects, flat stickers, cel shading or black ink outlines.
+
+Layout: EXACTLY 3 columns x 2 rows of equal square cells on a 3:2 canvas. Pure black (#000000) background everywhere. Each element centred in its cell with at least 10% black margin; nothing crosses a cell border. No grid lines, frames, labels, letters, numbers, faces, people or UI.
+
+Top row:
+1. "petal": ONE single cherry-blossom petal (rounded, with a small notch at its tip), slightly tilted and softly curved, with a bright luminous rim, a faint central vein and a gentle gradient toward its narrow base. About 45% of the cell.
+2. "ice spike cluster": three sharp crystal ice spikes erupting upward from a small base at the bottom centre of the cell, seen from the front at a slightly low angle, the tallest in the middle leaning slightly, faceted with bright edges, a few tiny shards and frost chips at the base. About 85% of the cell height.
+3. "single ice spike": ONE tall slender crystal spike pointing straight up from a base at the bottom centre, faceted, with a white-hot tip and bright edge highlights. About 90% of the cell height and only about 25% of its width.
+Bottom row:
+4. "full moon": a full moon disc with soft subtle craters, glowing, surrounded by a thin ornate ring of lace-like filigree with a few small star glints. About 80% of the cell.
+5. "frost rime": a flat patch of feathery frost crystals seen from directly above, roughly round, delicate fern-like ice feathers radiating from the centre, semi-transparent, brightest along the feather edges. About 80% of the cell.
+6. "shatter burst": an explosion of small sharp crystal fragments flying outward from the centre in all directions, fragments of different sizes with bright edges, a small white flash at the centre. About 85% of the cell.

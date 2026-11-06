@@ -550,6 +550,11 @@ em{font-style:normal}
 .hud-item,.hud-gauge{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .hud .ic{width:16px;height:16px}
 .hud-item.hp{color:#ff8fa5}
+/* Gold carried by an ultimate (the Queen's coins) lands: the coin pops and the total glows once. Transform and shadow only. */
+.hud-item.gain .ic{animation:gold-gain .5s cubic-bezier(.2,.9,.3,1.4)}
+.hud-item.gain b{animation:gold-glow .7s ease-out}
+@keyframes gold-gain{0%{transform:scale(1)}30%{transform:scale(1.45) rotate(-8deg)}100%{transform:scale(1)}}
+@keyframes gold-glow{0%,30%{text-shadow:0 0 10px #ffd45a,0 0 2px #fff3c4}100%{text-shadow:none}}
 .hud-gauge{flex:1;min-width:0;color:var(--gem)}
 .hud-gauge .ic{color:var(--gem)}
 .gauge-bar{flex:1;height:8px;border-radius:4px;background:#ffffff1a;overflow:hidden;min-width:20px}

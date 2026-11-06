@@ -619,6 +619,27 @@
       "height": 256
     },
     {
+      "id": "ur-kit",
+      "source": "defense/assets/merge/ur-kit.webp",
+      "sha256": "d76b194810f8692d3efb4305dd44927dd5e4e40e9d1854c232f7abcab5a257dc",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "ur-sweets",
+      "source": "defense/assets/merge/ur-sweets.webp",
+      "sha256": "33b666514a79a2b5f05fae39ee408455548e07c199b87bbbf084cbf5937d221d",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "id": "ur-kit2",
+      "source": "defense/assets/merge/ur-kit2.webp",
+      "sha256": "ceac0d26e0bf72ec125931e5bb430211dd0e147c38bab30589d213d411f29d99",
+      "width": 1024,
+      "height": 1024
+    },
+    {
       "id": "orbit-zone",
       "source": "defense/assets/merge/orbit-zone.webp",
       "sha256": "8315be3a83dd1b99f15ba76ec888c8e489400dcb829df64750e01b39c17b46bf",

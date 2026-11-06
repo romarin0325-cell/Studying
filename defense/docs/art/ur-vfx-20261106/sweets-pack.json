@@ -1,0 +1,157 @@
+{
+ "nodeModules": "C:/Users/romar/git/Studying/node_modules",
+ "out": "defense/assets/merge/ur-sweets.webp",
+ "cell": 256,
+ "columns": 4,
+ "rows": 3,
+ "mode": "alpha",
+ "inner": 0.86,
+ "cells": [
+  {
+   "name": "shortcake",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    0
+   ]
+  },
+  {
+   "name": "macarons",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    0
+   ]
+  },
+  {
+   "name": "pudding",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    0
+   ]
+  },
+  {
+   "name": "parfait",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    1
+   ]
+  },
+  {
+   "name": "donut",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    1
+   ]
+  },
+  {
+   "name": "cupcake",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    1
+   ]
+  },
+  {
+   "name": "stand",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    0
+   ],
+   "anchor": "bottom"
+  },
+  {
+   "name": "strawberry",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    0
+   ]
+  },
+  {
+   "name": "bow",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    0
+   ]
+  },
+  {
+   "name": "cotton",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    0,
+    1
+   ]
+  },
+  {
+   "name": "macaron",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    1,
+    1
+   ]
+  },
+  {
+   "name": "stardust",
+   "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-a.png",
+   "grid": [
+    3,
+    2
+   ],
+   "at": [
+    2,
+    1
+   ],
+   "source": "light"
+  }
+ ]
+}

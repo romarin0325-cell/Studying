@@ -1,0 +1,378 @@
+{
+  "spec": "defense/docs/art/ur-vfx-20261106/sweets-pack.json",
+  "mode": "alpha",
+  "cells": [
+    {
+      "index": 0,
+      "name": "shortcake",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        85,
+        48,
+        375,
+        424
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        30,
+        18,
+        196,
+        220
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 1,
+      "name": "macarons",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+      "cut": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "box": [
+        617,
+        50,
+        307,
+        428
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        303,
+        18,
+        162,
+        220
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 2,
+      "name": "pudding",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1078,
+        32,
+        372,
+        432
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        544,
+        18,
+        192,
+        220
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 3,
+      "name": "parfait",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+      "cut": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "box": [
+        126,
+        525,
+        285,
+        470
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        825,
+        18,
+        142,
+        220
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 4,
+      "name": "donut",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+      "cut": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "box": [
+        547,
+        573,
+        414,
+        383
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        18,
+        282,
+        220,
+        205
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 5,
+      "name": "cupcake",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d1-t1.png",
+      "cut": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "box": [
+        1087,
+        537,
+        360,
+        438
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        292,
+        274,
+        184,
+        220
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 6,
+      "name": "stand",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        114,
+        7,
+        335,
+        472
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        558,
+        274,
+        165,
+        220
+      ],
+      "anchor": "bottom"
+    },
+    {
+      "index": 7,
+      "name": "strawberry",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+      "cut": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "box": [
+        631,
+        105,
+        268,
+        298
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        796,
+        274,
+        200,
+        220
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 8,
+      "name": "bow",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1073,
+        112,
+        373,
+        313
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        18,
+        547,
+        220,
+        187
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 9,
+      "name": "cotton",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+      "cut": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "box": [
+        127,
+        541,
+        321,
+        435
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        301,
+        530,
+        167,
+        220
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 10,
+      "name": "macaron",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-t1.png",
+      "cut": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "box": [
+        621,
+        637,
+        285,
+        240
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        530,
+        546,
+        220,
+        188
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 11,
+      "name": "stardust",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx-20261106/gpt-d2-a.png",
+      "cut": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "box": [
+        1075,
+        549,
+        397,
+        401
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        787,
+        530,
+        218,
+        220
+      ],
+      "anchor": "center"
+    }
+  ]
+}
