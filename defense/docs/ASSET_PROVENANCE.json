@@ -640,6 +640,13 @@
       "height": 1024
     },
     {
+      "id": "ur-kit3",
+      "source": "defense/assets/merge/ur-kit3.webp",
+      "sha256": "f5bdac60b078817194b27c68ec4974491b77d222bf256bd447548d5ddd5f6248",
+      "width": 1024,
+      "height": 1024
+    },
+    {
       "id": "orbit-zone",
       "source": "defense/assets/merge/orbit-zone.webp",
       "sha256": "8315be3a83dd1b99f15ba76ec888c8e489400dcb829df64750e01b39c17b46bf",

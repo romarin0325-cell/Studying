@@ -1016,6 +1016,7 @@ export function cast(s,id){
     visualTargets=[target];
     s.finishers.push({uid:s.nextId++,source:u.uid,hero:id,kind:type,target:target.uid,origin,to:pathPoint(target.progress),damage:base*(type==='royal'?24:type==='mirror'?12:STARFALL_FACTOR*spent),rank:u.rank,life:total,total,...(type==='mirror'?{stored:0,ratio:mirrorRatio(s,u)}:{})});
     event(s,'targetLock',{hero:id,uid:target.uid,...pathPoint(target.progress)});
+    if(type==='starfall')look={spent};
   }
   else if(type==='freeze'){strike(3);for(const e of targets){addControl(s,e,'freeze',source,id,SNOW_RABBIT.freeze*control*scale);addSlow(s,e,source,SNOW_RABBIT.skillSlow*scale,SNOW_RABBIT.seconds);}}
   else if(type==='avalanche'){for(const e of targets){damage(s,e,base*(e.controlTime>0?12:4),id);addSlow(s,e,source,.5,4);}}
@@ -1024,6 +1025,8 @@ export function cast(s,id){
     const near=e=>targets.filter(t=>t.hp>0&&Math.hypot(pathPoint(t.progress).x-pathPoint(e.progress).x,pathPoint(t.progress).y-pathPoint(e.progress).y)<=180);
     const centre=targets.reduce((best,e)=>{const n=near(e).length;return !best||n>best.n||n===best.n&&e.progress>best.e.progress?{e,n}:best;},null)?.e;
     visualTargets=centre?near(centre):[];for(const e of visualTargets){damage(s,e,base*14,id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
+    // Where the breath lands (presentation only: the sequence draws the real radius around it).
+    if(centre)look={blast:pathPoint(centre.progress),radius:180};
   }
   else if(type==='inferno'){strike(7*(coreCrisis(s)?2:1));for(const e of targets)addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}
   else if(type==='combust'){for(const e of targets){damage(s,e,base*(e.burnTime>0?10:4),id);addStatus(s,e,'burn',source,id,base*BURN.skill,BURN.skillSeconds);}}
@@ -1050,7 +1053,8 @@ export function cast(s,id){
     for(const e of order){if(strikes<=0)break;strikes--;visualTargets.push(e);const execute=e.hp/e.maxHp<=executeThreshold(e,s);if(execute)marks.set(e.uid,{execute:true});damage(s,e,base*(execute?30:16),id);if(execute&&e.hp<=0&&extra<5){extra++;strikes++;}}
   }else if(type==='flurry'){visualTargets=[...targets].sort((a,b)=>b.progress-a.progress).slice(0,nightRabbitTargetCount(s));for(const e of visualTargets)damage(s,e,base*9,id);}
   else if(type==='thunder'){strike(THUNDER_FACTOR);for(const e of targets)addControl(s,e,'stun',source,id,1.2*control*scale);}
-  else if(type==='fortune')strike(fortuneFactor(s.gold,s.upgrades[id]||0));
+  // The bonus (+1 per 40 gold kept after paying) rides along for the presentation's fan of daggers.
+  else if(type==='fortune'){strike(fortuneFactor(s.gold,s.upgrades[id]||0));look={bonus:Math.min(5,Math.floor(Math.max(0,s.gold)/40))};}
   else if(type==='dividend'){const edict=s.edictWave!==s.wave?Math.round(waveIncome(s.wave)*.5):0;strike(4);giveGold(s,QUEEN_TAX,'필살기');s.edictWave=s.wave;look={tax:QUEEN_TAX,edict};}
   // Immunity is sampled first: stunning the protector must not strip the aura from allies in the same cast.
   else if(type==='bigshow'){strike(UNDERDOG.factor);const victims=s.board.map((ally,i)=>!!ally&&!immune(s,i));victims.forEach((on,i)=>{if(on)stunUnit(s,i,UNDERDOG.stun);});}

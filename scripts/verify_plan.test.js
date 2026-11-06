@@ -175,14 +175,17 @@ test('Star Garden sources select the existing tests that pin their contracts', (
     ['defense/src/combat/engine.js', ['combat', 'generated-reports', 'text']],
     ['defense/src/bond.js', ['bond']],
     ['defense/src/smart-auto.js', ['combat']],
-    ['defense/src/combat/effects.js', ['companion-vfx', 'lightning-vfx']],
+    ['defense/src/combat/effects.js', ['companion-vfx', 'lightning-vfx', 'ur-vfx']],
+    ['defense/src/combat/render.js', ['assets', 'ur-vfx']],
+    ['defense/src/combat/ur-vfx.js', ['ur-vfx']],
+    ['defense/src/combat/ur-warm.js', ['ur-vfx']],
     ['defense/src/lab/model.js', ['lab']],
     ['defense/lab.html', ['lab']],
     ['defense/scripts/build-lab.mjs', ['lab']],
     ['defense/src/memorial.js', ['memorial']],
     ['defense/src/course.js', ['study']],
     ['defense/scripts/current-values.mjs', ['generated-reports']],
-    ['defense/src/app.js', []]
+    ['defense/src/app.js', ['ur-vfx']]
   ]) assert.deepEqual(selected(file), expected, file);
   // The lab inputs rebuild the committed lab (CI compares it); tests that load sharp install dependencies.
   for (const file of ['defense/lab.html', 'defense/scripts/build-lab.mjs']) {
