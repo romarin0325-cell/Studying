@@ -39,12 +39,21 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
 test('summon face crops and prepared portraits share optical framing without moving anatomy',async()=>{
   const {derivedImageInputs}=await import('../scripts/image-policy.mjs');
   const crops=new Map(derivedImageInputs().filter(x=>x.id.startsWith('portrait:')).map(x=>[x.id.slice(9),x]));
+  const reviewedCrops={
+    gold_dragon:{x:250,y:215,size:240},
+    luna:{x:243,y:207,size:272},
+    doom:{x:253,y:205,size:230}
+  };
   for(const hero of HEROES){
     const anatomy={...hero.art.portrait},frame=portraitFrame(hero),prepared=crops.get(hero.id);
     assert.ok(prepared,hero.id);
-    assert.equal(frame.size,hero.id==='gold_dragon'?240:anatomy.size,'only Gold Dragon has the reviewed 4.17% portrait zoom');
-    const verticalLimit=hero.id==='demon_king'?16:8;
-    assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=verticalLimit,'only reviewed optical translations');
+    if(reviewedCrops[hero.id]){
+      assert.deepEqual(frame,reviewedCrops[hero.id],hero.id+' reviewed crop');
+    }else{
+      assert.equal(frame.size,anatomy.size,'use the original scale for translation-only portraits');
+      const verticalLimit=hero.id==='demon_king'?16:8;
+      assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=verticalLimit,'only reviewed optical translations');
+    }
     assert.deepEqual(hero.art.portrait,anatomy,'anatomical measurement is preserved');
     assert.deepEqual(prepared.crop,{left:Math.round(frame.x-frame.size/2),top:Math.round(frame.y-frame.size/2),width:frame.size,height:frame.size},hero.id);
   }

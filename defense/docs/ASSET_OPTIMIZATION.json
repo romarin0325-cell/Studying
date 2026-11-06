@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 33150041,
-    "deployableSourceBytes": 31325767,
-    "outputBytes": 17617174,
+    "sourceBytes": 33119221,
+    "deployableSourceBytes": 31294947,
+    "outputBytes": 17606350,
     "optimizedFiles": 177,
     "derivedFiles": 162,
-    "derivedOutputBytes": 3894814
+    "derivedOutputBytes": 3887454
   },
   "images": [
     {
@@ -1142,7 +1142,7 @@
     },
     {
       "id": "atlas:unit-doom",
-      "source": "./assets/cast-v2/doom.webp",
+      "source": "./assets/cast-v2/doom-revised.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-doom; combat renderer / stage UI",
@@ -1151,8 +1151,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 171594,
-        "sha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+        "bytes": 140774,
+        "sha256": "2dad84d7e0c07cc29663c183211d89f2b6e8d80bdd63d4c590d0d4554ca9b805",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1161,9 +1161,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/doom.webp",
-        "bytes": 63506,
-        "sha256": "1727475afec918e657906dc3c728228c84c482091f8533a39d5e61d77c3957ee",
+        "path": "./assets/optimized/cast-v2/doom-revised.webp",
+        "bytes": 52682,
+        "sha256": "0fe8b4bafe3d2af6e466d2a4bcce122bd7acd40b3724768ff923a874c9f420dd",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -7505,10 +7505,10 @@
       "source": "./assets/cast-v2/luna.webp",
       "profile": "portrait",
       "crop": {
-        "left": 117,
-        "top": 95,
-        "width": 250,
-        "height": 250
+        "left": 107,
+        "top": 71,
+        "width": 272,
+        "height": 272
       },
       "destination": "./assets/optimized/ui/portraits/luna.webp",
       "uses": [
@@ -7517,8 +7517,8 @@
       "sourceSha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
       "output": {
         "path": "./assets/optimized/ui/portraits/luna.webp",
-        "bytes": 20120,
-        "sha256": "cf2cbd8b67963eda52c87261510952141667256a9db277b393300e2ba3cc08fe",
+        "bytes": 19564,
+        "sha256": "51e6152a810c3abab5ea4c73322659008515c1a85b7242bad9d6952ba63bd7eb",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8042,23 +8042,23 @@
     },
     {
       "id": "portrait:doom",
-      "source": "./assets/cast-v2/doom.webp",
+      "source": "./assets/cast-v2/doom-revised.webp",
       "profile": "portrait",
       "crop": {
-        "left": 128,
-        "top": 74,
-        "width": 250,
-        "height": 250
+        "left": 138,
+        "top": 90,
+        "width": 230,
+        "height": 230
       },
       "destination": "./assets/optimized/ui/portraits/doom.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+      "sourceSha256": "2dad84d7e0c07cc29663c183211d89f2b6e8d80bdd63d4c590d0d4554ca9b805",
       "output": {
         "path": "./assets/optimized/ui/portraits/doom.webp",
-        "bytes": 17400,
-        "sha256": "18a09f33aae41f747fa58ddce68630bf462020d34f8713c3cce11ef98cc295cf",
+        "bytes": 14924,
+        "sha256": "e0d8c658c7f7131d35b75e8bf317727523ad216f06e2194279337fc7f97b6cef",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8069,7 +8069,7 @@
     },
     {
       "id": "figure:doom",
-      "source": "./assets/cast-v2/doom.webp",
+      "source": "./assets/cast-v2/doom-revised.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -8081,11 +8081,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+      "sourceSha256": "2dad84d7e0c07cc29663c183211d89f2b6e8d80bdd63d4c590d0d4554ca9b805",
       "output": {
         "path": "./assets/optimized/ui/figures/doom.webp",
-        "bytes": 33446,
-        "sha256": "ffd3dc4eb510ca04abf79626133aac5d91806885a7243f6c71c2530ecd620f28",
+        "bytes": 29118,
+        "sha256": "90dcebc273f0e6cf79d570b98d8c5b2c4ce8eedf1474950fb549bb1614d40c49",
         "metadata": {
           "width": 512,
           "height": 512,

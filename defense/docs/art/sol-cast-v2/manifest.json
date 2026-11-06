@@ -7832,230 +7832,214 @@
     },
     {
       "id": "doom",
-      "version": "v1",
-      "generationSourceSha256": "7821fc936fd4a24b26243e0ef4cc83fce005e251246dd96a31882dd123815eb5",
-      "commonScale": 0.6539533813251087,
-      "measurementUncertaintyPacked": 11.771160863851957,
+      "version": "revised-guided-v3-20261107",
+      "generationSourceSha256": "0e31f39938906945143433b1e187b4682ca4f261daf6b63a52b6c622506a0081",
+      "commonScale": 0.7279709516267079,
+      "measurementUncertaintyPacked": 13.103477129280742,
       "uncertaintySourcePixels": {
         "front": 18,
         "back": 26,
         "profile": 18,
-        "sole": 5
+        "sole": 4
       },
       "sourcePng": {
-        "file": "defense/assets/cast-v2/doom.png",
-        "bytes": 694278,
-        "sha256": "bfce702e0a2bc8850769fe19370909a0fb206ad6419e625d6d8ff7f68e143b7a"
+        "file": "defense/assets/cast-v2/doom-revised.png",
+        "bytes": 613563,
+        "sha256": "8978c4dacaf3fa4c60390257f518cdfa06ab14e9f03769428c7898e3fcfdfcef"
       },
       "sourceWebp": {
-        "file": "defense/assets/cast-v2/doom.webp",
-        "bytes": 171594,
-        "sha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018"
+        "file": "defense/assets/cast-v2/doom-revised.webp",
+        "bytes": 140774,
+        "sha256": "2dad84d7e0c07cc29663c183211d89f2b6e8d80bdd63d4c590d0d4554ca9b805"
       },
       "portrait": {
-        "x": 253,
-        "y": 207,
+        "x": 250,
+        "y": 200,
         "size": 250
       },
       "frames": [
         {
           "direction": "down",
           "sourceRect": {
-            "left": 196,
-            "top": 17,
-            "width": 332,
-            "height": 628
+            "left": 187,
+            "top": 73,
+            "width": 277,
+            "height": 517
           },
           "sourceEllipse": [
-            362,
-            220,
-            244,
-            230,
+            333,
+            204,
+            222,
+            204,
             0
           ],
           "sourceChin": [
-            362,
-            335
+            334,
+            305
           ],
           "sourceSole": [
-            367,
-            638
+            341,
+            589
           ],
-          "commonScale": 0.6539533813251087,
-          "resampledDimensions": [
-            217,
-            410
-          ],
+          "commonScale": 0.7279709516267079,
           "placement": [
             144,
-            74
+            104
           ],
           "ellipse": [
-            252.73,
-            206.65,
-            159.56,
-            150.41,
+            250.18,
+            199.73,
+            161.61,
+            148.51,
             0
           ],
           "chin": [
-            252.73,
-            281.85
+            250.9,
+            273.26
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 198.15,
+          "belowChin": 206.74,
           "paintedClipping": 0
         },
         {
           "direction": "up",
           "sourceRect": {
-            "left": 750,
-            "top": 25,
-            "width": 335,
-            "height": 616
+            "left": 788,
+            "top": 77,
+            "width": 284,
+            "height": 513
           },
           "sourceEllipse": [
-            922,
-            220,
-            244,
-            230,
+            917,
+            205,
+            222,
+            204,
             0
           ],
           "sourceChin": [
-            922,
-            335
+            917,
+            307
           ],
           "sourceSole": [
-            913,
-            638
+            917,
+            588
           ],
-          "commonScale": 0.6539533813251087,
-          "resampledDimensions": [
-            219,
-            403
-          ],
+          "commonScale": 0.7279709516267079,
           "placement": [
-            149,
-            79
+            162,
+            108
           ],
           "ellipse": [
-            261.89,
-            206.65,
-            159.56,
-            150.41,
+            256,
+            201.19,
+            161.61,
+            148.51,
             0
           ],
           "chin": [
-            261.89,
-            281.85
+            256,
+            275.44
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 198.15,
+          "belowChin": 204.56,
           "paintedClipping": 0
         },
         {
           "direction": "left",
           "sourceRect": {
-            "left": 185,
-            "top": 659,
-            "width": 356,
-            "height": 568
+            "left": 200,
+            "top": 665,
+            "width": 260,
+            "height": 506
           },
           "sourceEllipse": [
-            346,
-            813,
-            224,
-            224,
+            330,
+            780,
+            199,
+            198,
             0
           ],
           "sourceChin": [
-            299,
-            925
+            271,
+            879
           ],
           "sourceSole": [
-            355,
-            1225
+            312,
+            1169
           ],
-          "commonScale": 0.6539533813251087,
-          "resampledDimensions": [
-            233,
-            372
-          ],
+          "commonScale": 0.7279709516267079,
           "placement": [
-            145,
-            110
+            174,
+            113
           ],
           "ellipse": [
-            250.11,
-            210.57,
-            146.49,
-            146.49,
+            269.1,
+            196.82,
+            144.87,
+            144.14,
             0
           ],
           "chin": [
-            219.38,
-            283.81
+            226.15,
+            268.89
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 196.19,
+          "belowChin": 211.11,
           "paintedClipping": 0
         },
         {
           "direction": "right",
           "sourceRect": {
-            "left": 760,
-            "top": 662,
-            "width": 338,
-            "height": 566
+            "left": 771,
+            "top": 667,
+            "width": 269,
+            "height": 504
           },
           "sourceEllipse": [
-            946,
-            813,
-            224,
-            224,
+            910,
+            780,
+            199,
+            198,
             0
           ],
           "sourceChin": [
-            993,
-            925
+            977,
+            879
           ],
           "sourceSole": [
-            938,
-            1223
+            936,
+            1169
           ],
-          "commonScale": 0.6539533813251087,
-          "resampledDimensions": [
-            221,
-            370
-          ],
+          "commonScale": 0.7279709516267079,
           "placement": [
-            140,
-            113
+            136,
+            115
           ],
           "ellipse": [
-            261.23,
-            211.88,
-            146.49,
-            146.49,
+            237.07,
+            196.82,
+            144.87,
+            144.14,
             0
           ],
           "chin": [
-            291.97,
-            285.12
+            285.85,
+            268.89
           ],
           "sole": [
             256,
             480
           ],
-          "belowChin": 194.88,
+          "belowChin": 211.11,
           "paintedClipping": 0
         }
       ]

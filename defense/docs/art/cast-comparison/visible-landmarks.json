@@ -1,0 +1,87 @@
+{
+  "method": "Visual points on the installed 512px cells, ordered down, up, left, right. Eye is the midpoint in front and the visible eye in profile. Shoulder and hip are estimated joint heights under clothing. Omit covered points.",
+  "uncertainty": { "eye": 5, "chin": 5, "shoulder": 9, "hip": 11 },
+  "units": {
+    "siren": {
+      "sha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
+      "frames": [
+        { "eye": [244, 250], "chin": [249, 299], "shoulder": [255, 325], "hip": [255, 387] },
+        { "shoulder": [256, 328], "hip": [256, 388] },
+        { "eye": [219, 274], "chin": [215, 319], "shoulder": [251, 345], "hip": [248, 397] },
+        { "eye": [294, 275], "chin": [297, 320], "shoulder": [264, 345], "hip": [264, 397] }
+      ]
+    },
+    "red_dragon": {
+      "sha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
+      "frames": [
+        { "eye": [263, 240], "chin": [265, 285], "shoulder": [262, 309], "hip": [260, 377] },
+        { "shoulder": [252, 308] },
+        { "eye": [215, 251], "chin": [219, 298], "shoulder": [254, 320], "hip": [248, 382] },
+        { "eye": [300, 251], "chin": [297, 298], "shoulder": [263, 320], "hip": [270, 382] }
+      ]
+    },
+    "cherry_prince": {
+      "sha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
+      "frames": [
+        { "eye": [252, 232], "chin": [254, 282], "shoulder": [255, 306], "hip": [255, 373] },
+        {},
+        { "eye": [224, 242], "chin": [221, 288], "shoulder": [269, 309], "hip": [249, 374] },
+        { "eye": [286, 244], "chin": [288, 289], "shoulder": [230, 309], "hip": [259, 374] }
+      ]
+    },
+    "time_magician": {
+      "sha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
+      "frames": [
+        { "eye": [244, 239], "chin": [249, 282], "shoulder": [251, 317], "hip": [251, 385] },
+        {},
+        { "eye": [219, 249], "chin": [222, 289], "shoulder": [266, 319], "hip": [253, 387] },
+        { "eye": [292, 250], "chin": [286, 289], "shoulder": [240, 319], "hip": [253, 387] }
+      ]
+    },
+    "phantom": {
+      "sha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
+      "frames": [
+        { "eye": [251, 271], "chin": [250, 314], "shoulder": [255, 335], "hip": [255, 420] },
+        { "hip": [257, 420] },
+        { "eye": [223, 280], "chin": [227, 318], "shoulder": [270, 344], "hip": [263, 420] },
+        { "eye": [286, 280], "chin": [290, 318], "shoulder": [247, 344], "hip": [250, 420] }
+      ]
+    },
+    "night_rabbit": {
+      "sha256": "86c70648fd97c84e3a7a0da5df8c63aca215d47ab5f710270ff9b12834a9d1d2",
+      "frames": [
+        { "eye": [246, 258], "chin": [245, 295], "shoulder": [254, 324] },
+        {},
+        { "eye": [231, 246], "chin": [228, 286], "shoulder": [256, 324] },
+        { "eye": [286, 247], "chin": [287, 287], "shoulder": [254, 324] }
+      ]
+    },
+    "santa": {
+      "sha256": "3d2da49116fa36d1a0b39c60ab36404ab81f3917c07a9d1c2d91d9917f5f713f",
+      "frames": [
+        { "eye": [252, 242], "chin": [255, 284], "shoulder": [252, 319], "hip": [252, 373] },
+        { "shoulder": [250, 320], "hip": [250, 373] },
+        { "eye": [213, 247], "chin": [216, 290], "shoulder": [258, 320], "hip": [250, 377] },
+        { "eye": [295, 246], "chin": [294, 289], "shoulder": [247, 320], "hip": [253, 377] }
+      ]
+    },
+    "cure_master": {
+      "sha256": "1d9615e6369d1ce26eb34e7cc066cd23cd5d7c5e93e8e4b9fb0cc30e1225deac",
+      "frames": [
+        { "eye": [251, 245], "chin": [252, 287], "shoulder": [255, 310] },
+        {},
+        { "eye": [223, 252], "chin": [228, 294], "shoulder": [261, 321] },
+        { "eye": [284, 257], "chin": [284, 294], "shoulder": [250, 321] }
+      ]
+    },
+    "abyss_wing": {
+      "sha256": "8cdf06809c6171ded03ffa006d8cf50f9dfa08d37e2feac5f8ba73a07ec026d9",
+      "frames": [
+        { "eye": [255, 240], "chin": [255, 287], "shoulder": [258, 312], "hip": [256, 380] },
+        { "hip": [256, 380] },
+        { "eye": [217, 252], "chin": [221, 299], "shoulder": [251, 320], "hip": [247, 386] },
+        { "eye": [303, 251], "chin": [295, 299], "shoulder": [260, 320], "hip": [260, 386] }
+      ]
+    }
+  }
+}
