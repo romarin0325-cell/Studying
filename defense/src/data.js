@@ -801,8 +801,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 253,
-        "y": 207,
+        "x": 250,
+        "y": 200,
         "size": 250
       }
     },
@@ -1943,7 +1943,7 @@ export const ASSET_PATHS = {
   "unit-silver_rabbit": "./assets/cast-v2/silver_rabbit.webp",
   "unit-ancient_dragon": "./assets/cast-v2/ancient_dragon.webp",
   "unit-time_ruler": "./assets/cast-v2/time_ruler.webp",
-  "unit-doom": "./assets/cast-v2/doom.webp",
+  "unit-doom": "./assets/cast-v2/doom-revised.webp",
   "unit-santa": "./assets/cast-v2/santa.webp",
   "unit-jasmine": "./assets/cast-v2/jasmine.webp",
   "unit-star_boy": "./assets/cast-v2/star_boy.webp",

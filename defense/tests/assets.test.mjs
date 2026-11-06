@@ -42,7 +42,7 @@ test('summon face crops and prepared portraits share optical framing without mov
   const reviewedCrops={
     gold_dragon:{x:250,y:215,size:240},
     luna:{x:243,y:207,size:272},
-    doom:{x:252,y:196,size:258}
+    doom:{x:253,y:205,size:230}
   };
   for(const hero of HEROES){
     const anatomy={...hero.art.portrait},frame=portraitFrame(hero),prepared=crops.get(hero.id);

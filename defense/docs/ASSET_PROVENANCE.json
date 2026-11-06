@@ -242,8 +242,8 @@
     },
     {
       "id": "unit-doom",
-      "source": "defense/assets/cast-v2/doom.webp",
-      "sha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+      "source": "defense/assets/cast-v2/doom-revised.webp",
+      "sha256": "2dad84d7e0c07cc29663c183211d89f2b6e8d80bdd63d4c590d0d4554ca9b805",
       "width": 1024,
       "height": 1024
     },

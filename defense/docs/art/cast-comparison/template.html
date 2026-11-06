@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>별빛 정원 캐스트 비교</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font: 14px/1.5 "Segoe UI", "Malgun Gothic", sans-serif;
+      --paper:#fffdf8; --page:#f4f1ea; --ink:#252941; --muted:#53596a;
+      --line:#d9d4c9; --accent:#245461; --active:#e0eeed;
+      --ground:#f0e6d2; --tile:#5a574f19; --rule:#517f83; --size:96px;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--page); }
+    main { max-width:1420px; margin:auto; padding:25px clamp(10px,3vw,42px) 50px; }
+    header { display:grid; gap:5px; margin-bottom:15px; }
+    .brand { color:var(--accent); font-size:11px; font-weight:750; letter-spacing:.12em; }
+    h1, h2, h3, p, figure { margin:0; }
+    h1 { font-size:clamp(25px,5vw,38px); line-height:1.2; letter-spacing:-.045em; }
+    h2 { font-size:17px; }
+    h3 { font-size:14px; }
+    .note, small { color:var(--muted); font-size:12px; }
+    .panel { border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+    .controls { padding:11px; display:grid; gap:9px; margin-bottom:13px; }
+    .line, .nav { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; }
+    .nav { gap:4px; }
+    button, input, select { font:inherit; color:var(--ink); }
+    button, select, input[type=search] {
+      min-height:34px; padding:4px 8px; border:1px solid var(--line); border-radius:7px; background:var(--paper);
+    }
+    button { cursor:pointer; }
+    button:hover { border-color:#689499; }
+    button:disabled { opacity:.5; cursor:default; }
+    button[aria-pressed=true] { background:var(--active); border-color:#7da5a8; color:#1b4b55; font-weight:720; }
+    label { display:inline-flex; align-items:center; gap:5px; font-size:12px; }
+    input[type=checkbox] { accent-color:var(--accent); width:16px; height:16px; }
+    input[type=search] { max-width:145px; }
+    :focus-visible { outline:2px solid #57959b; outline-offset:2px; }
+    #results { min-height:23px; }
+    .roster { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,calc(var(--size) + 15px)),1fr)); gap:8px; }
+    .card { min-width:0; display:grid; justify-items:center; align-content:start; padding:6px; gap:4px; text-align:center; }
+    .card.selected { border-color:#80a9ad; }
+    .caption { min-height:26px; font-size:12px; line-height:1.3; display:grid; place-items:center; font-weight:710; }
+    .rarity { font-size:10px; font-weight:650; color:var(--muted); }
+    .card button { font-size:11px; min-height:28px; padding:3px 8px; }
+    .tile { position:relative; width:min(100%,var(--size)); aspect-ratio:1; overflow:hidden;
+      background:var(--ground); border-radius:5px; }
+    .slice { position:absolute; aspect-ratio:1; overflow:hidden; pointer-events:none; }
+    .slice img { position:absolute; max-width:none; }
+    .face { display:block; width:100%; height:100%; }
+    .missing { display:grid; place-items:center; color:#43495a; background:#ece8df; font-size:11px; }
+    .baseline { position:absolute; left:0; right:0; border-top:1px solid var(--rule); opacity:.8; }
+    .turn { padding:9px; margin-bottom:8px; }
+    .turn-title { display:flex; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:5px; }
+    .turn-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+    .turn-grid figure { min-width:0; display:grid; justify-items:center; gap:4px; text-align:center; }
+    .turn-grid figcaption { display:grid; font-size:11px; color:var(--muted); }
+    .board-layout { display:grid; align-items:start; gap:10px; }
+    .board-panel, .board-tools { padding:10px; }
+    .board { width:min(100%,510px); position:relative; isolation:isolate; margin:8px auto 3px; overflow:hidden;
+      border-radius:8px; background:var(--ground); }
+    .board .ground-cell { position:absolute; background:var(--tile); border:1px solid #8c817846; border-radius:6px; }
+    .board .hit { position:absolute; padding:0; min-height:0; border:1px solid transparent; background:transparent; border-radius:6px; }
+    .board .hit:hover, .board .hit[aria-pressed=true] { border:2px solid #539a9f; background:#549fa91f; }
+    .board .hit:focus-visible { z-index:2; }
+    .board-tools { display:grid; gap:9px; }
+    .board-tools label { display:grid; }
+    .board-tools select { width:100%; }
+    .lineup { display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+    .lineup span { padding:2px 6px; border-radius:5px; background:var(--active); color:#1b4955; font-size:11px; }
+    .empty { padding:16px; }
+    footer { margin-top:15px; display:grid; gap:4px; }
+    [hidden] { display:none !important; }
+    @media (min-width:770px) { .board-layout { grid-template-columns:minmax(0,540px) minmax(240px,1fr); } }
+    @media (max-width:500px) { main { padding-top:16px; } .line { gap:5px 7px; } .controls { padding:8px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">STAR GARDEN / CAST REVIEW</div>
+    <h1>별빛 정원 캐스트 비교</h1>
+    <p class="note" id="inventory"></p>
+  </header>
+  <section class="controls panel" aria-label="비교 설정">
+    <div class="nav" role="group" aria-label="비교 모드">
+      <button data-mode="all">전체 캐스트</button>
+      <button data-mode="board">5×5 배치 <span id="count"></span></button>
+      <button data-mode="turn">상하좌우</button>
+    </div>
+    <div class="line">
+      <label id="medium-control">그림 <select id="medium"><option value="body">전신</option><option value="portrait">초상화</option></select></label>
+      <label id="direction-control">방향 <select id="direction">
+        <option value="0">정면 ↓</option><option value="1">후면 ↑</option><option value="2">왼쪽 ←</option><option value="3">오른쪽 →</option>
+      </select></label>
+      <label id="size-control">셀 <select id="size">
+        <option value="38">38px</option><option value="64">64px</option><option value="96">96px</option>
+        <option value="128">128px</option><option value="160">160px</option>
+      </select></label>
+      <label>배경 <select id="theme"><option value="light">밝게</option><option value="night">어둡게</option>
+        <option value="field">전장 색</option></select></label>
+      <label id="feet-control"><input type="checkbox" id="feet"> 발 기준선</label>
+    </div>
+    <div class="line" id="filters">
+      <label id="scope-control">범위 <select id="scope">
+        <option value="selected">배치한 동료</option><option value="all">전체 캐스트</option>
+      </select></label>
+      <label>검색 <input type="search" id="search" placeholder="이름"></label>
+      <label>등급 <select id="rarity">
+        <option value="all">전체</option><option>C</option><option>R</option><option>SR</option><option>UR</option>
+        <option value="form">변신</option>
+      </select></label>
+      <label>정렬 <select id="sort">
+        <option value="roster">기본</option><option value="side">측면 높이 차이 큰 순</option>
+      </select></label>
+    </div>
+  </section>
+  <p class="note" id="results" role="status"></p>
+  <div id="view"></div>
+  <footer class="note">
+    <p>전신은 게임에 내장되는 아틀라스, 초상화는 게임에 준비된 파일을 사용합니다. 윤곽 높이는 512px 원본 셀에서 알파 40 이상을 잰 값이며, 머리카락과 장비도 포함합니다.</p>
+    <p id="fingerprint"></p>
+  </footer>
+</main>
+<script id="cast-data" type="application/json">/*__CAST_DATA__*/</script>
+<script>
+  const data = JSON.parse(document.getElementById('cast-data').textContent);
+  const $ = id => document.getElementById(id);
+  const units = new Map(data.units.map(u => [u.id, u]));
+  const urls = new Map();
+  const directions = ['정면 ↓','후면 ↑','왼쪽 ←','오른쪽 →'];
+  const themes = { light:['#f0e6d2','#5a574f19','#517f83'], night:['#1d273c','#9fb1d126','#9cbcc5'],
+    field:['#73717c','#342c4b44','#dbd5bc'] };
+  const sample = ['siren','luna','doom','jasmine','zeke'];
+  const board = data.board;
+  const capacity = board.dimension ** 2;
+  const makeSample = () => Array.from({length:capacity}, (_,i) =>
+    i >= board.dimension * 2 && i < board.dimension * 3 && units.has(sample[i - board.dimension * 2])
+      ? sample[i - board.dimension * 2] : '');
+  const state = { slots:makeSample(), focus:-1, pending:'' };
+  const labels = { form:'변신' };
+  let search = '';
+
+  function imageUrl(key, base64) {
+    if (!urls.has(key)) {
+      const source = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      urls.set(key, URL.createObjectURL(new Blob([source], {type:'image/webp'})));
+    }
+    return urls.get(key);
+  }
+
+  function readState() {
+    const query = new URLSearchParams(location.hash.slice(1));
+    state.mode = ['all','board','turn'].includes(query.get('mode')) ? query.get('mode') : 'all';
+    for (const [key, fallback] of Object.entries({
+      medium:'body', direction:'0', size:'96', theme:'light', scope:'selected', rarity:'all', sort:'roster'
+    })) {
+      const value = query.get(key);
+      state[key] = [...$(key).options].some(option => option.value === value) ? value : fallback;
+    }
+    state.feet = query.get('feet') !== '0';
+    const ids = query.get('slots')?.split(',') ?? [];
+    state.slots = query.has('slots') ? Array.from({length:capacity}, (_,i) =>
+      units.has(ids[i]) && ids.indexOf(ids[i]) === i ? ids[i] : '') : makeSample();
+    state.focus = -1;
+    state.pending = '';
+  }
+
+  function writeState() {
+    const { mode, medium, direction, size, theme, scope, rarity, sort, feet, slots } = state;
+    const query = new URLSearchParams({ mode, medium, direction, size, theme, scope, rarity, sort,
+      feet:Number(feet), slots:slots.join(',') });
+    history.replaceState(null,'','#' + query);
+  }
+
+  function sprite(unit, direction, style) {
+    const atlas = data.atlases[unit.atlas];
+    const column = unit.directional ? direction % unit.columns : 0;
+    const row = unit.directional ? Math.floor(direction / unit.columns) : unit.row;
+    return `<div class="slice" style="${style}">
+      <img alt="" src="${imageUrl(unit.atlas,atlas.bytes)}" style="width:${unit.columns*100}%;height:${atlas.rows*100}%;left:${-column*100}%;top:${-row*100}%">
+    </div>`;
+  }
+
+  function tile(unit, direction, portrait = false) {
+    if (portrait) {
+      return unit.portrait ? `<div class="tile"><img class="face" alt="${unit.name}" src="${imageUrl(unit.id,unit.portrait)}"></div>`
+        : '<div class="tile missing">전용 초상화 없음</div>';
+    }
+    const baseline = state.feet ? `<span class="baseline" style="top:${unit.foot*100}%"></span>` : '';
+    const scale = unit.scale || 1;
+    return `<div class="tile" role="img" aria-label="${unit.name} ${directions[direction]}">
+      ${baseline}${sprite(unit, direction,
+      `width:${scale*100}%;left:${(1-scale)*50}%;top:${unit.foot*(1-scale)*100}%`)}
+    </div>`;
+  }
+
+  function selectUnits() {
+    const list = state.mode === 'turn' && state.scope === 'selected' ? state.slots.filter(Boolean).map(id => units.get(id)) : data.units;
+    const phrase = search.trim().toLowerCase();
+    const filtered = list.filter(unit => (state.rarity === 'all' || state.rarity === unit.rarity)
+      && (unit.name + ' ' + unit.id).toLowerCase().includes(phrase));
+    const difference = ({heights:h}) => Math.max(Math.abs(h[0] - h[2]), Math.abs(h[0] - h[3]));
+    return state.sort === 'side' ? filtered.sort((a,b) => difference(b) - difference(a)) : filtered;
+  }
+
+  function rosterView(list) {
+    const face = state.medium === 'portrait';
+    const direction = Number(state.direction);
+    return `<div class="roster">${list.map(unit => {
+      const placed = state.slots.includes(unit.id);
+      return `<article class="card panel ${placed ? 'selected' : ''}" data-unit="${unit.id}">
+        <h3 class="caption">${unit.name}</h3>
+        ${tile(unit,direction,face)}
+        <span class="rarity">${labels[unit.rarity] ?? unit.rarity}${face ? '' : ' · ' + unit.heights[direction] + 'px'}</span>
+        <button data-pick="${unit.id}" aria-pressed="${placed}" aria-label="${unit.name} ${placed?'배치 해제':'배치 추가'}">${placed?'배치됨':'배치 +'}</button>
+      </article>`;
+    }).join('')}</div>`;
+  }
+
+  function turnView(list) {
+    return list.map(unit => `<section class="turn panel" data-unit="${unit.id}">
+      <div class="turn-title"><h3>${unit.name}</h3><small>${labels[unit.rarity] ?? unit.rarity}</small></div>
+      <div class="turn-grid">${directions.map((name,i) => `<figure>
+        ${tile(unit,i)}<figcaption><span>${name}</span><small>${unit.heights[i]}px</small></figcaption></figure>`).join('')}</div>
+    </section>`).join('');
+  }
+
+  function boardView() {
+    const { width, height, pitch, cells } = board;
+    const xp = n => n / width * 100 + '%', yp = n => n / height * 100 + '%';
+    const slotRect = ([x,y]) => `left:${xp(x-pitch/2+2)};top:${yp(y-pitch/2+2)};width:${xp(pitch-4)};height:${yp(pitch-4)}`;
+    const ground = cells.map(point => `<span class="ground-cell" style="${slotRect(point)}"></span>`).join('');
+    const lines = state.feet ? cells.filter((_,i) => i % board.dimension === 0).map(([x,y]) =>
+      `<span class="baseline" style="left:${xp(x-pitch/2)};width:${xp(pitch*board.dimension)};top:${yp(y+board.footOffset)}"></span>`).join('') : '';
+    const actors = state.slots.map((id,i) => {
+      if (!id) return '';
+      const unit = units.get(id), [x,y] = cells[i];
+      const frame = board.frame * (unit.scale || 1);
+      return sprite(unit, Number(state.direction),
+        `left:${xp(x-frame/2)};top:${yp(y+board.footOffset-frame*unit.foot)};width:${xp(frame)}`);
+    }).join('');
+    const hit = cells.map((point,i) => {
+      const id = state.slots[i], label = `${Math.floor(i/board.dimension)+1}행 ${i%board.dimension+1}열 ${units.get(id)?.name ?? '빈칸'}`;
+      return `<button class="hit" style="${slotRect(point)}" data-slot="${i}" title="${label}"
+        aria-label="${label}" aria-pressed="${state.focus===i}"></button>`;
+    }).join('');
+    return `<div class="board-layout">
+      <section class="board-panel panel"><h2>5×5 배치</h2>
+        <div class="board" style="aspect-ratio:${width}/${height}">${ground}${lines}${actors}${hit}</div>
+        <p class="note">전장과 같은 셀 간격·스프라이트 비율의 정지 배치입니다.</p>
+      </section>
+      <section class="board-tools panel">
+        <label>놓을 동료 <select id="pending"><option value="">동료 선택</option>
+          ${data.units.map(unit => `<option value="${unit.id}" ${unit.id===state.pending?'selected':''}>${unit.name}</option>`).join('')}
+        </select></label>
+        <p class="note">동료를 골라 칸을 누르세요. 배치된 칸을 고른 뒤 다른 칸을 누르면 이동하거나 자리를 바꿉니다.</p>
+        <div class="line">
+          <button data-action="remove" ${state.focus<0||!state.slots[state.focus]?'disabled':''}>선택 제거</button>
+          <button data-action="clear">비우기</button>
+          <button data-action="sample">비교 예시</button>
+        </div>
+        <div><h3>배치한 동료</h3><div class="lineup">${state.slots.filter(Boolean).map(id =>
+          `<span>${units.get(id).name}</span>`).join('') || '<small>빈 전장</small>'}</div></div>
+      </section></div>`;
+  }
+
+  function render() {
+    const onBoard = state.mode === 'board', turn = state.mode === 'turn';
+    const faces = state.mode === 'all' && state.medium === 'portrait';
+    const [ground, tileColor, rule] = themes[state.theme];
+    const style = document.documentElement.style;
+    for (const [key,value] of Object.entries({ground,tile:tileColor,rule,size:state.size+'px'})) style.setProperty('--'+key,value);
+    for (const button of document.querySelectorAll('[data-mode]')) button.setAttribute('aria-pressed', String(button.dataset.mode === state.mode));
+    for (const key of ['medium','direction','size','theme','scope','rarity','sort']) $(key).value = state[key];
+    $('feet').checked = state.feet;
+    $('medium-control').hidden = state.mode !== 'all';
+    $('direction-control').hidden = turn || faces;
+    $('size-control').hidden = onBoard;
+    $('feet-control').hidden = faces;
+    $('filters').hidden = onBoard;
+    $('scope-control').hidden = !turn;
+    const list = onBoard ? [] : selectUnits();
+    const placed = state.slots.filter(Boolean).length;
+    $('count').textContent = placed ? `(${placed})` : '';
+    $('results').textContent = onBoard
+      ? state.pending ? `${units.get(state.pending).name}을 놓을 칸을 선택하세요.` : `${placed}종 배치 · ${directions[Number(state.direction)]}`
+      : `${list.length}종 표시${turn&&state.scope==='selected'?' · 배치한 동료':''}`;
+    $('view').innerHTML = onBoard ? boardView() : list.length ? (turn ? turnView(list) : rosterView(list)) :
+      '<p class="empty panel">표시할 동료가 없습니다. 검색과 등급 또는 배치 선택을 확인하세요.</p>';
+    writeState();
+  }
+
+  function onSlot(index) {
+    const { slots, pending, focus } = state;
+    if (pending) {
+      const previous = slots.indexOf(pending);
+      if (previous >= 0 && previous !== index) slots[previous] = slots[index];
+      slots[index] = pending;
+      state.pending = '';
+    } else if (focus >= 0 && focus !== index && slots[focus]) {
+      [slots[focus],slots[index]] = [slots[index],slots[focus]];
+    }
+    state.focus = index;
+    render();
+    document.querySelector(`[data-slot="${index}"]`)?.focus({preventScroll:true});
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const { mode, pick, slot, action } = button.dataset;
+    if (mode) { state.mode = mode; render(); }
+    else if (pick) {
+      const previous = state.slots.indexOf(pick), vacant = state.slots.indexOf('');
+      if (previous < 0 && vacant < 0) { $('results').textContent = '배치가 가득 찼습니다.'; return; }
+      state.slots[previous >= 0 ? previous : vacant] = previous >= 0 ? '' : pick;
+      render();
+      document.querySelector(`[data-pick="${pick}"]`)?.focus({preventScroll:true});
+    } else if (slot !== undefined) onSlot(Number(slot));
+    else if (action) {
+      if (action === 'clear') state.slots = Array(capacity).fill('');
+      if (action === 'sample') state.slots = makeSample();
+      if (action === 'remove' && state.focus >= 0) state.slots[state.focus] = '';
+      state.focus = -1;
+      state.pending = '';
+      render();
+    }
+  });
+  document.addEventListener('change', event => {
+    const control = event.target;
+    if (control.id === 'pending') { state.pending = control.value; render(); $('pending').focus(); }
+    if (['medium','direction','size','theme','scope','rarity','sort','feet'].includes(control.id)) {
+      state[control.id] = control.id === 'feet' ? control.checked : control.value;
+      render();
+    }
+  });
+  $('search').oninput = () => { search = $('search').value; render(); };
+  window.onhashchange = () => { readState(); render(); };
+  $('inventory').textContent = `동료 ${data.collectibleCount}명 · 별도 변신 ${units.size-data.collectibleCount}종`;
+  $('fingerprint').textContent = `배포 에셋 지문 ${data.assetHash.slice(0,12)} · 오프라인 HTML`;
+  readState();
+  render();
+  window.castComparisonReady = true;
+</script>
+</body>
+</html>
