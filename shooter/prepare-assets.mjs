@@ -157,7 +157,7 @@ export function costumeLayout(width,height,id) {
 }
 
 
-const SHIELD_BOUNDS = [[8,4,350,351],[408,28,292,322],[750,25,340,330],[1165,30,256,320],[8,365,352,340],[390,350,346,368],[750,382,330,322],[1130,360,304,344],[5,700,357,360],[377,710,346,350],[750,720,340,340]];
+const SHIELD_BOUNDS = [[8,4,350,351],[400,0,320,350],[750,25,340,330],[1165,30,256,320],[8,365,352,340],[390,350,346,368],[750,382,330,322],[1130,360,304,344],[5,700,357,360],[377,710,346,350],[750,720,340,340]];
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const imagePath = name => path.join(root, 'assets', `${name}${name === 'worlds' ? '.jpg' : name === 'costume-tickets' ? '.svg' : '.png'}`);
@@ -262,6 +262,50 @@ async function containRaw(data, width, height, targetWidth, targetHeight) {
   return output;
 }
 
+function removeRelicEdgeFragments(pixels, width, height) {
+  // A neighboring atlas item can leak into a crop. Remove only small components
+  // touching its edges; retain the main silhouette and detached interior sparkles.
+  const seen = new Uint8Array(width * height);
+  for (let seed = 0; seed < seen.length; seed++) {
+    const x = seed % width, y = Math.floor(seed / width);
+    if ((x !== 0 && y !== 0 && x !== width - 1 && y !== height - 1) || seen[seed] || pixels[seed * 4 + 3] <= 30) continue;
+    const component = [seed]; seen[seed] = 1;
+    for (let next = 0; next < component.length; next++) {
+      const pixel = component[next], px = pixel % width, py = Math.floor(pixel / width);
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = px + dx, ny = py + dy, neighbor = ny * width + nx;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height || seen[neighbor] || pixels[neighbor * 4 + 3] <= 30) continue;
+        seen[neighbor] = 1; component.push(neighbor);
+      }
+    }
+    if (component.length < width * height * .01) for (const pixel of component) pixels[pixel * 4 + 3] = 0;
+  }
+}
+
+async function relicPixels(pixels, width, height, size, removeMatte = false) {
+  if (removeMatte) {
+    // Only these legacy atlases have a baked-in navy matte. Sample their corners
+    // and key matching blue pixels, including the holes inside rings and handles.
+    const corners = [0, width - 1, (height - 1) * width, width * height - 1];
+    const background = [0, 1, 2].map(channel => corners.map(pixel => pixels[pixel * 4 + channel]).sort((a, b) => a - b)[1]);
+    for (let offset = 0; offset < pixels.length; offset += 4) {
+      const [red, green, blue] = pixels.subarray(offset, offset + 3);
+      if (blue <= red || blue <= green) continue;
+      const difference = Math.max(Math.abs(red - background[0]), Math.abs(green - background[1]), Math.abs(blue - background[2]));
+      pixels[offset + 3] = Math.round(pixels[offset + 3] * clamp((difference - 14) / 24, 0, 1));
+    }
+  }
+  removeRelicEdgeFragments(pixels, width, height);
+  // Center the visible artwork, not its uneven atlas cell, and retain aspect ratio.
+  const box = alphaBounds(pixels, width, height);
+  const cropped = cropPixels(pixels, width, box.left, box.top, box.width, box.height);
+  const padding = Math.round(size / 32), innerSize = size - padding * 2;
+  const contained = await containRaw(cropped, box.width, box.height, innerSize, innerSize);
+  const sharp = await getSharp();
+  return sharp(contained, { raw: { width: innerSize, height: innerSize, channels: 4 } })
+    .extend({ top: padding, bottom: padding, left: padding, right: padding, background: '#00000000' }).raw().toBuffer();
+}
+
 async function writeRaw(destination, data, width, height, options, outputs) {
   const sharp = await getSharp();
   await fs.mkdir(path.dirname(destination), { recursive: true });
@@ -310,6 +354,9 @@ async function processSpriteSheet(name, destination, outputs) {
       const left = Math.floor((512 - resizedWidth) / 2), top = Math.floor((512 - resizedHeight) / 2);
       for (let y = 0; y < resizedHeight; y++) resized.copy(output, ((top + y) * 512 + left) * 4, y * resizedWidth * 4, (y + 1) * resizedWidth * 4);
       size = 512;
+    } else if (name === 'relics') {
+      output = await relicPixels(pixels, area.width, area.height, 384);
+      size = 384;
     } else if (standalone) {
       output = await containRaw(pixels, area.width, area.height, 384, 384);
       size = 384;
@@ -353,7 +400,7 @@ async function processTideRelics(destination, outputs) {
   for (let index = 0; index < 6; index++) {
     const width = Math.floor(source.width / 3), height = Math.floor(source.height / 2);
     const pixels = cropPixels(source.data, source.width, index % 3 * width, Math.floor(index / 3) * height, width, height);
-    await writeRaw(webpPath(destination, 'tide-relics', index), await resizeRaw(pixels, width, height, 384, 384), 384, 384, ART_WEBP, outputs);
+    await writeRaw(webpPath(destination, 'tide-relics', index), await relicPixels(pixels, width, height, 384), 384, 384, ART_WEBP, outputs);
   }
 }
 
@@ -364,11 +411,7 @@ async function processShieldRelics(destination, outputs) {
     const left = Math.floor(x / 1448 * source.width), top = Math.floor(y / 1086 * source.height);
     const cropWidth = Math.floor(width / 1448 * source.width), cropHeight = Math.floor(height / 1086 * source.height);
     const pixels = cropPixels(source.data, source.width, left, top, cropWidth, cropHeight);
-    const scale = 180 / Math.max(width, height), targetWidth = Math.max(1, Math.round(width * scale)), targetHeight = Math.max(1, Math.round(height * scale));
-    const resized = await resizeRaw(pixels, cropWidth, cropHeight, targetWidth, targetHeight), output = Buffer.alloc(192 * 192 * 4);
-    for (let offset = 0; offset < output.length; offset += 4) { output[offset] = 20; output[offset + 1] = 32; output[offset + 2] = 54; output[offset + 3] = 255; }
-    const leftOut = Math.floor((192 - targetWidth) / 2), topOut = Math.floor((192 - targetHeight) / 2);
-    for (let row = 0; row < targetHeight; row++) resized.copy(output, ((topOut + row) * 192 + leftOut) * 4, row * targetWidth * 4, (row + 1) * targetWidth * 4);
+    const output = await relicPixels(pixels, cropWidth, cropHeight, 192, true);
     await writeRaw(webpPath(destination, 'shield-relics', index), output, 192, 192, ART_WEBP, outputs);
   }
 }
@@ -380,8 +423,10 @@ async function processSmallRelics(name, columns, rows, destination, outputs, box
     const left = Math.floor(box[0] * source.width), top = Math.floor(box[1] * source.height);
     const width = Math.floor(box[2] * source.width), height = Math.floor(box[3] * source.height);
     const pixels = cropPixels(source.data, source.width, left, top, width, height);
+    const isRelic = ['celestial-relics', 'balance-relics', 'astral-relics'].includes(name);
     const sharp=await getSharp();
-    const resized=await sharp(pixels,{raw:{width,height,channels:4}}).resize(192,192,{fit:'contain',background:'#142036'}).raw().toBuffer();
+    const resized=isRelic ? await relicPixels(pixels,width,height,192,name!=='astral-relics')
+      : await sharp(pixels,{raw:{width,height,channels:4}}).resize(192,192,{fit:'contain',background:'#142036'}).raw().toBuffer();
     await writeRaw(webpPath(destination, name, index), resized, 192, 192, ART_WEBP, outputs);
   }
 }
@@ -427,8 +472,8 @@ export async function prepareAssets({ outputDirectory = GENERATED_ASSETS, writeR
   for (const name of EVENT_ASSETS) await processWorldAtlas(`${name}-world`, 1, cacheDirectory, outputs);
   await processTideRelics(cacheDirectory, outputs);
   await processShieldRelics(cacheDirectory, outputs);
-  await processSmallRelics('celestial-relics', 2, 2, cacheDirectory, outputs, [[0,0,.5,.5],[.5,0,.5,.455],[.008,.455,.484,.484],[.5,.5,.5,.5]]);
-  await processSmallRelics('balance-relics', 3, 2, cacheDirectory, outputs);
+  await processSmallRelics('celestial-relics', 2, 2, cacheDirectory, outputs, [[0,0,.5,.455],[.5,0,.5,.455],[.008,.455,.484,.484],[.5,.455,.5,.545]]);
+  await processSmallRelics('balance-relics', 3, 2, cacheDirectory, outputs, Array.from({length:6}, (_,index) => [index%3/3,index<3?0:.485,1/3,index<3?.485:.515]));
   await processSmallRelics('shop-items', 3, 1, cacheDirectory, outputs);
   await processSmallRelics('costume-tickets', 2, 2, cacheDirectory, outputs);
   await processSmallRelics('astral-relics', 3, 2, cacheDirectory, outputs);
