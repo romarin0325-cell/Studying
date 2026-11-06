@@ -169,7 +169,7 @@ export class CombatFX{
     if(e.type==='chain'){const lightning=e.hero==='lightning_sage',life=lightning?LIGHTNING_IMPACT_LIFE:.24;this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life,total:life,rank:1,...(lightning?{hop:true}:{})});}
     if(e.type==='skill'&&e.kind==='dream'&&dreamReady(this))DREAM.start(this);
     if(e.type==='dreamPhase'){if(dreamReady(this))DREAM.strike(this,e);else for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});}
-    if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
+    if(e.type==='crushPhase'){if(urReady(this,'behemoth'))UR_SPECS.behemoth.land(this,e);else this.add({...e,life:.9,total:.9});}
     if(e.type==='sunCharge'){this.bloomAt=this.clock;for(const p of e.points||[])this.add({type:'sunCharge',x:p.x+28,y:p.y+21,sunlight:e.sunlight,life:.9,total:.9});}
     if(e.type==='sunSpend'&&e.sunlight>0)this.add({type:'sunSpend',points:(e.points||[]).map(p=>({x:p.x+28,y:p.y+21})),sunlight:e.sunlight,life:1.2,total:1.2});
     if(e.type==='jokerColor'){this.companionJoker=e.color;this.wheelAt=this.clock;for(const p of e.points||[])this.add({type:'jokerFlip',x:p.x+28,y:p.y+21,color:e.color,life:.7,total:.7});}

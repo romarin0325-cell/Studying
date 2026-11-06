@@ -77,6 +77,8 @@ const RAMPS=Object.freeze({
   blade:[[0,'#140208'],[.45,'#3a0a16'],[.7,'#8a1426'],[.88,'#e0303e'],[1,'#ffb0b4']],
   blood:[[0,'#1a0006'],[.3,'#8a0a1e'],[.55,'#e01a34'],[.78,'#ff6a72'],[.93,'#ffd0d4'],[1,'#ffffff']],
   fire:[[0,'#2a0400'],[.3,'#c02a08'],[.55,'#ff6a1a'],[.78,'#ffb84a'],[.93,'#fff0c0'],[1,'#ffffff']],
+  quake:[[0,'#0e0c04'],[.3,'#3a3412'],[.5,'#5e8a18'],[.7,'#a6d84a'],[.86,'#e6f6a8'],[1,'#ffffff']],
+  dust:[[0,'#140e06'],[.45,'#5a4a30'],[.75,'#a8987a'],[.92,'#e8dcc4'],[1,'#fff8ec']],
   comet:[[0,'#04203a'],[.3,'#1a86d0'],[.55,'#56ccff'],[.78,'#b8eeff'],[.93,'#fff6d8'],[1,'#ffffff']],
   prism:[[0,'#12063a'],[.3,'#6a2ad8'],[.5,'#c050f0'],[.7,'#ff8ad8'],[.85,'#90e0ff'],[.95,'#e8fbff'],[1,'#ffffff']],
   dream:[[0,'#042a3a'],[.3,'#18a0c8'],[.55,'#64dcf0'],[.78,'#c4f4ff'],[.93,'#f4feff'],[1,'#ffffff']],
@@ -819,7 +821,8 @@ const cinderella={
     if(b>=0){
       if(b<.45){kit(fx,KIT.shatter,'miracle',P.x,P.y,lerp(220,460,easeOut(span(b,0,.4))),undefined,u.seed,1-span(b,.05,.45));wash(fx,'#ffd6ee',.2*(1-span(b,0,.4)));}
       if(!R)for(let i=0;i<22;i++){const k=span(b,0,1.1);if(k>=1)break;const ang=hash(u.seed,i+100)*6.283,v=120+hash(u.seed,i+130)*240;glint(fx,P.x+Math.cos(ang)*v*easeOut(k),P.y+Math.sin(ang)*v*easeOut(k)*.7+70*k*k,hash(u.seed,i+160)<.3?3.6:2.3,'#fff0fa','#ff8ad0',1-k,age*2+i);}
-      const show=easeBack(span(b,.04,.32)),settle=easeInOut(span(b,.95,1.4)),alpha=1-span(b,1.3,1.55);
+      if(fx.cinderellaEmblem==='miracle')miracleStar(fx,skill,age,b);
+      const show=easeBack(span(b,.04,.32)),settle=easeInOut(span(b,.95,1.4)),alpha=fx.cinderellaEmblem==='miracle'?0:1-span(b,1.3,1.55);
       if(alpha>0&&show>0){const x=lerp(P.x,o.x+22,settle),y=lerp(P.y,o.y+22,settle),w=lerp(160,40,settle)*show,g=bell(span(b,.2,.6));
         if(!R)fx.glow('rays','#ffb0dc',x,y,w*2.7,.55*alpha*(1-settle),age*.6);fx.glow('glow','#ffc8ea',x,y,w*1.8,.45*alpha);
         kit2(fx,KIT2.slipper,'miracle',x,y,w,undefined,-.12,alpha,'source-over');kit(fx,KIT.flare,'miracle',x-w*.3,y-w*.1,w*.7*g,undefined,.4,g);}
@@ -834,6 +837,22 @@ const cinderella={
   },
   body(fx,skill,age){if(fx.reduced)return null;const lift=bell(span(age,.04,MIRACLE_TWELVE+.3));return {dy:-7*lift,squash:1+.03*lift};},
 };
+// Proposal for the owner (2026-11-07, review page "기적 문양" switch; the game keeps the slipper until decided): the miracle itself
+// as the emblem. In the bloom a wishing star is born over her: a holy circle turns behind it, twelve small stars (the twelve
+// strokes) light around it one by one, it rises, and its light drifts down over her as glitter.
+function miracleStar(fx,skill,age,b){
+  const u=skill.ur,o=skill.origin,P=u.P,R=fx.reduced,show=easeBack(span(b,.04,.34)),fade=1-span(b,1.1,1.5),rise=easeInOut(span(b,.7,1.3));
+  if(!(show>0&&fade>0))return;const x=P.x,y=P.y-46*rise,s=show*(1-.25*rise);
+  if(!R)fx.glow('rays','#ff8ad0',x,y,400*s,.28*fade,age*.4);fx.glow('glow','#3a5cff',x,y,320*s,.4*fade);
+  kit2(fx,KIT2.circle,'miracle',x,y,270*s,undefined,R?0:age*.5,fade);kit2(fx,KIT2.circle,'miracle',x,y,190*s,undefined,R?0:-age*.8,.6*fade);
+  for(let i=0;i<12;i++){const on=span(b,.08+i*.035,.16+i*.035);if(on<=0)continue;const a=-Math.PI/2+i*Math.PI/6,r=126*s;
+    glint(fx,x+Math.cos(a)*r,y+Math.sin(a)*r*.9,(i%3?3.4:5.6)*on,i%2?'#ffc4e4':'#a8c4ff',i%2?'#ff6ab8':'#4a6cff',fade,age*2+i);}
+  kit(fx,KIT.flare,'miracle',x,y,100*s*(R?1:.85+.15*Math.sin(age*7)),undefined,age,.45*fade);
+  kit3(fx,KIT3.star,'miracle',x,y,124*s,undefined,R?0:Math.sin(age*1.5)*.08,fade,'source-over');kit3(fx,KIT3.star,'miracle',x,y,124*s,undefined,R?0:Math.sin(age*1.5)*.08,.35*fade);
+  // Its light drifts down over her, swaying as it falls.
+  if(!R&&b>.85)for(let i=0;i<14;i++){const k=((b-.85)*1.4+hash(u.seed,i+200))%1,px=o.x+(hash(u.seed,i+220)-.5)*100+Math.sin(k*6+i)*10;
+    glint(fx,px,lerp(y+30,o.y-6,k),2.3,'#fff0fa',i%2?'#ff8ad0':'#8ab4ff',bell(k)*fade,i+age*3);}
+}
 // Her midnight bell (every fourth attack during midnight, a splash on the boss or the target): the bell rings over it and a ring of
 // glass light runs out to the real splash radius. effects.js keeps its older drawing when the kit is missing.
 export function drawMidnightBell(fx,e,t){
@@ -1102,12 +1121,28 @@ const redDragon={
 // light; its glass fills (the stored echo against the x12 strike) and cracks as the seconds run; at five it shatters and its light
 // falls on the target. This replaces the old fill, which read a cap the engine no longer sets and so always showed empty.
 const mirrorState=new WeakMap();
+// The cast itself (owner review, 2026-11-07: the old emblem at the caster said "an ultimate fired", the first pass lost that): a prism
+// ring opens at her feet, her own hand mirror rises over her and flashes, and its reflection crosses the board to the target, where
+// the hanging mirror takes the light. At an R's weight: about half a second, one prop.
+const AURORA_BEAM=[.14,.3];
 const aurora={
-  life:()=>.9,
+  life:()=>.95,
   plan(fx,skill){skill.ur={seed:(skill.uid||1)*6.61};return null;},
-  over(fx,skill,age){const q=skill.targets?.[0];if(!q)return;const T=fx.point(q.uid,q),big=bossOf(fx,q)?1.35:1,k=span(age,0,.35);
-    kit(fx,KIT.flare,'prism',T.x,T.y-(big>1?140:100),lerp(60,230,easeOut(k))*big,undefined,0,1-span(age,.15,.6));
-    kit(fx,KIT.ring,'prism',T.x,T.y+6,lerp(40,160,easeOut(k))*big,lerp(16,64,easeOut(k))*big,0,1-span(age,.2,.8));},
+  field(fx,skill,age){const o=skill.origin,k=span(age,0,.55);if(k>=1)return;
+    fx.glow('glow','#b48cff',o.x,o.y+20,lerp(80,200,easeOut(k)),.45*(1-k));kit(fx,KIT.ring,'prism',o.x,o.y+24,lerp(60,230,easeOut(k)),lerp(24,92,easeOut(k)),0,1-k);},
+  over(fx,skill,age){
+    const o=skill.origin,q=skill.targets?.[0],R=fx.reduced,M={x:o.x,y:o.y-80},up=easeBack(span(age,0,.16)),gone=1-span(age,.4,.58);
+    if(up>0&&gone>0){fx.glow('glow','#b48cff',M.x,M.y,220*up,.7*gone);kit3(fx,KIT3.mirror,'prism',M.x,M.y,104*up,undefined,R?0:Math.sin(age*9)*.12,gone);
+      const flash=bell(span(age,.08,.26));if(flash>0){kit(fx,KIT.flare,'prism',M.x,M.y-12,170*flash,undefined,age,flash);glint(fx,M.x-14,M.y-20,8*flash,'#ffffff','#c070f0',flash,age*3);}}
+    if(!q)return;const T=fx.point(q.uid,q),big=bossOf(fx,q)?1.35:1,Tm={x:T.x,y:T.y-(big>1?140:100)};
+    // The reflection: a prism streak runs from her mirror to the target's.
+    const r=span(age,AURORA_BEAM[0],AURORA_BEAM[1]);
+    if(r>0&&age<AURORA_BEAM[1]+.12){const h=easeOut(r),H={x:lerp(M.x,Tm.x,h),y:lerp(M.y,Tm.y,h)},L=dist(M,H),a=1-span(age,AURORA_BEAM[1],AURORA_BEAM[1]+.12);
+      if(L>4)slash(fx,'prism',(M.x+H.x)/2,(M.y+H.y)/2,L,Math.atan2(H.y-M.y,H.x-M.x),1.1,a);kit(fx,KIT.flare,'prism',H.x,H.y,70,undefined,age*4,a);glint(fx,H.x,H.y,6,'#ffffff','#c070f0',a,age*5);}
+    const k=span(age,AURORA_BEAM[1]-.02,AURORA_BEAM[1]+.3);if(k<=0)return;
+    kit(fx,KIT.flare,'prism',Tm.x,Tm.y,lerp(60,230,easeOut(k))*big,undefined,0,1-span(k,.4,1));
+    kit(fx,KIT.ring,'prism',T.x,T.y+6,lerp(40,160,easeOut(k))*big,lerp(16,64,easeOut(k))*big,0,1-span(k,.5,1));},
+  body(fx,skill,age){if(fx.reduced)return null;const k=bell(span(age,0,.5));return {dy:-5*k,squash:1+.03*k};},
   // For the 5 s: the mirror over its target, from the engine's finisher state.
   persistentOver(fx,s){
     const now=fx.clock||0;
@@ -1148,16 +1183,28 @@ const starBoy={
   life:()=>1,
   plan(fx,skill){const t=skill.targets?.[0]||skill.origin,spent=Math.round(skill.spent||60),scale=lerp(1,1.35,clamp01((spent-60)/60));skill.ur={uid:t.uid,lock:{x:t.x,y:t.y},spent,scale,p:0};fx.starScale=scale;return null;},
   progress(fx,skill){const u=skill.ur,f=fx.s?.finishers?.find(f=>f.hero==='star_boy'&&f.kind==='starfall'&&f.origin&&casterAt(skill,f.origin));if(f){u.p=clamp01(1-f.life/f.total);u.to=f.to;}else if(u.p>0||skill.total-skill.life>.6)u.p=1;return u.p;},
-  field(fx,skill,age){const u=skill.ur,p=this.progress(fx,skill);if(p>=1)return;const T=fx.point(u.uid,u.to||u.lock),big=bossOf(fx,{uid:u.uid})?1.3:1,a=Math.min(1,age*6);
+  field(fx,skill,age){const u=skill.ur,o=skill.origin,w=span(age,0,.5);if(w<1){fx.glow('glow','#56ccff',o.x,o.y+20,lerp(70,180,easeOut(w)),.4*(1-w));kit(fx,KIT.ring,'comet',o.x,o.y+24,lerp(50,200,easeOut(w)),lerp(20,80,easeOut(w)),0,1-w);}
+    const p=this.progress(fx,skill);if(p>=1)return;const T=fx.point(u.uid,u.to||u.lock),big=bossOf(fx,{uid:u.uid})?1.3:1,a=Math.min(1,age*6);
     fx.glow('glow','#56ccff',T.x,T.y+4,120*big,.3*a);kit(fx,KIT.ring,'comet',T.x,T.y+6,lerp(120,72,p)*big,lerp(50,30,p)*big,0,.9*a);},
   over(fx,skill,age){
-    const u=skill.ur,p=this.progress(fx,skill);if(p>=1)return;const T=fx.point(u.uid,u.to||u.lock),big=bossOf(fx,{uid:u.uid})?1.3:1,head={x:T.x,y:T.y-(big>1?34:20)},S={x:head.x-230,y:head.y-290};
+    // The cast itself (owner review, 2026-11-07): he makes his wish. The starlight he spent swirls up around him into a star in his
+    // hands, and the star shoots up into the sky; the meteor that falls on the target is its answer. A C's weight: half a second.
+    const o=skill.origin,u=skill.ur,R=fx.reduced,wish=span(age,0,.5);
+    if(wish<1){fx.glow('glow','#56ccff',o.x,o.y-30,lerp(60,130,span(age,0,.2)),.45*(1-wish));
+      if(!R)stardust(fx,{x:o.x,y:o.y-4},u.lock.x+u.lock.y,span(age,0,.3),age,1-span(age,.3,.5),0,'#e8fbff','#56ccff');
+      const rise=easeIn(span(age,.12,.42)),S={x:o.x,y:lerp(o.y-44,o.y-300,rise)},sa=1-span(age,.38,.46);
+      if(rise>0)slash(fx,'comet',S.x,(S.y+o.y-44)/2,o.y-44-S.y,-Math.PI/2,1,sa);
+      const launch=bell(span(age,.08,.24));if(launch>0)kit(fx,KIT.flare,'comet',o.x,o.y-44,180*launch,undefined,age*2,launch);
+      kit(fx,KIT.flare,'comet',S.x,S.y,lerp(50,110,easeOut(span(age,0,.14)))*(1-.4*rise),undefined,age*3,.8*sa);
+      kit3(fx,KIT3.star,'comet',S.x,S.y,lerp(30,58,easeOut(span(age,0,.14)))*(1-.35*rise),undefined,age*4,sa);glint(fx,S.x,S.y,6*sa,'#ffffff','#56ccff',sa,age*6);}
+    const p=this.progress(fx,skill);if(p>=1)return;const T=fx.point(u.uid,u.to||u.lock),big=bossOf(fx,{uid:u.uid})?1.3:1,head={x:T.x,y:T.y-(big>1?34:20)},S={x:head.x-230,y:head.y-290};
     label(fx,'★'+u.spent,T.x,T.y+42,Math.min(1,age*6),18,'#bdf0ff');
     // The shooting star: its painted head sits at (+.40, +.36) of the cell from the centre, its streak tilted 43 degrees.
     const k=easeIn(p),H={x:lerp(S.x,head.x,k),y:lerp(S.y,head.y,k)},w=130*u.scale,rot=Math.atan2(head.y-S.y,head.x-S.x)-Math.atan2(.76,.82),ox=.4*w,oy=.36*w;
     kit3(fx,KIT3.meteor,'comet',H.x-(ox*Math.cos(rot)-oy*Math.sin(rot)),H.y-(ox*Math.sin(rot)+oy*Math.cos(rot)),w,undefined,rot,Math.min(1,p*4+.3));
     glint(fx,H.x,H.y,4*u.scale,'#ffffff','#56ccff',1,age*6);
   },
+  body(fx,skill,age){if(fx.reduced)return null;const k=bell(span(age,0,.45));return {dy:-5*k,squash:1+.03*k};},
   impactLife:.6,
   impact(fx,e,t){
     const c=t*e.total,R=fx.reduced,big=e.targetBoss?1.3:1,T={x:e.x,y:e.y-(e.targetBoss?34:20)},s=(fx.starScale||1)*big;
@@ -1170,11 +1217,96 @@ const starBoy={
   },
 };
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Behemoth · Earth Crusher (UR). The engine strikes three times, 0.5 s apart (0.25, 0.75 and 1.25 s of game time), each centred on a
+// random enemy and hitting every enemy within the crush radius (112.5, +5% per training; a circle on screen). Not a fist: the ground
+// itself breaks to exactly that radius. Owner review, 2026-11-07: the old stamp read as the weakest UR, so the three blows now build
+// to a UR finale.
+//   Cast: the board darkens to moss green, the ground under him cracks open and stones lift around him.
+//   Each blow (the engine's crushPhase, so on time even in the UR slow motion): a ring tightens at his feet and he stomps; at the
+//   centre the ground caves in to the true radius, green crystal spikes burst up along its true edge, the painted rock-and-crystal
+//   pillar erupts from the middle and rubble flies and tumbles back. Each blow is heavier than the last.
+//   The third: fault lines race from him to all three craters, every crater erupts at once and the earth heaves.
+const CRUSH_LEAD=.24,CRUSH_LIFE=[1,1,2];
+function crushPhase(fx,p){const v=fx.s?.volleys?.find(v=>v.kind==='crush'&&v.hero==='behemoth'&&v.phase===p),hit=fx.crushHits?.[p];return {left:v?v.life:null,since:hit?(fx.clock||0)-hit.at:null};}
+// One blow at (x, y) with the engine's radius. e.prev holds the earlier craters and e.from Behemoth, for the finale.
+function quakeStrike(fx,e,t){
+  const c=t*e.total,R=fx.reduced,r=e.radius||126,ph=e.phase|0,big=[1,1.12,1.3][ph]||1,X=e.x,Y=e.y,seed=e.seed||1,final=ph===2;
+  if(!e.struck){e.struck=true;stun(fx,[5,7,12][ph]||5,[.03,.04,.1][ph]||.03);}
+  const end=1-span(c,e.total-.45,e.total);
+  // The ground caves in to the true radius.
+  const cave=easeOut(span(c,0,.08)),ring=2*r*lerp(.5,1.08,easeOut(span(c,0,.2)))/.9;
+  fx.atlasStamp('effects-behemoth',2,3,1,X,Y+6,2*r*lerp(.85,1.05,cave),2*r*lerp(.85,1.05,cave),0,end,'source-over');
+  kit(fx,KIT.ring,'quake',X,Y+6,ring,ring,0,1-span(c,.12,.5));
+  if(!R)kit(fx,KIT.mist,'dust',X,Y+10,2*r*lerp(.8,1.4,easeOut(span(c,0,.6))),r*lerp(.5,.9,easeOut(span(c,0,.6))),0,.7*(1-span(c,.15,.8)),'source-over');
+  // Crystal spikes burst up along the true edge.
+  const n=8+ph*2;for(let i=0;i<n;i++){const a=i/n*6.283+hash(seed,i)*.3,k=easeOut(span(c,.02+hash(seed,i+9)*.06,.14))*(1-span(c,.5,.85));if(k<=0)continue;
+    kitStanding(fx,KIT.spikes,'quake',X+Math.cos(a)*r*.9,Y+Math.sin(a)*r*.9+8,(38+hash(seed,i+30)*22)*big,k,hash(seed,i+50)<.5?1:-1,Math.cos(a)*.25,1-span(c,.55,.85),'lighter');}
+  // The rock-and-crystal pillar erupts from the middle.
+  const up=easeBack(span(c,0,.16)),w=r*1.25*big,burst=r*1.7*big*lerp(.6,1.1,easeOut(span(c,0,.2)));
+  fx.atlasStamp('effects-behemoth',1,3,1,X,Y+12-w*up*.5,w,w*up,0,1-span(c,.4,.75),'source-over');
+  fx.atlasStamp('effects-behemoth',0,3,1,X,Y-10,burst,burst,0,1-span(c,.06,.35),'source-over');
+  kit(fx,KIT.flare,'quake',X,Y-14,190*big*(1-span(c,0,.18)),undefined,0,1-span(c,0,.22));
+  if(!R)for(let i=0;i<(final?18:12);i++){const k=span(c,0,.75);if(k>=1)break;const a=hash(seed,i+70)*6.283,v=r*(.4+hash(seed,i+90)*.8)*big;
+    kit(fx,KIT.shard,i%3?'dust':'quake',X+Math.cos(a)*v*easeOut(k),Y-8+Math.sin(a)*v*.45*easeOut(k)-(120+hash(seed,i+110)*90)*k+260*k*k,12+hash(seed,i+130)*10,undefined,a+k*7,1-span(k,.6,1));}
+  if(!final)return;
+  // The finale (owner review: not beams from him, the earth giving way before his majesty): the ground of every crater lifts in
+  // chunks and hangs trembling, then all of it breaks apart at once into rubble and dust, and the earth heaves across the board.
+  // His giant shadow rises behind the board meanwhile (behemoth.field).
+  const boom=c-.18;if(boom<0)return;const points=[...(e.prev||[]),{x:X,y:Y,radius:r}],lift=easeOut(span(boom,0,.42)),shatter=boom-.42;
+  if(!e.lifted){e.lifted=true;stun(fx,4,0);}
+  for(const [j,q] of points.entries()){const rr=q.radius||r;
+    if(!R)kit(fx,KIT.mist,'dust',q.x,q.y+8,2*rr*lerp(.9,1.5,easeOut(span(boom,0,1))),rr*lerp(.5,.9,easeOut(span(boom,0,1))),0,.75*(1-span(boom,.6,1.4)),'source-over');
+    for(let i=0;i<(R?5:11);i++){const a=hash(seed+j,i)*6.283,d=rr*Math.sqrt(hash(seed+j,i+20))*.85,x=q.x+Math.cos(a)*d,y=q.y+Math.sin(a)*d*.5,size=28+hash(seed+j,i+40)*22,
+      up=(40+hash(seed+j,i+60)*70)*lift,shake=R||shatter>0?0:Math.sin(boom*60+i)*2*lift;
+      if(shatter<0){fx.atlasStamp('effects-behemoth',1,3,1,x+shake,y-up,size*1.5,size*1.5,(hash(seed+j,i+80)-.5)*.8+boom*.6,1,'source-over');continue;}
+      // Each chunk breaks into a few pieces that fall away and turn to dust.
+      const k=span(shatter,0,.7);if(k>=1)continue;
+      for(let m=0;m<3;m++){const b=hash(i+j*31,m)*6.283,v=30+hash(i,m+9)*40;kit(fx,KIT.shard,'dust',x+Math.cos(b)*v*easeOut(k),y-up+Math.sin(b)*v*.6*easeOut(k)+140*k*k,size*.5*(1-.5*k),undefined,b+k*8,1-k,'source-over');}}
+    if(shatter>=0){const k=easeOut(span(shatter,0,.25)),w=rr*1.9*lerp(.6,1.15,k);fx.atlasStamp('effects-behemoth',0,3,1,q.x,q.y-10,w,w,0,1-span(shatter,.08,.5),'source-over');}}
+  if(shatter<0)return;if(!e.boomed){e.boomed=true;stun(fx,14,.1);}
+  const heave=easeOut(span(shatter,0,.55));kit(fx,KIT.ring,'quake',X,Y+6,lerp(2*r,1500,heave),lerp(2*r,1500,heave)*.5,0,.8*(1-heave));
+  const again=easeBack(span(shatter,0,.18)),W=r*1.7;fx.atlasStamp('effects-behemoth',1,3,1,X,Y+12-W*again*.5,W,W*again,0,1-span(shatter,.5,.9),'source-over');
+  wash(fx,'#c8f070',.22*(1-span(shatter,0,.45)));
+  if(!R)for(let i=0;i<24;i++){const k=span(shatter,0,1.1);if(k>=1)break;const x=40+hash(seed,i+150)*640,y=740-hash(seed,i+170)*120;
+    kit(fx,KIT.shard,'dust',x+Math.sin(k*5+i)*10,y-k*(220+hash(seed,i+190)*200),9+hash(seed,i+210)*8,undefined,k*6+i,bell(k));}
+}
+// His majesty: a giant shadow of Behemoth rises behind the board while the last craters break, under the units.
+function behemothShadow(fx,o,since){if(since===null||since>1.6)return;const k=easeOut(span(since,0,.45)),a=(fx.reduced?.3:.5)*k*(1-span(since,.9,1.6));
+  drawGhost(fx,'behemoth',360,770+40*(1-k),'down','#1a2a0c',a,600);}
+const behemoth={
+  life:()=>3,
+  plan(fx,skill){fx.crushHits=[];fx.crushFrom=skill.origin;skill.ur={seed:(skill.uid||1)*3.71};return null;},
+  // effects.js calls this at the engine's crushPhase: remember the crater and add the blow as its own effect.
+  land(fx,e){const hits=fx.crushHits||(fx.crushHits=[]),prev=hits.filter(Boolean).map(h=>({x:h.x,y:h.y,radius:h.radius}));hits[e.phase]={at:fx.clock||0,x:e.x,y:e.y,radius:e.radius};
+    const life=CRUSH_LIFE[e.phase]||1;fx.add?.({...e,type:'urFx',seed:((fx.clock||1)*5.3)%89+1+e.phase,prev,from:fx.crushFrom,life,total:life,draw:quakeStrike});},
+  strike:quakeStrike,
+  field(fx,skill,age){
+    const o=skill.origin,R=fx.reduced,mood=span(age,.02,.3)*(1-span(age,2.4,3));
+    behemothShadow(fx,o,crushPhase(fx,2).since);
+    vignette(fx,o.x,o.y,120,640,'#060a02',R?0:.5*mood);wash(fx,'#0e1404',.22*mood,'source-over');
+    const g=easeOut(span(age,0,.35));fx.atlasStamp('effects-behemoth',2,3,1,o.x,o.y+26,lerp(70,200,g),lerp(28,84,g),0,.8*mood,'source-over');
+    // Before each blow a ring of green light tightens at his feet.
+    for(let p=0;p<3;p++){const ph=crushPhase(fx,p);if(ph.left===null||ph.left>CRUSH_LEAD)continue;const k=1-ph.left/CRUSH_LEAD;kit(fx,KIT.ring,'quake',o.x,o.y+26,lerp(220,70,k),lerp(88,28,k),0,.9*k);}
+  },
+  over(fx,skill,age){
+    const o=skill.origin,R=fx.reduced,u=skill.ur,rise=span(age,.04,.5)*(1-span(age,1.6,2.2));if(rise<=0)return;
+    fx.glow('glow','#9ccc40',o.x,o.y-10,180*rise,.35*rise);
+    const wake=span(age,0,.5);if(wake<1){if(!R)fx.glow('rays','#b8e060',o.x,o.y+10,420*easeOut(wake),.55*(1-wake),age*.5);kit(fx,KIT.flare,'quake',o.x,o.y+14,lerp(120,260,easeOut(wake)),undefined,0,1-wake);
+      kit(fx,KIT.ring,'quake',o.x,o.y+26,lerp(90,420,easeOut(wake)),lerp(36,170,easeOut(wake)),0,1-wake);}
+    // Stones lift around him and hang, bobbing, until the last blow.
+    if(!R)for(let i=0;i<10;i++){const a=hash(u.seed,i)*6.283,r=58+hash(u.seed,i+20)*52,h=lerp(0,40+hash(u.seed,i+40)*50,easeOut(span(age,.04+i*.02,.5)))+Math.sin(age*3+i)*4;
+      kit(fx,KIT.shard,'quake',o.x+Math.cos(a)*r,o.y+20+Math.sin(a)*r*.4-h,12+hash(u.seed,i+60)*8,undefined,a+age*2,rise);}
+  },
+  body(fx,skill,age){if(fx.reduced)return null;let crouch=0,slam=0;for(let p=0;p<3;p++){const ph=crushPhase(fx,p);if(ph.left!==null&&ph.left<=CRUSH_LEAD)crouch=Math.max(crouch,1-ph.left/CRUSH_LEAD);if(ph.since!==null&&ph.since<.18)slam=Math.max(slam,1-ph.since/.18);}
+    const lift=bell(span(age,0,.4));return {dy:-6*lift-7*crouch+5*slam,squash:1+.04*lift+.05*crouch-.08*slam};},
+};
+
 export const UR_SPECS=Object.freeze({cherry_prince:cherry,luna,frost_witch:frost,harmonious:harmony,jasmine,queen,time_magician:trauma,galaxy_whale:whale,time_ruler:chrono,
-  cinderella,venom,doom,rumi,red_dragon:redDragon,aurora,star_boy:starBoy});
+  cinderella,venom,doom,rumi,red_dragon:redDragon,aurora,star_boy:starBoy,behemoth});
 const KIT_BOTH=['ur-kit','ur-kit2'],KIT_ALL=['ur-kit','ur-kit2','ur-kit3'],KIT_ONE_THREE=['ur-kit','ur-kit3'];
 const NEEDS=Object.freeze({harmonious:['ur-kit','ur-sweets'],jasmine:KIT_BOTH,queen:KIT_BOTH,time_magician:KIT_BOTH,galaxy_whale:KIT_BOTH,time_ruler:KIT_BOTH,
-  cinderella:KIT_ALL,venom:KIT_ONE_THREE,doom:KIT_ALL,rumi:KIT_ALL,red_dragon:KIT_ONE_THREE,aurora:KIT_ALL,star_boy:KIT_ONE_THREE});
+  cinderella:KIT_ALL,venom:KIT_ONE_THREE,doom:KIT_ALL,rumi:KIT_ALL,red_dragon:KIT_ONE_THREE,aurora:KIT_ALL,star_boy:KIT_ONE_THREE,behemoth:['ur-kit','ur-kit2','effects-behemoth']});
 // A sequence runs only with its art loaded; otherwise the previous visuals stay (same fallback rule as Ragnarok).
 export function urReady(fx,hero){const spec=UR_SPECS[hero];return !!spec&&(NEEDS[hero]||['ur-kit']).every(id=>fx.art?.images?.[id]);}
 export function urSpec(fx,skill){return skill&&skill.kind!=='dream'&&urReady(fx,skill.hero)?UR_SPECS[skill.hero]:null;}
