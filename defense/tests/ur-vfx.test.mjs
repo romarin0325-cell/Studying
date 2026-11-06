@@ -113,7 +113,7 @@ test('behemoth: the three engine blows land in order, the finale reaches every c
     const age=frame/60;fx.clock=age;skill.life=Math.max(0,2.4-age);
     for(const e of scene.advance(1/60)){if(e.type==='crushPhase')phases.push(e.phase);fx.event(e);}snapshot(fx,scene.state.enemies);
     finale=finale||fx.impacts?.find?.(e=>e.type==='urFx'&&e.phase===2)||null;
-    checked(fx.ctx,()=>{for(const name of ['field','over','body'])spec[name](fx,skill,age);fx.draw(1/60);},'behemoth '+age);
+    checked(fx.ctx,()=>{for(const name of ['field','over','body'])spec[name]?.(fx,skill,age);fx.draw(1/60);},'behemoth '+age);
   }
   assert.deepEqual(phases,[0,1,2]);assert.equal(fx.crushHits.filter(Boolean).length,3);
   if(finale)assert.equal(finale.prev.length,2);

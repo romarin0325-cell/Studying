@@ -1191,18 +1191,19 @@ const starBoy={
     // hands, and the star shoots up into the sky; the meteor that falls on the target is its answer. A C's weight: half a second.
     const o=skill.origin,u=skill.ur,R=fx.reduced,wish=span(age,0,.5);
     if(wish<1){fx.glow('glow','#56ccff',o.x,o.y-30,lerp(60,130,span(age,0,.2)),.45*(1-wish));
-      if(!R)stardust(fx,{x:o.x,y:o.y-4},u.lock.x+u.lock.y,span(age,0,.3),age,1-span(age,.3,.5),0,'#e8fbff','#56ccff');
-      const rise=easeIn(span(age,.12,.42)),S={x:o.x,y:lerp(o.y-44,o.y-300,rise)},sa=1-span(age,.38,.46);
+      if(!R)stardust(fx,{x:o.x,y:o.y-4},u.lock.x+u.lock.y,span(age,0,.12),age,1-span(age,.12,.2),0,'#e8fbff','#56ccff');
+      const rise=easeIn(span(age,.03,.15)),S={x:o.x,y:lerp(o.y-44,o.y-340,rise)},sa=1-span(age,.12,.16);
       if(rise>0)slash(fx,'comet',S.x,(S.y+o.y-44)/2,o.y-44-S.y,-Math.PI/2,1,sa);
-      const launch=bell(span(age,.08,.24));if(launch>0)kit(fx,KIT.flare,'comet',o.x,o.y-44,180*launch,undefined,age*2,launch);
+      const launch=bell(span(age,0,.12));if(launch>0)kit(fx,KIT.flare,'comet',o.x,o.y-44,180*launch,undefined,age*2,launch);
       kit(fx,KIT.flare,'comet',S.x,S.y,lerp(50,110,easeOut(span(age,0,.14)))*(1-.4*rise),undefined,age*3,.8*sa);
       kit3(fx,KIT3.star,'comet',S.x,S.y,lerp(30,58,easeOut(span(age,0,.14)))*(1-.35*rise),undefined,age*4,sa);glint(fx,S.x,S.y,6*sa,'#ffffff','#56ccff',sa,age*6);}
     const p=this.progress(fx,skill);if(p>=1)return;const T=fx.point(u.uid,u.to||u.lock),big=bossOf(fx,{uid:u.uid})?1.3:1,head={x:T.x,y:T.y-(big>1?34:20)},S={x:head.x-230,y:head.y-290};
     label(fx,'★'+u.spent,T.x,T.y+42,Math.min(1,age*6),18,'#bdf0ff');
     // The shooting star: its painted head sits at (+.40, +.36) of the cell from the centre, its streak tilted 43 degrees.
-    const k=easeIn(p),H={x:lerp(S.x,head.x,k),y:lerp(S.y,head.y,k)},w=130*u.scale,rot=Math.atan2(head.y-S.y,head.x-S.x)-Math.atan2(.76,.82),ox=.4*w,oy=.36*w;
-    kit3(fx,KIT3.meteor,'comet',H.x-(ox*Math.cos(rot)-oy*Math.sin(rot)),H.y-(ox*Math.sin(rot)+oy*Math.cos(rot)),w,undefined,rot,Math.min(1,p*4+.3));
-    glint(fx,H.x,H.y,4*u.scale,'#ffffff','#56ccff',1,age*6);
+    // The answer comes after the wish: the meteor shows only once his star has left the board.
+    const after=span(age,.12,.18),k=easeIn(p),H={x:lerp(S.x,head.x,k),y:lerp(S.y,head.y,k)},w=130*u.scale,rot=Math.atan2(head.y-S.y,head.x-S.x)-Math.atan2(.76,.82),ox=.4*w,oy=.36*w;
+    kit3(fx,KIT3.meteor,'comet',H.x-(ox*Math.cos(rot)-oy*Math.sin(rot)),H.y-(ox*Math.sin(rot)+oy*Math.cos(rot)),w,undefined,rot,Math.min(1,p*4+.3)*after);
+    glint(fx,H.x,H.y,4*u.scale,'#ffffff','#56ccff',after,age*6);
   },
   body(fx,skill,age){if(fx.reduced)return null;const k=bell(span(age,0,.45));return {dy:-5*k,squash:1+.03*k};},
   impactLife:.6,
@@ -1219,94 +1220,77 @@ const starBoy={
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Behemoth · Earth Crusher (UR). The engine strikes three times, 0.5 s apart (0.25, 0.75 and 1.25 s of game time), each centred on a
-// random enemy and hitting every enemy within the crush radius (112.5, +5% per training; a circle on screen). Not a fist: the ground
-// itself breaks to exactly that radius. Owner review, 2026-11-07: the old stamp read as the weakest UR, so the three blows now build
-// to a UR finale.
-//   Cast: the board darkens to moss green, the ground under him cracks open and stones lift around him.
-//   Each blow (the engine's crushPhase, so on time even in the UR slow motion): a ring tightens at his feet and he stomps; at the
-//   centre the ground caves in to the true radius, green crystal spikes burst up along its true edge, the painted rock-and-crystal
-//   pillar erupts from the middle and rubble flies and tumbles back. Each blow is heavier than the last.
-//   The third: fault lines race from him to all three craters, every crater erupts at once and the earth heaves.
-const CRUSH_LEAD=.24,CRUSH_LIFE=[1,1,2];
+// random enemy and hitting every enemy within the crush radius (112.5, +5% per training; a circle on screen). Not a fist: the earth
+// splits to exactly that radius, in three places. Second owner review (2026-11-07): the first rebuild popped like popcorn (bouncing
+// rock clusters, flying rubble) and made him flinch. This one keeps the old language, the painted crater and the rock-and-crystal
+// crest, and puts the UR weight in the atmosphere and in the earth itself.
+//   The board sinks into a low, dusty dark with a faint rumble. He does not move; the green power of the earth wells up at his feet.
+//   Each blow: the crack runs out from the centre to the true radius and stays as a scar, light breathes up from inside the cracks, a
+//   ring of dust rolls out at the edge, and the crest rises slowly out of the split and sinks back. The three scars stay on the board.
+//   After the third: all three scars blaze together from within, dust blooms from each, the earth heaves once, and the scars close.
+const CRUSH_LEAD=.24,CRUSH_LIFE=[3,2.5,1.6],CRUSH_FINALE=.2;
 function crushPhase(fx,p){const v=fx.s?.volleys?.find(v=>v.kind==='crush'&&v.hero==='behemoth'&&v.phase===p),hit=fx.crushHits?.[p];return {left:v?v.life:null,since:hit?(fx.clock||0)-hit.at:null};}
-// One blow at (x, y) with the engine's radius. e.prev holds the earlier craters and e.from Behemoth, for the finale.
+// One blow at (x, y) with the engine's radius, drawn as its own effect. The third also carries the earlier craters (e.prev).
 function quakeStrike(fx,e,t){
-  const c=t*e.total,R=fx.reduced,r=e.radius||126,ph=e.phase|0,big=[1,1.12,1.3][ph]||1,X=e.x,Y=e.y,seed=e.seed||1,final=ph===2;
-  if(!e.struck){e.struck=true;stun(fx,[5,7,12][ph]||5,[.03,.04,.1][ph]||.03);}
-  const end=1-span(c,e.total-.45,e.total);
-  // The ground caves in to the true radius.
-  const cave=easeOut(span(c,0,.08)),ring=2*r*lerp(.5,1.08,easeOut(span(c,0,.2)))/.9;
-  fx.atlasStamp('effects-behemoth',2,3,1,X,Y+6,2*r*lerp(.85,1.05,cave),2*r*lerp(.85,1.05,cave),0,end,'source-over');
-  kit(fx,KIT.ring,'quake',X,Y+6,ring,ring,0,1-span(c,.12,.5));
-  if(!R)kit(fx,KIT.mist,'dust',X,Y+10,2*r*lerp(.8,1.4,easeOut(span(c,0,.6))),r*lerp(.5,.9,easeOut(span(c,0,.6))),0,.7*(1-span(c,.15,.8)),'source-over');
-  // Crystal spikes burst up along the true edge.
-  const n=8+ph*2;for(let i=0;i<n;i++){const a=i/n*6.283+hash(seed,i)*.3,k=easeOut(span(c,.02+hash(seed,i+9)*.06,.14))*(1-span(c,.5,.85));if(k<=0)continue;
-    kitStanding(fx,KIT.spikes,'quake',X+Math.cos(a)*r*.9,Y+Math.sin(a)*r*.9+8,(38+hash(seed,i+30)*22)*big,k,hash(seed,i+50)<.5?1:-1,Math.cos(a)*.25,1-span(c,.55,.85),'lighter');}
-  // The rock-and-crystal pillar erupts from the middle.
-  const up=easeBack(span(c,0,.16)),w=r*1.25*big,burst=r*1.7*big*lerp(.6,1.1,easeOut(span(c,0,.2)));
-  fx.atlasStamp('effects-behemoth',1,3,1,X,Y+12-w*up*.5,w,w*up,0,1-span(c,.4,.75),'source-over');
-  fx.atlasStamp('effects-behemoth',0,3,1,X,Y-10,burst,burst,0,1-span(c,.06,.35),'source-over');
-  kit(fx,KIT.flare,'quake',X,Y-14,190*big*(1-span(c,0,.18)),undefined,0,1-span(c,0,.22));
-  if(!R)for(let i=0;i<(final?18:12);i++){const k=span(c,0,.75);if(k>=1)break;const a=hash(seed,i+70)*6.283,v=r*(.4+hash(seed,i+90)*.8)*big;
-    kit(fx,KIT.shard,i%3?'dust':'quake',X+Math.cos(a)*v*easeOut(k),Y-8+Math.sin(a)*v*.45*easeOut(k)-(120+hash(seed,i+110)*90)*k+260*k*k,12+hash(seed,i+130)*10,undefined,a+k*7,1-span(k,.6,1));}
-  if(!final)return;
-  // The finale (owner review: not beams from him, the earth giving way before his majesty): the ground of every crater lifts in
-  // chunks and hangs trembling, then all of it breaks apart at once into rubble and dust, and the earth heaves across the board.
-  // His giant shadow rises behind the board meanwhile (behemoth.field).
-  const boom=c-.18;if(boom<0)return;const points=[...(e.prev||[]),{x:X,y:Y,radius:r}],lift=easeOut(span(boom,0,.42)),shatter=boom-.42;
-  if(!e.lifted){e.lifted=true;stun(fx,4,0);}
-  for(const [j,q] of points.entries()){const rr=q.radius||r;
-    if(!R)kit(fx,KIT.mist,'dust',q.x,q.y+8,2*rr*lerp(.9,1.5,easeOut(span(boom,0,1))),rr*lerp(.5,.9,easeOut(span(boom,0,1))),0,.75*(1-span(boom,.6,1.4)),'source-over');
-    for(let i=0;i<(R?5:11);i++){const a=hash(seed+j,i)*6.283,d=rr*Math.sqrt(hash(seed+j,i+20))*.85,x=q.x+Math.cos(a)*d,y=q.y+Math.sin(a)*d*.5,size=28+hash(seed+j,i+40)*22,
-      up=(40+hash(seed+j,i+60)*70)*lift,shake=R||shatter>0?0:Math.sin(boom*60+i)*2*lift;
-      if(shatter<0){fx.atlasStamp('effects-behemoth',1,3,1,x+shake,y-up,size*1.5,size*1.5,(hash(seed+j,i+80)-.5)*.8+boom*.6,1,'source-over');continue;}
-      // Each chunk breaks into a few pieces that fall away and turn to dust.
-      const k=span(shatter,0,.7);if(k>=1)continue;
-      for(let m=0;m<3;m++){const b=hash(i+j*31,m)*6.283,v=30+hash(i,m+9)*40;kit(fx,KIT.shard,'dust',x+Math.cos(b)*v*easeOut(k),y-up+Math.sin(b)*v*.6*easeOut(k)+140*k*k,size*.5*(1-.5*k),undefined,b+k*8,1-k,'source-over');}}
-    if(shatter>=0){const k=easeOut(span(shatter,0,.25)),w=rr*1.9*lerp(.6,1.15,k);fx.atlasStamp('effects-behemoth',0,3,1,q.x,q.y-10,w,w,0,1-span(shatter,.08,.5),'source-over');}}
-  if(shatter<0)return;if(!e.boomed){e.boomed=true;stun(fx,14,.1);}
-  const heave=easeOut(span(shatter,0,.55));kit(fx,KIT.ring,'quake',X,Y+6,lerp(2*r,1500,heave),lerp(2*r,1500,heave)*.5,0,.8*(1-heave));
-  const again=easeBack(span(shatter,0,.18)),W=r*1.7;fx.atlasStamp('effects-behemoth',1,3,1,X,Y+12-W*again*.5,W,W*again,0,1-span(shatter,.5,.9),'source-over');
-  wash(fx,'#c8f070',.22*(1-span(shatter,0,.45)));
-  if(!R)for(let i=0;i<24;i++){const k=span(shatter,0,1.1);if(k>=1)break;const x=40+hash(seed,i+150)*640,y=740-hash(seed,i+170)*120;
-    kit(fx,KIT.shard,'dust',x+Math.sin(k*5+i)*10,y-k*(220+hash(seed,i+190)*200),9+hash(seed,i+210)*8,undefined,k*6+i,bell(k));}
+  const c=t*e.total,R=fx.reduced,r=e.radius||126,ph=e.phase|0,X=e.x,Y=e.y,ctx=fx.ctx,last=fx.crushHits?.[2],since3=last?(fx.clock||0)-last.at:null;
+  if(!e.struck){e.struck=true;stun(fx,[5,7,9][ph]||5,0);}
+  // The scar stays until the three blaze and close together, or fades with its own life when no third blow comes.
+  const close=since3!==null?1-span(since3,CRUSH_FINALE+.55,CRUSH_FINALE+1.1):1,keep=close*(1-span(c,e.total-.4,e.total));
+  if(keep>0){
+    // The crack runs out from the centre to the true radius; light breathes up from inside it.
+    const run=easeOut(span(c,0,.16)),D=2*r*1.05,breath=.85*bell(span(c,.03,.75));
+    ctx.save();ctx.beginPath();ctx.arc(X,Y+6,r*1.08*run+2,0,Math.PI*2);ctx.clip();
+    fx.atlasStamp('effects-behemoth',2,3,1,X,Y+6,D,D,0,keep,'source-over');
+    if(breath>0)fx.atlasStamp('effects-behemoth',2,3,1,X,Y+6,D,D,0,breath*keep,'lighter');
+    ctx.restore();
+    // A ring of dust rolls out at the true edge.
+    const roll=easeOut(span(c,.05,.55));
+    if(!R)kit(fx,KIT.mist,'dust',X,Y+8,2*r*lerp(.95,1.35,roll),r*lerp(.55,.85,roll),0,.6*(1-span(c,.2,.9)),'source-over');
+    kit(fx,KIT.ring,'quake',X,Y+6,2*r*lerp(.92,1.12,roll)/.9,2*r*lerp(.92,1.12,roll)/.9,0,.8*(1-span(c,.1,.55)));
+    // The crest rises slowly out of the split (no bounce) and sinks back into it.
+    const up=easeOut(span(c,.04,.32))*(1-easeIn(span(c,.6,1))),w=r*1.15*([1,1.06,1.14][ph]||1),ground=Y+16;
+    if(up>0){ctx.save();ctx.beginPath();ctx.rect(X-w,ground-w*1.5,w*2,w*1.5);ctx.clip();fx.atlasStamp('effects-behemoth',1,3,1,X,ground+w*.5-w*up,w,w,0,Math.min(1,up*1.4),'source-over');ctx.restore();}
+  }
+  if(ph!==2)return;
+  // After the third: all three scars blaze from within, dust blooms from each and the earth heaves once.
+  const f=c-CRUSH_FINALE;if(f<0)return;if(!e.boomed){e.boomed=true;stun(fx,13,.1);}
+  const blaze=bell(span(f,0,.7)),grow=lerp(1.05,1.14,easeOut(span(f,0,.4)));
+  for(const q of [...(e.prev||[]),{x:X,y:Y,radius:r}]){const rr=q.radius||r,D=2*rr*grow;
+    fx.glow('glow','#7ab82a',q.x,q.y,rr*2.6,.4*blaze);fx.atlasStamp('effects-behemoth',2,3,1,q.x,q.y+6,D,D,0,.5*blaze,'lighter');
+    if(!R)kit(fx,KIT.mist,'dust',q.x,q.y-6,2*rr*lerp(.8,1.6,easeOut(span(f,0,1))),rr*lerp(.6,1.1,easeOut(span(f,0,1))),0,.6*(1-span(f,.2,1.1)),'source-over');}
+  const heave=easeOut(span(f,0,.7));kit(fx,KIT.ring,'quake',360,410,lerp(240,1500,heave),lerp(120,760,heave),0,.55*(1-heave));
+  wash(fx,'#c8f070',.12*(1-span(f,0,.4)));
 }
-// His majesty: a giant shadow of Behemoth rises behind the board while the last craters break, under the units.
-function behemothShadow(fx,o,since){if(since===null||since>1.6)return;const k=easeOut(span(since,0,.45)),a=(fx.reduced?.3:.5)*k*(1-span(since,.9,1.6));
-  drawGhost(fx,'behemoth',360,770+40*(1-k),'down','#1a2a0c',a,600);}
 const behemoth={
   life:()=>3,
-  plan(fx,skill){fx.crushHits=[];fx.crushFrom=skill.origin;skill.ur={seed:(skill.uid||1)*3.71};return null;},
+  plan(fx,skill){fx.crushHits=[];skill.ur={seed:(skill.uid||1)*3.71};return null;},
   // effects.js calls this at the engine's crushPhase: remember the crater and add the blow as its own effect.
   land(fx,e){const hits=fx.crushHits||(fx.crushHits=[]),prev=hits.filter(Boolean).map(h=>({x:h.x,y:h.y,radius:h.radius}));hits[e.phase]={at:fx.clock||0,x:e.x,y:e.y,radius:e.radius};
-    const life=CRUSH_LIFE[e.phase]||1;fx.add?.({...e,type:'urFx',seed:((fx.clock||1)*5.3)%89+1+e.phase,prev,from:fx.crushFrom,life,total:life,draw:quakeStrike});},
+    const life=CRUSH_LIFE[e.phase]||1.6;fx.add?.({...e,type:'urFx',prev,life,total:life,draw:quakeStrike});},
   strike:quakeStrike,
   field(fx,skill,age){
-    const o=skill.origin,R=fx.reduced,mood=span(age,.02,.3)*(1-span(age,2.4,3));
-    behemothShadow(fx,o,crushPhase(fx,2).since);
-    vignette(fx,o.x,o.y,120,640,'#060a02',R?0:.5*mood);wash(fx,'#0e1404',.22*mood,'source-over');
-    const g=easeOut(span(age,0,.35));fx.atlasStamp('effects-behemoth',2,3,1,o.x,o.y+26,lerp(70,200,g),lerp(28,84,g),0,.8*mood,'source-over');
-    // Before each blow a ring of green light tightens at his feet.
-    for(let p=0;p<3;p++){const ph=crushPhase(fx,p);if(ph.left===null||ph.left>CRUSH_LEAD)continue;const k=1-ph.left/CRUSH_LEAD;kit(fx,KIT.ring,'quake',o.x,o.y+26,lerp(220,70,k),lerp(88,28,k),0,.9*k);}
+    const o=skill.origin,R=fx.reduced,mood=span(age,.02,.35)*(1-span(age,2.4,3));
+    vignette(fx,360,410,140,640,'#070903',R?0:.55*mood);wash(fx,'#10140a',.24*mood,'source-over');
+    // A faint rumble while the earth is awake.
+    if(!R&&mood>.5&&age<2.2)fx.shake=Math.max(fx.shake||0,1.2);
+    // The green power of the earth wells up at his feet; before each blow it gathers there.
+    const g=easeOut(span(age,0,.4));fx.glow('glow','#9ccc40',o.x,o.y+18,lerp(80,170,g),.35*mood);
+    // At the cast the power bursts up from the ground at his feet (the old cast moment, at UR weight).
+    const wake=span(age,0,.55);if(wake<1){if(!R)fx.glow('rays','#b8e060',o.x,o.y+10,440*easeOut(wake),.5*(1-wake),age*.5);kit(fx,KIT.flare,'quake',o.x,o.y+12,lerp(140,280,easeOut(wake)),undefined,0,.9*(1-wake));kit(fx,KIT.ring,'quake',o.x,o.y+26,lerp(90,440,easeOut(wake)),lerp(36,176,easeOut(wake)),0,1-wake);}
+    fx.atlasStamp('effects-behemoth',2,3,1,o.x,o.y+26,lerp(70,190,g),lerp(28,80,g),0,.75*mood,'source-over');
+    for(let p=0;p<3;p++){const ph=crushPhase(fx,p);if(ph.left===null||ph.left>CRUSH_LEAD)continue;const k=1-ph.left/CRUSH_LEAD;kit(fx,KIT.ring,'quake',o.x,o.y+26,lerp(200,80,k),lerp(80,32,k),0,.8*k);}
+    // Dust hangs low over the board.
+    if(!R)for(let i=0;i<5;i++){const k=(age*.12+i/5)%1;kit(fx,KIT.mist,'dust',80+i*140+Math.sin(age*.7+i)*30,640-k*60,260,90,0,.22*mood*bell(k),'source-over');}
   },
-  over(fx,skill,age){
-    const o=skill.origin,R=fx.reduced,u=skill.ur,rise=span(age,.04,.5)*(1-span(age,1.6,2.2));if(rise<=0)return;
-    fx.glow('glow','#9ccc40',o.x,o.y-10,180*rise,.35*rise);
-    const wake=span(age,0,.5);if(wake<1){if(!R)fx.glow('rays','#b8e060',o.x,o.y+10,420*easeOut(wake),.55*(1-wake),age*.5);kit(fx,KIT.flare,'quake',o.x,o.y+14,lerp(120,260,easeOut(wake)),undefined,0,1-wake);
-      kit(fx,KIT.ring,'quake',o.x,o.y+26,lerp(90,420,easeOut(wake)),lerp(36,170,easeOut(wake)),0,1-wake);}
-    // Stones lift around him and hang, bobbing, until the last blow.
-    if(!R)for(let i=0;i<10;i++){const a=hash(u.seed,i)*6.283,r=58+hash(u.seed,i+20)*52,h=lerp(0,40+hash(u.seed,i+40)*50,easeOut(span(age,.04+i*.02,.5)))+Math.sin(age*3+i)*4;
-      kit(fx,KIT.shard,'quake',o.x+Math.cos(a)*r,o.y+20+Math.sin(a)*r*.4-h,12+hash(u.seed,i+60)*8,undefined,a+age*2,rise);}
-  },
-  body(fx,skill,age){if(fx.reduced)return null;let crouch=0,slam=0;for(let p=0;p<3;p++){const ph=crushPhase(fx,p);if(ph.left!==null&&ph.left<=CRUSH_LEAD)crouch=Math.max(crouch,1-ph.left/CRUSH_LEAD);if(ph.since!==null&&ph.since<.18)slam=Math.max(slam,1-ph.since/.18);}
-    const lift=bell(span(age,0,.4));return {dy:-6*lift-7*crouch+5*slam,squash:1+.04*lift+.05*crouch-.08*slam};},
+  // He stands still: the weight is in the earth, not in a flinch.
+  body(){return null;},
 };
 
 export const UR_SPECS=Object.freeze({cherry_prince:cherry,luna,frost_witch:frost,harmonious:harmony,jasmine,queen,time_magician:trauma,galaxy_whale:whale,time_ruler:chrono,
   cinderella,venom,doom,rumi,red_dragon:redDragon,aurora,star_boy:starBoy,behemoth});
 const KIT_BOTH=['ur-kit','ur-kit2'],KIT_ALL=['ur-kit','ur-kit2','ur-kit3'],KIT_ONE_THREE=['ur-kit','ur-kit3'];
 const NEEDS=Object.freeze({harmonious:['ur-kit','ur-sweets'],jasmine:KIT_BOTH,queen:KIT_BOTH,time_magician:KIT_BOTH,galaxy_whale:KIT_BOTH,time_ruler:KIT_BOTH,
-  cinderella:KIT_ALL,venom:KIT_ONE_THREE,doom:KIT_ALL,rumi:KIT_ALL,red_dragon:KIT_ONE_THREE,aurora:KIT_ALL,star_boy:KIT_ONE_THREE,behemoth:['ur-kit','ur-kit2','effects-behemoth']});
+  cinderella:KIT_ALL,venom:KIT_ONE_THREE,doom:KIT_ALL,rumi:KIT_ALL,red_dragon:KIT_ONE_THREE,aurora:KIT_ALL,star_boy:KIT_ONE_THREE,behemoth:['ur-kit','effects-behemoth']});
 // A sequence runs only with its art loaded; otherwise the previous visuals stay (same fallback rule as Ragnarok).
 export function urReady(fx,hero){const spec=UR_SPECS[hero];return !!spec&&(NEEDS[hero]||['ur-kit']).every(id=>fx.art?.images?.[id]);}
 export function urSpec(fx,skill){return skill&&skill.kind!=='dream'&&urReady(fx,skill.hero)?UR_SPECS[skill.hero]:null;}
