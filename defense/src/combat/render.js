@@ -107,7 +107,7 @@ export class Renderer {
     if(e.type==='skill'&&e.kind==='lemonade')this.float('레몬 배리어 ♡',e.origin.x,e.origin.y-74,'#ffd3ec',24);
     if(e.type==='bombBlast'){this.shake=7;this.bursts(e.x,e.y,'#ff6a50',20,1.1);}
     if(e.type==='bombSet')this.bursts(e.x,e.y-8,'#ffd9c8',8,.6);
-    if(e.type==='crushPhase'){this.shake=4;this.bursts(e.x,e.y,HERO.behemoth.color,8,.7);}
+    if(e.type==='crushPhase'&&!urReady(this.fx,'behemoth')){this.shake=4;this.bursts(e.x,e.y,HERO.behemoth.color,8,.7);}
     if(e.type==='skill'){const life=e.kind==='dream'?2.9:e.kind==='bigshow'?2.4:e.kind==='inferno'?RAGNAROK_LIFE:1.6;this.skill={...e,uid:++this.skillSeq,life,total:life};
       // Sequenced ultimates (ur-vfx.js) set their own length and say when each target is struck on screen.
       const spec=e.kind==='dream'?null:urSpec(this.fx,this.skill);

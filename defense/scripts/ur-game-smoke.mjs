@@ -13,8 +13,8 @@ import {HEROES} from '../src/content.js';
 import {createBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 const url=pathToFileURL(path.join(gameRoot,'dist/StarGardenDefense.html')).href,NOW=Date.now(),out=path.join(gameRoot,'test-results/review-captures/ur-game-smoke.png');
-// Five decks cover every sequenced ultimate; Rumi at five stars casts the dream form.
-const DECKS=[[['queen','cinderella','venom','doom','rumi']],[['red_dragon','aurora','star_boy','jasmine','time_magician']],[['galaxy_whale','time_ruler','cherry_prince','luna','frost_witch']],[['rumi','harmonious','siren','zeke','queen'],{rumi:5},2]];
+// Four decks cover every sequenced ultimate (Behemoth from 2026-11-07); Rumi at five stars casts the dream form.
+const DECKS=[[['queen','cinderella','venom','doom','rumi']],[['red_dragon','aurora','star_boy','jasmine','time_magician']],[['galaxy_whale','time_ruler','cherry_prince','luna','frost_witch']],[['rumi','harmonious','behemoth','zeke','queen'],{rumi:5},3]];
 function fixture(deck,ranks={}){
   const p=createProfile(NOW);p.settings.auto=false;for(const h of HEROES)p.heroes[h.id].owned=true;
   p.deck=[...deck];if(!command(p,'begin',{mode:'main',stage:1},NOW).ok)throw Error('begin');

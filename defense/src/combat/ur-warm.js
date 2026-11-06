@@ -33,6 +33,10 @@ function* warmFrames(renderer,id,deck){
       yield;
     }
   }
+  // Behemoth's three blows land on the engine's crushPhase events: draw each blow, the finale too, across its life.
+  if(id==='behemoth'&&UR_SPECS.behemoth.strike){const from=cellPoint(12);
+    for(let phase=0;phase<3;phase++)for(let frame=0;frame<=10;frame++){fx.clock=frame/10;try{UR_SPECS.behemoth.strike(fx,{type:'urFx',phase,x:targets[phase].x,y:targets[phase].y,radius:126,seed:phase+1,from,prev:targets.slice(0,phase).map(q=>({x:q.x,y:q.y,radius:126})),total:phase===2?1.6:1},frame/10);}catch{}yield;}
+    fx.crushHits=[null,null,{at:0}];for(let frame=0;frame<=8;frame++){fx.clock=frame/5;try{UR_SPECS.behemoth.field(fx,{origin:from,ur:{seed:1}},1);}catch{}yield;}}
   // Rumi's dream form (5 stars) runs from effects.js on the engine's four volleys: rise every symbol and land every strike once.
   if(id==='rumi'&&dreamReady(renderer.fx)){
     const at=[.45,1,1.55,2.3],dream={type:'skill',uid:-2,hero:id,kind:'dream',origin:cellPoint(12),targets:[],total:2.9,life:2.9};DREAM.start(fx);

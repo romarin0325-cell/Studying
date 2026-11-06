@@ -6,7 +6,7 @@ import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from '../..
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from '../../../../src/combat/new-companion-vfx.js';
 import {drawGoldAttack,drawGoldPersistent,goldEvent,drawGoldGround,drawGoldImpact} from '../../../../src/combat/gold-dragon-vfx.js';
 import {drawRagnarok,drawMoonShot,drawMoonCut,MOON_CUT_LIFE} from '../../../../src/combat/blade-vfx.js';
-import {UR_SPECS,urSpec,urReady,contactEffect,drawContact,drawTimeStop} from './ur-vfx.js';
+import {UR_SPECS,urSpec,urReady,contactEffect,drawContact,drawTimeStop,DREAM,dreamReady,drawMidnightBell} from './ur-vfx.js';
 // Effects drawn under the units (attack circles and ultimate ground marks); draw() only ages them.
 const GROUND_TYPES=new Set(['attackShape','deathhandGround','ecloseGround','goldBreathGround']);
 export const ULTIMATE_FRAMES=Object.freeze({cinderella:0,galaxy_whale:1,time_ruler:2,doom:3,santa:4,jasmine:5,frost_witch:6,harmonious:7,zeke:8,rumi:9,luna:10,cherry_prince:11,siren:12,silver_rabbit:13,ancient_dragon:14,time_magician:15});
@@ -159,20 +159,24 @@ export class CombatFX{
     if(e.type==='bell')this.add({...e,life:.85,total:.85});
     if(e.type==='bossCast'&&e.pattern==='thunder')for(const i of e.cells||[])this.add({type:'thunderStrike',...cellPoint(i),seed:i,life:.6,total:.6});
     if(e.type==='instantKill')this.add({...e,life:.48,total:.48});
-    // Cherry Prince's sequenced royal cut draws its own impact (ur-vfx.js).
-    if((e.type==='finisherImpact'||e.type==='finisherFizzle')&&!(e.kind==='royal'&&urReady(this,e.hero)))this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
+    // Cherry Prince's sequenced royal cut draws its own impact (ur-vfx.js); Aurora's mirror and Shooting Star Boy's star (pass 3) are
+    // added here as their own effects, so they outlive the cast.
+    const finish=e.type==='finisherImpact'||e.type==='finisherFizzle',own=finish&&urReady(this,e.hero)?UR_SPECS[e.hero]:null;
+    if(own?.impact)this.add({...e,type:'urFx',hit:e.type==='finisherImpact',life:own.impactLife,total:own.impactLife,draw:(fx,ef,t)=>own.impact(fx,ef,t)});
+    else if(finish&&!(e.kind==='royal'&&urReady(this,e.hero)))this.add({...e,life:e.type==='finisherImpact'?.55:.25,total:e.type==='finisherImpact'?.55:.25});
     if(e.type==='bossCast')for(const p of e.cells?.map(cellPoint)||[e])this.add({...e,...p,type:'bossMagic',life:.65,total:.65});
     if(e.type==='supportPulse')for(const p of e.targets||[])this.add({...p,hero:e.hero,type:'support',pulse:true,life:.45,total:.45});
     if(e.type==='impact'){const life=e.hero==='lightning_sage'?LIGHTNING_IMPACT_LIFE:['red_dragon','santa','snow_rabbit'].includes(e.hero)?.38:['demon_king','miracle_larva'].includes(e.hero)?.45:e.hero==='luna'?MOON_CUT_LIFE:.3;this.add({...e,life,total:life});const contact=contactEffect(e);if(contact)this.add(contact);}
     if(e.type==='chain'){const lightning=e.hero==='lightning_sage',life=lightning?LIGHTNING_IMPACT_LIFE:.24;this.add({type:'impact',hero:e.hero,x:e.to.x,y:e.to.y,angle:Math.atan2(e.to.y-e.from.y,e.to.x-e.from.x),life,total:life,rank:1,...(lightning?{hop:true}:{})});}
-    if(e.type==='dreamPhase')for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});
+    if(e.type==='skill'&&e.kind==='dream'&&dreamReady(this))DREAM.start(this);
+    if(e.type==='dreamPhase'){if(dreamReady(this))DREAM.strike(this,e);else for(const p of (e.targets||[]).slice(0,18))this.add({type:'dreamHit',phase:e.phase,x:p.x,y:p.y,life:.5,total:.5});}
     if(e.type==='crushPhase')this.add({...e,life:.9,total:.9});
     if(e.type==='sunCharge'){this.bloomAt=this.clock;for(const p of e.points||[])this.add({type:'sunCharge',x:p.x+28,y:p.y+21,sunlight:e.sunlight,life:.9,total:.9});}
     if(e.type==='sunSpend'&&e.sunlight>0)this.add({type:'sunSpend',points:(e.points||[]).map(p=>({x:p.x+28,y:p.y+21})),sunlight:e.sunlight,life:1.2,total:1.2});
     if(e.type==='jokerColor'){this.companionJoker=e.color;this.wheelAt=this.clock;for(const p of e.points||[])this.add({type:'jokerFlip',x:p.x+28,y:p.y+21,color:e.color,life:.7,total:.7});}
     if(e.type==='reduce')this.add({...e,life:1.1,total:1.1});
     if(e.type==='armageddonBlast')this.add({type:'armageddon',x:e.x,y:e.y,radius:e.radius||180,life:1.3,total:1.3});
-    if(e.type==='skill'&&e.kind==='venomplague')for(const p of e.targets||[])this.add({type:'plagueBloom',x:p.x,y:p.y,life:1.1,total:1.1});
+    if(e.type==='skill'&&e.kind==='venomplague'&&!urReady(this,'venom'))for(const p of e.targets||[])this.add({type:'plagueBloom',x:p.x,y:p.y,life:1.1,total:1.1});
     if(e.type==='ward')this.add({type:'ward',x:e.x,y:e.y,hero:e.hero,life:.7,total:.7});
     if(e.type==='requiem')for(const p of e.points||[])this.add({type:'wipe',x:p.x,y:p.y,cleared:p.cleared||0,life:.8,total:.8});
     if(e.type==='skill'&&e.kind==='requiem')this.add({type:'novaRing',x:e.origin.x,y:e.origin.y-10,life:1.25,total:1.25});
@@ -413,7 +417,7 @@ export class CombatFX{
   }
   signature(skill,age,fade){
     const ctx=this.ctx,h=HERO[skill.hero],targets=skill.targets||[],seed=skill.uid||skill.rank||1;
-    if(skill.kind==='dream'){this.drawDream(skill,age);return true;}
+    if(skill.kind==='dream'){if(dreamReady(this))DREAM.field(this,skill,age);else this.drawDream(skill,age);return true;}
     if(skill.hero==='cinderella'){
       // Midnight: a huge glass clock swings in, chimes twelve, then shatters into falling glass.
       const pop=easeBack(window01(age,0,.38)),chime=window01(age,.5,.75),shatter=window01(age,.72,1.45);
@@ -554,7 +558,7 @@ export class CombatFX{
       }
       // Global buffs whose sequence carries the activation (Dessert Ensemble, Goddess Descent) leave no stamp on the units: the
       // HUD timer shows their duration. Without the sequence Harmonious keeps its neighbour-only stamp.
-      const quiet=id=>(id==='harmonious'||id==='jasmine')&&urReady(this,id);let owner=own&&!quiet(u.hero)?u.hero:null,active=owner?own:null;
+      const quiet=id=>(id==='harmonious'||id==='jasmine'||id==='rumi')&&urReady(this,id);let owner=own&&!quiet(u.hero)?u.hero:null,active=owner?own:null;
       if(!active){owner=Object.keys(ACTIVE_SKILLS).find(id=>!PARTIAL_AURAS.includes(ACTIVE_SKILLS[id])&&s.buffs[ACTIVE_SKILLS[id]]>0&&!quiet(id)&&(id!=='harmonious'||neighbors(i).some(n=>s.board[n]?.hero==='harmonious')));active=owner?activeSkill(s,owner):null;}
       if(!active||PARTIAL_AURAS.includes(active.key))continue;
       this.ultimate(owner,p.x,p.y+22,70,26,0,.16+Math.sin(this.clock*4+u.uid)*.05);
@@ -813,17 +817,17 @@ export class CombatFX{
   }
   // Layer above the units for the sequenced ultimates, plus the Frost Witch's winter snowfall once her cast has faded.
   drawSkillOver(skills,s){
-    for(const skill of skills){if(skill.life<=0||!skill.ur)continue;const ur=urSpec(this,skill);if(ur?.over)ur.over(this,skill,skill.total-skill.life);}
+    for(const skill of skills){if(skill.life<=0)continue;if(skill.kind==='dream'){if(dreamReady(this))DREAM.over(this,skill,skill.total-skill.life);continue;}if(!skill.ur)continue;const ur=urSpec(this,skill);if(ur?.over)ur.over(this,skill,skill.total-skill.life);}
     for(const [id,spec] of Object.entries(UR_SPECS))if(spec.persistentOver&&urReady(this,id))spec.persistentOver(this,s,skills);
   }
   drawFinisherLocks(s){
-    for(const f of s.finishers){const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);if(!target)continue;if(f.kind==='royal'&&urReady(this,f.hero))continue;const p=pathPoint(target.progress),row=f.kind==='royal'?0:4;
+    for(const f of s.finishers){const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);if(!target)continue;if((f.kind==='royal'||UR_SPECS[f.hero]?.impact)&&urReady(this,f.hero))continue;const p=pathPoint(target.progress),row=f.kind==='royal'?0:4;
       if(f.kind==='mirror'){this.atlasStamp('effects-trio',5,3,2,p.x-(target.boss?38:15),p.y-(target.boss?27:18),target.boss?88:56,target.boss?104:68,0,.78);continue;}
       this.atlasStamp('finishers',row,4,3,p.x,p.y-(target.boss?35:16),target.boss?148:84,undefined,0,.88);
     }
   }
   drawFinishers(s){
-    for(const f of s.finishers){const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);if(!target)continue;if(f.kind==='royal'&&urReady(this,f.hero))continue;
+    for(const f of s.finishers){const target=s.enemies.find(e=>e.uid===f.target&&e.hp>0);if(!target)continue;if((f.kind==='royal'||UR_SPECS[f.hero]?.impact)&&urReady(this,f.hero))continue;
       const to=pathPoint(target.progress),p=1-f.life/f.total,row=f.kind==='royal'?0:4;
       if(f.kind==='mirror'){
         // The lock follows its original enemy. Small shards fill from damage,
@@ -964,6 +968,7 @@ export class CombatFX{
         continue;
       }
       if(e.type==='bell'){
+        if(drawMidnightBell(this,e,t))continue;
         // Midnight bell: a glass star drops on the target, a clock face rings out to the splash radius, glass flies.
         const drop=Math.min(1,t/.18),ring=window01(t,.14,.8),fade=1-window01(t,.45,1),r=(e.radius||150)*easeOut(ring);
         ctx.save();ctx.globalCompositeOperation='lighter';
