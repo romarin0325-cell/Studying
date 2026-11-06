@@ -8,8 +8,10 @@ concurrency:
   cancel-in-progress: true
 jobs:
   gate:
+    # Preserve the legacy check name for branch-protection compatibility.
     name: Defense release gate
-    runs-on: ubuntu-latest
+    # Playwright 1.59.1 supports Ubuntu 24.04, but not the 26.04 latest image.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       VERIFY_BASE_SHA: ${{ github.event.pull_request.base.sha }}
