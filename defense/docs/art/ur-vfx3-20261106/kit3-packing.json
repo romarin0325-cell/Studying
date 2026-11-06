@@ -1,0 +1,444 @@
+{
+  "spec": "defense/docs/art/ur-vfx3-20261106/kit3-pack.json",
+  "mode": "kit",
+  "cells": [
+    {
+      "index": 0,
+      "name": "butterfly",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitL3-b.webp",
+      "cut": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "box": [
+        66,
+        94,
+        416,
+        314
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        13,
+        39,
+        230,
+        178
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 1,
+      "name": "flame",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitL3-a.webp",
+      "cut": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "box": [
+        651,
+        29,
+        221,
+        457
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        324,
+        13,
+        120,
+        230
+      ],
+      "anchor": "bottom"
+    },
+    {
+      "index": 2,
+      "name": "breath",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitL3-b.webp",
+      "cut": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "box": [
+        1047,
+        127,
+        450,
+        244
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        62,
+        230,
+        133
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 3,
+      "name": "meteor",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitL3-b.webp",
+      "cut": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "box": [
+        63,
+        556,
+        397,
+        361
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        781,
+        23,
+        230,
+        211
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 4,
+      "name": "mirror",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitL3-b.webp",
+      "cut": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "box": [
+        630,
+        515,
+        271,
+        435
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        51,
+        269,
+        154,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 5,
+      "name": "cracks",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitL3-b.webp",
+      "cut": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "box": [
+        1068,
+        540,
+        409,
+        393
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        273,
+        230,
+        222
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 6,
+      "name": "sun",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitD3-b.webp",
+      "cut": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "box": [
+        34,
+        13,
+        564,
+        569
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        270,
+        230,
+        228
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 7,
+      "name": "crescent",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitD3-b.webp",
+      "cut": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "box": [
+        718,
+        64,
+        437,
+        474
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        790,
+        269,
+        213,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 8,
+      "name": "star",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitD3-b.webp",
+      "cut": [
+        0,
+        627,
+        627,
+        1254
+      ],
+      "box": [
+        50,
+        630,
+        538,
+        508
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        13,
+        535,
+        230,
+        211
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 9,
+      "name": "bell",
+      "kind": "light",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitD3-b.webp",
+      "cut": [
+        627,
+        627,
+        1254,
+        1254
+      ],
+      "box": [
+        675,
+        641,
+        519,
+        506
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        529,
+        230,
+        222
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 10,
+      "name": "lily",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitO3-a.webp",
+      "cut": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "box": [
+        31,
+        57,
+        575,
+        512
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        548,
+        230,
+        207
+      ],
+      "anchor": "bottom",
+      "solo": true
+    },
+    {
+      "index": 11,
+      "name": "envelope",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitO3-c.webp",
+      "cut": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "box": [
+        696,
+        140,
+        470,
+        345
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        781,
+        554,
+        230,
+        173
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 12,
+      "name": "dagger",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitO3-a.webp",
+      "cut": [
+        0,
+        627,
+        627,
+        1254
+      ],
+      "box": [
+        194,
+        664,
+        240,
+        552
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        73,
+        781,
+        110,
+        230
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 13,
+      "name": "root",
+      "kind": "object",
+      "src": "defense/docs/art/ur-vfx3-20261106/gpt-kitO3-a.webp",
+      "cut": [
+        627,
+        627,
+        1254,
+        1254
+      ],
+      "box": [
+        643,
+        855,
+        574,
+        175
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        855,
+        230,
+        83
+      ],
+      "anchor": "center",
+      "solo": true
+    }
+  ]
+}

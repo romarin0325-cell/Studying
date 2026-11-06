@@ -50,10 +50,10 @@
     }
   },
   "totals": {
-    "sourceBytes": 32907345,
-    "deployableSourceBytes": 31083071,
-    "outputBytes": 17429664,
-    "optimizedFiles": 176,
+    "sourceBytes": 33150041,
+    "deployableSourceBytes": 31325767,
+    "outputBytes": 17617174,
+    "optimizedFiles": 177,
     "derivedFiles": 162,
     "derivedOutputBytes": 3894814
   },
@@ -2918,6 +2918,37 @@
         "path": "./assets/optimized/merge/ur-kit2.webp",
         "bytes": 212598,
         "sha256": "49a9645dc6a845b09859eef13eb1df9c961f9a256f14f47fa56712f32134ca09",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:ur-kit3",
+      "source": "./assets/merge/ur-kit3.webp",
+      "profile": "atlas",
+      "uses": [
+        "window.__ASTRA_ASSETS__.ur-kit3; combat renderer / stage UI"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 242696,
+        "sha256": "f5bdac60b078817194b27c68ec4974491b77d222bf256bd447548d5ddd5f6248",
+        "metadata": {
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/ur-kit3.webp",
+        "bytes": 187510,
+        "sha256": "5fbfdd7b5d4513a3719529d2862a2694a09d673e2497839b5914755bd9c0e614",
         "metadata": {
           "width": 1024,
           "height": 1024,

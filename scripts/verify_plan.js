@@ -398,6 +398,7 @@ function planDefense(plan, files, currentFiles) {
     [/^defense\/src\/(?:course|quiz|tutor)\.js$/, ['study']],
     [/^defense\/src\/(?:asset-policy|portrait-layout|combat\/render)\.js$/, ['assets']],
     [/^defense\/src\/combat\/effects\.js$/, ['companion-vfx', 'lightning-vfx']],
+    [/^defense\/src\/(?:app|combat\/(?:ur-vfx|ur-warm|render|effects))\.js$/, ['ur-vfx']],
     [/^defense\/src\/combat\/(?:new-)?companion-vfx\.js$/, ['companion-vfx']],
     [/^defense\/src\/combat\/lightning-vfx\.js$/, ['lightning-vfx']],
     [/^defense\/(?:src\/lab\/|lab\.html$|scripts\/build-lab\.mjs$)/, ['lab']],

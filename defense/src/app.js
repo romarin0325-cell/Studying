@@ -13,6 +13,7 @@ import {smartAutoPlay} from './smart-auto.js';
 import * as E from './combat/engine.js';
 import {portraitFrame} from './portrait-layout.js';
 import {Art,Renderer} from './combat/render.js';
+import {warmUltimates} from './combat/ur-warm.js';
 import {Sound} from './combat/audio.js';
 import {icon} from './icons.js';
 import {currentRecord,monthlyReward,weeklyReward} from './monthly.js';
@@ -382,7 +383,7 @@ function renderBattle(){
     for(const type of ['pointerup','pointerleave','pointercancel'])node.addEventListener(type,()=>{clearTimeout(skillHold);node.classList.remove('holding');hideSkillTip();});
     node.addEventListener('contextmenu',e=>e.preventDefault());node.addEventListener('selectstart',e=>e.preventDefault());
   }
-  renderer=new Renderer($('arena'),art);settings();bindArena();fitBattle();updateBattle();
+  renderer=new Renderer($('arena'),art);renderer.landed=e=>sound.event(e);renderer.watchGold(run.gold);const battleRenderer=renderer,deck=[...run.deck];art.ready.then(()=>{if(renderer===battleRenderer)warmUltimates(battleRenderer,deck,()=>renderer===battleRenderer);});settings();bindArena();fitBattle();updateBattle();
 }
 // Tall phones keep a slot under the arena for the wave strip and the unit card, so neither covers
 // the board. When that slot would shrink the arena below 90% width, the card overlays the dock instead.
@@ -395,7 +396,8 @@ const changedText=(node,value)=>{value=String(value);if(node.textContent!==value
 function updateBattle(){
   if(screen!=='battle'||!run)return;
   // Gold a sequenced ultimate is still carrying to the HUD (the Queen's coins) joins the total when it arrives, with one pulse.
-  changedText(hud.health,run.health);changedText(hud.gold,fmt(run.gold-(renderer?.heldGold?.()||0)));changedText(hud.gauge,Math.floor(run.gauge));changedText(hud['battle-time'],duration(run.time*1000));
+  const prices=[E.summonCost(run),...run.deck.map(id=>E.skillGoldCost(id)),...(modal==='training'?run.deck.filter(id=>run.upgrades[id]<E.trainCap(run)).map(id=>E.upgradeCost(run,id)):[])];
+  changedText(hud.health,run.health);changedText(hud.gold,fmt(renderer?renderer.displayGold(run.gold,prices):Math.max(0,run.gold)));changedText(hud.gauge,Math.floor(run.gauge));changedText(hud['battle-time'],duration(run.time*1000));
   if(renderer?.takeGoldPulse?.()){const item=hud.gold.parentElement;item.classList.remove('gain');void item.offsetWidth;item.classList.add('gain');}
   const fill=`scaleX(${Math.min(1,run.gauge/E.gaugeCap(run)).toFixed(3)})`;if(hud['gauge-fill'].style.transform!==fill)hud['gauge-fill'].style.transform=fill;
   changedText(hud['wave-label'],run.mode==='main'?`웨이브 ${run.wave}/6${run.wave===3||run.wave===6?' · 보스 웨이브':''}`:run.mode==='monthly'?`보스 ${Math.min(run.wave,CHALLENGE_WAVES)}/${CHALLENGE_WAVES} · 코어에 닿으면 종료`:`웨이브 ${Math.min(run.wave,E.lastWave(run))}/${E.lastWave(run)}${run.wave%3===0?' · 보스 웨이브':''}`);
@@ -526,6 +528,7 @@ function trainRow(id){
 }
 function training(){
   show('훈련','이번 원정 한정',`<p class="subtext">이번 원정에서만 적용됩니다. ${E.trainCap(run)?`1회당 공격력 +25%, 최대 ${E.trainCap(run)}회.`:'별빛 서약으로 이번 원정에서는 훈련할 수 없습니다.'} 일부 동료는 오라·감속 같은 역할 수치도 함께 오릅니다.</p><div class="choose-list" style="margin-top:14px">${run.deck.map(trainRow).join('')}</div>`,`<button class="primary wide" data-action="close">전투로 돌아가기</button>`,'training');
+  updateBattle();
 }
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
@@ -1547,10 +1550,10 @@ function frame(time){
   if(run&&screen==='battle'&&!document.hidden){
     if(!paused&&!modal){
       if(renderer.hitstop>0)renderer.hitstop=Math.max(0,renderer.hitstop-dt);else accumulator+=dt*speed*(slowmo>0?.3:1);slowmo=Math.max(0,slowmo-dt);let ticks=0;
-      while(accumulator>=.05&&ticks++<5){const before=run.phase;E.step(run,.05);performanceStats.steps++;if(before!=='reward'&&run.phase==='reward')autoIn=-.5;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);autoIn=0;}accumulator-=.05;}
+      renderer.watchGold(run.gold);while(accumulator>=.05&&ticks++<5){const before=run.phase;E.step(run,.05);renderer.watchGold(run.gold);performanceStats.steps++;if(before!=='reward'&&run.phase==='reward')autoIn=-.5;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);renderer.watchGold(run.gold);autoIn=0;}accumulator-=.05;}
       if(ticks)saves.mark();uiIn+=dt;
-      const batch=run.events.splice(0);requestTrack?.observe(run,batch);for(const e of batch){renderer.event(e);sound.event(e);if(e.type==='skill')cutIn(e);}
-      saves.schedule();if(uiIn>.18){uiIn=0;updateBattle();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);
+      const batch=run.events.splice(0),goldHolds=renderer.goldHolds.length;requestTrack?.observe(run,batch);for(const e of batch){renderer.event(e);if(e.type!=='hit'&&e.type!=='kill')sound.event(e);if(e.type==='skill')cutIn(e);}const spent=renderer.goldSpent;renderer.settleGold();
+      saves.schedule();if(uiIn>.18||spent||renderer.goldPulse||goldHolds!==renderer.goldHolds.length){uiIn=0;updateBattle();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);
       syncBattlePhase();
       if(run&&!paused&&['victory','defeat'].includes(run.phase))settle();
     }

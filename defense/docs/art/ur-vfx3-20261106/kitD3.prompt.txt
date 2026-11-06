@@ -1,0 +1,12 @@
+Use your built-in image generation tool to create ONE image, then save that image file as kitD3.png in the current working directory. Do not write code to draw it; it must be a generated painting.
+
+Create a MONOCHROME game VFX element sheet for an existing mobile fantasy tower-defense game. Reference image 1 (style-ref.png) shows the game's established effect language: luminous translucent glass-crystal light with bright hot cores, crisp readable silhouettes, fine facets and a few small sparkles, glowing on a PURE BLACK background. Reference image 2 (character.png) shows the motifs these pieces must echo: a dreamy child sorceress's emblem of a star, moon and sun with pastel ribbons, and a midnight-glass Cinderella emblem with a clock and a glass slipper. Match the finish and level of detail of the references exactly, BUT paint everything in pure white, silver and gray light only: absolutely no hue or colour (no red, orange, gold, green, violet or blue). These are luminance maps: the game recolours them at runtime with each hero's palette, so brightness alone must carry the form: white-hot cores and edges, light-gray bodies with crisp highlights, and a soft dark-gray glow fading into pure black. Do NOT paint opaque solid objects, flat stickers, cel shading or black ink outlines.
+
+Layout: EXACTLY 2 columns x 2 rows of equal square cells on a square canvas. Pure black (#000000) background everywhere. Each element centred in its cell with at least 10% black margin; nothing crosses a cell border. No grid lines, frames, labels, words, faces, people or UI.
+
+Top row:
+1. "sun": ONE radiant sun emblem seen from the front (a perfect circle): a round glowing disc with a white-hot centre, ringed by sixteen sharp rays that alternate long and short, a thin halo ring between disc and rays. About 85% of the cell.
+2. "crescent moon": ONE elegant crescent moon, opening to the RIGHT, smooth glowing body with a bright outer rim and a soft inner glow, a few tiny stars beside it. About 75% of the cell height.
+Bottom row:
+3. "star": ONE large five-pointed star of light, points slightly rounded, a bright faceted body with a white-hot centre, a soft glowing halo and tiny sparkles at the tips. About 80% of the cell.
+4. "bell": ONE ornate church bell seen from the front, hanging from a small loop at the top: a flared bell body with engraved bands, a clapper visible at the open mouth, bright rim light along its edges and a few short curved sound-wave arcs on both sides. About 80% of the cell height.
