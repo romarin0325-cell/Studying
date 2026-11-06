@@ -7545,12 +7545,381 @@
       ],
       "errors": [],
       "requests": []
+    },
+    "field": {
+      "baseline": "fac6fd5b87b8b63788db81b280d96e0d7867f6aa",
+      "viewport": [
+        390,
+        844
+      ],
+      "dpr": 2,
+      "rank": 1,
+      "directionOrder": [
+        "down",
+        "up",
+        "left",
+        "right"
+      ],
+      "assetsEqual": true,
+      "drawGeometryEqual": true,
+      "errors": [],
+      "external": [],
+      "before": {
+        "buildSha256": "56e1e3490ddb3fcad76c7d087b1a5e62547bf763ab4bcddcc7b45b2da5383527",
+        "shots": [
+          "battle-lineup.webp",
+          "luna-unit-info.webp",
+          "doom-unit-info.webp",
+          "four-directions.webp"
+        ],
+        "draws": {
+          "formation": {
+            "luna:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            }
+          },
+          "directions": {
+            "luna:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "luna:1": {
+              "source": [
+                320,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "luna:2": {
+              "source": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "luna:3": {
+              "source": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:1": {
+              "source": [
+                320,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:2": {
+              "source": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:3": {
+              "source": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            }
+          }
+        },
+        "assets": {
+          "luna": {
+            "atlas": "7b08e79ecedf30653689cff7c507c80353d1945484f51dee82957fd89b7de207",
+            "figure": "cce7f7896d790bbcfe29e4af1ac458c4f84ad79a719cbb60acf0323a165abee6"
+          },
+          "doom": {
+            "atlas": "1727475afec918e657906dc3c728228c84c482091f8533a39d5e61d77c3957ee",
+            "figure": "ffd3dc4eb510ca04abf79626133aac5d91806885a7243f6c71c2530ecd620f28"
+          }
+        },
+        "portraits": {
+          "luna": {
+            "button": "cf2cbd8b67963eda52c87261510952141667256a9db277b393300e2ba3cc08fe",
+            "unitInfo": "cf2cbd8b67963eda52c87261510952141667256a9db277b393300e2ba3cc08fe"
+          },
+          "doom": {
+            "button": "18a09f33aae41f747fa58ddce68630bf462020d34f8713c3cce11ef98cc295cf",
+            "unitInfo": "18a09f33aae41f747fa58ddce68630bf462020d34f8713c3cce11ef98cc295cf"
+          }
+        }
+      },
+      "after": {
+        "buildSha256": "bf39983fcb89f8846ab46881b983a0f9b76149c54acb34c74aa96ad4d18c94f3",
+        "shots": [
+          "battle-lineup.webp",
+          "luna-unit-info.webp",
+          "doom-unit-info.webp",
+          "four-directions.webp"
+        ],
+        "draws": {
+          "formation": {
+            "luna:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            }
+          },
+          "directions": {
+            "luna:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "luna:1": {
+              "source": [
+                320,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "luna:2": {
+              "source": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "luna:3": {
+              "source": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:0": {
+              "source": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:1": {
+              "source": [
+                320,
+                0,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:2": {
+              "source": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            },
+            "doom:3": {
+              "source": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "dest": [
+                -63,
+                -118.125,
+                126,
+                126
+              ]
+            }
+          }
+        },
+        "assets": {
+          "luna": {
+            "atlas": "7b08e79ecedf30653689cff7c507c80353d1945484f51dee82957fd89b7de207",
+            "figure": "cce7f7896d790bbcfe29e4af1ac458c4f84ad79a719cbb60acf0323a165abee6"
+          },
+          "doom": {
+            "atlas": "1727475afec918e657906dc3c728228c84c482091f8533a39d5e61d77c3957ee",
+            "figure": "ffd3dc4eb510ca04abf79626133aac5d91806885a7243f6c71c2530ecd620f28"
+          }
+        },
+        "portraits": {
+          "luna": {
+            "button": "51e6152a810c3abab5ea4c73322659008515c1a85b7242bad9d6952ba63bd7eb",
+            "unitInfo": "51e6152a810c3abab5ea4c73322659008515c1a85b7242bad9d6952ba63bd7eb"
+          },
+          "doom": {
+            "button": "b3efecb3626cb27cb891f93185c176ff38bc085db330b1aeb51cf12269198524",
+            "unitInfo": "b3efecb3626cb27cb891f93185c176ff38bc085db330b1aeb51cf12269198524"
+          }
+        }
+      }
     }
   },
   "comparison": {
     "file": "review.html",
-    "sha256": "f7adebffef5d0294dab34e3e3cf1e8301853b6223a8e21b49d271485d21a71e4",
-    "bytes": 2217180
+    "sha256": "ebaa3e34d7c9f4063e2cfd4c99ba2fb5b3200813d222326417fa0b97aeb6ae58",
+    "bytes": 3080456
   },
   "toolVerification": {
     "checks": [
@@ -7600,6 +7969,26 @@
         "frames": 0
       },
       {
+        "width": 1280,
+        "view": "battle-lineup",
+        "frames": 0
+      },
+      {
+        "width": 1280,
+        "view": "four-directions",
+        "frames": 0
+      },
+      {
+        "width": 1280,
+        "view": "luna-unit-info",
+        "frames": 0
+      },
+      {
+        "width": 1280,
+        "view": "doom-unit-info",
+        "frames": 0
+      },
+      {
         "width": 390,
         "view": "pair 38",
         "frames": 9
@@ -7645,6 +8034,26 @@
         "frames": 0
       },
       {
+        "width": 390,
+        "view": "battle-lineup",
+        "frames": 0
+      },
+      {
+        "width": 390,
+        "view": "four-directions",
+        "frames": 0
+      },
+      {
+        "width": 390,
+        "view": "luna-unit-info",
+        "frames": 0
+      },
+      {
+        "width": 390,
+        "view": "doom-unit-info",
+        "frames": 0
+      },
+      {
         "width": 320,
         "view": "pair 38",
         "frames": 9
@@ -7687,6 +8096,26 @@
       {
         "width": 320,
         "view": "twin screenshots",
+        "frames": 0
+      },
+      {
+        "width": 320,
+        "view": "battle-lineup",
+        "frames": 0
+      },
+      {
+        "width": 320,
+        "view": "four-directions",
+        "frames": 0
+      },
+      {
+        "width": 320,
+        "view": "luna-unit-info",
+        "frames": 0
+      },
+      {
+        "width": 320,
+        "view": "doom-unit-info",
         "frames": 0
       }
     ],
