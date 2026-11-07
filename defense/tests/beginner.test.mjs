@@ -4,7 +4,7 @@ import {createProfile,parseProfile,validateProfile,command,random} from '../src/
 import {BEGINNER_DAYS,beginnerState,featureOpen,newlyOpened,ftueNext,urChoices} from '../src/beginner.js';
 import {drawRelic,drawCharacter,calendar,lateOpen} from '../src/economy.js';
 import {HERO,HEROES,ARTIFACTS} from '../src/content.js';
-import {activeEvent,eventOpen,nextEvent,season,EVENT_ROTATION_START} from '../src/preview/season.js';
+import {activeEvent,eventOpen,eventWindow,nextEvent,season,EVENT_ROTATION_START} from '../src/preview/season.js';
 import {autoDeck,autoRelics,autoTwin,oathDeck} from '../src/auto-team.js';
 import {unlockProfile} from '../src/test-unlock.js';
 import {oathDeckProblem} from '../src/preview/oath.js';
@@ -40,8 +40,11 @@ test('ordinary hero draws keep their existing random sequence',()=>{
   for(let seed=1;seed<=40;seed++){const p=createProfile(now);p.dreams=100000;p.rng=seed;const q=structuredClone(p),c=calendar(now),expected=Array.from({length:10},()=>drawCharacter(()=>random(q),false,c.guardian,c.pickup,1,lateOpen(q.cleared)));const result=command(p,'draw',{banner:'normal',count:10},now);assert.deepEqual(result.items.map(x=>x.id),expected);assert.equal(p.rng,q.rng);}
 });
 test('events alternate from the specified season and inactive entries are rejected',()=>{
-  assert.equal(season(now).index,EVENT_ROTATION_START);assert.equal(activeEvent(now-day),'both');assert.equal(activeEvent(now),'oath');assert.equal(activeEvent(now,true),'twin');assert.equal(nextEvent(now).kind,'twin');assert.equal(eventOpen('twin',now),false);
-  const p=unlockProfile(createProfile(now));assert.equal(command(p,'begin',{mode:'twin'},now).message,'이번 격주 이벤트가 아니에요.');assert.equal(command(p,'begin',{mode:'oath',oaths:[]},now).ok,true);const token=p.active.token;assert.ok(parseProfile(p).active);assert.equal(command(p,'settle',{token,round:1,won:false},now+14*day).ok,true);
+  const start=Date.parse('2026-11-08T15:00:00Z');
+  assert.equal(season(start).index,EVENT_ROTATION_START);assert.equal(activeEvent(start-1),'both');assert.equal(activeEvent(start),'oath');assert.equal(activeEvent(start+7*day),'twin');assert.equal(activeEvent(start+14*day),'oath');assert.notEqual(season(start).id,season(start+14*day).id);assert.equal(activeEvent(start,true),'twin');assert.equal(activeEvent(start+7*day,true),'oath');assert.equal(eventOpen('twin',start),false);
+  assert.deepEqual(eventWindow(start),{index:2966,id:'W2966',start,end:start+7*day,daysLeft:7});assert.equal(eventWindow(start+day).daysLeft,6);assert.equal(eventWindow(start+7*day-1).daysLeft,1);assert.deepEqual(eventWindow(start+7*day),{index:2967,id:'W2967',start:start+7*day,end:start+14*day,daysLeft:7});
+  assert.deepEqual(nextEvent(start+day),{kind:'twin',start:start+7*day});assert.deepEqual(nextEvent(start+8*day),{kind:'oath',start:start+14*day});
+  const p=unlockProfile(createProfile(start));assert.equal(command(p,'begin',{mode:'twin'},start).message,'이번 주 이벤트가 아니에요.');assert.equal(command(p,'begin',{mode:'oath',oaths:[]},start).ok,true);const token=p.active.token;assert.ok(parseProfile(p).active);assert.equal(command(p,'settle',{token,round:9,won:true},start+day).ok,true);assert.equal(command(p,'begin',{mode:'oath',oaths:[]},start+7*day).message,'이번 주 이벤트가 아니에요.');assert.equal(p.oath.period,season(start+7*day).id);assert.equal(command(p,'twinParty',autoTwin(p),start+7*day).ok,true);assert.equal(command(p,'begin',{mode:'twin',side:'left'},start+7*day).ok,true);
 });
 test('unlocked trial stays a new profile on load and supports test tools',async()=>{
   const src=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../src'),result=await build({stdin:{contents:"export {createProfile,validateProfile,command,ProfileStore} from './profile.js';",resolveDir:src},bundle:true,write:false,format:'cjs',platform:'node',define:{__GARDEN_UNLOCKED__:'true'}}),compiled={exports:{}};runInNewContext(result.outputFiles[0].text,{module:compiled,structuredClone});const api=compiled.exports,p=api.createProfile(now,{trial:true});assert.equal(p.trial,true);assert.equal(p.cleared,0);assert.equal(api.validateProfile(p),true);

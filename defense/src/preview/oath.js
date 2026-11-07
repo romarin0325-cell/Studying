@@ -33,7 +33,7 @@ export const OATHS=Object.freeze([
   {id:'glass',group:'pressure',points:4,name:'유리 코어',text:'코어 생명력이 10입니다.'},
 ]);
 export const OATH=Object.fromEntries(OATHS.map(o=>[o.id,o]));
-export const OATH_BANDS=Object.freeze([{score:5,reward:50},{score:10,reward:50},{score:15,reward:60},{score:20,reward:60},{score:25,reward:80},{score:30,reward:80},{score:35,reward:100},{score:40,reward:120},{score:45,reward:120},{score:50,reward:150}]);
+export const OATH_BANDS=Object.freeze([{score:5,reward:100},{score:10,reward:120},{score:15,reward:150},{score:20,reward:180},{score:25,reward:200},{score:30,reward:230},{score:35,reward:250},{score:40,reward:270},{score:45,reward:320},{score:50,reward:380}]);
 // Oath points that v2 changed; a v1 record keeps the points it was scored with.
 const V1_POINTS=Object.freeze({tyrant:3});
 export const validOathRules=rules=>Object.hasOwn(TIER_BASE_BY_RULES,rules);

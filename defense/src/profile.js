@@ -310,26 +310,29 @@ function applyRequestProgress(p,deck,feats){
   return done;
 }
 function settleOath(p,a,args,now){
-  const st=oathState(p,now);
+  // Settle against the season that chose the run's bosses, clamping its record time to that season.
+  const s=season(integer(a.started)?a.started:now),at=Math.min(now,s.end-1),st=oathState(p,at);
+  if(p.oath?.period&&Number(p.oath.period.slice(1))>s.index)return {record:null,newBest:false,score:0,bands:[],pay:0};
   if(!args.won){p.oath={period:st.period,best:st.best,paid:st.best?st.paid:0,lifetime:st.lifetime};return {record:null,newBest:false,score:0,bands:[],pay:0};}
   const tier=a.tier||'easy',oaths=[...(a.oaths||[])],score=oathScore(tier,oaths);
-  const record={period:st.period,token:a.token,score,tier,oaths,deck:[...a.deck],at:now,rules:OATH_RULES};
+  const record={period:st.period,token:a.token,score,tier,oaths,deck:[...a.deck],at,rules:OATH_RULES};
   const newBest=!st.best||score>st.best.score,best=newBest?record:st.best,reached=oathBandsReached(best.score),bands=[];
   for(let i=st.paid;i<reached;i++)bands.push({score:OATH_BANDS[i].score,reward:OATH_BANDS[i].reward});
   p.oath={period:st.period,best,paid:reached,lifetime:!st.lifetime||score>st.lifetime.score?record:st.lifetime};
   return {record,newBest,score,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
 }
 function settleTwin(p,a,args,now){
-  const st=twinState(p,now),tier=a.tier||'easy',side=a.side,round=Math.max(0,Math.min(TWIN_WAVES,args.round));
+  const s=season(integer(a.started)?a.started:now),at=Math.min(now,s.end-1),st=twinState(p,at),tier=a.tier||'easy',side=a.side,round=Math.max(0,Math.min(TWIN_WAVES,args.round));
+  if(p.twin?.period&&Number(p.twin.period.slice(1))>s.index)return {newBest:false,side,round,total:0,bands:[],pay:0};
   const raw=args.damage??0,damage=Number.isFinite(raw)&&raw>0?raw:0,records=st.records;
   const deck=[...a.deck],relics=[...(a.relics||[])];
-  records[tier]={...records[tier],[side]:{round,damage,deck,relics,at:now}};
+  records[tier]={...records[tier],[side]:{round,damage,deck,relics,at}};
   // A record that shares a companion or relic with the new one is cleared, so the two counted records never overlap.
   const other=side==='left'?'right':'left';if(!twinRecordsDisjoint(records[tier][side],records[tier][other]))records[tier][other]=null;
   const total=(records[tier].left?.round||0)+(records[tier].right?.round||0),prevBest=st.best[tier];
   const newBest=!prevBest||total>prevBest.total;
   const snap=name=>({round:records[tier][name]?.round||0,damage:records[tier][name]?.damage||0});
-  const entry=newBest?{total,left:snap('left'),right:snap('right'),at:now}:prevBest;
+  const entry=newBest?{total,left:snap('left'),right:snap('right'),at}:prevBest;
   const best={...st.best,[tier]:entry},paid={...st.paid},bands=[];
   // This tier and every lower one pay the bands the new best reaches.
   for(const id of TIER_IDS.slice(0,TIER_IDS.indexOf(tier)+1)){
@@ -338,12 +341,12 @@ function settleTwin(p,a,args,now){
     paid[id]=Math.max(paid[id]||0,reached);
   }
   const rank=id=>TIER_IDS.indexOf(id);let lifetime=st.lifetime;
-  if(!lifetime||rank(tier)>rank(lifetime.tier)||rank(tier)===rank(lifetime.tier)&&total>lifetime.total)lifetime={tier,total,at:now};
+  if(!lifetime||rank(tier)>rank(lifetime.tier)||rank(tier)===rank(lifetime.tier)&&total>lifetime.total)lifetime={tier,total,at};
   p.twin={period:st.period,party:st.party,records,best,paid,lifetime};
   return {newBest,side,round,total,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
 }
 function beginPreview(p,mode,args,now){
-  if(!eventOpen(mode,now,UNLOCKED&&p.eventFlip))return {ok:false,message:'이번 격주 이벤트가 아니에요.'};
+  if(!eventOpen(mode,now,UNLOCKED&&p.eventFlip))return {ok:false,message:'이번 주 이벤트가 아니에요.'};
   if(p.cleared<TIERS.easy.unlock)return {ok:false,message:`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`};
   const tier=args.tier||'easy';if(!TIERS[tier]||p.cleared<TIERS[tier].unlock)return {ok:false,message:`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`};
   const stage=oathChapter(season(now).index,p.cleared)+1;

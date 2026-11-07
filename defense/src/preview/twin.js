@@ -7,7 +7,7 @@ export const TWIN_WAVES=6;
 export const TWIN_STAGE=Object.freeze({easy:42,hard:70,abyss:90});
 export const TWIN_SIDES=Object.freeze(['left','right']);
 export const TWIN_SIDE=Object.freeze({left:{name:'은빛 별길',short:'은빛'},right:{name:'금빛 별길',short:'금빛'}});
-export const TWIN_BANDS=Object.freeze([{total:4,base:60},{total:8,base:80},{total:12,base:120}]);
+export const TWIN_BANDS=Object.freeze([{total:4,base:75},{total:8,base:95},{total:12,base:145}]);
 export const twinBandReward=(tier,i)=>Math.round(TWIN_BANDS[i].base*TIERS[tier].reward);
 export function twinBosses(seasonIndex,side,met){
   const m=Math.max(1,Math.min(met,BOSS_ORDER.length)),off=side==='right'?2:0;

@@ -26,7 +26,7 @@ import {currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
-import {season,activeEvent,nextEvent,eventOpen} from './preview/season.js';
+import {season,eventWindow,activeEvent,nextEvent,eventOpen} from './preview/season.js';
 import {OATHS,OATH,OATH_GROUPS,OATH_CLOSED,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
 import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
 import {REQUEST,REQUEST_MAX,requestState,requestTracker,requestGoal} from './preview/requests.js';
@@ -1005,8 +1005,8 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind=
 // Starlight oath and the twin-star expedition sit beside the other challenges in 모험. Companion requests arrive in the
 // lobby as a visit, are tracked in 임무 and on the sortie sheet, and are thanked in person. Rules: preview/*.js, profile.js.
 let oathPick=[],twinDraft=null,twinDraftBase='',twinFocus='left',twinTab='hero',requestTrack=null;
-const seasonTag=()=>`격주 이벤트 · ${season(now()).daysLeft}일 남음`;
-const eventNextLine=()=>{const flip=UNLOCKED&&p().eventFlip;if(activeEvent(now(),flip)==='both')return '11월 9일부터 서약과 쌍성이 2주씩 번갈아 열려요';const n=nextEvent(now(),flip),d=new Date(n.start+9*3600000);return `다음 이벤트 · ${n.kind==='oath'?'별빛 서약':'쌍성 원정'} · ${d.getUTCMonth()+1}월 ${d.getUTCDate()}일부터`;};
+const seasonTag=()=>`격주 이벤트 · ${eventWindow(now()).daysLeft}일 남음`;
+const eventNextLine=()=>{const flip=UNLOCKED&&p().eventFlip;if(activeEvent(now(),flip)==='both')return '11월 9일부터 서약과 쌍성이 한 주씩 번갈아 열려요';const n=nextEvent(now(),flip),d=new Date(n.start+9*3600000);return `다음 이벤트 · ${n.kind==='oath'?'별빛 서약':'쌍성 원정'} · ${d.getUTCMonth()+1}월 ${d.getUTCDate()}일부터`;};
 const bossRoute=(ids,step=3)=>`<div class="boss-route">${ids.map((id,i)=>`<span><em>${(i+1)*step}</em>${BOSSES[id].name.replace('의 여신 ','의 ')}</span>`).join('')}</div>`;
 const deckPower=ids=>ids.reduce((n,id)=>n+combatPower(id,p().heroes[id],p().beds,collectionBonus(p().relics)),0);
 const keepScroll=fn=>{const body=$('sheet-body'),y=body?.scrollTop||0;fn();const next=$('sheet-body');if(next)next.scrollTop=y;};
@@ -1031,7 +1031,7 @@ function oathCard(){
     <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||profile.active?'disabled':''}>${!unlocked?`스테이지 ${TIERS.easy.unlock} 클리어 후 열려요`:'서약 고르기'}</button><p class="event-next">${eventNextLine()}</p></div>`;
 }
 function oathPrepare(){
-  if(!eventOpen('oath',now(),UNLOCKED&&p().eventFlip)){toast('이번 격주 이벤트가 아니에요.');return;}
+  if(!eventOpen('oath',now(),UNLOCKED&&p().eventFlip)){toast('이번 주 이벤트가 아니에요.');return;}
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const profile=p(),tier=challengeTier,score=oathScore(tier,oathPick),base=OATH_TIER_BASE[tier],deck=profile.deck,problem=oathConflict(oathPick)||oathDeckProblem(oathPick,deck);
   const groups=Object.keys(OATH_GROUPS).map(g=>`<section class="oath-group"><h4>${OATH_GROUPS[g]}</h4>${OATHS.filter(o=>o.group===g).map(o=>`<button class="oath-chip" data-oath="${o.id}" aria-pressed="${oathPick.includes(o.id)}"><span class="oath-pt">+${o.points}</span><span class="oath-copy"><b>${o.name}</b><small>${o.text}</small></span>${o.id==='hollow'?oathBoardGlyph():''}</button>`).join('')}</section>`).join('');
@@ -1065,7 +1065,7 @@ function twinCard(){
 }
 // The pair is edited on one sheet: two party panels (tap one to fill it) over one roster where each tile wears its side.
 function twinFormation(edit=false){
-  if(!eventOpen('twin',now(),UNLOCKED&&p().eventFlip)){toast('이번 격주 이벤트가 아니에요.');return;}
+  if(!eventOpen('twin',now(),UNLOCKED&&p().eventFlip)){toast('이번 주 이벤트가 아니에요.');return;}
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   // An unsaved pair survives a trip to another sheet (the relic book, a companion card) and comes back as it was left.
   const saved=JSON.stringify(twinParty(p()));
@@ -1093,7 +1093,7 @@ function twinPick(kind,id){
   keepScroll(()=>twinFormation(true));
 }
 function twinPrepare(side){
-  if(!eventOpen('twin',now(),UNLOCKED&&p().eventFlip)){toast('이번 격주 이벤트가 아니에요.');return;}
+  if(!eventOpen('twin',now(),UNLOCKED&&p().eventFlip)){toast('이번 주 이벤트가 아니에요.');return;}
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const party=twinParty(p())[side];
   show(TWIN_SIDE[side].name,'출격 준비',`<div class="prep-boss twin-${side}"><small>${TIERS[challengeTier].name} · ${TWIN_WAVES}웨이브 · 스테이지 ${TWIN_STAGE[challengeTier]} 수준</small><h2>${TWIN_SIDE[side].name}</h2>${bossRoute(twinBosses(season(now()).index,side,metBosses(p())))}</div>
@@ -1652,19 +1652,19 @@ function maybeUnlockNews(){
   return true;
 }
 
-// ── The biweekly event (서약 and 쌍성 take turns): one popup when a new season opens.
+// ── The biweekly event (서약 and 쌍성 take turns): one popup per event week.
 const eventFlip=()=>UNLOCKED&&p().eventFlip;
 const kstDate=t=>{const d=new Date(t+9*HOUR);return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일`;};
 function maybeEventPopup(){
   if(modal||screen!=='home'||FW.ftueNext(p())||coach.active||!FW.featureOpen(p(),'challenge'))return false;
-  const kind=SN.activeEvent(now(),eventFlip()),sn=season(now());if(kind==='both'||p().eventSeen===sn.id)return false;
-  act('eventSeen',{id:sn.id},false);
+  const kind=SN.activeEvent(now(),eventFlip()),sn=season(now()),win=eventWindow(now());if(kind==='both'||p().eventSeen===win.id)return false;
+  act('eventSeen',{id:win.id},false);
   const oath=kind==='oath',name=oath?'별빛 서약':'쌍성 원정',met=Math.min(9,p().cleared);
   const bosses=oath?oathBosses(sn.index,met):[...twinBosses(sn.index,'left',met),...twinBosses(sn.index,'right',met)];
   const max=oath?OATH_BANDS.reduce((n,b)=>n+b.reward,0):TIER_IDS.reduce((n,t)=>n+TWIN_BANDS.reduce((m,_,i)=>m+twinBandReward(t,i),0),0);
   const desc=oath?'서약을 걸고 9웨이브를 넘어 점수를 남겨요.':'두 편성으로 은빛·금빛 별길을 하나씩 넘어요.';
-  show(name,'격주 이벤트',`<div class="ev-pop" data-kind="${kind}"><div class="ev-banner"><span class="ev-sky" aria-hidden="true"></span><span class="ev-mark" aria-hidden="true">${icon(oath?'flag':'swap')}</span><span class="ev-band"><small>EVENT · 2주</small><b>${name}</b></span></div>
-    <p class="ev-period">${kstDate(sn.start)} – ${kstDate(sn.end-1)}</p><p class="ev-desc">${desc}</p>
+  show(name,'격주 이벤트',`<div class="ev-pop" data-kind="${kind}"><div class="ev-banner"><span class="ev-sky" aria-hidden="true"></span><span class="ev-mark" aria-hidden="true">${icon(oath?'flag':'swap')}</span><span class="ev-band"><small>EVENT · 7일</small><b>${name}</b></span></div>
+    <p class="ev-period">${kstDate(win.start)} – ${kstDate(win.end-1)}</p><p class="ev-desc">${desc}</p>
     <div class="ev-bosses">${[...new Set(bosses)].map(b=>`<span class="chip">${BOSSES[b].name}</span>`).join('')}</div>
     <div class="ev-reward"><span>구간 보상</span>${gem(max)}<small>최대</small></div></div>`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">닫기</button><button class="primary shine" data-action="event-go" data-kind="${kind}">바로 가기</button></div>`,'event');
