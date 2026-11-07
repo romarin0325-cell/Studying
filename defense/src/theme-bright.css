@@ -883,3 +883,11 @@ em.scaled{text-shadow:none}
 .twin-lock{color:#C2384F!important}
 .twin-rec{background:#fff!important;box-shadow:0 1px 3px rgba(30,47,92,.25)}
 .twin-rec.left{color:#4E6CB0!important}.twin-rec.right{color:#C4840A!important}
+
+/* First-week wiring (2026-11-07) */
+.tabbar button[aria-pressed=true]{padding-inline:10px}
+.tabbar button[aria-pressed=true] b::before{position:absolute;top:3px;right:8px;width:7px;height:7px;margin:0}
+.tabbar.tight button[aria-pressed=true] b::before{display:none}
+.tabbar .ev-tag{color:var(--coral)!important;opacity:1}
+.tabbar button[aria-pressed=true] .ev-tag{color:var(--paper)!important}
+.event-next{color:var(--ink2)}

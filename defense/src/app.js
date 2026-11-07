@@ -2,7 +2,9 @@ import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RAR
 import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
 import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,relicTierRates,relicRatesAt,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
-import {ProfileStore,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
+import {ProfileStore,createProfile,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,metBosses,basketState} from './profile.js';
+import {featureOpen,UNLOCKS} from './beginner.js';
+import {autoDeck,autoRelics,autoTwin,oathDeck} from './auto-team.js';
 import {GIFTS,GIFT_IDS,FAVORITE,FAVORITE_LINES,BOND_MAX,bondNeed,giftPoints} from './bond.js';
 import {COURSE} from './course.js';
 import {questionOf,pickQuestion,lectureById,termById,lectureQuestions,termQuestions,KIND_NAME} from './quiz.js';
@@ -24,13 +26,13 @@ import {currentRecord,monthlyReward,weeklyReward} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
-import {season} from './preview/season.js';
+import {season,activeEvent,nextEvent,eventOpen} from './preview/season.js';
 import {OATHS,OATH,OATH_GROUPS,OATH_CLOSED,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
 import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
 import {REQUEST,REQUEST_MAX,requestState,requestTracker,requestGoal} from './preview/requests.js';
 import {REQUESTS,REQUEST_HEROES,REQUEST_REWARD,AFTERWORDS} from './preview/requests-data.js';
 // The unlocked test build plays auto with the simulation player model; the release keeps the light helper.
-const autoPlay=UNLOCKED?smartAutoPlay:helperAuto;
+const autoPlay=(...args)=>(UNLOCKED&&!p().trial?smartAutoPlay:helperAuto)(...args);
 import {MEMORIAL_STORIES} from './memorial.js';
 import {burst,tapSpark,hearts,centerOf,floatText} from './fx.js';
 
@@ -220,7 +222,7 @@ function reveal(items,{count,cost=0,boost=false,lucky=false,tierUp=null}){
   const still=motionOff(),spots=items.filter(spotlightItem);
   const cards=items.map((item,i)=>`<div class="reveal-card" data-rarity="${rarityOfId(item.id)}" style="--i:${i}">${pullCard(item,kind,count===1)}${item.pity?'<span class="pity-tag">천장 확정</span>':''}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join('');
   const fresh=items.filter(i=>i.fresh).length;
-  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage${lucky?' lucky':''}${still&&!spots.length?' skip':' hold'}" data-top="${top}" data-count="${count}"><div class="reveal-spot" hidden></div>${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?' · 별빛 퀴즈 UR 2배':''}`}${tierUp?`<span class="tier-up">${icon('star')}유물 단계 ${tierUp[0]} → <b>${tierUp[1]}</b></span>`:''}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
+  show(lucky?'행운의 소환':'소환 결과',`최고 등급 ${top}`,`<div class="reveal-stage${lucky?' lucky':''}${still&&!spots.length?' skip':' hold'}" data-top="${top}" data-count="${count}"><div class="reveal-spot" hidden></div>${lucky?'<span class="lucky-banner" aria-hidden="true">행운의 보너스!</span>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span><div class="reveal-grid ${count===1?'single':''}">${cards}</div><p class="reveal-caption">${lucky?`행운의 보너스 ${items.length}회 · 신규 ${fresh}종`:`신규 ${fresh}종 · 꿈의결정 ${fmt(cost)} 사용${boost?(kind==='relic'?' · 별빛 퀴즈 정답':' · 별빛 퀴즈 UR 2배'):''}`}${tierUp?`<span class="tier-up">${icon('star')}유물 단계 ${tierUp[0]} → <b>${tierUp[1]}</b></span>`:''}</p><button class="reveal-skip" data-action="reveal-skip">모두 보기</button></div>`,
     bonusItems&&!lucky?`<button class="primary wide shine lucky-next" data-action="bonus-reveal">${icon('summon')}<b>행운이 찾아왔어요!</b></button>`
       :`<div class="dialog-buttons"><button class="secondary" data-draw-again="${count}"><b>${count}회 더</b>${gem(price*count,p().dreams<price*count)}</button><button class="primary" data-action="close">확인</button></div>`,'draw');
   sound.reveal?.(top);
@@ -346,7 +348,7 @@ function timerText(end){return end<=now()?'귀환 완료':duration(end-now());}
 let editingDeck=[],teamReturn=null;
 function team(edit=false){
   if(!edit){teamReturn=modal==='prepare'?modalInfo:null;editingDeck=[...p().deck];}
-  show('팀 편성',`출전 ${editingDeck.length}/${TEAM_SIZE}`,`${five(editingDeck,true)}<p class="fineprint" style="margin-top:10px">서로 다른 동료 ${TEAM_SIZE}명이 필요합니다. 편성된 동료를 누르면 해제됩니다.</p><div class="choose-list" style="margin-top:14px">${HEROES.filter(h=>p().heroes[h.id].owned).map(h=>`<button class="choose-row" data-team-pick="${h.id}" aria-pressed="${editingDeck.includes(h.id)}" ${away(p(),h.id)||p().active?'disabled':''}>${portrait(h.id)}<div><strong>${h.name}${badge(h.rarity)}</strong><small>${away(p(),h.id)?'파견 중 · 귀환 후 편성 가능':`${h.role} · 전투력 ${cpOf(h.id)}`}</small></div><span class="mark">${editingDeck.includes(h.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
+  show('팀 편성',`출전 ${editingDeck.length}/${TEAM_SIZE}`,`${five(editingDeck,true)}<p class="fineprint" style="margin-top:10px">서로 다른 동료 ${TEAM_SIZE}명이 필요합니다. 편성된 동료를 누르면 해제됩니다.</p><div class="auto-row"><button class="secondary auto-btn" data-action="auto-team-pick">${icon('auto')}<b>자동 편성</b></button></div><div class="choose-list" style="margin-top:14px">${HEROES.filter(h=>p().heroes[h.id].owned).map(h=>`<button class="choose-row" data-team-pick="${h.id}" aria-pressed="${editingDeck.includes(h.id)}" ${away(p(),h.id)||p().active?'disabled':''}>${portrait(h.id)}<div><strong>${h.name}${badge(h.rarity)}</strong><small>${away(p(),h.id)?'파견 중 · 귀환 후 편성 가능':`${h.role} · 전투력 ${cpOf(h.id)}`}</small></div><span class="mark">${editingDeck.includes(h.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
     `<button class="primary wide" data-action="save-team" ${editingDeck.length!==TEAM_SIZE||p().active?'disabled':''}>편성 확정 (${editingDeck.length}/${TEAM_SIZE})</button>`,'team');
 }
 // Relic loadout: the same flow as the team sheet (slots on top, owned list below, confirm returns to the prep sheet).
@@ -355,7 +357,7 @@ function relicTeam(edit=false){
   if(!edit){relicReturn=modal==='prepare'?modalInfo:null;editingRelics=[...p().equipped];}
   const owned=ARTIFACTS.filter(a=>p().relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
   const slots=`<div class="relic-slot-row">${[0,1,2].map(i=>{const id=editingRelics[i];return id?`<button class="relic-slot filled" data-relic-pick="${id}" data-rarity="${ARTIFACT[id].rarity}" aria-label="${ARTIFACT[id].name} 장착 해제">${image(id)}<span><b>${ARTIFACT[id].name}</b></span></button>`:`<button class="relic-slot empty" data-action="focus-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div>`;
-  show('유물 장착',`장착 ${editingRelics.length}/3`,`${slots}<p class="fineprint" style="margin-top:10px">장착한 유물을 누르면 해제됩니다.</p><div class="choose-list" style="margin-top:14px">${owned.map(a=>`<button class="choose-row relic-row" data-relic-pick="${a.id}" aria-pressed="${editingRelics.includes(a.id)}" ${p().active?'disabled':''}><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${relicLevel(p().relics[a.id])}</span></strong><small class="relic-effect">${relicText(a.id,relicLevel(p().relics[a.id]))}</small></div><span class="mark">${editingRelics.includes(a.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
+  show('유물 장착',`장착 ${editingRelics.length}/3`,`${slots}<p class="fineprint" style="margin-top:10px">장착한 유물을 누르면 해제됩니다.</p><div class="auto-row"><button class="secondary auto-btn" data-action="auto-relic-pick">${icon('auto')}<b>자동 장착</b></button></div><div class="choose-list" style="margin-top:14px">${owned.map(a=>`<button class="choose-row relic-row" data-relic-pick="${a.id}" aria-pressed="${editingRelics.includes(a.id)}" ${p().active?'disabled':''}><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${relicLevel(p().relics[a.id])}</span></strong><small class="relic-effect">${relicText(a.id,relicLevel(p().relics[a.id]))}</small></div><span class="mark">${editingRelics.includes(a.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
     `<button class="primary wide" data-action="save-relics" ${p().active?'disabled':''}>장착 확정 (${editingRelics.length}/3)</button>`,'relic-team');
 }
 function begin(kind,stage,side){const result=act('begin',{mode:kind,stage:kind==='weekly'?weeklyChapter()+1:stage,...(kind==='main'?{}:{tier:challengeTier}),...(kind==='oath'?{oaths:[...oathPick]}:{}),...(kind==='twin'?{side}:{})},false);if(!result.ok)return;close();if(kind==='weekly'){screen='draft';render();}else startBattle();}
@@ -538,6 +540,7 @@ function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
 function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[]};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);}
+function resultCta(r){return null;}
 function showResult(r){
   const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${modeTitle(r.mode,r.side)} · ${(TIERS[r.tier]||TIERS.easy).name}`;
   const crowned=r.mode==='main'&&r.won&&r.perfect,retry=r.mode==='main'&&r.won&&!r.perfect&&!(p().perfect||[]).includes(r.stage)?'코어 피해 없이 다시 클리어하면 퍼펙트 보상 +100':'';
@@ -548,7 +551,7 @@ function showResult(r){
     ${previewResult(r)}<div class="result-stat"><span>처치</span><b>${fmt(r.kills)}</b></div><div class="result-stat"><span>총 피해</span><b>${fmt(r.damage)}</b></div><div class="result-stat"><span>전투 시간</span><b>${duration(r.seconds*1000)}</b></div>
     ${mvp?`<div class="result-mvp">${image(mvp[0],true)}<div><p class="mvp-tag">MVP</p><strong>${HERO[mvp[0]].name}</strong><small>기여 피해 ${fmt(mvp[1])} (${Math.round(mvp[1]/Math.max(1,r.damage)*100)}%)</small></div></div>`:''}
     <p class="subtext">${wonLine}</p>`,
-    `<div class="dialog-buttons"><button class="secondary" data-action="${r.mode==='monthly'?'close':'go-collection'}">${r.mode==='monthly'?'기록 확인':'동료 강화'}</button><button class="primary" data-action="${r.mode==='monthly'?'monthly-retry':r.mode==='oath'?'oath-retry':'close'}">${r.mode==='monthly'||r.mode==='oath'?'다시 도전':'확인'}</button></div>`,'result');
+    resultCta(r)||(r.mode==='main'&&r.won&&r.stage<MAIN_STAGES?`<div class="dialog-buttons"><button class="secondary" data-action="go-collection">동료 강화</button><button class="primary" data-action="next-stage" data-stage="${r.stage+1}">다음 스테이지 ›</button></div>`:`<div class="dialog-buttons"><button class="secondary" data-action="${r.mode==='monthly'?'close':'go-collection'}">${r.mode==='monthly'?'기록 확인':'동료 강화'}</button><button class="primary" data-action="${r.mode==='monthly'?'monthly-retry':r.mode==='oath'?'oath-retry':'close'}">${r.mode==='monthly'||r.mode==='oath'?'다시 도전':'확인'}</button></div>`),'result');
   // Rewards count up; a win bursts gold stars over the result mark.
   const node=document.querySelector('#sheet .count-up'),to=Number(node?.dataset.to)||0,start=performance.now();
   if(node&&to>0&&$('app').dataset.reduced!=='true'&&!navigator.webdriver){const tick=t=>{const k=Math.min(1,(t-start)/900);node.textContent='+'+fmt(Math.round(to*(1-Math.pow(1-k,3))));if(k<1&&node.isConnected)requestAnimationFrame(tick);};node.textContent='+0';requestAnimationFrame(tick);}
@@ -578,7 +581,7 @@ function leave(){
 function retireSheet(){
   show('도전을 종료할까요?','확인',`<p class="subtext">완료한 ${clearedRounds(run)}라운드까지 ${run.mode==='monthly'?'기록합니다. 만월 토벌전 보상은 기록 화면에서 직접 확정하며, 언제든 다시 도전할 수 있습니다.':run.mode==='weekly'?'정산합니다. 이번 주 입장 횟수는 돌아오지 않습니다.':'정산합니다. 첫 클리어 보상은 받을 수 없습니다.'}</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="return-battle">계속 전투</button><button class="primary" data-action="confirm-retire">종료하고 ${run.mode==='monthly'?'기록':'정산'}</button></div>`,'retire');
 }
-const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${TEST_TOOLS.map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button><button class="secondary" data-test-tool="late-notice">신규 동료 안내 보기</button></div>`;
+const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${p().trial?'<button class="secondary" data-action="trial-end">체험 끝내기</button>':'<button class="secondary" data-action="trial-start">신규 플레이 체험</button>'}${TEST_TOOLS.filter(t=>p().trial||!['trial-day','ftue-reset'].includes(t.kind)).map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button><button class="secondary" data-test-tool="late-notice">신규 동료 안내 보기</button></div>`;
 function showSettings(){
   show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·필살기를 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.'],['cutin','필살기 컷인','필살기 이름 띠를 전장 위에 띄웁니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
     <div class="settings-row"><div><strong>전장 화질</strong><small>기본은 선명도와 전력 사용의 균형을 맞춥니다.</small></div><select id="quality-select" aria-label="전장 화질">${[['standard','기본'],['high','고화질'],['low','절전']].map(([id,text])=>`<option value="${id}" ${p().settings.quality===id?'selected':''}>${text}</option>`).join('')}</select></div>
@@ -607,7 +610,7 @@ const summonDot=()=>!todayDaily().free||['normal','season'].some(b=>p().pity[b]>
 function nav(){
   const dots={home:dailyClaimable(todayDaily())||greetOpen()||libraryDot(),summon:summonDot(),garden:gardenDot()};
   const current=screen==='library'?'home':screen;
-  $('navigation').innerHTML=NAV.map(([id,name])=>`<button class="nav-item" data-nav="${id}" ${current===id?'aria-current="page"':''}>${icon(id)}<span>${name}</span>${dots[id]?'<i class="dot"></i>':''}</button>`).join('');
+  $('navigation').innerHTML=NAV.map(([id,name])=>`<button class="nav-item" data-nav="${id}" ${id==='garden'&&!featureOpen(p(),'garden')?'data-locked="true"':''} ${current===id?'aria-current="page"':''}>${icon(id)}<span>${name}</span>${id==='garden'&&!featureOpen(p(),'garden')?`<i class="nav-lock">${icon('lock')}</i>`:dots[id]?'<i class="dot"></i>':''}</button>`).join('');
   $('navigation').hidden=screen==='battle'||screen==='draft';
 }
 // Dots change without a re-render (a claim, a greeting, a timer).
@@ -648,17 +651,17 @@ function home(){
     <button class="lb-touch" data-action="talk" aria-label="${hero.name}에게 말 걸기"></button>
     ${greetOpen()?`<span class="greet-cue" id="greet-cue" aria-hidden="true">${icon('heart')}</span>`:''}
     <div class="lb-chrome">
-      <button class="lb-season" data-action="season"><span class="lb-season-face">${image(c.guardian)}</span><span><small>${monthNo(c)} 수호자</small><b>${HERO[c.guardian].name}</b></span></button>
-      ${visitMarkup()}<div class="lb-side">
+      ${featureOpen(profile,'season')?`<button class="lb-season" data-action="season"><span class="lb-season-face">${image(c.guardian)}</span><span><small>${monthNo(c)} 수호자</small><b>${HERO[c.guardian].name}</b></span></button>`:''}
+      ${featureOpen(profile,'request')?visitMarkup():''}<div class="lb-side">
         <button class="lb-btn" data-action="daily">${icon('scroll')}<span>임무</span>${dailyClaimable(todayDaily())||requestAttention()?'<i class="dot"></i>':''}</button>
-        <button class="lb-btn" data-action="library">${icon('library')}<span>서재</span>${libraryDot()?'<i class="dot"></i>':''}</button>
+        ${featureOpen(profile,'library')?`<button class="lb-btn" data-action="library">${icon('library')}<span>서재</span>${libraryDot()?'<i class="dot"></i>':''}</button>`:''}
       </div>
       <button class="lb-view" data-action="lobby-view" aria-label="감상 모드">${icon('eye')}</button>
       <p class="lb-sub" id="subtitle" role="status"><b>${hero.name}</b><span id="subtitle-text"></span></p>
       <div class="lb-tray" id="gift-tray" ${giftTray?'':'hidden'}>${trayMarkup(hero.id)}</div>
       <div class="lb-bar">
         <button class="lb-name" data-action="bond" aria-label="${hero.name} · 호감도 ${e.bond} · 인연">${badge(hero.rarity)}<span class="lb-name-main"><strong>${hero.name}</strong><span class="bond-hearts" id="np-hearts" aria-hidden="true">${heartsOf(e.bond)}</span></span><i class="bond-xp" aria-hidden="true"><b id="np-xp" style="width:${Math.round(bondRatio(e)*100)}%"></b></i></button>
-        <button class="lb-gift" data-action="gift-tray" aria-expanded="${giftTray}" aria-label="선물 주기">${giftArt('bouquet','side')}<b id="gift-count">${giftTotal()}</b></button>
+        ${featureOpen(profile,'garden')?`<button class="lb-gift" data-action="gift-tray" aria-expanded="${giftTray}" aria-label="선물 주기">${giftArt('bouquet','side')}<b id="gift-count">${giftTotal()}</b></button>`:''}
       </div>
     </div>
   </section>
@@ -757,7 +760,8 @@ const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=P
 const memoryOpen=id=>p().heroes[id].owned&&p().heroes[id].bond>=MEMORIAL_STORIES[id].unlockBond;
 function renderCollection(){
   const owned=shown().filter(h=>p().heroes[h.id].owned).length,relics=ARTIFACTS.filter(a=>p().relics[a.id].owned).length,memories=shown().filter(h=>memoryOpen(h.id)).length+p().study.library.unlocked.length;
-  const tabs=[['hero','동료',`${owned}/${shown().length}`],['relic','유물',`${relics}/${ARTIFACTS.length}`],['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
+  if(!featureOpen(p(),'relic')&&collection==='relic')collection='hero';
+  const tabs=[['hero','동료',`${owned}/${shown().length}`],...(featureOpen(p(),'relic')?[['relic','유물',`${relics}/${ARTIFACTS.length}`]]:[]),['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
   return `<section class="book">
     <div class="tabbar">${tabs.map(([id,name,count])=>`<button data-collection="${id}" aria-pressed="${collection===id}"><b>${name}</b><small>${count}</small></button>`).join('')}</div>
     ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&p().cleared<PART_STAGES?`<p class="late-collection-note">${icon('lock')} 스테이지 ${PART_STAGES} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
@@ -879,8 +883,10 @@ function toggleStory(button){
 
 // ───────── Adventure ─────────
 function adventure(){
-  const tabs=[['main','메인'],['weekly','드래프트'],['oath','서약'],['twin','쌍성'],['monthly','토벌']];
-  return `<section class="adv"><div class="tabbar">${tabs.map(([id,name])=>`<button data-mode="${id}" aria-pressed="${mode===id}"><b>${name}</b></button>`).join('')}</div>${mode==='main'?mainStages():modeCard(mode)}</section>`;
+  if(!featureOpen(p(),'challenge')){mode='main';return `<section class="adv">${mainStages()}</section>`;}
+  const active=activeEvent(now(),UNLOCKED&&p().eventFlip),tabs=[['main','메인'],['weekly','드래프트'],['monthly','토벌'],...['oath','twin'].filter(id=>active==='both'||active===id).map(id=>[id,id==='oath'?'서약':'쌍성'])];
+  if((mode==='oath'||mode==='twin')&&active!=='both'&&mode!==active)mode=active;
+  return `<section class="adv"><div class="tabbar${tabs.length===5?' tight':''}">${tabs.map(([id,name])=>`<button data-mode="${id}" ${id==='oath'||id==='twin'?'data-event="1"':''} aria-pressed="${mode===id}"><b>${name}</b>${id==='oath'||id==='twin'?'<small class="ev-tag">이벤트</small>':''}</button>`).join('')}</div>${mode==='main'?mainStages():modeCard(mode)}</section>`;
 }
 function mainStages(){
   const profile=p(),next=Math.min(MAIN_STAGES,profile.cleared+1);cycle=Math.min(9,Math.max(0,cycle));
@@ -989,7 +995,7 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind=
   const head=kind==='main'?`<div class="prep-boss"><small>${c.name} · 6웨이브</small><h2>${boss.name}</h2>${boss.trait?`<p>${boss.trait}</p>`:''}${rewardChip}</div>`
     :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'유성 드래프트':'만월 토벌전'}</h2><p>${kind==='weekly'?`보유 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'유성 드래프트':'만월 토벌전','출격 준비',`${head}
-    ${kind==='weekly'?'':`<div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span></div>${five(p().deck)}`}
+    ${kind==='weekly'?'':`<div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span><button class="link" data-action="auto-prepare">자동 편성</button></div>${five(p().deck)}`}
     <div class="panel-head"><h3>장착 유물</h3><button class="link" data-action="relic-team">변경</button></div>${relicSlots(true)}${kind==='weekly'?'':requestChips(p().deck)}`,
     `<div class="dialog-buttons">${kind==='weekly'?'':'<button class="secondary" data-action="team">편성</button>'}<button class="primary shine" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장'}</button></div>`,'prepare',{stage,kind});
 }
@@ -998,7 +1004,8 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind=
 // Starlight oath and the twin-star expedition sit beside the other challenges in 모험. Companion requests arrive in the
 // lobby as a visit, are tracked in 임무 and on the sortie sheet, and are thanked in person. Rules: preview/*.js, profile.js.
 let oathPick=[],twinDraft=null,twinDraftBase='',twinFocus='left',twinTab='hero',requestTrack=null;
-const seasonTag=()=>`격주 시즌 · ${season(now()).daysLeft}일 남음`;
+const seasonTag=()=>`격주 이벤트 · ${season(now()).daysLeft}일 남음`;
+const eventNextLine=()=>{const flip=UNLOCKED&&p().eventFlip;if(activeEvent(now(),flip)==='both')return '11월 9일부터 서약과 쌍성이 2주씩 번갈아 열려요';const n=nextEvent(now(),flip),d=new Date(n.start+9*3600000);return `다음 이벤트 · ${n.kind==='oath'?'별빛 서약':'쌍성 원정'} · ${d.getUTCMonth()+1}월 ${d.getUTCDate()}일부터`;};
 const bossRoute=(ids,step=3)=>`<div class="boss-route">${ids.map((id,i)=>`<span><em>${(i+1)*step}</em>${BOSSES[id].name.replace('의 여신 ','의 ')}</span>`).join('')}</div>`;
 const deckPower=ids=>ids.reduce((n,id)=>n+combatPower(id,p().heroes[id],p().beds,collectionBonus(p().relics)),0);
 const keepScroll=fn=>{const body=$('sheet-body'),y=body?.scrollTop||0;fn();const next=$('sheet-body');if(next)next.scrollTop=y;};
@@ -1020,15 +1027,16 @@ function oathCard(){
     <h2>별빛 서약</h2><p>서약을 걸고 ${OATH_WAVES}웨이브를 넘어요. 클리어하면 점수가 남아요.</p>${tierPicker('oath')}
     ${bossRoute(oathBosses(s.index,metBosses(profile)))}${bandLadder(oathBands(),best,st.paid,pick)}
     <div class="mode-record"><div><small>이번 시즌 최고</small><b>${st.best?best:'—'}</b>${st.best?`<span>${TIERS[st.best.tier].name} · 서약 ${st.best.oaths.length}</span>`:''}</div>${nextBand(oathBands(),best,st.paid)}</div>
-    <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||profile.active?'disabled':''}>${!unlocked?`스테이지 ${TIERS.easy.unlock} 클리어 후 열려요`:'서약 고르기'}</button></div>`;
+    <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||profile.active?'disabled':''}>${!unlocked?`스테이지 ${TIERS.easy.unlock} 클리어 후 열려요`:'서약 고르기'}</button><p class="event-next">${eventNextLine()}</p></div>`;
 }
 function oathPrepare(){
+  if(!eventOpen('oath',now(),UNLOCKED&&p().eventFlip)){toast('이번 격주 이벤트가 아니에요.');return;}
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const profile=p(),tier=challengeTier,score=oathScore(tier,oathPick),base=OATH_TIER_BASE[tier],deck=profile.deck,problem=oathConflict(oathPick)||oathDeckProblem(oathPick,deck);
   const groups=Object.keys(OATH_GROUPS).map(g=>`<section class="oath-group"><h4>${OATH_GROUPS[g]}</h4>${OATHS.filter(o=>o.group===g).map(o=>`<button class="oath-chip" data-oath="${o.id}" aria-pressed="${oathPick.includes(o.id)}"><span class="oath-pt">+${o.points}</span><span class="oath-copy"><b>${o.name}</b><small>${o.text}</small></span>${o.id==='hollow'?oathBoardGlyph():''}</button>`).join('')}</section>`).join('');
   show('별빛 서약','출격 준비',`<div class="oath-head"><div class="oath-score"><small>${TIERS[tier].name} ${base} · 서약 ${score-base}</small><b>${score}</b><em>점</em></div>${bossRoute(oathBosses(season(now()).index,metBosses(profile)))}</div>
     <div class="oath-groups">${groups}</div>
-    <div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(profile))}</b></span></div>${five(deck)}${problem?`<p class="oath-problem">${icon('info')}<span>${escapeText(problem)}</span></p>`:''}
+    <div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(profile))}</b></span><button class="link" data-action="auto-oath">자동 편성</button></div>${five(deck)}${problem?`<p class="oath-problem">${icon('info')}<span>${escapeText(problem)}</span></p>`:''}
     <div class="panel-head"><h3>장착 유물</h3><button class="link" data-action="relic-team">변경</button></div>${relicSlots(true)}${requestChips(deck)}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="team">편성</button><button class="primary shine" data-begin="oath" data-stage="0" ${problem?'disabled':''}>${score}점 서약 입장</button></div>`,'prepare',{stage:0,kind:'oath'});
 }
@@ -1052,10 +1060,11 @@ function twinCard(){
     <h2>쌍성 원정</h2><p>두 편성으로 좌우 별길을 하나씩 넘어요. 같은 동료·유물은 한쪽 기록에만 남아요.</p>${tierPicker('twin')}
     <div class="twin-doors">${door('left')}${door('right')}</div>${bandLadder(twinBands(tier),credit,st.paid[tier])}
     <div class="mode-record"><div><small>지금 합계</small><b>${rec.left||rec.right?total:'—'}<em>/${TWIN_WAVES*2}</em></b><span>시즌 최고 ${credit}${from?` · ${TIERS[from].name}`:''}</span></div>${nextBand(twinBands(tier),credit,st.paid[tier])}</div>
-    <button class="${ready?'secondary':'primary shine'} wide" data-action="twin-party" ${!unlocked||profile.active?'disabled':''}>${ready?'편성 바꾸기':'두 편성 짜기'}</button></div>`;
+    <button class="${ready?'secondary':'primary shine'} wide" data-action="twin-party" ${!unlocked||profile.active?'disabled':''}>${ready?'편성 바꾸기':'두 편성 짜기'}</button><p class="event-next">${eventNextLine()}</p></div>`;
 }
 // The pair is edited on one sheet: two party panels (tap one to fill it) over one roster where each tile wears its side.
 function twinFormation(edit=false){
+  if(!eventOpen('twin',now(),UNLOCKED&&p().eventFlip)){toast('이번 격주 이벤트가 아니에요.');return;}
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   // An unsaved pair survives a trip to another sheet (the relic book, a companion card) and comes back as it was left.
   const saved=JSON.stringify(twinParty(p()));
@@ -1069,7 +1078,7 @@ function twinFormation(edit=false){
   const relics=ARTIFACTS.filter(a=>profile.relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
   // Relics are rows with their effect (the same rows as the relic loadout), each wearing the side that holds it.
   const relicItem=a=>{const at=where('relics',a.id),lv=relicLevel(profile.relics[a.id]);return `<button class="choose-row relic-row twin-relic" data-twin-pick="relics:${a.id}" ${at?`data-side="${at}"`:''} aria-pressed="${at===twinFocus}"><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${lv}</span></strong><small class="relic-effect">${relicText(a.id,lv)}</small></div><span class="mark">${at?`<i class="twin-mark">${TWIN_SIDE[at].short}</i>`:icon('plus')}</span></button>`;};
-  show('쌍성 편성',`${TWIN_SIDE.left.short} ${d.left.deck.length} · ${TWIN_SIDE.right.short} ${d.right.deck.length}`,`<div class="twin-panels">${panel('left')}${panel('right')}</div>
+  show('쌍성 편성',`${TWIN_SIDE.left.short} ${d.left.deck.length} · ${TWIN_SIDE.right.short} ${d.right.deck.length}`,`<div class="auto-row"><button class="secondary auto-btn" data-action="auto-twin">자동</button></div><div class="twin-panels">${panel('left')}${panel('right')}</div>
     <div class="tabbar twin-tabs"><button data-twin-tab="hero" aria-pressed="${twinTab==='hero'}"><b>동료</b></button><button data-twin-tab="relic" aria-pressed="${twinTab==='relic'}"><b>유물</b></button></div>
     ${twinTab==='hero'?`<div class="twin-grid">${heroes.map(h=>tile('deck',h.id,h)).join('')}</div>`:`<div class="choose-list twin-relics">${relics.map(relicItem).join('')}</div>`}`,
     `<button class="primary wide" data-action="save-twin" ${full('left')&&full('right')?'':'disabled'}>편성 확정</button>`,'twin-party');
@@ -1083,6 +1092,7 @@ function twinPick(kind,id){
   keepScroll(()=>twinFormation(true));
 }
 function twinPrepare(side){
+  if(!eventOpen('twin',now(),UNLOCKED&&p().eventFlip)){toast('이번 격주 이벤트가 아니에요.');return;}
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const party=twinParty(p())[side];
   show(TWIN_SIDE[side].name,'출격 준비',`<div class="prep-boss twin-${side}"><small>${TIERS[challengeTier].name} · ${TWIN_WAVES}웨이브 · 스테이지 ${TWIN_STAGE[challengeTier]} 수준</small><h2>${TWIN_SIDE[side].name}</h2>${bossRoute(twinBosses(season(now()).index,side,metBosses(p())))}</div>
@@ -1097,7 +1107,7 @@ const requestFace=id=>REQUEST[id].hero;
 const goalHero=g=>g.with||g.hero||(g.flag==='moonlit'?'night_rabbit':g.flag==='spared'?'ash':null);
 function requestVisit(){const st=requestState(p(),now());return st.active.find(e=>e.done)||st.active.find(e=>!e.seen)||null;}
 function requestArrivals(){
-  if(p().active)return;const st=requestState(p(),now());if(now()<st.next||st.active.length>=REQUEST_MAX)return;
+  if(!featureOpen(p(),'request')||p().active)return;const st=requestState(p(),now());if(now()<st.next||st.active.length>=REQUEST_MAX)return;
   const r=act('requestArrive',{},false);if(r.ok&&r.arrived?.length)toast(`${HERO[REQUEST[r.arrived[0]].hero].name}이(가) 정원에 찾아왔어요.`);
 }
 function visitMarkup(){
@@ -1162,18 +1172,19 @@ function previewResult(r){
 // ───────── Summon ─────────
 // Banner art first; two buttons at the thumb. The daily free summon is the 1-pull itself; pity is an exchange gauge.
 function renderSummon(){
+  const tabs=[['normal','일반'],...(featureOpen(p(),'season')?[['season','시즌']]:[]),...(featureOpen(p(),'relic')?[['relic','유물']]:[])];if(!tabs.some(([id])=>id===banner))banner='normal';
   const c=calendar(now()),featured=banner==='season'?c.guardian:banner==='relic'?'broken_clock':c.pickup,cost=banner==='relic'?T.relicDrawCost:T.heroDrawCost,dreams=p().dreams,free=banner==='normal'&&!todayDaily().free;
   const copy={normal:{tag:'이번 주 픽업',title:HERO[c.pickup].name,desc:'UR이 나오면 절반은 이번 주 픽업이에요.'},
     season:{tag:`${monthNo(c)} 한정`,title:HERO[c.guardian].name,desc:'이달의 수호자는 이 소환에서만 만나요.'},
     relic:{tag:'유물',title:'유물 소환',desc:'많이 소환할수록 높은 등급이 잘 나와요.'}}[banner];
   return `<section class="sm" data-banner="${banner}">
-    <div class="tabbar sm-tabs">${[['normal','일반'],['season','시즌'],['relic','유물']].map(([id,name])=>`<button data-banner="${id}" aria-pressed="${banner===id}"><b>${name}</b>${id==='normal'&&!todayDaily().free?'<i class="dot"></i>':''}</button>`).join('')}</div>
+    ${tabs.length>1?`<div class="tabbar sm-tabs">${tabs.map(([id,name])=>`<button data-banner="${id}" aria-pressed="${banner===id}"><b>${name}</b>${id==='normal'&&!todayDaily().free?'<i class="dot"></i>':''}</button>`).join('')}</div>`:''}
     <div class="sm-stage"><span class="sm-halo" aria-hidden="true"></span>${image(featured,banner!=='relic','sm-figure')}
       <div class="sm-copy"><span class="sm-tag">${copy.tag}</span><h2>${copy.title}</h2><p>${copy.desc}</p></div>
       <div class="sm-tools"><button class="sm-tool" data-action="rates">${icon('info')}<span>확률</span></button><button class="sm-tool" data-action="history">${icon('clock')}<span>기록</span></button></div>
       ${banner==='relic'?relicTierChip():pityChip()}</div>
     ${banner==='relic'?'':lateStrip()}
-    <div class="sm-actions"><button class="secondary sm-one" data-draw="1">${free?`<b>무료 소환</b><small>오늘 1회</small>`:`<b>1회 소환</b>${gem(cost,dreams<cost)}`}</button><button class="primary shine sm-ten" data-draw="10"><b>10회 소환</b>${gem(cost*10,dreams<cost*10)}${banner==='relic'?'':'<small class="sm-boost">퀴즈 정답 시 UR 2배</small>'}</button></div></section>`;
+    <div class="sm-actions"><button class="secondary sm-one" data-draw="1">${free?`<b>무료 소환</b><small>오늘 1회</small>`:`<b>1회 소환</b>${gem(cost,dreams<cost)}`}</button><button class="primary shine sm-ten" data-draw="10"><b>10회 소환</b>${gem(cost*10,dreams<cost*10)}<small class="sm-boost">${banner==='relic'?'퀴즈 정답 시 행운 보너스':'퀴즈 정답 시 UR 2배'}</small></button></div></section>`;
 }
 function pityChip(){
   const n=p().pity[banner],max=T.pity[banner],full=n>=max;
@@ -1352,10 +1363,10 @@ function openQuiz(state){quizState={chosen:-1,score:0,...state};renderQuiz();}
 function renderQuiz(){
   const s=quizState,q=s.question,answered=s.chosen>=0,correct=answered&&s.chosen===q.answer,last=!s.queue||s.index>=s.queue.length-1;
   const title={gacha:'별빛 퀴즈',accel:'오늘의 가속',practice:`${KIND_NAME[q.kind]} 문제`}[s.mode];
-  const kicker={gacha:'맞히면 이번 10회 소환의 UR 확률 2배',accel:'맞히면 파견 중인 동료가 모두 4시간 빨리 귀환',practice:s.queue?`${s.index+1} / ${s.queue.length}`:COURSE.title}[s.mode];
-  const note=s.mode==='accel'&&answered?`<small class="quiz-result">${escapeText(s.result?.message||'')}</small>`:s.mode==='gacha'&&answered&&correct?'<small class="quiz-result">UR 확률 2배! 가끔은 행운이 찾아올 수도 있어요.</small>':s.mode==='practice'&&answered&&last&&s.queue?.length>1?`<small class="quiz-result">${s.queue.length}문제 중 ${s.score}문제를 맞혔어요.</small>`:'';
+  const kicker={gacha:s.banner==='relic'?'맞히면 가끔 행운의 보너스 10회':'맞히면 이번 10회 소환의 UR 확률 2배',accel:'맞히면 파견 중인 동료가 모두 4시간 빨리 귀환',practice:s.queue?`${s.index+1} / ${s.queue.length}`:COURSE.title}[s.mode];
+  const note=s.mode==='accel'&&answered?`<small class="quiz-result">${escapeText(s.result?.message||'')}</small>`:s.mode==='gacha'&&answered&&correct?`<small class="quiz-result">${s.banner==='relic'?'정답! 가끔 행운의 보너스 10회가 찾아와요.':'UR 확률 2배! 가끔은 행운이 찾아올 수도 있어요.'}</small>`:s.mode==='practice'&&answered&&last&&s.queue?.length>1?`<small class="quiz-result">${s.queue.length}문제 중 ${s.score}문제를 맞혔어요.</small>`:'';
   const verdict=answered?`<div class="quiz-verdict ${correct?'right':'wrong'}"><b>${correct?'정답이에요!':'아쉬워요'}</b><p>${escapeText(q.explain)}</p>${note}${correct?'':'<small>이 문제는 별의 서재 오답 노트에 담았어요.</small>'}</div>`:'';
-  const footer=s.mode==='gacha'?(answered?`<button class="primary wide shine" data-action="quiz-go">${icon('summon')}<b>${correct?'UR 2배로 10회 소환':'10회 소환'}</b></button>`:'<button class="link quiz-skip" data-action="quiz-skip">퀴즈 없이 10회 소환</button>')
+  const footer=s.mode==='gacha'?(answered?`<button class="primary wide shine" data-action="quiz-go">${icon('summon')}<b>${correct&&s.banner!=='relic'?'UR 2배로 10회 소환':'10회 소환'}</b></button>`:'<button class="link quiz-skip" data-action="quiz-skip">퀴즈 없이 10회 소환</button>')
     :s.mode==='accel'?`<button class="${answered?'primary':'secondary'} wide" data-action="close">${answered?'확인':'나중에 풀기'}</button>`
     :answered&&!last?'<button class="primary wide" data-action="quiz-next">다음 문제</button>':`<button class="${answered?'primary':'secondary'} wide" data-action="close">${answered?'완료':'닫기'}</button>`;
   show(title,kicker,questionBlock(q,s.chosen,answered)+verdict+studyPeek(q),footer,'quiz',s.mode);
@@ -1370,7 +1381,7 @@ function answerQuiz(choice,button){
   if(screen==='library')refreshBehind();
 }
 function tenPull(){
-  if(banner==='relic'||p().dreams<T.heroDrawCost*10){draw(10);return;}
+  if(p().dreams<(banner==='relic'?T.relicDrawCost:T.heroDrawCost)*10){draw(10);return;}
   const held=quizHold.gacha;if(held&&held.banner===banner){openQuiz({mode:'gacha',banner,question:held.question,chosen:held.chosen});return;}
   const q=held?.question||pickQuestion('concept');if(!q){draw(10);return;}quizHold.gacha={banner,question:q,chosen:-1};
   openQuiz({mode:'gacha',banner,question:q});
@@ -1691,7 +1702,7 @@ document.addEventListener('click',e=>{
   const button=e.target.closest('button');
   if(lobbyView){if(!button||button.dataset.action!=='lobby-view'){setLobbyView(false);return;}}
   if(!button||button.disabled)return;const d=button.dataset;sound.click();
-  if(d.nav){if(screen==='battle'){leave();return;}close();if(d.nav===screen&&d.nav!=='home'){$('content').scrollTo({top:0,behavior:'smooth'});return;}screen=d.nav;render();return;}
+  if(d.nav){if(d.locked==='true'){toast(`스테이지 ${UNLOCKS.garden} 클리어 후 열려요`);return;}if(screen==='battle'){leave();return;}close();if(d.nav===screen&&d.nav!=='home'){$('content').scrollTo({top:0,behavior:'smooth'});return;}screen=d.nav;render();return;}
   if(d.hero){heroDetail(d.hero);return;}if(d.relic){relicDetail(d.relic);return;}
   if(d.memorial){openMemorial(d.memorial);return;}
   if(d.give){giveGift(d.to,d.give,button);return;}
@@ -1699,7 +1710,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=rarity===d.filter?'all':d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}if(d.part){focusPart(Number(d.part));return;}
   if(d.garden){gardenTab=d.garden;bedFocus=GARDENS.find(g=>g.id===gardenTab).beds[0];refreshGarden();return;}
-  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(d.testTool==='request-now'){close();screen='home';render();return;}if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
+  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(['event-flip','trial-day','ftue-reset'].includes(d.testTool)){close();if(d.testTool==='ftue-reset')screen='home';render();return;}if(d.testTool==='request-now'){close();screen='home';render();return;}if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
   if(d.oath){toggleOath(d.oath);return;}
   if(d.twinEnter){twinPrepare(d.twinEnter);return;}if(d.twinBegin){begin('twin',0,d.twinBegin);return;}
   if(d.twinFocus){twinFocus=d.twinFocus;if(d.twinTab)twinTab=d.twinTab;keepScroll(()=>twinFormation(true));return;}if(d.twinTab){twinTab=d.twinTab;keepScroll(()=>twinFormation(true));return;}
@@ -1750,6 +1761,14 @@ document.addEventListener('click',e=>{
     'tutor-clear':()=>{saveTutorSettings({key:'',model:tutorSettings().model});tutorCache.clear();toast('API 키를 지웠어요.');showSettings();},
     'today-star':todayStar,pity:pitySheet,'pity-claim':claimPity,basket:()=>claimBasket(button),'claim-all':()=>claimDispatches(p().dispatches.filter(x=>x.end<=now()).map(x=>x.slot)),
     'relic-info':relicInfo,'mode-info':()=>modeInfo(d.kind),'dispatch-info':dispatchInfo,
+    'auto-team-pick':()=>{editingDeck=autoDeck(p());team(true);},'auto-relic-pick':()=>{editingRelics=autoRelics(p());relicTeam(true);},
+    'auto-twin':()=>{twinDraft=autoTwin(p());twinFormation(true);},'auto-oath':()=>{const ids=oathDeck(p(),oathPick);if(!ids){toast('조건에 맞는 동료가 부족해요');return;}if(act('deck',{ids},false).ok)oathPrepare();},
+    'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),changed=JSON.stringify(deck)!==JSON.stringify(p().deck)||(featureOpen(p(),'relic')&&relics.length&&JSON.stringify(relics)!==JSON.stringify(p().equipped));if(!changed){toast('지금이 가장 강한 편성이에요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);toast(`전투력 ${fmt(before)} → ${fmt(teamPower(p()))}`);},
+    'next-stage':()=>{close();prepare(Number(d.stage));},
+    'trial-start':()=>{if(!UNLOCKED)return;show('신규 플레이 체험','',`<p class="subtext">지금 프로필은 따로 보관하고, 처음 시작하는 프로필로 바꿉니다. 체험을 끝내면 지금 상태로 돌아옵니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-start-confirm">시작</button></div>`,'trial-confirm');},
+    'trial-start-confirm':()=>{if(!UNLOCKED||p().trial)return;try{localStorage.setItem(SAVE_KEY+'.backup',store.raw||JSON.stringify(p()));const r=store.import(JSON.stringify(createProfile(Date.now(),{trial:true})));if(!r.ok){toast(r.message);return;}location.reload();}catch{toast('프로필을 보관할 수 없어요.');}},
+    'trial-end':()=>{if(!UNLOCKED||!p().trial)return;show('체험 끝내기','',`<p class="subtext">보관한 프로필로 돌아갑니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-end-confirm">돌아가기</button></div>`,'trial-confirm');},
+    'trial-end-confirm':()=>{if(!UNLOCKED||!p().trial)return;try{const raw=localStorage.getItem(SAVE_KEY+'.backup');if(!raw){toast('보관된 테스트 프로필이 없어요.');return;}const r=store.import(raw);if(!r.ok){toast(r.message);return;}localStorage.removeItem(SAVE_KEY+'.backup');location.reload();}catch{toast('프로필을 복원할 수 없어요.');}},
   };actions[d.action]?.();
 });
 // Every press gets a small sparkle; the summon stage skips to the full result.
