@@ -38,7 +38,13 @@ async function boot(width,height,profile=createProfile(NOW),fault=false,location
   if(time!==undefined)await page.clock.setFixedTime(time);
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
   await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
-  if(profile)await page.addInitScript(({key,profile})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(profile));},{key:SAVE_KEY,profile});
+  // Seed once in an empty document at the exact file URL, before the app or fault hooks run.
+  // An init script runs again on reload and can restore the original fixture over a temporarily empty file store.
+  if(profile){
+    await page.route(location,r=>r.fulfill({contentType:'text/html',body:'<!doctype html><title>Profile fixture</title>'}),{times:1});
+    await page.goto(location);
+    await page.evaluate(({key,profile})=>localStorage.setItem(key,JSON.stringify(profile)),{key:SAVE_KEY,profile});
+  }
   if(fault)await page.addInitScript(rewardOnly=>{window.__failRewardCheckpoint=rewardOnly;const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){let phase='';try{const saved=JSON.parse(v);phase=saved.active?.run?JSON.parse(saved.active.run).phase:'';}catch{}if(window.__testQuotaFailure||window.__failRewardCheckpoint&&phase==='reward')throw new DOMException('full','QuotaExceededError');return original.call(this,k,v);};},fault==='reward');
   if(fault==='avif')await page.addInitScript(()=>{const decode=HTMLImageElement.prototype.decode;HTMLImageElement.prototype.decode=function(){return /\.avif$/.test(this.src)?Promise.reject(new DOMException('Unsupported codec','EncodingError')):decode.call(this);};});
   await page.addInitScript(()=>{window.__memorialAssignments=[];const descriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');Object.defineProperty(HTMLImageElement.prototype,'src',{...descriptor,set(value){if(this.dataset.memorial&&String(value).startsWith('data:image/')||String(value).includes('/memorial/'))window.__memorialAssignments.push(String(value).slice(0,80));descriptor.set.call(this,value);}});});
