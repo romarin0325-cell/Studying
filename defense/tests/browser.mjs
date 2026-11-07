@@ -5,11 +5,13 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
 import {createProfile,command,SAVE_KEY} from '../src/profile.js';
-import {HEROES,TUNING} from '../src/content.js';
+import {HEROES,TUNING,LATE_COMPANIONS,HIDDEN} from '../src/content.js';
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
 import {allQuestions} from '../src/quiz.js';
+// Companions announced at stage 45 (the roster grows; counts come from the data, not from the day the test was written).
+const LATE_NEW=LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).length;
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
 const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.now();
@@ -209,7 +211,7 @@ try{
     await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
     await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
-    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),/스테이지 45 클리어 후 신규 동료 8명/);assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
+    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),new RegExp(`스테이지 45 클리어 후 신규 동료 ${LATE_NEW}명`));assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
     await shot(page,'collection',width,height);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
@@ -287,15 +289,15 @@ try{
   const lateTest=await boot(390,844,lateProfile);
   // The first load after clearing stage 45 announces who joined the summon: eight tiles, shown once.
   await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
-  assert.equal(await lateTest.page.locator('.late-card').count(),8,'eight new companions are announced');
-  assert.equal((await profile(lateTest.page)).noticeLate.length,8,'the announcement is recorded as seen');
+  assert.equal(await lateTest.page.locator('.late-card').count(),LATE_NEW,'every new companion is announced');
+  assert.equal((await profile(lateTest.page)).noticeLate.length,LATE_NEW,'the announcement is recorded as seen');
   await shot(lateTest.page,'late-notice',390,844);
   await lateTest.page.locator('[data-action="late-summon"]').click();await lateTest.page.locator('.sm-late.open').waitFor();
   assert.ok(await lateTest.page.locator('#overlay').isHidden(),'the announcement closes');
   await lateTest.page.locator('[data-action="rates"]').click();assert.match(await lateTest.page.locator('#sheet-body').innerText(),/신규 동료[\s\S]*언더독[\s\S]*베놈/);await close(lateTest.page);
   await reload(lateTest);await lateTest.page.waitForTimeout(1200);assert.ok(await lateTest.page.locator('#overlay').isHidden(),'not announced again after a reload');
   await nav(lateTest.page,'동료');
-  assert.equal(await lateTest.page.locator('.cards .cc').count(),39,'the new companions join the collection once stage 45 is cleared');
+  assert.equal(await lateTest.page.locator('.cards .cc').count(),HEROES.length,'the new companions join the collection once stage 45 is cleared');
   for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
   await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();
   const grown=createProfile(NOW);grown.cleared=36;grown.dreams=5000;
@@ -313,6 +315,8 @@ try{
   await page.locator('[data-enhance-relic="hourglass"]').click();assert.equal((await profile(page)).relics.hourglass.enhance,3);await close(page);
   await nav(page,'소환');const fill=await profile(page);assert.equal(fill.pity.normal,0);
   await page.locator('[data-banner="relic"]').click();await page.locator('[data-draw="10"]').click();
+  // The relic 10-pull asks the star quiz first (a right answer may add a lucky ten); skipping it draws at once.
+  await page.locator('#sheet[data-kind="quiz"]').waitFor();await page.locator('[data-action="quiz-skip"]').click();
   assert.equal((await profile(page)).relicDraws,10);assert.equal((await profile(page)).dreams,4200);await shot(page,'ten-relics',390,844);await close(page);
   await nav(page,'정원');assert.equal(await page.locator('.slot.locked').count(),0);
   await page.locator('[data-dispatch-slot="0"]').click();await page.locator('[data-send="queen"]').click();
