@@ -10,6 +10,7 @@ import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
 import {allQuestions} from '../src/quiz.js';
+import {eventWindow} from '../src/preview/season.js';
 // Companions announced at stage 45 (the roster grows; counts come from the data, not from the day the test was written).
 const LATE_NEW=LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).length;
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -28,11 +29,13 @@ if(committed!==null){
 const browser=await (isWebkit?webkit:chromium).launch({headless:true});
 const errors=[],requests=[],geometry=[],contexts=[];
 // The checks below were written for a player past the first session; the tutorial check opts in with {tutorial:true}.
-const veteran=p=>p?{...p,ftue:{legacy:true,done:[],seen:[],skipped:false},beginner:null,firstTen:true}:p;
-async function boot(width,height,profile=createProfile(NOW),fault=false,location=url,{tutorial=false}={}){
+// These fixtures have also read this week's event; the event check opts in to an unread popup.
+const veteran=p=>p?{...p,ftue:{legacy:true,done:[],seen:[],skipped:false},beginner:null,firstTen:true,eventSeen:eventWindow(Math.max(NOW,p.clockAt)).id}:p;
+async function boot(width,height,profile=createProfile(NOW),fault=false,location=url,{tutorial=false,time}={}){
   if(!tutorial)profile=veteran(profile);
   const context=await browser.newContext({viewport:{width,height},hasTouch:true});
   contexts.push(context);const page=await context.newPage();
+  if(time!==undefined)await page.clock.setFixedTime(time);
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
   await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
   if(profile)await page.addInitScript(({key,profile})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(profile));},{key:SAVE_KEY,profile});
@@ -91,6 +94,18 @@ try{
     await page.waitForFunction(()=>/출격/.test(document.querySelector('.coach-line')?.textContent||''));
     assert.deepEqual((await profile(page)).ftue.done,['lobby']);
     await shot(page,'tutorial-prepare',390,844);await t.context.close();
+  }
+  // An unread weekly event is a separate home popup, not a repeated companion announcement.
+  {
+    const time=Date.UTC(2026,10,10,3),p=veteran(createProfile(time));p.cleared=3;p.eventSeen='';
+    const t=await boot(390,844,p,false,url,{tutorial:true,time}),{page}=t;
+    await page.locator('#sheet[data-kind="event"]').waitFor();
+    assert.equal((await profile(page)).eventSeen,eventWindow(time).id,'this event week is recorded as seen');
+    await shot(page,'event-notice',390,844);await close(page);
+    await reload(t);await page.waitForTimeout(1200);
+    assert.equal((await profile(page)).eventSeen,eventWindow(time).id,'the event receipt survives a reload');
+    assert.ok(await page.locator('#sheet[data-kind="event"]').isHidden(),'the same event is not announced twice');
+    await t.context.close();
   }
   if(isWebkit){
     const probe=await browser.newPage(),source=await fs.readFile(path.join(game,'assets/memorial/zeke.avif'));
@@ -287,15 +302,21 @@ try{
   }
   const lateProfile=createProfile(NOW);lateProfile.cleared=45;
   const lateTest=await boot(390,844,lateProfile);
-  // The first load after clearing stage 45 announces who joined the summon: eight tiles, shown once.
+  // The first load after clearing stage 45 announces every new companion, shown once.
   await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
   assert.equal(await lateTest.page.locator('.late-card').count(),LATE_NEW,'every new companion is announced');
   assert.equal((await profile(lateTest.page)).noticeLate.length,LATE_NEW,'the announcement is recorded as seen');
+  const seenLate=(await profile(lateTest.page)).noticeLate;
+  await lateTest.page.waitForFunction(({key,ids})=>{try{return JSON.stringify(JSON.parse(localStorage.getItem(key)||'null')?.noticeLate)===JSON.stringify(ids);}catch{return false;}},{key:SAVE_KEY,ids:seenLate});
   await shot(lateTest.page,'late-notice',390,844);
   await lateTest.page.locator('[data-action="late-summon"]').click();await lateTest.page.locator('.sm-late.open').waitFor();
   assert.ok(await lateTest.page.locator('#overlay').isHidden(),'the announcement closes');
   await lateTest.page.locator('[data-action="rates"]').click();assert.match(await lateTest.page.locator('#sheet-body').innerText(),/신규 동료[\s\S]*언더독[\s\S]*베놈/);await close(lateTest.page);
-  await reload(lateTest);await lateTest.page.waitForTimeout(1200);assert.ok(await lateTest.page.locator('#overlay').isHidden(),'not announced again after a reload');
+  await reload(lateTest);await lateTest.page.waitForTimeout(1200);
+  const lateReload=await lateTest.page.evaluate(key=>({kind:document.getElementById('sheet').dataset.kind,title:document.getElementById('sheet-title').textContent,noticeLate:window.STAR_GARDEN.profile.noticeLate,diskNoticeLate:JSON.parse(localStorage.getItem(key)||'null')?.noticeLate}),SAVE_KEY);
+  assert.deepEqual(lateReload.noticeLate,seenLate,'companion receipts survive a reload: '+JSON.stringify(lateReload));
+  assert.deepEqual(lateReload.diskNoticeLate,seenLate,'companion receipts remain in storage: '+JSON.stringify(lateReload));
+  assert.ok(await lateTest.page.locator('#sheet[data-kind="late"]').isHidden(),'companions are not announced again after a reload: '+JSON.stringify(lateReload));
   await nav(lateTest.page,'동료');
   assert.equal(await lateTest.page.locator('.cards .cc').count(),HEROES.length,'the new companions join the collection once stage 45 is cleared');
   for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
