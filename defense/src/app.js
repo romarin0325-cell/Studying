@@ -10,6 +10,10 @@ import {CONSTELLATIONS,LIBRARY_ART,LIBRARY_STARS} from './library.js';
 import {TUTOR_MODELS,tutorSettings,saveTutorSettings,explainWithRumi,tutorHtml} from './tutor.js';
 import {createBattle,resumeBattle,autoPlay as helperAuto,clearedRounds} from './battle.js';
 import {smartAutoPlay} from './smart-auto.js';
+import {createCoach} from './coach.js';
+import * as FW from './beginner.js';
+import * as AT from './auto-team.js';
+import * as SN from './preview/season.js';
 import * as E from './combat/engine.js';
 import {portraitFrame} from './portrait-layout.js';
 import {Art,Renderer} from './combat/render.js';
@@ -363,7 +367,7 @@ function renderDraft(){
     <p class="draft-help">선택은 자동 저장되어 나중에 이어할 수 있습니다.</p></section>`;
 }
 function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&a.draft.length<TEAM_SIZE){screen='draft';render();}else startBattle(true);}
-function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;requestTrack=requestTracker();screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();}
+function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;requestTrack=requestTracker();screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();tutorialStart();sortieWipe();}
 function renderBattle(){
   if(!run)return;
   const name=run.mode==='main'?CHAPTERS[run.chapter].name:`${modeTitle(run.mode,run.side)} · ${(TIERS[run.tier]||TIERS.easy).name}`,tag=run.mode==='main'?`<small>STAGE</small><b>${stageLabel(run.chapter+1)}</b>`:`<b>${{weekly:'유성',monthly:'만월',oath:'서약',twin:TWIN_SIDE[run.side]?.short||'쌍성'}[run.mode]}</b>`;
@@ -584,8 +588,8 @@ function showSettings(){
     <p class="fineprint">진행 데이터는 이 기기의 브라우저에 저장됩니다. 기기를 옮길 때는 백업 파일을 사용하세요.</p>
     <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
-function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').classList.remove('spotting');$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();}
-function close(){if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);}
+function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').classList.remove('spotting');$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();coachTick();}
+function close(){if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
@@ -624,6 +628,7 @@ function render(){
   const lobbyArt=$('lobby-memorial');if(lobbyArt)lobbyArt.onerror=()=>{const id=p().lobby,fallback=window.__MEMORIAL_FALLBACK__?.[id];if(fallback&&lobbyArt.src!==fallback)lobbyArt.src=fallback;else lobbyArt.remove();};
   // Only a change of screen fades in; refreshes in place stay still.
   if(entering){c.classList.remove('enter');void c.offsetWidth;c.classList.add('enter');}
+  afterRender();
 }
 
 // ───────── Home ─────────
@@ -1464,6 +1469,224 @@ function artSheet(id,fresh=false){
   if(fresh){const img=document.querySelector('#sheet .art-frame');if(img){const c=centerOf(img);setTimeout(()=>burst(c.x,c.y,{count:30,spread:160,size:14,duration:1200,color:'#ffe08a'}),300);}}
 }
 
+// ───────── First week: tutorial coach, the sprout week board, unlock deliveries, the biweekly event popup ─────────
+// Star Boy, the first partner (a shooting-star courier), is the guide: every step is one line in his voice over the real
+// control. The battle waits while a step waits; nothing is taught by a page of text.
+const GUIDE='star_boy',coach=createCoach();
+let coachHold=false,tutorialRun=false,tutorialMark=null,castAt=0,nextTip=false;
+const qs=s=>document.querySelector(s);
+const guideFace=()=>`<span class="coach-art">${image(GUIDE)}</span>`;
+function guide(id,target,line,opts={}){if(coach.id===id&&!opts.force)return;coach.show({id,target,line,name:HERO[GUIDE].name,face:guideFace(),skippable:opts.skippable??true,...opts});}
+function ftueDone(step){if(!p().ftue.done.includes(step))act('ftue',{done:step},false);}
+function skipTutorial(){
+  if(!act('ftue',{skip:true},false).ok)return;coach.hide();coachHold=false;
+  if(tutorialRun){tutorialRun=false;if(!p().settings.auto)act('setting',{id:'auto',value:true},false);const b=qs('.toggle-auto');if(b){b.querySelector('b').textContent='ON';b.setAttribute('aria-pressed','true');}}
+  toast('튜토리얼을 건너뛰었어요. 첫 만남 10회 소환은 그대로 남아 있어요.');
+}
+// The cells of a mergeable pair, nearest first, so the drag hint is short.
+function mergePair(){
+  if(!run)return null;let best=null;
+  for(let a=0;a<25;a++)for(let b=0;b<25;b++){if(a===b||!E.canMerge(run.board[a],run.board[b],run))continue;const pa=E.cellPoint(a),pb=E.cellPoint(b),d=Math.hypot(pa.x-pb.x,pa.y-pb.y);if(!best||d<best.d)best={from:a,to:b,d};}
+  return best;
+}
+const cellScreen=i=>{const c=$('arena');if(!c)return null;const r=c.getBoundingClientRect(),q=E.cellPoint(i);return {x:r.left+q.x*r.width/720,y:r.top+q.y*r.height/780};};
+function cellsRect(a,b){
+  const c=$('arena');if(!c)return null;const r=c.getBoundingClientRect(),k=r.width/720,half=E.BOARD.cell/2*k,A=cellScreen(a),B=cellScreen(b);
+  const left=Math.min(A.x,B.x)-half,top=Math.min(A.y,B.y)-half,right=Math.max(A.x,B.x)+half,bottom=Math.max(A.y,B.y)+half;
+  return {left,top,right,bottom,width:right-left,height:bottom-top};
+}
+function castTarget(){
+  if(!run)return null;const alive=run.enemies.some(e=>e.hp>0);if(!alive)return null;
+  const ready=run.deck.filter(id=>E.bestUnit(run,id)&&run.gauge>=E.skillCost(run,id)&&run.gold>=E.skillGoldCost(id)&&!E.castLock(run,id));
+  return ready.includes(GUIDE)?GUIDE:ready.find(id=>['starfall','flurry','freeze'].includes(HERO[id].skill.type))||ready[0]||null;
+}
+// The battle half of the tutorial (stage 1): summon, merge, one ultimate, then hand over to auto.
+function battleCoach(step){
+  if(!tutorialRun||!run||screen!=='battle'||modal){if(coach.active&&!modal)coach.hide();return;}
+  const st=run.stats;
+  if(step==='summon'){
+    if(tutorialMark&&st.summons>tutorialMark.summons){ftueDone('summon');tutorialMark={...st};return;}
+    coachHold=true;guide('summon',()=>qs('[data-action="summon-battle"]'),'형아, 골드로 동료를 더 불러 보자! 동료 소환을 눌러 봐.');return;
+  }
+  if(step==='merge'){
+    if(st.merges>(tutorialMark?.merges||0)){ftueDone('merge');tutorialMark={...run.stats};coachHold=false;coach.hide();return;}
+    const pair=mergePair();coachHold=true;
+    if(!pair){guide('merge-more',()=>qs('[data-action="summon-battle"]'),'한 번 더! 같은 동료 둘이 모이면 합칠 수 있어.');return;}
+    guide('merge:'+pair.from+':'+pair.to,()=>cellsRect(pair.from,pair.to),'같은 동료끼리 끌어다 겹치면 합성! 별이 하나 늘어.',{drag:{from:()=>cellScreen(pair.from),to:()=>cellScreen(pair.to)}});return;
+  }
+  if(step==='cast'){
+    if(st.skills>(tutorialMark?.skills||0)){ftueDone('cast');castAt=performance.now();coachHold=false;coach.hide();return;}
+    const id=castTarget();if(!id){coachHold=false;if(coach.active)coach.hide();return;}
+    coachHold=true;guide('cast:'+id,()=>qs(`[data-skill="${id}"]`),'별빛이 모였어! 동료 카드를 누르면 필살기야. 지금!');return;
+  }
+  if(step==='auto'){
+    if(p().settings.auto){ftueDone('auto');tutorialRun=false;coachHold=false;coach.hide();return;}
+    if(performance.now()-castAt<2200){coachHold=false;return;}
+    coachHold=true;guide('auto',()=>qs('.toggle-auto'),'잘했어! 이제 자동에 맡겨도 돼. 형아는 보다가 필요할 때만 거들면 돼.');
+  }
+}
+// One place decides which coach mark (if any) belongs on screen. Called after renders, sheet changes and in battle.
+function coachTick(){
+  const step=FW.ftueNext(p());
+  if(nextTip){if(step||modal||screen!=='home'){nextTip=false;coach.hide();}return;}
+  if(!step){if(coach.active)coach.hide();coachHold=false;tutorialRun=false;return;}
+  if(step==='lobby'){
+    if(modal==='prepare'){ftueDone('lobby');return coachTick();}
+    if(screen==='home'&&!modal&&!lobbyView&&!$('splash'))guide('lobby',()=>qs('.lb-depart'),'띵동! 형아, 별빛 정원에 어서 와. 바로 출격해 볼까?');else coach.hide();return;
+  }
+  if(step==='prepare'){
+    if(modal==='prepare')guide('prepare',()=>qs('#sheet [data-begin]'),'이 다섯이 형아의 첫 동료야. 출격!');
+    else if(screen==='home'&&!modal)guide('lobby',()=>qs('.lb-depart'),'띵동! 형아, 별빛 정원에 어서 와. 바로 출격해 볼까?');else coach.hide();return;
+  }
+  if(['summon','merge','cast','auto'].includes(step)){
+    if(screen==='battle')return battleCoach(step);
+    if(screen==='home'&&!modal)guide('lobby',()=>qs('.lb-depart'),'출격해서 같이 싸워 보자!');else if(modal==='prepare')guide('prepare',()=>qs('#sheet [data-begin]'),'출격!');else coach.hide();return;
+  }
+  if(step==='firstTen'){
+    if(modal==='result')return guide('ten-go',()=>qs('#sheet [data-action="ftue-summon"]'),'첫 승리야! 이제 새 동료를 만나러 가자.',{skippable:false});
+    if(screen==='summon'&&!modal)return guide('ten',()=>qs('.sm-first'),'띵동! 새 동료 열 명이 배달 왔어. 한꺼번에 불러 보자!',{skippable:false});
+    if(screen==='home'&&!modal)return guide('ten-nav',()=>qs('[data-nav="summon"]'),'새 동료가 기다리고 있어. 소환으로 가자!',{skippable:false});
+    coach.hide();return;
+  }
+  if(step==='formation'){
+    if(modal==='team'){
+      const auto=qs('#sheet [data-action="auto-team-pick"]'),pending=editingDeck.join()!==AT.autoDeck(p()).join();
+      return pending&&auto?guide('team-auto',()=>auto,'새 동료가 왔으니 편성을 바꿔 보자. 자동 편성 한 번이면 끝!',{skippable:false})
+        :guide('team-save',()=>qs('#sheet [data-action="save-team"]'),'좋아, 이대로 확정!',{skippable:false});
+    }
+    if(!modal&&screen!=='battle'){team();return;}
+    coach.hide();
+  }
+}
+// Tutorial setup when the first main stage starts while the battle steps are still open.
+function tutorialStart(){
+  const step=FW.ftueNext(p());
+  if(step==='prepare')ftueDone('prepare');
+  tutorialRun=['summon','merge','cast','auto','prepare'].includes(step)&&run?.mode==='main'&&run.chapter===0;
+  if(!tutorialRun)return;
+  if(p().settings.auto)act('setting',{id:'auto',value:false},false);
+  tutorialMark={...run.stats};coachHold=true;castAt=0;
+}
+// The free first ten: no quiz, one SR or better guaranteed, then straight into formation.
+function firstTen(){
+  const result=act('draw',{banner:'normal',count:10,first:true},false);if(!result.ok)return;banner='normal';render();bonusItems=null;
+  ftueDone('firstTen');reveal(result.items,{count:10,cost:0,label:`첫 만남 10회 · 신규 ${result.items.filter(i=>i.fresh).length}종`});
+}
+
+// ── 새싹 일주일: seven login days (missed days never reset), one light task a day, a UR of the player's choice on day 7.
+const rewardBits=r=>[r.dreams?`${icon('gem')}<b>${fmt(r.dreams)}</b>`:'',r.dust?`${icon('dust')}<b>${fmt(r.dust)}</b>`:'',r.bouquet?`${giftArt('bouquet','mini')}<b>×${r.bouquet}</b>`:'',r.choice?`${icon('crown')}<b>UR 선택</b>`:''].filter(Boolean).join('');
+const rewardWords=r=>[r.dreams?`꿈의결정 +${fmt(r.dreams)}`:'',r.dust?`별가루 +${fmt(r.dust)}`:'',r.bouquet?`꽃다발 +${r.bouquet}`:''].filter(Boolean).join(' · ');
+const sproutClaimable=st=>st.days.reduce((n,d)=>n+(d.login.claimable?1:0)+(d.task.claimable?1:0),0);
+function sproutButton(){
+  const st=FW.beginnerState(p());if(!st.active)return '';const n=sproutClaimable(st);
+  return `<button class="lb-btn lb-sprout" data-action="sprout" aria-label="새싹 일주일 · ${st.count}일째">${icon('star')}<span>새싹</span><em class="sprout-count">${Math.min(7,st.count)}/7</em>${n?'<i class="dot"></i>':''}</button>`;
+}
+function mountSprout(){const side=qs('.lb-side');if(!side)return;side.querySelector('.lb-sprout')?.remove();const html=sproutButton();if(html)side.insertAdjacentHTML('afterbegin',html);}
+function sproutSheet(){
+  const st=FW.beginnerState(p());if(!st.active){close();return;}
+  const ur=FW.urChoices(p()),fan=ur.slice(0,5).map((x,i)=>`<span class="sp-face" style="--i:${i}">${image(x.id)}</span>`).join(''),day7=st.days[6];
+  const anchor=`<section class="sp-anchor${day7.login.claimable?' ready':''}"><div class="sp-fan" aria-hidden="true">${fan}</div><div class="sp-anchor-text"><small>7일째 보상</small><b>원하는 UR 동료 한 명</b><em>${day7.login.claimed?'받았어요':day7.login.claimable?'지금 고를 수 있어요':`${7-st.count}일 남았어요`}</em></div></section>`;
+  const tomorrow=st.days.find(d=>!d.unlocked);
+  const days=`<ol class="sp-days">${st.days.map(d=>`<li><button class="sp-day${d.big?' big':''}${d.login.claimed?' got':d.login.claimable?' ready':d.unlocked?'':' locked'}" data-sprout-day="${d.day}" ${d.login.claimable?'':'aria-disabled="true"'}><small>${tomorrow===d&&st.days[d.day-2]?.login.claimed?'내일':`${d.day}일`}</small><span class="sp-gift">${d.login.reward.choice?icon('crown'):d.login.reward.dust?icon('dust'):icon('gem')}</span><b>${d.login.reward.choice?'UR':fmt(d.login.reward.dreams||d.login.reward.dust)}</b>${d.login.claimed?`<i class="sp-check">${icon('check')}</i>`:''}</button></li>`).join('')}</ol>`;
+  const tasks=st.days.filter(d=>d.unlocked).map(d=>`<div class="mission ${d.task.claimed?'claimed':d.task.done?'ready':''}"><span class="mission-check">${d.task.claimed?icon('check'):`<small>${d.day}일</small>`}</span><div><strong>${d.task.text}</strong><small>${d.task.done?'완료':'진행 중'}</small></div>${gem(d.task.reward.dreams)}<button class="${d.task.claimable?'primary':'secondary'}" data-sprout-task="${d.day}" ${d.task.claimable?'':'disabled'}>${d.task.claimed?'완료':d.task.done?'받기':'진행'}</button></div>`).join('');
+  const n=sproutClaimable(st);
+  show('새싹 일주일','접속한 날마다 한 칸씩',`${anchor}${days}<h3 class="sp-head">그날의 할 일</h3><div class="sp-tasks">${tasks}</div>`,
+    n>1?'<button class="primary wide" data-action="sprout-all">모두 받기</button>':'<button class="secondary wide" data-action="close">닫기</button>','sprout');
+}
+function claimSprout(day,kind,button){
+  const d=FW.beginnerState(p()).days[day-1];if(!d?.[kind].claimable){if(kind==='login'&&!d?.login.claimed)toast(`${day}일째 접속하면 받을 수 있어요.`);return;}
+  if(kind==='login'&&day===7){urChoiceSheet();return;}
+  const r=act('beginnerClaim',{day,kind},false);if(!r.ok)return;
+  const c=button?centerOf(button):{x:innerWidth/2,y:innerHeight/2};burst(c.x,c.y,{count:d.big?26:12,spread:d.big?140:80,size:d.big?14:11,color:'#ffe39a'});
+  toast(rewardWords(r.reward));refreshLobby();mountSprout();sproutSheet();
+}
+function claimSproutAll(){
+  let total={dreams:0,dust:0,bouquet:0};const st=FW.beginnerState(p());
+  for(const d of st.days)for(const kind of ['login','task']){if(!d[kind].claimable||kind==='login'&&d.day===7)continue;const r=act('beginnerClaim',{day:d.day,kind},false);if(r.ok)for(const k of Object.keys(total))total[k]+=r.reward[k]||0;}
+  const words=rewardWords(total);if(words)toast(words);refreshLobby();mountSprout();
+  if(FW.beginnerState(p()).days[6].login.claimable)urChoiceSheet();else sproutSheet();
+}
+let urPick=null;
+function urChoiceSheet(){
+  const list=FW.urChoices(p());
+  show('UR 동료 선택','새싹 일주일 · 7일째',`<p class="ur-lede">함께할 UR 동료를 한 명 골라요. 이미 있는 동료를 고르면 강화 재료가 돼요.</p><div class="ur-grid">${list.map(x=>`<button class="ur-card${urPick===x.id?' on':''}" data-ur-pick="${x.id}" aria-pressed="${urPick===x.id}">${image(x.id)}<b>${HERO[x.id].name}</b><small>${x.owned?'보유 · 강화':HERO[x.id].role}</small></button>`).join('')}</div>`,
+    `<div class="dialog-buttons"><button class="secondary" data-action="sprout">돌아가기</button><button class="primary shine" data-action="ur-confirm" ${urPick?'':'disabled'}>${urPick?`${HERO[urPick].name}와 함께하기`:'동료를 골라요'}</button></div>`,'ur-choice');
+}
+function confirmUr(){
+  if(!urPick)return;const r=act('beginnerClaim',{day:7,kind:'login',choice:urPick},false);if(!r.ok)return;urPick=null;banner='normal';refreshLobby();mountSprout();
+  reveal([{id:r.hero.id,fresh:r.hero.fresh}],{count:1,cost:0,label:'새싹 일주일 · 7일째 선물'});
+}
+
+// ── Unlock deliveries: when a stage clear opens features, Star Boy delivers the news once, with a way there.
+const UNLOCK_NEWS={
+  garden:{name:'꿈의 온실',ic:'garden',line:'띵동! 정원 온실이 열렸어. 별가루로 물을 주면 동료 모두가 강해져!',go:'정원으로',to:()=>{screen='garden';render();}},
+  challenge:{name:'새 도전',ic:'adventure',line:'야호! 유성 드래프트, 만월 토벌전, 격주 이벤트가 열렸어!',go:'모험으로',to:()=>{screen='adventure';mode='weekly';render();}},
+  season:{name:'이달의 수호자 소환',ic:'summon',line:'이번 달에만 만나는 수호자도 불러 볼 수 있대!',go:'소환으로',to:()=>{screen='summon';banner='season';render();}},
+  library:{name:'별의 서재',ic:'library',line:'별의 서재가 열렸어! 퀴즈에서 틀린 문제가 여기 모여서 별이 돼.',go:'서재로',to:()=>{screen='library';render();}},
+  relic:{name:'유물',ic:'crown',line:'유물 소환이 열렸어! 유물은 편성한 동료 모두를 도와줘.',go:'유물 소환으로',to:()=>{screen='summon';banner='relic';render();}},
+  request:{name:'동료의 부탁',ic:'heart',line:'이제 동료들이 부탁하러 찾아올 거야. 들어 주면 더 친해져!',go:'확인',to:null},
+};
+let unlockGo=null;
+function maybeUnlockNews(){
+  if(modal||screen!=='home'||FW.ftueNext(p())||coach.active)return false;
+  const fresh=FW.newlyOpened(p()).filter(id=>UNLOCK_NEWS[id]);if(!fresh.length)return false;
+  for(const id of fresh)act('ftue',{seen:id},false);
+  const first=UNLOCK_NEWS[fresh[0]];unlockGo=first.to;
+  show(fresh.length>1?'새로 열렸어요':first.name,'별똥별 특급 배달',`<div class="news"><span class="news-face">${image(GUIDE)}</span><p class="news-line">${escapeText(first.line)}</p></div><ul class="news-list">${fresh.map(id=>`<li>${icon(UNLOCK_NEWS[id].ic)}<b>${UNLOCK_NEWS[id].name}</b></li>`).join('')}</ul>`,
+    first.to?`<div class="dialog-buttons"><button class="secondary" data-action="close">나중에</button><button class="primary shine" data-action="unlock-go">${first.go}</button></div>`:'<button class="primary wide" data-action="close">확인</button>','news');
+  return true;
+}
+
+// ── The biweekly event (서약 and 쌍성 take turns): one popup when a new season opens.
+const eventFlip=()=>UNLOCKED&&p().eventFlip;
+const kstDate=t=>{const d=new Date(t+9*HOUR);return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일`;};
+function maybeEventPopup(){
+  if(modal||screen!=='home'||FW.ftueNext(p())||coach.active||!FW.featureOpen(p(),'challenge'))return false;
+  const kind=SN.activeEvent(now(),eventFlip()),sn=season(now());if(kind==='both'||p().eventSeen===sn.id)return false;
+  act('eventSeen',{id:sn.id},false);
+  const oath=kind==='oath',name=oath?'별빛 서약':'쌍성 원정',met=Math.min(9,p().cleared);
+  const bosses=oath?oathBosses(sn.index,met):[...twinBosses(sn.index,'left',met),...twinBosses(sn.index,'right',met)];
+  const max=oath?OATH_BANDS.reduce((n,b)=>n+b.reward,0):TIER_IDS.reduce((n,t)=>n+TWIN_BANDS.reduce((m,_,i)=>m+twinBandReward(t,i),0),0);
+  const desc=oath?'서약을 걸고 9웨이브를 넘어 점수를 남겨요.':'두 편성으로 은빛·금빛 별길을 하나씩 넘어요.';
+  show(name,'격주 이벤트',`<div class="ev-pop" data-kind="${kind}"><div class="ev-banner"><span class="ev-sky" aria-hidden="true"></span><span class="ev-mark" aria-hidden="true">${icon(oath?'flag':'swap')}</span><span class="ev-band"><small>EVENT · 2주</small><b>${name}</b></span></div>
+    <p class="ev-period">${kstDate(sn.start)} – ${kstDate(sn.end-1)}</p><p class="ev-desc">${desc}</p>
+    <div class="ev-bosses">${[...new Set(bosses)].map(b=>`<span class="chip">${BOSSES[b].name}</span>`).join('')}</div>
+    <div class="ev-reward"><span>구간 보상</span>${gem(max)}<small>최대</small></div></div>`,
+    `<div class="dialog-buttons"><button class="secondary" data-action="close">닫기</button><button class="primary shine" data-action="event-go" data-kind="${kind}">바로 가기</button></div>`,'event');
+  return true;
+}
+
+// ── Sortie: a quick slanted band with the stage and the five faces while the battle builds underneath.
+function sortieWipe(){
+  if(!run||$('app').dataset.reduced==='true')return;qs('.sortie')?.remove();
+  const label=run.mode==='main'?`STAGE ${stageLabel(run.chapter+1)}`:modeTitle(run.mode,run.side),name=run.mode==='main'?BOSSES[CHAPTERS[run.chapter].bosses[0]].name:(TIERS[run.tier]||TIERS.easy).name;
+  const node=document.createElement('div');node.className='sortie';node.setAttribute('aria-hidden','true');
+  node.innerHTML=`<span class="sortie-band"><small>${label}</small><b>${escapeText(name)}</b></span><span class="sortie-faces">${run.deck.map((id,i)=>`<i style="--i:${i}">${image(id)}</i>`).join('')}</span>`;
+  document.body.append(node);setTimeout(()=>node.remove(),1150);
+}
+
+// After every render: the sprout button, the coach, then at most one notice (unlock news first, then the event).
+function afterRender(){
+  if(screen==='home')mountSprout();
+  coachTick();
+  if(screen==='home'&&!modal)setTimeout(()=>{if(!maybeUnlockNews())maybeEventPopup();},420);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||b.disabled||b.getAttribute('aria-disabled')==='true'&&!b.dataset.sproutDay)return;const d=b.dataset;
+  if(d.sproutDay){claimSprout(Number(d.sproutDay),'login',b);return;}
+  if(d.sproutTask){claimSprout(Number(d.sproutTask),'task',b);return;}
+  if(d.urPick){urPick=d.urPick;urChoiceSheet();return;}
+  // The tutorial ends on the formation save (the main handler saves first; this runs after it).
+  if(d.action==='save-team'&&FW.ftueNext(p())==='formation')setTimeout(()=>{if(p().deck.length!==TEAM_SIZE)return;ftueDone('formation');if(screen!=='home'){screen='home';render();}nextTip=true;guide('next',()=>qs('.lb-sprout'),'띵동! 첫 주 선물이 도착했어. 7일째엔 UR 동료를 직접 고를 수 있어!',{skippable:false});},80);
+  const a={sprout:sproutSheet,'sprout-all':claimSproutAll,'ur-confirm':confirmUr,'first-ten':firstTen,
+    'ftue-summon':()=>{close();screen='summon';banner='normal';render();},
+    'unlock-go':()=>{const go=unlockGo;unlockGo=null;close();go?.();},
+    'event-go':()=>{close();screen='adventure';mode=d.kind;render();},
+  }[d.action];if(a)a();
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&p().beginner&&p().beginner.last!==calendar(now()).day){act('tick',{},false);if(screen==='home')mountSprout();}});
+
+
 document.addEventListener('click',e=>{
   const button=e.target.closest('button');
   if(lobbyView){if(!button||button.dataset.action!=='lobby-view'){setLobbyView(false);return;}}
@@ -1549,11 +1772,11 @@ function frame(time){
   const dt=lastFrame?Math.min(.1,(time-lastFrame)/1000):0;lastFrame=time;
   if(run&&screen==='battle'&&!document.hidden){
     if(!paused&&!modal){
-      if(renderer.hitstop>0)renderer.hitstop=Math.max(0,renderer.hitstop-dt);else accumulator+=dt*speed*(slowmo>0?.3:1);slowmo=Math.max(0,slowmo-dt);let ticks=0;
+      if(coachHold)accumulator=0;else if(renderer.hitstop>0)renderer.hitstop=Math.max(0,renderer.hitstop-dt);else accumulator+=dt*speed*(slowmo>0?.3:1);slowmo=Math.max(0,slowmo-dt);let ticks=0;
       renderer.watchGold(run.gold);while(accumulator>=.05&&ticks++<5){const before=run.phase;E.step(run,.05);renderer.watchGold(run.gold);performanceStats.steps++;if(before!=='reward'&&run.phase==='reward')autoIn=-.5;autoIn+=.05;if(p().settings.auto&&!pointer&&autoIn>=.32){autoPlay(run);renderer.watchGold(run.gold);autoIn=0;}accumulator-=.05;}
       if(ticks)saves.mark();uiIn+=dt;
       const batch=run.events.splice(0),goldHolds=renderer.goldHolds.length;requestTrack?.observe(run,batch);for(const e of batch){renderer.event(e);if(e.type!=='hit'&&e.type!=='kill')sound.event(e);if(e.type==='skill')cutIn(e);}const spent=renderer.goldSpent;renderer.settleGold();
-      saves.schedule();if(uiIn>.18||spent||renderer.goldPulse||goldHolds!==renderer.goldHolds.length){uiIn=0;updateBattle();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);
+      saves.schedule();if(uiIn>.18||spent||renderer.goldPulse||goldHolds!==renderer.goldHolds.length){uiIn=0;updateBattle();if(tutorialRun)coachTick();}sound.battle=true;sound.boss=run.enemies.some(e=>e.boss);
       syncBattlePhase();
       if(run&&!paused&&['victory','defeat'].includes(run.phase))settle();
     }
@@ -1584,7 +1807,8 @@ art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 �
   if(navigator.webdriver)splash?.remove();
   else if(splash){Promise.race([art.ready,new Promise(r=>setTimeout(r,1400))]).then(()=>setTimeout(()=>splash.classList.add('ready'),250));
     splash.addEventListener('click',()=>{if(!splash.classList.contains('ready')||splash.classList.contains('out'))return;sound.unlock();splash.classList.add('out');setTimeout(()=>splash.remove(),650);
-      if(screen==='home')setTimeout(()=>{const hero=HERO[p().partner];say(partnerLines(hero)[0]);},700);});}}
+      if(screen==='home'&&!FW.ftueNext(p()))setTimeout(()=>{const hero=HERO[p().partner];say(partnerLines(hero)[0]);},700);setTimeout(coachTick,700);});}}
+if(p().beginner&&!p().beginner.closed&&!store.broken)act('tick',{},false);
 $('app').dataset.solo=String(SOLO);syncFullscreen();render();requestAnimationFrame(frame);setTimeout(maybeLateNotice,700);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
