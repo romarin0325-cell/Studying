@@ -219,7 +219,7 @@ function chooseBlessing(s,m){
   return [...s.reward].sort((a,b)=>(score[b]||0)-(score[a]||0))[0];
 }
 
-function dodge(s,m){
+function dodge(s,m,allowSwap=true){
   if(E.moveWait(s)>0)return false;
   const danger=dangerCells(s);if(!danger.size)return false;
   const lit=litCells(s);
@@ -231,11 +231,15 @@ function dodge(s,m){
     const u=s.board[c];s.board[c]=null;const free=bestCell(s,u,danger);s.board[c]=u;
     if(free.cell>=0){E.move(s,c,free.cell);m.dodged++;return true;}
     // No safe empty cell: swap with the weakest unit outside the light.
-    const weak=CELLS.filter(i=>!danger.has(i)&&!E.closedCell(s,i)&&s.board[i]&&!E.charging(s,s.board[i])).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
+    const weak=allowSwap?CELLS.filter(i=>!danger.has(i)&&!E.closedCell(s,i)&&s.board[i]&&!E.charging(s,s.board[i])).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0]:undefined;
     if(weak!==undefined&&unitValue(s,s.board[weak],weak)<unitValue(s,u,c)*.6){E.move(s,c,weak);m.dodged++;return true;}
   }
   return false;
 }
+export const dodgeLit=s=>dodge(s,mem(s),false);
+function helperMemory(s){const m=mem(s),bv=boardValue(s);if(!m.scale)m.scale=.6;m.dps=Math.max(m.dps||0,bv*m.scale*.7);return m;}
+export const chooseBlessingFor=s=>chooseBlessing(s,helperMemory(s));
+export const pickUltimateFor=s=>pickUltimate(s,helperMemory(s));
 function bestMerge(s,m,gv){
   let best=null;const cells=CELLS.filter(c=>s.board[c]);
   for(let x=0;x<cells.length;x++)for(let y=0;y<cells.length;y++){

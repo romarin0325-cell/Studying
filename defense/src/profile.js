@@ -8,7 +8,8 @@ import {MEMORIAL_STORIES} from './memorial.js';
 import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
 import {questionOf} from './quiz.js';
 import {CONSTELLATIONS} from './library.js';
-import {season} from './preview/season.js';
+import {season,eventOpen} from './preview/season.js';
+import {UNLOCKS,FTUE_STEPS,BEGINNER_DAYS,beginnerState,urChoices} from './beginner.js';
 import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,validOathRules,OATH_BANDS,OATH_RULES} from './preview/oath.js';
 import {twinParty,twinPartyProblem,twinState,twinBandReward,twinCredit,twinBandsReached,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES} from './preview/twin.js';
 import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState,requestGoal} from './preview/requests.js';
@@ -16,8 +17,11 @@ import {REQUEST_HEROES,REQUEST_REWARD} from './preview/requests-data.js';
 
 export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0,bondXp:0});
-export function createProfile(now=Date.now()){
-  return (UNLOCKED?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
+const freshFtue=legacy=>({legacy,done:[],seen:[],skipped:false});
+const freshBeginner=now=>({count:1,last:calendar(now).day,claimed:[],tasks:[],did:[],choice:null,closed:false});
+export function createProfile(now=Date.now(),{trial=false}={}){
+  trial=UNLOCKED&&trial===true;
+  return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(false),beginner:freshBeginner(now),firstTen:false,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
@@ -59,6 +63,10 @@ const BASKET_MS=TUNING.basketHours*HOUR;
 export function basketState(p,now){const elapsed=Math.max(0,now-p.basket.at),ready=Math.min(TUNING.basketMax,Math.floor(elapsed/BASKET_MS));return {ready,full:ready>=TUNING.basketMax,nextIn:ready>=TUNING.basketMax?0:BASKET_MS-elapsed%BASKET_MS,next:p.basket.next};}
 export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
+  const unique=(a,valid)=>Array.isArray(a)&&new Set(a).size===a.length&&a.every(valid),f=p?.ftue,b=p?.beginner;
+  if(!f||typeof f!=='object'||Array.isArray(f)||typeof f.legacy!=='boolean'||typeof f.skipped!=='boolean'||!unique(f.done,id=>FTUE_STEPS.includes(id))||!unique(f.seen,id=>Object.hasOwn(UNLOCKS,id)))return false;
+  if(b!==null&&(!b||typeof b!=='object'||Array.isArray(b)||!Number.isInteger(b.count)||b.count<1||b.count>7||typeof b.last!=='string'||b.last.length>10||!unique(b.claimed,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.tasks,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.did,id=>['greet','water','gift','relic'].includes(id))||!(b.choice===null||HERO[b.choice]?.rarity==='UR')||typeof b.closed!=='boolean'))return false;
+  if(typeof p.firstTen!=='boolean'||typeof p.eventSeen!=='string'||p.eventSeen.length>12||typeof p.eventFlip!=='boolean'||typeof p.trial!=='boolean'||!UNLOCKED&&(p.eventFlip||p.trial))return false;
   if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!==[...BED_IDS].sort().join()||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==4||p.relicRev!==2||!integer(p.cleared,MAIN_STAGES)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.pity||!integer(p.pity.normal)||!integer(p.pity.season))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond,BOND_MAX)||!integer(e.bondXp)||e.bondXp>=Math.max(1,bondNeed(e.bond));}))return false;
@@ -155,7 +163,8 @@ export function migrateMemories(p){
 export function migrateTwin(p){
   if(p?.twin&&typeof p.twin==='object'&&!Array.isArray(p.twin)&&Object.hasOwn(p.twin,'set'))delete p.twin.set;
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateBeginner(p);migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
+export function migrateBeginner(p){const legacy=!(p.cleared<=2&&p.draws===0);if(p.ftue===undefined)p.ftue=freshFtue(legacy);if(p.beginner===undefined)p.beginner=legacy?null:freshBeginner(Date.now());if(p.firstTen===undefined)p.firstTen=legacy;if(p.eventSeen===undefined)p.eventSeen='';if(p.eventFlip===undefined)p.eventFlip=false;if(p.trial===undefined)p.trial=false;}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
@@ -183,7 +192,7 @@ function draftOffers(p){
   return pool.length===1?[{id:pool[0],boon:'focus'},{id:pool[0],boon:'spark'}]:pool.slice(0,2).map(id=>({id,boon:random(p)<.5?'focus':'spark'}));
 }
 export function safeNow(p,now){return Math.max(p.clockAt,Math.floor(now));}
-function rollDay(p,now){if(p.daily.day!==calendar(now).day)p.daily=freshDaily(now);}
+function rollDay(p,now){const day=calendar(now).day;if(p.daily.day!==day)p.daily=freshDaily(now);const b=p.beginner;if(b&&!b.closed&&b.last!==day&&b.count<7){b.count++;b.last=day;}}
 // Old saves kept draw/dispatch missions; keep today's finished expedition only.
 export function migrateDaily(p){
   const d=p.daily;if(!d||typeof d!=='object')return;
@@ -334,6 +343,7 @@ function settleTwin(p,a,args,now){
   return {newBest,side,round,total,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
 }
 function beginPreview(p,mode,args,now){
+  if(!eventOpen(mode,now,UNLOCKED&&p.eventFlip))return {ok:false,message:'이번 격주 이벤트가 아니에요.'};
   if(p.cleared<TIERS.easy.unlock)return {ok:false,message:`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`};
   const tier=args.tier||'easy';if(!TIERS[tier]||p.cleared<TIERS[tier].unlock)return {ok:false,message:`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`};
   const stage=oathChapter(season(now).index,p.cleared)+1;
@@ -356,38 +366,53 @@ function receive(table,id){const e=table[id],fresh=!e.owned;if(fresh)e.owned=tru
 export function command(p,action,args={},now=Date.now()){
   now=safeNow(p,now);rollDay(p,now);
   const no=message=>({ok:false,message});
+  const did=id=>{const b=p.beginner;if(b&&!b.closed&&!b.did.includes(id))b.did.push(id);};
+  if(action==='tick')return {ok:true};
+  if(action==='eventSeen'){if(typeof args.id!=='string'||args.id.length>12)return no('이벤트를 확인하세요.');p.eventSeen=args.id;return {ok:true};}
+  if(action==='ftue'){
+    if(args.done!==undefined&&!FTUE_STEPS.includes(args.done)||args.seen!==undefined&&!Object.hasOwn(UNLOCKS,args.seen)||args.reset&&!UNLOCKED)return no('튜토리얼 정보를 확인하세요.');
+    if(args.reset){p.ftue.done=[];p.ftue.seen=[];p.ftue.skipped=false;p.firstTen=false;}
+    if(args.done!==undefined&&!p.ftue.done.includes(args.done))p.ftue.done.push(args.done);if(args.seen!==undefined&&!p.ftue.seen.includes(args.seen))p.ftue.seen.push(args.seen);if(args.skip===true){p.ftue.skipped=true;p.ftue.done=[...FTUE_STEPS];}return {ok:true};
+  }
+  if(action==='beginnerClaim'){
+    const b=p.beginner,d=beginnerState(p).days[args.day-1],kind=args.kind;if(!Number.isInteger(args.day)||!d||!['login','task'].includes(kind)||!d[kind].claimable)return no('보상을 받을 수 없습니다.');
+    const reward=d[kind].reward;let hero;if(kind==='login'&&args.day===7){if(!urChoices(p).some(x=>x.id===args.choice))return no('동료를 선택하세요.');hero={id:args.choice,fresh:receive(p.heroes,args.choice)};b.choice=args.choice;}
+    for(const key of ['dreams','dust'])if(reward[key])p[key]=Math.min(Number.MAX_SAFE_INTEGER,p[key]+reward[key]);if(reward.bouquet)p.gifts.bouquet=Math.min(999,p.gifts.bouquet+reward.bouquet);
+    b[kind==='login'?'claimed':'tasks'].push(args.day);if(b.claimed.length===7&&b.tasks.length===7)b.closed=true;return {ok:true,reward,...(hero?{hero}:{})};
+  }
   if(action==='memory'){
     const story=MEMORIAL_STORIES[args.id],e=p.heroes[args.id];if(!story||!e?.owned||e.bond<story.unlockBond||!integer(args.page,story.paragraphs.length-1))return no('호감도 10에서 인연 이야기가 열립니다.');
     p.memories[args.id]={page:args.page,of:story.paragraphs.length,read:!!p.memories[args.id]?.read||args.page===story.paragraphs.length-1};return {ok:true};
   }
   if(action==='draw'){
-    const banner=args.banner,count=args.count,free=args.free===true,boost=args.boost===true;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
+    const banner=args.banner,count=args.count,free=args.free===true,boost=args.boost===true,first=args.first===true;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
+    if(first&&(banner!=='normal'||count!==10||p.firstTen||free||boost))return no('첫 10회 소환을 확인하세요.');
     if(free&&(banner!=='normal'||count!==1||p.daily.free))return no('오늘의 무료 소환은 이미 사용했습니다.');
-    if(boost&&(free||count!==10||banner==='relic'))return no('부스트는 일반·시즌 10회 소환에서만 사용할 수 있습니다.');
-    const cost=free?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily.free=true;
-    p.dreams-=cost;const c=calendar(now),urMult=boost?2:1,paidHero=banner!=='relic'&&!free;
-    const pull=bonus=>{
+    if(boost&&(free||count!==10))return no('부스트는 유료 10회 소환에서만 사용할 수 있습니다.');
+    const cost=free||first?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily.free=true;if(first)p.firstTen=true;
+    p.dreams-=cost;const c=calendar(now),urMult=boost?2:1,paidHero=banner!=='relic'&&!free&&!first;
+    const pull=(bonus,minSR=false)=>{
       if(paidHero&&!bonus)p.pity[banner]=Math.min(9999,p.pity[banner]+1);
-      const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',c.guardian,c.pickup,urMult,lateOpen(p.cleared));
-      const item={id,fresh:receive(banner==='relic'?p.relics:p.heroes,id),banner,at:now};if(bonus)item.bonus=true;
+      const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',c.guardian,c.pickup,urMult,lateOpen(p.cleared),minSR);
+      const item={id,fresh:receive(banner==='relic'?p.relics:p.heroes,id),banner,at:now};if(bonus)item.bonus=true;if(first)item.first=true;
       p.history.unshift(item);if(banner==='relic')p.relicDraws++;else p.draws++;return item;
     };
-    const items=Array.from({length:count},()=>pull(false)),bonus=boost&&random(p)<.1?Array.from({length:10},()=>pull(true)):[];
-    p.history=p.history.slice(0,50);return {ok:true,items,bonus,cost,free,pity:{normal:p.pity.normal,season:p.pity.season}};
+    const items=[];for(let i=0;i<count;i++)items.push(pull(false,first&&i===9&&!items.some(x=>['SR','UR'].includes(HERO[x.id].rarity))));const bonus=boost&&random(p)<.1?Array.from({length:10},()=>pull(true)):[];
+    if(banner==='relic')did('relic');p.history=p.history.slice(0,50);return {ok:true,items,bonus,cost,free,pity:{normal:p.pity.normal,season:p.pity.season},...(first?{first:true}:{})};
   }
   if(action==='bed'){
     const id=args.id;if(!BED_IDS.includes(id))return no('알 수 없는 화단입니다.');if(p.active)return no('원정 종료 후 성장할 수 있습니다.');
     if(!bedOpen(id,p.cleared))return no(`스테이지 ${TUNING.beds[id].unlock} 클리어 후 열립니다.`);const cost=bedCost(id,p.beds[id]);
-    if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');p.dust-=cost;p.beds[id]++;return {ok:true,level:p.beds[id]};
+    if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');p.dust-=cost;p.beds[id]++;did('water');return {ok:true,level:p.beds[id]};
   }
   if(action==='enhance'){
     const table=args.kind==='relic'?p.relics:p.heroes,e=table[args.id];if(!e?.owned||p.active)return no('원정 종료 후 강화할 수 있습니다.');const cost=args.kind==='relic'?relicCost(ARTIFACT[args.id].rarity,e.enhance):duplicateCost(e.enhance);if(!Number.isSafeInteger(cost)||e.copies<cost)return no(`중복 ${args.kind==='relic'?'유물':'동료'}이 ${cost}개 필요합니다.`);e.copies-=cost;e.enhance++;return {ok:true,message:`강화 +${e.enhance} 달성`};
   }
   if(action==='partner'){if(!p.heroes[args.id]?.owned)return no('아직 획득하지 못한 동료입니다.');p.partner=args.id;return {ok:true};}
-  if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘 인사는 이미 완료했습니다.');p.petDay=day;const hearts=addBond(p.heroes[p.partner],GREETING_POINTS);p.dreams+=40;return {ok:true,hearts,message:`인사 완료 · 꿈의결정 +40${hearts?' · 호감도 상승!':''}`};}
+  if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘 인사는 이미 완료했습니다.');p.petDay=day;const hearts=addBond(p.heroes[p.partner],GREETING_POINTS);p.dreams+=40;did('greet');return {ok:true,hearts,message:`인사 완료 · 꿈의결정 +40${hearts?' · 호감도 상승!':''}`};}
   if(action==='gift'){
     const e=p.heroes[args.id],gift=args.gift;if(!e?.owned||!GIFT_IDS.includes(gift))return no('선물할 수 없습니다.');if(p.gifts[gift]<1)return no(`${GIFTS[gift].name}이(가) 없습니다.`);if(e.bond>=BOND_MAX)return no('호감도가 이미 최고예요.');
-    p.gifts[gift]--;const points=giftPoints(args.id,gift),hearts=addBond(e,points),favorite=FAVORITE[args.id]===gift;return {ok:true,points,hearts,favorite,line:favorite?FAVORITE_LINES[args.id]:GIFT_LINES[args.id]||null};
+    p.gifts[gift]--;const points=giftPoints(args.id,gift),hearts=addBond(e,points),favorite=FAVORITE[args.id]===gift;did('gift');return {ok:true,points,hearts,favorite,line:favorite?FAVORITE_LINES[args.id]:GIFT_LINES[args.id]||null};
   }
   if(action==='noticeLate'){p.noticeLate=[...new Set([...p.noticeLate,...lateNoticeIds(p)])];return {ok:true};}
   if(action==='lobby'){if(args.id===null){p.lobby=null;return {ok:true};}const e=p.heroes[args.id];if(!MEMORIAL_STORIES[args.id]||!e?.owned||e.bond<BOND_MAX)return no('호감도 10에서 메모리얼을 메인 화면으로 쓸 수 있습니다.');p.lobby=args.id;p.partner=args.id;return {ok:true};}
@@ -540,7 +565,7 @@ export function command(p,action,args={},now=Date.now()){
     if(!Array.isArray(p.requests?.after)||!p.requests.after.includes(args.hero))return no('아직 후기를 볼 수 없습니다.');
     if(!p.requests.read.includes(args.hero))p.requests.read.push(args.hero);return {ok:true};
   }
-  if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}
+  if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind,now);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}
   return no('사용할 수 없는 동작입니다.');
 }
 // Every command commits the entire profile, wallet and receipt together.

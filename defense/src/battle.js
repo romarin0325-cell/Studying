@@ -5,6 +5,7 @@ import {TEAM_SIZE} from './team-config.js';
 import {season} from './preview/season.js';
 import {oathBosses} from './preview/oath.js';
 import {twinBosses} from './preview/twin.js';
+import {dodgeLit,chooseBlessingFor,pickUltimateFor} from './smart-auto.js';
 
 export const battleMeta=(profile,deck)=>Object.fromEntries(deck.map(id=>[id,{power:heroMultiplier(profile.heroes[id],profile.beds),special:specialMultiplier(profile.heroes[id].enhance)}]));
 export function createBattle(profile){
@@ -31,8 +32,9 @@ export function resumeBattle(profile){
 // Optional helper keeps idle play moving; it never changes targets or placement.
 // Manual moves, merges, purchases and skills always remain available.
 export function autoPlay(s){
-  if(s.phase==='reward')return engine.chooseReward(s,s.reward.includes('oath')?'oath':s.reward[0]);
+  if(s.phase==='reward')return engine.chooseReward(s,s.reward.includes('oath')?'oath':chooseBlessingFor(s));
   if(!['combat','intermission'].includes(s.phase))return;
+  if(dodgeLit(s))return;
   const occupied=s.board.flatMap((u,i)=>u?[i]:[]);
   for(const from of occupied){const to=occupied.find(i=>engine.canMerge(s.board[from],s.board[i],s));if(to!==undefined){engine.move(s,from,to);return;}}
   const room=s.board.some((u,i)=>!u&&!engine.closedCell(s,i));
@@ -41,6 +43,7 @@ export function autoPlay(s){
     const best=s.deck.filter(id=>engine.bestUnit(s,id)&&!engine.castLock(s,id)&&s.gauge>=engine.skillCost(s,id)&&s.gold>=engine.skillGoldCost(id)).sort((a,b)=>(HERO[b].bossDamage||1)-(HERO[a].bossDamage||1));
     if(best.length){engine.cast(s,best[0]);return;}
   }
+  if(s.gauge>=engine.gaugeCap(s)-8&&s.enemies.some(e=>e.hp>0)){const id=pickUltimateFor(s);if(id){engine.cast(s,id);return;}}
   const id=s.deck.find(id=>s.upgrades[id]<engine.trainCap(s)&&s.gold>=engine.upgradeCost(s,id));if(id)engine.upgrade(s,id);
 }
 export const clearedRounds=s=>Math.max(0,s.wave-(s.phase==='reward'||s.phase==='victory'?0:1));

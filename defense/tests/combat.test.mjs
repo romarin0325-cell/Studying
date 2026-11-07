@@ -989,6 +989,12 @@ test('autoPlay skips unaffordable Doom and still casts another ready ultimate ag
   close(hp-boss.hp,E.power(s,s.board[12])*60);assert.equal(s.stats.byHero.doom,undefined);
 });
 
+test('helper dodges a lit unit and spends a full gauge only with living enemies',()=>{
+  const s=traitArena([{hero:'star_boy',index:12}]);s.telegraph={uid:1,pattern:'stun1',cells:[12],ends:s.time+3};s.gold=0;autoPlay(s);assert.equal(s.board[12],null);assert.ok(s.board.some(u=>u?.hero==='star_boy'));
+  const a=traitArena([{hero:'star_boy',index:12}]);enemiesFor(a,[{}]);a.gold=0;a.freeSummons=0;a.gauge=E.gaugeCap(a);autoPlay(a);assert.equal(a.stats.skills,1);
+  const b=traitArena([{hero:'star_boy',index:12}]);b.gold=0;b.freeSummons=0;b.gauge=E.gaugeCap(b);autoPlay(b);assert.equal(b.stats.skills,0);
+});
+
 test('poison uses one 40-stack cap and an ordinary shot or overlapping field cannot truncate the ultimate contribution',()=>{
   const s=traitArena([{hero:'mushroom_king',index:12,rank:3}]),[e]=enemiesFor(s,[{}]),u=s.board[12],base=E.power(s,u);
   e.statusEffects.push({type:'poison',source:'legacy:poison',owner:'mushroom_king',amount:40,power:base,until:s.time+7});
