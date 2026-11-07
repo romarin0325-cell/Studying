@@ -1,5 +1,4 @@
-// A reasonable player model for balance simulations and the unlocked test build.
-// The in-game auto (battle.js autoPlay) stays a light helper; this one plays like a
+// A reasonable player model for balance simulations. This one plays like a
 // careful person: it places by range and auras, compares summon and training per gold,
 // times ultimates (triggers, boss, economy, setup combos, gauge overflow), dodges lit
 // boss cells and cleans curses. It only uses the public run commands, never the RNG.
@@ -219,7 +218,7 @@ function chooseBlessing(s,m){
   return [...s.reward].sort((a,b)=>(score[b]||0)-(score[a]||0))[0];
 }
 
-function dodge(s,m){
+function dodge(s,m,allowSwap=true){
   if(E.moveWait(s)>0)return false;
   const danger=dangerCells(s);if(!danger.size)return false;
   const lit=litCells(s);
@@ -231,11 +230,16 @@ function dodge(s,m){
     const u=s.board[c];s.board[c]=null;const free=bestCell(s,u,danger);s.board[c]=u;
     if(free.cell>=0){E.move(s,c,free.cell);m.dodged++;return true;}
     // No safe empty cell: swap with the weakest unit outside the light.
-    const weak=CELLS.filter(i=>!danger.has(i)&&!E.closedCell(s,i)&&s.board[i]&&!E.charging(s,s.board[i])).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0];
+    const weak=allowSwap?CELLS.filter(i=>!danger.has(i)&&!E.closedCell(s,i)&&s.board[i]&&!E.charging(s,s.board[i])).sort((a,b)=>unitValue(s,s.board[a],a)-unitValue(s,s.board[b],b))[0]:undefined;
     if(weak!==undefined&&unitValue(s,s.board[weak],weak)<unitValue(s,u,c)*.6){E.move(s,c,weak);m.dodged++;return true;}
   }
   return false;
 }
+// Retained for the frozen previous-helper benchmark only.
+export const dodgeLit=s=>dodge(s,mem(s),false);
+function helperMemory(s){const m=mem(s),bv=boardValue(s);if(!m.scale)m.scale=.6;m.dps=Math.max(m.dps||0,bv*m.scale*.7);return m;}
+export const chooseBlessingFor=s=>chooseBlessing(s,helperMemory(s));
+export const pickUltimateFor=s=>pickUltimate(s,helperMemory(s));
 function bestMerge(s,m,gv){
   let best=null;const cells=CELLS.filter(c=>s.board[c]);
   for(let x=0;x<cells.length;x++)for(let y=0;y<cells.length;y++){
@@ -251,7 +255,7 @@ function bestMerge(s,m,gv){
   const free=CELLS.filter(c=>!s.board[c]&&!E.closedCell(s,c)).length;
   return best&&(best.v>0||free<=2)?best:null;
 }
-function spendGold(s,m){
+function spendGold(s,m,place=true){
   const reserve=s.deck.includes('doom')&&E.bestUnit(s,'doom')&&(s.enemies.some(e=>e.boss)||s.queue.some(q=>q.kind==='boss'))&&s.gauge>=HERO.doom.skill.cost-20?85:0;
   const budget=s.gold-reserve,free=CELLS.filter(c=>!s.board[c]&&!E.closedCell(s,c)).length,options=[];
   const sc=E.summonCost(s);if(free>0)options.push({kind:'summon',cost:sc,value:summonValue(s)*(free<=2?.6:1)});
@@ -259,14 +263,14 @@ function spendGold(s,m){
   if(!options.length)return false;
   options.sort((a,b)=>b.value/Math.max(1,b.cost)-a.value/Math.max(1,a.cost));
   const best=options[0];
-  if(best.cost<=budget)return act(s,best);
+  if(best.cost<=budget)return act(s,best,place);
   // Save for the best option when it is close; otherwise take the best affordable one that is nearly as good.
   if(budget>=best.cost*.6)return false;
   const alt=options.find(o=>o.cost<=budget&&o.value/Math.max(1,o.cost)>=best.value/Math.max(1,best.cost)*.75);
-  return alt?act(s,alt):false;
+  return alt?act(s,alt,place):false;
 }
-function act(s,o){
-  if(o.kind==='summon'){const r=E.summon(s);if(r.ok){placeNew(s,r.index);return true;}return false;}
+function act(s,o,place=true){
+  if(o.kind==='summon'){const r=E.summon(s);if(r.ok){if(place)placeNew(s,r.index);return true;}return false;}
   return E.upgrade(s,o.id).ok;
 }
 function placeNew(s,index){
@@ -285,15 +289,29 @@ function optimize(s,m){
   return false;
 }
 
-export function smartAutoPlay(s){
-  if(s.phase==='reward'){const id=chooseBlessing(s,mem(s));return E.chooseReward(s,id);}
-  if(!['combat','intermission'].includes(s.phase))return;
+function updateMemory(s){
   const m=mem(s),list=alive(s),bv=boardValue(s);
   if(s.phase==='combat'&&list.length&&s.time>m.lastTime+.2){const rate=(s.stats.damage-m.lastDamage)/(s.time-m.lastTime);m.dps=m.dps?m.dps*.85+rate*.15:rate;}
   m.lastDamage=s.stats.damage;m.lastTime=s.time;
   if(bv>0&&m.dps>0&&s.time>8)m.scale=m.scale?m.scale*.9+(m.dps/bv)*.1:m.dps/bv;
   if(!m.scale)m.scale=.6;
   m.dps=Math.max(m.dps||0,bv*m.scale*.7);
+  return m;
+}
+// Owner rule, 2026-11-07: auto summons, merges, casts and trains; the player owns positions.
+// smartAutoPlay remains the full measurement auto for simulations.
+export function playerAutoPlay(s){
+  if(s.phase==='reward')return E.chooseReward(s,s.reward.includes('oath')?'oath':chooseBlessing(s,mem(s)));
+  if(!['combat','intermission'].includes(s.phase))return;
+  const m=updateMemory(s),merge=bestMerge(s,m,goldValue(s,m));
+  if(merge){E.move(s,merge.from,merge.to);return;}
+  const ult=pickUltimate(s,m);if(ult&&E.cast(s,ult).ok)return;
+  spendGold(s,m,false);
+}
+export function smartAutoPlay(s){
+  if(s.phase==='reward'){const id=chooseBlessing(s,mem(s));return E.chooseReward(s,id);}
+  if(!['combat','intermission'].includes(s.phase))return;
+  const m=updateMemory(s);
   if(dodge(s,m))return;
   // A cursed low-rank unit with no partner only blocks a cell.
   for(const c of CELLS){const u=s.board[c];if(u?.cursed&&u.rank<=2&&!CELLS.some(o=>o!==c&&E.canMerge(u,s.board[o],s))&&s.board.filter(Boolean).length>1){E.sell(s,c);return;}}

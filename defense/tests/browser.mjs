@@ -5,11 +5,14 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
 import {createProfile,command,SAVE_KEY} from '../src/profile.js';
-import {HEROES,TUNING} from '../src/content.js';
+import {HEROES,TUNING,LATE_COMPANIONS,HIDDEN} from '../src/content.js';
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
 import {allQuestions} from '../src/quiz.js';
+import {eventWindow} from '../src/preview/season.js';
+// Companions announced at stage 45 (the roster grows; counts come from the data, not from the day the test was written).
+const LATE_NEW=LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).length;
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
 const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.now();
@@ -25,12 +28,23 @@ if(committed!==null){
 }
 const browser=await (isWebkit?webkit:chromium).launch({headless:true});
 const errors=[],requests=[],geometry=[],contexts=[];
-async function boot(width,height,profile=createProfile(NOW),fault=false,location=url){
+// The checks below were written for a player past the first session; the tutorial check opts in with {tutorial:true}.
+// These fixtures have also read this week's event; the event check opts in to an unread popup.
+const veteran=p=>p?{...p,ftue:{legacy:true,done:[],seen:[],skipped:false},beginner:null,firstTen:true,eventSeen:eventWindow(Math.max(NOW,p.clockAt)).id}:p;
+async function boot(width,height,profile=createProfile(NOW),fault=false,location=url,{tutorial=false,time}={}){
+  if(!tutorial)profile=veteran(profile);
   const context=await browser.newContext({viewport:{width,height},hasTouch:true});
   contexts.push(context);const page=await context.newPage();
+  if(time!==undefined)await page.clock.setFixedTime(time);
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
   await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
-  if(profile)await page.addInitScript(({key,profile})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(profile));},{key:SAVE_KEY,profile});
+  // Seed once in an empty document at the exact file URL, before the app or fault hooks run.
+  // An init script runs again on reload and can restore the original fixture over a temporarily empty file store.
+  if(profile){
+    await page.route(location,r=>r.fulfill({contentType:'text/html',body:'<!doctype html><title>Profile fixture</title>'}),{times:1});
+    await page.goto(location);
+    await page.evaluate(({key,profile})=>localStorage.setItem(key,JSON.stringify(profile)),{key:SAVE_KEY,profile});
+  }
   if(fault)await page.addInitScript(rewardOnly=>{window.__failRewardCheckpoint=rewardOnly;const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){let phase='';try{const saved=JSON.parse(v);phase=saved.active?.run?JSON.parse(saved.active.run).phase:'';}catch{}if(window.__testQuotaFailure||window.__failRewardCheckpoint&&phase==='reward')throw new DOMException('full','QuotaExceededError');return original.call(this,k,v);};},fault==='reward');
   if(fault==='avif')await page.addInitScript(()=>{const decode=HTMLImageElement.prototype.decode;HTMLImageElement.prototype.decode=function(){return /\.avif$/.test(this.src)?Promise.reject(new DOMException('Unsupported codec','EncodingError')):decode.call(this);};});
   await page.addInitScript(()=>{window.__memorialAssignments=[];const descriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');Object.defineProperty(HTMLImageElement.prototype,'src',{...descriptor,set(value){if(this.dataset.memorial&&String(value).startsWith('data:image/')||String(value).includes('/memorial/'))window.__memorialAssignments.push(String(value).slice(0,80));descriptor.set.call(this,value);}});});
@@ -77,6 +91,28 @@ async function inspectCell(page,index){
   await page.locator('#unit-panel').waitFor();await page.locator('#unit-panel').scrollIntoViewIfNeeded();
 }
 try{
+  // First session: Rumi points at the real sortie button, the hole passes the tap, the next step waits in the sheet.
+  {
+    const t=await boot(390,844,createProfile(NOW),false,url,{tutorial:true}),{page}=t;
+    await page.locator('.coach:not([hidden]) .coach-line').waitFor();
+    assert.match(await page.locator('.coach-name').textContent(),/루미/);
+    await page.locator('.lb-depart').click();await page.locator('#sheet[data-kind="prepare"]').waitFor();
+    await page.waitForFunction(()=>/출격/.test(document.querySelector('.coach-line')?.textContent||''));
+    assert.deepEqual((await profile(page)).ftue.done,['lobby']);
+    await shot(page,'tutorial-prepare',390,844);await t.context.close();
+  }
+  // An unread weekly event is a separate home popup, not a repeated companion announcement.
+  {
+    const time=Date.UTC(2026,10,10,3),p=veteran(createProfile(time));p.cleared=3;p.eventSeen='';
+    const t=await boot(390,844,p,false,url,{tutorial:true,time}),{page}=t;
+    await page.locator('#sheet[data-kind="event"]').waitFor();
+    assert.equal((await profile(page)).eventSeen,eventWindow(time).id,'this event week is recorded as seen');
+    await shot(page,'event-notice',390,844);await close(page);
+    await reload(t);await page.waitForTimeout(1200);
+    assert.equal((await profile(page)).eventSeen,eventWindow(time).id,'the event receipt survives a reload');
+    assert.ok(await page.locator('#sheet[data-kind="event"]').isHidden(),'the same event is not announced twice');
+    await t.context.close();
+  }
   if(isWebkit){
     const probe=await browser.newPage(),source=await fs.readFile(path.join(game,'assets/memorial/zeke.avif'));
     const supportsAvif=await probe.evaluate(async src=>{const img=new Image();img.src=src;try{await img.decode();return img.naturalWidth===720;}catch{return false;}},'data:image/avif;base64,'+source.toString('base64'));await probe.close();
@@ -94,7 +130,7 @@ try{
     const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
     await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
-    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),39);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),HEROES.length,'every owned companion has a memory tile');assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
     await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
     await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
     const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
@@ -196,7 +232,7 @@ try{
     await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
     await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
-    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),/스테이지 45 클리어 후 신규 동료 8명/);assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
+    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),new RegExp(`스테이지 45 클리어 후 신규 동료 ${LATE_NEW}명`));assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
     await shot(page,'collection',width,height);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
@@ -272,17 +308,23 @@ try{
   }
   const lateProfile=createProfile(NOW);lateProfile.cleared=45;
   const lateTest=await boot(390,844,lateProfile);
-  // The first load after clearing stage 45 announces who joined the summon: eight tiles, shown once.
+  // The first load after clearing stage 45 announces every new companion, shown once.
   await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
-  assert.equal(await lateTest.page.locator('.late-card').count(),8,'eight new companions are announced');
-  assert.equal((await profile(lateTest.page)).noticeLate.length,8,'the announcement is recorded as seen');
+  assert.equal(await lateTest.page.locator('.late-card').count(),LATE_NEW,'every new companion is announced');
+  assert.equal((await profile(lateTest.page)).noticeLate.length,LATE_NEW,'the announcement is recorded as seen');
+  const seenLate=(await profile(lateTest.page)).noticeLate;
+  await lateTest.page.waitForFunction(({key,ids})=>{try{return JSON.stringify(JSON.parse(localStorage.getItem(key)||'null')?.noticeLate)===JSON.stringify(ids);}catch{return false;}},{key:SAVE_KEY,ids:seenLate});
   await shot(lateTest.page,'late-notice',390,844);
   await lateTest.page.locator('[data-action="late-summon"]').click();await lateTest.page.locator('.sm-late.open').waitFor();
   assert.ok(await lateTest.page.locator('#overlay').isHidden(),'the announcement closes');
   await lateTest.page.locator('[data-action="rates"]').click();assert.match(await lateTest.page.locator('#sheet-body').innerText(),/신규 동료[\s\S]*언더독[\s\S]*베놈/);await close(lateTest.page);
-  await reload(lateTest);await lateTest.page.waitForTimeout(1200);assert.ok(await lateTest.page.locator('#overlay').isHidden(),'not announced again after a reload');
+  await reload(lateTest);await lateTest.page.waitForTimeout(1200);
+  const lateReload=await lateTest.page.evaluate(key=>({kind:document.getElementById('sheet').dataset.kind,title:document.getElementById('sheet-title').textContent,noticeLate:window.STAR_GARDEN.profile.noticeLate,diskNoticeLate:JSON.parse(localStorage.getItem(key)||'null')?.noticeLate}),SAVE_KEY);
+  assert.deepEqual(lateReload.noticeLate,seenLate,'companion receipts survive a reload: '+JSON.stringify(lateReload));
+  assert.deepEqual(lateReload.diskNoticeLate,seenLate,'companion receipts remain in storage: '+JSON.stringify(lateReload));
+  assert.ok(await lateTest.page.locator('#sheet[data-kind="late"]').isHidden(),'companions are not announced again after a reload: '+JSON.stringify(lateReload));
   await nav(lateTest.page,'동료');
-  assert.equal(await lateTest.page.locator('.cards .cc').count(),39,'the new companions join the collection once stage 45 is cleared');
+  assert.equal(await lateTest.page.locator('.cards .cc').count(),HEROES.length,'the new companions join the collection once stage 45 is cleared');
   for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
   await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();
   const grown=createProfile(NOW);grown.cleared=36;grown.dreams=5000;
@@ -300,6 +342,8 @@ try{
   await page.locator('[data-enhance-relic="hourglass"]').click();assert.equal((await profile(page)).relics.hourglass.enhance,3);await close(page);
   await nav(page,'소환');const fill=await profile(page);assert.equal(fill.pity.normal,0);
   await page.locator('[data-banner="relic"]').click();await page.locator('[data-draw="10"]').click();
+  // The relic 10-pull asks the star quiz first (a right answer may add a lucky ten); skipping it draws at once.
+  await page.locator('#sheet[data-kind="quiz"]').waitFor();await page.locator('[data-action="quiz-skip"]').click();
   assert.equal((await profile(page)).relicDraws,10);assert.equal((await profile(page)).dreams,4200);await shot(page,'ten-relics',390,844);await close(page);
   await nav(page,'정원');assert.equal(await page.locator('.slot.locked').count(),0);
   await page.locator('[data-dispatch-slot="0"]').click();await page.locator('[data-send="queen"]').click();

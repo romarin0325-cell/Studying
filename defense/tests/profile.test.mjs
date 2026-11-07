@@ -404,7 +404,7 @@ test('boost is a doubled-UR 10-pull and may add ten free bonus draws',()=>{
   assert.ok(sawBonus&&sawNone);
   const refused=createProfile(NOW);refused.dreams=100000;
   assert.equal(command(refused,'draw',{banner:'normal',count:1,boost:true},NOW).ok,false);
-  assert.equal(command(refused,'draw',{banner:'relic',count:10,boost:true},NOW).ok,false);
+  assert.equal(command(refused,'draw',{banner:'relic',count:1,boost:true},NOW).ok,false);
   assert.equal(command(refused,'draw',{banner:'normal',count:1,free:true,boost:true},NOW).ok,false);
   assert.equal(refused.daily.free,false);assert.equal(refused.dreams,100000);assert.equal(refused.pity.normal,0);
   const relic=command(refused,'draw',{banner:'relic',count:1},NOW);assert.equal(relic.pity.normal,0);assert.deepEqual(relic.bonus,[]);

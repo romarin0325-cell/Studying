@@ -97,9 +97,9 @@ export const lateOpen=cleared=>cleared>=LATE_UNLOCK_STAGE;
 export function heroPool(rarity,open=true){return (ROSTER[rarity]||[]).filter(id=>open||!LATE_COMPANIONS.includes(id));}
 // A UR from the season banner is the monthly guardian half the time; from the normal
 // banner it is this week's pickup half the time.
-export function drawCharacter(random,season,guardian,pickup=null,urMult=1,open=true){
+export function drawCharacter(random,season,guardian,pickup=null,urMult=1,open=true,minSR=false){
   const base=T.heroRates,ur=base[3]*urMult,rates=[base[0]-(ur-base[3]),base[1],base[2],ur];
-  const rarity=['C','R','SR','UR'][rollIndex(rates,random())];
+  const rarity=minSR?['SR','UR'][rollIndex([base[2]/(base[2]+base[3]),base[3]/(base[2]+base[3])],random())]:['C','R','SR','UR'][rollIndex(rates,random())];
   if(rarity==='UR'&&season&&random()<.5&&(open||!LATE_COMPANIONS.includes(guardian)))return guardian;
   if(rarity==='UR'&&!season&&pickup&&random()<.5)return pickup;
   const pool=heroPool(rarity,open);return pool[Math.floor(random()*pool.length)];

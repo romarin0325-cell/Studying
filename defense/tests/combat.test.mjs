@@ -989,6 +989,41 @@ test('autoPlay skips unaffordable Doom and still casts another ready ultimate ag
   close(hp-boss.hp,E.power(s,s.board[12])*60);assert.equal(s.stats.byHero.doom,undefined);
 });
 
+test('player auto leaves lit units in place and casts a valuable full-gauge ultimate only with living enemies',()=>{
+  const s=traitArena([{hero:'star_boy',index:12}]);s.telegraph={uid:1,pattern:'stun1',cells:[12],ends:s.time+3};s.gold=0;const uid=s.board[12].uid;autoPlay(s);assert.equal(s.board[12].uid,uid);
+  const a=traitArena([{hero:'star_boy',index:12}]);enemiesFor(a,[{}]);a.gold=0;a.freeSummons=0;a.gauge=E.gaugeCap(a);autoPlay(a);assert.equal(a.stats.skills,1);
+  const b=traitArena([{hero:'star_boy',index:12}]);b.gold=0;b.freeSummons=0;b.gauge=E.gaugeCap(b);autoPlay(b);assert.equal(b.stats.skills,0);
+});
+
+test('player auto preserves positions and summons in free-cell order throughout stage 1, including closed cells',()=>{
+  const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];
+  for(const closed of [[],[12,16,21]]){
+    const s=E.newRun({deck:DEFAULT_DECK,chapter:0,seed:1});s.oathMods.closed=closed;
+    // Apply the closed-cell constraint before the first action.
+    for(const i of closed)if(s.board[i]){const to=order.find(j=>!closed.includes(j)&&!s.board[j]);s.board[to]=s.board[i];s.board[i]=null;}
+    let autoIn=0,actions=0;
+    for(let tick=0;tick<18000&&!['victory','defeat'].includes(s.phase);tick++){
+      E.step(s,.05);autoIn+=.05;if(s.phase!=='reward'&&autoIn<.32)continue;autoIn=0;
+      const before=s.board.map(u=>u?.uid),merges=s.stats.merges,summons=s.stats.summons;s.events.length=0;
+      autoPlay(s);actions++;
+      const events=s.events,merge=events.find(e=>e.type==='merge');
+      assert.equal(events.some(e=>e.type==='move'||e.type==='sell'),false);
+      for(let i=0;i<25;i++)if(before[i]!==undefined){const at=s.board.findIndex(u=>u?.uid===before[i]);if(at>=0)assert.equal(at,i);else assert.ok(merge&&(i===merge.from||i===merge.to),'only merge materials may disappear during an auto action');}
+      if(s.stats.merges>merges){assert.ok(merge);assert.equal(s.board[merge.from],null);assert.ok(s.board[merge.to]);}
+      if(s.stats.summons>summons){const expected=order.find(i=>before[i]===undefined&&!closed.includes(i));assert.equal(events.find(e=>e.type==='summon').index,expected);}
+    }
+    assert.ok(actions>10);assert.ok(['victory','defeat'].includes(s.phase));assert.ok(s.stats.summons>0);assert.ok(s.stats.merges>0);
+  }
+});
+
+test('measurement auto still dodges and re-places its summon',()=>{
+  const dodge=traitArena([{hero:'star_boy',index:12}]);dodge.telegraph={uid:1,pattern:'stun1',cells:[12],ends:dodge.time+3};dodge.gold=0;
+  smartAutoPlay(dodge);assert.equal(dodge.board[12],null);assert.ok(dodge.events.some(e=>e.type==='move'));
+  const summon=traitArena([{hero:'star_boy',index:0}]);summon.gold=1000;summon.freeSummons=1;
+  smartAutoPlay(summon);const spawn=summon.events.find(e=>e.type==='summon'),move=summon.events.find(e=>e.type==='move');
+  assert.ok(spawn);assert.ok(move);assert.equal(move.from,spawn.index);assert.ok(summon.board[move.to]);
+});
+
 test('poison uses one 40-stack cap and an ordinary shot or overlapping field cannot truncate the ultimate contribution',()=>{
   const s=traitArena([{hero:'mushroom_king',index:12,rank:3}]),[e]=enemiesFor(s,[{}]),u=s.board[12],base=E.power(s,u);
   e.statusEffects.push({type:'poison',source:'legacy:poison',owner:'mushroom_king',amount:40,power:base,until:s.time+7});
