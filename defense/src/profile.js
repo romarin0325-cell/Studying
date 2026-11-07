@@ -2,7 +2,7 @@ import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLE
 import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
-import {TEAM_SIZE,SAVE_KEY,UNLOCKED} from './team-config.js';
+import {TEAM_SIZE,SAVE_KEY,UNLOCKED,SOLO} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
 import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
@@ -21,7 +21,7 @@ const freshFtue=legacy=>({legacy,done:[],seen:[],skipped:false});
 const freshBeginner=now=>({count:1,last:calendar(now).day,claimed:[],tasks:[],did:[],choice:null,closed:false});
 export function createProfile(now=Date.now(),{trial=false}={}){
   trial=UNLOCKED&&trial===true;
-  return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(false),beginner:freshBeginner(now),firstTen:false,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
+  return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(SOLO),beginner:SOLO?null:freshBeginner(now),firstTen:SOLO,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
