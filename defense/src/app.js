@@ -11,7 +11,6 @@ import {questionOf,pickQuestion,lectureById,termById,lectureQuestions,termQuesti
 import {CONSTELLATIONS,LIBRARY_ART,LIBRARY_STARS} from './library.js';
 import {TUTOR_MODELS,tutorSettings,saveTutorSettings,explainWithRumi,tutorHtml} from './tutor.js';
 import {createBattle,resumeBattle,autoPlay as helperAuto,clearedRounds} from './battle.js';
-import {smartAutoPlay} from './smart-auto.js';
 import {createCoach} from './coach.js';
 import * as FW from './beginner.js';
 import * as AT from './auto-team.js';
@@ -31,8 +30,8 @@ import {OATHS,OATH,OATH_GROUPS,OATH_CLOSED,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,
 import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
 import {REQUEST,REQUEST_MAX,requestState,requestTracker,requestGoal} from './preview/requests.js';
 import {REQUESTS,REQUEST_HEROES,REQUEST_REWARD,AFTERWORDS} from './preview/requests-data.js';
-// The unlocked test build plays auto with the simulation player model; the release keeps the light helper.
-const autoPlay=(...args)=>(UNLOCKED&&!p().trial?smartAutoPlay:helperAuto)(...args);
+// Every build uses the same in-game auto.
+const autoPlay=helperAuto;
 import {MEMORIAL_STORIES} from './memorial.js';
 import {burst,tapSpark,hearts,centerOf,floatText} from './fx.js';
 
@@ -584,7 +583,7 @@ function retireSheet(){
 }
 const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${p().trial?'<button class="secondary" data-action="trial-end">체험 끝내기</button>':'<button class="secondary" data-action="trial-start">신규 플레이 체험</button>'}${TEST_TOOLS.filter(t=>p().trial||!['trial-day','ftue-reset'].includes(t.kind)).map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button><button class="secondary" data-test-tool="late-notice">신규 동료 안내 보기</button></div>`;
 function showSettings(){
-  show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·필살기를 보조합니다. 직접 조작도 가능합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.'],['cutin','필살기 컷인','필살기 이름 띠를 전장 위에 띄웁니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
+  show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·필살기를 맡습니다. 자리 옮기기는 직접 합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.'],['cutin','필살기 컷인','필살기 이름 띠를 전장 위에 띄웁니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
     <div class="settings-row"><div><strong>전장 화질</strong><small>기본은 선명도와 전력 사용의 균형을 맞춥니다.</small></div><select id="quality-select" aria-label="전장 화질">${[['standard','기본'],['high','고화질'],['low','절전']].map(([id,text])=>`<option value="${id}" ${p().settings.quality===id?'selected':''}>${text}</option>`).join('')}</select></div>
     ${tutorPanel()}
     ${UNLOCKED?testToolsPanel():''}
@@ -1486,7 +1485,7 @@ function artSheet(id,fresh=false){
 // has one teacher. He is the garden's resident sage rather than a party member, so he guides before he is owned (as he
 // already does in the library). Every step is one line in his voice over the real control; the battle waits for it.
 const GUIDE='rumi',coach=createCoach({onSkip:()=>skipTutorial()});
-let coachHold=false,tutorialRun=false,tutorialMark=null,castAt=0,nextTip=false;
+let coachHold=false,tutorialRun=false,tutorialMark=null,castAt=0,nextTip=false,dodgeDone=false,dodgeFrom=-1,dodgeTo=-1;
 const qs=s=>document.querySelector(s);
 const guideFace=()=>`<span class="coach-art">${image(GUIDE)}</span>`;
 function guide(id,target,line,opts={}){if(coach.id===id&&!opts.force)return;coach.show({id,target,line,name:'대현자 '+HERO[GUIDE].name,face:guideFace(),skippable:opts.skippable??true,...opts});}
@@ -1513,9 +1512,25 @@ function castTarget(){
   const ready=run.deck.filter(id=>E.bestUnit(run,id)&&run.gauge>=E.skillCost(run,id)&&run.gold>=E.skillGoldCost(id)&&!E.castLock(run,id));
   return ready.includes(GUIDE)?GUIDE:ready.find(id=>['starfall','flurry','freeze'].includes(HERO[id].skill.type))||ready[0]||null;
 }
+function dodgeCoach(){
+  const showing=coach.id==='dodge';
+  if(!tutorialRun||!run||screen!=='battle'||modal||!['combat','intermission'].includes(run.phase)){
+    if(showing){dodgeDone=true;coach.hide();}coachHold=false;return false;
+  }
+  if(dodgeDone||!p().ftue.done.includes('merge')||coach.active&&!showing)return false;
+  const t=run.telegraph,cells=t&&['seal','storm','stun1','thunder','judgement'].includes(t.pattern)?t.cells:[];
+  const lit=cells.find(i=>{const u=run.board[i];return u&&!u.cursed&&!E.charging(run,u)&&!(t.pattern==='judgement'?E.invincible(run,i):E.immune(run,i));});
+  if(lit===undefined){if(showing){dodgeDone=true;coachHold=false;coach.hide();}return false;}
+  const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];
+  const safe=order.filter(i=>!run.board[i]&&!E.closedCell(run,i)&&!cells.includes(i)).sort((a,b)=>
+    (Math.abs(a%5-lit%5)+Math.abs(Math.floor(a/5)-Math.floor(lit/5)))-(Math.abs(b%5-lit%5)+Math.abs(Math.floor(b/5)-Math.floor(lit/5))))[0];
+  if(safe===undefined){if(showing){dodgeDone=true;coachHold=false;coach.hide();}return false;}
+  const changed=lit!==dodgeFrom||safe!==dodgeTo;dodgeFrom=lit;dodgeTo=safe;
+  coachHold=true;guide('dodge',()=>cellsRect(dodgeFrom,dodgeTo),'빨간 칸은 보스 공격 예고야! 동료를 끌어서 옮겨 줘.',{force:showing&&changed,drag:{from:()=>cellScreen(dodgeFrom),to:()=>cellScreen(dodgeTo)}});return true;
+}
 // The battle half of the tutorial (stage 1): summon, merge, one ultimate, then hand over to auto.
 function battleCoach(step){
-  if(!tutorialRun||!run||screen!=='battle'||modal){if(coach.active&&!modal)coach.hide();return;}
+  if(!tutorialRun||!run||screen!=='battle'||modal){coachHold=false;if(coach.active&&!modal)coach.hide();return;}
   const st=run.stats;
   if(step==='summon'){
     if(tutorialMark&&st.summons>tutorialMark.summons){ftueDone('summon');tutorialMark={...st};return;}
@@ -1533,14 +1548,15 @@ function battleCoach(step){
     coachHold=true;guide('cast:'+id,()=>qs(`[data-skill="${id}"]`),'별빛이 모였어! 동료 카드를 누르면 필살기야. 지금이야, 형아!');return;
   }
   if(step==='auto'){
-    if(p().settings.auto){ftueDone('auto');tutorialRun=false;coachHold=false;coach.hide();return;}
+    if(p().settings.auto){ftueDone('auto');coachHold=false;coach.hide();return;}
     if(performance.now()-castAt<2200){coachHold=false;return;}
-    coachHold=true;guide('auto',()=>qs('.toggle-auto'),'역시 형아! 이제 자동에 맡겨도 돼. 필요할 때만 거들면 돼.');
+    coachHold=true;guide('auto',()=>qs('.toggle-auto'),'역시 형아! 이제 소환·합성·필살기는 자동이 맡아. 자리는 형아가 정해 줘!');
   }
 }
 // One place decides which coach mark (if any) belongs on screen. Called after renders, sheet changes and in battle.
 function coachTick(){
   const step=FW.ftueNext(p());
+  if(dodgeCoach())return;
   if(nextTip){if(step||modal||screen!=='home'){nextTip=false;coach.hide();}return;}
   if(!step){if(coach.active)coach.hide();coachHold=false;tutorialRun=false;return;}
   if(step==='lobby'){
@@ -1579,7 +1595,7 @@ function tutorialStart(){
   if(!tutorialRun)return;
   if(p().settings.auto)act('setting',{id:'auto',value:false},false);
   const b=qs('.toggle-auto');if(b){b.querySelector('b').textContent='OFF';b.setAttribute('aria-pressed','false');}
-  tutorialMark={...run.stats};coachHold=true;castAt=0;
+  tutorialMark={...run.stats};coachHold=true;castAt=0;dodgeDone=false;
 }
 // The free first ten: no quiz, one SR or better guaranteed, then straight into formation.
 function firstTen(){
