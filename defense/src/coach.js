@@ -6,14 +6,15 @@ export function createCoach({onSkip}={}){
   const root=document.createElement('div');root.className='coach';root.hidden=true;root.setAttribute('aria-live','polite');
   root.innerHTML='<i class="coach-shade" data-side="t"></i><i class="coach-shade" data-side="b"></i><i class="coach-shade" data-side="l"></i><i class="coach-shade" data-side="r"></i>'
     +'<span class="coach-ring" aria-hidden="true"></span><span class="coach-tap" aria-hidden="true"><i></i><i></i></span><span class="coach-drag" aria-hidden="true"><i class="coach-path"></i><i class="coach-dot"></i></span>'
-    +'<div class="coach-say"><span class="coach-face"></span><p><b class="coach-name"></b><span class="coach-line"></span></p></div><button class="coach-skip" type="button">건너뛰기</button>';
+    +'<div class="coach-say"><span class="coach-face"></span><p><b class="coach-name"></b><span class="coach-line"></span></p><button class="coach-skip" type="button">건너뛰기</button></div>';
   document.body.append(root);
   const $=s=>root.querySelector(s),shades=[...root.querySelectorAll('.coach-shade')];
   let state=null,timer=0;
   // Swallow presses on the dim area (the hole has no element over it).
   for(const s of shades)for(const type of ['pointerdown','click','touchstart'])s.addEventListener(type,e=>{e.preventDefault();e.stopPropagation();$('.coach-ring').classList.remove('nudge');void root.offsetWidth;$('.coach-ring').classList.add('nudge');},{passive:false});
   $('.coach-skip').addEventListener('click',e=>{e.stopPropagation();state?.onSkip?.();onSkip?.();});
-  const rectOf=t=>{if(!t)return null;if(typeof t==='function')return t();if(t.getBoundingClientRect&&t.isConnected){const r=t.getBoundingClientRect();return r.width||r.height?r:null;}return null;};
+  // A target is an element, a rect, or a function returning either (looked up again on every frame).
+  const rectOf=t=>{if(typeof t==='function')t=t();if(!t)return null;if(t.getBoundingClientRect){if(!t.isConnected)return null;const r=t.getBoundingClientRect();return r.width||r.height?r:null;}return Number.isFinite(t.left)?t:null;};
   function place(){
     if(!state)return;const r=rectOf(state.target),W=innerWidth,H=innerHeight;
     if(!r){root.classList.add('waiting');return;}root.classList.remove('waiting');

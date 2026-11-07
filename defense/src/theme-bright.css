@@ -249,7 +249,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,canvas:focus-visi
 .coach-face{background:linear-gradient(180deg,#bfe9ff,#7cc6f0);box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--navy)}
 .coach-name{align-self:flex-start;padding:2px 12px 2px 8px;color:#fff;background:linear-gradient(100deg,var(--navy-d),var(--navy));clip-path:var(--para)}
 .coach-line{color:var(--ink)}
-.coach-skip{background:rgba(22,48,106,.72);border-color:rgba(255,255,255,.6)}
+.coach-skip{color:var(--ink2);background:rgba(31,63,134,.06);border-color:rgba(31,63,134,.22)}
 .sp-anchor{background:var(--grid),linear-gradient(100deg,#fff6dd,#fbf7f0 60%);border:1px solid rgba(176,122,18,.45);box-shadow:0 3px 0 rgba(176,122,18,.18)}
 .sp-anchor-text small{color:var(--gold)}
 .sp-anchor-text b{color:var(--ink)}

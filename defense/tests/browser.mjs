@@ -25,7 +25,10 @@ if(committed!==null){
 }
 const browser=await (isWebkit?webkit:chromium).launch({headless:true});
 const errors=[],requests=[],geometry=[],contexts=[];
-async function boot(width,height,profile=createProfile(NOW),fault=false,location=url){
+// The checks below were written for a player past the first session; the tutorial check opts in with {tutorial:true}.
+const veteran=p=>p?{...p,ftue:{legacy:true,done:[],seen:[],skipped:false},beginner:null,firstTen:true}:p;
+async function boot(width,height,profile=createProfile(NOW),fault=false,location=url,{tutorial=false}={}){
+  if(!tutorial)profile=veteran(profile);
   const context=await browser.newContext({viewport:{width,height},hasTouch:true});
   contexts.push(context);const page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
@@ -77,6 +80,16 @@ async function inspectCell(page,index){
   await page.locator('#unit-panel').waitFor();await page.locator('#unit-panel').scrollIntoViewIfNeeded();
 }
 try{
+  // First session: Rumi points at the real sortie button, the hole passes the tap, the next step waits in the sheet.
+  {
+    const t=await boot(390,844,createProfile(NOW),false,url,{tutorial:true}),{page}=t;
+    await page.locator('.coach:not([hidden]) .coach-line').waitFor();
+    assert.match(await page.locator('.coach-name').textContent(),/루미/);
+    await page.locator('.lb-depart').click();await page.locator('#sheet[data-kind="prepare"]').waitFor();
+    await page.waitForFunction(()=>/출격/.test(document.querySelector('.coach-line')?.textContent||''));
+    assert.deepEqual((await profile(page)).ftue.done,['lobby']);
+    await shot(page,'tutorial-prepare',390,844);await t.context.close();
+  }
   if(isWebkit){
     const probe=await browser.newPage(),source=await fs.readFile(path.join(game,'assets/memorial/zeke.avif'));
     const supportsAvif=await probe.evaluate(async src=>{const img=new Image();img.src=src;try{await img.decode();return img.naturalWidth===720;}catch{return false;}},'data:image/avif;base64,'+source.toString('base64'));await probe.close();

@@ -12,6 +12,8 @@ export function unlockProfile(p){
   // Relics at a mid-game spread (C Lv.7, R Lv.5, SR Lv.4, UR Lv.2) with spare duplicates to try levelling.
   for(const [id,entry] of Object.entries(p.relics)){const r=ARTIFACT[id].rarity;entry.owned=true;entry.enhance={C:6,R:4,SR:3,UR:1}[r];entry.copies={C:20,R:8,SR:5,UR:3}[r];}
   p.cleared=UNLOCKED_STAGE;p.dreams=99999;p.dust=99999;
+  // A finished account: no tutorial, no first-week board (the new-player trial in the test tools plays those).
+  p.ftue={legacy:true,done:[],seen:[],skipped:false};p.beginner=null;p.firstTen=true;
   // Content preview: a late-game account (greenhouse beds at their soft caps, every companion +15) so the challenge tiers
   // read as they would for a player near stage 90, and the three request companions below max hearts.
   if(PREVIEW){Object.assign(p.beds,{rose:45,spring:30,seed:20,crit:30,critDamage:25,stardust:49});for(const e of Object.values(p.heroes))e.enhance=15;Object.assign(p.heroes.night_rabbit,{bond:9,bondXp:0});Object.assign(p.heroes.underdog,{bond:9,bondXp:0});}

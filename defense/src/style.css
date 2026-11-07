@@ -724,7 +724,8 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .coach-say p{margin:0;display:flex;flex-direction:column;gap:2px;min-width:0}
 .coach-name{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:.04em}
 .coach-line{font-size:14.5px;font-weight:800;line-height:1.38;word-break:keep-all}
-.coach-skip{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;pointer-events:auto;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;color:#fff;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.3)}
+.coach-skip{flex:none;align-self:flex-start;margin:-2px -6px 0 auto;pointer-events:auto;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;color:var(--text2);background:rgba(255,255,255,.08);border:1px solid var(--line2)}
+.coach-skip[hidden]{display:none}
 @keyframes coach-pulse{0%,100%{opacity:1}50%{opacity:.55}}
 @keyframes coach-nudge{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 @keyframes coach-tap{0%{transform:scale(.4);opacity:.95}80%{opacity:0}100%{transform:scale(1.9);opacity:0}}
@@ -754,11 +755,12 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .sp-day.ready{border-color:#7fe3f2;box-shadow:0 0 0 2px rgba(127,227,242,.45),0 0 14px rgba(127,227,242,.35);animation:sp-ready 1.4s ease-in-out infinite}
 .sp-day.got{opacity:.55}
 .sp-day.locked{opacity:.72}
+.sp-more{font-style:normal;font-size:10px;font-weight:900;color:var(--gold);margin-left:1px}
 .sp-check{position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:var(--gold-ink)}
 .sp-check .ic{width:11px;height:11px}
 .sp-head{margin:16px 0 6px;font-size:13px;font-weight:900;color:var(--text2)}
 .sp-tasks .mission-check small{font-size:9.5px;font-weight:800;color:var(--text3)}
-@keyframes sp-ready{0%,100%{transform:none}50%{transform:translateY(-2px)}}
+@keyframes sp-ready{0%,100%{box-shadow:0 0 0 2px rgba(127,227,242,.35),0 0 8px rgba(127,227,242,.2)}50%{box-shadow:0 0 0 2px rgba(127,227,242,.7),0 0 16px rgba(127,227,242,.45)}}
 @keyframes sp-glow{0%,100%{box-shadow:0 0 0 1px var(--hair2)}50%{box-shadow:0 0 0 2px var(--gold),0 0 20px rgba(246,210,122,.45)}}
 .ur-lede{margin:0 0 10px;font-size:13px;color:var(--text2)}
 .ur-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
