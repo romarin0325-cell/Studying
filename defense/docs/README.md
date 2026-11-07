@@ -43,6 +43,7 @@ docs/
 - [GPT_IMAGE_SD_BRIEF.md](GPT_IMAGE_SD_BRIEF.md): 나노바나나로 만든 동료 6명의 SD를 GPT Image 2.5(Manus)로 다시 그리는 지시서. 참조·프롬프트·거르기·패킹 순서.
 - [ASSET_CONSISTENCY.md](ASSET_CONSISTENCY.md): 동료 SD·메모리얼 일관성 평가표. 측정 도구는 `scripts/art/consistency-report.mjs`, `consistency-table.mjs`.
 - [PARTNER_LINES.md](PARTNER_LINES.md): 대사.
+- [CHARACTER_CONCEPT_SHEETS.md](CHARACTER_CONCEPT_SHEETS.md): 동료 42인 전원 컨셉 분해 시트 (외형·성격·말투·페티시 앵커·관계성).
 
 `art/HEAD_PROFILE.json`은 키 그룹(tall·medium·short)별 머리 크기 기준이고, `art/units-manifest.json`은 `scripts/art/review-sd.mjs`가 읽는 아틀라스 프레임 목록이다. 둘 다 에셋 제작 도구의 입력이며 게임 빌드에는 들어가지 않는다.
 

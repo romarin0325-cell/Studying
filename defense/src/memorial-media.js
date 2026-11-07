@@ -561,7 +561,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 959,
     "bodyStartLine": 961,
     "bodyEndLine": 961,
-    "bodySha256": "67c72cf48335af3d85aeaae56c8200f258c618151248a5b98dbfd499b57ef6f0",
+    "bodySha256": "10caf9ae0b16842cca45459e4a9a7217bf26db69c0b362d7efcb7b37837a5f69",
     "avifPath": "./assets/memorial/aurora.avif",
     "webp": {
       "path": "./assets/memorial-webp/aurora.webp",
@@ -786,7 +786,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 767,
     "bodyStartLine": 768,
     "bodyEndLine": 774,
-    "bodySha256": "57c0b21d45ac04453217db8b821ccc63ce19af5727dbfe2df93bfdc3d790324c",
+    "bodySha256": "775c800f9af1b93e78c291b45f08f3d7710379eb40a3cd5254b716d41a9a6fb6",
     "avifPath": "./assets/memorial/ancient_dragon.avif",
     "webp": {
       "path": "./assets/memorial-webp/ancient_dragon.webp",
@@ -921,7 +921,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 538,
     "bodyStartLine": 539,
     "bodyEndLine": 548,
-    "bodySha256": "871cc130625a8bc269cab15148692c08ae1292de2e909a892dc145aafefa0287",
+    "bodySha256": "f59fc9482739b4e330faea9bba85114c92bfff99e3f20abcf0d9e9f7c32d314b",
     "avifPath": "./assets/memorial/luna.avif",
     "webp": {
       "path": "./assets/memorial-webp/luna.webp",
@@ -1371,7 +1371,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 947,
     "bodyStartLine": 949,
     "bodyEndLine": 949,
-    "bodySha256": "f425a13f196dd053e2205da78f455e88de90e0708c636ffaf49db3b7bdc0402f",
+    "bodySha256": "7a063bbcc8c651ade328e3847943242975db50560a1dde7f03debe51016a4b4d",
     "avifPath": "./assets/memorial/frost_witch.avif",
     "webp": {
       "path": "./assets/memorial-webp/frost_witch.webp",

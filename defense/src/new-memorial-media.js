@@ -73,7 +73,7 @@ export const NEW_MEMORIAL_MEDIA = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "ea18337c55296221c38b778b9c8faf624842fcefbf5bededc4af098a3dfaf0a7",
+    "bodySha256": "712508bfcd7d58e97d13cea406f2893ebe06d85a46d266b14e00344870ab15bc",
     "avifPath": "./assets/memorial/replacements/demon_king/456374580ef86787dd2158c9d3d30e1913ac284c9ee9c5b303c1cbecc015a215.avif",
     "webp": {
       "path": "./assets/memorial-webp/replacements/demon_king/e75f45084c22666cb0ad6ef4346034f572bf86b4c9a9cc15de079afb19845b17.webp",

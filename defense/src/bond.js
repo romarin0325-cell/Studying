@@ -21,7 +21,7 @@ export const FAVORITE=Object.freeze(Object.fromEntries([
 // What each companion says to the gift they love.
 export const FAVORITE_LINES=Object.freeze({
   gold_dragon:'용의 둥지에도 없는 꽃이로구나. 그래, 그대가 골랐으니 더 귀한 것이겠지. 가까이서 함께 보자꾸나.',
-  demon_king:'짐에게 직접 쓴 서신이라… 격식을 따질 생각은 없다. 한 글자도 빠짐없이 읽어 주마.',
+  demon_king:'직접 쓴 편지야? 글씨체가 고우네. 책갈피 사이에 끼워 둘게.',
   miracle_larva:'내 머리핀하고 닮은 꽃이다! 시들기 전에 네 옆에 놓아도 돼?',
   star_boy:'우와, 별사탕이다! 배달만 하다가 받으니까 엄청 신기해… 헤헤, 고마워!',
   siren:'흐아앙… 달콤해서 눈물이 쏙 들어갔어요. 오늘 노래는 당신 거예요!',
@@ -40,7 +40,7 @@ export const FAVORITE_LINES=Object.freeze({
   flame_sage:'…읽을 수 있는 이름이 하나 늘었군. 이번엔 태우지 않으마.',
   lightning_sage:'필체가 3도 기울었군. 문장엔 군더더기가 없고. …자주 펼쳐 보겠다.',
   zeke:'편지다! 하하, 드디어 나한테도 오는구나! …고맙다, 진심으로.',
-  luna:'…여기서 읽으라고? 됐어, 나중에 혼자 읽을 거야. …버리진 않아.',
+  luna:'…여기서 읽진 않을 거야. 불 끄고 혼자 있을 때 뜯어 볼게.',
   jasmine:'꾸미지 않은 말이라 더 좋아요. 이 편지가 초상화보다 저를 닮았네요.',
   doom:'봉투를 빼앗지 않고 받는 건 처음이군. …답장은 계약서보다 짧게 쓰지.',
   ash:"상급 악마에게 시들어버릴 꽃을 바치다니, 간도 크네. …뭐, 내 마법으로 영원히 지지 않는 불꽃으로 만들어 주지. 너한테 받은 건 재로 만들 순 없으니까.",
@@ -55,18 +55,18 @@ export const FAVORITE_LINES=Object.freeze({
   silver_rabbit:'쉿… 이렇게 예쁜 꽃은 기도할 때 제단에 몰래 놓아 둘래요.',
   mushroom_king:'숲 냄새가 나는군. 인간치고 제법이다. 그루터기 옆에 두마.',
   avalanche_maid:'주인님이 주신 꽃다발… 절대 안 얼리고 가슴에 꼭 품을게요! 흐앙!',
-  aurora:'꽃이다! 구름 위로 가져가서 맨발로 꽃밭 놀이 할래요.',
+  aurora:'센스가 구십구 점이네요? 마지막 일 점은… 직접 꽂아 주세요.',
   time_magician:'언젠가 시드는 꽃이라 더 아름답지. 오늘의 초침에 걸어 둘게.',
-  ancient_dragon:'작은 꽃다발에도 천 번의 봄이 담겨 있구나. 고맙다, 나그네여.',
+  ancient_dragon:'숲지기한테 꽃선물이라니 귀엽네. 고마워, 향기 좋다.',
   queen:'꽃을 짐에게 바치다니, 겁이 없구나. …마음에 든다.',
   cherry_prince:'연회의 어떤 보석보다 귀하게 간직하겠습니다.',
   cinderella:'무도회 날보다 설레요… 유리구두 옆에 꽂아 둘게요.',
-  frost_witch:'…짐의 궁전에선 피지 않는 것이로군. 녹지 않게 소중히 두겠다.',
+  frost_witch:'생화는 냉기에 약한데… 얼지 않게 침소 창가에 두겠다.',
 });
 // What each companion says to the other two gifts, in that companion's own voice.
 export const GIFT_LINES=Object.freeze({
   gold_dragon:'나를 떠올리며 골랐단 말이지? 고맙구나. 보물의 주인이 되는 것도 제법 기쁜 일이야.',
-  demon_king:'헌상품… 이 아니라 선물이라고? 좋다. 이번에는 네 뜻대로 불러 주지.',
+  demon_king:'관람료 대신인가? 안목이 제법이네. 기분 좋게 받아 두지.',
   miracle_larva:'나한테 주는 거야? 고마워! 나뭇가지 위 보물함에 넣어 둘게.',
   star_boy:'헤헤, 선물 배달받았다! 형아한테 받으니까 날아갈 것 같아!',
   siren:'와아, 선물이다! 고마운 마음은 노래로 꼭 갚을게요, 라-♪',
@@ -85,7 +85,7 @@ export const GIFT_LINES=Object.freeze({
   flame_sage:'…꼬맹이가 별걸 다 챙기는군. 불 옆엔 두지 않으마.',
   lightning_sage:'예정에 없던 입력이군. …긍정적인 변수로 분류해 두지.',
   zeke:'오, 나한테 주는 거야? 하하, 고맙다! 힘이 펄펄 나는걸!',
-  luna:'…뭐야, 나 주는 거야? 흥, 받아는 줄게. …고마워.',
+  luna:'내 몫까지 챙겼네. …품 안쪽에 넣어 둘게. 고마워.',
   jasmine:'성녀가 아니라 저에게 주는 선물이라니… 정말 기뻐요.',
   doom:'…함정은 아니군. 받아 두지. 빚으로 달아 두진 않겠다.',
   ash:"공물 치고는 꽤 귀여운걸? 내일은 더 근사한 걸로 가져와, 계약자.",
@@ -100,13 +100,13 @@ export const GIFT_LINES=Object.freeze({
   silver_rabbit:'선물이요…? 오늘 기도에는 감사 한 줄을 더 적어야겠어요.',
   mushroom_king:'흥, 인간 주제에 기특하구나. …받아 두마.',
   avalanche_maid:'주인님이 주신 선물…! 얼리지 않게 조심조심 둘게요!',
-  aurora:'후훗, 천재한테 바치는 선물이군요? 이번엔 받아 줄게요!',
+  aurora:'제 생각 하며 고른 거죠? 후훗, 기특해서 받아 줄게요!',
   time_magician:'선물이라… 이 순간은 되감지 않고 그대로 둘게.',
-  ancient_dragon:'고맙구나, 어린 나그네여. 정성은 크기와 상관없이 오래 남는 법이지.',
+  ancient_dragon:'고마워. 챙겨 오면서 내 생각 했을 테니 그걸로 충분해.',
   queen:'짐에게 바치는 것이로군. 갸륵하다. 곁에 두도록 하지.',
   cherry_prince:'나의 친우여, 이 마음 감사히 받겠습니다.',
   cinderella:'선물이라니, 작은 기적이 찾아왔네요! 고마워요!',
-  frost_witch:'…짐에게 주는 것이냐? 흥, 거절할 이유는 없군. 고맙다.',
+  frost_witch:'공물치곤 소박하군. …기각하진 않겠다. 고맙다.',
 });
 export const giftPoints=(id,gift)=>FAVORITE[id]===gift?FAVORITE_POINTS:GIFT_POINTS;
 export const bondNeed=level=>level>=BOND_MAX?0:BOND_STEPS[level];
