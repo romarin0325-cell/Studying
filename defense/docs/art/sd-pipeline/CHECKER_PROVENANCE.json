@@ -1,0 +1,15 @@
+{
+  "source": "User-provided C:/Users/romar/tools/asset-check checker, frozen in the previous experiment.",
+  "sourceSha256": "c77fc837a1567f1e77e5f4987ad4f85d8ea4ebe96b72ee43b2783d613b5939b2",
+  "portedSha256": "7ca6572c1b9d46035b22448e9ad70ea79473454a5497004fbf5d0bf7b7b2d459",
+  "method": "AST dependency closure of six measurement entrypoints; selected function bodies copied unchanged; private-path defaults and standalone HTML/CLI excluded.",
+  "entrypoints": [
+    "measure_geometry",
+    "attach_similarity",
+    "batch_ccip",
+    "score_records",
+    "public_record",
+    "clean"
+  ],
+  "thirdPartyCode": "imgutils/ONNX/Pillow/scikit-image are dependencies, not vendored model weights or generated art."
+}

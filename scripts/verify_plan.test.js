@@ -369,6 +369,15 @@ test('minimal plans never contain full, balance-matrix, or unrelated game comman
   assert.doesNotMatch(commands, /verify:full|simulation-balance|test:defense/);
 });
 
+test('repository SD workflow selects its own controls without building the game', () => {
+  const plan=createPlan(changes('defense/scripts/art/sd-pipeline/artifacts.mjs'));
+  const unit=plan.steps.find(s=>s.args[0]==='--test');
+  assert.ok(unit.args.includes('defense/tests/sd-pipeline.test.mjs'));
+  assert.equal(plan.steps.some(s=>s.id==='defense:build'),false);
+  assert.ok(plan.steps.every(s=>s.game==='defense'));
+  assert.equal(plan.browsers.includes('chromium'),false);
+});
+
 test('changed Shooter tests and their source mappings execute each command once', () => {
   const plan = createPlan(changes(
     'shooter/app.js',

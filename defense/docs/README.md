@@ -2,6 +2,8 @@
 
 숫자는 코드가 기준이다. 문서를 읽기 전에 어느 종류인지 본다.
 
+- SD 캐릭터 제작/재작성은 [정식 A–G 공정](art/sd-pipeline/RUNBOOK.md)과 [마네킹·프롬프트·선택본 시각 도구](art/sd-pipeline/index.html)에서 시작한다. 새 대화의 진입 스킬도 저장소에 있다. [2026-11-08 다섯 선택본 설치 기록](art/selected-cast-20261108/README.md)은 실제 판정과 남은 한계를 구분한다.
+
 ```
 docs/
 ├── README.md                 이 색인

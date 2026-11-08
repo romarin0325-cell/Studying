@@ -1,0 +1,118 @@
+{
+  "id": "red_dragon",
+  "name": "레드드래곤",
+  "version": "v2",
+  "canonical": 2,
+  "edit": 3,
+  "original": "레드드래곤.png",
+  "regions": [
+    {
+      "name": "opposite-temple-hair",
+      "path": "M 215 190 Q 245 164 273 173 L 290 200 L 294 219 L 277 230 L 265 250 L 241 275 L 218 272 L 210 241 Z",
+      "feather": 3
+    }
+  ],
+  "request": "In the bottom-right RIGHT-facing profile only, refine the far-side temporal red hair locks to describe the opposite side of the same haircut, using the front view and original design. Keep the short vermilion layered haircut with warm golden tips. Make the rear temple lock overlap cleanly behind the cheek, keeping the eye entirely unobstructed. Preserve the existing face boundary, eye shape, tiny open fanged grin, nose and jaw pixel-for-pixel in appearance. Keep BOTH profiles with that identical confident gentle grin and comfortable face volume. Preserve horns and gold horn bands, wing, tail, armor and stance. Do not flatten, stretch or rotate the face. Do not add any decoration. Only a small local hair polish is requested.",
+  "prompt": "Use case: precise-object-edit. Input 1 is the exact transparent 1024x1024 game sprite atlas to edit. Input 2 is an edit-area map: white regions are the ONLY permitted changes, black is protected. Do not render the mask. Input 3 is the original character design for identity, not proportions.\n\nIn the bottom-right RIGHT-facing profile only, refine the far-side temporal red hair locks to describe the opposite side of the same haircut, using the front view and original design. Keep the short vermilion layered haircut with warm golden tips. Make the rear temple lock overlap cleanly behind the cheek, keeping the eye entirely unobstructed. Preserve the existing face boundary, eye shape, tiny open fanged grin, nose and jaw pixel-for-pixel in appearance. Keep BOTH profiles with that identical confident gentle grin and comfortable face volume. Preserve horns and gold horn bands, wing, tail, armor and stance. Do not flatten, stretch or rotate the face. Do not add any decoration. Only a small local hair polish is requested.\n\nPreserve the square four-cell layout, pixel alignment, body scale and common ground. Top-left front, top-right back, bottom-left left profile, bottom-right right profile. Keep the refined crisp navy/brown contours, glossy selective cel shading and the existing SD style. This is a tiny regional correction, not a new character rendering. Everything outside the designated areas stays unchanged. Native transparent background, no labels, no guide marks, no floor shadow. Return the complete atlas.",
+  "promptFile": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\prompts\\red_dragon-regional-v1.txt",
+  "referencePaths": [
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\inputs\\red_dragon-base.png",
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\masks\\red_dragon-edit.png",
+    "C:\\Users\\romar\\Downloads\\캐릭터\\레드드래곤.png"
+  ],
+  "source": {
+    "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-registered-sd-pilot-20261107\\raw\\red_dragon-paint-v2.png",
+    "sha256": "b2170af21529726ad0abb10347305f2d846cb6dd864fcdbe77ee49173dce67b5",
+    "commonScale": 0.8165869218500797,
+    "shifts": [
+      [
+        -7,
+        -4
+      ],
+      [
+        1,
+        -4
+      ],
+      [
+        10,
+        41
+      ],
+      [
+        -12,
+        41
+      ]
+    ],
+    "canonicalView": 2,
+    "reflectedView": 3
+  },
+  "baseSha256": "c0dc4cbbdc93f883769a3ad8f33215151f967a7eacad8370bbd11dddb69b6a81",
+  "maskSha256": "1a65c597f828270c748ce98f7e5515ec247072ab0fe31b3ef7129c360e52277b",
+  "landmarks": {
+    "canonical": {
+      "crown": [
+        245,
+        136
+      ],
+      "eyeLeft": [
+        217,
+        233
+      ],
+      "chin": [
+        215,
+        281
+      ],
+      "shoulders": [
+        248,
+        309
+      ],
+      "hips": [
+        245,
+        378
+      ],
+      "ground": [
+        256,
+        480
+      ]
+    },
+    "mirrored": {
+      "crown": [
+        267,
+        136
+      ],
+      "eyeLeft": [
+        295,
+        233
+      ],
+      "chin": [
+        297,
+        281
+      ],
+      "shoulders": [
+        264,
+        309
+      ],
+      "hips": [
+        267,
+        378
+      ],
+      "ground": [
+        256,
+        480
+      ]
+    }
+  },
+  "inputs": [
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\inputs\\red_dragon-base.png",
+      "sha256": "c0dc4cbbdc93f883769a3ad8f33215151f967a7eacad8370bbd11dddb69b6a81"
+    },
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\masks\\red_dragon-edit.png",
+      "sha256": "1a65c597f828270c748ce98f7e5515ec247072ab0fe31b3ef7129c360e52277b"
+    },
+    {
+      "file": "C:\\Users\\romar\\Downloads\\캐릭터\\레드드래곤.png",
+      "sha256": "436fabcc03127e43eca7af634918fe07d13efd276515de9104cda8a20fbb919b"
+    }
+  ]
+}

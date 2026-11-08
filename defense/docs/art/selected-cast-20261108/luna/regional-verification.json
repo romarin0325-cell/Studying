@@ -1,0 +1,235 @@
+{
+  "id": "luna",
+  "name": "루나",
+  "output": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\new2\\luna-new2.png",
+  "sha256": "9989d6ceaf278f454498b63b3529d50beb4ff2e262e5980f92a5176c4f7c35bd",
+  "webpSha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2",
+  "bytes": {
+    "png": 812069,
+    "webp": 486566
+  },
+  "candidate": {
+    "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\raw\\luna-regional-v1.png",
+    "sha256": "bfe4d87afac34ec318776d2118d0de13c3505362b7068261820f0b0037fff819",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "alphaCleanup": {
+      "source": [
+        1254,
+        1254
+      ],
+      "alphaCleaned": 51512,
+      "unmatchedAlphaPixels": 0,
+      "majorComponents": [
+        {
+          "pixels": 105121,
+          "centroid": [
+            303.94214286393776,
+            336.99277023620397
+          ],
+          "bounds": [
+            136,
+            97,
+            468,
+            588
+          ]
+        },
+        {
+          "pixels": 106644,
+          "centroid": [
+            948.3017234912419,
+            337.04517835039945
+          ],
+          "bounds": [
+            782,
+            97,
+            1116,
+            588
+          ]
+        },
+        {
+          "pixels": 100273,
+          "centroid": [
+            332.2774625273005,
+            945.9662222133576
+          ],
+          "bounds": [
+            148,
+            719,
+            497,
+            1215
+          ]
+        },
+        {
+          "pixels": 101048,
+          "centroid": [
+            923.3385123901512,
+            947.9984858681023
+          ],
+          "bounds": [
+            758,
+            719,
+            1109,
+            1215
+          ]
+        }
+      ],
+      "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+    }
+  },
+  "baseSha256": "e077c7d0838b09443763719de139eab2b7cc5a29234110ee02554624423dbe52",
+  "allowedPixels": 17214,
+  "changedPixels": 11771,
+  "outsideMaskChanged": 0,
+  "faceProtection": {
+    "view": 2,
+    "rect": [
+      105,
+      70,
+      310,
+      220
+    ],
+    "mirroredMismatchPixels": 0,
+    "faceHash": "c06d23cc0ae0fd635be178217788fdd8907000b3b0902c7c07d55d87e378a38e",
+    "reflectedCanonicalHash": "c06d23cc0ae0fd635be178217788fdd8907000b3b0902c7c07d55d87e378a38e"
+  },
+  "views": [
+    {
+      "direction": "down",
+      "height": 403,
+      "marks": {
+        "crown": [
+          248,
+          131
+        ],
+        "eyeRight": [
+          220,
+          239
+        ],
+        "eyeLeft": [
+          284,
+          236
+        ],
+        "chin": [
+          248,
+          280
+        ],
+        "shoulders": [
+          251,
+          307
+        ],
+        "hips": [
+          254,
+          387
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    },
+    {
+      "direction": "up",
+      "height": 403,
+      "marks": {
+        "crown": [
+          260,
+          136
+        ],
+        "shoulders": [
+          260,
+          314
+        ],
+        "hips": [
+          258,
+          387
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    },
+    {
+      "direction": "left",
+      "height": 407,
+      "marks": {
+        "crown": [
+          254,
+          120
+        ],
+        "eyeRight": [
+          201,
+          220
+        ],
+        "chin": [
+          210,
+          267
+        ],
+        "shoulders": [
+          252,
+          301
+        ],
+        "hips": [
+          250,
+          374
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    },
+    {
+      "direction": "right",
+      "height": 407,
+      "marks": {
+        "crown": [
+          258,
+          120
+        ],
+        "eyeRight": [
+          311,
+          220
+        ],
+        "chin": [
+          302,
+          267
+        ],
+        "shoulders": [
+          260,
+          301
+        ],
+        "hips": [
+          262,
+          374
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    }
+  ],
+  "portrait": {
+    "crop": {
+      "left": 114,
+      "top": 68,
+      "width": 272,
+      "height": 272
+    },
+    "outputSize": 240,
+    "sha256": "2ab422f35e7e3bad21ad8bd1cd84f6e66278bc89cd0f25c6fad084dce74819d6"
+  },
+  "faceWarp": false
+}

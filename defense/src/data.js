@@ -96,9 +96,9 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 242,
-        "y": 220,
-        "size": 250
+        "x": 248,
+        "y": 206,
+        "size": 272
       }
     },
     "damage": 55,
@@ -393,8 +393,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 268,
-        "y": 204,
+        "x": 255,
+        "y": 203,
         "size": 250
       }
     },
@@ -542,8 +542,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 246,
-        "y": 226,
+        "x": 252,
+        "y": 217,
         "size": 250
       }
     },
@@ -801,8 +801,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 253,
-        "y": 207,
+        "x": 247,
+        "y": 206,
         "size": 250
       }
     },
@@ -987,8 +987,8 @@ export const HEROES = [
       "scale": 1,
       "directional": true,
       "portrait": {
-        "x": 250,
-        "y": 206,
+        "x": 253,
+        "y": 202,
         "size": 250
       }
     },
@@ -1924,7 +1924,7 @@ export const ASSET_PATHS = {
   "ultimates-extra-b": "./assets/merge/ultimates-extra-b.webp",
   "unit-zeke": "./assets/cast-v2/zeke-shoulder.webp",
   "unit-rumi": "./assets/cast-v2/rumi.webp",
-  "unit-luna": "./assets/cast-v2/luna.webp",
+  "unit-luna": "./assets/cast-selected-20261108/luna.webp",
   "unit-cinderella": "./assets/cast-v2/cinderella.webp",
   "unit-snow_rabbit": "./assets/cast-v2/snow_rabbit.webp",
   "unit-avalanche_maid": "./assets/cast-v2/avalanche_maid.webp",
@@ -1932,23 +1932,23 @@ export const ASSET_PATHS = {
   "unit-guardian": "./assets/cast-v2/guardian.webp",
   "unit-storm_sage": "./assets/cast-v2/storm_sage.webp",
   "unit-lightning_sage": "./assets/cast-v2/lightning_sage.webp",
-  "unit-red_dragon": "./assets/cast-v2/red_dragon.webp",
+  "unit-red_dragon": "./assets/cast-selected-20261108/red_dragon.webp",
   "unit-flame_sage": "./assets/cast-v2/flame_sage.webp",
   "unit-mushroom_king": "./assets/cast-v2/mushroom_king.webp",
   "unit-great_detective": "./assets/cast-v2/great_detective.webp",
-  "unit-siren": "./assets/cast-v2/siren.webp",
+  "unit-siren": "./assets/cast-selected-20261108/siren.webp",
   "unit-phantom": "./assets/cast-v2/phantom-pajamas-guided.webp",
   "unit-queen": "./assets/cast-v2/queen.webp",
   "unit-galaxy_whale": "./assets/cast-v2/galaxy_whale.webp",
   "unit-silver_rabbit": "./assets/cast-v2/silver_rabbit.webp",
   "unit-ancient_dragon": "./assets/cast-v2/ancient_dragon.webp",
   "unit-time_ruler": "./assets/cast-v2/time_ruler.webp",
-  "unit-doom": "./assets/cast-v2/doom.webp",
+  "unit-doom": "./assets/cast-selected-20261108/doom.webp",
   "unit-santa": "./assets/cast-v2/santa.webp",
   "unit-jasmine": "./assets/cast-v2/jasmine.webp",
   "unit-star_boy": "./assets/cast-v2/star_boy.webp",
   "unit-time_magician": "./assets/cast-v2/time_magician.webp",
-  "unit-cherry_prince": "./assets/cast-v2/cherry_prince.webp",
+  "unit-cherry_prince": "./assets/cast-selected-20261108/cherry_prince.webp",
   "unit-frost_witch": "./assets/cast-v2/frost_witch.webp",
   "unit-harmonious": "./assets/cast-v2/harmonious.webp",
   "unit-aurora": "./assets/cast-v2/aurora.webp",

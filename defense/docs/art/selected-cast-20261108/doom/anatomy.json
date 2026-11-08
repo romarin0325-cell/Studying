@@ -1,0 +1,172 @@
+{
+  "rawSha256": "707efc0ed6e51a39ed0d7322d56e06d65631174898025435740ef9bbf8c012d9",
+  "coordinateSpace": "unwarped-512-cell",
+  "measuredBy": "Sol, actual unwarped four-view coordinate renders; visible pupils/chin/feet inspected, covered skull and joints estimated. Cherry/Doom protected heads checked against their R2 source and exact transform; that construction is NOT independent proof.",
+  "exclusions": "hair-hats-ears-horns-ornaments-equipment",
+  "uncertainty": {
+    "visiblePupilsChin": 3,
+    "inferredSkullWidthHeight": 10,
+    "rearSkull": 12,
+    "coveredJoints": 10,
+    "sole": 2,
+    "meaning": "Visual estimate, not a statistical confidence interval or exact anatomical volume. Clothing hems and hair are not joint/skull landmarks."
+  },
+  "views": [
+    {
+      "skullEllipse": [
+        255.77,
+        216.88,
+        159.73,
+        150.55,
+        0
+      ],
+      "chin": [
+        261.28,
+        292.15
+      ],
+      "eyeLeft": [
+        297.08,
+        238.91
+      ],
+      "eyeRight": [
+        230.98,
+        241.66
+      ],
+      "shoulders": [
+        267,
+        328
+      ],
+      "hips": [
+        267,
+        408
+      ],
+      "knee": [
+        266,
+        448
+      ],
+      "ankle": [
+        266,
+        483
+      ],
+      "sole": [
+        265,
+        491
+      ],
+      "outerSleeve": [
+        192,
+        350
+      ],
+      "outerFoot": [
+        231,
+        482
+      ]
+    },
+    {
+      "skullEllipse": [
+        256.33,
+        216.88,
+        159.73,
+        150.55,
+        0
+      ],
+      "chin": [
+        256.33,
+        292.15
+      ],
+      "shoulders": [
+        257,
+        328
+      ],
+      "hips": [
+        257,
+        408
+      ],
+      "knee": [
+        257,
+        448
+      ],
+      "ankle": [
+        257,
+        483
+      ],
+      "sole": [
+        257,
+        491
+      ]
+    },
+    {
+      "skullEllipse": [
+        256.18,
+        216.88,
+        143.2,
+        150.55,
+        0
+      ],
+      "chin": [
+        215.79,
+        292.15
+      ],
+      "eyeLeft": [
+        223.13,
+        240.74
+      ],
+      "shoulders": [
+        264,
+        328
+      ],
+      "hips": [
+        263,
+        409
+      ],
+      "knee": [
+        262,
+        448
+      ],
+      "ankle": [
+        262,
+        482
+      ],
+      "sole": [
+        260,
+        490
+      ]
+    },
+    {
+      "skullEllipse": [
+        256.16,
+        216.88,
+        143.2,
+        150.55,
+        0
+      ],
+      "chin": [
+        298.39,
+        292.15
+      ],
+      "eyeRight": [
+        305.73,
+        242.58
+      ],
+      "shoulders": [
+        256,
+        328
+      ],
+      "hips": [
+        258,
+        409
+      ],
+      "knee": [
+        259,
+        448
+      ],
+      "ankle": [
+        259,
+        482
+      ],
+      "sole": [
+        260,
+        490
+      ]
+    }
+  ]
+}

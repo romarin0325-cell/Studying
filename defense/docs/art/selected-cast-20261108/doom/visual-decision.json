@@ -1,0 +1,289 @@
+{
+  "reviewer": "Sol · actually viewed all8 current fixed-scale review captures, original designs and unwarped four-view source charts",
+  "bindings": {
+    "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+    "atlasSha256": "bd487025d518e156d2ae3fac4a080e2fb56c5bc0320da1894801c79c10934fe5",
+    "packingSha256": "54c7648cec10cef3504e2e065bfbe2e507085a5f8a8b2dc5ce8810cb4e833d6a",
+    "evidenceSha256": "8ffed9f954c8b8a063324820873751e28bc4a861d63c0fc5dc919cd7a2c4eb59"
+  },
+  "checks": [
+    {
+      "id": "original-design",
+      "status": "pass",
+      "note": "원화의 긴 검정/가지색 재단 코트, 은색 스크롤 자수, 높은 칼라, 자수 조끼·보라 보석 단추·은 체인·검은 부츠와 레이피어를 네 방향에서 대조했습니다. 갑옷이나 짧은 제복으로 재해석하지 않았습니다.",
+      "evidence": [
+        "originals",
+        "four-views"
+      ],
+      "viewedScreenshotHashes": [
+        "6da1720b21bc8696199f9d83cdf64e3785ee9dae93e790166ed1613d85789f87",
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983"
+      ]
+    },
+    {
+      "id": "frozen-style",
+      "status": "pass",
+      "note": "고정 세이렌 화풍을 유지했습니다. 기존 둠의 눈매와 정체성을 참고하되 기존 픽셀을 변형한 결과가 아닙니다. 미세한 색 윤곽, 셀 명암과 절제된 광택을 원화/화풍 및 동료 줄에서 확인했습니다.",
+      "evidence": [
+        "style",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "6da1720b21bc8696199f9d83cdf64e3785ee9dae93e790166ed1613d85789f87",
+        "77e01b49c8815a51cfe312d4b0122f9c68f7017faedbdf57b2f9d07545457116",
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81"
+      ]
+    },
+    {
+      "id": "anatomical-head",
+      "status": "pass",
+      "note": "검은 헤어의 솟은 외곽을 제외하고 추정159.4×150.3, 측면142.9×150.3을 확인했습니다. 고정 얼굴창의 노출 볼·턱·눈 간격,64/96px 동료 인상과 독립 얼굴 박스120/112/115를 함께 봤습니다. 남성적인 낮은 눈매를 유지하면서 지나치게 긴 이마/작은 얼굴은 보이지 않습니다. 숨은 두개골은 ±약10px 추정입니다.",
+      "method": "fixed-scale-visual-plus-landmarks",
+      "detectorInterpretation": "독립 얼굴높이120/112/115, 윗선1/-2px입니다. CCIP0.042/0.043>0.036 경고를 삭제하지 않았습니다. 이는 학습된 동일인 유사도 경고로, 실제 고정 얼굴창에서 낮은 눈썹·눈매·짧은 턱·귀와 검은 가르마를 확인했습니다. 얼굴의 일치/머리 크기는 이 숫자만으로 합격시키지 않았습니다.",
+      "evidence": [
+        "head",
+        "measurements",
+        "cast",
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913",
+        "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913",
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983",
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81",
+        "2b3facd1bfd5bab5953dd5591e7d85a06f03325db4fd0ff68c52d600acb9c7d6"
+      ]
+    },
+    {
+      "id": "face-shape-expression",
+      "status": "pass",
+      "note": "좁고 낮은 회보라색 눈, 각이 조금 있는 눈썹, 절제한 입과 짧고 둥근 SD 턱을 확인했습니다. 정면과 좌우에서 성격이 같은 인물로 읽히고 턱이 찌그러지거나 한쪽 얼굴만 세로로 늘어나지 않았습니다.",
+      "evidence": [
+        "head",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913",
+        "6da1720b21bc8696199f9d83cdf64e3785ee9dae93e790166ed1613d85789f87"
+      ]
+    },
+    {
+      "id": "directional-registration",
+      "status": "pass",
+      "note": "공통 바닥에서 측면 눈 차이약1.5/3.3px, 턱1px·어깨1px·골반2px이며 전후/좌우 덩치가 유지됩니다. 코트 끝을 골반으로 재지 않았습니다. 발도 독립 알파 검출 기준0~-1/+1px 수준으로 이어집니다.",
+      "evidence": [
+        "four-views",
+        "measurements"
+      ],
+      "viewedScreenshotHashes": [
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983",
+        "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913",
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983"
+      ]
+    },
+    {
+      "id": "body-proportions",
+      "status": "pass",
+      "note": "턱 아래÷머리1.31~1.32, 몸통0.53~0.54·골반~발0.54~0.55입니다. 작은 마네킹에 새로 입힌 몸을 실제 동료 옆에서 확인했고, 성인형 장신 코트 아래로 긴 다리가 남는 문제는 해소됐습니다. 단단한 남성 몸과 긴 코트의 부피는 보존했습니다.",
+      "evidence": [
+        "measurements",
+        "four-views",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913",
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983",
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983",
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81"
+      ]
+    },
+    {
+      "id": "equipment-handedness",
+      "status": "pass",
+      "note": "레이피어는 정면/후면과 양 측면에서 해부학적 오른손입니다. 왼쪽 뷰의 가까운 왼팔은 빈손이며 먼 오른쪽 검 손이 뒤로 가립니다. 오른쪽 뷰에서는 가까운 오른손이 칼자루를 잡습니다. 손이 칼날을 잡지 않고 칼끝까지 셀 안에 있습니다.",
+      "evidence": [
+        "four-views",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983",
+        "6da1720b21bc8696199f9d83cdf64e3785ee9dae93e790166ed1613d85789f87"
+      ]
+    },
+    {
+      "id": "silhouette-perceived-size",
+      "status": "pass",
+      "note": "솟은 검은 머리와 실제 두개골을 구별했습니다.64/96px에서 후드/뿔을 포함한 참고 동료 옆에 놓아도 실제 얼굴이 과대하거나 전신이 장비 때문에 줄어든 인상이 없습니다. 어두운 코트가 넓어 보이는 특성은 몸/머리 크기와 별도로 봤습니다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81",
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81"
+      ]
+    },
+    {
+      "id": "outline-weight",
+      "status": "pass",
+      "note": "턱·소매·부츠의 공통32px 표본,64/96px를 확인했습니다. 얼굴 윤곽은 가는 갈색/자주색이고 옷의 검은 그림자와 밝은 자수는 선 굵기에서 구별했습니다. 두꺼운 스티커 테두리로 둘러싼 화풍은 아닙니다.",
+      "evidence": [
+        "line-samples",
+        "sizes",
+        "style"
+      ],
+      "viewedScreenshotHashes": [
+        "77e01b49c8815a51cfe312d4b0122f9c68f7017faedbdf57b2f9d07545457116",
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81",
+        "6da1720b21bc8696199f9d83cdf64e3785ee9dae93e790166ed1613d85789f87",
+        "77e01b49c8815a51cfe312d4b0122f9c68f7017faedbdf57b2f9d07545457116"
+      ]
+    },
+    {
+      "id": "shading-material",
+      "status": "pass",
+      "note": "검은 머리에 절제된 보라 광택, 천의 넓은 어두운 면, 은 장식/검의 작은 밝은 면이 구분됩니다. 자수 밀도는 원화 정체성을 보존하며,64px에서는 작은 선 질감으로 읽힙니다. 피부/머리/금속의 광택이 모두 같은 플라스틱으로 보이지 않습니다.",
+      "evidence": [
+        "cast",
+        "style",
+        "line-samples"
+      ],
+      "viewedScreenshotHashes": [
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81",
+        "6da1720b21bc8696199f9d83cdf64e3785ee9dae93e790166ed1613d85789f87",
+        "77e01b49c8815a51cfe312d4b0122f9c68f7017faedbdf57b2f9d07545457116",
+        "77e01b49c8815a51cfe312d4b0122f9c68f7017faedbdf57b2f9d07545457116"
+      ]
+    },
+    {
+      "id": "cast-consistency",
+      "status": "pass",
+      "note": "언더독·화염현자·지크 및 선택 루나/레드드래곤 옆의64/96px를 봤습니다. 정상 키의 단단한 SD 남성으로 읽히며, 큰 키 동료와 머리/몸을 따로 크게 만든 인상이 없습니다. 기존 캐스트의 둥근 볼과 얼굴 문법을 유지했습니다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81",
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81"
+      ]
+    },
+    {
+      "id": "game-size-readability",
+      "status": "pass",
+      "note": "밝고 어두운 바닥의64/96px 네 방향을 실제로 확인했습니다. 검은 머리와 코트가 하나의 무정형 덩어리가 되지 않고 얼굴, 은색 칼라, 오른손 검과 몸 방향이 읽힙니다. 아주 작은 자수의 개별 판독은 한계가 있습니다.",
+      "evidence": [
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81"
+      ]
+    },
+    {
+      "id": "portrait-alignment",
+      "status": "pass",
+      "note": "96px 파생 초상화를 확인했습니다. 얼굴이 중앙에 오고 눈·턱이 작은 창에 잘립니다거나 머리 부피만 화면을 채우는 현상은 보이지 않았습니다. 실제 게임 모든 초상화 사용처에 적용한 검증은 별도입니다.",
+      "evidence": [
+        "portrait",
+        "head"
+      ],
+      "viewedScreenshotHashes": [
+        "babbcaf3e7e0e1eb7e9cf6b6abe17a079f73a2088d6a541946910fb42eac1bd3",
+        "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913"
+      ]
+    },
+    {
+      "id": "seams-contact",
+      "status": "pass",
+      "note": "보호 머리와 새 작은 몸의 목/높은 칼라, 옆머리·귀·옷, 빈손/검 손의 접촉을 확대와 실제 크기에서 확인했습니다. 목이 끊기거나 회색 마네킹 잔재/중복 팔/부유 검자루는 보지 않았습니다.",
+      "evidence": [
+        "four-views",
+        "head",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983",
+        "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913",
+        "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461",
+        "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81"
+      ]
+    },
+    {
+      "id": "independent-detector",
+      "status": "pass",
+      "note": "현재 아틀라스와 검사 코드·패키지가 일치하는 실제 imgutils/ONNX 측정 및 원시 경고를 연결했습니다. 이 통과는 실행 검증이며 얼굴 크기 합격을 뜻하지 않습니다.",
+      "evidence": [
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "2b3facd1bfd5bab5953dd5591e7d85a06f03325db4fd0ff68c52d600acb9c7d6"
+      ]
+    },
+    {
+      "id": "source-integrity",
+      "status": "pass",
+      "note": "입력·job·실제 도구 출력의 해시 연결과 단계 순서를 확인했습니다.",
+      "evidence": [
+        "provenance"
+      ],
+      "viewedScreenshotHashes": []
+    },
+    {
+      "id": "package-integrity",
+      "status": "pass",
+      "note": "전신 공통 등방 배율·알파32 잘림0·방향 추출·보이는 WebP 픽셀 손실0을 코드로 확인했습니다.",
+      "evidence": [
+        "package"
+      ],
+      "viewedScreenshotHashes": []
+    }
+  ],
+  "visualObservation": {
+    "observedAt": "2026-11-08T04:30:13.689Z",
+    "screens": [
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-originals.png",
+        "sha256": "6da1720b21bc8696199f9d83cdf64e3785ee9dae93e790166ed1613d85789f87"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-head.png",
+        "sha256": "db9a3087e42ed8c5dda86f6caaf43fc75e9cdcb8123086d0611974a79ed9e913"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-body.png",
+        "sha256": "d06747f81d3d4496e9ad178b35253465612ca7c5f1c93634397921e3bab00983"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-sizes-64.png",
+        "sha256": "cbae7e9d6c2c05696695579d987f3f8f80761f9ecab96db584a5ba15ec9e0461"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-sizes-96.png",
+        "sha256": "135a39f31b3543b58ad07a81ecaed7c379eecd671ae887b6560449f9b8361f81"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-lines.png",
+        "sha256": "77e01b49c8815a51cfe312d4b0122f9c68f7017faedbdf57b2f9d07545457116"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-portrait.png",
+        "sha256": "babbcaf3e7e0e1eb7e9cf6b6abe17a079f73a2088d6a541946910fb42eac1bd3"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\doom-r3\\work\\r1-dc807bc8-2aae0f10\\capture-audit.png",
+        "sha256": "2b3facd1bfd5bab5953dd5591e7d85a06f03325db4fd0ff68c52d600acb9c7d6"
+      }
+    ],
+    "note": "Screen hashes identify the actual images viewed. The template itself did not perform artistic review. New pixels or policy require a fresh review."
+  }
+}

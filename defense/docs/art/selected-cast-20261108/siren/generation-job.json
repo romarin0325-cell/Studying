@@ -1,0 +1,69 @@
+{
+  "tool": "image_gen",
+  "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+  "preparedAt": "2026-11-08T04:18:05.824Z",
+  "prompt": "Precise image refinement: keep IMAGE1 exactly the same character, face expression, rounded cheek shapes, anatomy, head/body proportions, pose, costume, hair curls, scale, positions and four-direction layout. Give it the delicate tinted outer contours, finer internal lines and selective cel highlights of Image2. Preserve the blue hair, fish headphones, subtle happy singing face, white iridescent jacket and shorts, turquoise halter, bare feet, gold star and hip pouch on anatomical LEFT only. Finish it as a coherent single painting with no stitched hair/neck edges. In particular preserve the SAME front/profile head size and face height as IMAGE1; do not redesign, enlarge, raise or shrink any view. Return the same transparent2x2 atlas: front top-left, back top-right, left bottom-left, right bottom-right. No scenery, shadow, text, guides or extra objects. This is a whole painting; all17 pipeline QA items will be reviewed afresh.",
+  "transparent_background": true,
+  "referencePaths": [
+    "C:\\Users\\romar\\.codex\\generated_images\\01a0de3c-765a-7653-83dc-241fff360ce6\\exec-00bdea78-2faf-4f4c-a740-be179037a52a.png",
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\frozen-style-front.png"
+  ],
+  "inputs": [
+    {
+      "role": "1 NEW four-view sprite painting",
+      "file": "C:\\Users\\romar\\.codex\\generated_images\\01a0de3c-765a-7653-83dc-241fff360ce6\\exec-00bdea78-2faf-4f4c-a740-be179037a52a.png",
+      "sha256": "6258639b02b58bfe6a9af5e6acc7b2ab60f212e27f26d569951cd7e3c0517aed"
+    },
+    {
+      "role": "2 frozen fine-line SD style",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\frozen-style-front.png",
+      "sha256": "65eab14cd0cdff6396cb2cade1f89c17a1e700ae9ceab719c4b93d9b22180281"
+    }
+  ],
+  "qaPeers": [
+    {
+      "role": "ref:peer:jasmine",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-pipeline\\audit-inputs\\jasmine.png",
+      "sha256": "a59a55d4c9cbdca10b9108d7543aab0f98f60bde7c678e7fb825b5486806c2c1"
+    },
+    {
+      "role": "ref:peer:queen",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-pipeline\\audit-inputs\\queen.png",
+      "sha256": "a031e5b308c69c30120a83293b9b28b65a24e76394ea498cacd5b3988cccdd82"
+    },
+    {
+      "role": "ref:peer:cinderella",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-pipeline\\audit-inputs\\cinderella.png",
+      "sha256": "b7fbbd13edc758b0037032932c4ae7504912fb190803908c9c9a3d7bf8a637d0"
+    },
+    {
+      "role": "ref:peer:luna_new2",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\new2\\luna-new2.webp",
+      "sha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2"
+    },
+    {
+      "role": "ref:peer:red_dragon_new2",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\new2\\red_dragon-new2.webp",
+      "sha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e"
+    }
+  ],
+  "outputRole": "new-four-view-painting",
+  "derivativeProvenance": {
+    "structure": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-portrait-fit-20261107\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\feminine-medium.png",
+      "sha256": "fda26a1d652e6a7ebd0c76949983c2a46aedc41d88e42fed8a769b41754caff6",
+      "operation": "flatten the entire original1024px guide on a pale background; identical geometry and scale"
+    },
+    "style": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-portrait-fit-20261107\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "operation": "pixel crop top-left512x512 then pale-background flatten; no scale"
+    },
+    "identity": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-expressive-sd-pilot-20261108\\refs\\siren-existing.png",
+      "sha256": "ff93a03bf721fbf897a51b7785a64b9c7a8b74dd5238b201cc22fc0030018624",
+      "operation": "fixed(128,112,256,256) crop then pale-background flatten; no scale"
+    }
+  },
+  "selectionReason": "R5 exact-number prompt moved profile heads upward. Try a short geometry-preserving refinement of the coherent R3 native painting, with all new QA and no composited seams."
+}

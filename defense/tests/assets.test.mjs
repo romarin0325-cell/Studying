@@ -19,7 +19,16 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
   assert.equal(original.assets.length,40);
   assert.equal(additions.assets.length,5);
   const gold=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/gold-dragon-20261029/installation.json'),'utf8'));
-  const manifest={assets:[...original.assets,...additions.assets,...gold.assets]};
+  const selection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/selected-cast-20261108/selection.json'),'utf8'));
+  assert.deepEqual(selection.assets.map(e=>e.id),['luna','siren','cherry_prince','doom','red_dragon']);
+  const replacements=new Map(selection.assets.map(e=>[e.id,e]));
+  const previous=[...original.assets,...additions.assets,...gold.assets];
+  // A later owner-selected painting replaces the active inventory entry; the
+  // previous master remains recoverable and its recorded bytes stay untouched.
+  for(const entry of previous.filter(e=>replacements.has(e.id)))for(const record of [entry.sourcePng,entry.sourceWebp]){
+    assert.equal(createHash('sha256').update(await fs.readFile(path.join(root,record.file))).digest('hex'),record.sha256);
+  }
+  const manifest={assets:previous.map(e=>replacements.get(e.id)||e)};
   const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
   assert.equal(art.size,46);
   for(const entry of manifest.assets){
@@ -35,6 +44,19 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
     for(const view of entry.frames){assert.deepEqual(view.sole,[256,480]);assert.equal(view.commonScale,entry.commonScale);assert.equal(view.paintedClipping,0);}
     assert.ok(entry.measurementUncertaintyPacked>0,'covered head estimates must not imply exact ground truth');
   }
+});
+test('selected cast retains its authored UI crop and disclosed art limitations',async()=>{
+  const selection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/selected-cast-20261108/selection.json'),'utf8'));
+  for(const entry of selection.assets){
+    const hero=HEROES.find(h=>h.id===entry.id),p=portraitFrame(hero);
+    assert.deepEqual([p.x,p.y,p.size],[...entry.portrait.center,entry.portrait.size],entry.id+' approved portrait');
+    assert.deepEqual([hero.art.portrait.x,hero.art.portrait.y],entry.anatomyCenter,'UI offset does not overwrite head measurements');
+    assert.equal(entry.visibleLosslessPixelChanges,0);
+  }
+  const cherry=selection.assets.find(e=>e.id==='cherry_prince');
+  assert.equal(cherry.review.seventeenCheckApproval,false,'owner selection does not rewrite an art caution as pass');
+  assert.equal(cherry.review.checks.find(c=>c.id==='directional-registration').status,'caution');
+  assert.equal(selection.assets.find(e=>e.id==='luna').review.seventeenCheckApproval,false,'earlier NEW2 selection is not a retroactive17-check approval');
 });
 test('summon face crops and prepared portraits share optical framing without moving anatomy',async()=>{
   const {derivedImageInputs}=await import('../scripts/image-policy.mjs');
