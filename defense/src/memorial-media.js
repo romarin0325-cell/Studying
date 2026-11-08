@@ -831,7 +831,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": 879,
     "bodyStartLine": 880,
     "bodyEndLine": 889,
-    "bodySha256": "9e3623e8b25f27bd457dcd15c4b730d1c49ba7412e462af24b5198bb97485c42",
+    "bodySha256": "98cd29d609ea7ee01eedcdfe7cf7bdcadde872dc03b836f89a6d954a6ab6520d",
     "avifPath": "./assets/memorial/phantom.avif",
     "webp": {
       "path": "./assets/memorial-webp/phantom.webp",

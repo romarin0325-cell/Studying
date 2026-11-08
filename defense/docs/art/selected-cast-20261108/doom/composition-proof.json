@@ -1,0 +1,51 @@
+{
+  "baseSha256": "e93e0f6d6b78b5be7e4af3f0d6888932c89a90550c668d7eaa26898f89774cc7",
+  "candidateSha256": "728cd5e2a38e4b6fb6a31ce61cae58f198777eeced1085b274f9d7ede3d0deb0",
+  "maskSha256": "3ae2ea5a763e6657bc9d0a5757e6cebb0d044182fde57f9b3d2e99704ee7ea0f",
+  "protectedRects": [
+    [
+      0,
+      0,
+      512,
+      294
+    ],
+    [
+      512,
+      0,
+      512,
+      294
+    ],
+    [
+      0,
+      512,
+      512,
+      294
+    ],
+    [
+      512,
+      512,
+      512,
+      294
+    ]
+  ],
+  "allowed": 446464,
+  "changed": 96989,
+  "outsideMaskChanges": 0,
+  "meaning": "Code preserves protected pixels; neck/hair/hand seams still require a fresh visual decision.",
+  "candidateOriginal": {
+    "file": "C:\\Users\\romar\\.codex\\generated_images\\01a0de3c-765a-7653-83dc-241fff360ce6\\exec-532b1573-694b-4ab1-86c5-257399c8c46f.png",
+    "sha256": "71e640893dd07cd1132086e7341284dfd3137a4e7fd9859c2e89c7467b0a2983"
+  },
+  "canvasResample": {
+    "from": [
+      1254,
+      1254
+    ],
+    "to": [
+      1024,
+      1024
+    ],
+    "method": "isotropic whole square canvas"
+  },
+  "outputSha256": "707efc0ed6e51a39ed0d7322d56e06d65631174898025435740ef9bbf8c012d9"
+}

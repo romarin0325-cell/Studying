@@ -1,0 +1,1454 @@
+{
+  "schema": 1,
+  "selectedAt": "2026-11-08T11:40:01.502Z",
+  "selection": "Owner requested installation of the latest Luna/Siren/Cherry Prince/Doom/Red Dragon after reviewing the comparison and the disclosed Cherry Prince warning.",
+  "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+  "assets": [
+    {
+      "id": "luna",
+      "version": "NEW2",
+      "sourcePng": {
+        "file": "defense/assets/cast-selected-20261108/luna.png",
+        "bytes": 812069,
+        "sha256": "9989d6ceaf278f454498b63b3529d50beb4ff2e262e5980f92a5176c4f7c35bd"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-selected-20261108/luna.webp",
+        "bytes": 486566,
+        "sha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2"
+      },
+      "commonScale": 0.8165869218500797,
+      "measurementUncertaintyPacked": 12,
+      "anatomyCenter": [
+        248,
+        206
+      ],
+      "portrait": {
+        "center": [
+          250,
+          204
+        ],
+        "size": 272,
+        "crop": {
+          "left": 114,
+          "top": 68,
+          "width": 272,
+          "height": 272
+        },
+        "nudge": [
+          2,
+          -2
+        ]
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "ellipse": [
+            248,
+            205.5,
+            160,
+            149,
+            0
+          ],
+          "marks": {
+            "crown": [
+              248,
+              131
+            ],
+            "eyeRight": [
+              220,
+              239
+            ],
+            "eyeLeft": [
+              284,
+              236
+            ],
+            "chin": [
+              248,
+              280
+            ],
+            "shoulders": [
+              251,
+              307
+            ],
+            "hips": [
+              254,
+              387
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        },
+        {
+          "direction": "up",
+          "ellipse": [
+            260,
+            211,
+            160,
+            150,
+            0
+          ],
+          "marks": {
+            "crown": [
+              260,
+              136
+            ],
+            "shoulders": [
+              260,
+              314
+            ],
+            "hips": [
+              258,
+              387
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        },
+        {
+          "direction": "left",
+          "ellipse": [
+            254,
+            193.5,
+            144,
+            147,
+            0
+          ],
+          "marks": {
+            "crown": [
+              254,
+              120
+            ],
+            "eyeRight": [
+              201,
+              220
+            ],
+            "chin": [
+              210,
+              267
+            ],
+            "shoulders": [
+              252,
+              301
+            ],
+            "hips": [
+              250,
+              374
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        },
+        {
+          "direction": "right",
+          "ellipse": [
+            258,
+            193.5,
+            144,
+            147,
+            0
+          ],
+          "marks": {
+            "crown": [
+              258,
+              120
+            ],
+            "eyeRight": [
+              311,
+              220
+            ],
+            "chin": [
+              302,
+              267
+            ],
+            "shoulders": [
+              260,
+              301
+            ],
+            "hips": [
+              262,
+              374
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        }
+      ],
+      "review": {
+        "status": "owner-selected-prior-NEW2",
+        "seventeenCheckApproval": false,
+        "limits": "The selected NEW2 still has recorded profile eye/chin offsets; it is installed unchanged, not silently certified as a perfect17-check result."
+      },
+      "visibleLosslessPixelChanges": 0
+    },
+    {
+      "id": "siren",
+      "version": "NEW4",
+      "sourcePng": {
+        "file": "defense/assets/cast-selected-20261108/siren.png",
+        "bytes": 744551,
+        "sha256": "71975199d648cd346cfaece5da837ef28a9ccf5f80074dcbccc59f38f102f2db"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-selected-20261108/siren.webp",
+        "bytes": 449840,
+        "sha256": "f9b861a04d313c62c9388df70c722b851ec2210cebf62945af7cdfce96596a80"
+      },
+      "commonScale": 1,
+      "measurementUncertaintyPacked": 10,
+      "anatomyCenter": [
+        252,
+        217
+      ],
+      "portrait": {
+        "center": [
+          253,
+          209
+        ],
+        "size": 250,
+        "crop": {
+          "left": 128,
+          "top": 84,
+          "width": 250,
+          "height": 250
+        },
+        "nudge": [
+          1,
+          -8
+        ]
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "ellipse": [
+            252,
+            217,
+            162,
+            148,
+            -3
+          ],
+          "marks": {
+            "chin": [
+              256,
+              291
+            ],
+            "eyeRight": [
+              218,
+              245
+            ],
+            "eyeLeft": [
+              281,
+              235
+            ],
+            "shoulders": [
+              256,
+              322
+            ],
+            "hips": [
+              256,
+              389
+            ],
+            "knee": [
+              256,
+              434
+            ],
+            "ankle": [
+              256,
+              471
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "outerSleeve": [
+              178,
+              366
+            ],
+            "outerFoot": [
+              227,
+              473
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "ellipse": [
+            256,
+            217,
+            162,
+            148,
+            3
+          ],
+          "marks": {
+            "chin": [
+              256,
+              291
+            ],
+            "shoulders": [
+              256,
+              322
+            ],
+            "hips": [
+              256,
+              389
+            ],
+            "knee": [
+              256,
+              434
+            ],
+            "ankle": [
+              256,
+              471
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "ellipse": [
+            269,
+            210,
+            148,
+            148,
+            0
+          ],
+          "marks": {
+            "chin": [
+              225,
+              284
+            ],
+            "eyeLeft": [
+              209,
+              232
+            ],
+            "shoulders": [
+              267,
+              324
+            ],
+            "hips": [
+              265,
+              391
+            ],
+            "knee": [
+              258,
+              436
+            ],
+            "ankle": [
+              256,
+              473
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "ellipse": [
+            245,
+            210,
+            148,
+            148,
+            0
+          ],
+          "marks": {
+            "chin": [
+              291,
+              284
+            ],
+            "eyeRight": [
+              293,
+              233
+            ],
+            "shoulders": [
+              246,
+              324
+            ],
+            "hips": [
+              248,
+              391
+            ],
+            "knee": [
+              254,
+              436
+            ],
+            "ankle": [
+              256,
+              473
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        }
+      ],
+      "review": {
+        "status": "17-check-pass",
+        "seventeenCheckApproval": true,
+        "checks": [
+          {
+            "id": "original-design",
+            "status": "pass",
+            "note": "원화의 청록 홀터·흰 무지갯빛 재킷·흰 쇼츠·맨발·금색 물고기 헤드폰·왼쪽 별/주머니·흐르는 푸른 머리를 네 방향에서 대조했습니다. 수중 배경/떠 있는 자세를 복사하지 않고 조용한 대기로 옮겼습니다. 의상 구조와 열린 어깨를 보존했습니다."
+          },
+          {
+            "id": "frozen-style",
+            "status": "pass",
+            "note": "최초 동결 세이렌 화풍을 그대로 기준으로 썼습니다. 재생성 후보를 새 화풍 기준으로 승격하지 않았습니다. 부드러운 둥근 얼굴, 유색 얇은 윤곽과 선택적 셀 광택이 기존 캐스트와 이어지는지 실제 비교했습니다."
+          },
+          {
+            "id": "anatomical-head",
+            "status": "pass",
+            "note": "첫 패킹의 실제 얼굴/캐스트 비교에서 과소 크기를 발견해 머리카락 아래 두개골 추정을 재관찰했습니다. 전신 공통 배율만0.945→1.000으로 바꾼 뒤 추정162×148/측면148×148, 독립 얼굴 박스108/109/108과 같은 크기의 눈·볼·턱 인상을 함께 확인했습니다. 헤드폰/아호게/머리 부피를 머리로 세지 않았습니다. 측정 수정 이력은 보존했고 ±약10px 추정 한계가 있습니다."
+          },
+          {
+            "id": "face-shape-expression",
+            "status": "pass",
+            "note": "푸른 보라 눈, 동그란 볼과 짧은 턱, 작게 노래하는 웃음과 약한 정면 고개 기울기를 확인했습니다. 이전 무표정 마네킹 같은 얼굴을 반복하지 않았고 좌우의 볼·턱이 찌그러지거나 한쪽만 세로로 길지 않습니다. 기존과 미소의 개별 모양까지 동일한 복제는 아닙니다."
+          },
+          {
+            "id": "directional-registration",
+            "status": "pass",
+            "note": "공통 바닥에서 측면 눈 차이8/7px·턱7px·어깨/골반2px입니다.8px 허용 경계에 가깝다는 사실을 보존하며, 전신/고정 얼굴창에서 측면만 작아지는 문제가 크게 줄었는지 함께 봤습니다. 독립 얼굴 박스 높이는108/109/108·윗선 차이-5/-5px입니다. 완벽한 회전 연속성을 주장하지 않습니다."
+          },
+          {
+            "id": "body-proportions",
+            "status": "pass",
+            "note": "턱 아래÷머리1.28~1.32, 몸통0.45·골반~발0.60~0.61입니다. 최초 과소 패킹을 버리고 몸까지 같은 배율로 키워 정상 키 여성 마네킹의 작은 몸과 머리 관계를 회복했습니다. 얼굴만 키우거나 다리/몸통을 따로 늘리지 않았습니다."
+          },
+          {
+            "id": "equipment-handedness",
+            "status": "pass",
+            "note": "별 핀과 금색 주머니는 해부학적 왼쪽에 있습니다. 왼쪽 뷰에서 보이고 오른쪽 가까운 면에는 복제하지 않았습니다. 재킷·팔과 먼 쪽 장식의 가림, 뒷목 끈과 헤드폰 밴드가 회전 시 자연스럽게 이어지는지 확인했습니다."
+          },
+          {
+            "id": "silhouette-perceived-size",
+            "status": "pass",
+            "note": "금색 헤드폰, 작은 아호게와 긴 머리의 체감 부피를 실제 얼굴과 분리했습니다. 교정 후64/96px에서 동료보다 유독 작은 얼굴로 읽히지 않고, 긴 머리 때문에 몸이 자동 축소된 결과도 아닙니다. 머리 모양 자체의 부피 차이는 남겨 개성을 보존했습니다."
+          },
+          {
+            "id": "outline-weight",
+            "status": "pass",
+            "note": "턱·재킷 소매·맨발의32px 표본과64/96px를 동결 참조 옆에서 확인했습니다. 남색 외곽과 더 가는 내부선, 피부의 얇은 갈색 경계가 유지됩니다. 장식/속눈썹을 두개골 크기나 외곽선 굵기로 세지 않았습니다."
+          },
+          {
+            "id": "shading-material",
+            "status": "pass",
+            "note": "원화의 재킷 무지갯빛을 작은 셀 하이라이트로 단순화하고, 푸른 머리의 넓은 밝은 면·금색 헤드폰의 짧은 금속 반사·피부의 부드러운 명암을 나누었습니다. 같은 화풍의 밝은 머리 캐릭터들과 실제 크기로 비교했습니다."
+          },
+          {
+            "id": "cast-consistency",
+            "status": "pass",
+            "note": "자스민·여왕·신데렐라와 선택 루나/레드드래곤 옆의64/96px를 확인했습니다. 첫 패킹의 과소 인상은 해소됐고, 작은 정상 키 몸·둥근 얼굴·청록색 의상이 같은 전장의 동료로 읽힙니다. 원본의 풍성한 헤어가 만드는 체감 부피와 실제 머리 크기는 별도로 판단했습니다."
+          },
+          {
+            "id": "game-size-readability",
+            "status": "pass",
+            "note": "밝고 어두운 바닥의64/96px 상하좌우를 직접 봤습니다. 얼굴, 청록 홀터/허리끈, 금색 헤드폰과 몸 방향이 구별됩니다. 측면 얼굴이 정면보다 크게 줄어드는 기존 문제는 보이지 않으며, 무지갯빛 재킷의 세부 문양은64px에서 축약되어 읽힙니다."
+          },
+          {
+            "id": "portrait-alignment",
+            "status": "pass",
+            "note": "250px 크롭→240px 출력의96px 표시를 확인했습니다. 얼굴 중심과 눈높이가 자연스럽고 헤드폰까지 외곽 맞춤으로 얼굴을 줄이지 않았습니다. 실제 편성/쌍성 화면의 모든 크롭 소비처를 검증한 것은 아닙니다."
+          },
+          {
+            "id": "seams-contact",
+            "status": "pass",
+            "note": "보호 합성 R3/R4는 머리카락 수평 경계 때문에 선택하지 않았습니다. 최종 R6은 끊김 없는 전신 그림을 선택한 뒤 모든 검수를 다시 수행했습니다. 네 방향의 머리카락/목/재킷, 손·주머니·맨발을 확인했고 앞선 가로 접합선이나 회색 몸 잔재는 보이지 않았습니다."
+          },
+          {
+            "id": "independent-detector",
+            "status": "pass",
+            "note": "현재 아틀라스와 검사 코드·패키지가 일치하는 실제 imgutils/ONNX 측정 및 원시 경고를 연결했습니다. 이 통과는 실행 검증이며 얼굴 크기 합격을 뜻하지 않습니다."
+          },
+          {
+            "id": "source-integrity",
+            "status": "pass",
+            "note": "입력·job·실제 도구 출력의 해시 연결과 단계 순서를 확인했습니다."
+          },
+          {
+            "id": "package-integrity",
+            "status": "pass",
+            "note": "전신 공통 등방 배율·알파32 잘림0·방향 추출·보이는 WebP 픽셀 손실0을 코드로 확인했습니다."
+          }
+        ],
+        "warning": null
+      },
+      "visibleLosslessPixelChanges": 0
+    },
+    {
+      "id": "cherry_prince",
+      "version": "NEW2",
+      "sourcePng": {
+        "file": "defense/assets/cast-selected-20261108/cherry_prince.png",
+        "bytes": 629766,
+        "sha256": "a2e9832c9e209863ff43ba083a8529c94e0b2782b484514e6a718dce69bbd5bf"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-selected-20261108/cherry_prince.webp",
+        "bytes": 373876,
+        "sha256": "4c2f058e46b15f4a2812657ad2f898a470c96d2a4c331f73c09a85af5bcba867"
+      },
+      "commonScale": 1,
+      "measurementUncertaintyPacked": 10,
+      "anatomyCenter": [
+        253,
+        202
+      ],
+      "portrait": {
+        "center": [
+          255,
+          197
+        ],
+        "size": 250,
+        "crop": {
+          "left": 130,
+          "top": 72,
+          "width": 250,
+          "height": 250
+        },
+        "nudge": [
+          2,
+          -5
+        ]
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "ellipse": [
+            252.53,
+            202.16,
+            159.71,
+            150.31,
+            -3
+          ],
+          "marks": {
+            "chin": [
+              258.17,
+              277.32
+            ],
+            "eyeLeft": [
+              285.41,
+              223.77
+            ],
+            "eyeRight": [
+              217.77,
+              233.16
+            ],
+            "shoulders": [
+              259,
+              308
+            ],
+            "hips": [
+              260,
+              390
+            ],
+            "knee": [
+              258,
+              436
+            ],
+            "ankle": [
+              257,
+              469
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "outerSleeve": [
+              316,
+              382
+            ],
+            "outerFoot": [
+              227,
+              472
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "ellipse": [
+            255.62,
+            202.16,
+            159.71,
+            150.31,
+            3
+          ],
+          "marks": {
+            "chin": [
+              255.62,
+              277.32
+            ],
+            "shoulders": [
+              256,
+              308
+            ],
+            "hips": [
+              256,
+              390
+            ],
+            "knee": [
+              256,
+              436
+            ],
+            "ankle": [
+              256,
+              469
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "ellipse": [
+            264.89,
+            199.34,
+            140.92,
+            150.31,
+            0
+          ],
+          "marks": {
+            "chin": [
+              221.68,
+              274.5
+            ],
+            "eyeLeft": [
+              227.32,
+              219.07
+            ],
+            "shoulders": [
+              272,
+              306
+            ],
+            "hips": [
+              271,
+              388
+            ],
+            "knee": [
+              261,
+              434
+            ],
+            "ankle": [
+              255,
+              475
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "ellipse": [
+            247.62,
+            199.28,
+            140.92,
+            150.31,
+            0
+          ],
+          "marks": {
+            "chin": [
+              289.9,
+              274.44
+            ],
+            "eyeRight": [
+              301.17,
+              219.95
+            ],
+            "shoulders": [
+              249,
+              306
+            ],
+            "hips": [
+              248,
+              388
+            ],
+            "knee": [
+              252,
+              434
+            ],
+            "ankle": [
+              257,
+              475
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0
+        }
+      ],
+      "review": {
+        "status": "owner-selected-with-disclosed-caution",
+        "seventeenCheckApproval": false,
+        "checks": [
+          {
+            "id": "original-design",
+            "status": "pass",
+            "note": "원화의 흰색·금색 왕자 제복, 두 줄 단추, 루비 목장식, 분홍 안감 망토, 검은 부츠와 왼쪽 검집을 네 방향에서 대조했습니다. 원화의 가슴에 둔 오른손을 유지하고 왕관·노출 칼날을 추가하지 않았습니다. 조용한 대기 자세에 맞춰 망토의 펼침을 줄였습니다."
+          },
+          {
+            "id": "frozen-style",
+            "status": "pass",
+            "note": "동결된 세이렌 화풍을 계속 기준으로 삼았습니다. 이번 후보를 새 기준으로 삼지 않았고, 부드러운 SD 볼·유색 윤곽·선택적인 셀 광택을 실제 원화/화풍 화면과64·96px 동료 줄에서 대조했습니다."
+          },
+          {
+            "id": "anatomical-head",
+            "status": "pass",
+            "note": "머리카락 끝과 부피를 제외한 추정 두개골159.7×150.3, 측면 깊이140.9/높이150.3을 확인했습니다. 고정 얼굴창에서 눈~턱·볼의 크기와 동료 옆 인상을 봤고, 독립 얼굴 박스114/107/108도 함께 해석했습니다. 눈높이 차이는 별도 방향 항목에 주의로 남깁니다. 가려진 두개골은 ±약10px 추정이며 완벽히 동일한 부피라는 주장이 아닙니다."
+          },
+          {
+            "id": "face-shape-expression",
+            "status": "pass",
+            "note": "원화와 기존 얼굴의 부드러운 붉은 눈매, 살짝 내려간 눈꺼풀, 작은 미소와 미세한 고개 기울기를 확인했습니다. 좌우의 볼/턱선이 눌리거나 길게 늘어나지 않았습니다. 정면과 측면의 눈높이가 완전히 같은 상태는 아닙니다."
+          },
+          {
+            "id": "directional-registration",
+            "status": "caution",
+            "note": "주의: 공통 바닥에서 측면 평균 눈Y가 정면보다9.4px/8.5px 높아 기준8px를 넘습니다. 턱 차이약2.9px·어깨/골반2px·발0px는 기준 내지만 눈높이까지 완전 정합이라고 판정하지 않습니다. 96px 셀에서는 약1.8px/1.6px 차이이며, 다음 정합 수정 시 얼굴/몸/장비 검수도 다시 열어야 합니다."
+          },
+          {
+            "id": "body-proportions",
+            "status": "pass",
+            "note": "턱 아래÷머리1.35~1.37, 몸통0.55·골반~발0.60~0.61을 실제 전신 및 큰 키 중립 동료와 대조했습니다. R1/R2의 성인처럼 긴 몸을 버리고 작은 마네킹 몸에 의상을 다시 그렸습니다. 머리를 키워 긴 몸을 감추지 않았습니다."
+          },
+          {
+            "id": "equipment-handedness",
+            "status": "pass",
+            "note": "정면 오른손은 가슴, 왼손은 벨트 근처입니다. 검집은 해부학적 왼쪽에 있고, 왼쪽 뷰에서 가깝게·오른쪽 뷰에서 몸 뒤로 가려집니다. 무기 끝을 쥐거나 좌우 회전 시 장비 손이 바뀌는 현상을 보지 않았습니다."
+          },
+          {
+            "id": "silhouette-perceived-size",
+            "status": "pass",
+            "note": "은색 곱슬머리의 부피와 실제 얼굴을 분리했습니다.64/96px에서 흰 망토가 몸을 덮어 거대하게 보이거나 부푼 머리 때문에 몸이 자동 축소된 인상은 없습니다. 폼 전체 배율 하나만 사용했습니다."
+          },
+          {
+            "id": "outline-weight",
+            "status": "pass",
+            "note": "턱·소매/손·부츠의32px 표본과64/96px를 확인했습니다. 흰 제복에도 가는 자주/갈색 경계가 있고 거의 선 없는 옷으로 사라지지 않습니다. 내부 금색 자수는 외곽보다 가늘게 읽힙니다. 검은 부츠 그림자는 선 굵기로 세지 않았습니다."
+          },
+          {
+            "id": "shading-material",
+            "status": "pass",
+            "note": "머리의 밝은 면, 피부의 얕은 그림자, 흰 천의 연보라 셀 그림자와 금속의 작은 하이라이트를 동결 화풍 옆에서 확인했습니다. 망토 전체를 과도한 유광 재질로 바꾸지 않았습니다."
+          },
+          {
+            "id": "cast-consistency",
+            "status": "pass",
+            "note": "폭풍/번개 현자·지크·선택한 루나/레드드래곤 옆에서 같은 셀과 바닥으로 확인했습니다. 가늘고 조금 큰 키의 왕자라는 차이가 있으며 같은 작은 SD 전장으로 읽힙니다. 측면 눈높이 결함을 이 항목의 전체 인상으로 덮지 않았습니다."
+          },
+          {
+            "id": "game-size-readability",
+            "status": "pass",
+            "note": "64·96px의 상하좌우와 밝은/어두운 바닥을 모두 직접 봤습니다. 흰 머리, 붉은 눈, 분홍 망토 안감과 왕자 제복이 구별되고 얼굴/검집/몸이 뭉개지지 않습니다. 자수 낱개 식별까지 요구하지 않았습니다."
+          },
+          {
+            "id": "portrait-alignment",
+            "status": "pass",
+            "note": "250px 크롭으로 만든96px 초상화를 실제로 확인했습니다. 얼굴이 시각적으로 중앙에 들어오며 머리카락 외곽 때문에 얼굴을 줄이지 않았습니다. 편성/쌍성 등 실제 게임 사용처의 적용 검증은 아직 아닙니다."
+          },
+          {
+            "id": "seams-contact",
+            "status": "pass",
+            "note": "머리를 코드로 보존한 합성 결과에서 목·목장식·망토/견장·머리카락 연결과 손/검집 접촉을 확대 및 실제 크기로 확인했습니다. 머리 아래에 회색 마네킹 잔재나 수평 절단선, 이중 얼굴선은 보이지 않았습니다."
+          },
+          {
+            "id": "independent-detector",
+            "status": "pass",
+            "note": "현재 아틀라스와 검사 코드·패키지가 일치하는 실제 imgutils/ONNX 측정 및 원시 경고를 연결했습니다. 이 통과는 실행 검증이며 얼굴 크기 합격을 뜻하지 않습니다."
+          },
+          {
+            "id": "source-integrity",
+            "status": "pass",
+            "note": "입력·job·실제 도구 출력의 해시 연결과 단계 순서를 확인했습니다."
+          },
+          {
+            "id": "package-integrity",
+            "status": "pass",
+            "note": "전신 공통 등방 배율·알파32 잘림0·방향 추출·보이는 WebP 픽셀 손실0을 코드로 확인했습니다."
+          }
+        ],
+        "warning": "Profile eyes are9.4/8.5px above the frontal mean; the8px art gate still blocks G. Owner subsequently selected this candidate for game installation; the warning is not changed to pass."
+      },
+      "visibleLosslessPixelChanges": 0
+    },
+    {
+      "id": "doom",
+      "version": "NEW2",
+      "sourcePng": {
+        "file": "defense/assets/cast-selected-20261108/doom.png",
+        "bytes": 650705,
+        "sha256": "bd487025d518e156d2ae3fac4a080e2fb56c5bc0320da1894801c79c10934fe5"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-selected-20261108/doom.webp",
+        "bytes": 352294,
+        "sha256": "9adc2f0be9f2fe16f64c9aa15ea9a76c4ee3f0428214bc3e4524739bc9702264"
+      },
+      "commonScale": 0.998046875,
+      "measurementUncertaintyPacked": 10,
+      "anatomyCenter": [
+        247,
+        206
+      ],
+      "portrait": {
+        "center": [
+          254,
+          199
+        ],
+        "size": 250,
+        "crop": {
+          "left": 129,
+          "top": 74,
+          "width": 250,
+          "height": 250
+        },
+        "nudge": [
+          7,
+          -7
+        ]
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "ellipse": [
+            247.27,
+            206.46,
+            159.42,
+            150.26,
+            0
+          ],
+          "marks": {
+            "chin": [
+              252.77,
+              281.58
+            ],
+            "eyeLeft": [
+              288.5,
+              228.44
+            ],
+            "eyeRight": [
+              222.53,
+              231.19
+            ],
+            "shoulders": [
+              258.48,
+              317.36
+            ],
+            "hips": [
+              258.48,
+              397.2
+            ],
+            "knee": [
+              257.48,
+              437.13
+            ],
+            "ankle": [
+              257.48,
+              472.06
+            ],
+            "sole": [
+              256.48,
+              480.04
+            ],
+            "outerSleeve": [
+              183.63,
+              339.32
+            ],
+            "outerFoot": [
+              222.55,
+              471.06
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256.48,
+            480.04
+          ],
+          "commonScale": 0.998046875,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "up",
+          "ellipse": [
+            255.83,
+            206.46,
+            159.42,
+            150.26,
+            0
+          ],
+          "marks": {
+            "chin": [
+              255.83,
+              281.58
+            ],
+            "shoulders": [
+              256.5,
+              317.36
+            ],
+            "hips": [
+              256.5,
+              397.2
+            ],
+            "knee": [
+              256.5,
+              437.13
+            ],
+            "ankle": [
+              256.5,
+              472.06
+            ],
+            "sole": [
+              256.5,
+              480.04
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256.5,
+            480.04
+          ],
+          "commonScale": 0.998046875,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "left",
+          "ellipse": [
+            252.68,
+            207.46,
+            142.92,
+            150.26,
+            0
+          ],
+          "marks": {
+            "chin": [
+              212.37,
+              282.58
+            ],
+            "eyeLeft": [
+              219.69,
+              231.27
+            ],
+            "shoulders": [
+              260.48,
+              318.36
+            ],
+            "hips": [
+              259.49,
+              399.2
+            ],
+            "knee": [
+              258.49,
+              438.13
+            ],
+            "ankle": [
+              258.49,
+              472.06
+            ],
+            "sole": [
+              256.49,
+              480.04
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256.49,
+            480.04
+          ],
+          "commonScale": 0.998046875,
+          "paintedClipping": 0
+        },
+        {
+          "direction": "right",
+          "ellipse": [
+            252.66,
+            207.46,
+            142.92,
+            150.26,
+            0
+          ],
+          "marks": {
+            "chin": [
+              294.81,
+              282.58
+            ],
+            "eyeRight": [
+              302.13,
+              233.11
+            ],
+            "shoulders": [
+              252.5,
+              318.36
+            ],
+            "hips": [
+              254.5,
+              399.2
+            ],
+            "knee": [
+              255.49,
+              438.13
+            ],
+            "ankle": [
+              255.49,
+              472.06
+            ],
+            "sole": [
+              256.49,
+              480.04
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "observedSole": [
+            256.49,
+            480.04
+          ],
+          "commonScale": 0.998046875,
+          "paintedClipping": 0
+        }
+      ],
+      "review": {
+        "status": "17-check-pass",
+        "seventeenCheckApproval": true,
+        "checks": [
+          {
+            "id": "original-design",
+            "status": "pass",
+            "note": "원화의 긴 검정/가지색 재단 코트, 은색 스크롤 자수, 높은 칼라, 자수 조끼·보라 보석 단추·은 체인·검은 부츠와 레이피어를 네 방향에서 대조했습니다. 갑옷이나 짧은 제복으로 재해석하지 않았습니다."
+          },
+          {
+            "id": "frozen-style",
+            "status": "pass",
+            "note": "고정 세이렌 화풍을 유지했습니다. 기존 둠의 눈매와 정체성을 참고하되 기존 픽셀을 변형한 결과가 아닙니다. 미세한 색 윤곽, 셀 명암과 절제된 광택을 원화/화풍 및 동료 줄에서 확인했습니다."
+          },
+          {
+            "id": "anatomical-head",
+            "status": "pass",
+            "note": "검은 헤어의 솟은 외곽을 제외하고 추정159.4×150.3, 측면142.9×150.3을 확인했습니다. 고정 얼굴창의 노출 볼·턱·눈 간격,64/96px 동료 인상과 독립 얼굴 박스120/112/115를 함께 봤습니다. 남성적인 낮은 눈매를 유지하면서 지나치게 긴 이마/작은 얼굴은 보이지 않습니다. 숨은 두개골은 ±약10px 추정입니다."
+          },
+          {
+            "id": "face-shape-expression",
+            "status": "pass",
+            "note": "좁고 낮은 회보라색 눈, 각이 조금 있는 눈썹, 절제한 입과 짧고 둥근 SD 턱을 확인했습니다. 정면과 좌우에서 성격이 같은 인물로 읽히고 턱이 찌그러지거나 한쪽 얼굴만 세로로 늘어나지 않았습니다."
+          },
+          {
+            "id": "directional-registration",
+            "status": "pass",
+            "note": "공통 바닥에서 측면 눈 차이약1.5/3.3px, 턱1px·어깨1px·골반2px이며 전후/좌우 덩치가 유지됩니다. 코트 끝을 골반으로 재지 않았습니다. 발도 독립 알파 검출 기준0~-1/+1px 수준으로 이어집니다."
+          },
+          {
+            "id": "body-proportions",
+            "status": "pass",
+            "note": "턱 아래÷머리1.31~1.32, 몸통0.53~0.54·골반~발0.54~0.55입니다. 작은 마네킹에 새로 입힌 몸을 실제 동료 옆에서 확인했고, 성인형 장신 코트 아래로 긴 다리가 남는 문제는 해소됐습니다. 단단한 남성 몸과 긴 코트의 부피는 보존했습니다."
+          },
+          {
+            "id": "equipment-handedness",
+            "status": "pass",
+            "note": "레이피어는 정면/후면과 양 측면에서 해부학적 오른손입니다. 왼쪽 뷰의 가까운 왼팔은 빈손이며 먼 오른쪽 검 손이 뒤로 가립니다. 오른쪽 뷰에서는 가까운 오른손이 칼자루를 잡습니다. 손이 칼날을 잡지 않고 칼끝까지 셀 안에 있습니다."
+          },
+          {
+            "id": "silhouette-perceived-size",
+            "status": "pass",
+            "note": "솟은 검은 머리와 실제 두개골을 구별했습니다.64/96px에서 후드/뿔을 포함한 참고 동료 옆에 놓아도 실제 얼굴이 과대하거나 전신이 장비 때문에 줄어든 인상이 없습니다. 어두운 코트가 넓어 보이는 특성은 몸/머리 크기와 별도로 봤습니다."
+          },
+          {
+            "id": "outline-weight",
+            "status": "pass",
+            "note": "턱·소매·부츠의 공통32px 표본,64/96px를 확인했습니다. 얼굴 윤곽은 가는 갈색/자주색이고 옷의 검은 그림자와 밝은 자수는 선 굵기에서 구별했습니다. 두꺼운 스티커 테두리로 둘러싼 화풍은 아닙니다."
+          },
+          {
+            "id": "shading-material",
+            "status": "pass",
+            "note": "검은 머리에 절제된 보라 광택, 천의 넓은 어두운 면, 은 장식/검의 작은 밝은 면이 구분됩니다. 자수 밀도는 원화 정체성을 보존하며,64px에서는 작은 선 질감으로 읽힙니다. 피부/머리/금속의 광택이 모두 같은 플라스틱으로 보이지 않습니다."
+          },
+          {
+            "id": "cast-consistency",
+            "status": "pass",
+            "note": "언더독·화염현자·지크 및 선택 루나/레드드래곤 옆의64/96px를 봤습니다. 정상 키의 단단한 SD 남성으로 읽히며, 큰 키 동료와 머리/몸을 따로 크게 만든 인상이 없습니다. 기존 캐스트의 둥근 볼과 얼굴 문법을 유지했습니다."
+          },
+          {
+            "id": "game-size-readability",
+            "status": "pass",
+            "note": "밝고 어두운 바닥의64/96px 네 방향을 실제로 확인했습니다. 검은 머리와 코트가 하나의 무정형 덩어리가 되지 않고 얼굴, 은색 칼라, 오른손 검과 몸 방향이 읽힙니다. 아주 작은 자수의 개별 판독은 한계가 있습니다."
+          },
+          {
+            "id": "portrait-alignment",
+            "status": "pass",
+            "note": "96px 파생 초상화를 확인했습니다. 얼굴이 중앙에 오고 눈·턱이 작은 창에 잘립니다거나 머리 부피만 화면을 채우는 현상은 보이지 않았습니다. 실제 게임 모든 초상화 사용처에 적용한 검증은 별도입니다."
+          },
+          {
+            "id": "seams-contact",
+            "status": "pass",
+            "note": "보호 머리와 새 작은 몸의 목/높은 칼라, 옆머리·귀·옷, 빈손/검 손의 접촉을 확대와 실제 크기에서 확인했습니다. 목이 끊기거나 회색 마네킹 잔재/중복 팔/부유 검자루는 보지 않았습니다."
+          },
+          {
+            "id": "independent-detector",
+            "status": "pass",
+            "note": "현재 아틀라스와 검사 코드·패키지가 일치하는 실제 imgutils/ONNX 측정 및 원시 경고를 연결했습니다. 이 통과는 실행 검증이며 얼굴 크기 합격을 뜻하지 않습니다."
+          },
+          {
+            "id": "source-integrity",
+            "status": "pass",
+            "note": "입력·job·실제 도구 출력의 해시 연결과 단계 순서를 확인했습니다."
+          },
+          {
+            "id": "package-integrity",
+            "status": "pass",
+            "note": "전신 공통 등방 배율·알파32 잘림0·방향 추출·보이는 WebP 픽셀 손실0을 코드로 확인했습니다."
+          }
+        ],
+        "warning": null
+      },
+      "visibleLosslessPixelChanges": 0
+    },
+    {
+      "id": "red_dragon",
+      "version": "NEW2",
+      "sourcePng": {
+        "file": "defense/assets/cast-selected-20261108/red_dragon.png",
+        "bytes": 906274,
+        "sha256": "6c55bc6d2a4733e27514f6176b36d7e22fdbd04f33e6197c37459f20898c47b8"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-selected-20261108/red_dragon.webp",
+        "bytes": 621894,
+        "sha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e"
+      },
+      "commonScale": 0.8165869218500797,
+      "measurementUncertaintyPacked": 12,
+      "anatomyCenter": [
+        255,
+        203
+      ],
+      "portrait": {
+        "center": [
+          255,
+          199
+        ],
+        "size": 250,
+        "crop": {
+          "left": 130,
+          "top": 74,
+          "width": 250,
+          "height": 250
+        },
+        "nudge": [
+          0,
+          -4
+        ]
+      },
+      "frames": [
+        {
+          "direction": "down",
+          "ellipse": [
+            255,
+            202.5,
+            160,
+            153,
+            0
+          ],
+          "marks": {
+            "crown": [
+              255,
+              126
+            ],
+            "eyeRight": [
+              221,
+              231
+            ],
+            "eyeLeft": [
+              288,
+              230
+            ],
+            "chin": [
+              256,
+              279
+            ],
+            "shoulders": [
+              253,
+              301
+            ],
+            "hips": [
+              254,
+              379
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        },
+        {
+          "direction": "up",
+          "ellipse": [
+            251,
+            201,
+            160,
+            150,
+            0
+          ],
+          "marks": {
+            "crown": [
+              251,
+              126
+            ],
+            "shoulders": [
+              251,
+              301
+            ],
+            "hips": [
+              253,
+              380
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        },
+        {
+          "direction": "left",
+          "ellipse": [
+            245,
+            208.5,
+            144,
+            145,
+            0
+          ],
+          "marks": {
+            "crown": [
+              245,
+              136
+            ],
+            "eyeLeft": [
+              217,
+              233
+            ],
+            "chin": [
+              215,
+              281
+            ],
+            "shoulders": [
+              248,
+              309
+            ],
+            "hips": [
+              245,
+              378
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        },
+        {
+          "direction": "right",
+          "ellipse": [
+            267,
+            208.5,
+            144,
+            145,
+            0
+          ],
+          "marks": {
+            "crown": [
+              267,
+              136
+            ],
+            "eyeLeft": [
+              295,
+              233
+            ],
+            "chin": [
+              297,
+              281
+            ],
+            "shoulders": [
+              264,
+              309
+            ],
+            "hips": [
+              267,
+              378
+            ],
+            "ground": [
+              256,
+              480
+            ]
+          },
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 0.8165869218500797,
+          "paintedClipping": 0,
+          "interpretation": "An approximate skull centre inferred from the previously recorded crown/chin, not a new detector or a new17-check approval."
+        }
+      ],
+      "review": {
+        "status": "owner-selected-prior-NEW2",
+        "seventeenCheckApproval": false,
+        "limits": "The selected NEW2 is preserved unchanged; horns/wings are excluded from anatomical interpretation."
+      },
+      "visibleLosslessPixelChanges": 0
+    }
+  ]
+}

@@ -109,8 +109,8 @@
     },
     {
       "id": "unit-luna",
-      "source": "defense/assets/cast-v2/luna.webp",
-      "sha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
+      "source": "defense/assets/cast-selected-20261108/luna.webp",
+      "sha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2",
       "width": 1024,
       "height": 1024
     },
@@ -165,8 +165,8 @@
     },
     {
       "id": "unit-red_dragon",
-      "source": "defense/assets/cast-v2/red_dragon.webp",
-      "sha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
+      "source": "defense/assets/cast-selected-20261108/red_dragon.webp",
+      "sha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e",
       "width": 1024,
       "height": 1024
     },
@@ -193,8 +193,8 @@
     },
     {
       "id": "unit-siren",
-      "source": "defense/assets/cast-v2/siren.webp",
-      "sha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
+      "source": "defense/assets/cast-selected-20261108/siren.webp",
+      "sha256": "f9b861a04d313c62c9388df70c722b851ec2210cebf62945af7cdfce96596a80",
       "width": 1024,
       "height": 1024
     },
@@ -242,8 +242,8 @@
     },
     {
       "id": "unit-doom",
-      "source": "defense/assets/cast-v2/doom.webp",
-      "sha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+      "source": "defense/assets/cast-selected-20261108/doom.webp",
+      "sha256": "9adc2f0be9f2fe16f64c9aa15ea9a76c4ee3f0428214bc3e4524739bc9702264",
       "width": 1024,
       "height": 1024
     },
@@ -277,8 +277,8 @@
     },
     {
       "id": "unit-cherry_prince",
-      "source": "defense/assets/cast-v2/cherry_prince.webp",
-      "sha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
+      "source": "defense/assets/cast-selected-20261108/cherry_prince.webp",
+      "sha256": "4c2f058e46b15f4a2812657ad2f898a470c96d2a4c331f73c09a85af5bcba867",
       "width": 1024,
       "height": 1024
     },

@@ -1,0 +1,311 @@
+{
+  "viewports": [
+    390,
+    844
+  ],
+  "themes": [
+    "night",
+    "bright"
+  ],
+  "captures": [
+    {
+      "label": "night-home",
+      "file": "test-results/selected-cast/night-home.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "night-prepare",
+      "file": "test-results/selected-cast/night-prepare.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-formation",
+      "file": "test-results/selected-cast/night-formation.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-detail-luna",
+      "file": "test-results/selected-cast/night-detail-luna.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-detail-siren",
+      "file": "test-results/selected-cast/night-detail-siren.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-detail-cherry_prince",
+      "file": "test-results/selected-cast/night-detail-cherry_prince.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-detail-doom",
+      "file": "test-results/selected-cast/night-detail-doom.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-detail-red_dragon",
+      "file": "test-results/selected-cast/night-detail-red_dragon.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-twin-formation",
+      "file": "test-results/selected-cast/night-twin-formation.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "night-phantom-line",
+      "file": "test-results/selected-cast/night-phantom-line.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "night-battle-down",
+      "file": "test-results/selected-cast/night-battle-down.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "night-battle-up",
+      "file": "test-results/selected-cast/night-battle-up.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "night-battle-left",
+      "file": "test-results/selected-cast/night-battle-left.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "night-battle-right",
+      "file": "test-results/selected-cast/night-battle-right.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "bright-home",
+      "file": "test-results/selected-cast/bright-home.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "bright-prepare",
+      "file": "test-results/selected-cast/bright-prepare.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-formation",
+      "file": "test-results/selected-cast/bright-formation.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-detail-luna",
+      "file": "test-results/selected-cast/bright-detail-luna.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-detail-siren",
+      "file": "test-results/selected-cast/bright-detail-siren.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-detail-cherry_prince",
+      "file": "test-results/selected-cast/bright-detail-cherry_prince.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-detail-doom",
+      "file": "test-results/selected-cast/bright-detail-doom.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-detail-red_dragon",
+      "file": "test-results/selected-cast/bright-detail-red_dragon.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-twin-formation",
+      "file": "test-results/selected-cast/bright-twin-formation.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": {
+        "x": 0,
+        "right": 390,
+        "bottom": 844
+      }
+    },
+    {
+      "label": "bright-phantom-line",
+      "file": "test-results/selected-cast/bright-phantom-line.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "bright-battle-down",
+      "file": "test-results/selected-cast/bright-battle-down.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "bright-battle-up",
+      "file": "test-results/selected-cast/bright-battle-up.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "bright-battle-left",
+      "file": "test-results/selected-cast/bright-battle-left.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "bright-battle-right",
+      "file": "test-results/selected-cast/bright-battle-right.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    },
+    {
+      "label": "preview-home",
+      "file": "test-results/selected-cast/preview-home.png",
+      "documentWidth": 390,
+      "visibleBroken": [],
+      "sheet": null
+    }
+  ],
+  "embedded": [
+    {
+      "theme": "night",
+      "verifiedImages": 15
+    },
+    {
+      "theme": "bright",
+      "verifiedImages": 15
+    }
+  ],
+  "guideCases": [
+    {
+      "width": 390,
+      "stages": 7,
+      "checks": 17,
+      "masters": 9,
+      "comparisonCards": 20,
+      "externalRequests": 0
+    },
+    {
+      "width": 1280,
+      "stages": 7,
+      "checks": 17,
+      "masters": 9,
+      "comparisonCards": 20,
+      "externalRequests": 0
+    }
+  ],
+  "phantomReplacements": 8,
+  "pageErrors": [],
+  "externalRequests": [],
+  "limits": "Desktop Chromium CSS viewport and controlled combat fixtures; not physical-device FPS or a new anatomical-art pass."
+}

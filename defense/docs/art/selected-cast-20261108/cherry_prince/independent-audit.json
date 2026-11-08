@@ -1,0 +1,667 @@
+{
+  "python": "3.12.16 (main, Oct 26 2026, 14:10:56) [MSC v.1944 64 bit (AMD64)]",
+  "packages": {
+    "dghs-imgutils": "0.19.0",
+    "onnxruntime": "1.31.1",
+    "numpy": "1.26.4",
+    "scikit-image": "0.26.0",
+    "pillow": "13.0.0"
+  },
+  "checkerSource": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-expressive-sd-pilot-20261108\\runtime\\checker-source.py",
+  "checkerSha256": "c77fc837a1567f1e77e5f4987ad4f85d8ea4ebe96b72ee43b2783d613b5939b2",
+  "referenceDistribution": {
+    "file": "C:\\Users\\romar\\tools\\asset-check\\out\\report.json",
+    "generatedAt": "2026-11-07T22:50:20",
+    "sha256": "9ac97bef6fa93735e029edeae1e17a2e49098ddd77f0a000e7ef23f4a92191fb",
+    "count": 40
+  },
+  "distribution": {
+    "n_atlases": 40,
+    "front_face_height": {
+      "n": 40,
+      "min": 99,
+      "q1": 107,
+      "median": 111.5,
+      "q3": 119,
+      "iqr": 12,
+      "p80": 119.2,
+      "max": 144,
+      "mean": 113.525
+    },
+    "face_height_ratio_sideA_front": {
+      "n": 40,
+      "min": 0.882353,
+      "q1": 0.930418,
+      "median": 0.962421,
+      "q3": 0.9852,
+      "iqr": 0.054781,
+      "p80": 1.001835,
+      "max": 1.174312,
+      "mean": 0.968896
+    },
+    "face_height_ratio_sideB_front": {
+      "n": 40,
+      "min": 0.84466,
+      "q1": 0.929045,
+      "median": 0.965453,
+      "q3": 1,
+      "iqr": 0.070955,
+      "p80": 1.003478,
+      "max": 1.155963,
+      "mean": 0.965638
+    },
+    "face_height_diff_side_pct": {
+      "n": 40,
+      "min": 0,
+      "q1": 0.863943,
+      "median": 0.921659,
+      "q3": 1.886792,
+      "iqr": 1.022849,
+      "p80": 2.096385,
+      "max": 12.903226,
+      "mean": 1.938545
+    },
+    "face_top_diff_sideA": {
+      "n": 40,
+      "min": -25,
+      "q1": -7,
+      "median": 0.5,
+      "q3": 4,
+      "iqr": 11,
+      "p80": 4.4,
+      "max": 15,
+      "mean": -1.65
+    },
+    "face_top_diff_sideB": {
+      "n": 40,
+      "min": -23,
+      "q1": -7,
+      "median": 0,
+      "q3": 4.25,
+      "iqr": 11.25,
+      "p80": 6.2,
+      "max": 30,
+      "mean": -0.55
+    },
+    "foot_diff_back": {
+      "n": 40,
+      "min": -1,
+      "q1": 0,
+      "median": 0,
+      "q3": 0,
+      "iqr": 0,
+      "p80": 0,
+      "max": 3,
+      "mean": 0.1
+    },
+    "foot_diff_sideA": {
+      "n": 40,
+      "min": -24,
+      "q1": -1,
+      "median": 0,
+      "q3": 0.25,
+      "iqr": 1.25,
+      "p80": 1,
+      "max": 5,
+      "mean": -1.375
+    },
+    "foot_diff_sideB": {
+      "n": 40,
+      "min": -24,
+      "q1": -1,
+      "median": 0,
+      "q3": 1,
+      "iqr": 2,
+      "p80": 1,
+      "max": 6,
+      "mean": -1.25
+    },
+    "chin_to_foot_diff_sideA": {
+      "n": 40,
+      "min": -19,
+      "q1": -2.25,
+      "median": 3.5,
+      "q3": 11,
+      "iqr": 13.25,
+      "p80": 13,
+      "max": 25,
+      "mean": 4.05
+    },
+    "chin_to_foot_diff_sideB": {
+      "n": 40,
+      "min": -20,
+      "q1": -2.25,
+      "median": 3,
+      "q3": 10.25,
+      "iqr": 12.5,
+      "p80": 12,
+      "max": 26,
+      "mean": 3.45
+    },
+    "mirror_lpips_face": {
+      "n": 40,
+      "min": 0.038564,
+      "q1": 0.124472,
+      "median": 0.159427,
+      "q3": 0.269671,
+      "iqr": 0.145198,
+      "p80": 0.31031,
+      "max": 0.467264,
+      "mean": 0.199893
+    },
+    "mirror_lpips_head": {
+      "n": 40,
+      "min": 0.04634,
+      "q1": 0.092857,
+      "median": 0.139498,
+      "q3": 0.181186,
+      "iqr": 0.088329,
+      "p80": 0.184592,
+      "max": 0.320495,
+      "mean": 0.143637
+    },
+    "mirror_ssim_face": {
+      "n": 40,
+      "min": 0.158334,
+      "q1": 0.361745,
+      "median": 0.475761,
+      "q3": 0.556302,
+      "iqr": 0.194557,
+      "p80": 0.599588,
+      "max": 0.82446,
+      "mean": 0.473348
+    },
+    "ccip_front_vs_side": {
+      "n": 80,
+      "min": 0.005832,
+      "q1": 0.017342,
+      "median": 0.023087,
+      "q3": 0.033411,
+      "iqr": 0.016069,
+      "p80": 0.035923,
+      "max": 0.076876,
+      "mean": 0.027049
+    },
+    "ccip_front_back": {
+      "n": 40,
+      "min": 0.034967,
+      "q1": 0.0682,
+      "median": 0.103427,
+      "q3": 0.131182,
+      "iqr": 0.062981,
+      "p80": 0.135701,
+      "max": 0.212258,
+      "mean": 0.103604
+    },
+    "ccip_sideA_sideB": {
+      "n": 40,
+      "min": 0.001475,
+      "q1": 0.003555,
+      "median": 0.006814,
+      "q3": 0.021369,
+      "iqr": 0.017814,
+      "p80": 0.025871,
+      "max": 0.081083,
+      "mean": 0.015245
+    },
+    "ccip_model_same_character_threshold": 0.178475,
+    "front_face_height_outside_median_pm_8pct": [],
+    "thresholds": {
+      "side_front_face_height_ratio": [
+        0.92,
+        1.08
+      ],
+      "sideA_vs_sideB_face_height_diff_pct": 6,
+      "side_face_height_diff_definition": "abs(sideA - sideB) / mean(sideA, sideB) * 100",
+      "face_band_top_diff_vs_front_px": 8,
+      "foot_line_diff_vs_front_px": 3,
+      "mirror_lpips_face_p80": 0.31031,
+      "mirror_lpips_head_p80": 0.184592,
+      "ccip_front_vs_side_p80": 0.035923,
+      "front_face_height_median_pm_frac": 0.08,
+      "percentile_method": "numpy linear, strictly greater than p80",
+      "score": "10 missing front face; 8 per missing side face; 6 per missing head; 4 * how far a side/front face-height ratio sits outside 0.92-1.08, in units of 0.08; 3 * (side face-height % diff - 6) / 6 when that diff exceeds 6; 2 * (|face-top diff| - 8) / 8 per side when |diff| > 8px; 2 * (|foot diff| - 3) / 3 per non-front direction when |diff| > 3px; 1.5 * (face LPIPS - p80) / p80 when face mirror LPIPS exceeds the cast p80; 1.0 * (head LPIPS - p80) / p80 when head mirror LPIPS exceeds its own cast p80; 1.5 * (CCIP - p80) / p80 per front-vs-side CCIP above the cast p80; 2 * (relative face-height distance beyond 8%) / 0.08 when front face height is outside the cast median ±8%. Higher means more review."
+    }
+  },
+  "files": [
+    {
+      "character": "r1-5f87a54f-2aae0f10",
+      "group": "workflow-output",
+      "file": "atlas.png",
+      "path": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\cherry_prince-r3\\work\\r1-5f87a54f-2aae0f10\\atlas.png",
+      "image_stub": "workflow-output_atlas",
+      "original_size": [
+        1024,
+        1024
+      ],
+      "working_size": [
+        1024,
+        1024
+      ],
+      "size_note": null,
+      "directions": {
+        "front": {
+          "face": {
+            "chosen": {
+              "box": [
+                181,
+                173,
+                332,
+                287
+              ],
+              "score": 0.861025,
+              "width": 151,
+              "height": 114,
+              "count": 1
+            },
+            "all": [
+              {
+                "box": [
+                  181,
+                  173,
+                  332,
+                  287
+                ],
+                "score": 0.861025,
+                "width": 151,
+                "height": 114
+              }
+            ],
+            "kind": "face",
+            "expected": true
+          },
+          "head": {
+            "chosen": {
+              "box": [
+                131,
+                75,
+                371,
+                288
+              ],
+              "score": 0.937474,
+              "width": 240,
+              "height": 213,
+              "count": 1
+            },
+            "all": [
+              {
+                "box": [
+                  131,
+                  75,
+                  371,
+                  288
+                ],
+                "score": 0.937474,
+                "width": 240,
+                "height": 213
+              }
+            ],
+            "kind": "head"
+          },
+          "alpha_bbox": [
+            126,
+            74,
+            369,
+            482
+          ],
+          "alpha_width": 243,
+          "alpha_height": 408,
+          "foot_y": 480,
+          "foot_x": 252.803922,
+          "errors": []
+        },
+        "back": {
+          "face": {
+            "chosen": null,
+            "all": [],
+            "kind": "face",
+            "expected": false
+          },
+          "head": {
+            "chosen": {
+              "box": [
+                128,
+                76,
+                360,
+                285
+              ],
+              "score": 0.918874,
+              "width": 232,
+              "height": 209,
+              "count": 1
+            },
+            "all": [
+              {
+                "box": [
+                  128,
+                  76,
+                  360,
+                  285
+                ],
+                "score": 0.918874,
+                "width": 232,
+                "height": 209
+              }
+            ],
+            "kind": "head"
+          },
+          "alpha_bbox": [
+            127,
+            74,
+            367,
+            481
+          ],
+          "alpha_width": 240,
+          "alpha_height": 407,
+          "foot_y": 480,
+          "foot_x": 252.633721,
+          "errors": []
+        },
+        "sideA": {
+          "face": {
+            "chosen": {
+              "box": [
+                181,
+                174,
+                295,
+                281
+              ],
+              "score": 0.84733,
+              "width": 114,
+              "height": 107,
+              "count": 1
+            },
+            "all": [
+              {
+                "box": [
+                  181,
+                  174,
+                  295,
+                  281
+                ],
+                "score": 0.84733,
+                "width": 114,
+                "height": 107
+              }
+            ],
+            "kind": "face",
+            "expected": true
+          },
+          "head": {
+            "chosen": {
+              "box": [
+                158,
+                77,
+                385,
+                281
+              ],
+              "score": 0.929204,
+              "width": 227,
+              "height": 204,
+              "count": 1
+            },
+            "all": [
+              {
+                "box": [
+                  158,
+                  77,
+                  385,
+                  281
+                ],
+                "score": 0.929204,
+                "width": 227,
+                "height": 204
+              }
+            ],
+            "kind": "head"
+          },
+          "alpha_bbox": [
+            158,
+            73,
+            386,
+            481
+          ],
+          "alpha_width": 228,
+          "alpha_height": 408,
+          "foot_y": 480,
+          "foot_x": 256.587473,
+          "errors": []
+        },
+        "sideB": {
+          "face": {
+            "chosen": {
+              "box": [
+                221,
+                171,
+                328,
+                279
+              ],
+              "score": 0.846157,
+              "width": 107,
+              "height": 108,
+              "count": 1
+            },
+            "all": [
+              {
+                "box": [
+                  221,
+                  171,
+                  328,
+                  279
+                ],
+                "score": 0.846157,
+                "width": 107,
+                "height": 108
+              }
+            ],
+            "kind": "face",
+            "expected": true
+          },
+          "head": {
+            "chosen": {
+              "box": [
+                120,
+                76,
+                348,
+                280
+              ],
+              "score": 0.931072,
+              "width": 228,
+              "height": 204,
+              "count": 1
+            },
+            "all": [
+              {
+                "box": [
+                  120,
+                  76,
+                  348,
+                  280
+                ],
+                "score": 0.931072,
+                "width": 228,
+                "height": 204
+              }
+            ],
+            "kind": "head"
+          },
+          "alpha_bbox": [
+            113,
+            71,
+            347,
+            481
+          ],
+          "alpha_width": 234,
+          "alpha_height": 410,
+          "foot_y": 480,
+          "foot_x": 249.780911,
+          "errors": []
+        }
+      },
+      "derived": {
+        "face_width": {
+          "front": 151,
+          "sideA": 114,
+          "sideB": 107
+        },
+        "face_height": {
+          "front": 114,
+          "sideA": 107,
+          "sideB": 108
+        },
+        "face_height_ratio_sideA_front": 0.938596,
+        "face_height_ratio_sideB_front": 0.947368,
+        "face_height_diff_sideA_minus_sideB_px": -1,
+        "face_height_diff_side_pct": 0.930233,
+        "face_top": {
+          "front": 173,
+          "sideA": 174,
+          "sideB": 171
+        },
+        "face_bottom": {
+          "front": 287,
+          "sideA": 281,
+          "sideB": 279
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 1,
+          "sideB": -2
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -6,
+          "sideB": -8
+        },
+        "head_top": {
+          "front": 75,
+          "back": 76,
+          "sideA": 77,
+          "sideB": 76
+        },
+        "head_top_diff_vs_front": {
+          "back": 1,
+          "sideA": 2,
+          "sideB": 1
+        },
+        "chin_to_foot": {
+          "front": 193,
+          "sideA": 199,
+          "sideB": 201
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 6,
+          "sideB": 8
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 252.803922,
+          "back": 252.633721,
+          "sideA": 256.587473,
+          "sideB": 249.780911
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 408,
+          "back": 407,
+          "sideA": 408,
+          "sideB": 410
+        },
+        "alpha_bbox": {
+          "front": [
+            126,
+            74,
+            369,
+            482
+          ],
+          "back": [
+            127,
+            74,
+            367,
+            481
+          ],
+          "sideA": [
+            158,
+            73,
+            386,
+            481
+          ],
+          "sideB": [
+            113,
+            71,
+            347,
+            481
+          ]
+        }
+      },
+      "sourceSha256": "a2e9832c9e209863ff43ba083a8529c94e0b2782b484514e6a718dce69bbd5bf",
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            163,
+            157,
+            313,
+            298
+          ],
+          "sideB_crop": [
+            204,
+            154,
+            345,
+            296
+          ],
+          "lpips": 0.293081,
+          "ssim": 0.360495,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            123,
+            46,
+            420,
+            312
+          ],
+          "sideB_crop": [
+            85,
+            45,
+            383,
+            311
+          ],
+          "lpips": 0.14001,
+          "ssim": 0.611325,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.130252,
+        "front_sideA": 0.037602,
+        "front_sideB": 0.018232,
+        "sideA_sideB": 0.044338
+      },
+      "cast_face_height": {
+        "front_face_height": 114,
+        "cast_median": 111.5,
+        "ratio_to_median": 1.022422,
+        "band_low": 102.58,
+        "band_high": 120.42,
+        "outside_median_pm_8pct": false
+      },
+      "flags": [
+        "CCIP front-sideA 0.038 > cast p80 0.036"
+      ],
+      "review_score": 0.070087,
+      "review_reasons": [
+        "CCIP front-sideA 0.038 > cast p80 0.036"
+      ]
+    }
+  ],
+  "meaning": "Detections and perceptual distances are warning signals, not anatomical skull ground truth."
+}

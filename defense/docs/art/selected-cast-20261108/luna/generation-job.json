@@ -1,0 +1,118 @@
+{
+  "id": "luna",
+  "name": "루나",
+  "version": "v2",
+  "canonical": 3,
+  "edit": 2,
+  "original": "루나.jpg",
+  "regions": [
+    {
+      "name": "far-right-dagger-and-empty-near-arm",
+      "path": "M 143 302 L 258 296 L 282 330 L 287 375 L 258 407 L 139 409 L 111 388 L 112 348 Z",
+      "feather": 3
+    }
+  ],
+  "request": "In the bottom-left LEFT-facing profile only, correct the dagger ownership and arm overlap. The visible near arm is her anatomical LEFT arm and must be EMPTY, resting naturally downward in its black sleeve. Her anatomical RIGHT hand is the far hand, holding the ONE curved dagger slightly forward at waist height. Show a small credible far grip emerging just in front of the torso, partly occluded by the near forearm. The blade points forward to screen-left and its hilt joins that far right hand. Do not move the dagger to the left hand and do not add a second blade. Keep the silver-violet blade, compact gold guard, loose dark-violet dress and gold waist chains. Keep all head/face/hood pixels and their geometry unchanged. Keep the right-facing profile as the near-right-hand dagger reference. Preserve front and back exactly. The source hood, exposed face, limbs and silhouette are already approved; this is only a hand/weapon occlusion correction.",
+  "prompt": "Use case: precise-object-edit. Input 1 is the exact transparent 1024x1024 game sprite atlas to edit. Input 2 is an edit-area map: white regions are the ONLY permitted changes, black is protected. Do not render the mask. Input 3 is the original character design for identity, not proportions.\n\nIn the bottom-left LEFT-facing profile only, correct the dagger ownership and arm overlap. The visible near arm is her anatomical LEFT arm and must be EMPTY, resting naturally downward in its black sleeve. Her anatomical RIGHT hand is the far hand, holding the ONE curved dagger slightly forward at waist height. Show a small credible far grip emerging just in front of the torso, partly occluded by the near forearm. The blade points forward to screen-left and its hilt joins that far right hand. Do not move the dagger to the left hand and do not add a second blade. Keep the silver-violet blade, compact gold guard, loose dark-violet dress and gold waist chains. Keep all head/face/hood pixels and their geometry unchanged. Keep the right-facing profile as the near-right-hand dagger reference. Preserve front and back exactly. The source hood, exposed face, limbs and silhouette are already approved; this is only a hand/weapon occlusion correction.\n\nPreserve the square four-cell layout, pixel alignment, body scale and common ground. Top-left front, top-right back, bottom-left left profile, bottom-right right profile. Keep the refined crisp navy/brown contours, glossy selective cel shading and the existing SD style. This is a tiny regional correction, not a new character rendering. Everything outside the designated areas stays unchanged. Native transparent background, no labels, no guide marks, no floor shadow. Return the complete atlas.",
+  "promptFile": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\prompts\\luna-regional-v1.txt",
+  "referencePaths": [
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\inputs\\luna-base.png",
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\masks\\luna-edit.png",
+    "C:\\Users\\romar\\Downloads\\캐릭터\\루나.jpg"
+  ],
+  "source": {
+    "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-registered-sd-pilot-20261107\\raw\\luna-paint-v2.png",
+    "sha256": "e364985716147cb5a3024eac07b980ab2dcca3cab634ba95f8300e6f009a73e3",
+    "commonScale": 0.8165869218500797,
+    "shifts": [
+      [
+        2,
+        -5
+      ],
+      [
+        -3,
+        -5
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        2,
+        0
+      ]
+    ],
+    "canonicalView": 3,
+    "reflectedView": 2
+  },
+  "baseSha256": "e077c7d0838b09443763719de139eab2b7cc5a29234110ee02554624423dbe52",
+  "maskSha256": "d82b41ab1899a093dbddc321ffc0fec74b2e93af17950b77cc478f838a3402b5",
+  "landmarks": {
+    "canonical": {
+      "crown": [
+        258,
+        120
+      ],
+      "eyeRight": [
+        311,
+        220
+      ],
+      "chin": [
+        302,
+        267
+      ],
+      "shoulders": [
+        260,
+        301
+      ],
+      "hips": [
+        262,
+        374
+      ],
+      "ground": [
+        256,
+        480
+      ]
+    },
+    "mirrored": {
+      "crown": [
+        254,
+        120
+      ],
+      "eyeRight": [
+        201,
+        220
+      ],
+      "chin": [
+        210,
+        267
+      ],
+      "shoulders": [
+        252,
+        301
+      ],
+      "hips": [
+        250,
+        374
+      ],
+      "ground": [
+        256,
+        480
+      ]
+    }
+  },
+  "inputs": [
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\inputs\\luna-base.png",
+      "sha256": "e077c7d0838b09443763719de139eab2b7cc5a29234110ee02554624423dbe52"
+    },
+    {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\masks\\luna-edit.png",
+      "sha256": "d82b41ab1899a093dbddc321ffc0fec74b2e93af17950b77cc478f838a3402b5"
+    },
+    {
+      "file": "C:\\Users\\romar\\Downloads\\캐릭터\\루나.jpg",
+      "sha256": "2a26290816404d670d22ab3edada415bd948ca72ee36ddd14f82d62a2c9d6132"
+    }
+  ]
+}

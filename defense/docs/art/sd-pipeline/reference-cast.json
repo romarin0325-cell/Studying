@@ -1,0 +1,6047 @@
+{
+  "generated_at": "2026-11-07T22:50:20",
+  "description": "Frozen historical40-cast distribution from the user-owned independent checker, not a current whole-roster audit. Local image paths and unrelated pilot results removed.",
+  "originalReportSha256": "9ac97bef6fa93735e029edeae1e17a2e49098ddd77f0a000e7ef23f4a92191fb",
+  "files": [
+    {
+      "character": "ancient_dragon",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 151,
+          "sideA": 110,
+          "sideB": 109
+        },
+        "face_height": {
+          "front": 121,
+          "sideA": 119,
+          "sideB": 117
+        },
+        "face_height_ratio_sideA_front": 0.983471,
+        "face_height_ratio_sideB_front": 0.966942,
+        "face_height_diff_sideA_minus_sideB_px": 2,
+        "face_height_diff_side_pct": 1.694915,
+        "face_top": {
+          "front": 154,
+          "sideA": 133,
+          "sideB": 136
+        },
+        "face_bottom": {
+          "front": 275,
+          "sideA": 252,
+          "sideB": 253
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -21,
+          "sideB": -18
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -23,
+          "sideB": -22
+        },
+        "head_top": {
+          "front": 53,
+          "back": 73,
+          "sideA": 26,
+          "sideB": 29
+        },
+        "head_top_diff_vs_front": {
+          "back": 20,
+          "sideA": -27,
+          "sideB": -24
+        },
+        "chin_to_foot": {
+          "front": 203,
+          "sideA": 228,
+          "sideB": 229
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 25,
+          "sideB": 26
+        },
+        "foot_y": {
+          "front": 478,
+          "back": 478,
+          "sideA": 480,
+          "sideB": 482
+        },
+        "foot_x": {
+          "front": 292.73994,
+          "back": 295.1986,
+          "sideA": 326.844504,
+          "sideB": 172.570981
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 2,
+          "sideB": 4
+        },
+        "alpha_height": {
+          "front": 458,
+          "back": 454,
+          "sideA": 466,
+          "sideB": 465
+        },
+        "alpha_bbox": {
+          "front": [
+            86,
+            23,
+            441,
+            481
+          ],
+          "back": [
+            82,
+            27,
+            434,
+            481
+          ],
+          "sideA": [
+            144,
+            17,
+            476,
+            483
+          ],
+          "sideB": [
+            31,
+            20,
+            362,
+            485
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            157,
+            115,
+            301,
+            270
+          ],
+          "sideB_crop": [
+            214,
+            118,
+            357,
+            271
+          ],
+          "lpips": 0.1651,
+          "ssim": 0.491447,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            106,
+            0,
+            430,
+            289
+          ],
+          "sideB_crop": [
+            88,
+            0,
+            400,
+            287
+          ],
+          "lpips": 0.148965,
+          "ssim": 0.515013,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.067293,
+        "front_sideA": 0.012978,
+        "front_sideB": 0.014334,
+        "sideA_sideB": 0.005773
+      }
+    },
+    {
+      "character": "antropy",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 138,
+          "sideA": 106,
+          "sideB": 102
+        },
+        "face_height": {
+          "front": 103,
+          "sideA": 99,
+          "sideB": 87
+        },
+        "face_height_ratio_sideA_front": 0.961165,
+        "face_height_ratio_sideB_front": 0.84466,
+        "face_height_diff_sideA_minus_sideB_px": 12,
+        "face_height_diff_side_pct": 12.903226,
+        "face_top": {
+          "front": 202,
+          "sideA": 209,
+          "sideB": 222
+        },
+        "face_bottom": {
+          "front": 305,
+          "sideA": 308,
+          "sideB": 309
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 7,
+          "sideB": 20
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 3,
+          "sideB": 4
+        },
+        "head_top": {
+          "front": 104,
+          "back": 105,
+          "sideA": 118,
+          "sideB": 120
+        },
+        "head_top_diff_vs_front": {
+          "back": 1,
+          "sideA": 14,
+          "sideB": 16
+        },
+        "chin_to_foot": {
+          "front": 175,
+          "sideA": 171,
+          "sideB": 170
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -4,
+          "sideB": -5
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 256.260677,
+          "back": 262.548711,
+          "sideA": 235.892508,
+          "sideB": 253.4
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 423,
+          "back": 424,
+          "sideA": 405,
+          "sideB": 405
+        },
+        "alpha_bbox": {
+          "front": [
+            96,
+            60,
+            400,
+            483
+          ],
+          "back": [
+            122,
+            59,
+            416,
+            483
+          ],
+          "sideA": [
+            132,
+            78,
+            416,
+            483
+          ],
+          "sideB": [
+            75,
+            78,
+            354,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            146,
+            194,
+            284,
+            323
+          ],
+          "sideB_crop": [
+            213,
+            208,
+            347,
+            323
+          ],
+          "lpips": 0.437446,
+          "ssim": 0.265354,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            97,
+            89,
+            386,
+            338
+          ],
+          "sideB_crop": [
+            104,
+            91,
+            386,
+            338
+          ],
+          "lpips": 0.175083,
+          "ssim": 0.520872,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.117572,
+        "front_sideA": 0.028851,
+        "front_sideB": 0.076876,
+        "sideA_sideB": 0.051328
+      }
+    },
+    {
+      "character": "ash",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 152,
+          "sideA": 107,
+          "sideB": 109
+        },
+        "face_height": {
+          "front": 111,
+          "sideA": 105,
+          "sideB": 107
+        },
+        "face_height_ratio_sideA_front": 0.945946,
+        "face_height_ratio_sideB_front": 0.963964,
+        "face_height_diff_sideA_minus_sideB_px": -2,
+        "face_height_diff_side_pct": 1.886792,
+        "face_top": {
+          "front": 195,
+          "sideA": 189,
+          "sideB": 187
+        },
+        "face_bottom": {
+          "front": 306,
+          "sideA": 294,
+          "sideB": 294
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -6,
+          "sideB": -8
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -12,
+          "sideB": -12
+        },
+        "head_top": {
+          "front": 86,
+          "back": 84,
+          "sideA": 84,
+          "sideB": 86
+        },
+        "head_top_diff_vs_front": {
+          "back": -2,
+          "sideA": -2,
+          "sideB": 0
+        },
+        "chin_to_foot": {
+          "front": 173,
+          "sideA": 186,
+          "sideB": 186
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 13,
+          "sideB": 13
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 255.461942,
+          "back": 255.042497,
+          "sideA": 266.204239,
+          "sideB": 245.162109
+        },
+        "foot_diff_vs_front": {
+          "back": 1,
+          "sideA": 1,
+          "sideB": 1
+        },
+        "alpha_height": {
+          "front": 396,
+          "back": 397,
+          "sideA": 405,
+          "sideB": 405
+        },
+        "alpha_bbox": {
+          "front": [
+            54,
+            86,
+            459,
+            482
+          ],
+          "back": [
+            50,
+            86,
+            455,
+            483
+          ],
+          "sideA": [
+            127,
+            78,
+            474,
+            483
+          ],
+          "sideB": [
+            36,
+            78,
+            383,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            151,
+            173,
+            292,
+            310
+          ],
+          "sideB_crop": [
+            219,
+            170,
+            362,
+            311
+          ],
+          "lpips": 0.1529,
+          "ssim": 0.497882,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            101,
+            52,
+            413,
+            327
+          ],
+          "sideB_crop": [
+            100,
+            54,
+            411,
+            327
+          ],
+          "lpips": 0.098511,
+          "ssim": 0.590746,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.114254,
+        "front_sideA": 0.039122,
+        "front_sideB": 0.037359,
+        "sideA_sideB": 0.005027
+      }
+    },
+    {
+      "character": "aurora",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 139,
+          "sideA": 105,
+          "sideB": 103
+        },
+        "face_height": {
+          "front": 99,
+          "sideA": 97,
+          "sideB": 97
+        },
+        "face_height_ratio_sideA_front": 0.979798,
+        "face_height_ratio_sideB_front": 0.979798,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 203,
+          "sideA": 207,
+          "sideB": 209
+        },
+        "face_bottom": {
+          "front": 302,
+          "sideA": 304,
+          "sideB": 306
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 4,
+          "sideB": 6
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 4
+        },
+        "head_top": {
+          "front": 114,
+          "back": 112,
+          "sideA": 129,
+          "sideB": 124
+        },
+        "head_top_diff_vs_front": {
+          "back": -2,
+          "sideA": 15,
+          "sideB": 10
+        },
+        "chin_to_foot": {
+          "front": 180,
+          "sideA": 178,
+          "sideB": 176
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -4
+        },
+        "foot_y": {
+          "front": 482,
+          "back": 483,
+          "sideA": 482,
+          "sideB": 482
+        },
+        "foot_x": {
+          "front": 255.085366,
+          "back": 251.188988,
+          "sideA": 297.244071,
+          "sideB": 219.774492
+        },
+        "foot_diff_vs_front": {
+          "back": 1,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 443,
+          "back": 465,
+          "sideA": 427,
+          "sideB": 422
+        },
+        "alpha_bbox": {
+          "front": [
+            58,
+            64,
+            470,
+            507
+          ],
+          "back": [
+            59,
+            41,
+            485,
+            506
+          ],
+          "sideA": [
+            77,
+            70,
+            483,
+            497
+          ],
+          "sideB": [
+            36,
+            71,
+            433,
+            493
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            164,
+            192,
+            301,
+            319
+          ],
+          "sideB_crop": [
+            218,
+            194,
+            353,
+            321
+          ],
+          "lpips": 0.169101,
+          "ssim": 0.423209,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            122,
+            102,
+            402,
+            331
+          ],
+          "sideB_crop": [
+            118,
+            96,
+            393,
+            335
+          ],
+          "lpips": 0.182572,
+          "ssim": 0.587432,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.154968,
+        "front_sideA": 0.026913,
+        "front_sideB": 0.030008,
+        "sideA_sideB": 0.037168
+      }
+    },
+    {
+      "character": "avalanche_maid",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 151,
+          "sideA": 98,
+          "sideB": 96
+        },
+        "face_height": {
+          "front": 120,
+          "sideA": 114,
+          "sideB": 113
+        },
+        "face_height_ratio_sideA_front": 0.95,
+        "face_height_ratio_sideB_front": 0.941667,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.881057,
+        "face_top": {
+          "front": 182,
+          "sideA": 175,
+          "sideB": 175
+        },
+        "face_bottom": {
+          "front": 302,
+          "sideA": 289,
+          "sideB": 288
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -7,
+          "sideB": -7
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -13,
+          "sideB": -14
+        },
+        "head_top": {
+          "front": 82,
+          "back": 79,
+          "sideA": 81,
+          "sideB": 80
+        },
+        "head_top_diff_vs_front": {
+          "back": -3,
+          "sideA": -1,
+          "sideB": -2
+        },
+        "chin_to_foot": {
+          "front": 179,
+          "sideA": 192,
+          "sideB": 193
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 13,
+          "sideB": 14
+        },
+        "foot_y": {
+          "front": 481,
+          "back": 480,
+          "sideA": 481,
+          "sideB": 481
+        },
+        "foot_x": {
+          "front": 256.358534,
+          "back": 237.805556,
+          "sideA": 254.888722,
+          "sideB": 254.634945
+        },
+        "foot_diff_vs_front": {
+          "back": -1,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 405,
+          "back": 404,
+          "sideA": 411,
+          "sideB": 411
+        },
+        "alpha_bbox": {
+          "front": [
+            62,
+            79,
+            443,
+            484
+          ],
+          "back": [
+            52,
+            79,
+            434,
+            483
+          ],
+          "sideA": [
+            150,
+            73,
+            447,
+            484
+          ],
+          "sideB": [
+            64,
+            73,
+            358,
+            484
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            160,
+            157,
+            288,
+            307
+          ],
+          "sideB_crop": [
+            228,
+            158,
+            354,
+            305
+          ],
+          "lpips": 0.142625,
+          "ssim": 0.512261,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            120,
+            49,
+            367,
+            320
+          ],
+          "sideB_crop": [
+            154,
+            48,
+            388,
+            321
+          ],
+          "lpips": 0.151435,
+          "ssim": 0.507831,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.085476,
+        "front_sideA": 0.03574,
+        "front_sideB": 0.034804,
+        "sideA_sideB": 0.007475
+      }
+    },
+    {
+      "character": "behemoth",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 154,
+          "sideA": 103,
+          "sideB": 102
+        },
+        "face_height": {
+          "front": 128,
+          "sideA": 118,
+          "sideB": 118
+        },
+        "face_height_ratio_sideA_front": 0.921875,
+        "face_height_ratio_sideB_front": 0.921875,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 159,
+          "sideA": 159,
+          "sideB": 159
+        },
+        "face_bottom": {
+          "front": 287,
+          "sideA": 277,
+          "sideB": 277
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 0,
+          "sideB": 0
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -10,
+          "sideB": -10
+        },
+        "head_top": {
+          "front": 45,
+          "back": 45,
+          "sideA": 10,
+          "sideB": 18
+        },
+        "head_top_diff_vs_front": {
+          "back": 0,
+          "sideA": -35,
+          "sideB": -27
+        },
+        "chin_to_foot": {
+          "front": 193,
+          "sideA": 203,
+          "sideB": 203
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 10,
+          "sideB": 10
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 256.480039,
+          "back": 255.847097,
+          "sideA": 266.116776,
+          "sideB": 244.733333
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 476,
+          "back": 474,
+          "sideA": 481,
+          "sideB": 474
+        },
+        "alpha_bbox": {
+          "front": [
+            42,
+            7,
+            469,
+            483
+          ],
+          "back": [
+            50,
+            9,
+            462,
+            483
+          ],
+          "sideA": [
+            38,
+            2,
+            422,
+            483
+          ],
+          "sideB": [
+            91,
+            9,
+            476,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            115,
+            141,
+            250,
+            295
+          ],
+          "sideB_crop": [
+            263,
+            141,
+            397,
+            295
+          ],
+          "lpips": 0.067363,
+          "ssim": 0.788345,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            61,
+            0,
+            398,
+            322
+          ],
+          "sideB_crop": [
+            134,
+            0,
+            452,
+            321
+          ],
+          "lpips": 0.320495,
+          "ssim": 0.346956,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.05424,
+        "front_sideA": 0.027019,
+        "front_sideB": 0.032448,
+        "sideA_sideB": 0.005296
+      }
+    },
+    {
+      "character": "cherry_prince",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 154,
+          "sideA": 117,
+          "sideB": 112
+        },
+        "face_height": {
+          "front": 117,
+          "sideA": 107,
+          "sideB": 105
+        },
+        "face_height_ratio_sideA_front": 0.91453,
+        "face_height_ratio_sideB_front": 0.897436,
+        "face_height_diff_sideA_minus_sideB_px": 2,
+        "face_height_diff_side_pct": 1.886792,
+        "face_top": {
+          "front": 191,
+          "sideA": 188,
+          "sideB": 191
+        },
+        "face_bottom": {
+          "front": 308,
+          "sideA": 295,
+          "sideB": 296
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -3,
+          "sideB": 0
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -13,
+          "sideB": -12
+        },
+        "head_top": {
+          "front": 94,
+          "back": 94,
+          "sideA": 97,
+          "sideB": 96
+        },
+        "head_top_diff_vs_front": {
+          "back": 0,
+          "sideA": 3,
+          "sideB": 2
+        },
+        "chin_to_foot": {
+          "front": 172,
+          "sideA": 188,
+          "sideB": 186
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 16,
+          "sideB": 14
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 483,
+          "sideB": 482
+        },
+        "foot_x": {
+          "front": 255.094272,
+          "back": 258.954279,
+          "sideA": 255.822314,
+          "sideB": 253.817549
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 3,
+          "sideB": 2
+        },
+        "alpha_height": {
+          "front": 431,
+          "back": 417,
+          "sideA": 401,
+          "sideB": 406
+        },
+        "alpha_bbox": {
+          "front": [
+            30,
+            68,
+            461,
+            499
+          ],
+          "back": [
+            46,
+            82,
+            412,
+            499
+          ],
+          "sideA": [
+            69,
+            85,
+            469,
+            486
+          ],
+          "sideB": [
+            50,
+            85,
+            408,
+            491
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            155,
+            171,
+            308,
+            312
+          ],
+          "sideB_crop": [
+            213,
+            175,
+            359,
+            312
+          ],
+          "lpips": 0.226377,
+          "ssim": 0.358733,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            108,
+            67,
+            427,
+            326
+          ],
+          "sideB_crop": [
+            81,
+            66,
+            405,
+            326
+          ],
+          "lpips": 0.135869,
+          "ssim": 0.616846,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.146308,
+        "front_sideA": 0.014577,
+        "front_sideB": 0.015538,
+        "sideA_sideB": 0.008612
+      }
+    },
+    {
+      "character": "cinderella",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 142,
+          "sideA": 102,
+          "sideB": 106
+        },
+        "face_height": {
+          "front": 109,
+          "sideA": 110,
+          "sideB": 109
+        },
+        "face_height_ratio_sideA_front": 1.009174,
+        "face_height_ratio_sideB_front": 1,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.913242,
+        "face_top": {
+          "front": 162,
+          "sideA": 165,
+          "sideB": 165
+        },
+        "face_bottom": {
+          "front": 271,
+          "sideA": 275,
+          "sideB": 274
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 3,
+          "sideB": 3
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 4,
+          "sideB": 3
+        },
+        "head_top": {
+          "front": 70,
+          "back": 70,
+          "sideA": 77,
+          "sideB": 77
+        },
+        "head_top_diff_vs_front": {
+          "back": 0,
+          "sideA": 7,
+          "sideB": 7
+        },
+        "chin_to_foot": {
+          "front": 211,
+          "sideA": 208,
+          "sideB": 209
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -3,
+          "sideB": -2
+        },
+        "foot_y": {
+          "front": 482,
+          "back": 482,
+          "sideA": 483,
+          "sideB": 483
+        },
+        "foot_x": {
+          "front": 256.839763,
+          "back": 247.650732,
+          "sideA": 259.636503,
+          "sideB": 252.937309
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 1,
+          "sideB": 1
+        },
+        "alpha_height": {
+          "front": 458,
+          "back": 500,
+          "sideA": 484,
+          "sideB": 502
+        },
+        "alpha_bbox": {
+          "front": [
+            18,
+            53,
+            496,
+            511
+          ],
+          "back": [
+            1,
+            12,
+            482,
+            512
+          ],
+          "sideA": [
+            26,
+            27,
+            506,
+            511
+          ],
+          "sideB": [
+            26,
+            9,
+            494,
+            511
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            157,
+            148,
+            291,
+            292
+          ],
+          "sideB_crop": [
+            221,
+            148,
+            359,
+            291
+          ],
+          "lpips": 0.125389,
+          "ssim": 0.638293,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            116,
+            47,
+            391,
+            304
+          ],
+          "sideB_crop": [
+            128,
+            47,
+            396,
+            304
+          ],
+          "lpips": 0.108662,
+          "ssim": 0.593189,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.082311,
+        "front_sideA": 0.019675,
+        "front_sideB": 0.018402,
+        "sideA_sideB": 0.002701
+      }
+    },
+    {
+      "character": "cure_master",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 145,
+          "sideA": 101,
+          "sideB": 107
+        },
+        "face_height": {
+          "front": 116,
+          "sideA": 113,
+          "sideB": 111
+        },
+        "face_height_ratio_sideA_front": 0.974138,
+        "face_height_ratio_sideB_front": 0.956897,
+        "face_height_diff_sideA_minus_sideB_px": 2,
+        "face_height_diff_side_pct": 1.785714,
+        "face_top": {
+          "front": 187,
+          "sideA": 195,
+          "sideB": 196
+        },
+        "face_bottom": {
+          "front": 303,
+          "sideA": 308,
+          "sideB": 307
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 8,
+          "sideB": 9
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 5,
+          "sideB": 4
+        },
+        "head_top": {
+          "front": 71,
+          "back": 75,
+          "sideA": 92,
+          "sideB": 88
+        },
+        "head_top_diff_vs_front": {
+          "back": 4,
+          "sideA": 21,
+          "sideB": 17
+        },
+        "chin_to_foot": {
+          "front": 176,
+          "sideA": 171,
+          "sideB": 173
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -5,
+          "sideB": -3
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 480,
+          "sideA": 479,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 256.078387,
+          "back": 255.696203,
+          "sideA": 254.884969,
+          "sideB": 256.614263
+        },
+        "foot_diff_vs_front": {
+          "back": 1,
+          "sideA": 0,
+          "sideB": 1
+        },
+        "alpha_height": {
+          "front": 414,
+          "back": 414,
+          "sideA": 400,
+          "sideB": 401
+        },
+        "alpha_bbox": {
+          "front": [
+            33,
+            68,
+            468,
+            482
+          ],
+          "back": [
+            41,
+            69,
+            474,
+            483
+          ],
+          "sideA": [
+            137,
+            82,
+            473,
+            482
+          ],
+          "sideB": [
+            40,
+            82,
+            373,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            151,
+            178,
+            284,
+            325
+          ],
+          "sideB_crop": [
+            224,
+            179,
+            365,
+            324
+          ],
+          "lpips": 0.316837,
+          "ssim": 0.344807,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            109,
+            59,
+            360,
+            340
+          ],
+          "sideB_crop": [
+            154,
+            55,
+            403,
+            340
+          ],
+          "lpips": 0.137969,
+          "ssim": 0.595946,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.089011,
+        "front_sideA": 0.054997,
+        "front_sideB": 0.05276,
+        "sideA_sideB": 0.060907
+      }
+    },
+    {
+      "character": "doom",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 165,
+          "sideA": 128,
+          "sideB": 114
+        },
+        "face_height": {
+          "front": 119,
+          "sideA": 109,
+          "sideB": 112
+        },
+        "face_height_ratio_sideA_front": 0.915966,
+        "face_height_ratio_sideB_front": 0.941176,
+        "face_height_diff_sideA_minus_sideB_px": -3,
+        "face_height_diff_side_pct": 2.714932,
+        "face_top": {
+          "front": 205,
+          "sideA": 213,
+          "sideB": 208
+        },
+        "face_bottom": {
+          "front": 324,
+          "sideA": 322,
+          "sideB": 320
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 8,
+          "sideB": 3
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -4
+        },
+        "head_top": {
+          "front": 118,
+          "back": 115,
+          "sideA": 134,
+          "sideB": 131
+        },
+        "head_top_diff_vs_front": {
+          "back": -3,
+          "sideA": 16,
+          "sideB": 13
+        },
+        "chin_to_foot": {
+          "front": 170,
+          "sideA": 177,
+          "sideB": 180
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 7,
+          "sideB": 10
+        },
+        "foot_y": {
+          "front": 494,
+          "back": 494,
+          "sideA": 499,
+          "sideB": 500
+        },
+        "foot_x": {
+          "front": 109.914286,
+          "back": 405.683168,
+          "sideA": 107.598039,
+          "sideB": 347.680328
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 5,
+          "sideB": 6
+        },
+        "alpha_height": {
+          "front": 377,
+          "back": 410,
+          "sideA": 379,
+          "sideB": 395
+        },
+        "alpha_bbox": {
+          "front": [
+            100,
+            120,
+            454,
+            497
+          ],
+          "back": [
+            80,
+            98,
+            439,
+            508
+          ],
+          "sideA": [
+            70,
+            128,
+            439,
+            507
+          ],
+          "sideB": [
+            52,
+            108,
+            470,
+            503
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            144,
+            196,
+            312,
+            339
+          ],
+          "sideB_crop": [
+            212,
+            191,
+            362,
+            337
+          ],
+          "lpips": 0.314732,
+          "ssim": 0.417975,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            107,
+            105,
+            415,
+            350
+          ],
+          "sideB_crop": [
+            99,
+            102,
+            410,
+            349
+          ],
+          "lpips": 0.180959,
+          "ssim": 0.618428,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.173107,
+        "front_sideA": 0.049663,
+        "front_sideB": 0.060126,
+        "sideA_sideB": 0.03497
+      }
+    },
+    {
+      "character": "flame_sage",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 143,
+          "sideA": 111,
+          "sideB": 109
+        },
+        "face_height": {
+          "front": 116,
+          "sideA": 108,
+          "sideB": 108
+        },
+        "face_height_ratio_sideA_front": 0.931034,
+        "face_height_ratio_sideB_front": 0.931034,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 174,
+          "sideA": 175,
+          "sideB": 175
+        },
+        "face_bottom": {
+          "front": 290,
+          "sideA": 283,
+          "sideB": 283
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 1,
+          "sideB": 1
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -7,
+          "sideB": -7
+        },
+        "head_top": {
+          "front": 85,
+          "back": 87,
+          "sideA": 89,
+          "sideB": 89
+        },
+        "head_top_diff_vs_front": {
+          "back": 2,
+          "sideA": 4,
+          "sideB": 4
+        },
+        "chin_to_foot": {
+          "front": 189,
+          "sideA": 195,
+          "sideB": 195
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 6,
+          "sideB": 6
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 479,
+          "sideA": 478,
+          "sideB": 478
+        },
+        "foot_x": {
+          "front": 253.787731,
+          "back": 248.99262,
+          "sideA": 263.260985,
+          "sideB": 242.808
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 403,
+          "back": 400,
+          "sideA": 397,
+          "sideB": 397
+        },
+        "alpha_bbox": {
+          "front": [
+            121,
+            79,
+            372,
+            482
+          ],
+          "back": [
+            126,
+            83,
+            376,
+            483
+          ],
+          "sideA": [
+            152,
+            84,
+            390,
+            481
+          ],
+          "sideB": [
+            118,
+            84,
+            356,
+            481
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            164,
+            158,
+            309,
+            300
+          ],
+          "sideB_crop": [
+            201,
+            158,
+            344,
+            300
+          ],
+          "lpips": 0.038564,
+          "ssim": 0.82446,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            121,
+            60,
+            415,
+            311
+          ],
+          "sideB_crop": [
+            96,
+            59,
+            389,
+            313
+          ],
+          "lpips": 0.072191,
+          "ssim": 0.659879,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.038363,
+        "front_sideA": 0.007988,
+        "front_sideB": 0.007623,
+        "sideA_sideB": 0.001921
+      }
+    },
+    {
+      "character": "frost_witch",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 137,
+          "sideA": 107,
+          "sideB": 106
+        },
+        "face_height": {
+          "front": 104,
+          "sideA": 103,
+          "sideB": 103
+        },
+        "face_height_ratio_sideA_front": 0.990385,
+        "face_height_ratio_sideB_front": 0.990385,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 190,
+          "sideA": 194,
+          "sideB": 194
+        },
+        "face_bottom": {
+          "front": 294,
+          "sideA": 297,
+          "sideB": 297
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 4,
+          "sideB": 4
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 3,
+          "sideB": 3
+        },
+        "head_top": {
+          "front": 65,
+          "back": 61,
+          "sideA": 83,
+          "sideB": 88
+        },
+        "head_top_diff_vs_front": {
+          "back": -4,
+          "sideA": 18,
+          "sideB": 23
+        },
+        "chin_to_foot": {
+          "front": 189,
+          "sideA": 184,
+          "sideB": 184
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -5,
+          "sideB": -5
+        },
+        "foot_y": {
+          "front": 483,
+          "back": 484,
+          "sideA": 481,
+          "sideB": 481
+        },
+        "foot_x": {
+          "front": 255.209658,
+          "back": 250.250639,
+          "sideA": 251.124172,
+          "sideB": 260.426282
+        },
+        "foot_diff_vs_front": {
+          "back": 1,
+          "sideA": -2,
+          "sideB": -2
+        },
+        "alpha_height": {
+          "front": 455,
+          "back": 458,
+          "sideA": 448,
+          "sideB": 448
+        },
+        "alpha_bbox": {
+          "front": [
+            42,
+            34,
+            467,
+            489
+          ],
+          "back": [
+            43,
+            31,
+            472,
+            489
+          ],
+          "sideA": [
+            8,
+            64,
+            474,
+            512
+          ],
+          "sideB": [
+            39,
+            64,
+            474,
+            512
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            164,
+            178,
+            305,
+            313
+          ],
+          "sideB_crop": [
+            209,
+            178,
+            347,
+            313
+          ],
+          "lpips": 0.100934,
+          "ssim": 0.544203,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            126,
+            51,
+            407,
+            328
+          ],
+          "sideB_crop": [
+            110,
+            56,
+            387,
+            330
+          ],
+          "lpips": 0.12399,
+          "ssim": 0.569974,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.120893,
+        "front_sideA": 0.02066,
+        "front_sideB": 0.017307,
+        "sideA_sideB": 0.004912
+      }
+    },
+    {
+      "character": "galaxy_whale",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 134,
+          "sideA": 101,
+          "sideB": 96
+        },
+        "face_height": {
+          "front": 107,
+          "sideA": 104,
+          "sideB": 105
+        },
+        "face_height_ratio_sideA_front": 0.971963,
+        "face_height_ratio_sideB_front": 0.981308,
+        "face_height_diff_sideA_minus_sideB_px": -1,
+        "face_height_diff_side_pct": 0.956938,
+        "face_top": {
+          "front": 183,
+          "sideA": 179,
+          "sideB": 179
+        },
+        "face_bottom": {
+          "front": 290,
+          "sideA": 283,
+          "sideB": 284
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -4,
+          "sideB": -4
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -7,
+          "sideB": -6
+        },
+        "head_top": {
+          "front": 71,
+          "back": 64,
+          "sideA": 73,
+          "sideB": 75
+        },
+        "head_top_diff_vs_front": {
+          "back": -7,
+          "sideA": 2,
+          "sideB": 4
+        },
+        "chin_to_foot": {
+          "front": 189,
+          "sideA": 197,
+          "sideB": 196
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 8,
+          "sideB": 7
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 479,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 258.315832,
+          "back": 259.580645,
+          "sideA": 264.254172,
+          "sideB": 256.660628
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 1,
+          "sideB": 1
+        },
+        "alpha_height": {
+          "front": 427,
+          "back": 426,
+          "sideA": 419,
+          "sideB": 419
+        },
+        "alpha_bbox": {
+          "front": [
+            90,
+            55,
+            412,
+            482
+          ],
+          "back": [
+            102,
+            56,
+            428,
+            482
+          ],
+          "sideA": [
+            125,
+            64,
+            441,
+            483
+          ],
+          "sideB": [
+            76,
+            64,
+            397,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            166,
+            163,
+            299,
+            299
+          ],
+          "sideB_crop": [
+            225,
+            163,
+            351,
+            300
+          ],
+          "lpips": 0.17096,
+          "ssim": 0.457725,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            119,
+            41,
+            413,
+            317
+          ],
+          "sideB_crop": [
+            110,
+            43,
+            399,
+            317
+          ],
+          "lpips": 0.095236,
+          "ssim": 0.644916,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.068503,
+        "front_sideA": 0.015177,
+        "front_sideB": 0.009768,
+        "sideA_sideB": 0.004961
+      }
+    },
+    {
+      "character": "great_detective",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 132,
+          "sideA": 101,
+          "sideB": 93
+        },
+        "face_height": {
+          "front": 104,
+          "sideA": 100,
+          "sideB": 97
+        },
+        "face_height_ratio_sideA_front": 0.961538,
+        "face_height_ratio_sideB_front": 0.932692,
+        "face_height_diff_sideA_minus_sideB_px": 3,
+        "face_height_diff_side_pct": 3.045685,
+        "face_top": {
+          "front": 196,
+          "sideA": 197,
+          "sideB": 201
+        },
+        "face_bottom": {
+          "front": 300,
+          "sideA": 297,
+          "sideB": 298
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 1,
+          "sideB": 5
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -3,
+          "sideB": -2
+        },
+        "head_top": {
+          "front": 91,
+          "back": 90,
+          "sideA": 103,
+          "sideB": 101
+        },
+        "head_top_diff_vs_front": {
+          "back": -1,
+          "sideA": 12,
+          "sideB": 10
+        },
+        "chin_to_foot": {
+          "front": 180,
+          "sideA": 182,
+          "sideB": 181
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 1
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 254.88018,
+          "back": 256.017034,
+          "sideA": 258.307692,
+          "sideB": 253.754617
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 398,
+          "back": 398,
+          "sideA": 388,
+          "sideB": 387
+        },
+        "alpha_bbox": {
+          "front": [
+            140,
+            85,
+            371,
+            483
+          ],
+          "back": [
+            139,
+            85,
+            369,
+            483
+          ],
+          "sideA": [
+            166,
+            94,
+            380,
+            482
+          ],
+          "sideB": [
+            137,
+            95,
+            349,
+            482
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            167,
+            182,
+            300,
+            312
+          ],
+          "sideB_crop": [
+            222,
+            186,
+            343,
+            313
+          ],
+          "lpips": 0.309205,
+          "ssim": 0.308927,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            131,
+            74,
+            407,
+            325
+          ],
+          "sideB_crop": [
+            112,
+            71,
+            385,
+            327
+          ],
+          "lpips": 0.159465,
+          "ssim": 0.58054,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.100299,
+        "front_sideA": 0.024022,
+        "front_sideB": 0.024658,
+        "sideA_sideB": 0.036327
+      }
+    },
+    {
+      "character": "guardian",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 147,
+          "sideA": 115,
+          "sideB": 110
+        },
+        "face_height": {
+          "front": 119,
+          "sideA": 114,
+          "sideB": 114
+        },
+        "face_height_ratio_sideA_front": 0.957983,
+        "face_height_ratio_sideB_front": 0.957983,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 181,
+          "sideA": 172,
+          "sideB": 174
+        },
+        "face_bottom": {
+          "front": 300,
+          "sideA": 286,
+          "sideB": 288
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -9,
+          "sideB": -7
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -14,
+          "sideB": -12
+        },
+        "head_top": {
+          "front": 82,
+          "back": 78,
+          "sideA": 72,
+          "sideB": 75
+        },
+        "head_top_diff_vs_front": {
+          "back": -4,
+          "sideA": -10,
+          "sideB": -7
+        },
+        "chin_to_foot": {
+          "front": 181,
+          "sideA": 195,
+          "sideB": 193
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 14,
+          "sideB": 12
+        },
+        "foot_y": {
+          "front": 481,
+          "back": 480,
+          "sideA": 481,
+          "sideB": 481
+        },
+        "foot_x": {
+          "front": 259.166817,
+          "back": 252.798965,
+          "sideA": 257.623269,
+          "sideB": 252.086592
+        },
+        "foot_diff_vs_front": {
+          "back": -1,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 430,
+          "back": 426,
+          "sideA": 419,
+          "sideB": 421
+        },
+        "alpha_bbox": {
+          "front": [
+            138,
+            54,
+            446,
+            484
+          ],
+          "back": [
+            84,
+            57,
+            372,
+            483
+          ],
+          "sideA": [
+            145,
+            65,
+            454,
+            484
+          ],
+          "sideB": [
+            61,
+            63,
+            367,
+            484
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            160,
+            154,
+            311,
+            304
+          ],
+          "sideB_crop": [
+            212,
+            156,
+            356,
+            306
+          ],
+          "lpips": 0.140503,
+          "ssim": 0.535044,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            112,
+            40,
+            421,
+            317
+          ],
+          "sideB_crop": [
+            99,
+            43,
+            402,
+            319
+          ],
+          "lpips": 0.142102,
+          "ssim": 0.484506,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.054262,
+        "front_sideA": 0.01368,
+        "front_sideB": 0.015445,
+        "sideA_sideB": 0.003344
+      }
+    },
+    {
+      "character": "harmonious",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 134,
+          "sideA": 99,
+          "sideB": 100
+        },
+        "face_height": {
+          "front": 107,
+          "sideA": 105,
+          "sideB": 104
+        },
+        "face_height_ratio_sideA_front": 0.981308,
+        "face_height_ratio_sideB_front": 0.971963,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.956938,
+        "face_top": {
+          "front": 200,
+          "sideA": 208,
+          "sideB": 208
+        },
+        "face_bottom": {
+          "front": 307,
+          "sideA": 313,
+          "sideB": 312
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 8,
+          "sideB": 8
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 6,
+          "sideB": 5
+        },
+        "head_top": {
+          "front": 109,
+          "back": 105,
+          "sideA": 115,
+          "sideB": 113
+        },
+        "head_top_diff_vs_front": {
+          "back": -4,
+          "sideA": 6,
+          "sideB": 4
+        },
+        "chin_to_foot": {
+          "front": 175,
+          "sideA": 166,
+          "sideB": 167
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -9,
+          "sideB": -8
+        },
+        "foot_y": {
+          "front": 482,
+          "back": 481,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 260.005824,
+          "back": 253.662732,
+          "sideA": 272.55313,
+          "sideB": 244.759475
+        },
+        "foot_diff_vs_front": {
+          "back": -1,
+          "sideA": -3,
+          "sideB": -3
+        },
+        "alpha_height": {
+          "front": 470,
+          "back": 447,
+          "sideA": 400,
+          "sideB": 418
+        },
+        "alpha_bbox": {
+          "front": [
+            13,
+            24,
+            482,
+            494
+          ],
+          "back": [
+            35,
+            44,
+            462,
+            491
+          ],
+          "sideA": [
+            13,
+            82,
+            471,
+            482
+          ],
+          "sideB": [
+            46,
+            93,
+            424,
+            511
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            179,
+            192,
+            308,
+            329
+          ],
+          "sideB_crop": [
+            213,
+            192,
+            343,
+            328
+          ],
+          "lpips": 0.148415,
+          "ssim": 0.528394,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            134,
+            85,
+            409,
+            344
+          ],
+          "sideB_crop": [
+            121,
+            82,
+            388,
+            345
+          ],
+          "lpips": 0.192672,
+          "ssim": 0.505528,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.061516,
+        "front_sideA": 0.015098,
+        "front_sideB": 0.017887,
+        "sideA_sideB": 0.004318
+      }
+    },
+    {
+      "character": "jasmine",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 148,
+          "sideA": 104,
+          "sideB": 103
+        },
+        "face_height": {
+          "front": 111,
+          "sideA": 114,
+          "sideB": 113
+        },
+        "face_height_ratio_sideA_front": 1.027027,
+        "face_height_ratio_sideB_front": 1.018018,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.881057,
+        "face_top": {
+          "front": 174,
+          "sideA": 166,
+          "sideB": 168
+        },
+        "face_bottom": {
+          "front": 285,
+          "sideA": 280,
+          "sideB": 281
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -8,
+          "sideB": -6
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -5,
+          "sideB": -4
+        },
+        "head_top": {
+          "front": 67,
+          "back": 60,
+          "sideA": 73,
+          "sideB": 74
+        },
+        "head_top_diff_vs_front": {
+          "back": -7,
+          "sideA": 6,
+          "sideB": 7
+        },
+        "chin_to_foot": {
+          "front": 197,
+          "sideA": 201,
+          "sideB": 200
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 4,
+          "sideB": 3
+        },
+        "foot_y": {
+          "front": 482,
+          "back": 482,
+          "sideA": 481,
+          "sideB": 481
+        },
+        "foot_x": {
+          "front": 260.516646,
+          "back": 244.812808,
+          "sideA": 255.134868,
+          "sideB": 261.648475
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 467,
+          "back": 473,
+          "sideA": 469,
+          "sideB": 470
+        },
+        "alpha_bbox": {
+          "front": [
+            35,
+            29,
+            462,
+            496
+          ],
+          "back": [
+            55,
+            23,
+            476,
+            496
+          ],
+          "sideA": [
+            0,
+            43,
+            479,
+            512
+          ],
+          "sideB": [
+            55,
+            42,
+            501,
+            512
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            171,
+            148,
+            307,
+            298
+          ],
+          "sideB_crop": [
+            212,
+            151,
+            347,
+            298
+          ],
+          "lpips": 0.148048,
+          "ssim": 0.480035,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            131,
+            41,
+            402,
+            313
+          ],
+          "sideB_crop": [
+            124,
+            42,
+            380,
+            314
+          ],
+          "lpips": 0.165859,
+          "ssim": 0.454284,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.137677,
+        "front_sideA": 0.017905,
+        "front_sideB": 0.017354,
+        "sideA_sideB": 0.003557
+      }
+    },
+    {
+      "character": "joker",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 135,
+          "sideA": 94,
+          "sideB": 88
+        },
+        "face_height": {
+          "front": 110,
+          "sideA": 105,
+          "sideB": 105
+        },
+        "face_height_ratio_sideA_front": 0.954545,
+        "face_height_ratio_sideB_front": 0.954545,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 193,
+          "sideA": 195,
+          "sideB": 195
+        },
+        "face_bottom": {
+          "front": 303,
+          "sideA": 300,
+          "sideB": 300
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 2
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -3,
+          "sideB": -3
+        },
+        "head_top": {
+          "front": 72,
+          "back": 79,
+          "sideA": 75,
+          "sideB": 71
+        },
+        "head_top_diff_vs_front": {
+          "back": 7,
+          "sideA": 3,
+          "sideB": -1
+        },
+        "chin_to_foot": {
+          "front": 177,
+          "sideA": 180,
+          "sideB": 180
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 3,
+          "sideB": 3
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 481,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 255.914578,
+          "back": 255.933971,
+          "sideA": 256.654096,
+          "sideB": 255.297468
+        },
+        "foot_diff_vs_front": {
+          "back": 1,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 427,
+          "back": 428,
+          "sideA": 423,
+          "sideB": 423
+        },
+        "alpha_bbox": {
+          "front": [
+            71,
+            56,
+            464,
+            483
+          ],
+          "back": [
+            50,
+            56,
+            447,
+            484
+          ],
+          "sideA": [
+            97,
+            61,
+            477,
+            484
+          ],
+          "sideB": [
+            32,
+            61,
+            413,
+            484
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            171,
+            179,
+            295,
+            316
+          ],
+          "sideB_crop": [
+            225,
+            179,
+            341,
+            316
+          ],
+          "lpips": 0.246366,
+          "ssim": 0.362749,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            108,
+            40,
+            504,
+            337
+          ],
+          "sideB_crop": [
+            8,
+            36,
+            397,
+            336
+          ],
+          "lpips": 0.105987,
+          "ssim": 0.609658,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.192564,
+        "front_sideA": 0.026096,
+        "front_sideB": 0.027276,
+        "sideA_sideB": 0.011049
+      }
+    },
+    {
+      "character": "lightning_sage",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 136,
+          "sideA": 118,
+          "sideB": 115
+        },
+        "face_height": {
+          "front": 114,
+          "sideA": 112,
+          "sideB": 111
+        },
+        "face_height_ratio_sideA_front": 0.982456,
+        "face_height_ratio_sideB_front": 0.973684,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.896861,
+        "face_top": {
+          "front": 170,
+          "sideA": 160,
+          "sideB": 163
+        },
+        "face_bottom": {
+          "front": 284,
+          "sideA": 272,
+          "sideB": 274
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -10,
+          "sideB": -7
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -12,
+          "sideB": -10
+        },
+        "head_top": {
+          "front": 82,
+          "back": 81,
+          "sideA": 75,
+          "sideB": 77
+        },
+        "head_top_diff_vs_front": {
+          "back": -1,
+          "sideA": -7,
+          "sideB": -5
+        },
+        "chin_to_foot": {
+          "front": 195,
+          "sideA": 206,
+          "sideB": 204
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 11,
+          "sideB": 9
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 479,
+          "sideA": 478,
+          "sideB": 478
+        },
+        "foot_x": {
+          "front": 255.336401,
+          "back": 235.878947,
+          "sideA": 258.991314,
+          "sideB": 249.701412
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 405,
+          "back": 403,
+          "sideA": 413,
+          "sideB": 408
+        },
+        "alpha_bbox": {
+          "front": [
+            109,
+            77,
+            365,
+            482
+          ],
+          "back": [
+            130,
+            79,
+            384,
+            482
+          ],
+          "sideA": [
+            132,
+            68,
+            383,
+            481
+          ],
+          "sideB": [
+            125,
+            73,
+            377,
+            481
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            162,
+            143,
+            316,
+            289
+          ],
+          "sideB_crop": [
+            199,
+            146,
+            350,
+            291
+          ],
+          "lpips": 0.308186,
+          "ssim": 0.281551,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            112,
+            45,
+            413,
+            302
+          ],
+          "sideB_crop": [
+            98,
+            47,
+            390,
+            303
+          ],
+          "lpips": 0.242593,
+          "ssim": 0.503325,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.106067,
+        "front_sideA": 0.020973,
+        "front_sideB": 0.026268,
+        "sideA_sideB": 0.007094
+      }
+    },
+    {
+      "character": "luna",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 149,
+          "sideA": 105,
+          "sideB": 106
+        },
+        "face_height": {
+          "front": 109,
+          "sideA": 105,
+          "sideB": 107
+        },
+        "face_height_ratio_sideA_front": 0.963303,
+        "face_height_ratio_sideB_front": 0.981651,
+        "face_height_diff_sideA_minus_sideB_px": -2,
+        "face_height_diff_side_pct": 1.886792,
+        "face_top": {
+          "front": 189,
+          "sideA": 182,
+          "sideB": 180
+        },
+        "face_bottom": {
+          "front": 298,
+          "sideA": 287,
+          "sideB": 287
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -7,
+          "sideB": -9
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -11,
+          "sideB": -11
+        },
+        "head_top": {
+          "front": 90,
+          "back": null,
+          "sideA": 97,
+          "sideB": 96
+        },
+        "head_top_diff_vs_front": {
+          "back": null,
+          "sideA": 7,
+          "sideB": 6
+        },
+        "chin_to_foot": {
+          "front": 182,
+          "sideA": 195,
+          "sideB": 195
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 13,
+          "sideB": 13
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 482,
+          "sideB": 482
+        },
+        "foot_x": {
+          "front": 256.922401,
+          "back": 236.315653,
+          "sideA": 268.064955,
+          "sideB": 233.955556
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 2,
+          "sideB": 2
+        },
+        "alpha_height": {
+          "front": 393,
+          "back": 393,
+          "sideA": 386,
+          "sideB": 387
+        },
+        "alpha_bbox": {
+          "front": [
+            120,
+            90,
+            387,
+            483
+          ],
+          "back": [
+            110,
+            90,
+            383,
+            483
+          ],
+          "sideA": [
+            157,
+            99,
+            410,
+            485
+          ],
+          "sideB": [
+            93,
+            98,
+            347,
+            485
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            166,
+            166,
+            303,
+            303
+          ],
+          "sideB_crop": [
+            200,
+            163,
+            338,
+            304
+          ],
+          "lpips": 0.098817,
+          "ssim": 0.59818,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            122,
+            68,
+            416,
+            318
+          ],
+          "sideB_crop": [
+            90,
+            67,
+            382,
+            318
+          ],
+          "lpips": 0.063855,
+          "ssim": 0.702778,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.212258,
+        "front_sideA": 0.027687,
+        "front_sideB": 0.025484,
+        "sideA_sideB": 0.003551
+      }
+    },
+    {
+      "character": "mushroom_king",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 153,
+          "sideA": 109,
+          "sideB": 110
+        },
+        "face_height": {
+          "front": 109,
+          "sideA": 128,
+          "sideB": 126
+        },
+        "face_height_ratio_sideA_front": 1.174312,
+        "face_height_ratio_sideB_front": 1.155963,
+        "face_height_diff_sideA_minus_sideB_px": 2,
+        "face_height_diff_side_pct": 1.574803,
+        "face_top": {
+          "front": 228,
+          "sideA": 216,
+          "sideB": 219
+        },
+        "face_bottom": {
+          "front": 337,
+          "sideA": 344,
+          "sideB": 345
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -12,
+          "sideB": -9
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 7,
+          "sideB": 8
+        },
+        "head_top": {
+          "front": 171,
+          "back": 94,
+          "sideA": 114,
+          "sideB": 114
+        },
+        "head_top_diff_vs_front": {
+          "back": -77,
+          "sideA": -57,
+          "sideB": -57
+        },
+        "chin_to_foot": {
+          "front": 143,
+          "sideA": 135,
+          "sideB": 134
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -8,
+          "sideB": -9
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 255.230129,
+          "back": 257.796078,
+          "sideA": 270.432967,
+          "sideB": 240.727373
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 388,
+          "back": 388,
+          "sideA": 367,
+          "sideB": 367
+        },
+        "alpha_bbox": {
+          "front": [
+            85,
+            95,
+            424,
+            483
+          ],
+          "back": [
+            98,
+            95,
+            427,
+            483
+          ],
+          "sideA": [
+            122,
+            115,
+            438,
+            482
+          ],
+          "sideB": [
+            75,
+            115,
+            390,
+            482
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            169,
+            196,
+            312,
+            364
+          ],
+          "sideB_crop": [
+            200,
+            200,
+            344,
+            364
+          ],
+          "lpips": 0.123363,
+          "ssim": 0.42599,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            82,
+            80,
+            467,
+            371
+          ],
+          "sideB_crop": [
+            38,
+            80,
+            432,
+            370
+          ],
+          "lpips": 0.061843,
+          "ssim": 0.734359,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.046485,
+        "front_sideA": 0.023223,
+        "front_sideB": 0.018773,
+        "sideA_sideB": 0.00277
+      }
+    },
+    {
+      "character": "night_rabbit",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 141,
+          "sideA": 108,
+          "sideB": 111
+        },
+        "face_height": {
+          "front": 108,
+          "sideA": 108,
+          "sideB": 108
+        },
+        "face_height_ratio_sideA_front": 1,
+        "face_height_ratio_sideB_front": 1,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 190,
+          "sideA": 177,
+          "sideB": 178
+        },
+        "face_bottom": {
+          "front": 298,
+          "sideA": 285,
+          "sideB": 286
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -13,
+          "sideB": -12
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -13,
+          "sideB": -12
+        },
+        "head_top": {
+          "front": 50,
+          "back": 49,
+          "sideA": 56,
+          "sideB": 56
+        },
+        "head_top_diff_vs_front": {
+          "back": -1,
+          "sideA": 6,
+          "sideB": 6
+        },
+        "chin_to_foot": {
+          "front": 190,
+          "sideA": 194,
+          "sideB": 193
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 4,
+          "sideB": 3
+        },
+        "foot_y": {
+          "front": 488,
+          "back": 488,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 258.791866,
+          "back": 252.377049,
+          "sideA": 264.059859,
+          "sideB": 243.184489
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -9,
+          "sideB": -9
+        },
+        "alpha_height": {
+          "front": 439,
+          "back": 439,
+          "sideA": 425,
+          "sideB": 425
+        },
+        "alpha_bbox": {
+          "front": [
+            129,
+            50,
+            381,
+            489
+          ],
+          "back": [
+            133,
+            50,
+            382,
+            489
+          ],
+          "sideA": [
+            160,
+            57,
+            397,
+            482
+          ],
+          "sideB": [
+            112,
+            57,
+            348,
+            482
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            176,
+            160,
+            318,
+            302
+          ],
+          "sideB_crop": [
+            188,
+            161,
+            333,
+            303
+          ],
+          "lpips": 0.105036,
+          "ssim": 0.629795,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            127,
+            21,
+            419,
+            319
+          ],
+          "sideB_crop": [
+            96,
+            21,
+            380,
+            318
+          ],
+          "lpips": 0.093338,
+          "ssim": 0.610281,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.087745,
+        "front_sideA": 0.018474,
+        "front_sideB": 0.019328,
+        "sideA_sideB": 0.001973
+      }
+    },
+    {
+      "character": "phantom",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 145,
+          "sideA": 107,
+          "sideB": 109
+        },
+        "face_height": {
+          "front": 119,
+          "sideA": 105,
+          "sideB": 107
+        },
+        "face_height_ratio_sideA_front": 0.882353,
+        "face_height_ratio_sideB_front": 0.89916,
+        "face_height_diff_sideA_minus_sideB_px": -2,
+        "face_height_diff_side_pct": 1.886792,
+        "face_top": {
+          "front": 205,
+          "sideA": 207,
+          "sideB": 206
+        },
+        "face_bottom": {
+          "front": 324,
+          "sideA": 312,
+          "sideB": 313
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 1
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -12,
+          "sideB": -11
+        },
+        "head_top": {
+          "front": 110,
+          "back": 109,
+          "sideA": 116,
+          "sideB": 116
+        },
+        "head_top_diff_vs_front": {
+          "back": -1,
+          "sideA": 6,
+          "sideB": 6
+        },
+        "chin_to_foot": {
+          "front": 156,
+          "sideA": 167,
+          "sideB": 166
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 11,
+          "sideB": 10
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 257.629505,
+          "back": 251.678322,
+          "sideA": 259.924638,
+          "sideB": 254.630592
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 377,
+          "back": 378,
+          "sideA": 368,
+          "sideB": 368
+        },
+        "alpha_bbox": {
+          "front": [
+            130,
+            106,
+            371,
+            483
+          ],
+          "back": [
+            135,
+            105,
+            374,
+            483
+          ],
+          "sideA": [
+            146,
+            114,
+            384,
+            482
+          ],
+          "sideB": [
+            132,
+            114,
+            370,
+            482
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            171,
+            191,
+            312,
+            328
+          ],
+          "sideB_crop": [
+            202,
+            189,
+            345,
+            330
+          ],
+          "lpips": 0.076632,
+          "ssim": 0.605221,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            116,
+            86,
+            410,
+            342
+          ],
+          "sideB_crop": [
+            105,
+            86,
+            403,
+            341
+          ],
+          "lpips": 0.053668,
+          "ssim": 0.743042,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.122995,
+        "front_sideA": 0.030215,
+        "front_sideB": 0.033999,
+        "sideA_sideB": 0.001898
+      }
+    },
+    {
+      "character": "queen",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 144,
+          "sideA": 107,
+          "sideB": 104
+        },
+        "face_height": {
+          "front": 110,
+          "sideA": 107,
+          "sideB": 110
+        },
+        "face_height_ratio_sideA_front": 0.972727,
+        "face_height_ratio_sideB_front": 1,
+        "face_height_diff_sideA_minus_sideB_px": -3,
+        "face_height_diff_side_pct": 2.764977,
+        "face_top": {
+          "front": 181,
+          "sideA": 182,
+          "sideB": 180
+        },
+        "face_bottom": {
+          "front": 291,
+          "sideA": 289,
+          "sideB": 290
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 1,
+          "sideB": -1
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -1
+        },
+        "head_top": {
+          "front": 44,
+          "back": 37,
+          "sideA": 88,
+          "sideB": 85
+        },
+        "head_top_diff_vs_front": {
+          "back": -7,
+          "sideA": 44,
+          "sideB": 41
+        },
+        "chin_to_foot": {
+          "front": 210,
+          "sideA": 191,
+          "sideB": 190
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -19,
+          "sideB": -20
+        },
+        "foot_y": {
+          "front": 501,
+          "back": 501,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 255.553846,
+          "back": 258.015152,
+          "sideA": 258.281604,
+          "sideB": 250.876083
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -21,
+          "sideB": -21
+        },
+        "alpha_height": {
+          "front": 473,
+          "back": 473,
+          "sideA": 430,
+          "sideB": 430
+        },
+        "alpha_bbox": {
+          "front": [
+            90,
+            29,
+            404,
+            502
+          ],
+          "back": [
+            106,
+            29,
+            425,
+            502
+          ],
+          "sideA": [
+            104,
+            53,
+            414,
+            483
+          ],
+          "sideB": [
+            95,
+            53,
+            406,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            136,
+            165,
+            277,
+            306
+          ],
+          "sideB_crop": [
+            236,
+            163,
+            372,
+            307
+          ],
+          "lpips": 0.153755,
+          "ssim": 0.48237,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            97,
+            57,
+            403,
+            321
+          ],
+          "sideB_crop": [
+            116,
+            53,
+            414,
+            324
+          ],
+          "lpips": 0.181867,
+          "ssim": 0.366903,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.137193,
+        "front_sideA": 0.016029,
+        "front_sideB": 0.030239,
+        "sideA_sideB": 0.020932
+      }
+    },
+    {
+      "character": "red_dragon",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 143,
+          "sideA": 100,
+          "sideB": 102
+        },
+        "face_height": {
+          "front": 117,
+          "sideA": 109,
+          "sideB": 108
+        },
+        "face_height_ratio_sideA_front": 0.931624,
+        "face_height_ratio_sideB_front": 0.923077,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.921659,
+        "face_top": {
+          "front": 172,
+          "sideA": 178,
+          "sideB": 179
+        },
+        "face_bottom": {
+          "front": 289,
+          "sideA": 287,
+          "sideB": 287
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 6,
+          "sideB": 7
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -2
+        },
+        "head_top": {
+          "front": 56,
+          "back": 54,
+          "sideA": 78,
+          "sideB": 77
+        },
+        "head_top_diff_vs_front": {
+          "back": -2,
+          "sideA": 22,
+          "sideB": 21
+        },
+        "chin_to_foot": {
+          "front": 190,
+          "sideA": 192,
+          "sideB": 192
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 2
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 479,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 255.315094,
+          "back": 230.946104,
+          "sideA": 261.946548,
+          "sideB": 254.18091
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 429,
+          "back": 428,
+          "sideA": 420,
+          "sideB": 420
+        },
+        "alpha_bbox": {
+          "front": [
+            117,
+            53,
+            398,
+            482
+          ],
+          "back": [
+            106,
+            54,
+            386,
+            482
+          ],
+          "sideA": [
+            170,
+            62,
+            431,
+            482
+          ],
+          "sideB": [
+            86,
+            62,
+            346,
+            482
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            179,
+            161,
+            309,
+            304
+          ],
+          "sideB_crop": [
+            208,
+            162,
+            342,
+            304
+          ],
+          "lpips": 0.124842,
+          "ssim": 0.609031,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            135,
+            46,
+            418,
+            318
+          ],
+          "sideB_crop": [
+            98,
+            45,
+            382,
+            319
+          ],
+          "lpips": 0.091414,
+          "ssim": 0.633745,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.034967,
+        "front_sideA": 0.029211,
+        "front_sideB": 0.019067,
+        "sideA_sideB": 0.00679
+      }
+    },
+    {
+      "character": "rumi",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 135,
+          "sideA": 113,
+          "sideB": 110
+        },
+        "face_height": {
+          "front": 107,
+          "sideA": 117,
+          "sideB": 116
+        },
+        "face_height_ratio_sideA_front": 1.093458,
+        "face_height_ratio_sideB_front": 1.084112,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.858369,
+        "face_top": {
+          "front": 194,
+          "sideA": 169,
+          "sideB": 171
+        },
+        "face_bottom": {
+          "front": 301,
+          "sideA": 286,
+          "sideB": 287
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -25,
+          "sideB": -23
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -15,
+          "sideB": -14
+        },
+        "head_top": {
+          "front": 78,
+          "back": 73,
+          "sideA": 62,
+          "sideB": 61
+        },
+        "head_top_diff_vs_front": {
+          "back": -5,
+          "sideA": -16,
+          "sideB": -17
+        },
+        "chin_to_foot": {
+          "front": 179,
+          "sideA": 194,
+          "sideB": 193
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 15,
+          "sideB": 14
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 257.0311,
+          "back": 235.403302,
+          "sideA": 273.025602,
+          "sideB": 229.857988
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 408,
+          "back": 410,
+          "sideA": 423,
+          "sideB": 425
+        },
+        "alpha_bbox": {
+          "front": [
+            122,
+            75,
+            390,
+            483
+          ],
+          "back": [
+            104,
+            73,
+            368,
+            483
+          ],
+          "sideA": [
+            159,
+            61,
+            414,
+            484
+          ],
+          "sideB": [
+            90,
+            59,
+            347,
+            484
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            165,
+            151,
+            312,
+            304
+          ],
+          "sideB_crop": [
+            195,
+            153,
+            339,
+            305
+          ],
+          "lpips": 0.222413,
+          "ssim": 0.423411,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            124,
+            28,
+            424,
+            319
+          ],
+          "sideB_crop": [
+            79,
+            27,
+            381,
+            321
+          ],
+          "lpips": 0.115457,
+          "ssim": 0.618969,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.134942,
+        "front_sideA": 0.026518,
+        "front_sideB": 0.040629,
+        "sideA_sideB": 0.015619
+      }
+    },
+    {
+      "character": "santa",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 149,
+          "sideA": 105,
+          "sideB": 97
+        },
+        "face_height": {
+          "front": 105,
+          "sideA": 107,
+          "sideB": 107
+        },
+        "face_height_ratio_sideA_front": 1.019048,
+        "face_height_ratio_sideB_front": 1.019048,
+        "face_height_diff_sideA_minus_sideB_px": 0,
+        "face_height_diff_side_pct": 0,
+        "face_top": {
+          "front": 200,
+          "sideA": 198,
+          "sideB": 199
+        },
+        "face_bottom": {
+          "front": 305,
+          "sideA": 305,
+          "sideB": 306
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -1
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 0,
+          "sideB": 1
+        },
+        "head_top": {
+          "front": 67,
+          "back": 70,
+          "sideA": 91,
+          "sideB": 91
+        },
+        "head_top_diff_vs_front": {
+          "back": 3,
+          "sideA": 24,
+          "sideB": 24
+        },
+        "chin_to_foot": {
+          "front": 178,
+          "sideA": 175,
+          "sideB": 174
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -3,
+          "sideB": -4
+        },
+        "foot_y": {
+          "front": 483,
+          "back": 483,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 259.316777,
+          "back": 257.100698,
+          "sideA": 253.371981,
+          "sideB": 260.024155
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -3,
+          "sideB": -3
+        },
+        "alpha_height": {
+          "front": 421,
+          "back": 420,
+          "sideA": 390,
+          "sideB": 428
+        },
+        "alpha_bbox": {
+          "front": [
+            80,
+            67,
+            449,
+            488
+          ],
+          "back": [
+            76,
+            71,
+            469,
+            491
+          ],
+          "sideA": [
+            10,
+            93,
+            442,
+            483
+          ],
+          "sideB": [
+            28,
+            83,
+            431,
+            511
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            150,
+            181,
+            287,
+            322
+          ],
+          "sideB_crop": [
+            237,
+            182,
+            364,
+            323
+          ],
+          "lpips": 0.254194,
+          "ssim": 0.422979,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            91,
+            58,
+            452,
+            339
+          ],
+          "sideB_crop": [
+            57,
+            58,
+            421,
+            338
+          ],
+          "lpips": 0.157293,
+          "ssim": 0.635909,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.126131,
+        "front_sideA": 0.01772,
+        "front_sideB": 0.03331,
+        "sideA_sideB": 0.031002
+      }
+    },
+    {
+      "character": "silver_rabbit",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 151,
+          "sideA": 108,
+          "sideB": 106
+        },
+        "face_height": {
+          "front": 121,
+          "sideA": 109,
+          "sideB": 108
+        },
+        "face_height_ratio_sideA_front": 0.900826,
+        "face_height_ratio_sideB_front": 0.892562,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.921659,
+        "face_top": {
+          "front": 207,
+          "sideA": 209,
+          "sideB": 209
+        },
+        "face_bottom": {
+          "front": 328,
+          "sideA": 318,
+          "sideB": 317
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 2
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -10,
+          "sideB": -11
+        },
+        "head_top": {
+          "front": 57,
+          "back": 58,
+          "sideA": 70,
+          "sideB": 69
+        },
+        "head_top_diff_vs_front": {
+          "back": 1,
+          "sideA": 13,
+          "sideB": 12
+        },
+        "chin_to_foot": {
+          "front": 151,
+          "sideA": 162,
+          "sideB": 163
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 11,
+          "sideB": 12
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 255.54717,
+          "back": 255.581342,
+          "sideA": 258.65786,
+          "sideB": 251.788
+        },
+        "foot_diff_vs_front": {
+          "back": 1,
+          "sideA": 1,
+          "sideB": 1
+        },
+        "alpha_height": {
+          "front": 506,
+          "back": 506,
+          "sideA": 482,
+          "sideB": 497
+        },
+        "alpha_bbox": {
+          "front": [
+            50,
+            0,
+            512,
+            506
+          ],
+          "back": [
+            46,
+            0,
+            491,
+            506
+          ],
+          "sideA": [
+            70,
+            6,
+            503,
+            488
+          ],
+          "sideB": [
+            10,
+            6,
+            491,
+            503
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            170,
+            192,
+            312,
+            335
+          ],
+          "sideB_crop": [
+            203,
+            192,
+            341,
+            334
+          ],
+          "lpips": 0.114144,
+          "ssim": 0.525434,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            126,
+            32,
+            401,
+            356
+          ],
+          "sideB_crop": [
+            121,
+            31,
+            384,
+            356
+          ],
+          "lpips": 0.141027,
+          "ssim": 0.54391,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.078894,
+        "front_sideA": 0.021612,
+        "front_sideB": 0.021587,
+        "sideA_sideB": 0.003823
+      }
+    },
+    {
+      "character": "siren",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 134,
+          "sideA": 101,
+          "sideB": 100
+        },
+        "face_height": {
+          "front": 107,
+          "sideA": 108,
+          "sideB": 109
+        },
+        "face_height_ratio_sideA_front": 1.009346,
+        "face_height_ratio_sideB_front": 1.018692,
+        "face_height_diff_sideA_minus_sideB_px": -1,
+        "face_height_diff_side_pct": 0.921659,
+        "face_top": {
+          "front": 205,
+          "sideA": 200,
+          "sideB": 200
+        },
+        "face_bottom": {
+          "front": 312,
+          "sideA": 308,
+          "sideB": 309
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -5,
+          "sideB": -5
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -4,
+          "sideB": -3
+        },
+        "head_top": {
+          "front": 120,
+          "back": 116,
+          "sideA": 114,
+          "sideB": 113
+        },
+        "head_top_diff_vs_front": {
+          "back": -4,
+          "sideA": -6,
+          "sideB": -7
+        },
+        "chin_to_foot": {
+          "front": 168,
+          "sideA": 173,
+          "sideB": 172
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 5,
+          "sideB": 4
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 481,
+          "sideB": 481
+        },
+        "foot_x": {
+          "front": 256.59168,
+          "back": 256.282014,
+          "sideA": 257.269682,
+          "sideB": 256.308219
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 1,
+          "sideB": 1
+        },
+        "alpha_height": {
+          "front": 376,
+          "back": 377,
+          "sideA": 382,
+          "sideB": 382
+        },
+        "alpha_bbox": {
+          "front": [
+            108,
+            107,
+            410,
+            483
+          ],
+          "back": [
+            95,
+            107,
+            407,
+            484
+          ],
+          "sideA": [
+            155,
+            102,
+            423,
+            484
+          ],
+          "sideB": [
+            90,
+            102,
+            358,
+            484
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            162,
+            183,
+            295,
+            325
+          ],
+          "sideB_crop": [
+            222,
+            183,
+            352,
+            326
+          ],
+          "lpips": 0.133813,
+          "ssim": 0.5926,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            122,
+            84,
+            397,
+            338
+          ],
+          "sideB_crop": [
+            117,
+            83,
+            392,
+            338
+          ],
+          "lpips": 0.057468,
+          "ssim": 0.810581,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.108208,
+        "front_sideA": 0.012225,
+        "front_sideB": 0.032484,
+        "sideA_sideB": 0.028874
+      }
+    },
+    {
+      "character": "snow_rabbit",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 143,
+          "sideA": 110,
+          "sideB": 106
+        },
+        "face_height": {
+          "front": 116,
+          "sideA": 114,
+          "sideB": 113
+        },
+        "face_height_ratio_sideA_front": 0.982759,
+        "face_height_ratio_sideB_front": 0.974138,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.881057,
+        "face_top": {
+          "front": 205,
+          "sideA": 191,
+          "sideB": 192
+        },
+        "face_bottom": {
+          "front": 321,
+          "sideA": 305,
+          "sideB": 305
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -14,
+          "sideB": -13
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -16,
+          "sideB": -16
+        },
+        "head_top": {
+          "front": 75,
+          "back": 76,
+          "sideA": 75,
+          "sideB": 74
+        },
+        "head_top_diff_vs_front": {
+          "back": 1,
+          "sideA": 0,
+          "sideB": -1
+        },
+        "chin_to_foot": {
+          "front": 159,
+          "sideA": 175,
+          "sideB": 175
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 16,
+          "sideB": 16
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 254.720747,
+          "back": 238.591954,
+          "sideA": 261.779236,
+          "sideB": 239.57715
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 403,
+          "back": 404,
+          "sideA": 409,
+          "sideB": 409
+        },
+        "alpha_bbox": {
+          "front": [
+            96,
+            80,
+            401,
+            483
+          ],
+          "back": [
+            93,
+            80,
+            398,
+            484
+          ],
+          "sideA": [
+            116,
+            74,
+            405,
+            483
+          ],
+          "sideB": [
+            97,
+            74,
+            387,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            164,
+            173,
+            308,
+            323
+          ],
+          "sideB_crop": [
+            199,
+            175,
+            337,
+            322
+          ],
+          "lpips": 0.128529,
+          "ssim": 0.485714,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            82,
+            40,
+            433,
+            340
+          ],
+          "sideB_crop": [
+            71,
+            39,
+            425,
+            340
+          ],
+          "lpips": 0.086009,
+          "ssim": 0.659553,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.056761,
+        "front_sideA": 0.018186,
+        "front_sideB": 0.021867,
+        "sideA_sideB": 0.003299
+      }
+    },
+    {
+      "character": "star_boy",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 149,
+          "sideA": 107,
+          "sideB": 98
+        },
+        "face_height": {
+          "front": 120,
+          "sideA": 116,
+          "sideB": 115
+        },
+        "face_height_ratio_sideA_front": 0.966667,
+        "face_height_ratio_sideB_front": 0.958333,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.865801,
+        "face_top": {
+          "front": 199,
+          "sideA": 201,
+          "sideB": 201
+        },
+        "face_bottom": {
+          "front": 319,
+          "sideA": 317,
+          "sideB": 316
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 2
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -3
+        },
+        "head_top": {
+          "front": 91,
+          "back": 88,
+          "sideA": 96,
+          "sideB": 96
+        },
+        "head_top_diff_vs_front": {
+          "back": -3,
+          "sideA": 5,
+          "sideB": 5
+        },
+        "chin_to_foot": {
+          "front": 161,
+          "sideA": 163,
+          "sideB": 164
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 2,
+          "sideB": 3
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 257.225339,
+          "back": 253.7087,
+          "sideA": 252.738727,
+          "sideB": 268.189189
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 446,
+          "back": 449,
+          "sideA": 425,
+          "sideB": 404
+        },
+        "alpha_bbox": {
+          "front": [
+            1,
+            61,
+            441,
+            507
+          ],
+          "back": [
+            64,
+            61,
+            436,
+            510
+          ],
+          "sideA": [
+            5,
+            87,
+            445,
+            512
+          ],
+          "sideB": [
+            73,
+            83,
+            468,
+            487
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            147,
+            183,
+            288,
+            335
+          ],
+          "sideB_crop": [
+            234,
+            183,
+            362,
+            334
+          ],
+          "lpips": 0.340081,
+          "ssim": 0.357989,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            99,
+            62,
+            424,
+            351
+          ],
+          "sideB_crop": [
+            77,
+            63,
+            405,
+            348
+          ],
+          "lpips": 0.224306,
+          "ssim": 0.566099,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.100787,
+        "front_sideA": 0.043088,
+        "front_sideB": 0.072207,
+        "sideA_sideB": 0.02512
+      }
+    },
+    {
+      "character": "storm_sage",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 148,
+          "sideA": 123,
+          "sideB": 122
+        },
+        "face_height": {
+          "front": 129,
+          "sideA": 119,
+          "sideB": 113
+        },
+        "face_height_ratio_sideA_front": 0.922481,
+        "face_height_ratio_sideB_front": 0.875969,
+        "face_height_diff_sideA_minus_sideB_px": 6,
+        "face_height_diff_side_pct": 5.172414,
+        "face_top": {
+          "front": 149,
+          "sideA": 160,
+          "sideB": 166
+        },
+        "face_bottom": {
+          "front": 278,
+          "sideA": 279,
+          "sideB": 279
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 11,
+          "sideB": 17
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 1,
+          "sideB": 1
+        },
+        "head_top": {
+          "front": 65,
+          "back": 65,
+          "sideA": 76,
+          "sideB": 76
+        },
+        "head_top_diff_vs_front": {
+          "back": 0,
+          "sideA": 11,
+          "sideB": 11
+        },
+        "chin_to_foot": {
+          "front": 203,
+          "sideA": 201,
+          "sideB": 201
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -2
+        },
+        "foot_y": {
+          "front": 481,
+          "back": 481,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 254.22125,
+          "back": 249.640244,
+          "sideA": 257.211443,
+          "sideB": 254.317955
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 429,
+          "back": 429,
+          "sideA": 418,
+          "sideB": 418
+        },
+        "alpha_bbox": {
+          "front": [
+            97,
+            55,
+            391,
+            484
+          ],
+          "back": [
+            116,
+            55,
+            416,
+            484
+          ],
+          "sideA": [
+            159,
+            65,
+            445,
+            483
+          ],
+          "sideB": [
+            73,
+            65,
+            359,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            173,
+            142,
+            334,
+            297
+          ],
+          "sideB_crop": [
+            186,
+            149,
+            346,
+            296
+          ],
+          "lpips": 0.216933,
+          "ssim": 0.386799,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            125,
+            45,
+            445,
+            309
+          ],
+          "sideB_crop": [
+            74,
+            45,
+            394,
+            309
+          ],
+          "lpips": 0.062532,
+          "ssim": 0.777168,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.05897,
+        "front_sideA": 0.005832,
+        "front_sideB": 0.022951,
+        "sideA_sideB": 0.022681
+      }
+    },
+    {
+      "character": "sunflower",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 143,
+          "sideA": 90,
+          "sideB": 80
+        },
+        "face_height": {
+          "front": 112,
+          "sideA": 104,
+          "sideB": 102
+        },
+        "face_height_ratio_sideA_front": 0.928571,
+        "face_height_ratio_sideB_front": 0.910714,
+        "face_height_diff_sideA_minus_sideB_px": 2,
+        "face_height_diff_side_pct": 1.941748,
+        "face_top": {
+          "front": 182,
+          "sideA": 189,
+          "sideB": 193
+        },
+        "face_bottom": {
+          "front": 294,
+          "sideA": 293,
+          "sideB": 295
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 7,
+          "sideB": 11
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -1,
+          "sideB": 1
+        },
+        "head_top": {
+          "front": 74,
+          "back": 76,
+          "sideA": 93,
+          "sideB": 87
+        },
+        "head_top_diff_vs_front": {
+          "back": 2,
+          "sideA": 19,
+          "sideB": 13
+        },
+        "chin_to_foot": {
+          "front": 185,
+          "sideA": 186,
+          "sideB": 184
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 1,
+          "sideB": -1
+        },
+        "foot_y": {
+          "front": 479,
+          "back": 479,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 255.613917,
+          "back": 255.046433,
+          "sideA": 258.001393,
+          "sideB": 253.030568
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 417,
+          "back": 413,
+          "sideA": 401,
+          "sideB": 400
+        },
+        "alpha_bbox": {
+          "front": [
+            105,
+            66,
+            377,
+            483
+          ],
+          "back": [
+            117,
+            70,
+            385,
+            483
+          ],
+          "sideA": [
+            163,
+            82,
+            415,
+            483
+          ],
+          "sideB": [
+            99,
+            83,
+            340,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            170,
+            173,
+            288,
+            309
+          ],
+          "sideB_crop": [
+            230,
+            177,
+            334,
+            311
+          ],
+          "lpips": 0.382708,
+          "ssim": 0.31656,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            127,
+            63,
+            416,
+            323
+          ],
+          "sideB_crop": [
+            102,
+            55,
+            374,
+            329
+          ],
+          "lpips": 0.287685,
+          "ssim": 0.487014,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.084497,
+        "front_sideA": 0.033715,
+        "front_sideB": 0.064252,
+        "sideA_sideB": 0.019968
+      }
+    },
+    {
+      "character": "time_magician",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 137,
+          "sideA": 97,
+          "sideB": 96
+        },
+        "face_height": {
+          "front": 104,
+          "sideA": 98,
+          "sideB": 101
+        },
+        "face_height_ratio_sideA_front": 0.942308,
+        "face_height_ratio_sideB_front": 0.971154,
+        "face_height_diff_sideA_minus_sideB_px": -3,
+        "face_height_diff_side_pct": 3.015075,
+        "face_top": {
+          "front": 175,
+          "sideA": 179,
+          "sideB": 178
+        },
+        "face_bottom": {
+          "front": 279,
+          "sideA": 277,
+          "sideB": 279
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 4,
+          "sideB": 3
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -2,
+          "sideB": 0
+        },
+        "head_top": {
+          "front": 73,
+          "back": 78,
+          "sideA": 85,
+          "sideB": 87
+        },
+        "head_top_diff_vs_front": {
+          "back": 5,
+          "sideA": 12,
+          "sideB": 14
+        },
+        "chin_to_foot": {
+          "front": 201,
+          "sideA": 204,
+          "sideB": 203
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 3,
+          "sideB": 2
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 481,
+          "sideB": 482
+        },
+        "foot_x": {
+          "front": 253.717901,
+          "back": 258.456933,
+          "sideA": 268.317221,
+          "sideB": 241.114074
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 1,
+          "sideB": 2
+        },
+        "alpha_height": {
+          "front": 426,
+          "back": 426,
+          "sideA": 411,
+          "sideB": 413
+        },
+        "alpha_bbox": {
+          "front": [
+            92,
+            58,
+            463,
+            484
+          ],
+          "back": [
+            50,
+            58,
+            442,
+            484
+          ],
+          "sideA": [
+            33,
+            73,
+            462,
+            484
+          ],
+          "sideB": [
+            51,
+            73,
+            445,
+            486
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            166,
+            164,
+            293,
+            292
+          ],
+          "sideB_crop": [
+            219,
+            162,
+            345,
+            295
+          ],
+          "lpips": 0.20157,
+          "ssim": 0.471486,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            115,
+            56,
+            396,
+            307
+          ],
+          "sideB_crop": [
+            112,
+            58,
+            392,
+            309
+          ],
+          "lpips": 0.116539,
+          "ssim": 0.623572,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.109029,
+        "front_sideA": 0.013656,
+        "front_sideB": 0.019181,
+        "sideA_sideB": 0.006837
+      }
+    },
+    {
+      "character": "time_ruler",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 149,
+          "sideA": 118,
+          "sideB": 120
+        },
+        "face_height": {
+          "front": 111,
+          "sideA": 114,
+          "sideB": 113
+        },
+        "face_height_ratio_sideA_front": 1.027027,
+        "face_height_ratio_sideB_front": 1.018018,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.881057,
+        "face_top": {
+          "front": 182,
+          "sideA": 175,
+          "sideB": 176
+        },
+        "face_bottom": {
+          "front": 293,
+          "sideA": 289,
+          "sideB": 289
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -7,
+          "sideB": -6
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -4,
+          "sideB": -4
+        },
+        "head_top": {
+          "front": 102,
+          "back": 99,
+          "sideA": 97,
+          "sideB": 97
+        },
+        "head_top_diff_vs_front": {
+          "back": -3,
+          "sideA": -5,
+          "sideB": -5
+        },
+        "chin_to_foot": {
+          "front": 187,
+          "sideA": 190,
+          "sideB": 190
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 3,
+          "sideB": 3
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 479,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 262.532468,
+          "back": 247.34058,
+          "sideA": 266.225434,
+          "sideB": 247.511494
+        },
+        "foot_diff_vs_front": {
+          "back": -1,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 383,
+          "back": 382,
+          "sideA": 382,
+          "sideB": 382
+        },
+        "alpha_bbox": {
+          "front": [
+            108,
+            100,
+            419,
+            483
+          ],
+          "back": [
+            93,
+            100,
+            399,
+            482
+          ],
+          "sideA": [
+            147,
+            100,
+            443,
+            482
+          ],
+          "sideB": [
+            71,
+            100,
+            368,
+            482
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            154,
+            157,
+            308,
+            307
+          ],
+          "sideB_crop": [
+            205,
+            159,
+            361,
+            306
+          ],
+          "lpips": 0.07585,
+          "ssim": 0.696931,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            113,
+            68,
+            402,
+            317
+          ],
+          "sideB_crop": [
+            113,
+            68,
+            403,
+            318
+          ],
+          "lpips": 0.04634,
+          "ssim": 0.749246,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.120623,
+        "front_sideA": 0.047247,
+        "front_sideB": 0.04527,
+        "sideA_sideB": 0.005139
+      }
+    },
+    {
+      "character": "toffee_apple",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 152,
+          "sideA": 92,
+          "sideB": 95
+        },
+        "face_height": {
+          "front": 115,
+          "sideA": 103,
+          "sideB": 117
+        },
+        "face_height_ratio_sideA_front": 0.895652,
+        "face_height_ratio_sideB_front": 1.017391,
+        "face_height_diff_sideA_minus_sideB_px": -14,
+        "face_height_diff_side_pct": 12.727273,
+        "face_top": {
+          "front": 181,
+          "sideA": 179,
+          "sideB": 167
+        },
+        "face_bottom": {
+          "front": 296,
+          "sideA": 282,
+          "sideB": 284
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -2,
+          "sideB": -14
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -14,
+          "sideB": -12
+        },
+        "head_top": {
+          "front": 77,
+          "back": 76,
+          "sideA": 72,
+          "sideB": 75
+        },
+        "head_top_diff_vs_front": {
+          "back": -1,
+          "sideA": -5,
+          "sideB": -2
+        },
+        "chin_to_foot": {
+          "front": 185,
+          "sideA": 198,
+          "sideB": 196
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 13,
+          "sideB": 11
+        },
+        "foot_y": {
+          "front": 481,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 256.308153,
+          "back": 255.657923,
+          "sideA": 257.490431,
+          "sideB": 254.561212
+        },
+        "foot_diff_vs_front": {
+          "back": -1,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 414,
+          "back": 412,
+          "sideA": 413,
+          "sideB": 414
+        },
+        "alpha_bbox": {
+          "front": [
+            120,
+            70,
+            428,
+            484
+          ],
+          "back": [
+            88,
+            72,
+            389,
+            484
+          ],
+          "sideA": [
+            128,
+            71,
+            422,
+            484
+          ],
+          "sideB": [
+            72,
+            70,
+            379,
+            484
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            164,
+            163,
+            284,
+            298
+          ],
+          "sideB_crop": [
+            228,
+            149,
+            353,
+            302
+          ],
+          "lpips": 0.467264,
+          "ssim": 0.158334,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            105,
+            40,
+            443,
+            317
+          ],
+          "sideB_crop": [
+            54,
+            43,
+            406,
+            317
+          ],
+          "lpips": 0.195326,
+          "ssim": 0.450528,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.161584,
+        "front_sideA": 0.028911,
+        "front_sideB": 0.054957,
+        "sideA_sideB": 0.081083
+      }
+    },
+    {
+      "character": "trauma",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 137,
+          "sideA": 102,
+          "sideB": 102
+        },
+        "face_height": {
+          "front": 102,
+          "sideA": 107,
+          "sideB": 109
+        },
+        "face_height_ratio_sideA_front": 1.04902,
+        "face_height_ratio_sideB_front": 1.068627,
+        "face_height_diff_sideA_minus_sideB_px": -2,
+        "face_height_diff_side_pct": 1.851852,
+        "face_top": {
+          "front": 194,
+          "sideA": 190,
+          "sideB": 189
+        },
+        "face_bottom": {
+          "front": 296,
+          "sideA": 297,
+          "sideB": 298
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -4,
+          "sideB": -5
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 1,
+          "sideB": 2
+        },
+        "head_top": {
+          "front": 80,
+          "back": 82,
+          "sideA": 86,
+          "sideB": 85
+        },
+        "head_top_diff_vs_front": {
+          "back": 2,
+          "sideA": 6,
+          "sideB": 5
+        },
+        "chin_to_foot": {
+          "front": 184,
+          "sideA": 183,
+          "sideB": 183
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -1,
+          "sideB": -1
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 483,
+          "sideA": 480,
+          "sideB": 481
+        },
+        "foot_x": {
+          "front": 254.655706,
+          "back": 256.510569,
+          "sideA": 253.016743,
+          "sideB": 251.344136
+        },
+        "foot_diff_vs_front": {
+          "back": 3,
+          "sideA": 0,
+          "sideB": 1
+        },
+        "alpha_height": {
+          "front": 423,
+          "back": 425,
+          "sideA": 443,
+          "sideB": 423
+        },
+        "alpha_bbox": {
+          "front": [
+            25,
+            63,
+            450,
+            486
+          ],
+          "back": [
+            54,
+            62,
+            475,
+            487
+          ],
+          "sideA": [
+            24,
+            69,
+            481,
+            512
+          ],
+          "sideB": [
+            23,
+            67,
+            447,
+            490
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            162,
+            173,
+            296,
+            314
+          ],
+          "sideB_crop": [
+            212,
+            172,
+            346,
+            315
+          ],
+          "lpips": 0.256832,
+          "ssim": 0.450931,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            103,
+            54,
+            406,
+            329
+          ],
+          "sideB_crop": [
+            101,
+            53,
+            401,
+            330
+          ],
+          "lpips": 0.169277,
+          "ssim": 0.61031,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.090756,
+        "front_sideA": 0.020375,
+        "front_sideB": 0.019167,
+        "sideA_sideB": 0.003253
+      }
+    },
+    {
+      "character": "underdog",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 152,
+          "sideA": 133,
+          "sideB": 117
+        },
+        "face_height": {
+          "front": 119,
+          "sideA": 114,
+          "sideB": 108
+        },
+        "face_height_ratio_sideA_front": 0.957983,
+        "face_height_ratio_sideB_front": 0.907563,
+        "face_height_diff_sideA_minus_sideB_px": 6,
+        "face_height_diff_side_pct": 5.405405,
+        "face_top": {
+          "front": 185,
+          "sideA": 200,
+          "sideB": 215
+        },
+        "face_bottom": {
+          "front": 304,
+          "sideA": 314,
+          "sideB": 323
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 15,
+          "sideB": 30
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": 10,
+          "sideB": 19
+        },
+        "head_top": {
+          "front": 94,
+          "back": 95,
+          "sideA": 124,
+          "sideB": 124
+        },
+        "head_top_diff_vs_front": {
+          "back": 1,
+          "sideA": 30,
+          "sideB": 30
+        },
+        "chin_to_foot": {
+          "front": 176,
+          "sideA": 166,
+          "sideB": 157
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -10,
+          "sideB": -19
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 480,
+          "sideB": 480
+        },
+        "foot_x": {
+          "front": 251.50246,
+          "back": 256.095448,
+          "sideA": 260.650376,
+          "sideB": 246.992271
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": 0,
+          "sideB": 0
+        },
+        "alpha_height": {
+          "front": 391,
+          "back": 390,
+          "sideA": 360,
+          "sideB": 358
+        },
+        "alpha_bbox": {
+          "front": [
+            101,
+            92,
+            360,
+            483
+          ],
+          "back": [
+            134,
+            94,
+            380,
+            484
+          ],
+          "sideA": [
+            110,
+            123,
+            368,
+            483
+          ],
+          "sideB": [
+            138,
+            125,
+            400,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            132,
+            182,
+            305,
+            332
+          ],
+          "sideB_crop": [
+            220,
+            198,
+            373,
+            340
+          ],
+          "lpips": 0.39158,
+          "ssim": 0.266159,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            77,
+            95,
+            401,
+            343
+          ],
+          "sideB_crop": [
+            106,
+            94,
+            430,
+            352
+          ],
+          "lpips": 0.259531,
+          "ssim": 0.53548,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.129928,
+        "front_sideA": 0.014946,
+        "front_sideB": 0.013559,
+        "sideA_sideB": 0.015523
+      }
+    },
+    {
+      "character": "venom",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 154,
+          "sideA": 103,
+          "sideB": 103
+        },
+        "face_height": {
+          "front": 144,
+          "sideA": 129,
+          "sideB": 128
+        },
+        "face_height_ratio_sideA_front": 0.895833,
+        "face_height_ratio_sideB_front": 0.888889,
+        "face_height_diff_sideA_minus_sideB_px": 1,
+        "face_height_diff_side_pct": 0.77821,
+        "face_top": {
+          "front": 150,
+          "sideA": 154,
+          "sideB": 157
+        },
+        "face_bottom": {
+          "front": 294,
+          "sideA": 283,
+          "sideB": 285
+        },
+        "face_top_diff_vs_front": {
+          "sideA": 4,
+          "sideB": 7
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -11,
+          "sideB": -9
+        },
+        "head_top": {
+          "front": 53,
+          "back": 45,
+          "sideA": 84,
+          "sideB": 85
+        },
+        "head_top_diff_vs_front": {
+          "back": -8,
+          "sideA": 31,
+          "sideB": 32
+        },
+        "chin_to_foot": {
+          "front": 186,
+          "sideA": 196,
+          "sideB": 194
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": 10,
+          "sideB": 8
+        },
+        "foot_y": {
+          "front": 480,
+          "back": 480,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 259.688341,
+          "back": 256.291685,
+          "sideA": 257.635294,
+          "sideB": 254.531103
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -1,
+          "sideB": -1
+        },
+        "alpha_height": {
+          "front": 456,
+          "back": 456,
+          "sideA": 420,
+          "sideB": 419
+        },
+        "alpha_bbox": {
+          "front": [
+            92,
+            27,
+            454,
+            483
+          ],
+          "back": [
+            58,
+            27,
+            416,
+            483
+          ],
+          "sideA": [
+            64,
+            63,
+            424,
+            483
+          ],
+          "sideB": [
+            86,
+            64,
+            445,
+            483
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            133,
+            134,
+            268,
+            303
+          ],
+          "sideB_crop": [
+            246,
+            137,
+            381,
+            305
+          ],
+          "lpips": 0.334789,
+          "ssim": 0.251819,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            92,
+            54,
+            408,
+            314
+          ],
+          "sideB_crop": [
+            87,
+            54,
+            421,
+            318
+          ],
+          "lpips": 0.271134,
+          "ssim": 0.353373,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.135328,
+        "front_sideA": 0.036656,
+        "front_sideB": 0.047684,
+        "sideA_sideB": 0.011469
+      }
+    },
+    {
+      "character": "zeke",
+      "group": "installed",
+      "derived": {
+        "face_width": {
+          "front": 143,
+          "sideA": 108,
+          "sideB": 110
+        },
+        "face_height": {
+          "front": 122,
+          "sideA": 113,
+          "sideB": 114
+        },
+        "face_height_ratio_sideA_front": 0.92623,
+        "face_height_ratio_sideB_front": 0.934426,
+        "face_height_diff_sideA_minus_sideB_px": -1,
+        "face_height_diff_side_pct": 0.881057,
+        "face_top": {
+          "front": 180,
+          "sideA": 173,
+          "sideB": 172
+        },
+        "face_bottom": {
+          "front": 302,
+          "sideA": 286,
+          "sideB": 286
+        },
+        "face_top_diff_vs_front": {
+          "sideA": -7,
+          "sideB": -8
+        },
+        "face_bottom_diff_vs_front": {
+          "sideA": -16,
+          "sideB": -16
+        },
+        "head_top": {
+          "front": 73,
+          "back": 76,
+          "sideA": 68,
+          "sideB": 68
+        },
+        "head_top_diff_vs_front": {
+          "back": 3,
+          "sideA": -5,
+          "sideB": -5
+        },
+        "chin_to_foot": {
+          "front": 201,
+          "sideA": 193,
+          "sideB": 193
+        },
+        "chin_to_foot_diff_vs_front": {
+          "sideA": -8,
+          "sideB": -8
+        },
+        "foot_y": {
+          "front": 503,
+          "back": 503,
+          "sideA": 479,
+          "sideB": 479
+        },
+        "foot_x": {
+          "front": 233.055556,
+          "back": 264.684211,
+          "sideA": 243.487768,
+          "sideB": 251.405199
+        },
+        "foot_diff_vs_front": {
+          "back": 0,
+          "sideA": -24,
+          "sideB": -24
+        },
+        "alpha_height": {
+          "front": 440,
+          "back": 440,
+          "sideA": 419,
+          "sideB": 419
+        },
+        "alpha_bbox": {
+          "front": [
+            122,
+            64,
+            417,
+            504
+          ],
+          "back": [
+            83,
+            64,
+            376,
+            504
+          ],
+          "sideA": [
+            131,
+            63,
+            426,
+            482
+          ],
+          "sideB": [
+            70,
+            63,
+            365,
+            482
+          ]
+        }
+      },
+      "mirror": {
+        "pad": 0.15,
+        "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+        "face": {
+          "sideA_crop": [
+            152,
+            156,
+            294,
+            303
+          ],
+          "sideB_crop": [
+            201,
+            154,
+            345,
+            304
+          ],
+          "lpips": 0.063541,
+          "ssim": 0.714802,
+          "error": null
+        },
+        "head": {
+          "sideA_crop": [
+            103,
+            35,
+            395,
+            320
+          ],
+          "sideB_crop": [
+            95,
+            35,
+            396,
+            320
+          ],
+          "lpips": 0.068951,
+          "ssim": 0.69383,
+          "error": null
+        }
+      },
+      "ccip": {
+        "front_back": 0.041376,
+        "front_sideA": 0.007608,
+        "front_sideB": 0.007408,
+        "sideA_sideB": 0.001475
+      }
+    }
+  ]
+}

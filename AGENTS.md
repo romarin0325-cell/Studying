@@ -26,6 +26,8 @@ Functional correctness of the browser app is more important than refactoring or 
 The former `defense_legacy/`, `idle/`, `english_vocab_version/` and the old Hero Core Defense were removed; recover them from Git history if ever needed. `defense/` was promoted from `defense_test/` (Star Garden) and is the only Defense.
 
 ## Core guidelines
+
+- Defense SD character generation, regeneration, proportions, four-direction consistency or portrait-art work starts with `.agents/skills/star-garden-sd-art/SKILL.md` and `defense/docs/art/sd-pipeline/RUNBOOK.md`. Use the repository's A–G runner and complete cumulative checks; previous chat context is not the workflow store. This does not change unrelated games or imply permission to publish or regenerate approved art.
 - Prefer the smallest diff that restores working behavior (bug fixes). Design, UI and effect work in `defense/` follows `defense/AGENTS.md` instead (read it first when working there).
 - If UI behavior cannot be fully verified, state exactly what remains unverified.
 - For frontend tasks, use image inputs/output when helpful and compare against the requested behavior.

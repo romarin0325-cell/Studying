@@ -50,12 +50,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 33150041,
-    "deployableSourceBytes": 31325767,
-    "outputBytes": 17617174,
+    "sourceBytes": 34450583,
+    "deployableSourceBytes": 32626309,
+    "outputBytes": 17603944,
     "optimizedFiles": 177,
     "derivedFiles": 162,
-    "derivedOutputBytes": 3894814
+    "derivedOutputBytes": 3882286
   },
   "images": [
     {
@@ -515,7 +515,7 @@
     },
     {
       "id": "atlas:unit-luna",
-      "source": "./assets/cast-v2/luna.webp",
+      "source": "./assets/cast-selected-20261108/luna.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-luna; combat renderer / stage UI",
@@ -524,8 +524,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 201764,
-        "sha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
+        "bytes": 486566,
+        "sha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -534,9 +534,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/luna.webp",
-        "bytes": 72064,
-        "sha256": "7b08e79ecedf30653689cff7c507c80353d1945484f51dee82957fd89b7de207",
+        "path": "./assets/optimized/cast-selected-20261108/luna.webp",
+        "bytes": 67264,
+        "sha256": "46c8705fc9e6c4ecd53d2be463edc474e099500ff7b07e6d52225ea97ef773f5",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -779,7 +779,7 @@
     },
     {
       "id": "atlas:unit-red_dragon",
-      "source": "./assets/cast-v2/red_dragon.webp",
+      "source": "./assets/cast-selected-20261108/red_dragon.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-red_dragon; combat renderer / stage UI",
@@ -788,8 +788,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 240986,
-        "sha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
+        "bytes": 621894,
+        "sha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -798,9 +798,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/red_dragon.webp",
-        "bytes": 91376,
-        "sha256": "92c862e3f6e9aea70548fe1cc4760edda9cfd33d9550833ec876d5fc8a8bb2ae",
+        "path": "./assets/optimized/cast-selected-20261108/red_dragon.webp",
+        "bytes": 100964,
+        "sha256": "aff7cf3cacca6fb21cde1fa2d7daebdd0cab4802332f0c462161301d02951bdd",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -911,7 +911,7 @@
     },
     {
       "id": "atlas:unit-siren",
-      "source": "./assets/cast-v2/siren.webp",
+      "source": "./assets/cast-selected-20261108/siren.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-siren; combat renderer / stage UI",
@@ -920,8 +920,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 189274,
-        "sha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
+        "bytes": 449840,
+        "sha256": "f9b861a04d313c62c9388df70c722b851ec2210cebf62945af7cdfce96596a80",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -930,9 +930,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/siren.webp",
-        "bytes": 72786,
-        "sha256": "24a60c1fd4d2675f43cabf6faff9feb043cc4fd778c115c8f65c128ac015b084",
+        "path": "./assets/optimized/cast-selected-20261108/siren.webp",
+        "bytes": 71280,
+        "sha256": "06dc07a7c2004fe4a381a79ef07e5018769200b59ec8ef559ca810724152e619",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1142,7 +1142,7 @@
     },
     {
       "id": "atlas:unit-doom",
-      "source": "./assets/cast-v2/doom.webp",
+      "source": "./assets/cast-selected-20261108/doom.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-doom; combat renderer / stage UI",
@@ -1151,8 +1151,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 171594,
-        "sha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+        "bytes": 352294,
+        "sha256": "9adc2f0be9f2fe16f64c9aa15ea9a76c4ee3f0428214bc3e4524739bc9702264",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1161,9 +1161,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/doom.webp",
-        "bytes": 63506,
-        "sha256": "1727475afec918e657906dc3c728228c84c482091f8533a39d5e61d77c3957ee",
+        "path": "./assets/optimized/cast-selected-20261108/doom.webp",
+        "bytes": 55976,
+        "sha256": "3b0505f8e8e08cf544e9cb858775dfaf86fb05de6d025767c9928931de01f6e2",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1307,7 +1307,7 @@
     },
     {
       "id": "atlas:unit-cherry_prince",
-      "source": "./assets/cast-v2/cherry_prince.webp",
+      "source": "./assets/cast-selected-20261108/cherry_prince.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-cherry_prince; combat renderer / stage UI",
@@ -1316,8 +1316,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 180310,
-        "sha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
+        "bytes": 373876,
+        "sha256": "4c2f058e46b15f4a2812657ad2f898a470c96d2a4c331f73c09a85af5bcba867",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1326,9 +1326,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/cherry_prince.webp",
-        "bytes": 67392,
-        "sha256": "e13facd9c17d9066fb900d7661f4580b8e55c498959f6f73e2f559a41cd1560a",
+        "path": "./assets/optimized/cast-selected-20261108/cherry_prince.webp",
+        "bytes": 58410,
+        "sha256": "a10a8325e4c5a794f13431472eb9c8d15da8481ed86dad09383e7a44846d7e05",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -6206,11 +6206,11 @@
     },
     {
       "id": "portrait:siren",
-      "source": "./assets/cast-v2/siren.webp",
+      "source": "./assets/cast-selected-20261108/siren.webp",
       "profile": "portrait",
       "crop": {
-        "left": 121,
-        "top": 101,
+        "left": 128,
+        "top": 84,
         "width": 250,
         "height": 250
       },
@@ -6218,11 +6218,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
+      "sourceSha256": "f9b861a04d313c62c9388df70c722b851ec2210cebf62945af7cdfce96596a80",
       "output": {
         "path": "./assets/optimized/ui/portraits/siren.webp",
-        "bytes": 19904,
-        "sha256": "2b48ef787de60837a3e0b92494c53452bbd876fecb824977cb6e1f966cf959a5",
+        "bytes": 20978,
+        "sha256": "b8da1313a2b45726b0f5d5359b48c94ae147a05031f8394248058367be1c7250",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6233,7 +6233,7 @@
     },
     {
       "id": "figure:siren",
-      "source": "./assets/cast-v2/siren.webp",
+      "source": "./assets/cast-selected-20261108/siren.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6245,11 +6245,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "60b2c0380af708dc5d74e4a21bd7ba12b0574d7047a13d08669c18d28f750b3c",
+      "sourceSha256": "f9b861a04d313c62c9388df70c722b851ec2210cebf62945af7cdfce96596a80",
       "output": {
         "path": "./assets/optimized/ui/figures/siren.webp",
-        "bytes": 39836,
-        "sha256": "f19e24df95b89919f474dd7bf745ee28721fdbef64e583264bd248c1947aa081",
+        "bytes": 38412,
+        "sha256": "dfa79777ed2be966cd4f2a445f518f4273383928d71911d847167ccb3f9d93b7",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -6692,11 +6692,11 @@
     },
     {
       "id": "portrait:red_dragon",
-      "source": "./assets/cast-v2/red_dragon.webp",
+      "source": "./assets/cast-selected-20261108/red_dragon.webp",
       "profile": "portrait",
       "crop": {
-        "left": 143,
-        "top": 79,
+        "left": 130,
+        "top": 74,
         "width": 250,
         "height": 250
       },
@@ -6704,11 +6704,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
+      "sourceSha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e",
       "output": {
         "path": "./assets/optimized/ui/portraits/red_dragon.webp",
-        "bytes": 24986,
-        "sha256": "6269d9d965ca4c0cb0eee30dafd3309d4fb65f2495f54b4515aaaec1dec09ad5",
+        "bytes": 26812,
+        "sha256": "1ba03b9b99d50fc9b43f93b82cb88f80d805c6527b5a594ae15afe9ef301cc9f",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -6719,7 +6719,7 @@
     },
     {
       "id": "figure:red_dragon",
-      "source": "./assets/cast-v2/red_dragon.webp",
+      "source": "./assets/cast-selected-20261108/red_dragon.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -6731,11 +6731,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "3786255f27fcd223fd92385f39f8786dcd03bcdd707cea78f62a54b5487954cb",
+      "sourceSha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e",
       "output": {
         "path": "./assets/optimized/ui/figures/red_dragon.webp",
-        "bytes": 52712,
-        "sha256": "d1b8a9187c9fec205b97412aba2219654e53a170b7923d8f9196d4e6a1d00c24",
+        "bytes": 57456,
+        "sha256": "b8434a7228be68325543c4d443478e9f99465b6a1a8168a1c5f6b3b3bae5ae75",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -7502,23 +7502,23 @@
     },
     {
       "id": "portrait:luna",
-      "source": "./assets/cast-v2/luna.webp",
+      "source": "./assets/cast-selected-20261108/luna.webp",
       "profile": "portrait",
       "crop": {
-        "left": 117,
-        "top": 95,
-        "width": 250,
-        "height": 250
+        "left": 114,
+        "top": 68,
+        "width": 272,
+        "height": 272
       },
       "destination": "./assets/optimized/ui/portraits/luna.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
+      "sourceSha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2",
       "output": {
         "path": "./assets/optimized/ui/portraits/luna.webp",
-        "bytes": 20120,
-        "sha256": "cf2cbd8b67963eda52c87261510952141667256a9db277b393300e2ba3cc08fe",
+        "bytes": 17622,
+        "sha256": "8ca1eb4a97636fa809e420732b1f1383491c32751ae9ff519f90a5bfe5c834b0",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -7529,7 +7529,7 @@
     },
     {
       "id": "figure:luna",
-      "source": "./assets/cast-v2/luna.webp",
+      "source": "./assets/cast-selected-20261108/luna.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7541,11 +7541,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "60d09acc8f0c16f11b54eaa6712e3cf5fe55ec8ff7602c5f55da6b6b8a25f912",
+      "sourceSha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2",
       "output": {
         "path": "./assets/optimized/ui/figures/luna.webp",
-        "bytes": 37290,
-        "sha256": "cce7f7896d790bbcfe29e4af1ac458c4f84ad79a719cbb60acf0323a165abee6",
+        "bytes": 33772,
+        "sha256": "854855abde1417668d81da3ba45a3196eed83bf224e3d5124d965f98829b442a",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -7718,11 +7718,11 @@
     },
     {
       "id": "portrait:cherry_prince",
-      "source": "./assets/cast-v2/cherry_prince.webp",
+      "source": "./assets/cast-selected-20261108/cherry_prince.webp",
       "profile": "portrait",
       "crop": {
-        "left": 125,
-        "top": 81,
+        "left": 130,
+        "top": 72,
         "width": 250,
         "height": 250
       },
@@ -7730,11 +7730,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
+      "sourceSha256": "4c2f058e46b15f4a2812657ad2f898a470c96d2a4c331f73c09a85af5bcba867",
       "output": {
         "path": "./assets/optimized/ui/portraits/cherry_prince.webp",
-        "bytes": 20140,
-        "sha256": "c691d66a7bfedf7d4fe208b56afb1f692175a010689ed9f94a0651ec1110f6ad",
+        "bytes": 19370,
+        "sha256": "ded1ce2e42c39e11891db0c9ffa46e0a341fd0f450b535a2664b1779c14cda10",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -7745,7 +7745,7 @@
     },
     {
       "id": "figure:cherry_prince",
-      "source": "./assets/cast-v2/cherry_prince.webp",
+      "source": "./assets/cast-selected-20261108/cherry_prince.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7757,11 +7757,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "b5c5d13f368961d2db1a85d72a4737362196d4def1e6044abaab392337b6cff0",
+      "sourceSha256": "4c2f058e46b15f4a2812657ad2f898a470c96d2a4c331f73c09a85af5bcba867",
       "output": {
         "path": "./assets/optimized/ui/figures/cherry_prince.webp",
-        "bytes": 36486,
-        "sha256": "9b1630da7c7f8cef863ba8e0691b03c7a56bc8992773898e9c56024ed34529fd",
+        "bytes": 29510,
+        "sha256": "9fe99f5bffa625e224313f21faeca38dfd328a09a4122bed2d32fa5c61051915",
         "metadata": {
           "width": 512,
           "height": 512,
@@ -8042,10 +8042,10 @@
     },
     {
       "id": "portrait:doom",
-      "source": "./assets/cast-v2/doom.webp",
+      "source": "./assets/cast-selected-20261108/doom.webp",
       "profile": "portrait",
       "crop": {
-        "left": 128,
+        "left": 129,
         "top": 74,
         "width": 250,
         "height": 250
@@ -8054,11 +8054,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+      "sourceSha256": "9adc2f0be9f2fe16f64c9aa15ea9a76c4ee3f0428214bc3e4524739bc9702264",
       "output": {
         "path": "./assets/optimized/ui/portraits/doom.webp",
-        "bytes": 17400,
-        "sha256": "18a09f33aae41f747fa58ddce68630bf462020d34f8713c3cce11ef98cc295cf",
+        "bytes": 15822,
+        "sha256": "df4cc172d42b8e9cd22e3b05364e0bd781bb1d3f847a0309c8af255b037702a6",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8069,7 +8069,7 @@
     },
     {
       "id": "figure:doom",
-      "source": "./assets/cast-v2/doom.webp",
+      "source": "./assets/cast-selected-20261108/doom.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -8081,11 +8081,11 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "a76e4e9164958c7aebc4b36e100ad550430b39b4cfcd51054eb9795fb3a1e018",
+      "sourceSha256": "9adc2f0be9f2fe16f64c9aa15ea9a76c4ee3f0428214bc3e4524739bc9702264",
       "output": {
         "path": "./assets/optimized/ui/figures/doom.webp",
-        "bytes": 33446,
-        "sha256": "ffd3dc4eb510ca04abf79626133aac5d91806885a7243f6c71c2530ecd620f28",
+        "bytes": 30038,
+        "sha256": "8db615ef9664b8c21730412b39a47e7d9ff0f90f56108143c407cda951ee66f3",
         "metadata": {
           "width": 512,
           "height": 512,

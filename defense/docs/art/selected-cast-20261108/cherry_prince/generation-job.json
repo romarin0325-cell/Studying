@@ -1,0 +1,90 @@
+{
+  "tool": "image_gen",
+  "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+  "preparedAt": "2026-11-08T03:42:10.528Z",
+  "prompt": "Use case: precise-object-edit / stylized game asset. EDIT IMAGE1. Finish the GREY SMALL BODY with this character's ORIGINAL COSTUME. Keep the already colored head, expression, hairline, face shape and exact head size/position unchanged. This is not a new whole-character layout.\nImage1 is the actual edit target: new original-derived colored heads on exact common tiny SD bodies. Image2 is the allowed mask: WHITE lower area can be painted, BLACK head area is protected. Image3 is the ORIGINAL illustration for costume/materials/colors, not adult proportions or pose. Image4 is the fixed fine-line/cel SD rendering style. Image5 confirms the structural size and camera.\nDRESS THE GREY BODY IN PLACE: slender neutral body, chin280 and sole480, below-chin200px. Keep the grey body's short torso/legs and sole baseline in every cell. Do not lengthen legs or torso to fit adult clothing. Fit and simplify the original costume onto the small body. Four matching orthographic standing views, same skeletal levels. This character is 체리프린스.\nORIGINAL DESIGN: CHERRY PRINCE: A handsome gentle male prince, quietly assured, with soft half-lidded rose-red eyes, a small knowing closed-mouth smile, softly rounded SD cheeks and a tiny 2-degree head cant. His expression must feel individually graceful and welcoming rather than the same wide-eyed face as Siren. Preserve the white/silver wavy side-parted hair with layered curls and the small swept top lock. No crown. Use the original white royal double-breasted uniform with fine gold embroidered high collar, two rows of gold buttons, gold epaulettes, a ruby-pink oval throat brooch, brown-and-gold belt, white trousers, black boots, white cape with gold edge and pink lining, long split white coat panels. Keep the gold ornament on the back cape modest. A single black-and-gold ornate sword is SHEATHED at his anatomical LEFT hip, ruby/pink detail in its scabbard. His anatomical RIGHT palm rests lightly across his upper chest, as in his original portrait; his anatomical LEFT hand rests quietly near the belt, never gripping an exposed blade. In the left-facing profile the left-hip scabbard is near the camera; in the right-facing profile it is far and partially occluded. Carry that same hand, sheath and cape arrangement into the back view. Pose is a natural courteous idle, not a fencing or bowing action. Slightly taller body, same skull size as Siren: anatomical crown about y130, eyes about y233 and chin about y280. Sole y480. Do not enlarge his head to fill the fluffy hair silhouette.\nRestore any hair tips that naturally continue down into the white edit area. Join the neck, collar, sleeves, hair and costume cleanly at the fixed colored head. The original's asymmetry, equipment hand and near/far arm occlusion remain correct. Quiet idle, not a dramatic attack action. Right palm at chest, sheathed ornate sword on anatomical LEFT, black boots and pink cape lining.\nSame fine definite navy/plum/brown contours on face and clothes, lighter finer inside seams, selective cel shadows and small material highlights. No thick sticker edge or lineless white clothes. Exactly1024 square atlas with four512 cells in the SAME layout asimage1: front top-left, back top-right, left bottom-left, right bottom-right. Actual transparent background; no floor/shadow/labels/guides. Full figure, no clipped sword/hair/feet. Do not paint the mannequin grey in the final costume. Preserve the upper colored region; code will copy only the allowed mask and the face will be independently rechecked. Required QA remains: original-design, frozen-style, anatomical-head, face-shape-expression, directional-registration, body-proportions, equipment-handedness, silhouette-perceived-size, outline-weight, shading-material, cast-consistency, game-size-readability, portrait-alignment, seams-contact, independent-detector, source-integrity, package-integrity.",
+  "transparent_background": true,
+  "referencePaths": [
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\cherry_prince-r3-head-and-mannequin.png",
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\cherry_prince-r3-body-mask.png",
+    "C:\\Users\\romar\\Downloads\\캐릭터\\체리프린스.png",
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\frozen-style-front.png",
+    "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\neutral-tall-visible.png"
+  ],
+  "inputs": [
+    {
+      "role": "1 EDIT TARGET new colored head on exact tiny grey body",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\cherry_prince-r3-head-and-mannequin.png",
+      "sha256": "6d40f71cfb94084f74ca8a7122a63e81980547c5f361b1f4667e37f6d9c4fb1e"
+    },
+    {
+      "role": "2 allowed lower-body mask, white editable black protected",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\cherry_prince-r3-body-mask.png",
+      "sha256": "b69d14800383233a4ccd1de0b6a0cccf63830abf0713c0c505cfe844081f6507"
+    },
+    {
+      "role": "3 ORIGINAL costume design",
+      "file": "C:\\Users\\romar\\Downloads\\캐릭터\\체리프린스.png",
+      "sha256": "04a79147e51283003683fcbd768815adca9adb81820be8c3ec6fa65ccd78244b"
+    },
+    {
+      "role": "4 frozen SD rendering style",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\frozen-style-front.png",
+      "sha256": "65eab14cd0cdff6396cb2cade1f89c17a1e700ae9ceab719c4b93d9b22180281"
+    },
+    {
+      "role": "5 actual common head/body structure",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\neutral-tall-visible.png",
+      "sha256": "e25e7a87e60e80f0a15c67cadb5e4a0f249642385bb8b01d6e2937e98b0b2a9b"
+    }
+  ],
+  "qaPeers": [
+    {
+      "role": "ref:peer:storm_sage",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-pipeline\\audit-inputs\\storm_sage.png",
+      "sha256": "bc86ac132dd7656f7d45e792dfe338737af407e92309084bfd370d086b258878"
+    },
+    {
+      "role": "ref:peer:lightning_sage",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-pipeline\\audit-inputs\\lightning_sage.png",
+      "sha256": "4237300d6427d509f4a8d788575c6f5a066d98549a9e32d655449d5606ffba68"
+    },
+    {
+      "role": "ref:peer:zeke",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-pipeline\\audit-inputs\\zeke.png",
+      "sha256": "143564b5603c8968b3a1cdb3f5b66f830b11754ee28fd6673b78b47d6303d5e1"
+    },
+    {
+      "role": "ref:peer:luna_new2",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\new2\\luna-new2.webp",
+      "sha256": "ab52c15e26cc9d323373c03c7cc987da883f7d612c81af7822510c0948140ff2"
+    },
+    {
+      "role": "ref:peer:red_dragon_new2",
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\new2\\red_dragon-new2.webp",
+      "sha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e"
+    }
+  ],
+  "outputRole": "new-four-view-painting",
+  "derivativeProvenance": {
+    "structure": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-portrait-fit-20261107\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\neutral-tall.png",
+      "sha256": "1e1f2df598e2efdbff64498c35df960223e425e9602f6471c392390d714dd228",
+      "operation": "flatten the entire original1024px guide on a pale background; identical geometry and scale"
+    },
+    "style": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\work\\defense-portrait-fit-20261107\\defense\\docs\\art\\sol-cast-v2\\structure-masters\\style-siren.webp",
+      "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+      "operation": "pixel crop top-left512x512 then pale-background flatten; no scale"
+    },
+    "identity": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-expressive-sd-pilot-20261108\\refs\\cherry_prince-existing.png",
+      "sha256": "756c6e502913b465c3d9ff7a77f3d7b6971d5a7a1f92c38be9a955818fce90c0",
+      "operation": "fixed(128,112,256,256) crop then pale-background flatten; no scale"
+    }
+  },
+  "construction": {
+    "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\refs\\cherry_prince-r3-input-construction.json",
+    "sha256": "897eca56ffb3887a3a5be2fdef7c59f8a7d912e102500c8e24da44743eb21b86"
+  }
+}

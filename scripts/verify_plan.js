@@ -376,6 +376,8 @@ function planDefense(plan, files, currentFiles) {
   const checks = new Set(direct);
   const add = name => checks.add('defense/tests/' + name + '.test.mjs');
 
+  if (product.some(file => /^defense\/scripts\/art\/sd-pipeline\//.test(file))) add('sd-pipeline');
+
   if (inputs.some(file => /^defense\/(?:docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|image-pack|image-policy|local-inputs)\.mjs$|assets\/optimized\/ui\/)/.test(file))) add('build');
   // Each source selects the existing tests that pin its contract. data.js and content.js hold every number,
   // text, roster entry and relic, so they select the text/number, economy, combat, roster and report checks.

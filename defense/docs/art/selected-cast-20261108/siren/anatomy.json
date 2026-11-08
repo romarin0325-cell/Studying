@@ -1,0 +1,202 @@
+{
+  "rawSha256": "67ba9ddfd759dd0695bb8bba959b07dc58dc2cbb8c1367f597d44a55b1da76f0",
+  "coordinateSpace": "unwarped-512-cell",
+  "measuredBy": "Sol, actual unwarped four-view coordinate renders; visible pupils/chin/feet inspected, covered skull and joints estimated. Cherry/Doom protected heads checked against their R2 source and exact transform; that construction is NOT independent proof.; second observation informed by actual fixed-scale exposed-face/peer comparison and independent detector, not hair bounds.",
+  "exclusions": "hair-hats-ears-horns-ornaments-equipment",
+  "uncertainty": {
+    "visiblePupilsChin": 3,
+    "inferredSkullWidthHeight": 10,
+    "rearSkull": 12,
+    "coveredJoints": 10,
+    "sole": 2,
+    "meaning": "Visual estimate, not a statistical confidence interval or exact anatomical volume. Clothing hems and hair are not joint/skull landmarks."
+  },
+  "views": [
+    {
+      "skullEllipse": [
+        264,
+        220,
+        162,
+        148,
+        -3
+      ],
+      "chin": [
+        268,
+        294
+      ],
+      "eyeRight": [
+        230,
+        248
+      ],
+      "eyeLeft": [
+        293,
+        238
+      ],
+      "shoulders": [
+        268,
+        325
+      ],
+      "hips": [
+        268,
+        392
+      ],
+      "knee": [
+        268,
+        437
+      ],
+      "ankle": [
+        268,
+        474
+      ],
+      "sole": [
+        268,
+        483
+      ],
+      "outerSleeve": [
+        190,
+        369
+      ],
+      "outerFoot": [
+        239,
+        476
+      ]
+    },
+    {
+      "skullEllipse": [
+        252,
+        220,
+        162,
+        148,
+        3
+      ],
+      "chin": [
+        252,
+        294
+      ],
+      "shoulders": [
+        252,
+        325
+      ],
+      "hips": [
+        252,
+        392
+      ],
+      "knee": [
+        252,
+        437
+      ],
+      "ankle": [
+        252,
+        474
+      ],
+      "sole": [
+        252,
+        483
+      ]
+    },
+    {
+      "skullEllipse": [
+        264,
+        211,
+        148,
+        148,
+        0
+      ],
+      "chin": [
+        220,
+        285
+      ],
+      "eyeLeft": [
+        204,
+        233
+      ],
+      "shoulders": [
+        262,
+        325
+      ],
+      "hips": [
+        260,
+        392
+      ],
+      "knee": [
+        253,
+        437
+      ],
+      "ankle": [
+        251,
+        474
+      ],
+      "sole": [
+        251,
+        481
+      ]
+    },
+    {
+      "skullEllipse": [
+        256,
+        211,
+        148,
+        148,
+        0
+      ],
+      "chin": [
+        302,
+        285
+      ],
+      "eyeRight": [
+        304,
+        234
+      ],
+      "shoulders": [
+        257,
+        325
+      ],
+      "hips": [
+        259,
+        392
+      ],
+      "knee": [
+        265,
+        437
+      ],
+      "ankle": [
+        267,
+        474
+      ],
+      "sole": [
+        267,
+        481
+      ]
+    }
+  ],
+  "reassessment": {
+    "reason": "The first under-hair skull estimate172x156 was too generous relative to the actual rounded visible face, eyes/chin and fixed-scale peers. On the resulting0.945 scale, 64/96px comparison reads small and the independent face box is101 versus reference median111.5. Re-estimate the hidden crown using the actual cheek/chin shape, NOT the hair/headphone bounds. Apply ONE whole-character scale only; no face-only enlargement or directional rescaling.",
+    "previousAnatomy": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\source\\r1-anatomy-63ed6b63b5.json",
+      "sha256": "63ed6b63b545ff0be057bfdf9162c47845271579ba0234147c2eae44787c9bdc"
+    },
+    "previousPacking": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-63ed6b63-2aae0f10\\packing.json",
+      "sha256": "11e345d89fedcbb652d48d54ff2e56fed1f81668fc68a6991e0c5820e90aca19"
+    },
+    "previousAudit": {
+      "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-63ed6b63-2aae0f10\\audit-report.json",
+      "sha256": "7276397004adacf740e2244338169036b615dd22723d8f06009e0684347df77b"
+    },
+    "previousScreens": [
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-63ed6b63-2aae0f10\\capture-head.png",
+        "sha256": "473e5fa632484b3a2084d619dd03ef18090118e52ec9787dc50a7aa8ce962921"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-63ed6b63-2aae0f10\\capture-sizes-64.png",
+        "sha256": "e4ae3d8c66f898ec99c27901500ba54911e5606e5476e002a3fbb6799e0433d7"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-63ed6b63-2aae0f10\\capture-sizes-96.png",
+        "sha256": "e81afe4e950ae9dc9140c1143d6a727f1a06fe9761843af0ce23a45475e0abe0"
+      }
+    ],
+    "uncertainty": "Inferred skull still uncertain by about10px. An optical improvement and a face detector result are not proof of a perfectly identical physical skull."
+  }
+}

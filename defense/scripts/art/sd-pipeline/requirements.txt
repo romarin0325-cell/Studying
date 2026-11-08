@@ -1,0 +1,6 @@
+# Tested CPU checker environment. Python3.12; no image-generation API or GPU runtime.
+dghs-imgutils==0.19.0
+onnxruntime==1.31.1
+numpy==1.26.4
+scikit-image==0.26.0
+pillow==13.0.0

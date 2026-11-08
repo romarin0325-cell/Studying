@@ -1,0 +1,289 @@
+{
+  "reviewer": "Sol · actually viewed all8 current fixed-scale review captures, original designs and unwarped four-view source charts",
+  "bindings": {
+    "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+    "atlasSha256": "71975199d648cd346cfaece5da837ef28a9ccf5f80074dcbccc59f38f102f2db",
+    "packingSha256": "3a09c76615632e9fabf169f5476812b227b559d6bed43f2088602b6e12e67654",
+    "evidenceSha256": "c6904b7600d71f35776710439ef082eb42cfe68479900cf0c01f7df44f23d2c2"
+  },
+  "checks": [
+    {
+      "id": "original-design",
+      "status": "pass",
+      "note": "원화의 청록 홀터·흰 무지갯빛 재킷·흰 쇼츠·맨발·금색 물고기 헤드폰·왼쪽 별/주머니·흐르는 푸른 머리를 네 방향에서 대조했습니다. 수중 배경/떠 있는 자세를 복사하지 않고 조용한 대기로 옮겼습니다. 의상 구조와 열린 어깨를 보존했습니다.",
+      "evidence": [
+        "originals",
+        "four-views"
+      ],
+      "viewedScreenshotHashes": [
+        "e021c9323278f5dfe6958ca94e9a561759fa9ab913d136bf175c4433fd28c0b0",
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39"
+      ]
+    },
+    {
+      "id": "frozen-style",
+      "status": "pass",
+      "note": "최초 동결 세이렌 화풍을 그대로 기준으로 썼습니다. 재생성 후보를 새 화풍 기준으로 승격하지 않았습니다. 부드러운 둥근 얼굴, 유색 얇은 윤곽과 선택적 셀 광택이 기존 캐스트와 이어지는지 실제 비교했습니다.",
+      "evidence": [
+        "style",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "e021c9323278f5dfe6958ca94e9a561759fa9ab913d136bf175c4433fd28c0b0",
+        "ca6623b329b9a1c24cc1e7e41067d8ca7ae0ce9e3b111526491109aa2a786e28",
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77"
+      ]
+    },
+    {
+      "id": "anatomical-head",
+      "status": "pass",
+      "note": "첫 패킹의 실제 얼굴/캐스트 비교에서 과소 크기를 발견해 머리카락 아래 두개골 추정을 재관찰했습니다. 전신 공통 배율만0.945→1.000으로 바꾼 뒤 추정162×148/측면148×148, 독립 얼굴 박스108/109/108과 같은 크기의 눈·볼·턱 인상을 함께 확인했습니다. 헤드폰/아호게/머리 부피를 머리로 세지 않았습니다. 측정 수정 이력은 보존했고 ±약10px 추정 한계가 있습니다.",
+      "method": "fixed-scale-visual-plus-landmarks",
+      "detectorInterpretation": "최초 패킹의 얼굴높이101 과소 경고를 실제 동료 비교와 함께 확인해 전신 공통 배율로 수정했습니다. 현재108/109/108, 윗선-5/-5px이며 CCIP0.037>0.036은 원문에 보존합니다. 고정 얼굴창에서 둥근 볼·눈~턱과 얼굴 정체성을 다시 확인했습니다. 헤드폰/머리를 포함한 검출 외곽을 두개골로 쓰지 않았습니다.",
+      "evidence": [
+        "head",
+        "measurements",
+        "cast",
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1",
+        "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1",
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39",
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77",
+        "a3b6b2ca6bc328dbcf94bd82834077d992f441b24b3fa60a34b66c7f5ae066f5"
+      ]
+    },
+    {
+      "id": "face-shape-expression",
+      "status": "pass",
+      "note": "푸른 보라 눈, 동그란 볼과 짧은 턱, 작게 노래하는 웃음과 약한 정면 고개 기울기를 확인했습니다. 이전 무표정 마네킹 같은 얼굴을 반복하지 않았고 좌우의 볼·턱이 찌그러지거나 한쪽만 세로로 길지 않습니다. 기존과 미소의 개별 모양까지 동일한 복제는 아닙니다.",
+      "evidence": [
+        "head",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1",
+        "e021c9323278f5dfe6958ca94e9a561759fa9ab913d136bf175c4433fd28c0b0"
+      ]
+    },
+    {
+      "id": "directional-registration",
+      "status": "pass",
+      "note": "공통 바닥에서 측면 눈 차이8/7px·턱7px·어깨/골반2px입니다.8px 허용 경계에 가깝다는 사실을 보존하며, 전신/고정 얼굴창에서 측면만 작아지는 문제가 크게 줄었는지 함께 봤습니다. 독립 얼굴 박스 높이는108/109/108·윗선 차이-5/-5px입니다. 완벽한 회전 연속성을 주장하지 않습니다.",
+      "evidence": [
+        "four-views",
+        "measurements"
+      ],
+      "viewedScreenshotHashes": [
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39",
+        "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1",
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39"
+      ]
+    },
+    {
+      "id": "body-proportions",
+      "status": "pass",
+      "note": "턱 아래÷머리1.28~1.32, 몸통0.45·골반~발0.60~0.61입니다. 최초 과소 패킹을 버리고 몸까지 같은 배율로 키워 정상 키 여성 마네킹의 작은 몸과 머리 관계를 회복했습니다. 얼굴만 키우거나 다리/몸통을 따로 늘리지 않았습니다.",
+      "evidence": [
+        "measurements",
+        "four-views",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1",
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39",
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39",
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77"
+      ]
+    },
+    {
+      "id": "equipment-handedness",
+      "status": "pass",
+      "note": "별 핀과 금색 주머니는 해부학적 왼쪽에 있습니다. 왼쪽 뷰에서 보이고 오른쪽 가까운 면에는 복제하지 않았습니다. 재킷·팔과 먼 쪽 장식의 가림, 뒷목 끈과 헤드폰 밴드가 회전 시 자연스럽게 이어지는지 확인했습니다.",
+      "evidence": [
+        "four-views",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39",
+        "e021c9323278f5dfe6958ca94e9a561759fa9ab913d136bf175c4433fd28c0b0"
+      ]
+    },
+    {
+      "id": "silhouette-perceived-size",
+      "status": "pass",
+      "note": "금색 헤드폰, 작은 아호게와 긴 머리의 체감 부피를 실제 얼굴과 분리했습니다. 교정 후64/96px에서 동료보다 유독 작은 얼굴로 읽히지 않고, 긴 머리 때문에 몸이 자동 축소된 결과도 아닙니다. 머리 모양 자체의 부피 차이는 남겨 개성을 보존했습니다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77",
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77"
+      ]
+    },
+    {
+      "id": "outline-weight",
+      "status": "pass",
+      "note": "턱·재킷 소매·맨발의32px 표본과64/96px를 동결 참조 옆에서 확인했습니다. 남색 외곽과 더 가는 내부선, 피부의 얇은 갈색 경계가 유지됩니다. 장식/속눈썹을 두개골 크기나 외곽선 굵기로 세지 않았습니다.",
+      "evidence": [
+        "line-samples",
+        "sizes",
+        "style"
+      ],
+      "viewedScreenshotHashes": [
+        "ca6623b329b9a1c24cc1e7e41067d8ca7ae0ce9e3b111526491109aa2a786e28",
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77",
+        "e021c9323278f5dfe6958ca94e9a561759fa9ab913d136bf175c4433fd28c0b0",
+        "ca6623b329b9a1c24cc1e7e41067d8ca7ae0ce9e3b111526491109aa2a786e28"
+      ]
+    },
+    {
+      "id": "shading-material",
+      "status": "pass",
+      "note": "원화의 재킷 무지갯빛을 작은 셀 하이라이트로 단순화하고, 푸른 머리의 넓은 밝은 면·금색 헤드폰의 짧은 금속 반사·피부의 부드러운 명암을 나누었습니다. 같은 화풍의 밝은 머리 캐릭터들과 실제 크기로 비교했습니다.",
+      "evidence": [
+        "cast",
+        "style",
+        "line-samples"
+      ],
+      "viewedScreenshotHashes": [
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77",
+        "e021c9323278f5dfe6958ca94e9a561759fa9ab913d136bf175c4433fd28c0b0",
+        "ca6623b329b9a1c24cc1e7e41067d8ca7ae0ce9e3b111526491109aa2a786e28",
+        "ca6623b329b9a1c24cc1e7e41067d8ca7ae0ce9e3b111526491109aa2a786e28"
+      ]
+    },
+    {
+      "id": "cast-consistency",
+      "status": "pass",
+      "note": "자스민·여왕·신데렐라와 선택 루나/레드드래곤 옆의64/96px를 확인했습니다. 첫 패킹의 과소 인상은 해소됐고, 작은 정상 키 몸·둥근 얼굴·청록색 의상이 같은 전장의 동료로 읽힙니다. 원본의 풍성한 헤어가 만드는 체감 부피와 실제 머리 크기는 별도로 판단했습니다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77",
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77"
+      ]
+    },
+    {
+      "id": "game-size-readability",
+      "status": "pass",
+      "note": "밝고 어두운 바닥의64/96px 상하좌우를 직접 봤습니다. 얼굴, 청록 홀터/허리끈, 금색 헤드폰과 몸 방향이 구별됩니다. 측면 얼굴이 정면보다 크게 줄어드는 기존 문제는 보이지 않으며, 무지갯빛 재킷의 세부 문양은64px에서 축약되어 읽힙니다.",
+      "evidence": [
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77"
+      ]
+    },
+    {
+      "id": "portrait-alignment",
+      "status": "pass",
+      "note": "250px 크롭→240px 출력의96px 표시를 확인했습니다. 얼굴 중심과 눈높이가 자연스럽고 헤드폰까지 외곽 맞춤으로 얼굴을 줄이지 않았습니다. 실제 편성/쌍성 화면의 모든 크롭 소비처를 검증한 것은 아닙니다.",
+      "evidence": [
+        "portrait",
+        "head"
+      ],
+      "viewedScreenshotHashes": [
+        "142acd1151b3f6dded97178101236554612789d51d26d6b3aa31e1f35ab40d62",
+        "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1"
+      ]
+    },
+    {
+      "id": "seams-contact",
+      "status": "pass",
+      "note": "보호 합성 R3/R4는 머리카락 수평 경계 때문에 선택하지 않았습니다. 최종 R6은 끊김 없는 전신 그림을 선택한 뒤 모든 검수를 다시 수행했습니다. 네 방향의 머리카락/목/재킷, 손·주머니·맨발을 확인했고 앞선 가로 접합선이나 회색 몸 잔재는 보이지 않았습니다.",
+      "evidence": [
+        "four-views",
+        "head",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39",
+        "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1",
+        "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7",
+        "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77"
+      ]
+    },
+    {
+      "id": "independent-detector",
+      "status": "pass",
+      "note": "현재 아틀라스와 검사 코드·패키지가 일치하는 실제 imgutils/ONNX 측정 및 원시 경고를 연결했습니다. 이 통과는 실행 검증이며 얼굴 크기 합격을 뜻하지 않습니다.",
+      "evidence": [
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "a3b6b2ca6bc328dbcf94bd82834077d992f441b24b3fa60a34b66c7f5ae066f5"
+      ]
+    },
+    {
+      "id": "source-integrity",
+      "status": "pass",
+      "note": "입력·job·실제 도구 출력의 해시 연결과 단계 순서를 확인했습니다.",
+      "evidence": [
+        "provenance"
+      ],
+      "viewedScreenshotHashes": []
+    },
+    {
+      "id": "package-integrity",
+      "status": "pass",
+      "note": "전신 공통 등방 배율·알파32 잘림0·방향 추출·보이는 WebP 픽셀 손실0을 코드로 확인했습니다.",
+      "evidence": [
+        "package"
+      ],
+      "viewedScreenshotHashes": []
+    }
+  ],
+  "visualObservation": {
+    "observedAt": "2026-11-08T04:30:14.007Z",
+    "screens": [
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-originals.png",
+        "sha256": "e021c9323278f5dfe6958ca94e9a561759fa9ab913d136bf175c4433fd28c0b0"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-head.png",
+        "sha256": "e44279f8aa16e33d47f1dbad38a121c505595c06e680bc7d17904876ff9c5de1"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-body.png",
+        "sha256": "1c4d16a572567d008b9f96c485a6ab4331b438ddf3aa4fcb35b84e8a3cd9fe39"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-sizes-64.png",
+        "sha256": "52918361ae0b656903e2bd4b66be31d910bd949f234a6936c2a7de22bc2178d7"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-sizes-96.png",
+        "sha256": "18704812fe562f5addcaa89e5206f638fcbc0cf764a2675742b4c149e445bc77"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-lines.png",
+        "sha256": "ca6623b329b9a1c24cc1e7e41067d8ca7ae0ce9e3b111526491109aa2a786e28"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-portrait.png",
+        "sha256": "142acd1151b3f6dded97178101236554612789d51d26d6b3aa31e1f35ab40d62"
+      },
+      {
+        "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-sd-production-20261108\\runs\\siren-r6\\work\\r1-f9f39e7b-2aae0f10\\capture-audit.png",
+        "sha256": "a3b6b2ca6bc328dbcf94bd82834077d992f441b24b3fa60a34b66c7f5ae066f5"
+      }
+    ],
+    "note": "Screen hashes identify the actual images viewed. The template itself did not perform artistic review. New pixels or policy require a fresh review."
+  }
+}

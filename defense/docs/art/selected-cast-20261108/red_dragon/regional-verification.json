@@ -1,0 +1,235 @@
+{
+  "id": "red_dragon",
+  "name": "레드드래곤",
+  "output": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\new2\\red_dragon-new2.png",
+  "sha256": "6c55bc6d2a4733e27514f6176b36d7e22fdbd04f33e6197c37459f20898c47b8",
+  "webpSha256": "1ce728a6c7c2ac5cc677ccbf38bec22614c97b5142d824c3671796466f87974e",
+  "bytes": {
+    "png": 906274,
+    "webp": 621894
+  },
+  "candidate": {
+    "file": "C:\\Users\\romar\\Documents\\Codex\\2026-09-27\\card-ai-ui-pr-5-5\\art\\defense-protected-sd-pilot-20261107\\raw\\red_dragon-regional-v1.png",
+    "sha256": "48adfd6956cfda41e76bcd4cddc9f1cc8e67b48ac26532a7dbb22310a88d0c43",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "alphaCleanup": {
+      "source": [
+        1254,
+        1254
+      ],
+      "alphaCleaned": 69774,
+      "unmatchedAlphaPixels": 0,
+      "majorComponents": [
+        {
+          "pixels": 121852,
+          "centroid": [
+            319.7772543741588,
+            331.783425795227
+          ],
+          "bounds": [
+            78,
+            62,
+            544,
+            589
+          ]
+        },
+        {
+          "pixels": 124100,
+          "centroid": [
+            925.4814343271555,
+            335.0262610797744
+          ],
+          "bounds": [
+            702,
+            62,
+            1167,
+            589
+          ]
+        },
+        {
+          "pixels": 92473,
+          "centroid": [
+            351.3863181685465,
+            967.2241627285803
+          ],
+          "bounds": [
+            171,
+            707,
+            540,
+            1214
+          ]
+        },
+        {
+          "pixels": 92297,
+          "centroid": [
+            902.8263540526777,
+            967.3505856094997
+          ],
+          "bounds": [
+            714,
+            707,
+            1083,
+            1214
+          ]
+        }
+      ],
+      "method": "Native-alpha cleanup then connected-component ownership; no fixed mid-row cut. Every view retains original image coordinates, RGB and pixel scale."
+    }
+  },
+  "baseSha256": "c0dc4cbbdc93f883769a3ad8f33215151f967a7eacad8370bbd11dddb69b6a81",
+  "allowedPixels": 5790,
+  "changedPixels": 5778,
+  "outsideMaskChanged": 0,
+  "faceProtection": {
+    "view": 3,
+    "rect": [
+      270,
+      210,
+      80,
+      82
+    ],
+    "mirroredMismatchPixels": 0,
+    "faceHash": "d366563a361dd2f2cd513ecf4e30c5b3d5d2ce3af23be59912c9b1a08fa280e3",
+    "reflectedCanonicalHash": "d366563a361dd2f2cd513ecf4e30c5b3d5d2ce3af23be59912c9b1a08fa280e3"
+  },
+  "views": [
+    {
+      "direction": "down",
+      "height": 433,
+      "marks": {
+        "crown": [
+          255,
+          126
+        ],
+        "eyeRight": [
+          221,
+          231
+        ],
+        "eyeLeft": [
+          288,
+          230
+        ],
+        "chin": [
+          256,
+          279
+        ],
+        "shoulders": [
+          253,
+          301
+        ],
+        "hips": [
+          254,
+          379
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    },
+    {
+      "direction": "up",
+      "height": 433,
+      "marks": {
+        "crown": [
+          251,
+          126
+        ],
+        "shoulders": [
+          251,
+          301
+        ],
+        "hips": [
+          253,
+          380
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    },
+    {
+      "direction": "left",
+      "height": 417,
+      "marks": {
+        "crown": [
+          245,
+          136
+        ],
+        "eyeLeft": [
+          217,
+          233
+        ],
+        "chin": [
+          215,
+          281
+        ],
+        "shoulders": [
+          248,
+          309
+        ],
+        "hips": [
+          245,
+          378
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    },
+    {
+      "direction": "right",
+      "height": 417,
+      "marks": {
+        "crown": [
+          267,
+          136
+        ],
+        "eyeLeft": [
+          295,
+          233
+        ],
+        "chin": [
+          297,
+          281
+        ],
+        "shoulders": [
+          264,
+          309
+        ],
+        "hips": [
+          267,
+          378
+        ],
+        "ground": [
+          256,
+          480
+        ]
+      },
+      "uncertaintyPx": 6,
+      "interpretation": "manual visible / inferred anatomy; not a skull segmentation"
+    }
+  ],
+  "portrait": {
+    "crop": {
+      "left": 130,
+      "top": 74,
+      "width": 250,
+      "height": 250
+    },
+    "outputSize": 240,
+    "sha256": "62d535d20b5160a8d17f1924eb39c4e425855913caebc19b0cae25bb33c20c1f"
+  },
+  "faceWarp": false
+}

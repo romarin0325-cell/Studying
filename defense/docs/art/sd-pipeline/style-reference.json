@@ -1,0 +1,19 @@
+{
+  "source": "defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+  "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f",
+  "styleSamples": {
+    "chin": [
+      255,
+      302
+    ],
+    "outerSleeve": [
+      186,
+      374
+    ],
+    "outerFoot": [
+      230,
+      474
+    ]
+  },
+  "description": "Canonical full atlas for QA; the generation template derives only its front512px at unchanged scale."
+}
