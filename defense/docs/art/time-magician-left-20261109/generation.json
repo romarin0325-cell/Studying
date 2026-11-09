@@ -1,0 +1,27 @@
+{
+  "purpose": "user-selected historical left profile for Time Magician",
+  "tool": "built-in image_gen",
+  "toolOutputId": "exec-c065d3ff-4b40-4aa7-9646-dd0164f5e190.png",
+  "nativeSha256": "dd172a884241ccc47825262b7c0d6987d9455973253a805787385aef3de26880",
+  "historicalJobSha256": "3845a4197fc0ffdf8abedbf8addc91d49e66f73747f39d15e0a566292066ca6b",
+  "inputs": [
+    {
+      "role": "unchanged visible front sprite on neutral backing as the style, expression and scale reference",
+      "sha256": "2d30d2ecd69e4f455c6748cac5c45b56e2bb0546fd768cc6ee0d9b517ea8fe0e"
+    },
+    {
+      "role": "original illustration for identity and costume construction",
+      "sha256": "7bc5b6b2cf58ba39a02671eb48a158ecf8c80fe8fa58106c3dbc0e6ba1b41429"
+    }
+  ],
+  "prompt": "Use case: stylized-concept. Asset type: one transparent left-facing SD game sprite for an existing turnaround.\n\nPaint ONE completely new full-body true LEFT PROFILE, nose pointing to the LEFT edge of the canvas. Image 1 is the actual accepted front sprite. Use it as the exact reference for character, framing, face impression, body, linework and colors. Image 2 is the original illustration for concealed costume construction and character identity. Rotate the pose from Image 1 into a new hand-drawn side view.\n\nPreserve the dark chocolate brown hair with its sweeping layered fringe and one curled forelock, the sharply framed green iris, soft tilted glance and tiny confident smile of Image 1. Keep the same cheeks, short rounded jaw, broad short SD head and the same slightly tilted head posture. Use the same dark plum short jacket and shorts, vivid magenta piping and cape lining, high collar and short boots. The existing sprite holds a staff with a gold ring around the magenta core and three faceted crystals above and beside it. Preserve this specific compact staff design and scale, its dark thin shaft and anatomical RIGHT hand grip. In this left-facing profile the right grip is on the far side, the nearer left hand relaxed. Keep the staff forward enough to leave the cheek and eye unobscured.\n\nMatch Image 1 closely: crisp deep navy outer contour, finer color lines inside, broad clean cel-shadow planes, the same limited highlight placement and the same iris-to-cheek proportions. Same orthographic game camera, gently overhead by about 12 degrees. True profile with one visible eye and a small naturally rounded nose. Preserve the character-specific slight head angle.\n\nUse the same square framing and scale as Image 1. In a 512-unit canvas the ground is y480, chin about y282, eye center about y239, underlying skull crown about y132. The whole skull is about 150 units high and its natural profile depth about 145 units. Chin to sole is about 198 units. Treat hair and props as separate shapes. Keep these landmarks through the whole figure, so it will turn in place alongside the supplied front sprite.\n\nOne full standing figure with complete feet and prop, genuine transparent background. Plain cutout without scenery, stage shadow, magic effects, diagram marks, lettering, inset or extra figures.\n\nThe vertical fit is especially important. Match the compact body of Image 1 exactly: slightly shorten the collar-to-shorts distance and the exposed knee segment. Keep the head and its eye shape at the reference size. On the 512-unit canvas, the jaw is at about y282 and feet at y480; the jaw-to-sole distance is 198 units. Match the original game's short SD legs and low head on the shoulders.",
+  "sourceAtlasSha256": "063f159568b465fa7b8f20eeab3c2cb56bd5d2ce047c2022f2ea1bff2b9ae4b7",
+  "sampling": 0.4082934609250399,
+  "translation": [
+    -13,
+    13
+  ],
+  "clippedAlpha32": 0,
+  "historicalStatus": "Originally generated as a feasibility pilot before the later full-style/geometry workflow; this record does not claim those references were actually supplied.",
+  "selection": "Explicitly selected for installation by user on 2026-11-09."
+}

@@ -1,0 +1,209 @@
+{
+  "rawSha256": "dd172a884241ccc47825262b7c0d6987d9455973253a805787385aef3de26880",
+  "anatomySha256": "2cc6bb6136ee8aecdef7b4a794e6802353730de1f9416d5dff209b8d67e0777e",
+  "policySha256": "350f00a8b89417ebef04f3a2e0ed256eec6f10be311f59780ad5b7505b6040f5",
+  "commonScale": 1,
+  "nonRigidWarp": false,
+  "perDirectionScale": false,
+  "alphaThreshold": 32,
+  "visibleWebpChanges": 0,
+  "views": [
+    {
+      "direction": "down",
+      "marks": {
+        "chin": [
+          255.35,
+          281.85
+        ],
+        "sole": [
+          256,
+          480
+        ],
+        "eyeLeft": [
+          213,
+          245
+        ],
+        "eyeRight": [
+          272,
+          233
+        ],
+        "shoulders": [
+          250,
+          320
+        ],
+        "hips": [
+          249,
+          388
+        ]
+      },
+      "skullEllipse": [
+        255.35,
+        206.65,
+        159.56,
+        150.41,
+        -3
+      ],
+      "headBody": 1.3173991091017883,
+      "torso": 0.4520975998936241,
+      "legs": 0.6116614586796091,
+      "shift": [
+        0,
+        0
+      ],
+      "clipped": 0
+    },
+    {
+      "direction": "up",
+      "marks": {
+        "chin": [
+          260.58,
+          283.16
+        ],
+        "sole": [
+          256,
+          480
+        ],
+        "shoulders": [
+          256,
+          320
+        ],
+        "hips": [
+          252,
+          386
+        ]
+      },
+      "skullEllipse": [
+        260.58,
+        207.96,
+        159.56,
+        150.41,
+        3
+      ],
+      "headBody": 1.30868958180972,
+      "torso": 0.4388006116614587,
+      "legs": 0.6249584469117745,
+      "shift": [
+        0,
+        0
+      ],
+      "clipped": 0
+    },
+    {
+      "direction": "left",
+      "marks": {
+        "eyeLeft": [
+          201,
+          244
+        ],
+        "chin": [
+          211,
+          283
+        ],
+        "shoulders": [
+          243,
+          315
+        ],
+        "hips": [
+          238,
+          391
+        ],
+        "sole": [
+          256,
+          480
+        ],
+        "outerSleeve": [
+          263,
+          351
+        ],
+        "outerFoot": [
+          218,
+          475
+        ]
+      },
+      "skullEllipse": [
+        249,
+        208,
+        148,
+        148,
+        -2
+      ],
+      "headBody": 1.3310810810810811,
+      "torso": 0.5135135135135135,
+      "legs": 0.6013513513513513,
+      "shift": [
+        -13,
+        13
+      ],
+      "clipped": 0
+    },
+    {
+      "direction": "right",
+      "marks": {
+        "chin": [
+          305.05,
+          283.16
+        ],
+        "sole": [
+          256,
+          480
+        ],
+        "eyeRight": [
+          290,
+          248
+        ],
+        "shoulders": [
+          251,
+          317
+        ],
+        "hips": [
+          254,
+          386
+        ]
+      },
+      "skullEllipse": [
+        274.31,
+        211.23,
+        145.18,
+        143.87,
+        0
+      ],
+      "headBody": 1.3681796065892817,
+      "torso": 0.4795996385625912,
+      "legs": 0.6533676235490373,
+      "shift": [
+        0,
+        0
+      ],
+      "clipped": 0
+    }
+  ],
+  "portrait": {
+    "crop": {
+      "left": 123,
+      "top": 82,
+      "width": 250,
+      "height": 250
+    },
+    "center": [
+      248,
+      207
+    ],
+    "size": 240
+  },
+  "normalizationIsIndependentProof": false,
+  "profile": "left",
+  "preservedFrames": [
+    {
+      "direction": "down",
+      "rgbaSha256": "0f22cc9db3b0ff9ab3e9b5dfffb9c78d4d34d6e8ec882aebe2d499bb8a43e7cc"
+    },
+    {
+      "direction": "up",
+      "rgbaSha256": "423ecb3f9c1dee5a4a67e9726606d92788041bdbe41c7c92e2c3d49cbdd139ea"
+    },
+    {
+      "direction": "right",
+      "rgbaSha256": "de75da71299c24de6779777d279202d5a97299c272585313b5ec4bec1d8a8b24"
+    }
+  ]
+}
