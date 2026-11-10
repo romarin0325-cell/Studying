@@ -117,13 +117,13 @@ function ultValue(s,m,id,gv){
       finally{pending.forEach((a,i)=>{a.form=saved[i];});}
       return Math.max(0,projected-before)*m.scale*Math.min(30,Math.max(8,rem),timeLeft(s));
     }
-    case 'echo':return E.rumiDream(s,u)?strike(E.RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)):buff(E.ULT_BUFF.echo.ratio*scale,8);
+    case 'echo':return E.rumiDream(s,u)?strike(E.RUMI_DREAM.phases.reduce((n,p)=>n+p.factor,0)):buff(E.ULT_BUFF.echo.ratio*scale,E.ULT_BUFF.echo.seconds);
     case 'haste':return buff(fam('haste','speed',E.ULT_BUFF.haste.speed*scale),E.ULT_BUFF.haste.seconds);
     case 'march':return buff(fam('march','speed',E.ULT_BUFF.march.speed*scale),E.ULT_BUFF.march.seconds)+dps*.04*Math.min(8,rem);
     case 'awaken':return buff(fam('awaken','power',E.ULT_BUFF.awaken.power*scale),E.ULT_BUFF.awaken.seconds);
     case 'harmony':{const p=fam('harmony','power',E.ULT_BUFF.harmony.power),q=fam('harmony','speed',E.ULT_BUFF.harmony.speed);return buff((1+p)*(1+q)-1,E.ULT_BUFF.harmony.seconds);}
     case 'goddess':{const freed=CELLS.reduce((n,c)=>{const a=s.board[c];return n+(a&&(a.cursed||a.disabled>0)?unitValue(s,{...a,cursed:false},c)*m.scale*Math.min(8,a.cursed?rem:a.disabled):0);},0);
-      return strike(5)+buff(fam('radiance','power',E.ULT_BUFF.radiance.power*scale),8)+freed;}
+      return strike(5)+buff(fam('radiance','power',E.ULT_BUFF.radiance.power*scale),E.ULT_BUFF.radiance.seconds)+freed;}
     case 'trauma':{const mags=CELLS.filter(c=>s.board[c]?.hero==='time_magician');return strike(4)+mags.reduce((n,c)=>n+unitValue(s,s.board[c],c)*m.scale*(2.1*1.35-1)*Math.min(10,rem),0);}
     case 'glassfall':{const top=E.topCinderella(s),i=top?s.board.indexOf(top):-1;return strike(E.CINDERELLA.ult)+(top?unitValue(s,top,i)*m.scale*1.9*Math.min(10,rem):0);}
     case 'gift':return (summonValue(s)*m.scale*timeLeft(s))+buff(fam('festive','speed',E.ULT_BUFF.festive.speed*scale),E.ULT_BUFF.festive.seconds);
