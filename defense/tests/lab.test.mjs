@@ -35,14 +35,14 @@ test('Aurora even formation raises individual damage without adding another atta
  assert.equal(r.helpers.length,1);assert.equal(b.power/a.power,1.5);assert.ok(Math.abs(b.dps/a.dps-1.5)<.001);
 });
 test('normal-only deck and connected lightning are selectable and reset in baseline',()=>{
- const h=hero('underdog'),a=measure(h),b=measure(h,{normalDeck:true});assert.equal(b.power/a.power,1.8);
+ const h=hero('underdog'),a=measure(h),b=measure(h,{normalDeck:true});assert.equal(b.power/a.power,2);
  const l=hero('lightning_sage');assert.equal(measure(l,{lightningTeam:true}).power/measure(l).power,1.6);
  const o=baselineOptions({heroMax:true,auroraEven:true,coreNear:true,normalDeck:true,rank:3,boss:true});
  assert.equal(o.heroMax,false);assert.equal(o.auroraEven,false);assert.equal(o.normalDeck,false);assert.equal(o.coreNear,false);assert.equal(o.rank,3);assert.equal(o.boss,true);
 });
 test('wave age, rabbit companions, auras, and fake Cinderella use actual engine conditions',()=>{
  assert.equal(measure(hero('star_boy'),{age:0}).power/measure(hero('star_boy'),{age:1}).power,1.5);
- assert.equal(measure(hero('time_ruler'),{age:2}).power/measure(hero('time_ruler'),{age:1}).power,1.25);
+  assert.equal(measure(hero('time_ruler'),{age:2}).power/measure(hero('time_ruler'),{age:1}).power,1.5);
  const r=arena(hero('night_rabbit'),{rabbitTeam:true});assert.equal(E.nightRabbitTargetCount(r.s),13);
  assert.ok(measure(hero('behemoth'),{powerAura:true,speedAura:true}).dps>measure(hero('behemoth')).dps);
  const c=arena(hero('cinderella'),{falseCinderella:true});assert.notEqual(E.topCinderella(c.s).uid,c.u.uid);

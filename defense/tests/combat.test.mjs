@@ -44,7 +44,7 @@ function traitArena(placements,{artifacts=[],seed=1234,wave=1}={}){
   for(const p of placements)s.board[p.index]={
     ...template,uid:s.nextId++,hero:p.hero,rank:p.rank||1,birthWave:p.birthWave||wave,
     born:p.born||0,cooldown:100,windup:0,target:null,attacks:0,harvest:12,disabled:0,
-    priority:E.targetingLocked(p.hero)?'random':HERO[p.hero].bossDamage?'boss':'first',
+    priority:E.targetingLocked(p.hero)?'random':HERO[p.hero].bossDamage||HERO[p.hero].bossPriority?'boss':'first',
   };
   return s;
 }
@@ -384,7 +384,7 @@ test('Maid uses its renewed base damage and chooses random eligible targets with
 });
 
 test('Star Boy and Time Ruler use birth-wave age for exact power, displayed power and skill damage',()=>{
-  for(const [id,factors] of [['star_boy',[1.5,1,.75,.75]],['time_ruler',[.75,1,1.25,1.25]]]){
+  for(const [id,factors] of [['star_boy',[1.5,1,.75,.75]],['time_ruler',[.75,1,1.5,1.5]]]){
     for(const [age,factor] of factors.entries()){
       const s=traitArena([{hero:id,index:12,birthWave:3}],{wave:3+age}),u=s.board[12];
       const [enemy]=enemiesFor(s,[{progress:1200}]);
@@ -671,7 +671,7 @@ test('buffs: the strongest per family applies and families multiply',()=>{
   const plain=E.combatStats(s,u,12);
   s.buffs.awaken=5;s.buffScale.awaken=1;s.buffs.radiance=5;s.buffScale.radiance=1;
   const both=E.combatStats(s,u,12),dragon=1+.2;
-  close(both.damage/plain.damage,1.5,'awaken (+35%) and radiance (+50%) do not stack: only the stronger radiance counts');
+  close(both.damage/plain.damage,1.5,'awaken (+40%) and radiance (+50%) do not stack: only the stronger radiance counts');
   s.board[7]=null;const noAura=E.combatStats(s,u,12);close(both.damage/noAura.damage,dragon,'the aura family multiplies on top');
   s.buffs.haste=5;s.buffScale.haste=1;s.buffs.march=5;s.buffScale.march=1;
   const fast=E.combatStats(s,u,12);close(plain.cooldown/fast.cooldown,1+E.ULT_BUFF.haste.speed,'only haste counts in the ultimate family (march does not add); the siren aura was already in plain');
@@ -1724,8 +1724,8 @@ test('behemoth doubles placement auras and not ultimate buffs',()=>{
   close(HERO.behemoth.interval/E.combatStats(beast,beh).cooldown,1.3);
   assert.ok(E.combatStats(beast,beh,12,true).bonuses.includes('오라 2배'));
   plain.buffs.awaken=8;beast.buffs.awaken=8;
-  close(E.combatStats(plain,luna).damage/E.power(plain,luna),1.2*1.35);
-  close(E.combatStats(beast,beh).damage/E.power(beast,beh),1.4*1.35);
+  close(E.combatStats(plain,luna).damage/E.power(plain,luna),1.2*(1+E.ULT_BUFF.awaken.power));
+  close(E.combatStats(beast,beh).damage/E.power(beast,beh),1.4*(1+E.ULT_BUFF.awaken.power));
 });
 
 test('crush hits three times around a seeded enemy, echoes on the last hit, and stays recastable across a save',()=>{
@@ -1779,10 +1779,10 @@ test('an ultimate hits for the power shown on the unit: auras, running ultimate 
   // The preview shows the same number the cast deals.
   const prev=traitArena([{hero:'zeke',index:12},{hero:'ancient_dragon',index:13}]);enemiesFor(prev,[{hp:1e9,progress:1200}]);quiet(prev);prev.gauge=120;
   const shown=E.castPreview(prev,'zeke').lines.join(' ');assert.ok(shown.includes(Math.round(E.combatStats(prev,prev.board[12]).damage*7).toLocaleString('ko-KR')),'preview uses the live power');
-  // A running ultimate buff (awaken: +35%) and a relic power bonus (crown on a 3-star: +16%) multiply as separate families.
+  // A running ultimate buff (awaken) and a relic power bonus (crown on a 3-star: +16%) multiply as separate families.
   const buffed=traitArena([{hero:'zeke',index:12,rank:3}],{artifacts:['crown']}),[be]=enemiesFor(buffed,[{hp:1e9,progress:1200}]);
   buffed.buffs.awaken=8;buffed.buffTotals.awaken=8;
-  const live=E.combatStats(buffed,buffed.board[12]).damage;close(live/E.power(buffed,buffed.board[12]),1.35*(1+E.RELIC_VALUES.crown.power*E.relicScaleIn(buffed,'crown')));
+  const live=E.combatStats(buffed,buffed.board[12]).damage;close(live/E.power(buffed,buffed.board[12]),(1+E.ULT_BUFF.awaken.power)*(1+E.RELIC_VALUES.crown.power*E.relicScaleIn(buffed,'crown')));
   close(hitOf(buffed,'zeke',be),live*7,'buff and relic count');
   // The cast does not amplify itself: a buff cast (goddess radiance +50%) deals its own hit at the pre-cast power.
   const self=traitArena([{hero:'jasmine',index:12}]),[se]=enemiesFor(self,[{hp:1e9,progress:1200}]);const pre=E.combatStats(self,self.board[12]).damage;
@@ -1806,11 +1806,11 @@ test('stacked crush casts (and a dream form on top) still save and resume with e
   }
 });
 
-test('underdog: +80% power only while the whole deck is plain normal-rarity heroes; the big show stuns the whole board',()=>{
-  assert.deepEqual(E.UNDERDOG,{bonus:.8,factor:10,stun:2});
+test('underdog: +100% power only while the whole deck is plain normal-rarity heroes; the big show stuns the whole board',()=>{
+  assert.deepEqual(E.UNDERDOG,{bonus:1,factor:10,stun:2});
   const normals=HEROES.filter(h=>h.rarity==='C'&&!h.hidden).map(h=>h.id).filter(id=>id!=='underdog').slice(0,4);
   const solid=traitArena([{index:12,hero:'underdog'}]);solid.deck=['underdog',...normals];
-  assert.equal(E.personalTrait(solid,solid.board[12]).damageMultiplier,1.8);
+  assert.equal(E.personalTrait(solid,solid.board[12]).damageMultiplier,2);
   const mixed=traitArena([{index:12,hero:'underdog'}]);mixed.deck=['underdog',...normals.slice(0,3),'santa'];
   assert.equal(E.personalTrait(mixed,mixed.board[12]).damageMultiplier,1);
   const s=traitArena([{index:12,hero:'underdog'},{index:13,hero:'snow_rabbit'}]);
@@ -1823,7 +1823,7 @@ test('underdog: +80% power only while the whole deck is plain normal-rarity hero
   assert.ok(E.restore(E.serialize(s)));
 });
 test('toffee apple: random route positions, proximity trigger, five-apple cap and saved apples',()=>{
-  assert.deepEqual(E.APPLEBOMB,{factor:18,max:5,trigger:80,stun:3,radius:200});
+  assert.deepEqual(E.APPLEBOMB,{factor:18,max:5,trigger:80,stun:3,radius:200,bloom:.3});
   const s=traitArena([{index:12,hero:'toffee_apple'}]);const [lead]=enemiesFor(s,[{hp:1e9,progress:400}]);
   const base=E.combatStats(s,s.board[12]).damage;s.rng=1;readyCast(s,'toffee_apple');
   const preview=E.castPreview(s,'toffee_apple');
@@ -1887,6 +1887,134 @@ test('apples use the highest current Toffee, then a remaining lower rank, and ke
   s.buffs.radiance=8;const expected=E.combatStats(s,s.board[12]).damage*E.APPLEBOMB.factor;readyCast(s,'ash');
   assert.equal(s.board.some(u=>u?.hero==='toffee_apple'),false);close(s.bombs[0].damage,expected,'last value sampled before sacrifice');
   foe.progress=1000;const hp=foe.hp;hold(s);E.step(s,.05);close(hp-foe.hp,expected);assert.equal(s.bombs.length,0);
+});
+
+function detonateApples(s,progress=1000){
+  hold(s);for(const bomb of s.bombs)bomb.progress=progress;for(const e of s.enemies){e.progress=progress;e.speed=0;}
+  E.step(s,.05);
+}
+
+test('toffee apple bloom stacks add 30%p after each blast and apply to later attacks and apples',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple'}]);const [foe]=enemiesFor(s,[{hp:1e9,progress:1800}]);
+  const u=s.board[12],base=E.combatStats(s,u).damage,other=traitArena([{index:12,hero:'siren'}]);
+  enemiesFor(other,[{hp:1e9}]);const sirenBefore=E.combatStats(other,other.board[12]).damage;
+  assert.equal(E.personalTrait(s,u).damageMultiplier,1);assert.equal(s.toffeeBlooms,0);
+  assert.ok(E.castPreview(s,'toffee_apple').lines.at(-1).includes('사용 후 3초 기절'));
+  assert.equal(E.castPreview(s,'toffee_apple').lines.some(line=>line.includes('마지막 유효')),false);
+  readyCast(s,'toffee_apple');assert.ok(u.disabled>=3);
+  const first=foe.hp;detonateApples(s,1000);close(first-foe.hp,base*E.APPLEBOMB.factor,'first blast uses 0 stacks');
+  assert.equal(s.toffeeBlooms,1);close(E.personalTrait(s,u).damageMultiplier,1.3);close(E.combatStats(s,u).damage,base*1.3);
+  const shot=launchNormal(s,u);close(shot.damage,base*1.3);u.disabled=0;
+  readyCast(s,'toffee_apple');const second=foe.hp;detonateApples(s,1100);close(second-foe.hp,base*1.3*E.APPLEBOMB.factor);
+  assert.equal(s.toffeeBlooms,2);close(E.combatStats(s,u).damage,base*1.6);
+  u.disabled=0;readyCast(s,'toffee_apple');const third=foe.hp;detonateApples(s,1200);close(third-foe.hp,base*1.6*E.APPLEBOMB.factor);
+  assert.equal(s.toffeeBlooms,3);close(E.combatStats(s,u).damage,base*1.9);
+  close(E.combatStats(other,other.board[12]).damage,sirenBefore,'other heroes are unchanged');
+});
+
+test('installed apples use later bloom stacks, one blast adds one stack even if several enemies are hit',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple'}]);
+  const pack=enemiesFor(s,[{hp:1e9,progress:400},{hp:1e9,progress:450},{hp:1e9,progress:500}]);
+  const base=E.combatStats(s,s.board[12]).damage;
+  readyCast(s,'toffee_apple');s.board[12].disabled=0;readyCast(s,'toffee_apple');
+  assert.equal(s.bombs.length,2);s.bombs[0].progress=1000;s.bombs[1].progress=1000;
+  for(const e of pack)e.progress=1000;const hp=pack.map(e=>e.hp);hold(s);E.step(s,.05);
+  assert.equal(s.bombs.length,0);assert.equal(s.toffeeBlooms,2);
+  close(hp[0]-pack[0].hp,base*E.APPLEBOMB.factor+base*1.3*E.APPLEBOMB.factor,'same-frame blasts accumulate in order');
+  for(const e of pack)close(hp[pack.indexOf(e)]-e.hp,hp[0]-pack[0].hp);
+  const again=traitArena([{index:12,hero:'toffee_apple'}]);
+  const crowd=enemiesFor(again,[{hp:1e9,progress:1000},{hp:1e9,progress:1010},{hp:1e9,progress:1020}]);
+  readyCast(again,'toffee_apple');detonateApples(again,1000);
+  assert.equal(again.toffeeBlooms,1);assert.ok(crowd.every(e=>e.hp<1e9));
+});
+
+test('toffee bloom is shared, survives move merge sell and resummon, and resets on the next wave',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple',rank:1},{index:13,hero:'toffee_apple',rank:1},{index:0,hero:'siren'}]);
+  enemiesFor(s,[{hp:1e9,progress:1800}]);
+  readyCast(s,'toffee_apple');detonateApples(s,900);
+  assert.equal(s.toffeeBlooms,1);
+  close(E.personalTrait(s,s.board[12]).damageMultiplier,1.3);
+  close(E.personalTrait(s,s.board[13]).damageMultiplier,1.3);
+  assert.ok(E.move(s,12,18).ok);assert.equal(s.toffeeBlooms,1);
+  s.board[18].disabled=0;s.board[13].disabled=0;assert.ok(E.move(s,18,13).merged);
+  assert.equal(s.toffeeBlooms,1);close(E.personalTrait(s,s.board[13]).damageMultiplier,1.3);
+  const snap={...s.board[13],uid:s.nextId++,cooldown:100,windup:0,disabled:0};
+  const sold=E.sell(s,13);assert.ok(sold.ok);assert.equal(s.toffeeBlooms,1);
+  s.board[12]=snap;close(E.personalTrait(s,s.board[12]).damageMultiplier,1.3);
+  const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(saved.toffeeBlooms,1);
+  close(E.combatStats(saved,saved.board[12]).damage,E.combatStats(s,s.board[12]).damage);
+  const old=JSON.parse(E.serialize(s));delete old.toffeeBlooms;delete old.appleBase;
+  const legacy=E.restore(old);assert.ok(legacy);assert.equal(legacy.toffeeBlooms,0);
+  s.enemies=[];s.queue=[];E.step(s,.05);assert.equal(s.phase,'reward');
+  assert.ok(E.chooseReward(s,s.reward[0]).ok);
+  for(let i=0;i<40&&s.phase==='intermission';i++)E.step(s,.05);
+  assert.equal(s.phase,'combat');assert.equal(s.toffeeBlooms,0);
+  close(E.personalTrait(s,s.board[12]).damageMultiplier,1);
+});
+
+test('toffee bloom does not double-count with ultimate power buffs',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple'}]);const [foe]=enemiesFor(s,[{hp:1e9,progress:1800}]);
+  s.buffs.radiance=8;s.buffScale.radiance=1;
+  const live=E.combatStats(s,s.board[12]).damage;
+  readyCast(s,'toffee_apple');const first=foe.hp;detonateApples(s,1000);
+  close(first-foe.hp,live*E.APPLEBOMB.factor);
+  close(E.combatStats(s,s.board[12]).damage,live*1.3);
+  s.board[12].disabled=0;readyCast(s,'toffee_apple');const second=foe.hp;detonateApples(s,1100);
+  close(second-foe.hp,live*1.3*E.APPLEBOMB.factor);
+});
+
+test('requested hero and relic numbers, rumi dream form, and detective boss-first targeting',()=>{
+  assert.equal(E.ULT_BUFF.haste.speed,.35);assert.equal(E.ULT_BUFF.march.seconds,10);
+  assert.equal(E.ULT_BUFF.awaken.power,.4);assert.equal(E.ULT_BUFF.radiance.seconds,10);
+  assert.equal(E.ULT_BUFF.harmony.power,.25);assert.equal(E.ULT_BUFF.harmony.speed,.25);
+  assert.equal(E.ULT_BUFF.echo.seconds,10);assert.equal(E.REQUIEM.factor,9);
+  assert.equal(E.RELIC_VALUES.prism.chain,1);assert.equal(E.RELIC_VALUES.chalice.taken,.7);
+  assert.equal(E.RELIC_VALUES.roots.radius,.1);assert.equal(E.RELIC_VALUES.roots.life,.2);
+  assert.equal(E.RELIC_VALUES.seed.poison,.5);
+  assert.equal(E.RELIC_VALUES.broken_clock.duration,1);
+  const siren=traitArena([{hero:'siren',index:12}]);enemiesFor(siren,[{hp:1e9}]);quiet(siren);readyCast(siren,'siren');
+  close(siren.buffs.haste,10);close(E.combatStats(siren,siren.board[12]).cooldown,HERO.siren.interval/1.35);
+  const rabbit=traitArena([{hero:'silver_rabbit',index:12}]);enemiesFor(rabbit,[{hp:1e9}]);quiet(rabbit);readyCast(rabbit,'silver_rabbit');
+  close(rabbit.buffs.march,10);
+  const dragon=traitArena([{hero:'ancient_dragon',index:12},{hero:'star_boy',index:13}]);enemiesFor(dragon,[{hp:1e9}]);quiet(dragon);
+  const before=E.combatStats(dragon,dragon.board[13]).damage;readyCast(dragon,'ancient_dragon');
+  close(dragon.buffs.awaken,10);close(E.combatStats(dragon,dragon.board[13]).damage/before,1.4);
+  const jasmine=traitArena([{hero:'jasmine',index:12}]);enemiesFor(jasmine,[{hp:1e9}]);quiet(jasmine);readyCast(jasmine,'jasmine');
+  close(jasmine.buffs.radiance,10);assert.ok(jasmine.events.some(e=>e.type==='skill'&&e.kind==='goddess'));
+  const harmony=traitArena([{hero:'harmonious',index:12}]);enemiesFor(harmony,[{hp:1e9}]);quiet(harmony);readyCast(harmony,'harmonious');
+  close(harmony.buffs.harmony,10);close(E.combatStats(harmony,harmony.board[12]).damage/HERO.harmonious.damage,1.25);
+  const rumi=traitArena([{hero:'rumi',index:12,rank:1}]);enemiesFor(rumi,[{hp:1e9}]);quiet(rumi);readyCast(rumi,'rumi');
+  close(rumi.buffs.echo,10);assert.equal(E.rumiDream(rumi,rumi.board[12]),false);
+  const dream=traitArena([{hero:'rumi',index:12,rank:5}]);enemiesFor(dream,[{hp:1e9}]);quiet(dream);readyCast(dream,'rumi');
+  assert.equal(E.rumiDream(dream,dream.board[12]),true);assert.equal(dream.buffs.echo||0,0);
+  assert.ok(dream.volleys.some(v=>v.kind==='dream'));
+  const clock=traitArena([{hero:'siren',index:12}],{artifacts:['broken_clock']});enemiesFor(clock,[{hp:1e9}]);quiet(clock);
+  readyCast(clock,'siren');close(clock.buffs.haste,20);
+  const raw=JSON.parse(E.serialize(clock));assert.ok(raw.artifacts.includes('broken_clock'));assert.ok(E.restore(raw));
+  const pick=hero=>{
+    const s=traitArena([{hero,index:12}]);
+    const enemies=enemiesFor(s,[{hp:1e9,progress:1100},{hp:100,progress:1300},{kind:'boss',hp:50,progress:1200}]);
+    const shot=launchNormal(s,s.board[12]);
+    return {s,enemies,shot,u:s.board[12]};
+  };
+  for(const hero of ['great_detective','luna','cherry_prince']){
+    const {enemies,shot,u}=pick(hero);assert.equal(u.priority,'boss');assert.equal(shot.target,enemies[2].uid,hero+' bosses first');
+  }
+  const det=traitArena([{hero:'great_detective',index:12}]);
+  const pack=enemiesFor(det,[{hp:1e9,progress:400},{hp:100,progress:1800}]);
+  const detShot=launchNormal(det,det.board[12]);assert.equal(detShot.target,pack[1].uid,'no boss: first, not strongest');
+  det.shots=[];det.board[12].priority='strong';const strong=launchNormal(det,det.board[12]);assert.equal(strong.target,pack[0].uid);
+  det.shots=[];det.board[12].priority='last';const last=launchNormal(det,det.board[12]);assert.equal(last.target,pack[0].uid);
+  const luna=traitArena([{hero:'luna',index:0}]);
+  const field=enemiesFor(luna,[{hp:1e9,progress:100},{kind:'boss',hp:50,progress:2100}]);
+  const at=E.cellPoint(0),inRange=e=>{const p=E.pathPoint(e.progress);return Math.hypot(p.x-at.x,p.y-at.y)<=HERO.luna.range;};
+  if(inRange(field[1])===false&&inRange(field[0])){
+    const lunaShot=launchNormal(luna,luna.board[0]);assert.equal(lunaShot.target,field[0].uid,'out-of-range boss is not forced');
+  }
+  const expose=traitArena([{hero:'great_detective',index:12}]);
+  const marked=enemiesFor(expose,[{progress:1200},{kind:'boss',progress:1280}]);
+  const basic=launchNormal(expose,expose.board[12]);assert.equal(basic.target,marked[1].uid);
+  resolveNormal(expose,basic);assert.ok(marked[1].exposed>0);
 });
 
 test('Zeke approach power multiplies both normal and crisis ultimate while leaving attack cadence unchanged',()=>{
@@ -2012,7 +2140,7 @@ test('spotlight snapshots live attack power per buff, resolves duplicate ties by
   s.meta={queen:{power:10,special:1}};
   close(E.combatStats(s,target).damage,E.combatStats(s,other).damage);
   readyCast(s,'ancient_dragon');assert.equal(s.buffSpotlight.awaken,target.uid);
-  const base=E.power(s,target);close(E.combatStats(s,target).damage/base,1+.35*2);close(E.combatStats(s,other).damage/base,1+.35*.5);
+  const base=E.power(s,target);close(E.combatStats(s,target).damage/base,1+E.ULT_BUFF.awaken.power*2);close(E.combatStats(s,other).damage/base,1+E.ULT_BUFF.awaken.power*.5);
   const saved=E.restore(E.serialize(s));assert.ok(saved);assert.deepEqual(saved.buffSpotlight,s.buffSpotlight);
   const legacy=JSON.parse(E.serialize(s));delete legacy.buffSpotlight;const back=E.restore(legacy);assert.ok(back);assert.equal(back.buffSpotlight.awaken,target.uid);
   for(const invalid of [{awaken:0},{haste:s.nextId},{trauma:target.uid},{unknown:target.uid}]){
@@ -2020,8 +2148,8 @@ test('spotlight snapshots live attack power per buff, resolves duplicate ties by
   }
   // A rank change makes the other queen strongest; an already running buff keeps its recipient.
   other.rank=5;assert.ok(E.combatStats(s,other).damage>E.combatStats(s,target).damage);
-  assert.equal(s.buffSpotlight.awaken,target.uid);close(E.combatStats(s,other).damage/E.power(s,other),1+.35*.5);
-  s.board[0]=null;close(E.combatStats(s,other).damage/E.power(s,other),1+.35*.5,'removed target does not promote another unit');
+  assert.equal(s.buffSpotlight.awaken,target.uid);close(E.combatStats(s,other).damage/E.power(s,other),1+E.ULT_BUFF.awaken.power*.5);
+  s.board[0]=null;close(E.combatStats(s,other).damage/E.power(s,other),1+E.ULT_BUFF.awaken.power*.5,'removed target does not promote another unit');
   const removed=E.restore(E.serialize(s));assert.ok(removed);assert.equal(removed.buffSpotlight.awaken,target.uid);
   s.buffs.awaken=0;readyCast(s,'ancient_dragon');assert.equal(s.buffSpotlight.awaken,other.uid,'a later cast chooses the new strongest');
 });
@@ -2042,7 +2170,7 @@ test('spotlight keeps separate recipients for overlapping global buffs before ap
   enemiesFor(s,[{hp:1e9}]);quiet(s);readyCast(s,'ancient_dragon');
   const first=s.board[0],second=s.board[24];assert.equal(s.buffSpotlight.awaken,first.uid);
   second.rank=5;readyCast(s,'jasmine');assert.equal(s.buffSpotlight.radiance,second.uid);
-  close(E.combatStats(s,first).damage/E.power(s,first),1+.35*2,'first keeps stronger awaken over half radiance');
+  close(E.combatStats(s,first).damage/E.power(s,first),1+E.ULT_BUFF.awaken.power*2,'first keeps stronger awaken over half radiance');
   close(E.combatStats(s,second).damage/E.power(s,second),1+.5*2,'second receives radiance over half awaken');
 });
 
@@ -2152,7 +2280,7 @@ function armBoss(placements,chapter,progress=400){
 }
 
 test('immunity: antropy, an orthogonal cure aura, and the invincible timer',()=>{
-  assert.equal(E.REQUIEM.factor,8);assert.ok(Object.isFrozen(E.REQUIEM));
+  assert.equal(E.REQUIEM.factor,9);assert.ok(Object.isFrozen(E.REQUIEM));
   assert.equal(E.LEMONADE.seconds,4);assert.ok(Object.isFrozen(E.LEMONADE));
   const s=traitArena([
     {index:12,hero:'cure_master'},{index:13,hero:'star_boy'},{index:7,hero:'snow_rabbit'},{index:11,hero:'siren'},{index:17,hero:'guardian'},
@@ -2248,9 +2376,9 @@ test('goddess dispels stun and curse once, grants power, and no longer shields b
   const s=traitArena([{index:12,hero:'jasmine'},{index:0,hero:'star_boy'}]);
   enemiesFor(s,[{hp:1e9}]);s.board[0].disabled=4;s.board[0].cursed=true;
   const preview=E.castPreview(s,'jasmine');
-  assert.ok(preview.lines[1].includes('8초'));assert.equal(preview.lines[2],'기절과 저주를 한 번 풉니다.');
+  assert.ok(preview.lines[1].includes('10초'));assert.equal(preview.lines[2],'기절과 저주를 한 번 풉니다.');
   readyCast(s,'jasmine');
-  assert.equal(s.board[0].disabled,0);assert.equal(s.board[0].cursed,false);close(s.buffs.radiance,8);
+  assert.equal(s.board[0].disabled,0);assert.equal(s.board[0].cursed,false);close(s.buffs.radiance,10);
   const [seal]=armBoss([{index:12,hero:'jasmine'},{index:0,hero:'star_boy'}],0);
   seal.buffs.radiance=8;seal.enemies[0].skillIn=0;hold(seal);E.step(seal,.05);assert.equal(seal.telegraph.pattern,'seal');
   const cells=seal.telegraph.cells,uid=id=>seal.board.find(u=>u?.hero===id).uid;
@@ -2279,7 +2407,7 @@ test('lemonade clears disables and curses, grants invincible, and round-trips th
   for(const bad of [-1,NaN,11]){const raw=JSON.parse(E.serialize(s));raw.board[12].invincible=bad;assert.equal(E.restore(raw),null,'invincible '+bad);}
 });
 
-test('requiem wipes debuffs before the 8x hit, so exposure does not amplify it',()=>{
+test('requiem wipes debuffs before the 9x hit, so exposure does not amplify it',()=>{
   const s=traitArena([{index:12,hero:'antropy'}]);
   const [foe,clean]=enemiesFor(s,[{hp:1e9,progress:600},{hp:1e9,progress:800}]);
   const until=s.time+5;
@@ -2292,13 +2420,13 @@ test('requiem wipes debuffs before the 8x hit, so exposure does not amplify it',
   ];
   foe.slowEffects=[{source:'t:slow',owner:'antropy',amount:.4,until}];
   foe.ccImmune=s.time+9;foe.frostLock=s.time+4;foe.shield=0;foe.rage=0;
-  const base=E.combatStats(s,s.board[12]).damage,hit=`${Math.round(base*8).toLocaleString('ko-KR')} 피해`;
+  const base=E.combatStats(s,s.board[12]).damage,factor=E.REQUIEM.factor,hit=`${Math.round(base*factor).toLocaleString('ko-KR')} 피해`;
   const preview=E.castPreview(s,'antropy');
-  assert.equal(preview.lines[0],`적의 모든 디버프를 지우고 적 전체에게 공격력 8배, ${hit}를 줍니다.`);
+  assert.equal(preview.lines[0],`적의 모든 디버프를 지우고 적 전체에게 공격력 ${factor}배, ${hit}를 줍니다.`);
   assert.equal(preview.lines[1],'지금 지워지는 디버프가 걸린 적 1기.');
   const saved=E.serialize(s);E.castPreview(s,'antropy');assert.equal(E.serialize(s),saved);
   const hp=foe.hp,hp2=clean.hp,lock=foe.ccImmune,frost=foe.frostLock;readyCast(s,'antropy');
-  close(hp-foe.hp,base*8,'debuffed enemy');close(hp2-clean.hp,base*8,'clean enemy takes the same hit');
+  close(hp-foe.hp,base*factor,'debuffed enemy');close(hp2-clean.hp,base*factor,'clean enemy takes the same hit');
   const st=E.statusState(s,foe);
   assert.equal(st.burn,0);assert.equal(st.poison,0);assert.equal(st.exposure,0);assert.equal(st.divine,0);assert.equal(st.stun,0);assert.equal(st.slow,0);
   assert.equal(foe.controlTime,0);assert.equal(foe.slowTime,0);assert.equal(foe.statusEffects.length,0);assert.equal(foe.slowEffects.length,0);
@@ -2308,7 +2436,7 @@ test('requiem wipes debuffs before the 8x hit, so exposure does not amplify it',
   assert.ok(s.events.some(e=>e.type==='skill'&&e.kind==='requiem'));
   const bare=traitArena([{index:12,hero:'antropy'}]);enemiesFor(bare,[{hp:1e9}]);
   const bareBase=E.combatStats(bare,bare.board[12]).damage;
-  assert.deepEqual(E.castPreview(bare,'antropy').lines,[`적의 모든 디버프를 지우고 적 전체에게 공격력 8배, ${Math.round(bareBase*8).toLocaleString('ko-KR')} 피해를 줍니다.`]);
+  assert.deepEqual(E.castPreview(bare,'antropy').lines,[`적의 모든 디버프를 지우고 적 전체에게 공격력 ${E.REQUIEM.factor}배, ${Math.round(bareBase*E.REQUIEM.factor).toLocaleString('ko-KR')} 피해를 줍니다.`]);
 });
 
 test('cure master basic attack leaves a zone that damages a nearby enemy',()=>{
