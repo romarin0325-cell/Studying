@@ -75,7 +75,7 @@ export const HEROES = [
       "name": "꿈의 메아리",
       "cost": 60,
       "type": "echo",
-      "text": "8초 동안 모든 동료의 공격마다 공격력 65%의 추가 공격이 한 번 더 나갑니다."
+      "text": "10초 동안 모든 동료의 공격마다 공격력 65%의 추가 공격이 한 번 더 나갑니다."
     },
     "heightGroup": "medium",
     "role": "합성 · 관통 별",
@@ -558,7 +558,7 @@ export const HEROES = [
       "name": "공명의 아리아",
       "cost": 65,
       "type": "haste",
-      "text": "10초 동안 모든 동료의 공격 속도를 30% 올립니다."
+      "text": "10초 동안 모든 동료의 공격 속도를 35% 올립니다."
     },
     "heightGroup": "medium",
     "role": "인접 지원 · 물결",
@@ -706,7 +706,7 @@ export const HEROES = [
       "name": "은빛 행진",
       "cost": 60,
       "type": "march",
-      "text": "8초 동안 모든 동료의 공격이 성광을 남기고, 공격 속도가 20% 오릅니다."
+      "text": "10초 동안 모든 동료의 공격이 성광을 남기고, 공격 속도가 20% 오릅니다."
     },
     "heightGroup": "short",
     "role": "성광 부여 · 관통광",
@@ -743,7 +743,7 @@ export const HEROES = [
       "name": "태고의 약속",
       "cost": 75,
       "type": "awaken",
-      "text": "10초 동안 모든 동료의 공격력을 35% 올립니다."
+      "text": "10초 동안 모든 동료의 공격력을 40% 올립니다."
     },
     "heightGroup": "tall",
     "role": "인접 지원 · 십자화염",
@@ -774,7 +774,7 @@ export const HEROES = [
     "attack": "time",
     "trait": {
       "type": "chrono",
-      "text": "시간장을 깔아 적을 25% 느리게 합니다. 오래 남을수록 강해집니다: 등장한 웨이브 75%, 다음 웨이브 100%, 그 이후 125%. 합성하면 처음부터 다시 셉니다."
+      "text": "시간장을 깔아 적을 25% 느리게 합니다. 오래 남을수록 강해집니다: 등장한 웨이브 75%, 다음 웨이브 100%, 그 이후 150%. 합성하면 처음부터 다시 셉니다."
     },
     "skill": {
       "name": "아직 오지 않은 순간",
@@ -892,7 +892,7 @@ export const HEROES = [
       "name": "여신강림",
       "cost": 80,
       "type": "goddess",
-      "text": "적 전체에게 공격력 5배 피해를 줍니다. 기절과 저주를 한 번 풀고, 8초 동안 모든 동료의 공격력이 50% 오릅니다."
+      "text": "적 전체에게 공격력 5배 피해를 줍니다. 기절과 저주를 한 번 풀고, 10초 동안 모든 동료의 공격력이 50% 오릅니다."
     },
     "heightGroup": "medium",
     "role": "성광 연계 · 빛의 파동",
@@ -1078,7 +1078,7 @@ export const HEROES = [
       "name": "디저트 앙상블",
       "cost": 70,
       "type": "harmony",
-      "text": "10초 동안 모든 동료의 공격력과 공격 속도가 22% 오릅니다."
+      "text": "10초 동안 모든 동료의 공격력과 공격 속도가 25% 오릅니다."
     },
     "heightGroup": "short",
     "role": "다양성 지원 · 조화",
@@ -1183,7 +1183,7 @@ export const HEROES = [
     "attack": "stone",
     "trait": {
       "type": "underdog",
-      "text": "편성이 전부 노멀이면 공격력이 80% 오릅니다."
+      "text": "편성이 전부 노멀이면 공격력이 100% 오릅니다."
     },
     "skill": {
       "name": "빅쇼",
@@ -1220,13 +1220,13 @@ export const HEROES = [
     "attack": "sugar",
     "trait": {
       "type": "toffee",
-      "text": "폭탄을 설치하면 가장 높은 성급의 토피애플이 3초 기절합니다."
+      "text": "애플봄이 폭발할 때마다 해당 웨이브에서 공격력이 30% 증가합니다."
     },
     "skill": {
       "name": "애플봄",
       "cost": 95,
       "type": "applebomb",
-      "text": "경로의 무작위 위치에 사과를 설치합니다(최대 5개). 적이 접근하면 폭발해 반경 200 안의 적에게 폭발 시점의 최고 성급 토피애플 공격력 18배 피해를 줍니다. 토피애플이 없으면 마지막 유효 공격력을 사용합니다."
+      "text": "경로의 무작위 위치에 사과를 설치합니다(최대 5개). 적이 접근하면 폭발해 반경 200 안의 적에게 폭발 시점의 최고 성급 토피애플 공격력 18배 피해를 줍니다. 사용 후 3초 기절합니다."
     },
     "heightGroup": "medium",
     "role": "저축 폭탄 · 관통",
@@ -1337,7 +1337,7 @@ export const HEROES = [
       "name": "노바레퀴엠",
       "cost": 50,
       "type": "requiem",
-      "text": "적의 모든 디버프를 지우고 적 전체에게 공격력 8배 피해를 줍니다."
+      "text": "적의 모든 디버프를 지우고 적 전체에게 공격력 9배 피해를 줍니다."
     },
     "heightGroup": "short",
     "role": "디버프 무효 · 범위",
@@ -1532,8 +1532,8 @@ export const ARTIFACTS = [
   {
     "id": "seed",
     "name": "숨 쉬는 씨앗",
-    "text": "중독 피해가 40% 늘어납니다.",
-    "scale": ["40%"],
+    "text": "중독 피해가 50% 늘어납니다.",
+    "scale": ["50%"],
     "icon": 7,
     "atlas": "relics",
     "rarity": "C",
@@ -1592,8 +1592,8 @@ export const ARTIFACTS = [
   {
     "id": "prism",
     "name": "천 갈래 프리즘",
-    "text": "번개의현자·밤토끼·폭풍의현자의 공격이 다른 적에게 튈 때, 튄 공격의 피해가 90% 늘어납니다.",
-    "scale": ["90%"],
+    "text": "번개의현자·밤토끼·폭풍의현자의 공격이 다른 적에게 튈 때, 튄 공격의 피해가 100% 늘어납니다.",
+    "scale": ["100%"],
     "icon": 11,
     "atlas": "relics",
     "rarity": "R",
@@ -1612,8 +1612,8 @@ export const ARTIFACTS = [
   {
     "id": "roots",
     "name": "영원의 뿌리",
-    "text": "장판의 지속 시간이 20%, 범위가 8% 늘어납니다.",
-    "scale": ["20%", "8%"],
+    "text": "장판의 지속 시간이 20%, 범위가 10% 늘어납니다.",
+    "scale": ["20%", "10%"],
     "icon": 13,
     "atlas": "relics",
     "rarity": "R",
@@ -1692,8 +1692,8 @@ export const ARTIFACTS = [
   {
     "id": "chalice",
     "name": "독화의 성배",
-    "text": "화상과 중독 3중첩을 함께 가진 적이 받는 피해가 60% 늘어납니다.",
-    "scale": ["60%"],
+    "text": "화상과 중독 3중첩을 함께 가진 적이 받는 피해가 70% 늘어납니다.",
+    "scale": ["70%"],
     "icon": 2,
     "atlas": "relics-new",
     "rarity": "UR",
@@ -1721,7 +1721,7 @@ export const ARTIFACTS = [
   },
   {
     "id": "broken_clock",
-    "name": "깨진 시간의 보석",
+    "name": "시간의 보석",
     "text": "버프 필살기와 트라우마 변신의 지속 시간이 100% 늘어납니다.",
     "scale": ["100%"],
     "icon": 3,

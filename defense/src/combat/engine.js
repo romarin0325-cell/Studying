@@ -45,7 +45,7 @@ export const rankSupport=rank=>1+.2*(rank-1);
 export const rankControl=rank=>1+.1*(rank-1);
 export const TRAINING_STEP=.25;
 // Field-wide ultimate buffs. They multiply with placement auras, so they stay modest.
-export const ULT_BUFF=Object.freeze({haste:{speed:.3,seconds:10},awaken:{power:.35,seconds:10},march:{speed:.2,seconds:8},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:8},harmony:{power:.22,speed:.22,seconds:10},echo:{ratio:.65,seconds:8}});
+export const ULT_BUFF=Object.freeze({haste:{speed:.35,seconds:10},awaken:{power:.4,seconds:10},march:{speed:.2,seconds:10},festive:{speed:.2,seconds:6},radiance:{power:.5,seconds:10},harmony:{power:.25,speed:.25,seconds:10},echo:{ratio:.65,seconds:10}});
 export const STARFALL_FACTOR=.5,THUNDER_FACTOR=8;
 // Divine marks feed starlight when the marked enemy falls (per remaining stack).
 export const DIVINE_GAUGE=.5,DIVINE_BOSS_GAUGE=3;
@@ -145,10 +145,10 @@ export function has(s,id){return s.artifacts.includes(id);}
 export const RELIC_VALUES=Object.freeze({
   // Relic pass 7 (docs/archive/RELIC_PASS7.md): lantern refunds a share and hourglass adds a little per merge, so no ultimate
   // or merge loop can feed itself; outliers above ~1.3x of their budget came down; constellation rewards a real mosaic.
-  hourglass:{starlight:10,store:60},ember:{burn:.7},frost:{slowed:.22},banner:{power:.21},chorus:{speed:.35,count:3},lantern:{refund:.2},lens:{boss:.3},seed:{poison:.4},
+  hourglass:{starlight:10,store:60},ember:{burn:.7},frost:{slowed:.22},banner:{power:.21},chorus:{speed:.35,count:3},lantern:{refund:.2},lens:{boss:.3},seed:{poison:.5},
   feather:{base:6,perWave:3,cap:60},crown:{power:.16},sprout:{power:.2,discount:2},amulet:{near:.35,starlight:5},
-  meteor:{hit:1.1},prism:{chain:.9},tide:{power:.3,gauge:100},roots:{life:.2,radius:.08},guild:{power:.25},phoenix:{taken:.2,uses:1},
-  twin:{echo:1.2},constellation:{three:.32,four:.5},alchemy:{power:.6,waves:2},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.6,poison:3},
+  meteor:{hit:1.1},prism:{chain:1},tide:{power:.3,gauge:100},roots:{life:.2,radius:.1},guild:{power:.25},phoenix:{taken:.2,uses:1},
+  twin:{echo:1.2},constellation:{three:.32,four:.5},alchemy:{power:.6,waves:2},orbit:{tick:.05},tempo_bell:{perWave:.04,cap:.36},chalice:{taken:.7,poison:3},
   royal_seal:{starlight:30,boss:.4},gift_ribbon:{chance:.25},broken_clock:{duration:1},
   spotlight:{top:1,rest:.5},royal_crown:{core:3,gold:30},dream_crystal:{starlight:10,rumi:1},
 });
@@ -210,8 +210,10 @@ function syncTimeRuler(s){
   s.timeRulerUid=unit.uid;return unit;
 }
 // Underdog (노멀 덱 다크호스) and Toffee Apple (저축 폭탄): numbers from docs/plans/UPCOMING_BALANCE.md.
-export const UNDERDOG=Object.freeze({bonus:.8,factor:10,stun:2});
-export const APPLEBOMB=Object.freeze({factor:18,max:5,trigger:80,stun:3,radius:200});
+export const UNDERDOG=Object.freeze({bonus:1,factor:10,stun:2});
+export const APPLEBOMB=Object.freeze({factor:18,max:5,trigger:80,stun:3,radius:200,bloom:.3});
+export const toffeeBlooms=s=>Math.max(0,s.toffeeBlooms|0);
+export const toffeeBloomMult=s=>1+APPLEBOMB.bloom*toffeeBlooms(s);
 // Sunflower: one shared stack (0..3) of sunlight, +1 when a wave ends while a sunflower stands on the board. Its basic
 // attack bursts around the target with the radius of the current stack; Solar Flare spends the whole stack.
 export const SUNFLOWER=Object.freeze({max:3,radius:Object.freeze([0,30,60,90]),base:2,per:4});
@@ -226,7 +228,7 @@ export const skillName=(s,id)=>id==='joker'&&(jokerChaos(s)||jokerReady(s))?JOKE
 const jokerBit=color=>1<<JOKER.colors.indexOf(color);
 // The roulette picks a new colour at random among the four it is not showing, so every cast changes the colour.
 export const pickJokerColor=(s,color)=>{const others=JOKER.colors.filter(c=>c!==color);return others[Math.min(others.length-1,Math.floor(random(s)*others.length))];};
-export const REQUIEM=Object.freeze({factor:8});
+export const REQUIEM=Object.freeze({factor:9});
 export const LEMONADE=Object.freeze({seconds:4});
 // Ash burns the lowest other ally (an immune pick is guarded, not skipped), then hits the densest pack inside the radius.
 export const ARMAGEDDON=Object.freeze({factor:22,radius:180});
@@ -247,7 +249,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
     if(size>=2){trait.damageMultiplier=1+LIGHTNING_LINK[Math.min(size,5)];trait.chainRatio=size===2?.70:size===3?.75:.80;trait.extraChain=size>=4?1:0;}
   }else if(u.hero==='star_boy'||u.hero==='time_ruler'){
     const age=Math.max(0,s.wave-(u.birthWave??s.wave)),star=u.hero==='star_boy';
-    trait.damageMultiplier=star?(age===0?1.5:age===1?1:.75):(age===0?.75:age===1?1:1.25);
+    trait.damageMultiplier=star?(age===0?1.5:age===1?1:.75):(age===0?.75:age===1?1:1.5);
     Object.assign(trait,{key:'wave-age',age,active:age!==1,label:`${star?'별의 주기':'시간의 흐름'} · ${age===0?'등장':age===1?'다음':'이후'} 웨이브 ${Math.round(trait.damageMultiplier*100)}%`});
   }else if(u.hero==='aurora'){
     const count=s.board.filter(unit=>unit?.hero==='aurora').length,active=count>=2&&count%2===0;
@@ -262,6 +264,7 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   else if(u.hero==='avalanche_maid')Object.assign(trait,{key:'random-target',active:true,label:'무작위 표적 고정 · 기본 공격력 +50%'});
   else if(u.hero==='storm_sage')Object.assign(trait,{key:'storm-execute',active:true,executeChance:stormExecuteChance(s,u.rank),label:`일반 적 명중마다 즉사 ${pctText(stormExecuteChance(s,u.rank))}`});
   else if(u.hero==='underdog'){const active=s.deck.every(id=>HERO[id].rarity==='C'&&!HERO[id].hidden);Object.assign(trait,{key:'underdog',active,damageMultiplier:active?1+UNDERDOG.bonus:1,label:active?`노멀 덱 · 공격력 +${Math.round(UNDERDOG.bonus*100)}%`:'노멀 덱 대기'});}
+  else if(u.hero==='toffee_apple'){const n=toffeeBlooms(s),bonus=APPLEBOMB.bloom*n;Object.assign(trait,{key:'toffee-bloom',active:n>0,stacks:n,damageMultiplier:1+bonus,label:n?`애플봄 ${n}회 · 공격력 +${Math.round(bonus*100)}%`:'애플봄 대기'});}
   else if(u.hero==='sunflower'){const n=Math.min(SUNFLOWER.max,s.sunlight||0);Object.assign(trait,{key:'sunlight',active:n>0,sunlight:n,radius:SUNFLOWER.radius[n],label:n?`햇빛 ${n}/${SUNFLOWER.max} · 폭발 반경 ${SUNFLOWER.radius[n]}`:`햇빛 0/${SUNFLOWER.max} · 폭발 없음`});}
   else if(u.hero==='joker'){const color=s.jokerColor||'red';Object.assign(trait,{key:'joker',active:true,color,label:jokerChaos(s)?'카오스 · 일반 공격 시 화상·감속·중독·성광·노출':`${JOKER_NAMES[color]} · ${JOKER.colors.filter(c=>(s.jokerSeen||1)&jokerBit(c)).length}/5색`});}
   else if(u.hero==='antropy')Object.assign(trait,{key:'antropy',active:true,label:'디버프 무효'});
@@ -307,7 +310,7 @@ export function scaledTokens(id,k){
     luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
-    siren:[['10초',sec(10)]],ancient_dragon:[['10초',sec(10)]],silver_rabbit:[['8초',sec(8)]],santa:[['6초',sec(ULT_BUFF.festive.seconds)]],jasmine:[['8초',sec(8)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(10)]],rumi:[['8초',sec(8)]],cinderella:[['10초',sec(10)]],
+    siren:[['10초',sec(ULT_BUFF.haste.seconds)]],ancient_dragon:[['10초',sec(ULT_BUFF.awaken.seconds)]],silver_rabbit:[[`${ULT_BUFF.march.seconds}초`,sec(ULT_BUFF.march.seconds)]],santa:[['6초',sec(ULT_BUFF.festive.seconds)]],jasmine:[[`${ULT_BUFF.radiance.seconds}초`,sec(ULT_BUFF.radiance.seconds)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(ULT_BUFF.harmony.seconds)]],rumi:[[`${ULT_BUFF.echo.seconds}초`,sec(ULT_BUFF.echo.seconds)]],cinderella:[['10초',sec(10)]],
     luna:[['40%',pctText(executeThresholdFor(k))]],phantom:[['25%',pctText(Math.min(DAMAGE_TAKEN_CAP,.25*k))]],cure_master:[['4초',sec(4)]],venom:[['10초',sec(10)]]}[id]||[];
   return {trait,skill};
 }
@@ -479,7 +482,7 @@ export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[]
   const levels=Object.fromEntries(arts.filter(id=>Number.isInteger(relicLevels?.[id])&&relicLevels[id]>=1&&relicLevels[id]<=999).map(id=>[id,relicLevels[id]]));
   const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],critRevision:2,crit:cleanCrit(crit),critRng:critSeed(seed),bombs:[],sunlight:0,jokerColor:'red',jokerSeen:1,gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
-    buffs:{},buffTotals:{},buffScale:{},buffSpotlight:{},goldCharge:null,queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,
+    buffs:{},buffTotals:{},buffScale:{},buffSpotlight:{},goldCharge:null,queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,toffeeBlooms:0,appleBase:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{},leaks:0},tutorial:0,won:false};
   s.oaths=Array.isArray(oaths)?[...oaths]:[];s.oathMods=oathMods(s.oaths);s.side=side??null;s.lineup=Array.isArray(lineup)?[...lineup]:null;
   s.moveCooldown=0;s.castWave=[];
@@ -602,7 +605,7 @@ export const monthlyBoss=(wave,met=BOSS_ORDER.length)=>BOSS_ORDER[(wave-1)%Math.
 export const lastWave=s=>s.mode==='oath'?OATH_WAVES:s.mode==='twin'?TWIN_WAVES:s.mode==='main'?MAIN_WAVES:CHALLENGE_WAVES;
 function beginWave(s,wave){
   s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?.65:.4;s.settlement=null;s.telegraph=null;s.zones=[];
-  s.castWave=[];
+  s.castWave=[];s.toffeeBlooms=0;
   s.queue=wavePlan(wave,s.chapter,s.mode,s.tier).sequence;s.waveTotal=s.queue.length;
   if(s.queue.some(e=>e.kind==='boss'))event(s,'bossApproach',{wave});event(s,'wave',{wave});
 }
@@ -631,7 +634,7 @@ function chooseTarget(s,u,randomTarget=true){
   const enemies=s.enemies.filter(e=>e.hp>0&&canTarget(unitHero(s,u),at,pathPoint(e.progress)));if(!enemies.length)return null;
   if(u.hero==='avalanche_maid')return enemies[randomTarget?Math.floor(random(s)*enemies.length):0];
   const bosses=u.priority==='boss'?enemies.filter(e=>e.boss):[],pool=bosses.length?bosses:enemies;
-  const priority=u.priority==='boss'?(u.hero==='great_detective'?'strong':'first'):u.priority;
+  const priority=u.priority==='boss'?'first':u.priority;
   return pool.reduce((a,b)=>priority==='strong'?(a.hp>b.hp?a:b):priority==='last'?(a.progress<b.progress?a:b):(a.progress>b.progress?a:b));
 }
 const echoMaps=new WeakMap(),emberFresh=new WeakMap();
@@ -932,13 +935,19 @@ function reductionTarget(s,u){
   for(let i=0;i<s.board.length;i++){const ally=s.board[i];if(!ally||ally.uid===u.uid)continue;if(!pick||ally.rank<pick.ally.rank||ally.rank===pick.ally.rank&&ally.uid<pick.ally.uid)pick={ally,i};}
   return pick;
 }
-// Update every waiting apple from the highest-rank Toffee Apple, including her
-// current training, auras and buffs. Retain the last valid snapshot if none remain.
+function appleSource(s){return s.board.filter(a=>a?.hero==='toffee_apple').sort((a,b)=>b.rank-a.rank)[0];}
+function rememberAppleBase(s,u){
+  if(u)s.appleBase=combatStats(s,u).damage/toffeeBloomMult(s);
+  else if(!(s.appleBase>0)&&s.bombs?.length)s.appleBase=s.bombs[0].damage/APPLEBOMB.factor/toffeeBloomMult(s);
+}
+// Shared combat power already includes the wave bloom. Waiting apples store that result,
+// not a second copy of the 30% stacks, and keep the last base if no Toffee remains.
 function refreshAppleBombs(s){
   if(!s.bombs?.length)return;
-  const u=s.board.filter(a=>a?.hero==='toffee_apple').sort((a,b)=>b.rank-a.rank)[0];if(!u)return;
-  const amount=combatStats(s,u).damage*APPLEBOMB.factor,crit=unitCrit(s,u);
-  for(const bomb of s.bombs){bomb.damage=amount;if(crit)bomb.crit={...crit};else delete bomb.crit;}
+  const u=appleSource(s);
+  rememberAppleBase(s,u);if(!(s.appleBase>0))return;
+  const amount=s.appleBase*toffeeBloomMult(s)*APPLEBOMB.factor,crit=u?unitCrit(s,u):null;
+  for(const bomb of s.bombs){bomb.damage=amount;if(u){if(crit)bomb.crit={...crit};else delete bomb.crit;}}
 }
 // Pick an individual, not a hero type. Board order resolves equal live attack power.
 // Each global buff records this uid at cast time so its own power boost cannot change the winner.
@@ -1003,7 +1012,7 @@ export function cast(s,id){
   else if(type==='glassfall'){strike(CINDERELLA.ult);s.buffs.midnight=skillDuration(s,10*control);u.clock=0;}
   else if(type==='gift'){const hero=drawHero(s);gift=place(s,hero,1);if(gift<0)s.reserves.push({hero,rank:1});s.buffs.festive=skillDuration(s,ULT_BUFF.festive.seconds*control,'festive');}
   else if(type==='goddess'){
-    strike(5);s.buffs.radiance=skillDuration(s,8*control,'radiance');const freed=[];
+    strike(5);s.buffs.radiance=skillDuration(s,ULT_BUFF.radiance.seconds*control,'radiance');const freed=[];
     for(const [i,ally] of s.board.entries())if(ally){if(ally.disabled>0||ally.cursed)freed.push({...cellPoint(i),uid:ally.uid});ally.disabled=0;ally.cursed=false;}
     look={freed,allies:s.board.flatMap((ally,i)=>ally?[{...cellPoint(i),uid:ally.uid}]:[])};
   }
@@ -1337,11 +1346,11 @@ export function castPreview(s,id){
     }else if(jokerReady(s))lines.push(`적 전체에게 공격력 ${JOKER.chaosRoulette}배, ${allHit(JOKER.chaosRoulette)}를 주고 카오스가 됩니다.`);
     else lines.push(`적 전체에게 공격력 ${JOKER.roulette}배, ${allHit(JOKER.roulette)}를 주고 지금 ${JOKER_NAMES[color].split(' · ')[0]}을 뺀 네 색 중 하나로 무작위로 바꿉니다.`);
   }else if(type==='applebomb'){
-    const set=(s.bombs||[]).length;
+    const set=(s.bombs||[]).length,n=toffeeBlooms(s);
     lines.push(`경로의 무작위 위치에 사과를 설치합니다(최대 ${APPLEBOMB.max}개, 지금 ${set}개).`);
     lines.push(`적이 가까이 오면 바로 터져 반경 ${APPLEBOMB.radius} 안의 적에게 공격력 ${APPLEBOMB.factor}배, ${hit(APPLEBOMB.factor)}를 줍니다.`);
-    lines.push(`피해는 폭발 순간 최고 성급 토피애플의 현재 공격력으로 계산합니다. 토피애플이 없으면 마지막 유효 공격력을 사용합니다.`);
-    lines.push(`설치한 토피애플은 ${APPLEBOMB.stun}초 동안 기절합니다.`);
+    if(n)lines.push(`이번 웨이브 애플봄 ${n}회 · 공격력 +${Math.round(APPLEBOMB.bloom*n*100)}%.`);
+    lines.push(`사용 후 ${APPLEBOMB.stun}초 기절합니다.`);
   }else if(type==='requiem'){
     lines.push(`적의 모든 디버프를 지우고 적 전체에게 공격력 ${REQUIEM.factor}배, ${allHit(REQUIEM.factor)}를 줍니다.`);
     const n=targets.filter(e=>debuffCount(s,e)>0).length;
@@ -1532,12 +1541,14 @@ export function step(s,dt){
   if(s.bombs.length)s.bombs=s.bombs.filter(bomb=>{
     const alive=s.enemies.filter(e=>e.hp>0);
     if(!alive.some(e=>Math.abs(e.progress-bomb.progress)<=APPLEBOMB.trigger))return true;
+    refreshAppleBombs(s);
     const origin=pathPoint(bomb.progress);
     const hit=alive.filter(e=>{const p=pathPoint(e.progress);return Math.hypot(p.x-origin.x,p.y-origin.y)<=APPLEBOMB.radius;});
     for(const e of hit)damage(s,e,bomb.damage,'toffee_apple',{crit:bomb.crit});
     // Receipts keep lethal hits after those enemies leave the renderer map.
     // Only enemies inside the blast radius are targets.
     event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...origin,radius:APPLEBOMB.radius,targets:hit.map(e=>({uid:e.uid,...pathPoint(e.progress)}))});
+    s.toffeeBlooms=toffeeBlooms(s)+1;
     return false;
   });
   for(const z of s.zones){
@@ -1738,6 +1749,15 @@ export function restore(raw){
     const goldOk=v=>v.hero==='gold_dragon'&&s.deck.includes(v.hero)&&v.kind==='gold_breath'&&Number.isInteger(v.rank)&&v.rank>=1&&v.rank<=MAX_RANK&&v.total===GOLD_DRAGON.flight&&v.radius===GOLD_DRAGON.radius&&typeof v.opening==='boolean'&&numeric(v,['started'])&&v.started>=0&&v.started<=s.time&&Math.abs(v.life-(v.started+v.total-s.time))<1e-8&&numeric(v.origin,['x','y'])&&numeric(v.to,['x','y'])&&v.to.x>=0&&v.to.x<=720&&v.to.y>=0&&v.to.y<=780;
     if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length+CRUSH.hits*CRUSH.queue+1||s.volleys.filter(v=>v?.kind==='dream').length>RUMI_DREAM.phases.length||s.volleys.filter(v=>v?.kind==='gold_breath').length>1||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.life<=0||v.life>v.total||!echoOk(v)||!(dreamOk(v)||crushOk(v)||goldOk(v))))return null;
     if(!Array.isArray(s.bombs)||s.bombs.length>16||s.bombs.some(b=>!id(b?.uid)||!numeric(b,['progress','damage'])||b.progress<0||b.progress>PATH_LENGTH||b.damage<0))return null;
+    if(s.toffeeBlooms===undefined)s.toffeeBlooms=0;
+    if(!Number.isInteger(s.toffeeBlooms)||s.toffeeBlooms<0||s.toffeeBlooms>9999)return null;
+    if(s.appleBase===undefined){
+      const u=appleSource(s);
+      if(u)s.appleBase=combatStats(s,u).damage/toffeeBloomMult(s);
+      else if(s.bombs[0]?.damage>0)s.appleBase=s.bombs[0].damage/APPLEBOMB.factor/toffeeBloomMult(s);
+      else s.appleBase=0;
+    }
+    if(!Number.isFinite(s.appleBase)||s.appleBase<0)return null;
     const ids=[...s.board.filter(Boolean),...s.enemies,...s.shots,...s.finishers,...s.volleys,...s.zones,...s.bombs].map(o=>o.uid);
     if(new Set(ids).size!==ids.length||ids.some(n=>n>=s.nextId))return null;
     if(!Array.isArray(s.bag)||s.bag.length>6||new Set(s.bag).size!==s.bag.length||s.bag.some(h=>!s.deck.includes(h)))return null;
