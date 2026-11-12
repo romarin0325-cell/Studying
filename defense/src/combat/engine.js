@@ -308,10 +308,10 @@ export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
   const trait={snow_rabbit:[['35%',slow(SNOW_RABBIT.slow)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
     luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
-  const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초 동안',sec(6)+' 동안'],['50%',slow(.5)]],
+  const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초',sec(6)],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
     siren:[['10초',sec(ULT_BUFF.haste.seconds)]],ancient_dragon:[['10초',sec(ULT_BUFF.awaken.seconds)]],silver_rabbit:[[`${ULT_BUFF.march.seconds}초`,sec(ULT_BUFF.march.seconds)]],santa:[['6초',sec(ULT_BUFF.festive.seconds)]],jasmine:[[`${ULT_BUFF.radiance.seconds}초`,sec(ULT_BUFF.radiance.seconds)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(ULT_BUFF.harmony.seconds)]],rumi:[[`${ULT_BUFF.echo.seconds}초`,sec(ULT_BUFF.echo.seconds)]],cinderella:[['10초',sec(10)]],
-    luna:[['40%',pctText(executeThresholdFor(k))]],phantom:[['25%',pctText(Math.min(DAMAGE_TAKEN_CAP,.25*k))]],cure_master:[['4초',sec(4)]],venom:[['10초',sec(10)]]}[id]||[];
+    luna:[['40%',pctText(executeThresholdFor(k))]],phantom:[['25%',pctText(Math.min(DAMAGE_TAKEN_CAP,.25*k))]],cure_master:[['4초',sec(4)]],venom:[['10초',sec(10)]],avalanche_maid:[['50%',slow(.5)]],galaxy_whale:[['60%',slow(.6)]]}[id]||[];
   return {trait,skill};
 }
 // The trait text's growing numbers as this unit has them now (rank, training, enhancement), for the battle ⓘ sheet.
@@ -337,7 +337,7 @@ export function liveTraitTokens(s,u){
     storm_sage:[['1%',pctText(stormExecuteChance(s,u.rank))]],
     joker:[['20%',slow(JOKER.slow*k)]],
     aurora:[['75%',pctText(.75+level*.03)]],
-    santa:[['범위와 공격력이 두 배','범위가 두 배, 공격력이 '+num(2+level*.2)+'배']],
+    santa:[['범위와 피해가 2배','범위가 2배, 피해가 '+num(2+level*.2)+'배']],
   })[u.hero]||[];
 }
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
