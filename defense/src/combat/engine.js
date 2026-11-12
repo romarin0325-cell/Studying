@@ -743,12 +743,12 @@ function applyHit(s,shot){
     if(type==='execute'&&target.hp/target.maxHp<=executeThreshold(target,s))factor*=2;
     if(type==='shatter'&&target.slowTime>0)factor*=1.75;
     if(type==='splash'&&target.burnTime>0)factor*=1.4;
-    if(type==='miracle'&&shot.bell)factor*=target===e?CINDERELLA.bell:CINDERELLA.splash;
     if(type==='starfall'&&shot.count%5===0)factor*=2.2;
     if(shot.gift)factor*=2+(s.upgrades[hero.id]||0)*.2;
     if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
     if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
-    normalHit(s,target,amount*factor,shot,{gift:!!shot.gift},procTargets);
+    const strike=type==='miracle'&&shot.bell?(Number.isFinite(shot.bellPower)?shot.bellPower:amount)*(target===e?CINDERELLA.bell:CINDERELLA.splash):amount*factor;
+    normalHit(s,target,strike,shot,{gift:!!shot.gift},procTargets);
     if(divineMark&&target.hp>0)addStatus(s,target,'divine',sourceKey('attack',hero.id,shot.uid),hero.id,1,6);
     // The witch freezes enemies that are already slowed; each foe re-locks after 3s.
     if(type==='permafrost'&&shot.proc!==false&&target.hp>0&&target.slowTime>0&&(target.frostLock||0)-s.time<=1e-9){
@@ -828,7 +828,7 @@ function fire(s,u,index,e,ground,stats,ratio,bonus,echo){
   if(clockStep)u.clock=((u.clock||0)+clockStep)%12;
   const travel=(['cleave','pulse','cross'].includes(hero.shape)?.12:hero.shape==='beam'?.2:Math.hypot(to.x-from.x,to.y-from.y)/(hero.id==='great_detective'?1400:650))+(echo?.14:0);
   const gift=counts&&u.hero==='santa'&&u.attacks%4===0;
-  const shot={uid:s.nextId++,source:u.uid,target:e?.uid??null,hero:u.hero,form:unitForm(s,u),proc:counts,damage:stats.damage*ratio,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel,...(ground?{ground:true}:{}),...(u.hero==='lightning_sage'?{chainRatio:stats.chainRatio,extraChain:stats.extraChain}:{}),...(gift?{gift:true}:{}),...(u.hero==='gold_dragon'?{opening:goldOpening(s)}:{}),...(bell?{bell:true}:{})};
+  const shot={uid:s.nextId++,source:u.uid,target:e?.uid??null,hero:u.hero,form:unitForm(s,u),proc:counts,damage:stats.damage*ratio,rank:u.rank,count:u.attacks,origin:at,from,to,life:travel,total:travel,...(ground?{ground:true}:{}),...(u.hero==='lightning_sage'?{chainRatio:stats.chainRatio,extraChain:stats.extraChain}:{}),...(gift?{gift:true}:{}),...(u.hero==='gold_dragon'?{opening:goldOpening(s)}:{}),...(bell?{bell:true,bellPower:stats.damage}:{})};
   shot.crit=unitCrit(s,u,index);s.shots.push(shot);
   return shot;
 }
@@ -1088,7 +1088,7 @@ export function cast(s,id){
     }
   }
   else if(type==='applebomb'){
-    const bomb={uid:s.nextId++,progress:random(s)*PATH_LENGTH,damage:base*APPLEBOMB.factor};
+    const bomb={uid:s.nextId++,progress:random(s)*PATH_LENGTH,damage:base*APPLEBOMB.factor,source:u.uid,rank:u.rank};
     s.bombs.push(bomb);event(s,'bombSet',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...pathPoint(bomb.progress)});
     stunUnit(s,s.board.indexOf(u),APPLEBOMB.stun);
   }
@@ -1537,6 +1537,7 @@ export function step(s,dt){
     }
   }
   refreshAppleBombs(s);
+  const appleEchoes=[];
   // Passing elsewhere on the route does not trigger an apple: an enemy must be nearby.
   if(s.bombs.length)s.bombs=s.bombs.filter(bomb=>{
     const alive=s.enemies.filter(e=>e.hp>0);
@@ -1544,11 +1545,20 @@ export function step(s,dt){
     refreshAppleBombs(s);
     const origin=pathPoint(bomb.progress);
     const hit=alive.filter(e=>{const p=pathPoint(e.progress);return Math.hypot(p.x-origin.x,p.y-origin.y)<=APPLEBOMB.radius;});
-    for(const e of hit)damage(s,e,bomb.damage,'toffee_apple',{crit:bomb.crit});
+    const echoes=[];
+    for(const e of hit){const dealt=damage(s,e,bomb.damage,'toffee_apple',{crit:bomb.crit});if(dealt>0)echoes.push({uid:e.uid,dealt});}
     // Receipts keep lethal hits after those enemies leave the renderer map.
     // Only enemies inside the blast radius are targets.
     event(s,'bombBlast',{uid:bomb.uid,progress:bomb.progress,damage:bomb.damage,...origin,radius:APPLEBOMB.radius,targets:hit.map(e=>({uid:e.uid,...pathPoint(e.progress)}))});
     s.toffeeBlooms=toffeeBlooms(s)+1;
+    if(has(s,'twin')){
+      const caster=appleSource(s),source=Number.isSafeInteger(bomb.source)&&bomb.source>0?bomb.source:caster?.uid||bomb.uid;
+      const rank=Number.isInteger(bomb.rank)&&bomb.rank>=1?bomb.rank:caster?.rank||1,ratio=RV.twin.echo*relicScaleIn(s,'twin');
+      for(const {uid,dealt} of echoes){
+        const target=s.enemies.find(x=>x.uid===uid&&x.hp>0);if(!target)continue;
+        appleEchoes.push({uid:s.nextId++,source,hero:'toffee_apple',kind:'echo',target:uid,origin,to:pathPoint(target.progress),damage:dealt*ratio,rank,life:1.5,total:1.5});
+      }
+    }
     return false;
   });
   for(const z of s.zones){
@@ -1557,7 +1567,7 @@ export function step(s,dt){
     for(const e of targets){
       // Gravity fields deal +30% per divine stack on the enemy.
       if(z.hero==='galaxy_whale'&&!z.orbit)syncStatuses(s,e);
-      damage(s,e,z.damage*(z.orbit?RV.orbit.tick*relicScaleIn(s,'orbit'):.22)*(z.hero==='galaxy_whale'&&!z.orbit?1+.3*e.divine:1),z.hero,{dot:true,crit:z.crit});if(z.orbit)continue;
+      damage(s,e,z.damage*(z.orbit?RV.orbit.tick*relicScaleIn(s,'orbit'):.22)*(z.hero==='galaxy_whale'&&!z.orbit?1+.3*e.divine:1),z.hero,{dot:true,basic:true,crit:z.crit});if(z.orbit)continue;
       if(z.hero==='flame_sage')addStatus(s,e,'burn',sourceKey('zone',z.hero,z.uid),z.hero,z.damage*BURN.attack,BURN.attackSeconds,undefined,z.crit);
       if(z.hero==='mushroom_king')addPoison(s,e,sourceKey('zone',z.hero,z.uid),z.hero,1,7,z.damage,z.crit);
     }
@@ -1593,6 +1603,7 @@ export function step(s,dt){
     }
   }
   if(twinEchoes.length)s.finishers.push(...twinEchoes);
+  if(appleEchoes.length)s.finishers.push(...appleEchoes);
   s.finishers=s.finishers.filter(f=>f.life>0);
   // Dream form phases: each one strikes every enemy alive at that moment. The twin relic echoes the
   // summed damage once, after the last phase, like any other field ultimate.
@@ -1736,6 +1747,7 @@ export function restore(raw){
     if(s.shots.some(e=>e.form!==undefined&&e.form!==null&&!(e.form==='trauma'&&e.hero==='time_magician'||e.hero==='miracle_larva'&&Object.hasOwn(MIRACLE_FORMS,e.form))||e.proc!==undefined&&typeof e.proc!=='boolean'))return null;
     function validCrit(c){return c===null||c===undefined||numeric(c,['chance','damage'])&&c.chance>=0&&c.chance<=1&&c.damage>=1&&c.damage<=11;}
     if([...s.shots,...s.finishers,...s.volleys,...s.zones,...s.bombs,...s.enemies.flatMap(e=>e.statusEffects)].some(e=>!validCrit(e.crit)))return null;
+    if(s.shots.some(e=>e.bell!==undefined&&e.bell!==true||e.bellPower!==undefined&&(e.bell!==true||!numeric(e,['bellPower'])||e.bellPower<0)))return null;
     if(s.shots.some(e=>e.delay!==undefined&&e.reflected!==true||e.reflected!==undefined&&(e.reflected!==true||e.hero!=='aurora'||e.proc!==false||!numeric(e,['delay'])||e.delay<0||e.delay>.42)))return null;
     if(!Array.isArray(s.finishers)||s.finishers.length>100||s.finishers.some(f=>!id(f?.uid)||!id(f.source)||!id(f.target)||!s.deck.includes(f.hero)||!(f.kind==='echo'||['royal','starfall','mirror'].includes(f.kind)&&HERO[f.hero]?.skill.type===f.kind)||!numeric(f,['damage','rank','life','total'])||f.damage<0||f.kind==='echo'&&!(f.damage>0)||f.total<=0||f.life<=0||f.life>f.total||!numeric(f.origin,['x','y'])||!numeric(f.to,['x','y'])||f.kind==='mirror'&&(!numeric(f,['stored'])||f.stored<0||f.cap!==undefined&&(!numeric(f,['cap'])||f.cap<0||f.stored>f.cap/.45+1e-6))))return null;
     if(s.enemies.some(e=>!numeric(e,['divine','divineTime','rage','shield'])||!Number.isInteger(e.divine)||e.divine<0||e.divine>3||e.shield<0||e.rage<0))return null;
@@ -1748,7 +1760,7 @@ export function restore(raw){
     const crushOk=v=>v.hero==='behemoth'&&v.kind==='crush'&&Number.isInteger(v.phase)&&v.phase>=0&&v.phase<CRUSH.hits&&Number.isInteger(v.rank)&&v.rank>=1&&v.rank<=MAX_RANK&&v.total<=CRUSH.first+2*CRUSH.gap+.01&&[150,...Array.from({length:6},(_,level)=>CRUSH.radius*(1+level*CRUSH.trainingRadius))].some(radius=>Number.isFinite(v.radius)&&Math.abs(radius-v.radius)<1e-8);
     const goldOk=v=>v.hero==='gold_dragon'&&s.deck.includes(v.hero)&&v.kind==='gold_breath'&&Number.isInteger(v.rank)&&v.rank>=1&&v.rank<=MAX_RANK&&v.total===GOLD_DRAGON.flight&&v.radius===GOLD_DRAGON.radius&&typeof v.opening==='boolean'&&numeric(v,['started'])&&v.started>=0&&v.started<=s.time&&Math.abs(v.life-(v.started+v.total-s.time))<1e-8&&numeric(v.origin,['x','y'])&&numeric(v.to,['x','y'])&&v.to.x>=0&&v.to.x<=720&&v.to.y>=0&&v.to.y<=780;
     if(!Array.isArray(s.volleys)||s.volleys.length>RUMI_DREAM.phases.length+CRUSH.hits*CRUSH.queue+1||s.volleys.filter(v=>v?.kind==='dream').length>RUMI_DREAM.phases.length||s.volleys.filter(v=>v?.kind==='gold_breath').length>1||s.volleys.some(v=>!id(v?.uid)||!id(v.source)||!numeric(v,['damage','life','total'])||v.damage<0||v.total<=0||v.life<=0||v.life>v.total||!echoOk(v)||!(dreamOk(v)||crushOk(v)||goldOk(v))))return null;
-    if(!Array.isArray(s.bombs)||s.bombs.length>16||s.bombs.some(b=>!id(b?.uid)||!numeric(b,['progress','damage'])||b.progress<0||b.progress>PATH_LENGTH||b.damage<0))return null;
+    if(!Array.isArray(s.bombs)||s.bombs.length>16||s.bombs.some(b=>!id(b?.uid)||!numeric(b,['progress','damage'])||b.progress<0||b.progress>PATH_LENGTH||b.damage<0||b.source!==undefined&&!id(b.source)||b.rank!==undefined&&(!Number.isInteger(b.rank)||b.rank<1||b.rank>MAX_RANK)))return null;
     if(s.toffeeBlooms===undefined)s.toffeeBlooms=0;
     if(!Number.isInteger(s.toffeeBlooms)||s.toffeeBlooms<0||s.toffeeBlooms>9999)return null;
     if(s.appleBase===undefined){

@@ -1141,7 +1141,7 @@ export const HEROES = [
         "size": 250
       }
     },
-    "damage": 42,
+    "damage": 44,
     "interval": 2,
     "attack": "stone",
     "trait": {
@@ -1891,7 +1891,7 @@ export const BOSSES = {
     "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",
     "basicScale": 0.5,
     "deathWard": 180,
-    "trait": "일반 공격 피해 절반 · 보스 주변 즉사 면역 · 예고된 칸에 천벌",
+    "trait": "일반 공격·장판 피해 절반 · 보스 주변 즉사 면역 · 예고된 칸에 천벌",
     "atlas": "bosses-expansion",
     "frame": 2
   }
