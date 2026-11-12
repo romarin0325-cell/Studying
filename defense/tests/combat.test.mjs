@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../src/combat/engine.js';
 import {createBattle,resumeBattle,autoPlay,clearedRounds} from '../src/battle.js';
-import {HEROES,HERO,DEFAULT_DECK,CHAPTERS,BOSS_ORDER} from '../src/content.js';
+import {HEROES,HERO,BOSSES,DEFAULT_DECK,CHAPTERS,BOSS_ORDER} from '../src/content.js';
 import {createProfile,command,validateProfile} from '../src/profile.js';
 import {heroMultiplier,collectionBonus,relicScale} from '../src/economy.js';
 import {smartAutoPlay} from '../src/smart-auto.js';
@@ -84,6 +84,24 @@ function soloWinner(s){
   for(const u of knights)close(E.power(s,u),HERO.cinderella.damage*2.35**(u.rank-1)*(u===boosted[0]?1.5:1),'Cinderella power');
   assert.equal(E.topCinderella(s).uid,boosted[0].uid);
   return boosted[0];
+}
+function scaleCinderella(s,target=100){
+  const u=E.topCinderella(s);
+  s.meta??={};
+  s.meta.cinderella={power:(s.meta.cinderella?.power||1)*target/E.combatStats(s,u).damage,special:s.meta.cinderella?.special||1};
+  close(E.combatStats(s,u).damage,target,'cinderella attack');
+  return u;
+}
+function magicianPulse(s,mage){
+  const knight=E.topCinderella(s);
+  mage.attacks=2;mage.cooldown=0;mage.windup=0;mage.disabled=0;
+  knight.cooldown=100;knight.windup=0;knight.disabled=0;
+  s.shots=s.shots.filter(shot=>shot.source!==knight.uid);
+  resolveNormal(s,launchNormal(s,mage));
+  return s.shots.filter(shot=>shot.source===knight.uid);
+}
+function extraScale(s,mage){
+  return (.6+(s.upgrades.time_magician||0)*.05)*E.rankSupport(mage.rank)*E.special(s,'time_magician');
 }
 
 test('snow training adds two percentage points and the displayed slow includes rank and enhancement',()=>{
@@ -171,6 +189,11 @@ test('crush uses the reduced trained radius for hit boundaries, previews, effect
     close(s.events.find(e=>e.type==='crushPhase').radius,radius,'effect reports the actual snapshotted radius');
   }
   const s=traitArena([{hero:'behemoth',index:12}]);enemiesFor(s,[{}]);readyCast(s,'behemoth');
+  close(E.combatStats(s,s.board[12]).damage,44);close(E.power(s,s.board[12]),44);
+  const ranked=traitArena([{hero:'behemoth',index:12,rank:2}]);close(E.combatStats(ranked,ranked.board[12]).damage,44*2.35);
+  const crushHit=traitArena([{hero:'behemoth',index:12}]),[foe]=enemiesFor(crushHit,[{hp:1e9,progress:300}]);quiet(crushHit);
+  const before=foe.hp;readyCast(crushHit,'behemoth');advanceTo(crushHit,crushHit.time+1.3);
+  close(before-foe.hp,44*E.CRUSH.factor*E.CRUSH.hits);
   const legacy=JSON.parse(E.serialize(s));for(const v of legacy.volleys)delete v.radius;
   const migrated=E.restore(legacy);assert.ok(migrated);assert.ok(migrated.volleys.every(v=>v.radius===150));
   const bad=JSON.parse(E.serialize(s));bad.volleys[0].radius=900;assert.equal(E.restore(bad),null);
@@ -927,6 +950,100 @@ test('Cinderella hands off after its current winner is merged or sold; only the 
   assert.ok(E.restore(E.serialize(s)));
 });
 
+test('Cinderella bell uses her own 100% attack for every extra shot ratio, including save and Astea',()=>{
+  const arena=(mages=[],rank=1,level=0)=>{
+    const s=traitArena([{hero:'cinderella',index:12,rank:1},...mages.map((hero,i)=>({hero,index:[13,11,7,17][i],rank}))]);
+    s.upgrades.time_magician=level;
+    const pack=enemiesFor(s,[{hp:1e9,progress:1600},{hp:1e9,progress:1630}]);
+    scaleCinderella(s);
+    const knight=s.board[12];knight.clock=11;knight.cooldown=100;knight.windup=0;
+    return {s,knight,pack,mage:s.board[13]};
+  };
+  const expectBell=(pack,hp,mainUid)=>{
+    const main=pack.find(e=>e.uid===mainUid),near=pack.filter(e=>e.uid!==mainUid);
+    close(hp[pack.indexOf(main)]-main.hp,1000,'bell main');
+    for(const e of near){
+      const d=hp[pack.indexOf(e)]-e.hp;
+      if(d>0)close(d,300,'bell splash');
+    }
+  };
+  {
+    const {s,knight,pack}=arena();
+    const shot=launchNormal(s,knight);assert.equal(shot.bell,true);close(shot.bellPower,100);close(shot.damage,100);
+    const hp=pack.map(e=>e.hp);resolveNormal(s,shot);expectBell(pack,hp,shot.target);
+  }
+  for(const [rank,level,ratio] of [[1,0,.6],[4,0,.96],[5,0,1.08],[6,3,1.5]]){
+    const {s,knight,pack,mage}=arena(['time_magician'],rank,level);
+    close(extraScale(s,mage),ratio,`magician extra ${ratio}`);
+    const extras=magicianPulse(s,mage),bell=extras.find(shot=>shot.bell);
+    assert.ok(bell,`bell at extra ${ratio}`);close(bell.bellPower,100);close(bell.damage,100*ratio,'extra projectile keeps its ratio');
+    const hp=pack.map(e=>e.hp);resolveNormal(s,bell);expectBell(pack,hp,bell.target);
+    const leftover=extras.find(shot=>!shot.bell);assert.equal(leftover,undefined);
+  }
+  {
+    const {s,knight,pack}=arena();
+    s.buffs.echo=10;s.buffTotals.echo=10;knight.clock=10;
+    const first=launchNormal(s,knight),echo=s.shots.find(shot=>shot!==first&&shot.source===knight.uid);
+    assert.equal(first.bell,undefined);assert.equal(echo.bell,true);close(echo.bellPower,100);close(echo.damage,100*E.ULT_BUFF.echo.ratio);
+    const hp=pack.map(e=>e.hp);resolveNormal(s,echo);expectBell(pack,hp,echo.target);
+    const firstHp=pack.map(e=>e.hp);resolveNormal(s,first);
+    for(const [i,e] of pack.entries())close((firstHp[i]-e.hp)>0?firstHp[i]-e.hp:0,e.uid===first.target?100:0,'non-bell extra keeps ratio');
+  }
+  {
+    const {s,knight,pack,mage}=arena(['time_magician']);
+    s.buffs.echo=10;s.buffTotals.echo=10;knight.clock=11;
+    const extras=magicianPulse(s,mage),bell=extras.find(shot=>shot.bell),echo=extras.find(shot=>shot!==bell);
+    assert.ok(bell);assert.ok(echo);assert.equal(echo.bell,undefined);close(bell.bellPower,100);
+    close(echo.damage,100*extraScale(s,mage)*E.ULT_BUFF.echo.ratio);
+    const hp=pack.map(e=>e.hp);resolveNormal(s,bell);expectBell(pack,hp,bell.target);
+  }
+  {
+    const {s,knight,pack}=arena();
+    const shot=launchNormal(s,knight);assert.equal(shot.bell,true);
+    s.buffs.radiance=10;s.buffScale.radiance=1;
+    assert.ok(E.combatStats(s,knight).damage>100);
+    const flying=E.serialize(s),bad=JSON.parse(flying);bad.shots[0].bellPower=Infinity;assert.equal(E.restore(bad),null);
+    const restored=E.restore(flying);assert.ok(restored);assert.equal(restored.shots[0].bell,true);close(restored.shots[0].bellPower,100);
+    const liveHp=pack.map(e=>e.hp),savedPack=restored.enemies,savedHp=savedPack.map(e=>e.hp),savedShot=restored.shots[0];
+    resolveNormal(s,shot);resolveNormal(restored,savedShot);
+    expectBell(pack,liveHp,shot.target);expectBell(savedPack,savedHp,savedShot.target);
+  }
+  {
+    const s=traitArena([{hero:'cinderella',index:12}]);
+    const [boss]=enemiesFor(s,[{kind:'boss',hp:1e9,progress:1200}]);boss.boss='astea';boss.speed=0;boss.skillIn=99;
+    scaleCinderella(s);const knight=s.board[12];knight.clock=11;
+    const shot=launchNormal(s,knight);const hp=boss.hp;resolveNormal(s,shot);
+    close(hp-boss.hp,500,'Astea halves the bell');
+  }
+  {
+    const s=traitArena([{hero:'cinderella',index:12},{hero:'time_magician',index:13,rank:5}]);
+    enemiesFor(s,[{hp:1e9,progress:1600}]);scaleCinderella(s);
+    const mage=s.board[13],knight=s.board[12];knight.clock=0;
+    const extras=magicianPulse(s,mage),shot=extras[0];
+    assert.equal(shot.bell,undefined);close(shot.damage,100*extraScale(s,mage));
+    const hp=s.enemies[0].hp;resolveNormal(s,shot);close(hp-s.enemies[0].hp,shot.damage);
+  }
+  {
+    const s=traitArena([{hero:'cinderella',index:12},...[13,11,7,17].map(index=>({hero:'time_magician',index}))]);
+    enemiesFor(s,[{hp:1e9,progress:1600}]);scaleCinderella(s);
+    const knight=s.board[12];knight.clock=0;
+    let bells=0;
+    for(const index of [13,11,7,17]){
+      const extras=magicianPulse(s,s.board[index]);
+      bells+=extras.filter(shot=>shot.bell).length;
+      s.shots=s.shots.filter(shot=>shot.source!==knight.uid);
+    }
+    assert.equal(knight.clock,4);assert.equal(bells,0);
+  }
+  {
+    const s=traitArena([{hero:'cinderella',index:12},{hero:'time_magician',index:13}]);
+    enemiesFor(s,[{hp:1e9,progress:1600}]);scaleCinderella(s);s.buffs.midnight=10;
+    const knight=s.board[12];knight.clock=9;
+    const extras=magicianPulse(s,s.board[13]),bell=extras.find(shot=>shot.bell);
+    assert.ok(bell);const hp=s.enemies[0].hp;resolveNormal(s,bell);close(hp-s.enemies[0].hp,1000);
+  }
+});
+
 test('Zeke gains 40% attack power exactly when a living enemy reaches the last quarter of the path',()=>{
   const s=traitArena([{hero:'zeke',index:12}]),[enemy]=enemiesFor(s,[{progress:E.PATH_LENGTH*.75-1e-6}]),u=s.board[12];
   close(E.personalTrait(s,u).damageMultiplier,1);close(E.combatStats(s,u).cooldown,HERO.zeke.interval);
@@ -1195,6 +1312,45 @@ test('each ground hit creates an independently ticking field even for the same c
     const restored=E.restore(E.serialize(s));assert.ok(restored);assert.deepEqual(restored.zones,s.zones);
     close(E.combatStats(s,u).cooldown,HERO[hero].interval*(hero==='flame_sage'?1:1.15));
   }
+});
+
+test('Astea halves zone ticks including orbit, not burn poison or ultimates',()=>{
+  for(const hero of ['galaxy_whale','time_ruler','phantom','flame_sage','mushroom_king','cure_master']){
+    const run=boss=>{
+      const s=traitArena([{hero,index:12}]),[e]=enemiesFor(s,[boss?{kind:'boss',hp:1e9,progress:1200}:{hp:1e9,progress:1200}]);
+      if(boss){e.boss='astea';e.speed=0;e.skillIn=99;}
+      landZone(s,s.board[12],e);for(const z of s.zones)z.tick=0;s.board[12].disabled=100;
+      e.statusEffects=[];e.slowEffects=[];
+      const hp=e.hp;E.step(s,.001);return {s,e,dealt:hp-e.hp};
+    };
+    const grunt=run(false),boss=run(true);
+    assert.ok(Math.abs(boss.dealt-grunt.dealt*.5*(HERO[hero].bossDamage||1))<1e-6,hero+' zone tick');
+  }
+  {
+    const s=traitArena([{hero:'mushroom_king',index:12,rank:3}],{artifacts:['orbit']}),[e]=enemiesFor(s,[{kind:'boss',hp:1e9,progress:1200}]);
+    e.boss='astea';e.speed=0;e.skillIn=99;landZone(s,s.board[12],e);e.statusEffects=[];e.slowEffects=[];
+    const zone=s.zones.find(z=>z.orbit);assert.ok(zone);zone.tick=0;s.zones=s.zones.filter(z=>z.orbit);s.board[12].disabled=100;
+    const hp=e.hp;E.step(s,.001);
+    assert.ok(Math.abs(hp-e.hp-zone.damage*E.RELIC_VALUES.orbit.tick*.5*(HERO.mushroom_king.bossDamage||1))<1e-6,'orbit zone tick');
+  }
+  {
+    const burnOf=boss=>{
+      const s=traitArena([{hero:'flame_sage',index:12}]),[e]=enemiesFor(s,[boss?{kind:'boss',hp:1e9,progress:0}:{hp:1e9,progress:0}]);
+      if(boss){e.boss='astea';e.speed=0;e.skillIn=99;}
+      landZone(s,s.board[12],e);s.board[12].disabled=100;s.zones.forEach(z=>z.tick=0);E.step(s,.001);
+      s.zones=[];const hp=e.hp;E.step(s,1);return hp-e.hp;
+    };
+    assert.ok(Math.abs(burnOf(true)/burnOf(false)-(HERO.flame_sage.bossDamage||1))<1e-6,'burn DoT is not basicScale');
+  }
+  {
+    const ult=boss=>{
+      const s=traitArena([{hero:'jasmine',index:12}]),[e]=enemiesFor(s,[boss?{kind:'boss',hp:1e9,progress:1200}:{hp:1e9,progress:1200}]);
+      if(boss){e.boss='astea';e.speed=0;e.skillIn=99;}
+      quiet(s);const hp=e.hp;readyCast(s,'jasmine');return hp-e.hp;
+    };
+    assert.ok(Math.abs(ult(true)/ult(false)-(HERO.jasmine.bossDamage||1))<1e-6,'ultimate stays full');
+  }
+  assert.equal(BOSSES.astea.trait.includes('장판 피해 절반'),true);
 });
 
 test('orbit fields also overlap independently and the 75-field quota deterministically removes the oldest field',()=>{
@@ -1963,7 +2119,55 @@ test('toffee bloom does not double-count with ultimate power buffs',()=>{
   close(second-foe.hp,live*1.3*E.APPLEBOMB.factor);
 });
 
+test('twin echoes apple blooms 1.5s after the blast without extra bloom stacks or recasts',()=>{
+  const s=traitArena([{index:12,hero:'toffee_apple'}],{artifacts:['twin']});
+  const [foe]=enemiesFor(s,[{hp:1e9,progress:1800}]);
+  const base=E.combatStats(s,s.board[12]).damage;
+  readyCast(s,'toffee_apple');assert.equal(s.finishers.length,0,'placing does not echo');
+  const first=foe.hp;detonateApples(s,1000);const blast=first-foe.hp;
+  close(blast,base*E.APPLEBOMB.factor);assert.equal(s.toffeeBlooms,1);
+  const echo=s.finishers.find(f=>f.kind==='echo');assert.ok(echo);assert.equal(echo.hero,'toffee_apple');
+  close(echo.life,1.5);close(echo.damage,blast*E.RELIC_VALUES.twin.echo);
+  const t0=s.time;advanceTo(s,t0+1.49);assert.equal(foe.hp,first-blast);
+  const snap=E.serialize(s),saved=E.restore(snap);assert.ok(saved);assert.equal(saved.finishers.filter(f=>f.kind==='echo').length,1);
+  advanceTo(s,t0+1.5);advanceTo(saved,t0+1.5);
+  close(first-foe.hp,blast+echo.damage,'echo is flat 120% of the blast');
+  assert.equal(s.toffeeBlooms,1);assert.equal(s.finishers.some(f=>f.kind==='echo'),false);
+  assert.equal(E.serialize(saved),E.serialize(s));
+  const none=traitArena([{index:12,hero:'toffee_apple'}]);const [plain]=enemiesFor(none,[{hp:1e9,progress:1800}]);
+  const plainAtk=E.combatStats(none,none.board[12]).damage;readyCast(none,'toffee_apple');const plainHp=plain.hp;detonateApples(none,1000);
+  close(plainHp-plain.hp,plainAtk*E.APPLEBOMB.factor);assert.equal(none.finishers.length,0);
+  const strong=traitArena([{index:12,hero:'toffee_apple'}],{artifacts:['twin']});strong.relicLevels={twin:3};
+  const [tank]=enemiesFor(strong,[{hp:1e9,progress:1800}]);readyCast(strong,'toffee_apple');
+  const before=tank.hp;detonateApples(strong,1000);const hit=before-tank.hp;
+  close(strong.finishers.find(f=>f.kind==='echo').damage,hit*E.RELIC_VALUES.twin.echo*relicScale(3));
+  const crowd=traitArena([{index:12,hero:'toffee_apple'}],{artifacts:['twin']});
+  const pack=enemiesFor(crowd,[{hp:1e9,progress:1000},{hp:1e9,progress:1010},{hp:1e9,progress:1020}]);
+  readyCast(crowd,'toffee_apple');detonateApples(crowd,1000);
+  assert.equal(crowd.toffeeBlooms,1);assert.equal(crowd.finishers.filter(f=>f.kind==='echo').length,pack.length);
+  const dead=traitArena([{index:12,hero:'toffee_apple'}],{artifacts:['twin']});
+  const [victim]=enemiesFor(dead,[{hp:10,progress:1800}]);readyCast(dead,'toffee_apple');detonateApples(dead,1000);
+  assert.ok(victim.hp<=0);assert.equal(dead.finishers.some(f=>f.kind==='echo'),false);
+  const later=traitArena([{index:12,hero:'toffee_apple'}],{artifacts:['twin']});
+  const [doomed]=enemiesFor(later,[{hp:1e9,progress:1800}]);readyCast(later,'toffee_apple');
+  detonateApples(later,1000);assert.ok(later.finishers.some(f=>f.kind==='echo'));
+  doomed.hp=1;advanceTo(later,later.time+1.5);assert.ok(doomed.hp<=0);assert.equal(later.finishers.length,0);
+  const double=traitArena([{index:12,hero:'toffee_apple'}],{artifacts:['twin']});
+  enemiesFor(double,[{hp:1e9,progress:1800},{hp:1e9,progress:1810}]);
+  readyCast(double,'toffee_apple');double.board[12].disabled=0;readyCast(double,'toffee_apple');
+  double.bombs[0].progress=1000;double.bombs[1].progress=1000;for(const e of double.enemies)e.progress=1000;
+  hold(double);E.step(double,.05);
+  assert.equal(double.toffeeBlooms,2);assert.equal(double.finishers.filter(f=>f.kind==='echo').length,4);
+  const sold=traitArena([{index:12,hero:'toffee_apple'},{index:0,hero:'siren'}],{artifacts:['twin']});
+  const [left]=enemiesFor(sold,[{hp:1e9,progress:1800}]);readyCast(sold,'toffee_apple');sold.bombs[0].progress=1000;
+  const waiting=JSON.parse(E.serialize(sold));delete waiting.bombs[0].source;delete waiting.bombs[0].rank;
+  assert.ok(E.restore(waiting));
+  assert.ok(E.sell(sold,12).ok);left.progress=1000+E.APPLEBOMB.trigger;hold(sold);const hp=left.hp;E.step(sold,.05);
+  const soldEcho=sold.finishers.find(f=>f.kind==='echo');assert.ok(soldEcho);close(soldEcho.damage,(hp-left.hp)*E.RELIC_VALUES.twin.echo);
+});
+
 test('requested hero and relic numbers, rumi dream form, and detective boss-first targeting',()=>{
+  assert.equal(HERO.behemoth.damage,44);
   assert.equal(E.ULT_BUFF.haste.speed,.35);assert.equal(E.ULT_BUFF.march.seconds,10);
   assert.equal(E.ULT_BUFF.awaken.power,.4);assert.equal(E.ULT_BUFF.radiance.seconds,10);
   assert.equal(E.ULT_BUFF.harmony.power,.25);assert.equal(E.ULT_BUFF.harmony.speed,.25);
