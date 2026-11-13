@@ -45,7 +45,14 @@ try{
     await page.goto(url);await page.evaluate(({key,profile})=>localStorage.setItem(key,JSON.stringify(profile)),{key:SAVE_KEY,profile});
     await page.goto(url);await page.locator('.scene-partner').waitFor();
     await page.locator('[data-action="library"]').click();
-    await page.locator('[data-library-art]').first().click();
+    // Seven same-size gallery cards; the gallery opens on the constellation being earned, a side card centres first.
+    assert.equal(await page.locator('.gal-card').count(),CONSTELLATIONS.length);
+    const boxes=await page.locator('.gal-card').evaluateAll(es=>es.map(e=>e.offsetWidth+'x'+e.offsetHeight));
+    assert.equal(new Set(boxes).size,1,`gallery cards share one size: ${boxes}`);
+    assert.equal(await page.locator('.gal-card.on').getAttribute('data-gallery-card'),'1');
+    await page.locator('[data-gallery-card="0"]').click();await page.waitForFunction(()=>document.querySelector('.gal-card.on')?.dataset.galleryCard==='0');
+    assert.equal(await page.locator('#overlay').isHidden(),true,'a side card centres before it opens');
+    await page.locator('.gal-card.on').click();
     if(bright)await ink(page,'.art-reveal figcaption');
     await shot(page,`${skin}-library-art`);await close(page);
     await page.locator('.tabbar [data-library-tab="lecture"]').click();
