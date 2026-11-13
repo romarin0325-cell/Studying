@@ -203,6 +203,7 @@ export function migrateDaily(p){
 export function migrateBond(p){
   if(p.heroes&&typeof p.heroes==='object')for(const e of Object.values(p.heroes))if(e&&typeof e==='object'){if(e.bondXp===undefined)e.bondXp=0;if(Number.isSafeInteger(e.bond)&&e.bond>BOND_MAX)e.bond=BOND_MAX;if(e.bond===BOND_MAX)e.bondXp=0;}
   if(p.gifts===undefined)p.gifts={candy:0,letter:0,bouquet:0};if(p.lobby===undefined)p.lobby=null;
+  if(p.lobby!==null&&p.lobby!==p.partner)p.lobby=null;
   if(p.daily&&typeof p.daily==='object'&&p.daily.bouquet===undefined)p.daily.bouquet=false;
 }
 // Bosses a player has met: the weekly and monthly lineups only use these (stage k has boss k).
@@ -411,7 +412,7 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='enhance'){
     const table=args.kind==='relic'?p.relics:p.heroes,e=table[args.id];if(!e?.owned||p.active)return no('원정 종료 후 강화할 수 있습니다.');const cost=args.kind==='relic'?relicCost(ARTIFACT[args.id].rarity,e.enhance):duplicateCost(e.enhance);if(!Number.isSafeInteger(cost)||e.copies<cost)return no(`중복 ${args.kind==='relic'?'유물':'동료'}이 ${cost}개 필요합니다.`);e.copies-=cost;e.enhance++;return {ok:true,message:`강화 +${e.enhance} 달성`};
   }
-  if(action==='partner'){if(!p.heroes[args.id]?.owned)return no('아직 획득하지 못한 동료입니다.');p.partner=args.id;return {ok:true};}
+  if(action==='partner'){if(!p.heroes[args.id]?.owned)return no('아직 획득하지 못한 동료입니다.');if(p.partner!==args.id)p.lobby=null;p.partner=args.id;return {ok:true};}
   if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘 인사는 이미 완료했습니다.');p.petDay=day;const hearts=addBond(p.heroes[p.partner],GREETING_POINTS);p.dreams+=40;did('greet');return {ok:true,hearts,message:`인사 완료 · 꿈의결정 +40${hearts?' · 호감도 상승!':''}`};}
   if(action==='gift'){
     const e=p.heroes[args.id],gift=args.gift;if(!e?.owned||!GIFT_IDS.includes(gift))return no('선물할 수 없습니다.');if(p.gifts[gift]<1)return no(`${GIFTS[gift].name}이(가) 없습니다.`);if(e.bond>=BOND_MAX)return no('호감도가 이미 최고예요.');

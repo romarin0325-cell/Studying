@@ -2,6 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HEROES} from '../src/content.js';
 import {PARTNER_LINES,talkLines,greetLine,CLOSE_BOND} from '../src/lines.js';
+import {REQUEST} from '../src/preview/requests.js';
+
+test('Siren asks her companion to listen from the front seat',()=>{
+  assert.equal(REQUEST['siren-1'].arrive.at(-1),'대신 당신은 맨 앞자리에서 들어 주셔야 해요!');
+  assert.ok(REQUEST['siren-1'].arrive.every(line=>!line.includes('밀랍')));
+});
 
 test('every companion has its own lobby lines: three taps, a close line from six hearts, two greetings',()=>{
   assert.equal(Object.keys(PARTNER_LINES).length,HEROES.length);

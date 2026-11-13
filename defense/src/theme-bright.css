@@ -428,6 +428,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,canvas:focus-visi
 .q-dots i{background:#E6DFD0}
 .q-dots i.on{background:#22BCD9;box-shadow:none}
 .term-group,.lec-h{color:#1F3F86}
+.lib,.sheet[data-kind=lecture],.sheet[data-kind=library-art]{--gold-hi:#1F3F86}
 .lec-core{color:#1E2F5C!important;background:linear-gradient(90deg,rgba(31,63,134,.12),rgba(31,63,134,.03));border-left-color:#22BCD9}
 .lec-box{background:#FBF7F0;border-color:rgba(30,47,92,.1)}
 .lec-box.point{background:#FFF8EC;border-color:rgba(255,178,74,.4)}
