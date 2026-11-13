@@ -1,7 +1,7 @@
 import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN,MAX_RANK} from './content.js';
 import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
-import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward} from './monthly.js';
+import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED,SOLO} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
@@ -24,7 +24,7 @@ export function createProfile(now=Date.now(),{trial=false}={}){
   return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(SOLO),beginner:SOLO?null:freshBeginner(now),firstTen:SOLO,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
-    draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
+    draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,weeklyRuns:0,weeklyBest:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
     monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
     daily:freshDaily(now),study:freshStudy(),settings:{sound:true,auto:true,reduced:false,cutin:true,quality:'standard'},active:null,results:[]});
 }
@@ -55,6 +55,18 @@ export function migrateStudy(p){
 }
 // Gift basket: the clock starts when an old save first opens (nothing is owed for the time before).
 // Late companions (see LATE_COMPANIONS) the player has already been told about by the stage 45 announcement.
+// This week's draft: entries used and the best record (whose reward is what the week has paid).
+export function weeklyState(p,now){const own=p.weekly===calendar(now).week,runs=own?p.weeklyRuns:0;return {runs,left:WEEKLY_ENTRIES-runs,best:own?p.weeklyBest:null};}
+const validWeeklyBest=b=>b===null||!!b&&typeof b==='object'&&integer(b.round,CHALLENGE_WAVES)&&typeof b.won==='boolean'&&!!TIERS[b.tier]&&integer(b.reward)&&b.reward>0;
+// Saves from the one-entry week: the entry counts as one run and its result becomes the week's best. A draft still in
+// progress has paid nothing yet. A settled entry whose receipt has left the 30-result history paid an unknown amount,
+// so that week stays closed as the old rule had it (no second full payment).
+export function migrateWeekly(p){
+  if(p.weeklyRuns!==undefined)return;p.weeklyRuns=typeof p.weekly==='string'?1:0;p.weeklyBest=null;if(!p.weeklyRuns||p.active?.mode==='weekly')return;
+  const r=Array.isArray(p.results)?p.results.find(r=>r?.mode==='weekly'&&integer(r.at)&&calendar(r.at).week===p.weekly):null;
+  if(r&&integer(r.round)&&integer(r.reward)&&r.reward>0)p.weeklyBest={round:Math.min(CHALLENGE_WAVES,r.round),won:!!r.won,tier:TIERS[r.tier]?r.tier:'easy',reward:r.reward};
+  else p.weeklyRuns=WEEKLY_ENTRIES;
+}
 export function migrateNotices(p){if(!Array.isArray(p.noticeLate))p.noticeLate=[];}
 // The newly joined companions the announcement has not shown yet. Behemoth is a guardian and arrives through its own reveal.
 export const lateNoticeIds=p=>lateOpen(p.cleared)?LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)&&!(p.noticeLate||[]).includes(id)):[];
@@ -90,6 +102,7 @@ export function validateProfile(p){
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
   if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly','oath','twin'].includes(r.mode)||!integer(r.stage,MAIN_STAGES)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
   for(const k of ['weekly','monthly'])if(p[k]!==null&&(typeof p[k]!=='string'||!/^\d{4}-\d{2}(?:-\d{2})?$/.test(p[k])))return false;
+  if(!integer(p.weeklyRuns,WEEKLY_ENTRIES)||p.weekly===null&&(p.weeklyRuns!==0||p.weeklyBest!==null)||!validWeeklyBest(p.weeklyBest))return false;
   if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly','oath','twin'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
   const a=p.active;
   if(a){
@@ -99,7 +112,7 @@ export function validateProfile(p){
       if(!Array.isArray(a.draft)||a.draft.length>TEAM_SIZE||new Set(a.draft).size!==a.draft.length||a.draft.some(id=>!a.draftPool.includes(id))||a.boon>a.draft.length)return false;
       if(!Array.isArray(a.offers)||a.offers.length!==(a.draft.length===TEAM_SIZE?0:2)||a.offers.some(o=>!o||!a.draftPool.includes(o.id)||a.draft.includes(o.id)||!['focus','spark'].includes(o.boon)))return false;
       if(a.draft.length<TEAM_SIZE&&a.draftPool.length-a.draft.length>1&&a.offers[0].id===a.offers[1].id)return false;
-      if(a.draft.length===TEAM_SIZE&&a.deck.join()!==a.draft.join()||a.draft.length<TEAM_SIZE&&a.run!==null||p.weekly!==calendar(a.started).week)return false;
+      if(a.draft.length===TEAM_SIZE&&a.deck.join()!==a.draft.join()||a.draft.length<TEAM_SIZE&&a.run!==null||p.weekly!==calendar(a.started).week||p.weeklyRuns<1)return false;
     }else if(a.boon!==0)return false;
     if(a.mode==='oath'&&(oathConflict(a.oaths)||oathDeckProblem(a.oaths,a.deck)||!TIERS[a.tier]))return false;
     if(a.mode==='twin'&&(!TWIN_SIDES.includes(a.side)||!TIERS[a.tier]||!Array.isArray(a.relics)||a.relics.length>3||new Set(a.relics).size!==a.relics.length||a.relics.some(id=>!p.relics[id]?.owned)))return false;
@@ -163,7 +176,7 @@ export function migrateMemories(p){
 export function migrateTwin(p){
   if(p?.twin&&typeof p.twin==='object'&&!Array.isArray(p.twin)&&Object.hasOwn(p.twin,'set'))delete p.twin.set;
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateBeginner(p);migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
+export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateBeginner(p);migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);migrateWeekly(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
 export function migrateBeginner(p){const legacy=!(p.cleared<=2&&p.draws===0);if(p.ftue===undefined)p.ftue=freshFtue(legacy);if(p.beginner===undefined)p.beginner=legacy?null:freshBeginner(Date.now());if(p.firstTen===undefined)p.firstTen=legacy;if(p.eventSeen===undefined)p.eventSeen='';if(p.eventFlip===undefined)p.eventFlip=false;if(p.trial===undefined)p.trial=false;}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
@@ -473,8 +486,8 @@ export function command(p,action,args={},now=Date.now()){
     const c=calendar(now),stage=mode==='weekly'&&p.cleared>=TIERS.easy.unlock?weeklyStage(p,now):args.stage||Math.min(MAIN_STAGES,p.cleared+1);if(!integer(stage,MAIN_STAGES)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
     if(mode!=='main'&&p.cleared<TIERS.easy.unlock)return no(`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`);
     const tier=mode==='main'?null:args.tier||'easy';if(mode!=='main'&&(!TIERS[tier]||p.cleared<TIERS[tier].unlock))return no(`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`);
-    if(mode==='weekly'&&p.weekly===c.week)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
-    if(mode==='weekly')p.weekly=c.week;
+    if(mode==='weekly'&&weeklyState(p,now).left<=0)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
+    if(mode==='weekly'){if(p.weekly!==c.week){p.weekly=c.week;p.weeklyRuns=0;p.weeklyBest=null;}p.weeklyRuns++;}
     random(p);
     p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(p.equipped.map(id=>[id,relicLevel(p.relics[id])])),...(tier?{tier}:{})};
     if(mode==='weekly'){p.active.draftPool=available(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
@@ -490,8 +503,12 @@ export function command(p,action,args={},now=Date.now()){
     if(a.mode==='main'){
       if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
       p.dust+=args.won?40+a.stage*8:12;
-    }else if(a.mode==='weekly')reward=weeklyReward(a.tier||'easy',Math.min(CHALLENGE_WAVES,args.round),!!args.won);
-    let record=null,newBest=false,score=0,bands=[],side=null,total=0,shownRound=0;
+    }
+    let record=null,newBest=false,score=0,bands=[],side=null,total=0,shownRound=0,earned=0,paidBefore=0;
+    if(a.mode==='weekly'){
+      const tier=a.tier||'easy',round=Math.min(CHALLENGE_WAVES,args.round);earned=weeklyReward(tier,round,!!args.won);paidBefore=p.weeklyBest?.reward||0;
+      if(earned>paidBefore){reward=earned-paidBefore;newBest=true;p.weeklyBest={round,won:!!args.won,tier,reward:earned};}
+    }
     if(a.mode==='monthly'){
       record={period:calendar(now).month,token:a.token,round:args.round,damage:args.damage??0,seconds:args.seconds??0,at:now,deck:[...a.deck],tier:a.tier||'easy'};
       if(!validRecord(record))return no('전투 기록을 확인하세요.');
@@ -504,7 +521,7 @@ export function command(p,action,args={},now=Date.now()){
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
     const requestsDone=args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
     p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;
-    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
+    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
   }
   if(action==='claimMonthly'){
     const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 만월 토벌전 최고 기록을 확인하세요.');

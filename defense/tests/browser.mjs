@@ -11,6 +11,7 @@ import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
 import {allQuestions} from '../src/quiz.js';
 import {eventWindow} from '../src/preview/season.js';
+import {monthlyReward} from '../src/monthly.js';
 // Companions announced at stage 45 (the roster grows; counts come from the data, not from the day the test was written).
 const LATE_NEW=LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).length;
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -158,6 +159,9 @@ try{
   execFileSync(process.execPath,['defense/scripts/build.mjs','--solo'],{cwd:path.dirname(game),stdio:'pipe'});
   execFileSync(process.execPath,['defense/scripts/build.mjs','--web'],{cwd:path.dirname(game),stdio:'pipe'});
   const single=await boot(390,844,null,false,pathToFileURL(path.join(game,'test-results/solo/StarGardenDefenseSolo.html')).href);
+  // A fresh solo save opens every feature, so on an event week (any real date since 2026-11-09) the weekly event popup
+  // arrives on the first home screen; close it before using the home buttons.
+  await single.page.waitForTimeout(700);if(await single.page.locator('#sheet[data-kind="event"]').isVisible())await close(single.page);
   assert.equal((await profile(single.page)).deck.length,1);await single.page.locator('[data-action="prepare"]').click();await single.page.locator('#sheet-footer [data-action="team"]').click();assert.equal(await single.page.locator('#sheet .five-line .team-slot').count(),1);await single.page.locator('[data-team-pick="star_boy"]').first().click();await single.page.locator('.choose-list [data-team-pick="snow_rabbit"]').click();await single.page.locator('[data-action="save-team"]').click();assert.deepEqual((await profile(single.page)).deck,['snow_rabbit']);
   await single.page.locator('[data-begin="main"]').click();await single.page.locator('#arena').waitFor();assert.equal(await single.page.locator('[data-skill]').count(),1);await single.page.locator('[data-action="summon-battle"]').click();assert.ok(await single.page.evaluate(()=>window.STAR_GARDEN.battle.board.filter(Boolean).every(u=>u.hero==='snow_rabbit')));await shot(single.page,'solo-battle',390,844);await single.page.locator('[data-action="leave"]').click();await single.page.locator('[data-action="save-leave"]').click();await reload(single);await single.page.locator('[data-action="resume"]').click();assert.equal(await single.page.evaluate(()=>window.STAR_GARDEN.battle.deck.join()),'snow_rabbit');await single.context.close();
   const folder=await boot(390,844,(()=>{const p=createProfile(NOW);p.heroes.star_boy.bond=10;return p;})(),'avif',pathToFileURL(path.join(game,'test-results/web/StarGardenDefense.html')).href);assert.equal(await folder.page.evaluate(()=>window.__memorialAssignments.length),0);await folder.page.locator('[data-action="bond"]').click();await folder.page.locator('.bond-memory').click();await folder.page.locator('#memory-art img').waitFor();assert.match(await folder.page.locator('#memory-art img').getAttribute('src'),/\.webp$/);await shot(folder.page,'web-memorial-fallback',390,844);await close(folder.page);assert.equal(await folder.page.locator('img[data-memorial]').count(),0);await folder.context.close();
@@ -360,7 +364,11 @@ try{
   assert.ok(!(await profile(page)).active.deck.includes('queen'));
   await page.locator('[data-action="leave"]').click();await page.locator('[data-action="retire"]').click();await page.locator('[data-action="confirm-retire"]').click();
   assert.equal((await profile(page)).active,null);assert.ok((await profile(page)).weekly);
-  assert.equal((await profile(page)).results[0].mode,'weekly');
+  assert.equal((await profile(page)).results[0].mode,'weekly');assert.equal((await profile(page)).weeklyRuns,1);
+  // Three entries a week: the result offers another run and the card shows two of three gems left.
+  await page.locator('#sheet[data-kind="result"] [data-action="weekly-retry"]').waitFor();await page.locator('#sheet [data-action="close"]').first().click();
+  assert.equal(await page.locator('.mode.weekly .entry-pass').getAttribute('aria-label'),'남은 입장 2/3');
+  assert.equal(await page.locator('.mode.weekly [data-action="prepare-mode"]').isDisabled(),false);
   await test.context.close();
 
   const monthlyProfile=createProfile(NOW);monthlyProfile.cleared=3;monthlyProfile.settings.auto=false;
@@ -375,11 +383,11 @@ try{
   assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.equal((await profile(monthly.page)).dreams,600);
   assert.equal((await profile(monthly.page)).monthly,null);assert.ok((await profile(monthly.page)).monthlyBest);
   await shot(monthly.page,'monthly-record',390,844);await monthly.page.locator('#sheet-body [data-action="monthly-claim"]').click();
-  assert.match(await monthly.page.locator('#sheet-body').innerText(),/한 번/);await monthly.page.locator('[data-confirm-monthly]').click();
-  assert.equal((await profile(monthly.page)).dreams,730);assert.ok((await profile(monthly.page)).monthly);
+  assert.match(await monthly.page.locator('#sheet-body').innerText(),/한 번/);const monthlyPaid=600+monthlyReward((await profile(monthly.page)).monthlyBest);await monthly.page.locator('[data-confirm-monthly]').click();
+  assert.equal((await profile(monthly.page)).dreams,monthlyPaid);assert.ok((await profile(monthly.page)).monthly);
   await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
-  assert.equal((await profile(monthly.page)).dreams,730,'a second attempt cannot pay again');await monthly.context.close();
+  assert.equal((await profile(monthly.page)).dreams,monthlyPaid,'a second attempt cannot pay again');await monthly.context.close();
 
   // Live duration UI uses restored engine state, then a real cast and pause.
   const sustained=createProfile(NOW);sustained.settings.auto=false;sustained.settings.sound=false;command(sustained,'begin',{mode:'main',stage:1},NOW);const buffRun=createBattle(sustained);
@@ -401,7 +409,7 @@ try{
 
   const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
   const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);assert.equal((await profile(record.page)).dreams,600);
-  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,1003);await record.context.close();
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);const recordPaid=600+monthlyReward((await profile(record.page)).monthlyBest);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,recordPaid);await record.context.close();
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.
