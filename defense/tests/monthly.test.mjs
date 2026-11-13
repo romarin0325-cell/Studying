@@ -3,10 +3,32 @@ import assert from 'node:assert/strict';
 import {createProfile,command,parseProfile,ProfileStore} from '../src/profile.js';
 import {calendar} from '../src/economy.js';
 import {currentRecord,monthlyReward} from '../src/monthly.js';
+import {TIERS,TIER_IDS,CHALLENGE_WAVES} from '../src/content.js';
+import {wavePlan,challengeBase} from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-05T03:00:00Z'),NEXT=Date.parse('2026-11-01T00:00:00Z');
 const ready=()=>{const p=createProfile(NOW);p.cleared=3;return p;};
 const act=(p,id,args={},time=NOW)=>{const r=command(p,id,args,time);assert.ok(r.ok,r.message);return r;};
 function attempt(p,round,damage=0,time=NOW){act(p,'begin',{mode:'monthly',stage:4},time);const token=p.active.token;return act(p,'settle',{token,round,damage,seconds:37},time);}
+
+test('monthly health rises ten percent and rewards rise modestly without reversing progression',()=>{
+  const previousHp={easy:.33,hard:.33,abyss:.385};
+  assert.deepEqual(TIER_IDS.map(tier=>monthlyReward({tier,round:CHALLENGE_WAVES})),[1247,2206,3261]);
+  for(const tier of TIER_IDS){
+    let reward=-1,hp=0;
+    for(let round=0;round<=CHALLENGE_WAVES;round++){
+      const next=monthlyReward({tier,round});
+      const old=Math.round((100+35*round+(round===CHALLENGE_WAVES?150:0))*TIERS[tier].reward);
+      assert.ok(next>reward);assert.ok(next>old&&next<=Math.ceil(old*1.11));reward=next;
+      if(!round)continue;
+      const base=challengeBase(round,tier).base*30,actual=wavePlan(round,0,'monthly',tier).sequence[0].hp;
+      assert.ok(Math.abs(actual-base*previousHp[tier]*1.1)<=.5);
+      assert.ok(actual>hp);hp=actual;
+      const index=TIER_IDS.indexOf(tier);
+      if(index){const lower=TIER_IDS[index-1];assert.ok(next>monthlyReward({tier:lower,round}));assert.ok(actual>wavePlan(round,0,'monthly',lower).sequence[0].hp);}
+    }
+    assert.equal(monthlyReward({tier,round:CHALLENGE_WAVES+5}),reward,'completed rewards cap at eighteen bosses');
+  }
+});
 
 test('monthly entries are unlimited, only confirmed rewards pay, and the best result survives weaker attempts',()=>{
   const p=ready();attempt(p,3,300);const first=p.monthlyBest.token;attempt(p,3,500);attempt(p,2,9000);

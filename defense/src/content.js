@@ -66,9 +66,9 @@ export const TIERS=Object.freeze({
   // lateAt parks the late add-on on the last waves. weeklyLate (see wavePlan) raises every
   // weekly enemy the same way, so a full clear stays a stretch after the board has snowballed.
   // It is small enough that hard stays above easy without a weeklyLate of its own.
-  easy:{name:'쉬움',unlock:3,from:12,to:42,late:1,lateAt:6,boss:1.05,weeklyLate:.4,monthly:.33,reward:1.3},
-  hard:{name:'어려움',unlock:36,from:40,to:70,late:.9,boss:1.15,monthly:.33,reward:2.3},
-  abyss:{name:'심연',unlock:72,from:68,to:88,late:1,boss:1.25,monthly:.385,reward:3.4},
+  easy:{name:'쉬움',unlock:3,from:12,to:42,late:1,lateAt:6,boss:1.05,weeklyLate:.4,monthly:.363,reward:1.3},
+  hard:{name:'어려움',unlock:36,from:40,to:70,late:.9,boss:1.15,monthly:.363,reward:2.3},
+  abyss:{name:'심연',unlock:72,from:68,to:88,late:1,boss:1.25,monthly:.4235,reward:3.4},
 });
 export const TIER_IDS=Object.keys(TIERS);
 export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;

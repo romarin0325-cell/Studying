@@ -21,7 +21,7 @@ import {Art,Renderer} from './combat/render.js';
 import {warmUltimates} from './combat/ur-warm.js';
 import {Sound} from './combat/audio.js';
 import {icon} from './icons.js';
-import {currentRecord,monthlyReward,weeklyReward} from './monthly.js';
+import {currentRecord,monthlyReward,weeklyReward,MONTHLY_REWARDS} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
@@ -984,7 +984,7 @@ function modeCard(kind){if(kind==='oath')return oathCard();if(kind==='twin')retu
 function modeInfo(kind){if(kind==='oath'||kind==='twin'){previewInfo(kind);return;}
   const t=TIERS[challengeTier]||TIERS.easy;
   const weekly=`<ul class="notes"><li>생명력이 0이 되면 끝나고, 넘긴 웨이브만큼 보상을 받아요. 웨이브당 ${gem(Math.round(25*t.reward))}.</li><li>3웨이브마다 이번 주의 보스가 나와요.${metBosses(p())<9?` 메인 스테이지에서 만난 보스 ${metBosses(p())}종만 나와요.`:''}</li><li>어려움은 스테이지 ${TIERS.hard.unlock}, 심연은 스테이지 ${TIERS.abyss.unlock} 클리어 후 열려요.</li><li>중단해도 같은 입장으로 이어할 수 있어요. 파견 중인 동료는 참여할 수 없어요.</li><li>기간은 한국·일본 시간(UTC+9) 기준이에요.</li></ul>`;
-  const monthly=`<ul class="notes"><li>제한 시간은 없고, 보스가 코어에 닿으면 끝나요.</li><li>난이도가 높을수록, 같은 난이도에서는 격파 수와 총 피해가 클수록 좋은 기록이에요.</li><li>보상은 꿈의결정 100 + 격파 보스당 35, 완주 시 +150에 난이도 배율(×${t.reward})을 곱해요. 한 달에 한 번, 원하는 때에 확정해요.</li><li>매월 1일(UTC+9) 초기화되고 역대 최고 기록은 남아요.</li></ul>${monthlyRecordPanel()}`;
+  const monthly=`<ul class="notes"><li>제한 시간은 없고, 보스가 코어에 닿으면 끝나요.</li><li>난이도가 높을수록, 같은 난이도에서는 격파 수와 총 피해가 클수록 좋은 기록이에요.</li><li>보상은 꿈의결정 ${MONTHLY_REWARDS.base} + 격파 보스당 ${MONTHLY_REWARDS.perBoss}, 완주 시 +${MONTHLY_REWARDS.clear}에 난이도 배율(×${t.reward})을 곱해요. 한 달에 한 번, 원하는 때에 확정해요.</li><li>매월 1일(UTC+9) 초기화되고 역대 최고 기록은 남아요.</li></ul>${monthlyRecordPanel()}`;
   show(kind==='weekly'?'유성 드래프트':'만월 토벌전','규칙',kind==='weekly'?weekly:monthly,`<button class="primary wide" data-action="close">확인</button>`,'info');
 }
 function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind==='oath'){oathPrepare();return;}if(kind==='twin'){twinFormation();return;}

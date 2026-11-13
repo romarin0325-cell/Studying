@@ -193,6 +193,7 @@ test('starlight oath pays each band once, ignores a failed run and keeps an olde
   p.cleared=2;assert.match(command(p,'begin',{mode:'oath',oaths:[]},NOW).message,/스테이지 3/);p.cleared=10;
   assert.match(command(p,'begin',{mode:'oath',tier:'hard',oaths:[]},NOW).message,/어려움/);p.cleared=90;
   assert.match(command(p,'begin',{mode:'oath',oaths:['tough1','tough2']},NOW).message,/함께 걸 수 없습니다/);
+  assert.match(command(p,'begin',{mode:'oath',oaths:['nobeam','rabbits']},NOW).message,/함께 걸 수 없습니다/);
   assert.match(command(p,'begin',{mode:'oath',oaths:['lowstar'],deck:['zeke',...LEFT.slice(0,4)]},NOW).message,/C·R/);
   assert.match(command(p,'begin',{mode:'oath',oaths:['nobeam'],deck:['silver_rabbit',...LEFT.slice(0,4)]},NOW).message,/관통/);
   assert.match(command(p,'begin',{mode:'oath',oaths:['rabbits']},NOW).message,/은토끼·눈토끼·밤토끼/);
@@ -206,24 +207,24 @@ test('starlight oath pays each band once, ignores a failed run and keeps an olde
   assert.equal(fail.score,0);assert.equal(fail.record,null);assert.equal(fail.newBest,false);assert.deepEqual(fail.bands,[]);assert.equal(fail.reward,0);assert.equal(p.dreams,dreams);
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:first});
   const win=ok(p,'settle',{token:p.active.token,round:9,won:true,deck:['zeke']});
-  assert.equal(win.score,oathScore('easy',first));assert.equal(win.score,11);assert.equal(win.newBest,true);
-  assert.deepEqual(win.bands,[{score:5,reward:100},{score:10,reward:120}]);assert.equal(win.reward,220);
-  assert.equal(p.dreams,dreams+220);assert.deepEqual(win.record.deck,LEFT);assert.equal(p.oath.paid,2);assert.equal(validateProfile(p),true);
+  assert.equal(win.score,oathScore('easy',first));assert.equal(win.score,10);assert.equal(win.newBest,true);
+  assert.deepEqual(win.bands,[{score:5,reward:130},{score:10,reward:150}]);assert.equal(win.reward,280);
+  assert.equal(p.dreams,dreams+280);assert.deepEqual(win.record.deck,LEFT);assert.equal(p.oath.paid,2);assert.equal(validateProfile(p),true);
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:first});
   const again=ok(p,'settle',{token:p.active.token,round:9,won:true});
-  assert.equal(again.newBest,false);assert.deepEqual(again.bands,[]);assert.equal(p.dreams,dreams+220);
+  assert.equal(again.newBest,false);assert.deepEqual(again.bands,[]);assert.equal(p.dreams,dreams+280);
   const more=['lowstar','nobeam','drought','heavy','untrained','purse'];
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:more});
   const better=ok(p,'settle',{token:p.active.token,round:9,won:true});
-  assert.equal(better.score,19);assert.deepEqual(better.bands,[{score:15,reward:150}]);assert.equal(p.dreams,dreams+370);assert.equal(p.oath.lifetime.score,19);
+  assert.equal(better.score,18);assert.deepEqual(better.bands,[{score:15,reward:180}]);assert.equal(p.dreams,dreams+460);assert.equal(p.oath.lifetime.score,18);
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:first});
   const lost=ok(p,'settle',{token:p.active.token,round:1,won:false});
-  assert.equal(lost.score,0);assert.equal(p.oath.best.score,19);assert.equal(p.dreams,dreams+370);
+  assert.equal(lost.score,0);assert.equal(p.oath.best.score,18);assert.equal(p.dreams,dreams+460);
   const frozen=JSON.stringify(p);oathState(p,NOW);assert.equal(JSON.stringify(p),frozen);
 });
 
 test('event rewards and settlement follow the starting season',()=>{
-  assert.equal(OATH_BANDS.reduce((n,b)=>n+b.reward,0),2200);
+  assert.equal(OATH_BANDS.reduce((n,b)=>n+b.reward,0),2360);
   assert.deepEqual(TIER_IDS.map(t=>[0,1,2].map(i=>twinBandReward(t,i))),[[98,124,189],[173,218,334],[255,323,493]]);
   const boundary=Date.parse('2026-10-11T15:00:00Z'),before=boundary-60000,after=boundary+60000;
   for(const mode of ['oath','twin']){
@@ -232,7 +233,7 @@ test('event rewards and settlement follow the starting season',()=>{
     const begin=mode==='oath'?{mode,tier:'hard',oaths:['drought']}:{mode,tier:'easy',side:'right'};
     ok(p,'begin',initial,before-60000);const first=ok(p,'settle',{token:p.active.token,round:mode==='oath'?9:4,won:true},before-30000);assert.ok(first.reward>0);
     ok(p,'begin',begin,before);const out=ok(p,'settle',{token:p.active.token,round:mode==='oath'?9:6,won:true},after);
-    const state=p[mode];assert.equal(state.period,season(before).id);assert.deepEqual(out.bands.map(b=>b.reward),[mode==='oath'?150:124]);assert.ok(parseProfile(structuredClone(p)));
+    const state=p[mode];assert.equal(state.period,season(before).id);assert.deepEqual(out.bands.map(b=>b.reward),[mode==='oath'?180:124]);assert.ok(parseProfile(structuredClone(p)));
     if(mode==='oath'){assert.equal(state.best.at,boundary-1);assert.equal(state.lifetime.at,boundary-1);assert.equal(oathState(p,after).best,null);}
     else{assert.equal(state.records.easy.right.at,boundary-1);assert.equal(state.best.easy.at,boundary-1);assert.equal(state.lifetime.at,boundary-1);assert.equal(twinState(p,after).best.easy,null);}
     const q=profile();if(mode==='twin')ok(q,'twinParty',partyOf(),before);ok(q,'begin',begin,before);q[mode]=structuredClone(state);q[mode].period=season(after).id;
@@ -517,4 +518,21 @@ test('a v1 record keeps the 3 points 깨어난 군주 had; v2 scores it 2',()=>{
   const old={period,token:'old',score:3,tier:'easy',oaths:['tyrant'],deck,at:NOW};
   p.oath={period,best:old,paid:0,lifetime:old};assert.equal(validateProfile(p),true);
   assert.equal(oathScore('easy',['tyrant']),2);assert.equal(oathScore('easy',['tyrant'],1),3);
+});
+
+test('v3 retunes deck oath points while v1 and v2 saved scores and paid bands survive',()=>{
+  for(const [id,deck] of [['nobeam',LEFT],['rabbits',['silver_rabbit','snow_rabbit','night_rabbit','siren','santa']]]){
+    for(const rules of [1,2,3]){
+      const p=profile(),period=season(NOW).id;
+      const score=oathScore('hard',[id],rules),old={period,token:`old-${rules}`,score,tier:'hard',oaths:[id],deck:[...deck],at:NOW,...(rules===1?{}:{rules})};
+      assert.equal(score,(rules===1?10:12)+(rules<3?(id==='nobeam'?3:2):(id==='nobeam'?2:4)));
+      p.oath={period,best:old,paid:2,lifetime:old};
+      const saved=parseProfile(JSON.stringify(p));assert.ok(saved,`${id} v${rules}`);assert.equal(saved.oath.best.score,score);assert.equal(saved.oath.paid,2);
+      ok(saved,'begin',{mode:'oath',tier:'hard',oaths:[id],deck});
+      const wallet=saved.dreams,result=ok(saved,'settle',{token:saved.active.token,round:9,won:true});
+      assert.equal(result.record.rules,3);assert.equal(result.score,oathScore('hard',[id]));
+      assert.ok(result.bands.every(b=>b.score>10),'already paid bands are never paid again');
+      assert.equal(saved.dreams,wallet+result.reward);assert.ok(validateProfile(saved));
+    }
+  }
 });
