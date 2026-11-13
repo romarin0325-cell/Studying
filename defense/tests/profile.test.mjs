@@ -5,7 +5,7 @@ import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away,command} from '../src/profile.js';
-import {monthlyReward,weeklyReward} from '../src/monthly.js';
+import {monthlyReward,weeklyReward,WEEKLY_ENTRIES} from '../src/monthly.js';
 import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
@@ -220,6 +220,15 @@ test('one-entry saves keep their week: the entry counts once and its result beco
   p.results=[{at:NOW-HOUR,mode:'weekly',stage:4,round:9,reward:weeklyReward('hard',9,false),won:false,tier:'hard'}];
   const m=parseProfile(p);assert.ok(m);assert.equal(m.weeklyRuns,1);assert.deepEqual(m.weeklyBest,{round:9,won:false,tier:'hard',reward:weeklyReward('hard',9,false)});
   const fresh=createProfile(NOW);delete fresh.weeklyRuns;delete fresh.weeklyBest;const n=parseProfile(fresh);assert.equal(n.weeklyRuns,0);assert.equal(n.weeklyBest,null);
+  // A settled entry whose receipt left the 30-result history keeps the week closed, so it cannot pay twice.
+  const lost=createProfile(NOW);lost.cleared=40;lost.weekly=calendar(NOW).week;delete lost.weeklyRuns;delete lost.weeklyBest;lost.results=[];
+  const l=parseProfile(lost);assert.equal(l.weeklyRuns,WEEKLY_ENTRIES);assert.equal(l.weeklyBest,null);assert.equal(command(l,'begin',{mode:'weekly',tier:'easy'},NOW).ok,false);
+  // A draft still running from the old rule has paid nothing: it settles in full and leaves two entries.
+  const running=createProfile(NOW);running.cleared=40;for(const h of HEROES)running.heroes[h.id].owned=true;
+  assert.ok(command(running,'begin',{mode:'weekly',tier:'easy'},NOW).ok);delete running.weeklyRuns;delete running.weeklyBest;
+  const r=parseProfile(running);assert.ok(r);assert.equal(r.weeklyRuns,1);assert.equal(r.weeklyBest,null);
+  for(let i=0;i<5;i++)assert.ok(command(r,'draft',{index:0},NOW).ok);const paid=command(r,'settle',{token:r.active.token,round:5,won:false},NOW);
+  assert.equal(paid.reward,weeklyReward('easy',5,false));assert.equal(paid.left,WEEKLY_ENTRIES-1);
 });
 
 test('five owned heroes still give two honest tactical choices on the final draft pick',()=>{

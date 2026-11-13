@@ -58,11 +58,14 @@ export function migrateStudy(p){
 // This week's draft: entries used and the best record (whose reward is what the week has paid).
 export function weeklyState(p,now){const own=p.weekly===calendar(now).week,runs=own?p.weeklyRuns:0;return {runs,left:WEEKLY_ENTRIES-runs,best:own?p.weeklyBest:null};}
 const validWeeklyBest=b=>b===null||!!b&&typeof b==='object'&&integer(b.round,CHALLENGE_WAVES)&&typeof b.won==='boolean'&&!!TIERS[b.tier]&&integer(b.reward)&&b.reward>0;
-// Saves from the one-entry week: an entry this week counts as one run, and its result becomes the week's best.
+// Saves from the one-entry week: the entry counts as one run and its result becomes the week's best. A draft still in
+// progress has paid nothing yet. A settled entry whose receipt has left the 30-result history paid an unknown amount,
+// so that week stays closed as the old rule had it (no second full payment).
 export function migrateWeekly(p){
-  if(p.weeklyRuns!==undefined)return;p.weeklyRuns=typeof p.weekly==='string'?1:0;p.weeklyBest=null;
-  const r=p.weeklyRuns&&Array.isArray(p.results)?p.results.find(r=>r?.mode==='weekly'&&integer(r.at)&&calendar(r.at).week===p.weekly):null;
+  if(p.weeklyRuns!==undefined)return;p.weeklyRuns=typeof p.weekly==='string'?1:0;p.weeklyBest=null;if(!p.weeklyRuns||p.active?.mode==='weekly')return;
+  const r=Array.isArray(p.results)?p.results.find(r=>r?.mode==='weekly'&&integer(r.at)&&calendar(r.at).week===p.weekly):null;
   if(r&&integer(r.round)&&integer(r.reward)&&r.reward>0)p.weeklyBest={round:Math.min(CHALLENGE_WAVES,r.round),won:!!r.won,tier:TIERS[r.tier]?r.tier:'easy',reward:r.reward};
+  else p.weeklyRuns=WEEKLY_ENTRIES;
 }
 export function migrateNotices(p){if(!Array.isArray(p.noticeLate))p.noticeLate=[];}
 // The newly joined companions the announcement has not shown yet. Behemoth is a guardian and arrives through its own reveal.

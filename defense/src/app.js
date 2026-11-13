@@ -1434,7 +1434,7 @@ function galleryPager(at){
 function artGrid(){
   const l=p().study.library;
   return `<div class="mem-grid art-grid">${CONSTELLATIONS.map((k,i)=>{const open=l.unlocked.includes(k.id);
-    return `<button class="mem-tile art-tile ${open?'open':''}" ${open?`data-library-art="${k.id}"`:'disabled'} aria-label="${open?k.title:`${i+1}번째 그림 · 잠김`}">${open?`<img src="${libraryArt(k.id)}" alt="" draggable="false" loading="lazy">`:`<span class="art-lock">${icon(i===l.index?'star':'lock')}</span>`}<span class="mem-cap">${open?`<b>${k.name}</b>`:`<b>No.${i+1}</b>`}</span></button>`;}).join('')}</div>`;
+    return `<button class="mem-tile art-tile ${open?'open':''}" ${open?`data-library-art="${k.id}"`:'disabled'} aria-label="${open?k.title:`${i+1}번째 그림 · 잠김`}">${open?`<img class="gal-bg" src="${libraryArt(k.id)}" alt="" aria-hidden="true" draggable="false" loading="lazy"><img class="art-fit" src="${libraryArt(k.id)}" alt="" draggable="false" loading="lazy">`:`<span class="art-lock">${icon(i===l.index?'star':'lock')}</span>`}<span class="mem-cap">${open?`<b>${k.name}</b>`:`<b>No.${i+1}</b>`}</span></button>`;}).join('')}</div>`;
 }
 function renderLibrary(){
   const tabs=[['gallery','별의 회랑'],['lecture','강의'],['term','용어']];
@@ -1525,8 +1525,8 @@ function lightStar(key,button){
 function artSheet(id,fresh=false){
   const i=CONSTELLATIONS.findIndex(k=>k.id===id),k=CONSTELLATIONS[i],next=CONSTELLATIONS[i+1];if(!k)return;
   const l=p().study.library,n=CONSTELLATIONS.length,count=l.unlocked.length;
-  const tally=fresh?`<div class="art-tally" aria-label="그림 ${count}/${n}"><span>${CONSTELLATIONS.map(c=>`<i class="${c.id===id?'new':l.unlocked.includes(c.id)?'on':''}"></i>`).join('')}</span><b>${count}<em>/${n}</em></b></div>`:'';
-  show(k.title,`No.${i+1} · ${k.name}${fresh?' 완성!':''}`,`<figure class="art-reveal ${fresh?'fresh':''}" style="--ratio:${k.ratio}"><span class="art-frame"><img src="${libraryArt(k.id)}" alt="${k.title}" draggable="false">${fresh?`${skyMarkup(k,k.stars.length,{cls:'sky art-sky'})}<span class="art-seal" aria-hidden="true">${icon('check')}<small>완성</small></span>`:''}</span><figcaption>“${escapeText(k.line)}”<small>— 루미</small></figcaption></figure>${tally}${fresh?`<p class="art-next">${next?`다음은 <b>${next.name}</b>예요.`:'일곱 그림이 모두 걸렸어요. 고마워, 형아!'}</p>`:''}`,
+  const tally=fresh?`<div class="art-tally" aria-label="그림 ${count}/${n}"><span class="art-seal" aria-hidden="true">${icon('check')}<small>완성</small></span><span class="art-bars">${CONSTELLATIONS.map(c=>`<i class="${c.id===id?'new':l.unlocked.includes(c.id)?'on':''}"></i>`).join('')}</span><b>${count}<em>/${n}</em></b></div>`:'';
+  show(k.title,`No.${i+1} · ${k.name}${fresh?' 완성!':''}`,`<figure class="art-reveal ${fresh?'fresh':''}" style="--ratio:${k.ratio}"><span class="art-frame"><img src="${libraryArt(k.id)}" alt="${k.title}" draggable="false">${fresh?skyMarkup(k,k.stars.length,{cls:'sky art-sky'}):''}</span><figcaption>“${escapeText(k.line)}”<small>— 루미</small></figcaption></figure>${tally}${fresh?`<p class="art-next">${next?`다음은 <b>${next.name}</b>예요.`:'일곱 그림이 모두 걸렸어요. 고마워, 형아!'}</p>`:''}`,
     `<button class="primary wide ${fresh?'shine':''}" data-action="${fresh?'library-back':'close'}">${fresh?'회랑에 걸기':'닫기'}</button>`,'library-art',id);
   if(fresh&&!motionOff()){const frame=document.querySelector('#sheet .art-frame');if(frame){const c=centerOf(frame);setTimeout(()=>burst(c.x,c.y,{count:30,spread:160,size:14,duration:1200,color:'#ffe08a'}),900);}
     const seal=document.querySelector('#sheet .art-seal');if(seal)setTimeout(()=>{if(!seal.isConnected)return;const c=centerOf(seal);burst(c.x,c.y,{count:12,spread:60,size:10,color:'#fff1c4'});},1750);}

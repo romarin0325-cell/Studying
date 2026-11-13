@@ -663,7 +663,7 @@ body::before{background:var(--lobby,var(--garden) center/cover);filter:blur(30px
 .overlay{background:rgba(22,48,106,.32)!important;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .sheet{background:var(--grid),var(--paper)!important;border:0!important;border-top:3px solid var(--navy)!important;box-shadow:0 -10px 30px rgba(22,48,106,.25)!important}
 .sheet::before{background:rgba(31,63,134,.25)!important}
-#sheet-kicker:not(:empty){display:inline-flex;align-items:center;gap:6px;padding:2px 18px 2px 8px;margin-left:-20px;padding-left:20px;background:linear-gradient(100deg,var(--navy-d),var(--navy));color:#fff!important;clip-path:var(--slant);font-size:11px}
+#sheet-kicker:not(:empty){display:inline-flex;align-items:center;gap:6px;padding:2px 18px 2px 8px;margin-left:calc(-1 * var(--sheet-pad,20px));padding-left:var(--sheet-pad,20px);background:linear-gradient(100deg,var(--navy-d),var(--navy));color:#fff!important;clip-path:var(--slant);font-size:11px}
 .sheet-top small::before{color:var(--gold-star)!important;display:inline!important;line-height:1}
 .sheet-top h2{color:var(--ink)!important;-webkit-text-fill-color:var(--ink)!important}
 .sheet-top .icon-button{border-radius:50%}
@@ -735,7 +735,7 @@ body::before{background:var(--lobby,var(--garden) center/cover);filter:blur(30px
 .stage-tag small{color:rgba(255,255,255,.75)!important}
 .stage-tag b{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important}
 /* Every visible sheet kicker is a navy band, including the micro-label-only ones (settings). */
-.sheet-top small:not([hidden]){display:inline-flex;align-items:center;gap:6px;margin-left:-20px;padding:2px 18px 2px 20px;background:linear-gradient(100deg,var(--navy-d),var(--navy));color:#fff!important;clip-path:var(--slant);font-size:11px}
+.sheet-top small:not([hidden]){display:inline-flex;align-items:center;gap:6px;margin-left:calc(-1 * var(--sheet-pad,20px));padding:2px 18px 2px 20px;background:linear-gradient(100deg,var(--navy-d),var(--navy));color:#fff!important;clip-path:var(--slant);font-size:11px}
 .sheet-top small:empty{display:none}
 .sheet[data-kind=arrival] .sheet-top small:empty,.sheet[data-kind=daily] .sheet-top small:empty,.sheet[data-kind=draw] .sheet-top small:empty,.sheet[data-kind=garden] .sheet-top small:empty,.sheet[data-kind=hero] .sheet-top small:empty,.sheet[data-kind=info] .sheet-top small:empty,.sheet[data-kind=leave] .sheet-top small:empty,.sheet[data-kind=lecture] .sheet-top small:empty,.sheet[data-kind=memorial-locked] .sheet-top small:empty,.sheet[data-kind=partners] .sheet-top small:empty,.sheet[data-kind=prepare] .sheet-top small:empty,.sheet[data-kind=quiz] .sheet-top small:empty,.sheet[data-kind=rates] .sheet-top small:empty,.sheet[data-kind=records] .sheet-top small:empty,.sheet[data-kind=relic] .sheet-top small:empty,.sheet[data-kind=result] .sheet-top small:empty,.sheet[data-kind=retire] .sheet-top small:empty,.sheet[data-kind=reward] .sheet-top small:empty,.sheet[data-kind=settings] .sheet-top small:empty,.sheet[data-kind=training] .sheet-top small:empty{display:inline-flex}
 .spot-veil,.reveal-spot.is-ur .spot-veil{background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.55) 46%,transparent 54%),radial-gradient(40% 30% at 82% 16%,rgba(255,255,255,.8),transparent 70%),

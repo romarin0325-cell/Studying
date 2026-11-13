@@ -29,6 +29,18 @@ async function ink(page,selector){
     assert.ok((paper+.05)/(luminance(rgb)+.05)>=3,`${selector}: ${color} must read on paper`);
   }
 }
+// A painting is whole: its box keeps the image's own ratio, its corners stay square and no other element covers them.
+async function whole(page,selector){
+  const r=await page.locator(selector).evaluate(img=>{const b=img.getBoundingClientRect(),st=getComputedStyle(img),bw=parseFloat(st.borderLeftWidth),w=b.width-2*bw,h=b.height-2*bw;
+    const pts=[[b.left+bw+3,b.top+bw+3],[b.right-bw-3,b.top+bw+3],[b.left+bw+3,b.bottom-bw-3],[b.right-bw-3,b.bottom-bw-3]];
+    return {ratio:Math.abs((w/h)/(img.naturalWidth/img.naturalHeight)-1),corner:parseFloat(st.borderTopLeftRadius)-bw,covered:pts.filter(([x,y])=>document.elementFromPoint(x,y)!==img).length};});
+  assert.ok(r.ratio<.01&&r.corner<=.5&&r.covered===0,`${selector} shows the whole painting: ${JSON.stringify(r)}`);
+}
+// Library lists stay inside the screen and fold long subtitles instead of cutting them.
+async function rowsFit(page){
+  const bad=await page.locator('.lec-row').evaluateAll(rs=>rs.filter(r=>r.getBoundingClientRect().right>innerWidth-1||[...r.querySelectorAll('b,small')].some(t=>t.scrollWidth>t.clientWidth+1)).map(r=>r.textContent.trim().slice(0,20)));
+  assert.deepEqual(bad,[],'library rows fit the screen');
+}
 try{
   for(const bright of [false,true]){
     const skin=bright?'bright':'night',profile=createProfile(NOW);
@@ -52,15 +64,16 @@ try{
     assert.equal(await page.locator('.gal-card.on').getAttribute('data-gallery-card'),'1');
     await page.locator('[data-gallery-card="0"]').click();await page.waitForFunction(()=>document.querySelector('.gal-card.on')?.dataset.galleryCard==='0');
     assert.equal(await page.locator('#overlay').isHidden(),true,'a side card centres before it opens');
-    await page.locator('.gal-card.on').click();
+    await whole(page,'.gal-card.on .gal-art img');
+    await page.locator('.gal-card.on').click();await whole(page,'#sheet .art-frame img');
     if(bright)await ink(page,'.art-reveal figcaption');
     await shot(page,`${skin}-library-art`);await close(page);
     await page.locator('.tabbar [data-library-tab="lecture"]').click();
-    if(bright)await ink(page,'.lec-info b');
+    if(bright)await ink(page,'.lec-info b');await rowsFit(page);
     await page.locator('[data-lecture]').first().click();
     if(bright)await ink(page,'.lecture p,.lecture b');
     await shot(page,`${skin}-lecture`);await close(page);
-    await page.locator('[data-library-tab="term"]').click();await page.locator('[data-term]').first().click();
+    await page.locator('[data-library-tab="term"]').click();await rowsFit(page);await page.locator('[data-term]').first().click();
     if(bright)await ink(page,'.term-ja,.lecture p,.lecture b');
     await shot(page,`${skin}-term`);await close(page);
     await page.locator('[data-nav="home"]').first().click();
