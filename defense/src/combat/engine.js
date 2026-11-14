@@ -309,7 +309,7 @@ export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${witchFreeze(level,1,1).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 공격력 +${6+level*.5}% · 공격 속도 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 공격력 ${Math.round(auroraEcho(level)*100)}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${Math.round(sirenAura(level,1,1)*100)}%`,ancient_dragon:`인접 공격 +${Math.round(dragonAura(level,1,1)*100)}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${guardianStun(level,1,1).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${Math.round(magicianEcho(level,1,1)*100)}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${Math.round(sirenAura(level,1,1)*100)}%`,ancient_dragon:`인접 공격 +${Math.round(dragonAura(level,1,1)*100)}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${guardianStun(level,1,1).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${Math.round(santaGift(level)*100)}%`,time_magician:`인접 추가 공격 공격력 ${Math.round(magicianEcho(level,1,1)*100)}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -351,7 +351,7 @@ export function liveTraitTokens(s,u){
     storm_sage:[['1%',pctText(stormExecuteChance(s,u.rank))]],
     joker:[['20%',slow(JOKER.slow*k)]],
     aurora:[['75%',pctText(auroraEcho(level))]],
-    santa:[['범위와 피해가 2배','범위가 2배, 피해가 '+num(2+level*.2)+'배']],
+    santa:[['범위와 피해가 2배','범위가 2배, 피해가 '+num(santaGift(level))+'배']],
   })[u.hero]||[];
 }
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
@@ -760,7 +760,7 @@ function applyHit(s,shot){
     if(type==='shatter'&&target.slowTime>0)factor*=1.75;
     if(type==='splash'&&target.burnTime>0)factor*=1.4;
     if(type==='starfall'&&shot.count%5===0)factor*=2.2;
-    if(shot.gift)factor*=2+(s.upgrades[hero.id]||0)*.2;
+    if(shot.gift)factor*=santaGift(s.upgrades[hero.id]||0);
     if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
     if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
     const strike=type==='miracle'&&shot.bell?(Number.isFinite(shot.bellPower)?shot.bellPower:amount)*(target===e?CINDERELLA.bell:CINDERELLA.splash):amount*factor;
