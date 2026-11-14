@@ -21,7 +21,11 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
   const gold=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/gold-dragon-20261029/installation.json'),'utf8'));
   const selection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/selected-cast-20261108/selection.json'),'utf8'));
   assert.deepEqual(selection.assets.map(e=>e.id),['luna','siren','cherry_prince','doom','red_dragon']);
-  const replacements=new Map(selection.assets.map(e=>[e.id,e]));
+  const profileSelection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/time-magician-left-20261109/selection.json'),'utf8'));
+  assert.deepEqual(profileSelection.assets.map(e=>e.id),['time_magician']);
+  const selected=[...selection.assets,...profileSelection.assets];
+  const replacements=new Map(selected.map(e=>[e.id,e]));
+  assert.equal(replacements.size,selected.length,'selected inventory must not contain duplicate heroes');
   const previous=[...original.assets,...additions.assets,...gold.assets];
   // A later owner-selected painting replaces the active inventory entry; the
   // previous master remains recoverable and its recorded bytes stay untouched.
@@ -96,6 +100,21 @@ test('all collection, boss and battle textures resolve to local art with valid a
   assert.equal(ARTIFACTS.length,30);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,30);
   // Rows of three in the collection: 12 C, 6 R, 6 SR, 6 UR.
   assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,6]);
+});
+
+test('time magician selection changes only the left view and retains the previous masters',async()=>{
+  const base=path.join(root,'defense/assets');
+  const read=async(file,index,size)=>sharp(path.join(base,file)).extract({left:index%2*size,top:Math.floor(index/2)*size,width:size,height:size}).ensureAlpha().raw().toBuffer();
+  const visibleChanges=(a,b)=>{let n=0;for(let i=0;i<a.length;i+=4){if(!a[i+3]&&!b[i+3])continue;if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3])n++;}return n;};
+  for(const index of [0,1,2,3]){
+    const [oldP,newP,oldW,newW,oldOpt,newOpt]=await Promise.all([
+      read('cast-v2/time_magician.png',index,512),read('cast-selected-20261109/time_magician.png',index,512),
+      read('cast-v2/time_magician.webp',index,512),read('cast-selected-20261109/time_magician.webp',index,512),
+      read('optimized/cast-v2/time_magician.webp',index,320),read('optimized/cast-selected-20261109/time_magician.webp',index,320),
+    ]);
+    if(index===2){assert.notDeepEqual(newP,oldP,'the selected left view must change');assert.ok(visibleChanges(oldW,newW)>0);assert.ok(visibleChanges(oldOpt,newOpt)>0);assert.equal(visibleChanges(newP,newW),0,'selected PNG and WebP must show the same left artwork');}
+    else{assert.deepEqual(newP,oldP,'previous PNG view must be preserved');assert.equal(visibleChanges(oldW,newW),0,'previous source WebP view must be preserved');assert.equal(visibleChanges(oldOpt,newOpt),0,'previous optimized view must be preserved');}
+  }
 });
 
 test('every unit faces outward: the left cell looks left, the right cell is its mirror view and looks right',async()=>{

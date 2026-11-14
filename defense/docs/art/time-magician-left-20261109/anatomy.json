@@ -1,0 +1,172 @@
+{
+  "coordinateSpace": "unwarped-512-cell",
+  "exclusions": "hair-hats-ears-horns-ornaments-equipment",
+  "direction": "left",
+  "rawSha256": "dd172a884241ccc47825262b7c0d6987d9455973253a805787385aef3de26880",
+  "measuredBy": "Sol, 2026-11-09, candidate grid at the common 512px scale",
+  "uncertainty": "Skull hidden by hair is approximate (about +/-12px); visible eye/chin about +/-3px; covered joints about +/-6px. Reversed only the recorded integer translation to get raw 512px points.",
+  "views": [
+    {
+      "skullEllipse": [
+        262,
+        195,
+        148,
+        148,
+        -2
+      ],
+      "eyeLeft": [
+        214,
+        231
+      ],
+      "chin": [
+        224,
+        270
+      ],
+      "shoulders": [
+        256,
+        302
+      ],
+      "hips": [
+        251,
+        378
+      ],
+      "sole": [
+        269,
+        467
+      ],
+      "outerSleeve": [
+        276,
+        338
+      ],
+      "outerFoot": [
+        231,
+        462
+      ]
+    }
+  ],
+  "sideComparison": {
+    "direction": "left",
+    "peer": null,
+    "rows": [
+      {
+        "id": "skull-width",
+        "target": 145.18,
+        "actual": 148,
+        "delta": 2.82,
+        "limit": 10,
+        "outside": false
+      },
+      {
+        "id": "skull-height",
+        "target": 143.87,
+        "actual": 148,
+        "delta": 4.13,
+        "limit": 10,
+        "outside": false
+      },
+      {
+        "id": "skull-y",
+        "target": -268.77,
+        "actual": -272,
+        "delta": -3.23,
+        "limit": 10,
+        "outside": false
+      },
+      {
+        "id": "eye-y",
+        "target": -232,
+        "actual": -236,
+        "delta": -4,
+        "limit": 8,
+        "outside": false
+      },
+      {
+        "id": "eye-to-chin",
+        "target": 35.16,
+        "actual": 39,
+        "delta": 3.84,
+        "limit": 8,
+        "outside": false
+      },
+      {
+        "id": "chin-to-sole",
+        "target": 196.84,
+        "actual": 197,
+        "delta": 0.16,
+        "limit": 8,
+        "outside": false
+      },
+      {
+        "id": "shoulder-y",
+        "target": -164,
+        "actual": -165,
+        "delta": -1,
+        "limit": 10,
+        "outside": false
+      },
+      {
+        "id": "hip-y",
+        "target": -93,
+        "actual": -89,
+        "delta": 4,
+        "limit": 10,
+        "outside": false
+      },
+      {
+        "id": "head-to-body",
+        "target": 1.368,
+        "actual": 1.331,
+        "delta": -0.037,
+        "limit": 0.1,
+        "outside": false
+      },
+      {
+        "id": "torso-to-head",
+        "target": 0.494,
+        "actual": 0.514,
+        "delta": 0.02,
+        "limit": 0.1,
+        "outside": false
+      },
+      {
+        "id": "legs-to-head",
+        "target": 0.646,
+        "actual": 0.601,
+        "delta": -0.045,
+        "limit": 0.1,
+        "outside": false
+      },
+      {
+        "id": "skull-height-vs-front",
+        "target": 150.41,
+        "actual": 148,
+        "delta": -2.41,
+        "limit": 10,
+        "outside": false
+      },
+      {
+        "id": "chin-to-sole-vs-front",
+        "target": 198.15,
+        "actual": 197,
+        "delta": -1.15,
+        "limit": 8,
+        "outside": false
+      },
+      {
+        "id": "head-to-body-vs-front",
+        "target": 1.317,
+        "actual": 1.331,
+        "delta": 0.014,
+        "limit": 0.1,
+        "outside": false
+      }
+    ],
+    "pass": true,
+    "visualApproval": false,
+    "shift": [
+      -13,
+      13
+    ],
+    "clipped": 0
+  }
+}

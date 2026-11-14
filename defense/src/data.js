@@ -1947,7 +1947,7 @@ export const ASSET_PATHS = {
   "unit-santa": "./assets/cast-v2/santa.webp",
   "unit-jasmine": "./assets/cast-v2/jasmine.webp",
   "unit-star_boy": "./assets/cast-v2/star_boy.webp",
-  "unit-time_magician": "./assets/cast-v2/time_magician.webp",
+  "unit-time_magician": "./assets/cast-selected-20261109/time_magician.webp",
   "unit-cherry_prince": "./assets/cast-selected-20261108/cherry_prince.webp",
   "unit-frost_witch": "./assets/cast-v2/frost_witch.webp",
   "unit-harmonious": "./assets/cast-v2/harmonious.webp",

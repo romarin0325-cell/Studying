@@ -50,9 +50,9 @@
     }
   },
   "totals": {
-    "sourceBytes": 34450583,
-    "deployableSourceBytes": 32626309,
-    "outputBytes": 17603944,
+    "sourceBytes": 34698543,
+    "deployableSourceBytes": 32874269,
+    "outputBytes": 17722792,
     "optimizedFiles": 177,
     "derivedFiles": 162,
     "derivedOutputBytes": 3882286
@@ -1274,7 +1274,7 @@
     },
     {
       "id": "atlas:unit-time_magician",
-      "source": "./assets/cast-v2/time_magician.webp",
+      "source": "./assets/cast-selected-20261109/time_magician.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-time_magician; combat renderer / stage UI",
@@ -1283,8 +1283,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 194502,
-        "sha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
+        "bytes": 442462,
+        "sha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1293,9 +1293,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/time_magician.webp",
-        "bytes": 74150,
-        "sha256": "b597d6da2d6683f9f11fda792e354001ce30654438cb6e61aa8f3935caf971e8",
+        "path": "./assets/optimized/cast-selected-20261109/time_magician.webp",
+        "bytes": 192998,
+        "sha256": "d9d1b0cef97c9942b915df975ef47eb2d2f1325a4d7a80e91d142424e30f40b8",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1303,7 +1303,7 @@
           "codec": "webp"
         }
       },
-      "decision": "Separate smaller encoding; source preserved."
+      "decision": "Separate smaller lossless encoding; three unchanged optimized frames preserved, changed left frame prepared with unit profile."
     },
     {
       "id": "atlas:unit-cherry_prince",
@@ -7124,7 +7124,7 @@
     },
     {
       "id": "portrait:time_magician",
-      "source": "./assets/cast-v2/time_magician.webp",
+      "source": "./assets/cast-selected-20261109/time_magician.webp",
       "profile": "portrait",
       "crop": {
         "left": 123,
@@ -7136,7 +7136,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
+      "sourceSha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
       "output": {
         "path": "./assets/optimized/ui/portraits/time_magician.webp",
         "bytes": 20272,
@@ -7151,7 +7151,7 @@
     },
     {
       "id": "figure:time_magician",
-      "source": "./assets/cast-v2/time_magician.webp",
+      "source": "./assets/cast-selected-20261109/time_magician.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7163,7 +7163,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
+      "sourceSha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
       "output": {
         "path": "./assets/optimized/ui/figures/time_magician.webp",
         "bytes": 41198,
