@@ -404,12 +404,14 @@ function syncStatuses(s,e,at=s.time){
   e.takenBonus=Math.min(DAMAGE_TAKEN_CAP,e.exposed);
   return e;
 }
-function activePoison(e){
+// The poison stacks that count right now: strongest first, POISON_CAP stacks at most. Combat and the ultimate preview both use this.
+function selectPoison(effects){
   let remaining=POISON_CAP;
-  return e.statusEffects.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{
+  return effects.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{
     const stacks=Math.min(remaining,effect.amount);remaining-=stacks;return stacks?[{effect,stacks}]:[];
   });
 }
+function activePoison(e){return selectPoison(e.statusEffects);}
 export function statusState(s,e){syncStatuses(s,e);syncSlows(s,e);return {exposure:e.exposed,divine:e.divine,damageTakenBonus:e.takenBonus,burn:e.burn,burnOwner:e.burnOwner,poison:e.poison,poisonDps:activePoison(e).reduce((dps,{effect,stacks})=>dps+stacks*effect.power*POISON_POWER_RATIO,0)*poisonAmp(s),stun:e.stun,freeze:e.freeze,controlTime:e.controlTime,slow:e.slow};}
 function capStacks(e,type,cap){
   const effects=e.statusEffects.filter(effect=>effect.type===type).sort((a,b)=>b.until-a.until||a.source.localeCompare(b.source));
@@ -1173,13 +1175,12 @@ export function castPreview(s,id){
   };
   // activePoison after expired effects are dropped. Legacy saves keep the mushroom snapshot.
   const poisonNow=e=>{
-    const select=list=>{let remaining=POISON_CAP;return list.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{const stacks=Math.min(remaining,effect.amount);remaining-=stacks;return stacks?[{effect,stacks}]:[];});};
     if(!Array.isArray(e.statusEffects)){
       if(!(e.poison>0)||!(e.poisonTime>0))return [];
       const power=HERO.mushroom_king.damage*(s.meta?.mushroom_king?.power||1)*(1+(s.relicAttack||0));
-      return select([{type:'poison',source:'legacy:poison',amount:Math.min(POISON_CAP,e.poison),until:s.time+e.poisonTime,power}]);
+      return selectPoison([{type:'poison',source:'legacy:poison',amount:Math.min(POISON_CAP,e.poison),until:s.time+e.poisonTime,power}]);
     }
-    return select(e.statusEffects.filter(effect=>effect.until-s.time>1e-9));
+    return selectPoison(e.statusEffects.filter(effect=>effect.until-s.time>1e-9));
   };
   const burnPerSecond=num(base*BURN.skill*(has(s,'ember')?1+RV.ember.burn*relicScaleIn(s,'ember'):1));
   const repeat=e=>!!e.boss&&(e.ultControl||0)-s.time>1e-9;
