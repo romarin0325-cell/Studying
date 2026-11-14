@@ -78,12 +78,16 @@ export const heroMultiplier=(entry,beds)=>(1+roseAttack(beds?.rose||0))*enhanceM
 // attack shape and ultimate cost do not predict contribution (r <= 0), because a companion with a strong trait or
 // ultimate is given a weaker basic attack. So those stats are not part of the number. The special milestone (+10% every
 // five duplicates) counts at half weight: +20% special added 8% contribution where +20% attack added 13%.
+// Aura companions (they strengthen their neighbours) are the one class that stays above its rarity: the three measured
+// 21-52% over their rarity mean, and that term is the only one that improved a leave-one-out fit (r 0.64 -> 0.69).
 export const POWER_BASE=500;
 export const POWER_RARITY=Object.freeze({C:1,R:1.2,SR:1.4,UR:1.9});
 export const POWER_SPECIAL_SHARE=.5;
+export const POWER_AURA=1.2;
+const AURA_TRAITS=['hasteAura','powerAura','harmonyAura'];
 export function combatPower(id,entry,beds,relicBonus=0){
   const h=HERO[id];if(!h||!entry?.owned)return 0;
-  return Math.round(POWER_BASE*POWER_RARITY[h.rarity]*heroMultiplier(entry,beds)*(1+relicBonus)*(1+POWER_SPECIAL_SHARE*(specialMultiplier(entry.enhance)-1)));
+  return Math.round(POWER_BASE*POWER_RARITY[h.rarity]*(AURA_TRAITS.includes(h.trait.type)?POWER_AURA:1)*heroMultiplier(entry,beds)*(1+relicBonus)*(1+POWER_SPECIAL_SHARE*(specialMultiplier(entry.enhance)-1)));
 }
 export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
 const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep);

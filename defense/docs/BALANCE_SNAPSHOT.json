@@ -1534,10 +1534,10 @@
     },
     {
       "id": "siren",
-      "power": 500,
+      "power": 600,
       "dispatchAt9": {
-        "dust": 113,
-        "dreams": 22
+        "dust": 119,
+        "dreams": 23
       }
     },
     {

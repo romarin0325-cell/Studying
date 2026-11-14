@@ -360,7 +360,7 @@ function formation(tab='hero',edit=false){
   const relics=()=>ARTIFACTS.filter(a=>profile.relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity)).map(a=>`<button class="choose-row relic-row" data-relic-pick="${a.id}" aria-pressed="${editingRelics.includes(a.id)}" ${profile.active?'disabled':''}><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${relicLevel(profile.relics[a.id])}</span></strong><small class="relic-effect">${relicText(a.id,relicLevel(profile.relics[a.id]))}</small></div><span class="mark">${editingRelics.includes(a.id)?icon('check'):icon('plus')}</span></button>`).join('');
   const list=formTab==='hero'?heroes():relics()||`<p class="empty">아직 유물이 없어요.</p>`;
   show(formHeroes?'편성':'유물',formHeroes?`전투력 ${fmt(deckPower(editingDeck))}`:`장착 ${editingRelics.length}/3`,`${load}${bar}<div class="choose-list form-list">${list}</div>`,
-    `<button class="primary wide" data-action="save-team" ${(formHeroes&&editingDeck.length!==TEAM_SIZE)||profile.active?'disabled':''}>${formHeroes?'편성':'장착'} 확정</button>`,'team');
+    `<button class="primary wide" data-action="save-team" ${(formHeroes&&editingDeck.length!==TEAM_SIZE)||profile.active?'disabled':''}>${profile.active?'진행 중인 원정을 마친 뒤 바꿀 수 있어요':`${formHeroes?'편성':'장착'} 확정`}</button>`,'team');
   const scroller=qs('#sheet .form-list');if(scroller)scroller.scrollTop=keep;
 }
 function team(){formation('hero');}

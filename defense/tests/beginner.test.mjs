@@ -56,8 +56,8 @@ test('combat power follows rarity and growth, and auto formation keeps equals an
   for(const [id,e] of Object.entries(p.heroes)){e.owned=HERO[id].rarity!=='UR'||['zeke','luna','jasmine','rumi','venom','cherry_prince'].includes(id);e.enhance={C:8,R:6,SR:2,UR:0}[HERO[id].rarity];}
   assert.deepEqual(POWER_RARITY,{C:1,R:1.2,SR:1.4,UR:1.9});
   assert.equal(combatPower('zeke',entry(0)),950);assert.equal(combatPower('star_boy',entry(0)),500);assert.equal(combatPower('star_boy',entry(8)),735);
-  // Same rarity and enhancement: the same number, whatever the basic attack.
-  assert.equal(combatPower('siren',entry(8)),combatPower('night_rabbit',entry(8)));
+  // Same rarity and enhancement: the same number, whatever the basic attack. Aura companions sit 20% above it.
+  assert.equal(combatPower('snow_rabbit',entry(8)),combatPower('night_rabbit',entry(8)));assert.equal(combatPower('siren',entry(0)),600);assert.equal(combatPower('ancient_dragon',entry(0)),840);
   assert.ok(combatPower('zeke',entry(0))>combatPower('great_detective',entry(6))&&combatPower('great_detective',entry(6))>combatPower('storm_sage',entry(2))&&combatPower('storm_sage',entry(2))>combatPower('night_rabbit',entry(8)));
   const deck=autoDeck(p);assert.equal(deck.every(id=>HERO[id].rarity==='UR'),true);
   // Six URs tie; the five picked cover every shape the six have before a shape repeats.
