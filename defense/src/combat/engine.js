@@ -274,6 +274,20 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   }
   return trait;
 }
+// One formula per rule number: the attack code and every text that shows the number call the same function.
+// level = training level, k = enhancement special, sup = rank support, ctl = rank control. Keep the multiplication order.
+// Siren's song, adjacent attack speed.
+export const sirenAura=(level,k,sup)=>(.15+level*.03)*k*sup;
+// Ancient dragon's blessing, adjacent attack.
+export const dragonAura=(level,k,sup)=>(.2+level*.03)*k*sup;
+// Guardian's third-hit stun, seconds.
+export const guardianStun=(level,k,ctl)=>(.7+level*.05)*k*ctl;
+// Time magician's extra attack for neighbours, share of attack.
+export const magicianEcho=(level,k,sup)=>(.6+level*.05)*sup*k;
+// Frost witch's freeze on slowed enemies, seconds.
+export const witchFreeze=(level,k,ctl)=>(.6+level*.06)*k*ctl;
+// Aurora's phantom shot, share of the hit. Santa's gift bomb, damage factor.
+export const auroraEcho=level=>.75+level*.03,santaGift=level=>2+level*.2;
 export function harmonyAt(s,index){return index<0?0:new Set(neighbors(index).map(i=>s.board[i]?.hero).filter(id=>id&&id!=='harmonious')).size;}
 export function nightRabbitTargetCount(s){return 9+2*new Set(s.board.filter(u=>u&&['snow_rabbit','silver_rabbit'].includes(u.hero)).map(u=>u.hero)).size;}
 export function harmonyStrength(s,index){
