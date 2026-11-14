@@ -308,7 +308,7 @@ export function power(s,u){return unitHero(s,u).damage*Math.pow(2.35,u.rank-1)*(
 export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${witchFreeze(level,1,1).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 공격력 +${6+level*.5}% · 공격 속도 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
-  if(id==='aurora')return `환영탄 공격력 ${75+level*3}%`;
+  if(id==='aurora')return `환영탄 공격력 ${Math.round(auroraEcho(level)*100)}%`;
   const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${Math.round(sirenAura(level,1,1)*100)}%`,ancient_dragon:`인접 공격 +${Math.round(dragonAura(level,1,1)*100)}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${guardianStun(level,1,1).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${Math.round(magicianEcho(level,1,1)*100)}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
   return extra[id]||'';
 }
@@ -350,7 +350,7 @@ export function liveTraitTokens(s,u){
     frost_witch:[['40%',slow(.4*ctl*k)],['0.6초',secText(witchFreeze(level,k,ctl))]],
     storm_sage:[['1%',pctText(stormExecuteChance(s,u.rank))]],
     joker:[['20%',slow(JOKER.slow*k)]],
-    aurora:[['75%',pctText(.75+level*.03)]],
+    aurora:[['75%',pctText(auroraEcho(level))]],
     santa:[['범위와 피해가 2배','범위가 2배, 피해가 '+num(2+level*.2)+'배']],
   })[u.hero]||[];
 }
@@ -776,7 +776,7 @@ function applyHit(s,shot){
   if(type==='refraction'&&shot.proc!==false&&e.hp>0){
     const dx=point.x-shot.origin.x,dy=point.y-shot.origin.y,k=46/(Math.hypot(dx,dy)||1);
     const from={x:clamp(point.x+dx*k,24,696),y:clamp(point.y+dy*k,72,734)};
-    s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*(.75+(s.upgrades[hero.id]||0)*.03),origin:from,from,to:point,delay:.06,life:.24,total:.24});
+    s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*auroraEcho(s.upgrades[hero.id]||0),origin:from,from,to:point,delay:.06,life:.24,total:.24});
   }
   event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin,...(shot.hero==='gold_dragon'?{opening:shot.opening}:{}),...(sunR?{sunR}:{})});
   if(shot.bell)event(s,'bell',{...point,rank:shot.rank,boss:!!e.boss,radius:CINDERELLA.radius});
