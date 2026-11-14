@@ -10,14 +10,12 @@ const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export async function buildLab(output=path.join(game,'dist'),{check=false}={}){
  const pack=await loadImagePack();const assets={};for(const [id,relative]of Object.entries(RUNTIME_ASSET_PATHS))assets[id]='data:image/webp;base64,'+pack.read(relative).toString('base64');
  for(const h of HEROES)assets['figure:'+h.id]='data:image/webp;base64,'+pack.readDerived('figure:'+h.id).toString('base64');
- // Resolve local modules through Node, including in sandboxes that restrict ancestor directory listing.
- const localModules={name:'lab-local-modules',setup(b){
-  b.onResolve({filter:/.*/},args=>({path:args.kind==='entry-point'?path.join(game,'src/lab/app.js'):path.resolve(path.dirname(args.importer),args.path),namespace:'lab'}));
-  b.onLoad({filter:/.*/,namespace:'lab'},async args=>({contents:await fs.readFile(args.path,'utf8'),loader:'js'}));
- }};
- const js=await build({entryPoints:['lab-entry'],plugins:[localModules],bundle:true,write:false,format:'iife',target:'es2020',minify:true});
+ const js=await build({entryPoints:[path.join(game,'src/lab/app.js')],bundle:true,write:false,format:'iife',target:'es2020',minify:true});
  // Read styles before replacement so the standalone never contains a Promise string.
- const template=await fs.readFile(path.join(game,'lab.html'),'utf8'),labCss=await fs.readFile(path.join(game,'src/lab/style.css'),'utf8'),gameCss=await fs.readFile(path.join(game,'src/style.css'),'utf8');
+ // Line endings are normalised on read: the cut-in rules are cut out of the game stylesheet by line, and a CRLF checkout must
+ // build the same bytes as CI.
+ const read=async file=>(await fs.readFile(path.join(game,file),'utf8')).replace(/\r\n/g,'\n');
+ const template=await read('lab.html'),labCss=await read('src/lab/style.css'),gameCss=await read('src/style.css');
  const cutin=gameCss.slice(gameCss.indexOf('/* ───────── Ultimate cut-in'),gameCss.indexOf('@keyframes cutin-fade'));
  const fade=gameCss.slice(gameCss.indexOf('@keyframes cutin-fade')).split('\n')[0];
  if(!cutin.startsWith('/* ───────── Ultimate cut-in')||!fade.startsWith('@keyframes cutin-fade'))throw new Error('Game cut-in styles not found');
