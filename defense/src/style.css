@@ -2210,3 +2210,15 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .auto-row{display:flex;justify-content:flex-end;margin:8px 0}.auto-btn{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:5px 10px;font-size:12px}.auto-btn .ic{width:16px;height:16px}
 .nav-item[data-locked=true]{opacity:.5}.nav-item .nav-lock{position:absolute;top:0;right:15%;font-style:normal}.nav-item .nav-lock .ic{width:14px;height:14px;padding:1px;background:var(--panel);border:0;box-shadow:none}
 .event-next{margin:10px 0 0;color:var(--text3);font-size:11px;text-align:center}
+/* Formation sheet: the loadout (companions, then relics) stays in place and only the list under the tabs scrolls.
+   A fixed sheet height keeps the confirm button where it is when the two tabs hold lists of different lengths. */
+.sheet[data-kind=team]{height:91dvh}
+.sheet[data-kind=team] .sheet-body{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+.form-load,.prep-load{display:grid;gap:10px;flex-shrink:0}
+.form-load .relic-slots.compact,.prep-load .relic-slots.compact{margin:0}
+.form-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:12px 0 10px;flex-shrink:0}
+.form-bar .tabbar{flex:1;min-width:0}
+.form-bar .auto-btn{flex-shrink:0;min-height:44px;padding-inline:12px;white-space:nowrap}
+.form-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;align-content:start;padding-bottom:16px}
+.form-list{grid-auto-rows:max-content}
+.relic-slot b{word-break:keep-all}

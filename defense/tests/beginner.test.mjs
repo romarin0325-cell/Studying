@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createProfile,parseProfile,validateProfile,command,random} from '../src/profile.js';
 import {BEGINNER_DAYS,beginnerState,featureOpen,newlyOpened,ftueNext,urChoices} from '../src/beginner.js';
-import {drawRelic,drawCharacter,calendar,lateOpen} from '../src/economy.js';
+import {drawRelic,drawCharacter,calendar,lateOpen,combatPower,POWER_RARITY} from '../src/economy.js';
 import {HERO,HEROES,ARTIFACTS} from '../src/content.js';
 import {activeEvent,eventOpen,eventWindow,nextEvent,season,EVENT_ROTATION_START} from '../src/preview/season.js';
 import {autoDeck,autoRelics,autoTwin,oathDeck} from '../src/auto-team.js';
@@ -49,6 +49,22 @@ test('events alternate from the specified season and inactive entries are reject
 test('unlocked trial stays a new profile on load and supports test tools',async()=>{
   const src=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../src'),result=await build({stdin:{contents:"export {createProfile,validateProfile,command,ProfileStore} from './profile.js';",resolveDir:src},bundle:true,write:false,format:'cjs',platform:'node',define:{__GARDEN_UNLOCKED__:'true'}}),compiled={exports:{}};runInNewContext(result.outputFiles[0].text,{module:compiled,structuredClone});const api=compiled.exports,p=api.createProfile(now,{trial:true});assert.equal(p.trial,true);assert.equal(p.cleared,0);assert.equal(api.validateProfile(p),true);
   const storage={getItem:()=>JSON.stringify(p)},store=new api.ProfileStore(storage,now);assert.equal(store.value.cleared,0);assert.equal(store.value.beginner.count,1);assert.equal(api.command(store.value,'testGrant',{kind:'trial-day'},now).ok,true);assert.equal(store.value.beginner.count,2);assert.equal(api.command(store.value,'testGrant',{kind:'event-flip'},now).ok,true);assert.equal(store.value.eventFlip,true);assert.equal(api.command(store.value,'testGrant',{kind:'ftue-reset'},now).ok,true);
+});
+test('combat power follows rarity and growth, and auto formation keeps equals and spreads shapes',()=>{
+  // A mid account (about a thousand summons): commons far ahead in duplicates, the few URs at +0.
+  const p=createProfile(now),entry=e=>({owned:true,enhance:e});
+  for(const [id,e] of Object.entries(p.heroes)){e.owned=HERO[id].rarity!=='UR'||['zeke','luna','jasmine','rumi','venom','cherry_prince'].includes(id);e.enhance={C:8,R:6,SR:2,UR:0}[HERO[id].rarity];}
+  assert.deepEqual(POWER_RARITY,{C:1,R:1.2,SR:1.4,UR:1.9});
+  assert.equal(combatPower('zeke',entry(0)),950);assert.equal(combatPower('star_boy',entry(0)),500);assert.equal(combatPower('star_boy',entry(8)),735);
+  // Same rarity and enhancement: the same number, whatever the basic attack. Aura companions sit 20% above it.
+  assert.equal(combatPower('snow_rabbit',entry(8)),combatPower('night_rabbit',entry(8)));assert.equal(combatPower('siren',entry(0)),600);assert.equal(combatPower('ancient_dragon',entry(0)),840);
+  assert.ok(combatPower('zeke',entry(0))>combatPower('great_detective',entry(6))&&combatPower('great_detective',entry(6))>combatPower('storm_sage',entry(2))&&combatPower('storm_sage',entry(2))>combatPower('night_rabbit',entry(8)));
+  const deck=autoDeck(p);assert.equal(deck.every(id=>HERO[id].rarity==='UR'),true);
+  // Six URs tie; the five picked cover every shape the six have before a shape repeats.
+  assert.equal(new Set(deck.map(id=>HERO[id].shape)).size,new Set(['zeke','luna','jasmine','rumi','venom','cherry_prince'].map(id=>HERO[id].shape)).size);
+  // A tie never swaps out a companion already in the team.
+  p.deck=['venom','cherry_prince','luna','zeke','jasmine'];assert.deepEqual([...autoDeck(p)].sort(),[...p.deck].sort());
+  const fresh=createProfile(now);assert.deepEqual([...autoDeck(fresh)].sort(),[...fresh.deck].sort());
 });
 test('auto formation respects ownership, dispatch, rarity and oath constraints',()=>{
   const p=unlockProfile(createProfile(now));const ids=autoDeck(p,{size:10});assert.equal(ids.length,10);assert.equal(autoDeck(p,{exclude:[ids[0]]}).includes(ids[0]),false);p.dispatches=[{hero:ids[0]}];assert.equal(autoDeck(p).includes(ids[0]),false);assert.equal(autoDeck(p,{allow:id=>HERO[id].rarity==='C'}).every(id=>HERO[id].rarity==='C'),true);

@@ -136,7 +136,7 @@ function card(id,kind='hero',receipt=null,full=false){
 // The three relic slots: what is equipped now, tap to open it.
 function relicSlots(compact=false){
   const worn=p().equipped;
-  return `<div class="relic-slots ${compact?'compact':''}">${compact?'':`<div class="relic-slots-head"><b>장착 중인 유물 ${worn.length}/3</b><small>장착한 유물의 효과가 원정에 적용됩니다</small></div>`}<div class="relic-slot-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="relic-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<span><b>${ARTIFACT[id].name}</b>${compact?'':`<small>Lv.${relicLevel(p().relics[id])}</small>`}</span></button>`:`<button class="relic-slot empty" data-action="relic-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div></div>`;
+  return `<div class="relic-slots ${compact?'compact':''}">${compact?'':`<div class="relic-slots-head"><b>장착 중인 유물 ${worn.length}/3</b><small>장착한 유물의 효과가 원정에 적용됩니다</small></div>`}<div class="relic-slot-row">${[0,1,2].map(i=>{const id=worn[i];return id?`<button class="relic-slot filled" data-relic="${id}" data-rarity="${ARTIFACT[id].rarity}">${image(id)}<span><b>${ARTIFACT[id].name}</b>${compact?'':`<small>Lv.${relicLevel(p().relics[id])}</small>`}</span></button>`:`<button class="relic-slot empty" data-action="relic-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>${compact?'유물':'빈 칸'}</small></button>`;}).join('')}</div></div>`;
 }
 // Puts the current value of each enhancement-scaled number into the (escaped) description, coloured.
 const liveText=(text,tokens)=>{let out=escapeText(text),pos=0;for(const [from,to] of tokens){const f=escapeText(from),at=out.indexOf(f,pos);if(at<0)continue;const mark=`<em class="scaled">${escapeText(to)}</em>`;out=out.slice(0,at)+mark+out.slice(at+f.length);pos=at+mark.length;}return out;};
@@ -344,20 +344,32 @@ function skipReveal(){
 }
 function duration(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return `${String(Math.floor(seconds/3600)).padStart(2,'0')}:${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;}
 function timerText(end){return end<=now()?'귀환 완료':duration(end-now());}
-let editingDeck=[],teamReturn=null;
-function team(edit=false){
-  if(!edit){teamReturn=modal==='prepare'?modalInfo:null;editingDeck=[...p().deck];}
-  show('팀 편성',`출전 ${editingDeck.length}/${TEAM_SIZE}`,`${five(editingDeck,true)}<p class="fineprint" style="margin-top:10px">서로 다른 동료 ${TEAM_SIZE}명이 필요합니다. 편성된 동료를 누르면 해제됩니다.</p><div class="auto-row"><button class="secondary auto-btn" data-action="auto-team-pick">${icon('auto')}<b>자동 편성</b></button></div><div class="choose-list" style="margin-top:14px">${HEROES.filter(h=>p().heroes[h.id].owned).map(h=>`<button class="choose-row" data-team-pick="${h.id}" aria-pressed="${editingDeck.includes(h.id)}" ${away(p(),h.id)||p().active?'disabled':''}>${portrait(h.id)}<div><strong>${h.name}${badge(h.rarity)}</strong><small>${away(p(),h.id)?'파견 중 · 귀환 후 편성 가능':`${h.role} · 전투력 ${cpOf(h.id)}`}</small></div><span class="mark">${editingDeck.includes(h.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
-    `<button class="primary wide" data-action="save-team" ${editingDeck.length!==TEAM_SIZE||p().active?'disabled':''}>편성 확정 (${editingDeck.length}/${TEAM_SIZE})</button>`,'team');
+// One formation sheet. Companions and relics are two tabs under the loadout they fill, and 편성 확정 saves both.
+// The loadout stays in place while the list under the tabs scrolls. The meteor draft picks its own team, so its sheet
+// opens with relics only; before relics unlock the sheet is companions only.
+let editingDeck=[],editingRelics=[],formTab='hero',formReturn=null,formHeroes=true;
+function formation(tab='hero',edit=false){
+  if(!edit){formReturn=modal==='prepare'?modalInfo:null;formHeroes=formReturn?.kind!=='weekly';editingDeck=[...p().deck];editingRelics=[...p().equipped];}
+  const profile=p(),relicsOpen=featureOpen(profile,'relic'),next=!formHeroes?'relic':!relicsOpen?'hero':tab,keep=edit&&next===formTab?qs('#sheet .form-list')?.scrollTop||0:0;formTab=next;
+  const bonus=collectionBonus(profile.relics),power=id=>combatPower(id,profile.heroes[id],profile.beds,bonus);
+  const relicSlot=i=>{const id=editingRelics[i];return id?`<button class="relic-slot filled" data-relic-pick="${id}" data-rarity="${ARTIFACT[id].rarity}" aria-label="${ARTIFACT[id].name} 장착 해제">${image(id)}<span><b>${ARTIFACT[id].name}</b></span></button>`:`<button class="relic-slot empty" data-form-tab="relic" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>유물</small></button>`;};
+  const load=`<div class="form-load">${formHeroes?five(editingDeck,true):''}${relicsOpen?`<div class="relic-slots compact"><div class="relic-slot-row">${[0,1,2].map(relicSlot).join('')}</div></div>`:''}</div>`;
+  const tabs=formHeroes&&relicsOpen?`<div class="tabbar form-tabs"><button data-form-tab="hero" aria-pressed="${formTab==='hero'}"><b>동료</b><small>${editingDeck.length}/${TEAM_SIZE}</small></button><button data-form-tab="relic" aria-pressed="${formTab==='relic'}"><b>유물</b><small>${editingRelics.length}/3</small></button></div>`:'';
+  const bar=`<div class="form-bar">${tabs}<button class="secondary auto-btn" data-action="${formTab==='hero'?'auto-team-pick':'auto-relic-pick'}" ${profile.active?'disabled':''}>${icon('auto')}<b>${formTab==='hero'?'자동 편성':'자동 장착'}</b></button></div>`;
+  const heroes=()=>HEROES.filter(h=>profile.heroes[h.id].owned).sort((a,b)=>power(b.id)-power(a.id)||compareRarity(b,a)).map(h=>`<button class="choose-row" data-team-pick="${h.id}" aria-pressed="${editingDeck.includes(h.id)}" ${away(profile,h.id)||profile.active?'disabled':''}>${portrait(h.id)}<div><strong>${h.name}${badge(h.rarity)}</strong><small>${away(profile,h.id)?'파견 중 · 귀환 후 편성 가능':`${h.role} · 전투력 ${cpOf(h.id)}`}</small></div><span class="mark">${editingDeck.includes(h.id)?icon('check'):icon('plus')}</span></button>`).join('');
+  const relics=()=>ARTIFACTS.filter(a=>profile.relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity)).map(a=>`<button class="choose-row relic-row" data-relic-pick="${a.id}" aria-pressed="${editingRelics.includes(a.id)}" ${profile.active?'disabled':''}><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${relicLevel(profile.relics[a.id])}</span></strong><small class="relic-effect">${relicText(a.id,relicLevel(profile.relics[a.id]))}</small></div><span class="mark">${editingRelics.includes(a.id)?icon('check'):icon('plus')}</span></button>`).join('');
+  const list=formTab==='hero'?heroes():relics()||`<p class="empty">아직 유물이 없어요.</p>`;
+  show(formHeroes?'편성':'유물',formHeroes?`전투력 ${fmt(deckPower(editingDeck))}`:`장착 ${editingRelics.length}/3`,`${load}${bar}<div class="choose-list form-list">${list}</div>`,
+    `<button class="primary wide" data-action="save-team" ${(formHeroes&&editingDeck.length!==TEAM_SIZE)||profile.active?'disabled':''}>${profile.active?'진행 중인 원정을 마친 뒤 바꿀 수 있어요':`${formHeroes?'편성':'장착'} 확정`}</button>`,'team');
+  const scroller=qs('#sheet .form-list');if(scroller)scroller.scrollTop=keep;
 }
-// Relic loadout: the same flow as the team sheet (slots on top, owned list below, confirm returns to the prep sheet).
-let editingRelics=[],relicReturn=null;
-function relicTeam(edit=false){
-  if(!edit){relicReturn=modal==='prepare'?modalInfo:null;editingRelics=[...p().equipped];}
-  const owned=ARTIFACTS.filter(a=>p().relics[a.id].owned).sort((a,b)=>RARITIES.indexOf(b.rarity)-RARITIES.indexOf(a.rarity));
-  const slots=`<div class="relic-slot-row">${[0,1,2].map(i=>{const id=editingRelics[i];return id?`<button class="relic-slot filled" data-relic-pick="${id}" data-rarity="${ARTIFACT[id].rarity}" aria-label="${ARTIFACT[id].name} 장착 해제">${image(id)}<span><b>${ARTIFACT[id].name}</b></span></button>`:`<button class="relic-slot empty" data-action="focus-team" aria-label="${i+1}번째 유물 선택">${icon('plus')}<small>빈 칸</small></button>`;}).join('')}</div>`;
-  show('유물 장착',`장착 ${editingRelics.length}/3`,`${slots}<p class="fineprint" style="margin-top:10px">장착한 유물을 누르면 해제됩니다.</p><div class="auto-row"><button class="secondary auto-btn" data-action="auto-relic-pick">${icon('auto')}<b>자동 장착</b></button></div><div class="choose-list" style="margin-top:14px">${owned.map(a=>`<button class="choose-row relic-row" data-relic-pick="${a.id}" aria-pressed="${editingRelics.includes(a.id)}" ${p().active?'disabled':''}><span class="portrait" data-rarity="${a.rarity}">${image(a.id)}</span><div><strong>${a.name}${badge(a.rarity)}<span class="relic-lv">Lv.${relicLevel(p().relics[a.id])}</span></strong><small class="relic-effect">${relicText(a.id,relicLevel(p().relics[a.id]))}</small></div><span class="mark">${editingRelics.includes(a.id)?icon('check'):icon('plus')}</span></button>`).join('')}</div>`,
-    `<button class="primary wide" data-action="save-relics" ${p().active?'disabled':''}>장착 확정 (${editingRelics.length}/3)</button>`,'relic-team');
+function team(){formation('hero');}
+function relicTeam(){formation('relic');}
+function saveFormation(){
+  const profile=p(),same=(a,b)=>a.join()===b.join();
+  if(formHeroes&&!same(editingDeck,profile.deck)&&!act('deck',{ids:editingDeck},false).ok)return;
+  if(featureOpen(profile,'relic')&&!same(editingRelics,profile.equipped)&&!act('relics',{ids:editingRelics},false).ok)return;
+  const back=formReturn;formReturn=null;close();render();if(back)prepare(back.stage,back.kind);toast(formHeroes?'편성을 저장했습니다.':'유물 장착을 저장했습니다.');
 }
 function begin(kind,stage,side){const result=act('begin',{mode:kind,stage:kind==='weekly'?weeklyChapter()+1:stage,...(kind==='main'?{}:{tier:challengeTier}),...(kind==='oath'?{oaths:[...oathPick]}:{}),...(kind==='twin'?{side}:{})},false);if(!result.ok)return;close();if(kind==='weekly'){screen='draft';render();}else startBattle();}
 function renderDraft(){
@@ -995,14 +1007,14 @@ function modeInfo(kind){if(kind==='oath'||kind==='twin'){previewInfo(kind);retur
 function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind==='oath'){oathPrepare();return;}if(kind==='twin'){twinFormation();return;}
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const c=CHAPTERS[stage-1],boss=BOSSES[c.bosses[0]],t=TIERS[challengeTier]||TIERS.easy;
-  const perf=kind==='main'&&(p().perfect||[]).includes(stage);
+  const perf=kind==='main'&&(p().perfect||[]).includes(stage),relicsOpen=featureOpen(p(),'relic');
   const rewardChip=kind==='main'?`<div class="prep-rewards"><span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루'}</span>${perf?`<span class="prep-reward perfect done">${icon('crown')}퍼펙트 달성</span>`:`<span class="prep-reward perfect">${icon('crown')}퍼펙트 ${gem(PERFECT_REWARD)}</span>`}</div>${perf?'':`<small class="perfect-rule">코어 생명력을 잃지 않고 클리어하면 퍼펙트</small>`}`:'';
   const head=kind==='main'?`<div class="prep-boss"><small>${c.name} · 6웨이브</small><h2>${boss.name}</h2>${boss.trait?`<p>${boss.trait}</p>`:''}${rewardChip}</div>`
     :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'유성 드래프트':'만월 토벌전'}</h2><p>${kind==='weekly'?`보유 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'유성 드래프트':'만월 토벌전','출격 준비',`${head}
-    ${kind==='weekly'?'':`<div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span><button class="link" data-action="auto-prepare">자동 편성</button></div>${five(p().deck)}`}
-    <div class="panel-head"><h3>장착 유물</h3><button class="link" data-action="relic-team">변경</button></div>${relicSlots(true)}${kind==='weekly'?'':requestChips(p().deck)}`,
-    `<div class="dialog-buttons">${kind==='weekly'?'':'<button class="secondary" data-action="team">편성</button>'}<button class="primary shine" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장'}</button></div>`,'prepare',{stage,kind});
+    ${kind==='weekly'?relicsOpen?`<div class="panel-head"><h3>장착 유물</h3></div>`:'':`<div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span><button class="link" data-action="auto-prepare">자동 편성</button></div>`}
+    <div class="prep-load">${kind==='weekly'?'':five(p().deck)}${relicsOpen?relicSlots(true):''}</div>${kind==='weekly'?'':requestChips(p().deck)}`,
+    `<div class="dialog-buttons">${kind!=='weekly'?'<button class="secondary" data-action="team">편성</button>':relicsOpen?'<button class="secondary" data-action="relic-team">유물</button>':''}<button class="primary shine" data-begin="${kind}" data-stage="${stage}" ${p().deck.length!==TEAM_SIZE?'disabled':''}>${kind==='main'?'출격':'입장'}</button></div>`,'prepare',{stage,kind});
 }
 
 // ───────── Content preview (bright test build only) ─────────
@@ -1041,8 +1053,7 @@ function oathPrepare(){
   const groups=Object.keys(OATH_GROUPS).map(g=>`<section class="oath-group"><h4>${OATH_GROUPS[g]}</h4>${OATHS.filter(o=>o.group===g).map(o=>`<button class="oath-chip" data-oath="${o.id}" aria-pressed="${oathPick.includes(o.id)}"><span class="oath-pt">+${o.points}</span><span class="oath-copy"><b>${o.name}</b><small>${o.text}</small></span>${o.id==='hollow'?oathBoardGlyph():''}</button>`).join('')}</section>`).join('');
   show('별빛 서약','출격 준비',`<div class="oath-head"><div class="oath-score"><small>${TIERS[tier].name} ${base} · 서약 ${score-base}</small><b>${score}</b><em>점</em></div>${bossRoute(oathBosses(season(now()).index,metBosses(profile)))}</div>
     <div class="oath-groups">${groups}</div>
-    <div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(profile))}</b></span><button class="link" data-action="auto-oath">자동 편성</button></div>${five(deck)}${problem?`<p class="oath-problem">${icon('info')}<span>${escapeText(problem)}</span></p>`:''}
-    <div class="panel-head"><h3>장착 유물</h3><button class="link" data-action="relic-team">변경</button></div>${relicSlots(true)}${requestChips(deck)}`,
+    <div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(profile))}</b></span><button class="link" data-action="auto-oath">자동 편성</button></div><div class="prep-load">${five(deck)}${featureOpen(profile,'relic')?relicSlots(true):''}</div>${problem?`<p class="oath-problem">${icon('info')}<span>${escapeText(problem)}</span></p>`:''}${requestChips(deck)}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="team">편성</button><button class="primary shine" data-begin="oath" data-stage="0" ${problem?'disabled':''}>${score}점 서약 입장</button></div>`,'prepare',{stage:0,kind:'oath'});
 }
 // The closed board, drawn small in its chip so the cells are known before entering.
@@ -1638,7 +1649,7 @@ function coachTick(){
   }
   if(step==='formation'){
     if(modal==='team'){
-      const auto=qs('#sheet [data-action="auto-team-pick"]'),pending=editingDeck.join()!==AT.autoDeck(p()).join();
+      const auto=qs('#sheet [data-action="auto-team-pick"]'),pending=[...editingDeck].sort().join()!==AT.autoDeck(p()).sort().join();
       return pending&&auto?guide('team-auto',()=>auto,'새 동료가 왔으니 편성을 바꿔 보자. 자동 편성이면 한 번에 끝!',{skippable:false})
         :guide('team-save',()=>qs('#sheet [data-action="save-team"]'),'좋아, 이대로 확정!',{skippable:false});
     }
@@ -1812,20 +1823,21 @@ document.addEventListener('click',e=>{
   if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic,c=centerOf(button);if(act('enhance',{id,kind:d.enhance?'hero':'relic'},false).ok){refreshBehind();(d.enhance?heroDetail:relicDetail)(id);burst(c.x,c.y,{count:14,spread:80,size:11,color:'#ffe39a'});}return;}
   if(d.equip){if(act('equip',{id:d.equip},false).ok){refreshBehind();relicDetail(d.equip);}return;}
   if(d.setPartner){if(act('partner',{id:d.setPartner},false).ok){close();if(screen==='home')render();toast(`파트너 · ${HERO[d.setPartner].name}`);}return;}
-  if(d.relicPick){const i=editingRelics.indexOf(d.relicPick);if(i>=0)editingRelics.splice(i,1);else if(editingRelics.length<3)editingRelics.push(d.relicPick);else{toast('유물은 3개까지 장착해요. 먼저 하나를 빼 주세요.');return;}relicTeam(true);return;}
-  if(d.teamPick){const i=editingDeck.indexOf(d.teamPick);if(i>=0)editingDeck.splice(i,1);else if(editingDeck.length<TEAM_SIZE)editingDeck.push(d.teamPick);else{toast(`편성은 ${TEAM_SIZE}명이에요. 먼저 한 명을 빼 주세요.`);return;}team(true);return;}
+  if(d.formTab){formation(d.formTab,true);return;}
+  if(d.relicPick){const i=editingRelics.indexOf(d.relicPick);if(i>=0)editingRelics.splice(i,1);else if(editingRelics.length<3)editingRelics.push(d.relicPick);else{toast('유물은 3개까지 장착해요. 먼저 하나를 빼 주세요.');return;}formation('relic',true);return;}
+  if(d.teamPick){const i=editingDeck.indexOf(d.teamPick);if(i>=0)editingDeck.splice(i,1);else if(editingDeck.length<TEAM_SIZE)editingDeck.push(d.teamPick);else{toast(`편성은 ${TEAM_SIZE}명이에요. 먼저 한 명을 빼 주세요.`);return;}formation('hero',true);return;}
   if(d.dispatchSlot){dispatchTap(Number(d.dispatchSlot));return;}
   if(d.send){if(act('dispatch',{id:d.send,slot:Number(d.slot)},false).ok){close();refreshGarden();toast(`${HERO[d.send].name} 파견 출발 · ${T.dispatchHours}시간`);}return;}
   if(d.draft){if(act('draft',{index:Number(d.draft)},false).ok)render();return;}
   if(d.skill){if(skillHeld){skillHeld=false;return;}if(button.classList.contains('unavailable'))return;battleCommand(E.cast(run,d.skill));return;}if(d.train){battleCommand(E.upgrade(run,d.train));training();return;}if(d.sell){battleCommand(E.sell(run,Number(d.sell)));return;}if(d.reward){battleCommand(E.chooseReward(run,d.reward));close();previousPhase='';return;}
   if(d.setting){if(act('setting',{id:d.setting,value:!p().settings[d.setting]},false).ok)showSettings();return;}if(d.daily){claimDaily([d.daily]);return;}
   if(d.confirmMonthly){if(act('claimMonthly',{token:d.confirmMonthly}).ok){close();render();}return;}
-  const actions={close:()=>{if(modal==='reward')return;if(modal==='draw'&&bonusItems){showBonus();return;}close();},settings:showSettings,partner:partners,team:()=>team(),'relic-team':()=>relicTeam(),'save-relics':()=>{if(act('relics',{ids:editingRelics}).ok){const back=relicReturn;relicReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},'focus-team':()=>document.querySelector('#sheet-body .choose-list')?.scrollIntoView({behavior:'smooth',block:'start'}),rates,history,records,daily,
+  const actions={close:()=>{if(modal==='reward')return;if(modal==='draw'&&bonusItems){showBonus();return;}close();},settings:showSettings,partner:partners,team:()=>team(),'relic-team':()=>relicTeam(),'focus-team':()=>formation('hero',true),rates,history,records,daily,
     'daily-all':()=>claimDaily(DAILY_MISSIONS.filter(m=>missionDone(todayDaily(),m.id)&&!todayDaily().claimed.includes(m.id)).map(m=>m.id)),
     bond:()=>bondSheet(d.id||p().partner),'gift-tray':()=>toggleTray(button),talk,'lobby-view':()=>setLobbyView(!lobbyView),idle:collectStars,'idle-shard':collectStars,
     'memorial-story':()=>toggleStory(button),fullscreen:toggleFullscreen,'unit-info':unitInfo,'reveal-skip':skipReveal,'spot-skip':skipSpots,
     season:()=>{banner='season';screen='summon';render();},prepare:()=>prepare(Number(d.stage)),'prepare-mode':()=>prepare(Math.min(MAIN_STAGES,p().cleared+1),mode),resume,
-    'save-team':()=>{if(act('deck',{ids:editingDeck}).ok){const back=teamReturn;teamReturn=null;close();render();if(back)prepare(back.stage,back.kind);}},
+    'save-team':saveFormation,
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
     'go-collection':()=>{close();screen='collection';collection='hero';render();},'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},
     'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=PART_STAGES)showLateNotice();else show('신규 동료',`스테이지 ${PART_STAGES} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${PART_STAGES}을(를) 처음 클리어하면 일반 소환과 시즌 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
@@ -1843,9 +1855,9 @@ document.addEventListener('click',e=>{
     'tutor-clear':()=>{saveTutorSettings({key:'',model:tutorSettings().model});tutorCache.clear();toast('API 키를 지웠어요.');showSettings();},
     'today-star':todayStar,pity:pitySheet,'pity-claim':claimPity,basket:()=>claimBasket(button),'claim-all':()=>claimDispatches(p().dispatches.filter(x=>x.end<=now()).map(x=>x.slot)),
     'relic-info':relicInfo,'mode-info':()=>modeInfo(d.kind),'dispatch-info':dispatchInfo,
-    'auto-team-pick':()=>{editingDeck=autoDeck(p());team(true);},'auto-relic-pick':()=>{editingRelics=autoRelics(p());relicTeam(true);},
+    'auto-team-pick':()=>{editingDeck=autoDeck(p());formation('hero',true);},'auto-relic-pick':()=>{editingRelics=autoRelics(p());formation('relic',true);},
     'auto-twin':()=>{twinDraft=autoTwin(p());twinFormation(true);},'auto-oath':()=>{const ids=oathDeck(p(),oathPick);if(!ids){toast('조건에 맞는 동료가 부족해요');return;}if(act('deck',{ids},false).ok)oathPrepare();},
-    'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),changed=JSON.stringify(deck)!==JSON.stringify(p().deck)||(featureOpen(p(),'relic')&&relics.length&&JSON.stringify(relics)!==JSON.stringify(p().equipped));if(!changed){toast('지금이 가장 강한 편성이에요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);toast(`전투력 ${fmt(before)} → ${fmt(teamPower(p()))}`);},
+    'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),same=(a,b)=>[...a].sort().join()===[...b].sort().join(),changed=!same(deck,p().deck)||(featureOpen(p(),'relic')&&relics.length&&!same(relics,p().equipped));if(!changed){toast('지금이 가장 강한 편성이에요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);toast(`전투력 ${fmt(before)} → ${fmt(teamPower(p()))}`);},
     'next-stage':()=>{close();prepare(Number(d.stage));},
     'trial-start':()=>{if(!UNLOCKED)return;show('신규 플레이 체험','',`<p class="subtext">지금 프로필은 따로 보관하고, 처음 시작하는 프로필로 바꿉니다. 체험을 끝내면 지금 상태로 돌아옵니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-start-confirm">시작</button></div>`,'trial-confirm');},
     'trial-start-confirm':()=>{if(!UNLOCKED||p().trial)return;try{localStorage.setItem(SAVE_KEY+'.backup',store.raw||JSON.stringify(p()));const r=store.import(JSON.stringify(createProfile(Date.now(),{trial:true})));if(!r.ok){toast(r.message);return;}location.reload();}catch{toast('프로필을 보관할 수 없어요.');}},
