@@ -38,7 +38,7 @@ export const BOSSES=source.BOSSES;
 const worlds=[0,1,0,3,4,2,5,3,6];
 // Main stages: two parts of 45 (five chapters of nine). Part two opens when stage 45 is cleared and keeps the
 // same enemy-health slope; its chapters are the same worlds at dawn.
-export const PART_STAGES=45,MAIN_STAGES=90,CHAPTER_STAGES=9;
+export const PART_STAGES=45,MAIN_STAGES=90;
 export const PARTS=Object.freeze([
   {id:1,name:'달빛의 별길',chapters:['달빛 정원','별무리 숲','은하 사원','시간의 탑','창조의 끝']},
   {id:2,name:'새벽의 별길',chapters:['새벽 정원','이슬 숲','노을 사원','되감긴 탑','창조의 시작']},

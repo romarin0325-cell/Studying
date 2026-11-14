@@ -1,4 +1,4 @@
-import {HERO,HEROES} from '../content.js';
+import {HERO} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella,JOKER} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
@@ -1062,4 +1062,3 @@ export class CombatFX{
 }
 
 // A static contract is useful to keep new companions from silently sharing VFX.
-export const distinctAttackCount=()=>new Set(HEROES.map(h=>FX_PROFILES[h.id]?.motion)).size;
