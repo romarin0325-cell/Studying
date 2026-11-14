@@ -380,11 +380,11 @@ try{
   const bosses=await monthly.page.evaluate(()=>window.STAR_GARDEN.battle.enemies.map(e=>e.boss));
   assert.deepEqual(bosses,['artificial_demon']);await shot(monthly.page,'monthly-battle',390,844);
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
-  assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.equal((await profile(monthly.page)).dreams,600);
-  assert.equal((await profile(monthly.page)).monthly,null);assert.ok((await profile(monthly.page)).monthlyBest);
-  await shot(monthly.page,'monthly-record',390,844);await monthly.page.locator('#sheet-body [data-action="monthly-claim"]').click();
-  assert.match(await monthly.page.locator('#sheet-body').innerText(),/한 번/);const monthlyPaid=600+monthlyReward((await profile(monthly.page)).monthlyBest);await monthly.page.locator('[data-confirm-monthly]').click();
-  assert.equal((await profile(monthly.page)).dreams,monthlyPaid);assert.ok((await profile(monthly.page)).monthly);
+  assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.ok((await profile(monthly.page)).monthlyBest);
+  // The hunt pays its record when the run is settled; nothing is left to claim.
+  const monthlyPaid=600+monthlyReward((await profile(monthly.page)).monthlyBest);assert.equal((await profile(monthly.page)).dreams,monthlyPaid);assert.ok((await profile(monthly.page)).monthly);
+  assert.match(await monthly.page.locator('#sheet-body').innerText(),/획득 보상/);assert.equal(await monthly.page.locator('[data-action="monthly-claim"]').count(),0);
+  await shot(monthly.page,'monthly-record',390,844);await close(monthly.page);assert.match(await monthly.page.locator('#content .mode.monthly').innerText(),/받음/);
   await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
   assert.equal((await profile(monthly.page)).dreams,monthlyPaid,'a second attempt cannot pay again');await monthly.context.close();
@@ -408,8 +408,8 @@ try{
   await quota.page.locator('[data-action="leave"]').click();await quota.page.locator('[data-action="save-leave"]').click();assert.ok((await profile(quota.page)).active.run);await quota.context.close();
 
   const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
-  const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);assert.equal((await profile(record.page)).dreams,600);
-  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);const recordPaid=600+monthlyReward((await profile(record.page)).monthlyBest);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,recordPaid);await record.context.close();
+  const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);const recordPaid=600+monthlyReward((await profile(record.page)).monthlyBest);assert.equal((await profile(record.page)).dreams,recordPaid);
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);assert.equal(await record.page.locator('#content [data-action="monthly-claim"]').count(),0);assert.match(await record.page.locator('#content .mode.monthly').innerText(),/받음/);await shot(record.page,'monthly-confirm',390,844);await record.context.close();
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.

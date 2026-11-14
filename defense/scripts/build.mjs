@@ -9,7 +9,7 @@ import {MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST} from '
 import {LIBRARY_ART} from '../src/library.js';
 import {brightCss} from './theme-bright.mjs';
 import {MUSIC} from '../src/audio-tracks.js';
-import {RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
+import {EMBEDDED_ASSET_PATHS} from '../src/asset-policy.js';
 import {BRIGHT_ART,VISUAL_HEROES} from './image-policy.mjs';
 import {loadImagePack} from './image-pack.mjs';
 
@@ -32,7 +32,7 @@ const readText=async file=>(await fs.readFile(file,'utf8')).replace(/\r\n/g,'\n'
 const assets={},media={},memorial={},memorialFallback={};
 const sizes={battle:0,portraits:0,figures:0,relics:0,avif:0,webp:0,avifMax:0,webpMax:0};
 const pack=await loadImagePack();
-for(const [id,relative] of Object.entries(RUNTIME_ASSET_PATHS)){
+for(const [id,relative] of Object.entries(EMBEDDED_ASSET_PATHS)){
   const bytes=pack.read(relative),metadata=await sharp(bytes).metadata();
   if(!metadata.width||!metadata.height)throw new Error('Invalid canonical art: '+id);
   sizes.battle+=bytes.length;assets[id]='data:image/webp;base64,'+bytes.toString('base64');

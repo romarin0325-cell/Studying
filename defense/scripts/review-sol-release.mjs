@@ -12,7 +12,7 @@ import * as E from '../src/combat/engine.js';
 import {COMPANION_VISUALS} from '../src/combat/companion-vfx.js';
 import {gameRoot} from './local-inputs.mjs';
 import {loadImagePack} from './image-pack.mjs';
-import {RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
+import {EMBEDDED_ASSET_PATHS as RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
 const out=path.join(gameRoot,'test-results/sol-release');await fs.mkdir(out,{recursive:true});
 const ids=Object.keys(COMPANION_VISUALS),selection=JSON.parse(await fs.readFile(path.join(gameRoot,'docs/art/sol-20261023/selection.json')));
 const optimized=await loadImagePack();

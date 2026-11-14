@@ -1,7 +1,7 @@
 import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN,MAX_RANK} from './content.js';
 import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
-import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES} from './monthly.js';
+import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES,monthlyPaid,monthlyDue} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED,SOLO} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
@@ -514,6 +514,9 @@ export function command(p,action,args={},now=Date.now()){
       if(!validRecord(record))return no('전투 기록을 확인하세요.');
       newBest=betterMonth(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
       if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
+      // Paid here like the draft: whatever this month's best record is worth beyond what the month has paid.
+      const best=currentRecord(p,now),paid=monthlyPaid(p,now),due=monthlyDue(p,now);earned=monthlyReward(best);paidBefore=Number.isFinite(paid)?paid:earned;
+      if(due>0){reward+=due;p.monthly=best.period;p.monthlyClaim=structuredClone(best);}
     }
     if(a.mode==='oath'){const out=settleOath(p,a,args,now);record=out.record;newBest=out.newBest;score=out.score;bands=out.bands;reward+=out.pay;}
     if(a.mode==='twin'){const out=settleTwin(p,a,args,now);newBest=out.newBest;side=out.side;total=out.total;shownRound=out.round;bands=out.bands;reward+=out.pay;}
@@ -521,13 +524,14 @@ export function command(p,action,args={},now=Date.now()){
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
     const requestsDone=args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
     p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;
-    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
+    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:a.mode==='monthly'?{earned,paidBefore}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
   }
   if(action==='claimMonthly'){
     const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 만월 토벌전 최고 기록을 확인하세요.');
-    if(p.monthly===record.period)return no('이번 달 기록 보상은 이미 확정했습니다.');
-    const reward=monthlyReward(record);p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
-    return {ok:true,reward,message:`만월 토벌전 기록 보상 확정 · 꿈의결정 +${reward}`};
+    // Settling pays the hunt, so this only hands over what a save from the claim-once rule is still owed.
+    const reward=monthlyDue(p,now);if(reward<=0)return no('이번 달 기록 보상은 이미 받았습니다.');
+    p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
+    return {ok:true,reward,message:`만월 토벌전 기록 보상 · 꿈의결정 +${reward}`};
   }
   if(action==='answer'){
     const q=questionOf(args.kind,args.id);if(!q||!integer(args.choice,q.choices.length-1))return no('문제를 확인하세요.');

@@ -270,9 +270,23 @@ button:focus-visible,summary:focus-visible,input:focus-visible,canvas:focus-visi
 .news-line{background:var(--grid),var(--paper);border:1px solid rgba(31,63,134,.2);color:var(--ink)}
 .news-list li{background:var(--paper);border:1px solid rgba(31,63,134,.14)}
 .news-list .ic{color:var(--navy)}
-.ev-banner{background:linear-gradient(120deg,var(--navy-d),#2c58b8);border:none;border-radius:8px}
-.ev-pop[data-kind=twin] .ev-banner{background:linear-gradient(110deg,#7b8bb5 0 48%,#c9962e 52% 100%)}
-.ev-period{color:var(--navy)}
+/* The event banner stays a night picture on the paper skin (same rule as the painted backgrounds). */
+.ev-banner{background:radial-gradient(120% 90% at 78% 46%,#3a3f8f 0,#232a6e 34%,#111640 68%,#070a22 100%)!important}
+.ev-pop[data-kind=twin] .ev-banner{background:radial-gradient(70% 90% at 62% 34%,#3b4f8c 0,transparent 62%),radial-gradient(70% 90% at 88% 40%,#6a5326 0,transparent 60%),linear-gradient(180deg,#0b1034,#141a48 70%,#0a0d2a)!important}
+.ev-banner.has-art{background:#070a22 var(--event-oath) 72% 50%/cover!important}
+.ev-pop[data-kind=twin] .ev-banner.has-art{background:#070a22 var(--event-twin) 72% 50%/cover!important}
+.ev-shade{background:linear-gradient(90deg,rgba(6,8,28,.82) 0,rgba(6,8,28,.5) 38%,transparent 66%),linear-gradient(180deg,transparent 52%,rgba(6,8,28,.72) 100%)!important}
+.ev-title,.ev-title b{color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:0 2px 10px rgba(4,6,20,.8)!important}
+.ev-title em{color:#ffe7a6!important;-webkit-text-fill-color:#ffe7a6!important;text-shadow:0 1px 6px rgba(4,6,20,.9)!important}
+.ev-title small{-webkit-text-fill-color:#3a2306!important}
+.ev-halo{fill:rgba(246,210,122,.16)!important}.ev-halo.silver{fill:rgba(207,220,255,.18)!important}
+.ev-line{stroke:rgba(255,231,166,.55)!important}.ev-line.faint{stroke:rgba(255,231,166,.3)!important}
+.ev-dot{fill:#ffe7a6!important}.ev-dot.silver{fill:#dfe8ff!important}
+.ev-spark{fill:#fff3cf!important;filter:drop-shadow(0 0 4px rgba(246,210,122,.9))!important}.ev-spark.core{fill:#fffaf0!important;filter:drop-shadow(0 0 9px rgba(246,210,122,1))!important}
+.ev-spark.silver{fill:#f4f7ff!important;filter:drop-shadow(0 0 9px rgba(190,208,255,1))!important}
+.ev-road.silver{stroke:#cfdcff!important}.ev-road.gold{stroke:#ffd98a!important}
+.ev-title small{color:#3a2306!important;background:linear-gradient(180deg,#ffeab0,#e2a94a)!important}
+.sheet[data-kind=event] .sheet-top .icon-button{background:rgba(6,9,26,.55)!important;border-color:rgba(255,255,255,.22)!important;color:#fff!important;box-shadow:none!important}
 .ev-desc{color:var(--ink2)}
 .ev-reward{background:var(--paper);border:1px solid rgba(31,63,134,.14)}
 .sortie-band{background:linear-gradient(100deg,var(--navy-d),var(--navy))}

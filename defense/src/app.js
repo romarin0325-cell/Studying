@@ -21,7 +21,7 @@ import {Art,Renderer} from './combat/render.js';
 import {warmUltimates} from './combat/ur-warm.js';
 import {Sound} from './combat/audio.js';
 import {icon} from './icons.js';
-import {currentRecord,monthlyReward,weeklyReward,MONTHLY_REWARDS,WEEKLY_ENTRIES} from './monthly.js';
+import {currentRecord,monthlyReward,weeklyReward,MONTHLY_REWARDS,WEEKLY_ENTRIES,monthlyPaid,monthlyDue} from './monthly.js';
 import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
@@ -152,19 +152,17 @@ for(const type of ['pointerup','pointercancel'])document.addEventListener(type,(
 const weeklyChapter=()=>weeklyStage(p(),now())-1;
 function weeklyBosses(){return Array.from({length:CHALLENGE_WAVES/3},(_,i)=>E.weeklyBoss(weeklyChapter(),(i+1)*3,metBosses(p())));}
 const tierName=r=>(TIERS[r?.tier||'easy']||TIERS.easy).name;
-function monthlyRecordPanel(){
-  const record=currentRecord(p(),now()),claimed=p().monthly===calendar(now()).month,all=p().monthlyLifetime;
+const monthlyGot=()=>{const paid=monthlyPaid(p(),now());return Number.isFinite(paid)?paid:null;};
+function monthlyRecordPanel(payout=true){
+  const record=currentRecord(p(),now()),due=monthlyDue(p(),now()),got=monthlyGot(),all=p().monthlyLifetime;
   return `<div class="monthly-record"><span class="eyebrow">${monthNo(calendar(now()))} 최고 기록${record?` · ${tierName(record)}`:''}</span><div class="record-score"><b>${record?record.round:'—'}</b><span>/ ${CHALLENGE_WAVES} 보스 격파</span>${record?'<span class="record-stamp">BEST</span>':''}</div><p>${record?`${record.token.startsWith('legacy-')?'피해 기록 없음':`총 피해 ${fmt(record.damage)}`} · ${calendar(record.at).day}`:'도전을 마치면 최고 기록이 이곳에 남습니다.'}</p>
     ${record?`<div class="record-team"><small>기록 당시 편성</small>${record.deck.map(id=>portrait(id)).join('')}</div>`:''}
-    <div class="record-payout"><span>${claimed?'이번 달 확정 보상':'이 기록으로 받을 보상'}</span>${claimed?p().monthlyClaim?gem(monthlyReward(p().monthlyClaim)):'<b>수령 완료</b>':record?gem(monthlyReward(record)):'<b>기록 대기</b>'}</div>
-    ${claimed?'<p class="record-note">보상 확정 완료 · 기록 갱신과 재도전은 계속 가능합니다.</p>':record?'<button class="secondary wide" data-action="monthly-claim">이 기록으로 보상 받기</button>':''}
+    ${payout?`<div class="record-payout"><span>이번 달 받은 보상</span>${got===null?'<b>수령 완료</b>':record||got?gem(got):'<b>기록 대기</b>'}</div>`:''}
+    ${due>0?`<button class="secondary wide" data-action="monthly-claim">남은 보상 받기 ${gem(due)}</button>`:''}
     ${all?`<div class="lifetime-record">역대 최고 <strong>${tierName(all)} ${all.round}보스</strong><small>${all.period} · 총 피해 ${fmt(all.damage)}</small></div>`:''}</div>`;
 }
-function confirmMonthlyClaim(){
-  const record=currentRecord(p(),now());if(!record||p().monthly===record.period){toast('이번 달 보상 상태를 확인하세요.');return;}
-  show('이 기록으로 보상을 확정할까요?',`${record.period} 만월 토벌전`,`<div class="claim-score"><b>${record.round}</b><span>${tierName(record)} · 보스 격파</span></div><div class="reward-box"><span>확정할 보상</span>${gem(monthlyReward(record))}</div><p class="subtext">이번 달 보상은 한 번만 받을 수 있습니다. 기록을 더 올리고 싶다면 재도전한 뒤 수령하세요. 확정 후에도 최고 기록은 계속 갱신됩니다.</p>`,
-    `<div class="dialog-buttons"><button class="secondary" data-action="close">더 도전하기</button><button class="primary" data-confirm-monthly="${record.token}">보상 확정</button></div>`,'monthly-claim');
-}
+// A save from the claim-once rule can still be owed part of this month's record; one tap hands it over.
+function claimMonthlyDue(){const record=currentRecord(p(),now());if(!record||!act('claimMonthly',{token:record.token}).ok)return;if(modal==='info')modeInfo('monthly');else{close();render();}}
 // Summon reveal. A falling star opens it. Each new result, and every SR/UR, then
 // gets a full-screen spotlight in pull order. A NEW companion builds for about 2.7s
 // (gate, silhouette, flash, title). Duplicate SR/UR stay near 1s with no silhouette;
@@ -550,17 +548,21 @@ function training(){
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
-function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);}
+function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null,monthly:snapshot.mode==='monthly'?{earned:result.earned,paidBefore:result.paidBefore}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);}
 // The tutorial's first win leads straight to the free first ten.
 function resultCta(r){return FW.ftueNext(p())==='firstTen'&&r.won&&r.mode==='main'?`<button class="primary wide shine" data-action="ftue-summon">${icon('summon')}<b>새 동료 만나러 가기</b></button>`:null;}
 function showResult(r){
   const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${modeTitle(r.mode,r.side)} · ${(TIERS[r.tier]||TIERS.easy).name}`;
   const crowned=r.mode==='main'&&r.won&&r.perfect,retry=r.mode==='main'&&r.won&&!r.perfect&&!(p().perfect||[]).includes(r.stage)?'코어 피해 없이 다시 클리어하면 퍼펙트 보상 +100':'';
   const wonLine=r.won?[`파견 보상 +${p().cleared*5}%`,p().cleared%9===0&&p().cleared<=36?'파견 슬롯이 해금되었습니다.':'',retry].filter(Boolean).join(' · '):r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 웨이브에 도전하세요.';
-  const w=r.weekly,split=crowned&&r.firstPerfect?`<small class="reward-split">${r.clearReward>0?`첫 클리어 +${r.clearReward} · 퍼펙트 +100`:'퍼펙트 +100'}</small>`:w&&r.newBest&&w.paidBefore>0?`<small class="reward-split">기록 보상 ${fmt(w.earned)} − 받은 보상 ${fmt(w.paidBefore)}</small>`:'';
-  const weeklyLine=w?`<p class="record-result">${r.newBest?'이번 주 최고 기록 갱신':`이번 주 최고 ${w.best.won?'완주':`${w.best.round}웨이브`} 유지`} · 남은 입장 ${w.left}/${WEEKLY_ENTRIES}</p>`:'';
+  const w=r.weekly,split=crowned&&r.firstPerfect?`<small class="reward-split">${r.clearReward>0?`첫 클리어 +${r.clearReward} · 퍼펙트 +100`:'퍼펙트 +100'}</small>`:'';
+  // The draft and the hunt read the same way: the period's best record, what this run added, and what the period has paid.
+  const per=r.mode==='weekly'?w:r.mode==='monthly'?r.monthly:null,span=r.mode==='weekly'?'이번 주':'이번 달',best=r.mode==='monthly'?currentRecord(p(),now()):null;
+  const periodLine=!per?'':`<p class="record-result">${r.mode==='weekly'?`${r.newBest?`${span} 최고 기록${w.paidBefore>0?' 갱신':''}`:`${span} 최고 ${w.best.won?'완주':`${w.best.round}웨이브`} 유지`} · 남은 입장 ${w.left}/${WEEKLY_ENTRIES}`:`${r.newBest?`${span} 최고 기록${per.paidBefore>0?' 갱신':''}`:`${span} 최고 ${best?`${tierName(best)} ${best.round}보스`:''} 유지`} · 이번 도전 ${r.round}보스`}</p>`;
+  const periodBox=!per?'':r.reward>0?`<div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b class="count-up" data-to="${r.reward}">+${fmt(r.reward)}</b></span></div>${per.paidBefore>0?`<small class="reward-split">${span} 받은 보상 ${fmt(per.paidBefore)} → ${fmt(per.earned)}</small>`:''}`
+    :`<div class="reward-box kept"><span>${span} 받은 보상</span><span class="cost">${icon('gem')}<b>${fmt(per.paidBefore)}</b></span></div><small class="reward-split">최고 기록을 넘으면 오른 만큼 더 받아요</small>`;
   show(r.won?(r.mode==='oath'?'서약 완수':r.mode==='twin'?'별길 돌파':'스테이지 클리어'):r.mode==='main'?'스테이지 실패':'도전 종료',label,`<div class="battle-result ${r.won?'win':'lose'}"><span class="result-rays" aria-hidden="true"></span><span class="result-mark">${icon(r.won?'check':'close')}</span><b>${r.won?(r.mode==='main'?'승리':'완주'):r.mode==='main'?'패배':r.mode==='monthly'?`보스 ${r.round}체 격파`:`${r.round}웨이브`}</b>${crowned?`<span class="result-perfect">${icon('crown')}퍼펙트</span>`:''}${!r.won&&r.mode==='monthly'?'<small>보스가 코어에 닿아 도전이 끝났습니다</small>':''}</div>
-    ${r.mode==='monthly'?`<p class="record-result">${r.newBest?'이번 달 최고 기록 갱신':'도전 기록 저장'} · 이번 도전 ${r.round}보스</p>${monthlyRecordPanel()}`:`${weeklyLine}<div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b class="count-up" data-to="${r.reward}">+${fmt(r.reward)}</b></span></div>${split}`}
+    ${per?`${periodLine}${periodBox}${r.mode==='monthly'?monthlyRecordPanel(false):''}`:`<div class="reward-box"><span>획득 보상</span><span class="cost">${icon('gem')}<b class="count-up" data-to="${r.reward}">+${fmt(r.reward)}</b></span></div>${split}`}
     ${previewResult(r)}<div class="result-stat"><span>처치</span><b>${fmt(r.kills)}</b></div><div class="result-stat"><span>총 피해</span><b>${fmt(r.damage)}</b></div><div class="result-stat"><span>전투 시간</span><b>${duration(r.seconds*1000)}</b></div>
     ${mvp?`<div class="result-mvp">${image(mvp[0],true)}<div><p class="mvp-tag">MVP</p><strong>${HERO[mvp[0]].name}</strong><small>기여 피해 ${fmt(mvp[1])} (${Math.round(mvp[1]/Math.max(1,r.damage)*100)}%)</small></div></div>`:''}
     <p class="subtext">${wonLine}</p>`,
@@ -980,28 +982,30 @@ function recordRow(label,record,reward){
   return `<div class="mode-record"><div><small>${label}</small><b>${record?`${record.round}<em>/${CHALLENGE_WAVES}</em>`:'—'}</b>${record?`<span>${tierName(record)}</span>`:''}</div>${reward}</div>`;
 }
 const rewardNote=(label,n,state)=>`<span class="mode-reward ${state}"><small>${state==='paid'?icon('check'):''}${label}</small>${n===null?'':gem(n)}</span>`;
+// What a period record has paid, with what the chosen tier still holds beyond it (받음 · 완주 시 +N).
+const paidNote=(paid,full)=>rewardNote(full>paid?`받음 · 완주 시 +${fmt(full-paid)}`:'받음',paid,'paid');
 function modeCard(kind){if(kind==='oath')return oathCard();if(kind==='twin')return twinCard();
   const profile=p(),unlocked=profile.cleared>=TIERS.easy.unlock,t=TIERS[challengeTier]||TIERS.easy;
   if(kind==='monthly'){
-    const record=currentRecord(profile,now()),claimed=profile.monthly===calendar(now()).month;
+    const record=currentRecord(profile,now()),due=monthlyDue(profile,now()),got=monthlyGot(),full=monthlyReward({round:CHALLENGE_WAVES,tier:challengeTier});
     return `<div class="mode monthly"><div class="mode-top"><span class="mode-tag">${monthNo(calendar(now()))} · 입장 무제한</span><button class="info-btn" data-action="mode-info" data-kind="monthly" aria-label="규칙">${icon('info')}</button></div>
       <h2>만월 토벌전</h2><p>${CHALLENGE_WAVES}연전으로 이어지는 보스와 싸워 이번 달 최고 기록을 남겨요.</p>${tierPicker('monthly')}
-      ${recordRow('이번 달 최고',record,claimed?rewardNote('받음',profile.monthlyClaim?monthlyReward(profile.monthlyClaim):null,'paid'):record?`<button class="secondary mode-claim" data-action="monthly-claim">${gem(monthlyReward(record))}<span>받기</span></button>`:rewardNote('완주 시',monthlyReward({round:CHALLENGE_WAVES,tier:challengeTier}),'preview'))}
+      ${recordRow('이번 달 최고',record,due>0?`<button class="secondary mode-claim" data-action="monthly-claim">${gem(due)}<span>받기</span></button>`:got===null?rewardNote('받음',null,'paid'):record||got?paidNote(got,full):rewardNote('완주 시',full,'preview'))}
       <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||profile.active?'disabled':''}>${!unlocked?`스테이지 ${TIERS.easy.unlock} 클리어 후 열려요`:`${t.name} 도전`}</button></div>`;
   }
   const week=weeklyState(profile,now()),running=profile.active?.mode==='weekly'?profile.active:null,paid=week.best?.reward||0;
   return `<div class="mode weekly"><div class="mode-top"><span class="mode-tag">주간 · 월요일 초기화</span><span class="mode-top-end">${entryPass(week.left)}<button class="info-btn" data-action="mode-info" data-kind="weekly" aria-label="규칙">${icon('info')}</button></span></div>
     <h2>유성 드래프트</h2><p>둘 중 한 명을 ${TEAM_SIZE}번 골라 편성을 꾸리고 ${CHALLENGE_WAVES}웨이브를 넘어요.</p>${tierPicker('weekly')}
     <div class="boss-route">${weeklyBosses().map((id,i)=>`<span><em>${(i+1)*3}</em>${BOSSES[id].name.replace('의 여신 ','의 ')}</span>`).join('')}</div>
-    ${recordRow('이번 주 최고',week.best,running?rewardNote('진행 중 · 완주 시',Math.max(0,weeklyReward(running.tier||'easy',CHALLENGE_WAVES,true)-paid),'preview'):week.best?rewardNote('받음',paid,'paid'):rewardNote('완주 시',weeklyReward(challengeTier,CHALLENGE_WAVES,true),'preview'))}
+    ${recordRow('이번 주 최고',week.best,running?rewardNote('진행 중 · 완주 시',Math.max(0,weeklyReward(running.tier||'easy',CHALLENGE_WAVES,true)-paid),'preview'):week.best?paidNote(paid,week.left>0?weeklyReward(challengeTier,CHALLENGE_WAVES,true):0):rewardNote('완주 시',weeklyReward(challengeTier,CHALLENGE_WAVES,true),'preview'))}
     <button class="primary wide shine" data-action="prepare-mode" ${!unlocked||week.left<=0||profile.active?'disabled':''}>${!unlocked?`스테이지 ${TIERS.easy.unlock} 클리어 후 열려요`:week.left<=0?'다음 주에 다시 열려요':`${t.name} 드래프트 시작`}</button></div>`;
 }
 // Draft entries as three gems: lit ones are left this week.
 const entryPass=left=>`<span class="entry-pass" role="img" aria-label="남은 입장 ${left}/${WEEKLY_ENTRIES}">${Array.from({length:WEEKLY_ENTRIES},(_,i)=>`<i class="${i<left?'on':''}"></i>`).join('')}<b>${left}<em>/${WEEKLY_ENTRIES}</em></b></span>`;
 function modeInfo(kind){if(kind==='oath'||kind==='twin'){previewInfo(kind);return;}
   const t=TIERS[challengeTier]||TIERS.easy;
-  const weekly=`<ul class="notes"><li>한 주에 ${WEEKLY_ENTRIES}번 입장해요. 보상은 이번 주 최고 기록 하나만큼이고, 기록을 넘으면 차이만큼 더 받아요.</li><li>생명력이 0이 되면 끝나고, 넘긴 웨이브만큼 보상을 받아요. 웨이브당 ${gem(Math.round(25*t.reward))}.</li><li>3웨이브마다 이번 주의 보스가 나와요.${metBosses(p())<9?` 메인 스테이지에서 만난 보스 ${metBosses(p())}종만 나와요.`:''}</li><li>어려움은 스테이지 ${TIERS.hard.unlock}, 심연은 스테이지 ${TIERS.abyss.unlock} 클리어 후 열려요.</li><li>중단해도 같은 입장으로 이어할 수 있어요. 파견 중인 동료는 참여할 수 없어요.</li><li>기간은 한국·일본 시간(UTC+9) 기준이에요.</li></ul>`;
-  const monthly=`<ul class="notes"><li>제한 시간은 없고, 보스가 코어에 닿으면 끝나요.</li><li>난이도가 높을수록, 같은 난이도에서는 격파 수와 총 피해가 클수록 좋은 기록이에요.</li><li>보상은 꿈의결정 ${MONTHLY_REWARDS.base} + 격파 보스당 ${MONTHLY_REWARDS.perBoss}, 완주 시 +${MONTHLY_REWARDS.clear}에 난이도 배율(×${t.reward})을 곱해요. 한 달에 한 번, 원하는 때에 확정해요.</li><li>매월 1일(UTC+9) 초기화되고 역대 최고 기록은 남아요.</li></ul>${monthlyRecordPanel()}`;
+  const weekly=`<ul class="notes"><li>한 주에 ${WEEKLY_ENTRIES}번 입장해요. 보상은 이번 주 최고 기록으로 정해지고, 기록을 올리면 오른 만큼 바로 더 받아요.</li><li>생명력이 0이 되면 끝나고, 넘긴 웨이브가 기록이 돼요. 웨이브당 ${gem(Math.round(25*t.reward))}.</li><li>3웨이브마다 이번 주의 보스가 나와요.${metBosses(p())<9?` 메인 스테이지에서 만난 보스 ${metBosses(p())}종만 나와요.`:''}</li><li>어려움은 스테이지 ${TIERS.hard.unlock}, 심연은 스테이지 ${TIERS.abyss.unlock} 클리어 후 열려요.</li><li>중단해도 같은 입장으로 이어할 수 있어요. 파견 중인 동료는 참여할 수 없어요.</li><li>기간은 한국·일본 시간(UTC+9) 기준이에요.</li></ul>`;
+  const monthly=`<ul class="notes"><li>제한 시간은 없고, 보스가 코어에 닿으면 끝나요.</li><li>난이도가 높을수록, 같은 난이도에서는 격파 수와 총 피해가 클수록 좋은 기록이에요.</li><li>보상은 꿈의결정 ${MONTHLY_REWARDS.base} + 격파 보스당 ${MONTHLY_REWARDS.perBoss}, 완주 시 +${MONTHLY_REWARDS.clear}에 난이도 배율(×${t.reward})을 곱해요.</li><li>보상은 이번 달 최고 기록으로 정해지고, 기록을 올리면 오른 만큼 바로 더 받아요.</li><li>매월 1일(UTC+9) 초기화되고 역대 최고 기록은 남아요.</li></ul>${monthlyRecordPanel()}`;
   show(kind==='weekly'?'유성 드래프트':'만월 토벌전','규칙',kind==='weekly'?weekly:monthly,`<button class="primary wide" data-action="close">확인</button>`,'info');
 }
 function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind==='oath'){oathPrepare();return;}if(kind==='twin'){twinFormation();return;}
@@ -1227,8 +1231,9 @@ function claimPity(){
 function relicLadder(){
   const draws=p().relicDraws,tier=relicTier(draws),to=relicThreshold(tier+1),fill=Math.min(1,Math.max(0,(draws-relicThreshold(tier))/(to-relicThreshold(tier))));
   const cells=list=>list.map((v,i)=>`<em${i===3?' class="ur"':''}>${pct(v)}</em>`).join('');
-  const steps=[0,1,2,3].map(i=>{const t=tier+i;return `<div class="rl-row ${['now','next','later','later last'][i]}"${i?'':` style="--fill:${fill.toFixed(3)}"`}><span class="rl-step"><i>${t}</i><span><b>${t}단계</b><small>${i===0?'지금':i===1?`${fmt(to-draws)}회 남음`:`누적 ${fmt(relicThreshold(t))}회`}</small></span></span>${cells(relicTierRates(t))}</div>`;}).join('');
-  return `<div class="relic-ladder"><div class="rl-row rl-cols"><span></span>${RARITIES.map(r=>`<span>${badge(r)}</span>`).join('')}</div>${steps}<div class="rl-row max"><span class="rl-step"><i>∞</i><span><b>한계</b></span></span>${cells(relicRatesAt(1))}</div></div>`;
+  const near=tier>=2*T.relicProbabilityHalf;
+  const steps=[0,1,2,3].map(i=>{const t=tier+i;return `<div class="rl-row ${['now','next','later',near?'later last':'later end'][i]}"${i?'':` style="--fill:${fill.toFixed(3)}"`}><span class="rl-step"><i>${t}</i><span><b>${t}단계</b><small>${i===0?'지금':i===1?`${fmt(to-draws)}회 남음`:`누적 ${fmt(relicThreshold(t))}회`}</small></span></span>${cells(relicTierRates(t))}</div>`;}).join('');
+  return `<div class="relic-ladder"><div class="rl-row rl-cols"><span></span>${RARITIES.map(r=>`<span>${badge(r)}</span>`).join('')}</div>${steps}${near?`<div class="rl-row max"><span class="rl-step"><i>∞</i><span><b>한계</b></span></span>${cells(relicRatesAt(1))}</div>`:''}</div>`;
 }
 function rates(){
   const c=calendar(now()),list=banner==='relic'?relicRates(p().relicDraws):T.heroRates,urCount=heroPool('UR',lateOpen(p().cleared)).length;
@@ -1741,6 +1746,17 @@ function maybeUnlockNews(){
 // ── The biweekly event (서약 and 쌍성 take turns): one popup per event week.
 const eventFlip=()=>UNLOCKED&&p().eventFlip;
 const kstDate=t=>{const d=new Date(t+9*HOUR);return `${d.getUTCMonth()+1}월 ${d.getUTCDate()}일`;};
+// Line art for the event banner when no painted key visual is built in. Oath: stars joined into a ring around a lantern
+// star. Twin: two roads of light parting toward a pair of stars, silver on the left and gold on the right.
+const spark=(x,y,r,cls='')=>`<path class="ev-spark ${cls}" d="M${x} ${y-r}Q${x} ${y} ${x+r} ${y}Q${x} ${y} ${x} ${y+r}Q${x} ${y} ${x-r} ${y}Q${x} ${y} ${x} ${y-r}Z"/>`;
+function eventMotif(oath){
+  if(oath){
+    const cx=268,cy=78,ring=Array.from({length:9},(_,i)=>{const a=-Math.PI/2+i*Math.PI*2/9,r=i%2?52:58;return [Math.round(cx+Math.cos(a)*r),Math.round(cy+Math.sin(a)*r*.86)];});
+    return `<svg class="ev-motif" viewBox="0 0 360 168" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"><circle class="ev-halo" cx="${cx}" cy="${cy}" r="74"/><polygon class="ev-line" points="${ring.map(p=>p.join(',')).join(' ')}"/>${ring.map(([x,y],i)=>i%3?`<circle class="ev-dot" cx="${x}" cy="${y}" r="2.2"/>`:spark(x,y,7)).join('')}<path class="ev-line faint" d="M${cx-30} ${cy+34}Q${cx} ${cy+52} ${cx+30} ${cy+34}"/>${spark(cx,cy,20,'core')}<circle class="ev-dot" cx="${cx}" cy="${cy}" r="3"/></svg>`;
+  }
+  const road=(d,cls)=>`<path class="ev-road ${cls}" d="${d}"/>`;
+  return `<svg class="ev-motif" viewBox="0 0 360 168" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"><circle class="ev-halo silver" cx="238" cy="50" r="46"/><circle class="ev-halo" cx="296" cy="62" r="46"/>${road('M262 172C258 130 232 104 238 50','silver')}${road('M270 172C278 134 304 112 296 62','gold')}${[[251,140],[243,108],[236,78]].map(([x,y])=>`<circle class="ev-dot silver" cx="${x}" cy="${y}" r="2"/>`).join('')}${[[277,142],[291,112],[299,86]].map(([x,y])=>`<circle class="ev-dot" cx="${x}" cy="${y}" r="2"/>`).join('')}${spark(238,50,17,'core silver')}${spark(296,62,17,'core')}</svg>`;
+}
 function maybeEventPopup(){
   if(modal||screen!=='home'||FW.ftueNext(p())||coach.active||!FW.featureOpen(p(),'challenge'))return false;
   const kind=SN.activeEvent(now(),eventFlip()),sn=season(now()),win=eventWindow(now());if(kind==='both'||p().eventSeen===win.id)return false;
@@ -1749,8 +1765,9 @@ function maybeEventPopup(){
   const bosses=oath?oathBosses(sn.index,met):[...twinBosses(sn.index,'left',met),...twinBosses(sn.index,'right',met)];
   const max=oath?OATH_BANDS.reduce((n,b)=>n+b.reward,0):TIER_IDS.reduce((n,t)=>n+TWIN_BANDS.reduce((m,_,i)=>m+twinBandReward(t,i),0),0);
   const desc=oath?'서약을 걸고 9웨이브를 넘어 점수를 남겨요.':'두 편성으로 은빛·금빛 별길을 하나씩 넘어요.';
-  show(name,'격주 이벤트',`<div class="ev-pop" data-kind="${kind}"><div class="ev-banner"><span class="ev-sky" aria-hidden="true"></span><span class="ev-mark" aria-hidden="true">${icon(oath?'flag':'swap')}</span><span class="ev-band"><small>EVENT · 7일</small><b>${name}</b></span></div>
-    <p class="ev-period">${kstDate(win.start)} – ${kstDate(win.end-1)}</p><p class="ev-desc">${desc}</p>
+  const art=!!window.__ASTRA_ASSETS__?.[oath?'event-oath':'event-twin'];
+  show(name,'격주 이벤트',`<div class="ev-pop" data-kind="${kind}"><div class="ev-banner${art?' has-art':''}">${art?'':eventMotif(oath)}<span class="ev-shade" aria-hidden="true"></span><div class="ev-title"><small>EVENT</small><b>${name}</b><em>${kstDate(win.start)} – ${kstDate(win.end-1)}</em></div></div>
+    <p class="ev-desc">${desc}</p>
     <div class="ev-bosses">${[...new Set(bosses)].map(b=>`<span class="chip">${BOSSES[b].name}</span>`).join('')}</div>
     <div class="ev-reward"><span>구간 보상</span>${gem(max)}<small>최대</small></div></div>`,
     `<div class="dialog-buttons"><button class="secondary" data-action="close">닫기</button><button class="primary shine" data-action="event-go" data-kind="${kind}">바로 가기</button></div>`,'event');
@@ -1831,7 +1848,6 @@ document.addEventListener('click',e=>{
   if(d.draft){if(act('draft',{index:Number(d.draft)},false).ok)render();return;}
   if(d.skill){if(skillHeld){skillHeld=false;return;}if(button.classList.contains('unavailable'))return;battleCommand(E.cast(run,d.skill));return;}if(d.train){battleCommand(E.upgrade(run,d.train));training();return;}if(d.sell){battleCommand(E.sell(run,Number(d.sell)));return;}if(d.reward){battleCommand(E.chooseReward(run,d.reward));close();previousPhase='';return;}
   if(d.setting){if(act('setting',{id:d.setting,value:!p().settings[d.setting]},false).ok)showSettings();return;}if(d.daily){claimDaily([d.daily]);return;}
-  if(d.confirmMonthly){if(act('claimMonthly',{token:d.confirmMonthly}).ok){close();render();}return;}
   const actions={close:()=>{if(modal==='reward')return;if(modal==='draw'&&bonusItems){showBonus();return;}close();},settings:showSettings,partner:partners,team:()=>team(),'relic-team':()=>relicTeam(),'focus-team':()=>formation('hero',true),rates,history,records,daily,
     'daily-all':()=>claimDaily(DAILY_MISSIONS.filter(m=>missionDone(todayDaily(),m.id)&&!todayDaily().claimed.includes(m.id)).map(m=>m.id)),
     bond:()=>bondSheet(d.id||p().partner),'gift-tray':()=>toggleTray(button),talk,'lobby-view':()=>setLobbyView(!lobbyView),idle:collectStars,'idle-shard':collectStars,
@@ -1842,7 +1858,7 @@ document.addEventListener('click',e=>{
     'go-collection':()=>{close();screen='collection';collection='hero';render();},'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},
     'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=PART_STAGES)showLateNotice();else show('신규 동료',`스테이지 ${PART_STAGES} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${PART_STAGES}을(를) 처음 클리어하면 일반 소환과 시즌 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
     'go-garden':()=>{close();screen='garden';render();},'go-dawn':()=>{close();screen='garden';gardenTab='dawn';bedFocus='crit';render();},'go-home-gift':()=>{close();screen='home';giftTray=true;render();giftTray=true;const t=$('gift-tray');if(t){t.innerHTML=trayMarkup(p().partner);t.hidden=false;}},
-    'monthly-claim':confirmMonthlyClaim,'twin-party':()=>twinFormation(),'save-twin':()=>{if(act('twinParty',twinDraft).ok){twinDraft=null;close();render();}},'oath-retry':()=>{close();oathPrepare();},'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},'weekly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'weekly');},
+    'monthly-claim':claimMonthlyDue,'twin-party':()=>twinFormation(),'save-twin':()=>{if(act('twinParty',twinDraft).ok){twinDraft=null;close();render();}},'oath-retry':()=>{close();oathPrepare();},'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},'weekly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'weekly');},
     speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},
     'summon-battle':()=>battleCommand(E.summon(run)),training,auto:()=>{if(act('setting',{id:'auto',value:!p().settings.auto},false).ok){button.querySelector('b').textContent=p().settings.auto?'ON':'OFF';button.setAttribute('aria-pressed',p().settings.auto);syncBattlePhase();}},
     target:()=>{E.cycleTarget(run,selected);battleCommand({ok:true});},deselect:()=>{selected=-1;updateUnit();},leave,
@@ -1912,6 +1928,7 @@ document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement&&!
 if(window.__ASTRA_ASSETS__?.lobby)document.documentElement.style.setProperty('--lobby',`url("${window.__ASTRA_ASSETS__.lobby}") 50% 82%/cover`);
 document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASSETS__?.garden||'./assets/merge/garden.webp'}")`);
 for(const [name,id,path] of [['--greenhouse','greenhouse','./assets/merge/greenhouse.webp'],['--beds','greenhouse-beds','./assets/merge/greenhouse-beds.webp'],['--greenhouse-dawn','greenhouse-dawn','./assets/merge/greenhouse-dawn.webp'],['--beds-dawn','greenhouse-beds-dawn','./assets/merge/greenhouse-beds-dawn.webp'],['--gifts','gifts','./assets/merge/gifts.webp']])document.documentElement.style.setProperty(name,`url("${window.__ASTRA_ASSETS__?.[id]||path}")`);
+for(const id of ['event-oath','event-twin']){const src=window.__ASTRA_ASSETS__?.[id];if(src)document.documentElement.style.setProperty('--'+id,`url("${src}")`);}
 document.documentElement.style.setProperty('--altar',`url("${window.__ASTRA_ASSETS__?.['summon-altar']||'./assets/merge/summon-altar.webp'}")`);
 art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 못해 대체 이미지로 표시합니다.');});
 // Title: a quiet garden at night and the logo. The first touch enters (and unlocks sound, which needs a gesture).
