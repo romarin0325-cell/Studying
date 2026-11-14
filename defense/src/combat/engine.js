@@ -309,7 +309,7 @@ export function trainingBonus(id,level){
   if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 공격력 +${6+level*.5}% · 공격 속도 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 공격력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${Math.round(sirenAura(level,1,1)*100)}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${Math.round(sirenAura(level,1,1)*100)}%`,ancient_dragon:`인접 공격 +${Math.round(dragonAura(level,1,1)*100)}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -320,7 +320,7 @@ const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed
 // Ultimate durations, control times and ultimate slows grow too.
 export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
-  const trait={snow_rabbit:[['35%',slow(SNOW_RABBIT.slow)]],siren:[['15%',pctK(sirenAura(0,1,1))]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
+  const trait={snow_rabbit:[['35%',slow(SNOW_RABBIT.slow)]],siren:[['15%',pctK(sirenAura(0,1,1))]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(dragonAura(0,1,1))]],phantom:[['25%',slow(.25)]],
     luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초',sec(6)],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
@@ -340,7 +340,7 @@ export function liveTraitTokens(s,u){
     siren:[['15%',pctText(sirenAura(level,k,sup))]],
     great_detective:[['8%',taken((.08+level*.02)*k*ctl)],['15%',taken((.15+level*.02)*k*ctl)]],
     guardian:[['0.7초',secText((.7+level*.05)*k*ctl)]],
-    ancient_dragon:[['20%',pctText((.2+level*.03)*k*sup)]],
+    ancient_dragon:[['20%',pctText(dragonAura(level,k,sup))]],
     phantom:[['25%',slow(.25*ctl*k)]],
     luna:[['40%',pctText(executeThreshold(null,s))]],
     time_magician:[['60%',pctText((.6+level*.05)*sup*k)]],
@@ -358,7 +358,7 @@ export function liveTraitTokens(s,u){
 export function givenEffects(s,u,index){
   const level=s.upgrades[u.hero]||0,k=special(s,u.hero),near=neighbors(index).filter(i=>s.board[i]&&!s.board[i].cursed).length,out=[];if(u.cursed)return ['저주받아 효과 없음'];
   if(u.hero==='siren')out.push(`인접 ${near}명 공격 속도 +${pctText(sirenAura(level,k,rankSupport(u.rank)))}`);
-  else if(u.hero==='ancient_dragon')out.push(`인접 ${near}명 공격력 +${pctText((.2+level*.03)*k*rankSupport(u.rank))}`);
+  else if(u.hero==='ancient_dragon')out.push(`인접 ${near}명 공격력 +${pctText(dragonAura(level,k,rankSupport(u.rank)))}`);
   else if(u.hero==='harmonious'){const h=harmonyStrength(s,index);out.push(`인접 ${near}명 · 조화 ${h.count}종 · 공격력 +${pctText(h.damage)} · 공격 속도 +${pctText(h.speed)}`);}
   else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText((.6+level*.05)*rankSupport(u.rank)*k)}`);
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
@@ -871,7 +871,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(detail&&s.surgeWave===s.wave)bonuses.push('새벽검 +25% 공격력');
   const bestAdjacentRank=type=>adjacent.filter(a=>!a.cursed&&HERO[a.hero].trait.type===type).reduce((best,a)=>Math.max(best,a.rank),0);
   const dragonRank=bestAdjacentRank('powerAura'),sirenRank=bestAdjacentRank('hasteAura');
-  if(dragonRank)damageBonus('aura','고대 용의 가호',(.2+(s.upgrades.ancient_dragon||0)*.03)*special(s,'ancient_dragon')*rankSupport(dragonRank));
+  if(dragonRank)damageBonus('aura','고대 용의 가호',dragonAura(s.upgrades.ancient_dragon||0,special(s,'ancient_dragon'),rankSupport(dragonRank)));
   const harmonySources=index<0?[]:neighbors(index).filter(i=>s.board[i]?.hero==='harmonious'&&!s.board[i].cursed).map(i=>harmonyStrength(s,i));
   const harmony=harmonySources.reduce((best,value)=>value.damage>best.damage?value:best,{count:0,damage:0,speed:0});
   if(harmony.count){damageBonus('aura',`조화 ${harmony.count}종`,harmony.damage);speedBonus('aura',`조화 ${harmony.count}종`,harmony.speed);}
