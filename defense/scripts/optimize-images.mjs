@@ -62,16 +62,37 @@ if(process.argv.includes('--check')){
   if(derivedOnly)({manifest}=await loadImagePack({includeDerived:false}));
   else{
     const images=[];
+    const oldImages=new Map((previous?.images||[]).map(image=>[image.id,image]));
     for(const input of imageInputs()){
       const source=await fs.readFile(assetFile(input.source)),metadata=await imageMetadata(source);
       const original={bytes:source.length,sha256:imageHash(source),metadata};
       if(!input.profile){images.push({...input,original,output:null,decision:'Build-only source; omitted from HTML and preload.'});continue;}
+      const prior=oldImages.get(input.id);
+      if(prior&&same(previous.encoder,{...encoder(),aom:sharp.versions.aom,heif:sharp.versions.heif})&&same(previous.profiles?.[input.profile],IMAGE_PROFILES[input.profile])){
+        const {original:oldOriginal,output,decision,...recipe}=prior;
+        if(same(recipe,input)&&same(oldOriginal,original)&&output){
+          try{
+            const existing=await fs.readFile(assetFile(output.path));
+            if(existing.length===output.bytes&&imageHash(existing)===output.sha256&&same(await imageMetadata(existing),output.metadata)){
+              images.push(prior);console.log(input.id+': reused verified output');continue;
+            }
+          }catch(error){if(error.code!=='ENOENT')throw error;}
+        }
+      }
       const {codec,width,height,...options}=IMAGE_PROFILES[input.profile];
       let pipeline=sharp(source);if(width)pipeline=pipeline.resize(width,height);
       const candidate=await pipeline[codec](options).toBuffer();
       const smaller=candidate.length<source.length,bytes=smaller?candidate:source;
       const relative=smaller?input.source.replace('./assets/','./assets/optimized/'):input.source;
-      if(smaller){const file=assetFile(relative);await fs.mkdir(path.dirname(file),{recursive:true});await fs.writeFile(file,bytes);}
+      if(smaller){
+        const file=assetFile(relative);await fs.mkdir(path.dirname(file),{recursive:true});
+        try{await fs.writeFile(file,bytes,{flag:'wx'});}
+        catch(error){
+          if(error.code!=='EEXIST')throw error;
+          const existing=await fs.readFile(file);
+          if(!existing.equals(bytes))throw new Error('Refusing to overwrite existing optimized asset: '+relative);
+        }
+      }
       images.push({...input,original,output:{path:relative,bytes:bytes.length,sha256:imageHash(bytes),metadata:await imageMetadata(bytes)},decision:smaller?'Separate smaller encoding; source preserved.':'Candidate was not smaller; retained source bytes.'});
       console.log(input.id+': '+source.length+' -> '+bytes.length+' B'+(smaller?'':' (retained)'));
     }

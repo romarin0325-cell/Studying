@@ -14,6 +14,7 @@ export const IMAGE_PROFILES=Object.freeze({
   atlas:{codec:'webp',quality:85,alphaQuality:100,effort:6},
   ultimate:{codec:'webp',quality:90,alphaQuality:100,effort:6},
   illustration:{codec:'webp',quality:82,alphaQuality:100,effort:6},
+  eventBanner:{codec:'webp',width:1050,height:420,quality:80,alphaQuality:100,effort:6},
   memorialAvif:{codec:'avif',quality:45,effort:6,chromaSubsampling:'4:4:4'},
   memorialWebp:{codec:'webp',quality:76,alphaQuality:100,effort:6,smartSubsample:true},
 });
@@ -29,8 +30,8 @@ export function imageInputs(){
   const inputs=[];
   for(const [id,source] of Object.entries(ASSET_PATHS)){
     const buildOnly=Object.hasOwn(BUILD_ONLY_ATLASES,id),heroes=HEROES.filter(h=>h.art.atlas===id).map(h=>h.id),relics=ARTIFACTS.filter(a=>a.atlas===id).map(a=>a.id);
-    inputs.push({id:'atlas:'+id,source,profile:buildOnly?null:id.startsWith('unit-')?'unit':id==='ultimates'?'ultimate':'atlas',
-      uses:[...(buildOnly?[]:['window.__ASTRA_ASSETS__.'+id+'; combat renderer / stage UI']),
+    inputs.push({id:'atlas:'+id,source,profile:buildOnly?null:id.startsWith('event-')?'eventBanner':id.startsWith('unit-')?'unit':id==='ultimates'?'ultimate':'atlas',
+      uses:[...(buildOnly?[]:['window.__ASTRA_ASSETS__.'+id+'; '+(id.startsWith('event-')?'event popup; no battle preload':'combat renderer / stage UI')]),
         ...heroes.flatMap(hero=>['portrait:'+hero+'; collection / party / summon','figure:'+hero+'; home / details / cut-in / results']),
         ...relics.map(relic=>'relic:'+relic+'; collection / summon / equipment'),
         ...(buildOnly?[BUILD_ONLY_ATLASES[id]]:[])],retention:'Preserve source bytes at this path; optimized output is separate.'});

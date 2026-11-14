@@ -77,7 +77,12 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,96);
+  assert.equal(Object.keys(ASSET_PATHS).length,98);
+  for(const id of ['event-oath','event-twin']){
+    const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();
+    assert.equal(m.format,'webp',id);assert.equal(m.width,1400,id);assert.equal(m.height,560,id);
+    assert.equal(Object.hasOwn(RUNTIME_ASSET_PATHS,id),false,id+' is loaded lazily');
+  }
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['ur-kit',1024,768],['ur-sweets',1024,768],['ur-kit2',1024,1024],['ur-kit3',1024,1024],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['effects-joker-sun',768,384],['zeke-ragnarok',1536,512],['luna-blade',768,256],['ash-armageddon',1024,512],['effects-chaos-sun',1024,512],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.

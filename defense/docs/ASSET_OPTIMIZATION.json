@@ -35,6 +35,14 @@
       "alphaQuality": 100,
       "effort": 6
     },
+    "eventBanner": {
+      "codec": "webp",
+      "width": 1050,
+      "height": 420,
+      "quality": 80,
+      "alphaQuality": 100,
+      "effort": 6
+    },
     "memorialAvif": {
       "codec": "avif",
       "quality": 45,
@@ -50,10 +58,10 @@
     }
   },
   "totals": {
-    "sourceBytes": 34450583,
-    "deployableSourceBytes": 32626309,
-    "outputBytes": 17603944,
-    "optimizedFiles": 177,
+    "sourceBytes": 34826931,
+    "deployableSourceBytes": 33002657,
+    "outputBytes": 17688086,
+    "optimizedFiles": 179,
     "derivedFiles": 162,
     "derivedOutputBytes": 3882286
   },
@@ -1795,6 +1803,68 @@
         }
       },
       "decision": "Candidate was not smaller; retained source bytes."
+    },
+    {
+      "id": "atlas:event-oath",
+      "source": "./assets/merge/event-oath.webp",
+      "profile": "eventBanner",
+      "uses": [
+        "window.__ASTRA_ASSETS__.event-oath; event popup; no battle preload"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 193470,
+        "sha256": "6eda51fef76df4bf73520a147dfe7805b1280bfe124e92a4e3c6ab995e8feb5f",
+        "metadata": {
+          "width": 1400,
+          "height": 560,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/event-oath.webp",
+        "bytes": 42972,
+        "sha256": "9ee49cdaab3bd686f4789336269dde4b2090e1043f172eeb40f8a03fca27710f",
+        "metadata": {
+          "width": 1050,
+          "height": 420,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
+    },
+    {
+      "id": "atlas:event-twin",
+      "source": "./assets/merge/event-twin.webp",
+      "profile": "eventBanner",
+      "uses": [
+        "window.__ASTRA_ASSETS__.event-twin; event popup; no battle preload"
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 182878,
+        "sha256": "a96ede20d7bf57675204b7e9382cb4d781e3d210b89a3318d53b27d33044c349",
+        "metadata": {
+          "width": 1400,
+          "height": 560,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "output": {
+        "path": "./assets/optimized/merge/event-twin.webp",
+        "bytes": 41170,
+        "sha256": "1a963b3b4bdc95066fb780293e7f10f3c0a6359d398f8e2c8fa91d15ee1f8991",
+        "metadata": {
+          "width": 1050,
+          "height": 420,
+          "hasAlpha": false,
+          "codec": "webp"
+        }
+      },
+      "decision": "Separate smaller encoding; source preserved."
     },
     {
       "id": "atlas:greenhouse",

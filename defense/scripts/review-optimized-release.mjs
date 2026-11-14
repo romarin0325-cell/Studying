@@ -6,7 +6,7 @@ import {pathToFileURL} from 'node:url';
 import {chromium} from 'playwright';
 import {gameRoot} from './local-inputs.mjs';
 import {HEROES,LATE_COMPANIONS} from '../src/content.js';
-import {BUILD_ONLY_ATLASES,RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
+import {BUILD_ONLY_ATLASES,EMBEDDED_ASSET_PATHS as RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
 import {createProfile,command,SAVE_KEY} from '../src/profile.js';
 import {createBattle} from '../src/battle.js';
 import {serialize,step,restore} from '../src/combat/engine.js';
