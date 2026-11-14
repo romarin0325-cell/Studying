@@ -779,15 +779,32 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .news-list li{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
 .news-list .ic{width:20px;height:20px;color:var(--gold)}
 .news-list b{font-size:14px}
-.ev-banner{position:relative;height:128px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#232a6e,#0f1438 70%);border:1px solid var(--hair2)}
-.ev-pop[data-kind=twin] .ev-banner{background:linear-gradient(110deg,#5d6a92 0 48%,#9b7a2e 52% 100%)}
-.ev-sky{position:absolute;inset:0;background:radial-gradient(1.5px 1.5px at 18% 30%,#fff,transparent),radial-gradient(1.5px 1.5px at 62% 18%,#fff,transparent),radial-gradient(1px 1px at 80% 64%,#fff,transparent),radial-gradient(1px 1px at 36% 72%,#fff,transparent),radial-gradient(ellipse 60% 80% at 80% 30%,rgba(246,210,122,.28),transparent)}
-.ev-mark{position:absolute;right:18px;top:16px;width:72px;height:72px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.08);box-shadow:0 0 0 1px rgba(255,236,170,.4)}
-.ev-mark .ic{width:40px;height:40px;color:#ffe7a6;filter:drop-shadow(0 0 8px rgba(246,210,122,.8))}
-.ev-band{position:absolute;left:0;bottom:16px;padding:8px 26px 8px 16px;display:flex;flex-direction:column;background:linear-gradient(100deg,#f3c95e,#e09a2c);color:#2b1a04;clip-path:polygon(0 0,100% 0,calc(100% - 16px) 100%,0 100%)}
-.ev-band small{font-size:10px;font-weight:900;letter-spacing:.12em}
-.ev-band b{font-size:21px;font-weight:900;line-height:1.1}
-.ev-period{margin:10px 0 2px;font-size:13px;font-weight:900;color:var(--gold)}
+/* Event popup. The banner runs edge to edge under the close button and carries the title; the sheet's own title is kept for
+   screen readers only. Night sky in both themes: it is a picture, not a panel. */
+.sheet[data-kind=event]::before{display:none}
+.sheet[data-kind=event] .sheet-top{position:absolute;left:0;right:0;top:0;z-index:3;padding:10px 10px 0;justify-content:flex-end;pointer-events:none}
+.sheet[data-kind=event] .sheet-top::after{display:none}
+.sheet[data-kind=event] .sheet-top>div{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.sheet[data-kind=event] .sheet-top .icon-button{pointer-events:auto;background:rgba(6,9,26,.55);border-color:rgba(255,255,255,.22);color:#fff}
+.sheet[data-kind=event] .sheet-body{padding-top:0}
+.ev-banner{position:relative;height:168px;margin:0 -20px 12px;border-radius:25px 25px 0 0;overflow:hidden;background:radial-gradient(120% 90% at 78% 46%,#3a3f8f 0,#232a6e 34%,#111640 68%,#070a22 100%)}
+.ev-pop[data-kind=twin] .ev-banner{background:radial-gradient(70% 90% at 62% 34%,#3b4f8c 0,transparent 62%),radial-gradient(70% 90% at 88% 40%,#6a5326 0,transparent 60%),linear-gradient(180deg,#0b1034,#141a48 70%,#0a0d2a)}
+.ev-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(1.4px 1.4px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 22% 58%,#cfdcff,transparent),radial-gradient(1.2px 1.2px at 34% 14%,#fff,transparent),radial-gradient(1px 1px at 44% 40%,#ffe7a6,transparent),radial-gradient(1px 1px at 55% 12%,#fff,transparent),radial-gradient(1.3px 1.3px at 94% 16%,#fff,transparent),radial-gradient(1px 1px at 90% 84%,#cfdcff,transparent),radial-gradient(1px 1px at 8% 82%,#fff,transparent);opacity:.85}
+.ev-banner.has-art{background:#070a22 var(--event-oath) 72% 50%/cover}
+.ev-pop[data-kind=twin] .ev-banner.has-art{background:#070a22 var(--event-twin) 72% 50%/cover}
+.ev-banner.has-art::before{display:none}
+.ev-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,8,28,.82) 0,rgba(6,8,28,.5) 38%,transparent 66%),linear-gradient(180deg,transparent 52%,rgba(6,8,28,.72) 100%)}
+.ev-motif{position:absolute;inset:0;width:100%;height:100%}
+.ev-halo{fill:rgba(246,210,122,.16);filter:blur(12px)}.ev-halo.silver{fill:rgba(207,220,255,.18)}
+.ev-line{fill:none;stroke:rgba(255,231,166,.55);stroke-width:1;stroke-linejoin:round}.ev-line.faint{stroke:rgba(255,231,166,.3)}
+.ev-dot{fill:#ffe7a6}.ev-dot.silver{fill:#dfe8ff}
+.ev-spark{fill:#fff3cf;filter:drop-shadow(0 0 4px rgba(246,210,122,.9))}.ev-spark.core{fill:#fffaf0;filter:drop-shadow(0 0 9px rgba(246,210,122,1))}
+.ev-spark.silver{fill:#f4f7ff;filter:drop-shadow(0 0 9px rgba(190,208,255,1))}
+.ev-road{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:1 7}.ev-road.silver{stroke:#cfdcff}.ev-road.gold{stroke:#ffd98a}
+.ev-title{position:absolute;left:20px;right:20px;bottom:14px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;color:#fff}
+.ev-title small{padding:2px 8px 1px;border-radius:6px;font-size:10px;font-weight:900;letter-spacing:.14em;color:#3a2306;background:linear-gradient(180deg,#ffeab0,#e2a94a)}
+.ev-title b{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.15;text-shadow:0 2px 10px rgba(4,6,20,.8)}
+.ev-title em{font-style:normal;font-size:12.5px;font-weight:800;color:#ffe7a6;text-shadow:0 1px 6px rgba(4,6,20,.9)}
 .ev-desc{margin:0;font-size:13.5px;color:var(--text2)}
 .ev-bosses{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .ev-reward{display:flex;align-items:center;gap:6px;margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
@@ -2222,3 +2239,4 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .form-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;align-content:start;padding-bottom:16px}
 .form-list{grid-auto-rows:max-content}
 .relic-slot b{word-break:keep-all}
+.rl-row.end::before{display:none}

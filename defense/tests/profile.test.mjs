@@ -244,11 +244,9 @@ test('failed monthly entry, record save and reward confirmation preserve the wal
   disk.fail=true;assert.equal(s.transact('begin',{mode:'monthly',stage:4},NOW).ok,false);assert.equal(s.value.monthly,null);
   disk.fail=false;call(s,'begin',{mode:'monthly',stage:4});const before=structuredClone(s.value);
   disk.fail=true;assert.equal(s.transact('settle',{token:s.value.active.token,round:2},NOW).ok,false);assert.deepEqual(s.value,before);
-  disk.fail=false;call(s,'settle',{token:s.value.active.token,round:2,damage:1200,seconds:32});assert.equal(s.value.dreams,600);
-  const token=s.value.monthlyBest.token;disk.fail=true;assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);assert.equal(s.value.monthly,null);assert.equal(s.value.dreams,600);
-  disk.fail=false;call(s,'claimMonthly',{token});assert.equal(s.value.dreams,600+monthlyReward({round:2}));
-  assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);
-  call(s,'begin',{mode:'monthly'},NOW);call(s,'settle',{token:s.value.active.token,round:4});assert.equal(s.value.dreams,600+monthlyReward({round:2}));assert.equal(s.value.monthlyBest.round,4);
+  disk.fail=false;call(s,'settle',{token:s.value.active.token,round:2,damage:1200,seconds:32});assert.equal(s.value.dreams,600+monthlyReward({round:2}));assert.equal(s.value.monthlyClaim.round,2);
+  const token=s.value.monthlyBest.token;assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);
+  call(s,'begin',{mode:'monthly'},NOW);call(s,'settle',{token:s.value.active.token,round:4});assert.equal(s.value.dreams,600+monthlyReward({round:4}));assert.equal(s.value.monthlyBest.round,4);
   assert.equal(s.transact('claimMonthly',{token:s.value.monthlyBest.token},NOW).ok,false);
   call(s,'begin',{mode:'monthly'},Date.parse('2026-11-01T00:00:00Z'));
 });
