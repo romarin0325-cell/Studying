@@ -1510,42 +1510,42 @@
   "starter": [
     {
       "id": "star_boy",
-      "power": 655,
+      "power": 500,
       "dispatchAt9": {
-        "dust": 122,
-        "dreams": 24
+        "dust": 113,
+        "dreams": 22
       }
     },
     {
       "id": "snow_rabbit",
-      "power": 241,
+      "power": 500,
       "dispatchAt9": {
-        "dust": 94,
-        "dreams": 18
+        "dust": 113,
+        "dreams": 22
       }
     },
     {
       "id": "night_rabbit",
-      "power": 751,
+      "power": 500,
       "dispatchAt9": {
-        "dust": 127,
-        "dreams": 25
+        "dust": 113,
+        "dreams": 22
       }
     },
     {
       "id": "siren",
-      "power": 173,
+      "power": 500,
       "dispatchAt9": {
-        "dust": 88,
-        "dreams": 17
+        "dust": 113,
+        "dreams": 22
       }
     },
     {
       "id": "great_detective",
-      "power": 316,
+      "power": 600,
       "dispatchAt9": {
-        "dust": 100,
-        "dreams": 20
+        "dust": 119,
+        "dreams": 23
       }
     }
   ],

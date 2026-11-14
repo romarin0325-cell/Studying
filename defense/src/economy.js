@@ -72,12 +72,18 @@ export const roseAttack=level=>.01*level;
 export const springGauge=level=>120+level;
 export const seedGold=level=>2*level;
 export const heroMultiplier=(entry,beds)=>(1+roseAttack(beds?.rose||0))*enhanceMultiplier(entry.enhance);
+// Combat power is a rough guide to what a companion adds to a team; auto formation and dispatch rewards read it.
+// It is base x rarity x growth. Measured with the contribution bench (scripts/simulate.mjs, 2026-11-14): at equal
+// enhancement the rarity means are C 1.00 / R 1.17 / SR 1.36 / UR 1.94, and inside a rarity the basic-attack DPS, range,
+// attack shape and ultimate cost do not predict contribution (r <= 0), because a companion with a strong trait or
+// ultimate is given a weaker basic attack. So those stats are not part of the number. The special milestone (+10% every
+// five duplicates) counts at half weight: +20% special added 8% contribution where +20% attack added 13%.
+export const POWER_BASE=500;
+export const POWER_RARITY=Object.freeze({C:1,R:1.2,SR:1.4,UR:1.9});
+export const POWER_SPECIAL_SHARE=.5;
 export function combatPower(id,entry,beds,relicBonus=0){
   const h=HERO[id];if(!h||!entry?.owned)return 0;
-  const damage=h.damage/(h.interval+.13)*heroMultiplier(entry,beds)*(1+relicBonus);
-  const role=h.shape==='single'?1:1.12;
-  const support=['hasteAura','powerAura','harmonyAura'].includes(h.trait.type)?1.22:1;
-  return Math.round((damage*18*role*support+h.range*.12)*specialMultiplier(entry.enhance));
+  return Math.round(POWER_BASE*POWER_RARITY[h.rarity]*heroMultiplier(entry,beds)*(1+relicBonus)*(1+POWER_SPECIAL_SHARE*(specialMultiplier(entry.enhance)-1)));
 }
 export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
 const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep);
