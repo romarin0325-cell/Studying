@@ -306,7 +306,7 @@ export function bestUnit(s,id){
 }
 export function power(s,u){return unitHero(s,u).damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*TRAINING_STEP)*(s.meta?.[u.hero]?.power||1)*(1+(s.relicAttack||0))*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1)*personalTrait(s,u).damageMultiplier;}
 export function trainingBonus(id,level){
-  if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
+  if(id==='frost_witch')return `감속 대상 빙결 ${witchFreeze(level,1,1).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 공격력 +${6+level*.5}% · 공격 속도 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
   if(id==='aurora')return `환영탄 공격력 ${75+level*3}%`;
   const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${Math.round(sirenAura(level,1,1)*100)}%`,ancient_dragon:`인접 공격 +${Math.round(dragonAura(level,1,1)*100)}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${guardianStun(level,1,1).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${Math.round(magicianEcho(level,1,1)*100)}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
@@ -321,7 +321,7 @@ const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed
 export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
   const trait={snow_rabbit:[['35%',slow(SNOW_RABBIT.slow)]],siren:[['15%',pctK(sirenAura(0,1,1))]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(guardianStun(0,1,1))]],ancient_dragon:[['20%',pctK(dragonAura(0,1,1))]],phantom:[['25%',slow(.25)]],
-    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(magicianEcho(0,1,1))]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
+    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(magicianEcho(0,1,1))]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(witchFreeze(0,1,1))]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초',sec(6)],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
     siren:[['10초',sec(ULT_BUFF.haste.seconds)]],ancient_dragon:[['10초',sec(ULT_BUFF.awaken.seconds)]],silver_rabbit:[[`${ULT_BUFF.march.seconds}초`,sec(ULT_BUFF.march.seconds)]],santa:[['6초',sec(ULT_BUFF.festive.seconds)]],jasmine:[[`${ULT_BUFF.radiance.seconds}초`,sec(ULT_BUFF.radiance.seconds)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(ULT_BUFF.harmony.seconds)]],rumi:[[`${ULT_BUFF.echo.seconds}초`,sec(ULT_BUFF.echo.seconds)]],cinderella:[['10초',sec(10)]],
@@ -347,7 +347,7 @@ export function liveTraitTokens(s,u){
     time_ruler:[['25%',slow((.25+level*.03)*ctl*k)]],
     galaxy_whale:[['40%',slow(.4*ctl*k)]],
     harmonious:[['+6%','+'+pctText((.06+level*.005)*k*sup)],['+5%','+'+pctText((.05+level*.002)*k*sup)]],
-    frost_witch:[['40%',slow(.4*ctl*k)],['0.6초',secText((.6+level*.06)*k*ctl)]],
+    frost_witch:[['40%',slow(.4*ctl*k)],['0.6초',secText(witchFreeze(level,k,ctl))]],
     storm_sage:[['1%',pctText(stormExecuteChance(s,u.rank))]],
     joker:[['20%',slow(JOKER.slow*k)]],
     aurora:[['75%',pctText(.75+level*.03)]],
@@ -363,7 +363,7 @@ export function givenEffects(s,u,index){
   else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText(magicianEcho(level,k,rankSupport(u.rank)))}`);
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
   else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText(guardianStun(level,k,rankControl(u.rank)))}`);
-  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
+  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText(witchFreeze(level,k,rankControl(u.rank)))}`);
   else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
   else if(u.hero==='storm_sage')out.push(`일반 적 명중마다 즉사 ${pctText(stormExecuteChance(s,u.rank))}`);
   else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
@@ -768,7 +768,7 @@ function applyHit(s,shot){
     if(divineMark&&target.hp>0)addStatus(s,target,'divine',sourceKey('attack',hero.id,shot.uid),hero.id,1,6);
     // The witch freezes enemies that are already slowed; each foe re-locks after 3s.
     if(type==='permafrost'&&shot.proc!==false&&target.hp>0&&target.slowTime>0&&(target.frostLock||0)-s.time<=1e-9){
-      addControl(s,target,'freeze',sourceKey('attack',hero.id,shot.uid),hero.id,(.6+(s.upgrades[hero.id]||0)*.06)*special(s,hero.id)*rankControl(shot.rank));
+      addControl(s,target,'freeze',sourceKey('attack',hero.id,shot.uid),hero.id,witchFreeze(s.upgrades[hero.id]||0,special(s,hero.id),rankControl(shot.rank)));
       target.frostLock=s.time+FROST_RELOCK;
       event(s,'frostBreak',{...pathPoint(target.progress),hero:hero.id,rank:shot.rank});
     }
