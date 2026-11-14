@@ -1274,7 +1274,7 @@
     },
     {
       "id": "atlas:unit-time_magician",
-      "source": "./assets/cast-v2/time_magician.webp",
+      "source": "./assets/cast-selected-20261109/time_magician.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-time_magician; combat renderer / stage UI",
@@ -1293,7 +1293,7 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/time_magician.webp",
+        "path": "./assets/optimized/cast-selected-20261109/time_magician.webp",
         "bytes": 192998,
         "sha256": "d9d1b0cef97c9942b915df975ef47eb2d2f1325a4d7a80e91d142424e30f40b8",
         "metadata": {
@@ -7124,7 +7124,7 @@
     },
     {
       "id": "portrait:time_magician",
-      "source": "./assets/cast-v2/time_magician.webp",
+      "source": "./assets/cast-selected-20261109/time_magician.webp",
       "profile": "portrait",
       "crop": {
         "left": 123,
@@ -7151,7 +7151,7 @@
     },
     {
       "id": "figure:time_magician",
-      "source": "./assets/cast-v2/time_magician.webp",
+      "source": "./assets/cast-selected-20261109/time_magician.webp",
       "profile": "figure",
       "crop": {
         "left": 0,

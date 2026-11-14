@@ -50,6 +50,19 @@ test('a memorial can become the lobby once its companion reaches ten hearts',()=
   act(p,'lobby',{id:null});assert.equal(p.lobby,null);
 });
 
+test('changing partners clears the displayed memorial, including a stale saved selection',()=>{
+  const p=createProfile(NOW),id='snow_rabbit';p.heroes[id].bond=BOND_MAX;
+  act(p,'lobby',{id});
+  assert.equal(act(p,'partner',{id:'missing'}).ok,false);assert.equal(p.lobby,id);
+  act(p,'partner',{id});assert.equal(p.lobby,id,'reselecting the current partner keeps the memorial');
+  act(p,'partner',{id:'star_boy'});assert.equal(p.lobby,null);
+  assert.equal(parseProfile(JSON.stringify(p)).lobby,null);
+  act(p,'partner',{id});assert.equal(p.lobby,null,'returning to the partner does not silently hang the memorial');
+  p.lobby=id;p.partner='star_boy';
+  const migrated=parseProfile(JSON.stringify(p));assert.ok(migrated);assert.equal(migrated.lobby,null);
+  act(migrated,'lobby',{id});assert.equal(migrated.lobby,id);assert.equal(migrated.partner,id);
+});
+
 test('old saves keep their hearts, gain a gift bag, and over-capped greetings clamp to ten',()=>{
   const old=createProfile(NOW);delete old.gifts;delete old.lobby;delete old.daily.bouquet;delete old.basket;
   for(const e of Object.values(old.heroes))delete e.bondXp;old.heroes.star_boy.bond=14;old.heroes.snow_rabbit.bond=3;

@@ -51,7 +51,7 @@ export function testGrant(p,kind='wallet',now=Date.now()){
     case 'stage90':p.cleared=Math.max(p.cleared,90);return '스테이지 90까지 클리어한 상태로 바꿨어요';
     case 'dawn-max':Object.assign(p.beds,{crit:30,critDamage:25,stardust:49});p.cleared=Math.max(p.cleared,60);return '제2정원을 소프트캡까지 키웠어요';
     case 'dawn-reset':Object.assign(p.beds,{crit:0,critDamage:0,stardust:0});return '제2정원을 처음 상태로 되돌렸어요';
-    case 'weekly-reset':if(p.active?.mode==='weekly')p.active=null;p.weekly=null;return '유성 드래프트를 다시 입장할 수 있게 했어요';
+    case 'weekly-reset':if(p.active?.mode==='weekly')p.active=null;p.weekly=null;p.weeklyRuns=0;p.weeklyBest=null;return '유성 드래프트를 다시 입장할 수 있게 했어요';
     case 'monthly-reset':if(p.active?.mode==='monthly')p.active=null;p.monthly=null;p.monthlyBest=null;p.monthlyClaim=null;return '만월 토벌전 기록과 보상을 초기화했어요';
     case 'request-now':
       if(!p.requests||typeof p.requests!=='object'||Array.isArray(p.requests))p.requests={next:0,active:[],claimed:[],after:[],read:[]};

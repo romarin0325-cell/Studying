@@ -4,8 +4,12 @@ import {TEAM_SIZE} from './team-config.js';
 
 const tierOf=r=>r?.tier||'easy',rankOf=r=>TIER_IDS.indexOf(tierOf(r));
 // Rewards: base plus a share per wave/boss and a full-clear bonus, scaled by tier.
+// The meteor draft opens three times a week. Its gems follow the week's best record: a run that beats it pays the
+// difference, so retries buy a better draft, not three weekly rewards.
+export const WEEKLY_ENTRIES=3;
 export const weeklyReward=(tier,round,won)=>Math.round((100+25*Math.min(round,CHALLENGE_WAVES)+(won?100:0))*(TIERS[tier]||TIERS.easy).reward);
-export const monthlyReward=record=>Math.round((100+35*Math.min(record.round,CHALLENGE_WAVES)+(record.round>=CHALLENGE_WAVES?150:0))*(TIERS[tierOf(record)]||TIERS.easy).reward);
+export const MONTHLY_REWARDS=Object.freeze({base:110,perBoss:38,clear:165});
+export const monthlyReward=record=>Math.round((MONTHLY_REWARDS.base+MONTHLY_REWARDS.perBoss*Math.min(record.round,CHALLENGE_WAVES)+(record.round>=CHALLENGE_WAVES?MONTHLY_REWARDS.clear:0))*(TIERS[tierOf(record)]||TIERS.easy).reward);
 // Higher tier first, then more bosses, then more damage. The lifetime record keeps this order.
 export const betterRecord=(a,b)=>!b||rankOf(a)>rankOf(b)||rankOf(a)===rankOf(b)&&(a.round>b.round||a.round===b.round&&a.damage>b.damage);
 // This month's record is the one that pays most, so a short try at a higher tier never lowers the claim.

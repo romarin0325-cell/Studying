@@ -91,4 +91,6 @@ test('every relic scale token is written in that relic text',()=>{
     }
   }
   assert.equal(ARTIFACTS.find(relic=>relic.id==='tempo_bell').name,'이어지는 종');
+  assert.equal(ARTIFACTS.find(relic=>relic.id==='broken_clock').name,'시간의 보석');
+  assert.equal(ARTIFACTS.find(relic=>relic.id==='broken_clock').id,'broken_clock');
 });

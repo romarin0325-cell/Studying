@@ -2,8 +2,10 @@
 // Generated with the other reports (node defense/scripts/generated-reports.mjs) and checked by --check and the unit
 // tests, so the numbers cannot drift from the game. The other docs are dated records of the day they were written;
 // when one of their numbers disagrees with this file, this file is right.
-import {HEROES,ARTIFACTS,ROSTER,HIDDEN,TUNING,MAIN_STAGES,PART_STAGES,PARTS} from '../src/content.js';
+import {HEROES,ARTIFACTS,ROSTER,HIDDEN,TUNING,MAIN_STAGES,PART_STAGES,PARTS,TIERS,CHALLENGE_WAVES} from '../src/content.js';
 import * as E from '../src/combat/engine.js';
+import {OATHS,OATH_RULES,OATH_TIER_BASE,OATH_BANDS} from '../src/preview/oath.js';
+import {MONTHLY_REWARDS,monthlyReward} from '../src/monthly.js';
 import {relicThreshold,relicRates,PERFECT_REWARD,guardianOf,critChance,critDamage,stardustRate,bedCost,GARDENS,roseAttack,springGauge,seedGold,heroPool} from '../src/economy.js';
 
 const SHAPE={single:'단일',pulse:'원형(자기 칸)',beam:'관통',splash:'범위',cleave:'부채꼴',zone:'장판',cross:'십자',bounce:'도약',chain:'연쇄'};
@@ -18,6 +20,15 @@ export function currentValues(){
   const lines=[];
   lines.push('# 현재 수치 (자동 생성)','',
     '> 이 파일은 `node defense/scripts/generated-reports.mjs`가 코드에서 만든다. 직접 고치지 말고, 숫자가 이 파일과 다른 문서는 그날의 기록으로 읽는다. 코드와 다르면 테스트가 실패한다.','');
+  lines.push('## 별빛 서약 · 만월 토벌전','',
+    `서약 점수 규칙 v${OATH_RULES}. 난이도 기본점: ${Object.entries(OATH_TIER_BASE).map(([id,n])=>`${TIERS[id].name} ${n}`).join(' · ')}.`,
+    '','| 서약 | 점수 | 배타 그룹 |','|---|---:|---|',
+    ...OATHS.map(o=>`| ${o.name} | ${o.points} | ${o.exclusive||'—'} |`),'',
+    '| 서약 점수 | 구간 보상 | 누적 보상 |','|---:|---:|---:|',
+    ...OATH_BANDS.map((b,i)=>`| ${b.score} | ${b.reward} | ${OATH_BANDS.slice(0,i+1).reduce((sum,row)=>sum+row.reward,0)} |`),'',
+    `토벌 보상: (기본 ${MONTHLY_REWARDS.base} + 보스당 ${MONTHLY_REWARDS.perBoss} + ${CHALLENGE_WAVES}체 완주 ${MONTHLY_REWARDS.clear}) × 난이도 배율, 반올림.`,
+    '','| 토벌 난이도 | 보스 체력 배율 | 보상 배율 | 완주 보상 |','|---|---:|---:|---:|',
+    ...Object.entries(TIERS).map(([id,t])=>`| ${t.name} | ${t.monthly} | ${t.reward} | ${monthlyReward({tier:id,round:CHALLENGE_WAVES})} |`),'');
   lines.push('## 규칙','',
     '- **필살기 피해:** 필살기는 시전 순간 동료 정보에 보이는 공격력(`combatStats().damage`)에 배율을 곱한다. 골드드래곤은 5초 차지가 끝난 발사 순간에 계산한다. 성급·훈련·강화·온실·수집 보너스에 더해 배치 오라, 켜져 있는 필살기 버프, 유물 공격력 보너스가 모두 들어간다. 같은 종류 안에서는 가장 센 것 하나(유물은 합산)이고 종류끼리는 곱한다. 그 시전이 거는 버프·노출은 그 시전의 피해에 들어가지 않는다.',
     '- **받는 피해 증가 효과(노출, 확대경, 왕의 인장 등):** 위와 별개로 적에게 걸려 필살기와 일반 공격 모두에 적용된다.',
@@ -47,7 +58,7 @@ export function currentValues(){
     `| 별똥별소년 유성 | 사용 별빛당 공격력 ${E.STARFALL_FACTOR}배 |`,
     `| 번개의현자 천둥의 연쇄 | 공격력 ${E.THUNDER_FACTOR}배 |`,
     `| 앤트로피 노바레퀴엠 | 공격력 ${E.REQUIEM.factor}배 |`,
-    `| 토피애플 사과 | 폭발 시점 최고 성급 토피애플의 현재 공격력 ${E.APPLEBOMB.factor}배, 반경 ${E.APPLEBOMB.radius}. 전장에 없으면 마지막 유효 값, 무작위 경로·접근 ${E.APPLEBOMB.trigger} 이내 발동, 최대 ${E.APPLEBOMB.max}개 |`,
+    `| 토피애플 사과 | 폭발 시점 최고 성급 토피애플의 현재 공격력 ${E.APPLEBOMB.factor}배, 반경 ${E.APPLEBOMB.radius}. 폭발마다 해당 웨이브 공격력 +${E.APPLEBOMB.bloom*100}%p(합연산, 일반 공격·폭발 공통, 웨이브 시작 시 0). 전장에 없으면 마지막 유효 값, 무작위 경로·접근 ${E.APPLEBOMB.trigger} 이내 발동, 최대 ${E.APPLEBOMB.max}개 |`,
     `| 조커 카오스 룰렛 | 시작 빨강 포함 5색을 모으면 필살기가 카오스 룰렛(별빛 ${E.JOKER.chaosCost})으로 바뀌고, 쓰면 카오스가 되어 전투 종료까지 유지. 카오스 룰렛은 전체 공격력 ${E.JOKER.chaosRoulette}배(일반 룰렛 ${E.JOKER.roulette}배). 일반 공격 시 화상·중독·성광·노출·감속 모두 부여 |`,
     `| 마왕 데스핸드 | 공격력 ${E.DEATHHAND.base}배 + 대상별 디버프 1종당 ${E.DEATHHAND.perDebuff}배, 반경 ${E.DEATHHAND.radius}. 감속·노출·기절·빙결·성광·중독·화상 7종, 소모 없음 |`,
     '| 기적의우화 | 별빛 50, 전장의 라바·코쿤 전부를 각각 50%/50%로 미라클윙/어비스윙으로 전환. 합성 결과는 코쿤. 대상이 없으면 사용 불가 |',

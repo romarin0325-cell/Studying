@@ -4,6 +4,7 @@
 
 ## 원본과 검수 범위
 
+- 기존 `assets/cast-v2/time_magician.png`와 WebP는 원래 바이트 그대로 보존한다. 선택본은 `assets/cast-selected-20261109/`에 별도로 두며, 현재 설치 목록은 [selection.json](selection.json), 과거 목록은 `sol-cast-v2/manifest.json`에 각각 기록한다.
 - [left-native.png](left-native.png)는 당시 내장 이미지 도구가 생성한 1254px 원본이다. [generation.json](generation.json)에 실제 사용한 정면 참조·원화의 해시와 프롬프트를 기록했다. 당시 그림은 전체 세이렌 화풍·측면 투영 가이드를 입력한 신규 공정이 도입되기 전에 만들어졌으며, 그 입력을 사용한 것처럼 소급하지 않는다.
 - [anatomy.json](anatomy.json)과 [packing.json](packing.json)의 두개골·턱·발은 헤어와 장비를 제외한 수동 추정이다. 좌측 512px 셀의 추정 두개골은 148×148px, 턱~바닥은 197px이다. 머리카락 아래 경계의 불확실성이 있고 이 수치만으로 머리 크기와 화풍을 보증하지 않는다.
 - 좌측의 볼과 턱 형태가 기존 우측보다 다소 둥글게 보일 수 있다는 관찰이 남아 있다. 당시 새 실행기는 기록이 소급된 `audit` 모드였고, 현행 17항목의 최종 승인이나 G 단계 완료를 뜻하지 않는다. 사용자의 이번 명시적 선택에 따라 이 후보만 설치한다.
@@ -20,6 +21,7 @@
 - 이미지 인벤토리·최적화 매니페스트 검증.
 - 원본 PNG/WebP, 최적화본, 선택 에셋과 UI 초상화의 방향별 픽셀 확인.
 - 밝은/어두운 배경의 64·96px 및 원화·기존 동료와의 시각 비교. 보이지 않는 두개골은 추정으로 남긴다.
-- `npm run verify -- --only defense`: 일반·Bright·밸런스 랩 빌드와 선택된 빌드 계약 검사 3개 통과.
+- 2026-11-15 최신 `main`과 통합한 뒤 에셋 검사 9개와 생성 보고서 일치 검사를 다시 통과했다. 기존 원본 보존, 선택본의 좌측 교체와 나머지 세 방향의 보이는 픽셀 보존을 회귀 검사한다.
+- `npm run verify -- --only defense`: 일반·Bright·밸런스 랩 빌드와 선택된 빌드 계약 검사 통과.
 - `node defense/scripts/art/check-facing.mjs`: 설치된 방향 에셋의 방향 검사 통과.
 - 오프라인 Chromium 390×844, DPR 2에서 적을 좌우에 실제로 배치해 공격 방향과 편성 화면을 확인했다. 일반판 [왼쪽](night-battle-left.webp)·[오른쪽](night-battle-right.webp)·[편성](night-team.webp), Bright [왼쪽](bright-battle-left.webp)·[오른쪽](bright-battle-right.webp)·[편성](bright-team.webp). 페이지 오류와 외부 HTTP 요청은 0건이다. 실제 모바일 기기 성능 검사는 아니다.

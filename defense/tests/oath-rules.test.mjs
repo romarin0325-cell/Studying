@@ -4,10 +4,30 @@ import * as E from '../src/combat/engine.js';
 import {autoPlay} from '../src/battle.js';
 import {smartAutoPlay} from '../src/smart-auto.js';
 import {HERO,DEFAULT_DECK,MAX_RANK} from '../src/content.js';
-import {OATHS,OATH,OATH_CLOSED,oathConflict,oathDeckProblem,oathMods} from '../src/preview/oath.js';
+import {OATHS,OATH,OATH_CLOSED,OATH_BANDS,oathConflict,oathDeckProblem,oathMods} from '../src/preview/oath.js';
 
 const CLOSED=new Set(OATH_CLOSED);
 const SR=['lightning_sage','ancient_dragon','flame_sage','time_magician','storm_sage'];
+
+test('nobeam and rabbits are mutually exclusive in either selection order',()=>{
+  const rabbits=['silver_rabbit','snow_rabbit','night_rabbit','siren','santa'];
+  assert.equal(HERO.silver_rabbit.shape,'beam');
+  assert.equal(oathDeckProblem(['rabbits'],rabbits),'');
+  assert.match(oathDeckProblem(['nobeam'],rabbits),/관통/);
+  assert.equal(oathDeckProblem(['nobeam'],DEFAULT_DECK),'');
+  assert.equal(OATH.nobeam.points,2);assert.equal(OATH.rabbits.points,4);
+  for(const ids of [['nobeam','rabbits'],['rabbits','nobeam']])assert.match(oathConflict(ids),/함께 걸 수 없습니다/);
+  for(const id of ['nobeam','rabbits'])assert.equal(oathConflict([id]),'');
+});
+
+test('oath early rewards rise while each later band still pays more',()=>{
+  const old=[100,120,150,180,200,230,250,270,320,380];
+  for(const [i,band] of OATH_BANDS.entries()){
+    assert.equal(band.score,(i+1)*5);
+    assert.ok(i<8?band.reward>old[i]:band.reward===old[i]);
+    if(i)assert.ok(band.reward>OATH_BANDS[i-1].reward);
+  }
+});
 
 function occupied(s){return s.board.flatMap((u,i)=>u?[{i,u}]:[]);}
 function plant(s,hero,index,rank=1){

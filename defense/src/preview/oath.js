@@ -2,18 +2,17 @@ import {HERO,BOSS_ORDER,MAIN_STAGES} from '../content.js';
 import {season} from './season.js';
 
 export const OATH_WAVES=9;
-// Scoring rules carry a version so a retune never invalidates a stored record: v1 (2026-10-29) used 0/10/20,
-// v2 (2026-11-05) raises hard to 12 (the promotion from easy measured 11-13 pressure points) and sets 깨어난 군주 to 2
-// (with the curse capped at two it measured below 단단한 밤). See docs/SEASON_CONTENT.md.
-export const OATH_RULES=2;
-const TIER_BASE_BY_RULES=Object.freeze({1:Object.freeze({easy:0,hard:10,abyss:20}),2:Object.freeze({easy:0,hard:12,abyss:20})});
+// Keep stored scores under their original rules. v2 raised hard to 12 and lowered tyrant to 2;
+// v3 prices nobeam at 2 and rabbits at 4. See docs/SEASON_CONTENT.md.
+export const OATH_RULES=3;
+const TIER_BASE_BY_RULES=Object.freeze({1:Object.freeze({easy:0,hard:10,abyss:20}),2:Object.freeze({easy:0,hard:12,abyss:20}),3:Object.freeze({easy:0,hard:12,abyss:20})});
 export const OATH_TIER_BASE=TIER_BASE_BY_RULES[OATH_RULES];
 export const OATH_GROUPS=Object.freeze({deck:'편성',tempo:'운영',board:'배치',pressure:'압박'});
 export const OATH_CLOSED=Object.freeze([6,7,8,11,12,13,16,17,18]);
 export const OATHS=Object.freeze([
   {id:'lowstar',group:'deck',points:5,name:'낮은 별의 맹세',text:'C·R 동료만 편성할 수 있습니다.',exclusive:'rarity'},
-  {id:'nobeam',group:'deck',points:3,name:'곧은 길 봉인',text:'관통 공격 동료를 편성할 수 없습니다.'},
-  {id:'rabbits',group:'deck',points:2,name:'달토끼 원정대',text:'은토끼·눈토끼·밤토끼를 모두 편성해야 합니다.'},
+  {id:'nobeam',group:'deck',points:2,name:'곧은 길 봉인',text:'관통 공격 동료를 편성할 수 없습니다.',exclusive:'beam'},
+  {id:'rabbits',group:'deck',points:4,name:'달토끼 원정대',text:'은토끼·눈토끼·밤토끼를 모두 편성해야 합니다.',exclusive:'beam'},
   {id:'shapes',group:'deck',points:2,name:'서로 다른 궤도',text:'기본 공격 방식이 서로 다른 동료가 4종 이상이어야 합니다.'},
   {id:'crownless',group:'deck',points:3,name:'왕관 없는 원정',text:'UR 동료를 편성할 수 없습니다.',exclusive:'rarity'},
   {id:'drought',group:'tempo',points:3,name:'별빛 가뭄',text:'합성해도 별빛을 얻지 못하고, 전투 중 자연 수급이 절반입니다.'},
@@ -33,11 +32,10 @@ export const OATHS=Object.freeze([
   {id:'glass',group:'pressure',points:4,name:'유리 코어',text:'코어 생명력이 10입니다.'},
 ]);
 export const OATH=Object.fromEntries(OATHS.map(o=>[o.id,o]));
-export const OATH_BANDS=Object.freeze([{score:5,reward:100},{score:10,reward:120},{score:15,reward:150},{score:20,reward:180},{score:25,reward:200},{score:30,reward:230},{score:35,reward:250},{score:40,reward:270},{score:45,reward:320},{score:50,reward:380}]);
-// Oath points that v2 changed; a v1 record keeps the points it was scored with.
-const V1_POINTS=Object.freeze({tyrant:3});
+export const OATH_BANDS=Object.freeze([{score:5,reward:130},{score:10,reward:150},{score:15,reward:180},{score:20,reward:200},{score:25,reward:220},{score:30,reward:240},{score:35,reward:260},{score:40,reward:280},{score:45,reward:320},{score:50,reward:380}]);
+const OLD_POINTS=Object.freeze({1:Object.freeze({tyrant:3,nobeam:3,rabbits:2}),2:Object.freeze({nobeam:3,rabbits:2})});
 export const validOathRules=rules=>Object.hasOwn(TIER_BASE_BY_RULES,rules);
-export const oathPoints=(id,rules=OATH_RULES)=>(rules===1?V1_POINTS[id]:undefined)??OATH[id]?.points??0;
+export const oathPoints=(id,rules=OATH_RULES)=>OLD_POINTS[rules]?.[id]??OATH[id]?.points??0;
 export const oathScore=(tier,ids,rules=OATH_RULES)=>TIER_BASE_BY_RULES[rules][tier]+(Array.isArray(ids)?ids.reduce((n,id)=>n+oathPoints(id,rules),0):0);
 export function oathConflict(ids){
   if(!Array.isArray(ids))return '서약을 확인하세요.';

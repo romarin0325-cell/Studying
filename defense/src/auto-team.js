@@ -3,8 +3,16 @@ import {combatPower,collectionBonus,relicLevel} from './economy.js';
 import {TEAM_SIZE} from './team-config.js';
 import {oathConflict,oathDeckProblem} from './preview/oath.js';
 
+// The strongest companions by combat power. Equal power is common (same rarity, same enhancement), so a tie goes first
+// to a companion already in the team (auto never swaps equals), then to an attack shape the pick does not have yet.
 export function autoDeck(p,{exclude=[],allow=null,size=TEAM_SIZE}={}){
-  const bonus=collectionBonus(p.relics);return HEROES.filter(h=>p.heroes[h.id]?.owned&&!p.dispatches.some(d=>d.hero===h.id)&&!exclude.includes(h.id)&&(!allow||allow(h.id))).sort((a,b)=>combatPower(b.id,p.heroes[b.id],p.beds,bonus)-combatPower(a.id,p.heroes[a.id],p.beds,bonus)||compareRarity(b,a)).slice(0,size).map(h=>h.id);
+  const bonus=collectionBonus(p.relics),power=h=>combatPower(h.id,p.heroes[h.id],p.beds,bonus),deck=[],held=new Set(p.deck);
+  const pool=HEROES.filter(h=>p.heroes[h.id]?.owned&&!p.dispatches.some(d=>d.hero===h.id)&&!exclude.includes(h.id)&&(!allow||allow(h.id))).sort((a,b)=>power(b)-power(a)||compareRarity(b,a));
+  while(pool.length&&deck.length<size){
+    const top=power(pool[0]),shapes=new Set(deck.map(h=>h.shape)),tie=test=>pool.findIndex(h=>power(h)===top&&test(h));
+    let i=tie(h=>held.has(h.id));if(i<0)i=tie(h=>!shapes.has(h.shape));deck.push(...pool.splice(Math.max(0,i),1));
+  }
+  return deck.map(h=>h.id);
 }
 export function autoRelics(p,{exclude=[],count=3}={}){return ARTIFACTS.filter(a=>p.relics[a.id]?.owned&&!exclude.includes(a.id)).sort((a,b)=>compareRarity(b,a)||relicLevel(p.relics[b.id])-relicLevel(p.relics[a.id])).slice(0,count).map(a=>a.id);}
 export function autoTwin(p){const heroes=autoDeck(p,{size:10}),relics=autoRelics(p,{count:6}),left=[0,3,4,7,8],right=[1,2,5,6,9];return {left:{deck:left.map(i=>heroes[i]).filter(Boolean),relics:relics.filter((_,i)=>i%2===0)},right:{deck:right.map(i=>heroes[i]).filter(Boolean),relics:relics.filter((_,i)=>i%2===1)}};}
