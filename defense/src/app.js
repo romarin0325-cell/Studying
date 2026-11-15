@@ -1,7 +1,7 @@
-import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
+import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,CHAPTER_STAGES,partOf,levelOf,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,relicTierRates,relicRatesAt,idleReward,HOUR,PERFECT_REWARD} from './economy.js';
+import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,relicTierRates,relicRatesAt,idleReward,stageReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,createProfile,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,weeklyState,metBosses,basketState} from './profile.js';
 import {featureOpen,UNLOCKS} from './beginner.js';
 import {autoDeck,autoRelics,autoTwin,oathDeck} from './auto-team.js';
@@ -40,7 +40,7 @@ const store=new ProfileStore(storage),art=new Art(),sound=new Sound();
 const modeTitle=(mode,side)=>mode==='weekly'?'유성 드래프트':mode==='monthly'?'만월 토벌전':mode==='oath'?'별빛 서약':mode==='twin'?`쌍성 원정 · ${TWIN_SIDE[side]?.short||''}`:'';
 const p=()=>store.value,now=()=>Math.max(Date.now(),p().clockAt),fmt=n=>Number.isFinite(n)?n>=100000?new Intl.NumberFormat('ko-KR',{notation:'compact',maximumFractionDigits:1}).format(n):Math.floor(n).toLocaleString('ko-KR'):'—';
 const pct=n=>(n*100).toFixed(n<.001?3:2)+'%';
-let challengeTier='easy',screen='home',collection='hero',rarity='all',ownedOnly=false,banner='normal',mode='main',cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9)),gardenTab='dream',arrival=null,
+let challengeTier='easy',screen='home',collection='hero',rarity='all',ownedOnly=false,banner='normal',mode='main',cycle=chapterNow(),gardenTab='dream',arrival=null,
   modal=null,modalInfo=null,previousFocus=null,toastTimer,run=null,renderer=null,speed=1,paused=false,saveBlocked=false,selected=-1,pointer=null,
   lastFrame=0,accumulator=0,autoIn=0,uiIn=0,previousPhase='',lastResult=null,hud=null;
 const renderClock=new RenderClock(),performanceStats={renders:0,steps:0};
@@ -83,7 +83,9 @@ const RANK_TEXT={first:'선두',boss:'보스',strong:'강적',last:'후미'};
 // Each companion has its own lobby lines (src/lines.js); the close line joins from six hearts.
 const partnerLines=hero=>talkLines(hero.id,p().heroes[hero.id].bond);
 let talkIndex=0,skillHold=null,skillHeld=false,tipFor=null,revealTimers=[];
-const todayDaily=()=>{const d=p().daily;return d.day===calendar(now()).day?d:{combat:false,merges:0,idle:false,free:false,accel:false,claimed:[]};};
+const todayDaily=()=>{const d=p().daily;return d.day===calendar(now()).day?d:{combat:false,merges:0,idle:false,free:false,relicFree:false,accel:false,claimed:[]};};
+// Today's free single summon: one on the companion banner, one on the relic banner (once relics are open).
+const freeToday=b=>b==='normal'?!todayDaily().free:b==='relic'?FW.featureOpen(p(),'relic')&&!todayDaily().relicFree:false;
 const dailyClaimable=d=>DAILY_MISSIONS.some(m=>missionDone(d,m.id)&&!d.claimed.includes(m.id));
 const roseBonus=level=>Math.round(roseAttack(level)*100);
 // Dream greenhouse: each bed is a plant whose art grows through four stages.
@@ -550,13 +552,13 @@ function training(){
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
-function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);}
+function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=chapterNow();arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);}
 // The tutorial's first win leads straight to the free first ten.
 function resultCta(r){return FW.ftueNext(p())==='firstTen'&&r.won&&r.mode==='main'?`<button class="primary wide shine" data-action="ftue-summon">${icon('summon')}<b>새 동료 만나러 가기</b></button>`:null;}
 function showResult(r){
   const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${modeTitle(r.mode,r.side)} · ${(TIERS[r.tier]||TIERS.easy).name}`;
   const crowned=r.mode==='main'&&r.won&&r.perfect,retry=r.mode==='main'&&r.won&&!r.perfect&&!(p().perfect||[]).includes(r.stage)?'코어 피해 없이 다시 클리어하면 퍼펙트 보상 +100':'';
-  const wonLine=r.won?[`파견 보상 +${p().cleared*5}%`,p().cleared%9===0&&p().cleared<=36?'파견 슬롯이 해금되었습니다.':'',retry].filter(Boolean).join(' · '):r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 웨이브에 도전하세요.';
+  const wonLine=r.won?[`파견 보상 +${levelOf(p().cleared)*5}%`,dispatchSlots(p().cleared)>dispatchSlots(p().cleared-1)?'파견 슬롯이 해금되었습니다.':'',retry].filter(Boolean).join(' · '):r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 웨이브에 도전하세요.';
   const w=r.weekly,split=crowned&&r.firstPerfect?`<small class="reward-split">${r.clearReward>0?`첫 클리어 +${r.clearReward} · 퍼펙트 +100`:'퍼펙트 +100'}</small>`:w&&r.newBest&&w.paidBefore>0?`<small class="reward-split">기록 보상 ${fmt(w.earned)} − 받은 보상 ${fmt(w.paidBefore)}</small>`:'';
   const weeklyLine=w?`<p class="record-result">${r.newBest?'이번 주 최고 기록 갱신':`이번 주 최고 ${w.best.won?'완주':`${w.best.round}웨이브`} 유지`} · 남은 입장 ${w.left}/${WEEKLY_ENTRIES}</p>`:'';
   show(r.won?(r.mode==='oath'?'서약 완수':r.mode==='twin'?'별길 돌파':'스테이지 클리어'):r.mode==='main'?'스테이지 실패':'도전 종료',label,`<div class="battle-result ${r.won?'win':'lose'}"><span class="result-rays" aria-hidden="true"></span><span class="result-mark">${icon(r.won?'check':'close')}</span><b>${r.won?(r.mode==='main'?'승리':'완주'):r.mode==='main'?'패배':r.mode==='monthly'?`보스 ${r.round}체 격파`:`${r.round}웨이브`}</b>${crowned?`<span class="result-perfect">${icon('crown')}퍼펙트</span>`:''}${!r.won&&r.mode==='monthly'?'<small>보스가 코어에 닿아 도전이 끝났습니다</small>':''}</div>
@@ -619,7 +621,7 @@ const NAV=[['home','홈'],['collection','동료'],['adventure','모험'],['summo
 const TITLES={home:'별빛 정원',collection:'동료',adventure:'모험',summon:'소환',garden:'정원',library:'별의 서재',draft:'드래프트'};
 const greetOpen=()=>p().petDay!==calendar(now()).day;
 const gardenDot=()=>p().dispatches.some(d=>d.end<=now())||basketState(p(),now()).ready>0;
-const summonDot=()=>!todayDaily().free||['normal','season'].some(b=>p().pity[b]>=T.pity[b]);
+const summonDot=()=>freeToday('normal')||freeToday('relic')||['normal','season'].some(b=>p().pity[b]>=T.pity[b]);
 function nav(){
   const dots={home:dailyClaimable(todayDaily())||greetOpen()||libraryDot(),summon:summonDot(),garden:gardenDot()};
   const current=screen==='library'?'home':screen;
@@ -768,7 +770,7 @@ function relicCard(id){
   const a=ARTIFACT[id],e=p().relics[id],ready=e.owned&&e.copies>=relicCost(a.rarity,e.enhance)&&!p().active,worn=p().equipped.includes(id);
   return `<button class="cc relic ${e.owned?'':'unowned'} ${ready?'ready':''} ${worn?'worn':''}" data-relic="${id}" data-rarity="${a.rarity}" aria-label="${a.name}${e.owned?` Lv.${relicLevel(e)}`:', 미보유'}${worn?', 장착 중':''}"><span class="cc-art">${image(id)}</span>${badge(a.rarity)}${e.owned?`<span class="cc-plus">Lv.${relicLevel(e)}</span>`:''}${ready?`<span class="cc-up">${icon('up')}</span>`:''}${worn?`<span class="cc-worn">${icon('check')}</span>`:''}<strong>${a.name}</strong></button>`;
 }
-// Companions added after stage 45 stay out of the collection until stage 45 is cleared (or until owned).
+// Companions added after part one stay out of the collection until its last stage (PART_STAGES) is cleared (or until owned).
 const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES||p().heroes[h.id].owned);
 const memoryOpen=id=>p().heroes[id].owned&&p().heroes[id].bond>=MEMORIAL_STORIES[id].unlockBond;
 function renderCollection(){
@@ -901,30 +903,32 @@ function adventure(){
   if((mode==='oath'||mode==='twin')&&active!=='both'&&mode!==active)mode=active;
   return `<section class="adv"><div class="tabbar${tabs.length===5?' tight':''}">${tabs.map(([id,name])=>`<button data-mode="${id}" ${id==='oath'||id==='twin'?`data-event="1" aria-label="${name} · 이벤트"`:''} aria-pressed="${mode===id}"><b>${name}</b>${id==='oath'||id==='twin'?'<span class="ev-tag" aria-hidden="true">EVENT</span>':''}</button>`).join('')}</div>${mode==='main'?mainStages():modeCard(mode)}</section>`;
 }
+// The chapter (0-based, over all parts) the player is on now.
+function chapterNow(){return Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/CHAPTER_STAGES);}
 function mainStages(){
-  const profile=p(),next=Math.min(MAIN_STAGES,profile.cleared+1);cycle=Math.min(9,Math.max(0,cycle));
-  const part=cycle<5?1:2,base=(part-1)*5,secondOpen=profile.cleared>=PART_STAGES,perfect=new Set(profile.perfect||[]);
-  const tabs=PARTS.map(x=>{const open=x.id===1||secondOpen,done=Math.max(0,Math.min(PART_STAGES,profile.cleared-(x.id-1)*PART_STAGES));
-    return `<button class="part" data-part="${x.id}" aria-pressed="${part===x.id}"${open?'':' data-locked="true"'}><small>제${x.id}부</small><b>${x.name}</b><span class="part-meter">${open?`<i style="--p:${(done/PART_STAGES).toFixed(3)}"></i><em>${done}/${PART_STAGES}</em>`:`${icon('lock')}<em>스테이지 ${PART_STAGES}</em>`}</span></button>`;}).join('');
-  const groups=Array.from({length:5},(_,i)=>{const g=base+i,cleared=Math.max(0,Math.min(9,profile.cleared-g*9)),open=g*9<=profile.cleared,all=Array.from({length:9},(__,k)=>g*9+k+1).every(n=>perfect.has(n));return `<button class="chap ${cleared===9?'done':''}${all?' all-perfect':''}" data-cycle="${g}" aria-pressed="${cycle===g}" ${open?'':'disabled'}><b>${g+1}장</b><small>${open?`${cleared}/9`:icon('lock')}</small></button>`;}).join('');
-  const rows=CHAPTERS.slice(cycle*9,cycle*9+9).map(c=>{const done=c.stage<=profile.cleared,cur=c.stage===next,lock=c.stage>profile.cleared+1,perf=done&&perfect.has(c.stage);
+  const profile=p(),next=Math.min(MAIN_STAGES,profile.cleared+1),N=CHAPTER_STAGES;cycle=Math.min(MAIN_STAGES/N-1,Math.max(0,cycle));
+  const part=partOf(cycle*N+1),perfect=new Set(profile.perfect||[]);
+  const tabs=PARTS.map(x=>{const open=x.first<=profile.cleared+1,size=x.last-x.first+1,done=Math.max(0,Math.min(size,profile.cleared-x.first+1));
+    return `<button class="part" data-part="${x.id}" aria-pressed="${part.id===x.id}"${open?'':' data-locked="true"'}><small>제${x.id}부</small><b>${x.name}</b><span class="part-meter">${open?`<i style="--p:${(done/size).toFixed(3)}"></i><em>${done}/${size}</em>`:`${icon('lock')}<em>스테이지 ${x.first-1}</em>`}</span></button>`;}).join('');
+  const groups=part.chapters.map((_,i)=>{const g=part.chapterAt+i,cleared=Math.max(0,Math.min(N,profile.cleared-g*N)),open=g*N<=profile.cleared,all=Array.from({length:N},(__,k)=>g*N+k+1).every(n=>perfect.has(n));return `<button class="chap ${cleared===N?'done':''}${all?' all-perfect':''}" data-cycle="${g}" aria-pressed="${cycle===g}" ${open?'':'disabled'}><b>${g+1}장</b><small>${open?`${cleared}/${N}`:icon('lock')}</small></button>`;}).join('');
+  const rows=CHAPTERS.slice(cycle*N,cycle*N+N).map(c=>{const done=c.stage<=profile.cleared,cur=c.stage===next,lock=c.stage>profile.cleared+1,perf=done&&perfect.has(c.stage);
     return `<button class="stage ${cur?'current':''} ${done?'done':''}" data-prepare-stage="${c.stage}" ${lock?'disabled':''}><span class="stage-no">${stageLabel(c.stage)}</span><span class="stage-info"><strong>${BOSSES[c.bosses[0]].name}</strong><small>${c.name}</small></span><span class="stage-state${perf?' perfect':''}"${done?` aria-label="${perf?'퍼펙트 클리어':'클리어'}"`:''}>${perf?icon('crown'):done?icon('check'):cur?'<b>도전</b>':icon('lock')}</span></button>`;}).join('');
-  return `<div class="part-tabs">${tabs}</div><div class="stage-zone" data-zone="${part}"><div class="chap-tabs">${groups}</div><div class="chap-head"><b>${cycle+1}장 · ${PARTS[part-1].chapters[cycle-base]}</b><button class="link" data-action="records">기록</button></div><div class="stage-list">${rows}</div></div>`;
+  return `<div class="part-tabs">${tabs}</div><div class="stage-zone" data-zone="${part.id}"><div class="chap-tabs" style="--chapters:${part.chapters.length}">${groups}</div><div class="chap-head"><b>${cycle+1}장 · ${part.chapters[cycle-part.chapterAt]}</b><button class="link" data-action="records">기록</button></div><div class="stage-list">${rows}</div></div>`;
 }
-// Part tabs: the second part shows its lock and a preview until stage 45 is cleared.
+// Part tabs: a later part shows its lock and a preview until the part before it is cleared.
 function focusPart(n){
-  if(n===2&&p().cleared<PART_STAGES){partTeaser();return;}
-  const at=Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9);cycle=n===1?Math.min(4,at):Math.max(5,at);render();
+  const x=PARTS[n-1];if(!x)return;if(x.first>p().cleared+1){partTeaser(x);return;}
+  cycle=Math.min(x.chapterAt+x.chapters.length-1,Math.max(x.chapterAt,chapterNow()));render();
 }
-function partTeaser(){
-  const left=PART_STAGES-p().cleared;
-  show('새벽의 별길','제2부',`<div class="part-teaser"><span class="teaser-art" aria-hidden="true"></span><h2>새벽의 별길</h2><p>같은 별길을 새벽빛으로 다시 걷는 두 번째 이야기예요.</p><ul class="teaser-list"><li>${icon('crown')}<span>스테이지 46–90</span></li><li>${icon('drop')}<span>새벽 온실 · 두 번째 정원</span></li><li>${icon('star')}<span>새로운 동료</span></li></ul><small>스테이지 ${PART_STAGES}까지 ${left}개 남았어요</small></div>`,`<button class="primary wide" data-action="close">확인</button>`,'info');
+function partTeaser(x=PARTS[1]){
+  const left=x.first-1-p().cleared;
+  show(x.name,`제${x.id}부`,`<div class="part-teaser"><span class="teaser-art" aria-hidden="true"></span><h2>${x.name}</h2><p>같은 별길을 새벽빛으로 다시 걷는 두 번째 이야기예요.</p><ul class="teaser-list"><li>${icon('crown')}<span>스테이지 ${x.first}–${x.last}</span></li><li>${icon('drop')}<span>새벽 온실 · 두 번째 정원</span></li><li>${icon('star')}<span>새로운 동료</span></li></ul><small>스테이지 ${x.first-1}까지 ${left}개 남았어요</small></div>`,`<button class="primary wide" data-action="close">확인</button>`,'info');
 }
-// Arrival after the first clear of stage 45: the new companion flips in, and the dawn garden is one tap away.
+// Arrival after the first clear of the last stage of part one: the new companion flips in, and the dawn garden is one tap away.
 const subjectOf=name=>{const c=name.charCodeAt(name.length-1)-0xAC00;return name+(c>=0&&c<11172&&c%28?'이':'가');};
-// ───────── Late companions: the stage 45 announcement ─────────
-// Every companion on LATE_COMPANIONS joins the normal summon and the collection once stage 45 is cleared. Cleared saves that were never told
-// see the announcement once, after the stage 45 reveal or on the next home screen.
+// ───────── Late companions: the part one announcement ─────────
+// Every companion on LATE_COMPANIONS joins the normal summon and the collection once part one (PART_STAGES) is cleared. Cleared saves that were never told
+// see the announcement once, after the part one reveal or on the next home screen.
 const lateNew=()=>LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).sort((a,b)=>compareRarity(HERO[a],HERO[b]));
 const lateRarityLine=()=>RARITIES.map(r=>({r,n:lateNew().filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n).map(x=>`${RARITY[x.r].name} ${x.n}`).join(' · ');
 function maybeLateNotice(){if(modal||screen==='battle'||screen==='draft'||!lateNoticeIds(p()).length)return;showLateNotice();}
@@ -940,7 +944,7 @@ function showLateNotice(){lateFresh=true;
   sound.reveal?.('SR');
   act('noticeLate',{},false);
 }
-// The summon screen names the new companions before stage 45 (what is coming) and when they join: from the arrival
+// The summon screen names the new companions before part one is cleared (what is coming) and when they join: from the arrival
 // notice until the first summon after it. After that the rates sheet lists them with everyone else.
 let lateFresh=false;
 function lateStrip(){
@@ -956,16 +960,16 @@ function heroChance(id){
 function showArrival({part=false,unlocked=[]}={}){
   const ids=unlocked.filter(id=>HERO[id]),cards=ids.map((id,i)=>`<div class="reveal-card" data-rarity="${HERO[id].rarity}" style="--i:${i}">${card(id,'hero',{id,fresh:true},ids.length===1)}<span class="card-back" aria-hidden="true"><i></i></span></div>`).join('');
   if(part&&!ids.length){showPartOpen();return;}
-  show(part?'새벽의 별길이 열렸어요':'새 동료',`스테이지 ${PART_STAGES} 클리어`,`<div class="reveal-stage arrival" data-top="UR" data-count="${ids.length||1}">${part?'<p class="arrival-line">스테이지 46–90과 새벽 온실이 열렸어요</p>':''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span>${ids.length?`<div class="reveal-grid ${ids.length===1?'single':''}">${cards}</div><p class="reveal-caption">${subjectOf(ids.map(id=>HERO[id].name).join(', '))} 정원을 찾아왔어요</p><button class="reveal-skip" data-action="reveal-skip">바로 보기</button>`:''}</div>`,
+  show(part?'새벽의 별길이 열렸어요':'새 동료',`스테이지 ${PART_STAGES} 클리어`,`<div class="reveal-stage arrival" data-top="UR" data-count="${ids.length||1}">${part?`<p class="arrival-line">스테이지 ${PARTS[1].first}–${PARTS[1].last}과 새벽 온실이 열렸어요</p>`:''}<span class="reveal-meteor" aria-hidden="true"></span><span class="reveal-flash" aria-hidden="true"></span><span class="reveal-ring" aria-hidden="true"></span>${ids.length?`<div class="reveal-grid ${ids.length===1?'single':''}">${cards}</div><p class="reveal-caption">${subjectOf(ids.map(id=>HERO[id].name).join(', '))} 정원을 찾아왔어요</p><button class="reveal-skip" data-action="reveal-skip">바로 보기</button>`:''}</div>`,
     `<div class="dialog-buttons">${part?'<button class="secondary" data-action="close">확인</button><button class="primary" data-action="go-dawn">새벽 온실 보기</button>':'<button class="primary wide" data-action="close">확인</button>'}</div>`,'arrival');
   sound.reveal?.('UR');
   document.querySelectorAll('#sheet .reveal-card').forEach((node,i)=>revealTimers.push(setTimeout(()=>{if(modal!=='arrival'||!node.isConnected||node.closest('.skip'))return;const c=centerOf(node);burst(c.x,c.y,{count:18,spread:110,size:14,duration:900,color:'#ffe08a'});},(ids.length===1?1250:1150+i*120)+180)));
 }
-// Part two opens at stage 45: the dawn sky rises over the dawn greenhouse and each newly opened thing is dealt in as a row.
+// Part two opens when part one is cleared: the dawn sky rises over the dawn greenhouse and each newly opened thing is dealt in as a row.
 function showPartOpen(){
   const late=lateNew().length,sparks=Array.from({length:14},(_,i)=>`<i class="po-spark" style="--i:${i};--x:${(i*37+11)%100}%;--y:${(i*53+7)%62}%"></i>`).join('');
-  const rows=[['adventure','새벽의 별길',`스테이지 ${PART_STAGES+1}–${MAIN_STAGES}`],['garden','새벽 온실','치명타 확률 · 치명타 피해 화단'],...(late?[['summon',`신규 동료 ${late}명`,'별빛 소환에 합류']]:[])];
-  show('새벽의 별길이 열렸어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="part-open"><div class="po-sky" aria-hidden="true"><i class="po-rays"></i><i class="po-sun"></i>${sparks}</div><div class="po-head"><p class="po-kicker">PART 2</p><p class="po-title">새벽의 별길</p><p class="po-sub">STAGE ${PART_STAGES+1} – ${MAIN_STAGES}</p></div><ul class="po-list">${rows.map(([ic,b,s],i)=>`<li style="--i:${i}"><span class="po-ic">${icon(ic)}</span><span><b>${b}</b><small>${s}</small></span></li>`).join('')}</ul></div>`,
+  const rows=[['adventure','새벽의 별길',`스테이지 ${PARTS[1].first}–${PARTS[1].last}`],['garden','새벽 온실','치명타 확률 · 치명타 피해 화단'],...(late?[['summon',`신규 동료 ${late}명`,'별빛 소환에 합류']]:[])];
+  show('새벽의 별길이 열렸어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="part-open"><div class="po-sky" aria-hidden="true"><i class="po-rays"></i><i class="po-sun"></i>${sparks}</div><div class="po-head"><p class="po-kicker">PART 2</p><p class="po-title">새벽의 별길</p><p class="po-sub">STAGE ${PARTS[1].first} – ${PARTS[1].last}</p></div><ul class="po-list">${rows.map(([ic,b,s],i)=>`<li style="--i:${i}"><span class="po-ic">${icon(ic)}</span><span><b>${b}</b><small>${s}</small></span></li>`).join('')}</ul></div>`,
     '<div class="dialog-buttons"><button class="secondary" data-action="close">확인</button><button class="primary" data-action="go-dawn">새벽 온실 보기</button></div>','arrival');
   sound.reveal?.('UR');
 }
@@ -1008,7 +1012,7 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind=
   if(p().active){toast('진행 중인 원정이 있어요. 먼저 이어하세요.');return;}
   const c=CHAPTERS[stage-1],boss=BOSSES[c.bosses[0]],t=TIERS[challengeTier]||TIERS.easy;
   const perf=kind==='main'&&(p().perfect||[]).includes(stage),relicsOpen=featureOpen(p(),'relic');
-  const rewardChip=kind==='main'?`<div class="prep-rewards"><span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(160+10*stage)}`:'반복 클리어 · 별가루'}</span>${perf?`<span class="prep-reward perfect done">${icon('crown')}퍼펙트 달성</span>`:`<span class="prep-reward perfect">${icon('crown')}퍼펙트 ${gem(PERFECT_REWARD)}</span>`}</div>${perf?'':`<small class="perfect-rule">코어 생명력을 잃지 않고 클리어하면 퍼펙트</small>`}`:'';
+  const rewardChip=kind==='main'?`<div class="prep-rewards"><span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(stageReward(stage))}`:'반복 클리어 · 별가루'}</span>${perf?`<span class="prep-reward perfect done">${icon('crown')}퍼펙트 달성</span>`:`<span class="prep-reward perfect">${icon('crown')}퍼펙트 ${gem(PERFECT_REWARD)}</span>`}</div>${perf?'':`<small class="perfect-rule">코어 생명력을 잃지 않고 클리어하면 퍼펙트</small>`}`:'';
   const head=kind==='main'?`<div class="prep-boss"><small>${c.name} · 6웨이브</small><h2>${boss.name}</h2>${boss.trait?`<p>${boss.trait}</p>`:''}${rewardChip}</div>`
     :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'유성 드래프트':'만월 토벌전'}</h2><p>${kind==='weekly'?`보유 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'유성 드래프트':'만월 토벌전','출격 준비',`${head}
@@ -1189,12 +1193,12 @@ function previewResult(r){
 // Banner art first; two buttons at the thumb. The daily free summon is the 1-pull itself; pity is an exchange gauge.
 function renderSummon(){
   const tabs=[['normal','일반'],...(featureOpen(p(),'season')?[['season','시즌']]:[]),...(featureOpen(p(),'relic')?[['relic','유물']]:[])];if(!tabs.some(([id])=>id===banner))banner='normal';
-  const c=calendar(now()),featured=banner==='season'?c.guardian:banner==='relic'?'broken_clock':c.pickup,cost=banner==='relic'?T.relicDrawCost:T.heroDrawCost,dreams=p().dreams,free=banner==='normal'&&!todayDaily().free;
+  const c=calendar(now()),featured=banner==='season'?c.guardian:banner==='relic'?'broken_clock':c.pickup,cost=banner==='relic'?T.relicDrawCost:T.heroDrawCost,dreams=p().dreams,free=freeToday(banner);
   const copy={normal:{tag:'이번 주 픽업',title:HERO[c.pickup].name,desc:'UR이 나오면 절반은 이번 주 픽업이에요.'},
     season:{tag:`${monthNo(c)} 한정`,title:HERO[c.guardian].name,desc:'이달의 수호자는 이 소환에서만 만나요.'},
     relic:{tag:'유물',title:'유물 소환',desc:'많이 소환할수록 높은 등급이 잘 나와요.'}}[banner];
   return `<section class="sm" data-banner="${banner}">
-    ${tabs.length>1?`<div class="tabbar sm-tabs">${tabs.map(([id,name])=>`<button data-banner="${id}" aria-pressed="${banner===id}"><b>${name}</b>${id==='normal'&&!todayDaily().free?'<i class="dot"></i>':''}</button>`).join('')}</div>`:''}
+    ${tabs.length>1?`<div class="tabbar sm-tabs">${tabs.map(([id,name])=>`<button data-banner="${id}" aria-pressed="${banner===id}"><b>${name}</b>${freeToday(id)?'<i class="dot"></i>':''}</button>`).join('')}</div>`:''}
     <div class="sm-stage"><span class="sm-halo" aria-hidden="true"></span>${image(featured,banner!=='relic','sm-figure')}
       <div class="sm-copy"><span class="sm-tag">${copy.tag}</span><h2>${copy.title}</h2><p>${copy.desc}</p></div>
       <div class="sm-tools"><button class="sm-tool" data-action="rates">${icon('info')}<span>확률</span></button><button class="sm-tool" data-action="history">${icon('clock')}<span>기록</span></button></div>
@@ -1252,7 +1256,7 @@ function renderGarden(){
     <div class="gd-sec" id="dispatch-sec">${dispatchMarkup()}</div>
     <div class="gd-sec basket-sec" id="basket-sec">${basketMarkup()}</div></section>`;
 }
-// Two gardens: the dream greenhouse and the dawn greenhouse (opens at stage 45; viewable before, with locked beds).
+// Two gardens: the dream greenhouse and the dawn greenhouse (opens with part two; viewable before, with locked beds).
 function gardenTabs(){
   const open=bedOpen('crit',p().cleared),fresh=open&&!GARDENS[1].beds.some(id=>p().beds[id]>0);
   return `<div class="garden-tabs" role="tablist">${GARDENS.map((g,i)=>`<button role="tab" class="gtab" data-garden="${g.id}" aria-selected="${gardenTab===g.id}">${i&&!open?icon('lock'):''}<b>${i?'새벽 온실':'꿈의 온실'}</b>${i&&fresh?'<em class="new">NEW</em>':''}</button>`).join('')}</div>`;
@@ -1291,7 +1295,7 @@ function dispatchMarkup(){
   return `<div class="sec-head"><h3>파견</h3><span class="sec-sub">${count}/4</span><span class="grow"></span><button class="chip-btn" data-action="accel" ${d.accel||!running?'disabled':''}>${icon('clock')}${d.accel?'가속 완료':'−4시간 퀴즈'}</button>${ready>1&&!profile.active?'<button class="chip-btn gold" data-action="claim-all">모두 받기</button>':''}<button class="info-btn" data-action="dispatch-info" aria-label="파견 안내">${icon('info')}</button></div><div class="slot-row">${tiles}</div>`;
 }
 function dispatchInfo(){
-  show('파견','정원',`<ul class="notes"><li>동료 한 명을 ${T.dispatchHours}시간 동안 보내 별가루와 꿈의결정을 모아요. 앱을 닫아도 시간은 흘러요.</li><li>보상은 출발할 때의 전투력과 클리어한 스테이지 수로 정해져요. 지금 보너스 +${p().cleared*5}%.</li>${stardustBonus(p().beds,p().cleared)>0?`<li>별똥별 가속으로 받을 때 별가루가 +${Math.round(stardustBonus(p().beds,p().cleared)*100)}% 늘어요.</li>`:''}<li>파견 중인 동료는 전투에 나갈 수 없어요. 전투에 남을 동료 ${TEAM_SIZE}명은 꼭 남겨야 해요.</li><li>슬롯은 스테이지 9·18·27·36을 클리어하면 하나씩 열려요.</li><li>하루 한 번, 용어 퀴즈를 맞히면 파견 중인 동료가 모두 4시간 빨리 돌아와요.</li></ul>`,`<button class="primary wide" data-action="close">확인</button>`,'info');
+  show('파견','정원',`<ul class="notes"><li>동료 한 명을 ${T.dispatchHours}시간 동안 보내 별가루와 꿈의결정을 모아요. 앱을 닫아도 시간은 흘러요.</li><li>보상은 출발할 때의 전투력과 클리어한 스테이지 수로 정해져요. 지금 보너스 +${Math.round(levelOf(p().cleared)*T.dispatchStageStep*100)}%.</li>${stardustBonus(p().beds,p().cleared)>0?`<li>별똥별 가속으로 받을 때 별가루가 +${Math.round(stardustBonus(p().beds,p().cleared)*100)}% 늘어요.</li>`:''}<li>파견 중인 동료는 전투에 나갈 수 없어요. 전투에 남을 동료 ${TEAM_SIZE}명은 꼭 남겨야 해요.</li><li>슬롯은 스테이지 9·18·27·36을 클리어하면 하나씩 열려요.</li><li>하루 한 번, 용어 퀴즈를 맞히면 파견 중인 동료가 모두 4시간 빨리 돌아와요.</li></ul>`,`<button class="primary wide" data-action="close">확인</button>`,'info');
 }
 function dispatchTap(slot){
   const x=p().dispatches.find(y=>y.slot===slot);if(!x){chooseDispatch(slot);return;}
@@ -1628,7 +1632,7 @@ function coachTick(){
   const step=FW.ftueNext(p());
   if(dodgeCoach())return;
   if(nextTip){if(step||modal||screen!=='home'){nextTip=false;coach.hide();}return;}
-  if(!step){if(coach.active)coach.hide();coachHold=false;tutorialRun=false;return;}
+  if(!step){coachHold=false;tutorialRun=false;if(tourTick())return;if(coach.active)coach.hide();return;}
   if(step==='lobby'){
     if(modal==='prepare'){ftueDone('lobby');return coachTick();}
     if(screen==='home'&&!modal&&!lobbyView&&!$('splash'))guide('lobby',()=>qs('.lb-depart'),'형아, 어서 와! 대현자 루미가 하나씩 알려 줄게. 먼저 출격부터! (윙크)');else coach.hide();return;
@@ -1726,6 +1730,7 @@ const UNLOCK_NEWS={
   library:{name:'별의 서재',ic:'library',line:'루미의 별의 서재가 열렸어! 틀린 문제는 여기 모아서 같이 풀자. (안경 쓱)',go:'서재로',to:()=>{screen='library';render();}},
   relic:{name:'유물',ic:'crown',line:'유물 소환이 열렸어! 유물은 편성한 동료 모두를 도와줘.',go:'유물 소환으로',to:()=>{screen='summon';banner='relic';render();}},
   request:{name:'동료의 부탁',ic:'heart',line:'이제 동료들이 부탁하러 찾아올 거야. 들어 주면 더 친해져!',go:'확인',to:null},
+  dispatch:{name:'파견',ic:'garden',line:'파견이 열렸어! 쉬는 동료를 보내면 하루 뒤에 별가루랑 꿈의결정을 가져와.',go:'정원으로',to:()=>{screen='garden';render();}},
 };
 let unlockGo=null;
 function maybeUnlockNews(){
@@ -1737,6 +1742,68 @@ function maybeUnlockNews(){
     first.to?`<div class="dialog-buttons"><button class="secondary" data-action="close">나중에</button><button class="primary shine" data-action="unlock-go">${first.go}</button></div>`:'<button class="primary wide" data-action="close">확인</button>','news');
   return true;
 }
+
+// ── Feature tours: the first time an opened feature's screen is shown, Rumi points at its main control on the real
+// screen (FW.tourOpen). A step either waits for the player to use the control (done) or explains with a button (next).
+// The skip button ends only that tour. A tour pauses under a sheet unless the step belongs to that sheet.
+const TOURS={
+  garden:{screen:'garden',steps:[
+    {id:'water',target:()=>qs('[data-bed-grow="rose"]'),start:()=>{gardenTab='dream';bedFocus='rose';refreshGarden();},
+      line:()=>qs('[data-bed-grow="rose"]:disabled')?'장미 화단에 물을 주면 동료 모두의 공격력이 올라. 별가루는 전투랑 별똥별로 모여!':'별가루로 장미 화단에 물을 주면 동료 모두의 공격력이 올라. 한 번 줘 봐!',
+      done:t=>p().beds.rose>t.mark.rose,next:()=>qs('[data-bed-grow="rose"]:disabled')?'알겠어':null},
+    {id:'basket',target:()=>qs('#basket-sec'),line:'선물 바구니에는 8시간마다 선물이 쌓여. 선물로 동료랑 더 친해질 수 있어!',next:()=>'좋아'},
+  ]},
+  dispatch:{screen:'garden',steps:[
+    {id:'slot',target:()=>qs('[data-dispatch-slot="0"]'),line:()=>`편성에 없는 동료를 파견 보내면 24시간 뒤에 별가루랑 꿈의결정을 가져와. ${p().active?'진행 중인 전투를 마치면 빈 칸을 눌러 골라 봐!':'빈 칸을 눌러 골라 봐!'}`,
+      done:()=>modal==='dispatch'||p().dispatches.length>0,next:()=>p().active||available(p()).length<=TEAM_SIZE?'알겠어':null},
+  ]},
+  challenge:{screen:'adventure',steps:[
+    {id:'weekly',target:()=>qs('[data-mode="weekly"]'),line:'새 도전이 열렸어! 먼저 유성 드래프트. 탭을 눌러 봐!',done:()=>mode==='weekly'},
+    {id:'weekly-card',target:()=>qs('.mode.weekly'),line:'매주 세 번, 두 후보 중 하나씩 골라 다섯을 꾸려 싸워. 이번 주 최고 기록만큼 보상이 나와!',next:()=>'다음'},
+    {id:'monthly',target:()=>qs('[data-mode="monthly"]'),line:'만월 토벌전은 보스만 줄지어 나오는 한 달짜리 기록전이야. 눌러 봐!',done:()=>mode==='monthly'},
+    {id:'monthly-card',target:()=>qs('.mode.monthly'),line:'달이 끝나기 전에 최고 기록 보상을 꼭 받아 둬, 형아!',next:()=>'좋아'},
+  ]},
+  season:{screen:'summon',steps:[
+    {id:'tab',target:()=>qs('.sm-tabs [data-banner="season"]'),line:'이달의 수호자는 시즌 소환에서 만날 수 있어. 달마다 바뀌니까 한번 봐 둬!',done:()=>banner==='season'},
+  ]},
+  library:{screen:'library',steps:[
+    {id:'star',target:()=>qs('[data-action="today-star"]'),start:()=>{if(libraryTab!=='gallery'){libraryTab='gallery';render();}},line:'틀린 문제는 여기 모여. 하루 하나 복습하면 별이 켜지고, 별자리를 채우면 내 그림이 열려!',next:()=>'알겠어'},
+  ]},
+  relic:{screen:'summon',steps:[
+    {id:'tab',target:()=>qs('.sm-tabs [data-banner="relic"]'),line:'유물 소환이 열렸어! 유물 탭을 눌러 봐.',done:()=>banner==='relic'},
+    {id:'free',target:()=>qs('[data-draw="1"]'),line:'유물도 하루 한 번은 무료야. 뽑아 보자!',done:t=>p().relicDraws>t.mark.relicDraws,next:()=>freeToday('relic')?null:'다음'},
+    // Equipping is refused while a run is under way (profile 'relics'), so the tour ends here with a pointer for later.
+    {id:'equip-go',target:()=>qs('.sm-tabs [data-banner="relic"]'),line:()=>p().active?'유물은 장착해야 힘을 써. 진행 중인 전투를 마치면 편성 창의 유물 탭에서 장착해 줘!':'유물은 장착해야 힘을 써. 편성 창에서 유물 탭을 열어 줄게!',
+      next:()=>p().active?'알겠어':'장착하러 가기',onNext:()=>{if(p().active)endTour();else relicTeam();}},
+    {id:'auto',sheet:'team',target:()=>qs('#sheet [data-action="auto-relic-pick"]'),line:'자동 장착이면 좋은 유물부터 끼워 줘. 장착한 유물은 편성 동료 모두를 도와!',
+      done:()=>editingRelics.join()===AT.autoRelics(p()).join()},
+    {id:'save',sheet:'team',target:()=>qs('#sheet [data-action="save-team"]'),line:'좋아, 이대로 확정!',done:()=>modal!=='team'},
+  ]},
+};
+let tour=null;
+// A tour step that waits for the player is checked again after every tap (the action may not re-render the screen).
+document.addEventListener('click',()=>{if(tour)setTimeout(coachTick,0);});
+function endTour(){if(tour)act('ftue',{tour:tour.id},false);tour=null;coach.hide();}
+// Called from coachTick when no first-session step is waiting. Returns true while a tour step is on screen.
+function tourTick(){
+  if(!tour){
+    if(modal||screen==='battle'||screen==='draft'||$('splash'))return false;
+    const id=FW.TOUR_IDS.find(id=>FW.tourOpen(p(),id)&&TOURS[id].screen===screen);if(!id)return false;
+    tour={id,step:0,mark:{rose:p().beds.rose,relicDraws:p().relicDraws},started:-1};
+  }
+  const t=tour,def=TOURS[t.id],st=def.steps[t.step];
+  if(!st){endTour();return false;}
+  // A sheet step whose sheet has been closed ends the tour (the player has left it); other steps wait for their screen.
+  if(st.sheet&&modal!==st.sheet){endTour();return false;}
+  if(!st.sheet&&(modal||screen!==def.screen)){coach.hide();return false;}
+  if(t.started!==t.step){t.started=t.step;st.start?.();const el=st.target();if(el)el.scrollIntoView({block:'center',behavior:'smooth'});}
+  if(st.done?.(t)){advanceTour();return tourTick();}
+  const next=st.next?.();
+  guide(`tour:${t.id}:${st.id}:${next?'n':'d'}`,st.target,typeof st.line==='function'?st.line():st.line,{hand:next?false:'tap',onSkip:endTour,
+    next:next?{label:next,onNext:()=>{const go=st.onNext;advanceTour();go?.();coachTick();}}:null});
+  return true;
+}
+function advanceTour(){if(!tour)return;tour.step++;tour.mark={rose:p().beds.rose,relicDraws:p().relicDraws};if(tour.step>=TOURS[tour.id].steps.length)endTour();}
 
 // ── The biweekly event (서약 and 쌍성 take turns): one popup per event week.
 const eventFlip=()=>UNLOCKED&&p().eventFlip;
@@ -1801,7 +1868,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=rarity===d.filter?'all':d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}if(d.part){focusPart(Number(d.part));return;}
   if(d.garden){gardenTab=d.garden;bedFocus=GARDENS.find(g=>g.id===gardenTab).beds[0];refreshGarden();return;}
-  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(['event-flip','trial-day','ftue-reset'].includes(d.testTool)){close();if(d.testTool==='ftue-reset')screen='home';render();return;}if(d.testTool==='request-now'){close();screen='home';render();return;}if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=Math.min(9,Math.floor(Math.min(p().cleared,MAIN_STAGES-1)/9));refreshBehind();}return;}
+  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(['event-flip','trial-day','ftue-reset'].includes(d.testTool)){close();if(d.testTool==='ftue-reset')screen='home';render();return;}if(d.testTool==='request-now'){close();screen='home';render();return;}if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=chapterNow();refreshBehind();}return;}
   if(d.oath){toggleOath(d.oath);return;}
   if(d.twinEnter){twinPrepare(d.twinEnter);return;}if(d.twinBegin){begin('twin',0,d.twinBegin);return;}
   if(d.twinFocus){twinFocus=d.twinFocus;if(d.twinTab)twinTab=d.twinTab;keepScroll(()=>twinFormation(true));return;}if(d.twinTab){twinTab=d.twinTab;keepScroll(()=>twinFormation(true));return;}
@@ -1818,7 +1885,7 @@ document.addEventListener('click',e=>{
   if(d.libraryArt){artSheet(d.libraryArt);return;}if(d.lecture){lectureSheet(d.lecture);return;}if(d.term){termSheet(d.term);return;}
   if(d.practice){startPractice(...d.practice.split(':'));return;}if(d.quizChoice){answerQuiz(Number(d.quizChoice),button);return;}
   if(d.pityPick){pityPick=d.pityPick;pitySheet();return;}
-  if(d.draw||d.drawAgain){const n=Number(d.draw||d.drawAgain);if(n===10)tenPull();else draw(1,banner==='normal'&&!todayDaily().free);return;}
+  if(d.draw||d.drawAgain){const n=Number(d.draw||d.drawAgain);if(n===10)tenPull();else draw(1,freeToday(banner));return;}
   if(d.castNow){close();battleCommand(E.cast(run,d.castNow));return;}if(d.skillInfo){skillInfo(d.skillInfo);return;}
   if(d.enhance||d.enhanceRelic){const id=d.enhance||d.enhanceRelic,c=centerOf(button);if(act('enhance',{id,kind:d.enhance?'hero':'relic'},false).ok){refreshBehind();(d.enhance?heroDetail:relicDetail)(id);burst(c.x,c.y,{count:14,spread:80,size:11,color:'#ffe39a'});}return;}
   if(d.equip){if(act('equip',{id:d.equip},false).ok){refreshBehind();relicDetail(d.equip);}return;}
@@ -1857,7 +1924,7 @@ document.addEventListener('click',e=>{
     'relic-info':relicInfo,'mode-info':()=>modeInfo(d.kind),'dispatch-info':dispatchInfo,
     'auto-team-pick':()=>{editingDeck=autoDeck(p());formation('hero',true);},'auto-relic-pick':()=>{editingRelics=autoRelics(p());formation('relic',true);},
     'auto-twin':()=>{twinDraft=autoTwin(p());twinFormation(true);},'auto-oath':()=>{const ids=oathDeck(p(),oathPick);if(!ids){toast('조건에 맞는 동료가 부족해요');return;}if(act('deck',{ids},false).ok)oathPrepare();},
-    'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),same=(a,b)=>[...a].sort().join()===[...b].sort().join(),changed=!same(deck,p().deck)||(featureOpen(p(),'relic')&&relics.length&&!same(relics,p().equipped));if(!changed){toast('지금이 가장 강한 편성이에요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);toast(`전투력 ${fmt(before)} → ${fmt(teamPower(p()))}`);},
+    'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),same=(a,b)=>[...a].sort().join()===[...b].sort().join(),changed=!same(deck,p().deck)||(featureOpen(p(),'relic')&&relics.length&&!same(relics,p().equipped));if(!changed){toast('지금 편성이 자동 편성과 같아요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);const after=teamPower(p());toast(after>=before?`전투력 ${fmt(before)} → ${fmt(after)}`:'역할을 맞춰 편성했어요');},
     'next-stage':()=>{close();prepare(Number(d.stage));},
     'trial-start':()=>{if(!UNLOCKED)return;show('신규 플레이 체험','',`<p class="subtext">지금 프로필은 따로 보관하고, 처음 시작하는 프로필로 바꿉니다. 체험을 끝내면 지금 상태로 돌아옵니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-start-confirm">시작</button></div>`,'trial-confirm');},
     'trial-start-confirm':()=>{if(!UNLOCKED||p().trial)return;try{localStorage.setItem(SAVE_KEY+'.backup',store.raw||JSON.stringify(p()));const r=store.import(JSON.stringify(createProfile(Date.now(),{trial:true})));if(!r.ok){toast(r.message);return;}location.reload();}catch{toast('프로필을 보관할 수 없어요.');}},

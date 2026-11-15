@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,CLEAR_UNLOCKS,TUNING,HERO} from '../src/content.js';
+import {CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,CHAPTER_STAGES,INTRO_STAGES,CLEAR_UNLOCKS,TUNING,HERO,levelStage,levelOf,levelHp,partOf} from '../src/content.js';
 import {BED_IDS,GARDENS,bedCost,bedOpen,critChance,critDamage,critStats,stardustRate,stardustBonus,idleReward,dispatchDust,dispatchReward,combatPower,HOUR} from '../src/economy.js';
 import {createProfile,validateProfile,parseProfile,command,grantClearUnlocks} from '../src/profile.js';
 import {createBattle,resumeBattle,autoPlay} from '../src/battle.js';
@@ -9,19 +9,26 @@ import * as E from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
 const ok=(p,a,args={},now=NOW)=>{const r=command(p,a,args,now);assert.ok(r.ok,r.message);return r;};
 
-test('part two: 90 stages in two parts, the same slope, chapter names for both parts',()=>{
-  assert.equal(MAIN_STAGES,90);assert.equal(PART_STAGES,45);assert.equal(CHAPTERS.length,90);
-  assert.deepEqual(PARTS.map(x=>x.chapters.length),[5,5]);assert.equal(new Set(PARTS.flatMap(x=>x.chapters)).size,10);
-  for(const c of CHAPTERS)assert.equal(c.part,c.stage<=45?1:2);
-  assert.ok(Math.abs(CHAPTERS[89].hp-(1+2.5*89/8))<1e-12);
-  assert.equal(CHAPTERS[45].bosses[0],CHAPTERS[0].bosses[0],'stage 46 repeats the first boss');
-  assert.notEqual(CHAPTERS[45].name,CHAPTERS[0].name,'dawn names differ from the night ones');
+test('stages come from the part and chapter lists: 108 stages, an intro chapter, the same slope, chapter names for both parts',()=>{
+  assert.equal(MAIN_STAGES,108);assert.equal(PART_STAGES,54);assert.equal(CHAPTERS.length,MAIN_STAGES);
+  assert.deepEqual(PARTS.map(x=>x.chapters.length),[6,6]);assert.equal(new Set(PARTS.flatMap(x=>x.chapters)).size,12);
+  assert.deepEqual(PARTS.map(x=>[x.first,x.last,x.chapterAt]),[[1,54,0],[55,108,6]]);
+  assert.equal(MAIN_STAGES,PARTS.reduce((n,x)=>n+x.chapters.length*CHAPTER_STAGES,0),'every stage belongs to a chapter of a part');
+  for(const c of CHAPTERS){assert.equal(c.part,c.stage<=PART_STAGES?1:2);assert.equal(partOf(c.stage).id,c.part);assert.equal(c.bosses[0],CHAPTERS[(c.stage-1)%9].bosses[0],'stage n meets boss (n-1)%9');}
+  // Stage n after the intro is level n-9 of the original line, which it follows exactly from level 18.
+  for(let level=18;level<=levelOf(MAIN_STAGES);level++)assert.ok(Math.abs(CHAPTERS[levelStage(level)-1].hp-(1+2.5*(level-1)/8))<1e-12,'level '+level);
+  // The intro and the bent start rise steadily and meet the old stage 1 and the line without a jump.
+  for(let i=1;i<levelStage(18);i++)assert.ok(CHAPTERS[i].hp>CHAPTERS[i-1].hp,'stage '+(i+1)+' is harder than the one before');
+  assert.equal(CHAPTERS[INTRO_STAGES].hp,1,'stage 10 is the old stage 1');assert.ok(CHAPTERS[INTRO_STAGES-1].hp<1);
+  assert.ok(levelHp(9)<1+2.5*8/8,'old stage 9 (now 18) is easier than before');
+  assert.equal(CHAPTERS[PART_STAGES].bosses[0],CHAPTERS[0].bosses[0],'the first dawn stage repeats the first boss');
+  assert.notEqual(CHAPTERS[PART_STAGES].name,CHAPTERS[0].name,'dawn names differ from the night ones');
 });
 
 test('dawn garden: beds, caps and unlock stages',()=>{
   assert.deepEqual(GARDENS.map(g=>g.beds),[['rose','spring','seed'],['crit','critDamage','stardust']]);
   assert.deepEqual([...BED_IDS],['rose','spring','seed','crit','critDamage','stardust']);
-  assert.equal(TUNING.beds.crit.unlock,45);assert.equal(TUNING.beds.critDamage.unlock,45);assert.equal(TUNING.beds.stardust.unlock,60);
+  assert.equal(TUNING.beds.crit.unlock,PART_STAGES);assert.equal(TUNING.beds.critDamage.unlock,PART_STAGES);assert.equal(TUNING.beds.stardust.unlock,levelStage(60));
   assert.equal(bedCost('crit',0),517);assert.equal(bedCost('critDamage',0),500);assert.equal(bedCost('stardust',0),1200);
   // start values and soft-cap values from the design; effects keep growing linearly past the cap
   assert.ok(Math.abs(critChance(0)-.05)<1e-12);assert.ok(Math.abs(critChance(30)-.2)<1e-12);assert.ok(critChance(31)>critChance(30));
@@ -39,20 +46,21 @@ test('dawn garden: beds, caps and unlock stages',()=>{
 });
 
 test('base critical hits exist from the start; garden levels apply after unlocking',()=>{
-  assert.deepEqual(critStats({crit:9,critDamage:9},44),{chance:.05,damage:1.5});
-  assert.deepEqual(critStats({crit:0,critDamage:0},45),{chance:.05,damage:1.5});
-  assert.equal(stardustBonus({stardust:10},59),0);assert.ok(Math.abs(stardustBonus({stardust:10},60)-.11)<1e-12);
-  const p=createProfile(NOW);p.cleared=44;p.beds.stardust=34;p.idleAt=NOW-20*HOUR;
-  assert.equal(idleReward(p,NOW),Math.floor(20*(TUNING.idleDustPerHour+44*2)),'no bonus before the bed opens');
-  p.cleared=60;assert.equal(idleReward(p,NOW),Math.floor(20*(TUNING.idleDustPerHour+60*2)*1.35));
+  const dust=levelStage(60);
+  assert.deepEqual(critStats({crit:9,critDamage:9},PART_STAGES-1),{chance:.05,damage:1.5});
+  assert.deepEqual(critStats({crit:0,critDamage:0},PART_STAGES),{chance:.05,damage:1.5});
+  assert.equal(stardustBonus({stardust:10},dust-1),0);assert.ok(Math.abs(stardustBonus({stardust:10},dust)-.11)<1e-12);
+  const p=createProfile(NOW);p.cleared=PART_STAGES-1;p.beds.stardust=34;p.idleAt=NOW-20*HOUR;
+  assert.equal(idleReward(p,NOW),Math.floor(20*(TUNING.idleDustPerHour+levelOf(PART_STAGES-1)*2)),'no bonus before the bed opens');
+  p.cleared=dust;assert.equal(idleReward(p,NOW),Math.floor(20*(TUNING.idleDustPerHour+60*2)*1.35),'idle dust grows with the level, not the intro');
 });
 
 test('growing a dawn bed: stage lock and cost',()=>{
   const p=createProfile(NOW);p.dust=1e9;
-  assert.equal(command(p,'bed',{id:'crit'},NOW).ok,false,'closed before stage 45');
-  p.cleared=45;const cost=bedCost('crit',0);ok(p,'bed',{id:'crit'});assert.equal(p.beds.crit,1);assert.equal(p.dust,1e9-cost);
-  assert.equal(command(p,'bed',{id:'stardust'},NOW).ok,false,'stardust opens at stage 60');
-  p.cleared=60;ok(p,'bed',{id:'stardust'});
+  p.cleared=PART_STAGES-1;assert.equal(command(p,'bed',{id:'crit'},NOW).ok,false,'closed before the second part');
+  p.cleared=PART_STAGES;const cost=bedCost('crit',0);ok(p,'bed',{id:'crit'});assert.equal(p.beds.crit,1);assert.equal(p.dust,1e9-cost);
+  assert.equal(command(p,'bed',{id:'stardust'},NOW).ok,false,'stardust opens at level 60');
+  p.cleared=levelStage(60);ok(p,'bed',{id:'stardust'});
   p.beds.crit=38;const past=bedCost('crit',38);const dust=p.dust;ok(p,'bed',{id:'crit'});assert.equal(p.beds.crit,39);assert.equal(p.dust,dust-past,'levels past the soft cap still grow');
   assert.equal(validateProfile(p),true);p.beds.crit=100;assert.equal(validateProfile(p),true);
 });
@@ -68,25 +76,25 @@ test('save migration: revision 3 saves gain the dawn beds without a new Behemoth
   assert.equal(parseProfile(JSON.stringify(young)).heroes.behemoth.owned,false);
 });
 
-test('clearing stage 45 for the first time opens part two without a companion grant',()=>{
+test('clearing the last stage of part one for the first time opens part two without a companion grant',()=>{
   assert.deepEqual(CLEAR_UNLOCKS,{});
-  const p=createProfile(NOW);p.cleared=44;ok(p,'begin',{mode:'main',stage:45},NOW);
+  const end=PART_STAGES,p=createProfile(NOW);p.cleared=end-1;ok(p,'begin',{mode:'main',stage:end},NOW);
   const r=ok(p,'settle',{token:p.active.token,won:true,round:6},NOW+1000);
-  assert.equal(p.cleared,45);assert.equal(r.partOpened,true);assert.deepEqual(r.unlocked,[]);assert.equal(p.heroes.behemoth.owned,false);
-  ok(p,'begin',{mode:'main',stage:46},NOW+2000);assert.equal(p.active.stage,46);
+  assert.equal(p.cleared,end);assert.equal(r.partOpened,true);assert.deepEqual(r.unlocked,[]);assert.equal(p.heroes.behemoth.owned,false);
+  ok(p,'begin',{mode:'main',stage:end+1},NOW+2000);assert.equal(p.active.stage,end+1);
   const again=ok(p,'settle',{token:p.active.token,won:true,round:6},NOW+3000);assert.equal(again.partOpened,false);assert.deepEqual(again.unlocked,[]);
   assert.deepEqual(grantClearUnlocks(p),[],'already owned');
-  assert.equal(command(p,'begin',{mode:'main',stage:48},NOW+4000).ok,false,'stage 47 has to be cleared first');
-  p.active=null;p.cleared=90;assert.equal(command(p,'begin',{mode:'main',stage:90},NOW+5000).ok,true);
+  assert.equal(command(p,'begin',{mode:'main',stage:end+3},NOW+4000).ok,false,'the stage before has to be cleared first');
+  p.active=null;p.cleared=MAIN_STAGES;assert.equal(command(p,'begin',{mode:'main',stage:MAIN_STAGES},NOW+5000).ok,true);
   assert.equal(validateProfile(p),true);
 });
 
 test('the stardust bed is paid out when a dispatch is collected',()=>{
-  const p=createProfile(NOW);p.cleared=60;p.beds.stardust=10;p.heroes.queen.owned=true;
+  const p=createProfile(NOW);p.cleared=levelStage(60);p.beds.stardust=10;p.heroes.queen.owned=true;
   ok(p,'dispatch',{slot:0,id:'queen'},NOW);const stored=p.dispatches[0].dust,collected=NOW+TUNING.dispatchHours*HOUR;
   const r=ok(p,'claimDispatch',{slot:0},collected);
   assert.equal(r.dust,dispatchDust(stored,p.beds,p.cleared));assert.ok(r.dust>stored);
-  const q=createProfile(NOW);q.cleared=60;q.beds.stardust=0;q.heroes.queen.owned=true;ok(q,'dispatch',{slot:0,id:'queen'},NOW);
+  const q=createProfile(NOW);q.cleared=levelStage(60);q.beds.stardust=0;q.heroes.queen.owned=true;ok(q,'dispatch',{slot:0,id:'queen'},NOW);
   const base=q.dispatches[0].dust;assert.equal(ok(q,'claimDispatch',{slot:0},collected).dust,Math.floor(base*1.01));
 });
 
@@ -121,8 +129,8 @@ test('runs saved before critical hits restore without them, and bad crit data is
 });
 
 test('a battle takes its crit setting from the profile and resumes only with the same one',()=>{
-  const p=createProfile(NOW);p.cleared=50;Object.assign(p.beds,{crit:10,critDamage:4});
-  ok(p,'begin',{mode:'main',stage:50},NOW);
+  const p=createProfile(NOW);p.cleared=PART_STAGES+5;Object.assign(p.beds,{crit:10,critDamage:4});
+  ok(p,'begin',{mode:'main',stage:PART_STAGES+5},NOW);
   const run=createBattle(p);assert.deepEqual(run.crit,critStats(p.beds,p.cleared));assert.ok(run.crit.chance>.05);
   p.active.run=E.serialize(run);assert.ok(resumeBattle(p));
   p.beds.crit=11;assert.equal(resumeBattle(p),null,'a different crit setting cannot resume the old run');
@@ -135,7 +143,7 @@ test('test tools of the unlocked build',()=>{
   const p=createProfile(NOW);p.dreams=0;p.dust=0;
   assert.ok(testGrant(p,'wallet'));assert.equal(p.dreams,10000);assert.equal(p.dust,10000);
   testGrant(p,'dreams');testGrant(p,'dust');assert.equal(p.dreams,110000);assert.equal(p.dust,1010000);
-  testGrant(p,'stage60');assert.equal(p.cleared,60);testGrant(p,'dawn-max');assert.deepEqual([p.beds.crit,p.beds.critDamage,p.beds.stardust],[30,25,49]);assert.equal(validateProfile(p),true);
+  testGrant(p,'stage60');assert.equal(p.cleared,levelStage(60));testGrant(p,'dawn-max');assert.deepEqual([p.beds.crit,p.beds.critDamage,p.beds.stardust],[30,25,49]);assert.equal(validateProfile(p),true);
   testGrant(p,'dawn-reset');assert.deepEqual([p.beds.crit,p.beds.critDamage,p.beds.stardust],[0,0,0]);
   assert.equal(testGrant(p,'nope'),'');assert.ok(TEST_TOOLS.every(t=>t.label&&t.kind));
   const q=createProfile(NOW);assert.equal(command(q,'testGrant',{kind:'dust'},NOW).ok,false,'the normal build refuses test tools');

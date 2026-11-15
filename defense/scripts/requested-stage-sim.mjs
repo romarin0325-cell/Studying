@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {resolve} from 'node:path';
 import {isMainThread, Worker, parentPort, workerData} from 'node:worker_threads';
-import {HERO, CHAPTERS, BOSSES} from '../src/content.js';
+import {HERO, CHAPTERS, BOSSES, MAIN_STAGES} from '../src/content.js';
 import {heroMultiplier, specialMultiplier, seedGold, springGauge, critStats} from '../src/economy.js';
 import * as E from '../src/combat/engine.js';
 
@@ -269,10 +269,10 @@ async function runAll(stages,seeds,jobs){
 }
 async function main(){
   const args=process.argv.slice(2),opt=(name,fallback)=>{const at=args.indexOf('--'+name);return at<0?fallback:args[at+1];};
-  const stages=opt('stages','82,83,84,85,86,87,88,89,90').split(',').map(Number);
+  const stages=opt('stages','91,92,93,94,95,96,97,98,99').split(',').map(Number);
   const seeds=Number(opt('seeds','100')),jobs=Number(opt('jobs','1')),out=opt('json',null);
-  if(!Number.isInteger(seeds)||seeds<1||!Number.isInteger(jobs)||jobs<1||stages.some(x=>!Number.isInteger(x)||x<1||x>90))
-    throw new Error('Use positive integer seeds/jobs and stages 1..90');
+  if(!Number.isInteger(seeds)||seeds<1||!Number.isInteger(jobs)||jobs<1||stages.some(x=>!Number.isInteger(x)||x<1||x>MAIN_STAGES))
+    throw new Error('Use positive integer seeds/jobs and stages 1..'+MAIN_STAGES+'');
   const start=Date.now(),results=await runAll(stages,seeds,jobs);
   const payload={parameters:{stages,seeds,jobs,dt:DT,actionInterval:ACTION_INTERVAL,limit:LIMIT,deck:DECK,
     artifacts:ARTIFACTS,relicLevel:5,beds:BEDS,relicAttack:.03,enhancements:{santa:5,storm_sage:1,time_magician:1,siren:5,snow_rabbit:5},

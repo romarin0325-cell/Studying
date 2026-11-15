@@ -1,9 +1,13 @@
 import {heroPool,lateOpen} from './economy.js';
 
-export const UNLOCKS=Object.freeze({garden:2,challenge:3,season:3,library:4,relic:5,request:6});
+export const UNLOCKS=Object.freeze({garden:2,challenge:3,season:3,library:4,relic:5,request:6,dispatch:9});
 export const featureOpen=(p,id)=>p.ftue?.legacy===true||!Object.hasOwn(UNLOCKS,id)||p.cleared>=UNLOCKS[id];
 export const newlyOpened=p=>p.ftue?.legacy?[]:Object.keys(UNLOCKS).filter(id=>featureOpen(p,id)&&!p.ftue?.seen.includes(id));
 export const FTUE_STEPS=Object.freeze(['lobby','prepare','summon','merge','cast','auto','firstTen','formation']);
+// Feature tours: when a feature has opened, Rumi walks through its main control once, the first time its screen is
+// open (app.js TOURS). A finished or skipped tour is remembered; saves that never had the tutorial get none.
+export const TOUR_IDS=Object.freeze(['garden','challenge','season','library','relic','dispatch']);
+export const tourOpen=(p,id)=>!!p.ftue&&!p.ftue.legacy&&TOUR_IDS.includes(id)&&featureOpen(p,id)&&!(p.ftue.tours||[]).includes(id);
 export const ftueNext=p=>!p.ftue||p.ftue.legacy||p.ftue.skipped?null:FTUE_STEPS.find(id=>!p.ftue.done.includes(id))??null;
 export const BEGINNER_DAYS=Object.freeze([
   {day:1,login:{dreams:500},task:{id:'clear1',text:'스테이지 1 클리어',reward:{dreams:100}}},
@@ -11,8 +15,8 @@ export const BEGINNER_DAYS=Object.freeze([
   {day:3,login:{dust:1000},task:{id:'water',text:'온실에 물 주기',reward:{dreams:100}}},
   {day:4,login:{dreams:300,bouquet:2},task:{id:'gift',text:'동료에게 선물 주기',reward:{dreams:100}}},
   {day:5,login:{dreams:800},task:{id:'relic',text:'유물 소환 1회',reward:{dreams:100}}},
-  {day:6,login:{dust:1500},task:{id:'clear9',text:'스테이지 9 클리어',reward:{dreams:200}}},
-  {day:7,login:{choice:'UR'},big:true,task:{id:'clear12',text:'스테이지 12 클리어',reward:{dreams:200}}},
+  {day:6,login:{dust:1500},task:{id:'clear18',text:'스테이지 18 클리어',reward:{dreams:200}}},
+  {day:7,login:{choice:'UR'},big:true,task:{id:'clear21',text:'스테이지 21 클리어',reward:{dreams:200}}},
 ]);
 export const urChoices=p=>heroPool('UR',lateOpen(p.cleared)).map(id=>({id,owned:!!p.heroes[id]?.owned}));
 export function beginnerState(p){

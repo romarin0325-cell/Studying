@@ -726,6 +726,8 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .coach-line{font-size:14.5px;font-weight:800;line-height:1.38;word-break:keep-all}
 .coach-skip{flex:none;align-self:flex-start;margin:-2px -6px 0 auto;pointer-events:auto;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;color:var(--text2);background:rgba(255,255,255,.08);border:1px solid var(--line2)}
 .coach-skip[hidden]{display:none}
+.coach-next{align-self:flex-end;margin-top:6px;pointer-events:auto;padding:6px 16px;border-radius:999px;font-size:12.5px;font-weight:800;color:#2a1c05;background:linear-gradient(180deg,#ffe7a3,#f2c45a);border:0;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.coach-next[hidden]{display:none}
 @keyframes coach-pulse{0%,100%{opacity:1}50%{opacity:.55}}
 @keyframes coach-nudge{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 @keyframes coach-tap{0%{transform:scale(.4);opacity:.95}80%{opacity:0}100%{transform:scale(1.9);opacity:0}}
@@ -1629,7 +1631,7 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 
 /* ───────── Adventure ───────── */
 .adv{padding:12px 14px 18px;display:grid;gap:12px}
-.chap-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.chap-tabs{display:grid;grid-template-columns:repeat(var(--chapters,5),minmax(0,1fr));gap:6px}
 .chap{min-width:0;min-height:48px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:rgba(14,20,50,.72);border:1px solid var(--line);color:var(--text2)}
 .chap b{font-size:13px}.chap small{font-size:10px;color:var(--text3)}
 .chap small .ic{width:11px;height:11px}
