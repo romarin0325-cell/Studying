@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../src/combat/engine.js';
-import {HERO,HEROES,ROSTER} from '../src/content.js';
+import {HERO,HEROES,ROSTER,TUNING} from '../src/content.js';
 import {bedCost,legacyCritCost,critChance,critStats,specialMultiplier} from '../src/economy.js';
 import {createProfile,parseProfile} from '../src/profile.js';
 import {autoPlay} from '../src/battle.js';
@@ -103,5 +103,5 @@ test('crit budget to20% matches the old budget, then joins the half-price tail w
   const old=Array.from({length:38},(_,i)=>legacyCritCost(i)).reduce((a,b)=>a+b),now=Array.from({length:30},(_,i)=>bedCost('crit',i)).reduce((a,b)=>a+b);
   assert.ok(now>=old&&now-old<=30);for(let n=1;n<250;n++)assert.ok(bedCost('crit',n)>=bedCost('crit',n-1),'no price reversal at '+n);
   for(const n of [41,42,60,100])assert.equal(bedCost('crit',n),Math.ceil(legacyCritCost(38+n-30)/2));
-  const p=createProfile();p.cleared=45;p.beds.crit=38;const next=parseProfile(JSON.stringify(p));assert.equal(next.beds.crit,38);assert.equal(next.bedRev,p.bedRev);assert.ok(Math.abs(critStats(next.beds,45).chance-.24)<1e-12);
+  const p=createProfile();p.cleared=TUNING.beds.crit.unlock;p.beds.crit=38;const next=parseProfile(JSON.stringify(p));assert.equal(next.beds.crit,38);assert.equal(next.bedRev,p.bedRev);assert.ok(Math.abs(critStats(next.beds,p.cleared).chance-.24)<1e-12);
 });

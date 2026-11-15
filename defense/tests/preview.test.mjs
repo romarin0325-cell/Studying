@@ -8,7 +8,7 @@ const {createProfile,command,validateProfile,parseProfile,ProfileStore,SAVE_KEY}
 const E=await import('../src/combat/engine.js');
 const {createBattle,resumeBattle}=await import('../src/battle.js');
 const {HERO,HEROES,CHAPTERS,TIERS,TIER_IDS,BOSS_ORDER,CHALLENGE_WAVES,ARTIFACTS,DEFAULT_DECK,MAIN_STAGES}=await import('../src/content.js');
-const {HOUR,calendar}=await import('../src/economy.js');
+const {HOUR,calendar,stageDust}=await import('../src/economy.js');
 const {weeklyReward,monthlyReward}=await import('../src/monthly.js');
 const {season}=await import('../src/preview/season.js');
 const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
@@ -382,7 +382,7 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   const flagged=ok(p,'settle',{token:p.active.token,round:1,won:true,feats:{won:false,casts:{},bosses:2,flags:['spared']}});
   assert.deepEqual(flagged.requestsDone,['underdog-1','ash-3']);
   const dust=p.dust;ok(p,'begin',{mode:'main'});const quiet=ok(p,'settle',{token:p.active.token,round:1,won:true});
-  assert.equal(quiet.requestsDone,undefined);assert.equal(p.dust,dust+40+p.results[0].stage*8);assert.equal(quiet.reward,0);
+  assert.equal(quiet.requestsDone,undefined);assert.equal(p.dust,dust+stageDust(p.results[0].stage,true));assert.equal(quiet.reward,0);
   ok(p,'begin',{mode:'weekly',tier:'easy'});
   while(p.active.draft.length<5)ok(p,'draft',{index:0});
   const weekly=ok(p,'settle',{token:p.active.token,round:4,won:false});

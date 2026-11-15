@@ -8,7 +8,6 @@ const ROOT='https://generativelanguage.googleapis.com/v1beta/models';
 export const TUTOR_MODELS=Object.freeze([{id:'gemini-3.8-flash',label:'Gemini 3.8 Flash · 빠름'},{id:'gemini-4-argon',label:'Gemini 4 Argon · 깊이'},{id:'gemini-3.5-flash-lite',label:'Gemini 3.5 Flash Lite · 가벼움'}]);
 export function tutorSettings(){try{const s=JSON.parse(localStorage.getItem(STORE)||'{}');return {key:typeof s.key==='string'?s.key:'',model:TUTOR_MODELS.some(m=>m.id===s.model)?s.model:TUTOR_MODELS[0].id};}catch{return {key:'',model:TUTOR_MODELS[0].id};}}
 export function saveTutorSettings({key,model}){try{localStorage.setItem(STORE,JSON.stringify({key:String(key||'').trim(),model}));return true;}catch{return false;}}
-export const hasTutor=()=>!!tutorSettings().key;
 
 const PERSONA= `# Role: 별빛 정원의 대현자 루미 (Grand Sage Rumi)
 

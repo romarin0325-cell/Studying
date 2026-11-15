@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../src/combat/engine.js';
-import {HERO,ROSTER,LATE_COMPANIONS,DEFAULT_DECK} from '../src/content.js';
+import {HERO,ROSTER,LATE_COMPANIONS,DEFAULT_DECK,PART_STAGES} from '../src/content.js';
 import {heroPool,lateOpen} from '../src/economy.js';
 import {createProfile,parseProfile,validateProfile} from '../src/profile.js';
 import {skillType,measure,roster} from '../src/lab/model.js';
@@ -20,11 +20,11 @@ function bossPattern(s,e,pattern,cells=[12]){
   e.boss='ares';e.channel=.001;e.channelHp=e.hp;
   s.telegraph={uid:e.uid,pattern,cells,ends:s.time+.001,total:.001};E.step(s,.01);
 }
-test('Gold joins the regular late UR pool at clear45; old profiles gain one unowned identity',()=>{
+test('Gold joins the regular late UR pool after part one; old profiles gain one unowned identity',()=>{
   const h=HERO.gold_dragon;assert.equal(h.rarity,'UR');assert.equal(h.hidden,false);
   assert.ok(ROSTER.UR.includes(h.id)&&LATE_COMPANIONS.includes(h.id));
   assert.ok(!heroPool('UR',false).includes(h.id)&&heroPool('UR',true).includes(h.id));
-  assert.equal(lateOpen(44),false);assert.equal(lateOpen(45),true);assert.equal(skillType(h),'범위');
+  assert.equal(lateOpen(PART_STAGES-1),false);assert.equal(lateOpen(PART_STAGES),true);assert.equal(skillType(h),'범위');
   const p=createProfile(0);delete p.heroes.gold_dragon;const back=parseProfile(JSON.stringify(p));
   assert.ok(back&&validateProfile(back));assert.equal(back.heroes.gold_dragon.owned,false);assert.deepEqual(back.deck,DEFAULT_DECK);
 });

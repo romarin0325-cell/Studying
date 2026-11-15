@@ -6,13 +6,16 @@ export function createCoach({onSkip}={}){
   const root=document.createElement('div');root.className='coach';root.hidden=true;root.setAttribute('aria-live','polite');
   root.innerHTML='<i class="coach-shade" data-side="t"></i><i class="coach-shade" data-side="b"></i><i class="coach-shade" data-side="l"></i><i class="coach-shade" data-side="r"></i>'
     +'<span class="coach-ring" aria-hidden="true"></span><span class="coach-tap" aria-hidden="true"><i></i><i></i></span><span class="coach-drag" aria-hidden="true"><i class="coach-path"></i><i class="coach-dot"></i></span>'
-    +'<div class="coach-say"><span class="coach-face"></span><p><b class="coach-name"></b><span class="coach-line"></span></p><button class="coach-skip" type="button">건너뛰기</button></div>';
+    +'<div class="coach-say"><span class="coach-face"></span><p><b class="coach-name"></b><span class="coach-line"></span><button class="coach-next" type="button" hidden></button></p><button class="coach-skip" type="button">건너뛰기</button></div>';
   document.body.append(root);
   const $=s=>root.querySelector(s),shades=[...root.querySelectorAll('.coach-shade')];
   let state=null,timer=0;
   // Swallow presses on the dim area (the hole has no element over it).
   for(const s of shades)for(const type of ['pointerdown','click','touchstart'])s.addEventListener(type,e=>{e.preventDefault();e.stopPropagation();$('.coach-ring').classList.remove('nudge');void root.offsetWidth;$('.coach-ring').classList.add('nudge');},{passive:false});
-  $('.coach-skip').addEventListener('click',e=>{e.stopPropagation();state?.onSkip?.();onSkip?.();});
+  // A step with its own onSkip (a feature tour) ends only itself; otherwise the layer's onSkip ends the tutorial.
+  $('.coach-skip').addEventListener('click',e=>{e.stopPropagation();if(state?.onSkip)state.onSkip();else onSkip?.();});
+  // An explaining step (nothing to press) carries its own button to go on.
+  $('.coach-next').addEventListener('click',e=>{e.stopPropagation();state?.next?.onNext?.();});
   // A target is an element, a rect, or a function returning either (looked up again on every frame).
   const rectOf=t=>{if(typeof t==='function')t=t();if(!t)return null;if(t.getBoundingClientRect){if(!t.isConnected)return null;const r=t.getBoundingClientRect();return r.width||r.height?r:null;}return Number.isFinite(t.left)?t:null;};
   function place(){
@@ -33,6 +36,7 @@ export function createCoach({onSkip}={}){
     state=opts;root.hidden=false;root.dataset.hand=opts.drag?'drag':opts.hand===false?'none':'tap';root.classList.toggle('soft',!!opts.soft);
     $('.coach-face').innerHTML=opts.face||'';$('.coach-name').textContent=opts.name||'';$('.coach-line').textContent=opts.line||'';
     $('.coach-skip').hidden=!opts.skippable;
+    const next=$('.coach-next');next.hidden=!opts.next;next.textContent=opts.next?.label||'';
     const say=$('.coach-say');say.classList.remove('in');void say.offsetWidth;say.classList.add('in');
     place();clearInterval(timer);timer=setInterval(place,200);
   }
