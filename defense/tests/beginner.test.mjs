@@ -26,7 +26,7 @@ test('unlock notices, tutorial and cumulative login claims',()=>{
   command(p,'ftue',{skip:true},now+18*day);assert.equal(ftueNext(p),null);
 });
 test('task flags only follow successful actions and every claim closes the board',()=>{
-  const p=createProfile(now);p.cleared=12;p.dreams=10000;p.dust=10000;p.gifts.candy=1;
+  const p=createProfile(now);p.cleared=21;p.dreams=10000;p.dust=10000;p.gifts.candy=1;
   assert.equal(command(p,'pet',{},now).ok,true);assert.equal(command(p,'bed',{id:'rose'},now).ok,true);assert.equal(command(p,'gift',{id:p.partner,gift:'candy'},now).ok,true);assert.equal(command(p,'draw',{banner:'relic',count:1},now).ok,true);assert.deepEqual(p.beginner.did,['greet','water','gift','relic']);
   for(let i=1;i<=6;i++)command(p,'tick',{},now+i*day);for(const d of BEGINNER_DAYS){assert.equal(command(p,'beginnerClaim',{day:d.day,kind:'task'},now+6*day).ok,true);assert.equal(command(p,'beginnerClaim',{day:d.day,kind:'login',choice:urChoices(p)[0].id},now+6*day).ok,true);}assert.equal(p.beginner.closed,true);assert.equal(beginnerState(p).active,false);
 });

@@ -1,8 +1,8 @@
-import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,LATE_UNLOCK_STAGE,LATE_COMPANIONS,TUNING as T} from './content.js';
+import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,LATE_UNLOCK_STAGE,LATE_COMPANIONS,levelOf,TUNING as T} from './content.js';
 
 export const HOUR=3600000;
 // Season guardian of a calendar month (UTC+9). The six guardians retain the original rotation;
-// Behemoth joins the regular summon pool after stage45, alongside Venom.
+// Behemoth joins the regular summon pool after the first part, alongside Venom.
 export const guardianOf=(year,month)=>HIDDEN[((year*12+month)%HIDDEN.length+HIDDEN.length)%HIDDEN.length];
 // The next months (as {year,month}) in which a hidden hero is the guardian, starting with this month.
 export function guardianMonths(id,now=Date.now(),count=2){
@@ -40,7 +40,7 @@ export const collectionPoints=relics=>ARTIFACTS.reduce((n,a)=>n+relicPoints(a.id
 export const collectionBonus=relics=>collectionPoints(relics)/COLLECTION_POINTS_PER_PERCENT/100;
 // Dream greenhouse. Every bed is shared by all companions; duplicates stay personal.
 export const BED_IDS=Object.freeze(['rose','spring','seed','crit','critDamage','stardust']);
-// Two gardens of three beds each: the dream greenhouse (from the start) and the dawn greenhouse (opens at stage 45).
+// Two gardens of three beds each: the dream greenhouse (from the start) and the dawn greenhouse (opens with the second part).
 export const GARDENS=Object.freeze([{id:'dream',beds:['rose','spring','seed']},{id:'dawn',beds:['crit','critDamage','stardust']}]);
 // Retained old price for one +0.5%p purchase. Thirty new purchases cover the same
 // dust intervals as all38 old purchases. A smooth log-price bridge then joins the half-price tail.
@@ -90,11 +90,14 @@ export function combatPower(id,entry,beds,relicBonus=0){
   return Math.round(POWER_BASE*POWER_RARITY[h.rarity]*(AURA_TRAITS.includes(h.trait.type)?POWER_AURA:1)*heroMultiplier(entry,beds)*(1+relicBonus)*(1+POWER_SPECIAL_SHARE*(specialMultiplier(entry.enhance)-1)));
 }
 export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
-const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+cleared*T.dispatchStageStep);
+// Stage-scaled income reads the level (levelOf): the intro chapter adds no step, so later rewards keep their scale.
+const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+levelOf(cleared)*T.dispatchStageStep);
 export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,cleared);return {dust:Math.floor(base*T.dispatchDust),dreams:Math.max(1,Math.floor(base*T.dispatchDreams))};};
 // The stardust bed is applied when a dispatch is collected, so growing it helps dispatches already under way.
 export const dispatchDust=(dust,beds,cleared)=>Math.floor(dust*(1+stardustBonus(beds,cleared)));
-export const stageReward=stage=>T.firstClearBase+T.firstClearStep*stage;
+export const stageReward=stage=>T.firstClearBase+T.firstClearStep*levelOf(stage);
+// Stardust for finishing a main stage (a loss pays the flat consolation).
+export const stageDust=(stage,won)=>won?40+levelOf(stage)*8:12;
 export const PERFECT_REWARD=100;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
 export const relicThreshold=tier=>Math.ceil(T.relicThresholdBase*(T.relicThresholdGrowth**tier-1)/(T.relicThresholdGrowth-1));
@@ -115,4 +118,4 @@ export function drawCharacter(random,season,guardian,pickup=null,urMult=1,open=t
   const pool=heroPool(rarity,open);return pool[Math.floor(random()*pool.length)];
 }
 export function drawRelic(random,draws){const rarity=['C','R','SR','UR'][rollIndex(relicRates(draws),random())],pool=Object.values(ARTIFACT).filter(a=>a.rarity===rarity);return pool[Math.floor(random()*pool.length)].id;}
-export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+profile.cleared*2)*(1+stardustBonus(profile.beds,profile.cleared)));}
+export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+levelOf(profile.cleared)*2)*(1+stardustBonus(profile.beds,profile.cleared)));}

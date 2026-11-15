@@ -41,7 +41,7 @@
         "steep2": 1.2
       },
       "spring": {
-        "unlock": 15,
+        "unlock": 24,
         "base": 300,
         "growth": 1.06,
         "knee": 18,
@@ -50,7 +50,7 @@
         "steep2": 1.2
       },
       "seed": {
-        "unlock": 30,
+        "unlock": 39,
         "base": 700,
         "growth": 1.06,
         "knee": 12,
@@ -59,7 +59,7 @@
         "steep2": 1.2
       },
       "crit": {
-        "unlock": 45,
+        "unlock": 54,
         "base": 400,
         "growth": 1.09,
         "rise": 21,
@@ -72,7 +72,7 @@
         "priceTransition": 12
       },
       "critDamage": {
-        "unlock": 45,
+        "unlock": 54,
         "base": 500,
         "growth": 1.13,
         "rise": 18,
@@ -82,7 +82,7 @@
         "steep2": 1.2
       },
       "stardust": {
-        "unlock": 60,
+        "unlock": 69,
         "base": 1200,
         "growth": 1.05,
         "rise": 34,
@@ -363,7 +363,7 @@
       ]
     },
     "spring": {
-      "unlockStage": 15,
+      "unlockStage": 24,
       "levels": [
         {
           "level": 0,
@@ -416,7 +416,7 @@
       ]
     },
     "seed": {
-      "unlockStage": 30,
+      "unlockStage": 39,
       "levels": [
         {
           "level": 0,
@@ -463,7 +463,7 @@
       ]
     },
     "crit": {
-      "unlockStage": 45,
+      "unlockStage": 54,
       "levels": [
         {
           "level": 0,
@@ -510,7 +510,7 @@
       ]
     },
     "critDamage": {
-      "unlockStage": 45,
+      "unlockStage": 54,
       "levels": [
         {
           "level": 0,
@@ -557,7 +557,7 @@
       ]
     },
     "stardust": {
-      "unlockStage": 60,
+      "unlockStage": 69,
       "levels": [
         {
           "level": 0,
@@ -1460,51 +1460,51 @@
   "stages": [
     {
       "stage": 1,
-      "hp": 1,
+      "hp": 0.3,
       "slots": 0,
       "dispatchMultiplier": 1.05,
-      "firstClear": 170,
-      "totalFirstClear": 170
+      "firstClear": 160,
+      "totalFirstClear": 160
     },
     {
       "stage": 9,
-      "hp": 3.5,
+      "hp": 0.9,
       "slots": 1,
       "dispatchMultiplier": 1.45,
-      "firstClear": 250,
-      "totalFirstClear": 1890
+      "firstClear": 160,
+      "totalFirstClear": 1440
     },
     {
       "stage": 18,
-      "hp": 6.3125,
+      "hp": 2.4749889086595873,
       "slots": 2,
       "dispatchMultiplier": 1.9,
-      "firstClear": 340,
-      "totalFirstClear": 4590
+      "firstClear": 250,
+      "totalFirstClear": 3330
     },
     {
       "stage": 27,
-      "hp": 9.125,
+      "hp": 6.3125,
       "slots": 3,
       "dispatchMultiplier": 2.35,
-      "firstClear": 430,
-      "totalFirstClear": 8100
+      "firstClear": 340,
+      "totalFirstClear": 6030
     },
     {
       "stage": 36,
-      "hp": 11.9375,
+      "hp": 9.125,
       "slots": 4,
       "dispatchMultiplier": 2.8,
-      "firstClear": 520,
-      "totalFirstClear": 12420
+      "firstClear": 430,
+      "totalFirstClear": 9540
     },
     {
       "stage": 45,
-      "hp": 14.75,
+      "hp": 11.9375,
       "slots": 4,
       "dispatchMultiplier": 3.25,
-      "firstClear": 610,
-      "totalFirstClear": 17550
+      "firstClear": 520,
+      "totalFirstClear": 13860
     }
   ],
   "starter": [
@@ -1512,40 +1512,40 @@
       "id": "star_boy",
       "power": 500,
       "dispatchAt9": {
-        "dust": 113,
-        "dreams": 22
+        "dust": 78,
+        "dreams": 15
       }
     },
     {
       "id": "snow_rabbit",
       "power": 500,
       "dispatchAt9": {
-        "dust": 113,
-        "dreams": 22
+        "dust": 78,
+        "dreams": 15
       }
     },
     {
       "id": "night_rabbit",
       "power": 500,
       "dispatchAt9": {
-        "dust": 113,
-        "dreams": 22
+        "dust": 78,
+        "dreams": 15
       }
     },
     {
       "id": "siren",
       "power": 600,
       "dispatchAt9": {
-        "dust": 119,
-        "dreams": 23
+        "dust": 82,
+        "dreams": 16
       }
     },
     {
       "id": "great_detective",
       "power": 600,
       "dispatchAt9": {
-        "dust": 119,
-        "dreams": 23
+        "dust": 82,
+        "dreams": 16
       }
     }
   ],

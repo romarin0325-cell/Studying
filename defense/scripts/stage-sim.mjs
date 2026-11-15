@@ -1,8 +1,8 @@
 // Real-stage difficulty bench. Plays whole main stages with the built-in auto-play.
 //   node defense/scripts/stage-sim.mjs [--ai smart|basic] [--stages 3,9,15,21,27,33,39,45] [--seeds 10] [--decks "id,id,id,id,id;..."] [--rose auto|N] [--dawn off|mid|full] [--json out.json]
-// Stages go to 90 (part two). --dawn sets the dawn garden's crit beds: off (none), mid (13% / 180%), full (20% / 200%).
+// Stages go to MAIN_STAGES (108); growth assumptions follow the level (stage minus the nine intro stages). --dawn sets the dawn garden's crit beds: off (none), mid (13% / 180%), full (20% / 200%).
 import fs from 'node:fs/promises';
-import {HERO} from '../src/content.js';
+import {HERO,MAIN_STAGES,levelOf} from '../src/content.js';
 import {heroMultiplier,specialMultiplier,springGauge,seedGold} from '../src/economy.js';
 import * as engine from '../src/combat/engine.js';
 import {autoPlay as basicAuto,clearedRounds} from '../src/battle.js';
@@ -36,12 +36,14 @@ const decks=(opt('decks',null)?.split(';')??DEFAULT_DECKS.map(d=>d.join(','))).m
 });
 if(!decks.length)throw new Error('At least one deck is required');
 if(!Number.isInteger(SEEDS)||SEEDS<1)throw new Error('--seeds must be a positive integer');
-if(!STAGES.length||STAGES.some(stage=>!Number.isInteger(stage)||stage<1||stage>90))throw new Error('--stages must be integers from 1 to 90');
+if(!STAGES.length||STAGES.some(stage=>!Number.isInteger(stage)||stage<1||stage>MAIN_STAGES))throw new Error('--stages must be integers from 1 to '+MAIN_STAGES);
 const roseMode=ROSE==='auto'?ROSE:Number(ROSE);
 if(roseMode!=='auto'&&(!Number.isInteger(roseMode)||roseMode<0))throw new Error('--rose must be auto or a non-negative integer');
 
 // Greenhouse a player would plausibly have on the way to stage S. Enhance stays 0.
-const bedsFor=stage=>({
+// Growth is keyed to the level (the stage number before the intro chapter), as the old measurements were.
+const bedsFor=stage=>bedsAt(levelOf(stage));
+const bedsAt=stage=>({
   rose:roseMode==='auto'?Math.min(45,3+stage):roseMode,
   spring:stage>=15?Math.min(30,3*(stage-14)):0,
   seed:stage>=30?Math.min(20,2*(stage-29)):0,
