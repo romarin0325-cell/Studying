@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "selection": "Owner-selected left profile, with original front, back and right preserved.",
+  "assets": [
+    {
+      "id": "time_magician",
+      "version": "left-profile-20261109",
+      "sourcePng": {
+        "file": "defense/assets/cast-selected-20261109/time_magician.png",
+        "bytes": 722901,
+        "sha256": "dfe8e55e2f12c5bd433d4a00088c601dfa8dca3b9247092e5931f18f796dbf4d"
+      },
+      "sourceWebp": {
+        "file": "defense/assets/cast-selected-20261109/time_magician.webp",
+        "bytes": 442462,
+        "sha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f"
+      },
+      "commonScale": 1,
+      "coordinateSpace": "existing 512px packed frames; per-direction scale unchanged",
+      "measurementUncertaintyPacked": 12,
+      "portrait": {
+        "x": 255,
+        "y": 207,
+        "size": 250
+      },
+      "previousManifest": "defense/docs/art/sol-cast-v2/manifest.json",
+      "profileNativeSha256": "dd172a884241ccc47825262b7c0d6987d9455973253a805787385aef3de26880",
+      "frames": [
+        {
+          "direction": "down",
+          "ellipse": [
+            255.35,
+            206.65,
+            159.56,
+            150.41,
+            -3
+          ],
+          "chin": [
+            255.35,
+            281.85
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0,
+          "origin": "preserved historical direction; see sol-cast-v2/manifest.json"
+        },
+        {
+          "direction": "up",
+          "ellipse": [
+            260.58,
+            207.96,
+            159.56,
+            150.41,
+            3
+          ],
+          "chin": [
+            260.58,
+            283.16
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0,
+          "origin": "preserved historical direction; see sol-cast-v2/manifest.json"
+        },
+        {
+          "direction": "left",
+          "ellipse": [
+            249,
+            208,
+            148,
+            148,
+            -2
+          ],
+          "chin": [
+            211,
+            283
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0,
+          "origin": "selected left-profile; see anatomy.json"
+        },
+        {
+          "direction": "right",
+          "ellipse": [
+            274.31,
+            211.23,
+            145.18,
+            143.87,
+            0
+          ],
+          "chin": [
+            305.05,
+            283.16
+          ],
+          "sole": [
+            256,
+            480
+          ],
+          "commonScale": 1,
+          "paintedClipping": 0,
+          "origin": "preserved historical direction; see sol-cast-v2/manifest.json"
+        }
+      ]
+    }
+  ]
+}

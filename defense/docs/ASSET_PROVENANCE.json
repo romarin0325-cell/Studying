@@ -270,8 +270,8 @@
     },
     {
       "id": "unit-time_magician",
-      "source": "defense/assets/cast-v2/time_magician.webp",
-      "sha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
+      "source": "defense/assets/cast-selected-20261109/time_magician.webp",
+      "sha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
       "width": 1024,
       "height": 1024
     },
