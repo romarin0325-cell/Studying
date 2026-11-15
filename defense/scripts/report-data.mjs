@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
-import {HEROES,DEFAULT_DECK,ARTIFACTS,ASSET_PATHS,CHAPTERS,TUNING,ROSTER} from '../src/content.js';
+import {HEROES,DEFAULT_DECK,ARTIFACTS,ASSET_PATHS,CHAPTERS,TUNING,ROSTER,MAIN_STAGES,PART_STAGES,levelOf} from '../src/content.js';
 import {duplicateCost,enhanceMultiplier,specialMultiplier,bedCost,critChance,critDamage,stardustRate,BED_IDS,roseAttack,springGauge,seedGold,combatPower,dispatchReward,dispatchSlots,relicRates,relicThreshold,stageReward,relicCost,relicScale,relicPhase,RELIC_LEVEL_STEP,RELIC_COST_STEP,RELIC_COST_MULT,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from '../src/economy.js';
 import {createProfile} from '../src/profile.js';
 import {gameRoot,assetFile} from './local-inputs.mjs';
@@ -31,7 +31,7 @@ export function balanceSnapshot(){
         return {rarity,rows};
       })
     },
-    stages:[1,9,18,27,36,45].map(stage=>({stage,hp:CHAPTERS[stage-1].hp,slots:dispatchSlots(stage),dispatchMultiplier:1+TUNING.dispatchStageStep*stage,firstClear:stageReward(stage),totalFirstClear:Array.from({length:stage},(_,i)=>stageReward(i+1)).reduce((a,b)=>a+b,0)})),
+    stages:[...new Set([1,9,18,27,36,45,PART_STAGES,81,MAIN_STAGES])].map(stage=>({stage,level:levelOf(stage),hp:CHAPTERS[stage-1].hp,slots:dispatchSlots(stage),dispatchMultiplier:1+TUNING.dispatchStageStep*levelOf(stage),firstClear:stageReward(stage),totalFirstClear:Array.from({length:stage},(_,i)=>stageReward(i+1)).reduce((a,b)=>a+b,0)})),
     starter:DEFAULT_DECK.map(id=>({id,power:combatPower(id,p.heroes[id]),dispatchAt9:dispatchReward(combatPower(id,p.heroes[id]),9)})),
     roster:HEROES.map(h=>({id:h.id,name:h.name,rarity:h.rarity,hidden:h.hidden})),
     starlight:{perMerge:MERGE_STARLIGHT,perCombatSecond:STARLIGHT_PER_SECOND},

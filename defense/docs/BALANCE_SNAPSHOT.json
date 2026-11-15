@@ -1460,68 +1460,101 @@
   "stages": [
     {
       "stage": 1,
+      "level": 0,
       "hp": 0.3,
       "slots": 0,
-      "dispatchMultiplier": 1.05,
+      "dispatchMultiplier": 1,
       "firstClear": 160,
       "totalFirstClear": 160
     },
     {
       "stage": 9,
+      "level": 0,
       "hp": 0.9,
       "slots": 1,
-      "dispatchMultiplier": 1.45,
+      "dispatchMultiplier": 1,
       "firstClear": 160,
       "totalFirstClear": 1440
     },
     {
       "stage": 18,
+      "level": 9,
       "hp": 2.4749889086595873,
       "slots": 2,
-      "dispatchMultiplier": 1.9,
+      "dispatchMultiplier": 1.45,
       "firstClear": 250,
       "totalFirstClear": 3330
     },
     {
       "stage": 27,
+      "level": 18,
       "hp": 6.3125,
       "slots": 3,
-      "dispatchMultiplier": 2.35,
+      "dispatchMultiplier": 1.9,
       "firstClear": 340,
       "totalFirstClear": 6030
     },
     {
       "stage": 36,
+      "level": 27,
       "hp": 9.125,
       "slots": 4,
-      "dispatchMultiplier": 2.8,
+      "dispatchMultiplier": 2.35,
       "firstClear": 430,
       "totalFirstClear": 9540
     },
     {
       "stage": 45,
+      "level": 36,
       "hp": 11.9375,
       "slots": 4,
-      "dispatchMultiplier": 3.25,
+      "dispatchMultiplier": 2.8,
       "firstClear": 520,
       "totalFirstClear": 13860
+    },
+    {
+      "stage": 54,
+      "level": 45,
+      "hp": 14.75,
+      "slots": 4,
+      "dispatchMultiplier": 3.25,
+      "firstClear": 610,
+      "totalFirstClear": 18990
+    },
+    {
+      "stage": 81,
+      "level": 72,
+      "hp": 23.1875,
+      "slots": 4,
+      "dispatchMultiplier": 4.6,
+      "firstClear": 880,
+      "totalFirstClear": 39240
+    },
+    {
+      "stage": 108,
+      "level": 99,
+      "hp": 31.625,
+      "slots": 4,
+      "dispatchMultiplier": 5.95,
+      "firstClear": 1150,
+      "totalFirstClear": 66780
     }
   ],
   "starter": [
     {
       "id": "star_boy",
-      "power": 500,
+      "power": 450,
       "dispatchAt9": {
-        "dust": 78,
+        "dust": 75,
         "dreams": 15
       }
     },
     {
       "id": "snow_rabbit",
-      "power": 500,
+      "power": 600,
       "dispatchAt9": {
-        "dust": 78,
-        "dreams": 15
+        "dust": 82,
+        "dreams": 16
       }
     },
     {
@@ -1534,18 +1567,18 @@
     },
     {
       "id": "siren",
-      "power": 600,
+      "power": 400,
       "dispatchAt9": {
-        "dust": 82,
-        "dreams": 16
+        "dust": 73,
+        "dreams": 14
       }
     },
     {
       "id": "great_detective",
-      "power": 600,
+      "power": 480,
       "dispatchAt9": {
-        "dust": 82,
-        "dreams": 16
+        "dust": 77,
+        "dreams": 15
       }
     }
   ],

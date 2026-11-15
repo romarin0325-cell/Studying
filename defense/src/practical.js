@@ -1,6 +1,0 @@
-// Practical value of each companion for auto formation (1 = the average companion), measured in real main stages
-// by scripts/practical-stage-bench.mjs on 2026-11-16: three four-member cores (common, rare, super rare) with the
-// companion as the fifth, two stages each, 6 seeds, measurement auto, real in-run gold. It is a correction on top of
-// combat power, not a replacement: one fifth member moves a run by little, so the spread is narrow (0.84-1.30).
-// Regenerate after a balance patch:  node defense/scripts/practical-stage-bench.mjs --write
-export const PRACTICAL=Object.freeze({ancient_dragon:1.012,antropy:0.969,ash:0.937,aurora:0.895,avalanche_maid:1.101,behemoth:0.918,cherry_prince:0.896,cinderella:1.021,cure_master:0.94,demon_king:0.889,doom:1.055,flame_sage:1.085,frost_witch:1.28,galaxy_whale:1.249,gold_dragon:0.904,great_detective:0.844,guardian:0.98,harmonious:0.965,jasmine:0.972,joker:0.949,lightning_sage:0.987,luna:0.893,miracle_larva:1.114,mushroom_king:0.986,night_rabbit:0.929,phantom:1.123,queen:1.102,red_dragon:0.96,rumi:1.059,santa:1.009,silver_rabbit:0.886,siren:0.878,snow_rabbit:1.103,star_boy:0.865,storm_sage:1.183,sunflower:0.952,time_magician:1.047,time_ruler:1.301,toffee_apple:0.897,underdog:0.913,venom:0.906,zeke:1.05});
