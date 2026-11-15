@@ -5,7 +5,8 @@ import {BEGINNER_DAYS,beginnerState,featureOpen,newlyOpened,ftueNext,urChoices} 
 import {drawRelic,drawCharacter,calendar,lateOpen,combatPower,POWER_RARITY} from '../src/economy.js';
 import {HERO,HEROES,ARTIFACTS} from '../src/content.js';
 import {activeEvent,eventOpen,eventWindow,nextEvent,season,EVENT_ROTATION_START} from '../src/preview/season.js';
-import {autoDeck,autoRelics,autoTwin,oathDeck} from '../src/auto-team.js';
+import {autoDeck,autoRelics,autoTwin,oathDeck,autoScore} from '../src/auto-team.js';
+import {PRACTICAL} from '../src/practical.js';
 import {unlockProfile} from '../src/test-unlock.js';
 import {oathDeckProblem} from '../src/preview/oath.js';
 import {build} from 'esbuild';
@@ -50,7 +51,7 @@ test('unlocked trial stays a new profile on load and supports test tools',async(
   const src=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../src'),result=await build({stdin:{contents:"export {createProfile,validateProfile,command,ProfileStore} from './profile.js';",resolveDir:src},bundle:true,write:false,format:'cjs',platform:'node',define:{__GARDEN_UNLOCKED__:'true'}}),compiled={exports:{}};runInNewContext(result.outputFiles[0].text,{module:compiled,structuredClone});const api=compiled.exports,p=api.createProfile(now,{trial:true});assert.equal(p.trial,true);assert.equal(p.cleared,0);assert.equal(api.validateProfile(p),true);
   const storage={getItem:()=>JSON.stringify(p)},store=new api.ProfileStore(storage,now);assert.equal(store.value.cleared,0);assert.equal(store.value.beginner.count,1);assert.equal(api.command(store.value,'testGrant',{kind:'trial-day'},now).ok,true);assert.equal(store.value.beginner.count,2);assert.equal(api.command(store.value,'testGrant',{kind:'event-flip'},now).ok,true);assert.equal(store.value.eventFlip,true);assert.equal(api.command(store.value,'testGrant',{kind:'ftue-reset'},now).ok,true);
 });
-test('combat power follows rarity and growth, and auto formation keeps equals and spreads shapes',()=>{
+test('combat power follows rarity and growth; auto formation corrects it by measured stage value and keeps equals',()=>{
   // A mid account (about a thousand summons): commons far ahead in duplicates, the few URs at +0.
   const p=createProfile(now),entry=e=>({owned:true,enhance:e});
   for(const [id,e] of Object.entries(p.heroes)){e.owned=HERO[id].rarity!=='UR'||['zeke','luna','jasmine','rumi','venom','cherry_prince'].includes(id);e.enhance={C:8,R:6,SR:2,UR:0}[HERO[id].rarity];}
@@ -59,11 +60,16 @@ test('combat power follows rarity and growth, and auto formation keeps equals an
   // Same rarity and enhancement: the same number, whatever the basic attack. Aura companions sit 20% above it.
   assert.equal(combatPower('snow_rabbit',entry(8)),combatPower('night_rabbit',entry(8)));assert.equal(combatPower('siren',entry(0)),600);assert.equal(combatPower('ancient_dragon',entry(0)),840);
   assert.ok(combatPower('zeke',entry(0))>combatPower('great_detective',entry(6))&&combatPower('great_detective',entry(6))>combatPower('storm_sage',entry(2))&&combatPower('storm_sage',entry(2))>combatPower('night_rabbit',entry(8)));
-  const deck=autoDeck(p);assert.equal(deck.every(id=>HERO[id].rarity==='UR'),true);
-  // Six URs tie; the five picked cover every shape the six have before a shape repeats.
-  assert.equal(new Set(deck.map(id=>HERO[id].shape)).size,new Set(['zeke','luna','jasmine','rumi','venom','cherry_prince'].map(id=>HERO[id].shape)).size);
-  // A tie never swaps out a companion already in the team.
-  p.deck=['venom','cherry_prince','luna','zeke','jasmine'];assert.deepEqual([...autoDeck(p)].sort(),[...p.deck].sort());
+  // Auto formation: combat power times the measured stage value, the five best of that.
+  assert.ok(HEROES.every(h=>PRACTICAL[h.id]>.5&&PRACTICAL[h.id]<2),'every companion has a measured value');
+  const owned=HEROES.filter(h=>p.heroes[h.id].owned).map(h=>h.id),deck=autoDeck(p);
+  assert.deepEqual([...deck].sort(),[...owned].sort((a,b)=>autoScore(p,b)-autoScore(p,a)).slice(0,5).sort());
+  for(const id of deck)assert.equal(autoScore(p,id),Math.round(combatPower(id,p.heroes[id],p.beds)*PRACTICAL[id]));
+  // At equal rarity and growth the companion that wins more stages comes first.
+  const two=createProfile(now);for(const e of Object.values(two.heroes))e.owned=false;two.heroes.snow_rabbit.owned=two.heroes.star_boy.owned=true;
+  assert.ok(PRACTICAL.snow_rabbit>PRACTICAL.star_boy);assert.deepEqual(autoDeck(two,{size:1}),['snow_rabbit']);
+  // A pick that already matches the team never swaps anyone.
+  p.deck=[...deck].reverse();assert.deepEqual([...autoDeck(p)].sort(),[...p.deck].sort());
   const fresh=createProfile(now);assert.deepEqual([...autoDeck(fresh)].sort(),[...fresh.deck].sort());
 });
 test('auto formation respects ownership, dispatch, rarity and oath constraints',()=>{
