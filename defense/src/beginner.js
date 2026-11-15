@@ -5,7 +5,6 @@ export const featureOpen=(p,id)=>p.ftue?.legacy===true||!Object.hasOwn(UNLOCKS,i
 export const newlyOpened=p=>p.ftue?.legacy?[]:Object.keys(UNLOCKS).filter(id=>featureOpen(p,id)&&!p.ftue?.seen.includes(id));
 export const FTUE_STEPS=Object.freeze(['lobby','prepare','summon','merge','cast','auto','firstTen','formation']);
 export const ftueNext=p=>!p.ftue||p.ftue.legacy||p.ftue.skipped?null:FTUE_STEPS.find(id=>!p.ftue.done.includes(id))??null;
-export const ftueActive=p=>ftueNext(p)!==null;
 export const BEGINNER_DAYS=Object.freeze([
   {day:1,login:{dreams:500},task:{id:'clear1',text:'스테이지 1 클리어',reward:{dreams:100}}},
   {day:2,login:{dreams:2000},big:true,task:{id:'greet',text:'파트너에게 인사',reward:{dreams:100}}},
