@@ -1963,6 +1963,8 @@ export const ASSET_PATHS = {
   "unit-venom": "./assets/cast-v2/venom.webp",
   "garden": "./assets/merge/garden.webp",
   "summon-altar": "./assets/merge/summon-altar.webp",
+  "event-oath": "./assets/merge/event-oath.webp",
+  "event-twin": "./assets/merge/event-twin.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",
   "greenhouse-beds": "./assets/merge/greenhouse-beds.webp",
   "greenhouse-dawn": "./assets/merge/greenhouse-dawn.webp",
