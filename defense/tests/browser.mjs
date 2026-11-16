@@ -251,7 +251,7 @@ try{
     await page.locator('[data-banner="season"]').click();await page.locator('[data-action="rates"]').click();
     assert.match(await page.locator('#sheet-body').innerText(),/0.100%/);await close(page);
     await page.locator('[data-banner="relic"]').click();await shot(page,'relic-summon',width,height);
-    assert.match(await page.locator('[data-draw="1"]').innerText(),/1회 소환/);
+    assert.match(await page.locator('[data-draw="1"]').innerText(),/무료 소환/);
     await nav(page,'모험');assert.equal(await page.locator('.stage-list .stage').count(),9);assert.equal(await page.locator('[data-cycle="4"]').isDisabled(),true,'chapters open as they are reached');
     assert.equal(await page.locator('.part-tabs .part').count(),2);assert.equal(await page.locator('.part[data-part="2"]').getAttribute('data-locked'),'true','part two is locked until stage 45');
     await page.locator('.part[data-part="2"]').click();assert.ok((await page.locator('.part-teaser').innerText()).includes('새벽의 별길'));await close(page);
