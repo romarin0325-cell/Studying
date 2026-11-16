@@ -381,6 +381,20 @@
       "height": 1290
     },
     {
+      "id": "event-oath",
+      "source": "defense/assets/merge/event-oath.webp",
+      "sha256": "6eda51fef76df4bf73520a147dfe7805b1280bfe124e92a4e3c6ab995e8feb5f",
+      "width": 1400,
+      "height": 560
+    },
+    {
+      "id": "event-twin",
+      "source": "defense/assets/merge/event-twin.webp",
+      "sha256": "a96ede20d7bf57675204b7e9382cb4d781e3d210b89a3318d53b27d33044c349",
+      "width": 1400,
+      "height": 560
+    },
+    {
       "id": "greenhouse",
       "source": "defense/assets/merge/greenhouse.webp",
       "sha256": "15176cc961a0935db67a9afbe75ecaef7339d3cbb1f190ac266a0220dabedcbc",

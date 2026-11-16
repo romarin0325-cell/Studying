@@ -1,7 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {roster,measure,arena,castArena,defaults,skillType} from '../src/lab/model.js';
+import {HEROES} from '../src/content.js';
+import {MIRACLE_FORMS} from '../src/new-companions.js';
+import {battleMeta} from '../src/battle.js';
+import {critStats,combatPower} from '../src/economy.js';
 const hero=id=>roster.find(h=>h.id===id);
+test('roster follows all game heroes and transformation forms',()=>{
+ assert.deepEqual(roster.filter(h=>!h.owner).map(h=>h.id),HEROES.map(h=>h.id));
+ for(const id of Object.keys(MIRACLE_FORMS))assert.ok(hero(id),id);
+});
+test('growth and critical options use game battle and economy calculations',()=>{
+ const h=hero('frost_witch'),o={enhance:10,rose:12,critBed:20,critDamageBed:15,critical:true},a=arena(h,o);
+ const beds={rose:o.rose,crit:o.critBed,critDamage:o.critDamageBed},entry={owned:true,enhance:o.enhance};
+ assert.deepEqual(a.s.meta[h.id],battleMeta({beds,heroes:{[h.id]:entry}},[h.id])[h.id]);
+ assert.deepEqual(a.s.crit,critStats(beds,Infinity));assert.equal(arena(h,{critical:false}).s.crit,null);
+ assert.equal(measure(h,o).combatPower,combatPower(h.id,entry,beds));
+});
 test('all collectible identities and forms have finite real-engine results',()=>{for(const h of roster){const r=measure(h);assert.ok(Number.isFinite(r.dps)&&r.dps>=0,h.id);assert.ok(Number.isFinite(r.value),h.id);}});
 test('burn and poison contribute to measured DPS, external conditional effects change hits',()=>{const h=hero('luna');assert.ok(measure(h,{low:true,boss:true}).dps>measure(h,{boss:true}).dps*1.9);const v=measure(hero('venom'));assert.ok(v.dps>v.direct);});
 test('final patch uses canonical stats without the old scenario being applied twice',()=>{

@@ -12,6 +12,10 @@ export const BUILD_ONLY_ATLASES=Object.freeze({
   'orbit-zone':'Star Orbit zone drawn as a tilted opaque ellipse, replaced in pass 18 by the round orbit-sea; kept as the approved source.',
   'zeke-slash':'Zeke cleave slash, replaced in pass 18 by zeke-spin when his attack became a circle; kept as the approved source.',
 });
-export const RUNTIME_ASSET_PATHS=Object.freeze(Object.fromEntries(
+export const EMBEDDED_ASSET_PATHS=Object.freeze(Object.fromEntries(
   Object.entries(ASSET_PATHS).filter(([id])=>!Object.hasOwn(BUILD_ONLY_ATLASES,id)),
+));
+// Event paintings are embedded for the popup, but need not be decoded at battle startup.
+export const RUNTIME_ASSET_PATHS=Object.freeze(Object.fromEntries(
+  Object.entries(EMBEDDED_ASSET_PATHS).filter(([id])=>id!=='event-oath'&&id!=='event-twin'),
 ));
