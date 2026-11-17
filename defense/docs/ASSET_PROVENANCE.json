@@ -687,6 +687,13 @@
       "sha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
       "width": 512,
       "height": 512
+    },
+    {
+      "id": "relics-v2",
+      "source": "defense/assets/merge/relics-v2.webp",
+      "sha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
+      "width": 3072,
+      "height": 2560
     }
   ],
   "font": {

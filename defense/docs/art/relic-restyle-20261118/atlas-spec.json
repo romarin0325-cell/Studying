@@ -1,0 +1,194 @@
+{
+ "out": "defense/assets/merge/relics-v2.webp",
+ "cell": 512,
+ "columns": 6,
+ "fit": 0.88,
+ "webp": {
+  "quality": 94,
+  "alphaQuality": 100,
+  "effort": 6,
+  "smartSubsample": true
+ },
+ "cells": [
+  {
+   "id": "hourglass",
+   "pick": "mid-m1-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m1-1.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "ember",
+   "pick": "s1-a2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/gen-s1-a2.webp",
+   "quadrant": 1
+  },
+  {
+   "id": "frost",
+   "pick": "mid-m1-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m1-1.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "banner",
+   "pick": "mid-m1-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m1-1.webp",
+   "quadrant": 3
+  },
+  {
+   "id": "chorus",
+   "pick": "fix-f2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/fix-f2.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "lantern",
+   "pick": "hi-P2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P2.webp",
+   "quadrant": 3
+  },
+  {
+   "id": "lens",
+   "pick": "mid-m2-2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m2-2.webp",
+   "quadrant": 1
+  },
+  {
+   "id": "seed",
+   "pick": "mid-m2-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m2-1.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "feather",
+   "pick": "mid-m2-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m2-1.webp",
+   "quadrant": 3
+  },
+  {
+   "id": "crown",
+   "pick": "mid-m3-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m3-1.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "sprout",
+   "pick": "mid-m3-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m3-1.webp",
+   "quadrant": 1
+  },
+  {
+   "id": "amulet",
+   "pick": "mid-m3-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m3-1.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "meteor",
+   "pick": "mid-m4-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m4-1.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "prism",
+   "pick": "mid-m4-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m4-1.webp",
+   "quadrant": 1
+  },
+  {
+   "id": "tide",
+   "pick": "mid-m4-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m4-1.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "roots",
+   "pick": "mid-m4-2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m4-2.webp",
+   "quadrant": 3
+  },
+  {
+   "id": "guild",
+   "pick": "mid-m5-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m5-1.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "phoenix",
+   "pick": "mid-m5-1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/mid-m5-1.webp",
+   "quadrant": 1
+  },
+  {
+   "id": "twin",
+   "pick": "hi-P1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P1.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "constellation",
+   "pick": "hi-P3",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P3.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "alchemy",
+   "pick": "hi-P1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P1.webp",
+   "quadrant": 1
+  },
+  {
+   "id": "orbit",
+   "pick": "hi-P3",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P3.webp",
+   "quadrant": 1
+  },
+  {
+   "id": "tempo_bell",
+   "pick": "hi-P3",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P3.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "chalice",
+   "pick": "hi-P1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P1.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "royal_seal",
+   "pick": "hi-P1",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P1.webp",
+   "quadrant": 3
+  },
+  {
+   "id": "gift_ribbon",
+   "pick": "hi-P2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P2.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "broken_clock",
+   "pick": "fix-f2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/fix-f2.webp",
+   "quadrant": 0
+  },
+  {
+   "id": "spotlight",
+   "pick": "hi-P3",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P3.webp",
+   "quadrant": 3
+  },
+  {
+   "id": "royal_crown",
+   "pick": "hi-P2",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/hi-P2.webp",
+   "quadrant": 2
+  },
+  {
+   "id": "dream_crystal",
+   "pick": "fix-f3",
+   "sheet": "defense/docs/art/relic-restyle-20261118/sheets/fix-f3.webp",
+   "quadrant": 1
+  }
+ ]
+}

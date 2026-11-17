@@ -49,6 +49,8 @@ export function imageInputs(){
 // so changes to portraits, relic grid positions or crop sizes invalidate old files.
 // Owner-requested visual centring for collection portraits (2026-10-24), applied on top of the measured face centre
 // in art.portrait: hair mass and held props made these read slightly left or high. Offsets are in the 512 frame.
+// Relic atlas grids; any other relic atlas is 2x2. relics-v2 (2026-11-18 restyle) replaced the four older atlases.
+const RELIC_GRIDS={relics:{columns:5,rows:4},'relics-v2':{columns:6,rows:5}};
 export function derivedImageInputs(){
   const inputs=[];
   for(const h of VISUAL_HEROES){
@@ -61,7 +63,7 @@ export function derivedImageInputs(){
       destination:'./assets/optimized/ui/figures/'+h.id+'.webp',uses:['window.__GARDEN_MEDIA__; home / details / cut-in / results']});
   }
   for(const a of ARTIFACTS)inputs.push({id:'relic:'+a.id,source:ASSET_PATHS[a.atlas],profile:'relic',
-    crop:{columns:a.atlas==='relics'?5:2,rows:a.atlas==='relics'?4:2,index:a.icon},
+    crop:{...(RELIC_GRIDS[a.atlas]||{columns:2,rows:2}),index:a.icon},
     destination:'./assets/optimized/ui/relics/'+a.id+'.webp',uses:['window.__GARDEN_MEDIA__; collection / summon / equipment']});
   for(const h of HEROES)inputs.push({id:'memorialThumb:'+h.id,source:MEMORIAL_WEBP_PATHS[h.id],profile:'memorialThumb',crop:null,
     destination:'./assets/optimized/ui/memorial-thumbs/'+h.id+'.webp',uses:['window.__MEMORIAL_THUMBS__; album without full-painting decode']});

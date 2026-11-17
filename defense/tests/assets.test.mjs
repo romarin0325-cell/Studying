@@ -81,7 +81,7 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,98);
+  assert.equal(Object.keys(ASSET_PATHS).length,99);
   for(const id of ['event-oath','event-twin']){
     const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();
     assert.equal(m.format,'webp',id);assert.equal(m.width,1400,id);assert.equal(m.height,560,id);
@@ -105,6 +105,11 @@ test('all collection, boss and battle textures resolve to local art with valid a
   assert.equal(ARTIFACTS.length,30);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,30);
   // Rows of three in the collection: 12 C, 6 R, 6 SR, 6 UR.
   assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,6]);
+  // 2026-11-18 restyle: every relic icon is one 512 cell of the 6x5 relics-v2 atlas, one relic per cell.
+  const v2=await sharp(assetFile(ASSET_PATHS['relics-v2'])).metadata();
+  assert.equal(v2.width,3072);assert.equal(v2.height,2560);assert.equal(v2.hasAlpha,true);
+  assert.ok(ARTIFACTS.every(a=>a.atlas==='relics-v2'&&Number.isInteger(a.icon)&&a.icon>=0&&a.icon<30));
+  assert.equal(new Set(ARTIFACTS.map(a=>a.icon)).size,30);
 });
 
 test('time magician selection changes only the left view and retains the previous masters',async()=>{
@@ -140,7 +145,7 @@ test('Gold facing uses anatomical cheek regions, excludes gold horns, and still 
 test('optimized images preserve the source pack, codec, alpha and sprite geometry',async()=>{
   const {manifest,read}=await loadImagePack();
   assert.ok(manifest.totals.outputBytes<manifest.totals.deployableSourceBytes);
-  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','relics-patch','zeke-slash']);
+  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','relics-patch','relics-v2','zeke-slash']);
   for(const image of manifest.images){
     if(image.id.startsWith('atlas:unit-')){
       const m=await sharp(read(image.source)).metadata();
