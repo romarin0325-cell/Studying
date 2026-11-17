@@ -168,7 +168,7 @@ try{
     for(const [id,name,expected] of [
      ['blessing_tail','홀리블레싱','1턴 후 필드 버프 ‘성역’ 부여 예약.'+cancel],
      ['alchemist','은빛마법진','1턴 후 필드 버프 ‘달의축복’ 부여 예약.'+cancel],
-     ['venom','플래이그','사용 후 1·2·3·4·5턴에 각각 위력 1배로 공격 예약. 각 예약 발동 시 적에게 ‘약화·침묵·부식·저주·암흑·디바인·작열·유혹’ 중 무작위 1종 부여.'+cancel],
+     ['venom','플레이그','사용 후 1·2·3·4·5턴에 각각 위력 1배로 공격 예약. 각 예약 발동 시 적에게 ‘약화·침묵·부식·저주·암흑·디바인·작열·유혹’ 중 무작위 1종 부여.'+cancel],
      ['fireworks_girl','페스티벌나이트','사용 후 1·2·3턴에 각각 위력 1.5배로 공격 예약. 각 예약 발동 시 적이 작열 상태이면 배율 ×2.'+cancel]
     ]){
      const body=selector=>[...document.querySelectorAll(selector+' .skill-detail')].find(el=>el.querySelector('b').textContent.startsWith(name+' · '))?.querySelector('.skill-detail-body').textContent;

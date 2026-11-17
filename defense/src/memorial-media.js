@@ -1681,7 +1681,7 @@ export const MEMORIAL_MEDIA_MANIFEST = {
     "titleLine": null,
     "bodyStartLine": null,
     "bodyEndLine": null,
-    "bodySha256": "5ef8f4b8acbcc07d713590ca6836184333c8a7548403300ce802d439e5784f45",
+    "bodySha256": "748eb0f62580dc6ee21ac442e6ad953e6b6e5f60702a365b738a9f8679d30489",
     "avifPath": "./assets/memorial/replacements/antropy/ec6d3726ad7fc298ff10411a248c8122c83009aef678b0baa9caacd2114f3013.avif",
     "webp": {
       "path": "./assets/memorial-webp/replacements/antropy/4456efdf5e954e2176d45f1d6c2099edd47a7974cfd118329de447ed6ec5cbb7.webp",

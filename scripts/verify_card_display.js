@@ -56,7 +56,7 @@ vm.runInContext(`
         assert.equal(SkillDisplay.body(support),'1턴 후 필드 버프 ‘'+field+'’ 부여 예약.'+cancellation);
         assert.equal(SkillDisplay.body(buildResolvedDelayedSkill(support,findDelayedSkillEffect(support))),'발동 시 필드 버프 ‘'+field+'’ 부여.');
     }
-    assert.equal(SkillDisplay.body(skill('venom','플래이그')),'사용 후 1·2·3·4·5턴에 각각 위력 1배로 공격 예약. 각 예약 발동 시 적에게 ‘약화·침묵·부식·저주·암흑·디바인·작열·유혹’ 중 무작위 1종 부여.'+cancellation);
+    assert.equal(SkillDisplay.body(skill('venom','플레이그')),'사용 후 1·2·3·4·5턴에 각각 위력 1배로 공격 예약. 각 예약 발동 시 적에게 ‘약화·침묵·부식·저주·암흑·디바인·작열·유혹’ 중 무작위 1종 부여.'+cancellation);
     assert.equal(SkillDisplay.body(skill('fireworks_girl','페스티벌나이트')),'사용 후 1·2·3턴에 각각 위력 1.5배로 공격 예약. 각 예약 발동 시 적이 작열 상태이면 배율 ×2.'+cancellation);
     assert.equal(SkillDisplay.body(skill('blue_moon_priest','창조의기도')),'3턴 후 위력 2배로 공격 예약. 예약 발동 시 필드 버프 ‘성역’ 부여. 예약 발동 시 적에게 디바인 1스택 부여.'+cancellation);
     assert.equal(SkillDisplay.body(skill('grand_merchant','마나콜렉트')),'자신의 MP 30 회복.');

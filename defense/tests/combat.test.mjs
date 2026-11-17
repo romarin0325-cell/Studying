@@ -202,7 +202,7 @@ test('crush uses the reduced trained radius for hit boundaries, previews, effect
 test('the exact rarity roster has independent valid stats and every main stage rotates the nine guardians',()=>{
   assert.equal(HEROES.length,42);assert.equal(new Set(HEROES.map(h=>h.id)).size,42);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','앤트로피','마왕']);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','엔트로피','마왕']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
   assert.equal(CHAPTERS.length,MAIN_STAGES);assert.equal(CHAPTERS[PART_STAGES-1].part,1);assert.equal(CHAPTERS[PART_STAGES].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
