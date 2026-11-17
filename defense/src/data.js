@@ -1310,7 +1310,7 @@ export const HEROES = [
   },
   {
     "id": "antropy",
-    "name": "앤트로피",
+    "name": "엔트로피",
     "title": "디버프를 삼키는 빛",
     "color": "#c9b4f0",
     "art": {

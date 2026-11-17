@@ -76,7 +76,7 @@
 | `cherry_prince` | 체리프린스 | 체리로열가드 | `damage_half` | 3 | 50% 고정 / 가드 특성 발동 안 함 |
 | `harmonius` | 하모니어스 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `guardian` | 가디언 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
-| `legendary_captain` | 전설의선장 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
+| `legendary_captain` | 대해적선장 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `ember_tiger` | 엠버타이거 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `executor` | 처형인 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `underdog` | 언더독 | 퍼펙트머슬 | `damage_half` | 3 | 50% 고정 / 가드 특성 발동 안 함 |
@@ -84,7 +84,7 @@
 | `skull_dragon` | 스컬드래곤 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `flare_ribbon` | 플레어리본 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `venom` | 베놈 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
-| `dainichi_nyorai` | 대일여래 | 오지관제 | `damage_half` | 1 | 50% 고정 / 가드 특성 발동 안 함 |
+| `dainichi_nyorai` | 대일여래 | 오지관정 | `damage_half` | 1 | 50% 고정 / 가드 특성 발동 안 함 |
 | `discipline_captain` | 선도부장 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `supernova` | 초신성 | 가드 | `guard` | 1 | 플레이어 가드에만 75% 강화 / 가드 특성 유지 |
 | `victoria` | 빅토리아 | 디바인아머 | `damage_half` | 3 | 50% 고정 / 가드 특성 발동 안 함 |

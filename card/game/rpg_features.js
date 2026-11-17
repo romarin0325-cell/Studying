@@ -197,11 +197,16 @@
             this.global.unlocked_bonus_cards = [];
         }
 
+        const before = JSON.stringify(this.global.unlocked_bonus_cards);
+        if (typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardIdList === 'function') {
+            this.global.unlocked_bonus_cards = GameUtils.normalizeCardIdList(this.global.unlocked_bonus_cards);
+        }
+        let changed = JSON.stringify(this.global.unlocked_bonus_cards) !== before;
+
         const defaults = (typeof GameUtils !== 'undefined' && typeof GameUtils.getDefaultUnlockedBonusCardIds === 'function')
             ? GameUtils.getDefaultUnlockedBonusCardIds()
             : [];
 
-        let changed = false;
         defaults.forEach(id => {
             if (!this.global.unlocked_bonus_cards.includes(id)) {
                 this.global.unlocked_bonus_cards.push(id);
@@ -904,7 +909,10 @@
 
         const allowed = new Set(unlockedIds);
         const normalized = [];
-        ids.forEach(id => {
+        ids.forEach(rawId => {
+            const id = typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardId === 'function'
+                ? GameUtils.normalizeCardId(rawId)
+                : rawId;
             if (allowed.has(id) && !normalized.includes(id)) normalized.push(id);
         });
         return normalized;
@@ -924,8 +932,11 @@
         this.global.bonusPoolPresets = presets.map(preset => {
             if (!Array.isArray(preset)) return null;
             const deduped = [];
-            preset.forEach(id => {
-                if (!deduped.includes(id)) deduped.push(id);
+            preset.forEach(rawId => {
+                const id = typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardId === 'function'
+                    ? GameUtils.normalizeCardId(rawId)
+                    : rawId;
+                if (id && !deduped.includes(id)) deduped.push(id);
             });
             return deduped;
         });

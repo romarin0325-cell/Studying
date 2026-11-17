@@ -1160,7 +1160,7 @@ const BattleRuntime = {
             source.activeTrait === traitId
         );
 
-        if (sourceTraitIs('syn_water_nature') && skill.name === '문라이트세레나') {
+        if (sourceTraitIs('syn_water_nature') && skill.name === '문라이트세레나데') {
             rpg.log("루미의 특성 발동! 트윙클파티 추가!");
             BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
         }
