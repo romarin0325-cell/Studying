@@ -595,7 +595,7 @@ async function verifyCombatRules(page) {
   assert(result.instantDelayedCount === 0 && result.instantMessageCount === 5 && result.instantTargetHpLoss > 0, '시간의마술사 조합 즉발 처리가 올바르지 않습니다.');
 
   assert(result.luckyVickyMp === 90, `럭키비키 치명타 MP 회복이 유지되지 않았습니다: ${result.luckyVickyMp}`);
-  assert(result.galeExpiresAtTurn === 4 && result.galeBuffCount === 1, `실프스탭 3턴 질풍 부여가 잘못되었습니다: expiresAt=${result.galeExpiresAtTurn}, count=${result.galeBuffCount}`);
+  assert(result.galeExpiresAtTurn === 4 && result.galeBuffCount === 1, `실프스텝 3턴 질풍 부여가 잘못되었습니다: expiresAt=${result.galeExpiresAtTurn}, count=${result.galeBuffCount}`);
   assert(result.refreshedGaleExpiresAtTurn === 5 && result.refreshedGaleCount === 1, `기존 질풍 갱신이 잘못되었습니다: expiresAt=${result.refreshedGaleExpiresAtTurn}, count=${result.refreshedGaleCount}`);
   assert(result.refreshedGaleLogs.some(message => message.includes('지속 턴 갱신')), '기존 질풍 갱신 로그가 남지 않았습니다.');
   assert(result.galeRemainsOnTurnFour === true && result.galeRemainsOnTurnFive === false, '갱신된 질풍의 만료 턴 계산이 잘못되었습니다.');

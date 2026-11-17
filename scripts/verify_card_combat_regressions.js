@@ -88,7 +88,7 @@ function run() {
       ['supernova', '초신성', 'legend', 'fire', 'dealer', '2026-08-01', [500, 125, 105, 60, 60]],
       ['shooting_star_boy', '별똥별소년', 'normal', 'light', 'dealer', '2026-08-15', [290, 85, 60, 45, 55]],
       ['victoria', '빅토리아', 'legend', 'light', 'buffer', '2026-08-15', [540, 100, 95, 80, 75]],
-      ['holy_night', '홀리밤', 'normal', 'light', 'dealer', '2026-09-01', [300, 85, 55, 45, 45]],
+      ['holy_bomb', '홀리밤', 'normal', 'light', 'dealer', '2026-09-01', [300, 85, 55, 45, 45]],
       ['paladin', '팔라딘', 'epic', 'light', 'balancer', '2026-09-01', [400, 105, 75, 70, 70]],
       ['mad_scientist', '매드사이언티스트', 'rare', 'nature', 'balancer', '2026-09-15', [350, 80, 80, 55, 55]],
       ['grand_merchant', '대상인', 'rare', 'light', 'balancer', '2026-09-15', [340, 75, 90, 55, 60]],
@@ -136,7 +136,7 @@ function run() {
       supernova: { type: 'death_dmg_phy_debuff', val: 4, debuff: 'burn', stack: 3 },
       shooting_star_boy: { type: 'opening_self_atk_party_mdef_down', turns: 2, atkBoost: 100, mdefDown: 30 },
       victoria: { type: 'leader_field_stat_double', val: 2 },
-      holy_night: { type: 'death_dmg_phy', val: 3 },
+      holy_bomb: { type: 'death_dmg_phy', val: 3 },
       paladin: { type: 'pos_stat_boost', pos: 1, stat: 'atk', val: 100 },
       mad_scientist: { type: 'party_all_stats_mana_cost', statVal: 30, costMult: 2 },
       grand_merchant: { type: 'death_next_ally_max_mana', val: 20 },
@@ -160,10 +160,10 @@ function run() {
       ['supernova', '코어멜트다운', 'mag', 3, 30, 2.5, [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2 }]],
       ['shooting_star_boy', '슈팅플레어', 'mag', 2, 20, 1.5, [{ type: 'debuff', id: 'burn', stack: 1 }]],
       ['victoria', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'damage_half', duration: 3 }]],
-      ['victoria', '에태르랜스', 'mag', 2, 20, 2, [{ type: 'debuff', id: 'corrosion' }]],
+      ['victoria', '에테르랜스', 'mag', 2, 20, 2, [{ type: 'debuff', id: 'corrosion' }]],
       ['victoria', '기적의증명', 'sup', 3, 30, null, [{ type: 'delayed_field_buffs', turns: 3, buffs: ['goddess_descent', 'twinkle_party'] }]],
-      ['holy_night', '샤이닝팝', 'phy', 2, 20, 2, []],
-      ['holy_night', '라스트캐럴', 'phy', 3, 30, 4, [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2 }, { type: 'suicide' }]],
+      ['holy_bomb', '샤이닝팝', 'phy', 2, 20, 2, []],
+      ['holy_bomb', '라스트캐럴', 'phy', 3, 30, 4, [{ type: 'consume_debuff_all', debuff: 'divine', multPerStack: 2 }, { type: 'suicide' }]],
       ['paladin', '디바인아머', 'sup', 2, 20, null, [{ type: 'buff', id: 'damage_half', duration: 3 }]],
       ['paladin', '홀리그라운드', 'mag', 3, 30, 1, [{ type: 'field_buff', id: 'sanctuary' }]],
       ['paladin', '듀얼브레이커', 'mag', 2, 20, 2, [{ type: 'consume_field_buff_dmg', buff: 'arena', mult: 3 }]],
@@ -178,8 +178,8 @@ function run() {
       ['fireworks_girl', '스파클캐논', 'mag', 2, 20, 2, [{ type: 'debuff', id: 'burn', stack: 1 }]],
       ['astrologer', '스텔라리딩', 'sup', 3, 30, null, [{ type: 'moon_to_sun' }]],
       ['astrologer', '솔라브레이커', 'mag', 2, 20, 2, [{ type: 'consume_field_buff_dmg', buff: 'sun_bless', mult: 4 }]],
-      ['sun_moon_sword_maiden', '솔라크레센토', 'phy', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2 }]],
-      ['sun_moon_sword_maiden', '루나크레센토', 'mag', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2 }]]
+      ['sun_moon_sword_maiden', '솔라크레센트', 'phy', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2 }]],
+      ['sun_moon_sword_maiden', '루나크레센트', 'mag', 3, 30, 2.5, [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2 }]]
     ];
     expectedSkills.forEach(([cardId, name, type, tier, cost, val, effects]) => {
       const skill = getCard(cardId).skills.find(candidate => candidate.name === name);
@@ -321,21 +321,21 @@ function run() {
       releasedWaveIds(new Date(2026, 8, 1, 12)),
       expectedReleasedIds([
         'discipline_captain', 'supernova', 'shooting_star_boy', 'victoria',
-        'holy_night', 'paladin'
+        'holy_bomb', 'paladin'
       ])
     );
     assert.deepStrictEqual(
       releasedWaveIds(new Date(2026, 8, 15, 12)),
       expectedReleasedIds([
         'discipline_captain', 'supernova', 'shooting_star_boy', 'victoria',
-        'holy_night', 'paladin', 'mad_scientist', 'grand_merchant'
+        'holy_bomb', 'paladin', 'mad_scientist', 'grand_merchant'
       ])
     );
     assert.deepStrictEqual(
       releasedWaveIds(new Date(2026, 9, 1, 12)),
       expectedReleasedIds([
         'discipline_captain', 'supernova', 'shooting_star_boy', 'victoria',
-        'holy_night', 'paladin', 'mad_scientist', 'grand_merchant',
+        'holy_bomb', 'paladin', 'mad_scientist', 'grand_merchant',
         'comet_tracker', 'prophet'
       ])
     );
@@ -1063,7 +1063,7 @@ function run() {
     venomCaster.baseCrit = -100;
     const plagueRpg = makeRpg(venomCaster, ['venom']);
     plagueRpg.battle.enemy = makeUnit({hp:5000,maxHp:5000,buffs:{}});
-    BattleRuntime.executeSkill(plagueRpg, venomCaster, plagueRpg.battle.enemy, venomCaster.skills.find(skill => skill.name === '플래이그'));
+    BattleRuntime.executeSkill(plagueRpg, venomCaster, plagueRpg.battle.enemy, venomCaster.skills.find(skill => skill.name === '플레이그'));
     assert.strictEqual(plagueRpg.battle.enemy.hp, 5000);
     assert.deepStrictEqual(Object.keys(plagueRpg.battle.enemy.buffs), []);
     assert.deepStrictEqual(Array.from(plagueRpg.battle.delayedEffects, effect => effect.turn), [2,3,4,5,6]);
@@ -1611,12 +1611,12 @@ function run() {
     const impostor = makeUnit({ proto: { trait: { type: 'unrelated' } }, activeTrait: null });
     const impostorRpg = makeRpg(impostor, []);
     impostorRpg.battle.activeTraits = ['syn_water_nature'];
-    BattleRuntime.applySkillEffects(impostorRpg, impostor, impostorRpg.battle.enemy, { name: '문라이트세레나', effects: [] });
+    BattleRuntime.applySkillEffects(impostorRpg, impostor, impostorRpg.battle.enemy, { name: '문라이트세레나데', effects: [] });
     assert.strictEqual(impostorRpg.battle.fieldBuffs.length, 0);
     const rumi = makeUnit({ proto: getCard('rumi'), activeTrait: 'syn_water_nature' });
     const rumiRpg = makeRpg(rumi, ['rumi', 'golem']);
     rumiRpg.battle.activeTraits = ['syn_water_nature'];
-    BattleRuntime.applySkillEffects(rumiRpg, rumi, rumiRpg.battle.enemy, { name: '문라이트세레나', effects: [] });
+    BattleRuntime.applySkillEffects(rumiRpg, rumi, rumiRpg.battle.enemy, { name: '문라이트세레나데', effects: [] });
     assert.strictEqual(rumiRpg.battle.fieldBuffs.some(buff => buff.name === 'twinkle_party'), true);
 
     const bruleeWitch = getCard('brulee_witch');
@@ -1999,6 +1999,39 @@ function run() {
     assert.strictEqual(player.mp, 90);
     assert.strictEqual(scheduledCallbacks.length, 1);
     assert.strictEqual(actionRpg.battle.phase, 'enemy-pending');
+
+    // Legacy ID migration: holy_night -> holy_bomb (saves, pools, lookups)
+    assert.strictEqual(getCard('holy_night')?.id, 'holy_bomb');
+    assert.strictEqual(getCard('holy_bomb')?.name, '홀리밤');
+    const migrationRpg = { global: { unlocked_bonus_cards: ['holy_night', 'paladin'], bonusPoolPresets: [['holy_night']] }, state: {} };
+    RPGFeatureModules.install(migrationRpg);
+    assert.strictEqual(migrationRpg.ensureDefaultUnlockedBonusCards(), true);
+    assert(migrationRpg.global.unlocked_bonus_cards.includes('holy_bomb'));
+    assert(!migrationRpg.global.unlocked_bonus_cards.includes('holy_night'));
+    migrationRpg.ensureBonusPoolPresetState();
+    assert.deepStrictEqual(migrationRpg.global.bonusPoolPresets[0], ['holy_bomb']);
+    assert.deepStrictEqual(
+      migrationRpg.normalizeActiveBonusPoolIds(['holy_night', 'paladin', 'holy_bomb']),
+      ['holy_bomb', 'paladin']
+    );
+    const migratedRun = SaveDataMigrator.normalizeRunState({
+      saveSchemaVersion: 1,
+      inventory: ['holy_night', 'holy_night', 'paladin'],
+      deck: ['holy_night', null, 'paladin'],
+      activeBonusPoolIds: ['holy_night', 'paladin'],
+      runCardPool: {
+        schemaVersion: 1,
+        source: 'basic_set',
+        setId: 'twilight_liturgy',
+        baseCardIds: ['kobold', 'holy_night'],
+        extraCardIds: ['holy_night', 'paladin']
+      }
+    }, migrationRpg.state);
+    assert.deepStrictEqual(migratedRun.inventory, ['holy_bomb', 'holy_bomb', 'paladin']);
+    assert.deepStrictEqual(migratedRun.deck, ['holy_bomb', null, 'paladin']);
+    assert.deepStrictEqual(migratedRun.activeBonusPoolIds, ['holy_bomb', 'paladin']);
+    assert.deepStrictEqual(migratedRun.runCardPool.baseCardIds, ['kobold', 'holy_bomb']);
+    assert.deepStrictEqual(migratedRun.runCardPool.extraCardIds, ['holy_bomb', 'paladin']);
   `, sandbox, { filename: 'card-combat-regressions' });
 
   console.log('Card combat regression verification passed.');

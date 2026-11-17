@@ -177,6 +177,37 @@ const Storage = {
  * one place. Unknown properties inside supported schemas are preserved, future
  * schema versions are rejected, and UI-only state is removed only on save.
  */
+const LEGACY_CARD_ID_ALIASES = Object.freeze({
+    holy_night: 'holy_bomb'
+});
+
+function normalizeLegacyCardId(id) {
+    if (typeof id !== 'string' || !id) return id;
+    return Object.prototype.hasOwnProperty.call(LEGACY_CARD_ID_ALIASES, id)
+        ? LEGACY_CARD_ID_ALIASES[id]
+        : id;
+}
+
+function normalizeLegacyCardIdList(ids, options = {}) {
+    if (!Array.isArray(ids)) return [];
+    const preserveNulls = !!options.preserveNulls;
+    const allowDuplicates = !!options.allowDuplicates;
+    const seen = new Set();
+    const result = [];
+    ids.forEach(rawId => {
+        if ((rawId === null || rawId === undefined) && preserveNulls) {
+            result.push(null);
+            return;
+        }
+        const id = normalizeLegacyCardId(rawId);
+        if (!id) return;
+        if (!allowDuplicates && seen.has(id)) return;
+        seen.add(id);
+        result.push(id);
+    });
+    return result;
+}
+
 class SaveDataMigrator {
     static getSchemaVersion(rawSave) {
         if (!rawSave || rawSave.saveSchemaVersion === undefined) return 0;
@@ -232,7 +263,19 @@ class SaveDataMigrator {
             'wrongCollocations'
         ].forEach(ensureArray);
 
+        state.inventory = normalizeLegacyCardIdList(state.inventory, { allowDuplicates: true });
+        state.chaosPool = normalizeLegacyCardIdList(state.chaosPool, { allowDuplicates: true });
+        state.factoryPool = normalizeLegacyCardIdList(state.factoryPool, { allowDuplicates: true });
+        state.activeBonusPoolIds = normalizeLegacyCardIdList(state.activeBonusPoolIds);
         if (!Array.isArray(state.deck)) state.deck = [null, null, null];
+        else state.deck = normalizeLegacyCardIdList(state.deck, { preserveNulls: true, allowDuplicates: true });
+        if (state.runCardPool && typeof state.runCardPool === 'object' && !Array.isArray(state.runCardPool)) {
+            state.runCardPool = {
+                ...state.runCardPool,
+                ...(Array.isArray(state.runCardPool.baseCardIds) ? { baseCardIds: normalizeLegacyCardIdList(state.runCardPool.baseCardIds) } : {}),
+                ...(Array.isArray(state.runCardPool.extraCardIds) ? { extraCardIds: normalizeLegacyCardIdList(state.runCardPool.extraCardIds) } : {})
+            };
+        }
         if (!state.mode) state.mode = 'origin';
         if (!state.gameType) state.gameType = 'challenge';
         if (typeof state.hardMode !== 'boolean') state.hardMode = false;
@@ -888,16 +931,25 @@ const GameUtils = {
      * @param {Array} [pool]
      * @returns {Object|null}
      */
+    normalizeCardId(id) {
+        return normalizeLegacyCardId(id);
+    },
+
+    normalizeCardIdList(ids, options = {}) {
+        return normalizeLegacyCardIdList(ids, options);
+    },
+
     getCardById(id, pool) {
-        if (!id) return null;
+        const normalizedId = this.normalizeCardId(id);
+        if (!normalizedId) return null;
         if (Array.isArray(pool)) {
-            return pool.find(card => card.id === id) || null;
+            return pool.find(card => card.id === normalizedId) || null;
         }
         if (!cachedCardById) {
             cachedCardById = new Map(this.getAllCards().map(card => [card.id, card]));
             this.getBattleOnlyForms().forEach(card => cachedCardById.set(card.id, card));
         }
-        return cachedCardById.get(id) || null;
+        return cachedCardById.get(normalizedId) || null;
     },
 
     shuffle(list) {
@@ -2755,7 +2807,7 @@ const Logic = {
             p.fieldBuffStatMult = t.val || 2.0;
         }
 
-        // 프리즘트윈/앤트로피: 패시브 특성 활성화 표시
+        // 프리즘트윈/엔트로피: 패시브 특성 활성화 표시
         if (t.type === 'self_normal_atk_dmg_boost' || t.type === 'chaos_blessing_double') {
             active = true;
         }
@@ -3004,7 +3056,7 @@ const Logic = {
         }
         else if (enemy.id === 'iris_curse') {
             if (turn === 10) skill = enemy.skills.find(s => s.name === '아포칼립스');
-            else if (r < 0.3) skill = enemy.skills.find(s => s.name === '프레임샷');
+            else if (r < 0.3) skill = enemy.skills.find(s => s.name === '플레임샷');
         }
         else if (enemy.id === 'pharaoh') {
             if (turn % 5 === 0) skill = enemy.skills.find(s => s.name === '고대의저주');
