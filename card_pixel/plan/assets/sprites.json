@@ -1,0 +1,81 @@
+{
+  "ash-idle.png": {
+    "width": 78,
+    "height": 96,
+    "bodyCenterX": 39,
+    "feetBaselineY": 95
+  },
+  "ash-fx.png": {
+    "width": 26,
+    "height": 27,
+    "bodyCenterX": 12.5,
+    "feetBaselineY": 26,
+    "effect": true
+  },
+  "ash-attack.png": {
+    "width": 91,
+    "height": 91,
+    "bodyCenterX": 45,
+    "feetBaselineY": 90
+  },
+  "ash-hurt.png": {
+    "width": 81,
+    "height": 93,
+    "bodyCenterX": 40,
+    "feetBaselineY": 92
+  },
+  "luna-idle.png": {
+    "width": 67,
+    "height": 96,
+    "bodyCenterX": 33,
+    "feetBaselineY": 95
+  },
+  "luna-attack.png": {
+    "width": 101,
+    "height": 94,
+    "bodyCenterX": 40,
+    "feetBaselineY": 93
+  },
+  "luna-hurt.png": {
+    "width": 69,
+    "height": 92,
+    "bodyCenterX": 34,
+    "feetBaselineY": 91
+  },
+  "red_dragon-idle.png": {
+    "width": 71,
+    "height": 96,
+    "bodyCenterX": 35,
+    "feetBaselineY": 95
+  },
+  "red_dragon-attack.png": {
+    "width": 117,
+    "height": 94,
+    "bodyCenterX": 46,
+    "feetBaselineY": 93
+  },
+  "red_dragon-hurt.png": {
+    "width": 76,
+    "height": 94,
+    "bodyCenterX": 38,
+    "feetBaselineY": 93
+  },
+  "golem-idle.png": {
+    "width": 98,
+    "height": 96,
+    "bodyCenterX": 49,
+    "feetBaselineY": 95
+  },
+  "golem-attack.png": {
+    "width": 126,
+    "height": 92,
+    "bodyCenterX": 73,
+    "feetBaselineY": 91
+  },
+  "golem-hurt.png": {
+    "width": 105,
+    "height": 93,
+    "bodyCenterX": 52,
+    "feetBaselineY": 92
+  }
+}
