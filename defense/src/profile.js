@@ -1,7 +1,7 @@
-import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN,MAX_RANK} from './content.js';
-import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
+import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,INTRO_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN,MAX_RANK} from './content.js';
+import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,stageDust,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
 import {resumeBattle,battleMeta} from './battle.js';
-import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES} from './monthly.js';
+import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES,monthlyPaid,monthlyDue} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED,SOLO} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
@@ -9,7 +9,7 @@ import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIF
 import {questionOf} from './quiz.js';
 import {CONSTELLATIONS} from './library.js';
 import {season,eventOpen} from './preview/season.js';
-import {UNLOCKS,FTUE_STEPS,BEGINNER_DAYS,beginnerState,urChoices} from './beginner.js';
+import {UNLOCKS,FTUE_STEPS,TOUR_IDS,BEGINNER_DAYS,beginnerState,urChoices} from './beginner.js';
 import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,validOathRules,OATH_BANDS,OATH_RULES} from './preview/oath.js';
 import {twinParty,twinPartyProblem,twinState,twinBandReward,twinCredit,twinBandsReached,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES} from './preview/twin.js';
 import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState,requestGoal} from './preview/requests.js';
@@ -17,11 +17,11 @@ import {REQUEST_HEROES,REQUEST_REWARD} from './preview/requests-data.js';
 
 export {SAVE_KEY};
 const entry=owned=>({owned,level:1,enhance:0,copies:0,bond:0,bondXp:0});
-const freshFtue=legacy=>({legacy,done:[],seen:[],skipped:false});
+const freshFtue=legacy=>({legacy,done:[],seen:[],skipped:false,tours:[]});
 const freshBeginner=now=>({count:1,last:calendar(now).day,claimed:[],tasks:[],did:[],choice:null,closed:false});
 export function createProfile(now=Date.now(),{trial=false}={}){
   trial=UNLOCKED&&trial===true;
-  return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(SOLO),beginner:SOLO?null:freshBeginner(now),firstTen:SOLO,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
+  return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(SOLO),beginner:SOLO?null:freshBeginner(now),firstTen:SOLO,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,stageRev:1,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
     draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,weeklyRuns:0,weeklyBest:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
@@ -33,7 +33,8 @@ const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<
 // finish an expedition, merge five times, collect the shooting stars. A free
 // single summon replaces the old "spend gems to earn gems" mission.
 export const DAILY_MISSIONS=Object.freeze([{id:'combat',name:'원정 1회 완료',reward:60},{id:'merge',name:'전투에서 합성 5회',reward:30,goal:5},{id:'idle',name:'별똥별 수집',reward:30}]);
-export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,bouquet:false,accel:false,claimed:[]};}
+// free / relicFree: today's free single summon on the companion and the relic banner.
+export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,relicFree:false,bouquet:false,accel:false,claimed:[]};}
 // Study (루미의 별의 서재): wrong answers wait in a notebook (latest pick kept); one a day becomes a star.
 // Finishing a constellation unlocks its illustration and opens the next one.
 export const WRONG_MAX=60;
@@ -54,7 +55,7 @@ export function migrateStudy(p){
   if(p.study&&typeof p.study==='object'){if(p.study.solved===undefined)p.study.solved=[];if(Array.isArray(p.study.solved))p.study.solved=p.study.solved.filter(k=>typeof k==='string'&&questionOf(...k.split(':')));}
 }
 // Gift basket: the clock starts when an old save first opens (nothing is owed for the time before).
-// Late companions (see LATE_COMPANIONS) the player has already been told about by the stage 45 announcement.
+// Late companions (see LATE_COMPANIONS) the player has already been told about by the part one announcement.
 // This week's draft: entries used and the best record (whose reward is what the week has paid).
 export function weeklyState(p,now){const own=p.weekly===calendar(now).week,runs=own?p.weeklyRuns:0;return {runs,left:WEEKLY_ENTRIES-runs,best:own?p.weeklyBest:null};}
 const validWeeklyBest=b=>b===null||!!b&&typeof b==='object'&&integer(b.round,CHALLENGE_WAVES)&&typeof b.won==='boolean'&&!!TIERS[b.tier]&&integer(b.reward)&&b.reward>0;
@@ -76,10 +77,10 @@ export function basketState(p,now){const elapsed=Math.max(0,now-p.basket.at),rea
 export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
   const unique=(a,valid)=>Array.isArray(a)&&new Set(a).size===a.length&&a.every(valid),f=p?.ftue,b=p?.beginner;
-  if(!f||typeof f!=='object'||Array.isArray(f)||typeof f.legacy!=='boolean'||typeof f.skipped!=='boolean'||!unique(f.done,id=>FTUE_STEPS.includes(id))||!unique(f.seen,id=>Object.hasOwn(UNLOCKS,id)))return false;
+  if(!f||typeof f!=='object'||Array.isArray(f)||typeof f.legacy!=='boolean'||typeof f.skipped!=='boolean'||!unique(f.done,id=>FTUE_STEPS.includes(id))||!unique(f.seen,id=>Object.hasOwn(UNLOCKS,id))||!unique(f.tours,id=>TOUR_IDS.includes(id)))return false;
   if(b!==null&&(!b||typeof b!=='object'||Array.isArray(b)||!Number.isInteger(b.count)||b.count<1||b.count>7||typeof b.last!=='string'||b.last.length>10||!unique(b.claimed,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.tasks,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.did,id=>['greet','water','gift','relic'].includes(id))||!(b.choice===null||HERO[b.choice]?.rarity==='UR')||typeof b.closed!=='boolean'))return false;
   if(typeof p.firstTen!=='boolean'||typeof p.eventSeen!=='string'||p.eventSeen.length>12||typeof p.eventFlip!=='boolean'||typeof p.trial!=='boolean'||!UNLOCKED&&(p.eventFlip||p.trial))return false;
-  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!==[...BED_IDS].sort().join()||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==4||p.relicRev!==2||!integer(p.cleared,MAIN_STAGES)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
+  if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!==[...BED_IDS].sort().join()||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==4||p.relicRev!==2||p.stageRev!==1||!integer(p.cleared,MAIN_STAGES)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.pity||!integer(p.pity.normal)||!integer(p.pity.season))return false;
   if(!p.heroes||!p.relics||HEROES.some(h=>{const e=p.heroes[h.id];return !e||typeof e.owned!=='boolean'||!integer(e.level)||e.level<1||!integer(e.enhance)||!integer(e.copies)||!integer(e.bond,BOND_MAX)||!integer(e.bondXp)||e.bondXp>=Math.max(1,bondNeed(e.bond));}))return false;
   if(!p.gifts||typeof p.gifts!=='object'||Object.keys(p.gifts).sort().join()!=='bouquet,candy,letter'||!GIFT_IDS.every(id=>integer(p.gifts[id],999)))return false;
@@ -93,7 +94,7 @@ export function validateProfile(p){
   if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)||d.dust!==undefined&&!integer(d.dust)))return false;
   if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
   if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
-  if(['combat','idle','free','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced','cutin'].some(k=>typeof p.settings[k]!=='boolean'))return false;
+  if(['combat','idle','free','relicFree','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced','cutin'].some(k=>typeof p.settings[k]!=='boolean'))return false;
   if(!validStudy(p.study))return false;
   if(!p.basket||!integer(p.basket.at)||!integer(p.basket.next,GIFT_IDS.length-1))return false;
   if(!Array.isArray(p.perfect)||p.perfect.length>MAIN_STAGES||new Set(p.perfect).size!==p.perfect.length||p.perfect.some((n,i)=>(i&&n<=p.perfect[i-1])||!integer(n,MAIN_STAGES)||n<1||n>p.cleared))return false;
@@ -172,12 +173,28 @@ export function migrateMemories(p){
     m.of=now;
   }
 }
+// Stage revision 1 put the nine-stage intro chapter in front. A save from before it has played past the intro: every
+// main stage it names moves nine places (old stage n is stage n+9 now, at the same difficulty) and the intro counts as
+// cleared. A save that had not cleared a stage yet starts in the intro; its run in progress stays where it is.
+export function migrateStages(p){
+  if(p.stageRev!==undefined)return;p.stageRev=1;
+  if(!(Number.isSafeInteger(p.cleared)&&p.cleared>0))return;
+  const shift=n=>Number.isSafeInteger(n)&&n>=1?n+INTRO_STAGES:n;
+  p.cleared+=INTRO_STAGES;
+  if(Array.isArray(p.perfect))p.perfect=p.perfect.map(shift);
+  if(Array.isArray(p.results))for(const r of p.results)if(r?.mode==='main')r.stage=shift(r.stage);
+  const a=p.active;if(!a||typeof a!=='object'||a.mode!=='main')return;
+  a.stage=shift(a.stage);
+  if(typeof a.run==='string'){try{const run=JSON.parse(a.run);if(Number.isSafeInteger(run?.chapter))run.chapter+=INTRO_STAGES;a.run=JSON.stringify(run);}catch{}}
+}
 // Twin-star used to keep one shared "set" for the current party. Records are per side now; the old field cannot be read.
 export function migrateTwin(p){
   if(p?.twin&&typeof p.twin==='object'&&!Array.isArray(p.twin)&&Object.hasOwn(p.twin,'set'))delete p.twin.set;
 }
-export function parseProfile(raw){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateBeginner(p);migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);migrateWeekly(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}return validateProfile(p)?p:null;}catch{return null;}}
-export function migrateBeginner(p){const legacy=!(p.cleared<=2&&p.draws===0);if(p.ftue===undefined)p.ftue=freshFtue(legacy);if(p.beginner===undefined)p.beginner=legacy?null:freshBeginner(Date.now());if(p.firstTen===undefined)p.firstTen=legacy;if(p.eventSeen===undefined)p.eventSeen='';if(p.eventFlip===undefined)p.eventFlip=false;if(p.trial===undefined)p.trial=false;}
+// A battle checkpoint that no longer restores (an update changed combat or growth numbers) must not lock the whole
+// save: the sortie is kept and restarts from wave 1. notes.runDropped tells the caller that this happened.
+export function parseProfile(raw,notes){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateBeginner(p);migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);migrateWeekly(p);migrateStages(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}if(validateProfile(p))return p;if(p?.active&&typeof p.active==='object'&&typeof p.active.run==='string'){p.active.run=null;if(validateProfile(p)){if(notes)notes.runDropped=true;return p;}}return null;}catch{return null;}}
+export function migrateBeginner(p){const legacy=!(p.cleared<=2&&p.draws===0);if(p.ftue===undefined)p.ftue=freshFtue(legacy);if(p.ftue&&typeof p.ftue==='object'&&p.ftue.tours===undefined)p.ftue.tours=[];if(p.beginner===undefined)p.beginner=legacy?null:freshBeginner(Date.now());if(p.firstTen===undefined)p.firstTen=legacy;if(p.eventSeen===undefined)p.eventSeen='';if(p.eventFlip===undefined)p.eventFlip=false;if(p.trial===undefined)p.trial=false;}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
@@ -209,8 +226,9 @@ function rollDay(p,now){const day=calendar(now).day;if(p.daily.day!==day)p.daily
 // Old saves kept draw/dispatch missions; keep today's finished expedition only.
 export function migrateDaily(p){
   const d=p.daily;if(!d||typeof d!=='object')return;
-  if(d.merges===undefined){p.daily={day:typeof d.day==='string'?d.day:'',combat:d.combat===true,merges:0,idle:false,free:false,bouquet:false,accel:false,claimed:Array.isArray(d.claimed)?d.claimed.filter(id=>id==='combat'):[]};return;}
+  if(d.merges===undefined){p.daily={day:typeof d.day==='string'?d.day:'',combat:d.combat===true,merges:0,idle:false,free:false,relicFree:false,bouquet:false,accel:false,claimed:Array.isArray(d.claimed)?d.claimed.filter(id=>id==='combat'):[]};return;}
   if(d.accel===undefined)d.accel=false;
+  if(d.relicFree===undefined)d.relicFree=false;
 }
 // Bond v2: hearts are filled by points. Old saves keep their hearts (old greetings had no cap).
 export function migrateBond(p){
@@ -387,8 +405,9 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='tick')return {ok:true};
   if(action==='eventSeen'){if(typeof args.id!=='string'||args.id.length>12)return no('이벤트를 확인하세요.');p.eventSeen=args.id;return {ok:true};}
   if(action==='ftue'){
-    if(args.done!==undefined&&!FTUE_STEPS.includes(args.done)||args.seen!==undefined&&!Object.hasOwn(UNLOCKS,args.seen)||args.reset&&!UNLOCKED)return no('튜토리얼 정보를 확인하세요.');
-    if(args.reset){p.ftue.done=[];p.ftue.seen=[];p.ftue.skipped=false;p.firstTen=false;}
+    if(args.done!==undefined&&!FTUE_STEPS.includes(args.done)||args.seen!==undefined&&!Object.hasOwn(UNLOCKS,args.seen)||args.tour!==undefined&&!TOUR_IDS.includes(args.tour)||args.reset&&!UNLOCKED)return no('튜토리얼 정보를 확인하세요.');
+    if(args.reset){p.ftue.done=[];p.ftue.seen=[];p.ftue.tours=[];p.ftue.skipped=false;p.firstTen=false;}
+    if(args.tour!==undefined&&!p.ftue.tours.includes(args.tour))p.ftue.tours.push(args.tour);
     if(args.done!==undefined&&!p.ftue.done.includes(args.done))p.ftue.done.push(args.done);if(args.seen!==undefined&&!p.ftue.seen.includes(args.seen))p.ftue.seen.push(args.seen);if(args.skip===true){p.ftue.skipped=true;p.ftue.done=[...FTUE_STEPS];}return {ok:true};
   }
   if(action==='beginnerClaim'){
@@ -404,9 +423,10 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='draw'){
     const banner=args.banner,count=args.count,free=args.free===true,boost=args.boost===true,first=args.first===true;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
     if(first&&(banner!=='normal'||count!==10||p.firstTen||free||boost))return no('첫 10회 소환을 확인하세요.');
-    if(free&&(banner!=='normal'||count!==1||p.daily.free))return no('오늘의 무료 소환은 이미 사용했습니다.');
+    const freeKey=banner==='relic'?'relicFree':'free';
+    if(free&&(banner==='season'||count!==1||p.daily[freeKey]))return no('오늘의 무료 소환은 이미 사용했습니다.');
     if(boost&&(free||count!==10))return no('부스트는 유료 10회 소환에서만 사용할 수 있습니다.');
-    const cost=free||first?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily.free=true;if(first)p.firstTen=true;
+    const cost=free||first?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily[freeKey]=true;if(first)p.firstTen=true;
     p.dreams-=cost;const c=calendar(now),urMult=boost?2:1,paidHero=banner!=='relic'&&!free&&!first;
     const pull=(bonus,minSR=false)=>{
       if(paidHero&&!bonus)p.pity[banner]=Math.min(9999,p.pity[banner]+1);
@@ -470,7 +490,7 @@ export function command(p,action,args={},now=Date.now()){
     const banner=args.banner;if(!['normal','season'].includes(banner))return no('교환할 수 없는 소환입니다.');
     if(p.pity[banner]<TUNING.pity[banner])return no(`소환 ${TUNING.pity[banner]}회마다 교환할 수 있어요.`);
     const c=calendar(now),pool=banner==='season'?[c.guardian]:heroPool('UR',lateOpen(p.cleared));if(!pool.includes(args.id))return no('교환할 수 있는 동료를 골라 주세요.');
-    // A late companion (Behemoth in its guardian month) cannot be taken through the exchange before stage 45 either.
+    // A late companion (Behemoth in its guardian month) cannot be taken through the exchange before part one is cleared either.
     if(LATE_COMPANIONS.includes(args.id)&&!lateOpen(p.cleared))return no(`${HERO[args.id].name}은(는) 스테이지 ${LATE_UNLOCK_STAGE} 클리어 후에 교환할 수 있어요.`);
     p.pity[banner]-=TUNING.pity[banner];const item={id:args.id,fresh:receive(p.heroes,args.id),banner,at:now,pity:true};p.history.unshift(item);p.history=p.history.slice(0,50);
     return {ok:true,item,message:`${HERO[args.id].name}을(를) 데려왔어요`};
@@ -502,7 +522,7 @@ export function command(p,action,args={},now=Date.now()){
     const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0,clearReward=0,firstPerfect=false,unlocked=[],partOpened=false;if(!Array.isArray(p.perfect))p.perfect=[];
     if(a.mode==='main'){
       if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
-      p.dust+=args.won?40+a.stage*8:12;
+      p.dust+=stageDust(a.stage,!!args.won);
     }
     let record=null,newBest=false,score=0,bands=[],side=null,total=0,shownRound=0,earned=0,paidBefore=0;
     if(a.mode==='weekly'){
@@ -514,6 +534,9 @@ export function command(p,action,args={},now=Date.now()){
       if(!validRecord(record))return no('전투 기록을 확인하세요.');
       newBest=betterMonth(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
       if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
+      // Paid here like the draft: whatever this month's best record is worth beyond what the month has paid.
+      const best=currentRecord(p,now),paid=monthlyPaid(p,now),due=monthlyDue(p,now);earned=monthlyReward(best);paidBefore=Number.isFinite(paid)?paid:earned;
+      if(due>0){reward+=due;p.monthly=best.period;p.monthlyClaim=structuredClone(best);}
     }
     if(a.mode==='oath'){const out=settleOath(p,a,args,now);record=out.record;newBest=out.newBest;score=out.score;bands=out.bands;reward+=out.pay;}
     if(a.mode==='twin'){const out=settleTwin(p,a,args,now);newBest=out.newBest;side=out.side;total=out.total;shownRound=out.round;bands=out.bands;reward+=out.pay;}
@@ -521,13 +544,14 @@ export function command(p,action,args={},now=Date.now()){
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
     const requestsDone=args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
     p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;
-    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
+    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:a.mode==='monthly'?{earned,paidBefore}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
   }
   if(action==='claimMonthly'){
     const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 만월 토벌전 최고 기록을 확인하세요.');
-    if(p.monthly===record.period)return no('이번 달 기록 보상은 이미 확정했습니다.');
-    const reward=monthlyReward(record);p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
-    return {ok:true,reward,message:`만월 토벌전 기록 보상 확정 · 꿈의결정 +${reward}`};
+    // Settling pays the hunt, so this only hands over what a save from the claim-once rule is still owed.
+    const reward=monthlyDue(p,now);if(reward<=0)return no('이번 달 기록 보상은 이미 받았습니다.');
+    p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
+    return {ok:true,reward,message:`만월 토벌전 기록 보상 · 꿈의결정 +${reward}`};
   }
   if(action==='answer'){
     const q=questionOf(args.kind,args.id);if(!q||!integer(args.choice,q.choices.length-1))return no('문제를 확인하세요.');
@@ -593,8 +617,8 @@ export function command(p,action,args={},now=Date.now()){
 // A failed storage write never commits a draw, an entry ticket or a reward.
 export class ProfileStore{
   constructor(storage,now=Date.now()){
-    this.storage=storage;this.broken=false;this.conflict=false;this.warning='';let raw=null;
-    try{raw=storage.getItem(SAVE_KEY);this.value=raw?parseProfile(raw):createProfile(now);if(!this.value){this.broken=true;this.warning='저장 데이터가 손상되었습니다. 백업을 불러오세요.';this.value=createProfile(now);}}catch{this.broken=true;this.warning='저장 공간을 사용할 수 없습니다. 브라우저 저장 권한을 확인하세요.';this.value=createProfile(now);}
+    this.storage=storage;this.broken=false;this.conflict=false;this.warning='';this.restarted=false;let raw=null;
+    try{raw=storage.getItem(SAVE_KEY);const notes={};this.value=raw?parseProfile(raw,notes):createProfile(now);this.restarted=notes.runDropped===true;if(!this.value){this.broken=true;this.warning='저장 데이터가 손상되었습니다. 백업을 불러오세요.';this.value=createProfile(now);}}catch{this.broken=true;this.warning='저장 공간을 사용할 수 없습니다. 브라우저 저장 권한을 확인하세요.';this.value=createProfile(now);}
     this.raw=raw;if(UNLOCKED&&!this.broken)topUpUnlocked(this.value);
   }
   transact(action,args={},now=Date.now()){

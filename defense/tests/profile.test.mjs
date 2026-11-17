@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN} from '../src/content.js';
+import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,INTRO_STAGES,levelStage} from '../src/content.js';
 import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
@@ -21,14 +21,14 @@ test('cut-in setting defaults on, migrates old saves and accepts only booleans',
   assert.equal(command(migrated,'setting',{id:'cutin',value:0},NOW).ok,false);migrated.settings.cutin=0;assert.equal(validateProfile(migrated),false);
 });
 
-test('greenhouse beds are shared, unlock at stages 15 and 30, and soft-cap by cost',()=>{
+test('greenhouse beds are shared, unlock at levels 15 and 30, and soft-cap by cost',()=>{
   const p=createProfile(NOW);assert.deepEqual(p.beds,{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0});assert.equal(p.bedRev,4);p.dust=100000;const s=storeFor(p);
   call(s,'bed',{id:'rose'});assert.equal(s.value.beds.rose,1);assert.equal(s.value.dust,100000-bedCost('rose',0));assert.equal(bedCost('rose',0),120);
   for(const id of ['star_boy','queen'])assert.ok(Math.abs(heroMultiplier(s.value.heroes[id],s.value.beds)-1.01)<1e-12);
   assert.ok(combatPower('star_boy',s.value.heroes.star_boy,{rose:2})>combatPower('star_boy',s.value.heroes.star_boy,{rose:1}));
-  assert.equal(s.transact('bed',{id:'spring'},NOW).ok,false,'spring is closed before stage 15');
-  s.value.cleared=15;call(s,'bed',{id:'spring'});assert.equal(s.transact('bed',{id:'seed'},NOW).ok,false,'seed is closed before stage 30');
-  s.value.cleared=30;call(s,'bed',{id:'seed'});assert.deepEqual(s.value.beds,{rose:1,spring:1,seed:1,crit:0,critDamage:0,stardust:0});
+  s.value.cleared=levelStage(15)-1;assert.equal(s.transact('bed',{id:'spring'},NOW).ok,false,'spring is closed before level 15');
+  s.value.cleared=levelStage(15);call(s,'bed',{id:'spring'});assert.equal(s.transact('bed',{id:'seed'},NOW).ok,false,'seed is closed before level 30');
+  s.value.cleared=levelStage(30);call(s,'bed',{id:'seed'});assert.deepEqual(s.value.beds,{rose:1,spring:1,seed:1,crit:0,critDamage:0,stardust:0});
   assert.equal(s.transact('bed',{id:'moon'},NOW).ok,false);
   // Soft caps: the cost step jumps after rise and knee2, and no level is refused for being high.
   for(const [id,at] of [['rose',25],['rose',42],['spring',18],['spring',28],['seed',12],['seed',20]]){
@@ -88,17 +88,21 @@ test('a pre-renewal active run resumes with the renewed permanent multipliers',(
   assert.ok(Math.abs(resumed.meta.star_boy.special-1.2)<1e-12);
 });
 
-test('daily missions come from playing, the free summon is once a day, and old missions migrate',()=>{
+test('daily missions come from playing, the free summons are once a day on each banner, and old missions migrate',()=>{
   const s=storeFor(createProfile(NOW));assert.equal(s.transact('daily',{id:'idle'},NOW).ok,false);
   s.value.idleAt=NOW-3*HOUR;call(s,'idle');assert.equal(s.value.daily.idle,true);const d0=s.value.dreams;call(s,'daily',{id:'idle'});assert.equal(s.value.dreams,d0+30);
   const d1=s.value.dreams;call(s,'draw',{banner:'normal',count:1,free:true});assert.equal(s.value.dreams,d1);assert.equal(s.value.daily.free,true);assert.equal(s.value.history.length,1);
   assert.equal(s.transact('draw',{banner:'normal',count:1,free:true},NOW).ok,false,'one free summon a day');
-  assert.equal(storeFor(createProfile(NOW)).transact('draw',{banner:'relic',count:1,free:true},NOW).ok,false,'free summon is the normal banner only');
+  // The relic banner has its own free single a day; the season banner has none and a free ten does not exist.
+  const r=storeFor(createProfile(NOW)),r0=r.value.dreams;call(r,'draw',{banner:'relic',count:1,free:true});assert.equal(r.value.dreams,r0);assert.equal(r.value.daily.relicFree,true);assert.equal(r.value.daily.free,false);assert.equal(r.value.relicDraws,1);
+  assert.equal(r.transact('draw',{banner:'relic',count:1,free:true},NOW).ok,false,'one free relic summon a day');call(r,'draw',{banner:'normal',count:1,free:true});
+  assert.equal(r.transact('draw',{banner:'relic',count:1,free:true},NOW+24*HOUR).ok,true,'the next day it is free again');
+  for(const [banner,count] of [['season',1],['relic',10],['normal',10]])assert.equal(storeFor(createProfile(NOW)).transact('draw',{banner,count,free:true},NOW).ok,false,banner+' '+count);
   call(s,'begin',{mode:'main',stage:1});call(s,'settle',{token:s.value.active.token,won:false,round:0,merges:5});assert.equal(s.value.daily.merges,5);
   call(s,'daily',{id:'merge'});call(s,'daily',{id:'combat'});assert.equal(s.transact('daily',{id:'merge'},NOW).ok,false);
   const old=createProfile(NOW);old.daily={day:old.daily.day,combat:true,draw:true,dispatch:false,claimed:['draw']};
   const migrated=parseProfile(JSON.stringify(old));assert.ok(migrated);
-  assert.deepEqual(migrated.daily,{day:old.daily.day,combat:true,merges:0,idle:false,free:false,bouquet:false,accel:false,claimed:[]});
+  assert.deepEqual(migrated.daily,{day:old.daily.day,combat:true,merges:0,idle:false,free:false,relicFree:false,bouquet:false,accel:false,claimed:[]});
   const bad=structuredClone(migrated);bad.daily.claimed=['draw'];assert.equal(validateProfile(bad),false);
 });
 
@@ -200,7 +204,7 @@ test('weekly draft survives reload, excludes dispatched heroes and produces five
 });
 
 test('the draft opens three times a week and pays the week only up to its best record',()=>{
-  const p=createProfile(NOW);p.cleared=40;for(const h of HEROES)p.heroes[h.id].owned=true;const s=storeFor(p);
+  const p=createProfile(NOW);p.cleared=TUNING.beds.crit.unlock-5;for(const h of HEROES)p.heroes[h.id].owned=true;const s=storeFor(p);
   const run=(tier,round,won)=>{call(s,'begin',{mode:'weekly',tier});for(let i=0;i<5;i++)call(s,'draft',{index:0});const before=s.value.dreams,r=call(s,'settle',{token:s.value.active.token,round,won});assert.equal(s.value.dreams-before,r.reward);return r;};
   const first=run('easy',6,false);assert.equal(first.reward,weeklyReward('easy',6,false));assert.equal(first.newBest,true);assert.equal(first.left,2);
   const worse=run('easy',4,false);assert.equal(worse.reward,0,'a lower record pays nothing');assert.equal(worse.newBest,false);assert.equal(worse.left,1);
@@ -244,11 +248,9 @@ test('failed monthly entry, record save and reward confirmation preserve the wal
   disk.fail=true;assert.equal(s.transact('begin',{mode:'monthly',stage:4},NOW).ok,false);assert.equal(s.value.monthly,null);
   disk.fail=false;call(s,'begin',{mode:'monthly',stage:4});const before=structuredClone(s.value);
   disk.fail=true;assert.equal(s.transact('settle',{token:s.value.active.token,round:2},NOW).ok,false);assert.deepEqual(s.value,before);
-  disk.fail=false;call(s,'settle',{token:s.value.active.token,round:2,damage:1200,seconds:32});assert.equal(s.value.dreams,600);
-  const token=s.value.monthlyBest.token;disk.fail=true;assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);assert.equal(s.value.monthly,null);assert.equal(s.value.dreams,600);
-  disk.fail=false;call(s,'claimMonthly',{token});assert.equal(s.value.dreams,600+monthlyReward({round:2}));
-  assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);
-  call(s,'begin',{mode:'monthly'},NOW);call(s,'settle',{token:s.value.active.token,round:4});assert.equal(s.value.dreams,600+monthlyReward({round:2}));assert.equal(s.value.monthlyBest.round,4);
+  disk.fail=false;call(s,'settle',{token:s.value.active.token,round:2,damage:1200,seconds:32});assert.equal(s.value.dreams,600+monthlyReward({round:2}));assert.equal(s.value.monthlyClaim.round,2);
+  const token=s.value.monthlyBest.token;assert.equal(s.transact('claimMonthly',{token},NOW).ok,false);
+  call(s,'begin',{mode:'monthly'},NOW);call(s,'settle',{token:s.value.active.token,round:4});assert.equal(s.value.dreams,600+monthlyReward({round:4}));assert.equal(s.value.monthlyBest.round,4);
   assert.equal(s.transact('claimMonthly',{token:s.value.monthlyBest.token},NOW).ok,false);
   call(s,'begin',{mode:'monthly'},Date.parse('2026-11-01T00:00:00Z'));
 });
@@ -289,7 +291,7 @@ test('topUpUnlocked owns companions and relics added after the save, and testGra
   raw.relics.lens.owned=true;raw.relics.lens.enhance=2;raw.relics.lens.copies=1;
   const p=parseProfile(JSON.stringify(raw));
   assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.relics.hourglass.owned,false);
-  assert.equal(p.cleared,0);topUpUnlocked(p);assert.equal(p.cleared,90,'an old test save is raised to stage 90');
+  assert.equal(p.cleared,0);topUpUnlocked(p);assert.equal(p.cleared,MAIN_STAGES,'an old test save is raised to the last stage');
   assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.heroes.behemoth.bond,10);assert.equal(p.heroes.behemoth.bondXp,0);
   assert.equal(p.heroes.star_boy.bond,6);assert.equal(p.heroes.star_boy.bondXp,3);
   assert.equal(p.relics.hourglass.owned,true);assert.equal(p.relics.hourglass.enhance,6);assert.equal(p.relics.hourglass.copies,20);
@@ -303,36 +305,52 @@ test('topUpUnlocked owns companions and relics added after the save, and testGra
   assert.equal(p.dreams,9999999);assert.equal(p.dust,9999999);assert.equal(validateProfile(p),true);
 });
 
+test('a save from before the intro chapter moves every main stage it names nine places and keeps its battle',()=>{
+  const old=createProfile(NOW);delete old.stageRev;old.cleared=20;old.perfect=[3,7,20];
+  old.results=[{at:NOW,mode:'main',stage:20,round:6,reward:0,won:true},{at:NOW,mode:'weekly',stage:4,round:3,reward:10,won:false}];
+  call(storeFor(old),'tick');assert.equal(old.cleared,20,'a store on an in-memory profile does not migrate it');
+  old.active={mode:'main',stage:21,deck:[...old.deck],started:NOW,seed:77,token:'t-1',boon:0,run:null,relicAttack:0,relicLevels:{}};
+  old.active.run=E.serialize(createBattle({...old,active:{...old.active}}));
+  const moved=parseProfile(JSON.stringify(old));assert.ok(moved);assert.equal(moved.stageRev,1);
+  assert.equal(moved.cleared,20+INTRO_STAGES);assert.deepEqual(moved.perfect,[12,16,29]);
+  assert.equal(moved.results[0].stage,29);assert.equal(moved.results[1].stage,4,'other modes keep their stage');
+  assert.equal(moved.active.stage,30);assert.equal(JSON.parse(moved.active.run).chapter,29);assert.ok(resumeBattle(moved),'the battle in progress resumes on the same enemies');
+  assert.equal(parseProfile(JSON.stringify(moved)).cleared,moved.cleared,'a migrated save is not moved twice');
+  // A save that had not cleared a stage starts in the intro, and its stage 1 run stays stage 1.
+  const young=createProfile(NOW);delete young.stageRev;const y=parseProfile(JSON.stringify(young));assert.equal(y.cleared,0);assert.equal(y.stageRev,1);
+  const bad=createProfile(NOW);bad.stageRev=2;assert.equal(parseProfile(JSON.stringify(bad)),null);
+});
+
 test('perfect clears pay 100 dreams once on main stages',()=>{
   const old=createProfile(NOW);delete old.perfect;const loaded=parseProfile(JSON.stringify(old));assert.deepEqual(loaded.perfect,[]);
   const s=storeFor(loaded),start=s.value.dreams;
   call(s,'begin',{mode:'main',stage:1});
   const first=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:true});
-  assert.equal(first.reward,270);assert.equal(first.clearReward,170);assert.equal(first.firstPerfect,true);assert.equal(first.perfect,true);
-  assert.equal(s.value.dreams,start+270);assert.deepEqual(s.value.perfect,[1]);assert.equal(s.value.results[0].perfect,true);
+  assert.equal(first.reward,260);assert.equal(first.clearReward,160,'intro stages pay the level-0 first clear');assert.equal(first.firstPerfect,true);assert.equal(first.perfect,true);
+  assert.equal(s.value.dreams,start+260);assert.deepEqual(s.value.perfect,[1]);assert.equal(s.value.results[0].perfect,true);
   call(s,'begin',{mode:'main',stage:1});
   const again=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:true});
   assert.equal(again.reward,0);assert.equal(again.clearReward,0);assert.equal(again.firstPerfect,false);assert.equal(again.perfect,true);
-  assert.equal(s.value.dreams,start+270);assert.deepEqual(s.value.perfect,[1]);
+  assert.equal(s.value.dreams,start+260);assert.deepEqual(s.value.perfect,[1]);
   call(s,'begin',{mode:'main',stage:2});
   const plain=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:false});
-  assert.equal(plain.reward,180);assert.equal(plain.clearReward,180);assert.equal(plain.perfect,false);
+  assert.equal(plain.reward,160);assert.equal(plain.clearReward,160);assert.equal(plain.perfect,false);
   assert.deepEqual(s.value.perfect,[1]);assert.equal(s.value.results[0].perfect,undefined);
   call(s,'begin',{mode:'main',stage:3});
   const both=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:true});
-  assert.equal(both.clearReward,190);assert.equal(both.reward,290);assert.equal(both.firstPerfect,true);
+  assert.equal(both.clearReward,160);assert.equal(both.reward,260);assert.equal(both.firstPerfect,true);
   assert.deepEqual(s.value.perfect,[1,3]);
   const bad=structuredClone(s.value);
   for(const perfect of [[3,1],[1,1],[0],[4],[1.5]]){bad.perfect=perfect;assert.equal(validateProfile(bad),false,JSON.stringify(perfect));}
   bad.perfect=[1,3];assert.equal(validateProfile(bad),true);
 });
 
-test('unlockProfile owns every companion (three below ten hearts to try gifts), every relic, and clears all 90 main stages',()=>{
+test('unlockProfile owns every companion (three below ten hearts to try gifts), every relic, and clears every main stage',()=>{
   const fresh=createProfile(NOW),deck=[...fresh.deck],partner=fresh.partner,relics=structuredClone(fresh.relics);
   const p=unlockProfile(fresh);
   assert.equal(p,fresh);
   assert.ok(HEROES.every(h=>{const e=p.heroes[h.id];return e.owned&&e.bond===({star_boy:6,siren:3,snow_rabbit:8}[h.id]??10)&&e.level===1&&e.enhance===0&&e.copies===0;}));
-  assert.equal(p.cleared,90);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
+  assert.equal(p.cleared,MAIN_STAGES);assert.equal(p.dreams,99999);assert.equal(p.dust,99999);
   assert.deepEqual(p.deck,deck);assert.equal(p.partner,partner);
   assert.ok(Object.entries(p.relics).every(([id,r])=>r.owned&&r.enhance==={C:6,R:4,SR:3,UR:1}[ARTIFACT[id].rarity]&&r.copies>0),'every relic owned at a mid-game level with spare duplicates');
   assert.equal(validateProfile(p),true);
@@ -481,7 +499,7 @@ test('an old active run without a relic snapshot copies the saved run, and bad s
   check.active.relicLevels={hourglass:2};assert.equal(validateProfile(check),true);
 });
 
-test('Behemoth joins the normal UR pool and exchange only after stage 45, never the guardian rotation',()=>{
+test('Behemoth joins the normal UR pool and exchange only after part one, never the guardian rotation',()=>{
   const p=createProfile(NOW);assert.equal(HERO.behemoth.hidden,false);assert.ok(!HIDDEN.includes('behemoth'));
   for(let month=0;month<12;month++)assert.notEqual(calendar(Date.UTC(2027,month,15,3)).guardian,'behemoth');
   assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
@@ -489,22 +507,22 @@ test('Behemoth joins the normal UR pool and exchange only after stage 45, never 
   const behemothUr=open=>{const pool=heroPool('UR',open),at=pool.indexOf('behemoth'),rolls=[.999999,at<0?.999999:(at+.5)/pool.length];return drawCharacter(()=>rolls.shift(),false,calendar(NOW).guardian,null,1,open);};
   assert.notEqual(behemothUr(false),'behemoth');assert.equal(behemothUr(true),'behemoth');
   p.pity.normal=TUNING.pity.normal;p.pity.season=TUNING.pity.season;p.dreams=100000;
-  for(const stage of [0,44]){
+  for(const stage of [0,PART_STAGES-1]){
     p.cleared=stage;assert.equal(command(p,'pityClaim',{banner:'normal',id:'behemoth'},NOW).ok,false);
     assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.pity.normal,TUNING.pity.normal,'the gauge is kept');
   }
   const draws=command(p,'draw',{banner:'normal',count:10},NOW);assert.equal(draws.ok,true);assert.ok(!draws.items.some(i=>i.id==='behemoth'));
-  p.cleared=45;
+  p.cleared=PART_STAGES;
   assert.equal(command(p,'pityClaim',{banner:'season',id:'behemoth'},NOW).ok,false);assert.equal(p.pity.season,TUNING.pity.season);
   const late=command(p,'pityClaim',{banner:'normal',id:'behemoth'},NOW);
   assert.equal(late.ok,true);assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.pity.normal,10,'the exchange spends only the normal gauge');
 });
 
-test('the stage 45 announcement covers the late companions once: not before 45, never twice, old saves get an empty list',()=>{
+test('the part one announcement covers the late companions once: not before its last stage, never twice, old saves get an empty list',()=>{
   const fresh=createProfile(NOW),announced=LATE_COMPANIONS.filter(id=>!HERO[id].hidden);
-  assert.deepEqual(lateNoticeIds(fresh),[],'nothing to announce before stage 45');
-  fresh.cleared=44;assert.deepEqual(lateNoticeIds(fresh),[]);
-  fresh.cleared=45;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, including Behemoth');
+  assert.deepEqual(lateNoticeIds(fresh),[],'nothing to announce before part one is cleared');
+  fresh.cleared=PART_STAGES-1;assert.deepEqual(lateNoticeIds(fresh),[]);
+  fresh.cleared=PART_STAGES;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, including Behemoth');
   assert.deepEqual(announced.slice().sort(),['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon'].sort());
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);
   assert.deepEqual(lateNoticeIds(fresh),[]);assert.deepEqual(fresh.noticeLate.slice().sort(),announced.slice().sort());

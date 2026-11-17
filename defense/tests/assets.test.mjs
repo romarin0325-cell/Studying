@@ -21,7 +21,11 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
   const gold=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/gold-dragon-20261029/installation.json'),'utf8'));
   const selection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/selected-cast-20261108/selection.json'),'utf8'));
   assert.deepEqual(selection.assets.map(e=>e.id),['luna','siren','cherry_prince','doom','red_dragon']);
-  const replacements=new Map(selection.assets.map(e=>[e.id,e]));
+  const profileSelection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/time-magician-left-20261109/selection.json'),'utf8'));
+  assert.deepEqual(profileSelection.assets.map(e=>e.id),['time_magician']);
+  const selected=[...selection.assets,...profileSelection.assets];
+  const replacements=new Map(selected.map(e=>[e.id,e]));
+  assert.equal(replacements.size,selected.length,'selected inventory must not contain duplicate heroes');
   const previous=[...original.assets,...additions.assets,...gold.assets];
   // A later owner-selected painting replaces the active inventory entry; the
   // previous master remains recoverable and its recorded bytes stay untouched.
@@ -77,7 +81,12 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,96);
+  assert.equal(Object.keys(ASSET_PATHS).length,99);
+  for(const id of ['event-oath','event-twin']){
+    const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();
+    assert.equal(m.format,'webp',id);assert.equal(m.width,1400,id);assert.equal(m.height,560,id);
+    assert.equal(Object.hasOwn(RUNTIME_ASSET_PATHS,id),false,id+' is loaded lazily');
+  }
   // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
   for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['ur-kit',1024,768],['ur-sweets',1024,768],['ur-kit2',1024,1024],['ur-kit3',1024,1024],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['effects-joker-sun',768,384],['zeke-ragnarok',1536,512],['luna-blade',768,256],['ash-armageddon',1024,512],['effects-chaos-sun',1024,512],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
   // The summon altar (UI part 1) is a single portrait stage painting.
@@ -96,6 +105,26 @@ test('all collection, boss and battle textures resolve to local art with valid a
   assert.equal(ARTIFACTS.length,30);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,30);
   // Rows of three in the collection: 12 C, 6 R, 6 SR, 6 UR.
   assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,6]);
+  // 2026-11-18 restyle: every relic icon is one 512 cell of the 6x5 relics-v2 atlas, one relic per cell.
+  const v2=await sharp(assetFile(ASSET_PATHS['relics-v2'])).metadata();
+  assert.equal(v2.width,3072);assert.equal(v2.height,2560);assert.equal(v2.hasAlpha,true);
+  assert.ok(ARTIFACTS.every(a=>a.atlas==='relics-v2'&&Number.isInteger(a.icon)&&a.icon>=0&&a.icon<30));
+  assert.equal(new Set(ARTIFACTS.map(a=>a.icon)).size,30);
+});
+
+test('time magician selection changes only the left view and retains the previous masters',async()=>{
+  const base=path.join(root,'defense/assets');
+  const read=async(file,index,size)=>sharp(path.join(base,file)).extract({left:index%2*size,top:Math.floor(index/2)*size,width:size,height:size}).ensureAlpha().raw().toBuffer();
+  const visibleChanges=(a,b)=>{let n=0;for(let i=0;i<a.length;i+=4){if(!a[i+3]&&!b[i+3])continue;if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3])n++;}return n;};
+  for(const index of [0,1,2,3]){
+    const [oldP,newP,oldW,newW,oldOpt,newOpt]=await Promise.all([
+      read('cast-v2/time_magician.png',index,512),read('cast-selected-20261109/time_magician.png',index,512),
+      read('cast-v2/time_magician.webp',index,512),read('cast-selected-20261109/time_magician.webp',index,512),
+      read('optimized/cast-v2/time_magician.webp',index,320),read('optimized/cast-selected-20261109/time_magician.webp',index,320),
+    ]);
+    if(index===2){assert.notDeepEqual(newP,oldP,'the selected left view must change');assert.ok(visibleChanges(oldW,newW)>0);assert.ok(visibleChanges(oldOpt,newOpt)>0);assert.equal(visibleChanges(newP,newW),0,'selected PNG and WebP must show the same left artwork');}
+    else{assert.deepEqual(newP,oldP,'previous PNG view must be preserved');assert.equal(visibleChanges(oldW,newW),0,'previous source WebP view must be preserved');assert.equal(visibleChanges(oldOpt,newOpt),0,'previous optimized view must be preserved');}
+  }
 });
 
 test('every unit faces outward: the left cell looks left, the right cell is its mirror view and looks right',async()=>{
@@ -116,7 +145,7 @@ test('Gold facing uses anatomical cheek regions, excludes gold horns, and still 
 test('optimized images preserve the source pack, codec, alpha and sprite geometry',async()=>{
   const {manifest,read}=await loadImagePack();
   assert.ok(manifest.totals.outputBytes<manifest.totals.deployableSourceBytes);
-  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','relics-patch','zeke-slash']);
+  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','relics-patch','relics-v2','zeke-slash']);
   for(const image of manifest.images){
     if(image.id.startsWith('atlas:unit-')){
       const m=await sharp(read(image.source)).metadata();

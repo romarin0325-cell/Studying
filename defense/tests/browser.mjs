@@ -5,14 +5,15 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
 import {createProfile,command,SAVE_KEY} from '../src/profile.js';
-import {HEROES,TUNING,LATE_COMPANIONS,HIDDEN} from '../src/content.js';
+import {HEROES,TUNING,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from '../src/content.js';
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
 import {allQuestions} from '../src/quiz.js';
 import {eventWindow} from '../src/preview/season.js';
 import {monthlyReward} from '../src/monthly.js';
-// Companions announced at stage 45 (the roster grows; counts come from the data, not from the day the test was written).
+import {stageReward,PERFECT_REWARD} from '../src/economy.js';
+// Companions announced at the part-one completion stage (the roster grows; counts come from the data, not from the day the test was written).
 const LATE_NEW=LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).length;
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenDefense.html')).href;
@@ -236,7 +237,7 @@ try{
     await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
     await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
     assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
-    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),new RegExp(`스테이지 45 클리어 후 신규 동료 ${LATE_NEW}명`));assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
+    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),new RegExp(`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 신규 동료 ${LATE_NEW}명`));assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
     await shot(page,'collection',width,height);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
     await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
@@ -251,7 +252,7 @@ try{
     await page.locator('[data-banner="season"]').click();await page.locator('[data-action="rates"]').click();
     assert.match(await page.locator('#sheet-body').innerText(),/0.100%/);await close(page);
     await page.locator('[data-banner="relic"]').click();await shot(page,'relic-summon',width,height);
-    assert.match(await page.locator('[data-draw="1"]').innerText(),/1회 소환/);
+    assert.match(await page.locator('[data-draw="1"]').innerText(),/무료 소환/);
     await nav(page,'모험');assert.equal(await page.locator('.stage-list .stage').count(),9);assert.equal(await page.locator('[data-cycle="4"]').isDisabled(),true,'chapters open as they are reached');
     assert.equal(await page.locator('.part-tabs .part').count(),2);assert.equal(await page.locator('.part[data-part="2"]').getAttribute('data-locked'),'true','part two is locked until stage 45');
     await page.locator('.part[data-part="2"]').click();assert.ok((await page.locator('.part-teaser').innerText()).includes('새벽의 별길'));await close(page);
@@ -310,9 +311,9 @@ try{
     assert.equal((await profile(page)).dreams,3333);assert.ok((await profile(page)).active.run);
     await context.close();
   }
-  const lateProfile=createProfile(NOW);lateProfile.cleared=45;
+  const lateProfile=createProfile(NOW);lateProfile.cleared=LATE_UNLOCK_STAGE;
   const lateTest=await boot(390,844,lateProfile);
-  // The first load after clearing stage 45 announces every new companion, shown once.
+  // The first load after clearing part one announces every new companion, shown once.
   await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
   assert.equal(await lateTest.page.locator('.late-card').count(),LATE_NEW,'every new companion is announced');
   assert.equal((await profile(lateTest.page)).noticeLate.length,LATE_NEW,'the announcement is recorded as seen');
@@ -328,7 +329,7 @@ try{
   assert.deepEqual(lateReload.diskNoticeLate,seenLate,'companion receipts remain in storage: '+JSON.stringify(lateReload));
   assert.ok(await lateTest.page.locator('#sheet[data-kind="late"]').isHidden(),'companions are not announced again after a reload: '+JSON.stringify(lateReload));
   await nav(lateTest.page,'동료');
-  assert.equal(await lateTest.page.locator('.cards .cc').count(),HEROES.length,'the new companions join the collection once stage 45 is cleared');
+  assert.equal(await lateTest.page.locator('.cards .cc').count(),HEROES.length,'the new companions join the collection once part one is cleared');
   for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
   await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();
   const grown=createProfile(NOW);grown.cleared=36;grown.dreams=5000;
@@ -380,11 +381,11 @@ try{
   const bosses=await monthly.page.evaluate(()=>window.STAR_GARDEN.battle.enemies.map(e=>e.boss));
   assert.deepEqual(bosses,['artificial_demon']);await shot(monthly.page,'monthly-battle',390,844);
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
-  assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.equal((await profile(monthly.page)).dreams,600);
-  assert.equal((await profile(monthly.page)).monthly,null);assert.ok((await profile(monthly.page)).monthlyBest);
-  await shot(monthly.page,'monthly-record',390,844);await monthly.page.locator('#sheet-body [data-action="monthly-claim"]').click();
-  assert.match(await monthly.page.locator('#sheet-body').innerText(),/한 번/);const monthlyPaid=600+monthlyReward((await profile(monthly.page)).monthlyBest);await monthly.page.locator('[data-confirm-monthly]').click();
-  assert.equal((await profile(monthly.page)).dreams,monthlyPaid);assert.ok((await profile(monthly.page)).monthly);
+  assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.ok((await profile(monthly.page)).monthlyBest);
+  // The hunt pays its record when the run is settled; nothing is left to claim.
+  const monthlyPaid=600+monthlyReward((await profile(monthly.page)).monthlyBest);assert.equal((await profile(monthly.page)).dreams,monthlyPaid);assert.ok((await profile(monthly.page)).monthly);
+  assert.match(await monthly.page.locator('#sheet-body').innerText(),/획득 보상/);assert.equal(await monthly.page.locator('[data-action="monthly-claim"]').count(),0);
+  await shot(monthly.page,'monthly-record',390,844);await close(monthly.page);assert.match(await monthly.page.locator('#content .mode.monthly').innerText(),/받음/);
   await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
   assert.equal((await profile(monthly.page)).dreams,monthlyPaid,'a second attempt cannot pay again');await monthly.context.close();
@@ -408,8 +409,8 @@ try{
   await quota.page.locator('[data-action="leave"]').click();await quota.page.locator('[data-action="save-leave"]').click();assert.ok((await profile(quota.page)).active.run);await quota.context.close();
 
   const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
-  const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);assert.equal((await profile(record.page)).dreams,600);
-  await shot(record.page,'monthly-best-result',390,844);await close(record.page);await record.page.locator('#content [data-action="monthly-claim"]').click();await shot(record.page,'monthly-confirm',390,844);const recordPaid=600+monthlyReward((await profile(record.page)).monthlyBest);await record.page.locator('[data-confirm-monthly]').click();assert.equal((await profile(record.page)).dreams,recordPaid);await record.context.close();
+  const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);const recordPaid=600+monthlyReward((await profile(record.page)).monthlyBest);assert.equal((await profile(record.page)).dreams,recordPaid);
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);assert.equal(await record.page.locator('#content [data-action="monthly-claim"]').count(),0);assert.match(await record.page.locator('#content .mode.monthly').innerText(),/받음/);await shot(record.page,'monthly-confirm',390,844);await record.context.close();
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.
@@ -417,8 +418,8 @@ try{
   won.phase='victory';won.wave=6;won.won=true;won.stats.damage=2222;won.stats.byHero.star_boy=2222;end.active.run=E.serialize(won);
   const result=await boot(390,844,end);
   await result.page.locator('[data-action="resume"]').click();await result.page.locator('.battle-result').waitFor();
-  // No core leak in the fixture: first clear (170) plus the first perfect (100).
-  assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,870);assert.deepEqual((await profile(result.page)).perfect,[1]);assert.equal(await result.page.locator('.result-perfect').count(),1);await shot(result.page,'result',390,844);
+  // No core leak in the fixture: first clear plus the first perfect.
+  assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,600+stageReward(1)+PERFECT_REWARD);assert.deepEqual((await profile(result.page)).perfect,[1]);assert.equal(await result.page.locator('.result-perfect').count(),1);await shot(result.page,'result',390,844);
   await result.context.close();
   const gauge=createProfile(NOW);gauge.pity.normal=TUNING.pity.normal;const pity=await boot(390,844,gauge);await nav(pity.page,'소환');
   await pity.page.locator('.pity-chip.full').click();await pity.page.locator('[data-pity-pick="queen"]').click();await pity.page.locator('[data-action="pity-claim"]').click();

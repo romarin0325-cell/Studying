@@ -1,0 +1,40 @@
+{
+  "baseline": "4f7b0bc87a0f91019050b15c03d6ed8c20b12c07",
+  "selectedAtlasSha256": "f04bdb4c291eb475a64a1d3b2717b5cca387d086eebb4afd4368645334bb8e2e",
+  "sourceWebpIsSelectedBytes": true,
+  "rows": [
+    {
+      "direction": "front",
+      "masterPngChangedPixels": 0,
+      "matchesChosenPng": false,
+      "sourceWebpVisibleChanges": 0,
+      "optimizedVisibleChanges": 0
+    },
+    {
+      "direction": "back",
+      "masterPngChangedPixels": 0,
+      "matchesChosenPng": false,
+      "sourceWebpVisibleChanges": 0,
+      "optimizedVisibleChanges": 0
+    },
+    {
+      "direction": "left",
+      "masterPngChangedPixels": 64267,
+      "matchesChosenPng": true,
+      "sourceWebpVisibleChanges": 64274,
+      "optimizedVisibleChanges": 25883
+    },
+    {
+      "direction": "right",
+      "masterPngChangedPixels": 0,
+      "matchesChosenPng": false,
+      "sourceWebpVisibleChanges": 0,
+      "optimizedVisibleChanges": 0
+    }
+  ],
+  "frontUiByteIdentical": {
+    "portraits": true,
+    "figures": true
+  },
+  "checks": true
+}

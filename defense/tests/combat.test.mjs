@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../src/combat/engine.js';
 import {createBattle,resumeBattle,autoPlay,clearedRounds} from '../src/battle.js';
-import {HEROES,HERO,BOSSES,DEFAULT_DECK,CHAPTERS,BOSS_ORDER} from '../src/content.js';
+import {HEROES,HERO,BOSSES,DEFAULT_DECK,CHAPTERS,BOSS_ORDER,MAIN_STAGES,PART_STAGES,levelStage} from '../src/content.js';
 import {createProfile,command,validateProfile} from '../src/profile.js';
 import {heroMultiplier,collectionBonus,relicScale} from '../src/economy.js';
 import {smartAutoPlay} from '../src/smart-auto.js';
@@ -199,19 +199,19 @@ test('crush uses the reduced trained radius for hit boundaries, previews, effect
   const bad=JSON.parse(E.serialize(s));bad.volleys[0].radius=900;assert.equal(E.restore(bad),null);
 });
 
-test('the exact rarity roster has independent valid stats and all 90 stages (two parts of 45) rotate the nine guardians',()=>{
+test('the exact rarity roster has independent valid stats and every main stage rotates the nine guardians',()=>{
   assert.equal(HEROES.length,42);assert.equal(new Set(HEROES.map(h=>h.id)).size,42);
   assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','앤트로피','마왕']);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','엔트로피','마왕']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
-  assert.equal(CHAPTERS.length,90);assert.equal(CHAPTERS[8].hp,3.5);assert.equal(CHAPTERS[44].part,1);assert.equal(CHAPTERS[45].part,2);
+  assert.equal(CHAPTERS.length,MAIN_STAGES);assert.equal(CHAPTERS[PART_STAGES-1].part,1);assert.equal(CHAPTERS[PART_STAGES].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
-  const step=CHAPTERS[1].hp-CHAPTERS[0].hp;
-  for(let i=1;i<90;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-step)<1e-12);
+  // From level 18 (stage 27) on, the health line keeps its original slope of 2.5/8 a stage.
+  for(let i=levelStage(18);i<MAIN_STAGES;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-2.5/8)<1e-12);
 });
 
 test('six main waves contain exactly two copies of one boss and stage nine follows the renewed base health and slope',()=>{
-  for(const chapter of [0,8,9,35,44]){
+  for(const chapter of [0,8,9,17,35,53,MAIN_STAGES-1]){
     let bosses=0;
     for(let wave=1;wave<=6;wave++){
       const plan=E.wavePlan(wave,chapter);
@@ -220,8 +220,11 @@ test('six main waves contain exactly two copies of one boss and stage nine follo
     }assert.equal(bosses,2);
   }
   assert.equal(E.WAVE_BASE_HEALTH,100);
-  const expected=Math.round(Math.round(100*1.34**11*3.5*32)*E.BOSS_HEALTH_SCALE);
-  assert.equal(E.wavePlan(6,8).sequence.find(e=>e.kind==='boss').hp,expected);
+  for(const chapter of [8,17,levelStage(18)-1]){
+    const expected=Math.round(Math.round(100*1.34**11*CHAPTERS[chapter].hp*32)*E.BOSS_HEALTH_SCALE);
+    assert.equal(E.wavePlan(6,chapter).sequence.find(e=>e.kind==='boss').hp,expected);
+  }
+  assert.equal(CHAPTERS[levelStage(18)-1].hp,1+2.5*17/8,'stage 27 has the health the old stage 18 had');
   assert.equal(E.BOSS_HEALTH_SCALE,.65);
 });
 

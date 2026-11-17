@@ -2463,10 +2463,10 @@ const CARDS = [
     {
         id: 'rumi', name: '루미', grade: 'legend', element: 'water', role: 'buffer',
         stats: { hp: 500, atk: 90, matk: 120, def: 80, mdef: 90 },
-        trait: { type: 'syn_water_nature', desc: '덱에 물과 자연이 있을 경우, 문라이트세레나 발동 시 트윙클파티 추가 발동' },
+        trait: { type: 'syn_water_nature', desc: '덱에 물과 자연이 있을 경우, 문라이트세레나데 발동 시 트윙클파티 추가 발동' },
         skills: [
             { name: '밀키웨이엑스터시', type: 'mag', tier: 3, cost: 30, val: 3.0, effects: [{ type: 'field_buff', id: 'star_powder' }] },
-            { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'field_buff', id: 'moon_bless' }] },
+            { name: '문라이트세레나데', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'field_buff', id: 'moon_bless' }] },
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] }
         ]
     },
@@ -2487,7 +2487,7 @@ const CARDS = [
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
             { name: '대지의분노', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'field_buff', id: 'earth_bless' }] },
-            { name: '가이아포스', type: 'phy', tier: 3, cost: 30, val: 2.0, effects: [{ type: 'field_buff', id: 'moon_bless' }] }
+            { name: '아스트랄루트', type: 'phy', tier: 3, cost: 30, val: 2.0, effects: [{ type: 'field_buff', id: 'moon_bless' }] }
         ]
     },
     {
@@ -2690,7 +2690,7 @@ const CARDS = [
         trait: { type: 'pos_stat_boost', pos: 1, stat: 'matk', val: 30, desc: "중견 배치시 마법 공격력 30%증가" },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '문라이트세레나', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'field_buff', id: 'moon_bless' }] },
+            { name: '문라이트세레나데', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'field_buff', id: 'moon_bless' }] },
             { name: '선라이트플레임', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
@@ -2700,7 +2700,7 @@ const CARDS = [
         trait: { type: 'cond_twinkle_all', val: 50, desc: "트윙클파티 상태에서 물리/마법 공격력 50%증가" },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '크림샷', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
+            { name: '슈가휩', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
             { name: '크림익스플로전', type: 'mag', tier: 2, cost: 20, val: 1.0, effects: [{ type: 'field_buff', id: 'star_powder' }] }
         ]
     },
@@ -2740,7 +2740,7 @@ const CARDS = [
         trait: { type: 'death_dmg_mag', val: 3.0, desc: "사망시 적에게 300% 마법 피해" },
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
-            { name: '사일런트', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'silence' }] },
+            { name: '사일런스', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'silence' }] },
             { name: '위크니스', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'debuff', id: 'weak' }] }
         ]
     },
@@ -2750,7 +2750,7 @@ const CARDS = [
         trait: { type: 'death_debuff', debuff: 'darkness', desc: '사망시 암흑 부여' },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '미라지프레임', type: 'mag', tier: 3, cost: 30, val: 1.5, effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'weak' }] },
+            { name: '미라지플레임', type: 'mag', tier: 3, cost: 30, val: 1.5, effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'weak' }] },
             { name: '팬텀러쉬', type: 'phy', tier: 3, cost: 30, val: 1.5, effects: [{ type: 'debuff', id: 'burn', stack: 1 }, { type: 'debuff', id: 'curse' }] }
         ]
     },
@@ -3076,8 +3076,8 @@ const BONUS_CARDS = [
         trait: { type: 'on_hit_random_debuff', pool: ['corrosion', 'weak', 'silence', 'curse', 'stun'], desc: "해파리독: 피격 시 적에게 ‘부식·약화·침묵·저주·기절’ 중 무작위 1종 부여" },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '오로라텐타클', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
-            { name: '크리스탈레퀴엠', type: 'phy', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 3.0 }] }
+            { name: '아쿠아텐타클', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'random_debuff', count: 1, pool: ['weak', 'corrosion'] }] },
+            { name: '어비스스팅', type: 'phy', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'dmg_boost', condition: 'target_debuff', debuff: 'stun', mult: 3.0 }] }
         ]
     },
     {
@@ -3169,7 +3169,7 @@ const BONUS_CARDS = [
         trait: { type: 'instant_delayed_skills', desc: '덱의 지연 스킬이 즉시 발동' },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '엑셀레이터', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'corrosion' }] },
+            { name: '액셀러레이터', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'corrosion' }] },
             { name: '데스클록', type: 'mag', tier: 3, cost: 30, val: 2.0, effects: [{ type: 'turn_modulo_dmg', mod: 10, mult: 5.0 }] }
         ]
     },
@@ -3223,7 +3223,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
             { name: '홀리블레싱', type: 'sup', tier: 3, cost: 30, effects: [{ type: 'delayed_attack_field', turns: 1, field: 'sanctuary' }] },
-            { name: '폭스플레임', type: 'mag', tier: 2, cost: 20, val: 1.5, effects: [{ type: 'debuff', id: 'divine', stack: 1 }] }
+            { name: '스타폭스테일', type: 'mag', tier: 2, cost: 20, val: 1.5, effects: [{ type: 'debuff', id: 'divine', stack: 1 }] }
         ]
     },
     {
@@ -3233,7 +3233,7 @@ const BONUS_CARDS = [
         skills: [
             { name: '배리어', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'barrier', duration: 1 }] },
             { name: '솔라플레어', type: 'mag', tier: 3, cost: 30, val: 4.0, effects: [{ type: 'delayed_attack', turns: 2 }] },
-            { name: '어쓰블라썸', type: 'phy', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] }
+            { name: '어스블라썸', type: 'phy', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'earth_bless', mult: 2.0 }] }
         ]
     },
     {
@@ -3285,7 +3285,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'opening_atk_matk', val: 50, desc: "3턴 이내 물리 공격력/마법 공격력 50% 증가" },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '실프스탭', type: 'phy', tier: 2, cost: 20, val: 1.5, effects: [{ type: 'field_buff', id: 'gale', durationTurns: 3 }] },
+            { name: '실프스텝', type: 'phy', tier: 2, cost: 20, val: 1.5, effects: [{ type: 'field_buff', id: 'gale', durationTurns: 3 }] },
             { name: '템페스트크로', type: 'mag', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'gale', mult: 2.0 }] }
         ]
     },
@@ -3340,7 +3340,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'legendary_captain', name: '전설의선장', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
+        id: 'legendary_captain', name: '대해적선장', grade: 'rare', element: 'water', role: 'balancer', unlockSource: 'bonus',
         stats: { hp: 360, atk: 100, matk: 70, def: 60, mdef: 60 },
         trait: { type: 'death_debuff', debuff: 'stun', desc: '사망 시 적에게 기절 부여' },
         skills: [
@@ -3427,7 +3427,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'death_dmg_mag_stun_cond', val: 5.0, condition: 'deck_has_dragon', desc: "덱에 드래곤이 존재할 경우 사망 시 500% 마법 피해와 기절 부여" },
         skills: [
             { name: '매직가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '스파클', type: 'mag', tier: 3, cost: 30, val: 2.0, effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'debuff', id: 'burn', stack: 1 }] },
+            { name: '드래곤스파클', type: 'mag', tier: 3, cost: 30, val: 2.0, effects: [{ type: 'field_buff', id: 'twinkle_party' }, { type: 'debuff', id: 'burn', stack: 1 }] },
             { name: '버닝스피릿', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'burn', stack: 1 }] }
         ]
     },
@@ -3452,7 +3452,7 @@ const BONUS_CARD_EXPANSION = [
         ]
     },
     {
-        id: 'entropy', name: '앤트로피', grade: 'rare', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
+        id: 'entropy', name: '엔트로피', grade: 'rare', element: 'nature', role: 'dealer', unlockSource: 'hidden', releaseDate: '2026-06-01',
         stats: { hp: 340, atk: 105, matk: 105, def: 50, mdef: 50 },
         trait: { type: 'chaos_blessing_double', desc: '혼돈의 축복 효과가 2배로 적용된다' },
         skills: [
@@ -3487,7 +3487,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'death_dmg_phy_debuff', val: 4.0, debuff: 'corrosion', desc: "사망시 400% 물리 피해 + 부식" },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '플래이그', type: 'mag', tier: 2, cost: 20, val: 1.0, effects: [{ type: 'multi_delayed_attack', turns: [1, 2, 3, 4, 5], messages: ['첫번째 플래이그!', '두번째 플래이그!', '세번째 플래이그!', '네번째 플래이그!', '마지막 플래이그!'] }, { type: 'random_debuff', pool: ['weak', 'silence', 'corrosion', 'curse', 'darkness', 'divine', 'burn', 'temptation'], count: 1 }] },
+            { name: '플레이그', type: 'mag', tier: 2, cost: 20, val: 1.0, effects: [{ type: 'multi_delayed_attack', turns: [1, 2, 3, 4, 5], messages: ['첫번째 플레이그!', '두번째 플레이그!', '세번째 플레이그!', '네번째 플레이그!', '마지막 플레이그!'] }, { type: 'random_debuff', pool: ['weak', 'silence', 'corrosion', 'curse', 'darkness', 'divine', 'burn', 'temptation'], count: 1 }] },
             { name: '베놈허그', type: 'phy', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'debuff', id: 'darkness' }] }
         ]
     },
@@ -3496,7 +3496,7 @@ const BONUS_CARD_EXPANSION = [
         stats: { hp: 550, atk: 105, matk: 110, def: 75, mdef: 75 },
         trait: { type: 'death_clear_field_add_buff', buff: 'earth_bless', desc: "사망시 모든 필드 버프를 제거하고 대지의축복 부여" },
         skills: [
-            { name: '오지관제', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'damage_half', duration: 1 }, { type: 'random_field_buff' }] },
+            { name: '오지관정', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'damage_half', duration: 1 }, { type: 'random_field_buff' }] },
             { name: '일체지광', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'divine', stack: 1 }] },
             { name: '파쇄륜', type: 'phy', tier: 3, cost: 30, val: 2.0, effects: [{ type: 'consume_field_all', multPerStack: 1.5 }] }
         ]
@@ -3539,12 +3539,12 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'leader_field_stat_double', val: 2.0, desc: "대장 배치 시 아레나를 제외한 필드 버프의 능력치 효과를 2배로 받음" },
         skills: [
             { name: '디바인아머', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'buff', id: 'damage_half', duration: 3 }] },
-            { name: '에태르랜스', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'corrosion' }] },
+            { name: '에테르랜스', type: 'mag', tier: 2, cost: 20, val: 2.0, effects: [{ type: 'debuff', id: 'corrosion' }] },
             { name: '기적의증명', type: 'sup', tier: 3, cost: 30, effects: [{ type: 'delayed_field_buffs', turns: 3, buffs: ['goddess_descent', 'twinkle_party'] }] }
         ]
     },
     {
-        id: 'holy_night', name: '홀리밤', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-09-01',
+        id: 'holy_bomb', name: '홀리밤', grade: 'normal', element: 'light', role: 'dealer', unlockSource: 'bonus', releaseDate: '2026-09-01',
         stats: { hp: 300, atk: 85, matk: 55, def: 45, mdef: 45 },
         trait: { type: 'death_dmg_phy', val: 3.0, desc: "사망 시 적에게 300% 물리 피해" },
         skills: [
@@ -3636,8 +3636,8 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'alternate_skill_type_mana', val: 10, desc: "이전에 사용한 스킬과 다른 타입의 스킬 사용 시 MP 10 회복" },
         skills: [
             { name: '회피태세', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'evasion', duration: 1 }] },
-            { name: '솔라크레센토', type: 'phy', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2.0 }] },
-            { name: '루나크레센토', type: 'mag', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
+            { name: '솔라크레센트', type: 'phy', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'sun_bless', mult: 2.0 }] },
+            { name: '루나크레센트', type: 'mag', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'dmg_boost', condition: 'field_buff', buff: 'moon_bless', mult: 2.0 }] }
         ]
     },
     {
@@ -3698,7 +3698,7 @@ const BONUS_CARD_EXPANSION = [
         trait: { type: 'cond_earth_def_mdef', val: 50, desc: "대지의축복 상태에서 물리 방어력/마법 방어력 50% 증가" },
         skills: [
             { name: '가드', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'buff', id: 'guard', duration: 1 }] },
-            { name: '변태', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'transform', formId: 'mirror_cocoon' }] },
+            { name: '기적의우화', type: 'sup', tier: 1, cost: 10, effects: [{ type: 'transform', formId: 'mirror_cocoon' }] },
             { name: '실크바인드', type: 'mag', tier: 1, cost: 10, val: 1.0, effects: [{ type: 'debuff', id: 'weak' }] }
         ]
     },
@@ -3723,7 +3723,7 @@ const BATTLE_ONLY_FORMS = [
         trait: { type: 'cond_earth_def_mdef', val: 50, desc: "대지의축복 상태에서 물리 방어력/마법 방어력 50% 증가" },
         skills: [
             { name: '리버설', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'debuff', id: 'curse' }, { type: 'buff', id: 'magic_guard', duration: 1 }] },
-            { name: '변태', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'transform_choice', forms: ['aurora_wing', 'abyss_wing'] }] },
+            { name: '기적의우화', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'transform_choice', forms: ['aurora_wing', 'abyss_wing'] }] },
             { name: '리플렉션', type: 'sup', tier: 2, cost: 20, effects: [{ type: 'debuff', id: 'silence' }, { type: 'buff', id: 'barrier', duration: 1 }] }
         ]
     },
@@ -3787,7 +3787,7 @@ const BASIC_CARD_SETS = Object.freeze([
         subAxes: Object.freeze(['빛/어둠', '다종 디버프', '토끼·저등급 마무리']),
         trial: true,
         cardsByGrade: Object.freeze({
-            normal: Object.freeze(['kobold', 'mimic', 'fairy', 'blessing_tail', 'holy_night', 'vampire', 'shadow_cat', 'snow_rabbit', 'silver_rabbit', 'black_swan']),
+            normal: Object.freeze(['kobold', 'mimic', 'fairy', 'blessing_tail', 'holy_bomb', 'vampire', 'shadow_cat', 'snow_rabbit', 'silver_rabbit', 'black_swan']),
             rare: Object.freeze(['aurora', 'night_rabbit', 'fallen_angel', 'cream_maid', 'tinker_bell', 'silent_librarian', 'light_elemental', 'forget_me_not', 'void_knight', 'sphinx']),
             epic: Object.freeze(['archangel', 'fairy_queen', 'ghost_king', 'lightning_sage', 'unicorn', 'eclipse_queen', 'gumiho', 'mawang', 'santa', 'priest_of_end']),
             legend: Object.freeze(['jasmine', 'galaxy_whale', 'cinderella', 'luna', 'doom_luther', 'time_ruler', 'ancient_soul', 'frozen_witch', 'deep_lord', 'victoria'])
@@ -3975,7 +3975,7 @@ const SPECIAL_CARD_OVERRIDES = {
         skills: [
             cloneSkillByName(card, '가드'),
             { name: '에인션트버닝', type: 'mag', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'consume_debuff_all', debuff: 'burn', multPerStack: 2.0 }] },
-            { name: '본디지허그', type: 'phy', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'curse' }] }
+            { name: '커스드래핑', type: 'phy', tier: 3, cost: 30, val: 2.5, effects: [{ type: 'debuff', id: 'silence' }, { type: 'debuff', id: 'curse' }] }
         ]
     }),
     'rumi_halloween': card => ({
@@ -4193,7 +4193,7 @@ const ENEMIES = [
         id: 'iris_curse', name: '저주의 여신 아이리스', element: 'fire',
         stats: { hp: 1000, atk: 90, matk: 60, def: 90, mdef: 60 },
         skills: [
-            { name: '프레임샷', type: 'mag', rate: 0.3, val: 2.0, effects: [] },
+            { name: '플레임샷', type: 'mag', rate: 0.3, val: 2.0, effects: [] },
             { name: '아포칼립스', type: 'phy', rate: 0.0, val: 5.0, effects: [] }
         ]
     },
@@ -22472,6 +22472,37 @@ const Storage = {
  * one place. Unknown properties inside supported schemas are preserved, future
  * schema versions are rejected, and UI-only state is removed only on save.
  */
+const LEGACY_CARD_ID_ALIASES = Object.freeze({
+    holy_night: 'holy_bomb'
+});
+
+function normalizeLegacyCardId(id) {
+    if (typeof id !== 'string' || !id) return id;
+    return Object.prototype.hasOwnProperty.call(LEGACY_CARD_ID_ALIASES, id)
+        ? LEGACY_CARD_ID_ALIASES[id]
+        : id;
+}
+
+function normalizeLegacyCardIdList(ids, options = {}) {
+    if (!Array.isArray(ids)) return [];
+    const preserveNulls = !!options.preserveNulls;
+    const allowDuplicates = !!options.allowDuplicates;
+    const seen = new Set();
+    const result = [];
+    ids.forEach(rawId => {
+        if ((rawId === null || rawId === undefined) && preserveNulls) {
+            result.push(null);
+            return;
+        }
+        const id = normalizeLegacyCardId(rawId);
+        if (!id) return;
+        if (!allowDuplicates && seen.has(id)) return;
+        seen.add(id);
+        result.push(id);
+    });
+    return result;
+}
+
 class SaveDataMigrator {
     static getSchemaVersion(rawSave) {
         if (!rawSave || rawSave.saveSchemaVersion === undefined) return 0;
@@ -22527,7 +22558,19 @@ class SaveDataMigrator {
             'wrongCollocations'
         ].forEach(ensureArray);
 
+        state.inventory = normalizeLegacyCardIdList(state.inventory, { allowDuplicates: true });
+        state.chaosPool = normalizeLegacyCardIdList(state.chaosPool, { allowDuplicates: true });
+        state.factoryPool = normalizeLegacyCardIdList(state.factoryPool, { allowDuplicates: true });
+        state.activeBonusPoolIds = normalizeLegacyCardIdList(state.activeBonusPoolIds);
         if (!Array.isArray(state.deck)) state.deck = [null, null, null];
+        else state.deck = normalizeLegacyCardIdList(state.deck, { preserveNulls: true, allowDuplicates: true });
+        if (state.runCardPool && typeof state.runCardPool === 'object' && !Array.isArray(state.runCardPool)) {
+            state.runCardPool = {
+                ...state.runCardPool,
+                ...(Array.isArray(state.runCardPool.baseCardIds) ? { baseCardIds: normalizeLegacyCardIdList(state.runCardPool.baseCardIds) } : {}),
+                ...(Array.isArray(state.runCardPool.extraCardIds) ? { extraCardIds: normalizeLegacyCardIdList(state.runCardPool.extraCardIds) } : {})
+            };
+        }
         if (!state.mode) state.mode = 'origin';
         if (!state.gameType) state.gameType = 'challenge';
         if (typeof state.hardMode !== 'boolean') state.hardMode = false;
@@ -23183,16 +23226,25 @@ const GameUtils = {
      * @param {Array} [pool]
      * @returns {Object|null}
      */
+    normalizeCardId(id) {
+        return normalizeLegacyCardId(id);
+    },
+
+    normalizeCardIdList(ids, options = {}) {
+        return normalizeLegacyCardIdList(ids, options);
+    },
+
     getCardById(id, pool) {
-        if (!id) return null;
+        const normalizedId = this.normalizeCardId(id);
+        if (!normalizedId) return null;
         if (Array.isArray(pool)) {
-            return pool.find(card => card.id === id) || null;
+            return pool.find(card => card.id === normalizedId) || null;
         }
         if (!cachedCardById) {
             cachedCardById = new Map(this.getAllCards().map(card => [card.id, card]));
             this.getBattleOnlyForms().forEach(card => cachedCardById.set(card.id, card));
         }
-        return cachedCardById.get(id) || null;
+        return cachedCardById.get(normalizedId) || null;
     },
 
     shuffle(list) {
@@ -25050,7 +25102,7 @@ const Logic = {
             p.fieldBuffStatMult = t.val || 2.0;
         }
 
-        // 프리즘트윈/앤트로피: 패시브 특성 활성화 표시
+        // 프리즘트윈/엔트로피: 패시브 특성 활성화 표시
         if (t.type === 'self_normal_atk_dmg_boost' || t.type === 'chaos_blessing_double') {
             active = true;
         }
@@ -25299,7 +25351,7 @@ const Logic = {
         }
         else if (enemy.id === 'iris_curse') {
             if (turn === 10) skill = enemy.skills.find(s => s.name === '아포칼립스');
-            else if (r < 0.3) skill = enemy.skills.find(s => s.name === '프레임샷');
+            else if (r < 0.3) skill = enemy.skills.find(s => s.name === '플레임샷');
         }
         else if (enemy.id === 'pharaoh') {
             if (turn % 5 === 0) skill = enemy.skills.find(s => s.name === '고대의저주');
@@ -25802,10 +25854,18 @@ const SkillDisplay = Object.freeze({
         return Array.isArray(ids) ? ids.slice() : [];
     }
 
+    function normalizeLegacyCardId(id) {
+        if (typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardId === 'function') {
+            return GameUtils.normalizeCardId(id);
+        }
+        return id === 'holy_night' ? 'holy_bomb' : id;
+    }
+
     function uniquePreserve(ids) {
         const seen = new Set();
         const out = [];
-        (ids || []).forEach(id => {
+        (ids || []).forEach(rawId => {
+            const id = normalizeLegacyCardId(rawId);
             if (typeof id !== 'string' || !id || seen.has(id)) return;
             if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
             seen.add(id);
@@ -27382,7 +27442,7 @@ const BattleRuntime = {
             source.activeTrait === traitId
         );
 
-        if (sourceTraitIs('syn_water_nature') && skill.name === '문라이트세레나') {
+        if (sourceTraitIs('syn_water_nature') && skill.name === '문라이트세레나데') {
             rpg.log("루미의 특성 발동! 트윙클파티 추가!");
             BattleRuntime.applyFieldBuff(rpg, 'twinkle_party');
         }
@@ -27654,11 +27714,16 @@ const BattleRuntime = {
             this.global.unlocked_bonus_cards = [];
         }
 
+        const before = JSON.stringify(this.global.unlocked_bonus_cards);
+        if (typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardIdList === 'function') {
+            this.global.unlocked_bonus_cards = GameUtils.normalizeCardIdList(this.global.unlocked_bonus_cards);
+        }
+        let changed = JSON.stringify(this.global.unlocked_bonus_cards) !== before;
+
         const defaults = (typeof GameUtils !== 'undefined' && typeof GameUtils.getDefaultUnlockedBonusCardIds === 'function')
             ? GameUtils.getDefaultUnlockedBonusCardIds()
             : [];
 
-        let changed = false;
         defaults.forEach(id => {
             if (!this.global.unlocked_bonus_cards.includes(id)) {
                 this.global.unlocked_bonus_cards.push(id);
@@ -28361,7 +28426,10 @@ const BattleRuntime = {
 
         const allowed = new Set(unlockedIds);
         const normalized = [];
-        ids.forEach(id => {
+        ids.forEach(rawId => {
+            const id = typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardId === 'function'
+                ? GameUtils.normalizeCardId(rawId)
+                : rawId;
             if (allowed.has(id) && !normalized.includes(id)) normalized.push(id);
         });
         return normalized;
@@ -28381,8 +28449,11 @@ const BattleRuntime = {
         this.global.bonusPoolPresets = presets.map(preset => {
             if (!Array.isArray(preset)) return null;
             const deduped = [];
-            preset.forEach(id => {
-                if (!deduped.includes(id)) deduped.push(id);
+            preset.forEach(rawId => {
+                const id = typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardId === 'function'
+                    ? GameUtils.normalizeCardId(rawId)
+                    : rawId;
+                if (id && !deduped.includes(id)) deduped.push(id);
             });
             return deduped;
         });

@@ -1310,7 +1310,7 @@ export const HEROES = [
   },
   {
     "id": "antropy",
-    "name": "앤트로피",
+    "name": "엔트로피",
     "title": "디버프를 삼키는 빛",
     "color": "#c9b4f0",
     "art": {
@@ -1465,7 +1465,7 @@ export const ARTIFACTS = [
     "text": "합성할 때마다 별빛을 10 더 얻습니다. 최대치를 넘친 별빛은 60까지 모아 두었다가 다음 필살기를 쓰면 돌려받습니다.",
     "scale": ["10"],
     "icon": 0,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1475,7 +1475,7 @@ export const ARTIFACTS = [
     "text": "화상 피해가 70% 늘어납니다. 화상 입은 적이 쓰러지면 반경 90 안의 적에게 화상이 옮겨 붙습니다.",
     "scale": ["70%"],
     "icon": 1,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1485,7 +1485,7 @@ export const ARTIFACTS = [
     "text": "감속 중인 적에게 주는 피해가 22% 늘어납니다.",
     "scale": ["22%"],
     "icon": 2,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1495,7 +1495,7 @@ export const ARTIFACTS = [
     "text": "상하좌우에 다른 동료가 없는 동료의 공격력이 21% 오릅니다.",
     "scale": ["21%"],
     "icon": 3,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1505,7 +1505,7 @@ export const ARTIFACTS = [
     "text": "같은 동료가 전장에 3명 이상이면 그 동료들의 공격 속도가 35% 오릅니다.",
     "scale": ["35%"],
     "icon": 4,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1515,7 +1515,7 @@ export const ARTIFACTS = [
     "text": "필살기를 쓰면 쓴 별빛의 20%를 돌려받습니다.",
     "scale": ["20%"],
     "icon": 5,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "SR",
     "color": "#bbd5cc"
   },
@@ -1525,7 +1525,7 @@ export const ARTIFACTS = [
     "text": "보스에게 주는 피해가 30% 늘어납니다.",
     "scale": ["30%"],
     "icon": 6,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1535,7 +1535,7 @@ export const ARTIFACTS = [
     "text": "중독 피해가 50% 늘어납니다.",
     "scale": ["50%"],
     "icon": 7,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1545,7 +1545,7 @@ export const ARTIFACTS = [
     "text": "웨이브를 마칠 때마다 골드를 받습니다. 첫 웨이브 9G부터 웨이브마다 3G씩 늘어나 최대 60G입니다.",
     "scale": [{"t":"9G", "int":true}, {"t":"3G", "int":true}, {"t":"60G", "int":true}],
     "icon": 8,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1555,7 +1555,7 @@ export const ARTIFACTS = [
     "text": "3성 이상 동료의 공격력이 16% 오릅니다.",
     "scale": ["16%"],
     "icon": 9,
-    "atlas": "relics",
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1564,8 +1564,8 @@ export const ARTIFACTS = [
     "name": "풋내기 훈장",
     "text": "1·2성 동료의 공격력이 20% 오르고, 동료 소환 비용이 2G 줄어듭니다.",
     "scale": ["20%"],
-    "icon": 0,
-    "atlas": "relics-new",
+    "icon": 10,
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1574,8 +1574,8 @@ export const ARTIFACTS = [
     "name": "수호자의 부적",
     "text": "코어 가까이(경로 마지막 3분의 1) 온 적에게 주는 피해가 35% 늘어납니다. 코어가 피해를 입을 때마다 별빛을 5 얻습니다.",
     "scale": ["35%", "5"],
-    "icon": 1,
-    "atlas": "relics-new",
+    "icon": 11,
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   },
@@ -1584,8 +1584,8 @@ export const ARTIFACTS = [
     "name": "떨어진 별",
     "text": "동료의 12번째 공격마다 명중 지점에 운석이 떨어져, 반경 100 안의 적에게 그 공격 피해의 110%를 줍니다.",
     "scale": ["110%"],
-    "icon": 10,
-    "atlas": "relics",
+    "icon": 12,
+    "atlas": "relics-v2",
     "rarity": "R",
     "color": "#86c8ee"
   },
@@ -1594,8 +1594,8 @@ export const ARTIFACTS = [
     "name": "천 갈래 프리즘",
     "text": "번개의현자·밤토끼·폭풍의현자의 공격이 다른 적에게 튈 때, 튄 공격의 피해가 100% 늘어납니다.",
     "scale": ["100%"],
-    "icon": 11,
-    "atlas": "relics",
+    "icon": 13,
+    "atlas": "relics-v2",
     "rarity": "R",
     "color": "#86c8ee"
   },
@@ -1604,8 +1604,8 @@ export const ARTIFACTS = [
     "name": "파도의 소라",
     "text": "별빛을 100 이상 지니고 있으면 모든 동료의 공격력이 30% 오릅니다.",
     "scale": ["30%"],
-    "icon": 12,
-    "atlas": "relics",
+    "icon": 14,
+    "atlas": "relics-v2",
     "rarity": "R",
     "color": "#86c8ee"
   },
@@ -1614,8 +1614,8 @@ export const ARTIFACTS = [
     "name": "영원의 뿌리",
     "text": "장판의 지속 시간이 20%, 범위가 10% 늘어납니다.",
     "scale": ["20%", "10%"],
-    "icon": 13,
-    "atlas": "relics",
+    "icon": 15,
+    "atlas": "relics-v2",
     "rarity": "R",
     "color": "#86c8ee"
   },
@@ -1624,8 +1624,8 @@ export const ARTIFACTS = [
     "name": "동행의 악수",
     "text": "지원 오라를 받는 동료의 공격력이 25% 오릅니다.",
     "scale": ["25%"],
-    "icon": 14,
-    "atlas": "relics",
+    "icon": 16,
+    "atlas": "relics-v2",
     "rarity": "R",
     "color": "#86c8ee"
   },
@@ -1634,8 +1634,8 @@ export const ARTIFACTS = [
     "name": "돌아오는 새벽",
     "text": "원정마다 한 번, 코어에 닿은 보스를 경로 절반 지점으로 되돌리고, 그 보스가 받는 피해를 20% 늘립니다.",
     "scale": ["20%"],
-    "icon": 15,
-    "atlas": "relics",
+    "icon": 17,
+    "atlas": "relics-v2",
     "rarity": "R",
     "color": "#86c8ee"
   },
@@ -1644,8 +1644,8 @@ export const ARTIFACTS = [
     "name": "쌍성의 거울",
     "text": "필살기 피해가 적중하고 1.5초 뒤 120%로 한 번 더 들어갑니다. 버프와 소환은 반복되지 않습니다.",
     "scale": ["120%"],
-    "icon": 16,
-    "atlas": "relics",
+    "icon": 18,
+    "atlas": "relics-v2",
     "rarity": "UR",
     "color": "#c9a0f5"
   },
@@ -1654,8 +1654,8 @@ export const ARTIFACTS = [
     "name": "삼중 성좌",
     "text": "상하좌우에 서로 다른 동료가 3종 있으면 공격력이 32%, 4종이면 50% 오릅니다.",
     "scale": ["32%", "50%"],
-    "icon": 17,
-    "atlas": "relics",
+    "icon": 19,
+    "atlas": "relics-v2",
     "rarity": "SR",
     "color": "#c9a0f5"
   },
@@ -1664,8 +1664,8 @@ export const ARTIFACTS = [
     "name": "별빛 연금술",
     "text": "합성으로 생긴 동료는 그 웨이브부터 2웨이브 동안 공격력이 60% 오릅니다.",
     "scale": ["60%"],
-    "icon": 18,
-    "atlas": "relics",
+    "icon": 20,
+    "atlas": "relics-v2",
     "rarity": "UR",
     "color": "#c9a0f5"
   },
@@ -1674,8 +1674,8 @@ export const ARTIFACTS = [
     "name": "별바다의 궤도",
     "text": "3성 이상 동료의 공격이 명중 지점에 2초 동안 별장판을 남깁니다. 별장판은 0.5초마다 그 공격 피해의 5%를 줍니다.",
     "scale": ["5%"],
-    "icon": 19,
-    "atlas": "relics",
+    "icon": 21,
+    "atlas": "relics-v2",
     "rarity": "SR",
     "color": "#c9a0f5"
   },
@@ -1684,8 +1684,8 @@ export const ARTIFACTS = [
     "name": "이어지는 종",
     "text": "웨이브를 넘길 때마다 모든 동료의 공격 속도가 4% 오릅니다(최대 36%).",
     "scale": ["4%"],
-    "icon": 0,
-    "atlas": "relics-expansion",
+    "icon": 22,
+    "atlas": "relics-v2",
     "rarity": "SR",
     "color": "#86c8ee"
   },
@@ -1694,8 +1694,8 @@ export const ARTIFACTS = [
     "name": "독화의 성배",
     "text": "화상과 중독 3중첩을 함께 가진 적이 받는 피해가 70% 늘어납니다.",
     "scale": ["70%"],
-    "icon": 2,
-    "atlas": "relics-new",
+    "icon": 23,
+    "atlas": "relics-v2",
     "rarity": "UR",
     "color": "#c9a0f5"
   },
@@ -1704,8 +1704,8 @@ export const ARTIFACTS = [
     "name": "결전의 인장",
     "text": "보스가 나타날 때마다 별빛을 30 얻고, 보스에게 주는 피해가 40% 늘어납니다.",
     "scale": ["30", "40%"],
-    "icon": 1,
-    "atlas": "relics-expansion",
+    "icon": 24,
+    "atlas": "relics-v2",
     "rarity": "UR",
     "color": "#86c8ee"
   },
@@ -1714,8 +1714,8 @@ export const ARTIFACTS = [
     "name": "기적의 리본",
     "text": "동료를 소환하면 25% 확률로 리본을 단 2성으로 나옵니다.",
     "scale": ["25%"],
-    "icon": 2,
-    "atlas": "relics-expansion",
+    "icon": 25,
+    "atlas": "relics-v2",
     "rarity": "UR",
     "color": "#c9a0f5"
   },
@@ -1724,8 +1724,8 @@ export const ARTIFACTS = [
     "name": "시간의 보석",
     "text": "버프 필살기와 트라우마 변신의 지속 시간이 100% 늘어납니다.",
     "scale": ["100%"],
-    "icon": 3,
-    "atlas": "relics-expansion",
+    "icon": 26,
+    "atlas": "relics-v2",
     "rarity": "UR",
     "color": "#c9a0f5"
   },
@@ -1734,8 +1734,8 @@ export const ARTIFACTS = [
     "name": "스포트라이트",
     "text": "전역 필살기의 공격력·공격 속도·추가 공격 버프가 시전 시 공격력이 가장 높은 동료 1기에게 100% 늘어 적용되고, 나머지에게는 50%만 적용됩니다.",
     "scale": ["100%"],
-    "icon": 0,
-    "atlas": "relics-patch",
+    "icon": 27,
+    "atlas": "relics-v2",
     "rarity": "SR",
     "color": "#c9a0f5"
   },
@@ -1744,8 +1744,8 @@ export const ARTIFACTS = [
     "name": "로열 크라운",
     "text": "코어가 받는 피해가 3배가 되고, 웨이브를 마칠 때마다 골드 30을 받습니다.",
     "scale": [{"t":"30", "int":true}],
-    "icon": 1,
-    "atlas": "relics-patch",
+    "icon": 28,
+    "atlas": "relics-v2",
     "rarity": "SR",
     "color": "#c9a0f5"
   },
@@ -1754,8 +1754,8 @@ export const ARTIFACTS = [
     "name": "꿈의 조각",
     "text": "원정을 시작할 때 별빛을 10 더 얻고, 루미의 공격력이 100% 오릅니다.",
     "scale": [{"t":"10", "int":true}, "100%"],
-    "icon": 2,
-    "atlas": "relics-patch",
+    "icon": 29,
+    "atlas": "relics-v2",
     "rarity": "C",
     "color": "#bbd5cc"
   }
@@ -1947,7 +1947,7 @@ export const ASSET_PATHS = {
   "unit-santa": "./assets/cast-v2/santa.webp",
   "unit-jasmine": "./assets/cast-v2/jasmine.webp",
   "unit-star_boy": "./assets/cast-v2/star_boy.webp",
-  "unit-time_magician": "./assets/cast-v2/time_magician.webp",
+  "unit-time_magician": "./assets/cast-selected-20261109/time_magician.webp",
   "unit-cherry_prince": "./assets/cast-selected-20261108/cherry_prince.webp",
   "unit-frost_witch": "./assets/cast-v2/frost_witch.webp",
   "unit-harmonious": "./assets/cast-v2/harmonious.webp",
@@ -1963,6 +1963,8 @@ export const ASSET_PATHS = {
   "unit-venom": "./assets/cast-v2/venom.webp",
   "garden": "./assets/merge/garden.webp",
   "summon-altar": "./assets/merge/summon-altar.webp",
+  "event-oath": "./assets/merge/event-oath.webp",
+  "event-twin": "./assets/merge/event-twin.webp",
   "greenhouse": "./assets/merge/greenhouse.webp",
   "greenhouse-beds": "./assets/merge/greenhouse-beds.webp",
   "greenhouse-dawn": "./assets/merge/greenhouse-dawn.webp",
@@ -2004,7 +2006,8 @@ export const ASSET_PATHS = {
   "orbit-zone": "./assets/merge/orbit-zone.webp",
   "orbit-sea": "./assets/merge/orbit-sea.webp",
   "relics-new": "./assets/merge/relics-new.webp",
-  "relics-patch": "./assets/merge/relics-patch.webp"
+  "relics-patch": "./assets/merge/relics-patch.webp",
+  "relics-v2": "./assets/merge/relics-v2.webp"
 };
 
 export const STAGE_THEMES = [

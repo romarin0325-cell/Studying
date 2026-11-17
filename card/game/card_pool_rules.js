@@ -9,10 +9,18 @@
         return Array.isArray(ids) ? ids.slice() : [];
     }
 
+    function normalizeLegacyCardId(id) {
+        if (typeof GameUtils !== 'undefined' && typeof GameUtils.normalizeCardId === 'function') {
+            return GameUtils.normalizeCardId(id);
+        }
+        return id === 'holy_night' ? 'holy_bomb' : id;
+    }
+
     function uniquePreserve(ids) {
         const seen = new Set();
         const out = [];
-        (ids || []).forEach(id => {
+        (ids || []).forEach(rawId => {
+            const id = normalizeLegacyCardId(rawId);
             if (typeof id !== 'string' || !id || seen.has(id)) return;
             if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
             seen.add(id);

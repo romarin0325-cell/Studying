@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER,LATE_COMPANIONS,LATE_UNLOCK_STAGE} from '../src/content.js';
+import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER,LATE_COMPANIONS,LATE_UNLOCK_STAGE,PART_STAGES} from '../src/content.js';
 import {drawCharacter,heroPool,lateOpen,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP,guardianOf,guardianMonths} from '../src/economy.js';
 import {createProfile,random} from '../src/profile.js';
 
@@ -101,7 +101,9 @@ test('relics keep the rarity written on them, not their place in the list',()=>{
 test('dispatch uses four story gates and a logarithmic CP return with additive stage bonuses',()=>{
   for(const [clear,count] of [[0,0],[8,0],[9,1],[18,2],[27,3],[36,4],[45,4]])assert.equal(dispatchSlots(clear),count);
   for(const kind of ['dust','dreams']){
-    const a=dispatchReward(1000,0)[kind],b=dispatchReward(1000,20)[kind];
+    // The stage bonus grows with the level (the intro chapter adds none).
+    const a=dispatchReward(1000,9)[kind],b=dispatchReward(1000,29)[kind];
+    assert.equal(dispatchReward(1000,0)[kind],a);
     assert.ok(Math.abs(b-2*a)<=1);
     assert.ok(dispatchReward(1000000,9)[kind]>dispatchReward(10000,9)[kind]);
     assert.ok(dispatchReward(1000000,9)[kind]<dispatchReward(10000,9)[kind]*3);
@@ -156,8 +158,8 @@ test('calendar uses UTC+9, Monday weeks and six guardians independently of host 
   assert.equal(calendar(monday-HOUR).day,'2026-10-04');
 });
 
-test('companions added after the first 45 stages join the summon pool only once stage 45 is cleared',()=>{
-  assert.equal(LATE_UNLOCK_STAGE,45);assert.equal(lateOpen(44),false);assert.equal(lateOpen(45),true);
+test('companions added after the first part join the summon pool only once its last stage is cleared',()=>{
+  assert.equal(LATE_UNLOCK_STAGE,PART_STAGES);assert.equal(lateOpen(PART_STAGES-1),false);assert.equal(lateOpen(PART_STAGES),true);
   assert.equal(HERO.behemoth.hidden,false);assert.equal(HERO.behemoth.rarity,'UR');assert.ok(!HIDDEN.includes('behemoth'));
   assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
   for(const id of LATE_COMPANIONS)assert.ok(HEROES.some(h=>h.id===id),id);

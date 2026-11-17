@@ -270,8 +270,8 @@
     },
     {
       "id": "unit-time_magician",
-      "source": "defense/assets/cast-v2/time_magician.webp",
-      "sha256": "14616814fe4256d86cddb3ac8b95877144e136c296b6ea162d409396044326da",
+      "source": "defense/assets/cast-selected-20261109/time_magician.webp",
+      "sha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
       "width": 1024,
       "height": 1024
     },
@@ -379,6 +379,20 @@
       "sha256": "b8923879377378b2391eb683c4280e0102f49cb5d42f53c973049df0105c5c93",
       "width": 720,
       "height": 1290
+    },
+    {
+      "id": "event-oath",
+      "source": "defense/assets/merge/event-oath.webp",
+      "sha256": "6eda51fef76df4bf73520a147dfe7805b1280bfe124e92a4e3c6ab995e8feb5f",
+      "width": 1400,
+      "height": 560
+    },
+    {
+      "id": "event-twin",
+      "source": "defense/assets/merge/event-twin.webp",
+      "sha256": "a96ede20d7bf57675204b7e9382cb4d781e3d210b89a3318d53b27d33044c349",
+      "width": 1400,
+      "height": 560
     },
     {
       "id": "greenhouse",
@@ -673,6 +687,13 @@
       "sha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
       "width": 512,
       "height": 512
+    },
+    {
+      "id": "relics-v2",
+      "source": "defense/assets/merge/relics-v2.webp",
+      "sha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
+      "width": 3072,
+      "height": 2560
     }
   ],
   "font": {

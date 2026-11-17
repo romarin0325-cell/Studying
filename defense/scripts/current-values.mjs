@@ -32,10 +32,10 @@ export function currentValues(){
   lines.push('## 규칙','',
     '- **필살기 피해:** 필살기는 시전 순간 동료 정보에 보이는 공격력(`combatStats().damage`)에 배율을 곱한다. 골드드래곤은 5초 차지가 끝난 발사 순간에 계산한다. 성급·훈련·강화·온실·수집 보너스에 더해 배치 오라, 켜져 있는 필살기 버프, 유물 공격력 보너스가 모두 들어간다. 같은 종류 안에서는 가장 센 것 하나(유물은 합산)이고 종류끼리는 곱한다. 그 시전이 거는 버프·노출은 그 시전의 피해에 들어가지 않는다.',
     '- **받는 피해 증가 효과(노출, 확대경, 왕의 인장 등):** 위와 별개로 적에게 걸려 필살기와 일반 공격 모두에 적용된다.',
-    `- **메인 스테이지:** ${MAIN_STAGES}개. ${PARTS.map(x=>`제${x.id}부 「${x.name}」`).join(', ')} 각 ${PART_STAGES}개(5개 장 × 9). 적 체력은 두 부 모두 같은 기울기로 이어진다. 제2부는 스테이지 ${PART_STAGES}를 클리어하면 열린다.`,
+    `- **메인 스테이지:** ${MAIN_STAGES}개. ${PARTS.map(x=>`제${x.id}부 「${x.name}」 ${x.first}–${x.last}(${x.chapters.length}개 장 × 9)`).join(', ')}. 1장은 입문 장이고, 스테이지 10부터는 레벨 n-9의 체력 곡선을 따른다(레벨 18부터 기존 직선, 그 전은 낮게 휜 곡선, docs/STAGES.md). 제2부는 스테이지 ${PART_STAGES}를 클리어하면 열린다.`,
     `- **스테이지 ${PART_STAGES} 첫 클리어:** 제2부와 새벽 온실이 열리고 베히모스·베놈 등 신규 동료가 정규 소환 풀에 합류한다. 동료를 확정 지급하지 않으며 기존 보유 개체는 유지한다.`,
     `- **퍼펙트 클리어:** 코어 체력을 잃지 않고 메인 스테이지를 클리어하면 퍼펙트. 스테이지마다 첫 퍼펙트에 꿈의결정 ${PERFECT_REWARD}.`,
-    `- **일반 소환 UR(${ROSTER.UR.length}명):** ${ROSTER.UR.map(id=>HEROES.find(h=>h.id===id).name).join(', ')}. 픽업은 초기 정규 UR ${heroPool('UR',false).length}명을 매주 월요일(UTC+9) 순서대로 순환한다. 베놈·베히모스·골드드래곤은45클리어 후 일반 풀에 합류한다.`,
+    `- **일반 소환 UR(${ROSTER.UR.length}명):** ${ROSTER.UR.map(id=>HEROES.find(h=>h.id===id).name).join(', ')}. 픽업은 초기 정규 UR ${heroPool('UR',false).length}명을 매주 월요일(UTC+9) 순서대로 순환한다. 베놈·베히모스·골드드래곤은 스테이지 ${PART_STAGES} 클리어 후 일반 풀에 합류한다.`,
     `- **이달의 수호자(히든 ${HIDDEN.length}명, 시즌 소환에서만):** ${HIDDEN.map(id=>HEROES.find(h=>h.id===id).name).join(' → ')} 순서로 월마다 한 명. 월 번호는 (연도×12+월 인덱스) % ${HIDDEN.length}이고 지금 2026년 10월은 ${HEROES.find(h=>h.id===guardianOf(2026,9)).name}, 2027년 1월은 ${HEROES.find(h=>h.id===guardianOf(2027,0)).name}.`,
     `- **소환 확률:** C/R/SR/UR = ${TUNING.heroRates.map(r=>(r*100).toFixed(1).replace(/\.0$/,'')+'%').join(' / ')}, 천장 ${TUNING.pity.normal}/${TUNING.pity.season}.`,'');
   const bedRows=GARDENS.flatMap(g=>g.beds.map(id=>{const b=TUNING.beds[id],cap=b.knee2,name={rose:'용기의 장미',spring:'별이슬 샘',seed:'황금 씨앗',crit:'여명의 엉겅퀴',critDamage:'노을빛 불꽃나리',stardust:'유성우 은방울'}[id];
@@ -57,7 +57,7 @@ export function currentValues(){
     `| 애쉬 아마겟돈 | 공격력 ${E.ARMAGEDDON.factor}배, 반경 ${E.ARMAGEDDON.radius} |`,
     `| 별똥별소년 유성 | 사용 별빛당 공격력 ${E.STARFALL_FACTOR}배 |`,
     `| 번개의현자 천둥의 연쇄 | 공격력 ${E.THUNDER_FACTOR}배 |`,
-    `| 앤트로피 노바레퀴엠 | 공격력 ${E.REQUIEM.factor}배 |`,
+    `| 엔트로피 노바레퀴엠 | 공격력 ${E.REQUIEM.factor}배 |`,
     `| 토피애플 사과 | 폭발 시점 최고 성급 토피애플의 현재 공격력 ${E.APPLEBOMB.factor}배, 반경 ${E.APPLEBOMB.radius}. 폭발마다 해당 웨이브 공격력 +${E.APPLEBOMB.bloom*100}%p(합연산, 일반 공격·폭발 공통, 웨이브 시작 시 0). 전장에 없으면 마지막 유효 값, 무작위 경로·접근 ${E.APPLEBOMB.trigger} 이내 발동, 최대 ${E.APPLEBOMB.max}개 |`,
     `| 조커 카오스 룰렛 | 시작 빨강 포함 5색을 모으면 필살기가 카오스 룰렛(별빛 ${E.JOKER.chaosCost})으로 바뀌고, 쓰면 카오스가 되어 전투 종료까지 유지. 카오스 룰렛은 전체 공격력 ${E.JOKER.chaosRoulette}배(일반 룰렛 ${E.JOKER.roulette}배). 일반 공격 시 화상·중독·성광·노출·감속 모두 부여 |`,
     `| 마왕 데스핸드 | 공격력 ${E.DEATHHAND.base}배 + 대상별 디버프 1종당 ${E.DEATHHAND.perDebuff}배, 반경 ${E.DEATHHAND.radius}. 감속·노출·기절·빙결·성광·중독·화상 7종, 소모 없음 |`,

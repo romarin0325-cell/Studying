@@ -274,6 +274,20 @@ export function personalTrait(s,u,index=s.board.indexOf(u)){
   }
   return trait;
 }
+// One formula per rule number: the attack code and every text that shows the number call the same function.
+// level = training level, k = enhancement special, sup = rank support, ctl = rank control. Keep the multiplication order.
+// Siren's song, adjacent attack speed.
+export const sirenAura=(level,k,sup)=>(.15+level*.03)*k*sup;
+// Ancient dragon's blessing, adjacent attack.
+export const dragonAura=(level,k,sup)=>(.2+level*.03)*k*sup;
+// Guardian's third-hit stun, seconds.
+export const guardianStun=(level,k,ctl)=>(.7+level*.05)*k*ctl;
+// Time magician's extra attack for neighbours, share of attack.
+export const magicianEcho=(level,k,sup)=>(.6+level*.05)*sup*k;
+// Frost witch's freeze on slowed enemies, seconds.
+export const witchFreeze=(level,k,ctl)=>(.6+level*.06)*k*ctl;
+// Aurora's phantom shot, share of the hit. Santa's gift bomb, damage factor.
+export const auroraEcho=level=>.75+level*.03,santaGift=level=>2+level*.2;
 export function harmonyAt(s,index){return index<0?0:new Set(neighbors(index).map(i=>s.board[i]?.hero).filter(id=>id&&id!=='harmonious')).size;}
 export function nightRabbitTargetCount(s){return 9+2*new Set(s.board.filter(u=>u&&['snow_rabbit','silver_rabbit'].includes(u.hero)).map(u=>u.hero)).size;}
 export function harmonyStrength(s,index){
@@ -292,10 +306,10 @@ export function bestUnit(s,id){
 }
 export function power(s,u){return unitHero(s,u).damage*Math.pow(2.35,u.rank-1)*(1+(s.upgrades[u.hero]||0)*TRAINING_STEP)*(s.meta?.[u.hero]?.power||1)*(1+(s.relicAttack||0))*(1+s.globalAttack)*(s.surgeWave===s.wave?1.25:1)*personalTrait(s,u).damageMultiplier;}
 export function trainingBonus(id,level){
-  if(id==='frost_witch')return `감속 대상 빙결 ${(.6+level*.06).toFixed(2)}초 · 보스 절반`;
+  if(id==='frost_witch')return `감속 대상 빙결 ${witchFreeze(level,1,1).toFixed(2)}초 · 보스 절반`;
   if(id==='harmonious')return `조화 1종당 공격력 +${6+level*.5}% · 공격 속도 +${Number((5+level*.2).toFixed(1))}% · 앙상블 +${Math.round(ULT_BUFF.harmony.power*100)+level*2}%`;
-  if(id==='aurora')return `환영탄 공격력 ${75+level*3}%`;
-  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${15+level*3}%`,ancient_dragon:`인접 공격 +${20+level*3}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${(.7+level*.05).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${200+level*20}%`,time_magician:`인접 추가 공격 공격력 ${60+level*5}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
+  if(id==='aurora')return `환영탄 공격력 ${Math.round(auroraEcho(level)*100)}%`;
+  const extra={doom:`필살기 기본 ${7+level}배`,queen:`1성 배당 ${queenIncome(1,1,level)}G`,siren:`인접 공격 속도 +${Math.round(sirenAura(level,1,1)*100)}%`,ancient_dragon:`인접 공격 +${Math.round(dragonAura(level,1,1)*100)}%`,snow_rabbit:`감속 ${Math.round((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*100)}%`,guardian:`세 번째 공격 기절 ${guardianStun(level,1,1).toFixed(2)}초`,great_detective:`일반 노출 +${8+level*2}% · 보스 +${15+level*2}%`,time_ruler:`장판 감속 ${25+level*3}%`,santa:`선물 폭탄 공격력 ${Math.round(santaGift(level)*100)}%`,time_magician:`인접 추가 공격 공격력 ${Math.round(magicianEcho(level,1,1)*100)}%`,behemoth:`오라 2배 · 필살기 범위 +${Math.round(level*CRUSH.trainingRadius*100)}%`};
   return extra[id]||'';
 }
 // Base-power comparison excludes rank, relics and temporary buffs; it never
@@ -306,8 +320,8 @@ const pctText=v=>`${Number((v*100).toFixed(1))}%`,secText=v=>`${Number(v.toFixed
 // Ultimate durations, control times and ultimate slows grow too.
 export function scaledTokens(id,k){
   const pctK=v=>pctText(v*k),slow=v=>pctText(Math.min(.8,v*k)),sec=v=>secText(v*k);
-  const trait={snow_rabbit:[['35%',slow(SNOW_RABBIT.slow)]],siren:[['15%',pctK(.15)]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(.7)]],ancient_dragon:[['20%',pctK(.2)]],phantom:[['25%',slow(.25)]],
-    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(.6)]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(.6)]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
+  const trait={snow_rabbit:[['35%',slow(SNOW_RABBIT.slow)]],siren:[['15%',pctK(sirenAura(0,1,1))]],great_detective:[['8%',pctK(.08)],['15%',pctK(.15)]],guardian:[['0.7초',sec(guardianStun(0,1,1))]],ancient_dragon:[['20%',pctK(dragonAura(0,1,1))]],phantom:[['25%',slow(.25)]],
+    luna:[['40%',pctText(executeThresholdFor(k))]],time_magician:[['60%',pctK(magicianEcho(0,1,1))]],time_ruler:[['25%',slow(.25)]],galaxy_whale:[['40%',slow(.4)]],harmonious:[['+6%','+'+pctK(.06)],['+5%','+'+pctK(.05)]],frost_witch:[['40%',slow(.4)],['0.6초',sec(witchFreeze(0,1,1))]],storm_sage:[['1%',pctText(.01*k)]],joker:[['20%',slow(.2)]]}[id]||[];
   const skill={great_detective:[['35%',pctText(Math.min(DAMAGE_TAKEN_CAP,.35*k))]],aurora:[['50%',pctText(Math.min(1,.5*k))]],snow_rabbit:[['2초',sec(2)],['50%',slow(.5)]],frost_witch:[['6초',sec(6)],['50%',slow(.5)]],
     storm_sage:[['1.5초',sec(1.5)],['60%',slow(.6)]],guardian:[['1.5초',sec(1.5)],['3초',sec(3)]],lightning_sage:[['1.2초',sec(1.2)]],time_ruler:[['6초 전',sec(6)+' 전'],['2초',sec(2)]],
     siren:[['10초',sec(ULT_BUFF.haste.seconds)]],ancient_dragon:[['10초',sec(ULT_BUFF.awaken.seconds)]],silver_rabbit:[[`${ULT_BUFF.march.seconds}초`,sec(ULT_BUFF.march.seconds)]],santa:[['6초',sec(ULT_BUFF.festive.seconds)]],jasmine:[[`${ULT_BUFF.radiance.seconds}초`,sec(ULT_BUFF.radiance.seconds)]],time_magician:[['10초',sec(10)]],harmonious:[['10초',sec(ULT_BUFF.harmony.seconds)]],rumi:[[`${ULT_BUFF.echo.seconds}초`,sec(ULT_BUFF.echo.seconds)]],cinderella:[['10초',sec(10)]],
@@ -323,33 +337,33 @@ export function liveTraitTokens(s,u){
   const slow=v=>pctText(Math.min(.8,v)),taken=v=>pctText(Math.min(DAMAGE_TAKEN_CAP,v)),num=v=>Number(v.toFixed(2));
   return ({
     snow_rabbit:[['35%',slow((SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow)*ctl*k)]],
-    siren:[['15%',pctText((.15+level*.03)*k*sup)]],
+    siren:[['15%',pctText(sirenAura(level,k,sup))]],
     great_detective:[['8%',taken((.08+level*.02)*k*ctl)],['15%',taken((.15+level*.02)*k*ctl)]],
-    guardian:[['0.7초',secText((.7+level*.05)*k*ctl)]],
-    ancient_dragon:[['20%',pctText((.2+level*.03)*k*sup)]],
+    guardian:[['0.7초',secText(guardianStun(level,k,ctl))]],
+    ancient_dragon:[['20%',pctText(dragonAura(level,k,sup))]],
     phantom:[['25%',slow(.25*ctl*k)]],
     luna:[['40%',pctText(executeThreshold(null,s))]],
-    time_magician:[['60%',pctText((.6+level*.05)*sup*k)]],
+    time_magician:[['60%',pctText(magicianEcho(level,k,sup))]],
     time_ruler:[['25%',slow((.25+level*.03)*ctl*k)]],
     galaxy_whale:[['40%',slow(.4*ctl*k)]],
     harmonious:[['+6%','+'+pctText((.06+level*.005)*k*sup)],['+5%','+'+pctText((.05+level*.002)*k*sup)]],
-    frost_witch:[['40%',slow(.4*ctl*k)],['0.6초',secText((.6+level*.06)*k*ctl)]],
+    frost_witch:[['40%',slow(.4*ctl*k)],['0.6초',secText(witchFreeze(level,k,ctl))]],
     storm_sage:[['1%',pctText(stormExecuteChance(s,u.rank))]],
     joker:[['20%',slow(JOKER.slow*k)]],
-    aurora:[['75%',pctText(.75+level*.03)]],
-    santa:[['범위와 피해가 2배','범위가 2배, 피해가 '+num(2+level*.2)+'배']],
+    aurora:[['75%',pctText(auroraEcho(level))]],
+    santa:[['범위와 피해가 2배','범위가 2배, 피해가 '+num(santaGift(level))+'배']],
   })[u.hero]||[];
 }
 // What this unit gives the board right now (the ⓘ sheet), with live rank, training and enhancement.
 export function givenEffects(s,u,index){
   const level=s.upgrades[u.hero]||0,k=special(s,u.hero),near=neighbors(index).filter(i=>s.board[i]&&!s.board[i].cursed).length,out=[];if(u.cursed)return ['저주받아 효과 없음'];
-  if(u.hero==='siren')out.push(`인접 ${near}명 공격 속도 +${pctText((.15+level*.03)*k*rankSupport(u.rank))}`);
-  else if(u.hero==='ancient_dragon')out.push(`인접 ${near}명 공격력 +${pctText((.2+level*.03)*k*rankSupport(u.rank))}`);
+  if(u.hero==='siren')out.push(`인접 ${near}명 공격 속도 +${pctText(sirenAura(level,k,rankSupport(u.rank)))}`);
+  else if(u.hero==='ancient_dragon')out.push(`인접 ${near}명 공격력 +${pctText(dragonAura(level,k,rankSupport(u.rank)))}`);
   else if(u.hero==='harmonious'){const h=harmonyStrength(s,index);out.push(`인접 ${near}명 · 조화 ${h.count}종 · 공격력 +${pctText(h.damage)} · 공격 속도 +${pctText(h.speed)}`);}
-  else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText((.6+level*.05)*rankSupport(u.rank)*k)}`);
+  else if(u.hero==='time_magician')out.push(`인접 ${near}명 · 3타마다 추가 공격 ${pctText(magicianEcho(level,k,rankSupport(u.rank)))}`);
   else if(u.hero==='great_detective')out.push(`맞은 적 받는 피해 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.08+level*.02)*k*rankControl(u.rank)))} (보스 +${pctText(Math.min(DAMAGE_TAKEN_CAP,(.15+level*.02)*k*rankControl(u.rank)))})`);
-  else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText((.7+level*.05)*k*rankControl(u.rank))}`);
-  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText((.6+level*.06)*k*rankControl(u.rank))}`);
+  else if(u.hero==='guardian')out.push(`3타마다 기절 ${secText(guardianStun(level,k,rankControl(u.rank)))}`);
+  else if(u.hero==='frost_witch')out.push(`감속 ${pctText(Math.min(.8,.4*rankControl(u.rank)*k))} · 느려진 적 빙결 ${secText(witchFreeze(level,k,rankControl(u.rank)))}`);
   else if(['snow_rabbit','time_ruler','phantom','galaxy_whale'].includes(u.hero)){const base=u.hero==='time_ruler'?.25+level*.03:u.hero==='phantom'?.25:u.hero==='snow_rabbit'?SNOW_RABBIT.slow+level*SNOW_RABBIT.trainingSlow:.4;out.push(`감속 ${pctText(Math.min(.8,base*rankControl(u.rank)*k))}`);}
   else if(u.hero==='storm_sage')out.push(`일반 적 명중마다 즉사 ${pctText(stormExecuteChance(s,u.rank))}`);
   else if(u.hero==='queen'||u.hero==='doom')out.push(unitEconomy(s,u));
@@ -404,12 +418,14 @@ function syncStatuses(s,e,at=s.time){
   e.takenBonus=Math.min(DAMAGE_TAKEN_CAP,e.exposed);
   return e;
 }
-function activePoison(e){
+// The poison stacks that count right now: strongest first, POISON_CAP stacks at most. Combat and the ultimate preview both use this.
+function selectPoison(effects){
   let remaining=POISON_CAP;
-  return e.statusEffects.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{
+  return effects.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{
     const stacks=Math.min(remaining,effect.amount);remaining-=stacks;return stacks?[{effect,stacks}]:[];
   });
 }
+function activePoison(e){return selectPoison(e.statusEffects);}
 export function statusState(s,e){syncStatuses(s,e);syncSlows(s,e);return {exposure:e.exposed,divine:e.divine,damageTakenBonus:e.takenBonus,burn:e.burn,burnOwner:e.burnOwner,poison:e.poison,poisonDps:activePoison(e).reduce((dps,{effect,stacks})=>dps+stacks*effect.power*POISON_POWER_RATIO,0)*poisonAmp(s),stun:e.stun,freeze:e.freeze,controlTime:e.controlTime,slow:e.slow};}
 function capStacks(e,type,cap){
   const effects=e.statusEffects.filter(effect=>effect.type===type).sort((a,b)=>b.until-a.until||a.source.localeCompare(b.source));
@@ -744,7 +760,7 @@ function applyHit(s,shot){
     if(type==='shatter'&&target.slowTime>0)factor*=1.75;
     if(type==='splash'&&target.burnTime>0)factor*=1.4;
     if(type==='starfall'&&shot.count%5===0)factor*=2.2;
-    if(shot.gift)factor*=2+(s.upgrades[hero.id]||0)*.2;
+    if(shot.gift)factor*=santaGift(s.upgrades[hero.id]||0);
     if(type==='divine'&&target.divine>=3&&target.divineTime>0)factor*=1.65;
     if(type==='regal'&&(target.burnTime>0||target.divine>=3&&target.divineTime>0))factor*=1.6;
     const strike=type==='miracle'&&shot.bell?(Number.isFinite(shot.bellPower)?shot.bellPower:amount)*(target===e?CINDERELLA.bell:CINDERELLA.splash):amount*factor;
@@ -752,7 +768,7 @@ function applyHit(s,shot){
     if(divineMark&&target.hp>0)addStatus(s,target,'divine',sourceKey('attack',hero.id,shot.uid),hero.id,1,6);
     // The witch freezes enemies that are already slowed; each foe re-locks after 3s.
     if(type==='permafrost'&&shot.proc!==false&&target.hp>0&&target.slowTime>0&&(target.frostLock||0)-s.time<=1e-9){
-      addControl(s,target,'freeze',sourceKey('attack',hero.id,shot.uid),hero.id,(.6+(s.upgrades[hero.id]||0)*.06)*special(s,hero.id)*rankControl(shot.rank));
+      addControl(s,target,'freeze',sourceKey('attack',hero.id,shot.uid),hero.id,witchFreeze(s.upgrades[hero.id]||0,special(s,hero.id),rankControl(shot.rank)));
       target.frostLock=s.time+FROST_RELOCK;
       event(s,'frostBreak',{...pathPoint(target.progress),hero:hero.id,rank:shot.rank});
     }
@@ -760,14 +776,14 @@ function applyHit(s,shot){
   if(type==='refraction'&&shot.proc!==false&&e.hp>0){
     const dx=point.x-shot.origin.x,dy=point.y-shot.origin.y,k=46/(Math.hypot(dx,dy)||1);
     const from={x:clamp(point.x+dx*k,24,696),y:clamp(point.y+dy*k,72,734)};
-    s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*(.75+(s.upgrades[hero.id]||0)*.03),origin:from,from,to:point,delay:.06,life:.24,total:.24});
+    s.shots.push({...shot,uid:s.nextId++,proc:false,reflected:true,damage:amount*auroraEcho(s.upgrades[hero.id]||0),origin:from,from,to:point,delay:.06,life:.24,total:.24});
   }
   event(s,'impact',{...point,hero:hero.id,form:shot.form,angle:geometry.angle,rank:shot.rank,shape:hero.shape,origin:shot.origin,...(shot.hero==='gold_dragon'?{opening:shot.opening}:{}),...(sunR?{sunR}:{})});
   if(shot.bell)event(s,'bell',{...point,rank:shot.rank,boss:!!e.boss,radius:CINDERELLA.radius});
   // Time Magician: every third pierce lets each neighbour fire one extra shot.
   if(type==='accelerate'&&shot.proc!==false&&shot.count%3===0){
     const index=s.board.findIndex(u=>u?.uid===shot.source),recipients=[];
-    const scale=(.6+(s.upgrades[hero.id]||0)*.05)*rankSupport(shot.rank)*special(s,hero.id);
+    const scale=magicianEcho(s.upgrades[hero.id]||0,special(s,hero.id),rankSupport(shot.rank));
     if(index>=0)for(const n of neighbors(index)){const ally=s.board[n];if(ally&&!(ally.disabled>0)&&attack(s,ally,n,scale))recipients.push({...cellPoint(n),uid:ally.uid});}
     if(recipients.length)event(s,'supportPulse',{hero:hero.id,targets:recipients});
   }
@@ -792,7 +808,7 @@ function applyHit(s,shot){
   if(['slow','chrono','gravity','permafrost'].includes(type))slowTargets(s,area,hero,amount,point,sourceKey('attack',hero.id,shot.uid),shot.rank);
   if(type==='poison')addPoison(s,e,sourceKey('attack',hero.id,shot.uid),hero.id,1,7,amount,shot.crit);
   if(type==='abyss'&&shot.proc!==false){const source=sourceKey('attack',hero.id,shot.uid);for(const t of area){addSlow(s,t,source,.25*rankControl(shot.rank),2);addPoison(s,t,source,hero.id,1,8,amount,shot.crit);}}
-  if(type==='stun'&&shot.count%3===0)for(const t of area)addControl(s,t,'stun',sourceKey('attack',hero.id,shot.uid),hero.id,(.7+(s.upgrades[hero.id]||0)*.05)*special(s,hero.id)*rankControl(shot.rank));
+  if(type==='stun'&&shot.count%3===0)for(const t of area)addControl(s,t,'stun',sourceKey('attack',hero.id,shot.uid),hero.id,guardianStun(s.upgrades[hero.id]||0,special(s,hero.id),rankControl(shot.rank)));
   if(type==='expose'){
     const exposure=((e.boss ? .15 : .08)+s.upgrades[hero.id]*.02)*special(s,hero.id)*rankControl(shot.rank);
     addStatus(s,e,'exposure',sourceKey('attack',hero.id,shot.uid),hero.id,Math.min(DAMAGE_TAKEN_CAP,exposure),4);
@@ -855,7 +871,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(detail&&s.surgeWave===s.wave)bonuses.push('새벽검 +25% 공격력');
   const bestAdjacentRank=type=>adjacent.filter(a=>!a.cursed&&HERO[a.hero].trait.type===type).reduce((best,a)=>Math.max(best,a.rank),0);
   const dragonRank=bestAdjacentRank('powerAura'),sirenRank=bestAdjacentRank('hasteAura');
-  if(dragonRank)damageBonus('aura','고대 용의 가호',(.2+(s.upgrades.ancient_dragon||0)*.03)*special(s,'ancient_dragon')*rankSupport(dragonRank));
+  if(dragonRank)damageBonus('aura','고대 용의 가호',dragonAura(s.upgrades.ancient_dragon||0,special(s,'ancient_dragon'),rankSupport(dragonRank)));
   const harmonySources=index<0?[]:neighbors(index).filter(i=>s.board[i]?.hero==='harmonious'&&!s.board[i].cursed).map(i=>harmonyStrength(s,i));
   const harmony=harmonySources.reduce((best,value)=>value.damage>best.damage?value:best,{count:0,damage:0,speed:0});
   if(harmony.count){damageBonus('aura',`조화 ${harmony.count}종`,harmony.damage);speedBonus('aura',`조화 ${harmony.count}종`,harmony.speed);}
@@ -872,7 +888,7 @@ export function combatStats(s,u,index=s.board.indexOf(u),detail=false){
   if(s.buffs.radiance>0)damageBonus('ult','여신강림',ULT_BUFF.radiance.power*buffScale(s,'radiance')*spotlightBuffFactor(s,'radiance',u));
   if(unitForm(s,u)==='trauma'){damageBonus('ult','트라우마',TRAUMA.power);speedBonus('ult','트라우마',TRAUMA.speed);}
   if(u.hero==='cinderella'&&s.buffs.midnight>0&&topCinderella(s)?.uid===u.uid)speedBonus('ult','자정의 기적',CINDERELLA.haste);
-  if(sirenRank)speedBonus('aura','세이렌의 노래',(.15+(s.upgrades.siren||0)*.03)*special(s,'siren')*rankSupport(sirenRank));
+  if(sirenRank)speedBonus('aura','세이렌의 노래',sirenAura(s.upgrades.siren||0,special(s,'siren'),rankSupport(sirenRank)));
   // Placement auras only (dragon, harmony, siren). Ultimate buffs and relics stay single.
   if(u.hero==='behemoth'&&!u.cursed&&!(u.disabled>0)){power_.aura*=2;speed_.aura*=2;if(detail)bonuses.push('오라 2배');}
   if(s.oathMods?.aura){power_.aura*=s.oathMods.aura;speed_.aura*=s.oathMods.aura;}
@@ -1173,13 +1189,12 @@ export function castPreview(s,id){
   };
   // activePoison after expired effects are dropped. Legacy saves keep the mushroom snapshot.
   const poisonNow=e=>{
-    const select=list=>{let remaining=POISON_CAP;return list.filter(effect=>effect.type==='poison').sort((a,b)=>b.power-a.power||b.until-a.until||a.source.localeCompare(b.source)).flatMap(effect=>{const stacks=Math.min(remaining,effect.amount);remaining-=stacks;return stacks?[{effect,stacks}]:[];});};
     if(!Array.isArray(e.statusEffects)){
       if(!(e.poison>0)||!(e.poisonTime>0))return [];
       const power=HERO.mushroom_king.damage*(s.meta?.mushroom_king?.power||1)*(1+(s.relicAttack||0));
-      return select([{type:'poison',source:'legacy:poison',amount:Math.min(POISON_CAP,e.poison),until:s.time+e.poisonTime,power}]);
+      return selectPoison([{type:'poison',source:'legacy:poison',amount:Math.min(POISON_CAP,e.poison),until:s.time+e.poisonTime,power}]);
     }
-    return select(e.statusEffects.filter(effect=>effect.until-s.time>1e-9));
+    return selectPoison(e.statusEffects.filter(effect=>effect.until-s.time>1e-9));
   };
   const burnPerSecond=num(base*BURN.skill*(has(s,'ember')?1+RV.ember.burn*relicScaleIn(s,'ember'):1));
   const repeat=e=>!!e.boss&&(e.ultControl||0)-s.time>1e-9;
