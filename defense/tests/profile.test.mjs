@@ -4,9 +4,9 @@ import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,
 import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
-import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,away,command} from '../src/profile.js';
+import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,draftEligible,draftPool,away,command} from '../src/profile.js';
 import {monthlyReward,weeklyReward,WEEKLY_ENTRIES} from '../src/monthly.js';
-import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter} from '../src/economy.js';
+import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,draftHeroEntry,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter,enhanceMultiplier,specialMultiplier,roseAttack,lateOpen} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
@@ -235,12 +235,82 @@ test('one-entry saves keep their week: the entry counts once and its result beco
   assert.equal(paid.reward,weeklyReward('easy',5,false));assert.equal(paid.left,WEEKLY_ENTRIES-1);
 });
 
-test('five owned heroes still give two honest tactical choices on the final draft pick',()=>{
+test('a saved five-hero draft pool still gives two honest tactical choices on the final draft pick',()=>{
   const p=createProfile(NOW);p.cleared=3;const s=storeFor(p);call(s,'begin',{mode:'weekly',stage:4});
-  for(let i=0;i<4;i++)call(s,'draft',{index:0});
-  assert.equal(s.value.active.offers[0].id,s.value.active.offers[1].id);
-  assert.notEqual(s.value.active.offers[0].boon,s.value.active.offers[1].boon);
-  call(s,'draft',{index:1});assert.equal(new Set(s.value.active.deck).size,5);
+  const saved=structuredClone(s.value);
+  saved.active.draftPool=[...DEFAULT_DECK];saved.active.draft=DEFAULT_DECK.slice(0,3);saved.active.boon=0;
+  saved.active.offers=[{id:DEFAULT_DECK[3],boon:'focus'},{id:DEFAULT_DECK[4],boon:'spark'}];
+  const loaded=storeFor(parseProfile(JSON.stringify(saved)));
+  call(loaded,'draft',{index:0});
+  assert.equal(loaded.value.active.offers[0].id,DEFAULT_DECK[4]);
+  assert.equal(loaded.value.active.offers[0].id,loaded.value.active.offers[1].id);
+  assert.notEqual(loaded.value.active.offers[0].boon,loaded.value.active.offers[1].boon);
+  call(loaded,'draft',{index:1});assert.equal(new Set(loaded.value.active.deck).size,5);
+});
+
+test('weekly draft includes unowned companions with part-one unlock, base enhancement, and shared growth',()=>{
+  const early=createProfile(NOW);early.cleared=PART_STAGES-1;early.beds.rose=10;early.beds.spring=5;early.beds.seed=4;
+  early.relics.hourglass={owned:true,enhance:2,copies:0};early.equipped=['hourglass'];
+  early.heroes.star_boy.enhance=10;early.heroes.queen.owned=true;early.heroes.queen.enhance=6;
+  const earlyStore=storeFor(early);call(earlyStore,'dispatch',{slot:0,id:'queen'});
+  call(earlyStore,'begin',{mode:'weekly'});
+  const expectedEarly=HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)&&h.id!=='queen').map(h=>h.id);
+  assert.deepEqual(earlyStore.value.active.draftPool,expectedEarly,'before part one: early owned + unowned (including hidden), excluding late and dispatched');
+  assert.equal(LATE_COMPANIONS.some(id=>earlyStore.value.active.draftPool.includes(id)),false);
+  assert.equal(HIDDEN.every(id=>earlyStore.value.active.draftPool.includes(id)),true);
+  assert.equal(draftEligible(earlyStore.value,'gold_dragon'),false);
+  assert.equal(draftEligible(earlyStore.value,'queen'),false);
+
+  // Owned late companions remain eligible before PART_STAGES just like in the collection.
+  const ownedLate=createProfile(NOW);ownedLate.cleared=3;ownedLate.heroes.gold_dragon.owned=true;
+  assert.equal(draftPool(ownedLate).includes('gold_dragon'),true);
+
+  // After part one clear, all 42 companions (minus dispatched) join the draft pool.
+  const late=createProfile(NOW);late.cleared=PART_STAGES;late.beds.rose=10;late.beds.spring=5;late.beds.seed=4;
+  late.relics.hourglass={owned:true,enhance:2,copies:0};late.equipped=['hourglass'];
+  late.heroes.star_boy.enhance=10;late.heroes.queen.owned=true;
+  const lateStore=storeFor(late);call(lateStore,'dispatch',{slot:0,id:'queen'});
+  call(lateStore,'begin',{mode:'weekly'});
+  assert.equal(lateStore.value.active.draftPool.length,HEROES.length-1);
+  assert.equal(LATE_COMPANIONS.every(id=>lateStore.value.active.draftPool.includes(id)),true);
+
+  // Unowned drafted companions compute combat power and battle multipliers at enhance 0 while keeping shared growth;
+  // plain combatPower on an unowned entry still returns 0.
+  assert.equal(combatPower('luna',lateStore.value.heroes.luna,lateStore.value.beds,collectionBonus(lateStore.value.relics)),0);
+  const unownedPower=combatPower('luna',draftHeroEntry(lateStore.value.heroes.luna),lateStore.value.beds,collectionBonus(lateStore.value.relics));
+  assert.ok(unownedPower>0);
+  assert.equal(unownedPower,combatPower('luna',{owned:true,enhance:0},lateStore.value.beds,collectionBonus(lateStore.value.relics)));
+
+  // Pick a deterministic weekly deck containing both an enhanced owned hero and unowned heroes.
+  const deck=['star_boy','luna','gold_dragon','cinderella','snow_rabbit'];
+  lateStore.value.active.draft=[];lateStore.value.active.boon=0;
+  for(const id of deck){
+    lateStore.value.active.offers=[{id,boon:'focus'},{id:id==='queen'?'siren':deck.find(x=>x!==id),boon:'spark'}];
+    call(lateStore,'draft',{index:0});
+  }
+  assert.deepEqual(lateStore.value.active.deck,deck);
+  assert.equal(validateProfile(lateStore.value),true);
+
+  const run=createBattle(lateStore.value);assert.ok(run);
+  const expectedRose=1+roseAttack(lateStore.value.beds.rose);
+  assert.ok(Math.abs(run.meta.star_boy.power-expectedRose*enhanceMultiplier(10))<1e-12);
+  assert.ok(Math.abs(run.meta.star_boy.special-specialMultiplier(10))<1e-12);
+  for(const id of ['luna','gold_dragon','cinderella']){
+    assert.ok(Math.abs(run.meta[id].power-expectedRose)<1e-12,id+' uses beds.rose with enhance 0');
+    assert.equal(run.meta[id].special,1,id+' specialMultiplier(0) === 1');
+  }
+  assert.equal(run.gaugeMax,springGauge(5));assert.equal(run.gold,70+seedGold(4));
+  assert.ok(Math.abs(run.relicAttack-collectionBonus(lateStore.value.relics))<1e-12);
+  lateStore.value.active.run=E.serialize(run);
+  const reloaded=parseProfile(JSON.stringify(lateStore.value));assert.ok(reloaded&&resumeBattle(reloaded));
+
+  // Validation rejects unowned late companions before part one, dispatched heroes, and non-weekly unowned decks.
+  const badEarly=structuredClone(earlyStore.value);badEarly.active.draftPool.push('gold_dragon');assert.equal(validateProfile(badEarly),false);
+  const badAway=structuredClone(lateStore.value);badAway.active.draftPool.push('queen');assert.equal(validateProfile(badAway),false);
+  const badAwayDeck=structuredClone(lateStore.value);badAwayDeck.active.draft[0]='queen';badAwayDeck.active.deck[0]='queen';assert.equal(validateProfile(badAwayDeck),false);
+  const badMain=createProfile(NOW);badMain.active={mode:'main',stage:1,deck:['luna',...DEFAULT_DECK.slice(1)],started:NOW,seed:1,token:'t',boon:0,run:null,relicAttack:0,relicLevels:{}};
+  assert.equal(validateProfile(badMain),false,'main mode still rejects unowned heroes');
+  assert.equal(lateOpen(PART_STAGES-1),false);assert.equal(lateOpen(PART_STAGES),true);
 });
 
 test('failed monthly entry, record save and reward confirmation preserve the wallet and active run',()=>{

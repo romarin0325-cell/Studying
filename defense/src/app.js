@@ -1,7 +1,7 @@
 import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,CHAPTER_STAGES,partOf,levelOf,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,relicTierRates,relicRatesAt,idleReward,stageReward,HOUR,PERFECT_REWARD} from './economy.js';
+import {calendar,heroPool,lateOpen,guardianMonths,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,draftHeroEntry,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicRates,relicTierRates,relicRatesAt,idleReward,stageReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {ProfileStore,createProfile,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,weeklyState,metBosses,basketState} from './profile.js';
 import {featureOpen,UNLOCKS} from './beginner.js';
 import {autoDeck,autoRelics,autoTwin,oathDeck} from './auto-team.js';
@@ -58,6 +58,7 @@ const badge=(r,cls='')=>`<span class="badge ${cls}" data-rarity="${r}">${r}</spa
 const gem=(n,short=false)=>`<span class="cost ${short?'short':''}">${icon('gem')}<b>${fmt(n)}</b></span>`;
 const dispatchGain=({dust=0,dreams})=>`<span class="dispatch-gain">${dust?`<span class="cost dust">${icon('dust')}<b>${fmt(dust)}</b></span>`:''}${gem(dreams)}</span>`;
 const cpOf=id=>fmt(combatPower(id,p().heroes[id],p().beds,collectionBonus(p().relics)));
+const draftCpOf=id=>fmt(combatPower(id,draftHeroEntry(p().heroes[id]),p().beds,collectionBonus(p().relics)));
 const pctPts=points=>`+${(points/COLLECTION_POINTS_PER_PERCENT).toFixed(2)}%`;
 const scaleToken=(token,level)=>{const t=typeof token==='string'?token:token.t,int=typeof token==='object'&&token.int,m=t.match(/^(\d+(?:\.\d+)?)(.*)$/);if(!m)return [t,t];const v=Number(m[1])*relicScale(level);return [t,`${int?Math.round(v):Number(v.toFixed(1))}${m[2]}`];};
 const relicTokens=(id,level)=>(ARTIFACT[id].scale||[]).map(t=>scaleToken(t,level));
@@ -376,7 +377,7 @@ function renderDraft(){
   const a=p().active;if(a?.mode!=='weekly'){screen='home';render();return;}if(a.draft.length===TEAM_SIZE){startBattle();return;}
   $('content').innerHTML=`<section class="page">${heading('유성 드래프트',`<span class="count"><b>${a.draft.length+1}</b> / ${TEAM_SIZE}</span>`,'둘 중 한 명을 선택하세요.')}
     <div class="draft-selected">${Array.from({length:TEAM_SIZE},(_,i)=>a.draft[i]?image(a.draft[i]):`<span class="draft-dot">${i+1}</span>`).join('')}</div>
-    <div class="draft-options">${a.offers.map((o,i)=>`<button class="draft-card" data-draft="${i}" data-rarity="${HERO[o.id].rarity}">${badge(HERO[o.id].rarity)}<span class="art">${image(o.id,true)}</span><h3>${HERO[o.id].name}</h3><small>${HERO[o.id].role}</small><span class="cpline">전투력 ${cpOf(o.id)}</span><span class="boon">${o.boon==='focus'?'집중 전술 · 공격력 +5%':'별빛 전술 · 시작 별빛 +4'}</span></button>`).join('')}</div>
+    <div class="draft-options">${a.offers.map((o,i)=>`<button class="draft-card" data-draft="${i}" data-rarity="${HERO[o.id].rarity}">${badge(HERO[o.id].rarity)}<span class="art">${image(o.id,true)}</span><h3>${HERO[o.id].name}</h3><small>${HERO[o.id].role}</small><span class="cpline">전투력 ${draftCpOf(o.id)}</span><span class="boon">${o.boon==='focus'?'집중 전술 · 공격력 +5%':'별빛 전술 · 시작 별빛 +4'}</span></button>`).join('')}</div>
     <p class="draft-help">선택은 자동 저장되어 나중에 이어할 수 있습니다.</p></section>`;
 }
 function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&a.draft.length<TEAM_SIZE){screen='draft';render();}else startBattle(true);}
@@ -1008,7 +1009,7 @@ function modeCard(kind){if(kind==='oath')return oathCard();if(kind==='twin')retu
 const entryPass=left=>`<span class="entry-pass" role="img" aria-label="남은 입장 ${left}/${WEEKLY_ENTRIES}">${Array.from({length:WEEKLY_ENTRIES},(_,i)=>`<i class="${i<left?'on':''}"></i>`).join('')}<b>${left}<em>/${WEEKLY_ENTRIES}</em></b></span>`;
 function modeInfo(kind){if(kind==='oath'||kind==='twin'){previewInfo(kind);return;}
   const t=TIERS[challengeTier]||TIERS.easy;
-  const weekly=`<ul class="notes"><li>한 주에 ${WEEKLY_ENTRIES}번 입장해요. 보상은 이번 주 최고 기록으로 정해지고, 기록을 올리면 오른 만큼 바로 더 받아요.</li><li>생명력이 0이 되면 끝나고, 넘긴 웨이브가 기록이 돼요. 웨이브당 ${gem(Math.round(25*t.reward))}.</li><li>3웨이브마다 이번 주의 보스가 나와요.${metBosses(p())<9?` 메인 스테이지에서 만난 보스 ${metBosses(p())}종만 나와요.`:''}</li><li>어려움은 스테이지 ${TIERS.hard.unlock}, 심연은 스테이지 ${TIERS.abyss.unlock} 클리어 후 열려요.</li><li>중단해도 같은 입장으로 이어할 수 있어요. 파견 중인 동료는 참여할 수 없어요.</li><li>기간은 한국·일본 시간(UTC+9) 기준이에요.</li></ul>`;
+  const weekly=`<ul class="notes"><li>한 주에 ${WEEKLY_ENTRIES}번 입장해요. 보상은 이번 주 최고 기록으로 정해지고, 기록을 올리면 오른 만큼 바로 더 받아요.</li><li>생명력이 0이 되면 끝나고, 넘긴 웨이브가 기록이 돼요. 웨이브당 ${gem(Math.round(25*t.reward))}.</li><li>3웨이브마다 이번 주의 보스가 나와요.${metBosses(p())<9?` 메인 스테이지에서 만난 보스 ${metBosses(p())}종만 나와요.`:''}</li><li>어려움은 스테이지 ${TIERS.hard.unlock}, 심연은 스테이지 ${TIERS.abyss.unlock} 클리어 후 열려요.</li><li>중단해도 같은 입장으로 이어할 수 있어요. 미보유 동료도 후보로 등장하며, 파견 중인 동료는 참여할 수 없어요.</li><li>기간은 한국·일본 시간(UTC+9) 기준이에요.</li></ul>`;
   const monthly=`<ul class="notes"><li>제한 시간은 없고, 보스가 코어에 닿으면 끝나요.</li><li>난이도가 높을수록, 같은 난이도에서는 격파 수와 총 피해가 클수록 좋은 기록이에요.</li><li>보상은 꿈의결정 ${MONTHLY_REWARDS.base} + 격파 보스당 ${MONTHLY_REWARDS.perBoss}, 완주 시 +${MONTHLY_REWARDS.clear}에 난이도 배율(×${t.reward})을 곱해요.</li><li>보상은 이번 달 최고 기록으로 정해지고, 기록을 올리면 오른 만큼 바로 더 받아요.</li><li>매월 1일(UTC+9) 초기화되고 역대 최고 기록은 남아요.</li></ul>${monthlyRecordPanel()}`;
   show(kind==='weekly'?'유성 드래프트':'만월 토벌전','규칙',kind==='weekly'?weekly:monthly,`<button class="primary wide" data-action="close">확인</button>`,'info');
 }
@@ -1018,7 +1019,7 @@ function prepare(stage=Math.min(MAIN_STAGES,p().cleared+1),kind='main'){if(kind=
   const perf=kind==='main'&&(p().perfect||[]).includes(stage),relicsOpen=featureOpen(p(),'relic');
   const rewardChip=kind==='main'?`<div class="prep-rewards"><span class="prep-reward">${stage>p().cleared?`첫 클리어 ${gem(stageReward(stage))}`:'반복 클리어 · 별가루'}</span>${perf?`<span class="prep-reward perfect done">${icon('crown')}퍼펙트 달성</span>`:`<span class="prep-reward perfect">${icon('crown')}퍼펙트 ${gem(PERFECT_REWARD)}</span>`}</div>${perf?'':`<small class="perfect-rule">코어 생명력을 잃지 않고 클리어하면 퍼펙트</small>`}`:'';
   const head=kind==='main'?`<div class="prep-boss"><small>${c.name} · 6웨이브</small><h2>${boss.name}</h2>${boss.trait?`<p>${boss.trait}</p>`:''}${rewardChip}</div>`
-    :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'유성 드래프트':'만월 토벌전'}</h2><p>${kind==='weekly'?`보유 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
+    :`<div class="prep-boss"><small>${t.name}</small><h2>${kind==='weekly'?'유성 드래프트':'만월 토벌전'}</h2><p>${kind==='weekly'?`미보유를 포함한 동료 중에서 ${TEAM_SIZE}명을 골라요.`:`${CHALLENGE_WAVES}연전`}</p></div>`;
   show(kind==='main'?`스테이지 ${stageLabel(stage)}`:kind==='weekly'?'유성 드래프트':'만월 토벌전','출격 준비',`${head}
     ${kind==='weekly'?relicsOpen?`<div class="panel-head"><h3>장착 유물</h3></div>`:'':`<div class="panel-head"><h3>출전 편성</h3><span class="power">전투력 <b>${fmt(teamPower(p()))}</b></span><button class="link" data-action="auto-prepare">자동 편성</button></div>`}
     <div class="prep-load">${kind==='weekly'?'':five(p().deck)}${relicsOpen?relicSlots(true):''}</div>${kind==='weekly'?'':requestChips(p().deck)}`,

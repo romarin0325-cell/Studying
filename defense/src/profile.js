@@ -104,12 +104,12 @@ export function validateProfile(p){
   if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly','oath','twin'].includes(r.mode)||!integer(r.stage,MAIN_STAGES)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
   for(const k of ['weekly','monthly'])if(p[k]!==null&&(typeof p[k]!=='string'||!/^\d{4}-\d{2}(?:-\d{2})?$/.test(p[k])))return false;
   if(!integer(p.weeklyRuns,WEEKLY_ENTRIES)||p.weekly===null&&(p.weeklyRuns!==0||p.weeklyBest!==null)||!validWeeklyBest(p.weeklyBest))return false;
-  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly','oath','twin'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
+  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly','oath','twin'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>p.active.mode==='weekly'&&p.active.draft?.length===TEAM_SIZE?!draftEligible(p,id):!p.heroes[id]?.owned||away(p,id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
   const a=p.active;
   if(a){
     if(a.stage>p.cleared+1||!integer(a.seed,0xffffffff)||!a.seed||a.token.length>100||a.run!==null&&(typeof a.run!=='string'||a.run.length>2*1024*1024))return false;
     if(a.mode==='weekly'){
-      if(!Array.isArray(a.draftPool)||a.draftPool.length<TEAM_SIZE||a.draftPool.length>HEROES.length||new Set(a.draftPool).size!==a.draftPool.length||a.draftPool.some(id=>!p.heroes[id]?.owned||p.dispatches.some(d=>d.hero===id)))return false;
+      if(!Array.isArray(a.draftPool)||a.draftPool.length<TEAM_SIZE||a.draftPool.length>HEROES.length||new Set(a.draftPool).size!==a.draftPool.length||a.draftPool.some(id=>!draftEligible(p,id)))return false;
       if(!Array.isArray(a.draft)||a.draft.length>TEAM_SIZE||new Set(a.draft).size!==a.draft.length||a.draft.some(id=>!a.draftPool.includes(id))||a.boon>a.draft.length)return false;
       if(!Array.isArray(a.offers)||a.offers.length!==(a.draft.length===TEAM_SIZE?0:2)||a.offers.some(o=>!o||!a.draftPool.includes(o.id)||a.draft.includes(o.id)||!['focus','spark'].includes(o.boon)))return false;
       if(a.draft.length<TEAM_SIZE&&a.draftPool.length-a.draft.length>1&&a.offers[0].id===a.offers[1].id)return false;
@@ -199,6 +199,8 @@ const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
 export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
+export const draftEligible=(p,id)=>!!HERO[id]&&!away(p,id)&&(!!p.heroes?.[id]?.owned||!LATE_COMPANIONS.includes(id)||lateOpen(p.cleared));
+export const draftPool=p=>HEROES.filter(h=>draftEligible(p,h.id)).map(h=>h.id);
 // Greenhouse saves keep their exact power. Rose is +1% per level (bed revision 2): one old
 // garden level (+4%) is four rose levels, one revision-1 rose level (+2%) is two.
 // Revision 3 keeps spring/seed effect: spring 3*min(L,10)+max(0,L-10), seed 2*min(L,10)+max(0,L-10).
@@ -324,18 +326,18 @@ function validFeats(feats){
 }
 function applyRequestProgress(p,deck,feats){
   const list=p.requests?.active;if(!Array.isArray(list))return [];
-  const done=[];
+  const owned=id=>!!p.heroes?.[id]?.owned,done=[];
   for(const e of list){
-    if(!e||e.done||!REQUEST[e.id])continue;
+    if(!e||e.done||!REQUEST[e.id]||!owned(REQUEST[e.id].hero))continue;
     const goal=REQUEST[e.id].goal,target=requestGoal(e.id);let add=0;
     if(goal.type==='clear'){
       const withIds=goal.with==null?[]:Array.isArray(goal.with)?goal.with:[goal.with];
-      if(feats.won&&withIds.every(id=>deck.includes(id))&&(!goal.rarities||deck.every(id=>goal.rarities.includes(HERO[id]?.rarity))))add=1;
+      if(feats.won&&withIds.every(id=>owned(id)&&deck.includes(id))&&(!goal.rarities||deck.every(id=>owned(id)&&goal.rarities.includes(HERO[id]?.rarity))))add=1;
     }
-    else if(goal.type==='casts')add=feats.casts[goal.hero]||0;
-    else if(goal.type==='bosses'){if(deck.includes(goal.with))add=feats.bosses;}
-    else if(goal.type==='flag'&&feats.flags.includes(goal.flag))add=1;
-    else if(goal.type==='rank'&&(feats.ranks?.[goal.hero]||0)>=goal.n)add=1;
+    else if(goal.type==='casts'){if(owned(goal.hero))add=feats.casts[goal.hero]||0;}
+    else if(goal.type==='bosses'){if(owned(goal.with)&&deck.includes(goal.with))add=feats.bosses;}
+    else if(goal.type==='flag'&&feats.flags.includes(goal.flag)&&(goal.flag!=='moonlit'||['night_rabbit','snow_rabbit','silver_rabbit'].every(owned)))add=1;
+    else if(goal.type==='rank'&&owned(goal.hero)&&(feats.ranks?.[goal.hero]||0)>=goal.n)add=1;
     if(!add)continue;
     e.count=Math.min(target,e.count+add);if(e.count>=target){e.done=true;done.push(e.id);}
   }
@@ -510,7 +512,7 @@ export function command(p,action,args={},now=Date.now()){
     if(mode==='weekly'){if(p.weekly!==c.week){p.weekly=c.week;p.weeklyRuns=0;p.weeklyBest=null;}p.weeklyRuns++;}
     random(p);
     p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(p.equipped.map(id=>[id,relicLevel(p.relics[id])])),...(tier?{tier}:{})};
-    if(mode==='weekly'){p.active.draftPool=available(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
+    if(mode==='weekly'){p.active.draftPool=draftPool(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
   }
   if(action==='draft'){
     const a=p.active;if(a?.mode!=='weekly'||a.draft?.length>=TEAM_SIZE||!integer(args.index,1))return no('제시된 두 후보 중에서 선택하세요.');

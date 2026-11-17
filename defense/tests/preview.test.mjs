@@ -412,6 +412,52 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   assert.ok(TEST_TOOLS.some(t=>t.kind==='season-reset'&&t.label==='서약·쌍성 시즌 초기화'));
 });
 
+test('unowned companions never arrive with or progress requests, even through weekly draft',()=>{
+  const p=profile();
+  for(const e of Object.values(p.heroes))e.owned=false;
+  const ownedIds=['star_boy','snow_rabbit','night_rabbit','siren','underdog'];
+  for(const id of ownedIds)p.heroes[id].owned=true;
+  p.deck=[...ownedIds];
+  p.cleared=90;
+
+  // Unowned companions never arrive via requestArrive when owned heroes have exhausted their requests.
+  p.requests={next:0,active:[],claimed:ownedIds.flatMap(id=>[1,2,3].map(n=>`${id}-${n}`)),after:[...ownedIds],read:[]};
+  assert.deepEqual(ok(p,'requestArrive').arrived,[]);
+
+  // An unowned hero's own request never arrives and never progresses even if present in state.
+  p.requests={next:NOW+REQUEST_GAP_MIN,active:[
+    {id:'ash-1',at:NOW,seen:false,count:0,done:false},
+    {id:'siren-3',at:NOW,seen:false,count:0,done:false},
+    {id:'night_rabbit-3',at:NOW,seen:false,count:0,done:false},
+  ],claimed:['siren-1','siren-2','night_rabbit-1','night_rabbit-2'],after:[],read:[]};
+  ok(p,'begin',{mode:'weekly',tier:'easy'});
+  const unownedDeck=['ash','siren','harmonious','night_rabbit','silver_rabbit'];
+  p.active.draft=[];p.active.boon=0;
+  for(const id of unownedDeck){
+    p.active.offers=[{id,boon:'focus'},{id:id==='star_boy'?'snow_rabbit':'star_boy',boon:'spark'}];
+    ok(p,'draft',{index:0});
+  }
+  const blocked=ok(p,'settle',{token:p.active.token,round:18,won:true,feats:{won:true,casts:{ash:3,siren:2},bosses:3,flags:['moonlit','spared'],ranks:{ash:3}}});
+  assert.deepEqual(blocked.requestsDone,[]);
+  assert.ok(p.requests.active.every(e=>e.count===0&&!e.done));
+
+  // Rarity-constrained clear request (underdog-2: C only) also ignores wins that rely on unowned C draft picks.
+  p.requests={next:NOW+REQUEST_GAP_MIN,active:[
+    {id:'underdog-2',at:NOW,seen:false,count:0,done:false},
+    {id:'star_boy-1',at:NOW,seen:false,count:0,done:false},
+  ],claimed:['underdog-1'],after:[],read:[]};
+  ok(p,'begin',{mode:'weekly',tier:'easy'});
+  const mixedC=['underdog','star_boy','snow_rabbit','night_rabbit','sunflower'];
+  p.active.draft=[];p.active.boon=0;
+  for(const id of mixedC){
+    p.active.offers=[{id,boon:'focus'},{id:id==='siren'?'aurora':'siren',boon:'spark'}];
+    ok(p,'draft',{index:0});
+  }
+  const partial=ok(p,'settle',{token:p.active.token,round:18,won:true,feats:{won:true,casts:{},bosses:2,flags:[]}});
+  assert.deepEqual(partial.requestsDone,['star_boy-1'],'owned hero request still completes while unowned C teammate blocks underdog-2');
+  assert.equal(p.requests.active.find(e=>e.id==='underdog-2').done,false);
+});
+
 test('a stored oath and twin expedition still validates inside the profile store',async()=>{
   let raw=null;const storage={getItem:()=>raw,setItem:(k,v)=>{assert.equal(k,SAVE_KEY);raw=v;}};
   const store=new ProfileStore(storage,NOW);const p=store.value;
