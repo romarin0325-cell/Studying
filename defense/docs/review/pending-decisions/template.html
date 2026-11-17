@@ -1,0 +1,223 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>별빛 정원 · 결정·정리 대기 비교 도구</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;color:#e8e4f2;background:#14141d;font:15px/1.6 system-ui,-apple-system,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:24px;margin:0 0 6px;letter-spacing:-.5px}
+h2{font-size:19px;margin:0 0 8px;letter-spacing:-.3px}
+h3{font-size:15px;margin:0 0 6px;color:#d9c8ff}
+p{margin:0 0 10px}
+.muted{color:#a9a3bb;font-size:14px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 22px;padding:10px;background:#1c1b29;border:1px solid #302d44;border-radius:12px}
+.nav a{color:#dcd5ee;text-decoration:none;padding:6px 12px;border-radius:8px;background:#262435;border:1px solid #3d3854;font-size:13px;font-weight:600}
+.nav a:hover{background:#322f47;border-color:#695fa0}
+.section{margin-top:28px;padding:20px;background:#1b1a28;border:1px solid #302d44;border-radius:14px}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;vertical-align:middle;margin-right:6px}
+.badge.now{background:#283452;color:#9fd8f4;border:1px solid #44608e}
+.badge.prop{background:#47294a;color:#ffb8e2;border:1px solid #8a4b8f}
+.badge.warn{background:#4a371c;color:#ffd88a;border:1px solid #8a692b}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+select,button{font:inherit;color:#f1edf9;background:#262435;border:1px solid #47425e;border-radius:8px;padding:6px 10px;font-size:13px}
+button{cursor:pointer}
+button:hover{background:#322f47;border-color:#6e6596}
+button.active{background:#453673;border-color:#9e84f5;color:#fff}
+label{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,520px));gap:14px;justify-content:center;margin-top:8px}
+.stage figure{margin:0}
+.stage figcaption{font-weight:700;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;font-size:14px}
+canvas.board{width:100%;aspect-ratio:720/780;display:block;border-radius:10px;background:#000;border:1px solid #34304a}
+body.phone .stage{grid-template-columns:repeat(2,368px)}
+.timeline{display:flex;gap:8px;align-items:center;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.timeline input{width:min(520px,62vw)}
+.moments{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0 14px}
+.status-line{color:#9fd8f4;font-size:13px;text-align:center;min-height:20px;margin-bottom:8px}
+.table-scroll{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;min-width:860px}
+th,td{border-top:1px solid #34304a;padding:10px 8px;vertical-align:top;text-align:left}
+th:first-child{width:170px}
+th{font-size:13px}
+.strip{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:8px}
+.strip figure{margin:0;cursor:pointer}
+.strip img{width:100%;border-radius:6px;display:block;border:1px solid #34304a}
+.strip figcaption{font-size:12px;color:#b8b2ca;text-align:center;margin-top:3px}
+.cutin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:12px}
+.cutin-stage{position:relative;height:210px;border-radius:12px;overflow:hidden;background:radial-gradient(circle at 50% 30%,#27284b,#10111f);border:1px solid #383354}
+.cutin-band{position:absolute;left:-10%;right:-10%;top:22%;height:46%;transform:skewY(-7deg);border-block:2px solid var(--c,#ffe08a);background:linear-gradient(90deg,rgba(12,14,34,.94),color-mix(in srgb,var(--c,#ffe08a) 22%,rgba(12,14,34,.9)),rgba(12,14,34,.94));box-shadow:0 0 28px color-mix(in srgb,var(--c,#ffe08a) 40%,transparent)}
+.cutin-band.ur{height:54%;top:18%;border-color:#ffe08a;box-shadow:0 0 34px rgba(255,214,120,.55)}
+.cutin-lines{position:absolute;inset:0;opacity:.45;background:repeating-linear-gradient(90deg,transparent 0 26px,rgba(255,255,255,.12) 26px 28px,transparent 28px 60px)}
+.cutin-art{position:absolute;left:8%;bottom:-14%;height:152%;aspect-ratio:1;transform:skewY(7deg);display:flex;align-items:center;justify-content:center}
+.cutin-art img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6)) drop-shadow(0 0 14px color-mix(in srgb,var(--c,#ffe08a) 70%,transparent));transition:transform .25s ease,filter .25s ease}
+.cutin-art.swapped img{transform:scale(1.04);filter:drop-shadow(0 6px 10px rgba(0,0,0,.6)) drop-shadow(0 0 18px #ffd782)}
+.cutin-expr-tag{position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;background:rgba(16,17,32,.85);border:1px solid #6e63a8;color:#e6dcff}
+.cutin-text{position:absolute;left:43%;right:10%;top:50%;transform:translateY(-50%) skewY(7deg);display:grid;gap:3px}
+.cutin-text small{font-size:11px;font-weight:800;letter-spacing:.1em;color:color-mix(in srgb,var(--c,#ffe08a) 72%,#fff)}
+.cutin-text b{font-size:24px;line-height:1.12;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.65)}
+.cutin-band.ur .cutin-text b{color:#ffe69e}
+.cutin-quote{font-size:13px;line-height:1.35;color:#fff4dc;background:rgba(10,10,24,.58);border-left:2px solid var(--c,#ffe08a);padding:4px 8px;border-radius:0 6px 6px 0;margin-top:2px}
+.deck-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:10px 0}
+.compare-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:12px}
+.card{padding:14px;background:#141320;border:1px solid #322e49;border-radius:10px}
+.big-num{font-size:26px;font-weight:800;letter-spacing:-.5px;margin:4px 0}
+.bar-wrap{height:12px;border-radius:999px;background:#262438;overflow:hidden;margin:8px 0}
+.bar-fill{height:100%;border-radius:999px;transition:width .2s ease}
+.bar-fill.now{background:linear-gradient(90deg,#5586d6,#8ec4ff)}
+.bar-fill.prop{background:linear-gradient(90deg,#62b88d,#9ef0bf)}
+.asset-list{max-height:210px;overflow:auto;font-size:12px;border-top:1px solid #2b2740;margin-top:8px;padding-top:6px}
+.asset-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid #221f33}
+.kit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.kit-cell{position:relative;aspect-ratio:1;background:#0d0d16;border:1px solid #35314c;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.kit-cell.object{background:repeating-conic-gradient(#1f1e2c 0% 25%,#171622 0% 50%) 50%/16px 16px}
+.kit-cell.unused{border:2px dashed #ff8c5a;background:rgba(120,38,24,.24)}
+.kit-cell.removed{border:2px dashed #62b88d;opacity:.45}
+.kit-cell canvas{width:100%;height:100%;display:block}
+.kit-meta{position:absolute;left:4px;right:4px;bottom:4px;background:rgba(10,10,18,.84);border-radius:5px;padding:2px 5px;font-size:10.5px;line-height:1.25;display:flex;justify-content:space-between;align-items:center;gap:4px}
+.kit-meta span,.kit-meta small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kit-cell.unused .kit-meta{background:rgba(110,28,16,.92);color:#ffd7c2}
+.notes{margin-top:10px;padding:10px 12px;border-radius:8px;background:#141320;border:1px solid #2e2b42;font-size:13px;color:#c9c3da}
+.notes ul{margin:4px 0 0;padding-left:18px}
+@media (max-width:840px){
+  .stage,.cutin-grid,.compare-cards,body.phone .stage{grid-template-columns:1fr}
+  .deck-grid,.strip,.kit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  table,tbody,tr,td{display:block;width:100%;min-width:0}
+  table thead{display:none}
+  tbody th{display:block;width:100%;border-top:1px solid #34304a;padding:12px 0 8px;font-size:14px}
+  tbody td{display:block;width:100%;border-top:none;padding:0 0 14px}
+  .cutin-stage{height:225px}
+  .cutin-art{left:2%;bottom:-8%;height:128%}
+  .cutin-text{left:40%;right:6%}
+  .cutin-text b{font-size:19px}
+  .cutin-quote{font-size:12px}
+}
+</style>
+<main>
+  <h1>별빛 정원 · 결정·정리 대기 비교 도구</h1>
+  <p class="muted">오프라인 단일 HTML 비교 도구입니다. 실제 게임 엔진(<code>engine.js</code>)과 실제 렌더러(<code>render.js</code>, <code>ur-vfx.js</code>), 실제 배포 에셋 치수를 사용해 현재 사양과 제안 안을 나란히 비교합니다.</p>
+  <nav class="nav" aria-label="비교 항목 이동">
+    <a href="#sec-cinderella">1. 신데렐라 기적 문양 (유리구두 vs 소원의 별)</a>
+    <a href="#sec-cutin">2. 컷인 표정 · 필살기 대사</a>
+    <a href="#sec-decode">3. 덱 기준 이미지 디코딩</a>
+    <a href="#sec-kit3">4. ur-kit3 미사용 봉투 칸</a>
+  </nav>
+
+  <section id="sec-cinderella" class="section">
+    <h2>1. 신데렐라 · 자정의 기적 문양 비교</h2>
+    <p class="muted">같은 엔진 시드와 같은 타임라인으로 왼쪽은 <strong>현재 게임(유리구두 · <code>slipper</code>)</strong>, 오른쪽은 <strong>제안 안(소원의 별 · <code>miracle</code>)</strong>을 동시에 재생합니다. 1.12초 꽃잎 개방 이후부터 상징이 갈라집니다.</p>
+    <div class="controls">
+      <select id="theme" aria-label="전장 배경"><option value="night">밤 정원</option><option value="bright">Bright 정원</option><option value="dawn">새벽(2부)</option></select>
+      <select id="speed" aria-label="게임 배속"><option value="1">게임 1배속</option><option value="2">게임 2배속</option></select>
+      <select id="rate" aria-label="보기 속도"><option value="1">보기 1배</option><option value="0.5">보기 0.5배</option><option value="0.25">보기 0.25배</option></select>
+      <label><input type="checkbox" id="cutin" checked>컷인 띠·UR 슬로</label>
+      <label><input type="checkbox" id="hold" checked>타격 보류</label>
+      <label><input type="checkbox" id="hitstop" checked>히트스톱</label>
+      <label><input type="checkbox" id="kills" checked>처치 포함</label>
+      <label><input type="checkbox" id="reduced">연출 줄이기</label>
+      <label><input type="checkbox" id="phone">휴대폰 크기</label>
+    </div>
+    <div class="stage">
+      <figure>
+        <figcaption><span><span class="badge now">현재</span>유리구두 안 (<code>slipper</code>)</span><span class="muted">발밑 착지·빛 반짝임</span></figcaption>
+        <canvas id="before" class="board" aria-label="유리구두 안 전장"></canvas>
+      </figure>
+      <figure>
+        <figcaption><span><span class="badge prop">제안</span>소원의 별 안 (<code>miracle</code>)</span><span class="muted">마법진 2겹·12별·상승</span></figcaption>
+        <canvas id="after" class="board" aria-label="소원의 별 안 전장"></canvas>
+      </figure>
+    </div>
+    <div class="timeline">
+      <button id="play">일시정지</button>
+      <button id="restart">처음부터</button>
+      <input id="seek" type="range" min="0" max="2.8" step="0.0166667" value="0" aria-label="재생 시각">
+      <output id="clock">0.00초</output>
+    </div>
+    <div class="moments" id="moment-buttons"></div>
+    <div class="status-line" id="stop"></div>
+    <h3>핵심 시점 나란히 스틸 비교표</h3>
+    <p class="muted">스틸 이미지를 누르면 위 플레이어가 해당 시각으로 이동해 두 안을 크게 비교합니다.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>비교 대상</th><th>핵심 시점 (0.80초 · 1.25초 · 1.45초 · 1.85초 · 2.25초)</th></tr></thead>
+        <tbody id="cinderella-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="sec-cutin" class="section">
+    <h2>2. 컷인 표정 그림 및 필살기 대사 도입 비교</h2>
+    <p class="muted">현재 컷인(<code>app.js</code> <code>cutIn</code>)은 전신 SD 그림 1장과 등급·이름·스킬명만 표시합니다. 제안 안은 컷인 띠 안에 <strong>필살기 대사 1줄</strong>을 넣고, 시전 ~0.3초 지점에 <strong>표정만 바꾼 전신 그림 1장</strong>을 교체하는 구조입니다. <span class="badge warn">시안</span>대사 문구와 표정 변화 표시는 결정 검토용 예시입니다.</p>
+    <div class="controls">
+      <select id="cutin-hero" aria-label="컷인 대상 동료"></select>
+      <button id="cutin-replay">컷인 시점(0.3초 표정 교체) 재생</button>
+      <label><input type="checkbox" id="cutin-show-quote" checked>제안: 대사 표시</label>
+      <label><input type="checkbox" id="cutin-show-expr" checked>제안: 0.3초 표정 교체 강조</label>
+    </div>
+    <div class="cutin-grid">
+      <div>
+        <p><span class="badge now">현재</span>기술명 · 전신 고정 표정 (추가 에셋 0장)</p>
+        <div class="cutin-stage" id="cutin-now"></div>
+      </div>
+      <div>
+        <p><span class="badge prop">제안</span>필살기 대사 + 0.3초 표정 그림 교체 (동료당 표정 1장 추가)</p>
+        <div class="cutin-stage" id="cutin-prop"></div>
+      </div>
+    </div>
+    <div class="notes">
+      <strong>검토 포인트 (<code>VFX_PRODUCTION_PIPELINE.md</code> §3.5):</strong>
+      <ul>
+        <li>전투 SD(휴대폰 기준 얼굴 ~20px)에서는 윙크·표정 변화가 보이지 않지만, 컷인 띠 전신(얼굴 ~50~70px)에서는 식별 가능합니다.</li>
+        <li>표정 그림은 원본 전신에서 얼굴 영역만 편집해 몸이 틀어지지 않게 마스크 검증이 필요하며, 컷인 대사는 동료별 말투 검수가 필요합니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="sec-decode" class="section">
+    <h2>3. 덱 기준 이미지 디코딩 절감 비교</h2>
+    <p class="muted">현재 <code>Art.load()</code>(<code>src/combat/render.js</code>)는 전투 시작 시 <code>RUNTIME_ASSET_PATHS</code> 전체(<strong><span id="total-count"></span>장</strong>)를 한꺼번에 디코딩합니다. 아래에서 5인 덱을 바꿔 보며 덱 기준 디코딩 도입 시 예상 RGBA 디코딩 메모리 절감량을 비교할 수 있습니다.</p>
+    <div class="controls">
+      <button data-preset="cinderella">신데렐라 기본 덱</button>
+      <button data-preset="transform">변신·우화 포함 덱</button>
+      <button data-preset="heavy">전용 VFX 다수 덱</button>
+      <button data-preset="starter">초기 5인 덱</button>
+      <label><input type="checkbox" id="exclude-ui" checked>비전투 UI 그림(소환제단·온실·선물 등)도 전투 디코딩에서 제외</label>
+    </div>
+    <div class="deck-grid" id="deck-selects"></div>
+    <div class="compare-cards">
+      <div class="card">
+        <span class="badge now">현재</span><strong>전투 시작 시 전체 일괄 디코딩</strong>
+        <div class="big-num" id="decode-now-mib">-</div>
+        <div class="muted" id="decode-now-sub">-</div>
+        <div class="bar-wrap"><div class="bar-fill now" id="decode-now-bar" style="width:100%"></div></div>
+        <div class="asset-list" id="decode-now-list"></div>
+      </div>
+      <div class="card">
+        <span class="badge prop">제안</span><strong>선택 덱 기준 디코딩</strong>
+        <div class="big-num" id="decode-prop-mib">-</div>
+        <div class="muted" id="decode-prop-sub">-</div>
+        <div class="bar-wrap"><div class="bar-fill prop" id="decode-prop-bar" style="width:50%"></div></div>
+        <div class="asset-list" id="decode-prop-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-kit3" class="section">
+    <h2>4. <code>ur-kit3</code> 미사용 봉투 칸 제거 비교 (재패킹 시)</h2>
+    <p class="muted">둠의 연출이 ‘검은 봉투’에서 ‘왕관 금화(<code>ur-kit2</code>) + 단검(<code>ur-kit3</code>)’으로 변경되면서 11번 칸(<code>KIT3.envelope</code>)이 미사용 상태로 남았습니다. 현재 시트와 재패킹 시 제거 대상을 나란히 비교합니다.</p>
+    <div class="controls">
+      <label><input type="checkbox" id="kit3-hide-unused">오른쪽 시트에서 미사용 봉투 칸 제거 미리보기</label>
+    </div>
+    <div class="compare-cards">
+      <div class="card">
+        <span class="badge now">현재</span><strong>14칸 사용 (11번 봉투 칸 잔존)</strong>
+        <p class="muted" id="kit3-now-meta"></p>
+        <div class="kit-grid" id="kit3-now-grid"></div>
+      </div>
+      <div class="card">
+        <span class="badge prop">제안 · 재패킹 시</span><strong>13칸 정리 (봉투 칸 제거)</strong>
+        <p class="muted" id="kit3-prop-meta"></p>
+        <div class="kit-grid" id="kit3-prop-grid"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>/*__DATA__*/</script>
+<script>/*__SCRIPT__*/</script>
+</html>

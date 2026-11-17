@@ -1,0 +1,107 @@
+# 후속 과제 · 드래프트 개편 / 테스트 배포 수치 / 일본어 용어 / 학습자료 매핑 (2026-11-17)
+
+상태: **기획·과제 정리. 코드 미반영.**
+
+2026-11-17 추가된 신규 후속 과제와, 함께 검토·결정이 필요한 연출/에셋 정리 항목([결정 대기 비교 도구](../review/pending-decisions/index.html))을 묶어 정리한다.
+
+## 요약
+
+| 과제 | 핵심 방향 | 주요 관련 소스 |
+|---|---|---|
+| 1. 유성 드래프트 개편 | 미보유 동료도 후보 풀에 포함하되 **강화만 미적용(`enhance = 0`)** 상태로 등장 | `src/profile.js`, `src/battle.js`, `src/economy.js`, `src/app.js` |
+| 2. 테스트 배포용 수치 조정 | 테스트 빌드 한정 로테이션 1일·파견 2시간·파견/방치/미션 별똥별 5배·인연 10배·새싹미션 날짜 제한 제거 및 미션 단위 보상 개편 | `src/content.js`, `src/economy.js`, `src/bond.js`, `src/beginner.js`, `src/profile.js`, `src/preview/season.js`, `src/team-config.js` |
+| 3. 일본어판 대비 용어 정비 | `노출`·`성광` 등 직역 시 부자연스럽거나 직관성이 낮은 상태·규칙 명칭을 일본어권 기준으로 합리적 재명명 | `src/data.js`, `src/new-companions.js`, `docs/STATUS_RULES.md`, `src/app.js` |
+| 4. 학습자료 매핑 정비 | 영어판 · 일본어판 · 학습제거판 3종 빌드/과목 매핑 구조 및 학습제거판 대체 경로 정리 | `src/course.js`, `src/quiz.js`, `src/library.js`, `src/tutor.js`, `src/profile.js`, `src/app.js` |
+
+---
+
+## 1. 유성 드래프트 개편안 (미보유 동료 포함 · 강화 미적용)
+
+### 현재 동작
+- `available(p)`(`src/profile.js`)가 `p.heroes[h.id].owned && !away(p, h.id)`만 반환해 **보유 중이고 파견 중이 아닌 동료**만 `p.active.draftPool`에 들어간다.
+- `validateProfile(p)`(`src/profile.js`)도 `a.draftPool`, `a.draft`, `a.deck`의 모든 ID가 `p.heroes[id]?.owned === true`여야 유효한 저장으로 인정한다.
+- `combatPower(id, entry, beds, relicBonus)`(`src/economy.js`)는 `!entry?.owned`이면 `0`을 반환한다.
+
+### 개편 방향
+- **미보유 동료 등장:** 소지하지 않은 동료도 유성 드래프트 2택5 후보에 등장한다(단, 1부 클리어 전 `LATE_COMPANIONS` 해금 규칙을 드래프트에도 그대로 적용할지, 체험 목적으로 전체 42명을 열지는 구현 전 확정).
+- **강화만 미적용:** 미보유 동료를 뽑아 전장에 투입할 때는 공용 영구 성장(꿈의 온실·새벽 온실 `beds`, 유물 수집 보너스, 장착 유물, 치명타 화단)은 정상 적용하고, **개인 중복 강화(`enhance`)만 적용하지 않는다**(`enhance = 0`, 즉 `enhanceMultiplier(0) = 1`, `specialMultiplier(0) = 1`).
+- 보유 중인 동료는 기존처럼 자신의 강화 단계(`p.heroes[id].enhance`)를 그대로 적용받으며, 파견 중인 동료는 기존과 같이 후보에서 제외한다(미보유 동료는 파견 불가).
+
+### 구현 시 확인할 곳
+1. **후보 풀(`draftPool`):** `available(p)` 대신 드래프트 전용 풀 함수로 분리하고, 미보유 동료 여부와 1부 해금(`lateOpen(p.cleared)`) 반영 여부를 명시한다.
+2. **전투 메타·전투력(`battleMeta`, `combatPower`):** `battle.js`의 `battleMeta(profile, deck)`와 드래프트 카드의 `cpOf(o.id)`(`app.js`)가 미보유 동료일 때 `owned: true, enhance: 0` 가상 항목을 기준으로 전투력·배율을 계산하도록 분리한다.
+3. **세이브 검증(`validateProfile`)과 복원(`resumeBattle`):** `a.mode === 'weekly'`일 때 `draftPool`·`draft`·`deck`에 미보유 동료 ID가 들어 있어도 허용하되, 파견 중 동료나 존재하지 않는 ID는 계속 거부한다.
+4. **드래프트 UI·동료의 부탁 연동:** 카드에 `미보유 (강화 +0)` 구분 표시를 추가할지, 미보유 동료를 드래프트에서 써서 조건을 채운 경우 `applyRequestProgress`가 미보유 동료의 부탁까지 진행시킬지(부탁은 보유 동료에게만 도착하므로 영향은 제한적) 결정한다.
+
+---
+
+## 2. 테스트 배포용 수치 조정안
+
+목적: 짧은 주기의 테스트 배포 빌드에서 가챠 로테이션, 파견, 인연(메모리얼), 새싹 미션, 방치 성장의 전체 루프를 장기간 대기 없이 빠르게 체험·검증할 수 있도록 별도 수치 프로필을 설계한다. **일반 정식 빌드(`StarGardenDefense.html`, `StarGardenDefenseBright.html`)의 밸런스와 `golden-replay.mjs` 기준선에는 영향을 주지 않도록 빌드 플래그/테스트 프로필 경계를 분리한다.**
+
+### 조정 항목
+
+| 항목 | 현재 값 (정식 코드 기준) | 테스트 배포 제안 값 | 관련 위치 |
+|---|---|---|---|
+| **새싹미션·로그인·가챠 로테이션 주기** | 일반 픽업 주간(월요일 00:00 KST), 시즌 수호자 월간, 격주 이벤트 주간 교대 | **1일(24시간) 주기** (일일 00:00 KST 기준 로테이션) | `src/economy.js`(`calendar`, `guardianOf`), `src/preview/season.js` |
+| **새싹미션 접속 날짜 주기 제거 및 미션 단위 개편** | `beginner.count`(1~7)가 날짜 변경(`rollDay`)마다 1씩 증가하며, `unlocked = count >= d.day`로 일차별 잠금 | **접속 일수 대기 제거** · 일차 잠금 없이 미션 달성 단위로 즉시 보상 수령 가능한 구조로 개편 | `src/beginner.js`(`BEGINNER_DAYS`, `beginnerState`), `src/profile.js`(`rollDay`, `beginnerClaim`) |
+| **파견 주기** | `TUNING.dispatchHours = 24`시간 | **2시간** | `src/content.js`, `src/profile.js`(`validateProfile`, `migrateDispatch`, 파견 토스트 문구) |
+| **파견 별똥별(별가루) 획득량** | `TUNING.dispatchDust = 1.5` 기준 `dispatchReward` 산출 | **5배** | `src/content.js`, `src/economy.js`(`dispatchReward`, `dispatchDust`) |
+| **방치 별똥별(별가루) 획득량** | `TUNING.idleDustPerHour = 14`, `(14 + levelOf(cleared)*2)/시간` | **5배** | `src/content.js`, `src/economy.js`(`idleReward`) |
+| **인연(호감도) 획득량** | 인사 `GREETING_POINTS = 10`, 일반 선물 `10`, 선호 선물 `20`, 부탁 `REQUEST_REWARD.bond = 40` | **10배** (인사 100 · 일반 선물 100 · 선호 선물 200 등) | `src/bond.js`, `src/preview/requests-data.js` |
+| **미션 별똥별(별가루) 획득량** | 현재 `DAILY_MISSIONS`는 꿈의결정(60/30/30+30), `BEGINNER_DAYS`는 3·6일차 접속에 별가루(1,000·1,500) 지급 | **5배** (미션 단위로 재편된 별똥별·별가루 보상 포함 5배) | `src/profile.js`(`DAILY_MISSIONS`), `src/beginner.js`(`BEGINNER_DAYS`) |
+
+### 구현 시 확인할 곳
+- **파견 2시간 + 별가루 5배의 기준:** 파견 주기를 24시간 → 2시간(12배 빈도)으로 줄이면서 1회 획득량까지 5배로 둘지, 기존 시간당 효율의 5배로 맞출지 테스트 배포 목적에 맞게 확정한다. 또한 `validateProfile`의 `d.end - d.start === TUNING.dispatchHours * HOUR` 검사와 기존 저장 파견 변환(`migrateDispatch`)이 빌드 상수를 읽게 맞춘다.
+- **새싹미션 개편 범위:** `BEGINNER_DAYS`의 `login`과 `task`를 하나의 미션 목록(예: 7단계 또는 미션별 개별 해금)으로 합치거나 날짜 조건만 제거할지, 최종 `UR 동료 선택` 보상 해금 조건을 모든 선행 미션 완료로 둘지 정의한다.
+- **세이브 격리:** `src/team-config.js`의 `SAVE_KEY`처럼 테스트 배포 수치 빌드는 정식 저장과 분리된 저장 키·검증 경계를 유지한다.
+
+---
+
+## 3. 일본어판 대비 용어 정비
+
+### 문제와 목적
+- 현재 전투 규칙·도감·상태 설명에는 **`노출`**, **`성광`**처럼 한국어 한자 조어로는 익숙하지만 일본어로 직역(`露出`, `星光`)하면 의미가 어색하거나 게임 내 효과를 즉시 연상하기 어려운 명칭이 있다.
+- 일본어판 배포를 대비해, 일본 서브컬처·타워디펜스 게임에서 플레이어가 설명 한 줄만 읽고도 효과를 바로 이해할 수 있는 합리적이고 자연스러운 용어 체계로 정비한다.
+
+### 우선 점검 대상
+- **`노출` (받는 피해 증가 상태):**
+  - 현재 사용처: `명탐정`, `팬텀`, `혹한의마녀`, `조커(검정)`, `STATUS_RULES.md`, `data.js`.
+  - 일본어판 고려 사항: `露出`는 일반/서브컬처 문맥에서 전혀 다른 의미로 읽히기 쉬우므로 `脆弱(ぜいじゃく)` · `被ダメージ増加` · `弱点露出` 등 전투 디버프로 명확한 명칭 검토 필요.
+- **`성광` (중첩형 표식, 처치 시 별빛 획득 + 중첩당 받는 피해 +2%, 최대 3중첩):**
+  - 현재 사용처: `은토끼`, `자스민`, `아우로라`, `은하고래`, `체리프린스`, `조커(하양)`, `data.js`.
+  - 일본어판 고려 사항: `星光` 단독 표기보다 `星の印` · `星紋` · `星の刻印` 등 "적에게 새겨져 수확/발동 조건이 되는 표식"이라는 규칙이 드러나는 이름 검토 필요.
+- **함께 정비할 전투·시스템 용어:**
+  - 상태 이상/특수 개념: `감속` / `기절` / `빙결` / `화상` / `중독` / `저주` / `소멸` / `무적`.
+  - 성장·재화·모드 명칭: `별빛` · `별가루` · `꿈의결정` · `성급` · `강화` · `훈련` · `유성 드래프트` · `별빛 서약` · `쌍성 원정` · `만월 토벌전` · `새벽 온실` · `별의 서재`.
+  - 한국어 원문 내 미정리 잔여 불일치(`언더독` 역할 `"노멀 편성 · 단일"` ↔ C 등급, `마왕` 역할 `"디버프 회수 · 관통"` ↔ 유지/연계, `시간의지배자` 스킬 `"6초 전 위치로 되돌리며"` ↔ 실제 거리 밀침)도 다국어 용어집 작성과 함께 정리한다.
+
+---
+
+## 4. 학습자료 매핑 정비 (영어판 · 일본어판 · 학습제거판)
+
+### 현재 구조 (`defense/`)
+- `src/course.js`가 단일 상수 `COURSE`(`id: 'pm-2026'`, IPA 프로젝트 매니저 시험 대비 30강의 + 100용어)를 내보내고, `quiz.js`·`tutor.js`·`library.js`·`profile.js`(`p.study`)·`app.js`가 이를 직접 참조한다.
+- 게임 내 학습 연결 지점은 세 곳이다.
+  1. **10회 소환 별빛 퀴즈 (`concept`)**: 영웅 10회 시 UR 2배, 유물 10회 시 10% 확률 보너스 10회.
+  2. **파견 가속 퀴즈 (`term`)**: 하루 1회, 진행 중인 파견 4시간 단축.
+  3. **루미의 별의 서재 (`library`)**: 오답 노트 복습으로 하루 1별 점등 → 7개 별자리(루미 일러스트 7장) 해금 + Gemini API 오답 해설.
+
+### 배포판 3종 매핑 설계 과제
+
+| 배포 구분 | 학습 데이터 매핑 (`course`) | UI/기능 처리 | 확인 포인트 |
+|---|---|---|---|
+| **일본어판** | 일본어판 대상 과목 데이터(예: 현행 IPA PM 일본어 원문 또는 일본어 학습/자격 과목 스키마) | 게임 UI·캐릭터 대사·메모리얼·강의/용어 퀴즈 전체 일본어화, 루미 튜터 프롬프트(`tutor.js`) 일본어화 | 일본어 원문 기준 문제/해설 출처 검수, 폰트(`Jua`는 한글/영문 위주이므로 일본어 글꼴 또는 fallback 정책 결정) |
+| **영어판** | 영어 학습 과목(어휘·연어·문법·TOEIC 등 `COURSE` 스키마로 변환) | 게임 UI·캐릭터 대사 영어화, `tutor.js` 영어 설명 프롬프트 및 선택지 매핑 | `tests/independence.test.mjs` 규칙상 `defense/`는 다른 게임(`card/`, `shooter/`)을 런타임 import 할 수 없으므로, 과목 데이터는 `defense/` 내부 스냅샷/생성 스크립트로 독립 보유 |
+| **학습제거판** *(순수 게임판)* | `COURSE = null` 또는 빈 학습 모듈(`STUDY_ENABLED = false`) | **대체 보상·진입점 설계 필요:** ① 로비 `별의 서재` 버튼·`UNLOCKS.library`·`TOUR_IDS`의 `'library'`·설정 `tutorPanel()` 숨김 ② 10회 소환 부스트(퀴즈 없이 기본 확률 반영 또는 단순 확인/미니조건 전환) ③ 파견 가속(일일 1회 무료 버튼 등으로 대체) ④ 별자리 일러스트 7종의 비학습 해금 경로 마련 | `tests/study.test.mjs`와 `tests/profile.test.mjs`의 빌드 플래그별 분기, 기존 세이브(`p.study`)의 `migrateStudy` 무결성 유지 |
+
+---
+
+## 5. 연출 · 에셋 결정 대기 항목 (비교 도구 연결)
+
+현재 코드와 문서에 남아 있는 미확정 결정 항목 4가지는 [결정 대기 항목 비교 도구](../review/pending-decisions/index.html)(생성: `node defense/scripts/review-pending-decisions.mjs`)에서 나란히 확인할 수 있다.
+
+1. **신데렐라 기적 문양 안 (`유리구두` vs `소원의 별`):** 현재 게임은 `유리구두`(`slipper`), 제안 안은 `소원의 별`(`miracle`). 비교 도구의 듀얼 캔버스에서 실시간 재생·시점별 스틸컷으로 바로 비교.
+2. **컷인 표정 그림 및 필살기 대사 도입 여부:** 현재 컷인은 SD 전신 + 기술명(`app.js` `cutIn`)만 표시. 표정 교체(동료당 1장 추가) 및 대사 1줄 추가 시안 비교.
+3. **덱 기준 이미지 디코딩:** 현재 `Art.load()`(`src/combat/render.js`)가 전투 시작 시 `RUNTIME_ASSET_PATHS` 전체를 일괄 디코딩. 실제 5인 덱 기준 디코딩으로 전환 시 예상 절감량 비교.
+4. **`ur-kit3` 미사용 봉투 칸 제거:** `KIT3.envelope`(11번 칸, 둠 초기 시안 봉투)가 현재 미사용 상태로 남아 있으며, 다음 시트 재패킹 시 제거 대상(`VFX_DIRECTION_PLAN.md`, `VFX_SEQUENCE_GUIDE.md`).
