@@ -1,0 +1,24 @@
+Use your built-in image generation tool exactly once to make one image, with the tool's transparent background option set. Do not run shell commands and do not write any files: the tool's own saved output is all that is needed. When done, reply with the single word: done.
+
+IMAGE: a 2x2 sheet of four game relic icons on a fully transparent square canvas (1024x1024). One object centred in each quadrant, each object filling about 80 percent of its quadrant, with clear empty space between objects. Every object is a single solid item with no background, no card, no frame, no text, no letters, no ground shadow. The four icons must look like one set by one artist.
+
+STYLE. Paint exactly like the attached gift icons (star-candy pouch, love letter, bouquet) and the attached SD character sprites (the Queen's gold halo and scepter, Santa's sack): soft cel-painted anime game item art from the same game.
+- Line: one continuous outline around every silhouette in warm dark brown (never pure black), THIN and even like the gift icons (about 2-3 px at this size), not a thick sticker outline. A few thin interior lines where forms meet; small handmade details are welcome (stitches, wood grain, petal edges, a seam), drawn with the same thin brown line.
+- Shading: flat base colours with one soft cel shadow tone; a gentle soft blend inside the shadow edge is fine, like the gift icons. At most one small highlight per material.
+- Colour: gentle pastel-leaning palette, warm and friendly, the same saturation as the gift icons. Gold is flat warm yellow with one ochre shadow and one pale highlight, like the Queen's halo and the pouch ribbon: no metallic reflections.
+- Forbidden (these are the generic AI-icon look we are removing): engraving, filigree, scrollwork, embossed patterns, wet glossy shine, rim light, sparkle stars, glints, lens flares, glow halos, floating particles or shards, galaxy/nebula textures inside objects, ornate gold frames around objects, gems set in jewellery mounts, dangling charms and tassels that were not asked for. Also avoid the opposite failure: chunky vector clip-art with thick outlines and blob shapes.
+- Light from the upper left. Slight three-quarter view from above.
+- METAL RULE (most important for this sheet): every brass or gold surface is painted exactly like the Queen's gold halo in the reference: a flat warm yellow fill, ONE hard-edged ochre shadow shape, and ONE small cream highlight. No smooth gradients, no reflections of surroundings, no bright specular streaks.
+- Every object, including beams, tails and flames, ends inside its own quadrant with a closed outline; nothing touches the quadrant edge.
+
+REFERENCES: the gift icons and the character sprites set the style. The attached grey sheet shows other relic icons already made for this same set: match their line weight, shading, palette and level of detail exactly so the new icons sit beside them as one set. Do not copy any of their subjects.
+
+DESIGN DENSITY (this is a HIGH-RARITY sheet). Keep the rendering exactly as in the style rules above, but put far more design into the FORM, the way the character sprites do: the Queen's head alone has a thorn wreath with five small roses, an 18-ray halo and a red hair streak; Santa's hat has holly leaves with two outlined stars and textured fur trim. So each relic here is built from 4-6 distinct parts in 3-4 different materials (metal, cloth, glass, wax, wood, flowers, paper, pearls), with small hand-drawn motifs (stitches, lace edges, painted dots, tiny rose buds, a curl of ribbon) drawn with the same thin brown line and flat cel colours. Silhouettes should be interesting and asymmetric, not a plain blob. Motifs come from this game's world: a star garden at night with roses, hydrangeas, moons, stars, ribbons and small rabbits. Still no engraving, filigree, gloss streaks, glow or particle sparkles: richness comes from parts and motifs, never from shine.
+
+RARITY SIGN: no halo, no backplate and no stars around the objects; the rarity must come only from the richness of the object's own parts and materials.
+
+SUBJECTS (one per quadrant, reading order):
+1 top-left (SR): three chunky stars (blue, pink, yellow) linked into a triangle by brass wire with a tiny pearl at each joint, hung from a small brass ring with a short navy ribbon.
+2 top-right (SR): a small navy planet painted with tiny cream star dots and one pale cloud band, circled by a brass ring that carries two tiny moons, one cream and one pale blue.
+3 bottom-left (SR): a brass hand bell whose lip carries a painted band of small music notes, a turned wooden handle with a brass cap, and a teal ribbon bow tied at its neck.
+4 bottom-right (SR): a brass stage spotlight on a wall bracket with a short swag of red velvet curtain and a gold tassel hanging from the bracket; it throws a soft flat cone of pale yellow light.

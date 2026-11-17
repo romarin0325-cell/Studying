@@ -58,12 +58,12 @@
     }
   },
   "totals": {
-    "sourceBytes": 35074891,
+    "sourceBytes": 36313059,
     "deployableSourceBytes": 33250617,
     "outputBytes": 17806934,
     "optimizedFiles": 179,
     "derivedFiles": 162,
-    "derivedOutputBytes": 3882286
+    "derivedOutputBytes": 3679828
   },
   "images": [
     {
@@ -2119,27 +2119,7 @@
       "source": "./assets/merge/relics.webp",
       "profile": null,
       "uses": [
-        "relic:hourglass; collection / summon / equipment",
-        "relic:ember; collection / summon / equipment",
-        "relic:frost; collection / summon / equipment",
-        "relic:banner; collection / summon / equipment",
-        "relic:chorus; collection / summon / equipment",
-        "relic:lens; collection / summon / equipment",
-        "relic:seed; collection / summon / equipment",
-        "relic:feather; collection / summon / equipment",
-        "relic:crown; collection / summon / equipment",
-        "relic:meteor; collection / summon / equipment",
-        "relic:prism; collection / summon / equipment",
-        "relic:tide; collection / summon / equipment",
-        "relic:roots; collection / summon / equipment",
-        "relic:guild; collection / summon / equipment",
-        "relic:phoenix; collection / summon / equipment",
-        "relic:lantern; collection / summon / equipment",
-        "relic:constellation; collection / summon / equipment",
-        "relic:orbit; collection / summon / equipment",
-        "relic:twin; collection / summon / equipment",
-        "relic:alchemy; collection / summon / equipment",
-        "Source for collection relic icon crops."
+        "GPT-default relic icons, replaced 2026-11-18 by relics-v2 (restyle to the cast art); kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -2305,11 +2285,7 @@
       "source": "./assets/merge/relics-expansion.webp",
       "profile": null,
       "uses": [
-        "relic:tempo_bell; collection / summon / equipment",
-        "relic:royal_seal; collection / summon / equipment",
-        "relic:gift_ribbon; collection / summon / equipment",
-        "relic:broken_clock; collection / summon / equipment",
-        "Source for collection relic icon crops."
+        "GPT-default relic icons, replaced 2026-11-18 by relics-v2 (restyle to the cast art); kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -3085,10 +3061,7 @@
       "source": "./assets/merge/relics-new.webp",
       "profile": null,
       "uses": [
-        "relic:sprout; collection / summon / equipment",
-        "relic:amulet; collection / summon / equipment",
-        "relic:chalice; collection / summon / equipment",
-        "Source for collection relic icon crops."
+        "GPT-default relic icons, replaced 2026-11-18 by relics-v2 (restyle to the cast art); kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -3109,10 +3082,7 @@
       "source": "./assets/merge/relics-patch.webp",
       "profile": null,
       "uses": [
-        "relic:dream_crystal; collection / summon / equipment",
-        "relic:spotlight; collection / summon / equipment",
-        "relic:royal_crown; collection / summon / equipment",
-        "Source for collection relic icon crops."
+        "GPT-default relic icons, replaced 2026-11-18 by relics-v2 (restyle to the cast art); kept as the approved source."
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
@@ -3121,6 +3091,57 @@
         "metadata": {
           "width": 512,
           "height": 512,
+          "hasAlpha": true,
+          "codec": "webp"
+        }
+      },
+      "output": null,
+      "decision": "Build-only source; omitted from HTML and preload."
+    },
+    {
+      "id": "atlas:relics-v2",
+      "source": "./assets/merge/relics-v2.webp",
+      "profile": null,
+      "uses": [
+        "relic:hourglass; collection / summon / equipment",
+        "relic:ember; collection / summon / equipment",
+        "relic:frost; collection / summon / equipment",
+        "relic:banner; collection / summon / equipment",
+        "relic:chorus; collection / summon / equipment",
+        "relic:lens; collection / summon / equipment",
+        "relic:seed; collection / summon / equipment",
+        "relic:feather; collection / summon / equipment",
+        "relic:crown; collection / summon / equipment",
+        "relic:sprout; collection / summon / equipment",
+        "relic:amulet; collection / summon / equipment",
+        "relic:dream_crystal; collection / summon / equipment",
+        "relic:meteor; collection / summon / equipment",
+        "relic:prism; collection / summon / equipment",
+        "relic:tide; collection / summon / equipment",
+        "relic:roots; collection / summon / equipment",
+        "relic:guild; collection / summon / equipment",
+        "relic:phoenix; collection / summon / equipment",
+        "relic:lantern; collection / summon / equipment",
+        "relic:constellation; collection / summon / equipment",
+        "relic:orbit; collection / summon / equipment",
+        "relic:tempo_bell; collection / summon / equipment",
+        "relic:spotlight; collection / summon / equipment",
+        "relic:royal_crown; collection / summon / equipment",
+        "relic:twin; collection / summon / equipment",
+        "relic:alchemy; collection / summon / equipment",
+        "relic:chalice; collection / summon / equipment",
+        "relic:royal_seal; collection / summon / equipment",
+        "relic:gift_ribbon; collection / summon / equipment",
+        "relic:broken_clock; collection / summon / equipment",
+        "Source for collection relic icon crops (restyle 2026-11-18, docs/art/relic-restyle-20261118)."
+      ],
+      "retention": "Preserve source bytes at this path; optimized output is separate.",
+      "original": {
+        "bytes": 1238168,
+        "sha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
+        "metadata": {
+          "width": 3072,
+          "height": 2560,
           "hasAlpha": true,
           "codec": "webp"
         }
@@ -8490,22 +8511,22 @@
     },
     {
       "id": "relic:hourglass",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 0
       },
       "destination": "./assets/optimized/ui/relics/hourglass.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/hourglass.webp",
-        "bytes": 19170,
-        "sha256": "3cdda62322c6237fdcdb3ec2303c31063429423524448af8b4ebbca303cb997d",
+        "bytes": 12452,
+        "sha256": "28dc2a418717326fc1278f5be7b9389c7b3e2e515e9f2289897d9c84eb60f403",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8516,22 +8537,22 @@
     },
     {
       "id": "relic:ember",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 1
       },
       "destination": "./assets/optimized/ui/relics/ember.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/ember.webp",
-        "bytes": 14618,
-        "sha256": "c9948ad6538b0a3bf51dcc46002f6cdad4e7d7a7031cbfdf7579af7abd0cf9aa",
+        "bytes": 8338,
+        "sha256": "3439392bf81f1d852611e26e25961cecf6b3fb0995fdd98924057f6f2c93bf32",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8542,22 +8563,22 @@
     },
     {
       "id": "relic:frost",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 2
       },
       "destination": "./assets/optimized/ui/relics/frost.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/frost.webp",
-        "bytes": 23634,
-        "sha256": "7e8f50bdba07af6ec2c9f0105a768ba3d3e6b75a7c369680940012bae81da1e2",
+        "bytes": 9988,
+        "sha256": "22fcf0c1338f21f476a9bb9aa8fd19bb60910b00e1fc02ac856c2ceea3e7d5c3",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8568,22 +8589,22 @@
     },
     {
       "id": "relic:banner",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 3
       },
       "destination": "./assets/optimized/ui/relics/banner.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/banner.webp",
-        "bytes": 17238,
-        "sha256": "c476743f8cd867d751394e089237e97b5ebe47ced0877b083f62961544f07356",
+        "bytes": 11002,
+        "sha256": "d13f176ae9fd22007be99cde0865df8f2fcf2eca6686b13563c6fa755d35b1da",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8594,22 +8615,22 @@
     },
     {
       "id": "relic:chorus",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 4
       },
       "destination": "./assets/optimized/ui/relics/chorus.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/chorus.webp",
-        "bytes": 21556,
-        "sha256": "27fc38a5e882f2abc3c27212ffd1fd6d67259c4673274629b53765a519daefff",
+        "bytes": 8402,
+        "sha256": "3400b9760037ffba347a14818d903d9f67f0f733e36dbd892fcf720320f6eccd",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8620,22 +8641,22 @@
     },
     {
       "id": "relic:lens",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 6
       },
       "destination": "./assets/optimized/ui/relics/lens.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/lens.webp",
-        "bytes": 14000,
-        "sha256": "8d01971f957947007ca2b4f65f5ee51792e5e7cdeae32e9934051a624b0ffe30",
+        "bytes": 8034,
+        "sha256": "80782d3f0d03088386ca3d67ed85f72bdc0e6f853a844e02cc6712ef726fc4fc",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8646,22 +8667,22 @@
     },
     {
       "id": "relic:seed",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 7
       },
       "destination": "./assets/optimized/ui/relics/seed.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/seed.webp",
-        "bytes": 16666,
-        "sha256": "5506ca2a679b08cedc7d03223ef3185051289520039632897ad4750ab6774de1",
+        "bytes": 9896,
+        "sha256": "83982c47434549363879502f760f098fe952249e608338976b84734169dcc454",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8672,22 +8693,22 @@
     },
     {
       "id": "relic:feather",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 8
       },
       "destination": "./assets/optimized/ui/relics/feather.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/feather.webp",
-        "bytes": 14044,
-        "sha256": "66a2bf09be104f5c2a8a2cf40ac87dd4688edb2451e14047ddd8f30c1c07f7c6",
+        "bytes": 9482,
+        "sha256": "89773a20f1ad5ad8ab5402190eb012a9b033a4b175c2995646f7db8aa2383f9d",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8698,22 +8719,22 @@
     },
     {
       "id": "relic:crown",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 9
       },
       "destination": "./assets/optimized/ui/relics/crown.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/crown.webp",
-        "bytes": 19564,
-        "sha256": "64efe35415aa18c0ac1b336ee1ee30fbb3c8dad2413f2f337e8cfa0f492e5886",
+        "bytes": 11538,
+        "sha256": "ad38000e6df4b0bbd0140cee5d2b096310cdea227c8d4af6ca68337f9d636f74",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8724,22 +8745,22 @@
     },
     {
       "id": "relic:sprout",
-      "source": "./assets/merge/relics-new.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 0
+        "columns": 6,
+        "rows": 5,
+        "index": 10
       },
       "destination": "./assets/optimized/ui/relics/sprout.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/sprout.webp",
-        "bytes": 11764,
-        "sha256": "23a9b41e418e8e28292145be29d3812ca95eea6b07a4043e0acaacd40d33b8e9",
+        "bytes": 10442,
+        "sha256": "2c2a34dbffce01f58f03fdcd767983f617ddb2e9f40d0d20422303255d139f13",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8750,22 +8771,22 @@
     },
     {
       "id": "relic:amulet",
-      "source": "./assets/merge/relics-new.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 1
+        "columns": 6,
+        "rows": 5,
+        "index": 11
       },
       "destination": "./assets/optimized/ui/relics/amulet.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/amulet.webp",
-        "bytes": 14362,
-        "sha256": "20c76c7c457b1253c3f353ae83b521851b992ef0731174d7daafb68007dc5b61",
+        "bytes": 8438,
+        "sha256": "11e3657095e4990c10c0b136ccc6e622f646aa710224104dd485f31bdafdfd49",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8776,22 +8797,22 @@
     },
     {
       "id": "relic:dream_crystal",
-      "source": "./assets/merge/relics-patch.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 2
+        "columns": 6,
+        "rows": 5,
+        "index": 29
       },
       "destination": "./assets/optimized/ui/relics/dream_crystal.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/dream_crystal.webp",
-        "bytes": 24874,
-        "sha256": "9adb1d0a85ef37f9fb53fc4d9a272d17354605da41ca5880ffb89ca799cd588f",
+        "bytes": 6600,
+        "sha256": "ced24e18e4627af106ce2f929bdf705124fe8150942e9bb0817cca51a6501b99",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8802,22 +8823,22 @@
     },
     {
       "id": "relic:meteor",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 10
+        "columns": 6,
+        "rows": 5,
+        "index": 12
       },
       "destination": "./assets/optimized/ui/relics/meteor.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/meteor.webp",
-        "bytes": 17156,
-        "sha256": "ec80864eea58052d6498046dcd400fbc905f89213ebe064b58759a9ddc4b73f8",
+        "bytes": 10288,
+        "sha256": "42761a4ad60b15132369dcd168ec34320c2b35876d06c9c46c27f0e59853ebde",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8828,22 +8849,22 @@
     },
     {
       "id": "relic:prism",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 11
+        "columns": 6,
+        "rows": 5,
+        "index": 13
       },
       "destination": "./assets/optimized/ui/relics/prism.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/prism.webp",
-        "bytes": 21008,
-        "sha256": "3b44fd337ccbf0e010c456a36b386c22a692d8c842267bd0bd7b5a5650a2e26c",
+        "bytes": 8766,
+        "sha256": "b285c455be7d03185dc578f0bebeaa574a0cef3fe0603ea9587fd7e90044e8c3",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8854,22 +8875,22 @@
     },
     {
       "id": "relic:tide",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 12
+        "columns": 6,
+        "rows": 5,
+        "index": 14
       },
       "destination": "./assets/optimized/ui/relics/tide.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/tide.webp",
-        "bytes": 20772,
-        "sha256": "91782e676afa945a03403073085daf82551833f79de2f2acac4fbf00f3cbb1b6",
+        "bytes": 11898,
+        "sha256": "7522d166d9799f25f4f0770f928b482cc18c5205becaec5d3e4bbf3307509a87",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8880,22 +8901,22 @@
     },
     {
       "id": "relic:roots",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 13
+        "columns": 6,
+        "rows": 5,
+        "index": 15
       },
       "destination": "./assets/optimized/ui/relics/roots.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/roots.webp",
-        "bytes": 25048,
-        "sha256": "e722a67e5d0ce1428cbdf519a6f69160e853aeb57964483a03fb34e398b59622",
+        "bytes": 12336,
+        "sha256": "970c1a87bd6abbfcb9744f72859f57f15e012a506c4a2fbe3302312d92babb98",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8906,22 +8927,22 @@
     },
     {
       "id": "relic:guild",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 14
+        "columns": 6,
+        "rows": 5,
+        "index": 16
       },
       "destination": "./assets/optimized/ui/relics/guild.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/guild.webp",
-        "bytes": 16652,
-        "sha256": "99d9fa0705fd9dc67e8574f5dccc9d19eda18d8f90db3cd891cb3f124f907c41",
+        "bytes": 12188,
+        "sha256": "53b78df670093c2280d91ca743efb7109ebf079997f1115e5db4726614c3a10d",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8932,22 +8953,22 @@
     },
     {
       "id": "relic:phoenix",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 15
+        "columns": 6,
+        "rows": 5,
+        "index": 17
       },
       "destination": "./assets/optimized/ui/relics/phoenix.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/phoenix.webp",
-        "bytes": 18306,
-        "sha256": "e06d2100185d929097ba76b7515e366044e983042407ac9131080c6812a0277e",
+        "bytes": 12222,
+        "sha256": "0fb4fafc0d6b7be4465b5764affa4c6aa7cb39db5dceed637691da9a6ef24748",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8958,22 +8979,22 @@
     },
     {
       "id": "relic:lantern",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
+        "columns": 6,
+        "rows": 5,
         "index": 5
       },
       "destination": "./assets/optimized/ui/relics/lantern.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/lantern.webp",
-        "bytes": 13678,
-        "sha256": "a3bdebc87f176aa777e5d1b780a6d48c656df7fc23d5929f51e5c65c879ba356",
+        "bytes": 13456,
+        "sha256": "ec0b555995afd3a0749f2e2fb8f4fb3f4ab31b474333df46b078d80f72e2bce6",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -8984,22 +9005,22 @@
     },
     {
       "id": "relic:constellation",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 17
+        "columns": 6,
+        "rows": 5,
+        "index": 19
       },
       "destination": "./assets/optimized/ui/relics/constellation.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/constellation.webp",
-        "bytes": 23242,
-        "sha256": "ecdda70748eb022e6fb468faef0b25ec43b33a5c2db35f4406c3c50bd3b3eefd",
+        "bytes": 13156,
+        "sha256": "8523fbfe77d93238d2105e370770940ad5484d071d70f18aaca75d03d1c31049",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9010,22 +9031,22 @@
     },
     {
       "id": "relic:orbit",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 19
+        "columns": 6,
+        "rows": 5,
+        "index": 21
       },
       "destination": "./assets/optimized/ui/relics/orbit.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/orbit.webp",
-        "bytes": 14522,
-        "sha256": "adab0826380167f34c3a9c9fbc5ff7d45c7c96f23afa6da1a555001d7b498aeb",
+        "bytes": 10364,
+        "sha256": "5ece3ef27c7a72ec2b488c27e0b3b0d7eabb3ff09f1d1948c059211eb33599d5",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9036,22 +9057,22 @@
     },
     {
       "id": "relic:tempo_bell",
-      "source": "./assets/merge/relics-expansion.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 0
+        "columns": 6,
+        "rows": 5,
+        "index": 22
       },
       "destination": "./assets/optimized/ui/relics/tempo_bell.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/tempo_bell.webp",
-        "bytes": 15426,
-        "sha256": "f0c8302b3cc73505b12ce5446b7fed8372196ddfac650c5bd3264c0643944e8e",
+        "bytes": 9942,
+        "sha256": "a69c523438367f12d8a364ee21349b50290a3c69a6665d50e9814577ed2c168c",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9062,22 +9083,22 @@
     },
     {
       "id": "relic:spotlight",
-      "source": "./assets/merge/relics-patch.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 0
+        "columns": 6,
+        "rows": 5,
+        "index": 27
       },
       "destination": "./assets/optimized/ui/relics/spotlight.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/spotlight.webp",
-        "bytes": 13024,
-        "sha256": "9b6a7dbabb831b10c36d4f5ac0e6a6aca971c851450fb970d59c68cd118035a1",
+        "bytes": 11070,
+        "sha256": "20d5689e686934e6e8313dc2cd000bfa8d1237a7ccde2a50a20ee83ec683683f",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9088,22 +9109,22 @@
     },
     {
       "id": "relic:royal_crown",
-      "source": "./assets/merge/relics-patch.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 1
+        "columns": 6,
+        "rows": 5,
+        "index": 28
       },
       "destination": "./assets/optimized/ui/relics/royal_crown.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "a4da7b50c669b953ea24c2fdf81aeb3e75bb854cb62d93b55a4c6fe3ff51fbf2",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/royal_crown.webp",
-        "bytes": 20742,
-        "sha256": "55f1275d38264c54509b36bb6ea1b99dad6594d982cfc57a791b4dd49a04e89a",
+        "bytes": 14124,
+        "sha256": "13b22a6472519d44e0787157f5126f2120317cc800c3a35de496f5ae66fa5fc7",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9114,22 +9135,22 @@
     },
     {
       "id": "relic:twin",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 16
+        "columns": 6,
+        "rows": 5,
+        "index": 18
       },
       "destination": "./assets/optimized/ui/relics/twin.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/twin.webp",
-        "bytes": 25566,
-        "sha256": "8be9f2fcc32ad2da4dbd2c90079912aa737912f887861f5851df6cb6a964c3f5",
+        "bytes": 12070,
+        "sha256": "fc570267b1ee64e95758153ab2f4fed0ede5420e4c63a616b188b246e93561d3",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9140,22 +9161,22 @@
     },
     {
       "id": "relic:alchemy",
-      "source": "./assets/merge/relics.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 5,
-        "rows": 4,
-        "index": 18
+        "columns": 6,
+        "rows": 5,
+        "index": 20
       },
       "destination": "./assets/optimized/ui/relics/alchemy.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "7b6f7738062e5185843b82f56bd435df49b32b84c7efde10ab1fcc9049fa0120",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/alchemy.webp",
-        "bytes": 17296,
-        "sha256": "27286a73b3a8fa017c68f71664bbe0f920bfc4b379c37113148c426a8ad5c4ff",
+        "bytes": 12184,
+        "sha256": "e031834a99a23a5fe0ab3a0e7312ee3d2cc0cb57001a493afe328a943a267298",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9166,22 +9187,22 @@
     },
     {
       "id": "relic:chalice",
-      "source": "./assets/merge/relics-new.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 2
+        "columns": 6,
+        "rows": 5,
+        "index": 23
       },
       "destination": "./assets/optimized/ui/relics/chalice.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "d16c8091da229751d77c40c29e63d0bb0bed0e36800537ee2bb27b1458012c99",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/chalice.webp",
-        "bytes": 10796,
-        "sha256": "6ff5eb756813b4992b49c6c6a4c04ac65df084a5fa660053d23d3ec7bee1baf9",
+        "bytes": 11044,
+        "sha256": "e7774172f063b0a53be8e712b84415d4e6c67eac6f8daf766a5524a6dffa6766",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9192,22 +9213,22 @@
     },
     {
       "id": "relic:royal_seal",
-      "source": "./assets/merge/relics-expansion.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 1
+        "columns": 6,
+        "rows": 5,
+        "index": 24
       },
       "destination": "./assets/optimized/ui/relics/royal_seal.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/royal_seal.webp",
-        "bytes": 14830,
-        "sha256": "cfb37aba54733099112bb9a92b73a8f258ac0827506601d055d293ee94dd8fc7",
+        "bytes": 12288,
+        "sha256": "ef6793700d981a29e186b7d97ae3ec39e0be9006ca42ebe6b5e0ad229aef1c6a",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9218,22 +9239,22 @@
     },
     {
       "id": "relic:gift_ribbon",
-      "source": "./assets/merge/relics-expansion.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 2
+        "columns": 6,
+        "rows": 5,
+        "index": 25
       },
       "destination": "./assets/optimized/ui/relics/gift_ribbon.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/gift_ribbon.webp",
-        "bytes": 16788,
-        "sha256": "1b273450877d6b4039ee6ab7f48521ab8391472947d9f2b1afdd04d168f52008",
+        "bytes": 16238,
+        "sha256": "b5229f284f5a0b0bb9cc8f01d6512d3953b38263a759be3543878d8d6567e273",
         "metadata": {
           "width": 240,
           "height": 240,
@@ -9244,22 +9265,22 @@
     },
     {
       "id": "relic:broken_clock",
-      "source": "./assets/merge/relics-expansion.webp",
+      "source": "./assets/merge/relics-v2.webp",
       "profile": "relic",
       "crop": {
-        "columns": 2,
-        "rows": 2,
-        "index": 3
+        "columns": 6,
+        "rows": 5,
+        "index": 26
       },
       "destination": "./assets/optimized/ui/relics/broken_clock.webp",
       "uses": [
         "window.__GARDEN_MEDIA__; collection / summon / equipment"
       ],
-      "sourceSha256": "29bf885159d4f6a89f12154213911d20436a862b7fc9dc21f02d7dddbaf15c46",
+      "sourceSha256": "3a2489391e027f9cff538ba5d091a54fdae792e0b9c30e0b4219b22c5997153d",
       "output": {
         "path": "./assets/optimized/ui/relics/broken_clock.webp",
-        "bytes": 20242,
-        "sha256": "7be988b8ec12f6325745a048a7d0dc416ed2115fcc6238422aa0c60a440902c2",
+        "bytes": 15880,
+        "sha256": "6e0cae20ceba2351ae62f2f21c4589cf5aabdec6771a178559c54b31da0d0f21",
         "metadata": {
           "width": 240,
           "height": 240,
