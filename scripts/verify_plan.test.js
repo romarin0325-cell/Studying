@@ -288,6 +288,28 @@ test('Card-only changes never select Shooter or Defense commands', () => {
   assert.equal(ids(plan).includes('card:bundle-smoke'), false);
 });
 
+test('Pixel Relay slice or shared Card rules select the two headless suites once', () => {
+  const files = ['card_pixel/slice/src/bridge.js', 'card/game/logic.js'];
+  for (const scope of [[files[0]], [files[1]], files]) {
+    const plan = createPlan(changes(...scope));
+    const steps = plan.steps.filter(s => s.id === 'card:pixel:rules');
+    assert.equal(steps.length, 1);
+    assert.equal(steps[0].command, 'node');
+    assert.deepEqual(steps[0].args, [
+      '--test', 'card_pixel/slice/tests/bridge.test.mjs', 'card_pixel/slice/tests/rules.test.mjs'
+    ]);
+    assert.equal(steps[0].needsInstall, false);
+    assert.deepEqual(plan.browsers, []);
+    assert.deepEqual(plan.warnings, []);
+    assert.deepEqual(plan.detectedGames, ['card']);
+  }
+  const play = createPlan(changes('card_pixel/slice/tests/play.mjs'));
+  assert.ok(play.steps.every(s => s.args[0] === '--test' || s.args[0] === '--check'));
+  assert.deepEqual(play.browsers, []);
+  const docs = createPlan(changes('card_pixel/plan/README.md', 'card_pixel/slice/README.md'));
+  assert.deepEqual(docs.steps, []);
+});
+
 test('Shooter-only changes select direct build and combat checks without bundle smoke', () => {
   const plan = createPlan(changes('shooter/engine.js'));
   assert.deepEqual([...games(plan)], ['shooter']);
