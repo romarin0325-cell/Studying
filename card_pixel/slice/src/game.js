@@ -29,6 +29,30 @@
     wild: ['전투', '몽마가 기다린다'], elite: ['정예', '접두사 둘을 단 강적'], gate: ['문지기', '그림자의 릴레이 · 이기면 한 명이 동료가 된다'],
     boss: ['보스', '꿈의 주인'], spring: ['소환의 샘', '꿈의 결정으로 동료를 깨운다'], altar: ['혼돈의 제단', '무작위 동료에게 축복 · 세 번까지 굴린다']
   };
+  /* What each status and field blessing does. Numbers follow the card rules
+     (logic.js GAME_CONSTANTS.DEBUFF_REDUCTIONS, FIELD_BUFF_STATS, calculateStats; battle_runtime defProtocol). */
+  const STATUS_INFO = {
+    weak: '공격력 -20%', silence: '마법공격력 -20%', curse: '마법방어력 -20%', temptation: '마법방어력 -20%',
+    darkness: '방어력 -20% · 부식과 함께면 -40%', corrosion: '방어력 -20% · 암흑과 함께면 -40%',
+    burn: '쌓이는 표식(최대 3). 이를 읽거나 소모하는 기술·특성이 있다', divine: '쌓이는 표식(최대 3). 이를 읽거나 소모하는 기술·특성이 있다',
+    stun: '다음 행동을 건너뛴다', evasion: '회피율 +50%p', barrier: '물리 공격 한 번을 무효로 한다', magic_guard: '마법 공격 한 번을 무효로 한다',
+    guard: '받는 피해 50% 감소', damage_half: '받는 피해 50% 감소',
+    defProtocolPhy: '방어력 +50% (방어 프로토콜)', defProtocolMag: '마법방어력 +50% (방어 프로토콜)'
+  };
+  const FIELD_INFO = {
+    sun_bless: '공격력·마법공격력 +30%, 치명타 피해 +60%', moon_bless: '마법공격력 +30%, 회피율 +15%', sanctuary: '마법공격력·마법방어력 +30%',
+    goddess_descent: '공격력·마법공격력·방어력·마법방어력 +30%', destiny_oath: '공격력·마법공격력·방어력·마법방어력 +30%', earth_bless: '공격력·마법공격력 +25%',
+    twinkle_party: '공격력 +20%, 치명타율 +15%', star_powder: '방어력·마법방어력 +40%', valentine: '방어력·마법방어력 +50%',
+    arena: '일반 공격 위력 2배', gale: '치명타율 +20%, 회피율 +20%', reaper_realm: '치명타율 +40%, 치명타 피해 +40%'
+  };
+  const FIELD_NAMES = new Set(Object.keys(FIELD).map(id => core.BUFF_NAMES[id]));
+  const svg = d => '<svg viewBox="0 0 12 12" width="14" height="14" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="' + d + '"/></svg>';
+  const ICON = {
+    full: svg('M0 0h5v2H2v3H0zM7 0h5v5h-2V2H7zM0 7h2v3h3v2H0zM10 7h2v5H7v-2h3z'),
+    shrink: svg('M3 0h2v5H0V3h3zM7 0h2v3h3v2H7zM0 7h5v5H3V9H0zM7 7h5v2H9v3H7z'),
+    gear: svg('M0 1h12v2H0zM7 0h3v4H7zM0 5h12v2H0zM2 4h3v4H2zM0 9h12v2H0zM6 8h3v4H6z')
+  };
+  const tools = () => '<button class="b-full ic" aria-label="전체화면"><span class="i-full">' + ICON.full + '</span><span class="i-shrink">' + ICON.shrink + '</span></button><button class="b-set ic" aria-label="설정">' + ICON.gear + '</button>';
 
   /* ---------- sprites in the DOM ---------- */
   const spr = (id, pose) => ASSETS.sp[id + '-' + (pose || 'idle')] || ASSETS.sp[id + '-idle'];
@@ -45,7 +69,7 @@
   const titleLine = ['luna', 'ash', 'red_dragon'].filter(id => spr(id));
   document.getElementById('app').innerHTML =
     '<div id="frame">' +
-    '<section id="title" class="screen on"><div class="logo">다음은 너<small>RELAYMARE · 가제</small></div>' +
+    '<section id="title" class="screen on"><div class="corner">' + tools() + '</div><div class="logo">다음은 너<small>RELAYMARE · 가제</small></div>' +
     '<div class="line">' + titleLine.map(id => sprite(id)).join('<i>▶</i>') + '</div>' +
     '<p class="pitch">쓰러진 동료가 다음 동료의 힘이 된다.</p>' +
     '<button class="btn go" id="b-start">꿈길로 들어간다</button>' +
@@ -53,9 +77,9 @@
     '<section id="awaken" class="screen"></section><section id="map" class="screen"></section><section id="order" class="screen"></section>' +
     '<section id="spring" class="screen"></section><section id="altar" class="screen"></section><section id="pick" class="screen"></section><section id="end" class="screen"></section>' +
     '<section id="battle" class="screen">' +
-    '<header id="bar"><span id="room"></span><span id="turn"></span><button id="b-quirk" class="quirk"></button><span class="sp"></span><span id="gems"></span><button id="b-speed">1배</button><button id="b-sound" class="on">소리</button><button id="b-log">기록</button></header>' +
+    '<header id="bar"><span id="room"></span><span id="turn"></span><button id="b-quirk" class="quirk"></button><span class="sp"></span><button id="b-speed">1배</button><button id="b-log">기록</button>' + tools() + '</header>' +
     '<div id="stage"><canvas id="cv"></canvas><div id="hud">' +
-    '<div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div>' +
+    '<div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div>' +
     '<div class="sky" id="sky"><i></i><i></i><i></i><span id="skyname"></span></div>' +
     '<div class="chips" id="pa-chips"></div>' +
     '<div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">▶▶ 넘기는 중</div></div>' +
@@ -65,17 +89,63 @@
     '<div class="overlay" id="logbook"><div class="body" id="logbody"></div><button class="btn" id="b-logclose">닫기</button></div>' +
     '<div class="sheet" id="result"><div class="in win" id="result-in"></div></div>' +
     '</section>' +
-    '<div class="sheet" id="sheet"><div class="in win"><h3 id="sh-title"></h3><p id="sh-body"></p><button class="btn" id="b-sheetclose">닫기</button></div></div>' +
+    '<div class="sheet" id="sheet"><div class="in win"><h3 id="sh-title"></h3><div id="sh-body" class="shbody"></div><button class="btn" id="b-sheetclose">닫기</button></div></div>' +
     '</div>';
   const show = id => $$('.screen').forEach(s => { const on = s.id === id; if (!on && s.classList.contains('on') && !['title', 'battle'].includes(s.id)) s.innerHTML = ''; s.classList.toggle('on', on); });
-  function sheet(title, body) { $('#sh-title').textContent = title; $('#sh-body').textContent = body; $('#sheet').classList.add('on'); }
-  $('#b-sheetclose').addEventListener('click', () => $('#sheet').classList.remove('on'));
-  $('#sheet').addEventListener('click', ev => { if (ev.target.id === 'sheet') $('#sheet').classList.remove('on'); });
+  /* One bottom sheet for every detail view. The battle clock stops while it is open, so reading never costs a turn or hides a hit. */
+  function openSheet(title, html) {
+    $('#sh-title').textContent = title; $('#sh-body').innerHTML = html; $('#sh-body').scrollTop = 0;
+    $('#sheet').classList.add('on'); St.pause(true);
+  }
+  function closeSheet() { $('#sheet').classList.remove('on'); St.pause(false); }
+  function sheet(title, body) { openSheet(title, '<p>' + esc(body) + '</p>'); }
+  $('#b-sheetclose').addEventListener('click', closeSheet);
+  $('#sheet').addEventListener('click', ev => { if (ev.target.id === 'sheet') closeSheet(); });
   const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  /* ---------- fullscreen and settings (every screen carries the two icons) ---------- */
+  const fsSupported = !!document.documentElement.requestFullscreen;   // iOS Safari has no page fullscreen
+  function syncFullscreen() {
+    const root = document.documentElement;
+    root.classList.toggle('nofs', !fsSupported); root.classList.toggle('fs', !!document.fullscreenElement);
+    $$('.b-full').forEach(b => b.setAttribute('aria-label', document.fullscreenElement ? '전체화면 나가기' : '전체화면'));
+  }
+  async function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else { try { await document.documentElement.requestFullscreen({ navigationUI: 'hide' }); } catch (e) { await document.documentElement.requestFullscreen(); } }
+    } catch (e) { sheet('전체화면', '이 브라우저에서는 전체화면을 열지 못했다. 브라우저 메뉴에서 다시 시도해 보자.'); }
+    syncFullscreen();
+  }
+  document.addEventListener('fullscreenchange', syncFullscreen);
+  const SETTINGS_KEY = 'relaymare.settings';
+  function loadSettings() {
+    try { const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); if (typeof s.sound === 'boolean') St.soundOn = s.sound; if (typeof s.rim === 'boolean') St.RIM.on = s.rim; } catch (e) { /* private mode: defaults */ }
+  }
+  function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ sound: St.soundOn, rim: St.RIM.on })); } catch (e) { /* not kept */ } }
+  function settingsSheet() {
+    const row = (k, label, on, sub) => '<button class="tog' + (on ? ' on' : '') + '" data-set="' + k + '"><b>' + label + '</b><small>' + sub + '</small><span>' + (on ? '켜짐' : '꺼짐') + '</span></button>';
+    openSheet('설정', '<div class="togs">' + row('sound', '소리', St.soundOn, '효과음') +
+      row('rim', '윤곽선 강조', St.RIM.on, '어두운 캐릭터가 어두운 방에 묻히지 않게 밝은 1px 테두리를 두른다') +
+      (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '주소창과 탭을 숨긴다') : '') + '</div>');
+    $$('#sheet .tog').forEach(b => b.addEventListener('click', async () => {
+      const k = b.dataset.set;
+      if (k === 'sound') { St.soundOn = !St.soundOn; St.unlockAudio(); }
+      else if (k === 'rim') St.RIM.on = !St.RIM.on;
+      else if (k === 'full') await toggleFullscreen();
+      saveSettings(); settingsSheet();
+    }));
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target.closest('.b-full, .b-set, [data-sheet]'); if (!t) return;
+    if (t.classList.contains('b-full')) toggleFullscreen();
+    else if (t.classList.contains('b-set')) settingsSheet();
+    else { sfx.tap(); charSheet(t.dataset.sheet); }
+  });
 
   /* ---------- shared bits of the non-battle screens ---------- */
   let run = null;
-  const head = (title, sub) => '<header class="top"><b>' + esc(title) + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : '') + '<span class="sp"></span><span class="gems">◆ ' + (run ? run.crystals : 0) + '</span></header>';
+  const head = (title, sub) => '<header class="top"><b>' + esc(title) + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : '') + '<span class="sp"></span><span class="gems">◆ ' + (run ? run.crystals : 0) + '</span>' + tools() + '</header>';
   function badges(id) {
     const out = [];
     if (run && run.blessings[id]) out.push('<i class="bless">축복 +' + Math.round(run.blessings[id] * 100) + '%</i>');
@@ -84,51 +154,192 @@
   }
   function cardRow(id, o) {
     const c = card(id), opt = o || {};
-    return '<button class="cardrow win g-' + c.grade + (opt.cls ? ' ' + opt.cls : '') + '" data-id="' + id + '"><span class="pic">' + sprite(id) + '</span><span class="txt">' +
-      '<div class="nm">' + esc(c.name) + '<i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + '</i></div>' +
+    return '<button class="cardrow win g-' + c.grade + (opt.cls ? ' ' + opt.cls : '') + '" data-id="' + id + '"' + (opt.sheet ? ' data-sheet="' + id + '"' : '') + '><span class="pic">' + sprite(id) + '</span><span class="txt">' +
+      '<div class="nm">' + esc(c.name) + '<i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + '</i>' + (opt.tag ? '<i class="tag">' + esc(opt.tag) + '</i>' : '') + '</div>' +
       '<div class="st">HP ' + c.stats.hp + ' · 공 ' + c.stats.atk + ' · 마공 ' + c.stats.matk + ' · 방 ' + c.stats.def + '/' + c.stats.mdef + '</div>' +
       '<div class="trait">' + esc(c.trait.desc) + '</div>' +
       (opt.skills !== false ? '<div class="sk">' + c.skills.map(s => esc(s.name) + '<small>' + TYPE[s.type] + (s.cost ? ' ' + s.cost : '') + '</small>').join(' · ') + '</div>' : '') +
       '<div class="badges">' + badges(id) + '</div></span></button>';
   }
   const affixChips = def => (def.affixes || []).map(a => '<i class="affix">' + esc(Bridge.AFFIXES[a].name) + '</i>').join('');
+  const benchMinis = () => run.bench.map(id => '<button class="mini g-' + card(id).grade + '" data-sheet="' + id + '" aria-label="' + esc(card(id).name) + '">' + face(id, 40) +
+    (run.heirlooms[id] ? '<i class="h">유</i>' : '') + (run.blessings[id] ? '<i class="b">축</i>' : '') + '</button>').join('');
+
+  /* ---------- detail sheets: a character, a fighter now, the enemy now, the sky ---------- */
+  function skillBlock(s, entity, note) {
+    let text = '';
+    try { text = core.SkillDisplay.body(s, { entity }); } catch (e) { text = ''; }
+    return '<div class="skl ' + s.type + '"><b>' + esc(s.name) + '</b><small>' + (TYPE[s.type] || '') + ' · MP ' + (s.cost || 0) + (note ? ' · ' + esc(note) : '') + '</small>' + (text ? '<p>' + esc(text) + '</p>' : '') + '</div>';
+  }
+  function heirBlock(id) {
+    const h = run && run.heirlooms[id]; if (!h) return '';
+    const from = card(h.from), hs = from && Bridge.heirloomSkill(from);
+    return '<h4>유품</h4><div class="heirbox"><p>' + esc(from ? from.name : '') + '에게서 물려받은 기술. 위력 ' + Bridge.HEIRLOOM_POWER + '배 · MP 0 · 전투마다 한 번. 이 동료가 쓰러지면 사라진다.</p>' + (hs ? skillBlock(hs, from) : '') + '</div>';
+  }
+  function cardHead(id, sub) {
+    const c = card(id);
+    return '<div class="ih g-' + c.grade + '"><span class="pic">' + sprite(id) + '</span><div><b>' + esc(c.name) + '</b><i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + '</i>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div></div>';
+  }
+  /** rows: [label, now, base, unit]. The base shows struck through when the value moved. */
+  function statGrid(rows) {
+    return '<div class="sg">' + rows.map(r => {
+      const d = r[1] > r[2] ? 'up' : r[1] < r[2] ? 'down' : '';
+      return '<span><em>' + r[0] + '</em><b class="' + d + '">' + r[1] + (r[3] || '') + '</b>' + (d ? '<small>' + r[2] + (r[3] || '') + '</small>' : '') + '</span>';
+    }).join('') + '</div>';
+  }
+  function statusList(buffs, extra) {
+    const items = Object.keys(buffs || {}).filter(id => buffs[id]).map(id => {
+      const v = buffs[id], good = GOOD.includes(id) || /^defProtocol/.test(id);
+      const amount = id === 'burn' || id === 'divine' ? ' ' + v + '스택' : (id === 'guard' || id === 'damage_half') ? ' ' + v + '턴' : '';
+      return '<li><i class="' + (good ? 'good' : 'bad') + '">' + esc((core.BUFF_NAMES[id] || id) + amount) + '</i>' + esc(STATUS_INFO[id] || '') + '</li>';
+    }).concat(extra || []);
+    return items.length ? '<ul class="stl">' + items.join('') + '</ul>' : '<p class="none">없음</p>';
+  }
+  const blessLine = id => '<li><i class="good">축복 +' + Math.round(run.blessings[id] * 100) + '%</i>모든 능력치, 치명타율 +' + core.GAME_CONSTANTS.BLESSING_CRIT + '%p · 회피율 +' + core.GAME_CONSTANTS.BLESSING_EVA + '%p</li>';
+  /** A companion outside battle (map, spring, start): card numbers, trait, heirloom, every skill in full. */
+  function charSheet(id) {
+    const c = card(id); if (!c) return;
+    const s = c.stats;
+    let html = cardHead(id, ROLE_OF(c)) + statGrid([['체력', s.hp, s.hp], ['공격', s.atk, s.atk], ['마공', s.matk, s.matk], ['방어', s.def, s.def], ['마방', s.mdef, s.mdef]]);
+    if (run && run.blessings[id]) html += '<ul class="stl">' + blessLine(id) + '</ul>';
+    html += '<h4>특성</h4><p>' + esc(c.trait.desc) + '</p>' + heirBlock(id) + '<h4>기술</h4>' + c.skills.map(sk => skillBlock(sk, c)).join('');
+    openSheet('동료', html);
+  }
+  function ROLE_OF(c) { const r = core.DISPLAY_NAMES && core.DISPLAY_NAMES.role && core.DISPLAY_NAMES.role[c.role]; return r || ''; }
+  /** The unit as the screen shows it now, with the core's own stat formula (statuses, field, blessing, traits). */
+  function liveStats(ref) {
+    const host = B.bridge && B.bridge.host, b = host && host.battle; if (!b || !b.players) return null;
+    const shown = unitOf(ref); if (!shown) return null;
+    const u = ref.side === 'enemy' ? (B.bridge.enemyIndex === shown.idx ? b.enemy : null) : b.players[ref.idx];
+    if (!u) return null;
+    const view = Object.assign({}, u, { buffs: Object.assign({}, shown.buffs) });
+    const field = (b.fieldBuffs || []).filter(f => B.D.field.includes(f.name));
+    return { u, s: core.Logic.calculateStats(view, field, host.state.mode, host.state.artifacts, B.D.turn || b.turn || 1) };
+  }
+  function allySheet(i) {
+    const id = B.party[i], shown = B.D && B.D.allies[i]; if (!id || !shown) return;
+    const c = card(id), live = liveStats({ side: 'ally', idx: i }), init = core.Logic.calculateInitialStats(c, B.party, core.GameUtils.getAllCards(), i);
+    const base = Object.assign({}, c.stats, init && init.stats);
+    const where = shown.dead ? '쓰러짐' : shown.out ? '물러남' : i === B.D.cur ? '싸우는 중' : '뒤에서 대기';
+    let html = cardHead(id, POSITION[i] + ' · ' + where + ' · HP ' + shown.hp + '/' + shown.maxHp + ' · MP ' + shown.mp + '/' + shown.maxMp);
+    if (live) {
+      const s = live.s, critBase = Number.isFinite(base.baseCrit) ? base.baseCrit : core.GAME_CONSTANTS.BASE_CRIT, evaBase = (base.baseEva || 0) + core.GAME_CONSTANTS.BASE_EVA_BONUS;
+      const rows = [['공격', s.atk, base.atk], ['마공', s.matk, base.matk], ['방어', s.def, base.def], ['마방', s.mdef, base.mdef], ['치명', s.crit, critBase, '%'], ['회피', s.evasion, evaBase, '%']];
+      html += statGrid(rows);
+      if (rows.some(r => r[1] !== r[2])) html += '<p class="sm">줄 그은 숫자는 전투 시작 때 값. 축복·하늘·상태·최후의 일인이 지금 수치에 들어 있다.</p>';
+    }
+    const extra = [];
+    if (shown.lastStand) extra.push('<li><i class="bad">최후의 일인</i>공격력·마법공격력 ×1.5, 치명타율 +25%p</li>');
+    if (run.blessings[id]) extra.push(blessLine(id));
+    html += '<h4>상태</h4>' + statusList(shown.buffs, extra);
+    const traitNote = /^syn_/.test(c.trait.type) ? (init && init.activeTrait ? ' (발동 중)' : ' (조건 부족)') : c.trait.type === 'pos_stat_boost' ? (c.trait.pos === i ? ' (자리 효과 발동)' : ' (' + POSITION[c.trait.pos] + ' 전용)') : '';
+    html += '<h4>특성</h4><p>' + esc(c.trait.desc + traitNote) + '</p>' + heirBlock(id) + '<h4>기술</h4>' + c.skills.map(sk => skillBlock(sk, c)).join('');
+    openSheet('동료 · 지금', html);
+  }
+  function foeSheet() {
+    const shown = B.D && B.D.enemy; if (!shown) return;
+    const def = foeDef(shown.idx), live = liveStats({ side: 'enemy', idx: shown.idx }), many = B.door.enemies.length > 1;
+    let html = '<div class="ih foe"><span class="pic">' + sprite(def.sprite, { flip: foeFlip(def), cls: def.look === 'boss' ? 'boss-tint' : def.look === 'shadow' ? 'shadow-tint' : '' }) + '</span><div><b>' + esc(shown.name) + '</b><i class="grade">' + esc(def.kind || '') + '</i><i class="el-' + def.element + '">' + (ELEMENT[def.element] || '') + '</i>' +
+      '<small>HP ' + shown.hp.toLocaleString('en-US') + ' / ' + shown.maxHp.toLocaleString('en-US') + (many ? ' · ' + (shown.idx + 1) + '/' + B.door.enemies.length + '번째' : '') + '</small></div></div>';
+    if (live) {
+      const host = B.bridge.host, raw = core.Logic.calculateStats(Object.assign({}, live.u, { buffs: {} }), [], host.state.mode, [], B.D.turn || 1), s = live.s;
+      html += statGrid([['공격', s.atk, raw.atk], ['마공', s.matk, raw.matk], ['방어', s.def, raw.def], ['마방', s.mdef, raw.mdef]]);
+    }
+    const strong = Object.keys(ELEMENT).filter(el => core.Logic.getElementalMultiplier(el, def.element) > 1);
+    if (strong.length) html += '<p class="sm">상성: ' + strong.map(el => ELEMENT[el]).join('·') + ' 속성 동료가 치면 피해 ×' + core.Logic.getElementalMultiplier(strong[0], def.element) + '</p>';
+    const extra = [];
+    if (shown.charging) extra.push('<li><i class="bad">차징</i>힘을 모으는 중. 다음 행동이 크다</li>');
+    for (const a of shown.affixes || []) extra.push('<li><i class="affix">' + esc(Bridge.AFFIXES[a].name) + (a === 'frenzy' && shown.frenzied ? ' 발동' : '') + '</i>' + esc(Bridge.AFFIXES[a].desc) + '</li>');
+    html += '<h4>상태 · 접두사</h4>' + statusList(shown.buffs, extra);
+    const cd = $('#pf-cd'), lines = [];
+    if (B.intent) lines.push(B.intent.kind === 'stun' ? '이번 턴은 기절해서 못 움직인다.' : '다음 행동: ' + B.intent.name + (B.intent.dmg ? ' · ' + TYPE[B.intent.kind] + ' ' + (B.intent.dmg[0] === B.intent.dmg[1] ? B.intent.dmg[0] : B.intent.dmg[0] + '~' + B.intent.dmg[1]) : ''));
+    if (cd.classList.contains('on')) lines.push(cd.textContent);
+    if (def.note) lines.push(def.note);
+    if (lines.length) html += '<h4>행동</h4>' + lines.map(t => '<p>' + esc(t) + '</p>').join('');
+    if (many) html += '<p class="sm">이 문: ' + B.door.enemies.map((d, k) => (k === shown.idx ? '▶ ' : '') + d.name).map(esc).join(' → ') + '</p>';
+    const skills = (live && live.u.skills) || [];
+    if (skills.length) html += '<h4>기술</h4>' + skills.map(sk => { let t = ''; try { t = core.SkillDisplay.body(sk, { entity: live.u, enemy: true }); } catch (e) { t = ''; } return '<div class="skl ' + sk.type + '"><b>' + esc(sk.name) + '</b><small>' + (TYPE[sk.type] || '') + '</small>' + (t ? '<p>' + esc(t) + '</p>' : '') + '</div>'; }).join('');
+    openSheet('적 · 지금', html);
+  }
+  function fieldSheet() {
+    const list = (B.D && B.D.field) || [], max = core.GAME_CONSTANTS.MAX_FIELD_BUFFS || 3;
+    const html = (list.length ? '<ul class="stl">' + list.map(id => '<li><i class="good" style="background:' + (FIELD[id] || [0, '#33295c'])[1] + ';color:#120e24">' + esc(core.BUFF_NAMES[id] || id) + '</i>' + esc(FIELD_INFO[id] || '') + '</li>').join('') + '</ul>' : '<p class="none">지금 하늘에 걸린 필드 버프가 없다.</p>') +
+      '<p class="sm">필드 버프는 아군에게만 적용된다. 최대 ' + max + '개, 넘치면 가장 먼저 건 것이 사라진다.</p>';
+    openSheet('하늘 · 필드 버프', html);
+  }
 
   /* ---------- first awakening ---------- */
+  /* The start: two picks (the second offers one candidate of the first's element, since many traits
+     count an element), then three free random wakings. A wider start lets each run find its own combo. */
   function awakenScreen() {
-    const node = $('#awaken'), choices = R.pickChoices(run, roster, 3);
-    node.innerHTML = head('첫 깨우기') + '<div class="scroll"><p class="lead">셋 가운데 한 명을 깨운다. 고르지 않은 둘은 악몽이 되어 4층 문지기로 설 수 있다.</p>' +
-      '<div class="cards">' + choices.map(id => cardRow(id)).join('') + '</div></div>' +
-      '<div class="footer"><button class="btn go" id="b-wake" disabled>한 명을 고른다</button></div>';
-    show('awaken');
-    let pickId = null;
-    $$('.cardrow', node).forEach(b => b.addEventListener('click', () => {
-      pickId = b.dataset.id; sfx.tap();
-      $$('.cardrow', node).forEach(x => x.classList.toggle('sel', x === b));
-      const go = $('#b-wake'); go.disabled = false; go.textContent = card(pickId).name + '을(를) 깨운다';
-    }));
-    $('#b-wake').addEventListener('click', async () => {
-      if (!pickId) return;
-      R.takePick(run, choices, pickId); sfx.awaken();
-      const extra = [R.drawAwaken(run, roster, true), R.drawAwaken(run, roster, true)].filter(Boolean);
-      node.innerHTML = head('첫 깨우기') + '<div class="scroll"><p class="lead">꿈이 두 명을 더 데려왔다. 이 셋이 출발 동료다.</p><div class="cards" id="reveal"></div></div>' +
+    const node = $('#awaken');
+    let step = 0;
+    function pickStep() {
+      const near = step ? run.bench[0] : null, nearEl = near && card(near).element;
+      const choices = R.pickChoices(run, roster, 3, near ? { near } : null);
+      node.innerHTML = head('첫 깨우기', (step + 1) + ' / ' + R.START.picks) + '<div class="scroll"><p class="lead">' +
+        (near ? '한 명 더 고른다. 첫 동료 ' + esc(card(near).name) + '의 ' + ELEMENT[nearEl] + ' 속성이 하나는 꼭 섞여 있다 — 같은 속성을 세는 특성이 많다.'
+          : '셋 가운데 한 명을 깨운다. 고르지 않은 꿈은 악몽이 되어 4층 문지기로 설 수 있다.') + '</p>' +
+        (near ? '<div class="benchrow">' + benchMinis() + '</div>' : '') +
+        '<div class="cards">' + choices.map(id => cardRow(id, { tag: near && card(id).element === nearEl ? '같은 속성' : '' })).join('') + '</div></div>' +
+        '<div class="footer"><button class="btn go" id="b-wake" disabled>한 명을 고른다</button></div>';
+      show('awaken');
+      let pickId = null;
+      $$('.cards .cardrow', node).forEach(b => b.addEventListener('click', () => {
+        pickId = b.dataset.id; sfx.tap();
+        $$('.cards .cardrow', node).forEach(x => x.classList.toggle('sel', x === b));
+        const go = $('#b-wake'); go.disabled = false; go.textContent = card(pickId).name + '을(를) 깨운다';
+      }));
+      $('#b-wake').addEventListener('click', () => {
+        if (!pickId) return;
+        R.takePick(run, choices, pickId); sfx.awaken();
+        step++;
+        if (step < R.START.picks) pickStep(); else revealStep();
+      });
+    }
+    async function revealStep() {
+      node.innerHTML = head('첫 깨우기') + '<div class="scroll"><p class="lead">꿈이 ' + R.START.draws + '명을 더 데려왔다. 모두 출발 동료다. 누르면 기술을 자세히 본다.</p><div class="cards" id="reveal"></div></div>' +
         '<div class="footer"><button class="btn go" id="b-depart" disabled>꿈길로</button></div>';
       const box = $('#reveal');
-      box.insertAdjacentHTML('beforeend', cardRow(pickId, { skills: false }));
-      for (const id of extra) await reveal(box, id);
+      for (const id of run.bench) box.insertAdjacentHTML('beforeend', cardRow(id, { skills: false, sheet: true }));
+      for (let i = 0; i < R.START.draws; i++) { const id = R.drawAwaken(run, roster, true); if (id) await reveal(box, id); }
       const go = $('#b-depart'); go.disabled = false; go.addEventListener('click', () => { sfx.tap(); toMap(true); });
-    });
+    }
+    pickStep();
   }
-  /** Slot-style reveal of a woken character. */
-  async function reveal(box, id) {
-    const c = card(id), slot = document.createElement('div');
-    slot.className = 'revealing win';
-    box.appendChild(slot);
-    const pool = run.pool;
-    for (let i = 0; i < 9; i++) { slot.innerHTML = '<span class="pic">' + sprite(pool[Math.floor(Math.random() * pool.length)], { cls: 'sil' }) + '</span>'; sfx.roll(); await sleep(55 + i * 12); }
-    slot.outerHTML = cardRow(id, { skills: false, cls: 'pop' });
-    (c.grade === 'legend' ? sfx.jackpot : sfx.awaken)();
-    await sleep(240);
+  /** A summon. Silhouettes roll, then rare and better glow in their grade colour before the face shows,
+      then the card lands with its grade's effect. The card is placed once and stays (no second pop). */
+  async function reveal(box, id, o) {
+    const opt = o || {}, c = card(id), g = ['legend', 'transcendence'].includes(c.grade) ? 'legend' : (['rare', 'epic'].includes(c.grade) ? c.grade : 'normal');
+    const slot = document.createElement('div');
+    slot.className = 'revealing win g-' + g;
+    if (opt.first) box.prepend(slot); else box.appendChild(slot);
+    slot.scrollIntoView({ block: 'nearest' });
+    if (opt.roll !== false) {
+      const pool = run.pool;
+      for (let i = 0; i < 9; i++) { slot.innerHTML = '<span class="pic">' + sprite(pool[Math.floor(Math.random() * pool.length)], { cls: 'sil' }) + '</span>'; sfx.roll(); await sleep(55 + i * 12); }
+    }
+    if (g !== 'normal') {
+      slot.classList.add('tease');
+      slot.innerHTML = '<span class="pic">' + sprite(id, { cls: 'sil' }) + '</span>';
+      (g === 'legend' ? sfx.warn : sfx.charge)();
+      await sleep(g === 'legend' ? 650 : g === 'epic' ? 380 : 200);
+    }
+    const sparks = { legend: 16, epic: 10, rare: 5 }[g] || 0;
+    const wrap = document.createElement('div');
+    wrap.className = 'landing g-' + g + ' l-' + g;
+    wrap.innerHTML = (g === 'legend' ? '<i class="rays"></i>' : '') + cardRow(id, { skills: false, cls: 'pop', sheet: true }) +
+      (sparks ? '<span class="sparkle">' + Array.from({ length: sparks }, () => {
+        const a = Math.random() * Math.PI * 2, r = 26 + Math.random() * 46;
+        return '<b style="left:' + Math.round(8 + Math.random() * 84) + '%;top:' + Math.round(15 + Math.random() * 70) + '%;--dx:' + Math.round(Math.cos(a) * r) + 'px;--dy:' + Math.round(Math.sin(a) * r) + 'px;animation-delay:' + Math.round(Math.random() * 160) + 'ms"></b>';
+      }).join('') + '</span>' : '');
+    slot.replaceWith(wrap);
+    if (g === 'legend') { sfx.jackpot(); flashFrame('gold'); }
+    else if (g === 'epic') { sfx.awaken(); flashFrame('violet'); }
+    else sfx.awaken();
+    await sleep(g === 'legend' ? 900 : g === 'epic' ? 420 : 240);
   }
+  function flashFrame(kind) { const f = document.createElement('div'); f.className = 'flash ' + kind; $('#frame').appendChild(f); setTimeout(() => f.remove(), 800); }
 
   /* ---------- map ---------- */
   function toMap(advance) {
@@ -143,8 +354,8 @@
       '<div class="track">' + track + '</div>' +
       '<div class="bosscard win"><span class="pic">' + sprite(boss.sprite, { flip: foeFlip(boss), cls: boss.look === 'boss' ? 'boss-tint' : '' }) + '</span><span class="txt"><small>이번 꿈의 주인</small><b>' + esc(boss.name) + '</b><p>' + esc(boss.note) + '</p></span></div>' +
       '<h3>문을 고른다</h3><div class="doors">' + run.doors.map(doorCard).join('') + '</div>' +
-      '<h3>동료 <span class="sm">' + run.bench.length + '명' + (run.fallen.length ? ' · 쓰러짐 ' + run.fallen.length : '') + '</span></h3>' +
-      '<div class="benchrow">' + run.bench.map(id => '<span class="mini g-' + card(id).grade + '">' + face(id, 40) + (run.heirlooms[id] ? '<i class="h">유</i>' : '') + (run.blessings[id] ? '<i class="b">축</i>' : '') + '</span>').join('') + '</div>' +
+      '<h3>동료 <span class="sm">' + run.bench.length + '명' + (run.fallen.length ? ' · 쓰러짐 ' + run.fallen.length : '') + ' · 누르면 자세히</span></h3>' +
+      '<div class="benchrow">' + benchMinis() + '</div>' +
       '</div>';
     show('map');
     $$('.door', node).forEach(b => b.addEventListener('click', () => { St.unlockAudio(); sfx.tap(); enterDoor(run.doors[Number(b.dataset.i)]); }));
@@ -204,25 +415,38 @@
   }
 
   /* ---------- spring ---------- */
-  function springScreen(fresh) {
-    const node = $('#spring');
-    const recent = fresh || [];
-    node.innerHTML = head('소환의 샘', '꿈길 ' + run.floor + '층') + '<div class="scroll">' +
-      '<p class="lead">꿈의 결정을 바쳐 잠든 동료를 깨운다. 같은 동료는 둘 깨울 수 없다.</p>' +
-      '<div class="svc"><button class="btn big" id="b-draw"' + (run.crystals >= R.COST.draw ? '' : ' disabled') + '><b>깨우기</b><small>◆ ' + R.COST.draw + ' · 무작위 한 명</small><small>노멀 40 · 레어 30 · 에픽 20 · 전설 10</small></button>' +
-      '<button class="btn big" id="b-pick"' + (run.crystals >= R.COST.pick ? '' : ' disabled') + '><b>골라 깨우기</b><small>◆ ' + R.COST.pick + ' · 셋 중 하나</small><small>노멀 25 · 레어 30 · 에픽 25 · 전설 20</small></button></div>' +
-      '<div class="cards" id="fresh">' + recent.map(id => cardRow(id, { skills: false, cls: 'pop' })).join('') + '</div>' +
-      '<h3>동료 <span class="sm">' + run.bench.length + '명</span></h3><div class="benchrow">' + run.bench.map(id => '<span class="mini g-' + card(id).grade + '">' + face(id, 40) + '</span>').join('') + '</div></div>' +
-      '<div class="footer"><button class="btn go" id="b-leave">샘을 떠난다</button></div>';
-    show('spring');
-    $('#b-draw').addEventListener('click', async () => {
+  /* The spring keeps every card woken on this visit (newest first) and updates its buttons, crystals
+     and bench in place, so a summon shows exactly once. */
+  function springScreen() {
+    const node = $('#spring'), seen = [];
+    const lock = () => $$('#spring .btn').forEach(b => { b.disabled = true; });
+    function base() {
+      node.innerHTML = head('소환의 샘', '꿈길 ' + run.floor + '층') + '<div class="scroll">' +
+        '<p class="lead">꿈의 결정을 바쳐 잠든 동료를 깨운다. 같은 동료는 둘 깨울 수 없다.</p>' +
+        '<div class="svc"><button class="btn big" id="b-draw"><b>깨우기</b><small>◆ ' + R.COST.draw + ' · 무작위 한 명</small><small>노멀 40 · 레어 30 · 에픽 20 · 전설 10</small></button>' +
+        '<button class="btn big" id="b-pick"><b>골라 깨우기</b><small>◆ ' + R.COST.pick + ' · 셋 중 하나</small><small>노멀 25 · 레어 30 · 에픽 25 · 전설 20</small></button></div>' +
+        '<div class="cards" id="fresh">' + seen.map(id => cardRow(id, { skills: false, sheet: true })).join('') + '</div>' +
+        '<h3>동료 <span class="sm" id="sp-count"></span></h3><div class="benchrow" id="sp-bench"></div></div>' +
+        '<div class="footer"><button class="btn go" id="b-leave">샘을 떠난다</button></div>';
+      show('spring');
+      $('#b-draw').addEventListener('click', drawOne);
+      $('#b-pick').addEventListener('click', pickOne);
+      $('#b-leave').addEventListener('click', () => { sfx.tap(); toMap(true); });
+      refresh();
+    }
+    function refresh() {
+      $('#b-draw').disabled = run.crystals < R.COST.draw; $('#b-pick').disabled = run.crystals < R.COST.pick; $('#b-leave').disabled = false;
+      $('.gems', node).textContent = '◆ ' + run.crystals;
+      $('#sp-count').textContent = run.bench.length + '명 · 누르면 자세히';
+      $('#sp-bench').innerHTML = benchMinis();
+    }
+    async function drawOne() {
       const id = R.drawAwaken(run, roster, false); if (!id) return;
-      $$('#spring .btn').forEach(b => { b.disabled = true; });
-      const box = $('#fresh'); box.innerHTML = '';
-      await reveal(box, id);
-      springScreen([id]);
-    });
-    $('#b-pick').addEventListener('click', () => {
+      lock(); $('.gems', node).textContent = '◆ ' + run.crystals;
+      await reveal($('#fresh'), id, { first: true });
+      seen.unshift(id); refresh();
+    }
+    function pickOne() {
       const choices = R.pickChoices(run, roster, 3);
       if (!choices.length || !R.payPick(run)) return;
       sfx.tap();
@@ -230,9 +454,15 @@
         '<div class="footer"><button class="btn go" id="b-take" disabled>한 명을 고른다</button></div>';
       let sel = null;
       $$('.cardrow', node).forEach(b => b.addEventListener('click', () => { sel = b.dataset.id; sfx.tap(); $$('.cardrow', node).forEach(x => x.classList.toggle('sel', x === b)); const go = $('#b-take'); go.disabled = false; go.textContent = card(sel).name + '을(를) 깨운다'; }));
-      $('#b-take').addEventListener('click', () => { if (!sel) return; R.takePick(run, choices, sel); (card(sel).grade === 'legend' ? sfx.jackpot : sfx.awaken)(); springScreen([sel]); });
-    });
-    $('#b-leave').addEventListener('click', () => { sfx.tap(); toMap(true); });
+      $('#b-take').addEventListener('click', async () => {
+        if (!sel) return;
+        R.takePick(run, choices, sel);
+        base(); lock();
+        await reveal($('#fresh'), sel, { first: true, roll: false });
+        seen.unshift(sel); refresh();
+      });
+    }
+    base();
   }
 
   /* ---------- chaos altar ---------- */
@@ -365,7 +595,6 @@
   function render(fresh) {
     const D = B.D; if (!D) return;
     $('#turn').textContent = D.turn + '턴';
-    $('#gems').textContent = '◆ ' + run.crystals;
     D.allies.forEach((a, i) => {
       const node = $('#party .pm[data-i="' + i + '"]'); if (!a || !node) return;
       node.className = 'pm ' + (a.dead ? 'dead' : a.out ? 'out' : i === D.cur ? 'cur' : 'wait') + (a.lastStand ? ' last' : '');
@@ -430,11 +659,22 @@
     return ['', ''];
   }
   const fullText = (o, me) => (o.index === 0 ? '마나를 쓰지 않는 기본 공격.' : core.SkillDisplay.body({ name: o.name, type: o.type, val: o.val, cost: o.cost, tier: o.tier, effects: o.effects }, { entity: me }));
+  /* The tile line: the card's own skill text, shortened to fit two lines. The full text is one long press away. */
   function brief(o, me) {
     if (o.index === 0) return '마나 0';
-    return fullText(o, me).replace(/^위력 [\d.~]+배\.\s*/, '').replace(/(자신에게|적에게|자신의|적의) /g, '')
+    return fullText(o, me)
+      .replace(/^위력 [\d.~]+배\.\s*/, '')
+      .replace(/\.?\s*발동 전에 시전자가 사망하면 예약 취소\.?/g, '')
+      .replace(/사용 후 ([\d·]+)턴에 각각 위력 ([\d.]+)배로 공격 예약/g, (m, turns, x) => turns.split('·').length + '턴간 매 턴 ' + x + '배 공격 예약')
+      .replace(/(\d+)턴 후 위력 ([\d.~]+)배로 공격 예약/g, '$1턴 후 $2배 공격 예약')
+      .replace(/(각 )?예약 발동 시/g, '발동 시')
+      .replace(/(필드에 )?‘([^’]+)’ 중 무작위 (\d+)종/g, (m, f, list, n) => (list.split('·').some(x => FIELD_NAMES.has(x)) ? '무작위 필드 버프 ' : '무작위 디버프 ') + n + '종')
+      .replace(/적이 (\S+) 상태이면/g, '$1 상태면')
+      .replace(/(자신에게|적에게|자신의|적의) /g, '')
       .replace(/ \((다음 턴 행동 불가|받는 피해 50% 감소|마법 피해 무효|물리 피해 무효|회피율 \+50%p|최소 1 HP)\)/g, '')
-      .replace(/필드 버프 /g, '').replace(/\.$/, '').replace(/\. /g, ' · ');
+      .replace(/필드 버프 (?=‘)/g, '')
+      .replace(/\.$/, '').replace(/\. /g, ' · ')
+      .replace(/발동 시 ([^ ·]+) 부여 · 발동 시 ([^ ·]+) 부여/g, '발동 시 $1·$2 부여');
   }
   function renderActions() {
     const options = B.bridge.options(), D = B.D, me = card(B.party[D.cur]);
@@ -496,9 +736,26 @@
     play(B.bridge.retreat());
   });
   $('#b-quirk').addEventListener('click', () => { const q = B.bridge && B.bridge.quirk && Bridge.QUIRKS[B.bridge.quirk]; if (q) sheet('꿈의 변덕 · ' + q.name, q.desc); });
-  $('#stage').addEventListener('click', () => { if (B.busy) { clock.fast = true; $('#skip').className = 'on'; } });
+  /* Tap the scene: while moves play it fast-forwards; on your turn a tap on a fighter opens its sheet. */
+  function actorAt(px, py) {
+    const list = [B.foe].concat(B.allies).filter(a => a && a.vis !== false && a.alpha > 0.2);
+    for (const a of list) { const m = St.meta(a, a.pose || 'idle'); if (m && Math.abs(px - St.X(a)) <= m.w / 2 + 3 && py >= HY(a) - 4 && py <= FY(a) + 3) return a; }
+    return null;
+  }
+  $('#stage').addEventListener('click', ev => {
+    if (B.busy) { clock.fast = true; $('#skip').className = 'on'; return; }
+    if (!B.D) return;
+    const r = $('#cv').getBoundingClientRect(), a = actorAt((ev.clientX - r.left) * S.W / r.width, (ev.clientY - r.top) * S.H / r.height);
+    if (!a) return;
+    sfx.tap();
+    if (a === B.foe) foeSheet(); else allySheet(B.allies.indexOf(a));
+  });
+  /* The HUD pieces open their sheets even mid-animation; the battle waits while a sheet is open. */
+  $('#foebar').addEventListener('click', ev => { ev.stopPropagation(); sfx.tap(); foeSheet(); });
+  $('#sky').addEventListener('click', ev => { ev.stopPropagation(); sfx.tap(); fieldSheet(); });
+  $('#pa-chips').addEventListener('click', ev => { ev.stopPropagation(); if (B.D) { sfx.tap(); allySheet(Math.min(B.D.cur, 2)); } });
+  $('#party').addEventListener('click', ev => { const p = ev.target.closest('.pm[data-i]'); if (p && B.D) { sfx.tap(); allySheet(Number(p.dataset.i)); } });
   $('#b-speed').addEventListener('click', function () { clock.speed = clock.speed === 1 ? 2 : 1; this.textContent = clock.speed + '배'; this.classList.toggle('on', clock.speed === 2); });
-  $('#b-sound').addEventListener('click', function () { St.soundOn = !St.soundOn; this.classList.toggle('on', St.soundOn); St.unlockAudio(); });
   $('#b-log').addEventListener('click', () => {
     $('#logbody').innerHTML = B.log.map(t => '<div class="' + (/^===/.test(t) ? 't' : /피해|쓰러|특성|필드/.test(t) ? 'k' : '') + '">' + esc(t) + '</div>').join('');
     $('#logbook').classList.add('on'); const body = $('#logbody'); body.scrollTop = body.scrollHeight;
@@ -883,7 +1140,10 @@
       case 'enemyEnter': await foeEnter(e); break;
       case 'form': { const u = unitOf(e.who); if (u) { u.name = e.name; render(); } break; }
       case 'alert': ticker(e.text); break;
-      case 'await': await settlePending(); B.D = clone(e.s); await placeActors(true); render(); showIntent(e.intent, e.countdown); renderActions(); break;
+      case 'await':
+        await settlePending(); B.D = clone(e.s); await placeActors(true); render(); showIntent(e.intent, e.countdown); renderActions();
+        if (!run.hintShown) { run.hintShown = true; ticker('적·동료·하늘 칸을 누르면 자세히 본다 · 보는 동안 멈춘다'); }
+        break;
       case 'win': await settlePending(); await victory(); break;
       case 'lose': await settlePending(); await defeat(); break;
     }
@@ -936,6 +1196,7 @@
   }
 
   /* ---------- boot ---------- */
+  loadSettings(); syncFullscreen();
   St.init($('#cv'), $('#fx'));
   window.addEventListener('resize', layout);
   $('#b-start').addEventListener('click', () => { St.unlockAudio(); sfx.awaken(); newRun(); });
@@ -943,7 +1204,7 @@
 
   /** Review hooks for checking the page when it is not animating on its own. */
   window.__slice = {
-    advance: St.advance, B, clock, R, roster,
+    advance: St.advance, B, clock, R, roster, brief, foeSheet, allySheet, fieldSheet, charSheet, settingsSheet, closeSheet,
     get run() { return run; },
     get busy() { return B.busy; },
     state: () => (B.bridge ? B.bridge.state() : null),

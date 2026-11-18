@@ -8,7 +8,7 @@
   const SCALE = 2;
 
   /* ---------- virtual clock ---------- */
-  const clock = { t: 0, speed: 1, fast: false, slow: 1, waiters: [], tweens: [] };
+  const clock = { t: 0, speed: 1, fast: false, slow: 1, paused: false, waiters: [], tweens: [] };
   function wait(sec) { return new Promise(res => clock.waiters.push({ at: clock.t + sec, res })); }
   const EASE = { lin: k => k, out: k => 1 - (1 - k) * (1 - k), in: k => k * k, back: k => 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2) };
   function tween(obj, to, dur, ease) {
@@ -16,6 +16,7 @@
     return new Promise(res => clock.tweens.push({ obj, from, to, dur, t: 0, ease: EASE[ease || 'out'], res }));
   }
   function stepClock(real) {
+    if (clock.paused) return 0;                 // an info sheet is open: the battle waits
     const dt = real * (clock.fast ? 6 : clock.speed) * clock.slow;
     clock.t += dt;
     for (let i = clock.tweens.length - 1; i >= 0; i--) {
@@ -119,6 +120,29 @@
     entry[name] = c;
     return c;
   }
+  /** A 1 px outline around the silhouette, one pixel outside the sprite (canvas is 2 px larger). */
+  function rimOf(key) {
+    const entry = IMG[key];
+    if (!entry) return null;
+    if (entry.rim) return entry.rim;
+    const im = entry.base, w = im.width, h = im.height;
+    const src = document.createElement('canvas'); src.width = w; src.height = h;
+    const sx = src.getContext('2d'); sx.drawImage(im, 0, 0);
+    const a = sx.getImageData(0, 0, w, h).data;
+    const c = document.createElement('canvas'); c.width = w + 2; c.height = h + 2;
+    const x = c.getContext('2d'), out = x.createImageData(w + 2, h + 2), d = out.data;
+    const solid = (px, py) => px >= 0 && py >= 0 && px < w && py < h && a[(py * w + px) * 4 + 3] > 0;
+    for (let y = -1; y <= h; y++) for (let X0 = -1; X0 <= w; X0++) {
+      if (solid(X0, y)) continue;
+      if (solid(X0 - 1, y) || solid(X0 + 1, y) || solid(X0, y - 1) || solid(X0, y + 1)) {
+        const i = ((y + 1) * (w + 2) + (X0 + 1)) * 4;
+        d[i] = RIM.color[0]; d[i + 1] = RIM.color[1]; d[i + 2] = RIM.color[2]; d[i + 3] = 255;
+      }
+    }
+    x.putImageData(out, 0, 0);
+    entry.rim = c;
+    return c;
+  }
   function loadSprites() {
     return Promise.all(Object.keys(ASSETS.sp).map(key => new Promise(res => {
       const im = new Image();
@@ -129,6 +153,7 @@
   }
 
   /* ---------- stage state ---------- */
+  const RIM = { on: true, color: [226, 216, 255], alpha: 0.6 };
   const S = { W: 195, H: 200, BASE: 172, bg: 'cave', actors: [], parts: [], props: [], shake: 0, flash: 0, dark: 0, danger: 0, tint: null, tintA: 0,
     cam: { k: 1, x: 0, y: 0 }, beads: { burn: 0, divine: 0, x: 0, y: 0 } };
   let cv, ctx, fxLayer, bgCache = null;
@@ -258,6 +283,14 @@
       if (a.flip) { ctx.save(); ctx.translate(left + m.w + dx, top + dy); ctx.scale(-1, 1); ctx.drawImage(image, 0, 0); ctx.restore(); }
       else ctx.drawImage(image, left + dx, top + dy);
     };
+    if (RIM.on && a.white <= 0 && a.rim !== false) {     // light rim behind the sprite, under any aura
+      const rim = rimOf(IMG[key] ? key : a.sprite + '-idle');
+      if (rim) {
+        ctx.globalAlpha = a.alpha * RIM.alpha * (a.wait > 0.5 ? 0.55 : 1);
+        if (a.flip) { ctx.save(); ctx.translate(left + m.w + 1, top - 1); ctx.scale(-1, 1); ctx.drawImage(rim, 0, 0); ctx.restore(); }
+        else ctx.drawImage(rim, left - 1, top - 1);
+      }
+    }
     if (a.aura && a.white <= 0) {
       const glow = variant(IMG[key] ? key : a.sprite + '-idle', a.aura);
       ctx.globalAlpha = a.alpha * (0.42 + 0.22 * Math.sin(now / 260 + a.phase));
@@ -453,6 +486,7 @@
     get soundOn() { return soundOn; }, set soundOn(v) { soundOn = v; },
     loadSprites, variant, IMG, makeActor, removeActor, meta, X, footY, headY, chestY, tall,
     sparks, fly, rise, converge, ring, slash, dust, gem, number, banner, plate, prop, dropProp, punch,
-    init, resize, setRoom, clear, start, advance, draw
+    init, resize, setRoom, clear, start, advance, draw, RIM,
+    pause(on) { clock.paused = !!on; }
   };
 })(window);
