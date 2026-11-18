@@ -1,0 +1,26 @@
+[
+  {
+    "name": "ash-idle",
+    "grid": 3,
+    "width": 232,
+    "height": 306,
+    "runs": 49667,
+    "alignedFraction": 0.8481084019570339
+  },
+  {
+    "name": "luna-idle",
+    "grid": 3,
+    "width": 236,
+    "height": 305,
+    "runs": 47406,
+    "alignedFraction": 0.8300637050162427
+  },
+  {
+    "name": "ash-strip",
+    "grid": 3,
+    "width": 624,
+    "height": 182,
+    "runs": 71702,
+    "alignedFraction": 0.9096817383057655
+  }
+]

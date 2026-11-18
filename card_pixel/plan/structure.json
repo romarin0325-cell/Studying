@@ -1,0 +1,442 @@
+{
+  "layers": [
+    {
+      "id": "rules",
+      "title": "공용 전투 규칙",
+      "files": [
+        "card/game/data.js",
+        "card/game/logic.js",
+        "card/game/skill_display.js",
+        "card/game/battle_runtime.js"
+      ],
+      "role": "캐릭터·적·특성·기술과 피해 계산·전투 순서를 정하며, 시험판은 이 네 파일만 가져온다.",
+      "changes_here_affect": [
+        "uis",
+        "bundle",
+        "bridge",
+        "roster",
+        "run",
+        "screens",
+        "build",
+        "page",
+        "tests",
+        "sim"
+      ]
+    },
+    {
+      "id": "uis",
+      "title": "카드 화면 다섯 개",
+      "files": [
+        "card/build.mjs",
+        "card_legacy/build.mjs",
+        "card_astra/build.mjs",
+        "card_lumen/build.mjs",
+        "card_claude/build.mjs"
+      ],
+      "role": "다섯 제작 명령이 card/game을 읽어 각자의 화면을 만들며, 규칙 수정은 각 화면을 다시 만들 때 반영된다.",
+      "changes_here_affect": []
+    },
+    {
+      "id": "bundle",
+      "title": "규칙 묶음",
+      "files": [
+        "card_pixel/slice/tools/core-bundle.mjs"
+      ],
+      "role": "공용 규칙 네 파일을 고치지 않고 RelayCore로 묶고, 적 행동의 대기 시간을 연결층에 맡긴다.",
+      "changes_here_affect": [
+        "bridge",
+        "roster",
+        "run",
+        "screens",
+        "build",
+        "page",
+        "tests",
+        "sim"
+      ]
+    },
+    {
+      "id": "bridge",
+      "title": "전투 연결층 · A–H",
+      "files": [
+        "card_pixel/slice/src/bridge.js"
+      ],
+      "role": "전투 결과를 사건 목록으로 돌려주며, A 필살 예고·B 다음 행동·C 적 교대·D 물러나기와 실험 규칙 E 유품·F 최후의 일인·G 꿈의 변덕·H 적 접두사를 얹는다.",
+      "changes_here_affect": [
+        "run",
+        "screens",
+        "build",
+        "page",
+        "tests",
+        "sim"
+      ]
+    },
+    {
+      "id": "roster",
+      "title": "동료 목록·출현 후보",
+      "files": [
+        "card_pixel/slice/src/roster.js"
+      ],
+      "role": "카드 자료와 대기 그림이 있는 동료를 연결하고, 공용·기본덱별 출현 후보와 야생·그림자·보스 생성을 한곳에 둔다.",
+      "changes_here_affect": [
+        "run",
+        "screens",
+        "build",
+        "page",
+        "tests",
+        "sim"
+      ]
+    },
+    {
+      "id": "run",
+      "title": "일곱 층 원정·경제",
+      "files": [
+        "card_pixel/slice/src/run.js"
+      ],
+      "role": "층·문·소환 비용·제단·보상·영구 사망·전투 사이 유품을 관리하고, 같은 시작 숫자로 같은 원정을 만든다.",
+      "changes_here_affect": [
+        "screens",
+        "build",
+        "page",
+        "tests",
+        "sim"
+      ]
+    },
+    {
+      "id": "stage",
+      "title": "무대·카메라·소리",
+      "files": [
+        "card_pixel/slice/src/stage.js"
+      ],
+      "role": "그림·배경·입자·카메라·합성 효과음을 그리며, 가상 시계로 연출을 빠르게 하거나 넘긴다.",
+      "changes_here_affect": [
+        "screens",
+        "build",
+        "page",
+        "tests"
+      ]
+    },
+    {
+      "id": "screens",
+      "title": "화면·선택·사건 재생",
+      "files": [
+        "card_pixel/slice/src/game.js",
+        "card_pixel/slice/src/style.css"
+      ],
+      "role": "시작·소환·지도·출전 순서·전투·결과 화면을 보여 주고, 선택을 규칙에 보내며 사건에 맞춰 무대를 움직인다.",
+      "changes_here_affect": [
+        "build",
+        "page",
+        "tests"
+      ]
+    },
+    {
+      "id": "build",
+      "title": "한 파일로 만들기",
+      "files": [
+        "card_pixel/slice/build.mjs"
+      ],
+      "role": "규칙 묶음·연결층·목록·원정·무대·화면·꾸밈과 그림·치수를 읽어 한 문서 안에 넣는다.",
+      "changes_here_affect": [
+        "page",
+        "tests"
+      ]
+    },
+    {
+      "id": "page",
+      "title": "플레이하는 시험판",
+      "files": [
+        "card_pixel/slice/dist/RelaySlice.html"
+      ],
+      "role": "제작 결과인 한 파일로 실행되며, 글꼴만 외부에서 받고 없으면 기본 글꼴을 쓴다.",
+      "changes_here_affect": [
+        "tests"
+      ]
+    },
+    {
+      "id": "art",
+      "title": "그림 원본·자르기",
+      "files": [
+        "card_pixel/art/manifest.json",
+        "card_pixel/slice/tools/cut-sprites.mjs",
+        "card_pixel/art/strips/"
+      ],
+      "role": "디펜스 SD·생물·보스 시트에서 만든 3포즈 띠를 잘라 게임 그림으로 쓴다. 목록 64개 가운데 ok 62개(동료 42·야생 9·보스 11). 원본 띠는 이 PC에만 두고 git에는 1/3 해상도 사본(art/strips-1x)을 둔다.",
+      "changes_here_affect": [
+        "sprites",
+        "roster",
+        "run",
+        "stage",
+        "screens",
+        "build",
+        "page",
+        "tests"
+      ]
+    },
+    {
+      "id": "sprites",
+      "title": "게임용 그림·치수",
+      "files": [
+        "card_pixel/slice/assets/sprites.json",
+        "card_pixel/slice/assets/"
+      ],
+      "role": "현재 그림 187장의 크기·몸 중심·발 기준·방향을 담고, 제작 때 그림과 함께 RELAY_ASSETS로 들어간다.",
+      "changes_here_affect": [
+        "roster",
+        "run",
+        "stage",
+        "screens",
+        "build",
+        "page",
+        "tests"
+      ]
+    },
+    {
+      "id": "tests",
+      "title": "규칙 검사·자동 플레이",
+      "files": [
+        "card_pixel/slice/tests/bridge.test.mjs",
+        "card_pixel/slice/tests/rules.test.mjs",
+        "card_pixel/slice/tests/play.mjs"
+      ],
+      "role": "규칙 검사는 공용 규칙·연결층·원정을 읽어 A~H와 원정 구조를 확인하고, 자동 플레이는 시험판을 다시 만든 뒤 설치된 Chrome으로 일곱 층 원정을 끝까지 조작한다.",
+      "changes_here_affect": []
+    },
+    {
+      "id": "sim",
+      "title": "수치 모의 실행",
+      "files": [
+        "card_pixel/slice/tools/sim.mjs"
+      ],
+      "role": "규칙 묶음·연결층·목록·원정을 화면 없이 돌려 성공률·큰 피해·유품·최후의 일인을 세며, 실제 그림 대신 예정된 동료 목록을 쓴다.",
+      "changes_here_affect": []
+    }
+  ],
+  "flows": [
+    {
+      "from": "rules",
+      "to": "uis",
+      "label": "다섯 화면의 제작 명령이 공용 규칙을 읽음"
+    },
+    {
+      "from": "rules",
+      "to": "bundle",
+      "label": "변경하지 않은 전투 규칙 네 파일"
+    },
+    {
+      "from": "bundle",
+      "to": "bridge",
+      "label": "전투 계산과 진행 함수"
+    },
+    {
+      "from": "bundle",
+      "to": "roster",
+      "label": "카드·적·기본덱 자료"
+    },
+    {
+      "from": "bridge",
+      "to": "run",
+      "label": "난수 함수·꿈의 변덕·적 접두사 목록"
+    },
+    {
+      "from": "roster",
+      "to": "run",
+      "label": "동료 후보와 생성한 적"
+    },
+    {
+      "from": "run",
+      "to": "screens",
+      "label": "층·문·보상과 원정 상태"
+    },
+    {
+      "from": "bridge",
+      "to": "screens",
+      "label": "상태·행동 후보·순서 있는 전투 사건"
+    },
+    {
+      "from": "screens",
+      "to": "stage",
+      "label": "사건에 맞춘 그리기·카메라·소리 명령"
+    },
+    {
+      "from": "stage",
+      "to": "build",
+      "label": "무대 코드 원문"
+    },
+    {
+      "from": "screens",
+      "to": "build",
+      "label": "화면 코드와 꾸밈 원문"
+    },
+    {
+      "from": "build",
+      "to": "page",
+      "label": "규칙·화면·그림을 넣은 한 문서"
+    },
+    {
+      "from": "art",
+      "to": "sprites",
+      "label": "대기·공격·피격 그림과 치수 자료"
+    },
+    {
+      "from": "sprites",
+      "to": "roster",
+      "label": "대기 그림의 유무·방향으로 후보를 거름"
+    },
+    {
+      "from": "sprites",
+      "to": "stage",
+      "label": "제작 때 넣은 그림·몸 중심·발 기준"
+    },
+    {
+      "from": "bundle",
+      "to": "tests",
+      "label": "규칙 검사에 실제 전투 규칙을 제공"
+    },
+    {
+      "from": "run",
+      "to": "sim",
+      "label": "화면과 같은 원정 함수·경제 규칙"
+    },
+    {
+      "from": "page",
+      "to": "tests",
+      "label": "자동 플레이가 읽는 제작 결과"
+    }
+  ],
+  "assets": [
+    {
+      "step": "생성 기록",
+      "tool": "card_pixel/art/prompts.md",
+      "input": "그림 지시문·참고 그림",
+      "output": "card_pixel/art/strips/의 세 자세 원본과 manifest.json의 상태 기록; 생성 도구 자동 연결은 확인되지 않음"
+    },
+    {
+      "step": "선별·자르기",
+      "tool": "node card_pixel/slice/tools/cut-sprites.mjs",
+      "input": "manifest.json에서 status가 ok인 원본만",
+      "output": "자세별 그림과 sprites.json; 배경 제거·분리된 조각 제거·32색 정리·몸 중심과 발 기준 계산"
+    },
+    {
+      "step": "크기 맞추기",
+      "tool": "card_pixel/slice/tools/cut-sprites.mjs",
+      "input": "대기 자세의 높이를 기준으로 세 자세에 같은 배율 적용",
+      "output": "동료 72점·생물 48/64/80점·보스 104점 높이 기준; 현재 25장에는 분리된 ash-fx.png도 포함"
+    },
+    {
+      "step": "문서에 넣기",
+      "tool": "node card_pixel/slice/build.mjs",
+      "input": "slice/assets/의 그림과 sprites.json",
+      "output": "RelaySlice.html 안의 RELAY_ASSETS; 목록·무대·화면이 함께 읽음"
+    }
+  ],
+  "checks": [
+    {
+      "command": "node --test card_pixel/slice/tests/bridge.test.mjs card_pixel/slice/tests/rules.test.mjs",
+      "what_it_proves": "피해 예측·사건과 체력의 일치·A–D·E–H의 일부 사례·원정 재현·층 배치·경제·영구 사망을 단언으로 확인한다. 모든 조합을 증명하지는 않는다.",
+      "takes": "초 단위 예상·미측정"
+    },
+    {
+      "command": "node card_pixel/slice/tools/sim.mjs 300",
+      "what_it_proves": "성공률·실패 층·최대 한 방·유품·최후의 일인 횟수를 출력한다. --plain, --no-heirloom, --no-laststand로 비교할 수 있다. 합격 수치로 자동 판정하지 않는다.",
+      "takes": "초~분 단위 예상·미측정"
+    },
+    {
+      "command": "node card_pixel/slice/build.mjs",
+      "what_it_proves": "현재 입력 파일을 읽어 RelaySlice.html을 만들 수 있음을 확인한다. 플레이 성공을 확인하는 명령은 아니다.",
+      "takes": "초 단위 예상·미측정"
+    },
+    {
+      "command": "node card_pixel/slice/tests/play.mjs",
+      "what_it_proves": "기본 시작 숫자 7·21·99로 자동 조작하고 종료·오류·정체·반응 시간을 기록하도록 작성됐다. 첫 판의 화면을 tests/shots/에 저장한다. 현재 roomIdx·reward 참조가 화면과 달라 끝까지 확인하는 용도로는 보수가 필요하다.",
+      "takes": "분 단위 예상·현재 통과 미확인"
+    },
+    {
+      "command": "node card_pixel/plan/build-structure.mjs",
+      "what_it_proves": "structure.json의 연결 대상과 필수 자료를 확인하고 이 구조 페이지를 다시 만든다.",
+      "takes": "초 단위 예상·미측정"
+    }
+  ],
+  "docs": [
+    {
+      "path": "AGENTS.md",
+      "holds": "공용 규칙을 읽는 카드 화면 다섯 개와 게임별 제작·검사 범위."
+    },
+    {
+      "path": "card_pixel/AGENTS.md",
+      "holds": "소유자가 정한 방향·결정 장부·그림 원칙·담당 구분·검사 명령. 계획과 내역을 나눠 관리하라는 지침."
+    },
+    {
+      "path": "card_pixel/plan/plan-content.md",
+      "holds": "한 장 요약·조사 A/B·현재 게임 진단·타당성 평가·리뉴얼 설계·그림과 연출 계획·순서와 관문·출처. 여기서는 장 제목만 확인."
+    },
+    {
+      "path": "card_pixel/plan/renewal-plan.html",
+      "holds": "기획서를 읽는 시각 문서. build-plan.mjs가 plan-content.md와 화면·그림 자료를 읽어 만든다."
+    },
+    {
+      "path": "card_pixel/plan/source-inventory.md",
+      "holds": "원본 카드·특성·기술과 출처를 정리한 목록."
+    },
+    {
+      "path": "card_pixel/plan/pixel-pilot/",
+      "holds": "그림 시험의 보고서·측정 자료·비교 그림."
+    },
+    {
+      "path": "card_pixel/art/manifest.json",
+      "holds": "64개 그림의 식별자·종류·출처·원본 경로·시간·재시도·상태·메모. 자르기는 ok만 읽는다."
+    },
+    {
+      "path": "card_pixel/art/report.md · prompts.md · contact-*.png",
+      "holds": "그림 생성 결과·사용한 지시문·비교 그림. 보고서는 생성이 미완료이고 ok도 최종 사용 승인을 뜻하지 않는다고 기록한다."
+    },
+    {
+      "path": "card_pixel/slice/README.md",
+      "holds": "실행·검사·구조 안내. 본문은 세 층·content.js·A–D를 설명하므로 현재 일곱 층·roster.js·run.js·A–H와 차이가 있다."
+    },
+    {
+      "path": "card_pixel/plan/README.md · experimental-rules.md",
+      "holds": "지침과 연결층이 가리키지만 현재 파일은 없다. 실험 E–H는 bridge.js 머리말에서 확인했다."
+    },
+    {
+      "path": "card_pixel/history/ · model-log.md",
+      "holds": "지침상 날짜별 작업과 모델별 위임 평가를 둘 자리다. 현재 폴더와 파일은 없다."
+    },
+    {
+      "path": "card_pixel/plan/structure.json · build-structure.mjs · structure.html",
+      "holds": "이 지도에 담은 근거 자료·제작 명령·읽는 페이지."
+    }
+  ],
+  "routing": [
+    {
+      "kind_of_work": "방향·설계 결정, 합격 기준, 검수",
+      "who": "Claude (지휘)",
+      "how_checked": "직접 플레이·스크린샷·테스트 결과로"
+    },
+    {
+      "kind_of_work": "화면·연출·문구처럼 보고 판단하는 일",
+      "who": "Claude 직접",
+      "how_checked": "전후 비교 화면"
+    },
+    {
+      "kind_of_work": "명세가 있고 명령으로 합격이 판정되는 구현·스크립트·데이터 추출·테스트",
+      "who": "GPT (Terra / Sol)",
+      "how_checked": "테스트와 수치"
+    },
+    {
+      "kind_of_work": "그림 생성(스프라이트)",
+      "who": "GPT 이미지 생성",
+      "how_checked": "대조표(contact sheet)와 측정"
+    },
+    {
+      "kind_of_work": "찾기·요약·정리",
+      "who": "경량 모델",
+      "how_checked": "사람이 읽는 요약"
+    }
+  ],
+  "unverified": [
+    "이 페이지의 휴대폰·데스크톱 화면은 Claude가 설치된 Chrome으로 찍어 확인했다(2026-11-18). 도표는 휴대폰에서 상자 안에서 가로로 스크롤된다.",
+    "이 지도 작업에서는 게임 규칙 검사·모의 실행·시험판 제작·자동 플레이를 실행하지 않았다. 소요 시간은 명령의 작업 범위로 추정했으며 측정값이 아니다.",
+    "manifest.json의 ok는 자르기 대상 상태다. 그림의 최종 품질·잘림·방향·보스 크기와 생성부터 등록까지의 자동 연결은 확인하지 않았다.",
+    "영향 표는 읽는 코드와 전달되는 자료를 기준으로 한다. 공용 전투 규칙 네 파일 밖의 card/game 파일이 모두 시험판에 들어가는 것은 아니다. 이미 만든 게임 문서는 해당 제작 명령을 다시 실행해야 바뀐다."
+  ]
+}

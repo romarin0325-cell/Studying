@@ -1,0 +1,23 @@
+{
+  "ash-idle.png": 2,
+  "ash-attack.png": 7,
+  "ash-hurt.png": 8,
+  "luna-idle.png": 1,
+  "luna-attack.png": 1,
+  "luna-hurt.png": 1,
+  "red_dragon-idle.png": 2,
+  "red_dragon-attack.png": 5,
+  "red_dragon-hurt.png": 8,
+  "golem-idle.png": 74,
+  "golem-attack.png": 102,
+  "golem-hurt.png": 50,
+  "zeke-idle.png": 6,
+  "zeke-attack.png": 20,
+  "zeke-hurt.png": 5,
+  "flame_sage-idle.png": 4,
+  "flame_sage-attack.png": 5,
+  "flame_sage-hurt.png": 6,
+  "cherry_prince-idle.png": 1,
+  "cherry_prince-attack.png": 1,
+  "cherry_prince-hurt.png": 8
+}

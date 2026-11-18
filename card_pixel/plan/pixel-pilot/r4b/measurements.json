@@ -1,0 +1,535 @@
+{
+  "method": "Idle raw cell; 5-bit RGB; four-neighbour boundary; grid method from snap.mjs; head ratio is a narrowest-row estimate; fringe is counted on downsampled cut pixels before palette quantization.",
+  "characters": [
+    {
+      "id": "ash",
+      "group": "A",
+      "rawSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "idleHeight": 549,
+      "idleHeightFraction": 0.7582872928176796,
+      "gridPeriod": 3,
+      "gridAgreement": 0.906295691063903,
+      "colours95": 1198,
+      "outlineMedian": [
+        97.5,
+        2,
+        102
+      ],
+      "outlineDistance": 73.31609645909963,
+      "headRatioEstimate": 0.3020833333333333,
+      "neckRow": 29,
+      "cutSizes": {
+        "idle": {
+          "width": 78,
+          "height": 96
+        },
+        "attack": {
+          "width": 91,
+          "height": 91
+        },
+        "hurt": {
+          "width": 81,
+          "height": 93
+        }
+      },
+      "attackHeightDifference": -5,
+      "attackWidthRatio": 1.1666666666666667,
+      "fringeBeforeRemoval": {
+        "idle": 2,
+        "attack": 7,
+        "hurt": 8
+      }
+    },
+    {
+      "id": "luna",
+      "group": "A",
+      "rawSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "idleHeight": 561,
+      "idleHeightFraction": 0.7748618784530387,
+      "gridPeriod": 3,
+      "gridAgreement": 0.921662525412243,
+      "colours95": 2858,
+      "outlineMedian": [
+        97,
+        5,
+        98.5
+      ],
+      "outlineDistance": 69.93032246457898,
+      "headRatioEstimate": 0.5,
+      "neckRow": 48,
+      "cutSizes": {
+        "idle": {
+          "width": 67,
+          "height": 96
+        },
+        "attack": {
+          "width": 101,
+          "height": 94
+        },
+        "hurt": {
+          "width": 69,
+          "height": 92
+        }
+      },
+      "attackHeightDifference": -2,
+      "attackWidthRatio": 1.507462686567164,
+      "fringeBeforeRemoval": {
+        "idle": 1,
+        "attack": 1,
+        "hurt": 1
+      }
+    },
+    {
+      "id": "red_dragon",
+      "group": "A",
+      "rawSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "idleHeight": 583,
+      "idleHeightFraction": 0.8052486187845304,
+      "gridPeriod": 3,
+      "gridAgreement": 0.9209507277340099,
+      "colours95": 2354,
+      "outlineMedian": [
+        107,
+        5,
+        105
+      ],
+      "outlineDistance": 81,
+      "headRatioEstimate": 0.25,
+      "neckRow": 24,
+      "cutSizes": {
+        "idle": {
+          "width": 71,
+          "height": 96
+        },
+        "attack": {
+          "width": 117,
+          "height": 94
+        },
+        "hurt": {
+          "width": 76,
+          "height": 94
+        }
+      },
+      "attackHeightDifference": -2,
+      "attackWidthRatio": 1.647887323943662,
+      "fringeBeforeRemoval": {
+        "idle": 2,
+        "attack": 5,
+        "hurt": 8
+      }
+    },
+    {
+      "id": "golem",
+      "group": "A",
+      "rawSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "idleHeight": 483,
+      "idleHeightFraction": 0.6671270718232044,
+      "gridPeriod": 3,
+      "gridAgreement": 0.9226977369482411,
+      "colours95": 1565,
+      "outlineMedian": [
+        139,
+        11,
+        150
+      ],
+      "outlineDistance": 130.75167302944925,
+      "headRatioEstimate": 0.25,
+      "neckRow": 24,
+      "cutSizes": {
+        "idle": {
+          "width": 98,
+          "height": 96
+        },
+        "attack": {
+          "width": 126,
+          "height": 92
+        },
+        "hurt": {
+          "width": 105,
+          "height": 93
+        }
+      },
+      "attackHeightDifference": -4,
+      "attackWidthRatio": 1.2857142857142858,
+      "fringeBeforeRemoval": {
+        "idle": 74,
+        "attack": 102,
+        "hurt": 50
+      }
+    },
+    {
+      "id": "zeke",
+      "group": "B",
+      "rawSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "idleHeight": 573,
+      "idleHeightFraction": 0.7914364640883977,
+      "gridPeriod": 3,
+      "gridAgreement": 0.9154048863281076,
+      "colours95": 1906,
+      "outlineMedian": [
+        97,
+        6,
+        129
+      ],
+      "outlineDistance": 88.7130204648675,
+      "headRatioEstimate": 0.40625,
+      "neckRow": 39,
+      "cutSizes": {
+        "idle": {
+          "width": 88,
+          "height": 96
+        },
+        "attack": {
+          "width": 121,
+          "height": 95
+        },
+        "hurt": {
+          "width": 86,
+          "height": 96
+        }
+      },
+      "attackHeightDifference": -1,
+      "attackWidthRatio": 1.375,
+      "fringeBeforeRemoval": {
+        "idle": 6,
+        "attack": 20,
+        "hurt": 5
+      }
+    },
+    {
+      "id": "flame_sage",
+      "group": "B",
+      "rawSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "idleHeight": 584,
+      "idleHeightFraction": 0.8066298342541437,
+      "gridPeriod": 3,
+      "gridAgreement": 0.9072667644774316,
+      "colours95": 1753,
+      "outlineMedian": [
+        102,
+        7,
+        123
+      ],
+      "outlineDistance": 87.39565206576354,
+      "headRatioEstimate": 0.25,
+      "neckRow": 24,
+      "cutSizes": {
+        "idle": {
+          "width": 74,
+          "height": 96
+        },
+        "attack": {
+          "width": 111,
+          "height": 96
+        },
+        "hurt": {
+          "width": 81,
+          "height": 96
+        }
+      },
+      "attackHeightDifference": 0,
+      "attackWidthRatio": 1.5,
+      "fringeBeforeRemoval": {
+        "idle": 4,
+        "attack": 5,
+        "hurt": 6
+      }
+    },
+    {
+      "id": "cherry_prince",
+      "group": "B",
+      "rawSize": {
+        "width": 2172,
+        "height": 724
+      },
+      "idleHeight": 555,
+      "idleHeightFraction": 0.7665745856353591,
+      "gridPeriod": 3,
+      "gridAgreement": 0.9083916488346538,
+      "colours95": 2429,
+      "outlineMedian": [
+        99,
+        5,
+        126
+      ],
+      "outlineDistance": 88.11356308764275,
+      "headRatioEstimate": 0.5104166666666666,
+      "neckRow": 49,
+      "cutSizes": {
+        "idle": {
+          "width": 64,
+          "height": 96
+        },
+        "attack": {
+          "width": 108,
+          "height": 94
+        },
+        "hurt": {
+          "width": 66,
+          "height": 96
+        }
+      },
+      "attackHeightDifference": -2,
+      "attackWidthRatio": 1.6875,
+      "fringeBeforeRemoval": {
+        "idle": 1,
+        "attack": 1,
+        "hurt": 8
+      }
+    }
+  ],
+  "groups": {
+    "A": {
+      "idleHeight": {
+        "mean": 544,
+        "min": 483,
+        "max": 583
+      },
+      "idleHeightFraction": {
+        "mean": 0.7513812154696133,
+        "min": 0.6671270718232044,
+        "max": 0.8052486187845304
+      },
+      "gridPeriod": {
+        "mean": 3,
+        "min": 3,
+        "max": 3
+      },
+      "gridAgreement": {
+        "mean": 0.9179016702895992,
+        "min": 0.906295691063903,
+        "max": 0.9226977369482411
+      },
+      "colours95": {
+        "mean": 1993.75,
+        "min": 1198,
+        "max": 2858
+      },
+      "outlineDistance": {
+        "mean": 88.74952298828197,
+        "min": 69.93032246457898,
+        "max": 130.75167302944925
+      },
+      "headRatioEstimate": {
+        "mean": 0.3255208333333333,
+        "min": 0.25,
+        "max": 0.5
+      },
+      "attackHeightDifference": {
+        "mean": -3.25,
+        "min": -5,
+        "max": -2
+      },
+      "attackWidthRatio": {
+        "mean": 1.4019327407229445,
+        "min": 1.1666666666666667,
+        "max": 1.647887323943662
+      },
+      "idle_width": {
+        "mean": 78.5,
+        "min": 67,
+        "max": 98
+      },
+      "idle_height": {
+        "mean": 96,
+        "min": 96,
+        "max": 96
+      },
+      "idle_fringe": {
+        "mean": 19.75,
+        "min": 1,
+        "max": 74
+      },
+      "attack_width": {
+        "mean": 108.75,
+        "min": 91,
+        "max": 126
+      },
+      "attack_height": {
+        "mean": 92.75,
+        "min": 91,
+        "max": 94
+      },
+      "attack_fringe": {
+        "mean": 28.75,
+        "min": 1,
+        "max": 102
+      },
+      "hurt_width": {
+        "mean": 82.75,
+        "min": 69,
+        "max": 105
+      },
+      "hurt_height": {
+        "mean": 93,
+        "min": 92,
+        "max": 94
+      },
+      "hurt_fringe": {
+        "mean": 16.75,
+        "min": 1,
+        "max": 50
+      },
+      "raw_width": {
+        "mean": 2172,
+        "min": 2172,
+        "max": 2172
+      },
+      "raw_height": {
+        "mean": 724,
+        "min": 724,
+        "max": 724
+      },
+      "outline_R": {
+        "mean": 110.125,
+        "min": 97,
+        "max": 139
+      },
+      "outline_G": {
+        "mean": 5.75,
+        "min": 2,
+        "max": 11
+      },
+      "outline_B": {
+        "mean": 113.875,
+        "min": 98.5,
+        "max": 150
+      }
+    },
+    "B": {
+      "idleHeight": {
+        "mean": 570.6666666666666,
+        "min": 555,
+        "max": 584
+      },
+      "idleHeightFraction": {
+        "mean": 0.7882136279926336,
+        "min": 0.7665745856353591,
+        "max": 0.8066298342541437
+      },
+      "gridPeriod": {
+        "mean": 3,
+        "min": 3,
+        "max": 3
+      },
+      "gridAgreement": {
+        "mean": 0.9103544332133976,
+        "min": 0.9072667644774316,
+        "max": 0.9154048863281076
+      },
+      "colours95": {
+        "mean": 2029.3333333333333,
+        "min": 1753,
+        "max": 2429
+      },
+      "outlineDistance": {
+        "mean": 88.07407853942459,
+        "min": 87.39565206576354,
+        "max": 88.7130204648675
+      },
+      "headRatioEstimate": {
+        "mean": 0.38888888888888884,
+        "min": 0.25,
+        "max": 0.5104166666666666
+      },
+      "attackHeightDifference": {
+        "mean": -1,
+        "min": -2,
+        "max": 0
+      },
+      "attackWidthRatio": {
+        "mean": 1.5208333333333333,
+        "min": 1.375,
+        "max": 1.6875
+      },
+      "idle_width": {
+        "mean": 75.33333333333333,
+        "min": 64,
+        "max": 88
+      },
+      "idle_height": {
+        "mean": 96,
+        "min": 96,
+        "max": 96
+      },
+      "idle_fringe": {
+        "mean": 3.6666666666666665,
+        "min": 1,
+        "max": 6
+      },
+      "attack_width": {
+        "mean": 113.33333333333333,
+        "min": 108,
+        "max": 121
+      },
+      "attack_height": {
+        "mean": 95,
+        "min": 94,
+        "max": 96
+      },
+      "attack_fringe": {
+        "mean": 8.666666666666666,
+        "min": 1,
+        "max": 20
+      },
+      "hurt_width": {
+        "mean": 77.66666666666667,
+        "min": 66,
+        "max": 86
+      },
+      "hurt_height": {
+        "mean": 96,
+        "min": 96,
+        "max": 96
+      },
+      "hurt_fringe": {
+        "mean": 6.333333333333333,
+        "min": 5,
+        "max": 8
+      },
+      "raw_width": {
+        "mean": 2172,
+        "min": 2172,
+        "max": 2172
+      },
+      "raw_height": {
+        "mean": 724,
+        "min": 724,
+        "max": 724
+      },
+      "outline_R": {
+        "mean": 99.33333333333333,
+        "min": 97,
+        "max": 102
+      },
+      "outline_G": {
+        "mean": 6,
+        "min": 5,
+        "max": 7
+      },
+      "outline_B": {
+        "mean": 126,
+        "min": 123,
+        "max": 129
+      }
+    }
+  }
+}

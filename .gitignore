@@ -6,3 +6,11 @@ card/test-results/
 card_astra/test-results/
 card_lumen/test-results/
 test-results/card-uis/
+
+# card_pixel: screenshots from the play test; full-size generated strips stay local (the 1x archive in art/strips-1x is committed)
+card_pixel/slice/tests/shots/
+card_pixel/art/strips/
+card_pixel/art/refs/
+card_pixel/plan/pixel-pilot/r4/*-strip*.png
+card_pixel/plan/pixel-pilot/r4/*-idle*.png
+card_pixel/plan/pixel-pilot/r4b/*-strip.png
