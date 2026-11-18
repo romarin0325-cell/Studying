@@ -78,9 +78,13 @@ function fight(run, door, stat) {
 function playRun(seed) {
   const run = R.newRun(core, roster, seed, { plain: flag('--plain') });
   const stat = { best: 0, lastStands: 0, clutch: 0, heirloomsGained: 0, heirloomUses: 0, rules: {}, endFloor: 0, doors: {} };
-  const first = R.pickChoices(run, roster, 3);
-  R.takePick(run, first, first.slice().sort((a, b) => strength(b) - strength(a))[0]);
-  R.drawAwaken(run, roster, true); R.drawAwaken(run, roster, true);
+  const start = flag('--old-start') ? { picks: 1, draws: 2 } : R.START;
+  for (let p = 0; p < start.picks; p++) {
+    const c = R.pickChoices(run, roster, 3, p ? { near: run.bench[0] } : null);
+    R.takePick(run, c, c.slice().sort((a, b) => strength(b) - strength(a))[0]);
+  }
+  for (let d = 0; d < start.draws; d++) R.drawAwaken(run, roster, true);
+  if (args.find(a => a.startsWith('--crystals='))) run.crystals = Number(args.find(a => a.startsWith('--crystals=')).slice(11));
   for (let f = 1; f <= R.FLOORS && !run.result; f++) {
     const doors = R.nextFloor(run, roster);
     const battles = doors.filter(d => d.enemies.length);

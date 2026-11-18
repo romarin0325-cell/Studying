@@ -170,6 +170,24 @@ test('run: the same seed makes the same expedition, and the floors follow the pl
   for (const f of types.slice(1, 3)) assert.ok(f.includes('wild'), 'every choice floor before the gate has a fight');
 });
 
+test('run: the start offers two picks, the second with one candidate of the first pick\'s element', () => {
+  assert.deepEqual(plain(R.START), { picks: 2, draws: 3 });
+  for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    const run = R.newRun(core, roster, seed, {});
+    assert.equal(run.crystals, 1);
+    const a = R.pickChoices(run, roster, 3);
+    R.takePick(run, a, a[0]);
+    const first = roster.card(a[0]), b = R.pickChoices(run, roster, 3, { near: a[0] });
+    assert.equal(new Set(b).size, 3, 'three different candidates');
+    assert.ok(!b.includes(a[0]), 'never the card already woken');
+    const sameLeft = run.pool.some(id => id !== a[0] && roster.card(id).element === first.element);
+    if (sameLeft) assert.ok(b.some(id => roster.card(id).element === first.element), 'one shares the first pick\'s element (seed ' + seed + ')');
+    R.takePick(run, b, b[1]);
+    const rejects = [...new Set(a.slice(1).concat([b[0], b[2]]))].filter(id => !run.bench.includes(id));
+    assert.deepEqual(plain(run.unchosen).sort(), plain(rejects).sort(), 'both picks leave their rejects as nightmares, once each');
+  }
+});
+
 test('run: awakenings, the altar and permadeath', () => {
   const run = R.newRun(core, roster, 99, {});
   const c = R.pickChoices(run, roster, 3);

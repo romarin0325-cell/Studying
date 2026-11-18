@@ -26,7 +26,7 @@
     const rng = Bridge.mulberry32(seed >>> 0);
     return {
       seed: seed >>> 0, rng, pool: roster.pool(o.pool || 'common'), plain: !!o.plain,
-      floor: 0, doors: [], crystals: 3,
+      floor: 0, doors: [], crystals: 1,
       bench: [], fallen: [], heirlooms: {}, blessings: {}, unchosen: [],
       boss: pick(rng, roster.bosses),
       stats: { battles: 0, turns: 0, best: 0, bestBy: '', heirloomsUsed: 0, lastStands: 0, jackpots: 0 },
@@ -45,16 +45,23 @@
     for (const g of grades) { r -= rates[g]; if (r < 0) return pick(run.rng, byGrade[g]); }
     return pick(run.rng, byGrade[grades[grades.length - 1]]);
   }
-  /** Three different candidates for 골라 깨우기. */
-  function pickChoices(run, roster, n) {
-    const out = [];
-    for (let i = 0; i < (n || 3); i++) { const id = drawFrom(run, roster, RATES.pick, run.bench.concat(out)); if (id) out.push(id); }
-    return out;
+  /** Three different candidates for 골라 깨우기. With `near` (a card id), one candidate shares its
+      element, so the second start pick can build on the first (many traits count an element). */
+  function pickChoices(run, roster, n, opts) {
+    const out = [], near = opts && opts.near && roster.card(opts.near);
+    if (near) {
+      const same = run.pool.filter(id => !run.bench.includes(id) && roster.card(id).element === near.element);
+      if (same.length) out.push(pick(run.rng, same));
+    }
+    for (let i = out.length; i < (n || 3); i++) { const id = drawFrom(run, roster, RATES.pick, run.bench.concat(out)); if (id) out.push(id); }
+    return near ? shuffle(run.rng, out) : out;
   }
   function takePick(run, choices, id) {
     run.bench.push(id);
-    run.unchosen = choices.filter(x => x !== id);
+    run.unchosen = run.unchosen.filter(x => !choices.includes(x)).concat(choices.filter(x => x !== id));
   }
+  /** The start: two picks (the second leans toward the first's element), then three random wakings. */
+  const START = { picks: 2, draws: 3 };
   /** 깨우기: one random character, paid unless free. */
   function drawAwaken(run, roster, free) {
     if (!free) { if (run.crystals < COST.draw) return null; run.crystals -= COST.draw; }
@@ -166,7 +173,7 @@
   function gateChoices(run, door) { return door.enemies.map(e => e.source).filter(id => id && !run.bench.includes(id)); }
 
   root.RelayRun = {
-    FLOORS, RATES, COST, BLESS, JACKPOT, TIER,
+    FLOORS, RATES, COST, BLESS, JACKPOT, TIER, START,
     newRun, nextFloor, makeDoors, pickChoices, takePick, drawAwaken, payPick, altarRoll, altarKeep,
     battleOptions, applyBattle, gateChoices
   };
