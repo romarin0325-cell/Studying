@@ -72,6 +72,7 @@ export const stardustBonus=(beds,cleared)=>bedOpen('stardust',cleared)?stardustR
 export const roseAttack=level=>.01*level;
 export const springGauge=level=>120+level;
 export const seedGold=level=>2*level;
+export const draftHeroEntry=entry=>entry?.owned?entry:{owned:true,enhance:0};
 export const heroMultiplier=(entry,beds)=>(1+roseAttack(beds?.rose||0))*enhanceMultiplier(entry.enhance);
 // Combat power is a rough guide to what a companion adds to a team; auto formation and dispatch rewards read it.
 // It is base x rarity x growth. Measured with the contribution bench (scripts/simulate.mjs, 2026-11-14): at equal

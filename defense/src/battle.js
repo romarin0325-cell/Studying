@@ -1,4 +1,4 @@
-import {heroMultiplier,specialMultiplier,springGauge,seedGold,collectionBonus,relicLevel,critStats} from './economy.js';
+import {heroMultiplier,specialMultiplier,springGauge,seedGold,collectionBonus,relicLevel,critStats,draftHeroEntry} from './economy.js';
 import * as engine from './combat/engine.js';
 import {TEAM_SIZE} from './team-config.js';
 import {season} from './preview/season.js';
@@ -6,7 +6,7 @@ import {oathBosses} from './preview/oath.js';
 import {twinBosses} from './preview/twin.js';
 import {playerAutoPlay} from './smart-auto.js';
 
-export const battleMeta=(profile,deck)=>Object.fromEntries(deck.map(id=>[id,{power:heroMultiplier(profile.heroes[id],profile.beds),special:specialMultiplier(profile.heroes[id].enhance)}]));
+export const battleMeta=(profile,deck)=>Object.fromEntries(deck.map(id=>{const entry=draftHeroEntry(profile.heroes[id]);return [id,{power:heroMultiplier(entry,profile.beds),special:specialMultiplier(entry.enhance)}];}));
 export function createBattle(profile){
   const a=profile.active;if(!a||a.mode==='weekly'&&a.draft?.length!==TEAM_SIZE)return null;
   const meta=battleMeta(profile,a.deck),twin=a.mode==='twin',artifacts=twin?a.relics||[]:profile.equipped;

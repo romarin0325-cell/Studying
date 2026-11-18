@@ -1,6 +1,6 @@
 # 후속 과제 · 드래프트 개편 / 테스트 배포 수치 / 일본어 용어 / 학습자료 매핑 (2026-11-17)
 
-상태: **기획·과제 정리. 코드 미반영.**
+상태: **1번 항목 반영 완료(2026-11-18). 2~5번 항목 기획·과제 정리(코드 미반영).**
 
 2026-11-17 추가된 신규 후속 과제와, 함께 검토·결정이 필요한 연출/에셋 정리 항목([결정 대기 비교 도구](../review/pending-decisions/index.html))을 묶어 정리한다.
 
@@ -8,30 +8,20 @@
 
 | 과제 | 핵심 방향 | 주요 관련 소스 |
 |---|---|---|
-| 1. 유성 드래프트 개편 | 미보유 동료도 후보 풀에 포함하되 **강화만 미적용(`enhance = 0`)** 상태로 등장 | `src/profile.js`, `src/battle.js`, `src/economy.js`, `src/app.js` |
+| 1. 유성 드래프트 개편 *(반영 완료)* | 미보유 동료도 후보 풀에 포함하되 **1부 해금(`lateOpen`) 유지 · 강화만 미적용(`enhance = 0`)** 상태로 등장, 미보유 동료 부탁 불허 | `src/profile.js`, `src/battle.js`, `src/economy.js`, `src/app.js` |
 | 2. 테스트 배포용 수치 조정 | 테스트 빌드 한정 로테이션 1일·파견 2시간·파견/방치/미션 별똥별 5배·인연 10배·새싹미션 날짜 제한 제거 및 미션 단위 보상 개편 | `src/content.js`, `src/economy.js`, `src/bond.js`, `src/beginner.js`, `src/profile.js`, `src/preview/season.js`, `src/team-config.js` |
 | 3. 일본어판 대비 용어 정비 | `노출`·`성광` 등 직역 시 부자연스럽거나 직관성이 낮은 상태·규칙 명칭을 일본어권 기준으로 합리적 재명명 | `src/data.js`, `src/new-companions.js`, `docs/STATUS_RULES.md`, `src/app.js` |
 | 4. 학습자료 매핑 정비 | 영어판 · 일본어판 · 학습제거판 3종 빌드/과목 매핑 구조 및 학습제거판 대체 경로 정리 | `src/course.js`, `src/quiz.js`, `src/library.js`, `src/tutor.js`, `src/profile.js`, `src/app.js` |
 
 ---
 
-## 1. 유성 드래프트 개편안 (미보유 동료 포함 · 강화 미적용)
+## 1. 유성 드래프트 개편안 (미보유 동료 포함 · 강화 미적용 · **반영 완료**)
 
-### 현재 동작
-- `available(p)`(`src/profile.js`)가 `p.heroes[h.id].owned && !away(p, h.id)`만 반환해 **보유 중이고 파견 중이 아닌 동료**만 `p.active.draftPool`에 들어간다.
-- `validateProfile(p)`(`src/profile.js`)도 `a.draftPool`, `a.draft`, `a.deck`의 모든 ID가 `p.heroes[id]?.owned === true`여야 유효한 저장으로 인정한다.
-- `combatPower(id, entry, beds, relicBonus)`(`src/economy.js`)는 `!entry?.owned`이면 `0`을 반환한다.
-
-### 개편 방향
-- **미보유 동료 등장:** 소지하지 않은 동료도 유성 드래프트 2택5 후보에 등장한다(단, 1부 클리어 전 `LATE_COMPANIONS` 해금 규칙을 드래프트에도 그대로 적용할지, 체험 목적으로 전체 42명을 열지는 구현 전 확정).
-- **강화만 미적용:** 미보유 동료를 뽑아 전장에 투입할 때는 공용 영구 성장(꿈의 온실·새벽 온실 `beds`, 유물 수집 보너스, 장착 유물, 치명타 화단)은 정상 적용하고, **개인 중복 강화(`enhance`)만 적용하지 않는다**(`enhance = 0`, 즉 `enhanceMultiplier(0) = 1`, `specialMultiplier(0) = 1`).
-- 보유 중인 동료는 기존처럼 자신의 강화 단계(`p.heroes[id].enhance`)를 그대로 적용받으며, 파견 중인 동료는 기존과 같이 후보에서 제외한다(미보유 동료는 파견 불가).
-
-### 구현 시 확인할 곳
-1. **후보 풀(`draftPool`):** `available(p)` 대신 드래프트 전용 풀 함수로 분리하고, 미보유 동료 여부와 1부 해금(`lateOpen(p.cleared)`) 반영 여부를 명시한다.
-2. **전투 메타·전투력(`battleMeta`, `combatPower`):** `battle.js`의 `battleMeta(profile, deck)`와 드래프트 카드의 `cpOf(o.id)`(`app.js`)가 미보유 동료일 때 `owned: true, enhance: 0` 가상 항목을 기준으로 전투력·배율을 계산하도록 분리한다.
-3. **세이브 검증(`validateProfile`)과 복원(`resumeBattle`):** `a.mode === 'weekly'`일 때 `draftPool`·`draft`·`deck`에 미보유 동료 ID가 들어 있어도 허용하되, 파견 중 동료나 존재하지 않는 ID는 계속 거부한다.
-4. **드래프트 UI·동료의 부탁 연동:** 카드에 `미보유 (강화 +0)` 구분 표시를 추가할지, 미보유 동료를 드래프트에서 써서 조건을 채운 경우 `applyRequestProgress`가 미보유 동료의 부탁까지 진행시킬지(부탁은 보유 동료에게만 도착하므로 영향은 제한적) 결정한다.
+### 반영 내용 (2026-11-18)
+- **1부 해금 상태 유지 (`draftEligible`, `draftPool`, `src/profile.js`):** 1부 클리어(`lateOpen(p.cleared)`) 전에는 기존 30명(보유 + 미보유, `LATE_COMPANIONS` 제외 · 이미 보유한 예외 제외)만 후보로 나오고, 1부 클리어 후 42명 전체(파견 중 제외)가 후보에 포함된다.
+- **강화만 미적용 (`draftHeroEntry`, `src/economy.js` · `battleMeta`, `src/battle.js` · `draftCpOf`, `src/app.js`):** 미보유 동료는 `{ owned: true, enhance: 0 }` 기준으로 전투 배율·전투력을 계산해 온실·유물 공용 성장은 적용하고 개인 강화만 적용하지 않는다.
+- **UI 문구·표시:** 출격 준비 문구를 `"미보유를 포함한 동료 중에서 5명을 골라요."`로 수정했고, 드래프트 카드에 `미보유 (강화 +0)` 별도 표기는 넣지 않았다.
+- **세이브 검증 (`validateProfile`) & 동료의 부탁 (`applyRequestProgress`):** `weekly` 모드에서 `draftPool`·`draft`·`deck`의 해금/비파견 미보유 ID는 허용하고, 부탁 진행 판정에서는 요청자·조건 동료·편성이 모두 보유 동료일 때만 진행되도록 제한했다.
 
 ---
 
