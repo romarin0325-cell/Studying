@@ -58,9 +58,9 @@
     }
   },
   "totals": {
-    "sourceBytes": 36313059,
-    "deployableSourceBytes": 33250617,
-    "outputBytes": 17806934,
+    "sourceBytes": 36750113,
+    "deployableSourceBytes": 33687671,
+    "outputBytes": 18012472,
     "optimizedFiles": 179,
     "derivedFiles": 162,
     "derivedOutputBytes": 3679828
@@ -754,7 +754,7 @@
     },
     {
       "id": "atlas:unit-lightning_sage",
-      "source": "./assets/cast-v2/lightning_sage.webp",
+      "source": "./assets/cast-turnaround-20261120/lightning_sage.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-lightning_sage; combat renderer / stage UI",
@@ -763,8 +763,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 182914,
-        "sha256": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
+        "bytes": 417840,
+        "sha256": "c4044138cf54612f40d7b87ceabc71e65522d180e3cfcede735955ca0c9dbbfb",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -773,9 +773,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/lightning_sage.webp",
-        "bytes": 69514,
-        "sha256": "006e58485083b37e43b20e97cf6b29b681bbcd8e06ada46a8c5408e80309e913",
+        "path": "./assets/optimized/cast-turnaround-20261120/lightning_sage.webp",
+        "bytes": 182412,
+        "sha256": "db9f0e94c824eb02e62b3243033208d1c0b221848b8070a3bea6eed3828ec616",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -783,7 +783,7 @@
           "codec": "webp"
         }
       },
-      "decision": "Separate smaller encoding; source preserved."
+      "decision": "Separate smaller combat atlas with unchanged decoded pixels preserved outside the regional edit."
     },
     {
       "id": "atlas:unit-red_dragon",
@@ -952,7 +952,7 @@
     },
     {
       "id": "atlas:unit-phantom",
-      "source": "./assets/cast-v2/phantom-pajamas-guided.webp",
+      "source": "./assets/cast-turnaround-20261120/phantom.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-phantom; combat renderer / stage UI",
@@ -961,8 +961,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 145016,
-        "sha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
+        "bytes": 341536,
+        "sha256": "ffc7ded1a2f12ea19b36ad7daf586b74547a99ec2f7eb3a4ddfe6613a78dc8bc",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -971,9 +971,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-v2/phantom-pajamas-guided.webp",
-        "bytes": 53624,
-        "sha256": "f22359e0992f9db1fd08e8408b783b73fb7625c063e68207bf412357b1545282",
+        "path": "./assets/optimized/cast-turnaround-20261120/phantom.webp",
+        "bytes": 144896,
+        "sha256": "787708892948c96449697dc8795a307e4b5e81db5fbb6231a0d62af215a7d326",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -981,7 +981,7 @@
           "codec": "webp"
         }
       },
-      "decision": "Separate smaller encoding; source preserved."
+      "decision": "Separate smaller combat atlas with unchanged decoded pixels preserved outside the regional edit."
     },
     {
       "id": "atlas:unit-queen",
@@ -1282,7 +1282,7 @@
     },
     {
       "id": "atlas:unit-time_magician",
-      "source": "./assets/cast-selected-20261109/time_magician.webp",
+      "source": "./assets/cast-turnaround-20261120/time_magician.webp",
       "profile": "unit",
       "uses": [
         "window.__ASTRA_ASSETS__.unit-time_magician; combat renderer / stage UI",
@@ -1291,8 +1291,8 @@
       ],
       "retention": "Preserve source bytes at this path; optimized output is separate.",
       "original": {
-        "bytes": 442462,
-        "sha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
+        "bytes": 448070,
+        "sha256": "852c463579a1a7721796a00d7839822a5368174c5cd1653ee343499d436b758a",
         "metadata": {
           "width": 1024,
           "height": 1024,
@@ -1301,9 +1301,9 @@
         }
       },
       "output": {
-        "path": "./assets/optimized/cast-selected-20261109/time_magician.webp",
-        "bytes": 192998,
-        "sha256": "d9d1b0cef97c9942b915df975ef47eb2d2f1325a4d7a80e91d142424e30f40b8",
+        "path": "./assets/optimized/cast-turnaround-20261120/time_magician.webp",
+        "bytes": 194366,
+        "sha256": "b78d281aea0902efd8ffaf61e917d4363ed406f8dffb00af006992b61901edec",
         "metadata": {
           "width": 640,
           "height": 640,
@@ -1311,7 +1311,7 @@
           "codec": "webp"
         }
       },
-      "decision": "Separate smaller lossless encoding; three unchanged optimized frames preserved, changed left frame prepared with unit profile."
+      "decision": "Separate smaller combat atlas with unchanged decoded pixels preserved outside the regional edit."
     },
     {
       "id": "atlas:unit-cherry_prince",
@@ -7161,7 +7161,7 @@
     },
     {
       "id": "portrait:lightning_sage",
-      "source": "./assets/cast-v2/lightning_sage.webp",
+      "source": "./assets/cast-turnaround-20261120/lightning_sage.webp",
       "profile": "portrait",
       "crop": {
         "left": 109,
@@ -7173,7 +7173,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
+      "sourceSha256": "c4044138cf54612f40d7b87ceabc71e65522d180e3cfcede735955ca0c9dbbfb",
       "output": {
         "path": "./assets/optimized/ui/portraits/lightning_sage.webp",
         "bytes": 21684,
@@ -7188,7 +7188,7 @@
     },
     {
       "id": "figure:lightning_sage",
-      "source": "./assets/cast-v2/lightning_sage.webp",
+      "source": "./assets/cast-turnaround-20261120/lightning_sage.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7200,7 +7200,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
+      "sourceSha256": "c4044138cf54612f40d7b87ceabc71e65522d180e3cfcede735955ca0c9dbbfb",
       "output": {
         "path": "./assets/optimized/ui/figures/lightning_sage.webp",
         "bytes": 36300,
@@ -7215,7 +7215,7 @@
     },
     {
       "id": "portrait:time_magician",
-      "source": "./assets/cast-selected-20261109/time_magician.webp",
+      "source": "./assets/cast-turnaround-20261120/time_magician.webp",
       "profile": "portrait",
       "crop": {
         "left": 123,
@@ -7227,7 +7227,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
+      "sourceSha256": "852c463579a1a7721796a00d7839822a5368174c5cd1653ee343499d436b758a",
       "output": {
         "path": "./assets/optimized/ui/portraits/time_magician.webp",
         "bytes": 20272,
@@ -7242,7 +7242,7 @@
     },
     {
       "id": "figure:time_magician",
-      "source": "./assets/cast-selected-20261109/time_magician.webp",
+      "source": "./assets/cast-turnaround-20261120/time_magician.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7254,7 +7254,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
+      "sourceSha256": "852c463579a1a7721796a00d7839822a5368174c5cd1653ee343499d436b758a",
       "output": {
         "path": "./assets/optimized/ui/figures/time_magician.webp",
         "bytes": 41198,
@@ -7323,7 +7323,7 @@
     },
     {
       "id": "portrait:phantom",
-      "source": "./assets/cast-v2/phantom-pajamas-guided.webp",
+      "source": "./assets/cast-turnaround-20261120/phantom.webp",
       "profile": "portrait",
       "crop": {
         "left": 120,
@@ -7335,7 +7335,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; collection / party / summon"
       ],
-      "sourceSha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
+      "sourceSha256": "ffc7ded1a2f12ea19b36ad7daf586b74547a99ec2f7eb3a4ddfe6613a78dc8bc",
       "output": {
         "path": "./assets/optimized/ui/portraits/phantom.webp",
         "bytes": 18744,
@@ -7350,7 +7350,7 @@
     },
     {
       "id": "figure:phantom",
-      "source": "./assets/cast-v2/phantom-pajamas-guided.webp",
+      "source": "./assets/cast-turnaround-20261120/phantom.webp",
       "profile": "figure",
       "crop": {
         "left": 0,
@@ -7362,7 +7362,7 @@
       "uses": [
         "window.__GARDEN_MEDIA__; home / details / cut-in / results"
       ],
-      "sourceSha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
+      "sourceSha256": "ffc7ded1a2f12ea19b36ad7daf586b74547a99ec2f7eb3a4ddfe6613a78dc8bc",
       "output": {
         "path": "./assets/optimized/ui/figures/phantom.webp",
         "bytes": 27236,

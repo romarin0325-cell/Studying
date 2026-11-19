@@ -1,0 +1,396 @@
+{
+  "character": "phantom",
+  "revision": "3379bc5e9a5edf40d87a00e3be8ca207ca866185",
+  "input": {
+    "png": "defense/assets/cast-v2/phantom-pajamas-guided.png",
+    "pngSha256": "35ac0caf9359d6244cbd6d1b9a39aff4a5da090be6bb55d9f78d495e4aaae4dc",
+    "lossyReviewWebPSha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e"
+  },
+  "candidate": {
+    "file": "candidate.png",
+    "sha256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+    "size": [
+      1024,
+      1024
+    ],
+    "cell": 512,
+    "registration": [
+      256,
+      480
+    ],
+    "geometry": "All four logical 512 frames original registered. No resize or translation of the protected original. Donor portrait crops mapped back with uniform scale only."
+  },
+  "optical": {
+    "sourceHash": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+    "views": [
+      {
+        "crown": [
+          249,
+          138
+        ],
+        "chin": [
+          235,
+          314
+        ],
+        "span": [
+          146,
+          349
+        ],
+        "tip": [
+          243,
+          114
+        ],
+        "kind": "hair",
+        "u": [
+          5,
+          3
+        ]
+      },
+      null,
+      {
+        "crown": [
+          269,
+          138
+        ],
+        "chin": [
+          219,
+          318
+        ],
+        "span": [
+          160,
+          357
+        ],
+        "tip": [
+          242,
+          116
+        ],
+        "kind": "hair",
+        "u": [
+          5,
+          3
+        ]
+      },
+      {
+        "crown": [
+          244,
+          139
+        ],
+        "chin": [
+          281,
+          318
+        ],
+        "span": [
+          156,
+          349
+        ],
+        "tip": [
+          266,
+          118
+        ],
+        "kind": "hair",
+        "u": [
+          5,
+          3
+        ]
+      }
+    ],
+    "decision": "keep",
+    "side": "양 측면",
+    "note": "두 측면의 짙은 윗머리 호가 정면 높이로 올라왔다. 가는 한 가닥은 윗호와 떨어져 있다. 동공·볼·턱은 원래 위치에 남아 한쪽 눈과 곰 인형이 자연스럽게 이어진다. 새 윗부분은 표면 광택이 기존 정면보다 조금 부드럽다.",
+    "action": "정면·후면과 곰·눈·턱을 보존한 국소 후보. 게임 배포본에서 64·96px 회전을 확인한 뒤 선택할 수 있다."
+  },
+  "visibleFace": {
+    "views": [
+      {
+        "box": [
+          194,
+          220,
+          308,
+          314
+        ],
+        "eye": [
+          251,
+          272
+        ],
+        "u": 6,
+        "note": "후보 원본에서 노출 창과 동공을 확인했고 동일 사각형의 RGBA가 편집 전과 전부 일치한다."
+      },
+      null,
+      {
+        "box": [
+          196,
+          240,
+          274,
+          318
+        ],
+        "eye": [
+          222,
+          280
+        ],
+        "u": 6,
+        "note": "후보 원본에서 노출 창과 동공을 확인했고 동일 사각형의 RGBA가 편집 전과 전부 일치한다."
+      },
+      {
+        "box": [
+          243,
+          242,
+          315,
+          318
+        ],
+        "eye": [
+          292,
+          280
+        ],
+        "u": 6,
+        "note": "후보 원본에서 노출 창과 동공을 확인했고 동일 사각형의 RGBA가 편집 전과 전부 일치한다."
+      }
+    ],
+    "sourceHash": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd"
+  },
+  "anatomy": {
+    "coordinateSpace": "unwarped-512-cell",
+    "rawSha256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+    "measuredBy": "Codex, four fixed-grid candidate images at native scale; outlines observed; hidden skull and joints manually inferred.",
+    "uncertainty": "Painted crown ±5 px and visible jaw ±3 px. Skull boundary inferred under hair ±12 px front, ±18 px back, ±17 px profiles. Front/back and facial windows are pixel-locked to the verified input. Profile bare-skull, covered back jaw, clothed shoulder/hip centers, and foot anchor cannot be anatomically confirmed; shoulder ±7, hip ±10, painted contact vs registration anchor ±4 px.",
+    "exclusions": "hair-hats-ears-horns-ornaments-equipment",
+    "views": [
+      {
+        "skullEllipse": [
+          246,
+          237,
+          159,
+          151,
+          -7
+        ],
+        "chin": [
+          235,
+          314
+        ],
+        "shoulders": [
+          251,
+          331
+        ],
+        "hips": [
+          254,
+          402
+        ],
+        "sole": [
+          256,
+          480
+        ],
+        "outerSleeve": [
+          193,
+          353
+        ],
+        "outerFoot": [
+          214,
+          466
+        ],
+        "eyeLeft": [
+          220,
+          279
+        ],
+        "eyeRight": [
+          282,
+          265
+        ]
+      },
+      {
+        "skullEllipse": [
+          261,
+          236,
+          159,
+          151,
+          0
+        ],
+        "chin": [
+          261,
+          311
+        ],
+        "shoulders": [
+          260,
+          329
+        ],
+        "hips": [
+          260,
+          402
+        ],
+        "sole": [
+          256,
+          480
+        ]
+      },
+      {
+        "skullEllipse": [
+          255,
+          240,
+          145,
+          150,
+          0
+        ],
+        "chin": [
+          219,
+          318
+        ],
+        "shoulders": [
+          258,
+          331
+        ],
+        "hips": [
+          263,
+          402
+        ],
+        "sole": [
+          256,
+          480
+        ],
+        "eyeLeft": [
+          222,
+          280
+        ]
+      },
+      {
+        "skullEllipse": [
+          253,
+          240,
+          145,
+          150,
+          0
+        ],
+        "chin": [
+          281,
+          318
+        ],
+        "shoulders": [
+          249,
+          331
+        ],
+        "hips": [
+          248,
+          402
+        ],
+        "sole": [
+          256,
+          480
+        ],
+        "eyeRight": [
+          292,
+          280
+        ]
+      }
+    ]
+  },
+  "anchorNotes": {
+    "backJaw": "후면 피부 턱은 직접 관측되지 않아 optical null. 해부학적 chin은 보존 후면의 흑발 아래로 추정한 턱이다.",
+    "bareSkull": "머리카락 상단과 별도로 얼굴·귀·턱·원본 해부 추정 비교. 정면/후면 픽셀 동일. 측면 두개골 윗경계가 추가로 드러나지는 않았다.",
+    "sole": "모든 sole은 바닥 등록점이다. 최하단 불투명 발끝은 최대 약 4px 차이.",
+    "shouldersHips": "후드·곰·잠옷 아래 좌우 어깨 및 고관절 중앙 추정. 뒤/옆 얼굴·해부학적 복원치와 보이는 얼굴 부분을 별도로 사용한다.",
+    "pupilConvention": "정면 eyeLeft/eyeRight는 화면에 보이는 왼쪽/오른쪽. 측면은 각각 측면에서 보이는 단일 눈. 후면은 null."
+  },
+  "verification": {
+    "nPixelsCompared": 1048576,
+    "diffBySourceOrder": [
+      0,
+      0,
+      16358,
+      16318
+    ],
+    "changedBoundsWithinCells": [
+      null,
+      null,
+      [
+        146,
+        113,
+        374,
+        232
+      ],
+      [
+        135,
+        97,
+        373,
+        232
+      ]
+    ],
+    "outsideMaskChanged": 0,
+    "regions": [
+      {
+        "label": "front/full",
+        "box": [
+          0,
+          0,
+          512,
+          512
+        ],
+        "changedRGBA": 0
+      },
+      {
+        "label": "back/full",
+        "box": [
+          512,
+          0,
+          512,
+          512
+        ],
+        "changedRGBA": 0
+      },
+      {
+        "label": "left/visible face rectangle including pupils and jaw",
+        "box": [
+          196,
+          752,
+          79,
+          79
+        ],
+        "changedRGBA": 0
+      },
+      {
+        "label": "right/visible face rectangle including pupils and jaw",
+        "box": [
+          755,
+          754,
+          73,
+          77
+        ],
+        "changedRGBA": 0
+      },
+      {
+        "label": "left/lower face, ears, hands, teddy, garments, feet",
+        "box": [
+          0,
+          758,
+          512,
+          266
+        ],
+        "changedRGBA": 0
+      },
+      {
+        "label": "right/lower face, ears, hands, teddy, garments, feet",
+        "box": [
+          512,
+          758,
+          512,
+          266
+        ],
+        "changedRGBA": 0
+      }
+    ],
+    "gameSizesViewed": [
+      "compare-64-96.png"
+    ],
+    "visualPanels": [
+      "compare-heads.png",
+      "after/raw-grid-0.png",
+      "after/raw-grid-1.png",
+      "after/raw-grid-2.png",
+      "after/raw-grid-3.png"
+    ]
+  },
+  "process": {
+    "nativeFirst": "654ba4a17ba061c472daed8d3fac6147b77f6d186945bdebc5be1c0c0d407294",
+    "nativeSecond": "23c56976415281ffd40d1dbc68cf232406a3778ab1fba9b77efb7475f1525ea6",
+    "repoStageBComposition": "c99a1aac31d2a29f317996e2c970f973bf845b122f7461727c8c3d6935b1ecd9",
+    "selectedLocalRecipe": "register-hair.cjs T5 0 237 0 8 198 21",
+    "directStageBUsedForFinal": false,
+    "reason": "The whole-atlas predictor returned both side faces higher. A direct fixed mask cut a line through the bangs. A separately registered, locally regenerated high crown was blended only inside the frozen permission mask. The B approval concerns the rejected direct composite, not this final image."
+  }
+}

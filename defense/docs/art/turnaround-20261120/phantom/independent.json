@@ -1,0 +1,163 @@
+{
+  "units": "512-cell pixels on the native master; automatic detections are independent of artist marks",
+  "before": {
+    "sha256": "35ac0caf9359d6244cbd6d1b9a39aff4a5da090be6bb55d9f78d495e4aaae4dc",
+    "checkerSha256": "7ca6572c1b9d46035b22448e9ad70ea79473454a5497004fbf5d0bf7b7b2d459",
+    "packages": {
+      "dghs-imgutils": "0.19.0",
+      "onnxruntime": "1.31.1",
+      "numpy": "1.26.4",
+      "scikit-image": "0.26.0",
+      "pillow": "13.0.0"
+    },
+    "referenceDistribution": {
+      "file": "defense\\docs\\art\\sd-pipeline\\reference-cast.json",
+      "generatedAt": "2026-11-07T22:50:20",
+      "sha256": "2657d326410c6d01f48a213bd8b2d9ed02817875189800db5bc896407a6e8849",
+      "count": 40
+    },
+    "detectedFaceHeights": {
+      "front": 102,
+      "sideA": 89,
+      "sideB": 87
+    },
+    "faceTop": {
+      "front": 220,
+      "sideA": 238,
+      "sideB": 240
+    },
+    "ccip": {
+      "front_back": 0.098501,
+      "front_sideA": 0.037335,
+      "front_sideB": 0.036007,
+      "sideA_sideB": 0.003312
+    },
+    "mirror": {
+      "pad": 0.15,
+      "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+      "face": {
+        "sideA_crop": [
+          169,
+          224,
+          297,
+          341
+        ],
+        "sideB_crop": [
+          219,
+          226,
+          338,
+          341
+        ],
+        "lpips": 0.154361,
+        "ssim": 0.485425,
+        "error": null
+      },
+      "head": {
+        "sideA_crop": [
+          123,
+          119,
+          400,
+          351
+        ],
+        "sideB_crop": [
+          112,
+          122,
+          389,
+          351
+        ],
+        "lpips": 0.083395,
+        "ssim": 0.674332,
+        "error": null
+      }
+    },
+    "flags": [
+      "front face height 102px is outside cast median 111.5px ±8%",
+      "sideA/front face-height ratio 0.8725 outside 0.92-1.08",
+      "sideB/front face-height ratio 0.8529 outside 0.92-1.08",
+      "sideA face top is +18px vs front",
+      "sideB face top is +20px vs front",
+      "CCIP front-sideA 0.037 > cast p80 0.036",
+      "CCIP front-sideB 0.036 > cast p80 0.036"
+    ]
+  },
+  "after": {
+    "sha256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+    "checkerSha256": "7ca6572c1b9d46035b22448e9ad70ea79473454a5497004fbf5d0bf7b7b2d459",
+    "packages": {
+      "dghs-imgutils": "0.19.0",
+      "onnxruntime": "1.31.1",
+      "numpy": "1.26.4",
+      "scikit-image": "0.26.0",
+      "pillow": "13.0.0"
+    },
+    "referenceDistribution": {
+      "file": "defense\\docs\\art\\sd-pipeline\\reference-cast.json",
+      "generatedAt": "2026-11-07T22:50:20",
+      "sha256": "2657d326410c6d01f48a213bd8b2d9ed02817875189800db5bc896407a6e8849",
+      "count": 40
+    },
+    "detectedFaceHeights": {
+      "front": 102,
+      "sideA": 92,
+      "sideB": 91
+    },
+    "faceTop": {
+      "front": 220,
+      "sideA": 235,
+      "sideB": 236
+    },
+    "ccip": {
+      "front_back": 0.098501,
+      "front_sideA": 0.039619,
+      "front_sideB": 0.03848,
+      "sideA_sideB": 0.002988
+    },
+    "mirror": {
+      "pad": 0.15,
+      "note": "side A crop is expanded by 15% of the box on each edge, flipped horizontally, and resized to the side B crop size before LPIPS and grayscale SSIM. The face strip shows the same padded crops at one shared scale and does not apply that resize.",
+      "face": {
+        "sideA_crop": [
+          169,
+          221,
+          297,
+          341
+        ],
+        "sideB_crop": [
+          219,
+          222,
+          338,
+          341
+        ],
+        "lpips": 0.161106,
+        "ssim": 0.456777,
+        "error": null
+      },
+      "head": {
+        "sideA_crop": [
+          120,
+          92,
+          404,
+          356
+        ],
+        "sideB_crop": [
+          106,
+          95,
+          391,
+          355
+        ],
+        "lpips": 0.088313,
+        "ssim": 0.639326,
+        "error": null
+      }
+    },
+    "flags": [
+      "front face height 102px is outside cast median 111.5px ±8%",
+      "sideA/front face-height ratio 0.9020 outside 0.92-1.08",
+      "sideB/front face-height ratio 0.8922 outside 0.92-1.08",
+      "sideA face top is +15px vs front",
+      "sideB face top is +16px vs front",
+      "CCIP front-sideA 0.040 > cast p80 0.036",
+      "CCIP front-sideB 0.038 > cast p80 0.036"
+    ]
+  }
+}

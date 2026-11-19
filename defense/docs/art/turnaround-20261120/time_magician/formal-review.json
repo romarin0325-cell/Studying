@@ -1,0 +1,297 @@
+{
+  "scope": {
+    "A": "actual ordered image hashes and operator input review before native generation",
+    "B": "reproducible protected composition, selected native and exact job",
+    "C": "landmarks bound to 497d5c23 protected composite",
+    "D": {
+      "packedSha256": "46aa7f256a867e58c433908b62ed0592fc21f3b38df06045af2a09afd85facd2",
+      "commonScale": 1,
+      "translation": [
+        0,
+        0
+      ],
+      "alpha32Clipped": 0,
+      "visibleWebpChanges": 0,
+      "deltaFromSelected": {
+        "rgbaPixels": 74406,
+        "maxAbsAlpha": 7,
+        "reason": "The repo segment() cleans native alpha ≥250 to 255 and very low alpha to zero. This changes RGBA in all three protected views; exact game installation uses candidate.png.",
+        "actualPerViewChangedRGBA": [
+          4791,
+          4893,
+          48194,
+          16528
+        ],
+        "actualAlphaDeltaRange": [
+          -7,
+          5
+        ]
+      }
+    },
+    "E": {
+      "browser": "System Google Chrome, headless offline, 390/1280 CSS pixels, 8 actual sections",
+      "pageErrors": 0,
+      "externalHTTP": 0,
+      "officialAtlasAndSelectedBothAudited": true
+    },
+    "F": {
+      "total": 17,
+      "pass": 15,
+      "caution": [
+        "face-shape-expression",
+        "directional-registration"
+      ],
+      "meaning": "F recorded with two cautions, preventing formal export G."
+    },
+    "G": "not exported"
+  },
+  "reviewer": "Codex, eight offline fixed-scale review sections inspected in Chromium (system Google Chrome) plus both original-size protected PNGs and 64/96px light/dark crops.",
+  "bindings": {
+    "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+    "atlasSha256": "46aa7f256a867e58c433908b62ed0592fc21f3b38df06045af2a09afd85facd2",
+    "packingSha256": "a8b006c090df088219ea35a3e5de221d8dac939bfa7c59eb6174f176fe8a96eb",
+    "evidenceSha256": "c29c7d6fc4d399bcd46b08bdb0f62958d53d7d51df2a32f4f78fd193e33678c5"
+  },
+  "checks": [
+    {
+      "id": "original-design",
+      "status": "pass",
+      "note": "갈색 갈고리 윗가닥, 녹색 눈, 자홍 크리스털 지팡이, 검정·보라 망토와 핫핑크 안감이 원화와 연결된다.",
+      "evidence": [
+        "originals",
+        "four-views"
+      ],
+      "viewedScreenshotHashes": [
+        "a2a5c7405d220f74840f0dd313e045775695a6d604c7cff3dcfb3578f12567a0",
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30"
+      ]
+    },
+    {
+      "id": "frozen-style",
+      "status": "pass",
+      "note": "동결 세이렌의 가는 남보라 외각선과 색면 하이라이트 규칙이 새 갈색 윗머리에도 읽힌다. 어두운 머리의 반사 띠는 집게 모양의 작은 단위로 끊겼다.",
+      "evidence": [
+        "style",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "a2a5c7405d220f74840f0dd313e045775695a6d604c7cff3dcfb3578f12567a0",
+        "c7e5cadb7dd4d72ed7d7641c38b20e217e4bd8bf301b9a0edb9434695bacd16b",
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553"
+      ]
+    },
+    {
+      "id": "anatomical-head",
+      "status": "pass",
+      "note": "옆얼굴은 한 눈에서 코와 볼로 좁아지고, 귀 뒤쪽은 머리로 덮여 있다. 턱·동공·관자는 원래 위치이며 좌우 윗머리 본체는 y120/118이다. 숨은 우측 두개 타원 폭·높이는 약 150×147px, 추정오차 ±13–19px이다.",
+      "method": "fixed-scale-visual-plus-landmarks",
+      "detectorInterpretation": "ONNX 프레임의 99/91/90px 검출은 눈과 턱이 드러난 피부·앞머리창에 민감하다. 작은 동공의 원근, 정면의 기울기, 우측 등골 머리의 셀 면과 단일 윗가닥을 고정 실제 크기로 별도 비교했다. 면적 스칼라나 좌우 LPIPS로 숨은 두개 크기를 확정하지 않았다.",
+      "evidence": [
+        "head",
+        "measurements",
+        "cast",
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "bece5d6cbdbb11fd0ad347ef1c0e05b87deede9357f6ed49995065a153b1656e",
+        "bece5d6cbdbb11fd0ad347ef1c0e05b87deede9357f6ed49995065a153b1656e",
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30",
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553",
+        "bf2289e2653f5fb11e7720bad4857bff00bf3ef9913748e887a182efafb7738c"
+      ]
+    },
+    {
+      "id": "face-shape-expression",
+      "status": "caution",
+      "note": "소규모 초상과 전·측 고정창에서 기존의 얌전한 표정과 녹색 동공이 남아 있다. 검출 피부창의 정/좌/우 높이는 99/91/90px, 오른쪽 윗선은 정면 대비 14px 아래다. 원본과 같은 얼굴을 보존한 이번 수정에서 이 차이를 별도로 해소하지 않았다.",
+      "evidence": [
+        "head",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "bece5d6cbdbb11fd0ad347ef1c0e05b87deede9357f6ed49995065a153b1656e",
+        "a2a5c7405d220f74840f0dd313e045775695a6d604c7cff3dcfb3578f12567a0"
+      ]
+    },
+    {
+      "id": "directional-registration",
+      "status": "caution",
+      "note": "발선은 모두 480이며 우측 턱은 정면보다 4px 아래다. 정면 양 눈의 높이가 서로 12px 다른 기운 자세에서 중점 y239, 우측 단안 y248이라 공정의 +9px 경고를 남긴다.",
+      "evidence": [
+        "four-views",
+        "measurements"
+      ],
+      "viewedScreenshotHashes": [
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30",
+        "bece5d6cbdbb11fd0ad347ef1c0e05b87deede9357f6ed49995065a153b1656e",
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30"
+      ]
+    },
+    {
+      "id": "body-proportions",
+      "status": "pass",
+      "note": "같은 발선에서 목깃·짧은 조끼·반바지·부츠가 같은 길이로 회전한다. 우측 어깨·골반 추정의 수 px 편차는 원본의 약간 앞으로 내민 자세와 겹친 망토에서 읽힌다.",
+      "evidence": [
+        "measurements",
+        "four-views",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "bece5d6cbdbb11fd0ad347ef1c0e05b87deede9357f6ed49995065a153b1656e",
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30",
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30",
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553"
+      ]
+    },
+    {
+      "id": "equipment-handedness",
+      "status": "pass",
+      "note": "앞에서는 화면 왼쪽, 뒤에서는 오른쪽에 지팡이가 있고 양옆의 무기 손·원형 장식·크리스털은 보호된 원본과 픽셀 일치한다.",
+      "evidence": [
+        "four-views",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30",
+        "a2a5c7405d220f74840f0dd313e045775695a6d604c7cff3dcfb3578f12567a0"
+      ]
+    },
+    {
+      "id": "silhouette-perceived-size",
+      "status": "pass",
+      "note": "넓은 우측 윗머리는 11px 상승하고 가닥은 22px 상승했다. 정/좌/우 턱까지 높이는 178/164/170px. 정면 대비 잔차 8px가 수동 결합 여유 16px 안이며 96px에서 양 옆머리 둥근 덩어리가 비슷하게 읽힌다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553",
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553"
+      ]
+    },
+    {
+      "id": "outline-weight",
+      "status": "pass",
+      "note": "밝고 어두운 바탕에서 관자 양쪽의 어두운 외곽선이 원래 옆가닥까지 이어진다. 1차에서 보이던 희끄무레한 이중 외곽이 없다. 턱·소매·부츠 고정 표본의 선 굵기는 채택본을 따른다.",
+      "evidence": [
+        "line-samples",
+        "sizes",
+        "style"
+      ],
+      "viewedScreenshotHashes": [
+        "c7e5cadb7dd4d72ed7d7641c38b20e217e4bd8bf301b9a0edb9434695bacd16b",
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553",
+        "a2a5c7405d220f74840f0dd313e045775695a6d604c7cff3dcfb3578f12567a0",
+        "c7e5cadb7dd4d72ed7d7641c38b20e217e4bd8bf301b9a0edb9434695bacd16b"
+      ]
+    },
+    {
+      "id": "shading-material",
+      "status": "pass",
+      "note": "앞머리와 뒤통수 갈색 셀 면과 밝은 반사 조각이 기존의 따뜻한 색 방향으로 흐른다. 망토·붉은 보석·광택 부츠의 재질 묘사는 유지했다.",
+      "evidence": [
+        "cast",
+        "style",
+        "line-samples"
+      ],
+      "viewedScreenshotHashes": [
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553",
+        "a2a5c7405d220f74840f0dd313e045775695a6d604c7cff3dcfb3578f12567a0",
+        "c7e5cadb7dd4d72ed7d7641c38b20e217e4bd8bf301b9a0edb9434695bacd16b",
+        "c7e5cadb7dd4d72ed7d7641c38b20e217e4bd8bf301b9a0edb9434695bacd16b"
+      ]
+    },
+    {
+      "id": "cast-consistency",
+      "status": "pass",
+      "note": "별똥별소년·명탐정·조커와 같은 64/96px 발선에서 머리·몸의 덩어리와 장비 식별이 무리 없이 이어진다. 모자·지팡이 끝은 키 비교에 넣지 않았다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553",
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553"
+      ]
+    },
+    {
+      "id": "game-size-readability",
+      "status": "pass",
+      "note": "64px에서 갈색 머리, 보라 망토와 분홍 지팡이가 따로 읽히고 96px에서는 한쪽 녹색 동공과 머리 짧은 가닥이 보인다. 밝고 어두운 바닥을 모두 확인했다.",
+      "evidence": [
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553"
+      ]
+    },
+    {
+      "id": "portrait-alignment",
+      "status": "pass",
+      "note": "96px 초상 창에 두 녹색 눈과 턱이 중앙 가까이 보이며 위의 갈고리 가닥은 크롭 가장자리에 닿는다. 이번 지역 수정은 정면 초상 픽셀에 닿지 않는다.",
+      "evidence": [
+        "portrait",
+        "head"
+      ],
+      "viewedScreenshotHashes": [
+        "b535f53df6e87e1a51e66cd232ae9578b321cb8b26733c3860f89c8c939a2734",
+        "bece5d6cbdbb11fd0ad347ef1c0e05b87deede9357f6ed49995065a153b1656e"
+      ]
+    },
+    {
+      "id": "seams-contact",
+      "status": "pass",
+      "note": "관자와 뒤통수 곡선에서 흰 빈틈을 보인 첫 시안과 직접 비교했다. 최종 양쪽 접점은 어두운 실루엣이 이어지고 턱·귀·목깃·지팡이가 울거나 어긋나지 않는다.",
+      "evidence": [
+        "four-views",
+        "head",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "0febccc96edafe783c70614e20550685a8cd62db5dde017e13417545ec272c30",
+        "bece5d6cbdbb11fd0ad347ef1c0e05b87deede9357f6ed49995065a153b1656e",
+        "61fea0b17d3430b179841ab6f8d8077efdc387981f2e20c9025a25f5fffeaee2",
+        "790f481e0674be9793f84c978f3ebde8126b11801f555f5cf057ed0be1669553"
+      ]
+    },
+    {
+      "id": "independent-detector",
+      "status": "pass",
+      "note": "실제 고정 아틀라스의 ONNX/CCIP/LPIPS 측정 및 일곱 경고를 확인했으며, 최종 보존 PNG에도 별도로 같은 검사를 실행했다.",
+      "evidence": [
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "bf2289e2653f5fb11e7720bad4857bff00bf3ef9913748e887a182efafb7738c"
+      ]
+    },
+    {
+      "id": "source-integrity",
+      "status": "pass",
+      "note": "사전 확인 A, 정확한 job으로 호출한 ImageGen, 1254² 원본과 1024² 마스크 합성을 해시로 확인했다.",
+      "evidence": [
+        "provenance"
+      ],
+      "viewedScreenshotHashes": []
+    },
+    {
+      "id": "package-integrity",
+      "status": "pass",
+      "note": "공통 패킹의 PNG→무손실 WebP 픽셀 보존을 확인했다. 이 판정은 D의 알파 가장자리 정리까지 원본 RGBA 보존을 보증하지 않는다. 설치용은 별도 protected PNG를 사용한다.",
+      "evidence": [
+        "package"
+      ],
+      "viewedScreenshotHashes": []
+    }
+  ]
+}

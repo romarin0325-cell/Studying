@@ -1,0 +1,1145 @@
+{
+  "viewport": [
+    390,
+    844
+  ],
+  "dpr": 2,
+  "browser": "157.0.8103.79",
+  "expected": {
+    "atlas:unit-phantom": {
+      "sha256": "787708892948c96449697dc8795a307e4b5e81db5fbb6231a0d62af215a7d326",
+      "bytes": 144896,
+      "source": "./assets/cast-turnaround-20261120/phantom.webp",
+      "path": "./assets/optimized/cast-turnaround-20261120/phantom.webp"
+    },
+    "portrait:phantom": {
+      "sha256": "deaeb269b73cd9d22577029d54fe9af2aa2e5a03ff7ef98f2ef921927d4bf3f3",
+      "bytes": 18744,
+      "source": "./assets/cast-turnaround-20261120/phantom.webp",
+      "path": "./assets/optimized/ui/portraits/phantom.webp"
+    },
+    "figure:phantom": {
+      "sha256": "0ed3da12945de435597934ace54cea577c0ac8d8a04208ba99f425dbbf3d14c1",
+      "bytes": 27236,
+      "source": "./assets/cast-turnaround-20261120/phantom.webp",
+      "path": "./assets/optimized/ui/figures/phantom.webp"
+    },
+    "atlas:unit-lightning_sage": {
+      "sha256": "db9f0e94c824eb02e62b3243033208d1c0b221848b8070a3bea6eed3828ec616",
+      "bytes": 182412,
+      "source": "./assets/cast-turnaround-20261120/lightning_sage.webp",
+      "path": "./assets/optimized/cast-turnaround-20261120/lightning_sage.webp"
+    },
+    "portrait:lightning_sage": {
+      "sha256": "4595240d5a55e75ca696338570c27d381ff6bf3784c7a219a19ee2421cdb8c47",
+      "bytes": 21684,
+      "source": "./assets/cast-turnaround-20261120/lightning_sage.webp",
+      "path": "./assets/optimized/ui/portraits/lightning_sage.webp"
+    },
+    "figure:lightning_sage": {
+      "sha256": "68234cb156cd414fd1aafd6adde623fd7b09d81cf747c5a9f0631442a4376de8",
+      "bytes": 36300,
+      "source": "./assets/cast-turnaround-20261120/lightning_sage.webp",
+      "path": "./assets/optimized/ui/figures/lightning_sage.webp"
+    },
+    "atlas:unit-time_magician": {
+      "sha256": "b78d281aea0902efd8ffaf61e917d4363ed406f8dffb00af006992b61901edec",
+      "bytes": 194366,
+      "source": "./assets/cast-turnaround-20261120/time_magician.webp",
+      "path": "./assets/optimized/cast-turnaround-20261120/time_magician.webp"
+    },
+    "portrait:time_magician": {
+      "sha256": "a74b378004109c02359c39eb1eea6b45e7aa6c0e6889fb190cd28133ec274ebc",
+      "bytes": 20272,
+      "source": "./assets/cast-turnaround-20261120/time_magician.webp",
+      "path": "./assets/optimized/ui/portraits/time_magician.webp"
+    },
+    "figure:time_magician": {
+      "sha256": "5dbcf01f8f0905bef45815cbefbd151e140ae4a1b3ba153c4ed861b89314c845",
+      "bytes": 41198,
+      "source": "./assets/cast-turnaround-20261120/time_magician.webp",
+      "path": "./assets/optimized/ui/figures/time_magician.webp"
+    }
+  },
+  "themes": [
+    {
+      "name": "night",
+      "file": "StarGardenDefense.html",
+      "releaseSha256": "b993320c1d951c0d200b50b58cd263cee8aad459899bb03dce0f47355e699854",
+      "battles": [
+        {
+          "direction": "left",
+          "units": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "cell": 11,
+              "origin": {
+                "x": 270,
+                "y": 437
+              }
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "cell": 12,
+              "origin": {
+                "x": 360,
+                "y": 437
+              }
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "cell": 13,
+              "origin": {
+                "x": 450,
+                "y": 437
+              }
+            }
+          ],
+          "target": {
+            "uid": 7,
+            "progress": 1970,
+            "x": 76,
+            "y": 392
+          },
+          "crops": {
+            "phantom/down": {
+              "count": 70,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/down": {
+              "count": 70,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/down": {
+              "count": 70,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "phantom/left": {
+              "count": 17,
+              "src": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/left": {
+              "count": 17,
+              "src": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/left": {
+              "count": 17,
+              "src": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            }
+          },
+          "acquisitions": {
+            "phantom": {
+              "unit": 4,
+              "target": 7,
+              "progress": 1970,
+              "facing": "left",
+              "time": 11.360000000000019
+            },
+            "lightning_sage": {
+              "unit": 5,
+              "target": 7,
+              "progress": 1970,
+              "facing": "left",
+              "time": 11.360000000000019
+            },
+            "time_magician": {
+              "unit": 6,
+              "target": 7,
+              "progress": 1970,
+              "facing": "left",
+              "time": 11.360000000000019
+            }
+          },
+          "attackCounts": {
+            "phantom": 1,
+            "lightning_sage": 1,
+            "time_magician": 1
+          },
+          "initial": [
+            {
+              "id": "phantom",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "lightning_sage",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "time_magician",
+              "facing": "down",
+              "attacks": 0
+            }
+          ],
+          "freezeDirection": "left",
+          "cleanFrame": {
+            "time": 11.360000000000019,
+            "units": [
+              {
+                "id": "phantom",
+                "facing": "left",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "lightning_sage",
+                "facing": "left",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "time_magician",
+                "facing": "left",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              }
+            ]
+          },
+          "applied": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "facing": "left",
+              "attacks": 1
+            }
+          ],
+          "screen": "battle",
+          "battleLabel": "달빛 정원",
+          "canvas": [
+            1080,
+            1170
+          ],
+          "arenaCssRect": {
+            "x": 9,
+            "y": 134.625,
+            "width": 372,
+            "height": 403,
+            "top": 134.625,
+            "right": 381,
+            "bottom": 537.625,
+            "left": 9
+          },
+          "rendererDpr": 1.5,
+          "online": false
+        },
+        {
+          "direction": "right",
+          "units": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "cell": 11,
+              "origin": {
+                "x": 270,
+                "y": 437
+              }
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "cell": 12,
+              "origin": {
+                "x": 360,
+                "y": 437
+              }
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "cell": 13,
+              "origin": {
+                "x": 450,
+                "y": 437
+              }
+            }
+          ],
+          "target": {
+            "uid": 7,
+            "progress": 818,
+            "x": 644,
+            "y": 392
+          },
+          "crops": {
+            "phantom/down": {
+              "count": 76,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/down": {
+              "count": 76,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/down": {
+              "count": 76,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "phantom/right": {
+              "count": 15,
+              "src": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/right": {
+              "count": 15,
+              "src": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/right": {
+              "count": 15,
+              "src": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            }
+          },
+          "acquisitions": {
+            "phantom": {
+              "unit": 4,
+              "target": 7,
+              "progress": 818,
+              "facing": "right",
+              "time": 11.360000000000019
+            },
+            "lightning_sage": {
+              "unit": 5,
+              "target": 7,
+              "progress": 818,
+              "facing": "right",
+              "time": 11.360000000000019
+            },
+            "time_magician": {
+              "unit": 6,
+              "target": 7,
+              "progress": 818,
+              "facing": "right",
+              "time": 11.360000000000019
+            }
+          },
+          "attackCounts": {
+            "phantom": 1,
+            "lightning_sage": 1,
+            "time_magician": 1
+          },
+          "initial": [
+            {
+              "id": "phantom",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "lightning_sage",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "time_magician",
+              "facing": "down",
+              "attacks": 0
+            }
+          ],
+          "freezeDirection": "right",
+          "cleanFrame": {
+            "time": 11.360000000000019,
+            "units": [
+              {
+                "id": "phantom",
+                "facing": "right",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "lightning_sage",
+                "facing": "right",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "time_magician",
+                "facing": "right",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              }
+            ]
+          },
+          "applied": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "facing": "right",
+              "attacks": 1
+            }
+          ],
+          "screen": "battle",
+          "battleLabel": "달빛 정원",
+          "canvas": [
+            1080,
+            1170
+          ],
+          "arenaCssRect": {
+            "x": 9,
+            "y": 134.625,
+            "width": 372,
+            "height": 403,
+            "top": 134.625,
+            "right": 381,
+            "bottom": 537.625,
+            "left": 9
+          },
+          "rendererDpr": 1.5,
+          "online": false
+        }
+      ],
+      "hashes": {
+        "atlas:unit-phantom": "787708892948c96449697dc8795a307e4b5e81db5fbb6231a0d62af215a7d326",
+        "portrait:phantom": "deaeb269b73cd9d22577029d54fe9af2aa2e5a03ff7ef98f2ef921927d4bf3f3",
+        "figure:phantom": "0ed3da12945de435597934ace54cea577c0ac8d8a04208ba99f425dbbf3d14c1",
+        "atlas:unit-lightning_sage": "db9f0e94c824eb02e62b3243033208d1c0b221848b8070a3bea6eed3828ec616",
+        "portrait:lightning_sage": "4595240d5a55e75ca696338570c27d381ff6bf3784c7a219a19ee2421cdb8c47",
+        "figure:lightning_sage": "68234cb156cd414fd1aafd6adde623fd7b09d81cf747c5a9f0631442a4376de8",
+        "atlas:unit-time_magician": "b78d281aea0902efd8ffaf61e917d4363ed406f8dffb00af006992b61901edec",
+        "portrait:time_magician": "a74b378004109c02359c39eb1eea6b45e7aa6c0e6889fb190cd28133ec274ebc",
+        "figure:time_magician": "5dbcf01f8f0905bef45815cbefbd151e140ae4a1b3ba153c4ed861b89314c845"
+      },
+      "formation": [
+        {
+          "id": "phantom",
+          "rendered": true,
+          "decoded": true,
+          "matchesPortrait": true
+        },
+        {
+          "id": "lightning_sage",
+          "rendered": true,
+          "decoded": true,
+          "matchesPortrait": true
+        },
+        {
+          "id": "time_magician",
+          "rendered": true,
+          "decoded": true,
+          "matchesPortrait": true
+        }
+      ],
+      "details": [
+        {
+          "id": "phantom",
+          "cardPortraitMatches": true,
+          "kind": "hero",
+          "text": [
+            "곰인형 속 악몽",
+            "팬텀",
+            "SR",
+            "견제"
+          ],
+          "matchingMedia": [
+            "figure:phantom"
+          ]
+        },
+        {
+          "id": "lightning_sage",
+          "cardPortraitMatches": true,
+          "kind": "hero",
+          "text": [
+            "찰나의 섬광",
+            "번개의현자",
+            "SR",
+            "연쇄"
+          ],
+          "matchingMedia": [
+            "figure:lightning_sage"
+          ]
+        },
+        {
+          "id": "time_magician",
+          "cardPortraitMatches": true,
+          "kind": "hero",
+          "text": [
+            "부서진 동화의 주인",
+            "시간의마술사",
+            "SR",
+            "시간 연계"
+          ],
+          "matchingMedia": [
+            "figure:time_magician"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bright",
+      "file": "StarGardenDefenseBright.html",
+      "releaseSha256": "f95b7c9abc5feec84c5565c434f296c495099b1434cbd9c53fee3972bfea6e26",
+      "battles": [
+        {
+          "direction": "left",
+          "units": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "cell": 11,
+              "origin": {
+                "x": 270,
+                "y": 437
+              }
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "cell": 12,
+              "origin": {
+                "x": 360,
+                "y": 437
+              }
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "cell": 13,
+              "origin": {
+                "x": 450,
+                "y": 437
+              }
+            }
+          ],
+          "target": {
+            "uid": 7,
+            "progress": 1970,
+            "x": 76,
+            "y": 392
+          },
+          "crops": {
+            "phantom/down": {
+              "count": 74,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/down": {
+              "count": 74,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/down": {
+              "count": 74,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "phantom/left": {
+              "count": 16,
+              "src": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/left": {
+              "count": 16,
+              "src": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/left": {
+              "count": 16,
+              "src": [
+                0,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            }
+          },
+          "acquisitions": {
+            "phantom": {
+              "unit": 4,
+              "target": 7,
+              "progress": 1970,
+              "facing": "left",
+              "time": 11.360000000000019
+            },
+            "lightning_sage": {
+              "unit": 5,
+              "target": 7,
+              "progress": 1970,
+              "facing": "left",
+              "time": 11.360000000000019
+            },
+            "time_magician": {
+              "unit": 6,
+              "target": 7,
+              "progress": 1970,
+              "facing": "left",
+              "time": 11.360000000000019
+            }
+          },
+          "attackCounts": {
+            "phantom": 1,
+            "lightning_sage": 1,
+            "time_magician": 1
+          },
+          "initial": [
+            {
+              "id": "phantom",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "lightning_sage",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "time_magician",
+              "facing": "down",
+              "attacks": 0
+            }
+          ],
+          "freezeDirection": "left",
+          "cleanFrame": {
+            "time": 11.360000000000019,
+            "units": [
+              {
+                "id": "phantom",
+                "facing": "left",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "lightning_sage",
+                "facing": "left",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "time_magician",
+                "facing": "left",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              }
+            ]
+          },
+          "applied": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "facing": "left",
+              "attacks": 1
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "facing": "left",
+              "attacks": 1
+            }
+          ],
+          "screen": "battle",
+          "battleLabel": "달빛 정원",
+          "canvas": [
+            1080,
+            1170
+          ],
+          "arenaCssRect": {
+            "x": 9,
+            "y": 131.5,
+            "width": 372,
+            "height": 403,
+            "top": 131.5,
+            "right": 381,
+            "bottom": 534.5,
+            "left": 9
+          },
+          "rendererDpr": 1.5,
+          "online": false
+        },
+        {
+          "direction": "right",
+          "units": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "cell": 11,
+              "origin": {
+                "x": 270,
+                "y": 437
+              }
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "cell": 12,
+              "origin": {
+                "x": 360,
+                "y": 437
+              }
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "cell": 13,
+              "origin": {
+                "x": 450,
+                "y": 437
+              }
+            }
+          ],
+          "target": {
+            "uid": 7,
+            "progress": 818,
+            "x": 644,
+            "y": 392
+          },
+          "crops": {
+            "phantom/down": {
+              "count": 74,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/down": {
+              "count": 74,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/down": {
+              "count": 74,
+              "src": [
+                0,
+                0,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "phantom/right": {
+              "count": 17,
+              "src": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "lightning_sage/right": {
+              "count": 17,
+              "src": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            },
+            "time_magician/right": {
+              "count": 17,
+              "src": [
+                320,
+                320,
+                320,
+                320
+              ],
+              "natural": [
+                640,
+                640
+              ]
+            }
+          },
+          "acquisitions": {
+            "phantom": {
+              "unit": 4,
+              "target": 7,
+              "progress": 818,
+              "facing": "right",
+              "time": 11.360000000000019
+            },
+            "lightning_sage": {
+              "unit": 5,
+              "target": 7,
+              "progress": 818,
+              "facing": "right",
+              "time": 11.360000000000019
+            },
+            "time_magician": {
+              "unit": 6,
+              "target": 7,
+              "progress": 818,
+              "facing": "right",
+              "time": 11.360000000000019
+            }
+          },
+          "attackCounts": {
+            "phantom": 1,
+            "lightning_sage": 1,
+            "time_magician": 1
+          },
+          "initial": [
+            {
+              "id": "phantom",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "lightning_sage",
+              "facing": "down",
+              "attacks": 0
+            },
+            {
+              "id": "time_magician",
+              "facing": "down",
+              "attacks": 0
+            }
+          ],
+          "freezeDirection": "right",
+          "cleanFrame": {
+            "time": 11.360000000000019,
+            "units": [
+              {
+                "id": "phantom",
+                "facing": "right",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "lightning_sage",
+                "facing": "right",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              },
+              {
+                "id": "time_magician",
+                "facing": "right",
+                "target": 7,
+                "attacks": 0,
+                "windup": 0.13
+              }
+            ]
+          },
+          "applied": [
+            {
+              "id": "phantom",
+              "uid": 4,
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "id": "lightning_sage",
+              "uid": 5,
+              "facing": "right",
+              "attacks": 1
+            },
+            {
+              "id": "time_magician",
+              "uid": 6,
+              "facing": "right",
+              "attacks": 1
+            }
+          ],
+          "screen": "battle",
+          "battleLabel": "달빛 정원",
+          "canvas": [
+            1080,
+            1170
+          ],
+          "arenaCssRect": {
+            "x": 9,
+            "y": 131.5,
+            "width": 372,
+            "height": 403,
+            "top": 131.5,
+            "right": 381,
+            "bottom": 534.5,
+            "left": 9
+          },
+          "rendererDpr": 1.5,
+          "online": false
+        }
+      ],
+      "hashes": {
+        "atlas:unit-phantom": "787708892948c96449697dc8795a307e4b5e81db5fbb6231a0d62af215a7d326",
+        "portrait:phantom": "deaeb269b73cd9d22577029d54fe9af2aa2e5a03ff7ef98f2ef921927d4bf3f3",
+        "figure:phantom": "0ed3da12945de435597934ace54cea577c0ac8d8a04208ba99f425dbbf3d14c1",
+        "atlas:unit-lightning_sage": "db9f0e94c824eb02e62b3243033208d1c0b221848b8070a3bea6eed3828ec616",
+        "portrait:lightning_sage": "4595240d5a55e75ca696338570c27d381ff6bf3784c7a219a19ee2421cdb8c47",
+        "figure:lightning_sage": "68234cb156cd414fd1aafd6adde623fd7b09d81cf747c5a9f0631442a4376de8",
+        "atlas:unit-time_magician": "b78d281aea0902efd8ffaf61e917d4363ed406f8dffb00af006992b61901edec",
+        "portrait:time_magician": "a74b378004109c02359c39eb1eea6b45e7aa6c0e6889fb190cd28133ec274ebc",
+        "figure:time_magician": "5dbcf01f8f0905bef45815cbefbd151e140ae4a1b3ba153c4ed861b89314c845"
+      },
+      "formation": [
+        {
+          "id": "phantom",
+          "rendered": true,
+          "decoded": true,
+          "matchesPortrait": true
+        },
+        {
+          "id": "lightning_sage",
+          "rendered": true,
+          "decoded": true,
+          "matchesPortrait": true
+        },
+        {
+          "id": "time_magician",
+          "rendered": true,
+          "decoded": true,
+          "matchesPortrait": true
+        }
+      ],
+      "details": [
+        {
+          "id": "phantom",
+          "cardPortraitMatches": true,
+          "kind": "hero",
+          "text": [
+            "곰인형 속 악몽",
+            "팬텀",
+            "SR",
+            "견제"
+          ],
+          "matchingMedia": [
+            "figure:phantom"
+          ]
+        },
+        {
+          "id": "lightning_sage",
+          "cardPortraitMatches": true,
+          "kind": "hero",
+          "text": [
+            "찰나의 섬광",
+            "번개의현자",
+            "SR",
+            "연쇄"
+          ],
+          "matchingMedia": [
+            "figure:lightning_sage"
+          ]
+        },
+        {
+          "id": "time_magician",
+          "cardPortraitMatches": true,
+          "kind": "hero",
+          "text": [
+            "부서진 동화의 주인",
+            "시간의마술사",
+            "SR",
+            "시간 연계"
+          ],
+          "matchingMedia": [
+            "figure:time_magician"
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "network": [],
+  "status": "passed"
+}

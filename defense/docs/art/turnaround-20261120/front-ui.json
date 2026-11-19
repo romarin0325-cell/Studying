@@ -1,0 +1,74 @@
+[
+  {
+    "id": "portrait:phantom",
+    "crop": {
+      "left": 120,
+      "top": 120,
+      "width": 250,
+      "height": 250
+    },
+    "visibleCropChanges": 0,
+    "originalOutputSHA256": "deaeb269b73cd9d22577029d54fe9af2aa2e5a03ff7ef98f2ef921927d4bf3f3",
+    "installedOutputSHA256": "deaeb269b73cd9d22577029d54fe9af2aa2e5a03ff7ef98f2ef921927d4bf3f3"
+  },
+  {
+    "id": "figure:phantom",
+    "crop": {
+      "left": 0,
+      "top": 0,
+      "width": 512,
+      "height": 512
+    },
+    "visibleCropChanges": 0,
+    "originalOutputSHA256": "0ed3da12945de435597934ace54cea577c0ac8d8a04208ba99f425dbbf3d14c1",
+    "installedOutputSHA256": "0ed3da12945de435597934ace54cea577c0ac8d8a04208ba99f425dbbf3d14c1"
+  },
+  {
+    "id": "portrait:lightning_sage",
+    "crop": {
+      "left": 109,
+      "top": 102,
+      "width": 250,
+      "height": 250
+    },
+    "visibleCropChanges": 0,
+    "originalOutputSHA256": "4595240d5a55e75ca696338570c27d381ff6bf3784c7a219a19ee2421cdb8c47",
+    "installedOutputSHA256": "4595240d5a55e75ca696338570c27d381ff6bf3784c7a219a19ee2421cdb8c47"
+  },
+  {
+    "id": "figure:lightning_sage",
+    "crop": {
+      "left": 0,
+      "top": 0,
+      "width": 512,
+      "height": 512
+    },
+    "visibleCropChanges": 0,
+    "originalOutputSHA256": "68234cb156cd414fd1aafd6adde623fd7b09d81cf747c5a9f0631442a4376de8",
+    "installedOutputSHA256": "68234cb156cd414fd1aafd6adde623fd7b09d81cf747c5a9f0631442a4376de8"
+  },
+  {
+    "id": "portrait:time_magician",
+    "crop": {
+      "left": 123,
+      "top": 82,
+      "width": 250,
+      "height": 250
+    },
+    "visibleCropChanges": 0,
+    "originalOutputSHA256": "a74b378004109c02359c39eb1eea6b45e7aa6c0e6889fb190cd28133ec274ebc",
+    "installedOutputSHA256": "a74b378004109c02359c39eb1eea6b45e7aa6c0e6889fb190cd28133ec274ebc"
+  },
+  {
+    "id": "figure:time_magician",
+    "crop": {
+      "left": 0,
+      "top": 0,
+      "width": 512,
+      "height": 512
+    },
+    "visibleCropChanges": 0,
+    "originalOutputSHA256": "5dbcf01f8f0905bef45815cbefbd151e140ae4a1b3ba153c4ed861b89314c845",
+    "installedOutputSHA256": "5dbcf01f8f0905bef45815cbefbd151e140ae4a1b3ba153c4ed861b89314c845"
+  }
+]

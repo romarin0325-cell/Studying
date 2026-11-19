@@ -1,0 +1,7 @@
+{
+  "selectedPNG": "defense/assets/cast-turnaround-20261120/lightning_sage.png",
+  "selectedSHA256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+  "rejectedSHA256": "5a7dad34c6c8bd4981f6d3a2ec51473727ab6bde512afa9bdc125d1d79fc9dee",
+  "decision": "좌 5·우 7px 더 높이면 정수리 수치는 정면에 가까워진다. 64px의 실제 옆얼굴 인상 차이는 분명하지 않고, 우측 솟은 갈래 밑 빈 폭은 두 표본에서 16→9px/16→10px가 되어 캐릭터 고유의 분리가 약해진다. 선·눈·턱을 보존한 현행을 선정했다.",
+  "comparison": "crown-comparison.png"
+}
