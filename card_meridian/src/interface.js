@@ -1,0 +1,519 @@
+/* Presentation adapter. Game rules and learning content are owned by card/game/.
+   Every hook calls the original method unless this file owns its entire view. */
+'use strict';
+
+const Astra = {
+  ready: false,
+  allCards: false,
+  collectionContext: 'library',
+  localPortraits: new Map(),
+  portraitPath: '',
+  modalStack: [],
+  get elementNames() { return DISPLAY_NAMES.element; },
+  get roleNames() { return DISPLAY_NAMES.role; },
+  get gradeNames() { return DISPLAY_NAMES.grade; },
+  get modeNames() { return DISPLAY_NAMES.mode; },
+
+  $(id) { return document.getElementById(id); },
+  setTheme(name) {
+    const themes = {astra:'#1a302f',strawberry:'#f6e9e8',dreamsky:'#edf3f2'};
+    if (!Object.prototype.hasOwnProperty.call(themes,name)) name = 'astra';
+    document.body.dataset.theme = name;
+    document.querySelector('meta[name="theme-color"]').content = themes[name];
+    document.querySelectorAll('[data-theme-choice]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.themeChoice === name)));
+    document.querySelectorAll('img[data-fallback=true]').forEach(img => {
+      // Never replace a real portrait or interrupt an in-flight local image load.
+      if (img.src.startsWith('data:image/')) img.src = this.fallback(img._astraEntity);
+    });
+    try { localStorage.setItem('dreamweaverTheme',name); } catch { /* Theme remains usable for this session. */ }
+  },
+  openGrades() {
+    const select = this.$('card-grade');
+    const options = this.$('grade-options');
+    options.replaceChildren();
+    for (const option of select.options) {
+      const button = this.text('button',option.textContent,'secondary compact');
+      button.dataset.gradeChoice = option.value;
+      button.setAttribute('aria-pressed',String(select.value === option.value));
+      button.onclick = () => {
+        select.value = option.value;
+        this.$('grade-picker-open').textContent = `${option.textContent} ▾`;
+        this.$('modal-grade-picker').classList.remove('active');
+        this.renderCollection();
+      };
+      options.append(button);
+    }
+    this.$('modal-grade-picker').classList.add('active');
+  },
+  syncFullscreenShortcut() {
+    const button = this.$('btn-game-fullscreen');
+    const label = button.textContent;
+    button.setAttribute('aria-label',label);
+    button.title = label;
+    button.textContent = document.fullscreenElement ? '⛶−' : '⛶';
+  },
+  installChatViewport() {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const modal = this.$('modal-lumi-question');
+    const update = () => {
+      // Follow only the visible chat viewport; do not scroll the page or trap zoom.
+      if (viewport.scale !== 1) { modal.style.removeProperty('--chat-height'); modal.style.removeProperty('--chat-top'); return; }
+      modal.style.setProperty('--chat-height',`${viewport.height}px`);
+      modal.style.setProperty('--chat-top',`${viewport.offsetTop}px`);
+    };
+    viewport.addEventListener('resize',update);
+    viewport.addEventListener('scroll',update);
+    update();
+  },
+  icon(name) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', `#i-${name}`);
+    svg.append(use);
+    svg.setAttribute('aria-hidden', 'true');
+    return svg;
+  },
+  text(tag, value, className) {
+    const el = document.createElement(tag);
+    el.textContent = value;
+    if (className) el.className = className;
+    return el;
+  },
+  hook(name, after) {
+    const original = RPG[name];
+    if (typeof original !== 'function') throw new Error(`Missing Card API: ${name}`);
+    RPG[name] = function (...args) {
+      const result = original.apply(this, args);
+      after.apply(Astra, args);
+      return result;
+    };
+  },
+  hookDoubleConfirmed(name, after) {
+    const original = RPG[name];
+    if (typeof original !== 'function' || typeof RPG.showDoubleConfirm !== 'function') throw new Error(`Missing Card API: ${name}`);
+    RPG[name] = function (...args) {
+      const showDoubleConfirm = this.showDoubleConfirm;
+      let intercepted = false;
+      this.showDoubleConfirm = function (firstMessage, secondMessage, onYes) {
+        intercepted = true;
+        this.showDoubleConfirm = showDoubleConfirm;
+        return showDoubleConfirm.call(this, firstMessage, secondMessage, () => {
+          const result = onYes?.();
+          after.apply(Astra, args);
+          return result;
+        });
+      };
+      try { return original.apply(this, args); }
+      finally { if (!intercepted) this.showDoubleConfirm = showDoubleConfirm; }
+    };
+  },
+  home() {
+    if (!this.ready || document.body.dataset.collectionContext === 'factory' || ['battle','draft'].includes(document.body.dataset.screen)) return;
+    if (document.body.dataset.screen === 'title') return;
+    RPG.toMenu();
+  },
+  learn() { RPG.showScreen('screen-study'); },
+  settings() {
+    if (!this.ready) return;
+    this.$('asset-path').value = this.portraitPath;
+    const gameMenu = document.querySelector('.settings-grid button');
+    gameMenu.disabled = document.body.dataset.screen === 'title';
+    gameMenu.textContent = gameMenu.disabled ? '여정 시작 후' : '게임 메뉴';
+    gameMenu.title = '저장 · 기록 관리';
+    this.$('modal-astra-settings').classList.add('active');
+  },
+  closeSettings() { this.$('modal-astra-settings').classList.remove('active'); },
+  toast(message) {
+    const toast = this.$('astra-toast');
+    toast.textContent = message;
+    toast.classList.add('visible');
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => toast.classList.remove('visible'), 3500);
+  },
+
+  // This emblem is deliberately a card back, never a generated replacement
+  // portrait. Native image loading still resolves each exact original filename.
+  fallback(entity) {
+    const themed = window.DREAMWEAVER_THEME_CARDS?.[document.body.dataset.theme];
+    if (themed) return themed;
+    const color = { fire:'#d8a999', water:'#a5dfff', nature:'#b5d6bd', light:'#e7ca94', dark:'#bdb5dd' }[entity?.element] || '#a5dfff';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240"><g fill="none" stroke="${color}"><path opacity=".25" d="M90 15 162 60v120l-72 45-72-45V60Z"/><path opacity=".2" d="M90 32 145 68v104l-55 36-55-36V68Z"/><circle cx="90" cy="120" r="46" opacity=".35"/><path stroke-width="1.5" d="m90 68 14 38 38 14-38 14-14 38-14-38-38-14 38-14Z"/><path opacity=".65" fill="${color}" fill-opacity=".12" d="m90 88 11 32-11 32-11-32Z"/><path opacity=".5" d="M56 58h12m44 0h12M56 182h12m44 0h12M90 45v9m0 132v9"/></g></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  },
+  installImages() {
+    try { this.portraitPath = localStorage.getItem('astraPortraitPath') || ''; } catch { /* Session default. */ }
+    const originalLoad = ImageAssets.load.bind(ImageAssets);
+    const requests = new WeakMap();
+    const absent = new Set();
+    // The first two filenames predate the name changes in 2a937c3.
+    const alternateNames = {'대해적선장.png':'전설의선장.png', '엔트로피.png':'앤트로피.png', '대천사.png':'대천사1.png'};
+    ImageAssets.load = (img, entity, options = {}) => {
+      if (!img) return;
+      const filename = ImageAssets.getEntitySource(entity).normalize('NFC');
+      const names = [filename, alternateNames[filename]].filter(Boolean);
+      const picked = names.map(name => this.localPortraits.get(name)).find(Boolean);
+      const key = [filename, this.portraitPath, picked || ''].join('|');
+      const active = requests.get(img);
+      img._astraEntity = entity;
+      img.dataset.astraSource = filename;
+      if (active?.key === key && !options.force) return;
+      const request = {key};
+      requests.set(img, request);
+      const sources = [];
+      if (picked) sources.push({url:picked});
+      for (const name of names) {
+        const url = this.portraitPath + name;
+        if (options.force || !absent.has(url)) sources.push({url, local:true});
+      }
+      const packed = names.find(name => Object.hasOwn(window.MERIDIAN_PORTRAITS, name));
+      if (packed) sources.push({url:window.MERIDIAN_PORTRAITS[packed]});
+      const alt = options.alt ?? entity?.name ?? filename.replace(/\.png$/i, '');
+      const trySource = index => {
+        if (requests.get(img) !== request) return;
+        const source = sources[index];
+        if (!source) {
+          img.dataset.fallback = 'true';
+          originalLoad(img, this.fallback(entity), {...options, alt, force:true});
+          return;
+        }
+        delete img.dataset.fallback;
+        originalLoad(img, source.url, {...options, alt, force:true});
+        const onError = img.onerror;
+        img.onerror = () => {
+          if (requests.get(img) !== request) return;
+          onError?.();
+          if (source.local) absent.add(source.url);
+          trySource(index + 1);
+        };
+      };
+      trySource(0);
+    };
+  },
+  refreshImages() {
+    document.querySelectorAll('img[data-astra-source]').forEach(img => {
+      ImageAssets.load(img, img._astraEntity || img.dataset.astraSource, { force:true, alt:img.alt });
+    });
+    if (document.body.dataset.screen === 'menu') this.renderParty();
+  },
+  setPortraitPath(value) {
+    const clean = value.trim().replaceAll('\\', '/');
+    if (/^[a-z]+:/i.test(clean) || clean.startsWith('//') || /[?#<>]/.test(clean)) {
+      this.toast('HTML 기준 상대 폴더 경로를 입력하세요. 예: portraits/');
+      return false;
+    }
+    this.portraitPath = clean && !clean.endsWith('/') ? `${clean}/` : clean;
+    try { localStorage.setItem('astraPortraitPath', this.portraitPath); } catch { this.toast('이 실행 중에만 경로를 적용합니다.'); }
+    this.refreshImages();
+    this.$('asset-status').textContent = this.portraitPath ? `초상화 위치: ${this.portraitPath}` : '내장 원화와 HTML 옆의 초상화를 사용합니다.';
+    return true;
+  },
+  selectPortraitFiles(files) {
+    for (const url of this.localPortraits.values()) URL.revokeObjectURL(url);
+    this.localPortraits.clear();
+    for (const file of files) {
+      if (!/\.(png|jpe?g|webp|gif|avif)$/i.test(file.name)) continue;
+      const key = file.name.normalize('NFC');
+      if (!this.localPortraits.has(key)) this.localPortraits.set(key, URL.createObjectURL(file));
+    }
+    this.refreshImages();
+    this.$('asset-status').textContent = `초상화 ${this.localPortraits.size}개 연결됨 · 현재 실행 중에 유지됩니다.`;
+  },
+  screenChanged(id) {
+    const kind = id.replace('screen-', '');
+    this.$('astra-toast').classList.remove('visible');
+    if (kind !== 'collection' && this.collectionContext === 'factory') {
+      this.collectionContext = 'library';
+      delete document.body.dataset.collectionContext;
+    }
+    document.body.dataset.screen = ['title','menu','collection','deck','study','battle'].includes(kind) ? kind : 'draft';
+    document.querySelectorAll('[data-nav]').forEach(button => {
+      if (button.dataset.nav === kind) button.setAttribute('aria-current','page');
+      else button.removeAttribute('aria-current');
+    });
+    const names = { title:'타이틀', menu:'항해일지', deck:'파티 편성', collection:'카드 도감', study:'학습 서재', battle:'전투' };
+    const status = document.querySelector('.header-status');
+    if (status) status.textContent = names[kind] || '새로운 조합을 선택하세요';
+    if (kind === 'title') {
+      this.$('modal-menu').classList.remove('active');
+      Meridian.title();
+    }
+    document.querySelector('.header-tools button[aria-label="설정"]').disabled = document.body.dataset.screen === 'battle' || document.body.dataset.screen === 'draft';
+  },
+  renderParty() { Meridian.lobby(); },
+  cardButton(card, count, onClick) {
+    const button = document.createElement('button');
+    const availability = count === null ? '풀 카드' : count ? `${count}장 보유` : '미보유';
+    button.className = `card-item ${card.grade}${count === 0 ? ' unowned' : ''}`;
+    button.dataset.cardId = card.id;
+    button.dataset.grade = card.grade;
+    button.setAttribute('aria-label', `${card.name}, ${this.gradeNames[card.grade] || card.grade}, ${availability}`);
+    button.append(ImageAssets.createPortrait(card));
+    button.append(this.text('span', card.name, 'card-name'));
+    const meta = this.text('span','', 'card-meta');
+    meta.append(this.text('span', this.elementNames[card.element] || card.element));
+    meta.append(this.text('span', count ? `×${count}` : availability));
+    button.append(meta);
+    button.onclick = onClick;
+    return button;
+  },
+  renderBattleStatuses() {
+    const render = (id, actor) => {
+      const buffs = actor?.buffs;
+      const box = this.$(id);
+      box.replaceChildren();
+      for (const [key,value] of Object.entries(buffs || {})) {
+        if (!value) continue;
+        const negative = StatusRules.isNegative(key);
+        const label = `${negative ? '−' : '+'} ${StatusRules.formatDisplay(key, value, RPG.state.artifacts || [], actor)}`;
+        const badge = this.text('span',label,`status-badge ${negative ? 'status-negative' : 'status-positive'}`);
+        badge.title = `${negative ? '디버프' : '버프'}: ${BUFF_NAMES[key] || key}`;
+        box.append(badge);
+      }
+    };
+    render('p-buffs',RPG.battle.players[RPG.battle.currentPlayerIdx]);
+    render('e-buffs',RPG.battle.enemy);
+  },
+  decorateMissionReward() {
+    const rewardId = RPG.missionViewType === 'special' ? RPG.global.specialMission?.rewardCardId : RPG.global.monthlyMission?.rewardCardId;
+    const card = RPG.getCardData(rewardId);
+    const section = this.$(RPG.missionViewType === 'special' ? 'special-mission-section' : 'monthly-mission-section');
+    const panel = section.children[1];
+    panel.classList.add('mission-reward-showcase');
+    panel.querySelector('.reward-card-preview')?.remove();
+    panel.querySelector('.reward-progress')?.remove();
+    if (!card) { panel.classList.remove('mission-reward-showcase'); delete panel.dataset.grade; return; }
+    panel.dataset.grade = card.grade;
+    const preview = this.text('button','','reward-card-preview');
+    preview.setAttribute('aria-label',`${card.name} 보상 카드 자세히 보기`);
+    preview.append(ImageAssets.createPortrait(card));
+    preview.onclick = () => RPG.showCardInfo(card.id);
+    panel.prepend(preview);
+    const mission = RPG.missionViewType === 'special' ? RPG.global.specialMission : RPG.global.monthlyMission;
+    const objectives = Object.values(mission.missions || {});
+    const complete = objectives.filter(item => (item.progress || 0) >= item.target).length;
+    const progress = this.text('div',mission.claimed ? '수령 완료' : `${complete} / ${objectives.length} 미션 완료`,'reward-progress');
+    const meter = document.createElement('progress');
+    meter.max = Math.max(1,objectives.length);
+    meter.value = complete;
+    meter.setAttribute('aria-label','보상 획득까지 완료한 미션');
+    progress.append(meter);
+    panel.append(progress);
+  },
+  renderCards(containerId, list, clickHandler) {
+    const box = this.$(containerId);
+    box.replaceChildren();
+    const counts = new Map();
+    for (const id of list) counts.set(id,(counts.get(id)||0)+1);
+    for (const id of RPG.sortCardIdsByGrade([...counts.keys()])) {
+      const card = RPG.getCardData(id);
+      if (card) box.append(this.cardButton(card, containerId === 'card-pool-grid' ? null : counts.get(id), () => clickHandler(id)));
+    }
+  },
+  renderCollection() {
+    const counts = new Map();
+    for (const id of RPG.state.inventory) counts.set(id,(counts.get(id)||0)+1);
+    const source = this.allCards ? GameUtils.getAllCards() : [...counts.keys()].map(id => RPG.getCardData(id)).filter(Boolean);
+    const cards = new Map(source.map(card => [card.id,card]));
+    const query = this.$('card-search').value.trim().toLocaleLowerCase();
+    const grade = this.$('card-grade').value;
+    const filtered = [...cards.values()].filter(card => (grade === 'all' || card.grade === grade)
+      && `${card.name} ${card.element} ${card.role} ${this.elementNames[card.element] || ''} ${this.roleNames[card.role] || ''}`.toLocaleLowerCase().includes(query));
+    const box = this.$('collection-grid');
+    box.replaceChildren();
+    const byId = new Map(filtered.map(card => [card.id,card]));
+    for (const id of RPG.sortCardIdsByGrade([...byId.keys()])) box.append(this.cardButton(byId.get(id), counts.get(id)||0, () => RPG.showCardInfo(id)));
+    this.$('collection-empty').hidden = filtered.length !== 0;
+    this.$('collection-count').textContent = `${filtered.length}종`;
+    this.$('collection-scope').textContent = this.allCards ? '전체 도감' : '보유 카드';
+    this.$('collection-scope').setAttribute('aria-pressed',String(this.allCards));
+  },
+  openCollection() {
+    this.collectionContext = 'library';
+    delete document.body.dataset.collectionContext;
+    this.$('collection-title').textContent = '카드 도감';
+    this.$('collection-back').textContent = '여정으로';
+    this.$('collection-back').onclick = () => RPG.toMenu();
+    RPG.showScreen('screen-collection');
+    this.renderCollection();
+  },
+  openFactoryViewDeck() {
+    const draft = RPG.state.factoryDraft;
+    if (!draft || !draft.active) return RPG.toMenu();
+    const body = this.$('factory-draft-body');
+    if (body) draft.scrollTop = body.scrollTop;
+    const pool = draft.pool || [];
+    this.collectionContext = 'factory';
+    document.body.dataset.collectionContext = 'factory';
+    this.$('collection-title').textContent = '현재 구성 중인 덱';
+    this.$('collection-count').textContent = `${pool.length}장`;
+    this.$('collection-back').textContent = '드래프트로';
+    this.$('collection-back').onclick = () => {
+      delete document.body.dataset.collectionContext;
+      this.collectionContext = 'library';
+      RPG.showScreen('screen-factory-draft');
+      RPG.renderFactoryDraftScreen();
+    };
+    RPG.showScreen('screen-collection');
+    this.renderCards('collection-grid', pool, id => RPG.showCardInfo(id));
+    this.$('collection-empty').hidden = pool.length !== 0;
+  },
+  renderDeckSlots() {
+    ['선봉','중견','대장'].forEach((role, index) => {
+      const slot = this.$(`slot-${index}`);
+      const card = RPG.state.deck[index] ? RPG.getCardData(RPG.state.deck[index]) : null;
+      slot.replaceChildren(ImageAssets.createPortrait(card || ''));
+      const text = this.text('span','', 'slot-text');
+      text.append(this.text('small', `${index + 1} / ${role}`), this.text('strong', card?.name || '카드 선택'));
+      slot.append(text);
+      slot.setAttribute('aria-pressed',String(RPG.selectedSlot === index));
+      slot.setAttribute('aria-label', `${role} ${card?.name || '빈 자리'}`);
+    });
+  },
+  updateSlotSelection(index) {
+    document.querySelectorAll('.deck-slot').forEach((slot, i) => slot.setAttribute('aria-pressed',String(i === index)));
+    this.$('deck-hint').textContent = `${['선봉','중견','대장'][index]}에 배치할 카드를 선택하세요`;
+  },
+
+  // All UIs share validation, allowlisted keys and rollback on failed writes.
+  backupKeys() { return CardProgressTransfer.backupKeys(); },
+  exportSave() { return CardProgressTransfer.exportSave(message => this.toast(message)); },
+  validateImport(payload) { return CardProgressTransfer.validateImport(payload); },
+  importFile(file) {
+    return CardProgressTransfer.importFile(file, {
+      notify: message => this.toast(message),
+      reset: () => { this.$('astra-import').value = ''; }
+    });
+  },
+
+  installDialogs() {
+    const focusable = modal => [...modal.querySelectorAll('button:not(:disabled),input:not(:disabled),select,textarea,summary,a[href],[tabindex="0"]')].filter(el => el.getClientRects().length && !el.closest('[inert]'));
+    let top = null;
+    let previousActive = new Set();
+    const returns = new WeakMap();
+    const sync = () => {
+      if (this.$('modal-library').classList.contains('active')) {
+        this.$('modal-library').classList.remove('active');
+        this.learn();
+      }
+      const active = [...document.querySelectorAll('.modal.active')].sort((a,b) => Number(getComputedStyle(a).zIndex) - Number(getComputedStyle(b).zIndex));
+      const next = active.at(-1) || null;
+      for (const modal of active) if (!previousActive.has(modal)) returns.set(modal,document.activeElement);
+      for (const modal of document.querySelectorAll('.modal')) {
+        modal.inert = modal.classList.contains('active') && modal !== next;
+        modal.setAttribute('role','dialog');
+        modal.setAttribute('aria-modal','true');
+        if (!modal.hasAttribute('aria-label') && !modal.hasAttribute('aria-labelledby')) {
+          const heading = modal.querySelector('h2,h3');
+          if (heading && !heading.id) heading.id = `${modal.id}-heading`;
+          if (heading) modal.setAttribute('aria-labelledby',heading.id);
+        }
+      }
+      for (const el of document.querySelectorAll('.astra-header,main,.astra-nav')) el.inert = !!next;
+      if (next !== top) {
+        if (next) {
+          const opener = top && returns.get(top);
+          const target = previousActive.has(next) && next.contains(opener) ? opener : focusable(next)[0];
+          (target || next.querySelector('.modal-content'))?.focus({preventScroll:true});
+        } else if (top) {
+          let target = returns.get(top);
+          const visited = new Set();
+          while (target?.closest('.modal') && !target.getClientRects().length && !visited.has(target)) {
+            visited.add(target);
+            target = returns.get(target.closest('.modal'));
+          }
+          if (target?.isConnected && target.getClientRects().length && !target.closest('[inert]')) target.focus({preventScroll:true});
+        }
+        top = next;
+      }
+      previousActive = new Set(active);
+    };
+    const observer = new MutationObserver(records => {
+      if (records.some(record => record.target.classList?.contains('modal'))) sync();
+    });
+    observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+    document.addEventListener('keydown',event => {
+      if (!top) return;
+      const buttons = focusable(top);
+      if (event.key === 'Tab' && buttons.length) {
+        if (event.shiftKey && document.activeElement === buttons[0]) { event.preventDefault(); buttons.at(-1).focus(); }
+        else if (!event.shiftKey && document.activeElement === buttons.at(-1)) { event.preventDefault(); buttons[0].focus(); }
+      }
+      if (event.key === 'Escape') {
+        // Respect application callbacks; never bypass a mandatory quiz or choice.
+        const close = buttons.find(el => /^(닫기|취소|아니오)$/.test(el.textContent.trim()));
+        if (close) { event.preventDefault(); close.click(); }
+      }
+    });
+    sync();
+  },
+  init() {
+    if (this.ready) return;
+    let theme = 'astra';
+    try { theme = localStorage.getItem('dreamweaverTheme') || theme; } catch { /* Use default. */ }
+    this.setTheme(theme);
+    this.installChatViewport();
+    this.hook('syncGameFullscreenButton',this.syncFullscreenShortcut);
+    RPG.syncGameFullscreenButton();
+    if (!RPG._featuresInstalled) throw new Error('ASTRA requires installed Card feature modules.');
+    this.hook('showScreen',this.screenChanged);
+    this.hook('showCardInfo',id => {
+      const card = RPG.getCardData(id);
+      if (!card) return;
+      this.$('modal-card').dataset.grade = card.grade;
+      this.$('md-grade').textContent = `${this.gradeNames[card.grade] || card.grade} · ${this.roleNames[card.role] || card.role} · ${this.elementNames[card.element] || card.element}`;
+    });
+    this.hook('toMenu',this.renderParty);
+    this.hook('renderMissionView',this.decorateMissionReward);
+    this.hook('renderBattlefield',this.renderBattleStatuses);
+    this.hook('runGacha', challenge => Meridian.showSummon(challenge));
+    this.hook('updateDeckSlots',this.renderDeckSlots);
+    this.hook('selectDeckSlot',this.updateSlotSelection);
+    RPG.openDeck = () => Meridian.openDeck();
+    this.hook('openModeSelect',() => {
+      for (const button of this.$('mode-list').querySelectorAll('button')) {
+        const mode = button.id.replace('mode-btn-','');
+        if (RPG.tempGameType === 'challenge' && RPG.global.hardChallengeCleared?.[mode]) {
+          button.classList.add('hard-cleared');
+          button.append(this.text('small','✦ HARD CLEAR','hard-clear-badge'));
+          button.setAttribute('aria-label',`${button.firstChild.textContent}, 하드모드 클리어`);
+        }
+        button.setAttribute('aria-pressed','false');
+        button.addEventListener('click',() => {
+          for (const item of this.$('mode-list').querySelectorAll('button')) item.setAttribute('aria-pressed',String(item.id === `mode-btn-${RPG.selectedModeId}`));
+        });
+      }
+    });
+    this.hook('toggleHardMode',() => this.$('btn-hard-mode').setAttribute('aria-pressed',String(RPG.hardModeActive)));
+    this.hook('openModeSelect',() => this.$('btn-hard-mode').setAttribute('aria-pressed','false'));
+    RPG.renderCardList = (containerId,list,callback) => this.renderCards(containerId,list,callback);
+    RPG.openCollection = () => this.openCollection();
+    RPG.openFactoryViewDeck = () => this.openFactoryViewDeck();
+    RPG.openLibrary = () => this.learn();
+    this.hookDoubleConfirmed('reshuffleChaosPool',this.renderParty);
+    this.$('card-search').addEventListener('input',() => this.renderCollection());
+    this.$('card-grade').addEventListener('change',() => this.renderCollection());
+    this.$('collection-scope').addEventListener('click',() => { this.allCards = !this.allCards; this.renderCollection(); });
+    this.$('asset-path-form').addEventListener('submit',event => { event.preventDefault(); this.setPortraitPath(this.$('asset-path').value); });
+    this.$('portrait-files').addEventListener('change',event => this.selectPortraitFiles(event.target.files));
+    this.$('astra-import').addEventListener('change',event => this.importFile(event.target.files[0]));
+    const importLabel = document.querySelector('.file-label');
+    importLabel.tabIndex = 0;
+    importLabel.setAttribute('role','button');
+    importLabel.addEventListener('keydown',event => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.$('astra-import').click(); }
+    });
+    this.installDialogs();
+    this.ready = true;
+    this.screenChanged('screen-title');
+    try {
+      const importNotice = sessionStorage.getItem('astraImportNotice');
+      if (importNotice) {
+        sessionStorage.removeItem('astraImportNotice');
+        this.toast(importNotice);
+      }
+    } catch { /* Session storage may be unavailable for local files. */ }
+  }
+};
+Astra.installImages();
+document.addEventListener('DOMContentLoaded',() => Astra.init());
