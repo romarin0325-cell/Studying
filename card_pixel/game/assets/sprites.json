@@ -16,7 +16,7 @@
     "effect": true
   },
   "ash-attack.png": {
-    "width": 68,
+    "width": 85,
     "height": 69,
     "bodyCenterX": 34,
     "feetBaselineY": 68
@@ -37,7 +37,7 @@
     "facing": "right"
   },
   "luna-attack.png": {
-    "width": 76,
+    "width": 84,
     "height": 71,
     "bodyCenterX": 30,
     "feetBaselineY": 70
@@ -49,25 +49,25 @@
     "feetBaselineY": 68
   },
   "red_dragon-idle.png": {
-    "width": 53,
-    "height": 72,
-    "bodyCenterX": 26,
-    "feetBaselineY": 71,
+    "width": 59,
+    "height": 80,
+    "bodyCenterX": 29,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "red_dragon-attack.png": {
-    "width": 88,
-    "height": 71,
-    "bodyCenterX": 35,
-    "feetBaselineY": 70
+    "width": 98,
+    "height": 79,
+    "bodyCenterX": 39,
+    "feetBaselineY": 78
   },
   "red_dragon-hurt.png": {
-    "width": 57,
-    "height": 71,
-    "bodyCenterX": 28,
-    "feetBaselineY": 70
+    "width": 64,
+    "height": 79,
+    "bodyCenterX": 32,
+    "feetBaselineY": 78
   },
   "golem-idle.png": {
     "width": 81,
@@ -91,67 +91,67 @@
     "feetBaselineY": 76
   },
   "zeke-idle.png": {
-    "width": 66,
-    "height": 72,
-    "bodyCenterX": 33,
-    "feetBaselineY": 71,
+    "width": 74,
+    "height": 80,
+    "bodyCenterX": 37,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "zeke-attack.png": {
-    "width": 91,
-    "height": 71,
-    "bodyCenterX": 34,
-    "feetBaselineY": 70
+    "width": 101,
+    "height": 79,
+    "bodyCenterX": 38,
+    "feetBaselineY": 78
   },
   "zeke-hurt.png": {
-    "width": 64,
-    "height": 72,
-    "bodyCenterX": 32,
-    "feetBaselineY": 71
+    "width": 72,
+    "height": 80,
+    "bodyCenterX": 36,
+    "feetBaselineY": 79
   },
   "flame_sage-idle.png": {
-    "width": 56,
-    "height": 72,
-    "bodyCenterX": 28,
-    "feetBaselineY": 71,
+    "width": 62,
+    "height": 80,
+    "bodyCenterX": 31,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "flame_sage-attack.png": {
-    "width": 83,
-    "height": 72,
-    "bodyCenterX": 40,
-    "feetBaselineY": 71
+    "width": 93,
+    "height": 80,
+    "bodyCenterX": 44,
+    "feetBaselineY": 79
   },
   "flame_sage-hurt.png": {
-    "width": 61,
-    "height": 72,
-    "bodyCenterX": 30,
-    "feetBaselineY": 71
+    "width": 67,
+    "height": 80,
+    "bodyCenterX": 33,
+    "feetBaselineY": 79
   },
   "cherry_prince-idle.png": {
-    "width": 48,
-    "height": 72,
-    "bodyCenterX": 24,
-    "feetBaselineY": 71,
+    "width": 53,
+    "height": 80,
+    "bodyCenterX": 26,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "cherry_prince-attack.png": {
-    "width": 81,
-    "height": 71,
-    "bodyCenterX": 43,
-    "feetBaselineY": 70
+    "width": 102,
+    "height": 79,
+    "bodyCenterX": 48,
+    "feetBaselineY": 78
   },
   "cherry_prince-hurt.png": {
-    "width": 50,
-    "height": 72,
-    "bodyCenterX": 25,
-    "feetBaselineY": 71
+    "width": 63,
+    "height": 80,
+    "bodyCenterX": 27,
+    "feetBaselineY": 79
   },
   "emerald_beetle-idle.png": {
     "width": 56,
@@ -190,7 +190,7 @@
     "feetBaselineY": 46
   },
   "magma_beetle-hurt.png": {
-    "width": 49,
+    "width": 53,
     "height": 48,
     "bodyCenterX": 24,
     "feetBaselineY": 47
@@ -207,11 +207,11 @@
   "gold_moth-attack.png": {
     "width": 60,
     "height": 48,
-    "bodyCenterX": 29,
+    "bodyCenterX": 32,
     "feetBaselineY": 47
   },
   "gold_moth-hurt.png": {
-    "width": 40,
+    "width": 49,
     "height": 48,
     "bodyCenterX": 20,
     "feetBaselineY": 47
@@ -274,7 +274,7 @@
     "feetBaselineY": 47
   },
   "night_bat-hurt.png": {
-    "width": 48,
+    "width": 52,
     "height": 48,
     "bodyCenterX": 24,
     "feetBaselineY": 47
@@ -289,7 +289,7 @@
     "facing": "right"
   },
   "dark_knight-attack.png": {
-    "width": 78,
+    "width": 105,
     "height": 80,
     "bodyCenterX": 45,
     "feetBaselineY": 79
@@ -337,7 +337,7 @@
     "feetBaselineY": 103
   },
   "artificial_demon_god-hurt.png": {
-    "width": 81,
+    "width": 83,
     "height": 104,
     "bodyCenterX": 40,
     "feetBaselineY": 103
@@ -385,46 +385,46 @@
     "feetBaselineY": 103
   },
   "gold_dragon-idle.png": {
-    "width": 53,
-    "height": 72,
-    "bodyCenterX": 26,
-    "feetBaselineY": 71,
+    "width": 59,
+    "height": 80,
+    "bodyCenterX": 29,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "gold_dragon-attack.png": {
-    "width": 85,
-    "height": 71,
-    "bodyCenterX": 40,
-    "feetBaselineY": 70
+    "width": 94,
+    "height": 79,
+    "bodyCenterX": 44,
+    "feetBaselineY": 78
   },
   "gold_dragon-hurt.png": {
-    "width": 60,
-    "height": 71,
-    "bodyCenterX": 30,
-    "feetBaselineY": 70
+    "width": 67,
+    "height": 79,
+    "bodyCenterX": 33,
+    "feetBaselineY": 78
   },
   "ancient_dragon-idle.png": {
-    "width": 53,
-    "height": 72,
-    "bodyCenterX": 26,
-    "feetBaselineY": 71,
+    "width": 59,
+    "height": 80,
+    "bodyCenterX": 29,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "ancient_dragon-attack.png": {
-    "width": 86,
-    "height": 71,
-    "bodyCenterX": 40,
-    "feetBaselineY": 70
+    "width": 95,
+    "height": 78,
+    "bodyCenterX": 45,
+    "feetBaselineY": 77
   },
   "ancient_dragon-hurt.png": {
-    "width": 58,
-    "height": 71,
-    "bodyCenterX": 29,
-    "feetBaselineY": 70
+    "width": 64,
+    "height": 79,
+    "bodyCenterX": 32,
+    "feetBaselineY": 78
   },
   "cinderella-idle.png": {
     "width": 61,
@@ -436,13 +436,13 @@
     "facing": "right"
   },
   "cinderella-attack.png": {
-    "width": 79,
+    "width": 91,
     "height": 72,
     "bodyCenterX": 37,
     "feetBaselineY": 71
   },
   "cinderella-hurt.png": {
-    "width": 69,
+    "width": 70,
     "height": 72,
     "bodyCenterX": 34,
     "feetBaselineY": 71
@@ -484,7 +484,7 @@
     "feetBaselineY": 71
   },
   "sunflower-hurt.png": {
-    "width": 52,
+    "width": 56,
     "height": 72,
     "bodyCenterX": 26,
     "feetBaselineY": 71
@@ -511,67 +511,67 @@
     "feetBaselineY": 70
   },
   "storm_sage-idle.png": {
-    "width": 45,
-    "height": 72,
-    "bodyCenterX": 22,
-    "feetBaselineY": 71,
+    "width": 50,
+    "height": 80,
+    "bodyCenterX": 25,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "storm_sage-attack.png": {
-    "width": 87,
-    "height": 72,
-    "bodyCenterX": 43,
-    "feetBaselineY": 71
+    "width": 96,
+    "height": 80,
+    "bodyCenterX": 48,
+    "feetBaselineY": 79
   },
   "storm_sage-hurt.png": {
-    "width": 54,
-    "height": 72,
-    "bodyCenterX": 27,
-    "feetBaselineY": 71
+    "width": 62,
+    "height": 80,
+    "bodyCenterX": 30,
+    "feetBaselineY": 79
   },
   "lightning_sage-idle.png": {
-    "width": 48,
-    "height": 72,
-    "bodyCenterX": 24,
-    "feetBaselineY": 71,
+    "width": 53,
+    "height": 80,
+    "bodyCenterX": 26,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "lightning_sage-attack.png": {
-    "width": 89,
-    "height": 72,
-    "bodyCenterX": 40,
-    "feetBaselineY": 71
+    "width": 98,
+    "height": 80,
+    "bodyCenterX": 45,
+    "feetBaselineY": 79
   },
   "lightning_sage-hurt.png": {
-    "width": 55,
-    "height": 72,
-    "bodyCenterX": 27,
-    "feetBaselineY": 71
+    "width": 63,
+    "height": 80,
+    "bodyCenterX": 30,
+    "feetBaselineY": 79
   },
   "santa-idle.png": {
-    "width": 52,
-    "height": 72,
-    "bodyCenterX": 26,
-    "feetBaselineY": 71,
+    "width": 42,
+    "height": 58,
+    "bodyCenterX": 21,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "santa-attack.png": {
-    "width": 84,
-    "height": 70,
-    "bodyCenterX": 43,
-    "feetBaselineY": 69
+    "width": 68,
+    "height": 56,
+    "bodyCenterX": 35,
+    "feetBaselineY": 55
   },
   "santa-hurt.png": {
-    "width": 60,
-    "height": 70,
-    "bodyCenterX": 30,
-    "feetBaselineY": 69
+    "width": 51,
+    "height": 56,
+    "bodyCenterX": 24,
+    "feetBaselineY": 55
   },
   "jasmine-idle.png": {
     "width": 63,
@@ -583,7 +583,7 @@
     "facing": "right"
   },
   "jasmine-attack.png": {
-    "width": 88,
+    "width": 98,
     "height": 72,
     "bodyCenterX": 40,
     "feetBaselineY": 71
@@ -595,109 +595,109 @@
     "feetBaselineY": 71
   },
   "night_rabbit-idle.png": {
-    "width": 47,
-    "height": 72,
-    "bodyCenterX": 23,
-    "feetBaselineY": 71,
+    "width": 38,
+    "height": 58,
+    "bodyCenterX": 19,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "night_rabbit-attack.png": {
-    "width": 49,
-    "height": 71,
-    "bodyCenterX": 30,
-    "feetBaselineY": 70
+    "width": 51,
+    "height": 57,
+    "bodyCenterX": 24,
+    "feetBaselineY": 56
   },
   "night_rabbit-hurt.png": {
-    "width": 48,
-    "height": 72,
-    "bodyCenterX": 24,
-    "feetBaselineY": 71
+    "width": 43,
+    "height": 58,
+    "bodyCenterX": 19,
+    "feetBaselineY": 57
   },
   "snow_rabbit-idle.png": {
-    "width": 39,
-    "height": 72,
-    "bodyCenterX": 19,
-    "feetBaselineY": 71,
+    "width": 32,
+    "height": 58,
+    "bodyCenterX": 16,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "snow_rabbit-attack.png": {
-    "width": 43,
-    "height": 72,
-    "bodyCenterX": 28,
-    "feetBaselineY": 71
+    "width": 56,
+    "height": 58,
+    "bodyCenterX": 23,
+    "feetBaselineY": 57
   },
   "snow_rabbit-hurt.png": {
-    "width": 45,
-    "height": 72,
-    "bodyCenterX": 22,
-    "feetBaselineY": 71
+    "width": 40,
+    "height": 58,
+    "bodyCenterX": 18,
+    "feetBaselineY": 57
   },
   "silver_rabbit-idle.png": {
-    "width": 46,
-    "height": 72,
-    "bodyCenterX": 23,
-    "feetBaselineY": 71,
+    "width": 37,
+    "height": 58,
+    "bodyCenterX": 18,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "silver_rabbit-attack.png": {
-    "width": 72,
-    "height": 71,
-    "bodyCenterX": 34,
-    "feetBaselineY": 70
+    "width": 58,
+    "height": 57,
+    "bodyCenterX": 27,
+    "feetBaselineY": 56
   },
   "silver_rabbit-hurt.png": {
-    "width": 52,
-    "height": 71,
-    "bodyCenterX": 26,
-    "feetBaselineY": 70
+    "width": 46,
+    "height": 57,
+    "bodyCenterX": 21,
+    "feetBaselineY": 56
   },
   "guardian-idle.png": {
-    "width": 52,
-    "height": 72,
-    "bodyCenterX": 26,
-    "feetBaselineY": 71,
+    "width": 42,
+    "height": 58,
+    "bodyCenterX": 21,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "guardian-attack.png": {
-    "width": 78,
-    "height": 72,
-    "bodyCenterX": 34,
-    "feetBaselineY": 71
+    "width": 63,
+    "height": 58,
+    "bodyCenterX": 27,
+    "feetBaselineY": 57
   },
   "guardian-hurt.png": {
-    "width": 59,
-    "height": 71,
-    "bodyCenterX": 29,
-    "feetBaselineY": 70
+    "width": 48,
+    "height": 57,
+    "bodyCenterX": 23,
+    "feetBaselineY": 56
   },
   "behemoth-idle.png": {
-    "width": 56,
-    "height": 72,
-    "bodyCenterX": 28,
-    "feetBaselineY": 71,
+    "width": 62,
+    "height": 80,
+    "bodyCenterX": 31,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "behemoth-attack.png": {
-    "width": 59,
-    "height": 71,
-    "bodyCenterX": 37,
-    "feetBaselineY": 70
+    "width": 78,
+    "height": 79,
+    "bodyCenterX": 41,
+    "feetBaselineY": 78
   },
   "behemoth-hurt.png": {
-    "width": 63,
-    "height": 72,
-    "bodyCenterX": 31,
-    "feetBaselineY": 71
+    "width": 70,
+    "height": 80,
+    "bodyCenterX": 35,
+    "feetBaselineY": 79
   },
   "venom-idle.png": {
     "width": 52,
@@ -730,7 +730,7 @@
     "facing": "right"
   },
   "aurora-attack.png": {
-    "width": 65,
+    "width": 80,
     "height": 72,
     "bodyCenterX": 34,
     "feetBaselineY": 71
@@ -772,13 +772,13 @@
     "facing": "right"
   },
   "cure_master-attack.png": {
-    "width": 61,
+    "width": 79,
     "height": 72,
     "bodyCenterX": 33,
     "feetBaselineY": 71
   },
   "cure_master-hurt.png": {
-    "width": 57,
+    "width": 61,
     "height": 72,
     "bodyCenterX": 28,
     "feetBaselineY": 71
@@ -820,7 +820,7 @@
     "feetBaselineY": 71
   },
   "great_detective-hurt.png": {
-    "width": 52,
+    "width": 54,
     "height": 72,
     "bodyCenterX": 26,
     "feetBaselineY": 71
@@ -841,31 +841,31 @@
     "feetBaselineY": 71
   },
   "joker-hurt.png": {
-    "width": 59,
+    "width": 69,
     "height": 72,
     "bodyCenterX": 29,
     "feetBaselineY": 71
   },
   "miracle_larva-idle.png": {
-    "width": 49,
-    "height": 72,
-    "bodyCenterX": 24,
-    "feetBaselineY": 71,
+    "width": 39,
+    "height": 58,
+    "bodyCenterX": 19,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "miracle_larva-attack.png": {
-    "width": 54,
-    "height": 71,
-    "bodyCenterX": 35,
-    "feetBaselineY": 70
+    "width": 58,
+    "height": 57,
+    "bodyCenterX": 28,
+    "feetBaselineY": 56
   },
   "miracle_larva-hurt.png": {
-    "width": 59,
-    "height": 71,
-    "bodyCenterX": 29,
-    "feetBaselineY": 70
+    "width": 50,
+    "height": 57,
+    "bodyCenterX": 25,
+    "feetBaselineY": 56
   },
   "mushroom_king-idle.png": {
     "width": 53,
@@ -883,31 +883,31 @@
     "feetBaselineY": 71
   },
   "mushroom_king-hurt.png": {
-    "width": 56,
+    "width": 59,
     "height": 74,
     "bodyCenterX": 28,
     "feetBaselineY": 73
   },
   "phantom-idle.png": {
-    "width": 44,
-    "height": 72,
-    "bodyCenterX": 22,
-    "feetBaselineY": 71,
+    "width": 36,
+    "height": 58,
+    "bodyCenterX": 18,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "phantom-attack.png": {
-    "width": 78,
-    "height": 72,
-    "bodyCenterX": 36,
-    "feetBaselineY": 71
+    "width": 63,
+    "height": 58,
+    "bodyCenterX": 29,
+    "feetBaselineY": 57
   },
   "phantom-hurt.png": {
-    "width": 51,
-    "height": 72,
-    "bodyCenterX": 25,
-    "feetBaselineY": 71
+    "width": 44,
+    "height": 58,
+    "bodyCenterX": 20,
+    "feetBaselineY": 57
   },
   "rumi-idle.png": {
     "width": 53,
@@ -946,7 +946,7 @@
     "feetBaselineY": 71
   },
   "time_magician-hurt.png": {
-    "width": 52,
+    "width": 56,
     "height": 72,
     "bodyCenterX": 26,
     "feetBaselineY": 71
@@ -961,13 +961,13 @@
     "facing": "right"
   },
   "time_ruler-attack.png": {
-    "width": 59,
+    "width": 82,
     "height": 72,
     "bodyCenterX": 34,
     "feetBaselineY": 71
   },
   "time_ruler-hurt.png": {
-    "width": 60,
+    "width": 63,
     "height": 72,
     "bodyCenterX": 30,
     "feetBaselineY": 71
@@ -982,13 +982,13 @@
     "facing": "right"
   },
   "toffee_apple-attack.png": {
-    "width": 61,
+    "width": 72,
     "height": 72,
     "bodyCenterX": 39,
     "feetBaselineY": 71
   },
   "toffee_apple-hurt.png": {
-    "width": 57,
+    "width": 65,
     "height": 72,
     "bodyCenterX": 28,
     "feetBaselineY": 71
@@ -1003,7 +1003,7 @@
     "facing": "right"
   },
   "trauma-attack.png": {
-    "width": 63,
+    "width": 81,
     "height": 72,
     "bodyCenterX": 33,
     "feetBaselineY": 71
@@ -1015,46 +1015,46 @@
     "feetBaselineY": 71
   },
   "underdog-idle.png": {
-    "width": 48,
-    "height": 72,
-    "bodyCenterX": 24,
-    "feetBaselineY": 71,
+    "width": 54,
+    "height": 80,
+    "bodyCenterX": 27,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "underdog-attack.png": {
-    "width": 79,
-    "height": 72,
-    "bodyCenterX": 35,
-    "feetBaselineY": 71
+    "width": 87,
+    "height": 80,
+    "bodyCenterX": 39,
+    "feetBaselineY": 79
   },
   "underdog-hurt.png": {
-    "width": 56,
-    "height": 72,
-    "bodyCenterX": 28,
-    "feetBaselineY": 71
+    "width": 66,
+    "height": 79,
+    "bodyCenterX": 31,
+    "feetBaselineY": 78
   },
   "entropy-idle.png": {
-    "width": 52,
-    "height": 72,
-    "bodyCenterX": 26,
-    "feetBaselineY": 71,
+    "width": 42,
+    "height": 58,
+    "bodyCenterX": 21,
+    "feetBaselineY": 57,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "entropy-attack.png": {
-    "width": 76,
-    "height": 72,
-    "bodyCenterX": 39,
-    "feetBaselineY": 71
+    "width": 61,
+    "height": 58,
+    "bodyCenterX": 31,
+    "feetBaselineY": 57
   },
   "entropy-hurt.png": {
-    "width": 54,
-    "height": 72,
-    "bodyCenterX": 27,
-    "feetBaselineY": 71
+    "width": 43,
+    "height": 58,
+    "bodyCenterX": 21,
+    "feetBaselineY": 57
   },
   "mawang-idle.png": {
     "width": 49,
@@ -1078,25 +1078,25 @@
     "feetBaselineY": 71
   },
   "doom_luther-idle.png": {
-    "width": 41,
-    "height": 72,
-    "bodyCenterX": 20,
-    "feetBaselineY": 71,
+    "width": 45,
+    "height": 80,
+    "bodyCenterX": 22,
+    "feetBaselineY": 79,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "doom_luther-attack.png": {
-    "width": 74,
-    "height": 71,
-    "bodyCenterX": 36,
-    "feetBaselineY": 70
+    "width": 92,
+    "height": 79,
+    "bodyCenterX": 40,
+    "feetBaselineY": 78
   },
   "doom_luther-hurt.png": {
-    "width": 53,
-    "height": 72,
-    "bodyCenterX": 26,
-    "feetBaselineY": 71
+    "width": 59,
+    "height": 80,
+    "bodyCenterX": 29,
+    "feetBaselineY": 79
   },
   "harmonius-idle.png": {
     "width": 57,
@@ -1108,7 +1108,7 @@
     "facing": "right"
   },
   "harmonius-attack.png": {
-    "width": 73,
+    "width": 84,
     "height": 72,
     "bodyCenterX": 36,
     "feetBaselineY": 71
@@ -1120,25 +1120,25 @@
     "feetBaselineY": 71
   },
   "shooting_star_boy-idle.png": {
-    "width": 46,
-    "height": 72,
-    "bodyCenterX": 23,
-    "feetBaselineY": 71,
+    "width": 41,
+    "height": 64,
+    "bodyCenterX": 20,
+    "feetBaselineY": 63,
     "kind": "ally",
     "size": "ally",
     "facing": "right"
   },
   "shooting_star_boy-attack.png": {
-    "width": 81,
-    "height": 72,
-    "bodyCenterX": 37,
-    "feetBaselineY": 71
+    "width": 72,
+    "height": 64,
+    "bodyCenterX": 33,
+    "feetBaselineY": 63
   },
   "shooting_star_boy-hurt.png": {
-    "width": 56,
-    "height": 72,
-    "bodyCenterX": 28,
-    "feetBaselineY": 71
+    "width": 51,
+    "height": 64,
+    "bodyCenterX": 25,
+    "feetBaselineY": 63
   },
   "iris_love-idle.png": {
     "width": 75,
@@ -1171,13 +1171,13 @@
     "facing": "right"
   },
   "iris_curse-attack.png": {
-    "width": 100,
+    "width": 131,
     "height": 104,
     "bodyCenterX": 56,
     "feetBaselineY": 103
   },
   "iris_curse-hurt.png": {
-    "width": 92,
+    "width": 93,
     "height": 104,
     "bodyCenterX": 46,
     "feetBaselineY": 103
@@ -1198,13 +1198,13 @@
     "feetBaselineY": 103
   },
   "flora-hurt.png": {
-    "width": 87,
+    "width": 95,
     "height": 104,
     "bodyCenterX": 43,
     "feetBaselineY": 103
   },
   "poseidon-idle.png": {
-    "width": 83,
+    "width": 112,
     "height": 104,
     "bodyCenterX": 41,
     "feetBaselineY": 103,
@@ -1215,7 +1215,7 @@
   "poseidon-attack.png": {
     "width": 126,
     "height": 103,
-    "bodyCenterX": 76,
+    "bodyCenterX": 54,
     "feetBaselineY": 102
   },
   "poseidon-hurt.png": {
@@ -1276,7 +1276,7 @@
     "facing": "right"
   },
   "pharaoh-attack.png": {
-    "width": 134,
+    "width": 138,
     "height": 102,
     "bodyCenterX": 60,
     "feetBaselineY": 101
@@ -1303,9 +1303,1857 @@
     "feetBaselineY": 92
   },
   "gray-hurt.png": {
-    "width": 86,
+    "width": 101,
     "height": 96,
     "bodyCenterX": 43,
     "feetBaselineY": 95
+  },
+  "alchemist-idle.png": {
+    "width": 40,
+    "height": 64,
+    "bodyCenterX": 20,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "alchemist-attack.png": {
+    "width": 64,
+    "height": 64,
+    "bodyCenterX": 29,
+    "feetBaselineY": 63
+  },
+  "alchemist-hurt.png": {
+    "width": 49,
+    "height": 64,
+    "bodyCenterX": 20,
+    "feetBaselineY": 63
+  },
+  "ancient_soul-idle.png": {
+    "width": 54,
+    "height": 80,
+    "bodyCenterX": 27,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "ancient_soul-attack.png": {
+    "width": 91,
+    "height": 80,
+    "bodyCenterX": 37,
+    "feetBaselineY": 79
+  },
+  "ancient_soul-hurt.png": {
+    "width": 67,
+    "height": 79,
+    "bodyCenterX": 33,
+    "feetBaselineY": 78
+  },
+  "archangel-idle.png": {
+    "width": 52,
+    "height": 64,
+    "bodyCenterX": 26,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "archangel-attack.png": {
+    "width": 74,
+    "height": 64,
+    "bodyCenterX": 35,
+    "feetBaselineY": 63
+  },
+  "archangel-hurt.png": {
+    "width": 52,
+    "height": 65,
+    "bodyCenterX": 26,
+    "feetBaselineY": 64
+  },
+  "astrologer-idle.png": {
+    "width": 81,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "astrologer-attack.png": {
+    "width": 81,
+    "height": 72,
+    "bodyCenterX": 37,
+    "feetBaselineY": 71
+  },
+  "astrologer-hurt.png": {
+    "width": 58,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "black_swan-idle.png": {
+    "width": 54,
+    "height": 80,
+    "bodyCenterX": 27,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "black_swan-attack.png": {
+    "width": 80,
+    "height": 80,
+    "bodyCenterX": 36,
+    "feetBaselineY": 79
+  },
+  "black_swan-hurt.png": {
+    "width": 66,
+    "height": 79,
+    "bodyCenterX": 33,
+    "feetBaselineY": 78
+  },
+  "blessing_tail-idle.png": {
+    "width": 56,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "blessing_tail-attack.png": {
+    "width": 83,
+    "height": 72,
+    "bodyCenterX": 33,
+    "feetBaselineY": 71
+  },
+  "blessing_tail-hurt.png": {
+    "width": 60,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "blue_moon_priest-idle.png": {
+    "width": 37,
+    "height": 64,
+    "bodyCenterX": 18,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "blue_moon_priest-attack.png": {
+    "width": 62,
+    "height": 64,
+    "bodyCenterX": 26,
+    "feetBaselineY": 63
+  },
+  "blue_moon_priest-hurt.png": {
+    "width": 45,
+    "height": 64,
+    "bodyCenterX": 22,
+    "feetBaselineY": 63
+  },
+  "brulee_witch-idle.png": {
+    "width": 55,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "brulee_witch-attack.png": {
+    "width": 74,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71
+  },
+  "brulee_witch-hurt.png": {
+    "width": 59,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "candy_boy-idle.png": {
+    "width": 48,
+    "height": 58,
+    "bodyCenterX": 24,
+    "feetBaselineY": 57,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "candy_boy-attack.png": {
+    "width": 76,
+    "height": 58,
+    "bodyCenterX": 37,
+    "feetBaselineY": 57
+  },
+  "candy_boy-hurt.png": {
+    "width": 51,
+    "height": 58,
+    "bodyCenterX": 25,
+    "feetBaselineY": 57
+  },
+  "chaos_mage-idle.png": {
+    "width": 50,
+    "height": 64,
+    "bodyCenterX": 25,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "chaos_mage-attack.png": {
+    "width": 76,
+    "height": 64,
+    "bodyCenterX": 31,
+    "feetBaselineY": 63
+  },
+  "chaos_mage-hurt.png": {
+    "width": 52,
+    "height": 64,
+    "bodyCenterX": 23,
+    "feetBaselineY": 63
+  },
+  "comet_tracker-idle.png": {
+    "width": 64,
+    "height": 72,
+    "bodyCenterX": 32,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "comet_tracker-attack.png": {
+    "width": 98,
+    "height": 72,
+    "bodyCenterX": 43,
+    "feetBaselineY": 71
+  },
+  "comet_tracker-hurt.png": {
+    "width": 65,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71
+  },
+  "cotton_candy_sheep-idle.png": {
+    "width": 44,
+    "height": 64,
+    "bodyCenterX": 22,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "cotton_candy_sheep-attack.png": {
+    "width": 79,
+    "height": 64,
+    "bodyCenterX": 34,
+    "feetBaselineY": 63
+  },
+  "cotton_candy_sheep-hurt.png": {
+    "width": 55,
+    "height": 64,
+    "bodyCenterX": 27,
+    "feetBaselineY": 63
+  },
+  "cream_maid-idle.png": {
+    "width": 41,
+    "height": 64,
+    "bodyCenterX": 20,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "cream_maid-attack.png": {
+    "width": 62,
+    "height": 64,
+    "bodyCenterX": 27,
+    "feetBaselineY": 63
+  },
+  "cream_maid-hurt.png": {
+    "width": 51,
+    "height": 64,
+    "bodyCenterX": 25,
+    "feetBaselineY": 63
+  },
+  "crystal_dancer-idle.png": {
+    "width": 52,
+    "height": 72,
+    "bodyCenterX": 26,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "crystal_dancer-attack.png": {
+    "width": 86,
+    "height": 72,
+    "bodyCenterX": 39,
+    "feetBaselineY": 71
+  },
+  "crystal_dancer-hurt.png": {
+    "width": 63,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71
+  },
+  "dainichi_nyorai-idle.png": {
+    "width": 64,
+    "height": 80,
+    "bodyCenterX": 32,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "dainichi_nyorai-attack.png": {
+    "width": 71,
+    "height": 80,
+    "bodyCenterX": 39,
+    "feetBaselineY": 79
+  },
+  "dainichi_nyorai-hurt.png": {
+    "width": 65,
+    "height": 80,
+    "bodyCenterX": 32,
+    "feetBaselineY": 79
+  },
+  "deep_lord-idle.png": {
+    "width": 59,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "deep_lord-attack.png": {
+    "width": 86,
+    "height": 72,
+    "bodyCenterX": 41,
+    "feetBaselineY": 71
+  },
+  "deep_lord-hurt.png": {
+    "width": 61,
+    "height": 72,
+    "bodyCenterX": 26,
+    "feetBaselineY": 71
+  },
+  "desert_fox-idle.png": {
+    "width": 56,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "desert_fox-attack.png": {
+    "width": 71,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "desert_fox-hurt.png": {
+    "width": 56,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71
+  },
+  "discipline_captain-idle.png": {
+    "width": 35,
+    "height": 58,
+    "bodyCenterX": 17,
+    "feetBaselineY": 57,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "discipline_captain-attack.png": {
+    "width": 40,
+    "height": 58,
+    "bodyCenterX": 15,
+    "feetBaselineY": 57
+  },
+  "discipline_captain-hurt.png": {
+    "width": 45,
+    "height": 58,
+    "bodyCenterX": 22,
+    "feetBaselineY": 57
+  },
+  "dragon_miko-idle.png": {
+    "width": 48,
+    "height": 64,
+    "bodyCenterX": 24,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "dragon_miko-attack.png": {
+    "width": 78,
+    "height": 63,
+    "bodyCenterX": 37,
+    "feetBaselineY": 62
+  },
+  "dragon_miko-hurt.png": {
+    "width": 51,
+    "height": 64,
+    "bodyCenterX": 25,
+    "feetBaselineY": 63
+  },
+  "eclipse_queen-idle.png": {
+    "width": 60,
+    "height": 86,
+    "bodyCenterX": 30,
+    "feetBaselineY": 85,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "eclipse_queen-attack.png": {
+    "width": 90,
+    "height": 85,
+    "bodyCenterX": 39,
+    "feetBaselineY": 84
+  },
+  "eclipse_queen-hurt.png": {
+    "width": 67,
+    "height": 86,
+    "bodyCenterX": 31,
+    "feetBaselineY": 85
+  },
+  "ember_tiger-idle.png": {
+    "width": 58,
+    "height": 80,
+    "bodyCenterX": 29,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "ember_tiger-attack.png": {
+    "width": 87,
+    "height": 80,
+    "bodyCenterX": 37,
+    "feetBaselineY": 79
+  },
+  "ember_tiger-hurt.png": {
+    "width": 63,
+    "height": 81,
+    "bodyCenterX": 31,
+    "feetBaselineY": 80
+  },
+  "executor-idle.png": {
+    "width": 56,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "executor-attack.png": {
+    "width": 77,
+    "height": 71,
+    "bodyCenterX": 35,
+    "feetBaselineY": 70
+  },
+  "executor-hurt.png": {
+    "width": 49,
+    "height": 71,
+    "bodyCenterX": 24,
+    "feetBaselineY": 70
+  },
+  "fairy-idle.png": {
+    "width": 47,
+    "height": 64,
+    "bodyCenterX": 23,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "fairy-attack.png": {
+    "width": 63,
+    "height": 64,
+    "bodyCenterX": 28,
+    "feetBaselineY": 63
+  },
+  "fairy-hurt.png": {
+    "width": 56,
+    "height": 64,
+    "bodyCenterX": 27,
+    "feetBaselineY": 63
+  },
+  "fairy_queen-idle.png": {
+    "width": 58,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "fairy_queen-attack.png": {
+    "width": 77,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71
+  },
+  "fairy_queen-hurt.png": {
+    "width": 58,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "fallen_angel-idle.png": {
+    "width": 59,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "fallen_angel-attack.png": {
+    "width": 83,
+    "height": 73,
+    "bodyCenterX": 38,
+    "feetBaselineY": 72
+  },
+  "fallen_angel-hurt.png": {
+    "width": 63,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71
+  },
+  "fenrir-idle.png": {
+    "width": 77,
+    "height": 80,
+    "bodyCenterX": 25,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "fenrir-attack.png": {
+    "width": 89,
+    "height": 78,
+    "bodyCenterX": 40,
+    "feetBaselineY": 77
+  },
+  "fenrir-hurt.png": {
+    "width": 52,
+    "height": 78,
+    "bodyCenterX": 26,
+    "feetBaselineY": 77
+  },
+  "fireworks_girl-idle.png": {
+    "width": 51,
+    "height": 72,
+    "bodyCenterX": 25,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "fireworks_girl-attack.png": {
+    "width": 72,
+    "height": 71,
+    "bodyCenterX": 30,
+    "feetBaselineY": 70
+  },
+  "fireworks_girl-hurt.png": {
+    "width": 56,
+    "height": 71,
+    "bodyCenterX": 26,
+    "feetBaselineY": 70
+  },
+  "flare_ribbon-idle.png": {
+    "width": 49,
+    "height": 64,
+    "bodyCenterX": 24,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "flare_ribbon-attack.png": {
+    "width": 73,
+    "height": 64,
+    "bodyCenterX": 31,
+    "feetBaselineY": 63
+  },
+  "flare_ribbon-hurt.png": {
+    "width": 56,
+    "height": 64,
+    "bodyCenterX": 28,
+    "feetBaselineY": 63
+  },
+  "forget_me_not-idle.png": {
+    "width": 46,
+    "height": 64,
+    "bodyCenterX": 23,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "forget_me_not-attack.png": {
+    "width": 74,
+    "height": 64,
+    "bodyCenterX": 31,
+    "feetBaselineY": 63
+  },
+  "forget_me_not-hurt.png": {
+    "width": 53,
+    "height": 64,
+    "bodyCenterX": 22,
+    "feetBaselineY": 63
+  },
+  "frozen_witch-idle.png": {
+    "width": 48,
+    "height": 80,
+    "bodyCenterX": 24,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "frozen_witch-attack.png": {
+    "width": 88,
+    "height": 79,
+    "bodyCenterX": 38,
+    "feetBaselineY": 78
+  },
+  "frozen_witch-hurt.png": {
+    "width": 55,
+    "height": 78,
+    "bodyCenterX": 27,
+    "feetBaselineY": 77
+  },
+  "ghost_king-idle.png": {
+    "width": 47,
+    "height": 72,
+    "bodyCenterX": 23,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "ghost_king-attack.png": {
+    "width": 78,
+    "height": 71,
+    "bodyCenterX": 36,
+    "feetBaselineY": 70
+  },
+  "ghost_king-hurt.png": {
+    "width": 60,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71
+  },
+  "grand_merchant-idle.png": {
+    "width": 56,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "grand_merchant-attack.png": {
+    "width": 88,
+    "height": 72,
+    "bodyCenterX": 36,
+    "feetBaselineY": 71
+  },
+  "grand_merchant-hurt.png": {
+    "width": 63,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71
+  },
+  "gumiho-idle.png": {
+    "width": 86,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "gumiho-attack.png": {
+    "width": 90,
+    "height": 72,
+    "bodyCenterX": 32,
+    "feetBaselineY": 71
+  },
+  "gumiho-hurt.png": {
+    "width": 69,
+    "height": 72,
+    "bodyCenterX": 34,
+    "feetBaselineY": 71
+  },
+  "hellhound-idle.png": {
+    "width": 51,
+    "height": 72,
+    "bodyCenterX": 25,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "hellhound-attack.png": {
+    "width": 85,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "hellhound-hurt.png": {
+    "width": 55,
+    "height": 72,
+    "bodyCenterX": 24,
+    "feetBaselineY": 71
+  },
+  "holy_bomb-idle.png": {
+    "width": 59,
+    "height": 64,
+    "bodyCenterX": 29,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "holy_bomb-attack.png": {
+    "width": 71,
+    "height": 64,
+    "bodyCenterX": 31,
+    "feetBaselineY": 63
+  },
+  "holy_bomb-hurt.png": {
+    "width": 65,
+    "height": 64,
+    "bodyCenterX": 32,
+    "feetBaselineY": 63
+  },
+  "jack_o_lantern-idle.png": {
+    "width": 54,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "jack_o_lantern-attack.png": {
+    "width": 77,
+    "height": 72,
+    "bodyCenterX": 33,
+    "feetBaselineY": 71
+  },
+  "jack_o_lantern-hurt.png": {
+    "width": 61,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "jellyfish_princess-idle.png": {
+    "width": 68,
+    "height": 64,
+    "bodyCenterX": 22,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "jellyfish_princess-attack.png": {
+    "width": 73,
+    "height": 61,
+    "bodyCenterX": 28,
+    "feetBaselineY": 60
+  },
+  "jellyfish_princess-hurt.png": {
+    "width": 47,
+    "height": 63,
+    "bodyCenterX": 23,
+    "feetBaselineY": 62
+  },
+  "kobold-idle.png": {
+    "width": 46,
+    "height": 58,
+    "bodyCenterX": 23,
+    "feetBaselineY": 57,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "kobold-attack.png": {
+    "width": 65,
+    "height": 58,
+    "bodyCenterX": 28,
+    "feetBaselineY": 57
+  },
+  "kobold-hurt.png": {
+    "width": 44,
+    "height": 59,
+    "bodyCenterX": 22,
+    "feetBaselineY": 58
+  },
+  "legendary_captain-idle.png": {
+    "width": 60,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "legendary_captain-attack.png": {
+    "width": 78,
+    "height": 71,
+    "bodyCenterX": 33,
+    "feetBaselineY": 70
+  },
+  "legendary_captain-hurt.png": {
+    "width": 54,
+    "height": 69,
+    "bodyCenterX": 27,
+    "feetBaselineY": 68
+  },
+  "light_elemental-idle.png": {
+    "width": 48,
+    "height": 72,
+    "bodyCenterX": 24,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "light_elemental-attack.png": {
+    "width": 74,
+    "height": 72,
+    "bodyCenterX": 34,
+    "feetBaselineY": 71
+  },
+  "light_elemental-hurt.png": {
+    "width": 52,
+    "height": 72,
+    "bodyCenterX": 26,
+    "feetBaselineY": 71
+  },
+  "mad_scientist-idle.png": {
+    "width": 38,
+    "height": 64,
+    "bodyCenterX": 19,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "mad_scientist-attack.png": {
+    "width": 65,
+    "height": 64,
+    "bodyCenterX": 29,
+    "feetBaselineY": 63
+  },
+  "mad_scientist-hurt.png": {
+    "width": 48,
+    "height": 63,
+    "bodyCenterX": 24,
+    "feetBaselineY": 62
+  },
+  "marshmallow-idle.png": {
+    "width": 52,
+    "height": 64,
+    "bodyCenterX": 26,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "marshmallow-attack.png": {
+    "width": 77,
+    "height": 63,
+    "bodyCenterX": 33,
+    "feetBaselineY": 62
+  },
+  "marshmallow-hurt.png": {
+    "width": 52,
+    "height": 64,
+    "bodyCenterX": 26,
+    "feetBaselineY": 63
+  },
+  "mimic-idle.png": {
+    "width": 53,
+    "height": 72,
+    "bodyCenterX": 26,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "mimic-attack.png": {
+    "width": 86,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71
+  },
+  "mimic-hurt.png": {
+    "width": 61,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71
+  },
+  "mirage-idle.png": {
+    "width": 51,
+    "height": 72,
+    "bodyCenterX": 25,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "mirage-attack.png": {
+    "width": 83,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "mirage-hurt.png": {
+    "width": 58,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "mummy-idle.png": {
+    "width": 42,
+    "height": 72,
+    "bodyCenterX": 21,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "mummy-attack.png": {
+    "width": 73,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "mummy-hurt.png": {
+    "width": 58,
+    "height": 69,
+    "bodyCenterX": 29,
+    "feetBaselineY": 68
+  },
+  "paladin-idle.png": {
+    "width": 55,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "paladin-attack.png": {
+    "width": 96,
+    "height": 71,
+    "bodyCenterX": 44,
+    "feetBaselineY": 70
+  },
+  "paladin-hurt.png": {
+    "width": 61,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71
+  },
+  "perfect_aurora-idle.png": {
+    "width": 52,
+    "height": 72,
+    "bodyCenterX": 26,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "perfect_aurora-attack.png": {
+    "width": 87,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "perfect_aurora-hurt.png": {
+    "width": 55,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71
+  },
+  "phoenix-idle.png": {
+    "width": 66,
+    "height": 80,
+    "bodyCenterX": 33,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "phoenix-attack.png": {
+    "width": 91,
+    "height": 80,
+    "bodyCenterX": 39,
+    "feetBaselineY": 79
+  },
+  "phoenix-hurt.png": {
+    "width": 65,
+    "height": 79,
+    "bodyCenterX": 32,
+    "feetBaselineY": 78
+  },
+  "priest_of_end-idle.png": {
+    "width": 54,
+    "height": 80,
+    "bodyCenterX": 27,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "priest_of_end-attack.png": {
+    "width": 91,
+    "height": 79,
+    "bodyCenterX": 46,
+    "feetBaselineY": 78
+  },
+  "priest_of_end-hurt.png": {
+    "width": 58,
+    "height": 78,
+    "bodyCenterX": 29,
+    "feetBaselineY": 77
+  },
+  "prism_twin-idle.png": {
+    "width": 51,
+    "height": 72,
+    "bodyCenterX": 25,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "prism_twin-attack.png": {
+    "width": 78,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71
+  },
+  "prism_twin-hurt.png": {
+    "width": 57,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71
+  },
+  "prophet-idle.png": {
+    "width": 46,
+    "height": 72,
+    "bodyCenterX": 23,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "prophet-attack.png": {
+    "width": 81,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "prophet-hurt.png": {
+    "width": 55,
+    "height": 68,
+    "bodyCenterX": 27,
+    "feetBaselineY": 67
+  },
+  "pudding_princess-idle.png": {
+    "width": 42,
+    "height": 64,
+    "bodyCenterX": 21,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "pudding_princess-attack.png": {
+    "width": 75,
+    "height": 64,
+    "bodyCenterX": 31,
+    "feetBaselineY": 63
+  },
+  "pudding_princess-hurt.png": {
+    "width": 49,
+    "height": 64,
+    "bodyCenterX": 24,
+    "feetBaselineY": 63
+  },
+  "red_moon-idle.png": {
+    "width": 38,
+    "height": 64,
+    "bodyCenterX": 19,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "red_moon-attack.png": {
+    "width": 72,
+    "height": 64,
+    "bodyCenterX": 27,
+    "feetBaselineY": 63
+  },
+  "red_moon-hurt.png": {
+    "width": 40,
+    "height": 65,
+    "bodyCenterX": 20,
+    "feetBaselineY": 64
+  },
+  "rumi_bunny-idle.png": {
+    "width": 43,
+    "height": 72,
+    "bodyCenterX": 21,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "rumi_bunny-attack.png": {
+    "width": 58,
+    "height": 72,
+    "bodyCenterX": 19,
+    "feetBaselineY": 71
+  },
+  "rumi_bunny-hurt.png": {
+    "width": 44,
+    "height": 72,
+    "bodyCenterX": 22,
+    "feetBaselineY": 71
+  },
+  "rumi_miko-idle.png": {
+    "width": 45,
+    "height": 72,
+    "bodyCenterX": 22,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "rumi_miko-attack.png": {
+    "width": 79,
+    "height": 70,
+    "bodyCenterX": 34,
+    "feetBaselineY": 69
+  },
+  "rumi_miko-hurt.png": {
+    "width": 54,
+    "height": 70,
+    "bodyCenterX": 27,
+    "feetBaselineY": 69
+  },
+  "rumi_wedding-idle.png": {
+    "width": 54,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "rumi_wedding-attack.png": {
+    "width": 83,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "rumi_wedding-hurt.png": {
+    "width": 58,
+    "height": 71,
+    "bodyCenterX": 29,
+    "feetBaselineY": 70
+  },
+  "sakura-idle.png": {
+    "width": 62,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "sakura-attack.png": {
+    "width": 87,
+    "height": 71,
+    "bodyCenterX": 35,
+    "feetBaselineY": 70
+  },
+  "sakura-hurt.png": {
+    "width": 59,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "shadow_cat-idle.png": {
+    "width": 55,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "shadow_cat-attack.png": {
+    "width": 67,
+    "height": 72,
+    "bodyCenterX": 34,
+    "feetBaselineY": 71
+  },
+  "shadow_cat-hurt.png": {
+    "width": 62,
+    "height": 74,
+    "bodyCenterX": 31,
+    "feetBaselineY": 73
+  },
+  "shadow_stalker-idle.png": {
+    "width": 49,
+    "height": 64,
+    "bodyCenterX": 24,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "shadow_stalker-attack.png": {
+    "width": 66,
+    "height": 64,
+    "bodyCenterX": 26,
+    "feetBaselineY": 63
+  },
+  "shadow_stalker-hurt.png": {
+    "width": 45,
+    "height": 65,
+    "bodyCenterX": 22,
+    "feetBaselineY": 64
+  },
+  "silent_librarian-idle.png": {
+    "width": 42,
+    "height": 64,
+    "bodyCenterX": 21,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "silent_librarian-attack.png": {
+    "width": 79,
+    "height": 64,
+    "bodyCenterX": 30,
+    "feetBaselineY": 63
+  },
+  "silent_librarian-hurt.png": {
+    "width": 50,
+    "height": 64,
+    "bodyCenterX": 24,
+    "feetBaselineY": 63
+  },
+  "skull_dragon-idle.png": {
+    "width": 60,
+    "height": 80,
+    "bodyCenterX": 30,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "skull_dragon-attack.png": {
+    "width": 90,
+    "height": 80,
+    "bodyCenterX": 40,
+    "feetBaselineY": 79
+  },
+  "skull_dragon-hurt.png": {
+    "width": 63,
+    "height": 80,
+    "bodyCenterX": 31,
+    "feetBaselineY": 79
+  },
+  "slime-idle.png": {
+    "width": 40,
+    "height": 64,
+    "bodyCenterX": 20,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "slime-attack.png": {
+    "width": 64,
+    "height": 63,
+    "bodyCenterX": 27,
+    "feetBaselineY": 62
+  },
+  "slime-hurt.png": {
+    "width": 46,
+    "height": 63,
+    "bodyCenterX": 23,
+    "feetBaselineY": 62
+  },
+  "snow_penguin-idle.png": {
+    "width": 38,
+    "height": 72,
+    "bodyCenterX": 19,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "snow_penguin-attack.png": {
+    "width": 53,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71
+  },
+  "snow_penguin-hurt.png": {
+    "width": 51,
+    "height": 71,
+    "bodyCenterX": 25,
+    "feetBaselineY": 70
+  },
+  "sphinx-idle.png": {
+    "width": 54,
+    "height": 80,
+    "bodyCenterX": 27,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "sphinx-attack.png": {
+    "width": 88,
+    "height": 80,
+    "bodyCenterX": 38,
+    "feetBaselineY": 79
+  },
+  "sphinx-hurt.png": {
+    "width": 66,
+    "height": 81,
+    "bodyCenterX": 33,
+    "feetBaselineY": 80
+  },
+  "succubus-idle.png": {
+    "width": 40,
+    "height": 58,
+    "bodyCenterX": 20,
+    "feetBaselineY": 57,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "succubus-attack.png": {
+    "width": 64,
+    "height": 57,
+    "bodyCenterX": 29,
+    "feetBaselineY": 56
+  },
+  "succubus-hurt.png": {
+    "width": 46,
+    "height": 58,
+    "bodyCenterX": 23,
+    "feetBaselineY": 57
+  },
+  "sugar_powder-idle.png": {
+    "width": 43,
+    "height": 64,
+    "bodyCenterX": 21,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "sugar_powder-attack.png": {
+    "width": 71,
+    "height": 59,
+    "bodyCenterX": 29,
+    "feetBaselineY": 58
+  },
+  "sugar_powder-hurt.png": {
+    "width": 50,
+    "height": 64,
+    "bodyCenterX": 24,
+    "feetBaselineY": 63
+  },
+  "sun_moon_sword_maiden-idle.png": {
+    "width": 70,
+    "height": 80,
+    "bodyCenterX": 35,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "sun_moon_sword_maiden-attack.png": {
+    "width": 94,
+    "height": 78,
+    "bodyCenterX": 44,
+    "feetBaselineY": 77
+  },
+  "sun_moon_sword_maiden-hurt.png": {
+    "width": 74,
+    "height": 77,
+    "bodyCenterX": 37,
+    "feetBaselineY": 76
+  },
+  "sun_priestess-idle.png": {
+    "width": 48,
+    "height": 72,
+    "bodyCenterX": 24,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "sun_priestess-attack.png": {
+    "width": 88,
+    "height": 71,
+    "bodyCenterX": 38,
+    "feetBaselineY": 70
+  },
+  "sun_priestess-hurt.png": {
+    "width": 58,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "supernova-idle.png": {
+    "width": 59,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "supernova-attack.png": {
+    "width": 87,
+    "height": 72,
+    "bodyCenterX": 36,
+    "feetBaselineY": 71
+  },
+  "supernova-hurt.png": {
+    "width": 68,
+    "height": 72,
+    "bodyCenterX": 32,
+    "feetBaselineY": 71
+  },
+  "sylphid-idle.png": {
+    "width": 82,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "sylphid-attack.png": {
+    "width": 86,
+    "height": 71,
+    "bodyCenterX": 30,
+    "feetBaselineY": 70
+  },
+  "sylphid-hurt.png": {
+    "width": 62,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71
+  },
+  "tinker_bell-idle.png": {
+    "width": 50,
+    "height": 64,
+    "bodyCenterX": 25,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "tinker_bell-attack.png": {
+    "width": 80,
+    "height": 64,
+    "bodyCenterX": 36,
+    "feetBaselineY": 63
+  },
+  "tinker_bell-hurt.png": {
+    "width": 53,
+    "height": 64,
+    "bodyCenterX": 25,
+    "feetBaselineY": 63
+  },
+  "trans_ares-idle.png": {
+    "width": 68,
+    "height": 80,
+    "bodyCenterX": 34,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_ares-attack.png": {
+    "width": 82,
+    "height": 80,
+    "bodyCenterX": 32,
+    "feetBaselineY": 79
+  },
+  "trans_ares-hurt.png": {
+    "width": 66,
+    "height": 79,
+    "bodyCenterX": 33,
+    "feetBaselineY": 78
+  },
+  "trans_behemoth-idle.png": {
+    "width": 49,
+    "height": 80,
+    "bodyCenterX": 24,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_behemoth-attack.png": {
+    "width": 62,
+    "height": 79,
+    "bodyCenterX": 29,
+    "feetBaselineY": 78
+  },
+  "trans_behemoth-hurt.png": {
+    "width": 57,
+    "height": 79,
+    "bodyCenterX": 28,
+    "feetBaselineY": 78
+  },
+  "trans_chaos_lord-idle.png": {
+    "width": 47,
+    "height": 64,
+    "bodyCenterX": 23,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_chaos_lord-attack.png": {
+    "width": 71,
+    "height": 64,
+    "bodyCenterX": 34,
+    "feetBaselineY": 63
+  },
+  "trans_chaos_lord-hurt.png": {
+    "width": 58,
+    "height": 65,
+    "bodyCenterX": 29,
+    "feetBaselineY": 64
+  },
+  "trans_cinderella-idle.png": {
+    "width": 63,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_cinderella-attack.png": {
+    "width": 82,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "trans_cinderella-hurt.png": {
+    "width": 67,
+    "height": 73,
+    "bodyCenterX": 33,
+    "feetBaselineY": 72
+  },
+  "trans_executor-idle.png": {
+    "width": 65,
+    "height": 80,
+    "bodyCenterX": 32,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_executor-attack.png": {
+    "width": 93,
+    "height": 80,
+    "bodyCenterX": 34,
+    "feetBaselineY": 79
+  },
+  "trans_executor-hurt.png": {
+    "width": 71,
+    "height": 80,
+    "bodyCenterX": 35,
+    "feetBaselineY": 79
+  },
+  "trans_flora-idle.png": {
+    "width": 59,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_flora-attack.png": {
+    "width": 76,
+    "height": 72,
+    "bodyCenterX": 32,
+    "feetBaselineY": 71
+  },
+  "trans_flora-hurt.png": {
+    "width": 60,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71
+  },
+  "trans_gray-idle.png": {
+    "width": 77,
+    "height": 72,
+    "bodyCenterX": 27,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_gray-attack.png": {
+    "width": 86,
+    "height": 64,
+    "bodyCenterX": 40,
+    "feetBaselineY": 63
+  },
+  "trans_gray-hurt.png": {
+    "width": 72,
+    "height": 64,
+    "bodyCenterX": 36,
+    "feetBaselineY": 63
+  },
+  "trans_luna_jasmine-idle.png": {
+    "width": 59,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_luna_jasmine-attack.png": {
+    "width": 91,
+    "height": 72,
+    "bodyCenterX": 33,
+    "feetBaselineY": 71
+  },
+  "trans_luna_jasmine-hurt.png": {
+    "width": 56,
+    "height": 71,
+    "bodyCenterX": 28,
+    "feetBaselineY": 70
+  },
+  "trans_poseidon-idle.png": {
+    "width": 84,
+    "height": 80,
+    "bodyCenterX": 28,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_poseidon-attack.png": {
+    "width": 92,
+    "height": 76,
+    "bodyCenterX": 35,
+    "feetBaselineY": 75
+  },
+  "trans_poseidon-hurt.png": {
+    "width": 79,
+    "height": 76,
+    "bodyCenterX": 47,
+    "feetBaselineY": 75
+  },
+  "trans_thor-idle.png": {
+    "width": 80,
+    "height": 72,
+    "bodyCenterX": 31,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_thor-attack.png": {
+    "width": 86,
+    "height": 71,
+    "bodyCenterX": 31,
+    "feetBaselineY": 70
+  },
+  "trans_thor-hurt.png": {
+    "width": 70,
+    "height": 71,
+    "bodyCenterX": 35,
+    "feetBaselineY": 70
+  },
+  "trans_yeon_rabbit-idle.png": {
+    "width": 37,
+    "height": 58,
+    "bodyCenterX": 18,
+    "feetBaselineY": 57,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "trans_yeon_rabbit-attack.png": {
+    "width": 64,
+    "height": 58,
+    "bodyCenterX": 29,
+    "feetBaselineY": 57
+  },
+  "trans_yeon_rabbit-hurt.png": {
+    "width": 42,
+    "height": 57,
+    "bodyCenterX": 20,
+    "feetBaselineY": 56
+  },
+  "unicorn-idle.png": {
+    "width": 61,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "unicorn-attack.png": {
+    "width": 78,
+    "height": 72,
+    "bodyCenterX": 35,
+    "feetBaselineY": 71
+  },
+  "unicorn-hurt.png": {
+    "width": 57,
+    "height": 72,
+    "bodyCenterX": 28,
+    "feetBaselineY": 71
+  },
+  "vampire-idle.png": {
+    "width": 38,
+    "height": 64,
+    "bodyCenterX": 19,
+    "feetBaselineY": 63,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "vampire-attack.png": {
+    "width": 69,
+    "height": 64,
+    "bodyCenterX": 27,
+    "feetBaselineY": 63
+  },
+  "vampire-hurt.png": {
+    "width": 43,
+    "height": 65,
+    "bodyCenterX": 21,
+    "feetBaselineY": 64
+  },
+  "victoria-idle.png": {
+    "width": 58,
+    "height": 72,
+    "bodyCenterX": 29,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "victoria-attack.png": {
+    "width": 87,
+    "height": 60,
+    "bodyCenterX": 39,
+    "feetBaselineY": 59
+  },
+  "victoria-hurt.png": {
+    "width": 65,
+    "height": 71,
+    "bodyCenterX": 32,
+    "feetBaselineY": 70
+  },
+  "void_knight-idle.png": {
+    "width": 82,
+    "height": 80,
+    "bodyCenterX": 41,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "void_knight-attack.png": {
+    "width": 99,
+    "height": 79,
+    "bodyCenterX": 43,
+    "feetBaselineY": 78
+  },
+  "void_knight-hurt.png": {
+    "width": 66,
+    "height": 78,
+    "bodyCenterX": 33,
+    "feetBaselineY": 77
+  },
+  "werebear-idle.png": {
+    "width": 44,
+    "height": 72,
+    "bodyCenterX": 22,
+    "feetBaselineY": 71,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "werebear-attack.png": {
+    "width": 77,
+    "height": 72,
+    "bodyCenterX": 30,
+    "feetBaselineY": 71
+  },
+  "werebear-hurt.png": {
+    "width": 53,
+    "height": 72,
+    "bodyCenterX": 24,
+    "feetBaselineY": 71
+  },
+  "world_tree-idle.png": {
+    "width": 50,
+    "height": 80,
+    "bodyCenterX": 25,
+    "feetBaselineY": 79,
+    "kind": "ally",
+    "size": "ally",
+    "facing": "right"
+  },
+  "world_tree-attack.png": {
+    "width": 81,
+    "height": 80,
+    "bodyCenterX": 37,
+    "feetBaselineY": 79
+  },
+  "world_tree-hurt.png": {
+    "width": 49,
+    "height": 79,
+    "bodyCenterX": 24,
+    "feetBaselineY": 78
   }
 }
