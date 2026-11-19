@@ -1,10 +1,10 @@
 /* ---------- battle (portrait phone: scene, relay strip, message, commands in thumb reach) ---------- */
-#bar { display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 8px; background: #0f0b20; border-bottom: 2px solid var(--line); flex: none; }
-#bar #room { color: var(--gold); } #bar #turn { color: var(--dim); margin-left: 6px; } #bar .sp { flex: 1; }
+#bar { display: flex; align-items: center; gap: 5px; height: calc(48px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 8px 0; background: #0f0b20; border-bottom: 2px solid var(--line); flex: none; }
+#bar #room { color: var(--gold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #bar #turn { color: var(--dim); flex: none; } #bar .sp { flex: 1; }
 #bar #gems { color: var(--aqua); margin-right: 4px; }
 #bar button { background: var(--win2); border: 2px solid var(--line); padding: 0 6px; min-width: 44px; height: 30px; font-size: 12px; }
 #bar button.on { border-color: var(--aqua); color: var(--aqua); }
-#bar button.quirk { min-width: 0; border-color: var(--gold); color: var(--gold); font: 10px var(--px9); padding: 0 5px; height: 24px; white-space: nowrap; overflow: hidden; max-width: 96px; text-overflow: ellipsis; }
+#bar #b-field { white-space: nowrap; color: var(--gold); }
 
 #stage { position: relative; flex: none; overflow: hidden; background: #140d1f; border-bottom: 2px solid var(--line); }
 #cv { display: block; }
@@ -19,7 +19,7 @@
 .chips i.bad { background: #6b2433; } .chips i.good { background: #1f5a4f; } .chips i.burn { background: #a3391f; } .chips i.div { background: #8a6a12; }
 
 /* the enemy: one wide bar across the top of the scene */
-#foebar { position: absolute; left: 8px; right: 8px; top: 6px; padding: 5px 8px 6px; background: rgba(15, 11, 32, .9); border: 2px solid var(--line); }
+#foebar { position: absolute; left: 8px; right: 8px; top: 6px; padding: 5px 8px 6px; background: var(--win); border: 1px solid var(--line); box-shadow: 0 2px 0 #08050f; }
 #foebar .nm { display: flex; align-items: center; gap: 6px; white-space: nowrap; height: 18px; }
 #foebar .nm i { font: 10px/14px var(--px9); font-style: normal; background: var(--line); padding: 0 4px; color: var(--ink); }
 #foebar .nm i.boss { background: var(--coral); color: #1b0b10; } #foebar .nm i.shadow { background: var(--violet); }
@@ -33,10 +33,12 @@
 .cd { font: 12px/16px var(--px); padding: 0 5px; background: #3a1420; color: #ffb0a8; display: none; min-width: 0; overflow-wrap: anywhere; }
 .cd.on { display: block; } .cd.now { background: var(--coral); color: #1b0b10; animation: blink .5s steps(2) infinite; }
 @keyframes blink { 50% { opacity: .55; } }
-.sky { position: absolute; top: 84px; left: 8px; display: flex; gap: 3px; align-items: center; }
+.sky { position: absolute; top: 84px; left: 8px; right: auto; max-width: calc(100% - 16px); display: flex; gap: 3px; align-items: center; background: var(--win); border: 1px solid var(--line); padding: 3px 5px; }
 .sky i { width: 16px; height: 16px; border: 1px solid #2b2350; background: rgba(10, 7, 22, .7); font: 10px/14px var(--px9); font-style: normal; text-align: center; color: #1b0b10; overflow: hidden; }
 .sky i.on { border-color: #fff; }
 .sky span { font: 10px/14px var(--px9); color: var(--ink); margin-left: 3px; text-shadow: 1px 1px 0 #000; }
+#region-next { font: 12px/15px var(--px); color: var(--gold); margin-left: 4px; white-space: nowrap; }
+#region-next:empty, #skyname:empty { display: none; }
 #pa-chips { position: absolute; left: 8px; bottom: 6px; max-width: 60%; }
 .intent { position: absolute; transform: translate(-50%, -100%); padding: 3px 8px 4px; background: #0f0b20; border: 2px solid var(--line2); white-space: nowrap; display: none; text-align: center; }
 .intent.on { display: block; }
@@ -53,14 +55,14 @@
 .num.big { font: 24px var(--px); } .num.crit { color: var(--gold); font: 30px var(--px14); } .num.foe { color: #ff9c92; } .num.self { color: #c9a8ff; font: 12px var(--px); }
 .num.heal { color: var(--hp); } .num.tag { font: 12px var(--px); color: var(--aqua); } .num.tag.bad { color: #ffb0a8; } .num.tag.good { color: #a8ffe0; } .num.call { font: 12px var(--px); color: var(--gold); }
 @keyframes pop { 0% { transform: translate(-50%, 0) scale(.4); opacity: 0; } 12% { transform: translate(-50%, -110%) scale(1.25); opacity: 1; } 24% { transform: translate(-50%, -80%) scale(1); } 75% { transform: translate(-50%, -130%); opacity: 1; } 100% { transform: translate(-50%, -170%); opacity: 0; } }
-.banner { position: absolute; left: 0; right: 0; top: 46%; padding: 6px 8px; background: rgba(8, 5, 15, .9); border-top: 2px solid var(--aqua); border-bottom: 2px solid var(--aqua); text-align: center; animation: slide .18s steps(4); font-size: 12px; }
+.banner { position: absolute; left: 0; right: 0; top: 46%; padding: 6px 8px; background: var(--win); border-top: 2px solid var(--aqua); border-bottom: 2px solid var(--aqua); text-align: center; animation: slide .18s steps(4); font-size: 12px; }
 .banner b { font-weight: normal; background: var(--aqua); color: #08221f; padding: 0 5px; margin-right: 6px; }
 .banner.ult { border-color: var(--coral); } .banner.ult b { background: var(--coral); color: #1b0b10; }
 .banner.gold { border-color: var(--gold); } .banner.gold b { background: var(--gold); color: #2a1c00; }
 .banner.low { top: 66%; } .banner.big { font-size: 24px; padding: 10px 8px; }
 @keyframes slide { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 /* the skill name plate of a big move: a pixel window that slides in from the caster's side */
-.skillplate { position: absolute; top: 34%; padding: 4px 12px 6px; background: #0b0618; border: 2px solid var(--c); box-shadow: 0 0 0 2px #0b0618, 4px 4px 0 rgba(0, 0, 0, .5); white-space: nowrap; animation: plate-l .16s steps(4) both; }
+.skillplate { position: absolute; top: 34%; padding: 4px 12px 6px; background: var(--win); border: 2px solid var(--c); box-shadow: 0 2px 0 #08050f; white-space: nowrap; animation: plate-l .16s steps(4) both; }
 .skillplate.left { left: 10px; } .skillplate.right { right: 10px; text-align: right; animation-name: plate-r; }
 .skillplate small { display: block; font: 10px/13px var(--px9); color: var(--c); }
 .skillplate b { font: 22px/26px var(--px14); font-weight: normal; color: #fff; text-shadow: 2px 2px 0 #000; }
@@ -91,6 +93,7 @@
 
 #msg { position: relative; flex: none; height: 30px; background: #100c22; border-bottom: 2px solid #231c44; }
 #ticker { position: absolute; inset: 0; padding: 0 10px; display: flex; align-items: center; color: var(--dim); white-space: nowrap; overflow: hidden; }
+#ticker.retreat-preview { display: block; line-height: 28px; overflow-x: auto; color: var(--gold); }
 #tally { position: absolute; inset: 0; padding: 0 8px; display: flex; align-items: center; gap: 3px; background: #100c22; overflow: hidden; white-space: nowrap; }
 #tally:empty { display: none; }
 #tally span { font: 10px/18px var(--px9); padding: 0 4px; background: #33295c; animation: slide .12s steps(3); flex: none; }
@@ -98,8 +101,8 @@
 
 #panel { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); min-height: 0; }
 #acts { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 6px; flex: 1; min-height: 0; max-height: 216px; }
-.act { display: flex; align-items: stretch; text-align: left; padding: 0; background: var(--win); border: 2px solid var(--line); box-shadow: inset 0 -4px 0 #130f28, 0 3px 0 #08050f; overflow: hidden; min-height: 64px; }
-.act:active { transform: translateY(2px); box-shadow: inset 0 -2px 0 #130f28, 0 1px 0 #08050f; }
+.act { display: flex; align-items: stretch; text-align: left; padding: 0; background: var(--win); border: 2px solid var(--line); box-shadow: 0 2px 0 #08050f; overflow: hidden; min-height: 64px; }
+.act:active { transform: translateY(2px); box-shadow: none; }
 .act[disabled] { opacity: .42; pointer-events: none; }
 .act .ic { flex: none; width: 24px; display: flex; align-items: center; justify-content: center; color: #120e24; background: var(--line2); }
 .act.phy .ic { background: var(--phy); } .act.mag .ic { background: var(--mag); } .act.sup .ic { background: var(--sup); }
@@ -124,17 +127,13 @@
 #b-heir u { position: absolute; right: 6px; top: 6px; text-decoration: none; font: 10px/15px var(--px9); background: var(--coral); color: #1b0b10; padding: 0 4px; animation: blink .5s steps(2) infinite; }
 #b-heir:active { transform: translateY(2px); } #b-heir[disabled] { opacity: .45; pointer-events: none; }
 #b-retreat.armed { border-color: var(--gold); color: var(--gold); } #b-retreat[disabled] { opacity: .45; pointer-events: none; }
-.overlay { position: absolute; inset: 40px 0 0 0; background: rgba(8, 5, 15, .96); display: none; flex-direction: column; z-index: 5; }
-.overlay.on { display: flex; }
-.overlay .body { flex: 1; overflow-y: auto; padding: 10px 12px; font: 12px/18px var(--px); color: var(--dim); }
-.overlay .body div.t { color: var(--gold); margin-top: 6px; } .overlay .body div.k { color: var(--ink); }
-.overlay .btn { margin: 8px 12px 12px; }
 
 /* tap to inspect */
 #foebar, #sky, #pa-chips { pointer-events: auto; cursor: pointer; }
 #foebar .nm u.ii { text-decoration: none; font: 10px/12px var(--px9); width: 14px; text-align: center; border: 1px solid var(--line2); color: var(--line2); flex: none; }
-.sky { padding: 3px; margin: -3px; }
 .pm { cursor: pointer; }
+#cv { image-rendering: pixelated; }
+#battle.resumed-result #hud, #battle.resumed-result #party, #battle.resumed-result #msg, #battle.resumed-result #panel { visibility: hidden; }
 
 #result .in h3 { font: 22px var(--px14); color: var(--gold); margin-bottom: 6px; }
 #result .gain small { color: var(--dim); font: 10px var(--px9); }
@@ -144,9 +143,10 @@
 #result .heirline b { font-weight: normal; background: var(--gold); color: #2a1c00; padding: 0 4px; margin-right: 6px; }
 #result .heirline small { display: block; font: 10px var(--px9); color: var(--dim); margin-top: 2px; }
 #result .btn { margin-top: 12px; }
+#result .in, #result .btn { box-shadow: 0 2px 0 #08050f; }
 @media (max-height: 700px) {
   .act { min-height: 52px; } .act .r3 { -webkit-line-clamp: 1; } .act .r2 strong { font-size: 24px; line-height: 24px; }
-  .pm { height: 48px; } #row2 { height: 40px; } #msg { height: 26px; } #bar { height: 36px; }
+  .pm { height: 48px; } #row2 { height: 40px; } #msg { height: 26px; }
 }
 
 

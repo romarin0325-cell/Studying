@@ -73,7 +73,11 @@ export function createHud(core, stage, sfx, widgets) {
     const newest = D.field[D.field.length - 1];
     S.tint = newest ? (FIELD[newest] || [0, '#ccc'])[1] : S.tint; S.tintA = newest ? 1 : 0;
   }
-  function ticker(text) { $('#ticker').textContent = text; }
+  function ticker(text, retreat = false) {
+    const node = $('#ticker');
+    node.textContent = text;
+    node.classList.toggle('retreat-preview', retreat);
+  }
 
   function showIntent(intent, cd, foe) {
     const n = $('#intent'), c = $('#pf-cd');
@@ -90,6 +94,8 @@ export function createHud(core, stage, sfx, widgets) {
     } else { c.className = 'cd'; S.danger = 0; }
     let html;
     if (intent.kind === 'stun') html = '<small>이번 턴</small><b>기절 · 행동 불가</b>';
+    else if (intent.kind === 'rest') html = '<small>이번 턴</small><b>적 휴식</b>' +
+      (intent.vulnerable ? '<small>받는 피해 ×' + intent.vulnerable + '</small>' : '');
     else if (intent.kind === 'charge') html = '<small>다음 행동</small><b class="sup">힘을 모은다</b>';
     else if (intent.kind === 'sup') html = '<small>다음 행동</small><b class="sup">' + esc(intent.name) + '</b>';
     else {

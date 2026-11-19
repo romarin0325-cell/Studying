@@ -1,21 +1,42 @@
-import { $, $$, show } from '../dom.js';
+import { $, $$, esc, show } from '../dom.js';
 import { head } from '../widgets.js';
+import { chooseGateReward } from '../../engine/run.js';
+import { treasureScreen } from './treasure.js';
 
-export function pickScreen(run, choices, widgets, sfx, toMap) {
-  const { card, cardRow } = widgets;
+export function gatePickScreen(run, ui) {
+  const { card, cardRow } = ui.widgets;
+  const { sfx } = ui.audio;
+  const { candidates, relic } = run.pending;
+  const artifact = ui.artifacts.get(relic);
   const node = $('#pick');
-  node.innerHTML = head(run, '그림자가 깨어났다') + '<div class="scroll"><p class="lead">쓰러뜨린 그림자가 꿈으로 돌아왔다. 한 명이 동료가 된다.</p><div class="cards">' + choices.map(id => cardRow(run, id)).join('') + '</div></div>' +
-    '<div class="footer"><button class="btn back" id="b-gate-skip">데려가지 않는다</button><button class="btn go" id="b-gate-take" disabled>한 명을 고른다</button></div>';
+  node.innerHTML = head(run, '문지기 보상', run.floor + '층') + '<div class="scroll">' +
+    '<p class="lead">그림자 한 명을 깨우거나 유물을 장착한다.</p><div class="cards">' +
+    candidates.map(id => cardRow(run, id, { tag: '이번 원정 합류' })).join('') +
+    (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + ui.icon(relic) +
+      '<span><b>' + esc(artifact.name) + '</b><small>' + esc(artifact.desc) + '</small></span></button>' : '') +
+    '</div></div><div class="footer"><button class="btn" id="b-leave">두고 가기</button>' +
+    '<button class="btn go" id="b-gate-take" disabled>보상을 고른다</button></div>';
   show('pick');
-  let sel = null;
-  $$('.cardrow', node).forEach(button => button.addEventListener('click', () => {
-    sel = button.dataset.id;
+  let choice;
+  const take = $('#b-gate-take', node);
+  const rows = $$('[data-id], [data-relic]', node);
+  for (const row of rows) row.addEventListener('click', () => {
+    const id = row.dataset.id || row.dataset.relic;
+    choice = { kind: row.dataset.id ? 'join' : 'relic', id };
     sfx.tap();
-    $$('.cardrow', node).forEach(row => row.classList.toggle('sel', row === button));
-    const take = $('#b-gate-take');
+    for (const other of rows) other.classList.toggle('sel', other === row);
     take.disabled = false;
-    take.textContent = card(sel).name + '을(를) 데려간다';
-  }));
-  $('#b-gate-take').addEventListener('click', () => { if (!sel) return; run.bench.push(sel); sfx.awaken(); toMap(true); });
-  $('#b-gate-skip').addEventListener('click', () => { sfx.tap(); toMap(true); });
+    take.textContent = choice.kind === 'join' ? card(id).name + ' 깨우기' : artifact.name + ' 받기';
+  });
+  take.addEventListener('click', () => {
+    if (!choice || !ui.command(chooseGateReward, choice).ok) return;
+    if (choice.kind === 'join') {
+      sfx.awaken();
+      ui.leave();
+    } else {
+      sfx.gem();
+      treasureScreen(run, ui, choice.id, { equipped: run.relics.includes(choice.id) });
+    }
+  });
+  $('#b-leave', node).addEventListener('click', ui.leave);
 }

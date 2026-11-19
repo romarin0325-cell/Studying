@@ -1,29 +1,55 @@
-import { $, $$, esc, show, sleep } from '../dom.js';
+import { $, esc, show, sleep } from '../dom.js';
 import { head } from '../widgets.js';
 import { GRADE } from '../../engine/roster.js';
-import * as R from '../../engine/run.js';
+import { altarKeep, altarRoll } from '../../engine/run.js';
 
-export function altarScreen(run, roster, widgets, sfx, toMap) {
-  const { card, sprite } = widgets;
+export function altarScreen(run, ui, kept = null) {
+  const { card, sprite } = ui.widgets;
+  const { sfx } = ui.audio;
   const node = $('#altar');
-  let left = 3, current = null;
-  function draw() {
-    const c = current && card(current.id);
-    node.innerHTML = head(run, '혼돈의 제단', '꿈길 ' + run.floor + '층') + '<div class="scroll">' +
-      '<p class="lead">무작위 동료 한 명이 축복을 받는다. 등급이 낮을수록 크게 받고(노멀 +40% … 전설 +10%), 드물게 대박(2.5배)이 터진다. 세 번까지 굴릴 수 있고 마지막 결과가 남는다. 축복은 원정이 끝날 때까지 간다.</p>' +
-      '<div class="altarslot win' + (current && current.jackpot ? ' jackpot' : '') + '" id="slot">' + (c ? '<span class="pic">' + sprite(current.id) + '</span><span class="txt"><b>' + esc(c.name) + '</b><strong>+' + Math.round(current.mult * 100) + '%</strong><small>' + (current.jackpot ? '대박! ' : '') + (GRADE[c.grade] || '') + ' · 체력·공격·방어 모두</small></span>' : '<span class="empty">?</span>') + '</div>' +
-      '</div><div class="footer"><button class="btn" id="b-roll"' + (left ? '' : ' disabled') + '>굴린다 (남은 ' + left + ')</button><button class="btn go" id="b-keep"' + (current ? '' : ' disabled') + '>' + (current ? (left ? '이걸로 정한다' : '받아들인다') : '먼저 굴린다') + '</button></div>';
-    $('#b-roll').addEventListener('click', roll);
-    $('#b-keep').addEventListener('click', () => { R.altarKeep(run, current); sfx.awaken(); toMap(true); });
-  }
-  async function roll() {
-    if (!left) return;
-    left--; $$('#altar .btn').forEach(b => { b.disabled = true; });
-    const slot = $('#slot');
-    for (let i = 0; i < 12; i++) { const id = run.bench[i % run.bench.length]; slot.innerHTML = '<span class="pic">' + sprite(id) + '</span><span class="txt"><b>…</b></span>'; sfx.roll(); await sleep(45 + i * 10); }
-    current = R.altarRoll(run, roster);
-    (current.jackpot ? sfx.jackpot : sfx.buff)();
-    draw();
-  }
-  draw(); show('altar');
+  const pending = run.pending;
+  const current = pending?.roll || kept;
+  const left = pending ? 3 - pending.rolls : 0;
+  const fighter = current && card(current.id);
+  const slot = fighter ? '<span class="pic">' + sprite(current.id) + '</span><span class="txt"><b>' + esc(fighter.name) +
+    '</b><strong>+' + Math.round(current.multiplier * 100) + '%</strong><small>' +
+    (current.jackpot ? '대박 · ' : '') + (GRADE[fighter.grade] || '') + ' · 체력·공격·방어</small></span>' :
+    '<span class="empty">?</span>';
+  const actions = pending ? '<button class="btn" id="b-roll"' + (left && run.bench.length ? '' : ' disabled') +
+    '>굴리기 (' + left + ')</button><button class="btn' + (current ? ' go' : '') + '" id="b-keep"' +
+    (current ? '' : ' disabled') + '>축복 받기</button>' : '';
+  node.innerHTML = head(run, '혼돈의 제단', run.floor + '층') + '<div class="scroll">' +
+    '<p class="lead">무작위 동료 한 명이 원정 끝까지 축복을 받는다. 최대 세 번 굴리고 마지막 결과를 받는다.</p>' +
+    '<div class="altarslot win' + (current?.jackpot ? ' jackpot' : '') + '" id="slot">' + slot + '</div></div>' +
+    '<div class="footer">' + actions + (!pending || !current ? '<button class="btn" id="b-leave">' +
+    (pending ? '떠나기' : '다음 층으로') + '</button>' : '') + '</div>';
+  show('altar');
+  $('#b-leave', node)?.addEventListener('click', ui.leave);
+  $('#b-keep', node)?.addEventListener('click', () => {
+    const result = ui.command(altarKeep);
+    if (result.ok) {
+      sfx.awaken();
+      if (run.room.type === 'event') ui.route();
+      else altarScreen(run, ui, result);
+    }
+  });
+  $('#b-roll', node)?.addEventListener('click', async event => {
+    const result = ui.command(altarRoll);
+    if (!result.ok) return;
+    event.currentTarget.disabled = true;
+    $('#b-keep', node).disabled = true;
+    const leave = $('#b-leave', node);
+    if (leave) leave.disabled = true;
+    const box = $('#slot', node);
+    for (let i = 0; i < 8 && box.isConnected; i++) {
+      const id = run.bench[i % run.bench.length];
+      box.innerHTML = '<span class="pic">' + sprite(id) + '</span><span class="txt"><b>…</b></span>';
+      sfx.roll();
+      await sleep(45 + i * 10);
+    }
+    if (box.isConnected) {
+      (result.jackpot ? sfx.jackpot : sfx.buff)();
+      altarScreen(run, ui);
+    }
+  });
 }

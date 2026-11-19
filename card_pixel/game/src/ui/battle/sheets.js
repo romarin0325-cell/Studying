@@ -2,6 +2,9 @@ import { $, esc } from '../dom.js';
 import { TYPE, foeFlip, statGrid } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
+import { QUIRKS } from '../../content/quirks.js';
+import { REGIONS } from '../../content/regions.js';
+import { RELIC_LIMIT } from '../../engine/rooms.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
 import { FIELD, GOOD } from './hud.js';
 
@@ -118,6 +121,20 @@ export function createDetails(core, widgets, openSheet) {
     openSheet('하늘 · 필드 버프', html);
   }
 
+  function battlefieldSheet(B) {
+    if (!B.door) return;
+    const region = REGIONS[B.door.region?.id], quirk = QUIRKS[B.door.quirk];
+    const block = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
+    const slots = Array.from({ length: RELIC_LIMIT }, (_, index) => {
+      const id = B.artifacts[index];
+      const relic = core.ARTIFACT_LIST.find(item => item.id === id);
+      if (!relic) return '<li>빈 칸</li>';
+      return '<li><b>' + esc(relic.name) + '</b>' +
+        (id === B.temporaryRelic ? ' · 이번 전투만' : '') + ' · ' + esc(relic.desc) + '</li>';
+    });
+    openSheet('전장·유물', (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
+      '<h4>장착 유물</h4><ul class="stl">' + slots.join('') + '</ul>');
+  }
 
-  return { charSheet, allySheet, foeSheet, fieldSheet };
+  return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
 }

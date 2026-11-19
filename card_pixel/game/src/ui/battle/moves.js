@@ -18,7 +18,7 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     const text = (o.prefix || '') + e.amount.toLocaleString('en-US') + (o.adv ? ' ▲' : '');
     St.number(text, St.X(actor), HY(actor) - (big ? 8 : 2), (o.crit ? 'crit ' : big ? 'big ' : '') + (isAlly ? 'foe' : ''));
     sfx.hit(big); if (o.crit) sfx.crit();
-    if (!isAlly && e.amount > stats.best) { stats.best = e.amount; stats.bestBy = o.by || ''; }
+    if (!isAlly && e.amount > stats.best) stats.best = e.amount;
   }
 
   /* B. Big common move: name plate, wind-up with a 2x camera punch on the caster, then one
@@ -115,7 +115,7 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     p.actor.front = 1;
     if (p.stage === 'ready') { if (isBig(p)) await bigMove(p, seen); else await quietMove(p); }
     const calc = e.calc || {};
-    impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: colorsOf(p.e.who), big: isBig(p), by: p.isFoe ? '' : unitOf(p.e.who).name }, stats);
+    impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: colorsOf(p.e.who), big: isBig(p) }, stats);
     await wait(0.14);
   }
   async function strikeMiss(p, why, seen) {

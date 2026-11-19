@@ -1,6 +1,6 @@
 /* RelayStage: the pixel stage. A low-resolution canvas (2x integer upscale), a virtual clock so
    every animation can be sped up or skipped, sprite variants (flash, waiting, shadow, boss),
-   a camera that punches in at an integer zoom, code-drawn backgrounds, props and particles. It knows nothing about rules. */
+   a camera that punches in at an integer zoom, cached backgrounds, props and particles. It knows nothing about rules. */
 export function createStage(ASSETS) {
   const SCALE = 2;
 
@@ -32,6 +32,7 @@ export function createStage(ASSETS) {
 
   /* ---------- sprites and their variants ---------- */
   const IMG = {};   // IMG[key] = { base: Image, <variant>: canvas }
+  const backgrounds = new Map();
   const RECOLOR = {
     shadow(r, g, b) {
       const l = (r * 0.3 + g * 0.59 + b * 0.11) / 255;
@@ -101,6 +102,18 @@ export function createStage(ASSETS) {
     })));
   }
 
+  function loadBackground(id) {
+    const src = ASSETS.bg?.[id];
+    if (!src || backgrounds.has(id)) return;
+    const image = new Image();
+    backgrounds.set(id, null);
+    image.onload = () => {
+      backgrounds.set(id, image);
+      if (S.bg === id) bgCache = null;
+    };
+    image.src = src;
+  }
+
   /* ---------- stage state ---------- */
   const RIM = { on: true, color: [226, 216, 255], alpha: 0.6 };
   const S = { W: 195, H: 200, BASE: 172, bg: 'cave', actors: [], parts: [], props: [], shake: 0, flash: 0, dark: 0, danger: 0, tint: null, tintA: 0,
@@ -168,7 +181,37 @@ export function createStage(ASSETS) {
     gate: { sky: '#0f1024', wall: '#1d1b3a', brick: '#15142c', pillar: ['#11102a', '#2c2a55'], trim: ['#3b2f6b', '#6a55b8'], floor: ['#272446', '#34305c', '#17152e'], flame: ['#a678ff', '#e6d4ff'], glow: 'rgba(166,120,255,.12)' },
     throne: { sky: '#081420', wall: '#10283a', brick: '#0b1d2c', pillar: ['#091a28', '#1c4660'], trim: ['#1d5a78', '#3fb2d6'], floor: ['#16303f', '#1f4458', '#0c1e29'], flame: ['#5fd4ff', '#e2fbff'], glow: 'rgba(95,212,255,.12)' }
   };
+  function paintLandscape(image) {
+    const c = document.createElement('canvas');
+    c.width = S.W + 16;
+    c.height = S.H + 16;
+    const g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.translate(8, 8);
+    const x = Math.floor((S.W - image.width) / 2);
+    const y = S.H - image.height;
+    const cap = S.bg === 'twilight_cathedral' && y < -10 ? 86 : 0;
+    const artworkTop = cap ? 0 : y;
+    g.drawImage(image, Math.floor(image.width / 2), 0, 1, 1, -8, -8, c.width, c.height);
+    g.drawImage(image, x, y);
+    if (cap) {
+      // Keep the bell and the floor at native scale by cropping the middle of the wall.
+      g.drawImage(image, 0, 0, image.width, cap, x, 0, image.width, cap);
+    }
+    if (S.bossRoom) {
+      g.fillStyle = 'rgba(12,7,27,.32)';
+      g.fillRect(-8, -8, c.width, c.height);
+    }
+    const bell = S.bg === 'twilight_cathedral' ? { x: x + 143, y: artworkTop + 62 } : null;
+    bgCache = { canvas: c, bell };
+  }
+
   function paintBg() {
+    const landscape = backgrounds.get(S.bg);
+    if (landscape) {
+      paintLandscape(landscape);
+      return;
+    }
     const p = BG[S.bg] || BG.cave, W = S.W, H = S.H, wallTop = 14, wallBottom = S.BASE - 70;
     const c = document.createElement('canvas'); c.width = W + 16; c.height = H + 16;
     const g = c.getContext('2d'); g.translate(8, 8);
@@ -204,6 +247,7 @@ export function createStage(ASSETS) {
   function drawBg(now) {
     if (!bgCache) paintBg();
     ctx.drawImage(bgCache.canvas, -8, -8);
+    if (!bgCache.p) return;
     const f = (now / 170 | 0) % 2, p = bgCache.p;
     for (const px of bgCache.cols.slice(0, 2)) {
       const y = bgCache.torchY;
@@ -423,7 +467,16 @@ export function createStage(ASSETS) {
     cv.width = W; cv.height = H; cv.style.width = W * SCALE + 'px'; cv.style.height = H * SCALE + 'px';
     ctx.imageSmoothingEnabled = false;
   }
-  function setRoom(bg) { S.bg = bg; bgCache = null; }
+  function setRoom(bg, bossRoom = false) {
+    S.bg = bg;
+    S.bossRoom = bossRoom;
+    bgCache = null;
+    loadBackground(bg);
+  }
+  function bellPosition() {
+    if (!bgCache) paintBg();
+    return bgCache.bell;
+  }
   function clear() {
     S.actors.length = 0; S.parts.length = 0; S.props.length = 0; S.cam.k = 1;
     S.shake = S.flash = S.dark = S.danger = S.tintA = 0; S.tint = null; S.beads.burn = S.beads.divine = 0;
@@ -434,7 +487,7 @@ export function createStage(ASSETS) {
     SCALE, S, clock, wait, tween, ELEMENT_COLORS,
     loadSprites, variant, IMG, makeActor, removeActor, meta, X, footY, headY, chestY, tall,
     sparks, fly, rise, converge, ring, slash, dust, gem, number, banner, plate, prop, dropProp, punch,
-    init, resize, setRoom, clear, start, advance, draw, RIM,
+    init, resize, setRoom, bellPosition, clear, start, advance, draw, RIM,
     pause(on) { clock.paused = !!on; }
   };
 }

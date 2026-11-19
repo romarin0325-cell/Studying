@@ -1,8 +1,10 @@
 import { $, $$, esc, show } from '../dom.js';
-import { DOOR, foeFlip } from '../widgets.js';
+import { foeFlip } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
+import { ROOM_NAMES } from '../../content/layouts.js';
 import { QUIRKS } from '../../content/quirks.js';
+import { REGIONS } from '../../content/regions.js';
 import { create as createBattle } from '../../engine/bridge.js';
 import { tools } from '../settings.js';
 import { createHud, FIELD, GOOD } from './hud.js';
@@ -12,22 +14,21 @@ import { createMoves } from './moves.js';
 export function battleMarkup() {
   return (
     '<section id="battle" class="screen">' +
-    '<header id="bar"><span id="room"></span><span id="turn"></span><button id="b-quirk" class="quirk"></button><span class="sp"></span><button id="b-speed">1배</button><button id="b-log">기록</button>' + tools() + '</header>' +
+    '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">전장·유물</button><button id="b-speed">1배</button><button id="b-log">기록</button>' + tools() + '</header>' +
     '<div id="stage"><canvas id="cv"></canvas><div id="hud">' +
     '<div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div>' +
-    '<div class="sky" id="sky"><i></i><i></i><i></i><span id="skyname"></span></div>' +
+    '<button class="sky" id="sky" aria-label="하늘 정보"><i></i><i></i><i></i><span id="skyname"></span><small id="region-next"></small></button>' +
     '<div class="chips" id="pa-chips"></div>' +
     '<div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">▶▶ 넘기는 중</div></div>' +
     '<div id="party"></div>' +
     '<div id="msg"><div id="ticker"></div><div id="tally"></div></div>' +
     '<div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div>' +
-    '<div class="overlay" id="logbook"><div class="body" id="logbody"></div><button class="btn" id="b-logclose">닫기</button></div>' +
     '<div class="sheet" id="result"><div class="in win" id="result-in"></div></div>' +
     '</section>'
   );
 }
 
-export function createBattleView({ core, roster, widgets, stage: St, audio, sheets, details, toMap, onEnd, onGatePick }) {
+export function createBattleView({ core, roster, widgets, stage: St, audio, sheets, details }) {
   const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
   const { sfx } = audio;
   const { card, face, spr } = widgets;
@@ -38,11 +39,14 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const B = { bridge: null, door: null, party: [], allies: [], foe: null, D: null, pending: null, busy: false, log: [], all: [], relayBanner: null, armed: false, intent: null, fallSpot: null, options: [], seen: new Set() };
   const errors = [];
   let battleContext = null;
-  let run = null;
+  let run = null, onResult, onContinue;
 
   function layout() {
     const frame = $('#frame'), w = Math.floor(Math.min(430, frame.clientWidth) / 2) * 2, h = frame.clientHeight;
-    const W = w / 2, H = Math.max(150, Math.min(214, Math.floor((h - (h < 700 ? 320 : 396)) / 2)));
+    const top = $('#bar').offsetHeight || 48;
+    const bottom = parseFloat(window.getComputedStyle($('#panel')).paddingBottom) || 8;
+    const reserved = top + bottom + (h < 700 ? 270 : 365);
+    const W = w / 2, H = Math.max(132, Math.min(214, Math.floor((h - reserved) / 2)));
     St.resize(W, H);
     $('#stage').style.height = H * 2 + 'px';
     if (B.allies.length) placeActors(false);
@@ -79,10 +83,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
 
   const hud = createHud(core, St, sfx, widgets);
   const { ticker, tally, tallyWorthy } = hud;
-  const { brief, renderActions, lockPanel } = createTiles({
-    core, card, audio, sheets, B, foeDef, play,
-    markHeirloomUsed: () => { run.stats.heirloomsUsed++; }
-  });
+  const { brief, renderActions, lockPanel } = createTiles({ core, card, audio, sheets, B, foeDef, play, ticker });
   const { isBig, label, impact, strikeAndHit, strikeMiss, settleMove } = createMoves({
     stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   });
@@ -94,6 +95,31 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   function showIntent(intent, countdown) {
     B.intent = intent;
     hud.showIntent(intent, countdown, B.foe);
+  }
+
+  function showRegion(event) {
+    const node = $('#region-next');
+    const region = B.door.region;
+    const bellIn = event?.region?.bellIn;
+    let message = '';
+    if (region?.id === 'twilight_bell' && bellIn != null) {
+      message = bellIn + '턴 뒤 적 디바인 +' + (region.stacks ?? REGIONS.twilight_bell.stacks);
+    } else if (region?.id === 'tide_cycle' && event && !foeDef().boss) {
+      const turns = event.countdown?.inTurns;
+      if (event.intent.kind === 'rest') {
+        message = '조류 · 적 휴식' + (event.intent.vulnerable ? ' · 받는 피해 ×' + event.intent.vulnerable : '');
+      }
+      else if (turns === 0) message = '조류 · 이번 턴 2.5배';
+      else if (turns === 1) message = '조류 · 다음 턴 2.5배';
+      else if (turns != null) message = '조류 · ' + turns + '턴 뒤 2.5배';
+    } else if (region?.id === 'arena_charge' && event?.region && !B.chargeSpent) {
+      message = event.region.ready ? '기세 2/2 · 다음 공격 기술 ×2' : '기세 ' + event.region.charge + '/2';
+    } else if (region?.id === 'ember_carry' && event && B.D.enemy.idx < B.door.enemies.length - 1) {
+      message = '교대 시 작열 최대 2 계승';
+    } else if (region?.id === 'starlit_sky' && event && B.D.turn === 1) {
+      message = B.D.field.length ? '시작 하늘 · ' + B.D.field.length + '개' : '시작 하늘 · 비어 있음';
+    }
+    node.textContent = message;
   }
 
   /* Tap the scene: while moves play it fast-forwards; on your turn a tap on a fighter opens its sheet. */
@@ -113,14 +139,19 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   /* The HUD pieces open their sheets even mid-animation; the battle waits while a sheet is open. */
   $('#foebar').addEventListener('click', ev => { ev.stopPropagation(); sfx.tap(); foeSheet(); });
   $('#sky').addEventListener('click', ev => { ev.stopPropagation(); sfx.tap(); fieldSheet(); });
+  $('#b-field').addEventListener('click', () => {
+    sfx.tap();
+    details.battlefieldSheet(B);
+  });
   $('#pa-chips').addEventListener('click', ev => { ev.stopPropagation(); if (B.D) { sfx.tap(); allySheet(Math.min(B.D.cur, 2)); } });
   $('#party').addEventListener('click', ev => { const p = ev.target.closest('.pm[data-i]'); if (p && B.D) { sfx.tap(); allySheet(Number(p.dataset.i)); } });
   $('#b-speed').addEventListener('click', function () { clock.speed = clock.speed === 1 ? 2 : 1; this.textContent = clock.speed + '배'; this.classList.toggle('on', clock.speed === 2); });
   $('#b-log').addEventListener('click', () => {
-    $('#logbody').innerHTML = B.log.map(t => '<div class="' + (/^===/.test(t) ? 't' : /피해|쓰러|특성|필드/.test(t) ? 'k' : '') + '">' + esc(t) + '</div>').join('');
-    $('#logbook').classList.add('on'); const body = $('#logbody'); body.scrollTop = body.scrollHeight;
+    const lines = B.log.map(line => '<p>' + esc(line) + '</p>').join('');
+    sheets.openSheet('전투 기록', lines || '<p>기록 없음</p>');
+    const body = $('#sh-body');
+    body.scrollTop = body.scrollHeight;
   });
-  $('#b-logclose').addEventListener('click', () => $('#logbook').classList.remove('on'));
 
   function logLine(text) { B.log.push(text); if (!/^(===|---)/.test(text)) ticker(text); }
   async function showBanner(tag, text, cls, sec) { const b = St.banner(tag, text, cls); await wait(sec || 0.7); b.remove(); }
@@ -134,7 +165,8 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
 
   function setupBattleStage() {
-    St.clear(); St.setRoom(B.door.bg || 'cave');
+    St.clear();
+    St.setRoom(B.door.bg, B.door.type === 'boss' || !!B.door.final);
     B.allies = B.party.map((id, i) => {
       const u = B.D.allies[i];
       if (!id || !u) return null;
@@ -145,11 +177,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     });
     B.foe = B.D.enemy.hp > 0 ? makeFoe(foeDef()) : null;
     if (B.foe && B.D.enemy.frenzied) B.foe.aura = 'red';
-    hud.buildParty(run, B.party); showIntent(null);
-    $('#room').textContent = run.floor + '층 · ' + DOOR[B.door.type][0]; $('#tally').innerHTML = '';
-    const q = B.door.quirk && QUIRKS[B.door.quirk], qb = $('#b-quirk');
-    qb.textContent = q ? '변덕 · ' + q.name : ''; qb.style.display = q ? '' : 'none';
-    return q;
+    hud.buildParty(run, B.party); showIntent(null); showRegion();
+    $('#room').textContent = run.floor + '층 · ' + ROOM_NAMES[B.door.type];
+    $('#tally').innerHTML = '';
+    return QUIRKS[B.door.quirk];
   }
   async function intro(e) {
     B.D = clone(e.s);
@@ -187,8 +218,11 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const p = B.pending;
     if (p && e.cause.kind === 'act' && same(e.cause.by, p.e.who) && e.delta < 0 && !same(e.who, p.e.who)) {
       let sum = null;
-      if (p.stage === 'ready' && !p.isFoe && tallyWorthy(e, run.stats)) { sum = tally(e.calc, e.amount, run.stats); if (!isBig(p)) await sum; }
-      await strikeAndHit(p, e, run.stats, B.seen);
+      if (p.stage === 'ready' && !p.isFoe && tallyWorthy(e, B.hitRecord)) {
+        sum = tally(e.calc, e.amount, B.hitRecord);
+        if (!isBig(p)) await sum;
+      }
+      await strikeAndHit(p, e, B.hitRecord, B.seen);
       if (sum) await sum;
       return;
     }
@@ -218,7 +252,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       for (let i = 0; i < 20; i++) St.fly(sx - 10 + Math.random() * 20, sy - 16 - Math.random() * 40, St.X(foe), CY(foe), 0.26 + Math.random() * 0.14, colors[i % 3], 24, i % 4 ? 1 : 2);
     }
     await wait(0.32);
-    impact(e, { crit: !!(e.calc && e.calc.crit), adv: !!(e.calc && e.calc.adv), colors, prefix: '반격 ', by: from ? unitOf({ side: 'ally', idx }).name + ' 반격' : '계승' }, run.stats);
+    impact(e, { crit: !!e.calc?.crit, adv: !!e.calc?.adv, colors, prefix: '반격 ' }, B.hitRecord);
     await wait(0.28);
     if (from) { from.pose = 'idle'; from.front = 0; }
     if (foe && B.D.enemy.hp > 0) foe.pose = 'idle';
@@ -282,10 +316,17 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   async function onLastStand(e) {
     const a = actorOf(e.who), u = unitOf(e.who); if (u) u.lastStand = true;
     render();
-    if (a) { a.aura = 'red'; a.white = 0.12; St.ring(St.X(a), CY(a), '#ff6b5e', 34); St.rise(St.X(a), FY(a), 18, ['#ff6b5e', '#ffc857', '#ffffff'], 30); }
-    sfx.warn(); S.flash = 0.3;
-    run.stats.lastStands++;
-    await showBanner('최후의 일인', (u ? u.name : '') + ' — 공격력·마법공격력 ×1.5, 치명타율 +25%', 'ult', 0.85);
+    if (a) {
+      a.aura = 'red';
+      St.ring(St.X(a), CY(a), '#ff6b5e', 24);
+    }
+    if (B.showLastStand) {
+      B.showLastStand = false;
+      sfx.warn();
+      const plate = St.plate(u?.name || '', '최후의 일인', '#ff6b5e', 1);
+      await wait(0.85);
+      plate.remove();
+    }
   }
   async function onRule(e) {
     const who = e.who && !Array.isArray(e.who) ? actorOf(e.who) : null;
@@ -297,6 +338,22 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       case 'overflow': if (who) label('넘침 ' + e.amount, who, 'good', -10); await wait(0.2); break;
       case 'starfall': await wait(0.05); break;
       case 'martyr': await showBanner('순교', '남은 아군의 공격력 +40%', 'gold', 0.7); break;
+      case 'twilight_bell': {
+        const bell = St.bellPosition();
+        if (bell) St.ring(bell.x, bell.y, '#ffc857', 34);
+        ticker(e.stacks ? '종이 울렸다 · 적 디바인 +' + e.stacks : '종이 울렸다');
+        sfx.buff();
+        break;
+      }
+      case 'ember_carry': if (who) label('작열 계승 +' + e.stacks, who, 'bad'); break;
+      case 'tide_cycle':
+        ticker(e.vulnerable ? e.name + ' · 적이 받는 피해 ×' + e.vulnerable : '조류가 물러났다 · 적 휴식');
+        break;
+      case 'arena_charge':
+        B.chargeSpent = true;
+        showRegion();
+        if (who) label('기세 ×' + e.multiplier, who, 'good');
+        break;
     }
   }
   async function onEnter(e) {
@@ -318,7 +375,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.D.enemy.hp = 0; render(); showIntent(null);
     foe.pose = 'hurt'; foe.white = 0.16; foe.front = 1; S.flash = 0.4; S.shake = 6; sfx.hit(true);
     St.sparks(St.X(foe), CY(foe), 40, ['#3a2f58', '#8b6cff', '#ffffff'], 100);
-    if (e.treasure) { label('보물! ◆+2', foe, 'good', -14); sfx.gem(); }
+    if (e.treasure) { label('보물 발견', foe, 'good', -14); sfx.gem(); }
     clock.slow = 0.5; await wait(0.2); clock.slow = 1;
     await tween(foe, { alpha: 0, oy: 6 }, 0.45, 'in');
     St.removeActor(foe); B.foe = null; S.beads.burn = S.beads.divine = 0; S.danger = 0;
@@ -334,11 +391,11 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   async function victory() {
     showIntent(null); S.danger = 0; tween(S, { dark: 0 }, 0.2);
     sfx.win();
-    const b = St.banner('승리', run.floor + '층 · ' + DOOR[B.door.type][0], 'gold big');
-    const n = Math.max(1, B.door.reward || 0), fp = foePos();
-    for (let i = 0; i < n; i++) St.gem(fp.x - 10 + i * 8, S.BASE - 30, S.W - 60, 2, 0.6 + i * 0.12, () => sfx.gem());
+    const b = St.banner('승리', run.floor + '층 · ' + ROOM_NAMES[B.door.type], 'gold big');
+    const fp = foePos();
+    if (B.door.reward) St.gem(fp.x, S.BASE - 30, S.W - 60, 2, 0.65, () => sfx.gem());
     for (const idx of lineup(B.D)) { const a = B.allies[idx]; tween(a, { oy: -6 }, 0.12).then(() => tween(a, { oy: 0 }, 0.14, 'in')); }
-    await wait(1.2 + n * 0.1); b.remove();
+    await wait(1.2); b.remove();
   }
   async function defeat() {
     showIntent(null); sfx.lose(); tween(S, { dark: 0.6 }, 0.6);
@@ -372,8 +429,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       case 'form': { const u = unitOf(e.who); if (u) { u.name = e.name; render(); } break; }
       case 'alert': ticker(e.text); break;
       case 'await':
-        await settlePending(); B.D = clone(e.s); await placeActors(true); render(); showIntent(e.intent, e.countdown); renderActions();
-        if (!run.hintShown) { run.hintShown = true; ticker('적·동료·하늘 칸을 누르면 자세히 본다 · 보는 동안 멈춘다'); }
+        await settlePending(); B.D = clone(e.s); await placeActors(true); render(); showIntent(e.intent, e.countdown); showRegion(e); renderActions();
         break;
       case 'win': await settlePending(); await victory(); break;
       case 'lose': await settlePending(); await defeat(); break;
@@ -391,6 +447,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       placeActors(false);
       render(true);
       showIntent(ready?.intent, ready?.countdown);
+      showRegion(ready);
     } finally {
       if (B.bridge.awaiting) {
         B.intent = ready?.intent;
@@ -400,12 +457,16 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
   async function play(events) {
     if (!events.length) return;
+    const bridge = B.bridge;
     B.busy = true; lockPanel();
     const start = B.all.length;
     B.all = B.all.concat(events);
     let i = 0;
     try {
-      for (; i < events.length; i++) await handle(events[i]);
+      for (; i < events.length; i++) {
+        if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
+        await handle(events[i]);
+      }
       await settlePending();
     } catch (error) {
       const entry = {
@@ -422,50 +483,87 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       }
       logLine('화면 오류를 기록했다.');
     } finally {
-      B.busy = false; clock.fast = false; $('#skip').className = '';
+      if (bridge === B.bridge) {
+        B.busy = false; clock.fast = false; $('#skip').className = '';
+      }
     }
-    if (B.bridge.outcome) finishBattle();
+    if (bridge === B.bridge && bridge.outcome && $('#battle').classList.contains('on')) finishBattle();
   }
 
   /* ---------- battle in and out ---------- */
-  function startBattle(expedition, order) {
+  function startBattle(expedition, options, settle, advance) {
     run = expedition;
-    const door = run.door;
-    B.door = door; B.party = order.slice(0, 3); B.log = []; B.all = []; B.pending = null; B.relayBanner = null; B.seen = new Set();
-    while (B.party.length < 3) B.party.push(null);
+    onResult = settle;
+    onContinue = advance;
+    const door = run.room;
+    B.door = door; B.party = options.party; B.log = []; B.all = []; B.pending = null; B.relayBanner = null; B.seen = new Set();
+    B.artifacts = options.artifacts;
+    B.temporaryRelic = run.nextBattle?.relic;
+    B.chargeSpent = false;
+    B.hitRecord = { best: run.stats.best };
+    B.showLastStand = run.stats.lastStands === 0 || door.type === 'boss' || !!door.final;
     B.D = B.foe = null; B.allies = []; B.fallSpot = null;
     battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map(e => e.id), party: B.party.slice() };
-    const opts = R.battleOptions(run, door, order);
-    opts.party = B.party;
-    B.bridge = createBattle(core, opts);
+    B.bridge = createBattle(core, options);
     $('#result').classList.remove('on');
+    $('#battle').classList.remove('resumed-result');
     show('battle'); layout(); ticker('');
     play(B.bridge.start());
   }
   function finishBattle() {
-    const res = R.applyBattle(run, roster, B.door, B.party, B.bridge, B.all);
-    const ended = !res.win || res.wiped || run.result;
-    const gained = B.bridge.heirloomsGained().filter(g => run.bench.includes(g.to));
+    const res = onResult(B.bridge.summary());
+    if (res) showResult(res, onContinue);
+  }
+
+  function showResult(res, advance) {
     const rows = [];
     if (res.wiped) rows.push('<p>마지막 동료가 적과 함께 쓰러졌다. 원정은 여기서 끝난다.</p>');
-    if (res.win) rows.push('<p class="gain">꿈의 결정 ◆ +' + res.crystals + ' <small>(지금 ◆ ' + run.crystals + ')</small></p>');
-    if (res.fallen.length) rows.push('<div class="fallen"><small>쓰러진 동료 — 이 원정에서 돌아오지 않는다</small><div>' + res.fallen.map(id => '<span class="mini dead">' + face(id, 40) + '<b>' + esc(card(id).name) + '</b></span>').join('') + '</div></div>');
-    for (const g of gained) rows.push('<p class="heirline"><b>유품</b> ' + esc(card(g.to).name) + ' ← ' + esc(card(g.from).name) + '의 ' + esc(g.name) + '<small>다음 전투부터도 한 번씩 쓸 수 있다</small></p>');
+    if (res.win && res.crystals) rows.push('<p class="gain">결정 +' + res.crystals + ' · 보유 ' + run.crystals + '</p>');
+    if (res.fallen?.length) rows.push('<div class="fallen"><small>쓰러진 동료</small><div>' + res.fallen.map(id => '<span class="mini dead">' + face(id, 40) + '<b>' + esc(card(id).name) + '</b></span>').join('') + '</div></div>');
+    for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>유품</b> ' + esc(card(g.to).name) + ' ← ' + esc(card(g.from).name) + '의 ' + esc(g.name) + '</p>');
+    if (res.bet) rows.push('<p>' + (res.bet.won ? '내기 성공' : '내기 실패') + '</p>');
     const box = $('#result-in');
-    box.innerHTML = '<h3>' + (res.win ? (B.door.type === 'boss' ? '꿈의 주인을 쓰러뜨렸다' : '돌파') : '전멸') + '</h3>' + rows.join('') + '<button class="btn go" id="b-next">' + (ended ? '결과 보기' : '다음으로') + '</button>';
+    const label = run.room.type === 'borrowed' ? '살아남은 동료 깨우기' : '다음 층으로';
+    box.innerHTML = '<h3>' + (res.win ? '돌파' : '전멸') + '</h3>' + rows.join('') +
+      '<button class="btn go" id="b-next">' + label + '</button>';
     $('#result').classList.add('on');
     $('#b-next').addEventListener('click', () => {
       sfx.tap(); $('#result').classList.remove('on');
-      if (ended) return onEnd(res.wiped);
-      if (B.door.type === 'gate') { const c = R.gateChoices(run, B.door); if (c.length) return onGatePick(c); }
-      toMap(true);
+      advance();
     });
   }
 
-  function reset(expedition) {
+  function attach(expedition) {
+    if (run === expedition) return;
+    if (B.busy) {
+      clock.waiters.length = clock.tweens.length = 0;
+      clock.fast = false;
+      clock.slow = 1;
+      B.busy = false;
+    }
+    B.bridge = null;
     run = expedition;
     battleContext = null;
     B.all = [];
+  }
+
+  function restoreResult(expedition, advance) {
+    attach(expedition);
+    B.D = B.foe = B.bridge = null;
+    B.allies = [];
+    B.log = [];
+    B.door = run.room;
+    B.artifacts = run.relics;
+    B.temporaryRelic = null;
+    St.clear();
+    St.setRoom(run.room.bg, !!run.room.final);
+    $('#battle').classList.add('resumed-result');
+    $('#room').textContent = run.floor + '층 · ' + ROOM_NAMES[B.door.type];
+    $('#turn').textContent = '';
+    show('battle');
+    layout();
+    lockPanel();
+    showResult({ win: true }, advance);
   }
 
   /** Review hooks for the live page and hidden preview panes. */
@@ -479,5 +577,5 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     },
     async settle(max) { let t = 0; while (B.busy && t < (max || 60)) { await St.advance(0.5); t += 0.5; } return t; }
   };
-  return { layout, startBattle, reset, review };
+  return { layout, startBattle, attach, restoreResult, review, get expedition() { return run; } };
 }

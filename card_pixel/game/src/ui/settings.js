@@ -1,13 +1,16 @@
-import { $$, svg } from './dom.js';
+import { $, $$, svg } from './dom.js';
+import { storage } from './storage.js';
 
 const ICON = {
   full: svg('M0 0h5v2H2v3H0zM7 0h5v5h-2V2H7zM0 7h2v3h3v2H0zM10 7h2v5H7v-2h3z'),
   shrink: svg('M3 0h2v5H0V3h3zM7 0h2v3h3v2H7zM0 7h5v5H3V9H0zM7 7h5v2H9v3H7z'),
   gear: svg('M0 1h12v2H0zM7 0h3v4H7zM0 5h12v2H0zM2 4h3v4H2zM0 9h12v2H0zM6 8h3v4H6z')
 };
-export const tools = () => '<button class="b-full ic" aria-label="전체화면"><span class="i-full">' + ICON.full + '</span><span class="i-shrink">' + ICON.shrink + '</span></button><button class="b-set ic" aria-label="설정">' + ICON.gear + '</button>';
+export const tools = () => '<button class="b-full ic" aria-label="' + (document.fullscreenElement ? '전체화면 나가기' : '전체화면') + '"><span class="i-full">' + ICON.full + '</span><span class="i-shrink">' + ICON.shrink + '</span></button><button class="b-set ic" aria-label="설정">' + ICON.gear + '</button>';
 
-export function createSettings(St, audio, sheets, inspectCompanion) {
+const SETTINGS_KEY = 'relaymare.settings';
+
+export function createSettings(St, audio, sheets, clearRecords) {
   const { sfx } = audio;
   const { openSheet, sheet } = sheets;
 
@@ -26,35 +29,52 @@ export function createSettings(St, audio, sheets, inspectCompanion) {
     syncFullscreen();
   }
   document.addEventListener('fullscreenchange', syncFullscreen);
-  const SETTINGS_KEY = 'relaymare.settings';
+  function syncOutline() {
+    document.documentElement.classList.toggle('meta-rim', St.RIM.on);
+  }
+
   function loadSettings() {
     try {
-      const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      const saved = JSON.parse(storage.getItem(SETTINGS_KEY) || '{}');
       if (typeof saved.sound === 'boolean') audio.soundOn = saved.sound;
       if (typeof saved.rim === 'boolean') St.RIM.on = saved.rim;
-    } catch (e) {
-      // Keep the defaults when storage is unavailable.
-    }
+    } catch { /* Keep defaults for an invalid settings entry. */ }
+    syncOutline();
   }
-  function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio.soundOn, rim: St.RIM.on })); } catch (e) { /* not kept */ } }
+  function saveSettings() {
+    storage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio.soundOn, rim: St.RIM.on }));
+  }
+
   function settingsSheet() {
     const row = (k, label, on, sub) => '<button class="tog' + (on ? ' on' : '') + '" data-set="' + k + '"><b>' + label + '</b><small>' + sub + '</small><span>' + (on ? '켜짐' : '꺼짐') + '</span></button>';
-    openSheet('설정', '<div class="togs">' + row('sound', '소리', audio.soundOn, '효과음') +
-      row('rim', '윤곽선 강조', St.RIM.on, '어두운 캐릭터가 어두운 방에 묻히지 않게 밝은 1px 테두리를 두른다') +
-      (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '주소창과 탭을 숨긴다') : '') + '</div>');
+    openSheet('설정', '<div class="meta-sheet togs">' + row('sound', '소리', audio.soundOn, '효과음') +
+      row('rim', '윤곽선 강조', St.RIM.on, '동료와 적의 윤곽을 밝게 표시한다.') +
+      (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '주소창과 탭을 숨긴다.') : '') +
+      '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>');
     $$('#sheet .tog').forEach(b => b.addEventListener('click', async () => {
       const k = b.dataset.set;
       if (k === 'sound') { audio.soundOn = !audio.soundOn; audio.unlockAudio(); }
-      else if (k === 'rim') St.RIM.on = !St.RIM.on;
+      else if (k === 'rim') { St.RIM.on = !St.RIM.on; syncOutline(); }
       else if (k === 'full') await toggleFullscreen();
       saveSettings(); settingsSheet();
     }));
+    $('#meta-erase').addEventListener('click', () => {
+      openSheet('기록을 지울까요?', `<div class="meta-sheet meta-erase-confirm">
+        <p>동료, 수첩, 기록과 진행 중인 원정을 모두 지운다. 되돌릴 수 없다.</p>
+        <button class="btn" id="meta-erase-back">취소</button>
+        <button class="btn meta-danger" id="meta-erase-confirm">모든 기록 지우기</button>
+      </div>`);
+      $('#meta-erase-back').addEventListener('click', settingsSheet);
+      $('#meta-erase-confirm').addEventListener('click', clearRecords);
+    });
   }
   document.addEventListener('click', ev => {
-    const t = ev.target.closest('.b-full, .b-set, [data-sheet]'); if (!t) return;
+    const t = ev.target.closest('.b-full, .b-set');
+    if (!t) return;
+    audio.unlockAudio();
+    sfx.tap();
     if (t.classList.contains('b-full')) toggleFullscreen();
-    else if (t.classList.contains('b-set')) settingsSheet();
-    else { sfx.tap(); inspectCompanion(t.dataset.sheet); }
+    else settingsSheet();
   });
 
   return { loadSettings, syncFullscreen, settingsSheet };

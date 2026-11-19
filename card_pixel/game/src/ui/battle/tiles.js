@@ -1,20 +1,30 @@
 import { $, $$, esc } from '../dom.js';
 import { TYPE } from '../widgets.js';
-import { QUIRKS } from '../../content/quirks.js';
 import { FIELD } from './hud.js';
 
-export function createTiles({ core, card, audio, sheets, B, foeDef, play, markHeirloomUsed }) {
+const damageRange = ([low, high]) => low === high ? String(low) : low + '~' + high;
+const hasFinalConsonant = name => /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
+
+export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker }) {
   const { sfx } = audio;
   const { openSheet, closeSheet, sheet } = sheets;
   const FIELD_NAMES = new Set(Object.keys(FIELD).map(id => core.BUFF_NAMES[id]));
 
   function supportLine(o, intent) {
-    const buffs = o.effects.filter(e => e.type === 'buff').map(e => e.id);
-    const hi = intent && intent.dmg ? intent.dmg[1] : null;
-    if (buffs.includes('guard') || buffs.includes('damage_half')) return hi != null ? [hi + ' → ' + Math.floor(hi * 0.5), '받는 피해 절반'] : ['절반', '받는 피해 절반'];
-    if (buffs.includes('barrier')) return intent && intent.kind === 'phy' ? [hi + ' → 0', '물리 공격을 지운다'] : ['—', '이번 공격은 못 막는다'];
-    if (buffs.includes('magic_guard')) return intent && intent.kind === 'mag' ? [hi + ' → 0', '마법 공격을 지운다'] : ['—', '이번 공격은 못 막는다'];
-    if (buffs.includes('evasion')) return ['회피 +50%', '맞지 않을 수도 있다'];
+    const defense = o.defense;
+    if (defense) {
+      const { kind, reduction } = defense;
+      const percent = Math.round(reduction * 100);
+      if (kind === 'evasion') return ['회피 ' + percent + '%', '적 공격 회피 확률'];
+      if ((kind === 'barrier' && intent?.kind !== 'phy') || (kind === 'magic_guard' && intent?.kind !== 'mag')) {
+        return ['—', (kind === 'barrier' ? '물리' : '마법') + ' 피해 한 번 무효'];
+      }
+      const currentBuffs = B.D.allies[B.D.cur].buffs;
+      const dmg = !currentBuffs.guard && !currentBuffs.damage_half ? intent?.dmg : null;
+      const reduced = dmg && dmg.map(amount => Math.floor(amount * (1 - reduction)));
+      return [dmg ? damageRange(dmg) + ' → ' + damageRange(reduced) : '피해 −' + percent + '%',
+        kind === 'barrier' || kind === 'magic_guard' ? '이번 공격 무효' : '받는 피해 ' + percent + '% 감소'];
+    }
     const field = o.effects.find(e => e.type === 'field_buff');
     if (field) return [core.BUFF_NAMES[field.id] || field.id, '하늘에 건다'];
     return ['', ''];
@@ -123,16 +133,32 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, markHe
   });
   $('#b-heir').addEventListener('click', function () {
     if (B.busy || this.disabled || this.dataset.i == null) return;
-    audio.unlockAudio(); sfx.tap(); markHeirloomUsed();
+    audio.unlockAudio(); sfx.tap();
     play(B.bridge.act(Number(this.dataset.i)));
   });
   $('#b-retreat').addEventListener('click', () => {
     if (B.busy || !B.bridge.canRetreat()) return;
     const r = $('#b-retreat');
-    if (!B.armed) { B.armed = true; r.className = 'armed'; r.innerHTML = '↩ 한 번 더<small>누르면 물러난다</small>'; sfx.tap(); return; }
+    if (!B.armed) {
+      const preview = B.bridge.previewRetreat();
+      const next = B.D.allies[preview.next.idx];
+      const current = B.D.allies[B.D.cur];
+      const hp = preview.dmg.map(damage => Math.max(0, next.hp - damage)).reverse();
+      const skill = preview.intent.name;
+      const line = preview.intent.dmg ? next.name + (hasFinalConsonant(next.name) ? '이 ' : '가 ') +
+        skill + (hasFinalConsonant(skill) ? '을' : '를') + ' 받음 · 명중 시 ' +
+        damageRange(preview.dmg) + ' · HP ' + next.hp + '→' + damageRange(hp) :
+        next.name + ' 출전 · 적 ' + preview.intent.name + ' · HP ' + next.hp + '→' + next.hp;
+      B.armed = true;
+      r.className = 'armed';
+      r.innerHTML = esc(current.name) + ' 물러나기<small>턴 소모 · 유품 없음</small>';
+      $('#tally').innerHTML = '';
+      ticker(line, true);
+      sfx.tap();
+      return;
+    }
     play(B.bridge.retreat());
   });
-  $('#b-quirk').addEventListener('click', () => { const q = B.bridge && B.bridge.quirk && QUIRKS[B.bridge.quirk]; if (q) sheet('꿈의 변덕 · ' + q.name, q.desc); });
 
   return { brief, renderActions, lockPanel };
 }
