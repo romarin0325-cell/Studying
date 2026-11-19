@@ -497,3 +497,17 @@ test('profile migration and injected session storage keep profile and run togeth
   save.clear();
   assert.equal(save.load(), null);
 });
+
+test('intro: the borrowed-battle survivor not taken in the first pick is offered again in the second', () => {
+  const run = Run.createRun({ core, roster, dungeonId: 'dawn_forest', seed: 7 });
+  enter(run, 0, INTRO.party);
+  // Ash falls, both rabbits survive (the stay-and-fight path)
+  settle(run, { survivors: [false, true, true] });
+  advance(run);
+  enter(run);
+  assert.equal(run.pending.kind, 'start');
+  assert.ok(run.pending.candidates.includes('snow_rabbit') && run.pending.candidates.includes('silver_rabbit'));
+  ok(Run.chooseStartPick(run, 'snow_rabbit'));
+  assert.equal(run.pending.kind, 'start');
+  assert.ok(run.pending.candidates.includes('silver_rabbit'), 'the other survivor is still a candidate');
+});

@@ -77,7 +77,7 @@ function advance(run) {
 function prepareStartPick(run, remaining, near, priority) {
   const candidates = choicesFor(run, dependencies.get(run).roster, 3, { near, priority });
   seeCharacters(run, candidates);
-  run.pending = { kind: 'start', remaining, candidates, near };
+  run.pending = { kind: 'start', remaining, candidates, near, priority };
 }
 
 function completeStart(run) {
@@ -106,7 +106,9 @@ export function chooseStartPick(run, id) {
   if (id) join(run, id);
   run.unchosen = unique([...run.unchosen, ...pending.candidates]).filter(candidate => canJoin(run, candidate));
   if (pending.remaining > 1 && id) {
-    prepareStartPick(run, pending.remaining - 1, id, []);
+    // Priority candidates the player did not take yet (intro survivors, the reserved one) stay offered.
+    const stillWaiting = (pending.priority || []).filter(other => other !== id && canJoin(run, other));
+    prepareStartPick(run, pending.remaining - 1, id, stillWaiting);
     return { ok: true, id, pending: copy(run.pending), awakened: [] };
   }
   return { ok: true, id, awakened: completeStart(run), reserved: run.reserved, pending: null };
