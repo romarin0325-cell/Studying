@@ -27,7 +27,7 @@ for (const n of ['ash', 'luna', 'red_dragon', 'guardian']) {
 }
 // Small character icons for the pool views: the trial's idle sprites, fitted into 64x64 cells.
 // (Until 2026-11-18 these came from the old prototype's atlas in card_pixel/generated/, which is not committed.)
-const slice = path.join(repo, 'card_pixel/slice/assets');
+const slice = path.join(repo, 'card_pixel/game/assets');
 const sliceMeta = JSON.parse(fs.readFileSync(path.join(slice, 'sprites.json'), 'utf8'));
 const minis = [];
 for (const [file, m] of Object.entries(sliceMeta).filter(([f, m]) => /-idle\.png$/.test(f) && (m.kind || 'ally') === 'ally').slice(0, 40)) {

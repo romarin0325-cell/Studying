@@ -8,14 +8,14 @@
 - 그대로 살리는 것: 영구 사망 3인 릴레이 전투, 특성·스킬·캐릭터성(`card/game`의 규칙).
 
 ## 원칙
-1. **전투 규칙의 원본은 `card/game`이다.** 시험판은 그 파일을 고치지 않고 감싼다(`slice/tools/core-bundle.mjs`). 전투 규칙을 바꾸려면 `card/game`을 고치고, 그러면 카드 게임 화면 다섯 개(card, legacy, astra, lumen, claude)도 함께 바뀐다.
-2. 로그라이트 층(문, 꿈의 변덕, 적 접두사, 유품, 최후의 일인, 경제)은 `slice/src/bridge.js`와 `slice/src/run.js`에만 둔다.
-3. **공용 구조 먼저.** 캐릭터·풀·적 생성은 `slice/src/roster.js` 하나에 둔다. 지금은 공용 풀(`common`)을 쓰고, 던전별 풀은 나중에 `pool('set:<기본덱 id>')`로 바꾼다.
-4. 숫자는 시뮬레이션(`slice/tools/sim.mjs`)으로 맞추되 목표는 균형이 아니라 **순간**이다. 현재 기준: 예고를 읽는 플레이로 클리어 60~70%, 1,000 넘는 한 방이 나오는 판 25% 이상.
+1. **전투 규칙의 원본은 `card/game`이다.** RELAYMARE는 그 파일을 고치지 않고 감싼다(`game/tools/core-bundle.mjs`). 전투 규칙을 바꾸려면 `card/game`을 고치고, 그러면 카드 게임 화면 다섯 개(card, legacy, astra, lumen, claude)도 함께 바뀐다.
+2. 로그라이트 층(문, 꿈의 변덕, 적 접두사, 유품, 최후의 일인, 경제)은 `game/src/engine/bridge.js`와 `game/src/engine/run.js`에만 둔다.
+3. **공용 구조 먼저.** 캐릭터·풀·적 생성은 `game/src/engine/roster.js` 하나에 둔다. 지금은 공용 풀(`common`)을 쓰고, 던전별 풀은 나중에 `pool('set:<기본덱 id>')`로 바꾼다.
+4. 숫자는 시뮬레이션(`game/tools/sim.mjs`)으로 맞추되 목표는 균형이 아니라 **순간**이다. 현재 기준: 예고를 읽는 플레이로 클리어 60~70%, 1,000 넘는 한 방이 나오는 판 25% 이상.
 5. 그림
    - 이미지 생성은 **모두 오른쪽 보기**로 만든다. 적은 코드에서 좌우를 뒤집는다(생성 도구가 "왼쪽 보기" 지시를 반복해서 어겼다, 2026-11-18).
-   - 크기: 동료 72px, 생물 48/64/80px(크기 등급), 보스 104px.
-   - 그림에 코드로 덧칠하지 않는다. 비율은 생성에서 고치고, 색·외곽선은 후처리(`slice/tools/cut-sprites.mjs`)로 맞춘다.
+   - 크기: 동료 58/64/72/80px(키 등급, 기본 72px), 생물 48/64/80px(크기 등급), 보스 104px.
+   - 그림에 코드로 덧칠하지 않는다. 비율은 생성에서 고치고, 색·외곽선은 후처리(`game/tools/cut-sprites.mjs`)로 맞춘다.
 6. 연출은 지금 **두 단계만** 정했다.
    - 조용한 공용: 일반 공격, 1~2티어, 보조, 상태이상. 짧은 돌진·베기·탄.
    - 큰 공용: 3티어 공격, 보스 필살, 유품. 이름판 + 시전자에게 2배 카메라 + 스킬 데이터로 고른 모양 6종(광선·운석·비·폭발·돌진·연타) + 충격 한 번.
@@ -52,7 +52,7 @@
 | `plan/` | 계획: 리뉴얼 기획서, 실험 규칙, 로드맵, 구조도. 앞으로 할 일과 그 이유 |
 | `history/` | 내역: 날짜별 작업 기록, GPT 위임 평가(`model-log.md`). 한 일과 결과 |
 | `art/` | 그림 원본(생성 띠), 생성 지시문, `manifest.json`, 대조표 |
-| `slice/` | 플레이 가능한 시험판: `src/`, `tools/`, `tests/`, `assets/`, `dist/` |
+| `game/` | RELAYMARE의 소스와 플레이용 빌드: `src/`, `tools/`, `tests/`, `assets/`, `dist/` |
 
 이 폴더 바로 아래의 `build.mjs`, `serve.mjs`, `src/`, `dist/`, `generated/`, `scripts/`, `tests/`는 2026-11-15 이전부터 있던 다른 시험판이다. 누가 만들었는지 기록이 없고 지금 빌드에 쓰지 않는다. git에 넣지 않았다. 지울지는 소유자에게 묻는다.
 
@@ -68,12 +68,12 @@
 위임할 때마다 `history/model-log.md`에 한 줄: 날짜, 일, 모델, 걸린 시간, 쓸만한가, 문제.
 
 ## 검증 (바뀐 것만)
-- 전투 규칙·로그라이트 규칙: `node --test card_pixel/slice/tests/bridge.test.mjs card_pixel/slice/tests/rules.test.mjs`
-- 숫자: `node card_pixel/slice/tools/sim.mjs 300` (비교: `--plain`, `--no-heirloom`, `--no-laststand`)
-- 화면·실시간: `node card_pixel/slice/tests/play.mjs` (설치된 Chrome으로 세 판을 끝까지 자동 플레이, 화면은 `slice/tests/shots/`)
-- 빌드: `node card_pixel/slice/build.mjs` → `slice/dist/RelaySlice.html`
+- 전투 규칙·로그라이트 규칙: `node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs`
+- 숫자: `node card_pixel/game/tools/sim.mjs 300` (비교: `--plain`, `--no-heirloom`, `--no-laststand`)
+- 화면·실시간: `node card_pixel/game/tests/play.mjs` (설치된 Chrome으로 세 판을 끝까지 자동 플레이, 화면은 `game/tests/shots/`)
+- 빌드: `node card_pixel/game/build.mjs` → `game/dist/Relaymare.html`
 
 ## git
-- 브랜치 `claude/card-pixel-renewal`, 작업 폴더 `Studying-card-pixel`(별도 worktree). 주 작업 폴더의 다른 게임 작업과 섞지 않는다.
+- 브랜치 `claude/relaymare-v1`, 작업 폴더 `Studying-card-pixel`(별도 worktree). 주 작업 폴더의 다른 게임 작업과 섞지 않는다.
 - worktree의 `node_modules`는 주 폴더로 연결된 junction이다. worktree를 지우기 전에 junction부터 끊는다(안 그러면 주 폴더의 node_modules가 지워진다).
-- `slice/dist/`는 빌드해서 함께 커밋한다. `slice/tests/shots/`는 커밋하지 않는다.
+- `game/dist/`는 빌드해서 함께 커밋한다. `game/tests/shots/`는 커밋하지 않는다.

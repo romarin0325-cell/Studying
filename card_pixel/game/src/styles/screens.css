@@ -1,0 +1,118 @@
+/* ---------- title ---------- */
+#title { align-items: center; justify-content: center; text-align: center; gap: 16px; padding: 20px; }
+#title .logo { font-size: 30px; line-height: 1.1; color: var(--ink); text-shadow: 3px 3px 0 #5b3fd0, 6px 6px 0 #08050f; letter-spacing: 2px; }
+#title .logo small { display: block; font: 10px var(--px9); color: var(--aqua); letter-spacing: 4px; margin-top: 12px; text-shadow: none; }
+#title .line { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 104px; }
+#title .line img:nth-child(1) { opacity: .45; } #title .line img:nth-child(2) { opacity: .7; }
+#title .line i { color: var(--aqua); font-style: normal; align-self: center; padding: 0 2px; animation: nudge 1s steps(2) infinite; }
+@keyframes nudge { 50% { transform: translateX(3px); } }
+#title .pitch { color: var(--gold); font-size: 12px; }
+
+
+#title .corner { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
+
+/* ---------- cards on the reward, order and end screens ---------- */
+.cards { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.cardrow { display: flex; gap: 8px; padding: 6px 8px 6px 4px; align-items: center; text-align: left; width: 100%; }
+.cardrow.sel { border-color: var(--gold); box-shadow: inset 0 0 0 2px #120e24, 0 0 0 2px var(--gold), 0 3px 0 #08050f; }
+.cardrow.used { opacity: .35; }
+.cardrow .pic { flex: none; width: 84px; height: 98px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+.cardrow .txt { flex: 1; min-width: 0; }
+.cardrow .nm { font: 15px/20px var(--px14); } .cardrow .nm i { font: 10px var(--px9); font-style: normal; color: var(--dim); margin-left: 6px; }
+.cardrow .nm i.grade { color: #120e24; background: var(--gc, #b9b3c4); padding: 0 4px; }
+
+.cardrow { border-left: 4px solid var(--gc, var(--line)); }
+.cardrow.pop { animation: pop-in .3s steps(5); } @keyframes pop-in { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+.cardrow.g-legend.pop { box-shadow: inset 0 0 0 2px #120e24, 0 0 0 2px var(--gold), 0 3px 0 #08050f; }
+.cardrow .sk small { color: #7d74a0; margin-left: 2px; }
+.badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; } .badges:empty { display: none; }
+.badges i { font: 10px/14px var(--px9); font-style: normal; padding: 0 4px; }
+.badges i.bless { background: #1f4f5a; color: #bff7ff; } .badges i.heir { background: var(--gold); color: #2a1c00; }
+.revealing { height: 106px; display: flex; align-items: center; justify-content: center; } .revealing .pic { height: 98px; display: flex; align-items: flex-end; }
+.cardrow .st { font: 10px var(--px9); color: var(--dim); }
+.cardrow .trait { font: 10px/13px var(--px9); color: var(--aqua); margin-top: 2px; }
+.cardrow .sk { font: 10px/13px var(--px9); color: var(--dim); margin-top: 2px; }
+
+.slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.slot { min-height: 150px; padding: 4px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.slot .pos { font: 10px var(--px9); color: var(--aqua); }
+.slot .pic { height: 98px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; width: 100%; }
+.slot .empty { color: #4a3f7a; font-size: 22px; height: 98px; line-height: 98px; }
+.slot .nm { font-size: 12px; white-space: nowrap; }
+.slot .fx { font: 10px/12px var(--px9); color: var(--gold); min-height: 24px; }
+
+.footer { flex: none; padding: 10px 14px 14px; background: #0f0b20; border-top: 2px solid var(--line); display: flex; gap: 8px; align-items: center; }
+.footer .btn { flex: 1; }
+
+.sumtable { margin-top: 10px; width: 100%; border-collapse: collapse; font: 10px/18px var(--px9); }
+.sumtable td { border-bottom: 1px solid #2b2350; padding: 1px 4px; } .sumtable td:last-child { text-align: right; color: var(--ink); } .sumtable td:first-child { color: var(--dim); }
+.note { margin-top: 12px; padding: 6px 8px; font: 10px/15px var(--px9); color: var(--dim); border: 1px dashed #4a3f7a; }
+
+/* ---------- run screens: header, map, doors, spring, altar ---------- */
+header.top { flex: none; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; background: #0f0b20; border-bottom: 2px solid var(--line); }
+header.top b { font: 15px var(--px14); font-weight: normal; color: var(--gold); } header.top span { color: var(--dim); } header.top .sp { flex: 1; } header.top .gems { color: var(--aqua); font-size: 15px; }
+.lead { color: var(--ink); line-height: 1.6; }
+.track { display: flex; align-items: center; justify-content: center; margin: 2px 0 12px; }
+.track i { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-style: normal; background: #1a1430; border: 2px solid #3a3166; color: var(--dim); }
+.track i.done { background: #2a2350; color: #7466b8; } .track i.cur { border-color: var(--aqua); color: var(--aqua); background: #12303a; box-shadow: 0 0 0 2px #0b0618, 0 0 0 4px var(--aqua); }
+.track i.gate { border-color: var(--violet); } .track i.boss { border-color: var(--coral); color: var(--coral); }
+.track u { width: 12px; height: 2px; background: #3a3166; }
+.bosscard { display: flex; gap: 10px; align-items: center; padding: 6px 10px 6px 6px; border-color: #6b2433; }
+.bosscard .pic { flex: none; width: 72px; height: 80px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+.bosscard .pic img { max-height: 80px; width: auto; }
+.bosscard small { display: block; font: 10px var(--px9); color: var(--coral); } .bosscard b { font: 15px var(--px14); font-weight: normal; } .bosscard p { font: 10px/14px var(--px9); color: var(--dim); margin-top: 2px; }
+.doors { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.door { width: 100%; text-align: left; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.door:active { transform: translateY(2px); }
+.door .dt { display: flex; align-items: baseline; gap: 8px; } .door .dt b { font: 22px var(--px14); font-weight: normal; } .door .dt small { font: 10px var(--px9); color: var(--dim); flex: 1; }
+.door .rw { color: var(--aqua); white-space: nowrap; }
+.door.t-elite { border-color: #b0482c; } .door.t-gate { border-color: var(--violet); } .door.t-boss { border-color: var(--coral); } .door.t-spring { border-color: var(--aqua); } .door.t-altar { border-color: #c2559c; }
+.door.t-elite .dt b { color: #ff9a62; } .door.t-gate .dt b { color: #b999ff; } .door.t-boss .dt b { color: var(--coral); } .door.t-spring .dt b { color: var(--aqua); } .door.t-altar .dt b { color: #ff8fd0; }
+.door .foes { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.door .foe { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.door .foe img { max-height: 64px; width: auto; }
+.door .foe .dot { font: 10px/14px var(--px9); font-style: normal; }
+.door .foe .affix { font: 10px/14px var(--px9); font-style: normal; background: #4a2a12; color: #ffd8a8; padding: 0 4px; }
+img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 0 #6a55b8) drop-shadow(0 -1px 0 #6a55b8); }
+
+.qbox { padding: 6px 8px; border: 2px solid var(--gold); background: #2a1f06; display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.qbox b { font-weight: normal; color: var(--gold); } .qbox span { font: 10px/14px var(--px9); color: var(--ink); }
+.benchrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.foelist { display: flex; flex-direction: column; gap: 6px; }
+.foeline { display: flex; gap: 8px; align-items: center; padding: 4px 8px 4px 4px; border-color: #6b2433; }
+.foeline .pic { flex: none; width: 64px; height: 70px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; } .foeline .pic img { max-height: 70px; width: auto; }
+.foeline b { font-weight: normal; } .foeline .afx { display: block; font: 10px/14px var(--px9); color: var(--dim); margin-top: 2px; } .foeline .afx i { font-style: normal; background: #4a2a12; color: #ffd8a8; padding: 0 4px; }
+.btn.back { flex: 0 0 auto; }
+.svc { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+
+.altarslot { margin-top: 14px; display: flex; gap: 12px; align-items: center; justify-content: center; min-height: 130px; padding: 10px; border-color: #c2559c; }
+.altarslot .pic { height: 110px; display: flex; align-items: flex-end; } .altarslot .pic img { max-height: 110px; width: auto; }
+.altarslot b { display: block; font: 15px var(--px14); font-weight: normal; } .altarslot strong { display: block; font: 30px var(--px14); font-weight: normal; color: #ff8fd0; } .altarslot small { font: 10px var(--px9); color: var(--dim); }
+.altarslot .empty { font: 30px var(--px14); color: #4a3f7a; }
+.altarslot.jackpot { border-color: var(--gold); background: #2a1f06; animation: jack .4s steps(2) 3; } .altarslot.jackpot strong { color: var(--gold); }
+@keyframes jack { 50% { box-shadow: inset 0 0 0 2px #120e24, 0 0 0 4px var(--gold); } }
+.slot .badges { justify-content: center; }
+.cardrow .nm i.tag { color: #08221f; background: var(--aqua); padding: 0 4px; }
+
+/* ---------- summons: grade tease, landing, legend rays ---------- */
+.revealing.tease { border-color: var(--gc); animation: tease .12s steps(2) infinite; }
+.revealing.tease img.sil { filter: brightness(0) drop-shadow(1px 0 0 var(--gc)) drop-shadow(-1px 0 0 var(--gc)) drop-shadow(0 -1px 0 var(--gc)) drop-shadow(0 1px 0 var(--gc)); }
+@keyframes tease { 50% { box-shadow: inset 0 0 0 2px #120e24, 0 0 0 3px var(--gc); } }
+.landing { position: relative; }
+.landing .cardrow { position: relative; z-index: 1; }
+.landing.l-legend .cardrow { animation: pop-in .3s steps(5), glow-gold .36s steps(2) .3s 5; }
+.landing.l-epic .cardrow { animation: pop-in .3s steps(5), glow-epic .36s steps(2) .3s 3; }
+@keyframes glow-gold { 50% { box-shadow: inset 0 0 0 2px #120e24, 0 0 0 4px var(--gold), 0 0 0 7px #4a3608; } }
+@keyframes glow-epic { 50% { box-shadow: inset 0 0 0 2px #120e24, 0 0 0 3px #b07cff; } }
+.landing .rays { position: absolute; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px; pointer-events: none; z-index: 0;
+  background: repeating-conic-gradient(rgba(255, 200, 87, .34) 0 7deg, transparent 7deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 0 16%, transparent 60%); mask: radial-gradient(circle, #000 0 16%, transparent 60%);
+  animation: rays 1.8s steps(18) forwards; }
+@keyframes rays { from { transform: rotate(0) scale(.4); opacity: 0; } 15% { opacity: 1; } to { transform: rotate(40deg) scale(1); opacity: 0; } }
+.landing .sparkle { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.landing .sparkle b { position: absolute; width: 4px; height: 4px; background: var(--gc); box-shadow: 0 0 0 1px #08050f; opacity: 0; animation: sparkle .7s steps(7) forwards; }
+@keyframes sparkle { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.5); } }
+.flash { position: absolute; inset: 0; pointer-events: none; z-index: 7; animation: flash .7s steps(6) forwards; }
+.flash.gold { background: #ffe9a8; } .flash.violet { background: #c9a8ff; }
+@keyframes flash { from { opacity: .6; } to { opacity: 0; } }

@@ -7,7 +7,7 @@
 | | ① 엔진 | ② 테스트 빌드 | ③ 기획서 |
 |---|---|---|---|
 | 한 줄 | 화면 없이 돌아가는 전투·원정 규칙 | 그 규칙을 손으로 플레이하는 한 파일 | 무엇을 왜 만드는지 적은 문서 |
-| 위치 | `slice/src/bridge.js` `run.js` `roster.js`, `slice/tools/core-bundle.mjs` `sim.mjs`, `slice/tests/bridge.test.mjs` `rules.test.mjs` | `slice/src/game.js` `stage.js` `style.css`, `slice/build.mjs`, `slice/assets/`, `slice/dist/RelaySlice.html`, `slice/tests/play.mjs`, `art/` | `plan/`(계획), `history/`(내역), `AGENTS.md`(원칙·결정) |
+| 위치 | `game/src/engine/`, `game/src/content/`, `game/tools/core-bundle.mjs` `sim.mjs`, `game/tests/bridge.test.mjs` `rules.test.mjs` | `game/src/ui/`, `game/src/stage/`, `game/src/styles/`, `game/build.mjs`, `game/assets/`, `game/dist/Relaymare.html`, `game/tests/play.mjs`, `art/` | `plan/`(계획), `history/`(내역), `AGENTS.md`(원칙·결정) |
 | 다시 확인하는 법 | 명령 한 줄로 합격/불합격과 숫자가 나온다 | 빌드해서 열고, 자동 플레이로 오류·멈춤을 본다. 보기 좋은지는 사람이 본다 | 출처와 `[초안]` `[미확인]` 표시를 따라간다. 명령으로 판정되지 않는다 |
 | 믿어도 되는 것 | 규칙이 말한 대로 계산되는가, 같은 시드는 같은 원정인가 | 화면이 규칙을 제대로 보여 주고 끝까지 진행되는가 | 방향과 사용자가 정한 결정 |
 | 믿으면 안 되는 것 | "재미있는가"(숫자는 균형이 아니라 순간을 목표로 맞췄다) | "규칙이 맞는가"(화면이 막아 주지 않는다) | 수치(대부분 시뮬레이션하지 않은 초안) |
@@ -19,17 +19,17 @@
 화면, 소리, 그림이 없어도 돌아간다. 브라우저 없이 Node만으로 확인한다.
 
 - `tools/core-bundle.mjs`: `card/game` 규칙 파일을 고치지 않고 한 덩어리(`window.RelayCore`)로 감싼다. 바꾸는 것은 `setTimeout`뿐이다.
-- `src/bridge.js`: 전투를 화면 없이 돌리고 순서 있는 사건 목록을 돌려준다.
+- `game/src/engine/bridge.js`: 전투를 화면 없이 돌리고 순서 있는 사건 목록을 돌려준다.
   - 채택 규칙 A~D(보스 카운트다운 표시, 적 다음 행동 예고, 적 릴레이, 물러나기), 실험 규칙 E~H(유품, 최후의 일인, 꿈의 변덕 7종, 적 접두사 5종)
-- `src/run.js`: 일곱 층, 문, 깨우기·골라 깨우기, 혼돈의 제단, 영구 사망, 유품 보관, 보상. 시작은 골라 깨우기 2번 + 무작위 3명, 결정 1.
-- `src/roster.js`: 캐릭터·풀·적(야생 9종, 그림자, 보스 11종) 생성.
+- `game/src/engine/run.js`: 일곱 층, 문, 깨우기·골라 깨우기, 혼돈의 제단, 영구 사망, 유품 보관, 보상. 시작은 골라 깨우기 2번 + 무작위 3명, 결정 1.
+- `game/src/engine/roster.js`: 캐릭터·풀·적(야생 9종, 그림자, 보스 11종) 생성.
 
 다시 확인:
 ```bash
-node --test card_pixel/slice/tests/bridge.test.mjs card_pixel/slice/tests/rules.test.mjs
-node card_pixel/slice/tools/sim.mjs 400
+node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs
+node card_pixel/game/tools/sim.mjs 400
 ```
-- 첫 줄: 규칙 24개. 둘째 줄: 400판을 가장 강한 셋으로 자동 플레이해 클리어율·한 방 피해·유품 사용 횟수를 잰다.
+- 첫 줄: 규칙 35개. 둘째 줄: 400판을 가장 강한 셋으로 자동 플레이해 클리어율·한 방 피해·유품 사용 횟수를 잰다.
 - 가장 최근 값(2026-11-18): 클리어 68%, 1,000 넘는 한 방이 나온 판 33%. 기준(`AGENTS.md` 원칙 4)은 클리어 60~70%, 한 방 25% 이상.
 
 주의:
@@ -40,20 +40,21 @@ node card_pixel/slice/tools/sim.mjs 400
 
 엔진 위에 화면을 얹은 한 파일이다. 규칙은 하나도 가지고 있지 않다(화면은 보여 주고 묻기만 한다).
 
-- 산출물: `slice/dist/RelaySlice.html`(오프라인에서 열리는 한 파일, 글꼴만 CDN)
-- `src/stage.js`: 저해상도 캔버스 무대(2배 정수 확대), 가상 시계, 카메라, 코드로 그린 배경·이펙트, 합성 효과음, 윤곽선 강조, 전투 멈춤
-- `src/game.js`: 모든 화면(타이틀, 첫 깨우기, 지도, 출전 순서, 전투, 샘, 제단, 결산)과 전투 사건 재생기, 자세히 보기 시트, 설정, 전체화면
-- `src/style.css`, `assets/`(캐릭터·생물·보스 3포즈 + `sprites.json`), `tools/cut-sprites.mjs`
+- 산출물: `game/dist/Relaymare.html`(오프라인에서 열리는 한 파일, 글꼴만 CDN)
+- `game/src/stage/`: 저해상도 캔버스 무대, 가상 시계, 카메라, 이펙트와 합성 효과음
+- `game/src/ui/`: 화면 전환, 전투 사건 재생, 자세히 보기 시트, 설정
+- `game/src/styles/`, `game/assets/`(캐릭터·생물·보스 3포즈 + `sprites.json`), `game/tools/cut-sprites.mjs`
+- 전체 모듈 지도와 플레이 방법은 [game/README.md](game/README.md)에 있다.
 - 그림 원본·생성 지시문·대조표: `art/`
 
 다시 확인:
 ```bash
-node card_pixel/slice/build.mjs
-node card_pixel/slice/tests/play.mjs
+node card_pixel/game/build.mjs
+node card_pixel/game/tests/play.mjs
 ```
-- 첫 줄: 빌드(`dist/`가 최신인지). 둘째 줄: 설치된 Chrome으로 원정 세 판을 끝까지 자동 플레이해 브라우저 오류, 멈춤, 행동 후 대기 시간, 프레임을 본다. 화면은 `slice/tests/shots/`(git 제외)에 남는다.
+- 첫 줄: 빌드(`dist/`가 최신인지). 둘째 줄: 설치된 Chrome으로 원정 세 판을 끝까지 자동 플레이해 브라우저 오류, 멈춤, 행동 후 대기 시간, 프레임을 본다. 화면은 `game/tests/shots/`(git 제외)에 남는다.
 - 이 명령이 **증명하지 못하는 것**: 연출이 촌스럽지 않은지, 배치가 편한지, 실제 휴대폰 터치·사파리·소리. 이것은 사람이 플레이해서 정한다.
-- 화면을 바꿨으면 전/후를 바꿔 볼 수 있는 검토 페이지를 `slice/tests/shots/`에 만들어 확인한다.
+- 화면을 바꿨으면 전/후를 바꿔 볼 수 있는 검토 페이지를 `game/tests/shots/`에 만들어 확인한다.
 
 임시인 것: 영입과 결정은 저장되지 않는다. 대표 기술·전용 연출은 없다(큰 공용 연출만). 보스·야생 수치는 시뮬레이션으로만 맞췄다.
 
@@ -91,8 +92,8 @@ node card_pixel/slice/tests/play.mjs
 | 바꾼 것 | 다시 볼 것 |
 |---|---|
 | `card/game/*` | ① 규칙 테스트와 시뮬레이션, ② 빌드와 자동 플레이. (카드 게임 화면 다섯 개도 영향받는다) |
-| `slice/src/bridge.js` `run.js` `roster.js` | ① 규칙 테스트와 시뮬레이션, ② 빌드(화면이 쓰는 값이 바뀌었는지) |
-| `slice/src/game.js` `stage.js` `style.css`, 그림 | ② 빌드와 자동 플레이, 바뀐 화면 스크린샷 |
+| `game/src/bridge.js` `run.js` `roster.js` | ① 규칙 테스트와 시뮬레이션, ② 빌드(화면이 쓰는 값이 바뀌었는지) |
+| `game/src/ui/`, `game/src/stage/`, `game/src/styles/`, 그림 | ② 빌드와 자동 플레이, 바뀐 화면 스크린샷 |
 | `plan/` `history/` `AGENTS.md` | 제품 검증 불필요. 결정 장부와 `plan/roadmap.md`가 서로 맞는지만 본다 |
 
 ## 이 폴더 바로 아래의 옛 파일
