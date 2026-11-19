@@ -1,0 +1,323 @@
+{
+  "reviewer": "Codex · 팬텀 감사용 패킹본 공식 원본 캡처 8장 육안 검토",
+  "bindings": {
+    "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+    "atlasSha256": "282191296b4e79db247ba8d24045cca27cc553e88d9f88b7f23781acb040b3bd",
+    "packingSha256": "414190170ea557e30b17ce94f40b3793f10d336a4b5aa5aba0ad5ef5e32384bb",
+    "evidenceSha256": "815839657a454e856ff0ffeb6112e98907645d3a13695d8ec4b056595bf799b2"
+  },
+  "checks": [
+    {
+      "id": "original-design",
+      "status": "pass",
+      "note": "원화의 검보라색 앞머리, 라벤더 눈, 흰 별무늬 긴 잠옷과 맨발을 네 방향에서 찾을 수 있다. 정면과 양측은 원화처럼 가슴 앞 갈색 곰을 안고, 후면에는 후드와 별무늬 등판이 보인다.",
+      "evidence": [
+        "originals",
+        "four-views"
+      ],
+      "viewedScreenshotHashes": [
+        "eab238ea075b2e9e3fd04dc11cac506e748286c5ca6fcdc0af1d7aa87852d153",
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5"
+      ]
+    },
+    {
+      "id": "frozen-style",
+      "status": "pass",
+      "note": "동결 세이렌과 대조하면 짙은 유색 외곽 안에 가는 속선과 국소 하이라이트를 쓰고 눈과 볼을 짧게 묶는 SD 구성이 유지된다. 측면 윗머리 반사의 부드러움은 명암·재질 항목에 따로 기록했다.",
+      "evidence": [
+        "style",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "eab238ea075b2e9e3fd04dc11cac506e748286c5ca6fcdc0af1d7aa87852d153",
+        "aa1e6fb8cae1806c543a82da1019f1a43f1f63c4baf544d4665b0769539f5665",
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa"
+      ]
+    },
+    {
+      "id": "anatomical-head",
+      "status": "caution",
+      "note": "고정 얼굴창에서 두 측면의 짙은 둥근 윗머리가 정면과 가까워지고, 독립 머리 박스 윗선은 정/좌/우 y123/123/125로 가깝다. 한편 가려진 두개골의 옆 깊이는 수동 추정이고 얼굴 박스 102/92/91px가 캐스트 기준보다 짧아 실제 두개부 일치의 완전 승인을 유보한다.",
+      "method": "fixed-scale-visual-plus-landmarks",
+      "detectorInterpretation": "얼굴 검출 사각형은 눈과 턱이 드러나는 정도 및 앞머리 가림에 민감하다. 정/좌/우 얼굴 박스 높이 102/92/91과 윗선 +15/+16px, 정면-측면 CCIP 0.039694/0.038537을 보존한다. 검출 머리 윗선은 y123/123/125, 수동 두개 타원은 정면 159×151·측면 145×150인데 상단 두피는 머리카락 아래로 가려져 실제 해부 크기를 단정할 수 없다.",
+      "evidence": [
+        "head",
+        "measurements",
+        "cast",
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41",
+        "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41",
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5",
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa",
+        "295f21dfdf59b42494d009aaa45ff4c759126f56080ff8a7dd4998c95a3e0f15"
+      ]
+    },
+    {
+      "id": "face-shape-expression",
+      "status": "caution",
+      "note": "정면의 약간 기운 눈매와 측면의 보라색 동공 하나, 낮게 다문 입은 같은 인물로 읽힌다. 측면에서 앞머리가 이마·반대 눈을 많이 덮는다. 보이는 동공은 정면 중점보다 8px, 피부 턱은 4px 낮으며 얼굴 검출 윗선 차이는 +15/+16px로 남았다.",
+      "evidence": [
+        "head",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41",
+        "eab238ea075b2e9e3fd04dc11cac506e748286c5ca6fcdc0af1d7aa87852d153"
+      ]
+    },
+    {
+      "id": "directional-registration",
+      "status": "pass",
+      "note": "네 방향의 턱·어깨·잠옷 허리·발을 같은 바닥에서 비교했다. 어깨 y329–331, 골반 y402, 등록 발 y480이고 독립 발끝 추정은 y484·484·484·485다. 손에 안긴 곰과 코의 진행 방향도 각 프로필에 맞는다.",
+      "evidence": [
+        "four-views",
+        "measurements"
+      ],
+      "viewedScreenshotHashes": [
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5",
+        "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41",
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5"
+      ]
+    },
+    {
+      "id": "body-proportions",
+      "status": "pass",
+      "note": "정면과 양측 모두 짧은 몸통, 주름진 긴 바지, 짧은 맨발이 같은 작은 키군 안에 들어간다. 턱 아래/추정 머리는 정면 1.10, 양측 1.08이다. 곰에 가려진 관절의 흔들림과 옆모습에서 좁아지는 몸통을 감안했다.",
+      "evidence": [
+        "measurements",
+        "four-views",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41",
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5",
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5",
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa"
+      ]
+    },
+    {
+      "id": "equipment-handedness",
+      "status": "pass",
+      "note": "정면에서 양손이 곰의 허리에 닿는다. 좌·우에서 곰의 주둥이가 인물과 함께 반대 방향을 보며 가까운 팔이 인형 뒤에서 앞으로 감긴다. 후면에서는 몸통과 후드가 곰을 가린다.",
+      "evidence": [
+        "four-views",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5",
+        "eab238ea075b2e9e3fd04dc11cac506e748286c5ca6fcdc0af1d7aa87852d153"
+      ]
+    },
+    {
+      "id": "silhouette-perceived-size",
+      "status": "pass",
+      "note": "정면과 양측의 잔가닥, 그 아래 넓게 이어지는 검보라 윗선, 턱을 따로 보았다. 두 측면의 둥근 머리 덩어리가 함께 올라가 64·96px 회전에서 예전처럼 머리만 갑자기 작아지지 않는다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa",
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa"
+      ]
+    },
+    {
+      "id": "outline-weight",
+      "status": "pass",
+      "note": "공식 32px 턱·소매·맨발 표본을 4배로 보았다. 턱 아래와 곰의 경계, 소매 바깥과 발목에는 짙은 유색 선이 남고 옷주름과 피부 안쪽 선은 가늘다. 작은 그림에서 외곽에 새로운 밝은 테가 생기지 않는다.",
+      "evidence": [
+        "line-samples",
+        "sizes",
+        "style"
+      ],
+      "viewedScreenshotHashes": [
+        "aa1e6fb8cae1806c543a82da1019f1a43f1f63c4baf544d4665b0769539f5665",
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa",
+        "eab238ea075b2e9e3fd04dc11cac506e748286c5ca6fcdc0af1d7aa87852d153",
+        "aa1e6fb8cae1806c543a82da1019f1a43f1f63c4baf544d4665b0769539f5665"
+      ]
+    },
+    {
+      "id": "shading-material",
+      "status": "caution",
+      "note": "별 잠옷과 곰의 부드러운 갈색, 피부와 보라색 머리의 재질 구분은 유지된다. 확대 시 양측 새 윗머리의 라벤더 광택은 정면·후면의 짧고 날카로운 반사보다 넓고 연속적으로 번진다.",
+      "evidence": [
+        "cast",
+        "style",
+        "line-samples"
+      ],
+      "viewedScreenshotHashes": [
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa",
+        "eab238ea075b2e9e3fd04dc11cac506e748286c5ca6fcdc0af1d7aa87852d153",
+        "aa1e6fb8cae1806c543a82da1019f1a43f1f63c4baf544d4665b0769539f5665",
+        "aa1e6fb8cae1806c543a82da1019f1a43f1f63c4baf544d4665b0769539f5665"
+      ]
+    },
+    {
+      "id": "cast-consistency",
+      "status": "pass",
+      "note": "엔트로피·미라클라바·하모니어스와 같은 셀에 두었다. 팬텀의 머리는 어두워 가장 묵직하게 읽히지만, 작은 맨발과 둥근 볼·짧은 몸통·가슴에 모은 손이 같은 작은 체형군의 서 있는 인상으로 이어진다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa",
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa"
+      ]
+    },
+    {
+      "id": "game-size-readability",
+      "status": "pass",
+      "note": "64px와 96px의 밝은 바닥·어두운 바닥에서 네 방향을 모두 확인했다. 64px에서도 양옆 시선과 몸 앞 갈색 곰, 뒤의 라벤더 후드를 구분할 수 있고, 96px에서는 앞머리의 한 가닥과 조밀한 윗호가 따로 읽힌다.",
+      "evidence": [
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa"
+      ]
+    },
+    {
+      "id": "portrait-alignment",
+      "status": "caution",
+      "note": "96px 초상에서 눈·코·볼과 곰의 얼굴은 중앙에 읽힌다. 사후 D가 만든 250px 크롭은 y116에서 시작하고 가장 높은 정면 잔가닥은 y113부터 나타난다. 위 3개 스캔라인의 알파32 이상 65픽셀을 잘라 상단 여백에는 주의를 남긴다.",
+      "evidence": [
+        "portrait",
+        "head"
+      ],
+      "viewedScreenshotHashes": [
+        "471a3f5a6f6c64272b6b80ea167385182c2eb3f47c7a4b6d7612af93acc21a7e",
+        "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41"
+      ]
+    },
+    {
+      "id": "seams-contact",
+      "status": "pass",
+      "note": "확대 비교에서 윗머리와 앞머리 사이에 최초 직접 합성의 수평 절단선이 보이지 않는다. 귀와 턱, 후드의 목 접점, 곰을 감싼 손과 얼굴의 가림을 앞·좌·우에서 따져 보았고, 작은 크기에서도 떠 보이는 부분은 찾지 못했다.",
+      "evidence": [
+        "four-views",
+        "head",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5",
+        "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41",
+        "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+        "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa"
+      ]
+    },
+    {
+      "id": "independent-detector",
+      "status": "pass",
+      "note": "현재 아틀라스와 검사 코드·패키지가 일치하는 실제 imgutils/ONNX 측정 및 원시 경고를 연결했습니다. 이 통과는 실행 검증이며 얼굴 크기 합격을 뜻하지 않습니다.",
+      "evidence": [
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "295f21dfdf59b42494d009aaa45ff4c759126f56080ff8a7dd4998c95a3e0f15"
+      ]
+    },
+    {
+      "id": "source-integrity",
+      "status": "caution",
+      "note": "과거 생성 기록을 가져온 감사본입니다. 당시 사전 검수 절차가 실행됐다고 소급 인증하지 않습니다.",
+      "evidence": [
+        "provenance"
+      ],
+      "viewedScreenshotHashes": []
+    },
+    {
+      "id": "package-integrity",
+      "status": "pass",
+      "note": "전신 공통 등방 배율·알파32 잘림0·방향 추출·보이는 WebP 픽셀 손실0을 코드로 확인했습니다.",
+      "evidence": [
+        "package"
+      ],
+      "viewedScreenshotHashes": []
+    }
+  ],
+  "scope": {
+    "mode": "retrospective review of D repack",
+    "reviewedSourceSHA256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+    "reviewedPackedSHA256": "282191296b4e79db247ba8d24045cca27cc553e88d9f88b7f23781acb040b3bd",
+    "measuredProtectedCandidateFile": "installed-independent.json",
+    "beforeCandidateComparison": "candidate-retro-CD.json",
+    "priorAB": "The first protected generation was a separate raw candidate. The final registered painting was imported as a retrospective audit. Do not transfer D decisions to installed bytes.",
+    "repackedVsProtectedSource": {
+      "outsideAllowedMaskRGBAChanged": 9233,
+      "clippingAlpha32": 0,
+      "scale": 1,
+      "viewShifts": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "portraitCaution": {
+      "cropTop": 116,
+      "firstAlpha32Y": 113,
+      "cutRows": 3,
+      "countAlpha32Above": 65
+    },
+    "detectorFlags": [
+      "front face height 102px is outside cast median 111.5px ±8%",
+      "sideA/front face-height ratio 0.9020 outside 0.92-1.08",
+      "sideB/front face-height ratio 0.8922 outside 0.92-1.08",
+      "sideA face top is +15px vs front",
+      "sideB face top is +16px vs front",
+      "CCIP front-sideA 0.040 > cast p80 0.036",
+      "CCIP front-sideB 0.039 > cast p80 0.036"
+    ],
+    "hardware": {
+      "python": "3.12.10",
+      "environmentFingerprint": "601ca0a21c55ef0c7d1fb39b97b20daf5ff333bb12ba7daadc2f27926c9fbcb6",
+      "packages": {
+        "dghs-imgutils": "0.19.0",
+        "onnxruntime": "1.31.1",
+        "numpy": "1.26.4",
+        "scikit-image": "0.26.0",
+        "pillow": "13.0.0"
+      },
+      "HF_HUB_OFFLINE": "1",
+      "chrome": "157.0.8103.79",
+      "browserExecutable": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+      "runnerChange": "No code changes; Playwright launched with local executable path via Node preload.",
+      "mobileEvidence": "390px desktop Chromium viewport; no physical device checked."
+    },
+    "captureHashes": {
+      "originals": "eab238ea075b2e9e3fd04dc11cac506e748286c5ca6fcdc0af1d7aa87852d153",
+      "head": "14a49a98f666c77145339e1a0bd808fecf44c0cc90c5af38f9759e5e08cf6a41",
+      "body": "7334fe41cc20393af5daef0339cc50d2754cefb14b1b937d2e7e82b3a40e0cc5",
+      "sizes-64": "8bd9f21aaf910a1202511856c53b8693ae0437ae85d578a21f110b6b84b98156",
+      "sizes-96": "c9bb78c60ad3c8439b99528a9349e8a984acdb80ada63b0c02656396ecbccefa",
+      "lines": "aa1e6fb8cae1806c543a82da1019f1a43f1f63c4baf544d4665b0769539f5665",
+      "portrait": "471a3f5a6f6c64272b6b80ea167385182c2eb3f47c7a4b6d7612af93acc21a7e",
+      "audit": "295f21dfdf59b42494d009aaa45ff4c759126f56080ff8a7dd4998c95a3e0f15"
+    }
+  }
+}

@@ -289,7 +289,15 @@
         "before": 7,
         "after": 7
       },
-      "formalGExport": false
+      "formalGExport": false,
+      "packedFormalReview": {
+        "atlasSha256": "282191296b4e79db247ba8d24045cca27cc553e88d9f88b7f23781acb040b3bd",
+        "counts": {
+          "pass": 12,
+          "caution": 5
+        },
+        "decisionFile": "phantom/formal-review.json"
+      }
     },
     "lightning_sage": {
       "masterSHA256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
@@ -664,7 +672,15 @@
         "before": 5,
         "after": 2
       },
-      "formalGExport": false
+      "formalGExport": false,
+      "packedFormalReview": {
+        "atlasSha256": "a4091d9aec70c19cddd6eefd6587033a2ab865b11833487f7427bdf74893ab8a",
+        "counts": {
+          "pass": 11,
+          "caution": 6
+        },
+        "decisionFile": "lightning_sage/formal-review.json"
+      }
     },
     "time_magician": {
       "masterSHA256": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
@@ -966,7 +982,15 @@
         "before": 7,
         "after": 7
       },
-      "formalGExport": false
+      "formalGExport": false,
+      "packedFormalReview": {
+        "atlasSha256": "46aa7f256a867e58c433908b62ed0592fc21f3b38df06045af2a09afd85facd2",
+        "counts": {
+          "pass": 15,
+          "caution": 2
+        },
+        "decisionFile": "time_magician/formal-review.json"
+      }
     }
   }
 }

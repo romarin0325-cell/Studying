@@ -24,7 +24,7 @@
 
 각 캐릭터 폴더의 `generation.json`에 실제 ImageGen 호출 ID, 입력 순서와 역할, 프롬프트, 원출력 해시를 보관했다. 각 `independent.json`에는 고정 캐스트 분포와 같은 검사기로 교정 전후의 정확한 PNG를 검사한 결과가 있다. 보이는 얼굴 검출창, 양측의 유사도, 가려진 두개골 추정, 칠해진 머리의 실효 높이는 서로 다른 관측값이다.
 
-- 팬텀은 두 번 생성한 윗머리를 마스크 안에 합성했다. 원출력부터 최종 PNG까지 재현했다. 사후 C·D 패킹에서 공통 알파 정리가 보호 영역 9,233픽셀에 영향을 줘 보호 합성본을 골랐다. 최종 독립 검사에도 얼굴창 크기·위치와 캐릭터 유사도 경고 7개가 남았다. [보호·재현](phantom/verification.json) · [패킹 대조](phantom/packing-audit.json)
+- 팬텀은 두 번 생성한 윗머리를 마스크 안에 합성했다. 원출력부터 최종 PNG까지 재현했다. 사후 C·D 패킹에서 공통 알파 정리가 보호 영역 9,233픽셀에 영향을 줘 보호 합성본을 골랐다. 최종 독립 검사에도 얼굴창 크기·위치와 캐릭터 유사도 경고 7개가 남았다. 사후 D의 F는 12개 통과, 5개 주의였다. 이 D가 만든 초상은 잔가닥 상단 3줄을 자르며 게임은 이전 정면 초상을 그대로 쓴다. [보호·재현](phantom/verification.json) · [패킹 대조](phantom/packing-audit.json) · [F 판정](phantom/formal-review.json)
 - 번개의현자는 두 옆얼굴에서 턱과 목깃이 만나는 짧은 구간을 맞춘 뒤 확대해 이중선이 사라진 것을 확인했다. 설치 원본의 독립 경고는 5개에서 2개로 줄었다. 오른쪽 얼굴 검출창 비율과 정·우 유사도 경고가 남았다. 공통 배율 0.96875를 적용한 D 파생본의 F는 11개 통과, 6개 주의였다. [정합](lightning_sage/registration.json) · [안경·동공·창 보호](lightning_sage/protected-features.json) · [자동 검출](lightning_sage/independent.json) · [F 판정](lightning_sage/formal-review.json)
 - 시간의마술사는 새 시안 세 장 중 세 번째를 골랐다. 공통 패킹 파생본의 F는 15개 통과, 2개 주의였다. 얼굴 판독과 방향별 등록을 주의로 남겼다. 실제 설치 입력은 승인된 왼쪽의 알파까지 보존하는 PNG이고, 이 파일에도 독립 검사를 별도로 실행했다. [F 판정과 양쪽 해시](time_magician/formal-review.json) · [보호 영역](time_magician/pixel-proof.json)
 
