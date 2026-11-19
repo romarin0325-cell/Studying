@@ -1,0 +1,972 @@
+{
+  "baseCommit": "3379bc5e9a5edf40d87a00e3be8ca207ca866185",
+  "cell": 512,
+  "viewOrder": [
+    "front",
+    "back",
+    "left",
+    "right"
+  ],
+  "actors": {
+    "phantom": {
+      "masterSHA256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+      "core": {
+        "sourceHash": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+        "views": [
+          {
+            "crown": [
+              249,
+              138
+            ],
+            "chin": [
+              235,
+              314
+            ],
+            "span": [
+              146,
+              349
+            ],
+            "tip": [
+              243,
+              114
+            ],
+            "kind": "hair",
+            "u": [
+              5,
+              3
+            ]
+          },
+          null,
+          {
+            "crown": [
+              269,
+              138
+            ],
+            "chin": [
+              219,
+              318
+            ],
+            "span": [
+              160,
+              357
+            ],
+            "tip": [
+              242,
+              116
+            ],
+            "kind": "hair",
+            "u": [
+              5,
+              3
+            ]
+          },
+          {
+            "crown": [
+              244,
+              139
+            ],
+            "chin": [
+              281,
+              318
+            ],
+            "span": [
+              156,
+              349
+            ],
+            "tip": [
+              266,
+              118
+            ],
+            "kind": "hair",
+            "u": [
+              5,
+              3
+            ]
+          }
+        ],
+        "decision": "keep",
+        "side": "양 측면",
+        "note": "두 측면의 짙은 윗머리 호가 정면 높이로 올라왔다. 가는 한 가닥은 윗호와 떨어져 있다. 동공·볼·턱은 원래 위치에 남아 한쪽 눈과 곰 인형이 자연스럽게 이어진다. 새 윗부분은 표면 광택이 기존 정면보다 조금 부드럽다.",
+        "action": "교정한 양 측면을 채택했습니다. 가닥과 주머리를 별도로 표시하면 정면선까지 회복된 부분을 볼 수 있습니다."
+      },
+      "optics": {
+        "sourceHash": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+        "views": [
+          {
+            "box": [
+              194,
+              220,
+              308,
+              314
+            ],
+            "eye": [
+              251,
+              272
+            ],
+            "u": 6,
+            "note": "후보 원본에서 노출 창과 동공을 확인했고 동일 사각형의 RGBA가 편집 전과 전부 일치한다."
+          },
+          null,
+          {
+            "box": [
+              196,
+              240,
+              274,
+              318
+            ],
+            "eye": [
+              222,
+              280
+            ],
+            "u": 6,
+            "note": "후보 원본에서 노출 창과 동공을 확인했고 동일 사각형의 RGBA가 편집 전과 전부 일치한다."
+          },
+          {
+            "box": [
+              243,
+              242,
+              315,
+              318
+            ],
+            "eye": [
+              292,
+              280
+            ],
+            "u": 6,
+            "note": "후보 원본에서 노출 창과 동공을 확인했고 동일 사각형의 RGBA가 편집 전과 전부 일치한다."
+          }
+        ]
+      },
+      "anatomy": {
+        "coordinateSpace": "unwarped-512-cell",
+        "rawSha256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+        "measuredBy": "Codex, four fixed-grid candidate images at native scale; outlines observed; hidden skull and joints manually inferred.",
+        "uncertainty": "Painted crown ±5 px and visible jaw ±3 px. Skull boundary inferred under hair ±12 px front, ±18 px back, ±17 px profiles. Front/back and facial windows are pixel-locked to the verified input. Profile bare-skull, covered back jaw, clothed shoulder/hip centers, and foot anchor cannot be anatomically confirmed; shoulder ±7, hip ±10, painted contact vs registration anchor ±4 px.",
+        "exclusions": "hair-hats-ears-horns-ornaments-equipment",
+        "views": [
+          {
+            "skullEllipse": [
+              246,
+              237,
+              159,
+              151,
+              -7
+            ],
+            "chin": [
+              235,
+              314
+            ],
+            "shoulders": [
+              251,
+              331
+            ],
+            "hips": [
+              254,
+              402
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "outerSleeve": [
+              193,
+              353
+            ],
+            "outerFoot": [
+              214,
+              466
+            ],
+            "eyeLeft": [
+              220,
+              279
+            ],
+            "eyeRight": [
+              282,
+              265
+            ]
+          },
+          {
+            "skullEllipse": [
+              261,
+              236,
+              159,
+              151,
+              0
+            ],
+            "chin": [
+              261,
+              311
+            ],
+            "shoulders": [
+              260,
+              329
+            ],
+            "hips": [
+              260,
+              402
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          },
+          {
+            "skullEllipse": [
+              255,
+              240,
+              145,
+              150,
+              0
+            ],
+            "chin": [
+              219,
+              318
+            ],
+            "shoulders": [
+              258,
+              331
+            ],
+            "hips": [
+              263,
+              402
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "eyeLeft": [
+              222,
+              280
+            ]
+          },
+          {
+            "skullEllipse": [
+              253,
+              240,
+              145,
+              150,
+              0
+            ],
+            "chin": [
+              281,
+              318
+            ],
+            "shoulders": [
+              249,
+              331
+            ],
+            "hips": [
+              248,
+              402
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "eyeRight": [
+              292,
+              280
+            ]
+          }
+        ]
+      },
+      "anatomyNote": "양 측면의 두개골은 머리카락 아래 추정치(±17px)입니다. 칠해진 윗머리는 별도로 찍었습니다.",
+      "protectedText": "정면·후면과 측면의 눈, 턱, 곰인형, 몸을 보존했습니다. 정면에 비해 새 윗머리의 반사광이 조금 부드럽습니다.",
+      "bodyUncertainty": [
+        null,
+        null,
+        {
+          "skull": 17,
+          "height": 21
+        },
+        {
+          "skull": 17,
+          "height": 21
+        }
+      ],
+      "independentFile": "phantom/independent.json",
+      "automaticFlagCount": {
+        "before": 7,
+        "after": 7
+      },
+      "formalGExport": false
+    },
+    "lightning_sage": {
+      "masterSHA256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+      "core": {
+        "sourceHash": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+        "views": [
+          {
+            "crown": [
+              230,
+              131
+            ],
+            "chin": [
+              249,
+              312
+            ],
+            "span": [
+              148,
+              349
+            ],
+            "tip": [
+              226,
+              104
+            ],
+            "kind": "hair",
+            "eye": [
+              251,
+              268
+            ],
+            "u": [
+              4,
+              3
+            ],
+            "note": "보존 정면. 머리 본체의 둥근 정점과 가운데 턱선을 선택했다."
+          },
+          null,
+          {
+            "crown": [
+              261,
+              137
+            ],
+            "chin": [
+              215,
+              305
+            ],
+            "span": [
+              169,
+              358
+            ],
+            "tip": [
+              229,
+              115
+            ],
+            "kind": "hair",
+            "eye": [
+              216,
+              260
+            ],
+            "u": [
+              3,
+              2
+            ],
+            "note": "정수리의 넓은 호는 솟은 갈래 뒤로 136~138px에서 이어진다. 안경 밑 턱은 305px, 원래 목깃 앞쪽에서 연결된다."
+          },
+          {
+            "crown": [
+              243,
+              139
+            ],
+            "chin": [
+              290,
+              302
+            ],
+            "span": [
+              143,
+              332
+            ],
+            "tip": [
+              270,
+              116
+            ],
+            "kind": "hair",
+            "eye": [
+              290,
+              258
+            ],
+            "u": [
+              3,
+              2
+            ],
+            "note": "흰 머리 본체는 138~139px에서 이어진다. 기존 얇은 안경 중앙을 고정하고 아래턱과 목깃 접점을 별도로 확인했다."
+          }
+        ],
+        "decision": "review",
+        "side": "양 측면",
+        "note": "정면 실효 머리 181px, 좌 168px, 우 163px. 원본 좌 156·우 153px에 비해 회복되었으나 우측이 정면보다 18px 작게 읽힌다. 좌우 창·안경 및 양 목깃 접점 보존을 우선한 국소 후보.",
+        "action": "교정본을 적용했습니다. 오른쪽에는 정면과 볼륨 차이가 남아, 실효 머리 판정을 추가 대조로 두었습니다."
+      },
+      "optics": {
+        "sourceHash": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+        "views": [
+          {
+            "box": [
+              192,
+              205,
+              310,
+              312
+            ],
+            "eye": [
+              251,
+              268
+            ],
+            "u": 6,
+            "note": "양 눈동자 중점. 앞머리 아래 이어진 이마와 양 볼, 턱까지; 귀와 목은 제외."
+          },
+          null,
+          {
+            "box": [
+              191,
+              207,
+              272,
+              305
+            ],
+            "eye": [
+              216,
+              260
+            ],
+            "u": 5,
+            "note": "얇은 안경 아래 보이는 왼쪽 옆얼굴 및 턱. 귀 안쪽 피부는 제외."
+          },
+          {
+            "box": [
+              234,
+              208,
+              309,
+              302
+            ],
+            "eye": [
+              290,
+              258
+            ],
+            "u": 5,
+            "note": "단일 동공, 미간의 이마와 코 앞끝·볼·턱을 포함. 목깃 쪽에서 귀·목 제외."
+          }
+        ]
+      },
+      "anatomy": {
+        "id": "lightning_sage",
+        "rawSha256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+        "sourceSha256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+        "cell": 512,
+        "order": [
+          "front",
+          "back",
+          "left",
+          "right"
+        ],
+        "coordinateSpace": "unwarped-512-cell",
+        "measuredBy": "최종 1024 RGBA 원본을 고정 발선에서 독립 육안 판독. 가려진 두개골·견갑·골반은 외형과 목·복식 연결로 추정했고, 밑창은 최하단 알파32 단면의 각 발 지지 범위로 교차검사했다.",
+        "uncertainty": "단위 512셀 px. 두개골 폭·높이 보통 ±10~14, 뒷머리 ±16. 드러난 턱·동공 ±2~4, 허리/어깨 옷의 가림 ±8~15, 밑창 중심 x ±4~7·y ±2. gameAnchor는 원래 포장 좌표.",
+        "exclusions": "hair-hats-ears-horns-ornaments-equipment",
+        "ellipseFormat": "centerX,centerY,diameterWidth,diameterHeight,angleDegrees; inferred with the physical lower jaw listed separately",
+        "views": [
+          {
+            "skullEllipse": [
+              251,
+              232,
+              162,
+              158,
+              0
+            ],
+            "eyeRight": [
+              220,
+              268
+            ],
+            "eyeLeft": [
+              282,
+              267
+            ],
+            "chin": [
+              249,
+              312
+            ],
+            "shoulders": [
+              251,
+              329
+            ],
+            "hips": [
+              255,
+              385
+            ],
+            "sole": [
+              253,
+              480
+            ],
+            "gameAnchor": [
+              256,
+              480
+            ],
+            "u": {
+              "skull": 12,
+              "shoulders": 9,
+              "hips": 10,
+              "sole": 4
+            },
+            "note": "정면의 두 눈 모두 보인다. 해부학적 오른눈은 화면 왼쪽."
+          },
+          {
+            "skullEllipse": [
+              250,
+              232,
+              162,
+              155,
+              0
+            ],
+            "eyeRight": null,
+            "eyeLeft": null,
+            "chin": [
+              249,
+              309
+            ],
+            "chinVisible": false,
+            "shoulders": [
+              251,
+              332
+            ],
+            "hips": [
+              251,
+              388
+            ],
+            "sole": [
+              248,
+              480
+            ],
+            "gameAnchor": [
+              256,
+              480
+            ],
+            "u": {
+              "skull": 16,
+              "chin": 15,
+              "shoulders": 12,
+              "hips": 15,
+              "sole": 6
+            },
+            "note": "뒤쪽에 피부 턱과 눈이 보이지 않는다. 이 값은 정식 측정기록의 필수 해부 추정에만 쓰고 광학 턱은 null."
+          },
+          {
+            "skullEllipse": [
+              253,
+              229,
+              151,
+              152,
+              0
+            ],
+            "eyeLeft": [
+              216,
+              260
+            ],
+            "eyeRight": null,
+            "chin": [
+              215,
+              305
+            ],
+            "shoulders": [
+              247,
+              328
+            ],
+            "hips": [
+              248,
+              385
+            ],
+            "sole": [
+              253,
+              479
+            ],
+            "gameAnchor": [
+              256,
+              480
+            ],
+            "u": {
+              "skull": 13,
+              "chin": 2,
+              "shoulders": 10,
+              "hips": 10,
+              "sole": 6
+            },
+            "note": "왼쪽을 보는 진측면. 창을 든 해부학적 오른손은 먼 쪽에 있고 보이는 동공 한 개를 기록."
+          },
+          {
+            "skullEllipse": [
+              246,
+              229,
+              151,
+              147,
+              0
+            ],
+            "eyeLeft": null,
+            "eyeRight": [
+              290,
+              258
+            ],
+            "chin": [
+              290,
+              302
+            ],
+            "shoulders": [
+              264,
+              327
+            ],
+            "hips": [
+              264,
+              385
+            ],
+            "sole": [
+              259,
+              479
+            ],
+            "gameAnchor": [
+              256,
+              480
+            ],
+            "u": {
+              "skull": 13,
+              "chin": 2,
+              "shoulders": 10,
+              "hips": 10,
+              "sole": 6
+            },
+            "note": "오른쪽을 보는 진측면. 창 쪽 팔 및 가까운 금색 눈, 안경과 피부 턱까지 분리하여 판독."
+          }
+        ],
+        "backOptical": {
+          "crown": [
+            239,
+            135
+          ],
+          "chin": null,
+          "span": [
+            146,
+            350
+          ],
+          "tip": [
+            250,
+            109
+          ],
+          "kind": "hair",
+          "note": "흰 모발 아래의 피부 턱과 두개골 상단은 가려져 있다. crown은 외형상 조밀한 머리 덩어리 윗면만 표시한다."
+        }
+      },
+      "anatomyNote": "가려진 두개골 폭·높이는 측면에서 약 ±13px입니다. 그림에서 보이는 밑창과 게임 발 고정점을 따로 기록했습니다.",
+      "protectedText": "정면·후면과 양쪽 안경, 동공, 창, 몸을 보존했습니다. 양쪽 아래턱은 목깃에 맞춰 이어 그렸습니다.",
+      "bodyUncertainty": [
+        {
+          "skull": 12,
+          "height": 16
+        },
+        {
+          "skull": 16,
+          "height": 22
+        },
+        {
+          "skull": 13,
+          "height": 19
+        },
+        {
+          "skull": 13,
+          "height": 19
+        }
+      ],
+      "independentFile": "lightning_sage/independent.json",
+      "automaticFlagCount": {
+        "before": 5,
+        "after": 2
+      },
+      "formalGExport": false
+    },
+    "time_magician": {
+      "masterSHA256": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
+      "core": {
+        "sourceHash": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
+        "views": [
+          {
+            "crown": [
+              255,
+              106
+            ],
+            "chin": [
+              240,
+              284
+            ],
+            "span": [
+              138,
+              346
+            ],
+            "tip": [
+              234,
+              81
+            ],
+            "kind": "hair",
+            "eye": [
+              242,
+              239
+            ],
+            "u": [
+              5,
+              3
+            ],
+            "note": "정면은 채택본을 보존했다. 녹색 두 동공의 중점이다. 갈색 둥근 윗선 위의 갈고리 가닥은 별도로 읽었다."
+          },
+          null,
+          {
+            "crown": [
+              246,
+              120
+            ],
+            "chin": [
+              206,
+              284
+            ],
+            "span": [
+              151,
+              328
+            ],
+            "tip": [
+              221,
+              89
+            ],
+            "kind": "hair",
+            "eye": [
+              203,
+              244
+            ],
+            "u": [
+              6,
+              3
+            ],
+            "note": "기존 #672 채택 왼쪽. 볼과 피부 턱 하단은 유지했고 귀 위 뒷머리는 횡폭으로 제외했다."
+          },
+          {
+            "crown": [
+              243,
+              118
+            ],
+            "chin": [
+              290,
+              288
+            ],
+            "span": [
+              150,
+              339
+            ],
+            "tip": [
+              269,
+              88
+            ],
+            "kind": "hair",
+            "eye": [
+              292,
+              248
+            ],
+            "u": [
+              5,
+              3
+            ],
+            "note": "싹 위 갈고리가 아닌 뒤통수에 넓게 이어지는 갈색 윗선의 중앙이다. 가닥 최고점, 보이는 녹색 동공 한 개와 턱은 따로 읽었다."
+          }
+        ],
+        "decision": "review",
+        "side": "오른쪽",
+        "note": "오른쪽 윗머리와 갈고리 가닥을 교정했습니다. 오른쪽은 정면보다 8px, 기존 왼쪽은 14px 작습니다. 오른쪽 눈높이와 좁은 피부창은 기존 그림에서 이어집니다.",
+        "action": "오른쪽 교정본을 적용했습니다. #672의 왼쪽은 그대로 두고, 얼굴창·동공 높이 차이는 추가 대조로 표시합니다."
+      },
+      "optics": {
+        "sourceHash": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
+        "views": [
+          {
+            "box": [
+              189,
+              188,
+              300,
+              284
+            ],
+            "eye": [
+              242,
+              239
+            ],
+            "u": 6,
+            "note": "정면은 채택본을 보존했다. 녹색 두 동공의 중점이다. 갈색 둥근 윗선 위의 갈고리 가닥은 별도로 읽었다."
+          },
+          null,
+          {
+            "box": [
+              183,
+              202,
+              248,
+              284
+            ],
+            "eye": [
+              203,
+              244
+            ],
+            "u": 6,
+            "note": "기존 #672 채택 왼쪽. 볼과 피부 턱 하단은 유지했고 귀 위 뒷머리는 횡폭으로 제외했다."
+          },
+          {
+            "box": [
+              241,
+              206,
+              313,
+              287
+            ],
+            "eye": [
+              292,
+              248
+            ],
+            "u": 6,
+            "note": "싹 위 갈고리가 아닌 뒤통수에 넓게 이어지는 갈색 윗선의 중앙이다. 가닥 최고점, 보이는 녹색 동공 한 개와 턱은 따로 읽었다."
+          }
+        ]
+      },
+      "anatomy": {
+        "rawSha256": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
+        "coordinateSpace": "unwarped-512-cell",
+        "exclusions": "hair-hats-ears-horns-ornaments-equipment",
+        "measuredBy": "Codex, manual inspection of exact lossless 1024 candidate, registered four directions/512 cells; under-hair geometry interpreted independently of the broad hair cap.",
+        "uncertainty": "Visible pupil/chin ~±3–5px; shoulder/hip centers obscured by cape/tunic ~±7–10px. Hidden skull center, width or height ~±13–19px, strongest along the rear profile. The back-facing jaw is wholly inferred. A sole is the shared support-line center between the two feet, not the leftmost shoe pixel.",
+        "notes": "Three unedited cells have exact source pixel identity. Their historical packed skull/sole coordinates and body observations were checked on the current grid for continuity. Front and true left chin represent visible actual skin rather than the center of a fitted ellipse. In newly painted upper-right hair, ignore the discrete curl and hair perimeter for the anatomical ellipsoid, and use pupil, temple, visible cheek, jaw and nape with larger uncertainty. The visual hair-crown assessment is separate.",
+        "protectedReference": "defense/docs/art/time-magician-left-20261109/packing.json",
+        "views": [
+          {
+            "skullEllipse": [
+              255.35,
+              206.65,
+              159.56,
+              150.41,
+              -3
+            ],
+            "chin": [
+              240,
+              284
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "eyeLeft": [
+              213,
+              245
+            ],
+            "eyeRight": [
+              272,
+              233
+            ],
+            "shoulders": [
+              250,
+              320
+            ],
+            "hips": [
+              249,
+              388
+            ],
+            "outerSleeve": [
+              323,
+              358
+            ],
+            "outerFoot": [
+              299,
+              477
+            ]
+          },
+          {
+            "skullEllipse": [
+              260.58,
+              207.96,
+              159.56,
+              150.41,
+              3
+            ],
+            "chin": [
+              260.58,
+              283.16
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "shoulders": [
+              256,
+              320
+            ],
+            "hips": [
+              252,
+              386
+            ]
+          },
+          {
+            "skullEllipse": [
+              249,
+              208,
+              148,
+              148,
+              -2
+            ],
+            "eyeLeft": [
+              201,
+              244
+            ],
+            "chin": [
+              206,
+              284
+            ],
+            "shoulders": [
+              243,
+              315
+            ],
+            "hips": [
+              238,
+              391
+            ],
+            "sole": [
+              256,
+              480
+            ],
+            "outerSleeve": [
+              263,
+              351
+            ],
+            "outerFoot": [
+              218,
+              475
+            ]
+          },
+          {
+            "skullEllipse": [
+              255,
+              212,
+              150,
+              147,
+              0
+            ],
+            "eyeRight": [
+              292,
+              248
+            ],
+            "chin": [
+              290,
+              288
+            ],
+            "shoulders": [
+              250,
+              317
+            ],
+            "hips": [
+              253,
+              385
+            ],
+            "sole": [
+              256,
+              480
+            ]
+          }
+        ]
+      },
+      "anatomyNote": "가려진 두개골은 약 ±13~19px의 추정치입니다. 얼굴·동공·턱과 넓은 머리 윗선을 나누어 읽었습니다.",
+      "protectedText": "기존 #672의 왼쪽과 정면·후면, 오른쪽 얼굴·동공·턱·지팡이를 보존했습니다. 오른쪽 동공은 정면보다 9px 아래입니다.",
+      "bodyUncertainty": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "independentFile": "time_magician/independent.json",
+      "automaticFlagCount": {
+        "before": 7,
+        "after": 7
+      },
+      "formalGExport": false
+    }
+  }
+}

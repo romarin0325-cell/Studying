@@ -1,0 +1,45 @@
+{
+  "character": "time_magician",
+  "baseline": "defense/assets/cast-selected-20261109/time_magician.png",
+  "baselineMasterSHA256": "dfe8e55e2f12c5bd433d4a00088c601dfa8dca3b9247092e5931f18f796dbf4d",
+  "selectedMasterSHA256": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
+  "jobs": [
+    {
+      "tool": "image_gen",
+      "toolOutput": "exec-923699bb-f250-4c2b-bd89-b27c25abd755.png",
+      "nativeFile": "native.png",
+      "nativeSha256": "75d92508c65e36c1b5f6a75e32e6b0670fd1f20611d052f20156ab6842b4fef6",
+      "prompt": "Color-finish an inbetween animation frame. IMAGE 1 is the TARGET 1024 square illustration atlas in progress. Its bottom-right boy has an unpainted flat brown placeholder for the entire upper hair cap; that flat shape ALREADY has the correct upper silhouette and lifted cowlick. Paint the missing chestnut locks *INSIDE THE ENTIRE FLAT SHAPE*, respecting its pixel footprint, top and width. Never substitute the SHORTER silhouette in Image 3. Use Image 3, the original clean 2x2 atlas, solely to pick up the actual character shade, finishing style, layer flow and curl, and to keep his lower fringe exactly aligned with its original side locks. Image 2 gives the established line and cel technique. Image 4 is a white-on-black edit window, restricting changes to that cap. Reconstruct the layered chestnut-brown strands, a clean dark outer line and warm broken tapered cel highlights matching the ORIGINAL brown front hair, not blue. The top of the solid dome in the edited BOTTOM RIGHT 512px cell is y107 (absolute atlas y619) and the short curved cowlick extends to y88; old Image 3 is y129/y110. Follow the wide arch, not only the cowlick. The outline touches the UNCHANGED two bottom hair spike junctions at y204-206 (atlas 716–718). The hair part, temple strand, side locks, eye, face, body, staff, equipment in the right hand, feet and full other three views stay at the same x,y pixels. No uniform rescaling, no position shift. True RIGHT-looking boy with one green eye. Return the same full 2x2 atlas, original layout and transparent background no written marks, hair painted to completion. Keep fixed feet and do not draw a ground shadow.\nAll cumulative post-generation checks remain required: original-design, frozen-style, anatomical-head, face-shape-expression, directional-registration, body-proportions, equipment-handedness, silhouette-perceived-size, outline-weight, shading-material, cast-consistency, game-size-readability, portrait-alignment, seams-contact, independent-detector, source-integrity, package-integrity.",
+      "promptSha256": "35b196550d97e2b3b909387a8bfbbcc4f649de345888805e51d6d5e6f3fa704e",
+      "referenceOrder": [
+        {
+          "order": 1,
+          "role": "target silhouette control: existing art with a flat desaturated maroon unpainted block filling the new right crown shape. Use its silhouette, not its flat rendering.",
+          "file": "inputs/target-silhouette-guide.png",
+          "sha256": "abcde9093018a3fd8c1221923a60582f09124d89445664c4cdeadead4fb91e8f"
+        },
+        {
+          "order": 2,
+          "role": "frozen Siren line and materials source only",
+          "file": "defense/docs/art/sol-cast-v2/structure-masters/style-siren.webp",
+          "sha256": "7d11e8c60d2b51394a8f614f8fd989058998d47c7b9f80bd433aee00a2efff7f"
+        },
+        {
+          "order": 3,
+          "role": "ref:edit-base",
+          "file": "defense/assets/cast-selected-20261109/time_magician.png",
+          "sha256": "dfe8e55e2f12c5bd433d4a00088c601dfa8dca3b9247092e5931f18f796dbf4d"
+        },
+        {
+          "order": 4,
+          "role": "ref:edit-mask",
+          "file": "feather-mask.png",
+          "sha256": "23ab5a9fa8531ac84e095532d4641074776e745ec7d3c58e62c51e6200d8b39b"
+        }
+      ],
+      "originalJobFileSHA256": "58c638d6d90ac437ca227bbca122c80359c2dd85804cb22081711be14983b611",
+      "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+      "modelReported": null
+    }
+  ]
+}

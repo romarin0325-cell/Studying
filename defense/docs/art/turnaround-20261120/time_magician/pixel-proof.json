@@ -1,0 +1,53 @@
+{
+  "sourceSha256": "dfe8e55e2f12c5bd433d4a00088c601dfa8dca3b9247092e5931f18f796dbf4d",
+  "candidateSha256": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
+  "nativeSha256": "75d92508c65e36c1b5f6a75e32e6b0670fd1f20611d052f20156ab6842b4fef6",
+  "allowedBinaryMaskSha256": "9f01172a2dfbe5a11f5feb32379b000d469221c255434a16b2fcbfecf6c0cdeb",
+  "featherMaskSha256": "23ab5a9fa8531ac84e095532d4641074776e745ec7d3c58e62c51e6200d8b39b",
+  "inside": 15397,
+  "outside": 0,
+  "changedBoundsExclusive": [
+    638,
+    591,
+    873,
+    719
+  ],
+  "byRegion": {
+    "front": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    },
+    "back": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    },
+    "left": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    },
+    "right": {
+      "rgbaChanged": 15397,
+      "visibleChanged": 15397
+    },
+    "rightFace": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    },
+    "rightEye": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    },
+    "rightChin": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    },
+    "rightFullStaffAndGrippingHand": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    },
+    "rightBelowCollar": {
+      "rgbaChanged": 0,
+      "visibleChanged": 0
+    }
+  }
+}

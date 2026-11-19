@@ -1,0 +1,45 @@
+{
+  "sourceHash": "6472dd601a8bc011f245de4534e373800bc055014e978355467c860d790b6ee8",
+  "nativeHash": "f45408395b4b687ece127474751f1d7b66603e1006883140e0c23e5d5b14f3ba",
+  "nativeSize": 1254,
+  "registeredCanvas": 1024,
+  "crownTranslationsNativeToBase": [
+    [
+      -6,
+      14
+    ],
+    [
+      5,
+      14
+    ]
+  ],
+  "jawTranslationsNativeToBase": [
+    [
+      0,
+      5
+    ],
+    [
+      -1,
+      5
+    ]
+  ],
+  "method": "Isotropic native atlas normalization, then integer translation of two disconnected patches per side. Low-gradient hair seams and cheek coverage stay in the frozen aperture. A 23-pixel wide contact interval toward the existing collar co-registers just the two translucent jaw outlines by their sampled lower alpha edge before mixing. No skull, face or whole-view rescaling. Ocular band, upper two views, hands, cloak and feet are locked.",
+  "contactIntervals": {
+    "leftFaceX": [
+      210,
+      233
+    ],
+    "rightFaceX": [
+      273,
+      296
+    ],
+    "originalRightCoordinateReflectedAround": 512
+  },
+  "originalSource": "defense/assets/cast-v2/lightning_sage.png",
+  "preMaskSha256": "2dba086f9424e1d164587a07a72ce364f3fb50fae17257400f5882f77a0d0c64",
+  "registeredNativeSha256": "c377b4be12815f3a15e8900d35df0b50beb521cedded8e2a0981db7a6b6920a8",
+  "weightedMaskSha256": "bdef8b3d3ee729ccdb51b15d1055b3d0a629ae77374951b9dda59b7677de8c13",
+  "candidateSha256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+  "changedPixels": 21964,
+  "changedOutsideFrozenMask": 0
+}

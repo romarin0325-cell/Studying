@@ -1,0 +1,251 @@
+{
+  "reviewer": "Codex 시각 판독. 8장 Chrome 캡처의 내용과 실제 크기의 64/96 밝은·어두운 행, 비정규화 원본의 동일 배율 양측 턱 확대를 확인했다.",
+  "bindings": {
+    "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+    "atlasSha256": "a4091d9aec70c19cddd6eefd6587033a2ab865b11833487f7427bdf74893ab8a",
+    "packingSha256": "4c7e4d180c815f6c46195dd736c7f3440d793f5757199fdf70cd3d676770dcd7",
+    "evidenceSha256": "5e68aa941d2275a3c4d31a9ecc605aea18718211b8a1627c5c047722bc0c66bf"
+  },
+  "checks": [
+    {
+      "id": "original-design",
+      "status": "pass",
+      "note": "은발의 솟은 한 갈래, 둥근 안경과 금색 눈, 주름진 번개 망토와 파란 창이 원화 및 허용 편집 이전의 캐릭터와 이어진다.",
+      "evidence": [
+        "originals",
+        "four-views"
+      ],
+      "viewedScreenshotHashes": [
+        "891470877b71ccc792b59085bdb96c6805b900305949f3c7b733e34e7b71ff0f",
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc"
+      ]
+    },
+    {
+      "id": "frozen-style",
+      "status": "pass",
+      "note": "전신과 얼굴 확대에서 은발 하이라이트·어두운 외곽·간결한 면 음영의 관계가 정·후·좌·우에서 이어진다. 번개의 흰 광선과 머리 색도 유지된다.",
+      "evidence": [
+        "style",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "891470877b71ccc792b59085bdb96c6805b900305949f3c7b733e34e7b71ff0f",
+        "33b09e63fb5c1ea6ecda29450e58f12ff5df0509ce9bbfacaf83b783072a2ce6",
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac"
+      ]
+    },
+    {
+      "id": "anatomical-head",
+      "status": "caution",
+      "note": "고정 셀 실효 머리 정/좌/우 181/168/163px. 우측 18px 잔차가 판독오차보다 크며 뼈 타원은 모발 아래 추정이다.",
+      "method": "fixed-scale-visual-plus-landmarks",
+      "detectorInterpretation": "D 파생본 imgutils 우측/정면 얼굴 높이 0.8889, CCIP 0.039 대 참조 p80 0.036. 얼굴 검출과 두개골 판독은 다르며 우측 실효 머리 잔차도 있어서 caution으로 기록했다.",
+      "evidence": [
+        "head",
+        "measurements",
+        "cast",
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "3465ac51251921962bd0e0310793c18b1cc556b4e97313e9abd81d126d7a01ba",
+        "3465ac51251921962bd0e0310793c18b1cc556b4e97313e9abd81d126d7a01ba",
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc",
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac",
+        "3ba6436566c7177f914f61d4d12b05c639ffd28e265513d34ec90bd21a2cc26d"
+      ]
+    },
+    {
+      "id": "face-shape-expression",
+      "status": "pass",
+      "note": "금빛 동공, 안경 원의 위치·코·본래 표정은 원본의 같은 픽셀이다. 두 측면의 아래턱은 목깃 앞에서 각각 하나의 윤곽으로 연결된다.",
+      "evidence": [
+        "head",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "3465ac51251921962bd0e0310793c18b1cc556b4e97313e9abd81d126d7a01ba",
+        "891470877b71ccc792b59085bdb96c6805b900305949f3c7b733e34e7b71ff0f"
+      ]
+    },
+    {
+      "id": "directional-registration",
+      "status": "pass",
+      "note": "정면과 후면 원본이 고정되고 발바닥·창의 손잡이 방향·양 옆얼굴이 64·96px 고정 행에서 읽힌다. 정규화는 네 방향에 동일한 배율을 썼다.",
+      "evidence": [
+        "four-views",
+        "measurements"
+      ],
+      "viewedScreenshotHashes": [
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc",
+        "3465ac51251921962bd0e0310793c18b1cc556b4e97313e9abd81d126d7a01ba",
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc"
+      ]
+    },
+    {
+      "id": "body-proportions",
+      "status": "caution",
+      "note": "망토 안 어깨·골반은 추정이고, 현행 tall 분류의 몸·다리 그림은 보존한 작업이다. 기준표의 정면 턱 아래 200px보다 짧아 이 작업으로 큰 키까지 확정할 수 없다.",
+      "evidence": [
+        "measurements",
+        "four-views",
+        "cast"
+      ],
+      "viewedScreenshotHashes": [
+        "3465ac51251921962bd0e0310793c18b1cc556b4e97313e9abd81d126d7a01ba",
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc",
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc",
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac"
+      ]
+    },
+    {
+      "id": "equipment-handedness",
+      "status": "pass",
+      "note": "창을 쥔 같은 손이 정면 좌측, 후면 우측에 대응하며 양 프로필에서 창날과 손등이 각각 원래 선을 유지한다.",
+      "evidence": [
+        "four-views",
+        "originals"
+      ],
+      "viewedScreenshotHashes": [
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc",
+        "891470877b71ccc792b59085bdb96c6805b900305949f3c7b733e34e7b71ff0f"
+      ]
+    },
+    {
+      "id": "silhouette-perceived-size",
+      "status": "caution",
+      "note": "푸른 망토와 창은 원본 실루엣을 유지하나, 옆얼굴 특히 우측이 정면보다 여전히 작게 읽힌다. 고정 크기 전체 인상에 차이가 남는다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac",
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac"
+      ]
+    },
+    {
+      "id": "outline-weight",
+      "status": "caution",
+      "note": "확대 시 기존 채색선과 은발의 회색 내부선은 이어진다. 공식 시렌 턱 표본은 목 장식도 포함하여 대응 부위의 선 굵기를 정량 합격으로 정하기 어렵다.",
+      "evidence": [
+        "line-samples",
+        "sizes",
+        "style"
+      ],
+      "viewedScreenshotHashes": [
+        "33b09e63fb5c1ea6ecda29450e58f12ff5df0509ce9bbfacaf83b783072a2ce6",
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac",
+        "891470877b71ccc792b59085bdb96c6805b900305949f3c7b733e34e7b71ff0f",
+        "33b09e63fb5c1ea6ecda29450e58f12ff5df0509ce9bbfacaf83b783072a2ce6"
+      ]
+    },
+    {
+      "id": "shading-material",
+      "status": "pass",
+      "note": "은백색 머리의 하이라이트와 푸른 망토의 광선이 서로 구분되고, 정·후와 같은 주광에서 얼굴 볼과 방울 장식의 음영이 읽힌다.",
+      "evidence": [
+        "cast",
+        "style",
+        "line-samples"
+      ],
+      "viewedScreenshotHashes": [
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac",
+        "891470877b71ccc792b59085bdb96c6805b900305949f3c7b733e34e7b71ff0f",
+        "33b09e63fb5c1ea6ecda29450e58f12ff5df0509ce9bbfacaf83b783072a2ce6",
+        "33b09e63fb5c1ea6ecda29450e58f12ff5df0509ce9bbfacaf83b783072a2ce6"
+      ]
+    },
+    {
+      "id": "cast-consistency",
+      "status": "caution",
+      "note": "고정된 시간술사·체리프린스·제크 3장과 맞춰봤다. 3개 이름은 기존 검수 HTML에 undefined로 떠 입력 파일명으로 식별했다. 46명 전체 순위까지 이 자료만으로 확정하지 않는다.",
+      "evidence": [
+        "cast",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac",
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac"
+      ]
+    },
+    {
+      "id": "game-size-readability",
+      "status": "pass",
+      "note": "밝은 바닥과 어두운 바닥에서 원래 크기로 64와 96을 확인했다. 창과 망토, 안경·밝은 머리, 좌우를 식별할 수 있으며 미세한 턱 볼륨 차이는 96에서 더 잘 보인다.",
+      "evidence": [
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac"
+      ]
+    },
+    {
+      "id": "portrait-alignment",
+      "status": "pass",
+      "note": "정면 두 눈 및 턱을 근거로 계산한 250px 자르기에서 양 눈과 안경이 좌우의 중심 근처에 있으며 볼과 양 관자가 박스 안에 보인다.",
+      "evidence": [
+        "portrait",
+        "head"
+      ],
+      "viewedScreenshotHashes": [
+        "5bacb0b2c8ba5935d3809bea018fd21934688a717b3695459eb0a4999285e528",
+        "3465ac51251921962bd0e0310793c18b1cc556b4e97313e9abd81d126d7a01ba"
+      ]
+    },
+    {
+      "id": "seams-contact",
+      "status": "pass",
+      "note": "정합 후 최종 원본에서 양측 턱 경계를 3배로 나란히 보았고, 재배치본 머리와 전신에서도 목깃에 닿는 선과 손·창 손잡이 연결을 확인했다.",
+      "evidence": [
+        "four-views",
+        "head",
+        "sizes"
+      ],
+      "viewedScreenshotHashes": [
+        "d17d23a496170f1d07fbc3c98c9b8983d1ee25a94924c06956e232321168d6dc",
+        "3465ac51251921962bd0e0310793c18b1cc556b4e97313e9abd81d126d7a01ba",
+        "c2b923ff2f2877b47f7c442bd9022611f3c81f3fb0934ec85096d51349d9d9ea",
+        "1266e42c7c347eb873a74483099536d4f15d80861d0b70a522be0a0977a3a3ac"
+      ]
+    },
+    {
+      "id": "independent-detector",
+      "status": "pass",
+      "note": "현재 아틀라스와 검사 코드·패키지가 일치하는 실제 imgutils/ONNX 측정 및 원시 경고를 연결했습니다. 이 통과는 실행 검증이며 얼굴 크기 합격을 뜻하지 않습니다.",
+      "evidence": [
+        "independent-audit"
+      ],
+      "viewedScreenshotHashes": [
+        "3ba6436566c7177f914f61d4d12b05c639ffd28e265513d34ec90bd21a2cc26d"
+      ]
+    },
+    {
+      "id": "source-integrity",
+      "status": "caution",
+      "note": "과거 생성 기록을 가져온 감사본입니다. 당시 사전 검수 절차가 실행됐다고 소급 인증하지 않습니다.",
+      "evidence": [
+        "provenance"
+      ],
+      "viewedScreenshotHashes": []
+    },
+    {
+      "id": "package-integrity",
+      "status": "pass",
+      "note": "전신 공통 등방 배율·알파32 잘림0·방향 추출·보이는 WebP 픽셀 손실0을 코드로 확인했습니다.",
+      "evidence": [
+        "package"
+      ],
+      "viewedScreenshotHashes": []
+    }
+  ]
+}
