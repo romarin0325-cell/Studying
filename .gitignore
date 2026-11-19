@@ -6,6 +6,7 @@ card/test-results/
 card_astra/test-results/
 card_lumen/test-results/
 test-results/card-uis/
+test-results/meridian/
 
 # card_pixel: screenshots from the play test; full-size generated strips stay local (the 1x archive in art/strips-1x is committed)
 card_pixel/slice/tests/shots/

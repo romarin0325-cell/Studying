@@ -10,6 +10,7 @@
 | `card/` | DREAMWEAVER · Card | [card/README](card/README.md) · [doc](card/doc/README.md) | `card/dist/DREAMWEAVER.html` |
 | `card_legacy/` | DREAMWEAVER · Legacy (기존 어두운 화면, 최신 공통 기능) | [README](card_legacy/README.md) | `card_legacy/dist/DREAMWEAVER-Legacy.html` |
 | `card_astra/` | DREAMWEAVER · Astra (Card의 새 화면) | [README](card_astra/README.md) | `card_astra/dist/DREAMWEAVER-Astra.html` |
+| `card_meridian/` | DREAMWEAVER · 새벽 항로 (아스트라 기반) | [README](card_meridian/README.md) | [게임 열기](card_meridian/dist/DREAMWEAVER-Meridian.html) |
 | `card_lumen/` | DREAMWEAVER · Lumen (Card의 밝은 Postcard 화면) | [README](card_lumen/README.md) · [설계](card_lumen/docs/DESIGN.md) | `card_lumen/dist/DREAMWEAVER-Lumen.html` |
 | `card_claude/` | DREAMWEAVER · Claude UI 비교 빌드 | [README](card_claude/README.md) | `card_claude/dist/DREAMWEAVER-Claude.html` |
 | `shooter/` | 별의 잔향 · ASTRAL BLOOM | [README](shooter/README.md) · [doc](shooter/doc/README.md) | `shooter/dist/AstralBloom.html` |
