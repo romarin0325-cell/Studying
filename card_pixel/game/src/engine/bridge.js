@@ -15,9 +15,15 @@
    F  last stand            the last fighter standing gets ATK/MATK x1.5 and crit +25
    G  quirks                one battle-wide rule twist per door (content/quirks.js)
    H  affixes               enemy modifiers that give ordinary fights a readable twist (AFFIXES)
+ Regional events (each has t: 'rule' and the usual snapshot s):
+   ember_carry / twilight_bell  { rule, who: enemy ref, stacks: number actually added }
+   tide_cycle                  { rule, who: enemy ref, kind: 'rest' }; the hit uses the usual act event
+   arena_charge                { rule, who: ally ref, multiplier: 2 } when spent
+ The await event carries region: { bellIn } or { charge, ready }, and the next tide hit in countdown.
  Works in the browser and in Node with the same card core. */
 import { mulberry32 } from './rng.js';
 import { QUIRKS } from '../content/quirks.js';
+import { REGIONS } from '../content/regions.js';
 
 export { QUIRKS } from '../content/quirks.js';
 export { AFFIXES } from '../content/affixes.js';
@@ -26,11 +32,13 @@ export { mulberry32 } from './rng.js';
 const strip = html => String(html).replace(/<[^>]*>/g, '');
 
 const FIELD_POOL = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'valentine', 'arena', 'reaper_realm', 'gale'];
+const DEFENSE_BUFFS = ['guard', 'barrier', 'magic_guard', 'damage_half', 'evasion'];
+const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
 
 /** The attack a fallen fighter hands on: the strongest physical or magic skill, free of MP and at 1.5x power. */
 export const HEIRLOOM_POWER = 1.5;
 export function heirloomSkill(proto) {
-  const attacks = (proto.skills || []).filter(s => s.type === 'phy' || s.type === 'mag');
+  const attacks = (proto.skills || []).filter(isAttack);
   if (!attacks.length) return null;
   const power = s => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 1);
   const best = attacks.slice().sort((x, y) => power(y) - power(x))[0];
@@ -44,6 +52,16 @@ export function heirloomSkill(proto) {
     }
   }
   return skill;
+}
+
+export function heirloomPreview(core, party) {
+  const seats = [party[0] || null, party[1] || null, party[2] || null];
+  return seats.map((from, idx) => {
+    const to = from ? seats.slice(idx + 1).find(Boolean) || null : null;
+    const giver = to && core.GameUtils.getCardById(from);
+    const skill = giver && heirloomSkill(giver);
+    return { from, to, skill: skill ? { name: skill.name, type: skill.type, tier: skill.tier || 1, val: skill.val ?? 1 } : null };
+  });
 }
 
 let active = null;        // battle that is inside a core call right now
@@ -97,18 +115,24 @@ function installHooks(core) {
 
 export function create(core, opts) {
   const original = installHooks(core);
-  const { BattleRuntime, Logic, GameUtils, getMaxMana, buildBattleEnemy } = core;
+  const { BattleRuntime, Logic, GameUtils, StatusRules, SideEffects, getMaxMana, buildBattleEnemy } = core;
   const TM = BattleRuntime.TurnManager;
   const rng = mulberry32(opts.seed == null ? Math.floor(Math.random() * 4294967296) : opts.seed);
   const queue = opts.enemies.slice();
   const rules = Object.assign({ heirloom: true, lastStand: true }, opts.rules || {});
   const quirk = opts.quirk && QUIRKS[opts.quirk] ? opts.quirk : null;
   const Q = quirk ? QUIRKS[quirk] : {};
+  const region = opts.region?.id;
+  const bellTurns = opts.region?.turns ?? REGIONS.twilight_bell.turns;
+  const bellStacks = opts.region?.stacks ?? REGIONS.twilight_bell.stacks;
+  const bet = opts.bet;
   const B = {
     timers: [], events: [], ctx: [], probing: false,
     enemyIdx: 0, awaiting: false, outcome: null, retreatUsed: false,
     pendingNext: null, lastDownIdx: -1, intentCache: null, lastCalc: null, prev: null,
-    lastHit: null, carry: 0, lastStandDone: false, gained: [], turnStartHp: 0
+    lastHit: null, carry: 0, lastStandDone: false, turnStartHp: 0,
+    gained: [], heirloomsUsed: 0, enemyDowns: [], bestHit: null,
+    charge: 0, chargeSpent: false, dueEffects: [], betMet: false, fieldSeen: false
   };
 
   const host = B.host = {
@@ -117,11 +141,17 @@ export function create(core, opts) {
     state: {
       deck: opts.party.slice(0, 3).concat([null, null, null]).slice(0, 3),
       mode: 'default', gameType: 'pixel', hardMode: false, enemyScale: 0,
-      artifacts: (opts.artifacts || []).slice(), chaosBuffs: (opts.blessings || []).slice()
+      artifacts: (opts.artifacts || []).slice(0, 4), chaosBuffs: (opts.blessings || []).slice()
     },
     battle: {},
     log(msg, kind) {
       const text = strip(msg), hit = /(\d+) 피해/.exec(text);
+      if (/^전투 개시/.test(text)) B.events.unshift({ t: 'begin', enemy: enemyRef(), quirk, s: null });
+      const calc = B.lastCalc;
+      if (calc && calc.by && /class="log-dmg"/.test(msg) && hit && Number(hit[1]) === calc.result.dmg) {
+        const amount = calc.result.dmg;
+        if (amount > (B.bestHit?.amount || 0)) B.bestHit = { amount, by: calc.by, skill: calc.info.skill };
+      }
       flush(hit ? Number(hit[1]) : 0);
       push({ t: 'log', text, kind: kind || '' });
       noteLog(text);
@@ -133,16 +163,16 @@ export function create(core, opts) {
     showBattleScreen() {}, clearBattleLog() {}, renderBattleView() {},
     renderBattleControls() { B.awaiting = true; },
     winBattle() {
-      if (B.lastDownIdx === B.enemyIdx) return;
-      B.lastDownIdx = B.enemyIdx;
-      flush();
-      push({ t: 'enemyDown', who: enemyRef(), treasure: hasAffix(host.battle.enemy, 'treasure') });
+      if (!recordEnemyDown()) return;
       if (B.enemyIdx + 1 < queue.length) {
         B.pendingNext = host.battle.phase || 'player-resolving';
         if (quirk === 'overflow') B.carry = Math.max(0, -Math.floor(host.battle.enemy.hp));
       } else { host.battle.isFinished = true; B.outcome = 'win'; push({ t: 'win' }); }
     },
-    loseBattle() { flush(); host.battle.isFinished = true; B.outcome = 'lose'; push({ t: 'lose' }); }
+    loseBattle() {
+      if (host.battle.enemy.hp <= 0) recordEnemyDown();
+      flush(); host.battle.isFinished = true; B.outcome = 'lose'; push({ t: 'lose' });
+    }
   };
 
   const enemyRef = () => ({ side: 'enemy', idx: B.enemyIdx });
@@ -154,6 +184,17 @@ export function create(core, opts) {
   const players = () => (host.battle.players || []).filter(Boolean);
 
   function push(ev) { ev.s = B.prev; B.events.push(ev); return ev; }
+
+  function recordEnemyDown() {
+    if (B.lastDownIdx === B.enemyIdx) return false;
+    B.lastDownIdx = B.enemyIdx;
+    flush();
+    const treasure = hasAffix(host.battle.enemy, 'treasure');
+    B.enemyDowns.push({ idx: B.enemyIdx, treasure });
+    if (bet?.kind === 'kill_on_turn' && bet.turn === host.battle.turn) B.betMet = true;
+    push({ t: 'enemyDown', who: enemyRef(), treasure });
+    return true;
+  }
 
   /* ---------- snapshots and deltas ---------- */
   function unitSnap(u) {
@@ -183,6 +224,8 @@ export function create(core, opts) {
     const b = host.battle;
     const was = B.prev;
     if (!was) return;
+    if (bet?.kind === 'empty_sky' && !B.fieldSeen && (b.phase === 'player-resolving' || b.phase === 'player-ready') &&
+        b.fieldBuffs.some(f => !f.expiresAtTurn || f.expiresAtTurn > b.turn)) B.fieldSeen = true;
     const now = snapshot();
     B.prev = now;
     const cause = B.ctx.length ? B.ctx[B.ctx.length - 1] : null;
@@ -193,6 +236,7 @@ export function create(core, opts) {
         const ev = { t: 'hp', who, delta: z.hp - a.hp, amount: Math.abs(z.hp - a.hp), cause: describeCause(cause, who) };
         const c = B.lastCalc;
         if (c && c.target === unit && ev.delta < 0) {
+          c.info.dmg = c.result.dmg;  // Companion can modify a death hit after the calculation returns.
           ev.calc = c.info;
           if (z.hp === 0) ev.amount = Math.max(ev.amount, c.info.dmg);   // show the full hit on a kill
           B.lastCalc = null;
@@ -228,7 +272,6 @@ export function create(core, opts) {
   /* Some outcomes only exist as log lines in the core; give the screen a typed event for them. */
   function noteLog(text) {
     const b = host.battle;
-    if (/^전투 개시/.test(text)) { push({ t: 'begin', enemy: enemyRef(), quirk }); return; }
     const target = b.players && b.players[b.currentPlayerIdx];
     if (/회피 성공/.test(text) && target) push({ t: 'miss', who: allyRef(target.pos), why: 'evasion' });
     else if (/배리어로 방어/.test(text) && target) push({ t: 'miss', who: allyRef(target.pos), why: 'barrier' });
@@ -273,6 +316,20 @@ export function create(core, opts) {
     if (f.def === 0) for (const k of ['def', 'mdef', 'baseDef', 'baseMdef']) enemy[k] = 0;
     if (hasAffix(enemy, 'tough')) enemy.buffs.damage_half = 3;
   }
+  function applyStart() {
+    const start = opts.start;
+    if (!start) return;
+    const b = host.battle;
+    for (const id of (start.field || []).slice(0, 3)) BattleRuntime.applyFieldBuff(host, id);
+    for (const [id, stacks] of Object.entries(start.enemyDebuffs || {})) {
+      StatusRules.add(b.enemy, id, stacks, host.state.artifacts);
+    }
+    for (const p of players()) {
+      const values = start.allyStart?.[p.pos];
+      if (Number.isFinite(values?.hp)) p.hp = Math.max(1, Math.min(p.maxHp, values.hp));
+      if (Number.isFinite(values?.mp)) p.mp = Math.max(0, Math.min(getMaxMana(p), values.mp));
+    }
+  }
 
   /* ---------- E/F: what happens when an ally falls ---------- */
   function afterAllyDown(victim) {
@@ -311,8 +368,9 @@ export function create(core, opts) {
   B.onSkill = function (source, target, skill, delayed, go) {
     flush();
     const who = refOf(source);
+    if (skill.heirloom && !delayed && isAlly(source)) B.heirloomsUsed++;
     push({ t: 'act', who, target: refOf(target), delayed, heirloom: !!skill.heirloom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
-    B.ctx.push({ kind: 'act', who, skill, delayed });
+    B.ctx.push({ kind: 'act', who, skill, delayed, source });
     B.lastHit = null;
     const formId = source.formId;
     const heirlooms = (source.skills || []).filter(s => s.heirloom);
@@ -363,6 +421,13 @@ export function create(core, opts) {
   };
   B.onStartPlayerTurn = function (go) {
     const b = host.battle;
+    if (region === 'twilight_bell' && b.isNewTurn && b.enemy?.hp > 0 && bellTurns.includes(b.turn)) {
+      const before = b.enemy.buffs.divine || 0;
+      asRule(region, () => {
+        const after = StatusRules.add(b.enemy, 'divine', bellStacks, host.state.artifacts);
+        push({ t: 'rule', rule: region, who: enemyRef(), stacks: bellStacks > 0 ? after - before : 0 });
+      });
+    }
     if (quirk === 'starfall' && b.isNewTurn && b.enemy && b.enemy.hp > 0) {
       const have = (b.fieldBuffs || []).map(f => f.name), pool = FIELD_POOL.filter(id => !have.includes(id));
       if (pool.length) {
@@ -371,7 +436,9 @@ export function create(core, opts) {
         asRule('starfall', () => BattleRuntime.applyFieldBuff(host, id));
       }
     }
-    return go();
+    const previousDue = B.dueEffects;
+    B.dueEffects = b.delayedEffects.filter(effect => effect.turn === b.turn);
+    try { return go(); } finally { B.dueEffects = previousDue; }
   };
   B.onEnemyTurn = function (go) {
     flush();
@@ -399,10 +466,14 @@ export function create(core, opts) {
     const cache = B.intentCache;
     let action;
     if (cache && cache.enemy === enemy && cache.turn === host.battle.turn) action = cache.action;
-    else action = original.decide.call(Logic, enemy, localTurn(enemy));
+    else action = decide(enemy);
     B.intentCache = null;
     const top = B.ctx[B.ctx.length - 1];
     if (top && top.enemyTurn) top.skill = action;
+    if (action.type === 'rest') {
+      push({ t: 'rule', rule: 'tide_cycle', who: enemyRef(), kind: 'rest' });
+      return action;
+    }
     const target = host.battle.players[host.battle.currentPlayerIdx];
     push({
       t: 'act', who: enemyRef(), target: target ? allyRef(target.pos) : null, delayed: false,
@@ -413,10 +484,25 @@ export function create(core, opts) {
   };
   B.onCalc = function (source, target, skill, lines, result) {
     const b = host.battle;
+    const cause = B.ctx.at(-1);
+    if (target === b.enemy && cause?.source === source && isAlly(source)) {
+      if (chargedSkill(cause.skill)) {
+        B.chargeSpent = true;
+        B.charge = 0;
+        result.dmg *= 2;
+        push({ t: 'rule', rule: 'arena_charge', who: cause.who, multiplier: 2 });
+      } else if (region === 'arena_charge' && !B.chargeSpent && cause.skill === host.NORMAL_ATTACK && result.dmg > 0) {
+        B.charge = Math.min(2, B.charge + 1);
+      }
+      if (bet?.kind === 'delayed_on_time' && cause.delayed && result.dmg > 0 &&
+          B.dueEffects.some(effect => effect.source === source && effect.skill === cause.skill)) B.betMet = true;
+    }
     const stats = Logic.calculateStats(source, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
     B.lastHit = { source, target, dmg: result.dmg };
     B.lastCalc = {
       target,
+      by: target === b.enemy ? source.baseCardId || source.proto?.baseCardId || source.proto?.id : null,
+      result,
       info: {
         stat: skill.type === 'phy' ? 'atk' : 'matk',
         base: skill.type === 'phy' ? stats.atk : stats.matk,
@@ -429,32 +515,50 @@ export function create(core, opts) {
 
   /* ---------- rule B: intent, rule A: countdown ---------- */
   const isScripted = action => !!action && action.name !== '일반 공격' && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
-  function previewEnemyHit(action, target) {
+  const inTide = () => region === 'tide_cycle' && !queue[B.enemyIdx].boss;
+  function decide(enemy) {
+    const turn = localTurn(enemy);
+    const phase = turn % 4;
+    if (!inTide() || phase === 1 || phase === 2) return original.decide.call(Logic, enemy, turn);
+    if (phase === 0) return { type: 'rest', name: REGIONS.tide_cycle.rest };
+
+    const power = skill => skill.effects?.find(e => e.type === 'random_mult')?.max ?? skill.val ?? 1;
+    const strongest = enemy.skills.filter(skill => skill.type === 'mag').sort((a, b) => power(b) - power(a))[0];
+    const powerRoll = strongest ? Logic.resolveSkillMultiplier(strongest, enemy) : 1;
+    const effects = (strongest?.effects || []).filter(effect => effect.type !== 'random_mult');
+    return { type: 'mag', name: REGIONS.tide_cycle.hit, val: powerRoll * 2.5, effects };
+  }
+  function previewEnemyHit(action, target, mayHitEnemy) {
     const b = host.battle, enemy = b.enemy;
     const es = Logic.calculateStats(enemy, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
     const ts = Logic.calculateStats(target, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
-    const val = action.type === 'phy' ? es.atk : es.matk;
-    const def = action.type === 'phy' ? ts.def : ts.mdef;
+    const physical = action.type === 'phy';
+    if ((physical ? target.buffs.barrier : target.buffs.magic_guard) || ts.evasion >= 100) return [0, 0];
+    const val = physical ? es.atk : es.matk;
+    const def = physical ? ts.def : ts.mdef;
     const random = (action.effects || []).find(e => e.type === 'random_mult');
     let lo = Number.isFinite(action.val) ? action.val : 1, hi = lo;
-    if (random) { lo = random.min; hi = random.max; }
-    const reduce = 1 - core.StatusRules.damageReduction(target).rate;
-    const hit = m => Math.floor(Math.floor(val * m * (100 / (100 + def))) * reduce);
-    let range = [hit(lo), hit(hi)];
-    if (enemy.id === 'pharaoh' && action.name === '고대의저주') range = [hit(lo), hit(3.0)];   // x3 if it was hit this turn
-    return range;
+    if (random) { lo = random.min; hi = lo + Math.ceil(random.max - lo); }
+    if (enemy.id === 'pharaoh' && action.name === '고대의저주') {
+      if (enemy.tookDamageThisTurn) lo = hi = 3;
+      else if (mayHitEnemy) hi = 3;
+    }
+    const reduce = 1 - StatusRules.damageReduction(target).rate;
+    const hit = m => Math.floor(val * m * (100 / (100 + def)) * reduce);
+    return [hit(lo), hit(hi)];
   }
-  function currentIntent() {
-    const b = host.battle, enemy = b.enemy, target = b.players[b.currentPlayerIdx];
+  function currentIntent(target = currentPlayer(), mayHitEnemy = true) {
+    const b = host.battle, enemy = b.enemy;
     if (enemy.buffs.stun) return { kind: 'stun', name: '기절', ult: false };
     let cache = B.intentCache;
     if (!cache || cache.enemy !== enemy || cache.turn !== b.turn) {
-      cache = B.intentCache = { enemy, turn: b.turn, action: original.decide.call(Logic, enemy, localTurn(enemy)) };
+      cache = B.intentCache = { enemy, turn: b.turn, action: decide(enemy) };
     }
     const a = cache.action;
+    if (a.type === 'rest') return { kind: 'rest', name: a.name };
     if (a.isChargeStart) return { kind: 'charge', name: a.name, ult: true };
-    if (a.type !== 'phy' && a.type !== 'mag') return { kind: 'sup', name: a.name, ult: isScripted(a), effects: (a.effects || []).map(e => e.type) };
-    const dmg = previewEnemyHit(a, target);
+    if (!isAttack(a)) return { kind: 'sup', name: a.name, ult: isScripted(a), effects: (a.effects || []).map(e => e.type) };
+    const dmg = previewEnemyHit(a, target, mayHitEnemy);
     return {
       kind: a.type, name: a.name, ult: isScripted(a), dmg, lethal: dmg[1] >= target.hp,
       extra: (a.effects || []).map(e => e.type).filter(t => t !== 'random_mult')
@@ -462,6 +566,11 @@ export function create(core, opts) {
   }
   function countdown() {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
+    if (inTide()) {
+      let inTurns = (3 - local % 4 + 4) % 4;
+      if (inTurns === 0 && enemy.buffs.stun) inTurns = 4;
+      return { name: REGIONS.tide_cycle.hit, inTurns, charge: false };
+    }
     const skillName = action => action.name.replace(/ 차징$/, '');
     const cache = B.intentCache;
     const current = cache && cache.enemy === enemy && cache.turn === b.turn && !enemy.buffs.stun && cache.action;
@@ -486,12 +595,17 @@ export function create(core, opts) {
 
   /* ---------- stepping ---------- */
   function nextEnemy() {
+    const burn = region === 'ember_carry' ? Math.min(2, host.battle.enemy.buffs.burn || 0) : 0;
     B.enemyIdx++;
     host.battle.enemy = buildBattleEnemy(host);
     setupEnemy(host.battle.enemy);
     host.battle.enemy.relayEnteredTurn = host.battle.turn + 1;   // its own turn count starts with its first action
     B.prev = snapshot();
     push({ t: 'enemyEnter', who: enemyRef(), name: host.battle.enemy.name });
+    if (burn > 0) {
+      push({ t: 'rule', rule: 'ember_carry', who: enemyRef(), stacks: burn });
+      asRule('ember_carry', () => { host.battle.enemy.buffs.burn = burn; });
+    }
   }
   /* H frenzy is checked when the player's turn starts, so the announced damage already includes it. */
   function checkFrenzy() {
@@ -523,7 +637,15 @@ export function create(core, opts) {
     if (B.awaiting) {
       checkFrenzy();
       flush();
-      push({ t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent: currentIntent(), countdown: countdown() });
+      const wait = { t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent: currentIntent(), countdown: countdown() };
+      if (region === 'twilight_bell') {
+        const turn = host.battle.turn;
+        const next = Math.min(...bellTurns.filter(n => n > turn));
+        wait.region = { bellIn: Number.isFinite(next) ? next - turn : null };
+      } else if (region === 'arena_charge') {
+        wait.region = { charge: B.charge, ready: B.charge === 2 };
+      }
+      push(wait);
     }
   }
   function run(fn) {
@@ -543,23 +665,67 @@ export function create(core, opts) {
       return choice.forms.map(formId => Object.assign({}, skill, { chosenFormId: formId }));
     });
   }
+  function chargedSkill(skill) {
+    return region === 'arena_charge' && B.charge === 2 && skill !== host.NORMAL_ATTACK && isAttack(skill);
+  }
   function previewSkill(player, skill) {
-    if (skill.type !== 'phy' && skill.type !== 'mag') return null;
+    if (!isAttack(skill)) return null;
     if (core.findDelayedSkillEffect && core.findDelayedSkillEffect(skill)) return { delayed: true };
     const b = host.battle, saved = Math.random, outer = active, critMult = core.GAME_CONSTANTS.BASE_CRIT_MULT;
+    let enemy = b.enemy, attack = skill;
+    if (skill === host.NORMAL_ATTACK) {
+      if (host.hasArtifact('divine_ares')) attack = { ...skill, val: 2.5 };
+      else if (host.hasArtifact('double_attack')) attack = { ...skill, val: 2 };
+      const trait = player.proto.trait.type;
+      if (trait === 'normal_attack_burn_divine' || trait === 'syn_fire_3_crit_burn') {
+        enemy = { ...enemy, buffs: { ...enemy.buffs } };
+        StatusRules.add(enemy, 'burn', 1, host.state.artifacts);
+        if (trait === 'normal_attack_burn_divine') StatusRules.add(enemy, 'divine', 1, host.state.artifacts);
+      }
+    }
     let first = true;
     active = B; B.probing = true;
+    if (Q.critMult) core.GAME_CONSTANTS.BASE_CRIT_MULT = Q.critMult;
     Math.random = () => { if (first) { first = false; return 0.9999; } return 0.5; };   // no crit, mid roll for random parts
     try {
-      const r = original.calc.call(Logic, player, b.enemy, skill, b.fieldBuffs, b.activeTraits, null,
+      const r = original.calc.call(Logic, player, enemy, attack, b.fieldBuffs, b.activeTraits, null,
         host.state.mode, host.state.deck, b.turn, host.state.artifacts);
-      return { dmg: r.dmg, kill: r.dmg >= b.enemy.hp, forcedCrit: !!r.isCrit };
+      const dmg = chargedSkill(skill) ? r.dmg * 2 : r.dmg;
+      return { dmg, kill: dmg >= enemy.hp, forcedCrit: !!r.isCrit };
     } finally { Math.random = saved; B.probing = false; active = outer; core.GAME_CONSTANTS.BASE_CRIT_MULT = critMult; }
   }
+  function previewDefense(player, skill) {
+    const effect = (skill.effects || []).find(e => e.type === 'buff' && DEFENSE_BUFFS.includes(e.id));
+    if (!effect) return null;
+    const kind = effect.id;
+    const source = { ...player, buffs: { ...player.buffs } };
+    SideEffects.apply({ source, skill }, effect);
+    let reduction = 1;
+    if (kind === 'guard') reduction = StatusRules.guardReduction(source);
+    else if (kind === 'damage_half') reduction = StatusRules.damageReduction({ buffs: { damage_half: source.buffs.damage_half } }).rate;
+    else if (kind === 'evasion') {
+      const b = host.battle;
+      const stats = Logic.calculateStats(source, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
+      reduction = Math.max(0, Math.min(1, stats.evasion / 100));
+    }
+    return { kind, reduction };
+  }
+  function nextAlly() {
+    return players().find(p => !p.isDead && p.pos > host.battle.currentPlayerIdx);
+  }
   function canRetreat() {
-    if (!B.awaiting || B.retreatUsed || B.outcome) return false;
-    const b = host.battle;
-    return b.players.some(p => p && !p.isDead && p.pos > b.currentPlayerIdx);
+    return B.awaiting && !B.retreatUsed && !B.outcome && !!nextAlly();
+  }
+  function survivors() { return host.battle.players.map(p => !!p && (!p.isDead || !!p.retreated)); }
+  function heirloomsGained() { return B.gained.map(gain => ({ ...gain })); }
+  function betWon() {
+    if (B.outcome !== 'win') return false;
+    if (bet.kind === 'empty_sky') return !B.fieldSeen;
+    if (bet.kind === 'same_grade_full') {
+      const grades = host.state.deck.map(id => id && GameUtils.getCardById(id).grade);
+      return !!grades[0] && grades.every(grade => grade === grades[0]);
+    }
+    return B.betMet;
   }
 
   return {
@@ -574,9 +740,9 @@ export function create(core, opts) {
         host.renderBattleView = function () {
           if (!ready && host.battle.players && host.battle.enemy) {
             ready = true; setupAllies(); setupEnemy(host.battle.enemy);
+            applyStart();
             B.prev = snapshot();                                      // the set-up values are the starting point, not a change
-            const begin = B.events.filter(e => e.t === 'begin').pop();
-            if (begin) begin.s = B.prev;
+            B.events[0].s = B.prev;
           }
           return init.apply(this, arguments);
         };
@@ -589,21 +755,27 @@ export function create(core, opts) {
       const player = currentPlayer(), skill = actionSkills(player)[index];
       if (!skill || player.mp < (skill.cost || 0)) return [];
       const events = run(() => { BattleRuntime.executeSkill(host, player, host.battle.enemy, skill); });
-      if (skill.heirloom) player.skills = player.skills.filter(s => s !== skill);   // once per battle
+      if (skill.heirloom) player.skills = player.skills.filter(s => s !== skill);  // once per battle
       return events;
     },
     retreat() {
       if (!canRetreat()) return [];
       return run(() => {
-        const b = host.battle, player = currentPlayer();
+        const b = host.battle, player = currentPlayer(), next = nextAlly();
         player.isDead = true; player.retreated = true;        // the core skips it; death traits never run
         B.retreatUsed = true;
         push({ t: 'retreat', who: allyRef(player.pos) });
-        while (b.currentPlayerIdx < b.players.length && (!b.players[b.currentPlayerIdx] || b.players[b.currentPlayerIdx].isDead)) b.currentPlayerIdx++;
+        b.currentPlayerIdx = next.pos;
         checkLastStand();
         b.phase = 'player-ready';
         TM.endPlayerTurn(host);                                // leaving costs the turn: the enemy acts on the newcomer
       });
+    },
+    previewRetreat() {
+      if (!canRetreat()) return null;
+      const player = nextAlly();
+      const intent = currentIntent(player, false);
+      return { next: allyRef(player.pos), intent, dmg: intent.dmg || [0, 0], lethal: !!intent.lethal };
     },
     options() {
       if (!B.awaiting || B.outcome) return [];
@@ -613,7 +785,7 @@ export function create(core, opts) {
         type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0,
         usable: player.mp >= (skill.cost || 0), effects: skill.effects || [], val: skill.val,
         heirloom: !!skill.heirloom, heirFrom: skill.heirFrom || null, heirFromName: skill.heirFromName || null,
-        preview: previewSkill(player, skill)
+        preview: previewSkill(player, skill), defense: previewDefense(player, skill)
       }));
     },
     canRetreat,
@@ -624,8 +796,22 @@ export function create(core, opts) {
     enemyCount: queue.length,
     state() { return snapshot(); },
     /** Units that are still alive when the battle ends (retreated fighters count as alive). */
-    survivors() { return host.battle.players.map(p => !!p && (!p.isDead || !!p.retreated)); },
+    survivors,
     /** Heirlooms handed on in this battle: [{ to, from, name }] (card ids). */
-    heirloomsGained() { return B.gained.slice(); }
+    heirloomsGained,
+    summary() {
+      return {
+        outcome: B.outcome,
+        survivors: survivors(),
+        retreated: host.battle.players.map(p => !!p?.retreated),
+        heirloomsGained: heirloomsGained(),
+        heirloomsUsed: B.heirloomsUsed,
+        lastStands: Number(B.lastStandDone),
+        enemyDowns: B.enemyDowns.map(down => ({ ...down })),
+        bestHit: B.bestHit && { ...B.bestHit },
+        turns: host.battle.turn,
+        bet: bet ? { kind: bet.kind, won: betWon() } : null
+      };
+    }
   };
 }

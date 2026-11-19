@@ -27,6 +27,10 @@ const dummy = over => Object.assign({
 const battle = opts => Bridge.create(S.RelayCore, Object.assign({ party: ['red_dragon', 'ash', 'luna'], enemies: [dummy()], seed: 7 }, opts));
 const last = (events, t) => events.filter(e => e.t === t).pop();
 const plain = value => JSON.parse(JSON.stringify(value));
+const option = (b, name) => b.options().find(o => o.name === name);
+const quietEnemy = (hp = 99999, overrides = {}) => dummy({
+  stats: { hp, atk: 0, matk: 0, def: 60, mdef: 60, ...overrides }, skills: []
+});
 
 test('the unchanged rule files load and the first turn waits for the player', () => {
   assert.ok(S.RelayCore.GameUtils.getCardById('red_dragon'));
@@ -39,7 +43,6 @@ test('the unchanged rule files load and the first turn waits for the player', ()
 });
 
 test('every playable card starts the battle before emitting any state differences', () => {
-  const diff = new Set(['turn', 'enter', 'hp', 'mp', 'buff', 'field']);
   for (const card of S.RelayCore.GameUtils.getAllCards().filter(c => !c.battleOnly)) {
     for (let pos = 0; pos < 3; pos++) {
       const party = ['zeke', 'cherry_prince', 'ash'].filter(id => id !== card.id).slice(0, 2);
@@ -47,8 +50,8 @@ test('every playable card starts the battle before emitting any state difference
       const events = battle({ party }).start();
       const begin = events.findIndex(e => e.t === 'begin');
       const lineup = card.id + ' in slot ' + pos;
-      assert.ok(begin >= 0 && events[begin].s, lineup);
-      assert.ok(!events.slice(0, begin).some(e => diff.has(e.t)), lineup);
+      assert.equal(begin, 0, lineup);
+      assert.ok(events[begin].s, lineup);
       assert.equal(events.at(-1).t, 'await', lineup);
     }
   }
@@ -200,6 +203,7 @@ test('instant Nightmare records only one treasure defeat per enemy', () => {
     assert.deepEqual(plain(events.filter(e => e.t === 'enemyDown').map(e => [e.who.idx, e.treasure])), [[idx, true]]);
   }
   assert.equal(b.outcome, 'win');
+  assert.deepEqual(plain(b.summary().enemyDowns), [{ idx: 0, treasure: true }, { idx: 1, treasure: true }]);
 });
 
 test('the replacement fighter enters before the enemy acts after a self-destruct', () => {
@@ -301,4 +305,322 @@ test('ally HP always equals the start value plus the reported changes', () => {
       assert.deepEqual(b.state().allies.map(a => a.hp), hp, `seed ${seed} step ${i}`);
     }
   }
+});
+
+test('Ember carries at most two burn stacks, after the new enemy enters', () => {
+  const b = battle({ region: { id: 'ember_carry' }, artifacts: ['over_flame'],
+    start: { enemyDebuffs: { burn: 3, divine: 2 } }, enemies: [quietEnemy(1), quietEnemy()] });
+  assert.equal(b.start()[0].s.enemy.buffs.burn, 5);
+  const events = b.act(0);
+  const enter = events.findIndex(e => e.t === 'enemyEnter');
+  const rule = events.findIndex(e => e.t === 'rule' && e.rule === 'ember_carry');
+  const buff = events.findIndex(e => e.t === 'buff' && e.id === 'burn');
+  assert.ok(enter >= 0 && enter < rule && rule < buff);
+  assert.deepEqual(plain(events[rule].who), { side: 'enemy', idx: 1 });
+  assert.equal(events[rule].stacks, 2);
+  assert.deepEqual(plain(b.state().enemy.buffs), { burn: 2 });
+});
+
+test('Twilight forecasts each bell and applies divine through artifact caps', () => {
+  const b = battle({ region: { id: 'twilight_bell' }, artifacts: ['over_divine'], enemies: [quietEnemy()] });
+  let events = b.start();
+  for (let turn = 1; turn <= 9; turn++) {
+    const next = [3, 6, 9].find(n => n > turn);
+    assert.deepEqual(last(events, 'await').region, { bellIn: next ? next - turn : null });
+    const rule = events.find(e => e.t === 'rule' && e.rule === 'twilight_bell');
+    assert.equal(rule?.stacks, { 3: 4, 6: 1, 9: 0 }[turn]);
+    if (rule) assert.ok(events.indexOf(rule) < events.findIndex(e => e.t === 'await'));
+    if (turn < 9) events = b.act(0);
+  }
+  assert.equal(b.state().enemy.buffs.divine, 5);
+
+  const custom = battle({ region: { id: 'twilight_bell', turns: [4, 2], stacks: 1 }, enemies: [quietEnemy()] });
+  assert.equal(last(custom.start(), 'await').region.bellIn, 1);
+  events = custom.act(0);
+  assert.equal(last(events, 'rule').stacks, 1);
+  assert.equal(last(events, 'await').region.bellIn, 2);
+});
+
+test('Starlit sky uses the announced starting field and adds no effects of its own', () => {
+  const config = { start: { field: ['sun_bless', 'star_powder'] }, enemies: [quietEnemy()] };
+  const starlit = battle({ ...config, region: { id: 'starlit_sky' } });
+  const plainSky = battle(config);
+  assert.deepEqual(starlit.start(), plainSky.start());
+  assert.deepEqual(starlit.act(0), plainSky.act(0));
+  assert.deepEqual(plain(starlit.state().field), config.start.field);
+  const empty = battle({ region: { id: 'starlit_sky' } });
+  assert.deepEqual(plain(empty.start()[0].s.field), []);
+});
+
+test('Tide forecasts and resolves the strongest magic hit, then announces rest', () => {
+  const enemy = quietEnemy(99999, { atk: 1, matk: 40 });
+  enemy.skills = [
+    { name: '약한 마법', type: 'mag', val: 1, rate: 0.3 },
+    { name: '강한 마법', type: 'mag', val: 2, rate: 0.3, effects: [{ type: 'debuff', id: 'curse', stack: 1 }] },
+    { name: '물리 기술', type: 'phy', val: 6, rate: 0.3 }
+  ];
+  const b = battle({ region: { id: 'tide_cycle' }, enemies: [enemy] });
+  const hit = '조류의 일격';
+  let events = b.start();
+  for (let i = 2; i >= 0; i--) {
+    assert.deepEqual(last(events, 'await').countdown, { name: hit, inTurns: i, charge: false });
+    if (i > 0) events = b.act(0);
+  }
+  assert.deepEqual(plain(last(events, 'await').intent), { kind: 'mag', name: hit, ult: false, dmg: [133, 133], lethal: false, extra: ['debuff'] });
+  events = b.act(0);
+  const strike = events.find(e => e.t === 'act' && e.who.side === 'enemy');
+  assert.equal(strike.skill.name, hit);
+  assert.equal(events.find(e => e.t === 'hp' && e.who.side === 'ally').amount, 133);
+  assert.equal(events.find(e => e.t === 'buff' && e.id === 'curse').to, 1);
+  assert.deepEqual(last(events, 'await').intent, { kind: 'rest', name: '물러간 조류' });
+  assert.equal(last(events, 'await').countdown.inTurns, 3);
+  events = b.act(0);
+  assert.equal(last(events, 'rule').kind, 'rest');
+  assert.equal(events.some(e => e.t === 'act' && e.who.side === 'enemy'), false);
+  assert.equal(events.some(e => e.t === 'hp' && e.who.side === 'ally'), false);
+});
+
+test('Tide counts from each enemy entry, falls back to MATK, and skips bosses', () => {
+  const enemy = quietEnemy(99999, { matk: 60 });
+  const config = { region: { id: 'tide_cycle' }, enemies: [quietEnemy(1), enemy] };
+  const b = battle(config);
+  b.start();
+  assert.equal(last(b.act(0), 'await').countdown.inTurns, 2);
+  assert.equal(last(b.act(0), 'await').countdown.inTurns, 1);
+  const tide = last(b.act(0), 'await');
+  assert.equal(tide.s.turn, 4);
+  assert.deepEqual(tide.intent.dmg, [100, 100]);
+  assert.equal(b.act(0).find(e => e.t === 'hp' && e.who.side === 'ally').amount, 100);
+
+  const boss = battle({ ...config, enemies: [{ ...enemy, boss: true }] });
+  assert.equal(last(boss.start(), 'await').countdown, null);
+  boss.act(0);
+  assert.equal(last(boss.act(0), 'await').intent.name, '일반 공격');
+});
+
+test('Tide scales the core magic roll and announces that exact roll before the attack', () => {
+  const enemy = quietEnemy(99999, { matk: 60 });
+  enemy.skills = [{ name: '파도', type: 'mag', rate: 0, effects: [{ type: 'random_mult', min: 1, max: 3 }] }];
+  const b = battle({ region: { id: 'tide_cycle' }, enemies: [enemy] });
+  b.start();
+  b.act(0);
+  const wait = last(b.act(0), 'await');
+  assert.ok([100, 200, 300].includes(wait.intent.dmg[0]));
+  assert.equal(wait.intent.dmg[1], wait.intent.dmg[0]);
+  const events = b.act(0);
+  assert.equal(events.find(e => e.t === 'hp' && e.who.side === 'ally').amount, wait.intent.dmg[0]);
+});
+
+test('Arena charge survives both relays, doubles the preview and damage, and is spent once', () => {
+  const config = { party: ['red_dragon', 'snow_rabbit'], enemies: [quietEnemy(1), quietEnemy()] };
+  const charged = battle({ ...config, region: { id: 'arena_charge' } });
+  const ordinary = battle(config);
+  for (const b of [charged, ordinary]) {
+    const opening = last(b.start(), 'await');
+    const down = last(b.act(0), 'await');
+    const next = last(b.retreat(), 'await');
+    if (b === charged) {
+      assert.deepEqual(opening.region, { charge: 0, ready: false });
+      assert.deepEqual(down.region, { charge: 1, ready: false });
+      assert.deepEqual(next.region, { charge: 1, ready: false });
+    }
+    b.act(0);
+    b.act(0);
+    const wait = last(b.act(option(b, '배리어').index), 'await');
+    if (b === charged) assert.deepEqual(wait.region, { charge: 2, ready: true });
+  }
+  const skill = '스노우샷';
+  const powered = option(charged, skill), base = option(ordinary, skill);
+  assert.equal(powered.preview.dmg, base.preview.dmg * 2);
+  assert.equal(option(charged, '일반 공격').preview.dmg, option(ordinary, '일반 공격').preview.dmg);
+  const boosted = charged.act(powered.index), unboosted = ordinary.act(base.index);
+  const hit = events => events.find(e => e.t === 'hp' && e.who.side === 'enemy').amount;
+  assert.equal(hit(boosted), hit(unboosted) * 2);
+  const spent = boosted.find(e => e.t === 'rule' && e.rule === 'arena_charge');
+  assert.deepEqual(spent.who, { side: 'ally', idx: 1 });
+  assert.equal(spent.multiplier, 2);
+  assert.deepEqual(last(boosted, 'await').region, { charge: 0, ready: false });
+  for (let i = 0; i < 2; i++) charged.act(0);
+  assert.equal(option(charged, skill).preview.dmg, base.preview.dmg);
+  assert.ok(charged.act(powered.index).every(e => e.rule !== 'arena_charge'));
+});
+
+test('Starting field buffs use the core function and are part of begin', () => {
+  const b = battle({ start: { field: ['sun_bless', 'star_powder', 'gale', 'arena'] } });
+  const events = b.start();
+  assert.equal(events[0].t, 'begin');
+  assert.deepEqual(plain(events[0].s.field), ['sun_bless', 'star_powder', 'gale']);
+  assert.equal(events.filter(e => e.t === 'field').length, 0);
+  assert.equal(events.filter(e => e.t === 'log' && /필드버프.*발동/.test(e.text)).length, 3);
+});
+
+test('Starting enemy debuffs obey the core stack rules and emit no starting delta', () => {
+  const b = battle({ start: { enemyDebuffs: { burn: 8, divine: 2, curse: 1 } }, artifacts: ['over_divine'] });
+  const events = b.start();
+  assert.equal(events[0].t, 'begin');
+  assert.deepEqual(plain(events[0].s.enemy.buffs), { burn: 3, divine: 4, curse: 1 });
+  assert.equal(events.some(e => e.t === 'buff'), false);
+});
+
+test('Starting ally HP and MP override set-up by seat without HP or MP deltas', () => {
+  const b = battle({ party: ['ash', null, 'snow_rabbit'], quirk: 'surge',
+    start: { allyStart: { 0: { hp: 40, mp: 0 }, 1: { hp: 90 }, 2: { mp: 150 } } } });
+  const events = b.start();
+  assert.equal(events[0].t, 'begin');
+  assert.deepEqual(plain(events[0].s.allies.map(a => a && [a.hp, a.mp, a.maxMp])), [[40, 0, 200], null, [290, 150, 200]]);
+  assert.equal(events.some(e => e.t === 'hp' || e.t === 'mp'), false);
+  assert.equal(option(b, '아마겟돈').usable, false);
+});
+
+test('Equipped relics reach core behavior and only the first four are equipped', () => {
+  const b = battle({ artifacts: ['double_attack', 'reverse', 'companion', 'over_divine', 'gale_storm'], enemies: [quietEnemy()] });
+  assert.deepEqual(plain(b.start()[0].s.field), []);
+  const preview = option(b, '일반 공격').preview.dmg;
+  const hit = b.act(0).find(e => e.t === 'hp' && e.who.side === 'enemy');
+  assert.equal(hit.calc.val, 2);
+  assert.equal(hit.amount, preview);
+});
+
+test('Kill-on-turn checks every enemy defeat and requires winning the battle', () => {
+  for (const turn of [1, 2, 3]) {
+    const b = battle({ enemies: [quietEnemy(1), quietEnemy(1)], bet: { kind: 'kill_on_turn', turn } });
+    b.start();
+    b.act(0);
+    assert.deepEqual(b.summary().bet, { kind: 'kill_on_turn', won: false });
+    b.act(0);
+    assert.deepEqual(b.summary().bet, { kind: 'kill_on_turn', won: turn < 3 });
+  }
+  const lose = battle({ party: ['red_dragon'], enemies: [quietEnemy(1), quietEnemy(99999, { atk: 5000 })],
+    bet: { kind: 'kill_on_turn', turn: 1 } });
+  lose.start();
+  lose.act(0);
+  lose.act(0);
+  assert.equal(lose.summary().outcome, 'lose');
+  assert.equal(lose.summary().bet.won, false);
+});
+
+test('Delayed-on-time requires damage from a scheduled landing, including a winning landing', () => {
+  const config = { enemies: [quietEnemy(1)], bet: { kind: 'delayed_on_time' } };
+  const scheduled = battle({ ...config, party: ['phantom'] });
+  scheduled.start();
+  const events = scheduled.act(option(scheduled, '나이트메어').index);
+  const landing = events.find(e => e.t === 'act' && e.delayed);
+  assert.equal(landing.s.turn, 2);
+  assert.ok(events.some(e => e.t === 'hp' && e.who.side === 'enemy' && e.cause.delayed));
+  assert.equal(scheduled.outcome, 'win');
+  assert.deepEqual(scheduled.summary().bet, { kind: 'delayed_on_time', won: true });
+
+  const instant = battle({ ...config, party: ['phantom', 'time_magician'] });
+  instant.start();
+  assert.ok(instant.act(option(instant, '나이트메어').index).some(e => e.t === 'act' && e.delayed));
+  assert.equal(instant.outcome, 'win');
+  assert.deepEqual(instant.summary().bet, { kind: 'delayed_on_time', won: false });
+});
+
+test('Empty-sky checks both starting fields and fields added by player actions', () => {
+  const config = { party: ['fairy'], enemies: [quietEnemy(1)], bet: { kind: 'empty_sky' } };
+  for (const source of ['empty', 'starting', 'skill', 'artifact']) {
+    const b = battle({ ...config, start: source === 'starting' ? { field: ['sun_bless'] } : null,
+      artifacts: source === 'artifact' ? ['gale_storm'] : [] });
+    b.start();
+    if (source === 'skill') b.act(option(b, '스타파우더').index);
+    b.act(0);
+    assert.equal(b.outcome, 'win');
+    assert.deepEqual(b.summary().bet, { kind: 'empty_sky', won: source === 'empty' });
+  }
+});
+
+test('Same-grade-full checks the three starting seats even after a retreat', () => {
+  for (const third of ['slime', 'ash', null]) {
+    const b = battle({ party: ['snow_rabbit', 'silver_rabbit', third], enemies: [quietEnemy(1)], bet: { kind: 'same_grade_full' } });
+    b.start();
+    b.retreat();
+    b.act(0);
+    assert.equal(b.outcome, 'win');
+    assert.deepEqual(b.summary().bet, { kind: 'same_grade_full', won: third === 'slime' });
+  }
+});
+
+test('Summary accounts for a retreat, death, heirloom, last stand, treasure, and the full best hit', () => {
+  const treasure = { ...quietEnemy(1, { atk: 5000 }), affixes: ['treasure'] };
+  const b = battle({ party: ['fairy', 'red_dragon', 'snow_rabbit'], enemies: [treasure, quietEnemy(1)], seed: 9 });
+  b.start();
+  const retreat = b.retreat();
+  assert.ok(retreat.some(e => e.t === 'laststand' && e.who.idx === 2));
+  assert.ok(retreat.some(e => e.t === 'heirloom' && e.to.idx === 2));
+  const first = b.act(option(b, '파이어브레스').index);
+  assert.equal(first.filter(e => e.t === 'enemyDown').length, 1);
+  const hit = first.find(e => e.t === 'hp' && e.who.side === 'enemy');
+  assert.equal(hit.delta, -1);
+  assert.ok(hit.amount > 1);
+  b.act(0);
+  const summary = b.summary();
+  assert.deepEqual(plain(summary), {
+    outcome: 'win', survivors: [true, false, true], retreated: [true, false, false],
+    heirloomsGained: [{ to: 'snow_rabbit', from: 'red_dragon', name: '파이어브레스' }],
+    heirloomsUsed: 1, lastStands: 1, enemyDowns: [{ idx: 0, treasure: true }, { idx: 1, treasure: false }],
+    bestHit: { amount: hit.amount, by: 'snow_rabbit', skill: '파이어브레스' }, turns: 3, bet: null
+  });
+  summary.bestHit.amount = 0;
+  summary.enemyDowns[0].treasure = false;
+  assert.equal(b.summary().bestHit.amount, hit.amount);
+  assert.equal(b.summary().enemyDowns[0].treasure, true);
+});
+
+test('Guard preview applies 75% with Guardian and 50% without', () => {
+  const enemy = quietEnemy(99999, { atk: 226 });
+  for (const guardian of [false, true]) {
+    const b = battle({ party: ['red_dragon', guardian ? 'guardian' : null], enemies: [enemy] });
+    assert.deepEqual(last(b.start(), 'await').intent.dmg, [141, 141]);
+    const guard = option(b, '가드');
+    assert.deepEqual(guard.defense, { kind: 'guard', reduction: guardian ? 0.75 : 0.5 });
+    const hit = b.act(guard.index).find(e => e.t === 'hp' && e.who.side === 'ally');
+    assert.equal(hit.amount, guardian ? 35 : 70);
+  }
+});
+
+test('Other defensive tiles show block, half damage, and actual evasion with the current field', () => {
+  for (const [id, kind, reduction] of [['snow_rabbit', 'barrier', 1], ['guardian', 'guard', 0.75],
+    ['cherry_prince', 'damage_half', 0.5], ['ash', 'evasion', 0.7]]) {
+    const b = battle({ party: [id], start: { field: ['moon_bless'] } });
+    b.start();
+    assert.deepEqual(b.options().find(o => o.defense?.kind === kind)?.defense, { kind, reduction });
+  }
+  const b = battle({ party: ['mirror_cocoon'] });
+  b.start();
+  assert.deepEqual(option(b, '리버설').defense, { kind: 'magic_guard', reduction: 1 });
+});
+
+test('Retreat preview skips empty seats, preserves the roll, and matches damage on the incoming ally', () => {
+  const config = { party: ['red_dragon', null, 'snow_rabbit'], enemies: [quietEnemy(99999, { atk: 198 })] };
+  const b = battle(config);
+  const wait = last(b.start(), 'await');
+  const before = plain(b.state());
+  const preview = b.previewRetreat();
+  assert.deepEqual(b.previewRetreat(), preview);
+  assert.deepEqual(plain(b.state()), before);
+  assert.deepEqual(preview.next, { side: 'ally', idx: 2 });
+  assert.equal(preview.intent.name, wait.intent.name);
+  assert.notDeepEqual(preview.dmg, wait.intent.dmg);
+  assert.deepEqual(preview.dmg, [141, 141]);
+  assert.equal(preview.lethal, false);
+  const events = b.retreat();
+  const attack = events.find(e => e.t === 'act' && e.who.side === 'enemy');
+  assert.deepEqual(attack.target, preview.next);
+  assert.equal(attack.skill.name, preview.intent.name);
+  assert.equal(events.find(e => e.t === 'hp' && e.who.side === 'ally').amount, preview.dmg[0]);
+  assert.equal(b.previewRetreat(), null);
+});
+
+test('Heirloom preview shows the next occupied seat and handles support-only and empty seats', () => {
+  const preview = party => Bridge.heirloomPreview(S.RelayCore, Object.freeze(party));
+  assert.deepEqual(preview(['ash', 'joker', 'snow_rabbit']), [
+    { from: 'ash', to: 'joker', skill: { name: '아마겟돈', type: 'phy', tier: 3, val: 10.5 } },
+    { from: 'joker', to: 'snow_rabbit', skill: null },
+    { from: 'snow_rabbit', to: null, skill: null }
+  ]);
+  assert.deepEqual(preview(['ash', null, 'snow_rabbit']).map(p => [p.from, p.to]), [
+    ['ash', 'snow_rabbit'], [null, null], ['snow_rabbit', null]
+  ]);
+  assert.equal(S.RelayCore.GameUtils.getCardById('ash').skills.find(s => s.name === '아마겟돈').val, 7);
 });
