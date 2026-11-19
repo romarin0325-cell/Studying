@@ -61,6 +61,13 @@
     const best = attacks.slice().sort((x, y) => power(y) - power(x))[0];
     const skill = Object.assign(JSON.parse(JSON.stringify(best)), { cost: 0, heirloom: true, heirFrom: proto.id, heirFromName: proto.name });
     if (Number.isFinite(skill.val)) skill.val = Math.round(skill.val * HEIRLOOM_POWER * 100) / 100;
+    for (const effect of skill.effects || []) {
+      if (['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'].includes(effect.type)) {
+        effect.min *= HEIRLOOM_POWER;
+        effect.max *= HEIRLOOM_POWER;
+        if (effect.type === 'random_mult_moon_boost') effect.boostMax *= HEIRLOOM_POWER;
+      }
+    }
     return skill;
   }
 
@@ -120,7 +127,7 @@
     const B = {
       timers: [], events: [], ctx: [], probing: false,
       enemyIdx: 0, awaiting: false, outcome: null, retreatUsed: false,
-      pendingNext: null, intentCache: null, lastCalc: null, prev: null,
+      pendingNext: null, lastDownIdx: -1, intentCache: null, lastCalc: null, prev: null,
       lastHit: null, carry: 0, lastStandDone: false, gained: [], turnStartHp: 0
     };
 
@@ -146,6 +153,8 @@
       showBattleScreen() {}, clearBattleLog() {}, renderBattleView() {},
       renderBattleControls() { B.awaiting = true; },
       winBattle() {
+        if (B.lastDownIdx === B.enemyIdx) return;
+        B.lastDownIdx = B.enemyIdx;
         flush();
         push({ t: 'enemyDown', who: enemyRef(), treasure: hasAffix(host.battle.enemy, 'treasure') });
         if (B.enemyIdx + 1 < queue.length) {
@@ -192,10 +201,10 @@
     /* `hint` is the damage number of the log line being written: the full hit, even past 0 HP. */
     function flush(hint) {
       const b = host.battle;
-      if (!b.players || !b.enemy) return;
-      const now = snapshot(), was = B.prev;
-      B.prev = now;
+      const was = B.prev;
       if (!was) return;
+      const now = snapshot();
+      B.prev = now;
       const cause = B.ctx.length ? B.ctx[B.ctx.length - 1] : null;
       const diffUnit = (who, unit, a, z) => {
         if (!a || !z) return;
@@ -249,13 +258,25 @@
     }
 
     /* ---------- G/H: setting units up ---------- */
+    function applyAllyModifier(p, modifier) {
+      if (modifier.atk) {
+        p.atk = Math.floor(p.atk * modifier.atk);
+        p.matk = Math.floor(p.matk * modifier.atk);
+      }
+      if (modifier.def === 0) { p.def = 0; p.mdef = 0; }
+      if (modifier.crit) p.baseCrit = (Number.isFinite(p.baseCrit) ? p.baseCrit : 10) + modifier.crit;
+    }
+    function addAllyModifier(p, modifier) {
+      p.relayModifiers.push(modifier);
+      applyAllyModifier(p, modifier);
+    }
     function setupAllies() {
       for (const p of players()) {
-        const a = Q.ally || {};
-        if (a.atk) { p.atk = Math.floor(p.atk * a.atk); p.matk = Math.floor(p.matk * a.atk); }
-        if (a.def === 0) { p.def = 0; p.mdef = 0; }
-        if (a.crit) p.baseCrit = (Number.isFinite(p.baseCrit) ? p.baseCrit : 10) + a.crit;
-        if (a.mp) { p.maxMp = a.mp; p.mp = a.mp; }
+        p.relayModifiers = [];
+        if (Q.ally) {
+          addAllyModifier(p, Q.ally);
+          if (Q.ally.mp) { p.maxMp = Q.ally.mp; p.mp = Q.ally.mp; }
+        }
         const held = rules.heirloom && opts.heirlooms && opts.heirlooms[p.id];
         if (held) {
           const giver = GameUtils.getCardById(held.from), skill = giver && heirloomSkill(giver);
@@ -289,7 +310,7 @@
       if (quirk === 'martyr') {
         const alive = players().filter(p => !p.isDead);
         if (alive.length) {
-          asRule('martyr', () => alive.forEach(p => { p.atk = Math.floor(p.atk * 1.4); p.matk = Math.floor(p.matk * 1.4); }));
+          asRule('martyr', () => alive.forEach(p => addAllyModifier(p, { atk: 1.4 })));
           push({ t: 'rule', rule: 'martyr', who: alive.map(p => allyRef(p.pos)) });
         }
       }
@@ -302,8 +323,7 @@
       const p = alive[0];
       B.lastStandDone = true;
       p.lastStand = true;
-      p.atk = Math.floor(p.atk * 1.5); p.matk = Math.floor(p.matk * 1.5);
-      p.baseCrit = (Number.isFinite(p.baseCrit) ? p.baseCrit : 10) + 25;
+      addAllyModifier(p, { atk: 1.5, crit: 25 });
       push({ t: 'laststand', who: allyRef(p.pos) });
     }
 
@@ -314,8 +334,15 @@
       push({ t: 'act', who, target: refOf(target), delayed, heirloom: !!skill.heirloom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
       B.ctx.push({ kind: 'act', who, skill, delayed });
       B.lastHit = null;
+      const formId = source.formId;
+      const heirlooms = (source.skills || []).filter(s => s.heirloom);
       try {
         const result = go();
+        if (source.formId !== formId && source.relayModifiers) {
+          // the core rebuilds stats and skills from the new form's card: put back what the relay rules gave
+          for (const modifier of source.relayModifiers) applyAllyModifier(source, modifier);
+          for (const held of heirlooms) if (!source.skills.includes(held)) source.skills.push(held);
+        }
         const hit = B.lastHit && B.lastHit.source === source && B.lastHit.target === target ? B.lastHit.dmg : 0;
         const enemy = host.battle.enemy;
         if (isAlly(source) && target === enemy && hit > 0 && !B.outcome) {
@@ -388,6 +415,7 @@
       return go();
     };
     B.onDecide = function (enemy) {
+      flush();
       const cache = B.intentCache;
       let action;
       if (cache && cache.enemy === enemy && cache.turn === host.battle.turn) action = cache.action;
@@ -453,13 +481,24 @@
       };
     }
     function countdown() {
-      const enemy = host.battle.enemy, local = localTurn(enemy);
+      const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
+      const skillName = action => action.name.replace(/ 차징$/, '');
+      const cache = B.intentCache;
+      const current = cache && cache.enemy === enemy && cache.turn === b.turn && !enemy.buffs.stun && cache.action;
+      if (isScripted(current)) return { name: skillName(current), inTurns: 0, charge: !!current.isChargeStart };
+
       const saved = Math.random;
-      B.probing = true; Math.random = () => 0.999;   // random branches fall through, scripted turns remain
+      B.probing = true;
       try {
-        for (let k = 0; k <= 14; k++) {
+        for (let k = 1; k <= 14; k++) {
+          Math.random = () => 0.999;
           const a = original.decide.call(Logic, Object.assign({}, enemy), local + k);
-          if (isScripted(a)) return { name: a.name.replace(/ 차징$/, ''), inTurns: k, charge: !!a.isChargeStart };
+          if (!isScripted(a)) continue;
+          Math.random = () => 0;
+          const other = original.decide.call(Logic, Object.assign({}, enemy), local + k);
+          const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart };
+          if (isScripted(other) && skillName(other) !== next.name) next.alt = skillName(other);
+          return next;
         }
       } finally { Math.random = saved; B.probing = false; }
       return null;
@@ -517,7 +556,13 @@
 
     /* ---------- player options ---------- */
     function currentPlayer() { return host.battle.players[host.battle.currentPlayerIdx]; }
-    function skillAt(index) { const p = currentPlayer(); return index === 0 ? host.NORMAL_ATTACK : p.skills[index - 1]; }
+    function actionSkills(player) {
+      return [host.NORMAL_ATTACK].concat(player.skills).flatMap(skill => {
+        const choice = (skill.effects || []).find(effect => effect.type === 'transform_choice');
+        if (!choice) return [skill];
+        return choice.forms.map(formId => Object.assign({}, skill, { chosenFormId: formId }));
+      });
+    }
     function previewSkill(player, skill) {
       if (skill.type !== 'phy' && skill.type !== 'mag') return null;
       if (core.findDelayedSkillEffect && core.findDelayedSkillEffect(skill)) return { delayed: true };
@@ -561,7 +606,7 @@
       },
       act(index) {
         if (!B.awaiting || B.outcome) return [];
-        const player = currentPlayer(), skill = skillAt(index);
+        const player = currentPlayer(), skill = actionSkills(player)[index];
         if (!skill || player.mp < (skill.cost || 0)) return [];
         const events = run(() => { BattleRuntime.executeSkill(host, player, host.battle.enemy, skill); });
         if (skill.heirloom) player.skills = player.skills.filter(s => s !== skill);   // once per battle
@@ -583,8 +628,9 @@
       options() {
         if (!B.awaiting || B.outcome) return [];
         const player = currentPlayer();
-        return [host.NORMAL_ATTACK].concat(player.skills).map((skill, index) => ({
-          index, name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0,
+        return actionSkills(player).map((skill, index) => ({
+          index, name: skill.chosenFormId ? skill.name + ' → ' + GameUtils.getCardById(skill.chosenFormId).name : skill.name,
+          type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0,
           usable: player.mp >= (skill.cost || 0), effects: skill.effects || [], val: skill.val,
           heirloom: !!skill.heirloom, heirFrom: skill.heirFrom || null, heirFromName: skill.heirFromName || null,
           preview: previewSkill(player, skill)

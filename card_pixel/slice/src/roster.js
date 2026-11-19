@@ -48,7 +48,10 @@
     const has = id => !!sp[id + '-idle'];
     const card = id => core.GameUtils.getCardById(id);
     const facing = id => (sp[id + '-idle'] && sp[id + '-idle'].facing) || (id === 'golem' || id === 'emerald_beetle' ? 'left' : 'right');
-    const allies = core.GameUtils.getAllCards().filter(c => !c.battleOnly && has(c.id) && !WILD[c.id]).map(c => c.id);
+    const allies = core.GameUtils.getAllCards().filter(c => {
+      const idle = sp[c.id + '-idle'];
+      return !c.battleOnly && idle && idle.kind !== 'boss' && !WILD[c.id];
+    }).map(c => c.id);
     const wild = Object.keys(WILD).filter(has);
     const bosses = Object.keys(BOSSES);
 

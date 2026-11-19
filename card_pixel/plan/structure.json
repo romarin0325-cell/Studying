@@ -320,7 +320,7 @@
       "step": "크기 맞추기",
       "tool": "card_pixel/slice/tools/cut-sprites.mjs",
       "input": "대기 자세의 높이를 기준으로 세 자세에 같은 배율 적용",
-      "output": "동료 72점·생물 48/64/80점·보스 104점 높이 기준; 현재 25장에는 분리된 ash-fx.png도 포함"
+      "output": "동료 72점·생물 48/64/80점·보스 104점 높이 기준; 현재 187장에는 분리된 ash-fx.png도 포함"
     },
     {
       "step": "문서에 넣기",
@@ -347,7 +347,7 @@
     },
     {
       "command": "node card_pixel/slice/tests/play.mjs",
-      "what_it_proves": "기본 시작 숫자 7·21·99로 자동 조작하고 종료·오류·정체·반응 시간을 기록하도록 작성됐다. 첫 판의 화면을 tests/shots/에 저장한다. 현재 roomIdx·reward 참조가 화면과 달라 끝까지 확인하는 용도로는 보수가 필요하다.",
+      "what_it_proves": "기본 시작 숫자 7·21·99로 현재 층·문과 화면 상태를 읽어 자동 조작하고 종료·오류·정체·반응 시간을 기록한다. 첫 판의 화면을 tests/shots/에 저장한다.",
       "takes": "분 단위 예상·현재 통과 미확인"
     },
     {
@@ -391,15 +391,15 @@
     },
     {
       "path": "card_pixel/slice/README.md",
-      "holds": "실행·검사·구조 안내. 본문은 세 층·content.js·A–D를 설명하므로 현재 일곱 층·roster.js·run.js·A–H와 차이가 있다."
+      "holds": "실행·검사·구조 안내. 일곱 층 원정과 roster.js·run.js의 역할, 채택 규칙 A–D와 실험 규칙 E–H를 설명한다."
     },
     {
       "path": "card_pixel/plan/README.md · experimental-rules.md",
-      "holds": "지침과 연결층이 가리키지만 현재 파일은 없다. 실험 E–H는 bridge.js 머리말에서 확인했다."
+      "holds": "계획 폴더 안내와 실험 규칙 E–H의 설계·시뮬레이션 수치."
     },
     {
       "path": "card_pixel/history/ · model-log.md",
-      "holds": "지침상 날짜별 작업과 모델별 위임 평가를 둘 자리다. 현재 폴더와 파일은 없다."
+      "holds": "날짜별 작업 기록과 모델별 위임 평가."
     },
     {
       "path": "card_pixel/plan/structure.json · build-structure.mjs · structure.html",

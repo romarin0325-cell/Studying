@@ -35,8 +35,9 @@
   }
 
   /* ---------- awakenings ---------- */
-  function drawFrom(run, roster, rates, exclude) {
-    const pool = run.pool.filter(id => !exclude.includes(id));
+  const canRecruit = (run, id) => !run.bench.includes(id) && !run.fallen.includes(id);
+  function drawFrom(run, roster, rates, exclude = []) {
+    const pool = run.pool.filter(id => canRecruit(run, id) && !exclude.includes(id));
     if (!pool.length) return null;
     const byGrade = {};
     for (const id of pool) (byGrade[GRADE_OF(roster.card(id).grade)] = byGrade[GRADE_OF(roster.card(id).grade)] || []).push(id);
@@ -50,13 +51,14 @@
   function pickChoices(run, roster, n, opts) {
     const out = [], near = opts && opts.near && roster.card(opts.near);
     if (near) {
-      const same = run.pool.filter(id => !run.bench.includes(id) && roster.card(id).element === near.element);
+      const same = run.pool.filter(id => canRecruit(run, id) && roster.card(id).element === near.element);
       if (same.length) out.push(pick(run.rng, same));
     }
-    for (let i = out.length; i < (n || 3); i++) { const id = drawFrom(run, roster, RATES.pick, run.bench.concat(out)); if (id) out.push(id); }
+    for (let i = out.length; i < (n || 3); i++) { const id = drawFrom(run, roster, RATES.pick, out); if (id) out.push(id); }
     return near ? shuffle(run.rng, out) : out;
   }
   function takePick(run, choices, id) {
+    if (!canRecruit(run, id)) return;
     run.bench.push(id);
     run.unchosen = run.unchosen.filter(x => !choices.includes(x)).concat(choices.filter(x => x !== id));
   }
@@ -65,7 +67,7 @@
   /** 깨우기: one random character, paid unless free. */
   function drawAwaken(run, roster, free) {
     if (!free) { if (run.crystals < COST.draw) return null; run.crystals -= COST.draw; }
-    const id = drawFrom(run, roster, RATES.draw, run.bench);
+    const id = drawFrom(run, roster, RATES.draw);
     if (id) run.bench.push(id);
     return id;
   }
@@ -82,7 +84,7 @@
 
   /* ---------- floors and doors ---------- */
   function drawShadow(run, roster, grades, taken) {
-    const pool = run.pool.filter(id => !run.bench.includes(id) && !taken.includes(id) && grades.includes(GRADE_OF(roster.card(id).grade)));
+    const pool = run.pool.filter(id => canRecruit(run, id) && !taken.includes(id) && grades.includes(GRADE_OF(roster.card(id).grade)));
     return pool.length ? pick(run.rng, pool) : null;
   }
   function affixes(run, n, allowTreasure) {
@@ -112,7 +114,7 @@
   }
   function gateDoor(run, roster, f) {
     const mul = TIER[f], taken = [];
-    const first = run.unchosen.filter(id => !run.bench.includes(id));
+    const first = run.unchosen.filter(id => canRecruit(run, id));
     const a = first.length ? pick(run.rng, first) : drawShadow(run, roster, ['rare', 'epic'], taken);
     if (a) taken.push(a);
     const b = drawShadow(run, roster, ['epic', 'legend'], taken) || drawShadow(run, roster, ['normal', 'rare', 'epic', 'legend'], taken);
@@ -165,12 +167,16 @@
       if (party.some((id, i) => id && alive[i] && roster.card(id).trait && roster.card(id).trait.type === 'looter')) crystals += 1;
       run.crystals += crystals;
     }
-    if (!win) run.result = 'lose';
+    const wiped = win && run.bench.length === 0;
+    if (!win || (wiped && door.type !== 'boss')) run.result = 'lose';
     else if (door.type === 'boss') run.result = 'win';
-    return { win, fallen, crystals };
+    return { win, wiped, fallen, crystals };
   }
   /** After the gate: the defeated shadows can be woken for free (pick one). */
-  function gateChoices(run, door) { return door.enemies.map(e => e.source).filter(id => id && !run.bench.includes(id)); }
+  function gateChoices(run, door) {
+    if (run.result) return [];
+    return door.enemies.map(e => e.source).filter(id => id && canRecruit(run, id));
+  }
 
   root.RelayRun = {
     FLOORS, RATES, COST, BLESS, JACKPOT, TIER, START,

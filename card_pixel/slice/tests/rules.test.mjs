@@ -42,6 +42,36 @@ test('E heirloom: the fallen fighter\'s strongest attack goes to the next one, f
   assert.deepEqual(JSON.parse(JSON.stringify(b.heirloomsGained())), [{ to: 'ash', from: 'red_dragon', name: best.name }]);
 });
 
+test('E heirlooms scale random attack ranges and damage without changing the original skills', () => {
+  for (const id of ['santa', 'avalanche_maid']) {
+    const card = roster.card(id);
+    const original = card.skills.find(s => s.effects.some(e => e.type === 'random_mult'));
+    const range = plain(original.effects.find(e => e.type === 'random_mult'));
+    const hit = heirloom => {
+      const heirlooms = heirloom ? { [id]: { from: id } } : {};
+      const b = battle({ party: [id], seed: 1, heirlooms });
+      b.start();
+      const option = b.options().find(o => o.name === original.name && o.heirloom === heirloom);
+      const effect = option.effects.find(e => e.type === 'random_mult');
+      const power = heirloom ? 1.5 : 1;
+      assert.deepEqual([effect.min, effect.max], [range.min * power, range.max * power], id);
+      return b.act(option.index).find(e => e.t === 'hp' && e.who.side === 'enemy').amount;
+    };
+    const normal = hit(false), inherited = hit(true);
+    assert.ok(Math.abs(inherited - normal * 1.5) <= 1, id + ': ' + normal + ' → ' + inherited);
+    assert.deepEqual(plain(original.effects.find(e => e.type === 'random_mult')), range, id);
+  }
+  const gray = roster.card('gray');
+  for (const type of ['random_mult_moon_boost', 'delayed_random_attack']) {
+    const skill = gray.skills.find(s => s.effects.some(e => e.type === type));
+    const original = plain(skill.effects.find(e => e.type === type));
+    const inherited = Bridge.heirloomSkill({ ...gray, skills: [skill] }).effects.find(e => e.type === type);
+    assert.deepEqual([inherited.min, inherited.max], [original.min * 1.5, original.max * 1.5], type);
+    if (type === 'random_mult_moon_boost') assert.equal(inherited.boostMax, original.boostMax * 1.5);
+    assert.deepEqual(plain(skill.effects.find(e => e.type === type)), original);
+  }
+});
+
 test('E heirloom: usable once per battle, and it comes back in the next battle', () => {
   const b = battle({ party: ['ash', 'luna'], heirlooms: { ash: { from: 'red_dragon', name: '파이어브레스' } } });
   b.start();
@@ -214,4 +244,66 @@ test('run: awakenings, the altar and permadeath', () => {
   assert.deepEqual(plain(run.fallen).sort(), ['ash', 'luna', 'red_dragon']);
   assert.equal(run.bench.length, 0);
   assert.equal(run.result, 'lose');
+});
+
+test('run: fallen ids stay out of awakenings, shadow encounters and recruitment', () => {
+  const shadowDoors = new Set();
+  for (let seed = 1; seed <= 100; seed++) {
+    const run = R.newRun(core, roster, seed, {});
+    run.bench = ['zeke'];
+    run.fallen = ['ash', 'red_dragon', 'luna', 'siren'];
+    run.unchosen = ['ash'];
+    const check = (ids, source) => {
+      assert.ok(ids.every(id => !run.fallen.includes(id)), source + ' seed ' + seed);
+    };
+    check(R.pickChoices(run, roster, 3), 'pick');
+    check(R.pickChoices(run, roster, 3, { near: 'red_dragon' }), 'near pick');
+    check([R.drawAwaken(run, roster, true)], 'draw');
+    for (const f of [3, 4, 5]) {
+      for (const door of R.makeDoors(run, roster, f)) {
+        const sources = door.enemies.map(e => e.source).filter(Boolean);
+        if (sources.length) shadowDoors.add(door.type);
+        check(sources, 'floor ' + f + ' ' + door.type);
+      }
+    }
+    const door = { enemies: [roster.shadowOf('ash', 1), roster.shadowOf('zeke', 1)] };
+    assert.deepEqual(plain(R.gateChoices(run, door)), []);
+    R.takePick(run, ['ash'], 'ash');
+    check(run.bench, 'recruit');
+  }
+  assert.deepEqual(shadowDoors, new Set(['wild', 'elite', 'gate']));
+});
+
+test('roster: boss-only sprites stay out of the ally pool, and kind is optional', () => {
+  const meta = JSON.parse(fs.readFileSync(path.join(here, '../assets/sprites.json'), 'utf8'));
+  const entries = Object.entries(meta).map(([filename, sprite]) => [filename.replace(/\.png$/, ''), sprite]);
+  const real = RelayRoster.create(core, { sp: Object.fromEntries(entries) });
+  assert.equal(real.allies.length, 42);
+  assert.ok(!real.allies.includes('gray') && real.bosses.includes('gray'));
+  const fake = RelayRoster.create(core, { sp: { 'gray-idle': {} } });
+  assert.deepEqual(plain(fake.allies), ['gray']);
+});
+
+test('run: a winning self-destruct ends an empty-bench run, with a win only at the boss', () => {
+  const party = ['chaos_mage'];
+  for (const [type, reserve, result] of [
+    ['wild', [], 'lose'], ['gate', [], 'lose'], ['boss', [], 'win'], ['wild', ['ash'], null]
+  ]) {
+    const run = R.newRun(core, roster, 7, {});
+    run.bench = party.concat(reserve);
+    const foe = dummy({ source: 'luna', stats: { hp: 100, atk: 60, matk: 60, def: 60, mdef: 60 } });
+    const door = { type, enemies: [foe], reward: 1 };
+    const b = battle(R.battleOptions(run, door, party));
+    const start = b.start();
+    const carnival = b.options().find(o => o.name === '카오스카니발');
+    const events = start.concat(b.act(carnival.index));
+    assert.equal(b.outcome, 'win', type);
+    assert.ok(!b.survivors().some(Boolean), type);
+    const res = R.applyBattle(run, roster, door, party, b, events);
+    assert.equal(res.win, true, type);
+    assert.equal(res.wiped, reserve.length === 0, type);
+    assert.deepEqual(plain(run.bench), reserve, type);
+    assert.equal(run.result, result, type);
+    if (type === 'gate') assert.deepEqual(plain(R.gateChoices(run, door)), []);
+  }
 });

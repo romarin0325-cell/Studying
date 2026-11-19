@@ -77,7 +77,7 @@ h3 { font-size: 12px; color: var(--aqua); margin-top: 14px; }
 #foebar .row { display: flex; gap: 6px; align-items: flex-start; margin-top: 4px; }
 #foebar .row .chips { flex: 1; }
 #foebar .row:has(.chips:empty):not(:has(.cd.on)) { display: none; }
-.cd { font: 12px/16px var(--px); padding: 0 5px; background: #3a1420; color: #ffb0a8; display: none; white-space: nowrap; }
+.cd { font: 12px/16px var(--px); padding: 0 5px; background: #3a1420; color: #ffb0a8; display: none; min-width: 0; overflow-wrap: anywhere; }
 .cd.on { display: block; } .cd.now { background: var(--coral); color: #1b0b10; animation: blink .5s steps(2) infinite; }
 @keyframes blink { 50% { opacity: .55; } }
 .sky { position: absolute; top: 84px; left: 8px; display: flex; gap: 3px; align-items: center; }
