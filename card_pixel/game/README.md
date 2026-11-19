@@ -4,7 +4,7 @@
 
 ```sh
 node card_pixel/game/build.mjs
-node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs
+node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs
 node card_pixel/game/tools/sim.mjs 100
 node card_pixel/game/tests/play.mjs
 ```

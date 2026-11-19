@@ -6,7 +6,7 @@ import path from 'node:path';
 
 export const CORE_FILES = ['data.js', 'logic.js', 'skill_display.js', 'battle_runtime.js'];
 const EXPORTS = [
-  'CARDS', 'ENEMIES', 'BASIC_CARD_SETS', 'BUFF_NAMES', 'DISPLAY_NAMES',
+  'CARDS', 'ENEMIES', 'BASIC_CARD_SETS', 'ARTIFACT_LIST', 'BUFF_NAMES', 'DISPLAY_NAMES',
   'GameUtils', 'Logic', 'StatusRules', 'SideEffects', 'SkillDisplay', 'BattleRuntime',
   'getMaxMana', 'findDelayedSkillEffect', 'buildBattleEnemy'
 ];

@@ -264,7 +264,8 @@ function planCardPixel(plan, files, currentFiles) {
   if (files.some(file => isPixelGameSource(file) || /^card\/game\/[^/]+\.js$/.test(file))) {
     addNodeTest(plan, 'card', 'card:pixel:rules', 'Check the Pixel Relay bridge and run rules', [
       'card_pixel/game/tests/bridge.test.mjs',
-      'card_pixel/game/tests/rules.test.mjs'
+      'card_pixel/game/tests/rules.test.mjs',
+      'card_pixel/game/tests/run.test.mjs'
     ]);
   }
 }

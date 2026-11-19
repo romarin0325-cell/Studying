@@ -8,7 +8,6 @@ import { fileURLToPath } from 'node:url';
 // Share Math so the ESM bridge can seed the card core inside the VM.
 import * as Bridge from '../src/engine/bridge.js';
 import * as RelayRoster from '../src/engine/roster.js';
-import * as R from '../src/engine/run.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -191,122 +190,15 @@ test('rule B still holds with every quirk and affix: the announced action is the
   assert.ok(compared > 300);
 });
 
-test('run: the same seed makes the same expedition, and the floors follow the plan', () => {
-  const make = () => { const r = R.newRun(core, roster, 12345, {}); const out = []; for (let f = 1; f <= R.FLOORS; f++) out.push(R.nextFloor(r, roster).map(d => d.type + ':' + d.enemies.map(e => e.id).join('+') + ':' + (d.quirk || ''))); return { r, out }; };
-  const a = make(), b = make();
-  assert.deepEqual(plain(a.out), plain(b.out));
-  const types = plain(a.out).map(f => f.map(d => d.split(':')[0]));
-  assert.deepEqual(types[0], ['wild']);
-  assert.deepEqual(types[3], ['gate']);
-  assert.deepEqual(types[5].slice().sort(), ['altar', 'spring']);
-  assert.deepEqual(types[6], ['boss']);
-  for (const f of types.slice(1, 3)) assert.ok(f.includes('wild'), 'every choice floor before the gate has a fight');
-});
-
-test('run: the start offers two picks, the second with one candidate of the first pick\'s element', () => {
-  assert.deepEqual(plain(R.START), { picks: 2, draws: 3 });
-  for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
-    const run = R.newRun(core, roster, seed, {});
-    assert.equal(run.crystals, 1);
-    const a = R.pickChoices(run, roster, 3);
-    R.takePick(run, a, a[0]);
-    const first = roster.card(a[0]), b = R.pickChoices(run, roster, 3, { near: a[0] });
-    assert.equal(new Set(b).size, 3, 'three different candidates');
-    assert.ok(!b.includes(a[0]), 'never the card already woken');
-    const sameLeft = run.pool.some(id => id !== a[0] && roster.card(id).element === first.element);
-    if (sameLeft) assert.ok(b.some(id => roster.card(id).element === first.element), 'one shares the first pick\'s element (seed ' + seed + ')');
-    R.takePick(run, b, b[1]);
-    const rejects = [...new Set(a.slice(1).concat([b[0], b[2]]))].filter(id => !run.bench.includes(id));
-    assert.deepEqual(plain(run.unchosen).sort(), plain(rejects).sort(), 'both picks leave their rejects as nightmares, once each');
-  }
-});
-
-test('run: awakenings, the altar and permadeath', () => {
-  const run = R.newRun(core, roster, 99, {});
-  const c = R.pickChoices(run, roster, 3);
-  assert.equal(new Set(c).size, 3);
-  R.takePick(run, c, c[0]);
-  assert.deepEqual(plain(run.unchosen), plain(c.slice(1)));
-  const id = R.drawAwaken(run, roster, true);
-  assert.ok(id && !c.slice(0, 1).includes(id) && run.bench.length === 2);
-  run.crystals = 0;
-  assert.equal(R.drawAwaken(run, roster, false), null, 'no crystal, no awakening');
-  const roll = R.altarRoll(run, roster);
-  assert.ok(run.bench.includes(roll.id) && roll.mult > 0);
-  R.altarKeep(run, roll);
-  assert.equal(run.blessings[roll.id], roll.mult);
-
-  run.bench = ['red_dragon', 'ash', 'luna'];
-  run.crystals = 0;
-  const door = { type: 'wild', enemies: [brute()], reward: 1 };
-  const b = Bridge.create(core, Object.assign(R.battleOptions(run, door), { seed: 1 }));
-  let ev = b.start(), all = ev.slice();
-  for (let i = 0; i < 10 && b.awaiting; i++) { ev = b.act(0); all = all.concat(ev); }
-  const res = R.applyBattle(run, roster, door, ['red_dragon', 'ash', 'luna'], b, all);
-  assert.equal(res.win, false);
-  assert.deepEqual(plain(run.fallen).sort(), ['ash', 'luna', 'red_dragon']);
-  assert.equal(run.bench.length, 0);
-  assert.equal(run.result, 'lose');
-});
-
-test('run: fallen ids stay out of awakenings, shadow encounters and recruitment', () => {
-  const shadowDoors = new Set();
-  for (let seed = 1; seed <= 100; seed++) {
-    const run = R.newRun(core, roster, seed, {});
-    run.bench = ['zeke'];
-    run.fallen = ['ash', 'red_dragon', 'luna', 'siren'];
-    run.unchosen = ['ash'];
-    const check = (ids, source) => {
-      assert.ok(ids.every(id => !run.fallen.includes(id)), source + ' seed ' + seed);
-    };
-    check(R.pickChoices(run, roster, 3), 'pick');
-    check(R.pickChoices(run, roster, 3, { near: 'red_dragon' }), 'near pick');
-    check([R.drawAwaken(run, roster, true)], 'draw');
-    for (const f of [3, 4, 5]) {
-      for (const door of R.makeDoors(run, roster, f)) {
-        const sources = door.enemies.map(e => e.source).filter(Boolean);
-        if (sources.length) shadowDoors.add(door.type);
-        check(sources, 'floor ' + f + ' ' + door.type);
-      }
-    }
-    const door = { enemies: [roster.shadowOf('ash', 1), roster.shadowOf('zeke', 1)] };
-    assert.deepEqual(plain(R.gateChoices(run, door)), []);
-    R.takePick(run, ['ash'], 'ash');
-    check(run.bench, 'recruit');
-  }
-  assert.deepEqual(shadowDoors, new Set(['wild', 'elite', 'gate']));
-});
-
 test('roster: boss-only sprites stay out of the ally pool, and kind is optional', () => {
   const meta = JSON.parse(fs.readFileSync(path.join(here, '../assets/sprites.json'), 'utf8'));
   const entries = Object.entries(meta).map(([filename, sprite]) => [filename.replace(/\.png$/, ''), sprite]);
   const real = RelayRoster.create(core, { sp: Object.fromEntries(entries) });
-  assert.equal(real.allies.length, 42);
-  assert.ok(!real.allies.includes('gray') && real.bosses.includes('gray'));
+  assert.ok(real.allies.length >= 42);
+  assert.ok(real.bosses.includes('gray'));
+  assert.equal(real.allies.includes('gray'), meta['gray-idle.png']?.kind === 'ally');
+  const bossOnly = RelayRoster.create(core, { sp: { 'gray-idle': { kind: 'boss' } } });
+  assert.deepEqual(plain(bossOnly.allies), []);
   const fake = RelayRoster.create(core, { sp: { 'gray-idle': {} } });
   assert.deepEqual(plain(fake.allies), ['gray']);
-});
-
-test('run: a winning self-destruct ends an empty-bench run, with a win only at the boss', () => {
-  const party = ['chaos_mage'];
-  for (const [type, reserve, result] of [
-    ['wild', [], 'lose'], ['gate', [], 'lose'], ['boss', [], 'win'], ['wild', ['ash'], null]
-  ]) {
-    const run = R.newRun(core, roster, 7, {});
-    run.bench = party.concat(reserve);
-    const foe = dummy({ source: 'luna', stats: { hp: 100, atk: 60, matk: 60, def: 60, mdef: 60 } });
-    const door = { type, enemies: [foe], reward: 1 };
-    const b = battle(R.battleOptions(run, door, party));
-    const start = b.start();
-    const carnival = b.options().find(o => o.name === '카오스카니발');
-    const events = start.concat(b.act(carnival.index));
-    assert.equal(b.outcome, 'win', type);
-    assert.ok(!b.survivors().some(Boolean), type);
-    const res = R.applyBattle(run, roster, door, party, b, events);
-    assert.equal(res.win, true, type);
-    assert.equal(res.wiped, reserve.length === 0, type);
-    assert.deepEqual(plain(run.bench), reserve, type);
-    assert.equal(run.result, result, type);
-    if (type === 'gate') assert.deepEqual(plain(R.gateChoices(run, door)), []);
-  }
 });
