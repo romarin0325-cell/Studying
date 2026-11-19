@@ -372,12 +372,45 @@ test('Tide forecasts and resolves the strongest magic hit, then announces rest',
   assert.equal(strike.skill.name, hit);
   assert.equal(events.find(e => e.t === 'hp' && e.who.side === 'ally').amount, 133);
   assert.equal(events.find(e => e.t === 'buff' && e.id === 'curse').to, 1);
-  assert.deepEqual(last(events, 'await').intent, { kind: 'rest', name: '물러간 조류' });
+  assert.deepEqual(last(events, 'await').intent, { kind: 'rest', name: '물러간 조류', vulnerable: 1.5 });
   assert.equal(last(events, 'await').countdown.inTurns, 3);
+  assert.deepEqual(plain(last(events, 'rule').who), { side: 'enemy', idx: 0 });
+  assert.equal(last(events, 'rule').name, '조류가 빠진 틈');
   events = b.act(0);
-  assert.equal(last(events, 'rule').kind, 'rest');
   assert.equal(events.some(e => e.t === 'act' && e.who.side === 'enemy'), false);
   assert.equal(events.some(e => e.t === 'hp' && e.who.side === 'ally'), false);
+});
+
+test('Tide opening scales previews and dealt damage only on each non-boss enemy’s fourth cycle turn', () => {
+  const enemies = [quietEnemy(1), quietEnemy()];
+  const config = { party: ['red_dragon'], enemies };
+  const plainBattle = battle(config);
+  const tide = battle({ ...config, region: { id: 'tide_cycle' } });
+  const boss = battle({ ...config, enemies: [enemies[0], { ...enemies[1], boss: true }], region: { id: 'tide_cycle' } });
+  for (const b of [plainBattle, tide, boss]) {
+    b.start();
+    b.host.battle.players[0].baseCrit = 0;
+    b.act(0);
+  }
+
+  for (let turn = 1; turn <= 9; turn++) {
+    const opening = turn % 4 === 0;
+    const baseline = option(plainBattle, '일반 공격').preview.dmg;
+    for (const b of [plainBattle, tide, boss]) {
+      const vulnerable = b === tide && opening;
+      const expected = vulnerable ? Math.floor(baseline * 1.5) : baseline;
+      const attack = option(b, '일반 공격');
+      assert.equal(b.state().turn, turn + 1);
+      assert.equal(attack.preview.dmg, expected);
+      const events = b.act(attack.index);
+      const hit = events.find(e => e.t === 'hp' && e.who.side === 'enemy');
+      assert.equal(hit.amount, attack.preview.dmg);
+      const nextOpening = b === tide && (turn + 1) % 4 === 0;
+      assert.equal(last(events, 'await').intent.vulnerable, nextOpening ? 1.5 : undefined);
+      const marker = events.find(e => e.t === 'rule' && e.rule === 'tide_cycle');
+      assert.equal(marker?.vulnerable, nextOpening ? 1.5 : undefined);
+    }
+  }
 });
 
 test('Tide counts from each enemy entry, falls back to MATK, and skips bosses', () => {

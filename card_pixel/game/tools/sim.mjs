@@ -1,4 +1,4 @@
-// node card_pixel/game/tools/sim.mjs [runs] [--all | --dungeon=<id>] [--nightmare]
+// node card_pixel/game/tools/sim.mjs [runs] [--all | --dungeon=<id>] [--difficulty=normal|nightmare]
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -13,10 +13,12 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..', '..', '..');
 const args = process.argv.slice(2);
 const flag = name => args.includes(name);
-const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--all') ? 200 : 300));
+const runs = Number(args.find(arg => /^\d+$/.test(arg)) || 300);
 const dungeon = args.find(arg => arg.startsWith('--dungeon='))?.slice('--dungeon='.length) || 'ember_volcano';
-const difficulty = flag('--nightmare') ? 'nightmare' : 'normal';
+const difficulty = args.find(arg => arg.startsWith('--difficulty='))?.slice('--difficulty='.length)
+  ?? (flag('--nightmare') ? 'nightmare' : 'normal');
 const dungeons = flag('--all') ? Object.keys(DUNGEONS).filter(id => difficulty === 'normal' || DUNGEONS[id].nightmareRule) : [dungeon];
+if (!['normal', 'nightmare'].includes(difficulty)) throw new RangeError('Invalid difficulty: ' + difficulty);
 if (!runs || dungeons.some(id => !Object.hasOwn(DUNGEONS, id))) throw new RangeError('Invalid run count or dungeon');
 
 const manifest = JSON.parse(fs.readFileSync(path.join(here, '../assets/sprites.json'), 'utf8'));
@@ -78,7 +80,9 @@ function fight(run) {
     events = bridge.act(index);
   }
   if (!bridge.outcome) throw new Error('Battle did not finish: ' + run.id + ' floor ' + run.floor);
-  checked(R.settleBattle(run, bridge));
+  const summary = bridge.summary();
+  checked(R.settleBattle(run, summary));
+  return summary.heirloomsGained.length;
 }
 
 function chooseDoor(run) {
@@ -124,6 +128,7 @@ function resolveChoices(run) {
 
 function playRun(dungeonId, seed) {
   const run = R.createRun({ core, roster, dungeonId, difficulty, seed, plain: flag('--plain') });
+  let heirloomsGained = 0;
   resolveChoices(run);
   while (run.phase !== 'done') {
     const door = chooseDoor(run);
@@ -132,7 +137,7 @@ function playRun(dungeonId, seed) {
       const retries = run.stats.retries;
       do {
         if (run.stats.retries - retries >= 20) throw new Error('Intro retry limit: ' + run.id);
-        fight(run);
+        heirloomsGained += fight(run);
       } while (run.room.status === 'order');
     } else if (door.type === 'spring') {
       if (run.bench.length < 6 && R.springPick(run).ok) {
@@ -149,24 +154,29 @@ function playRun(dungeonId, seed) {
     }
   }
   const end = checked(R.finishRun(run));
-  return { end, stats: run.stats, fallen: run.fallen.length };
+  return { end, stats: run.stats, fallen: run.fallen.length, heirloomsGained };
 }
 
 console.log(difficulty + ' · ' + runs + ' seeds per dungeon');
-console.log('| Dungeon | Clear | 1,000+ hit | Battles/run | Fallen/run | Recruitable/run |');
-console.log('| --- | ---: | ---: | ---: | ---: | ---: |');
+console.log('| Dungeon | Clear | 1,000+ hit | Battles/run | Fallen/run | Heirlooms gained/run | Heirlooms used/run | Last stands/run | Turns/battle | Recruitable/run |');
+console.log('| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
 for (const id of dungeons) {
-  const counts = { wins: 0, bigHits: 0, battles: 0, fallen: 0, recruitable: 0 };
+  const counts = { wins: 0, bigHits: 0, battles: 0, fallen: 0, gained: 0, used: 0, lastStands: 0, turns: 0, recruitable: 0 };
   for (let seed = 1; seed <= runs; seed++) {
-    const { end, stats, fallen } = playRun(id, seed * 7919);
+    const { end, stats, fallen, heirloomsGained } = playRun(id, seed * 7919);
     counts.wins += Number(end.result === 'win');
     counts.bigHits += Number(stats.best >= 1000);
     counts.battles += stats.battles;
     counts.fallen += fallen;
+    counts.gained += heirloomsGained;
+    counts.used += stats.heirloomsUsed;
+    counts.lastStands += stats.lastStands;
+    counts.turns += stats.turns;
     counts.recruitable += end.recruitable.length;
   }
   const percent = n => (n / runs * 100).toFixed(1) + '%';
   const average = n => (n / runs).toFixed(2);
   console.log('| ' + [id, percent(counts.wins), percent(counts.bigHits), average(counts.battles),
-    average(counts.fallen), average(counts.recruitable)].join(' | ') + ' |');
+    average(counts.fallen), average(counts.gained), average(counts.used), average(counts.lastStands),
+    (counts.turns / counts.battles).toFixed(2), average(counts.recruitable)].join(' | ') + ' |');
 }

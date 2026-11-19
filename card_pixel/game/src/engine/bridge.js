@@ -17,7 +17,7 @@
    H  affixes               enemy modifiers that give ordinary fights a readable twist (AFFIXES)
  Regional events (each has t: 'rule' and the usual snapshot s):
    ember_carry / twilight_bell  { rule, who: enemy ref, stacks: number actually added }
-   tide_cycle                  { rule, who: enemy ref, kind: 'rest' }; the hit uses the usual act event
+   tide_cycle                  { rule, who: enemy ref, kind: 'rest', name, vulnerable }; emitted when the opening starts
    arena_charge                { rule, who: ally ref, multiplier: 2 } when spent
  The await event carries region: { bellIn } or { charge, ready }, and the next tide hit in countdown.
  Works in the browser and in Node with the same card core. */
@@ -421,6 +421,14 @@ export function create(core, opts) {
   };
   B.onStartPlayerTurn = function (go) {
     const b = host.battle;
+    // Mark the opening before scheduled hits or the player's command can land.
+    if (b.isNewTurn && b.enemy?.hp > 0) {
+      const vulnerable = tideVulnerability(b.enemy);
+      if (vulnerable) {
+        flush();
+        push({ t: 'rule', rule: region, who: enemyRef(), kind: 'rest', name: REGIONS.tide_cycle.opening, vulnerable });
+      }
+    }
     if (region === 'twilight_bell' && b.isNewTurn && b.enemy?.hp > 0 && bellTurns.includes(b.turn)) {
       const before = b.enemy.buffs.divine || 0;
       asRule(region, () => {
@@ -470,10 +478,7 @@ export function create(core, opts) {
     B.intentCache = null;
     const top = B.ctx[B.ctx.length - 1];
     if (top && top.enemyTurn) top.skill = action;
-    if (action.type === 'rest') {
-      push({ t: 'rule', rule: 'tide_cycle', who: enemyRef(), kind: 'rest' });
-      return action;
-    }
+    if (action.type === 'rest') return action;
     const target = host.battle.players[host.battle.currentPlayerIdx];
     push({
       t: 'act', who: enemyRef(), target: target ? allyRef(target.pos) : null, delayed: false,
@@ -485,6 +490,11 @@ export function create(core, opts) {
   B.onCalc = function (source, target, skill, lines, result) {
     const b = host.battle;
     const cause = B.ctx.at(-1);
+    const vulnerable = target === b.enemy && tideVulnerability(target);
+    if (vulnerable && result.dmg > 0) {
+      result.dmg = tideDamage(result.dmg, vulnerable);
+      lines.push(`${REGIONS.tide_cycle.opening}: 받는 피해 ${vulnerable}배`);
+    }
     if (target === b.enemy && cause?.source === source && isAlly(source)) {
       if (chargedSkill(cause.skill)) {
         B.chargeSpent = true;
@@ -516,11 +526,17 @@ export function create(core, opts) {
   /* ---------- rule B: intent, rule A: countdown ---------- */
   const isScripted = action => !!action && action.name !== '일반 공격' && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
   const inTide = () => region === 'tide_cycle' && !queue[B.enemyIdx].boss;
+  function tideVulnerability(enemy) {
+    if (!inTide()) return 0;
+    const turn = localTurn(enemy);
+    return turn > 0 && turn % 4 === 0 ? 1.5 : 0;
+  }
+  const tideDamage = (damage, vulnerable) => vulnerable ? Math.floor(damage * vulnerable) : damage;
   function decide(enemy) {
     const turn = localTurn(enemy);
-    const phase = turn % 4;
-    if (!inTide() || phase === 1 || phase === 2) return original.decide.call(Logic, enemy, turn);
-    if (phase === 0) return { type: 'rest', name: REGIONS.tide_cycle.rest };
+    const vulnerable = tideVulnerability(enemy);
+    if (vulnerable) return { type: 'rest', name: REGIONS.tide_cycle.rest, vulnerable };
+    if (!inTide() || turn % 4 !== 3) return original.decide.call(Logic, enemy, turn);
 
     const power = skill => skill.effects?.find(e => e.type === 'random_mult')?.max ?? skill.val ?? 1;
     const strongest = enemy.skills.filter(skill => skill.type === 'mag').sort((a, b) => power(b) - power(a))[0];
@@ -549,13 +565,13 @@ export function create(core, opts) {
   }
   function currentIntent(target = currentPlayer(), mayHitEnemy = true) {
     const b = host.battle, enemy = b.enemy;
-    if (enemy.buffs.stun) return { kind: 'stun', name: '기절', ult: false };
+    if (enemy.buffs.stun && !tideVulnerability(enemy)) return { kind: 'stun', name: '기절', ult: false };
     let cache = B.intentCache;
     if (!cache || cache.enemy !== enemy || cache.turn !== b.turn) {
       cache = B.intentCache = { enemy, turn: b.turn, action: decide(enemy) };
     }
     const a = cache.action;
-    if (a.type === 'rest') return { kind: 'rest', name: a.name };
+    if (a.type === 'rest') return { kind: 'rest', name: a.name, vulnerable: a.vulnerable };
     if (a.isChargeStart) return { kind: 'charge', name: a.name, ult: true };
     if (!isAttack(a)) return { kind: 'sup', name: a.name, ult: isScripted(a), effects: (a.effects || []).map(e => e.type) };
     const dmg = previewEnemyHit(a, target, mayHitEnemy);
@@ -690,7 +706,7 @@ export function create(core, opts) {
     try {
       const r = original.calc.call(Logic, player, enemy, attack, b.fieldBuffs, b.activeTraits, null,
         host.state.mode, host.state.deck, b.turn, host.state.artifacts);
-      const dmg = chargedSkill(skill) ? r.dmg * 2 : r.dmg;
+      const dmg = chargedSkill(skill) ? r.dmg * 2 : tideDamage(r.dmg, tideVulnerability(enemy));
       return { dmg, kill: dmg >= enemy.hp, forcedCrit: !!r.isCrit };
     } finally { Math.random = saved; B.probing = false; active = outer; core.GAME_CONSTANTS.BASE_CRIT_MULT = critMult; }
   }
