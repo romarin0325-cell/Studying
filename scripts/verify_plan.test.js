@@ -296,7 +296,7 @@ test('RELAYMARE or shared Card rules select the two headless suites once', () =>
     assert.equal(steps.length, 1);
     assert.equal(steps[0].command, 'node');
     assert.deepEqual(steps[0].args, [
-      '--test', 'card_pixel/game/tests/bridge.test.mjs', 'card_pixel/game/tests/rules.test.mjs', 'card_pixel/game/tests/run.test.mjs', 'card_pixel/game/tests/music.test.mjs'
+      '--test', 'card_pixel/game/tests/bridge.test.mjs', 'card_pixel/game/tests/music.test.mjs', 'card_pixel/game/tests/rules.test.mjs', 'card_pixel/game/tests/run.test.mjs'
     ]);
     assert.equal(steps[0].needsInstall, false);
     assert.deepEqual(plan.browsers, []);
