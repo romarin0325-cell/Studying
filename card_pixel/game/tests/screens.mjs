@@ -732,6 +732,8 @@ function orderHint() {
   settleWin(run);
   advance(run);
   reachFloor(run, 8);
+  assert.equal(run.doors[0].type, 'boss');
+  const session = storedSession({ run, profile });
   command(Run.chooseDoor, run, 0);
   const defaults = Run.defaultParty(run);
   const alternate = Run.suggestOrder(run);
@@ -742,9 +744,10 @@ function orderHint() {
   const moves = formationMoves(defaults, alternate, name);
   assert.ok(moves.some(move => move.includes(' ↔ ')) && moves.some(move => move.startsWith('대기 ')));
   return {
-    session: storedSession({ run }), proof: `${defaults.join(' → ')} differs from ${alternate.join(' → ')}`,
+    session, proof: `${defaults.join(' → ')} differs from ${alternate.join(' → ')}`,
     async show(page, { text, capture }) {
       await page.locator('#hub.on #meta-depart').click();
+      await page.locator('#map.on .door-entry[data-door="0"]').click();
       const order = page.locator('#order.on');
       for (const [index, id] of defaults.entries()) {
         await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
@@ -921,7 +924,16 @@ function formationBoard() {
       await text(order.locator('.relay-blessing'), '+' + Math.round((blessing.multiplier - 1) * 100) + '%');
       const positions = await Promise.all([0, 1, 2].map(i => slot(i).boundingBox()));
       assert.equal(new Set(positions.map(pos => pos.y)).size, 1);
-      assert.ok(positions.every(pos => pos.height === 84));
+      const sprites = await Promise.all([0, 1, 2].map(i => slot(i).locator('.relay-seat-art img').boundingBox()));
+      assert.ok(sprites.every(pos => pos.height >= 64 && pos.height <= 72));
+      assert.equal(new Set(sprites.map(pos => pos.y + pos.height)).size, 1);
+      for (const [i, seat] of positions.slice(0, 2).entries()) {
+        const link = await order.locator(`[data-link="${i}"]`).boundingBox();
+        assert.ok(link.x >= seat.x + seat.width && link.x + link.width <= positions[i + 1].x);
+        assert.ok(Math.abs(link.y + link.height / 2 - (seat.y + seat.height / 2)) <= 1);
+      }
+      const reserveFace = await order.locator(`[data-bench="${reserve}"] .run-face`).boundingBox();
+      assert.ok(reserveFace.width >= 48 && reserveFace.height >= 48);
       const depart = await order.locator('#b-go').boundingBox();
       assert.ok(depart && depart.y >= 0 && depart.y + depart.height <= viewport.height);
       await order.locator(`[data-bench="${reserve}"]`).click();

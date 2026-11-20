@@ -21,10 +21,14 @@ assert(seeds.every(seed => Number.isSafeInteger(seed) && seed > 0 && seed <= 0xf
 assert(Number.isSafeInteger(runCount) && runCount > 0, 'Use a positive run count, for example --runs=2');
 
 const screenshotLabels = [
-  'title', 'borrowed-battle', 'first-awakening', 'map', 'order', 'battle-turn', 'big-move',
-  'event', 'treasure', 'gate-reward', 'boss', 'recruit', 'hub', 'destinations',
+  'title', 'opening', 'borrowed-battle', 'first-awakening', 'map', 'order', 'battle-turn', 'big-move',
+  'event', 'treasure', 'gate-reward', 'reinforce', 'boss', 'recruit', 'hub', 'destinations',
   'preparation', 'collection', 'notebook', 'records'
 ];
+const openingChoices = {
+  stand: { label: '애쉬로 마지막 공격', lead: '눈토끼', next: '눈토끼와 간다' },
+  rescue: { label: '애쉬를 살린다', lead: '애쉬', next: '애쉬와 간다' }
+};
 
 async function launch() {
   const options = { headless: !args.includes('--headed') };
@@ -73,7 +77,7 @@ function installFrameCounter() {
   requestAnimationFrame(tick);
 }
 
-function look({ canRetreat = false, borrowedPath } = {}) {
+function look({ canRetreat = false } = {}) {
   const game = window.__game;
   const run = game.run;
   const active = document.querySelector('.screen.on');
@@ -82,16 +86,16 @@ function look({ canRetreat = false, borrowedPath } = {}) {
   const inBattle = screen === 'battle';
   const result = inBattle && !!active.querySelector('#result.on');
   const ready = inBattle && !result && !game.busy && !!active.querySelector('.act:not([disabled])');
+  const opening = ready && !!active.querySelector('.opening-choice');
   const form = !!sheet?.querySelector('[data-form]');
+  const battle = ready ? game.B.bridge : null;
+  const battleState = battle?.state();
+  const fighterId = battleState ? game.B.party[battleState.cur] : null;
   let tap = null;
   let formIndex = null;
-  let fighterId = null;
 
-  if (ready) {
-    const battle = game.B.bridge;
-    const state = battle.state();
-    const fighter = state.allies[state.cur];
-    fighterId = game.B.party[state.cur];
+  if (ready && !opening) {
+    const fighter = battleState.allies[battleState.cur];
     const intent = game.B.intent || {};
     const options = battle.options();
     const usable = options.filter(action => action.usable);
@@ -105,8 +109,7 @@ function look({ canRetreat = false, borrowedPath } = {}) {
     const dangerous = intent.ult || incoming >= fighter.maxHp / 3 || incoming >= fighter.hp;
     const defend = incoming > 0 && exact && intent.name !== '일반 공격';
     const reduce = incoming > 0 && half && !fighter.buffs.damage_half && dangerous;
-    const borrowedAsh = run.room.type === 'borrowed' && fighterId === 'ash';
-    const retreat = borrowedAsh ? borrowedPath === 'retreat' : !kill && !exact && (intent.lethal || incoming >= fighter.hp);
+    const retreat = !kill && !exact && (intent.lethal || incoming >= fighter.hp);
     const pick = kill || (defend && exact) || (reduce && half) || best || usable[0];
 
     if (canRetreat && retreat && battle.canRetreat()) {
@@ -128,7 +131,7 @@ function look({ canRetreat = false, borrowedPath } = {}) {
     [...node.querySelectorAll('.sel, [aria-pressed="true"]')].map(item => item.textContent)
   ];
   return {
-    screen, result, ready, tap, form, formIndex, fighterId,
+    screen, result, ready, opening, tap, form, formIndex, fighterId,
     visible: JSON.stringify([screen, signature(active), signature(sheet), result]),
     bigMove: inBattle && !!active.querySelector('.skillplate'),
     dungeonId: run?.dungeonId,
@@ -137,6 +140,7 @@ function look({ canRetreat = false, borrowedPath } = {}) {
     room: run?.room?.type,
     crystals: run?.crystals,
     pendingKind: run?.pending?.kind,
+    reinforcementFull: screen === 'reinforce' && run.bench.length >= (run.pending.limit ?? 6),
     doors: screen === 'map' ? run.doors.map(({ type, index }) => ({ type, index })) : [],
     outcome: run?.result,
     stats: run?.stats
@@ -167,7 +171,19 @@ async function playTitle({ page, shot }) {
   await page.locator('#title.on #b-start').click();
 }
 
-async function playAwaken({ page }) {
+async function playAwaken({ page }, state, expedition) {
+  if (state.room === 'awakening') {
+    const awaken = page.locator('#awaken.on');
+    assert.equal(await awaken.locator('.wake-lead .face-badge b').innerText(), openingChoices[expedition.openingPath].lead);
+    if (await awaken.locator('#wake-draws').isVisible()) {
+      const depart = awaken.locator('#b-depart');
+      await depart.waitFor();
+      assert.equal(await awaken.locator('.wake-slot.landed').count(), 3, 'First awakening did not reveal three companions');
+      await depart.click();
+      expedition.firstAwakening = true;
+      return;
+    }
+  }
   if (await clickIfVisible(page, '#awaken.on #b-depart')) return;
   if (await clickIfVisible(page, '#awaken.on #b-wake:not([disabled])')) return;
   if (await clickIfVisible(page, '#awaken.on #wake-choices .cardrow')) {
@@ -180,13 +196,33 @@ async function playMap({ page }, state) {
   const safe = state.doors.find(door => door.type !== 'elite');
   const door = (state.crystals < 3 && elite) || safe || state.doors[0];
   assert(door, 'No doors on floor ' + state.floor);
-  await page.locator('#map.on .door-entry[data-door="' + door.index + '"]').click();
-  // The party marches off (about 0.5 s) before the room opens; do not tap the map again meanwhile.
-  await page.waitForFunction(() => !document.querySelector('#map.on'), null, { timeout: 5000 });
+  await page.locator('#map.on .run-doors .door-entry[data-door="' + door.index + '"]').click();
+  await page.locator('#map.on').waitFor({ state: 'hidden' });
 }
 
-async function playOrder({ page }) {
+async function playOrder({ page }, state) {
+  if (state.room === 'boss') await clickIfVisible(page, '#order.on .relay-alternative#b-alternate-order');
   await page.locator('#order.on #b-go').click();
+}
+
+async function playReinforce({ page }, state) {
+  const screen = page.locator('#reinforce.on');
+  if (state.reinforcementFull) {
+    await screen.locator('#b-reinforce-pass').click();
+    return;
+  }
+  await screen.locator('[data-candidate]').first().click();
+  await screen.locator('#b-reinforce-take').click();
+}
+
+async function chooseWhoLeaves(page) {
+  const confirm = page.locator('#sheet.on #b-dismiss-confirm');
+  if (!await confirm.isVisible()) return false;
+  // Send away the most recent joiners first; the confirm button enables once enough are picked.
+  const choices = page.locator('#sheet.on [data-dismiss-id][aria-pressed="false"]');
+  while (await confirm.isDisabled() && await choices.count()) await choices.last().click();
+  await confirm.click();
+  return true;
 }
 
 async function playSpring({ page }, state, expedition) {
@@ -241,11 +277,27 @@ async function playGateReward({ page }) {
 
 async function playBattle({ page }, state, expedition) {
   if (state.result) {
-    await page.locator('#battle.on #result.on #b-next').click();
+    const next = page.locator('#battle.on #result.on #b-next');
+    if (state.room === 'borrowed') {
+      assert.equal(await next.innerText(), openingChoices[expedition.openingPath].next);
+    }
+    await next.click();
     return;
   }
-  if (!state.ready || !state.tap) return;
-  if (state.tap.retreat) {
+  if (!state.ready) return;
+  if (state.room === 'borrowed' && !expedition.borrowedStarted) {
+    assert.equal(state.fighterId, 'ash', 'The borrowed battle should start with Ash');
+    assert(state.opening, 'Ash did not get the opening decision');
+    const buttons = page.locator('#battle.on .opening-choice:not([disabled])');
+    assert.deepEqual(await buttons.locator('b').allTextContents(),
+      [openingChoices.rescue.label, openingChoices.stand.label]);
+    const label = openingChoices[expedition.openingPath].label;
+    await buttons.filter({ has: page.getByText(label, { exact: true }) }).click();
+    if (expedition.openingPath === 'rescue') expedition.retreats++;
+    expedition.borrowedStarted = true;
+  } else if (!state.tap) {
+    return;
+  } else if (state.tap.retreat) {
     await page.locator('#battle.on #b-retreat').click();
     await page.locator('#battle.on #b-retreat.armed').click();
     expedition.retreats++;
@@ -305,6 +357,7 @@ const roomPlayers = {
   awaken: playAwaken,
   map: playMap,
   order: playOrder,
+  reinforce: playReinforce,
   spring: playSpring,
   altar: playAltar,
   event: playEvent,
@@ -315,10 +368,11 @@ const roomPlayers = {
 
 async function captureRoom({ shot }, state) {
   if (state.screen === 'awaken') await shot('first-awakening');
-  if (['map', 'order', 'event', 'treasure'].includes(state.screen)) await shot(state.screen);
+  if (['map', 'order', 'event', 'treasure', 'reinforce'].includes(state.screen)) await shot(state.screen);
   if (state.screen === 'pick') await shot('gate-reward');
-  if (state.ready && state.room === 'borrowed') await shot('borrowed-battle');
-  if (state.ready) await shot('battle-turn');
+  if (state.opening) await shot('opening');
+  if (state.room === 'borrowed' && !state.opening && (state.ready || state.result)) await shot('borrowed-battle');
+  if (state.ready && state.room !== 'borrowed') await shot('battle-turn');
   if (state.bigMove) await shot('big-move');
   if (state.ready && state.room === 'boss') await shot('boss');
 }
@@ -343,6 +397,8 @@ async function resumeExpedition(campaign, expedition) {
 
 async function shouldResume({ page, resumed }, expedition, state) {
   if (resumed || expedition.dungeon === 'dawn_forest') return false;
+  // A relic receipt can briefly appear before the saved reinforcement screen.
+  if (state.pendingKind === 'reinforcement') return state.screen === 'reinforce' && state.floor > 1;
   if (!['spring', 'altar', 'event', 'treasure', 'pick'].includes(state.screen)) return false;
   if (state.pendingKind) return true;
   if (state.floor !== 3) return false;
@@ -359,14 +415,14 @@ async function failStuck({ page, seed }, state) {
     + ', pending ' + state.pendingKind + ', tap ' + JSON.stringify(state.tap) + '\n' + log.join('\n'));
 }
 
-async function playExpedition(campaign, dungeon, depart, borrowedPath) {
+async function playExpedition(campaign, dungeon, depart, openingPath) {
   const { page } = campaign;
-  const expedition = { dungeon, retreats: 0, frames: [], waits: [], started: performance.now() };
+  const expedition = { dungeon, openingPath, retreats: 0, frames: [], waits: [], started: performance.now() };
   let lastProgress = expedition.started;
   let previousScreen;
   await depart(campaign);
   for (;;) {
-    const state = await page.evaluate(look, { canRetreat: expedition.retreats === 0, borrowedPath });
+    const state = await page.evaluate(look, { canRetreat: expedition.retreats === 0 });
     assert.equal(state.dungeonId, dungeon, 'Unexpected expedition');
     const now = performance.now();
     if (state.visible !== previousScreen) {
@@ -379,12 +435,8 @@ async function playExpedition(campaign, dungeon, depart, borrowedPath) {
     }
     if (now - lastProgress >= 25000) await failStuck(campaign, state);
     if (state.stats.retries >= 20) throw new Error('Intro gate retry limit reached on floor ' + state.floor);
-    if (state.room === 'borrowed' && state.ready && !expedition.borrowedStarted) {
-      assert.equal(state.fighterId, 'ash', 'The borrowed battle should start with Ash');
-      assert(state.tap, 'Ash has no playable action in the borrowed battle');
-      assert.equal(!!state.tap.retreat, borrowedPath === 'retreat', 'Unexpected first action for Ash');
-      expedition.borrowedStarted = true;
-    }
+    // A full roster (six) asks who leaves before a spring draw, a gate captive or an event recruit joins.
+    if (await chooseWhoLeaves(page)) continue;
     await captureRoom(campaign, state);
     if (state.screen === 'recruit') {
       const seconds = (now - expedition.started) / 1000;
@@ -396,6 +448,7 @@ async function playExpedition(campaign, dungeon, depart, borrowedPath) {
       if (dungeon === 'dawn_forest') {
         assert.equal(state.outcome, 'win', 'The intro must be cleared to unlock the main expeditions');
         assert(expedition.borrowedStarted, 'The borrowed battle never opened for play');
+        assert(expedition.firstAwakening, 'The first awakening was never completed');
         assert(await page.locator('#recruit.on [data-candidate]').first().isVisible(),
           'The intro offered no recruit');
       }
@@ -431,13 +484,13 @@ function report(seed, expedition, state, seconds) {
   console.log('  battle frames ' + frames.length + ', mean ' + mean + ' ms, >20 ms ' + over(20) + ', >34 ms ' + over(34));
 }
 
-async function playCampaign(campaign, borrowedPath) {
+async function playCampaign(campaign, openingPath) {
   const { page, seed } = campaign;
   await page.addInitScript(installFrameCounter);
   const url = pathToFileURL(path.join(game, 'dist', 'Relaymare.html'));
   url.searchParams.set('seed', seed);
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });
-  await playExpedition(campaign, 'dawn_forest', playTitle, borrowedPath);
+  await playExpedition(campaign, 'dawn_forest', playTitle, openingPath);
   const tried = new Set();
   for (let i = 0; i < runCount; i++) {
     const dungeon = await playDestinations(campaign, tried);
@@ -460,12 +513,12 @@ async function playSeed(browser, seed, index) {
       await page.screenshot({ path: path.join(shots, seed + '-' + number + '-' + label + '.png') });
       taken.add(label);
     }
-    let borrowedPath = index % 2 ? 'retreat' : 'fight';
-    if (seed === 7) borrowedPath = 'fight';
-    if (seed === 21) borrowedPath = 'retreat';
+    let openingPath = index % 2 ? 'rescue' : 'stand';
+    if (seed === 7) openingPath = 'stand';
+    if (seed === 21) openingPath = 'rescue';
     const campaign = { page, seed, shot, resumed: false };
-    console.log('\nCampaign ' + seed + ' · borrowed battle: ' + borrowedPath);
-    await Promise.race([watchBrowser(page), playCampaign(campaign, borrowedPath)]);
+    console.log('\nCampaign ' + seed + ' · opening: ' + openingChoices[openingPath].label);
+    await Promise.race([watchBrowser(page), playCampaign(campaign, openingPath)]);
   } finally {
     const missing = screenshotLabels.filter(label => !taken.has(label));
     if (missing.length) console.log('Seed ' + seed + ' · screenshots not reached: ' + missing.join(', '));

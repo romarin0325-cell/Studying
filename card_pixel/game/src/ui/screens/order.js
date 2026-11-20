@@ -28,7 +28,7 @@ export function formationMoves(party, target, name) {
 export function orderScreen(run, ui) {
   ui.playMusic();
   const { core, widgets, audio, sheets } = ui;
-  const { card, sprite, face, faceBadge } = widgets;
+  const { card, spr, sprite, face, faceBadge } = widgets;
   const { sfx } = audio;
   const node = $('#order');
   const room = run.room;
@@ -87,14 +87,16 @@ export function orderScreen(run, ui) {
       const fighter = id && card(id);
       const trait = traitLine(fighter, i);
       const active = selected?.slot === i;
+      const art = id ? sprite(id, { flip: spr(id)?.facing === 'left' }) : '';
       return '<button class="relay-seat win' + (active ? ' sel' : '') + '" data-slot="' + i + '" aria-pressed="' + active + '">' +
-        '<small>' + POSITION[i] + '</small><span class="run-face">' + (id ? face(id, 44) : '') + '</span>' +
+        '<small>' + POSITION[i] + '</small><span class="relay-seat-art">' + art + '</span>' +
         '<b>' + esc(fighter?.name || '빈 자리') + '</b><small class="relay-trait" title="' + esc(trait) + '">' +
         esc(trait) + '</small></button>';
-    }).join('');
+    });
     const links = previews.slice(0, 2).map((entry, i) =>
       '<button class="relay-link" data-link="' + i + '" aria-label="' + POSITION[i] + ' 유품 흐름"' +
-      (entry.skill ? '' : ' disabled') + '>→</button>').join('');
+      (entry.skill ? '' : ' disabled') + '>→</button>');
+    const board = slots.map((slot, i) => slot + (links[i] ?? '')).join('');
     const bench = run.bench.filter(id => !party.includes(id));
     const returning = qualifies ? party.filter(id => id && run.recruited?.includes(id)) : [];
     const recruits = qualifies ? party.filter(id => id && !returning.includes(id)) : [];
@@ -113,11 +115,11 @@ export function orderScreen(run, ui) {
       esc(room.enemies.map(enemy => enemy.name).join(' → ')) + '</b><small>' +
       esc((room.enemies.length > 1 ? room.enemies.length + '연전 · ' : '') + room.name +
         (hazards.length ? ' · ' + hazards.join(' · ') : '')) + '</small></span></button>' +
-      boost + '<div class="relay-seats">' + slots + '<div class="relay-links">' + links + '</div></div>' +
+      boost + '<div class="relay-seats">' + board + '</div>' +
       (survival ? '<div class="relay-survival">' + survival + '</div>' : '') + orderHint() +
       '<h3>대기 동료</h3><div class="reserve-cards">' + (bench.map(id => '<button class="win' +
         (selected?.bench === id ? ' sel' : '') + '" data-bench="' + esc(id) + '" aria-pressed="' + (selected?.bench === id) +
-        '">' + faceBadge(id) + '</button>').join('') || '<p class="sm">없음</p>') +
+        '">' + faceBadge(id, name(id), 48) + '</button>').join('') || '<p class="sm">없음</p>') +
       '</div></div><div class="footer"><button class="btn go" id="b-go"' +
       (party.some(Boolean) ? '' : ' disabled') + '>' + action + '</button></div>';
     show('order');
