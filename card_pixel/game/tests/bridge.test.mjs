@@ -6,6 +6,9 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 // Share Math so the ESM bridge can seed the card core inside the VM.
 import * as Bridge from '../src/engine/bridge.js';
+import { create as makeRoster } from '../src/engine/roster.js';
+import { createStage } from '../src/stage/stage.js';
+import { createMoves } from '../src/ui/battle/moves.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -82,6 +85,114 @@ test('review 16: Guardian previews Pangaea Rebirth damage with Time Magician in 
   const scheduled = battle({ ...config, party: ['guardian'] });
   scheduled.start();
   assert.deepEqual(option(scheduled, '판게아리버스').preview, { delayed: true });
+});
+
+test('Double Attack changes only the normal attack forecast and hit, including when Pangaea resolves later', () => {
+  const config = { seed: 1, enemies: [quietEnemy(99999, { def: 0, mdef: 0 })] };
+  const measure = (party, name, artifacts, extraTurns = 0) => {
+    const b = battle({ ...config, party, artifacts });
+    b.start();
+    const move = option(b, name);
+    const events = b.act(move.index);
+    for (let i = 0; i < extraTurns; i++) events.push(...b.act(0));
+    const damage = events.filter(e => e.t === 'hp' && e.who.side === 'enemy' && e.calc?.skill === move.name)
+      .map(e => e.amount);
+    return [move.preview, damage];
+  };
+  const compare = (party, name, turns) => [[], ['double_attack']].map(artifacts => measure(party, name, artifacts, turns));
+  const guardian = ['guardian', null, 'time_magician'];
+  const preview = dmg => ({ dmg, kill: false, forcedCrit: false });
+  assert.deepEqual(compare(guardian, '일반 공격'), [[preview(143), [143]], [preview(286), [286]]]);
+  for (const support of ['가드', '배틀필드']) assert.deepEqual(compare(guardian, support), [[null, []], [null, []]]);
+  const instant = [{ ...preview(455), instant: true }, [455]];
+  assert.deepEqual(compare(guardian, '판게아리버스'), [instant, instant]);
+  const delayed = [{ delayed: true }, [455]];
+  assert.deepEqual(compare(['guardian'], '판게아리버스', 4), [delayed, delayed]);
+  const [base, doubled] = compare(['red_dragon'], '드래곤크로');
+  assert.ok(base[0].dmg > 0 && base[0].dmg === base[1][0]);
+  assert.deepEqual(doubled, base);
+});
+
+test('Arena from Battlefield or Colosseum doubles only allied normal hits', () => {
+  for (const [id, support, attack] of [
+    ['guardian', '배틀필드', '판게아리버스'],
+    ['golem', '콜로세움', '차지어택']
+  ]) {
+    const b = battle({ party: [id, null, 'time_magician'], enemies: [quietEnemy(99999, { def: 0, mdef: 0 })], seed: 1 });
+    b.start();
+    const normal = option(b, '일반 공격').preview.dmg, special = option(b, attack).preview.dmg;
+    b.act(option(b, support).index);
+    assert.deepEqual(plain(b.state().field), ['arena']);
+    assert.equal(option(b, '일반 공격').preview.dmg, 2 * normal);
+    assert.equal(option(b, attack).preview.dmg, special);
+    if (id === 'golem') assert.equal(b.state().enemy.buffs.weak, 1);
+    const hit = b.act(0).find(e => e.t === 'hp' && e.who.side === 'enemy');
+    assert.equal(hit.amount, 2 * normal);
+  }
+});
+
+test('shadows keep enemy stats without inheriting seat or deck traits, including after a relay', () => {
+  const core = S.RelayCore;
+  const roster = makeRoster(core, { sp: {} });
+  const ids = ['red_dragon', 'phoenix'];
+  const enemies = ids.map(id => roster.shadowOf(id));
+  assert.equal(roster.card(ids[0]).trait.type, 'pos_stat_boost');
+  assert.equal(roster.card(ids[1]).trait.type, 'syn_fire_3_crit_burn');
+  const b = battle({ party: ['red_dragon', 'phoenix', 'ash'], enemies });
+  b.start();
+  function check(i) {
+    const enemy = b.host.battle.enemy;
+    assert.equal(b.enemyIndex, i);
+    assert.equal(enemy.atk, enemies[i].stats.atk);
+    assert.equal(enemy.pos, undefined);
+    assert.equal(enemy.proto, undefined);
+    assert.equal(enemy.activeTrait, undefined);
+  }
+  check(0);
+  b.host.battle.enemy.hp = 1;
+  b.act(option(b, '드래곤크로').index);
+  check(1);
+});
+
+test('heirloom act metadata drives the donor form, palette and cleanup on stage', async () => {
+  const b = battle({
+    party: ['ash'], enemies: [quietEnemy()],
+    heirlooms: { ash: { from: 'miracle_larva', form: 'aurora_wing', name: '뷰티토네이도',
+      skill: { name: '뷰티토네이도', type: 'mag', val: 3, heirloom: true } } }
+  });
+  b.start();
+  const e = b.act(option(b, '뷰티토네이도').index).find(e => e.t === 'act' && e.heirloom);
+  assert.equal(e.heirFrom, 'aurora_wing');
+  assert.deepEqual(e.who, { side: 'ally', idx: 0 });
+  const stage = createStage({ sp: {} });
+  const actor = stage.makeActor({ sprite: 'ash', x: 20, y: -14 });
+  const target = stage.makeActor({ sprite: 'golem' });
+  const { beginMove, settleMove } = createMoves({
+    stage: { ...stage, wait: async () => {}, tween: async (a, to) => Object.assign(a, to) },
+    actorOf: () => target, unitOf: () => ({ hp: 1 }), colorsOf: () => stage.ELEMENT_COLORS.fire,
+    card: id => S.RelayCore.GameUtils.getCardById(id), spr: () => ({ facing: 'left' })
+  });
+  const move = beginMove(e, actor, false);
+  assert.equal(move.actor.sprite, 'aurora_wing');
+  assert.equal(move.actor.flip, true);
+  assert.equal(move.actor.x, actor.x);
+  assert.equal(move.actor.y, actor.y);
+  assert.equal(move.colors, stage.ELEMENT_COLORS[move.donor.element]);
+  assert.notEqual(move.colors, stage.ELEMENT_COLORS.fire);
+  assert.equal(actor.vis, false);
+  await settleMove(move);
+  assert.equal(actor.vis, true);
+  assert.deepEqual(stage.S.actors, [actor, target]);
+
+  const fromAsh = battle({ party: ['guardian'], enemies: [quietEnemy()], heirlooms: { guardian: { from: 'ash' } } });
+  fromAsh.start();
+  const ashAct = fromAsh.act(option(fromAsh, '아마겟돈').index).find(e => e.t === 'act' && e.heirloom);
+  const effect = {};
+  stage.IMG['ash-fx'] = { base: effect };
+  const ashMove = beginMove(ashAct, actor, false);
+  assert.equal(ashMove.effectSprite, effect);
+  assert.equal(ashMove.colors, stage.ELEMENT_COLORS.fire);
+  await settleMove(ashMove);
 });
 
 test('review 19: Creator charges Divine Blade on turn three and uses it next turn', () => {
@@ -693,6 +804,7 @@ test('an inherited delayed skill counts actual landings once per enemy', () => {
   assert.equal(b.summary().heirloomKills, 0);
   const events = b.act(option(b, '나이트메어').index);
   assert.deepEqual(events.filter(e => e.t === 'act' && e.delayed && e.heirloom).map(e => e.target.idx), [0, 1]);
+  assert.ok(events.filter(e => e.t === 'act' && e.delayed && e.heirloom).every(e => e.heirFrom === 'phantom'));
   assert.equal(b.outcome, 'win');
   assert.equal(b.summary().heirloomKills, 2);
   assert.equal(b.summary().heirloomsUsed, 1);

@@ -12,7 +12,7 @@ import * as Bridge from '../src/engine/bridge.js';
 import * as Daily from '../src/engine/daily-rift.js';
 import * as DailyStore from '../src/engine/daily-store.js';
 import * as Meta from '../src/engine/meta.js';
-import { create as makeRoster } from '../src/engine/roster.js';
+import { create as makeRoster, POSITION } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
@@ -185,6 +185,40 @@ function tileInstant() {
       await text(forecast.locator('strong'), String(preview.dmg), { exact: true });
       await text(forecast.locator('small').filter({ hasText: '즉시' }), '즉시');
       assert.doesNotMatch(await forecast.innerText(), /예약/, `${skill} must display an instant forecast`);
+    }
+  };
+}
+
+function fieldSupport() {
+  function prepare(lead, skill, field) {
+    const run = makeRun({ seed: 1, profileView: { lead } });
+    const battle = startBattle(run);
+    act(battle, skill);
+    assert.ok(battle.state().field.includes(field));
+    return storedSession({ run });
+  }
+  const session = prepare('guardian', '배틀필드', 'arena');
+  const cureMaster = prepare('cure_master', '레모네이드', 'star_powder');
+  return {
+    session, proof: '배틀필드 → 아레나, 레모네이드 → 스타파우더',
+    async show(page, { text, capture, revisit }) {
+      async function check(source, name, line, field, description, label) {
+        await openBattle(source);
+        const tile = skillTile(source, name);
+        await text(tile.locator('.r2'), line, { exact: true });
+        await text(tile.locator('.r3'), field);
+        await capture(label, source);
+        await tile.hover();
+        await source.mouse.down();
+        const sheet = source.locator('#sheet.on');
+        await sheet.waitFor();
+        await source.mouse.up();
+        await text(sheet.locator('#sh-title'), name);
+        await text(sheet.locator('#sh-body p'), field + ' — 아군 ' + description);
+        await capture(label ? label + '-detail' : 'detail', source);
+      }
+      await check(page, '배틀필드', '일반 공격 피해 2배', '아레나', '일반 공격 피해 2배');
+      await revisit(cureMaster, source => check(source, '레모네이드', '방어·마방 +40%', '스타파우더', '방어력·마법방어력 +40%', 'lemonade'));
     }
   };
 }
@@ -379,9 +413,15 @@ function fieldCap() {
   assert.equal(field.length, 5);
   return {
     session: storedSession({ run }), proof: `${relic} equipped; ${field.join(', ')}`,
-    async show(page, { text }) {
+    async show(page, { text, capture }) {
       await openBattle(page);
+      const slots = page.locator('#sky-slots i');
+      assert.equal(await slots.count(), 5, 'Buff Overload must display five HUD slots before they are filled');
+      await text(skillTile(page, skill).locator('.r2'), '무작위 아군 강화 1종', { exact: true });
       for (let i = 0; i < 3; i++) await tapTile(page, skill);
+      assert.equal(await page.locator('#sky-slots i.on').count(), 5, 'All five HUD slots must be filled');
+      await text(page.locator('#skyname'), field.map(id => core.BUFF_NAMES[id]).join(' · '), { exact: true });
+      await capture('hud');
       await page.locator('#b-field').click();
       const battlefield = page.locator('#sheet.on #sh-body');
       await text(battlefield.getByText('버프오버로드', { exact: true }), '버프오버로드');
@@ -435,6 +475,39 @@ function resumeSeats() {
       // The init script seeds only the initial navigation. Reload reads the UI’s own write.
       await page.reload({ waitUntil: 'domcontentloaded' });
       const names = ['빈 자리', '마왕', '밤토끼'];
+      for (const [index, name] of names.entries()) {
+        await text(page.locator(`#order.on [data-slot="${index}"] b`), name, { exact: true });
+      }
+    }
+  };
+}
+
+function mapSeats() {
+  const run = makeRun({ seed: 21 });
+  const previous = run.bench.slice(0, 3);
+  startBattle(run, { party: previous });
+  settleWin(run, { survivors: [true, false, true] });
+  advance(run);
+  const party = Run.defaultParty(run);
+  assert.equal(party[0], previous[0]);
+  assert.equal(party[2], previous[2]);
+  assert.ok(party[1] && party[1] !== previous[1]);
+  assert.notDeepEqual(party, run.bench.slice(0, 3));
+  const reserves = run.bench.filter(id => !party.includes(id));
+  return {
+    session: storedSession({ run }), proof: 'A reserve refills only the fallen middle seat: ' + party.join(' → '),
+    async show(page, { text, capture }) {
+      const map = page.locator('#map.on'), actors = map.locator('.map-actor');
+      const names = party.map(id => roster.card(id).name);
+      assert.deepEqual(await actors.evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), party);
+      assert.deepEqual(await map.locator('.benchrow .mini').evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), reserves);
+      for (const [index, name] of names.entries()) {
+        const actor = actors.nth(index);
+        await text(actor.locator('small'), POSITION[index], { exact: true });
+        assert.equal(await actor.getAttribute('aria-label'), POSITION[index] + ' ' + name);
+      }
+      await capture();
+      await map.locator('[data-door="0"]').click();
       for (const [index, name] of names.entries()) {
         await text(page.locator(`#order.on [data-slot="${index}"] b`), name, { exact: true });
       }
@@ -553,6 +626,39 @@ function contractBattleSheet() {
       const sheet = page.locator('#sheet.on #sh-body');
       await text(sheet.locator('h4').filter({ hasText: name }), `계약 · ${name} · 아직`);
       await text(sheet.getByText(rule, { exact: true }), rule);
+    }
+  };
+}
+
+function contractImpossible() {
+  const run = eliteContractRun(nightmareProfile());
+  assert.equal(run.floor, 2);
+  assert.equal(Boolean(run.doors[0].risk), false);
+  startBattle(run, { door: 0 });
+  assert.equal(run.contract.riskDoorTaken, false);
+  const safeSession = storedSession({ run });
+  settleWin(run);
+  advance(run);
+  reachFloor(run, 4);
+  startBattle(run);
+  assert.equal(run.contract.riskDoorTaken, false);
+  assert.equal(run.contract.met, false);
+  assert.equal(run.contract.failed, false);
+  const name = CONTRACTS.elite.name;
+  return {
+    session: safeSession, proof: 'Safe floor-2 door forecloses elite on floors 2 and 4 before settlement failure is recorded',
+    async show(page, { text, capture, revisit }) {
+      async function check(source) {
+        await openBattle(source);
+        await source.locator('#b-field').click();
+        const sheet = source.locator('#sheet.on #sh-body');
+        await text(sheet.locator('h4').filter({ hasText: name }), `계약 · ${name} · 이번 원정 불가`, { exact: true });
+      }
+      await check(page);
+      await revisit(storedSession({ run }), async source => {
+        await check(source);
+        await capture('floor-4', source);
+      });
     }
   };
 }
@@ -1003,6 +1109,7 @@ function riftRecords(detail) {
 const cases = {
   'tile-range': tileRange,
   'tile-instant': tileInstant,
+  'field-support': fieldSupport,
   'retreat-warning': retreatWarning,
   'door-sky': doorSky,
   'door-hp': doorHp,
@@ -1013,9 +1120,11 @@ const cases = {
   'field-cap': fieldCap,
   'form-sheet': formSheet,
   'resume-seats': resumeSeats,
+  'map-seats': mapSeats,
   'countdown-charge': countdownCharge,
   'contract-sheet': contractSheet,
   'contract-battle-sheet': contractBattleSheet,
+  'contract-impossible': contractImpossible,
   'contract-payout': contractPayout,
   'return-stamp': returnStamp,
   'order-hint': orderHint,

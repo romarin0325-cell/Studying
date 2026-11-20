@@ -166,18 +166,19 @@ export function mapScreen(run, ui) {
       esc(title) + ' 정보">정보</button></div>';
   }).join('');
 
-  const front = run.bench.slice(0, 3).map((id, index) => ({ id, role: POSITION[index], art: spr(id) }));
-  front.sort((a, b) => a.art.h - b.art.h);
-  const lineup = front.map(({ id, role, art }) => {
+  const front = Run.defaultParty(run);
+  const lineup = front.map((id, index) => {
+    if (!id) return '';
+    const role = POSITION[index], art = spr(id);
     const flip = art.facing === 'left';
     const center = flip ? art.w - art.cx : art.cx;
     const style = 'width:' + art.w * 2 + 'px;height:' + art.h * 2 + 'px;' +
       'left:calc(50% - ' + center * 2 + 'px);bottom:' + (art.fy + 1 - art.h) * 2 + 'px;';
-    return '<button class="map-actor" data-sheet="' + esc(id) + '" aria-label="' + esc(role + ' ' + card(id).name) + '">' +
+    return '<button class="map-actor" style="grid-column:' + (index + 1) + '" data-sheet="' + esc(id) + '" aria-label="' + esc(role + ' ' + card(id).name) + '">' +
       '<span class="map-actor-art">' + sprite(id, { flip, style }) + '</span><small>' + role + '</small></button>';
   }).join('');
   const cast = '<div class="map-party" style="--march-time:' + MARCH_MS + 'ms">' + lineup + '</div>';
-  const reserve = { ...run, bench: run.bench.slice(3) };
+  const reserve = { ...run, bench: run.bench.filter(id => !front.includes(id)) };
   const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + '</button>' : '';
   const title = rift ? [shortRiftDate(rift.spec?.dayKey), '균열'].filter(Boolean).join(' ') : dungeon.name;
   node.innerHTML = head(run, title, run.floor + '층') + '<div class="run-route">' +
@@ -192,7 +193,7 @@ export function mapScreen(run, ui) {
       if (party.classList.contains('marching')) return;
       ui.audio.unlockAudio();
       ui.audio.sfx.tap();
-      if (front.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (lineup && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         party.classList.add('marching');
         await sleep(MARCH_MS);
       }

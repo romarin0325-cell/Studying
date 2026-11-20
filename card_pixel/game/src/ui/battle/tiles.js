@@ -1,6 +1,7 @@
 import { $, $$, esc } from '../dom.js';
 import { TYPE } from '../widgets.js';
 import { FIELD } from './hud.js';
+import { skillFields } from './fields.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
 
 const damageRange = ([low, high]) => low === high ? String(low) : low + '~' + high;
@@ -27,8 +28,6 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
       return [dmg ? damageRange(dmg) + ' → ' + damageRange(reduced) : '피해 −' + percent + '%',
         kind === 'barrier' || kind === 'magic_guard' ? '이번 공격 무효' : '받는 피해 ' + percent + '% 감소'];
     }
-    const field = o.effects.find(e => e.type === 'field_buff');
-    if (field) return [core.BUFF_NAMES[field.id] || field.id, '하늘에 건다'];
     return ['', ''];
   }
   const fullText = (o, me) => (o.index === 0 ? '마나를 쓰지 않는 기본 공격.' : core.SkillDisplay.body({
@@ -64,8 +63,14 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
       const chooseForm = o === firstForm, p = o.preview;
       const name = chooseForm ? FORM_SKILL : o.name;
       const usable = chooseForm ? forms.some(form => form.usable) : o.usable;
+      const fields = skillFields(core, o, B.artifacts);
       let r2, r3 = chooseForm ? '변신할 형태를 고른다' : brief(o, me);
-      if (p?.delayed && !p.instant) r2 = '<strong class="txt">예약</strong>';
+      if (fields) {
+        r2 = '<strong class="field-effect">' + esc(fields.line) + '</strong>';
+        const other = fields.other.length ? brief({ ...o, effects: fields.other }, me) : '';
+        r3 = [fields.names.length <= 2 ? fields.names.join('·') : '', other].filter(Boolean).join(' · ');
+      }
+      else if (p?.delayed && !p.instant) r2 = '<strong class="txt">예약</strong>';
       else if (p?.instant && o.type === 'sup') r2 = '<strong class="txt">즉시</strong>';
       else if (p) {
         const damage = previewDamage(p);
@@ -121,8 +126,10 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
     const o = (B.options || [])[index]; if (!o) return;
     const me = card(B.party[B.D.cur]);
     const name = isFormOption(o) ? FORM_SKILL : o.name;
+    const fields = skillFields(core, o, B.artifacts);
     sheet(name + ' · ' + TYPE[o.type] + (o.cost ? ' · MP ' + o.cost : '') + (o.heirloom ? ' · 유품' : ''),
-      (o.heirloom ? (o.heirFromName || '') + '에게서 물려받은 기술. 위력 1.5배, MP 0, 이 전투에서 한 번. ' : '') + fullText(o, me) + '  특성 — ' + me.trait.desc);
+      (o.heirloom ? (o.heirFromName || '') + '에게서 물려받은 기술. 위력 1.5배, MP 0, 이 전투에서 한 번. ' : '') + fullText(o, me) +
+      (fields ? ' ' + fields.detail : '') + '  특성 — ' + me.trait.desc);
   }
   const acts = $('#acts');
   acts.addEventListener('pointerdown', ev => {

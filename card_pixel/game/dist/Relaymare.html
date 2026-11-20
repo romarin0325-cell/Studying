@@ -144,7 +144,8 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .sky { position: absolute; top: 84px; left: 8px; right: auto; max-width: calc(100% - 16px); display: flex; gap: 3px; align-items: center; background: var(--win); border: 1px solid var(--line); padding: 3px 5px; }
 .sky i { width: 16px; height: 16px; border: 1px solid #2b2350; background: rgba(10, 7, 22, .7); font: 10px/14px var(--px9); font-style: normal; text-align: center; color: #1b0b10; overflow: hidden; }
 .sky i.on { border-color: #fff; }
-.sky span { font: 10px/14px var(--px9); color: var(--ink); margin-left: 3px; text-shadow: 1px 1px 0 #000; }
+#sky-slots { display: flex; flex: none; gap: 3px; }
+#skyname { font: 10px/14px var(--px9); color: var(--ink); margin-left: 3px; text-shadow: 1px 1px 0 #000; }
 #region-next { font: 12px/15px var(--px); color: var(--gold); margin-left: 4px; white-space: nowrap; }
 #region-next:empty, #skyname:empty { display: none; }
 #pa-chips { position: absolute; left: 8px; bottom: 6px; max-width: 60%; }
@@ -235,6 +236,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .act .r2 strong { font: 24px/26px var(--px); font-weight: normal; color: #fff; }
 .act .r2 strong.range { font-size: 18px; }
 .act .r2 strong.txt { font: 15px/26px var(--px14); color: var(--sup); } .act .r2 strong.no { color: var(--dim); }
+.act .r2 strong.field-effect { font: 11px/13px var(--px9); white-space: normal; align-self: center; color: var(--sup); }
 .act .r2 small { font: 10px var(--px9); color: var(--gold); }
 .act .r2 u { text-decoration: none; font: 10px/15px var(--px9); background: var(--coral); color: #1b0b10; padding: 0 4px; margin-left: auto; animation: blink .5s steps(2) infinite; }
 .act .r3 { font: 10px/13px var(--px9); color: var(--dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -446,8 +448,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   bottom: 28px;
   left: 16px;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .map-actor { position: relative; height: 172px; min-width: 0; background: none; border: 0; padding: 0; }
 .map-actor-art { position: absolute; inset: 0 0 18px; pointer-events: none; }
@@ -8213,7 +8214,11 @@ const BattleRuntime = {
   }
   function heldHeirloomSkill(core2, held) {
     if (!held) return null;
-    if (held.skill) return structuredClone(held.skill);
+    if (held.skill) {
+      const skill = structuredClone(held.skill);
+      skill.heirFrom ??= held.form || held.from;
+      return skill;
+    }
     const giver = core2.GameUtils.getCardById(held.form || held.from);
     return giver ? heirloomSkill(giver, held.name) : null;
   }
@@ -8611,7 +8616,7 @@ const BattleRuntime = {
       flush();
       const who = refOf(source);
       if (skill.heirloom && !delayed && isAlly(source)) B.heirloomsUsed++;
-      push({ t: "act", who, target: refOf(target), delayed, heirloom: !!skill.heirloom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map((e) => e.type) } });
+      push({ t: "act", who, target: refOf(target), delayed, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map((e) => e.type) } });
       B.ctx.push({ kind: "act", who, skill, delayed, source });
       B.lastHit = null;
       const formId = source.formId;
@@ -13346,6 +13351,7 @@ const BattleRuntime = {
     reaper_realm: ["\uC0AC\uC2E0", "#a678ff"],
     gale: ["\uC9C8\uD48D", "#7fe3c8"]
   };
+  var fieldCap = (core2, artifacts) => artifacts?.includes("buff_overload") ? 5 : core2.GAME_CONSTANTS.MAX_FIELD_BUFFS;
   function createHud(core2, stage2, sfx, widgets2) {
     const { S, wait, footY: FY, headY: HY } = stage2;
     const { face: face2, card } = widgets2;
@@ -13416,13 +13422,10 @@ const BattleRuntime = {
         S.beads.x = B.foe.x;
         S.beads.y = FY(B.foe);
       }
-      const sky = $("#sky").children;
-      for (let i = 0; i < 3; i++) {
+      $("#sky-slots").innerHTML = Array.from({ length: fieldCap(core2, B.artifacts) }, (_, i) => {
         const id = D.field[i], f = id && (FIELD[id] || [id.slice(0, 2), "#ccc"]);
-        sky[i].className = f ? "on" : "";
-        sky[i].style.background = f ? f[1] : "";
-        sky[i].textContent = f ? f[0].slice(0, 1) : "";
-      }
+        return f ? '<i class="on" style="background:' + f[1] + '">' + esc(f[0].slice(0, 1)) + "</i>" : "<i></i>";
+      }).join("");
       $("#skyname").textContent = D.field.map((id) => core2.BUFF_NAMES[id] || id).join(" \xB7 ");
       const newest = D.field[D.field.length - 1];
       S.tint = newest ? (FIELD[newest] || [0, "#ccc"])[1] : S.tint;
@@ -13507,6 +13510,79 @@ const BattleRuntime = {
     return { buildParty, render, ticker, showIntent, tallyWorthy, tally };
   }
 
+  // card_pixel/game/src/ui/battle/fields.js
+  var FIELD_STATS = {
+    atk: ["\uACF5\uACA9\uB825", "\uACF5\uACA9"],
+    matk: ["\uB9C8\uBC95\uACF5\uACA9\uB825", "\uB9C8\uACF5"],
+    def: ["\uBC29\uC5B4\uB825", "\uBC29\uC5B4"],
+    mdef: ["\uB9C8\uBC95\uBC29\uC5B4\uB825", "\uB9C8\uBC29"],
+    crit: ["\uCE58\uBA85\uD0C0\uC728", "\uCE58\uBA85\uD0C0\uC728"],
+    evasion: ["\uD68C\uD53C\uC728", "\uD68C\uD53C\uC728"]
+  };
+  function fieldInfo(core2, id, artifacts, short = false) {
+    if (id === "arena") return "\uC77C\uBC18 \uACF5\uACA9 \uD53C\uD574 2\uBC30";
+    const stats = core2.GAME_CONSTANTS.FIELD_BUFF_STATS[id];
+    if (!stats) return "";
+    const boosts = {
+      earth_bless: ["divine_flora", "nature_blessing"],
+      star_powder: ["divine_thor", "milkshake"]
+    }[id];
+    const mult = boosts && artifacts?.includes(boosts[0]) ? 2.5 : boosts && artifacts?.includes(boosts[1]) ? 2 : 1;
+    const groups = /* @__PURE__ */ new Map();
+    for (const [stat, value] of Object.entries(stats)) {
+      const rate = stat === "crit" || stat === "evasion";
+      const amount2 = "+" + (rate ? value : value * 100) * mult + (rate ? "%p" : "%");
+      const names = groups.get(amount2) || [];
+      names.push(FIELD_STATS[stat][Number(short)]);
+      groups.set(amount2, names);
+    }
+    const lines = Array.from(groups, ([amount2, names]) => names.join("\xB7") + " " + amount2);
+    if (id === "sun_bless") lines.push("\uCE58\uBA85\uD0C0 \uD53C\uD574 +" + core2.GAME_CONSTANTS.SUN_BLESS_CRIT_BONUS * 100 + "%p");
+    if (id === "reaper_realm") lines.push("\uCE58\uBA85\uD0C0 \uD53C\uD574 +40%p");
+    return lines.join(" \xB7 ");
+  }
+  var RANDOM_FIELDS = ["sun_bless", "moon_bless", "sanctuary", "goddess_descent", "earth_bless", "twinkle_party", "star_powder"];
+  function fieldEffect(effect, instant, describe) {
+    const after = effect.turns && !instant ? effect.turns + "\uD134 \uB4A4 " : "";
+    switch (effect.type) {
+      case "field_buff":
+        return { ids: [effect.id], line: describe(effect.id) };
+      case "delayed_attack_field":
+        return { ids: [effect.field], line: after + describe(effect.field) };
+      case "delayed_field_buffs":
+        return { ids: effect.buffs, line: after + effect.buffs.map(describe).join(" \xB7 ") };
+      case "random_field_buff":
+        return { ids: effect.pool || [...RANDOM_FIELDS, "arena"], line: "\uBB34\uC791\uC704 \uC544\uAD70 \uAC15\uD654 1\uC885" };
+      case "roulette_field":
+        return { ids: RANDOM_FIELDS, line: "\uD558\uB298 \uCD08\uAE30\uD654 \xB7 \uBB34\uC791\uC704 \uC544\uAD70 \uAC15\uD654 1\uC885" };
+      case "delayed_random_unique_field_buffs":
+        return { ids: effect.pool, line: after + "\uC5C6\uB294 \uD558\uB298 \uD6A8\uACFC \uCD5C\uB300 " + effect.count + "\uC885" };
+      case "consume_all_burn_cond_buff":
+        return { ids: ["sun_bless", "earth_bless"], line: "\uC544\uAD70 \uACF5\uACA9\xB7\uB9C8\uACF5 \uC99D\uAC00 \xB7 \uC791\uC5F4\uB85C \uAC15\uD654" };
+      case "moon_to_sun":
+        return { ids: ["moon_bless", "sun_bless"], line: "\uC544\uAD70 \uB9C8\uACF5 \uC99D\uAC00 \xB7 \uB2EC\uC774 \uC788\uC73C\uBA74 \uD0DC\uC591" };
+      default:
+        return null;
+    }
+  }
+  function skillFields(core2, option, artifacts) {
+    if (option.type !== "sup") return null;
+    const other = [], fields = [];
+    for (const effect of option.effects) {
+      const field = fieldEffect(effect, option.preview?.instant, (id) => fieldInfo(core2, id, artifacts, true));
+      if (field) fields.push(field);
+      else other.push(effect);
+    }
+    if (!fields.length) return null;
+    const ids = [...new Set(fields.flatMap((field) => field.ids))];
+    return {
+      line: fields.map((field) => field.line).join(" \xB7 "),
+      names: ids.map((id) => core2.BUFF_NAMES[id] || id),
+      detail: ids.map((id) => (core2.BUFF_NAMES[id] || id) + " \u2014 \uC544\uAD70 " + fieldInfo(core2, id, artifacts)).join(". ") + ".",
+      other
+    };
+  }
+
   // card_pixel/game/src/ui/battle/sheets.js
   var STATUS_INFO = {
     weak: "\uACF5\uACA9\uB825 -20%",
@@ -13524,20 +13600,15 @@ const BattleRuntime = {
     defProtocolPhy: "\uBC29\uC5B4\uB825 +50% (\uBC29\uC5B4 \uD504\uB85C\uD1A0\uCF5C)",
     defProtocolMag: "\uB9C8\uBC95\uBC29\uC5B4\uB825 +50% (\uBC29\uC5B4 \uD504\uB85C\uD1A0\uCF5C)"
   };
-  var FIELD_INFO = {
-    sun_bless: "\uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 +30%, \uCE58\uBA85\uD0C0 \uD53C\uD574 +60%",
-    moon_bless: "\uB9C8\uBC95\uACF5\uACA9\uB825 +30%, \uD68C\uD53C\uC728 +15%",
-    sanctuary: "\uB9C8\uBC95\uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uBC29\uC5B4\uB825 +30%",
-    goddess_descent: "\uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825\xB7\uBC29\uC5B4\uB825\xB7\uB9C8\uBC95\uBC29\uC5B4\uB825 +30%",
-    destiny_oath: "\uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825\xB7\uBC29\uC5B4\uB825\xB7\uB9C8\uBC95\uBC29\uC5B4\uB825 +30%",
-    earth_bless: "\uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 +25%",
-    twinkle_party: "\uACF5\uACA9\uB825 +20%, \uCE58\uBA85\uD0C0\uC728 +15%",
-    star_powder: "\uBC29\uC5B4\uB825\xB7\uB9C8\uBC95\uBC29\uC5B4\uB825 +40%",
-    valentine: "\uBC29\uC5B4\uB825\xB7\uB9C8\uBC95\uBC29\uC5B4\uB825 +50%",
-    arena: "\uC77C\uBC18 \uACF5\uACA9 \uC704\uB825 2\uBC30",
-    gale: "\uCE58\uBA85\uD0C0\uC728 +20%, \uD68C\uD53C\uC728 +20%",
-    reaper_realm: "\uCE58\uBA85\uD0C0\uC728 +40%, \uCE58\uBA85\uD0C0 \uD53C\uD574 +40%"
-  };
+  function contractStatus(run, B) {
+    const { id, met, failed, riskDoorTaken } = run.contract;
+    if (met) return "\uB2EC\uC131";
+    const fighters = B.party.filter(Boolean).length;
+    const missedRisk = id === "elite" && run.floor >= 2 && !riskDoorTaken;
+    const missedElite = id === "elite" && run.floor === 6 && (B.door.type !== "elite" || fighters < 2);
+    if (failed || run.floor > 6 || missedRisk || missedElite || id === "rescue" && run.floor === 6 && fighters < 2) return "\uC774\uBC88 \uC6D0\uC815 \uBD88\uAC00";
+    return "\uC544\uC9C1";
+  }
   function createDetails(core2, widgets2, openSheet) {
     const { card, sprite: sprite2, cardHead } = widgets2;
     function skillBlock(s, entity, note) {
@@ -13635,6 +13706,7 @@ const BattleRuntime = {
       if (shown.charging) extra.push('<li><i class="bad">\uCC28\uC9D5</i>\uD798\uC744 \uBAA8\uC73C\uB294 \uC911. \uB2E4\uC74C \uD589\uB3D9\uC774 \uD06C\uB2E4</li>');
       for (const a of shown.affixes || []) extra.push('<li><i class="affix">' + esc(AFFIXES[a].name) + (a === "frenzy" && shown.frenzied ? " \uBC1C\uB3D9" : "") + "</i>" + esc(AFFIXES[a].desc) + "</li>");
       html += "<h4>\uC0C1\uD0DC \xB7 \uC811\uB450\uC0AC</h4>" + statusList(shown.buffs, extra, B.artifacts);
+      if (def.source) html += "<h4>\uD2B9\uC131</h4><p>\uADF8\uB9BC\uC790\uC5D0\uAC8C \uC6D0\uBCF8 \uCE74\uB4DC \uD2B9\uC131\uC740 \uC801\uC6A9\uB418\uC9C0 \uC54A\uB294\uB2E4.</p>";
       const cd = $("#pf-cd"), lines = [];
       if (B.intent) lines.push(B.intent.kind === "stun" ? "\uC774\uBC88 \uD134\uC740 \uAE30\uC808\uD574\uC11C \uBABB \uC6C0\uC9C1\uC778\uB2E4." : "\uB2E4\uC74C \uD589\uB3D9: " + B.intent.name + (B.intent.dmg ? " \xB7 " + TYPE[B.intent.kind] + " " + (B.intent.dmg[0] === B.intent.dmg[1] ? B.intent.dmg[0] : B.intent.dmg[0] + "~" + B.intent.dmg[1]) : ""));
       if (cd.classList.contains("on")) lines.push(cd.textContent);
@@ -13655,8 +13727,8 @@ const BattleRuntime = {
     }
     function fieldSheet(B) {
       const list = B.D?.field || [];
-      const max = B.artifacts?.includes("buff_overload") ? 5 : core2.GAME_CONSTANTS.MAX_FIELD_BUFFS || 3;
-      const html = (list.length ? '<ul class="stl">' + list.map((id) => '<li><i class="good" style="background:' + (FIELD[id] || [0, "#33295c"])[1] + ';color:#120e24">' + esc(core2.BUFF_NAMES[id] || id) + "</i>" + esc(FIELD_INFO[id] || "") + "</li>").join("") + "</ul>" : '<p class="none">\uC9C0\uAE08 \uD558\uB298\uC5D0 \uAC78\uB9B0 \uD544\uB4DC \uBC84\uD504\uAC00 \uC5C6\uB2E4.</p>') + '<p class="sm">\uD544\uB4DC \uBC84\uD504\uB294 \uC544\uAD70\uC5D0\uAC8C\uB9CC \uC801\uC6A9\uB41C\uB2E4. \uCD5C\uB300 ' + max + "\uAC1C, \uB118\uCE58\uBA74 \uAC00\uC7A5 \uBA3C\uC800 \uAC74 \uAC83\uC774 \uC0AC\uB77C\uC9C4\uB2E4.</p>";
+      const max = fieldCap(core2, B.artifacts);
+      const html = (list.length ? '<ul class="stl">' + list.map((id) => '<li><i class="good" style="background:' + (FIELD[id] || [0, "#33295c"])[1] + ';color:#120e24">' + esc(core2.BUFF_NAMES[id] || id) + "</i>" + esc(fieldInfo(core2, id, B.artifacts)) + "</li>").join("") + "</ul>" : '<p class="none">\uC9C0\uAE08 \uD558\uB298\uC5D0 \uAC78\uB9B0 \uD544\uB4DC \uBC84\uD504\uAC00 \uC5C6\uB2E4.</p>') + '<p class="sm">\uD544\uB4DC \uBC84\uD504\uB294 \uC544\uAD70\uC5D0\uAC8C\uB9CC \uC801\uC6A9\uB41C\uB2E4. \uCD5C\uB300 ' + max + "\uAC1C, \uB118\uCE58\uBA74 \uAC00\uC7A5 \uBA3C\uC800 \uAC74 \uAC83\uC774 \uC0AC\uB77C\uC9C4\uB2E4.</p>";
       openSheet("\uD558\uB298 \xB7 \uD544\uB4DC \uBC84\uD504", html);
     }
     function battlefieldSheet(run, B) {
@@ -13675,7 +13747,7 @@ const BattleRuntime = {
         riftKindLabel(run.daily.kind),
         "\uC815\uC0B0\uD55C \uC804\uD22C " + (run.stats?.turns ?? 0) + "\uD134"
       ].filter(Boolean).join(" \xB7 ") : "";
-      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", (dailyLine ? "<p>" + esc(dailyLine) + "</p>" : "") + (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + (run.contract.met ? "\uB2EC\uC131" : "\uC544\uC9C1") + "</h4><p>" + esc(contract.rule) + "</p>" : "") + '<h4>\uC7A5\uCC29 \uC720\uBB3C</h4><ul class="stl">' + slots.join("") + "</ul>");
+      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", (dailyLine ? "<p>" + esc(dailyLine) + "</p>" : "") + (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + contractStatus(run, B) + "</h4><p>" + esc(contract.rule) + "</p>" : "") + '<h4>\uC7A5\uCC29 \uC720\uBB3C</h4><ul class="stl">' + slots.join("") + "</ul>");
     }
     return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
   }
@@ -13705,8 +13777,6 @@ const BattleRuntime = {
           kind === "barrier" || kind === "magic_guard" ? "\uC774\uBC88 \uACF5\uACA9 \uBB34\uD6A8" : "\uBC1B\uB294 \uD53C\uD574 " + percent + "% \uAC10\uC18C"
         ];
       }
-      const field = o.effects.find((e) => e.type === "field_buff");
-      if (field) return [core2.BUFF_NAMES[field.id] || field.id, "\uD558\uB298\uC5D0 \uAC74\uB2E4"];
       return ["", ""];
     }
     const fullText = (o, me) => o.index === 0 ? "\uB9C8\uB098\uB97C \uC4F0\uC9C0 \uC54A\uB294 \uAE30\uBCF8 \uACF5\uACA9." : core2.SkillDisplay.body({
@@ -13734,8 +13804,13 @@ const BattleRuntime = {
         const chooseForm = o === firstForm, p = o.preview;
         const name = chooseForm ? FORM_SKILL : o.name;
         const usable = chooseForm ? forms.some((form) => form.usable) : o.usable;
+        const fields = skillFields(core2, o, B.artifacts);
         let r2, r3 = chooseForm ? "\uBCC0\uC2E0\uD560 \uD615\uD0DC\uB97C \uACE0\uB978\uB2E4" : brief(o, me);
-        if (p?.delayed && !p.instant) r2 = '<strong class="txt">\uC608\uC57D</strong>';
+        if (fields) {
+          r2 = '<strong class="field-effect">' + esc(fields.line) + "</strong>";
+          const other = fields.other.length ? brief({ ...o, effects: fields.other }, me) : "";
+          r3 = [fields.names.length <= 2 ? fields.names.join("\xB7") : "", other].filter(Boolean).join(" \xB7 ");
+        } else if (p?.delayed && !p.instant) r2 = '<strong class="txt">\uC608\uC57D</strong>';
         else if (p?.instant && o.type === "sup") r2 = '<strong class="txt">\uC989\uC2DC</strong>';
         else if (p) {
           const damage = previewDamage(p);
@@ -13805,9 +13880,10 @@ const BattleRuntime = {
       if (!o) return;
       const me = card(B.party[B.D.cur]);
       const name = isFormOption(o) ? FORM_SKILL : o.name;
+      const fields = skillFields(core2, o, B.artifacts);
       sheet(
         name + " \xB7 " + TYPE[o.type] + (o.cost ? " \xB7 MP " + o.cost : "") + (o.heirloom ? " \xB7 \uC720\uD488" : ""),
-        (o.heirloom ? (o.heirFromName || "") + "\uC5D0\uAC8C\uC11C \uBB3C\uB824\uBC1B\uC740 \uAE30\uC220. \uC704\uB825 1.5\uBC30, MP 0, \uC774 \uC804\uD22C\uC5D0\uC11C \uD55C \uBC88. " : "") + fullText(o, me) + "  \uD2B9\uC131 \u2014 " + me.trait.desc
+        (o.heirloom ? (o.heirFromName || "") + "\uC5D0\uAC8C\uC11C \uBB3C\uB824\uBC1B\uC740 \uAE30\uC220. \uC704\uB825 1.5\uBC30, MP 0, \uC774 \uC804\uD22C\uC5D0\uC11C \uD55C \uBC88. " : "") + fullText(o, me) + (fields ? " " + fields.detail : "") + "  \uD2B9\uC131 \u2014 " + me.trait.desc
       );
     }
     const acts = $("#acts");
@@ -13887,9 +13963,25 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/battle/moves.js
-  function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp }) {
+  function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp, card, spr }) {
     const { S, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
     const label = (text, actor, cls, dy) => St.number(text, St.X(actor), HY(actor) - 4 + (dy || 0), "tag " + (cls || ""));
+    function beginMove(e, actor, isFoe) {
+      const p = { e, actor, target: e.target ? actorOf(e.target) : null, kind: e.skill.type, isFoe, stage: "ready", colors: colorsOf(e.who) };
+      const donor = e.heirloom && e.heirFrom && card(e.heirFrom);
+      if (!donor) return p;
+      p.donor = donor;
+      p.colors = St.ELEMENT_COLORS[donor.element] || St.ELEMENT_COLORS.none;
+      p.effectSprite = St.variant(donor.id + "-fx", "base");
+      const art = spr(donor.id);
+      if (art) {
+        p.caster = actor;
+        p.casterVisible = actor.vis;
+        actor.vis = false;
+        p.actor = St.makeActor({ sprite: donor.id, x: actor.x, y: actor.y, flip: art.facing === "left" });
+      }
+      return p;
+    }
     function impact(e, o, stats) {
       const actor = actorOf(e.who), unit = unitOf(e.who), isAlly = e.who.side === "ally";
       applyHp(e);
@@ -13912,20 +14004,21 @@ const BattleRuntime = {
       const { tier, val } = p.e.skill;
       return !!p.e.ult || !!p.e.heirloom || !p.isFoe && tier >= 3 && (!Number.isFinite(val) || val >= 2);
     }
-    function shapeOf(skill) {
+    function shapeOf(skill, val) {
       const fx = skill.effects || [];
       if (fx.includes("random_mult") || fx.includes("multi_hit")) return skill.type === "phy" ? "flurry" : "rain";
       if (fx.includes("consume_debuff_all") || fx.includes("consume_field_all")) return "burst";
-      if (fx.includes("self_hp_cost_ratio") || (skill.val || 0) >= 4) return "meteor";
+      if (fx.includes("self_hp_cost_ratio") || (val ?? skill.val ?? 0) >= 4) return "meteor";
       return skill.type === "phy" ? "dash" : "beam";
     }
     const ATTACK_FRAME = { red_dragon: "mag", ash: "mag", flame_sage: "mag", luna: "phy", zeke: "phy", cherry_prince: "phy", golem: "phy" };
     const poseFor = (actor, kind) => !ATTACK_FRAME[actor.sprite] || ATTACK_FRAME[actor.sprite] === kind ? "attack" : "idle";
     async function bigMove(p, seen) {
-      const { actor, target, isFoe } = p, dir = isFoe ? -1 : 1, colors = colorsOf(p.e.who), skill = p.e.skill;
+      const { actor, target, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
       const key = (isFoe ? "f:" : "a:") + skill.name, first = !seen.has(key);
       seen.add(key);
-      const who = isFoe ? p.e.ult ? "\uD544\uC0B4" : unitOf(p.e.who).name : p.e.heirloom ? "\uC720\uD488 \xB7 " + unitOf(p.e.who).name : unitOf(p.e.who).name;
+      const caster = unitOf(p.e.who).name;
+      const who = isFoe && p.e.ult ? "\uD544\uC0B4" : p.e.heirloom ? "\uC720\uD488 \xB7 " + (donor?.name || caster) : caster;
       actor.front = 1;
       $$("#fx .num").forEach((n) => n.remove());
       const plate = St.plate(who, skill.name, isFoe && p.e.ult ? "#ff6b5e" : p.e.heirloom ? "#ffc857" : colors[1], dir);
@@ -13937,7 +14030,10 @@ const BattleRuntime = {
         St.converge(St.X(actor) + dir * 10, CY(actor), 18, colors, 34, 0.3);
         await St.punch(St.X(actor) + dir * 14, CY(actor) - 6, 0.18);
       } else await wait(0.12);
-      const tx = St.X(target), ty = CY(target), shape = shapeOf(skill);
+      const tx = St.X(target), ty = CY(target);
+      if (p.effectSprite) St.fly(St.X(actor) + dir * 14, CY(actor), tx, ty, 0.28, colors[1], 16, 2, null, p.effectSprite);
+      const original = donor?.skills.find((s) => s.name === skill.name && s.type === skill.type);
+      const shape = shapeOf(skill, original && (original.val ?? 0));
       if (shape === "beam") {
         const x0 = St.X(actor) + dir * 16, y = CY(actor) - 4;
         const orb = St.prop({ kind: "orb", x: x0, y, r: 2, colors });
@@ -14000,7 +14096,7 @@ const BattleRuntime = {
       p.stage = "hit";
     }
     async function quietMove(p) {
-      const { actor, target, isFoe } = p, dir = isFoe ? -1 : 1, colors = colorsOf(p.e.who);
+      const { actor, target, isFoe, colors } = p, dir = isFoe ? -1 : 1;
       actor.pose = poseFor(actor, p.kind);
       if (p.kind === "phy") {
         sfx.swing();
@@ -14021,7 +14117,7 @@ const BattleRuntime = {
         else await quietMove(p);
       }
       const calc = e.calc || {};
-      impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: colorsOf(p.e.who), big: isBig(p) }, stats);
+      impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p) }, stats);
       await wait(0.14);
     }
     async function strikeMiss(p, why, seen) {
@@ -14041,18 +14137,25 @@ const BattleRuntime = {
       await wait(0.3);
     }
     async function settleMove(p) {
-      if (p.stage === "ready") {
-        p.actor.pose = poseFor(p.actor, p.kind);
-        await wait(0.12);
+      try {
+        if (p.stage === "ready") {
+          p.actor.pose = poseFor(p.actor, p.kind);
+          await wait(0.12);
+        }
+        await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
+        p.actor.pose = "idle";
+        p.actor.front = 0;
+        const t = p.target, tu = p.e.target && unitOf(p.e.target);
+        if (t && tu && tu.hp > 0 && t.pose === "hurt") t.pose = "idle";
+        if (S.dark > 0.01) tween(S, { dark: 0 }, 0.2);
+      } finally {
+        if (p.caster) {
+          St.removeActor(p.actor);
+          p.caster.vis = p.casterVisible;
+        }
       }
-      await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
-      p.actor.pose = "idle";
-      p.actor.front = 0;
-      const t = p.target, tu = p.e.target && unitOf(p.e.target);
-      if (t && tu && tu.hp > 0 && t.pose === "hurt") t.pose = "idle";
-      if (S.dark > 0.01) tween(S, { dark: 0 }, 0.2);
     }
-    return { isBig, label, impact, strikeAndHit, strikeMiss, settleMove };
+    return { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove };
   }
 
   // card_pixel/game/src/ui/battle/view.js
@@ -14067,7 +14170,7 @@ const BattleRuntime = {
     return rows;
   }
   function battleMarkup() {
-    return '<section id="battle" class="screen"><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">\uC804\uC7A5\xB7\uC720\uBB3C</button><button id="b-speed">1\uBC30</button><button id="b-log">\uAE30\uB85D</button>' + tools() + '</header><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div><button class="sky" id="sky" aria-label="\uD558\uB298 \uC815\uBCF4"><i></i><i></i><i></i><span id="skyname"></span><small id="region-next"></small></button><div class="chips" id="pa-chips"></div><div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uB118\uAE30\uB294 \uC911</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
+    return '<section id="battle" class="screen"><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">\uC804\uC7A5\xB7\uC720\uBB3C</button><button id="b-speed">1\uBC30</button><button id="b-log">\uAE30\uB85D</button>' + tools() + '</header><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div><button class="sky" id="sky" aria-label="\uD558\uB298 \uC815\uBCF4"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button><div class="chips" id="pa-chips"></div><div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uB118\uAE30\uB294 \uC911</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
   }
   function createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: St, audio: audio2, sheets: sheets2, details, music: music2 }) {
     const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
@@ -14131,13 +14234,15 @@ const BattleRuntime = {
     const hud = createHud(core2, St, sfx, widgets2);
     const { ticker, tally, tallyWorthy } = hud;
     const { brief, renderActions, lockPanel } = createTiles({ core: core2, card, audio: audio2, sheets: sheets2, B, foeDef, play, ticker });
-    const { isBig, label, impact, strikeAndHit, strikeMiss, settleMove } = createMoves({
+    const { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove } = createMoves({
       stage: St,
       sfx,
       actorOf,
       unitOf,
       colorsOf,
-      applyHp
+      applyHp,
+      card,
+      spr
     });
     const foeSheet = () => details.foeSheet(B);
     const allySheet = (index) => details.allySheet(run, B, index);
@@ -14317,7 +14422,7 @@ const BattleRuntime = {
         actor.front = 0;
         return;
       }
-      B.pending = { e, actor, target: e.target ? actorOf(e.target) : null, kind: e.skill.type, isFoe, stage: "ready" };
+      B.pending = beginMove(e, actor, isFoe);
       if (e.ult) {
         sfx.warn();
         await wait(0.12);
@@ -15129,16 +15234,17 @@ const BattleRuntime = {
       const chips = quirk + door.enemies.map(affixChips).join("");
       return '<div class="door-plate win"><button class="door-entry" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk">' + esc(rules) + "</small>" : "") + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
-    const front = run.bench.slice(0, 3).map((id, index) => ({ id, role: POSITION[index], art: spr(id) }));
-    front.sort((a, b) => a.art.h - b.art.h);
-    const lineup = front.map(({ id, role, art }) => {
+    const front = defaultParty(run);
+    const lineup = front.map((id, index) => {
+      if (!id) return "";
+      const role = POSITION[index], art = spr(id);
       const flip = art.facing === "left";
       const center = flip ? art.w - art.cx : art.cx;
       const style = "width:" + art.w * 2 + "px;height:" + art.h * 2 + "px;left:calc(50% - " + center * 2 + "px);bottom:" + (art.fy + 1 - art.h) * 2 + "px;";
-      return '<button class="map-actor" data-sheet="' + esc(id) + '" aria-label="' + esc(role + " " + card(id).name) + '"><span class="map-actor-art">' + sprite2(id, { flip, style }) + "</span><small>" + role + "</small></button>";
+      return '<button class="map-actor" style="grid-column:' + (index + 1) + '" data-sheet="' + esc(id) + '" aria-label="' + esc(role + " " + card(id).name) + '"><span class="map-actor-art">' + sprite2(id, { flip, style }) + "</span><small>" + role + "</small></button>";
     }).join("");
     const cast = '<div class="map-party" style="--march-time:' + MARCH_MS + 'ms">' + lineup + "</div>";
-    const reserve = { ...run, bench: run.bench.slice(3) };
+    const reserve = { ...run, bench: run.bench.filter((id) => !front.includes(id)) };
     const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + "</button>" : "";
     const title = rift ? [shortRiftDate(rift.spec?.dayKey), "\uADE0\uC5F4"].filter(Boolean).join(" ") : dungeon.name;
     node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, cast) + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
@@ -15149,7 +15255,7 @@ const BattleRuntime = {
         if (party.classList.contains("marching")) return;
         ui.audio.unlockAudio();
         ui.audio.sfx.tap();
-        if (front.length && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        if (lineup && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           party.classList.add("marching");
           await sleep(MARCH_MS);
         }

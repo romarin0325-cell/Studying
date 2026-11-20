@@ -8,7 +8,8 @@ import { REGIONS } from '../../content/regions.js';
 import { RELIC_LIMIT } from '../../engine/rooms.js';
 import { CONTRACTS } from '../../content/contracts.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
-import { FIELD, GOOD } from './hud.js';
+import { FIELD, GOOD, fieldCap } from './hud.js';
+import { fieldInfo } from './fields.js';
 
 /* What each status and field blessing does. Numbers follow the card rules
    (logic.js GAME_CONSTANTS.DEBUFF_REDUCTIONS, FIELD_BUFF_STATS, calculateStats; battle_runtime defProtocol). */
@@ -19,12 +20,15 @@ const STATUS_INFO = {
   guard: '받는 피해 50% 감소', damage_half: '받는 피해 50% 감소',
   defProtocolPhy: '방어력 +50% (방어 프로토콜)', defProtocolMag: '마법방어력 +50% (방어 프로토콜)'
 };
-const FIELD_INFO = {
-  sun_bless: '공격력·마법공격력 +30%, 치명타 피해 +60%', moon_bless: '마법공격력 +30%, 회피율 +15%', sanctuary: '마법공격력·마법방어력 +30%',
-  goddess_descent: '공격력·마법공격력·방어력·마법방어력 +30%', destiny_oath: '공격력·마법공격력·방어력·마법방어력 +30%', earth_bless: '공격력·마법공격력 +25%',
-  twinkle_party: '공격력 +20%, 치명타율 +15%', star_powder: '방어력·마법방어력 +40%', valentine: '방어력·마법방어력 +50%',
-  arena: '일반 공격 위력 2배', gale: '치명타율 +20%, 회피율 +20%', reaper_realm: '치명타율 +40%, 치명타 피해 +40%'
-};
+function contractStatus(run, B) {
+  const { id, met, failed, riskDoorTaken } = run.contract;
+  if (met) return '달성';
+  const fighters = B.party.filter(Boolean).length;
+  const missedRisk = id === 'elite' && run.floor >= 2 && !riskDoorTaken;
+  const missedElite = id === 'elite' && run.floor === 6 && (B.door.type !== 'elite' || fighters < 2);
+  if (failed || run.floor > 6 || missedRisk || missedElite || (id === 'rescue' && run.floor === 6 && fighters < 2)) return '이번 원정 불가';
+  return '아직';
+}
 
 export function createDetails(core, widgets, openSheet) {
   const { card, sprite, cardHead } = widgets;
@@ -118,6 +122,7 @@ export function createDetails(core, widgets, openSheet) {
     if (shown.charging) extra.push('<li><i class="bad">차징</i>힘을 모으는 중. 다음 행동이 크다</li>');
     for (const a of shown.affixes || []) extra.push('<li><i class="affix">' + esc(AFFIXES[a].name) + (a === 'frenzy' && shown.frenzied ? ' 발동' : '') + '</i>' + esc(AFFIXES[a].desc) + '</li>');
     html += '<h4>상태 · 접두사</h4>' + statusList(shown.buffs, extra, B.artifacts);
+    if (def.source) html += '<h4>특성</h4><p>그림자에게 원본 카드 특성은 적용되지 않는다.</p>';
     const cd = $('#pf-cd'), lines = [];
     if (B.intent) lines.push(B.intent.kind === 'stun' ? '이번 턴은 기절해서 못 움직인다.' : '다음 행동: ' + B.intent.name + (B.intent.dmg ? ' · ' + TYPE[B.intent.kind] + ' ' + (B.intent.dmg[0] === B.intent.dmg[1] ? B.intent.dmg[0] : B.intent.dmg[0] + '~' + B.intent.dmg[1]) : ''));
     if (cd.classList.contains('on')) lines.push(cd.textContent);
@@ -130,8 +135,8 @@ export function createDetails(core, widgets, openSheet) {
   }
   function fieldSheet(B) {
     const list = B.D?.field || [];
-    const max = B.artifacts?.includes('buff_overload') ? 5 : (core.GAME_CONSTANTS.MAX_FIELD_BUFFS || 3);
-    const html = (list.length ? '<ul class="stl">' + list.map(id => '<li><i class="good" style="background:' + (FIELD[id] || [0, '#33295c'])[1] + ';color:#120e24">' + esc(core.BUFF_NAMES[id] || id) + '</i>' + esc(FIELD_INFO[id] || '') + '</li>').join('') + '</ul>' : '<p class="none">지금 하늘에 걸린 필드 버프가 없다.</p>') +
+    const max = fieldCap(core, B.artifacts);
+    const html = (list.length ? '<ul class="stl">' + list.map(id => '<li><i class="good" style="background:' + (FIELD[id] || [0, '#33295c'])[1] + ';color:#120e24">' + esc(core.BUFF_NAMES[id] || id) + '</i>' + esc(fieldInfo(core, id, B.artifacts)) + '</li>').join('') + '</ul>' : '<p class="none">지금 하늘에 걸린 필드 버프가 없다.</p>') +
       '<p class="sm">필드 버프는 아군에게만 적용된다. 최대 ' + max + '개, 넘치면 가장 먼저 건 것이 사라진다.</p>';
     openSheet('하늘 · 필드 버프', html);
   }
@@ -152,7 +157,7 @@ export function createDetails(core, widgets, openSheet) {
       '정산한 전투 ' + (run.stats?.turns ?? 0) + '턴'].filter(Boolean).join(' · ') : '';
     openSheet('전장·유물', (dailyLine ? '<p>' + esc(dailyLine) + '</p>' : '') +
       (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
-      (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + (run.contract.met ? '달성' : '아직') +
+      (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + contractStatus(run, B) +
         '</h4><p>' + esc(contract.rule) + '</p>' : '') +
       '<h4>장착 유물</h4><ul class="stl">' + slots.join('') + '</ul>');
   }

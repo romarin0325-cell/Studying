@@ -68,7 +68,11 @@ export function heirloomSkill(proto, name) {
 
 export function heldHeirloomSkill(core, held) {
   if (!held) return null;
-  if (held.skill) return structuredClone(held.skill);
+  if (held.skill) {
+    const skill = structuredClone(held.skill);
+    skill.heirFrom ??= held.form || held.from;
+    return skill;
+  }
   const giver = core.GameUtils.getCardById(held.form || held.from);
   return giver ? heirloomSkill(giver, held.name) : null;
 }
@@ -401,7 +405,7 @@ export function create(core, opts) {
     flush();
     const who = refOf(source);
     if (skill.heirloom && !delayed && isAlly(source)) B.heirloomsUsed++;
-    push({ t: 'act', who, target: refOf(target), delayed, heirloom: !!skill.heirloom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
+    push({ t: 'act', who, target: refOf(target), delayed, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
     B.ctx.push({ kind: 'act', who, skill, delayed, source });
     B.lastHit = null;
     const formId = source.formId;

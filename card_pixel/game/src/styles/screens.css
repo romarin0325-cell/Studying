@@ -165,8 +165,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   bottom: 28px;
   left: 16px;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .map-actor { position: relative; height: 172px; min-width: 0; background: none; border: 0; padding: 0; }
 .map-actor-art { position: absolute; inset: 0 0 18px; pointer-events: none; }

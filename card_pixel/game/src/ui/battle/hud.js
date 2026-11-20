@@ -9,6 +9,7 @@ export const FIELD = {
   destiny_oath: ['서약', '#ff8fb1'], earth_bless: ['대지', '#9ad06a'], twinkle_party: ['트윙', '#ffe07a'], star_powder: ['별', '#cfe3ff'],
   valentine: ['발렌', '#ff7aa8'], arena: ['투기', '#ff7a5a'], reaper_realm: ['사신', '#a678ff'], gale: ['질풍', '#7fe3c8']
 };
+export const fieldCap = (core, artifacts) => artifacts?.includes('buff_overload') ? 5 : core.GAME_CONSTANTS.MAX_FIELD_BUFFS;
 
 export function createHud(core, stage, sfx, widgets) {
   const { S, wait, footY: FY, headY: HY } = stage;
@@ -64,11 +65,10 @@ export function createHud(core, stage, sfx, widgets) {
     chips($('#pf-chips'), foe, true);
     S.beads.burn = foe.buffs.burn || 0; S.beads.divine = foe.buffs.divine || 0;
     if (B.foe) { S.beads.x = B.foe.x; S.beads.y = FY(B.foe); }
-    const sky = $('#sky').children;
-    for (let i = 0; i < 3; i++) {
+    $('#sky-slots').innerHTML = Array.from({ length: fieldCap(core, B.artifacts) }, (_, i) => {
       const id = D.field[i], f = id && (FIELD[id] || [id.slice(0, 2), '#ccc']);
-      sky[i].className = f ? 'on' : ''; sky[i].style.background = f ? f[1] : ''; sky[i].textContent = f ? f[0].slice(0, 1) : '';
-    }
+      return f ? '<i class="on" style="background:' + f[1] + '">' + esc(f[0].slice(0, 1)) + '</i>' : '<i></i>';
+    }).join('');
     $('#skyname').textContent = D.field.map(id => core.BUFF_NAMES[id] || id).join(' · ');
     const newest = D.field[D.field.length - 1];
     S.tint = newest ? (FIELD[newest] || [0, '#ccc'])[1] : S.tint; S.tintA = newest ? 1 : 0;

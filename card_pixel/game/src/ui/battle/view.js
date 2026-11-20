@@ -31,7 +31,7 @@ export function battleMarkup() {
     '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">전장·유물</button><button id="b-speed">1배</button><button id="b-log">기록</button>' + tools() + '</header>' +
     '<div id="stage"><canvas id="cv"></canvas><div id="hud">' +
     '<div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div>' +
-    '<button class="sky" id="sky" aria-label="하늘 정보"><i></i><i></i><i></i><span id="skyname"></span><small id="region-next"></small></button>' +
+    '<button class="sky" id="sky" aria-label="하늘 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
     '<div class="chips" id="pa-chips"></div>' +
     '<div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">▶▶ 넘기는 중</div></div>' +
     '<div id="party"></div>' +
@@ -99,8 +99,8 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const hud = createHud(core, St, sfx, widgets);
   const { ticker, tally, tallyWorthy } = hud;
   const { brief, renderActions, lockPanel } = createTiles({ core, card, audio, sheets, B, foeDef, play, ticker });
-  const { isBig, label, impact, strikeAndHit, strikeMiss, settleMove } = createMoves({
-    stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
+  const { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove } = createMoves({
+    stage: St, sfx, actorOf, unitOf, colorsOf, applyHp, card, spr
   });
   const foeSheet = () => details.foeSheet(B);
   const allySheet = index => details.allySheet(run, B, index);
@@ -224,7 +224,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       await tween(actor, { oy: -4 }, 0.08); await tween(actor, { oy: 0 }, 0.1, 'in'); await wait(0.1);
       actor.front = 0; return;
     }
-    B.pending = { e, actor, target: e.target ? actorOf(e.target) : null, kind: e.skill.type, isFoe, stage: 'ready' };
+    B.pending = beginMove(e, actor, isFoe);
     if (e.ult) { sfx.warn(); await wait(0.12); }
     else if (e.skill.name !== '일반 공격' && !isBig(B.pending)) St.number(e.skill.name, St.X(actor), HY(actor) - 12, 'call');
     else if (e.delayed) label(e.skill.name + ' 발동', actor, 'good');
