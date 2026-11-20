@@ -132,9 +132,13 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     }
     p.stage = 'hit';
   }
-  async function strikeAndHit(p, e, stats, seen) {
+  async function strikeAndHit(p, e, stats, seen, finishHit) {
     p.actor.front = 1;
     if (p.stage === 'ready') { if (isBig(p)) await bigMove(p, seen); else await quietMove(p); }
+    if (finishHit) {
+      p.finishing = true;
+      return finishHit(e);
+    }
     const calc = e.calc || {};
     impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p) }, stats);
     await wait(0.14);
@@ -150,7 +154,8 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   async function settleMove(p) {
     try {
       if (p.stage === 'ready') { p.actor.pose = poseFor(p.actor, p.kind); await wait(0.12); }
-      await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
+      if (p.finishing) Object.assign(p.actor, { ox: 0, oy: 0 });
+      else await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
       p.actor.pose = 'idle'; p.actor.front = 0;
       const t = p.target, tu = p.e.target && unitOf(p.e.target);
       if (t && tu && tu.hp > 0 && t.pose === 'hurt') t.pose = 'idle';

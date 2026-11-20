@@ -5,6 +5,7 @@ import { DUNGEONS } from '../../content/dungeons.js';
 import { LAYOUTS } from '../../content/layouts.js';
 import { hubLineup, sceneActors } from './hub.js';
 import { runRecordSheet } from './records.js';
+import { openBattleLog } from '../battle/log.js';
 
 export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, stamp, endingPending, changeChoices, confirm }) {
   const won = rewards.result === 'win';
@@ -25,6 +26,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
       <div class="meta-recruit-heading">
         <h2>${won ? '동료 영입' : '꿈 조각'}</h2>
         <button class="btn" id="meta-run-record">기록</button>
+        ${run.lastBattleLog?.length ? '<button class="btn log-button" id="meta-battle-log">전투 기록</button>' : ''}
       </div>
       ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} · ${esc(stampContract.name)}</p>` : ''}
       ${candidates.length ? `<p>${won ? `생환자 중 최대 ${limit}명 영입` : '다음 원정 후보 한 명 예약'}</p>`
@@ -74,6 +76,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
     renderSelection();
   }));
   $('#meta-run-record', node).addEventListener('click', () => runRecordSheet(run, card, sheets.openSheet));
+  $('#meta-battle-log', node)?.addEventListener('click', () => openBattleLog(sheets, widgets, run.lastBattleLog));
   action.addEventListener('click', () => {
     if (!confirm(won ? { recruits: choices } : { shard: choices[0] || null })) feedback.textContent = '선택을 다시 확인해 주세요.';
   });

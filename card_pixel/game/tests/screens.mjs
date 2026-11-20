@@ -12,9 +12,12 @@ import * as Bridge from '../src/engine/bridge.js';
 import * as Daily from '../src/engine/daily-rift.js';
 import * as DailyStore from '../src/engine/daily-store.js';
 import * as Meta from '../src/engine/meta.js';
+import { openingModel } from '../src/engine/opening.js';
 import { create as makeRoster, POSITION } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
+import { battleLog } from '../src/ui/battle/log.js';
+import { formationMoves } from '../src/ui/screens/order.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -59,6 +62,9 @@ function settleWin(run, overrides = {}) {
 }
 
 function advance(run) {
+  if (run.pending?.kind === 'reinforcement') {
+    command(Run.resolveReinforcement, run, { key: run.pending.key, id: null, replaceId: null });
+  }
   command(Run.leaveRoom, run);
   command(Run.nextFloor, run);
 }
@@ -77,8 +83,8 @@ function reachFloor(run, floor, visit = () => {}) {
   return run;
 }
 
-function makeRun({ dungeonId = 'ember_volcano', seed, floor = 1, difficulty, contract, profileView, firstPick, visit }) {
-  const run = Run.createRun({ core, roster, dungeonId, seed, difficulty, contract, profileView });
+function makeRun({ dungeonId = 'ember_volcano', seed, floor = 1, difficulty, contract, profileView, firstPick, visit, tempoVersion = 1 }) {
+  const run = Run.createRun({ core, roster, dungeonId, seed, difficulty, contract, profileView, tempoVersion });
   startPicks(run, firstPick);
   return reachFloor(run, floor, visit);
 }
@@ -718,40 +724,45 @@ function returnStamp() {
 
 function orderHint() {
   const profile = snowRabbitProfile();
-  const run = makeRun({ seed: 21, floor: 6, profileView: Meta.startView(profile, 'ember_volcano') });
-  const party = Run.suggestOrder(run).slice().reverse();
+  const run = makeRun({ seed: 21, floor: 6, tempoVersion: 2, profileView: Meta.startView(profile, 'ember_volcano') });
+  const suggested = Run.suggestOrder(run);
+  const reserve = run.bench.find(id => !suggested.includes(id));
+  const party = [suggested[2], reserve, suggested[0]];
   startBattle(run, { party });
-  settleWin(run, { survivors: [true, false, true] });
+  settleWin(run);
   advance(run);
   reachFloor(run, 8);
   command(Run.chooseDoor, run, 0);
   const defaults = Run.defaultParty(run);
   const alternate = Run.suggestOrder(run);
   assert.ok(run.guide.bossOrder);
-  assert.equal(defaults[0], party[0]);
-  assert.equal(defaults[2], party[2]);
-  assert.ok(defaults[1] && defaults[1] !== party[1]);
+  assert.deepEqual(defaults, party);
   assert.notDeepEqual(defaults, alternate);
   const name = id => roster.card(id).name;
-  const inheritance = Bridge.heirloomPreview(core, alternate).find(entry => entry.to === alternate.at(-1) && entry.skill);
-  assert.ok(inheritance);
+  const moves = formationMoves(defaults, alternate, name);
+  assert.ok(moves.some(move => move.includes(' ↔ ')) && moves.some(move => move.startsWith('대기 ')));
   return {
     session: storedSession({ run }), proof: `${defaults.join(' → ')} differs from ${alternate.join(' → ')}`,
     async show(page, { text, capture }) {
+      await page.locator('#hub.on #meta-depart').click();
       const order = page.locator('#order.on');
       for (const [index, id] of defaults.entries()) {
         await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
       }
       const hint = order.locator('.relay-alternative');
-      await text(hint.locator('b'), '다른 순서 · ' + alternate.map(name).join(' → '));
-      await text(hint.locator('small'), `${name(inheritance.to)}에게 ${inheritance.skill.name} ×${Bridge.HEIRLOOM_POWER}`);
+      for (const move of moves) await text(hint.locator('b').filter({ hasText: move }), move);
       await hint.scrollIntoViewIfNeeded();
       await capture();
-      await hint.getByRole('button', { name: '이 순서로' }).click();
+      await hint.click();
       for (const [index, id] of alternate.entries()) {
         await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
       }
       assert.equal(await hint.count(), 0);
+      await text(page.locator('#b-alternate-order'), '되돌리기', { exact: true });
+      await page.locator('#b-alternate-order').click();
+      for (const [index, id] of defaults.entries()) {
+        await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
+      }
       assert.equal(await page.evaluate(() => window.__game.run.room.status), 'order');
     }
   };
@@ -814,6 +825,272 @@ function retreatOutcomes() {
       await text(button.locator('small').filter({ hasText: retreat }), retreat);
       await text(button.locator('small').filter({ hasText: fall }), fall);
       await text(page.locator('#turn'), '1턴');
+    }
+  };
+}
+
+function openingFixture(rescue) {
+  const run = makeRun({ dungeonId: 'dawn_forest', seed: 7, tempoVersion: 2 });
+  const battle = startBattle(run, { party: INTRO.party });
+  const model = openingModel(battle);
+  assert.equal(model.stand.actorId, 'ash');
+  assert.deepEqual(model.stand.damageRange, [80, 80]);
+  assert.equal(model.rescue.incomingHpAfter, 149);
+  const first = rescue ? battle.retreat() : battle.act(model.stand.optionIndex);
+  const second = act(battle, rescue ? '실버스톰' : '아마겟돈');
+  const summary = battle.summary();
+  assert.equal(summary.outcome, 'win');
+  assert.equal(summary.survivors.filter(Boolean).length, rescue ? 3 : 2);
+  command(Run.settleBattle, run, summary);
+  assert.equal(run.openingLead, rescue ? 'ash' : 'snow_rabbit');
+  return { run, first, second, model };
+}
+
+function openingChoices() {
+  openingFixture(false);
+  openingFixture(true);
+  return {
+    session: null, seed: 7, proof: 'Seed 7: rescue leaves snow_rabbit at 149 HP and Ash leads; stand leaves Armageddon and snow_rabbit leads',
+    async show(page, { text, capture }) {
+      await text(page.locator('#title.on .title-relay'), '쓰러진 동료가 다음 동료의 힘이 된다');
+      await capture('title');
+      await page.locator('#b-start').click();
+      await battleIdle(page);
+      const choice = page.locator('#acts .opening-choice');
+      assert.equal(await choice.count(), 2);
+      await text(page.locator('#opening-face'), 'HP 40 / 420');
+      await text(choice.nth(0), '눈토끼 HP 290 → 149');
+      await text(choice.nth(1), '쓰러지면 눈토끼가 아마겟돈을 받는다');
+      await capture();
+      await choice.nth(0).click();
+      await battleIdle(page);
+      await skillTile(page, '실버스톰').click();
+      await text(page.locator('#result.on #b-next'), '애쉬와 간다');
+      await capture('rescue');
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.locator('#result.on #b-result-log').click();
+      await text(page.locator('#sheet.on .battle-log-row.retreat'), '애쉬');
+    }
+  };
+}
+
+function openingAwaken() {
+  const { run } = openingFixture(false);
+  advance(run);
+  command(Run.chooseDoor, run, 0);
+  const session = storedSession({ run });
+  assert.equal(run.pending.remaining, 1);
+  assert.deepEqual(run.bench, ['snow_rabbit']);
+  const id = run.pending.candidates[0];
+  const { awakened } = command(Run.chooseStartPick, run, id);
+  assert.equal(awakened.length, 3);
+  assert.deepEqual(run.bench, ['snow_rabbit', id, ...awakened]);
+  return {
+    session, motion: 'no-preference', proof: ['snow_rabbit', id, ...awakened].join(' + '),
+    async show(page, { text, capture }) {
+      await text(page.locator('#awaken.on .wake-lead'), '눈토끼');
+      await text(page.locator('#awaken.on .wake-lead'), '아마겟돈');
+      await capture('companion');
+      await page.locator(`#wake-choices [data-id="${id}"]`).click();
+      await page.locator('#b-wake').click();
+      await page.locator('#b-wake-skip').click();
+      await text(page.locator('.wake-summary'), '내가 정한 둘 + 깨어난 셋 + 결정 1', { exact: true });
+      assert.deepEqual(await page.locator('.wake-slot.landed [data-sheet]').evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), awakened);
+      await capture();
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await text(page.locator('.wake-summary'), '내가 정한 둘 + 깨어난 셋 + 결정 1');
+    }
+  };
+}
+
+function formationBoard() {
+  const run = makeRun({ seed: 7, tempoVersion: 2 });
+  command(Run.chooseDoor, run, 0);
+  const { blessing, party } = Run.getTempoView(run, 0);
+  const reserve = run.bench.find(id => !party.includes(id));
+  const expected = [reserve, party[2], party[1]];
+  const session = storedSession({ run });
+  command(Run.confirmOrder, run, expected);
+  assert.deepEqual(Run.battleOptions(run).party, expected);
+  return {
+    session, proof: `${blessing.id} ×${blessing.multiplier}, bench to front, then middle and rear swap`,
+    async show(page, { text, capture }) {
+      const order = page.locator('#order.on');
+      const slot = i => order.locator(`[data-slot="${i}"]`);
+      await text(order.locator('.relay-blessing'), roster.card(blessing.id).name);
+      await text(order.locator('.relay-blessing'), '+' + Math.round((blessing.multiplier - 1) * 100) + '%');
+      const positions = await Promise.all([0, 1, 2].map(i => slot(i).boundingBox()));
+      assert.equal(new Set(positions.map(pos => pos.y)).size, 1);
+      assert.ok(positions.every(pos => pos.height === 84));
+      const depart = await order.locator('#b-go').boundingBox();
+      assert.ok(depart && depart.y >= 0 && depart.y + depart.height <= viewport.height);
+      await order.locator(`[data-bench="${reserve}"]`).click();
+      await slot(0).click();
+      await slot(1).click();
+      await slot(2).click();
+      for (const [i, id] of expected.entries()) await text(slot(i).locator('b'), roster.card(id).name, { exact: true });
+      assert.equal(await page.evaluate(() => window.__game.run.room.party), null);
+      await capture();
+      await order.locator('.relay-link:not([disabled])').first().click();
+      await text(page.locator('#sheet.on #sh-title'), '쓰러지면 유품 계승');
+      await capture('heirloom');
+      await page.locator('#b-sheetclose').click();
+      await openBattle(page);
+      assert.deepEqual(await page.evaluate(() => window.__game.run.room.party), expected);
+    }
+  };
+}
+
+function settlePlayedWin(run) {
+  const battle = startBattle(run, { party: Run.suggestOrder(run).reverse() });
+  for (let i = 0; !battle.outcome && i < 30; i++) {
+    const options = battle.options().filter(option => option.usable);
+    const power = option => option.preview?.min ?? option.preview?.dmg ?? 0;
+    const choice = options.find(option => option.preview?.kill) ?? options.sort((a, b) => power(b) - power(a))[0];
+    battle.act(choice.index);
+  }
+  if (battle.outcome !== 'win') return false;
+  command(Run.settleBattle, run, battle.summary());
+  return run.pending?.kind === 'reinforcement';
+}
+
+function reinforcementBoard() {
+  let empty, full, join;
+  for (let seed = 0; seed < 32 && !full; seed++) {
+    const run = makeRun({ seed, tempoVersion: 2, profileView: { lead: 'red_dragon' } });
+    if (!settlePlayedWin(run) || run.bench.length !== 5) continue;
+    empty = storedSession({ run });
+    join = run.pending.candidates[0];
+    command(Run.resolveReinforcement, run, { key: run.pending.key, id: join, replaceId: null });
+    advance(run);
+    if (settlePlayedWin(run) && run.bench.length === run.pending.limit) full = run;
+  }
+  assert.ok(full, 'A live seed reaches floor 2 reinforcement at capacity');
+  const session = storedSession({ run: full });
+  const { key, candidates } = full.pending;
+  const id = candidates[0], replaceId = full.bench[0];
+  assert.equal(Run.resolveReinforcement(full, { key, id, replaceId: null }).ok, false);
+  command(Run.resolveReinforcement, full, { key, id, replaceId });
+  assert.equal(Run.resolveReinforcement(full, { key, id, replaceId }).ok, false);
+  assert.ok(full.released.includes(replaceId) && full.bench.includes(id));
+  return {
+    session, proof: `actual battles: join ${join}, then ${replaceId} → ${id} at 6/6; duplicate key rejected`,
+    async show(page, { text, capture, revisit }) {
+      const screen = page.locator('#reinforce.on');
+      await text(screen.locator('.lead'), '동료 6/6명');
+      await screen.locator(`[data-candidate="${id}"]`).click();
+      assert.equal(await screen.locator('#b-reinforce-take').isDisabled(), true);
+      await screen.locator(`[data-release="${replaceId}"]`).click();
+      await capture();
+      await screen.locator('#b-reinforce-take').click();
+      await page.locator('#map.on').waitFor();
+      assert.deepEqual(await page.evaluate(() => window.__game.run.bench), full.bench);
+      await revisit(empty, async source => {
+        await text(source.locator('#reinforce.on .lead'), '동료 5/6명');
+        await capture('vacancy', source);
+        await source.locator('#b-reinforce-pass').click();
+        await source.locator('#map.on').waitFor();
+        assert.equal(await source.evaluate(() => window.__game.run.bench.length), 5);
+      });
+    }
+  };
+}
+
+function tempoTelegraph() {
+  const run = makeRun({ seed: 1, tempoVersion: 2, dungeonId: 'starlit_garden', profileView: { lead: 'avalanche_maid' } });
+  const battle = startBattle(run);
+  const intent = battle.state().turn && battle.previewRetreat().intent;
+  assert.equal(intent.kind, 'phy');
+  const block = act(battle, '배리어');
+  assert.ok(block.some(event => event.t === 'miss' && event.why === 'barrier'));
+  const next = block.findLast(event => event.t === 'await');
+  assert.equal(next.countdown.inTurns, 0);
+  assert.equal(next.intent.name, next.countdown.name);
+  const range = ([min, max]) => min === max ? String(min) : min + '~' + max;
+  return {
+    session: storedSession({ run }), proof: `Barrier stops turn 1; turn 2 announces ${next.intent.name} ${range(next.intent.dmg)}`,
+    async show(page, { text, capture }) {
+      await openBattle(page);
+      await text(skillTile(page, '배리어').locator('.r3'), '다음 물리 차단');
+      await tapTile(page, '배리어');
+      await text(page.locator('#intent.on'), next.intent.name);
+      await text(page.locator('#intent.on strong'), range(next.intent.dmg), { exact: true });
+      await text(page.locator('#pf-cd.on'), '이번 턴 ' + next.countdown.name);
+      await capture();
+    }
+  };
+}
+
+function lastHit() {
+  const { second } = openingFixture(false);
+  const hit = second.find(event => event.t === 'hp' && event.who.side === 'enemy');
+  assert.ok(hit.amount > -hit.delta, 'The last hit must show damage beyond remaining HP');
+  const run = makeRun({ dungeonId: 'dawn_forest', seed: 7, tempoVersion: 2 });
+  return {
+    session: storedSession({ run }), motion: 'no-preference', mute: true,
+    proof: `Armageddon ${hit.amount} damage, enemy HP delta ${hit.delta}, Ash's heirloom`,
+    async show(page, { text, capture }) {
+      await battleIdle(page);
+      await page.locator('#acts .stand').click();
+      await battleIdle(page);
+      await page.evaluate(() => {
+        const observer = new MutationObserver(() => {
+          if (!document.querySelector('.finish-cast')) return;
+          observer.disconnect();
+          window.__game.clock.paused = true;
+        });
+        observer.observe(document.querySelector('#fx'), { childList: true });
+      });
+      await page.locator('#b-heir').click();
+      await text(page.locator('.finish-damage'), String(hit.amount), { exact: true });
+      await text(page.locator('.finish-cast'), '유품 원주인');
+      await capture('impact', page, { duringBattle: true });
+      await page.evaluate(() => { window.__game.clock.paused = false; });
+      await text(page.locator('#result.on #b-next'), '눈토끼와 간다');
+      await text(page.locator('#result.on .finish-portrait'), '생환');
+      await text(page.locator('#result.on .finish-portrait'), hit.amount + ' 피해');
+    }
+  };
+}
+
+function groupedBattleLog() {
+  const run = makeRun({ seed: 1, profileView: { lead: 'guardian' } });
+  const battle = startBattle(run);
+  const events = act(battle, '판게아리버스');
+  for (let i = 0; i < 3; i++) events.push(...act(battle, '가드'));
+  const groups = battleLog(events, run.room.party, run.room.enemies);
+  const cast = groups.find(group => group.turn === 1).rows.find(row => row.kind === 'reserve');
+  const hit = groups.find(group => group.turn === 5).rows.find(row => row.origin === cast.key);
+  assert.ok(hit.amount > 0 && cast.hits.some(entry => entry.key === hit.key));
+  const { run: intro, first, second } = openingFixture(true);
+  const loss = openingFixture(false);
+  const lossLog = battleLog([...loss.first, ...loss.second], loss.run.room.party, loss.run.room.enemies);
+  assert.ok(lossLog[0].rows.some(row => row.kind === 'down' && row.faces[0].id === 'ash'));
+  assert.ok(lossLog[0].rows.some(row => row.kind === 'heirloom' && row.faces[1].id === 'snow_rabbit'));
+  intro.lastBattleLog = battleLog([...first, ...second], intro.room.party, intro.room.enemies);
+  assert.ok(intro.lastBattleLog[0].rows.some(row => row.kind === 'retreat' && row.faces[0].id === 'ash'));
+  return {
+    session: storedSession({ run }), proof: `1턴 판게아리버스 예약 → 5턴 발동 · ${hit.amount}; Ash retreat, death and heirloom with faces`,
+    async show(page, { text, capture, revisit }) {
+      await openBattle(page);
+      await text(skillTile(page, '판게아리버스').locator('.r2'), '5턴에 적중');
+      await tapTile(page, '판게아리버스');
+      for (let i = 0; i < 3; i++) await tapTile(page, '가드');
+      await page.locator('#b-log').click();
+      const sheet = page.locator('#sheet.on');
+      await text(sheet.locator('.trigger'), '5턴 발동 · ' + hit.amount);
+      assert.equal(await sheet.locator('[data-latest-turn]').evaluate(node => node === document.activeElement), true);
+      await capture();
+      await sheet.locator('.trigger [data-log-jump]').click();
+      await text(sheet.locator('.reserve'), '1턴 판게아리버스 예약');
+      await capture('reservation');
+      await revisit(storedSession({ run: intro }), async source => {
+        await source.locator('#result.on #b-result-log').click();
+        const retreat = source.locator('#sheet.on .battle-log-row.retreat');
+        await text(retreat, '애쉬');
+        assert.equal(await retreat.locator('img').count(), 1);
+        await capture('resumed', source);
+      });
     }
   };
 }
@@ -1107,6 +1384,13 @@ function riftRecords(detail) {
 }
 
 const cases = {
+  'opening-choices': openingChoices,
+  'opening-awaken': openingAwaken,
+  'formation-board': formationBoard,
+  'reinforcement-board': reinforcementBoard,
+  'tempo-telegraph': tempoTelegraph,
+  'last-hit': lastHit,
+  'battle-log': groupedBattleLog,
   'tile-range': tileRange,
   'tile-instant': tileInstant,
   'field-support': fieldSupport,
@@ -1142,7 +1426,10 @@ const cases = {
   'rift-record-detail': () => riftRecords(true)
 };
 
-async function inject(page, session, { daily, now } = {}) {
+async function inject(page, session, { daily, now, seed, mute } = {}) {
+  const url = seed == null ? gameUrl : gameUrl + '?seed=' + seed;
+  const entries = [[sessionKey, session], ...(daily ? [[dailyKey, daily]] : [])];
+  if (mute) entries.push(['relaymare.settings', JSON.stringify({ sound: false, music: false })]);
   await page.addInitScript(({ url, entries, now }) => {
     if (location.href !== url) return;
     if (now) {
@@ -1161,10 +1448,13 @@ async function inject(page, session, { daily, now } = {}) {
     }
     const marker = 'relaymare.gallery.seeded';
     if (sessionStorage.getItem(marker)) return;
-    for (const [key, value] of entries) localStorage.setItem(key, value);
+    for (const [key, value] of entries) {
+      if (value == null) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    }
     sessionStorage.setItem(marker, '1');
-  }, { url: gameUrl, entries: [[sessionKey, session], ...(daily ? [[dailyKey, daily]] : [])], now });
-  await page.goto(gameUrl, { waitUntil: 'domcontentloaded' });
+  }, { url, entries, now });
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.locator('.screen.on').waitFor();
 }
 
@@ -1205,7 +1495,7 @@ async function openDoorInfo(page, index) {
 }
 
 async function withPage(browser, session, show, options) {
-  const context = await browser.newContext({ viewport, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+  const context = await browser.newContext({ viewport, deviceScaleFactor: 1, reducedMotion: options?.motion ?? 'reduce' });
   try {
     const page = await context.newPage();
     page.setDefaultTimeout(7000);
@@ -1233,8 +1523,8 @@ async function withPage(browser, session, show, options) {
   }
 }
 
-async function capturePage(page) {
-  if (await page.locator('#battle.on').count() && !await page.locator('#result.on').count()) await battleIdle(page);
+async function capturePage(page, { duringBattle = false } = {}) {
+  if (!duringBattle && await page.locator('#battle.on').count() && !await page.locator('#result.on').count()) await battleIdle(page);
   await page.waitForFunction(() => document.fonts.status === 'loaded', null, { timeout: 7000 });
   await page.evaluate(async () => {
     const images = Array.from(document.querySelectorAll('.screen.on img, #sheet.on img'));
@@ -1260,8 +1550,8 @@ async function runCase(browser, name, fixture) {
         }
         found.add(expected);
       },
-      async capture(label, source = page) {
-        captures.push({ name: label ? `${name}-${label}` : name, image: await capturePage(source) });
+      async capture(label, source = page, options) {
+        captures.push({ name: label ? `${name}-${label}` : name, image: await capturePage(source, options) });
       },
       revisit: (session, show) => withPage(browser, session, show)
     });

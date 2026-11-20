@@ -1,5 +1,26 @@
 import { $, sleep } from './dom.js';
 
+/** A short row of summons. Skip and reduced motion land the same three faces. */
+export function revealLine(box, skip, sfx, done) {
+  const slots = [...box.querySelectorAll('.wake-slot')];
+  let timer;
+  function finish() {
+    clearTimeout(timer);
+    for (const slot of slots) slot.classList.add('landed');
+    done();
+  }
+  if (!slots.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return finish();
+  skip.addEventListener('click', finish, { once: true });
+  let index = 0;
+  function next() {
+    if (!box.isConnected) return;
+    slots[index++].classList.add('landed');
+    sfx.awaken();
+    timer = setTimeout(index < slots.length ? next : finish, 210);
+  }
+  timer = setTimeout(next, 140);
+}
+
 /** A summon. Silhouettes roll, then rare and better glow in their grade colour before the face shows,
     then the card lands with its grade's effect. The card is placed once and stays (no second pop). */
 export async function reveal(run, widgets, sfx, box, id, o) {

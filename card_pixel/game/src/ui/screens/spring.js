@@ -1,5 +1,5 @@
 import { $, $$, show } from '../dom.js';
-import { head } from '../widgets.js';
+import { chooseReplacements, head, replacementCount } from '../widgets.js';
 import { COST, springDraw, springPick, springTake } from '../../engine/run.js';
 import { reveal } from '../reveal.js';
 
@@ -22,9 +22,14 @@ export function springScreen(run, ui) {
       '<div class="footer"><button class="btn go" id="b-leave">샘을 떠난다</button></div>';
     show('spring');
     $('#b-draw', node).addEventListener('click', () => {
-      const result = command(springDraw);
-      if (result.ok) showWaking(result.id, true);
-      else showFailure(result.reason);
+      function draw(replaceId = null) {
+        const result = command(springDraw, replaceId);
+        if (result.ok) showWaking(result.id, true);
+        else showFailure(result.reason);
+      }
+      const count = replacementCount(run, 1);
+      if (count) chooseReplacements(run, ui, count, ([id]) => draw(id));
+      else draw();
     });
     $('#b-pick', node).addEventListener('click', () => {
       const result = command(springPick);
@@ -61,7 +66,8 @@ export function springScreen(run, ui) {
   function choose() {
     node.innerHTML = head(run, '골라 깨우기', run.floor + '층') +
       '<div class="scroll"><div class="cards">' + run.pending.candidates.map(id => cardRow(run, id)).join('') + '</div></div>' +
-      '<div class="footer"><button class="btn go" id="b-take" disabled>한 명을 고른다</button></div>';
+      '<div class="footer">' + (run.tempoVersion === 2 ? '<button class="btn" id="b-spring-pass">넘기기</button>' : '') +
+      '<button class="btn go" id="b-take" disabled>한 명을 고른다</button></div>';
     show('spring');
     let selected;
     const rows = $$('.cardrow', node);
@@ -73,11 +79,18 @@ export function springScreen(run, ui) {
       take.disabled = false;
       take.textContent = card(selected).name + ' 깨우기';
     });
-    take.addEventListener('click', () => {
-      if (!command(springTake, selected).ok) return;
+    function join(id, replaceId = null) {
+      if (!command(springTake, id, replaceId).ok) return;
       base();
-      showWaking(selected, false);
+      if (id) showWaking(id, false);
+    }
+    take.addEventListener('click', () => {
+      const id = selected;
+      const count = replacementCount(run, 1);
+      if (count) chooseReplacements(run, ui, count, ([replaceId]) => join(id, replaceId));
+      else join(id);
     });
+    $('#b-spring-pass', node)?.addEventListener('click', () => join(null));
   }
 
   if (run.pending?.kind === 'spring') choose();

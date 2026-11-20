@@ -8,6 +8,7 @@ import { createSheet, sheetMarkup } from '../sheet.js';
 import { createWidgets } from '../widgets.js';
 import { createDetails } from '../battle/sheets.js';
 import { battleMarkup, contractSettlement, createBattleView } from '../battle/view.js';
+import { openBattleLog } from '../battle/log.js';
 import { awakenScreen } from '../screens/awaken.js';
 import { mapScreen } from '../screens/map.js';
 import { orderScreen } from '../screens/order.js';
@@ -16,8 +17,9 @@ import { altarScreen } from '../screens/altar.js';
 import { eventScreen } from '../screens/event.js';
 import { treasureScreen } from '../screens/treasure.js';
 import { gatePickScreen } from '../screens/gate-pick.js';
+import { reinforceScreen } from '../screens/reinforce.js';
 
-const screens = ['awaken', 'map', 'order', 'spring', 'altar', 'event', 'treasure', 'pick'];
+const screens = ['awaken', 'map', 'order', 'spring', 'altar', 'event', 'treasure', 'pick', 'reinforce'];
 let runtime;
 
 function mount(frame, shared) {
@@ -46,6 +48,11 @@ function mount(frame, shared) {
   });
   for (const id of screens) {
     $('#' + id).addEventListener('click', event => {
+      if (event.target.closest('[data-battle-log]') && battle.expedition) {
+        audio.sfx.tap();
+        openBattleLog(sheets, widgets, battle.expedition.lastBattleLog);
+        return;
+      }
       const button = event.target.closest('[data-sheet]');
       if (!button || !battle.expedition) return;
       event.stopPropagation();
@@ -104,12 +111,12 @@ export function enterRun(run, host) {
   };
 
   function routeBattleReward(result) {
-    if (run.phase === 'done' || result.retry || run.pending) {
-      route();
+    if (result.relic?.equipped && (!run.pending || run.pending.kind === 'reinforcement')) {
+      treasureScreen(run, ui, result.relic.id, { equipped: true });
       return true;
     }
-    if (result.relic?.equipped) {
-      treasureScreen(run, ui, result.relic.id, { equipped: true });
+    if (run.phase === 'done' || result.retry || run.pending) {
+      route();
       return true;
     }
     return false;
@@ -130,6 +137,7 @@ export function enterRun(run, host) {
     if (run.pending?.kind === 'start') return awakenScreen(run, ui);
     if (run.pending?.kind === 'gate') return gatePickScreen(run, ui);
     if (run.pending?.kind === 'relic') return treasureScreen(run, ui, run.pending.id);
+    if (run.pending?.kind === 'reinforcement') return reinforceScreen(run, ui);
     if (run.room?.status === 'left') {
       if (command(Run.nextFloor).ok) route();
       return;
@@ -144,9 +152,12 @@ export function enterRun(run, host) {
     }
     if (run.room?.status === 'battle') {
       const options = Run.battleOptions(run);
-      return battle.startBattle(run, options, summary => {
-        const result = command(Run.settleBattle, summary);
-        if (result.ok && !contractSettlement(run.floor, result.contract).length && routeBattleReward(result)) return null;
+      return battle.startBattle(run, options, (summary, log) => {
+        const result = Run.settleBattle(run, summary);
+        if (result.ok) {
+          run.lastBattleLog = log;
+          host.save(run);
+        }
         return result;
       }, afterBattle);
     }

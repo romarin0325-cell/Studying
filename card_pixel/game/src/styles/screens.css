@@ -7,6 +7,8 @@
 #title .line i { color: var(--aqua); font-style: normal; align-self: center; padding: 0 2px; animation: nudge 1s steps(2) infinite; }
 @keyframes nudge { 50% { transform: translateX(3px); } }
 #title .pitch { color: var(--gold); font-size: 12px; }
+#title .title-relay { position: relative; color: var(--gold); font-size: 14px; }
+#title #b-start { min-height: 48px; }
 
 
 #title .corner { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
@@ -116,6 +118,9 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   image-rendering: pixelated;
 }
 .run-face { display: inline-block; width: 44px; height: 44px; overflow: hidden; background: var(--bg); flex: none; }
+.face-badge { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.face-badge b { overflow-wrap: anywhere; }
+.log-button { min-width: 48px; min-height: 48px; }
 .loss { color: var(--coral); }
 
 .run-route, .run-event { min-height: 0; display: flex; flex: 1; flex-direction: column; overflow-y: auto; }
@@ -196,18 +201,45 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .run-opponents .run-face { width: 32px; }
 .run-opponents b, .run-opponents small, .relay-seat b, .relay-seat small, .run-relic-choice b, .run-relic-choice small { display: block; }
 .run-opponents small, .relay-seat small, .run-relic-choice small { color: var(--dim); }
-.relay-seats { margin-top: 10px; }
-.relay-seat { min-height: 70px; }
+.relay-seats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 8px; max-width: 352px; margin: 10px auto 0; }
+.relay-seat { height: 84px; min-width: 0; display: grid; grid-template-rows: 15px 32px 16px 14px; justify-items: center; gap: 0; padding: 2px 4px; text-align: center; }
+.relay-seat .run-face { height: 32px; }
 .relay-seat b, .reserve-cards b, .run-relic-choice b { font-size: 16px; }
-.relay-seat > small:first-child { color: var(--aqua); flex: none; }
-.relay-seat .recruit-flag { margin-left: auto; text-align: right; color: var(--gold); }
-.relay-link { min-height: 30px; display: flex; justify-content: center; flex-direction: column; padding: 4px 6px; color: var(--gold); font-size: 12px; }
-.relay-link small { display: block; color: var(--coral); }
-.relay-alternative { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; margin: 8px 0; }
-.relay-alternative b { font: 14px/20px var(--px); }
-.relay-alternative small { display: block; color: var(--gold); }
-.relay-alternative .btn { flex: none; }
+.relay-seat > small:first-child { color: var(--aqua); line-height: 15px; }
+.relay-seat b, .relay-seat .relay-trait { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.relay-seat b { font-size: 14px; line-height: 16px; }
+.relay-seat .relay-trait { font-size: 10px; line-height: 14px; }
+.relay-links { grid-column: 1 / -1; position: relative; height: 48px; }
+.relay-link { position: absolute; width: 48px; height: 48px; transform: translateX(-50%); padding: 0; border: 0; background: transparent; color: var(--gold); font-size: 22px; }
+.relay-link:first-child { left: calc((100% - 16px) / 3 + 4px); }
+.relay-link:last-child { left: calc(100% - ((100% - 16px) / 3 + 4px)); }
+.relay-link:disabled { color: var(--line2); cursor: default; }
+.relay-flow, .relay-blessing { display: flex; align-items: center; gap: 8px; }
+.relay-blessing { justify-content: space-between; padding: 4px 8px; margin-top: 8px; color: var(--gold); }
+.relay-survival { display: grid; gap: 2px; margin-bottom: 8px; color: var(--dim); }
+.relay-alternative, .relay-undo { width: 100%; margin: 0 0 4px; }
+.relay-alternative b { display: block; font: 14px/21px var(--px); color: var(--gold); }
 .reserve-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+.reserve-cards button { min-height: 48px; }
+.reserve-cards button[aria-pressed="true"], .reinforce-candidates button[aria-pressed="true"] { border-color: var(--aqua); }
+:is(#order, #awaken, #reinforce) .btn, #b-dismiss-confirm { min-height: 48px; }
+#b-dismiss-confirm { margin-top: 12px; }
+
+.wake-lead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; color: var(--gold); }
+.wake-lead small { display: block; }
+#awaken .lead { margin-top: 10px; }
+.wake-line, .reinforce-candidates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+.wake-face, .reinforce-candidates button { width: 100%; min-height: 76px; min-width: 0; padding: 5px 4px; border-top: 3px solid var(--gc, var(--line)); }
+.wake-face .face-badge, .reinforce-candidates .face-badge { flex-direction: column; gap: 2px; }
+.reinforce-candidates button { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.reinforce-candidates button > span:not(.face-badge), .reinforce-candidates small { font-size: 11px; color: var(--dim); }
+.wake-slot { min-width: 0; background: var(--win); border-top: 2px solid var(--gc, var(--line)); }
+.wake-slot:not(.landed) .wake-face { visibility: hidden; }
+.wake-slot.landed .wake-face { animation: wake-land .18s steps(4) both; }
+.wake-summary { margin-top: 14px; padding: 8px 10px; color: var(--gold); }
+.wake-summary:empty, #awaken [hidden] { display: none; }
+@keyframes wake-land { from { opacity: .25; transform: translateY(5px); } }
+@media (prefers-reduced-motion: reduce) { .wake-slot.landed .wake-face { animation: none; } }
 
 .run-event .run-scene { min-height: 190px; }
 .event-cast { display: flex; position: absolute; left: 0; right: 0; bottom: 36px; align-items: flex-end; justify-content: space-between; padding: 0 12px; }

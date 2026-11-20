@@ -50,7 +50,7 @@ export function treasureScreen(run, ui, id, { equipped = false } = {}) {
       render();
       $('.run-relic-compare', node).scrollIntoView({ block: 'nearest' });
     });
-    $('#b-leave', node).addEventListener('click', ui.leave);
+    $('#b-leave', node).addEventListener('click', equipped && run.pending?.kind === 'reinforcement' ? ui.route : ui.leave);
     $('#b-equip', node)?.addEventListener('click', () => {
       if (offered && !ui.command(takeTreasure).ok) return;
       if (run.pending?.kind === 'relic' && !ui.command(equipRelic, id, replacing).ok) {

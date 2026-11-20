@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { head } from '../widgets.js';
+import { chooseReplacements, head, replacementCount } from '../widgets.js';
 import { chooseGateReward } from '../../engine/run.js';
 import { treasureScreen } from './treasure.js';
 
@@ -29,15 +29,21 @@ export function gatePickScreen(run, ui) {
     take.disabled = false;
     take.textContent = choice.kind === 'join' ? card(id).name + ' 깨우기' : artifact.name + ' 받기';
   });
-  take.addEventListener('click', () => {
-    if (!choice || !ui.command(chooseGateReward, choice).ok) return;
-    if (choice.kind === 'join') {
+  function apply(selected) {
+    if (!selected || !ui.command(chooseGateReward, selected).ok) return;
+    if (selected.kind === 'join') {
       sfx.awaken();
       ui.leave();
     } else {
       sfx.gem();
-      treasureScreen(run, ui, choice.id, { equipped: run.relics.includes(choice.id) });
+      treasureScreen(run, ui, selected.id, { equipped: run.relics.includes(selected.id) });
     }
+  }
+  take.addEventListener('click', () => {
+    const selected = choice;
+    const count = selected?.kind === 'join' ? replacementCount(run, 1) : 0;
+    if (count) chooseReplacements(run, ui, count, ([replaceId]) => apply({ ...selected, replaceId }));
+    else apply(selected);
   });
   $('#b-leave', node).addEventListener('click', ui.leave);
 }

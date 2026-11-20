@@ -1,5 +1,5 @@
 import { $, esc } from '../dom.js';
-import { TYPE } from '../widgets.js';
+import { TYPE, formatRange } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
 
@@ -100,8 +100,9 @@ export function createHud(core, stage, sfx, widgets) {
     else if (intent.kind === 'charge') html = '<small>다음 행동</small><b class="sup">힘을 모은다</b>';
     else if (intent.kind === 'sup') html = '<small>다음 행동</small><b class="sup">' + esc(intent.name) + '</b>';
     else {
-      const range = intent.dmg[0] === intent.dmg[1] ? intent.dmg[0] : intent.dmg[0] + '~' + intent.dmg[1];
-      html = '<small>' + (intent.ult ? '필살 · ' : '다음 · ') + esc(intent.name) + '</small><b class="' + intent.kind + '">' + TYPE[intent.kind] + '</b><strong>' + range + '</strong>' + (intent.lethal ? '<u>치명</u>' : '');
+      const range = formatRange(intent.dmg ?? intent.damageRange);
+      html = '<small>' + (intent.ult ? '필살 · ' : '다음 · ') + esc(intent.name) + '</small><b class="' + esc(intent.kind) + '">' +
+        esc(TYPE[intent.kind] || '') + '</b>' + (range ? '<strong>' + esc(range) + '</strong>' : '') + (intent.lethal ? '<u>치명</u>' : '');
     }
     n.innerHTML = html; n.className = 'intent on' + (intent.ult && intent.kind !== 'charge' ? ' ult' : '');
     n.style.left = Math.round(Math.min(S.W - 40, Math.max(40, foe.x)) * 2) + 'px';

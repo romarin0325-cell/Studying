@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { head } from '../widgets.js';
+import { chooseReplacements, head, replacementCount } from '../widgets.js';
 import { chooseEvent } from '../../engine/run.js';
 import { eventChoices } from '../../engine/rooms.js';
 import { BLESS } from '../../engine/awakenings.js';
@@ -36,7 +36,7 @@ export function eventScreen(run, ui, result = null) {
   let selection = null;
   const hosts = event?.requires.present || [];
   const joined = result?.effects.flatMap(effect => effect.type === 'join' ? effect.ids : []) || [];
-  const released = result?.effects.find(effect => effect.type === 'release')?.id;
+  const released = result?.effects.filter(effect => effect.type === 'release').map(effect => effect.id) ?? [];
 
   const actor = (id, classes, flip) => {
     const asset = spr(id);
@@ -46,9 +46,9 @@ export function eventScreen(run, ui, result = null) {
     }) : '';
   };
   const party = run.bench.find(id => !joined.includes(id) && !hosts.includes(id));
-  const visible = [...new Set([...hosts, ...joined, released].filter(Boolean))];
+  const visible = [...new Set([...hosts, ...joined, ...released].filter(Boolean))];
   const artwork = '<div class="event-cast">' + (party ? actor(party, 'event-party', false) : '') +
-    '<div class="event-visitors">' + visible.map(id => actor(id, joined.includes(id) ? 'event-joiner' : id === released ? 'event-released' : '', true)).join('') +
+    '<div class="event-visitors">' + visible.map(id => actor(id, joined.includes(id) ? 'event-joiner' : released.includes(id) ? 'event-released' : '', true)).join('') +
     '</div></div>';
 
   function effectText(effect, target) {
@@ -87,19 +87,25 @@ export function eventScreen(run, ui, result = null) {
   }
 
   function take(choice, target) {
-    const outcome = ui.command(chooseEvent, choice.id, target);
-    if (!outcome.ok) return;
-    ui.sheets.closeSheet();
-    if (outcome.effects.some(effect => effect.type === 'join')) sfx.awaken();
-    else sfx.tap();
-    if (run.pending || (run.room.relic && outcome.effects.some(effect => effect.type === 'relic' && effect.equipped))) ui.route();
-    else eventScreen(run, ui, outcome);
+    function apply(replaceIds) {
+      const outcome = ui.command(chooseEvent, choice.id, target, replaceIds);
+      if (!outcome.ok) return;
+      ui.sheets.closeSheet();
+      if (outcome.effects.some(effect => effect.type === 'join')) sfx.awaken();
+      else sfx.tap();
+      if (run.pending || (run.room.relic && outcome.effects.some(effect => effect.type === 'relic' && effect.equipped))) ui.route();
+      else eventScreen(run, ui, outcome);
+    }
+    const recruits = choice.ops.filter(op => op.type === 'join').reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+    const count = replacementCount(run, recruits);
+    if (count) chooseReplacements(run, ui, count, apply);
+    else apply([]);
   }
 
   const cost = choice => choice.cost ? '결정 ' + choice.cost + ' · ' : '';
   const results = result ? [
     joined.length ? joined.map(id => card(id).name).join(' · ') + ' · 이번 원정 합류' : '',
-    released ? card(released).name + ' · 원정 이탈' : '',
+    ...released.map(id => card(id).name + ' · 원정 이탈'),
     result.crystals ? '결정 ' + (result.crystals > 0 ? '+' : '') + result.crystals : '',
     ...result.effects.filter(effect => !['join', 'release'].includes(effect.type)).map(effect =>
       effect.type === 'bless' ? effectText(effect, effect.id) : effectText(effect))
