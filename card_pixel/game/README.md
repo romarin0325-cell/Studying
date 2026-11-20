@@ -22,6 +22,7 @@ node card_pixel/game/tests/play.mjs --seeds=7,21 --runs=2
 - Node 테스트 4개는 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`)를 확인한다.
 - 자동 플레이는 먼저 빌드한다. Playwright Chromium을 쓰고, 없으면 설치된 Chrome, Edge 순으로 시도한다. `CHROMIUM_PATH`로 실행 파일을 지정할 수 있다. `--seeds=7,21`과 `--runs=2`가 기본값이며 시드마다 입문 1판 뒤 본편 2판을 돈다. `--headed`를 붙이면 창을 띄운다.
 - 자동 플레이는 본편 이어하기, 브라우저 오류·멈춤, 행동 뒤 대기 시간과 전투 프레임을 확인한다. 화면은 `tests/shots/`에 남긴다.
+- `node card_pixel/game/tests/screens.mjs`는 엔진 명령으로 13가지 상태(범위 피해·즉시 발동·물러나기 경고·시작 하늘·문 HP·내기 문구·저장 실패·원정 복원 실패·미귀환 기록·필드 상한·변신 상세·빈자리 복원·차징 예고)를 만들어 Chrome에서 열고 글자를 확인한 뒤 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `--case <이름>`으로 하나만 돈다.
 - Windows 실행 파일 `dist/Relaymare.exe`는 `node card_pixel/game/launcher/build-launcher.mjs`로 만든다. 같은 폴더의 `Relaymare.html`을 Chrome(없으면 Edge)의 앱 창으로 연다. 자세한 내용은 [launcher/README.md](launcher/README.md).
 
 ## 시뮬레이션·음악·그림 도구
