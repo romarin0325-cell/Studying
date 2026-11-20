@@ -1,25 +1,29 @@
 import { $, esc, show } from './dom.js';
 import * as assets from './assets.js';
-import { tools } from './settings.js';
+import { openBackupSheet, settingsSnapshot, tools } from './settings.js';
 import { sheetMarkup } from './sheet.js';
 import { enterRun } from './run/index.js';
 import { createDetails } from './battle/sheets.js';
 import { openBattleLog } from './battle/log.js';
 import { titleScreen } from './screens/title.js';
 import { hubScreen } from './screens/hub.js';
-import { dungeonsScreen, preparationSheet } from './screens/dungeons.js';
-import { recruitScreen } from './screens/recruit.js';
-import { collectionScreen, companionSheet } from './screens/collection.js';
+import { departureDifficulty, dungeonsScreen, listedPool, preparationSheet } from './screens/dungeons.js';
+import { missionRecruitSheet, recruitScreen } from './screens/recruit.js';
+import { collectionScreen, companionSheet, rosterTable } from './screens/collection.js';
 import { notebookScreen } from './screens/notebook.js';
 import { recordsScreen } from './screens/records.js';
 import { endingScreen } from './screens/ending.js';
 import { dailyResultScreen, dailyResultTitle, openDailyHistory, openDailyPreparation, openEarlierRift, shortRiftDate } from './screens/daily-rift.js';
-import { availableDungeons, applyRunEnd, createProfile, setExpeditionParty, startView } from '../engine/meta.js';
+import * as Meta from '../engine/meta.js';
 import { createRun, finishRun } from '../engine/run.js';
+import { DUNGEONS } from '../content/dungeons.js';
+import { CONTRACTS } from '../content/contracts.js';
+
+const { availableDungeons, applyRunEnd, createProfile, setExpeditionParty, startView } = Meta;
 
 const PAGES = {
   hub: '꿈의 관측소', dungeons: '행선지', recruit: '', collection: '동료 도감',
-  notebook: '꿈길 수첩', records: '기록', ending: '꿈길의 끝', 'daily-result': '오늘의 균열'
+  notebook: '꿈길 수첩', records: '기록', ending: '꿈길의 끝', 'daily-result': '오늘의 균열', recovery: '기록 복구'
 };
 
 export function mountPage() {
@@ -32,7 +36,9 @@ export function mountPage() {
 }
 
 export function createNavigation({ core, roster, widgets, stage, audio, music, sheets, store, dailyStore }) {
-  const stored = store.load();
+  const detail = store.loadDetailed?.();
+  const stored = detail ?? store.load();
+  let recovery = ['profileDamaged', 'unavailable'].includes(detail?.status) ? detail.status : null;
   let profile = stored?.profile || createProfile();
   let run = stored?.run || null;
   let dailyRun = null;
@@ -114,19 +120,66 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   function showHub(arriving = []) {
     sheets.closeSheet();
     const node = page('hub');
+    const goal = currentGoal(run);
+    const target = goal?.target;
+    const completedTower = profile.notebook.chapters.includes(7);
+    const collecting = completedTower && target?.screen === 'collection';
+    const destinationId = !collecting && (target?.dungeonId ?? profile.ui?.destination);
     hubScreen(node, {
-      profile, run, widgets, inspect, openDungeons, prepare, resume: enterExpedition, arriving,
+      profile, run, widgets, inspect, openDungeons, destinationId, resume: enterExpedition, goal, arriving,
+      depart: collecting ? () => openMeta('collection', true)
+        : destinationId ? () => prepare(destinationId, target?.contractId) : openDungeons,
+      departureLabel: collecting ? '동료 출현 지역 보기' : null,
       daily: dailyStore?.view?.(profile, new Date()), openDaily: showDaily
     });
     if (profile.ui?.announcement) updateUi({ announcement: null });
     for (const button of node.querySelectorAll('[data-meta-page]')) button.addEventListener('click', () => {
-      const id = button.dataset.metaPage;
-      const content = page(id, { back: showHub });
-      if (id === 'collection') collectionScreen(content, { profile, roster, widgets, core, inspect });
-      else if (id === 'notebook') notebookScreen(content, profile, roster.card);
-      else if (id === 'records') recordsScreen(content, profile, roster.card, sheets.openSheet, () => showEnding(),
-        dailyStore?.history ? showDailyHistory : null, log => openBattleLog(sheets, widgets, log));
+      openMeta(button.dataset.metaPage);
     });
+  }
+
+  function currentGoal(current = null) {
+    const goal = Meta.nextGoal?.(profile, current);
+    const name = profile.lead && roster.card(profile.lead)?.name;
+    const text = name && goal?.text === '대표 동료와 본편 출발'
+      ? goal.text.replace('대표 동료와', name + (/[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 ? '과' : '와'))
+      : goal?.text;
+    return goal && { ...goal, text };
+  }
+
+  function openMeta(id, showWanted = false) {
+    const content = page(id, { back: showHub });
+    if (id === 'collection') collectionScreen(content, { profile, roster, widgets, core, inspect, showWanted });
+    else if (id === 'notebook') {
+      function renderNotebook() {
+        const scroll = content.scrollTop;
+        notebookScreen(content, profile, roster.card, {
+          goal: currentGoal(run), missions: Meta.missionsView?.(profile, roster),
+          openMission: !run && Meta.claimMission ? kind => invite(kind) : null
+        });
+        content.scrollTop = scroll;
+      }
+      function invite(kind, index = 0) {
+        const periods = Meta.missionsView?.(profile, roster)?.claimable?.filter(period => period.kind === kind) ?? [];
+        if (run || !periods.length) return;
+        const period = periods[index];
+        missionRecruitSheet({
+          period, widgets, sheets, remaining: periods.length,
+          next: () => invite(kind, (index + 1) % periods.length),
+          claim(id) {
+            const result = Meta.claimMission(profile, period.key, id, roster);
+            if (!result?.announce?.ok) return false;
+            updateProfile(result.profile);
+            sheets.closeSheet();
+            renderNotebook();
+            sessionNotice(id ? `${roster.card(id).name} · 관측소에 영입` : '임무 완료 도장 획득');
+            return true;
+          }
+        });
+      }
+      renderNotebook();
+    } else if (id === 'records') recordsScreen(content, profile, roster.card, sheets.openSheet, () => showEnding(),
+      dailyStore?.history ? showDailyHistory : null, log => openBattleLog(sheets, widgets, log));
   }
 
   function showDailyHistory(node) {
@@ -236,7 +289,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   function showEnding(arriving = []) {
     const node = page('ending');
     endingScreen(node, {
-      profile, widgets,
+      profile, widgets, goal: currentGoal(),
       finish() {
         if (!profile.ui?.endingSeen) updateUi({ endingSeen: true });
         showHub(arriving);
@@ -260,25 +313,37 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const node = page('dungeons', { back: showHub });
     const destinations = availableDungeons(profile);
     const mainDestinations = destinations.filter(dungeon => dungeon.id !== 'dawn_forest');
-    const quick = stored && !run && !profile.ui?.destination
-      ? mainDestinations.find(dungeon => !profile.records.clears[dungeon.id]?.normal) || mainDestinations[0] || destinations[0]
-      : null;
-    const quickStart = quick ? { name: quick.name, start: () => startExpedition(quick.id) } : null;
-    dungeonsScreen(node, { profile, roster, widgets, prepare: run ? null : prepare, quickStart });
+    const quick = !run && (mainDestinations.find(dungeon => dungeon.id === profile.ui?.destination)
+      ?? mainDestinations.find(dungeon => dungeon.id === currentGoal()?.target?.dungeonId) ?? mainDestinations[0]);
+    const difficulty = quick ? departureDifficulty(profile, quick.id) : 'normal';
+    const quickStart = quick ? { name: quick.name, difficulty, start: () => startExpedition(quick.id, difficulty) } : null;
+    dungeonsScreen(node, {
+      profile, roster, widgets, prepare: run ? null : prepare, quickStart,
+      openRoster(dungeonId) {
+        const dungeon = DUNGEONS[dungeonId];
+        rosterTable({ dungeon, pool: listedPool(roster, dungeon), locked: true, currentProfile: () => profile, updateProfile, widgets, sheets });
+      }
+    });
   }
 
-  function prepare(dungeonId) {
+  function prepare(dungeonId, contractId) {
     if (run || !availableDungeons(profile).some(dungeon => dungeon.id === dungeonId)) return;
+    const initialContract = Object.hasOwn(CONTRACTS, contractId) && profile.nightmareUnlocks.includes(dungeonId) ? contractId : null;
     if (profile.ui?.destination !== dungeonId || !profile.ui?.preparing) updateUi({ destination: dungeonId, preparing: true });
     preparationOpen = true;
-    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster, widgets, sheets, start: startExpedition });
+    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster, widgets, sheets, start: startExpedition, initialContract });
   }
 
   function closePreparation() {
-    if (!preparationOpen) return;
+    if (!preparationOpen || $('#sheet').classList.contains('on')) return;
     preparationOpen = false;
     updateUi({ preparing: false });
     if ($('#hub').classList.contains('on')) showHub();
+    else if ($('#dungeons').classList.contains('on')) {
+      const top = $('#dungeons .meta-page').scrollTop;
+      openDungeons();
+      $('#dungeons .meta-page').scrollTop = top;
+    }
   }
 
   function startExpedition(destination, difficulty = 'normal', contract = null) {
@@ -288,7 +353,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       ? Number(requestedSeed) >>> 0 : Math.floor(Math.random() * 0x100000000);
     run = createRun({ core, roster, dungeonId, difficulty, contract, seed, profileView: startView(profile, dungeonId) });
     preparationOpen = false;
-    updateUi({ destination: destination || profile.ui?.destination, preparing: false, announcement: null });
+    updateUi({
+      destination: destination || profile.ui?.destination, preparing: false, announcement: null,
+      ...(destination && { difficulty: { ...profile.ui?.difficulty, [dungeonId]: difficulty } })
+    });
     enterExpedition();
   }
 
@@ -308,10 +376,9 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const candidates = rewards.result === 'win' ? rewards.recruitable : rewards.shardCandidates;
     const initial = candidates.length === 1 ? candidates : [];
     const choices = saved?.runId === run.id ? saved.ids.filter(id => candidates.includes(id)) : initial;
-    const stamp = rewards.result === 'win' && run.contract ? applyRunEnd(profile, run).announce.stamp : null;
     const node = page('recruit', { title: rewards.result === 'win' ? '생환' : '원정 실패' });
     recruitScreen(node, {
-      run, rewards, profile, widgets, sheets, choices, stamp,
+      run, rewards, profile, widgets, sheets, choices, preview: selection => applyRunEnd(profile, run, selection).announce,
       endingPending: run.dungeonId === 'creation_tower' && rewards.result === 'win' && !profile.ui?.endingSeen,
       changeChoices: ids => updateUi({ recruitChoices: { runId: run.id, ids } }),
       confirm: confirmReturn
@@ -341,7 +408,9 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     }
     const hubReturners = run.result === 'win' ? run.bench.filter(id => next.recruits[id]) : [];
     const returners = [...new Set([...recruits, ...hubReturners, ...(next.ui?.returners || [])])].slice(0, 3);
-    const announcement = { dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters };
+    const announcement = {
+      dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters, missionEarned: !!announce.missions?.length
+    };
     const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen,
       lastBattleLog: run.lastBattleLog };
     run = null;
@@ -354,8 +423,11 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function resetData() {
-    store.clear();
-    dailyStore?.clear?.();
+    try {
+      if (store.clear() === false) return warnSave();
+      if (!store.loadDetailed) dailyStore?.clear?.();
+    } catch { return warnSave(); }
+    recovery = null;
     profile = createProfile();
     run = null;
     dailyRun = null;
@@ -370,10 +442,52 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     showTitle();
   }
 
-  function showTitle(savedProfile) {
+  function currentBackup({ lastGood = false } = {}) {
+    const settings = settingsSnapshot(stage, audio, music);
+    if (!recovery) return store.exportBackup({ profile, run, dailyRun, settings });
+    const good = lastGood ? store.loadLastGood?.() : null;
+    return store.exportBackup(good?.status === 'ok' ? { profile: good.profile, settings } : { settings });
+  }
+
+  function showRecovery() {
+    const good = store.loadLastGood?.();
+    const hasGood = good?.status === 'ok';
+    const unavailable = recovery === 'unavailable';
+    const node = page('recovery');
+    node.innerHTML = `<div class="meta-panel meta-sheet meta-recovery">
+      <h2>${unavailable ? '저장 공간에 접근할 수 없다' : '전체 기록 복구 필요'}</h2>
+      ${hasGood ? `<button class="btn go" id="meta-last-good">직전 기록으로 복구 · 동료 ${Object.keys(good.profile?.recruits ?? {}).length}명</button>` : ''}
+      <button class="btn${hasGood ? '' : ' go'}" data-backup-action="import">기록 가져오기</button>
+      <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
+      <p class="meta-feedback" role="status"></p>
+    </div>`;
+    $('#meta-last-good', node)?.addEventListener('click', () => {
+      const result = store.restoreLastGood?.();
+      if (result?.ok) location.reload();
+      else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했다.';
+    });
+    $('#meta-recovery-new', node).addEventListener('click', () => {
+      if (unavailable) {
+        recovery = null;
+        return showTitle();
+      }
+      sheets.openSheet('새 기록을 시작할까요?', `<div class="meta-sheet">
+        <p>남아 있는 동료, 수첩, 균열과 복구 사본을 지운다.</p>
+        <button class="btn meta-danger" id="meta-recovery-erase">모든 기록 지우기</button>
+      </div>`);
+      $('#meta-recovery-erase').addEventListener('click', resetData);
+    });
+  }
+
+  $('#frame').addEventListener('click', event => {
+    const mode = event.target.closest('[data-backup-action]')?.dataset.backupAction;
+    if (mode) openBackupSheet({ mode, sheets, store, currentBackup, recovered: () => location.reload() });
+  });
+
+  function showTitle(savedProfile, notice) {
     music.play('hub');
     titleScreen({
-      profile: savedProfile, widgets,
+      profile: savedProfile, widgets, notice,
       start() {
         if (!savedProfile) startExpedition();
         else if (endingDue()) showEnding();
@@ -386,12 +500,12 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function boot() {
-    if (run?.phase === 'done') showRecruit();
+    if (recovery) showRecovery();
+    else if (run?.phase === 'done') showRecruit();
     // The observatory opens with the first return: until then a reload goes straight back into the intro.
     else if (run && !Object.keys(profile.recruits || {}).length) enterExpedition();
     else if (run) showHub();
-    else showTitle(stored?.profile);
-    if (stored?.runError) sessionNotice('진행 중인 원정을 불러오지 못했다. 동료와 기록은 남아 있다.');
+    else showTitle(stored?.profile, detail?.status === 'runDamaged' || stored?.runError ? '원정만 손상 · 동료와 수첩 유지' : '');
   }
 
   return { boot, closePreparation, resetData, inspect, get run() { return dailyRun ?? run; }, get review() { return review; } };

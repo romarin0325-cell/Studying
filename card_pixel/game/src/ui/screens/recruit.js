@@ -7,9 +7,11 @@ import { hubLineup, sceneActors } from './hub.js';
 import { runRecordSheet } from './records.js';
 import { openBattleLog } from '../battle/log.js';
 
-export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, stamp, endingPending, changeChoices, confirm }) {
+export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, preview, endingPending, changeChoices, confirm }) {
   const won = rewards.result === 'win';
   const dungeon = DUNGEONS[run.dungeonId];
+  const selection = ids => won ? { recruits: ids } : { shard: ids[0] || null };
+  const stamp = preview(selection(choices))?.stamp;
   const stampDungeon = DUNGEONS[stamp?.dungeonId];
   const stampContract = CONTRACTS[stamp?.contractId];
   const candidates = won ? rewards.recruitable : rewards.shardCandidates;
@@ -29,6 +31,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
         ${run.lastBattleLog?.length ? '<button class="btn log-button" id="meta-battle-log">전투 기록</button>' : ''}
       </div>
       ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} · ${esc(stampContract.name)}</p>` : ''}
+      <p class="meta-mission-earned" hidden>동료 초대 가능</p>
       ${candidates.length ? `<p>${won ? `생환자 중 최대 ${limit}명 영입` : '다음 원정 후보 한 명 예약'}</p>`
         : `<p>${won ? '새로 영입할 동료가 없다.' : '예약할 동료가 없다.'}</p>`}
       <div class="meta-recruit-list">${candidates.map(id => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">
@@ -56,8 +59,9 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
       button.setAttribute('aria-pressed', selected);
       $('.meta-recruit-mark', button).textContent = selected ? '선택' : '';
     }
+    $('.meta-mission-earned', node).hidden = !preview(selection(active))?.missions?.length;
     action.textContent = active.length
-      ? won ? `${active.map(id => card(id).name).join(' · ')} 영입` : '다음 원정 후보로 예약'
+      ? won ? `${active.map(id => card(id).name).join(' · ')} · 관측소에 영입` : '다음 원정 후보로 예약'
       : endingPending ? '엔딩 보기' : '관측소로 돌아가기';
     if (!active.length && (mustRecruit || mustReserve)) action.textContent = won ? '영입할 동료 고르기' : '예약할 동료 고르기';
     action.disabled = !active.length && (mustRecruit || mustReserve);
@@ -78,7 +82,32 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
   $('#meta-run-record', node).addEventListener('click', () => runRecordSheet(run, card, sheets.openSheet));
   $('#meta-battle-log', node)?.addEventListener('click', () => openBattleLog(sheets, widgets, run.lastBattleLog));
   action.addEventListener('click', () => {
-    if (!confirm(won ? { recruits: choices } : { shard: choices[0] || null })) feedback.textContent = '선택을 다시 확인해 주세요.';
+    if (!confirm(selection(choices))) feedback.textContent = '선택을 다시 확인해 주세요.';
   });
   renderSelection();
+}
+
+export function missionRecruitSheet({ period, widgets, sheets, claim, next, remaining }) {
+  let chosen = null;
+  const candidates = (period.candidates ?? []).filter(id => widgets.card(id));
+  sheets.openSheet('동료 초대', `<div class="meta-sheet meta-mission-claim">
+    <p>${period.kind === 'weekly' ? '주간' : '월간'} · ${esc(period.key.split(':')[1])}${remaining > 1 ? ` · 수령 ${remaining}건` : ''}</p>
+    ${candidates.length ? `<div class="meta-recruit-list">${candidates.map(id => `<button class="meta-panel meta-recruit-card" data-invite="${esc(id)}" aria-pressed="false">
+      <span class="meta-face">${widgets.face(id, 44)}</span><b>${esc(widgets.card(id).name)}</b>
+    </button>`).join('')}</div>` : '<p>완료 도장을 받을 수 있다.</p>'}
+    <p class="meta-feedback" role="status"></p>
+    <button class="btn go" id="meta-mission-claim"${candidates.length ? ' disabled' : ''}>${candidates.length ? '관측소에 영입' : '완료 도장 받기'}</button>
+    ${remaining > 1 ? '<button class="btn" id="meta-mission-next">다른 기간 보기</button>' : ''}
+  </div>`);
+  const action = $('#meta-mission-claim');
+  const buttons = $$('[data-invite]');
+  for (const button of buttons) button.addEventListener('click', () => {
+    chosen = button.dataset.invite;
+    for (const other of buttons) other.setAttribute('aria-pressed', String(button === other));
+    action.disabled = false;
+  });
+  action.addEventListener('click', () => {
+    if (!claim(chosen)) $('.meta-mission-claim .meta-feedback').textContent = '초대할 동료를 다시 확인해 주세요.';
+  });
+  $('#meta-mission-next')?.addEventListener('click', next);
 }

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../src/content/contracts.js';
+import { DUNGEONS } from '../src/content/dungeons.js';
 import { EVENTS, eventForRun } from '../src/content/events.js';
 import { INTRO } from '../src/content/intro.js';
 import * as Bridge from '../src/engine/bridge.js';
@@ -14,7 +15,7 @@ import * as Daily from '../src/engine/daily-rift.js';
 import * as DailyStore from '../src/engine/daily-store.js';
 import * as Meta from '../src/engine/meta.js';
 import { openingModel } from '../src/engine/opening.js';
-import { create as makeRoster, POSITION } from '../src/engine/roster.js';
+import { create as makeRoster, expeditionPool, POSITION } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import { eventChoices } from '../src/engine/rooms.js';
 import * as Save from '../src/engine/save.js';
@@ -348,6 +349,7 @@ function saveFail() {
   command(Run.chooseDoor, run, 0);
   assert.equal(run.room.status, 'order');
   const store = Save.createSaveStore({
+    getItem: () => null,
     setItem(key) {
       assert.equal(key, sessionKey);
       throw new DOMException('Forced session write failure', 'QuotaExceededError');
@@ -380,7 +382,7 @@ function runLost() {
     session: storedSession({ profile, run, unsupportedRun: true }),
     proof: `run version ${Save.RUN_VERSION + 1} rejected; ${profile.lead} remains recruited`,
     async show(page, { text, capture }) {
-      await text(page.locator('#session-notices p'), '진행 중인 원정을 불러오지 못했다');
+      await text(page.locator('#title.on .title-save-notice'), '원정만 손상 · 동료와 수첩 유지');
       await capture();
       await page.locator('#title.on #b-start').click();
       await page.locator('#hub.on [data-meta-page="collection"]').click();
@@ -1888,7 +1890,319 @@ function riftRecords(detail) {
   };
 }
 
+function mainReturn(profile, dungeonId, difficulty = 'normal', seed = 7) {
+  const run = makeRun({ dungeonId, seed, floor: 8, difficulty, profileView: Meta.startView(profile, dungeonId) });
+  startBattle(run);
+  settleWin(run);
+  Run.finishRun(run, new Date(...riftDate));
+  return run;
+}
+
+function applyReturn(profile, run, selection) {
+  const result = Meta.applyRunEnd(profile, run, selection);
+  assert.ok(result.announce.ok, result.announce.reason);
+  return result;
+}
+
+function nextGoalLine() {
+  const profile = snowRabbitProfile();
+  const goal = Meta.nextGoal(profile, null);
+  assert.equal(goal.target.screen, 'dungeons');
+  assert.equal(goal.reward, '동행 1칸 열림');
+  return {
+    session: storedSession({ profile }), proof: 'Real intro return sets the first main goal and names its reward',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await text(page.locator('#hub.on .meta-next-goal'), '눈토끼와 본편 출발 · 동행 1칸 열림', { exact: true });
+      await capture();
+      await page.locator('#hub.on #meta-depart').click();
+      await text(page.locator('#sheet.on #sh-title'), DUNGEONS[goal.target.dungeonId].name + ' · 준비');
+    }
+  };
+}
+
+function endingGoal() {
+  let profile = snowRabbitProfile();
+  for (const id of ['ember_volcano', 'twilight_cathedral', 'starlit_garden', 'creation_tower']) {
+    profile = applyReturn(profile, mainReturn(profile, id, 'easy')).profile;
+    assert.equal(profile.records.clears[id].easy, 1);
+    assert.ok(!profile.nightmareUnlocks.includes(id));
+  }
+  const goal = Meta.nextGoal(profile, null);
+  assert.equal(goal.target.dungeonId, 'midnight_trench');
+  return {
+    session: storedSession({ profile }), proof: 'Four dream clears unlock the ending; the next goal points to an unreturned theme',
+    async show(page, { text, capture }) {
+      await page.locator('#title.on #b-start').click();
+      await text(page.locator('#ending.on .meta-record-table'), '5곳 · 새벽의 숲');
+      await text(page.locator('#ending.on .meta-next-goal'), goal.text);
+      await capture();
+      await page.locator('#ending.on #meta-ending-finish').click();
+      await text(page.locator('#hub.on .meta-next-goal'), goal.text);
+      await page.locator('#hub.on [data-meta-page="notebook"]').click();
+      await page.locator('#notebook.on [data-chapter="6"]').click();
+      await text(page.locator('#notebook.on .meta-progress'), '생환 3개 지역');
+      await page.locator('#notebook.on .meta-back').click();
+      await page.locator('#hub.on [data-meta-page="records"]').click();
+      const row = page.locator('#records.on .meta-clear-table tr').filter({ hasText: '홍련 화산' });
+      await text(row.locator('td').first(), '1회', { exact: true });
+      await capture('dream-record');
+    }
+  };
+}
+
+function preDepartureRoster() {
+  const dungeonId = 'ember_volcano';
+  const original = nightmareProfile();
+  const base = expeditionPool(roster, dungeonId).baseIds;
+  assert.deepEqual(Object.keys(DUNGEONS).map(id => expeditionPool(roster, id).baseIds.length), [14, 39, 40, 39, 40, 37, 130]);
+  const id = base.find(id => id !== original.lead && !original.seenCharacters.includes(id));
+  const sealed = base.find(other => other !== id && other !== original.lead);
+  const { profile, announce } = Meta.setSeals(original, dungeonId, [sealed], roster);
+  assert.ok(announce.ok, announce.reason);
+  const view = Meta.startView(profile, dungeonId);
+  const pool = expeditionPool(roster, dungeonId, view);
+  const reference = Run.createRun({ core, roster, dungeonId, seed: 7, profileView: view });
+  assert.deepEqual(pool.effectiveIds, reference.pool);
+  return {
+    session: storedSession({ profile }), seed: 7, proof: `39 base, ${pool.effectiveIds.length} candidates with ${sealed} sealed and ${id} unseen`,
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await page.locator('#hub.on #meta-telescope').click();
+      await page.locator('#dungeons.on [data-locked-roster="creation_tower"]').click();
+      await text(page.locator('#sheet.on .meta-roster'), '기본 130명');
+      assert.doesNotMatch(await page.locator('#sheet.on .meta-roster').innerText(), /이번 원정 후보/);
+      await page.locator('#b-sheetclose').click();
+      await page.locator('#dungeons.on [data-dungeon="ember_volcano"]').click();
+      const button = page.locator('#sheet.on #meta-roster-open');
+      await text(button, '홍련의 계승 · 기본 39명 · 출현표');
+      await page.locator('#meta-seals summary').click();
+      await button.scrollIntoViewIfNeeded();
+      const formation = () => page.evaluate(() => ({
+        top: document.querySelector('#sh-body').scrollTop,
+        leads: document.querySelector('.meta-prep-leads').scrollLeft,
+        seals: document.querySelector('.meta-seal-options').scrollTop,
+        lead: document.querySelector('[data-lead][aria-pressed=true]')?.dataset.lead,
+        sealed: [...document.querySelectorAll('[data-seal][aria-pressed=true]')].map(el => el.dataset.seal)
+      }));
+      const before = await formation();
+      await button.click();
+      await text(page.locator('#sheet.on .meta-roster > p').first(), `이번 원정 후보 ${pool.effectiveIds.length}명`);
+      const unknown = page.locator(`.meta-roster [data-companion="${id}"].concealed`);
+      await text(unknown.locator('b'), roster.card(id).name);
+      await unknown.click();
+      await text(unknown, '만나고 싶은 동료');
+      await capture();
+      await page.locator('#b-sheetclose').click();
+      assert.deepEqual(await formation(), before);
+      assert.equal(await page.locator('#meta-seals').getAttribute('open'), '');
+      await page.locator('#meta-start-expedition').click();
+      const live = await page.evaluate(() => {
+        const { pool, rng, seed } = window.__game.run;
+        return { pool, rng, seed };
+      });
+      assert.deepEqual(live, { pool: reference.pool, rng: reference.rng, seed: reference.seed });
+    }
+  };
+}
+
+function difficultyChoice() {
+  const profile = snowRabbitProfile();
+  assert.deepEqual(Meta.availableDungeons(profile).find(dungeon => dungeon.id === 'ember_volcano').difficulties, ['easy', 'normal']);
+  return {
+    session: storedSession({ profile }), proof: 'First main departure offers dream and journey; nightmare is gated',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      const sheet = page.locator('#sheet.on');
+      const chooseRegion = id => page.locator(`#dungeons.on [data-dungeon="${id}"]`).click();
+      await page.locator('#hub.on #meta-telescope').click();
+      await chooseRegion('ember_volcano');
+      assert.equal(await sheet.locator('[data-difficulty="normal"]').getAttribute('aria-pressed'), 'true');
+      assert.equal(await sheet.locator('[data-difficulty="nightmare"]').isDisabled(), true);
+      await text(sheet.locator('.meta-prep-section').filter({ hasText: '난이도' }), '이 지역을 여정으로 생환하면 악몽이 열린다.');
+      await sheet.locator('[data-difficulty="easy"]').click();
+      await text(sheet.locator('.meta-prep-section').filter({ hasText: '난이도' }), '꿈결 · 적 공격·마공 35% 감소');
+      await capture();
+      await page.locator('#b-sheetclose').click();
+      await chooseRegion('twilight_cathedral');
+      assert.equal(await sheet.locator('[data-difficulty="normal"]').getAttribute('aria-pressed'), 'true');
+      await page.locator('#b-sheetclose').click();
+      await chooseRegion('ember_volcano');
+      assert.equal(await sheet.locator('[data-difficulty="easy"]').getAttribute('aria-pressed'), 'true');
+      await page.locator('#b-sheetclose').click();
+      const quick = page.locator('#dungeons.on #meta-quick-start');
+      await text(quick, '홍련 화산 · 꿈결 · 바로 출발', { exact: true });
+      await quick.click();
+      assert.equal(await page.evaluate(() => window.__game.run.difficulty), 'easy');
+    }
+  };
+}
+
+function missionInvitations() {
+  let profile = snowRabbitProfile();
+  const first = applyReturn(profile, mainReturn(profile, 'ember_volcano', 'easy'));
+  assert.deepEqual(first.announce.missions, []);
+  profile = applyReturn(first.profile, mainReturn(first.profile, 'twilight_cathedral', 'easy')).profile;
+  const run = mainReturn(profile, 'starlit_garden', 'easy');
+  const candidates = Run.runRewards(run).recruitable;
+  const final = applyReturn(profile, run, { recruits: candidates.length === 1 ? candidates : [] });
+  assert.deepEqual(final.announce.missions, ['month:2026-11']);
+  const weekly = Meta.missionsView(final.profile, roster, new Date(...riftDate)).claimable.find(period => period.kind === 'weekly');
+  const candidate = weekly.candidates[0];
+  assert.ok(Meta.claimMission(final.profile, weekly.key, candidate, roster).announce.ok);
+  return {
+    session: storedSession({ profile, run }), now: riftDate,
+    proof: 'Weekly reward was earned on return two; three distinct dream returns earn the monthly reward',
+    async show(page, { text, capture }) {
+      await text(page.locator('#recruit.on .meta-mission-earned'), '동료 초대 가능', { exact: true });
+      await capture('return');
+      await page.locator('#recruit.on #meta-recruit-confirm').click();
+      await page.locator('#hub.on [data-meta-page="notebook"]').click();
+      await page.locator('#notebook.on [data-chapter="4"]').click();
+      await text(page.locator('#notebook.on .meta-chapter-detail'), '오늘의 균열');
+      assert.doesNotMatch(await page.locator('#notebook.on .meta-chapter-detail').innerText(), /악몽/);
+      await text(page.locator('#notebook.on [data-mission="weekly"]'), '이번 주');
+      await text(page.locator('#notebook.on [data-mission="monthly"]'), '이번 달');
+      await capture();
+      await page.evaluate(() => window.__gallerySetDate(2026, 11, 1, 12));
+      await page.locator('#notebook.on [data-mission="weekly"]').click();
+      await page.locator(`#sheet.on [data-invite="${candidate}"]`).click();
+      const claim = page.locator('#sheet.on #meta-mission-claim');
+      await text(claim, '관측소에 영입', { exact: true });
+      await capture('claim');
+      await claim.click();
+      await text(page.locator('#session-notices p').last(), roster.card(candidate).name + ' · 관측소에 영입');
+      assert.equal(await page.locator('#notebook.on [data-mission="weekly"]').count(), 0);
+    }
+  };
+}
+
+function readingSettingsCase() {
+  const run = makeRun({ dungeonId: 'twilight_cathedral', seed: 21, floor: 2, tempoVersion: 2,
+    profileView: { lead: 'frozen_witch' } });
+  const settings = { sound: false, music: false, textScale: 1.25, markers: true, speed: 2 };
+  const session = storedSession({ run });
+  const battle = startBattle(run, { party: Run.defaultParty(run) });
+  const { intent } = act(battle, '일반 공격').findLast(event => event.t === 'await');
+  assert.equal(intent.salience, 'strong');
+  assert.equal(Save.normalizeSettings(settings).textScale, 1.25);
+  return {
+    session, settings, proof: 'Old sound switches plus large text, non-color markers, and 2× seed a real fight',
+    async show(page, { text, capture }) {
+      // Floor 2 forks: the formation and the enter button appear once a door is chosen.
+      await page.locator('#map.on [data-door="0"]').click();
+      await openBattle(page);
+      assert.doesNotMatch(await page.locator('meta[name="viewport"]').getAttribute('content'), /maximum-scale|user-scalable/);
+      await text(page.locator('#b-speed'), '2배', { exact: true });
+      await tapTile(page, '일반 공격');
+      assert.equal(await page.locator('#intent').evaluate(node => getComputedStyle(node, '::before').content.includes('!')), true);
+      const lines = await page.locator('#acts .act .tx').evaluateAll(tiles => tiles.map(tile =>
+        [...tile.children].filter(line => line.textContent.trim() && getComputedStyle(line).display !== 'none').length));
+      assert.ok(lines.every(lines => lines <= 2), `Visible lines per tile: ${lines}`);
+      await capture();
+      await page.locator('#b-field').click();
+      const frozen = await page.evaluate(() => [window.__game.clock.paused, window.__game.clock.t, window.__game.state().turn]);
+      assert.equal(frozen[0], true);
+      await page.waitForTimeout(150);
+      assert.deepEqual(await page.evaluate(() => [window.__game.clock.paused, window.__game.clock.t, window.__game.state().turn]), frozen);
+      await page.locator('#b-sheetclose').click();
+      await page.locator('#b-speed').click();
+      await page.locator('#battle.on .b-set').click();
+      await text(page.locator('#sheet.on [data-set="speed"] span'), '1배', { exact: true });
+      await page.locator('#sheet.on [data-set="speed"]').click();
+      await text(page.locator('#sheet.on [data-set="text"] span'), '크게(125%)', { exact: true });
+      assert.equal(await page.evaluate(() => window.__game.clock.speed), 2);
+      await capture('options', page, { duringBattle: true });
+    }
+  };
+}
+
+function backupStore(entries) {
+  const saved = new Map(Object.entries(entries));
+  return Save.createSaveStore({
+    getItem: key => saved.get(key) ?? null,
+    setItem: (key, value) => saved.set(key, value),
+    removeItem: key => saved.delete(key)
+  }, { core, roster });
+}
+
+function damagedRecovery() {
+  const profile = snowRabbitProfile();
+  const lastGood = storedSession({ profile });
+  const session = '{"broken":';
+  const store = backupStore({ [sessionKey]: session, 'relaymare.lastGood': lastGood });
+  assert.equal(store.loadDetailed().status, 'profileDamaged');
+  assert.ok(store.restoreLastGood().ok);
+  assert.equal(store.loadDetailed().profile.lead, profile.lead);
+  return {
+    session, lastGood, proof: 'Invalid JSON blocks the first departure until a valid saved return is restored',
+    async show(page, { text, capture }) {
+      await text(page.locator('#recovery.on h2'), '전체 기록 복구 필요');
+      assert.equal(await page.locator('#title.on #b-start').count(), 0);
+      const restore = page.locator('#recovery.on #meta-last-good');
+      await text(restore, '직전 기록으로 복구 · 동료 1명', { exact: true });
+      await capture();
+      await Promise.all([page.waitForEvent('domcontentloaded'), restore.click()]);
+      await page.locator('#title.on .b-set').click();
+      await page.locator('#sheet.on [data-backup-action="export"]').click();
+      const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#meta-backup-download').click()]);
+      assert.equal((JSON.parse(fs.readFileSync(await download.path(), 'utf8'))).session.profile.lead, profile.lead);
+      await page.locator('#b-sheetclose').click();
+      await enterObservatory(page);
+      await text(page.locator('#hub.on .meta-next-goal'), '동행 1칸 열림');
+    }
+  };
+}
+
+function saveImport() {
+  const current = riftFixture();
+  const oldAttempt = current.start([2026, 10, 20, 12]);
+  command(current.store.abandon, oldAttempt.id);
+  const incoming = riftFixture();
+  const first = incoming.start([2026, 10, 19, 12]);
+  command(incoming.store.abandon, first.id);
+  const active = reachRiftFloor(incoming.start(), 4);
+  command(incoming.store.save, active);
+  const main = makeRun({ seed: 7, floor: 4, profileView: Meta.startView(incoming.profile, 'ember_volcano') });
+  const file = incoming.page(main);
+  const store = backupStore({ [sessionKey]: file.session, [dailyKey]: file.daily });
+  const backup = store.exportBackup();
+  const inspected = store.inspectBackup(backup);
+  assert.ok(inspected.ok, inspected.reason);
+  assert.equal(inspected.summary.dailyOfficialStarts, 2);
+  assert.equal(inspected.summary.dailyActive.floor, 4);
+  return {
+    ...current.page(), proof: 'Import compares 1 versus 2 official starts and restores a main and rift checkpoint at floor 4',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await page.locator('#hub.on .b-set').click();
+      await page.locator('#sheet.on [data-backup-action="import"]').click();
+      await page.locator('#meta-backup-file').setInputFiles({
+        name: 'relaymare.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup))
+      });
+      await text(page.locator('#sheet.on #sh-title'), '기록 가져오기 확인');
+      const columns = page.locator('#sheet.on .meta-backup-compare section');
+      await text(columns.first(), '1회 · 정산 1회');
+      await text(columns.last(), '2회 · 정산 1회');
+      await text(columns.last(), '2026-11-21 · 기록 도전 · 4층');
+      await text(columns.last(), '홍련 화산 4층');
+      await capture();
+      await Promise.all([page.waitForEvent('domcontentloaded'), page.locator('#meta-backup-confirm').click()]);
+      await text(page.locator('#hub.on #meta-depart'), '홍련 화산 4층 이어가기');
+      await text(riftRow(page).locator('small'), '이어가기');
+    }
+  };
+}
+
 const cases = {
+  'next-goal': nextGoalLine,
+  'ending-goal': endingGoal,
+  'roster-table': preDepartureRoster,
+  'difficulty-choice': difficultyChoice,
+  'missions-invitations': missionInvitations,
+  'reading-settings': readingSettingsCase,
+  'save-recovery': damagedRecovery,
+  'save-import': saveImport,
   'map-awaken-faces': mapAwakenFaces,
   'truthful-hud': truthfulHud,
   'blessing-parity': blessingParity,
@@ -1945,10 +2259,13 @@ const cases = {
   'rift-record-detail': () => riftRecords(true)
 };
 
-async function inject(page, session, { daily, now, seed, mute } = {}) {
+async function inject(page, session, { daily, now, seed, mute, settings, lastGood } = {}) {
   const url = seed == null ? gameUrl : gameUrl + '?seed=' + seed;
   const entries = [[sessionKey, session], ...(daily ? [[dailyKey, daily]] : [])];
-  if (mute) entries.push(['relaymare.settings', JSON.stringify({ sound: false, music: false })]);
+  if (lastGood) entries.push(['relaymare.lastGood', lastGood]);
+  if (mute || settings) entries.push(['relaymare.settings', JSON.stringify({
+    ...(mute ? { sound: false, music: false } : {}), ...settings
+  })]);
   await page.addInitScript(({ url, entries, now }) => {
     if (location.href !== url) return;
     if (now) {
@@ -2032,10 +2349,16 @@ async function withPage(browser, session, show, options) {
       });
       page.on('crash', () => fail('Page crash', 'Chrome crashed while showing the case'));
     });
-    await Promise.race([browserFailure, (async () => {
-      await inject(page, session, options);
-      await show(page);
-    })()]);
+    try {
+      await Promise.race([browserFailure, (async () => {
+        await inject(page, session, options);
+        await show(page);
+      })()]);
+    } catch (error) {
+      // Keep what the screen looked like when the case failed.
+      await page.screenshot({ path: shots + 'last-failure.png' }).catch(() => {});
+      throw error;
+    }
     if (errors.length) throw errors[0];
   } finally {
     await context.close();

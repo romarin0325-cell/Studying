@@ -146,7 +146,11 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
           (p.instant ? '<small>즉시</small>' : adv ? '<small>▲상성</small>' : '') +
           (p.forcedCrit ? '<small>치명</small>' : '') + (p.kill ? '<u>처치</u>' : '');
       }
-      else { const s = supportLine(o, B.intent); r2 = '<strong class="txt' + (s[0] === '—' ? ' no' : '') + '">' + esc(s[0]) + '</strong>'; if (s[1]) r3 = s[1]; }
+      else {
+        const [forecast, description] = supportLine(o, B.intent);
+        r2 = forecast ? '<strong class="txt">' + esc(forecast) + '</strong>' : '';
+        if (description) r3 = description;
+      }
       const marks = relicMarks(core, markedRelics(o));
       return '<button class="act ' + o.type + '" data-i="' + o.index + '"' + (usable ? '' : ' disabled') + '>' +
         '<span class="ic">' + TYPE[o.type].slice(0, 1) + marks + '</span><span class="tx">' +

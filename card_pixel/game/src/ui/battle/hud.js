@@ -151,8 +151,9 @@ export function createHud(core, stage, sfx, widgets) {
     const { intent, D } = B;
     const [current, future] = intentLines(intent, countdown, D?.allies[D?.cur]?.hp, core.BUFF_NAMES);
     const boss = intent?.salience === 'boss' || intent?.salience == null && intent?.ult;
+    const danger = boss || intent?.salience === 'strong' || /쓰러/.test(current ?? '');
     n.textContent = current ?? '';
-    n.className = 'intent' + (current ? ' on' : '') + (boss ? ' ult' : '');
+    n.className = 'intent' + (current ? ' on' : '') + (boss ? ' ult' : '') + (danger ? ' danger' : '');
     c.textContent = future ?? '';
     c.className = 'cd' + (future ? ' on' : '');
     S.danger = boss ? 1 : 0;

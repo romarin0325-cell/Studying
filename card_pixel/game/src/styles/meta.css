@@ -1,6 +1,6 @@
 .meta-screen {
   background: var(--night);
-  font: 14px/21px var(--px);
+  font: 0.875rem/1.3125rem var(--px);
 }
 
 .meta-top {
@@ -15,7 +15,7 @@
 }
 
 .meta-top h1, .meta-title-name h1 {
-  font: 22px/1.2 var(--px);
+  font: 1.375rem/1.2 var(--px);
   letter-spacing: 0;
 }
 
@@ -27,7 +27,7 @@
 }
 
 .meta-screen button, .meta-sheet button, .meta-sheet select, .meta-screen select {
-  font: 16px/1.25 var(--px);
+  font: 1rem/1.25 var(--px);
 }
 
 .meta-screen .btn, #sheet:has(.meta-sheet) .btn {
@@ -45,6 +45,31 @@
   background: #205952;
   border: 2px solid var(--aqua);
 }
+
+.meta-missions, .meta-mission-claim, .meta-recovery, .meta-backup {
+  display: grid;
+  gap: 8px;
+}
+.meta-missions { margin: 10px 0; }
+.meta-mission-line { text-align: left; word-break: keep-all; }
+.meta-mission-earned { color: var(--gold); }
+.meta-recovery { padding: 12px; }
+.meta-backup-actions, .meta-backup-compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.meta-backup-compare section {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  background: var(--night);
+}
+.meta-backup-compare h4, .meta-backup-compare dl { margin: 0; }
+.meta-backup-compare dt { margin-top: 6px; color: var(--dim); }
+.meta-backup-compare dd { margin: 0; overflow-wrap: anywhere; }
+.meta-backup input { min-width: 0; color: inherit; font: inherit; }
+.meta-backup input::file-selector-button { font: inherit; }
 
 .meta-screen .ic, #title.meta-screen .ic {
   display: inline-grid;
@@ -91,11 +116,11 @@
 }
 
 .meta-screen small, .meta-sheet small {
-  font: 12px/16px var(--px);
+  font: 0.75rem/1rem var(--px);
 }
 
 .meta-screen h2 {
-  font: 16px/1.25 var(--px);
+  font: 1rem/1.25 var(--px);
   letter-spacing: 0;
 }
 
@@ -141,10 +166,12 @@
 .meta-title-name span {
   display: block;
   color: var(--aqua);
-  font-size: 12px;
+  font-size: 0.75rem;
   letter-spacing: 3px;
   margin-top: 5px;
 }
+
+.title-save-notice { position: relative; padding: 8px; border-color: var(--coral); }
 
 #hub .meta-page, #recruit .meta-page {
   padding: 0 0 calc(10px + env(safe-area-inset-bottom));
@@ -222,6 +249,12 @@
 }
 
 .meta-hub-actions { flex-direction: column; }
+.meta-next-goal {
+  color: var(--gold);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+#ending .meta-next-goal { margin: 8px 0; }
 .meta-hub-links > button { flex: 1; }
 
 #hub .daily-row {
@@ -256,7 +289,7 @@
   background: var(--win);
   border: 1px solid var(--line);
   color: var(--gold);
-  font: 12px/16px var(--px);
+  font: 0.75rem/1rem var(--px);
 }
 
 .meta-bolt { position: relative; flex: 0 0 22px; height: 18px; overflow: hidden; }
@@ -310,11 +343,11 @@
 .meta-dungeon-copy {
   display: grid;
   gap: 3px;
-  font: 14px/21px var(--px);
+  font: 0.875rem/1.3125rem var(--px);
 }
 
 .meta-dungeon-copy b, .meta-dungeon-locked b, .meta-recruit-card b {
-  font: 16px/20px var(--px);
+  font: 1rem/1.25rem var(--px);
 }
 
 .meta-clear-marks {
@@ -335,6 +368,7 @@
 }
 
 .meta-dungeon-locked small, .meta-recruit-card small { display: block; }
+.meta-dungeon-locked .meta-roster-line.btn { margin-top: 4px; }
 
 .meta-face {
   width: 44px;
@@ -354,14 +388,14 @@
   border: 2px solid var(--line2);
 }
 
-#sheet:has(.meta-sheet) h3 { font: 22px/1.2 var(--px); }
+#sheet:has(.meta-sheet) h3 { font: 1.375rem/1.2 var(--px); }
 
 .meta-sheet, #sheet .meta-sheet p {
-  font: 14px/21px var(--px);
+  font: 0.875rem/1.3125rem var(--px);
 }
 
 #sheet .meta-sheet h4 {
-  font: 16px/20px var(--px);
+  font: 1rem/1.25rem var(--px);
   letter-spacing: 0;
 }
 
@@ -389,13 +423,13 @@
   padding: 6px 2px;
 }
 
-#sheet .rift-loans .rift-companion { font: 12px/16px var(--px); }
+#sheet .rift-loans .rift-companion { font: 0.75rem/1rem var(--px); }
 #sheet .rift-prep-note { margin: 10px 0; }
 .rift-prep > .go { margin-top: 6px; }
 .rift-actions { display: grid; gap: 8px; }
 .rift-result { padding: 12px; margin-bottom: 12px; }
 .rift-result-cast { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-bottom: 10px; }
-.rift-result-cast b { font: 12px/16px var(--px); }
+.rift-result-cast b { font: 0.75rem/1rem var(--px); }
 .rift-result-cast .fallen img { filter: grayscale(1); opacity: .6; }
 .rift-result-cast .fallen small { color: var(--coral); }
 .rift-stamp { display: inline-block; margin-top: 8px; padding: 4px 8px; }
@@ -412,7 +446,7 @@
   cursor: pointer;
   min-height: 44px;
   padding: 10px 0;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .meta-prep-slots {
@@ -425,7 +459,7 @@
 
 .meta-prep-contract { margin-top: 8px; }
 .meta-contract-options { display: grid; gap: 6px; }
-.meta-contract-options .btn.big small { font: 12px/17px var(--px); }
+.meta-contract-options .btn.big small { font: 0.75rem/1.0625rem var(--px); }
 .meta-contract-options .btn.big .gain { color: var(--gold); margin-top: 0; }
 .meta-nightmare-record.btn { width: auto; padding-inline: 8px; }
 
@@ -446,7 +480,7 @@
   min-width: 56px;
   max-width: 92px;
   padding: 4px;
-  font: 12px/16px var(--px);
+  font: 0.75rem/1rem var(--px);
   overflow-wrap: anywhere;
 }
 
@@ -475,6 +509,11 @@
 .meta-feedback { color: var(--coral); padding: 4px 0; }
 .meta-feedback:empty { display: none; }
 .meta-prep .go { margin: 8px 0 3px; }
+.meta-prep .meta-roster-line { margin-top: 6px; text-align: left; }
+#sheet .meta-prep [data-difficulty][disabled] { opacity: 1; color: var(--dim); border-style: dashed; }
+.meta-prep [data-difficulty] { flex: 1 1 0; }
+.meta-roster .meta-collection-grid { margin-top: 8px; }
+.meta-roster .meta-cell small { overflow-wrap: anywhere; }
 
 .meta-crystals {
   position: relative;
@@ -531,18 +570,20 @@
   text-align: left;
 }
 
-.meta-recruit-mark { font: 12px/16px var(--px); color: var(--aqua); }
+.meta-recruit-mark { font: 0.75rem/1rem var(--px); color: var(--aqua); }
+.emphasize-markers .meta-recruit-mark:not(:empty)::before { content: "✓ " / ""; }
 .meta-recruit-actions { padding: 10px 12px 4px; }
 
 .meta-collection-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
 }
 
 .meta-collection-bar select { min-width: 0; }
-#meta-collected { margin-left: auto; white-space: nowrap; }
+#meta-collected { margin-left: auto; }
 
 .meta-collection-grid {
   display: grid;
@@ -565,7 +606,7 @@
   box-shadow: 0 2px #090612;
 }
 
-.meta-cell b { font: 16px/18px var(--px); overflow-wrap: anywhere; }
+.meta-cell b { font: 1rem/1.125rem var(--px); overflow-wrap: anywhere; }
 .meta-cell small { color: var(--aqua); }
 .meta-cell.concealed img { filter: brightness(0); opacity: .65; }
 .meta-cell.concealed .meta-face { background: #463968; }
@@ -593,7 +634,7 @@
 }
 
 .meta-skill { padding: 7px 8px; margin: 4px 0; background: var(--night); }
-.meta-skill b { font: 16px/20px var(--px); }
+.meta-skill b { font: 1rem/1.25rem var(--px); }
 .meta-companion .go { margin-top: 8px; }
 
 .meta-chapter-detail {
@@ -621,7 +662,7 @@
 .meta-stamp {
   border: 1px solid var(--gold);
   color: var(--gold);
-  font: 12px/16px var(--px);
+  font: 0.75rem/1rem var(--px);
   padding: 1px 4px;
   white-space: nowrap;
 }

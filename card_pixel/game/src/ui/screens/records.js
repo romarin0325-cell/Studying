@@ -3,7 +3,7 @@ import { CONTRACTS } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import * as Meta from '../../engine/meta.js';
 
-export const DIFFICULTY_NAME = { normal: '여정', nightmare: '악몽' };
+export const DIFFICULTY_NAME = { easy: '꿈결', normal: '여정', nightmare: '악몽' };
 const amount = value => value.toLocaleString('ko-KR');
 export const hitText = (hit, card) => hit ? `${amount(hit.amount)} · ${card(hit.by)?.name || hit.by} · ${hit.skill}` : '기록 없음';
 export const longestText = (longest, card) => longest
@@ -51,14 +51,15 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
     <section class="meta-panel">
       <h2>지역별 생환</h2>
       <table class="meta-record-table meta-clear-table">
-        <thead><tr><th scope="col">지역</th><th scope="col">여정</th><th scope="col">악몽</th></tr></thead>
+        <thead><tr><th scope="col">지역</th><th scope="col">꿈결</th><th scope="col">여정</th><th scope="col">악몽</th></tr></thead>
         <tbody>${Object.values(DUNGEONS).map(dungeon => {
           const clear = records.clears[dungeon.id];
           const count = (clear?.nightmare || 0) + '회';
           const nightmare = !dungeon.nightmareRule ? '—' : Meta.contractsFor
             ? `<button class="btn meta-nightmare-record" data-nightmare-record="${dungeon.id}" aria-label="${esc(dungeon.name)} 악몽 ${count} · 계약 도장">${count}</button>`
             : count;
-          return `<tr><th scope="row">${esc(dungeon.name)}</th><td>${clear?.normal || 0}회</td><td>${nightmare}</td></tr>`;
+          const easy = dungeon.layout === 'intro' ? '—' : (clear?.easy ?? 0) + '회';
+          return `<tr><th scope="row">${esc(dungeon.name)}</th><td>${easy}</td><td>${clear?.normal || 0}회</td><td>${nightmare}</td></tr>`;
         }).join('')}</tbody>
       </table>
     </section>

@@ -370,6 +370,11 @@ async function playRecruit({ page, shot }) {
   const first = page.locator('#recruit.on [data-candidate]').first();
   if (await first.isVisible() && await first.getAttribute('aria-pressed') !== 'true') await first.click();
   await page.locator('#recruit.on #meta-recruit-confirm').click();
+  await page.locator('#hub.on, #ending.on').waitFor();
+  if (await page.locator('#ending.on').isVisible()) {
+    await shot('ending');
+    await page.locator('#ending.on #meta-ending-finish').click();
+  }
   await page.locator('#hub.on').waitFor();
   await shot('hub');
 }
@@ -390,8 +395,11 @@ async function playDestinations({ page, shot }, tried) {
 async function playPreparation({ page, shot }) {
   const depart = page.locator('#sheet.on .meta-prep #meta-start-expedition');
   await depart.waitFor();
+  const journey = page.locator('#sheet.on [data-difficulty="normal"]');
+  if (await journey.isVisible() && await journey.getAttribute('aria-pressed') !== 'true') await journey.click();
   await shot('preparation');
   await depart.click();
+  assert.equal(await page.evaluate(() => window.__game.run.difficulty), 'normal');
 }
 
 async function playHubPages({ page, shot }) {

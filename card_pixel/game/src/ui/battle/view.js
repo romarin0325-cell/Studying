@@ -9,7 +9,7 @@ import { REGIONS } from '../../content/regions.js';
 import { CONTRACT_ESCROW } from '../../content/contracts.js';
 import { create as createBattle } from '../../engine/bridge.js';
 import * as Opening from '../../engine/opening.js';
-import { tools } from '../settings.js';
+import { syncBattleSpeed, tools } from '../settings.js';
 import { createHud, FIELD, GOOD } from './hud.js';
 import { createTiles } from './tiles.js';
 import { createMoves } from './moves.js';
@@ -178,7 +178,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   });
   $('#pa-chips').addEventListener('click', ev => { ev.stopPropagation(); if (B.D) { sfx.tap(); allySheet(Math.min(B.D.cur, 2)); } });
   $('#party').addEventListener('click', ev => { const p = ev.target.closest('.pm[data-i]'); if (p && B.D) { sfx.tap(); allySheet(Number(p.dataset.i)); } });
-  $('#b-speed').addEventListener('click', function () { clock.speed = clock.speed === 1 ? 2 : 1; this.textContent = clock.speed + '배'; this.classList.toggle('on', clock.speed === 2); });
+  syncBattleSpeed(St);
   const currentLog = () => B.bridge ? battleLog(B.all.slice(0, B.played), B.party, B.door.enemies) : run?.lastBattleLog;
   function showLog() {
     sfx.tap();

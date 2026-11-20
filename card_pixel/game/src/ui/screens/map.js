@@ -230,7 +230,8 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
       isShowdown ? ROOM_NAMES[door.type] : door.type === 'event' ? '사건' : enemy?.name,
       door.enemies.length > 1 ? door.enemies.length + '연전' : ''
     ].filter(Boolean).join(' · ');
-    const rules = risks(door).join(' · ') || roomEffect(door);
+    const risksHere = risks(door);
+    const rules = risksHere.join(' · ') || roomEffect(door);
     const gain = reward(door);
     const quirk = door.quirk ? '<i>' + esc(QUIRKS[door.quirk].name) + '</i>' : '';
     const chips = quirk + door.enemies.map(affixChips).join('');
@@ -238,7 +239,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
       doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + '</b>' +
       (info ? '<small>' + esc(info) + '</small>' : '') +
       (chips ? '<span class="chips door-chips">' + chips + '</span>' : '') +
-      (rules ? '<small class="door-risk">' + esc(rules) + '</small>' : '') +
+      (rules ? '<small class="door-risk' + (risksHere.length ? ' danger' : '') + '">' + esc(rules) + '</small>' : '') +
       lessonLine(door) +
       (gain ? '<small class="door-reward">' + esc(gain) + '</small>' : '') +
       '</span>' + (door.relic && !door.final ? icon(door.relic) : '') + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' +

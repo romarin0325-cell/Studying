@@ -98,7 +98,7 @@ export function springScreen(run, ui) {
         sfx.tap();
         for (const other of rows) other.classList.toggle('sel', other === row);
         take.disabled = run.crystals < cost;
-        take.textContent = card(selected).name + ' 합류' + price;
+        take.textContent = card(selected).name + ' · 이번 원정 합류' + price;
         if (take.disabled) showFailure('insufficient_crystals');
       });
     }
@@ -113,7 +113,7 @@ export function springScreen(run, ui) {
       const id = selected;
       const count = replacementCount(run, 1);
       if (count) chooseReplacements(run, ui, count, ([replaceId]) => join(id, replaceId), {
-        incoming: [id], label: ([replaceId]) => card(replaceId).name + ' 보내고 ' + card(id).name + ' 합류' + price
+        incoming: [id], label: ([replaceId]) => card(replaceId).name + ' 보내고 ' + card(id).name + ' 이번 원정 합류' + price
       });
       else join(id);
     });

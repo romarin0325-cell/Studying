@@ -189,7 +189,7 @@
   border: 1px solid var(--line);
   background: var(--win);
   color: var(--ink);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .door-plate.previewing { border-color: var(--aqua); }

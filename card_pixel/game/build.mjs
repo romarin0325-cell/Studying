@@ -47,7 +47,7 @@ const fontFaces = ['Galmuri9', 'Galmuri11', 'Galmuri14'].map(fontFace).join('\n'
 const html = `<!doctype html>
 <html lang="ko" translate="no"><head><meta charset="utf-8">
 <meta name="google" content="notranslate">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>다음은 너 — RELAYMARE</title>
 <link rel="icon" href="${pngUrl(path.join(here, 'assets/app-icon.png'))}">
 <style>${fontFaces}

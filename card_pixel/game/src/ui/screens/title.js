@@ -1,10 +1,10 @@
-import { $, show } from '../dom.js';
+import { $, esc, show } from '../dom.js';
 import { background } from '../assets.js';
 import { tools } from '../settings.js';
 import { INTRO } from '../../content/intro.js';
 import { hubLineup, sceneActors } from './hub.js';
 
-export function titleScreen({ profile, widgets, start }) {
+export function titleScreen({ profile, widgets, start, notice }) {
   const node = $('#title');
   const lineup = profile ? hubLineup(profile.lead, profile.ui?.returners || []) : INTRO.party;
   node.innerHTML = `
@@ -14,6 +14,7 @@ export function titleScreen({ profile, widgets, start }) {
     <div class="corner">${tools()}</div>
     <div class="meta-title-name"><h1>다음은 너</h1><span>RELAYMARE</span></div>
     <p class="title-relay">쓰러진 동료가 다음 동료의 힘이 된다</p>
+    ${notice ? `<p class="title-save-notice win" role="status">${esc(notice)}</p>` : ''}
     <button class="btn go" id="b-start">꿈길로 들어간다</button>
   `;
   show('title');

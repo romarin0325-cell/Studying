@@ -29,9 +29,9 @@ export function sceneActors(ids, widgets, { interactive = false, lead = null, ar
   }).join('');
 }
 
-export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, prepare, resume, arriving = [], daily, openDaily }) {
+export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, depart, destinationId, departureLabel, resume, goal, arriving = [], daily, openDaily }) {
   const lead = profile.lead && widgets.card(profile.lead);
-  const destination = DUNGEONS[profile.ui?.destination];
+  const destination = DUNGEONS[destinationId];
   const finalConsonant = name => {
     const code = name.charCodeAt(name.length - 1);
     return code >= 0xac00 && code <= 0xd7a3 ? (code - 0xac00) % 28 : 0;
@@ -40,13 +40,14 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
   const ending = destination ? finalConsonant(destination.name) : 0;
   const direction = destination ? destination.name + (ending && ending !== 8 ? '으로' : '로') : '떠날 곳 고르기';
   const action = run ? `${DUNGEONS[run.dungeonId].name} ${Math.max(run.floor, 1)}층 이어가기`
-    : [title, direction].filter(Boolean).join(' ');
+    : departureLabel ?? [title, direction].filter(Boolean).join(' ');
   const canBrowse = profile.notebook.chapters.includes(1);
   const announcement = profile.ui?.announcement;
   const unlocks = announcement ? [
-    ...announcement.dungeons.map(id => DUNGEONS[id].name),
-    ...announcement.nightmares.map(id => DUNGEONS[id].name + ' · 악몽'),
-    ...announcement.chapters.map(chapterTitle)
+    ...(announcement.dungeons ?? []).map(id => DUNGEONS[id].name),
+    ...(announcement.nightmares ?? []).map(id => DUNGEONS[id].name + ' · 악몽'),
+    ...(announcement.chapters ?? []).map(chapterTitle),
+    ...(announcement.missionEarned ? ['동료 초대 가능'] : [])
   ] : [];
   const lineup = hubLineup(profile.lead, profile.ui?.returners || []);
 
@@ -60,6 +61,7 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
     </div>
     <div class="meta-hub-actions">
       <button class="btn go" id="meta-depart">${esc(action)}</button>
+      ${!run && goal?.text ? `<p class="meta-next-goal">${esc([goal.text, goal.reward].filter(Boolean).join(' · '))}</p>` : ''}
       ${destination && !run ? '<button class="btn" id="meta-change-destination">행선지 바꾸기</button>' : ''}
     </div>
     ${dailyRow(daily)}
@@ -69,9 +71,9 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
       <button class="btn" data-meta-page="records">기록</button>
     </nav>` : ''}
   `;
-  $('#meta-depart', node).addEventListener('click', run ? resume : destination ? () => prepare(destination.id) : openDungeons);
-  $('#meta-telescope', node).addEventListener('click', openDungeons);
-  $('#meta-change-destination', node)?.addEventListener('click', openDungeons);
+  $('#meta-depart', node).addEventListener('click', run ? resume : depart);
+  $('#meta-telescope', node).addEventListener('click', () => openDungeons());
+  $('#meta-change-destination', node)?.addEventListener('click', () => openDungeons());
   $('#meta-daily-rift', node)?.addEventListener('click', () => openDaily());
   $$('[data-companion]', node).forEach(button => button.addEventListener('click', () => inspect(button.dataset.companion)));
 }
