@@ -1,13 +1,16 @@
 import { $, $$, esc } from '../dom.js';
 import { background } from '../assets.js';
+import { CONTRACTS } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { LAYOUTS } from '../../content/layouts.js';
 import { hubLineup, sceneActors } from './hub.js';
 import { runRecordSheet } from './records.js';
 
-export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, endingPending, changeChoices, confirm }) {
+export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, stamp, endingPending, changeChoices, confirm }) {
   const won = rewards.result === 'win';
   const dungeon = DUNGEONS[run.dungeonId];
+  const stampDungeon = DUNGEONS[stamp?.dungeonId];
+  const stampContract = CONTRACTS[stamp?.contractId];
   const candidates = won ? rewards.recruitable : rewards.shardCandidates;
   const limit = won ? rewards.recruitLimit : 1;
   const mustRecruit = won && candidates.length > 0 && !profile.lead && run.firstIntroClear;
@@ -23,6 +26,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
         <h2>${won ? '동료 영입' : '꿈 조각'}</h2>
         <button class="btn" id="meta-run-record">기록</button>
       </div>
+      ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} · ${esc(stampContract.name)}</p>` : ''}
       ${candidates.length ? `<p>${won ? `생환자 중 최대 ${limit}명 영입` : '다음 원정 후보 한 명 예약'}</p>`
         : `<p>${won ? '새로 영입할 동료가 없다.' : '예약할 동료가 없다.'}</p>`}
       <div class="meta-recruit-list">${candidates.map(id => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">

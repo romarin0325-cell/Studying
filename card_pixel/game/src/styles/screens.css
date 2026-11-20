@@ -203,6 +203,10 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .relay-seat .recruit-flag { margin-left: auto; text-align: right; color: var(--gold); }
 .relay-link { min-height: 30px; display: flex; justify-content: center; flex-direction: column; padding: 4px 6px; color: var(--gold); font-size: 12px; }
 .relay-link small { display: block; color: var(--coral); }
+.relay-alternative { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; margin: 8px 0; }
+.relay-alternative b { font: 14px/20px var(--px); }
+.relay-alternative small { display: block; color: var(--gold); }
+.relay-alternative .btn { flex: none; }
 .reserve-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
 
 .run-event .run-scene { min-height: 190px; }

@@ -6,11 +6,24 @@ import { INTRO } from '../../content/intro.js';
 import { ROOM_NAMES } from '../../content/layouts.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
+import { CONTRACT_ESCROW } from '../../content/contracts.js';
 import { create as createBattle } from '../../engine/bridge.js';
 import { tools } from '../settings.js';
 import { createHud, FIELD, GOOD } from './hud.js';
 import { createTiles } from './tiles.js';
 import { createMoves } from './moves.js';
+
+export function contractSettlement(floor, contract) {
+  if (!contract) return [];
+  const rows = [];
+  if (contract.metNow) rows.push('<p class="contract-met">계약 달성</p>');
+  if (floor === 6) {
+    if (contract.paid) rows.push('<p class="gain">7층 앞에서 ◆' + contract.paid + '</p>');
+    else if (contract.failed) rows.push('<p class="contract-failed">계약 실패 · 맡긴 ◆' +
+      (contract.escrowed || CONTRACT_ESCROW) + ' 사라짐</p>');
+  }
+  return rows;
+}
 
 export function battleMarkup() {
   return (
@@ -143,7 +156,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   $('#sky').addEventListener('click', ev => { ev.stopPropagation(); sfx.tap(); fieldSheet(); });
   $('#b-field').addEventListener('click', () => {
     sfx.tap();
-    details.battlefieldSheet(B);
+    details.battlefieldSheet(run, B);
   });
   $('#pa-chips').addEventListener('click', ev => { ev.stopPropagation(); if (B.D) { sfx.tap(); allySheet(Math.min(B.D.cur, 2)); } });
   $('#party').addEventListener('click', ev => { const p = ev.target.closest('.pm[data-i]'); if (p && B.D) { sfx.tap(); allySheet(Number(p.dataset.i)); } });
@@ -528,18 +541,24 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   function showResult(res, advance) {
     const rows = [];
     if (res.wiped) rows.push('<p>마지막 동료가 적과 함께 쓰러졌다. 원정은 여기서 끝난다.</p>');
-    if (res.win && res.crystals) rows.push('<p class="gain">결정 +' + res.crystals + ' · 보유 ' + run.crystals + '</p>');
+    const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
+    if (res.win && battleCrystals > 0) rows.push('<p class="gain">결정 +' + battleCrystals + ' · 보유 ' + run.crystals + '</p>');
+    rows.push(...contractSettlement(run.floor, res.contract));
     if (res.fallen?.length) rows.push('<div class="fallen"><small>쓰러진 동료</small><div>' + res.fallen.map(id => '<span class="mini dead">' + face(id, 40) + '<b>' + esc(card(id).name) + '</b></span>').join('') + '</div></div>');
     for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>유품</b> ' + esc(card(g.to).name) + ' ← ' + esc(card(g.from).name) + '의 ' + esc(g.name) + '</p>');
     if (res.bet) rows.push('<p>' + (res.bet.won ? '내기 성공' : '내기 실패') + '</p>');
     const box = $('#result-in');
-    const label = run.room.type === 'borrowed' ? '살아남은 동료 깨우기' : '다음 층으로';
+    let label = '다음 층으로';
+    if (run.phase === 'done') label = '원정 결과';
+    else if (run.room.type === 'borrowed') label = '살아남은 동료 깨우기';
+    else if (run.pending?.kind === 'gate') label = '문지기 보상';
+    else if (res.relic?.equipped || run.pending?.kind === 'relic') label = '유물 확인';
     box.innerHTML = '<h3>' + (res.win ? '돌파' : '전멸') + '</h3>' + rows.join('') +
       '<button class="btn go" id="b-next">' + label + '</button>';
     $('#result').classList.add('on');
     $('#b-next').addEventListener('click', () => {
       sfx.tap(); $('#result').classList.remove('on');
-      advance();
+      advance(res);
     });
   }
 
@@ -557,7 +576,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.all = [];
   }
 
-  function restoreResult(expedition, advance) {
+  function restoreResult(expedition, advance, result = { win: true }) {
     attach(expedition);
     B.D = B.foe = B.bridge = null;
     B.allies = [];
@@ -575,7 +594,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     show('battle');
     layout();
     lockPanel();
-    showResult({ win: true }, advance);
+    showResult(result, advance);
   }
 
   /** Review hooks for the live page and hidden preview panes. */

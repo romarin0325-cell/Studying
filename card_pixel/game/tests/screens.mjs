@@ -6,6 +6,8 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
+import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../src/content/contracts.js';
+import { INTRO } from '../src/content/intro.js';
 import * as Bridge from '../src/engine/bridge.js';
 import * as Meta from '../src/engine/meta.js';
 import { create as makeRoster } from '../src/engine/roster.js';
@@ -70,8 +72,8 @@ function reachFloor(run, floor, visit = () => {}) {
   return run;
 }
 
-function makeRun({ dungeonId = 'ember_volcano', seed, floor = 1, profileView, firstPick, visit }) {
-  const run = Run.createRun({ core, roster, dungeonId, seed, profileView });
+function makeRun({ dungeonId = 'ember_volcano', seed, floor = 1, difficulty, contract, profileView, firstPick, visit }) {
+  const run = Run.createRun({ core, roster, dungeonId, seed, difficulty, contract, profileView });
   startPicks(run, firstPick);
   return reachFloor(run, floor, visit);
 }
@@ -460,6 +462,251 @@ function countdownCharge() {
   };
 }
 
+function nightmareProfile() {
+  const profile = snowRabbitProfile();
+  const run = makeRun({ seed: 7, floor: 8, profileView: Meta.startView(profile, 'ember_volcano') });
+  startBattle(run);
+  settleWin(run);
+  const result = Meta.applyRunEnd(profile, run);
+  assert.ok(result.announce.ok);
+  assert.equal(Meta.contractsFor(result.profile, run.dungeonId).unlocked, true);
+  return result.profile;
+}
+
+function eliteContractRun(profile) {
+  return makeRun({ seed: 21, floor: 2, difficulty: 'nightmare', contract: 'elite',
+    profileView: Meta.startView(profile, 'ember_volcano') });
+}
+
+function completeContractFloor(run, door) {
+  startBattle(run, { door });
+  return settleWin(run);
+}
+
+function eliteSettlement(profile, eliteDoor = 1) {
+  const run = eliteContractRun(profile);
+  completeContractFloor(run, 1);
+  assert.equal(run.contract.riskDoorTaken, true);
+  advance(run);
+  reachFloor(run, 6);
+  assert.equal(run.contract.escrowed, CONTRACT_ESCROW);
+  const result = completeContractFloor(run, eliteDoor);
+  return { run, result };
+}
+
+function contractSheet() {
+  const profile = nightmareProfile();
+  const session = storedSession({ profile });
+  const { name, rule } = CONTRACTS.heirloom;
+  const terms = `문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김 · 6층까지 달성하면 ◆${CONTRACT_PAYOUT}`;
+  assert.equal(Meta.contractsFor(profile, 'ember_volcano').stamps.heirloom, null);
+  return {
+    session, proof: 'normal clear unlocked the three nightmare contracts in ember_volcano',
+    async show(page, { text, capture }) {
+      await page.locator('#title.on #b-start').click();
+      await page.locator('#hub.on #meta-telescope').click();
+      await page.locator('#dungeons.on [data-dungeon="ember_volcano"]').click();
+      assert.equal(await page.locator('#meta-contract-choice').count(), 0);
+      await page.locator('#sheet.on [data-difficulty="nightmare"]').click();
+      const choice = page.locator('#sheet.on #meta-contract-choice');
+      await text(choice, '악몽 계약 · 없음');
+      await choice.click();
+      await text(page.locator('#sheet.on [data-contract=""]'), '계약 없음');
+      const option = page.locator('#sheet.on [data-contract="heirloom"]');
+      await text(option.locator('b'), name);
+      await text(option.locator('small').filter({ hasText: rule }), rule);
+      await text(option.locator('small').filter({ hasText: terms }), terms);
+      await text(option.locator('small').filter({ hasText: '도장 없음' }), '도장 없음');
+      await capture();
+      await option.click();
+      await text(choice, '악몽 계약 · ' + name);
+      await page.locator('#sheet.on #meta-start-expedition').click();
+      await page.waitForFunction(() => window.__game.run?.contract?.id === 'heirloom');
+    }
+  };
+}
+
+function contractBattleSheet() {
+  const run = eliteContractRun(nightmareProfile());
+  const { name, rule } = CONTRACTS.elite;
+  assert.equal(run.floor, 2);
+  assert.equal(run.doors[1].risk, true);
+  return {
+    session: storedSession({ run }), proof: 'elite contract active at floor 2 before taking the risky door',
+    async show(page, { text, capture }) {
+      const safe = await openDoorInfo(page, 0);
+      assert.doesNotMatch(await safe.innerText(), /둘이 돌아온 정예전/);
+      await page.locator('#b-sheetclose').click();
+      const risk = await openDoorInfo(page, 1);
+      await text(risk.locator('h4').filter({ hasText: name }), name);
+      await capture('risk-door');
+      await page.locator('#b-sheetclose').click();
+      await page.locator('#map.on [data-door="1"]').click();
+      await openBattle(page);
+      assert.doesNotMatch(await page.locator('#battle.on').innerText(), /둘이 돌아온 정예전/);
+      await page.locator('#battle.on #b-field').click();
+      const sheet = page.locator('#sheet.on #sh-body');
+      await text(sheet.locator('h4').filter({ hasText: name }), `계약 · ${name} · 아직`);
+      await text(sheet.getByText(rule, { exact: true }), rule);
+    }
+  };
+}
+
+function contractPayout() {
+  const profile = nightmareProfile();
+  const { run, result } = eliteSettlement(profile);
+  assert.ok(result.contract.metNow && result.relic?.equipped);
+  assert.equal(result.contract.paid, CONTRACT_PAYOUT);
+  const failure = eliteSettlement(profile, 0);
+  assert.equal(failure.result.contract.failed, true);
+  return {
+    session: storedSession({ run }),
+    proof: `floor 6 elite settlement pays ${result.contract.paid}; the regular door forfeits ${failure.result.contract.escrowed}`,
+    async show(page, { text, capture, revisit }) {
+      await text(page.locator('#result.on .contract-met'), '계약 달성');
+      await text(page.locator('#result.on .gain'), '7층 앞에서 ◆' + CONTRACT_PAYOUT);
+      await capture();
+      await page.locator('#result.on #b-next').click();
+      await page.locator('#treasure.on').waitFor();
+      await revisit(storedSession({ run: failure.run }), async failurePage => {
+        const resultSheet = failurePage.locator('#result.on');
+        await text(resultSheet.locator('.contract-failed'), '계약 실패 · 맡긴 ◆' + CONTRACT_ESCROW + ' 사라짐');
+        await capture('failed', failurePage);
+        await resultSheet.locator('#b-next').click();
+        await failurePage.waitForFunction(() => window.__game.run?.floor === 7);
+      });
+    }
+  };
+}
+
+function returnStamp() {
+  const profile = nightmareProfile();
+  const { run } = eliteSettlement(profile);
+  advance(run);
+  reachFloor(run, 8);
+  completeContractFloor(run, 0);
+  assert.deepEqual(Meta.applyRunEnd(profile, run).announce.stamp, { dungeonId: run.dungeonId, contractId: 'elite' });
+  const { name } = CONTRACTS.elite;
+  return {
+    session: storedSession({ run, profile }), proof: `${run.dungeonId} nightmare clear awards a new elite contract stamp`,
+    async show(page, { text, capture }) {
+      await text(page.locator('#recruit.on .meta-contract-stamp'), '홍련 화산 · ' + name);
+      await capture();
+      await page.locator('#recruit.on #meta-recruit-confirm').click();
+      await page.locator('#hub.on [data-meta-page="records"]').click();
+      await page.locator('#records.on [data-nightmare-record="ember_volcano"]').click();
+      const stamps = page.locator('#sheet.on tr');
+      await text(stamps.filter({ hasText: name }).locator('td'), '획득', { exact: true });
+      for (const contract of [CONTRACTS.rescue, CONTRACTS.heirloom]) {
+        await text(stamps.filter({ hasText: contract.name }).locator('td'), '미획득', { exact: true });
+      }
+      await capture('records');
+    }
+  };
+}
+
+function orderHint() {
+  const profile = snowRabbitProfile();
+  const run = makeRun({ seed: 21, floor: 6, profileView: Meta.startView(profile, 'ember_volcano') });
+  const party = Run.suggestOrder(run).slice().reverse();
+  startBattle(run, { party });
+  settleWin(run, { survivors: [true, false, true] });
+  advance(run);
+  reachFloor(run, 8);
+  command(Run.chooseDoor, run, 0);
+  const defaults = Run.defaultParty(run);
+  const alternate = Run.suggestOrder(run);
+  assert.ok(run.guide.bossOrder);
+  assert.equal(defaults[0], party[0]);
+  assert.equal(defaults[2], party[2]);
+  assert.ok(defaults[1] && defaults[1] !== party[1]);
+  assert.notDeepEqual(defaults, alternate);
+  const name = id => roster.card(id).name;
+  const inheritance = Bridge.heirloomPreview(core, alternate).find(entry => entry.to === alternate.at(-1) && entry.skill);
+  assert.ok(inheritance);
+  return {
+    session: storedSession({ run }), proof: `${defaults.join(' → ')} differs from ${alternate.join(' → ')}`,
+    async show(page, { text, capture }) {
+      const order = page.locator('#order.on');
+      for (const [index, id] of defaults.entries()) {
+        await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
+      }
+      const hint = order.locator('.relay-alternative');
+      await text(hint.locator('b'), '다른 순서 · ' + alternate.map(name).join(' → '));
+      await text(hint.locator('small'), `${name(inheritance.to)}에게 ${inheritance.skill.name} ×${Bridge.HEIRLOOM_POWER}`);
+      await hint.scrollIntoViewIfNeeded();
+      await capture();
+      await hint.getByRole('button', { name: '이 순서로' }).click();
+      for (const [index, id] of alternate.entries()) {
+        await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
+      }
+      assert.equal(await hint.count(), 0);
+      assert.equal(await page.evaluate(() => window.__game.run.room.status), 'order');
+    }
+  };
+}
+
+function springCount() {
+  const run = makeRun({ seed: 7 });
+  startBattle(run);
+  settleWin(run, { survivors: [true, false, false] });
+  advance(run);
+  reachFloor(run, 6);
+  startBattle(run);
+  settleWin(run, { survivors: [true, true, false] });
+  advance(run);
+  assert.equal(run.floor, 7);
+  assert.equal(run.bench.length, 2);
+  assert.ok(run.crystals >= Run.COST.draw);
+  const spring = `현재 2명 · 결정 ${Run.COST.draw}개로 셋째 깨우기`;
+  const altar = '현재 2명 중 한 명 축복';
+  return {
+    session: storedSession({ run }), proof: `floor 7 with ${run.bench.length} living fighters and ${run.crystals} crystals`,
+    async show(page, { text, capture }) {
+      await text(page.locator('#map.on [data-door="0"] .door-risk'), spring);
+      await text(page.locator('#map.on [data-door="1"] .door-risk'), altar);
+      await capture();
+      const springInfo = await openDoorInfo(page, 0);
+      await text(springInfo.getByText(spring, { exact: true }), spring);
+      await text(springInfo.getByText(`보유 결정 ${run.crystals}개`), `보유 결정 ${run.crystals}개`);
+      await capture('info');
+      await page.locator('#b-sheetclose').click();
+      const altarInfo = await openDoorInfo(page, 1);
+      await text(altarInfo.getByText(altar, { exact: true }), altar);
+    }
+  };
+}
+
+function retreatOutcomes() {
+  const run = makeRun({ dungeonId: 'dawn_forest', seed: 7 });
+  command(Run.chooseDoor, run, 0);
+  command(Run.confirmOrder, run, INTRO.party);
+  const battle = Bridge.create(core, Run.battleOptions(run));
+  const ready = battle.start().findLast(event => event.t === 'await');
+  const { allies, cur } = battle.state();
+  const preview = battle.previewRetreat();
+  const next = allies[preview.next.idx];
+  const [low, high] = preview.dmg;
+  const after = Math.max(0, next.hp - high);
+  const maxAfter = Math.max(0, next.hp - low);
+  assert.ok(allies[cur].hp <= ready.intent.dmg[0]);
+  const retreat = `물러나면 ${next.name} HP ${next.hp}→${after === maxAfter ? after : `${after}~${maxAfter}`}`;
+  const fall = `쓰러지면 ${next.name}에게 ${Bridge.heirloomSkill(roster.card(allies[cur].form)).name} ×${Bridge.HEIRLOOM_POWER}`;
+  return {
+    session: storedSession({ run }), proof: `${allies[cur].hp} HP vs. minimum ${ready.intent.dmg[0]} damage; ${retreat} / ${fall}`,
+    async show(page, { text }) {
+      await battleIdle(page);
+      await page.locator('#b-retreat').click();
+      // Without a reserved-attack warning the button carries both outcomes; the ticker keeps the hit detail.
+      await text(page.locator('#ticker'), '명중 시');
+      const button = page.locator('#b-retreat.armed');
+      await text(button.locator('small').filter({ hasText: retreat }), retreat);
+      await text(button.locator('small').filter({ hasText: fall }), fall);
+      await text(page.locator('#turn'), '1턴');
+    }
+  };
+}
+
 const cases = {
   'tile-range': tileRange,
   'tile-instant': tileInstant,
@@ -473,7 +720,14 @@ const cases = {
   'field-cap': fieldCap,
   'form-sheet': formSheet,
   'resume-seats': resumeSeats,
-  'countdown-charge': countdownCharge
+  'countdown-charge': countdownCharge,
+  'contract-sheet': contractSheet,
+  'contract-battle-sheet': contractBattleSheet,
+  'contract-payout': contractPayout,
+  'return-stamp': returnStamp,
+  'order-hint': orderHint,
+  'spring-count': springCount,
+  'retreat-outcomes': retreatOutcomes
 };
 
 async function inject(page, session) {
@@ -553,7 +807,7 @@ async function withPage(browser, session, show) {
 }
 
 async function capturePage(page) {
-  if (await page.locator('#battle.on').count()) await battleIdle(page);
+  if (await page.locator('#battle.on').count() && !await page.locator('#result.on').count()) await battleIdle(page);
   await page.waitForFunction(() => document.fonts.status === 'loaded', null, { timeout: 7000 });
   await page.evaluate(async () => {
     const images = Array.from(document.querySelectorAll('.screen.on img, #sheet.on img'));

@@ -1,6 +1,7 @@
 import { $, $$, esc } from '../dom.js';
 import { TYPE } from '../widgets.js';
 import { FIELD } from './hud.js';
+import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
 
 const damageRange = ([low, high]) => low === high ? String(low) : low + '~' + high;
 const previewDamage = p => p.min != null && p.max != null ? damageRange([p.min, p.max]) : String(p.dmg ?? '');
@@ -162,11 +163,23 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
         next.name + ' 출전 · 적 ' + preview.intent.name + ' · HP ' + next.hp + '→' + next.hp;
       const pending = [...new Set(B.D.delayed?.filter(attack => attack.by === B.D.cur).map(attack => attack.name))];
       const warning = pending.length ? '예약한 ' + pending.join('·') + '도 취소된다' : '';
+      let outcomes;
+      const minimum = B.intent?.dmg?.[0];
+      if (minimum != null && current.hp <= minimum) {
+        const form = card(current.form || B.party[B.D.cur]);
+        const heir = form && heirloomSkill(form);
+        outcomes = [
+          '물러나면 ' + next.name + ' HP ' + next.hp + '→' + damageRange(hp),
+          '쓰러지면 ' + next.name + '에게 ' + (heir ? heir.name + ' ×' + HEIRLOOM_POWER : '넘길 유품 없음')
+        ];
+      }
       B.armed = true;
       r.className = 'armed';
-      r.innerHTML = esc(current.name) + ' 물러나기<small>' + esc(warning || '턴 소모 · 유품 없음') + '</small>';
+      const notes = warning ? [warning] : outcomes || ['턴 소모 · 유품 없음'];
+      r.innerHTML = esc(current.name) + ' 물러나기' + notes.map(note => '<small>' + esc(note) + '</small>').join('');
       $('#tally').innerHTML = '';
-      ticker(line, true);
+      // The button already carries the outcomes unless the reserved-attack warning took its place.
+      ticker(warning && outcomes ? outcomes.join('\n') : line, true);
       sfx.tap();
       return;
     }

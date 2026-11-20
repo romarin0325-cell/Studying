@@ -93,11 +93,20 @@
 
 #msg { position: relative; flex: none; height: 30px; background: #100c22; border-bottom: 2px solid #231c44; }
 #msg:has(#relay-hint:not([hidden])) { height: auto; min-height: 30px; }
+#msg:has(#ticker.retreat-outcomes) { height: auto; min-height: 30px; }
 #relay-hint { padding: 3px 10px; line-height: 15px; color: var(--gold); word-break: keep-all; }
 #ticker { position: absolute; inset: 0; padding: 0 10px; display: flex; align-items: center; color: var(--dim); white-space: nowrap; overflow: hidden; }
 #ticker.retreat-preview { display: block; line-height: 28px; overflow-x: auto; color: var(--gold); }
 #relay-hint:not([hidden]) + #ticker { display: none; }
-#relay-hint:not([hidden]) + #ticker.retreat-preview { display: block; position: static; line-height: 22px; }
+#relay-hint:not([hidden]) + #ticker.retreat-preview:not(.retreat-outcomes) { display: block; position: static; line-height: 22px; }
+#ticker.retreat-outcomes, #relay-hint:not([hidden]) + #ticker.retreat-outcomes {
+  display: block;
+  position: static;
+  padding: 2px 10px;
+  white-space: pre-line;
+  line-height: 15px;
+  overflow-wrap: anywhere;
+}
 #tally { position: absolute; inset: 0; padding: 0 8px; display: flex; align-items: center; gap: 3px; background: #100c22; overflow: hidden; white-space: nowrap; }
 #tally:empty { display: none; }
 #tally span { font: 10px/18px var(--px9); padding: 0 4px; background: #33295c; animation: slide .12s steps(3); flex: none; }
@@ -124,6 +133,9 @@
 #row2 { flex: none; display: flex; gap: 6px; height: 46px; }
 #b-retreat { flex: 1; background: var(--win2); border: 2px solid var(--line); box-shadow: 0 3px 0 #08050f; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; }
 #b-retreat small { font: 10px var(--px9); color: var(--dim); }
+#b-retreat.armed { min-width: 0; }
+#b-retreat.armed small { max-width: 100%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+#b-retreat.armed small:only-of-type { white-space: normal; overflow-wrap: anywhere; }
 #b-heir { display: none; flex: 1.6; text-align: left; padding: 2px 10px; background: #3a2a08; border: 2px solid var(--gold); box-shadow: inset 0 -3px 0 #241a04, 0 3px 0 #08050f; position: relative; overflow: hidden; }
 #b-heir.on { display: block; }
 #b-heir small { display: block; font: 10px/12px var(--px9); color: var(--gold); }
@@ -142,6 +154,8 @@
 
 #result .in h3 { font: 22px var(--px14); color: var(--gold); margin-bottom: 6px; }
 #result .gain small { color: var(--dim); font: 10px var(--px9); }
+#result .contract-met { color: var(--gold); }
+#result .contract-failed { color: var(--coral); }
 #result .fallen { margin: 8px 0; } #result .fallen small { display: block; font: 10px var(--px9); color: var(--coral); margin-bottom: 4px; }
 #result .fallen div { display: flex; gap: 6px; flex-wrap: wrap; }
 #result .heirline { margin: 6px 0; padding: 6px 8px; border: 2px solid var(--gold); background: #2a1f06; }

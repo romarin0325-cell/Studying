@@ -2,7 +2,7 @@ import { $, $$, esc, show } from '../dom.js';
 import { head, badges, foeFlip } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import { HEIRLOOM_POWER, heirloomPreview } from '../../engine/bridge.js';
-import { confirmOrder } from '../../engine/run.js';
+import * as Run from '../../engine/run.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { AFFIXES } from '../../content/affixes.js';
 
@@ -13,11 +13,23 @@ export function orderScreen(run, ui) {
   const { sfx } = audio;
   const node = $('#order');
   const room = run.room;
-  const party = room.party?.slice() ?? [0, 1, 2].map(i => run.bench[i] || null);
+  const party = room.party?.slice() ?? Run.defaultParty?.(run)?.slice() ?? [0, 1, 2].map(i => run.bench[i] || null);
   const all = core.GameUtils.getAllCards();
   const qualifiers = room.type === 'gate' || room.type === 'boss';
   const quirk = QUIRKS[room.quirk];
+  const alternative = room.type === 'boss' && run.guide?.bossOrder ? Run.suggestOrder?.(run) : null;
+  const alternateSeats = alternative?.length ? [0, 1, 2].map(i => alternative[i] ?? null) : null;
   let selected = -1;
+
+  function orderHint() {
+    if (!alternateSeats || alternateSeats.every((id, i) => id === party[i])) return '';
+    const last = alternative.at(-1);
+    const heir = heirloomPreview(core, alternateSeats).find(entry => entry.to === last && entry.skill);
+    const inheritance = heir ? card(last).name + '에게 ' + heir.skill.name + ' ×' + HEIRLOOM_POWER : '넘길 공격 없음';
+    return '<div class="relay-alternative win"><div><b>다른 순서 · ' +
+      esc(alternative.map(id => card(id).name).join(' → ')) + '</b><small>' + esc(inheritance) + '</small></div>' +
+      '<button class="btn" id="b-alternate-order">이 순서로</button></div>';
+  }
 
   function render() {
     const previews = heirloomPreview(core, party);
@@ -51,11 +63,18 @@ export function orderScreen(run, ui) {
       esc(room.enemies.map(enemy => enemy.name).join(' → ')) + '</b><small>' +
       esc((room.enemies.length > 1 ? room.enemies.length + '연전 · ' : '') + room.name +
         (hazards.length ? ' · ' + hazards.join(' · ') : '')) + '</small></span></button>' +
-      '<div class="relay-seats">' + slots + '</div><h3>대기 동료</h3><p class="sm">자리를 누른 뒤, 바꿀 자리나 대기 동료를 고른다.</p>' +
+      '<div class="relay-seats">' + slots + '</div>' + orderHint() +
+      '<h3>대기 동료</h3><p class="sm">자리를 누른 뒤, 바꿀 자리나 대기 동료를 고른다.</p>' +
       '<div class="reserve-cards">' + (bench.map(id => '<button class="win" data-bench="' + esc(id) + '"><span class="run-face">' +
         face(id, 44) + '</span><b>' + esc(card(id).name) + '</b></button>').join('') || '<p>없음</p>') +
       '</div></div><div class="footer"><button class="btn go" id="b-go">' + action + '</button></div>';
     show('order');
+    $('#b-alternate-order', node)?.addEventListener('click', () => {
+      party.splice(0, party.length, ...alternateSeats);
+      selected = -1;
+      sfx.tap();
+      render();
+    });
     for (const button of $$('[data-slot]', node)) button.addEventListener('click', () => {
       const index = Number(button.dataset.slot);
       if (selected < 0) selected = index;
@@ -76,7 +95,7 @@ export function orderScreen(run, ui) {
     $('#b-go', node).addEventListener('click', () => {
       audio.unlockAudio();
       sfx.tap();
-      if (ui.command(confirmOrder, party).ok) ui.route();
+      if (ui.command(Run.confirmOrder, party).ok) ui.route();
     });
     $('#b-opponents', node).addEventListener('click', () => {
       sheets.openSheet(room.name, room.enemies.map(enemy => '<div class="run-foe-detail">' +

@@ -2,6 +2,7 @@ import { $, $$, esc, show, sleep } from '../dom.js';
 import { affixChips, foeFlip, head, TYPE } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
+import { CONTRACTS, CONTRACT_ESCROW } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { ROOM_NAMES } from '../../content/layouts.js';
 import { REGIONS } from '../../content/regions.js';
@@ -76,12 +77,45 @@ export function mapScreen(run, ui) {
   }
 
   function reward(door, crystalLabel = '결정') {
-    const crystals = door.reward;
+    const crystals = (door.reward ?? 0) - escrow(door);
     const relic = !door.final && artifacts.get(door.relic);
     return [
       crystals ? crystalLabel + ' +' + crystals : '',
       door.type === 'gate' && !door.final ? (relic ? '그림자 1명 또는 ' + relic.name : '그림자 1명') : relic?.name
     ].filter(Boolean).join(' · ');
+  }
+
+  function escrow(door) {
+    return run.floor === 4 && door.type === 'gate' && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0;
+  }
+
+  function roomEffect(door) {
+    const count = run.bench.length;
+    if (run.floor === 7 && count < 3) {
+      if (door.type === 'altar') return count ? '현재 ' + count + '명 중 한 명 축복' : '축복 받을 동료 없음';
+      if (door.type === 'spring') {
+        const missing = 3 - count;
+        const cost = missing * Run.COST.draw;
+        const short = cost - run.crystals;
+        return '현재 ' + count + '명 · 결정 ' + cost + '개로 ' + (missing === 1 ? '셋째' : missing + '명') + ' 깨우기' +
+          (short > 0 ? ' · 결정 ' + short + '개 부족' : '');
+      }
+    }
+    return ROOM_EFFECT[door.type] || '';
+  }
+
+  function contractGoal(door) {
+    const contract = CONTRACTS[run.contract?.id];
+    if (!contract) return '';
+    const { floor } = run;
+    const eliteRisk = contract.id === 'elite' && floor === 2 && door.risk;
+    const relevant = contract.id === 'elite'
+      ? eliteRisk || (floor === 6 && door.type === 'elite')
+      : floor === 4 || floor === 6;
+    if (!relevant) return '';
+    const goal = eliteRisk ? '이 위험 문을 지나 6층 정예에 도전한다.' : contract.rule;
+    return '<h4>계약 · ' + esc(contract.name) + '</h4><p>' + esc(goal) + '</p>' +
+      (run.contract.met ? '<p>달성</p>' : '');
   }
 
   function doorPreview(door) {
@@ -111,7 +145,7 @@ export function mapScreen(run, ui) {
       isShowdown ? ROOM_NAMES[door.type] : door.type === 'event' ? '사건' : enemy?.name,
       door.enemies.length > 1 ? door.enemies.length + '연전' : ''
     ].filter(Boolean).join(' · ');
-    const rules = risks(door).join(' · ');
+    const rules = risks(door).join(' · ') || roomEffect(door);
     const gain = reward(door);
     const quirk = door.quirk ? '<i>' + esc(QUIRKS[door.quirk].name) + '</i>' : '';
     const chips = quirk + door.enemies.map(affixChips).join('');
@@ -119,7 +153,7 @@ export function mapScreen(run, ui) {
       doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + '</b>' +
       (info ? '<small>' + esc(info) + '</small>' : '') +
       (chips ? '<span class="chips door-chips">' + chips + '</span>' : '') +
-      (rules || ROOM_EFFECT[door.type] ? '<small class="door-risk">' + esc(rules || ROOM_EFFECT[door.type]) + '</small>' : '') +
+      (rules ? '<small class="door-risk">' + esc(rules) + '</small>' : '') +
       (gain ? '<small class="door-reward">' + esc(gain) + '</small>' : '') +
       '</span>' + (door.relic && !door.final ? icon(door.relic) : '') + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' +
       esc(title) + ' 정보">정보</button></div>';
@@ -185,10 +219,14 @@ export function mapScreen(run, ui) {
     const rule = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
     const sky = startSky(door), gain = reward(door, '확정 결정');
     const treasure = door.enemies.some(enemy => enemy.affixes?.includes('treasure'));
+    const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : '';
     openSheet(door.name, enemies + rule(quirk) + rule(region) +
       (sky ? '<p>' + esc(sky) + '</p>' : '') +
       (door.event ? '<p>' + esc(door.event.text) + '</p>' : '') +
+      (service ? '<p>' + esc(service) + '</p>' : '') +
+      (service && door.type === 'spring' ? '<p>보유 결정 ' + run.crystals + '개</p>' : '') +
       (gain ? '<p class="gain">' + esc(gain) + '</p>' : '') +
-      (treasure ? '<p class="gain">추가 보상 · 보물 적 1명 처치마다 결정 +2</p>' : '') + rule(relic));
+      (escrow(door) ? '<p>계약에 ◆' + CONTRACT_ESCROW + ' 맡김</p>' : '') +
+      (treasure ? '<p class="gain">추가 보상 · 보물 적 1명 처치마다 결정 +2</p>' : '') + contractGoal(door) + rule(relic));
   }
 }

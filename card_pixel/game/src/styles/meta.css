@@ -372,6 +372,12 @@
 
 .meta-prep-slots > * { flex: 1 1 92px; min-width: 0; }
 
+.meta-prep-contract { margin-top: 8px; }
+.meta-contract-options { display: grid; gap: 6px; }
+.meta-contract-options .btn.big small { font: 12px/17px var(--px); }
+.meta-contract-options .btn.big .gain { color: var(--gold); margin-top: 0; }
+.meta-nightmare-record.btn { width: auto; padding-inline: 8px; }
+
 .meta-prep-leads {
   position: relative;
   display: flex;
@@ -449,6 +455,14 @@
   justify-content: space-between;
   gap: 8px;
   align-items: center;
+}
+
+.meta-recruit-body .meta-contract-stamp {
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  margin: 5px 0;
+  padding: 4px 8px;
+  width: fit-content;
 }
 
 .meta-recruit-list {

@@ -162,12 +162,12 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     if ($('#hub').classList.contains('on')) showHub();
   }
 
-  function startExpedition(destination, difficulty = 'normal') {
+  function startExpedition(destination, difficulty = 'normal', contract = null) {
     const dungeonId = destination || 'dawn_forest';
     const requestedSeed = new URLSearchParams(location.search).get('seed');
     const seed = requestedSeed !== null && /^\d+$/.test(requestedSeed)
       ? Number(requestedSeed) >>> 0 : Math.floor(Math.random() * 0x100000000);
-    run = createRun({ core, roster, dungeonId, difficulty, seed, profileView: startView(profile, dungeonId) });
+    run = createRun({ core, roster, dungeonId, difficulty, contract, seed, profileView: startView(profile, dungeonId) });
     preparationOpen = false;
     updateUi({ destination: destination || profile.ui?.destination, preparing: false, announcement: null });
     enterExpedition();
@@ -189,9 +189,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const candidates = rewards.result === 'win' ? rewards.recruitable : rewards.shardCandidates;
     const initial = candidates.length === 1 ? candidates : [];
     const choices = saved?.runId === run.id ? saved.ids.filter(id => candidates.includes(id)) : initial;
+    const stamp = rewards.result === 'win' && run.contract ? applyRunEnd(profile, run).announce.stamp : null;
     const node = page('recruit', { title: rewards.result === 'win' ? '생환' : '원정 실패' });
     recruitScreen(node, {
-      run, rewards, profile, widgets, sheets, choices,
+      run, rewards, profile, widgets, sheets, choices, stamp,
       endingPending: run.dungeonId === 'creation_tower' && rewards.result === 'win' && !profile.ui?.endingSeen,
       changeChoices: ids => updateUi({ recruitChoices: { runId: run.id, ids } }),
       confirm: confirmReturn

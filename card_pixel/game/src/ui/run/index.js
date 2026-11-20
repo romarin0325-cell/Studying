@@ -7,7 +7,7 @@ import { $, esc, show } from '../dom.js';
 import { createSheet, sheetMarkup } from '../sheet.js';
 import { createWidgets } from '../widgets.js';
 import { createDetails } from '../battle/sheets.js';
-import { battleMarkup, createBattleView } from '../battle/view.js';
+import { battleMarkup, contractSettlement, createBattleView } from '../battle/view.js';
 import { awakenScreen } from '../screens/awaken.js';
 import { mapScreen } from '../screens/map.js';
 import { orderScreen } from '../screens/order.js';
@@ -103,9 +103,26 @@ export function enterRun(run, host) {
     playMusic: () => host.runtime.music?.play(run.dungeonId)
   };
 
-  function afterBattle() {
+  function routeBattleReward(result) {
+    if (run.phase === 'done' || result.retry || run.pending) {
+      route();
+      return true;
+    }
+    if (result.relic?.equipped) {
+      treasureScreen(run, ui, result.relic.id, { equipped: true });
+      return true;
+    }
+    return false;
+  }
+
+  function afterBattle(result) {
+    if (routeBattleReward(result)) return;
     if (run.room.type === 'borrowed' && run.phase === 'reward') return wakeSurvivors();
     leave();
+  }
+
+  function equippedRoomRelic() {
+    return ['elite', 'gate'].includes(run.room.type) && run.relics.includes(run.room.relic);
   }
 
   function route() {
@@ -129,22 +146,13 @@ export function enterRun(run, host) {
       const options = Run.battleOptions(run);
       return battle.startBattle(run, options, summary => {
         const result = command(Run.settleBattle, summary);
-        if (result.ok) {
-          if (run.phase === 'done' || result.retry || run.pending) {
-            route();
-            return null;
-          }
-          if (result.relic?.equipped) {
-            treasureScreen(run, ui, result.relic.id, { equipped: true });
-            return null;
-          }
-        }
+        if (result.ok && !contractSettlement(run.floor, result.contract).length && routeBattleReward(result)) return null;
         return result;
       }, afterBattle);
     }
     if (run.phase === 'reward') {
       if (run.room.type === 'borrowed') return battle.restoreResult(run, afterBattle);
-      if (['elite', 'gate'].includes(run.room.type) && run.relics.includes(run.room.relic)) {
+      if (equippedRoomRelic()) {
         return treasureScreen(run, ui, run.room.relic, { equipped: true });
       }
       return battle.restoreResult(run, leave);
@@ -163,6 +171,11 @@ export function enterRun(run, host) {
     if (run.room?.type === 'awakening') return awakenScreen(run, ui);
   }
 
-  route();
+  const savedContract = run.phase === 'reward' && run.room?.status === 'resolved' && run.contract
+    ? { ...run.contract, metNow: run.contract.metAtFloor === run.floor } : null;
+  if (contractSettlement(run.floor, savedContract).length) {
+    const relic = equippedRoomRelic() ? { id: run.room.relic, equipped: true } : null;
+    battle.restoreResult(run, afterBattle, { win: true, contract: savedContract, relic });
+  } else route();
   return battle.review;
 }

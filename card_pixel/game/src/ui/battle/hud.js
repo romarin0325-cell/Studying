@@ -77,6 +77,7 @@ export function createHud(core, stage, sfx, widgets) {
     const node = $('#ticker');
     node.textContent = text;
     node.classList.toggle('retreat-preview', retreat);
+    node.classList.toggle('retreat-outcomes', retreat && text.includes('\n'));
   }
 
   function showIntent(intent, cd, foe) {

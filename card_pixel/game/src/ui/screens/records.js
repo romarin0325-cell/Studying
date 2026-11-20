@@ -1,5 +1,7 @@
-import { $, esc } from '../dom.js';
+import { $, $$, esc } from '../dom.js';
+import { CONTRACTS } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
+import * as Meta from '../../engine/meta.js';
 
 export const DIFFICULTY_NAME = { normal: '여정', nightmare: '악몽' };
 const amount = value => value.toLocaleString('ko-KR');
@@ -50,7 +52,10 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding) {
         <thead><tr><th scope="col">지역</th><th scope="col">여정</th><th scope="col">악몽</th></tr></thead>
         <tbody>${Object.values(DUNGEONS).map(dungeon => {
           const clear = records.clears[dungeon.id];
-          const nightmare = dungeon.nightmareRule ? (clear?.nightmare || 0) + '회' : '—';
+          const count = (clear?.nightmare || 0) + '회';
+          const nightmare = !dungeon.nightmareRule ? '—' : Meta.contractsFor
+            ? `<button class="btn meta-nightmare-record" data-nightmare-record="${dungeon.id}" aria-label="${esc(dungeon.name)} 악몽 ${count} · 계약 도장">${count}</button>`
+            : count;
           return `<tr><th scope="row">${esc(dungeon.name)}</th><td>${clear?.normal || 0}회</td><td>${nightmare}</td></tr>`;
         }).join('')}</tbody>
       </table>
@@ -58,6 +63,13 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding) {
     ${latest ? `<button class="btn" id="meta-latest-record">최근 원정 · ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ''}
     ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">엔딩 다시 보기</button>' : ''}
   `;
+  for (const button of $$('[data-nightmare-record]', node)) button.addEventListener('click', () => {
+    const dungeonId = button.dataset.nightmareRecord;
+    const stamps = Meta.contractsFor?.(profile, dungeonId)?.stamps;
+    openSheet(`${DUNGEONS[dungeonId].name} · 계약 도장`, `<div class="meta-sheet">${recordTable(
+      Object.values(CONTRACTS).map(({ id, name }) => [name, stamps?.[id] ? '획득' : '미획득'])
+    )}</div>`);
+  });
   $('#meta-latest-record', node)?.addEventListener('click', () => runRecordSheet(latest, card, openSheet));
   $('#meta-replay-ending', node)?.addEventListener('click', replayEnding);
 }

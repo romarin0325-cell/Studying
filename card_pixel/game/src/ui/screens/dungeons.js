@@ -3,8 +3,11 @@ import { background, icon } from '../assets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { REGIONS } from '../../content/regions.js';
 import { INTRO } from '../../content/intro.js';
-import { availableDungeons, setExpeditionParty, setSeals, startView } from '../../engine/meta.js';
+import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../../content/contracts.js';
+import * as Meta from '../../engine/meta.js';
 import { DIFFICULTY_NAME } from './records.js';
+
+const { availableDungeons, setExpeditionParty, setSeals, startView } = Meta;
 
 function regionalRule(dungeon) {
   const region = REGIONS[dungeon.region?.id];
@@ -55,20 +58,23 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
   const { card } = roster;
   let sealsOpen = false;
   let leadRow;
+  let contract = null;
 
-  function render(message = '', focusLead) {
+  function render(message = '', focusLead, prepScroll = $('#sh-body').scrollTop) {
     const profile = currentProfile();
     const entry = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
     const view = startView(profile, dungeonId);
     const difficulty = profile.ui?.difficulty?.[dungeonId] || 'normal';
+    const contracts = Meta.contractsFor?.(profile, dungeonId);
+    const canContract = difficulty === 'nightmare' && contracts?.unlocked;
     const intro = dungeon.layout === 'intro';
     const lead = view.lead;
     const selected = view.companions;
     const name = id => esc(card(id).name);
     const option = (id, chosen) => `<option value="${id}"${id === chosen ? ' selected' : ''}>${name(id)}</option>`;
     const leadChoices = view.leadCandidates.filter(id => !view.seals.includes(id));
-    const scroll = $('#sh-body').scrollTop;
     const leadScroll = leadRow?.scrollLeft;
+    const contractChoice = canContract ? CONTRACTS[contract] : null;
 
     sheets.openSheet(`${dungeon.name} · 준비`, `<div class="meta-sheet meta-prep">
       <section class="meta-prep-section">
@@ -103,13 +109,16 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
         <h4>난이도</h4><div class="meta-prep-slots">${entry.difficulties.map(id => `<button class="btn" data-difficulty="${id}"
           aria-pressed="${id === difficulty}">${DIFFICULTY_NAME[id]}</button>`).join('')}</div>
       </section>` : ''}
+      ${canContract ? `<button class="btn meta-prep-contract" id="meta-contract-choice">
+        악몽 계약 · ${esc(contractChoice?.name || '없음')}
+      </button>` : ''}
       <section class="meta-prep-section">
         <h4>지역 규칙</h4><p>${esc(regionalRule(dungeon))}</p>
       </section>
       <p class="meta-feedback" role="status">${esc(message)}</p>
       <button class="btn go" id="meta-start-expedition">출발</button>
     </div>`);
-    $('#sh-body').scrollTop = scroll;
+    $('#sh-body').scrollTop = prepScroll;
 
     leadRow = $('.meta-prep-leads');
     if (leadRow) {
@@ -147,7 +156,29 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
       updateProfile({ ...profile, ui: { ...profile.ui, difficulty: { ...profile.ui?.difficulty, [dungeonId]: button.dataset.difficulty } } });
       render();
     });
-    $('#meta-start-expedition').addEventListener('click', () => start(dungeonId, difficulty));
+    $('#meta-contract-choice')?.addEventListener('click', () => {
+      sealsOpen = $('#meta-seals')?.open || false;
+      const scroll = $('#sh-body').scrollTop;
+      function back() {
+        render('', undefined, scroll);
+        $('#meta-contract-choice')?.focus({ preventScroll: true });
+      }
+      sheets.openSheet('악몽 계약', `<div class="meta-sheet meta-contract-options">
+        <button class="btn" data-contract="" aria-pressed="${!contract}">계약 없음</button>
+        ${Object.values(CONTRACTS).map(entry => `<button class="btn big" data-contract="${entry.id}" aria-pressed="${entry.id === contract}">
+          <b>${esc(entry.name)}</b><small>${esc(entry.rule)}</small>
+          <small>문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김 · 6층까지 달성하면 ◆${CONTRACT_PAYOUT}</small>
+          <small class="${contracts.stamps?.[entry.id] ? 'gain' : ''}">${contracts.stamps?.[entry.id] ? '도장 획득' : '도장 없음'}</small>
+        </button>`).join('')}
+        <button class="btn" id="meta-contract-back">준비로 돌아가기</button>
+      </div>`);
+      for (const button of $$('.meta-contract-options [data-contract]')) button.addEventListener('click', () => {
+        contract = button.dataset.contract || null;
+        back();
+      });
+      $('#meta-contract-back').addEventListener('click', back);
+    });
+    $('#meta-start-expedition').addEventListener('click', () => start(dungeonId, difficulty, contractChoice?.id ?? null));
 
     function updateParty(nextLead, companions, preferredCompanion, focusLead) {
       sealsOpen = $('#meta-seals')?.open || false;

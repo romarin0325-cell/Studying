@@ -5,6 +5,7 @@ import { AFFIXES } from '../../content/affixes.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
 import { RELIC_LIMIT } from '../../engine/rooms.js';
+import { CONTRACTS } from '../../content/contracts.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
 import { FIELD, GOOD } from './hud.js';
 
@@ -129,9 +130,10 @@ export function createDetails(core, widgets, openSheet) {
     openSheet('하늘 · 필드 버프', html);
   }
 
-  function battlefieldSheet(B) {
+  function battlefieldSheet(run, B) {
     if (!B.door) return;
     const region = REGIONS[B.door.region?.id], quirk = QUIRKS[B.door.quirk];
+    const contract = CONTRACTS[run.contract?.id];
     const block = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
     const slots = Array.from({ length: RELIC_LIMIT }, (_, index) => {
       const id = B.artifacts[index];
@@ -141,6 +143,8 @@ export function createDetails(core, widgets, openSheet) {
         (id === B.temporaryRelic ? ' · 이번 전투만' : '') + ' · ' + esc(relic.desc) + '</li>';
     });
     openSheet('전장·유물', (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
+      (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + (run.contract.met ? '달성' : '아직') +
+        '</h4><p>' + esc(contract.rule) + '</p>' : '') +
       '<h4>장착 유물</h4><ul class="stl">' + slots.join('') + '</ul>');
   }
 
