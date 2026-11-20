@@ -24,6 +24,7 @@
 import { mulberry32 } from './rng.js';
 import { QUIRKS } from '../content/quirks.js';
 import { REGIONS } from '../content/regions.js';
+import { BOSS_PREVIEW_TURNS, STRONG_BEAT, THREE_BEAT, TIDE_BEATS, TIDE_STRONG_BEAT } from '../content/tempo.js';
 
 export { QUIRKS } from '../content/quirks.js';
 export { AFFIXES } from '../content/affixes.js';
@@ -35,6 +36,44 @@ const FIELD_POOL = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', '
 const DEFENSE_BUFFS = ['guard', 'barrier', 'magic_guard', 'damage_half', 'evasion'];
 const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
 const RANDOM_DAMAGE = ['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'];
+const isScripted = action => !!action && action.name !== '일반 공격' && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
+
+function patternActions(enemy, pattern, openingIntent) {
+  if (pattern === 'tide') return TIDE_BEATS;
+  if (pattern !== 'threeBeat' && pattern !== 'introFixed') return [];
+  const basic = THREE_BEAT[0];
+  const skill = enemy.skills.find(s => isAttack(s) && (!openingIntent || s.type === openingIntent));
+  const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic;
+  if (pattern === 'introFixed') return openingIntent ? [signature, basic, THREE_BEAT[2]] : [signature];
+  return THREE_BEAT.map(beat => !beat.signature ? beat : skill
+    ? { ...signature, rate: 0, power: signature.power * beat.power } : basic);
+}
+
+export function enemyBeats(core, enemy, pattern, openingIntent) {
+  if (pattern !== 'bossScript') {
+    const beats = patternActions(enemy, pattern, openingIntent);
+    return beats.map(({ name, type, power }, index) => ({ turn: index + 1, name, type, power }));
+  }
+  const decide = coreHooks.get(core)?.decide ?? core.Logic.decideEnemyAction;
+  const saved = Math.random;
+  const beats = [];
+  // Only fixed scripted moves are known at the door. Random branches are announced in battle.
+  try {
+    for (let turn = 1; turn <= BOSS_PREVIEW_TURNS; turn++) {
+      Math.random = () => 0;
+      const low = decide.call(core.Logic, { ...enemy }, turn);
+      Math.random = () => 1 - Number.EPSILON;
+      const high = decide.call(core.Logic, { ...enemy }, turn);
+      const fixed = low.name === high.name;
+      if ((!fixed && !(isScripted(low) && isScripted(high))) || (fixed && !isScripted(high) && turn !== 1)) continue;
+      for (const action of fixed ? [high] : [low, high]) {
+        const type = !action.isChargeStart && isAttack(action) ? action.type : 'rest';
+        beats.push({ turn, name: action.name, type, power: type === 'rest' ? 0 : action.val ?? 1 });
+      }
+    }
+  } finally { Math.random = saved; }
+  return beats;
+}
 
 export function enemyStatsWithQuirk(stats, quirk) {
   const modifiers = QUIRKS[quirk]?.foe || {};
@@ -160,6 +199,7 @@ export function create(core, opts) {
   const quirk = opts.quirk && QUIRKS[opts.quirk] ? opts.quirk : null;
   const Q = quirk ? QUIRKS[quirk] : {};
   const region = opts.region?.id;
+  const pattern = opts.tempo?.pattern;
   const bellTurns = opts.region?.turns ?? REGIONS.twilight_bell.turns;
   const bellStacks = opts.region?.stacks ?? REGIONS.twilight_bell.stacks;
   const bet = opts.bet;
@@ -337,6 +377,7 @@ export function create(core, opts) {
   function setupAllies() {
     for (const p of players()) {
       p.relayModifiers = [];
+      if (pattern !== 'introFixed' && Number.isFinite(opts.tempo?.startMp)) p.mp = Math.min(getMaxMana(p), opts.tempo.startMp);
       if (Q.ally) {
         addAllyModifier(p, Q.ally);
         if (Q.ally.mp) { p.maxMp = Q.ally.mp; p.mp = Q.ally.mp; }
@@ -348,6 +389,7 @@ export function create(core, opts) {
   function setupEnemy(enemy) {
     const def = queue[B.enemyIdx] || {};
     enemy.affixes = (def.affixes || []).slice();
+    enemy.relayBeats = patternActions(enemy, pattern, opts.openingIntent);
     const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk);
     Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
     if (hasAffix(enemy, 'tough')) enemy.buffs.damage_half = 3;
@@ -562,16 +604,20 @@ export function create(core, opts) {
   };
 
   /* ---------- rule B: intent, rule A: countdown ---------- */
-  const isScripted = action => !!action && action.name !== '일반 공격' && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
   const inTide = () => region === 'tide_cycle' && !queue[B.enemyIdx].boss;
   function tideVulnerability(enemy) {
     if (!inTide()) return 0;
     const turn = localTurn(enemy);
+    if (pattern === 'tide') return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
     return turn > 0 && turn % 4 === 0 ? 1.5 : 0;
   }
   const tideDamage = (damage, vulnerable) => vulnerable ? Math.floor(damage * vulnerable) : damage;
   function decide(enemy) {
     const turn = localTurn(enemy);
+    if (enemy.relayBeats.length && (pattern !== 'introFixed' || opts.openingIntent)) {
+      const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
+      return { ...beat, val: beat.power };
+    }
     const vulnerable = tideVulnerability(enemy);
     if (vulnerable) return { type: 'rest', name: REGIONS.tide_cycle.rest, vulnerable };
     if (!inTide() || turn % 4 !== 3) return original.decide.call(Logic, enemy, turn);
@@ -620,6 +666,13 @@ export function create(core, opts) {
   }
   function countdown() {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
+    if (pattern === 'threeBeat' || pattern === 'tide') {
+      const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
+      const period = enemy.relayBeats.length;
+      let inTurns = (strong - local % period + period) % period;
+      if (inTurns === 0 && enemy.buffs.stun) inTurns = period;
+      return { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+    }
     if (inTide()) {
       let inTurns = (3 - local % 4 + 4) % 4;
       if (inTurns === 0 && enemy.buffs.stun) inTurns = 4;
@@ -692,7 +745,9 @@ export function create(core, opts) {
     if (B.awaiting) {
       checkFrenzy();
       flush();
-      const wait = { t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent: currentIntent(), countdown: countdown() };
+      const intent = currentIntent();
+      if (pattern) Object.assign(intent, { type: intent.kind, damageRange: intent.dmg ?? [0, 0] });
+      const wait = { t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent, countdown: countdown() };
       if (region === 'twilight_bell') {
         const turn = host.battle.turn;
         const next = Math.min(...bellTurns.filter(n => n > turn));

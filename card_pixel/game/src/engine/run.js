@@ -4,11 +4,12 @@ import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
-import { canJoin, choicesFor, COST, drawFrom, join, RATES, rollBlessing, seeCharacters } from './awakenings.js';
-import { enemyStatsWithQuirk } from './bridge.js';
+import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
+import { canJoin, choicesFor, COST, drawFrom, join, RATES, release, rollBlessing, seeCharacters, validateReplacements } from './awakenings.js';
+import { enemyBeats, enemyStatsWithQuirk } from './bridge.js';
 import { doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { pick, shuffle } from './rng.js';
-import { copy, eventChoices, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
+import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
 import { strength } from './roster.js';
 
 export { COST, RATES };
@@ -54,6 +55,8 @@ export function createRun(options) {
     throw new RangeError('Locked nightmare: ' + dungeonId);
   }
   const intro = dungeon.layout === 'intro';
+  const tempoVersion = daily?.spec.ruleVersion ?? options.tempoVersion ?? TEMPO_VERSION;
+  if (tempoVersion !== 1 && tempoVersion !== TEMPO_VERSION) throw new RangeError('invalid_tempo_version');
   if (contract !== null && (typeof contract !== 'string' || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== 'nightmare'
     || !profileView.nightmareUnlocks?.includes(dungeonId))) {
     throw new RangeError('Unavailable contract: ' + String(contract));
@@ -76,6 +79,9 @@ export function createRun(options) {
     id: daily ? `rift/v${daily.spec.ruleVersion}/${daily.spec.dayKey}/${daily.attemptNo}`
       : [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join('/'),
     daily: copy(daily),
+    tempoVersion, openingLead: null,
+    firstMainAssist: tempoVersion === TEMPO_VERSION && !daily && !intro && difficulty === 'normal'
+      && (profileView.bossOrder ?? true),
     dungeonId, difficulty, floors: daily ? DAILY_FLOORS : dungeon.floors, seed: seed >>> 0, rng, pool, plain,
     phase: 'start', floor: 0, doors: [], room: null, pending: null,
     lead, companions, preferredCompanion: profileView.preferredCompanion || null,
@@ -111,7 +117,7 @@ function advance(run) {
   run.floor++;
   run.room = null;
   run.phase = 'map';
-  if (run.daily) run.doors = dailyDoors(run.daily.spec, run.floor, roster);
+  if (run.daily) run.doors = dailyDoors(run.daily.spec, run.floor, roster).map(door => ({ ...door, tempo: null }));
   else {
     run.doors = dungeon.layout === 'intro' && run.floor === run.floors
       ? [introFinaleDoor(run, roster, dungeon)]
@@ -130,10 +136,12 @@ function introFinaleDoor(run, roster, dungeon) {
   const tier = dungeon.tiers[run.floor - 1];
   const enemies = [first, second].map(id => id ? roster.shadowOf(id, tier) : roster.wildOf(dungeon.wild[0], tier));
   const template = LAYOUTS.intro[run.floor - 1][0];
-  return {
+  const door = {
     ...template, index: 0, name: ROOM_NAMES[template.type], bg: dungeon.background,
     region: null, enemies, quirk: null, start: null, relic: null
   };
+  door.tempo = applyDoorTempo(run, roster, door);
+  return door;
 }
 
 function prepareStartPick(run, remaining, near, priority) {
@@ -193,7 +201,9 @@ export function chooseDoor(run, index) {
   if (run.room.regionChoice) run.region = copy(run.room.regionChoice);
   if (run.room.enemies.length) run.room.status = 'order';
   if (run.room.type === 'awakening') {
-    prepareStartPick(run, START.picks, null, [run.profileShard, ...run.introCandidates].filter(Boolean));
+    const openingLead = usesTempo(run) && canJoin(run, run.openingLead) ? run.openingLead : null;
+    if (openingLead) join(run, openingLead);
+    prepareStartPick(run, openingLead ? 1 : START.picks, openingLead, [run.profileShard, ...run.introCandidates].filter(Boolean));
   }
   if (run.room.type === 'altar') run.pending = { kind: 'altar', rolls: 0, roll: null };
   if (run.room.type === 'event') run.pending = { kind: 'event', choices: eventChoices(run, core, roster) };
@@ -261,13 +271,42 @@ export function doorEnemies(run, index) {
   });
 }
 
+export function getTempoView(run, doorIndex) {
+  const door = run.doors[doorIndex];
+  const { core } = dependencies.get(run);
+  const suggested = door?.type === 'boss' && run.guide?.bossOrder ? suggestOrder(run) : null;
+  return {
+    party: door?.type === 'borrowed' ? INTRO.party.slice() : defaultParty(run),
+    suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
+    enemies: doorEnemies(run, doorIndex).map(enemy => ({
+      id: enemy.id, name: enemy.name, maxHp: enemy.maxHp, element: enemy.element,
+      beats: enemyBeats(core, enemy, door.tempo?.pattern, door.intent)
+    })),
+    pattern: door?.tempo?.pattern ?? null,
+    blessing: copy(door?.tempo?.blessing ?? null),
+    startMp: door?.tempo?.startMp ?? null
+  };
+}
+
+function battleBlessings(run, door) {
+  const blessings = { ...run.blessings };
+  const blessing = door.tempo?.blessing;
+  if (blessing) {
+    // The card core stores blessings as a bonus over base stats.
+    const bonus = Number((blessing.multiplier - 1).toFixed(2));
+    blessings[blessing.id] = Math.max(blessings[blessing.id] ?? 0, bonus);
+  }
+  return Object.entries(blessings).map(([id, multiplier]) => ({ id, multiplier }));
+}
+
 export function battleOptions(run) {
   if (!battleRoom(run)) return null;
   const room = run.room;
   return copy({
     party: room.party, enemies: room.enemies, quirk: room.quirk || null,
     seed: room.type === 'borrowed' ? INTRO.seed : (run.seed + run.floor * 1013 + run.stats.battles * 7) >>> 0,
-    heirlooms: run.heirlooms, blessings: Object.entries(run.blessings).map(([id, multiplier]) => ({ id, multiplier })),
+    heirlooms: run.heirlooms, blessings: battleBlessings(run, room),
+    ...(room.tempo && { tempo: room.tempo, openingIntent: room.intent }),
     artifacts: battleArtifacts(run), region: room.region, start: battleStart(run, room), bet: run.nextBattle?.bet || null
   });
 }
@@ -292,6 +331,14 @@ function setGateReward(run, room, downs, betRelic) {
     relic: run.relics.includes(room.relic) || room.relic === betRelic ? null : room.relic
   };
   run.reserved = null;
+}
+
+function setReinforcement(run, roster) {
+  if (!usesTempo(run) || DUNGEONS[run.dungeonId].layout === 'intro' || !REINFORCE_FLOORS.includes(run.floor)) return;
+  const candidates = choicesFor({ ...run, rng: floorRng(run, TEMPO_SEEDS.reinforcement) }, roster, REINFORCE_CHOICES);
+  if (!candidates.length) return;
+  seeCharacters(run, candidates);
+  run.pending = { kind: 'reinforcement', key: `${run.id}/${run.floor}`, candidates, limit: ROSTER_LIMIT };
 }
 
 function meetsContract(run, summary, survivors) {
@@ -404,10 +451,15 @@ export function settleBattle(run, input) {
       if (betWon) crystals += next.reward.crystals || 0;
       run.crystals += crystals;
       if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
+      if (!final && !wiped) setReinforcement(run, roster);
     }
     if (room.type === 'elite' && room.relic && !wiped) relic = grantRelic(run, room.relic);
     if (betRelic && !wiped) relic = grantRelic(run, betRelic);
     if (room.type === 'borrowed' && !wiped) {
+      if (usesTempo(run)) {
+        const first = room.party[0];
+        run.openingLead = survivors.includes(first) ? first : heirloomsGained.find(entry => entry.from === first)?.to ?? survivors[0];
+      }
       run.introCandidates = survivors;
       run.introHeirlooms = run.heirlooms;
       run.heirlooms = {};
@@ -429,6 +481,9 @@ export function chooseGateReward(run, choice) {
   const pending = run.pending;
   if (run.phase !== 'reward' || pending?.kind !== 'gate') return invalid('no_gate_reward');
   if (choice?.kind === 'join' && pending.candidates.includes(choice.id) && canJoin(run, choice.id)) {
+    const error = validateReplacements(run, 1, choice.replaceId == null ? [] : [choice.replaceId]);
+    if (error) return invalid(error);
+    if (choice.replaceId != null) release(run, choice.replaceId);
     join(run, choice.id);
     run.pending = null;
     return { ok: true, joined: choice.id };
@@ -440,11 +495,30 @@ export function chooseGateReward(run, choice) {
   return invalid('invalid_gate_reward');
 }
 
-export function springDraw(run) {
+export function resolveReinforcement(run, { key, id, replaceId = null } = {}) {
+  const pending = run.pending;
+  if (run.phase !== 'reward' || pending?.kind !== 'reinforcement' || pending.key !== key) return invalid('invalid_reinforcement_key');
+  if (id === null) {
+    if (replaceId !== null) return invalid('invalid_replacement');
+  } else {
+    if (!pending.candidates.includes(id) || !canJoin(run, id)) return invalid('invalid_candidate');
+    const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
+    if (error) return invalid(error);
+    if (replaceId !== null) release(run, replaceId);
+    join(run, id);
+  }
+  run.pending = null;
+  return { ok: true, joined: id, released: replaceId };
+}
+
+export function springDraw(run, replaceId = null) {
   if (!springRoom(run) || run.pending) return invalid('no_waking');
   if (run.crystals < COST.draw) return invalid('insufficient_crystals');
+  const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
+  if (error) return invalid(error);
   const id = drawFrom(run, dependencies.get(run).roster, RATES.draw);
   if (!id) return invalid('empty_pool');
+  if (replaceId !== null) release(run, replaceId);
   join(run, id);
   run.crystals -= COST.draw;
   return { ok: true, id, cost: COST.draw };
@@ -465,9 +539,16 @@ export function springPick(run) {
   return { ok: true, candidates: candidates.slice(), cost: COST.pick };
 }
 
-export function springTake(run, id) {
+export function springTake(run, id, replaceId = null) {
   if (!springRoom(run) || run.pending?.kind !== 'spring') return invalid('no_spring_pick');
+  if (usesTempo(run) && id === null && replaceId === null) {
+    run.pending = null;
+    return { ok: true, id };
+  }
   if (!run.pending.candidates.includes(id) || !canJoin(run, id)) return invalid('invalid_candidate');
+  const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
+  if (error) return invalid(error);
+  if (replaceId !== null) release(run, replaceId);
   join(run, id);
   run.pending = null;
   return { ok: true, id };
@@ -492,10 +573,10 @@ export function altarKeep(run) {
   return { ok: true, ...roll };
 }
 
-export function chooseEvent(run, choiceId, targetId) {
+export function chooseEvent(run, choiceId, targetId, replaceIds) {
   if (run.phase !== 'room' || run.pending?.kind !== 'event') return invalid('no_event');
   const { core, roster } = dependencies.get(run);
-  return resolveEvent(run, core, roster, choiceId, targetId);
+  return resolveEvent(run, core, roster, choiceId, targetId, replaceIds);
 }
 
 export function takeTreasure(run) {
@@ -529,7 +610,7 @@ export function leaveRoom(run) {
     run.pending = run.pending.after;
     if (run.pending) return { ok: true, skipped, pending: copy(run.pending), left: false };
   }
-  if (['start', 'spring'].includes(run.pending?.kind) || (run.pending?.kind === 'altar' && run.pending.roll)) {
+  if (['start', 'spring', 'reinforcement'].includes(run.pending?.kind) || (run.pending?.kind === 'altar' && run.pending.roll)) {
     return invalid('choice_required');
   }
   run.pending = null;

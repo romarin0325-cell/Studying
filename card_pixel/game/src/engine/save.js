@@ -37,6 +37,11 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
     || !Array.isArray(run.pool) || !Array.isArray(run.bench) || !Array.isArray(run.doors)) return null;
   run.contract ??= null;
   run.daily ??= null;
+  run.tempoVersion ??= run.daily?.spec.ruleVersion ?? 1;
+  run.firstMainAssist ??= false;
+  run.openingLead ??= null;
+  for (const door of run.doors) door.tempo ??= null;
+  if (run.room) run.room.tempo ??= null;
   run.lastParty ??= null;
   run.guide ??= { bossOrder: false };
   run.joinOrder ??= run.bench.slice();

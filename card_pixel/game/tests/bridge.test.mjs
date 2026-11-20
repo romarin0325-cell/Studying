@@ -35,6 +35,57 @@ const quietEnemy = (hp = 99999, overrides = {}) => dummy({
   stats: { hp, atk: 0, matk: 0, def: 60, mdef: 60, ...overrides }, skills: []
 });
 
+test('tempo three-beat countdown and resolved hits restart on the second shadow', () => {
+  const first = dummy();
+  const second = dummy({ name: '둘째', skills: [{ name: '서리 파동', type: 'mag', val: 2, rate: 0.3 }] });
+  const b = battle({ enemies: [first, second], tempo: { pattern: 'threeBeat', startMp: 65 }, quirk: 'surge' });
+  const start = last(b.start(), 'await');
+  assert.equal(start.s.allies[0].mp, 200);
+  assert.deepEqual(start.countdown, { name: '강타', inTurns: 1, charge: false });
+  const checkBeat = (wait, name, type, power) => {
+    assert.equal(wait.intent.name, name);
+    assert.equal(wait.intent.type, type);
+    const events = b.act(0);
+    const action = events.find(event => event.t === 'act' && event.who.side === 'enemy');
+    assert.deepEqual([action.skill.name, action.skill.type, action.skill.val], [name, type, power]);
+    const hit = events.find(event => event.t === 'hp' && event.who.side === 'ally');
+    assert.ok(hit);
+    assert.deepEqual(wait.intent.damageRange, [hit.amount, hit.amount]);
+    return last(events, 'await');
+  };
+  const strong = checkBeat(start, '일반 공격', 'phy', 1);
+  assert.deepEqual(strong.countdown, { name: '강타', inTurns: 0, charge: false });
+  const weak = checkBeat(strong, '강타', 'phy', 2.3);
+  checkBeat(weak, '약공', 'phy', 0.55);
+  b.host.battle.enemy.hp = 1;
+  const entry = last(b.act(0), 'await');
+  assert.equal(entry.s.enemy.idx, 1);
+  assert.deepEqual(entry.countdown, { name: '서리 파동', inTurns: 1, charge: false });
+  const nextStrong = checkBeat(entry, '일반 공격', 'phy', 1);
+  assert.deepEqual(nextStrong.countdown, { name: '서리 파동', inTurns: 0, charge: false });
+  checkBeat(nextStrong, '서리 파동', 'mag', 2.3);
+});
+
+test('tempo tide has a fixed x2.5 spell and a fourth-beat opening even on a strong magic shadow', () => {
+  const enemy = dummy({ skills: [{ name: '마법', type: 'mag', val: 3, rate: 0.3 }] });
+  const b = battle({ enemies: [enemy], tempo: { pattern: 'tide', startMp: 65 }, region: { id: 'tide_cycle' } });
+  const start = last(b.start(), 'await');
+  assert.equal(start.intent.kind, 'phy');
+  assert.equal(start.countdown.inTurns, 2);
+  const ripple = b.act(0);
+  assert.equal(last(ripple, 'await').intent.name, '잔물결');
+  const incoming = last(b.act(0), 'await');
+  assert.equal(incoming.intent.type, 'mag');
+  assert.deepEqual(incoming.countdown, { name: incoming.intent.name, inTurns: 0, charge: false });
+  const events = b.act(0);
+  const action = events.find(event => event.t === 'act' && event.who.side === 'enemy');
+  assert.deepEqual([action.skill.name, action.skill.type, action.skill.val], [incoming.intent.name, 'mag', 2.5]);
+  const rest = last(events, 'await');
+  assert.equal(rest.intent.type, 'rest');
+  assert.equal(rest.intent.vulnerable, 1.5);
+  assert.equal(last(b.act(0), 'await').intent.kind, 'phy');
+});
+
 test('review 1: Red Moon wins when the death counter defeats the last enemy', () => {
   const b = battle({ party: ['red_moon'], seed: 0, enemies: [quietEnemy(500, { atk: 5000 })] });
   b.start();

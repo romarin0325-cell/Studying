@@ -11,6 +11,7 @@ import { LAYOUTS } from '../src/content/layouts.js';
 import { RELICS } from '../src/content/relics.js';
 import * as Bridge from '../src/engine/bridge.js';
 import * as Meta from '../src/engine/meta.js';
+import { openingModel } from '../src/engine/opening.js';
 import { create as makeRoster, GRADE_BUCKETS, gradeOf } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
@@ -25,7 +26,9 @@ const core = sandbox.RelayCore;
 const manifest = JSON.parse(fs.readFileSync(new URL('../assets/sprites.json', import.meta.url), 'utf8'));
 const sp = Object.fromEntries(Object.entries(manifest).map(([name, sprite]) => [name.replace(/\.png$/, ''), sprite]));
 const roster = makeRoster(core, { sp });
-const make = (opts = {}) => Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7, ...opts });
+// Retain the original seeded fixtures on v1. The tempo tests below use the new-run default.
+const make = (opts = {}) => Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7, tempoVersion: 1, ...opts });
+const makeTempo = (opts = {}) => Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7, ...opts });
 
 function ok(result) {
   assert.equal(result.ok, true, result.reason);
@@ -54,6 +57,7 @@ function enter(run, index = 0, party) {
 }
 
 function advance(run) {
+  if (run.pending?.kind === 'reinforcement') ok(Run.resolveReinforcement(run, { key: run.pending.key, id: null }));
   ok(Run.leaveRoom(run));
   if (run.phase !== 'done') ok(Run.nextFloor(run));
 }
@@ -751,7 +755,7 @@ test('profile migration and injected session storage keep profile and run togeth
 });
 
 test('intro: the borrowed-battle survivor not taken in the first pick is offered again in the second', () => {
-  const run = Run.createRun({ core, roster, dungeonId: 'dawn_forest', seed: 7 });
+  const run = make({ dungeonId: 'dawn_forest', seed: 7 });
   enter(run, 0, INTRO.party);
   // Ash falls, both rabbits survive (the stay-and-fight path)
   settle(run, { survivors: [false, true, true] });
@@ -1010,4 +1014,229 @@ test('the boss order guide stays on after the intro and turns off for new runs a
   const next = make({ profileView: Meta.startView(firstWin.profile, ember) });
   assert.deepEqual(next.guide, { bossOrder: false });
   assert.deepEqual(run.guide, { bossOrder: true });
+});
+
+test('tempo 2 preserves both fixed openings and makes their outcomes the first awakening pick', () => {
+  for (const rescue of [false, true]) {
+    const run = makeTempo({ dungeonId: 'dawn_forest' });
+    assert.equal(run.tempoVersion, 2);
+    enter(run);
+    const bridge = Bridge.create(core, Run.battleOptions(run));
+    bridge.start();
+    const before = bridge.state();
+    const model = openingModel(bridge);
+    assert.deepEqual(model, openingModel(bridge));
+    assert.deepEqual(bridge.state(), before);
+    assert.equal(before.allies[0].mp, 0);
+    assert.deepEqual(model.stand, { optionIndex: 0, actorId: 'ash', targetId: 'wild_golem', damageRange: [80, 80] });
+    assert.deepEqual(model.rescue, {
+      actorId: 'ash', incomingId: 'snow_rabbit', damageRange: [141, 141], incomingHpAfter: 149
+    });
+    if (rescue) {
+      bridge.retreat();
+      assert.equal(bridge.state().allies[1].hp, model.rescue.incomingHpAfter);
+    } else bridge.act(model.stand.optionIndex);
+    const skill = bridge.options().find(option => rescue ? option.name === '실버스톰' : option.heirloom);
+    assert.equal(skill.cost, rescue ? 20 : 0);
+    bridge.act(skill.index);
+    assert.equal(bridge.summary().turns, 2);
+    assert.equal(bridge.outcome, 'win');
+    const result = ok(Run.settleBattle(run, bridge));
+    assert.equal(result.survivors.length, rescue ? 3 : 2);
+    assert.equal(run.openingLead, rescue ? 'ash' : 'snow_rabbit');
+    advance(run);
+    enter(run);
+    const saved = roundTrip(run);
+    assert.deepEqual(saved.bench, [run.openingLead]);
+    assert.equal(saved.pending.remaining, 1);
+    const companion = saved.pending.candidates[0];
+    const pick = ok(Run.chooseStartPick(saved, companion));
+    assert.equal(pick.awakened.length, 3);
+    assert.deepEqual(saved.bench, [run.openingLead, companion, ...pick.awakened]);
+    assert.equal(saved.crystals, 1);
+    assert.equal(saved.heirlooms.snow_rabbit?.from, rescue ? undefined : 'ash');
+    assert.equal(Run.chooseStartPick(saved, companion).ok, false);
+    roundTrip(saved);
+  }
+});
+
+test('tempo 2 Dawn doors forecast the exact first physical or magic attack', () => {
+  const run = reach(makeTempo({ dungeonId: 'dawn_forest' }), 3);
+  for (const [index, type] of ['phy', 'mag'].entries()) {
+    const saved = roundTrip(run);
+    const preview = Run.getTempoView(saved, index);
+    assert.equal(preview.pattern, 'introFixed');
+    assert.equal(preview.enemies[0].beats[0].type, type);
+    enter(saved, index);
+    const bridge = Bridge.create(core, Run.battleOptions(saved));
+    const wait = bridge.start().find(event => event.t === 'await');
+    const swing = bridge.act(0).find(event => event.t === 'act' && event.who.side === 'enemy');
+    assert.equal(wait.intent.name, preview.enemies[0].beats[0].name);
+    assert.equal(wait.intent.type, type);
+    assert.equal(swing.skill.type, type);
+    assert.equal(swing.skill.name, wait.intent.name);
+  }
+});
+
+test('tempo views are read-only and blessing is stable, per-battle and merged with altar', () => {
+  const run = reach(makeTempo(), 2);
+  const before = Save.serializeRun(run);
+  const preview = Run.getTempoView(run, 1);
+  assert.deepEqual(Run.getTempoView(run, 1), preview);
+  assert.deepEqual(Run.getTempoView(roundTrip(run), 1), preview);
+  assert.deepEqual(Run.getTempoView(run, 0).blessing, preview.blessing);
+  assert.equal(Save.serializeRun(run), before);
+  const { id } = preview.blessing;
+  run.blessings[id] = 0.1;
+  enter(run, 1, [id]);
+  let options = Run.battleOptions(run);
+  assert.ok(Math.abs(options.blessings.find(entry => entry.id === id).multiplier - (preview.blessing.multiplier - 1)) < 1e-10);
+  const bridge = Bridge.create(core, options);
+  const wait = bridge.start().find(event => event.t === 'await');
+  assert.equal(wait.s.allies[0].mp, preview.startMp);
+  assert.equal(wait.s.enemy.maxHp, preview.enemies[0].maxHp);
+  run.blessings[id] = 1;
+  options = Run.battleOptions(run);
+  assert.deepEqual(options.blessings.filter(entry => entry.id === id), [{ id, multiplier: 1 }]);
+  settle(run);
+  assert.equal(run.blessings[id], 1);
+});
+
+test('v1 saves without tempo fields restore the same doors, formation, MP and reward rules', () => {
+  const control = reach(make(), 2);
+  const old = JSON.parse(Save.serializeRun(control));
+  delete old.run.tempoVersion;
+  delete old.run.firstMainAssist;
+  delete old.run.openingLead;
+  for (const door of old.run.doors) delete door.tempo;
+  const restored = Save.restoreRun(old, { core, roster });
+  assert.deepEqual(restored, control);
+  for (const run of [control, restored]) {
+    enter(run, 0);
+    const opts = Run.battleOptions(run);
+    assert.equal(opts.tempo, undefined);
+    const begin = Bridge.create(core, opts).start().find(event => event.t === 'begin');
+    assert.equal(begin.s.allies[0].mp, 100);
+    assert.equal(settle(run).pending, null);
+    advance(run);
+  }
+  assert.deepEqual(restored, control);
+});
+
+test('tempo 2 reinforcement joins, passes and replaces atomically across save and repeat input', () => {
+  let run = reach(makeTempo(), 1);
+  enter(run);
+  const { pending } = settle(run);
+  assert.equal(pending.kind, 'reinforcement');
+  assert.equal(pending.limit, 6);
+  assert.equal(pending.candidates.length, 3);
+  assert.ok(!pending.candidates.includes(run.reserved));
+  assert.equal(Run.leaveRoom(run).reason, 'choice_required');
+  const { key, candidates: [id] } = pending;
+  run = roundTrip(run);
+  assert.deepEqual(ok(Run.resolveReinforcement(run, { key, id })), { ok: true, joined: id, released: null });
+  assert.equal(run.bench.length, 6);
+  assert.equal(Run.resolveReinforcement(run, { key, id }).ok, false);
+  advance(run);
+  enter(run);
+  const offer = settle(run).pending;
+  const pick = { key: offer.key, id: offer.candidates[0] };
+  const snapshot = Save.serializeRun(run);
+  assert.equal(Run.resolveReinforcement(run, pick).reason, 'roster_full');
+  assert.equal(Run.resolveReinforcement(run, { ...pick, replaceId: pick.id }).reason, 'invalid_replacement');
+  assert.equal(Save.serializeRun(run), snapshot);
+  const passed = roundTrip(run);
+  assert.deepEqual(ok(Run.resolveReinforcement(passed, { key: pick.key, id: null })), { ok: true, joined: null, released: null });
+  assert.deepEqual(passed.bench, run.bench);
+  const replaceId = run.bench[0];
+  const crystals = run.crystals;
+  assert.deepEqual(ok(Run.resolveReinforcement(run, { ...pick, replaceId })), { ok: true, joined: pick.id, released: replaceId });
+  assert.equal(run.bench.length, 6);
+  assert.ok(run.released.includes(replaceId));
+  assert.ok(!run.fallen.includes(replaceId));
+  assert.equal(run.crystals, crystals);
+});
+
+test('reinforcement skips exhausted pools and waits behind an elite relic replacement', () => {
+  const exhausted = reach(makeTempo(), 1);
+  exhausted.pool = exhausted.bench.slice();
+  enter(exhausted);
+  assert.equal(settle(exhausted).pending, null);
+  const run = reach(makeTempo(), 6);
+  const { relic } = run.doors[1];
+  run.relics = Object.keys(RELICS).filter(id => id !== relic).slice(0, 4);
+  enter(run, 1);
+  const pending = settle(run).pending;
+  assert.equal(pending.kind, 'relic');
+  assert.equal(pending.after.kind, 'reinforcement');
+  assert.equal(Run.resolveReinforcement(run, { key: pending.after.key, id: null }).ok, false);
+  const saved = roundTrip(run);
+  assert.equal(ok(Run.equipRelic(saved, relic, pending.replace[0])).pending.kind, 'reinforcement');
+  assert.equal(Run.leaveRoom(saved).reason, 'choice_required');
+  ok(Run.resolveReinforcement(saved, { key: pending.after.key, id: null }));
+  advance(saved);
+  assert.equal(saved.floor, 7);
+});
+
+test('tempo 2 two-recruit event validates both releases and price before applying either join', () => {
+  const run = reach(makeTempo({ dungeonId: 'creation_tower' }), 3);
+  const event = EVENTS.find(entry => entry.id === 'rabbit_tracks');
+  const rabbits = event.choices[1].ops[0].ids;
+  run.bench = run.pool.filter(id => !rabbits.includes(id) && id !== run.reserved).slice(0, 6);
+  run.joinOrder = run.bench.slice();
+  if (rabbits.includes(run.reserved)) run.reserved = null;
+  run.doors[2].event = event;
+  enter(run, 2);
+  const [a, b] = run.bench;
+  const before = Save.serializeRun(run);
+  assert.equal(Run.chooseEvent(run, 'both', null, [a]).reason, 'roster_full');
+  assert.equal(Run.chooseEvent(run, 'both', null, [a, a]).reason, 'invalid_replacement');
+  assert.equal(Save.serializeRun(run), before);
+  const result = ok(Run.chooseEvent(run, 'both', null, [a, b]));
+  assert.equal(result.crystals, -1);
+  assert.equal(run.bench.length, 6);
+  assert.deepEqual(run.bench.slice(-2), rabbits);
+  assert.deepEqual(run.released.slice(-2), [a, b]);
+  assert.equal(Run.chooseEvent(run, 'both', null, [a, b]).ok, false);
+  roundTrip(run);
+});
+
+test('tempo 2 spring draws and gate claims share the roster limit without automatic release', () => {
+  const run = reach(makeTempo(), 1);
+  enter(run);
+  const { key, candidates: [id] } = settle(run).pending;
+  ok(Run.resolveReinforcement(run, { key, id }));
+  advance(run);
+  reach(run, 3);
+  enter(run);
+  const before = Save.serializeRun(run);
+  assert.equal(Run.springDraw(run).reason, 'roster_full');
+  assert.equal(Save.serializeRun(run), before);
+  const replace = run.bench[0];
+  const crystals = run.crystals;
+  assert.ok(ok(Run.springDraw(run, replace)).id);
+  assert.equal(run.crystals, crystals - Run.COST.draw);
+  assert.equal(run.bench.length, 6);
+  assert.deepEqual(run.released, [replace]);
+  advance(run);
+  enter(run);
+  const { candidates: [captive] } = settle(run).pending;
+  const pick = { kind: 'join', id: captive };
+  assert.equal(Run.chooseGateReward(run, pick).reason, 'roster_full');
+  assert.deepEqual(run.released, [replace]);
+  ok(Run.chooseGateReward(run, { ...pick, replaceId: run.bench[0] }));
+  assert.equal(run.bench.length, 6);
+  assert.ok(run.bench.includes(captive));
+});
+
+test('main assist follows the first-main guide while nightmare keeps its separate floor scale', () => {
+  const assisted = reach(makeTempo(), 4);
+  const regular = reach(makeTempo({ profileView: { bossOrder: false } }), 4);
+  const nightmare = reach(makeTempo({ difficulty: 'nightmare' }), 4);
+  assert.equal(assisted.firstMainAssist, true);
+  assert.equal(roundTrip(assisted).firstMainAssist, true);
+  assert.equal(regular.firstMainAssist, false);
+  assert.equal(nightmare.firstMainAssist, false);
+  assert.deepEqual(assisted.doors[0].enemies.map(enemy => enemy.id), regular.doors[0].enemies.map(enemy => enemy.id));
+  assert.ok(assisted.doors[0].enemies[0].stats.atk < regular.doors[0].enemies[0].stats.atk);
 });

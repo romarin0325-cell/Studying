@@ -82,6 +82,7 @@ function settle(run, changes = {}) {
 }
 
 function advance(run) {
+  if (run.pending?.kind === 'reinforcement') ok(Run.resolveReinforcement(run, { key: run.pending.key, id: null }));
   ok(Run.leaveRoom(run));
   ok(Run.nextFloor(run));
 }
@@ -132,6 +133,8 @@ test('the first rift is fixed by date alone and opens at notebook chapter four',
   reason(start(store, FIRST, 'practice'), 'official_required');
   const run = ok(start(store, FIRST)).run;
   assert.deepEqual(run.daily, { spec, kind: 'official', attemptNo: 1 });
+  assert.equal(run.tempoVersion, run.daily.spec.ruleVersion);
+  assert.equal(Run.getTempoView(run, 0).pattern, null);
   assert.equal(run.id, `rift/v1/${FIRST}/1`);
   assert.deepEqual([run.floor, run.floors, run.phase, run.crystals, run.contract], [1, 7, 'map', 0, null]);
   for (const ids of [run.pool, run.bench, run.joinOrder]) {

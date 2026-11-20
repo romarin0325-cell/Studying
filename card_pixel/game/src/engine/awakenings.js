@@ -1,5 +1,6 @@
 import { nextFloat, pick, shuffle } from './rng.js';
 import { gradeOf } from './roster.js';
+import { ROSTER_LIMIT, usesTempo } from '../content/tempo.js';
 
 export const RATES = {
   draw: { normal: 40, rare: 30, epic: 20, legend: 10 },
@@ -31,6 +32,23 @@ export function join(run, id) {
     run.heirlooms[id] = run.introHeirlooms[id];
     delete run.introHeirlooms[id];
   }
+}
+
+export function validateReplacements(run, incoming, ids) {
+  if (!Array.isArray(ids) || new Set(ids).size !== ids.length || ids.some(id => !run.bench.includes(id))) {
+    return 'invalid_replacement';
+  }
+  const required = usesTempo(run) ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
+  if (ids.length < required) return 'roster_full';
+  if (ids.length > required) return 'invalid_replacement';
+  return null;
+}
+
+export function release(run, id) {
+  run.released.push(id);
+  run.bench = run.bench.filter(other => other !== id);
+  delete run.blessings[id];
+  delete run.heirlooms[id];
 }
 
 export function drawFrom(run, roster, rates, exclude = []) {

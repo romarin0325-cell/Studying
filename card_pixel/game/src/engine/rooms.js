@@ -5,7 +5,11 @@ import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { QUIRKS } from '../content/quirks.js';
 import { RELICS } from '../content/relics.js';
-import { BLESS, canJoin, drawFrom, join, RATES, seeCharacters, seeRelic } from './awakenings.js';
+import {
+  BLESSING_MULTIPLIERS, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
+  REGION_MULTIPLIERS, ROOM_MULTIPLIERS, START_MP, TEMPO_SEEDS, usesTempo
+} from '../content/tempo.js';
+import { BLESS, canJoin, drawFrom, join, RATES, release, seeCharacters, seeRelic, validateReplacements } from './awakenings.js';
 import { heldHeirloomSkill } from './bridge.js';
 import { gradeOf } from './roster.js';
 import { nextFloat, pick, shuffle } from './rng.js';
@@ -107,6 +111,47 @@ function wildEnemies(run, roster, dungeon, template, tier, region, quirk) {
   return enemies;
 }
 
+export function floorRng(run, salt) {
+  return { state: (run.seed ^ Math.imul(run.floor, FLOOR_SEED_STEP) ^ salt) >>> 0 };
+}
+
+function battleBlessing(run, roster) {
+  const ids = run.bench.slice().sort();
+  const preferred = ids.filter(id => ['normal', 'rare'].includes(roster.card(id).grade));
+  const id = pick(floorRng(run, TEMPO_SEEDS.blessing), preferred.length ? preferred : ids);
+  return id ? { id, multiplier: BLESSING_MULTIPLIERS[roster.card(id).grade] } : null;
+}
+
+function battleScale(run, room) {
+  const key = room.risk && room.type === 'wild' ? 'risk' : room.type;
+  const assist = run.firstMainAssist && (FIRST_MAIN_ASSIST[run.dungeonId]?.[key] || FIRST_MAIN_ASSIST[key]);
+  const nightmare = run.difficulty === 'nightmare' && NIGHTMARE_MULTIPLIERS[run.dungeonId]?.[key];
+  return assist || nightmare || REGION_MULTIPLIERS[run.dungeonId]?.[key] || ROOM_MULTIPLIERS[key];
+}
+
+export function applyDoorTempo(run, roster, door) {
+  if (!usesTempo(run)) return null;
+  const intro = DUNGEONS[run.dungeonId].layout === 'intro';
+  const scale = intro ? INTRO_MULTIPLIERS[run.floor] : battleScale(run, door);
+  if (scale) {
+    const [hp, attack] = scale;
+    for (const { stats } of door.enemies) {
+      stats.hp = Math.round(stats.hp * hp);
+      stats.atk = Math.round(stats.atk * attack);
+      stats.matk = Math.round(stats.matk * attack);
+    }
+  }
+  let pattern = 'threeBeat';
+  if (door.type === 'boss') pattern = 'bossScript';
+  else if (door.type === 'borrowed' || door.intent) pattern = 'introFixed';
+  else if (door.region?.id === 'tide_cycle') pattern = 'tide';
+  return {
+    pattern,
+    blessing: intro ? null : battleBlessing(run, roster),
+    startMp: intro ? (door.type === 'borrowed' ? INTRO.start.allyStart[0].mp : null) : QUIRKS[door.quirk]?.ally?.mp ?? START_MP
+  };
+}
+
 function makeBattleDoor(run, roster, dungeon, template, index, region, battleCount) {
   const challenge = run.difficulty === 'nightmare' ? dungeon.nightmareRule : null;
   const elite = template.type === 'elite';
@@ -139,10 +184,12 @@ function makeBattleDoor(run, roster, dungeon, template, index, region, battleCou
   const hasSky = region?.id === 'starlit_sky';
   const filledSky = hasSky && !skyBet && (battleCount > 1 ? index === 1 : nextFloat(run.rng) < 0.5);
   const start = template.type === 'borrowed' ? INTRO.start : hasSky ? { field: filledSky ? SKY : [] } : null;
-  return {
+  const door = {
     ...template, index, name: ROOM_NAMES[template.type], bg: dungeon.background, region: copy(region),
     enemies, quirk: affixOnly ? null : quirk, start: copy(start), relic: elite || template.type === 'gate' ? relicOffer(run, roster) : null
   };
+  door.tempo = applyDoorTempo(run, roster, door);
+  return door;
 }
 
 function eventCandidates(run) {
@@ -167,7 +214,7 @@ export function makeDoors(run, roster) {
     const relic = template.type === 'treasure' || merchant ? relicOffer(run, roster) : null;
     return {
       ...template, index, name: event?.name || ROOM_NAMES[template.type], bg: dungeon.background,
-      enemies: [], region: copy(region), regionChoice: copy(regionChoice || null),
+      enemies: [], tempo: null, region: copy(region), regionChoice: copy(regionChoice || null),
       event: event ? copy(event) : null, relic
     };
   });
@@ -212,15 +259,23 @@ export function eventChoices(run, core, roster) {
   });
 }
 
-export function resolveEvent(run, core, roster, choiceId, targetId) {
+export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds = []) {
   const choice = eventChoices(run, core, roster).find(entry => entry.id === choiceId);
   if (!choice?.enabled || (choice.targets ? !choice.targets.includes(targetId) : targetId != null)) return invalid('invalid_event_choice');
+  const recruits = choice.ops.filter(op => op.type === 'join');
+  const recruitCount = recruits.reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+  const error = validateReplacements(run, recruitCount, replaceIds);
+  if (error) return invalid(error);
   const result = { ok: true, choiceId, effects: [] };
   const before = run.crystals;
   const paidRelic = choice.ops.some(op => op.type === 'relic' && !op.temporary);
   if (!paidRelic) run.crystals -= choice.cost || 0;
   run.pending = null;
   run.room.status = 'resolved';
+  for (const id of replaceIds) {
+    release(run, id);
+    result.effects.push({ type: 'release', id });
+  }
   for (const op of choice.ops) {
     switch (op.type) {
       case 'crystals':
@@ -233,10 +288,7 @@ export function resolveEvent(run, core, roster, choiceId, targetId) {
         break;
       }
       case 'release':
-        run.released.push(targetId);
-        run.bench = run.bench.filter(id => id !== targetId);
-        delete run.blessings[targetId];
-        delete run.heirlooms[targetId];
+        release(run, targetId);
         run.crystals += SALE_PRICE[gradeOf(roster.card(targetId).grade)];
         result.effects.push({ type: 'release', id: targetId });
         break;
