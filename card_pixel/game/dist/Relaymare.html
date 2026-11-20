@@ -107,12 +107,13 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .btn.big b { font: 15px var(--px14); font-weight: normal; color: var(--aqua); } .btn.big small { font: 10px/13px var(--px9); color: var(--dim); }
 
 /* ---------- battle (portrait phone: scene, relay strip, message, commands in thumb reach) ---------- */
-#bar { display: flex; align-items: center; gap: 5px; height: calc(48px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 8px 0; background: #0f0b20; border-bottom: 2px solid var(--line); flex: none; }
+#bar { display: flex; align-items: center; gap: 5px; height: calc(50px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 8px 0; background: #0f0b20; border-bottom: 2px solid var(--line); flex: none; }
 #bar #room { color: var(--gold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #bar #turn { color: var(--dim); flex: none; } #bar .sp { flex: 1; }
 #bar #gems { color: var(--aqua); margin-right: 4px; }
 #bar button { background: var(--win2); border: 2px solid var(--line); padding: 0 6px; min-width: 44px; height: 30px; font-size: 12px; }
 #bar button.on { border-color: var(--aqua); color: var(--aqua); }
 #bar #b-field { white-space: nowrap; color: var(--gold); }
+#bar #b-log { min-width: 48px; height: 48px; flex: none; }
 
 #stage { position: relative; flex: none; overflow: hidden; background: #140d1f; border-bottom: 2px solid var(--line); }
 #cv { display: block; }
@@ -236,6 +237,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .act .r2 strong { font: 24px/26px var(--px); font-weight: normal; color: #fff; }
 .act .r2 strong.range { font-size: 18px; }
 .act .r2 strong.txt { font: 15px/26px var(--px14); color: var(--sup); } .act .r2 strong.no { color: var(--dim); }
+.act .r2 strong.delayed-forecast { white-space: normal; font: 13px/17px var(--px); align-self: center; }
 .act .r2 strong.field-effect { font: 11px/13px var(--px9); white-space: normal; align-self: center; color: var(--sup); }
 .act .r2 small { font: 10px var(--px9); color: var(--gold); }
 .act .r2 u { text-decoration: none; font: 10px/15px var(--px9); background: var(--coral); color: #1b0b10; padding: 0 4px; margin-left: auto; animation: blink .5s steps(2) infinite; }
@@ -254,6 +256,20 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #b-heir u { position: absolute; right: 6px; top: 6px; text-decoration: none; font: 10px/15px var(--px9); background: var(--coral); color: #1b0b10; padding: 0 4px; animation: blink .5s steps(2) infinite; }
 #b-heir:active { transform: translateY(2px); } #b-heir[disabled] { opacity: .45; pointer-events: none; }
 #b-retreat.armed { border-color: var(--gold); color: var(--gold); } #b-retreat[disabled] { opacity: .45; pointer-events: none; }
+#row2 { min-height: 48px; }
+#row2:has(.armed) { height: auto; min-height: 80px; }
+.retreat-face { display: flex; align-items: center; gap: 6px; }
+.retreat-face .run-face { width: 32px; height: 24px; }
+
+#opening-face { display: none; }
+.opening-decision #opening-face { display: flex; min-height: 48px; align-items: center; justify-content: space-between; padding: 3px 10px; color: var(--coral); }
+.opening-decision #row2, .opening-decision #party, .opening-decision #msg { display: none; }
+.opening-decision #acts { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; max-height: 174px; flex: none; }
+.opening-choice { display: grid; align-content: center; gap: 3px; padding: 8px 10px; min-height: 62px; font-size: 15px; }
+.opening-choice small { font: 12px/16px var(--px); color: var(--ink); }
+.opening-choice.rescue { background: #183d3e; border-color: var(--aqua); color: var(--aqua); }
+.opening-choice.stand { background: #3d242c; border-color: var(--coral); color: #ffc6a7; }
+.opening-result { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding: 4px 8px; color: var(--gold); }
 
 /* tap to inspect */
 #foebar, #sky, #pa-chips { pointer-events: auto; cursor: pointer; }
@@ -271,8 +287,41 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #result .heirline { margin: 6px 0; padding: 6px 8px; border: 2px solid var(--gold); background: #2a1f06; }
 #result .heirline b { font-weight: normal; background: var(--gold); color: #2a1c00; padding: 0 4px; margin-right: 6px; }
 #result .heirline small { display: block; font: 10px var(--px9); color: var(--dim); margin-top: 2px; }
-#result .btn { margin-top: 12px; }
+#result .in { max-height: 90%; overflow-y: auto; }
+.result-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; margin-top: 12px; }
+.result-actions .btn { min-height: 48px; }
 #result .in, #result .btn { box-shadow: 0 2px 0 #08050f; }
+
+.num.finish-damage { z-index: 2; color: var(--gold); font: 32px var(--px14); animation: finish-grow .1s steps(4) both; }
+@keyframes finish-grow {
+  from { transform: translate(-50%, -50%) scale(.65); }
+  to { transform: translate(-50%, -50%) scale(1.3); }
+}
+.finish-cast { position: absolute; left: 8px; right: 8px; bottom: 8px; padding: 5px 8px; color: var(--gold); }
+.finish-portrait, .finish-survivors { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+.finish-portrait > div { display: grid; gap: 2px; align-content: start; }
+.finish-portrait small { color: var(--gold); }
+.finish-portrait .run-face { width: 40px; height: 30px; }
+#result .finish-portrait { margin: 8px 0; }
+
+#sheet.battle-log-sheet { z-index: 10; }
+#sheet.battle-log-sheet .in { max-height: 72%; }
+.battle-log-sheet .shbody { position: relative; }
+.battle-log-turn { margin-bottom: 8px; padding: 4px 8px; background: var(--win2); border-left: 2px solid var(--line2); }
+.battle-log-turn h4 { font: 14px var(--px); color: var(--gold); }
+.battle-log-row { padding: 5px 0; border-top: 1px solid var(--line); }
+.battle-log-row p { margin: 0; }
+.battle-log-row:is(.heirloom, .heirloom-use, .trigger) p { color: var(--gold); }
+.battle-log-row.down p { color: var(--coral); }
+.battle-log-row.retreat p { color: var(--aqua); }
+.battle-log-row .run-face { width: 40px; height: 28px; }
+.log-faces { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.log-jump { min-height: 48px; min-width: 48px; color: var(--aqua); background: transparent; border: 1px solid var(--line); padding: 0 8px; }
+.battle-log-sheet #b-sheetclose { min-height: 48px; }
+#frame:has(#sheet.on) .finish-damage { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .num.finish-damage, .cd.now { animation: none; }
+}
 @media (max-height: 700px) {
   .act { min-height: 52px; } .act .r3 { -webkit-line-clamp: 1; } .act .r2 strong { font-size: 24px; line-height: 24px; }
   .pm { height: 48px; } #row2 { height: 40px; } #msg { height: 26px; }
@@ -290,6 +339,8 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #title .line i { color: var(--aqua); font-style: normal; align-self: center; padding: 0 2px; animation: nudge 1s steps(2) infinite; }
 @keyframes nudge { 50% { transform: translateX(3px); } }
 #title .pitch { color: var(--gold); font-size: 12px; }
+#title .title-relay { position: relative; color: var(--gold); font-size: 14px; }
+#title #b-start { min-height: 48px; }
 
 
 #title .corner { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
@@ -399,6 +450,9 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   image-rendering: pixelated;
 }
 .run-face { display: inline-block; width: 44px; height: 44px; overflow: hidden; background: var(--bg); flex: none; }
+.face-badge { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.face-badge b { overflow-wrap: anywhere; }
+.log-button { min-width: 48px; min-height: 48px; }
 .loss { color: var(--coral); }
 
 .run-route, .run-event { min-height: 0; display: flex; flex: 1; flex-direction: column; overflow-y: auto; }
@@ -479,18 +533,45 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .run-opponents .run-face { width: 32px; }
 .run-opponents b, .run-opponents small, .relay-seat b, .relay-seat small, .run-relic-choice b, .run-relic-choice small { display: block; }
 .run-opponents small, .relay-seat small, .run-relic-choice small { color: var(--dim); }
-.relay-seats { margin-top: 10px; }
-.relay-seat { min-height: 70px; }
+.relay-seats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 8px; max-width: 352px; margin: 10px auto 0; }
+.relay-seat { height: 84px; min-width: 0; display: grid; grid-template-rows: 15px 32px 16px 14px; justify-items: center; gap: 0; padding: 2px 4px; text-align: center; }
+.relay-seat .run-face { height: 32px; }
 .relay-seat b, .reserve-cards b, .run-relic-choice b { font-size: 16px; }
-.relay-seat > small:first-child { color: var(--aqua); flex: none; }
-.relay-seat .recruit-flag { margin-left: auto; text-align: right; color: var(--gold); }
-.relay-link { min-height: 30px; display: flex; justify-content: center; flex-direction: column; padding: 4px 6px; color: var(--gold); font-size: 12px; }
-.relay-link small { display: block; color: var(--coral); }
-.relay-alternative { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; margin: 8px 0; }
-.relay-alternative b { font: 14px/20px var(--px); }
-.relay-alternative small { display: block; color: var(--gold); }
-.relay-alternative .btn { flex: none; }
+.relay-seat > small:first-child { color: var(--aqua); line-height: 15px; }
+.relay-seat b, .relay-seat .relay-trait { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.relay-seat b { font-size: 14px; line-height: 16px; }
+.relay-seat .relay-trait { font-size: 10px; line-height: 14px; }
+.relay-links { grid-column: 1 / -1; position: relative; height: 48px; }
+.relay-link { position: absolute; width: 48px; height: 48px; transform: translateX(-50%); padding: 0; border: 0; background: transparent; color: var(--gold); font-size: 22px; }
+.relay-link:first-child { left: calc((100% - 16px) / 3 + 4px); }
+.relay-link:last-child { left: calc(100% - ((100% - 16px) / 3 + 4px)); }
+.relay-link:disabled { color: var(--line2); cursor: default; }
+.relay-flow, .relay-blessing { display: flex; align-items: center; gap: 8px; }
+.relay-blessing { justify-content: space-between; padding: 4px 8px; margin-top: 8px; color: var(--gold); }
+.relay-survival { display: grid; gap: 2px; margin-bottom: 8px; color: var(--dim); }
+.relay-alternative, .relay-undo { width: 100%; margin: 0 0 4px; }
+.relay-alternative b { display: block; font: 14px/21px var(--px); color: var(--gold); }
 .reserve-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+.reserve-cards button { min-height: 48px; }
+.reserve-cards button[aria-pressed="true"], .reinforce-candidates button[aria-pressed="true"] { border-color: var(--aqua); }
+:is(#order, #awaken, #reinforce) .btn, #b-dismiss-confirm { min-height: 48px; }
+#b-dismiss-confirm { margin-top: 12px; }
+
+.wake-lead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 8px; color: var(--gold); }
+.wake-lead small { display: block; }
+#awaken .lead { margin-top: 10px; }
+.wake-line, .reinforce-candidates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+.wake-face, .reinforce-candidates button { width: 100%; min-height: 76px; min-width: 0; padding: 5px 4px; border-top: 3px solid var(--gc, var(--line)); }
+.wake-face .face-badge, .reinforce-candidates .face-badge { flex-direction: column; gap: 2px; }
+.reinforce-candidates button { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.reinforce-candidates button > span:not(.face-badge), .reinforce-candidates small { font-size: 11px; color: var(--dim); }
+.wake-slot { min-width: 0; background: var(--win); border-top: 2px solid var(--gc, var(--line)); }
+.wake-slot:not(.landed) .wake-face { visibility: hidden; }
+.wake-slot.landed .wake-face { animation: wake-land .18s steps(4) both; }
+.wake-summary { margin-top: 14px; padding: 8px 10px; color: var(--gold); }
+.wake-summary:empty, #awaken [hidden] { display: none; }
+@keyframes wake-land { from { opacity: .25; transform: translateY(5px); } }
+@media (prefers-reduced-motion: reduce) { .wake-slot.landed .wake-face { animation: none; } }
 
 .run-event .run-scene { min-height: 190px; }
 .event-cast { display: flex; position: absolute; left: 0; right: 0; bottom: 36px; align-items: flex-end; justify-content: space-between; padding: 0 12px; }
@@ -1215,6 +1296,198 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
     left: auto;
     flex: 0 0 auto;
   }
+}
+
+#map .walking-map {
+  --branch-light: 1;
+  --other-paths: 1;
+  --scene-opacity: 1;
+  flex: 0 0 350px;
+  min-height: 350px;
+  margin: 0 12px;
+  background: #0e0a18;
+  isolation: isolate;
+}
+
+.map-landscape, .map-trails, .map-trail, .map-walkers, .map-walker-anchor, .map-portals {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-landscape {
+  inset: -4px;
+  background: linear-gradient(180deg, #120d231a, #120d231c 48%, #120d237a),
+    var(--landscape, none) center bottom / cover no-repeat;
+  opacity: var(--scene-opacity);
+}
+
+.map-trails { opacity: var(--scene-opacity); }
+.map-trail { width: 100%; height: 100%; }
+.map-trail:not(:first-child) { opacity: calc(var(--branch-light) * var(--other-paths)); }
+.map-trail.chosen { opacity: 1; }
+.map-walkers { z-index: 1; opacity: var(--scene-opacity); }
+.map-portals { z-index: 2; }
+
+#map .map-walker {
+  position: absolute;
+  top: -56px;
+  left: -24px;
+  width: 48px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+}
+
+.map-walker::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  bottom: -3px;
+  width: 24px;
+  height: 7px;
+  background: #130d248e;
+  clip-path: polygon(0 28%, 16% 0, 84% 0, 100% 28%, 100% 72%, 84% 100%, 16% 100%, 0 72%);
+}
+
+.map-walker-art {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateY(var(--foot-lift, 0px)) rotate(var(--walk-lean, 0deg));
+  pointer-events: none;
+}
+
+#map .map-walker img { position: absolute; animation: none; }
+#map .map-walker small {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  bottom: auto;
+  translate: -50% 0;
+  padding: 0 4px;
+  background: #1d1736;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.map-door {
+  --door-rim: #9982b2;
+  --door-fill: #432e56;
+  --door-shine: #d0abd7;
+  position: absolute;
+  left: clamp(28px, var(--door-x), 100% - 28px);
+  top: var(--door-y);
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.map-door:not(.chosen) { opacity: calc((.36 + .64 * var(--branch-light)) * var(--other-paths)); }
+.map-door.chosen { z-index: 1; }
+.map-door:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.map-door[data-kind="spring"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #90ead9; }
+.map-door[data-kind="altar"], .map-door[data-kind="event"] { --door-rim: #ab82b1; --door-fill: #5a375c; --door-shine: #f8b5d9; }
+.map-door[data-kind="treasure"] { --door-rim: #b78854; --door-fill: #65412d; --door-shine: #ffd983; }
+.map-door:is([data-kind="gate"], [data-kind="boss"], [data-kind="elite"]) {
+  --door-rim: #ad7469;
+  --door-fill: #56303d;
+  --door-shine: #ffad8b;
+}
+
+.map-door-frame {
+  position: absolute;
+  inset: 0 2px;
+  background: #171026;
+  clip-path: polygon(0 24%, 10% 24%, 10% 12%, 22% 12%, 22% 4%, 78% 4%, 78% 12%, 90% 12%, 90% 24%, 100% 24%, 100% 100%, 0 100%);
+}
+
+.map-door-frame::before, .map-door-frame::after, .map-door-light {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-door-frame::before {
+  inset: 3px;
+  clip-path: inherit;
+  background: var(--door-rim);
+}
+
+.map-door-frame::after {
+  background: #110b1b;
+  opacity: var(--door-dark, 0);
+}
+
+.map-door-light {
+  inset: 11px 8px 4px;
+  background: repeating-linear-gradient(0deg, #161024 0 4px, var(--door-fill) 4px 8px, #161024 8px 12px);
+  clip-path: polygon(0 28%, 15% 28%, 15% 12%, 32% 12%, 32% 0, 68% 0, 68% 12%, 85% 12%, 85% 28%, 100% 28%, 100% 100%, 0 100%);
+  opacity: calc(.6 + .4 * var(--branch-light));
+}
+
+.map-door.chosen .map-door-light, .map-door:hover:not(:disabled) .map-door-light {
+  background: repeating-linear-gradient(0deg, var(--door-fill) 0 4px, var(--door-shine) 4px 8px, var(--door-fill) 8px 12px);
+}
+
+.map-door-emblem {
+  position: absolute;
+  inset: 7px 5px 3px;
+  display: grid;
+  place-items: center;
+}
+
+#map .map-door-emblem img { max-width: 40px; max-height: 42px; object-fit: contain; }
+.map-door-shadow { filter: brightness(0) drop-shadow(0 1px 0 var(--door-shine)); }
+
+#map .map-door-line {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  display: block;
+  width: max-content;
+  padding: 1px 4px;
+  background: var(--win);
+  color: var(--ink);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+#map .map-door[data-map-door="1"]:nth-last-child(2) { left: min(var(--door-x), 100% - 42px); }
+#map .map-door[data-map-door="1"]:nth-last-child(2) .map-door-line {
+  left: auto;
+  right: -12px;
+  transform: none;
+}
+.walking-map[data-walk-phase="zoom"] .map-door.chosen .map-door-line { opacity: var(--scene-opacity); }
+
+.map-skip {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  padding: 9px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  align-content: start;
+}
+
+.map-skip span {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  background: var(--win);
+  color: var(--ink);
+  font-size: 12px;
 }
 </style></head>
 <body><div id="app"></div>
@@ -8170,6 +8443,67 @@ const BattleRuntime = {
     arena_charge: { id: "arena_charge", name: "\uD22C\uAE30\uC7A5\uC758 \uAE30\uC138", desc: "\uC77C\uBC18 \uACF5\uACA9\uC744 \uB450 \uBC88 \uB9DE\uD788\uBA74 \uB2E4\uC74C \uBB3C\uB9AC\xB7\uB9C8\uBC95 \uAE30\uC220\uC774 \uD53C\uD574 2\uBC30\uB97C \uC900\uB2E4. \uC804\uD22C\uB2F9 \uD55C \uBC88." }
   };
 
+  // card_pixel/game/src/content/tempo.js
+  var TEMPO_VERSION = 2;
+  var START_MP = 65;
+  var REINFORCE_FLOORS = [1, 2, 6];
+  var ROSTER_LIMIT = 6;
+  var REINFORCE_CHOICES = 3;
+  var BLESSING_MULTIPLIERS = {
+    normal: 1.6,
+    rare: 1.45,
+    epic: 1.3,
+    event: 1.3,
+    legend: 1.15,
+    transcendence: 1.15
+  };
+  var ROOM_MULTIPLIERS = {
+    wild: [0.67, 2.8],
+    risk: [0.76, 3.3],
+    gate: [1.25, 4.9],
+    elite: [1.18, 3.4],
+    boss: [1, 1]
+  };
+  var REGION_MULTIPLIERS = {
+    ember_volcano: { wild: [0.64, 2.35], risk: [0.73, 2.75], boss: [0.63, 1.69] },
+    twilight_cathedral: { wild: [0.67, 2.7], risk: [0.76, 2.95], gate: [1.27, 5.2], boss: [0.655, 1.7] },
+    starlit_garden: { wild: [0.65, 2.55], risk: [0.76, 3.1], gate: [1.19, 4.56], boss: [0.62, 1.66] },
+    midnight_trench: { wild: [0.72, 3.35], risk: [0.76, 3.55], boss: [0.62, 1.8] },
+    arena: { wild: [0.65, 2], risk: [0.75, 2.35], boss: [0.68, 1.68] },
+    creation_tower: { boss: [0.61, 1.56] }
+  };
+  var NIGHTMARE_MULTIPLIERS = {
+    ember_volcano: { wild: [0.58, 2.2], risk: [0.69, 2.55], gate: [1.17, 4.85], elite: [0.84, 2.15], boss: [0.63, 1.65] },
+    twilight_cathedral: { wild: [0.59, 1.66], risk: [0.69, 2.1], gate: [1.2, 4.65], elite: [0.87, 2.1] },
+    starlit_garden: { wild: [0.61, 2.18], risk: [0.72, 2.6], gate: [1.13, 4.62], elite: [0.89, 2.2], boss: [0.64, 1.7] },
+    midnight_trench: { wild: [0.68, 3.1], risk: [0.76, 3.3], gate: [1.19, 4.85], elite: [0.96, 2.7], boss: [0.61, 1.78] },
+    arena: { wild: [0.6, 1.4], risk: [0.69, 1.8], gate: [1.2, 4.65], elite: [0.84, 2.05], boss: [0.66, 1.6] },
+    creation_tower: { wild: [0.64, 2.32], risk: [0.74, 2.74], elite: [0.88, 2.2], boss: [0.64, 1.59] }
+  };
+  var FIRST_MAIN_ASSIST = {
+    gate: [0.97, 2.85],
+    boss: [0.6, 1.6],
+    ember_volcano: { boss: [0.56, 1.55] },
+    twilight_cathedral: { boss: [0.53, 1.46] }
+  };
+  var INTRO_MULTIPLIERS = { 3: [0.92, 2.8], 5: [1.12, 4.5] };
+  var basic = { name: "\uC77C\uBC18 \uACF5\uACA9", type: "phy", power: 1 };
+  var THREE_BEAT = [basic, { signature: true, power: 1.15 }, { name: "\uC57D\uACF5", type: "phy", power: 0.55 }];
+  var STRONG_BEAT = 2;
+  var TIDE_BEATS = [
+    basic,
+    { name: "\uC794\uBB3C\uACB0", type: "phy", power: 0.75 },
+    { name: "\uC870\uB958\uC758 \uC77C\uACA9", type: "mag", power: 2.5 },
+    { name: "\uBB3C\uB7EC\uAC04 \uC870\uB958", type: "rest", power: 0, vulnerable: 1.5 }
+  ];
+  var TIDE_STRONG_BEAT = 3;
+  var BOSS_PREVIEW_TURNS = 15;
+  var FLOOR_SEED_STEP = 2654435769;
+  var TEMPO_SEEDS = { blessing: 2500926157, reinforcement: 1740171825 };
+  function usesTempo(run) {
+    return !run.daily && run.tempoVersion === TEMPO_VERSION;
+  }
+
   // card_pixel/game/src/content/affixes.js
   var AFFIXES = {
     tough: { name: "\uB2E8\uB2E8\uD568", desc: "\uCC98\uC74C 3\uD134 \uB3D9\uC548 \uBC1B\uB294 \uD53C\uD574 \uC808\uBC18" },
@@ -8185,6 +8519,42 @@ const BattleRuntime = {
   var DEFENSE_BUFFS = ["guard", "barrier", "magic_guard", "damage_half", "evasion"];
   var isAttack = (skill) => skill.type === "phy" || skill.type === "mag";
   var RANDOM_DAMAGE = ["random_mult", "random_mult_moon_boost", "delayed_random_attack"];
+  var isScripted = (action) => !!action && action.name !== "\uC77C\uBC18 \uACF5\uACA9" && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
+  function patternActions(enemy, pattern, openingIntent) {
+    if (pattern === "tide") return TIDE_BEATS;
+    if (pattern !== "threeBeat" && pattern !== "introFixed") return [];
+    const basic2 = THREE_BEAT[0];
+    const skill = enemy.skills.find((s) => isAttack(s) && (!openingIntent || s.type === openingIntent));
+    const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic2;
+    if (pattern === "introFixed") return openingIntent ? [signature, basic2, THREE_BEAT[2]] : [signature];
+    return THREE_BEAT.map((beat) => !beat.signature ? beat : skill ? { ...signature, rate: 0, power: signature.power * beat.power } : basic2);
+  }
+  function enemyBeats(core2, enemy, pattern, openingIntent) {
+    if (pattern !== "bossScript") {
+      const beats2 = patternActions(enemy, pattern, openingIntent);
+      return beats2.map(({ name, type, power: power2 }, index) => ({ turn: index + 1, name, type, power: power2 }));
+    }
+    const decide = coreHooks.get(core2)?.decide ?? core2.Logic.decideEnemyAction;
+    const saved = Math.random;
+    const beats = [];
+    try {
+      for (let turn = 1; turn <= BOSS_PREVIEW_TURNS; turn++) {
+        Math.random = () => 0;
+        const low = decide.call(core2.Logic, { ...enemy }, turn);
+        Math.random = () => 1 - Number.EPSILON;
+        const high = decide.call(core2.Logic, { ...enemy }, turn);
+        const fixed = low.name === high.name;
+        if (!fixed && !(isScripted(low) && isScripted(high)) || fixed && !isScripted(high) && turn !== 1) continue;
+        for (const action of fixed ? [high] : [low, high]) {
+          const type = !action.isChargeStart && isAttack(action) ? action.type : "rest";
+          beats.push({ turn, name: action.name, type, power: type === "rest" ? 0 : action.val ?? 1 });
+        }
+      }
+    } finally {
+      Math.random = saved;
+    }
+    return beats;
+  }
   function enemyStatsWithQuirk(stats, quirk) {
     const modifiers = QUIRKS[quirk]?.foe || {};
     return {
@@ -8310,6 +8680,7 @@ const BattleRuntime = {
     const quirk = opts.quirk && QUIRKS[opts.quirk] ? opts.quirk : null;
     const Q = quirk ? QUIRKS[quirk] : {};
     const region = opts.region?.id;
+    const pattern = opts.tempo?.pattern;
     const bellTurns = opts.region?.turns ?? REGIONS.twilight_bell.turns;
     const bellStacks = opts.region?.stacks ?? REGIONS.twilight_bell.stacks;
     const bet = opts.bet;
@@ -8549,6 +8920,7 @@ const BattleRuntime = {
     function setupAllies() {
       for (const p of players()) {
         p.relayModifiers = [];
+        if (pattern !== "introFixed" && Number.isFinite(opts.tempo?.startMp)) p.mp = Math.min(getMaxMana(p), opts.tempo.startMp);
         if (Q.ally) {
           addAllyModifier(p, Q.ally);
           if (Q.ally.mp) {
@@ -8563,6 +8935,7 @@ const BattleRuntime = {
     function setupEnemy(enemy) {
       const def = queue[B.enemyIdx] || {};
       enemy.affixes = (def.affixes || []).slice();
+      enemy.relayBeats = patternActions(enemy, pattern, opts.openingIntent);
       const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk);
       Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
       if (hasAffix(enemy, "tough")) enemy.buffs.damage_half = 3;
@@ -8799,16 +9172,20 @@ const BattleRuntime = {
         }
       };
     };
-    const isScripted = (action) => !!action && action.name !== "\uC77C\uBC18 \uACF5\uACA9" && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
     const inTide = () => region === "tide_cycle" && !queue[B.enemyIdx].boss;
     function tideVulnerability(enemy) {
       if (!inTide()) return 0;
       const turn = localTurn(enemy);
+      if (pattern === "tide") return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
       return turn > 0 && turn % 4 === 0 ? 1.5 : 0;
     }
     const tideDamage = (damage, vulnerable) => vulnerable ? Math.floor(damage * vulnerable) : damage;
     function decide(enemy) {
       const turn = localTurn(enemy);
+      if (enemy.relayBeats.length && (pattern !== "introFixed" || opts.openingIntent)) {
+        const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
+        return { ...beat, val: beat.power };
+      }
       const vulnerable = tideVulnerability(enemy);
       if (vulnerable) return { type: "rest", name: REGIONS.tide_cycle.rest, vulnerable };
       if (!inTide() || turn % 4 !== 3) return original.decide.call(Logic, enemy, turn);
@@ -8863,6 +9240,13 @@ const BattleRuntime = {
     }
     function countdown() {
       const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
+      if (pattern === "threeBeat" || pattern === "tide") {
+        const strong = pattern === "tide" ? TIDE_STRONG_BEAT : STRONG_BEAT;
+        const period = enemy.relayBeats.length;
+        let inTurns = (strong - local % period + period) % period;
+        if (inTurns === 0 && enemy.buffs.stun) inTurns = period;
+        return { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+      }
       if (inTide()) {
         let inTurns = (3 - local % 4 + 4) % 4;
         if (inTurns === 0 && enemy.buffs.stun) inTurns = 4;
@@ -8946,7 +9330,9 @@ const BattleRuntime = {
       if (B.awaiting) {
         checkFrenzy();
         flush();
-        const wait = { t: "await", who: allyRef(host.battle.currentPlayerIdx), intent: currentIntent(), countdown: countdown() };
+        const intent = currentIntent();
+        if (pattern) Object.assign(intent, { type: intent.kind, damageRange: intent.dmg ?? [0, 0] });
+        const wait = { t: "await", who: allyRef(host.battle.currentPlayerIdx), intent, countdown: countdown() };
         if (region === "twilight_bell") {
           const turn = host.battle.turn;
           const next = Math.min(...bellTurns.filter((n) => n > turn));
@@ -9550,8 +9936,10 @@ const BattleRuntime = {
     doorStart: () => doorStart,
     equipRelic: () => equipRelic,
     finishRun: () => finishRun,
+    getTempoView: () => getTempoView,
     leaveRoom: () => leaveRoom,
     nextFloor: () => nextFloor,
+    resolveReinforcement: () => resolveReinforcement,
     runRewards: () => runRewards,
     settleBattle: () => settleBattle,
     springDraw: () => springDraw,
@@ -9651,6 +10039,21 @@ const BattleRuntime = {
       run.heirlooms[id] = run.introHeirlooms[id];
       delete run.introHeirlooms[id];
     }
+  }
+  function validateReplacements(run, incoming, ids) {
+    if (!Array.isArray(ids) || new Set(ids).size !== ids.length || ids.some((id) => !run.bench.includes(id))) {
+      return "invalid_replacement";
+    }
+    const required = usesTempo(run) ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
+    if (ids.length < required) return "roster_full";
+    if (ids.length > required) return "invalid_replacement";
+    return null;
+  }
+  function release(run, id) {
+    run.released.push(id);
+    run.bench = run.bench.filter((other) => other !== id);
+    delete run.blessings[id];
+    delete run.heirlooms[id];
   }
   function drawFrom(run, roster2, rates, exclude = []) {
     const byGrade = {};
@@ -10232,6 +10635,43 @@ const BattleRuntime = {
     }
     return enemies;
   }
+  function floorRng(run, salt) {
+    return { state: (run.seed ^ Math.imul(run.floor, FLOOR_SEED_STEP) ^ salt) >>> 0 };
+  }
+  function battleBlessing(run, roster2) {
+    const ids = run.bench.slice().sort();
+    const preferred = ids.filter((id2) => ["normal", "rare"].includes(roster2.card(id2).grade));
+    const id = pick(floorRng(run, TEMPO_SEEDS.blessing), preferred.length ? preferred : ids);
+    return id ? { id, multiplier: BLESSING_MULTIPLIERS[roster2.card(id).grade] } : null;
+  }
+  function battleScale(run, room) {
+    const key = room.risk && room.type === "wild" ? "risk" : room.type;
+    const assist = run.firstMainAssist && (FIRST_MAIN_ASSIST[run.dungeonId]?.[key] || FIRST_MAIN_ASSIST[key]);
+    const nightmare2 = run.difficulty === "nightmare" && NIGHTMARE_MULTIPLIERS[run.dungeonId]?.[key];
+    return assist || nightmare2 || REGION_MULTIPLIERS[run.dungeonId]?.[key] || ROOM_MULTIPLIERS[key];
+  }
+  function applyDoorTempo(run, roster2, door) {
+    if (!usesTempo(run)) return null;
+    const intro = DUNGEONS[run.dungeonId].layout === "intro";
+    const scale = intro ? INTRO_MULTIPLIERS[run.floor] : battleScale(run, door);
+    if (scale) {
+      const [hp, attack] = scale;
+      for (const { stats } of door.enemies) {
+        stats.hp = Math.round(stats.hp * hp);
+        stats.atk = Math.round(stats.atk * attack);
+        stats.matk = Math.round(stats.matk * attack);
+      }
+    }
+    let pattern = "threeBeat";
+    if (door.type === "boss") pattern = "bossScript";
+    else if (door.type === "borrowed" || door.intent) pattern = "introFixed";
+    else if (door.region?.id === "tide_cycle") pattern = "tide";
+    return {
+      pattern,
+      blessing: intro ? null : battleBlessing(run, roster2),
+      startMp: intro ? door.type === "borrowed" ? INTRO.start.allyStart[0].mp : null : QUIRKS[door.quirk]?.ally?.mp ?? START_MP
+    };
+  }
   function makeBattleDoor(run, roster2, dungeon, template, index, region, battleCount) {
     const challenge = run.difficulty === "nightmare" ? dungeon.nightmareRule : null;
     const elite = template.type === "elite";
@@ -10262,7 +10702,7 @@ const BattleRuntime = {
     const hasSky = region?.id === "starlit_sky";
     const filledSky = hasSky && !skyBet && (battleCount > 1 ? index === 1 : nextFloat(run.rng) < 0.5);
     const start = template.type === "borrowed" ? INTRO.start : hasSky ? { field: filledSky ? SKY3 : [] } : null;
-    return {
+    const door = {
       ...template,
       index,
       name: ROOM_NAMES[template.type],
@@ -10273,6 +10713,8 @@ const BattleRuntime = {
       start: copy(start),
       relic: elite || template.type === "gate" ? relicOffer(run, roster2) : null
     };
+    door.tempo = applyDoorTempo(run, roster2, door);
+    return door;
   }
   function eventCandidates(run) {
     const present = (id) => (run.pool.includes(id) || run.bench.includes(id)) && !run.fallen.includes(id) && !run.released.includes(id);
@@ -10297,6 +10739,7 @@ const BattleRuntime = {
         name: event?.name || ROOM_NAMES[template.type],
         bg: dungeon.background,
         enemies: [],
+        tempo: null,
         region: copy(region),
         regionChoice: copy(regionChoice || null),
         event: event ? copy(event) : null,
@@ -10339,15 +10782,23 @@ const BattleRuntime = {
       return { ...copy(choice), targets, enabled: eligible && (targets === null || targets.length > 0) && run.crystals >= (choice.cost || 0) };
     });
   }
-  function resolveEvent(run, core2, roster2, choiceId, targetId) {
+  function resolveEvent(run, core2, roster2, choiceId, targetId, replaceIds = []) {
     const choice = eventChoices(run, core2, roster2).find((entry) => entry.id === choiceId);
     if (!choice?.enabled || (choice.targets ? !choice.targets.includes(targetId) : targetId != null)) return invalid("invalid_event_choice");
+    const recruits = choice.ops.filter((op) => op.type === "join");
+    const recruitCount = recruits.reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+    const error = validateReplacements(run, recruitCount, replaceIds);
+    if (error) return invalid(error);
     const result = { ok: true, choiceId, effects: [] };
     const before = run.crystals;
     const paidRelic = choice.ops.some((op) => op.type === "relic" && !op.temporary);
     if (!paidRelic) run.crystals -= choice.cost || 0;
     run.pending = null;
     run.room.status = "resolved";
+    for (const id of replaceIds) {
+      release(run, id);
+      result.effects.push({ type: "release", id });
+    }
     for (const op of choice.ops) {
       switch (op.type) {
         case "crystals":
@@ -10360,10 +10811,7 @@ const BattleRuntime = {
           break;
         }
         case "release":
-          run.released.push(targetId);
-          run.bench = run.bench.filter((id) => id !== targetId);
-          delete run.blessings[targetId];
-          delete run.heirlooms[targetId];
+          release(run, targetId);
           run.crystals += SALE_PRICE[gradeOf(roster2.card(targetId).grade)];
           result.effects.push({ type: "release", id: targetId });
           break;
@@ -10459,6 +10907,8 @@ const BattleRuntime = {
       throw new RangeError("Locked nightmare: " + dungeonId);
     }
     const intro = dungeon.layout === "intro";
+    const tempoVersion = daily?.spec.ruleVersion ?? options.tempoVersion ?? TEMPO_VERSION;
+    if (tempoVersion !== 1 && tempoVersion !== TEMPO_VERSION) throw new RangeError("invalid_tempo_version");
     if (contract !== null && (typeof contract !== "string" || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== "nightmare" || !profileView.nightmareUnlocks?.includes(dungeonId))) {
       throw new RangeError("Unavailable contract: " + String(contract));
     }
@@ -10476,6 +10926,9 @@ const BattleRuntime = {
     const run = bindRun({
       id: daily ? `rift/v${daily.spec.ruleVersion}/${daily.spec.dayKey}/${daily.attemptNo}` : [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join("/"),
       daily: copy(daily),
+      tempoVersion,
+      openingLead: null,
+      firstMainAssist: tempoVersion === TEMPO_VERSION && !daily && !intro && difficulty === "normal" && (profileView.bossOrder ?? true),
       dungeonId,
       difficulty,
       floors: daily ? FLOORS : dungeon.floors,
@@ -10549,7 +11002,7 @@ const BattleRuntime = {
     run.floor++;
     run.room = null;
     run.phase = "map";
-    if (run.daily) run.doors = doorsFor(run.daily.spec, run.floor, roster2);
+    if (run.daily) run.doors = doorsFor(run.daily.spec, run.floor, roster2).map((door) => ({ ...door, tempo: null }));
     else {
       run.doors = dungeon.layout === "intro" && run.floor === run.floors ? [introFinaleDoor(run, roster2, dungeon)] : makeDoors(run, roster2);
       observeDoors(run);
@@ -10564,7 +11017,7 @@ const BattleRuntime = {
     const tier = dungeon.tiers[run.floor - 1];
     const enemies = [first, second].map((id) => id ? roster2.shadowOf(id, tier) : roster2.wildOf(dungeon.wild[0], tier));
     const template = LAYOUTS.intro[run.floor - 1][0];
-    return {
+    const door = {
       ...template,
       index: 0,
       name: ROOM_NAMES[template.type],
@@ -10575,6 +11028,8 @@ const BattleRuntime = {
       start: null,
       relic: null
     };
+    door.tempo = applyDoorTempo(run, roster2, door);
+    return door;
   }
   function prepareStartPick(run, remaining, near, priority) {
     const candidates = choicesFor(run, dependencies.get(run).roster, 3, { near, priority });
@@ -10629,7 +11084,9 @@ const BattleRuntime = {
     if (run.room.regionChoice) run.region = copy(run.room.regionChoice);
     if (run.room.enemies.length) run.room.status = "order";
     if (run.room.type === "awakening") {
-      prepareStartPick(run, START.picks, null, [run.profileShard, ...run.introCandidates].filter(Boolean));
+      const openingLead = usesTempo(run) && canJoin(run, run.openingLead) ? run.openingLead : null;
+      if (openingLead) join(run, openingLead);
+      prepareStartPick(run, openingLead ? 1 : START.picks, openingLead, [run.profileShard, ...run.introCandidates].filter(Boolean));
     }
     if (run.room.type === "altar") run.pending = { kind: "altar", rolls: 0, roll: null };
     if (run.room.type === "event") run.pending = { kind: "event", choices: eventChoices(run, core2, roster2) };
@@ -10688,6 +11145,34 @@ const BattleRuntime = {
       return { ...copy(enemy), stats, maxHp: stats.hp };
     });
   }
+  function getTempoView(run, doorIndex) {
+    const door = run.doors[doorIndex];
+    const { core: core2 } = dependencies.get(run);
+    const suggested = door?.type === "boss" && run.guide?.bossOrder ? suggestOrder(run) : null;
+    return {
+      party: door?.type === "borrowed" ? INTRO.party.slice() : defaultParty(run),
+      suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
+      enemies: doorEnemies(run, doorIndex).map((enemy) => ({
+        id: enemy.id,
+        name: enemy.name,
+        maxHp: enemy.maxHp,
+        element: enemy.element,
+        beats: enemyBeats(core2, enemy, door.tempo?.pattern, door.intent)
+      })),
+      pattern: door?.tempo?.pattern ?? null,
+      blessing: copy(door?.tempo?.blessing ?? null),
+      startMp: door?.tempo?.startMp ?? null
+    };
+  }
+  function battleBlessings(run, door) {
+    const blessings = { ...run.blessings };
+    const blessing = door.tempo?.blessing;
+    if (blessing) {
+      const bonus = Number((blessing.multiplier - 1).toFixed(2));
+      blessings[blessing.id] = Math.max(blessings[blessing.id] ?? 0, bonus);
+    }
+    return Object.entries(blessings).map(([id, multiplier]) => ({ id, multiplier }));
+  }
   function battleOptions(run) {
     if (!battleRoom(run)) return null;
     const room = run.room;
@@ -10697,7 +11182,8 @@ const BattleRuntime = {
       quirk: room.quirk || null,
       seed: room.type === "borrowed" ? INTRO.seed : run.seed + run.floor * 1013 + run.stats.battles * 7 >>> 0,
       heirlooms: run.heirlooms,
-      blessings: Object.entries(run.blessings).map(([id, multiplier]) => ({ id, multiplier })),
+      blessings: battleBlessings(run, room),
+      ...room.tempo && { tempo: room.tempo, openingIntent: room.intent },
       artifacts: battleArtifacts(run),
       region: room.region,
       start: battleStart(run, room),
@@ -10723,6 +11209,13 @@ const BattleRuntime = {
       relic: run.relics.includes(room.relic) || room.relic === betRelic ? null : room.relic
     };
     run.reserved = null;
+  }
+  function setReinforcement(run, roster2) {
+    if (!usesTempo(run) || DUNGEONS[run.dungeonId].layout === "intro" || !REINFORCE_FLOORS.includes(run.floor)) return;
+    const candidates = choicesFor({ ...run, rng: floorRng(run, TEMPO_SEEDS.reinforcement) }, roster2, REINFORCE_CHOICES);
+    if (!candidates.length) return;
+    seeCharacters(run, candidates);
+    run.pending = { kind: "reinforcement", key: `${run.id}/${run.floor}`, candidates, limit: ROSTER_LIMIT };
   }
   function meetsContract(run, summary, survivors) {
     switch (run.contract.id) {
@@ -10815,10 +11308,15 @@ const BattleRuntime = {
         if (betWon) crystals += next.reward.crystals || 0;
         run.crystals += crystals;
         if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
+        if (!final && !wiped) setReinforcement(run, roster2);
       }
       if (room.type === "elite" && room.relic && !wiped) relic = grantRelic(run, room.relic);
       if (betRelic && !wiped) relic = grantRelic(run, betRelic);
       if (room.type === "borrowed" && !wiped) {
+        if (usesTempo(run)) {
+          const first = room.party[0];
+          run.openingLead = survivors.includes(first) ? first : heirloomsGained.find((entry) => entry.from === first)?.to ?? survivors[0];
+        }
         run.introCandidates = survivors;
         run.introHeirlooms = run.heirlooms;
         run.heirlooms = {};
@@ -10847,6 +11345,9 @@ const BattleRuntime = {
     const pending = run.pending;
     if (run.phase !== "reward" || pending?.kind !== "gate") return invalid("no_gate_reward");
     if (choice?.kind === "join" && pending.candidates.includes(choice.id) && canJoin(run, choice.id)) {
+      const error = validateReplacements(run, 1, choice.replaceId == null ? [] : [choice.replaceId]);
+      if (error) return invalid(error);
+      if (choice.replaceId != null) release(run, choice.replaceId);
       join(run, choice.id);
       run.pending = null;
       return { ok: true, joined: choice.id };
@@ -10857,11 +11358,29 @@ const BattleRuntime = {
     }
     return invalid("invalid_gate_reward");
   }
-  function springDraw(run) {
+  function resolveReinforcement(run, { key, id, replaceId = null } = {}) {
+    const pending = run.pending;
+    if (run.phase !== "reward" || pending?.kind !== "reinforcement" || pending.key !== key) return invalid("invalid_reinforcement_key");
+    if (id === null) {
+      if (replaceId !== null) return invalid("invalid_replacement");
+    } else {
+      if (!pending.candidates.includes(id) || !canJoin(run, id)) return invalid("invalid_candidate");
+      const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
+      if (error) return invalid(error);
+      if (replaceId !== null) release(run, replaceId);
+      join(run, id);
+    }
+    run.pending = null;
+    return { ok: true, joined: id, released: replaceId };
+  }
+  function springDraw(run, replaceId = null) {
     if (!springRoom(run) || run.pending) return invalid("no_waking");
     if (run.crystals < COST.draw) return invalid("insufficient_crystals");
+    const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
+    if (error) return invalid(error);
     const id = drawFrom(run, dependencies.get(run).roster, RATES.draw);
     if (!id) return invalid("empty_pool");
+    if (replaceId !== null) release(run, replaceId);
     join(run, id);
     run.crystals -= COST.draw;
     return { ok: true, id, cost: COST.draw };
@@ -10880,9 +11399,16 @@ const BattleRuntime = {
     seeCharacters(run, candidates);
     return { ok: true, candidates: candidates.slice(), cost: COST.pick };
   }
-  function springTake(run, id) {
+  function springTake(run, id, replaceId = null) {
     if (!springRoom(run) || run.pending?.kind !== "spring") return invalid("no_spring_pick");
+    if (usesTempo(run) && id === null && replaceId === null) {
+      run.pending = null;
+      return { ok: true, id };
+    }
     if (!run.pending.candidates.includes(id) || !canJoin(run, id)) return invalid("invalid_candidate");
+    const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
+    if (error) return invalid(error);
+    if (replaceId !== null) release(run, replaceId);
     join(run, id);
     run.pending = null;
     return { ok: true, id };
@@ -10904,10 +11430,10 @@ const BattleRuntime = {
     run.room.status = "resolved";
     return { ok: true, ...roll };
   }
-  function chooseEvent(run, choiceId, targetId) {
+  function chooseEvent(run, choiceId, targetId, replaceIds) {
     if (run.phase !== "room" || run.pending?.kind !== "event") return invalid("no_event");
     const { core: core2, roster: roster2 } = dependencies.get(run);
-    return resolveEvent(run, core2, roster2, choiceId, targetId);
+    return resolveEvent(run, core2, roster2, choiceId, targetId, replaceIds);
   }
   function takeTreasure(run) {
     if (run.phase !== "room" || run.room?.type !== "treasure" || run.room.status !== "service") return invalid("no_treasure");
@@ -10937,7 +11463,7 @@ const BattleRuntime = {
       run.pending = run.pending.after;
       if (run.pending) return { ok: true, skipped, pending: copy(run.pending), left: false };
     }
-    if (["start", "spring"].includes(run.pending?.kind) || run.pending?.kind === "altar" && run.pending.roll) {
+    if (["start", "spring", "reinforcement"].includes(run.pending?.kind) || run.pending?.kind === "altar" && run.pending.roll) {
       return invalid("choice_required");
     }
     run.pending = null;
@@ -11200,6 +11726,11 @@ const BattleRuntime = {
     if (!run || !Object.hasOwn(DUNGEONS, run.dungeonId) || !PHASES.includes(run.phase) || !Number.isInteger(run.rng?.state) || run.rng.state < 0 || run.rng.state > 4294967295 || !Array.isArray(run.pool) || !Array.isArray(run.bench) || !Array.isArray(run.doors)) return null;
     run.contract ??= null;
     run.daily ??= null;
+    run.tempoVersion ??= run.daily?.spec.ruleVersion ?? 1;
+    run.firstMainAssist ??= false;
+    run.openingLead ??= null;
+    for (const door of run.doors) door.tempo ??= null;
+    if (run.room) run.room.tempo ??= null;
     run.lastParty ??= null;
     run.guide ??= { bossOrder: false };
     run.joinOrder ??= run.bench.slice();
@@ -11851,7 +12382,7 @@ const BattleRuntime = {
       source.start(at);
       source.stop(end);
     }
-    function synth(deck, wave, hz, cutoff, level, attack, release, at, duration, sweep) {
+    function synth(deck, wave, hz, cutoff, level, attack, release2, at, duration, sweep) {
       const source = context.createOscillator();
       const filter = context.createBiquadFilter();
       const envelope = context.createGain();
@@ -11864,7 +12395,7 @@ const BattleRuntime = {
       filter.frequency.value = cutoff;
       envelope.gain.setValueAtTime(0, at);
       envelope.gain.linearRampToValueAtTime(level, peak);
-      envelope.gain.setValueAtTime(level, Math.max(peak, end - release));
+      envelope.gain.setValueAtTime(level, Math.max(peak, end - release2));
       envelope.gain.linearRampToValueAtTime(0, end);
       attachSource(deck, source, filter, envelope, at, end);
     }
@@ -11910,9 +12441,9 @@ const BattleRuntime = {
         percussion(deck, part, strength2, at, duration);
         return;
       }
-      const [wave, cutoff, level, attack, release, ratio, overtone] = instrument;
+      const [wave, cutoff, level, attack, release2, ratio, overtone] = instrument;
       const hz = frequency(pitch);
-      synth(deck, wave, hz, cutoff, level * strength2, attack, release, at, duration);
+      synth(deck, wave, hz, cutoff, level * strength2, attack, release2, at, duration);
       if (ratio) {
         synth(
           deck,
@@ -11921,7 +12452,7 @@ const BattleRuntime = {
           cutoff,
           level * strength2 * overtone,
           attack,
-          release,
+          release2,
           at,
           duration * 0.75
         );
@@ -12705,7 +13236,7 @@ const BattleRuntime = {
       await tween(cam, { k: 1, x: S.W / 2, y: S.H / 2 }, 0.1, "in");
       cam.k = 1;
     }
-    function number(text, x, y, cls) {
+    function number2(text, x, y, cls) {
       const d = document.createElement("div");
       d.className = "num " + (cls || "");
       d.textContent = text;
@@ -12825,7 +13356,7 @@ const BattleRuntime = {
       slash,
       dust,
       gem,
-      number,
+      number: number2,
       banner,
       plate,
       prop,
@@ -13103,22 +13634,32 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/sheet.js
   function sheetMarkup() {
-    return '<div class="sheet" id="sheet"><div class="in win"><h3 id="sh-title"></h3><div id="sh-body" class="shbody"></div><button class="btn" id="b-sheetclose">\uB2EB\uAE30</button></div></div>';
+    return '<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title"><div class="in win"><h3 id="sh-title"></h3><div id="sh-body" class="shbody"></div><button class="btn" id="b-sheetclose">\uB2EB\uAE30</button></div></div>';
   }
   function createSheet(stage2) {
     let afterDismiss;
-    function openSheet(title, html, { onClose } = {}) {
+    let opener;
+    function openSheet(title, html, { onClose, variant, latest } = {}) {
       afterDismiss = onClose;
+      opener = latest ? document.activeElement : null;
       $("#sh-title").textContent = title;
       const body = $("#sh-body");
       body.innerHTML = html;
-      body.scrollTop = 0;
-      $("#sheet").classList.add("on");
+      const panel = $("#sheet");
+      panel.classList.toggle("battle-log-sheet", variant === "battle-log");
+      panel.classList.add("on");
+      body.scrollTop = latest ? body.scrollHeight : 0;
+      if (latest) {
+        const target = body.querySelector(latest);
+        target?.focus({ preventScroll: true });
+        if (target) body.scrollTop = target.offsetTop;
+      }
       stage2.pause(true);
     }
     function closeSheet() {
       afterDismiss = void 0;
       $("#sheet").classList.remove("on");
+      $("#sheet").classList.remove("battle-log-sheet");
       stage2.pause(false);
     }
     function sheet(title, body) {
@@ -13126,7 +13667,9 @@ const BattleRuntime = {
     }
     function dismiss() {
       const onClose = afterDismiss;
+      const focus = opener;
       closeSheet();
+      focus?.focus({ preventScroll: true });
       onClose?.();
     }
     $("#b-sheetclose").addEventListener("click", dismiss);
@@ -13137,10 +13680,30 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/widgets.js
-  var TYPE = { phy: "\uBB3C\uB9AC", mag: "\uB9C8\uBC95", sup: "\uBCF4\uC870" };
+  var TYPE = { phy: "\uBB3C\uB9AC", mag: "\uB9C8\uBC95", sup: "\uBCF4\uC870", rest: "\uD734\uC2DD" };
+  var formatRange = (range) => Array.isArray(range) ? range[0] === range[1] ? String(range[0]) : range.join("~") : String(range ?? "");
   var foeFlip = (def) => (def.facing || "right") === "right";
+  var replacementCount = (run, incoming) => !run.daily && run.tempoVersion === 2 ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
+  function chooseReplacements(run, ui, count, action) {
+    const selected = /* @__PURE__ */ new Set();
+    ui.sheets.openSheet("\uBCF4\uB0BC \uB3D9\uB8CC " + count + "\uBA85", '<div class="reserve-cards">' + run.bench.map((id) => '<button class="win" data-dismiss-id="' + esc(id) + '" aria-pressed="false">' + ui.widgets.faceBadge(id) + "</button>").join("") + '</div><button class="btn go" id="b-dismiss-confirm" disabled>\uAD50\uCCB4 \uD655\uC815</button>');
+    const confirm = $("#b-dismiss-confirm");
+    for (const button of $$("#sh-body [data-dismiss-id]")) button.addEventListener("click", () => {
+      const id = button.dataset.dismissId;
+      if (selected.has(id)) selected.delete(id);
+      else if (selected.size < count) selected.add(id);
+      button.setAttribute("aria-pressed", selected.has(id));
+      confirm.disabled = selected.size !== count;
+      ui.audio.sfx.tap();
+    });
+    confirm.addEventListener("click", () => {
+      const ids = [...selected];
+      ui.sheets.closeSheet();
+      action(ids);
+    }, { once: true });
+  }
   var riftKindLabel = (kind) => kind === "practice" ? "\uC5F0\uC2B5" : "\uAE30\uB85D \uB3C4\uC804";
-  var head = (run, title, sub) => '<header class="top"><b>' + esc(title) + "</b>" + (sub ? "<span>" + esc(sub) + "</span>" : "") + '<span class="sp"></span><span class="gems">' + (run?.daily ? riftKindLabel(run.daily.kind) : "\u25C6 " + (run ? run.crystals : 0)) + "</span>" + tools() + "</header>";
+  var head = (run, title, sub) => '<header class="top"><b>' + esc(title) + "</b>" + (sub ? "<span>" + esc(sub) + "</span>" : "") + '<span class="sp"></span><span class="gems">' + (run?.daily ? riftKindLabel(run.daily.kind) : "\u25C6 " + (run ? run.crystals : 0)) + "</span>" + (run?.lastBattleLog?.length ? '<button class="log-button" data-battle-log>\uAE30\uB85D</button>' : "") + tools() + "</header>";
   function badges(run, id) {
     const out = [];
     if (run && run.blessings[id]) out.push('<i class="bless">\uCD95\uBCF5 +' + Math.round(run.blessings[id] * 100) + "%</i>");
@@ -13180,7 +13743,10 @@ const BattleRuntime = {
       const art = sprite2(id) || (c.baseCardId ? sprite2(c.baseCardId) : "");
       return '<div class="ih g-' + c.grade + '"><span class="pic">' + art + "</span><div><b>" + esc(c.name) + '</b><i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + "</i>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</div></div>";
     }
-    return { card, spr, sprite: sprite2, face: face2, cardRow, benchMinis, cardHead };
+    function faceBadge(id, name = card(id)?.name, size = 40) {
+      return '<span class="face-badge"><span class="run-face">' + face2(id, size) + "</span><b>" + esc(name || id) + "</b></span>";
+    }
+    return { card, spr, sprite: sprite2, face: face2, faceBadge, cardRow, benchMinis, cardHead };
   }
 
   // card_pixel/game/src/ui/screens/daily-rift.js
@@ -13464,8 +14030,8 @@ const BattleRuntime = {
       else if (intent.kind === "charge") html = '<small>\uB2E4\uC74C \uD589\uB3D9</small><b class="sup">\uD798\uC744 \uBAA8\uC740\uB2E4</b>';
       else if (intent.kind === "sup") html = '<small>\uB2E4\uC74C \uD589\uB3D9</small><b class="sup">' + esc(intent.name) + "</b>";
       else {
-        const range = intent.dmg[0] === intent.dmg[1] ? intent.dmg[0] : intent.dmg[0] + "~" + intent.dmg[1];
-        html = "<small>" + (intent.ult ? "\uD544\uC0B4 \xB7 " : "\uB2E4\uC74C \xB7 ") + esc(intent.name) + '</small><b class="' + intent.kind + '">' + TYPE[intent.kind] + "</b><strong>" + range + "</strong>" + (intent.lethal ? "<u>\uCE58\uBA85</u>" : "");
+        const range = formatRange(intent.dmg ?? intent.damageRange);
+        html = "<small>" + (intent.ult ? "\uD544\uC0B4 \xB7 " : "\uB2E4\uC74C \xB7 ") + esc(intent.name) + '</small><b class="' + esc(intent.kind) + '">' + esc(TYPE[intent.kind] || "") + "</b>" + (range ? "<strong>" + esc(range) + "</strong>" : "") + (intent.lethal ? "<u>\uCE58\uBA85</u>" : "");
       }
       n.innerHTML = html;
       n.className = "intent on" + (intent.ult && intent.kind !== "charge" ? " ult" : "");
@@ -13752,11 +14318,26 @@ const BattleRuntime = {
     return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
   }
 
+  // card_pixel/game/src/engine/opening.js
+  function openingModel(bridge) {
+    const state = bridge.state();
+    const retreat = bridge.previewRetreat();
+    const attack = bridge.options().find((option) => option.index === 0 && option.usable && option.preview);
+    if (!retreat || !attack || !state.enemy) return null;
+    const actorId = state.allies[state.cur].form;
+    const incoming = state.allies[retreat.next.idx];
+    const { dmg, min = dmg, max = dmg } = attack.preview;
+    return {
+      stand: { optionIndex: attack.index, actorId, targetId: state.enemy.form, damageRange: [min, max] },
+      rescue: { actorId, incomingId: incoming.form, damageRange: retreat.dmg.slice(), incomingHpAfter: Math.max(0, incoming.hp - retreat.dmg[1]) }
+    };
+  }
+
   // card_pixel/game/src/ui/battle/tiles.js
-  var damageRange = ([low, high]) => low === high ? String(low) : low + "~" + high;
-  var previewDamage = (p) => p.min != null && p.max != null ? damageRange([p.min, p.max]) : String(p.dmg ?? "");
+  var previewDamage = (p) => p.min != null && p.max != null ? formatRange([p.min, p.max]) : String(p.dmg ?? "");
   var hasFinalConsonant = (name) => /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 44032) % 28 !== 0;
-  function createTiles({ core: core2, card, audio: audio2, sheets: sheets2, B, foeDef, play, ticker }) {
+  function createTiles({ core: core2, widgets: widgets2, audio: audio2, sheets: sheets2, B, foeDef, play, ticker }) {
+    const { card, faceBadge } = widgets2;
     const { sfx } = audio2;
     const { openSheet, closeSheet, sheet } = sheets2;
     const FIELD_NAMES = new Set(Object.keys(FIELD).map((id) => core2.BUFF_NAMES[id]));
@@ -13766,15 +14347,14 @@ const BattleRuntime = {
         const { kind, reduction } = defense;
         const percent = Math.round(reduction * 100);
         if (kind === "evasion") return ["\uD68C\uD53C " + percent + "%", "\uC801 \uACF5\uACA9 \uD68C\uD53C \uD655\uB960"];
-        if (kind === "barrier" && intent?.kind !== "phy" || kind === "magic_guard" && intent?.kind !== "mag") {
-          return ["\u2014", (kind === "barrier" ? "\uBB3C\uB9AC" : "\uB9C8\uBC95") + " \uD53C\uD574 \uD55C \uBC88 \uBB34\uD6A8"];
-        }
+        const blocking = kind === "barrier" ? "phy" : kind === "magic_guard" ? "mag" : null;
+        if (blocking && intent?.kind !== blocking) return [TYPE[blocking] + " \uD53C\uD574 \uCC28\uB2E8", "\uD55C \uBC88 \uBB34\uD6A8"];
         const currentBuffs = B.D.allies[B.D.cur].buffs;
         const dmg = !currentBuffs.guard && !currentBuffs.damage_half ? intent?.dmg : null;
         const reduced = dmg && dmg.map((amount2) => Math.floor(amount2 * (1 - reduction)));
         return [
-          dmg ? damageRange(dmg) + " \u2192 " + damageRange(reduced) : "\uD53C\uD574 \u2212" + percent + "%",
-          kind === "barrier" || kind === "magic_guard" ? "\uC774\uBC88 \uACF5\uACA9 \uBB34\uD6A8" : "\uBC1B\uB294 \uD53C\uD574 " + percent + "% \uAC10\uC18C"
+          dmg ? formatRange(dmg) + " \u2192 " + formatRange(reduced) : "\uD53C\uD574 \u2212" + percent + "%",
+          blocking ? "\uB2E4\uC74C " + TYPE[blocking] + " \uCC28\uB2E8" : (TYPE[intent?.kind] ? TYPE[intent.kind] + " \uD53C\uD574 " : "\uBC1B\uB294 \uD53C\uD574 ") + percent + "% \uAC10\uC18C"
         ];
       }
       return ["", ""];
@@ -13795,22 +14375,49 @@ const BattleRuntime = {
     const FORM_SKILL = "\uAE30\uC801\uC758\uC6B0\uD654";
     const FORM_PREFIX = FORM_SKILL + " \u2192 ";
     const isFormOption = (o) => o.name.startsWith(FORM_PREFIX);
-    function renderActions() {
+    function delayedLine(option, turn) {
+      if (option.preview?.instant) return "";
+      const effect = core2.findDelayedSkillEffect?.(option);
+      if (!effect) return option.preview?.delayed ? "\uC608\uC57D" : "";
+      const offsets = Array.isArray(effect?.turns) ? effect.turns : [effect?.turns];
+      const turns = offsets.filter(Number.isFinite).map((offset) => turn + offset);
+      if (!turns.length) return "\uC608\uC57D";
+      const landing = turns.join("\xB7") + "\uD134";
+      return landing + (option.type === "sup" ? "\uC5D0 \uBC1C\uB3D9" : "\uC5D0 \uC801\uC911");
+    }
+    function renderOpening(model) {
+      const { stand, rescue } = model;
+      const current = B.D.allies[B.D.cur];
+      const next = B.D.allies.find((ally) => ally?.form === rescue.incomingId);
+      const actorId = stand.actorId ?? current.form ?? B.party[B.D.cur];
+      const heirloom = heirloomSkill(card(actorId));
+      const retreatHp = next && rescue.incomingHpAfter != null ? next.name + " HP " + next.hp + " \u2192 " + formatRange(rescue.incomingHpAfter) : "\uB4A4\uC758 \uB3D9\uB8CC\uAC00 \uB300\uC2E0 \uB9DE\uB294\uB2E4";
+      const inheritance = next && heirloom ? "\uC4F0\uB7EC\uC9C0\uBA74 " + next.name + (hasFinalConsonant(next.name) ? "\uC774 " : "\uAC00 ") + heirloom.name + (hasFinalConsonant(heirloom.name) ? "\uC744" : "\uB97C") + " \uBC1B\uB294\uB2E4" : "\uC4F0\uB7EC\uC9C0\uBA74 \uB4A4\uC758 \uB3D9\uB8CC\uC5D0\uAC8C \uC720\uD488\uC744 \uB0A8\uAE34\uB2E4";
+      $("#opening-face").innerHTML = faceBadge(actorId, current.name) + "<b>HP " + current.hp + " / " + current.maxHp + "</b>";
+      $("#acts").innerHTML = '<button class="act opening-choice rescue" data-opening-rescue><b>' + esc(current.name) + "\uB97C \uC0B4\uB9B0\uB2E4</b><small>" + esc(retreatHp) + '</small></button><button class="act opening-choice stand" data-i="' + stand.optionIndex + '"><b>' + esc(current.name) + "\uB85C \uB9C8\uC9C0\uB9C9 \uACF5\uACA9</b><small>" + esc(inheritance) + "</small><small>" + esc(B.D.enemy.name) + "\uC5D0 \uD53C\uD574 " + esc(formatRange(stand.damageRange)) + "</small></button>";
+    }
+    function renderActions(opening) {
       const options = B.bridge.options(), D = B.D, me = card(B.party[D.cur]);
       const adv = core2.Logic.getElementalMultiplier(me.element, foeDef().element) > 1;
       const forms = options.filter(isFormOption), firstForm = forms[0];
       B.options = options;
+      $("#battle").classList.toggle("opening-decision", !!opening);
+      if (opening) {
+        renderOpening(opening);
+        return;
+      }
       const tile = (o) => {
         const chooseForm = o === firstForm, p = o.preview;
         const name = chooseForm ? FORM_SKILL : o.name;
         const usable = chooseForm ? forms.some((form) => form.usable) : o.usable;
         const fields = skillFields(core2, o, B.artifacts);
+        const landing = delayedLine(o, D.turn);
         let r2, r3 = chooseForm ? "\uBCC0\uC2E0\uD560 \uD615\uD0DC\uB97C \uACE0\uB978\uB2E4" : brief(o, me);
         if (fields) {
           r2 = '<strong class="field-effect">' + esc(fields.line) + "</strong>";
           const other = fields.other.length ? brief({ ...o, effects: fields.other }, me) : "";
-          r3 = [fields.names.length <= 2 ? fields.names.join("\xB7") : "", other].filter(Boolean).join(" \xB7 ");
-        } else if (p?.delayed && !p.instant) r2 = '<strong class="txt">\uC608\uC57D</strong>';
+          r3 = [landing, fields.names.length <= 2 ? fields.names.join("\xB7") : "", other].filter(Boolean).join(" \xB7 ");
+        } else if (landing) r2 = '<strong class="txt delayed-forecast">' + esc(landing) + "</strong>";
         else if (p?.instant && o.type === "sup") r2 = '<strong class="txt">\uC989\uC2DC</strong>';
         else if (p) {
           const damage = previewDamage(p);
@@ -13831,8 +14438,8 @@ const BattleRuntime = {
         h.className = "on";
         h.dataset.i = heir.index;
         h.disabled = false;
-        const forecast = p?.instant ? previewDamage(p) + " \xB7 \uC989\uC2DC" : p?.delayed ? "\uC608\uC57D" : p ? previewDamage(p) : "";
-        h.innerHTML = "<small>\uC720\uD488 \xB7 " + esc(heir.heirFromName || "") + "</small><b>" + esc(heir.name) + "</b><strong>" + forecast + "</strong>" + (p?.kill ? "<u>\uCC98\uCE58</u>" : "");
+        const forecast = p?.instant ? previewDamage(p) + " \xB7 \uC989\uC2DC" : p?.delayed ? delayedLine(heir, D.turn) : p ? previewDamage(p) : "";
+        h.innerHTML = "<small>\uC720\uD488 \xB7 " + esc(heir.heirFromName || "") + "</small><b>" + esc(heir.name) + "</b><strong>" + esc(forecast) + "</strong>" + (p?.kill ? "<u>\uCC98\uCE58</u>" : "");
       } else {
         h.className = "";
         h.innerHTML = "";
@@ -13856,6 +14463,11 @@ const BattleRuntime = {
       audio2.unlockAudio();
       sfx.tap();
       play(B.bridge.act(index));
+    }
+    function retreat() {
+      audio2.unlockAudio();
+      sfx.tap();
+      play(B.bridge.retreat());
     }
     function formSheet(option) {
       const formIds = option.effects.find((e) => e.type === "transform_choice").forms;
@@ -13888,7 +14500,7 @@ const BattleRuntime = {
     }
     const acts = $("#acts");
     acts.addEventListener("pointerdown", (ev) => {
-      const b = ev.target.closest(".act");
+      const b = ev.target.closest(".act:not(.opening-choice)");
       if (!b) return;
       pressed = false;
       clearTimeout(pressTimer);
@@ -13899,7 +14511,7 @@ const BattleRuntime = {
     });
     ["pointerup", "pointerleave", "pointercancel"].forEach((t) => acts.addEventListener(t, () => clearTimeout(pressTimer)));
     acts.addEventListener("contextmenu", (ev) => {
-      const b = ev.target.closest(".act");
+      const b = ev.target.closest(".act:not(.opening-choice)");
       if (b) {
         ev.preventDefault();
         detail(Number(b.dataset.i));
@@ -13908,6 +14520,7 @@ const BattleRuntime = {
     acts.addEventListener("click", (ev) => {
       const b = ev.target.closest(".act");
       if (!b || b.disabled || B.busy) return;
+      if (b.hasAttribute("data-opening-rescue")) return retreat();
       if (pressed) {
         pressed = false;
         return;
@@ -13935,7 +14548,7 @@ const BattleRuntime = {
         const current = B.D.allies[B.D.cur];
         const hp = preview.dmg.map((damage) => Math.max(0, next.hp - damage)).reverse();
         const skill = preview.intent.name;
-        const line = preview.intent.dmg ? next.name + (hasFinalConsonant(next.name) ? "\uC774 " : "\uAC00 ") + skill + (hasFinalConsonant(skill) ? "\uC744" : "\uB97C") + " \uBC1B\uC74C \xB7 \uBA85\uC911 \uC2DC " + damageRange(preview.dmg) + " \xB7 HP " + next.hp + "\u2192" + damageRange(hp) : next.name + " \uCD9C\uC804 \xB7 \uC801 " + preview.intent.name + " \xB7 HP " + next.hp + "\u2192" + next.hp;
+        const line = preview.intent.dmg ? next.name + (hasFinalConsonant(next.name) ? "\uC774 " : "\uAC00 ") + skill + (hasFinalConsonant(skill) ? "\uC744" : "\uB97C") + " \uBC1B\uC74C \xB7 \uBA85\uC911 \uC2DC " + formatRange(preview.dmg) + " \xB7 HP " + next.hp + "\u2192" + formatRange(hp) : next.name + " \uCD9C\uC804 \xB7 \uC801 " + preview.intent.name + " \xB7 HP " + next.hp + "\u2192" + next.hp;
         const pending = [...new Set(B.D.delayed?.filter((attack) => attack.by === B.D.cur).map((attack) => attack.name))];
         const warning = pending.length ? "\uC608\uC57D\uD55C " + pending.join("\xB7") + "\uB3C4 \uCDE8\uC18C\uB41C\uB2E4" : "";
         let outcomes;
@@ -13944,20 +14557,20 @@ const BattleRuntime = {
           const form = card(current.form || B.party[B.D.cur]);
           const heir = form && heirloomSkill(form);
           outcomes = [
-            "\uBB3C\uB7EC\uB098\uBA74 " + next.name + " HP " + next.hp + "\u2192" + damageRange(hp),
+            "\uBB3C\uB7EC\uB098\uBA74 " + next.name + " HP " + next.hp + "\u2192" + formatRange(hp),
             "\uC4F0\uB7EC\uC9C0\uBA74 " + next.name + "\uC5D0\uAC8C " + (heir ? heir.name + " \xD7" + HEIRLOOM_POWER : "\uB118\uAE38 \uC720\uD488 \uC5C6\uC74C")
           ];
         }
         B.armed = true;
         r.className = "armed";
         const notes = warning ? [warning] : outcomes || ["\uD134 \uC18C\uBAA8 \xB7 \uC720\uD488 \uC5C6\uC74C"];
-        r.innerHTML = esc(current.name) + " \uBB3C\uB7EC\uB098\uAE30" + notes.map((note) => "<small>" + esc(note) + "</small>").join("");
+        r.innerHTML = esc(current.name) + ' \uBB3C\uB7EC\uB098\uAE30<span class="retreat-face">' + faceBadge(next.form, next.name, 32) + "<small>HP " + next.hp + " \u2192 " + formatRange(hp) + "</small></span>" + notes.map((note) => "<small>" + esc(note) + "</small>").join("");
         $("#tally").innerHTML = "";
         ticker(warning && outcomes ? outcomes.join("\n") : line, true);
         sfx.tap();
         return;
       }
-      play(B.bridge.retreat());
+      retreat();
     });
     return { brief, renderActions, lockPanel };
   }
@@ -14110,11 +14723,15 @@ const BattleRuntime = {
       }
       p.stage = "hit";
     }
-    async function strikeAndHit(p, e, stats, seen) {
+    async function strikeAndHit(p, e, stats, seen, finishHit) {
       p.actor.front = 1;
       if (p.stage === "ready") {
         if (isBig(p)) await bigMove(p, seen);
         else await quietMove(p);
+      }
+      if (finishHit) {
+        p.finishing = true;
+        return finishHit(e);
       }
       const calc = e.calc || {};
       impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p) }, stats);
@@ -14142,7 +14759,8 @@ const BattleRuntime = {
           p.actor.pose = poseFor(p.actor, p.kind);
           await wait(0.12);
         }
-        await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
+        if (p.finishing) Object.assign(p.actor, { ox: 0, oy: 0 });
+        else await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
         p.actor.pose = "idle";
         p.actor.front = 0;
         const t = p.target, tu = p.e.target && unitOf(p.e.target);
@@ -14158,6 +14776,105 @@ const BattleRuntime = {
     return { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove };
   }
 
+  // card_pixel/game/src/ui/battle/log.js
+  var number = (value) => value.toLocaleString("en-US");
+  var attackKey = (side, idx, name) => [side, idx, name].join(":");
+  function battleLog(events, party, enemies) {
+    const turns = /* @__PURE__ */ new Map();
+    const casts = /* @__PURE__ */ new Map();
+    const scheduled = /* @__PURE__ */ new Map();
+    let queue = /* @__PURE__ */ new Map();
+    let turn = 1;
+    let serial = 0;
+    let action;
+    let source;
+    function add(text, faces = [], kind = "") {
+      const row = { key: ++serial, text, faces, kind };
+      if (!turns.has(turn)) turns.set(turn, []);
+      turns.get(turn).push(row);
+      return row;
+    }
+    for (const event of events) {
+      let person = function(ref) {
+        if (!ref) return null;
+        const enemy = enemies[ref.idx];
+        const state = ref.side === "enemy" ? event.s?.enemy : event.s?.allies?.[ref.idx];
+        return ref.side === "enemy" ? { id: enemy?.sprite, name: state?.name ?? enemy?.name } : { id: state?.form || party[ref.idx], name: state?.name };
+      };
+      turn = event.t === "turn" ? event.n : event.s?.turn ?? turn;
+      const nextQueue = /* @__PURE__ */ new Map();
+      for (const { by, name, turn: due } of event.s?.delayed ?? []) {
+        const castKey = attackKey("ally", by, name);
+        const key = castKey + ":" + due;
+        const count = (nextQueue.get(key) ?? 0) + 1;
+        nextQueue.set(key, count);
+        if (count <= (queue.get(key) ?? 0)) continue;
+        const cast = casts.get(castKey);
+        if (!cast) continue;
+        cast.kind = "reserve";
+        if (!scheduled.has(key)) scheduled.set(key, []);
+        scheduled.get(key).push(cast);
+      }
+      queue = nextQueue;
+      switch (event.t) {
+        case "act": {
+          const { who, skill } = event;
+          source = who;
+          const key = attackKey(who.side, who.idx, skill.name);
+          const origin = event.delayed ? scheduled.get(key + ":" + turn)?.shift() : null;
+          const faces = [person(who)];
+          if (event.heirFrom) faces.push({ id: event.heirFrom });
+          action = add(skill.name, faces, origin ? "trigger" : event.charge ? "charge" : event.heirFrom ? "heirloom-use" : "");
+          if (origin) {
+            action.origin = origin.key;
+            (origin.hits ??= []).push({ key: action.key, turn });
+          } else if (!event.delayed) casts.set(key, action);
+          break;
+        }
+        case "hp":
+          if (event.delta < 0 && event.cause?.kind === "act" && action?.text === event.cause.skill && source?.side === event.cause.by?.side && source?.idx === event.cause.by?.idx) {
+            action.amount = (action.amount ?? 0) + event.amount;
+          } else if (event.delta) {
+            add((event.delta > 0 ? "\uD68C\uBCF5 +" : "\uD53C\uD574 ") + number(event.amount), [person(event.who)]);
+          }
+          break;
+        case "down":
+        case "enemyDown":
+          add("\uC4F0\uB7EC\uC9D0", [person(event.who)], "down");
+          break;
+        case "retreat":
+          add("\uBB3C\uB7EC\uB0A8 \xB7 \uC0DD\uD658", [person(event.who)], "retreat");
+          break;
+        case "heirloom":
+          add(event.skill.name, [person(event.from), person(event.to)], "heirloom");
+          break;
+        case "log": {
+          const actor = action?.faces[0];
+          const duplicate = actor?.name && event.text?.startsWith(actor.name + "\uC758 " + action.text + "!");
+          if (event.text && !duplicate && !/^(===|---|적에게 [\d,]+ 피해)| 준비\.\.\. \(| 발동!$/.test(event.text)) add(event.text);
+          break;
+        }
+      }
+    }
+    return [...turns].map(([turn2, rows]) => ({ turn: turn2, rows }));
+  }
+  function openBattleLog(sheets2, widgets2, turns = []) {
+    if (!Array.isArray(turns)) turns = [];
+    const portraits = (faces) => faces.filter((face2) => face2?.id).map(({ id, name }) => widgets2.faceBadge(id, name)).join(" \u2192 ");
+    const content = turns.map(({ turn, rows }, index) => '<section class="battle-log-turn" tabindex="-1"' + (index === turns.length - 1 ? " data-latest-turn" : "") + "><h4>" + turn + "\uD134</h4>" + rows.map((row) => {
+      const { key, kind, text, faces, amount: amount2, origin, hits } = row;
+      const heading = kind.startsWith("heirloom") ? "\uC720\uD488 \xB7 " + text : kind === "reserve" ? turn + "\uD134 " + text + " \uC608\uC57D" : kind === "trigger" ? turn + "\uD134 \uBC1C\uB3D9" : kind === "charge" ? text + " \xB7 \uCC28\uC9D5" : text;
+      const jump = origin ? '<button class="log-jump" data-log-jump="' + origin + '">' + esc(text) + " \uC608\uC57D \u2191</button>" : (hits ?? []).map((hit) => '<button class="log-jump" data-log-jump="' + hit.key + '">' + hit.turn + "\uD134 \uBC1C\uB3D9 \u2193</button>").join("");
+      return '<div class="battle-log-row ' + kind + '" id="log-entry-' + key + '" tabindex="-1">' + (faces?.length ? '<div class="log-faces">' + portraits(faces) + "</div>" : "") + "<p>" + esc(heading + (amount2 == null ? "" : " \xB7 " + number(amount2))) + "</p>" + jump + "</div>";
+    }).join("") + "</section>").join("");
+    sheets2.openSheet("\uC804\uD22C \uAE30\uB85D", content || "<p>\uAE30\uB85D \uC5C6\uC74C</p>", { variant: "battle-log", latest: "[data-latest-turn]" });
+    for (const button of $$("#sh-body [data-log-jump]")) button.addEventListener("click", () => {
+      const row = $("#log-entry-" + button.dataset.logJump);
+      row?.focus({ preventScroll: true });
+      row?.scrollIntoView({ block: "nearest" });
+    });
+  }
+
   // card_pixel/game/src/ui/battle/view.js
   function contractSettlement(floor, contract) {
     if (!contract) return [];
@@ -14170,12 +14887,12 @@ const BattleRuntime = {
     return rows;
   }
   function battleMarkup() {
-    return '<section id="battle" class="screen"><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">\uC804\uC7A5\xB7\uC720\uBB3C</button><button id="b-speed">1\uBC30</button><button id="b-log">\uAE30\uB85D</button>' + tools() + '</header><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div><button class="sky" id="sky" aria-label="\uD558\uB298 \uC815\uBCF4"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button><div class="chips" id="pa-chips"></div><div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uB118\uAE30\uB294 \uC911</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
+    return '<section id="battle" class="screen"><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">\uC804\uC7A5\xB7\uC720\uBB3C</button><button id="b-speed">1\uBC30</button><button id="b-log">\uAE30\uB85D</button>' + tools() + '</header><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div><button class="sky" id="sky" aria-label="\uD558\uB298 \uC815\uBCF4"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button><div class="chips" id="pa-chips"></div><div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uB118\uAE30\uB294 \uC911</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
   }
   function createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: St, audio: audio2, sheets: sheets2, details, music: music2 }) {
     const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
     const { sfx } = audio2;
-    const { card, face: face2, spr } = widgets2;
+    const { card, face: face2, faceBadge, spr } = widgets2;
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
     const LINKED_TRAITS = ["ally_death_base_atk_phy", "ally_light_death_base_matk_mag"];
@@ -14233,7 +14950,7 @@ const BattleRuntime = {
     const colorsOf = (ref) => St.ELEMENT_COLORS[elementOf(ref)] || St.ELEMENT_COLORS.none;
     const hud = createHud(core2, St, sfx, widgets2);
     const { ticker, tally, tallyWorthy } = hud;
-    const { brief, renderActions, lockPanel } = createTiles({ core: core2, card, audio: audio2, sheets: sheets2, B, foeDef, play, ticker });
+    const { brief, renderActions, lockPanel } = createTiles({ core: core2, widgets: widgets2, audio: audio2, sheets: sheets2, B, foeDef, play, ticker });
     const { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove } = createMoves({
       stage: St,
       sfx,
@@ -14249,8 +14966,13 @@ const BattleRuntime = {
     const fieldSheet = () => details.fieldSheet(B);
     const render = (fresh) => hud.render(B, fresh);
     function showIntent(intent, countdown) {
-      B.intent = intent;
-      hud.showIntent(intent, countdown, B.foe);
+      B.intent = intent && { ...intent, kind: intent.kind ?? intent.type, dmg: intent.dmg ?? intent.damageRange };
+      hud.showIntent(B.intent, countdown, B.foe);
+    }
+    const isOpening = () => B.door.type === "borrowed" && run.tempoVersion === 2;
+    function renderReady() {
+      const opening = isOpening() && B.D.turn === 1 && B.party[B.D.cur] === "ash" ? openingModel?.(B.bridge) : null;
+      renderActions(Number.isInteger(opening?.stand?.optionIndex) && opening?.rescue ? opening : null);
     }
     function showRegion(event) {
       const node = $("#region-next");
@@ -14261,7 +14983,7 @@ const BattleRuntime = {
         message = bellIn + "\uD134 \uB4A4 \uC801 \uB514\uBC14\uC778 +" + (region.stacks ?? REGIONS.twilight_bell.stacks);
       } else if (region?.id === "tide_cycle" && event && !foeDef().boss) {
         const turns = event.countdown?.inTurns;
-        if (event.intent.kind === "rest") {
+        if (B.intent?.kind === "rest") {
           message = "\uC870\uB958 \xB7 \uC801 \uD734\uC2DD" + (event.intent.vulnerable ? " \xB7 \uBC1B\uB294 \uD53C\uD574 \xD7" + event.intent.vulnerable : "");
         } else if (turns === 0) message = "\uC870\uB958 \xB7 \uC774\uBC88 \uD134 2.5\uBC30";
         else if (turns === 1) message = "\uC870\uB958 \xB7 \uB2E4\uC74C \uD134 2.5\uBC30";
@@ -14329,12 +15051,12 @@ const BattleRuntime = {
       this.textContent = clock.speed + "\uBC30";
       this.classList.toggle("on", clock.speed === 2);
     });
-    $("#b-log").addEventListener("click", () => {
-      const lines = B.log.map((line) => "<p>" + esc(line) + "</p>").join("");
-      sheets2.openSheet("\uC804\uD22C \uAE30\uB85D", lines || "<p>\uAE30\uB85D \uC5C6\uC74C</p>");
-      const body = $("#sh-body");
-      body.scrollTop = body.scrollHeight;
-    });
+    const currentLog = () => B.bridge ? battleLog(B.all.slice(0, B.played), B.party, B.door.enemies) : run?.lastBattleLog;
+    function showLog() {
+      sfx.tap();
+      openBattleLog(sheets2, widgets2, currentLog());
+    }
+    $("#b-log").addEventListener("click", showLog);
     function logLine(text) {
       B.log.push(text);
       if (!/^(===|---)/.test(text)) ticker(text);
@@ -14365,7 +15087,7 @@ const BattleRuntime = {
           sprite: id,
           ...slotPos(i),
           wait: i ? 1 : 0,
-          flip: (spr(id).facing || "right") === "left",
+          flip: (spr(id)?.facing || "right") === "left",
           vis: !u.dead && !u.out,
           aura: u.lastStand ? "red" : null
         });
@@ -14382,6 +15104,10 @@ const BattleRuntime = {
     async function intro(e) {
       B.D = clone(e.s);
       const q = setupBattleStage(), def = foeDef();
+      if (isOpening() && openingModel) {
+        render(true);
+        return;
+      }
       B.allies.forEach((a, i) => {
         if (a) a.x = -60 - i * 26;
       });
@@ -14431,27 +15157,37 @@ const BattleRuntime = {
     }
     async function onHp(e) {
       const p = B.pending;
-      if (p && e.cause.kind === "act" && same(e.cause.by, p.e.who) && e.delta < 0 && !same(e.who, p.e.who)) {
+      if (e.who.side === "enemy" && e.delta < 0 && e.cause?.by?.side === "ally") {
+        const source = e.cause.by;
+        B.lastStriker = {
+          id: unitOf(source)?.form || B.party[source.idx],
+          name: unitOf(source)?.name,
+          donor: p && same(source, p.e.who) ? p.e.heirFrom : null
+        };
+      }
+      const finisher = e === B.finalHit;
+      if (p && e.cause?.kind === "act" && same(e.cause.by, p.e.who) && e.delta < 0 && !same(e.who, p.e.who)) {
         let sum = null;
-        if (p.stage === "ready" && !p.isFoe && tallyWorthy(e, B.hitRecord)) {
+        if (!finisher && p.stage === "ready" && !p.isFoe && tallyWorthy(e, B.hitRecord)) {
           sum = tally(e.calc, e.amount, B.hitRecord);
           if (!isBig(p)) await sum;
         }
-        await strikeAndHit(p, e, B.hitRecord, B.seen);
+        await strikeAndHit(p, e, B.hitRecord, B.seen, finisher ? finishHit : null);
         if (sum) await sum;
         return;
       }
-      if (e.cause.kind === "relay" && e.who.side === "enemy" && e.delta < 0) {
+      if (e.cause?.kind === "relay" && e.who.side === "enemy" && e.delta < 0) {
         await relayHit(e);
         return;
       }
+      if (finisher) return finishHit(e);
       const actor = actorOf(e.who);
       applyHp(e);
       if (!actor) return;
       if (e.delta > 0) {
         St.number("+" + e.amount, St.X(actor), HY(actor) - 2, "heal");
         sfx.buff();
-      } else if (e.cause.kind === "self") {
+      } else if (e.cause?.kind === "self") {
         St.number("-" + e.amount + " \uB300\uAC00", St.X(actor), HY(actor) + 8, "self");
         actor.white = 0.06;
       } else {
@@ -14484,8 +15220,13 @@ const BattleRuntime = {
         for (let i = 0; i < 20; i++) St.fly(sx - 10 + Math.random() * 20, sy - 16 - Math.random() * 40, St.X(foe), CY(foe), 0.26 + Math.random() * 0.14, colors[i % 3], 24, i % 4 ? 1 : 2);
       }
       await wait(0.32);
-      impact(e, { crit: !!e.calc?.crit, adv: !!e.calc?.adv, colors, prefix: "\uBC18\uACA9 " }, B.hitRecord);
-      await wait(0.28);
+      if (e === B.finalHit) {
+        const finisher = B.D.allies[idx >= 0 ? idx : e.cause.victim?.idx];
+        await finishHit(e, finisher && { id: finisher.form, name: finisher.name });
+      } else {
+        impact(e, { crit: !!e.calc?.crit, adv: !!e.calc?.adv, colors, prefix: "\uBC18\uACA9 " }, B.hitRecord);
+        await wait(0.28);
+      }
       if (from) {
         from.pose = "idle";
         from.front = 0;
@@ -14690,6 +15431,12 @@ const BattleRuntime = {
       B.D.enemy.hp = 0;
       render();
       showIntent(null);
+      if (B.finalHit && same(B.finalHit.who, e.who) && B.finishNumber) {
+        St.removeActor(foe);
+        B.foe = null;
+        S.beads.burn = S.beads.divine = 0;
+        return;
+      }
       foe.pose = "hurt";
       foe.white = 0.16;
       foe.front = 1;
@@ -14721,12 +15468,63 @@ const BattleRuntime = {
       sfx.enter();
       await showBanner(e.who.idx + 1 + "/" + B.door.enemies.length, e.name + " \u2014 \uC774\uC5B4\uC11C \uB098\uC120\uB2E4", def.boss ? "ult" : "", 0.6);
     }
+    const bossRoom = () => B.door.type === "boss" || !!B.door.final;
+    const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const frames = (count) => wait(count / 60);
+    async function finishHit(e, striker) {
+      const foe = B.foe;
+      applyHp(e);
+      if (!foe) return;
+      const reduced = reducedMotion();
+      B.finisher = striker ?? (e.cause?.by?.side === "ally" || e.cause?.rule === "overflow" ? B.lastStriker : null);
+      showIntent(null);
+      foe.pose = "hurt";
+      foe.front = 1;
+      if (!reduced) {
+        clock.slow = 0.05;
+        try {
+          await frames((bossRoom() ? 6 : 3) * clock.slow);
+        } finally {
+          clock.slow = 1;
+        }
+      }
+      B.finishNumber = St.number(e.amount.toLocaleString("en-US"), St.X(foe), HY(foe) - 6, "finish-damage");
+      sfx.hit(true);
+      if (!reduced) {
+        foe.white = 0.08;
+        S.shake = bossRoom() ? 6 : 3;
+        St.ring(St.X(foe), CY(foe), "#ffc857", 32);
+        await frames(6);
+        foe.look = "shadow";
+        await tween(foe, { alpha: 0, oy: 14 }, 8 / 60, "in");
+      } else {
+        foe.vis = false;
+      }
+    }
+    function finishPortrait(survivors, amount2) {
+      const faceFrom = B.finisher?.id && faceBadge(B.finisher.id, B.finisher.name);
+      const donor = B.finisher?.donor;
+      const strike = amount2 == null ? "\uB9C8\uC9C0\uB9C9 \uC77C\uACA9" : "\uB9C8\uC9C0\uB9C9 \uC77C\uACA9 \xB7 " + amount2.toLocaleString("en-US") + " \uD53C\uD574";
+      return '<div class="finish-portrait">' + (faceFrom || amount2 != null ? "<div><small>" + strike + "</small>" + (faceFrom || "") + "</div>" : "") + (donor ? "<div><small>\uC720\uD488 \uC6D0\uC8FC\uC778</small>" + faceBadge(donor) + "</div>" : "") + (survivors.length ? '<div><small>\uC0DD\uD658</small><div class="finish-survivors">' + survivors.map((id) => faceBadge(id)).join("") + "</div></div>" : "") + "</div>";
+    }
     async function victory() {
       music2?.play("victory");
       showIntent(null);
       S.danger = 0;
       tween(S, { dark: 0 }, 0.2);
       sfx.win();
+      if (B.finishNumber) {
+        const living = B.bridge.survivors();
+        const survivors = B.party.filter((id, index) => id && living[index]);
+        const plate = document.createElement("div");
+        plate.className = "finish-cast win";
+        plate.innerHTML = "<b>\uC2B9\uB9AC</b>" + finishPortrait(survivors);
+        $("#fx").append(plate);
+        await frames(reducedMotion() ? 2 : bossRoom() ? 44 : 18);
+        plate.remove();
+        B.finishNumber.remove();
+        return;
+      }
       const b = St.banner("\uC2B9\uB9AC", run.floor + "\uCE35 \xB7 " + ROOM_NAMES[B.door.type], "gold big");
       const fp = foePos();
       if (B.door.reward) St.gem(fp.x, S.BASE - 30, S.W - 60, 2, 0.65, () => sfx.gem());
@@ -14852,7 +15650,7 @@ const BattleRuntime = {
           render();
           showIntent(e.intent, e.countdown);
           showRegion(e);
-          renderActions();
+          renderReady();
           break;
         case "win":
           await settlePending();
@@ -14878,8 +15676,7 @@ const BattleRuntime = {
         showRegion(ready);
       } finally {
         if (B.bridge.awaiting) {
-          B.intent = ready?.intent;
-          renderActions();
+          renderReady();
         }
       }
     }
@@ -14894,10 +15691,14 @@ const BattleRuntime = {
         ticker("");
       }
       B.all = B.all.concat(events);
+      if (events.some((e) => e.t === "win")) {
+        B.finalHit = events.findLast((e) => e.t === "hp" && e.who?.side === "enemy" && e.who.idx === B.door.enemies.length - 1 && e.delta < 0 && e.amount > 0 && (e.s?.enemy?.hp ?? 0) === 0);
+      }
       let i = 0;
       try {
         for (; i < events.length; i++) {
           if (bridge !== B.bridge || !$("#battle").classList.contains("on")) return;
+          B.played = start + i + 1;
           await handle(events[i]);
         }
         await settlePending();
@@ -14918,6 +15719,7 @@ const BattleRuntime = {
           console.error("Relay screen recovery failed", entry, recoveryError);
         }
         logLine("\uD654\uBA74 \uC624\uB958\uB97C \uAE30\uB85D\uD588\uB2E4.");
+        B.played = B.all.length;
       } finally {
         if (bridge === B.bridge) {
           B.busy = false;
@@ -14942,6 +15744,8 @@ const BattleRuntime = {
       B.pending = null;
       B.relayBanner = null;
       B.seen = /* @__PURE__ */ new Set();
+      B.played = 0;
+      B.finalHit = B.finishNumber = B.finisher = B.lastStriker = null;
       B.artifacts = options.artifacts;
       B.temporaryRelic = run.nextBattle?.relic;
       B.chargeSpent = false;
@@ -14953,8 +15757,10 @@ const BattleRuntime = {
       battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map((e) => e.id), party: B.party.slice() };
       B.bridge = create(core2, options);
       $("#result").classList.remove("on");
-      $("#battle").classList.remove("resumed-result");
-      relayHint.hidden = door.type !== "borrowed";
+      $("#battle").classList.remove("resumed-result", "opening-decision");
+      $("#acts").innerHTML = "";
+      $("#b-heir").className = "";
+      relayHint.hidden = door.type !== "borrowed" || isOpening() && !!openingModel;
       music2?.play(door.type === "boss" || door.final ? "boss" : "battle", run.dungeonId);
       show("battle");
       layout();
@@ -14962,7 +15768,7 @@ const BattleRuntime = {
       play(B.bridge.start());
     }
     function finishBattle() {
-      const res = onResult(B.bridge.summary());
+      const res = onResult(B.bridge.summary(), currentLog());
       if (res) showResult(res, onContinue);
     }
     function showResult(res, advance2) {
@@ -14974,19 +15780,30 @@ const BattleRuntime = {
       if (res.fallen?.length) rows.push('<div class="fallen"><small>\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC</small><div>' + res.fallen.map((id) => '<span class="mini dead">' + face2(id, 40) + "<b>" + esc(card(id).name) + "</b></span>").join("") + "</div></div>");
       for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>\uC720\uD488</b> ' + esc(card(g.to).name) + " \u2190 " + esc(card(g.from).name) + "\uC758 " + esc(g.name) + "</p>");
       if (res.bet) rows.push("<p>" + (res.bet.won ? "\uB0B4\uAE30 \uC131\uACF5" : "\uB0B4\uAE30 \uC2E4\uD328") + "</p>");
+      if (res.win && (B.finalHit || res.survivors?.length)) rows.unshift(finishPortrait(res.survivors ?? [], B.finalHit?.amount));
       const box = $("#result-in");
       let label2 = "\uB2E4\uC74C \uCE35\uC73C\uB85C";
       if (run.phase === "done") label2 = "\uC6D0\uC815 \uACB0\uACFC";
-      else if (run.room.type === "borrowed") label2 = "\uC0B4\uC544\uB0A8\uC740 \uB3D9\uB8CC \uAE68\uC6B0\uAE30";
-      else if (run.pending?.kind === "gate") label2 = "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1";
+      else if (res.retry) label2 = "\uD3B8\uC131 \uB2E4\uC2DC \uD558\uAE30";
+      else if (run.room.type === "borrowed") {
+        const lead = run.openingLead;
+        if (lead) {
+          const name = card(lead).name;
+          const consonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 44032) % 28 !== 0;
+          label2 = name + (consonant ? "\uACFC \uAC04\uB2E4" : "\uC640 \uAC04\uB2E4");
+          rows.unshift('<div class="opening-result win">' + faceBadge(lead) + "<small>\uCCAB \uB3D9\uD589</small></div>");
+        } else label2 = "\uC0B4\uC544\uB0A8\uC740 \uB3D9\uB8CC \uAE68\uC6B0\uAE30";
+      } else if (run.pending?.kind === "gate") label2 = "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1";
       else if (res.relic?.equipped || run.pending?.kind === "relic") label2 = "\uC720\uBB3C \uD655\uC778";
-      box.innerHTML = "<h3>" + (res.win ? "\uB3CC\uD30C" : "\uC804\uBA78") + "</h3>" + rows.join("") + '<button class="btn go" id="b-next">' + label2 + "</button>";
+      else if (run.pending?.kind === "reinforcement") label2 = "\uB3D9\uB8CC \uBCF4\uCDA9";
+      box.innerHTML = "<h3>" + (res.win ? "\uB3CC\uD30C" : "\uC804\uBA78") + "</h3>" + rows.join("") + '<div class="result-actions"><button class="btn log-button" id="b-result-log">\uAE30\uB85D</button><button class="btn go" id="b-next">' + esc(label2) + "</button></div>";
       $("#result").classList.add("on");
+      $("#b-result-log").addEventListener("click", showLog);
       $("#b-next").addEventListener("click", () => {
         sfx.tap();
         $("#result").classList.remove("on");
         advance2(res);
-      });
+      }, { once: true });
     }
     function attach(expedition) {
       if (run === expedition) return;
@@ -15006,6 +15823,7 @@ const BattleRuntime = {
       B.D = B.foe = B.bridge = null;
       B.allies = [];
       B.log = [];
+      B.finalHit = B.finisher = null;
       B.door = run.room;
       B.artifacts = run.relics;
       B.temporaryRelic = null;
@@ -15013,6 +15831,7 @@ const BattleRuntime = {
       music2?.play("victory");
       St.clear();
       St.setRoom(run.room.bg, !!run.room.final);
+      $("#battle").classList.remove("opening-decision");
       $("#battle").classList.add("resumed-result");
       $("#room").textContent = roomLabel();
       $("#turn").textContent = "";
@@ -15052,30 +15871,126 @@ const BattleRuntime = {
     } };
   }
 
+  // card_pixel/game/src/ui/reveal.js
+  function revealLine(box, skip, sfx, done) {
+    const slots = [...box.querySelectorAll(".wake-slot")];
+    let timer;
+    function finish() {
+      clearTimeout(timer);
+      for (const slot of slots) slot.classList.add("landed");
+      done();
+    }
+    if (!slots.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
+    skip.addEventListener("click", finish, { once: true });
+    let index = 0;
+    function next() {
+      if (!box.isConnected) return;
+      slots[index++].classList.add("landed");
+      sfx.awaken();
+      timer = setTimeout(index < slots.length ? next : finish, 210);
+    }
+    timer = setTimeout(next, 140);
+  }
+  async function reveal(run, widgets2, sfx, box, id, o) {
+    const { card, cardRow, sprite: sprite2 } = widgets2;
+    const opt = o || {}, c = card(id), g = ["legend", "transcendence"].includes(c.grade) ? "legend" : ["rare", "epic"].includes(c.grade) ? c.grade : "normal";
+    const slot = document.createElement("div");
+    slot.className = "revealing win g-" + g;
+    if (opt.first) box.prepend(slot);
+    else box.appendChild(slot);
+    slot.scrollIntoView({ block: "nearest" });
+    if (opt.roll !== false) {
+      const pool = run.pool;
+      for (let i = 0; i < 9; i++) {
+        slot.innerHTML = '<span class="pic">' + sprite2(pool[Math.floor(Math.random() * pool.length)], { cls: "sil" }) + "</span>";
+        sfx.roll();
+        await sleep(55 + i * 12);
+      }
+    }
+    if (g !== "normal") {
+      slot.classList.add("tease");
+      slot.innerHTML = '<span class="pic">' + sprite2(id, { cls: "sil" }) + "</span>";
+      (g === "legend" ? sfx.warn : sfx.charge)();
+      await sleep(g === "legend" ? 650 : g === "epic" ? 380 : 200);
+    }
+    const sparks = { legend: 16, epic: 10, rare: 5 }[g] || 0;
+    const wrap = document.createElement("div");
+    wrap.className = "landing g-" + g + " l-" + g;
+    wrap.innerHTML = (g === "legend" ? '<i class="rays"></i>' : "") + cardRow(run, id, { skills: false, cls: "pop", sheet: true }) + (sparks ? '<span class="sparkle">' + Array.from({ length: sparks }, () => {
+      const a = Math.random() * Math.PI * 2, r = 26 + Math.random() * 46;
+      return '<b style="left:' + Math.round(8 + Math.random() * 84) + "%;top:" + Math.round(15 + Math.random() * 70) + "%;--dx:" + Math.round(Math.cos(a) * r) + "px;--dy:" + Math.round(Math.sin(a) * r) + "px;animation-delay:" + Math.round(Math.random() * 160) + 'ms"></b>';
+    }).join("") + "</span>" : "");
+    slot.replaceWith(wrap);
+    if (g === "legend") {
+      sfx.jackpot();
+      flashFrame("gold");
+    } else if (g === "epic") {
+      sfx.awaken();
+      flashFrame("violet");
+    } else sfx.awaken();
+    await sleep(g === "legend" ? 900 : g === "epic" ? 420 : 240);
+  }
+  function flashFrame(kind) {
+    const f = document.createElement("div");
+    f.className = "flash " + kind;
+    $("#frame").appendChild(f);
+    setTimeout(() => f.remove(), 800);
+  }
+
   // card_pixel/game/src/ui/screens/awaken.js
   function awakenScreen(run, ui) {
     ui.playMusic();
-    const { card, cardRow } = ui.widgets;
+    const { card, cardRow, faceBadge } = ui.widgets;
     const { sfx } = ui.audio;
     const node = $("#awaken");
     const pending = run.pending;
     const intro = run.dungeonId === "dawn_forest";
+    const lead = intro ? run.openingLead : null;
+    const introCandidates = run.introCandidates ?? [];
     const observed = intro ? { ...run, heirlooms: { ...run.introHeirlooms, ...run.heirlooms } } : run;
+    const leadPlate = (id) => '<div class="wake-lead win">' + faceBadge(id) + "<span>\uCCAB \uB3D9\uD589" + (observed.heirlooms[id] ? "<small>\uC720\uD488 \xB7 " + esc(observed.heirlooms[id].name) + "</small>" : "") + "</span></div>";
+    function line(ids) {
+      return ids.map((id) => '<button class="wake-face win g-' + esc(card(id).grade) + '" data-sheet="' + esc(id) + '">' + faceBadge(id) + "</button>").join("");
+    }
+    function completed2(chosen, awakened, animate) {
+      const summary = chosen.length === 2 && awakened.length === 3 ? "\uB0B4\uAC00 \uC815\uD55C \uB458 + \uAE68\uC5B4\uB09C \uC14B + \uACB0\uC815 " + run.crystals : "\uB0B4\uAC00 \uC815\uD55C " + chosen.length + "\uBA85 + \uAE68\uC5B4\uB09C " + awakened.length + "\uBA85 + \uACB0\uC815 " + run.crystals;
+      node.innerHTML = head(run, "\uCCAB \uAE68\uC6B0\uAE30", "2\uCE35") + '<div class="scroll">' + (lead ? leadPlate(lead) : "") + '<h3>\uB0B4\uAC00 \uC815\uD55C \uB3D9\uB8CC</h3><div class="wake-line">' + line(chosen.filter((id) => id !== lead)) + '</div><h3>\uAE68\uC5B4\uB09C \uB3D9\uB8CC</h3><div class="wake-line" id="wake-draws">' + awakened.map((id) => '<div class="wake-slot g-' + esc(card(id).grade) + '">' + line([id]) + "</div>").join("") + '</div><p class="wake-summary win" aria-live="polite"></p></div><div class="footer"><button class="btn" id="b-wake-skip">\uAC74\uB108\uB6F0\uAE30</button><button class="btn go" id="b-depart" hidden>\uAFC8\uAE38\uB85C</button></div>';
+      show("awaken");
+      const skip = $("#b-wake-skip", node);
+      const depart = $("#b-depart", node);
+      depart.addEventListener("click", ui.leave, { once: true });
+      const box = $("#wake-draws", node);
+      function done() {
+        if (!box.isConnected) return;
+        $(".wake-summary", node).textContent = summary;
+        skip.hidden = true;
+        depart.hidden = false;
+      }
+      if (animate) revealLine(box, skip, sfx, done);
+      else {
+        for (const slot of box.children) slot.classList.add("landed");
+        done();
+      }
+    }
     if (!pending) {
+      if (lead && run.bench.includes(lead)) {
+        const split = Math.max(1, run.bench.length - START.draws);
+        return completed2(run.bench.slice(0, split), run.bench.slice(split), false);
+      }
       node.innerHTML = head(run, "\uCCAB \uAE68\uC6B0\uAE30", "2\uCE35") + '<div class="scroll"><h3>\uC774\uBC88 \uC6D0\uC815 \uD569\uB958</h3><div class="cards">' + run.bench.map((id) => cardRow(run, id, { sheet: true, skills: false })).join("") + '</div></div><div class="footer"><button class="btn go" id="b-depart">\uAFC8\uAE38\uB85C</button></div>';
       show("awaken");
       $("#b-depart", node).addEventListener("click", ui.leave);
       return;
     }
     const near = pending.near && card(pending.near);
-    const info = intro ? "\uAE68\uC6B4 \uB3D9\uB8CC\uB294 \uC774\uBC88 \uC6D0\uC815\uC5D0 \uD569\uB958\uD55C\uB2E4." : "\uB3D9\uB8CC\uB97C \uACE0\uB974\uBA74 \uBB34\uC791\uC704\uB85C " + START.draws + "\uBA85\uC774 \uB354 \uAE68\uC5B4\uB09C\uB2E4.";
-    const allies = run.bench.length ? '<h3>\uC774\uBC88 \uC6D0\uC815 \uD569\uB958</h3><div class="cards">' + run.bench.map((id) => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? "\uB300\uD45C" : "" })).join("") + "</div>" : "";
-    const candidates = intro ? pending.candidates.slice().sort((a, b) => Number(run.introCandidates.includes(b)) - Number(run.introCandidates.includes(a))) : pending.candidates;
+    const info = lead ? "\uD568\uAED8 \uAC08 \uB3D9\uB8CC \uD55C \uBA85\uC744 \uACE0\uB978\uB2E4." : intro ? "\uAE68\uC6B4 \uB3D9\uB8CC\uB294 \uC774\uBC88 \uC6D0\uC815\uC5D0 \uD569\uB958\uD55C\uB2E4." : "\uB3D9\uB8CC\uB97C \uACE0\uB974\uBA74 \uBB34\uC791\uC704\uB85C " + START.draws + "\uBA85\uC774 \uB354 \uAE68\uC5B4\uB09C\uB2E4.";
+    const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>\uC774\uBC88 \uC6D0\uC815 \uD569\uB958</h3><div class="cards">' + run.bench.map((id) => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? "\uB300\uD45C" : "" })).join("") + "</div>" : "";
+    const candidates = intro ? pending.candidates.slice().sort((a, b) => Number(introCandidates.includes(b)) - Number(introCandidates.includes(a))) : pending.candidates;
     const cards = candidates.map((id) => {
-      const tag = run.introCandidates.includes(id) ? "\uB300\uC5EC \uC804\uD22C \uC0DD\uD658" : id === run.profileShard ? "\uC608\uC57D \uD6C4\uBCF4" : near && card(id).element === near.element ? "\uAC19\uC740 \uC18D\uC131" : "";
+      const tag = introCandidates.includes(id) ? "\uB300\uC5EC \uC804\uD22C \uC0DD\uD658" : id === run.profileShard ? "\uC608\uC57D \uD6C4\uBCF4" : near && card(id).element === near.element ? "\uAC19\uC740 \uC18D\uC131" : "";
       return cardRow(observed, id, { tag });
     }).join("");
-    node.innerHTML = head(run, "\uCCAB \uAE68\uC6B0\uAE30", "\uB0A8\uC740 \uC120\uD0DD " + pending.remaining) + '<div class="scroll"><p class="lead">' + info + "</p>" + allies + '<div class="cards" id="wake-choices">' + cards + '</div></div><div class="footer"><button class="btn go" id="b-wake"' + (cards ? " disabled" : "") + ">" + (cards ? "\uD55C \uBA85\uC744 \uACE0\uB978\uB2E4" : "\uACC4\uC18D\uD55C\uB2E4") + "</button></div>";
+    node.innerHTML = head(run, "\uCCAB \uAE68\uC6B0\uAE30", "\uB0A8\uC740 \uC120\uD0DD " + pending.remaining) + '<div class="scroll">' + allies + '<p class="lead">' + info + '</p><div class="cards" id="wake-choices">' + cards + '</div></div><div class="footer"><button class="btn go" id="b-wake"' + (cards ? " disabled" : "") + ">" + (cards ? "\uD55C \uBA85\uC744 \uACE0\uB978\uB2E4" : "\uACC4\uC18D\uD55C\uB2E4") + "</button></div>";
     show("awaken");
     let selected = null;
     const button = $("#b-wake", node);
@@ -15090,14 +16005,181 @@ const BattleRuntime = {
       });
     }
     button.addEventListener("click", () => {
-      if (!ui.command(chooseStartPick, selected).ok) return;
+      const result = ui.command(chooseStartPick, selected);
+      if (!result.ok) return;
       sfx.awaken();
+      if (intro && !run.pending && Array.isArray(result.awakened)) {
+        return completed2(run.bench.filter((id) => !result.awakened.includes(id)), result.awakened, true);
+      }
       ui.route();
     });
   }
 
+  // card_pixel/game/src/stage/walking-map.js
+  var WIDTH = 366;
+  var HEIGHT = 350;
+  var FRAME_MS = 1e3 / 60;
+  var ENTRY_END = 22;
+  var ZOOM_START = 14;
+  var ROOM_OPEN = 23;
+  var FORK = [195, 243];
+  var BRANCHES = {
+    1: [{ center: [276, 203], bends: [[229, 231]] }],
+    2: [
+      { center: [278, 162], bends: [[220, 209], [248, 186]] },
+      { center: [282, 275], bends: [[231, 260], [255, 291]] }
+    ],
+    3: [
+      { center: [278, 162], bends: [[220, 209], [248, 186]] },
+      { center: [320, 230], bends: [[235, 240], [272, 252]] },
+      { center: [274, 295], bends: [[220, 269], [241, 307]] }
+    ]
+  };
+  var lastExit = /* @__PURE__ */ new WeakMap();
+  function getWalkLayout(run) {
+    const prior = lastExit.get(run);
+    const slope = prior?.floor === run.floor - 1 ? prior.slope : 0;
+    const entry = [[-100, 326 - slope * 46], [34, 303 - slope * 4], [102, 278], FORK];
+    const branches = BRANCHES[run.doors.length].map(({ center, bends }) => ({
+      center,
+      path: [FORK, ...bends, [center[0], center[1] + 23]]
+    }));
+    return { entry, branches };
+  }
+  function mapPosition([x, y]) {
+    return [x * 100 / WIDTH + "%", y * 100 / HEIGHT + "%"];
+  }
+  function paintPath(canvas, points) {
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    const ctx = canvas.getContext("2d");
+    ctx.lineJoin = "bevel";
+    ctx.beginPath();
+    ctx.moveTo(...points[0]);
+    for (const point of points.slice(1)) ctx.lineTo(...point);
+    for (const [width, color] of [[32, "#130e20b8"], [28, "#a38d8a88"], [24, "#312436ad"]]) {
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.stroke();
+    }
+    ctx.setLineDash([3, 12]);
+    ctx.strokeStyle = "#cbb09d66";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  function measurePath(points) {
+    let length = 0;
+    const segments = points.slice(1).map(([x, y], index) => {
+      const [fromX, fromY] = points[index];
+      const dx = x - fromX, dy = y - fromY;
+      const start = length;
+      length += Math.hypot(dx, dy);
+      return { start, end: length, fromX, fromY, dx, dy };
+    });
+    return { segments, length };
+  }
+  var clamp2 = (value) => Math.min(1, Math.max(0, value));
+  var lerp = (from, to, t) => from + (to - from) * t;
+  var pixelStep = (value) => 2 * Math.round(value / 2);
+  function moveActor(actor, track, distance, step, stance) {
+    const segment = track.segments.find((part) => part.end >= distance) ?? track.segments.at(-1);
+    const t = clamp2((distance - segment.start) / (segment.end - segment.start));
+    const point = [pixelStep(segment.fromX + segment.dx * t), pixelStep(segment.fromY + segment.dy * t)];
+    const [x, y] = mapPosition(point);
+    const lift = step >= 0 && Math.floor(step / 2) % 2 ? -2 : 0;
+    const lean = stance && step >= 0 ? 6 * segment.dy / Math.hypot(segment.dx, segment.dy) : 0;
+    actor.style.transform = "translate3d(" + x + "," + y + ",0)";
+    actor.style.zIndex = point[1];
+    actor.style.setProperty("--foot-lift", lift + "px");
+    actor.style.setProperty("--walk-lean", lean + "deg");
+  }
+  function mountWalkingMap(scene, layout, { run, instant, open, footstep }) {
+    const landscape = scene.querySelector(".map-landscape");
+    const trunks = scene.querySelector(".map-trails");
+    const canvases = scene.querySelectorAll(".map-trail");
+    const doors = scene.querySelectorAll(".map-door");
+    const skip = scene.querySelector(".map-skip");
+    const actors = [...scene.querySelectorAll(".map-walker-anchor")].map((node) => ({
+      node,
+      seat: Number(node.dataset.seat)
+    }));
+    paintPath(canvases[0], layout.entry);
+    const tracks = layout.branches.map((branch, index) => {
+      paintPath(canvases[index + 1], branch.path);
+      return measurePath([...layout.entry, ...branch.path.slice(1)]);
+    });
+    const entryTrack = measurePath(layout.entry);
+    const readyDistance = entryTrack.length - 31;
+    let raf = 0, completed2 = false;
+    function play(lastFrame, draw, finish) {
+      const start = performance.now();
+      function tick(now) {
+        if (!scene.isConnected) return;
+        const frame = Math.min(lastFrame, Math.max(0, Math.floor((now - start) / FRAME_MS)));
+        draw(frame);
+        if (frame === lastFrame) finish?.();
+        else raf = requestAnimationFrame(tick);
+      }
+      draw(0);
+      raf = requestAnimationFrame(tick);
+    }
+    function enter(frame) {
+      const approach = clamp2((frame - 5) / 8);
+      scene.dataset.walkPhase = frame === ENTRY_END ? "ready" : "arrival";
+      landscape.style.transform = "translateX(" + (approach * 2 - 2) + "px)";
+      trunks.style.transform = "translateX(" + (approach * 4 - 4) + "px)";
+      scene.style.setProperty("--branch-light", clamp2((frame - 13) / 9));
+      for (const { node, seat } of actors) {
+        const step = frame - 5 - seat * 2;
+        const distance = lerp(106, readyDistance, clamp2(step / 8)) - seat * 39;
+        moveActor(node, entryTrack, distance, step < 8 ? step : -1, false);
+      }
+    }
+    function walkThrough(index) {
+      if (completed2) return;
+      completed2 = true;
+      cancelAnimationFrame(raf);
+      if (!scene.isConnected) return;
+      const y = layout.branches[index].center[1];
+      lastExit.set(run, { floor: run.floor, slope: y < 188 ? -1 : y > 253 ? 1 : 0 });
+      open();
+    }
+    function select(index) {
+      cancelAnimationFrame(raf);
+      if (instant()) return walkThrough(index);
+      enter(ENTRY_END);
+      skip.hidden = false;
+      skip.onclick = () => walkThrough(index);
+      const track = tracks[index];
+      const zoom = doors[index].querySelector(".map-door-frame");
+      doors[index].classList.add("chosen");
+      canvases[index + 1].classList.add("chosen");
+      let footsteps = 0;
+      play(ROOM_OPEN, (frame) => {
+        scene.dataset.walkPhase = frame < 4 ? "chosen" : frame < ZOOM_START ? "walking" : "zoom";
+        for (const { node, seat } of actors) {
+          const step = frame - 3 - seat * 2;
+          const distance = lerp(readyDistance, track.length, clamp2(step / 10)) - seat * 39;
+          moveActor(node, track, distance, step < 10 ? step : -1, true);
+        }
+        const due = Number(frame >= 5) + Number(frame >= 11);
+        while (footsteps < due) {
+          footstep();
+          footsteps++;
+        }
+        const progress = clamp2((frame - (ZOOM_START - 1)) / 9);
+        scene.style.setProperty("--other-paths", 1 - progress);
+        scene.style.setProperty("--scene-opacity", 1 - progress);
+        zoom.style.transform = "scale(" + (1 + 14 * progress ** 2) + ")";
+        zoom.style.setProperty("--door-dark", clamp2((progress - 0.43) / 0.57));
+      }, () => walkThrough(index));
+    }
+    if (instant()) enter(ENTRY_END);
+    else play(ENTRY_END, enter);
+    return select;
+  }
+
   // card_pixel/game/src/ui/screens/map.js
-  var MARCH_MS = 500;
   var AFFIX_RISK = {
     tough: "\uCCAB 3\uD134 \uC801 \uD53C\uD574 \uC808\uBC18",
     frenzy: "\uC801 HP \uC808\uBC18\uBD80\uD130 \uACF5\uACA9 \xD71.5",
@@ -15119,6 +16201,20 @@ const BattleRuntime = {
   function confront(name) {
     const endsWithConsonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 44032) % 28 !== 0;
     return name + (endsWithConsonant ? "\uACFC \uB300\uBA74" : "\uC640 \uB300\uBA74");
+  }
+  function primaryBeat(door, preview) {
+    const pattern = preview?.pattern ?? door.tempo?.pattern;
+    const beats = preview?.enemies?.[0]?.beats ?? [];
+    const turn = { introFixed: 1, threeBeat: 2, tide: 3 }[pattern];
+    return beats.find((beat) => beat.turn === turn) ?? (pattern === "bossScript" ? beats.filter((beat) => TYPE[beat.type] && beat.power > 1).sort((a, b) => b.power - a.power || a.turn - b.turn)[0] : void 0);
+  }
+  function doorDecision(run, door, preview) {
+    const crystals = (door.reward ?? 0) - (run.floor === 4 && door.type === "gate" && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0);
+    if (!door.enemies.length) return REGIONS[door.regionChoice?.id]?.name ?? ROOM_NAMES[door.type] ?? door.name;
+    const beat = primaryBeat(door, preview);
+    const type = TYPE[beat?.type ?? door.intent];
+    const risk = type ? type + (beat?.name === "\uC77C\uBC18 \uACF5\uACA9" ? " \uACF5\uACA9" : " \uAC15\uACF5") : ROOM_NAMES[door.type] ?? door.name;
+    return !run.daily && crystals > 0 ? risk + " \xB7 \uACB0\uC815 " + crystals : risk;
   }
   function mapScreen(run, ui) {
     ui.playMusic();
@@ -15215,10 +16311,20 @@ const BattleRuntime = {
         }).join("");
         return '<span class="door-lineup">' + previews + "</span>";
       }
-      const visitor = door.event?.requires.present?.[0];
+      const visitor = door.event?.requires?.present?.[0];
       if (visitor) return '<span class="run-face" title="' + esc(card(visitor).name) + '">' + face2(visitor, 44) + "</span>";
       return icon2(door.type);
     }
+    const layout = getWalkLayout(run);
+    const tempoViews = run.doors.map((door) => getTempoView?.(run, door.index));
+    const portals = run.doors.map((door, index) => {
+      const [x, y] = mapPosition(layout.branches[index].center);
+      const enemy = door.enemies[0];
+      const visitor = door.event?.requires?.present?.[0];
+      const art = enemy && sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: "map-door-shadow" }) || visitor && sprite2(visitor) || icon2(door.relic || (door.type === "wild" ? "battle" : door.type));
+      const label = doorDecision(run, door, tempoViews[index]);
+      return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + door.type + '" aria-label="' + esc(door.name + " \xB7 " + label) + '" style="--door-x:' + x + ";--door-y:" + y + '"><span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span><span class="map-door-emblem">' + art + '</span></span><small class="map-door-line">' + esc(label) + "</small></button>";
+    }).join("");
     const doors = run.doors.map((door) => {
       const enemy = door.enemies[0];
       const isShowdown = run.doors.length === 1 && !!enemy;
@@ -15237,34 +16343,49 @@ const BattleRuntime = {
     const front = defaultParty(run);
     const lineup = front.map((id, index) => {
       if (!id) return "";
-      const role = POSITION[index], art = spr(id);
+      const role = POSITION[index];
+      const art = spr(id);
+      if (!art) return "";
       const flip = art.facing === "left";
-      const center = flip ? art.w - art.cx : art.cx;
-      const style = "width:" + art.w * 2 + "px;height:" + art.h * 2 + "px;left:calc(50% - " + center * 2 + "px);bottom:" + (art.fy + 1 - art.h) * 2 + "px;";
-      return '<button class="map-actor" style="grid-column:' + (index + 1) + '" data-sheet="' + esc(id) + '" aria-label="' + esc(role + " " + card(id).name) + '"><span class="map-actor-art">' + sprite2(id, { flip, style }) + "</span><small>" + role + "</small></button>";
+      const scale = 0.85;
+      const style = "width:" + art.w * scale + "px;height:" + art.h * scale + "px;left:" + -art.cx * scale + "px;top:" + -(art.fy + 1) * scale + "px;transform-origin:" + art.cx * scale + "px " + (art.fy + 1) * scale + "px;";
+      return '<div class="map-walker-anchor" data-seat="' + index + '"><button type="button" class="map-actor map-walker" data-sheet="' + esc(id) + '" aria-label="' + esc(role + " " + card(id).name) + '"><span class="map-walker-art">' + sprite2(id, { flip, style }) + "</span><small>" + role + "</small></button></div>";
     }).join("");
-    const cast = '<div class="map-party" style="--march-time:' + MARCH_MS + 'ms">' + lineup + "</div>";
+    const landscape = '<div class="map-landscape" aria-hidden="true"></div>';
+    const trails = '<div class="map-trails" aria-hidden="true">' + '<canvas class="map-trail"></canvas>'.repeat(1 + run.doors.length) + "</div>";
+    const cast = '<div class="map-walkers">' + lineup + "</div>";
+    const skip = '<button type="button" class="map-skip" hidden><span>\uAC74\uB108\uB6F0\uAE30</span></button>';
     const reserve = { ...run, bench: run.bench.filter((id) => !front.includes(id)) };
     const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + "</button>" : "";
     const title = rift ? [shortRiftDate(rift.spec?.dayKey), "\uADE0\uC5F4"].filter(Boolean).join(" ") : dungeon.name;
-    node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, cast) + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
+    node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + "</div>" + skip, "walking-map") + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
     show("map");
-    const party = $(".map-party", node);
-    for (const button of $$("[data-door]", node)) {
-      button.addEventListener("click", async () => {
-        if (party.classList.contains("marching")) return;
-        ui.audio.unlockAudio();
-        ui.audio.sfx.tap();
-        if (lineup && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          party.classList.add("marching");
-          await sleep(MARCH_MS);
-        }
-        if (party.isConnected && node.classList.contains("on")) ui.enterDoor(Number(button.dataset.door));
-      });
+    const walkTo = mountWalkingMap($(".walking-map", node), layout, {
+      run,
+      instant: () => window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.__game?.clock?.speed > 1,
+      open: ui.route,
+      footstep: ui.audio.sfx.enter
+    });
+    let locked = false;
+    const choices = $$("[data-door], [data-map-door]", node);
+    function choose(index) {
+      if (locked) return;
+      locked = true;
+      if (!ui.command(chooseDoor, index).ok) {
+        locked = false;
+        return;
+      }
+      ui.audio.unlockAudio();
+      ui.audio.sfx.tap();
+      for (const button of $$("button:not(.map-skip)", node)) button.disabled = true;
+      walkTo(index);
+    }
+    for (const button of choices) {
+      button.addEventListener("click", () => choose(Number(button.dataset.door ?? button.dataset.mapDoor)));
     }
     for (const button of $$("[data-info]", node)) {
       button.addEventListener("click", () => {
-        if (!party.classList.contains("marching")) describeDoor(run.doors[Number(button.dataset.info)]);
+        if (!locked) describeDoor(run.doors[Number(button.dataset.info)]);
       });
     }
     $("#b-floors", node).addEventListener("click", () => {
@@ -15275,10 +16396,13 @@ const BattleRuntime = {
     $("#b-roster", node)?.addEventListener("click", () => openSheet("\uB300\uAE30 \uB3D9\uB8CC", '<div class="benchrow">' + benchMinis(reserve) + "</div>"));
     function describeDoor(door) {
       const ready = doorEnemies?.(run, door.index);
+      const tempo = tempoViews[door.index];
       const enemies = door.enemies.map((enemy, index) => {
         const strong = Object.keys(ELEMENT).filter((element) => core2.Logic.getElementalMultiplier(element, enemy.element) > 1);
-        const hp = ready?.[index]?.maxHp ?? enemy.stats.hp;
-        return '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4><p>" + esc(ELEMENT[enemy.element] || "") + " \xB7 HP " + hp + "</p>" + (strong.length ? "<p>\uC0C1\uC131 \uC6B0\uC704 \xB7 " + strong.map((element) => ELEMENT[element]).join(" \xB7 ") + "</p>" : "") + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id].name + (id === "treasure" ? "" : " \xB7 " + AFFIXES[id].desc)) + "</p>").join("") + "</div></div>";
+        const preview = tempo?.enemies?.[index];
+        const hp = preview?.maxHp ?? ready?.[index]?.maxHp ?? enemy.stats.hp;
+        const beats = preview?.beats?.map((beat) => beat.turn + "\uD134 \xB7 " + beat.name + (TYPE[beat.type] ? " (" + TYPE[beat.type] + ")" : "")) ?? [];
+        return '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4><p>" + esc(ELEMENT[enemy.element] || "") + " \xB7 HP " + hp + "</p>" + (strong.length ? "<p>\uC0C1\uC131 \uC6B0\uC704 \xB7 " + strong.map((element) => ELEMENT[element]).join(" \xB7 ") + "</p>" : "") + (beats.length ? "<p>" + esc(beats.join(" / ")) + "</p>" : "") + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id].name + (id === "treasure" ? "" : " \xB7 " + AFFIXES[id].desc)) + "</p>").join("") + "</div></div>";
       }).join("");
       const region = REGIONS[door.region?.id], quirk = QUIRKS[door.quirk], relic = !door.final && artifacts.get(door.relic);
       const rule = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
@@ -15290,71 +16414,112 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/screens/order.js
+  function formationMoves(party, target, name) {
+    const seats = party.slice();
+    const moves = [];
+    for (const [i, id] of target.entries()) {
+      if (id === seats[i] || !id) continue;
+      const j = seats.indexOf(id);
+      if (j >= 0) {
+        moves.push(seats[i] ? POSITION[i] + " " + name(seats[i]) + " \u2194 " + POSITION[j] + " " + name(id) : POSITION[j] + " " + name(id) + " \u2192 " + POSITION[i]);
+        [seats[i], seats[j]] = [seats[j], seats[i]];
+      }
+    }
+    for (const [i, id] of target.entries()) {
+      if (id && id !== seats[i]) moves.push("\uB300\uAE30 " + name(id) + " \uD22C\uC785");
+    }
+    return moves;
+  }
   function orderScreen(run, ui) {
     ui.playMusic();
     const { core: core2, widgets: widgets2, audio: audio2, sheets: sheets2 } = ui;
-    const { card, sprite: sprite2, face: face2 } = widgets2;
+    const { card, sprite: sprite2, face: face2, faceBadge } = widgets2;
     const { sfx } = audio2;
     const node = $("#order");
     const room = run.room;
-    const party = room.party?.slice() ?? defaultParty?.(run)?.slice() ?? [0, 1, 2].map((i) => run.bench[i] || null);
-    const all = core2.GameUtils.getAllCards();
-    const qualifiers = !run.daily && (room.type === "gate" || room.type === "boss");
+    const tempo = getTempoView?.(run, room.index);
+    const seats = (ids) => POSITION.map((_, i) => ids?.[i] ?? null);
+    let party = seats(room.party ?? tempo?.party ?? defaultParty(run));
+    const alternative = room.type === "boss" && run.guide?.bossOrder ? tempo?.suggestedParty ?? suggestOrder(run) : null;
+    const alternateSeats = alternative?.some(Boolean) ? seats(alternative) : null;
+    const blessing = tempo?.blessing ?? room.tempo?.blessing;
     const quirk = QUIRKS[room.quirk];
-    const alternative = room.type === "boss" && run.guide?.bossOrder ? suggestOrder?.(run) : null;
-    const alternateSeats = alternative?.length ? [0, 1, 2].map((i) => alternative[i] ?? null) : null;
-    let selected = -1;
+    const qualifies = !run.daily && (room.type === "gate" || room.type === "boss");
+    const all = core2.GameUtils.getAllCards();
+    const name = (id) => card(id)?.name || id;
+    let selected = null;
+    let beforeHint = null;
     function orderHint() {
-      if (!alternateSeats || alternateSeats.every((id, i) => id === party[i])) return "";
-      const last = alternative.at(-1);
-      const heir = heirloomPreview(core2, alternateSeats).find((entry) => entry.to === last && entry.skill);
-      const inheritance = heir ? card(last).name + "\uC5D0\uAC8C " + heir.skill.name + " \xD7" + HEIRLOOM_POWER : "\uB118\uAE38 \uACF5\uACA9 \uC5C6\uC74C";
-      return '<div class="relay-alternative win"><div><b>\uB2E4\uB978 \uC21C\uC11C \xB7 ' + esc(alternative.map((id) => card(id).name).join(" \u2192 ")) + "</b><small>" + esc(inheritance) + '</small></div><button class="btn" id="b-alternate-order">\uC774 \uC21C\uC11C\uB85C</button></div>';
+      if (beforeHint) return '<button class="btn relay-undo" id="b-alternate-order">\uB418\uB3CC\uB9AC\uAE30</button>';
+      if (!alternateSeats) return "";
+      const moves = formationMoves(party, alternateSeats, name);
+      if (!moves.length) return "";
+      return '<button class="btn relay-alternative" id="b-alternate-order">' + moves.map((move) => "<b>" + esc(move) + "</b>").join("") + "</button>";
+    }
+    function traitLine(fighter, index) {
+      const trait = fighter?.trait;
+      if (!trait) return "";
+      if (trait.type === "pos_stat_boost") {
+        return trait.pos === index ? "\uC790\uB9AC \uD6A8\uACFC \uBC1C\uB3D9" : POSITION[trait.pos] + " \uC804\uC6A9";
+      }
+      if (/^syn_/.test(trait.type)) {
+        return core2.Logic.calculateInitialStats(fighter, party, all, index).activeTrait ? "\uC2DC\uB108\uC9C0 \uBC1C\uB3D9" : "\uC2DC\uB108\uC9C0 \uC870\uAC74 \uBD80\uC871";
+      }
+      return trait.desc;
+    }
+    function select(choice) {
+      sfx.tap();
+      if (!selected || selected.bench && choice.bench || selected.slot === choice.slot) {
+        selected = selected?.slot === choice.slot && selected?.bench === choice.bench ? null : choice;
+      } else {
+        const slot = choice.slot ?? selected.slot;
+        const bench = choice.bench ?? selected.bench;
+        if (bench) party[slot] = bench;
+        else [party[selected.slot], party[slot]] = [party[slot], party[selected.slot]];
+        selected = null;
+      }
+      render();
     }
     function render() {
       const previews = heirloomPreview(core2, party);
       const slots = party.map((id, i) => {
         const fighter = id && card(id);
-        const picked = selected === i ? " sel" : "";
-        const preview = previews[i];
-        const link = preview.skill ? "\uC4F0\uB7EC\uC9C0\uBA74 \u2193 " + card(preview.to).name + "\uC5D0\uAC8C " + preview.skill.name + " \xD7" + HEIRLOOM_POWER : "\uB118\uAE38 \uACF5\uACA9 \uC5C6\uC74C";
-        const replaced = preview.skill && run.heirlooms[preview.to]?.name;
-        const recruitment = run.recruited?.includes(id) ? "\uC0DD\uD658 \uC2DC \uC778\uC5F0" : "\uC0DD\uD658 \uC2DC \uC601\uC785 \uD6C4\uBCF4";
-        let trait = "";
-        if (fighter?.trait.type === "pos_stat_boost") {
-          trait = fighter.trait.pos === i ? "\uC790\uB9AC \uD6A8\uACFC \uBC1C\uB3D9" : POSITION[fighter.trait.pos] + " \uC804\uC6A9";
-        } else if (fighter && /^syn_/.test(fighter.trait.type)) {
-          trait = core2.Logic.calculateInitialStats(fighter, party, all, i).activeTrait ? "\uC2DC\uB108\uC9C0 \uBC1C\uB3D9" : "\uC2DC\uB108\uC9C0 \uC870\uAC74 \uBD80\uC871";
-        }
-        return '<button class="relay-seat win' + picked + '" data-slot="' + i + '" aria-pressed="' + (selected === i) + '"><small>' + POSITION[i] + '</small><span class="run-face">' + (id ? face2(id, 44) : "") + "</span><span><b>" + esc(fighter?.name || "\uBE48 \uC790\uB9AC") + '</b><span class="badges">' + (id ? badges(run, id) : "") + "</span>" + (trait ? "<small>" + esc(trait) + "</small>" : "") + "</span>" + (id && qualifiers ? '<small class="recruit-flag">' + recruitment + "</small>" : "") + "</button>" + (i < 2 ? '<p class="relay-link">' + esc(link) + (replaced ? "<small>" + esc(replaced) + " \uC720\uD488\uC744 \uAD50\uCCB4\uD55C\uB2E4</small>" : "") + "</p>" : "");
+        const trait = traitLine(fighter, i);
+        const active2 = selected?.slot === i;
+        return '<button class="relay-seat win' + (active2 ? " sel" : "") + '" data-slot="' + i + '" aria-pressed="' + active2 + '"><small>' + POSITION[i] + '</small><span class="run-face">' + (id ? face2(id, 44) : "") + "</span><b>" + esc(fighter?.name || "\uBE48 \uC790\uB9AC") + '</b><small class="relay-trait" title="' + esc(trait) + '">' + esc(trait) + "</small></button>";
       }).join("");
+      const links = previews.slice(0, 2).map((entry, i) => '<button class="relay-link" data-link="' + i + '" aria-label="' + POSITION[i] + ' \uC720\uD488 \uD750\uB984"' + (entry.skill ? "" : " disabled") + ">\u2192</button>").join("");
       const bench = run.bench.filter((id) => !party.includes(id));
-      const hazards = [quirk?.name, ...new Set(room.enemies.flatMap((enemy) => (enemy.affixes || []).map((id) => AFFIXES[id].name)))].filter(Boolean);
+      const returning = qualifies ? party.filter((id) => id && run.recruited?.includes(id)) : [];
+      const recruits = qualifies ? party.filter((id) => id && !returning.includes(id)) : [];
+      const survival2 = [
+        recruits.length && (returning.length ? recruits.map(name).join(" \xB7 ") + " \xB7 " : "") + "\uC0DD\uD658 \uC2DC \uC601\uC785 \uD6C4\uBCF4",
+        returning.length && returning.map(name).join(" \xB7 ") + " \xB7 \uC0DD\uD658 \uC2DC \uC778\uC5F0"
+      ].filter(Boolean).map((line) => '<small class="recruit-flag">' + esc(line) + "</small>").join("");
+      const hazards = [quirk?.name, ...new Set(room.enemies.flatMap((enemy) => (enemy.affixes || []).map((id) => AFFIXES[id]?.name)))].filter(Boolean);
+      const boost = blessing?.id && Number.isFinite(blessing.multiplier) ? '<div class="relay-blessing win">' + faceBadge(blessing.id) + "<span>\uC774\uBC88 \uC804\uD22C \uCD95\uBCF5 <b>+" + Math.round((blessing.multiplier - 1) * 100) + "%</b></span></div>" : "";
       const action = room.final && run.stats.retries ? "\uD3B8\uC131\uC744 \uBC14\uAFD4 \uC7AC\uB3C4\uC804" : "\uCD9C\uC804 (" + party.filter(Boolean).length + "\uBA85)";
-      node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", run.floor + "\uCE35") + '<div class="scroll"><button class="win run-opponents" id="b-opponents"><span>' + room.enemies.map((enemy) => '<span class="run-face">' + face2(enemy.sprite, 32) + "</span>").join("") + "</span><span><b>" + esc(room.enemies.map((enemy) => enemy.name).join(" \u2192 ")) + "</b><small>" + esc((room.enemies.length > 1 ? room.enemies.length + "\uC5F0\uC804 \xB7 " : "") + room.name + (hazards.length ? " \xB7 " + hazards.join(" \xB7 ") : "")) + '</small></span></button><div class="relay-seats">' + slots + "</div>" + orderHint() + '<h3>\uB300\uAE30 \uB3D9\uB8CC</h3><p class="sm">\uC790\uB9AC\uB97C \uB204\uB978 \uB4A4, \uBC14\uAFC0 \uC790\uB9AC\uB098 \uB300\uAE30 \uB3D9\uB8CC\uB97C \uACE0\uB978\uB2E4.</p><div class="reserve-cards">' + (bench.map((id) => '<button class="win" data-bench="' + esc(id) + '"><span class="run-face">' + face2(id, 44) + "</span><b>" + esc(card(id).name) + "</b></button>").join("") || "<p>\uC5C6\uC74C</p>") + '</div></div><div class="footer"><button class="btn go" id="b-go">' + action + "</button></div>";
+      node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", run.floor + "\uCE35") + '<div class="scroll"><button class="win run-opponents" id="b-opponents"><span>' + room.enemies.map((enemy) => '<span class="run-face">' + face2(enemy.sprite, 32) + "</span>").join("") + "</span><span><b>" + esc(room.enemies.map((enemy) => enemy.name).join(" \u2192 ")) + "</b><small>" + esc((room.enemies.length > 1 ? room.enemies.length + "\uC5F0\uC804 \xB7 " : "") + room.name + (hazards.length ? " \xB7 " + hazards.join(" \xB7 ") : "")) + "</small></span></button>" + boost + '<div class="relay-seats">' + slots + '<div class="relay-links">' + links + "</div></div>" + (survival2 ? '<div class="relay-survival">' + survival2 + "</div>" : "") + orderHint() + '<h3>\uB300\uAE30 \uB3D9\uB8CC</h3><div class="reserve-cards">' + (bench.map((id) => '<button class="win' + (selected?.bench === id ? " sel" : "") + '" data-bench="' + esc(id) + '" aria-pressed="' + (selected?.bench === id) + '">' + faceBadge(id) + "</button>").join("") || '<p class="sm">\uC5C6\uC74C</p>') + '</div></div><div class="footer"><button class="btn go" id="b-go"' + (party.some(Boolean) ? "" : " disabled") + ">" + action + "</button></div>";
       show("order");
       $("#b-alternate-order", node)?.addEventListener("click", () => {
-        party.splice(0, party.length, ...alternateSeats);
-        selected = -1;
-        sfx.tap();
-        render();
-      });
-      for (const button of $$("[data-slot]", node)) button.addEventListener("click", () => {
-        const index = Number(button.dataset.slot);
-        if (selected < 0) selected = index;
-        else {
-          [party[selected], party[index]] = [party[index], party[selected]];
-          selected = -1;
+        if (beforeHint) {
+          party = beforeHint;
+          beforeHint = null;
+        } else {
+          beforeHint = party.slice();
+          party = alternateSeats.slice();
         }
+        selected = null;
         sfx.tap();
         render();
       });
-      for (const button of $$("[data-bench]", node)) button.addEventListener("click", () => {
-        if (selected < 0) return;
-        party[selected] = button.dataset.bench;
-        selected = -1;
+      for (const button of $$("[data-slot]", node)) button.addEventListener("click", () => select({ slot: Number(button.dataset.slot) }));
+      for (const button of $$("[data-bench]", node)) button.addEventListener("click", () => select({ bench: button.dataset.bench }));
+      for (const button of $$("[data-link]", node)) button.addEventListener("click", () => {
+        const { from, to, skill } = previews[Number(button.dataset.link)];
+        const replaced = run.heirlooms?.[to]?.name;
         sfx.tap();
-        render();
+        sheets2.openSheet("\uC4F0\uB7EC\uC9C0\uBA74 \uC720\uD488 \uACC4\uC2B9", '<div class="relay-flow">' + faceBadge(from) + " \u2192 " + faceBadge(to) + "</div><p>" + esc(skill.name) + " \xB7 \uC704\uB825 \xD7" + HEIRLOOM_POWER + " \xB7 MP 0</p>" + (replaced ? "<p>" + esc(replaced) + " \uC720\uD488 \uAD50\uCCB4</p>" : ""));
       });
       $("#b-go", node).addEventListener("click", () => {
         audio2.unlockAudio();
@@ -15362,57 +16527,10 @@ const BattleRuntime = {
         if (ui.command(confirmOrder, party).ok) ui.route();
       });
       $("#b-opponents", node).addEventListener("click", () => {
-        sheets2.openSheet(room.name, room.enemies.map((enemy) => '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4>" + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id].desc) + "</p>").join("") + "</div></div>").join("") + (quirk ? "<p>" + esc(quirk.name + " \xB7 " + quirk.desc) + "</p>" : ""));
+        sheets2.openSheet(room.name, room.enemies.map((enemy, index) => '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4>" + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id]?.desc || "") + "</p>").join("") + (tempo?.enemies?.[index]?.beats ?? []).map((beat) => "<p>" + esc(beat.turn + "\uBC15 \xB7 " + beat.name + " \xB7 " + (TYPE[beat.type] || "")) + "</p>").join("") + "</div></div>").join("") + (quirk ? "<p>" + esc(quirk.name + " \xB7 " + quirk.desc) + "</p>" : ""));
       });
     }
     render();
-  }
-
-  // card_pixel/game/src/ui/reveal.js
-  async function reveal(run, widgets2, sfx, box, id, o) {
-    const { card, cardRow, sprite: sprite2 } = widgets2;
-    const opt = o || {}, c = card(id), g = ["legend", "transcendence"].includes(c.grade) ? "legend" : ["rare", "epic"].includes(c.grade) ? c.grade : "normal";
-    const slot = document.createElement("div");
-    slot.className = "revealing win g-" + g;
-    if (opt.first) box.prepend(slot);
-    else box.appendChild(slot);
-    slot.scrollIntoView({ block: "nearest" });
-    if (opt.roll !== false) {
-      const pool = run.pool;
-      for (let i = 0; i < 9; i++) {
-        slot.innerHTML = '<span class="pic">' + sprite2(pool[Math.floor(Math.random() * pool.length)], { cls: "sil" }) + "</span>";
-        sfx.roll();
-        await sleep(55 + i * 12);
-      }
-    }
-    if (g !== "normal") {
-      slot.classList.add("tease");
-      slot.innerHTML = '<span class="pic">' + sprite2(id, { cls: "sil" }) + "</span>";
-      (g === "legend" ? sfx.warn : sfx.charge)();
-      await sleep(g === "legend" ? 650 : g === "epic" ? 380 : 200);
-    }
-    const sparks = { legend: 16, epic: 10, rare: 5 }[g] || 0;
-    const wrap = document.createElement("div");
-    wrap.className = "landing g-" + g + " l-" + g;
-    wrap.innerHTML = (g === "legend" ? '<i class="rays"></i>' : "") + cardRow(run, id, { skills: false, cls: "pop", sheet: true }) + (sparks ? '<span class="sparkle">' + Array.from({ length: sparks }, () => {
-      const a = Math.random() * Math.PI * 2, r = 26 + Math.random() * 46;
-      return '<b style="left:' + Math.round(8 + Math.random() * 84) + "%;top:" + Math.round(15 + Math.random() * 70) + "%;--dx:" + Math.round(Math.cos(a) * r) + "px;--dy:" + Math.round(Math.sin(a) * r) + "px;animation-delay:" + Math.round(Math.random() * 160) + 'ms"></b>';
-    }).join("") + "</span>" : "");
-    slot.replaceWith(wrap);
-    if (g === "legend") {
-      sfx.jackpot();
-      flashFrame("gold");
-    } else if (g === "epic") {
-      sfx.awaken();
-      flashFrame("violet");
-    } else sfx.awaken();
-    await sleep(g === "legend" ? 900 : g === "epic" ? 420 : 240);
-  }
-  function flashFrame(kind) {
-    const f = document.createElement("div");
-    f.className = "flash " + kind;
-    $("#frame").appendChild(f);
-    setTimeout(() => f.remove(), 800);
   }
 
   // card_pixel/game/src/ui/screens/spring.js
@@ -15427,9 +16545,14 @@ const BattleRuntime = {
       node.innerHTML = head(run, "\uC18C\uD658\uC758 \uC0D8", run.floor + "\uCE35") + '<div class="scroll"><p class="lead">\uAFC8\uC758 \uACB0\uC815\uC744 \uBC14\uCCD0 \uB3D9\uB8CC\uB97C \uAE68\uC6B4\uB2E4.</p><div class="svc"><button class="btn big" id="b-draw"><b>\uAE68\uC6B0\uAE30</b><small>\uACB0\uC815 ' + COST.draw + ' \xB7 \uBB34\uC791\uC704 \uD55C \uBA85</small><small>\uB178\uBA40 40 \xB7 \uB808\uC5B4 30 \xB7 \uC5D0\uD53D 20 \xB7 \uC804\uC124 10</small></button><button class="btn big" id="b-pick"><b>\uACE8\uB77C \uAE68\uC6B0\uAE30</b><small>\uACB0\uC815 ' + COST.pick + ' \xB7 \uC14B \uC911 \uD558\uB098</small><small>\uB178\uBA40 25 \xB7 \uB808\uC5B4 30 \xB7 \uC5D0\uD53D 25 \xB7 \uC804\uC124 20</small></button></div><p class="run-status" id="spring-status" role="status"></p><div class="cards" id="fresh">' + fresh.map((id) => cardRow(run, id, { skills: false, sheet: true })).join("") + '</div><h3>\uB3D9\uB8CC <span class="sm" id="sp-count"></span></h3><div class="benchrow" id="sp-bench"></div></div><div class="footer"><button class="btn go" id="b-leave">\uC0D8\uC744 \uB5A0\uB09C\uB2E4</button></div>';
       show("spring");
       $("#b-draw", node).addEventListener("click", () => {
-        const result = command(springDraw);
-        if (result.ok) showWaking(result.id, true);
-        else showFailure(result.reason);
+        function draw(replaceId = null) {
+          const result = command(springDraw, replaceId);
+          if (result.ok) showWaking(result.id, true);
+          else showFailure(result.reason);
+        }
+        const count = replacementCount(run, 1);
+        if (count) chooseReplacements(run, ui, count, ([id]) => draw(id));
+        else draw();
       });
       $("#b-pick", node).addEventListener("click", () => {
         const result = command(springPick);
@@ -15462,7 +16585,7 @@ const BattleRuntime = {
       if (box.isConnected && $("#fresh", node) === box) refresh();
     }
     function choose() {
-      node.innerHTML = head(run, "\uACE8\uB77C \uAE68\uC6B0\uAE30", run.floor + "\uCE35") + '<div class="scroll"><div class="cards">' + run.pending.candidates.map((id) => cardRow(run, id)).join("") + '</div></div><div class="footer"><button class="btn go" id="b-take" disabled>\uD55C \uBA85\uC744 \uACE0\uB978\uB2E4</button></div>';
+      node.innerHTML = head(run, "\uACE8\uB77C \uAE68\uC6B0\uAE30", run.floor + "\uCE35") + '<div class="scroll"><div class="cards">' + run.pending.candidates.map((id) => cardRow(run, id)).join("") + '</div></div><div class="footer">' + (run.tempoVersion === 2 ? '<button class="btn" id="b-spring-pass">\uB118\uAE30\uAE30</button>' : "") + '<button class="btn go" id="b-take" disabled>\uD55C \uBA85\uC744 \uACE0\uB978\uB2E4</button></div>';
       show("spring");
       let selected;
       const rows = $$(".cardrow", node);
@@ -15474,11 +16597,18 @@ const BattleRuntime = {
         take.disabled = false;
         take.textContent = card(selected).name + " \uAE68\uC6B0\uAE30";
       });
-      take.addEventListener("click", () => {
-        if (!command(springTake, selected).ok) return;
+      function join2(id, replaceId = null) {
+        if (!command(springTake, id, replaceId).ok) return;
         base();
-        showWaking(selected, false);
+        if (id) showWaking(id, false);
+      }
+      take.addEventListener("click", () => {
+        const id = selected;
+        const count = replacementCount(run, 1);
+        if (count) chooseReplacements(run, ui, count, ([replaceId]) => join2(id, replaceId));
+        else join2(id);
       });
+      $("#b-spring-pass", node)?.addEventListener("click", () => join2(null));
     }
     if (run.pending?.kind === "spring") choose();
     else base();
@@ -15560,7 +16690,7 @@ const BattleRuntime = {
     let selection = null;
     const hosts = event?.requires.present || [];
     const joined = result?.effects.flatMap((effect) => effect.type === "join" ? effect.ids : []) || [];
-    const released = result?.effects.find((effect) => effect.type === "release")?.id;
+    const released = result?.effects.filter((effect) => effect.type === "release").map((effect) => effect.id) ?? [];
     const actor = (id, classes, flip) => {
       const asset = spr(id);
       return asset ? sprite2(id, {
@@ -15570,8 +16700,8 @@ const BattleRuntime = {
       }) : "";
     };
     const party = run.bench.find((id) => !joined.includes(id) && !hosts.includes(id));
-    const visible = [...new Set([...hosts, ...joined, released].filter(Boolean))];
-    const artwork = '<div class="event-cast">' + (party ? actor(party, "event-party", false) : "") + '<div class="event-visitors">' + visible.map((id) => actor(id, joined.includes(id) ? "event-joiner" : id === released ? "event-released" : "", true)).join("") + "</div></div>";
+    const visible = [...new Set([...hosts, ...joined, ...released].filter(Boolean))];
+    const artwork = '<div class="event-cast">' + (party ? actor(party, "event-party", false) : "") + '<div class="event-visitors">' + visible.map((id) => actor(id, joined.includes(id) ? "event-joiner" : released.includes(id) ? "event-released" : "", true)).join("") + "</div></div>";
     function effectText(effect, target) {
       const name = (id) => card(id).name;
       switch (effect.type) {
@@ -15605,18 +16735,24 @@ const BattleRuntime = {
       }
     }
     function take(choice, target) {
-      const outcome = ui.command(chooseEvent, choice.id, target);
-      if (!outcome.ok) return;
-      ui.sheets.closeSheet();
-      if (outcome.effects.some((effect) => effect.type === "join")) sfx.awaken();
-      else sfx.tap();
-      if (run.pending || run.room.relic && outcome.effects.some((effect) => effect.type === "relic" && effect.equipped)) ui.route();
-      else eventScreen(run, ui, outcome);
+      function apply(replaceIds) {
+        const outcome = ui.command(chooseEvent, choice.id, target, replaceIds);
+        if (!outcome.ok) return;
+        ui.sheets.closeSheet();
+        if (outcome.effects.some((effect) => effect.type === "join")) sfx.awaken();
+        else sfx.tap();
+        if (run.pending || run.room.relic && outcome.effects.some((effect) => effect.type === "relic" && effect.equipped)) ui.route();
+        else eventScreen(run, ui, outcome);
+      }
+      const recruits = choice.ops.filter((op) => op.type === "join").reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+      const count = replacementCount(run, recruits);
+      if (count) chooseReplacements(run, ui, count, apply);
+      else apply([]);
     }
     const cost = (choice) => choice.cost ? "\uACB0\uC815 " + choice.cost + " \xB7 " : "";
     const results = result ? [
       joined.length ? joined.map((id) => card(id).name).join(" \xB7 ") + " \xB7 \uC774\uBC88 \uC6D0\uC815 \uD569\uB958" : "",
-      released ? card(released).name + " \xB7 \uC6D0\uC815 \uC774\uD0C8" : "",
+      ...released.map((id) => card(id).name + " \xB7 \uC6D0\uC815 \uC774\uD0C8"),
       result.crystals ? "\uACB0\uC815 " + (result.crystals > 0 ? "+" : "") + result.crystals : "",
       ...result.effects.filter((effect) => !["join", "release"].includes(effect.type)).map((effect) => effect.type === "bless" ? effectText(effect, effect.id) : effectText(effect))
     ].filter(Boolean) : [];
@@ -15685,7 +16821,7 @@ const BattleRuntime = {
         render();
         $(".run-relic-compare", node).scrollIntoView({ block: "nearest" });
       });
-      $("#b-leave", node).addEventListener("click", ui.leave);
+      $("#b-leave", node).addEventListener("click", equipped && run.pending?.kind === "reinforcement" ? ui.route : ui.leave);
       $("#b-equip", node)?.addEventListener("click", () => {
         if (offered && !ui.command(takeTreasure).ok) return;
         if (run.pending?.kind === "relic" && !ui.command(equipRelic, id, replacing).ok) {
@@ -15724,21 +16860,75 @@ const BattleRuntime = {
       take.disabled = false;
       take.textContent = choice.kind === "join" ? card(id).name + " \uAE68\uC6B0\uAE30" : artifact.name + " \uBC1B\uAE30";
     });
-    take.addEventListener("click", () => {
-      if (!choice || !ui.command(chooseGateReward, choice).ok) return;
-      if (choice.kind === "join") {
+    function apply(selected) {
+      if (!selected || !ui.command(chooseGateReward, selected).ok) return;
+      if (selected.kind === "join") {
         sfx.awaken();
         ui.leave();
       } else {
         sfx.gem();
-        treasureScreen(run, ui, choice.id, { equipped: run.relics.includes(choice.id) });
+        treasureScreen(run, ui, selected.id, { equipped: run.relics.includes(selected.id) });
       }
+    }
+    take.addEventListener("click", () => {
+      const selected = choice;
+      const count = selected?.kind === "join" ? replacementCount(run, 1) : 0;
+      if (count) chooseReplacements(run, ui, count, ([replaceId]) => apply({ ...selected, replaceId }));
+      else apply(selected);
     });
     $("#b-leave", node).addEventListener("click", ui.leave);
   }
 
+  // card_pixel/game/src/ui/screens/reinforce.js
+  function reinforceScreen(run, ui) {
+    ui.playMusic();
+    const node = $("#reinforce");
+    const pending = run.pending;
+    const limit = pending.limit ?? 6;
+    const full = run.bench.length >= limit;
+    const { card, faceBadge } = ui.widgets;
+    let incoming = null;
+    let outgoing = null;
+    function submit(id, replaceId = null) {
+      if (run.pending !== pending || typeof resolveReinforcement !== "function") return;
+      const result = ui.command(resolveReinforcement, { key: pending.key, id, replaceId });
+      if (result.ok) {
+        if (result.joined) ui.audio.sfx.awaken();
+        ui.leave();
+      } else {
+        $("#reinforce-feedback", node).textContent = "\uD569\uB958\uD560 \uB3D9\uB8CC\uC640 \uBCF4\uB0BC \uB3D9\uB8CC\uB97C \uD655\uC778\uD55C\uB2E4.";
+      }
+    }
+    function render() {
+      const candidates = (pending.candidates ?? []).slice(0, 3).filter((id) => card(id));
+      const canResolve = typeof resolveReinforcement === "function";
+      const selected = (id) => incoming === id;
+      const takeLabel = outgoing ? card(outgoing).name + " \uBCF4\uB0B4\uACE0 " + card(incoming).name + " \uD569\uB958" : incoming && !full ? card(incoming).name + " \uD569\uB958" : full && incoming ? "\uBCF4\uB0BC \uB3D9\uB8CC\uB97C \uACE0\uB978\uB2E4" : "\uD55C \uBA85\uC744 \uACE0\uB978\uB2E4";
+      node.innerHTML = head(run, "\uB3D9\uB8CC \uBCF4\uCDA9", run.floor + "\uCE35") + '<div class="scroll"><p class="lead">\uB3D9\uB8CC ' + run.bench.length + "/" + limit + '\uBA85</p><div class="reinforce-candidates">' + candidates.map((id) => {
+        const fighter = card(id);
+        const skill = heirloomSkill(fighter) ?? fighter.skills?.[0];
+        return '<button class="win g-' + esc(fighter.grade) + '" data-candidate="' + esc(id) + '" aria-pressed="' + selected(id) + '">' + faceBadge(id) + "<span>" + esc(GRADE[fighter.grade]) + " \xB7 " + esc(ELEMENT[fighter.element]) + "</span>" + (skill ? "<small>" + esc(skill.name + " \xB7 " + TYPE[skill.type]) + "</small>" : "") + "</button>";
+      }).join("") + "</div>" + (full && incoming ? '<h3>\uBCF4\uB0BC \uB3D9\uB8CC</h3><div class="reserve-cards">' + run.bench.map((id) => '<button class="win" data-release="' + esc(id) + '" aria-pressed="' + (outgoing === id) + '">' + faceBadge(id) + "</button>").join("") + "</div>" : "") + '<p id="reinforce-feedback" class="run-status" role="status"></p></div><div class="footer"><button class="btn" id="b-reinforce-pass">\uB118\uAE30\uAE30</button><button class="btn go" id="b-reinforce-take"' + (canResolve && incoming && (!full || outgoing) ? "" : " disabled") + ">" + esc(takeLabel) + "</button></div>";
+      show("reinforce");
+      for (const button of $$("[data-candidate]", node)) button.addEventListener("click", () => {
+        incoming = button.dataset.candidate;
+        outgoing = null;
+        ui.audio.sfx.tap();
+        render();
+      });
+      for (const button of $$("[data-release]", node)) button.addEventListener("click", () => {
+        outgoing = button.dataset.release;
+        ui.audio.sfx.tap();
+        render();
+      });
+      $("#b-reinforce-take", node).addEventListener("click", () => submit(incoming, outgoing));
+      $("#b-reinforce-pass", node).addEventListener("click", () => canResolve ? submit(null) : ui.leave());
+    }
+    render();
+  }
+
   // card_pixel/game/src/ui/run/index.js
-  var screens = ["awaken", "map", "order", "spring", "altar", "event", "treasure", "pick"];
+  var screens = ["awaken", "map", "order", "spring", "altar", "event", "treasure", "pick", "reinforce"];
   var runtime;
   function mount(frame, shared) {
     const core2 = window.RelayCore;
@@ -15765,6 +16955,11 @@ const BattleRuntime = {
     });
     for (const id of screens) {
       $("#" + id).addEventListener("click", (event) => {
+        if (event.target.closest("[data-battle-log]") && battle.expedition) {
+          audio2.sfx.tap();
+          openBattleLog(sheets2, widgets2, battle.expedition.lastBattleLog);
+          return;
+        }
         const button = event.target.closest("[data-sheet]");
         if (!button || !battle.expedition) return;
         event.stopPropagation();
@@ -15832,12 +17027,12 @@ const BattleRuntime = {
       playMusic: () => host.runtime.music?.play(run.dungeonId)
     };
     function routeBattleReward(result) {
-      if (run.phase === "done" || result.retry || run.pending) {
-        route();
+      if (result.relic?.equipped && (!run.pending || run.pending.kind === "reinforcement")) {
+        treasureScreen(run, ui, result.relic.id, { equipped: true });
         return true;
       }
-      if (result.relic?.equipped) {
-        treasureScreen(run, ui, result.relic.id, { equipped: true });
+      if (run.phase === "done" || result.retry || run.pending) {
+        route();
         return true;
       }
       return false;
@@ -15855,6 +17050,7 @@ const BattleRuntime = {
       if (run.pending?.kind === "start") return awakenScreen(run, ui);
       if (run.pending?.kind === "gate") return gatePickScreen(run, ui);
       if (run.pending?.kind === "relic") return treasureScreen(run, ui, run.pending.id);
+      if (run.pending?.kind === "reinforcement") return reinforceScreen(run, ui);
       if (run.room?.status === "left") {
         if (command(nextFloor).ok) route();
         return;
@@ -15869,9 +17065,12 @@ const BattleRuntime = {
       }
       if (run.room?.status === "battle") {
         const options = battleOptions(run);
-        return battle.startBattle(run, options, (summary) => {
-          const result = command(settleBattle, summary);
-          if (result.ok && !contractSettlement(run.floor, result.contract).length && routeBattleReward(result)) return null;
+        return battle.startBattle(run, options, (summary, log) => {
+          const result = settleBattle(run, summary);
+          if (result.ok) {
+            run.lastBattleLog = log;
+            host.save(run);
+          }
           return result;
         }, afterBattle);
       }
@@ -16043,6 +17242,7 @@ const BattleRuntime = {
     </div>
     <div class="corner">${tools()}</div>
     <div class="meta-title-name"><h1>\uB2E4\uC74C\uC740 \uB108</h1><span>RELAYMARE</span></div>
+    <p class="title-relay">\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC\uAC00 \uB2E4\uC74C \uB3D9\uB8CC\uC758 \uD798\uC774 \uB41C\uB2E4</p>
     <button class="btn go" id="b-start">\uAFC8\uAE38\uB85C \uB4E4\uC5B4\uAC04\uB2E4</button>
   `;
     show("title");
@@ -16308,6 +17508,7 @@ const BattleRuntime = {
       <div class="meta-recruit-heading">
         <h2>${won ? "\uB3D9\uB8CC \uC601\uC785" : "\uAFC8 \uC870\uAC01"}</h2>
         <button class="btn" id="meta-run-record">\uAE30\uB85D</button>
+        ${run.lastBattleLog?.length ? '<button class="btn log-button" id="meta-battle-log">\uC804\uD22C \uAE30\uB85D</button>' : ""}
       </div>
       ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} \xB7 ${esc(stampContract.name)}</p>` : ""}
       ${candidates.length ? `<p>${won ? `\uC0DD\uD658\uC790 \uC911 \uCD5C\uB300 ${limit}\uBA85 \uC601\uC785` : "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4 \uD55C \uBA85 \uC608\uC57D"}</p>` : `<p>${won ? "\uC0C8\uB85C \uC601\uC785\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4." : "\uC608\uC57D\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4."}</p>`}
@@ -16351,6 +17552,7 @@ const BattleRuntime = {
       renderSelection();
     }));
     $("#meta-run-record", node).addEventListener("click", () => runRecordSheet(run, card, sheets2.openSheet));
+    $("#meta-battle-log", node)?.addEventListener("click", () => openBattleLog(sheets2, widgets2, run.lastBattleLog));
     action.addEventListener("click", () => {
       if (!confirm(won ? { recruits: choices } : { shard: choices[0] || null })) feedback.textContent = "\uC120\uD0DD\uC744 \uB2E4\uC2DC \uD655\uC778\uD574 \uC8FC\uC138\uC694.";
     });

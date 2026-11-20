@@ -34,7 +34,7 @@ const { outputFiles: [bundle] } = await build({
   platform: 'browser',
   write: false
 });
-const css = ['base', 'battle', 'screens', 'meta'].map(name => read(`src/styles/${name}.css`)).join('\n');
+const css = ['base', 'battle', 'screens', 'meta', 'map'].map(name => read(`src/styles/${name}.css`)).join('\n');
 
 // Galmuri is embedded so the page looks the same offline (assets/fonts/README.md).
 function fontFace(name) {

@@ -1,4 +1,4 @@
-import { $, $$, esc, show, sleep } from '../dom.js';
+import { $, $$, esc, show } from '../dom.js';
 import { affixChips, foeFlip, head, TYPE } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
@@ -8,9 +8,9 @@ import { ROOM_NAMES } from '../../content/layouts.js';
 import { REGIONS } from '../../content/regions.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { AFFIXES } from '../../content/affixes.js';
+import { getWalkLayout, mapPosition, mountWalkingMap } from '../../stage/walking-map.js';
 import { shortRiftDate } from './daily-rift.js';
 
-const MARCH_MS = 500;
 const AFFIX_RISK = {
   tough: '첫 3턴 적 피해 절반', frenzy: '적 HP 절반부터 공격 ×1.5',
   leech: '적이 준 피해의 절반 회복', thorns: '물리 피해 25% 반사'
@@ -26,6 +26,26 @@ const REGION_RISK = {
 function confront(name) {
   const endsWithConsonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
   return name + (endsWithConsonant ? '과 대면' : '와 대면');
+}
+
+function primaryBeat(door, preview) {
+  const pattern = preview?.pattern ?? door.tempo?.pattern;
+  const beats = preview?.enemies?.[0]?.beats ?? [];
+  const turn = { introFixed: 1, threeBeat: 2, tide: 3 }[pattern];
+  return beats.find(beat => beat.turn === turn) ?? (pattern === 'bossScript'
+    ? beats.filter(beat => TYPE[beat.type] && beat.power > 1).sort((a, b) => b.power - a.power || a.turn - b.turn)[0]
+    : undefined);
+}
+
+export function doorDecision(run, door, preview) {
+  const crystals = (door.reward ?? 0) - (run.floor === 4 && door.type === 'gate' && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0);
+  if (!door.enemies.length) return REGIONS[door.regionChoice?.id]?.name ?? ROOM_NAMES[door.type] ?? door.name;
+  const beat = primaryBeat(door, preview);
+  const type = TYPE[beat?.type ?? door.intent];
+  const risk = type
+    ? type + (beat?.name === '일반 공격' ? ' 공격' : ' 강공')
+    : ROOM_NAMES[door.type] ?? door.name;
+  return !run.daily && crystals > 0 ? risk + ' · 결정 ' + crystals : risk;
 }
 
 export function mapScreen(run, ui) {
@@ -138,10 +158,26 @@ export function mapScreen(run, ui) {
       }).join('');
       return '<span class="door-lineup">' + previews + '</span>';
     }
-    const visitor = door.event?.requires.present?.[0];
+    const visitor = door.event?.requires?.present?.[0];
     if (visitor) return '<span class="run-face" title="' + esc(card(visitor).name) + '">' + face(visitor, 44) + '</span>';
     return icon(door.type);
   }
+
+  const layout = getWalkLayout(run);
+  const tempoViews = run.doors.map(door => Run.getTempoView?.(run, door.index));
+  const portals = run.doors.map((door, index) => {
+    const [x, y] = mapPosition(layout.branches[index].center);
+    const enemy = door.enemies[0];
+    const visitor = door.event?.requires?.present?.[0];
+    const art = (enemy && sprite(enemy.sprite, { flip: foeFlip(enemy), cls: 'map-door-shadow' })) ||
+      (visitor && sprite(visitor)) || icon(door.relic || (door.type === 'wild' ? 'battle' : door.type));
+    const label = doorDecision(run, door, tempoViews[index]);
+    return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + door.type +
+      '" aria-label="' + esc(door.name + ' · ' + label) + '" style="--door-x:' + x + ';--door-y:' + y + '">' +
+      '<span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span>' +
+      '<span class="map-door-emblem">' + art + '</span></span><small class="map-door-line">' + esc(label) +
+      '</small></button>';
+  }).join('');
 
   const doors = run.doors.map(door => {
     const enemy = door.enemies[0];
@@ -169,40 +205,58 @@ export function mapScreen(run, ui) {
   const front = Run.defaultParty(run);
   const lineup = front.map((id, index) => {
     if (!id) return '';
-    const role = POSITION[index], art = spr(id);
+    const role = POSITION[index];
+    const art = spr(id);
+    if (!art) return '';
     const flip = art.facing === 'left';
-    const center = flip ? art.w - art.cx : art.cx;
-    const style = 'width:' + art.w * 2 + 'px;height:' + art.h * 2 + 'px;' +
-      'left:calc(50% - ' + center * 2 + 'px);bottom:' + (art.fy + 1 - art.h) * 2 + 'px;';
-    return '<button class="map-actor" style="grid-column:' + (index + 1) + '" data-sheet="' + esc(id) + '" aria-label="' + esc(role + ' ' + card(id).name) + '">' +
-      '<span class="map-actor-art">' + sprite(id, { flip, style }) + '</span><small>' + role + '</small></button>';
+    const scale = .85;
+    const style = 'width:' + art.w * scale + 'px;height:' + art.h * scale + 'px;' +
+      'left:' + (-art.cx * scale) + 'px;top:' + (-(art.fy + 1) * scale) + 'px;' +
+      'transform-origin:' + art.cx * scale + 'px ' + (art.fy + 1) * scale + 'px;';
+    return '<div class="map-walker-anchor" data-seat="' + index + '">' +
+      '<button type="button" class="map-actor map-walker" data-sheet="' + esc(id) + '" aria-label="' + esc(role + ' ' + card(id).name) + '">' +
+      '<span class="map-walker-art">' + sprite(id, { flip, style }) + '</span><small>' + role + '</small></button></div>';
   }).join('');
-  const cast = '<div class="map-party" style="--march-time:' + MARCH_MS + 'ms">' + lineup + '</div>';
+  const landscape = '<div class="map-landscape" aria-hidden="true"></div>';
+  const trails = '<div class="map-trails" aria-hidden="true">' + '<canvas class="map-trail"></canvas>'.repeat(1 + run.doors.length) + '</div>';
+  const cast = '<div class="map-walkers">' + lineup + '</div>';
+  const skip = '<button type="button" class="map-skip" hidden><span>건너뛰기</span></button>';
   const reserve = { ...run, bench: run.bench.filter(id => !front.includes(id)) };
   const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + '</button>' : '';
   const title = rift ? [shortRiftDate(rift.spec?.dayKey), '균열'].filter(Boolean).join(' ') : dungeon.name;
   node.innerHTML = head(run, title, run.floor + '층') + '<div class="run-route">' +
     '<button class="floor-strip" id="b-floors" aria-label="층 진행과 문지기 정보">' + track + '</button>' +
-    scene(dungeon.background, cast) + '<div class="run-doors">' + doors + '</div>' +
+    scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + '</div>' + skip, 'walking-map') +
+    '<div class="run-doors">' + doors + '</div>' +
     '<div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more +
     '</div><small>동료 ' + run.bench.length + ' · 쓰러짐 ' + run.fallen.length + '</small></div></div>';
   show('map');
-  const party = $('.map-party', node);
-  for (const button of $$('[data-door]', node)) {
-    button.addEventListener('click', async () => {
-      if (party.classList.contains('marching')) return;
-      ui.audio.unlockAudio();
-      ui.audio.sfx.tap();
-      if (lineup && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        party.classList.add('marching');
-        await sleep(MARCH_MS);
-      }
-      if (party.isConnected && node.classList.contains('on')) ui.enterDoor(Number(button.dataset.door));
-    });
+  const walkTo = mountWalkingMap($('.walking-map', node), layout, {
+    run,
+    instant: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.__game?.clock?.speed > 1,
+    open: ui.route,
+    footstep: ui.audio.sfx.enter
+  });
+  let locked = false;
+  const choices = $$('[data-door], [data-map-door]', node);
+  function choose(index) {
+    if (locked) return;
+    locked = true;
+    if (!ui.command(Run.chooseDoor, index).ok) {
+      locked = false;
+      return;
+    }
+    ui.audio.unlockAudio();
+    ui.audio.sfx.tap();
+    for (const button of $$('button:not(.map-skip)', node)) button.disabled = true;
+    walkTo(index);
+  }
+  for (const button of choices) {
+    button.addEventListener('click', () => choose(Number(button.dataset.door ?? button.dataset.mapDoor)));
   }
   for (const button of $$('[data-info]', node)) {
     button.addEventListener('click', () => {
-      if (!party.classList.contains('marching')) describeDoor(run.doors[Number(button.dataset.info)]);
+      if (!locked) describeDoor(run.doors[Number(button.dataset.info)]);
     });
   }
   $('#b-floors', node).addEventListener('click', () => {
@@ -217,12 +271,17 @@ export function mapScreen(run, ui) {
 
   function describeDoor(door) {
     const ready = Run.doorEnemies?.(run, door.index);
+    const tempo = tempoViews[door.index];
     const enemies = door.enemies.map((enemy, index) => {
       const strong = Object.keys(ELEMENT).filter(element => core.Logic.getElementalMultiplier(element, enemy.element) > 1);
-      const hp = ready?.[index]?.maxHp ?? enemy.stats.hp;
+      const preview = tempo?.enemies?.[index];
+      const hp = preview?.maxHp ?? ready?.[index]?.maxHp ?? enemy.stats.hp;
+      const beats = preview?.beats?.map(beat => beat.turn + '턴 · ' + beat.name +
+        (TYPE[beat.type] ? ' (' + TYPE[beat.type] + ')' : '')) ?? [];
       return '<div class="run-foe-detail">' + sprite(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === 'shadow' ? 'shadow-tint' : '' }) +
         '<div><h4>' + esc(enemy.name) + '</h4><p>' + esc(ELEMENT[enemy.element] || '') + ' · HP ' + hp + '</p>' +
         (strong.length ? '<p>상성 우위 · ' + strong.map(element => ELEMENT[element]).join(' · ') + '</p>' : '') +
+        (beats.length ? '<p>' + esc(beats.join(' / ')) + '</p>' : '') +
         (enemy.note ? '<p>' + esc(enemy.note) + '</p>' : '') +
         (enemy.affixes || []).map(id => '<p>' + esc(AFFIXES[id].name + (id === 'treasure' ? '' : ' · ' + AFFIXES[id].desc)) + '</p>').join('') + '</div></div>';
     }).join('');
