@@ -405,6 +405,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .floor-cell.cur { color: var(--aqua); border-color: var(--aqua); }
 .floor-cell.done { color: var(--dim); }
 .floor-cell:has(.run-face, .run-icon) { flex: 1.55; }
+.floor-cell.rift-gate { flex: 2.6; }
 .floor-cell .run-face { width: 28px; height: 30px; }
 .floor-cell .run-icon, .floor-cell .run-face { flex-shrink: 1; }
 .floor-cell.shadow-tint, .run-face.shadow-tint img { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2); }
@@ -758,6 +759,19 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .meta-hub-actions { flex-direction: column; }
 .meta-hub-links > button { flex: 1; }
 
+#hub .daily-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: calc(100% - 24px);
+  height: 48px;
+  margin: 8px 12px 0;
+  text-align: left;
+}
+
+.daily-row small { color: var(--gold); }
+
 .meta-unlocks {
   position: absolute;
   top: 12px;
@@ -885,6 +899,44 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   font: 16px/20px var(--px);
   letter-spacing: 0;
 }
+
+#sheet:has(.rift-prep) .in { margin-inline: 14px; }
+.rift-opponents { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
+.rift-opponents .meta-face { flex: none; }
+.rift-opponents .meta-face.boss { align-self: center; }
+.rift-shadow img { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2); }
+#sheet .rift-date-notice { color: var(--gold); }
+#sheet .rift-region { color: var(--dim); }
+.rift-loans, .rift-result-cast {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.rift-companion, #sheet .rift-loans .rift-companion {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+  padding: 6px 2px;
+}
+
+#sheet .rift-loans .rift-companion { font: 12px/16px var(--px); }
+#sheet .rift-prep-note { margin: 10px 0; }
+.rift-prep > .go { margin-top: 6px; }
+.rift-actions { display: grid; gap: 8px; }
+.rift-result { padding: 12px; margin-bottom: 12px; }
+.rift-result-cast { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-bottom: 10px; }
+.rift-result-cast b { font: 12px/16px var(--px); }
+.rift-result-cast .fallen img { filter: grayscale(1); opacity: .6; }
+.rift-result-cast .fallen small { color: var(--coral); }
+.rift-stamp { display: inline-block; margin-top: 8px; padding: 4px 8px; }
+.rift-record-list, .rift-record-pages { display: grid; gap: 6px; margin-top: 8px; }
+.rift-record-list .btn { text-align: left; }
+.rift-record-pages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .meta-prep-section {
   border-bottom: 1px solid var(--line);
@@ -9431,6 +9483,7 @@ const BattleRuntime = {
     availableDungeons: () => availableDungeons,
     contractsFor: () => contractsFor,
     createProfile: () => createProfile,
+    dailyRiftUnlocked: () => dailyRiftUnlocked,
     notebookView: () => notebookView,
     recordRunProgress: () => recordRunProgress,
     setExpeditionParty: () => setExpeditionParty,
@@ -9474,7 +9527,7 @@ const BattleRuntime = {
   var run_exports = {};
   __export(run_exports, {
     COST: () => COST,
-    FLOORS: () => FLOORS,
+    FLOORS: () => FLOORS2,
     RATES: () => RATES,
     START: () => START,
     altarKeep: () => altarKeep,
@@ -9502,6 +9555,16 @@ const BattleRuntime = {
     suggestOrder: () => suggestOrder,
     takeTreasure: () => takeTreasure
   });
+
+  // card_pixel/game/src/content/daily-rift.js
+  var RULE_VERSION = 1;
+  var REGIONS2 = ["ember_volcano", "twilight_cathedral", "starlit_garden", "midnight_trench", "arena"];
+  var EVENTS = ["rumi", "glass_pawprints", "jellyfish_vials"];
+  var QUIRKS2 = ["glass", "overheat", "martyr", "echo"];
+  var AFFIXES2 = ["tough", "frenzy", "leech", "thorns"];
+  var SKY2 = ["sun_bless", "star_powder"];
+  var SCALE = { 1: 0.84, 4: 0.88, 6: 0.98, 7: 1.16 };
+  var FLOORS = 7;
 
   // card_pixel/game/src/content/layouts.js
   var LAYOUTS = {
@@ -9569,10 +9632,11 @@ const BattleRuntime = {
     return run.pool.includes(id) && !run.bench.includes(id) && !run.fallen.includes(id) && !run.released.includes(id) && (allowReserved || run.reserved !== id);
   }
   function seeCharacters(run, ids) {
+    if (run.daily) return;
     run.seenCharacters = [.../* @__PURE__ */ new Set([...run.seenCharacters, ...ids])];
   }
   function seeRelic(run, id) {
-    if (id && !run.seenRelics.includes(id)) run.seenRelics.push(id);
+    if (!run.daily && id && !run.seenRelics.includes(id)) run.seenRelics.push(id);
   }
   function join(run, id) {
     run.bench.push(id);
@@ -9622,7 +9686,7 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/content/events.js
-  var EVENTS = [
+  var EVENTS2 = [
     {
       id: "jellyfish_vials",
       name: "\uC824\uB9AC\uD53C\uC26C\uD504\uB9B0\uC138\uC2A4\uC758 \uB3C5\uBCD1",
@@ -9909,10 +9973,178 @@ const BattleRuntime = {
     }
   ];
 
+  // card_pixel/game/src/engine/daily-rift.js
+  var MS_PER_DAY = 864e5;
+  var BATTLE_FLOORS = [1, 4, 6, 7];
+  var LOAN_GRADES = ["normal", "rare", "legend", "rare", "epic"];
+  var RISKS = [...QUIRKS2, ...AFFIXES2];
+  var eventFor = (id) => EVENTS2.find((event) => event.id === id);
+  var stream = (seed, k) => ({ state: (seed ^ Math.imul(k, 2654435769)) >>> 0 });
+  var sameList = (a, b) => a.length === b.length && b.every((value, i) => value === a[i]);
+  function dayKey(now) {
+    const year = String(now.getFullYear()).padStart(4, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  function dateIndex(key) {
+    if (typeof key !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return NaN;
+    const [year, month, day] = key.split("-").map(Number);
+    const date = /* @__PURE__ */ new Date(0);
+    date.setUTCFullYear(year, month - 1, day);
+    return date.toISOString().slice(0, 10) === key ? date.getTime() / MS_PER_DAY : NaN;
+  }
+  var seedFor = (key) => Number(key.replaceAll("-", ""));
+  var regionFor = (d) => REGIONS2[(d % REGIONS2.length + REGIONS2.length) % REGIONS2.length];
+  function favorsAttack(card, type) {
+    const { atk, matk } = card.stats;
+    return type === "phy" ? atk >= matk : matk >= atk;
+  }
+  function pickLoans(roster2, common, visitor, rng) {
+    const candidates = common.filter((id) => id !== visitor).map((id) => roster2.card(id)).map((card) => ({ card, type: heirloomSkill(card)?.type })).filter((entry) => entry.type);
+    const selected = [];
+    function draw(grade, matches = () => true) {
+      const choice = pick(rng, candidates.filter((entry) => entry.card.grade === grade && !selected.includes(entry) && matches(entry)));
+      if (!choice) throw new RangeError("invalid_daily_options");
+      selected.push(choice);
+      return choice;
+    }
+    const first = draw("normal");
+    draw("rare", ({ card, type }) => type === first.type && favorsAttack(card, type));
+    draw("legend");
+    const reserve = draw("rare", ({ type }) => type !== first.type);
+    draw("epic", ({ card, type }) => type === reserve.type && favorsAttack(card, type));
+    return selected.map(({ card }) => card.id);
+  }
+  function relicPool(cards) {
+    const relics = ["double_attack", "gale_storm", "lucky_vicky", "big_bang"];
+    if (cards.some((card) => card.skills.some((skill) => skill.type === "sup" && skill.cost > 0))) relics.push("support_boost");
+    if (cards.some((card) => card.element === "water")) relics.push("frozen_body");
+    if (cards.some((card) => card.element === "nature")) relics.push("reverse");
+    return relics;
+  }
+  function specFor(key, roster2, ruleVersion = RULE_VERSION) {
+    const day = dateIndex(key);
+    if (!Number.isInteger(day) || ruleVersion !== RULE_VERSION) throw new RangeError("invalid_daily_options");
+    const seed = seedFor(key);
+    const dungeonId = regionFor(day);
+    const dungeon = DUNGEONS[dungeonId];
+    const eventId = pick(stream(seed, 3), EVENTS);
+    const visitor = eventFor(eventId).requires.present[0];
+    const common = roster2.pool("common").sort();
+    const loanIds = pickLoans(roster2, common, visitor, stream(seed, 1));
+    const relicIds = shuffle(stream(seed, 2), relicPool(loanIds.map(roster2.card))).slice(0, 4);
+    const regional = roster2.pool(dungeon.pool).sort();
+    const gateRng = stream(seed, 4);
+    const gateIds = ["rare", "epic"].map((grade) => {
+      const allowed = (id) => id !== visitor && !loanIds.includes(id) && roster2.card(id).grade === grade;
+      const local = regional.filter(allowed);
+      return pick(gateRng, local.length ? local : common.filter(allowed));
+    });
+    const wildRng = stream(seed, 5);
+    const wildCount = dungeonId === "ember_volcano" ? 2 : 1;
+    const wildIds = Object.fromEntries([1, 6].map((floor) => [
+      floor,
+      Array.from({ length: wildCount }, () => pick(wildRng, dungeon.wild))
+    ]));
+    const skyRng = stream(seed, 7);
+    const sky = Object.fromEntries(BATTLE_FLOORS.map((floor) => [
+      floor,
+      dungeonId !== "starlit_garden" ? null : nextFloat(skyRng) < 0.5 ? SKY2.slice() : []
+    ]));
+    return {
+      ruleVersion,
+      dayKey: key,
+      seed,
+      dungeonId,
+      bossId: dungeon.boss,
+      loanIds,
+      gateIds,
+      wildIds,
+      relicIds,
+      eventId,
+      riskId: pick(stream(seed, 6), RISKS),
+      sky,
+      altarSeed: stream(seed, 8).state
+    };
+  }
+  function validAttempt(daily, roster2) {
+    const { spec, kind, attemptNo } = daily || {};
+    if (!spec || !Number.isSafeInteger(attemptNo) || (kind === "official" ? attemptNo !== 1 : kind !== "practice" || attemptNo < 2)) return false;
+    const day = dateIndex(spec.dayKey);
+    const dungeon = DUNGEONS[spec.dungeonId];
+    if (spec.ruleVersion !== RULE_VERSION || !Number.isInteger(day) || spec.dungeonId !== regionFor(day) || spec.seed !== seedFor(spec.dayKey) || spec.bossId !== dungeon.boss || spec.altarSeed !== stream(spec.seed, 8).state || !EVENTS.includes(spec.eventId) || !RISKS.includes(spec.riskId)) return false;
+    const visitor = eventFor(spec.eventId).requires.present[0];
+    const { loanIds, gateIds, relicIds, sky, wildIds } = spec;
+    const validIds = (ids, count, allowed) => Array.isArray(ids) && ids.length === count && new Set(ids).size === count && Array.from(ids).every(allowed);
+    const available = (id) => id !== visitor && roster2.allies.includes(id);
+    if (!validIds(loanIds, 5, available) || !validIds(gateIds, 2, (id) => available(id) && !loanIds.includes(id)) || !validIds(relicIds, 4, (id) => Object.hasOwn(RELICS, id))) return false;
+    const cards = loanIds.map(roster2.card);
+    if (!sameList(cards.map((card) => card.grade), LOAN_GRADES) || !sameList(gateIds.map((id) => roster2.card(id).grade), ["rare", "epic"])) return false;
+    const types = cards.map((card) => heirloomSkill(card)?.type);
+    if (!types.every(Boolean) || types[0] !== types[1] || types[0] === types[3] || types[3] !== types[4] || !favorsAttack(cards[1], types[1]) || !favorsAttack(cards[4], types[4])) return false;
+    const wildCount = spec.dungeonId === "ember_volcano" ? 2 : 1;
+    return [1, 6].every((floor) => Array.isArray(wildIds?.[floor]) && wildIds[floor].length === wildCount && Array.from(wildIds[floor]).every((id) => dungeon.wild.includes(id))) && BATTLE_FLOORS.every((floor) => spec.dungeonId === "starlit_garden" ? Array.isArray(sky?.[floor]) && (!sky[floor].length || sameList(sky[floor], SKY2)) : sky?.[floor] === null);
+  }
+  function doorsFor(spec, floor, roster2) {
+    const dungeon = DUNGEONS[spec.dungeonId];
+    const doors = [];
+    function add(type, details = {}) {
+      doors.push({
+        type,
+        index: doors.length,
+        name: ROOM_NAMES[type],
+        bg: dungeon.background,
+        region: structuredClone(dungeon.region),
+        enemies: [],
+        quirk: null,
+        start: null,
+        relic: null,
+        ...details
+      });
+    }
+    const [a, b, c, d] = spec.relicIds;
+    const tier = SCALE[floor];
+    const start = spec.sky[floor] ? { field: spec.sky[floor].slice() } : null;
+    if (floor === 1 || floor === 6) {
+      const multiplier = tier * (spec.dungeonId === "ember_volcano" ? 0.65 : 1);
+      const enemies = spec.wildIds[floor].map((id) => roster2.wildOf(id, multiplier));
+      add("wild", { enemies, start });
+      if (floor === 6) {
+        const riskEnemies = structuredClone(enemies);
+        const quirk = QUIRKS2.includes(spec.riskId) ? spec.riskId : null;
+        if (!quirk) riskEnemies[0].affixes = [spec.riskId];
+        add("elite", { name: "\uC704\uD5D8\uD55C \uBB38", risk: true, enemies: riskEnemies, quirk, start: structuredClone(start), relic: d });
+      }
+    } else if (floor === 2) {
+      add("treasure", { relic: a });
+      add("treasure", { relic: b });
+    } else if (floor === 3) {
+      const event = structuredClone(eventFor(spec.eventId));
+      add("event", { event, name: event.name });
+    } else if (floor === 4) {
+      add("gate", { enemies: spec.gateIds.map((id) => roster2.shadowOf(id, tier)), start });
+    } else if (floor === 5) {
+      add("treasure", { relic: c });
+      add("altar");
+    } else if (floor === 7) {
+      add("boss", { enemies: [roster2.bossOf(spec.bossId, tier)], start });
+    }
+    return doors;
+  }
+  function compare(a, b) {
+    const rank = { abandon: 0, lose: 1, win: 2 };
+    if (a.outcome !== b.outcome) return Math.sign(rank[a.outcome] - rank[b.outcome]);
+    if (a.outcome === "win") {
+      return Math.sign(a.livingIds.length - b.livingIds.length) || Math.sign(b.turns - a.turns);
+    }
+    return a.outcome === "lose" ? Math.sign(a.floor - b.floor) : 0;
+  }
+
   // card_pixel/game/src/engine/rooms.js
   var RELIC_LIMIT = 4;
   var SALE_PRICE = { normal: 1, rare: 2, epic: 3, legend: 4 };
-  var SKY2 = ["sun_bless", "star_powder"];
+  var SKY3 = ["sun_bless", "star_powder"];
   var ATTACK_TYPES = ["phy", "mag"];
   var copy = (value) => structuredClone(value);
   var invalid = (reason) => ({ ok: false, reason });
@@ -9931,7 +10163,7 @@ const BattleRuntime = {
     if (rule.critOrEvade) return critOrEvade;
     if (rule.fieldSources) {
       const fields = /* @__PURE__ */ new Set([
-        ...run.region?.id === "starlit_sky" ? SKY2 : [],
+        ...run.region?.id === "starlit_sky" ? SKY3 : [],
         ...run.nextBattle?.start?.field || [],
         ...effects.filter((effect) => ["field_buff", "conditional_field_buff"].includes(effect.type)).map((effect) => effect.id),
         ...effects.flatMap((effect) => effect.field || (effect.type === "delayed_field_buffs" ? effect.buffs : []))
@@ -10024,7 +10256,7 @@ const BattleRuntime = {
     const skyBet = run.nextBattle?.bet?.kind === "empty_sky";
     const hasSky = region?.id === "starlit_sky";
     const filledSky = hasSky && !skyBet && (battleCount > 1 ? index === 1 : nextFloat(run.rng) < 0.5);
-    const start = template.type === "borrowed" ? INTRO.start : hasSky ? { field: filledSky ? SKY2 : [] } : null;
+    const start = template.type === "borrowed" ? INTRO.start : hasSky ? { field: filledSky ? SKY3 : [] } : null;
     return {
       ...template,
       index,
@@ -10039,7 +10271,7 @@ const BattleRuntime = {
   }
   function eventCandidates(run) {
     const present = (id) => (run.pool.includes(id) || run.bench.includes(id)) && !run.fallen.includes(id) && !run.released.includes(id);
-    return EVENTS.filter((event) => (event.requires.present || []).every(present) && (event.requires.bench || []).every((id) => run.bench.includes(id)));
+    return EVENTS2.filter((event) => (event.requires.present || []).every(present) && (event.requires.bench || []).every((id) => run.bench.includes(id)));
   }
   function makeDoors(run, roster2) {
     const dungeon = DUNGEONS[run.dungeonId];
@@ -10185,7 +10417,7 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/engine/run.js
-  var FLOORS = 8;
+  var FLOORS2 = 8;
   var START = { picks: 2, draws: 3 };
   var dependencies = /* @__PURE__ */ new WeakMap();
   var unique = (ids) => [...new Set(ids)];
@@ -10202,7 +10434,15 @@ const BattleRuntime = {
     }
     return run;
   }
-  function createRun({ core: core2, roster: roster2, dungeonId, difficulty = "normal", seed = 0, profileView = {}, plain = false, contract = null }) {
+  function createRun(options) {
+    const { core: core2, roster: roster2, daily = null, difficulty = "normal", plain = false, contract = null } = options;
+    let { dungeonId, seed = 0, profileView = {} } = options;
+    if (daily !== null) {
+      if (options.seed !== void 0 || dungeonId !== void 0 || options.profileView !== void 0 || difficulty !== "normal" || plain || contract !== null || !validAttempt(daily, roster2)) {
+        throw new RangeError("invalid_daily_options");
+      }
+      ({ dungeonId, seed } = daily.spec);
+    }
     dungeonId ??= profileView.dungeonId || "dawn_forest";
     const dungeon = DUNGEONS[dungeonId];
     if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError("Unknown dungeon: " + dungeonId);
@@ -10217,22 +10457,23 @@ const BattleRuntime = {
     if (contract !== null && (typeof contract !== "string" || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== "nightmare" || !profileView.nightmareUnlocks?.includes(dungeonId))) {
       throw new RangeError("Unavailable contract: " + String(contract));
     }
-    const rng = { state: seed >>> 0 };
+    const rng = { state: daily ? daily.spec.altarSeed : seed >>> 0 };
     const seals = profileView.seals || [];
     const companions = intro ? [] : (profileView.companions || []).filter((id) => roster2.allies.includes(id) && !seals.includes(id));
     const lead = !intro && roster2.allies.includes(profileView.lead) && !seals.includes(profileView.lead) ? profileView.lead : null;
     const shard = roster2.allies.includes(profileView.reserved) && !seals.includes(profileView.reserved) ? profileView.reserved : null;
-    const pool = roster2.pool(dungeon.pool, { seals, companions: [...companions, lead, shard].filter(Boolean) });
-    const boss = difficulty === "nightmare" && dungeon.hiddenBosses.length ? pick(rng, dungeon.hiddenBosses) : dungeon.boss;
+    const pool = daily ? daily.spec.loanIds.slice() : roster2.pool(dungeon.pool, { seals, companions: [...companions, lead, shard].filter(Boolean) });
+    const boss = daily?.spec.bossId ?? (difficulty === "nightmare" && dungeon.hiddenBosses.length ? pick(rng, dungeon.hiddenBosses) : dungeon.boss);
     const preview = intro ? INTRO.boss : roster2.bossOf(boss);
     const bossPreview = { id: boss, name: preview.name, note: preview.note, sprite: preview.sprite || null };
     const region = dungeon.region?.first ? pick(rng, dungeon.region.first) : dungeon.region;
     const laterRegions = dungeon.region?.second ? shuffle(rng, dungeon.region.second.filter((rule) => rule.id !== region.id)).slice(0, 2) : null;
     const run = bindRun({
-      id: [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join("/"),
+      id: daily ? `rift/v${daily.spec.ruleVersion}/${daily.spec.dayKey}/${daily.attemptNo}` : [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join("/"),
+      daily: copy(daily),
       dungeonId,
       difficulty,
-      floors: dungeon.floors,
+      floors: daily ? FLOORS : dungeon.floors,
       seed: seed >>> 0,
       rng,
       pool,
@@ -10255,7 +10496,7 @@ const BattleRuntime = {
       heirlooms: {},
       blessings: {},
       relics: [],
-      crystals: intro ? 0 : 1,
+      crystals: intro || daily ? 0 : 1,
       contract: contract === null ? null : {
         id: contract,
         met: false,
@@ -10265,7 +10506,7 @@ const BattleRuntime = {
         paid: 0,
         failed: false
       },
-      guide: { bossOrder: profileView.bossOrder ?? true },
+      guide: { bossOrder: daily ? false : profileView.bossOrder ?? true },
       eligible: [],
       gateSurvivors: [],
       reserved: null,
@@ -10285,7 +10526,10 @@ const BattleRuntime = {
       stats: { battles: 0, turns: 0, best: 0, bestBy: "", bestHit: null, heirloomsUsed: 0, lastStands: 0, jackpots: 0, gateWins: 0, retries: 0 },
       result: null
     }, { core: core2, roster: roster2 });
-    if (intro) {
+    if (daily) {
+      for (const id of daily.spec.loanIds) join(run, id);
+      advance(run);
+    } else if (intro) {
       for (const id of INTRO.party) join(run, id);
       advance(run);
     } else {
@@ -10300,8 +10544,11 @@ const BattleRuntime = {
     run.floor++;
     run.room = null;
     run.phase = "map";
-    run.doors = dungeon.layout === "intro" && run.floor === run.floors ? [introFinaleDoor(run, roster2, dungeon)] : makeDoors(run, roster2);
-    observeDoors(run);
+    if (run.daily) run.doors = doorsFor(run.daily.spec, run.floor, roster2);
+    else {
+      run.doors = dungeon.layout === "intro" && run.floor === run.floors ? [introFinaleDoor(run, roster2, dungeon)] : makeDoors(run, roster2);
+      observeDoors(run);
+    }
   }
   function introFinaleDoor(run, roster2, dungeon) {
     const available = run.pool.filter((id) => canJoin(run, id));
@@ -10399,6 +10646,7 @@ const BattleRuntime = {
     if (!fighters.length || new Set(fighters).size !== fighters.length || fighters.some((id) => !run.bench.includes(id))) {
       return invalid("invalid_party");
     }
+    if (run.daily && fighters.length !== Math.min(3, run.bench.length)) return invalid("invalid_party");
     const party = [...ids, ...Array(3 - ids.length).fill(null)];
     if (run.room.type === "borrowed" && INTRO.party.some((id, index) => party[index] !== id)) return invalid("fixed_party");
     run.bench = [...fighters, ...run.bench.filter((id) => !fighters.includes(id))];
@@ -10544,7 +10792,7 @@ const BattleRuntime = {
       run.stats.gateWins++;
       run.gateSurvivors = unique([...run.gateSurvivors, ...survivors]);
     }
-    if (win && (gate || final)) run.eligible = unique([...run.eligible, ...survivors]);
+    if (!run.daily && win && (gate || final)) run.eligible = unique([...run.eligible, ...survivors]);
     const wiped = win && run.bench.length === 0;
     if (!win || wiped && !final) run.result = "lose";
     else if (final) run.result = "win";
@@ -10556,11 +10804,13 @@ const BattleRuntime = {
     const betRelic = betWon ? next.reward.relic : null;
     let relic = null;
     if (win) {
-      crystals += (room.reward || 0) + 2 * downs.filter((entry) => entry.treasure).length;
-      if (survivors.some((id) => roster2.card(id).trait?.type === "looter")) crystals++;
-      if (betWon) crystals += next.reward.crystals || 0;
-      run.crystals += crystals;
-      if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
+      if (!run.daily) {
+        crystals += (room.reward || 0) + 2 * downs.filter((entry) => entry.treasure).length;
+        if (survivors.some((id) => roster2.card(id).trait?.type === "looter")) crystals++;
+        if (betWon) crystals += next.reward.crystals || 0;
+        run.crystals += crystals;
+        if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
+      }
       if (room.type === "elite" && room.relic && !wiped) relic = grantRelic(run, room.relic);
       if (betRelic && !wiped) relic = grantRelic(run, betRelic);
       if (room.type === "borrowed" && !wiped) {
@@ -10696,6 +10946,7 @@ const BattleRuntime = {
     return { ok: true, floor: run.floor, doors: copy(run.doors) };
   }
   function runRewards(run) {
+    if (run.daily) return { result: run.result, recruitable: [], recruitLimit: 0, shardCandidates: [] };
     return {
       result: run.result,
       recruitable: run.result === "win" ? run.eligible.filter((id) => run.bench.includes(id) && !run.fallen.includes(id) && !run.recruited.includes(id)) : [],
@@ -10706,7 +10957,7 @@ const BattleRuntime = {
   function finishRun(run) {
     if (run.phase !== "done" || !run.result) return invalid("run_not_done");
     const rewards = runRewards(run);
-    run.pending ||= { kind: "recruit", ...copy(rewards) };
+    if (!run.daily) run.pending ||= { kind: "recruit", ...copy(rewards) };
     return rewards;
   }
 
@@ -10715,7 +10966,7 @@ const BattleRuntime = {
   var INTRO2 = "dawn_forest";
   var TOWER = "creation_tower";
   var EARLY = ["ember_volcano", "twilight_cathedral"];
-  var REGIONS2 = Object.keys(DUNGEONS).filter((id) => id !== INTRO2 && id !== TOWER);
+  var REGIONS3 = Object.keys(DUNGEONS).filter((id) => id !== INTRO2 && id !== TOWER);
   var completed = (profile, chapter) => profile.notebook.chapters.includes(chapter);
   var cleared = (profile, dungeon) => !!(profile.records.clears[dungeon]?.normal || profile.records.clears[dungeon]?.nightmare);
   var union = (left, right) => [.../* @__PURE__ */ new Set([...left, ...right])];
@@ -10753,6 +11004,9 @@ const BattleRuntime = {
   }
   function notebookView(profile) {
     return NOTEBOOK.map((chapter) => ({ ...chapter, opens: chapter.opens.slice(), completed: completed(profile, chapter.id) }));
+  }
+  function dailyRiftUnlocked(profile) {
+    return completed(profile, 4);
   }
   function companionSlots(profile) {
     if (completed(profile, 5)) return 3;
@@ -10814,6 +11068,7 @@ const BattleRuntime = {
     profile.notebook.chapters = union(profile.notebook.chapters, [chapter]).sort((a, b) => a - b);
   }
   function recordRunProgress(profile, run) {
+    if (run.daily) return { profile, announce: { ok: true, chapters: [] } };
     const next = structuredClone(profile);
     if (run.dungeonId !== INTRO2) {
       if (run.lead && Object.hasOwn(next.recruits, run.lead) && !completed(next, 2)) {
@@ -10827,7 +11082,7 @@ const BattleRuntime = {
     return { profile: next, announce: { ok: true, chapters } };
   }
   function unlockDungeons(profile) {
-    const regionalClears = REGIONS2.filter((id) => cleared(profile, id)).length;
+    const regionalClears = REGIONS3.filter((id) => cleared(profile, id)).length;
     const unlocked = {
       initial: true,
       intro_clear: cleared(profile, INTRO2),
@@ -10843,6 +11098,7 @@ const BattleRuntime = {
   }
   function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) {
     const noStamp = { stamp: null };
+    if (run.daily) return reject(profile, "daily_run", noStamp);
     if (run.phase !== "done" || !run.result) return reject(profile, "run_not_done", noStamp);
     if (profile.records.appliedRuns.includes(run.id)) return reject(profile, "already_applied", noStamp);
     const rewards = runRewards(run);
@@ -10862,7 +11118,7 @@ const BattleRuntime = {
     if (run.profileShard && run.profileShard === next.reserved) next.reserved = null;
     if (shard) next.reserved = shard;
     const bonds = [];
-    let stamp = null;
+    let stamp2 = null;
     if (run.result === "win") {
       const clears = records.clears[dungeonId] ||= { normal: 0, nightmare: 0 };
       clears[difficulty]++;
@@ -10881,7 +11137,7 @@ const BattleRuntime = {
           const stamps = (next.contractStamps ||= {})[dungeonId] ||= {};
           if (!Object.hasOwn(stamps, contractId)) {
             stamps[contractId] = run.id;
-            stamp = { dungeonId, contractId };
+            stamp2 = { dungeonId, contractId };
           }
         }
         addChapter(next, 4);
@@ -10902,7 +11158,7 @@ const BattleRuntime = {
         bonds,
         shard,
         returned,
-        stamp,
+        stamp: stamp2,
         chapters: next.notebook.chapters.filter((id) => !completed(profile, id)),
         dungeons: next.unlockedDungeons.filter((id) => !profile.unlockedDungeons.includes(id)),
         nightmares: next.nightmareUnlocks.filter((id) => !profile.nightmareUnlocks.includes(id))
@@ -10931,10 +11187,14 @@ const BattleRuntime = {
     const snapshot = fighting ? { ...run, room: { ...run.room, status: "order" } } : run;
     return { version: RUN_VERSION, run: snapshot };
   }
+  function serializeRun(run) {
+    return JSON.stringify(runData(run));
+  }
   function restoreRun(data, { core: core2, roster: roster2, migrate } = {}) {
     const run = readVersion(data, RUN_VERSION, migrate)?.run;
     if (!run || !Object.hasOwn(DUNGEONS, run.dungeonId) || !PHASES.includes(run.phase) || !Number.isInteger(run.rng?.state) || run.rng.state < 0 || run.rng.state > 4294967295 || !Array.isArray(run.pool) || !Array.isArray(run.bench) || !Array.isArray(run.doors)) return null;
     run.contract ??= null;
+    run.daily ??= null;
     run.lastParty ??= null;
     run.guide ??= { bossOrder: false };
     run.joinOrder ??= run.bench.slice();
@@ -10949,6 +11209,7 @@ const BattleRuntime = {
   function createSaveStore(storage2, { key = "relaymare.session", core: core2, roster: roster2, migrateRun, migrateProfile } = {}) {
     return {
       save({ profile, run = null }) {
+        if (run?.daily) return false;
         const progressed = run ? recordRunProgress(profile, run).profile : profile;
         storage2.setItem(key, JSON.stringify({ version: SESSION_VERSION, profile: progressed, run: run ? runData(run) : null }));
       },
@@ -10960,13 +11221,184 @@ const BattleRuntime = {
         if (data.run == null) return { profile, run: null };
         try {
           const run = restoreRun(data.run, { core: core2, roster: roster2, migrate: migrateRun });
-          if (run) return { profile: recordRunProgress(profile, run).profile, run };
+          if (run && !run.daily) return { profile: recordRunProgress(profile, run).profile, run };
         } catch {
         }
         return { profile, run: null, runError: "run_restore_failed" };
       },
       clear() {
         storage2.removeItem(key);
+      }
+    };
+  }
+
+  // card_pixel/game/src/engine/daily-store.js
+  var KEY = "relaymare.daily";
+  var VERSION = 1;
+  var empty = () => ({ version: VERSION, days: {}, active: null });
+  var emptyDay = (spec) => ({ spec, starts: 0, official: null, bestPractice: null, last: null });
+  function checkpointFor(run) {
+    const { floor, bench, stats, daily } = run;
+    if (!Number.isInteger(floor) || floor < 1 || floor > FLOORS || !Array.isArray(bench) || !Array.from(bench).every((id) => daily.spec.loanIds.includes(id)) || new Set(bench).size !== bench.length || ![stats?.turns, stats?.heirloomsUsed].every((n) => Number.isSafeInteger(n) && n >= 0)) return null;
+    const livingIds = daily.spec.loanIds.filter((id) => bench.includes(id));
+    return { floor, turns: stats.turns, livingIds, heirloomsUsed: stats.heirloomsUsed };
+  }
+  function response(day, score, duplicate) {
+    return { ok: true, score, official: day.official, bestPractice: day.bestPractice, duplicate };
+  }
+  function previousResult(data, runId) {
+    if (typeof runId !== "string") return null;
+    const key = runId.split("/")[2];
+    if (!Object.hasOwn(data.days, key)) return null;
+    const day = data.days[key];
+    if (day.official?.runId === runId) return response(day, day.official, true);
+    if (day.bestPractice?.runId === runId) return response(day, day.bestPractice, true);
+    if (day.last?.runId === runId) {
+      const { receipts, ...score2 } = day.last;
+      return response(day, score2, true);
+    }
+    const score = day.last?.receipts?.[runId];
+    return score ? response(day, score, true) : null;
+  }
+  function create3(storage2, { core: core2, roster: roster2 }) {
+    function read() {
+      try {
+        const saved = storage2.getItem(KEY);
+        if (saved == null) return empty();
+        const data = JSON.parse(saved);
+        if (data?.version === VERSION && data.days && typeof data.days === "object" && !Array.isArray(data.days) && (data.active === null || typeof data.active === "object")) return data;
+      } catch {
+      }
+      return null;
+    }
+    function write(data) {
+      try {
+        return storage2.setItem(KEY, JSON.stringify(data)) !== false;
+      } catch {
+        return false;
+      }
+    }
+    function activeCheckpoint(data, run) {
+      const { active: active2 } = data;
+      const daily = run?.daily;
+      const day = data.days[active2.dayKey];
+      if (!daily || !day || run.id !== active2.runId || daily.kind !== active2.kind || daily.attemptNo !== day.starts || !day.spec || daily.spec?.dayKey !== active2.dayKey || run.seed !== day.spec.seed || run.dungeonId !== day.spec.dungeonId || run.floors !== FLOORS || run.difficulty !== "normal" || run.contract !== null || run.crystals !== 0) return null;
+      try {
+        if (JSON.stringify(daily.spec) === JSON.stringify(day.spec)) return checkpointFor(run);
+      } catch {
+      }
+      return null;
+    }
+    function settle(data, outcome, checkpoint) {
+      const { runId, dayKey: dayKey2, kind } = data.active;
+      const day = data.days[dayKey2];
+      if (!day || !checkpoint) return invalid("invalid_save");
+      const score = { runId, dayKey: dayKey2, kind, outcome, ...checkpoint };
+      if (kind === "official") day.official = score;
+      else if (outcome !== "abandon" && (!day.bestPractice || compare(score, day.bestPractice) > 0)) day.bestPractice = score;
+      const { receipts = {}, ...prior } = day.last || {};
+      if (prior.runId) receipts[prior.runId] = prior;
+      day.last = Object.keys(receipts).length ? { ...score, receipts } : score;
+      data.active = null;
+      return write(data) ? response(day, score, false) : invalid("storage_failed");
+    }
+    return {
+      view(profile, now) {
+        const key = dayKey(now);
+        const unlocked = dailyRiftUnlocked(profile);
+        const { days, active: active2 } = read() || empty();
+        const today = days[key];
+        return {
+          dayKey: key,
+          unlocked,
+          spec: unlocked ? today?.spec ?? specFor(key, roster2) : null,
+          official: today?.official ?? null,
+          bestPractice: today?.bestPractice ?? null,
+          active: active2 ? { runId: active2.runId, dayKey: active2.dayKey, kind: active2.kind, floor: active2.checkpoint?.floor } : null
+        };
+      },
+      start({ profile, now, expectedDayKey, kind }) {
+        if (!dailyRiftUnlocked(profile)) return invalid("locked");
+        const key = dayKey(now);
+        if (key !== expectedDayKey) return invalid("date_changed");
+        const data = read();
+        if (!data) return invalid("invalid_save");
+        if (data.active) return invalid("active_exists");
+        if (kind !== "official" && kind !== "practice") return invalid("invalid_save");
+        const day = data.days[key];
+        if (kind === "official" && day?.starts) return invalid("already_recorded");
+        if (kind === "practice" && !day?.official) return invalid("official_required");
+        let run;
+        try {
+          const spec = day?.spec ?? specFor(key, roster2);
+          const record = data.days[key] ||= emptyDay(spec);
+          const attemptNo = record.starts + 1;
+          run = createRun({ core: core2, roster: roster2, daily: { spec, kind, attemptNo } });
+          record.starts = attemptNo;
+          data.active = { runId: run.id, dayKey: key, kind, snapshot: serializeRun(run), checkpoint: checkpointFor(run) };
+        } catch {
+          return invalid("invalid_save");
+        }
+        return write(data) ? { ok: true, run } : invalid("storage_failed");
+      },
+      resume() {
+        const data = read();
+        if (!data) return invalid("invalid_save");
+        if (!data.active) return invalid("no_active");
+        try {
+          const run = restoreRun(data.active.snapshot, { core: core2, roster: roster2 });
+          if (activeCheckpoint(data, run) && validAttempt(run.daily, roster2)) return { ok: true, run };
+        } catch {
+        }
+        return invalid("invalid_save");
+      },
+      save(run) {
+        const data = read();
+        if (!data) return invalid("invalid_save");
+        if (!data.active) return invalid("no_active");
+        const checkpoint = activeCheckpoint(data, run);
+        if (!checkpoint) return invalid("invalid_save");
+        let snapshot;
+        try {
+          snapshot = serializeRun(run);
+          if (!restoreRun(snapshot, { core: core2, roster: roster2 })) return invalid("invalid_save");
+        } catch {
+          return invalid("invalid_save");
+        }
+        data.active = { ...data.active, snapshot, checkpoint };
+        return write(data) ? { ok: true } : invalid("storage_failed");
+      },
+      finish(run) {
+        const data = read();
+        if (!data) return invalid("invalid_save");
+        const duplicate = previousResult(data, run?.id);
+        if (duplicate) return duplicate;
+        if (!data.active) return invalid("no_active");
+        const checkpoint = activeCheckpoint(data, run);
+        if (!checkpoint) return invalid("invalid_save");
+        if (run.phase !== "done" || !["win", "lose"].includes(run.result)) return invalid("run_not_done");
+        return settle(data, run.result, checkpoint);
+      },
+      abandon(runId) {
+        const data = read();
+        if (!data) return invalid("invalid_save");
+        const duplicate = previousResult(data, runId);
+        if (duplicate) return duplicate;
+        if (!data.active) return invalid("no_active");
+        if (runId !== data.active.runId) return invalid("invalid_save");
+        return settle(data, "abandon", data.active.checkpoint);
+      },
+      history({ before = null, limit = 7 } = {}) {
+        const { days } = read() || empty();
+        const keys = Object.keys(days).filter((key) => days[key]?.official && (before === null || key < before)).sort().reverse();
+        const rows = keys.slice(0, limit).map((key) => {
+          const { spec, official, bestPractice } = days[key];
+          return { dayKey: key, spec, official, bestPractice };
+        });
+        return { rows, nextBefore: keys.length > rows.length ? rows.at(-1)?.dayKey ?? null : null };
+      },
+      clear() {
+        storage2.removeItem(KEY);
       }
     };
   }
@@ -11657,7 +12089,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/stage/stage.js
   function createStage(ASSETS) {
-    const SCALE = 2;
+    const SCALE2 = 2;
     const clock = { t: 0, speed: 1, fast: false, slow: 1, paused: false, waiters: [], tweens: [] };
     function wait(sec) {
       return new Promise((res) => clock.waiters.push({ at: clock.t + sec, res }));
@@ -12272,8 +12704,8 @@ const BattleRuntime = {
       const d = document.createElement("div");
       d.className = "num " + (cls || "");
       d.textContent = text;
-      d.style.left = Math.round(x * SCALE) + "px";
-      d.style.top = Math.round(Math.max(16, y) * SCALE) + "px";
+      d.style.left = Math.round(x * SCALE2) + "px";
+      d.style.top = Math.round(Math.max(16, y) * SCALE2) + "px";
       fxLayer.appendChild(d);
       setTimeout(() => d.remove(), 1300);
       return d;
@@ -12338,8 +12770,8 @@ const BattleRuntime = {
       bgCache = null;
       cv.width = W;
       cv.height = H;
-      cv.style.width = W * SCALE + "px";
-      cv.style.height = H * SCALE + "px";
+      cv.style.width = W * SCALE2 + "px";
+      cv.style.height = H * SCALE2 + "px";
       ctx.imageSmoothingEnabled = false;
     }
     function setRoom(bg, bossRoom = false) {
@@ -12363,7 +12795,7 @@ const BattleRuntime = {
       if (fxLayer) fxLayer.innerHTML = "";
     }
     return {
-      SCALE,
+      SCALE: SCALE2,
       S,
       clock,
       wait,
@@ -12669,7 +13101,9 @@ const BattleRuntime = {
     return '<div class="sheet" id="sheet"><div class="in win"><h3 id="sh-title"></h3><div id="sh-body" class="shbody"></div><button class="btn" id="b-sheetclose">\uB2EB\uAE30</button></div></div>';
   }
   function createSheet(stage2) {
-    function openSheet(title, html) {
+    let afterDismiss;
+    function openSheet(title, html, { onClose } = {}) {
+      afterDismiss = onClose;
       $("#sh-title").textContent = title;
       const body = $("#sh-body");
       body.innerHTML = html;
@@ -12678,15 +13112,21 @@ const BattleRuntime = {
       stage2.pause(true);
     }
     function closeSheet() {
+      afterDismiss = void 0;
       $("#sheet").classList.remove("on");
       stage2.pause(false);
     }
     function sheet(title, body) {
       openSheet(title, "<p>" + esc(body) + "</p>");
     }
-    $("#b-sheetclose").addEventListener("click", closeSheet);
+    function dismiss() {
+      const onClose = afterDismiss;
+      closeSheet();
+      onClose?.();
+    }
+    $("#b-sheetclose").addEventListener("click", dismiss);
     $("#sheet").addEventListener("click", (event) => {
-      if (event.target.id === "sheet") closeSheet();
+      if (event.target.id === "sheet") dismiss();
     });
     return { openSheet, closeSheet, sheet };
   }
@@ -12694,7 +13134,8 @@ const BattleRuntime = {
   // card_pixel/game/src/ui/widgets.js
   var TYPE = { phy: "\uBB3C\uB9AC", mag: "\uB9C8\uBC95", sup: "\uBCF4\uC870" };
   var foeFlip = (def) => (def.facing || "right") === "right";
-  var head = (run, title, sub) => '<header class="top"><b>' + esc(title) + "</b>" + (sub ? "<span>" + esc(sub) + "</span>" : "") + '<span class="sp"></span><span class="gems">\u25C6 ' + (run ? run.crystals : 0) + "</span>" + tools() + "</header>";
+  var riftKindLabel = (kind) => kind === "practice" ? "\uC5F0\uC2B5" : "\uAE30\uB85D \uB3C4\uC804";
+  var head = (run, title, sub) => '<header class="top"><b>' + esc(title) + "</b>" + (sub ? "<span>" + esc(sub) + "</span>" : "") + '<span class="sp"></span><span class="gems">' + (run?.daily ? riftKindLabel(run.daily.kind) : "\u25C6 " + (run ? run.crystals : 0)) + "</span>" + tools() + "</header>";
   function badges(run, id) {
     const out = [];
     if (run && run.blessings[id]) out.push('<i class="bless">\uCD95\uBCF5 +' + Math.round(run.blessings[id] * 100) + "%</i>");
@@ -12717,7 +13158,7 @@ const BattleRuntime = {
       const style = (o && o.flip ? "transform:scaleX(-1);" : "") + (o && o.style ? o.style : "");
       return '<img class="' + cls + '" alt="" src="' + m.src + '" width="' + m.w + '" height="' + m.h + '"' + (style ? ' style="' + style + '"' : "") + ">";
     }
-    function face(id, box) {
+    function face2(id, box) {
       const m = spr(id);
       if (!m) return "";
       return sprite2(id, {
@@ -12728,13 +13169,165 @@ const BattleRuntime = {
       const c = card(id), opt = o || {};
       return '<button class="cardrow win g-' + c.grade + (opt.cls ? " " + opt.cls : "") + '" data-id="' + id + '"' + (opt.sheet ? ' data-sheet="' + id + '"' : "") + '><span class="pic">' + sprite2(id) + '</span><span class="txt"><div class="nm">' + esc(c.name) + '<i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + "</i>" + (opt.tag ? '<i class="tag">' + esc(opt.tag) + "</i>" : "") + '</div><div class="st">HP ' + c.stats.hp + " \xB7 \uACF5 " + c.stats.atk + " \xB7 \uB9C8\uACF5 " + c.stats.matk + " \xB7 \uBC29 " + c.stats.def + "/" + c.stats.mdef + '</div><div class="trait">' + esc(c.trait.desc) + "</div>" + (opt.skills !== false ? '<div class="sk">' + c.skills.map((s) => esc(s.name) + "<small>" + TYPE[s.type] + (s.cost ? " " + s.cost : "") + "</small>").join(" \xB7 ") + "</div>" : "") + '<div class="badges">' + badges(run, id) + "</div></span></button>";
     }
-    const benchMinis = (run) => run.bench.map((id) => '<button class="mini g-' + card(id).grade + '" data-sheet="' + id + '" aria-label="' + esc(card(id).name) + '">' + face(id, 40) + (run.heirlooms[id] ? '<i class="h">\uC720</i>' : "") + (run.blessings[id] ? '<i class="b">\uCD95</i>' : "") + "</button>").join("");
+    const benchMinis = (run) => run.bench.map((id) => '<button class="mini g-' + card(id).grade + '" data-sheet="' + id + '" aria-label="' + esc(card(id).name) + '">' + face2(id, 40) + (run.heirlooms[id] ? '<i class="h">\uC720</i>' : "") + (run.blessings[id] ? '<i class="b">\uCD95</i>' : "") + "</button>").join("");
     function cardHead(id, sub) {
       const c = card(id);
       const art = sprite2(id) || (c.baseCardId ? sprite2(c.baseCardId) : "");
       return '<div class="ih g-' + c.grade + '"><span class="pic">' + art + "</span><div><b>" + esc(c.name) + '</b><i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + "</i>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</div></div>";
     }
-    return { card, spr, sprite: sprite2, face, cardRow, benchMinis, cardHead };
+    return { card, spr, sprite: sprite2, face: face2, cardRow, benchMinis, cardHead };
+  }
+
+  // card_pixel/game/src/ui/screens/daily-rift.js
+  var shortRiftDate = (dayKey2) => dayKey2?.slice(5).replace("-", ".") || "";
+  var REGION_HINT = {
+    ember_carry: "\uAD50\uB300 \uC2DC \uC801 \uC791\uC5F4 \uCD5C\uB300 2 \uACC4\uC2B9",
+    twilight_bell: "3\xB76\xB79\uD134 \uC801 \uB514\uBC14\uC778 +2",
+    starlit_sky: "\uBB38\uC5D0\uC11C \uC2DC\uC791 \uD558\uB298 \uD655\uC778",
+    tide_cycle: "3\uD134 \uAC15\uD654 \xB7 4\uD134 \uBE48\uD2C8 \xB7 \uBCF4\uC2A4 \uC81C\uC678",
+    arena_charge: "\uC77C\uBC18 \uACF5\uACA9 2\uD68C \uBA85\uC911 \u2192 \uAE30\uC220 \uD53C\uD574 \xD72"
+  };
+  function koreanRiftDate(dayKey2) {
+    if (!dayKey2) return "";
+    const [, month, day] = dayKey2.split("-");
+    return `${Number(month)}\uC6D4 ${Number(day)}\uC77C`;
+  }
+  function dailyRow(view) {
+    if (!view?.unlocked) return "";
+    const { active: active2, official, dayKey: dayKey2 } = view;
+    const action = active2 ? active2.floor ? `${active2.floor}\uCE35 \uC774\uC5B4\uAC00\uAE30` : "\uC774\uC5B4\uAC00\uAE30" : official ? "\uC5F0\uC2B5\uD558\uAE30" : "\uCCAB \uB3C4\uC804";
+    const summary = [shortRiftDate(active2?.dayKey || dayKey2), action].filter(Boolean).join(" \xB7 ");
+    return `<button class="btn daily-row" id="meta-daily-rift"><span>\uC624\uB298\uC758 \uADE0\uC5F4</span><small>${esc(summary)}</small></button>`;
+  }
+  function face(widgets2, id, name, options = {}) {
+    const { shadow = false, boss = false } = options;
+    return `<span class="meta-face${boss ? " boss" : ""}${shadow ? " rift-shadow" : ""}"${name ? ` role="img" aria-label="${esc(name)}"` : ""}>${widgets2.face(id, boss ? 32 : 44)}</span>`;
+  }
+  function openDailyPreparation(view, ui) {
+    const { spec, official, dayKey: dayKey2 = spec?.dayKey } = view;
+    const { widgets: widgets2, roster: roster2, sheets: sheets2, start, inspectLoan, message } = ui;
+    if (!spec) return sheets2.sheet("\uC624\uB298\uC758 \uADE0\uC5F4", "\uC624\uB298\uC758 \uD3B8\uC131\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uB2E4.");
+    const dungeon = DUNGEONS[spec.dungeonId];
+    const region = REGIONS[dungeon?.region?.id];
+    const boss = spec.bossId && roster2.bosses.includes(spec.bossId) ? roster2.bossOf(spec.bossId) : null;
+    const loans = spec.loanIds ?? [];
+    const kind = official ? "practice" : "official";
+    const render = () => openDailyPreparation(view, ui);
+    const row = (label, ids) => `<h4>${label}</h4><div class="rift-loans">
+    ${ids.map((id) => `<button class="btn rift-companion" data-rift-loan="${esc(id)}">
+      ${face(widgets2, id)}<span>${esc(widgets2.card(id)?.name || id)}</span>
+    </button>`).join("")}
+  </div>`;
+    const date = koreanRiftDate(dayKey2);
+    sheets2.openSheet([date, "\uC624\uB298\uC758 \uADE0\uC5F4"].filter(Boolean).join(" \xB7 "), `<div class="meta-sheet rift-prep">
+    ${message ? `<p class="rift-date-notice" role="status">${esc(message)}</p>` : ""}
+    <p>${esc([dungeon?.name, "7\uCE35", "\uC804\uD22C 4\uD68C"].filter(Boolean).join(" \xB7 "))}</p>
+    ${boss ? `<div class="rift-opponents">${face(widgets2, boss.sprite, "", { boss: true })}<span>7\uCE35 \xB7 ${esc(boss.name)}</span></div>` : ""}
+    ${region ? `<p class="rift-region">${esc(region.name)} \xB7 ${esc(REGION_HINT[region.id] ?? region.desc)}</p>` : ""}
+    ${spec.gateIds?.length ? `<div class="rift-opponents">
+      ${spec.gateIds.map((id) => face(widgets2, id, "", { shadow: true })).join("")}
+      <span>4\uCE35 \xB7 ${esc(spec.gateIds.map((id) => widgets2.card(id)?.name || id).join(" \u2192 "))}</span>
+    </div>` : ""}
+    ${row("\uCCAB \uCD9C\uC804", loans.slice(0, 3))}
+    ${row("\uB300\uAE30", loans.slice(3))}
+    ${official ? "" : '<p class="rift-prep-note">\uCCAB \uB3C4\uC804\uC740 \uC624\uB298\uC758 \uAE30\uB85D\uC5D0 \uB0A8\uB294\uB2E4. \uC774\uD6C4\uC5D0\uB294 \uAC19\uC740 \uADE0\uC5F4\uC744 \uC5F0\uC2B5\uD560 \uC218 \uC788\uB2E4.</p>'}
+    <button class="btn go" id="meta-daily-start">${official ? "\uC5F0\uC2B5\uD558\uAE30" : "\uCCAB \uAE30\uB85D\uC5D0 \uB3C4\uC804"}</button>
+  </div>`);
+    $("#meta-daily-start").addEventListener("click", () => start(dayKey2, kind));
+    for (const button of $$("#sh-body [data-rift-loan]")) button.addEventListener("click", () => {
+      inspectLoan(button.dataset.riftLoan, render);
+    });
+  }
+  function openEarlierRift(active2, { sheets: sheets2, resume, abandon }) {
+    const date = shortRiftDate(active2.dayKey);
+    const title = [date, "\uADE0\uC5F4"].filter(Boolean).join(" ");
+    const prompt = () => openEarlierRift(active2, { sheets: sheets2, resume, abandon });
+    sheets2.openSheet(title, `<div class="meta-sheet rift-actions">
+    <button class="btn go" id="meta-rift-resume">${esc(title)} \uC774\uC5B4\uAC00\uAE30</button>
+    <button class="btn meta-danger" id="meta-rift-abandon">${esc([date, "\uB3C4\uC804\uC744 \uD3EC\uAE30"].filter(Boolean).join(" "))}</button>
+  </div>`);
+    $("#meta-rift-resume").addEventListener("click", resume);
+    $("#meta-rift-abandon").addEventListener("click", () => {
+      sheets2.openSheet("\uC774 \uB3C4\uC804\uC744 \u2018\uD3EC\uAE30\u2019\uB85C \uAE30\uB85D\uD560\uAE4C\uC694?", `<div class="meta-sheet rift-actions">
+      <button class="btn meta-danger" id="meta-rift-confirm-abandon">\uD3EC\uAE30</button>
+    </div>`, { onClose: prompt });
+      $("#meta-rift-confirm-abandon").addEventListener("click", () => abandon(active2.runId));
+    });
+  }
+  function dailyResultTitle(score) {
+    if (score.outcome === "win") return [shortRiftDate(score.dayKey), "\uADE0\uC5F4 \uB3CC\uD30C"].filter(Boolean).join(" ");
+    return `${score.floor ?? 1}\uCE35\uC5D0\uC11C \uADE0\uC5F4\uC774 \uB2EB\uD614\uB2E4`;
+  }
+  function stamp(dayKey2) {
+    return `<span class="meta-stamp rift-stamp">${esc(shortRiftDate(dayKey2))} \xB7 \uB3CC\uD30C \uB3C4\uC7A5</span>`;
+  }
+  function survival(score, total = 5) {
+    return `\uC0DD\uC874 ${score.livingIds?.length ?? 0}/${total}\uBA85`;
+  }
+  function dailyResultScreen(node, { spec, score, official }, { widgets: widgets2, today, practice, openToday, hub }) {
+    const sameDay = score.dayKey && today === score.dayKey;
+    const living = new Set(score.livingIds ?? []);
+    const loans = spec?.loanIds ?? [];
+    const stamped = score.outcome === "win" && (score.kind === "official" || official && official.runId === score.runId);
+    const survivors = survival(score, loans.length || 5);
+    node.innerHTML = `<section class="meta-panel rift-result">
+    <div class="rift-result-cast">
+      ${loans.map((id) => `<div class="rift-companion${living.has(id) ? "" : " fallen"}">
+        ${face(widgets2, id)}<b>${esc(widgets2.card(id)?.name || id)}</b>${living.has(id) ? "" : "<small>\uC4F0\uB7EC\uC9D0</small>"}
+      </div>`).join("")}
+    </div>
+    ${score.outcome === "win" && !living.size ? `<p>\uBCF4\uC2A4 \uACA9\uD30C \xB7 ${survivors}</p><p>${score.turns ?? 0}\uD134</p>` : `<p>${survivors} \xB7 ${score.turns ?? 0}\uD134</p>`}
+    <p>\uC720\uD488 \uC0AC\uC6A9 ${score.heirloomsUsed ?? 0}\uD68C</p>
+    ${stamped ? stamp(score.dayKey) : ""}
+  </section>
+  <div class="rift-actions">
+    <button class="btn go" id="meta-rift-again">${sameDay ? "\uAC19\uC740 \uD3B8\uC131\uC73C\uB85C \uC5F0\uC2B5" : "\uC624\uB298 \uADE0\uC5F4 \uBCF4\uAE30"}</button>
+    <button class="btn" id="meta-rift-hub">\uAD00\uCE21\uC18C\uB85C</button>
+  </div>`;
+    $("#meta-rift-again", node).addEventListener("click", sameDay ? () => practice(score.dayKey) : () => openToday());
+    $("#meta-rift-hub", node).addEventListener("click", () => hub());
+  }
+  function scoreLabel(score) {
+    if (!score) return "\uAE30\uB85D \uC5C6\uC74C";
+    if (score.outcome === "win") return "\uB3CC\uD30C";
+    if (score.outcome === "abandon") return "\uD3EC\uAE30";
+    return `${score.floor ?? 1}\uCE35 \uC2E4\uD328`;
+  }
+  function openRiftRecord(row, sheets2) {
+    const dayKey2 = row.dayKey ?? row.spec?.dayKey;
+    const total = row.spec?.loanIds?.length || 5;
+    const dungeon = DUNGEONS[row.spec?.dungeonId];
+    const entry = (label, score) => {
+      const summary = score?.outcome === "win" ? [row.official?.outcome === "win" ? "" : "\uB3CC\uD30C", survival(score, total), `${score.turns ?? 0}\uD134`].filter(Boolean).join(" \xB7 ") : scoreLabel(score);
+      return `<div class="rift-record-score"><h4>${label}</h4><p>${esc(summary)}</p></div>`;
+    };
+    sheets2.openSheet([shortRiftDate(dayKey2), "\uADE0\uC5F4 \uAE30\uB85D"].filter(Boolean).join(" "), `<div class="meta-sheet">
+    ${dungeon ? `<p>${esc(dungeon.name)}</p>` : ""}
+    ${entry("\uCCAB \uAE30\uB85D", row.official)}
+    ${entry("\uC5F0\uC2B5 \uCD5C\uACE0", row.bestPractice)}
+    ${row.official?.outcome === "win" ? stamp(dayKey2) : ""}
+  </div>`);
+  }
+  function openDailyHistory({ rows = [], nextBefore = null } = {}, ui) {
+    const { node, sheets: sheets2, next, previous } = ui;
+    node.innerHTML = `<h2>\uADE0\uC5F4 \uAE30\uB85D</h2>
+    <div class="rift-record-list">
+      ${rows.map((row, index) => {
+      const date = shortRiftDate(row.dayKey ?? row.spec?.dayKey);
+      const dungeon = DUNGEONS[row.spec?.dungeonId]?.name;
+      const label = [date, dungeon, scoreLabel(row.official ?? row.bestPractice)].filter(Boolean).join(" \xB7 ");
+      return `<button class="btn" data-rift-record="${index}">${esc(label)}</button>`;
+    }).join("") || "<p>\uAE30\uB85D \uC5C6\uC74C</p>"}
+    </div>
+    ${previous || nextBefore ? `<div class="rift-record-pages">
+      <button class="btn" id="meta-rift-previous"${previous ? "" : " disabled"}>\uC774\uC804</button>
+      <button class="btn" id="meta-rift-next"${nextBefore ? "" : " disabled"}>\uB2E4\uC74C</button>
+    </div>` : ""}`;
+    for (const button of $$("[data-rift-record]", node)) button.addEventListener("click", () => {
+      openRiftRecord(rows[Number(button.dataset.riftRecord)], sheets2);
+    });
+    if (previous) $("#meta-rift-previous", node)?.addEventListener("click", previous);
+    if (nextBefore) $("#meta-rift-next", node)?.addEventListener("click", () => next(nextBefore));
   }
 
   // card_pixel/game/src/ui/battle/hud.js
@@ -12755,7 +13348,7 @@ const BattleRuntime = {
   };
   function createHud(core2, stage2, sfx, widgets2) {
     const { S, wait, footY: FY, headY: HY } = stage2;
-    const { face, card } = widgets2;
+    const { face: face2, card } = widgets2;
     function chips(node, unit, isFoe) {
       const out = [];
       for (const id of Object.keys(unit.buffs)) {
@@ -12788,7 +13381,7 @@ const BattleRuntime = {
     function buildParty(run, party) {
       $("#party").innerHTML = party.map((id, i) => {
         if (!id) return '<div class="pm none"></div>';
-        return '<div class="pm" data-i="' + i + '"><span class="face">' + face(id, 40) + "<i>" + POSITION[i] + '</i></span><span class="info"><span class="top"><b>' + esc(card(id).name) + "</b>" + (run.heirlooms[id] ? '<i class="h">\uC720</i>' : "") + '</span><span class="bar hp"><u></u><span class="n"></span></span><span class="bar mp"><u></u><span class="n"></span></span></span><em class="st"></em></div>';
+        return '<div class="pm" data-i="' + i + '"><span class="face">' + face2(id, 40) + "<i>" + POSITION[i] + '</i></span><span class="info"><span class="top"><b>' + esc(card(id).name) + "</b>" + (run.heirlooms[id] ? '<i class="h">\uC720</i>' : "") + '</span><span class="bar hp"><u></u><span class="n"></span></span><span class="bar mp"><u></u><span class="n"></span></span></span><em class="st"></em></div>';
       }).join("");
     }
     function render(B, fresh) {
@@ -12973,7 +13566,7 @@ const BattleRuntime = {
       return items.length ? '<ul class="stl">' + items.join("") + "</ul>" : '<p class="none">\uC5C6\uC74C</p>';
     }
     const blessLine = (run, id) => '<li><i class="good">\uCD95\uBCF5 +' + Math.round(run.blessings[id] * 100) + "%</i>\uBAA8\uB4E0 \uB2A5\uB825\uCE58, \uCE58\uBA85\uD0C0\uC728 +" + core2.GAME_CONSTANTS.BLESSING_CRIT + "%p \xB7 \uD68C\uD53C\uC728 +" + core2.GAME_CONSTANTS.BLESSING_EVA + "%p</li>";
-    function charSheet(run, id) {
+    function charSheet(run, id, { loaned = false, onClose } = {}) {
       const c = card(id);
       if (!c) return;
       const s = c.stats, h = run && run.heirlooms[id], from = h && (card(h.form || h.from) || card(h.from));
@@ -12981,7 +13574,11 @@ const BattleRuntime = {
       if (run && run.blessings[id]) html += '<ul class="stl">' + blessLine(run, id) + "</ul>";
       const heir = from ? heirBlock(h.skill ?? heirloomSkill(from), from.name, from) : "";
       html += "<h4>\uD2B9\uC131</h4><p>" + esc(c.trait.desc) + "</p>" + heir + "<h4>\uAE30\uC220</h4>" + c.skills.map((sk) => skillBlock(sk, c)).join("");
-      openSheet("\uB3D9\uB8CC", html);
+      const offered = loaned ? heirloomSkill(c) : null;
+      if (offered) {
+        html += '<h4>\uB118\uAE38 \uC720\uD488</h4><div class="heirbox"><p>\uC704\uB825 \xD7' + HEIRLOOM_POWER + " \xB7 MP 0 \xB7 \uC804\uD22C\uB9C8\uB2E4 \uD55C \uBC88</p>" + skillBlock({ ...offered, cost: 0 }, c) + "</div>";
+      }
+      openSheet(loaned ? c.name : "\uB3D9\uB8CC", html, { onClose });
     }
     function ROLE_OF(c) {
       const r = core2.DISPLAY_NAMES && core2.DISPLAY_NAMES.role && core2.DISPLAY_NAMES.role[c.role];
@@ -13073,7 +13670,12 @@ const BattleRuntime = {
         if (!relic) return "<li>\uBE48 \uCE78</li>";
         return "<li><b>" + esc(relic.name) + "</b>" + (id === B.temporaryRelic ? " \xB7 \uC774\uBC88 \uC804\uD22C\uB9CC" : "") + " \xB7 " + esc(relic.desc) + "</li>";
       });
-      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + (run.contract.met ? "\uB2EC\uC131" : "\uC544\uC9C1") + "</h4><p>" + esc(contract.rule) + "</p>" : "") + '<h4>\uC7A5\uCC29 \uC720\uBB3C</h4><ul class="stl">' + slots.join("") + "</ul>");
+      const dailyLine = run.daily ? [
+        shortRiftDate(run.daily.spec?.dayKey),
+        riftKindLabel(run.daily.kind),
+        "\uC815\uC0B0\uD55C \uC804\uD22C " + (run.stats?.turns ?? 0) + "\uD134"
+      ].filter(Boolean).join(" \xB7 ") : "";
+      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", (dailyLine ? "<p>" + esc(dailyLine) + "</p>" : "") + (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + (run.contract.met ? "\uB2EC\uC131" : "\uC544\uC9C1") + "</h4><p>" + esc(contract.rule) + "</p>" : "") + '<h4>\uC7A5\uCC29 \uC720\uBB3C</h4><ul class="stl">' + slots.join("") + "</ul>");
     }
     return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
   }
@@ -13470,7 +14072,7 @@ const BattleRuntime = {
   function createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: St, audio: audio2, sheets: sheets2, details, music: music2 }) {
     const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
     const { sfx } = audio2;
-    const { card, face, spr } = widgets2;
+    const { card, face: face2, spr } = widgets2;
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
     const LINKED_TRAITS = ["ally_death_base_atk_phy", "ally_light_death_base_matk_mag"];
@@ -13668,7 +14270,7 @@ const BattleRuntime = {
       hud.buildParty(run, B.party);
       showIntent(null);
       showRegion();
-      $("#room").textContent = run.floor + "\uCE35 \xB7 " + ROOM_NAMES[B.door.type];
+      $("#room").textContent = roomLabel();
       $("#tally").innerHTML = "";
       return QUIRKS[B.door.quirk];
     }
@@ -14220,6 +14822,9 @@ const BattleRuntime = {
       }
       if (bridge === B.bridge && bridge.outcome && $("#battle").classList.contains("on")) finishBattle();
     }
+    function roomLabel() {
+      return run.daily ? "\uADE0\uC5F4 " + run.floor + "\uCE35" : run.floor + "\uCE35 \xB7 " + ROOM_NAMES[B.door.type];
+    }
     function startBattle(expedition, options, settle, advance2) {
       run = expedition;
       onResult = settle;
@@ -14261,7 +14866,7 @@ const BattleRuntime = {
       const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
       if (res.win && battleCrystals > 0) rows.push('<p class="gain">\uACB0\uC815 +' + battleCrystals + " \xB7 \uBCF4\uC720 " + run.crystals + "</p>");
       rows.push(...contractSettlement(run.floor, res.contract));
-      if (res.fallen?.length) rows.push('<div class="fallen"><small>\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC</small><div>' + res.fallen.map((id) => '<span class="mini dead">' + face(id, 40) + "<b>" + esc(card(id).name) + "</b></span>").join("") + "</div></div>");
+      if (res.fallen?.length) rows.push('<div class="fallen"><small>\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC</small><div>' + res.fallen.map((id) => '<span class="mini dead">' + face2(id, 40) + "<b>" + esc(card(id).name) + "</b></span>").join("") + "</div></div>");
       for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>\uC720\uD488</b> ' + esc(card(g.to).name) + " \u2190 " + esc(card(g.from).name) + "\uC758 " + esc(g.name) + "</p>");
       if (res.bet) rows.push("<p>" + (res.bet.won ? "\uB0B4\uAE30 \uC131\uACF5" : "\uB0B4\uAE30 \uC2E4\uD328") + "</p>");
       const box = $("#result-in");
@@ -14304,7 +14909,7 @@ const BattleRuntime = {
       St.clear();
       St.setRoom(run.room.bg, !!run.room.final);
       $("#battle").classList.add("resumed-result");
-      $("#room").textContent = run.floor + "\uCE35 \xB7 " + ROOM_NAMES[B.door.type];
+      $("#room").textContent = roomLabel();
       $("#turn").textContent = "";
       show("battle");
       layout();
@@ -14413,26 +15018,31 @@ const BattleRuntime = {
   function mapScreen(run, ui) {
     ui.playMusic();
     const { core: core2, widgets: widgets2, sheets: sheets2, artifacts, scene, icon: icon2 } = ui;
-    const { card, spr, sprite: sprite2, face, benchMinis } = widgets2;
+    const { card, spr, sprite: sprite2, face: face2, benchMinis } = widgets2;
     const { openSheet } = sheets2;
     const dungeon = DUNGEONS[run.dungeonId];
     const node = $("#map");
     const intro = dungeon.layout === "intro";
     const gate = run.doors.find((door) => door.type === "gate");
-    const boss = run.bossPreview;
-    const shadow = (id) => '<span class="run-face shadow-tint">' + face(id, 28) + "</span>";
+    const rift = run.daily;
+    const gateIds = rift?.spec?.gateIds ?? gate?.enemies?.map((enemy) => enemy.sprite) ?? [];
+    const bossId = rift?.spec?.bossId;
+    const boss = run.bossPreview || (bossId && ui.roster.bosses.includes(bossId) ? ui.roster.bossOf(bossId) : null);
+    const shadow = (id) => '<span class="run-face shadow-tint">' + face2(id, 28) + "</span>";
     const track = Array.from({ length: run.floors }, (_, index) => {
       const floor = index + 1;
       let marker = "";
-      if (intro && floor === run.floors) {
+      if (rift && floor === 4) {
+        marker = gateIds.length ? gateIds.map(shadow).join("") : icon2("gate");
+      } else if (intro && floor === run.floors) {
         const shadows = gate?.enemies.map((enemy) => enemy.sprite) || [run.reserved, null];
         marker = shadows.map((id) => id ? shadow(id) : icon2("nightmare")).join("");
       } else if (!intro && floor === 4) {
         marker = run.reserved ? shadow(run.reserved) : icon2("gate");
-      } else if (floor === run.floors && boss.sprite) {
-        marker = '<span class="run-face">' + face(boss.sprite, 28) + "</span>";
+      } else if (floor === run.floors && boss?.sprite) {
+        marker = '<span class="run-face">' + face2(boss.sprite, 28) + "</span>";
       }
-      const classes = floor === run.floor ? " cur" : floor < run.floor ? " done" : "";
+      const classes = (floor === run.floor ? " cur" : floor < run.floor ? " done" : "") + (rift && floor === 4 && gateIds.length > 1 ? " rift-gate" : "");
       return '<span class="floor-cell' + classes + '"><small>' + floor + "</small>" + marker + "</span>";
     }).join("");
     function startSky(door) {
@@ -14459,8 +15069,8 @@ const BattleRuntime = {
       const crystals = (door.reward ?? 0) - escrow(door);
       const relic = !door.final && artifacts.get(door.relic);
       return [
-        crystals ? crystalLabel + " +" + crystals : "",
-        door.type === "gate" && !door.final ? relic ? "\uADF8\uB9BC\uC790 1\uBA85 \uB610\uB294 " + relic.name : "\uADF8\uB9BC\uC790 1\uBA85" : relic?.name
+        !rift && crystals ? crystalLabel + " +" + crystals : "",
+        !rift && door.type === "gate" && !door.final ? relic ? "\uADF8\uB9BC\uC790 1\uBA85 \uB610\uB294 " + relic.name : "\uADF8\uB9BC\uC790 1\uBA85" : relic?.name
       ].filter(Boolean).join(" \xB7 ");
     }
     function escrow(door) {
@@ -14501,14 +15111,14 @@ const BattleRuntime = {
         return '<span class="door-lineup">' + previews + "</span>";
       }
       const visitor = door.event?.requires.present?.[0];
-      if (visitor) return '<span class="run-face" title="' + esc(card(visitor).name) + '">' + face(visitor, 44) + "</span>";
+      if (visitor) return '<span class="run-face" title="' + esc(card(visitor).name) + '">' + face2(visitor, 44) + "</span>";
       return icon2(door.type);
     }
     const doors = run.doors.map((door) => {
       const enemy = door.enemies[0];
       const isShowdown = run.doors.length === 1 && !!enemy;
       const opponent = enemy?.source ? card(enemy.source).name : enemy?.name;
-      const title = isShowdown && opponent ? confront(opponent) : door.name;
+      const title2 = isShowdown && opponent ? confront(opponent) : door.name;
       const info = [
         isShowdown ? ROOM_NAMES[door.type] : door.type === "event" ? "\uC0AC\uAC74" : enemy?.name,
         door.enemies.length > 1 ? door.enemies.length + "\uC5F0\uC804" : ""
@@ -14517,7 +15127,7 @@ const BattleRuntime = {
       const gain = reward(door);
       const quirk = door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
       const chips = quirk + door.enemies.map(affixChips).join("");
-      return '<div class="door-plate win"><button class="door-entry" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk">' + esc(rules) + "</small>" : "") + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      return '<div class="door-plate win"><button class="door-entry" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk">' + esc(rules) + "</small>" : "") + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
     const front = run.bench.slice(0, 3).map((id, index) => ({ id, role: POSITION[index], art: spr(id) }));
     front.sort((a, b) => a.art.h - b.art.h);
@@ -14530,7 +15140,8 @@ const BattleRuntime = {
     const cast = '<div class="map-party" style="--march-time:' + MARCH_MS + 'ms">' + lineup + "</div>";
     const reserve = { ...run, bench: run.bench.slice(3) };
     const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + "</button>" : "";
-    node.innerHTML = head(run, dungeon.name, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, cast) + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
+    const title = rift ? [shortRiftDate(rift.spec?.dayKey), "\uADE0\uC5F4"].filter(Boolean).join(" ") : dungeon.name;
+    node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, cast) + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
     show("map");
     const party = $(".map-party", node);
     for (const button of $$("[data-door]", node)) {
@@ -14551,9 +15162,9 @@ const BattleRuntime = {
       });
     }
     $("#b-floors", node).addEventListener("click", () => {
-      const names = gate?.enemies.map((enemy) => enemy.name).join(" \xB7 ") || (run.reserved ? card(run.reserved).name : "");
+      const names = rift ? gateIds.map((id) => card(id)?.name || id).join(" \xB7 ") : gate?.enemies.map((enemy) => enemy.name).join(" \xB7 ") || (run.reserved ? card(run.reserved).name : "");
       const middle = names ? "<p>" + (intro ? "5\uCE35" : "4\uCE35") + " \xB7 \uBB38\uC9C0\uAE30 " + esc(names) + "</p>" : "";
-      openSheet("\uCE35 \uC9C4\uD589", "<p>\uD604\uC7AC " + run.floor + " / " + run.floors + "\uCE35</p>" + middle + "<p>" + run.floors + "\uCE35 \xB7 " + esc(boss.name) + "</p><p>" + esc(boss.note || "") + "</p>");
+      openSheet("\uCE35 \uC9C4\uD589", "<p>\uD604\uC7AC " + run.floor + " / " + run.floors + "\uCE35</p>" + middle + (boss?.name ? "<p>" + run.floors + "\uCE35 \xB7 " + esc(boss.name) + "</p>" : "") + (boss?.note ? "<p>" + esc(boss.note) + "</p>" : ""));
     });
     $("#b-roster", node)?.addEventListener("click", () => openSheet("\uB300\uAE30 \uB3D9\uB8CC", '<div class="benchrow">' + benchMinis(reserve) + "</div>"));
     function describeDoor(door) {
@@ -14576,13 +15187,13 @@ const BattleRuntime = {
   function orderScreen(run, ui) {
     ui.playMusic();
     const { core: core2, widgets: widgets2, audio: audio2, sheets: sheets2 } = ui;
-    const { card, sprite: sprite2, face } = widgets2;
+    const { card, sprite: sprite2, face: face2 } = widgets2;
     const { sfx } = audio2;
     const node = $("#order");
     const room = run.room;
     const party = room.party?.slice() ?? defaultParty?.(run)?.slice() ?? [0, 1, 2].map((i) => run.bench[i] || null);
     const all = core2.GameUtils.getAllCards();
-    const qualifiers = room.type === "gate" || room.type === "boss";
+    const qualifiers = !run.daily && (room.type === "gate" || room.type === "boss");
     const quirk = QUIRKS[room.quirk];
     const alternative = room.type === "boss" && run.guide?.bossOrder ? suggestOrder?.(run) : null;
     const alternateSeats = alternative?.length ? [0, 1, 2].map((i) => alternative[i] ?? null) : null;
@@ -14602,19 +15213,19 @@ const BattleRuntime = {
         const preview = previews[i];
         const link = preview.skill ? "\uC4F0\uB7EC\uC9C0\uBA74 \u2193 " + card(preview.to).name + "\uC5D0\uAC8C " + preview.skill.name + " \xD7" + HEIRLOOM_POWER : "\uB118\uAE38 \uACF5\uACA9 \uC5C6\uC74C";
         const replaced = preview.skill && run.heirlooms[preview.to]?.name;
-        const recruitment = run.recruited.includes(id) ? "\uC0DD\uD658 \uC2DC \uC778\uC5F0" : "\uC0DD\uD658 \uC2DC \uC601\uC785 \uD6C4\uBCF4";
+        const recruitment = run.recruited?.includes(id) ? "\uC0DD\uD658 \uC2DC \uC778\uC5F0" : "\uC0DD\uD658 \uC2DC \uC601\uC785 \uD6C4\uBCF4";
         let trait = "";
         if (fighter?.trait.type === "pos_stat_boost") {
           trait = fighter.trait.pos === i ? "\uC790\uB9AC \uD6A8\uACFC \uBC1C\uB3D9" : POSITION[fighter.trait.pos] + " \uC804\uC6A9";
         } else if (fighter && /^syn_/.test(fighter.trait.type)) {
           trait = core2.Logic.calculateInitialStats(fighter, party, all, i).activeTrait ? "\uC2DC\uB108\uC9C0 \uBC1C\uB3D9" : "\uC2DC\uB108\uC9C0 \uC870\uAC74 \uBD80\uC871";
         }
-        return '<button class="relay-seat win' + picked + '" data-slot="' + i + '" aria-pressed="' + (selected === i) + '"><small>' + POSITION[i] + '</small><span class="run-face">' + (id ? face(id, 44) : "") + "</span><span><b>" + esc(fighter?.name || "\uBE48 \uC790\uB9AC") + '</b><span class="badges">' + (id ? badges(run, id) : "") + "</span>" + (trait ? "<small>" + esc(trait) + "</small>" : "") + "</span>" + (id && qualifiers ? '<small class="recruit-flag">' + recruitment + "</small>" : "") + "</button>" + (i < 2 ? '<p class="relay-link">' + esc(link) + (replaced ? "<small>" + esc(replaced) + " \uC720\uD488\uC744 \uAD50\uCCB4\uD55C\uB2E4</small>" : "") + "</p>" : "");
+        return '<button class="relay-seat win' + picked + '" data-slot="' + i + '" aria-pressed="' + (selected === i) + '"><small>' + POSITION[i] + '</small><span class="run-face">' + (id ? face2(id, 44) : "") + "</span><span><b>" + esc(fighter?.name || "\uBE48 \uC790\uB9AC") + '</b><span class="badges">' + (id ? badges(run, id) : "") + "</span>" + (trait ? "<small>" + esc(trait) + "</small>" : "") + "</span>" + (id && qualifiers ? '<small class="recruit-flag">' + recruitment + "</small>" : "") + "</button>" + (i < 2 ? '<p class="relay-link">' + esc(link) + (replaced ? "<small>" + esc(replaced) + " \uC720\uD488\uC744 \uAD50\uCCB4\uD55C\uB2E4</small>" : "") + "</p>" : "");
       }).join("");
       const bench = run.bench.filter((id) => !party.includes(id));
       const hazards = [quirk?.name, ...new Set(room.enemies.flatMap((enemy) => (enemy.affixes || []).map((id) => AFFIXES[id].name)))].filter(Boolean);
       const action = room.final && run.stats.retries ? "\uD3B8\uC131\uC744 \uBC14\uAFD4 \uC7AC\uB3C4\uC804" : "\uCD9C\uC804 (" + party.filter(Boolean).length + "\uBA85)";
-      node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", run.floor + "\uCE35") + '<div class="scroll"><button class="win run-opponents" id="b-opponents"><span>' + room.enemies.map((enemy) => '<span class="run-face">' + face(enemy.sprite, 32) + "</span>").join("") + "</span><span><b>" + esc(room.enemies.map((enemy) => enemy.name).join(" \u2192 ")) + "</b><small>" + esc((room.enemies.length > 1 ? room.enemies.length + "\uC5F0\uC804 \xB7 " : "") + room.name + (hazards.length ? " \xB7 " + hazards.join(" \xB7 ") : "")) + '</small></span></button><div class="relay-seats">' + slots + "</div>" + orderHint() + '<h3>\uB300\uAE30 \uB3D9\uB8CC</h3><p class="sm">\uC790\uB9AC\uB97C \uB204\uB978 \uB4A4, \uBC14\uAFC0 \uC790\uB9AC\uB098 \uB300\uAE30 \uB3D9\uB8CC\uB97C \uACE0\uB978\uB2E4.</p><div class="reserve-cards">' + (bench.map((id) => '<button class="win" data-bench="' + esc(id) + '"><span class="run-face">' + face(id, 44) + "</span><b>" + esc(card(id).name) + "</b></button>").join("") || "<p>\uC5C6\uC74C</p>") + '</div></div><div class="footer"><button class="btn go" id="b-go">' + action + "</button></div>";
+      node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", run.floor + "\uCE35") + '<div class="scroll"><button class="win run-opponents" id="b-opponents"><span>' + room.enemies.map((enemy) => '<span class="run-face">' + face2(enemy.sprite, 32) + "</span>").join("") + "</span><span><b>" + esc(room.enemies.map((enemy) => enemy.name).join(" \u2192 ")) + "</b><small>" + esc((room.enemies.length > 1 ? room.enemies.length + "\uC5F0\uC804 \xB7 " : "") + room.name + (hazards.length ? " \xB7 " + hazards.join(" \xB7 ") : "")) + '</small></span></button><div class="relay-seats">' + slots + "</div>" + orderHint() + '<h3>\uB300\uAE30 \uB3D9\uB8CC</h3><p class="sm">\uC790\uB9AC\uB97C \uB204\uB978 \uB4A4, \uBC14\uAFC0 \uC790\uB9AC\uB098 \uB300\uAE30 \uB3D9\uB8CC\uB97C \uACE0\uB978\uB2E4.</p><div class="reserve-cards">' + (bench.map((id) => '<button class="win" data-bench="' + esc(id) + '"><span class="run-face">' + face2(id, 44) + "</span><b>" + esc(card(id).name) + "</b></button>").join("") || "<p>\uC5C6\uC74C</p>") + '</div></div><div class="footer"><button class="btn go" id="b-go">' + action + "</button></div>";
       show("order");
       $("#b-alternate-order", node)?.addEventListener("click", () => {
         party.splice(0, party.length, ...alternateSeats);
@@ -14956,11 +15567,11 @@ const BattleRuntime = {
         return selectable ? '<button class="' + cls + '" data-replace="' + esc(slotId) + '">' + body + "</button>" : '<div class="' + cls + '">' + body + "</div>";
       }).join("");
       const description = relic ? "<h2>" + esc(relic.name) + "</h2><p>" + esc(relic.desc) + "</p>" : "<h2>\uB0A8\uC740 \uC720\uBB3C \uC5C6\uC74C</h2>";
-      const compare = old ? '<div class="run-relic-compare"><p class="loss">\uBE60\uC9D0 \xB7 ' + esc(old.name + " \xB7 " + old.desc) + '</p><p class="gain">\uC7A5\uCC29 \xB7 ' + esc(relic.name + " \xB7 " + relic.desc) + "</p></div>" : "";
+      const compare2 = old ? '<div class="run-relic-compare"><p class="loss">\uBE60\uC9D0 \xB7 ' + esc(old.name + " \xB7 " + old.desc) + '</p><p class="gain">\uC7A5\uCC29 \xB7 ' + esc(relic.name + " \xB7 " + relic.desc) + "</p></div>" : "";
       const canEquip = !!relic && !equipped && !!(pending || offered);
       const label = old ? old.name + (hasFinalConsonant2(old.name) ? "\uC744" : "\uB97C") + " \uBE7C\uACE0 \uC7A5\uCC29" : "\uC7A5\uCC29";
       const disabled = replaceable.length && !old || pending && run.crystals < pending.cost;
-      node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-treasure scroll">' + ui.scene(run.room.bg, '<div class="relic-dais">' + (relic ? ui.icon(id, 3) : "") + "</div>") + '<div class="run-relic-description win">' + description + (equipped ? '<small class="gain">\uC7A5\uCC29 \uC644\uB8CC</small>' : "") + (pending?.cost ? "<small>\uACB0\uC815 " + pending.cost + (run.crystals < pending.cost ? " \xB7 " + (pending.cost - run.crystals) + "\uAC1C \uBD80\uC871" : "") + "</small>" : "") + '</div><h3>\uC7A5\uCC29 \uC720\uBB3C</h3><div class="run-relic-slots">' + slots + "</div>" + (replaceable.length && !old ? '<p class="sm">\uBE7C\uB0BC \uC720\uBB3C\uC744 \uACE0\uB978\uB2E4.</p>' : "") + compare + '</div><div class="footer"><button class="btn' + (canEquip ? "" : " go") + '" id="b-leave">' + (canEquip ? "\uB450\uACE0 \uAC00\uAE30" : "\uB2E4\uC74C\uC73C\uB85C") + "</button>" + (canEquip ? '<button class="btn go" id="b-equip"' + (disabled ? " disabled" : "") + ">" + esc(label) + "</button>" : "") + "</div>";
+      node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-treasure scroll">' + ui.scene(run.room.bg, '<div class="relic-dais">' + (relic ? ui.icon(id, 3) : "") + "</div>") + '<div class="run-relic-description win">' + description + (equipped ? '<small class="gain">\uC7A5\uCC29 \uC644\uB8CC</small>' : "") + (pending?.cost ? "<small>\uACB0\uC815 " + pending.cost + (run.crystals < pending.cost ? " \xB7 " + (pending.cost - run.crystals) + "\uAC1C \uBD80\uC871" : "") + "</small>" : "") + '</div><h3>\uC7A5\uCC29 \uC720\uBB3C</h3><div class="run-relic-slots">' + slots + "</div>" + (replaceable.length && !old ? '<p class="sm">\uBE7C\uB0BC \uC720\uBB3C\uC744 \uACE0\uB978\uB2E4.</p>' : "") + compare2 + '</div><div class="footer"><button class="btn' + (canEquip ? "" : " go") + '" id="b-leave">' + (canEquip ? "\uB450\uACE0 \uAC00\uAE30" : "\uB2E4\uC74C\uC73C\uB85C") + "</button>" + (canEquip ? '<button class="btn go" id="b-equip"' + (disabled ? " disabled" : "") + ">" + esc(label) + "</button>" : "") + "</div>";
       show("treasure");
       for (const button of $$("[data-replace]", node)) button.addEventListener("click", () => {
         replacing = button.dataset.replace;
@@ -15271,7 +15882,7 @@ const BattleRuntime = {
     </${tag}>`;
     }).join("");
   }
-  function hubScreen(node, { profile, run, widgets: widgets2, inspect, openDungeons, prepare, resume, arriving = [] }) {
+  function hubScreen(node, { profile, run, widgets: widgets2, inspect, openDungeons, prepare, resume, arriving = [], daily, openDaily }) {
     const lead = profile.lead && widgets2.card(profile.lead);
     const destination = DUNGEONS[profile.ui?.destination];
     const finalConsonant = (name) => {
@@ -15302,6 +15913,7 @@ const BattleRuntime = {
       <button class="btn go" id="meta-depart">${esc(action)}</button>
       ${destination && !run ? '<button class="btn" id="meta-change-destination">\uD589\uC120\uC9C0 \uBC14\uAFB8\uAE30</button>' : ""}
     </div>
+    ${dailyRow(daily)}
     ${canBrowse ? `<nav class="meta-hub-links" aria-label="\uAD00\uCE21\uC18C">
       <button class="btn" data-meta-page="collection">\uB3D9\uB8CC</button>
       <button class="btn" data-meta-page="notebook">\uC218\uCCA9</button>
@@ -15311,6 +15923,7 @@ const BattleRuntime = {
     $("#meta-depart", node).addEventListener("click", run ? resume : destination ? () => prepare(destination.id) : openDungeons);
     $("#meta-telescope", node).addEventListener("click", openDungeons);
     $("#meta-change-destination", node)?.addEventListener("click", openDungeons);
+    $("#meta-daily-rift", node)?.addEventListener("click", () => openDaily());
     $$("[data-companion]", node).forEach((button) => button.addEventListener("click", () => inspect(button.dataset.companion)));
   }
 
@@ -15355,7 +15968,7 @@ const BattleRuntime = {
     ])}
   </div>`);
   }
-  function recordsScreen(node, profile, card, openSheet, replayEnding) {
+  function recordsScreen(node, profile, card, openSheet, replayEnding, renderDailyHistory) {
     const { records } = profile;
     const longest = records.longestServing;
     const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
@@ -15381,9 +15994,11 @@ const BattleRuntime = {
     }).join("")}</tbody>
       </table>
     </section>
+    ${renderDailyHistory ? '<section class="meta-panel" id="meta-daily-history"></section>' : ""}
     ${latest ? `<button class="btn" id="meta-latest-record">\uCD5C\uADFC \uC6D0\uC815 \xB7 ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ""}
     ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">\uC5D4\uB529 \uB2E4\uC2DC \uBCF4\uAE30</button>' : ""}
   `;
+    if (renderDailyHistory) renderDailyHistory($("#meta-daily-history", node));
     for (const button of $$("[data-nightmare-record]", node)) button.addEventListener("click", () => {
       const dungeonId = button.dataset.nightmareRecord;
       const stamps = contractsFor?.(profile, dungeonId)?.stamps;
@@ -15569,17 +16184,17 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/screens/recruit.js
-  function recruitScreen(node, { run, rewards, profile, widgets: widgets2, sheets: sheets2, choices, stamp, endingPending, changeChoices, confirm }) {
+  function recruitScreen(node, { run, rewards, profile, widgets: widgets2, sheets: sheets2, choices, stamp: stamp2, endingPending, changeChoices, confirm }) {
     const won = rewards.result === "win";
     const dungeon = DUNGEONS[run.dungeonId];
-    const stampDungeon = DUNGEONS[stamp?.dungeonId];
-    const stampContract = CONTRACTS[stamp?.contractId];
+    const stampDungeon = DUNGEONS[stamp2?.dungeonId];
+    const stampContract = CONTRACTS[stamp2?.contractId];
     const candidates = won ? rewards.recruitable : rewards.shardCandidates;
     const limit = won ? rewards.recruitLimit : 1;
     const mustRecruit = won && candidates.length > 0 && !profile.lead && run.firstIntroClear;
     const mustReserve = !won && candidates.length > 0;
     const gateFloor = LAYOUTS[dungeon.layout].findIndex((doors) => doors.some((door) => door.type === "gate")) + 1;
-    const { card, face } = widgets2;
+    const { card, face: face2 } = widgets2;
     const reason = (id) => won ? `${run.room?.party?.includes(id) ? run.floor : gateFloor}\uCE35 \uCD9C\uC804 \xB7 \uC0DD\uD658` : "\uCD9C\uC804 \uAE30\uB85D \uC788\uC74C";
     node.innerHTML = `
     <div class="meta-scene meta-return-stage" style="background-image:url(${background(dungeon.background)})"></div>
@@ -15591,7 +16206,7 @@ const BattleRuntime = {
       ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} \xB7 ${esc(stampContract.name)}</p>` : ""}
       ${candidates.length ? `<p>${won ? `\uC0DD\uD658\uC790 \uC911 \uCD5C\uB300 ${limit}\uBA85 \uC601\uC785` : "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4 \uD55C \uBA85 \uC608\uC57D"}</p>` : `<p>${won ? "\uC0C8\uB85C \uC601\uC785\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4." : "\uC608\uC57D\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4."}</p>`}
       <div class="meta-recruit-list">${candidates.map((id) => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">
-        <span class="meta-face">${face(id, 44)}</span>
+        <span class="meta-face">${face2(id, 44)}</span>
         <span><b>${esc(card(id).name)}</b><small>${esc(reason(id))}</small></span>
         <span class="meta-recruit-mark" aria-hidden="true"></span>
       </button>`).join("")}</div>
@@ -15700,8 +16315,8 @@ const BattleRuntime = {
         const known = seen.has(id);
         const name = known ? esc(widgets2.card(id).name) : "\uBBF8\uC870\uC6B0";
         const recruit = profile.recruits[id];
-        const face = `<span class="meta-face">${widgets2.face(id, 44)}</span>`;
-        return known ? `<button class="meta-cell" data-companion="${id}">${face}<b>${name}</b>${recruit ? `<small>\uC778\uC5F0 ${recruit.bond}</small>` : ""}</button>` : `<div class="meta-cell concealed">${face}<small>\uBBF8\uC870\uC6B0</small></div>`;
+        const face2 = `<span class="meta-face">${widgets2.face(id, 44)}</span>`;
+        return known ? `<button class="meta-cell" data-companion="${id}">${face2}<b>${name}</b>${recruit ? `<small>\uC778\uC5F0 ${recruit.bond}</small>` : ""}</button>` : `<div class="meta-cell concealed">${face2}<small>\uBBF8\uC870\uC6B0</small></div>`;
       }).join("");
       $$("[data-companion]", grid).forEach((button) => button.addEventListener("click", () => inspect(button.dataset.companion)));
     }
@@ -15746,7 +16361,8 @@ const BattleRuntime = {
     collection: "\uB3D9\uB8CC \uB3C4\uAC10",
     notebook: "\uAFC8\uAE38 \uC218\uCCA9",
     records: "\uAE30\uB85D",
-    ending: "\uAFC8\uAE38\uC758 \uB05D"
+    ending: "\uAFC8\uAE38\uC758 \uB05D",
+    "daily-result": "\uC624\uB298\uC758 \uADE0\uC5F4"
   };
   function mountPage() {
     $("#app").innerHTML = `<div id="frame">
@@ -15756,15 +16372,17 @@ const BattleRuntime = {
     <div id="session-notices" role="alert"></div>
   </div>`;
   }
-  function createNavigation({ core: core2, roster: roster2, widgets: widgets2, stage: stage2, audio: audio2, music: music2, sheets: sheets2, store: store2 }) {
+  function createNavigation({ core: core2, roster: roster2, widgets: widgets2, stage: stage2, audio: audio2, music: music2, sheets: sheets2, store: store2, dailyStore: dailyStore2 }) {
     const stored = store2.load();
     let profile = stored?.profile || createProfile();
     let run = stored?.run || null;
+    let dailyRun = null;
     let review = null;
     let preparationOpen = false;
     let crystalCount = 0;
     let gainedAtReturn = false;
     let warnedSave = false;
+    const details = createDetails(core2, widgets2, sheets2.openSheet);
     const host = {
       save(current) {
         if (current !== run) return;
@@ -15779,6 +16397,13 @@ const BattleRuntime = {
       assets: assets_exports,
       runtime: { stage: stage2, audio: audio2, music: music2, sheets: sheets2 }
     };
+    const dailyHost = {
+      ...host,
+      save(current) {
+        if (current === dailyRun && !dailyStore2?.save?.(current)?.ok) warnSave();
+      },
+      finish: finishDaily
+    };
     function sessionNotice(message) {
       const notice = document.createElement("p");
       notice.className = "win";
@@ -15791,10 +16416,12 @@ const BattleRuntime = {
         if (store2.save({ profile, run }) !== false) return;
       } catch {
       }
-      if (!warnedSave) {
-        warnedSave = true;
-        sessionNotice("\uC800\uC7A5\uC5D0 \uC2E4\uD328\uD588\uB2E4. \uC0C8\uB85C\uACE0\uCE68\uD558\uBA74 \uC9C0\uAE08\uBD80\uD130\uC758 \uC9C4\uD589\uC774 \uC0AC\uB77C\uC9C4\uB2E4.");
-      }
+      warnSave();
+    }
+    function warnSave() {
+      if (warnedSave) return;
+      warnedSave = true;
+      sessionNotice("\uC800\uC7A5\uC5D0 \uC2E4\uD328\uD588\uB2E4. \uC0C8\uB85C\uACE0\uCE68\uD558\uBA74 \uC9C0\uAE08\uBD80\uD130\uC758 \uC9C4\uD589\uC774 \uC0AC\uB77C\uC9C4\uB2E4.");
     }
     function updateProfile(next) {
       profile = next;
@@ -15803,8 +16430,8 @@ const BattleRuntime = {
     function updateUi(patch) {
       updateProfile({ ...profile, ui: { ...profile.ui, ...patch } });
     }
-    function page(id, { title = PAGES[id], back } = {}) {
-      music2.play("hub");
+    function page(id, { title = PAGES[id], back, track = "hub" } = {}) {
+      music2.play(track);
       const section = $("#" + id);
       const crystals = id === "recruit" && run ? `<span class="meta-crystals">
       <img class="px" src="${icon("crystal")}" alt="\uACB0\uC815" width="32" height="32">${run.crystals}
@@ -15821,14 +16448,144 @@ const BattleRuntime = {
     function showHub(arriving = []) {
       sheets2.closeSheet();
       const node = page("hub");
-      hubScreen(node, { profile, run, widgets: widgets2, inspect, openDungeons, prepare, resume: enterExpedition, arriving });
+      hubScreen(node, {
+        profile,
+        run,
+        widgets: widgets2,
+        inspect,
+        openDungeons,
+        prepare,
+        resume: enterExpedition,
+        arriving,
+        daily: dailyStore2?.view?.(profile, /* @__PURE__ */ new Date()),
+        openDaily: showDaily
+      });
       if (profile.ui?.announcement) updateUi({ announcement: null });
       for (const button of node.querySelectorAll("[data-meta-page]")) button.addEventListener("click", () => {
         const id = button.dataset.metaPage;
         const content = page(id, { back: showHub });
         if (id === "collection") collectionScreen(content, { profile, roster: roster2, widgets: widgets2, core: core2, inspect });
         else if (id === "notebook") notebookScreen(content, profile, roster2.card);
-        else if (id === "records") recordsScreen(content, profile, roster2.card, sheets2.openSheet, () => showEnding());
+        else if (id === "records") recordsScreen(
+          content,
+          profile,
+          roster2.card,
+          sheets2.openSheet,
+          () => showEnding(),
+          dailyStore2?.history ? showDailyHistory : null
+        );
+      });
+    }
+    function showDailyHistory(node) {
+      const cursors = [null];
+      function render() {
+        openDailyHistory(dailyStore2.history({ before: cursors.at(-1), limit: 7 }) ?? {}, {
+          node,
+          sheets: sheets2,
+          next(cursor) {
+            cursors.push(cursor);
+            render();
+          },
+          previous: cursors.length > 1 ? () => {
+            cursors.pop();
+            render();
+          } : null
+        });
+      }
+      render();
+    }
+    function showDaily(message) {
+      const view = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
+      if (!view?.unlocked) return;
+      if (view.active) {
+        const today = view.dayKey ?? view.spec?.dayKey;
+        if (view.active.dayKey && today && view.active.dayKey !== today) return promptDailyResume(view.active);
+        return resumeDaily();
+      }
+      openDailyPreparation(view, {
+        roster: roster2,
+        widgets: widgets2,
+        sheets: sheets2,
+        message,
+        start: startDaily,
+        inspectLoan: (id, onClose) => details.charSheet(null, id, { loaned: true, onClose })
+      });
+    }
+    function promptDailyResume(active2) {
+      openEarlierRift(active2, { sheets: sheets2, resume: resumeDaily, abandon: abandonDaily });
+    }
+    function startDaily(expectedDayKey, kind) {
+      const now = /* @__PURE__ */ new Date();
+      const result = dailyStore2?.start?.({ profile, now, expectedDayKey, kind });
+      if (result?.ok && result.run) return enterDaily(result.run);
+      if (result?.reason === "date_changed") {
+        const view = dailyStore2.view?.(profile, now);
+        const date = shortRiftDate(view?.dayKey ?? view?.spec?.dayKey);
+        if ($("#hub").classList.contains("on")) showHub();
+        showDaily(date ? `\uB0A0\uC9DC\uAC00 \uBC14\uB00C\uC5C8\uB2E4. ${date} \uADE0\uC5F4\uC744 \uD655\uC778\uD558\uC790.` : "\uB0A0\uC9DC\uAC00 \uBC14\uB00C\uC5C8\uB2E4. \uC624\uB298\uC758 \uADE0\uC5F4\uC744 \uD655\uC778\uD558\uC790.");
+      } else if (["active_exists", "already_recorded", "official_required"].includes(result?.reason)) {
+        showDaily();
+      } else if (result?.reason === "storage_failed") {
+        warnSave();
+      } else {
+        sessionNotice("\uADE0\uC5F4\uC744 \uC2DC\uC791\uD558\uC9C0 \uBABB\uD588\uB2E4.");
+      }
+    }
+    function resumeDaily() {
+      const restored = dailyStore2?.resume?.();
+      if (restored?.ok && restored.run) return enterDaily(restored.run);
+      sessionNotice("\uC9C4\uD589 \uC911\uC778 \uADE0\uC5F4\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uB2E4.");
+      const active2 = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date())?.active;
+      if (active2 && !$("#meta-rift-resume")) promptDailyResume(active2);
+    }
+    function abandonDaily(runId) {
+      const result = dailyStore2?.abandon?.(runId);
+      if (result?.ok) {
+        showHub();
+        showDaily();
+      } else if (result?.reason === "storage_failed") warnSave();
+      else sessionNotice("\uADE0\uC5F4\uC744 \uD3EC\uAE30\uD558\uC9C0 \uBABB\uD588\uB2E4.");
+    }
+    function enterDaily(current) {
+      dailyRun = current;
+      review = null;
+      sheets2.closeSheet();
+      audio2.unlockAudio();
+      if (current.phase === "done") return finishDaily(current);
+      review = enterRun(current, dailyHost) || null;
+    }
+    function finishDaily(current) {
+      if (current !== dailyRun || current.phase !== "done") return;
+      const result = dailyStore2?.finish?.(current);
+      if (!result?.ok) {
+        if (result?.reason === "storage_failed") warnSave();
+        const node2 = page("daily-result", { title: "\uADE0\uC5F4 \uAE30\uB85D" });
+        node2.innerHTML = '<div class="rift-actions"><p>\uADE0\uC5F4 \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uB2E4.</p><button class="btn go" id="meta-rift-retry">\uB2E4\uC2DC \uC800\uC7A5</button></div>';
+        $("#meta-rift-retry", node2).addEventListener("click", () => finishDaily(current));
+        return;
+      }
+      const spec = current.daily?.spec;
+      const score = {
+        runId: current.id,
+        dayKey: spec?.dayKey,
+        kind: current.daily?.kind,
+        outcome: current.result,
+        floor: current.floor,
+        turns: current.stats?.turns,
+        livingIds: current.bench,
+        heirloomsUsed: current.stats?.heirloomsUsed,
+        ...result.score
+      };
+      const view = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
+      dailyRun = null;
+      review = null;
+      const node = page("daily-result", { title: dailyResultTitle(score), track: score.outcome === "win" ? "victory" : "defeat" });
+      dailyResultScreen(node, { spec, score, official: result.official }, {
+        widgets: widgets2,
+        today: view?.dayKey ?? view?.spec?.dayKey,
+        practice: (dayKey2) => startDaily(dayKey2, "practice"),
+        openToday: showDaily,
+        hub: showHub
       });
     }
     function endingDue() {
@@ -15899,7 +16656,7 @@ const BattleRuntime = {
       const candidates = rewards.result === "win" ? rewards.recruitable : rewards.shardCandidates;
       const initial = candidates.length === 1 ? candidates : [];
       const choices = saved?.runId === run.id ? saved.ids.filter((id) => candidates.includes(id)) : initial;
-      const stamp = rewards.result === "win" && run.contract ? applyRunEnd(profile, run).announce.stamp : null;
+      const stamp2 = rewards.result === "win" && run.contract ? applyRunEnd(profile, run).announce.stamp : null;
       const node = page("recruit", { title: rewards.result === "win" ? "\uC0DD\uD658" : "\uC6D0\uC815 \uC2E4\uD328" });
       recruitScreen(node, {
         run,
@@ -15908,7 +16665,7 @@ const BattleRuntime = {
         widgets: widgets2,
         sheets: sheets2,
         choices,
-        stamp,
+        stamp: stamp2,
         endingPending: run.dungeonId === "creation_tower" && rewards.result === "win" && !profile.ui?.endingSeen,
         changeChoices: (ids) => updateUi({ recruitChoices: { runId: run.id, ids } }),
         confirm: confirmReturn
@@ -15949,8 +16706,10 @@ const BattleRuntime = {
     }
     function resetData() {
       store2.clear();
+      dailyStore2?.clear?.();
       profile = createProfile();
       run = null;
+      dailyRun = null;
       review = null;
       preparationOpen = false;
       sheets2.closeSheet();
@@ -15984,7 +16743,7 @@ const BattleRuntime = {
       if (stored?.runError) sessionNotice("\uC9C4\uD589 \uC911\uC778 \uC6D0\uC815\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uB2E4. \uB3D9\uB8CC\uC640 \uAE30\uB85D\uC740 \uB0A8\uC544 \uC788\uB2E4.");
     }
     return { boot, closePreparation, resetData, inspect, get run() {
-      return run;
+      return dailyRun ?? run;
     }, get review() {
       return review;
     } };
@@ -15998,6 +16757,7 @@ const BattleRuntime = {
   var audio = createAudio(stage.clock);
   var widgets = createWidgets(assets, roster.card);
   var store = createSaveStore(storage, { core, roster });
+  var dailyStore = create3?.(storage, { core, roster });
   var musicContext;
   var musicPlayer;
   var musicTrack;
@@ -16042,7 +16802,7 @@ const BattleRuntime = {
   });
   mountPage();
   var sheets = createSheet(stage);
-  var navigation = createNavigation({ core, roster, widgets, stage, audio, music, sheets, store });
+  var navigation = createNavigation({ core, roster, widgets, stage, audio, music, sheets, store, dailyStore });
   var settings = createSettings(stage, audio, music, sheets, navigation.resetData);
   settings.loadSettings();
   settings.syncFullscreen();
