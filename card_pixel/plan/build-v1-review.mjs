@@ -131,7 +131,7 @@ dialog img { max-height: 92vh; max-width: 96vw; display: block; }
 <h2>화면 (Chrome 자동 플레이, 390×844)</h2>
 <div class="tour">${tour.map(t => `<figure><img src="${t.src}" alt=""><figcaption>${esc(t.caption)}</figcaption></figure>`).join('')}
 <figure><img src="${titleBack}" alt=""><figcaption>다시 켠 제목: 대표가 선다</figcaption></figure>
-<figure><img src="${ending}" alt=""><figcaption>엔딩: 꿈길의 끝 (창조의 탑 첫 격파)</figcaption></figure>
+<figure><img src="${ending}" alt=""><figcaption>엔딩: 꿈길의 끝 (실제 원정으로 탑 보스를 이긴 뒤)</figcaption></figure>
 <figure><img src="${procession}" alt=""><figcaption>엔딩: 영입한 동료들의 행진</figcaption></figure></div>
 
 <h2>시험판 → 정식판</h2>
