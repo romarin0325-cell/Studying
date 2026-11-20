@@ -87,6 +87,30 @@ try {
   assert.equal(await mobile.locator('.modal.active').count(),0);
   console.log('First visit, explicit ticket debit, direct equip and resume passed');
 
+  await mobile.evaluate(() => { RPG.state.tickets = 1; RPG.toMenu(); });
+  await mobile.click('#btn-normal-gacha');
+  await mobile.click('#modal-gacha .md-dismiss');
+  const normalSummon = mobile.locator('#btn-normal-gacha');
+  const quizSummon = mobile.locator('#btn-challenge-gacha');
+  assert.ok(await normalSummon.isDisabled() && await quizSummon.isDisabled());
+  await mobile.click('[onclick="RPG.openChaosBlessing()"]');
+  await mobile.click('#modal-chaos button[onclick*="great_sage"]');
+  await mobile.click('#confirm-no');
+  const answer = await mobile.evaluate(() => {
+    const question = document.getElementById('quiz-question').innerText;
+    const options = [...document.querySelectorAll('#quiz-options button')].map(button => button.innerText);
+    return GRAMMAR_DATA.flatMap(lecture => lecture.quizzes)
+      .find(quiz => quiz.question === question && quiz.options.every(option => options.includes(option))).answer;
+  });
+  await mobile.locator('#quiz-options').getByRole('button', {name:answer, exact:true}).click();
+  await mobile.click('#modal-info.active button');
+  assert.equal(await mobile.locator('#ui-tickets').innerText(), '1');
+  assert.ok(await normalSummon.isEnabled() && await quizSummon.isEnabled(), 'Blessing ticket unlocks both summons in place');
+  await normalSummon.click();
+  assert.equal(await mobile.evaluate(() => RPG.state.tickets), 0);
+  await mobile.click('#modal-gacha.active .md-dismiss');
+  console.log('A sage blessing ticket can be spent immediately in the same lobby');
+
   await roster(mobile);
   await mobile.waitForFunction(() => [...document.querySelectorAll('.md-party-card img,#next-enemy-img')].every(el=>el.complete && el.naturalWidth));
   await shot(mobile,'lobby-mobile');
