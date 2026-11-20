@@ -10,7 +10,11 @@ export const DOOR = {
 };
 export const foeFlip = def => (def.facing || 'right') === 'right';
 
-export const head = (run, title, sub) => '<header class="top"><b>' + esc(title) + '</b>' + (sub ? '<span>' + esc(sub) + '</span>' : '') + '<span class="sp"></span><span class="gems">◆ ' + (run ? run.crystals : 0) + '</span>' + tools() + '</header>';
+export const riftKindLabel = kind => kind === 'practice' ? '연습' : '기록 도전';
+
+export const head = (run, title, sub) => '<header class="top"><b>' + esc(title) + '</b>' +
+  (sub ? '<span>' + esc(sub) + '</span>' : '') + '<span class="sp"></span><span class="gems">' +
+  (run?.daily ? riftKindLabel(run.daily.kind) : '◆ ' + (run ? run.crystals : 0)) + '</span>' + tools() + '</header>';
 export function badges(run, id) {
   const out = [];
   if (run && run.blessings[id]) out.push('<i class="bless">축복 +' + Math.round(run.blessings[id] * 100) + '%</i>');

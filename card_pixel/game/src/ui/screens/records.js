@@ -32,7 +32,7 @@ export function runRecordSheet(run, card, openSheet) {
   </div>`);
 }
 
-export function recordsScreen(node, profile, card, openSheet, replayEnding) {
+export function recordsScreen(node, profile, card, openSheet, replayEnding, renderDailyHistory) {
   const { records } = profile;
   const longest = records.longestServing;
   const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
@@ -60,9 +60,11 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding) {
         }).join('')}</tbody>
       </table>
     </section>
+    ${renderDailyHistory ? '<section class="meta-panel" id="meta-daily-history"></section>' : ''}
     ${latest ? `<button class="btn" id="meta-latest-record">최근 원정 · ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ''}
     ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">엔딩 다시 보기</button>' : ''}
   `;
+  if (renderDailyHistory) renderDailyHistory($('#meta-daily-history', node));
   for (const button of $$('[data-nightmare-record]', node)) button.addEventListener('click', () => {
     const dungeonId = button.dataset.nightmareRecord;
     const stamps = Meta.contractsFor?.(profile, dungeonId)?.stamps;

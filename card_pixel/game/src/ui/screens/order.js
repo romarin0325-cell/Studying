@@ -15,7 +15,7 @@ export function orderScreen(run, ui) {
   const room = run.room;
   const party = room.party?.slice() ?? Run.defaultParty?.(run)?.slice() ?? [0, 1, 2].map(i => run.bench[i] || null);
   const all = core.GameUtils.getAllCards();
-  const qualifiers = room.type === 'gate' || room.type === 'boss';
+  const qualifiers = !run.daily && (room.type === 'gate' || room.type === 'boss');
   const quirk = QUIRKS[room.quirk];
   const alternative = room.type === 'boss' && run.guide?.bossOrder ? Run.suggestOrder?.(run) : null;
   const alternateSeats = alternative?.length ? [0, 1, 2].map(i => alternative[i] ?? null) : null;
@@ -39,7 +39,7 @@ export function orderScreen(run, ui) {
       const preview = previews[i];
       const link = preview.skill ? '쓰러지면 ↓ ' + card(preview.to).name + '에게 ' + preview.skill.name + ' ×' + HEIRLOOM_POWER : '넘길 공격 없음';
       const replaced = preview.skill && run.heirlooms[preview.to]?.name;
-      const recruitment = run.recruited.includes(id) ? '생환 시 인연' : '생환 시 영입 후보';
+      const recruitment = run.recruited?.includes(id) ? '생환 시 인연' : '생환 시 영입 후보';
       let trait = '';
       if (fighter?.trait.type === 'pos_stat_boost') {
         trait = fighter.trait.pos === i ? '자리 효과 발동' : POSITION[fighter.trait.pos] + ' 전용';

@@ -224,6 +224,19 @@
 .meta-hub-actions { flex-direction: column; }
 .meta-hub-links > button { flex: 1; }
 
+#hub .daily-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: calc(100% - 24px);
+  height: 48px;
+  margin: 8px 12px 0;
+  text-align: left;
+}
+
+.daily-row small { color: var(--gold); }
+
 .meta-unlocks {
   position: absolute;
   top: 12px;
@@ -351,6 +364,44 @@
   font: 16px/20px var(--px);
   letter-spacing: 0;
 }
+
+#sheet:has(.rift-prep) .in { margin-inline: 14px; }
+.rift-opponents { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
+.rift-opponents .meta-face { flex: none; }
+.rift-opponents .meta-face.boss { align-self: center; }
+.rift-shadow img { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2); }
+#sheet .rift-date-notice { color: var(--gold); }
+#sheet .rift-region { color: var(--dim); }
+.rift-loans, .rift-result-cast {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.rift-companion, #sheet .rift-loans .rift-companion {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+  padding: 6px 2px;
+}
+
+#sheet .rift-loans .rift-companion { font: 12px/16px var(--px); }
+#sheet .rift-prep-note { margin: 10px 0; }
+.rift-prep > .go { margin-top: 6px; }
+.rift-actions { display: grid; gap: 8px; }
+.rift-result { padding: 12px; margin-bottom: 12px; }
+.rift-result-cast { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-bottom: 10px; }
+.rift-result-cast b { font: 12px/16px var(--px); }
+.rift-result-cast .fallen img { filter: grayscale(1); opacity: .6; }
+.rift-result-cast .fallen small { color: var(--coral); }
+.rift-stamp { display: inline-block; margin-top: 8px; padding: 4px 8px; }
+.rift-record-list, .rift-record-pages { display: grid; gap: 6px; margin-top: 8px; }
+.rift-record-list .btn { text-align: left; }
+.rift-record-pages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .meta-prep-section {
   border-bottom: 1px solid var(--line);

@@ -6,7 +6,10 @@ export function sheetMarkup() {
 
 /* Reading a detail sheet pauses the battle clock. */
 export function createSheet(stage) {
-  function openSheet(title, html) {
+  let afterDismiss;
+
+  function openSheet(title, html, { onClose } = {}) {
+    afterDismiss = onClose;
     $('#sh-title').textContent = title;
     const body = $('#sh-body');
     body.innerHTML = html;
@@ -16,6 +19,7 @@ export function createSheet(stage) {
   }
 
   function closeSheet() {
+    afterDismiss = undefined;
     $('#sheet').classList.remove('on');
     stage.pause(false);
   }
@@ -24,9 +28,15 @@ export function createSheet(stage) {
     openSheet(title, '<p>' + esc(body) + '</p>');
   }
 
-  $('#b-sheetclose').addEventListener('click', closeSheet);
+  function dismiss() {
+    const onClose = afterDismiss;
+    closeSheet();
+    onClose?.();
+  }
+
+  $('#b-sheetclose').addEventListener('click', dismiss);
   $('#sheet').addEventListener('click', event => {
-    if (event.target.id === 'sheet') closeSheet();
+    if (event.target.id === 'sheet') dismiss();
   });
 
   return { openSheet, closeSheet, sheet };

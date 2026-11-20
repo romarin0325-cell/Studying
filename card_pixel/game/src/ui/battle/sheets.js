@@ -1,5 +1,6 @@
 import { $, esc } from '../dom.js';
-import { TYPE, foeFlip, statGrid } from '../widgets.js';
+import { TYPE, foeFlip, riftKindLabel, statGrid } from '../widgets.js';
+import { shortRiftDate } from '../screens/daily-rift.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
 import { QUIRKS } from '../../content/quirks.js';
@@ -52,14 +53,19 @@ export function createDetails(core, widgets, openSheet) {
   }
   const blessLine = (run, id) => '<li><i class="good">축복 +' + Math.round(run.blessings[id] * 100) + '%</i>모든 능력치, 치명타율 +' + core.GAME_CONSTANTS.BLESSING_CRIT + '%p · 회피율 +' + core.GAME_CONSTANTS.BLESSING_EVA + '%p</li>';
   /** A companion outside battle (map, spring, start): card numbers, trait, heirloom, every skill in full. */
-  function charSheet(run, id) {
+  function charSheet(run, id, { loaned = false, onClose } = {}) {
     const c = card(id); if (!c) return;
     const s = c.stats, h = run && run.heirlooms[id], from = h && (card(h.form || h.from) || card(h.from));
     let html = cardHead(id, ROLE_OF(c)) + statGrid([['체력', s.hp, s.hp], ['공격', s.atk, s.atk], ['마공', s.matk, s.matk], ['방어', s.def, s.def], ['마방', s.mdef, s.mdef]]);
     if (run && run.blessings[id]) html += '<ul class="stl">' + blessLine(run, id) + '</ul>';
     const heir = from ? heirBlock(h.skill ?? heirloomSkill(from), from.name, from) : '';
     html += '<h4>특성</h4><p>' + esc(c.trait.desc) + '</p>' + heir + '<h4>기술</h4>' + c.skills.map(sk => skillBlock(sk, c)).join('');
-    openSheet('동료', html);
+    const offered = loaned ? heirloomSkill(c) : null;
+    if (offered) {
+      html += '<h4>넘길 유품</h4><div class="heirbox"><p>위력 ×' + HEIRLOOM_POWER +
+        ' · MP 0 · 전투마다 한 번</p>' + skillBlock({ ...offered, cost: 0 }, c) + '</div>';
+    }
+    openSheet(loaned ? c.name : '동료', html, { onClose });
   }
   function ROLE_OF(c) { const r = core.DISPLAY_NAMES && core.DISPLAY_NAMES.role && core.DISPLAY_NAMES.role[c.role]; return r || ''; }
   /** The unit as the screen shows it now, with the core's own stat formula (statuses, field, blessing, traits). */
@@ -142,7 +148,10 @@ export function createDetails(core, widgets, openSheet) {
       return '<li><b>' + esc(relic.name) + '</b>' +
         (id === B.temporaryRelic ? ' · 이번 전투만' : '') + ' · ' + esc(relic.desc) + '</li>';
     });
-    openSheet('전장·유물', (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
+    const dailyLine = run.daily ? [shortRiftDate(run.daily.spec?.dayKey), riftKindLabel(run.daily.kind),
+      '정산한 전투 ' + (run.stats?.turns ?? 0) + '턴'].filter(Boolean).join(' · ') : '';
+    openSheet('전장·유물', (dailyLine ? '<p>' + esc(dailyLine) + '</p>' : '') +
+      (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
       (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + (run.contract.met ? '달성' : '아직') +
         '</h4><p>' + esc(contract.rule) + '</p>' : '') +
       '<h4>장착 유물</h4><ul class="stl">' + slots.join('') + '</ul>');

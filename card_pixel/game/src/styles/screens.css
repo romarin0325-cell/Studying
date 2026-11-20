@@ -124,6 +124,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .floor-cell.cur { color: var(--aqua); border-color: var(--aqua); }
 .floor-cell.done { color: var(--dim); }
 .floor-cell:has(.run-face, .run-icon) { flex: 1.55; }
+.floor-cell.rift-gate { flex: 2.6; }
 .floor-cell .run-face { width: 28px; height: 30px; }
 .floor-cell .run-icon, .floor-cell .run-face { flex-shrink: 1; }
 .floor-cell.shadow-tint, .run-face.shadow-tint img { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2); }

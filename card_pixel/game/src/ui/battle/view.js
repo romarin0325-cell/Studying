@@ -193,7 +193,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.foe = B.D.enemy.hp > 0 ? makeFoe(foeDef()) : null;
     if (B.foe && B.D.enemy.frenzied) B.foe.aura = 'red';
     hud.buildParty(run, B.party); showIntent(null); showRegion();
-    $('#room').textContent = run.floor + '층 · ' + ROOM_NAMES[B.door.type];
+    $('#room').textContent = roomLabel();
     $('#tally').innerHTML = '';
     return QUIRKS[B.door.quirk];
   }
@@ -512,6 +512,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
 
   /* ---------- battle in and out ---------- */
+  function roomLabel() {
+    return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + ROOM_NAMES[B.door.type];
+  }
+
   function startBattle(expedition, options, settle, advance) {
     run = expedition;
     onResult = settle;
@@ -589,7 +593,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     St.clear();
     St.setRoom(run.room.bg, !!run.room.final);
     $('#battle').classList.add('resumed-result');
-    $('#room').textContent = run.floor + '층 · ' + ROOM_NAMES[B.door.type];
+    $('#room').textContent = roomLabel();
     $('#turn').textContent = '';
     show('battle');
     layout();

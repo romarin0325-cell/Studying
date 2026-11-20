@@ -1,6 +1,7 @@
 import { scheduleTimer } from './engine/bridge.js';
 import { create as createRoster } from './engine/roster.js';
 import { createSaveStore } from './engine/save.js';
+import * as DailyStore from './engine/daily-store.js';
 import * as Run from './engine/run.js';
 import { createMusic } from './audio/music.js';
 import { createStage } from './stage/stage.js';
@@ -19,6 +20,7 @@ const stage = createStage(assets);
 const audio = createAudio(stage.clock);
 const widgets = createWidgets(assets, roster.card);
 const store = createSaveStore(storage, { core, roster });
+const dailyStore = DailyStore.create?.(storage, { core, roster });
 
 let musicContext;
 let musicPlayer;
@@ -61,7 +63,7 @@ document.addEventListener('visibilitychange', () => {
 
 mountPage();
 const sheets = createSheet(stage);
-const navigation = createNavigation({ core, roster, widgets, stage, audio, music, sheets, store });
+const navigation = createNavigation({ core, roster, widgets, stage, audio, music, sheets, store, dailyStore });
 const settings = createSettings(stage, audio, music, sheets, navigation.resetData);
 
 settings.loadSettings();

@@ -2,6 +2,7 @@ import { $, $$, esc } from '../dom.js';
 import { background, icon } from '../assets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { chapterTitle } from './notebook.js';
+import { dailyRow } from './daily-rift.js';
 
 export function hubLineup(lead, recent) {
   return [...new Set([lead, ...recent].filter(Boolean))].slice(0, 3);
@@ -28,7 +29,7 @@ export function sceneActors(ids, widgets, { interactive = false, lead = null, ar
   }).join('');
 }
 
-export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, prepare, resume, arriving = [] }) {
+export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, prepare, resume, arriving = [], daily, openDaily }) {
   const lead = profile.lead && widgets.card(profile.lead);
   const destination = DUNGEONS[profile.ui?.destination];
   const finalConsonant = name => {
@@ -61,6 +62,7 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
       <button class="btn go" id="meta-depart">${esc(action)}</button>
       ${destination && !run ? '<button class="btn" id="meta-change-destination">행선지 바꾸기</button>' : ''}
     </div>
+    ${dailyRow(daily)}
     ${canBrowse ? `<nav class="meta-hub-links" aria-label="관측소">
       <button class="btn" data-meta-page="collection">동료</button>
       <button class="btn" data-meta-page="notebook">수첩</button>
@@ -70,5 +72,6 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
   $('#meta-depart', node).addEventListener('click', run ? resume : destination ? () => prepare(destination.id) : openDungeons);
   $('#meta-telescope', node).addEventListener('click', openDungeons);
   $('#meta-change-destination', node)?.addEventListener('click', openDungeons);
+  $('#meta-daily-rift', node)?.addEventListener('click', () => openDaily());
   $$('[data-companion]', node).forEach(button => button.addEventListener('click', () => inspect(button.dataset.companion)));
 }

@@ -8,6 +8,7 @@ import { ROOM_NAMES } from '../../content/layouts.js';
 import { REGIONS } from '../../content/regions.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { AFFIXES } from '../../content/affixes.js';
+import { shortRiftDate } from './daily-rift.js';
 
 const MARCH_MS = 500;
 const AFFIX_RISK = {
@@ -36,21 +37,27 @@ export function mapScreen(run, ui) {
   const node = $('#map');
   const intro = dungeon.layout === 'intro';
   const gate = run.doors.find(door => door.type === 'gate');
-  const boss = run.bossPreview;
+  const rift = run.daily;
+  const gateIds = rift?.spec?.gateIds ?? gate?.enemies?.map(enemy => enemy.sprite) ?? [];
+  const bossId = rift?.spec?.bossId;
+  const boss = run.bossPreview || (bossId && ui.roster.bosses.includes(bossId) ? ui.roster.bossOf(bossId) : null);
   const shadow = id => '<span class="run-face shadow-tint">' + face(id, 28) + '</span>';
 
   const track = Array.from({ length: run.floors }, (_, index) => {
     const floor = index + 1;
     let marker = '';
-    if (intro && floor === run.floors) {
+    if (rift && floor === 4) {
+      marker = gateIds.length ? gateIds.map(shadow).join('') : icon('gate');
+    } else if (intro && floor === run.floors) {
       const shadows = gate?.enemies.map(enemy => enemy.sprite) || [run.reserved, null];
       marker = shadows.map(id => id ? shadow(id) : icon('nightmare')).join('');
     } else if (!intro && floor === 4) {
       marker = run.reserved ? shadow(run.reserved) : icon('gate');
-    } else if (floor === run.floors && boss.sprite) {
+    } else if (floor === run.floors && boss?.sprite) {
       marker = '<span class="run-face">' + face(boss.sprite, 28) + '</span>';
     }
-    const classes = floor === run.floor ? ' cur' : floor < run.floor ? ' done' : '';
+    const classes = (floor === run.floor ? ' cur' : floor < run.floor ? ' done' : '') +
+      (rift && floor === 4 && gateIds.length > 1 ? ' rift-gate' : '');
     return '<span class="floor-cell' + classes + '"><small>' + floor + '</small>' + marker + '</span>';
   }).join('');
 
@@ -80,8 +87,8 @@ export function mapScreen(run, ui) {
     const crystals = (door.reward ?? 0) - escrow(door);
     const relic = !door.final && artifacts.get(door.relic);
     return [
-      crystals ? crystalLabel + ' +' + crystals : '',
-      door.type === 'gate' && !door.final ? (relic ? '그림자 1명 또는 ' + relic.name : '그림자 1명') : relic?.name
+      !rift && crystals ? crystalLabel + ' +' + crystals : '',
+      !rift && door.type === 'gate' && !door.final ? (relic ? '그림자 1명 또는 ' + relic.name : '그림자 1명') : relic?.name
     ].filter(Boolean).join(' · ');
   }
 
@@ -172,7 +179,8 @@ export function mapScreen(run, ui) {
   const cast = '<div class="map-party" style="--march-time:' + MARCH_MS + 'ms">' + lineup + '</div>';
   const reserve = { ...run, bench: run.bench.slice(3) };
   const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + '</button>' : '';
-  node.innerHTML = head(run, dungeon.name, run.floor + '층') + '<div class="run-route">' +
+  const title = rift ? [shortRiftDate(rift.spec?.dayKey), '균열'].filter(Boolean).join(' ') : dungeon.name;
+  node.innerHTML = head(run, title, run.floor + '층') + '<div class="run-route">' +
     '<button class="floor-strip" id="b-floors" aria-label="층 진행과 문지기 정보">' + track + '</button>' +
     scene(dungeon.background, cast) + '<div class="run-doors">' + doors + '</div>' +
     '<div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more +
@@ -197,10 +205,12 @@ export function mapScreen(run, ui) {
     });
   }
   $('#b-floors', node).addEventListener('click', () => {
-    const names = gate?.enemies.map(enemy => enemy.name).join(' · ') || (run.reserved ? card(run.reserved).name : '');
+    const names = rift ? gateIds.map(id => card(id)?.name || id).join(' · ')
+      : gate?.enemies.map(enemy => enemy.name).join(' · ') || (run.reserved ? card(run.reserved).name : '');
     const middle = names ? '<p>' + (intro ? '5층' : '4층') + ' · 문지기 ' + esc(names) + '</p>' : '';
     openSheet('층 진행', '<p>현재 ' + run.floor + ' / ' + run.floors + '층</p>' + middle +
-      '<p>' + run.floors + '층 · ' + esc(boss.name) + '</p><p>' + esc(boss.note || '') + '</p>');
+      (boss?.name ? '<p>' + run.floors + '층 · ' + esc(boss.name) + '</p>' : '') +
+      (boss?.note ? '<p>' + esc(boss.note) + '</p>' : ''));
   });
   $('#b-roster', node)?.addEventListener('click', () => openSheet('대기 동료', '<div class="benchrow">' + benchMinis(reserve) + '</div>'));
 
