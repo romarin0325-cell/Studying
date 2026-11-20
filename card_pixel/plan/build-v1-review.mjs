@@ -65,6 +65,16 @@ const REVIEW_FIXES = [
   ['countdown-charge', '창조신 카운트다운에 차징 뒤 쓸 디바인블레이드 예고']
 ];
 
+const DAILY_RIFT = [
+  ['rift-first', '첫 본편 생환으로 수첩 4장을 열면 관측소에 오늘의 균열이 나타난다.'],
+  ['rift-preparation', '날짜마다 같은 동료 5명(출전 3명·대기 2명)을 빌려 7층에서 전투 4회를 치른다.'],
+  ['rift-battle', '전장·유물을 열면 전투가 멈추고 도전 종류와 끝낸 전투의 누적 턴 수를 볼 수 있다.'],
+  ['rift-result-win', '하루 한 번의 기록 도전에서 돌파하면 날짜 도장을 받고, 같은 편성으로 횟수 제한 없이 연습할 수 있다.'],
+  ['rift-yesterday', '어제 균열이 남아 있으면 이어가거나 포기한 뒤 오늘 균열을 시작할 수 있다.'],
+  ['rift-records', '기록의 지역별 생환 아래에 균열 기록이 최신 날짜순으로 7개씩 표시된다.'],
+  ['rift-record-detail', '날짜별 상세에는 첫 기록과 연습 최고가 각각 남아, 첫 도전 실패 뒤 연습으로 돌파한 경우도 볼 수 있다.']
+];
+
 const DECISIONS = [
   ['구조', '입문 5층 + 테마 던전 5 + 창조의 탑(엔딩). 원정 8층·전투 5회·문 1-2-3-1-2-2-2-1', 'Astra + 기획서'],
   ['첫 30초', '빈사의 애쉬를 살릴지, 버텨서 눈토끼에게 아마겟돈을 물려줄지 고르는 대여 전투', 'Astra'],
@@ -78,7 +88,6 @@ const DECISIONS = [
 ];
 
 const QUESTIONS = [
-  'Galmuri 글꼴 세 개(약 1.5MB)를 내려받아 내장해도 되는지. 지금은 인터넷이 있어야 글꼴이 나온다.',
   '에인션트소울 도트: 컨셉은 남성인데 일러스트를 따라 여성스럽게 나왔다. 다시 만들지.',
   '배경음 12곡: 아무도 들어 보지 않았다. game/tools/music-preview.html 에서 곡별로 들을 수 있다.',
   '시작 숫자(골라 2 + 무작위 3, 결정 1)와 윤곽선 기본 켜짐은 Claude 판단이다.',
@@ -106,6 +115,7 @@ const fixedTour = async entries => {
 };
 const funChanges = await fixedTour(FUN_CHANGES);
 const reviewFixes = await fixedTour(REVIEW_FIXES);
+const dailyRift = await fixedTour(DAILY_RIFT);
 const { results: audioLevels } = JSON.parse(fs.readFileSync(path.resolve(here, '../game/tools/music-levels.json'), 'utf8'));
 const musicLevels = audioLevels.filter(track => track.kind === 'music');
 const ending = await img('ending.jpg'), procession = await img('ending-procession.jpg'), titleBack = await img('title-returning.jpg');
@@ -161,7 +171,7 @@ dialog img { max-height: 92vh; max-width: 96vw; display: block; }
   <div><b>7</b>던전 (입문 + 테마 5 + 창조의 탑)</div>
   <div><b>130</b>아군 도트 (일러스트에서 88명 새로)</div>
   <div><b>28</b>사건</div><div><b>14</b>유물</div>
-  <div><b>12</b>배경음</div><div><b>119</b>자동 테스트</div>
+  <div><b>12</b>배경음</div><div><b>129</b>자동 테스트</div>
 </div>
 <div class="panel">플레이: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\dist\\Relaymare.html</code><br>
 배경음 듣기: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\tools\\music-preview.html</code><br>
@@ -173,9 +183,12 @@ dialog img { max-height: 92vh; max-width: 96vw; display: block; }
 <div class="tour">${funChanges}</div>
 <h3>검증 리뷰로 고친 것</h3>
 <div class="tour">${reviewFixes}</div>
+<h3>오늘의 균열</h3>
+<div class="tour">${dailyRift}</div>
 <h3>실행 파일과 소리</h3>
 <div class="panel">
 <p><code>card_pixel/game/dist/Relaymare.exe</code>를 열면 Chrome 앱 창에서 실행된다. Chrome이 없으면 Edge를 쓴다. 저장은 게임 전용 프로필에 남는다.</p>
+<p>소유자 승인으로 내려받은 Galmuri 9·11·14를 게임에 내장해 인터넷이 없어도 같은 글꼴로 보인다.</p>
 <p>음량을 잰 뒤 음악 마스터를 −14 dB에서 −10 dB로 올렸다. 아래는 조정 뒤 배경음 12곡의 측정값.</p>
 <table class="music-levels"><tr><th>곡</th><th>최고 (dBFS)</th><th>RMS (dBFS)</th></tr>
 ${musicLevels.map(({ name, peakDbfs, rmsDbfs }) => `<tr><td>${esc(name)}</td><td>${peakDbfs.toFixed(1)}</td><td>${rmsDbfs.toFixed(1)}</td></tr>`).join('')}
