@@ -3,6 +3,7 @@ import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
 import { canJoin, choicesFor, COST, drawFrom, join, RATES, rollBlessing, seeCharacters } from './awakenings.js';
+import { enemyStatsWithQuirk } from './bridge.js';
 import { pick, shuffle } from './rng.js';
 import { copy, eventChoices, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
 
@@ -17,6 +18,9 @@ const springRoom = run => run.phase === 'room' && run.room?.type === 'spring' &&
 // Keep the card core and sprite registry outside the persisted run.
 export function bindRun(run, { core, roster }) {
   dependencies.set(run, { core, roster });
+  let reward = run.pending;
+  while (reward?.kind === 'relic') reward = reward.after;
+  if (reward?.kind === 'gate' && run.relics?.includes(reward.relic)) reward.relic = null;
   if (run.room?.type === 'gate' && run.room.final && run.result === 'win'
     && run.phase === 'reward' && (!run.pending || run.pending.kind === 'gate')) {
     run.pending = null;
@@ -41,7 +45,7 @@ export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed
   const seals = profileView.seals || [];
   const companions = intro ? [] : (profileView.companions || []).filter(id => roster.allies.includes(id) && !seals.includes(id));
   const lead = !intro && roster.allies.includes(profileView.lead) && !seals.includes(profileView.lead) ? profileView.lead : null;
-  const shard = !intro && roster.allies.includes(profileView.reserved) && !seals.includes(profileView.reserved) ? profileView.reserved : null;
+  const shard = roster.allies.includes(profileView.reserved) && !seals.includes(profileView.reserved) ? profileView.reserved : null;
   const pool = roster.pool(dungeon.pool, { seals, companions: [...companions, lead, shard].filter(Boolean) });
   const boss = difficulty === 'nightmare' && dungeon.hiddenBosses.length ? pick(rng, dungeon.hiddenBosses) : dungeon.boss;
   const preview = intro ? INTRO.boss : roster.bossOf(boss);
@@ -108,7 +112,15 @@ function prepareStartPick(run, remaining, near, priority) {
 
 function completeStart(run) {
   const { roster } = dependencies.get(run);
-  run.reserved = pick(run.rng, run.unchosen.filter(id => canJoin(run, id))) || null;
+  const unchosen = run.unchosen.filter(id => canJoin(run, id));
+  run.reserved = pick(run.rng, unchosen) || null;
+  if (run.companions.includes(run.reserved)) {
+    const spare = unchosen.find(id => !run.companions.includes(id));
+    if (spare) run.reserved = spare;
+    else if (run.reserved === run.preferredCompanion && unchosen.length > 1) {
+      run.reserved = unchosen.find(id => id !== run.preferredCompanion);
+    }
+  }
   const awakened = [];
   for (let i = 0; i < START.draws; i++) {
     const id = drawFrom(run, roster, RATES.draw);
@@ -147,7 +159,9 @@ export function chooseDoor(run, index) {
   const { core, roster } = dependencies.get(run);
   if (run.room.regionChoice) run.region = copy(run.room.regionChoice);
   if (run.room.enemies.length) run.room.status = 'order';
-  if (run.room.type === 'awakening') prepareStartPick(run, START.picks, null, run.introCandidates);
+  if (run.room.type === 'awakening') {
+    prepareStartPick(run, START.picks, null, [run.profileShard, ...run.introCandidates].filter(Boolean));
+  }
   if (run.room.type === 'altar') run.pending = { kind: 'altar', rolls: 0, roll: null };
   if (run.room.type === 'event') run.pending = { kind: 'event', choices: eventChoices(run, core, roster) };
   return { ok: true, room: copy(run.room), pending: copy(run.pending) };
@@ -168,20 +182,46 @@ export function confirmOrder(run, ids) {
   return { ok: true, party: party.slice() };
 }
 
+function battleStart(run, door) {
+  const eventStart = run.nextBattle?.start;
+  if (!door.start && !eventStart) return null;
+  const start = { ...door.start, ...eventStart };
+  if (door.start?.field || eventStart?.field) {
+    start.field = unique([...(eventStart?.field || []), ...(door.start?.field || [])]).slice(0, 3);
+  }
+  return start;
+}
+
+function battleArtifacts(run) {
+  return unique([...run.relics, run.nextBattle?.relic].filter(Boolean)).slice(0, RELIC_LIMIT);
+}
+
+export function doorStart(run, index) {
+  const door = run.doors[index];
+  if (!door?.enemies.length) return { field: [], enemyDebuffs: {} };
+  const start = battleStart(run, door);
+  const artifacts = battleArtifacts(run);
+  const field = unique([...(artifacts.includes('gale_storm') ? ['gale'] : []), ...(start?.field || [])]);
+  const cap = artifacts.includes('buff_overload') ? 5 : dependencies.get(run).core.GAME_CONSTANTS.MAX_FIELD_BUFFS;
+  return { field: field.slice(-cap), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
+}
+
+export function doorEnemies(run, index) {
+  const door = run.doors[index];
+  return (door?.enemies || []).map(enemy => {
+    const stats = enemyStatsWithQuirk(enemy.stats, door.quirk);
+    return { ...copy(enemy), stats, maxHp: stats.hp };
+  });
+}
+
 export function battleOptions(run) {
   if (!battleRoom(run)) return null;
   const room = run.room;
-  const next = run.nextBattle;
-  const start = room.start || next?.start ? { ...room.start, ...next?.start } : null;
-  if (start && (room.start?.field || next?.start?.field)) {
-    start.field = unique([...(next?.start?.field || []), ...(room.start?.field || [])]).slice(0, 3);
-  }
-  const artifacts = unique([...run.relics, next?.relic].filter(Boolean)).slice(0, RELIC_LIMIT);
   return copy({
     party: room.party, enemies: room.enemies, quirk: room.quirk || null,
     seed: room.type === 'borrowed' ? INTRO.seed : (run.seed + run.floor * 1013 + run.stats.battles * 7) >>> 0,
     heirlooms: run.heirlooms, blessings: Object.entries(run.blessings).map(([id, multiplier]) => ({ id, multiplier })),
-    artifacts, region: room.region, start, bet: next?.bet || null
+    artifacts: battleArtifacts(run), region: room.region, start: battleStart(run, room), bet: run.nextBattle?.bet || null
   });
 }
 
@@ -198,11 +238,11 @@ function summarizeStats(run, summary) {
   }
 }
 
-function setGateReward(run, room, downs) {
+function setGateReward(run, room, downs, betRelic) {
   run.pending = {
     kind: 'gate',
     candidates: unique(downs.map(entry => room.enemies[entry.idx].source).filter(id => canJoin(run, id, { allowReserved: true }))),
-    relic: room.relic
+    relic: run.relics.includes(room.relic) || room.relic === betRelic ? null : room.relic
   };
   run.reserved = null;
 }
@@ -251,7 +291,7 @@ export function settleBattle(run, input) {
     delete run.heirlooms[id];
   }
   const heirloomsGained = summary.heirloomsGained.filter(entry => survivors.includes(entry.to));
-  for (const { to, from, name } of heirloomsGained) run.heirlooms[to] = { from, name };
+  for (const { to, ...heirloom } of heirloomsGained) run.heirlooms[to] = copy(heirloom);
   if (gate && win) {
     run.stats.gateWins++;
     run.gateSurvivors = unique([...run.gateSurvivors, ...survivors]);
@@ -265,15 +305,16 @@ export function settleBattle(run, input) {
   const downs = [...new Map(summary.enemyDowns.map(entry => [entry.idx, entry])).values()];
   let crystals = 0;
   const betWon = win && !!next?.bet && summary.bet?.kind === next.bet.kind && summary.bet?.won === true;
+  const betRelic = betWon ? next.reward.relic : null;
   let relic = null;
   if (win) {
     crystals = (room.reward || 0) + 2 * downs.filter(entry => entry.treasure).length;
     if (survivors.some(id => roster.card(id).trait?.type === 'looter')) crystals++;
     if (betWon) crystals += next.reward.crystals || 0;
     run.crystals += crystals;
-    if (gate && !final && !wiped) setGateReward(run, room, downs);
+    if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
     if (room.type === 'elite' && room.relic && !wiped) relic = grantRelic(run, room.relic);
-    if (betWon && next.reward.relic && !wiped) relic = grantRelic(run, next.reward.relic);
+    if (betRelic && !wiped) relic = grantRelic(run, betRelic);
     if (room.type === 'borrowed' && !wiped) {
       run.introCandidates = survivors;
       run.introHeirlooms = run.heirlooms;
@@ -298,7 +339,7 @@ export function chooseGateReward(run, choice) {
     run.pending = null;
     return { ok: true, joined: choice.id };
   }
-  if (choice?.kind === 'relic' && pending.relic && choice.id === pending.relic) {
+  if (choice?.kind === 'relic' && pending.relic && choice.id === pending.relic && !run.relics.includes(choice.id)) {
     run.pending = null;
     return { ok: true, relic: grantRelic(run, choice.id), pending: copy(run.pending) };
   }
@@ -379,6 +420,7 @@ export function equipRelic(run, id, replaceId) {
   run.relics[run.relics.indexOf(replaceId)] = id;
   run.crystals -= pending.cost;
   run.pending = pending.after;
+  if (run.pending?.kind === 'gate' && run.relics.includes(run.pending.relic)) run.pending.relic = null;
   return { ok: true, id, replaced: replaceId, cost: pending.cost, pending: copy(run.pending) };
 }
 

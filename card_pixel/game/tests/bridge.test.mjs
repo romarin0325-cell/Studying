@@ -32,6 +32,73 @@ const quietEnemy = (hp = 99999, overrides = {}) => dummy({
   stats: { hp, atk: 0, matk: 0, def: 60, mdef: 60, ...overrides }, skills: []
 });
 
+test('review 1: Red Moon wins when the death counter defeats the last enemy', () => {
+  const b = battle({ party: ['red_moon'], seed: 0, enemies: [quietEnemy(500, { atk: 5000 })] });
+  b.start();
+  const events = b.act(0);
+  assert.deepEqual(events.filter(e => ['enemyDown', 'win', 'lose'].includes(e.t)).map(e => e.t), ['enemyDown', 'win']);
+  assert.deepEqual(b.summary().survivors.slice(), [false, false, false]);
+
+  const relay = battle({ party: ['red_moon'], seed: 0, enemies: [quietEnemy(500, { atk: 5000 }), quietEnemy()] });
+  relay.start();
+  relay.act(0);
+  assert.equal(relay.outcome, 'lose');
+});
+
+test('review 8: Illumination landing after two normals leaves arena charge for a direct skill', () => {
+  const b = battle({ party: ['prism_twin'], seed: 1, enemies: [quietEnemy()], region: { id: 'arena_charge' } });
+  b.start();
+  b.act(option(b, '일루미네이션').index);
+  b.act(0);
+  const events = b.act(0);
+  assert.ok(events.some(e => e.t === 'act' && e.delayed && e.skill.name === '일루미네이션'));
+  assert.deepEqual(last(events, 'await').region, { charge: 2, ready: true });
+  const direct = b.options().find(o => o.index > 0 && o.usable && o.preview?.dmg > 0);
+  assert.ok(b.act(direct.index).some(e => e.rule === 'arena_charge'));
+});
+
+test('review 13: the Ice Age heirloom previews its full damage range and minimum kill', () => {
+  const b = battle({
+    party: ['mummy'], seed: 3, enemies: [quietEnemy(112, { mdef: 70 })],
+    heirlooms: { mummy: { from: 'avalanche_maid', name: '아이스에이지' } }
+  });
+  b.start();
+  const preview = option(b, '아이스에이지').preview;
+  assert.ok(preview.min < 112 && preview.max >= 112);
+  assert.ok(preview.min <= preview.dmg && preview.dmg <= preview.max);
+  assert.equal(preview.kill, false);
+  b.host.battle.enemy.hp = preview.min;
+  assert.equal(option(b, '아이스에이지').preview.kill, true);
+});
+
+test('review 16: Guardian previews Pangaea Rebirth damage with Time Magician in reserve', () => {
+  const config = { seed: 1, enemies: [quietEnemy()] };
+  const instant = battle({ ...config, party: ['guardian', null, 'time_magician'] });
+  instant.start();
+  const move = option(instant, '판게아리버스');
+  assert.equal(move.preview.instant, true);
+  const hit = instant.act(move.index).find(e => e.t === 'hp' && e.who.side === 'enemy');
+  assert.equal(move.preview.dmg, hit.amount);
+  const scheduled = battle({ ...config, party: ['guardian'] });
+  scheduled.start();
+  assert.deepEqual(option(scheduled, '판게아리버스').preview, { delayed: true });
+});
+
+test('review 19: Creator charges Divine Blade on turn three and uses it next turn', () => {
+  const base = S.RelayCore.ENEMIES.find(e => e.id === 'creator_god');
+  const b = battle({ seed: 2, enemies: [quietEnemy(99999, { atk: 10, matk: 10 })] });
+  const enemy = b.host.getCurrentStageEnemyData();
+  Object.assign(enemy, { id: base.id, name: base.name, skills: base.skills });
+  b.start();
+  b.act(0);
+  const wait = last(b.act(0), 'await');
+  assert.equal(wait.intent.kind, 'charge');
+  assert.deepEqual(wait.countdown, { name: '디바인블레이드', inTurns: 0, charge: true });
+  b.act(0);
+  const attack = b.act(0).find(e => e.t === 'act' && e.who.side === 'enemy');
+  assert.equal(attack.skill.name, '디바인블레이드');
+});
+
 test('the unchanged rule files load and the first turn waits for the player', () => {
   assert.ok(S.RelayCore.GameUtils.getCardById('red_dragon'));
   const b = battle();
@@ -590,7 +657,10 @@ test('Summary accounts for a retreat, death, heirloom, last stand, treasure, and
   const summary = b.summary();
   assert.deepEqual(plain(summary), {
     outcome: 'win', survivors: [true, false, true], retreated: [true, false, false],
-    heirloomsGained: [{ to: 'snow_rabbit', from: 'red_dragon', name: '파이어브레스' }],
+    heirloomsGained: [{
+      to: 'snow_rabbit', from: 'red_dragon', name: '파이어브레스', form: 'red_dragon',
+      skill: Bridge.heirloomSkill(S.RelayCore.GameUtils.getCardById('red_dragon'))
+    }],
     heirloomsUsed: 1, lastStands: 1, enemyDowns: [{ idx: 0, treasure: true }, { idx: 1, treasure: false }],
     bestHit: { amount: hit.amount, by: 'snow_rabbit', skill: '파이어브레스' }, turns: 3, bet: null
   });

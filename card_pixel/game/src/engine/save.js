@@ -1,5 +1,5 @@
 import { DUNGEONS } from '../content/dungeons.js';
-import { PROFILE_VERSION } from './meta.js';
+import { PROFILE_VERSION, recordRunProgress } from './meta.js';
 import { bindRun } from './run.js';
 
 export const RUN_VERSION = 1;
@@ -22,7 +22,7 @@ function readVersion(data, version, migrate) {
 
 function runData(run) {
   const fighting = run.phase === 'room' && run.room?.status === 'battle';
-  const snapshot = fighting ? { ...run, room: { ...run.room, status: 'order', party: null } } : run;
+  const snapshot = fighting ? { ...run, room: { ...run.room, status: 'order' } } : run;
   return { version: RUN_VERSION, run: snapshot };
 }
 
@@ -52,14 +52,22 @@ export function restoreProfile(data, { migrate } = {}) {
 export function createSaveStore(storage, { key = 'relaymare.session', core, roster, migrateRun, migrateProfile } = {}) {
   return {
     save({ profile, run = null }) {
-      storage.setItem(key, JSON.stringify({ version: SESSION_VERSION, profile, run: run ? runData(run) : null }));
+      const progressed = run ? recordRunProgress(profile, run).profile : profile;
+      storage.setItem(key, JSON.stringify({ version: SESSION_VERSION, profile: progressed, run: run ? runData(run) : null }));
     },
     load() {
       const data = readVersion(storage.getItem(key), SESSION_VERSION);
       if (!data) return null;
       const profile = restoreProfile(data.profile, { migrate: migrateProfile });
-      const run = data.run ? restoreRun(data.run, { core, roster, migrate: migrateRun }) : null;
-      return profile && (!data.run || run) ? { profile, run } : null;
+      if (!profile) return null;
+      if (data.run == null) return { profile, run: null };
+      try {
+        const run = restoreRun(data.run, { core, roster, migrate: migrateRun });
+        if (run) return { profile: recordRunProgress(profile, run).profile, run };
+      } catch {
+        // Run migrations can fail independently of the profile.
+      }
+      return { profile, run: null, runError: 'run_restore_failed' };
     },
     clear() {
       storage.removeItem(key);

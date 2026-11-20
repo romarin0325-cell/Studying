@@ -84,6 +84,222 @@ function roundTrip(run, actualRoster = roster) {
   return restored;
 }
 
+function profileWithSnowRabbit() {
+  const intro = reach(make({ dungeonId: 'dawn_forest', seed: 7 }), 2);
+  enter(intro);
+  ok(Run.chooseStartPick(intro, 'snow_rabbit'));
+  startPicks(intro);
+  advance(intro);
+  const result = Meta.applyRunEnd(Meta.createProfile(), clear(intro), { recruits: ['snow_rabbit'] });
+  ok(result.announce);
+  return result.profile;
+}
+
+test('review 3: a gate relic paid by the championship bet leaves the shadow choice open', () => {
+  const run = reach(make({
+    dungeonId: 'arena', seed: 1103811, profileView: { lead: 'luna', companions: ['underdog'] }
+  }), 3);
+  enter(run, 2);
+  assert.equal(run.room.event.id, 'championship');
+  ok(Run.chooseEvent(run, 'team'));
+  advance(run);
+  enter(run);
+  assert.equal(run.room.relic, 'double_attack');
+  settle(run, { bet: { kind: 'same_grade_full', won: true } });
+  assert.ok(run.relics.includes('double_attack'));
+  assert.equal(run.pending.relic, null);
+  assert.equal(Run.chooseGateReward(run, { kind: 'relic', id: 'double_attack' }).ok, false);
+  const shadow = run.pending.candidates[0];
+  assert.equal(ok(Run.chooseGateReward(run, { kind: 'join', id: shadow })).joined, shadow);
+});
+
+test('review 4: the intro seed 7 first awakening gives a saved Siren shard priority', () => {
+  const run = make({ dungeonId: 'dawn_forest', seed: 7, profileView: { reserved: 'siren' } });
+  enter(run, 0, INTRO.party);
+  settle(run, { survivors: [false, true, true] });
+  advance(run);
+  enter(run);
+  assert.deepEqual(run.pending.candidates, ['siren', 'snow_rabbit', 'silver_rabbit']);
+});
+
+test('review 5: seed 91 reserves an unchosen gatekeeper while Snow Rabbit is guaranteed at the spring', () => {
+  const run = make({ seed: 91, profileView: {
+    lead: 'ash', companions: ['snow_rabbit'], preferredCompanion: 'snow_rabbit'
+  } });
+  assert.ok(run.pending.candidates.includes('snow_rabbit'));
+  ok(Run.chooseStartPick(run, 'zeke'));
+  assert.ok(run.unchosen.includes(run.reserved));
+  assert.notEqual(run.reserved, 'snow_rabbit');
+  reach(run, 3);
+  enter(run);
+  assert.ok(!run.bench.includes('snow_rabbit'));
+  assert.ok(ok(Run.springPick(run)).candidates.includes('snow_rabbit'));
+});
+
+test('review 6: an Aurora Wing heirloom survives settlement and reload with its form and skill', () => {
+  let run = make({ seed: 0, profileView: { lead: 'miracle_larva', companions: ['executor'], reserved: 'executor' } });
+  ok(Run.chooseStartPick(run, 'executor'));
+  enter(run, 0, ['miracle_larva', 'executor']);
+  const options = Run.battleOptions(run);
+  const enemy = { ...options.enemies[0], stats: { hp: 1500, atk: 0, matk: 0, def: 0, mdef: 0 }, skills: [] };
+  const battle = Bridge.create(core, { ...options, enemies: [enemy] });
+  battle.start();
+  const act = name => battle.act(battle.options().find(o => o.name === name).index);
+  act('기적의우화');
+  act('기적의우화 → 오로라윙');
+  battle.host.battle.players[0].hp = 1;
+  battle.host.battle.enemy.atk = 5000;
+  battle.host.battle.enemy.baseAtk = 5000;
+  battle.act(0);
+  assert.equal(battle.options().find(o => o.heirloom).name, '뷰티토네이도');
+  battle.host.battle.enemy.hp = 1;
+  battle.act(0);
+  ok(Run.settleBattle(run, battle));
+  run = roundTrip(run);
+  advance(run);
+  enter(run, 0, ['executor']);
+  const next = Bridge.create(core, Run.battleOptions(run));
+  next.start();
+  assert.equal(next.options().find(o => o.heirloom).name, '뷰티토네이도');
+  assert.equal(run.heirlooms.executor.form, 'aurora_wing');
+  assert.equal(run.heirlooms.executor.skill.name, '뷰티토네이도');
+});
+
+test('review 9: a normal risky door has exactly one quirk or affix', () => {
+  for (const seed of [2, 3, 21, 91]) {
+    const door = reach(make({ seed }), 2).doors[1];
+    const affixes = door.enemies.flatMap(enemy => enemy.affixes || []);
+    assert.equal(Number(!!door.quirk) + affixes.length, 1, 'seed ' + seed);
+  }
+});
+
+test('review 11: representative and gate progress persist before the expedition ends', () => {
+  const profile = profileWithSnowRabbit();
+  const run = make({ seed: 0, profileView: Meta.startView(profile, 'ember_volcano') });
+  let persisted;
+  const store = Save.createSaveStore({
+    getItem: () => persisted, setItem: (_, value) => { persisted = value; }
+  }, { core, roster });
+  store.save({ profile, run });
+  let saved = store.load();
+  assert.deepEqual(saved.profile.notebook, { chapters: [1, 2], firstLead: 'snow_rabbit' });
+  reach(run, 4);
+  enter(run);
+  settle(run);
+  store.save({ profile: saved.profile, run });
+  saved = store.load();
+  assert.deepEqual(saved.profile.notebook.chapters, [1, 2, 3]);
+  assert.ok(saved.profile.seenRelics.includes(run.room.relic));
+  assert.deepEqual(saved.run.pending, run.pending);
+
+  const oldSession = JSON.parse(persisted);
+  assert.deepEqual(oldSession.profile, saved.profile, 'progress was written with the session');
+  persisted = JSON.stringify({ ...oldSession, profile });
+  assert.deepEqual(store.load().profile, saved.profile, 'older saves recover already-earned progress');
+});
+
+test('review 12: an in-battle reload keeps empty front and middle seats at the room entrance', () => {
+  for (const order of [[null, 'mawang', 'night_rabbit'], ['mawang', null, 'night_rabbit']]) {
+    const run = make({
+      dungeonId: 'twilight_cathedral', seed: 0, profileView: { lead: 'mawang', reserved: 'night_rabbit' }
+    });
+    ok(Run.chooseStartPick(run, 'night_rabbit'));
+    reach(run, 6);
+    enter(run, 0, order);
+    const saved = Save.restoreRun(Save.serializeRun(run), { core, roster });
+    assert.equal(saved.room.status, 'order');
+    assert.deepEqual(saved.room.party, order);
+    ok(Run.confirmOrder(saved, saved.room.party));
+    assert.deepEqual(Run.battleOptions(saved), Run.battleOptions(run));
+  }
+});
+
+test('review 15: Flora casts on enemy turns 5 and 10 and halves hits on player turns 6 and 11', () => {
+  const flora = roster.bossOf('flora');
+  const battle = Bridge.create(core, {
+    seed: 0, party: ['red_dragon'],
+    enemies: [{ ...flora, stats: { hp: 99999, atk: 0, matk: 0, def: 60, mdef: 60 } }]
+  });
+  battle.start();
+  const casts = [];
+  const halved = [];
+  for (let turn = 1; turn <= 11; turn++) {
+    if (battle.host.battle.enemy.buffs.damage_half) halved.push(turn);
+    if (battle.act(0).some(e => e.t === 'act' && e.who.side === 'enemy' && e.skill.name === '제네시스블룸')) casts.push(turn);
+  }
+  assert.deepEqual(casts, [5, 10]);
+  assert.deepEqual(halved, [6, 11]);
+  assert.match(flora.note, /적의 5턴·10턴.*플레이어의 6턴·11턴/);
+});
+
+test('review 17: the Starlit Garden door exposes the Star Powder that the cake event adds', () => {
+  const run = reach(make({ seed: 0, dungeonId: 'starlit_garden' }), 3);
+  enter(run, 2);
+  assert.equal(run.room.event.id, 'hidden_cake_crown');
+  ok(Run.chooseEvent(run, 'powder'));
+  advance(run);
+  const start = Run.doorStart(run, 0);
+  assert.deepEqual(start, { field: ['star_powder'], enemyDebuffs: {} });
+  enter(run);
+  const battle = Bridge.create(core, Run.battleOptions(run));
+  const begin = battle.start().find(e => e.t === 'begin');
+  assert.deepEqual(Array.from(begin.s.field), start.field);
+});
+
+test('review 18: door stats agree with battle HP on the seed 3 Echo door', () => {
+  const run = reach(make({ seed: 3 }), 2);
+  const door = run.doors[1];
+  // A v1 save can still carry both Echo and Treasure on a normal door.
+  door.quirk = 'echo';
+  door.enemies[0].affixes = ['treasure'];
+  const enemies = Run.doorEnemies(run, 1);
+  assert.equal(enemies[0].maxHp, Math.floor(door.enemies[0].stats.hp * 1.2));
+  assert.deepEqual(enemies[0].affixes, ['treasure']);
+  assert.equal(door.reward, 2);
+  enter(run, 1);
+  const battle = Bridge.create(core, Run.battleOptions(run));
+  battle.start();
+  assert.equal(battle.host.battle.enemy.maxHp, enemies[0].maxHp);
+});
+
+test('review 22: a winning run lists living participants separately from the fallen lead', () => {
+  const profile = profileWithSnowRabbit();
+  const run = reach(make({ seed: 21, profileView: Meta.startView(profile, 'ember_volcano') }), 8);
+  enter(run);
+  const [lead, retreated, survivor] = run.room.party;
+  assert.equal(lead, 'snow_rabbit');
+  settle(run, { survivors: [false, false, true], retreated: [false, true, false] });
+  const { announce } = Meta.applyRunEnd(profile, run);
+  assert.equal(run.result, 'win');
+  assert.ok(run.participated.includes(lead));
+  assert.ok(!announce.returned.includes(lead));
+  assert.ok(announce.returned.includes(retreated) && announce.returned.includes(survivor));
+});
+
+test('review SAVE: an unreadable run version or throwing migration keeps the recruited profile', () => {
+  const profile = Meta.createProfile();
+  profile.recruits.snow_rabbit = { bond: 2, since: 1 };
+  let persisted;
+  const storage = {
+    getItem: () => persisted, setItem: (_, value) => { persisted = value; }
+  };
+  const store = Save.createSaveStore(storage, { core, roster });
+  store.save({ profile, run: make() });
+  const corrupt = JSON.parse(persisted);
+  corrupt.run.version = 2;
+  persisted = JSON.stringify(corrupt);
+  const restored = store.load();
+  assert.deepEqual(restored?.profile, profile);
+  assert.equal(restored.run, null);
+  assert.equal(typeof restored.runError, 'string');
+  const migrating = Save.createSaveStore(storage, {
+    core, roster, migrateRun() { throw new Error('migration failed'); }
+  });
+  assert.deepEqual(migrating.load(), restored);
+  store.save(restored);
+  assert.deepEqual(store.load(), { profile, run: null });
+});
+
 test('dungeons, events and relics resolve against the card core and current sprite manifest', () => {
   for (const dungeon of Object.values(DUNGEONS)) {
     const cards = roster.pool(dungeon.pool);
@@ -241,7 +457,9 @@ for (const retreat of [false, true]) {
       assert.deepEqual(run.pending.candidates.slice(0, 2), INTRO.party.slice(1));
       assert.ok(!run.pending.candidates.includes('ash'));
       ok(Run.chooseStartPick(run, 'snow_rabbit'));
-      assert.deepEqual(run.heirlooms.snow_rabbit, { from: 'ash', name: '아마겟돈' });
+      assert.deepEqual(run.heirlooms.snow_rabbit, {
+        from: 'ash', name: '아마겟돈', form: 'ash', skill: Bridge.heirloomSkill(roster.card('ash'))
+      });
     }
   });
 }

@@ -41,7 +41,9 @@ test('E heirloom: the fallen fighter\'s strongest attack goes to the next one, f
   assert.ok(opt, 'the heir has the heirloom option');
   assert.equal(opt.cost, 0);
   assert.equal(opt.val, Math.round(best.val * 1.5 * 100) / 100);
-  assert.deepEqual(JSON.parse(JSON.stringify(b.heirloomsGained())), [{ to: 'ash', from: 'red_dragon', name: best.name }]);
+  assert.deepEqual(plain(b.heirloomsGained()), [{
+    to: 'ash', from: 'red_dragon', name: best.name, form: 'red_dragon', skill: Bridge.heirloomSkill(red)
+  }]);
 });
 
 test('E heirlooms scale random attack ranges and damage without changing the original skills', () => {

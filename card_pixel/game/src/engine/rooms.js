@@ -6,6 +6,7 @@ import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { QUIRKS } from '../content/quirks.js';
 import { RELICS } from '../content/relics.js';
 import { BLESS, canJoin, drawFrom, join, RATES, seeCharacters, seeRelic } from './awakenings.js';
+import { heldHeirloomSkill } from './bridge.js';
 import { gradeOf } from './roster.js';
 import { nextFloat, pick, shuffle } from './rng.js';
 
@@ -109,7 +110,13 @@ function wildEnemies(run, roster, dungeon, template, tier, region, quirk) {
 function makeBattleDoor(run, roster, dungeon, template, index, region, battleCount) {
   const challenge = run.difficulty === 'nightmare' ? dungeon.nightmareRule : null;
   const elite = template.type === 'elite';
-  const quirk = !run.plain && template.risk ? pick(run.rng, Object.keys(QUIRKS)) : null;
+  const singleRisk = run.difficulty === 'normal' && template.type === 'wild';
+  const quirks = Object.keys(QUIRKS);
+  const riskRoll = !run.plain && template.risk ? nextFloat(run.rng) * quirks.length : -1;
+  const quirk = quirks[Math.floor(riskRoll)] || null;
+  // Use the unused fraction of the roll to choose which modifier applies on a normal door.
+  // Overflow always keeps its quirk because it adds an enemy to the room.
+  const affixOnly = singleRisk && quirk && quirk !== 'overflow' && riskRoll % 1 < 0.5;
   const tier = dungeon.tiers[run.floor - 1] * (elite ? 1.12 : 1) * (challenge?.scale || 1);
   let enemies;
   if (template.type === 'borrowed') {
@@ -124,14 +131,17 @@ function makeBattleDoor(run, roster, dungeon, template, index, region, battleCou
     enemies = wildEnemies(run, roster, dungeon, template, tier, region, quirk);
   }
   const affixCount = run.plain ? 0 : (elite ? 2 : Number(!!template.risk && quirk !== 'overflow')) + Number(!!challenge?.extraAffix);
-  if (affixCount) enemies[0].affixes = shuffle(run.rng, Object.keys(AFFIXES)).slice(0, affixCount);
+  if (affixCount) {
+    const affixes = shuffle(run.rng, Object.keys(AFFIXES)).slice(0, affixCount);
+    if (!singleRisk || affixOnly) enemies[0].affixes = affixes;
+  }
   const skyBet = run.nextBattle?.bet?.kind === 'empty_sky';
   const hasSky = region?.id === 'starlit_sky';
   const filledSky = hasSky && !skyBet && (battleCount > 1 ? index === 1 : nextFloat(run.rng) < 0.5);
   const start = template.type === 'borrowed' ? INTRO.start : hasSky ? { field: filledSky ? SKY : [] } : null;
   return {
     ...template, index, name: ROOM_NAMES[template.type], bg: dungeon.background, region: copy(region),
-    enemies, quirk, start: copy(start), relic: elite || template.type === 'gate' ? relicOffer(run, roster) : null
+    enemies, quirk: affixOnly ? null : quirk, start: copy(start), relic: elite || template.type === 'gate' ? relicOffer(run, roster) : null
   };
 }
 
@@ -169,8 +179,7 @@ function canAttemptBet(run, core, roster, kind) {
   if (kind === 'delayed_on_time') {
     return run.bench.some(id => {
       const card = roster.card(id);
-      const heirloom = run.heirlooms[id];
-      const inherited = roster.card(heirloom?.from)?.skills.find(skill => skill.name === heirloom.name);
+      const inherited = heldHeirloomSkill(core, run.heirlooms[id]);
       return card.trait?.type !== 'instant_delayed_skills' && [...card.skills, inherited]
         .some(skill => skill && ATTACK_TYPES.includes(skill.type) && core.findDelayedSkillEffect(skill));
     });
@@ -268,7 +277,8 @@ export function resolveEvent(run, core, roster, choiceId, targetId) {
       }
       case 'heirloom': {
         const id = op.to || targetId;
-        run.heirlooms[id] = { from: op.from, name: op.name };
+        const held = { from: op.from, name: op.name, form: op.from };
+        run.heirlooms[id] = { ...held, skill: heldHeirloomSkill(core, held) };
         result.effects.push({ type: 'heirloom', id, ...run.heirlooms[id] });
         break;
       }

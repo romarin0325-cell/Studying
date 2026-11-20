@@ -34,24 +34,57 @@ const strip = html => String(html).replace(/<[^>]*>/g, '');
 const FIELD_POOL = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'valentine', 'arena', 'reaper_realm', 'gale'];
 const DEFENSE_BUFFS = ['guard', 'barrier', 'magic_guard', 'damage_half', 'evasion'];
 const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
+const RANDOM_DAMAGE = ['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'];
+
+export function enemyStatsWithQuirk(stats, quirk) {
+  const modifiers = QUIRKS[quirk]?.foe || {};
+  return {
+    hp: Math.floor(Math.floor(stats.hp) * (modifiers.hp || 1)),
+    atk: Math.floor(Math.floor(stats.atk) * (modifiers.atk || 1)),
+    matk: Math.floor(Math.floor(stats.matk) * (modifiers.atk || 1)),
+    def: modifiers.def ?? Math.floor(stats.def),
+    mdef: modifiers.def ?? Math.floor(stats.mdef)
+  };
+}
 
 /** The attack a fallen fighter hands on: the strongest physical or magic skill, free of MP and at 1.5x power. */
 export const HEIRLOOM_POWER = 1.5;
-export function heirloomSkill(proto) {
+export function heirloomSkill(proto, name) {
   const attacks = (proto.skills || []).filter(isAttack);
   if (!attacks.length) return null;
   const power = s => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 1);
-  const best = attacks.slice().sort((x, y) => power(y) - power(x))[0];
+  const best = attacks.find(attack => attack.name === name) || attacks.sort((x, y) => power(y) - power(x))[0];
   const skill = Object.assign(JSON.parse(JSON.stringify(best)), { cost: 0, heirloom: true, heirFrom: proto.id, heirFromName: proto.name });
   if (Number.isFinite(skill.val)) skill.val = Math.round(skill.val * HEIRLOOM_POWER * 100) / 100;
   for (const effect of skill.effects || []) {
-    if (['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'].includes(effect.type)) {
+    if (RANDOM_DAMAGE.includes(effect.type)) {
       effect.min *= HEIRLOOM_POWER;
       effect.max *= HEIRLOOM_POWER;
       if (effect.type === 'random_mult_moon_boost') effect.boostMax *= HEIRLOOM_POWER;
     }
   }
   return skill;
+}
+
+export function heldHeirloomSkill(core, held) {
+  if (!held) return null;
+  if (held.skill) return structuredClone(held.skill);
+  const giver = core.GameUtils.getCardById(held.form || held.from);
+  return giver ? heirloomSkill(giver, held.name) : null;
+}
+
+function instantDamageSkill(skill, delay) {
+  // Match the core's resolved damage effects. Other delayed effects only change what happens after the hit.
+  let effect;
+  if (delay.type === 'delayed_turn_scale_attack') {
+    effect = { type: 'dmg_boost_turn_scale', scale: delay.scale };
+  } else if (delay.type === 'delayed_attack_debuff_scale') {
+    effect = { type: 'dmg_boost', condition: 'target_debuff_count_scale', multPerDebuff: delay.multPerDebuff };
+  } else if (delay.type === 'phantom_nightmare') {
+    effect = { type: 'dmg_boost', condition: 'target_debuff', debuff: 'darkness', mult: delay.darknessMult || 2 };
+  }
+  if (!effect) return skill;
+  return { ...skill, effects: [...skill.effects.filter(entry => entry !== delay), effect] };
 }
 
 export function heirloomPreview(core, party) {
@@ -170,7 +203,10 @@ export function create(core, opts) {
       } else { host.battle.isFinished = true; B.outcome = 'win'; push({ t: 'win' }); }
     },
     loseBattle() {
-      if (host.battle.enemy.hp <= 0) recordEnemyDown();
+      if (host.battle.enemy.hp <= 0) {
+        if (B.enemyIdx === queue.length - 1) return host.winBattle();
+        recordEnemyDown();
+      }
       flush(); host.battle.isFinished = true; B.outcome = 'lose'; push({ t: 'lose' });
     }
   };
@@ -300,20 +336,15 @@ export function create(core, opts) {
         addAllyModifier(p, Q.ally);
         if (Q.ally.mp) { p.maxMp = Q.ally.mp; p.mp = Q.ally.mp; }
       }
-      const held = rules.heirloom && opts.heirlooms && opts.heirlooms[p.id];
-      if (held) {
-        const giver = GameUtils.getCardById(held.from), skill = giver && heirloomSkill(giver);
-        if (skill) p.skills.push(skill);
-      }
+      const skill = rules.heirloom && heldHeirloomSkill(core, opts.heirlooms?.[p.id]);
+      if (skill) p.skills.push(skill);
     }
   }
   function setupEnemy(enemy) {
     const def = queue[B.enemyIdx] || {};
     enemy.affixes = (def.affixes || []).slice();
-    const f = Q.foe || {};
-    if (f.hp) { enemy.maxHp = Math.floor(enemy.maxHp * f.hp); enemy.hp = enemy.maxHp; }
-    if (f.atk) for (const k of ['atk', 'matk', 'baseAtk', 'baseMatk']) enemy[k] = Math.floor(enemy[k] * f.atk);
-    if (f.def === 0) for (const k of ['def', 'mdef', 'baseDef', 'baseMdef']) enemy[k] = 0;
+    const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk);
+    Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
     if (hasAffix(enemy, 'tough')) enemy.buffs.damage_half = 3;
   }
   function applyStart() {
@@ -340,7 +371,7 @@ export function create(core, opts) {
       if (skill && heir) {
         heir.skills = heir.skills.filter(s => !s.heirloom);
         heir.skills.push(skill);
-        B.gained.push({ to: heir.id, from: victim.id, name: skill.name });
+        B.gained.push({ to: heir.id, from: victim.id, name: skill.name, form: victim.formId, skill });
         push({ t: 'heirloom', from: allyRef(victim.pos), to: allyRef(heir.pos), skill: { name: skill.name, type: skill.type, tier: skill.tier || 1 } });
       }
     }
@@ -496,7 +527,8 @@ export function create(core, opts) {
       lines.push(`${REGIONS.tide_cycle.opening}: 받는 피해 ${vulnerable}배`);
     }
     if (target === b.enemy && cause?.source === source && isAlly(source)) {
-      if (chargedSkill(cause.skill)) {
+      const scheduled = cause.delayed && B.dueEffects.some(effect => effect.source === source && effect.skill === cause.skill);
+      if (!scheduled && chargedSkill(cause.skill)) {
         B.chargeSpent = true;
         B.charge = 0;
         result.dmg *= 2;
@@ -504,8 +536,7 @@ export function create(core, opts) {
       } else if (region === 'arena_charge' && !B.chargeSpent && cause.skill === host.NORMAL_ATTACK && result.dmg > 0) {
         B.charge = Math.min(2, B.charge + 1);
       }
-      if (bet?.kind === 'delayed_on_time' && cause.delayed && result.dmg > 0 &&
-          B.dueEffects.some(effect => effect.source === source && effect.skill === cause.skill)) B.betMet = true;
+      if (bet?.kind === 'delayed_on_time' && scheduled && result.dmg > 0) B.betMet = true;
     }
     const stats = Logic.calculateStats(source, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
     B.lastHit = { source, target, dmg: result.dmg };
@@ -587,7 +618,8 @@ export function create(core, opts) {
       if (inTurns === 0 && enemy.buffs.stun) inTurns = 4;
       return { name: REGIONS.tide_cycle.hit, inTurns, charge: false };
     }
-    const skillName = action => action.name.replace(/ 차징$/, '');
+    const skillName = action => action.isChargeStart && action.name === '차지'
+      ? '디바인블레이드' : action.name.replace(/ 차징$/, '');
     const cache = B.intentCache;
     const current = cache && cache.enemy === enemy && cache.turn === b.turn && !enemy.buffs.stun && cache.action;
     if (isScripted(current)) return { name: skillName(current), inTurns: 0, charge: !!current.isChargeStart };
@@ -685,10 +717,13 @@ export function create(core, opts) {
     return region === 'arena_charge' && B.charge === 2 && skill !== host.NORMAL_ATTACK && isAttack(skill);
   }
   function previewSkill(player, skill) {
-    if (!isAttack(skill)) return null;
-    if (core.findDelayedSkillEffect && core.findDelayedSkillEffect(skill)) return { delayed: true };
+    const delay = core.findDelayedSkillEffect?.(skill);
+    const instant = !!delay && BattleRuntime.hasActiveTrait(host, 'instant_delayed_skills');
+    if (!isAttack(skill)) return instant ? { instant, dmg: 0 } : null;
+    if (delay && !instant) return { delayed: true };
     const b = host.battle, saved = Math.random, outer = active, critMult = core.GAME_CONSTANTS.BASE_CRIT_MULT;
     let enemy = b.enemy, attack = skill;
+    if (instant) attack = instantDamageSkill(skill, delay);
     if (skill === host.NORMAL_ATTACK) {
       if (host.hasArtifact('divine_ares')) attack = { ...skill, val: 2.5 };
       else if (host.hasArtifact('double_attack')) attack = { ...skill, val: 2 };
@@ -699,15 +734,35 @@ export function create(core, opts) {
         if (trait === 'normal_attack_burn_divine') StatusRules.add(enemy, 'divine', 1, host.state.artifacts);
       }
     }
-    let first = true;
+    const random = attack.effects?.some(effect => RANDOM_DAMAGE.includes(effect.type));
+    const hits = instant && Array.isArray(delay.turns) ? delay.turns.length : 1;
+    const damage = roll => {
+      let first = true;
+      Math.random = () => {
+        if (!first) return roll;
+        first = false;
+        return 1 - Number.EPSILON; // No chance crit. Guaranteed crits still apply.
+      };
+      const result = original.calc.call(Logic, player, enemy, attack, b.fieldBuffs, b.activeTraits, null,
+        host.state.mode, host.state.deck, b.turn, host.state.artifacts);
+      const hit = tideDamage(result.dmg, tideVulnerability(enemy));
+      return { hit, total: hit * (hits + Number(chargedSkill(skill))), forcedCrit: !!result.isCrit };
+    };
     active = B; B.probing = true;
     if (Q.critMult) core.GAME_CONSTANTS.BASE_CRIT_MULT = Q.critMult;
-    Math.random = () => { if (first) { first = false; return 0.9999; } return 0.5; };   // no crit, mid roll for random parts
     try {
-      const r = original.calc.call(Logic, player, enemy, attack, b.fieldBuffs, b.activeTraits, null,
-        host.state.mode, host.state.deck, b.turn, host.state.artifacts);
-      const dmg = chargedSkill(skill) ? r.dmg * 2 : tideDamage(r.dmg, tideVulnerability(enemy));
-      return { dmg, kill: dmg >= enemy.hp, forcedCrit: !!r.isCrit };
+      const middle = damage(0.5);
+      const preview = { dmg: middle.total, kill: middle.total >= enemy.hp, forcedCrit: middle.forcedCrit };
+      if (instant) preview.instant = true;
+      if (random) {
+        preview.min = damage(0).total;
+        preview.max = damage(1 - Number.EPSILON).total;
+        preview.kill = preview.min >= enemy.hp;
+      } else if (hits > 1) {
+        // Later hits can change with the effects of earlier hits.
+        preview.kill = middle.hit * (1 + Number(chargedSkill(skill))) >= enemy.hp;
+      }
+      return preview;
     } finally { Math.random = saved; B.probing = false; active = outer; core.GAME_CONSTANTS.BASE_CRIT_MULT = critMult; }
   }
   function previewDefense(player, skill) {
@@ -733,7 +788,7 @@ export function create(core, opts) {
     return B.awaiting && !B.retreatUsed && !B.outcome && !!nextAlly();
   }
   function survivors() { return host.battle.players.map(p => !!p && (!p.isDead || !!p.retreated)); }
-  function heirloomsGained() { return B.gained.map(gain => ({ ...gain })); }
+  function heirloomsGained() { return structuredClone(B.gained); }
   function betWon() {
     if (B.outcome !== 'win') return false;
     if (bet.kind === 'empty_sky') return !B.fieldSeen;
@@ -813,7 +868,7 @@ export function create(core, opts) {
     state() { return snapshot(); },
     /** Units that are still alive when the battle ends (retreated fighters count as alive). */
     survivors,
-    /** Heirlooms handed on in this battle: [{ to, from, name }] (card ids). */
+    /** Heirlooms handed on in this battle, including the donor's form and the inherited skill. */
     heirloomsGained,
     summary() {
       return {

@@ -102,6 +102,7 @@ export function recordRunProgress(profile, run) {
     }
     if (run.stats.gateWins > 0) addChapter(next, 3);
   }
+  next.seenRelics = union(next.seenRelics, run.seenRelics);
   const chapters = next.notebook.chapters.filter(id => !completed(profile, id));
   return { profile: next, announce: { ok: true, chapters } };
 }
@@ -139,7 +140,6 @@ export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) 
   records.appliedRuns.push(run.id);
   if (run.stats.bestHit?.amount > (records.bestHit?.amount || 0)) records.bestHit = { ...run.stats.bestHit, dungeonId, difficulty };
   next.seenCharacters = union(next.seenCharacters, run.seenCharacters);
-  next.seenRelics = union(next.seenRelics, run.seenRelics);
   if (run.profileShard && run.profileShard === next.reserved) next.reserved = null;
   if (shard) next.reserved = shard;
   const bonds = [];
@@ -166,10 +166,11 @@ export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) 
   }
   const longest = Object.entries(next.recruits).sort(([, a], [, b]) => b.bond - a.bond || a.since - b.since)[0];
   records.longestServing = longest ? { id: longest[0], ...longest[1] } : null;
+  const returned = run.participated.filter(id => run.bench.includes(id) && !run.fallen.includes(id));
   return {
     profile: next,
     announce: {
-      ok: true, recruits: recruits.slice(), bonds, shard,
+      ok: true, recruits: recruits.slice(), bonds, shard, returned,
       chapters: next.notebook.chapters.filter(id => !completed(profile, id)),
       dungeons: next.unlockedDungeons.filter(id => !profile.unlockedDungeons.includes(id)),
       nightmares: next.nightmareUnlocks.filter(id => !profile.nightmareUnlocks.includes(id))
