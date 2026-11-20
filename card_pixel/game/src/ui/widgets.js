@@ -58,7 +58,8 @@ export function createWidgets(ASSETS, card) {
 
   function cardHead(id, sub) {
     const c = card(id);
-    return '<div class="ih g-' + c.grade + '"><span class="pic">' + sprite(id) + '</span><div><b>' + esc(c.name) + '</b><i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + '</i>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div></div>';
+    const art = sprite(id) || (c.baseCardId ? sprite(c.baseCardId) : '');
+    return '<div class="ih g-' + c.grade + '"><span class="pic">' + art + '</span><div><b>' + esc(c.name) + '</b><i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + '</i>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div></div>';
   }
 
   return { card, spr, sprite, face, cardRow, benchMinis, cardHead };

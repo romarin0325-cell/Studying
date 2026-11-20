@@ -13,7 +13,7 @@ export function orderScreen(run, ui) {
   const { sfx } = audio;
   const node = $('#order');
   const room = run.room;
-  const party = [0, 1, 2].map(i => run.bench[i] || null);
+  const party = room.party?.slice() ?? [0, 1, 2].map(i => run.bench[i] || null);
   const all = core.GameUtils.getAllCards();
   const qualifiers = room.type === 'gate' || room.type === 'boss';
   const quirk = QUIRKS[room.quirk];

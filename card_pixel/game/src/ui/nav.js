@@ -24,6 +24,7 @@ export function mountPage() {
     <section id="title" class="screen meta-screen"></section>
     ${Object.keys(PAGES).map(id => `<section id="${id}" class="screen meta-screen"></section>`).join('')}
     ${sheetMarkup()}
+    <div id="session-notices" role="alert"></div>
   </div>`;
 }
 
@@ -35,6 +36,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   let preparationOpen = false;
   let crystalCount = 0;
   let gainedAtReturn = false;
+  let warnedSave = false;
 
   const host = {
     save(current) {
@@ -51,8 +53,22 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     runtime: { stage, audio, music, sheets }
   };
 
+  function sessionNotice(message) {
+    const notice = document.createElement('p');
+    notice.className = 'win';
+    notice.textContent = message;
+    $('#session-notices').append(notice);
+    setTimeout(() => notice.remove(), 10000);
+  }
+
   function persist() {
-    store.save({ profile, run });
+    try {
+      if (store.save({ profile, run }) !== false) return;
+    } catch { /* The current session remains in memory. */ }
+    if (!warnedSave) {
+      warnedSave = true;
+      sessionNotice('저장에 실패했다. 새로고침하면 지금부터의 진행이 사라진다.');
+    }
   }
 
   function updateProfile(next) {
@@ -199,11 +215,12 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const recent = { ...next.ui?.recent };
     const entry = { dungeonId: run.dungeonId, floor: run.floor, result: run.result };
     const recruits = announce.recruits;
+    const returned = new Set(announce.returned ?? run.bench.filter(id => !run.fallen.includes(id)));
     for (const id of new Set([...run.participated, ...recruits])) {
-      if (next.recruits[id]) recent[id] = [entry, ...(recent[id] || [])].slice(0, 3);
+      if (next.recruits[id]) recent[id] = [{ ...entry, returned: returned.has(id) }, ...(recent[id] || [])].slice(0, 3);
     }
-    const returned = run.result === 'win' ? run.bench.filter(id => next.recruits[id]) : [];
-    const returners = [...new Set([...recruits, ...returned, ...(next.ui?.returners || [])])].slice(0, 3);
+    const hubReturners = run.result === 'win' ? run.bench.filter(id => next.recruits[id]) : [];
+    const returners = [...new Set([...recruits, ...hubReturners, ...(next.ui?.returners || [])])].slice(0, 3);
     const announcement = { dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters };
     const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen };
     run = null;
@@ -251,6 +268,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     else if (run && !Object.keys(profile.recruits || {}).length) enterExpedition();
     else if (run) showHub();
     else showTitle(stored?.profile);
+    if (stored?.runError) sessionNotice('진행 중인 원정을 불러오지 못했다. 동료와 기록은 남아 있다.');
   }
 
   return { boot, closePreparation, resetData, inspect, get run() { return run; }, get review() { return review; } };

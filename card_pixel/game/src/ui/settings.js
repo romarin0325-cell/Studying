@@ -43,7 +43,9 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
     syncOutline();
   }
   function saveSettings() {
-    storage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio.soundOn, music: music.enabled, rim: St.RIM.on }));
+    try {
+      storage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio.soundOn, music: music.enabled, rim: St.RIM.on }));
+    } catch { /* This visit keeps the changed settings in memory. */ }
   }
 
   function settingsSheet() {

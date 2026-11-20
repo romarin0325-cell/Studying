@@ -3,6 +3,7 @@ import { TYPE } from '../widgets.js';
 import { FIELD } from './hud.js';
 
 const damageRange = ([low, high]) => low === high ? String(low) : low + '~' + high;
+const previewDamage = p => p.min != null && p.max != null ? damageRange([p.min, p.max]) : String(p.dmg ?? '');
 const hasFinalConsonant = name => /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
 
 export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker }) {
@@ -29,7 +30,10 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
     if (field) return [core.BUFF_NAMES[field.id] || field.id, '하늘에 건다'];
     return ['', ''];
   }
-  const fullText = (o, me) => (o.index === 0 ? '마나를 쓰지 않는 기본 공격.' : core.SkillDisplay.body({ name: o.name, type: o.type, val: o.val, cost: o.cost, tier: o.tier, effects: o.effects }, { entity: me }));
+  const fullText = (o, me) => (o.index === 0 ? '마나를 쓰지 않는 기본 공격.' : core.SkillDisplay.body({
+    name: o.name, type: o.type, val: o.val, cost: o.cost, tier: o.tier, effects: o.effects,
+    isActualDelayedTrigger: o.preview?.instant
+  }, { entity: me }));
   /* The tile line: the card's own skill text, shortened to fit two lines. The full text is one long press away. */
   function brief(o, me) {
     if (o.index === 0) return '마나 0';
@@ -60,8 +64,14 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
       const name = chooseForm ? FORM_SKILL : o.name;
       const usable = chooseForm ? forms.some(form => form.usable) : o.usable;
       let r2, r3 = chooseForm ? '변신할 형태를 고른다' : brief(o, me);
-      if (p && p.delayed) r2 = '<strong class="txt">예약</strong>';
-      else if (p) r2 = '<strong>' + p.dmg + '</strong>' + (adv ? '<small>▲상성</small>' : '') + (p.forcedCrit ? '<small>치명</small>' : '') + (p.kill ? '<u>처치</u>' : '');
+      if (p?.delayed && !p.instant) r2 = '<strong class="txt">예약</strong>';
+      else if (p?.instant && o.type === 'sup') r2 = '<strong class="txt">즉시</strong>';
+      else if (p) {
+        const damage = previewDamage(p);
+        r2 = '<strong' + (damage.includes('~') ? ' class="range"' : '') + '>' + damage + '</strong>' +
+          (p.instant ? '<small>즉시</small>' : adv ? '<small>▲상성</small>' : '') +
+          (p.forcedCrit ? '<small>치명</small>' : '') + (p.kill ? '<u>처치</u>' : '');
+      }
       else { const s = supportLine(o, B.intent); r2 = '<strong class="txt' + (s[0] === '—' ? ' no' : '') + '">' + esc(s[0]) + '</strong>'; if (s[1]) r3 = s[1]; }
       return '<button class="act ' + o.type + '" data-i="' + o.index + '"' + (usable ? '' : ' disabled') + '>' +
         '<span class="ic">' + TYPE[o.type].slice(0, 1) + '</span><span class="tx">' +
@@ -75,7 +85,8 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
     if (heir) {
       const p = heir.preview;
       h.className = 'on'; h.dataset.i = heir.index; h.disabled = false;
-      h.innerHTML = '<small>유품 · ' + esc(heir.heirFromName || '') + '</small><b>' + esc(heir.name) + '</b><strong>' + (p && p.dmg ? p.dmg : p && p.delayed ? '예약' : '') + '</strong>' + (p && p.kill ? '<u>처치</u>' : '');
+      const forecast = p?.instant ? previewDamage(p) + ' · 즉시' : p?.delayed ? '예약' : p ? previewDamage(p) : '';
+      h.innerHTML = '<small>유품 · ' + esc(heir.heirFromName || '') + '</small><b>' + esc(heir.name) + '</b><strong>' + forecast + '</strong>' + (p?.kill ? '<u>처치</u>' : '');
     } else { h.className = ''; h.innerHTML = ''; h.disabled = true; delete h.dataset.i; }
     const r = $('#b-retreat'), can = B.bridge.canRetreat();
     B.armed = false; r.className = ''; r.disabled = !can;
@@ -149,9 +160,11 @@ export function createTiles({ core, card, audio, sheets, B, foeDef, play, ticker
         skill + (hasFinalConsonant(skill) ? '을' : '를') + ' 받음 · 명중 시 ' +
         damageRange(preview.dmg) + ' · HP ' + next.hp + '→' + damageRange(hp) :
         next.name + ' 출전 · 적 ' + preview.intent.name + ' · HP ' + next.hp + '→' + next.hp;
+      const pending = [...new Set(B.D.delayed?.filter(attack => attack.by === B.D.cur).map(attack => attack.name))];
+      const warning = pending.length ? '예약한 ' + pending.join('·') + '도 취소된다' : '';
       B.armed = true;
       r.className = 'armed';
-      r.innerHTML = esc(current.name) + ' 물러나기<small>턴 소모 · 유품 없음</small>';
+      r.innerHTML = esc(current.name) + ' 물러나기<small>' + esc(warning || '턴 소모 · 유품 없음') + '</small>';
       $('#tally').innerHTML = '';
       ticker(line, true);
       sfx.tap();

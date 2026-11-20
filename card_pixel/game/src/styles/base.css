@@ -19,6 +19,8 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 .screen { position: absolute; inset: 0; display: none; flex-direction: column; }
 .screen.on { display: flex; }
 .scroll { overflow-y: auto; overflow-x: hidden; padding: 14px 14px 20px; flex: 1; }
+#session-notices { position: absolute; top: 52px; inset-inline: 12px; z-index: 11; pointer-events: none; }
+#session-notices p { margin-bottom: 4px; padding: 8px 10px; border-color: var(--coral); word-break: keep-all; }
 
 /* windows and buttons */
 .win { background: var(--win); border: 2px solid var(--line); box-shadow: inset 0 0 0 2px #120e24, 0 3px 0 #08050f; }

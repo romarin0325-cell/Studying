@@ -83,10 +83,10 @@ export function createHud(core, stage, sfx, widgets) {
     const n = $('#intent'), c = $('#pf-cd');
     if (!intent || !foe) { n.className = 'intent'; c.className = 'cd'; S.danger = 0; return; }
     if (cd) {
-      const inTurns = cd.inTurns + (cd.charge ? 1 : 0);
-      const name = cd.alt ? cd.name + ' 또는 ' + cd.alt : cd.name;
-      if (inTurns === 0) c.textContent = '이번 턴 ' + name + '!';
-      else if (cd.charge && inTurns === 1) c.textContent = '다음 턴 ' + name + '!';
+      const inTurns = (cd.inTurns ?? 0) + (cd.charge ? 1 : 0);
+      const name = [cd.name, cd.alt].filter(Boolean).join(' 또는 ') || '필살기';
+      if (cd.charge && inTurns === 1) c.textContent = '다음 턴 ' + name + '!';
+      else if (inTurns === 0) c.textContent = '이번 턴 ' + name + '!';
       else c.textContent = name + '까지 ' + inTurns + '턴';
       c.className = 'cd on' + (inTurns === 0 ? ' now' : '');
       S.danger = inTurns === 0 ? 1 : inTurns <= 2 ? 0.45 : 0;

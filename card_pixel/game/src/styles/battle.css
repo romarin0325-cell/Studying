@@ -116,6 +116,7 @@
 .act .r1 em { font: 10px var(--px9); font-style: normal; margin-left: auto; color: var(--mp); flex: none; }
 .act .r2 { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; min-height: 26px; }
 .act .r2 strong { font: 24px/26px var(--px); font-weight: normal; color: #fff; }
+.act .r2 strong.range { font-size: 18px; }
 .act .r2 strong.txt { font: 15px/26px var(--px14); color: var(--sup); } .act .r2 strong.no { color: var(--dim); }
 .act .r2 small { font: 10px var(--px9); color: var(--gold); }
 .act .r2 u { text-decoration: none; font: 10px/15px var(--px9); background: var(--coral); color: #1b0b10; padding: 0 4px; margin-left: auto; animation: blink .5s steps(2) infinite; }

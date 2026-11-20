@@ -1,6 +1,7 @@
 import { $, $$, esc, show, sleep } from '../dom.js';
 import { affixChips, foeFlip, head, TYPE } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
+import * as Run from '../../engine/run.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { ROOM_NAMES } from '../../content/layouts.js';
 import { REGIONS } from '../../content/regions.js';
@@ -52,6 +53,12 @@ export function mapScreen(run, ui) {
     return '<span class="floor-cell' + classes + '"><small>' + floor + '</small>' + marker + '</span>';
   }).join('');
 
+  function startSky(door) {
+    if (door.region?.id !== 'starlit_sky' || !door.enemies.length) return '';
+    const field = Run.doorStart?.(run, door.index)?.field ?? door.start?.field;
+    return field ? '시작 하늘 · ' + (field.map(id => core.BUFF_NAMES[id] || id).join(' · ') || '비어 있음') : '';
+  }
+
   function risks(door) {
     const lines = [];
     if (door.regionChoice) lines.push('후반 · ' + REGIONS[door.regionChoice.id].name);
@@ -59,9 +66,8 @@ export function mapScreen(run, ui) {
     for (const id of new Set(door.enemies.flatMap(enemy => enemy.affixes || []))) {
       if (AFFIX_RISK[id]) lines.push(AFFIX_RISK[id]);
     }
-    if (door.region?.id === 'starlit_sky' && door.start?.field) {
-      lines.push('시작 하늘 · ' + (door.start.field.map(id => core.BUFF_NAMES[id] || id).join(' · ') || '비어 있음'));
-    }
+    const sky = startSky(door);
+    if (sky) lines.push(sky);
     const regionalRisk = REGION_RISK[door.region?.id];
     if (regionalRisk && door.enemies.length && !(door.region.id === 'tide_cycle' && door.type === 'boss')) {
       lines.push(regionalRisk);
@@ -69,11 +75,11 @@ export function mapScreen(run, ui) {
     return lines;
   }
 
-  function reward(door) {
+  function reward(door, crystalLabel = '결정') {
     const crystals = door.reward;
     const relic = !door.final && artifacts.get(door.relic);
     return [
-      crystals ? '결정 +' + crystals : '',
+      crystals ? crystalLabel + ' +' + crystals : '',
       door.type === 'gate' && !door.final ? (relic ? '그림자 1명 또는 ' + relic.name : '그림자 1명') : relic?.name
     ].filter(Boolean).join(' · ');
   }
@@ -165,19 +171,24 @@ export function mapScreen(run, ui) {
   $('#b-roster', node)?.addEventListener('click', () => openSheet('대기 동료', '<div class="benchrow">' + benchMinis(reserve) + '</div>'));
 
   function describeDoor(door) {
-    const enemies = door.enemies.map(enemy => {
+    const ready = Run.doorEnemies?.(run, door.index);
+    const enemies = door.enemies.map((enemy, index) => {
       const strong = Object.keys(ELEMENT).filter(element => core.Logic.getElementalMultiplier(element, enemy.element) > 1);
+      const hp = ready?.[index]?.maxHp ?? enemy.stats.hp;
       return '<div class="run-foe-detail">' + sprite(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === 'shadow' ? 'shadow-tint' : '' }) +
-        '<div><h4>' + esc(enemy.name) + '</h4><p>' + esc(ELEMENT[enemy.element] || '') + ' · HP ' + enemy.stats.hp + '</p>' +
+        '<div><h4>' + esc(enemy.name) + '</h4><p>' + esc(ELEMENT[enemy.element] || '') + ' · HP ' + hp + '</p>' +
         (strong.length ? '<p>상성 우위 · ' + strong.map(element => ELEMENT[element]).join(' · ') + '</p>' : '') +
         (enemy.note ? '<p>' + esc(enemy.note) + '</p>' : '') +
-        (enemy.affixes || []).map(id => '<p>' + esc(AFFIXES[id].name + ' · ' + AFFIXES[id].desc) + '</p>').join('') + '</div></div>';
+        (enemy.affixes || []).map(id => '<p>' + esc(AFFIXES[id].name + (id === 'treasure' ? '' : ' · ' + AFFIXES[id].desc)) + '</p>').join('') + '</div></div>';
     }).join('');
     const region = REGIONS[door.region?.id], quirk = QUIRKS[door.quirk], relic = !door.final && artifacts.get(door.relic);
     const rule = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
+    const sky = startSky(door), gain = reward(door, '확정 결정');
+    const treasure = door.enemies.some(enemy => enemy.affixes?.includes('treasure'));
     openSheet(door.name, enemies + rule(quirk) + rule(region) +
-      (door.start?.field ? '<p>' + esc(risks(door).at(-1)) + '</p>' : '') +
+      (sky ? '<p>' + esc(sky) + '</p>' : '') +
       (door.event ? '<p>' + esc(door.event.text) + '</p>' : '') +
-      (reward(door) ? '<p class="gain">' + esc(reward(door)) + '</p>' : '') + rule(relic));
+      (gain ? '<p class="gain">' + esc(gain) + '</p>' : '') +
+      (treasure ? '<p class="gain">추가 보상 · 보물 적 1명 처치마다 결정 +2</p>' : '') + rule(relic));
   }
 }

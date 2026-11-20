@@ -22,7 +22,7 @@ export function companionSheet({ core, widgets, sheets, profile, id, setLead }) 
       <div class="meta-companion-art">${sprite(id)}</div>
       ${recruit ? `<p>인연 ${recruit.bond}${profile.lead === id ? ' · 대표' : ''}</p>` : ''}
       ${recruit ? `<h4>최근 원정</h4><p>${recent.map(entry =>
-        `${esc(DUNGEONS[entry.dungeonId].name)} · ${entry.floor}층 · ${entry.result === 'win' ? '생환' : '원정 실패'}`
+        `${esc(DUNGEONS[entry.dungeonId].name)} · ${entry.floor}층 · ${entry.result === 'win' ? '원정 승리' : '원정 실패'} · ${entry.returned === true ? '생환' : entry.returned === false ? '미귀환' : '귀환 여부 미기록'}`
       ).join('<br>') || '원정 기록 없음'}</p>` : ''}
       <h4>특성</h4><p>${esc(character.trait.desc)}</p>
       <h4>기술</h4>${skills}

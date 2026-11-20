@@ -75,7 +75,7 @@ export function eventScreen(run, ui, result = null) {
         return NEXT + ' · 적 ' + Object.entries(effect.enemyDebuffs).map(([id, stacks]) =>
           (ui.core.BUFF_NAMES[id] || id) + ' +' + stacks).join(' · ');
       case 'bet': {
-        const condition = effect.kind === 'kill_on_turn' ? effect.turn + '턴에 마지막 적 처치' : BET[effect.kind];
+        const condition = effect.kind === 'kill_on_turn' ? effect.turn + '턴에 적 하나를 쓰러뜨리고 이긴다' : BET[effect.kind];
         const prize = effect.reward.crystals ? '결정 +' + effect.reward.crystals : ui.artifacts.get(effect.reward.relic)?.name;
         return NEXT + ' · ' + condition + ' → ' + prize + ' · 실패 시 보상 없음';
       }
