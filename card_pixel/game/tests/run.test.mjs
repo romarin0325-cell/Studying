@@ -802,12 +802,12 @@ test('contracts require this dungeon’s unlocked nightmare and default to none'
   });
 });
 
-test('rescue needs a lethal retreat and both fighters alive in a won floor-four or floor-six battle', () => {
-  for (const { floor, lethal, incomingAlive, outcome, met } of [
+test('rescue needs the fighter who withdrew from a lethal blow to survive a floor-four or floor-six win', () => {
+  for (const { floor, lethal, retreatedAlive = true, incomingAlive, outcome, met } of [
     { floor: 4, lethal: true, incomingAlive: true, outcome: 'win', met: true },
-    { floor: 6, lethal: true, incomingAlive: true, outcome: 'win', met: true },
+    { floor: 6, lethal: true, incomingAlive: false, outcome: 'win', met: true },
     { floor: 4, lethal: false, incomingAlive: true, outcome: 'win', met: false },
-    { floor: 6, lethal: true, incomingAlive: false, outcome: 'win', met: false },
+    { floor: 6, lethal: true, retreatedAlive: false, incomingAlive: true, outcome: 'win', met: false },
     { floor: 6, lethal: true, incomingAlive: true, outcome: 'lose', met: false },
     { floor: 2, lethal: true, incomingAlive: true, outcome: 'win', met: false }
   ]) {
@@ -815,7 +815,7 @@ test('rescue needs a lethal retreat and both fighters alive in a won floor-four 
     enter(run);
     const [retreated, incoming] = run.room.party;
     const result = settle(run, {
-      outcome, retreated: [true, false, false], survivors: [false, incomingAlive, true],
+      outcome, retreated: [retreatedAlive, false, false], survivors: [false, incomingAlive, true],
       rescues: [{ retreated, incoming, lethal }]
     });
     assert.equal(result.contract.metNow, met);
@@ -825,14 +825,16 @@ test('rescue needs a lethal retreat and both fighters alive in a won floor-four 
   }
 });
 
-test('heirloom counts the killing hit on floors four and six and requires victory', () => {
-  for (const [floor, kills, outcome, met] of [[4, 1, 'win', true], [6, 1, 'win', true], [6, 0, 'win', false],
-    [6, 1, 'lose', false], [2, 1, 'win', false]]) {
+test('heirloom requires a killing hit and victory at the floor-four gate', () => {
+  for (const [floor, kills, outcome, met] of [[4, 1, 'win', true], [4, 0, 'win', false],
+    [4, 1, 'lose', false], [6, 1, 'win', false], [2, 1, 'win', false]]) {
     const run = reach(contractedRun('heirloom'), floor);
     enter(run);
     const result = settle(run, { outcome, heirloomsUsed: 1, heirloomKills: kills });
     assert.equal(result.contract.metNow, met);
-    assert.equal(result.contract.paid, floor === 6 && met ? CONTRACT_PAYOUT : 0);
+    assert.equal(run.contract.metAtFloor, met ? 4 : null);
+    assert.equal(result.contract.paid, 0);
+    assert.equal(result.contract.failed, floor === 6);
   }
 });
 

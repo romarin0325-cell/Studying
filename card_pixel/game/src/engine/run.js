@@ -344,10 +344,9 @@ function setReinforcement(run, roster) {
 function meetsContract(run, summary, survivors) {
   switch (run.contract.id) {
     case 'rescue':
-      return summary.rescues?.some(({ retreated, incoming, lethal }) =>
-        lethal && survivors.includes(retreated) && survivors.includes(incoming));
+      return summary.rescues?.some(({ retreated, lethal }) => lethal && survivors.includes(retreated));
     case 'heirloom':
-      return summary.heirloomKills > 0;
+      return run.floor === 4 && summary.heirloomKills > 0;
     case 'elite':
       return run.floor === 6 && run.room.type === 'elite' && run.contract.riskDoorTaken && survivors.length >= 2;
   }

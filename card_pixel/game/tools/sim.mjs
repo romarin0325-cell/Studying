@@ -133,7 +133,8 @@ function fight(run, { naive, bossSuggestion, bossOrder, opening, onBattle }) {
   let events = bridge.start();
   let defended = false;
   if (fixed && (opening ? opening === 'rescue' : !naive && rules.heirloom && run.seed % 2) && bridge.canRetreat()) events = bridge.retreat();
-  const targetFloor = (run.floor === 4 || run.floor === 6) && !run.contract?.met;
+  const pursueRescue = run.contract?.id === 'rescue' && !run.contract.met && (run.floor === 4 || run.floor === 6);
+  const pursueHeirloom = run.contract?.id === 'heirloom' && !run.contract.met && run.floor === 4;
   for (let actions = 0; bridge.awaiting && actions < 500; actions++) {
     const wait = events.findLast(event => event.t === 'await');
     if (run.daily && !naive && run.room.type !== 'boss' && shouldRetreat(bridge, wait)) {
@@ -141,13 +142,12 @@ function fight(run, { naive, bossSuggestion, bossOrder, opening, onBattle }) {
       defended = false;
       continue;
     }
-    if (targetFloor && run.contract?.id === 'rescue' && shouldRetreat(bridge, wait, true)) {
+    if (pursueRescue && shouldRetreat(bridge, wait, true)) {
       events = bridge.retreat();
       defended = false;
       continue;
     }
-    const preferHeirloom = targetFloor && run.contract?.id === 'heirloom'
-      && (!usesTempo(run) || bridge.enemyIndex === bridge.enemyCount - 1);
+    const preferHeirloom = pursueHeirloom && (!usesTempo(run) || bridge.enemyIndex === bridge.enemyCount - 1);
     const heirloom = fixed && opening === 'stand' && bridge.options().find(option => option.usable && option.heirloom);
     const setup = rescueSetup && !wait?.intent.lethal && bridge.state().cur === 0 && prepareRescue(bridge);
     const index = (heirloom || setup)?.index ?? chooseAction(bridge, wait, !naive && !defended, naive, preferHeirloom);
@@ -355,10 +355,11 @@ function measureBossOrder() {
 }
 
 function measureContracts() {
-  console.log(`tempo ${tempoVersion} · ${difficulty} · ${contract} · ${runs} seeds per dungeon`);
+  console.log(`tempo ${tempoVersion} · ${difficulty} · ${contract} · ${runs} seeds per dungeon · offset ${seedOffset}`);
   console.log('| Dungeon | Met | Paid | Stamped | Clear |');
   console.log('| --- | ---: | ---: | ---: | ---: |');
-  const rate = n => `${n}/${runs} (${(100 * n / runs).toFixed(1)}%)`;
+  const rate = (n, count) => `${n}/${count} (${percent(n, count)})`;
+  const total = { met: 0, paid: 0, stamped: 0, clear: 0 };
   for (const id of dungeons) {
     const profile = Meta.createProfile();
     profile.unlockedDungeons.push(id);
@@ -373,8 +374,10 @@ function measureContracts() {
       counts.stamped += Number(!!announce.stamp);
       counts.clear += Number(end.result === 'win');
     }
-    console.log(`| ${id} | ${Object.values(counts).map(rate).join(' | ')} |`);
+    for (const key of Object.keys(total)) total[key] += counts[key];
+    console.log(`| ${id} | ${Object.values(counts).map(n => rate(n, runs)).join(' | ')} |`);
   }
+  console.log(`| Total | ${Object.values(total).map(n => rate(n, runs * dungeons.length)).join(' | ')} |`);
 }
 
 const ROOM_LABELS = ['B1', 'B2 safe', 'B2 risk', 'B3', 'B4 gate', 'B5 finale', 'B6 wild', 'B6 elite', 'B8 boss', 'Normal battles'];
