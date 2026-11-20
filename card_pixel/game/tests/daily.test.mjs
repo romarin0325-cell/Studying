@@ -412,3 +412,15 @@ test('the daily sim reproduces both design policy totals across 60 first attempt
     { policy: 'Careful', wins: 37, turns: 2229 }
   ]);
 });
+
+test('daily door previews and checkpoints do not adopt main expedition lessons or streaks', () => {
+  const run = attempt(FIRST, { lessonVersion: 1 });
+  reach(run, 6);
+  for (const door of run.doors) {
+    assert.equal(door.tempo, null);
+    assert.equal(Run.getTempoView(run, door.index).lesson, null);
+  }
+  const restored = Save.restoreRun(Save.serializeRun(run), deps);
+  assert.equal(restored.lessonVersion, undefined);
+  assert.equal(restored.blessingHistory, undefined);
+});

@@ -204,3 +204,18 @@ test('roster: boss-only sprites stay out of the ally pool, and kind is optional'
   const fake = RelayRoster.create(core, { sp: { 'gray-idle': {} } });
   assert.deepEqual(plain(fake.allies), ['gray']);
 });
+
+test('live affixes and ordinary strong attacks report their own values, without boss salience', () => {
+  const target = dummy({ affixes: ['tough', 'frenzy'], stats: { hp: 3000, atk: 1, matk: 1, def: 50, mdef: 50 } });
+  const b = battle({ enemies: [target], tempo: { pattern: 'threeBeat' } });
+  const opening = last(b.start(), 'await');
+  assert.equal(opening.intent.salience, 'ordinary');
+  assert.equal(opening.affixes.find(affix => affix.id === 'tough').turns, 3);
+  b.host.battle.enemy.hp = 1200;
+  const strong = last(b.act(0), 'await');
+  assert.equal(strong.intent.salience, 'strong');
+  assert.equal(strong.affixes.find(affix => affix.id === 'tough').turns, 2);
+  assert.equal(strong.affixes.find(affix => affix.id === 'frenzy').active, true);
+  const blow = b.act(0).find(event => event.t === 'act' && event.who.side === 'enemy');
+  assert.deepEqual([blow.salience, blow.ult], ['strong', false]);
+});

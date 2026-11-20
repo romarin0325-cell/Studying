@@ -1,4 +1,6 @@
 import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../content/contracts.js';
+import { LESSON_VERSION } from '../content/boss-lessons.js';
+import { BOSSES } from '../content/bosses.js';
 import { FLOORS as DAILY_FLOORS } from '../content/daily-rift.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
@@ -6,7 +8,7 @@ import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
 import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import { canJoin, choicesFor, COST, drawFrom, join, RATES, release, rollBlessing, seeCharacters, validateReplacements } from './awakenings.js';
-import { enemyBeats, enemyStatsWithQuirk } from './bridge.js';
+import { affixView, create as createBattle, enemyBeats, enemyStatsWithQuirk } from './bridge.js';
 import { doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { pick, shuffle } from './rng.js';
 import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
@@ -57,6 +59,8 @@ export function createRun(options) {
   const intro = dungeon.layout === 'intro';
   const tempoVersion = daily?.spec.ruleVersion ?? options.tempoVersion ?? TEMPO_VERSION;
   if (tempoVersion !== 1 && tempoVersion !== TEMPO_VERSION) throw new RangeError('invalid_tempo_version');
+  const lessonVersion = daily || intro || tempoVersion !== TEMPO_VERSION ? 0 : options.lessonVersion ?? LESSON_VERSION;
+  if (![0, LESSON_VERSION].includes(lessonVersion)) throw new RangeError('invalid_lesson_version');
   if (contract !== null && (typeof contract !== 'string' || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== 'nightmare'
     || !profileView.nightmareUnlocks?.includes(dungeonId))) {
     throw new RangeError('Unavailable contract: ' + String(contract));
@@ -79,6 +83,8 @@ export function createRun(options) {
     id: daily ? `rift/v${daily.spec.ruleVersion}/${daily.spec.dayKey}/${daily.attemptNo}`
       : [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join('/'),
     daily: copy(daily),
+    ...(!daily && { lessonVersion }),
+    ...(lessonVersion && { blessingHistory: [] }),
     tempoVersion, openingLead: null,
     firstMainAssist: tempoVersion === TEMPO_VERSION && !daily && !intro && difficulty === 'normal'
       && (profileView.bossOrder ?? true),
@@ -223,6 +229,11 @@ export function suggestOrder(run) {
 
 export function confirmOrder(run, ids) {
   if (run.phase !== 'room' || run.room?.status !== 'order') return invalid('no_battle_to_order');
+  const order = validateOrder(run, run.room, ids);
+  return order.ok ? applyOrder(run, order) : order;
+}
+
+function validateOrder(run, door, ids) {
   if (!Array.isArray(ids) || ids.length < 1 || ids.length > 3) return invalid('invalid_party');
   const fighters = Array.from(ids).filter(id => id !== null);
   if (!fighters.length || new Set(fighters).size !== fighters.length || fighters.some(id => !run.bench.includes(id))) {
@@ -230,13 +241,29 @@ export function confirmOrder(run, ids) {
   }
   if (run.daily && fighters.length !== Math.min(3, run.bench.length)) return invalid('invalid_party');
   const party = [...ids, ...Array(3 - ids.length).fill(null)];
-  if (run.room.type === 'borrowed' && INTRO.party.some((id, index) => party[index] !== id)) return invalid('fixed_party');
+  if (door.type === 'borrowed' && INTRO.party.some((id, index) => party[index] !== id)) return invalid('fixed_party');
+  return { ok: true, party, fighters };
+}
+
+function applyOrder(run, { party, fighters }) {
   // Keep the existing bench order for seeded room choices; defaultParty refills seats by joinOrder.
   run.bench = [...fighters, ...run.bench.filter(id => !fighters.includes(id))];
   run.room.party = party;
   run.lastParty = party.slice();
   run.room.status = 'battle';
   return { ok: true, party: party.slice() };
+}
+
+export function enterBattleDoor(run, { floor, index, partyIds } = {}) {
+  if (run.phase !== 'map' || floor !== run.floor || !Number.isInteger(index) || run.doors[index]?.index !== index) {
+    return invalid('invalid_door');
+  }
+  const door = run.doors[index];
+  if (!door.enemies.length) return invalid('no_battle_to_order');
+  const order = validateOrder(run, door, partyIds);
+  if (!order.ok) return order;
+  chooseDoor(run, index);
+  return applyOrder(run, order);
 }
 
 function battleStart(run, door) {
@@ -284,8 +311,20 @@ export function getTempoView(run, doorIndex) {
     })),
     pattern: door?.tempo?.pattern ?? null,
     blessing: copy(door?.tempo?.blessing ?? null),
-    startMp: door?.tempo?.startMp ?? null
+    startMp: door?.tempo?.startMp ?? null,
+    enemyKind: door?.enemies[0]?.kind ?? null,
+    enemyIndex: door?.enemies.length ? 0 : null,
+    enemyCount: door?.enemies.length ?? 0,
+    lesson: copy(door?.tempo?.lesson ?? null),
+    affixes: (door?.enemies[0]?.affixes ?? []).map(id => affixView(id)),
+    bossRule: door?.type === 'boss' ? {
+      bossId: run.boss, name: door.enemies[0].name, text: BOSSES[run.boss].note
+    } : null
   };
+}
+
+function blessingBonus(blessing, id) {
+  return blessing?.id === id ? Number((blessing.multiplier - 1).toFixed(2)) : 0;
 }
 
 function battleBlessings(run, door) {
@@ -293,22 +332,50 @@ function battleBlessings(run, door) {
   const blessing = door.tempo?.blessing;
   if (blessing) {
     // The card core stores blessings as a bonus over base stats.
-    const bonus = Number((blessing.multiplier - 1).toFixed(2));
+    const bonus = blessingBonus(blessing, blessing.id);
     blessings[blessing.id] = Math.max(blessings[blessing.id] ?? 0, bonus);
   }
   return Object.entries(blessings).map(([id, multiplier]) => ({ id, multiplier }));
 }
 
+export function getBlessingView(run, doorIndex, partyIds, id) {
+  const { core, roster } = dependencies.get(run);
+  const door = run.doors[doorIndex];
+  const expeditionBonus = run.blessings[id] ?? 0;
+  const battleBonus = blessingBonus(door?.tempo?.blessing, id);
+  const active = partyIds.includes(id);
+  const effectiveBonus = Math.max(expeditionBonus, battleBonus) * (partyIds.includes('entropy') ? 2 : 1);
+  let stats = null;
+  if (roster.card(id)) {
+    // A reserve has no assigned position. Show its own stats with the selected party's blessing multiplier.
+    const party = active ? partyIds : id === 'entropy' || !partyIds.includes('entropy') ? [id] : [id, 'entropy'];
+    const options = door?.enemies.length ? optionsForDoor(run, door, party) : {
+      party, enemies: [roster.wildOf(INTRO.creature)], blessings: battleBlessings(run, {})
+    };
+    if (!active && id === 'entropy') {
+      const blessing = options.blessings.find(entry => entry.id === id);
+      if (blessing) blessing.multiplier /= 2;
+    }
+    const preview = createBattle(core, options);
+    preview.start();
+    stats = preview.allyStats(party.indexOf(id));
+  }
+  return { expeditionBonus, battleBonus, effectiveBonus, active, stats };
+}
+
 export function battleOptions(run) {
   if (!battleRoom(run)) return null;
-  const room = run.room;
-  return copy({
-    party: room.party, enemies: room.enemies, quirk: room.quirk || null,
+  return copy(optionsForDoor(run, run.room, run.room.party));
+}
+
+function optionsForDoor(run, room, party) {
+  return {
+    party, enemies: room.enemies, quirk: room.quirk || null,
     seed: room.type === 'borrowed' ? INTRO.seed : (run.seed + run.floor * 1013 + run.stats.battles * 7) >>> 0,
     heirlooms: run.heirlooms, blessings: battleBlessings(run, room),
     ...(room.tempo && { tempo: room.tempo, openingIntent: room.intent }),
     artifacts: battleArtifacts(run), region: room.region, start: battleStart(run, room), bet: run.nextBattle?.bet || null
-  });
+  };
 }
 
 function summarizeStats(run, summary) {
@@ -418,6 +485,9 @@ export function settleBattle(run, input) {
 
   const next = run.nextBattle;
   run.nextBattle = null;
+  if (run.lessonVersion) {
+    run.blessingHistory = [...(run.blessingHistory ?? []), room.tempo?.blessing?.id ?? null].slice(-2);
+  }
   run.fallen.push(...fallen);
   run.bench = run.bench.filter(id => !fallen.includes(id));
   run.eligible = run.eligible.filter(id => !fallen.includes(id));
@@ -447,6 +517,7 @@ export function settleBattle(run, input) {
     if (!run.daily) {
       crystals += (room.reward || 0) + 2 * downs.filter(entry => entry.treasure).length;
       if (survivors.some(id => roster.card(id).trait?.type === 'looter')) crystals++;
+      for (const id of survivors) crystals += run.firstSurvivalPay?.[id] ?? 0;
       if (betWon) crystals += next.reward.crystals || 0;
       run.crystals += crystals;
       if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
@@ -465,6 +536,9 @@ export function settleBattle(run, input) {
       run.bench = [];
       run.joinOrder = [];
     }
+  }
+  for (const id of room.party) {
+    if (run.firstSurvivalPay) delete run.firstSurvivalPay[id];
   }
   room.status = 'resolved';
   run.phase = run.result && !run.pending ? 'done' : 'reward';
@@ -524,6 +598,7 @@ export function springDraw(run, replaceId = null) {
 }
 
 export function springPick(run) {
+  if (run.lessonVersion) return getSpringOffer(run);
   if (!springRoom(run) || run.pending) return invalid('no_pick_waking');
   if (run.crystals < COST.pick) return invalid('insufficient_crystals');
   const { roster } = dependencies.get(run);
@@ -539,6 +614,11 @@ export function springPick(run) {
 }
 
 export function springTake(run, id, replaceId = null) {
+  if (run.lessonVersion && run.room?.springOffer) {
+    if (springRoom(run) && id === null && replaceId === null) return { ok: true, id };
+    const result = commitSpringOffer(run, { key: run.room.springOffer.key, id, replaceId });
+    return result.ok ? { ...result, id } : result;
+  }
   if (!springRoom(run) || run.pending?.kind !== 'spring') return invalid('no_spring_pick');
   if (usesTempo(run) && id === null && replaceId === null) {
     run.pending = null;
@@ -551,6 +631,54 @@ export function springTake(run, id, replaceId = null) {
   join(run, id);
   run.pending = null;
   return { ok: true, id };
+}
+
+export function getSpringOffer(run) {
+  if (!springRoom(run)) return invalid('no_pick_waking');
+  if (run.pending?.kind === 'spring') {
+    const { candidates, cost } = run.pending;
+    return { ok: true, key: `${run.id}/${run.floor}/prepaid`, candidates: candidates.slice(), cost, alreadyPaid: true };
+  }
+  if (run.pending) return invalid('no_pick_waking');
+  if (!run.room.springOffer) {
+    if (run.crystals < COST.pick) return invalid('insufficient_crystals');
+    const { roster } = dependencies.get(run);
+    const rng = { ...run.rng };
+    const available = run.paidPickUsed ? [] : run.companions.filter(id => canJoin(run, id));
+    const companion = available.includes(run.preferredCompanion) ? run.preferredCompanion : pick(rng, available);
+    const candidates = choicesFor({ ...run, rng }, roster, 3, { priority: companion ? [companion] : [] });
+    if (!candidates.length) return invalid('empty_pool');
+    const serial = (run.room.springOfferSerial ?? 0) + 1;
+    run.room.springOfferSerial = serial;
+    run.room.springOffer = {
+      key: `${run.id}/${run.floor}/spring/${serial}`, candidates, seed: run.rng.state, nextSeed: rng.state
+    };
+  }
+  const { key, candidates } = run.room.springOffer;
+  return { ok: true, key, candidates: candidates.slice(), cost: COST.pick, alreadyPaid: false };
+}
+
+export function commitSpringOffer(run, { key, id, replaceId = null } = {}) {
+  if (!springRoom(run) || (run.pending?.kind !== 'spring' && !run.room.springOffer)) return invalid('no_spring_pick');
+  const offer = getSpringOffer(run);
+  if (!offer.ok || key !== offer.key) return invalid('invalid_spring_key');
+  if (!offer.candidates.includes(id) || !canJoin(run, id)) return invalid('invalid_candidate');
+  const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
+  if (error) return invalid(error);
+  const charged = offer.alreadyPaid ? 0 : offer.cost;
+  if (run.crystals < charged) return invalid('insufficient_crystals');
+  if (replaceId !== null) release(run, replaceId);
+  join(run, id);
+  run.crystals -= charged;
+  run.paidPickUsed = true;
+  seeCharacters(run, offer.candidates);
+  if (offer.alreadyPaid) run.pending = null;
+  else {
+    const { seed, nextSeed } = run.room.springOffer;
+    if (run.rng.state === seed) run.rng.state = nextSeed;
+    delete run.room.springOffer;
+  }
+  return { ok: true, joined: id, released: replaceId, charged };
 }
 
 export function altarRoll(run) {

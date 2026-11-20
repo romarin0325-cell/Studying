@@ -384,3 +384,29 @@ const TEMPO_EVENTS = [
 ];
 
 export const EVENTS = [...ORIGINAL_EVENTS, ...TEMPO_EVENTS.map(event => ({ ...event, minTempoVersion: 2 }))];
+
+export function eventForRun(event, run) {
+  if (!event || !run.lessonVersion) return event;
+  const updated = structuredClone(event);
+  const choice = id => updated.choices.find(entry => entry.id === id);
+  switch (event.id) {
+    case 'mimic_paybox':
+      choice('porter').text = '미믹 합류 · 계약금 ◆1 · 첫 출전 생환 추가 ◆1 · 생환 일당 ◆1';
+      choice('porter').ops.push({ type: 'crystals', amount: 1 }, { type: 'firstSurvivalPay', id: 'mimic', amount: 1 });
+      break;
+    case 'venom_five_knots':
+      choice('hold').text = '플레이그 · 다음 턴부터 매턴 1회·최대 5회·물러나면 남은 예약 소멸';
+      choice('hold').cost = run.floor === 5 ? 1 : 2;
+      break;
+    case 'rollcall_ends':
+      updated.choices.unshift(
+        { id: 'captain', text: '선도부장 한 명 합류 · 무료', ops: [{ type: 'join', ids: ['discipline_captain'] }] },
+        { id: 'werebear', text: '웨어베어 한 명 합류 · 무료', ops: [{ type: 'join', ids: ['werebear'] }] }
+      );
+      break;
+    case 'whale_third_peal':
+      choice('peal').text = '다음 전투 3턴에 적 하나 처치 후 승리 · 오버디바인';
+      break;
+  }
+  return updated;
+}

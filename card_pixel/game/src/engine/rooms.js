@@ -1,13 +1,14 @@
 import { AFFIXES } from '../content/affixes.js';
+import { LESSON_SALT, makeBossLesson } from '../content/boss-lessons.js';
 import { DUNGEONS } from '../content/dungeons.js';
-import { EVENTS } from '../content/events.js';
+import { EVENTS, eventForRun } from '../content/events.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { QUIRKS } from '../content/quirks.js';
 import { RELICS } from '../content/relics.js';
 import {
-  BLESSING_MULTIPLIERS, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
-  REGION_MULTIPLIERS, ROOM_MULTIPLIERS, START_MP, TEMPO_SEEDS, usesTempo
+  BLESSING_MULTIPLIERS, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS, LESSON_NIGHTMARE_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
+  REGION_MULTIPLIERS, ROOM_MULTIPLIERS, ROSTER_LIMIT, START_MP, TEMPO_SEEDS, usesTempo
 } from '../content/tempo.js';
 import { BLESS, canJoin, drawFrom, join, RATES, release, seeCharacters, seeRelic, validateReplacements } from './awakenings.js';
 import { heldHeirloomSkill } from './bridge.js';
@@ -116,7 +117,11 @@ export function floorRng(run, salt) {
 }
 
 function battleBlessing(run, roster) {
-  const ids = run.bench.slice().sort();
+  let ids = run.bench.slice().sort();
+  const [older, recent] = run.blessingHistory ?? [];
+  if (run.lessonVersion && recent && recent === older && ids.length > 1) {
+    ids = ids.filter(id => id !== recent);
+  }
   const preferred = ids.filter(id => ['normal', 'rare'].includes(roster.card(id).grade));
   const id = pick(floorRng(run, TEMPO_SEEDS.blessing), preferred.length ? preferred : ids);
   return id ? { id, multiplier: BLESSING_MULTIPLIERS[roster.card(id).grade] } : null;
@@ -125,7 +130,8 @@ function battleBlessing(run, roster) {
 function battleScale(run, room) {
   const key = room.risk && room.type === 'wild' ? 'risk' : room.type;
   const assist = run.firstMainAssist && (FIRST_MAIN_ASSIST[run.dungeonId]?.[key] || FIRST_MAIN_ASSIST[key]);
-  const nightmare = run.difficulty === 'nightmare' && NIGHTMARE_MULTIPLIERS[run.dungeonId]?.[key];
+  const tunedNightmare = run.lessonVersion && LESSON_NIGHTMARE_MULTIPLIERS[run.dungeonId]?.[key];
+  const nightmare = run.difficulty === 'nightmare' && (tunedNightmare || NIGHTMARE_MULTIPLIERS[run.dungeonId]?.[key]);
   return assist || nightmare || REGION_MULTIPLIERS[run.dungeonId]?.[key] || ROOM_MULTIPLIERS[key];
 }
 
@@ -145,8 +151,19 @@ export function applyDoorTempo(run, roster, door) {
   if (door.type === 'boss') pattern = 'bossScript';
   else if (door.type === 'borrowed' || door.intent) pattern = 'introFixed';
   else if (door.region?.id === 'tide_cycle') pattern = 'tide';
+  const roll = run.lessonVersion && !intro ? nextFloat(floorRng(run, LESSON_SALT ^ door.index)) : 0;
+  const lesson = run.lessonVersion && !intro ? makeBossLesson(run.boss, run.floor, roll) : null;
+  if (lesson?.armor) {
+    for (const { id, stats } of door.enemies) {
+      const armor = lesson.armor[id] ?? lesson.armor.all;
+      if (!armor) continue;
+      stats.def = Math.round(stats.def * armor);
+      stats.mdef = Math.round(stats.mdef * armor);
+    }
+  }
   return {
     pattern,
+    ...(lesson && { lesson }),
     blessing: intro ? null : battleBlessing(run, roster),
     startMp: intro ? (door.type === 'borrowed' ? INTRO.start.allyStart[0].mp : null) : QUIRKS[door.quirk]?.ally?.mp ?? START_MP
   };
@@ -217,7 +234,7 @@ export function makeDoors(run, roster) {
     return {
       ...template, index, name: event?.name || ROOM_NAMES[template.type], bg: dungeon.background,
       enemies: [], tempo: null, region: copy(region), regionChoice: copy(regionChoice || null),
-      event: event ? copy(event) : null, relic
+      event: event ? copy(eventForRun(event, run)) : null, relic
     };
   });
 }
@@ -258,8 +275,33 @@ export function eventChoices(run, core, roster) {
       }
       return true;
     });
-    return { ...copy(choice), targets, enabled: eligible && (targets === null || targets.length > 0) && run.crystals >= (choice.cost || 0) };
+    const view = { ...copy(choice), targets, enabled: eligible && (targets === null || targets.length > 0) && run.crystals >= (choice.cost || 0) };
+    if (run.lessonVersion) addEventChoiceDetails(view, run, core, roster);
+    return view;
   });
+}
+
+function addEventChoiceDetails(choice, run, core, roster) {
+  const incoming = choice.ops.filter(op => op.type === 'join')
+    .reduce((count, op) => count + (op.random ? 1 : op.ids.length), 0);
+  if (incoming) {
+    choice.requiredReleases = Math.max(0, run.bench.length + incoming - ROSTER_LIMIT);
+    if (choice.requiredReleases > run.bench.filter(id => id !== run.lead).length) choice.enabled = false;
+  }
+  const blessing = choice.ops.find(op => op.type === 'bless' && Number.isFinite(op.multiplier));
+  if (blessing) {
+    const ids = blessing.all ? run.bench : choice.targets ?? [];
+    choice.blessingChanges = Object.fromEntries(ids.map(id => [id, {
+      before: run.blessings[id] ?? 0, after: blessing.multiplier
+    }]));
+  }
+  if (run.room.event.id === 'kobold_boot_exchange' && choice.id === 'exchange') {
+    choice.netCrystals = Object.fromEntries(choice.targets.map(id => [id, SALE_PRICE[gradeOf(roster.card(id).grade)] - choice.cost]));
+  }
+  if (run.room.event.id === 'penguin_ice_seam' && choice.id === 'carry') {
+    choice.waterAllies = run.bench.filter(id => core.GameUtils.cardMatchesElement(roster.card(id), 'water'));
+    if (!choice.waterAllies.length) choice.text += ' · 물 동료 없음';
+  }
 }
 
 export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds = []) {
@@ -283,6 +325,9 @@ export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds =
     switch (op.type) {
       case 'crystals':
         run.crystals += op.amount;
+        break;
+      case 'firstSurvivalPay':
+        (run.firstSurvivalPay ||= {})[op.id] = op.amount;
         break;
       case 'join': {
         const ids = op.random ? [drawFrom(run, roster, RATES.draw)] : op.ids;

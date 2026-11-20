@@ -38,6 +38,7 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
   run.contract ??= null;
   run.daily ??= null;
   run.tempoVersion ??= run.daily?.spec.ruleVersion ?? 1;
+  if (!run.daily) run.lessonVersion ??= 0;
   run.firstMainAssist ??= false;
   run.openingLead ??= null;
   for (const door of run.doors) door.tempo ??= null;

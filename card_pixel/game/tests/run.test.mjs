@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../src/content/contracts.js';
 import { DUNGEONS } from '../src/content/dungeons.js';
-import { EVENTS } from '../src/content/events.js';
+import { EVENTS, eventForRun } from '../src/content/events.js';
 import { INTRO } from '../src/content/intro.js';
 import { LAYOUTS } from '../src/content/layouts.js';
 import { RELICS } from '../src/content/relics.js';
@@ -1619,8 +1619,283 @@ testTempoEvent('rollcall_ends', {
     const { start, intent } = eventBattle(run);
     assert.equal(start.enemy.buffs.silence, 1);
     assert.equal(start.enemy.buffs.weak, 1);
-    assert.equal(intent.name, '일반 공격');
+    assert.equal(intent.name, run.difficulty === 'normal' && run.floor === 6 ? '물리 충전' : '일반 공격');
   }
+});
+
+test('one command validates a previewed battle door and saves its exact lineup once', () => {
+  const run = reach(makeTempo(), 2);
+  const partyIds = Run.defaultParty(run).reverse();
+  const profile = Meta.createProfile();
+  let writes = 0, checkpoint;
+  const store = Save.createSaveStore({
+    getItem: () => checkpoint,
+    setItem(key, value) { writes++; checkpoint = value; }
+  }, { core, roster });
+  function enter(request) {
+    const result = Run.enterBattleDoor(run, request);
+    if (result.ok) store.save({ profile, run });
+    return result;
+  }
+  const before = Save.serializeRun(run);
+  for (const request of [
+    { floor: 1, index: 1, partyIds }, { floor: 2, index: 5, partyIds },
+    { floor: 2, index: 1, partyIds: [partyIds[0], partyIds[0]] },
+    { floor: 2, index: 1, partyIds: ['someone_else'] }, { floor: 2, index: 1, partyIds: [null] }
+  ]) {
+    assert.equal(enter(request).ok, false);
+    assert.equal(Save.serializeRun(run), before);
+  }
+  const equivalent = roundTrip(run);
+  ok(Run.chooseDoor(equivalent, 1));
+  ok(Run.confirmOrder(equivalent, partyIds));
+  ok(enter({ floor: 2, index: 1, partyIds }));
+  assert.deepEqual(run, equivalent);
+  assert.equal(writes, 1);
+  assert.deepEqual(store.load().run.room.party, partyIds);
+  assert.equal(enter({ floor: 2, index: 1, partyIds }).ok, false);
+  assert.equal(writes, 1);
+
+  for (const floor of [1, 2, 4, 6]) {
+    const candidate = reach(makeTempo(), floor);
+    if (floor > 1) assert.equal(Run.enterBattleDoor(candidate, { floor, index: 2, partyIds: Run.defaultParty(candidate) }).ok, false);
+    ok(Run.enterBattleDoor(candidate, { floor, index: 0, partyIds: Run.defaultParty(candidate) }));
+    const { pending } = settle(candidate);
+    assert.equal(pending.kind, floor === 4 ? 'gate' : 'reinforcement');
+    if (floor !== 4) ok(Run.resolveReinforcement(candidate, { key: pending.key, id: pending.candidates[0] }));
+    else if (pending.candidates.length) ok(Run.chooseGateReward(candidate, { kind: 'join', id: pending.candidates[0] }));
+    else ok(Run.chooseGateReward(candidate, { kind: 'relic', id: pending.relic }));
+    assert.equal(candidate.pending, null);
+  }
+});
+
+test('a named spring pick is available across reload and only charges a successful commit', () => {
+  const run = reach(makeTempo({ profileView: { companions: ['snow_rabbit'], preferredCompanion: 'snow_rabbit' } }), 3);
+  enter(run);
+  if (run.bench.includes('snow_rabbit')) run.bench = run.bench.filter(id => id !== 'snow_rabbit');
+  run.crystals = 7;
+  const before = run.crystals;
+  const seed = run.rng.state;
+  const offer = ok(Run.getSpringOffer(run));
+  assert.ok(offer.candidates.includes('snow_rabbit'));
+  assert.equal(offer.alreadyPaid, false);
+  assert.equal(run.crystals, before);
+  assert.equal(run.paidPickUsed, false);
+  assert.equal(run.rng.state, seed);
+  const restored = roundTrip(run);
+  assert.deepEqual(ok(Run.getSpringOffer(restored)), offer);
+  assert.equal(Run.commitSpringOffer(restored, { key: offer.key + 'invalid', id: offer.candidates[0] }).ok, false);
+  assert.equal(Run.commitSpringOffer(restored, { key: offer.key, id: 'missing' }).ok, false);
+  assert.equal(restored.crystals, before);
+  assert.deepEqual(ok(Run.commitSpringOffer(restored, { key: offer.key, id: 'snow_rabbit' })),
+    { ok: true, joined: 'snow_rabbit', released: null, charged: 3 });
+  assert.equal(restored.crystals, before - 3);
+  assert.equal(restored.paidPickUsed, true);
+  assert.equal(Run.commitSpringOffer(restored, offer).ok, false);
+
+  const full = roundTrip(run);
+  full.bench = full.bench.concat(full.pool.filter(id => !full.bench.includes(id) && !offer.candidates.includes(id))).slice(0, 6);
+  const replaceId = full.bench.at(-1);
+  full.blessings[replaceId] = 0.4;
+  full.heirlooms[replaceId] = { from: 'ash', name: '아마겟돈' };
+  assert.equal(Run.commitSpringOffer(full, { key: offer.key, id: 'snow_rabbit' }).reason, 'roster_full');
+  assert.equal(full.crystals, before);
+  assert.deepEqual(ok(Run.commitSpringOffer(full, { key: offer.key, id: 'snow_rabbit', replaceId })),
+    { ok: true, joined: 'snow_rabbit', released: replaceId, charged: 3 });
+  assert.equal(full.blessings[replaceId], undefined);
+  assert.equal(full.heirlooms[replaceId], undefined);
+  assert.ok(full.released.includes(replaceId));
+
+  const legacy = reach(makeTempo({ lessonVersion: 0 }), 3);
+  enter(legacy);
+  legacy.crystals = 3;
+  ok(Run.springPick(legacy));
+  const prepaid = roundTrip(legacy);
+  const pending = ok(Run.getSpringOffer(prepaid));
+  assert.equal(pending.alreadyPaid, true);
+  assert.equal(ok(Run.commitSpringOffer(prepaid, { key: pending.key, id: pending.candidates[0] })).charged, 0);
+  assert.equal(prepaid.crystals, 0);
+});
+
+test('blessing views use the live core stats and streaks use only settled battles', () => {
+  const run = reach(makeTempo(), 1);
+  const door = run.doors[0];
+  const stats = view => [view.stats.hp, view.stats.atk, view.stats.crit, view.stats.evasion];
+  run.bench = ['snow_rabbit', 'entropy'];
+  door.tempo.blessing = null;
+  const rabbit = ['snow_rabbit'];
+  assert.deepEqual(stats(Run.getBlessingView(run, 0, rabbit, rabbit[0])), [290, 60, 10, 5]);
+  run.blessings.snow_rabbit = 0.4;
+  door.tempo.blessing = { id: rabbit[0], multiplier: 1.6 };
+  const preview = Run.getBlessingView(run, 0, rabbit, rabbit[0]);
+  assert.deepEqual([preview.expeditionBonus, preview.battleBonus, preview.effectiveBonus, preview.active], [0.4, 0.6, 0.6, true]);
+  assert.deepEqual(stats(preview), [464, 96, 20, 10]);
+  const party = ['snow_rabbit', 'entropy'];
+  const doubled = Run.getBlessingView(run, 0, party, rabbit[0]);
+  assert.equal(doubled.effectiveBonus, 1.2);
+  assert.deepEqual(stats(doubled), [638, 132, 20, 10]);
+  assert.deepEqual(run.blessingHistory, []);
+  enter(run, 0, party);
+  const b = Bridge.create(core, Run.battleOptions(run));
+  b.start();
+  assert.deepEqual(b.allyStats(0), doubled.stats);
+  assert.deepEqual(run.blessingHistory, []);
+  settle(run);
+  advance(run);
+  assert.equal(run.doors[0].tempo.blessing.id, 'snow_rabbit');
+  enter(run, 0, party);
+  settle(run);
+  assert.deepEqual(roundTrip(run).blessingHistory, ['snow_rabbit', 'snow_rabbit']);
+  advance(run);
+  enter(run, 0);
+  advance(run);
+  assert.equal(run.doors[0].tempo.blessing.id, 'entropy');
+});
+
+test('a missing lesson version restores pre-lesson v2 rooms and rewards', () => {
+  const source = reach(makeTempo({ lessonVersion: 0 }), 1);
+  const raw = JSON.parse(Save.serializeRun(source));
+  delete raw.run.lessonVersion;
+  const restored = Save.restoreRun(raw, { core, roster });
+  assert.equal(restored.lessonVersion, 0);
+  reach(restored, 6);
+  reach(source, 6);
+  assert.deepEqual(restored, source);
+  assert.ok(restored.doors.every(door => !door.tempo.lesson));
+  assert.equal(restored.blessingHistory, undefined);
+});
+
+test('both lesson doors in all six regions use the same local-turn window in either difficulty', () => {
+  const wait = events => events.findLast(event => event.t === 'await');
+  const enemyAction = events => events.find(event => event.t === 'act' && event.who.side === 'enemy');
+  for (const dungeonId of Object.keys(DUNGEONS).filter(id => id !== 'dawn_forest')) {
+    for (const difficulty of ['normal', 'nightmare']) {
+      const run = reach(makeTempo({ dungeonId, difficulty }), 2);
+      const expected = difficulty === 'nightmare' && DUNGEONS[dungeonId].hiddenBosses[0]
+        ? DUNGEONS[dungeonId].hiddenBosses[0] : DUNGEONS[dungeonId].boss;
+      for (const floor of [2, 6]) {
+        reach(run, floor);
+        for (const { index, tempo, enemies } of run.doors) {
+          const label = [dungeonId, difficulty, floor, index].join('/');
+          const { lesson } = Run.getTempoView(run, index);
+          assert.deepEqual(lesson, tempo.lesson, label);
+          assert.equal(lesson.bossId, expected, label);
+          assert.equal(lesson.floor, floor, label);
+          assert.deepEqual(roundTrip(run).doors[index].tempo.lesson, lesson, label);
+          assert.equal(lesson.transferBeforeLocalTurn, 2);
+          assert.equal(lesson.maxUsesPerRoom, 1);
+          if (floor === 6 && index === 1) assert.ok(enemies[0].affixes.length >= 2);
+
+          function ready() {
+            const entered = roundTrip(run);
+            ok(Run.enterBattleDoor(entered, { floor, index, partyIds: entered.bench.slice(0, 3) }));
+            const opts = Run.battleOptions(entered);
+            opts.quirk = null;
+            // Keep the real door's first enemy and affixes. Use a second for the transfer check
+            // even when the sampled door naturally has only one.
+            opts.enemies = [opts.enemies[0], structuredClone(opts.enemies.at(-1)), structuredClone(opts.enemies.at(-1))];
+            for (const enemy of opts.enemies) Object.assign(enemy.stats, { hp: 99999, atk: 0, matk: 0 });
+            const bridge = Bridge.create(core, opts);
+            const first = wait(bridge.start());
+            assert.equal(first.intent.localTurn, 1, label);
+            if (enemies[0].affixes?.includes('tough')) assert.equal(first.affixes.find(affix => affix.id === 'tough').turns, 3);
+            return bridge;
+          }
+          function kill(bridge) {
+            bridge.host.battle.enemy.hp = 1;
+            const events = bridge.act(0);
+            assert.ok(events.some(event => event.t === 'enemyDown'), label);
+            return events;
+          }
+
+          const early = ready();
+          assert.equal(wait(kill(early)).enemyIndex, 1, label);
+          assert.equal(wait(early.act(0)).intent.localTurn, 2, label);
+          assert.deepEqual(early.summary().lesson, { bossId: expected, previewed: true, resolved: false, enemyIndex: 1 }, label);
+          assert.equal(wait(kill(early)).enemyIndex, 2, label);
+          early.act(0);
+          assert.equal(early.summary().lesson.enemyIndex, 1, label);
+
+          const late = ready();
+          const telegraph = wait(late.act(0)).intent;
+          if (lesson.steps[1]) assert.equal(telegraph.name, lesson.steps[1].name, label);
+          const canceled = kill(late);
+          if (telegraph.rule) {
+            assert.ok(canceled.some(event => event.actionId === telegraph.actionId && event.preventedBy === 'enemy_down'), label);
+          }
+          late.act(0);
+          assert.equal(late.summary().lesson.enemyIndex, 0, label);
+          assert.equal(late.summary().lesson.resolved, false, label);
+
+          const stunned = ready();
+          const intent = wait(stunned.act(0)).intent;
+          stunned.host.battle.enemy.buffs.stun = 1;
+          const stopped = stunned.act(0);
+          assert.equal(enemyAction(stopped), undefined, label);
+          if (intent.rule) assert.ok(stopped.some(event => event.actionId === intent.actionId && event.preventedBy === 'stun'), label);
+          assert.equal(stunned.summary().lesson.resolved, true, label);
+
+          const acted = ready();
+          const announced = wait(acted.act(0)).intent;
+          const response = acted.act(0);
+          assert.equal(enemyAction(response)?.skill.name, announced.name, label);
+          assert.equal(acted.summary().lesson.resolved, true, label);
+        }
+      }
+    }
+  }
+});
+
+test('adjusted events expose the actual payment, eligibility, replacement count and blessing change', () => {
+  function open(id, floor, dungeonId, party) {
+    const run = reach(makeTempo({ dungeonId }), floor);
+    const event = EVENTS.find(entry => entry.id === id);
+    run.reserved = null;
+    run.bench = party ?? run.pool.filter(id => !event.requires.present.includes(id)).slice(0, 6);
+    run.joinOrder = run.bench.slice();
+    run.crystals = 10;
+    const door = run.doors.find(candidate => candidate.type === 'event');
+    door.event = eventForRun(event, run);
+    enter(run, door.index);
+    return run;
+  }
+  const choice = (run, id) => run.pending.choices.find(entry => entry.id === id);
+  const mimic = open('mimic_paybox', 3, 'arena');
+  const sent = mimic.bench.at(-1);
+  assert.equal(ok(Run.chooseEvent(mimic, 'porter', null, [sent])).crystals, 1);
+  advance(mimic);
+  enter(mimic, 0, ['mimic']);
+  assert.equal(settle(mimic).crystals, mimic.room.reward + 2);
+  assert.equal(mimic.firstSurvivalPay.mimic, undefined);
+  ok(Run.chooseGateReward(mimic, { kind: 'relic', id: mimic.pending.relic }));
+  advance(mimic);
+  enter(mimic, mimic.doors.findIndex(door => door.type === 'treasure'));
+  advance(mimic);
+  enter(mimic, 0, ['mimic']);
+  assert.equal(settle(mimic).crystals, mimic.room.reward + 1);
+
+  const early = open('venom_five_knots', 3, 'midnight_trench');
+  const late = open('venom_five_knots', 5, 'midnight_trench');
+  assert.deepEqual([choice(early, 'hold').cost, choice(late, 'hold').cost], [2, 1]);
+  assert.match(choice(late, 'hold').text, /최대 5회/);
+
+  const roll = open('rollcall_ends', 3, 'arena');
+  assert.deepEqual([choice(roll, 'captain').requiredReleases, choice(roll, 'pair').requiredReleases], [1, 2]);
+  roll.released.push('werebear');
+  assert.equal(Run.chooseEvent(roll, 'pair', null, roll.bench.slice(-2)).ok, false);
+  assert.equal(ok(Run.chooseEvent(roll, 'captain', null, roll.bench.slice(-1))).crystals, 0);
+
+  const penguin = open('penguin_ice_seam', 5, 'midnight_trench', ['ash']);
+  assert.deepEqual(choice(penguin, 'carry').waterAllies, []);
+  assert.match(choice(penguin, 'carry').text, /물 동료 없음/);
+  const whale = open('whale_third_peal', 5, 'twilight_cathedral');
+  assert.match(choice(whale, 'peal').text, /3턴에 적 하나 처치 후 승리/);
+
+  const bowl = open('dainichi_alms_bowl', 3, 'starlit_garden');
+  assert.deepEqual(choice(bowl, 'level').blessingChanges[bowl.bench[0]], { before: 0, after: 0.1 });
+  const boots = open('kobold_boot_exchange', 3, 'arena');
+  assert.deepEqual(choice(boots, 'mend').blessingChanges[boots.bench[0]], { before: 0, after: 0.2 });
+  assert.deepEqual(Object.keys(choice(boots, 'exchange').netCrystals), choice(boots, 'exchange').targets);
 });
 
 test('tempo 2 spring draws and gate claims share the roster limit without automatic release', () => {

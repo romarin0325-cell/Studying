@@ -27,6 +27,9 @@ export const NIGHTMARE_MULTIPLIERS = {
   arena: { wild: [0.60, 1.40], risk: [0.69, 1.80], gate: [1.20, 4.65], elite: [0.84, 2.05], boss: [0.66, 1.60] },
   creation_tower: { wild: [0.64, 2.32], risk: [0.74, 2.74], elite: [0.88, 2.2], boss: [0.64, 1.59] }
 };
+export const LESSON_NIGHTMARE_MULTIPLIERS = {
+  midnight_trench: { boss: [0.64, 1.78] }
+};
 export const FIRST_MAIN_ASSIST = {
   gate: [0.97, 2.85], boss: [0.6, 1.6],
   ember_volcano: { boss: [0.56, 1.55] },

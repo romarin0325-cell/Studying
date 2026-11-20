@@ -6,6 +6,7 @@ import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 // Share Math so the ESM bridge can seed the card core inside the VM.
 import * as Bridge from '../src/engine/bridge.js';
+import { makeBossLesson } from '../src/content/boss-lessons.js';
 import { create as makeRoster } from '../src/engine/roster.js';
 import { createStage } from '../src/stage/stage.js';
 import { createMoves } from '../src/ui/battle/moves.js';
@@ -33,6 +34,121 @@ const plain = value => JSON.parse(JSON.stringify(value));
 const option = (b, name) => b.options().find(o => o.name === name);
 const quietEnemy = (hp = 99999, overrides = {}) => dummy({
   stats: { hp, atk: 0, matk: 0, def: 60, mdef: 60, ...overrides }, skills: []
+});
+
+function bossFixture(id, stats) {
+  const data = S.RelayCore.ENEMIES.find(enemy => enemy.id === id);
+  return { ...plain(data), boss: true, stats: { hp: 99999, atk: 0, matk: 0, def: 60, mdef: 60, ...stats } };
+}
+
+test('Soul Drain previews zero HP damage, the incoming MP, and the actual response to a ward or evasion', () => {
+  function prepare(kind, preventedBy) {
+    const lesson = kind === 'flat' ? makeBossLesson('iris_love', 6, 0) : null;
+    const b = battle({
+      party: ['snow_rabbit', null, 'guardian'],
+      enemies: [lesson ? quietEnemy() : bossFixture('iris_love')],
+      ...(lesson && { tempo: { pattern: 'threeBeat', lesson } })
+    });
+    let events = b.start();
+    const turn = lesson ? 2 : 7;
+    const player = b.host.battle.players[0];
+    const incoming = b.host.battle.players[2];
+    player.mp = 34;
+    incoming.mp = 18;
+    if (preventedBy === 'magic_guard') player.buffs.magic_guard = 15;
+    if (preventedBy === 'evasion') player.baseEva = 100;
+    for (let i = 1; i < turn; i++) events = b.act(0);
+    return { b, intent: last(events, 'await').intent };
+  }
+  for (const type of ['flat', 'all']) {
+    for (const blocked of ['magic_guard', 'evasion', null]) {
+      const { b, intent } = prepare(type, blocked);
+      assert.deepEqual(intent.damageRange, [0, 0]);
+      assert.deepEqual([intent.resourceEffect.mode, intent.resourceEffect.before, intent.resourceEffect.after, intent.resourceEffect.preventedBy],
+        [type, 34, blocked ? 34 : type === 'flat' ? 10 : 0, blocked]);
+      const rule = b.act(0).find(event => event.actionId === intent.actionId && event.t === 'rule');
+      assert.deepEqual([rule.target, rule.before, rule.after, rule.preventedBy],
+        [{ side: 'ally', idx: 0 }, 34, intent.resourceEffect.after, blocked]);
+    }
+    const { b } = prepare(type, null);
+    const preview = b.previewRetreat();
+    for (let i = 0; i < 5; i++) assert.deepEqual(b.previewRetreat(), preview);
+    assert.deepEqual([preview.intent.target, preview.intent.resourceEffect.before, preview.intent.resourceEffect.after],
+      [{ side: 'ally', idx: 2 }, 18, 0]);
+    const response = b.retreat().find(event => event.t === 'rule' && event.actionId === preview.intent.actionId);
+    assert.deepEqual([response.target, response.before, response.after], [preview.intent.target, 18, 0]);
+  }
+});
+
+test('Retaliation resolves the conditional power from actual damage, including scheduled hits', () => {
+  function prepare(delayed) {
+    const b = battle({ party: ['snow_rabbit', 'guardian'], enemies: [bossFixture('pharaoh')], seed: 8207928 });
+    let wait = last(b.start(), 'await');
+    const player = b.host.battle.players[0];
+    player.baseEva = -100;
+    player.mdef = 60;
+    player.maxHp = player.hp = 250;
+    player.skills.push({ name: '검증용 대기', type: 'sup', cost: 0, effects: [] });
+    if (delayed) b.host.battle.delayedEffects.push({
+      turn: 5, source: player, skill: { name: '예약 검증', type: 'phy', tier: 1, val: 1, effects: [] }
+    });
+    for (let i = 1; i <= 4; i++) {
+      if (i === 4) b.host.battle.enemy.matk = b.host.battle.enemy.baseMatk = 200;
+      wait = last(b.act(0), 'await');
+    }
+    return { b, wait };
+  }
+  for (const branch of ['hit', 'pass', 'scheduled']) {
+    const { b, wait } = prepare(branch === 'scheduled');
+    assert.equal(wait.intent.conditions[0].met, branch === 'scheduled' ? true : null);
+    assert.deepEqual(wait.intent.damageRange, branch === 'scheduled' ? [375, 375] : [125, 375]);
+    assert.equal(wait.intent.lethalText, branch === 'scheduled' ? '명중 시 쓰러짐' : '쓰러질 수 있음');
+    const move = branch === 'hit' ? 0 : option(b, '검증용 대기').index;
+    const events = b.act(move);
+    const hp = events.find(event => event.t === 'hp' && event.cause?.by?.side === 'enemy');
+    assert.equal(hp.amount, branch === 'pass' ? 125 : 375);
+    const rule = events.find(event => event.t === 'rule' && event.actionId === wait.intent.actionId);
+    assert.equal(rule.before.enemyHitThisTurn, branch !== 'pass');
+  }
+});
+
+test('the lesson cleanse, temporary defense and first-cycle tower tide use the stated values', () => {
+  function lessonBattle(id, floor, region, enemy = quietEnemy()) {
+    const lesson = makeBossLesson(id, floor, 0);
+    const tempo = { pattern: region ? 'tide' : 'threeBeat', lesson };
+    return battle({ enemies: [enemy], region, tempo });
+  }
+  const trench = lessonBattle('poseidon', 6, { id: 'tide_cycle' });
+  trench.start();
+  const cleanse = last(trench.act(0), 'await').intent;
+  assert.deepEqual(cleanse.debuffs, { corrosion: 1, curse: 1 });
+  const rule = trench.act(0).find(event => event.t === 'rule' && event.actionId === cleanse.actionId);
+  assert.deepEqual(rule.before, cleanse.debuffs);
+  assert.deepEqual(rule.after, {});
+
+  const flora = lessonBattle('flora', 6);
+  flora.start();
+  flora.act(0);
+  const normal = flora.options()[0].preview.dmg;
+  flora.act(0);
+  assert.equal(flora.options()[0].preview.dmg, Math.floor(normal * 0.5));
+  flora.act(0);
+  assert.equal(flora.options()[0].preview.dmg, normal);
+
+  const protocol = lessonBattle('artificial_demon_god', 6);
+  protocol.start();
+  const change = protocol.act(0);
+  const defense = change.find(event => event.t === 'rule' && event.rule === 'defense_protocol');
+  assert.deepEqual(defense.after, { type: 'phy', def: 81 });
+  assert.equal(last(change, 'await').intent.defenseProtocol.bonus, 0.35);
+
+  const tower = lessonBattle('creator_god', 6, { id: 'tide_cycle' });
+  assert.equal(last(tower.start(), 'await').intent.kind, 'phy');
+  assert.equal(last(tower.act(0), 'await').intent.kind, 'mag');
+  assert.equal(last(tower.act(0), 'await').intent.name, '잔물결');
+  assert.equal(last(tower.act(0), 'await').intent.kind, 'rest');
+  for (let i = 0; i < 2; i++) tower.act(0);
+  assert.equal(last(tower.act(0), 'await').intent.name, '조류의 일격');
 });
 
 test('tempo three-beat countdown and resolved hits restart on the second shadow', () => {
@@ -595,13 +711,16 @@ test('Tide forecasts and resolves the strongest magic hit, then announces rest',
     assert.deepEqual(last(events, 'await').countdown, { name: hit, inTurns: i, charge: false });
     if (i > 0) events = b.act(0);
   }
-  assert.deepEqual(plain(last(events, 'await').intent), { kind: 'mag', name: hit, ult: false, dmg: [133, 133], lethal: false, extra: ['debuff'] });
+  const { kind, name, salience, damageRange, lethal, extra } = last(events, 'await').intent;
+  assert.deepEqual(plain({ kind, name, salience, damageRange, lethal, extra }),
+    { kind: 'mag', name: hit, salience: 'strong', damageRange: [133, 133], lethal: false, extra: ['debuff'] });
   events = b.act(0);
   const strike = events.find(e => e.t === 'act' && e.who.side === 'enemy');
   assert.equal(strike.skill.name, hit);
   assert.equal(events.find(e => e.t === 'hp' && e.who.side === 'ally').amount, 133);
   assert.equal(events.find(e => e.t === 'buff' && e.id === 'curse').to, 1);
-  assert.deepEqual(last(events, 'await').intent, { kind: 'rest', name: '물러간 조류', vulnerable: 1.5 });
+  const rest = last(events, 'await').intent;
+  assert.deepEqual([rest.kind, rest.name, rest.vulnerable, rest.damageRange], ['rest', '물러간 조류', 1.5, [0, 0]]);
   assert.equal(last(events, 'await').countdown.inTurns, 3);
   assert.deepEqual(plain(last(events, 'rule').who), { side: 'enemy', idx: 0 });
   assert.equal(last(events, 'rule').name, '조류가 빠진 틈');

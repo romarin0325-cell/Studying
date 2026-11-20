@@ -3,6 +3,8 @@
 // Use --boss-order-audit for 160 paired first-boss runs in each of the two starting main dungeons.
 // Use --daily-from=YYYY-MM-DD --days=60 for paired first attempts at the daily rift.
 // Use --keep-party to retain careful battle actions while only filling vacant formation seats.
+// Use --lessons=0 for the pre-E5 main route. --intent-audit replays its three boss fixtures.
+// Use --entry-audit for the Ember route's battle entry and settlement commands.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -23,9 +25,10 @@ const args = process.argv.slice(2);
 const flag = name => args.includes(name);
 const argValue = name => args.find(arg => arg.startsWith(`${name}=`))?.slice(name.length + 1);
 const tempoVersion = Number(argValue('--tempo') ?? TEMPO_VERSION);
+const lessonVersion = Number(argValue('--lessons') ?? (flag('--intent-audit') ? 0 : 1));
 const seedOffset = Number(argValue('--seed-offset') ?? 0);
 const opening = argValue('--opening');
-if (![1, TEMPO_VERSION].includes(tempoVersion) || !Number.isSafeInteger(seedOffset)
+if (![1, TEMPO_VERSION].includes(tempoVersion) || ![0, 1].includes(lessonVersion) || !Number.isSafeInteger(seedOffset)
   || (opening && !['stand', 'rescue'].includes(opening))) throw new RangeError('Invalid tempo, seed offset or opening');
 const dailyFrom = args.find(arg => arg.startsWith('--daily-from='))?.slice('--daily-from='.length);
 const days = Number(args.find(arg => arg.startsWith('--days='))?.slice('--days='.length) ?? 60);
@@ -55,7 +58,7 @@ const strength = id => RelayRoster.strength(roster.card(id));
 const strongest = ids => ids.slice().sort((a, b) => strength(b) - strength(a));
 const isBuff = (option, ids) => option.effects.some(effect => effect.type === 'buff' && ids.includes(effect.id));
 
-function chooseAction(bridge, wait, allowDefense, naive, preferHeirloom) {
+function chooseAction(bridge, wait, allowDefense, naive, preferHeirloom, pattern) {
   const state = bridge.state();
   const fighter = state.allies[state.cur];
   const usable = bridge.options().filter(option => option.usable);
@@ -73,7 +76,8 @@ function chooseAction(bridge, wait, allowDefense, naive, preferHeirloom) {
       || (intent.kind === 'mag' && isBuff(option, ['magic_guard'])));
     if (exact && (intent.name !== '일반 공격' || incoming >= fighter.hp)) return exact.index;
     const half = usable.find(option => isBuff(option, ['guard', 'damage_half']));
-    if (half && !fighter.buffs.damage_half && (intent.ult || incoming >= fighter.maxHp * 0.33 || incoming >= fighter.hp)) return half.index;
+    const signature = pattern === 'threeBeat' && intent.salience === 'strong' && !intent.rule && intent.name !== '일반 공격';
+    if (half && !fighter.buffs.damage_half && (intent.ult || signature || incoming >= fighter.maxHp * 0.33 || incoming >= fighter.hp)) return half.index;
   }
   const best = usable.filter(option => option.preview?.dmg > 0).sort((a, b) => b.preview.dmg - a.preview.dmg)[0];
   return best?.index || 0;
@@ -92,13 +96,13 @@ function shouldRetreat(bridge, wait, rescue = false) {
   return retreat && !retreat.lethal;
 }
 
-function tempoParty(run) {
-  const { blessing } = run.room.tempo;
+function tempoParty(run, door) {
+  const { blessing } = door.tempo;
   const scores = new Map(run.bench.map(id => {
     const card = roster.card(id);
     const boost = Math.max(1 + (run.blessings[id] || 0), blessing?.id === id ? blessing.multiplier : 1);
-    const affinity = run.room.enemies.reduce((sum, enemy) => sum + core.Logic.getElementalMultiplier(card.element, enemy.element), 0)
-      / run.room.enemies.length;
+    const affinity = door.enemies.reduce((sum, enemy) => sum + core.Logic.getElementalMultiplier(card.element, enemy.element), 0)
+      / door.enemies.length;
     return [id, (strength(id) + (run.heirlooms[id] ? 15 : 0)) * boost * Math.max(1, affinity)];
   }));
   return run.bench.slice().sort((a, b) => scores.get(b) - scores.get(a)).slice(0, 3).reverse();
@@ -113,25 +117,27 @@ function prepareRescue(bridge) {
     .sort((a, b) => (b.preview?.dmg ?? 0) - (a.preview?.dmg ?? 0))[0] ?? null;
 }
 
-function fight(run, { naive, bossSuggestion, bossOrder, opening, onBattle }) {
-  const fixed = run.room.type === 'borrowed';
+function fight(run, { naive, bossSuggestion, bossOrder, opening, onBattle, trace, actionOverride, door = run.room }) {
+  const fixed = door.type === 'borrowed';
   const rescueSetup = usesTempo(run) && run.floor === 6 && run.contract?.id === 'rescue' && !run.contract.met;
   let order = run.bench.slice(0, 3);
   if (run.daily) {
     order = naive ? R.defaultParty(run) : R.suggestOrder(run);
-    if (run.room.type === 'boss' && bossOrder) order = bossOrder;
+    if (door.type === 'boss' && bossOrder) order = bossOrder;
   } else if (!fixed && naive && bossSuggestion && run.floor === 8) order = R.suggestOrder(run);
   else if (!fixed && (naive || flag('--keep-party'))) order = R.defaultParty(run);
   else if (!fixed && !naive) {
     if (run.stats.retries % 2) order = strongest(run.bench).slice(0, 3);
-    else order = run.room.tempo ? tempoParty(run) : R.suggestOrder(run);
-    if (run.room.tempo && run.floor === 6 && run.contract?.id === 'elite') order.reverse();
+    else order = door.tempo ? tempoParty(run, door) : R.suggestOrder(run);
+    if (door.tempo && run.floor === 6 && run.contract?.id === 'elite') order.reverse();
     if (rescueSetup && order.length === 3) [order[1], order[2]] = [order[2], order[1]];
   }
-  checked(R.confirmOrder(run, order));
+  if (run.phase === 'map') checked(R.enterBattleDoor(run, { floor: run.floor, index: door.index, partyIds: order }));
+  else checked(R.confirmOrder(run, order));
   const bridge = Bridge.create(core, { ...R.battleOptions(run), rules });
   let events = bridge.start();
   let defended = false;
+  let rescueWaits = 0;
   if (fixed && (opening ? opening === 'rescue' : !naive && rules.heirloom && run.seed % 2) && bridge.canRetreat()) events = bridge.retreat();
   const pursueRescue = run.contract?.id === 'rescue' && !run.contract.met && (run.floor === 4 || run.floor === 6);
   const pursueHeirloom = run.contract?.id === 'heirloom' && !run.contract.met && run.floor === 4;
@@ -149,11 +155,15 @@ function fight(run, { naive, bossSuggestion, bossOrder, opening, onBattle }) {
     }
     const preferHeirloom = pursueHeirloom && (!usesTempo(run) || bridge.enemyIndex === bridge.enemyCount - 1);
     const heirloom = fixed && opening === 'stand' && bridge.options().find(option => option.usable && option.heirloom);
-    const setup = rescueSetup && !wait?.intent.lethal && bridge.state().cur === 0 && prepareRescue(bridge);
-    const index = (heirloom || setup)?.index ?? chooseAction(bridge, wait, !naive && !defended, naive, preferHeirloom);
+    // A fighter may be unable to set up a lethal hit indefinitely (e.g. against a leech).
+    const setup = rescueSetup && rescueWaits < 8 && !wait?.intent.lethal && bridge.state().cur === 0 && prepareRescue(bridge);
+    if (setup) rescueWaits++;
+    const index = actionOverride?.(run, wait, bridge) ?? (heirloom || setup)?.index
+      ?? chooseAction(bridge, wait, !naive && !defended, naive, preferHeirloom, door.tempo?.pattern);
     const option = bridge.options().find(item => item.index === index);
     defended = option?.type === 'sup';
     events = bridge.act(index);
+    trace?.(run, wait, option, events, bridge);
   }
   if (!bridge.outcome) throw new Error('Battle did not finish: ' + run.id + ' floor ' + run.floor);
   const summary = bridge.summary();
@@ -230,31 +240,33 @@ function weakestReserve(run) {
   return strongest(reserves.length ? reserves : run.bench).at(-1);
 }
 
-function playRun(dungeonId, seed, { profile, naive = false, bossSuggestion = false, opening, onBattle, firstMain = false } = {}) {
+function playRun(dungeonId, seed, { profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, firstMain = false } = {}) {
   const profileView = profile ? Meta.startView(profile, dungeonId) : { bossOrder: firstMain };
   const intro = DUNGEONS[dungeonId].layout === 'intro';
   const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : difficulty,
-    contract: intro ? null : contract, seed, profileView, tempoVersion, plain: flag('--plain') });
+    contract: intro ? null : contract, seed, profileView, tempoVersion, lessonVersion, plain: flag('--plain') });
   let heirloomsGained = 0;
   resolveChoices(run, naive);
   while (run.phase !== 'done') {
     const door = chooseDoor(run, naive);
-    checked(R.chooseDoor(run, door.index));
+    if (!door.enemies.length) checked(R.chooseDoor(run, door.index));
     if (door.enemies.length) {
       const retries = run.stats.retries;
       do {
         if (run.stats.retries - retries >= 20) throw new Error('Intro retry limit: ' + run.id);
-        heirloomsGained += fight(run, { naive, bossSuggestion, opening, onBattle });
+        heirloomsGained += fight(run, { naive, bossSuggestion, opening, onBattle, trace, actionOverride, door });
       } while (run.room.status === 'order');
     } else if (door.type === 'spring') {
-      if (!naive && run.bench.length < ROSTER_LIMIT && R.springPick(run).ok) {
-        checked(R.springTake(run, strongest(run.pending.candidates)[0]));
+      if (!naive && run.bench.length < ROSTER_LIMIT) {
+        const offer = R.springPick(run);
+        if (offer.ok) checked(R.springTake(run, strongest(offer.candidates)[0]));
       }
       while (run.bench.length < ROSTER_LIMIT && R.springDraw(run).ok) { /* Draw only while the pool and crystals allow it. */ }
     } else if (door.type === 'treasure') {
       checked(R.takeTreasure(run));
     }
     resolveChoices(run, naive);
+    onRoom?.(run);
     if (run.phase !== 'done') {
       checked(R.leaveRoom(run));
       if (run.phase !== 'done') checked(R.nextFloor(run));
@@ -355,7 +367,7 @@ function measureBossOrder() {
 }
 
 function measureContracts() {
-  console.log(`tempo ${tempoVersion} · ${difficulty} · ${contract} · ${runs} seeds per dungeon · offset ${seedOffset}`);
+  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficulty} · ${contract} · ${runs} seeds per dungeon · offset ${seedOffset}`);
   console.log('| Dungeon | Met | Paid | Stamped | Clear |');
   console.log('| --- | ---: | ---: | ---: | ---: |');
   const rate = (n, count) => `${n}/${count} (${percent(n, count)})`;
@@ -424,16 +436,22 @@ function battleMetrics(rooms, run, state, summary, result) {
 }
 
 function measureRuns() {
-  console.log(`tempo ${tempoVersion} · ${difficulty} · ${runs} seeds per dungeon · offset ${seedOffset}${opening ? ` · ${opening}` : ''}`);
+  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficulty} · ${runs} seeds per dungeon · offset ${seedOffset}${opening ? ` · ${opening}` : ''}`);
   console.log('Rooms: turns / deaths / MP left / battles with a death / win rate.');
   const summaries = [];
   for (const id of dungeons) {
     const rooms = {};
+    const lessons = { 2: { total: 0, reached: 0 }, 6: { total: 0, reached: 0 } };
     const counts = { wins: 0, bossLosses: 0, voluntary: 0, eligible: 0, bigHits: 0, retries: 0 };
     for (let seed = 1; seed <= runs; seed++) {
       let previous = null;
       const onBattle = (run, state, summary, result, party) => {
         battleMetrics(rooms, run, state, summary, result);
+        const lesson = lessons[run.floor];
+        if (lesson && DUNGEONS[run.dungeonId].layout !== 'intro') {
+          lesson.total++;
+          lesson.reached += Number(!!summary.lesson?.previewed);
+        }
         if (previous?.allAlive) {
           counts.eligible++;
           if (party.length !== 3 || party.some(id => !previous.party.includes(id))) counts.voluntary++;
@@ -455,15 +473,71 @@ function measureRuns() {
       const { count, turns, fallen, loss, mp, wins } = row;
       console.log(`| ${label} | ${count} | ${(turns / count).toFixed(2)} / ${(fallen / count).toFixed(2)} / ${percent(mp, count)} / ${percent(loss, count)} / ${percent(wins, count)} |`);
     }
-    summaries.push(`| ${id} | ${counts.wins}/${runs} · ${percent(counts.wins, runs)} | ${percent(counts.bossLosses, runs - counts.wins)} | ${counts.voluntary}/${counts.eligible} · ${percent(counts.voluntary, counts.eligible)} | ${percent(counts.bigHits, runs)} | ${counts.retries} |`);
+    const normal = rooms['Normal battles'];
+    const normalTurns = normal ? (normal.turns / normal.count).toFixed(2) : '—';
+    const normalMp = normal ? percent(normal.mp, normal.count) : '—';
+    const preview = floor => {
+      const { reached, total } = lessons[floor];
+      return total ? `${reached}/${total} · ${percent(reached, total)}` : '—';
+    };
+    summaries.push(`| ${id} | ${counts.wins}/${runs} · ${percent(counts.wins, runs)} | ${normalTurns} | ${normalMp} | ${preview(2)} | ${preview(6)} | ${percent(counts.bossLosses, runs - counts.wins)} | ${counts.voluntary}/${counts.eligible} · ${percent(counts.voluntary, counts.eligible)} | ${percent(counts.bigHits, runs)} | ${counts.retries} |`);
   }
-  console.log('\n| Dungeon | Clear | Final boss share of run losses | Voluntary change | 1,000+ hit | Intro retries |');
-  console.log('| --- | ---: | ---: | ---: | ---: | ---: |');
+  console.log('\n| Dungeon | Clear | Normal turns | Normal MP left | B2 preview | B6 preview | Final boss share of run losses | Voluntary change | 1,000+ hit | Intro retries |');
+  console.log('| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
   console.log(summaries.join('\n'));
 }
 
+function measureIntents() {
+  const cases = [
+    ['twilight_cathedral', 8207928, [7]],
+    ['starlit_garden', 8207928, [5]],
+    ['arena', 8215847, [3, 4]]
+  ];
+  for (const [id, seed, turns] of cases) {
+    const branches = id === 'starlit_garden' ? ['original', 'hit', 'no-hit'] : ['original'];
+    for (const branch of branches) {
+      console.log(id, seed, branch, `lessons ${lessonVersion}`);
+      playRun(id, seed, {
+        actionOverride(run, wait, bridge) {
+          if (run.room.type !== 'boss' || wait?.s.turn !== 5 || branch === 'original') return;
+          if (branch === 'hit') return 0;
+          // A neutral support command isolates the unhit branch from Guard and Death Roulette.
+          const { artifacts } = bridge.host.state;
+          bridge.host.state.artifacts = artifacts.filter(artifact => artifact !== 'death_roulette');
+          bridge.host.battle.players[wait.s.cur].skills.push({ name: '검증용 대기', type: 'sup', cost: 0, effects: [] });
+          return bridge.options().find(option => option.name === '검증용 대기').index;
+        },
+        trace(run, wait, option, events) {
+          if (run.room.type !== 'boss' || !turns.includes(wait?.s.turn)) return;
+          const actual = events.filter(event => (event.t === 'rule' && event.actionId === wait.intent.actionId)
+              || (event.t === 'act' && event.who.side === 'enemy')
+              || (event.t === 'hp' && event.cause?.by?.side === 'enemy'))
+            .map(({ s, ...event }) => event);
+          console.log(JSON.stringify({ turn: wait.s.turn, party: run.room.party, playerAction: option?.name, intent: wait.intent, actual }));
+        }
+      });
+    }
+  }
+}
+
+function measureEntry() {
+  const seed = 6115841;
+  const { run, end } = playRun('ember_volcano', seed, {
+    onBattle(run, state, summary, result, party) {
+      console.log(JSON.stringify({ floor: run.floor, index: run.room.index, party, turns: summary.turns,
+        win: result.win, pending: result.pending?.kind ?? null }));
+    },
+    onRoom(run) {
+      console.log(JSON.stringify({ floor: run.floor, index: run.room.index, room: run.room.type, bench: run.bench, relics: run.relics }));
+    }
+  });
+  console.log(JSON.stringify({ seed, result: end.result, relics: run.relics, recruitable: end.recruitable }));
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (dailyFrom !== undefined) measureDaily();
+  if (flag('--intent-audit')) measureIntents();
+  else if (flag('--entry-audit')) measureEntry();
+  else if (dailyFrom !== undefined) measureDaily();
   else if (flag('--first-main')) {
     if (difficulty !== 'normal') throw new RangeError('First main audit uses normal difficulty');
     measureFirstMain();

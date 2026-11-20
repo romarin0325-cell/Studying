@@ -22,6 +22,8 @@
  The await event carries region: { bellIn } or { charge, ready }, and the next tide hit in countdown.
  Works in the browser and in Node with the same card core. */
 import { mulberry32 } from './rng.js';
+import { AFFIXES } from '../content/affixes.js';
+import { BOSSES } from '../content/bosses.js';
 import { QUIRKS } from '../content/quirks.js';
 import { REGIONS } from '../content/regions.js';
 import { BOSS_PREVIEW_TURNS, STRONG_BEAT, THREE_BEAT, TIDE_BEATS, TIDE_STRONG_BEAT } from '../content/tempo.js';
@@ -38,6 +40,26 @@ const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
 const RANDOM_DAMAGE = ['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'];
 const isScripted = action => !!action && action.name !== '일반 공격' && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
 
+export function affixView(id, enemy) {
+  if (id === 'tough') {
+    const turns = enemy ? enemy.buffs.damage_half ?? 0 : 3;
+    return { id, name: AFFIXES[id].name, turns, active: turns > 0, text: turns ? `피해 절반 ${turns}턴 남음` : '피해 반감 종료' };
+  }
+  if (id === 'frenzy') {
+    const ready = enemy && enemy.hp <= enemy.maxHp / 2;
+    const active = !!enemy?.frenzied;
+    const text = active ? '공·마공 ×1.5 적용 중'
+      : ready ? 'HP 절반 이하, 다음 턴 공·마공 ×1.5' : 'HP 절반 이하가 되면 다음 턴 공·마공 ×1.5';
+    return { id, name: AFFIXES[id].name, active, text };
+  }
+  const text = {
+    leech: '준 HP 피해의 절반 회복',
+    thorns: '물리 피해 25% 반사, 아군 HP 최저 1',
+    treasure: '승리 시 ◆+2'
+  };
+  return { id, name: AFFIXES[id].name, active: true, text: text[id] };
+}
+
 function patternActions(enemy, pattern, openingIntent) {
   if (pattern === 'tide') return TIDE_BEATS;
   if (pattern !== 'threeBeat' && pattern !== 'introFixed') return [];
@@ -46,7 +68,7 @@ function patternActions(enemy, pattern, openingIntent) {
   const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic;
   if (pattern === 'introFixed') return openingIntent ? [signature, basic, THREE_BEAT[2]] : [signature];
   return THREE_BEAT.map(beat => !beat.signature ? beat : skill
-    ? { ...signature, rate: 0, power: signature.power * beat.power } : basic);
+    ? { ...signature, power: signature.power * beat.power } : basic);
 }
 
 export function enemyBeats(core, enemy, pattern, openingIntent) {
@@ -154,7 +176,8 @@ function installHooks(core) {
   if (coreHooks.has(core)) return coreHooks.get(core);
   const { Logic, BattleRuntime } = core;
   const TM = BattleRuntime.TurnManager;
-  const original = { decide: Logic.decideEnemyAction, calc: Logic.calculateDamage };
+  const original = { decide: Logic.decideEnemyAction, calc: Logic.calculateDamage,
+    multiplier: Logic.resolveSkillMultiplier, evasion: Logic.checkEvasion };
   coreHooks.set(core, original);
 
   Logic.decideEnemyAction = function (enemy, turn) {
@@ -171,6 +194,15 @@ function installHooks(core) {
     b.onCalc(source, target, skill, lines, result);
     return result;
   };
+  Logic.resolveSkillMultiplier = function (skill, source, logFn) {
+    if (skill.hitPower !== undefined && active?.host.battle.enemy === source && source.tookDamageThisTurn) return skill.hitPower;
+    return original.multiplier.call(this, skill, source, logFn);
+  };
+  Logic.checkEvasion = function (target) {
+    const evaded = original.evasion.apply(this, arguments);
+    if (evaded && active?.enemyAction?.target === target) active.enemyAction.preventedBy = 'evasion';
+    return evaded;
+  };
   const wrap = (obj, name, handler) => {
     const orig = obj[name];
     obj[name] = function (rpg) {
@@ -181,6 +213,7 @@ function installHooks(core) {
     };
   };
   wrap(BattleRuntime, 'executeSkill', (b, go, a) => b.onSkill(a[1], a[2], a[3], !!a[4], go));
+  wrap(BattleRuntime, 'applySkillEffects', (b, go, a) => b.onEnemyEffects(a[1], a[2], a[3], go));
   wrap(BattleRuntime, 'handleDeathTraits', (b, go, a) => b.onRelay('own', a[1], go));
   wrap(BattleRuntime, 'handleLinkedDeathTraits', (b, go, a) => b.onRelay('linked', a[1], go));
   wrap(TM, 'startPlayerTurn', (b, go) => b.onStartPlayerTurn(go));
@@ -200,6 +233,7 @@ export function create(core, opts) {
   const Q = quirk ? QUIRKS[quirk] : {};
   const region = opts.region?.id;
   const pattern = opts.tempo?.pattern;
+  const lesson = opts.tempo?.lesson;
   const bellTurns = opts.region?.turns ?? REGIONS.twilight_bell.turns;
   const bellStacks = opts.region?.stacks ?? REGIONS.twilight_bell.stacks;
   const bet = opts.bet;
@@ -209,7 +243,8 @@ export function create(core, opts) {
     pendingNext: null, lastDownIdx: -1, intentCache: null, lastCalc: null, prev: null,
     lastHit: null, carry: 0, lastStandDone: false, turnStartHp: 0,
     gained: [], heirloomsUsed: 0, heirloomKills: 0, rescues: [], enemyDowns: [], bestHit: null,
-    charge: 0, chargeSpent: false, dueEffects: [], betMet: false, fieldSeen: false
+    charge: 0, chargeSpent: false, dueEffects: [], betMet: false, fieldSeen: false,
+    lessonOwner: null, lessonPreviews: 0, lessonResolved: 0, enemyAction: null
   };
 
   const host = B.host = {
@@ -270,6 +305,12 @@ export function create(core, opts) {
     if (B.lastDownIdx === B.enemyIdx) return false;
     B.lastDownIdx = B.enemyIdx;
     flush();
+    const cache = B.intentCache;
+    if (cache?.enemy === host.battle.enemy && cache.turn === host.battle.turn && cache.intentRule) {
+      const { action, intentRule, target } = cache;
+      const value = ruleValue(intentRule, host.battle.enemy, target);
+      emitActionRule(action, intentRule, ruleTarget(action, intentRule, target), value, value, 'enemy_down');
+    }
     const treasure = hasAffix(host.battle.enemy, 'treasure');
     B.enemyDowns.push({ idx: B.enemyIdx, treasure });
     if (bet?.kind === 'kill_on_turn' && bet.turn === host.battle.turn) B.betMet = true;
@@ -393,6 +434,11 @@ export function create(core, opts) {
     const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk);
     Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
     if (hasAffix(enemy, 'tough')) enemy.buffs.damage_half = 3;
+    if (teachesLesson()) {
+      for (const [id, stacks] of Object.entries(lesson.startDebuffs ?? {})) {
+        StatusRules.add(enemy, id, stacks, host.state.artifacts);
+      }
+    }
   }
   function applyStart() {
     const start = opts.start;
@@ -501,6 +547,7 @@ export function create(core, opts) {
     const b = host.battle;
     // Mark the opening before scheduled hits or the player's command can land.
     if (b.isNewTurn && b.enemy?.hp > 0) {
+      applyLessonOpening(b.enemy);
       const vulnerable = tideVulnerability(b.enemy);
       if (vulnerable) {
         flush();
@@ -531,7 +578,19 @@ export function create(core, opts) {
     B.turnStartHp = players().reduce((n, p) => n + Math.max(0, p.hp), 0);
     B.ctx.push({ kind: 'act', who: enemyRef(), skill: null, enemyTurn: true });
     push({ t: 'enemyTurn', who: enemyRef() });
-    try { return go(); } finally { B.closeEnemyTurn(); }
+    const enemy = host.battle.enemy;
+    if (teachesLesson() && localTurn(enemy) === lesson.transferBeforeLocalTurn && enemy.hp > 0) {
+      B.lessonOwner = B.enemyIdx;
+      B.lessonResolved++;
+    }
+    const cache = B.intentCache;
+    if (enemy.buffs.stun && cache?.enemy === enemy && cache.turn === host.battle.turn
+      && cache.intentRule && cache.intentRule !== 'defense_protocol') {
+      const target = currentPlayer();
+      const value = ruleValue(cache.intentRule, enemy, target);
+      emitActionRule(cache.action, cache.intentRule, ruleTarget(cache.action, cache.intentRule, target), value, value, 'stun');
+    }
+    try { return go(); } finally { finishEnemyAction(); B.closeEnemyTurn(); }
   };
   B.closeEnemyTurn = function () {
     const top = B.ctx[B.ctx.length - 1];
@@ -539,6 +598,9 @@ export function create(core, opts) {
   };
   B.onEndEnemyTurn = function (go) {
     const enemy = host.battle.enemy;
+    finishEnemyAction();
+    if (lessonStep(localTurn(enemy))?.rule === 'charged_hit') enemy.isCharging = false;
+    applyDefenseProtocol(enemy);
     if (hasAffix(enemy, 'leech') && enemy.hp > 0) {           // H leech: heal half of what it dealt this turn
       const dealt = B.turnStartHp - players().reduce((n, p) => n + Math.max(0, p.hp), 0);
       const heal = Math.min(enemy.maxHp - enemy.hp, Math.floor(Math.max(0, dealt) * 0.5));
@@ -551,19 +613,39 @@ export function create(core, opts) {
     flush();
     const cache = B.intentCache;
     let action;
-    if (cache && cache.enemy === enemy && cache.turn === host.battle.turn) action = cache.action;
+    if (cache && cache.enemy === enemy && cache.turn === host.battle.turn && cache.action.type !== 'stun') action = cache.action;
     else action = decide(enemy);
     B.intentCache = null;
     const top = B.ctx[B.ctx.length - 1];
     if (top && top.enemyTurn) top.skill = action;
+    if (action.chargeSkillId) enemy.chargeSkillId = action.chargeSkillId;
+    const target = currentPlayer();
+    const rule = actionRule(action);
+    if (rule && rule !== 'defense_protocol') B.enemyAction = { action, rule, enemy, target, before: ruleValue(rule, enemy, target) };
     if (action.type === 'rest') return action;
-    const target = host.battle.players[host.battle.currentPlayerIdx];
+    const salience = actionSalience(action);
+    const power = enemy.tookDamageThisTurn ? retaliationPower(action, enemy) ?? action.val : action.val;
     push({
-      t: 'act', who: enemyRef(), target: target ? allyRef(target.pos) : null, delayed: false,
-      charge: !!action.isChargeStart, ult: isScripted(action),
-      skill: { name: action.name, type: action.isChargeStart ? 'sup' : action.type, tier: isScripted(action) ? 3 : 1, cost: 0, val: action.val, effects: (action.effects || []).map(e => e.type) }
+      t: 'act', who: enemyRef(), target: isAttack(action) && !action.isChargeStart ? allyRef(target.pos) : enemyRef(), delayed: false,
+      actionId: actionId(action), charge: !!action.isChargeStart, salience, ult: salience === 'boss',
+      skill: { name: action.name, type: action.isChargeStart ? 'sup' : action.type, tier: salience === 'boss' ? 3 : 1, cost: 0, val: power, effects: (action.effects || []).map(e => e.type) }
     });
     return action;
+  };
+  B.onEnemyEffects = function (source, target, skill, go) {
+    const result = go();
+    if (B.enemyAction?.action !== skill || source !== host.battle.enemy) return result;
+    B.enemyAction.landed = true;
+    if (skill.drainFlat) target.mp = Math.max(0, target.mp - skill.drainFlat);
+    if (skill.rule === 'cleanse') StatusRules.clearNegative(source);
+    if (skill.rule === 'lesson_guard') source.lessonGuard = { turn: host.battle.turn + 1, reduction: skill.reduction };
+    if (skill.rule === 'swap_stats') {
+      [source.atk, source.matk] = [source.matk, source.atk];
+      [source.baseAtk, source.baseMatk] = [source.baseMatk, source.baseAtk];
+      [source.def, source.mdef] = [source.mdef, source.def];
+      [source.baseDef, source.baseMdef] = [source.baseMdef, source.baseDef];
+    }
+    return result;
   };
   B.onCalc = function (source, target, skill, lines, result) {
     const b = host.battle;
@@ -573,7 +655,9 @@ export function create(core, opts) {
       result.dmg = tideDamage(result.dmg, vulnerable);
       lines.push(`${REGIONS.tide_cycle.opening}: 받는 피해 ${vulnerable}배`);
     }
+    if (target === b.enemy) result.dmg = lessonGuardDamage(target, result.dmg, b.turn);
     if (target === b.enemy && cause?.source === source && isAlly(source)) {
+      if (lesson && result.dmg > 0) target.lessonHitType = skill.type;
       const scheduled = cause.delayed && B.dueEffects.some(effect => effect.source === source && effect.skill === cause.skill);
       if (!scheduled && chargedSkill(cause.skill)) {
         B.chargeSpent = true;
@@ -612,87 +696,241 @@ export function create(core, opts) {
     return turn > 0 && turn % 4 === 0 ? 1.5 : 0;
   }
   const tideDamage = (damage, vulnerable) => vulnerable ? Math.floor(damage * vulnerable) : damage;
+  function teachesLesson() {
+    return !!lesson && B.enemyIdx <= lesson.maxUsesPerRoom && (B.lessonOwner === null || B.lessonOwner === B.enemyIdx);
+  }
+  function lessonStep(turn) {
+    return teachesLesson() ? lesson.steps[turn - 1] : null;
+  }
+  function applyLessonOpening(enemy) {
+    if (!lesson) return;
+    enemy.lessonHitType = null;
+    const turn = localTurn(enemy);
+    const step = lessonStep(turn);
+    if (turn !== lesson.transferBeforeLocalTurn || !enemy.lessonProtocol) {
+      delete enemy.buffs.defProtocolPhy;
+      delete enemy.buffs.defProtocolMag;
+    }
+    if (step?.rule !== 'alternating_defense') return;
+    const before = enemy[step.stat];
+    enemy[step.stat] = Math.floor(enemy['base' + (step.stat === 'def' ? 'Def' : 'Mdef')] * (1 + step.bonus));
+    enemy.buffs[step.stat === 'def' ? 'defProtocolPhy' : 'defProtocolMag'] = 1;
+    emitActionRule(step, step.rule, enemyRef(), { [step.stat]: before }, { [step.stat]: enemy[step.stat] });
+  }
+  function applyDefenseProtocol(enemy) {
+    const step = lessonStep(localTurn(enemy));
+    if (step?.rule !== 'defense_protocol') return;
+    const type = enemy.lessonHitType;
+    const stat = type === 'phy' ? 'def' : 'mdef';
+    if (!type) {
+      emitActionRule(step, step.rule, enemyRef(), null, null, 'no_hit');
+      return;
+    }
+    const before = enemy[stat];
+    enemy[stat] = Math.floor(before * (1 + step.bonus));
+    enemy.lessonProtocol = { stat, bonus: step.bonus, type };
+    enemy.buffs[stat === 'def' ? 'defProtocolPhy' : 'defProtocolMag'] = 1;
+    emitActionRule(step, step.rule, enemyRef(), { type, [stat]: before }, { type, [stat]: enemy[stat] });
+  }
+  function lessonGuardDamage(enemy, damage, turn) {
+    const guard = enemy.lessonGuard;
+    return guard?.turn === turn ? Math.floor(damage * (1 - guard.reduction)) : damage;
+  }
+  function actionSalience(action) {
+    if (isBoss() && isScripted(action)) return 'boss';
+    return action.rule || action.strong ? 'strong' : 'ordinary';
+  }
+  function isBoss() {
+    const def = queue[B.enemyIdx];
+    return !!def.boss || Object.hasOwn(BOSSES, def.id);
+  }
+  function actionRule(action) {
+    if (action.rule === 'alternating_defense') return null; // Its defense is already active when the player sees the intent.
+    if (action.rule) return action.rule;
+    if (action.effects?.some(effect => effect.type === 'mana_burn')) return 'mana_drain';
+    if (action.name === '고대의저주' && host.battle.enemy.id === 'pharaoh') return 'retaliation';
+    if (action.isChargeStart) return 'charge';
+    if (action.chargeReset) return 'charged_hit';
+    if (action.name === '어비스블레싱') return 'cleanse';
+    if (isScripted(action) && isBoss()) return 'boss_action';
+    return null;
+  }
+  function retaliationPower(action, enemy) {
+    return action.hitPower ?? (enemy.id === 'pharaoh' && action.name === '고대의저주' ? 3 : null);
+  }
+  function actionId(action) {
+    return `${B.enemyIdx}/${host.battle.turn}/${action.name}`;
+  }
+  function ruleTarget(action, rule, target) {
+    if (!isAttack(action) || action.isChargeStart || ['swap_stats', 'defense_protocol', 'alternating_defense'].includes(rule)) return enemyRef();
+    return target ? allyRef(target.pos) : null;
+  }
+  function enemyDebuffs(enemy) {
+    return Object.fromEntries(Object.entries(enemy.buffs).filter(([id, value]) => value > 0 && StatusRules.isNegative(id)));
+  }
+  function ruleValue(rule, enemy, target) {
+    if (rule === 'mana_drain') return target?.mp ?? null;
+    if (rule === 'cleanse') return enemyDebuffs(enemy);
+    if (rule === 'charge') return !!enemy.isCharging;
+    if (rule === 'swap_stats') return { atk: enemy.atk, matk: enemy.matk, def: enemy.def, mdef: enemy.mdef };
+    if (rule === 'lesson_guard') return enemy.lessonGuard?.reduction ?? 0;
+    return target ? { hp: Math.max(0, target.hp), enemyHitThisTurn: enemy.tookDamageThisTurn } : null;
+  }
+  function emitActionRule(action, rule, target, before, after, preventedBy = null) {
+    flush();
+    push({ t: 'rule', turn: host.battle.turn, enemyIndex: B.enemyIdx, actionId: actionId(action), rule, target, before, after, preventedBy });
+  }
+  function finishEnemyAction() {
+    const response = B.enemyAction;
+    if (!response) return;
+    B.enemyAction = null;
+    const { action, rule, enemy, target, before, landed } = response;
+    let preventedBy = response.preventedBy ?? null;
+    if (!landed && !preventedBy && isAttack(action) && !action.isChargeStart) {
+      preventedBy = action.type === 'phy' && target.buffs.barrier ? 'barrier' : 'magic_guard';
+    }
+    emitActionRule(action, rule, ruleTarget(action, rule, target), before, ruleValue(rule, enemy, target), preventedBy);
+  }
   function decide(enemy) {
     const turn = localTurn(enemy);
+    const step = lessonStep(turn);
+    if (step && (step.rule !== 'charged_hit' || enemy.isCharging)) return step;
+    if (inTide() && B.lessonOwner === B.enemyIdx && lesson?.tideAfter && turn === lesson.steps.length + 1) {
+      return lesson.tideAfter;
+    }
     if (enemy.relayBeats.length && (pattern !== 'introFixed' || opts.openingIntent)) {
       const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
-      return { ...beat, val: beat.power };
+      const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
+      return { ...beat, val: beat.power, strong: pattern !== 'introFixed' && (turn - 1) % enemy.relayBeats.length === strong - 1 };
     }
     const vulnerable = tideVulnerability(enemy);
     if (vulnerable) return { type: 'rest', name: REGIONS.tide_cycle.rest, vulnerable };
-    if (!inTide() || turn % 4 !== 3) return original.decide.call(Logic, enemy, turn);
+    if (!inTide() || turn % 4 !== 3) {
+      const probe = { ...enemy };
+      const action = original.decide.call(Logic, probe, turn);
+      return action.isChargeStart && probe.chargeSkillId ? { ...action, chargeSkillId: probe.chargeSkillId } : action;
+    }
 
     const power = skill => skill.effects?.find(e => e.type === 'random_mult')?.max ?? skill.val ?? 1;
     const strongest = enemy.skills.filter(skill => skill.type === 'mag').sort((a, b) => power(b) - power(a))[0];
     const powerRoll = strongest ? Logic.resolveSkillMultiplier(strongest, enemy) : 1;
     const effects = (strongest?.effects || []).filter(effect => effect.type !== 'random_mult');
-    return { type: 'mag', name: REGIONS.tide_cycle.hit, val: powerRoll * 2.5, effects };
+    return { type: 'mag', name: REGIONS.tide_cycle.hit, val: powerRoll * 2.5, effects, strong: true };
   }
-  function previewEnemyHit(action, target, mayHitEnemy) {
+  function enemyHitPreview(action, target, mayHitEnemy) {
     const b = host.battle, enemy = b.enemy;
     const es = Logic.calculateStats(enemy, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
     const ts = Logic.calculateStats(target, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
     const physical = action.type === 'phy';
-    if ((physical ? target.buffs.barrier : target.buffs.magic_guard) || ts.evasion >= 100) return [0, 0];
+    const ward = physical ? 'barrier' : 'magic_guard';
+    const preventedBy = ts.evasion >= 100 ? 'evasion' : target.buffs[ward] ? ward : null;
     const val = physical ? es.atk : es.matk;
     const def = physical ? ts.def : ts.mdef;
     const random = (action.effects || []).find(e => e.type === 'random_mult');
     let lo = Number.isFinite(action.val) ? action.val : 1, hi = lo;
     if (random) { lo = random.min; hi = lo + Math.ceil(random.max - lo); }
-    if (enemy.id === 'pharaoh' && action.name === '고대의저주') {
-      if (enemy.tookDamageThisTurn) lo = hi = 3;
-      else if (mayHitEnemy) hi = 3;
-    }
     const reduce = 1 - StatusRules.damageReduction(target).rate;
-    const hit = m => Math.floor(val * m * (100 / (100 + def)) * reduce);
-    return [hit(lo), hit(hi)];
+    const hit = m => preventedBy ? 0 : Math.floor(val * m * (100 / (100 + def)) * reduce);
+    const hitPower = retaliationPower(action, enemy);
+    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy };
+    const met = enemy.tookDamageThisTurn ? true : mayHitEnemy ? null : false;
+    const otherwise = hit(lo), whenMet = hit(hitPower);
+    const range = [met === true ? whenMet : otherwise, met === false ? otherwise : whenMet];
+    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy };
   }
   function currentIntent(target = currentPlayer(), mayHitEnemy = true) {
     const b = host.battle, enemy = b.enemy;
-    if (enemy.buffs.stun && !tideVulnerability(enemy)) return { kind: 'stun', name: '기절', ult: false };
+    const local = localTurn(enemy);
+    const stunned = !!enemy.buffs.stun;
     let cache = B.intentCache;
     if (!cache || cache.enemy !== enemy || cache.turn !== b.turn) {
-      cache = B.intentCache = { enemy, turn: b.turn, action: decide(enemy) };
+      const action = stunned ? lessonStep(local) ?? { type: 'stun', name: '기절' } : decide(enemy);
+      cache = B.intentCache = { enemy, turn: b.turn, action, intentRule: actionRule(action), target: currentPlayer() };
     }
     const a = cache.action;
-    if (a.type === 'rest') return { kind: 'rest', name: a.name, vulnerable: a.vulnerable };
-    if (a.isChargeStart) return { kind: 'charge', name: a.name, ult: true };
-    if (!isAttack(a)) return { kind: 'sup', name: a.name, ult: isScripted(a), effects: (a.effects || []).map(e => e.type) };
-    const dmg = previewEnemyHit(a, target, mayHitEnemy);
+    const kind = stunned ? 'stun' : a.isChargeStart ? 'charge' : a.type;
+    const salience = stunned ? 'ordinary' : actionSalience(a);
+    const attack = !stunned && !a.isChargeStart && isAttack(a);
+    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null };
+    const { range, conditions, preventedBy } = hit;
+    const resourceEffect = cache.intentRule === 'mana_drain' ? {
+      kind: 'mp', mode: a.drainFlat ? 'flat' : 'all',
+      amount: a.drainFlat ?? target.mp, before: target.mp,
+      after: stunned || preventedBy ? target.mp : Math.max(0, target.mp - (a.drainFlat ?? target.mp)),
+      onHit: true, preventedBy: stunned ? 'stun' : preventedBy
+    } : null;
+    const extra = (a.effects || []).map(e => e.type).filter(t => t !== 'random_mult');
+    const lethal = attack && range[1] >= target.hp;
+    const lethalText = !lethal ? null : range[0] >= target.hp ? '명중 시 쓰러짐' : '쓰러질 수 있음';
     return {
-      kind: a.type, name: a.name, ult: isScripted(a), dmg, lethal: dmg[1] >= target.hp,
-      extra: (a.effects || []).map(e => e.type).filter(t => t !== 'random_mult')
+      kind, name: stunned ? '기절' : a.name, target: attack ? allyRef(target.pos) : ruleTarget(a, cache.intentRule, target),
+      localTurn: local, damageRange: range, conditions, resourceEffect, salience,
+      nextDistinct: nextDistinct(a, local), actionId: actionId(a), rule: cache.intentRule, preventedBy: stunned ? 'stun' : preventedBy,
+      ...(cache.intentRule === 'cleanse' && { debuffs: enemyDebuffs(enemy) }),
+      ...(local === lesson?.transferBeforeLocalTurn && enemy.lessonProtocol && { defenseProtocol: enemy.lessonProtocol }),
+      ...(a.bonus && { bonus: a.bonus, stat: a.stat }),
+      ...(a.reduction && { reduction: a.reduction }),
+      ...(a.vulnerable && { vulnerable: a.vulnerable }),
+      type: kind, ult: salience === 'boss', ...(attack && { dmg: range, lethal, lethalText, extra }),
+      ...(!attack && extra.length && { effects: extra })
     };
   }
-  function countdown() {
+  function nextDistinct(action, local) {
+    const enemy = host.battle.enemy;
+    if (action.isChargeStart) {
+      const next = lessonStep(local + 1) ?? enemy.skills.find(skill => skill.name === (action.chargeSkillId ?? '디바인블레이드'));
+      if (next) return { inTurns: 1, name: next.name, kind: next.type, power: next.val };
+    }
+    if (teachesLesson() && local < lesson.steps.length) {
+      const next = lesson.steps.slice(local).find(step => step && step.name !== action.name);
+      if (next) return { inTurns: lesson.steps.indexOf(next) + 1 - local, name: next.name, kind: next.type, power: next.val };
+    }
+    if (enemy.relayBeats.length && (pattern !== 'introFixed' || opts.openingIntent)) {
+      for (let offset = 1; offset < enemy.relayBeats.length; offset++) {
+        const beat = enemy.relayBeats[(local + offset - 1) % enemy.relayBeats.length];
+        if (beat.name !== action.name) return { name: beat.name, kind: beat.type, power: beat.power, inTurns: offset };
+      }
+    }
+    if (inTide() && local % TIDE_BEATS.length === TIDE_STRONG_BEAT) {
+      return { name: REGIONS.tide_cycle.rest, kind: 'rest', inTurns: 1 };
+    }
+    const next = countdown(true);
+    return next && next.name !== action.name ? next : null;
+  }
+  function countdown(futureOnly = false) {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
     if (pattern === 'threeBeat' || pattern === 'tide') {
       const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
       const period = enemy.relayBeats.length;
       let inTurns = (strong - local % period + period) % period;
-      if (inTurns === 0 && enemy.buffs.stun) inTurns = period;
+      if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
       return { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
     }
     if (inTide()) {
       let inTurns = (3 - local % 4 + 4) % 4;
-      if (inTurns === 0 && enemy.buffs.stun) inTurns = 4;
+      if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = 4;
       return { name: REGIONS.tide_cycle.hit, inTurns, charge: false };
     }
     const skillName = action => action.isChargeStart && action.name === '차지'
       ? '디바인블레이드' : action.name.replace(/ 차징$/, '');
     const cache = B.intentCache;
     const current = cache && cache.enemy === enemy && cache.turn === b.turn && !enemy.buffs.stun && cache.action;
-    if (isScripted(current)) return { name: skillName(current), inTurns: 0, charge: !!current.isChargeStart };
+    if (!futureOnly && isScripted(current)) return { name: skillName(current), inTurns: 0, charge: !!current.isChargeStart };
 
     const saved = Math.random;
     B.probing = true;
     try {
+      const futureEnemy = { ...enemy };
+      if (current?.chargeReset) {
+        futureEnemy.isCharging = false;
+        futureEnemy.chargeSkillId = null;
+      }
       for (let k = 1; k <= 14; k++) {
         Math.random = () => 0.999;
-        const a = original.decide.call(Logic, Object.assign({}, enemy), local + k);
+        const a = original.decide.call(Logic, { ...futureEnemy }, local + k);
         if (!isScripted(a)) continue;
         Math.random = () => 0;
-        const other = original.decide.call(Logic, Object.assign({}, enemy), local + k);
+        const other = original.decide.call(Logic, { ...futureEnemy }, local + k);
         const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart };
         if (isScripted(other) && skillName(other) !== next.name) next.alt = skillName(other);
         return next;
@@ -745,9 +983,17 @@ export function create(core, opts) {
     if (B.awaiting) {
       checkFrenzy();
       flush();
+      if (teachesLesson() && localTurn(host.battle.enemy) === lesson.transferBeforeLocalTurn) {
+        B.lessonOwner = B.enemyIdx;
+        B.lessonPreviews++;
+      }
       const intent = currentIntent();
-      if (pattern) Object.assign(intent, { type: intent.kind, damageRange: intent.dmg ?? [0, 0] });
-      const wait = { t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent, countdown: countdown() };
+      const def = queue[B.enemyIdx];
+      const wait = {
+        t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent, countdown: countdown(),
+        enemyKind: def.kind ?? null, enemyIndex: B.enemyIdx, enemyCount: queue.length,
+        affixes: (def.affixes ?? []).map(id => affixView(id, host.battle.enemy))
+      };
       if (region === 'twilight_bell') {
         const turn = host.battle.turn;
         const next = Math.min(...bellTurns.filter(n => n > turn));
@@ -807,7 +1053,8 @@ export function create(core, opts) {
       };
       const result = original.calc.call(Logic, player, enemy, attack, b.fieldBuffs, b.activeTraits, null,
         host.state.mode, host.state.deck, b.turn, host.state.artifacts);
-      const hit = tideDamage(result.dmg, tideVulnerability(enemy));
+      const tideHit = tideDamage(result.dmg, tideVulnerability(enemy));
+      const hit = lessonGuardDamage(enemy, tideHit, b.turn);
       return { hit, total: hit * (hits + Number(chargedSkill(skill))), forcedCrit: !!result.isCrit };
     };
     active = B; B.probing = true;
@@ -930,6 +1177,13 @@ export function create(core, opts) {
     get enemyIndex() { return B.enemyIdx; },
     enemyCount: queue.length,
     state() { return snapshot(); },
+    allyStats(index) {
+      const b = host.battle;
+      const ally = b.players[index];
+      if (!ally) return null;
+      const stats = Logic.calculateStats(ally, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
+      return { ...stats, hp: ally.hp, maxHp: ally.maxHp, mp: ally.mp, maxMp: getMaxMana(ally) };
+    },
     /** Units that are still alive when the battle ends (retreated fighters count as alive). */
     survivors,
     /** Heirlooms handed on in this battle, including the donor's form and the inherited skill. */
@@ -947,6 +1201,7 @@ export function create(core, opts) {
         enemyDowns: B.enemyDowns.map(down => ({ ...down })),
         bestHit: B.bestHit && { ...B.bestHit },
         turns: host.battle.turn,
+        ...(lesson && { lesson: { bossId: lesson.bossId, previewed: B.lessonPreviews > 0, resolved: B.lessonResolved > 0, enemyIndex: B.lessonOwner } }),
         bet: bet ? { kind: bet.kind, won: betWon() } : null
       };
     }
