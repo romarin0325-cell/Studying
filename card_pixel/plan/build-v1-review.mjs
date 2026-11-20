@@ -16,6 +16,7 @@ async function dataUrl(file, width) {
   return 'data:image/jpeg;base64,' + buffer.toString('base64');
 }
 const esc = text => String(text).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const figure = ({ src, caption }) => `<figure><img src="${src}" alt=""><figcaption>${esc(caption)}</figcaption></figure>`;
 
 // One campaign's screens in play order: [shot name, caption]
 const TOUR = [
@@ -36,6 +37,32 @@ const TOUR = [
   ['16-collection', '동료 도감'],
   ['17-notebook', '꿈길 수첩 7장'],
   ['18-records', '기록']
+];
+
+const FUN_CHANGES = [
+  ['order-hint', '첫 본편 보스의 다른 순서. 첫 승 전까지 보이고 ‘이 순서로’를 눌러야 바뀐다'],
+  ['retreat-outcomes', '물러나기 첫 탭에 다음 동료가 대신 맞고 남을 HP와, 쓰러질 때 넘길 유품 ×1.5를 함께 표시'],
+  ['spring-count', '7층 샘·제단에 실제 인원 표시. 현재 2명이면 결정 1개로 셋째 깨우기 또는 둘 중 한 명 축복'],
+  ['contract-sheet', '악몽 준비에서 계약 셋 중 하나를 고른다. 기본은 계약 없음. 계약을 고르면 문지기 보상에서 결정 1개를 맡긴다'],
+  ['contract-battle-sheet', '전장·유물에서 ‘둘이 돌아온 정예전’의 조건과 달성 여부를 본다'],
+  ['contract-payout', '6층까지 계약을 달성하면 7층 앞에서 결정 3개'],
+  ['return-stamp', '생환하면 달성한 악몽 계약의 지역 도장을 받는다'],
+  ['return-stamp-records', '기록에서 지역별 계약 도장을 본다. 6곳에 3개씩, 모두 18개']
+];
+
+const REVIEW_FIXES = [
+  ['tile-range-kill', '무작위 기술은 피해 범위를 보여 주고, 최저 피해로도 쓰러뜨릴 때만 ‘처치’'],
+  ['tile-instant', '시간의마술사와 출전하면 판게아리버스 타일에 ‘즉시’와 피해량 표시'],
+  ['retreat-warning', '물러나기 첫 탭에 예약한 일루미네이션도 취소된다고 알림'],
+  ['door-sky-card', '별빛 정원 문에 사건에서 고른 스타파우더를 시작 하늘로 표시'],
+  ['door-hp', '위험 문 상세에 메아리를 적용한 용암 갑충 HP 546 표시'],
+  ['bet-text', '별판 내기는 정해진 턴에 적 하나를 쓰러뜨리고 전투에서 이기면 성공'],
+  ['save-fail', '저장에 실패하면 새로고침 때 지금부터의 진행이 사라진다고 알림'],
+  ['record-fallen', '쓰러진 눈토끼의 기록에 ‘원정 승리 · 미귀환’'],
+  ['field-cap', '버프오버로드를 장착하면 하늘 상세에 필드 ‘최대 5개’'],
+  ['form-sheet', '동료 상세에 변신 후 오로라윙의 기술 표시'],
+  ['resume-seats', '전투 중 새로고침해도 출전 순서의 빈 자리 위치까지 복원'],
+  ['countdown-charge', '창조신 카운트다운에 차징 뒤 쓸 디바인블레이드 예고']
 ];
 
 const DECISIONS = [
@@ -71,6 +98,16 @@ for (const [name, caption] of TOUR) {
   if (fs.existsSync(file)) tour.push({ src: await dataUrl(file, 360), caption });
 }
 const img = name => dataUrl(path.join(fixed, name));
+const fixedTour = async entries => {
+  const figures = await Promise.all(entries.map(async ([name, caption]) =>
+    figure({ src: await img(name + '.jpg'), caption })
+  ));
+  return figures.join('');
+};
+const funChanges = await fixedTour(FUN_CHANGES);
+const reviewFixes = await fixedTour(REVIEW_FIXES);
+const { results: audioLevels } = JSON.parse(fs.readFileSync(path.resolve(here, '../game/tools/music-levels.json'), 'utf8'));
+const musicLevels = audioLevels.filter(track => track.kind === 'music');
 const ending = await img('ending.jpg'), procession = await img('ending-procession.jpg'), titleBack = await img('title-returning.jpg');
 const before = { screens: await img('trial-screens.jpg'), battle: await img('trial-battle.jpg') };
 const after = {
@@ -103,6 +140,8 @@ code { background: #0c0a18; padding: 1px 6px; border: 1px solid var(--line); fon
 .tour figcaption { padding: 6px 8px; font-size: 13px; color: var(--dim); }
 table { width: 100%; border-collapse: collapse; } td, th { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
 th { color: var(--teal); font-weight: 600; }
+.music-levels { max-width: 420px; font-size: 13px; }
+.music-levels td, .music-levels th { padding: 4px 6px; }
 .wide { width: 100%; display: block; border: 2px solid var(--line); }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
 .pair img { width: 100%; border: 2px solid var(--line); }
@@ -114,7 +153,7 @@ dialog { padding: 0; border: 2px solid var(--teal); background: #000; max-width:
 dialog img { max-height: 92vh; max-width: 96vw; display: block; }
 @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } }
 </style></head><body>
-<header><h1>「다음은 너」 정식판 v1 <small>검토 페이지 · 2026-11-20</small></h1>
+<header><h1>「다음은 너」 정식판 v1 <small>검토 페이지 · 2026-11-21</small></h1>
 <p>게임 전체를 만들었다. GPT 6.2 Astra(max)가 설계·화면·사건을 자문하고, GPT 6.2 Sol(high~xhigh)이 구현했고, Claude가 계획·지시·검수를 맡았다. 아래에서 화면, 바꾼 것, Claude가 정한 것, 확인이 필요한 것을 볼 수 있다.</p></header>
 <main>
 <h2>한눈에</h2>
@@ -122,14 +161,29 @@ dialog img { max-height: 92vh; max-width: 96vw; display: block; }
   <div><b>7</b>던전 (입문 + 테마 5 + 창조의 탑)</div>
   <div><b>130</b>아군 도트 (일러스트에서 88명 새로)</div>
   <div><b>28</b>사건</div><div><b>14</b>유물</div>
-  <div><b>12</b>배경음</div><div><b>88</b>자동 테스트</div>
+  <div><b>12</b>배경음</div><div><b>119</b>자동 테스트</div>
 </div>
 <div class="panel">플레이: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\dist\\Relaymare.html</code><br>
 배경음 듣기: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\tools\\music-preview.html</code><br>
 결정 전체: <code>card_pixel\\plan\\v1-decisions.md</code> · 작업 기록: <code>card_pixel\\history\\2026-11-20.md</code> · GPT 평가: <code>card_pixel\\history\\model-log.md</code></div>
 
+<section>
+<h2>11월 21일에 바뀐 것</h2>
+<h3>재미 감사 뒤 새로 넣은 것</h3>
+<div class="tour">${funChanges}</div>
+<h3>검증 리뷰로 고친 것</h3>
+<div class="tour">${reviewFixes}</div>
+<h3>실행 파일과 소리</h3>
+<div class="panel">
+<p><code>card_pixel/game/dist/Relaymare.exe</code>를 열면 Chrome 앱 창에서 실행된다. Chrome이 없으면 Edge를 쓴다. 저장은 게임 전용 프로필에 남는다.</p>
+<p>음량을 잰 뒤 음악 마스터를 −14 dB에서 −10 dB로 올렸다. 아래는 조정 뒤 배경음 12곡의 측정값.</p>
+<table class="music-levels"><tr><th>곡</th><th>최고 (dBFS)</th><th>RMS (dBFS)</th></tr>
+${musicLevels.map(({ name, peakDbfs, rmsDbfs }) => `<tr><td>${esc(name)}</td><td>${peakDbfs.toFixed(1)}</td><td>${rmsDbfs.toFixed(1)}</td></tr>`).join('')}
+</table></div>
+</section>
+
 <h2>화면 (Chrome 자동 플레이, 390×844)</h2>
-<div class="tour">${tour.map(t => `<figure><img src="${t.src}" alt=""><figcaption>${esc(t.caption)}</figcaption></figure>`).join('')}
+<div class="tour">${tour.map(figure).join('')}
 <figure><img src="${titleBack}" alt=""><figcaption>다시 켠 제목: 대표가 선다</figcaption></figure>
 <figure><img src="${ending}" alt=""><figcaption>엔딩: 꿈길의 끝 (실제 원정으로 탑 보스를 이긴 뒤)</figcaption></figure>
 <figure><img src="${procession}" alt=""><figcaption>엔딩: 영입한 동료들의 행진</figcaption></figure></div>
