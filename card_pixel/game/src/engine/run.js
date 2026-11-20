@@ -1,3 +1,4 @@
+import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../content/contracts.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
@@ -6,6 +7,7 @@ import { canJoin, choicesFor, COST, drawFrom, join, RATES, rollBlessing, seeChar
 import { enemyStatsWithQuirk } from './bridge.js';
 import { pick, shuffle } from './rng.js';
 import { copy, eventChoices, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
+import { strength } from './roster.js';
 
 export { COST, RATES };
 export const FLOORS = 8;
@@ -29,7 +31,7 @@ export function bindRun(run, { core, roster }) {
   return run;
 }
 
-export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed = 0, profileView = {}, plain = false }) {
+export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed = 0, profileView = {}, plain = false, contract = null }) {
   dungeonId ??= profileView.dungeonId || 'dawn_forest';
   const dungeon = DUNGEONS[dungeonId];
   if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError('Unknown dungeon: ' + dungeonId);
@@ -41,6 +43,10 @@ export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed
     throw new RangeError('Locked nightmare: ' + dungeonId);
   }
   const intro = dungeon.layout === 'intro';
+  if (contract !== null && (typeof contract !== 'string' || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== 'nightmare'
+    || !profileView.nightmareUnlocks?.includes(dungeonId))) {
+    throw new RangeError('Unavailable contract: ' + String(contract));
+  }
   const rng = { state: seed >>> 0 };
   const seals = profileView.seals || [];
   const companions = intro ? [] : (profileView.companions || []).filter(id => roster.allies.includes(id) && !seals.includes(id));
@@ -59,7 +65,11 @@ export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed
     phase: 'start', floor: 0, doors: [], room: null, pending: null,
     lead, companions, preferredCompanion: profileView.preferredCompanion || null,
     recruited: (profileView.recruited || []).slice(), profileShard: shard,
-    bench: [], fallen: [], released: [], heirlooms: {}, blessings: {}, relics: [], crystals: intro ? 0 : 1,
+    bench: [], joinOrder: [], lastParty: null, fallen: [], released: [], heirlooms: {}, blessings: {}, relics: [], crystals: intro ? 0 : 1,
+    contract: contract === null ? null : {
+      id: contract, met: false, metAtFloor: null, riskDoorTaken: false, escrowed: 0, paid: 0, failed: false
+    },
+    guide: { bossOrder: profileView.bossOrder ?? true },
     eligible: [], gateSurvivors: [], reserved: null, unchosen: [], participated: [], seenCharacters: [], seenRelics: [],
     introCandidates: [], introHeirlooms: {}, firstIntroClear: intro && !profileView.introCleared,
     paidPickUsed: false, boss, bossPreview, region: copy(region), laterRegions: copy(laterRegions), nextBattle: null,
@@ -156,6 +166,7 @@ export function chooseDoor(run, index) {
   if (run.phase !== 'map' || !Number.isInteger(index) || !run.doors[index]) return invalid('invalid_door');
   run.room = { ...copy(run.doors[index]), status: 'service', party: null };
   run.phase = 'room';
+  if (run.contract && run.floor === 2 && run.room.risk) run.contract.riskDoorTaken = true;
   const { core, roster } = dependencies.get(run);
   if (run.room.regionChoice) run.region = copy(run.room.regionChoice);
   if (run.room.enemies.length) run.room.status = 'order';
@@ -167,6 +178,17 @@ export function chooseDoor(run, index) {
   return { ok: true, room: copy(run.room), pending: copy(run.pending) };
 }
 
+export function defaultParty(run) {
+  const party = (run.lastParty || [null, null, null]).map(id => run.bench.includes(id) ? id : null);
+  const reserves = (run.joinOrder ?? run.bench).filter(id => run.bench.includes(id) && !party.includes(id));
+  return party.map(id => id ?? reserves.shift() ?? null);
+}
+
+export function suggestOrder(run) {
+  const { roster } = dependencies.get(run);
+  return run.bench.slice().sort((a, b) => strength(roster.card(b)) - strength(roster.card(a))).slice(0, 3).reverse();
+}
+
 export function confirmOrder(run, ids) {
   if (run.phase !== 'room' || run.room?.status !== 'order') return invalid('no_battle_to_order');
   if (!Array.isArray(ids) || ids.length < 1 || ids.length > 3) return invalid('invalid_party');
@@ -176,8 +198,10 @@ export function confirmOrder(run, ids) {
   }
   const party = [...ids, ...Array(3 - ids.length).fill(null)];
   if (run.room.type === 'borrowed' && INTRO.party.some((id, index) => party[index] !== id)) return invalid('fixed_party');
+  // Keep the existing bench order for seeded room choices; defaultParty refills seats by joinOrder.
   run.bench = [...fighters, ...run.bench.filter(id => !fighters.includes(id))];
   run.room.party = party;
+  run.lastParty = party.slice();
   run.room.status = 'battle';
   return { ok: true, party: party.slice() };
 }
@@ -247,10 +271,52 @@ function setGateReward(run, room, downs, betRelic) {
   run.reserved = null;
 }
 
+function meetsContract(run, summary, survivors) {
+  switch (run.contract.id) {
+    case 'rescue':
+      return summary.rescues?.some(({ retreated, incoming, lethal }) =>
+        lethal && survivors.includes(retreated) && survivors.includes(incoming));
+    case 'heirloom':
+      return summary.heirloomKills > 0;
+    case 'elite':
+      return run.floor === 6 && run.room.type === 'elite' && run.contract.riskDoorTaken && survivors.length >= 2;
+  }
+}
+
+function settleContract(run, summary, survivors, wiped) {
+  const contract = run.contract;
+  if (!contract) return { progress: null, crystals: 0 };
+  const won = summary.outcome === 'win';
+  const { floor } = run;
+  let crystals = 0;
+  let metNow = false;
+  if (won && (floor === 4 || floor === 6) && !contract.met && meetsContract(run, summary, survivors)) {
+    contract.met = metNow = true;
+    contract.metAtFloor = floor;
+  }
+  if (won && floor === 4 && run.room.type === 'gate') {
+    contract.escrowed = CONTRACT_ESCROW;
+    crystals -= CONTRACT_ESCROW;
+  }
+  if (floor === 6) {
+    if (won && !wiped && contract.met) {
+      contract.paid = CONTRACT_PAYOUT;
+      crystals += CONTRACT_PAYOUT;
+    } else {
+      contract.failed = true;
+    }
+  }
+  const { id, met, escrowed, paid, failed } = contract;
+  return { progress: { id, met, metNow, escrowed, paid, failed }, crystals };
+}
+
 function validSummary(summary, room) {
   return summary && ['win', 'lose'].includes(summary.outcome) && Array.isArray(summary.survivors)
     && room.party.every((id, index) => id === null || typeof summary.survivors[index] === 'boolean')
     && [summary.turns, summary.heirloomsUsed, summary.lastStands].every(n => Number.isInteger(n) && n >= 0)
+    && (summary.heirloomKills === undefined || (Number.isInteger(summary.heirloomKills) && summary.heirloomKills >= 0))
+    && (summary.rescues === undefined || (Array.isArray(summary.rescues) && summary.rescues.every(entry =>
+      typeof entry?.retreated === 'string' && typeof entry.incoming === 'string' && typeof entry.lethal === 'boolean')))
     && Array.isArray(summary.retreated) && summary.retreated.every(retreated => typeof retreated === 'boolean')
     && (!summary.bestHit || (Number.isFinite(summary.bestHit.amount) && summary.bestHit.amount >= 0
       && typeof summary.bestHit.by === 'string' && typeof summary.bestHit.skill === 'string'))
@@ -278,7 +344,7 @@ export function settleBattle(run, input) {
     run.stats.retries++;
     room.status = 'order';
     room.party = null;
-    return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null };
+    return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null, contract: null };
   }
 
   const next = run.nextBattle;
@@ -303,12 +369,13 @@ export function settleBattle(run, input) {
 
   const { roster } = dependencies.get(run);
   const downs = [...new Map(summary.enemyDowns.map(entry => [entry.idx, entry])).values()];
-  let crystals = 0;
+  const contract = settleContract(run, summary, survivors, wiped);
+  let crystals = contract.crystals;
   const betWon = win && !!next?.bet && summary.bet?.kind === next.bet.kind && summary.bet?.won === true;
   const betRelic = betWon ? next.reward.relic : null;
   let relic = null;
   if (win) {
-    crystals = (room.reward || 0) + 2 * downs.filter(entry => entry.treasure).length;
+    crystals += (room.reward || 0) + 2 * downs.filter(entry => entry.treasure).length;
     if (survivors.some(id => roster.card(id).trait?.type === 'looter')) crystals++;
     if (betWon) crystals += next.reward.crystals || 0;
     run.crystals += crystals;
@@ -320,6 +387,7 @@ export function settleBattle(run, input) {
       run.introHeirlooms = run.heirlooms;
       run.heirlooms = {};
       run.bench = [];
+      run.joinOrder = [];
     }
   }
   room.status = 'resolved';
@@ -327,6 +395,7 @@ export function settleBattle(run, input) {
   return {
     ok: true, win, wiped, fallen, survivors, heirloomsGained, crystals, relic,
     bet: next?.bet ? { ...next.bet, won: betWon } : null,
+    contract: contract.progress,
     result: run.result, pending: copy(run.pending)
   };
 }

@@ -1,3 +1,4 @@
+import { CONTRACTS } from '../content/contracts.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { NOTEBOOK } from '../content/notebook.js';
 import { gradeOf } from './roster.js';
@@ -17,7 +18,7 @@ export function createProfile() {
     version: PROFILE_VERSION,
     recruits: {}, lead: null, companions: [], preferredCompanion: null, reserved: null, seals: {},
     notebook: { chapters: [], firstLead: null },
-    unlockedDungeons: [INTRO], nightmareUnlocks: [],
+    unlockedDungeons: [INTRO], nightmareUnlocks: [], contractStamps: {},
     records: { runs: 0, clears: {}, bestHit: null, longestServing: null, appliedRuns: [] },
     seenCharacters: [], seenRelics: []
   };
@@ -28,6 +29,12 @@ export function availableDungeons(profile) {
     .map(({ id, name, floors, background }) => ({
       id, name, floors, background, difficulties: profile.nightmareUnlocks.includes(id) ? ['normal', 'nightmare'] : ['normal']
     }));
+}
+
+export function contractsFor(profile, dungeonId) {
+  const earned = profile.contractStamps?.[dungeonId];
+  const stamps = Object.fromEntries(Object.keys(CONTRACTS).map(id => [id, earned?.[id] ?? null]));
+  return { unlocked: profile.nightmareUnlocks.includes(dungeonId), stamps };
 }
 
 export function notebookView(profile) {
@@ -59,12 +66,13 @@ export function startView(profile, dungeonId = INTRO) {
     preferredCompanion: actualLead && profile.recruits[actualLead].bond >= 1 && companions.includes(profile.preferredCompanion)
       ? profile.preferredCompanion : null,
     seals, sealSlots: sealSlots(profile, dungeonId), reserved: profile.reserved, introCleared: cleared(profile, INTRO),
+    bossOrder: !Object.keys(DUNGEONS).some(id => id !== INTRO && cleared(profile, id)),
     recruited, runNumber: profile.records.runs + 1,
     unlockedDungeons: profile.unlockedDungeons.slice(), nightmareUnlocks: profile.nightmareUnlocks.slice()
   };
 }
 
-const reject = (profile, reason) => ({ profile, announce: { ok: false, reason } });
+const reject = (profile, reason, extra) => ({ profile, announce: { ok: false, reason, ...extra } });
 
 export function setExpeditionParty(profile, { lead = null, companions = [], preferredCompanion = null } = {}) {
   const recruited = Object.keys(profile.recruits);
@@ -123,15 +131,16 @@ function unlockDungeons(profile) {
 }
 
 export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) {
-  if (run.phase !== 'done' || !run.result) return reject(profile, 'run_not_done');
-  if (profile.records.appliedRuns.includes(run.id)) return reject(profile, 'already_applied');
+  const noStamp = { stamp: null };
+  if (run.phase !== 'done' || !run.result) return reject(profile, 'run_not_done', noStamp);
+  if (profile.records.appliedRuns.includes(run.id)) return reject(profile, 'already_applied', noStamp);
   const rewards = runRewards(run);
   if (!Array.isArray(recruits) || recruits.length > rewards.recruitLimit || new Set(recruits).size !== recruits.length
     || recruits.some(id => !rewards.recruitable.includes(id) || Object.hasOwn(profile.recruits, id))) {
-    return reject(profile, 'invalid_recruits');
+    return reject(profile, 'invalid_recruits', noStamp);
   }
   if (shard !== null && (!rewards.shardCandidates.includes(shard) || Object.hasOwn(profile.recruits, shard))) {
-    return reject(profile, 'invalid_shard');
+    return reject(profile, 'invalid_shard', noStamp);
   }
   const { profile: next } = recordRunProgress(profile, run);
   const { dungeonId, difficulty } = run;
@@ -143,6 +152,7 @@ export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) 
   if (run.profileShard && run.profileShard === next.reserved) next.reserved = null;
   if (shard) next.reserved = shard;
   const bonds = [];
+  let stamp = null;
   if (run.result === 'win') {
     const clears = (records.clears[dungeonId] ||= { normal: 0, nightmare: 0 });
     clears[difficulty]++;
@@ -156,6 +166,14 @@ export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) 
     if (!next.lead && recruits.length) next.lead = recruits[0];
     if (dungeonId === INTRO) addChapter(next, 1);
     else {
+      const contractId = run.contract?.id;
+      if (difficulty === 'nightmare' && run.contract?.met && Object.hasOwn(CONTRACTS, contractId)) {
+        const stamps = ((next.contractStamps ||= {})[dungeonId] ||= {});
+        if (!Object.hasOwn(stamps, contractId)) {
+          stamps[contractId] = run.id;
+          stamp = { dungeonId, contractId };
+        }
+      }
       addChapter(next, 4);
       next.nightmareUnlocks = union(next.nightmareUnlocks, [dungeonId]);
       if (next.notebook.firstLead && run.lead && run.lead !== next.notebook.firstLead && run.gateSurvivors.includes(run.lead)
@@ -170,7 +188,7 @@ export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) 
   return {
     profile: next,
     announce: {
-      ok: true, recruits: recruits.slice(), bonds, shard, returned,
+      ok: true, recruits: recruits.slice(), bonds, shard, returned, stamp,
       chapters: next.notebook.chapters.filter(id => !completed(profile, id)),
       dungeons: next.unlockedDungeons.filter(id => !profile.unlockedDungeons.includes(id)),
       nightmares: next.nightmareUnlocks.filter(id => !profile.nightmareUnlocks.includes(id))

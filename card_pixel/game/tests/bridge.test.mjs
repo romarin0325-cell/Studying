@@ -657,6 +657,7 @@ test('Summary accounts for a retreat, death, heirloom, last stand, treasure, and
   const summary = b.summary();
   assert.deepEqual(plain(summary), {
     outcome: 'win', survivors: [true, false, true], retreated: [true, false, false],
+    rescues: [{ retreated: 'fairy', incoming: 'red_dragon', lethal: true }], heirloomKills: 1,
     heirloomsGained: [{
       to: 'snow_rabbit', from: 'red_dragon', name: '파이어브레스', form: 'red_dragon',
       skill: Bridge.heirloomSkill(S.RelayCore.GameUtils.getCardById('red_dragon'))
@@ -666,8 +667,69 @@ test('Summary accounts for a retreat, death, heirloom, last stand, treasure, and
   });
   summary.bestHit.amount = 0;
   summary.enemyDowns[0].treasure = false;
+  summary.rescues[0].lethal = false;
   assert.equal(b.summary().bestHit.amount, hit.amount);
   assert.equal(b.summary().enemyDowns[0].treasure, true);
+  assert.equal(b.summary().rescues[0].lethal, true);
+});
+
+test('a rescue uses the minimum forecast on the outgoing fighter, including equality', () => {
+  const enemy = quietEnemy(1000, { atk: 100 });
+  enemy.skills = [{ name: '시험용 예고', type: 'phy', rate: 1, effects: [{ type: 'random_mult', min: 1, max: 3 }] }];
+  for (const offset of [0, 1]) {
+    const b = battle({ party: ['fairy', null, 'red_dragon'], enemies: [enemy], seed: 7 });
+    const [min, max] = last(b.start(), 'await').intent.dmg;
+    assert.ok(max > min);
+    b.host.battle.players[0].hp = min + offset;
+    b.retreat();
+    assert.deepEqual(b.summary().rescues, [{ retreated: 'fairy', incoming: 'red_dragon', lethal: offset === 0 }]);
+  }
+});
+
+test('an inherited delayed skill counts actual landings once per enemy', () => {
+  const b = battle({ party: ['fairy'], enemies: [quietEnemy(1), quietEnemy(1)],
+    heirlooms: { fairy: { from: 'phantom', name: '나이트메어' } } });
+  b.start();
+  assert.equal(b.summary().heirloomKills, 0);
+  const events = b.act(option(b, '나이트메어').index);
+  assert.deepEqual(events.filter(e => e.t === 'act' && e.delayed && e.heirloom).map(e => e.target.idx), [0, 1]);
+  assert.equal(b.outcome, 'win');
+  assert.equal(b.summary().heirloomKills, 2);
+  assert.equal(b.summary().heirloomsUsed, 1);
+});
+
+test('using an heirloom before a lethal counter or status does not credit the kill', () => {
+  const counter = battle({ party: ['red_moon'], seed: 0, enemies: [quietEnemy(500, { atk: 5000 })],
+    heirlooms: { red_moon: { from: 'red_dragon', skill: { name: '희미한 불꽃', type: 'mag', cost: 0, val: 0.01, heirloom: true } } } });
+  counter.start();
+  counter.act(option(counter, '희미한 불꽃').index);
+  assert.equal(counter.outcome, 'win');
+  assert.equal(counter.summary().heirloomsUsed, 1);
+  assert.equal(counter.summary().heirloomKills, 0);
+
+  const status = battle({ party: ['fairy'], enemies: [quietEnemy(500)],
+    heirlooms: { fairy: { from: 'red_dragon', name: '파이어브레스' } } });
+  const runtime = S.RelayCore.BattleRuntime;
+  const apply = runtime.applySkillEffects;
+  let statusKilled = false;
+  runtime.applySkillEffects = function (host, source, target, skill) {
+    apply.call(this, host, source, target, skill);
+    if (host === status.host && skill.heirloom && target.buffs.burn && target.hp > 0) {
+      // The core's burn stacks do not tick HP. Inject a status damage event after the real hit.
+      target.hp = 0;
+      statusKilled = true;
+      host.log('작열 피해.');
+    }
+  };
+  try {
+    status.start();
+    status.act(option(status, '파이어브레스').index);
+    assert.equal(statusKilled, true);
+    assert.equal(status.outcome, 'win');
+    assert.equal(status.summary().heirloomKills, 0);
+  } finally {
+    runtime.applySkillEffects = apply;
+  }
 });
 
 test('Guard preview applies 75% with Guardian and 50% without', () => {

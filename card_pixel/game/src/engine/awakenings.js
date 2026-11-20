@@ -24,6 +24,7 @@ export function seeRelic(run, id) {
 
 export function join(run, id) {
   run.bench.push(id);
+  run.joinOrder.push(id);
   seeCharacters(run, [id]);
   if (run.introHeirlooms[id]) {
     run.heirlooms[id] = run.introHeirlooms[id];

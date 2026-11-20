@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../src/content/contracts.js';
 import { DUNGEONS } from '../src/content/dungeons.js';
 import { EVENTS } from '../src/content/events.js';
 import { INTRO } from '../src/content/intro.js';
@@ -761,4 +762,251 @@ test('intro: the borrowed-battle survivor not taken in the first pick is offered
   ok(Run.chooseStartPick(run, 'snow_rabbit'));
   assert.equal(run.pending.kind, 'start');
   assert.ok(run.pending.candidates.includes('silver_rabbit'), 'the other survivor is still a candidate');
+});
+
+const ember = 'ember_volcano';
+const emptyStamps = { rescue: null, heirloom: null, elite: null };
+
+function nightmareProfile() {
+  const profile = profileWithSnowRabbit();
+  const journey = clear(make({ profileView: Meta.startView(profile, ember) }));
+  return Meta.applyRunEnd(profile, journey).profile;
+}
+
+function contractedRun(contract, opts = {}) {
+  return make({ difficulty: 'nightmare', contract, profileView: { nightmareUnlocks: [ember] }, ...opts });
+}
+
+test('contracts require this dungeon’s unlocked nightmare and default to none', () => {
+  const profile = profileWithSnowRabbit();
+  const lockedView = Meta.startView(profile, ember);
+  assert.deepEqual(Meta.contractsFor(profile, ember), { unlocked: false, stamps: emptyStamps });
+  assert.throws(() => make({ difficulty: 'nightmare', contract: 'rescue', profileView: lockedView }), /Locked nightmare/);
+  assert.throws(() => make({ difficulty: 'nightmare', contract: 'rescue' }), /Unavailable contract/);
+  assert.throws(() => make({ dungeonId: 'dawn_forest', difficulty: 'nightmare', contract: 'rescue' }), /Unavailable difficulty/);
+
+  const unlocked = nightmareProfile();
+  const profileView = Meta.startView(unlocked, ember);
+  assert.deepEqual(Meta.contractsFor(unlocked, ember), { unlocked: true, stamps: emptyStamps });
+  assert.deepEqual(Meta.contractsFor(unlocked, 'twilight_cathedral'), { unlocked: false, stamps: emptyStamps });
+  assert.throws(() => make({ contract: 'rescue', profileView }), /Unavailable contract/);
+  assert.throws(() => make({ difficulty: 'nightmare', contract: 'toString', profileView }), /Unavailable contract/);
+  assert.throws(() => make({ difficulty: 'nightmare', contract: ['rescue'], profileView }), /Unavailable contract/);
+  assert.equal(make({ difficulty: 'nightmare', profileView }).contract, null);
+  assert.deepEqual(contractedRun('rescue', { profileView }).contract, {
+    id: 'rescue', met: false, metAtFloor: null, riskDoorTaken: false, escrowed: 0, paid: 0, failed: false
+  });
+});
+
+test('rescue needs a lethal retreat and both fighters alive in a won floor-four or floor-six battle', () => {
+  for (const { floor, lethal, incomingAlive, outcome, met } of [
+    { floor: 4, lethal: true, incomingAlive: true, outcome: 'win', met: true },
+    { floor: 6, lethal: true, incomingAlive: true, outcome: 'win', met: true },
+    { floor: 4, lethal: false, incomingAlive: true, outcome: 'win', met: false },
+    { floor: 6, lethal: true, incomingAlive: false, outcome: 'win', met: false },
+    { floor: 6, lethal: true, incomingAlive: true, outcome: 'lose', met: false },
+    { floor: 2, lethal: true, incomingAlive: true, outcome: 'win', met: false }
+  ]) {
+    const run = reach(contractedRun('rescue'), floor);
+    enter(run);
+    const [retreated, incoming] = run.room.party;
+    const result = settle(run, {
+      outcome, retreated: [true, false, false], survivors: [false, incomingAlive, true],
+      rescues: [{ retreated, incoming, lethal }]
+    });
+    assert.equal(result.contract.metNow, met);
+    assert.equal(run.contract.met, met);
+    assert.equal(run.contract.metAtFloor, met ? floor : null);
+    assert.equal(result.contract.failed, floor === 6 && !met);
+  }
+});
+
+test('heirloom counts the killing hit on floors four and six and requires victory', () => {
+  for (const [floor, kills, outcome, met] of [[4, 1, 'win', true], [6, 1, 'win', true], [6, 0, 'win', false],
+    [6, 1, 'lose', false], [2, 1, 'win', false]]) {
+    const run = reach(contractedRun('heirloom'), floor);
+    enter(run);
+    const result = settle(run, { outcome, heirloomsUsed: 1, heirloomKills: kills });
+    assert.equal(result.contract.metNow, met);
+    assert.equal(result.contract.paid, floor === 6 && met ? CONTRACT_PAYOUT : 0);
+  }
+});
+
+test('an heirloom received in an event qualifies at the gate', () => {
+  const run = reach(contractedRun('heirloom'), 3);
+  const door = run.doors.find(entry => entry.type === 'event');
+  door.event = EVENTS.find(event => event.id === 'red_moon_scabbard');
+  enter(run, door.index);
+  const heir = run.bench[0];
+  ok(Run.chooseEvent(run, 'blade', heir));
+  advance(run);
+  enter(run, 0, [heir]);
+
+  const options = Run.battleOptions(run);
+  const enemies = options.enemies.map(enemy => ({ ...enemy, stats: { hp: 1, atk: 0, matk: 0, def: 0, mdef: 0 }, skills: [] }));
+  const battle = Bridge.create(core, { ...options, enemies });
+  battle.start();
+  battle.act(battle.options().find(move => move.heirloom).index);
+  battle.act(0);
+  assert.equal(battle.summary().heirloomKills, 1);
+  assert.equal(ok(Run.settleBattle(run, battle)).contract.metNow, true);
+});
+
+test('elite requires both target doors and at least two winning survivors, including retreats', () => {
+  for (const [risk, elite, survivors, outcome, met] of [
+    [1, 1, [false, true, false], 'win', true],
+    [0, 1, [false, true, true], 'win', false],
+    [1, 0, [false, true, true], 'win', false],
+    [1, 1, [false, false, false], 'win', false],
+    [1, 1, [false, true, false], 'lose', false]
+  ]) {
+    const run = reach(contractedRun('elite'), 2);
+    enter(run, risk);
+    assert.equal(run.contract.riskDoorTaken, Boolean(risk));
+    settle(run);
+    advance(run);
+    reach(run, 6);
+    enter(run, elite);
+    const result = settle(run, { outcome, survivors, retreated: [true, false, false] });
+    assert.equal(result.contract.metNow, met);
+    assert.equal(result.contract.failed, !met);
+  }
+});
+
+test('contract escrow, payout and failure each settle once across saves', () => {
+  for (const [gateKill, floorSixWin] of [[true, true], [false, true], [true, false]]) {
+    let run = reach(contractedRun('heirloom'), 4);
+    const gateCrystals = run.crystals;
+    enter(run);
+    const gateParty = run.room.party.slice();
+    const gate = settle(run, { heirloomKills: Number(gateKill) });
+    const looter = party => Number(party.some(id => roster.card(id).trait?.type === 'looter'));
+    assert.equal(gate.crystals, run.room.reward + looter(gateParty) - CONTRACT_ESCROW);
+    assert.equal(run.crystals, gateCrystals + gate.crystals);
+    assert.deepEqual(gate.contract, {
+      id: 'heirloom', met: gateKill, metNow: gateKill, escrowed: CONTRACT_ESCROW, paid: 0, failed: false
+    });
+    run = roundTrip(run);
+    assert.equal(Run.settleBattle(run, {}).reason, 'no_active_battle');
+    assert.equal(run.crystals, gateCrystals + gate.crystals);
+    advance(run);
+    reach(run, 6);
+    enter(run);
+    const crystalsBeforeSix = run.crystals;
+    const sixParty = run.room.party.slice();
+    const battle = Bridge.create(core, Run.battleOptions(run));
+    battle.start();
+    battle.act(0);
+    assert.equal(battle.awaiting, true);
+    run = Save.restoreRun(Save.serializeRun(run), { core, roster });
+    assert.equal(run.room.status, 'order');
+    assert.deepEqual(Run.defaultParty(run), sixParty);
+    assert.equal(run.crystals, crystalsBeforeSix);
+    assert.equal(run.contract.metAtFloor, gateKill ? 4 : null);
+    assert.equal(run.contract.escrowed, CONTRACT_ESCROW);
+    ok(Run.confirmOrder(run, sixParty));
+    const six = settle(run, { outcome: floorSixWin ? 'win' : 'lose', heirloomKills: 0 });
+    const paid = gateKill && floorSixWin ? CONTRACT_PAYOUT : 0;
+    const sixReward = floorSixWin ? run.room.reward + looter(sixParty) + paid : 0;
+    assert.equal(six.crystals, sixReward);
+    assert.deepEqual(six.contract, {
+      id: 'heirloom', met: gateKill, metNow: false, escrowed: CONTRACT_ESCROW, paid, failed: paid === 0
+    });
+    run = roundTrip(run);
+    assert.equal(Run.settleBattle(run, {}).reason, 'no_active_battle');
+    assert.equal(run.crystals, crystalsBeforeSix + sixReward);
+    if (floorSixWin) {
+      advance(run);
+      assert.equal(run.floor, 7);
+      assert.equal(run.crystals, crystalsBeforeSix + sixReward);
+    }
+  }
+});
+
+test('a contract stamps the first return per dungeon and contract, once across save and replay', () => {
+  const profile = nightmareProfile();
+  const play = (seed, met, win = true) => {
+    const run = reach(contractedRun('heirloom', { seed }), 4);
+    enter(run);
+    settle(run, { heirloomKills: Number(met) });
+    advance(run);
+    reach(run, 8);
+    enter(run);
+    settle(run, { outcome: win ? 'win' : 'lose' });
+    return roundTrip(run);
+  };
+  const bossLoss = play(7, true, false);
+  assert.equal(bossLoss.contract.paid, CONTRACT_PAYOUT);
+  assert.equal(Meta.applyRunEnd(profile, bossLoss).announce.stamp, null);
+  assert.equal(Meta.applyRunEnd(profile, play(8, false)).announce.stamp, null);
+
+  const success = play(9, true);
+  const first = Meta.applyRunEnd(profile, success);
+  assert.deepEqual(ok(first.announce).stamp, { dungeonId: ember, contractId: 'heirloom' });
+  const restored = Save.restoreProfile(Save.serializeProfile(first.profile));
+  assert.deepEqual(restored.contractStamps, { [ember]: { heirloom: success.id } });
+  assert.deepEqual(Meta.contractsFor(restored, ember).stamps, { ...emptyStamps, heirloom: success.id });
+  const replay = Meta.applyRunEnd(restored, success);
+  assert.equal(replay.announce.reason, 'already_applied');
+  assert.equal(replay.announce.stamp, null);
+  const later = Meta.applyRunEnd(restored, play(10, true));
+  assert.equal(ok(later.announce).stamp, null);
+  assert.deepEqual(later.profile.contractStamps, restored.contractStamps);
+});
+
+test('legacy saves default new metadata and use the saved bench for the initial lineup', () => {
+  const oldProfile = Meta.createProfile();
+  delete oldProfile.contractStamps;
+  assert.deepEqual(Save.restoreProfile(oldProfile).contractStamps, {});
+  const old = JSON.parse(Save.serializeRun(reach(make(), 1)));
+  for (const key of ['contract', 'lastParty', 'guide', 'joinOrder']) delete old.run[key];
+  const run = Save.restoreRun(old, { core, roster });
+  assert.equal(run.contract, null);
+  assert.equal(run.lastParty, null);
+  assert.deepEqual(run.guide, { bossOrder: false });
+  assert.deepEqual(Run.defaultParty(run), old.run.bench.slice(0, 3));
+});
+
+test('default party keeps surviving seats and refills a fall in join order after reordering', () => {
+  const run = reach(make(), 1);
+  const [a, b, c, d, e] = run.bench;
+  assert.deepEqual(Run.defaultParty(run), [a, b, c]);
+  enter(run, 0, [d, a, e]);
+  settle(run);
+  advance(run);
+  assert.deepEqual(Run.defaultParty(run), [d, a, e]);
+  enter(run, 0, [a, d, c]);
+  settle(run, { survivors: [true, false, true] });
+  const restored = roundTrip(run);
+  assert.deepEqual(restored.lastParty, [a, d, c]);
+  assert.deepEqual(Run.defaultParty(restored), [a, b, c]);
+
+  const short = Run.bindRun({ bench: [a], joinOrder: [a], lastParty: [null, a, null] }, { core, roster });
+  assert.deepEqual(Run.defaultParty(short), [null, a, null]);
+});
+
+test('suggestion selects the strongest three and places the highest score last', () => {
+  const cards = {
+    lowest: { stats: { hp: 100, atk: 10, matk: 10 }, grade: 'normal' },
+    mage: { stats: { hp: 200, atk: 10, matk: 40 }, grade: 'normal' },
+    rare: { stats: { hp: 80, atk: 30, matk: 10 }, grade: 'rare' },
+    legend: { stats: { hp: 100, atk: 20, matk: 20 }, grade: 'legend' }
+  };
+  const run = Run.bindRun({ bench: ['legend', 'lowest', 'mage', 'rare'] }, { roster: { card: id => cards[id] } });
+  assert.deepEqual(Run.suggestOrder(run), ['rare', 'mage', 'legend']);
+  assert.deepEqual(run.bench, ['legend', 'lowest', 'mage', 'rare']);
+  run.bench = ['mage', 'rare'];
+  assert.deepEqual(Run.suggestOrder(run), ['rare', 'mage']);
+});
+
+test('the boss order guide stays on after the intro and turns off for new runs after a main clear', () => {
+  const profile = profileWithSnowRabbit();
+  const run = make({ profileView: Meta.startView(profile, ember) });
+  assert.deepEqual(run.guide, { bossOrder: true });
+  assert.deepEqual(roundTrip(run).guide, { bossOrder: true });
+  const firstWin = Meta.applyRunEnd(profile, clear(run));
+  ok(firstWin.announce);
+  const next = make({ profileView: Meta.startView(firstWin.profile, ember) });
+  assert.deepEqual(next.guide, { bossOrder: false });
+  assert.deepEqual(run.guide, { bossOrder: true });
 });

@@ -164,7 +164,7 @@ export function create(core, opts) {
     enemyIdx: 0, awaiting: false, outcome: null, retreatUsed: false,
     pendingNext: null, lastDownIdx: -1, intentCache: null, lastCalc: null, prev: null,
     lastHit: null, carry: 0, lastStandDone: false, turnStartHp: 0,
-    gained: [], heirloomsUsed: 0, enemyDowns: [], bestHit: null,
+    gained: [], heirloomsUsed: 0, heirloomKills: 0, rescues: [], enemyDowns: [], bestHit: null,
     charge: 0, chargeSpent: false, dueEffects: [], betMet: false, fieldSeen: false
   };
 
@@ -184,6 +184,7 @@ export function create(core, opts) {
       if (calc && calc.by && /class="log-dmg"/.test(msg) && hit && Number(hit[1]) === calc.result.dmg) {
         const amount = calc.result.dmg;
         if (amount > (B.bestHit?.amount || 0)) B.bestHit = { amount, by: calc.by, skill: calc.info.skill };
+        if (calc.heirloom && amount > 0 && calc.hpBefore > 0 && calc.target.hp <= 0) B.heirloomKills++;
       }
       flush(hit ? Number(hit[1]) : 0);
       push({ t: 'log', text, kind: kind || '' });
@@ -542,6 +543,8 @@ export function create(core, opts) {
     B.lastHit = { source, target, dmg: result.dmg };
     B.lastCalc = {
       target,
+      hpBefore: target.hp,
+      heirloom: !!skill.heirloom && cause?.kind === 'act' && cause.source === source && target === b.enemy,
       by: target === b.enemy ? source.baseCardId || source.proto?.baseCardId || source.proto?.id : null,
       result,
       info: {
@@ -833,6 +836,8 @@ export function create(core, opts) {
       if (!canRetreat()) return [];
       return run(() => {
         const b = host.battle, player = currentPlayer(), next = nextAlly();
+        const [minimum] = currentIntent().dmg || [0];
+        B.rescues.push({ retreated: host.state.deck[player.pos], incoming: host.state.deck[next.pos], lethal: player.hp <= minimum });
         player.isDead = true; player.retreated = true;        // the core skips it; death traits never run
         B.retreatUsed = true;
         push({ t: 'retreat', who: allyRef(player.pos) });
@@ -875,8 +880,10 @@ export function create(core, opts) {
         outcome: B.outcome,
         survivors: survivors(),
         retreated: host.battle.players.map(p => !!p?.retreated),
+        rescues: B.rescues.map(rescue => ({ ...rescue })),
         heirloomsGained: heirloomsGained(),
         heirloomsUsed: B.heirloomsUsed,
+        heirloomKills: B.heirloomKills,
         lastStands: Number(B.lastStandDone),
         enemyDowns: B.enemyDowns.map(down => ({ ...down })),
         bestHit: B.bestHit && { ...B.bestHit },

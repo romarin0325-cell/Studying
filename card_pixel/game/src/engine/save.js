@@ -35,6 +35,10 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
   if (!run || !Object.hasOwn(DUNGEONS, run.dungeonId) || !PHASES.includes(run.phase)
     || !Number.isInteger(run.rng?.state) || run.rng.state < 0 || run.rng.state > 0xffffffff
     || !Array.isArray(run.pool) || !Array.isArray(run.bench) || !Array.isArray(run.doors)) return null;
+  run.contract ??= null;
+  run.lastParty ??= null;
+  run.guide ??= { bossOrder: false };
+  run.joinOrder ??= run.bench.slice();
   return bindRun(run, { core, roster });
 }
 
@@ -46,6 +50,7 @@ export function restoreProfile(data, { migrate } = {}) {
   const profile = readVersion(data, PROFILE_VERSION, migrate);
   if (!profile?.recruits || !profile.records || !Array.isArray(profile.notebook?.chapters)
     || !Array.isArray(profile.unlockedDungeons) || !Array.isArray(profile.nightmareUnlocks)) return null;
+  profile.contractStamps ??= {};
   return profile;
 }
 

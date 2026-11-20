@@ -12,6 +12,13 @@ export const POSITION = ['선봉', '중견', '대장'];
 export const GRADE_BUCKETS = ['normal', 'rare', 'epic', 'legend'];
 export const gradeOf = grade => GRADE_BUCKETS.includes(grade) ? grade : 'legend';
 
+const gradeRank = { normal: 0, rare: 1, epic: 2, legend: 3, transcendence: 3, event: 2 };
+
+export function strength(card) {
+  const { hp, atk, matk } = card.stats;
+  return hp / 4 + Math.max(atk, matk) + gradeRank[card.grade] * 30;
+}
+
 const power = s => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 2);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
