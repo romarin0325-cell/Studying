@@ -40,7 +40,8 @@ const html = `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>다음은 너 — RELAYMARE</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri/dist/galmuri.css">
+<link rel="icon" href="${pngUrl(path.join(here, 'assets/app-icon.png'))}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
 <style>${css}</style></head>
 <body><div id="app"></div>
 ${inline('window.RELAY_ASSETS=' + JSON.stringify({ sp, bg, icons }) + ';')}

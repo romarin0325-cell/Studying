@@ -22,6 +22,7 @@ node card_pixel/game/tests/play.mjs --seeds=7,21 --runs=2
 - Node 테스트 4개는 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`)를 확인한다.
 - 자동 플레이는 먼저 빌드한다. Playwright Chromium을 쓰고, 없으면 설치된 Chrome, Edge 순으로 시도한다. `CHROMIUM_PATH`로 실행 파일을 지정할 수 있다. `--seeds=7,21`과 `--runs=2`가 기본값이며 시드마다 입문 1판 뒤 본편 2판을 돈다. `--headed`를 붙이면 창을 띄운다.
 - 자동 플레이는 본편 이어하기, 브라우저 오류·멈춤, 행동 뒤 대기 시간과 전투 프레임을 확인한다. 화면은 `tests/shots/`에 남긴다.
+- Windows 실행 파일 `dist/Relaymare.exe`는 `node card_pixel/game/launcher/build-launcher.mjs`로 만든다. 같은 폴더의 `Relaymare.html`을 Chrome(없으면 Edge)의 앱 창으로 연다. 자세한 내용은 [launcher/README.md](launcher/README.md).
 
 ## 시뮬레이션·음악·그림 도구
 
@@ -34,6 +35,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 
 - 시뮬레이션은 실제 `assets/sprites.json`의 명단과 원정 명령을 써서 클리어율, 1,000 이상 한 방, 전투·사망·유품·영입 후보 수를 잰다. 기본은 홍련 화산 여정 300판이다. 횟수는 숫자 인수로, 던전은 `--dungeon=ember_volcano`처럼 지정한다. `--all`은 던전마다 그 횟수만큼 돌며, 악몽에서는 입문을 건너뛴다. `--plain`, `--no-heirloom`, `--no-laststand`로 비교한다.
 - [tools/music-preview.html](tools/music-preview.html)을 브라우저에서 바로 열어 합성 배경음 12곡을 듣는다. 전투·보스 곡은 던전을 골라 들어 볼 수 있다.
+- `node card_pixel/game/tools/music-levels.mjs`는 설치된 Chrome에서 12곡과 효과음 몇 개를 재생해 최고·평균(RMS) 음량, -1 dBFS 이상 비율, 가장 긴 무음 구간을 표와 JSON으로 남긴다.
 - 스프라이트 도구는 `../art/manifest.json`에서 `status: "ok"`인 띠의 대기·공격·피격 포즈를 잘라 `assets/`와 `sprites.json`을 갱신한다. 동료 높이는 `small` 58 / `medium` 64 / `normal` 72(기본) / `tall` 80px이고 `heightPx`로 덮어쓴다. 떨어진 파츠는 본체 면적의 1.5% 이상이면 남긴다. `keepParts: false`면 본체만 쓴다.
 - 아이콘 도구는 `sheets.tsv`에 지정된 2×2 시트를 잘라 `assets/icons/`에 32×32 PNG로 저장한다.
 
