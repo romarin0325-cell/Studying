@@ -195,7 +195,9 @@ function makeBattleDoor(run, roster, dungeon, template, index, region, battleCou
 function eventCandidates(run) {
   const present = id => (run.pool.includes(id) || run.bench.includes(id))
     && !run.fallen.includes(id) && !run.released.includes(id);
-  return EVENTS.filter(event => (event.requires.present || []).every(present)
+  return EVENTS.filter(event => (event.minTempoVersion ?? 1) <= (run.tempoVersion ?? 1)
+    && (!event.dungeons || event.dungeons.includes(run.dungeonId))
+    && (event.requires.present || []).every(present)
     && (event.requires.bench || []).every(id => run.bench.includes(id)));
 }
 
@@ -246,7 +248,8 @@ export function eventChoices(run, core, roster) {
       targets = run.bench.length > 1 ? run.bench.filter(id => id !== run.lead) : [];
     }
     const eligible = choice.ops.every(op => {
-      if (op.type === 'join') return op.random ? run.pool.some(id => canJoin(run, id)) : op.ids.every(id => canJoin(run, id));
+      if (op.type === 'join' && !op.random) return op.ids.every(id => canJoin(run, id));
+      if (op.type === 'join' || (op.type === 'release' && op.randomReplacement)) return run.pool.some(id => canJoin(run, id));
       if (op.type === 'bet') return canAttemptBet(run, core, roster, op.kind);
       if (op.type === 'relic') {
         const id = op.id === 'offered' ? run.room.relic : op.id;
@@ -291,6 +294,12 @@ export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds =
         release(run, targetId);
         run.crystals += SALE_PRICE[gradeOf(roster.card(targetId).grade)];
         result.effects.push({ type: 'release', id: targetId });
+        // The selected release has already opened the incoming fighter's seat.
+        if (op.randomReplacement) {
+          const id = drawFrom(run, roster, RATES.draw);
+          join(run, id);
+          result.effects.push({ type: 'join', ids: [id] });
+        }
         break;
       case 'bless':
         for (const id of op.all ? run.bench : [targetId]) {
