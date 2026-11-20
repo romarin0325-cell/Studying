@@ -39429,6 +39429,7 @@ const Meridian = {
     };
     Astra.hook('showBattleScreen', () => this.battleStarted());
     Astra.hook('openModeSelect', () => this.modeBrowser());
+    Astra.hook('applyGreatSageBlessing', () => this.lobby());
     Astra.hook('updateDeckSlots', () => this.updateDeckActions());
     Astra.hook('selectDeckSlot', () => this.updateDeckActions());
     Astra.hook('finishWinBattle', (extra, clear) => this.victory(extra, clear));
