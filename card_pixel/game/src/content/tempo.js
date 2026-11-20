@@ -13,7 +13,7 @@ export const ROOM_MULTIPLIERS = {
 };
 export const REGION_MULTIPLIERS = {
   ember_volcano: { wild: [0.64, 2.35], risk: [0.73, 2.75], boss: [0.63, 1.69] },
-  twilight_cathedral: { wild: [0.67, 2.70], risk: [0.76, 2.95], gate: [1.27, 5.20], boss: [0.655, 1.70] },
+  twilight_cathedral: { wild: [0.67, 2.70], risk: [0.76, 2.95], gate: [1.27, 5.20], elite: [1.32, 3.4], boss: [0.655, 1.70] },
   starlit_garden: { wild: [0.65, 2.55], risk: [0.76, 3.10], gate: [1.19, 4.56], boss: [0.62, 1.66] },
   midnight_trench: { wild: [0.72, 3.35], risk: [0.76, 3.55], boss: [0.62, 1.80] },
   arena: { wild: [0.65, 2.0], risk: [0.75, 2.35], boss: [0.68, 1.68] },
