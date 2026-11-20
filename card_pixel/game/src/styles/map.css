@@ -2,8 +2,8 @@
   --branch-light: 1;
   --other-paths: 1;
   --scene-opacity: 1;
-  flex: 0 0 350px;
-  min-height: 350px;
+  flex: 0 0 clamp(210px, 31dvh, 350px);
+  min-height: 210px;
   margin: 0 12px;
   background: #0e0a18;
   isolation: isolate;
@@ -91,6 +91,7 @@
 
 .map-door:not(.chosen) { opacity: calc((.36 + .64 * var(--branch-light)) * var(--other-paths)); }
 .map-door.chosen { z-index: 1; }
+.map-door[aria-pressed="true"] { --door-rim: var(--aqua); --door-shine: var(--aqua); }
 .map-door:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
 .map-door[data-kind="spring"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #90ead9; }
 .map-door[data-kind="altar"], .map-door[data-kind="event"] { --door-rim: #ab82b1; --door-fill: #5a375c; --door-shine: #f8b5d9; }
@@ -166,6 +167,7 @@
   right: -12px;
   transform: none;
 }
+#map .map-door:not(:first-child):last-child .map-door-line { top: calc(100% - 16px); }
 .walking-map[data-walk-phase="zoom"] .map-door.chosen .map-door-line { opacity: var(--scene-opacity); }
 
 .map-skip {
@@ -188,4 +190,30 @@
   background: var(--win);
   color: var(--ink);
   font-size: 12px;
+}
+
+.door-plate.previewing { border-color: var(--aqua); }
+.run-doors:has(.previewing) .door-plate:not(.previewing) { min-height: 48px; }
+.run-doors:has(.previewing) .door-plate:not(.previewing) .door-entry > :not(.door-copy),
+.run-doors:has(.previewing) .door-plate:not(.previewing) .door-copy > :not(b) { display: none; }
+.door-plate.previewing .door-entry { flex-wrap: wrap; }
+.door-entry .door-lesson, .door-lesson { display: flex; align-items: center; gap: 4px; color: var(--gold); }
+.door-lesson .run-icon { width: 16px; height: 16px; flex: none; }
+.map-formation { padding: 0 12px calc(10px + env(safe-area-inset-bottom)); }
+.map-formation[hidden] { display: none; }
+.map-formation .relay-seats { margin-top: 0; }
+.map-formation .relay-seat { grid-template-rows: 16px 42px 20px auto; }
+.map-formation .reserve-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.map-formation .reserve-cards .run-face { width: 40px; height: 40px; }
+.map-awaken { margin: 6px 12px 0; padding: 5px 8px; text-align: center; color: var(--gold); flex: none; }
+.map-awaken-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.map-awaken-faces button { height: auto; padding: 4px; animation: map-awaken-in 260ms steps(5) var(--wake-delay) both; }
+.map-awaken-faces .run-face { width: 40px; height: 40px; }
+.map-receipt { margin: 8px 12px 0; }
+@keyframes map-awaken-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-awaken-faces button { animation: none; }
 }

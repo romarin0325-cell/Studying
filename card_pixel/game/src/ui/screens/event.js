@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { chooseReplacements, head, replacementCount } from '../widgets.js';
+import { bonusPercent, chooseReplacements, departureLoss, head, heirloomOffer, replacementCount } from '../widgets.js';
 import { chooseEvent } from '../../engine/run.js';
 import { eventChoices } from '../../engine/rooms.js';
 import { BLESS } from '../../engine/awakenings.js';
@@ -32,7 +32,7 @@ export function eventScreen(run, ui, result = null) {
   const { sfx } = ui.audio;
   const event = run.room.event;
   const node = $('#event');
-  const choices = run.pending?.kind === 'event' ? run.pending.choices || eventChoices(run, ui.core, ui.roster) : [];
+  const choices = run.pending?.kind === 'event' ? eventChoices(run, ui.core, ui.roster) : [];
   let selection = null;
   const hosts = event?.requires.present || [];
   const joined = result?.effects.flatMap(effect => effect.type === 'join' ? effect.ids : []) || [];
@@ -75,15 +75,28 @@ export function eventScreen(run, ui, result = null) {
         return NEXT + ' · 적 ' + Object.entries(effect.enemyDebuffs).map(([id, stacks]) =>
           (ui.core.BUFF_NAMES[id] || id) + ' +' + stacks).join(' · ');
       case 'bet': {
-        const condition = effect.kind === 'kill_on_turn' ? effect.turn + '턴에 적 하나를 쓰러뜨리고 이긴다' : BET[effect.kind];
+        const condition = effect.kind === 'kill_on_turn' ? effect.turn + '턴에 적 하나 처치 후 승리' : BET[effect.kind];
         const prize = effect.reward.crystals ? '결정 +' + effect.reward.crystals : ui.artifacts.get(effect.reward.relic)?.name;
-        return NEXT + ' · ' + condition + ' → ' + prize + ' · 실패 시 보상 없음';
+        return (effect.kind === 'kill_on_turn' ? '다음 전투 ' : NEXT + ' · ') + condition + ' → ' + prize + ' · 실패 시 보상 없음';
       }
       case 'crystals':
         return '결정 +' + effect.amount;
       case 'heirloom':
         return STAYS + ' · ' + (target ? name(target) + '에게 ' : '') + '유품 ' + effect.name;
     }
+  }
+
+  const joinIds = choice => choice.ops.flatMap(op => op.type === 'join' && !op.random ? op.ids : []);
+  function releases(choice) {
+    const count = choice.ops.filter(op => op.type === 'join').reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+    return choice.requiredReleases ?? replacementCount(run, count);
+  }
+  function targetValue(choice, id) {
+    const change = choice.blessingChanges?.[id];
+    const net = choice.netCrystals?.[id];
+    if (change) return '원정 +' + bonusPercent(change.before) + '% → +' + bonusPercent(change.after) + '%';
+    if (net != null) return '순수입 ◆' + net;
+    return '';
   }
 
   function take(choice, target) {
@@ -96,9 +109,8 @@ export function eventScreen(run, ui, result = null) {
       if (run.pending || (run.room.relic && outcome.effects.some(effect => effect.type === 'relic' && effect.equipped))) ui.route();
       else eventScreen(run, ui, outcome);
     }
-    const recruits = choice.ops.filter(op => op.type === 'join').reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
-    const count = replacementCount(run, recruits);
-    if (count) chooseReplacements(run, ui, count, apply);
+    const count = releases(choice);
+    if (count) chooseReplacements(run, ui, count, apply, { incoming: joinIds(choice) });
     else apply([]);
   }
 
@@ -112,9 +124,17 @@ export function eventScreen(run, ui, result = null) {
   ].filter(Boolean) : [];
   const plates = choices.map(choice => {
     const short = run.crystals < (choice.cost || 0) ? '결정 ' + (choice.cost - run.crystals) + '개 부족' : '';
+    const count = releases(choice);
+    const changes = !choice.targets && choice.blessingChanges ? Object.keys(choice.blessingChanges).map(id =>
+      '<small>' + esc(card(id).name + ' · ' + targetValue(choice, id)) + '</small>').join('') : '';
+    const offer = joinIds(choice).map(id => heirloomOffer(card(id))).join('');
+    const effects = choice.ops.map(effect => effectText(effect)).filter(Boolean);
+    if (event.id === 'penguin_ice_seam' && choice.id === 'carry' && !choice.text.includes('물 동료 없음') &&
+      !run.bench.some(id => ui.core.GameUtils.cardMatchesElement(card(id), 'water'))) effects.push('물 동료 없음');
     return '<button class="event-choice win" data-choice="' + esc(choice.id) + '"' + (choice.enabled ? '' : ' disabled') +
-      '><b>' + esc(choice.text) + '</b><span>' + esc(cost(choice) + choice.ops.map(effect => effectText(effect)).join(' · ')) +
-      '</span>' + (short || !choice.enabled ? '<small>' + esc(short || '조건 미충족') + '</small>' : '') + '</button>';
+      '><b>' + esc(choice.text) + '</b><span>' + esc(cost(choice) + effects.join(' · ')) +
+      '</span>' + offer + changes + (count ? '<small class="loss">보낼 동료 ' + count + '명 필요</small>' : '') +
+      (short || !choice.enabled ? '<small>' + esc(short || '조건 미충족') + '</small>' : '') + '</button>';
   }).join('');
   const secondary = results.length ? results.map(line => '<p>' + esc(line) + '</p>').join('') :
     event && choices.length ? '<p>' + esc(DIALOGUE[event.id] || '') + '</p>' : '';
@@ -140,7 +160,9 @@ export function eventScreen(run, ui, result = null) {
     const choice = choices.find(entry => entry.id === button.dataset.choice);
     if (!choice.targets) return take(choice);
     selection = null;
-    ui.sheets.openSheet('동료 고르기', '<div class="cards">' + choice.targets.map(id => cardRow(run, id, { skills: false })).join('') +
+    ui.sheets.openSheet('동료 고르기', '<div class="cards">' + choice.targets.map(id => cardRow(run, id, {
+      skills: false, detail: targetValue(choice, id)
+    })).join('') +
       '</div><p id="event-target-effect"></p><button class="btn go" id="b-event-target" disabled>선택 확정</button>');
     const confirm = $('#b-event-target');
     const rows = $$('#sh-body [data-id]');
@@ -148,7 +170,12 @@ export function eventScreen(run, ui, result = null) {
       selection = row.dataset.id;
       sfx.tap();
       for (const other of rows) other.classList.toggle('sel', other === row);
-      $('#event-target-effect').textContent = choice.ops.map(effect => effectText(effect, selection)).join(' · ');
+      const detail = targetValue(choice, selection);
+      const losing = choice.target === 'release' ? departureLoss(run, selection) : '';
+      const line = [detail, losing].filter(Boolean).join(' · ');
+      const text = $('#event-target-effect');
+      text.textContent = line || choice.ops.map(effect => effectText(effect, selection)).filter(Boolean).join(' · ');
+      text.classList.toggle('loss', !!losing);
       confirm.disabled = false;
       confirm.textContent = card(selection).name + ' · ' + targetVerb(choice);
     });

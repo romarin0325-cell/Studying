@@ -22,15 +22,13 @@
 /* the enemy: one wide bar across the top of the scene */
 #foebar { position: absolute; left: 8px; right: 8px; top: 6px; padding: 5px 8px 6px; background: var(--win); border: 1px solid var(--line); box-shadow: 0 2px 0 #08050f; }
 #foebar .nm { display: flex; align-items: center; gap: 6px; white-space: nowrap; height: 18px; }
-#foebar .nm i { font: 10px/14px var(--px9); font-style: normal; background: var(--line); padding: 0 4px; color: var(--ink); }
-#foebar .nm i.boss { background: var(--coral); color: #1b0b10; } #foebar .nm i.shadow { background: var(--violet); }
+#pf-kind { color: var(--dim); font: 12px/16px var(--px); }
+#pf-kind.boss { color: var(--coral); } #pf-kind.shadow { color: var(--aqua); }
 #foebar .nm b { font: 15px/18px var(--px14); font-weight: normal; }
 #foebar .nm em { font-style: normal; }
 #foebar .nm span { margin-left: auto; color: #fff; }
 #foebar .bar { height: 12px; margin-top: 4px; }
-#foebar .row { display: flex; gap: 6px; align-items: flex-start; margin-top: 4px; }
-#foebar .row .chips { flex: 1; }
-#foebar .row:has(.chips:empty):not(:has(.cd.on)) { display: none; }
+#pf-chips:not(:empty) { margin-top: 4px; }
 .cd { font: 12px/16px var(--px); padding: 0 5px; background: #3a1420; color: #ffb0a8; display: none; min-width: 0; overflow-wrap: anywhere; }
 .cd.on { display: block; } .cd.now { background: var(--coral); color: #1b0b10; animation: blink .5s steps(2) infinite; }
 @keyframes blink { 50% { opacity: .55; } }
@@ -43,20 +41,16 @@
 #region-next { font: 12px/15px var(--px); color: var(--gold); margin-left: 4px; white-space: nowrap; }
 #region-next:empty, #skyname:empty { display: none; }
 #pa-chips { position: absolute; left: 8px; bottom: 6px; max-width: 60%; }
-.intent { position: absolute; transform: translate(-50%, -100%); padding: 3px 8px 4px; background: #0f0b20; border: 2px solid var(--line2); white-space: nowrap; display: none; text-align: center; }
+.intent { display: none; margin: 4px 0 0; color: var(--ink); font: 12px/17px var(--px); overflow-wrap: anywhere; }
 .intent.on { display: block; }
-.intent:after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -4px; width: 8px; height: 5px; background: var(--line2); }
-.intent small { display: block; font: 10px/13px var(--px9); color: var(--dim); }
-.intent b { font: 15px/18px var(--px14); font-weight: normal; } .intent b.phy { color: var(--phy); } .intent b.mag { color: var(--mag); } .intent b.sup { color: var(--sup); }
-.intent strong { font: 15px/18px var(--px14); color: #fff; font-weight: normal; margin-left: 4px; }
-.intent.ult { border-color: var(--coral); background: #2a0c14; animation: blink .5s steps(2) infinite; } .intent.ult:after { background: var(--coral); }
-.intent u { text-decoration: none; background: var(--coral); color: #1b0b10; padding: 0 4px; margin-left: 5px; font: 10px/14px var(--px9); }
+.intent.ult { color: #ffb0a8; }
 #skip { position: absolute; right: 8px; bottom: 6px; font: 10px var(--px9); color: var(--dim); display: none; }
 #skip.on { display: block; }
 
 .num { position: absolute; transform: translate(-50%, -50%); font: 15px var(--px14); color: #fff; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; white-space: nowrap; animation: pop 1.25s steps(24) forwards; }
 .num.big { font: 24px var(--px); } .num.crit { color: var(--gold); font: 30px var(--px14); } .num.foe { color: #ff9c92; } .num.self { color: #c9a8ff; font: 12px var(--px); }
 .num.heal { color: var(--hp); } .num.tag { font: 12px var(--px); color: var(--aqua); } .num.tag.bad { color: #ffb0a8; } .num.tag.good { color: #a8ffe0; } .num.call { font: 12px var(--px); color: var(--gold); }
+.num.tag.strong-call { color: var(--gold); animation: none; }
 @keyframes pop { 0% { transform: translate(-50%, 0) scale(.4); opacity: 0; } 12% { transform: translate(-50%, -110%) scale(1.25); opacity: 1; } 24% { transform: translate(-50%, -80%) scale(1); } 75% { transform: translate(-50%, -130%); opacity: 1; } 100% { transform: translate(-50%, -170%); opacity: 0; } }
 .banner { position: absolute; left: 0; right: 0; top: 46%; padding: 6px 8px; background: var(--win); border-top: 2px solid var(--aqua); border-bottom: 2px solid var(--aqua); text-align: center; animation: slide .18s steps(4); font-size: 12px; }
 .banner b { font-weight: normal; background: var(--aqua); color: #08221f; padding: 0 5px; margin-right: 6px; }
@@ -179,7 +173,7 @@
 #cv { image-rendering: pixelated; }
 #battle.resumed-result #hud, #battle.resumed-result #party, #battle.resumed-result #msg, #battle.resumed-result #panel { visibility: hidden; }
 
-#result .in h3 { font: 22px var(--px14); color: var(--gold); margin-bottom: 6px; }
+#result .result-heading h3 { font: 22px var(--px14); color: var(--gold); margin-bottom: 6px; }
 #result .gain small { color: var(--dim); font: 10px var(--px9); }
 #result .contract-met { color: var(--gold); }
 #result .contract-failed { color: var(--coral); }
@@ -189,8 +183,12 @@
 #result .heirline b { font-weight: normal; background: var(--gold); color: #2a1c00; padding: 0 4px; margin-right: 6px; }
 #result .heirline small { display: block; font: 10px var(--px9); color: var(--dim); margin-top: 2px; }
 #result .in { max-height: 90%; overflow-y: auto; }
-.result-actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; margin-top: 12px; }
-.result-actions .btn { min-height: 48px; }
+.result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.result-heading .btn { width: auto; }
+.victory-decision { margin: 8px 0; }
+.victory-decision .footer { padding: 5px 0 0; }
+.victory-decision h4 { color: var(--gold); }
+#result #b-next { margin-top: 8px; }
 #result .in, #result .btn { box-shadow: 0 2px 0 #08050f; }
 
 .num.finish-damage { z-index: 2; color: var(--gold); font: 32px var(--px14); animation: finish-grow .1s steps(4) both; }

@@ -3,6 +3,7 @@ import { TYPE, formatRange } from '../widgets.js';
 import { relicMarks } from '../relics.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
+import * as Bridge from '../../engine/bridge.js';
 
 export const GOOD = ['guard', 'evasion', 'barrier', 'magic_guard', 'damage_half'];
 export const FIELD = {
@@ -14,8 +15,52 @@ export const fieldCap = (core, artifacts) => artifacts?.includes('buff_overload'
 export const skyRelics = B => (B.artifacts || []).filter(id => id === 'buff_overload' ||
   (id === 'gale_storm' && B.D?.turn <= 3 && B.D.field.includes('gale')));
 
+const INTENT_TYPE = { ...TYPE, charge: '충전', stun: '기절' };
+export const BLOCKED_BY = { magic_guard: '매직가드', barrier: '배리어', evasion: '회피', stun: '기절' };
+export const mpLossText = effect => effect?.kind === 'mp'
+  ? effect.mode === 'all' ? '현재 MP 전부 소멸' : Number.isFinite(effect.amount) ? '현재 MP −' + effect.amount : '현재 MP 감소'
+  : '';
+
+export function intentLines(intent, countdown, hp, buffNames = {}) {
+  if (!intent) return [];
+  const { kind, resourceEffect, vulnerable } = intent;
+  const range = intent.damageRange ?? intent.dmg;
+  const hits = intent.conditions?.find?.(condition => condition.kind === 'enemyHitThisTurn');
+  const attack = kind === 'phy' || kind === 'mag';
+  const falls = intent.lethalText ?? (intent.lethal && Array.isArray(range) && hp != null
+    ? range[0] >= hp ? '명중 시 쓰러짐' : '쓰러질 수 있음' : '');
+  const damage = attack && range != null ? (Number.isFinite(hits?.whenMet) && Number.isFinite(hits?.otherwise) && hits.met == null
+    ? '때리면 ' + hits.whenMet + ' / 안 때리면 ' + hits.otherwise
+    : 'HP ' + formatRange(range) + (hits?.met ? ' · 이미 피격' : '')) : '';
+  const resource = kind === 'stun' ? '' : mpLossText(resourceEffect) ||
+    (intent.extra?.includes('mana_burn') ? '현재 MP 전부 소멸' : '');
+  const clean = kind !== 'stun' && intent.rule === 'cleanse'
+    ? '자기 약화 전부 해제 · 지금 ' + (Object.entries(intent.debuffs ?? {}).map(([id, value]) =>
+      (buffNames[id] ?? id) + ' ' + value).join(' · ') || '약화 없음') : '';
+  const modifier = kind === 'stun' ? '행동 불가' : vulnerable ? '받는 피해 ×' + vulnerable :
+    kind === 'charge' ? '충전' : intent.reduction ? '다음 턴 받는 피해 ' + Math.round(intent.reduction * 100) + '% 감소' :
+      intent.rule === 'swap_stats' ? '명중 뒤 공·마공, 물방·마방 교환' : clean;
+  const block = resourceEffect?.preventedBy ?? intent.preventedBy;
+  const name = (kind === 'charge' ? intent.name?.replace(/ 차징$/, ' 충전') : intent.name) || INTENT_TYPE[kind];
+  const blocked = kind !== 'stun' && BLOCKED_BY[block] ? BLOCKED_BY[block] + '로 차단' : '';
+  const current = ['내 행동 뒤', [name, modifier && !name?.includes(modifier) ? modifier : ''].filter(Boolean).join(' · '),
+    blocked ? [attack ? damage : '', blocked].filter(Boolean).join(' / ') : [damage, resource].filter(Boolean).join(' / '), falls].filter(Boolean).join(' · ');
+  const next = Object.hasOwn(intent, 'nextDistinct') ? intent.nextDistinct : countdown && { ...countdown,
+    inTurns: (countdown.inTurns ?? 0) + (countdown.charge ? 1 : 0) };
+  const sameName = next?.name === intent.name && kind !== 'charge';
+  const future = next?.name && next.inTurns > 0 && !sameName ?
+    (next.inTurns === 1 ? '다음 턴 ' : next.inTurns + '턴 뒤 ') + [next.name, next.alt].filter(Boolean).join(' 또는 ') +
+    (TYPE[next.kind] ? ' · ' + TYPE[next.kind] + (next.power ? ' ×' + next.power : '') : '') : '';
+  return [current, future];
+}
+
+export function affixLines(unit) {
+  return (unit.affixes ?? []).map(id => (AFFIXES[id] && Bridge.affixView?.(id, unit)) ??
+    (AFFIXES[id] && { id, name: AFFIXES[id].name, text: AFFIXES[id].desc })).filter(Boolean);
+}
+
 export function createHud(core, stage, sfx, widgets) {
-  const { S, wait, footY: FY, headY: HY } = stage;
+  const { S, wait, footY: FY } = stage;
   const { face, card } = widgets;
 
   function chips(node, unit, isFoe) {
@@ -25,13 +70,15 @@ export function createHud(core, stage, sfx, widgets) {
       const name = core.BUFF_NAMES[id] || id;
       if (id === 'burn') out.push('<i class="burn">작열 ' + v + '</i>');
       else if (id === 'divine') out.push('<i class="div">디바인 ' + v + '</i>');
+      else if (isFoe && id === 'damage_half' && unit.affixes?.includes('tough')) continue;
       else if (id === 'defProtocolPhy') out.push('<i class="good">물리방어↑</i>');
       else if (id === 'defProtocolMag') out.push('<i class="good">마법방어↑</i>');
       else out.push('<i class="' + (GOOD.includes(id) ? 'good' : 'bad') + '">' + esc(name) + (GOOD.includes(id) && v > 1 ? ' ' + v : '') + '</i>');
     }
     if (isFoe) {
       if (unit.charging) out.push('<i class="bad">차징</i>');
-      for (const a of unit.affixes || []) out.push('<i class="affix' + (a === 'frenzy' && unit.frenzied ? ' on' : '') + '">' + esc(AFFIXES[a].name) + '</i>');
+      for (const affix of affixLines(unit)) out.push('<i class="affix' + (affix.id === 'frenzy' && affix.active ? ' on' : '') +
+        '">' + esc([affix.name, affix.text].filter(Boolean).join(' · ')) + '</i>');
     } else if (unit.lastStand) out.push('<i class="last">최후의 일인</i>');
     node.innerHTML = out.join('');
   }
@@ -60,12 +107,13 @@ export function createHud(core, stage, sfx, widgets) {
     });
     const me = D.allies[Math.min(D.cur, 2)];
     chips($('#pa-chips'), me && !me.dead && !me.out ? me : { buffs: {} }, false);
-    const foe = D.enemy, def = B.door.enemies[foe.idx], many = B.door.enemies.length > 1, kind = $('#pf-kind');
-    kind.textContent = many ? (foe.idx + 1) + '/' + B.door.enemies.length : def.kind; kind.className = def.boss ? 'boss' : def.look === 'shadow' ? 'shadow' : def.elite ? 'elite' : '';
+    const foe = D.enemy, def = B.door.enemies[foe.idx];
+    enemyHeading(B);
     $('#pf-name').textContent = foe.name;
     const el = $('#pf-el'); el.textContent = ELEMENT[def.element] || ''; el.className = 'el-' + def.element;
     bar($('#pf-hp'), foe.hp, foe.maxHp, fresh); $('#pf-hpn').textContent = foe.hp.toLocaleString('en-US') + ' / ' + foe.maxHp.toLocaleString('en-US');
     chips($('#pf-chips'), foe, true);
+    placeSky();
     S.beads.burn = foe.buffs.burn || 0; S.beads.divine = foe.buffs.divine || 0;
     if (B.foe) { S.beads.x = B.foe.x; S.beads.y = FY(B.foe); }
     $('#sky-slots').innerHTML = relicMarks(core, skyRelics(B)) + Array.from({ length: fieldCap(core, B.artifacts) }, (_, i) => {
@@ -83,33 +131,33 @@ export function createHud(core, stage, sfx, widgets) {
     node.classList.toggle('retreat-outcomes', retreat && text.includes('\n'));
   }
 
-  function showIntent(intent, cd, foe) {
+  function placeSky() {
+    $('#sky').style.top = ($('#foebar').offsetHeight + 12) + 'px';
+  }
+
+  function enemyHeading(B) {
+    const idx = B.D?.enemy?.idx ?? 0;
+    const def = B.door?.enemies[idx];
+    if (!def) return;
+    const kind = $('#pf-kind');
+    const number = B.door.enemies.length > 1 ? ' ' + (idx + 1) + '/' + B.door.enemies.length : '';
+    const type = INTENT_TYPE[B.intent?.kind];
+    kind.textContent = (def.kind || '') + number + (type ? ' · 다음 ' + type : '');
+    kind.className = def.boss ? 'boss' : def.look === 'shadow' ? 'shadow' : def.elite ? 'elite' : '';
+  }
+
+  function showIntent(B, countdown) {
     const n = $('#intent'), c = $('#pf-cd');
-    if (!intent || !foe) { n.className = 'intent'; c.className = 'cd'; S.danger = 0; return; }
-    if (cd) {
-      const inTurns = (cd.inTurns ?? 0) + (cd.charge ? 1 : 0);
-      const name = [cd.name, cd.alt].filter(Boolean).join(' 또는 ') || '필살기';
-      if (cd.charge && inTurns === 1) c.textContent = '다음 턴 ' + name + '!';
-      else if (inTurns === 0) c.textContent = '이번 턴 ' + name + '!';
-      else c.textContent = name + '까지 ' + inTurns + '턴';
-      c.className = 'cd on' + (inTurns === 0 ? ' now' : '');
-      S.danger = inTurns === 0 ? 1 : inTurns <= 2 ? 0.45 : 0;
-      if (inTurns <= 1) sfx.warn();
-    } else { c.className = 'cd'; S.danger = 0; }
-    let html;
-    if (intent.kind === 'stun') html = '<small>이번 턴</small><b>기절 · 행동 불가</b>';
-    else if (intent.kind === 'rest') html = '<small>이번 턴</small><b>적 휴식</b>' +
-      (intent.vulnerable ? '<small>받는 피해 ×' + intent.vulnerable + '</small>' : '');
-    else if (intent.kind === 'charge') html = '<small>다음 행동</small><b class="sup">힘을 모은다</b>';
-    else if (intent.kind === 'sup') html = '<small>다음 행동</small><b class="sup">' + esc(intent.name) + '</b>';
-    else {
-      const range = formatRange(intent.dmg ?? intent.damageRange);
-      html = '<small>' + (intent.ult ? '필살 · ' : '다음 · ') + esc(intent.name) + '</small><b class="' + esc(intent.kind) + '">' +
-        esc(TYPE[intent.kind] || '') + '</b>' + (range ? '<strong>' + esc(range) + '</strong>' : '') + (intent.lethal ? '<u>치명</u>' : '');
-    }
-    n.innerHTML = html; n.className = 'intent on' + (intent.ult && intent.kind !== 'charge' ? ' ult' : '');
-    n.style.left = Math.round(Math.min(S.W - 40, Math.max(40, foe.x)) * 2) + 'px';
-    n.style.top = Math.max($('#foebar').offsetHeight + 14 + n.offsetHeight, (HY(foe) - 4) * 2) + 'px';
+    const { intent, D } = B;
+    const [current, future] = intentLines(intent, countdown, D?.allies[D?.cur]?.hp, core.BUFF_NAMES);
+    const boss = intent?.salience === 'boss' || intent?.salience == null && intent?.ult;
+    n.textContent = current ?? '';
+    n.className = 'intent' + (current ? ' on' : '') + (boss ? ' ult' : '');
+    c.textContent = future ?? '';
+    c.className = 'cd' + (future ? ' on' : '');
+    S.danger = boss ? 1 : 0;
+    enemyHeading(B);
+    placeSky();
   }
 
   function shortLine(line) {

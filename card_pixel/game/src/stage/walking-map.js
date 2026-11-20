@@ -87,9 +87,10 @@ export function mountWalkingMap(scene, layout, { run, instant, open, footstep })
   const canvases = scene.querySelectorAll('.map-trail');
   const doors = scene.querySelectorAll('.map-door');
   const skip = scene.querySelector('.map-skip');
-  const actors = [...scene.querySelectorAll('.map-walker-anchor')].map(node => ({
+  const readActors = () => [...scene.querySelectorAll('.map-walker-anchor')].map(node => ({
     node, seat: Number(node.dataset.seat)
   }));
+  let actors = readActors();
   paintPath(canvases[0], layout.entry);
   const tracks = layout.branches.map((branch, index) => {
     paintPath(canvases[index + 1], branch.path);
@@ -137,6 +138,7 @@ export function mountWalkingMap(scene, layout, { run, instant, open, footstep })
 
   function select(index) {
     cancelAnimationFrame(raf);
+    actors = readActors();
     if (instant()) return walkThrough(index);
     enter(ENTRY_END);
     skip.hidden = false;
@@ -169,5 +171,12 @@ export function mountWalkingMap(scene, layout, { run, instant, open, footstep })
 
   if (instant()) enter(ENTRY_END);
   else play(ENTRY_END, enter);
-  return select;
+  return {
+    select,
+    updateActors() {
+      cancelAnimationFrame(raf);
+      actors = readActors();
+      enter(ENTRY_END);
+    }
+  };
 }

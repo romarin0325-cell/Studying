@@ -243,9 +243,11 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       const current = B.D.allies[B.D.cur];
       const hp = preview.dmg.map(damage => Math.max(0, next.hp - damage)).reverse();
       const skill = preview.intent.name;
+      const effect = preview.intent.resourceEffect;
+      const mp = effect?.kind === 'mp' && !effect.preventedBy ? ' · MP ' + effect.before + '→' + effect.after : '';
       const line = preview.intent.dmg ? next.name + (hasFinalConsonant(next.name) ? '이 ' : '가 ') +
         skill + (hasFinalConsonant(skill) ? '을' : '를') + ' 받음 · 명중 시 ' +
-        damageRange(preview.dmg) + ' · HP ' + next.hp + '→' + damageRange(hp) :
+        damageRange(preview.dmg) + ' · HP ' + next.hp + '→' + damageRange(hp) + mp :
         next.name + ' 출전 · 적 ' + preview.intent.name + ' · HP ' + next.hp + '→' + next.hp;
       const pending = [...new Set(B.D.delayed?.filter(attack => attack.by === B.D.cur).map(attack => attack.name))];
       const warning = pending.length ? '예약한 ' + pending.join('·') + '도 취소된다' : '';

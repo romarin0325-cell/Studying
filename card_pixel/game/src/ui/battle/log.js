@@ -1,12 +1,33 @@
 import { $, $$, esc } from '../dom.js';
+import { BLOCKED_BY } from './hud.js';
 
 const number = value => value.toLocaleString('en-US');
 const attackKey = (side, idx, name) => [side, idx, name].join(':');
+const PREVIEW = {
+  mana_drain: 'MP 소멸', cleanse: '정화', retaliation: '피격에 따른 반격', charge: '충전',
+  defense_protocol: '방어 전환', alternating_defense: '교대 방어', lesson_guard: '피해 감소', swap_stats: '능력치 교환'
+};
+const RESPONSES = { ...BLOCKED_BY, enemy_down: '적 처치', no_hit: '피격 없음' };
+
+function ruleResponse(event) {
+  const { rule, before, after, preventedBy } = event;
+  if (preventedBy) {
+    const response = RESPONSES[preventedBy] ?? preventedBy;
+    return response + (preventedBy === 'no_hit' ? ' · 발동 안 함' :
+      ['magic_guard', 'barrier', 'evasion'].includes(preventedBy) ? '로 차단' : '로 중단');
+  }
+  if (rule === 'mana_drain' && Number.isFinite(before) && Number.isFinite(after)) return 'MP ' + before + ' → ' + after;
+  if (Number.isFinite(before?.hp) && Number.isFinite(after?.hp)) return 'HP ' + before.hp + ' → ' + after.hp;
+  if (rule === 'cleanse') return Object.keys(before ?? {}).length ? '약화 해제' : '해제할 약화 없음';
+  if (rule === 'charge') return '충전 완료';
+  return '발동';
+}
 
 export function battleLog(events, party, enemies) {
   const turns = new Map();
   const casts = new Map();
   const scheduled = new Map();
+  const forecasts = new Map();
   let queue = new Map();
   let turn = 1;
   let serial = 0;
@@ -46,6 +67,27 @@ export function battleLog(events, party, enemies) {
     queue = nextQueue;
 
     switch (event.t) {
+      case 'await': {
+        const intent = event.intent;
+        if (!intent?.rule || !intent.actionId || forecasts.has(intent.actionId)) break;
+        const idx = event.s?.enemy?.idx ?? 0;
+        const text = PREVIEW[intent.rule] ?? intent.name;
+        const row = add(text + ' 예고', [person({ side: 'enemy', idx })], 'forecast');
+        forecasts.set(intent.actionId, { row, text });
+        break;
+      }
+      case 'rule': {
+        if (!event.actionId) break;
+        const forecast = forecasts.get(event.actionId);
+        const text = forecast?.text ?? PREVIEW[event.rule] ?? event.actionId.split('/').at(-1);
+        const updated = text + (forecast ? ' 예고 → ' : ' · ') + ruleResponse(event);
+        if (forecast) {
+          forecast.row.text = updated;
+          const target = person(event.target);
+          if (target?.id && target.id !== forecast.row.faces[0]?.id) forecast.row.faces.push(target);
+        } else add(updated, [person(event.target)], 'forecast');
+        break;
+      }
       case 'act': {
         const { who, skill } = event;
         source = who;

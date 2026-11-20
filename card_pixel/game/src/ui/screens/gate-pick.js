@@ -5,21 +5,21 @@ import { chooseGateReward } from '../../engine/run.js';
 import { RELIC_LIMIT } from '../../engine/rooms.js';
 import { treasureScreen } from './treasure.js';
 
-export function gatePickScreen(run, ui) {
-  ui.playMusic();
+export function gatePickScreen(run, ui, { node = $('#pick'), inline = false, onRelic } = {}) {
+  if (!inline) ui.playMusic();
   const { card, cardRow } = ui.widgets;
   const { sfx } = ui.audio;
   const { candidates, relic } = run.pending;
   const artifact = ui.artifacts.get(relic);
-  const node = $('#pick');
-  node.innerHTML = head(run, '문지기 보상', run.floor + '층') + '<div class="scroll">' +
+  node.innerHTML = (inline ? '<h4>문지기 보상</h4>' : head(run, '문지기 보상', run.floor + '층')) +
+    '<div class="' + (inline ? 'decision-body' : 'scroll') + '">' +
     '<p class="lead">그림자 한 명을 깨우거나 유물을 장착한다.</p><div class="cards">' +
-    candidates.map(id => cardRow(run, id, { tag: '이번 원정 합류' })).join('') +
+    candidates.map(id => cardRow(run, id, { tag: '이번 원정 합류', offer: true })).join('') +
     (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + relicIcon(relic, 32) +
       '<span><b>' + esc(artifact.name) + '</b><small>' + esc(relicEffect(artifact)) + '</small></span></button>' : '') +
     '</div></div><div class="footer"><button class="btn" id="b-leave">두고 가기</button>' +
     '<button class="btn go" id="b-gate-take" disabled>보상을 고른다</button></div>';
-  show('pick');
+  if (!inline) show('pick');
   let choice;
   const take = $('#b-gate-take', node);
   const rows = $$('[data-id], [data-relic]', node);
@@ -39,13 +39,14 @@ export function gatePickScreen(run, ui) {
       ui.leave();
     } else {
       sfx.gem();
-      treasureScreen(run, ui, selected.id, { equipped: run.relics.includes(selected.id) });
+      if (onRelic) onRelic(selected.id);
+      else treasureScreen(run, ui, selected.id, { equipped: run.relics.includes(selected.id) });
     }
   }
   take.addEventListener('click', () => {
     const selected = choice;
     const count = selected?.kind === 'join' ? replacementCount(run, 1) : 0;
-    if (count) chooseReplacements(run, ui, count, ([replaceId]) => apply({ ...selected, replaceId }));
+    if (count) chooseReplacements(run, ui, count, ([replaceId]) => apply({ ...selected, replaceId }), { incoming: [selected.id] });
     else apply(selected);
   });
   $('#b-leave', node).addEventListener('click', ui.leave);

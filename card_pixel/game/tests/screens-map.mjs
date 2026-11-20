@@ -13,7 +13,8 @@ import { create as makeRoster, POSITION } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import { createSaveStore } from '../src/engine/save.js';
 import { getWalkLayout } from '../src/stage/walking-map.js';
-import { doorDecision } from '../src/ui/screens/map.js';
+import { doorDecision, doorLesson } from '../src/ui/screens/map.js';
+import { DUNGEONS } from '../src/content/dungeons.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -71,6 +72,9 @@ function reachFloor(dungeonId, seed, floor) {
 const cases = {
   'one-door': { dungeon: 'ember_volcano', seed: 21, floor: 1, lines: ['물리 강공 · 결정 1'], select: 0, mode: 'speed' },
   'two-doors': { dungeon: 'dawn_forest', seed: 7, floor: 3, lines: ['물리 강공 · 결정 1', '마법 강공 · 결정 1'], select: 0 },
+  'formation-preview': { dungeon: 'twilight_cathedral', seed: 21, floor: 2,
+    lines: ['2턴째 예행 · 결정 1', '2턴째 예행 · 결정 2'], select: 1, swap: true },
+  'boss-lesson': { dungeon: 'twilight_cathedral', seed: 21, floor: 8, lines: ['사랑의 여신 아이리스'] },
   'three-doors': { dungeon: 'ember_volcano', seed: 21, floor: 3, lines: ['소환의 샘', '혼돈의 제단', '사건'] },
   'mid-walk': { dungeon: 'dawn_forest', seed: 7, floor: 3, lines: ['물리 강공 · 결정 1', '마법 강공 · 결정 1'], select: 0, frame: 'walking' },
   'door-zoom': { dungeon: 'ember_volcano', seed: 21, floor: 3, lines: ['소환의 샘', '혼돈의 제단', '사건'], select: 1, frame: 'zoom' }
@@ -93,16 +97,26 @@ function fixture(spec) {
   store.save({ run, profile });
   const savedMap = session;
   assert.deepEqual(store.load()?.run, initial);
-  let expected, destination;
+  let expected, destination, entering;
+  const party = Run.defaultParty(run);
+  const reserve = spec.swap ? run.bench.find(id => !party.includes(id)) : null;
+  const lesson = run.doors.map(door => doorLesson(Run.getTempoView(run, door.index)));
   if (select != null) {
-    command(Run.chooseDoor, run, select);
-    destination = run.room.status === 'order' ? 'order' : run.room.type;
+    if (run.doors[select].enemies.length) {
+      entering = party.slice();
+      if (reserve) entering[0] = reserve;
+      command(Run.enterBattleDoor, run, { floor, index: select, partyIds: entering });
+      destination = 'battle';
+    } else {
+      command(Run.chooseDoor, run, select);
+      destination = run.room.type;
+    }
     store.save({ run, profile });
     expected = JSON.parse(session).run.run;
-    assert.deepEqual(store.load()?.run, run);
+    assert.deepEqual(store.load()?.run, expected);
     assert.equal(Run.chooseDoor(run, select).ok, false);
   }
-  return { ...spec, session: savedMap, party: Run.defaultParty(run), expected, destination };
+  return { ...spec, session: savedMap, party, reserve, entering, lesson, expected, destination };
 }
 
 async function inject(page, session) {
@@ -132,6 +146,13 @@ async function assertMap(page, model) {
   })));
   assert.deepEqual(actors, model.party.flatMap((id, index) => id ? [{ id, position: POSITION[index] }] : []));
   assert.equal(await map.locator('.floor-cell.cur small').textContent(), String(model.floor));
+  for (const [index, lesson] of model.lesson.entries()) {
+    if (lesson) assert.equal(await map.locator(`[data-door-preview="${index}"] .door-lesson span`).textContent(), lesson);
+  }
+  if (model.lines.length === 1 && model.floor !== 3) {
+    assert.equal(await scene.locator('[data-map-door]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await map.locator('#b-go').textContent(), '이 편성으로 입장');
+  }
   return scene;
 }
 
@@ -190,6 +211,20 @@ async function runCase(browser, model) {
       if (model.mode === 'speed') await page.evaluate(() => { window.__game.clock.speed = 2; });
       const input = model.frame === 'zoom' ? openFromList : openInScene;
       await input.click();
+      if (model.entering) {
+        assert.equal(await page.evaluate(() => window.mapGalleryWrites), 0);
+        assert.equal(await page.evaluate(() => window.__game.run.phase), 'map');
+        const map = page.locator('#map.on');
+        if (model.reserve) {
+          await map.locator(`[data-bench="${model.reserve}"]`).click();
+          await map.locator('.relay-seat[data-slot="0"]').click();
+          assert.deepEqual(await map.locator('.map-actor').evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), model.entering);
+          await map.locator('#b-go').scrollIntoViewIfNeeded();
+          image = await capture(page);
+        }
+        await map.locator('#b-go').click();
+        if (model.frame) await scene.scrollIntoViewIfNeeded();
+      }
       const destination = page.locator('#' + model.destination + '.on');
       if (model.frame) {
         assert.equal(await scene.getAttribute('data-walk-phase'), 'chosen');
@@ -216,6 +251,7 @@ async function runCase(browser, model) {
       }
       assert.equal(await destination.count(), 1, 'The chosen room should already be open');
       await assertSavedChoice(page, model);
+      if (model.entering) assert.deepEqual(await page.evaluate(() => window.__game.B.party), model.entering);
     }
     assert.deepEqual(errors, []);
     return image;
@@ -249,6 +285,16 @@ assert.ok(args.case === undefined || Object.hasOwn(cases, args.case), 'Unknown c
 const fixtures = (args.case ? [args.case] : Object.keys(cases)).map(name => ({ name, model: fixture(cases[name]) }));
 if (args['validate-only']) {
   for (const { name, model } of fixtures) console.log(name + ': ' + model.lines.join(' | '));
+  for (const dungeon of Object.values(DUNGEONS).filter(dungeon => dungeon.layout !== 'intro')) {
+    for (const floor of [2, 6]) {
+      const run = reachFloor(dungeon.id, 21, floor);
+      for (const door of run.doors) {
+        const view = Run.getTempoView(run, door.index);
+        assert.equal(view.lesson.bossId, run.boss);
+        assert.match(doorLesson(view), /^2턴째 /);
+      }
+    }
+  }
 } else {
   const browser = await chromium.launch({ channel: 'chrome' });
   try {

@@ -1,11 +1,10 @@
 import { $, $$, esc, show } from '../dom.js';
-import { head, TYPE } from '../widgets.js';
+import { departureLoss, head, heirloomOffer, TYPE } from '../widgets.js';
 import { ELEMENT, GRADE } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
 
-export function reinforceScreen(run, ui) {
-  ui.playMusic();
-  const node = $('#reinforce');
+export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = false } = {}) {
+  if (!inline) ui.playMusic();
   const pending = run.pending;
   const limit = pending.limit ?? 6;
   const full = run.bench.length >= limit;
@@ -38,23 +37,27 @@ export function reinforceScreen(run, ui) {
       esc(ELEMENT[fighter.element] ?? fighter.element) + '</span></small></span>' +
       '<span class="reinforce-stats">HP ' + hp + ' · 공 ' + atk + ' · 마공 ' + matk + '</span>' +
       '<span class="reinforce-trait">' + esc(fighter.trait?.desc ?? '') + '</span>' +
-      '<span class="reinforce-skills">' + skills + '</span></span></button>';
+      '<span class="reinforce-skills">' + skills + '</span>' + heirloomOffer(fighter) + '</span></button>';
   }
 
   function render() {
     const scrollTop = $('.scroll', node)?.scrollTop ?? 0;
-    node.innerHTML = head(run, '동료 보충', run.floor + '층') + '<div class="scroll">' +
-      '<p class="lead">동료 ' + run.bench.length + '/' + limit + '명</p><div class="reinforce-candidates">' +
+    node.innerHTML = (inline ? '<h4>동료 보충</h4>' : head(run, '동료 보충', run.floor + '층')) +
+      '<div class="' + (inline ? 'decision-body' : 'scroll') + '">' +
+      '<p class="lead">' + (full ? '동료 ' : '무료 합류 · ') + run.bench.length + '/' + limit + '명</p><div class="reinforce-candidates">' +
       candidates.map(candidateCard).join('') + '</div>' +
       (full && incoming ? '<h3>보낼 동료</h3><div class="reserve-cards">' +
         run.bench.map(id => '<button class="win" data-release="' + esc(id) + '" aria-pressed="' + (outgoing === id) + '">' +
           faceBadge(id) + '</button>').join('') + '</div>' : '') +
       '<p id="reinforce-feedback" class="run-status" role="status"></p></div>' +
-      '<div class="footer"><button class="btn" id="b-reinforce-pass">넘기기</button>' +
-      '<button class="btn go" id="b-reinforce-take"' + (canResolve && incoming && (!full || outgoing) ? '' : ' disabled') +
-      '>데려간다</button></div>';
-    show('reinforce');
-    $('.scroll', node).scrollTop = scrollTop;
+      (outgoing ? '<p class="loss release-loss">' + esc(card(outgoing).name + ' · ' + departureLoss(run, outgoing)) + '</p>' : '') +
+      '<div class="footer"><button class="btn" id="b-reinforce-pass">' + (full ? '현재 여섯 유지' : '자리를 비워 둔다') + '</button>' +
+      '<button class="btn' + (full ? '' : ' go') + '" id="b-reinforce-take"' + (canResolve && incoming && (!full || outgoing) ? '' : ' disabled') +
+      '>' + esc(incoming ? (outgoing ? card(outgoing).name + ' 보내고 ' : '') + card(incoming).name + ' 합류' : '합류할 동료 고르기') + '</button></div>';
+    if (!inline) {
+      show('reinforce');
+      $('.scroll', node).scrollTop = scrollTop;
+    }
     for (const button of $$('[data-candidate]', node)) button.addEventListener('click', () => {
       incoming = button.dataset.candidate;
       outgoing = null;

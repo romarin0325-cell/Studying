@@ -3,11 +3,33 @@ import { tools } from './settings.js';
 import { ELEMENT, GRADE } from '../engine/roster.js';
 import { AFFIXES } from '../content/affixes.js';
 import { ROSTER_LIMIT } from '../content/tempo.js';
+import { heirloomSkill } from '../engine/bridge.js';
 
 export const TYPE = { phy: '물리', mag: '마법', sup: '보조', rest: '휴식' };
 export const formatRange = range => Array.isArray(range)
   ? range[0] === range[1] ? String(range[0]) : range.join('~')
   : String(range ?? '');
+export const bonusPercent = bonus => Math.round((bonus ?? 0) * 100);
+export function blessingText(view) {
+  if (!view) return '';
+  const { expeditionBonus, battleBonus, effectiveBonus, active } = view;
+  return '원정 +' + bonusPercent(expeditionBonus) + '% · 이번 +' + bonusPercent(battleBonus) +
+    '% → 적용 +' + bonusPercent(effectiveBonus) + '% · ' + (active ? '출전 중' : '대기 중');
+}
+
+export function heirloomOffer(fighter) {
+  const skill = fighter && heirloomSkill(fighter);
+  return skill ? '<small class="heir-offer">쓰러질 때 남김 · ' + esc(skill.name) + '</small>' : '';
+}
+
+export function departureLoss(run, id) {
+  const held = run.heirlooms?.[id];
+  return [
+    '원정 축복 +' + bonusPercent(run.blessings?.[id]) + '%',
+    held && '보유 유품 ' + (held.name ?? held.skill?.name ?? '') + ' 소실',
+    '이번 원정 재합류 불가'
+  ].filter(Boolean).join(' · ');
+}
 export const DOOR = {
   wild: ['전투', '몽마가 기다린다'], elite: ['정예', '접두사 둘을 단 강적'], gate: ['문지기', '그림자의 릴레이 · 이기면 한 명이 동료가 된다'],
   boss: ['보스', '꿈의 주인'], spring: ['소환의 샘', '꿈의 결정으로 동료를 깨운다'], altar: ['혼돈의 제단', '무작위 동료에게 축복 · 세 번까지 굴린다']
@@ -16,11 +38,15 @@ export const foeFlip = def => (def.facing || 'right') === 'right';
 export const replacementCount = (run, incoming) => !run.daily && run.tempoVersion === 2
   ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
 
-export function chooseReplacements(run, ui, count, action) {
+export function chooseReplacements(run, ui, count, action, { incoming = [], label } = {}) {
   const selected = new Set();
-  ui.sheets.openSheet('보낼 동료 ' + count + '명', '<div class="reserve-cards">' +
+  const names = ids => ids.map(id => ui.widgets.card(id)?.name || id).join(' · ');
+  ui.sheets.openSheet('보낼 동료 ' + count + '명', (incoming.length ? '<div class="cards">' +
+    incoming.map(id => ui.widgets.cardRow(run, id, { skills: false, offer: true, tag: '합류' })).join('') + '</div>' : '') +
+    '<div class="reserve-cards">' +
     run.bench.map(id => '<button class="win" data-dismiss-id="' + esc(id) + '" aria-pressed="false">' +
-      ui.widgets.faceBadge(id) + '</button>').join('') + '</div><button class="btn go" id="b-dismiss-confirm" disabled>교체 확정</button>');
+      ui.widgets.faceBadge(id) + '</button>').join('') + '</div><div class="loss release-loss" id="dismiss-loss"></div>' +
+    '<button class="btn go" id="b-dismiss-confirm" disabled>교체 확정</button>');
   const confirm = $('#b-dismiss-confirm');
   for (const button of $$('#sh-body [data-dismiss-id]')) button.addEventListener('click', () => {
     const id = button.dataset.dismissId;
@@ -28,6 +54,9 @@ export function chooseReplacements(run, ui, count, action) {
     else if (selected.size < count) selected.add(id);
     button.setAttribute('aria-pressed', selected.has(id));
     confirm.disabled = selected.size !== count;
+    $('#dismiss-loss').innerHTML = [...selected].map(id => '<p>' + esc(names([id]) + ' · ' + departureLoss(run, id)) + '</p>').join('');
+    confirm.textContent = selected.size !== count ? '교체 확정' : label?.([...selected]) ??
+      (incoming.length ? names([...selected]) + ' 보내고 ' + names(incoming) + ' 합류' : '교체 확정');
     ui.audio.sfx.tap();
   });
   confirm.addEventListener('click', () => {
@@ -81,7 +110,8 @@ export function createWidgets(ASSETS, card) {
     return '<button class="cardrow win g-' + c.grade + (opt.cls ? ' ' + opt.cls : '') + '" data-id="' + id + '"' + (opt.sheet ? ' data-sheet="' + id + '"' : '') + '><span class="pic">' + sprite(id) + '</span><span class="txt">' +
       '<div class="nm">' + esc(c.name) + '<i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + '</i>' + (opt.tag ? '<i class="tag">' + esc(opt.tag) + '</i>' : '') + '</div>' +
       '<div class="st">HP ' + c.stats.hp + ' · 공 ' + c.stats.atk + ' · 마공 ' + c.stats.matk + ' · 방 ' + c.stats.def + '/' + c.stats.mdef + '</div>' +
-      '<div class="trait">' + esc(c.trait.desc) + '</div>' +
+      '<div class="trait">' + esc(c.trait.desc) + '</div>' + (opt.offer ? heirloomOffer(c) : '') +
+      (opt.detail ? '<small class="card-detail">' + esc(opt.detail) + '</small>' : '') +
       (opt.skills !== false ? '<div class="sk">' + c.skills.map(s => esc(s.name) + '<small>' + TYPE[s.type] + (s.cost ? ' ' + s.cost : '') + '</small>').join(' · ') + '</div>' : '') +
       '<div class="badges">' + badges(run, id) + '</div></span></button>';
   }

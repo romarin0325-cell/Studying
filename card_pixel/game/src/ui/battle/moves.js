@@ -42,7 +42,8 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
      of six shapes chosen from the skill's own data, then one impact. Quiet moves (A) skip all of it. */
   function isBig(p) {
     const { tier, val } = p.e.skill;
-    return !!p.e.ult || !!p.e.heirloom || (!p.isFoe && tier >= 3 && (!Number.isFinite(val) || val >= 2));
+    return (p.e.salience === 'boss' || p.e.salience == null && p.e.ult) ||
+      !!p.e.heirloom || (!p.isFoe && tier >= 3 && (!Number.isFinite(val) || val >= 2));
   }
   function shapeOf(skill, val) {
     const fx = skill.effects || [];
@@ -151,8 +152,9 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     else { St.ring(St.X(target), CY(target), why === 'barrier' ? '#ffc857' : '#8ea2ff', 28); label(why === 'barrier' ? '배리어! 무효' : '매직가드! 무효', target, 'good'); sfx.guard(); }
     await wait(0.3);
   }
-  async function settleMove(p) {
+  async function settleMove(p, seen) {
     try {
+      if (p.stage === 'ready' && p.e.salience === 'boss' && p.target) await bigMove(p, seen);
       if (p.stage === 'ready') { p.actor.pose = poseFor(p.actor, p.kind); await wait(0.12); }
       if (p.finishing) Object.assign(p.actor, { ox: 0, oy: 0 });
       else await tween(p.actor, { ox: 0, oy: 0 }, 0.1);

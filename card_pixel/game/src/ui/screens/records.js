@@ -16,7 +16,7 @@ export function recordTable(rows) {
   </tbody></table>`;
 }
 
-export function runRecordSheet(run, card, openSheet) {
+export function runRecordSheet(run, card, openSheet, showBattleLog) {
   const stats = run.stats;
   openSheet('원정 기록', `<div class="meta-sheet">
     <p>${esc(DUNGEONS[run.dungeonId].name)} · ${DIFFICULTY_NAME[run.difficulty]} · ${run.result === 'win' ? '생환' : '실패'}</p>
@@ -29,10 +29,12 @@ export function runRecordSheet(run, card, openSheet) {
       ['최후의 일인', `${stats.lastStands}회`],
       ['대박 축복', `${stats.jackpots}회`]
     ])}
+    ${showBattleLog && run.lastBattleLog?.length ? '<button class="btn" id="meta-latest-battle">마지막 전투 기록</button>' : ''}
   </div>`);
+  $('#meta-latest-battle')?.addEventListener('click', () => showBattleLog(run.lastBattleLog));
 }
 
-export function recordsScreen(node, profile, card, openSheet, replayEnding, renderDailyHistory) {
+export function recordsScreen(node, profile, card, openSheet, replayEnding, renderDailyHistory, showBattleLog) {
   const { records } = profile;
   const longest = records.longestServing;
   const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
@@ -72,6 +74,6 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
       Object.values(CONTRACTS).map(({ id, name }) => [name, stamps?.[id] ? '획득' : '미획득'])
     )}</div>`);
   });
-  $('#meta-latest-record', node)?.addEventListener('click', () => runRecordSheet(latest, card, openSheet));
+  $('#meta-latest-record', node)?.addEventListener('click', () => runRecordSheet(latest, card, openSheet, showBattleLog));
   $('#meta-replay-ending', node)?.addEventListener('click', replayEnding);
 }

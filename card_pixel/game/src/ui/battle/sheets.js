@@ -1,14 +1,14 @@
 import { $, esc } from '../dom.js';
-import { TYPE, foeFlip, riftKindLabel, statGrid } from '../widgets.js';
+import { blessingText, TYPE, foeFlip, riftKindLabel, statGrid } from '../widgets.js';
 import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../relics.js';
 import { shortRiftDate } from '../screens/daily-rift.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
-import { AFFIXES } from '../../content/affixes.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
 import { CONTRACTS } from '../../content/contracts.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
-import { FIELD, GOOD, fieldCap, skyRelics } from './hud.js';
+import { affixLines, FIELD, GOOD, fieldCap, intentLines, skyRelics } from './hud.js';
+import * as Run from '../../engine/run.js';
 import { fieldInfo } from './fields.js';
 
 /* What each status and field blessing does. Numbers follow the card rules
@@ -57,11 +57,15 @@ export function createDetails(core, widgets, openSheet) {
   }
   const blessLine = (run, id) => '<li><i class="good">축복 +' + Math.round(run.blessings[id] * 100) + '%</i>모든 능력치, 치명타율 +' + core.GAME_CONSTANTS.BLESSING_CRIT + '%p · 회피율 +' + core.GAME_CONSTANTS.BLESSING_EVA + '%p</li>';
   /** A companion outside battle (map, spring, start): card numbers, trait, heirloom, every skill in full. */
-  function charSheet(run, id, { loaned = false, onClose } = {}) {
+  function charSheet(run, id, { loaned = false, onClose, blessing } = {}) {
     const c = card(id); if (!c) return;
     const s = c.stats, h = run && run.heirlooms[id], from = h && (card(h.form || h.from) || card(h.from));
-    let html = cardHead(id, ROLE_OF(c)) + statGrid([['체력', s.hp, s.hp], ['공격', s.atk, s.atk], ['마공', s.matk, s.matk], ['방어', s.def, s.def], ['마방', s.mdef, s.mdef]]);
-    if (run && run.blessings[id]) html += '<ul class="stl">' + blessLine(run, id) + '</ul>';
+    const actual = blessing?.stats ?? s;
+    let html = cardHead(id, ROLE_OF(c)) + statGrid([['체력', actual.maxHp ?? actual.hp ?? s.hp, s.hp],
+      ['공격', actual.atk ?? s.atk, s.atk], ['마공', actual.matk ?? s.matk, s.matk],
+      ['방어', actual.def ?? s.def, s.def], ['마방', actual.mdef ?? s.mdef, s.mdef]]);
+    if (blessing) html += '<p class="seat-blessing">' + esc(blessingText(blessing)) + '</p>';
+    else if (run?.blessings[id]) html += '<ul class="stl">' + blessLine(run, id) + '</ul>';
     const heir = from ? heirBlock(h.skill ?? heirloomSkill(from), from.name, from) : '';
     html += '<h4>특성</h4><p>' + esc(c.trait.desc) + '</p>' + heir + '<h4>기술</h4>' + c.skills.map(sk => skillBlock(sk, c)).join('');
     const offered = loaned ? heirloomSkill(c) : null;
@@ -98,7 +102,12 @@ export function createDetails(core, widgets, openSheet) {
     }
     const extra = [];
     if (shown.lastStand) extra.push('<li><i class="bad">최후의 일인</i>공격력·마법공격력 ×1.5, 치명타율 +25%p</li>');
-    if (run.blessings[id]) extra.push(blessLine(run, id));
+    if (!B.blessingViews?.has(id)) {
+      B.blessingViews?.set(id, Run.getBlessingView?.(run, B.door.index, B.party, id));
+    }
+    const blessing = B.blessingViews?.get(id);
+    if (blessing) extra.push('<li class="seat-blessing">' + esc(blessingText(blessing)) + '</li>');
+    else if (run.blessings[id]) extra.push(blessLine(run, id));
     html += '<h4>상태</h4>' + statusList(shown.buffs, extra, B.artifacts);
     const traitNote = /^syn_/.test(c.trait.type) ? (init && init.activeTrait ? ' (발동 중)' : ' (조건 부족)') : c.trait.type === 'pos_stat_boost' ? (c.trait.pos === i ? ' (자리 효과 발동)' : ' (' + POSITION[c.trait.pos] + ' 전용)') : '';
     const skills = live?.u.skills || c.skills;
@@ -120,12 +129,12 @@ export function createDetails(core, widgets, openSheet) {
     if (strong.length) html += '<p class="sm">상성: ' + strong.map(el => ELEMENT[el]).join('·') + ' 속성 동료가 치면 피해 ×' + core.Logic.getElementalMultiplier(strong[0], def.element) + '</p>';
     const extra = [];
     if (shown.charging) extra.push('<li><i class="bad">차징</i>힘을 모으는 중. 다음 행동이 크다</li>');
-    for (const a of shown.affixes || []) extra.push('<li><i class="affix">' + esc(AFFIXES[a].name) + (a === 'frenzy' && shown.frenzied ? ' 발동' : '') + '</i>' + esc(AFFIXES[a].desc) + '</li>');
-    html += '<h4>상태 · 접두사</h4>' + statusList(shown.buffs, extra, B.artifacts);
+    for (const affix of affixLines(shown)) extra.push('<li><i class="affix">' + esc(affix.name) + '</i>' + esc(affix.text) + '</li>');
+    const buffs = { ...shown.buffs };
+    if (shown.affixes?.includes('tough')) delete buffs.damage_half;
+    html += '<h4>상태 · 접두사</h4>' + statusList(buffs, extra, B.artifacts);
     if (def.source) html += '<h4>특성</h4><p>그림자에게 원본 카드 특성은 적용되지 않는다.</p>';
-    const cd = $('#pf-cd'), lines = [];
-    if (B.intent) lines.push(B.intent.kind === 'stun' ? '이번 턴은 기절해서 못 움직인다.' : '다음 행동: ' + B.intent.name + (B.intent.dmg ? ' · ' + TYPE[B.intent.kind] + ' ' + (B.intent.dmg[0] === B.intent.dmg[1] ? B.intent.dmg[0] : B.intent.dmg[0] + '~' + B.intent.dmg[1]) : ''));
-    if (cd.classList.contains('on')) lines.push(cd.textContent);
+    const lines = intentLines(B.intent, B.countdown, B.D.allies[B.D.cur]?.hp, core.BUFF_NAMES).filter(Boolean);
     if (def.note) lines.push(def.note);
     if (lines.length) html += '<h4>행동</h4>' + lines.map(t => '<p>' + esc(t) + '</p>').join('');
     if (many) html += '<p class="sm">이 문: ' + B.door.enemies.map((d, k) => (k === shown.idx ? '▶ ' : '') + d.name).map(esc).join(' → ') + '</p>';

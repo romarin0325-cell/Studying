@@ -4,6 +4,7 @@ import { tools } from './settings.js';
 import { sheetMarkup } from './sheet.js';
 import { enterRun } from './run/index.js';
 import { createDetails } from './battle/sheets.js';
+import { openBattleLog } from './battle/log.js';
 import { titleScreen } from './screens/title.js';
 import { hubScreen } from './screens/hub.js';
 import { dungeonsScreen, preparationSheet } from './screens/dungeons.js';
@@ -124,7 +125,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       if (id === 'collection') collectionScreen(content, { profile, roster, widgets, core, inspect });
       else if (id === 'notebook') notebookScreen(content, profile, roster.card);
       else if (id === 'records') recordsScreen(content, profile, roster.card, sheets.openSheet, () => showEnding(),
-        dailyStore?.history ? showDailyHistory : null);
+        dailyStore?.history ? showDailyHistory : null, log => openBattleLog(sheets, widgets, log));
     });
   }
 
@@ -341,7 +342,8 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const hubReturners = run.result === 'win' ? run.bench.filter(id => next.recruits[id]) : [];
     const returners = [...new Set([...recruits, ...hubReturners, ...(next.ui?.returners || [])])].slice(0, 3);
     const announcement = { dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters };
-    const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen };
+    const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen,
+      lastBattleLog: run.lastBattleLog };
     run = null;
     review = null;
     updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });

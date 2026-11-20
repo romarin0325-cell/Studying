@@ -201,7 +201,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .run-opponents .run-face { width: 32px; }
 .run-opponents b, .run-opponents small, .relay-seat b, .relay-seat small, .run-relic-choice b, .run-relic-choice small { display: block; }
 .run-opponents small, .relay-seat small, .run-relic-choice small { color: var(--dim); }
-.relay-seats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr) 36px) minmax(0, 1fr); align-items: center; margin: 10px 0 8px; }
+.relay-seats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr) 48px) minmax(0, 1fr); align-items: stretch; margin: 10px 0 8px; }
 .relay-seat { min-width: 0; display: grid; grid-template: 17px 68px 20px 28px / minmax(0, 1fr); justify-items: center; gap: 4px; padding: 6px 4px; text-align: center; }
 .relay-seat-art, .reinforce-art { display: block; width: 100%; height: 100%; }
 .relay-seat-art img, .reinforce-art img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
@@ -213,7 +213,17 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   font-size: 11px; line-height: 14px; word-break: keep-all; overflow: hidden;
 }
 .relay-link { height: 48px; padding: 0; border: 0; background: transparent; color: var(--gold); font-size: 22px; }
+.relay-link { align-self: center; }
 .relay-link:disabled { color: var(--line2); cursor: default; }
+.relay-seat .seat-blessing, .seat-blessing, .card-detail { color: var(--aqua); font: 12px/16px var(--px); }
+.formation-actions { display: flex; gap: 6px; margin-top: 8px; }
+.formation-actions #b-go { flex: 1; }
+.formation-actions .btn { min-height: 48px; }
+.reserve-cards button:has(.seat-blessing) { flex-direction: column; text-align: center; }
+.heir-offer { display: block; color: var(--gold); font: 12px/16px var(--px); }
+.release-loss { margin: 8px 0; }
+#sheet .release-loss p, #result .release-loss, #sheet #event-target-effect.loss { color: var(--coral); }
+.relic-receipt { display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 8px; }
 .relay-flow, .relay-blessing { display: flex; align-items: center; gap: 8px; }
 .relay-blessing { justify-content: space-between; padding: 4px 8px; margin-top: 8px; color: var(--gold); }
 .relay-survival { display: grid; gap: 2px; margin-bottom: 8px; color: var(--dim); }

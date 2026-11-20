@@ -74,7 +74,7 @@ export function awakenScreen(run, ui) {
   const cards = candidates.map(id => {
     const tag = introCandidates.includes(id) ? '대여 전투 생환' :
       id === run.profileShard ? '예약 후보' : near && card(id).element === near.element ? '같은 속성' : '';
-    return cardRow(observed, id, { tag });
+    return cardRow(observed, id, { tag, offer: true });
   }).join('');
   node.innerHTML = head(run, '첫 깨우기', '남은 선택 ' + pending.remaining) + '<div class="scroll">' + allies +
     '<p class="lead">' + info + '</p><div class="cards" id="wake-choices">' + cards + '</div></div>' +
@@ -100,6 +100,7 @@ export function awakenScreen(run, ui) {
     if (intro && !run.pending && Array.isArray(result.awakened)) {
       return completed(run.bench.filter(id => !result.awakened.includes(id)), result.awakened, true);
     }
+    if (!intro && !run.pending) ui.showAwakened(result.awakened);
     ui.route();
   });
 }

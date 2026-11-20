@@ -7,7 +7,7 @@ import { $, esc, show } from '../dom.js';
 import { createSheet, sheetMarkup } from '../sheet.js';
 import { createWidgets } from '../widgets.js';
 import { createDetails } from '../battle/sheets.js';
-import { battleMarkup, contractSettlement, createBattleView } from '../battle/view.js';
+import { battleMarkup, createBattleView } from '../battle/view.js';
 import { openBattleLog } from '../battle/log.js';
 import { awakenScreen } from '../screens/awaken.js';
 import { mapScreen } from '../screens/map.js';
@@ -15,7 +15,7 @@ import { orderScreen } from '../screens/order.js';
 import { springScreen } from '../screens/spring.js';
 import { altarScreen } from '../screens/altar.js';
 import { eventScreen } from '../screens/event.js';
-import { treasureScreen } from '../screens/treasure.js';
+import { treasureReceipt, treasureScreen } from '../screens/treasure.js';
 import { gatePickScreen } from '../screens/gate-pick.js';
 import { reinforceScreen } from '../screens/reinforce.js';
 
@@ -66,14 +66,14 @@ function mount(frame, shared) {
       details.charSheet(battle.expedition, button.dataset.sheet);
     }
   });
-  return { frame, core, roster, widgets, audio, sheets, battle };
+  return { frame, core, roster, widgets, audio, sheets, battle, details };
 }
 
 export function enterRun(run, host) {
   if (run.phase === 'done') return host.finish(run);
   const frame = $('#frame') || $('#app');
   if (!runtime || runtime.frame !== frame || !$('#battle')) runtime = mount(frame, host.runtime);
-  const { core, roster, widgets, audio, sheets, battle } = runtime;
+  const { core, roster, widgets, audio, sheets, battle, details } = runtime;
   battle.attach(run);
   const { assets } = host;
   const icon = (id, scale = 1) => {
@@ -92,9 +92,13 @@ export function enterRun(run, host) {
     if (result.ok) host.save(run);
     return result;
   }
-  function leave() {
+  let mapEntry = false;
+  let awakened = [];
+  let receipt = '';
+  function leave(equipped) {
     const result = command(Run.leaveRoom);
     if (!result.ok) return;
+    if (typeof equipped === 'string') receipt = equipped;
     if (result.left && run.phase !== 'done') command(Run.nextFloor);
     route();
   }
@@ -105,46 +109,90 @@ export function enterRun(run, host) {
     if (!command(Run.leaveRoom).ok || !command(Run.nextFloor).ok) return;
     enterDoor(0);
   }
+  function enterFormation(index, partyIds) {
+    const result = Run.enterBattleDoor
+      ? command(Run.enterBattleDoor, { floor: run.floor, index, partyIds })
+      : Run.chooseDoor(run, index);
+    if (!Run.enterBattleDoor && result.ok) {
+      const order = command(Run.confirmOrder, partyIds);
+      if (!order.ok) { host.save(run); route(); return order; }
+    }
+    mapEntry = result.ok;
+    return result;
+  }
   const ui = {
     core, roster, widgets, audio, sheets, icon, scene, artifacts, command, leave, route, enterDoor,
+    enterFormation,
+    companion: (id, blessing) => details.charSheet(run, id, { blessing }),
+    showAwakened(ids) {
+      const applied = host.profile?.()?.records?.appliedRuns ?? [];
+      if (!applied.some(id => !String(id).includes('/dawn_forest/'))) awakened = ids ?? [];
+    },
     playMusic: () => host.runtime.music?.play(run.dungeonId)
   };
 
-  function routeBattleReward(result) {
-    if (result.relic?.equipped && (!run.pending || run.pending.kind === 'reinforcement')) {
-      treasureScreen(run, ui, result.relic.id, { equipped: true });
-      return true;
+  function battleDecision(node, result, next) {
+    let equipped = result.relic?.equipped ? result.relic.id : run.lastBattleRelic;
+    const decision = document.createElement('div');
+    decision.className = 'victory-decision';
+    function render() {
+      node.innerHTML = treasureReceipt(artifacts.get(equipped));
+      node.append(decision);
+      next.hidden = true;
+      const options = { node: decision, inline: true, onEquipped, onRelic: onEquipped };
+      const rewardUi = { ...ui, leave: leaveDecision };
+      if (run.pending?.kind === 'reinforcement') reinforceScreen(run, rewardUi, options);
+      else if (run.pending?.kind === 'gate') gatePickScreen(run, rewardUi, options);
+      else if (run.pending?.kind === 'relic') treasureScreen(run, rewardUi, run.pending.id, options);
+      else if (equipped) {
+        decision.replaceChildren();
+        next.hidden = false;
+      } else {
+        next.hidden = false;
+        decision.remove();
+      }
     }
-    if (run.phase === 'done' || result.retry || run.pending) {
-      route();
-      return true;
+    function leaveDecision() {
+      const left = command(Run.leaveRoom);
+      if (!left.ok) return;
+      if (left.left) {
+        if (run.phase !== 'done') command(Run.nextFloor);
+        route();
+      } else render();
     }
-    return false;
+    function onEquipped(id) {
+      if (run.relics.includes(id)) {
+        equipped = run.lastBattleRelic = id;
+        host.save(run);
+      }
+      render();
+    }
+    render();
   }
 
   function afterBattle(result) {
-    if (routeBattleReward(result)) return;
+    if (run.phase === 'done' || result.retry) return route();
     if (run.room.type === 'borrowed' && run.phase === 'reward') return wakeSurvivors();
     leave();
   }
 
   function equippedRoomRelic() {
-    return ['elite', 'gate'].includes(run.room.type) && run.relics.includes(run.room.relic);
+    return ['elite', 'gate'].includes(run.room?.type) && run.relics.includes(run.room.relic);
   }
 
   function route() {
     if (run.phase === 'done') return host.finish(run);
     if (run.pending?.kind === 'start') return awakenScreen(run, ui);
-    if (run.pending?.kind === 'gate') return gatePickScreen(run, ui);
-    if (run.pending?.kind === 'relic') return treasureScreen(run, ui, run.pending.id);
-    if (run.pending?.kind === 'reinforcement') return reinforceScreen(run, ui);
     if (run.room?.status === 'left') {
       if (command(Run.nextFloor).ok) route();
       return;
     }
     if (run.phase === 'map') {
       if (run.doors[0]?.type === 'borrowed' || run.doors[0]?.type === 'awakening') return enterDoor(0);
-      return mapScreen(run, ui);
+      mapScreen(run, ui, { awakened, receipt });
+      awakened = [];
+      receipt = '';
+      return;
     }
     if (run.room?.status === 'order') {
       if (run.room.type === 'borrowed' && command(Run.confirmOrder, INTRO.party).ok) return route();
@@ -152,22 +200,24 @@ export function enterRun(run, host) {
     }
     if (run.room?.status === 'battle') {
       const options = Run.battleOptions(run);
+      const fromMap = mapEntry;
+      mapEntry = false;
       return battle.startBattle(run, options, (summary, log) => {
         const result = Run.settleBattle(run, summary);
         if (result.ok) {
           run.lastBattleLog = log;
+          run.lastBattleRelic = result.relic?.equipped ? result.relic.id : null;
           host.save(run);
         }
         return result;
-      }, afterBattle);
+      }, afterBattle, { fromMap, decision: battleDecision });
     }
     if (run.phase === 'reward') {
-      if (run.room.type === 'borrowed') return battle.restoreResult(run, afterBattle);
-      if (equippedRoomRelic()) {
-        return treasureScreen(run, ui, run.room.relic, { equipped: true });
-      }
-      return battle.restoreResult(run, leave);
+      const contract = run.contract ? { ...run.contract, metNow: run.contract.metAtFloor === run.floor } : null;
+      const relic = equippedRoomRelic() ? { id: run.room.relic, equipped: true } : null;
+      return battle.restoreResult(run, afterBattle, { win: true, contract, relic }, battleDecision);
     }
+    if (run.pending?.kind === 'relic') return treasureScreen(run, ui, run.pending.id);
     if (run.pending?.kind === 'altar' || run.room?.type === 'altar') return altarScreen(run, ui);
     if (run.room?.type === 'spring') return springScreen(run, ui);
     if (run.room?.type === 'event') {
@@ -177,16 +227,14 @@ export function enterRun(run, host) {
       return eventScreen(run, ui);
     }
     if (run.room?.type === 'treasure') {
+      if (run.room.status === 'resolved' && run.relics.includes(run.room.relic)) {
+        return leave(artifacts.get(run.room.relic)?.name);
+      }
       return treasureScreen(run, ui, run.room.relic, { equipped: run.relics.includes(run.room.relic) });
     }
     if (run.room?.type === 'awakening') return awakenScreen(run, ui);
   }
 
-  const savedContract = run.phase === 'reward' && run.room?.status === 'resolved' && run.contract
-    ? { ...run.contract, metNow: run.contract.metAtFloor === run.floor } : null;
-  if (contractSettlement(run.floor, savedContract).length) {
-    const relic = equippedRoomRelic() ? { id: run.room.relic, equipped: true } : null;
-    battle.restoreResult(run, afterBattle, { win: true, contract: savedContract, relic });
-  } else route();
+  route();
   return battle.review;
 }

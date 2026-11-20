@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../src/content/contracts.js';
+import { EVENTS, eventForRun } from '../src/content/events.js';
 import { INTRO } from '../src/content/intro.js';
 import * as Bridge from '../src/engine/bridge.js';
 import * as Daily from '../src/engine/daily-rift.js';
@@ -15,12 +16,14 @@ import * as Meta from '../src/engine/meta.js';
 import { openingModel } from '../src/engine/opening.js';
 import { create as makeRoster, POSITION } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
+import { eventChoices } from '../src/engine/rooms.js';
 import * as Save from '../src/engine/save.js';
 import { battleLog } from '../src/ui/battle/log.js';
-import { skyRelics } from '../src/ui/battle/hud.js';
+import { affixLines, intentLines, skyRelics } from '../src/ui/battle/hud.js';
 import { commandRelics } from '../src/ui/battle/tiles.js';
 import { relicEffect } from '../src/ui/relics.js';
 import { formationMoves } from '../src/ui/screens/order.js';
+import { blessingText } from '../src/ui/widgets.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -128,9 +131,20 @@ function storedSession({ run = null, profile = Meta.createProfile(), unsupported
     assert.equal(loaded.run.room.status, 'order');
     assert.deepEqual(loaded.run.room.party, run.room.party);
   } else {
-    assert.deepEqual(loaded.run, run);
+    // The save is JSON. Arrays built inside the card core's vm realm carry another Array prototype,
+    // so compare against the JSON form; jsonSafe still fails on values JSON would silently drop.
+    assert.deepEqual(loaded.run, jsonSafe(run));
   }
   return storage.get(sessionKey);
+}
+
+function jsonSafe(value, path = 'run') {
+  const tag = Object.prototype.toString.call(value);
+  assert.ok(!['[object Map]', '[object Set]', '[object Function]'].includes(tag), `${path} is a ${tag}; the JSON save would lose it`);
+  if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) jsonSafe(child, path + '.' + key);
+  }
+  return path === 'run' ? JSON.parse(JSON.stringify(value)) : value;
 }
 
 function snowRabbitProfile() {
@@ -320,9 +334,9 @@ function betText() {
     async show(page, { text }) {
       await page.locator('#map.on [data-door="2"]').click();
       await text(page.locator('#event.on h2'), '점성술사의 별판');
-      await text(page.locator('#event.on [data-choice="third"] span'), '3턴에 적 하나를 쓰러뜨리고 이긴다');
+      await text(page.locator('#event.on [data-choice="third"] span'), '3턴에 적 하나 처치 후 승리');
       const fourth = page.locator('#event.on [data-choice="fourth"] span');
-      await text(fourth, '4턴에 적 하나를 쓰러뜨리고 이긴다');
+      await text(fourth, '4턴에 적 하나 처치 후 승리');
       await fourth.scrollIntoViewIfNeeded();
     }
   };
@@ -341,7 +355,7 @@ function saveFail() {
   }, { core, roster });
   assert.throws(() => store.save({ profile: Meta.createProfile(), run }), { name: 'QuotaExceededError' });
   return {
-    session, proof: 'floor 1 map can enter order; session write propagates QuotaExceededError',
+    session, proof: 'floor 1 map enters battle; session write propagates QuotaExceededError',
     async show(page, { text }) {
       await page.locator('#map.on [data-door="0"]').waitFor();
       await page.evaluate(key => {
@@ -351,8 +365,8 @@ function saveFail() {
           return write.call(this, item, value);
         };
       }, sessionKey);
-      await page.locator('#map.on [data-door="0"]').click();
-      await page.locator('#order.on').waitFor();
+      await page.locator('#map.on #b-go').click();
+      await page.locator('#battle.on').waitFor();
       await text(page.locator('#session-notices p'), '저장에 실패했다');
     }
   };
@@ -514,7 +528,7 @@ function relicComparison(run, session, arrive, source) {
     async show(page, { text, capture, revisit }) {
       async function select(sourcePage) {
         await arrive?.(sourcePage);
-        const screen = sourcePage.locator('#treasure.on');
+        const screen = sourcePage.locator(source === 'bet' || source === 'gate' ? '#result.on .victory-decision' : '#treasure.on');
         const equip = screen.locator('#b-equip');
         await equip.waitFor();
         assert.equal(await equip.isDisabled(), true);
@@ -571,8 +585,8 @@ function gateRelicCompare() {
   const session = storedSession({ run });
   command(Run.chooseGateReward, run, { kind: 'relic', id });
   return relicComparison(run, session, async page => {
-    await page.locator(`#pick.on [data-relic="${id}"]`).click();
-    await page.locator('#pick.on #b-gate-take').click();
+    await page.locator(`#result.on [data-relic="${id}"]`).click();
+    await page.locator('#result.on #b-gate-take').click();
   }, 'gate');
 }
 
@@ -707,7 +721,6 @@ function mapSeats() {
       const map = page.locator('#map.on'), actors = map.locator('.map-actor');
       const names = party.map(id => roster.card(id).name);
       assert.deepEqual(await actors.evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), party);
-      assert.deepEqual(await map.locator('.benchrow .mini').evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), reserves);
       for (const [index, name] of names.entries()) {
         const actor = actors.nth(index);
         await text(actor.locator('small'), POSITION[index], { exact: true });
@@ -715,9 +728,12 @@ function mapSeats() {
       }
       await capture();
       await map.locator('[data-door="0"]').click();
+      assert.deepEqual(await map.locator('[data-bench]').evaluateAll(nodes => nodes.map(node => node.dataset.bench)), reserves);
       for (const [index, name] of names.entries()) {
-        await text(page.locator(`#order.on [data-slot="${index}"] b`), name, { exact: true });
+        await text(map.locator(`.relay-seat[data-slot="${index}"] b`), name, { exact: true });
       }
+      await openBattle(page);
+      assert.deepEqual(await page.evaluate(() => window.__game.B.party), party);
     }
   };
 }
@@ -742,7 +758,7 @@ function countdownCharge() {
       await tapTile(page, '일반 공격');
       await tapTile(page, '일반 공격');
       await text(page.locator('#turn'), '3턴');
-      await text(page.locator('#pf-cd.on'), '다음 턴 디바인블레이드!');
+      await text(page.locator('#pf-cd.on'), '다음 턴 디바인블레이드');
     }
   };
 }
@@ -882,15 +898,16 @@ function contractPayout() {
     proof: `floor 6 elite settlement pays ${result.contract.paid}; the regular door forfeits ${failure.result.contract.escrowed}`,
     async show(page, { text, capture, revisit }) {
       await text(page.locator('#result.on .contract-met'), '계약 달성');
-      await text(page.locator('#result.on .gain'), '7층 앞에서 ◆' + CONTRACT_PAYOUT);
+      await text(page.locator('#result.on .gain').filter({ hasText: '7층 앞에서' }), '7층 앞에서 ◆' + CONTRACT_PAYOUT);
+      await text(page.locator('#result.on .relic-receipt'), '장착 완료');
       await capture();
-      await page.locator('#result.on #b-next').click();
-      await page.locator('#treasure.on').waitFor();
+      await page.locator('#result.on #b-reinforce-pass, #result.on #b-next:visible').first().click();
+      await page.locator('#map.on').waitFor();
       await revisit(storedSession({ run: failure.run }), async failurePage => {
         const resultSheet = failurePage.locator('#result.on');
         await text(resultSheet.locator('.contract-failed'), '계약 실패 · 맡긴 ◆' + CONTRACT_ESCROW + ' 사라짐');
         await capture('failed', failurePage);
-        await resultSheet.locator('#b-next').click();
+        await resultSheet.locator('#b-reinforce-pass, #b-next:visible').first().click();
         await failurePage.waitForFunction(() => window.__game.run?.floor === 7);
       });
     }
@@ -948,12 +965,12 @@ function orderHint() {
     session, proof: `${defaults.join(' → ')} differs from ${alternate.join(' → ')}`,
     async show(page, { text, capture }) {
       await page.locator('#hub.on #meta-depart').click();
-      await page.locator('#map.on .door-entry[data-door="0"]').click();
-      const order = page.locator('#order.on');
+      const order = page.locator('#map.on .map-formation');
       for (const [index, id] of defaults.entries()) {
         await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
       }
       const hint = order.locator('.relay-alternative');
+      await text(hint, '기초 전력 제안 · 대기');
       for (const move of moves) await text(hint.locator('b').filter({ hasText: move }), move);
       await hint.scrollIntoViewIfNeeded();
       await capture();
@@ -967,7 +984,7 @@ function orderHint() {
       for (const [index, id] of defaults.entries()) {
         await text(order.locator(`[data-slot="${index}"] b`), name(id), { exact: true });
       }
-      assert.equal(await page.evaluate(() => window.__game.run.room.status), 'order');
+      assert.equal(await page.evaluate(() => window.__game.run.phase), 'map');
     }
   };
 }
@@ -1111,6 +1128,8 @@ function formationBoard() {
   const run = makeRun({ seed: 7, tempoVersion: 2 });
   command(Run.chooseDoor, run, 0);
   const { blessing, party } = Run.getTempoView(run, 0);
+  run.blessings[blessing.id] = .4;
+  const blessed = blessingText(Run.getBlessingView(run, 0, party, blessing.id));
   const reserve = run.bench.find(id => !party.includes(id));
   const expected = [reserve, party[2], party[1]];
   const session = storedSession({ run });
@@ -1121,8 +1140,14 @@ function formationBoard() {
     async show(page, { text, capture }) {
       const order = page.locator('#order.on');
       const slot = i => order.locator(`[data-slot="${i}"]`);
-      await text(order.locator('.relay-blessing'), roster.card(blessing.id).name);
-      await text(order.locator('.relay-blessing'), '+' + Math.round((blessing.multiplier - 1) * 100) + '%');
+      await text(order.locator('.seat-blessing'), blessed, { exact: true });
+      const blessedSlot = party.indexOf(blessing.id);
+      const blessedButton = blessedSlot < 0 ? order.locator(`[data-bench="${blessing.id}"]`) : slot(blessedSlot);
+      await blessedButton.click();
+      await order.locator('#b-formation-info').click();
+      await text(page.locator('#sheet.on .seat-blessing'), blessed, { exact: true });
+      await page.locator('#b-sheetclose').click();
+      await blessedButton.click();
       const positions = await Promise.all([0, 1, 2].map(i => slot(i).boundingBox()));
       assert.equal(new Set(positions.map(pos => pos.y)).size, 1);
       const sprites = await Promise.all([0, 1, 2].map(i => slot(i).locator('.relay-seat-art img').boundingBox()));
@@ -1179,9 +1204,12 @@ function reinforcementBoard() {
     if (settlePlayedWin(run) && run.bench.length === run.pending.limit) full = run;
   }
   assert.ok(full, 'A live seed reaches floor 2 reinforcement at capacity');
-  const session = storedSession({ run: full });
   const { key, candidates } = full.pending;
   const id = candidates[0], replaceId = full.bench[0];
+  full.blessings[replaceId] = .4;
+  const held = Bridge.heirloomSkill(roster.card(id));
+  full.heirlooms[replaceId] = { from: id, name: held.name };
+  const session = storedSession({ run: full });
   assert.equal(Run.resolveReinforcement(full, { key, id, replaceId: null }).ok, false);
   command(Run.resolveReinforcement, full, { key, id, replaceId });
   assert.equal(Run.resolveReinforcement(full, { key, id, replaceId }).ok, false);
@@ -1189,17 +1217,19 @@ function reinforcementBoard() {
   return {
     session, proof: `actual battles: join ${join}, then ${replaceId} → ${id} at 6/6; duplicate key rejected`,
     async show(page, { text, capture, revisit }) {
-      const screen = page.locator('#reinforce.on');
+      const screen = page.locator('#result.on .victory-decision');
       await text(screen.locator('.lead'), '동료 6/6명');
       await screen.locator(`[data-candidate="${id}"]`).click();
+      await text(screen.locator(`[data-candidate="${id}"] .heir-offer`), '쓰러질 때 남김 · ' + held.name);
       assert.equal(await screen.locator('#b-reinforce-take').isDisabled(), true);
       await screen.locator(`[data-release="${replaceId}"]`).click();
+      await text(screen.locator('.release-loss'), '원정 축복 +40% · 보유 유품 ' + held.name + ' 소실 · 이번 원정 재합류 불가');
       await capture();
       await screen.locator('#b-reinforce-take').click();
       await page.locator('#map.on').waitFor();
       assert.deepEqual(await page.evaluate(() => window.__game.run.bench), full.bench);
       await revisit(empty, async source => {
-        await text(source.locator('#reinforce.on .lead'), '동료 5/6명');
+        await text(source.locator('#result.on .victory-decision .lead'), '무료 합류 · 5/6명');
         await capture('vacancy', source);
         await source.locator('#b-reinforce-pass').click();
         await source.locator('#map.on').waitFor();
@@ -1227,8 +1257,8 @@ function tempoTelegraph() {
       await text(skillTile(page, '배리어').locator('.r3'), '다음 물리 차단');
       await tapTile(page, '배리어');
       await text(page.locator('#intent.on'), next.intent.name);
-      await text(page.locator('#intent.on strong'), range(next.intent.dmg), { exact: true });
-      await text(page.locator('#pf-cd.on'), '이번 턴 ' + next.countdown.name);
+      await text(page.locator('#intent.on'), 'HP ' + range(next.intent.dmg));
+      assert.doesNotMatch(await page.locator('#pf-cd').textContent(), new RegExp(next.intent.name));
       await capture();
     }
   };
@@ -1304,6 +1334,268 @@ function groupedBattleLog() {
         assert.equal(await retreat.locator('img').count(), 1);
         await capture('resumed', source);
       });
+    }
+  };
+}
+
+function mapAwakenFaces() {
+  const run = Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7 });
+  command(Run.chooseStartPick, run, run.pending.candidates[0]);
+  const pick = run.pending.candidates[0];
+  const session = storedSession({ run });
+  const result = command(Run.chooseStartPick, run, pick);
+  assert.equal(result.awakened.length, 3);
+  return {
+    session, proof: 'First main map reveals three random companions while the entrance is available',
+    async show(page, { text, capture }) {
+      if (await page.locator('#hub.on').count()) await page.locator('#hub.on #meta-depart').click();
+      await page.locator(`#awaken.on #wake-choices [data-id="${pick}"]`).click();
+      await page.locator('#awaken.on #b-wake').click();
+      await text(page.locator('#map.on .map-awaken > b'), '함께 깨어남');
+      const faces = page.locator('#map.on .map-awaken button');
+      assert.deepEqual(await faces.evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), result.awakened);
+      assert.equal(await page.locator('#map.on #b-go').isEnabled(), true);
+      await page.waitForFunction(() => [...document.querySelectorAll('.map-awaken button')].every(node =>
+        node.getAnimations().every(animation => animation.effect.getComputedTiming().endTime <= 770)));
+      await capture();
+    }
+  };
+}
+
+function truthfulHud() {
+  const run = makeRun({ dungeonId: 'twilight_cathedral', seed: 21, floor: 2, tempoVersion: 2,
+    profileView: { lead: 'frozen_witch' } });
+  run.doors[0].enemies[0].affixes = ['tough', 'leech'];
+  command(Run.chooseDoor, run, 0);
+  command(Run.confirmOrder, run, Run.defaultParty(run));
+  const battle = Bridge.create(core, Run.battleOptions(run));
+  const events = battle.start();
+  const first = act(battle, '일반 공격');
+  events.push(...first);
+  const intent = first.findLast(event => event.t === 'await').intent;
+  assert.equal(intent.rule, 'mana_drain');
+  assert.deepEqual(intent.damageRange, [0, 0]);
+  const [current] = intentLines(intent);
+  assert.match(current, /HP 0 \/ 현재 MP −12/);
+  assert.match(intentLines({ kind: 'mag', damageRange: [125, 375], lethalText: '쓰러질 수 있음',
+    conditions: [{ kind: 'enemyHitThisTurn', whenMet: 375, otherwise: 125, met: null }] })[0], /때리면 375 \/ 안 때리면 125 · 쓰러질 수 있음/);
+  const affixes = affixLines(battle.state().enemy);
+  assert.equal(affixes.find(affix => affix.id === 'tough').turns, 2);
+  const block = act(battle, '매직가드');
+  events.push(...block);
+  const expected = 'MP 소멸 예고 → 매직가드로 차단';
+  assert.ok(battleLog(events, run.room.party, run.room.enemies).flatMap(turn => turn.rows).some(row => row.text === expected));
+  return {
+    session: storedSession({ run }), proof: 'Turn 2 damage 0 / MP −12, tough remaining 2, Magic Guard blocks the rule',
+    async show(page, { text, capture }) {
+      await openBattle(page);
+      await tapTile(page, '일반 공격');
+      await text(page.locator('#pf-kind'), '다음 마법');
+      await text(page.locator('#intent.on'), current, { exact: true });
+      await text(page.locator('#pf-chips .affix').filter({ hasText: '단단함' }), '피해 절반 2턴 남음');
+      await capture('hud');
+      await page.evaluate(() => {
+        const observer = new MutationObserver(() => {
+          if (!document.querySelector('.strong-call')) return;
+          observer.disconnect();
+          window.__game.clock.paused = true;
+        });
+        observer.observe(document.querySelector('#fx'), { childList: true });
+      });
+      await skillTile(page, '매직가드').click();
+      await text(page.locator('.strong-call'), intent.name);
+      assert.equal(await page.locator('.skillplate').count(), 0);
+      await capture('strong', page, { duringBattle: true });
+      await page.evaluate(() => { window.__game.clock.paused = false; });
+      await battleIdle(page);
+      await page.locator('#b-log').click();
+      await text(page.locator('#sheet.on .forecast').filter({ hasText: expected }), expected);
+    }
+  };
+}
+
+function blessingParity() {
+  const run = makeRun({ seed: 21, tempoVersion: 2 });
+  run.bench = run.joinOrder = ['snow_rabbit', 'gold_dragon', 'ash', 'entropy'];
+  run.blessings.snow_rabbit = .4;
+  run.doors[0].tempo.blessing = { id: 'snow_rabbit', multiplier: 1.6 };
+  const session = storedSession({ run });
+  const before = Run.getBlessingView(run, 0, Run.defaultParty(run), 'snow_rabbit');
+  assert.equal(before.stats.hp, 464);
+  const party = ['snow_rabbit', 'entropy', 'ash'];
+  const boosted = Run.getBlessingView(run, 0, party, 'snow_rabbit');
+  assert.equal(boosted.stats.hp, 638);
+  assert.equal(boosted.effectiveBonus, 1.2);
+  return {
+    session, proof: 'Snow Rabbit’s 60% / 464 HP becomes 120% / 638 HP with Entropy, matching both sheets',
+    async show(page, { text, capture }) {
+      const map = page.locator('#map.on');
+      const seat = map.locator('.relay-seat[data-slot="0"] .seat-blessing');
+      await text(seat, blessingText(before), { exact: true });
+      await map.locator('[data-bench="entropy"]').click();
+      await map.locator('.relay-seat[data-slot="1"]').click();
+      await text(seat, blessingText(boosted), { exact: true });
+      await map.locator('.relay-seat[data-slot="0"]').click();
+      await map.locator('#b-formation-info').click();
+      await text(page.locator('#sheet.on .seat-blessing'), blessingText(boosted), { exact: true });
+      await text(page.locator('#sheet.on .sg').getByText('638', { exact: true }), '638');
+      await capture('formation');
+      await page.locator('#b-sheetclose').click();
+      await openBattle(page);
+      await page.locator('#party [data-i="0"]').click();
+      await text(page.locator('#sheet.on .seat-blessing'), blessingText(boosted), { exact: true });
+      await text(page.locator('#sheet.on .ih small'), 'HP 638/638');
+    }
+  };
+}
+
+function springCommit() {
+  const run = makeRun({ seed: 21, floor: 3, tempoVersion: 2 });
+  command(Run.chooseDoor, run, 0);
+  assert.equal(run.room.type, 'spring');
+  run.crystals = 5;
+  const session = storedSession({ run });
+  const offer = command(Run.getSpringOffer, run);
+  assert.equal(run.crystals, 5);
+  assert.deepEqual(command(Run.getSpringOffer, run), offer);
+  const legacy = Save.restoreRun(sessionRun(session), { core, roster });
+  legacy.lessonVersion = 0;
+  command(Run.springPick, legacy);
+  const prepaid = storedSession({ run: legacy });
+  const oldOffer = command(Run.getSpringOffer, legacy);
+  assert.equal(command(Run.commitSpringOffer, legacy, { key: oldOffer.key, id: oldOffer.candidates[0] }).charged, 0);
+  const full = Save.restoreRun(sessionRun(session), { core, roster });
+  const extra = full.pool.find(id => !full.bench.includes(id) && id !== full.reserved);
+  full.bench.push(extra);
+  assert.equal(full.bench.length, 6);
+  assert.equal(command(Run.commitSpringOffer, run, { key: offer.key, id: offer.candidates[0] }).charged, 3);
+  assert.equal(Run.commitSpringOffer(run, { key: offer.key, id: offer.candidates[0] }).ok, false);
+  return {
+    session, proof: 'Closing costs 0, same candidates, one ◆3 commit, legacy prepaid charges 0',
+    async show(page, { text, capture, revisit }) {
+      const spring = page.locator('#spring.on');
+      await spring.locator('#b-pick').click();
+      const candidates = () => spring.locator('.cardrow').evaluateAll(nodes => nodes.map(node => node.dataset.id));
+      assert.deepEqual(await candidates(), offer.candidates);
+      await spring.locator('#b-spring-pass').click();
+      await text(spring.locator('.gems'), '◆ 5');
+      await spring.locator('#b-pick').click();
+      assert.deepEqual(await candidates(), offer.candidates);
+      await spring.locator('.cardrow').first().click();
+      await text(spring.locator('#b-take'), '합류 · ◆3');
+      await capture();
+      await spring.locator('#b-take').click();
+      await text(spring.locator('.gems'), '◆ 2');
+      await revisit(storedSession({ run: full }), async source => {
+        await text(source.locator('#spring.on #b-draw'), '보낼 동료를 먼저 정함');
+        await capture('full', source);
+      });
+      await revisit(prepaid, async source => {
+        await source.locator('#spring.on .cardrow').first().click();
+        await text(source.locator('#spring.on #b-take'), '결제 완료');
+        await capture('prepaid', source);
+        await source.locator('#spring.on #b-take').click();
+        assert.equal(await source.evaluate(() => window.__game.run.crystals), 2);
+      });
+    }
+  };
+}
+
+function sessionRun(session) { return JSON.parse(session).run; }
+
+function eventValues() {
+  function eventRun(id, dungeonId, floor = 3) {
+    const run = makeRun({ dungeonId, seed: 21, floor, tempoVersion: 2 });
+    const door = run.doors.find(door => door.type === 'event');
+    door.event = eventForRun(EVENTS.find(event => event.id === id), run);
+    command(Run.chooseDoor, run, door.index);
+    run.crystals = 5;
+    return run;
+  }
+  const alms = eventRun('dainichi_alms_bowl', 'starlit_garden');
+  const who = alms.bench[0];
+  alms.blessings[who] = .4;
+  assert.deepEqual(eventChoices(alms, core, roster)[0].blessingChanges[who], { before: .4, after: .1 });
+  const kobold = eventRun('kobold_boot_exchange', 'ember_volcano');
+  const exchange = eventChoices(kobold, core, roster).find(choice => choice.id === 'exchange');
+  const target = exchange.targets[0];
+  assert.ok(exchange.netCrystals[target] >= 0);
+  const whale = eventRun('whale_third_peal', 'twilight_cathedral');
+  const ice = eventRun('penguin_ice_seam', 'midnight_trench');
+  ice.bench = ice.bench.filter(id => !core.GameUtils.cardMatchesElement(roster.card(id), 'water'));
+  assert.match(eventChoices(ice, core, roster).find(choice => choice.id === 'carry').text, /물 동료 없음/);
+  const rolls = eventRun('rollcall_ends', 'arena');
+  rolls.bench = roster.allies.filter(id => !['discipline_captain', 'werebear'].includes(id)).slice(0, 6);
+  for (const id of ['discipline_captain', 'werebear']) if (!rolls.pool.includes(id)) rolls.pool.push(id);
+  assert.equal(eventChoices(rolls, core, roster).find(choice => choice.id === 'pair').requiredReleases, 2);
+  const mimic = eventRun('mimic_paybox', 'ember_volcano');
+  const venom = eventRun('venom_five_knots', 'midnight_trench', 5);
+  assert.equal(eventChoices(venom, core, roster).find(choice => choice.id === 'hold').cost, 1);
+  return {
+    session: storedSession({ run: alms }), proof: 'Blessing old/new, kobold net, whale bet, no water, roll-call releases, mimic pay, venom schedule',
+    async show(page, { text, capture, revisit }) {
+      await text(page.locator('#event.on [data-choice="level"]'), '원정 +40% → +10%');
+      await capture();
+      await revisit(storedSession({ run: kobold }), async source => {
+        await source.locator('#event.on [data-choice="exchange"]').click();
+        await source.locator(`#sheet.on [data-id="${target}"]`).click();
+        await text(source.locator('#event-target-effect'), '순수입 ◆' + exchange.netCrystals[target]);
+        await capture('kobold', source);
+      });
+      for (const [label, run, choice, line] of [
+        ['whale', whale, 'peal', '다음 전투 3턴에 적 하나 처치 후 승리'],
+        ['penguin', ice, 'carry', '물 동료 없음'],
+        ['roll-call', rolls, 'pair', '보낼 동료 2명 필요'],
+        ['mimic', mimic, 'porter', '계약금 ◆1'],
+        ['venom', venom, 'hold', '다음 턴부터 매턴 1회·최대 5회']
+      ]) await revisit(storedSession({ run }), async source => {
+        const button = source.locator(`#event.on [data-choice="${choice}"]`);
+        await text(button, line);
+        await button.scrollIntoViewIfNeeded();
+        await capture(label, source);
+      });
+    }
+  };
+}
+
+function returnedBattleLog() {
+  const profile = snowRabbitProfile();
+  const run = makeRun({ seed: 7, floor: 8, profileView: Meta.startView(profile, 'ember_volcano') });
+  startBattle(run);
+  settleWin(run);
+  assert.equal(run.phase, 'done');
+  const row = 'MP 소멸 예고 → 매직가드로 차단';
+  run.lastBattleLog = [{ turn: 7, rows: [{ key: 1, text: row, faces: [], kind: 'forecast' }] }];
+  return {
+    session: storedSession({ run, profile }), proof: 'Confirm the return, then reopen the persisted last battle',
+    async show(page, { text }) {
+      await page.locator('#recruit.on #meta-recruit-confirm').click();
+      await page.locator('#hub.on [data-meta-page="records"]').click();
+      await page.locator('#records.on #meta-latest-record').click();
+      await page.locator('#sheet.on #meta-latest-battle').click();
+      await text(page.locator('#sheet.on .forecast'), row);
+      assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).profile.ui.latestRun.lastBattleLog.length, sessionKey), 1);
+    }
+  };
+}
+
+function treasureReceiptFlow() {
+  const run = makeRun({ seed: 1, floor: 5 });
+  command(Run.chooseDoor, run, run.doors.find(door => door.type === 'treasure').index);
+  const session = storedSession({ run });
+  const result = command(Run.takeTreasure, run);
+  assert.ok(result.relic.equipped);
+  const id = result.relic.id;
+  assert.equal(Run.takeTreasure(run).ok, false);
+  return {
+    session, proof: 'Empty treasure slot equips once, shows the receipt inline, and advances without a second tap',
+    async show(page, { text, capture }) {
+      await page.locator('#treasure.on #b-equip').click();
+      await text(page.locator('#treasure.on .relic-receipt'), '장착 완료');
+      await page.locator('#map.on').waitFor();
+      await text(page.locator('#map.on .map-receipt'), '장착 완료');
+      assert.deepEqual(await page.evaluate(() => window.__game.run.relics), [id]);
+      await capture();
     }
   };
 }
@@ -1597,6 +1889,13 @@ function riftRecords(detail) {
 }
 
 const cases = {
+  'map-awaken-faces': mapAwakenFaces,
+  'truthful-hud': truthfulHud,
+  'blessing-parity': blessingParity,
+  'spring-commit': springCommit,
+  'event-values': eventValues,
+  'returned-battle-log': returnedBattleLog,
+  'treasure-receipt': treasureReceiptFlow,
   'opening-choices': openingChoices,
   'opening-awaken': openingAwaken,
   'formation-board': formationBoard,
@@ -1693,7 +1992,7 @@ async function battleIdle(page) {
 }
 
 async function openBattle(page) {
-  await page.locator('#order.on #b-go').click();
+  await page.locator('#order.on #b-go, #map.on #b-go').click();
   await battleIdle(page);
 }
 
@@ -1855,7 +2154,9 @@ async function main() {
           captures.push(...images);
         }
       } catch (error) {
-        results.push({ case: name, result: 'FAIL', text: error.message });
+        // Keep the first line and where in this file it failed; long assertion diffs hide the cause.
+        const where = error.stack?.match(/screens\.mjs:\d+/)?.[0] ?? '';
+        results.push({ case: name, result: 'FAIL', text: error.message.split('\n')[0] + (where ? ' @ ' + where : '') });
         captures.push({ name });
       }
     }

@@ -1,4 +1,4 @@
-// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--runs=2] [--headed]
+// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--runs=2] [--headed] [--entry-count]
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -13,6 +13,45 @@ const game = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repo = path.resolve(game, '../..');
 const shots = path.join(game, 'tests', 'shots');
 const args = process.argv.slice(2);
+if (args.includes('--entry-count')) {
+  // Pipe tools/sim.mjs --entry-audit here to count its winning route without launching Chrome.
+  let output = '';
+  for await (const chunk of process.stdin.setEncoding('utf8')) output += chunk;
+  assert.ok(output.trim(), 'Pipe tools/sim.mjs --entry-audit to play.mjs --entry-count');
+  const rows = output.trim().split(/\r?\n/).map(line => JSON.parse(line));
+  const end = rows.pop();
+  assert.equal(end.seed, 6115841);
+  assert.equal(end.result, 'win');
+  assert.deepEqual(end.relics, ['big_bang']);
+  assert.deepEqual(end.recruitable, ['cherry_prince']);
+  const battles = rows.filter(row => row.party);
+  const rooms = rows.filter(row => row.room);
+  assert.deepEqual(battles.map(row => [row.floor, row.index, row.party, row.pending]), [
+    [1, 0, ['sun_moon_sword_maiden', 'gold_dragon', 'cherry_prince'], 'reinforcement'],
+    [2, 1, ['gold_dragon', 'sakura', 'cherry_prince'], 'reinforcement'],
+    [4, 0, ['sun_moon_sword_maiden', 'sakura', 'cherry_prince'], 'gate'],
+    [6, 0, ['cinderella', 'sakura', 'cherry_prince'], 'reinforcement'],
+    [8, 0, ['supernova', 'sakura', 'cherry_prince'], null]
+  ]);
+  assert.deepEqual(rooms.map(row => [row.index, row.room]), [
+    [0, 'wild'], [1, 'wild'], [0, 'spring'], [0, 'gate'], [1, 'treasure'], [0, 'wild'], [0, 'spring'], [0, 'boss']
+  ]);
+  for (const floor of [3, 7]) assert.equal(rooms.find(row => row.floor === floor).bench.length, 6);
+  // Audit inputs for this route: two starter picks, two skipped springs,
+  // one treasure equip, three reinforcements, one captive and one recruit.
+  const swaps = [3, 2, 1, 1, 1];
+  const tally = [['지명', 2, 4], ...rooms.map(({ floor }) => {
+    const i = battles.findIndex(row => row.floor === floor);
+    const taps = i < 0 ? 2 : 1 + Number([2, 6].includes(floor)) + swaps[i] * 2 + (battles[i].pending ? 2 : 1);
+    return [floor + '층', 2, taps];
+  }), ['영입', 1, 1]];
+  const screens = tally.reduce((sum, [, count]) => sum + count, 0);
+  const taps = tally.reduce((sum, [, , count]) => sum + count, 0);
+  assert.ok(screens <= 19 && taps <= 43);
+  console.table(tally.map(([step, screens, taps]) => ({ step, screens, taps })));
+  console.log(`6,115,841 · engine win · ${swaps.reduce((a, b) => a + b)} audit swaps · ${screens} non-battle screens · ${taps} taps (flow count)`);
+  process.exit(0);
+}
 const option = (name, fallback) => args.find(arg => arg.startsWith(name + '='))?.slice(name.length + 1) ?? fallback;
 const seeds = option('--seeds', '7,21').split(',').map(Number);
 const runCount = Number(option('--runs', '2'));
@@ -140,8 +179,8 @@ function look({ canRetreat = false } = {}) {
     room: run?.room?.type,
     crystals: run?.crystals,
     pendingKind: run?.pending?.kind,
-    reinforcementFull: screen === 'reinforce' && run.bench.length >= (run.pending.limit ?? 6),
-    doors: screen === 'map' ? run.doors.map(({ type, index }) => ({ type, index })) : [],
+    reinforcementFull: run?.pending?.kind === 'reinforcement' && run.bench.length >= (run.pending.limit ?? 6),
+    doors: screen === 'map' ? run.doors.map(({ type, index, enemies }) => ({ type, index, battle: !!enemies.length })) : [],
     outcome: run?.result,
     stats: run?.stats
   };
@@ -196,7 +235,15 @@ async function playMap({ page }, state) {
   const safe = state.doors.find(door => door.type !== 'elite');
   const door = (state.crystals < 3 && elite) || safe || state.doors[0];
   assert(door, 'No doors on floor ' + state.floor);
-  await page.locator('#map.on .run-doors .door-entry[data-door="' + door.index + '"]').click();
+  const map = page.locator('#map.on');
+  if (!door.battle || state.doors.length > 1) await map.locator('.door-entry[data-door="' + door.index + '"]').click();
+  if (door.battle) {
+    if (door.type === 'boss') await clickIfVisible(page, '#map.on .relay-alternative#b-alternate-order');
+    const party = await map.locator('.map-actor').evaluateAll(nodes => nodes.map(node => node.dataset.sheet));
+    await map.locator('#b-go').click();
+    await page.locator('#battle.on').waitFor();
+    assert.deepEqual(await page.evaluate(() => window.__game.B.party.filter(Boolean)), party);
+  }
   await page.locator('#map.on').waitFor({ state: 'hidden' });
 }
 
@@ -206,7 +253,7 @@ async function playOrder({ page }, state) {
 }
 
 async function playReinforce({ page }, state) {
-  const screen = page.locator('#reinforce.on');
+  const screen = page.locator('#result.on .victory-decision');
   if (state.reinforcementFull) {
     await screen.locator('#b-reinforce-pass').click();
     return;
@@ -226,11 +273,11 @@ async function chooseWhoLeaves(page) {
 }
 
 async function playSpring({ page }, state, expedition) {
-  if (state.pendingKind === 'spring') {
+  if (await page.locator('#spring.on #b-take').isVisible()) {
     if (await clickIfVisible(page, '#spring.on #b-take:not([disabled])')) return;
-    if (await clickIfVisible(page, '#spring.on .cardrow')) {
+    if (await clickIfVisible(page, '#spring.on .cardrow:not([disabled])')) {
       await page.locator('#spring.on #b-take').click();
-    }
+    } else await clickIfVisible(page, '#spring.on #b-spring-pass');
     return;
   }
   if (expedition.springAttempt !== state.floor) {
@@ -259,24 +306,28 @@ async function playEvent({ page }) {
   await page.locator('#event.on #b-leave').click();
 }
 
-async function playTreasure({ page }) {
-  if (await clickIfVisible(page, '#treasure.on #b-equip:not([disabled])')) return;
-  if (await clickIfVisible(page, '#treasure.on [data-replace]:not(.sel)')) {
-    await page.locator('#treasure.on #b-equip').click();
+async function playTreasure({ page }, state) {
+  const scope = state.result ? '#result.on .victory-decision' : '#treasure.on';
+  if (await clickIfVisible(page, scope + ' #b-equip:not([disabled])')) return;
+  if (await clickIfVisible(page, scope + ' [data-replace][aria-pressed="false"]')) {
+    await clickIfVisible(page, scope + ' #b-equip:not([disabled])');
     return;
   }
-  await page.locator('#treasure.on #b-leave').click();
+  await clickIfVisible(page, scope + ' #b-leave:not([disabled])');
 }
 
 async function playGateReward({ page }) {
-  if (await clickIfVisible(page, '#pick.on #b-gate-take:not([disabled])')) return;
-  const picked = await clickIfVisible(page, '#pick.on [data-relic]')
-    || await clickIfVisible(page, '#pick.on .cardrow');
-  await page.locator(picked ? '#pick.on #b-gate-take' : '#pick.on #b-leave').click();
+  const scope = '#result.on .victory-decision';
+  if (await clickIfVisible(page, scope + ' #b-gate-take:not([disabled])')) return;
+  const picked = await clickIfVisible(page, scope + ' [data-relic]') || await clickIfVisible(page, scope + ' .cardrow');
+  await page.locator(scope + (picked ? ' #b-gate-take' : ' #b-leave')).click();
 }
 
 async function playBattle({ page }, state, expedition) {
   if (state.result) {
+    if (state.pendingKind === 'reinforcement') return playReinforce({ page }, state);
+    if (state.pendingKind === 'gate') return playGateReward({ page });
+    if (state.pendingKind === 'relic') return playTreasure({ page }, state);
     const next = page.locator('#battle.on #result.on #b-next');
     if (state.room === 'borrowed') {
       assert.equal(await next.innerText(), openingChoices[expedition.openingPath].next);
@@ -357,12 +408,10 @@ const roomPlayers = {
   awaken: playAwaken,
   map: playMap,
   order: playOrder,
-  reinforce: playReinforce,
   spring: playSpring,
   altar: playAltar,
   event: playEvent,
   treasure: playTreasure,
-  pick: playGateReward,
   battle: playBattle
 };
 
@@ -397,13 +446,12 @@ async function resumeExpedition(campaign, expedition) {
 
 async function shouldResume({ page, resumed }, expedition, state) {
   if (resumed || expedition.dungeon === 'dawn_forest') return false;
-  // A relic receipt can briefly appear before the saved reinforcement screen.
-  if (state.pendingKind === 'reinforcement') return state.screen === 'reinforce' && state.floor > 1;
-  if (!['spring', 'altar', 'event', 'treasure', 'pick'].includes(state.screen)) return false;
+  if (state.result && state.pendingKind === 'reinforcement') return state.floor > 1;
+  if (!['spring', 'altar', 'event', 'treasure'].includes(state.screen)) return false;
   if (state.pendingKind) return true;
   if (state.floor !== 3) return false;
   if (state.screen !== 'spring') return true;
-  // Let the spring charge for the purchase before reloading the choice or receipt.
+  // Let the spring return from its offer or reveal before reloading the room.
   return (expedition.springAttempt === state.floor || state.crystals === 0)
     && await page.locator('#spring.on #b-leave:not([disabled])').isVisible();
 }
