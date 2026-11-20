@@ -1,5 +1,6 @@
 import { $, esc } from '../dom.js';
 import { TYPE, formatRange } from '../widgets.js';
+import { relicMarks } from '../relics.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
 
@@ -10,6 +11,8 @@ export const FIELD = {
   valentine: ['발렌', '#ff7aa8'], arena: ['투기', '#ff7a5a'], reaper_realm: ['사신', '#a678ff'], gale: ['질풍', '#7fe3c8']
 };
 export const fieldCap = (core, artifacts) => artifacts?.includes('buff_overload') ? 5 : core.GAME_CONSTANTS.MAX_FIELD_BUFFS;
+export const skyRelics = B => (B.artifacts || []).filter(id => id === 'buff_overload' ||
+  (id === 'gale_storm' && B.D?.turn <= 3 && B.D.field.includes('gale')));
 
 export function createHud(core, stage, sfx, widgets) {
   const { S, wait, footY: FY, headY: HY } = stage;
@@ -65,7 +68,7 @@ export function createHud(core, stage, sfx, widgets) {
     chips($('#pf-chips'), foe, true);
     S.beads.burn = foe.buffs.burn || 0; S.beads.divine = foe.buffs.divine || 0;
     if (B.foe) { S.beads.x = B.foe.x; S.beads.y = FY(B.foe); }
-    $('#sky-slots').innerHTML = Array.from({ length: fieldCap(core, B.artifacts) }, (_, i) => {
+    $('#sky-slots').innerHTML = relicMarks(core, skyRelics(B)) + Array.from({ length: fieldCap(core, B.artifacts) }, (_, i) => {
       const id = D.field[i], f = id && (FIELD[id] || [id.slice(0, 2), '#ccc']);
       return f ? '<i class="on" style="background:' + f[1] + '">' + esc(f[0].slice(0, 1)) + '</i>' : '<i></i>';
     }).join('');

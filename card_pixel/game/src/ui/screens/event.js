@@ -125,6 +125,15 @@ export function eventScreen(run, ui, result = null) {
     '<div class="event-choices">' + plates +
     '<button class="btn' + (canChoose ? '' : ' go') + '" id="b-leave">' +
     (choices.length ? '그냥 지나가기' : '다음 층으로') + '</button></div></div>';
+  // The confirm button names what the chosen companion receives (or that they leave).
+  function targetVerb(choice) {
+    if (choice.target === 'release') return '보내기';
+    const types = choice.ops.map(effect => effect.type);
+    if (types.includes('heirloom')) return '유품 받기';
+    if (types.includes('bless')) return '축복 받기';
+    return '고르기';
+  }
+
   show('event');
   $('#b-leave', node)?.addEventListener('click', ui.leave);
   for (const button of $$('[data-choice]', node)) button.addEventListener('click', () => {
@@ -141,7 +150,7 @@ export function eventScreen(run, ui, result = null) {
       for (const other of rows) other.classList.toggle('sel', other === row);
       $('#event-target-effect').textContent = choice.ops.map(effect => effectText(effect, selection)).join(' · ');
       confirm.disabled = false;
-      confirm.textContent = card(selection).name + ' · ' + (choice.target === 'release' ? '보내기' : '축복 받기');
+      confirm.textContent = card(selection).name + ' · ' + targetVerb(choice);
     });
     confirm.addEventListener('click', () => { if (selection) take(choice, selection); });
   });

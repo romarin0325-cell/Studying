@@ -1,14 +1,14 @@
 import { $, esc } from '../dom.js';
 import { TYPE, foeFlip, riftKindLabel, statGrid } from '../widgets.js';
+import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../relics.js';
 import { shortRiftDate } from '../screens/daily-rift.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
-import { RELIC_LIMIT } from '../../engine/rooms.js';
 import { CONTRACTS } from '../../content/contracts.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
-import { FIELD, GOOD, fieldCap } from './hud.js';
+import { FIELD, GOOD, fieldCap, skyRelics } from './hud.js';
 import { fieldInfo } from './fields.js';
 
 /* What each status and field blessing does. Numbers follow the card rules
@@ -136,30 +136,36 @@ export function createDetails(core, widgets, openSheet) {
   function fieldSheet(B) {
     const list = B.D?.field || [];
     const max = fieldCap(core, B.artifacts);
+    const relics = skyRelics(B).map(id => {
+      const relic = core.GameUtils.getArtifactById(id);
+      return '<p><b>' + esc(relic.name) + '</b> · ' + esc(relicEffect(relic)) + '</p>';
+    }).join('');
     const html = (list.length ? '<ul class="stl">' + list.map(id => '<li><i class="good" style="background:' + (FIELD[id] || [0, '#33295c'])[1] + ';color:#120e24">' + esc(core.BUFF_NAMES[id] || id) + '</i>' + esc(fieldInfo(core, id, B.artifacts)) + '</li>').join('') + '</ul>' : '<p class="none">지금 하늘에 걸린 필드 버프가 없다.</p>') +
-      '<p class="sm">필드 버프는 아군에게만 적용된다. 최대 ' + max + '개, 넘치면 가장 먼저 건 것이 사라진다.</p>';
+      '<p class="sm">필드 버프는 아군에게만 적용된다. 최대 ' + max + '개, 넘치면 가장 먼저 건 것이 사라진다.</p>' + relics;
     openSheet('하늘 · 필드 버프', html);
   }
 
-  function battlefieldSheet(run, B) {
+  function battlefieldSheet(run, B, focusSlot) {
     if (!B.door) return;
     const region = REGIONS[B.door.region?.id], quirk = QUIRKS[B.door.quirk];
     const contract = CONTRACTS[run.contract?.id];
     const block = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
-    const slots = Array.from({ length: RELIC_LIMIT }, (_, index) => {
-      const id = B.artifacts[index];
-      const relic = core.ARTIFACT_LIST.find(item => item.id === id);
-      if (!relic) return '<li>빈 칸</li>';
-      return '<li><b>' + esc(relic.name) + '</b>' +
-        (id === B.temporaryRelic ? ' · 이번 전투만' : '') + ' · ' + esc(relic.desc) + '</li>';
-    });
+    const artifacts = B.artifacts || [];
+    const focusField = () => $('#b-field')?.focus({ preventScroll: true });
     const dailyLine = run.daily ? [shortRiftDate(run.daily.spec?.dayKey), riftKindLabel(run.daily.kind),
       '정산한 전투 ' + (run.stats?.turns ?? 0) + '턴'].filter(Boolean).join(' · ') : '';
-    openSheet('전장·유물', (dailyLine ? '<p>' + esc(dailyLine) + '</p>' : '') +
+    openSheet('전장·유물', relicStrip(core, artifacts, { temporary: B.temporaryRelic }) + (dailyLine ? '<p>' + esc(dailyLine) + '</p>' : '') +
       (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
       (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + contractStatus(run, B) +
-        '</h4><p>' + esc(contract.rule) + '</p>' : '') +
-      '<h4>장착 유물</h4><ul class="stl">' + slots.join('') + '</ul>');
+        '</h4><p>' + esc(contract.rule) + '</p>' : ''), {
+      latest: focusSlot != null ? `[data-slot="${focusSlot}"]` : undefined, onClose: focusField
+    });
+    bindRelicSlots($('#sh-body'), artifacts, (id, button) => {
+      openRelicSheet(openSheet, core.GameUtils.getArtifactById(id), {
+        temporary: id != null && id === B.temporaryRelic,
+        back: () => battlefieldSheet(run, B, button.dataset.slot), onClose: focusField
+      });
+    });
   }
 
   return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };

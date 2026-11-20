@@ -17,6 +17,9 @@ import { create as makeRoster, POSITION } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { battleLog } from '../src/ui/battle/log.js';
+import { skyRelics } from '../src/ui/battle/hud.js';
+import { commandRelics } from '../src/ui/battle/tiles.js';
+import { relicEffect } from '../src/ui/relics.js';
 import { formationMoves } from '../src/ui/screens/order.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
@@ -414,6 +417,7 @@ function fieldCap() {
   });
   const battle = startBattle(run, { door: 1 });
   assert.ok(Run.battleOptions(run).artifacts.includes(relic));
+  assert.equal(skyRelics({ artifacts: Run.battleOptions(run).artifacts, D: battle.state() })[0], relic);
   for (let i = 0; i < 3; i++) act(battle, skill);
   const { field } = battle.state();
   assert.equal(field.length, 5);
@@ -423,6 +427,7 @@ function fieldCap() {
       await openBattle(page);
       const slots = page.locator('#sky-slots i');
       assert.equal(await slots.count(), 5, 'Buff Overload must display five HUD slots before they are filled');
+      await page.locator('#sky [data-relic-mark="buff_overload"]').waitFor();
       await text(skillTile(page, skill).locator('.r2'), '무작위 아군 강화 1종', { exact: true });
       for (let i = 0; i < 3; i++) await tapTile(page, skill);
       assert.equal(await page.locator('#sky-slots i.on').count(), 5, 'All five HUD slots must be filled');
@@ -430,12 +435,208 @@ function fieldCap() {
       await capture('hud');
       await page.locator('#b-field').click();
       const battlefield = page.locator('#sheet.on #sh-body');
-      await text(battlefield.getByText('버프오버로드', { exact: true }), '버프오버로드');
+      await battlefield.getByRole('button', { name: /버프오버로드/ }).click();
+      assert.equal(await page.evaluate(() => window.__game.clock.paused), true);
+      await text(page.locator('#sh-title'), '버프오버로드', { exact: true });
+      await text(battlefield.locator('.relic-sheet p'), relicEffect(core.GameUtils.getArtifactById(relic)), { exact: true });
+      await battlefield.locator('[data-relic-back]').click();
+      await text(page.locator('#sh-title'), '전장·유물', { exact: true });
+      assert.equal(await page.evaluate(() => window.__game.clock.paused), true);
       await page.locator('#b-sheetclose').click();
+      assert.equal(await page.evaluate(() => window.__game.clock.paused), false);
       await page.locator('#sky').click();
       const sheet = page.locator('#sheet.on #sh-body');
       assert.equal(await sheet.locator('.stl li').count(), 5, 'Field sheet must list all five buffs');
       await text(sheet.locator('p.sm'), '최대 5개');
+    }
+  };
+}
+
+function relicMap(showDetails) {
+  const relic = 'buff_overload';
+  const run = makeRun({
+    dungeonId: 'starlit_garden', seed: 88, floor: 5, profileView: { lead: 'dainichi_nyorai' },
+    visit(current) {
+      if (current.floor === 4) command(Run.chooseGateReward, current, { kind: 'relic', id: relic });
+    }
+  });
+  assert.deepEqual(run.relics, [relic]);
+  const effect = relicEffect(core.GameUtils.getArtifactById(relic));
+  return {
+    session: storedSession({ run }), proof: `gate reward equipped ${relic}; three empty slots; ${effect}`,
+    async show(page, { text }) {
+      const strip = page.locator('#map.on .relic-strip');
+      await strip.waitFor();
+      const slots = strip.locator('.relic-slot');
+      const sizes = await slots.evaluateAll(nodes => nodes.map(node => [node.offsetWidth, node.offsetHeight]));
+      assert.deepEqual(sizes, Array.from({ length: 4 }, () => [52, 52]));
+      assert.equal(await strip.locator('.empty').count(), 3);
+      assert.equal(await slots.first().locator('img').count(), 1);
+      const top = (await strip.boundingBox()).y;
+      await page.locator('#map.on .run-route').evaluate(node => { node.scrollTop = node.scrollHeight; });
+      assert.equal((await strip.boundingBox()).y, top);
+      await page.locator('#map.on .run-route').evaluate(node => { node.scrollTop = 0; });
+      if (!showDetails) return;
+      await slots.nth(1).click();
+      await text(page.locator('#sheet.on #sh-title'), '빈 칸', { exact: true });
+      await page.locator('#b-sheetclose').click();
+      await slots.first().click();
+      await text(page.locator('#sheet.on #sh-title'), '버프오버로드', { exact: true });
+      await text(page.locator('#sheet.on .relic-sheet p'), effect, { exact: true });
+    }
+  };
+}
+
+function fillRelicSlots(run, incoming) {
+  run.relics = ['double_attack', 'reverse', 'support_boost', 'buff_overload', 'ice_break']
+    .filter(id => id !== incoming).slice(0, 4);
+}
+
+function relicComparison(run, session, arrive, source) {
+  assert.equal(run.pending?.kind, 'relic');
+  const { id, cost } = run.pending;
+  const equipped = run.relics.slice();
+  const replace = equipped[0];
+  const incoming = core.GameUtils.getArtifactById(id);
+  const outgoing = core.GameUtils.getArtifactById(replace);
+  const label = replace === 'double_attack' ? '더블어택을 빼고 장착' : '리버스를 빼고 장착';
+  const crystals = run.crystals;
+  const keep = Save.restoreRun(Save.serializeRun(run), { core, roster });
+  command(Run.leaveRoom, keep);
+  assert.deepEqual(keep.relics, equipped);
+  assert.equal(keep.crystals, crystals);
+  command(Run.equipRelic, run, id, replace);
+  const swapped = [id, ...equipped.slice(1)];
+  assert.deepEqual(run.relics, swapped);
+  assert.equal(run.crystals, crystals - cost);
+  return {
+    session, proof: `${source}: ${id} vs ${replace}, cost ${cost}; both equip and skip verified`,
+    async show(page, { text, capture, revisit }) {
+      async function select(sourcePage) {
+        await arrive?.(sourcePage);
+        const screen = sourcePage.locator('#treasure.on');
+        const equip = screen.locator('#b-equip');
+        await equip.waitFor();
+        assert.equal(await equip.isDisabled(), true);
+        await screen.locator(`[data-replace="${replace}"]`).click();
+        return screen;
+      }
+      async function saved(sourcePage) {
+        return sourcePage.evaluate(key => JSON.parse(localStorage.getItem(key)).run.run, sessionKey);
+      }
+      const screen = await select(page);
+      const compare = screen.locator('.run-relic-compare');
+      await text(compare.locator('.incoming h3'), incoming.name, { exact: true });
+      await text(compare.locator('.incoming p'), relicEffect(incoming), { exact: true });
+      await text(compare.locator('.outgoing h3'), outgoing.name, { exact: true });
+      await text(compare.locator('.outgoing p'), relicEffect(outgoing), { exact: true });
+      const left = await compare.locator('.incoming').boundingBox();
+      const right = await compare.locator('.outgoing').boundingBox();
+      assert.ok(left.x < right.x && left.y === right.y && left.height === right.height);
+      if (cost) await text(screen.locator('.relic-cost'), `결정 ${cost}`, { exact: true });
+      await text(screen.locator('#b-equip'), label, { exact: true });
+      await text(screen.locator('#b-leave'), '두고 간다', { exact: true });
+      await capture();
+      await screen.locator('#b-leave').click();
+      const kept = await saved(page);
+      assert.deepEqual(kept.relics, equipped);
+      assert.equal(kept.crystals, crystals);
+      assert.notEqual(kept.pending?.id, id);
+      await revisit(session, async sourcePage => {
+        const offer = await select(sourcePage);
+        await offer.locator('#b-equip').click();
+        const accepted = await saved(sourcePage);
+        assert.deepEqual(accepted.relics, swapped);
+        assert.equal(accepted.crystals, crystals - cost);
+      });
+    }
+  };
+}
+
+function treasureRelicCompare() {
+  const run = makeRun({ seed: 1, floor: 5 });
+  command(Run.chooseDoor, run, 1);
+  fillRelicSlots(run, run.room.relic);
+  const session = storedSession({ run });
+  command(Run.takeTreasure, run);
+  return relicComparison(run, session, null, 'treasure');
+}
+
+function gateRelicCompare() {
+  const run = makeRun({ seed: 1, floor: 4 });
+  startBattle(run);
+  fillRelicSlots(run, run.room.relic);
+  settleWin(run);
+  const id = run.pending.relic;
+  const session = storedSession({ run });
+  command(Run.chooseGateReward, run, { kind: 'relic', id });
+  return relicComparison(run, session, async page => {
+    await page.locator(`#pick.on [data-relic="${id}"]`).click();
+    await page.locator('#pick.on #b-gate-take').click();
+  }, 'gate');
+}
+
+function championship() {
+  const run = makeRun({ dungeonId: 'arena', seed: 1103811, floor: 3,
+    profileView: { lead: 'luna', companions: ['underdog'] } });
+  command(Run.chooseDoor, run, 2);
+  assert.equal(run.room.event.id, 'championship');
+  command(Run.chooseEvent, run, 'team');
+  advance(run);
+  return run;
+}
+
+function betRelicCompare() {
+  const run = championship();
+  fillRelicSlots(run, 'double_attack');
+  startBattle(run);
+  settleWin(run, { bet: { kind: 'same_grade_full', won: true } });
+  assert.equal(run.pending.id, 'double_attack');
+  assert.equal(run.pending.after.kind, 'gate');
+  return relicComparison(run, storedSession({ run }), null, 'bet');
+}
+
+function eventRelicCompare() {
+  for (let seed = 1; seed <= 40; seed++) {
+    const run = makeRun({ dungeonId: 'starlit_garden', seed, floor: 3 });
+    command(Run.chooseDoor, run, 2);
+    const choice = run.pending?.choices?.find(entry => entry.enabled && !entry.targets && entry.cost > 0 &&
+      entry.ops.length === 1 && entry.ops[0].type === 'relic' && !entry.ops[0].temporary);
+    if (!choice) continue;
+    const { id } = choice.ops[0];
+    fillRelicSlots(run, id === 'offered' ? run.room.relic : id);
+    const session = storedSession({ run });
+    command(Run.chooseEvent, run, choice.id);
+    return relicComparison(run, session, page => page.locator(`#event.on [data-choice="${choice.id}"]`).click(), 'event');
+  }
+  assert.fail('Expected a paid relic event in the starlit garden');
+}
+
+function relicTileMark() {
+  const run = championship();
+  startBattle(run);
+  settleWin(run, { bet: { kind: 'same_grade_full', won: true } });
+  advance(run);
+  reachFloor(run, 6);
+  const battle = startBattle(run);
+  const options = battle.options();
+  const artifacts = Run.battleOptions(run).artifacts;
+  assert.deepEqual(artifacts, ['double_attack']);
+  const state = battle.state();
+  assert.deepEqual(options.filter(option => commandRelics(artifacts, option, roster.card(run.room.party[0]), state).length)
+    .map(option => option.name), ['일반 공격']);
+  const base = Bridge.create(core, { ...Run.battleOptions(run), artifacts: [] });
+  base.start();
+  assert.ok(options[0].preview.dmg > base.options()[0].preview.dmg);
+  assert.deepEqual(options.slice(1).map(option => option.preview), base.options().slice(1).map(option => option.preview));
+  return {
+    session: storedSession({ run }), proof: `championship reward: normal attack ${base.options()[0].preview.dmg} → ${options[0].preview.dmg}; skills unchanged`,
+    async show(page) {
+      await openBattle(page);
+      const tile = skillTile(page, '일반 공격');
+      await tile.locator('[data-relic-mark="double_attack"]').waitFor();
+      assert.equal(await page.locator('#battle.on [data-relic-mark="double_attack"]').count(), 1);
+      assert.equal(await page.locator('#battle.on .relic-strip').count(), 0);
     }
   };
 }
@@ -1414,6 +1615,13 @@ const cases = {
   'run-lost': runLost,
   'record-fallen': recordFallen,
   'field-cap': fieldCap,
+  'relic-strip': () => relicMap(false),
+  'relic-slot-sheet': () => relicMap(true),
+  'relic-compare': treasureRelicCompare,
+  'relic-compare-gate': gateRelicCompare,
+  'relic-compare-bet': betRelicCompare,
+  'relic-compare-event': eventRelicCompare,
+  'relic-tile-mark': relicTileMark,
   'form-sheet': formSheet,
   'resume-seats': resumeSeats,
   'map-seats': mapSeats,

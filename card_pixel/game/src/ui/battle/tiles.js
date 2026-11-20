@@ -1,5 +1,6 @@
 import { $, $$, esc } from '../dom.js';
 import { TYPE, formatRange as damageRange } from '../widgets.js';
+import { relicEffect, relicMarks } from '../relics.js';
 import { FIELD } from './hud.js';
 import { skillFields } from './fields.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
@@ -7,11 +8,42 @@ import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
 const previewDamage = p => p.min != null && p.max != null ? damageRange([p.min, p.max]) : String(p.dmg ?? '');
 const hasFinalConsonant = name => /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
 
+export function commandRelics(artifacts, option, actor, { enemy, turn }) {
+  const normal = option.index === 0;
+  const attack = option.type === 'phy' || option.type === 'mag';
+  const immediate = !option.preview?.delayed;
+  const trait = actor?.trait?.type;
+  const addsBurn = normal && (trait === 'normal_attack_burn_divine' || trait === 'syn_fire_3_crit_burn');
+  const addsDivine = normal && trait === 'normal_attack_burn_divine';
+  const applies = status => option.effects.some(effect =>
+    ((effect.type === 'debuff' || effect.type === 'self_debuff') && effect.id === status) ||
+    (effect.type === 'random_debuff' && effect.pool?.includes(status)) ||
+    (effect.type === 'turn_modulo_debuffs' && turn % effect.mod === 0 && effect.debuffs?.includes(status)) ||
+    effect.type === 'wild_card_debuff');
+  return (artifacts || []).filter(id => {
+    switch (id) {
+      case 'double_attack': return normal;
+      case 'support_boost': return option.type === 'sup' && !option.heirloom &&
+        actor?.skills.some(skill => skill.name === option.name.split(' → ')[0] && skill.cost > 0);
+      case 'death_roulette': return attack || !normal;
+      case 'over_flame': return addsBurn || applies('burn');
+      case 'over_divine': return addsDivine || applies('divine') || (immediate && (enemy.buffs.divine || 0) < 3 &&
+        option.effects.some(effect => effect.type === 'check_divine_3_stun_else_add'));
+      case 'flame_piercing': return immediate && option.type === 'phy' && (addsBurn || !!enemy.buffs.burn);
+      case 'ice_break': return immediate && attack && !!enemy.buffs.stun;
+      case 'lucky_vicky': return !!option.preview?.forcedCrit;
+      default: return false;
+    }
+  });
+}
+
 export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, ticker }) {
   const { card, faceBadge } = widgets;
   const { sfx } = audio;
   const { openSheet, closeSheet, sheet } = sheets;
   const FIELD_NAMES = new Set(Object.keys(FIELD).map(id => core.BUFF_NAMES[id]));
+  const markedRelics = option => commandRelics(B.artifacts, option,
+    card(B.D.allies[B.D.cur].form || B.party[B.D.cur]), B.D);
 
   function supportLine(o, intent) {
     const defense = o.defense;
@@ -115,8 +147,9 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
           (p.forcedCrit ? '<small>치명</small>' : '') + (p.kill ? '<u>처치</u>' : '');
       }
       else { const s = supportLine(o, B.intent); r2 = '<strong class="txt' + (s[0] === '—' ? ' no' : '') + '">' + esc(s[0]) + '</strong>'; if (s[1]) r3 = s[1]; }
+      const marks = relicMarks(core, markedRelics(o));
       return '<button class="act ' + o.type + '" data-i="' + o.index + '"' + (usable ? '' : ' disabled') + '>' +
-        '<span class="ic">' + TYPE[o.type].slice(0, 1) + '</span><span class="tx">' +
+        '<span class="ic">' + TYPE[o.type].slice(0, 1) + marks + '</span><span class="tx">' +
         '<span class="r1"><b>' + esc(name) + '</b><em>' + (o.cost ? 'MP ' + o.cost : '') + '</em></span>' +
         '<span class="r2">' + r2 + '</span><span class="r3">' + esc(r3) + '</span></span></button>';
     };
@@ -128,7 +161,8 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       const p = heir.preview;
       h.className = 'on'; h.dataset.i = heir.index; h.disabled = false;
       const forecast = p?.instant ? previewDamage(p) + ' · 즉시' : p?.delayed ? delayedLine(heir, D.turn) : p ? previewDamage(p) : '';
-      h.innerHTML = '<small>유품 · ' + esc(heir.heirFromName || '') + '</small><b>' + esc(heir.name) + '</b><strong>' + esc(forecast) + '</strong>' + (p?.kill ? '<u>처치</u>' : '');
+      h.innerHTML = '<small>유품 · ' + esc(heir.heirFromName || '') + '</small><b>' + esc(heir.name) + '</b><strong>' + esc(forecast) + '</strong>' +
+        relicMarks(core, markedRelics(heir)) + (p?.kill ? '<u>처치</u>' : '');
     } else { h.className = ''; h.innerHTML = ''; h.disabled = true; delete h.dataset.i; }
     const r = $('#b-retreat'), can = B.bridge.canRetreat();
     B.armed = false; r.className = ''; r.disabled = !can;
@@ -167,9 +201,13 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     const me = card(B.party[B.D.cur]);
     const name = isFormOption(o) ? FORM_SKILL : o.name;
     const fields = skillFields(core, o, B.artifacts);
+    const relics = markedRelics(o).map(id => {
+      const relic = core.GameUtils.getArtifactById(id);
+      return relic.name + ' · ' + relicEffect(relic);
+    }).join(' ');
     sheet(name + ' · ' + TYPE[o.type] + (o.cost ? ' · MP ' + o.cost : '') + (o.heirloom ? ' · 유품' : ''),
       (o.heirloom ? (o.heirFromName || '') + '에게서 물려받은 기술. 위력 1.5배, MP 0, 이 전투에서 한 번. ' : '') + fullText(o, me) +
-      (fields ? ' ' + fields.detail : '') + '  특성 — ' + me.trait.desc);
+      (fields ? ' ' + fields.detail : '') + (relics ? ' ' + relics : '') + '  특성 — ' + me.trait.desc);
   }
   const acts = $('#acts');
   acts.addEventListener('pointerdown', ev => {

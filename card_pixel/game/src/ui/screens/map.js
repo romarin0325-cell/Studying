@@ -10,6 +10,7 @@ import { QUIRKS } from '../../content/quirks.js';
 import { AFFIXES } from '../../content/affixes.js';
 import { getWalkLayout, mapPosition, mountWalkingMap } from '../../stage/walking-map.js';
 import { shortRiftDate } from './daily-rift.js';
+import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../relics.js';
 
 const AFFIX_RISK = {
   tough: '첫 3턴 적 피해 절반', frenzy: '적 HP 절반부터 공격 ×1.5',
@@ -224,13 +225,17 @@ export function mapScreen(run, ui) {
   const reserve = { ...run, bench: run.bench.filter(id => !front.includes(id)) };
   const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + '</button>' : '';
   const title = rift ? [shortRiftDate(rift.spec?.dayKey), '균열'].filter(Boolean).join(' ') : dungeon.name;
-  node.innerHTML = head(run, title, run.floor + '층') + '<div class="run-route">' +
+  node.innerHTML = head(run, title, run.floor + '층') + relicStrip(core, run.relics) + '<div class="run-route">' +
     '<button class="floor-strip" id="b-floors" aria-label="층 진행과 문지기 정보">' + track + '</button>' +
     scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + '</div>' + skip, 'walking-map') +
     '<div class="run-doors">' + doors + '</div>' +
     '<div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more +
     '</div><small>동료 ' + run.bench.length + ' · 쓰러짐 ' + run.fallen.length + '</small></div></div>';
   show('map');
+  bindRelicSlots(node, run.relics, id => {
+    ui.audio.sfx.tap();
+    openRelicSheet(openSheet, artifacts.get(id));
+  });
   const walkTo = mountWalkingMap($('.walking-map', node), layout, {
     run,
     instant: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.__game?.clock?.speed > 1,
@@ -297,6 +302,7 @@ export function mapScreen(run, ui) {
       (service && door.type === 'spring' ? '<p>보유 결정 ' + run.crystals + '개</p>' : '') +
       (gain ? '<p class="gain">' + esc(gain) + '</p>' : '') +
       (escrow(door) ? '<p>계약에 ◆' + CONTRACT_ESCROW + ' 맡김</p>' : '') +
-      (treasure ? '<p class="gain">추가 보상 · 보물 적 1명 처치마다 결정 +2</p>' : '') + contractGoal(door) + rule(relic));
+      (treasure ? '<p class="gain">추가 보상 · 보물 적 1명 처치마다 결정 +2</p>' : '') + contractGoal(door) +
+      (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ''));
   }
 }

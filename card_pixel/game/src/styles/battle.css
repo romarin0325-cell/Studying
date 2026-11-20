@@ -4,7 +4,7 @@
 #bar #gems { color: var(--aqua); margin-right: 4px; }
 #bar button { background: var(--win2); border: 2px solid var(--line); padding: 0 6px; min-width: 44px; height: 30px; font-size: 12px; }
 #bar button.on { border-color: var(--aqua); color: var(--aqua); }
-#bar #b-field { white-space: nowrap; color: var(--gold); }
+#bar #b-field { min-width: 48px; height: 48px; white-space: nowrap; color: var(--gold); }
 #bar #b-log { min-width: 48px; height: 48px; flex: none; }
 
 #stage { position: relative; flex: none; overflow: hidden; background: #140d1f; border-bottom: 2px solid var(--line); }
@@ -38,6 +38,7 @@
 .sky i { width: 16px; height: 16px; border: 1px solid #2b2350; background: rgba(10, 7, 22, .7); font: 10px/14px var(--px9); font-style: normal; text-align: center; color: #1b0b10; overflow: hidden; }
 .sky i.on { border-color: #fff; }
 #sky-slots { display: flex; flex: none; gap: 3px; }
+.sky:has(.relic-marks) { min-height: 48px; }
 #skyname { font: 10px/14px var(--px9); color: var(--ink); margin-left: 3px; text-shadow: 1px 1px 0 #000; }
 #region-next { font: 12px/15px var(--px); color: var(--gold); margin-left: 4px; white-space: nowrap; }
 #region-next:empty, #skyname:empty { display: none; }
@@ -121,6 +122,13 @@
 .act[disabled] { opacity: .42; pointer-events: none; }
 .act .ic { flex: none; width: 24px; display: flex; align-items: center; justify-content: center; color: #120e24; background: var(--line2); }
 .act.phy .ic { background: var(--phy); } .act.mag .ic { background: var(--mag); } .act.sup .ic { background: var(--sup); }
+.relic-marks { display: inline-flex; align-items: center; gap: 2px; }
+.relic-mark { display: grid; place-items: center; background: #171228; }
+.act .ic:has(.relic-marks) { flex-direction: column; gap: 2px; line-height: 14px; }
+.act .ic .relic-marks { flex-direction: column; gap: 1px; }
+.act .ic .relic-icon { width: 12px; height: 12px; }
+.act .ic .relic-marks:has(.relic-mark:nth-child(4)) { display: grid; grid-template-columns: repeat(2, 11px); }
+.act .ic .relic-marks:has(.relic-mark:nth-child(4)) .relic-icon { width: 11px; height: 11px; }
 .act .tx { flex: 1; min-width: 0; padding: 4px 7px 7px 7px; display: flex; flex-direction: column; justify-content: center; }
 .act .r1 { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
 .act .r1 b { font: 15px/20px var(--px14); font-weight: normal; overflow: hidden; text-overflow: ellipsis; }
@@ -145,6 +153,7 @@
 #b-heir small { display: block; font: 10px/12px var(--px9); color: var(--gold); }
 #b-heir b { font: 15px/20px var(--px14); font-weight: normal; color: #fff; }
 #b-heir strong { font: 15px/20px var(--px); font-weight: normal; color: var(--gold); margin-left: 8px; }
+#b-heir .relic-marks { vertical-align: middle; margin-left: 6px; }
 #b-heir u { position: absolute; right: 6px; top: 6px; text-decoration: none; font: 10px/15px var(--px9); background: var(--coral); color: #1b0b10; padding: 0 4px; animation: blink .5s steps(2) infinite; }
 #b-heir:active { transform: translateY(2px); } #b-heir[disabled] { opacity: .45; pointer-events: none; }
 #b-retreat.armed { border-color: var(--gold); color: var(--gold); } #b-retreat[disabled] { opacity: .45; pointer-events: none; }

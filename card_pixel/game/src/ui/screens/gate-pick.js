@@ -1,6 +1,8 @@
 import { $, $$, esc, show } from '../dom.js';
 import { chooseReplacements, head, replacementCount } from '../widgets.js';
+import { relicEffect, relicIcon } from '../relics.js';
 import { chooseGateReward } from '../../engine/run.js';
+import { RELIC_LIMIT } from '../../engine/rooms.js';
 import { treasureScreen } from './treasure.js';
 
 export function gatePickScreen(run, ui) {
@@ -13,8 +15,8 @@ export function gatePickScreen(run, ui) {
   node.innerHTML = head(run, '문지기 보상', run.floor + '층') + '<div class="scroll">' +
     '<p class="lead">그림자 한 명을 깨우거나 유물을 장착한다.</p><div class="cards">' +
     candidates.map(id => cardRow(run, id, { tag: '이번 원정 합류' })).join('') +
-    (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + ui.icon(relic) +
-      '<span><b>' + esc(artifact.name) + '</b><small>' + esc(artifact.desc) + '</small></span></button>' : '') +
+    (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + relicIcon(relic, 32) +
+      '<span><b>' + esc(artifact.name) + '</b><small>' + esc(relicEffect(artifact)) + '</small></span></button>' : '') +
     '</div></div><div class="footer"><button class="btn" id="b-leave">두고 가기</button>' +
     '<button class="btn go" id="b-gate-take" disabled>보상을 고른다</button></div>';
   show('pick');
@@ -27,7 +29,8 @@ export function gatePickScreen(run, ui) {
     sfx.tap();
     for (const other of rows) other.classList.toggle('sel', other === row);
     take.disabled = false;
-    take.textContent = choice.kind === 'join' ? card(id).name + ' 깨우기' : artifact.name + ' 받기';
+    take.textContent = choice.kind === 'join' ? card(id).name + ' 깨우기' :
+      run.relics.length === RELIC_LIMIT ? '교체할 유물 고르기' : artifact.name + ' 받기';
   });
   function apply(selected) {
     if (!selected || !ui.command(chooseGateReward, selected).ok) return;

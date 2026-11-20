@@ -112,7 +112,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #bar #gems { color: var(--aqua); margin-right: 4px; }
 #bar button { background: var(--win2); border: 2px solid var(--line); padding: 0 6px; min-width: 44px; height: 30px; font-size: 12px; }
 #bar button.on { border-color: var(--aqua); color: var(--aqua); }
-#bar #b-field { white-space: nowrap; color: var(--gold); }
+#bar #b-field { min-width: 48px; height: 48px; white-space: nowrap; color: var(--gold); }
 #bar #b-log { min-width: 48px; height: 48px; flex: none; }
 
 #stage { position: relative; flex: none; overflow: hidden; background: #140d1f; border-bottom: 2px solid var(--line); }
@@ -146,6 +146,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .sky i { width: 16px; height: 16px; border: 1px solid #2b2350; background: rgba(10, 7, 22, .7); font: 10px/14px var(--px9); font-style: normal; text-align: center; color: #1b0b10; overflow: hidden; }
 .sky i.on { border-color: #fff; }
 #sky-slots { display: flex; flex: none; gap: 3px; }
+.sky:has(.relic-marks) { min-height: 48px; }
 #skyname { font: 10px/14px var(--px9); color: var(--ink); margin-left: 3px; text-shadow: 1px 1px 0 #000; }
 #region-next { font: 12px/15px var(--px); color: var(--gold); margin-left: 4px; white-space: nowrap; }
 #region-next:empty, #skyname:empty { display: none; }
@@ -229,6 +230,13 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .act[disabled] { opacity: .42; pointer-events: none; }
 .act .ic { flex: none; width: 24px; display: flex; align-items: center; justify-content: center; color: #120e24; background: var(--line2); }
 .act.phy .ic { background: var(--phy); } .act.mag .ic { background: var(--mag); } .act.sup .ic { background: var(--sup); }
+.relic-marks { display: inline-flex; align-items: center; gap: 2px; }
+.relic-mark { display: grid; place-items: center; background: #171228; }
+.act .ic:has(.relic-marks) { flex-direction: column; gap: 2px; line-height: 14px; }
+.act .ic .relic-marks { flex-direction: column; gap: 1px; }
+.act .ic .relic-icon { width: 12px; height: 12px; }
+.act .ic .relic-marks:has(.relic-mark:nth-child(4)) { display: grid; grid-template-columns: repeat(2, 11px); }
+.act .ic .relic-marks:has(.relic-mark:nth-child(4)) .relic-icon { width: 11px; height: 11px; }
 .act .tx { flex: 1; min-width: 0; padding: 4px 7px 7px 7px; display: flex; flex-direction: column; justify-content: center; }
 .act .r1 { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
 .act .r1 b { font: 15px/20px var(--px14); font-weight: normal; overflow: hidden; text-overflow: ellipsis; }
@@ -253,6 +261,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #b-heir small { display: block; font: 10px/12px var(--px9); color: var(--gold); }
 #b-heir b { font: 15px/20px var(--px14); font-weight: normal; color: #fff; }
 #b-heir strong { font: 15px/20px var(--px); font-weight: normal; color: var(--gold); margin-left: 8px; }
+#b-heir .relic-marks { vertical-align: middle; margin-left: 6px; }
 #b-heir u { position: absolute; right: 6px; top: 6px; text-decoration: none; font: 10px/15px var(--px9); background: var(--coral); color: #1b0b10; padding: 0 4px; animation: blink .5s steps(2) infinite; }
 #b-heir:active { transform: translateY(2px); } #b-heir[disabled] { opacity: .45; pointer-events: none; }
 #b-retreat.armed { border-color: var(--gold); color: var(--gold); } #b-retreat[disabled] { opacity: .45; pointer-events: none; }
@@ -611,16 +620,48 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 #event-target-effect { margin: 8px 0; }
 
 .run-treasure .run-scene { height: clamp(152px, 29dvh, 300px); margin: -12px -12px 10px; display: flex; align-items: flex-end; justify-content: center; }
+.run-treasure.comparing .run-scene { height: clamp(136px, 21dvh, 180px); }
 .relic-dais { margin-bottom: 28px; padding: 0 16px; border-bottom: 9px solid #756050; box-shadow: 0 5px 0 #2b2031; display: flex; justify-content: center; }
-.relic-dais .run-icon { width: 96px; height: 96px; }
-.run-relic-description, .run-relic-compare { padding: 9px 12px; }
+.relic-icon { display: block; flex: none; object-fit: contain; }
+.run-relic-description { padding: 9px 12px; font-size: 14px; }
 .run-relic-description h2 { margin-bottom: 5px; }
-.run-relic-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 5px 0 8px; }
-.relic-slot { min-height: 78px; display: flex; align-items: center; gap: 8px; padding: 6px 8px; text-align: left; }
-.relic-slot span { overflow-wrap: anywhere; }
+.relic-rack {
+  flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 6px 8px; padding: 6px 12px; background: #0f0b20; border-bottom: 1px solid var(--line);
+}
+.relic-rack-label { color: var(--gold); }
+.relic-strip { display: grid; grid-template-columns: repeat(4, 52px); gap: 6px; }
+.relic-slot {
+  width: 52px; height: 52px; display: grid; place-items: center; padding: 0;
+  background: var(--win); border: 2px solid var(--line2); color: var(--gold); box-shadow: 0 2px 0 #08050f;
+}
+.relic-slot.empty { background: #120e24; border: 1px dashed var(--line); box-shadow: inset 0 0 0 3px #0b0714; }
+.relic-slot[aria-pressed="true"] { border-color: var(--coral); background: #422b40; }
+.relic-slot:active { transform: translateY(2px); }
+.relic-slot:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
 .relic-slot.equipped { border-color: var(--gold); animation: equipped .24s steps(2); }
 @keyframes equipped { 50% { background: #4b3a20; } }
-.run-relic-compare { border-left: 2px solid var(--gold); background: var(--win); }
+#sh-body .relic-rack { position: sticky; top: 0; z-index: 1; padding: 4px 0 8px; margin-bottom: 8px; background: var(--win); }
+.relic-sheet-effect { display: flex; align-items: center; gap: 12px; }
+#sheet .relic-sheet p { font: 14px/21px var(--px); }
+.relic-sheet small { color: var(--gold); }
+.relic-sheet [data-relic-back] { margin-top: 10px; }
+#sheet:has(.relic-sheet, .relic-strip) .btn,
+.run-treasure + .footer .btn, .run-relic-choice { min-height: 48px; }
+.run-relic-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.relic-compare-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0;
+  padding: 8px 10px; background: var(--win); border: 1px solid var(--line); border-top: 2px solid var(--aqua);
+  box-shadow: 0 2px 0 #08050f; overflow-wrap: anywhere;
+}
+.relic-compare-card > small { color: var(--aqua); }
+.relic-compare-card.outgoing { border-top-color: var(--coral); }
+.relic-compare-card.outgoing > small { color: var(--coral); }
+.relic-compare-card h3 { margin: 0; color: var(--ink); }
+.relic-compare-card p { font: 14px/20px var(--px); }
+.relic-compare-card.outgoing:not(:has(h3)) p { color: var(--dim); }
+.relic-cost { margin-top: 10px; font-size: 14px; }
+.run-treasure.comparing + .footer #b-equip { flex: 2; }
 
 @media (max-width: 370px) {
   .run-screen header.top b { font-size: 19px; }
@@ -10111,7 +10152,7 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/content/events.js
-  var EVENTS2 = [
+  var ORIGINAL_EVENTS = [
     {
       id: "jellyfish_vials",
       name: "\uC824\uB9AC\uD53C\uC26C\uD504\uB9B0\uC138\uC2A4\uC758 \uB3C5\uBCD1",
@@ -10397,6 +10438,268 @@ const BattleRuntime = {
       ]
     }
   ];
+  var TEMPO_EVENTS = [
+    {
+      id: "kobold_boot_exchange",
+      name: "\uCF54\uBCFC\uD2B8\uC758 \uB450 \uCF24\uB808",
+      text: "\uCF54\uBCFC\uD2B8\uAC00 \uAE30\uC2B5 \uC5F0\uC2B5\uC744 \uB9C8\uCE58\uC790 \uD759 \uBB3B\uC740 \uC7A5\uD654 \uC606\uC5D0 \uC0C8 \uC7A5\uD654\uAC00 \uB193\uC778\uB2E4. \uC0C8 \uC7A5\uD654\uC758 \uC8FC\uC778\uC740 \uCC9C\uB9C9 \uBC16\uC5D0\uC11C \uAE30\uB2E4\uB9B0\uB2E4.",
+      requires: { present: ["kobold"] },
+      choices: [
+        {
+          id: "mend",
+          text: "\uD55C \uBA85\uC758 \uC7A5\uD654\uB97C \uAE30\uC6B4\uB2E4 \xB7 \uC6D0\uC815 \uCD95\uBCF5\uC744 20%\uB85C \uAD50\uCCB4",
+          target: "bench",
+          ops: [{ type: "bless", multiplier: 0.2 }]
+        },
+        {
+          id: "exchange",
+          text: "\uD55C \uBA85\uC744 \uBCF4\uB0B4\uACE0 \uBB34\uC791\uC704 \uD6C4\uC784\uC744 \uBC1B\uB294\uB2E4",
+          cost: 1,
+          target: "release",
+          ops: [{ type: "release", randomReplacement: true }]
+        }
+      ]
+    },
+    {
+      id: "mimic_paybox",
+      name: "\uBBF8\uBBF9\uC758 \uC77C\uB2F9 \uC0C1\uC790",
+      text: "\uBBF8\uBBF9\uC774 \uAC00\uB4DC\uB85C \uB69C\uAED1\uC744 \uB2EB\uC790 \uACB0\uC815 \uB458\uC774 \uB2EC\uADF8\uB77D\uAC70\uB9B0\uB2E4. \uB69C\uAED1 \uC548\uCABD\uC5D0\uB294 \u201C\uAC19\uC774 \uB098\uAC00\uC11C \uC0B4\uC544\uC624\uBA74 \uD55C \uB2E2\uC529\u201D\uC774\uB77C\uACE0 \uC801\uD600 \uC788\uB2E4.",
+      requires: { present: ["mimic"] },
+      choices: [
+        {
+          id: "cash",
+          text: "\uBD99\uC5B4 \uC788\uB294 \uACB0\uC815 \uB458\uC744 \uB5C0\uB2E4",
+          ops: [{ type: "crystals", amount: 2 }]
+        },
+        {
+          id: "porter",
+          text: "\uBBF8\uBBF9\uC744 \uAE68\uC6B4\uB2E4 \xB7 \uCD9C\uC804 \uC0DD\uD658 \uC77C\uB2F9 1",
+          ops: [{ type: "join", ids: ["mimic"] }]
+        }
+      ]
+    },
+    {
+      id: "ash_split_wick",
+      name: "\uC560\uC26C\uC758 \uAC08\uB77C\uC9C4 \uC2EC\uC9C0",
+      dungeons: ["ember_volcano", "creation_tower"],
+      text: "\uC560\uC26C\uAC00 \uD55C \uC2EC\uC9C0\uC758 \uC591 \uB05D\uC5D0 \uBD88\uC744 \uBD99\uC778\uB2E4. \uD55C\uCABD \uBD88\uC740 \uC190\uC744 \uAC10\uC2F8\uACE0, \uB2E4\uB978 \uCABD \uBD88\uC740 \uC190\uBAA9\uAE4C\uC9C0 \uD0C0\uACE0 \uC624\uB978\uB2E4.",
+      requires: { present: ["ash"] },
+      choices: [
+        {
+          id: "veil",
+          text: "\uB4DC\uB9BC\uD30C\uC774\uC5B4\uB97C \uC900\uB2E4 \xB7 \uC0AC\uC6A9 \uC2DC \uD68C\uD53C 1\uD134",
+          target: "bench",
+          ops: [{ type: "heirloom", from: "ash", name: "\uB4DC\uB9BC\uD30C\uC774\uC5B4" }]
+        },
+        {
+          id: "flare",
+          text: "\uC544\uB9C8\uAC9F\uB3C8\uC744 \uC900\uB2E4 \xB7 \uC0AC\uC6A9 \uC2DC \uC790\uAE30 HP \uC808\uBC18 \uC18C\uBAA8\uC640 \uAE30\uC808",
+          cost: 2,
+          target: "bench",
+          ops: [{ type: "heirloom", from: "ash", name: "\uC544\uB9C8\uAC9F\uB3C8" }]
+        }
+      ]
+    },
+    {
+      id: "miko_lottery_cups",
+      name: "\uC6A9\uD608\uC758\uBB34\uB140\uC758 \uC81C\uBE44 \uC794",
+      dungeons: ["ember_volcano", "creation_tower"],
+      text: "\uC6A9\uD608\uC758\uBB34\uB140\uAC00 \uB4DC\uB798\uACE4\uC2A4\uD30C\uD074\uC758 \uBD88\uAF43\uC73C\uB85C \uC81C\uBE44\uB97C \uBC1D\uD78C\uB2E4. \uBB34\uB140\uC758 \uC794 \uD558\uB098\uAC00 \uC544\uC9C1 \uC6D0 \uBC16\uC5D0 \uC788\uB2E4.",
+      requires: { present: ["dragon_miko"] },
+      choices: [
+        {
+          id: "old_circle",
+          text: "\uC9C0\uAE08 \uB3D9\uB8CC\uB4E4\uB07C\uB9AC \uC81C\uBE44\uB97C \uBF51\uB294\uB2E4",
+          ops: [{ type: "altar" }]
+        },
+        {
+          id: "one_more",
+          text: "\uBB34\uB140\uB3C4 \uAE68\uC6CC \uD568\uAED8 \uC81C\uBE44\uB97C \uBF51\uB294\uB2E4",
+          cost: 1,
+          ops: [{ type: "join", ids: ["dragon_miko"] }, { type: "altar" }]
+        }
+      ]
+    },
+    {
+      id: "holy_bomb_last_verse",
+      name: "\uD640\uB9AC\uBC24\uC758 \uB9C8\uC9C0\uB9C9 \uC18C\uC808",
+      dungeons: ["twilight_cathedral", "creation_tower"],
+      text: "\uD640\uB9AC\uBC24\uC774 \uC545\uBCF4 \uB05D\uC5D0 \uC4F4 \uC790\uAE30 \uC774\uB984\uC744 \uC9C0\uC6B4\uB2E4. \u201C\uB9C8\uC9C0\uB9C9 \uC18C\uC808\uC744 \uBD80\uB97C \uC0AC\uB78C\uC774 \uC5EC\uAE30\uC5D0 \uC11C\uBA85\uD574.\u201D",
+      requires: { present: ["holy_bomb"] },
+      choices: [
+        {
+          id: "singer",
+          text: "\uD640\uB9AC\uBC24\uC744 \uAE68\uC6CC \uC545\uBCF4\uB97C \uB3CC\uB824\uC900\uB2E4",
+          cost: 1,
+          ops: [{ type: "join", ids: ["holy_bomb"] }]
+        },
+        {
+          id: "sign",
+          text: "\uD55C \uBA85\uC774 \uB77C\uC2A4\uD2B8\uCE90\uB7F4\uC5D0 \uC11C\uBA85\uD55C\uB2E4 \xB7 \uC0AC\uC6A9 \uC2DC \uC790\uD3ED",
+          target: "bench",
+          ops: [{ type: "heirloom", from: "holy_bomb", name: "\uB77C\uC2A4\uD2B8\uCE90\uB7F4" }]
+        }
+      ]
+    },
+    {
+      id: "whale_third_peal",
+      name: "\uC740\uD558\uACE0\uB798\uAC00 \uC0BC\uD0A8 \uC885",
+      dungeons: ["twilight_cathedral", "creation_tower"],
+      text: "\uC740\uD558\uACE0\uB798\uC758 \uC785\uC5D0\uC11C \uC791\uC740 \uC885\uC774 \uAD74\uB7EC \uB098\uC628\uB2E4. \uADF8 \uC548\uC5D0 \uC14B\uC9F8 \uC6B8\uB9BC\uACFC \uC5B4\uB460\uC744 \uAFF0\uB6AB\uB294 \uD770 \uC74C\uD45C\uAC00 \uB4E4\uC5B4 \uC788\uB2E4.",
+      requires: { present: ["galaxy_whale"] },
+      choices: [
+        {
+          id: "peal",
+          text: "\uC14B\uC9F8 \uD134 \uCC98\uCE58\uB85C \uC624\uBC84\uB514\uBC14\uC778\uC758 \uAC12\uC744 \uCE58\uB978\uB2E4",
+          ops: [
+            { type: "start", enemyDebuffs: { divine: 1 } },
+            { type: "bet", kind: "kill_on_turn", turn: 3, reward: { relic: "over_divine" } }
+          ]
+        },
+        {
+          id: "buy_bell",
+          text: "\uC885\uAC12\uC744 \uB0B4\uACE0 \uC624\uBC84\uB514\uBC14\uC778\uC744 \uBC1B\uB294\uB2E4",
+          cost: 3,
+          ops: [{ type: "relic", id: "over_divine" }]
+        },
+        {
+          id: "white_note",
+          text: "\uC571\uC194\uB8E8\uD2B8\uB77C\uC774\uD2B8\uC758 \uD770 \uC74C\uD45C\uB97C \uBCA0\uB080\uB2E4",
+          cost: 2,
+          target: "bench",
+          ops: [{ type: "heirloom", from: "galaxy_whale", name: "\uC571\uC194\uB8E8\uD2B8\uB77C\uC774\uD2B8" }]
+        }
+      ]
+    },
+    {
+      id: "two_garden_chairs",
+      name: "\uC815\uC6D0\uC5D0 \uB0A8\uC740 \uB450 \uC758\uC790",
+      dungeons: ["starlit_garden", "creation_tower"],
+      text: "\uBBF8\uC774\uB77C\uAC00 \uAC00\uC6B4\uB370 \uC758\uC790\uC758 \uB2E4\uB9AC\uB97C \uBD95\uB300\uB85C \uBB36\uB294\uB2E4. \uBE45\uD1A0\uB9AC\uC544\uAC00 \uB9E8 \uB4A4 \uC758\uC790\uC5D0 \uC549\uC790 \uB4F1\uBD88\uC774 \uB450 \uBC30\uB85C \uBC1D\uC544\uC9C4\uB2E4.",
+      requires: { present: ["mummy", "victoria"] },
+      choices: [
+        {
+          id: "middle",
+          text: "\uC911\uACAC\uC744 \uB9E1\uC744 \uBBF8\uC774\uB77C\uB97C \uAE68\uC6B4\uB2E4",
+          cost: 1,
+          ops: [{ type: "join", ids: ["mummy"] }]
+        },
+        {
+          id: "rear",
+          text: "\uB300\uC7A5\uC744 \uB9E1\uC744 \uBE45\uD1A0\uB9AC\uC544\uB97C \uAE68\uC6B4\uB2E4",
+          cost: 3,
+          ops: [{ type: "join", ids: ["victoria"] }]
+        },
+        {
+          id: "lanterns",
+          text: "\uC758\uC790\uB97C \uC811\uACE0 \uB4F1\uBD88 \uB458\uB9CC \uAC00\uC838\uAC04\uB2E4",
+          ops: [{ type: "field", ids: ["goddess_descent", "twinkle_party"] }]
+        }
+      ]
+    },
+    {
+      id: "dainichi_alms_bowl",
+      name: "\uB300\uC77C\uC5EC\uB798\uC758 \uBE48 \uBC1C\uC6B0",
+      dungeons: ["starlit_garden", "creation_tower"],
+      text: "\uB300\uC77C\uC5EC\uB798\uAC00 \uBC1C\uC6B0\uB97C \uAE30\uC6B8\uC774\uC790 \uACB0\uC815 \uB458\uC774 \uBC14\uB2E5\uC744 \uAD6C\uB978\uB2E4. \uBC1C\uC6B0 \uC548\uCABD\uC5D0\uB294 \uB204\uAD6C\uC758 \uC774\uB9C8\uC5D0 \uB300\uB3C4 \uAC19\uC740 \uB192\uC774\uAE4C\uC9C0 \uB2FF\uB294 \uAE08\uC774 \uADF8\uC5B4\uC838 \uC788\uB2E4.",
+      requires: { present: ["dainichi_nyorai"] },
+      choices: [
+        {
+          id: "level",
+          text: "\uACB0\uC815 \uB458\uC744 \uBC1B\uACE0 \uBAA8\uB450\uC758 \uC6D0\uC815 \uCD95\uBCF5\uC744 10%\uB85C \uB9DE\uCD98\uB2E4",
+          ops: [{ type: "bless", all: true, multiplier: 0.1 }, { type: "crystals", amount: 2 }]
+        },
+        {
+          id: "mantra",
+          text: "\uC9C0\uAE08 \uC6D0\uC815 \uCD95\uBCF5\uC744 \uC9C0\uD0A8\uB2E4 \xB7 \uB2E4\uC74C \uC804\uD22C \uBCF4\uC870 MP 0",
+          ops: [{ type: "relic", id: "support_boost", temporary: true }]
+        }
+      ]
+    },
+    {
+      id: "penguin_ice_seam",
+      name: "\uB208\uAF43\uD3AD\uADC4\uC758 \uB9C8\uC9C0\uB9C9 \uBE59\uD310",
+      dungeons: ["midnight_trench", "creation_tower"],
+      text: "\uB208\uAF43\uD3AD\uADC4\uC774 \uC81C\uD2B8\uC2AC\uB77C\uC774\uB4DC\uB97C \uBA48\uCD98 \uC790\uB9AC\uC5D0\uC11C \uC5BC\uC74C \uD55C \uC7A5\uC774 \uD1B5\uC9F8\uB85C \uB4E4\uB9B0\uB2E4. \uBC1C\uB85C \uBC1F\uC744 \uC218\uB3C4, \uB4F1\uC5D0 \uBB36\uC744 \uC218\uB3C4 \uC788\uB2E4.",
+      requires: { present: ["snow_penguin"] },
+      choices: [
+        {
+          id: "break",
+          text: "\uCCAB \uC801 \uBC1C\uBC11\uC5D0\uC11C \uC5BC\uC74C\uC744 \uAE6C\uB2E4",
+          ops: [{ type: "start", enemyDebuffs: { stun: 1 } }]
+        },
+        {
+          id: "carry",
+          text: "\uBB3C \uB3D9\uB8CC\uAC00 \uC4F0\uB7EC\uC9C8 \uB54C \uAE70 \uC5BC\uC74C\uC744 \uB0A8\uAE34\uB2E4",
+          ops: [{ type: "relic", id: "frozen_body", temporary: true }]
+        }
+      ]
+    },
+    {
+      id: "venom_five_knots",
+      name: "\uBCA0\uB188\uC758 \uB2E4\uC12F \uB9E4\uB4ED",
+      dungeons: ["midnight_trench", "creation_tower"],
+      text: "\uBCA0\uB188\uC774 \uBC43\uC804\uC5D0 \uD50C\uB808\uC774\uADF8\uC758 \uB9E4\uB4ED\uC744 \uB2E4\uC12F \uAC1C \uBB36\uB294\uB2E4. \uC190\uC744 \uB193\uC790 \uC544\uC9C1 \uD480\uB9AC\uC9C0 \uC54A\uC740 \uB9E4\uB4ED\uC774 \uBB3C\uBC11\uC73C\uB85C \uAC00\uB77C\uC549\uB294\uB2E4.",
+      requires: { present: ["venom"] },
+      choices: [
+        {
+          id: "hold",
+          text: "\uD50C\uB808\uC774\uADF8\uB97C \uC900\uB2E4 \xB7 \uBB3C\uB7EC\uB098\uBA74 \uB0A8\uC740 \uC608\uC57D \uC18C\uBA78",
+          cost: 2,
+          target: "bench",
+          ops: [{ type: "heirloom", from: "venom", name: "\uD50C\uB808\uC774\uADF8" }]
+        },
+        {
+          id: "brace",
+          text: "\uB300\uC2E0 \uB9DE\uC744 \uB3D9\uB8CC\uC758 \uC6D0\uC815 \uCD95\uBCF5\uC744 25%\uB85C \uAD50\uCCB4\uD55C\uB2E4",
+          target: "bench",
+          ops: [{ type: "bless", multiplier: 0.25 }]
+        }
+      ]
+    },
+    {
+      id: "arena_chalk_lines",
+      name: "\uBD84\uD544\uB85C \uADF8\uC740 \uACB0\uD22C\uC120",
+      dungeons: ["arena", "creation_tower"],
+      text: "\uAC00\uB514\uC5B8\uC774 \uBC30\uD2C0\uD544\uB4DC\uC5D0 \uC9E7\uC740 \uD68D\uC744 \uB458 \uAE0B\uB294\uB2E4. \uD314\uB77C\uB518\uC774 \uADF8 \uB05D\uC5D0 \uCE7C\uC744 \uB300\uC790 \uD770 \uC120\uC774 \uCE7C\uB0A0 \uC18D\uC73C\uB85C \uBE68\uB824 \uB4E0\uB2E4.",
+      requires: { present: ["guardian", "paladin"] },
+      choices: [
+        {
+          id: "grind",
+          text: "\uCCAB \uC801\uC758 \uAC11\uC637\uC744 \uAE01\uACE0 \uC120\uC744 \uB0A8\uAE34\uB2E4",
+          ops: [{ type: "field", ids: ["arena"] }, { type: "start", enemyDebuffs: { corrosion: 1 } }]
+        },
+        {
+          id: "cut",
+          text: "\uD55C \uBA85\uC5D0\uAC8C \uC120\uC744 \uBCA0\uB294 \uB4C0\uC5BC\uBE0C\uB808\uC774\uCEE4\uB97C \uC900\uB2E4",
+          cost: 2,
+          target: "bench",
+          ops: [{ type: "field", ids: ["arena"] }, { type: "heirloom", from: "paladin", name: "\uB4C0\uC5BC\uBE0C\uB808\uC774\uCEE4" }]
+        }
+      ]
+    },
+    {
+      id: "rollcall_ends",
+      name: "\uC55E\uB4A4\uAC00 \uBE48 \uCD9C\uC11D\uBD80",
+      dungeons: ["arena", "creation_tower"],
+      text: "\uC120\uB3C4\uBD80\uC7A5\uC774 \uCCAB \uC904\uC5D0 \uC11C\uBA85\uD55C\uB2E4. \uC6E8\uC5B4\uBCA0\uC5B4\uC758 \uCEE4\uB2E4\uB780 \uBC1C\uB3C4\uC7A5\uC740 \uAC00\uC6B4\uB370 \uD55C \uC904\uC744 \uBE44\uC6CC \uB450\uACE0 \uB9E8 \uB05D\uC5D0 \uCC0D\uD78C\uB2E4.",
+      requires: { present: ["discipline_captain", "werebear"] },
+      choices: [
+        {
+          id: "pair",
+          text: "\uC120\uB3C4\uBD80\uC7A5\uACFC \uC6E8\uC5B4\uBCA0\uC5B4\uB97C \uD568\uAED8 \uAE68\uC6B4\uB2E4",
+          cost: 1,
+          ops: [{ type: "join", ids: ["discipline_captain", "werebear"] }]
+        },
+        {
+          id: "rebuke",
+          text: "\uCCAB \uC801\uC5D0\uAC8C \uCE68\uBB35\uACFC \uC57D\uD654\uB97C \uAC74\uB2E4",
+          ops: [{ type: "start", enemyDebuffs: { silence: 1, weak: 1 } }]
+        }
+      ]
+    }
+  ];
+  var EVENTS2 = [...ORIGINAL_EVENTS, ...TEMPO_EVENTS.map((event) => ({ ...event, minTempoVersion: 2 }))];
 
   // card_pixel/game/src/engine/daily-rift.js
   var MS_PER_DAY = 864e5;
@@ -10735,7 +11038,7 @@ const BattleRuntime = {
   }
   function eventCandidates(run) {
     const present = (id) => (run.pool.includes(id) || run.bench.includes(id)) && !run.fallen.includes(id) && !run.released.includes(id);
-    return EVENTS2.filter((event) => (event.requires.present || []).every(present) && (event.requires.bench || []).every((id) => run.bench.includes(id)));
+    return EVENTS2.filter((event) => (event.minTempoVersion ?? 1) <= (run.tempoVersion ?? 1) && (!event.dungeons || event.dungeons.includes(run.dungeonId)) && (event.requires.present || []).every(present) && (event.requires.bench || []).every((id) => run.bench.includes(id)));
   }
   function makeDoors(run, roster2) {
     const dungeon = DUNGEONS[run.dungeonId];
@@ -10788,7 +11091,8 @@ const BattleRuntime = {
         targets = run.bench.length > 1 ? run.bench.filter((id) => id !== run.lead) : [];
       }
       const eligible = choice.ops.every((op) => {
-        if (op.type === "join") return op.random ? run.pool.some((id) => canJoin(run, id)) : op.ids.every((id) => canJoin(run, id));
+        if (op.type === "join" && !op.random) return op.ids.every((id) => canJoin(run, id));
+        if (op.type === "join" || op.type === "release" && op.randomReplacement) return run.pool.some((id) => canJoin(run, id));
         if (op.type === "bet") return canAttemptBet(run, core2, roster2, op.kind);
         if (op.type === "relic") {
           const id = op.id === "offered" ? run.room.relic : op.id;
@@ -10831,6 +11135,11 @@ const BattleRuntime = {
           release(run, targetId);
           run.crystals += SALE_PRICE[gradeOf(roster2.card(targetId).grade)];
           result.effects.push({ type: "release", id: targetId });
+          if (op.randomReplacement) {
+            const id = drawFrom(run, roster2, RATES.draw);
+            join(run, id);
+            result.effects.push({ type: "join", ids: [id] });
+          }
           break;
         case "bless":
           for (const id of op.all ? run.bench : [targetId]) {
@@ -13766,6 +14075,57 @@ const BattleRuntime = {
     return { card, spr, sprite: sprite2, face: face2, faceBadge, cardRow, benchMinis, cardHead };
   }
 
+  // card_pixel/game/src/ui/relics.js
+  var EFFECTS = {
+    reverse: "\uC790\uC5F0 \uC18D\uC131 \uB3D9\uB8CC\uAC00 \uC4F0\uB7EC\uC9C0\uBA74 \uD558\uB298\uC5D0 \uB300\uC9C0\uC758 \uCD95\uBCF5\uC744 \uAC74\uB2E4.",
+    companion: "\uC4F0\uB7EC\uC9C8 \uB54C \uBC1C\uB3D9\uD558\uB294 \uD2B9\uC131\uACFC \uC720\uBB3C\uC758 \uD53C\uD574 2\uBC30.",
+    double_attack: "\uC77C\uBC18 \uACF5\uACA9 \uC704\uB825 2\uBC30.",
+    over_flame: "\uC791\uC5F4\uC744 \uBD80\uC5EC\uD560 \uB54C \uC911\uCCA9\uB7C9 2\uBC30. \uCD5C\uB300 5\uC911\uCCA9.",
+    over_divine: "\uB514\uBC14\uC778\uC744 \uBD80\uC5EC\uD560 \uB54C \uC911\uCCA9\uB7C9 2\uBC30. \uCD5C\uB300 5\uC911\uCCA9.",
+    flame_piercing: "\uBB3C\uB9AC \uACF5\uACA9\uC774 \uC801\uC758 \uC791\uC5F4 1\uC911\uCCA9\uB9C8\uB2E4 \uBC29\uC5B4\uB825\uC744 10% \uB354 \uAD00\uD1B5\uD55C\uB2E4.",
+    frozen_body: "\uBB3C \uC18D\uC131 \uB3D9\uB8CC\uAC00 \uC4F0\uB7EC\uC9C0\uBA74 \uC801\uC744 \uAE30\uC808\uC2DC\uD0A8\uB2E4.",
+    ice_break: "\uAE30\uC808\uD55C \uC801\uC5D0\uAC8C \uC8FC\uB294 \uACF5\uACA9 \uD53C\uD574 2\uBC30.",
+    support_boost: "\uBCF4\uC870 \uAE30\uC220\uC758 MP \uC18C\uBAA8 0.",
+    lucky_vicky: "\uCE58\uBA85\uD0C0\uB97C \uB0B4\uAC70\uB098 \uACF5\uACA9\uC744 \uD53C\uD558\uBA74 MP 10 \uD68C\uBCF5.",
+    big_bang: "\uC804\uC124\xB7\uCD08\uC6D4 \uB3D9\uB8CC\uAC00 \uC4F0\uB7EC\uC9C0\uBA74 \uC801\uC5D0\uAC8C \uC704\uB825 3\uBC30\uC758 \uBB3C\uB9AC \uD53C\uD574\uB97C \uC900\uB2E4.",
+    death_roulette: "\uACF5\uACA9 \uD53C\uD574 2\uBC30. \uC77C\uBC18 \uACF5\uACA9 \uC678 \uAE30\uC220\uC774 \uBC1C\uB3D9\uD560 \uB54C 30% \uD655\uB960\uB85C \uC2DC\uC804\uC790\uAC00 \uC4F0\uB7EC\uC9C4\uB2E4.",
+    gale_storm: "\uC804\uD22C \uC2DC\uC791\uBD80\uD130 3\uD134 \uB3D9\uC548 \uD558\uB298\uC5D0 \uC9C8\uD48D\uC744 \uAC74\uB2E4. \uCE58\uBA85\uD0C0\uC728\xB7\uD68C\uD53C\uC728 +20%p.",
+    buff_overload: "\uD558\uB298\uC5D0 \uD544\uB4DC \uBC84\uD504\uB97C \uCD5C\uB300 5\uAC1C\uAE4C\uC9C0 \uAC74\uB2E4."
+  };
+  var relicEffect = (relic) => EFFECTS[relic.id] ?? relic.desc;
+  function relicIcon(id, size, label = "") {
+    const src = icon(id);
+    return src ? `<img class="px relic-icon" width="${size}" height="${size}" src="${esc(src)}" alt="${esc(label)}">` : "";
+  }
+  function relicStrip(core2, ids, { replaceable = [], equipped, temporary } = {}) {
+    const slots = Array.from({ length: RELIC_LIMIT }, (_, index) => {
+      const id = ids[index];
+      const relic = core2.GameUtils.getArtifactById(id);
+      const label = `${index + 1}\uBC88 \uCE78 \xB7 ${relic?.name ?? "\uBE48 \uCE78"}` + (id && id === temporary ? " \xB7 \uC774\uBC88 \uC804\uD22C\uB9CC" : "");
+      const replace = replaceable.includes(id) ? ` data-replace="${esc(id)}" aria-pressed="false"` : "";
+      const style = !relic ? " empty" : id === equipped ? " equipped" : "";
+      return `<button type="button" class="relic-slot${style}" data-slot="${index}"${replace} aria-label="${esc(label)}" title="${esc(label)}">` + (relic ? relicIcon(id, 48) : "") + "</button>";
+    }).join("");
+    return '<div class="relic-rack"><span class="relic-rack-label">\uC7A5\uCC29 \uC720\uBB3C</span><div class="relic-strip" role="group" aria-label="\uC7A5\uCC29 \uC720\uBB3C">' + slots + "</div></div>";
+  }
+  function bindRelicSlots(root, ids, onSlot) {
+    for (const button of $$(".relic-slot", root)) {
+      button.addEventListener("click", () => onSlot(ids[Number(button.dataset.slot)], button));
+    }
+  }
+  function openRelicSheet(openSheet, relic, { temporary = false, back, onClose } = {}) {
+    const body = '<div class="relic-sheet" tabindex="-1">' + (relic ? '<div class="relic-sheet-effect">' + relicIcon(relic.id, 48) + "<div><p>" + esc(relicEffect(relic)) + "</p>" + (temporary ? "<small>\uC774\uBC88 \uC804\uD22C\uB9CC</small>" : "") + "</div></div>" : "<p>\uC720\uBB3C\uC744 \uC7A5\uCC29\uD560 \uC218 \uC788\uB2E4.</p>") + (back ? '<button type="button" class="btn" data-relic-back>\uC7A5\uCC29 \uC720\uBB3C\uB85C</button>' : "") + "</div>";
+    openSheet(relic?.name ?? "\uBE48 \uCE78", body, { latest: ".relic-sheet", onClose });
+    if (back) $("[data-relic-back]").addEventListener("click", back);
+  }
+  function relicMarks(core2, ids) {
+    if (!ids.length) return "";
+    return '<span class="relic-marks">' + ids.map((id) => {
+      const relic = core2.GameUtils.getArtifactById(id);
+      return `<span class="relic-mark" data-relic-mark="${esc(id)}" title="${esc(relic.name)}">` + relicIcon(id, 16, relic.name) + "</span>";
+    }).join("") + "</span>";
+  }
+
   // card_pixel/game/src/ui/screens/daily-rift.js
   var shortRiftDate = (dayKey2) => dayKey2?.slice(5).replace("-", ".") || "";
   var REGION_HINT = {
@@ -13935,6 +14295,7 @@ const BattleRuntime = {
     gale: ["\uC9C8\uD48D", "#7fe3c8"]
   };
   var fieldCap = (core2, artifacts) => artifacts?.includes("buff_overload") ? 5 : core2.GAME_CONSTANTS.MAX_FIELD_BUFFS;
+  var skyRelics = (B) => (B.artifacts || []).filter((id) => id === "buff_overload" || id === "gale_storm" && B.D?.turn <= 3 && B.D.field.includes("gale"));
   function createHud(core2, stage2, sfx, widgets2) {
     const { S, wait, footY: FY, headY: HY } = stage2;
     const { face: face2, card } = widgets2;
@@ -14005,7 +14366,7 @@ const BattleRuntime = {
         S.beads.x = B.foe.x;
         S.beads.y = FY(B.foe);
       }
-      $("#sky-slots").innerHTML = Array.from({ length: fieldCap(core2, B.artifacts) }, (_, i) => {
+      $("#sky-slots").innerHTML = relicMarks(core2, skyRelics(B)) + Array.from({ length: fieldCap(core2, B.artifacts) }, (_, i) => {
         const id = D.field[i], f = id && (FIELD[id] || [id.slice(0, 2), "#ccc"]);
         return f ? '<i class="on" style="background:' + f[1] + '">' + esc(f[0].slice(0, 1)) + "</i>" : "<i></i>";
       }).join("");
@@ -14311,26 +14672,36 @@ const BattleRuntime = {
     function fieldSheet(B) {
       const list = B.D?.field || [];
       const max = fieldCap(core2, B.artifacts);
-      const html = (list.length ? '<ul class="stl">' + list.map((id) => '<li><i class="good" style="background:' + (FIELD[id] || [0, "#33295c"])[1] + ';color:#120e24">' + esc(core2.BUFF_NAMES[id] || id) + "</i>" + esc(fieldInfo(core2, id, B.artifacts)) + "</li>").join("") + "</ul>" : '<p class="none">\uC9C0\uAE08 \uD558\uB298\uC5D0 \uAC78\uB9B0 \uD544\uB4DC \uBC84\uD504\uAC00 \uC5C6\uB2E4.</p>') + '<p class="sm">\uD544\uB4DC \uBC84\uD504\uB294 \uC544\uAD70\uC5D0\uAC8C\uB9CC \uC801\uC6A9\uB41C\uB2E4. \uCD5C\uB300 ' + max + "\uAC1C, \uB118\uCE58\uBA74 \uAC00\uC7A5 \uBA3C\uC800 \uAC74 \uAC83\uC774 \uC0AC\uB77C\uC9C4\uB2E4.</p>";
+      const relics = skyRelics(B).map((id) => {
+        const relic = core2.GameUtils.getArtifactById(id);
+        return "<p><b>" + esc(relic.name) + "</b> \xB7 " + esc(relicEffect(relic)) + "</p>";
+      }).join("");
+      const html = (list.length ? '<ul class="stl">' + list.map((id) => '<li><i class="good" style="background:' + (FIELD[id] || [0, "#33295c"])[1] + ';color:#120e24">' + esc(core2.BUFF_NAMES[id] || id) + "</i>" + esc(fieldInfo(core2, id, B.artifacts)) + "</li>").join("") + "</ul>" : '<p class="none">\uC9C0\uAE08 \uD558\uB298\uC5D0 \uAC78\uB9B0 \uD544\uB4DC \uBC84\uD504\uAC00 \uC5C6\uB2E4.</p>') + '<p class="sm">\uD544\uB4DC \uBC84\uD504\uB294 \uC544\uAD70\uC5D0\uAC8C\uB9CC \uC801\uC6A9\uB41C\uB2E4. \uCD5C\uB300 ' + max + "\uAC1C, \uB118\uCE58\uBA74 \uAC00\uC7A5 \uBA3C\uC800 \uAC74 \uAC83\uC774 \uC0AC\uB77C\uC9C4\uB2E4.</p>" + relics;
       openSheet("\uD558\uB298 \xB7 \uD544\uB4DC \uBC84\uD504", html);
     }
-    function battlefieldSheet(run, B) {
+    function battlefieldSheet(run, B, focusSlot) {
       if (!B.door) return;
       const region = REGIONS[B.door.region?.id], quirk = QUIRKS[B.door.quirk];
       const contract = CONTRACTS[run.contract?.id];
       const block = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
-      const slots = Array.from({ length: RELIC_LIMIT }, (_, index) => {
-        const id = B.artifacts[index];
-        const relic = core2.ARTIFACT_LIST.find((item) => item.id === id);
-        if (!relic) return "<li>\uBE48 \uCE78</li>";
-        return "<li><b>" + esc(relic.name) + "</b>" + (id === B.temporaryRelic ? " \xB7 \uC774\uBC88 \uC804\uD22C\uB9CC" : "") + " \xB7 " + esc(relic.desc) + "</li>";
-      });
+      const artifacts = B.artifacts || [];
+      const focusField = () => $("#b-field")?.focus({ preventScroll: true });
       const dailyLine = run.daily ? [
         shortRiftDate(run.daily.spec?.dayKey),
         riftKindLabel(run.daily.kind),
         "\uC815\uC0B0\uD55C \uC804\uD22C " + (run.stats?.turns ?? 0) + "\uD134"
       ].filter(Boolean).join(" \xB7 ") : "";
-      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", (dailyLine ? "<p>" + esc(dailyLine) + "</p>" : "") + (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + contractStatus(run, B) + "</h4><p>" + esc(contract.rule) + "</p>" : "") + '<h4>\uC7A5\uCC29 \uC720\uBB3C</h4><ul class="stl">' + slots.join("") + "</ul>");
+      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", relicStrip(core2, artifacts, { temporary: B.temporaryRelic }) + (dailyLine ? "<p>" + esc(dailyLine) + "</p>" : "") + (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + contractStatus(run, B) + "</h4><p>" + esc(contract.rule) + "</p>" : ""), {
+        latest: focusSlot != null ? `[data-slot="${focusSlot}"]` : void 0,
+        onClose: focusField
+      });
+      bindRelicSlots($("#sh-body"), artifacts, (id, button) => {
+        openRelicSheet(openSheet, core2.GameUtils.getArtifactById(id), {
+          temporary: id != null && id === B.temporaryRelic,
+          back: () => battlefieldSheet(run, B, button.dataset.slot),
+          onClose: focusField
+        });
+      });
     }
     return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
   }
@@ -14353,11 +14724,48 @@ const BattleRuntime = {
   // card_pixel/game/src/ui/battle/tiles.js
   var previewDamage = (p) => p.min != null && p.max != null ? formatRange([p.min, p.max]) : String(p.dmg ?? "");
   var hasFinalConsonant = (name) => /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 44032) % 28 !== 0;
+  function commandRelics(artifacts, option, actor, { enemy, turn }) {
+    const normal = option.index === 0;
+    const attack = option.type === "phy" || option.type === "mag";
+    const immediate = !option.preview?.delayed;
+    const trait = actor?.trait?.type;
+    const addsBurn = normal && (trait === "normal_attack_burn_divine" || trait === "syn_fire_3_crit_burn");
+    const addsDivine = normal && trait === "normal_attack_burn_divine";
+    const applies = (status) => option.effects.some((effect) => (effect.type === "debuff" || effect.type === "self_debuff") && effect.id === status || effect.type === "random_debuff" && effect.pool?.includes(status) || effect.type === "turn_modulo_debuffs" && turn % effect.mod === 0 && effect.debuffs?.includes(status) || effect.type === "wild_card_debuff");
+    return (artifacts || []).filter((id) => {
+      switch (id) {
+        case "double_attack":
+          return normal;
+        case "support_boost":
+          return option.type === "sup" && !option.heirloom && actor?.skills.some((skill) => skill.name === option.name.split(" \u2192 ")[0] && skill.cost > 0);
+        case "death_roulette":
+          return attack || !normal;
+        case "over_flame":
+          return addsBurn || applies("burn");
+        case "over_divine":
+          return addsDivine || applies("divine") || immediate && (enemy.buffs.divine || 0) < 3 && option.effects.some((effect) => effect.type === "check_divine_3_stun_else_add");
+        case "flame_piercing":
+          return immediate && option.type === "phy" && (addsBurn || !!enemy.buffs.burn);
+        case "ice_break":
+          return immediate && attack && !!enemy.buffs.stun;
+        case "lucky_vicky":
+          return !!option.preview?.forcedCrit;
+        default:
+          return false;
+      }
+    });
+  }
   function createTiles({ core: core2, widgets: widgets2, audio: audio2, sheets: sheets2, B, foeDef, play, ticker }) {
     const { card, faceBadge } = widgets2;
     const { sfx } = audio2;
     const { openSheet, closeSheet, sheet } = sheets2;
     const FIELD_NAMES = new Set(Object.keys(FIELD).map((id) => core2.BUFF_NAMES[id]));
+    const markedRelics = (option) => commandRelics(
+      B.artifacts,
+      option,
+      card(B.D.allies[B.D.cur].form || B.party[B.D.cur]),
+      B.D
+    );
     function supportLine(o, intent) {
       const defense = o.defense;
       if (defense) {
@@ -14444,7 +14852,8 @@ const BattleRuntime = {
           r2 = '<strong class="txt' + (s[0] === "\u2014" ? " no" : "") + '">' + esc(s[0]) + "</strong>";
           if (s[1]) r3 = s[1];
         }
-        return '<button class="act ' + o.type + '" data-i="' + o.index + '"' + (usable ? "" : " disabled") + '><span class="ic">' + TYPE[o.type].slice(0, 1) + '</span><span class="tx"><span class="r1"><b>' + esc(name) + "</b><em>" + (o.cost ? "MP " + o.cost : "") + '</em></span><span class="r2">' + r2 + '</span><span class="r3">' + esc(r3) + "</span></span></button>";
+        const marks = relicMarks(core2, markedRelics(o));
+        return '<button class="act ' + o.type + '" data-i="' + o.index + '"' + (usable ? "" : " disabled") + '><span class="ic">' + TYPE[o.type].slice(0, 1) + marks + '</span><span class="tx"><span class="r1"><b>' + esc(name) + "</b><em>" + (o.cost ? "MP " + o.cost : "") + '</em></span><span class="r2">' + r2 + '</span><span class="r3">' + esc(r3) + "</span></span></button>";
       };
       const plain = options.filter((o) => !o.heirloom && (!isFormOption(o) || o === firstForm));
       const heir = options.find((o) => o.heirloom);
@@ -14456,7 +14865,7 @@ const BattleRuntime = {
         h.dataset.i = heir.index;
         h.disabled = false;
         const forecast = p?.instant ? previewDamage(p) + " \xB7 \uC989\uC2DC" : p?.delayed ? delayedLine(heir, D.turn) : p ? previewDamage(p) : "";
-        h.innerHTML = "<small>\uC720\uD488 \xB7 " + esc(heir.heirFromName || "") + "</small><b>" + esc(heir.name) + "</b><strong>" + esc(forecast) + "</strong>" + (p?.kill ? "<u>\uCC98\uCE58</u>" : "");
+        h.innerHTML = "<small>\uC720\uD488 \xB7 " + esc(heir.heirFromName || "") + "</small><b>" + esc(heir.name) + "</b><strong>" + esc(forecast) + "</strong>" + relicMarks(core2, markedRelics(heir)) + (p?.kill ? "<u>\uCC98\uCE58</u>" : "");
       } else {
         h.className = "";
         h.innerHTML = "";
@@ -14510,9 +14919,13 @@ const BattleRuntime = {
       const me = card(B.party[B.D.cur]);
       const name = isFormOption(o) ? FORM_SKILL : o.name;
       const fields = skillFields(core2, o, B.artifacts);
+      const relics = markedRelics(o).map((id) => {
+        const relic = core2.GameUtils.getArtifactById(id);
+        return relic.name + " \xB7 " + relicEffect(relic);
+      }).join(" ");
       sheet(
         name + " \xB7 " + TYPE[o.type] + (o.cost ? " \xB7 MP " + o.cost : "") + (o.heirloom ? " \xB7 \uC720\uD488" : ""),
-        (o.heirloom ? (o.heirFromName || "") + "\uC5D0\uAC8C\uC11C \uBB3C\uB824\uBC1B\uC740 \uAE30\uC220. \uC704\uB825 1.5\uBC30, MP 0, \uC774 \uC804\uD22C\uC5D0\uC11C \uD55C \uBC88. " : "") + fullText(o, me) + (fields ? " " + fields.detail : "") + "  \uD2B9\uC131 \u2014 " + me.trait.desc
+        (o.heirloom ? (o.heirFromName || "") + "\uC5D0\uAC8C\uC11C \uBB3C\uB824\uBC1B\uC740 \uAE30\uC220. \uC704\uB825 1.5\uBC30, MP 0, \uC774 \uC804\uD22C\uC5D0\uC11C \uD55C \uBC88. " : "") + fullText(o, me) + (fields ? " " + fields.detail : "") + (relics ? " " + relics : "") + "  \uD2B9\uC131 \u2014 " + me.trait.desc
       );
     }
     const acts = $("#acts");
@@ -16375,8 +16788,12 @@ const BattleRuntime = {
     const reserve = { ...run, bench: run.bench.filter((id) => !front.includes(id)) };
     const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + "</button>" : "";
     const title = rift ? [shortRiftDate(rift.spec?.dayKey), "\uADE0\uC5F4"].filter(Boolean).join(" ") : dungeon.name;
-    node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + "</div>" + skip, "walking-map") + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
+    node.innerHTML = head(run, title, run.floor + "\uCE35") + relicStrip(core2, run.relics) + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + "</div>" + skip, "walking-map") + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
     show("map");
+    bindRelicSlots(node, run.relics, (id) => {
+      ui.audio.sfx.tap();
+      openRelicSheet(openSheet, artifacts.get(id));
+    });
     const walkTo = mountWalkingMap($(".walking-map", node), layout, {
       run,
       instant: () => window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.__game?.clock?.speed > 1,
@@ -16426,7 +16843,7 @@ const BattleRuntime = {
       const sky = startSky(door), gain = reward(door, "\uD655\uC815 \uACB0\uC815");
       const treasure = door.enemies.some((enemy) => enemy.affixes?.includes("treasure"));
       const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : "";
-      openSheet(door.name, enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow(door) ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + CONTRACT_ESCROW + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 1\uBA85 \uCC98\uCE58\uB9C8\uB2E4 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + rule(relic));
+      openSheet(door.name, enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow(door) ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + CONTRACT_ESCROW + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 1\uBA85 \uCC98\uCE58\uB9C8\uB2E4 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
     }
   }
 
@@ -16782,6 +17199,13 @@ const BattleRuntime = {
     const secondary = results.length ? results.map((line) => "<p>" + esc(line) + "</p>").join("") : event && choices.length ? "<p>" + esc(DIALOGUE[event.id] || "") + "</p>" : "";
     const canChoose = choices.some((choice) => choice.enabled);
     node.innerHTML = head(run, "\uC0AC\uAC74", run.floor + "\uCE35") + '<div class="run-event">' + ui.scene(run.room.bg, artwork) + '<div class="event-dialog win"><h2>' + esc(event?.name || "\uACE0\uC694\uD55C \uBC29") + "</h2><p>" + esc(event?.text || "\uBC29 \uC548\uC774 \uBE44\uC5B4 \uC788\uB2E4.") + "</p>" + secondary + '</div><div class="event-choices">' + plates + '<button class="btn' + (canChoose ? "" : " go") + '" id="b-leave">' + (choices.length ? "\uADF8\uB0E5 \uC9C0\uB098\uAC00\uAE30" : "\uB2E4\uC74C \uCE35\uC73C\uB85C") + "</button></div></div>";
+    function targetVerb(choice) {
+      if (choice.target === "release") return "\uBCF4\uB0B4\uAE30";
+      const types = choice.ops.map((effect) => effect.type);
+      if (types.includes("heirloom")) return "\uC720\uD488 \uBC1B\uAE30";
+      if (types.includes("bless")) return "\uCD95\uBCF5 \uBC1B\uAE30";
+      return "\uACE0\uB974\uAE30";
+    }
     show("event");
     $("#b-leave", node)?.addEventListener("click", ui.leave);
     for (const button of $$("[data-choice]", node)) button.addEventListener("click", () => {
@@ -16797,7 +17221,7 @@ const BattleRuntime = {
         for (const other of rows) other.classList.toggle("sel", other === row);
         $("#event-target-effect").textContent = choice.ops.map((effect) => effectText(effect, selection)).join(" \xB7 ");
         confirm.disabled = false;
-        confirm.textContent = card(selection).name + " \xB7 " + (choice.target === "release" ? "\uBCF4\uB0B4\uAE30" : "\uCD95\uBCF5 \uBC1B\uAE30");
+        confirm.textContent = card(selection).name + " \xB7 " + targetVerb(choice);
       });
       confirm.addEventListener("click", () => {
         if (selection) take(choice, selection);
@@ -16811,48 +17235,48 @@ const BattleRuntime = {
     const relic = ui.artifacts.get(id);
     const pending = run.pending?.kind === "relic" ? run.pending : null;
     const offered = run.room.type === "treasure" && run.room.status === "service";
-    const slotsFull = run.relics.length === RELIC_LIMIT;
-    const replaceable = pending?.replace || (offered && slotsFull ? run.relics : []);
+    const canEquip = !!relic && !equipped && !!(pending || offered);
+    const comparing = canEquip && run.relics.length === RELIC_LIMIT;
+    const replaceable = comparing ? pending?.replace ?? run.relics : [];
     const { sfx } = ui.audio;
     const node = $("#treasure");
+    const title = run.room.type === "treasure" ? "\uBCF4\uBB3C\uBC29" : "\uC720\uBB3C";
+    const cost = pending?.cost ?? 0;
+    const short = Math.max(0, cost - run.crystals);
     let replacing = null;
-    function render() {
-      const old = ui.artifacts.get(replacing);
-      const title = run.room.type === "treasure" ? "\uBCF4\uBB3C\uBC29" : "\uC720\uBB3C";
-      const slots = Array.from({ length: RELIC_LIMIT }, (_, index) => {
-        const slotId = run.relics[index];
-        const item = ui.artifacts.get(slotId);
-        const selectable = replaceable.includes(slotId);
-        const body = slotId ? ui.icon(slotId, 2) + "<span>" + esc(item.name) + "</span>" : "<span>\uBE48 \uCE78</span>";
-        const cls = "relic-slot win" + (slotId === replacing ? " sel" : "") + (slotId && slotId === id && (equipped || !offered) ? " equipped" : "");
-        return selectable ? '<button class="' + cls + '" data-replace="' + esc(slotId) + '">' + body + "</button>" : '<div class="' + cls + '">' + body + "</div>";
-      }).join("");
-      const description = relic ? "<h2>" + esc(relic.name) + "</h2><p>" + esc(relic.desc) + "</p>" : "<h2>\uB0A8\uC740 \uC720\uBB3C \uC5C6\uC74C</h2>";
-      const compare2 = old ? '<div class="run-relic-compare"><p class="loss">\uBE60\uC9D0 \xB7 ' + esc(old.name + " \xB7 " + old.desc) + '</p><p class="gain">\uC7A5\uCC29 \xB7 ' + esc(relic.name + " \xB7 " + relic.desc) + "</p></div>" : "";
-      const canEquip = !!relic && !equipped && !!(pending || offered);
-      const label = old ? old.name + (hasFinalConsonant2(old.name) ? "\uC744" : "\uB97C") + " \uBE7C\uACE0 \uC7A5\uCC29" : "\uC7A5\uCC29";
-      const disabled = replaceable.length && !old || pending && run.crystals < pending.cost;
-      node.innerHTML = head(run, title, run.floor + "\uCE35") + '<div class="run-treasure scroll">' + ui.scene(run.room.bg, '<div class="relic-dais">' + (relic ? ui.icon(id, 3) : "") + "</div>") + '<div class="run-relic-description win">' + description + (equipped ? '<small class="gain">\uC7A5\uCC29 \uC644\uB8CC</small>' : "") + (pending?.cost ? "<small>\uACB0\uC815 " + pending.cost + (run.crystals < pending.cost ? " \xB7 " + (pending.cost - run.crystals) + "\uAC1C \uBD80\uC871" : "") + "</small>" : "") + '</div><h3>\uC7A5\uCC29 \uC720\uBB3C</h3><div class="run-relic-slots">' + slots + "</div>" + (replaceable.length && !old ? '<p class="sm">\uBE7C\uB0BC \uC720\uBB3C\uC744 \uACE0\uB978\uB2E4.</p>' : "") + compare2 + '</div><div class="footer"><button class="btn' + (canEquip ? "" : " go") + '" id="b-leave">' + (canEquip ? "\uB450\uACE0 \uAC00\uAE30" : "\uB2E4\uC74C\uC73C\uB85C") + "</button>" + (canEquip ? '<button class="btn go" id="b-equip"' + (disabled ? " disabled" : "") + ">" + esc(label) + "</button>" : "") + "</div>";
-      show("treasure");
-      for (const button of $$("[data-replace]", node)) button.addEventListener("click", () => {
-        replacing = button.dataset.replace;
-        sfx.tap();
-        render();
-        $(".run-relic-compare", node).scrollIntoView({ block: "nearest" });
-      });
-      $("#b-leave", node).addEventListener("click", equipped && run.pending?.kind === "reinforcement" ? ui.route : ui.leave);
-      $("#b-equip", node)?.addEventListener("click", () => {
-        if (offered && !ui.command(takeTreasure).ok) return;
-        if (run.pending?.kind === "relic" && !ui.command(equipRelic, id, replacing).ok) {
-          ui.route();
-          return;
-        }
-        sfx.gem();
-        if (run.pending) ui.route();
-        else treasureScreen(run, ui, id, { equipped: true });
-      });
-    }
-    render();
+    const description = relic ? "<h2>" + esc(relic.name) + "</h2><p>" + esc(relicEffect(relic)) + "</p>" : "<h2>\uB0A8\uC740 \uC720\uBB3C \uC5C6\uC74C</h2>";
+    const offer = comparing ? '<div class="run-relic-compare" aria-live="polite">' + comparisonCard(relic, "\uC7A5\uCC29", "incoming") + comparisonCard(null, "\uBE60\uC9D0", "outgoing") + "</div>" : '<div class="run-relic-description win">' + description + (equipped ? '<small class="gain">\uC7A5\uCC29 \uC644\uB8CC</small>' : "") + "</div>";
+    node.innerHTML = head(run, title, run.floor + "\uCE35") + relicStrip(ui.core, run.relics, { replaceable, equipped: equipped ? id : null }) + '<div class="run-treasure scroll' + (comparing ? " comparing" : "") + '">' + ui.scene(run.room.bg, '<div class="relic-dais">' + (relic ? relicIcon(id, 96) : "") + "</div>") + offer + (cost ? '<p class="relic-cost' + (short ? " loss" : "") + '">\uACB0\uC815 ' + cost + (short ? " \xB7 " + short + "\uAC1C \uBD80\uC871" : "") + "</p>" : "") + '</div><div class="footer"><button class="btn' + (canEquip ? "" : " go") + '" id="b-leave">' + (canEquip ? "\uB450\uACE0 \uAC04\uB2E4" : "\uB2E4\uC74C\uC73C\uB85C") + "</button>" + (canEquip ? '<button class="btn go" id="b-equip"' + (comparing || short ? " disabled" : "") + ">\uC7A5\uCC29</button>" : "") + "</div>";
+    show("treasure");
+    const equip = $("#b-equip", node);
+    bindRelicSlots(node, run.relics, (slotId, button) => {
+      sfx.tap();
+      const item = ui.artifacts.get(slotId);
+      if (!button.hasAttribute("data-replace")) {
+        openRelicSheet(ui.sheets.openSheet, item);
+        return;
+      }
+      replacing = slotId;
+      for (const slot of $$("[data-replace]", node)) slot.setAttribute("aria-pressed", String(slot === button));
+      $(".run-relic-compare .outgoing", node).outerHTML = comparisonCard(item, "\uBE60\uC9D0", "outgoing");
+      equip.textContent = item.name + (hasFinalConsonant2(item.name) ? "\uC744" : "\uB97C") + " \uBE7C\uACE0 \uC7A5\uCC29";
+      equip.disabled = !!short;
+    });
+    $("#b-leave", node).addEventListener("click", equipped && run.pending?.kind === "reinforcement" ? ui.route : ui.leave);
+    equip?.addEventListener("click", () => {
+      if (offered && !ui.command(takeTreasure).ok) return;
+      if (run.pending?.kind === "relic" && !ui.command(equipRelic, id, replacing).ok) {
+        ui.route();
+        return;
+      }
+      sfx.gem();
+      if (run.pending) ui.route();
+      else treasureScreen(run, ui, id, { equipped: true });
+    });
+  }
+  function comparisonCard(relic, label, kind) {
+    const details = relic ? relicIcon(relic.id, 32) + "<h3>" + esc(relic.name) + "</h3><p>" + esc(relicEffect(relic)) + "</p>" : "<p>\uBE84 \uC720\uBB3C\uC744 \uACE0\uB978\uB2E4.</p>";
+    return '<article class="relic-compare-card ' + kind + '"><small>' + label + "</small>" + details + "</article>";
   }
   function hasFinalConsonant2(word) {
     return /[가-힣]$/.test(word) && (word.charCodeAt(word.length - 1) - 44032) % 28 !== 0;
@@ -16866,7 +17290,7 @@ const BattleRuntime = {
     const { candidates, relic } = run.pending;
     const artifact = ui.artifacts.get(relic);
     const node = $("#pick");
-    node.innerHTML = head(run, "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1", run.floor + "\uCE35") + '<div class="scroll"><p class="lead">\uADF8\uB9BC\uC790 \uD55C \uBA85\uC744 \uAE68\uC6B0\uAC70\uB098 \uC720\uBB3C\uC744 \uC7A5\uCC29\uD55C\uB2E4.</p><div class="cards">' + candidates.map((id) => cardRow(run, id, { tag: "\uC774\uBC88 \uC6D0\uC815 \uD569\uB958" })).join("") + (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + ui.icon(relic) + "<span><b>" + esc(artifact.name) + "</b><small>" + esc(artifact.desc) + "</small></span></button>" : "") + '</div></div><div class="footer"><button class="btn" id="b-leave">\uB450\uACE0 \uAC00\uAE30</button><button class="btn go" id="b-gate-take" disabled>\uBCF4\uC0C1\uC744 \uACE0\uB978\uB2E4</button></div>';
+    node.innerHTML = head(run, "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1", run.floor + "\uCE35") + '<div class="scroll"><p class="lead">\uADF8\uB9BC\uC790 \uD55C \uBA85\uC744 \uAE68\uC6B0\uAC70\uB098 \uC720\uBB3C\uC744 \uC7A5\uCC29\uD55C\uB2E4.</p><div class="cards">' + candidates.map((id) => cardRow(run, id, { tag: "\uC774\uBC88 \uC6D0\uC815 \uD569\uB958" })).join("") + (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + relicIcon(relic, 32) + "<span><b>" + esc(artifact.name) + "</b><small>" + esc(relicEffect(artifact)) + "</small></span></button>" : "") + '</div></div><div class="footer"><button class="btn" id="b-leave">\uB450\uACE0 \uAC00\uAE30</button><button class="btn go" id="b-gate-take" disabled>\uBCF4\uC0C1\uC744 \uACE0\uB978\uB2E4</button></div>';
     show("pick");
     let choice;
     const take = $("#b-gate-take", node);
@@ -16877,7 +17301,7 @@ const BattleRuntime = {
       sfx.tap();
       for (const other of rows) other.classList.toggle("sel", other === row);
       take.disabled = false;
-      take.textContent = choice.kind === "join" ? card(id).name + " \uAE68\uC6B0\uAE30" : artifact.name + " \uBC1B\uAE30";
+      take.textContent = choice.kind === "join" ? card(id).name + " \uAE68\uC6B0\uAE30" : run.relics.length === RELIC_LIMIT ? "\uAD50\uCCB4\uD560 \uC720\uBB3C \uACE0\uB974\uAE30" : artifact.name + " \uBC1B\uAE30";
     });
     function apply(selected) {
       if (!selected || !ui.command(chooseGateReward, selected).ok) return;
