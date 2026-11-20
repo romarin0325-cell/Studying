@@ -3,6 +3,7 @@ import { head } from '../widgets.js';
 import { chooseStartPick, START } from '../../engine/run.js';
 
 export function awakenScreen(run, ui) {
+  ui.playMusic();
   const { card, cardRow } = ui.widgets;
   const { sfx } = ui.audio;
   const node = $('#awaken');

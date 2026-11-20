@@ -1,5 +1,6 @@
 import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
+import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
 import { canJoin, choicesFor, COST, drawFrom, join, RATES, rollBlessing, seeCharacters } from './awakenings.js';
 import { pick, shuffle } from './rng.js';
@@ -16,6 +17,11 @@ const springRoom = run => run.phase === 'room' && run.room?.type === 'spring' &&
 // Keep the card core and sprite registry outside the persisted run.
 export function bindRun(run, { core, roster }) {
   dependencies.set(run, { core, roster });
+  if (run.room?.type === 'gate' && run.room.final && run.result === 'win'
+    && run.phase === 'reward' && (!run.pending || run.pending.kind === 'gate')) {
+    run.pending = null;
+    run.phase = 'done';
+  }
   return run;
 }
 
@@ -67,11 +73,31 @@ export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed
 }
 
 function advance(run) {
+  const { roster } = dependencies.get(run);
+  const dungeon = DUNGEONS[run.dungeonId];
   run.floor++;
   run.room = null;
   run.phase = 'map';
-  run.doors = makeDoors(run, dependencies.get(run).roster);
+  run.doors = dungeon.layout === 'intro' && run.floor === run.floors
+    ? [introFinaleDoor(run, roster, dungeon)]
+    : makeDoors(run, roster);
   observeDoors(run);
+}
+
+function introFinaleDoor(run, roster, dungeon) {
+  const available = run.pool.filter(id => canJoin(run, id));
+  const preferred = available.filter(id => ['rare', 'epic'].includes(roster.card(id).grade));
+  const first = run.reserved || pick(run.rng, preferred) || pick(run.rng, available);
+  const gentleShadows = run.pool.filter(id => id !== first && INTRO.finaleGrades.includes(roster.card(id).grade));
+  const second = pick(run.rng, gentleShadows.filter(id => canJoin(run, id))) ||
+    pick(run.rng, gentleShadows.filter(id => !run.fallen.includes(id) && !run.released.includes(id)));
+  const tier = dungeon.tiers[run.floor - 1];
+  const enemies = [first, second].map(id => id ? roster.shadowOf(id, tier) : roster.wildOf(dungeon.wild[0], tier));
+  const template = LAYOUTS.intro[run.floor - 1][0];
+  return {
+    ...template, index: 0, name: ROOM_NAMES[template.type], bg: dungeon.background,
+    region: null, enemies, quirk: null, start: null, relic: null
+  };
 }
 
 function prepareStartPick(run, remaining, near, priority) {
@@ -245,7 +271,7 @@ export function settleBattle(run, input) {
     if (survivors.some(id => roster.card(id).trait?.type === 'looter')) crystals++;
     if (betWon) crystals += next.reward.crystals || 0;
     run.crystals += crystals;
-    if (gate && !wiped) setGateReward(run, room, downs);
+    if (gate && !final && !wiped) setGateReward(run, room, downs);
     if (room.type === 'elite' && room.relic && !wiped) relic = grantRelic(run, room.relic);
     if (betWon && next.reward.relic && !wiped) relic = grantRelic(run, next.reward.relic);
     if (room.type === 'borrowed' && !wiped) {

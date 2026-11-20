@@ -14,7 +14,7 @@ export function sceneActors(ids, widgets, { interactive = false, lead = null, ar
     if (!meta) return '';
     const name = esc(widgets.card(id)?.name || id);
     const tag = interactive ? 'button' : 'span';
-    const target = interactive ? ` data-companion="${id}" aria-label="${name}"` : '';
+    const target = interactive ? ` data-companion="${esc(id)}" aria-label="${name}"` : '';
     const feet = 2 * (meta.h - meta.fy);
     const center = 2 * (meta.facing === 'left' ? meta.w - meta.cx : meta.cx);
     const sprite = widgets.sprite(id, {
@@ -22,7 +22,7 @@ export function sceneActors(ids, widgets, { interactive = false, lead = null, ar
       style: `width:${meta.w * 2}px;height:${meta.h * 2}px`
     });
     return `<${tag} class="meta-actor actor-${index}${arriving.includes(id) ? ' arriving' : ''}${id === lead ? ' lead' : ''}"${target}
-      style="--actor-width:${meta.w * 2}px;--actor-height:${meta.h * 2}px;--actor-center:${center}px;--actor-feet:${feet}px">
+      style="--actor-index:${index};--actor-width:${meta.w * 2}px;--actor-height:${meta.h * 2}px;--actor-center:${center}px;--actor-feet:${feet}px">
       <span class="meta-actor-bob">${sprite}</span>
     </${tag}>`;
   }).join('');

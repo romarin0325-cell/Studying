@@ -4,6 +4,7 @@ import { takeTreasure, equipRelic } from '../../engine/run.js';
 import { RELIC_LIMIT } from '../../engine/rooms.js';
 
 export function treasureScreen(run, ui, id, { equipped = false } = {}) {
+  ui.playMusic();
   const relic = ui.artifacts.get(id);
   const pending = run.pending?.kind === 'relic' ? run.pending : null;
   const offered = run.room.type === 'treasure' && run.room.status === 'service';
@@ -20,7 +21,7 @@ export function treasureScreen(run, ui, id, { equipped = false } = {}) {
       const slotId = run.relics[index];
       const item = ui.artifacts.get(slotId);
       const selectable = replaceable.includes(slotId);
-      const body = slotId ? ui.icon(slotId) + '<span>' + esc(item.name) + '</span>' : '<span>빈 칸</span>';
+      const body = slotId ? ui.icon(slotId, 2) + '<span>' + esc(item.name) + '</span>' : '<span>빈 칸</span>';
       const cls = 'relic-slot win' + (slotId === replacing ? ' sel' : '') +
         (slotId && slotId === id && (equipped || !offered) ? ' equipped' : '');
       return selectable ? '<button class="' + cls + '" data-replace="' + esc(slotId) + '">' + body + '</button>' :

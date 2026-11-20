@@ -50,12 +50,13 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, quickS
   $$('[data-dungeon]', node).forEach(button => button.addEventListener('click', () => prepare(button.dataset.dungeon)));
 }
 
-export function preparationSheet({ dungeonId, currentProfile, updateProfile, roster, sheets, start }) {
+export function preparationSheet({ dungeonId, currentProfile, updateProfile, roster, widgets, sheets, start }) {
   const dungeon = DUNGEONS[dungeonId];
   const { card } = roster;
   let sealsOpen = false;
+  let leadRow;
 
-  function render(message = '') {
+  function render(message = '', focusLead) {
     const profile = currentProfile();
     const entry = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
     const view = startView(profile, dungeonId);
@@ -67,12 +68,18 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
     const option = (id, chosen) => `<option value="${id}"${id === chosen ? ' selected' : ''}>${name(id)}</option>`;
     const leadChoices = view.leadCandidates.filter(id => !view.seals.includes(id));
     const scroll = $('#sh-body').scrollTop;
+    const leadScroll = leadRow?.scrollLeft;
 
     sheets.openSheet(`${dungeon.name} · 준비`, `<div class="meta-sheet meta-prep">
       <section class="meta-prep-section">
-        <h4>대표</h4>
+        <h4 id="meta-lead-heading">대표</h4>
         ${intro ? `<p>대여 편성 · ${INTRO.party.map(name).join(', ')}</p>` : leadChoices.length
-          ? `<select id="meta-prep-lead" aria-label="대표"><option value="">미지정</option>${leadChoices.map(id => option(id, lead)).join('')}</select>`
+          ? `<div class="meta-prep-leads" role="group" aria-labelledby="meta-lead-heading">
+            <button class="btn" type="button" data-lead="" aria-pressed="${lead === null}">미지정</button>
+            ${leadChoices.map(id => `<button class="btn" type="button" data-lead="${esc(id)}" aria-pressed="${id === lead}">
+              <span class="meta-face">${widgets.face(id, 44)}</span><span>${name(id)}</span>
+            </button>`).join('')}
+          </div>`
           : '<p>지정할 동료 없음</p>'}
       </section>
       ${!intro && view.companionSlots ? `<section class="meta-prep-section">
@@ -104,11 +111,19 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
     </div>`);
     $('#sh-body').scrollTop = scroll;
 
-    $('#meta-prep-lead')?.addEventListener('change', event => {
-      const nextLead = event.target.value || null;
-      const companions = profile.companions.filter(id => id !== nextLead);
-      updateParty(nextLead, companions, nextLead === profile.lead ? profile.preferredCompanion : null);
-    });
+    leadRow = $('.meta-prep-leads');
+    if (leadRow) {
+      const buttons = $$('[data-lead]', leadRow);
+      const active = buttons.find(button => button.getAttribute('aria-pressed') === 'true');
+      leadRow.scrollLeft = leadScroll ?? Math.max(0, active.offsetLeft + active.offsetWidth - leadRow.clientWidth);
+      buttons.find(button => button.dataset.lead === focusLead)?.focus({ preventScroll: true });
+      for (const button of buttons) button.addEventListener('click', () => {
+        const nextLead = button.dataset.lead || null;
+        const companions = profile.companions.filter(id => id !== nextLead);
+        const preferred = nextLead === profile.lead ? profile.preferredCompanion : null;
+        updateParty(nextLead, companions, preferred, button.dataset.lead);
+      });
+    }
     for (const select of $$('.meta-prep [data-slot]')) select.addEventListener('change', () => {
       const index = Number(select.dataset.slot);
       const next = selected.slice();
@@ -134,11 +149,11 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
     });
     $('#meta-start-expedition').addEventListener('click', () => start(dungeonId, difficulty));
 
-    function updateParty(nextLead, companions, preferredCompanion) {
+    function updateParty(nextLead, companions, preferredCompanion, focusLead) {
       sealsOpen = $('#meta-seals')?.open || false;
       const result = setExpeditionParty(profile, { lead: nextLead, companions, preferredCompanion });
       if (result.announce.ok) updateProfile(result.profile);
-      render(result.announce.ok ? '' : '편성을 다시 확인해 주세요.');
+      render(result.announce.ok ? '' : '편성을 다시 확인해 주세요.', focusLead);
     }
   }
 

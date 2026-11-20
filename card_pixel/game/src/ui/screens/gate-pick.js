@@ -4,6 +4,7 @@ import { chooseGateReward } from '../../engine/run.js';
 import { treasureScreen } from './treasure.js';
 
 export function gatePickScreen(run, ui) {
+  ui.playMusic();
   const { card, cardRow } = ui.widgets;
   const { sfx } = ui.audio;
   const { candidates, relic } = run.pending;

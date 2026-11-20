@@ -2,6 +2,7 @@ import { scheduleTimer } from './engine/bridge.js';
 import { create as createRoster } from './engine/roster.js';
 import { createSaveStore } from './engine/save.js';
 import * as Run from './engine/run.js';
+import { createMusic } from './audio/music.js';
 import { createStage } from './stage/stage.js';
 import { createAudio } from './stage/audio.js';
 import { $ } from './ui/dom.js';
@@ -19,10 +20,49 @@ const audio = createAudio(stage.clock);
 const widgets = createWidgets(assets, roster.card);
 const store = createSaveStore(storage, { core, roster });
 
+let musicContext;
+let musicPlayer;
+let musicTrack;
+let musicEnabled = true;
+const music = {
+  get enabled() { return musicEnabled; },
+  setEnabled(enabled) {
+    musicEnabled = enabled;
+    musicPlayer?.setEnabled(enabled);
+  },
+  play(trackId, dungeonId) {
+    musicTrack = [trackId, dungeonId];
+    musicPlayer?.play(trackId, dungeonId);
+  }
+};
+
+const unlockEffects = audio.unlockAudio;
+audio.unlockAudio = function unlockAudio() {
+  unlockEffects();
+  if (document.hidden || navigator.userActivation?.hasBeenActive === false) return;
+  if (!musicContext) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    try {
+      musicContext = new AudioContext();
+    } catch { return; }
+    musicPlayer = createMusic({ context: musicContext, destination: musicContext.destination });
+    musicPlayer.setEnabled(musicEnabled);
+    if (musicTrack) musicPlayer.play(...musicTrack);
+  }
+  if (musicContext.state !== 'running') musicContext.resume().catch(() => {});
+};
+
+document.addEventListener('visibilitychange', () => {
+  if (!musicContext) return;
+  const change = document.hidden ? musicContext.suspend() : musicContext.resume();
+  change.catch(() => {});
+});
+
 mountPage();
 const sheets = createSheet(stage);
-const navigation = createNavigation({ core, roster, widgets, stage, audio, sheets, store });
-const settings = createSettings(stage, audio, sheets, navigation.resetData);
+const navigation = createNavigation({ core, roster, widgets, stage, audio, music, sheets, store });
+const settings = createSettings(stage, audio, music, sheets, navigation.resetData);
 
 settings.loadSettings();
 settings.syncFullscreen();

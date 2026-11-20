@@ -92,8 +92,12 @@
 .pm .top i.h, .benchrow .mini i.h { font: 10px/13px var(--px9); font-style: normal; background: var(--gold); color: #2a1c00; padding: 0 3px; }
 
 #msg { position: relative; flex: none; height: 30px; background: #100c22; border-bottom: 2px solid #231c44; }
+#msg:has(#relay-hint:not([hidden])) { height: auto; min-height: 30px; }
+#relay-hint { padding: 3px 10px; line-height: 15px; color: var(--gold); word-break: keep-all; }
 #ticker { position: absolute; inset: 0; padding: 0 10px; display: flex; align-items: center; color: var(--dim); white-space: nowrap; overflow: hidden; }
 #ticker.retreat-preview { display: block; line-height: 28px; overflow-x: auto; color: var(--gold); }
+#relay-hint:not([hidden]) + #ticker { display: none; }
+#relay-hint:not([hidden]) + #ticker.retreat-preview { display: block; position: static; line-height: 22px; }
 #tally { position: absolute; inset: 0; padding: 0 8px; display: flex; align-items: center; gap: 3px; background: #100c22; overflow: hidden; white-space: nowrap; }
 #tally:empty { display: none; }
 #tally span { font: 10px/18px var(--px9); padding: 0 4px; background: #33295c; animation: slide .12s steps(3); flex: none; }

@@ -10,10 +10,14 @@ import { recruitScreen } from './screens/recruit.js';
 import { collectionScreen, companionSheet } from './screens/collection.js';
 import { notebookScreen } from './screens/notebook.js';
 import { recordsScreen } from './screens/records.js';
+import { endingScreen } from './screens/ending.js';
 import { availableDungeons, applyRunEnd, createProfile, setExpeditionParty, startView } from '../engine/meta.js';
 import { createRun, finishRun } from '../engine/run.js';
 
-const PAGES = { hub: '꿈의 관측소', dungeons: '행선지', recruit: '', collection: '동료 도감', notebook: '꿈길 수첩', records: '기록' };
+const PAGES = {
+  hub: '꿈의 관측소', dungeons: '행선지', recruit: '', collection: '동료 도감',
+  notebook: '꿈길 수첩', records: '기록', ending: '꿈길의 끝'
+};
 
 export function mountPage() {
   $('#app').innerHTML = `<div id="frame">
@@ -23,7 +27,7 @@ export function mountPage() {
   </div>`;
 }
 
-export function createNavigation({ core, roster, widgets, stage, audio, sheets, store }) {
+export function createNavigation({ core, roster, widgets, stage, audio, music, sheets, store }) {
   const stored = store.load();
   let profile = stored?.profile || createProfile();
   let run = stored?.run || null;
@@ -44,7 +48,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
     },
     profile: () => profile,
     assets,
-    runtime: { stage, audio, sheets }
+    runtime: { stage, audio, music, sheets }
   };
 
   function persist() {
@@ -61,6 +65,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
   }
 
   function page(id, { title = PAGES[id], back } = {}) {
+    music.play('hub');
     const section = $('#' + id);
     const crystals = id === 'recruit' && run ? `<span class="meta-crystals">
       <img class="px" src="${assets.icon('crystal')}" alt="결정" width="32" height="32">${run.crystals}
@@ -79,12 +84,28 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
     sheets.closeSheet();
     const node = page('hub');
     hubScreen(node, { profile, run, widgets, inspect, openDungeons, prepare, resume: enterExpedition, arriving });
+    if (profile.ui?.announcement) updateUi({ announcement: null });
     for (const button of node.querySelectorAll('[data-meta-page]')) button.addEventListener('click', () => {
       const id = button.dataset.metaPage;
       const content = page(id, { back: showHub });
       if (id === 'collection') collectionScreen(content, { profile, roster, widgets, core, inspect });
       else if (id === 'notebook') notebookScreen(content, profile, roster.card);
-      else if (id === 'records') recordsScreen(content, profile, roster.card, sheets.openSheet);
+      else if (id === 'records') recordsScreen(content, profile, roster.card, sheets.openSheet, () => showEnding());
+    });
+  }
+
+  function endingDue() {
+    return profile.notebook.chapters.includes(7) && !profile.ui?.endingSeen;
+  }
+
+  function showEnding(arriving = []) {
+    const node = page('ending');
+    endingScreen(node, {
+      profile, widgets,
+      finish() {
+        if (!profile.ui?.endingSeen) updateUi({ endingSeen: true });
+        showHub(arriving);
+      }
     });
   }
 
@@ -115,7 +136,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
     if (run || !availableDungeons(profile).some(dungeon => dungeon.id === dungeonId)) return;
     if (profile.ui?.destination !== dungeonId || !profile.ui?.preparing) updateUi({ destination: dungeonId, preparing: true });
     preparationOpen = true;
-    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster, sheets, start: startExpedition });
+    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster, widgets, sheets, start: startExpedition });
   }
 
   function closePreparation() {
@@ -155,6 +176,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
     const node = page('recruit', { title: rewards.result === 'win' ? '생환' : '원정 실패' });
     recruitScreen(node, {
       run, rewards, profile, widgets, sheets, choices,
+      endingPending: run.dungeonId === 'creation_tower' && rewards.result === 'win' && !profile.ui?.endingSeen,
       changeChoices: ids => updateUi({ recruitChoices: { runId: run.id, ids } }),
       confirm: confirmReturn
     });
@@ -169,7 +191,8 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
       run = null;
       review = null;
       updateUi({ recruitChoices: null });
-      showHub();
+      if (endingDue()) showEnding();
+      else showHub();
       return true;
     }
     const next = result.profile;
@@ -187,7 +210,8 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
     review = null;
     updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });
     if (recruits.length) audio.sfx.crit();
-    showHub(recruits);
+    if (endingDue()) showEnding(recruits);
+    else showHub(recruits);
     return true;
   }
 
@@ -206,18 +230,27 @@ export function createNavigation({ core, roster, widgets, stage, audio, sheets, 
     showTitle();
   }
 
-  function showTitle() {
-    titleScreen(() => startExpedition());
+  function showTitle(savedProfile) {
+    music.play('hub');
+    titleScreen({
+      profile: savedProfile, widgets,
+      start() {
+        if (!savedProfile) startExpedition();
+        else if (endingDue()) showEnding();
+        else {
+          showHub();
+          if (profile.ui?.preparing) prepare(profile.ui.destination);
+        }
+      }
+    });
   }
 
   function boot() {
     if (run?.phase === 'done') showRecruit();
     // The observatory opens with the first return: until then a reload goes straight back into the intro.
     else if (run && !Object.keys(profile.recruits || {}).length) enterExpedition();
-    else if (stored) {
-      showHub();
-      if (!run && profile.ui?.preparing) prepare(profile.ui.destination);
-    } else showTitle();
+    else if (run) showHub();
+    else showTitle(stored?.profile);
   }
 
   return { boot, closePreparation, resetData, inspect, get run() { return run; }, get review() { return review; } };

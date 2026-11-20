@@ -5,7 +5,7 @@ import { LAYOUTS } from '../../content/layouts.js';
 import { hubLineup, sceneActors } from './hub.js';
 import { runRecordSheet } from './records.js';
 
-export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, changeChoices, confirm }) {
+export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, endingPending, changeChoices, confirm }) {
   const won = rewards.result === 'win';
   const dungeon = DUNGEONS[run.dungeonId];
   const candidates = won ? rewards.recruitable : rewards.shardCandidates;
@@ -52,7 +52,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
     }
     action.textContent = active.length
       ? won ? `${active.map(id => card(id).name).join(' · ')} 영입` : '다음 원정 후보로 예약'
-      : '관측소로 돌아가기';
+      : endingPending ? '엔딩 보기' : '관측소로 돌아가기';
     if (!active.length && (mustRecruit || mustReserve)) action.textContent = won ? '영입할 동료 고르기' : '예약할 동료 고르기';
     action.disabled = !active.length && (mustRecruit || mustReserve);
   }

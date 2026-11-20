@@ -27,6 +27,7 @@ const DIALOGUE = {
 };
 
 export function eventScreen(run, ui, result = null) {
+  ui.playMusic();
   const { card, sprite, spr, cardRow } = ui.widgets;
   const { sfx } = ui.audio;
   const event = run.room.event;

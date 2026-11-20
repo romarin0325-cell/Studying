@@ -100,18 +100,21 @@
 }
 
 #title.meta-screen {
+  --title-bottom: calc(max(24px, 12vh) + env(safe-area-inset-bottom));
   justify-content: flex-end;
   gap: 12px;
-  padding: 12px 12px calc(max(24px, 12vh) + env(safe-area-inset-bottom));
+  padding: 12px 12px var(--title-bottom);
 }
 
 .meta-title-art {
+  --floor: calc(var(--title-bottom) + 158px);
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
   background-color: var(--night);
   background-size: 390px 586px;
-  background-position: center 32%;
+  background-position: center bottom calc(var(--title-bottom) + 79px);
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
@@ -189,9 +192,12 @@
 .meta-actor.actor-1 { --position: 22%; --depth: -10px; }
 .meta-actor.actor-2 { --position: 78%; --depth: -16px; }
 .meta-actor-bob { display: block; }
-.meta-observatory .meta-actor-bob { animation: meta-bob 2.8s steps(1, end) infinite; }
-.meta-observatory .actor-1 .meta-actor-bob { animation-delay: -.7s; }
-.meta-observatory .actor-2 .meta-actor-bob { animation-delay: -1.3s; }
+.meta-title-art .actor-0 { --position: 72%; }
+.meta-title-art .actor-1 { --position: 50%; --depth: 6px; }
+.meta-title-art .actor-2 { --position: 28%; --depth: 10px; }
+:is(.meta-observatory, .meta-title-art, .meta-ending-stage) .meta-actor-bob { animation: meta-bob 2.8s steps(1, end) infinite; }
+:is(.meta-observatory, .meta-title-art) .actor-1 .meta-actor-bob { animation-delay: -.7s; }
+:is(.meta-observatory, .meta-title-art) .actor-2 .meta-actor-bob { animation-delay: -1.3s; }
 .meta-actor.arriving { animation: meta-arrive 300ms steps(6, end) both; }
 
 .meta-actor.lead::after {
@@ -227,6 +233,7 @@
   display: grid;
   gap: 4px;
   pointer-events: none;
+  animation: meta-unlocks-fade 500ms ease 4s forwards;
 }
 
 .meta-unlocks > div {
@@ -253,6 +260,9 @@
 @keyframes meta-unbolt {
   from { transform: translateX(-3px); }
   to { transform: translateX(-15px); }
+}
+@keyframes meta-unlocks-fade {
+  to { opacity: 0; visibility: hidden; }
 }
 
 .meta-dungeon, .meta-dungeon-locked {
@@ -361,6 +371,29 @@
 }
 
 .meta-prep-slots > * { flex: 1 1 92px; min-width: 0; }
+
+.meta-prep-leads {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+}
+
+#sheet .meta-prep-leads .btn {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  min-width: 56px;
+  max-width: 92px;
+  padding: 4px;
+  font: 12px/16px var(--px);
+  overflow-wrap: anywhere;
+}
+
+#sheet .meta-prep-leads [aria-pressed="true"] { border-color: var(--aqua); }
 
 .meta-screen select, .meta-sheet select {
   min-height: 44px;
@@ -528,8 +561,9 @@
   white-space: nowrap;
 }
 
-#records .meta-panel { padding: 10px; margin-bottom: 10px; }
-#meta-latest-record { width: 100%; }
+#records .meta-panel, .meta-ending-record { padding: 10px; margin-bottom: 10px; }
+#meta-latest-record, #meta-replay-ending { width: 100%; }
+#meta-replay-ending { margin-top: 8px; }
 .meta-record-table { width: 100%; border-collapse: collapse; margin: 5px 0; }
 .meta-record-table th, .meta-record-table td {
   text-align: left;
@@ -541,11 +575,43 @@
 .meta-clear-table td, .meta-clear-table th:not(:first-child) { text-align: center; width: 20%; }
 .meta-clear-table th:first-child { width: 60%; }
 
+.meta-ending-stage {
+  --floor: 60px;
+  height: clamp(240px, 46dvh, 420px);
+  border: 1px solid var(--line2);
+  margin-bottom: 12px;
+}
+
+.meta-ending-stage .meta-actor {
+  --depth: 0px;
+  animation: meta-procession 9.6s steps(96, end) both;
+  animation-delay: calc(var(--actor-index) * 3.2s);
+}
+
+@keyframes meta-procession {
+  from { left: 0; transform: translateX(-100%); }
+  to { left: 100%; transform: translateX(0); }
+}
+
 .meta-sheet .tog { min-height: 50px; border: 1px solid var(--line2); box-shadow: 0 2px #090612; }
 #sheet .meta-danger { border-color: var(--coral); color: var(--coral); }
 .meta-erase-confirm .btn { margin-top: 5px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .meta-observatory .meta-actor-bob, .meta-actor.arriving, .meta-bolt img { animation: none; }
+  :is(.meta-observatory, .meta-title-art, .meta-ending-stage) .meta-actor-bob,
+  .meta-actor.arriving, .meta-bolt img, .meta-ending-stage .meta-actor { animation: none; }
+  .meta-unlocks { animation-timing-function: step-end; }
   .meta-crystal-flight { display: none; }
+  .meta-ending-stage {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 0 12px;
+  }
+  .meta-ending-stage .meta-actor {
+    position: relative;
+    left: auto;
+    flex: 0 0 auto;
+  }
 }

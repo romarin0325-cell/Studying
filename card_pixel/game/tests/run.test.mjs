@@ -246,6 +246,39 @@ for (const retreat of [false, true]) {
   });
 }
 
+test('intro floor five keeps the reserved shadow and draws a normal or rare rival', () => {
+  for (const seed of [7, 21, 413, 490]) {
+    const run = reach(make({ dungeonId: 'dawn_forest', seed }), 5);
+    const [reserved, rival] = run.doors[0].enemies;
+    assert.equal(reserved.source, run.reserved);
+    assert.notEqual(rival.source, reserved.source);
+    assert.ok(['normal', 'rare'].includes(roster.card(rival.source).grade), 'seed ' + seed);
+  }
+});
+
+test('intro floor five goes straight from victory to recruitment', () => {
+  const run = reach(make({ dungeonId: 'dawn_forest' }), 5);
+  assert.equal(run.doors[0].relic, null);
+  enter(run);
+  const { pending, survivors } = settle(run);
+  assert.equal(pending, null);
+  assert.equal(run.phase, 'done');
+  assert.equal(run.stats.gateWins, 1);
+  assert.deepEqual(Run.finishRun(run).recruitable, survivors);
+});
+
+test('a saved intro finale gate reward resumes at recruitment', () => {
+  const run = reach(make({ dungeonId: 'dawn_forest' }), 5);
+  enter(run);
+  const { survivors } = settle(run);
+  run.phase = 'reward';
+  run.pending = { kind: 'gate', candidates: run.room.enemies.map(enemy => enemy.source), relic: 'reverse' };
+  const restored = Save.restoreRun(Save.serializeRun(run), { core, roster });
+  assert.equal(restored.phase, 'done');
+  assert.equal(restored.pending, null);
+  assert.deepEqual(Run.finishRun(restored).recruitable, survivors);
+});
+
 test('first intro floor-five loss restores the bench and choices at room entrance', () => {
   const run = reach(make({ dungeonId: 'dawn_forest' }), 5);
   enter(run);
@@ -264,7 +297,7 @@ test('first intro floor-five loss restores the bench and choices at room entranc
   assert.equal(roundTrip(run).stats.retries, 1);
   ok(Run.confirmOrder(run, bench.slice(1, 4)));
   settle(run);
-  advance(run);
+  assert.equal(run.phase, 'done');
   assert.equal(Run.finishRun(run).result, 'win');
   const replay = reach(make({ dungeonId: 'dawn_forest', profileView: { introCleared: true } }), 5);
   enter(replay);

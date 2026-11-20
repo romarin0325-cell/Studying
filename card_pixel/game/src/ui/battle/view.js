@@ -2,6 +2,7 @@ import { $, $$, esc, show } from '../dom.js';
 import { foeFlip } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
+import { INTRO } from '../../content/intro.js';
 import { ROOM_NAMES } from '../../content/layouts.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
@@ -21,20 +22,21 @@ export function battleMarkup() {
     '<div class="chips" id="pa-chips"></div>' +
     '<div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">▶▶ 넘기는 중</div></div>' +
     '<div id="party"></div>' +
-    '<div id="msg"><div id="ticker"></div><div id="tally"></div></div>' +
+    '<div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div>' +
     '<div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div>' +
     '<div class="sheet" id="result"><div class="in win" id="result-in"></div></div>' +
     '</section>'
   );
 }
 
-export function createBattleView({ core, roster, widgets, stage: St, audio, sheets, details }) {
+export function createBattleView({ core, roster, widgets, stage: St, audio, sheets, details, music }) {
   const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
   const { sfx } = audio;
   const { card, face, spr } = widgets;
   const clone = o => JSON.parse(JSON.stringify(o));
   const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
   const LINKED_TRAITS = ['ally_death_base_atk_phy', 'ally_light_death_base_matk_mag'];
+  const relayHint = $('#relay-hint');
 
   const B = { bridge: null, door: null, party: [], allies: [], foe: null, D: null, pending: null, busy: false, log: [], all: [], relayBanner: null, armed: false, intent: null, fallSpot: null, options: [], seen: new Set() };
   const errors = [];
@@ -389,6 +391,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     await showBanner((e.who.idx + 1) + '/' + B.door.enemies.length, e.name + ' — 이어서 나선다', def.boss ? 'ult' : '', 0.6);
   }
   async function victory() {
+    music?.play('victory');
     showIntent(null); S.danger = 0; tween(S, { dark: 0 }, 0.2);
     sfx.win();
     const b = St.banner('승리', run.floor + '층 · ' + ROOM_NAMES[B.door.type], 'gold big');
@@ -398,6 +401,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     await wait(1.2); b.remove();
   }
   async function defeat() {
+    music?.play('defeat');
     showIntent(null); sfx.lose(); tween(S, { dark: 0.6 }, 0.6);
     const b = St.banner('전멸', '꿈길이 끊겼다', 'ult big');
     await wait(1.4); b.remove();
@@ -460,6 +464,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const bridge = B.bridge;
     B.busy = true; lockPanel();
     const start = B.all.length;
+    if (start && !relayHint.hidden) {
+      relayHint.hidden = true;
+      ticker('');
+    }
     B.all = B.all.concat(events);
     let i = 0;
     try {
@@ -507,6 +515,8 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.bridge = createBattle(core, options);
     $('#result').classList.remove('on');
     $('#battle').classList.remove('resumed-result');
+    relayHint.hidden = door.type !== 'borrowed';
+    music?.play(door.type === 'boss' || door.final ? 'boss' : 'battle', run.dungeonId);
     show('battle'); layout(); ticker('');
     play(B.bridge.start());
   }
@@ -555,6 +565,8 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.door = run.room;
     B.artifacts = run.relics;
     B.temporaryRelic = null;
+    relayHint.hidden = true;
+    music?.play('victory');
     St.clear();
     St.setRoom(run.room.bg, !!run.room.final);
     $('#battle').classList.add('resumed-result');

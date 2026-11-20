@@ -7,6 +7,7 @@ import { QUIRKS } from '../../content/quirks.js';
 import { AFFIXES } from '../../content/affixes.js';
 
 export function orderScreen(run, ui) {
+  ui.playMusic();
   const { core, widgets, audio, sheets } = ui;
   const { card, sprite, face } = widgets;
   const { sfx } = audio;

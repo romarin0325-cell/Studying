@@ -36,7 +36,7 @@ function mount(frame, shared) {
 
   const sheets = shared?.sheets || createSheet(stage);
   const details = createDetails(core, widgets, sheets.openSheet);
-  const battle = createBattleView({ core, roster, widgets, stage, audio, sheets, details });
+  const battle = createBattleView({ core, roster, widgets, stage, audio, sheets, details, music: shared?.music });
   const canvas = $('#cv');
   stage.init(canvas, $('#fx'));
   stage.loadSprites();
@@ -68,7 +68,6 @@ export function enterRun(run, host) {
   if (!runtime || runtime.frame !== frame || !$('#battle')) runtime = mount(frame, host.runtime);
   const { core, roster, widgets, audio, sheets, battle } = runtime;
   battle.attach(run);
-  const { sfx } = audio;
   const { assets } = host;
   const icon = (id, scale = 1) => {
     const src = assets.icon(id);
@@ -93,8 +92,6 @@ export function enterRun(run, host) {
     route();
   }
   function enterDoor(index) {
-    audio.unlockAudio();
-    sfx.tap();
     if (command(Run.chooseDoor, index).ok) route();
   }
   function wakeSurvivors() {
@@ -102,7 +99,8 @@ export function enterRun(run, host) {
     enterDoor(0);
   }
   const ui = {
-    core, roster, widgets, audio, sheets, icon, scene, artifacts, command, leave, route, enterDoor
+    core, roster, widgets, audio, sheets, icon, scene, artifacts, command, leave, route, enterDoor,
+    playMusic: () => host.runtime.music?.play(run.dungeonId)
   };
 
   function afterBattle() {

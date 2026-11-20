@@ -194,8 +194,12 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .pm .top i.h, .benchrow .mini i.h { font: 10px/13px var(--px9); font-style: normal; background: var(--gold); color: #2a1c00; padding: 0 3px; }
 
 #msg { position: relative; flex: none; height: 30px; background: #100c22; border-bottom: 2px solid #231c44; }
+#msg:has(#relay-hint:not([hidden])) { height: auto; min-height: 30px; }
+#relay-hint { padding: 3px 10px; line-height: 15px; color: var(--gold); word-break: keep-all; }
 #ticker { position: absolute; inset: 0; padding: 0 10px; display: flex; align-items: center; color: var(--dim); white-space: nowrap; overflow: hidden; }
 #ticker.retreat-preview { display: block; line-height: 28px; overflow-x: auto; color: var(--gold); }
+#relay-hint:not([hidden]) + #ticker { display: none; }
+#relay-hint:not([hidden]) + #ticker.retreat-preview { display: block; position: static; line-height: 22px; }
 #tally { position: absolute; inset: 0; padding: 0 8px; display: flex; align-items: center; gap: 3px; background: #100c22; overflow: hidden; white-space: nowrap; }
 #tally:empty { display: none; }
 #tally span { font: 10px/18px var(--px9); padding: 0 4px; background: #33295c; animation: slide .12s steps(3); flex: none; }
@@ -386,10 +390,24 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .run-doors { display: grid; gap: 8px; flex-shrink: 0; padding: 8px 12px 10px; background: var(--night); }
 .door-plate { display: grid; grid-template-columns: minmax(0, 1fr) 48px; min-height: 80px; }
 .door-entry { display: flex; gap: 10px; align-items: center; background: none; border: 0; text-align: left; padding: 7px 10px; }
-.door-entry > span { min-width: 0; flex: 1; }
+.door-copy { min-width: 0; flex: 1; }
 .door-entry b, .door-entry small { display: block; }
 .door-entry b { font-size: 16px; }
 .door-entry small { color: var(--dim); }
+.door-lineup { display: flex; align-items: flex-end; gap: 4px; flex: none; }
+.door-enemy { display: flex; min-width: 40px; flex-direction: column; align-items: center; }
+.door-enemy img.shadow-tint {
+  width: 40px;
+  height: 38px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2) brightness(.52) drop-shadow(0 1px 0 #8070ad);
+}
+.door-entry .door-intent { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.door-element { width: 6px; height: 6px; background: currentColor; border-radius: 50%; }
+.door-intent .phy { color: var(--phy); }
+.door-intent .mag { color: var(--mag); }
+.door-chips { margin: 2px 0; }
 .door-entry .door-risk { color: var(--ink); }
 .door-entry .door-reward { color: var(--aqua); }
 .door-entry:active, .door-info:active { background: var(--win2); }
@@ -399,12 +417,36 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .run-map-party .benchrow > * { flex: none; }
 .run-map-party small { text-align: right; white-space: nowrap; color: var(--dim); }
 .run-map-party .run-more { padding: 0 4px; min-width: 44px; }
-.run-start-party { height: 100%; display: flex; align-items: flex-end; justify-content: center; padding: 0 10px 12px; }
-.run-start-party button { position: relative; flex: 1; min-width: 0; height: 148px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; background: none; border: 0; padding: 0 2px; }
-.run-start-party button img { margin-bottom: 2px; }
-.run-start-party button span, .run-start-party button small { width: 100%; word-break: keep-all; background: var(--win); }
-.run-start-party button span { line-height: 17px; }
-.run-start-party button small { color: var(--aqua); }
+#map .run-scene { min-height: 204px; }
+.map-party {
+  position: absolute;
+  right: 16px;
+  bottom: 28px;
+  left: 16px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+.map-actor { position: relative; height: 172px; min-width: 0; background: none; border: 0; padding: 0; }
+.map-actor-art { position: absolute; inset: 0 0 18px; pointer-events: none; }
+.map-actor-art::before {
+  content: '';
+  position: absolute;
+  left: calc(50% - 16px);
+  bottom: -3px;
+  width: 32px;
+  height: 7px;
+  border-radius: 50%;
+  background: #21162f80;
+}
+.map-actor img { position: absolute; animation: map-idle 2.6s steps(2) infinite; }
+.map-actor:nth-child(2) img { animation-delay: -.8s; }
+.map-actor:nth-child(3) img { animation-delay: -1.6s; }
+.map-actor small { position: absolute; left: 50%; bottom: 0; translate: -50% 0; padding: 0 4px; background: var(--win); white-space: nowrap; }
+.map-party.marching { animation: map-march var(--march-time) linear both; pointer-events: none; }
+.map-party.marching img { animation: map-idle .18s steps(2) infinite; }
+@keyframes map-idle { 50% { translate: 0 -2px; } }
+@keyframes map-march { to { translate: 130% 0; } }
 .run-foe-detail { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); padding: 4px 0; }
 .run-foe-detail img { flex: none; }
 
@@ -444,11 +486,13 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 #event-target-effect { margin: 8px 0; }
 
 .run-treasure .run-scene { height: clamp(152px, 29dvh, 300px); margin: -12px -12px 10px; display: flex; align-items: flex-end; justify-content: center; }
-.relic-dais { margin-bottom: 28px; padding: 0 26px; border-bottom: 9px solid #756050; box-shadow: 0 5px 0 #2b2031; display: flex; justify-content: center; }
+.relic-dais { margin-bottom: 28px; padding: 0 16px; border-bottom: 9px solid #756050; box-shadow: 0 5px 0 #2b2031; display: flex; justify-content: center; }
+.relic-dais .run-icon { width: 96px; height: 96px; }
 .run-relic-description, .run-relic-compare { padding: 9px 12px; }
 .run-relic-description h2 { margin-bottom: 5px; }
 .run-relic-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 5px 0 8px; }
-.relic-slot { min-height: 56px; display: flex; align-items: center; gap: 8px; padding: 6px 8px; text-align: left; }
+.relic-slot { min-height: 78px; display: flex; align-items: center; gap: 8px; padding: 6px 8px; text-align: left; }
+.relic-slot span { overflow-wrap: anywhere; }
 .relic-slot.equipped { border-color: var(--gold); animation: equipped .24s steps(2); }
 @keyframes equipped { 50% { background: #4b3a20; } }
 .run-relic-compare { border-left: 2px solid var(--gold); background: var(--win); }
@@ -457,11 +501,10 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   .run-screen header.top b { font-size: 19px; }
   .run-map-party { flex-wrap: wrap; gap: 2px; }
   .run-map-party small { flex-basis: 100%; text-align: left; }
-  .run-start-party button span { font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .event-joiner, .event-released, .relic-slot.equipped { animation: none; }
+  .map-actor img, .map-party.marching, .map-party.marching img, .event-joiner, .event-released, .relic-slot.equipped { animation: none; }
 }
 
 .meta-screen {
@@ -566,18 +609,21 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 }
 
 #title.meta-screen {
+  --title-bottom: calc(max(24px, 12vh) + env(safe-area-inset-bottom));
   justify-content: flex-end;
   gap: 12px;
-  padding: 12px 12px calc(max(24px, 12vh) + env(safe-area-inset-bottom));
+  padding: 12px 12px var(--title-bottom);
 }
 
 .meta-title-art {
+  --floor: calc(var(--title-bottom) + 158px);
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
   background-color: var(--night);
   background-size: 390px 586px;
-  background-position: center 32%;
+  background-position: center bottom calc(var(--title-bottom) + 79px);
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
@@ -655,9 +701,12 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .meta-actor.actor-1 { --position: 22%; --depth: -10px; }
 .meta-actor.actor-2 { --position: 78%; --depth: -16px; }
 .meta-actor-bob { display: block; }
-.meta-observatory .meta-actor-bob { animation: meta-bob 2.8s steps(1, end) infinite; }
-.meta-observatory .actor-1 .meta-actor-bob { animation-delay: -.7s; }
-.meta-observatory .actor-2 .meta-actor-bob { animation-delay: -1.3s; }
+.meta-title-art .actor-0 { --position: 72%; }
+.meta-title-art .actor-1 { --position: 50%; --depth: 6px; }
+.meta-title-art .actor-2 { --position: 28%; --depth: 10px; }
+:is(.meta-observatory, .meta-title-art, .meta-ending-stage) .meta-actor-bob { animation: meta-bob 2.8s steps(1, end) infinite; }
+:is(.meta-observatory, .meta-title-art) .actor-1 .meta-actor-bob { animation-delay: -.7s; }
+:is(.meta-observatory, .meta-title-art) .actor-2 .meta-actor-bob { animation-delay: -1.3s; }
 .meta-actor.arriving { animation: meta-arrive 300ms steps(6, end) both; }
 
 .meta-actor.lead::after {
@@ -693,6 +742,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   display: grid;
   gap: 4px;
   pointer-events: none;
+  animation: meta-unlocks-fade 500ms ease 4s forwards;
 }
 
 .meta-unlocks > div {
@@ -719,6 +769,9 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 @keyframes meta-unbolt {
   from { transform: translateX(-3px); }
   to { transform: translateX(-15px); }
+}
+@keyframes meta-unlocks-fade {
+  to { opacity: 0; visibility: hidden; }
 }
 
 .meta-dungeon, .meta-dungeon-locked {
@@ -827,6 +880,29 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 }
 
 .meta-prep-slots > * { flex: 1 1 92px; min-width: 0; }
+
+.meta-prep-leads {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+}
+
+#sheet .meta-prep-leads .btn {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  min-width: 56px;
+  max-width: 92px;
+  padding: 4px;
+  font: 12px/16px var(--px);
+  overflow-wrap: anywhere;
+}
+
+#sheet .meta-prep-leads [aria-pressed="true"] { border-color: var(--aqua); }
 
 .meta-screen select, .meta-sheet select {
   min-height: 44px;
@@ -994,8 +1070,9 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   white-space: nowrap;
 }
 
-#records .meta-panel { padding: 10px; margin-bottom: 10px; }
-#meta-latest-record { width: 100%; }
+#records .meta-panel, .meta-ending-record { padding: 10px; margin-bottom: 10px; }
+#meta-latest-record, #meta-replay-ending { width: 100%; }
+#meta-replay-ending { margin-top: 8px; }
 .meta-record-table { width: 100%; border-collapse: collapse; margin: 5px 0; }
 .meta-record-table th, .meta-record-table td {
   text-align: left;
@@ -1007,13 +1084,45 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .meta-clear-table td, .meta-clear-table th:not(:first-child) { text-align: center; width: 20%; }
 .meta-clear-table th:first-child { width: 60%; }
 
+.meta-ending-stage {
+  --floor: 60px;
+  height: clamp(240px, 46dvh, 420px);
+  border: 1px solid var(--line2);
+  margin-bottom: 12px;
+}
+
+.meta-ending-stage .meta-actor {
+  --depth: 0px;
+  animation: meta-procession 9.6s steps(96, end) both;
+  animation-delay: calc(var(--actor-index) * 3.2s);
+}
+
+@keyframes meta-procession {
+  from { left: 0; transform: translateX(-100%); }
+  to { left: 100%; transform: translateX(0); }
+}
+
 .meta-sheet .tog { min-height: 50px; border: 1px solid var(--line2); box-shadow: 0 2px #090612; }
 #sheet .meta-danger { border-color: var(--coral); color: var(--coral); }
 .meta-erase-confirm .btn { margin-top: 5px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .meta-observatory .meta-actor-bob, .meta-actor.arriving, .meta-bolt img { animation: none; }
+  :is(.meta-observatory, .meta-title-art, .meta-ending-stage) .meta-actor-bob,
+  .meta-actor.arriving, .meta-bolt img, .meta-ending-stage .meta-actor { animation: none; }
+  .meta-unlocks { animation-timing-function: step-end; }
   .meta-crystal-flight { display: none; }
+  .meta-ending-stage {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 0 12px;
+  }
+  .meta-ending-stage .meta-actor {
+    position: relative;
+    left: auto;
+    flex: 0 0 auto;
+  }
 }
 </style></head>
 <body><div id="app"></div>
@@ -9084,6 +9193,8 @@ const BattleRuntime = {
     enemyHp: 220,
     seed: 7,
     start: { allyStart: { 0: { hp: 40, mp: 0 } } },
+    relayHint: "\uC560\uC26C\uAC00 \uC4F0\uB7EC\uC9C0\uBA74 \uB208\uD1A0\uB07C\uAC00 \uC544\uB9C8\uAC9F\uB3C8\uC744 \uBB3C\uB824\uBC1B\uB294\uB2E4 \xB7 \uBB3C\uB7EC\uB098\uBA74 \uC14B \uB2E4 \uC0B0\uB2E4.",
+    finaleGrades: ["normal", "rare"],
     boss: { id: "shadow_pair", name: "\uADF8\uB9BC\uC790 \uB458", note: "\uCC98\uC74C \uAE68\uC6B0\uAE30\uC5D0\uC11C \uB193\uCE5C \uD6C4\uBCF4\uC640 \uADF8\uB9BC\uC790 \uD55C \uBA85." }
   };
 
@@ -9257,6 +9368,42 @@ const BattleRuntime = {
     springTake: () => springTake,
     takeTreasure: () => takeTreasure
   });
+
+  // card_pixel/game/src/content/layouts.js
+  var LAYOUTS = {
+    expedition: [
+      [{ type: "wild", reward: 1 }],
+      [{ type: "wild", reward: 1 }, { type: "wild", risk: true, reward: 2 }],
+      [{ type: "spring" }, { type: "altar" }, { type: "event" }],
+      [{ type: "gate", reward: 3 }],
+      [{ type: "event" }, { type: "treasure" }],
+      [{ type: "wild", reward: 1 }, { type: "elite", reward: 3 }],
+      [{ type: "spring" }, { type: "altar" }],
+      [{ type: "boss" }]
+    ],
+    intro: [
+      [{ type: "borrowed" }],
+      [{ type: "awakening" }],
+      [
+        { type: "wild", intent: "phy", creature: "emerald_beetle", reward: 1 },
+        { type: "wild", intent: "mag", creature: "gold_moth", reward: 1 }
+      ],
+      [{ type: "spring" }, { type: "treasure" }],
+      [{ type: "gate", final: true, reward: 3 }]
+    ]
+  };
+  var ROOM_NAMES = {
+    borrowed: "\uB300\uC5EC \uC804\uD22C",
+    awakening: "\uCCAB \uAE68\uC6B0\uAE30",
+    wild: "\uBABD\uB9C8",
+    elite: "\uC815\uC608",
+    gate: "\uBB38\uC9C0\uAE30",
+    boss: "\uAFC8\uC758 \uC8FC\uC778",
+    spring: "\uC18C\uD658\uC758 \uC0D8",
+    altar: "\uD63C\uB3C8\uC758 \uC81C\uB2E8",
+    event: "\uC0AC\uAC74",
+    treasure: "\uBCF4\uBB3C\uBC29"
+  };
 
   // card_pixel/game/src/content/relics.js
   var RELICS = {
@@ -9627,42 +9774,6 @@ const BattleRuntime = {
     }
   ];
 
-  // card_pixel/game/src/content/layouts.js
-  var LAYOUTS = {
-    expedition: [
-      [{ type: "wild", reward: 1 }],
-      [{ type: "wild", reward: 1 }, { type: "wild", risk: true, reward: 2 }],
-      [{ type: "spring" }, { type: "altar" }, { type: "event" }],
-      [{ type: "gate", reward: 3 }],
-      [{ type: "event" }, { type: "treasure" }],
-      [{ type: "wild", reward: 1 }, { type: "elite", reward: 3 }],
-      [{ type: "spring" }, { type: "altar" }],
-      [{ type: "boss" }]
-    ],
-    intro: [
-      [{ type: "borrowed" }],
-      [{ type: "awakening" }],
-      [
-        { type: "wild", intent: "phy", creature: "emerald_beetle", reward: 1 },
-        { type: "wild", intent: "mag", creature: "gold_moth", reward: 1 }
-      ],
-      [{ type: "spring" }, { type: "treasure" }],
-      [{ type: "gate", final: true, reward: 3 }]
-    ]
-  };
-  var ROOM_NAMES = {
-    borrowed: "\uB300\uC5EC \uC804\uD22C",
-    awakening: "\uCCAB \uAE68\uC6B0\uAE30",
-    wild: "\uBABD\uB9C8",
-    elite: "\uC815\uC608",
-    gate: "\uBB38\uC9C0\uAE30",
-    boss: "\uAFC8\uC758 \uC8FC\uC778",
-    spring: "\uC18C\uD658\uC758 \uC0D8",
-    altar: "\uD63C\uB3C8\uC758 \uC81C\uB2E8",
-    event: "\uC0AC\uAC74",
-    treasure: "\uBCF4\uBB3C\uBC29"
-  };
-
   // card_pixel/game/src/engine/rooms.js
   var RELIC_LIMIT = 4;
   var SALE_PRICE = { normal: 1, rare: 2, epic: 3, legend: 4 };
@@ -9940,6 +10051,10 @@ const BattleRuntime = {
   var springRoom = (run) => run.phase === "room" && run.room?.type === "spring" && run.room.status === "service";
   function bindRun(run, { core: core2, roster: roster2 }) {
     dependencies.set(run, { core: core2, roster: roster2 });
+    if (run.room?.type === "gate" && run.room.final && run.result === "win" && run.phase === "reward" && (!run.pending || run.pending.kind === "gate")) {
+      run.pending = null;
+      run.phase = "done";
+    }
     return run;
   }
   function createRun({ core: core2, roster: roster2, dungeonId, difficulty = "normal", seed = 0, profileView = {}, plain = false }) {
@@ -10020,11 +10135,34 @@ const BattleRuntime = {
     return run;
   }
   function advance(run) {
+    const { roster: roster2 } = dependencies.get(run);
+    const dungeon = DUNGEONS[run.dungeonId];
     run.floor++;
     run.room = null;
     run.phase = "map";
-    run.doors = makeDoors(run, dependencies.get(run).roster);
+    run.doors = dungeon.layout === "intro" && run.floor === run.floors ? [introFinaleDoor(run, roster2, dungeon)] : makeDoors(run, roster2);
     observeDoors(run);
+  }
+  function introFinaleDoor(run, roster2, dungeon) {
+    const available = run.pool.filter((id) => canJoin(run, id));
+    const preferred = available.filter((id) => ["rare", "epic"].includes(roster2.card(id).grade));
+    const first = run.reserved || pick(run.rng, preferred) || pick(run.rng, available);
+    const gentleShadows = run.pool.filter((id) => id !== first && INTRO.finaleGrades.includes(roster2.card(id).grade));
+    const second = pick(run.rng, gentleShadows.filter((id) => canJoin(run, id))) || pick(run.rng, gentleShadows.filter((id) => !run.fallen.includes(id) && !run.released.includes(id)));
+    const tier = dungeon.tiers[run.floor - 1];
+    const enemies = [first, second].map((id) => id ? roster2.shadowOf(id, tier) : roster2.wildOf(dungeon.wild[0], tier));
+    const template = LAYOUTS.intro[run.floor - 1][0];
+    return {
+      ...template,
+      index: 0,
+      name: ROOM_NAMES[template.type],
+      bg: dungeon.background,
+      region: null,
+      enemies,
+      quirk: null,
+      start: null,
+      relic: null
+    };
   }
   function prepareStartPick(run, remaining, near, priority) {
     const candidates = choicesFor(run, dependencies.get(run).roster, 3, { near, priority });
@@ -10181,7 +10319,7 @@ const BattleRuntime = {
       if (survivors.some((id) => roster2.card(id).trait?.type === "looter")) crystals++;
       if (betWon) crystals += next.reward.crystals || 0;
       run.crystals += crystals;
-      if (gate && !wiped) setGateReward(run, room, downs);
+      if (gate && !final && !wiped) setGateReward(run, room, downs);
       if (room.type === "elite" && room.relic && !wiped) relic = grantRelic(run, room.relic);
       if (betWon && next.reward.relic && !wiped) relic = grantRelic(run, next.reward.relic);
       if (room.type === "borrowed" && !wiped) {
@@ -10555,6 +10693,690 @@ const BattleRuntime = {
         storage2.removeItem(key);
       }
     };
+  }
+
+  // card_pixel/game/src/audio/music.js
+  var TRACKS = {
+    hub: {
+      name: "\uAFC8\uC758 \uAD00\uCE21\uC18C",
+      description: "\uB530\uB73B\uD55C \uD604\uACFC \uBCC4\uBE5B\uCC98\uB7FC \uBC88\uC9C0\uB294 \uC720\uB9AC\uC885\uC774 \uBC24\uD558\uB298\uC744 \uADF8\uB9BD\uB2C8\uB2E4.",
+      key: "D major",
+      bpm: 76,
+      beats: 4,
+      instruments: ["velvet", "round", "glass", "brush"],
+      chords: {
+        Dmaj9: ["D2", "F#3", "A3", "C#4", "E4"],
+        Bm7: ["B2", "F#3", "A3", "D4"],
+        Gmaj7: ["G2", "F#3", "B3", "D4"],
+        A6: ["A2", "E3", "F#3", "C#4"],
+        Em7: ["E2", "G3", "B3", "D4"],
+        D_Fs: ["F#2", "A3", "D4", "E4"]
+      },
+      progression: ["Dmaj9", "Bm7", "Gmaj7", "A6", "Dmaj9", "D_Fs", "Em7", "A6", "Bm7", "Gmaj7", "Em7", "A6"],
+      bass: [[0, 0, 1.8], [2.5, 7, 0.8]],
+      melody: [
+        [[null, 0.5], ["A4", 0.5], ["C#5", 0.5], ["E5", 1.5], ["F#5", 1]],
+        [["D5", 1.5], ["C#5", 0.5], ["B4", 1.5], [null, 0.5]],
+        [["A4", 0.5], ["B4", 0.5], ["D5", 1.5], ["F#5", 1.5]],
+        [["E5", 1.5], ["C#5", 1.5], [null, 1]],
+        [[null, 0.5], ["A4", 0.5], ["C#5", 0.5], ["E5", 0.5], ["A5", 2]],
+        [["F#5", 1], ["E5", 0.5], ["D5", 1.5], ["A4", 1]],
+        [["G4", 1], ["B4", 0.5], ["D5", 0.5], ["E5", 2]],
+        [["C#5", 2], [null, 1.5], ["F#5", 0.5]],
+        [["B5", 1.5], ["A5", 0.5], ["F#5", 1], ["D5", 1]],
+        [["G5", 1], ["F#5", 0.5], ["D5", 1.5], [null, 1]],
+        [["E5", 1], ["D5", 0.5], ["B4", 0.5], ["G4", 2]],
+        [["A4", 1], ["C#5", 1], ["E5", 1], [null, 1]]
+      ]
+    },
+    dawn_forest: {
+      name: "\uC0C8\uBCBD\uC758 \uC232",
+      description: "\uBD80\uB4DC\uB7EC\uC6B4 \uD50C\uB8E8\uD2B8\uAC00 \uC0C8\uBCBD\uBE5B\uC744 \uB530\uB77C \uAC00\uBCCD\uAC8C \uC624\uB985\uB2C8\uB2E4.",
+      key: "G major",
+      bpm: 94,
+      beats: 4,
+      instruments: ["velvet", "round", "flute", "seed"],
+      chords: {
+        Gadd9: ["G2", "B3", "D4", "A4"],
+        Em7: ["E2", "G3", "B3", "D4"],
+        Cmaj7: ["C2", "G3", "B3", "E4"],
+        Dsus: ["D2", "A3", "D4", "G4"],
+        Bm7: ["B2", "F#3", "A3", "D4"],
+        D7: ["D2", "A3", "C4", "F#4"]
+      },
+      progression: ["Gadd9", "Em7", "Cmaj7", "Dsus", "Bm7", "Em7", "Cmaj7", "D7"],
+      bass: [[0, 0, 1.3], [2, 7, 0.65], [3, 12, 0.55]],
+      melody: [
+        [["G4", 0.5], ["A4", 0.5], ["B4", 1], ["D5", 1.5], ["B4", 0.5]],
+        [["E5", 1], ["D5", 0.5], ["B4", 0.5], ["G4", 1.5], [null, 0.5]],
+        [["G4", 0.5], ["A4", 0.5], ["B4", 1], ["E5", 1], ["D5", 1]],
+        [["A4", 1.5], ["G4", 0.5], ["D5", 1.5], [null, 0.5]],
+        [["F#5", 0.75], ["D5", 0.25], ["B4", 1], ["A4", 1], ["B4", 1]],
+        [["E5", 0.5], ["F#5", 0.5], ["G5", 1], ["B5", 1], ["G5", 1]],
+        [["E5", 1], ["G5", 0.5], ["E5", 0.5], ["D5", 1], ["C5", 1]],
+        [["A4", 1], ["C5", 0.5], ["A4", 0.5], ["F#4", 1.5], [null, 0.5]]
+      ]
+    },
+    ember_volcano: {
+      name: "\uD64D\uB828 \uD654\uC0B0",
+      description: "\uAC70\uCE5C \uB9AC\uB4DC\uC640 \uC5C7\uBC15 \uBD81\uC18C\uB9AC\uAC00 \uC6A9\uC554\uCC98\uB7FC \uBC00\uACE0 \uB4E4\uC5B4\uC635\uB2C8\uB2E4.",
+      key: "E minor",
+      bpm: 118,
+      beats: 4,
+      instruments: ["reedPad", "pulse", "reed", "forge"],
+      chords: {
+        Em: ["E2", "B3", "E4", "G4"],
+        C: ["C2", "G3", "C4", "E4"],
+        Am: ["A2", "E3", "A3", "C4"],
+        B7: ["B2", "A3", "D#4", "F#4"],
+        G: ["G2", "B3", "D4", "G4"],
+        Em_D: ["D2", "G3", "B3", "E4"]
+      },
+      progression: ["Em", "C", "Am", "B7", "Em", "Em_D", "G", "B7"],
+      bass: [[0, 0, 0.65], [0.75, 0, 0.4], [1.5, 12, 0.4], [2, 0, 0.65], [3.25, 7, 0.45]],
+      melody: [
+        [["E4", 0.75], ["G4", 0.25], ["B4", 0.75], ["A4", 0.25], ["E4", 1], [null, 1]],
+        [["G4", 0.5], ["E4", 0.75], ["G4", 0.25], ["C5", 1], ["B4", 0.5], ["G4", 1]],
+        [["A4", 0.75], ["C5", 0.25], ["E5", 0.75], ["D5", 0.25], ["C5", 1], ["A4", 1]],
+        [["F#4", 0.5], ["A4", 0.5], ["B4", 0.75], ["D#5", 0.25], ["B4", 1.5], [null, 0.5]],
+        [["E5", 0.75], ["G5", 0.25], ["B5", 0.75], ["A5", 0.25], ["G5", 0.5], ["E5", 1.5]],
+        [["D5", 1], ["B4", 0.5], ["G4", 0.5], ["F#4", 0.75], ["G4", 0.25], ["B4", 1]],
+        [["D5", 0.5], ["E5", 0.5], ["G5", 1], ["A5", 0.5], ["G5", 0.5], ["D5", 1]],
+        [["F#5", 0.5], ["D#5", 0.5], ["B4", 0.75], ["A4", 0.25], ["F#4", 1], ["D#4", 1]]
+      ]
+    },
+    twilight_cathedral: {
+      name: "\uD669\uD63C \uC131\uB2F9",
+      description: "\uB0AE\uC740 \uC624\uB974\uAC04 \uC704\uB85C \uCCAD\uB3D9\uC885\uC758 \uC9E7\uACE0 \uC5C4\uC219\uD55C \uC120\uC728\uC774 \uC6B8\uB9BD\uB2C8\uB2E4.",
+      key: "D minor",
+      bpm: 72,
+      beats: 4,
+      instruments: ["organ", "sub", "bell", "toll"],
+      chords: {
+        Dm: ["D2", "A3", "D4", "F4"],
+        Bb: ["Bb2", "F3", "Bb3", "D4"],
+        Gm: ["G2", "Bb3", "D4", "G4"],
+        A7: ["A2", "G3", "C#4", "E4"],
+        F: ["F2", "A3", "C4", "F4"],
+        C: ["C2", "G3", "C4", "E4"]
+      },
+      progression: ["Dm", "Bb", "Gm", "A7", "F", "C", "Bb", "A7"],
+      bass: [[0, 0, 2.6], [3, 7, 0.8]],
+      melody: [
+        [["D5", 1.5], ["A4", 0.5], ["F4", 1.5], [null, 0.5]],
+        [["Bb4", 1.5], ["F4", 0.5], ["D4", 1.5], [null, 0.5]],
+        [["G4", 1.5], ["Bb4", 0.5], ["D5", 1.5], ["C5", 0.5]],
+        [["Bb4", 1], ["E4", 0.5], ["C#5", 2], [null, 0.5]],
+        [["A5", 1.5], ["F5", 0.5], ["C5", 1.5], [null, 0.5]],
+        [["G5", 1.5], ["E5", 0.5], ["D5", 1], ["C5", 1]],
+        [["F5", 1], ["D5", 1], ["Bb4", 1.5], ["D5", 0.5]],
+        [["E5", 0.75], ["D5", 0.25], ["C#5", 2.5], [null, 0.5]]
+      ]
+    },
+    starlit_garden: {
+      name: "\uBCC4\uBE5B \uC815\uC6D0",
+      description: "\uD558\uD504\uCC98\uB7FC \uD295\uAE30\uB294 \uC74C\uACFC \uAC00\uBCBC\uC6B4 \uC138 \uBC15\uC790\uAC00 \uAFC8\uACB0\uCC98\uB7FC \uB9F4\uB3D5\uB2C8\uB2E4.",
+      key: "F major",
+      bpm: 106,
+      beats: 3,
+      instruments: ["halo", "round", "pluck", "waltz"],
+      chords: {
+        Fmaj7: ["F2", "A3", "C4", "E4"],
+        Dm7: ["D2", "F3", "A3", "C4"],
+        Bbmaj7: ["Bb2", "F3", "A3", "D4"],
+        C7: ["C2", "G3", "Bb3", "E4"],
+        Am7: ["A2", "G3", "C4", "E4"],
+        Gm7: ["G2", "Bb3", "D4", "F4"]
+      },
+      progression: ["Fmaj7", "Dm7", "Bbmaj7", "C7", "Am7", "Dm7", "Gm7", "C7"],
+      bass: [[0, 0, 0.8], [1, 7, 0.45], [2, 12, 0.45]],
+      melody: [
+        [[null, 0.5], ["C5", 0.5], ["A5", 1], ["G5", 0.5], ["F5", 0.5]],
+        [["E5", 0.5], ["F5", 0.5], ["D5", 1.5], [null, 0.5]],
+        [[null, 0.5], ["F5", 0.5], ["D6", 1], ["C6", 0.5], ["A5", 0.5]],
+        [["G5", 1], ["E5", 0.5], ["C5", 1], [null, 0.5]],
+        [["E5", 0.5], ["A5", 0.5], ["C6", 1], ["E6", 1]],
+        [["D6", 1], ["C6", 0.5], ["A5", 0.5], ["F5", 1]],
+        [["Bb5", 0.75], ["A5", 0.25], ["G5", 1], ["D5", 1]],
+        [["E5", 0.5], ["F5", 0.5], ["G5", 0.5], ["C5", 1], [null, 0.5]]
+      ]
+    },
+    midnight_trench: {
+      name: "\uC2EC\uC57C\uC758 \uD574\uAD6C",
+      description: "\uAE4A\uC740 \uC0AC\uC778\uD30C \uBCA0\uC774\uC2A4\uC640 \uB290\uB9B0 \uBB3C\uBC29\uC6B8 \uC120\uC728\uC774 \uC5B4\uB460 \uC18D\uC744 \uB5A0\uB2E4\uB2D9\uB2C8\uB2E4.",
+      key: "C minor",
+      bpm: 60,
+      beats: 4,
+      instruments: ["deep", "sub", "droplet", "tide"],
+      chords: {
+        Cm9: ["C2", "Eb3", "G3", "Bb3", "D4"],
+        Abmaj7: ["Ab2", "Eb3", "G3", "C4"],
+        Fm7: ["F2", "Ab3", "C4", "Eb4"],
+        Gm7: ["G2", "Bb3", "D4", "F4"],
+        Ebmaj7: ["Eb2", "G3", "Bb3", "D4"],
+        G7: ["G2", "F3", "B3", "D4"]
+      },
+      progression: ["Cm9", "Abmaj7", "Fm7", "Gm7", "Ebmaj7", "Abmaj7", "Fm7", "G7"],
+      bass: [[0, 0, 3], [3.25, 0, 0.65]],
+      melody: [
+        [[null, 0.5], ["G4", 1.5], ["Eb4", 0.75], ["D4", 0.25], ["C4", 1]],
+        [["Eb4", 1.5], [null, 0.5], ["G4", 1], ["Ab4", 1]],
+        [["C5", 1.25], ["Ab4", 0.75], ["G4", 0.5], ["F4", 1.5]],
+        [[null, 0.5], ["D4", 0.75], ["F4", 0.25], ["G4", 2.5]],
+        [["Bb4", 1.5], ["G4", 0.75], ["F4", 0.25], ["Eb4", 1.5]],
+        [[null, 0.75], ["C5", 1.25], ["Eb5", 0.75], ["C5", 0.25], ["G4", 1]],
+        [["Ab4", 1.5], ["F4", 0.75], ["Eb4", 0.25], ["C4", 1.5]],
+        [["D4", 1], ["F4", 1], ["B3", 1.5], [null, 0.5]]
+      ]
+    },
+    arena: {
+      name: "\uD22C\uAE30\uC7A5",
+      description: "\uC9E7\uC740 \uBE0C\uB77C\uC2A4 \uAD6C\uC808\uACFC \uD589\uC9C4 \uBD81\uC774 \uACB0\uD22C\uC758 \uAC78\uC74C\uC744 \uB9DE\uCDA5\uB2C8\uB2E4.",
+      key: "Bb major",
+      bpm: 112,
+      beats: 4,
+      instruments: ["reedPad", "pulse", "brass", "march"],
+      chords: {
+        Bb: ["Bb2", "F3", "Bb3", "D4"],
+        Gm: ["G2", "G3", "Bb3", "D4"],
+        Eb: ["Eb2", "G3", "Bb3", "Eb4"],
+        F7: ["F2", "A3", "C4", "Eb4"],
+        Cm: ["C2", "G3", "C4", "Eb4"],
+        Bb_D: ["D2", "F3", "Bb3", "D4"]
+      },
+      progression: ["Bb", "Gm", "Eb", "F7", "Bb_D", "Eb", "Cm", "F7"],
+      bass: [[0, 0, 0.85], [1, 0, 0.55], [2, 7, 0.85], [3, 0, 0.55]],
+      melody: [
+        [["Bb4", 0.75], ["Bb4", 0.25], ["D5", 1], ["F5", 1.5], [null, 0.5]],
+        [["G5", 0.75], ["F5", 0.25], ["D5", 1], ["Bb4", 1.5], [null, 0.5]],
+        [["Eb5", 0.75], ["Eb5", 0.25], ["G5", 1], ["Bb5", 1], ["G5", 1]],
+        [["F5", 0.5], ["Eb5", 0.5], ["C5", 1], ["A4", 1.5], [null, 0.5]],
+        [["D5", 0.75], ["D5", 0.25], ["F5", 1], ["Bb5", 1], ["D6", 1]],
+        [["C6", 0.75], ["Bb5", 0.25], ["G5", 1], ["Eb5", 2]],
+        [["G5", 0.5], ["Eb5", 0.5], ["C5", 1], ["G4", 0.75], ["C5", 0.25], ["Eb5", 1]],
+        [["F5", 1], ["C5", 0.75], ["A4", 0.25], ["F4", 1], ["A4", 1]]
+      ]
+    },
+    creation_tower: {
+      name: "\uCC3D\uC870\uC758 \uD0D1",
+      description: "\uB113\uAC8C \uD37C\uC9C0\uB294 \uD654\uC74C \uC704\uB85C \uBCC4\uBE5B \uC885\uC758 \uC120\uC728\uC774 \uCE35\uCE35\uC774 \uC62C\uB77C\uAC11\uB2C8\uB2E4.",
+      key: "A major",
+      bpm: 86,
+      beats: 4,
+      instruments: ["halo", "round", "carillon", "spire"],
+      chords: {
+        Aadd9: ["A2", "E3", "B3", "C#4", "E4"],
+        Fsm7: ["F#2", "A3", "C#4", "E4"],
+        Dmaj7: ["D2", "A3", "C#4", "F#4"],
+        Esus: ["E2", "A3", "B3", "E4"],
+        Bm7: ["B2", "A3", "D4", "F#4"],
+        Csm7: ["C#2", "G#3", "B3", "E4"],
+        A_E: ["E2", "A3", "C#4", "E4"],
+        E7: ["E2", "G#3", "B3", "D4"]
+      },
+      progression: ["Aadd9", "Fsm7", "Dmaj7", "Esus", "Bm7", "Csm7", "Dmaj7", "E7", "Fsm7", "Dmaj7", "A_E", "E7"],
+      bass: [[0, 0, 1.8], [2, 7, 0.7], [3, 12, 0.85]],
+      melody: [
+        [["A4", 1], ["E5", 1], ["B5", 1.5], ["C#6", 0.5]],
+        [["A5", 1.5], ["F#5", 0.5], ["E5", 1], ["C#5", 1]],
+        [["D5", 1], ["A5", 1], ["C#6", 1.5], ["D6", 0.5]],
+        [["B5", 1.5], ["A5", 0.5], ["E5", 1.5], [null, 0.5]],
+        [["F#5", 0.5], ["A5", 0.5], ["B5", 1], ["D6", 1.5], ["C#6", 0.5]],
+        [["B5", 1], ["G#5", 0.5], ["E5", 0.5], ["C#5", 2]],
+        [["D5", 0.5], ["F#5", 0.5], ["A5", 1], ["D6", 2]],
+        [["B5", 1], ["G#5", 1], ["E5", 1.5], [null, 0.5]],
+        [["F#5", 1], ["C#6", 1], ["E6", 2]],
+        [["D6", 1.5], ["C#6", 0.5], ["A5", 1], ["F#5", 1]],
+        [["E5", 1], ["A5", 0.5], ["B5", 0.5], ["C#6", 1], ["E6", 1]],
+        [["D6", 1], ["B5", 0.5], ["A5", 0.5], ["G#5", 1.5], [null, 0.5]]
+      ]
+    },
+    battle: {
+      name: "\uC804\uD22C",
+      description: "\uB358\uC804\uC758 \uC120\uC728\uACFC \uC545\uAE30\uAC00 \uBE60\uB978 \uBCA0\uC774\uC2A4\uC640 \uC5C7\uBC15 \uD0C0\uC545\uC744 \uD0C0\uACE0 \uB2EC\uB9BD\uB2C8\uB2E4.",
+      bpmScale: 1.28,
+      bars: [0, 1, 2, 3, 0, -3, -2, -1],
+      lowerBars: 0,
+      gate: 0.72,
+      bass: {
+        3: [[0, 0, 0.5], [0.75, 12, 0.4], [1.5, 7, 0.4], [2.25, 0, 0.5]],
+        4: [[0, 0, 0.5], [0.75, 12, 0.4], [1.5, 7, 0.4], [2, 0, 0.5], [3.25, 12, 0.5]]
+      }
+    },
+    boss: {
+      name: "\uBCF4\uC2A4",
+      description: "\uB358\uC804\uC758 \uBAA8\uD2F0\uD504\uAC00 \uB0AE\uAC8C \uC2DC\uC791\uD558\uACE0, \uBAB0\uC544\uCE58\uB294 \uBD81 \uC704\uB85C \uB2E4\uC2DC \uC19F\uC544\uC624\uB985\uB2C8\uB2E4.",
+      bpmScale: 1.48,
+      bars: [0, 2, 1, 3, 0, -3, -2, -1],
+      lowerBars: 4,
+      gate: 0.86,
+      bass: {
+        3: [[0, 0, 0.65], [1, 0, 0.35], [1.5, 12, 0.4], [2, 7, 0.35], [2.5, 0, 0.45]],
+        4: [[0, 0, 0.65], [1, 0, 0.35], [1.5, 12, 0.4], [2, 0, 0.65], [3, 7, 0.35], [3.5, 0, 0.4]]
+      }
+    },
+    victory: {
+      name: "\uC2B9\uB9AC",
+      description: "\uC720\uB9AC\uC885\uC758 \uC0C1\uC2B9\uC74C\uC774 \uBC1D\uC740 \uD654\uC74C\uC5D0 \uB2FF\uACE0 \uC794\uD5A5\uC774 \uC0AC\uB77C\uC9D1\uB2C8\uB2E4.",
+      key: "G major",
+      bpm: 132,
+      beats: 3,
+      instruments: ["halo", "round", "glass", "seed"],
+      once: true,
+      chords: { D7: ["D2", "A3", "C4", "F#4"], Gadd9: ["G2", "B3", "D4", "A4"] },
+      progression: ["D7", "Gadd9"],
+      bass: [[0, 0, 1.45]],
+      melody: [
+        [["D5", 0.5], ["F#5", 0.5], ["A5", 0.5], ["D6", 0.5], ["F#6", 1]],
+        [["G6", 2.5], [null, 0.5]]
+      ]
+    },
+    defeat: {
+      name: "\uD328\uBC30",
+      description: "\uB0AE\uC740 \uD604\uACFC \uBB3C\uBC29\uC6B8 \uC74C\uC774 \uCC9C\uCC9C\uD788 \uAC00\uB77C\uC549\uACE0 \uBA48\uCDA5\uB2C8\uB2E4.",
+      key: "B minor",
+      bpm: 70,
+      beats: 3,
+      instruments: ["deep", "sub", "droplet", "tide"],
+      once: true,
+      chords: { Em7: ["E2", "G3", "B3", "D4"], Bm: ["B2", "F#3", "B3", "D4"] },
+      progression: ["Em7", "Bm"],
+      bass: [[0, 0, 2.3]],
+      melody: [
+        [["G4", 0.75], ["F#4", 0.75], ["E4", 1.5]],
+        [["D4", 1], ["B3", 1.5], [null, 0.5]]
+      ]
+    }
+  };
+  var INSTRUMENTS = {
+    velvet: ["triangle", 880, 0.017, 0.28, 0.45],
+    reedPad: ["sawtooth", 560, 0.022, 0.17, 0.32],
+    organ: ["sine", 1050, 0.019, 0.23, 0.42, 2, 0.24],
+    halo: ["triangle", 1150, 0.018, 0.32, 0.46, 2, 0.24],
+    deep: ["sine", 700, 0.021, 0.38, 0.52, 1.005, 0.36],
+    round: ["triangle", 420, 0.045, 0.025, 0.16],
+    sub: ["sine", 260, 0.052, 0.05, 0.22],
+    pulse: ["triangle", 620, 0.048, 0.012, 0.11],
+    glass: ["sine", 4200, 0.066, 9e-3, 0.32, 2.76, 0.31],
+    flute: ["sine", 2600, 0.065, 0.041, 0.14, 2, 0.17],
+    reed: ["sawtooth", 1420, 0.054, 0.028, 0.16, 1.007, 0.27],
+    bell: ["sine", 3300, 0.068, 6e-3, 0.46, 2.37, 0.46],
+    pluck: ["triangle", 2850, 0.061, 8e-3, 0.29, 2, 0.22],
+    droplet: ["sine", 1700, 0.065, 0.023, 0.42, 1.5, 0.23],
+    brass: ["sawtooth", 1280, 0.06, 0.057, 0.14, 1.006, 0.34],
+    carillon: ["triangle", 3200, 0.063, 0.012, 0.35, 2.5, 0.3]
+  };
+  var PERCUSSION = {
+    brush: { pitch: 68, color: 2100, hits: [[0, "kick", 0.4], [2.5, "hat", 0.45]] },
+    seed: { pitch: 83, color: 2750, hits: [[0, "kick", 0.55], [1.5, "hat", 0.4], [3, "hat", 0.5]] },
+    forge: { pitch: 91, color: 1850, hits: [[0, "kick", 1], [1.5, "hat", 0.65], [2, "kick", 0.8], [3, "snare", 0.8], [3.5, "hat", 0.55]] },
+    toll: { pitch: 57, color: 1250, hits: [[0, "kick", 0.64], [3, "hat", 0.32]] },
+    waltz: { pitch: 73, color: 3e3, hits: [[0, "kick", 0.64], [1, "hat", 0.5], [2, "hat", 0.4]] },
+    tide: { pitch: 54, color: 950, hits: [[0, "kick", 0.5], [2.75, "hat", 0.32]] },
+    march: { pitch: 88, color: 2200, hits: [[0, "kick", 0.95], [1, "snare", 0.85], [2, "kick", 0.85], [3, "snare", 0.85], [3.5, "hat", 0.44]] },
+    spire: { pitch: 63, color: 2600, hits: [[0, "kick", 0.68], [2, "hat", 0.4], [3.5, "hat", 0.36]] }
+  };
+  var COMBAT_HITS = {
+    battle: [
+      [0, "kick", 0.95],
+      [0.75, "hat", 0.58],
+      [1.5, "snare", 0.72],
+      [2, "kick", 0.78],
+      [2.75, "hat", 0.54],
+      [3.25, "snare", 0.65]
+    ],
+    boss: [
+      [0, "kick", 1.1],
+      [0.5, "hat", 0.62],
+      [1, "snare", 0.82],
+      [1.75, "kick", 0.82],
+      [2, "kick", 0.95],
+      [2.5, "hat", 0.62],
+      [3, "snare", 0.92],
+      [3.5, "kick", 0.68]
+    ]
+  };
+  var PITCH_CLASSES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  var MASTER_LEVEL = 10 ** (-14 / 20);
+  var START_AHEAD = 0.035;
+  var CROSSFADE = 0.8;
+  var STOP_FADE = 0.12;
+  var FOREGROUND_AHEAD = 0.35;
+  var BACKGROUND_AHEAD = 4;
+  function midi(note) {
+    const [, letter, accidental, octave] = /^([A-G])([#b]?)(\d)$/.exec(note);
+    const offset = accidental === "#" ? 1 : accidental === "b" ? -1 : 0;
+    return (Number(octave) + 1) * 12 + PITCH_CLASSES[letter] + offset;
+  }
+  function frequency(note) {
+    return 440 * 2 ** ((note - 69) / 12);
+  }
+  function isDungeon(id) {
+    return id !== "hub" && Object.hasOwn(TRACKS, id) && !TRACKS[id].bars && !TRACKS[id].once;
+  }
+  function makeScore(id, dungeon) {
+    const arrangement = TRACKS[id];
+    const combat = Boolean(arrangement.bars);
+    const theme = combat ? TRACKS[dungeon] : arrangement;
+    const [pad, bass, lead, drum] = theme.instruments;
+    const kit = PERCUSSION[drum];
+    const { beats, progression } = theme;
+    const secondsPerBeat = 60 / (theme.bpm * (arrangement.bpmScale ?? 1));
+    const barDuration = beats * secondsPerBeat;
+    const bars = combat ? arrangement.bars : progression.map((_, index) => index);
+    const bassPattern = combat ? arrangement.bass[beats] : theme.bass;
+    const hits = combat ? COMBAT_HITS[id] : kit.hits;
+    const events = [];
+    bars.forEach((bar, index) => {
+      const source = bar < 0 ? progression.length + bar : bar;
+      const [root, ...voicing] = theme.chords[progression[source]].map(midi);
+      function note(part, pitch, beat2, length, strength = 1) {
+        events.push({
+          part,
+          pitch,
+          offset: index * barDuration + beat2 * secondsPerBeat,
+          duration: length * secondsPerBeat,
+          strength
+        });
+      }
+      for (const pitch of voicing) note(pad, pitch, 0, beats, 3 / voicing.length);
+      for (const [beat2, interval, length] of bassPattern) note(bass, root + interval, beat2, length);
+      const register = index < arrangement.lowerBars ? -12 : 0;
+      const gate = arrangement.gate ?? 0.94;
+      let beat = 0;
+      for (const [pitch, length] of theme.melody[source]) {
+        if (pitch) note(lead, midi(pitch) + register, beat, length * gate, beat === 0 ? 1 : 0.9);
+        beat += length;
+      }
+      if (theme.once && index === bars.length - 1) return;
+      for (const [start, part, strength] of hits) {
+        if (start < beats) note(part, 0, start, Math.min(beats - start, 0.5), strength);
+      }
+    });
+    events.sort((a, b) => a.offset - b.offset);
+    return { events, barDuration, duration: bars.length * barDuration, once: Boolean(theme.once), kit };
+  }
+  function gainAt(deck, now) {
+    if (deck.fade && now >= deck.fade.start) {
+      const { start, end, level } = deck.fade;
+      return level * Math.max(0, (end - now) / (end - start));
+    }
+    return Math.min(1, Math.max(0, (now - deck.start) / deck.fadeIn));
+  }
+  function fadeOut(deck, level, start, duration) {
+    const gain = deck.bus.gain;
+    gain.cancelScheduledValues(start);
+    gain.setValueAtTime(level, start);
+    gain.linearRampToValueAtTime(0, start + duration);
+    deck.fade = { start, end: start + duration, level };
+  }
+  function createMusic({ context, destination = context.destination }) {
+    let master = null;
+    let timer = null;
+    let noise = null;
+    let current = null;
+    let queued = null;
+    let wanted = null;
+    let dungeon = "dawn_forest";
+    let enabled = true;
+    let volume = 1;
+    const decks = /* @__PURE__ */ new Set();
+    function attachSource(deck, source, filter, envelope, at, end) {
+      function disconnect() {
+        source.onended = null;
+        source.disconnect();
+        filter.disconnect();
+        envelope.disconnect();
+        deck.voices.delete(voice);
+      }
+      const voice = { source, end, disconnect };
+      deck.voices.add(voice);
+      source.onended = disconnect;
+      source.connect(filter);
+      filter.connect(envelope);
+      envelope.connect(deck.bus);
+      source.start(at);
+      source.stop(end);
+    }
+    function synth(deck, wave, hz, cutoff, level, attack, release, at, duration, sweep) {
+      const source = context.createOscillator();
+      const filter = context.createBiquadFilter();
+      const envelope = context.createGain();
+      const end = at + duration;
+      const peak = at + Math.min(attack, duration * 0.35);
+      source.type = wave;
+      source.frequency.setValueAtTime(hz, at);
+      if (sweep) source.frequency.exponentialRampToValueAtTime(sweep, end);
+      filter.type = "lowpass";
+      filter.frequency.value = cutoff;
+      envelope.gain.setValueAtTime(0, at);
+      envelope.gain.linearRampToValueAtTime(level, peak);
+      envelope.gain.setValueAtTime(level, Math.max(peak, end - release));
+      envelope.gain.linearRampToValueAtTime(0, end);
+      attachSource(deck, source, filter, envelope, at, end);
+    }
+    function percussion(deck, part, strength, at, duration) {
+      const { pitch, color } = deck.score.kit;
+      if (part === "kick") {
+        synth(
+          deck,
+          "sine",
+          pitch * 1.6,
+          360,
+          0.046 * strength,
+          8e-3,
+          0.16,
+          at,
+          Math.min(duration, 0.16),
+          pitch * 0.65
+        );
+        return;
+      }
+      if (!noise) {
+        noise = context.createBuffer(1, Math.ceil(context.sampleRate * 0.13), context.sampleRate);
+        const samples = noise.getChannelData(0);
+        for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+      }
+      const source = context.createBufferSource();
+      const filter = context.createBiquadFilter();
+      const envelope = context.createGain();
+      const snare = part === "snare";
+      const end = at + Math.min(duration, snare ? 0.12 : 0.052);
+      source.buffer = noise;
+      filter.type = "bandpass";
+      filter.frequency.value = snare ? color : color * 1.8;
+      envelope.gain.setValueAtTime(0, at);
+      envelope.gain.linearRampToValueAtTime(strength * (snare ? 0.031 : 0.018), at + 6e-3);
+      envelope.gain.linearRampToValueAtTime(0, end);
+      attachSource(deck, source, filter, envelope, at, end);
+    }
+    function scheduleEvent(deck, event, at) {
+      const { part, pitch, duration, strength } = event;
+      const instrument = INSTRUMENTS[part];
+      if (!instrument) {
+        percussion(deck, part, strength, at, duration);
+        return;
+      }
+      const [wave, cutoff, level, attack, release, ratio, overtone] = instrument;
+      const hz = frequency(pitch);
+      synth(deck, wave, hz, cutoff, level * strength, attack, release, at, duration);
+      if (ratio) {
+        synth(
+          deck,
+          "sine",
+          hz * ratio,
+          cutoff,
+          level * strength * overtone,
+          attack,
+          release,
+          at,
+          duration * 0.75
+        );
+      }
+    }
+    function scheduleDeck(deck, now, horizon) {
+      const { events, duration, once } = deck.score;
+      const until = Math.min(horizon, deck.fade?.end ?? Infinity);
+      if (deck.stopping || until <= deck.start) return;
+      const elapsedCycles = Math.floor((now - deck.start) / duration);
+      if (!once && elapsedCycles > deck.cycle) {
+        deck.cycle = elapsedCycles;
+        deck.index = 0;
+      }
+      while (!once || deck.cycle === 0) {
+        const event = events[deck.index];
+        const at = deck.start + deck.cycle * duration + event.offset;
+        if (at >= until) break;
+        if (at >= now) scheduleEvent(deck, event, at);
+        deck.index++;
+        if (deck.index === events.length) {
+          deck.cycle++;
+          deck.index = 0;
+        }
+      }
+    }
+    function releaseDeck(deck, now) {
+      for (const voice of deck.voices) {
+        if (now < voice.end) voice.source.stop(now);
+        voice.disconnect();
+      }
+      deck.bus.disconnect();
+      decks.delete(deck);
+      if (current === deck) current = null;
+      if (queued === deck) queued = null;
+    }
+    function advance2(now) {
+      if (queued && queued.start <= now) {
+        current = queued;
+        queued = null;
+      }
+      for (const deck of decks) {
+        const ended = deck.score.once && now >= deck.start + deck.score.duration;
+        const faded = deck.fade && now >= deck.fade.end;
+        const closed = context.state === "closed";
+        if (ended || faded || closed || deck.stopping && context.state !== "running") {
+          if ((ended || closed) && wanted === deck.request) wanted = null;
+          releaseDeck(deck, now);
+        }
+      }
+    }
+    function schedule() {
+      const now = context.currentTime;
+      advance2(now);
+      if (!decks.size) {
+        if (timer !== null) clearInterval(timer);
+        timer = null;
+        context.removeEventListener("statechange", schedule);
+        globalThis.document?.removeEventListener("visibilitychange", schedule);
+        master?.disconnect();
+        master = null;
+        return;
+      }
+      if (context.state !== "running") return;
+      const ahead = globalThis.document?.hidden ? BACKGROUND_AHEAD : FOREGROUND_AHEAD;
+      for (const deck of decks) scheduleDeck(deck, now, now + ahead);
+    }
+    function startDeck(request, at, fadeIn) {
+      if (!master) {
+        master = context.createGain();
+        master.gain.value = MASTER_LEVEL * volume;
+        master.connect(destination);
+        timer = setInterval(schedule, 50);
+        context.addEventListener("statechange", schedule);
+        globalThis.document?.addEventListener("visibilitychange", schedule);
+      }
+      const bus = context.createGain();
+      bus.gain.value = 0;
+      bus.gain.setValueAtTime(0, at);
+      bus.gain.linearRampToValueAtTime(1, at + fadeIn);
+      bus.connect(master);
+      const deck = {
+        request,
+        score: makeScore(request.id, request.dungeon),
+        bus,
+        start: at,
+        fadeIn,
+        cycle: 0,
+        index: 0,
+        voices: /* @__PURE__ */ new Set(),
+        fade: null,
+        stopping: false
+      };
+      decks.add(deck);
+      return deck;
+    }
+    function cancelQueue(now) {
+      if (!queued) return;
+      if (current) {
+        current.bus.gain.cancelScheduledValues(queued.start);
+        current.fade = null;
+      }
+      releaseDeck(queued, now);
+    }
+    function cue(request, now) {
+      if (context.state === "closed") return;
+      if (!current) {
+        current = startDeck(request, now + START_AHEAD, 0.065);
+      } else {
+        const { start, score } = current;
+        const nextBar = Math.max(1, Math.floor((now - start) / score.barDuration) + 1);
+        const bar = score.once ? Math.min(nextBar, score.duration / score.barDuration) : nextBar;
+        const at = start + bar * score.barDuration;
+        fadeOut(current, 1, at, CROSSFADE);
+        queued = startDeck(request, at, CROSSFADE);
+      }
+      schedule();
+    }
+    function play(id, dungeonId = dungeon) {
+      if (!Object.hasOwn(TRACKS, id) || context.state === "closed") return;
+      if (isDungeon(id)) dungeon = id;
+      const combat = Boolean(TRACKS[id].bars);
+      if (combat && isDungeon(dungeonId)) dungeon = dungeonId;
+      const now = context.currentTime;
+      advance2(now);
+      const region = combat ? dungeon : null;
+      if (wanted?.id === id && wanted.dungeon === region) return;
+      if (current?.request.id === id && current.request.dungeon === region) return;
+      cancelQueue(now);
+      wanted = { id, dungeon: region };
+      if (enabled) cue(wanted, now);
+    }
+    function fadeToSilence() {
+      const now = context.currentTime;
+      advance2(now);
+      cancelQueue(now);
+      current = null;
+      for (const deck of decks) {
+        const level = gainAt(deck, now);
+        if (context.state !== "running" || level === 0) {
+          releaseDeck(deck, now);
+        } else if (!deck.stopping) {
+          deck.stopping = true;
+          fadeOut(deck, level, now, STOP_FADE);
+        }
+      }
+      schedule();
+    }
+    function stop() {
+      wanted = null;
+      fadeToSilence();
+    }
+    function setEnabled(value) {
+      const next = Boolean(value);
+      if (enabled === next) return;
+      enabled = next;
+      if (!enabled) fadeToSilence();
+      else if (wanted) {
+        wanted = { ...wanted };
+        cue(wanted, context.currentTime);
+      }
+    }
+    function setVolume(value) {
+      if (!Number.isFinite(value)) return;
+      volume = Math.min(1, Math.max(0, value));
+      master?.gain.setTargetAtTime(MASTER_LEVEL * volume, context.currentTime, 0.025);
+    }
+    return { play, stop, setEnabled, setVolume };
   }
 
   // card_pixel/game/src/stage/stage.js
@@ -11314,7 +12136,7 @@ const BattleRuntime = {
   // card_pixel/game/src/stage/audio.js
   function createAudio(clock) {
     let ac = null, soundOn = true;
-    function unlockAudio() {
+    function unlockAudio2() {
       if (ac) {
         if (ac.state === "suspended") ac.resume();
         return;
@@ -11412,7 +12234,7 @@ const BattleRuntime = {
     };
     return {
       sfx,
-      unlockAudio,
+      unlockAudio: unlockAudio2,
       get soundOn() {
         return soundOn;
       },
@@ -11487,7 +12309,7 @@ const BattleRuntime = {
   };
   var tools = () => '<button class="b-full ic" aria-label="' + (document.fullscreenElement ? "\uC804\uCCB4\uD654\uBA74 \uB098\uAC00\uAE30" : "\uC804\uCCB4\uD654\uBA74") + '"><span class="i-full">' + ICON.full + '</span><span class="i-shrink">' + ICON.shrink + '</span></button><button class="b-set ic" aria-label="\uC124\uC815">' + ICON.gear + "</button>";
   var SETTINGS_KEY = "relaymare.settings";
-  function createSettings(St, audio2, sheets2, clearRecords) {
+  function createSettings(St, audio2, music2, sheets2, clearRecords) {
     const { sfx } = audio2;
     const { openSheet, sheet } = sheets2;
     const fsSupported = !!document.documentElement.requestFullscreen;
@@ -11520,23 +12342,25 @@ const BattleRuntime = {
       try {
         const saved = JSON.parse(storage.getItem(SETTINGS_KEY) || "{}");
         if (typeof saved.sound === "boolean") audio2.soundOn = saved.sound;
+        if (typeof saved.music === "boolean") music2.setEnabled(saved.music);
         if (typeof saved.rim === "boolean") St.RIM.on = saved.rim;
       } catch {
       }
       syncOutline();
     }
     function saveSettings() {
-      storage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio2.soundOn, rim: St.RIM.on }));
+      storage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio2.soundOn, music: music2.enabled, rim: St.RIM.on }));
     }
     function settingsSheet() {
       const row = (k, label, on, sub) => '<button class="tog' + (on ? " on" : "") + '" data-set="' + k + '"><b>' + label + "</b><small>" + sub + "</small><span>" + (on ? "\uCF1C\uC9D0" : "\uAEBC\uC9D0") + "</span></button>";
-      openSheet("\uC124\uC815", '<div class="meta-sheet togs">' + row("sound", "\uC18C\uB9AC", audio2.soundOn, "\uD6A8\uACFC\uC74C") + row("rim", "\uC724\uACFD\uC120 \uAC15\uC870", St.RIM.on, "\uB3D9\uB8CC\uC640 \uC801\uC758 \uC724\uACFD\uC744 \uBC1D\uAC8C \uD45C\uC2DC\uD55C\uB2E4.") + (fsSupported ? row("full", "\uC804\uCCB4\uD654\uBA74", !!document.fullscreenElement, "\uC8FC\uC18C\uCC3D\uACFC \uD0ED\uC744 \uC228\uAE34\uB2E4.") : "") + '<button class="btn meta-danger" id="meta-erase">\uAE30\uB85D \uC9C0\uC6B0\uAE30</button></div>');
+      openSheet("\uC124\uC815", '<div class="meta-sheet togs">' + row("sound", "\uC18C\uB9AC", audio2.soundOn, "\uD6A8\uACFC\uC74C") + row("music", "\uC74C\uC545", music2.enabled, "\uBC30\uACBD \uC74C\uC545") + row("rim", "\uC724\uACFD\uC120 \uAC15\uC870", St.RIM.on, "\uB3D9\uB8CC\uC640 \uC801\uC758 \uC724\uACFD\uC744 \uBC1D\uAC8C \uD45C\uC2DC\uD55C\uB2E4.") + (fsSupported ? row("full", "\uC804\uCCB4\uD654\uBA74", !!document.fullscreenElement, "\uC8FC\uC18C\uCC3D\uACFC \uD0ED\uC744 \uC228\uAE34\uB2E4.") : "") + '<button class="btn meta-danger" id="meta-erase">\uAE30\uB85D \uC9C0\uC6B0\uAE30</button></div>');
       $$("#sheet .tog").forEach((b) => b.addEventListener("click", async () => {
         const k = b.dataset.set;
         if (k === "sound") {
           audio2.soundOn = !audio2.soundOn;
           audio2.unlockAudio();
-        } else if (k === "rim") {
+        } else if (k === "music") music2.setEnabled(!music2.enabled);
+        else if (k === "rim") {
           St.RIM.on = !St.RIM.on;
           syncOutline();
         } else if (k === "full") await toggleFullscreen();
@@ -11601,6 +12425,7 @@ const BattleRuntime = {
     if (run && run.heirlooms[id]) out.push('<i class="heir">\uC720\uD488 ' + esc(run.heirlooms[id].name) + "</i>");
     return out.join("");
   }
+  var affixChips = (def) => (def.affixes || []).map((a) => '<i class="affix">' + esc(AFFIXES[a].name) + "</i>").join("");
   function statGrid(rows) {
     return '<div class="sg">' + rows.map((r) => {
       const d = r[1] > r[2] ? "up" : r[1] < r[2] ? "down" : "";
@@ -12319,15 +13144,16 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/battle/view.js
   function battleMarkup() {
-    return '<section id="battle" class="screen"><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">\uC804\uC7A5\xB7\uC720\uBB3C</button><button id="b-speed">1\uBC30</button><button id="b-log">\uAE30\uB85D</button>' + tools() + '</header><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div><button class="sky" id="sky" aria-label="\uD558\uB298 \uC815\uBCF4"><i></i><i></i><i></i><span id="skyname"></span><small id="region-next"></small></button><div class="chips" id="pa-chips"></div><div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uB118\uAE30\uB294 \uC911</div></div><div id="party"></div><div id="msg"><div id="ticker"></div><div id="tally"></div></div><div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
+    return '<section id="battle" class="screen"><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">\uC804\uC7A5\xB7\uC720\uBB3C</button><button id="b-speed">1\uBC30</button><button id="b-log">\uAE30\uB85D</button>' + tools() + '</header><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div><button class="sky" id="sky" aria-label="\uD558\uB298 \uC815\uBCF4"><i></i><i></i><i></i><span id="skyname"></span><small id="region-next"></small></button><div class="chips" id="pa-chips"></div><div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uB118\uAE30\uB294 \uC911</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
   }
-  function createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: St, audio: audio2, sheets: sheets2, details }) {
+  function createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: St, audio: audio2, sheets: sheets2, details, music: music2 }) {
     const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
     const { sfx } = audio2;
     const { card, face, spr } = widgets2;
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
     const LINKED_TRAITS = ["ally_death_base_atk_phy", "ally_light_death_base_matk_mag"];
+    const relayHint = $("#relay-hint");
     const B = { bridge: null, door: null, party: [], allies: [], foe: null, D: null, pending: null, busy: false, log: [], all: [], relayBanner: null, armed: false, intent: null, fallSpot: null, options: [], seen: /* @__PURE__ */ new Set() };
     const errors = [];
     let battleContext = null;
@@ -12868,6 +13694,7 @@ const BattleRuntime = {
       await showBanner(e.who.idx + 1 + "/" + B.door.enemies.length, e.name + " \u2014 \uC774\uC5B4\uC11C \uB098\uC120\uB2E4", def.boss ? "ult" : "", 0.6);
     }
     async function victory() {
+      music2?.play("victory");
       showIntent(null);
       S.danger = 0;
       tween(S, { dark: 0 }, 0.2);
@@ -12883,6 +13710,7 @@ const BattleRuntime = {
       b.remove();
     }
     async function defeat() {
+      music2?.play("defeat");
       showIntent(null);
       sfx.lose();
       tween(S, { dark: 0.6 }, 0.6);
@@ -13033,6 +13861,10 @@ const BattleRuntime = {
       B.busy = true;
       lockPanel();
       const start = B.all.length;
+      if (start && !relayHint.hidden) {
+        relayHint.hidden = true;
+        ticker("");
+      }
       B.all = B.all.concat(events);
       let i = 0;
       try {
@@ -13091,6 +13923,8 @@ const BattleRuntime = {
       B.bridge = create(core2, options);
       $("#result").classList.remove("on");
       $("#battle").classList.remove("resumed-result");
+      relayHint.hidden = door.type !== "borrowed";
+      music2?.play(door.type === "boss" || door.final ? "boss" : "battle", run.dungeonId);
       show("battle");
       layout();
       ticker("");
@@ -13138,6 +13972,8 @@ const BattleRuntime = {
       B.door = run.room;
       B.artifacts = run.relics;
       B.temporaryRelic = null;
+      relayHint.hidden = true;
+      music2?.play("victory");
       St.clear();
       St.setRoom(run.room.bg, !!run.room.final);
       $("#battle").classList.add("resumed-result");
@@ -13181,6 +14017,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/awaken.js
   function awakenScreen(run, ui) {
+    ui.playMusic();
     const { card, cardRow } = ui.widgets;
     const { sfx } = ui.audio;
     const node = $("#awaken");
@@ -13223,7 +14060,7 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/screens/map.js
-  var ROOM_ICONS = { wild: "battle", awakening: "awaken" };
+  var MARCH_MS = 500;
   var AFFIX_RISK = {
     tough: "\uCCAB 3\uD134 \uC801 \uD53C\uD574 \uC808\uBC18",
     frenzy: "\uC801 HP \uC808\uBC18\uBD80\uD130 \uACF5\uACA9 \xD71.5",
@@ -13247,8 +14084,9 @@ const BattleRuntime = {
     return name + (endsWithConsonant ? "\uACFC \uB300\uBA74" : "\uC640 \uB300\uBA74");
   }
   function mapScreen(run, ui) {
+    ui.playMusic();
     const { core: core2, widgets: widgets2, sheets: sheets2, artifacts, scene, icon: icon2 } = ui;
-    const { card, sprite: sprite2, face, benchMinis } = widgets2;
+    const { card, spr, sprite: sprite2, face, benchMinis } = widgets2;
     const { openSheet } = sheets2;
     const dungeon = DUNGEONS[run.dungeonId];
     const node = $("#map");
@@ -13262,7 +14100,7 @@ const BattleRuntime = {
       if (intro && floor === run.floors) {
         const shadows = gate?.enemies.map((enemy) => enemy.sprite) || [run.reserved, null];
         marker = shadows.map((id) => id ? shadow(id) : icon2("nightmare")).join("");
-      } else if (floor === 4) {
+      } else if (!intro && floor === 4) {
         marker = run.reserved ? shadow(run.reserved) : icon2("gate");
       } else if (floor === run.floors && boss.sprite) {
         marker = '<span class="run-face">' + face(boss.sprite, 28) + "</span>";
@@ -13288,11 +14126,26 @@ const BattleRuntime = {
     }
     function reward(door) {
       const crystals = door.reward;
-      const relic = artifacts.get(door.relic);
+      const relic = !door.final && artifacts.get(door.relic);
       return [
         crystals ? "\uACB0\uC815 +" + crystals : "",
-        door.type === "gate" ? relic ? "\uADF8\uB9BC\uC790 1\uBA85 \uB610\uB294 " + relic.name : "\uADF8\uB9BC\uC790 1\uBA85" : relic?.name
+        door.type === "gate" && !door.final ? relic ? "\uADF8\uB9BC\uC790 1\uBA85 \uB610\uB294 " + relic.name : "\uADF8\uB9BC\uC790 1\uBA85" : relic?.name
       ].filter(Boolean).join(" \xB7 ");
+    }
+    function doorPreview(door) {
+      if (door.enemies.length) {
+        const previews = door.enemies.map((enemy) => {
+          const types = ["phy", "mag"].filter((type) => enemy.skills.some((skill) => skill.type === type));
+          const element = ELEMENT[enemy.element];
+          const dot = element ? '<i class="door-element el-' + enemy.element + '" role="img" aria-label="' + element + '"></i>' : "";
+          const attacks = types.map((type) => '<span class="' + type + '">' + TYPE[type] + "</span>").join("");
+          return '<span class="door-enemy" title="' + esc(enemy.name) + '">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: "shadow-tint" }) + '<small class="door-intent">' + dot + attacks + "</small></span>";
+        }).join("");
+        return '<span class="door-lineup">' + previews + "</span>";
+      }
+      const visitor = door.event?.requires.present?.[0];
+      if (visitor) return '<span class="run-face" title="' + esc(card(visitor).name) + '">' + face(visitor, 44) + "</span>";
+      return icon2(door.type);
     }
     const doors = run.doors.map((door) => {
       const enemy = door.enemies[0];
@@ -13305,34 +14158,53 @@ const BattleRuntime = {
       ].filter(Boolean).join(" \xB7 ");
       const rules = risks(door).join(" \xB7 ");
       const gain = reward(door);
-      return '<div class="door-plate win"><button class="door-entry" data-door="' + door.index + '">' + icon2(ROOM_ICONS[door.type] || door.type) + "<span><b>" + esc(title) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (rules || ROOM_EFFECT[door.type] ? '<small class="door-risk">' + esc(rules || ROOM_EFFECT[door.type]) + "</small>" : "") + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      const quirk = door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
+      const chips = quirk + door.enemies.map(affixChips).join("");
+      return '<div class="door-plate win"><button class="door-entry" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules || ROOM_EFFECT[door.type] ? '<small class="door-risk">' + esc(rules || ROOM_EFFECT[door.type]) + "</small>" : "") + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
-    const firstParty = !intro && run.floor === 1;
-    const lineup = firstParty ? '<div class="run-start-party">' + run.bench.map((id, index) => {
-      const label = id === run.lead ? "\uB300\uD45C" : index < 2 ? id === run.profileShard ? "\uC608\uC57D \uD6C4\uBCF4" : "\uC9C1\uC811 \uC120\uD0DD" : "\uBB34\uB8CC \uAE68\uC6B0\uAE30";
-      return '<button data-sheet="' + esc(id) + '">' + sprite2(id) + "<span>" + esc(card(id).name) + "</span><small>" + label + "</small></button>";
-    }).join("") + "</div>" : "";
-    const more = run.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (run.bench.length - 6) + "</button>" : "";
-    node.innerHTML = head(run, dungeon.name, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, lineup) + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...run, bench: run.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
+    const front = run.bench.slice(0, 3).map((id, index) => ({ id, role: POSITION[index], art: spr(id) }));
+    front.sort((a, b) => a.art.h - b.art.h);
+    const lineup = front.map(({ id, role, art }) => {
+      const flip = art.facing === "left";
+      const center = flip ? art.w - art.cx : art.cx;
+      const style = "width:" + art.w * 2 + "px;height:" + art.h * 2 + "px;left:calc(50% - " + center * 2 + "px);bottom:" + (art.fy + 1 - art.h) * 2 + "px;";
+      return '<button class="map-actor" data-sheet="' + esc(id) + '" aria-label="' + esc(role + " " + card(id).name) + '"><span class="map-actor-art">' + sprite2(id, { flip, style }) + "</span><small>" + role + "</small></button>";
+    }).join("");
+    const cast = '<div class="map-party" style="--march-time:' + MARCH_MS + 'ms">' + lineup + "</div>";
+    const reserve = { ...run, bench: run.bench.slice(3) };
+    const more = reserve.bench.length > 6 ? '<button class="btn run-more" id="b-roster">+' + (reserve.bench.length - 6) + "</button>" : "";
+    node.innerHTML = head(run, dungeon.name, run.floor + "\uCE35") + '<div class="run-route"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, cast) + '<div class="run-doors">' + doors + '</div><div class="run-map-party"><div class="benchrow">' + benchMinis({ ...reserve, bench: reserve.bench.slice(0, 6) }) + more + "</div><small>\uB3D9\uB8CC " + run.bench.length + " \xB7 \uC4F0\uB7EC\uC9D0 " + run.fallen.length + "</small></div></div>";
     show("map");
+    const party = $(".map-party", node);
     for (const button of $$("[data-door]", node)) {
-      button.addEventListener("click", () => ui.enterDoor(Number(button.dataset.door)));
+      button.addEventListener("click", async () => {
+        if (party.classList.contains("marching")) return;
+        ui.audio.unlockAudio();
+        ui.audio.sfx.tap();
+        if (front.length && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          party.classList.add("marching");
+          await sleep(MARCH_MS);
+        }
+        if (party.isConnected && node.classList.contains("on")) ui.enterDoor(Number(button.dataset.door));
+      });
     }
     for (const button of $$("[data-info]", node)) {
-      button.addEventListener("click", () => describeDoor(run.doors[Number(button.dataset.info)]));
+      button.addEventListener("click", () => {
+        if (!party.classList.contains("marching")) describeDoor(run.doors[Number(button.dataset.info)]);
+      });
     }
     $("#b-floors", node).addEventListener("click", () => {
       const names = gate?.enemies.map((enemy) => enemy.name).join(" \xB7 ") || (run.reserved ? card(run.reserved).name : "");
       const middle = names ? "<p>" + (intro ? "5\uCE35" : "4\uCE35") + " \xB7 \uBB38\uC9C0\uAE30 " + esc(names) + "</p>" : "";
       openSheet("\uCE35 \uC9C4\uD589", "<p>\uD604\uC7AC " + run.floor + " / " + run.floors + "\uCE35</p>" + middle + "<p>" + run.floors + "\uCE35 \xB7 " + esc(boss.name) + "</p><p>" + esc(boss.note || "") + "</p>");
     });
-    $("#b-roster", node)?.addEventListener("click", () => openSheet("\uC774\uBC88 \uC6D0\uC815 \uB3D9\uB8CC", '<div class="benchrow">' + benchMinis(run) + "</div>"));
+    $("#b-roster", node)?.addEventListener("click", () => openSheet("\uB300\uAE30 \uB3D9\uB8CC", '<div class="benchrow">' + benchMinis(reserve) + "</div>"));
     function describeDoor(door) {
       const enemies = door.enemies.map((enemy) => {
         const strong = Object.keys(ELEMENT).filter((element) => core2.Logic.getElementalMultiplier(element, enemy.element) > 1);
         return '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4><p>" + esc(ELEMENT[enemy.element] || "") + " \xB7 HP " + enemy.stats.hp + "</p>" + (strong.length ? "<p>\uC0C1\uC131 \uC6B0\uC704 \xB7 " + strong.map((element) => ELEMENT[element]).join(" \xB7 ") + "</p>" : "") + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id].name + " \xB7 " + AFFIXES[id].desc) + "</p>").join("") + "</div></div>";
       }).join("");
-      const region = REGIONS[door.region?.id], quirk = QUIRKS[door.quirk], relic = artifacts.get(door.relic);
+      const region = REGIONS[door.region?.id], quirk = QUIRKS[door.quirk], relic = !door.final && artifacts.get(door.relic);
       const rule = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
       openSheet(door.name, enemies + rule(quirk) + rule(region) + (door.start?.field ? "<p>" + esc(risks(door).at(-1)) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (reward(door) ? '<p class="gain">' + esc(reward(door)) + "</p>" : "") + rule(relic));
     }
@@ -13340,6 +14212,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/order.js
   function orderScreen(run, ui) {
+    ui.playMusic();
     const { core: core2, widgets: widgets2, audio: audio2, sheets: sheets2 } = ui;
     const { card, sprite: sprite2, face } = widgets2;
     const { sfx } = audio2;
@@ -13450,6 +14323,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/spring.js
   function springScreen(run, ui) {
+    ui.playMusic();
     const { widgets: widgets2, audio: audio2, command, leave } = ui;
     const { sfx } = audio2;
     const { card, cardRow, benchMinis } = widgets2;
@@ -13518,6 +14392,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/altar.js
   function altarScreen(run, ui, kept = null) {
+    ui.playMusic();
     const { card, sprite: sprite2 } = ui.widgets;
     const { sfx } = ui.audio;
     const node = $("#altar");
@@ -13582,6 +14457,7 @@ const BattleRuntime = {
     rumi: "\u201C\uD55C \uC0AC\uB78C\uC5D0\uAC8C \uCD95\uBCF5\uC744 \uBAA8\uC544 \uC904 \uC218\uB3C4 \uC788\uC5B4.\u201D"
   };
   function eventScreen(run, ui, result = null) {
+    ui.playMusic();
     const { card, sprite: sprite2, spr, cardRow } = ui.widgets;
     const { sfx } = ui.audio;
     const event = run.room.event;
@@ -13682,6 +14558,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/treasure.js
   function treasureScreen(run, ui, id, { equipped = false } = {}) {
+    ui.playMusic();
     const relic = ui.artifacts.get(id);
     const pending = run.pending?.kind === "relic" ? run.pending : null;
     const offered = run.room.type === "treasure" && run.room.status === "service";
@@ -13697,7 +14574,7 @@ const BattleRuntime = {
         const slotId = run.relics[index];
         const item = ui.artifacts.get(slotId);
         const selectable = replaceable.includes(slotId);
-        const body = slotId ? ui.icon(slotId) + "<span>" + esc(item.name) + "</span>" : "<span>\uBE48 \uCE78</span>";
+        const body = slotId ? ui.icon(slotId, 2) + "<span>" + esc(item.name) + "</span>" : "<span>\uBE48 \uCE78</span>";
         const cls = "relic-slot win" + (slotId === replacing ? " sel" : "") + (slotId && slotId === id && (equipped || !offered) ? " equipped" : "");
         return selectable ? '<button class="' + cls + '" data-replace="' + esc(slotId) + '">' + body + "</button>" : '<div class="' + cls + '">' + body + "</div>";
       }).join("");
@@ -13734,6 +14611,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/gate-pick.js
   function gatePickScreen(run, ui) {
+    ui.playMusic();
     const { card, cardRow } = ui.widgets;
     const { sfx } = ui.audio;
     const { candidates, relic } = run.pending;
@@ -13783,7 +14661,7 @@ const BattleRuntime = {
     if (!$("#sheet")) frame.insertAdjacentHTML("beforeend", sheetMarkup());
     const sheets2 = shared?.sheets || createSheet(stage2);
     const details = createDetails(core2, widgets2, sheets2.openSheet);
-    const battle = createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: stage2, audio: audio2, sheets: sheets2, details });
+    const battle = createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: stage2, audio: audio2, sheets: sheets2, details, music: shared?.music });
     const canvas = $("#cv");
     stage2.init(canvas, $("#fx"));
     stage2.loadSprites();
@@ -13814,7 +14692,6 @@ const BattleRuntime = {
     if (!runtime || runtime.frame !== frame || !$("#battle")) runtime = mount(frame, host.runtime);
     const { core: core2, roster: roster2, widgets: widgets2, audio: audio2, sheets: sheets2, battle } = runtime;
     battle.attach(run);
-    const { sfx } = audio2;
     const { assets: assets2 } = host;
     const icon2 = (id, scale = 1) => {
       const src = assets2.icon(id);
@@ -13839,8 +14716,6 @@ const BattleRuntime = {
       route();
     }
     function enterDoor(index) {
-      audio2.unlockAudio();
-      sfx.tap();
       if (command(chooseDoor, index).ok) route();
     }
     function wakeSurvivors() {
@@ -13859,7 +14734,8 @@ const BattleRuntime = {
       command,
       leave,
       route,
-      enterDoor
+      enterDoor,
+      playMusic: () => host.runtime.music?.play(run.dungeonId)
     };
     function afterBattle() {
       if (run.room.type === "borrowed" && run.phase === "reward") return wakeSurvivors();
@@ -13921,19 +14797,6 @@ const BattleRuntime = {
     }
     route();
     return battle.review;
-  }
-
-  // card_pixel/game/src/ui/screens/title.js
-  function titleScreen(start) {
-    const node = $("#title");
-    node.innerHTML = `
-    <div class="meta-title-art" style="background-image:url(${background("dawn_forest")})"></div>
-    <div class="corner">${tools()}</div>
-    <div class="meta-title-name"><h1>\uB2E4\uC74C\uC740 \uB108</h1><span>RELAYMARE</span></div>
-    <button class="btn go" id="b-start">\uAFC8\uAE38\uB85C \uB4E4\uC5B4\uAC04\uB2E4</button>
-  `;
-    show("title");
-    $("#b-start", node).addEventListener("click", start, { once: true });
   }
 
   // card_pixel/game/src/ui/screens/notebook.js
@@ -14008,7 +14871,7 @@ const BattleRuntime = {
       if (!meta) return "";
       const name = esc(widgets2.card(id)?.name || id);
       const tag = interactive ? "button" : "span";
-      const target = interactive ? ` data-companion="${id}" aria-label="${name}"` : "";
+      const target = interactive ? ` data-companion="${esc(id)}" aria-label="${name}"` : "";
       const feet = 2 * (meta.h - meta.fy);
       const center = 2 * (meta.facing === "left" ? meta.w - meta.cx : meta.cx);
       const sprite2 = widgets2.sprite(id, {
@@ -14016,7 +14879,7 @@ const BattleRuntime = {
         style: `width:${meta.w * 2}px;height:${meta.h * 2}px`
       });
       return `<${tag} class="meta-actor actor-${index}${arriving.includes(id) ? " arriving" : ""}${id === lead ? " lead" : ""}"${target}
-      style="--actor-width:${meta.w * 2}px;--actor-height:${meta.h * 2}px;--actor-center:${center}px;--actor-feet:${feet}px">
+      style="--actor-index:${index};--actor-width:${meta.w * 2}px;--actor-height:${meta.h * 2}px;--actor-center:${center}px;--actor-feet:${feet}px">
       <span class="meta-actor-bob">${sprite2}</span>
     </${tag}>`;
     }).join("");
@@ -14064,11 +14927,28 @@ const BattleRuntime = {
     $$("[data-companion]", node).forEach((button) => button.addEventListener("click", () => inspect(button.dataset.companion)));
   }
 
+  // card_pixel/game/src/ui/screens/title.js
+  function titleScreen({ profile, widgets: widgets2, start }) {
+    const node = $("#title");
+    const lineup = profile ? hubLineup(profile.lead, profile.ui?.returners || []) : INTRO.party;
+    node.innerHTML = `
+    <div class="meta-title-art" style="background-image:url(${background("dawn_forest")})" aria-hidden="true">
+      ${sceneActors(lineup, widgets2)}
+    </div>
+    <div class="corner">${tools()}</div>
+    <div class="meta-title-name"><h1>\uB2E4\uC74C\uC740 \uB108</h1><span>RELAYMARE</span></div>
+    <button class="btn go" id="b-start">\uAFC8\uAE38\uB85C \uB4E4\uC5B4\uAC04\uB2E4</button>
+  `;
+    show("title");
+    $("#b-start", node).addEventListener("click", start, { once: true });
+  }
+
   // card_pixel/game/src/ui/screens/records.js
   var DIFFICULTY_NAME = { normal: "\uC5EC\uC815", nightmare: "\uC545\uBABD" };
   var amount = (value) => value.toLocaleString("ko-KR");
   var hitText = (hit, card) => hit ? `${amount(hit.amount)} \xB7 ${card(hit.by)?.name || hit.by} \xB7 ${hit.skill}` : "\uAE30\uB85D \uC5C6\uC74C";
-  function table(rows) {
+  var longestText = (longest, card) => longest ? `${card(longest.id)?.name || longest.id} \xB7 \uC778\uC5F0 ${longest.bond ?? 0}` + (Number.isFinite(longest.since) ? ` \xB7 ${longest.since}\uBC88\uC9F8 \uC6D0\uC815\uC5D0\uC11C \uC601\uC785` : "") : "\uAE30\uB85D \uC5C6\uC74C";
+  function recordTable(rows) {
     return `<table class="meta-record-table"><tbody>
     ${rows.map(([label, value]) => `<tr><th scope="row">${esc(label)}</th><td>${esc(value)}</td></tr>`).join("")}
   </tbody></table>`;
@@ -14077,7 +14957,7 @@ const BattleRuntime = {
     const stats = run.stats;
     openSheet("\uC6D0\uC815 \uAE30\uB85D", `<div class="meta-sheet">
     <p>${esc(DUNGEONS[run.dungeonId].name)} \xB7 ${DIFFICULTY_NAME[run.difficulty]} \xB7 ${run.result === "win" ? "\uC0DD\uD658" : "\uC2E4\uD328"}</p>
-    ${table([
+    ${recordTable([
       ["\uB3C4\uB2EC\uD55C \uCE35", `${run.floor} / ${run.floors}`],
       ["\uC804\uD22C", `${stats.battles}\uD68C \xB7 ${stats.turns}\uD134`],
       ["\uCD5C\uACE0 \uD53C\uD574", hitText(stats.bestHit, card)],
@@ -14088,18 +14968,18 @@ const BattleRuntime = {
     ])}
   </div>`);
   }
-  function recordsScreen(node, profile, card, openSheet) {
+  function recordsScreen(node, profile, card, openSheet, replayEnding) {
     const { records } = profile;
     const longest = records.longestServing;
     const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
     const latest = profile.ui?.latestRun;
     node.innerHTML = `
     <section class="meta-panel">
-      ${table([
+      ${recordTable([
       ["\uC6D0\uC815", `${records.runs}\uD68C`],
       ["\uCD5C\uACE0 \uD53C\uD574", hitText(records.bestHit, card)],
       ...bestPlace ? [["\uCD5C\uACE0 \uD53C\uD574 \uC9C0\uC5ED", `${bestPlace.name} \xB7 ${DIFFICULTY_NAME[records.bestHit.difficulty]}`]] : [],
-      ["\uAC00\uC7A5 \uC624\uB798 \uD568\uAED8\uD55C \uB3D9\uB8CC", longest ? `${card(longest.id)?.name || longest.id} \xB7 \uC778\uC5F0 ${longest.bond} \xB7 ${longest.since}\uBC88\uC9F8 \uC6D0\uC815\uC5D0\uC11C \uC601\uC785` : "\uAE30\uB85D \uC5C6\uC74C"]
+      ["\uAC00\uC7A5 \uC624\uB798 \uD568\uAED8\uD55C \uB3D9\uB8CC", longestText(longest, card)]
     ])}
     </section>
     <section class="meta-panel">
@@ -14114,8 +14994,10 @@ const BattleRuntime = {
       </table>
     </section>
     ${latest ? `<button class="btn" id="meta-latest-record">\uCD5C\uADFC \uC6D0\uC815 \xB7 ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ""}
+    ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">\uC5D4\uB529 \uB2E4\uC2DC \uBCF4\uAE30</button>' : ""}
   `;
     $("#meta-latest-record", node)?.addEventListener("click", () => runRecordSheet(latest, card, openSheet));
+    $("#meta-replay-ending", node)?.addEventListener("click", replayEnding);
   }
 
   // card_pixel/game/src/ui/screens/dungeons.js
@@ -14159,11 +15041,12 @@ const BattleRuntime = {
     $("#meta-quick-start", node)?.addEventListener("click", quickStart.start);
     $$("[data-dungeon]", node).forEach((button) => button.addEventListener("click", () => prepare(button.dataset.dungeon)));
   }
-  function preparationSheet({ dungeonId, currentProfile, updateProfile, roster: roster2, sheets: sheets2, start }) {
+  function preparationSheet({ dungeonId, currentProfile, updateProfile, roster: roster2, widgets: widgets2, sheets: sheets2, start }) {
     const dungeon = DUNGEONS[dungeonId];
     const { card } = roster2;
     let sealsOpen = false;
-    function render(message = "") {
+    let leadRow;
+    function render(message = "", focusLead) {
       const profile = currentProfile();
       const entry = availableDungeons(profile).find((dungeon2) => dungeon2.id === dungeonId);
       const view = startView(profile, dungeonId);
@@ -14175,10 +15058,16 @@ const BattleRuntime = {
       const option = (id, chosen) => `<option value="${id}"${id === chosen ? " selected" : ""}>${name(id)}</option>`;
       const leadChoices = view.leadCandidates.filter((id) => !view.seals.includes(id));
       const scroll = $("#sh-body").scrollTop;
+      const leadScroll = leadRow?.scrollLeft;
       sheets2.openSheet(`${dungeon.name} \xB7 \uC900\uBE44`, `<div class="meta-sheet meta-prep">
       <section class="meta-prep-section">
-        <h4>\uB300\uD45C</h4>
-        ${intro ? `<p>\uB300\uC5EC \uD3B8\uC131 \xB7 ${INTRO.party.map(name).join(", ")}</p>` : leadChoices.length ? `<select id="meta-prep-lead" aria-label="\uB300\uD45C"><option value="">\uBBF8\uC9C0\uC815</option>${leadChoices.map((id) => option(id, lead)).join("")}</select>` : "<p>\uC9C0\uC815\uD560 \uB3D9\uB8CC \uC5C6\uC74C</p>"}
+        <h4 id="meta-lead-heading">\uB300\uD45C</h4>
+        ${intro ? `<p>\uB300\uC5EC \uD3B8\uC131 \xB7 ${INTRO.party.map(name).join(", ")}</p>` : leadChoices.length ? `<div class="meta-prep-leads" role="group" aria-labelledby="meta-lead-heading">
+            <button class="btn" type="button" data-lead="" aria-pressed="${lead === null}">\uBBF8\uC9C0\uC815</button>
+            ${leadChoices.map((id) => `<button class="btn" type="button" data-lead="${esc(id)}" aria-pressed="${id === lead}">
+              <span class="meta-face">${widgets2.face(id, 44)}</span><span>${name(id)}</span>
+            </button>`).join("")}
+          </div>` : "<p>\uC9C0\uC815\uD560 \uB3D9\uB8CC \uC5C6\uC74C</p>"}
       </section>
       ${!intro && view.companionSlots ? `<section class="meta-prep-section">
         <h4>\uB3D9\uD589</h4>
@@ -14208,11 +15097,19 @@ const BattleRuntime = {
       <button class="btn go" id="meta-start-expedition">\uCD9C\uBC1C</button>
     </div>`);
       $("#sh-body").scrollTop = scroll;
-      $("#meta-prep-lead")?.addEventListener("change", (event) => {
-        const nextLead = event.target.value || null;
-        const companions = profile.companions.filter((id) => id !== nextLead);
-        updateParty(nextLead, companions, nextLead === profile.lead ? profile.preferredCompanion : null);
-      });
+      leadRow = $(".meta-prep-leads");
+      if (leadRow) {
+        const buttons = $$("[data-lead]", leadRow);
+        const active2 = buttons.find((button) => button.getAttribute("aria-pressed") === "true");
+        leadRow.scrollLeft = leadScroll ?? Math.max(0, active2.offsetLeft + active2.offsetWidth - leadRow.clientWidth);
+        buttons.find((button) => button.dataset.lead === focusLead)?.focus({ preventScroll: true });
+        for (const button of buttons) button.addEventListener("click", () => {
+          const nextLead = button.dataset.lead || null;
+          const companions = profile.companions.filter((id) => id !== nextLead);
+          const preferred = nextLead === profile.lead ? profile.preferredCompanion : null;
+          updateParty(nextLead, companions, preferred, button.dataset.lead);
+        });
+      }
       for (const select of $$(".meta-prep [data-slot]")) select.addEventListener("change", () => {
         const index = Number(select.dataset.slot);
         const next = selected.slice();
@@ -14237,18 +15134,18 @@ const BattleRuntime = {
         render();
       });
       $("#meta-start-expedition").addEventListener("click", () => start(dungeonId, difficulty));
-      function updateParty(nextLead, companions, preferredCompanion) {
+      function updateParty(nextLead, companions, preferredCompanion, focusLead2) {
         sealsOpen = $("#meta-seals")?.open || false;
         const result = setExpeditionParty(profile, { lead: nextLead, companions, preferredCompanion });
         if (result.announce.ok) updateProfile(result.profile);
-        render(result.announce.ok ? "" : "\uD3B8\uC131\uC744 \uB2E4\uC2DC \uD655\uC778\uD574 \uC8FC\uC138\uC694.");
+        render(result.announce.ok ? "" : "\uD3B8\uC131\uC744 \uB2E4\uC2DC \uD655\uC778\uD574 \uC8FC\uC138\uC694.", focusLead2);
       }
     }
     render();
   }
 
   // card_pixel/game/src/ui/screens/recruit.js
-  function recruitScreen(node, { run, rewards, profile, widgets: widgets2, sheets: sheets2, choices, changeChoices, confirm }) {
+  function recruitScreen(node, { run, rewards, profile, widgets: widgets2, sheets: sheets2, choices, endingPending, changeChoices, confirm }) {
     const won = rewards.result === "win";
     const dungeon = DUNGEONS[run.dungeonId];
     const candidates = won ? rewards.recruitable : rewards.shardCandidates;
@@ -14288,7 +15185,7 @@ const BattleRuntime = {
         button.setAttribute("aria-pressed", selected);
         $(".meta-recruit-mark", button).textContent = selected ? "\uC120\uD0DD" : "";
       }
-      action.textContent = active2.length ? won ? `${active2.map((id) => card(id).name).join(" \xB7 ")} \uC601\uC785` : "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4\uB85C \uC608\uC57D" : "\uAD00\uCE21\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30";
+      action.textContent = active2.length ? won ? `${active2.map((id) => card(id).name).join(" \xB7 ")} \uC601\uC785` : "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4\uB85C \uC608\uC57D" : endingPending ? "\uC5D4\uB529 \uBCF4\uAE30" : "\uAD00\uCE21\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30";
       if (!active2.length && (mustRecruit || mustReserve)) action.textContent = won ? "\uC601\uC785\uD560 \uB3D9\uB8CC \uACE0\uB974\uAE30" : "\uC608\uC57D\uD560 \uB3D9\uB8CC \uACE0\uB974\uAE30";
       action.disabled = !active2.length && (mustRecruit || mustReserve);
     }
@@ -14388,8 +15285,42 @@ const BattleRuntime = {
     render();
   }
 
+  // card_pixel/game/src/ui/screens/ending.js
+  function endingScreen(node, { profile, widgets: widgets2, finish }) {
+    const { records, recruits } = profile;
+    const companions = Object.keys(recruits).sort((a, b) => recruits[a].since - recruits[b].since);
+    const regions = Object.values(DUNGEONS).filter(({ id }) => {
+      const clears = records.clears[id];
+      return clears?.normal || clears?.nightmare;
+    });
+    node.innerHTML = `
+    <section class="meta-panel meta-ending-record">
+      ${recordTable([
+      ["\uC6D0\uC815", `${records.runs}\uD68C`],
+      ["\uC601\uC785\uD55C \uB3D9\uB8CC", `${companions.length}\uBA85`],
+      ["\uCD5C\uACE0 \uD53C\uD574", hitText(records.bestHit, widgets2.card)],
+      ["\uAC00\uC7A5 \uC624\uB798 \uD568\uAED8\uD55C \uB3D9\uB8CC", longestText(records.longestServing, widgets2.card)],
+      ["\uC0DD\uD658 \uC9C0\uC5ED", regions.map((region) => region.name).join(" \xB7 ") || "\uAE30\uB85D \uC5C6\uC74C"]
+    ])}
+    </section>
+    <div class="meta-scene meta-ending-stage" style="background-image:url(${background("observatory")})" aria-hidden="true">
+      ${sceneActors(companions, widgets2)}
+    </div>
+    <button class="btn go" id="meta-ending-finish">\uAD00\uCE21\uC18C\uB85C</button>
+  `;
+    $("#meta-ending-finish", node).addEventListener("click", finish, { once: true });
+  }
+
   // card_pixel/game/src/ui/nav.js
-  var PAGES = { hub: "\uAFC8\uC758 \uAD00\uCE21\uC18C", dungeons: "\uD589\uC120\uC9C0", recruit: "", collection: "\uB3D9\uB8CC \uB3C4\uAC10", notebook: "\uAFC8\uAE38 \uC218\uCCA9", records: "\uAE30\uB85D" };
+  var PAGES = {
+    hub: "\uAFC8\uC758 \uAD00\uCE21\uC18C",
+    dungeons: "\uD589\uC120\uC9C0",
+    recruit: "",
+    collection: "\uB3D9\uB8CC \uB3C4\uAC10",
+    notebook: "\uAFC8\uAE38 \uC218\uCCA9",
+    records: "\uAE30\uB85D",
+    ending: "\uAFC8\uAE38\uC758 \uB05D"
+  };
   function mountPage() {
     $("#app").innerHTML = `<div id="frame">
     <section id="title" class="screen meta-screen"></section>
@@ -14397,7 +15328,7 @@ const BattleRuntime = {
     ${sheetMarkup()}
   </div>`;
   }
-  function createNavigation({ core: core2, roster: roster2, widgets: widgets2, stage: stage2, audio: audio2, sheets: sheets2, store: store2 }) {
+  function createNavigation({ core: core2, roster: roster2, widgets: widgets2, stage: stage2, audio: audio2, music: music2, sheets: sheets2, store: store2 }) {
     const stored = store2.load();
     let profile = stored?.profile || createProfile();
     let run = stored?.run || null;
@@ -14417,7 +15348,7 @@ const BattleRuntime = {
       },
       profile: () => profile,
       assets: assets_exports,
-      runtime: { stage: stage2, audio: audio2, sheets: sheets2 }
+      runtime: { stage: stage2, audio: audio2, music: music2, sheets: sheets2 }
     };
     function persist() {
       store2.save({ profile, run });
@@ -14430,6 +15361,7 @@ const BattleRuntime = {
       updateProfile({ ...profile, ui: { ...profile.ui, ...patch } });
     }
     function page(id, { title = PAGES[id], back } = {}) {
+      music2.play("hub");
       const section = $("#" + id);
       const crystals = id === "recruit" && run ? `<span class="meta-crystals">
       <img class="px" src="${icon("crystal")}" alt="\uACB0\uC815" width="32" height="32">${run.crystals}
@@ -14447,12 +15379,27 @@ const BattleRuntime = {
       sheets2.closeSheet();
       const node = page("hub");
       hubScreen(node, { profile, run, widgets: widgets2, inspect, openDungeons, prepare, resume: enterExpedition, arriving });
+      if (profile.ui?.announcement) updateUi({ announcement: null });
       for (const button of node.querySelectorAll("[data-meta-page]")) button.addEventListener("click", () => {
         const id = button.dataset.metaPage;
         const content = page(id, { back: showHub });
         if (id === "collection") collectionScreen(content, { profile, roster: roster2, widgets: widgets2, core: core2, inspect });
         else if (id === "notebook") notebookScreen(content, profile, roster2.card);
-        else if (id === "records") recordsScreen(content, profile, roster2.card, sheets2.openSheet);
+        else if (id === "records") recordsScreen(content, profile, roster2.card, sheets2.openSheet, () => showEnding());
+      });
+    }
+    function endingDue() {
+      return profile.notebook.chapters.includes(7) && !profile.ui?.endingSeen;
+    }
+    function showEnding(arriving = []) {
+      const node = page("ending");
+      endingScreen(node, {
+        profile,
+        widgets: widgets2,
+        finish() {
+          if (!profile.ui?.endingSeen) updateUi({ endingSeen: true });
+          showHub(arriving);
+        }
       });
     }
     function inspect(id) {
@@ -14477,7 +15424,7 @@ const BattleRuntime = {
       if (run || !availableDungeons(profile).some((dungeon) => dungeon.id === dungeonId)) return;
       if (profile.ui?.destination !== dungeonId || !profile.ui?.preparing) updateUi({ destination: dungeonId, preparing: true });
       preparationOpen = true;
-      preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster: roster2, sheets: sheets2, start: startExpedition });
+      preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster: roster2, widgets: widgets2, sheets: sheets2, start: startExpedition });
     }
     function closePreparation() {
       if (!preparationOpen) return;
@@ -14517,6 +15464,7 @@ const BattleRuntime = {
         widgets: widgets2,
         sheets: sheets2,
         choices,
+        endingPending: run.dungeonId === "creation_tower" && rewards.result === "win" && !profile.ui?.endingSeen,
         changeChoices: (ids) => updateUi({ recruitChoices: { runId: run.id, ids } }),
         confirm: confirmReturn
       });
@@ -14530,7 +15478,8 @@ const BattleRuntime = {
         run = null;
         review = null;
         updateUi({ recruitChoices: null });
-        showHub();
+        if (endingDue()) showEnding();
+        else showHub();
         return true;
       }
       const next = result.profile;
@@ -14548,7 +15497,8 @@ const BattleRuntime = {
       review = null;
       updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });
       if (recruits.length) audio2.sfx.crit();
-      showHub(recruits);
+      if (endingDue()) showEnding(recruits);
+      else showHub(recruits);
       return true;
     }
     function resetData() {
@@ -14565,16 +15515,26 @@ const BattleRuntime = {
       stage2.clear();
       showTitle();
     }
-    function showTitle() {
-      titleScreen(() => startExpedition());
+    function showTitle(savedProfile) {
+      music2.play("hub");
+      titleScreen({
+        profile: savedProfile,
+        widgets: widgets2,
+        start() {
+          if (!savedProfile) startExpedition();
+          else if (endingDue()) showEnding();
+          else {
+            showHub();
+            if (profile.ui?.preparing) prepare(profile.ui.destination);
+          }
+        }
+      });
     }
     function boot() {
       if (run?.phase === "done") showRecruit();
       else if (run && !Object.keys(profile.recruits || {}).length) enterExpedition();
-      else if (stored) {
-        showHub();
-        if (!run && profile.ui?.preparing) prepare(profile.ui.destination);
-      } else showTitle();
+      else if (run) showHub();
+      else showTitle(stored?.profile);
     }
     return { boot, closePreparation, resetData, inspect, get run() {
       return run;
@@ -14591,10 +15551,52 @@ const BattleRuntime = {
   var audio = createAudio(stage.clock);
   var widgets = createWidgets(assets, roster.card);
   var store = createSaveStore(storage, { core, roster });
+  var musicContext;
+  var musicPlayer;
+  var musicTrack;
+  var musicEnabled = true;
+  var music = {
+    get enabled() {
+      return musicEnabled;
+    },
+    setEnabled(enabled) {
+      musicEnabled = enabled;
+      musicPlayer?.setEnabled(enabled);
+    },
+    play(trackId, dungeonId) {
+      musicTrack = [trackId, dungeonId];
+      musicPlayer?.play(trackId, dungeonId);
+    }
+  };
+  var unlockEffects = audio.unlockAudio;
+  audio.unlockAudio = function unlockAudio() {
+    unlockEffects();
+    if (document.hidden || navigator.userActivation?.hasBeenActive === false) return;
+    if (!musicContext) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      try {
+        musicContext = new AudioContext();
+      } catch {
+        return;
+      }
+      musicPlayer = createMusic({ context: musicContext, destination: musicContext.destination });
+      musicPlayer.setEnabled(musicEnabled);
+      if (musicTrack) musicPlayer.play(...musicTrack);
+    }
+    if (musicContext.state !== "running") musicContext.resume().catch(() => {
+    });
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (!musicContext) return;
+    const change = document.hidden ? musicContext.suspend() : musicContext.resume();
+    change.catch(() => {
+    });
+  });
   mountPage();
   var sheets = createSheet(stage);
-  var navigation = createNavigation({ core, roster, widgets, stage, audio, sheets, store });
-  var settings = createSettings(stage, audio, sheets, navigation.resetData);
+  var navigation = createNavigation({ core, roster, widgets, stage, audio, music, sheets, store });
+  var settings = createSettings(stage, audio, music, sheets, navigation.resetData);
   settings.loadSettings();
   settings.syncFullscreen();
   $("#frame").addEventListener("click", (event) => {

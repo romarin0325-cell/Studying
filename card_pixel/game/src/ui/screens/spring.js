@@ -4,6 +4,7 @@ import { COST, springDraw, springPick, springTake } from '../../engine/run.js';
 import { reveal } from '../reveal.js';
 
 export function springScreen(run, ui) {
+  ui.playMusic();
   const { widgets, audio, command, leave } = ui;
   const { sfx } = audio;
   const { card, cardRow, benchMinis } = widgets;

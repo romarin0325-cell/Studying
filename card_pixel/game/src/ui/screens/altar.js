@@ -4,6 +4,7 @@ import { GRADE } from '../../engine/roster.js';
 import { altarKeep, altarRoll } from '../../engine/run.js';
 
 export function altarScreen(run, ui, kept = null) {
+  ui.playMusic();
   const { card, sprite } = ui.widgets;
   const { sfx } = ui.audio;
   const node = $('#altar');

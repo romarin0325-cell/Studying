@@ -3,9 +3,12 @@ import { DUNGEONS } from '../../content/dungeons.js';
 
 export const DIFFICULTY_NAME = { normal: '여정', nightmare: '악몽' };
 const amount = value => value.toLocaleString('ko-KR');
-const hitText = (hit, card) => hit ? `${amount(hit.amount)} · ${card(hit.by)?.name || hit.by} · ${hit.skill}` : '기록 없음';
+export const hitText = (hit, card) => hit ? `${amount(hit.amount)} · ${card(hit.by)?.name || hit.by} · ${hit.skill}` : '기록 없음';
+export const longestText = (longest, card) => longest
+  ? `${card(longest.id)?.name || longest.id} · 인연 ${longest.bond ?? 0}` + (Number.isFinite(longest.since) ? ` · ${longest.since}번째 원정에서 영입` : '')
+  : '기록 없음';
 
-function table(rows) {
+export function recordTable(rows) {
   return `<table class="meta-record-table"><tbody>
     ${rows.map(([label, value]) => `<tr><th scope="row">${esc(label)}</th><td>${esc(value)}</td></tr>`).join('')}
   </tbody></table>`;
@@ -15,7 +18,7 @@ export function runRecordSheet(run, card, openSheet) {
   const stats = run.stats;
   openSheet('원정 기록', `<div class="meta-sheet">
     <p>${esc(DUNGEONS[run.dungeonId].name)} · ${DIFFICULTY_NAME[run.difficulty]} · ${run.result === 'win' ? '생환' : '실패'}</p>
-    ${table([
+    ${recordTable([
       ['도달한 층', `${run.floor} / ${run.floors}`],
       ['전투', `${stats.battles}회 · ${stats.turns}턴`],
       ['최고 피해', hitText(stats.bestHit, card)],
@@ -27,18 +30,18 @@ export function runRecordSheet(run, card, openSheet) {
   </div>`);
 }
 
-export function recordsScreen(node, profile, card, openSheet) {
+export function recordsScreen(node, profile, card, openSheet, replayEnding) {
   const { records } = profile;
   const longest = records.longestServing;
   const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
   const latest = profile.ui?.latestRun;
   node.innerHTML = `
     <section class="meta-panel">
-      ${table([
+      ${recordTable([
         ['원정', `${records.runs}회`],
         ['최고 피해', hitText(records.bestHit, card)],
         ...(bestPlace ? [['최고 피해 지역', `${bestPlace.name} · ${DIFFICULTY_NAME[records.bestHit.difficulty]}`]] : []),
-        ['가장 오래 함께한 동료', longest ? `${card(longest.id)?.name || longest.id} · 인연 ${longest.bond} · ${longest.since}번째 원정에서 영입` : '기록 없음']
+        ['가장 오래 함께한 동료', longestText(longest, card)]
       ])}
     </section>
     <section class="meta-panel">
@@ -53,6 +56,8 @@ export function recordsScreen(node, profile, card, openSheet) {
       </table>
     </section>
     ${latest ? `<button class="btn" id="meta-latest-record">최근 원정 · ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ''}
+    ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">엔딩 다시 보기</button>' : ''}
   `;
   $('#meta-latest-record', node)?.addEventListener('click', () => runRecordSheet(latest, card, openSheet));
+  $('#meta-replay-ending', node)?.addEventListener('click', replayEnding);
 }

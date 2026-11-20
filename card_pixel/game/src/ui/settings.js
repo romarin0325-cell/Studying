@@ -10,7 +10,7 @@ export const tools = () => '<button class="b-full ic" aria-label="' + (document.
 
 const SETTINGS_KEY = 'relaymare.settings';
 
-export function createSettings(St, audio, sheets, clearRecords) {
+export function createSettings(St, audio, music, sheets, clearRecords) {
   const { sfx } = audio;
   const { openSheet, sheet } = sheets;
 
@@ -37,23 +37,26 @@ export function createSettings(St, audio, sheets, clearRecords) {
     try {
       const saved = JSON.parse(storage.getItem(SETTINGS_KEY) || '{}');
       if (typeof saved.sound === 'boolean') audio.soundOn = saved.sound;
+      if (typeof saved.music === 'boolean') music.setEnabled(saved.music);
       if (typeof saved.rim === 'boolean') St.RIM.on = saved.rim;
     } catch { /* Keep defaults for an invalid settings entry. */ }
     syncOutline();
   }
   function saveSettings() {
-    storage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio.soundOn, rim: St.RIM.on }));
+    storage.setItem(SETTINGS_KEY, JSON.stringify({ sound: audio.soundOn, music: music.enabled, rim: St.RIM.on }));
   }
 
   function settingsSheet() {
     const row = (k, label, on, sub) => '<button class="tog' + (on ? ' on' : '') + '" data-set="' + k + '"><b>' + label + '</b><small>' + sub + '</small><span>' + (on ? '켜짐' : '꺼짐') + '</span></button>';
     openSheet('설정', '<div class="meta-sheet togs">' + row('sound', '소리', audio.soundOn, '효과음') +
+      row('music', '음악', music.enabled, '배경 음악') +
       row('rim', '윤곽선 강조', St.RIM.on, '동료와 적의 윤곽을 밝게 표시한다.') +
       (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '주소창과 탭을 숨긴다.') : '') +
       '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>');
     $$('#sheet .tog').forEach(b => b.addEventListener('click', async () => {
       const k = b.dataset.set;
       if (k === 'sound') { audio.soundOn = !audio.soundOn; audio.unlockAudio(); }
+      else if (k === 'music') music.setEnabled(!music.enabled);
       else if (k === 'rim') { St.RIM.on = !St.RIM.on; syncOutline(); }
       else if (k === 'full') await toggleFullscreen();
       saveSettings(); settingsSheet();

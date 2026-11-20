@@ -181,6 +181,8 @@ async function playMap({ page }, state) {
   const door = (state.crystals < 3 && elite) || safe || state.doors[0];
   assert(door, 'No doors on floor ' + state.floor);
   await page.locator('#map.on .door-entry[data-door="' + door.index + '"]').click();
+  // The party marches off (about 0.5 s) before the room opens; do not tap the map again meanwhile.
+  await page.waitForFunction(() => !document.querySelector('#map.on'), null, { timeout: 5000 });
 }
 
 async function playOrder({ page }) {
