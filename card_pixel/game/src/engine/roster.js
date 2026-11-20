@@ -5,6 +5,7 @@
    Nothing here decides a run; run.js does. */
 import { WILD, LARGE } from '../content/wild.js';
 import { BOSSES } from '../content/bosses.js';
+import { DUNGEONS } from '../content/dungeons.js';
 
 export const ELEMENT = { fire: '불', water: '물', nature: '자연', light: '빛', dark: '어둠' };
 export const GRADE = { normal: '노멀', rare: '레어', epic: '에픽', legend: '전설', transcendence: '초월', event: '이벤트' };
@@ -22,6 +23,23 @@ export function strength(card) {
 const power = s => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 2);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
+export function expeditionPool(roster, dungeonId, startView = {}) {
+  if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError('Unknown dungeon: ' + dungeonId);
+  const dungeon = DUNGEONS[dungeonId];
+  const { seals = [], companions = [], lead, reserved } = startView;
+  const additions = dungeon.layout === 'intro' ? [reserved] : [...companions, lead, reserved];
+  const baseIds = roster.pool(dungeon.pool);
+  const availableIds = roster.pool(dungeon.pool, { companions: additions });
+  const effectiveIds = roster.pool(dungeon.pool, { companions: additions, seals });
+  return {
+    setName: roster.poolName(dungeon.pool),
+    baseIds,
+    addedIds: effectiveIds.filter(id => !baseIds.includes(id)),
+    sealedIds: availableIds.filter(id => seals.includes(id)),
+    effectiveIds
+  };
+}
+
 export function create(core, assets) {
   const sp = assets.sp;
   const has = id => !!sp[id + '-idle'];
@@ -34,6 +52,7 @@ export function create(core, assets) {
   const spriteFor = (role, id) => has(role + '_' + id) ? role + '_' + id : id;
   const wild = Object.keys(WILD).filter(id => has(spriteFor('wild', id)));
   const bosses = Object.keys(BOSSES);
+  const poolName = spec => spec.name ?? core.BASIC_CARD_SETS.find(entry => entry.id === spec.set)?.name;
 
   function pool(spec = 'common', { seals = [], companions = [] } = {}) {
     if (typeof spec === 'string') {
@@ -84,5 +103,5 @@ export function create(core, assets) {
       skills: JSON.parse(JSON.stringify(base.skills)), note: b.note, boss: true
     };
   }
-  return { allies, wild, bosses, has, card, facing, pool, wildOf, shadowOf, bossOf, LARGE: LARGE.filter(id => wild.includes(id)) };
+  return { allies, wild, bosses, has, card, facing, pool, poolName, wildOf, shadowOf, bossOf, LARGE: LARGE.filter(id => wild.includes(id)) };
 }

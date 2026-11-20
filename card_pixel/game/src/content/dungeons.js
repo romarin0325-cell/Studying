@@ -17,7 +17,7 @@ const standard = {
 export const DUNGEONS = {
   dawn_forest: {
     id: 'dawn_forest', name: '새벽의 숲', background: 'dawn_forest',
-    pool: { ids: ['ash', 'snow_rabbit', 'silver_rabbit', 'night_rabbit', 'sunflower', 'siren',
+    pool: { name: '입문 풀', ids: ['ash', 'snow_rabbit', 'silver_rabbit', 'night_rabbit', 'sunflower', 'siren',
       'aurora', 'guardian', 'storm_sage', 'luna', 'queen', 'rumi', 'red_dragon', 'gold_dragon'] },
     floors: 5, layout: 'intro', tiers: [1, 1, 0.56, 1, 0.46],
     wild: ['golem', 'emerald_beetle', 'gold_moth'], boss: INTRO.boss.id,
@@ -60,7 +60,7 @@ export const DUNGEONS = {
     ...standard, id: 'creation_tower', name: '창조의 탑', background: 'creation_tower',
     tiers: [...APPROACH, 1.06],
     nightmareRule: nightmare(1.05),
-    pool: { all: true }, wild: ['golem', 'magma_beetle', 'gold_moth', 'wraith', 'abyss_eye', 'dark_knight'],
+    pool: { all: true, name: '전체 동료' }, wild: ['golem', 'magma_beetle', 'gold_moth', 'wraith', 'abyss_eye', 'dark_knight'],
     boss: 'creator_god', hiddenBosses: [],
     region: { first: [EMBER, BELL, SKY, TIDE, ARENA], second: [EMBER, BELL, SKY, TIDE, ARENA] },
     unlock: { kind: 'region_clear_count', count: 3 }

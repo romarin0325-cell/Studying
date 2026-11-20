@@ -4,6 +4,7 @@ import { EVENTS } from '../content/events.js';
 import { ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
 import { heirloomSkill } from './bridge.js';
+import { localDayKey } from './dates.js';
 import { nextFloat, pick, shuffle } from './rng.js';
 
 const MS_PER_DAY = 86_400_000;
@@ -14,12 +15,7 @@ const eventFor = id => EVENTS.find(event => event.id === id);
 const stream = (seed, k) => ({ state: (seed ^ Math.imul(k, 0x9e3779b9)) >>> 0 });
 const sameList = (a, b) => a.length === b.length && b.every((value, i) => value === a[i]);
 
-export function dayKey(now) {
-  const year = String(now.getFullYear()).padStart(4, '0');
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+export { localDayKey as dayKey };
 
 function dateIndex(key) {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return NaN;

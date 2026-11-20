@@ -10,14 +10,17 @@ import { INTRO } from '../src/content/intro.js';
 import { LAYOUTS } from '../src/content/layouts.js';
 import { RELICS } from '../src/content/relics.js';
 import * as Bridge from '../src/engine/bridge.js';
+import * as DailyStore from '../src/engine/daily-store.js';
 import * as Meta from '../src/engine/meta.js';
 import { openingModel } from '../src/engine/opening.js';
-import { create as makeRoster, GRADE_BUCKETS, gradeOf } from '../src/engine/roster.js';
+import { create as makeRoster, expeditionPool, GRADE_BUCKETS, gradeOf } from '../src/engine/roster.js';
 import { makeDoors } from '../src/engine/rooms.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { mulberry32, nextFloat, shuffle } from '../src/engine/rng.js';
+import { DAILY_KEY, SESSION_KEY, SETTINGS_KEY, slotStorage } from '../src/ui/storage.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
+import { playRun } from '../tools/sim.mjs';
 
 const sandbox = { console, Math, __relayCoreTimer: Bridge.scheduleTimer };
 sandbox.window = sandbox;
@@ -74,12 +77,12 @@ function reach(run, floor) {
   return run;
 }
 
-function clear(run) {
+function clear(run, date) {
   reach(run, run.floors);
   enter(run);
   settle(run);
   if (run.phase !== 'done') advance(run);
-  Run.finishRun(run);
+  Run.finishRun(run, date);
   return run;
 }
 
@@ -1936,4 +1939,318 @@ test('main assist follows the first-main guide while nightmare keeps its separat
   assert.equal(nightmare.firstMainAssist, false);
   assert.deepEqual(assisted.doors[0].enemies.map(enemy => enemy.id), regular.doors[0].enemies.map(enemy => enemy.id));
   assert.ok(assisted.doors[0].enemies[0].stats.atk < regular.doors[0].enemies[0].stats.atk);
+});
+
+test('expedition listing matches all seven default pools and overlapping departure modifiers without consuming a draw', () => {
+  const sizes = [14, 39, 40, 39, 40, 37, 130];
+  assert.deepEqual(Object.keys(DUNGEONS).map(id => expeditionPool(roster, id).baseIds.length), sizes);
+  const profile = Meta.createProfile();
+  assert.deepEqual(profile.unlockedDungeons, ['dawn_forest']);
+  const before = structuredClone(profile);
+  const base = expeditionPool(roster, ember).baseIds;
+  const [lead, reserved, sealedOutside] = roster.allies.filter(id => !base.includes(id));
+  const sealed = base[0];
+  const profileView = { lead, companions: [lead, sealed, lead, base[1], reserved], reserved, seals: [sealed, sealedOutside] };
+  const run = makeTempo({ profileView });
+  const pristine = Save.serializeRun(run);
+  const view = expeditionPool(roster, ember, profileView);
+  assert.equal(view.setName, '홍련의 계승');
+  assert.deepEqual(view.addedIds, [lead, reserved]);
+  assert.deepEqual(view.sealedIds, [sealed]);
+  assert.deepEqual(view.effectiveIds, run.pool);
+  assert.deepEqual(view.effectiveIds, [...base.slice(1), lead, reserved]);
+  assert.equal(Save.serializeRun(run), pristine);
+  assert.deepEqual(profile, before);
+  const reference = makeTempo({ profileView });
+  startPicks(run);
+  startPicks(reference);
+  assert.equal(Save.serializeRun(run), Save.serializeRun(reference));
+});
+
+test('easy and journey seed 7 share HP, enemy actions and the carried heirloom, including the risk door', t => {
+  function opening(difficulty) {
+    const run = reach(makeTempo({ difficulty, profileView: { lead: 'ash' } }), 1);
+    enter(run);
+    const [, recipient] = Run.battleOptions(run).party;
+    const { name } = Bridge.heirloomSkill(roster.card('ash'));
+    settle(run, { survivors: [false, true, true], heirloomsGained: [{ to: recipient, from: 'ash', name }] });
+    advance(run);
+    return run;
+  }
+  const normal = opening('normal');
+  const easy = opening('easy');
+  assert.equal(easy.firstMainAssist, true);
+  for (const { index } of normal.doors) {
+    assert.deepEqual(Run.getTempoView(normal, index), Run.getTempoView(easy, index));
+    const scaled = Run.doorEnemies(normal, index).map(enemy => ({
+      ...enemy, stats: { ...enemy.stats, atk: Math.round(enemy.stats.atk * 0.65), matk: Math.round(enemy.stats.matk * 0.65) }
+    }));
+    assert.deepEqual(Run.doorEnemies(easy, index), scaled);
+  }
+  const riskIndex = normal.doors.findIndex(door => door.risk);
+  for (const run of [normal, easy]) enter(run, riskIndex, Run.defaultParty(run));
+  const { enemyAttackScale, ...easyOptions } = Run.battleOptions(easy);
+  const normalOptions = Run.battleOptions(normal);
+  assert.equal(enemyAttackScale, 0.65);
+  assert.deepEqual(easyOptions, normalOptions);
+  assert.ok(Object.keys(normalOptions.heirlooms).length);
+  const stats = [normal, easy].map(run => {
+    const battle = Bridge.create(core, Run.battleOptions(run));
+    battle.start();
+    const { maxHp, baseAtk, baseMatk } = battle.host.battle.enemy;
+    return [maxHp, baseAtk, baseMatk];
+  });
+  assert.deepEqual(stats[1], [stats[0][0], Math.round(stats[0][1] * 0.65), Math.round(stats[0][2] * 0.65)]);
+  t.diagnostic(JSON.stringify({ seed: normal.seed, stats, actions: Run.getTempoView(normal, riskIndex).enemies[0].beats,
+    heirlooms: normalOptions.heirlooms }));
+});
+
+test('easy returns unlock the campaign and ending while journey alone unlocks nightmare and the first seal', () => {
+  let profile = profileWithSnowRabbit();
+  assert.equal(Meta.nextGoal(profile).reward, '동행 1칸 열림');
+  assert.throws(() => makeTempo({ dungeonId: 'dawn_forest', difficulty: 'easy' }), /Unavailable difficulty/);
+  assert.deepEqual(Meta.availableDungeons(profile).find(entry => entry.id === ember).difficulties, ['easy', 'normal']);
+  for (const dungeonId of [ember, 'twilight_cathedral', 'starlit_garden', 'creation_tower']) {
+    const run = clear(makeTempo({ difficulty: 'easy', profileView: Meta.startView(profile, dungeonId), dungeonId }));
+    const recruit = Run.runRewards(run).recruitable[0];
+    profile.ui.wantedCompanionId = recruit;
+    const result = Meta.applyRunEnd(profile, roundTrip(run), { recruits: [recruit] });
+    ok(result.announce);
+    assert.deepEqual(result.announce.nightmares, []);
+    assert.equal(result.profile.ui.wantedCompanionId, null);
+    profile = result.profile;
+    assert.equal(profile.records.clears[dungeonId].easy, 1);
+    assert.equal(Meta.startView(profile, dungeonId).sealSlots, 0);
+    assert.equal(Meta.startView(profile, dungeonId).firstMainAssist, true);
+  }
+  assert.ok(profile.notebook.chapters.includes(7));
+  assert.equal(Meta.dailyRiftUnlocked(profile), true);
+  assert.equal(Meta.nextGoal(profile).target.dungeonId, 'midnight_trench');
+  assert.throws(() => makeTempo({ difficulty: 'nightmare', profileView: Meta.startView(profile, ember) }), /Locked nightmare/);
+  const journey = makeTempo({ profileView: Meta.startView(profile, ember) });
+  assert.equal(journey.firstMainAssist, true);
+  const result = Meta.applyRunEnd(profile, clear(journey));
+  assert.deepEqual(ok(result.announce).nightmares, [ember]);
+  assert.equal(Meta.startView(result.profile, ember).sealSlots, 1);
+  assert.equal(makeTempo({ profileView: Meta.startView(result.profile, ember) }).firstMainAssist, false);
+  assert.equal(makeTempo({ difficulty: 'easy', profileView: Meta.startView(result.profile, ember) }).firstMainAssist, true);
+});
+
+const localTime = stamp => new Date(stamp);
+
+function returnRun(profile, dungeonId, date, seed = 7) {
+  return clear(makeTempo({ dungeonId, seed, difficulty: 'easy', profileView: Meta.startView(profile, dungeonId) }), localTime(date));
+}
+
+test('mission dates are pinned at the first settlement and survive Sunday, month-end, reload and duplicate submission', () => {
+  let profile = profileWithSnowRabbit();
+  const sunday = returnRun(profile, ember, '2026-11-22T23:59:00');
+  profile = Meta.applyRunEnd(profile, sunday).profile;
+  const firstWeek = 'week:2026-11-16';
+  const nextWeek = 'week:2026-11-23';
+  const november = 'month:2026-11';
+  assert.equal(profile.missions.periods[firstWeek].gates, 1);
+  const failedRun = reach(makeTempo({ seed: 21, profileView: Meta.startView(profile, ember) }), 6);
+  enter(failedRun);
+  settle(failedRun, { outcome: 'lose', survivors: [false, false, false], enemyDowns: [] });
+  Run.finishRun(failedRun, localTime('2026-11-23T00:01:00'));
+  const loss = Meta.applyRunEnd(profile, failedRun);
+  ok(loss.announce);
+  profile = loss.profile;
+  assert.equal(profile.missions.periods[nextWeek].gates, 1);
+  assert.deepEqual(profile.missions.periods[november].regionIds, [ember]);
+  const repeated = Meta.applyRunEnd(profile, failedRun);
+  assert.equal(repeated.announce.reason, 'already_applied');
+  assert.equal(repeated.profile, profile);
+  const twilight = 'twilight_cathedral';
+  const firstOffer = Meta.applyRunEnd(profile, returnRun(profile, twilight, '2026-11-29T23:59:00'));
+  profile = firstOffer.profile;
+  assert.deepEqual(ok(firstOffer.announce).missions, [nextWeek]);
+  const lastDay = roundTrip(returnRun(profile, 'starlit_garden', '2026-11-30T23:59:00'));
+  Run.finishRun(lastDay, localTime('2026-12-01T00:01:00'));
+  const monthReturn = Meta.applyRunEnd(profile, lastDay);
+  assert.deepEqual(ok(monthReturn.announce).missions, [november]);
+  profile = monthReturn.profile;
+  assert.equal(lastDay.endDayKey, '2026-11-30');
+  assert.equal(profile.missions.periods['month:2026-12'], undefined);
+  assert.deepEqual(profile.missions.periods[november].regionIds, [ember, twilight, 'starlit_garden']);
+  assert.equal(Meta.applyRunEnd(profile, lastDay).announce.reason, 'already_applied');
+  const fromSave = Save.restoreProfile(Save.serializeProfile(profile));
+  const afterBoundary = Meta.missionsView(fromSave, roster, localTime('2026-12-07T12:00:00'));
+  assert.deepEqual(afterBoundary.claimable.map(period => period.key), [november, nextWeek]);
+  const [month, week] = afterBoundary.claimable;
+  assert.ok(month.candidates.every(id => roster.card(id).grade === 'legend'));
+  assert.ok(week.candidates.every(id => ['normal', 'rare'].includes(roster.card(id).grade)));
+  assert.ok(month.candidates.length <= 3 && week.candidates.length <= 3);
+
+  const [alreadyTaken] = week.candidates;
+  fromSave.reserved = alreadyTaken;
+  const regular = returnRun(fromSave, ember, '2026-12-07T12:00:00');
+  const ordinary = Meta.applyRunEnd(fromSave, regular, { recruits: [alreadyTaken] });
+  profile = ordinary.profile;
+  ok(ordinary.announce);
+  assert.deepEqual(profile.missions.periods[nextWeek].offerOrder, fromSave.missions.periods[nextWeek].offerOrder);
+  assert.equal(Meta.claimMission(profile, nextWeek, alreadyTaken, roster).announce.reason, 'invalid_mission_companion');
+  const options = Meta.missionsView(profile, roster).claimable.find(period => period.key === nextWeek).candidates;
+  assert.ok(!options.includes(alreadyTaken));
+  profile.ui.wantedCompanionId = options[0];
+  const invite = Meta.claimMission(profile, nextWeek, options[0], roster);
+  assert.deepEqual(ok(invite.announce).recruits, [options[0]]);
+  assert.equal(invite.profile.ui.wantedCompanionId, null);
+  assert.equal(Meta.claimMission(invite.profile, nextWeek, options[0], roster).announce.reason, 'mission_not_claimable');
+  const monthlyInvite = Meta.claimMission(invite.profile, november, month.candidates[0], roster);
+  assert.deepEqual(ok(monthlyInvite.announce).recruits, [month.candidates[0]]);
+  assert.equal(monthlyInvite.profile.missions.periods[november].claimedId, month.candidates[0]);
+  assert.equal(Meta.claimMission(monthlyInvite.profile, november, month.candidates[0], roster).announce.reason, 'mission_not_claimable');
+});
+
+test('mission rewards fall back through the fixed pool and award a completion stamp when everyone is owned', () => {
+  let profile = profileWithSnowRabbit();
+  profile = Meta.applyRunEnd(profile, returnRun(profile, ember, '2026-11-23T12:00:00')).profile;
+  const key = 'week:2026-11-23';
+  const second = returnRun(profile, ember, '2026-11-24T12:00:00');
+  const { profile: earned } = Meta.applyRunEnd(profile, second);
+  const { offerOrder } = earned.missions.periods[key];
+  for (const id of offerOrder.filter(id => ['normal', 'rare'].includes(roster.card(id).grade))) earned.recruits[id] = { since: 1, bond: 0 };
+  const [fallback] = Meta.missionsView(earned, roster).claimable[0].candidates;
+  assert.ok(['epic', 'legend'].includes(roster.card(fallback).grade));
+  ok(Meta.claimMission(earned, key, fallback, roster).announce);
+  for (const id of roster.allies) profile.recruits[id] = { since: 1, bond: 0 };
+  const allOwned = Meta.applyRunEnd(profile, second);
+  assert.deepEqual(allOwned.profile.missions.periods[key], { gates: 2, regionIds: [], state: 'claimed', offerOrder: [], claimedId: null });
+  assert.deepEqual(ok(allOwned.announce).missions, []);
+  assert.equal(Meta.missionsView(allOwned.profile, roster).claimable.length, 0);
+});
+
+test('last good and file recovery preserve real checkpoints and allow a new real battle recruit settlement', t => {
+  const entries = new Map();
+  let failWrite = () => false;
+  const raw = {
+    getItem: key => entries.get(key) ?? null,
+    setItem(key, value) {
+      if (failWrite(key)) throw new Error('quota exceeded');
+      entries.set(key, value);
+    },
+    removeItem: key => entries.delete(key)
+  };
+  const storage = slotStorage(raw);
+  assert.deepEqual(Save.normalizeSettings({ sound: false, music: false, rim: false }), {
+    sound: false, music: false, rim: false, speed: 1, textScale: 1, markers: true
+  });
+  const store = Save.createSaveStore(storage, { core, roster });
+  const daily = DailyStore.create(storage, { core, roster });
+  assert.deepEqual(store.loadDetailed(), { status: 'empty' });
+  const offline = Save.createSaveStore({ getItem() { throw new Error('denied'); } });
+  assert.deepEqual(offline.loadDetailed(), { status: 'unavailable' });
+  let profile = Meta.createProfile();
+  for (const dungeonId of ['dawn_forest', ember]) {
+    const { run, end } = playRun(dungeonId, 7, { profile, difficulty: 'easy', opening: 'stand' });
+    assert.equal(end.result, 'win');
+    const result = Meta.applyRunEnd(profile, run, { recruits: [end.recruitable[0]] });
+    profile = result.profile;
+    ok(result.announce);
+  }
+  const legacy = structuredClone(profile);
+  delete legacy.missions;
+  delete legacy.ui;
+  for (const clear of Object.values(legacy.records.clears)) delete clear.easy;
+  storage.setItem(SESSION_KEY, JSON.stringify({ version: 1, profile: legacy, run: null }));
+  const upgraded = store.loadDetailed();
+  assert.equal(upgraded.status, 'ok');
+  assert.deepEqual(upgraded.profile.recruits, profile.recruits);
+  assert.equal(upgraded.profile.records.clears[ember].easy, 0);
+  assert.deepEqual(upgraded.profile.missions.periods, {});
+  assert.equal(upgraded.profile.ui.wantedCompanionId, null);
+  store.save({ profile });
+  assert.deepEqual(store.loadLastGood(), { status: 'ok', profile, run: null });
+
+  const official = key => ok(daily.start({
+    profile, now: localTime(key + 'T12:00:00'), expectedDayKey: key, kind: 'official'
+  })).run;
+  const first = official('2026-11-21');
+  ok(daily.abandon(first.id));
+  const active = official('2026-11-22');
+  const main = reach(makeTempo({ seed: 21, profileView: Meta.startView(profile, ember) }), 2);
+  store.save({ profile, run: main });
+  const latestWritten = storage.getItem(SESSION_KEY);
+  const brokenRun = JSON.parse(latestWritten);
+  delete brokenRun.run.run.rng;
+  storage.setItem(SESSION_KEY, JSON.stringify(brokenRun));
+  const damaged = store.loadDetailed();
+  assert.equal(damaged.status, 'runDamaged');
+  assert.equal(damaged.run, null);
+  assert.deepEqual(damaged.profile.recruits, profile.recruits);
+  assert.deepEqual(damaged.profile.notebook, profile.notebook);
+  storage.setItem(SESSION_KEY, latestWritten);
+
+  reach(main, 3);
+  enter(main);
+  const offer = ok(Run.getSpringOffer(main));
+  enter(active);
+  const settings = { sound: false, music: true, rim: false, speed: 2, textScale: 1.25, markers: true };
+  failWrite = () => true;
+  assert.throws(() => store.save({ profile, run: main }), /quota exceeded/);
+  assert.equal(daily.save(active).reason, 'storage_failed');
+  assert.equal(store.loadDetailed().run.floor, 2);
+  const backup = store.exportBackup({ profile, run: main, dailyRun: active, settings });
+  const summary = ok(store.inspectBackup(JSON.stringify(backup))).summary;
+  assert.deepEqual(summary, {
+    recruits: 2, dungeonId: ember, floor: 3, dailyOfficialStarts: 2, dailyOfficialResults: 1,
+    dailyActive: { dayKey: '2026-11-22', kind: 'official', floor: 1 }
+  });
+  failWrite = () => false;
+
+  storage.setItem(SESSION_KEY, '{');
+  assert.equal(store.loadDetailed().status, 'profileDamaged');
+  ok(store.restoreLastGood());
+  assert.deepEqual(store.loadDetailed().profile, profile);
+  assert.equal(ok(daily.resume()).run.id, active.id);
+  assert.equal(daily.history().rows.length, 1);
+  const missingLedger = JSON.parse(storage.getItem(SESSION_KEY));
+  delete missingLedger.profile.records.appliedRuns;
+  storage.setItem(SESSION_KEY, JSON.stringify(missingLedger));
+  assert.equal(store.loadDetailed().status, 'profileDamaged');
+
+  for (const [part, change, reason] of [
+    ['session', missingLedger, 'invalid_session'],
+    ['daily', { ...backup.daily, active: { ...backup.daily.active, checkpoint: { ...backup.daily.active.checkpoint, turns: 99 } } }, 'invalid_daily'],
+    ['settings', { ...settings, speed: 3 }, 'invalid_settings']
+  ]) assert.equal(store.inspectBackup({ ...backup, [part]: change }).reason, reason);
+  ok(store.restoreLastGood());
+  const beforeImport = store.exportBackup();
+  for (const failureKey of [DAILY_KEY, 'relaymare.activeSlot']) {
+    failWrite = key => key.endsWith(failureKey);
+    assert.equal(store.restoreBackup(backup).reason, 'storage_failed');
+    assert.deepEqual(store.exportBackup(), beforeImport);
+    assert.equal(store.loadDetailed().status, 'ok');
+  }
+  failWrite = () => false;
+  ok(store.restoreBackup(backup));
+  const restored = store.loadDetailed();
+  assert.equal(restored.status, 'ok');
+  assert.deepEqual(ok(Run.getSpringOffer(restored.run)), offer);
+  assert.equal(restored.run.crystals, main.crystals);
+  assert.deepEqual(restored.profile.notebook, backup.session.profile.notebook);
+  assert.deepEqual(restored.profile.recruits, profile.recruits);
+  assert.deepEqual(restored.profile.missions, profile.missions);
+  assert.deepEqual(JSON.parse(storage.getItem(SETTINGS_KEY)), settings);
+  assert.deepEqual(ok(store.inspectBackup(store.exportBackup())).summary, summary);
+  assert.equal(ok(daily.resume()).run.room.status, 'order');
+  assert.equal(daily.history().rows[0].official.runId, first.id);
+  assert.equal(daily.abandon(first.id).duplicate, true);
+  assert.equal(daily.start({ profile, now: localTime('2026-11-22T12:00:00'), expectedDayKey: '2026-11-22', kind: 'official' }).reason, 'active_exists');
+
+  const { run, end } = playRun('twilight_cathedral', 21, { profile: restored.profile, difficulty: 'easy' });
+  assert.equal(end.result, 'win');
+  assert.equal(run.stats.battles, 5);
+  assert.equal(end.recruitable[0], 'ancient_soul');
+  const recruited = Meta.applyRunEnd(restored.profile, run, { recruits: ['ancient_soul'] });
+  assert.deepEqual(ok(recruited.announce).recruits, ['ancient_soul']);
+  store.save({ profile: recruited.profile });
+  assert.deepEqual(store.loadDetailed().profile.recruits.ancient_soul, { bond: 0, since: 3 });
+  assert.equal(Meta.applyRunEnd(store.loadDetailed().profile, run).announce.reason, 'already_applied');
+  t.diagnostic(`Restored the floor-3 spring, ${summary.dailyOfficialStarts} official attempts, then recruited ancient_soul after ${run.stats.battles} battles.`);
+  assert.equal(store.clear(), true);
+  assert.equal(entries.size, 0);
+  assert.equal(store.loadLastGood().status, 'empty');
 });

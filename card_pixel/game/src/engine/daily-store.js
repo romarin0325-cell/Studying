@@ -1,11 +1,11 @@
-import { FLOORS, RULE_VERSION } from '../content/daily-rift.js';
+import { FLOORS } from '../content/daily-rift.js';
+import { DAILY_KEY as KEY, slotStorage } from '../ui/storage.js';
 import { compare, dayKey, specFor, validAttempt } from './daily-rift.js';
 import { dailyRiftUnlocked } from './meta.js';
 import { invalid } from './rooms.js';
 import { createRun } from './run.js';
 import { restoreRun, serializeRun } from './save.js';
 
-const KEY = 'relaymare.daily';
 const VERSION = 1;
 const empty = () => ({ version: VERSION, days: {}, active: null });
 const emptyDay = spec => ({ spec, starts: 0, official: null, bestPractice: null, last: null });
@@ -17,6 +17,84 @@ function checkpointFor(run) {
     || ![stats?.turns, stats?.heirloomsUsed].every(n => Number.isSafeInteger(n) && n >= 0)) return null;
   const livingIds = daily.spec.loanIds.filter(id => bench.includes(id));
   return { floor, turns: stats.turns, livingIds, heirloomsUsed: stats.heirloomsUsed };
+}
+
+function activeCheckpoint(data, run) {
+  const { active } = data;
+  const daily = run?.daily;
+  const day = data.days[active?.dayKey];
+  if (!daily || !day || run.id !== active.runId || daily.kind !== active.kind || daily.attemptNo !== day.starts
+    || !day.spec || daily.spec?.dayKey !== active.dayKey
+    || run.seed !== day.spec.seed || run.dungeonId !== day.spec.dungeonId || run.floors !== FLOORS
+    || run.difficulty !== 'normal' || run.contract !== null || run.crystals !== 0) return null;
+  try {
+    if (JSON.stringify(daily.spec) === JSON.stringify(day.spec)) return checkpointFor(run);
+  } catch {
+    // An invalid run may contain values that cannot be serialized.
+  }
+  return null;
+}
+
+const dictionary = value => !!value && typeof value === 'object' && !Array.isArray(value);
+const nonnegative = n => Number.isSafeInteger(n) && n >= 0;
+
+function validCheckpoint(checkpoint, spec) {
+  return dictionary(checkpoint) && Number.isInteger(checkpoint.floor) && checkpoint.floor >= 1 && checkpoint.floor <= FLOORS
+    && nonnegative(checkpoint.turns) && nonnegative(checkpoint.heirloomsUsed) && Array.isArray(checkpoint.livingIds)
+    && new Set(checkpoint.livingIds).size === checkpoint.livingIds.length
+    && Array.from(checkpoint.livingIds).every(id => spec.loanIds.includes(id));
+}
+
+function validScore(score, day, kind) {
+  if (!dictionary(score) || score.dayKey !== day.spec.dayKey || score.kind !== kind
+    || !['win', 'lose', 'abandon'].includes(score.outcome) || !validCheckpoint(score, day.spec)) return false;
+  const attempt = Number(score.runId?.split?.('/').at(-1));
+  return score.runId === `rift/v${day.spec.ruleVersion}/${day.spec.dayKey}/${attempt}`
+    && Number.isSafeInteger(attempt) && attempt <= day.starts && (kind === 'official' ? attempt === 1 : attempt > 1);
+}
+
+export function restoreDailyData(data, { core, roster }) {
+  if (!dictionary(data) || data.version !== VERSION || !dictionary(data.days)
+    || (data.active !== null && !dictionary(data.active))) return null;
+  const { active } = data;
+  try {
+    for (const [key, day] of Object.entries(data.days)) {
+      if (!Number.isSafeInteger(day?.starts) || day.starts < 1 || day.spec?.dayKey !== key
+        || !validAttempt({ spec: day.spec, kind: 'official', attemptNo: 1 }, roster)) return null;
+      if (day.official === null ? active?.dayKey !== key || active.kind !== 'official' || day.starts !== 1
+        : !validScore(day.official, day, 'official')) return null;
+      if (day.bestPractice !== null && (!validScore(day.bestPractice, day, 'practice') || day.bestPractice.outcome === 'abandon')) return null;
+      if (day.last === null) {
+        if (day.official !== null) return null;
+      } else {
+        if (!validScore(day.last, day, day.last?.kind) || !['official', 'practice'].includes(day.last.kind)) return null;
+        if (day.last.receipts !== undefined && (!dictionary(day.last.receipts) || Object.entries(day.last.receipts)
+          .some(([id, score]) => id !== score?.runId || !['official', 'practice'].includes(score.kind)
+            || !validScore(score, day, score.kind)))) return null;
+      }
+    }
+    if (active) {
+      const day = data.days[active.dayKey];
+      const run = restoreRun(active.snapshot, { core, roster });
+      const checkpoint = activeCheckpoint(data, run);
+      if (!checkpoint || !validAttempt(run.daily, roster) || !validCheckpoint(active.checkpoint, day.spec)
+        || run.id !== `rift/v${day.spec.ruleVersion}/${active.dayKey}/${day.starts}`
+        || run.pool.length !== day.spec.loanIds.length || run.pool.some((id, index) => id !== day.spec.loanIds[index])
+        || (active.kind === 'official' && day.official !== null) || previousResult(data, run.id)
+        || checkpoint.floor !== active.checkpoint.floor || checkpoint.turns !== active.checkpoint.turns
+        || checkpoint.heirloomsUsed !== active.checkpoint.heirloomsUsed
+        || checkpoint.livingIds.join(',') !== active.checkpoint.livingIds.join(',')) return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export function withDailyCheckpoint(data, run) {
+  const checkpoint = run && activeCheckpoint(data, run);
+  if (!checkpoint) return data;
+  return { ...data, active: { ...data.active, snapshot: serializeRun(run), checkpoint } };
 }
 
 function response(day, score, duplicate) {
@@ -39,6 +117,7 @@ function previousResult(data, runId) {
 }
 
 export function create(storage, { core, roster }) {
+  storage = slotStorage(storage);
   function read() {
     try {
       const saved = storage.getItem(KEY);
@@ -58,22 +137,6 @@ export function create(storage, { core, roster }) {
     } catch {
       return false;
     }
-  }
-
-  function activeCheckpoint(data, run) {
-    const { active } = data;
-    const daily = run?.daily;
-    const day = data.days[active.dayKey];
-    if (!daily || !day || run.id !== active.runId || daily.kind !== active.kind || daily.attemptNo !== day.starts
-      || !day.spec || daily.spec?.dayKey !== active.dayKey
-      || run.seed !== day.spec.seed || run.dungeonId !== day.spec.dungeonId || run.floors !== FLOORS
-      || run.difficulty !== 'normal' || run.contract !== null || run.crystals !== 0) return null;
-    try {
-      if (JSON.stringify(daily.spec) === JSON.stringify(day.spec)) return checkpointFor(run);
-    } catch {
-      // An invalid run may contain values that cannot be serialized.
-    }
-    return null;
   }
 
   function settle(data, outcome, checkpoint) {

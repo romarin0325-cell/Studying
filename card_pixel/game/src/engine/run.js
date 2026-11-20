@@ -6,13 +6,13 @@ import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
-import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
+import { EASY_ENEMY_ATTACK, REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import { canJoin, choicesFor, COST, drawFrom, join, RATES, release, rollBlessing, seeCharacters, validateReplacements } from './awakenings.js';
 import { affixView, create as createBattle, enemyBeats, enemyStatsWithQuirk } from './bridge.js';
-import { doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
+import { dayKey, doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { pick, shuffle } from './rng.js';
 import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
-import { strength } from './roster.js';
+import { expeditionPool, strength } from './roster.js';
 
 export { COST, RATES };
 export const FLOORS = 8;
@@ -21,6 +21,8 @@ const dependencies = new WeakMap();
 const unique = ids => [...new Set(ids)];
 const battleRoom = run => run.phase === 'room' && run.room?.status === 'battle';
 const springRoom = run => run.phase === 'room' && run.room?.type === 'spring' && run.room.status === 'service';
+export const runRoster = run => dependencies.get(run)?.roster;
+const enemyAttackScale = run => run.difficulty === 'easy' ? EASY_ENEMY_ATTACK : 1;
 
 // Keep the card core and sprite registry outside the persisted run.
 export function bindRun(run, { core, roster }) {
@@ -49,14 +51,15 @@ export function createRun(options) {
   dungeonId ??= profileView.dungeonId || 'dawn_forest';
   const dungeon = DUNGEONS[dungeonId];
   if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError('Unknown dungeon: ' + dungeonId);
-  if (!['normal', 'nightmare'].includes(difficulty) || (difficulty === 'nightmare' && !dungeon.nightmareRule)) {
+  const intro = dungeon.layout === 'intro';
+  if (!['easy', 'normal', 'nightmare'].includes(difficulty) || (difficulty === 'nightmare' && !dungeon.nightmareRule)
+    || (difficulty === 'easy' && intro)) {
     throw new RangeError('Unavailable difficulty: ' + difficulty);
   }
   if (profileView.unlockedDungeons && !profileView.unlockedDungeons.includes(dungeonId)) throw new RangeError('Locked dungeon: ' + dungeonId);
   if (difficulty === 'nightmare' && profileView.nightmareUnlocks && !profileView.nightmareUnlocks.includes(dungeonId)) {
     throw new RangeError('Locked nightmare: ' + dungeonId);
   }
-  const intro = dungeon.layout === 'intro';
   const tempoVersion = daily?.spec.ruleVersion ?? options.tempoVersion ?? TEMPO_VERSION;
   if (tempoVersion !== 1 && tempoVersion !== TEMPO_VERSION) throw new RangeError('invalid_tempo_version');
   const lessonVersion = daily || intro || tempoVersion !== TEMPO_VERSION ? 0 : options.lessonVersion ?? LESSON_VERSION;
@@ -70,8 +73,7 @@ export function createRun(options) {
   const companions = intro ? [] : (profileView.companions || []).filter(id => roster.allies.includes(id) && !seals.includes(id));
   const lead = !intro && roster.allies.includes(profileView.lead) && !seals.includes(profileView.lead) ? profileView.lead : null;
   const shard = roster.allies.includes(profileView.reserved) && !seals.includes(profileView.reserved) ? profileView.reserved : null;
-  const pool = daily ? daily.spec.loanIds.slice()
-    : roster.pool(dungeon.pool, { seals, companions: [...companions, lead, shard].filter(Boolean) });
+  const pool = daily ? daily.spec.loanIds.slice() : expeditionPool(roster, dungeonId, profileView).effectiveIds;
   const boss = daily?.spec.bossId
     ?? (difficulty === 'nightmare' && dungeon.hiddenBosses.length ? pick(rng, dungeon.hiddenBosses) : dungeon.boss);
   const preview = intro ? INTRO.boss : roster.bossOf(boss);
@@ -86,8 +88,8 @@ export function createRun(options) {
     ...(!daily && { lessonVersion }),
     ...(lessonVersion && { blessingHistory: [] }),
     tempoVersion, openingLead: null,
-    firstMainAssist: tempoVersion === TEMPO_VERSION && !daily && !intro && difficulty === 'normal'
-      && (profileView.bossOrder ?? true),
+    firstMainAssist: !daily && !intro && (difficulty === 'easy' || (tempoVersion === TEMPO_VERSION && difficulty === 'normal'
+      && (profileView.firstMainAssist ?? profileView.bossOrder ?? true))),
     dungeonId, difficulty, floors: daily ? DAILY_FLOORS : dungeon.floors, seed: seed >>> 0, rng, pool, plain,
     phase: 'start', floor: 0, doors: [], room: null, pending: null,
     lead, companions, preferredCompanion: profileView.preferredCompanion || null,
@@ -293,7 +295,7 @@ export function doorStart(run, index) {
 export function doorEnemies(run, index) {
   const door = run.doors[index];
   return (door?.enemies || []).map(enemy => {
-    const stats = enemyStatsWithQuirk(enemy.stats, door.quirk);
+    const stats = enemyStatsWithQuirk(enemy.stats, door.quirk, enemyAttackScale(run));
     return { ...copy(enemy), stats, maxHp: stats.hp };
   });
 }
@@ -371,6 +373,7 @@ export function battleOptions(run) {
 function optionsForDoor(run, room, party) {
   return {
     party, enemies: room.enemies, quirk: room.quirk || null,
+    ...(run.difficulty === 'easy' && { enemyAttackScale: enemyAttackScale(run) }),
     seed: room.type === 'borrowed' ? INTRO.seed : (run.seed + run.floor * 1013 + run.stats.battles * 7) >>> 0,
     heirlooms: run.heirlooms, blessings: battleBlessings(run, room),
     ...(room.tempo && { tempo: room.tempo, openingIntent: room.intent }),
@@ -763,9 +766,12 @@ export function runRewards(run) {
   };
 }
 
-export function finishRun(run) {
+export function finishRun(run, now = new Date()) {
   if (run.phase !== 'done' || !run.result) return invalid('run_not_done');
   const rewards = runRewards(run);
-  if (!run.daily) run.pending ||= { kind: 'recruit', ...copy(rewards) };
+  if (!run.daily) {
+    run.endDayKey ??= dayKey(now);
+    run.pending ||= { kind: 'recruit', ...copy(rewards) };
+  }
   return rewards;
 }

@@ -1,10 +1,11 @@
-// node card_pixel/game/tools/sim.mjs [runs] [--all | --dungeon=<id>] [--difficulty=normal|nightmare] [--tempo=1|2]
+// node card_pixel/game/tools/sim.mjs [runs] [--all | --dungeon=<id>] [--difficulty=easy|normal|nightmare] [--tempo=1|2]
 // Add --contract=rescue|heirloom|elite for the nightmare audit seeds (120 per dungeon by default).
 // Use --boss-order-audit for 160 paired first-boss runs in each of the two starting main dungeons.
 // Use --daily-from=YYYY-MM-DD --days=60 for paired first attempts at the daily rift.
 // Use --keep-party to retain careful battle actions while only filling vacant formation seats.
 // Use --lessons=0 for the pre-E5 main route. --intent-audit replays its three boss fixtures.
 // Use --entry-audit for the Ember route's battle entry and settlement commands.
+// Use --easy-audit for 32 paired first departures in each early dungeon.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -33,12 +34,12 @@ if (![1, TEMPO_VERSION].includes(tempoVersion) || ![0, 1].includes(lessonVersion
 const dailyFrom = args.find(arg => arg.startsWith('--daily-from='))?.slice('--daily-from='.length);
 const days = Number(args.find(arg => arg.startsWith('--days='))?.slice('--days='.length) ?? 60);
 const contract = args.find(arg => arg.startsWith('--contract='))?.slice('--contract='.length) ?? null;
-const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (contract === null ? 300 : 120));
+const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--easy-audit') ? 32 : contract === null ? 300 : 120));
 const dungeon = args.find(arg => arg.startsWith('--dungeon='))?.slice('--dungeon='.length) || 'ember_volcano';
 const difficulty = args.find(arg => arg.startsWith('--difficulty='))?.slice('--difficulty='.length)
   ?? (flag('--nightmare') || contract !== null ? 'nightmare' : 'normal');
 const dungeons = flag('--all') ? Object.keys(DUNGEONS).filter(id => difficulty === 'normal' || DUNGEONS[id].nightmareRule) : [dungeon];
-if (!['normal', 'nightmare'].includes(difficulty)) throw new RangeError('Invalid difficulty: ' + difficulty);
+if (!['easy', 'normal', 'nightmare'].includes(difficulty)) throw new RangeError('Invalid difficulty: ' + difficulty);
 if (!runs || dungeons.some(id => !Object.hasOwn(DUNGEONS, id))) throw new RangeError('Invalid run count or dungeon');
 if (contract !== null && (!Object.hasOwn(CONTRACTS, contract) || difficulty !== 'nightmare' || dungeons.some(id => !DUNGEONS[id].nightmareRule))) {
   throw new RangeError('Unavailable nightmare contract: ' + contract);
@@ -240,10 +241,13 @@ function weakestReserve(run) {
   return strongest(reserves.length ? reserves : run.bench).at(-1);
 }
 
-function playRun(dungeonId, seed, { profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, firstMain = false } = {}) {
+export function playRun(dungeonId, seed, {
+  profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride,
+  firstMain = false, difficulty: selectedDifficulty = difficulty
+} = {}) {
   const profileView = profile ? Meta.startView(profile, dungeonId) : { bossOrder: firstMain };
   const intro = DUNGEONS[dungeonId].layout === 'intro';
-  const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : difficulty,
+  const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : selectedDifficulty,
     contract: intro ? null : contract, seed, profileView, tempoVersion, lessonVersion, plain: flag('--plain') });
   let heirloomsGained = 0;
   resolveChoices(run, naive);
@@ -413,6 +417,36 @@ function measureFirstMain() {
   }
 }
 
+function measureEasy() {
+  const totals = { normal: 0, easy: 0 };
+  const main = ['ember_volcano', 'twilight_cathedral'];
+  const rate = (wins, count) => `${wins}/${count} · ${percent(wins, count)}`;
+  const delta = (normal, easy, count) => `${(100 * (easy - normal) / count).toFixed(1)} pp`;
+  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${runs} pairs per dungeon · careless, default formation`);
+  console.log(`Main seeds: ${seedOffset + 26011221} + 7919 × i, i = 1…${runs}`);
+  console.log('| Dungeon | Journey | Easy | Difference |');
+  console.log('| --- | ---: | ---: | ---: |');
+  for (const id of main) {
+    const wins = { normal: 0, easy: 0 };
+    for (let i = 1; i <= runs; i++) {
+      const intro = playRun('dawn_forest', seedOffset + 25300057 + 6151 * i, {
+        naive: true, opening: i % 2 ? 'stand' : 'rescue'
+      });
+      const { profile } = Meta.applyRunEnd(Meta.createProfile(), intro.run, { recruits: intro.end.recruitable.slice(0, 1) });
+      const seed = seedOffset + 26011221 + 7919 * i;
+      for (const difficulty of Object.keys(wins)) {
+        const { end } = playRun(id, seed, { difficulty, profile, naive: true });
+        wins[difficulty] += Number(end.result === 'win');
+      }
+    }
+    totals.normal += wins.normal;
+    totals.easy += wins.easy;
+    console.log(`| ${id} | ${rate(wins.normal, runs)} | ${rate(wins.easy, runs)} | ${delta(wins.normal, wins.easy, runs)} |`);
+  }
+  const count = runs * main.length;
+  console.log(`| Total | ${rate(totals.normal, count)} | ${rate(totals.easy, count)} | ${delta(totals.normal, totals.easy, count)} |`);
+}
+
 function battleMetrics(rooms, run, state, summary, result) {
   const labels = [`B${run.floor}`];
   if (run.floor === 2) labels[0] += run.room.risk ? ' risk' : ' safe';
@@ -537,6 +571,7 @@ function measureEntry() {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (flag('--intent-audit')) measureIntents();
   else if (flag('--entry-audit')) measureEntry();
+  else if (flag('--easy-audit')) measureEasy();
   else if (dailyFrom !== undefined) measureDaily();
   else if (flag('--first-main')) {
     if (difficulty !== 'normal') throw new RangeError('First main audit uses normal difficulty');

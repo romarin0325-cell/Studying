@@ -309,6 +309,7 @@ test('restoring battle and altar checkpoints preserves the independent main sess
     if (key !== FIRST) ok(start(store, key));
     const ended = playDaily(key, options);
     assert.equal(Meta.applyRunEnd(profile, ended).announce.reason, 'daily_run');
+    assert.equal(Meta.creditMissions(profile, ended), profile);
     assert.equal(session.save({ profile, run: ended }), false);
     assert.equal(ok(store.finish(ended)).score.outcome, key === FIRST ? 'win' : 'lose');
     assert.equal(storage.getItem('relaymare.session'), savedMain);
@@ -333,6 +334,9 @@ test('the first record and stamp stay fixed while practice best and duplicate re
   const better = playDaily(FIRST);
   better.id = run.id;
   better.daily = run.daily;
+  const missionProfile = unlockedProfile();
+  assert.equal(Meta.creditMissions(missionProfile, better), missionProfile);
+  assert.deepEqual(missionProfile.missions.periods, {});
   const scored = ok(reopened.finish(better));
   assert.deepEqual(scored.official, official);
   assert.deepEqual([scored.bestPractice.outcome, scored.bestPractice.turns, scored.bestPractice.livingIds.length], ['win', 33, 3]);

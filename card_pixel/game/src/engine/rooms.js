@@ -172,7 +172,7 @@ export function applyDoorTempo(run, roster, door) {
 function makeBattleDoor(run, roster, dungeon, template, index, region, battleCount) {
   const challenge = run.difficulty === 'nightmare' ? dungeon.nightmareRule : null;
   const elite = template.type === 'elite';
-  const singleRisk = run.difficulty === 'normal' && template.type === 'wild';
+  const singleRisk = run.difficulty !== 'nightmare' && template.type === 'wild';
   const quirks = Object.keys(QUIRKS);
   const riskRoll = !run.plain && template.risk ? nextFloat(run.rng) * quirks.length : -1;
   const quirk = quirks[Math.floor(riskRoll)] || null;

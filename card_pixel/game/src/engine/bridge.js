@@ -97,12 +97,13 @@ export function enemyBeats(core, enemy, pattern, openingIntent) {
   return beats;
 }
 
-export function enemyStatsWithQuirk(stats, quirk) {
+export function enemyStatsWithQuirk(stats, quirk, attackScale = 1) {
   const modifiers = QUIRKS[quirk]?.foe || {};
+  const attack = value => Math.round(Math.floor(Math.floor(value) * (modifiers.atk || 1)) * attackScale);
   return {
     hp: Math.floor(Math.floor(stats.hp) * (modifiers.hp || 1)),
-    atk: Math.floor(Math.floor(stats.atk) * (modifiers.atk || 1)),
-    matk: Math.floor(Math.floor(stats.matk) * (modifiers.atk || 1)),
+    atk: attack(stats.atk),
+    matk: attack(stats.matk),
     def: modifiers.def ?? Math.floor(stats.def),
     mdef: modifiers.def ?? Math.floor(stats.mdef)
   };
@@ -431,7 +432,7 @@ export function create(core, opts) {
     const def = queue[B.enemyIdx] || {};
     enemy.affixes = (def.affixes || []).slice();
     enemy.relayBeats = patternActions(enemy, pattern, opts.openingIntent);
-    const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk);
+    const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk, opts.enemyAttackScale);
     Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
     if (hasAffix(enemy, 'tough')) enemy.buffs.damage_half = 3;
     if (teachesLesson()) {

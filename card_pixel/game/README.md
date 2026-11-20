@@ -1,10 +1,10 @@
 # 다음은 너 (RELAYMARE)
 
-[dist/Relaymare.html](dist/Relaymare.html)을 브라우저로 연다. 규칙·그림·소리를 담은 단일 HTML이다. Galmuri 글꼴은 CDN에서 읽고, 오프라인에서는 대체 글꼴을 쓴다.
+[dist/Relaymare.html](dist/Relaymare.html)을 브라우저로 연다. 규칙·그림·소리·Galmuri 글꼴을 담은 단일 HTML이라 오프라인에서도 실행된다.
 
 1. 첫 실행에서 제목을 누르면 새벽의 숲 대여 전투가 시작된다. 적의 다음 행동을 읽고, 애쉬를 물러나게 하거나 쓰러진 뒤의 유품을 써 본다.
 2. 살아남은 동료를 깨우고, 문과 출전 순서를 고른다. 원정에서 쓰러진 동료는 그 원정의 풀에서 빠진다. 방 사이 선택은 브라우저에 저장되며 전투 중 닫으면 그 방의 편성부터 다시 시작한다.
-3. 클리어하면 문지기나 보스전에 출전하고 생환한 동료를 영입한다. 관측소에서 대표와 다음 행선지를 고른다. 본편 던전은 여정 첫 클리어 뒤 악몽이 열린다. 창조의 탑을 깨면 엔딩을 본다.
+3. 클리어하면 문지기나 보스전에 출전하고 생환한 동료를 영입한다. 관측소에서 대표와 다음 행선지를 고른다. 본편은 꿈결과 여정으로 시작하고, 각 던전의 여정 첫 클리어 뒤 악몽이 열린다. 창조의 탑을 깨면 엔딩을 본다.
 
 새 원정의 시드를 고정하려면 URL에 `?seed=7`을 붙인다. 브라우저 검토 훅 `window.__game`과 `window.__slice`는 같은 객체다.
 
@@ -30,6 +30,7 @@ node card_pixel/game/tests/play.mjs --seeds=7,21 --runs=2
 ```sh
 node card_pixel/game/tools/sim.mjs --all
 node card_pixel/game/tools/sim.mjs --all --difficulty=nightmare
+node card_pixel/game/tools/sim.mjs --easy-audit
 node card_pixel/game/tools/sim.mjs --daily-from=2026-11-21 --days=60
 node card_pixel/game/tools/cut-sprites.mjs
 node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pixel/art/icons card_pixel/game/assets/icons 32
