@@ -199,11 +199,20 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 
 #msg { position: relative; flex: none; height: 30px; background: #100c22; border-bottom: 2px solid #231c44; }
 #msg:has(#relay-hint:not([hidden])) { height: auto; min-height: 30px; }
+#msg:has(#ticker.retreat-outcomes) { height: auto; min-height: 30px; }
 #relay-hint { padding: 3px 10px; line-height: 15px; color: var(--gold); word-break: keep-all; }
 #ticker { position: absolute; inset: 0; padding: 0 10px; display: flex; align-items: center; color: var(--dim); white-space: nowrap; overflow: hidden; }
 #ticker.retreat-preview { display: block; line-height: 28px; overflow-x: auto; color: var(--gold); }
 #relay-hint:not([hidden]) + #ticker { display: none; }
-#relay-hint:not([hidden]) + #ticker.retreat-preview { display: block; position: static; line-height: 22px; }
+#relay-hint:not([hidden]) + #ticker.retreat-preview:not(.retreat-outcomes) { display: block; position: static; line-height: 22px; }
+#ticker.retreat-outcomes, #relay-hint:not([hidden]) + #ticker.retreat-outcomes {
+  display: block;
+  position: static;
+  padding: 2px 10px;
+  white-space: pre-line;
+  line-height: 15px;
+  overflow-wrap: anywhere;
+}
 #tally { position: absolute; inset: 0; padding: 0 8px; display: flex; align-items: center; gap: 3px; background: #100c22; overflow: hidden; white-space: nowrap; }
 #tally:empty { display: none; }
 #tally span { font: 10px/18px var(--px9); padding: 0 4px; background: #33295c; animation: slide .12s steps(3); flex: none; }
@@ -230,6 +239,9 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #row2 { flex: none; display: flex; gap: 6px; height: 46px; }
 #b-retreat { flex: 1; background: var(--win2); border: 2px solid var(--line); box-shadow: 0 3px 0 #08050f; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; }
 #b-retreat small { font: 10px var(--px9); color: var(--dim); }
+#b-retreat.armed { min-width: 0; }
+#b-retreat.armed small { max-width: 100%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+#b-retreat.armed small:only-of-type { white-space: normal; overflow-wrap: anywhere; }
 #b-heir { display: none; flex: 1.6; text-align: left; padding: 2px 10px; background: #3a2a08; border: 2px solid var(--gold); box-shadow: inset 0 -3px 0 #241a04, 0 3px 0 #08050f; position: relative; overflow: hidden; }
 #b-heir.on { display: block; }
 #b-heir small { display: block; font: 10px/12px var(--px9); color: var(--gold); }
@@ -248,6 +260,8 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 
 #result .in h3 { font: 22px var(--px14); color: var(--gold); margin-bottom: 6px; }
 #result .gain small { color: var(--dim); font: 10px var(--px9); }
+#result .contract-met { color: var(--gold); }
+#result .contract-failed { color: var(--coral); }
 #result .fallen { margin: 8px 0; } #result .fallen small { display: block; font: 10px var(--px9); color: var(--coral); margin-bottom: 4px; }
 #result .fallen div { display: flex; gap: 6px; flex-wrap: wrap; }
 #result .heirline { margin: 6px 0; padding: 6px 8px; border: 2px solid var(--gold); background: #2a1f06; }
@@ -468,6 +482,10 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 .relay-seat .recruit-flag { margin-left: auto; text-align: right; color: var(--gold); }
 .relay-link { min-height: 30px; display: flex; justify-content: center; flex-direction: column; padding: 4px 6px; color: var(--gold); font-size: 12px; }
 .relay-link small { display: block; color: var(--coral); }
+.relay-alternative { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px; margin: 8px 0; }
+.relay-alternative b { font: 14px/20px var(--px); }
+.relay-alternative small { display: block; color: var(--gold); }
+.relay-alternative .btn { flex: none; }
 .reserve-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
 
 .run-event .run-scene { min-height: 190px; }
@@ -886,6 +904,12 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
 
 .meta-prep-slots > * { flex: 1 1 92px; min-width: 0; }
 
+.meta-prep-contract { margin-top: 8px; }
+.meta-contract-options { display: grid; gap: 6px; }
+.meta-contract-options .btn.big small { font: 12px/17px var(--px); }
+.meta-contract-options .btn.big .gain { color: var(--gold); margin-top: 0; }
+.meta-nightmare-record.btn { width: auto; padding-inline: 8px; }
+
 .meta-prep-leads {
   position: relative;
   display: flex;
@@ -963,6 +987,14 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #6a55b8) drop-shadow(-1px 0 
   justify-content: space-between;
   gap: 8px;
   align-items: center;
+}
+
+.meta-recruit-body .meta-contract-stamp {
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  margin: 5px 0;
+  padding: 4px 8px;
+  width: fit-content;
 }
 
 .meta-recruit-list {
@@ -8242,6 +8274,8 @@ const BattleRuntime = {
       turnStartHp: 0,
       gained: [],
       heirloomsUsed: 0,
+      heirloomKills: 0,
+      rescues: [],
       enemyDowns: [],
       bestHit: null,
       charge: 0,
@@ -8270,6 +8304,7 @@ const BattleRuntime = {
         if (calc && calc.by && /class="log-dmg"/.test(msg) && hit && Number(hit[1]) === calc.result.dmg) {
           const amount2 = calc.result.dmg;
           if (amount2 > (B.bestHit?.amount || 0)) B.bestHit = { amount: amount2, by: calc.by, skill: calc.info.skill };
+          if (calc.heirloom && amount2 > 0 && calc.hpBefore > 0 && calc.target.hp <= 0) B.heirloomKills++;
         }
         flush(hit ? Number(hit[1]) : 0);
         push({ t: "log", text, kind: kind || "" });
@@ -8689,6 +8724,8 @@ const BattleRuntime = {
       B.lastHit = { source, target, dmg: result.dmg };
       B.lastCalc = {
         target,
+        hpBefore: target.hp,
+        heirloom: !!skill.heirloom && cause?.kind === "act" && cause.source === source && target === b.enemy,
         by: target === b.enemy ? source.baseCardId || source.proto?.baseCardId || source.proto?.id : null,
         result,
         info: {
@@ -9035,6 +9072,8 @@ const BattleRuntime = {
         if (!canRetreat()) return [];
         return run(() => {
           const b = host.battle, player = currentPlayer(), next = nextAlly();
+          const [minimum] = currentIntent().dmg || [0];
+          B.rescues.push({ retreated: host.state.deck[player.pos], incoming: host.state.deck[next.pos], lethal: player.hp <= minimum });
           player.isDead = true;
           player.retreated = true;
           B.retreatUsed = true;
@@ -9096,8 +9135,10 @@ const BattleRuntime = {
           outcome: B.outcome,
           survivors: survivors(),
           retreated: host.battle.players.map((p) => !!p?.retreated),
+          rescues: B.rescues.map((rescue) => ({ ...rescue })),
           heirloomsGained: heirloomsGained(),
           heirloomsUsed: B.heirloomsUsed,
+          heirloomKills: B.heirloomKills,
           lastStands: Number(B.lastStandDone),
           enemyDowns: B.enemyDowns.map((down) => ({ ...down })),
           bestHit: B.bestHit && { ...B.bestHit },
@@ -9144,6 +9185,11 @@ const BattleRuntime = {
   var POSITION = ["\uC120\uBD09", "\uC911\uACAC", "\uB300\uC7A5"];
   var GRADE_BUCKETS = ["normal", "rare", "epic", "legend"];
   var gradeOf = (grade) => GRADE_BUCKETS.includes(grade) ? grade : "legend";
+  var gradeRank = { normal: 0, rare: 1, epic: 2, legend: 3, transcendence: 3, event: 2 };
+  function strength(card) {
+    const { hp, atk, matk } = card.stats;
+    return hp / 4 + Math.max(atk, matk) + gradeRank[card.grade] * 30;
+  }
   var power = (s) => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 2);
   var clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   function create2(core2, assets2) {
@@ -9375,6 +9421,42 @@ const BattleRuntime = {
     }
   };
 
+  // card_pixel/game/src/engine/meta.js
+  var meta_exports = {};
+  __export(meta_exports, {
+    PROFILE_VERSION: () => PROFILE_VERSION,
+    applyRunEnd: () => applyRunEnd,
+    availableDungeons: () => availableDungeons,
+    contractsFor: () => contractsFor,
+    createProfile: () => createProfile,
+    notebookView: () => notebookView,
+    recordRunProgress: () => recordRunProgress,
+    setExpeditionParty: () => setExpeditionParty,
+    setSeals: () => setSeals,
+    startView: () => startView
+  });
+
+  // card_pixel/game/src/content/contracts.js
+  var CONTRACT_ESCROW = 1;
+  var CONTRACT_PAYOUT = 3;
+  var CONTRACTS = {
+    rescue: {
+      id: "rescue",
+      name: "\uC0B4\uC544\uC11C \uB118\uAE34 \uC790\uB9AC",
+      rule: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC4F0\uB7EC\uC9C8 \uC608\uACE0\uB97C \uBC1B\uC740 \uB3D9\uB8CC\uB97C \uBB3C\uB7EC\uB098\uAC8C \uD558\uACE0, \uADF8 \uB3D9\uB8CC\uC640 \uBC1B\uC740 \uB3D9\uB8CC\uAC00 \uD568\uAED8 \uC0B4\uC544\uC11C \uC774\uAE34\uB2E4."
+    },
+    heirloom: {
+      id: "heirloom",
+      name: "\uB9C8\uC9C0\uB9C9 \uC720\uD488",
+      rule: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC720\uD488 \uAE30\uC220\uC758 \uBA85\uC911\uC73C\uB85C \uC801\uC744 \uC4F0\uB7EC\uB728\uB9AC\uACE0 \uC774\uAE34\uB2E4."
+    },
+    elite: {
+      id: "elite",
+      name: "\uB458\uC774 \uB3CC\uC544\uC628 \uC815\uC608\uC804",
+      rule: "2\uCE35 \uC704\uD5D8 \uBB38\uC744 \uC9C0\uB098 6\uCE35 \uC815\uC608\uB97C \uACE0\uB974\uACE0, \uC815\uC608\uC804\uC5D0 \uB098\uC120 \uB3D9\uB8CC \uB458 \uC774\uC0C1\uC774 \uC0B4\uC544\uC11C \uC774\uAE34\uB2E4."
+    }
+  };
+
   // card_pixel/game/src/content/notebook.js
   var NOTEBOOK = [
     { id: 1, title: "\uCCAB \uC0DD\uD658", opens: ["hub", "recruiting", "lead"] },
@@ -9403,6 +9485,7 @@ const BattleRuntime = {
     chooseStartPick: () => chooseStartPick,
     confirmOrder: () => confirmOrder,
     createRun: () => createRun,
+    defaultParty: () => defaultParty,
     doorEnemies: () => doorEnemies,
     doorStart: () => doorStart,
     equipRelic: () => equipRelic,
@@ -9414,6 +9497,7 @@ const BattleRuntime = {
     springDraw: () => springDraw,
     springPick: () => springPick,
     springTake: () => springTake,
+    suggestOrder: () => suggestOrder,
     takeTreasure: () => takeTreasure
   });
 
@@ -9490,6 +9574,7 @@ const BattleRuntime = {
   }
   function join(run, id) {
     run.bench.push(id);
+    run.joinOrder.push(id);
     seeCharacters(run, [id]);
     if (run.introHeirlooms[id]) {
       run.heirlooms[id] = run.introHeirlooms[id];
@@ -10115,7 +10200,7 @@ const BattleRuntime = {
     }
     return run;
   }
-  function createRun({ core: core2, roster: roster2, dungeonId, difficulty = "normal", seed = 0, profileView = {}, plain = false }) {
+  function createRun({ core: core2, roster: roster2, dungeonId, difficulty = "normal", seed = 0, profileView = {}, plain = false, contract = null }) {
     dungeonId ??= profileView.dungeonId || "dawn_forest";
     const dungeon = DUNGEONS[dungeonId];
     if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError("Unknown dungeon: " + dungeonId);
@@ -10127,6 +10212,9 @@ const BattleRuntime = {
       throw new RangeError("Locked nightmare: " + dungeonId);
     }
     const intro = dungeon.layout === "intro";
+    if (contract !== null && (typeof contract !== "string" || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== "nightmare" || !profileView.nightmareUnlocks?.includes(dungeonId))) {
+      throw new RangeError("Unavailable contract: " + String(contract));
+    }
     const rng = { state: seed >>> 0 };
     const seals = profileView.seals || [];
     const companions = intro ? [] : (profileView.companions || []).filter((id) => roster2.allies.includes(id) && !seals.includes(id));
@@ -10158,12 +10246,24 @@ const BattleRuntime = {
       recruited: (profileView.recruited || []).slice(),
       profileShard: shard,
       bench: [],
+      joinOrder: [],
+      lastParty: null,
       fallen: [],
       released: [],
       heirlooms: {},
       blessings: {},
       relics: [],
       crystals: intro ? 0 : 1,
+      contract: contract === null ? null : {
+        id: contract,
+        met: false,
+        metAtFloor: null,
+        riskDoorTaken: false,
+        escrowed: 0,
+        paid: 0,
+        failed: false
+      },
+      guide: { bossOrder: profileView.bossOrder ?? true },
       eligible: [],
       gateSurvivors: [],
       reserved: null,
@@ -10270,6 +10370,7 @@ const BattleRuntime = {
     if (run.phase !== "map" || !Number.isInteger(index) || !run.doors[index]) return invalid("invalid_door");
     run.room = { ...copy(run.doors[index]), status: "service", party: null };
     run.phase = "room";
+    if (run.contract && run.floor === 2 && run.room.risk) run.contract.riskDoorTaken = true;
     const { core: core2, roster: roster2 } = dependencies.get(run);
     if (run.room.regionChoice) run.region = copy(run.room.regionChoice);
     if (run.room.enemies.length) run.room.status = "order";
@@ -10279,6 +10380,15 @@ const BattleRuntime = {
     if (run.room.type === "altar") run.pending = { kind: "altar", rolls: 0, roll: null };
     if (run.room.type === "event") run.pending = { kind: "event", choices: eventChoices(run, core2, roster2) };
     return { ok: true, room: copy(run.room), pending: copy(run.pending) };
+  }
+  function defaultParty(run) {
+    const party = (run.lastParty || [null, null, null]).map((id) => run.bench.includes(id) ? id : null);
+    const reserves = (run.joinOrder ?? run.bench).filter((id) => run.bench.includes(id) && !party.includes(id));
+    return party.map((id) => id ?? reserves.shift() ?? null);
+  }
+  function suggestOrder(run) {
+    const { roster: roster2 } = dependencies.get(run);
+    return run.bench.slice().sort((a, b) => strength(roster2.card(b)) - strength(roster2.card(a))).slice(0, 3).reverse();
   }
   function confirmOrder(run, ids) {
     if (run.phase !== "room" || run.room?.status !== "order") return invalid("no_battle_to_order");
@@ -10291,6 +10401,7 @@ const BattleRuntime = {
     if (run.room.type === "borrowed" && INTRO.party.some((id, index) => party[index] !== id)) return invalid("fixed_party");
     run.bench = [...fighters, ...run.bench.filter((id) => !fighters.includes(id))];
     run.room.party = party;
+    run.lastParty = party.slice();
     run.room.status = "battle";
     return { ok: true, party: party.slice() };
   }
@@ -10358,8 +10469,44 @@ const BattleRuntime = {
     };
     run.reserved = null;
   }
+  function meetsContract(run, summary, survivors) {
+    switch (run.contract.id) {
+      case "rescue":
+        return summary.rescues?.some(({ retreated, incoming, lethal }) => lethal && survivors.includes(retreated) && survivors.includes(incoming));
+      case "heirloom":
+        return summary.heirloomKills > 0;
+      case "elite":
+        return run.floor === 6 && run.room.type === "elite" && run.contract.riskDoorTaken && survivors.length >= 2;
+    }
+  }
+  function settleContract(run, summary, survivors, wiped) {
+    const contract = run.contract;
+    if (!contract) return { progress: null, crystals: 0 };
+    const won = summary.outcome === "win";
+    const { floor } = run;
+    let crystals = 0;
+    let metNow = false;
+    if (won && (floor === 4 || floor === 6) && !contract.met && meetsContract(run, summary, survivors)) {
+      contract.met = metNow = true;
+      contract.metAtFloor = floor;
+    }
+    if (won && floor === 4 && run.room.type === "gate") {
+      contract.escrowed = CONTRACT_ESCROW;
+      crystals -= CONTRACT_ESCROW;
+    }
+    if (floor === 6) {
+      if (won && !wiped && contract.met) {
+        contract.paid = CONTRACT_PAYOUT;
+        crystals += CONTRACT_PAYOUT;
+      } else {
+        contract.failed = true;
+      }
+    }
+    const { id, met, escrowed, paid, failed } = contract;
+    return { progress: { id, met, metNow, escrowed, paid, failed }, crystals };
+  }
   function validSummary(summary, room) {
-    return summary && ["win", "lose"].includes(summary.outcome) && Array.isArray(summary.survivors) && room.party.every((id, index) => id === null || typeof summary.survivors[index] === "boolean") && [summary.turns, summary.heirloomsUsed, summary.lastStands].every((n) => Number.isInteger(n) && n >= 0) && Array.isArray(summary.retreated) && summary.retreated.every((retreated) => typeof retreated === "boolean") && (!summary.bestHit || Number.isFinite(summary.bestHit.amount) && summary.bestHit.amount >= 0 && typeof summary.bestHit.by === "string" && typeof summary.bestHit.skill === "string") && (!summary.bet || typeof summary.bet.kind === "string" && typeof summary.bet.won === "boolean") && Array.isArray(summary.heirloomsGained) && summary.heirloomsGained.every((entry) => typeof entry?.to === "string" && typeof entry.from === "string" && typeof entry.name === "string") && Array.isArray(summary.enemyDowns) && summary.enemyDowns.every((entry) => Number.isInteger(entry?.idx) && entry.idx >= 0 && entry.idx < room.enemies.length && typeof entry.treasure === "boolean");
+    return summary && ["win", "lose"].includes(summary.outcome) && Array.isArray(summary.survivors) && room.party.every((id, index) => id === null || typeof summary.survivors[index] === "boolean") && [summary.turns, summary.heirloomsUsed, summary.lastStands].every((n) => Number.isInteger(n) && n >= 0) && (summary.heirloomKills === void 0 || Number.isInteger(summary.heirloomKills) && summary.heirloomKills >= 0) && (summary.rescues === void 0 || Array.isArray(summary.rescues) && summary.rescues.every((entry) => typeof entry?.retreated === "string" && typeof entry.incoming === "string" && typeof entry.lethal === "boolean")) && Array.isArray(summary.retreated) && summary.retreated.every((retreated) => typeof retreated === "boolean") && (!summary.bestHit || Number.isFinite(summary.bestHit.amount) && summary.bestHit.amount >= 0 && typeof summary.bestHit.by === "string" && typeof summary.bestHit.skill === "string") && (!summary.bet || typeof summary.bet.kind === "string" && typeof summary.bet.won === "boolean") && Array.isArray(summary.heirloomsGained) && summary.heirloomsGained.every((entry) => typeof entry?.to === "string" && typeof entry.from === "string" && typeof entry.name === "string") && Array.isArray(summary.enemyDowns) && summary.enemyDowns.every((entry) => Number.isInteger(entry?.idx) && entry.idx >= 0 && entry.idx < room.enemies.length && typeof entry.treasure === "boolean");
   }
   function settleBattle(run, input) {
     if (!battleRoom(run)) return invalid("no_active_battle");
@@ -10378,7 +10525,7 @@ const BattleRuntime = {
       run.stats.retries++;
       room.status = "order";
       room.party = null;
-      return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null };
+      return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null, contract: null };
     }
     const next = run.nextBattle;
     run.nextBattle = null;
@@ -10401,12 +10548,13 @@ const BattleRuntime = {
     else if (final) run.result = "win";
     const { roster: roster2 } = dependencies.get(run);
     const downs = [...new Map(summary.enemyDowns.map((entry) => [entry.idx, entry])).values()];
-    let crystals = 0;
+    const contract = settleContract(run, summary, survivors, wiped);
+    let crystals = contract.crystals;
     const betWon = win && !!next?.bet && summary.bet?.kind === next.bet.kind && summary.bet?.won === true;
     const betRelic = betWon ? next.reward.relic : null;
     let relic = null;
     if (win) {
-      crystals = (room.reward || 0) + 2 * downs.filter((entry) => entry.treasure).length;
+      crystals += (room.reward || 0) + 2 * downs.filter((entry) => entry.treasure).length;
       if (survivors.some((id) => roster2.card(id).trait?.type === "looter")) crystals++;
       if (betWon) crystals += next.reward.crystals || 0;
       run.crystals += crystals;
@@ -10418,6 +10566,7 @@ const BattleRuntime = {
         run.introHeirlooms = run.heirlooms;
         run.heirlooms = {};
         run.bench = [];
+        run.joinOrder = [];
       }
     }
     room.status = "resolved";
@@ -10432,6 +10581,7 @@ const BattleRuntime = {
       crystals,
       relic,
       bet: next?.bet ? { ...next.bet, won: betWon } : null,
+      contract: contract.progress,
       result: run.result,
       pending: copy(run.pending)
     };
@@ -10579,6 +10729,7 @@ const BattleRuntime = {
       notebook: { chapters: [], firstLead: null },
       unlockedDungeons: [INTRO2],
       nightmareUnlocks: [],
+      contractStamps: {},
       records: { runs: 0, clears: {}, bestHit: null, longestServing: null, appliedRuns: [] },
       seenCharacters: [],
       seenRelics: []
@@ -10592,6 +10743,11 @@ const BattleRuntime = {
       background: background2,
       difficulties: profile.nightmareUnlocks.includes(id) ? ["normal", "nightmare"] : ["normal"]
     }));
+  }
+  function contractsFor(profile, dungeonId) {
+    const earned = profile.contractStamps?.[dungeonId];
+    const stamps = Object.fromEntries(Object.keys(CONTRACTS).map((id) => [id, earned?.[id] ?? null]));
+    return { unlocked: profile.nightmareUnlocks.includes(dungeonId), stamps };
   }
   function notebookView(profile) {
     return NOTEBOOK.map((chapter) => ({ ...chapter, opens: chapter.opens.slice(), completed: completed(profile, chapter.id) }));
@@ -10625,13 +10781,14 @@ const BattleRuntime = {
       sealSlots: sealSlots(profile, dungeonId),
       reserved: profile.reserved,
       introCleared: cleared(profile, INTRO2),
+      bossOrder: !Object.keys(DUNGEONS).some((id) => id !== INTRO2 && cleared(profile, id)),
       recruited,
       runNumber: profile.records.runs + 1,
       unlockedDungeons: profile.unlockedDungeons.slice(),
       nightmareUnlocks: profile.nightmareUnlocks.slice()
     };
   }
-  var reject = (profile, reason) => ({ profile, announce: { ok: false, reason } });
+  var reject = (profile, reason, extra) => ({ profile, announce: { ok: false, reason, ...extra } });
   function setExpeditionParty(profile, { lead = null, companions = [], preferredCompanion = null } = {}) {
     const recruited = Object.keys(profile.recruits);
     if (lead !== null && (!completed(profile, 1) || !recruited.includes(lead))) return reject(profile, "invalid_lead");
@@ -10683,14 +10840,15 @@ const BattleRuntime = {
     if (regionalClears >= DUNGEONS[TOWER].unlock.count) addChapter(profile, 6);
   }
   function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) {
-    if (run.phase !== "done" || !run.result) return reject(profile, "run_not_done");
-    if (profile.records.appliedRuns.includes(run.id)) return reject(profile, "already_applied");
+    const noStamp = { stamp: null };
+    if (run.phase !== "done" || !run.result) return reject(profile, "run_not_done", noStamp);
+    if (profile.records.appliedRuns.includes(run.id)) return reject(profile, "already_applied", noStamp);
     const rewards = runRewards(run);
     if (!Array.isArray(recruits) || recruits.length > rewards.recruitLimit || new Set(recruits).size !== recruits.length || recruits.some((id) => !rewards.recruitable.includes(id) || Object.hasOwn(profile.recruits, id))) {
-      return reject(profile, "invalid_recruits");
+      return reject(profile, "invalid_recruits", noStamp);
     }
     if (shard !== null && (!rewards.shardCandidates.includes(shard) || Object.hasOwn(profile.recruits, shard))) {
-      return reject(profile, "invalid_shard");
+      return reject(profile, "invalid_shard", noStamp);
     }
     const { profile: next } = recordRunProgress(profile, run);
     const { dungeonId, difficulty } = run;
@@ -10702,6 +10860,7 @@ const BattleRuntime = {
     if (run.profileShard && run.profileShard === next.reserved) next.reserved = null;
     if (shard) next.reserved = shard;
     const bonds = [];
+    let stamp = null;
     if (run.result === "win") {
       const clears = records.clears[dungeonId] ||= { normal: 0, nightmare: 0 };
       clears[difficulty]++;
@@ -10715,6 +10874,14 @@ const BattleRuntime = {
       if (!next.lead && recruits.length) next.lead = recruits[0];
       if (dungeonId === INTRO2) addChapter(next, 1);
       else {
+        const contractId = run.contract?.id;
+        if (difficulty === "nightmare" && run.contract?.met && Object.hasOwn(CONTRACTS, contractId)) {
+          const stamps = (next.contractStamps ||= {})[dungeonId] ||= {};
+          if (!Object.hasOwn(stamps, contractId)) {
+            stamps[contractId] = run.id;
+            stamp = { dungeonId, contractId };
+          }
+        }
         addChapter(next, 4);
         next.nightmareUnlocks = union(next.nightmareUnlocks, [dungeonId]);
         if (next.notebook.firstLead && run.lead && run.lead !== next.notebook.firstLead && run.gateSurvivors.includes(run.lead) && run.bench.includes(run.lead) && Object.hasOwn(profile.recruits, run.lead)) addChapter(next, 5);
@@ -10733,6 +10900,7 @@ const BattleRuntime = {
         bonds,
         shard,
         returned,
+        stamp,
         chapters: next.notebook.chapters.filter((id) => !completed(profile, id)),
         dungeons: next.unlockedDungeons.filter((id) => !profile.unlockedDungeons.includes(id)),
         nightmares: next.nightmareUnlocks.filter((id) => !profile.nightmareUnlocks.includes(id))
@@ -10764,11 +10932,16 @@ const BattleRuntime = {
   function restoreRun(data, { core: core2, roster: roster2, migrate } = {}) {
     const run = readVersion(data, RUN_VERSION, migrate)?.run;
     if (!run || !Object.hasOwn(DUNGEONS, run.dungeonId) || !PHASES.includes(run.phase) || !Number.isInteger(run.rng?.state) || run.rng.state < 0 || run.rng.state > 4294967295 || !Array.isArray(run.pool) || !Array.isArray(run.bench) || !Array.isArray(run.doors)) return null;
+    run.contract ??= null;
+    run.lastParty ??= null;
+    run.guide ??= { bossOrder: false };
+    run.joinOrder ??= run.bench.slice();
     return bindRun(run, { core: core2, roster: roster2 });
   }
   function restoreProfile(data, { migrate } = {}) {
     const profile = readVersion(data, PROFILE_VERSION, migrate);
     if (!profile?.recruits || !profile.records || !Array.isArray(profile.notebook?.chapters) || !Array.isArray(profile.unlockedDungeons) || !Array.isArray(profile.nightmareUnlocks)) return null;
+    profile.contractStamps ??= {};
     return profile;
   }
   function createSaveStore(storage2, { key = "relaymare.session", core: core2, roster: roster2, migrateRun, migrateProfile } = {}) {
@@ -11171,13 +11344,13 @@ const BattleRuntime = {
     bars.forEach((bar, index) => {
       const source = bar < 0 ? progression.length + bar : bar;
       const [root, ...voicing] = theme.chords[progression[source]].map(midi);
-      function note(part, pitch, beat2, length, strength = 1) {
+      function note(part, pitch, beat2, length, strength2 = 1) {
         events.push({
           part,
           pitch,
           offset: index * barDuration + beat2 * secondsPerBeat,
           duration: length * secondsPerBeat,
-          strength
+          strength: strength2
         });
       }
       for (const pitch of voicing) note(pad, pitch, 0, beats, 3 / voicing.length);
@@ -11190,8 +11363,8 @@ const BattleRuntime = {
         beat += length;
       }
       if (theme.once && index === bars.length - 1) return;
-      for (const [start, part, strength] of hits) {
-        if (start < beats) note(part, 0, start, Math.min(beats - start, 0.5), strength);
+      for (const [start, part, strength2] of hits) {
+        if (start < beats) note(part, 0, start, Math.min(beats - start, 0.5), strength2);
       }
     });
     events.sort((a, b) => a.offset - b.offset);
@@ -11256,7 +11429,7 @@ const BattleRuntime = {
       envelope.gain.linearRampToValueAtTime(0, end);
       attachSource(deck, source, filter, envelope, at, end);
     }
-    function percussion(deck, part, strength, at, duration) {
+    function percussion(deck, part, strength2, at, duration) {
       const { pitch, color } = deck.score.kit;
       if (part === "kick") {
         synth(
@@ -11264,7 +11437,7 @@ const BattleRuntime = {
           "sine",
           pitch * 1.6,
           360,
-          0.046 * strength,
+          0.046 * strength2,
           8e-3,
           0.16,
           at,
@@ -11287,27 +11460,27 @@ const BattleRuntime = {
       filter.type = "bandpass";
       filter.frequency.value = snare ? color : color * 1.8;
       envelope.gain.setValueAtTime(0, at);
-      envelope.gain.linearRampToValueAtTime(strength * (snare ? 0.031 : 0.018), at + 6e-3);
+      envelope.gain.linearRampToValueAtTime(strength2 * (snare ? 0.031 : 0.018), at + 6e-3);
       envelope.gain.linearRampToValueAtTime(0, end);
       attachSource(deck, source, filter, envelope, at, end);
     }
     function scheduleEvent(deck, event, at) {
-      const { part, pitch, duration, strength } = event;
+      const { part, pitch, duration, strength: strength2 } = event;
       const instrument = INSTRUMENTS[part];
       if (!instrument) {
-        percussion(deck, part, strength, at, duration);
+        percussion(deck, part, strength2, at, duration);
         return;
       }
       const [wave, cutoff, level, attack, release, ratio, overtone] = instrument;
       const hz = frequency(pitch);
-      synth(deck, wave, hz, cutoff, level * strength, attack, release, at, duration);
+      synth(deck, wave, hz, cutoff, level * strength2, attack, release, at, duration);
       if (ratio) {
         synth(
           deck,
           "sine",
           hz * ratio,
           cutoff,
-          level * strength * overtone,
+          level * strength2 * overtone,
           attack,
           release,
           at,
@@ -12664,6 +12837,7 @@ const BattleRuntime = {
       const node = $("#ticker");
       node.textContent = text;
       node.classList.toggle("retreat-preview", retreat);
+      node.classList.toggle("retreat-outcomes", retreat && text.includes("\n"));
     }
     function showIntent(intent, cd, foe) {
       const n = $("#intent"), c = $("#pf-cd");
@@ -12886,9 +13060,10 @@ const BattleRuntime = {
       const html = (list.length ? '<ul class="stl">' + list.map((id) => '<li><i class="good" style="background:' + (FIELD[id] || [0, "#33295c"])[1] + ';color:#120e24">' + esc(core2.BUFF_NAMES[id] || id) + "</i>" + esc(FIELD_INFO[id] || "") + "</li>").join("") + "</ul>" : '<p class="none">\uC9C0\uAE08 \uD558\uB298\uC5D0 \uAC78\uB9B0 \uD544\uB4DC \uBC84\uD504\uAC00 \uC5C6\uB2E4.</p>') + '<p class="sm">\uD544\uB4DC \uBC84\uD504\uB294 \uC544\uAD70\uC5D0\uAC8C\uB9CC \uC801\uC6A9\uB41C\uB2E4. \uCD5C\uB300 ' + max + "\uAC1C, \uB118\uCE58\uBA74 \uAC00\uC7A5 \uBA3C\uC800 \uAC74 \uAC83\uC774 \uC0AC\uB77C\uC9C4\uB2E4.</p>";
       openSheet("\uD558\uB298 \xB7 \uD544\uB4DC \uBC84\uD504", html);
     }
-    function battlefieldSheet(B) {
+    function battlefieldSheet(run, B) {
       if (!B.door) return;
       const region = REGIONS[B.door.region?.id], quirk = QUIRKS[B.door.quirk];
+      const contract = CONTRACTS[run.contract?.id];
       const block = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
       const slots = Array.from({ length: RELIC_LIMIT }, (_, index) => {
         const id = B.artifacts[index];
@@ -12896,7 +13071,7 @@ const BattleRuntime = {
         if (!relic) return "<li>\uBE48 \uCE78</li>";
         return "<li><b>" + esc(relic.name) + "</b>" + (id === B.temporaryRelic ? " \xB7 \uC774\uBC88 \uC804\uD22C\uB9CC" : "") + " \xB7 " + esc(relic.desc) + "</li>";
       });
-      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + '<h4>\uC7A5\uCC29 \uC720\uBB3C</h4><ul class="stl">' + slots.join("") + "</ul>");
+      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + (run.contract.met ? "\uB2EC\uC131" : "\uC544\uC9C1") + "</h4><p>" + esc(contract.rule) + "</p>" : "") + '<h4>\uC7A5\uCC29 \uC720\uBB3C</h4><ul class="stl">' + slots.join("") + "</ul>");
     }
     return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
   }
@@ -13083,11 +13258,22 @@ const BattleRuntime = {
         const line = preview.intent.dmg ? next.name + (hasFinalConsonant(next.name) ? "\uC774 " : "\uAC00 ") + skill + (hasFinalConsonant(skill) ? "\uC744" : "\uB97C") + " \uBC1B\uC74C \xB7 \uBA85\uC911 \uC2DC " + damageRange(preview.dmg) + " \xB7 HP " + next.hp + "\u2192" + damageRange(hp) : next.name + " \uCD9C\uC804 \xB7 \uC801 " + preview.intent.name + " \xB7 HP " + next.hp + "\u2192" + next.hp;
         const pending = [...new Set(B.D.delayed?.filter((attack) => attack.by === B.D.cur).map((attack) => attack.name))];
         const warning = pending.length ? "\uC608\uC57D\uD55C " + pending.join("\xB7") + "\uB3C4 \uCDE8\uC18C\uB41C\uB2E4" : "";
+        let outcomes;
+        const minimum = B.intent?.dmg?.[0];
+        if (minimum != null && current.hp <= minimum) {
+          const form = card(current.form || B.party[B.D.cur]);
+          const heir = form && heirloomSkill(form);
+          outcomes = [
+            "\uBB3C\uB7EC\uB098\uBA74 " + next.name + " HP " + next.hp + "\u2192" + damageRange(hp),
+            "\uC4F0\uB7EC\uC9C0\uBA74 " + next.name + "\uC5D0\uAC8C " + (heir ? heir.name + " \xD7" + HEIRLOOM_POWER : "\uB118\uAE38 \uC720\uD488 \uC5C6\uC74C")
+          ];
+        }
         B.armed = true;
         r.className = "armed";
-        r.innerHTML = esc(current.name) + " \uBB3C\uB7EC\uB098\uAE30<small>" + esc(warning || "\uD134 \uC18C\uBAA8 \xB7 \uC720\uD488 \uC5C6\uC74C") + "</small>";
+        const notes = warning ? [warning] : outcomes || ["\uD134 \uC18C\uBAA8 \xB7 \uC720\uD488 \uC5C6\uC74C"];
+        r.innerHTML = esc(current.name) + " \uBB3C\uB7EC\uB098\uAE30" + notes.map((note) => "<small>" + esc(note) + "</small>").join("");
         $("#tally").innerHTML = "";
-        ticker(line, true);
+        ticker(warning && outcomes ? outcomes.join("\n") : line, true);
         sfx.tap();
         return;
       }
@@ -13266,6 +13452,16 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/battle/view.js
+  function contractSettlement(floor, contract) {
+    if (!contract) return [];
+    const rows = [];
+    if (contract.metNow) rows.push('<p class="contract-met">\uACC4\uC57D \uB2EC\uC131</p>');
+    if (floor === 6) {
+      if (contract.paid) rows.push('<p class="gain">7\uCE35 \uC55E\uC5D0\uC11C \u25C6' + contract.paid + "</p>");
+      else if (contract.failed) rows.push('<p class="contract-failed">\uACC4\uC57D \uC2E4\uD328 \xB7 \uB9E1\uAE34 \u25C6' + (contract.escrowed || CONTRACT_ESCROW) + " \uC0AC\uB77C\uC9D0</p>");
+    }
+    return rows;
+  }
   function battleMarkup() {
     return '<section id="battle" class="screen"><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">\uC804\uC7A5\xB7\uC720\uBB3C</button><button id="b-speed">1\uBC30</button><button id="b-log">\uAE30\uB85D</button>' + tools() + '</header><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar"><div class="nm"><i id="pf-kind"></i><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="bar hp"><u id="pf-hp"></u></div><div class="row"><div class="chips" id="pf-chips"></div><div class="cd" id="pf-cd"></div></div></div><button class="sky" id="sky" aria-label="\uD558\uB298 \uC815\uBCF4"><i></i><i></i><i></i><span id="skyname"></span><small id="region-next"></small></button><div class="chips" id="pa-chips"></div><div class="intent" id="intent"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uB118\uAE30\uB294 \uC911</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><div id="panel"><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
   }
@@ -13403,7 +13599,7 @@ const BattleRuntime = {
     });
     $("#b-field").addEventListener("click", () => {
       sfx.tap();
-      details.battlefieldSheet(B);
+      details.battlefieldSheet(run, B);
     });
     $("#pa-chips").addEventListener("click", (ev) => {
       ev.stopPropagation();
@@ -14060,18 +14256,24 @@ const BattleRuntime = {
     function showResult(res, advance2) {
       const rows = [];
       if (res.wiped) rows.push("<p>\uB9C8\uC9C0\uB9C9 \uB3D9\uB8CC\uAC00 \uC801\uACFC \uD568\uAED8 \uC4F0\uB7EC\uC84C\uB2E4. \uC6D0\uC815\uC740 \uC5EC\uAE30\uC11C \uB05D\uB09C\uB2E4.</p>");
-      if (res.win && res.crystals) rows.push('<p class="gain">\uACB0\uC815 +' + res.crystals + " \xB7 \uBCF4\uC720 " + run.crystals + "</p>");
+      const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
+      if (res.win && battleCrystals > 0) rows.push('<p class="gain">\uACB0\uC815 +' + battleCrystals + " \xB7 \uBCF4\uC720 " + run.crystals + "</p>");
+      rows.push(...contractSettlement(run.floor, res.contract));
       if (res.fallen?.length) rows.push('<div class="fallen"><small>\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC</small><div>' + res.fallen.map((id) => '<span class="mini dead">' + face(id, 40) + "<b>" + esc(card(id).name) + "</b></span>").join("") + "</div></div>");
       for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>\uC720\uD488</b> ' + esc(card(g.to).name) + " \u2190 " + esc(card(g.from).name) + "\uC758 " + esc(g.name) + "</p>");
       if (res.bet) rows.push("<p>" + (res.bet.won ? "\uB0B4\uAE30 \uC131\uACF5" : "\uB0B4\uAE30 \uC2E4\uD328") + "</p>");
       const box = $("#result-in");
-      const label2 = run.room.type === "borrowed" ? "\uC0B4\uC544\uB0A8\uC740 \uB3D9\uB8CC \uAE68\uC6B0\uAE30" : "\uB2E4\uC74C \uCE35\uC73C\uB85C";
+      let label2 = "\uB2E4\uC74C \uCE35\uC73C\uB85C";
+      if (run.phase === "done") label2 = "\uC6D0\uC815 \uACB0\uACFC";
+      else if (run.room.type === "borrowed") label2 = "\uC0B4\uC544\uB0A8\uC740 \uB3D9\uB8CC \uAE68\uC6B0\uAE30";
+      else if (run.pending?.kind === "gate") label2 = "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1";
+      else if (res.relic?.equipped || run.pending?.kind === "relic") label2 = "\uC720\uBB3C \uD655\uC778";
       box.innerHTML = "<h3>" + (res.win ? "\uB3CC\uD30C" : "\uC804\uBA78") + "</h3>" + rows.join("") + '<button class="btn go" id="b-next">' + label2 + "</button>";
       $("#result").classList.add("on");
       $("#b-next").addEventListener("click", () => {
         sfx.tap();
         $("#result").classList.remove("on");
-        advance2();
+        advance2(res);
       });
     }
     function attach(expedition) {
@@ -14087,7 +14289,7 @@ const BattleRuntime = {
       battleContext = null;
       B.all = [];
     }
-    function restoreResult(expedition, advance2) {
+    function restoreResult(expedition, advance2, result = { win: true }) {
       attach(expedition);
       B.D = B.foe = B.bridge = null;
       B.allies = [];
@@ -14105,7 +14307,7 @@ const BattleRuntime = {
       show("battle");
       layout();
       lockPanel();
-      showResult({ win: true }, advance2);
+      showResult(result, advance2);
     }
     const review = {
       advance: St.advance,
@@ -14252,12 +14454,38 @@ const BattleRuntime = {
       return lines;
     }
     function reward(door, crystalLabel = "\uACB0\uC815") {
-      const crystals = door.reward;
+      const crystals = (door.reward ?? 0) - escrow(door);
       const relic = !door.final && artifacts.get(door.relic);
       return [
         crystals ? crystalLabel + " +" + crystals : "",
         door.type === "gate" && !door.final ? relic ? "\uADF8\uB9BC\uC790 1\uBA85 \uB610\uB294 " + relic.name : "\uADF8\uB9BC\uC790 1\uBA85" : relic?.name
       ].filter(Boolean).join(" \xB7 ");
+    }
+    function escrow(door) {
+      return run.floor === 4 && door.type === "gate" && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0;
+    }
+    function roomEffect(door) {
+      const count = run.bench.length;
+      if (run.floor === 7 && count < 3) {
+        if (door.type === "altar") return count ? "\uD604\uC7AC " + count + "\uBA85 \uC911 \uD55C \uBA85 \uCD95\uBCF5" : "\uCD95\uBCF5 \uBC1B\uC744 \uB3D9\uB8CC \uC5C6\uC74C";
+        if (door.type === "spring") {
+          const missing = 3 - count;
+          const cost = missing * COST.draw;
+          const short = cost - run.crystals;
+          return "\uD604\uC7AC " + count + "\uBA85 \xB7 \uACB0\uC815 " + cost + "\uAC1C\uB85C " + (missing === 1 ? "\uC14B\uC9F8" : missing + "\uBA85") + " \uAE68\uC6B0\uAE30" + (short > 0 ? " \xB7 \uACB0\uC815 " + short + "\uAC1C \uBD80\uC871" : "");
+        }
+      }
+      return ROOM_EFFECT[door.type] || "";
+    }
+    function contractGoal(door) {
+      const contract = CONTRACTS[run.contract?.id];
+      if (!contract) return "";
+      const { floor } = run;
+      const eliteRisk = contract.id === "elite" && floor === 2 && door.risk;
+      const relevant = contract.id === "elite" ? eliteRisk || floor === 6 && door.type === "elite" : floor === 4 || floor === 6;
+      if (!relevant) return "";
+      const goal = eliteRisk ? "\uC774 \uC704\uD5D8 \uBB38\uC744 \uC9C0\uB098 6\uCE35 \uC815\uC608\uC5D0 \uB3C4\uC804\uD55C\uB2E4." : contract.rule;
+      return "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + "</h4><p>" + esc(goal) + "</p>" + (run.contract.met ? "<p>\uB2EC\uC131</p>" : "");
     }
     function doorPreview(door) {
       if (door.enemies.length) {
@@ -14283,11 +14511,11 @@ const BattleRuntime = {
         isShowdown ? ROOM_NAMES[door.type] : door.type === "event" ? "\uC0AC\uAC74" : enemy?.name,
         door.enemies.length > 1 ? door.enemies.length + "\uC5F0\uC804" : ""
       ].filter(Boolean).join(" \xB7 ");
-      const rules = risks(door).join(" \xB7 ");
+      const rules = risks(door).join(" \xB7 ") || roomEffect(door);
       const gain = reward(door);
       const quirk = door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
       const chips = quirk + door.enemies.map(affixChips).join("");
-      return '<div class="door-plate win"><button class="door-entry" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules || ROOM_EFFECT[door.type] ? '<small class="door-risk">' + esc(rules || ROOM_EFFECT[door.type]) + "</small>" : "") + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      return '<div class="door-plate win"><button class="door-entry" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk">' + esc(rules) + "</small>" : "") + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
     const front = run.bench.slice(0, 3).map((id, index) => ({ id, role: POSITION[index], art: spr(id) }));
     front.sort((a, b) => a.art.h - b.art.h);
@@ -14337,7 +14565,8 @@ const BattleRuntime = {
       const rule = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
       const sky = startSky(door), gain = reward(door, "\uD655\uC815 \uACB0\uC815");
       const treasure = door.enemies.some((enemy) => enemy.affixes?.includes("treasure"));
-      openSheet(door.name, enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 1\uBA85 \uCC98\uCE58\uB9C8\uB2E4 \uACB0\uC815 +2</p>' : "") + rule(relic));
+      const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : "";
+      openSheet(door.name, enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow(door) ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + CONTRACT_ESCROW + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 1\uBA85 \uCC98\uCE58\uB9C8\uB2E4 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + rule(relic));
     }
   }
 
@@ -14349,11 +14578,20 @@ const BattleRuntime = {
     const { sfx } = audio2;
     const node = $("#order");
     const room = run.room;
-    const party = room.party?.slice() ?? [0, 1, 2].map((i) => run.bench[i] || null);
+    const party = room.party?.slice() ?? defaultParty?.(run)?.slice() ?? [0, 1, 2].map((i) => run.bench[i] || null);
     const all = core2.GameUtils.getAllCards();
     const qualifiers = room.type === "gate" || room.type === "boss";
     const quirk = QUIRKS[room.quirk];
+    const alternative = room.type === "boss" && run.guide?.bossOrder ? suggestOrder?.(run) : null;
+    const alternateSeats = alternative?.length ? [0, 1, 2].map((i) => alternative[i] ?? null) : null;
     let selected = -1;
+    function orderHint() {
+      if (!alternateSeats || alternateSeats.every((id, i) => id === party[i])) return "";
+      const last = alternative.at(-1);
+      const heir = heirloomPreview(core2, alternateSeats).find((entry) => entry.to === last && entry.skill);
+      const inheritance = heir ? card(last).name + "\uC5D0\uAC8C " + heir.skill.name + " \xD7" + HEIRLOOM_POWER : "\uB118\uAE38 \uACF5\uACA9 \uC5C6\uC74C";
+      return '<div class="relay-alternative win"><div><b>\uB2E4\uB978 \uC21C\uC11C \xB7 ' + esc(alternative.map((id) => card(id).name).join(" \u2192 ")) + "</b><small>" + esc(inheritance) + '</small></div><button class="btn" id="b-alternate-order">\uC774 \uC21C\uC11C\uB85C</button></div>';
+    }
     function render() {
       const previews = heirloomPreview(core2, party);
       const slots = party.map((id, i) => {
@@ -14374,8 +14612,14 @@ const BattleRuntime = {
       const bench = run.bench.filter((id) => !party.includes(id));
       const hazards = [quirk?.name, ...new Set(room.enemies.flatMap((enemy) => (enemy.affixes || []).map((id) => AFFIXES[id].name)))].filter(Boolean);
       const action = room.final && run.stats.retries ? "\uD3B8\uC131\uC744 \uBC14\uAFD4 \uC7AC\uB3C4\uC804" : "\uCD9C\uC804 (" + party.filter(Boolean).length + "\uBA85)";
-      node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", run.floor + "\uCE35") + '<div class="scroll"><button class="win run-opponents" id="b-opponents"><span>' + room.enemies.map((enemy) => '<span class="run-face">' + face(enemy.sprite, 32) + "</span>").join("") + "</span><span><b>" + esc(room.enemies.map((enemy) => enemy.name).join(" \u2192 ")) + "</b><small>" + esc((room.enemies.length > 1 ? room.enemies.length + "\uC5F0\uC804 \xB7 " : "") + room.name + (hazards.length ? " \xB7 " + hazards.join(" \xB7 ") : "")) + '</small></span></button><div class="relay-seats">' + slots + '</div><h3>\uB300\uAE30 \uB3D9\uB8CC</h3><p class="sm">\uC790\uB9AC\uB97C \uB204\uB978 \uB4A4, \uBC14\uAFC0 \uC790\uB9AC\uB098 \uB300\uAE30 \uB3D9\uB8CC\uB97C \uACE0\uB978\uB2E4.</p><div class="reserve-cards">' + (bench.map((id) => '<button class="win" data-bench="' + esc(id) + '"><span class="run-face">' + face(id, 44) + "</span><b>" + esc(card(id).name) + "</b></button>").join("") || "<p>\uC5C6\uC74C</p>") + '</div></div><div class="footer"><button class="btn go" id="b-go">' + action + "</button></div>";
+      node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", run.floor + "\uCE35") + '<div class="scroll"><button class="win run-opponents" id="b-opponents"><span>' + room.enemies.map((enemy) => '<span class="run-face">' + face(enemy.sprite, 32) + "</span>").join("") + "</span><span><b>" + esc(room.enemies.map((enemy) => enemy.name).join(" \u2192 ")) + "</b><small>" + esc((room.enemies.length > 1 ? room.enemies.length + "\uC5F0\uC804 \xB7 " : "") + room.name + (hazards.length ? " \xB7 " + hazards.join(" \xB7 ") : "")) + '</small></span></button><div class="relay-seats">' + slots + "</div>" + orderHint() + '<h3>\uB300\uAE30 \uB3D9\uB8CC</h3><p class="sm">\uC790\uB9AC\uB97C \uB204\uB978 \uB4A4, \uBC14\uAFC0 \uC790\uB9AC\uB098 \uB300\uAE30 \uB3D9\uB8CC\uB97C \uACE0\uB978\uB2E4.</p><div class="reserve-cards">' + (bench.map((id) => '<button class="win" data-bench="' + esc(id) + '"><span class="run-face">' + face(id, 44) + "</span><b>" + esc(card(id).name) + "</b></button>").join("") || "<p>\uC5C6\uC74C</p>") + '</div></div><div class="footer"><button class="btn go" id="b-go">' + action + "</button></div>";
       show("order");
+      $("#b-alternate-order", node)?.addEventListener("click", () => {
+        party.splice(0, party.length, ...alternateSeats);
+        selected = -1;
+        sfx.tap();
+        render();
+      });
       for (const button of $$("[data-slot]", node)) button.addEventListener("click", () => {
         const index = Number(button.dataset.slot);
         if (selected < 0) selected = index;
@@ -14868,9 +15112,24 @@ const BattleRuntime = {
       enterDoor,
       playMusic: () => host.runtime.music?.play(run.dungeonId)
     };
-    function afterBattle() {
+    function routeBattleReward(result) {
+      if (run.phase === "done" || result.retry || run.pending) {
+        route();
+        return true;
+      }
+      if (result.relic?.equipped) {
+        treasureScreen(run, ui, result.relic.id, { equipped: true });
+        return true;
+      }
+      return false;
+    }
+    function afterBattle(result) {
+      if (routeBattleReward(result)) return;
       if (run.room.type === "borrowed" && run.phase === "reward") return wakeSurvivors();
       leave();
+    }
+    function equippedRoomRelic() {
+      return ["elite", "gate"].includes(run.room.type) && run.relics.includes(run.room.relic);
     }
     function route() {
       if (run.phase === "done") return host.finish(run);
@@ -14893,22 +15152,13 @@ const BattleRuntime = {
         const options = battleOptions(run);
         return battle.startBattle(run, options, (summary) => {
           const result = command(settleBattle, summary);
-          if (result.ok) {
-            if (run.phase === "done" || result.retry || run.pending) {
-              route();
-              return null;
-            }
-            if (result.relic?.equipped) {
-              treasureScreen(run, ui, result.relic.id, { equipped: true });
-              return null;
-            }
-          }
+          if (result.ok && !contractSettlement(run.floor, result.contract).length && routeBattleReward(result)) return null;
           return result;
         }, afterBattle);
       }
       if (run.phase === "reward") {
         if (run.room.type === "borrowed") return battle.restoreResult(run, afterBattle);
-        if (["elite", "gate"].includes(run.room.type) && run.relics.includes(run.room.relic)) {
+        if (equippedRoomRelic()) {
           return treasureScreen(run, ui, run.room.relic, { equipped: true });
         }
         return battle.restoreResult(run, leave);
@@ -14926,7 +15176,11 @@ const BattleRuntime = {
       }
       if (run.room?.type === "awakening") return awakenScreen(run, ui);
     }
-    route();
+    const savedContract = run.phase === "reward" && run.room?.status === "resolved" && run.contract ? { ...run.contract, metNow: run.contract.metAtFloor === run.floor } : null;
+    if (contractSettlement(run.floor, savedContract).length) {
+      const relic = equippedRoomRelic() ? { id: run.room.relic, equipped: true } : null;
+      battle.restoreResult(run, afterBattle, { win: true, contract: savedContract, relic });
+    } else route();
     return battle.review;
   }
 
@@ -15119,7 +15373,8 @@ const BattleRuntime = {
         <thead><tr><th scope="col">\uC9C0\uC5ED</th><th scope="col">\uC5EC\uC815</th><th scope="col">\uC545\uBABD</th></tr></thead>
         <tbody>${Object.values(DUNGEONS).map((dungeon) => {
       const clear = records.clears[dungeon.id];
-      const nightmare2 = dungeon.nightmareRule ? (clear?.nightmare || 0) + "\uD68C" : "\u2014";
+      const count = (clear?.nightmare || 0) + "\uD68C";
+      const nightmare2 = !dungeon.nightmareRule ? "\u2014" : contractsFor ? `<button class="btn meta-nightmare-record" data-nightmare-record="${dungeon.id}" aria-label="${esc(dungeon.name)} \uC545\uBABD ${count} \xB7 \uACC4\uC57D \uB3C4\uC7A5">${count}</button>` : count;
       return `<tr><th scope="row">${esc(dungeon.name)}</th><td>${clear?.normal || 0}\uD68C</td><td>${nightmare2}</td></tr>`;
     }).join("")}</tbody>
       </table>
@@ -15127,11 +15382,19 @@ const BattleRuntime = {
     ${latest ? `<button class="btn" id="meta-latest-record">\uCD5C\uADFC \uC6D0\uC815 \xB7 ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ""}
     ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">\uC5D4\uB529 \uB2E4\uC2DC \uBCF4\uAE30</button>' : ""}
   `;
+    for (const button of $$("[data-nightmare-record]", node)) button.addEventListener("click", () => {
+      const dungeonId = button.dataset.nightmareRecord;
+      const stamps = contractsFor?.(profile, dungeonId)?.stamps;
+      openSheet(`${DUNGEONS[dungeonId].name} \xB7 \uACC4\uC57D \uB3C4\uC7A5`, `<div class="meta-sheet">${recordTable(
+        Object.values(CONTRACTS).map(({ id, name }) => [name, stamps?.[id] ? "\uD68D\uB4DD" : "\uBBF8\uD68D\uB4DD"])
+      )}</div>`);
+    });
     $("#meta-latest-record", node)?.addEventListener("click", () => runRecordSheet(latest, card, openSheet));
     $("#meta-replay-ending", node)?.addEventListener("click", replayEnding);
   }
 
   // card_pixel/game/src/ui/screens/dungeons.js
+  var { availableDungeons: availableDungeons2, setExpeditionParty: setExpeditionParty2, setSeals: setSeals2, startView: startView2 } = meta_exports;
   function regionalRule(dungeon) {
     const region = REGIONS[dungeon.region?.id];
     if (region) return region.desc;
@@ -15143,7 +15406,7 @@ const BattleRuntime = {
     region_clear_count: "\uC11C\uB85C \uB2E4\uB978 \uC138 \uC9C0\uC5ED \uC0DD\uD658"
   };
   function dungeonsScreen(node, { profile, roster: roster2, widgets: widgets2, prepare, quickStart }) {
-    const available = new Map(availableDungeons(profile).map((dungeon) => [dungeon.id, dungeon]));
+    const available = new Map(availableDungeons2(profile).map((dungeon) => [dungeon.id, dungeon]));
     const rows = Object.values(DUNGEONS).map((dungeon) => {
       if (!available.has(dungeon.id)) return `
       <article class="meta-panel meta-dungeon-locked">
@@ -15177,19 +15440,22 @@ const BattleRuntime = {
     const { card } = roster2;
     let sealsOpen = false;
     let leadRow;
-    function render(message = "", focusLead) {
+    let contract = null;
+    function render(message = "", focusLead, prepScroll = $("#sh-body").scrollTop) {
       const profile = currentProfile();
-      const entry = availableDungeons(profile).find((dungeon2) => dungeon2.id === dungeonId);
-      const view = startView(profile, dungeonId);
+      const entry = availableDungeons2(profile).find((dungeon2) => dungeon2.id === dungeonId);
+      const view = startView2(profile, dungeonId);
       const difficulty = profile.ui?.difficulty?.[dungeonId] || "normal";
+      const contracts = contractsFor?.(profile, dungeonId);
+      const canContract = difficulty === "nightmare" && contracts?.unlocked;
       const intro = dungeon.layout === "intro";
       const lead = view.lead;
       const selected = view.companions;
       const name = (id) => esc(card(id).name);
       const option = (id, chosen) => `<option value="${id}"${id === chosen ? " selected" : ""}>${name(id)}</option>`;
       const leadChoices = view.leadCandidates.filter((id) => !view.seals.includes(id));
-      const scroll = $("#sh-body").scrollTop;
       const leadScroll = leadRow?.scrollLeft;
+      const contractChoice = canContract ? CONTRACTS[contract] : null;
       sheets2.openSheet(`${dungeon.name} \xB7 \uC900\uBE44`, `<div class="meta-sheet meta-prep">
       <section class="meta-prep-section">
         <h4 id="meta-lead-heading">\uB300\uD45C</h4>
@@ -15221,13 +15487,16 @@ const BattleRuntime = {
         <h4>\uB09C\uC774\uB3C4</h4><div class="meta-prep-slots">${entry.difficulties.map((id) => `<button class="btn" data-difficulty="${id}"
           aria-pressed="${id === difficulty}">${DIFFICULTY_NAME[id]}</button>`).join("")}</div>
       </section>` : ""}
+      ${canContract ? `<button class="btn meta-prep-contract" id="meta-contract-choice">
+        \uC545\uBABD \uACC4\uC57D \xB7 ${esc(contractChoice?.name || "\uC5C6\uC74C")}
+      </button>` : ""}
       <section class="meta-prep-section">
         <h4>\uC9C0\uC5ED \uADDC\uCE59</h4><p>${esc(regionalRule(dungeon))}</p>
       </section>
       <p class="meta-feedback" role="status">${esc(message)}</p>
       <button class="btn go" id="meta-start-expedition">\uCD9C\uBC1C</button>
     </div>`);
-      $("#sh-body").scrollTop = scroll;
+      $("#sh-body").scrollTop = prepScroll;
       leadRow = $(".meta-prep-leads");
       if (leadRow) {
         const buttons = $$("[data-lead]", leadRow);
@@ -15253,7 +15522,7 @@ const BattleRuntime = {
       for (const button of $$(".meta-prep [data-seal]")) button.addEventListener("click", () => {
         const id = button.dataset.seal;
         const ids = view.seals.includes(id) ? view.seals.filter((sealed) => sealed !== id) : [...view.seals, id];
-        const result = setSeals(profile, dungeonId, ids, roster2);
+        const result = setSeals2(profile, dungeonId, ids, roster2);
         if (result.announce.ok) updateProfile(result.profile);
         const errors = { empty_grade: "\uAC01 \uB4F1\uAE09\uC5D0\uC11C \uD55C \uBA85 \uC774\uC0C1 \uB0A8\uACA8\uC57C \uD55C\uB2E4.", invalid_seals: `\uCD5C\uB300 ${view.sealSlots}\uBA85\uAE4C\uC9C0 \uBD09\uC778\uD560 \uC218 \uC788\uB2E4.` };
         sealsOpen = true;
@@ -15264,10 +15533,32 @@ const BattleRuntime = {
         updateProfile({ ...profile, ui: { ...profile.ui, difficulty: { ...profile.ui?.difficulty, [dungeonId]: button.dataset.difficulty } } });
         render();
       });
-      $("#meta-start-expedition").addEventListener("click", () => start(dungeonId, difficulty));
+      $("#meta-contract-choice")?.addEventListener("click", () => {
+        sealsOpen = $("#meta-seals")?.open || false;
+        const scroll = $("#sh-body").scrollTop;
+        function back() {
+          render("", void 0, scroll);
+          $("#meta-contract-choice")?.focus({ preventScroll: true });
+        }
+        sheets2.openSheet("\uC545\uBABD \uACC4\uC57D", `<div class="meta-sheet meta-contract-options">
+        <button class="btn" data-contract="" aria-pressed="${!contract}">\uACC4\uC57D \uC5C6\uC74C</button>
+        ${Object.values(CONTRACTS).map((entry2) => `<button class="btn big" data-contract="${entry2.id}" aria-pressed="${entry2.id === contract}">
+          <b>${esc(entry2.name)}</b><small>${esc(entry2.rule)}</small>
+          <small>\uBB38\uC9C0\uAE30 \uBCF4\uC0C1\uC5D0\uC11C \u25C6${CONTRACT_ESCROW} \uB9E1\uAE40 \xB7 6\uCE35\uAE4C\uC9C0 \uB2EC\uC131\uD558\uBA74 \u25C6${CONTRACT_PAYOUT}</small>
+          <small class="${contracts.stamps?.[entry2.id] ? "gain" : ""}">${contracts.stamps?.[entry2.id] ? "\uB3C4\uC7A5 \uD68D\uB4DD" : "\uB3C4\uC7A5 \uC5C6\uC74C"}</small>
+        </button>`).join("")}
+        <button class="btn" id="meta-contract-back">\uC900\uBE44\uB85C \uB3CC\uC544\uAC00\uAE30</button>
+      </div>`);
+        for (const button of $$(".meta-contract-options [data-contract]")) button.addEventListener("click", () => {
+          contract = button.dataset.contract || null;
+          back();
+        });
+        $("#meta-contract-back").addEventListener("click", back);
+      });
+      $("#meta-start-expedition").addEventListener("click", () => start(dungeonId, difficulty, contractChoice?.id ?? null));
       function updateParty(nextLead, companions, preferredCompanion, focusLead2) {
         sealsOpen = $("#meta-seals")?.open || false;
-        const result = setExpeditionParty(profile, { lead: nextLead, companions, preferredCompanion });
+        const result = setExpeditionParty2(profile, { lead: nextLead, companions, preferredCompanion });
         if (result.announce.ok) updateProfile(result.profile);
         render(result.announce.ok ? "" : "\uD3B8\uC131\uC744 \uB2E4\uC2DC \uD655\uC778\uD574 \uC8FC\uC138\uC694.", focusLead2);
       }
@@ -15276,9 +15567,11 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/screens/recruit.js
-  function recruitScreen(node, { run, rewards, profile, widgets: widgets2, sheets: sheets2, choices, endingPending, changeChoices, confirm }) {
+  function recruitScreen(node, { run, rewards, profile, widgets: widgets2, sheets: sheets2, choices, stamp, endingPending, changeChoices, confirm }) {
     const won = rewards.result === "win";
     const dungeon = DUNGEONS[run.dungeonId];
+    const stampDungeon = DUNGEONS[stamp?.dungeonId];
+    const stampContract = CONTRACTS[stamp?.contractId];
     const candidates = won ? rewards.recruitable : rewards.shardCandidates;
     const limit = won ? rewards.recruitLimit : 1;
     const mustRecruit = won && candidates.length > 0 && !profile.lead && run.firstIntroClear;
@@ -15293,6 +15586,7 @@ const BattleRuntime = {
         <h2>${won ? "\uB3D9\uB8CC \uC601\uC785" : "\uAFC8 \uC870\uAC01"}</h2>
         <button class="btn" id="meta-run-record">\uAE30\uB85D</button>
       </div>
+      ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} \xB7 ${esc(stampContract.name)}</p>` : ""}
       ${candidates.length ? `<p>${won ? `\uC0DD\uD658\uC790 \uC911 \uCD5C\uB300 ${limit}\uBA85 \uC601\uC785` : "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4 \uD55C \uBA85 \uC608\uC57D"}</p>` : `<p>${won ? "\uC0C8\uB85C \uC601\uC785\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4." : "\uC608\uC57D\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4."}</p>`}
       <div class="meta-recruit-list">${candidates.map((id) => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">
         <span class="meta-face">${face(id, 44)}</span>
@@ -15579,11 +15873,11 @@ const BattleRuntime = {
       updateUi({ preparing: false });
       if ($("#hub").classList.contains("on")) showHub();
     }
-    function startExpedition(destination, difficulty = "normal") {
+    function startExpedition(destination, difficulty = "normal", contract = null) {
       const dungeonId = destination || "dawn_forest";
       const requestedSeed = new URLSearchParams(location.search).get("seed");
       const seed = requestedSeed !== null && /^\d+$/.test(requestedSeed) ? Number(requestedSeed) >>> 0 : Math.floor(Math.random() * 4294967296);
-      run = createRun({ core: core2, roster: roster2, dungeonId, difficulty, seed, profileView: startView(profile, dungeonId) });
+      run = createRun({ core: core2, roster: roster2, dungeonId, difficulty, contract, seed, profileView: startView(profile, dungeonId) });
       preparationOpen = false;
       updateUi({ destination: destination || profile.ui?.destination, preparing: false, announcement: null });
       enterExpedition();
@@ -15603,6 +15897,7 @@ const BattleRuntime = {
       const candidates = rewards.result === "win" ? rewards.recruitable : rewards.shardCandidates;
       const initial = candidates.length === 1 ? candidates : [];
       const choices = saved?.runId === run.id ? saved.ids.filter((id) => candidates.includes(id)) : initial;
+      const stamp = rewards.result === "win" && run.contract ? applyRunEnd(profile, run).announce.stamp : null;
       const node = page("recruit", { title: rewards.result === "win" ? "\uC0DD\uD658" : "\uC6D0\uC815 \uC2E4\uD328" });
       recruitScreen(node, {
         run,
@@ -15611,6 +15906,7 @@ const BattleRuntime = {
         widgets: widgets2,
         sheets: sheets2,
         choices,
+        stamp,
         endingPending: run.dungeonId === "creation_tower" && rewards.result === "win" && !profile.ui?.endingSeen,
         changeChoices: (ids) => updateUi({ recruitChoices: { runId: run.id, ids } }),
         confirm: confirmReturn
