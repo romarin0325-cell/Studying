@@ -1,6 +1,6 @@
 // Builds card_pixel/plan/v1-review.html: the owner's offline review page for the full game (v1).
-// Inputs: fixed images in plan/v1-review/ and the Chrome play-through screenshots in game/tests/shots/
-// (run `node card_pixel/game/tests/play.mjs` first). Usage: node card_pixel/plan/build-v1-review.mjs
+// Inputs: fixed images in plan/v1-review/ and optional Chrome play-through screenshots in game/tests/shots/
+// (from `node card_pixel/game/tests/play.mjs`). Usage: node card_pixel/plan/build-v1-review.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,11 +20,11 @@ const figure = ({ src, caption }) => `<figure><img src="${src}" alt=""><figcapti
 
 // One campaign's screens in play order: [shot name, caption]
 const TOUR = [
-  ['01-title', '제목. 한 번 누르면 바로 대여 전투'],
-  ['02-borrowed-battle', '첫 30초: 빈사의 애쉬, 쓰러지면 눈토끼가 아마겟돈을 물려받는다'],
+  ['01-title', '제목. 릴레이 안내를 읽고 첫 대여 전투로 들어간다'],
+  ['03-borrowed-battle', '첫 30초에 애쉬가 쓰러지고 눈토끼가 아마겟돈을 물려받았다'],
   ['04-big-move', '큰 기술: 이름판과 2배 카메라'],
-  ['05-first-awakening', '첫 깨우기: 살아남은 대여 동료가 먼저'],
-  ['06-map', '지도: 동료가 서 있고, 문 카드에 적의 실루엣·속성·물리/마법'],
+  ['05-first-awakening', '첫 깨우기에서 눈토끼를 첫 동행으로 두고 함께 갈 동료를 고른다'],
+  ['06-map', '지도에서는 갈림길 끝에 문이 서고, 문 아래에 적의 공격 유형과 보상이 보인다'],
   ['07-order', '출전 순서: 쓰러지면 누구에게 무엇이 넘어가는지'],
   ['14-event', '사건: 기간과 값이 보이는 선택지'],
   ['09-treasure', '보물: 유물 96px, 장착 네 칸'],
@@ -37,6 +37,24 @@ const TOUR = [
   ['16-collection', '동료 도감'],
   ['17-notebook', '꿈길 수첩 7장'],
   ['18-records', '기록']
+];
+
+// JPEGs exported at 390 px wide, quality 82, from tests/shots/screens and screens-map.
+const REDESIGN = [
+  ['redesign-opening-choices-title', '제목 화면에 쓰러진 동료가 다음 동료의 힘이 된다는 릴레이 규칙이 나온다.'],
+  ['redesign-opening-choices', '첫 대여 전투에서 애쉬를 살리거나, 애쉬로 마지막 공격을 해 눈토끼에게 아마겟돈을 넘길 수 있다.'],
+  ['redesign-opening-choices-rescue', '애쉬를 살려 승리하면 결과 화면에 애쉬가 첫 동행으로 표시된다.'],
+  ['redesign-opening-awaken-companion', '첫 동행 눈토끼와 유품 아마겟돈을 위에 두고 함께 갈 동료 한 명을 고른다.'],
+  ['redesign-opening-awaken', '첫 동행과 고른 동료 아래에 새로 깨어난 세 명을 공개하고 결정 1개를 받는다.'],
+  ['redesign-formation-board', '선봉·중견·대장을 가로로 놓고 자리 사이에 계승 화살표를, 위에 이번 전투의 축복을 표시한다.'],
+  ['redesign-order-hint', '첫 본편 보스의 편성 제안에 선봉과 대장의 맞교대, 대기 중인 동료의 투입을 표시한다.'],
+  ['redesign-reinforcement-board', '동료가 6명일 때 후보를 데려오려면 같은 화면에서 보낼 동료를 고른다.'],
+  ['redesign-tempo-telegraph', '전투 화면에 적의 다음 공격과 예상 마법 피해 274, 배리어가 막는 공격 유형이 표시된다.'],
+  ['redesign-last-hit-impact', '눈토끼의 아마겟돈이 마지막 일격으로 350 피해를 주고 유품 원주인 애쉬와 생환자가 표시된다.'],
+  ['redesign-battle-log', '턴별 전투 기록에서 판게아리버스의 5턴 발동과 피해를 보고 1턴 예약으로 돌아갈 수 있다.'],
+  ['redesign-two-doors', '새벽의 숲 3층 갈림길에 물리 강공과 마법 강공을 예고하는 문 두 개가 서 있다.'],
+  ['redesign-three-doors', '홍련 화산 3층 장면에 소환의 샘, 혼돈의 제단, 사건으로 통하는 문 세 개가 서 있다.'],
+  ['redesign-mid-walk', '문을 고르면 선봉이 먼저 방향을 틀고 중견과 대장이 뒤따라 걷는다.']
 ];
 
 const FUN_CHANGES = [
@@ -113,6 +131,7 @@ const fixedTour = async entries => {
   ));
   return figures.join('');
 };
+const redesign = await fixedTour(REDESIGN);
 const funChanges = await fixedTour(FUN_CHANGES);
 const reviewFixes = await fixedTour(REVIEW_FIXES);
 const dailyRift = await fixedTour(DAILY_RIFT);
@@ -166,12 +185,51 @@ dialog img { max-height: 92vh; max-width: 96vw; display: block; }
 <header><h1>「다음은 너」 정식판 v1 <small>검토 페이지 · 2026-11-21</small></h1>
 <p>게임 전체를 만들었다. GPT 6.2 Astra(max)가 설계·화면·사건을 자문하고, GPT 6.2 Sol(high~xhigh)이 구현했고, Claude가 계획·지시·검수를 맡았다. 아래에서 화면, 바꾼 것, Claude가 정한 것, 확인이 필요한 것을 볼 수 있다.</p></header>
 <main>
+<section aria-labelledby="redesign-title">
+<h2 id="redesign-title">피드백 반영 재설계 (11월 21일 아침)</h2>
+<div class="panel">
+<p>소유자는 첫 전투와 깨우기가 이해하기 어렵고, 편성과 로그가 불편하며, 갈림길이 단순한 선택 화면처럼 느껴진다고 했다. 일반전은 길고 MP가 남아 좋은 조합이 굳었으며, 마지막 보스에 난도가 몰리고 승리 연출도 약하다고 봤다. 첫 전투의 선택을 첫 동행으로 이어 주고, 가로 편성 보드와 걷는 지도를 도입했다. 일반전은 예고가 있는 짧고 강한 전투로 조정하고, 무료 보충과 전투별 축복, 마지막 일격 연출과 턴별 기록을 넣었다.</p>
+<table>
+<thead><tr><th scope="col">시뮬레이션 지표</th><th scope="col">재설계 전</th><th scope="col">재설계 후</th></tr></thead>
+<tbody>
+<tr><th colspan="3" scope="rowgroup">결정 기록 9장 · 같은 1,152시드의 메모리 실험</th></tr>
+<tr><td>일반전 평균 턴</td><td>6.78턴</td><td>4.37턴</td></tr>
+<tr><td>일반전 종료 시 잔여 MP</td><td>70.3%</td><td>47.4%</td></tr>
+<tr><td>모든 전투 종료 시 잔여 MP</td><td>61%</td><td>40%</td></tr>
+<tr><td>세 명 생존 후 자발적 멤버 교체</td><td>25%</td><td>72%</td></tr>
+<tr><td>전체 패배 중 마지막 보스 비중</td><td>99.5%</td><td>55.8%</td></tr>
+<tr><td>본편 원정 클리어율</td><td>67.7%</td><td>67.0%</td></tr>
+</tbody>
+<tbody>
+<tr><th colspan="3" scope="rowgroup">구현 커밋 a2037df · 지역·난이도당 384시드</th></tr>
+<tr><td>일반전 평균 턴 · 잔여 MP</td><td>—</td><td>3.8~5.8턴 · 45~49%</td></tr>
+<tr><td>세 명 생존 후 자발적 멤버 교체</td><td>19~32%</td><td>72~80%</td></tr>
+<tr><td>전체 패배 중 마지막 보스 비중</td><td>94~100%</td><td>38~68%</td></tr>
+<tr><td>클리어율 · 여정 / 악몽</td><td>—</td><td>61~74% / 41~46%</td></tr>
+<tr><td>첫 본편 · 문지기 통과율</td><td>—</td><td>89~91%</td></tr>
+<tr><td>첫 본편 · 클리어율</td><td>10~13%</td><td>47~54%</td></tr>
+</tbody>
+</table>
+<p>구현 수치는 신중하게 플레이하는 정책으로 측정했다. 첫 본편은 홍련·황혼에서 기본 편성을 유지하는 초행 플레이를 모의했다.</p>
+</div>
+<h3>재설계 화면</h3>
+<div class="tour">${redesign}</div>
+<h3>규칙 질문과 답</h3>
+<div class="panel"><ul class="q">
+<li>더블어택은 일반 공격만 두 배로 만든다. 가디언의 일반 공격은 143 → 286, 판게아리버스는 적용 여부와 관계없이 455다.</li>
+<li>배틀필드는 아군의 일반 공격 피해를 두 배로 만든다. 콜로세움은 같은 효과에 적 약화를 더한다.</li>
+<li>적에게는 선봉·중견·대장 자리 특성이 없다.</li>
+<li>버프 오버로드가 적용되면 전장 표시와 하늘 상세에 필드 칸 5개가 표시된다.</li>
+<li>계승한 스킬은 원래 주인의 이펙트로 재생된다.</li>
+</ul></div>
+</section>
+
 <h2>한눈에</h2>
 <div class="stats">
   <div><b>7</b>던전 (입문 + 테마 5 + 창조의 탑)</div>
   <div><b>130</b>아군 도트 (일러스트에서 88명 새로)</div>
   <div><b>28</b>사건</div><div><b>14</b>유물</div>
-  <div><b>12</b>배경음</div><div><b>129</b>자동 테스트</div>
+  <div><b>12</b>배경음</div><div><b>144</b>자동 테스트</div>
 </div>
 <div class="panel">플레이: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\dist\\Relaymare.html</code><br>
 배경음 듣기: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\tools\\music-preview.html</code><br>
