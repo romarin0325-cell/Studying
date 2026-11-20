@@ -15,11 +15,12 @@ export function canJoin(run, id, { allowReserved = false } = {}) {
 }
 
 export function seeCharacters(run, ids) {
+  if (run.daily) return;
   run.seenCharacters = [...new Set([...run.seenCharacters, ...ids])];
 }
 
 export function seeRelic(run, id) {
-  if (id && !run.seenRelics.includes(id)) run.seenRelics.push(id);
+  if (!run.daily && id && !run.seenRelics.includes(id)) run.seenRelics.push(id);
 }
 
 export function join(run, id) {

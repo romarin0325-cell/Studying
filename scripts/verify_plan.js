@@ -266,7 +266,8 @@ function planCardPixel(plan, files, currentFiles) {
       'card_pixel/game/tests/bridge.test.mjs',
       'card_pixel/game/tests/rules.test.mjs',
       'card_pixel/game/tests/run.test.mjs',
-      'card_pixel/game/tests/music.test.mjs'
+      'card_pixel/game/tests/music.test.mjs',
+      'card_pixel/game/tests/daily.test.mjs'
     ]);
   }
 }

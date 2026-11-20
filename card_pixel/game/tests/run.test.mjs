@@ -959,9 +959,10 @@ test('legacy saves default new metadata and use the saved bench for the initial 
   delete oldProfile.contractStamps;
   assert.deepEqual(Save.restoreProfile(oldProfile).contractStamps, {});
   const old = JSON.parse(Save.serializeRun(reach(make(), 1)));
-  for (const key of ['contract', 'lastParty', 'guide', 'joinOrder']) delete old.run[key];
+  for (const key of ['contract', 'daily', 'lastParty', 'guide', 'joinOrder']) delete old.run[key];
   const run = Save.restoreRun(old, { core, roster });
   assert.equal(run.contract, null);
+  assert.equal(run.daily, null);
   assert.equal(run.lastParty, null);
   assert.deepEqual(run.guide, { bossOrder: false });
   assert.deepEqual(Run.defaultParty(run), old.run.bench.slice(0, 3));

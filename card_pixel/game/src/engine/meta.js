@@ -41,6 +41,10 @@ export function notebookView(profile) {
   return NOTEBOOK.map(chapter => ({ ...chapter, opens: chapter.opens.slice(), completed: completed(profile, chapter.id) }));
 }
 
+export function dailyRiftUnlocked(profile) {
+  return completed(profile, 4);
+}
+
 function companionSlots(profile) {
   if (completed(profile, 5)) return 3;
   if (completed(profile, 4)) return 2;
@@ -102,6 +106,7 @@ function addChapter(profile, chapter) {
 }
 
 export function recordRunProgress(profile, run) {
+  if (run.daily) return { profile, announce: { ok: true, chapters: [] } };
   const next = structuredClone(profile);
   if (run.dungeonId !== INTRO) {
     if (run.lead && Object.hasOwn(next.recruits, run.lead) && !completed(next, 2)) {
@@ -132,6 +137,7 @@ function unlockDungeons(profile) {
 
 export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) {
   const noStamp = { stamp: null };
+  if (run.daily) return reject(profile, 'daily_run', noStamp);
   if (run.phase !== 'done' || !run.result) return reject(profile, 'run_not_done', noStamp);
   if (profile.records.appliedRuns.includes(run.id)) return reject(profile, 'already_applied', noStamp);
   const rewards = runRewards(run);

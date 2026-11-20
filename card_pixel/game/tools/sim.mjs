@@ -1,6 +1,7 @@
 // node card_pixel/game/tools/sim.mjs [runs] [--all | --dungeon=<id>] [--difficulty=normal|nightmare]
 // Add --contract=rescue|heirloom|elite for the nightmare audit seeds (120 per dungeon by default).
 // Use --boss-order-audit for 160 paired first-boss runs in each of the two starting main dungeons.
+// Use --daily-from=YYYY-MM-DD --days=60 for paired first attempts at the daily rift.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -8,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { CONTRACTS } from '../src/content/contracts.js';
 import { DUNGEONS } from '../src/content/dungeons.js';
 import * as Bridge from '../src/engine/bridge.js';
+import * as Daily from '../src/engine/daily-rift.js';
 import * as Meta from '../src/engine/meta.js';
 import * as RelayRoster from '../src/engine/roster.js';
 import * as R from '../src/engine/run.js';
@@ -17,6 +19,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..', '..', '..');
 const args = process.argv.slice(2);
 const flag = name => args.includes(name);
+const dailyFrom = args.find(arg => arg.startsWith('--daily-from='))?.slice('--daily-from='.length);
+const days = Number(args.find(arg => arg.startsWith('--days='))?.slice('--days='.length) ?? 60);
 const contract = args.find(arg => arg.startsWith('--contract='))?.slice('--contract='.length) ?? null;
 const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (contract === null ? 300 : 120));
 const dungeon = args.find(arg => arg.startsWith('--dungeon='))?.slice('--dungeon='.length) || 'ember_volcano';
@@ -72,10 +76,21 @@ function checked(result) {
   return result;
 }
 
-function fight(run, { naive, bossSuggestion }) {
+function shouldRetreat(bridge, wait) {
+  if (!bridge.canRetreat() || bridge.options().some(option => option.usable && option.preview?.kill)) return false;
+  const state = bridge.state();
+  if (state.allies[state.cur].hp > (wait?.intent?.dmg?.[0] || 0)) return false;
+  const retreat = bridge.previewRetreat();
+  return retreat && !retreat.lethal;
+}
+
+function fight(run, { naive, bossSuggestion, bossOrder }) {
   const fixed = run.room.type === 'borrowed';
   let order = run.bench.slice(0, 3);
-  if (!fixed && naive && bossSuggestion && run.floor === 8) order = R.suggestOrder(run);
+  if (run.daily) {
+    order = naive ? R.defaultParty(run) : R.suggestOrder(run);
+    if (run.room.type === 'boss' && bossOrder) order = bossOrder;
+  } else if (!fixed && naive && bossSuggestion && run.floor === 8) order = R.suggestOrder(run);
   else if (!fixed && !naive) {
     order = run.stats.retries % 2 ? strongest(run.bench).slice(0, 3) : R.suggestOrder(run);
   }
@@ -87,6 +102,11 @@ function fight(run, { naive, bossSuggestion }) {
   const targetFloor = (run.floor === 4 || run.floor === 6) && !run.contract?.met;
   for (let actions = 0; bridge.awaiting && actions < 500; actions++) {
     const wait = events.findLast(event => event.t === 'await');
+    if (run.daily && !naive && run.room.type !== 'boss' && shouldRetreat(bridge, wait)) {
+      events = bridge.retreat();
+      defended = false;
+      continue;
+    }
     if (targetFloor && run.contract?.id === 'rescue' && bridge.canRetreat()) {
       const state = bridge.state();
       if (state.allies[state.cur].hp <= (wait?.intent?.dmg?.[0] || 0)) {
@@ -188,6 +208,68 @@ function playRun(dungeonId, seed, { profile, naive = false, bossSuggestion = fal
   return { run, end, stats: run.stats, fallen: run.fallen.length, heirloomsGained };
 }
 
+const DAILY_RELIC_ORDER = ['double_attack', 'gale_storm', 'support_boost', 'lucky_vicky', 'big_bang', 'frozen_body', 'reverse'];
+const DAILY_EVENTS = { rumi: 'one', glass_pawprints: 'sand', jellyfish_vials: 'stun' };
+
+function dailyDoor(run, naive) {
+  const [left, right] = run.doors;
+  if (naive || !right) return left;
+  if (run.floor === 2) {
+    return DAILY_RELIC_ORDER.indexOf(left.relic) < DAILY_RELIC_ORDER.indexOf(right.relic) ? left : right;
+  }
+  if (run.floor === 5) return DAILY_RELIC_ORDER.slice(0, 2).includes(left.relic) ? left : right;
+  if (run.floor === 6 && run.bench.length >= 4 && !['tough', 'leech', 'glass'].includes(run.daily.spec.riskId)) return right;
+  return left;
+}
+
+export function playDaily(key, { naive = false, bossOrder = null } = {}) {
+  const spec = Daily.specFor(key, roster);
+  const run = R.createRun({ core, roster, daily: { spec, kind: 'official', attemptNo: 1 } });
+  while (run.phase !== 'done') {
+    const door = dailyDoor(run, naive);
+    checked(R.chooseDoor(run, door.index));
+    if (door.enemies.length) fight(run, { naive, bossOrder });
+    else if (door.type === 'treasure') checked(R.takeTreasure(run));
+    else if (door.type === 'event') {
+      const id = naive ? run.pending.choices[0].id : DAILY_EVENTS[spec.eventId];
+      const choice = run.pending.choices.find(entry => entry.id === id);
+      checked(R.chooseEvent(run, id, choice.targets ? strongest(choice.targets)[0] : undefined));
+    }
+    resolveChoices(run, naive);
+    if (run.phase !== 'done') {
+      checked(R.leaveRoom(run));
+      checked(R.nextFloor(run));
+    }
+  }
+  return run;
+}
+
+export function dailyTotals(from, count) {
+  Daily.specFor(from, roster);
+  if (!Number.isSafeInteger(count) || count < 1) throw new RangeError('Invalid daily sample size');
+  return [true, false].map(naive => {
+    const date = new Date(`${from}T00:00:00Z`);
+    let wins = 0, turns = 0;
+    for (let i = 0; i < count; i++) {
+      const run = playDaily(date.toISOString().slice(0, 10), { naive });
+      wins += Number(run.result === 'win');
+      turns += run.stats.turns;
+      date.setUTCDate(date.getUTCDate() + 1);
+    }
+    return { policy: naive ? 'Careless' : 'Careful', wins, turns };
+  });
+}
+
+function measureDaily() {
+  const totals = dailyTotals(dailyFrom, days);
+  console.log(`${dailyFrom} · ${days} days`);
+  console.log('| Policy | Wins | Clear | Total turns |');
+  console.log('| --- | ---: | ---: | ---: |');
+  for (const { policy, wins, turns } of totals) {
+    console.log(`| ${policy} | ${wins}/${days} | ${(100 * wins / days).toFixed(1)}% | ${turns} |`);
+  }
+}
+
 function measureBossOrder() {
   const pairs = 160;
   let defaultTotal = 0;
@@ -265,8 +347,11 @@ function measureRuns() {
   }
 }
 
-if (flag('--boss-order-audit')) {
-  if (difficulty !== 'normal') throw new RangeError('Boss order audit uses normal difficulty');
-  measureBossOrder();
-} else if (contract !== null) measureContracts();
-else measureRuns();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  if (dailyFrom !== undefined) measureDaily();
+  else if (flag('--boss-order-audit')) {
+    if (difficulty !== 'normal') throw new RangeError('Boss order audit uses normal difficulty');
+    measureBossOrder();
+  } else if (contract !== null) measureContracts();
+  else measureRuns();
+}

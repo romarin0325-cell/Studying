@@ -14,12 +14,12 @@
 
 ```sh
 node card_pixel/game/build.mjs
-node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs
+node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/daily.test.mjs
 node card_pixel/game/tests/play.mjs --seeds=7,21 --runs=2
 ```
 
 - 빌드는 esbuild로 `src/main.js`와 모듈을 묶어 `dist/Relaymare.html`을 만든다.
-- Node 테스트 4개는 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`)를 확인한다.
+- Node 테스트 5개는 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열의 생성·정산·저장(`daily`)을 확인한다.
 - 자동 플레이는 먼저 빌드한다. Playwright Chromium을 쓰고, 없으면 설치된 Chrome, Edge 순으로 시도한다. `CHROMIUM_PATH`로 실행 파일을 지정할 수 있다. `--seeds=7,21`과 `--runs=2`가 기본값이며 시드마다 입문 1판 뒤 본편 2판을 돈다. `--headed`를 붙이면 창을 띄운다.
 - 자동 플레이는 본편 이어하기, 브라우저 오류·멈춤, 행동 뒤 대기 시간과 전투 프레임을 확인한다. 화면은 `tests/shots/`에 남긴다.
 - `node card_pixel/game/tests/screens.mjs`는 엔진 명령으로 13가지 상태(범위 피해·즉시 발동·물러나기 경고·시작 하늘·문 HP·내기 문구·저장 실패·원정 복원 실패·미귀환 기록·필드 상한·변신 상세·빈자리 복원·차징 예고)를 만들어 Chrome에서 열고 글자를 확인한 뒤 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `--case <이름>`으로 하나만 돈다.
@@ -30,6 +30,7 @@ node card_pixel/game/tests/play.mjs --seeds=7,21 --runs=2
 ```sh
 node card_pixel/game/tools/sim.mjs --all
 node card_pixel/game/tools/sim.mjs --all --difficulty=nightmare
+node card_pixel/game/tools/sim.mjs --daily-from=2026-11-21 --days=60
 node card_pixel/game/tools/cut-sprites.mjs
 node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pixel/art/icons card_pixel/game/assets/icons 32
 ```
@@ -110,7 +111,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/styles/` | 공용(`base`)·전투(`battle`)·원정 화면(`screens`)·거점과 메타 화면(`meta`) CSS |
 | `assets/` | 포즈 PNG와 `sprites.json`, `backgrounds/`, `icons/` |
 | `tools/` | 카드 원본을 감싸는 `core-bundle.mjs`, 시뮬레이션, 미리듣기, 그림 자르기 |
-| `tests/` | Node 테스트 4개와 브라우저 자동 플레이 |
+| `tests/` | Node 테스트 5개와 브라우저 자동 플레이 |
 | `dist/` | 플레이용 단일 HTML |
 
 ## 어디를 고치면 무엇이 바뀌나

@@ -288,7 +288,7 @@ test('Card-only changes never select Shooter or Defense commands', () => {
   assert.equal(ids(plan).includes('card:bundle-smoke'), false);
 });
 
-test('RELAYMARE or shared Card rules select the two headless suites once', () => {
+test('RELAYMARE or shared Card rules select the headless suite once', () => {
   const files = ['card_pixel/game/src/engine/bridge.js', 'card/game/logic.js'];
   for (const scope of [[files[0]], [files[1]], files]) {
     const plan = createPlan(changes(...scope));
@@ -296,7 +296,8 @@ test('RELAYMARE or shared Card rules select the two headless suites once', () =>
     assert.equal(steps.length, 1);
     assert.equal(steps[0].command, 'node');
     assert.deepEqual(steps[0].args, [
-      '--test', 'card_pixel/game/tests/bridge.test.mjs', 'card_pixel/game/tests/music.test.mjs', 'card_pixel/game/tests/rules.test.mjs', 'card_pixel/game/tests/run.test.mjs'
+      '--test', 'card_pixel/game/tests/bridge.test.mjs', 'card_pixel/game/tests/daily.test.mjs',
+      'card_pixel/game/tests/music.test.mjs', 'card_pixel/game/tests/rules.test.mjs', 'card_pixel/game/tests/run.test.mjs'
     ]);
     assert.equal(steps[0].needsInstall, false);
     assert.deepEqual(plan.browsers, []);

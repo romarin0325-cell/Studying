@@ -1,10 +1,12 @@
 import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../content/contracts.js';
+import { FLOORS as DAILY_FLOORS } from '../content/daily-rift.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
 import { canJoin, choicesFor, COST, drawFrom, join, RATES, rollBlessing, seeCharacters } from './awakenings.js';
 import { enemyStatsWithQuirk } from './bridge.js';
+import { doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { pick, shuffle } from './rng.js';
 import { copy, eventChoices, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
 import { strength } from './roster.js';
@@ -31,7 +33,16 @@ export function bindRun(run, { core, roster }) {
   return run;
 }
 
-export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed = 0, profileView = {}, plain = false, contract = null }) {
+export function createRun(options) {
+  const { core, roster, daily = null, difficulty = 'normal', plain = false, contract = null } = options;
+  let { dungeonId, seed = 0, profileView = {} } = options;
+  if (daily !== null) {
+    if (options.seed !== undefined || dungeonId !== undefined || options.profileView !== undefined
+      || difficulty !== 'normal' || plain || contract !== null || !validAttempt(daily, roster)) {
+      throw new RangeError('invalid_daily_options');
+    }
+    ({ dungeonId, seed } = daily.spec);
+  }
   dungeonId ??= profileView.dungeonId || 'dawn_forest';
   const dungeon = DUNGEONS[dungeonId];
   if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError('Unknown dungeon: ' + dungeonId);
@@ -47,36 +58,44 @@ export function createRun({ core, roster, dungeonId, difficulty = 'normal', seed
     || !profileView.nightmareUnlocks?.includes(dungeonId))) {
     throw new RangeError('Unavailable contract: ' + String(contract));
   }
-  const rng = { state: seed >>> 0 };
+  const rng = { state: daily ? daily.spec.altarSeed : seed >>> 0 };
   const seals = profileView.seals || [];
   const companions = intro ? [] : (profileView.companions || []).filter(id => roster.allies.includes(id) && !seals.includes(id));
   const lead = !intro && roster.allies.includes(profileView.lead) && !seals.includes(profileView.lead) ? profileView.lead : null;
   const shard = roster.allies.includes(profileView.reserved) && !seals.includes(profileView.reserved) ? profileView.reserved : null;
-  const pool = roster.pool(dungeon.pool, { seals, companions: [...companions, lead, shard].filter(Boolean) });
-  const boss = difficulty === 'nightmare' && dungeon.hiddenBosses.length ? pick(rng, dungeon.hiddenBosses) : dungeon.boss;
+  const pool = daily ? daily.spec.loanIds.slice()
+    : roster.pool(dungeon.pool, { seals, companions: [...companions, lead, shard].filter(Boolean) });
+  const boss = daily?.spec.bossId
+    ?? (difficulty === 'nightmare' && dungeon.hiddenBosses.length ? pick(rng, dungeon.hiddenBosses) : dungeon.boss);
   const preview = intro ? INTRO.boss : roster.bossOf(boss);
   const bossPreview = { id: boss, name: preview.name, note: preview.note, sprite: preview.sprite || null };
   const region = dungeon.region?.first ? pick(rng, dungeon.region.first) : dungeon.region;
   const laterRegions = dungeon.region?.second
     ? shuffle(rng, dungeon.region.second.filter(rule => rule.id !== region.id)).slice(0, 2) : null;
   const run = bindRun({
-    id: [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join('/'),
-    dungeonId, difficulty, floors: dungeon.floors, seed: seed >>> 0, rng, pool, plain,
+    id: daily ? `rift/v${daily.spec.ruleVersion}/${daily.spec.dayKey}/${daily.attemptNo}`
+      : [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join('/'),
+    daily: copy(daily),
+    dungeonId, difficulty, floors: daily ? DAILY_FLOORS : dungeon.floors, seed: seed >>> 0, rng, pool, plain,
     phase: 'start', floor: 0, doors: [], room: null, pending: null,
     lead, companions, preferredCompanion: profileView.preferredCompanion || null,
     recruited: (profileView.recruited || []).slice(), profileShard: shard,
-    bench: [], joinOrder: [], lastParty: null, fallen: [], released: [], heirlooms: {}, blessings: {}, relics: [], crystals: intro ? 0 : 1,
+    bench: [], joinOrder: [], lastParty: null, fallen: [], released: [], heirlooms: {}, blessings: {}, relics: [],
+    crystals: intro || daily ? 0 : 1,
     contract: contract === null ? null : {
       id: contract, met: false, metAtFloor: null, riskDoorTaken: false, escrowed: 0, paid: 0, failed: false
     },
-    guide: { bossOrder: profileView.bossOrder ?? true },
+    guide: { bossOrder: daily ? false : profileView.bossOrder ?? true },
     eligible: [], gateSurvivors: [], reserved: null, unchosen: [], participated: [], seenCharacters: [], seenRelics: [],
     introCandidates: [], introHeirlooms: {}, firstIntroClear: intro && !profileView.introCleared,
     paidPickUsed: false, boss, bossPreview, region: copy(region), laterRegions: copy(laterRegions), nextBattle: null,
     stats: { battles: 0, turns: 0, best: 0, bestBy: '', bestHit: null, heirloomsUsed: 0, lastStands: 0, jackpots: 0, gateWins: 0, retries: 0 },
     result: null
   }, { core, roster });
-  if (intro) {
+  if (daily) {
+    for (const id of daily.spec.loanIds) join(run, id);
+    advance(run);
+  } else if (intro) {
     for (const id of INTRO.party) join(run, id);
     advance(run);
   } else {
@@ -92,10 +111,13 @@ function advance(run) {
   run.floor++;
   run.room = null;
   run.phase = 'map';
-  run.doors = dungeon.layout === 'intro' && run.floor === run.floors
-    ? [introFinaleDoor(run, roster, dungeon)]
-    : makeDoors(run, roster);
-  observeDoors(run);
+  if (run.daily) run.doors = dailyDoors(run.daily.spec, run.floor, roster);
+  else {
+    run.doors = dungeon.layout === 'intro' && run.floor === run.floors
+      ? [introFinaleDoor(run, roster, dungeon)]
+      : makeDoors(run, roster);
+    observeDoors(run);
+  }
 }
 
 function introFinaleDoor(run, roster, dungeon) {
@@ -196,6 +218,7 @@ export function confirmOrder(run, ids) {
   if (!fighters.length || new Set(fighters).size !== fighters.length || fighters.some(id => !run.bench.includes(id))) {
     return invalid('invalid_party');
   }
+  if (run.daily && fighters.length !== Math.min(3, run.bench.length)) return invalid('invalid_party');
   const party = [...ids, ...Array(3 - ids.length).fill(null)];
   if (run.room.type === 'borrowed' && INTRO.party.some((id, index) => party[index] !== id)) return invalid('fixed_party');
   // Keep the existing bench order for seeded room choices; defaultParty refills seats by joinOrder.
@@ -362,7 +385,7 @@ export function settleBattle(run, input) {
     run.stats.gateWins++;
     run.gateSurvivors = unique([...run.gateSurvivors, ...survivors]);
   }
-  if (win && (gate || final)) run.eligible = unique([...run.eligible, ...survivors]);
+  if (!run.daily && win && (gate || final)) run.eligible = unique([...run.eligible, ...survivors]);
   const wiped = win && run.bench.length === 0;
   if (!win || (wiped && !final)) run.result = 'lose';
   else if (final) run.result = 'win';
@@ -375,11 +398,13 @@ export function settleBattle(run, input) {
   const betRelic = betWon ? next.reward.relic : null;
   let relic = null;
   if (win) {
-    crystals += (room.reward || 0) + 2 * downs.filter(entry => entry.treasure).length;
-    if (survivors.some(id => roster.card(id).trait?.type === 'looter')) crystals++;
-    if (betWon) crystals += next.reward.crystals || 0;
-    run.crystals += crystals;
-    if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
+    if (!run.daily) {
+      crystals += (room.reward || 0) + 2 * downs.filter(entry => entry.treasure).length;
+      if (survivors.some(id => roster.card(id).trait?.type === 'looter')) crystals++;
+      if (betWon) crystals += next.reward.crystals || 0;
+      run.crystals += crystals;
+      if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
+    }
     if (room.type === 'elite' && room.relic && !wiped) relic = grantRelic(run, room.relic);
     if (betRelic && !wiped) relic = grantRelic(run, betRelic);
     if (room.type === 'borrowed' && !wiped) {
@@ -520,6 +545,7 @@ export function nextFloor(run) {
 }
 
 export function runRewards(run) {
+  if (run.daily) return { result: run.result, recruitable: [], recruitLimit: 0, shardCandidates: [] };
   return {
     result: run.result,
     recruitable: run.result === 'win' ? run.eligible.filter(id => run.bench.includes(id)
@@ -532,6 +558,6 @@ export function runRewards(run) {
 export function finishRun(run) {
   if (run.phase !== 'done' || !run.result) return invalid('run_not_done');
   const rewards = runRewards(run);
-  run.pending ||= { kind: 'recruit', ...copy(rewards) };
+  if (!run.daily) run.pending ||= { kind: 'recruit', ...copy(rewards) };
   return rewards;
 }

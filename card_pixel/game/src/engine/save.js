@@ -36,6 +36,7 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
     || !Number.isInteger(run.rng?.state) || run.rng.state < 0 || run.rng.state > 0xffffffff
     || !Array.isArray(run.pool) || !Array.isArray(run.bench) || !Array.isArray(run.doors)) return null;
   run.contract ??= null;
+  run.daily ??= null;
   run.lastParty ??= null;
   run.guide ??= { bossOrder: false };
   run.joinOrder ??= run.bench.slice();
@@ -57,6 +58,7 @@ export function restoreProfile(data, { migrate } = {}) {
 export function createSaveStore(storage, { key = 'relaymare.session', core, roster, migrateRun, migrateProfile } = {}) {
   return {
     save({ profile, run = null }) {
+      if (run?.daily) return false;
       const progressed = run ? recordRunProgress(profile, run).profile : profile;
       storage.setItem(key, JSON.stringify({ version: SESSION_VERSION, profile: progressed, run: run ? runData(run) : null }));
     },
@@ -68,7 +70,7 @@ export function createSaveStore(storage, { key = 'relaymare.session', core, rost
       if (data.run == null) return { profile, run: null };
       try {
         const run = restoreRun(data.run, { core, roster, migrate: migrateRun });
-        if (run) return { profile: recordRunProgress(profile, run).profile, run };
+        if (run && !run.daily) return { profile: recordRunProgress(profile, run).profile, run };
       } catch {
         // Run migrations can fail independently of the profile.
       }
