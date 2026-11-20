@@ -57,6 +57,19 @@ const REDESIGN = [
   ['redesign-mid-walk', '문을 고르면 선봉이 먼저 방향을 틀고 중견과 대장이 뒤따라 걷는다.']
 ];
 
+const PHASE_TWO = [
+  ['formation-preview', '황혼 성당 2층의 두 문에 2턴째 예행을 표시한다. 지도에서 편성을 바꾸고 바로 입장할 수 있다.'],
+  ['boss-lesson', '황혼 성당 8층에서 아이리스의 7턴 소울드레인이 명중하면 현재 MP가 전부 사라진다고 예고한다.'],
+  ['map-awaken-faces', '첫 본편 지도에 무작위로 함께 깨어난 동료 세 명의 얼굴과 이름을 표시한다.'],
+  ['truthful-hud', '2턴 전투 기록에 MP 소멸 예고와 매직가드로 차단한 결과를 한 줄로 표시한다.'],
+  ['spring-commit', '지명 샘에서 후보 셋을 먼저 보고, 합류를 확정할 때 결정 3개를 낸다.'],
+  ['blessing-parity', '전투 중 눈토끼 상세에 편성 자리와 같은 실효 축복 +120%와 HP 638을 표시한다.'],
+  ['relic-compare-gate', '문지기 돌파 화면에서 보상 유물 빅뱅과 빼낼 유물 더블어택의 효과를 나란히 비교한다.'],
+  ['returned-battle-log', '귀환 후 기록 화면에서 마지막 전투의 턴별 기록을 다시 열 수 있다.'],
+  ['relic-strip', '지도 상단의 유물 네 칸에 장착한 버프오버로드와 빈칸 세 개가 보인다.'],
+  ['relic-compare', '보물방에서 유물 네 칸이 찼을 때 새 유물과 빼낼 유물의 효과를 비교하고 교체 여부를 정한다.']
+];
+
 const FUN_CHANGES = [
   ['order-hint', '첫 본편 보스의 다른 순서. 첫 승 전까지 보이고 ‘이 순서로’를 눌러야 바뀐다'],
   ['retreat-outcomes', '물러나기 첫 탭에 다음 동료가 대신 맞고 남을 HP와, 쓰러질 때 넘길 유품 ×1.5를 함께 표시'],
@@ -132,6 +145,7 @@ const fixedTour = async entries => {
   return figures.join('');
 };
 const redesign = await fixedTour(REDESIGN);
+const phaseTwo = await fixedTour(PHASE_TWO);
 const funChanges = await fixedTour(FUN_CHANGES);
 const reviewFixes = await fixedTour(REVIEW_FIXES);
 const dailyRift = await fixedTour(DAILY_RIFT);
@@ -224,12 +238,31 @@ dialog img { max-height: 92vh; max-width: 96vw; display: block; }
 </ul></div>
 </section>
 
+<section aria-labelledby="phase-two-title">
+<h2 id="phase-two-title">2단계: 예고·조작·보스 시범 (11월 21일 오전)</h2>
+<div class="panel">
+<p>2차 감사에서 일반전은 짧아지고 자발 교체는 늘었지만, 실제 효과와 다른 전투 예고, 반복 입장, 동료가 6명일 때의 교체 비교가 남았다. 예고에 MP 소멸과 조건별 피해를 표시하고, 여섯 지역의 2·6층에 보스 규칙 예행을 넣었다. 지도에서 편성을 마치고 바로 입장하며, 보충·포로·유물은 승리 화면에서 결정한다. 교체할 때는 후보의 유품 기술과 내보내는 동료가 잃는 것을 표시한다.</p>
+<table>
+<thead><tr><th scope="col">검증 항목</th><th scope="col">결과</th></tr></thead>
+<tbody>
+<tr><th scope="row">원정 한 판의 비전투 화면 / 탭</th><td>29화면 / 51탭 → 19화면 / 43탭</td></tr>
+<tr><th scope="row">보스 예행 도달률</th><td>2층 85~96% / 6층 90~98%</td></tr>
+<tr><th scope="row">클리어율 변화</th><td>최대 3.1%p</td></tr>
+<tr><th scope="row">황혼 7턴 · 시드 8,207,928</th><td>HP 피해 0, MP 5 → 0</td></tr>
+<tr><th scope="row">별빛 5턴 · 시드 8,207,928</th><td>피해 125 / 375 (때리지 않음 / 때림)</td></tr>
+<tr><th scope="row">투기장 3턴 · 시드 8,215,847</th><td>충전 후 다음 턴 마법 ×4</td></tr>
+</tbody>
+</table>
+</div>
+<div class="tour">${phaseTwo}</div>
+</section>
+
 <h2>한눈에</h2>
 <div class="stats">
   <div><b>7</b>던전 (입문 + 테마 5 + 창조의 탑)</div>
   <div><b>130</b>아군 도트 (일러스트에서 88명 새로)</div>
   <div><b>28</b>사건</div><div><b>14</b>유물</div>
-  <div><b>12</b>배경음</div><div><b>144</b>자동 테스트</div>
+  <div><b>12</b>배경음</div><div><b>320</b>자동 테스트</div>
 </div>
 <div class="panel">플레이: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\dist\\Relaymare.html</code><br>
 배경음 듣기: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\tools\\music-preview.html</code><br>
