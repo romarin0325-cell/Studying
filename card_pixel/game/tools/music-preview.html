@@ -294,7 +294,7 @@ const COMBAT_HITS = {
 };
 
 const PITCH_CLASSES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-const MASTER_LEVEL = 10 ** (-14 / 20);
+const MASTER_LEVEL = 10 ** (-10 / 20);
 const START_AHEAD = 0.035;
 const CROSSFADE = 0.8;
 const STOP_FADE = 0.12;
@@ -644,6 +644,10 @@ export function createMusic({ context, destination = context.destination }) {
   return { play, stop, setEnabled, setVolume };
 }
 /* END EMBEDDED MUSIC MODULE */
+
+    if (new URLSearchParams(location.search).has('measure')) {
+      window.musicLevelPreview = { tracks: TRACKS, makeScore, createMusic };
+    }
 
     const trackList = document.getElementById('tracks');
     const status = document.getElementById('status');

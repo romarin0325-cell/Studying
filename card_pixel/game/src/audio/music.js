@@ -256,7 +256,7 @@ const COMBAT_HITS = {
 };
 
 const PITCH_CLASSES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-const MASTER_LEVEL = 10 ** (-14 / 20);
+const MASTER_LEVEL = 10 ** (-10 / 20);
 const START_AHEAD = 0.035;
 const CROSSFADE = 0.8;
 const STOP_FADE = 0.12;

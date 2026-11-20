@@ -242,7 +242,7 @@ test('play is idempotent and crossfades on the next bar with independent gains',
   music.play('hub');
   const outgoing = context.sources[0].bus;
   const [master] = outgoing.outputs;
-  closeTo(master.gain.value, 10 ** (-14 / 20));
+  closeTo(master.gain.value, 10 ** (-10 / 20));
   const start = context.sources[0].startAt;
   const bar = start + 4 * 60 / TRACKS.hub.bpm;
   tick(0.4);
@@ -350,7 +350,7 @@ test('volume clamps and disabling releases nodes while retaining the selected tr
   music.setVolume(2);
   music.play('arena');
   const [master] = context.sources[0].bus.outputs;
-  closeTo(master.gain.value, 10 ** (-14 / 20));
+  closeTo(master.gain.value, 10 ** (-10 / 20));
   tick(0.4);
   music.setVolume(-1);
   assert.deepEqual(master.gain.events.at(-1), ['target', 0, 0.4, 0.025]);
