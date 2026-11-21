@@ -70,6 +70,21 @@ const PHASE_TWO = [
   ['relic-compare', '보물방에서 유물 네 칸이 찼을 때 새 유물과 빼낼 유물의 효과를 비교하고 교체 여부를 정한다.']
 ];
 
+const AFTERNOON_REVIEW = [
+  ['next-goal', '관측소에 눈토끼와 본편에 출발하면 동행 1칸이 열린다고 표시한다.'],
+  ['roster-table', '홍련 화산 출현표에서 미조우 동료의 이름과 등급을 보고 만나고 싶은 동료를 표시할 수 있다.'],
+  ['difficulty-choice', '홍련 화산 출발 준비에서 적 공격·마공이 35% 감소하는 꿈결을 고른 화면이다.'],
+  ['missions-invitations', '꿈길 수첩 4장에 이번 주와 이번 달의 동료 초대 항목이 표시된다.'],
+  ['reading-settings', '글자 크기를 125%로 키운 전투 화면에 위험 예고 표식과 2배속이 표시된다.'],
+  ['save-recovery', '전체 기록이 손상되면 동료 1명이 담긴 직전 기록으로 복구할 수 있다.'],
+  ['save-import', '기록 가져오기 전에 현재 기록과 백업의 본편·균열 진행을 나란히 비교한다.'],
+  ['ending-goal', '엔딩에 아직 생환하지 않은 심야의 해구가 다음 목표로 표시된다.'],
+  ['lesson-action-tables', '황혼 성당 문 상세의 행동표에 2턴 소울드레인 예행, HP 피해 0, 현재 MP −12가 표시된다.'],
+  ['tide-ripple-warning', '창조의 탑에서 다음 행동 예고와 조류 경고에 모두 잔물결(물리 ×0.75)이 표시된다.'],
+  ['double-relic-receipt', '황혼 성당 정예전 승리 화면에 정예와 내기로 얻은 유물 빅뱅과 오버디바인이 함께 표시된다.'],
+  ['rift-save-failure', '균열 승리를 저장하지 못하면 결과 화면에서 다시 저장하거나 현재 기록을 파일로 내보낼 수 있다.']
+];
+
 const FUN_CHANGES = [
   ['order-hint', '첫 본편 보스의 다른 순서. 첫 승 전까지 보이고 ‘이 순서로’를 눌러야 바뀐다'],
   ['retreat-outcomes', '물러나기 첫 탭에 다음 동료가 대신 맞고 남을 HP와, 쓰러질 때 넘길 유품 ×1.5를 함께 표시'],
@@ -120,7 +135,6 @@ const DECISIONS = [
 
 const QUESTIONS = [
   '에인션트소울 도트: 컨셉은 남성인데 일러스트를 따라 여성스럽게 나왔다. 다시 만들지.',
-  '배경음 12곡: 아무도 들어 보지 않았다. game/tools/music-preview.html 에서 곡별로 들을 수 있다.',
   '시작 숫자(골라 2 + 무작위 3, 결정 1)와 윤곽선 기본 켜짐은 Claude 판단이다.',
   '본편 첫 던전의 난이도: 시뮬레이션은 클리어 60~70%인데, 순서를 바꾸지 않는 단순 봇은 Chrome에서 네 번 다 보스에서 졌다. 실제로 해 보고 판단이 필요하다.'
 ];
@@ -146,6 +160,7 @@ const fixedTour = async entries => {
 };
 const redesign = await fixedTour(REDESIGN);
 const phaseTwo = await fixedTour(PHASE_TWO);
+const afternoonReview = await fixedTour(AFTERNOON_REVIEW);
 const funChanges = await fixedTour(FUN_CHANGES);
 const reviewFixes = await fixedTour(REVIEW_FIXES);
 const dailyRift = await fixedTour(DAILY_RIFT);
@@ -257,12 +272,24 @@ dialog img { max-height: 92vh; max-width: 96vw; display: block; }
 <div class="tour">${phaseTwo}</div>
 </section>
 
+<section aria-labelledby="afternoon-review-title">
+<h2 id="afternoon-review-title">완성도 점검과 2차 검증 (11월 21일 오후)</h2>
+<div class="panel">
+<p>관측소와 엔딩에 다음 목표를 표시하고, 출발 준비에 동료 출현표와 쉬운 난이도 ‘꿈결’을 추가했다. 주간·월간 미션으로 동료를 초대할 수 있게 했다. 글자 크기·표식 강조·전투 배속 설정과 직전 귀환본 복구·기록 내보내기·가져오기도 추가했다.</p>
+<p>2차 검증에서 재현한 10건과 손상 데이터 사례 2건을 고쳤다. 저장에 실패한 균열 승리를 파일로 내보낼 수 있고, 구버전 계약은 수락 당시 조건으로 정산한다. 지도·편성의 행동표와 조류 예고에는 실제 적 행동을 표시한다.</p>
+<p>배경음은 마지막으로 열린 화면에 맞춰 재생된다. 유물 장착·교체, 결정 순증가, 미션 영입, 계약 도장 획득, 저장 복구가 확정될 때 확인음이 난다. 소유자 결정에 따라 기존 곡을 유지했다.</p>
+<p>오프라인에서 CPU를 6배 느리게 설정한 성능 측정에서 제목 화면은 0.56초에 표시됐고, 전투 프레임 시간의 95백분위수는 16.8ms였다.</p>
+<p>공통 로직을 모으고 균열 진행과 전투 예고를 별도 모듈로 분리했다. 정리 전후 <code>sim.mjs --all</code>의 여정·악몽 출력은 바이트 단위로 일치했다.</p>
+</div>
+<div class="tour">${afternoonReview}</div>
+</section>
+
 <h2>한눈에</h2>
 <div class="stats">
   <div><b>7</b>던전 (입문 + 테마 5 + 창조의 탑)</div>
   <div><b>130</b>아군 도트 (일러스트에서 88명 새로)</div>
   <div><b>28</b>사건</div><div><b>14</b>유물</div>
-  <div><b>12</b>배경음</div><div><b>320</b>자동 테스트</div>
+  <div><b>12</b>배경음</div><div><b>341</b>자동 테스트</div>
 </div>
 <div class="panel">플레이: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\dist\\Relaymare.html</code><br>
 배경음 듣기: <code>C:\\Users\\BOMHANA\\Downloads\\게임\\Studying-card-pixel\\card_pixel\\game\\tools\\music-preview.html</code><br>
