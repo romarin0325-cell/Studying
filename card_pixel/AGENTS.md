@@ -5,10 +5,10 @@
 ## 목적
 - 카드 게임(`card/`, DREAMWEAVER)을 **도트 로그라이트 릴레이 RPG**로 다시 만든다.
 - 최우선은 켜자마자 재미있고 "다음이 보고 싶다"는 느낌이다. 보수적인 최소 수정이 목표가 아니다. **우아한 숫자보다 파격적인 재미.**
-- 그대로 살리는 것: 영구 사망 3인 릴레이 전투, 특성·스킬·캐릭터성(`card/game`의 규칙).
+- 그대로 살리는 것: 영구 사망 3인 릴레이 전투, 특성·스킬·캐릭터성(`card/game`에서 가져와 `game/core/`에서 관리하는 규칙).
 
 ## 원칙
-1. **전투 규칙의 원본은 `card/game`이다.** RELAYMARE는 그 파일을 고치지 않고 감싼다(`game/tools/core-bundle.mjs`). 전투 규칙을 바꾸려면 `card/game`을 고치고, 그러면 카드 게임 화면 다섯 개(card, legacy, astra, lumen, claude)도 함께 바뀐다.
+1. **RELAYMARE 전투 규칙의 원본은 `game/core/`다.** 2026-11-21에 `card/game`의 규칙 파일 네 개를 그대로 복사해 왔다(출처 커밋은 `game/core/README.md`). `game/tools/core-bundle.mjs`가 이 파일들을 읽는다. `game/core/`를 고치면 RELAYMARE만 바뀌고 `card/`의 카드 게임들은 바뀌지 않는다. 반대로 `card/game`의 이후 변경도 RELAYMARE에 들어오지 않는다.
 2. 로그라이트 층(문, 꿈의 변덕, 적 접두사, 유품, 최후의 일인, 경제)은 `game/src/engine/bridge.js`와 `game/src/engine/run.js`에만 둔다.
 3. **공용 구조 먼저.** 캐릭터·풀·적 생성은 `game/src/engine/roster.js` 하나에 둔다. 지금은 공용 풀(`common`)을 쓰고, 던전별 풀은 나중에 `pool('set:<기본덱 id>')`로 바꾼다.
 4. 숫자는 시뮬레이션(`game/tools/sim.mjs`)으로 맞추되 목표는 균형이 아니라 **순간**이다. 현재 기준: 예고를 읽는 플레이로 클리어 60~70%, 1,000 넘는 한 방이 나오는 판 25% 이상.

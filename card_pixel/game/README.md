@@ -46,7 +46,8 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 
 | 위치 | 담당 |
 | --- | --- |
-| `build.mjs` | 카드 원본·게임 모듈·CSS·그림을 단일 HTML로 묶는다 |
+| `build.mjs` | `core/`의 전투 규칙·게임 모듈·CSS·그림을 단일 HTML로 묶는다 |
+| `core/` | RELAYMARE 전용 전투 규칙 원본(`data.js`, `logic.js`, `skill_display.js`, `battle_runtime.js`). 2026-11-21 `card/game`에서 복사했고 이후 독립. 출처는 `core/README.md` |
 | `src/` | 게임 소스 |
 | `src/main.js` | 엔진·무대·저장·음악 초기화와 첫 화면 연결 |
 | `src/engine/` | 전투·원정·프로필 규칙 |
@@ -75,7 +76,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/content/quirks.js` | 전투 전체에 걸리는 꿈의 변덕 |
 | `src/content/affixes.js` | 적에게 붙는 접두사 |
 | `src/content/wild.js` | 야생 몽마 수치·크기·기술 |
-| `src/content/bosses.js` | 보스 수치와 예고 문구. 기술은 카드 원본에서 읽는다 |
+| `src/content/bosses.js` | 보스 수치와 예고 문구. 기술은 `core/`의 전투 규칙에서 읽는다 |
 | `src/content/boss-lessons.js` | 보스 행동표와 예행 전투 규칙 |
 | `src/content/contracts.js` | 악몽 계약 조건과 예치금·지급액 |
 | `src/content/daily-rift.js` | 균열 층 수와 지역·사건·전투 보정 자료 |
@@ -131,7 +132,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/styles/` | 공용(`base`: 색·모양·글꼴 토큰, 버튼, 시트, 장식)·전투(`battle`)·원정 화면(`screens`)·타이틀·관측소와 메타 화면(`meta`) CSS. 디자인 근거는 `plan/ui-direction.md` |
 | `src/styles/map.css` | 걷는 지도와 문·편성 패널 스타일 |
 | `assets/` | 포즈 PNG와 `sprites.json`, `backgrounds/`, `icons/` |
-| `tools/` | 카드 원본을 감싸는 `core-bundle.mjs`, 시뮬레이션, 미리듣기, 그림 자르기 |
+| `tools/` | `core/`의 전투 규칙을 감싸는 `core-bundle.mjs`, 시뮬레이션, 미리듣기, 그림 만들기 |
 | `tests/` | Node 테스트 진입 파일 5개, 화면·지도 갤러리, 브라우저 자동 플레이 |
 | `tests/support/core.mjs` | 테스트별 카드 코어 VM과 스프라이트 명단 생성 |
 | `tests/run/tempo-events.mjs` | `run.test.mjs`에서 등록하는 템포 2 사건 사례 |
@@ -146,10 +147,10 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | --- | --- |
 | 던전 | `content/dungeons.js`에 풀·보스·난이도·지역·해금을 등록한다. 층별 문이 달라지면 `content/layouts.js`, 새 해금 조건이면 `engine/meta.js`를 고친다. 배경 ID에 맞춘 PNG는 `assets/backgrounds/`에 둔다 |
 | 사건 | `content/events.js`에 등장 인물 조건과 선택지·비용·`ops`를 넣는다. 새 효과는 `engine/rooms.js`, 다음 전투에서 판정하는 새 조건은 `engine/bridge.js`에 잇는다 |
-| 유물 | 카드 원본 `ARTIFACT_LIST`의 ID를 `content/relics.js`에 제안 조건과 함께 추가한다. 이름·설명·전투 효과는 원본을 읽는다. 같은 ID의 아이콘은 `assets/icons/`에 둔다 |
+| 유물 | `core/logic.js`의 `ARTIFACT_LIST`에서 ID를 찾아 `content/relics.js`에 제안 조건과 함께 추가한다. 이름·설명·전투 효과는 `core/`의 전투 규칙에서 읽는다. 같은 ID의 아이콘은 `assets/icons/`에 둔다 |
 | 캐릭터 스프라이트 | `../art/strips/<id>-strip.png`와 `../art/manifest.json`을 준비해 자른 뒤 빌드한다. 동료는 카드 ID와 `kind: "ally"`를 쓰고, 동료와 ID가 겹치는 적은 `wild_<id>`·`boss_<id>`를 우선 조회한다. 던전 풀은 `content/dungeons.js`에서 확인한다 |
 | 지역 규칙 | `content/regions.js`에 설명을 두고 `content/dungeons.js`에서 던전에 연결한다. 전투 중 판정·예고는 `engine/bridge.js`, 문·적·시작 필드 생성은 `engine/rooms.js`를 본다 |
 | 화면 | `ui/screens/`에 화면을 두고, 거점 흐름은 `ui/nav.js`, 원정 중 흐름은 `ui/run/index.js`에 연결한다. 버튼은 엔진 명령을 호출한다 |
 
 - **원정 상태는 엔진 명령만 바꾼다.** 화면과 시뮬레이션은 같은 명령으로 출전·방 선택·전투 정산·보상을 처리한다. 저장은 그 상태를 되살린다.
-- **카드 전투 규칙의 원본은 `card/game/`이다.** `tools/core-bundle.mjs`가 원본 파일을 그대로 읽어 `RelayCore`로 감싸고 타이머만 연결한다. RELAYMARE 전용 규칙은 엔진 연결층에 둔다.
+- **RELAYMARE 전투 규칙의 원본은 `core/`다.** `tools/core-bundle.mjs`가 이 파일들을 읽어 `RelayCore`로 감싸고 타이머를 연결한다. `card/game`과는 2026-11-21부터 독립이다. 릴레이 진행과 전투 연동은 엔진 연결층에 둔다.
