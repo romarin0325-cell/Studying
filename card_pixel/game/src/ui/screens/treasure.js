@@ -27,15 +27,18 @@ export function treasureScreen(run, ui, id, { equipped = false, node = $('#treas
   const offer = comparing ? '<div class="run-relic-compare" aria-live="polite">' +
     comparisonCard(relic, '장착', 'incoming') + comparisonCard(null, '해제', 'outgoing') + '</div>' :
     '<div class="run-relic-description win">' + description + (equipped ? '<small class="gain">장착 완료</small>' : '') + '</div>';
-  node.innerHTML = (inline ? '<h4>유물 교체</h4>' : head(run, title, run.floor + '층')) +
+  // A victory reward already lives inside the result sheet's scroll area.
+  node.innerHTML = (inline ? '<h4>유물 교체</h4>' : head(run, title, run.floor + '층') +
+    '<div class="screen-split"><div class="fixed-top">') +
     relicStrip(ui.core, run.relics, { replaceable, equipped: equipped ? id : null }) +
-    '<div class="run-treasure' + (inline ? '' : ' scroll') + (comparing ? ' comparing' : '') + '">' +
+    '<div class="run-treasure' + (comparing ? ' comparing' : '') + '">' +
     (inline ? '' : ui.scene(run.room.bg, '<div class="relic-dais">' + (relic ? relicIcon(id, 96) : '') + '</div>')) + offer +
     (cost ? '<p class="relic-cost' + (short ? ' loss' : '') + '">결정 ' + cost + (short ? ' · ' + short + '개 부족' : '') + '</p>' : '') +
-    '</div><div class="footer"><button class="btn' + (canEquip ? '' : ' go') + '" id="b-leave">' +
+    '</div>' + (inline ? '' : '</div>') + '<div class="footer' + (inline ? '' : ' fixed-foot') +
+    '"><button class="btn' + (canEquip ? '' : ' go') + '" id="b-leave">' +
     (canEquip ? '두고 가기' : '다음으로') + '</button>' +
     (canEquip ? '<button class="btn go" id="b-equip"' + (comparing || short ? ' disabled' : '') + '>장착</button>' : '') +
-    '</div>';
+    '</div>' + (inline ? '' : '</div>');
   // Inline on the victory panel the comparison lives inside #result; switching screens would hide it.
   if (!inline) show('treasure');
   const equip = $('#b-equip', node);
@@ -64,7 +67,7 @@ export function treasureScreen(run, ui, id, { equipped = false, node = $('#treas
     else if (offered || pending) {
       const actions = $('.footer', node);
       actions.querySelectorAll('button').forEach(button => { button.disabled = true; });
-      actions.insertAdjacentHTML('beforebegin', treasureReceipt(relic));
+      $('.run-treasure', node).insertAdjacentHTML('beforeend', treasureReceipt(relic));
       setTimeout(() => {
         if (!actions.isConnected || !node.classList.contains('on')) return;
         if (run.pending) ui.route();

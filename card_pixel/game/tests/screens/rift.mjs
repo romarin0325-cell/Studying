@@ -19,6 +19,8 @@ export function createRiftCases({
     const run = makeRun({ seed: 7, floor: 8, profileView: Meta.startView(intro, 'ember_volcano') });
     startBattle(run);
     settleWin(run);
+    // The held final result is confirmed the way the result panel's button does.
+    assert.equal(Run.confirmResult(run).ok, true);
     const { profile, announce } = Meta.applyRunEnd(intro, run);
     assert.equal(announce.ok, true, announce.reason);
     assert.ok(Meta.dailyRiftUnlocked(profile), 'The first main expedition clear must unlock the rift');
@@ -58,6 +60,7 @@ export function createRiftCases({
     settleWin(run, won
       ? { survivors: [false, false, true], turns: 24, heirloomsUsed: 2 }
       : { outcome: 'lose', survivors: [false, false, false], turns: 24, enemyDowns: [] });
+    assert.equal(Run.confirmResult(run).ok, true);
     assert.equal(run.phase, 'done');
     assert.equal(run.result, won ? 'win' : 'lose');
     return run;
@@ -102,7 +105,7 @@ export function createRiftCases({
       ...fixture.page(main), proof: 'Both slots save a distinct floor-four run',
       async show(page, { text, capture }) {
         await enterObservatory(page);
-        await text(page.locator('#hub.on #meta-depart'), '홍련 화산 4층 이어가기', { exact: true });
+        await text(page.locator('#hub.on #meta-depart'), '홍련 화산 4층 · 문지기 전투 입구부터', { exact: true });
         await text(riftRow(page).locator('small'), '11.21 · 4층 이어가기', { exact: true });
         await capture();
         await page.locator('#hub.on #meta-depart').click();

@@ -323,6 +323,7 @@ export function createTourCases({
       async open(page) {
         await enterObservatory(page);
         await page.locator('#hub.on [data-meta-page="notebook"]').click();
+        await page.locator('#notebook.on [data-screen-tab="missions"]').click();
       },
       after: (page, { text }) => text(page.locator('[data-mission-guide="weekly"]'), '완료 도장')
     });

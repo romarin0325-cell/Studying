@@ -2,11 +2,20 @@
   --branch-light: 1;
   --other-paths: 1;
   --scene-opacity: 1;
-  flex: 0 0 clamp(210px, 31dvh, 350px);
+  height: clamp(210px, 31dvh, 350px);
   min-height: 210px;
-  margin: 2px 12px 0;
+  margin-top: 2px;
   background: #2a2148;
   isolation: isolate;
+}
+
+/* Anchor the choices low, where the thumb rests; all doors show when they fit and only the list scrolls when they do not. */
+#map .run-route > .fixed-top { padding-top: 0; }
+#map .run-doors.scroll-list {
+  align-self: end;
+  align-content: start;
+  max-height: 100%;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
 }
 
 .map-landscape, .map-trails, .map-trail, .map-walkers, .map-walker-anchor, .map-portals {

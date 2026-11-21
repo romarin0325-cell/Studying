@@ -3,8 +3,9 @@ import { background } from '../assets.js';
 import { tools } from '../settings.js';
 import { INTRO } from '../../content/intro.js';
 import { hubLineup, sceneActors } from './hub.js';
+import { resumeLabel } from '../glossary.js';
 
-export function titleScreen({ profile, widgets, start, notice }) {
+export function titleScreen({ profile, run, widgets, start, resume = start, notice }) {
   const node = $('#title');
   const lineup = profile ? hubLineup(profile.lead, profile.ui?.returners || []) : INTRO.party;
   node.innerHTML = `
@@ -15,8 +16,8 @@ export function titleScreen({ profile, widgets, start, notice }) {
     <div class="meta-title-name"><h1>다음은 <em>너</em></h1><span>RELAYMARE</span></div>
     <p class="title-relay">쓰러진 동료가 다음 동료의 힘이 된다</p>
     ${notice ? `<p class="title-save-notice win" role="status">${esc(notice)}</p>` : ''}
-    <button class="btn go" id="b-start">꿈길 입장</button>
+    <button class="btn go" id="b-start">${run ? esc(resumeLabel(run, profile?.ui)) : '꿈길 입장'}</button>
   `;
   show('title');
-  $('#b-start', node).addEventListener('click', start, { once: true });
+  $('#b-start', node).addEventListener('click', run ? resume : start, { once: true });
 }

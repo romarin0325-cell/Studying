@@ -8,8 +8,10 @@ import { fileURLToPath } from 'node:url';
 import * as Bridge from '../src/engine/bridge.js';
 import { makeBossLesson } from '../src/content/boss-lessons.js';
 import { create as makeRoster } from '../src/engine/roster.js';
+import * as Run from '../src/engine/run.js';
 import { createStage } from '../src/stage/stage.js';
 import { createMoves } from '../src/ui/battle/moves.js';
+import { createCoreRoster } from './support/core.mjs';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -75,6 +77,7 @@ test('Soul Drain previews zero HP damage, the incoming MP, and the actual respon
     for (let i = 0; i < 5; i++) assert.deepEqual(b.previewRetreat(), preview);
     assert.deepEqual([preview.intent.target, preview.intent.resourceEffect.before, preview.intent.resourceEffect.after],
       [{ side: 'ally', idx: 2 }, 18, 0]);
+    assert.equal(b.previewRelay().retreat.next.mpAfter, 0);
     const response = b.retreat().find(event => event.t === 'rule' && event.actionId === preview.intent.actionId);
     assert.deepEqual([response.target, response.before, response.after], [preview.intent.target, 18, 0]);
   }
@@ -504,6 +507,126 @@ test('rule D: the last fighter cannot retreat', () => {
   const b = battle({ party: ['luna'], seed: 2 });
   b.start();
   assert.equal(b.canRetreat(), false);
+});
+
+test('the seeded floor 2 relay forecast agrees with both actual outcomes against the second enemy', () => {
+  const { core, roster } = createCoreRoster();
+  const run = Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 26019140, tempoVersion: 2 });
+  for (const id of ['dragon_miko', 'zeke']) assert.equal(Run.chooseStartPick(run, id).ok, true);
+  assert.equal(Run.enterBattleDoor(run, { floor: 1, index: 0, partyIds: ['werebear', 'lightning_sage', 'zeke'] }).ok, true);
+  const first = Bridge.create(core, Run.battleOptions(run));
+  first.start();
+  for (const name of ['강타', '강타', '강타', '일반 공격', '일반 공격']) first.act(option(first, name).index);
+  assert.equal(first.outcome, 'win');
+  assert.equal(Run.settleBattle(run, first.summary()).ok, true);
+  assert.equal(Run.resolveReinforcement(run, { key: run.pending.key, id: 'hellhound', replaceId: null }).ok, true);
+  assert.equal(Run.leaveRoom(run).ok, true);
+  assert.equal(Run.nextFloor(run).ok, true);
+  assert.equal(Run.enterBattleDoor(run, { floor: 2, index: 0, partyIds: ['dragon_miko', 'siren', 'zeke'] }).ok, true);
+  function reachDecision() {
+    const b = Bridge.create(core, Run.battleOptions(run));
+    let events = b.start();
+    for (const name of ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격']) events = b.act(option(b, name).index);
+    assert.deepEqual([b.state().turn, b.enemyIndex, b.state().allies[0].hp], [5, 1, 62]);
+    assert.deepEqual(last(events, 'await').intent.damageRange, [212, 212]);
+    return b;
+  }
+  const retreating = reachDecision(), standing = reachDecision();
+  const before = retreating.state();
+  const expected = {
+    danger: 'certain',
+    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [313, 313] } },
+    stand: { falls: 'certain', inheritor: { id: 'siren', name: '세이렌' }, heirloom: { skill: '드래곤스파클', from: 'dragon_miko' }, replaces: null }
+  };
+  const random = Math.random;
+  Math.random = () => { throw new Error('previewRelay must not roll'); };
+  try {
+    for (let i = 0; i < 3; i++) assert.deepEqual(retreating.previewRelay(), expected);
+  } finally {
+    Math.random = random;
+  }
+  assert.deepEqual(retreating.state(), before);
+  assert.deepEqual(retreating.heirloomsGained(), []);
+  assert.ok(last(retreating.retreat(), 'retreat'));
+  assert.deepEqual([retreating.state().cur, retreating.state().allies[1].hp], [1, 313]);
+  assert.deepEqual(retreating.previewRelay().retreat, { available: false, next: null });
+  const handoff = last(standing.act(0), 'heirloom');
+  assert.deepEqual([handoff.to.idx, handoff.skill.name], [1, expected.stand.heirloom.skill]);
+  assert.equal(standing.heirloomsGained()[0].from, expected.stand.heirloom.from);
+});
+
+test('relay forecast distinguishes possible death and reports ascending HP after a variable hit', () => {
+  const enemy = quietEnemy(99999, { atk: 100 });
+  enemy.skills = [{ name: '시험용 예고', type: 'phy', rate: 1, effects: [{ type: 'random_mult', min: 1, max: 3 }] }];
+  const b = battle({ party: ['fairy', null, 'red_dragon'], enemies: [enemy] });
+  const [low, high] = last(b.start(), 'await').intent.damageRange;
+  assert.ok(low < high);
+  b.host.battle.players[0].hp = high;
+  const preview = b.previewRelay();
+  assert.equal(preview.danger, 'possible');
+  assert.equal(preview.stand.falls, 'possible');
+  assert.equal(preview.stand.inheritor.id, 'red_dragon');
+  const [nextLow, nextHigh] = b.previewRetreat().dmg;
+  assert.deepEqual(preview.retreat.next.hpAfter, [420 - nextHigh, 420 - nextLow]);
+  b.host.battle.players[0].hp = low;
+  assert.equal(b.previewRelay().danger, 'certain');
+});
+
+test('relay forecast accounts for guard, barrier and active evasion', () => {
+  const b = battle({ enemies: [quietEnemy(99999, { atk: 100 })] });
+  const [damage] = last(b.start(), 'await').intent.damageRange;
+  const player = b.host.battle.players[0];
+  player.hp = damage - 1;
+  assert.equal(b.previewRelay().danger, 'certain');
+  for (const defense of ['guard', 'barrier', 'evasion']) {
+    player.buffs = { [defense]: 1 };
+    assert.equal(b.previewRelay().danger, defense === 'evasion' ? 'possible' : 'none', defense);
+  }
+  player.baseEva = 100;
+  assert.equal(b.previewRelay().danger, 'none', 'guaranteed evasion');
+});
+
+test('relay forecast can show a lethal hit with no inheritor or retreat for the last companion', () => {
+  const b = battle({ party: ['luna'], enemies: [quietEnemy(99999, { atk: 100 })] });
+  b.start();
+  const player = b.host.battle.players[0];
+  player.hp = 1;
+  player.baseEva = -100;
+  assert.deepEqual(b.previewRelay(), {
+    danger: 'certain', retreat: { available: false, next: null },
+    stand: { falls: 'certain', inheritor: null, heirloom: null, replaces: null }
+  });
+  assert.ok(last(b.act(0), 'lose'));
+  assert.deepEqual(b.heirloomsGained(), []);
+});
+
+test('relay forecast hands off the transformed form attack and identifies the heirloom it replaces', () => {
+  const b = battle({
+    party: ['miracle_larva', 'ash'], enemies: [quietEnemy(99999, { atk: 40 })],
+    heirlooms: { ash: { from: 'red_dragon' } }
+  });
+  b.start();
+  for (const name of ['기적의우화', '기적의우화 → 오로라윙']) b.act(option(b, name).index);
+  assert.equal(b.state().allies[0].form, 'aurora_wing');
+  const player = b.host.battle.players[0];
+  player.hp = 1;
+  player.baseEva = -100;
+  const { stand } = b.previewRelay();
+  assert.deepEqual(stand, {
+    falls: 'certain', inheritor: { id: 'ash', name: '애쉬' },
+    heirloom: { skill: '뷰티토네이도', from: 'miracle_larva' }, replaces: { skill: '파이어브레스' }
+  });
+  const inherited = last(b.act(0), 'heirloom');
+  assert.equal(inherited.skill.name, stand.heirloom.skill);
+  assert.equal(b.heirloomsGained()[0].form, 'aurora_wing');
+  assert.deepEqual(b.options().filter(skill => skill.heirloom).map(skill => skill.name), [stand.heirloom.skill]);
+});
+
+test('relay forecast lists the outgoing fighter’s pending reserves only once', () => {
+  const b = battle({ party: ['prism_twin', 'ash'], enemies: [quietEnemy()] });
+  b.start();
+  b.act(option(b, '일루미네이션').index);
+  assert.deepEqual(b.previewRelay().retreat.cancelsReserve, ['일루미네이션']);
 });
 
 test('rule C: enemies arrive one after another and allies keep their state', () => {

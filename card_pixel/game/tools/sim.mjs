@@ -175,6 +175,7 @@ function fight(run, { naive, bossSuggestion, bossOrder, opening, onBattle, trace
   if (!bridge.outcome) throw new Error('Battle did not finish: ' + run.id + ' floor ' + run.floor);
   const summary = bridge.summary();
   const result = checked(R.settleBattle(run, summary));
+  if (result.retry) checked(R.confirmResult(run));
   onBattle?.(run, bridge.state(), summary, result, order.filter(Boolean));
   return summary.heirloomsGained.length;
 }
@@ -286,6 +287,7 @@ export function playRun(dungeonId, seed, {
       checked(R.takeTreasure(run));
     }
     resolveChoices(run, naive);
+    if (run.phase === 'result') checked(R.confirmResult(run));
     onRoom?.(run);
     if (run.phase !== 'done') {
       checked(R.leaveRoom(run));
@@ -324,6 +326,7 @@ export function playDaily(key, { naive = false, bossOrder = null } = {}) {
       checked(R.chooseEvent(run, id, choice.targets ? strongest(choice.targets)[0] : undefined));
     }
     resolveChoices(run, naive);
+    if (run.phase === 'result') checked(R.confirmResult(run));
     if (run.phase !== 'done') {
       checked(R.leaveRoom(run));
       checked(R.nextFloor(run));

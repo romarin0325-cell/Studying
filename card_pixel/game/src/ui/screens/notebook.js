@@ -2,6 +2,7 @@ import { $, $$, esc } from '../dom.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { NOTEBOOK } from '../../content/notebook.js';
 import { notebookView } from '../../engine/meta.js';
+import { bindScreenTabs } from '../nav/screen-tabs.js';
 
 const GOALS = {
   1: '새벽의 숲에서 생환',
@@ -73,20 +74,36 @@ export function notebookScreen(node, profile, card, { missions, openMission, des
     for (const button of node.querySelectorAll('[data-chapter]')) button.setAttribute('aria-pressed', Number(button.dataset.chapter) === id);
   }
 
+  node.classList.add('screen-split');
   node.innerHTML = `
-    <article class="meta-panel meta-chapter-detail"></article>
-    ${goal?.text ? `<p class="meta-next-goal">${esc([goal.text, goal.reward].filter(Boolean).join(' · '))}</p>` : ''}
-    ${missions?.unlocked ? `<div class="meta-missions">${missionRows(missions, !!openMission)}</div>` : ''}
-    <div class="meta-chapters">
-      ${chapters.map(chapter => `<button class="meta-panel" data-chapter="${chapter.id}">
-        <span>${chapter.id}장 · ${esc(chapter.title)}</span>
-        ${chapter.completed ? '<span class="meta-stamp">완료</span>' : ''}
-        ${chapter.id === current.id && !chapter.completed ? '<small>현재</small>' : ''}
-      </button>`).join('')}
+    <div class="fixed-top">
+      ${missions?.unlocked ? `<div class="screen-tabs" role="group" aria-label="수첩 종류">
+        <button class="btn" data-screen-tab="chapters">수첩 장</button>
+        <button class="btn" data-screen-tab="missions">영입 임무</button>
+      </div>` : ''}
     </div>
+    <div class="scroll-list">
+      <div data-screen-panel="chapters">
+        <article class="meta-panel meta-chapter-detail"></article>
+        <div class="meta-chapters">
+          ${chapters.map(chapter => `<button class="meta-panel" data-chapter="${chapter.id}">
+            <span>${chapter.id}장 · ${esc(chapter.title)}</span>
+            ${chapter.completed ? '<span class="meta-stamp">완료</span>' : ''}
+            ${chapter.id === current.id && !chapter.completed ? '<small>현재</small>' : ''}
+          </button>`).join('')}
+        </div>
+      </div>
+      ${missions?.unlocked ? `<div data-screen-panel="missions"><div class="meta-missions">${missionRows(missions, !!openMission)}</div></div>` : ''}
+    </div>
+    ${goal?.text ? `<p class="meta-next-goal fixed-foot">${esc([goal.text, goal.reward].filter(Boolean).join(' · '))}</p>` : ''}
   `;
+  if (missions?.unlocked) bindScreenTabs(node, node.dataset.screenTabActive ?? 'chapters');
+  const list = $('.scroll-list', node);
   for (const button of node.querySelectorAll('[data-chapter]')) {
-    button.addEventListener('click', () => openChapter(Number(button.dataset.chapter)));
+    button.addEventListener('click', () => {
+      openChapter(Number(button.dataset.chapter));
+      list.scrollTop = 0;
+    });
   }
   $$('[data-mission]', node).forEach(button => button.addEventListener('click', () => openMission(button.dataset.mission)));
   $$('[data-mission-guide]', node).forEach(button => button.addEventListener('click', () =>

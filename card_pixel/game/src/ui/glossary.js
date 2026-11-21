@@ -1,3 +1,34 @@
+import { DUNGEONS } from '../content/dungeons.js';
+import { resumePoint } from '../engine/resume.js';
+
+export const RESUME = {
+  battle: {
+    wild: '전투 입구부터',
+    elite: '강한 적 전투 입구부터',
+    gate: '문지기 전투 입구부터',
+    boss: '보스 전투 입구부터'
+  },
+  result: '결과 확인',
+  map: '지도에서',
+  event: '사건에서',
+  spring: '소환의 샘에서',
+  altar: '혼돈의 제단에서',
+  treasure: '보물방에서',
+  recruit: '영입 후보 고르기',
+  dailyResult: '균열 기록 보기',
+  awakening: '동료 고르기',
+  borrowed: '대여 첫 전투부터',
+  borrowedReplay: '대여 첫 전투 · 기록한 선택부터',
+  label: (region, floor, destination) => `${region} ${floor}층 · ${destination}`
+};
+
+export function resumeLabel(run, entry) {
+  const point = resumePoint(run, entry);
+  const destination = point.kind === 'battle' ? RESUME.battle[point.roomType]
+    : point.kind === 'borrowed' && point.replay ? RESUME.borrowedReplay : RESUME[point.kind];
+  return RESUME.label(DUNGEONS[run.dungeonId].name, point.floor, destination);
+}
+
 export const TERMS = {
   crystal: { short: '결정', firstUse: '결정 ◆ · 이번 원정에서 쓰는 재화', detail: '소환의 샘과 원정 중 거래에 사용합니다.', scope: '원정' },
   join: { short: '합류', firstUse: '이번 원정 합류', detail: '이번 원정에 함께할 동료가 됩니다.', scope: '원정' },

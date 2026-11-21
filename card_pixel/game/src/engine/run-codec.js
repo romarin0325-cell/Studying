@@ -2,10 +2,10 @@ import { DUNGEONS } from '../content/dungeons.js';
 import { CONTRACT_RULE_VERSION, CONTRACTS, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
 import { calendarDate } from './dates.js';
 import { openFeatures } from './entry.js';
-import { bindRun } from './run.js';
+import { bindRun, runRewards } from './run.js';
 
 export const RUN_VERSION = 1;
-const PHASES = ['start', 'map', 'room', 'reward', 'done'];
+const PHASES = ['start', 'map', 'room', 'reward', 'result', 'done'];
 
 export const dictionary = value => !!value && typeof value === 'object' && !Array.isArray(value);
 export const count = value => Number.isSafeInteger(value) && value >= 0;
@@ -39,6 +39,7 @@ export function serializeRun(run) {
 export function restoreRun(data, { core, roster, migrate } = {}) {
   const run = readVersion(data, RUN_VERSION, migrate)?.run;
   if (!dictionary(run) || !string(run.id) || !Object.hasOwn(DUNGEONS, run.dungeonId) || !PHASES.includes(run.phase)
+    || (run.phase !== 'result' && run.resultRewards !== undefined)
     || !['easy', 'normal', 'nightmare'].includes(run.difficulty)
     || (run.difficulty !== 'normal' && (run.daily || DUNGEONS[run.dungeonId].layout === 'intro'))
     || !count(run.floor) || !count(run.floors) || run.floor > run.floors || !count(run.crystals)
@@ -68,10 +69,43 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
   run.lastParty ??= null;
   run.guide ??= { bossOrder: false };
   run.joinOrder ??= run.bench.slice();
+  migrateResult(run);
+  if (run.phase === 'result' && !validHeldResult(run)) return null;
   return bindRun(run, { core, roster });
 }
 
 const recruitTags = tags => dictionary(tags) && Object.values(tags).every(tag => ['boss', 'gate', 'battle', 'bench'].includes(tag));
+const validRewards = rewards => strings(rewards.recruitable) && strings(rewards.shardCandidates)
+  && count(rewards.recruitLimit) && (rewards.recruitTags === undefined || recruitTags(rewards.recruitTags));
+
+function migrateResult(run) {
+  if (run.phase === 'room' && run.room?.status === 'order' && run.awaitingRetryResult === true) {
+    run.phase = 'result';
+    run.room.status = 'resolved';
+  } else if (run.phase === 'reward' && ['win', 'lose'].includes(run.result) && run.room?.status === 'resolved') {
+    // Early versions offered a gate reward on the intro finale and resumed directly at recruitment.
+    if (run.result === 'win' && run.room.type === 'gate' && run.room.final && run.pending?.kind === 'gate') {
+      run.phase = 'done';
+      run.pending = null;
+    } else {
+      run.phase = 'result';
+      run.resultRewards = runRewards(run);
+    }
+  }
+  delete run.awaitingRetryResult;
+}
+
+function validHeldResult(run) {
+  if (run.room?.status !== 'resolved' || !run.room.enemies.length) return false;
+  const battle = run.lastBattleResult;
+  if (battle && (battle.floor !== run.floor || battle.roomType !== run.room.type)) return false;
+  if (run.result === null) {
+    return run.firstIntroClear && run.room.final && run.room.type === 'gate' && run.pending === null
+      && battle?.outcome === 'lose' && run.resultRewards === undefined;
+  }
+  return ['win', 'lose'].includes(run.result) && (!run.pending || run.pending.kind === 'relic')
+    && dictionary(run.resultRewards) && run.resultRewards.result === run.result && validRewards(run.resultRewards);
+}
 
 function validEntryRules(run) {
   const { features, lastBattleResult, repeatStacks, participationTags, pending } = run;
@@ -81,8 +115,7 @@ function validEntryRules(run) {
   if (run.rewardRuleVersion !== undefined && run.rewardRuleVersion !== 2) return false;
   if (run.drawRuleVersion === 2 && (!dictionary(repeatStacks) || !Object.values(repeatStacks).every(count))) return false;
   if (participationTags !== undefined && !recruitTags(participationTags)) return false;
-  if (pending?.kind === 'recruit' && (!strings(pending.recruitable) || !strings(pending.shardCandidates)
-    || !count(pending.recruitLimit) || (pending.recruitTags !== undefined && !recruitTags(pending.recruitTags)))) return false;
+  if (pending?.kind === 'recruit' && !validRewards(pending)) return false;
   if (pending?.kind === 'springDraw' && (run.drawRuleVersion !== 2 || run.phase !== 'room' || run.room?.type !== 'spring'
     || run.room.status !== 'service' || !string(pending.key) || !run.pool.includes(pending.id)
     || [run.bench, run.fallen, run.released].some(ids => ids.includes(pending.id)) || pending.cost !== 1)) return false;

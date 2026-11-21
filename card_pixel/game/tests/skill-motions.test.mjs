@@ -4,7 +4,7 @@ import test from 'node:test';
 import { SKILL_MOTIONS } from '../src/content/skill-motions.js';
 import { create as createBattle } from '../src/engine/bridge.js';
 import { createStage } from '../src/stage/stage.js';
-import { contactOffset, resolveMotion, spriteBox } from '../src/ui/battle/motion.js';
+import { contactOffset, motionPoint, rangedTiming, resolveMotion, socketPoint, spriteBox } from '../src/ui/battle/motion.js';
 import { createMoves } from '../src/ui/battle/moves.js';
 import { createCoreRoster } from './support/core.mjs';
 
@@ -22,16 +22,22 @@ function resolve(sourceKey, options) {
   return resolveMotion({ sourceKey, skill: rosterSkill(sourceKey), side: 'ally', ...options });
 }
 
-test('every table key refers to its exact current roster slot and covers the audited melee families', () => {
+test('every table key names the exact slot and covers all the native audit findings', () => {
   for (const [key, entry] of Object.entries(SKILL_MOTIONS)) {
-    assert.match(key, /^(ally|boss|wild)\/[a-z_0-9]+\/[1-9]\d*$/);
+    assert.match(key, /^(ally|boss|wild|form)\/[a-z_0-9]+\/[1-9]\d*$/);
     assert.equal(rosterSkill(key)?.name, entry.expectedName, key);
   }
-  const families = audit.design.firstWave.families;
-  const required = audit.entries.filter(entry =>
-    ['ally', 'boss', 'wild'].includes(entry.context) && families.includes(entry.family));
-  assert.equal(required.filter(entry => entry.verdict === 'mismatch').length, audit.design.firstWave.nativeMismatchesInFamilies);
-  for (const entry of required) assert.equal(SKILL_MOTIONS[entry.caseId]?.range, 'melee', entry.caseId);
+  const families = new Set(audit.design.families.map(entry => entry.id));
+  const required = audit.entries.filter(entry => ['ally', 'boss', 'wild', 'form'].includes(entry.context));
+  assert.equal(required.length, 267);
+  assert.equal(Object.keys(SKILL_MOTIONS).length, 269);
+  assert.equal(audit.counts.nativeSlots.total - Object.keys(SKILL_MOTIONS).length, 167);
+  assert.equal(required.filter(entry => SKILL_MOTIONS[entry.caseId]?.range === 'ranged').length, 190);
+  for (const entry of required) {
+    const motion = SKILL_MOTIONS[entry.caseId];
+    assert.ok(families.has(motion?.family), entry.caseId);
+    if (!audit.design.firstWave.families.includes(entry.family)) assert.equal(motion.family, entry.family, entry.caseId);
+  }
 });
 
 test('the four Dragon Claws and Fire Breath choose the intended art by original slot', () => {
@@ -68,9 +74,44 @@ test('physical basics are quiet and unknown or stale source keys fall back', () 
     side: 'ally', isBasic: true, salience: 'boss', casterSprite: 'ancient_dragon'
   });
   assert.deepEqual(basic, { family: 'impact', variant: 'strike', range: 'melee', frame: 'idle', size: 'quiet' });
-  assert.equal(resolve('boss/iris_love/3', { side: 'enemy' }), null);
-  assert.equal(resolve('ally/ash/2'), null);
-  assert.equal(resolve('ally/executor/3', { skill: rosterSkill('ally/zeke/2') }), null);
+  assert.equal(resolve('boss/iris_love/3', { side: 'enemy' }).variant, 'absorb');
+  assert.deepEqual(resolve('ally/ash/2'), {
+    family: 'fall', variant: 'meteor', range: 'ranged', frame: 'idle', socket: 'top', tint: 'fire', size: 'big'
+  });
+  assert.equal(resolve('ally/executor/3', { skill: rosterSkill('ally/zeke/2') }).family, 'orb');
+  assert.equal(resolve('ally/aurora_wing/2').family, 'drift');
+  const fallback = (type, effects, val = 2, salience = 'boss') =>
+    resolveMotion({ skill: { name: 'new skill', type, effects, val }, side: 'enemy', salience });
+  for (const [type, effects, val, family, variant] of [
+    ['phy', ['multi_hit'], 2, 'blade', 'double'],
+    ['mag', ['random_mult'], 4, 'fall', 'rain'],
+    ['mag', ['consume_field_all'], 4, 'blast', 'burst'],
+    ['phy', ['self_hp_cost_ratio'], 2, 'fall', 'meteor'],
+    ['mag', [], 4, 'fall', 'meteor'],
+    ['phy', [], 2, 'impact', 'body'],
+    ['mag', [], 2, 'ray', 'straight']
+  ]) {
+    const motion = fallback(type, effects, val);
+    assert.deepEqual([motion.family, motion.variant, motion.size], [family, variant, 'big']);
+  }
+  assert.equal(fallback('phy', [], 2, 'quiet').variant, 'strike');
+  assert.equal(fallback('mag', [], 2, 'quiet').variant, 'bolt');
+});
+
+test('sockets follow crop rounding, mirror on the drawn pixel, and fall back to hand then chest', () => {
+  const meta = { w: 34, h: 49, cx: 12, fy: 45 };
+  const actor = { x: 68.5, y: 124, ox: 1.5, oy: -3 };
+  const sockets = { hand: [24, 32], mouth: [18, 10] };
+  assert.deepEqual(socketPoint(actor, meta, sockets, 'mouth'), { x: 76, y: 85 });
+  assert.deepEqual(socketPoint({ ...actor, flip: true }, meta, sockets, 'mouth'), { x: 63, y: 85 });
+  assert.deepEqual(socketPoint(actor, meta, sockets, 'eye'), { x: 82, y: 107 });
+  assert.deepEqual(socketPoint(actor, meta, {}, 'hand'), { x: 70, y: 104 });
+  assert.deepEqual(socketPoint(actor, meta, sockets, 'ground'), { x: 70, y: 121 });
+  const from = { x: 0, y: 30 }, to = { x: 90, y: 40 };
+  assert.deepEqual(motionPoint(from, to, 0.5, 20), { x: 45, y: 15 });
+  assert.equal(rangedTiming({ family: 'shot', from, to, big: false }).travel, Math.hypot(90, 10) / 900);
+  assert.equal(rangedTiming({ family: 'shot', from, to, big: true }).travel, Math.hypot(90, 10) / 700);
+  assert.deepEqual(rangedTiming({ family: 'ray', still: true }), { travel: 0, hold: 0.09 });
 });
 
 for (const dir of [1, -1]) {
@@ -195,3 +236,43 @@ test('a warded heirloom in reduced motion marks contact without moving and resto
   assert.deepEqual(stage.S.actors, [actor, target]);
   assert.equal(stage.S.props.length, 0);
 });
+
+for (const still of [false, true]) {
+  test(`an orb applies the HP event at arrival once (reduced motion ${still})`, async () => {
+    const stage = createStage({ sp, sockets: { 'fairy-attack': { hand: [0, 0] } } });
+    const source = stage.makeActor({ sprite: 'fairy', x: 51 });
+    const target = stage.makeActor({ sprite: 'night_bat', x: 149, flip: true });
+    const counts = { hp: 0, number: 0, cast: 0, hit: 0 };
+    const moves = createMoves({
+      stage: { ...stage, reducedMotion: () => still, number: () => counts.number++ },
+      sfx: { cast: () => counts.cast++, hit: () => counts.hit++ },
+      actorOf: () => target, unitOf: () => ({ hp: 70, maxHp: 100 }),
+      colorsOf: () => stage.ELEMENT_COLORS.light,
+      applyHp() {
+        counts.hp++;
+        const [fx] = stage.S.props;
+        assert.equal(move.stage, 'hit');
+        assert.equal(fx.arrived, stage.clock.t);
+        assert.equal(fx.family, 'orb');
+        assert.equal(fx.travel === 0, still);
+        assert.deepEqual(fx.from, stage.socket(source, 'hand'));
+      }
+    });
+    const sourceKey = 'ally/fairy/2', enemy = { side: 'enemy', idx: 0 };
+    const move = moves.beginMove({ who: { side: 'ally', idx: 0 }, target: enemy,
+      sourceKey, skill: rosterSkill(sourceKey) }, source, false);
+    const hit = moves.strikeAndHit(move, { event: { who: enemy, amount: 30 } }, { best: 0 }, false);
+    if (still) {
+      await Promise.resolve();
+      assert.equal(counts.hp, 1);
+    } else {
+      await stage.advance(0.035);
+      assert.equal(counts.hp, 0);
+      assert.equal(move.stage, 'ready');
+    }
+    await stage.advance(0.36);
+    await hit;
+    assert.deepEqual(counts, { hp: 1, number: 1, cast: 1, hit: 1 });
+    assert.equal(stage.S.props.length, 0);
+  });
+}

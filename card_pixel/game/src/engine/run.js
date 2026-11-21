@@ -32,11 +32,6 @@ export function bindRun(run, { core, roster }) {
   let reward = run.pending;
   while (reward?.kind === 'relic') reward = reward.after;
   if (reward?.kind === 'gate' && run.relics?.includes(reward.relic)) reward.relic = null;
-  if (run.room?.type === 'gate' && run.room.final && run.result === 'win'
-    && run.phase === 'reward' && (!run.pending || run.pending.kind === 'gate')) {
-    run.pending = null;
-    run.phase = 'done';
-  }
   return run;
 }
 
@@ -128,8 +123,7 @@ export function createRun(options) {
   return run;
 }
 
-function advance(run) {
-  const { roster } = dependencies.get(run);
+function advance(run, roster = dependencies.get(run).roster) {
   const dungeon = DUNGEONS[run.dungeonId];
   run.floor++;
   run.room = null;
@@ -141,6 +135,14 @@ function advance(run) {
       : makeDoors(run, roster);
     observeDoors(run);
   }
+}
+
+export function previewNextFloor(run) {
+  const roster = runRoster(run);
+  if (!roster || run.floor >= run.floors) return null;
+  const preview = copy(run);
+  advance(preview, roster);
+  return preview;
 }
 
 function introFinaleDoor(run, roster, dungeon) {
@@ -340,6 +342,8 @@ function participationTag(run, id) {
 }
 
 function recordBattleResult(run, { outcome, wiped, fallen, survivors, heirloomsGained = [], crystals = 0, relics = [] }) {
+  delete run.lastBattleRelic;
+  delete run.lastBattleRelics;
   run.lastBattleResult = {
     v: 1, floor: run.floor, roomType: run.room.type, outcome, wiped,
     fallenIds: fallen.slice(), survivorIds: survivors.slice(),
@@ -347,6 +351,19 @@ function recordBattleResult(run, { outcome, wiped, fallen, survivors, heirloomsG
     rewardDelta: { crystals, relicIds: relics.slice() }
   };
   return run.lastBattleResult;
+}
+
+export function recordBattleLog(run, log) {
+  if (!['reward', 'result'].includes(run.phase) || run.room?.status !== 'resolved' || !Array.isArray(log)) {
+    return invalid('no_battle_result');
+  }
+  run.lastBattleLog = copy(log);
+  return { ok: true };
+}
+
+function recordBattleRelic(run, id) {
+  const previous = run.lastBattleRelics ?? run.lastBattleResult?.rewardDelta.relicIds ?? [];
+  run.lastBattleRelics = unique([...previous.filter(relic => run.relics.includes(relic)), id]);
 }
 
 function meetsContract(run, summary, survivors) {
@@ -431,11 +448,12 @@ export function settleBattle(run, input) {
   }
   if (!win && final && gate && run.firstIntroClear) {
     run.stats.retries++;
-    room.status = 'order';
+    room.status = 'resolved';
     room.party = null;
     const lastBattleResult = recordBattleResult(run, {
       outcome: summary.outcome, wiped: run.bench.every(id => fallen.includes(id)), fallen, survivors
     });
+    run.phase = 'result';
     return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null, contract: null, relic: null, relics: [], lastBattleResult };
   }
 
@@ -503,10 +521,11 @@ export function settleBattle(run, input) {
     if (run.firstSurvivalPay) delete run.firstSurvivalPay[id];
   }
   room.status = 'resolved';
-  run.phase = run.result && !run.pending ? 'done' : 'reward';
+  run.phase = run.result ? 'result' : 'reward';
   const lastBattleResult = recordBattleResult(run, {
     outcome: summary.outcome, wiped: nobodyReturned, fallen, survivors, heirloomsGained, crystals, relics
   });
+  if (run.result) run.resultRewards = runRewards(run);
   return {
     ok: true, win, wiped, fallen, survivors, heirloomsGained, crystals, relic, relics,
     bet: next?.bet ? { ...next.bet, won: betWon } : null,
@@ -528,7 +547,9 @@ export function chooseGateReward(run, choice) {
   }
   if (choice?.kind === 'relic' && pending.relic && choice.id === pending.relic && !run.relics.includes(choice.id)) {
     run.pending = null;
-    return { ok: true, relic: grantRelic(run, choice.id), pending: copy(run.pending) };
+    const relic = grantRelic(run, choice.id);
+    if (relic.equipped) recordBattleRelic(run, relic.id);
+    return { ok: true, relic, pending: copy(run.pending) };
   }
   return invalid('invalid_gate_reward');
 }
@@ -792,7 +813,20 @@ export function equipRelic(run, id, replaceId) {
   run.crystals -= pending.cost;
   run.pending = pending.after;
   if (run.pending?.kind === 'gate' && run.relics.includes(run.pending.relic)) run.pending.relic = null;
+  if (['reward', 'result'].includes(run.phase)) recordBattleRelic(run, id);
   return { ok: true, id, replaced: replaceId, cost: pending.cost, pending: copy(run.pending) };
+}
+
+export function confirmResult(run, now = new Date()) {
+  if (run.phase !== 'result') return invalid('no_held_result');
+  if (!run.result) {
+    run.room.status = 'order';
+    run.phase = 'room';
+    return { ok: true, retry: true, phase: run.phase };
+  }
+  const exit = exitRoom(run);
+  if (exit.left) finishRun(run, now);
+  return exit;
 }
 
 export function leaveRoom(run) {
@@ -800,6 +834,10 @@ export function leaveRoom(run) {
   if (!room || !['room', 'reward'].includes(run.phase) || ['battle', 'order', 'left'].includes(room.status)) {
     return invalid('no_room_to_leave');
   }
+  return exitRoom(run);
+}
+
+function exitRoom(run) {
   const skipped = [];
   if (run.pending?.kind === 'relic') {
     skipped.push(run.pending.id);
@@ -810,7 +848,7 @@ export function leaveRoom(run) {
     return invalid('choice_required');
   }
   run.pending = null;
-  room.status = 'left';
+  run.room.status = 'left';
   run.phase = run.result ? 'done' : 'reward';
   return { ok: true, skipped, left: true, phase: run.phase };
 }
@@ -823,7 +861,7 @@ export function nextFloor(run) {
 
 export function runRewards(run) {
   if (run.daily) return { result: run.result, recruitable: [], recruitTags: {}, recruitLimit: 0, shardCandidates: [] };
-  const snapshot = run.pending?.kind === 'recruit' ? run.pending : null;
+  const snapshot = run.pending?.kind === 'recruit' ? run.pending : run.resultRewards;
   const recruitable = snapshot?.recruitable?.slice() ?? (run.result === 'win' ? unique(run.bench).filter(id =>
     !run.fallen.includes(id) && !run.released.includes(id) && !run.recruited.includes(id)) : []);
   return {
@@ -843,5 +881,6 @@ export function finishRun(run, now = new Date()) {
     if (!run.pending) run.rewardRuleVersion = 2;
     run.pending ||= { kind: 'recruit', ...copy(rewards) };
   }
+  delete run.resultRewards;
   return rewards;
 }

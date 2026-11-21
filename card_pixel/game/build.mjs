@@ -11,6 +11,7 @@ const read = file => fs.readFileSync(path.join(here, file), 'utf8');
 const inline = code => '<script>' + code.replace(/<\/script/gi, '<\\/script') + '</script>';
 
 const meta = JSON.parse(read('assets/sprites.json'));
+const sockets = JSON.parse(read('assets/sprite-sockets.json'));
 const pngUrl = file => 'data:image/png;base64,' + fs.readFileSync(file).toString('base64');
 const sp = {};
 for (const [file, m] of Object.entries(meta)) {
@@ -57,7 +58,7 @@ const html = `<!doctype html>
 <style>${fontFaces}
 ${css}</style></head>
 <body><div id="app"></div>
-${inline('window.RELAY_ASSETS=' + JSON.stringify({ sp, bg, icons }) + ';')}
+${inline('window.RELAY_ASSETS=' + JSON.stringify({ sp, bg, icons, sockets }) + ';')}
 ${inline(coreBundle(repo))}
 ${inline(bundle.text)}
 </body></html>

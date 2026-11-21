@@ -4,6 +4,8 @@ import { DUNGEONS } from '../../content/dungeons.js';
 import { chapterTitle } from './notebook.js';
 import { dailyRow } from './daily-rift.js';
 import { pixelIcon } from '../pixel-icons.js';
+import { resumeLabel } from '../glossary.js';
+import { josa } from '../text.js';
 
 export function hubLineup(lead, recent) {
   const ids = Array.isArray(recent) ? recent : [];
@@ -35,14 +37,9 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
   arriving = [], daily, openDaily, flags, firstMain }) {
   const lead = profile.lead && widgets.card(profile.lead);
   const destination = DUNGEONS[destinationId];
-  const finalConsonant = name => {
-    const code = name.charCodeAt(name.length - 1);
-    return code >= 0xac00 && code <= 0xd7a3 ? (code - 0xac00) % 28 : 0;
-  };
-  const title = lead ? lead.name + (finalConsonant(lead.name) ? '과' : '와') : '';
-  const ending = destination ? finalConsonant(destination.name) : 0;
-  const direction = destination ? destination.name + (ending && ending !== 8 ? '으로' : '로') : '떠날 곳 고르기';
-  const action = run ? `${DUNGEONS[run.dungeonId].name} ${Math.max(run.floor, 1)}층 이어가기`
+  const title = lead ? josa(lead.name, '과/와') : '';
+  const direction = destination ? josa(destination.name, '으로/로') : '떠날 곳 고르기';
+  const action = run ? resumeLabel(run, profile.ui)
     : departureLabel ?? [title, direction].filter(Boolean).join(' ');
   const canBrowse = flags.introCleared && profile.notebook.chapters.includes(1);
   const announcement = profile.ui?.announcement;

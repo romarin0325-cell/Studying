@@ -3,6 +3,7 @@ import { DUNGEONS } from '../content/dungeons.js';
 import { MISSIONS, MISSION_OFFER_LIMIT, MISSION_UNLOCK_CHAPTER } from '../content/missions.js';
 import { NOTEBOOK, NOTEBOOK_GOALS } from '../content/notebook.js';
 import { calendarDate, localDayKey } from './dates.js';
+import { chronicle, HISTORY_LIMIT, returnedCompanions } from './history.js';
 import { expeditionPool, gradeOf } from './roster.js';
 import { shuffle } from './rng.js';
 import { finishRun, runRewards, runRoster } from './run.js';
@@ -21,7 +22,7 @@ const union = (left, right) => [...new Set([...left, ...right])];
 export function createProfile() {
   return {
     version: PROFILE_VERSION,
-    recruits: {}, lead: null, companions: [], preferredCompanion: null, reserved: null, seals: {},
+    recruits: {}, lead: null, companions: [], preferredCompanion: null, reserved: null, seals: {}, history: {},
     notebook: { chapters: [], firstLead: null },
     unlockedDungeons: [INTRO], nightmareUnlocks: [], contractStamps: {},
     records: { runs: 0, clears: {}, bestHit: null, longestServing: null, appliedRuns: [] },
@@ -398,21 +399,29 @@ export function applyRunEnd(profile, run, { recruits = [], shard = null } = {}) 
       if (difficulty === 'normal') next.nightmareUnlocks = union(next.nightmareUnlocks, [dungeonId]);
       if (next.notebook.firstLead && run.lead && run.lead !== next.notebook.firstLead && run.gateSurvivors.includes(run.lead)
         && run.bench.includes(run.lead) && Object.hasOwn(profile.recruits, run.lead)) addChapter(next, 5);
-      if (dungeonId === TOWER) addChapter(next, 7);
+      if (dungeonId === TOWER) {
+        addChapter(next, 7);
+        records.towerRunId = run.id;
+      }
     }
     unlockDungeons(next);
   }
   next = creditMissions(next, run);
+  const history = next.history ?? {};
+  next.history = { ...history, ...Object.fromEntries(Object.entries(chronicle(run)).map(([id, entry]) => {
+    const previous = Object.hasOwn(history, id) ? history[id] : [];
+    return [id, [entry, ...previous].slice(0, HISTORY_LIMIT)];
+  })) };
   records.appliedRuns.push(run.id);
   completeOwnedOffers(next);
   updateLongestServing(next);
   const missions = Object.keys(next.missions.periods).filter(key => next.missions.periods[key].state === 'earned'
     && profile.missions?.periods[key]?.state !== 'earned');
-  const returned = run.participated.filter(id => run.bench.includes(id) && !run.fallen.includes(id));
   return {
     profile: next,
     announce: {
-      ok: true, recruits: recruits.slice(), bonds, shard, returned, stamp, missions,
+      ok: true, recruits: recruits.slice(), bonds, shard, returned: returnedCompanions(run),
+      fielded: run.participated.slice(), stamp, missions,
       chapters: next.notebook.chapters.filter(id => !completed(profile, id)),
       dungeons: next.unlockedDungeons.filter(id => !profile.unlockedDungeons.includes(id)),
       nightmares: next.nightmareUnlocks.filter(id => !profile.nightmareUnlocks.includes(id))

@@ -26,10 +26,10 @@ export function springScreen(run, ui) {
   const fresh = [];
   const repeat = usesRepeatDraws(run);
 
-  function base() {
+  function base({ revealing = false } = {}) {
     const pending = run.pending?.kind === 'springDraw' ? run.pending : null;
     const pick = run.features?.springPick !== false || run.pending?.kind === 'spring';
-    node.innerHTML = head(run, TERMS.spring.short, run.floor + '층') + '<div class="scroll">' +
+    node.innerHTML = head(run, TERMS.spring.short, run.floor + '층') + '<div class="screen-split"><div class="fixed-top">' +
       '<p class="lead">' + TERMS.crystal.firstUse + '</p>' +
       '<div class="svc"><div class="spring-service win"><button class="btn big" id="b-draw"><b>' +
       (pending ? esc(card(pending.id).name) + ' 합류 계속' : TERMS.spring.detail) + '</b></button>' + rates(run, 'draw') + '</div>' +
@@ -37,9 +37,9 @@ export function springScreen(run, ui) {
         '<small>보기 무료 · 선택할 때 결정 ' + COST.pick + '개</small></button>' +
         '<p class="sm">무작위 한 칸당</p>' + rates(run, 'pick') + '</div>' : '') + '</div>' +
       '<p class="run-status" id="spring-status" role="status"></p>' +
-      '<div class="cards" id="fresh">' + fresh.map(draw => drawCard(run, widgets, draw)).join('') + '</div>' +
-      '<h3>동료 <span class="sm" id="sp-count"></span></h3><div class="benchrow" id="sp-bench"></div></div>' +
-      '<div class="footer"><button class="btn go" id="b-leave">샘 나가기</button></div>';
+      '<div class="cards" id="fresh">' + (!revealing && fresh.length ? drawCard(run, widgets, fresh[0]) : '') + '</div>' +
+      '<button class="btn" id="b-spring-bench">동료 <span class="sm" id="sp-count"></span></button></div>' +
+      '<div class="footer fixed-foot"><button class="btn go" id="b-leave">샘 나가기</button></div></div>';
     show('spring');
     $('#b-draw', node).addEventListener('click', () => {
       if (pending) return completeDraw(pending);
@@ -54,6 +54,11 @@ export function springScreen(run, ui) {
       } else finish(result, true);
     });
     $('#b-pick', node)?.addEventListener('click', () => openOffer());
+    $('#b-spring-bench', node).addEventListener('click', () => {
+      ui.sheets.openSheet('동료 ' + run.bench.length + '명', '<div class="benchrow" id="sp-bench">' + benchMinis(run) + '</div>' +
+        (fresh.length > 1 ? '<h4>이전 소환</h4><div class="cards">' +
+          fresh.slice(1).map(draw => drawCard(run, widgets, draw)).join('') + '</div>' : ''));
+    });
     $('#b-leave', node).addEventListener('click', () => {
       if (run.pending?.kind === 'spring' && !command(Run.springTake, null).ok) return;
       leave();
@@ -80,13 +85,12 @@ export function springScreen(run, ui) {
     $('#b-leave', node).disabled = run.tempoVersion !== 2 && run.pending?.kind === 'spring';
     $('.gems', node).textContent = TERMS.crystal.short + ' ◆' + run.crystals;
     $('#sp-count', node).textContent = run.bench.length + '명';
-    $('#sp-bench', node).innerHTML = benchMinis(run);
   }
 
   async function finish(result, roll) {
     if (!result.ok) return showFailure(result.reason);
     const draw = result.draw ?? { kind: 'join', id: result.joined ?? result.id };
-    base();
+    base({ revealing: true });
     const box = $('#fresh', node);
     for (const id of ['b-draw', 'b-pick', 'b-leave']) {
       const button = $('#' + id, node);
@@ -111,14 +115,14 @@ export function springScreen(run, ui) {
     const price = cost ? ' · ◆' + cost : ' · 결제 완료';
     const previewKind = id => repeat && !offer.alreadyPaid ? drawKind(run, id) : 'join';
     node.innerHTML = head(run, '후보 3칸 중 하나 선택', null) +
-      '<div class="scroll"><div class="cards">' + offer.slots.map(({ slotId, id, source }) =>
+      '<div class="screen-split"><div class="fixed-top"><p class="run-status" id="spring-status" role="status"></p></div>' +
+      '<div class="scroll-list spring-candidates"><div class="cards">' + offer.slots.map(({ slotId, id, source }) =>
         cardRow(run, id, {
           slotId, offer: true, tag: source === 'invite' ? '초대 확정 · ' + card(id).name : '무작위',
           detail: TERMS[previewKind(id)].firstUse
         })).join('') +
-      '</div><p class="run-status" id="spring-status" role="status"></p></div>' +
-      '<div class="footer"><button class="btn" id="b-spring-pass">닫기</button>' +
-      '<button class="btn go" id="b-take" disabled>동료 선택</button></div>';
+      '</div></div><div class="footer fixed-foot"><button class="btn" id="b-spring-pass">닫기</button>' +
+      '<button class="btn go" id="b-take" disabled>동료 선택</button></div></div>';
     show('spring');
     let selected;
     const rows = $$('.cardrow', node);
@@ -146,7 +150,7 @@ export function springScreen(run, ui) {
       if (count) chooseReplacements(run, ui, count, ([replaceId]) => commit(replaceId), { incoming: [id] });
       else commit();
     });
-    $('#b-spring-pass', node).addEventListener('click', base);
+    $('#b-spring-pass', node).addEventListener('click', () => base());
   }
 
   base();

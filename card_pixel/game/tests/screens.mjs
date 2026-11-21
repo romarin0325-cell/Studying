@@ -1,4 +1,4 @@
-// node card_pixel/game/tests/screens.mjs [--case <name|entry|tours>] [--validate-only] [--strict-overflow]
+// node card_pixel/game/tests/screens.mjs [--case <name|entry|tours|fixed-layouts>] [--validate-only] [--strict-overflow]
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -27,6 +27,9 @@ import { playRun } from '../tools/sim.mjs';
 import { createRiftCases, riftDate } from './screens/rift.mjs';
 import { createEntryCases } from './screens/entry.mjs';
 import { createTourCases } from './screens/tours.mjs';
+import { createMotionCases } from './screens/motion.mjs';
+import { createResumeCases } from './screens/resume.mjs';
+import { createHistoryCases } from './screens/history.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -43,6 +46,65 @@ const shotSize = viewportMode || textScale ? `-${viewport.width}x${viewport.heig
 const shots = fileURLToPath(new URL(`shots/screens${shotSize}${textScale ? '-text125' : ''}/`, import.meta.url));
 
 const { core, roster } = createCoreRoster();
+
+// mayFit: lists that may fit on a tall screen; they need not scroll then, but must be the only scroller when they overflow.
+async function checkFixedScreen(page, screenId, actions, scrolls = [], fixed = [], { mayFit = [] } = {}) {
+  const screen = page.locator(`#${screenId}.on`);
+  await screen.locator(actions[0]).waitFor();
+  const issues = await screen.evaluate((root, { actions, scrolls, fixed, mayFit }) => {
+    const errors = [];
+    const layout = root.querySelector('.screen-split');
+    const bounds = [...actions, ...fixed].map(selector => {
+      const node = root.querySelector(selector);
+      const rect = node?.getBoundingClientRect();
+      if (!rect?.width || !rect.height || rect.top < -1 || rect.bottom > innerHeight + 1 ||
+        rect.left < -1 || rect.right > innerWidth + 1) errors.push(`${selector} exceeds the viewport`);
+      return { selector, node, rect };
+    });
+    for (const node of [document.documentElement, document.body, root, layout]) {
+      if (!node || node.scrollHeight > node.clientHeight + 1 || node.scrollWidth > node.clientWidth + 1) {
+        errors.push(`${node?.id || node?.className || node?.tagName || 'split'} overflows its frame`);
+      }
+    }
+    const ports = scrolls.map(selector => {
+      const node = root.querySelector(selector);
+      if (node && mayFit.includes(selector) && node.scrollHeight <= node.clientHeight + 1) return node;
+      if (!node || !/^(auto|scroll)$/.test(getComputedStyle(node).overflowY) ||
+        node.scrollHeight <= node.clientHeight + 1 || node.clientHeight === 0) {
+        errors.push(`${selector} has no scrollable content`);
+      }
+      return node;
+    });
+    for (const node of root.querySelectorAll('*')) {
+      if (!node.clientHeight || ports.includes(node)) continue;
+      if (/^(auto|scroll)$/.test(getComputedStyle(node).overflowY) && node.scrollHeight > node.clientHeight + 1) {
+        errors.push(`Unexpected scroll area ${node.id || node.className || node.tagName}`);
+      }
+    }
+    for (const port of ports.filter(Boolean)) {
+      if (port.scrollHeight <= port.clientHeight + 1) continue;
+      const initial = port.scrollTop;
+      port.scrollTop = initial ? 0 : port.scrollHeight;
+      if (port.scrollTop === initial) errors.push('The list could not be scrolled');
+      for (const { selector, node, rect } of bounds) {
+        if (!node || !rect) continue;
+        const after = node.getBoundingClientRect();
+        if (after.x !== rect.x || after.y !== rect.y) errors.push(`${selector} moved when the list scrolled`);
+      }
+      port.scrollTop = initial;
+    }
+    return errors;
+  }, { actions, scrolls, fixed, mayFit });
+  assert.deepEqual(issues, [], `${screenId}: ${issues.join('; ')}`);
+}
+
+async function fullyInList(item) {
+  return item.evaluate(node => {
+    const row = node.getBoundingClientRect();
+    const list = node.closest('.scroll-list').getBoundingClientRect();
+    return row.top >= list.top - 1 && row.bottom <= list.bottom + 1;
+  });
+}
 
 function command(action, run, ...args) {
   const result = action(run, ...args);
@@ -66,6 +128,16 @@ function settleWin(run, overrides = {}) {
     enemyDowns: enemies.map((_, idx) => ({ idx, treasure: false })),
     bestHit: null, turns: 3, bet: null, ...overrides
   });
+}
+
+// A final result waits in phase 'result' until the player confirms it (Run.confirmResult).
+function confirmHeld(run, now) {
+  if (run.phase === 'result') command(Run.confirmResult, run, ...(now ? [now] : []));
+}
+
+function applyRunEnd(profile, run, selection) {
+  confirmHeld(run);
+  return Meta.applyRunEnd(profile, run, selection);
 }
 
 function advance(run) {
@@ -162,7 +234,7 @@ function snowRabbitProfile(seed = 7, profile = legacyProfile()) {
   reachFloor(intro, 5);
   startBattle(intro);
   settleWin(intro);
-  const result = Meta.applyRunEnd(profile, intro, { recruits: ['snow_rabbit'] });
+  const result = applyRunEnd(profile, intro, { recruits: ['snow_rabbit'] });
   assert.equal(result.announce.ok, true, result.announce.reason);
   return result.profile;
 }
@@ -413,7 +485,7 @@ function recordFallen() {
   settleWin(run, { survivors: [false, false, true], retreated: [false, true, false] });
   assert.equal(run.result, 'win');
   assert.ok(run.fallen.includes('snow_rabbit') && run.participated.includes('snow_rabbit'));
-  const { announce } = Meta.applyRunEnd(profile, run);
+  const { announce } = applyRunEnd(profile, run);
   assert.ok(announce.ok && !announce.returned.includes('snow_rabbit'));
   return {
     session: storedSession({ profile, run }), proof: 'floor 8 won with recruited snow_rabbit fallen and absent from returned',
@@ -423,7 +495,7 @@ function recordFallen() {
       await page.locator('#hub.on [data-meta-page="collection"]').click();
       await page.locator('#collection.on [data-companion="snow_rabbit"]').click();
       await text(page.locator('#sheet.on #sh-title'), '눈토끼');
-      const record = '홍련 화산 · 8층 · 원정 승리 · 미귀환';
+      const record = '홍련 화산 · 8층 · 원정 승리 · 쓰러짐';
       const entry = page.locator('#sheet.on #sh-body').getByText(record, { exact: true });
       await text(entry, record);
       await entry.scrollIntoViewIfNeeded();
@@ -498,9 +570,9 @@ function relicMap(showDetails) {
       assert.equal(await strip.locator('.empty').count(), 3);
       assert.equal(await slots.first().locator('img').count(), 1);
       const top = (await strip.boundingBox()).y;
-      await page.locator('#map.on .run-route').evaluate(node => { node.scrollTop = node.scrollHeight; });
+      await page.locator('#map.on .run-doors').evaluate(node => { node.scrollTop = node.scrollHeight; });
       assert.equal((await strip.boundingBox()).y, top);
-      await page.locator('#map.on .run-route').evaluate(node => { node.scrollTop = 0; });
+      await page.locator('#map.on .run-doors').evaluate(node => { node.scrollTop = 0; });
       if (!showDetails) return;
       await slots.nth(1).click();
       await text(page.locator('#sheet.on #sh-title'), '빈 칸', { exact: true });
@@ -562,6 +634,9 @@ function relicComparison(run, session, arrive, source) {
       if (cost) await text(screen.locator('.relic-cost'), `결정 ${cost}`, { exact: true });
       await text(screen.locator('#b-equip'), label, { exact: true });
       await text(screen.locator('#b-leave'), '두고 가기', { exact: true });
+      if (source === 'treasure' || source === 'event') {
+        await checkFixedScreen(page, 'treasure', ['#b-equip', '#b-leave'], [], ['.run-relic-compare .incoming']);
+      }
       await capture();
       await screen.locator('#b-leave').click();
       const kept = await saved(page);
@@ -751,6 +826,30 @@ function mapSeats() {
   };
 }
 
+function fixedMap() {
+  const run = makeRun({ seed: 21, floor: 3, tempoVersion: 2 });
+  assert.deepEqual(run.doors.map(door => door.type), ['spring', 'altar', 'event']);
+  return {
+    session: storedSession({ run }), proof: 'Three doors remain available while the floor strip and walking stage stay fixed',
+    async show(page, { text, capture }) {
+      await checkFixedScreen(page, 'map', ['[data-map-door="0"]'], ['.run-doors'], ['#b-floors', '.walking-map'], { mayFit: ['.run-doors'] });
+      // Every door is either fully on screen or reachable by scrolling the door list alone.
+      const reachable = await page.locator('#map.on .run-doors').evaluate(list => {
+        const box = list.getBoundingClientRect(), scrolls = list.scrollHeight > list.clientHeight + 1;
+        return [...list.querySelectorAll('[data-map-door]')].every(door => {
+          const rect = door.getBoundingClientRect();
+          return scrolls || (rect.top >= box.top - 1 && rect.bottom <= Math.min(box.bottom, innerHeight) + 1);
+        });
+      });
+      assert.equal(reachable, true, 'All three doors are visible or the door list scrolls');
+      await page.locator('#map.on [data-info="2"]').click();
+      await text(page.locator('#sheet.on #sh-title'), TERMS.event.short, { exact: true });
+      await page.locator('#b-sheetclose').click();
+      await capture();
+    }
+  };
+}
+
 function countdownCharge() {
   // Floor eight and its four preceding battles contribute to the 32-bit battle seed.
   const seed = (2 - 8 * 1013 - 4 * 7) >>> 0;
@@ -784,7 +883,7 @@ function nightmareProfile() {
   const run = makeRun({ seed: 7, floor: 8, profileView: view });
   startBattle(run);
   settleWin(run);
-  const result = Meta.applyRunEnd(profile, run);
+  const result = applyRunEnd(profile, run);
   assert.ok(result.announce.ok);
   assert.equal(Meta.contractsFor(result.profile, run.dungeonId).unlocked, true);
   return result.profile;
@@ -940,7 +1039,7 @@ function returnStamp() {
   advance(run);
   reachFloor(run, 8);
   completeContractFloor(run, 0);
-  assert.deepEqual(Meta.applyRunEnd(profile, run).announce.stamp, { dungeonId: run.dungeonId, contractId: 'elite' });
+  assert.deepEqual(applyRunEnd(profile, run).announce.stamp, { dungeonId: run.dungeonId, contractId: 'elite' });
   const { name } = CONTRACTS.elite;
   return {
     session: storedSession({ run, profile }), proof: `${run.dungeonId} nightmare clear awards a new elite contract stamp`,
@@ -1045,9 +1144,87 @@ function retreatOutcomes() {
       await battleIdle(page);
       await page.locator('#b-retreat').click();
       const button = page.locator('#b-retreat.armed');
-      await text(button, '애쉬 생존 · 다음 동료가 이번 공격을 받음');
-      await text(button, retreat);
+      await text(button, '물러나면 · ' + retreat);
+      await text(button, '남으면 · 애쉬 쓰러짐');
       await text(page.locator('#turn'), '1턴');
+    }
+  };
+}
+
+function relayOutcomes() {
+  const run = makeRun({ seed: 26019140, tempoVersion: 2, firstPick: 'dragon_miko' });
+  const first = startBattle(run, { party: ['werebear', 'lightning_sage', 'zeke'] });
+  for (const name of ['강타', '강타', '강타', '일반 공격', '일반 공격']) act(first, name);
+  assert.equal(first.outcome, 'win');
+  command(Run.settleBattle, run, first.summary());
+  command(Run.resolveReinforcement, run, { key: run.pending.key, id: 'hellhound', replaceId: null });
+  advance(run);
+
+  const battle = startBattle(run, { party: ['dragon_miko', 'siren', 'zeke'] });
+  const session = storedSession({ run });
+  const moves = ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격'];
+  const safe = battle.previewRelay();
+  assert.equal(safe.danger, 'none');
+  assert.deepEqual(safe.retreat.next.hpAfter, [419, 419]);
+  let events;
+  for (const name of moves) events = act(battle, name);
+  assert.deepEqual([run.floor, battle.enemyIndex, battle.state().turn, battle.state().allies[0].hp], [2, 1, 5, 62]);
+  assert.deepEqual(events.findLast(event => event.t === 'await').intent.damageRange, [212, 212]);
+  const preview = battle.previewRelay();
+  assert.equal(preview.danger, 'certain');
+  assert.deepEqual(preview.retreat.next.hpAfter, [313, 313]);
+  assert.equal(preview.stand.inheritor.name, '세이렌');
+  assert.equal(preview.stand.heirloom.skill, '드래곤스파클');
+  battle.retreat();
+  assert.equal(battle.state().allies[1].hp, preview.retreat.next.hpAfter[0]);
+
+  return {
+    session, proof: '26019140 / floor 2 turn 5 / HP 62 vs 212 / Siren 500 → 313 or inherits Dragon Sparkle',
+    async show(page, { text, capture }) {
+      await openBattle(page);
+      const button = page.locator('#b-retreat');
+      const lines = button.locator('small');
+      await button.click();
+      await text(button, TERMS.retreat.short + ' 확정');
+      assert.deepEqual(await lines.allTextContents(), ['용혈의무녀 생존 · 다음 동료가 이번 공격을 받음', '세이렌 HP 500 → 419']);
+      assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), 0);
+      await capture('safe');
+      for (const name of moves) await tapTile(page, name);
+      await text(page.locator('#turn'), '5턴', { exact: true });
+      await text(page.locator('#party .pm.cur .hp .n'), '62/395', { exact: true });
+      const tileSizes = () => page.locator('#acts .act').evaluateAll(tiles => tiles.map(tile => {
+        const { width, height } = tile.getBoundingClientRect();
+        return [width, height];
+      }));
+      const before = await tileSizes();
+      await button.click();
+      await text(lines.nth(0), '물러나면 · 세이렌 HP 500 → 313', { exact: true });
+      await text(lines.nth(1), '남으면 · 용혈의무녀 쓰러짐 → 세이렌이 드래곤스파클 계승', { exact: true });
+      assert.deepEqual(await tileSizes(), before, 'Arming retreat must keep command tile sizes');
+      const misfits = await button.evaluate(node => {
+        const panel = node.closest('#panel');
+        const row = node.closest('#row2');
+        const { left, top, right, bottom } = row.getBoundingClientRect();
+        const problems = [];
+        if (left < 0 || top < 0 || right > innerWidth || bottom > innerHeight) problems.push(`row off screen ${Math.round(top)}-${Math.round(bottom)}/${innerHeight}`);
+        // With large text the command panel scrolls by design; the armed row itself must be fully on screen.
+        const parts = document.documentElement.classList.contains('large-text') ? [] : [['panel', panel]];
+        parts.push(['row', row], ['button', node], ...[...node.querySelectorAll('small')].map((part, i) => ['line ' + i, part]));
+        for (const [name, part] of parts) {
+          if (part.scrollWidth > part.clientWidth + 1 || part.scrollHeight > part.clientHeight + 1) {
+            problems.push(`${name} ${part.scrollWidth}x${part.scrollHeight} in ${part.clientWidth}x${part.clientHeight}`);
+          }
+        }
+        return problems;
+      });
+      assert.deepEqual(misfits, [], 'Both relay outcomes must fit in the visible retreat row: ' + misfits.join('; '));
+      await capture();
+      await button.click();
+      await battleIdle(page);
+      await text(page.locator('#party .pm.cur b'), '세이렌', { exact: true });
+      await text(page.locator('#party .pm.cur .hp .n'), `${preview.retreat.next.hpAfter[0]}/500`, { exact: true });
+      await text(page.locator('#party .pm.out .st'), '후퇴', { exact: true });
+      await capture('retreated');
     }
   };
 }
@@ -1798,6 +1975,7 @@ function springCommit() {
     session, proof: 'Closing costs 0, same candidates, one ◆3 commit, legacy prepaid charges 0',
     async show(page, { text, capture, revisit }) {
       const spring = page.locator('#spring.on');
+      await checkFixedScreen(page, 'spring', ['#b-draw', '#b-pick', '#b-leave'], [], ['.gems']);
       await spring.locator('#b-pick').click();
       const candidates = () => spring.locator('.cardrow').evaluateAll(nodes => nodes.map(node => node.dataset.id));
       assert.deepEqual(await candidates(), offer.candidates);
@@ -1807,9 +1985,14 @@ function springCommit() {
       assert.deepEqual(await candidates(), offer.candidates);
       await spring.locator(`[data-slot-id="${selected.slotId}"]`).click();
       await text(spring.locator('#b-take'), '합류 · ◆3');
+      // Tall candidate cards exercise overflow even when the ordinary three fit.
+      await spring.locator('[data-slot-id]').evaluateAll(rows => rows.forEach(row => { row.style.minHeight = '240px'; }));
+      await checkFixedScreen(page, 'spring', ['#b-take', '#b-spring-pass'], ['.spring-candidates'], ['.gems']);
+      await spring.locator('[data-slot-id]').evaluateAll(rows => rows.forEach(row => row.style.removeProperty('min-height')));
       await capture();
       await spring.locator('#b-take').click();
       await text(spring.locator('.gems'), '결정 ◆2', { exact: true });
+      await checkFixedScreen(page, 'spring', ['#b-draw', '#b-pick', '#b-leave'], [], ['.gems', '#fresh']);
       await revisit(storedSession({ run: full }), async source => {
         await text(source.locator('#spring.on #b-draw'), TERMS.spring.detail);
         await capture('full', source);
@@ -1882,11 +2065,54 @@ function eventValues() {
   };
 }
 
+function fixedEvent() {
+  const run = makeRun({ seed: 21, floor: 3, tempoVersion: 2 });
+  command(Run.chooseDoor, run, run.doors.find(door => door.type === 'event').index);
+  const event = run.room.event;
+  run.room.event = {
+    ...event,
+    text: (event.text + ' ').repeat(24),
+    choices: Array.from({ length: 6 }, (_, index) => ({
+      id: 'layout-' + index, text: `선택지 ${index + 1}`, ops: []
+    }))
+  };
+  assert.equal(eventChoices(run, core, roster).length, 6);
+  return {
+    session: storedSession({ run }), proof: 'Six choices and a long description exercise two independent scroll areas',
+    async show(page, { text, capture }) {
+      await text(page.locator('#event.on .event-dialog h2'), event.name, { exact: true });
+      assert.equal(await page.locator('#event.on [data-choice]').count(), 6);
+      await checkFixedScreen(page, 'event', ['#b-leave'], ['.scroll-detail', '.event-choices'], ['.run-scene', '.event-dialog h2']);
+      await capture();
+    }
+  };
+}
+
+function fixedAltar() {
+  const run = makeRun({ seed: 21, floor: 3, tempoVersion: 2 });
+  command(Run.chooseDoor, run, run.doors.find(door => door.type === 'altar').index);
+  const roll = command(Run.altarRoll, run);
+  return {
+    session: storedSession({ run }), proof: 'The current and rolled blessing share a fixed slot',
+    async show(page, { text, capture }) {
+      const altar = page.locator('#altar.on');
+      await text(altar.locator('#slot'), roster.card(roll.id).name);
+      await text(altar.locator('#slot'), '기존 축복');
+      await text(altar.locator('#slot'), '새 축복');
+      await checkFixedScreen(page, 'altar', ['#b-keep', '#b-roll'], [], ['#slot']);
+      await capture();
+      await altar.locator('#b-keep').click();
+      await checkFixedScreen(page, 'altar', ['#b-leave'], [], ['#slot']);
+    }
+  };
+}
+
 function returnedBattleLog() {
   const profile = snowRabbitProfile();
   const run = makeRun({ seed: 7, floor: 8, profileView: Meta.startView(profile, 'ember_volcano') });
   startBattle(run);
   settleWin(run);
+  confirmHeld(run);
   assert.equal(run.phase, 'done');
   const row = 'MP 소멸 예고 → 매직가드로 차단';
   run.lastBattleLog = [{ turn: 7, rows: [{ key: 1, text: row, faces: [], kind: 'forecast' }] }];
@@ -1914,6 +2140,8 @@ function treasureReceiptFlow() {
   return {
     session, proof: 'Empty treasure slot equips once, shows the receipt inline, and advances without a second tap',
     async show(page, { text, capture }) {
+      await checkFixedScreen(page, 'treasure', ['#b-equip', '#b-leave'], [], ['.run-relic-description']);
+      assert.equal(await page.locator('#treasure.on .run-relic-compare').count(), 0);
       await page.locator('#treasure.on #b-equip').click();
       await text(page.locator('#treasure.on .relic-receipt'), '장착 완료');
       await page.locator('#map.on').waitFor();
@@ -1934,12 +2162,12 @@ function mainReturn(profile, dungeonId, difficulty = 'normal', seed = 7) {
   const run = makeRun({ dungeonId, seed, floor: 8, difficulty, profileView: Meta.startView(profile, dungeonId) });
   startBattle(run);
   settleWin(run);
-  Run.finishRun(run, new Date(...riftDate));
+  confirmHeld(run, new Date(...riftDate));
   return run;
 }
 
 function applyReturn(profile, run, selection) {
-  const result = Meta.applyRunEnd(profile, run, selection);
+  const result = applyRunEnd(profile, run, selection);
   assert.ok(result.announce.ok, result.announce.reason);
   return result;
 }
@@ -1974,9 +2202,14 @@ function endingGoal() {
     session: storedSession({ profile }), proof: 'Four dream clears unlock the ending; the next goal points to an unreturned theme',
     async show(page, { text, capture }) {
       await page.locator('#title.on #b-start').click();
-      await text(page.locator('#ending.on .meta-record-table'), '5곳 · 새벽의 숲');
+      await text(page.locator('#ending.on [data-screen-panel="settlement"]'), '영입한 동료');
       await text(page.locator('#ending.on .meta-next-goal'), goal.text);
+      await checkFixedScreen(page, 'ending', ['#meta-ending-finish'], [], ['.meta-ending-stage', '.screen-tabs']);
       await capture();
+      await page.locator('#ending.on [data-screen-tab="dreams"]').click();
+      await text(page.locator('#ending.on [data-screen-panel="dreams"]'), '5곳 · 새벽의 숲');
+      await checkFixedScreen(page, 'ending', ['#meta-ending-finish'], [], ['.meta-ending-stage', '.screen-tabs']);
+      await capture('dreams');
       await page.locator('#ending.on #meta-ending-finish').click();
       await text(page.locator('#hub.on .meta-next-goal'), goal.text);
       await page.locator('#hub.on [data-meta-page="notebook"]').click();
@@ -2077,6 +2310,73 @@ function destinations() {
   };
 }
 
+function fixedDestinations() {
+  let profile = snowRabbitProfile();
+  for (const id of ['ember_volcano', 'twilight_cathedral', 'starlit_garden']) {
+    profile = applyReturn(profile, mainReturn(profile, id, 'easy')).profile;
+  }
+  assert.ok(Meta.availableDungeons(profile).some(({ id }) => id === 'creation_tower'));
+  return {
+    session: storedSession({ profile }), proof: 'Three theme clears unlock a region low in the destination list',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await page.locator('#hub.on #meta-telescope').click();
+      const pageSelector = '#dungeons.on';
+      const region = page.locator(`${pageSelector} [data-dungeon="creation_tower"]`);
+      const list = page.locator(`${pageSelector} .scroll-list`);
+      await checkFixedScreen(page, 'dungeons', ['#meta-quick-start', '#meta-prepare-destination'], ['.scroll-list']);
+      await region.click();
+      await text(page.locator('#sheet.on #sh-title'), '창조의 탑 · 준비');
+      await page.locator('#b-sheetclose').click();
+      await page.waitForFunction(() => document.querySelector('#dungeons.on [data-dungeon="creation_tower"][aria-pressed="true"]'));
+      assert.equal(await fullyInList(region), true);
+      assert.ok(await list.evaluate(node => node.scrollTop) > 0);
+      await text(page.locator(`${pageSelector} #meta-quick-start`), '창조의 탑');
+      await checkFixedScreen(page, 'dungeons', ['#meta-quick-start', '#meta-prepare-destination'], ['.scroll-list']);
+      await page.locator(`${pageSelector} .meta-back`).click();
+      await page.locator('#hub.on #meta-telescope').click();
+      assert.equal(await region.getAttribute('aria-pressed'), 'true');
+      assert.equal(await fullyInList(region), true);
+      await capture();
+    }
+  };
+}
+
+function fixedCollection() {
+  const dungeonId = 'ember_volcano';
+  const profile = snowRabbitProfile();
+  const pool = roster.pool(DUNGEONS[dungeonId].pool);
+  assert.ok(pool.length >= 30);
+  const id = pool.at(-1);
+  const name = roster.card(id).name;
+  return {
+    session: storedSession({ profile }), proof: `${pool.length} portraits in ${dungeonId}`,
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await page.locator('#hub.on [data-meta-page="collection"]').click();
+      const screen = page.locator('#collection.on');
+      await screen.locator('#meta-pool').selectOption(dungeonId);
+      await checkFixedScreen(page, 'collection', ['.meta-back'], ['.scroll-list'], ['.meta-collection-bar']);
+      const item = screen.locator(`[data-companion="${id}"]`);
+      await item.scrollIntoViewIfNeeded();
+      assert.equal(await fullyInList(item), true);
+      const list = screen.locator('.scroll-list');
+      const top = await list.evaluate(node => node.scrollTop);
+      assert.ok(top > 0);
+      await item.click();
+      await text(page.locator('#sheet.on #sh-title'), name, { exact: true });
+      await page.locator('#b-sheetclose').click();
+      assert.equal(await list.evaluate(node => node.scrollTop), top);
+      assert.equal(await fullyInList(item), true);
+      await capture();
+      await screen.locator('#meta-companion-search').fill(name);
+      assert.ok(await screen.locator('[data-companion]').count() < pool.length);
+      assert.equal(await item.isVisible(), true);
+      await checkFixedScreen(page, 'collection', ['.meta-back'], [], ['.meta-collection-bar']);
+    }
+  };
+}
+
 function missionInvitations() {
   let profile = snowRabbitProfile();
   const first = applyReturn(profile, mainReturn(profile, 'ember_volcano', 'easy'));
@@ -2097,11 +2397,18 @@ function missionInvitations() {
       await capture('return');
       await page.locator('#recruit.on #meta-recruit-confirm').click();
       await page.locator('#hub.on [data-meta-page="notebook"]').click();
+      // Stress the scroll boundary with wrapped chapter rows at every gallery size.
+      await page.locator('#notebook.on [data-chapter]').evaluateAll(rows => rows.forEach(row => {
+        row.style.minHeight = '84px';
+      }));
+      await checkFixedScreen(page, 'notebook', ['.meta-back', '[data-screen-tab="missions"]'], ['.scroll-list']);
       await page.locator('#notebook.on [data-chapter="4"]').click();
       await text(page.locator('#notebook.on .meta-chapter-detail'), '오늘의 균열');
       assert.doesNotMatch(await page.locator('#notebook.on .meta-chapter-detail').innerText(), /악몽/);
+      await page.locator('#notebook.on [data-screen-tab="missions"]').click();
       await text(page.locator('#notebook.on [data-mission="weekly"]'), '이번 주');
       await text(page.locator('#notebook.on [data-mission="monthly"]'), '이번 달');
+      await checkFixedScreen(page, 'notebook', ['.meta-back', '[data-screen-tab="missions"]']);
       await capture();
       await page.evaluate(() => window.__gallerySetDate(2026, 11, 1, 12));
       await page.locator('#notebook.on [data-mission="weekly"]').click();
@@ -2204,6 +2511,19 @@ function damagedRecovery() {
       assert.equal(await page.locator('#title.on #b-start').count(), 0);
       const restore = page.locator('#recovery.on #meta-last-good');
       await text(restore, '직전 기록으로 복구 · 동료 1명', { exact: true });
+      await checkFixedScreen(page, 'recovery', ['#meta-last-good', '[data-backup-action="import"]', '#meta-recovery-new']);
+      await page.locator('#meta-recovery-new').click();
+      await checkFixedScreen(page, 'recovery', ['#meta-recovery-erase', '#meta-recovery-cancel']);
+      await page.locator('#meta-recovery-cancel').click();
+      const file = page.locator('#meta-recovery-file');
+      await file.setInputFiles({ name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{') });
+      await text(page.locator('#recovery.on .meta-feedback'), 'RELAYMARE 기록 파일을 선택해 주세요.');
+      assert.equal(await page.locator('#sheet.on').count(), 0);
+      await file.setInputFiles({ name: 'relaymare.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(store.exportBackup())) });
+      await text(page.locator('#sheet.on #sh-title'), '기록 가져오기 확인');
+      assert.equal(await page.locator('#sheet.on .meta-backup-compare section').count(), 2);
+      await capture('backup-compare');
+      await page.locator('#b-sheetclose').click();
       await capture();
       await Promise.all([page.waitForEvent('domcontentloaded'), restore.click()]);
       await page.locator('#title.on .b-set').click();
@@ -2251,7 +2571,7 @@ function saveImport() {
       await text(columns.last(), '홍련 화산 4층');
       await capture();
       await Promise.all([page.waitForEvent('domcontentloaded'), page.locator('#meta-backup-confirm').click()]);
-      await text(page.locator('#hub.on #meta-depart'), '홍련 화산 4층 이어가기');
+      await text(page.locator('#hub.on #meta-depart'), '홍련 화산 4층 · 문지기 전투 입구부터');
       await text(riftRow(page).locator('small'), '이어가기');
     }
   };
@@ -2522,15 +2842,76 @@ const { riftFixture, reachRiftFloor, riftRow, riftSaveFailure, damagedRiftRecove
   core, roster, sessionKey, dailyKey, command, snowRabbitProfile, makeRun, startBattle, settleWin, storedSession,
   reachFloor, enterObservatory, openBattle, backupStore, mainReturn, applyReturn
 });
+
+function fixedRecords() {
+  const fixture = riftFixture();
+  for (let day = 11; day <= 20; day++) {
+    const attempt = fixture.start([2026, 10, day, 12]);
+    assert.ok(fixture.store.abandon(attempt.id).ok);
+  }
+  assert.equal(fixture.store.history({ limit: 10 }).rows.length, 10);
+  return {
+    ...fixture.page(), proof: 'Ten dated records, a paged history, and one detail sheet',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await page.locator('#hub.on [data-meta-page="records"]').click();
+      const screen = page.locator('#records.on');
+      await screen.locator('[data-screen-tab="expedition"]').click();
+      await text(screen.locator('.meta-clear-table'), '지역');
+      await screen.locator('[data-screen-tab="rift"]').click();
+      const rows = screen.locator('[data-rift-record]');
+      assert.equal(await rows.count(), 7);
+      await capture();
+      // Use the real history rows with a multiline row height to force overflow before paging.
+      await rows.evaluateAll(nodes => nodes.forEach(node => { node.style.minHeight = '110px'; }));
+      await checkFixedScreen(page, 'records', ['.meta-back', '[data-screen-tab="rift"]'], ['.scroll-list']);
+      await screen.locator('#meta-rift-next').click();
+      assert.equal(await rows.count(), 3);
+      await rows.first().click();
+      await text(page.locator('#sheet.on #sh-title'), '균열 기록');
+      await capture('detail');
+    }
+  };
+}
+
+function withFixedRiftResult(makeFixture, action) {
+  return () => {
+    const fixture = makeFixture();
+    return {
+      ...fixture,
+      show(page, context) {
+        return fixture.show(page, {
+          ...context,
+          async capture(label, source = page, options) {
+            const score = source.locator('#daily-result.on .rift-result');
+            const before = await score.boundingBox();
+            const detail = source.locator('#daily-result.on .scroll-list details');
+            assert.equal(await detail.getAttribute('open'), null);
+            await detail.locator('summary').click();
+            assert.notEqual(await detail.getAttribute('open'), null);
+            assert.deepEqual(await score.boundingBox(), before);
+            await checkFixedScreen(source, 'daily-result', [action, '#meta-rift-hub'], [], ['.rift-result']);
+            await context.capture(label, source, options);
+          }
+        });
+      }
+    };
+  };
+}
+
 const entryCases = createEntryCases({ roster, storedSession, snowRabbitProfile, nightmareProfile, mainReturn, enterObservatory });
 const tourCases = createTourCases({
   core, roster, sessionKey, command, makeRun, startBattle, settleWin, storedSession, snowRabbitProfile,
   mainReturn, applyReturn, enterObservatory, openBattle, battleIdle, riftDate, riftFixture
 });
-const caseGroups = { entry: entryCases, tours: tourCases };
+// Ranged and magic marks shot frame by frame (skill motions phase 2).
+const motionCases = createMotionCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, skillTile, shots });
+const resumeCases = createResumeCases({ makeRun, startBattle, settleWin, command, storedSession, snowRabbitProfile, sessionKey });
+const historyCases = createHistoryCases({ storedSession, enterObservatory });
+const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases };
 
 const cases = {
-  'rift-save-failure': riftSaveFailure,
+  'rift-save-failure': withFixedRiftResult(riftSaveFailure, '[data-backup-action="export"]'),
   'legacy-contract-receipt': legacyContractReceipt,
   'lesson-action-tables': lessonActionTables,
   'tide-ripple-warning': tideRippleWarning,
@@ -2602,10 +2983,29 @@ const cases = {
   'boss-formation': orderHint,
   'spring-count': springCount,
   'retreat-outcomes': retreatOutcomes,
+  'relay-outcomes': relayOutcomes,
+  'fixed-map': fixedMap,
+  'fixed-event': fixedEvent,
+  'fixed-altar': fixedAltar,
+  'fixed-destinations': fixedDestinations,
+  'fixed-collection': fixedCollection,
+  'fixed-records': fixedRecords,
   ...riftCases,
+  'rift-result-win': withFixedRiftResult(riftCases['rift-result-win'], '#meta-rift-again'),
+  'rift-result-fail': withFixedRiftResult(riftCases['rift-result-fail'], '#meta-rift-again'),
   ...entryCases,
-  ...tourCases
+  ...tourCases,
+  ...motionCases,
+  ...resumeCases,
+  ...historyCases
 };
+
+caseGroups['fixed-layouts'] = Object.fromEntries([
+  'fixed-map', 'spring-commit', 'fixed-event', 'treasure-receipt', 'relic-compare',
+  'relic-compare-gate', 'relic-compare-bet', 'relic-compare-event',
+  'fixed-destinations', 'fixed-collection', 'missions-invitations', 'fixed-records', 'fixed-altar',
+  'ending-goal', 'rift-result-win', 'rift-result-fail', 'rift-save-failure', 'save-recovery'
+].map(name => [name, cases[name]]));
 
 async function inject(page, session, { daily, now, seed, mute, settings, lastGood } = {}) {
   const url = seed == null ? gameUrl : gameUrl + '?seed=' + seed;
@@ -2696,7 +3096,12 @@ async function withPage(browser, session, show, options, onFailure) {
       }
       page.on('pageerror', error => fail('Page error', error.message));
       page.on('console', message => {
-        if (message.type() === 'error') fail('Console error', message.text());
+        if (message.type() !== 'error') return;
+        // Battle errors keep their stack in the review report; show its first frames with the message.
+        const stack = message.text().startsWith('Relay screen')
+          ? page.evaluate(() => window.__game?.report?.()?.errors?.at(-1)?.stack?.split(/\r?\n/).slice(0, 4).join(' | ') ?? '').catch(() => '')
+          : Promise.resolve('');
+        stack.then(trace => fail('Console error', message.text() + (trace ? ' :: ' + trace : '')));
       });
       page.on('crash', () => fail('Page crash', 'Chrome crashed while showing the case'));
     });

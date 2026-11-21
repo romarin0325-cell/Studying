@@ -5,6 +5,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { WILD } from '../src/content/wild.js';
+import { SPRITE_SOCKET_OVERRIDES } from '../src/content/sprite-sockets.js';
 import { createWidgets } from '../src/ui/widgets.js';
 import { createCoreRoster } from './support/core.mjs';
 
@@ -12,6 +13,7 @@ const originals = new URL('../../art/pixel-v2/', import.meta.url);
 const assets = new URL('../assets/', import.meta.url);
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const sprites = readJson(new URL('sprites.json', assets));
+const sockets = readJson(new URL('sprite-sockets.json', assets));
 const { characters } = readJson(new URL('manifest.json', originals));
 const legacy = readJson(new URL('../../art/manifest.json', import.meta.url));
 const effect = 'ash-fx.png';
@@ -19,6 +21,23 @@ const poses = ['idle', 'attack', 'hurt'];
 const spriteFile = (id, pose) => id + '-' + pose + '.png';
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const image = (dir, file) => sharp(fileURLToPath(new URL(file, dir)));
+
+test('every idle and attack crop has six local sockets and valid overrides', () => {
+  const names = ['hand', 'mouth', 'eye', 'weaponTip', 'top', 'foot'];
+  const files = Object.keys(sprites).filter(file => /-(idle|attack)\.png$/.test(file));
+  assert.equal(files.length, 300);
+  assert.deepEqual(Object.keys(sockets), files.map(file => file.slice(0, -4)));
+  for (const [key, points] of Object.entries(sockets)) {
+    assert.deepEqual(Object.keys(points), names, key);
+    assert.equal(points.top[1], 0, key);
+    for (const [name, [x, y]] of Object.entries({ ...points, ...SPRITE_SOCKET_OVERRIDES[key] })) {
+      const { width, height } = sprites[key + '.png'];
+      assert.ok(names.includes(name) && Number.isInteger(x) && Number.isInteger(y) &&
+        x >= 0 && x < width && y >= 0 && y < height, key + ': ' + name);
+    }
+  }
+  for (const key of Object.keys(SPRITE_SOCKET_OVERRIDES)) assert.ok(Object.hasOwn(sockets, key), key);
+});
 
 test('all playable allies, wild enemies, and bosses have three sprite poses', () => {
   const { roster } = createCoreRoster();

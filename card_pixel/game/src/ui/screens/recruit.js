@@ -7,8 +7,15 @@ import { runRecordSheet } from './records.js';
 import { openBattleLog } from '../battle/log.js';
 import { featureFlags } from '../../engine/meta.js';
 import { TERMS } from '../glossary.js';
+import { chronicle } from '../../engine/history.js';
+import { outcomeText, storyLine } from '../story-lines.js';
 
 const TAGS = { boss: '보스전 출전', gate: '문지기 출전', battle: '일반전 출전', bench: '대기에서 귀환' };
+
+function companionStory(entry, card) {
+  const line = storyLine(entry, card);
+  return line ? `<span class="companion-story" title="${esc(line)}">${esc(line)}</span>` : '';
+}
 
 export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, preview, endingPending, changeChoices, confirm }) {
   const won = rewards.result === 'win';
@@ -22,6 +29,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
   const mustRecruit = won && candidates.length > 0 && !profile.lead && run.firstIntroClear;
   const mustReserve = !won && candidates.length > 0;
   const { card, face } = widgets;
+  const history = chronicle(run);
   const reason = id => won ? TAGS[rewards.recruitTags[id]] : '출전 기록 있음';
 
   node.classList.add('screen-split');
@@ -43,7 +51,8 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
     <div class="scroll-list">
       <div class="meta-recruit-list">${candidates.map(id => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">
         <span class="meta-face">${face(id, 44)}</span>
-        <span><b>${esc(card(id).name)}</b>${won ? `<span class="companion-tag">${TERMS.returned.short}</span>` : ''}<small>${esc(reason(id))}</small></span>
+        <span><b>${esc(card(id).name)}</b>${won ? `<span class="companion-tag">${outcomeText(history[id])}</span>` : ''}
+          ${reason(id) ? `<small>${esc(reason(id))}</small>` : ''}${companionStory(history[id], card)}</span>
         <span class="meta-recruit-mark" aria-hidden="true"></span>
       </button>`).join('')}</div>
     </div>
@@ -94,10 +103,11 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
   renderSelection();
 }
 
-export function recruitReceipt(ids, { card, face }) {
+export function recruitReceipt(ids, { card, face }, history) {
   return '<div class="recruit-receipts" role="status">' + ids.map(id =>
     '<div class="recruit-receipt win" data-recruited="' + esc(id) + '"><span class="run-face">' + face(id, 28) + '</span>' +
-    '<b>' + esc(card(id).name) + '</b><span class="companion-tag">' + TERMS.recruit.short + '</span></div>').join('') + '</div>';
+    '<b>' + esc(card(id).name) + '</b><span class="companion-tag">' + TERMS.recruit.short + '</span>' +
+    companionStory(history?.[id]?.[0], card) + '</div>').join('') + '</div>';
 }
 
 export function missionRecruitSheet({ period, widgets, sheets, claim, next, remaining }) {

@@ -267,11 +267,12 @@ export function mapScreen(run, ui, { receipt } = {}) {
   const cast = '<div class="map-walkers">' + lineup(front) + '</div>';
   const skip = '<button type="button" class="map-skip" hidden><span>건너뛰기</span></button>';
   const title = rift ? [shortRiftDate(rift.spec?.dayKey), '균열'].filter(Boolean).join(' ') : dungeon.name;
-  node.innerHTML = head(run, title, run.floor + '층') + (run.relics.length ? relicStrip(core, run.relics) : '') + '<div class="run-route">' +
+  node.innerHTML = head(run, title, run.floor + '층') + (run.relics.length ? relicStrip(core, run.relics) : '') +
+    '<div class="screen-split run-route"><div class="fixed-top">' +
     '<button class="floor-strip" id="b-floors" aria-label="층 진행과 문지기 정보">' + track + '</button>' +
     scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + '</div>' + skip, 'walking-map') +
     (receipt ? '<p class="map-receipt gain" role="status">' + esc(receipt) + ' · 장착 완료</p>' : '') +
-    '<div class="run-doors">' + doors + '</div></div>';
+    '</div><div class="run-doors scroll-list">' + doors + '</div></div>';
   show('map');
   bindRelicSlots(node, run.relics, id => {
     ui.audio.sfx.tap();
@@ -298,7 +299,6 @@ export function mapScreen(run, ui, { receipt } = {}) {
       if (!ui.command(Run.chooseDoor, index).ok) return;
       locked = true;
       for (const entry of $$('button:not(.map-skip)', node)) entry.disabled = true;
-      $('.walking-map', node).scrollIntoView({ block: 'nearest' });
       walk.select(index);
     });
   }

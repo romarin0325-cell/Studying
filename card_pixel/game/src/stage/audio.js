@@ -28,6 +28,10 @@ export function createAudio(clock) {
     hit: big => { noise(big ? 0.28 : 0.11, big ? 0.15 : 0.09); tone(big ? 86 : 150, big ? 0.28 : 0.1, 'triangle', 0.12, 46); },
     crit: () => { tone(880, 0.07, 'square', 0.05); tone(1320, 0.12, 'square', 0.045, 0, 0.06); },
     cast: () => { tone(520, 0.2, 'sine', 0.05, 980); tone(260, 0.2, 'triangle', 0.03, 520); },
+    throw: () => tone(470, 0.085, 'triangle', 0.055, 195),
+    zap: () => tone(1150, 0.13, 'square', 0.04, 690),
+    whoosh: () => { noise(0.1, 0.055); tone(265, 0.1, 'triangle', 0.045, 105); },
+    chime: up => { tone(up ? 590 : 495, 0.08, 'sine', 0.055); tone(up ? 880 : 330, 0.1, 'triangle', 0.045, 0, 0.045); },
     charge: () => { tone(220, 0.35, 'sawtooth', 0.04, 880); tone(110, 0.35, 'triangle', 0.05, 440); },
     buff: () => [0, 1, 2].forEach(i => tone(523 * Math.pow(1.26, i), 0.09, 'square', 0.035, 0, i * 0.06)),
     debuff: () => [0, 1].forEach(i => tone(330 - i * 70, 0.12, 'sawtooth', 0.03, 0, i * 0.08)),
@@ -53,9 +57,7 @@ export function createAudio(clock) {
     },
     awaken: () => [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, 'square', 0.04, 0, i * 0.07)),
     jackpot: () => [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0.14, 'square', 0.05, 0, i * 0.06)),
-    roll: () => tone(880 + Math.random() * 440, 0.04, 'square', 0.025),
-    boom: () => { noise(0.45, 0.18); tone(70, 0.45, 'triangle', 0.15, 30); },
-    beam: () => { tone(1200, 0.4, 'sawtooth', 0.045, 260); tone(300, 0.4, 'square', 0.03, 120); noise(0.3, 0.05); }
+    roll: () => tone(880 + Math.random() * 440, 0.04, 'square', 0.025)
   };
 
   return {

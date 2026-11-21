@@ -320,7 +320,7 @@ export function create(core, opts) {
   const isAlly = unit => !!unit && unit !== host.battle.enemy && !!unit.proto;
   let sourceCards;
   function allySkillSource(source, skill, delayed) {
-    if (!isAttack(skill) || skill.name === host.NORMAL_ATTACK.name) return;
+    if (skill.name === host.NORMAL_ATTACK.name) return;
     if (skill.heirloom) return skillSourceKey('ally', skill.heirFrom && GameUtils.getCardById(skill.heirFrom), skill);
     const native = skillSourceKey('ally', source.proto, skill);
     if (!delayed) return native;
@@ -499,17 +499,23 @@ export function create(core, opts) {
   }
 
   /* ---------- E/F: what happens when an ally falls ---------- */
+  function nextAlly(from = currentPlayer()) {
+    return players().find(p => !p.isDead && p.pos > from.pos);
+  }
+  function inheritance(victim) {
+    const heir = rules.heirloom && nextAlly(victim);
+    const skill = heir && heirloomSkill(victim.proto);
+    return skill ? { heir, skill } : null;
+  }
   function afterAllyDown(victim) {
     if (!isAlly(victim) || victim.retreated) return;
-    if (rules.heirloom) {
-      const skill = heirloomSkill(victim.proto);
-      const heir = players().find(p => !p.isDead && p.pos > victim.pos);
-      if (skill && heir) {
-        heir.skills = heir.skills.filter(s => !s.heirloom);
-        heir.skills.push(skill);
-        B.gained.push({ to: heir.id, from: victim.id, name: skill.name, form: victim.formId, skill });
-        push({ t: 'heirloom', from: allyRef(victim.pos), to: allyRef(heir.pos), skill: { name: skill.name, type: skill.type, tier: skill.tier || 1 } });
-      }
+    const handoff = inheritance(victim);
+    if (handoff) {
+      const { heir, skill } = handoff;
+      heir.skills = heir.skills.filter(s => !s.heirloom);
+      heir.skills.push(skill);
+      B.gained.push({ to: heir.id, from: victim.id, name: skill.name, form: victim.formId, skill });
+      push({ t: 'heirloom', from: allyRef(victim.pos), to: allyRef(heir.pos), skill: { name: skill.name, type: skill.type, tier: skill.tier || 1 } });
     }
     if (quirk === 'martyr') {
       const alive = players().filter(p => !p.isDead);
@@ -670,7 +676,7 @@ export function create(core, opts) {
     const salience = actionSalience(action);
     const power = enemy.tookDamageThisTurn ? retaliationPower(action, enemy) ?? action.val : action.val;
     const def = queue[B.enemyIdx];
-    const sourceKey = !action.isChargeStart && isAttack(action) && (def.source
+    const sourceKey = !action.isChargeStart && (def.source
       ? skillSourceKey('ally', GameUtils.getCardById(def.source), action)
       : skillSourceKey(isBoss() ? 'boss' : 'wild', def, action));
     push({
@@ -874,6 +880,8 @@ export function create(core, opts) {
     const physical = action.type === 'phy';
     const ward = physical ? 'barrier' : 'magic_guard';
     const preventedBy = ts.evasion >= 100 ? 'evasion' : target.buffs[ward] ? ward : null;
+    // Telegraphs give damage on hit. An active evasion buff also gives a miss branch in the relay forecast.
+    const canEvade = !!target.buffs.evasion && ts.evasion > 0;
     const val = physical ? es.atk : es.matk;
     const def = physical ? ts.def : ts.mdef;
     const random = (action.effects || []).find(e => e.type === 'random_mult');
@@ -882,40 +890,44 @@ export function create(core, opts) {
     const reduce = 1 - StatusRules.damageReduction(target).rate;
     const hit = m => preventedBy ? 0 : Math.floor(val * m * (100 / (100 + def)) * reduce);
     const hitPower = retaliationPower(action, enemy);
-    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy };
+    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy, canEvade };
     const met = enemy.tookDamageThisTurn ? true : mayHitEnemy ? null : false;
     const otherwise = hit(lo), whenMet = hit(hitPower);
     const range = [met === true ? whenMet : otherwise, met === false ? otherwise : whenMet];
-    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy };
+    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy, canEvade };
+  }
+  function enemyResponse({ action: a, intentRule }, target, mayHitEnemy) {
+    const stunned = !!host.battle.enemy.buffs.stun;
+    const attack = !stunned && !a.isChargeStart && isAttack(a);
+    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null };
+    const preventedBy = stunned ? 'stun' : hit.preventedBy;
+    const resourceEffect = intentRule === 'mana_drain' ? {
+      kind: 'mp', mode: a.drainFlat ? 'flat' : 'all',
+      amount: a.drainFlat ?? target.mp, before: target.mp,
+      after: preventedBy ? target.mp : Math.max(0, target.mp - (a.drainFlat ?? target.mp)),
+      onHit: true, preventedBy
+    } : null;
+    return { ...hit, attack, stunned, preventedBy, resourceEffect };
   }
   function currentIntent(target = currentPlayer(), mayHitEnemy = true) {
     const b = host.battle, enemy = b.enemy;
     const local = localTurn(enemy);
-    const stunned = !!enemy.buffs.stun;
     let cache = B.intentCache;
     if (!cache || cache.enemy !== enemy || cache.turn !== b.turn) {
-      const action = stunned ? lessonStep(local) ?? { type: 'stun', name: '기절' } : decide(enemy);
+      const action = enemy.buffs.stun ? lessonStep(local) ?? { type: 'stun', name: '기절' } : decide(enemy);
       cache = B.intentCache = { enemy, turn: b.turn, action, intentRule: actionRule(action), target: currentPlayer() };
     }
     const a = cache.action;
+    const { attack, stunned, range, conditions, preventedBy, resourceEffect } = enemyResponse(cache, target, mayHitEnemy);
     const kind = stunned ? 'stun' : a.isChargeStart ? 'charge' : a.type;
     const salience = stunned ? 'ordinary' : actionSalience(a);
-    const attack = !stunned && !a.isChargeStart && isAttack(a);
-    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null };
-    const { range, conditions, preventedBy } = hit;
-    const resourceEffect = cache.intentRule === 'mana_drain' ? {
-      kind: 'mp', mode: a.drainFlat ? 'flat' : 'all',
-      amount: a.drainFlat ?? target.mp, before: target.mp,
-      after: stunned || preventedBy ? target.mp : Math.max(0, target.mp - (a.drainFlat ?? target.mp)),
-      onHit: true, preventedBy: stunned ? 'stun' : preventedBy
-    } : null;
     const extra = (a.effects || []).map(e => e.type).filter(t => t !== 'random_mult');
     const lethal = attack && range[1] >= target.hp;
     const lethalText = !lethal ? null : range[0] >= target.hp ? '명중 시 쓰러짐' : '쓰러질 수 있음';
     return {
       kind, name: stunned ? '기절' : a.name, target: attack ? allyRef(target.pos) : ruleTarget(a, cache.intentRule, target),
       localTurn: local, damageRange: range, conditions, resourceEffect, salience,
-      nextDistinct: nextDistinct(a, local), actionId: actionId(a), rule: cache.intentRule, preventedBy: stunned ? 'stun' : preventedBy,
+      nextDistinct: nextDistinct(a, local), actionId: actionId(a), rule: cache.intentRule, preventedBy,
       ...(cache.intentRule === 'cleanse' && { debuffs: enemyDebuffs(enemy) }),
       ...(local === lesson?.transferBeforeLocalTurn && enemy.lessonProtocol && { defenseProtocol: enemy.lessonProtocol }),
       ...(a.bonus && { bonus: a.bonus, stat: a.stat }),
@@ -1154,11 +1166,38 @@ export function create(core, opts) {
     }
     return { kind, reduction };
   }
-  function nextAlly() {
-    return players().find(p => !p.isDead && p.pos > host.battle.currentPlayerIdx);
-  }
   function canRetreat() {
     return B.awaiting && !B.retreatUsed && !B.outcome && !!nextAlly();
+  }
+  function relayHit(target, mayHitEnemy) {
+    const { range, canEvade, resourceEffect } = enemyResponse(B.intentCache, target, mayHitEnemy);
+    return { min: canEvade ? 0 : Math.min(...range), max: Math.max(...range), resourceEffect };
+  }
+  function previewRelay() {
+    // settle() has already chosen this enemy's action before exposing an awaiting turn.
+    const player = B.awaiting && !B.outcome ? currentPlayer() : null;
+    const hit = player && relayHit(player, true);
+    const danger = !hit || hit.max < player.hp ? 'none' : hit.min >= player.hp ? 'certain' : 'possible';
+    const handoff = danger !== 'none' ? inheritance(player) : null;
+    const held = handoff?.heir.skills.find(skill => skill.heirloom);
+    const next = player && !B.retreatUsed ? nextAlly(player) : null;
+    const retreat = { available: !!next, next: null };
+    if (next) {
+      const { min, max, resourceEffect } = relayHit(next, false);
+      retreat.next = { id: next.id, name: next.name, hp: next.hp, hpAfter: [Math.max(0, next.hp - max), Math.max(0, next.hp - min)] };
+      if (resourceEffect && !resourceEffect.preventedBy) retreat.next.mpAfter = resourceEffect.after;
+      const reserves = host.battle.delayedEffects.filter(effect => effect.source === player).map(effect => effect.skill.name);
+      if (reserves.length) retreat.cancelsReserve = [...new Set(reserves)];
+    }
+    return {
+      danger, retreat,
+      stand: {
+        falls: danger === 'none' ? 'no' : danger,
+        inheritor: handoff ? { id: handoff.heir.id, name: handoff.heir.name } : null,
+        heirloom: handoff ? { skill: handoff.skill.name, from: player.id } : null,
+        replaces: held ? { skill: held.name } : null
+      }
+    };
   }
   function survivors() { return host.battle.players.map(p => !!p && (!p.isDead || !!p.retreated)); }
   function heirloomsGained() { return structuredClone(B.gained); }
@@ -1223,6 +1262,7 @@ export function create(core, opts) {
       const intent = currentIntent(player, false);
       return { next: allyRef(player.pos), intent, dmg: intent.dmg || [0, 0], lethal: !!intent.lethal };
     },
+    previewRelay,
     options() {
       if (!B.awaiting || B.outcome) return [];
       const player = currentPlayer();

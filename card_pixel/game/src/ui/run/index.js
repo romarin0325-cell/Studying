@@ -1,4 +1,5 @@
 import * as Run from '../../engine/run.js';
+import { resumePoint } from '../../engine/resume.js';
 import { create as createRoster } from '../../engine/roster.js';
 import { INTRO } from '../../content/intro.js';
 import { createStage } from '../../stage/stage.js';
@@ -151,15 +152,18 @@ export function enterRun(run, host) {
   };
 
   function battleDecision(node, result, next, open = false) {
-    const gained = run.lastBattleRelics ?? result.rewardDelta.relicIds;
-    const equipped = new Set(gained.filter(id => run.relics.includes(id)));
     const decision = document.createElement('div');
     decision.className = 'victory-decision';
+    function showReceipts() {
+      const gained = run.lastBattleRelics ?? result.rewardDelta.relicIds;
+      node.innerHTML = gained.filter(id => run.relics.includes(id)).map(id => treasureReceipt(artifacts.get(id))).join('');
+    }
     function render() {
-      node.innerHTML = [...equipped].map(id => treasureReceipt(artifacts.get(id))).join('');
+      if (run.phase === 'result' && !run.pending) return route();
+      showReceipts();
       node.append(decision);
       next.hidden = true;
-      const options = { node: decision, inline: true, onEquipped, onRelic: onEquipped };
+      const options = { node: decision, inline: true, onEquipped: render, onRelic: render };
       const rewardUi = { ...ui, leave: leaveDecision };
       if (run.pending?.kind === 'reinforcement') reinforceScreen(run, rewardUi, options);
       else if (run.pending?.kind === 'gate') gatePickScreen(run, rewardUi, options);
@@ -171,6 +175,10 @@ export function enterRun(run, host) {
       }
     }
     function leaveDecision() {
+      if (run.phase === 'result') {
+        if (!confirmHeldResult()) render();
+        return;
+      }
       const left = command(Run.leaveRoom);
       if (!left.ok) return;
       if (left.left) {
@@ -178,37 +186,29 @@ export function enterRun(run, host) {
         route();
       } else render();
     }
-    function onEquipped(id) {
-      if (run.relics.includes(id)) {
-        for (const previous of equipped) if (!run.relics.includes(previous)) equipped.delete(previous);
-        equipped.add(id);
-        run.lastBattleRelic = id;
-        run.lastBattleRelics = [...equipped];
-        host.save(run);
-      }
-      render();
-    }
     if (open) render();
-    else node.innerHTML = [...equipped].map(id => treasureReceipt(artifacts.get(id))).join('');
+    else showReceipts();
   }
 
-  function afterBattle() {
-    if (run.result) {
-      if (run.phase !== 'done' && !command(Run.leaveRoom).left) return;
-      if (run.daily) return host.finish(run);
+  function confirmHeldResult() {
+    const result = command(Run.confirmResult);
+    if (result.retry) {
+      route();
+      return true;
+    }
+    if (!result.left) return false;
+    host.finish(run);
+    if (!run.daily) {
       const rewards = Run.runRewards(run);
-      host.finish(run);
-      // The observatory owns the return transaction and the no-choice confirmation.
       if (!rewards.recruitable.length && !rewards.shardCandidates.length) {
         $('#recruit.on #meta-recruit-confirm')?.click();
       }
-      return;
     }
-    if (run.awaitingRetryResult) {
-      delete run.awaitingRetryResult;
-      host.save(run);
-      return route();
-    }
+    return true;
+  }
+
+  function afterBattle() {
+    if (run.phase === 'result') return confirmHeldResult();
     if (run.room.type === 'borrowed' && run.phase === 'reward') return wakeSurvivors();
     leave();
   }
@@ -229,19 +229,16 @@ export function enterRun(run, host) {
       return;
     }
     if (run.phase === 'map') {
-      if (run.doors[0]?.type === 'borrowed' || run.doors[0]?.type === 'awakening') return enterDoor(0);
-      const door = host.profile?.().ui?.entryDoor;
-      if (!browseMap && run.floor === 3 && door?.runId === run.id && run.doors[door.index]?.enemies.length) {
-        return previewDoor(door.index);
-      }
-      if (!browseMap && run.doors.length === 1 && run.doors[0].enemies.length) return previewDoor(0);
+      const point = resumePoint(run, host.profile?.()?.ui);
+      if (point.kind === 'borrowed' || point.kind === 'awakening') return enterDoor(0);
+      if (!browseMap && point.kind === 'battle') return previewDoor(point.doorIndex);
       mapScreen(run, ui, { receipt });
       receipt = '';
       return;
     }
+    if (run.phase === 'result' || run.phase === 'reward') return battle.restoreResult(run, afterBattle, battleDecision);
     if (run.room?.status === 'order') {
       if (run.room.type === 'borrowed' && command(Run.confirmOrder, INTRO.party).ok) return route();
-      if (run.awaitingRetryResult) return battle.restoreResult(run, afterBattle, battleDecision);
       return orderScreen(run, ui);
     }
     if (run.room?.status === 'battle') {
@@ -251,14 +248,7 @@ export function enterRun(run, host) {
       return battle.startBattle(run, options, (summary, log) => {
         const result = Run.settleBattle(run, summary);
         if (result.ok) {
-          run.lastBattleLog = appendSettlement(log, result);
-          // Keep the settled room resumable until the player confirms the final result.
-          // leaveRoom moves a settled run with a final outcome to done.
-          if (run.phase === 'done') run.phase = 'reward';
-          if (result.retry) run.awaitingRetryResult = true;
-          run.lastBattleRelic = result.relic?.equipped ? result.relic.id : null;
-          run.lastBattleRelics = Array.isArray(result.relics) ? result.relics : null;
-          host.save(run);
+          command(Run.recordBattleLog, appendSettlement(log, result));
         }
         return result;
       }, afterBattle, {
@@ -270,7 +260,6 @@ export function enterRun(run, host) {
         replay: run.room.type === 'borrowed' ? host.tutorial?.battleActions(run) : undefined
       });
     }
-    if (run.phase === 'reward') return battle.restoreResult(run, afterBattle, battleDecision);
     if (run.pending?.kind === 'relic') return treasureScreen(run, ui, run.pending.id);
     if (run.pending?.kind === 'altar' || run.room?.type === 'altar') return altarScreen(run, ui);
     if (run.room?.type === 'spring') return springScreen(run, ui);

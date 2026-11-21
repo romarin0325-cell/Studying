@@ -2,6 +2,7 @@ import { $, $$, esc } from '../dom.js';
 import { CONTRACTS } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import * as Meta from '../../engine/meta.js';
+import { bindScreenTabs } from '../nav/screen-tabs.js';
 
 export const DIFFICULTY_NAME = { easy: '꿈결', normal: '여정', nightmare: '악몽' };
 const amount = value => value.toLocaleString('ko-KR');
@@ -40,8 +41,14 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
   const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
   const latest = profile.ui?.latestRun;
   const showDifficulty = Meta.featureFlags(profile).difficultyChoice;
+  node.classList.add('screen-split');
   node.innerHTML = `
-    <section class="meta-panel">
+    ${renderDailyHistory ? `<div class="fixed-top screen-tabs" role="group" aria-label="기록 종류">
+      <button class="btn" data-screen-tab="expedition">원정 기록</button>
+      <button class="btn" data-screen-tab="rift">균열 기록</button>
+    </div>` : ''}
+    <div class="scroll-list">
+    <section class="meta-panel" data-screen-panel="expedition">
       ${recordTable([
         ['원정', `${records.runs}회`],
         ['최고 피해', hitText(records.bestHit, card)],
@@ -49,7 +56,7 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
         ['인연이 가장 높은 동료', longestText(longest, card)]
       ])}
     </section>
-    <section class="meta-panel">
+    <section class="meta-panel" data-screen-panel="expedition">
       <h2>지역별 생환</h2>
       <table class="meta-record-table meta-clear-table">
         <thead><tr><th scope="col">지역</th>${showDifficulty
@@ -66,11 +73,17 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
         }).join('')}</tbody>
       </table>
     </section>
-    ${renderDailyHistory ? '<section class="meta-panel" id="meta-daily-history"></section>' : ''}
+    ${renderDailyHistory ? '<section class="meta-panel" id="meta-daily-history" data-screen-panel="rift"></section>' : ''}
+    </div>
+    ${latest || profile.ui?.endingSeen ? `<div class="fixed-foot">
     ${latest ? `<button class="btn" id="meta-latest-record">최근 원정 · ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ''}
     ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">엔딩 다시 보기</button>' : ''}
+    </div>` : ''}
   `;
-  if (renderDailyHistory) renderDailyHistory($('#meta-daily-history', node));
+  if (renderDailyHistory) {
+    const hasDailyHistory = renderDailyHistory($('#meta-daily-history', node));
+    bindScreenTabs(node, hasDailyHistory && !latest ? 'rift' : 'expedition');
+  }
   for (const button of $$('[data-nightmare-record]', node)) button.addEventListener('click', () => {
     const dungeonId = button.dataset.nightmareRecord;
     const stamps = Meta.contractsFor?.(profile, dungeonId)?.stamps;

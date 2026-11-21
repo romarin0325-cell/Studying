@@ -192,9 +192,11 @@
 .large-text #row2 { height: auto; }
 #row2 { flex: none; display: flex; gap: 6px; min-height: 40px; }
 #b-retreat { flex: 1; min-width: 0; padding: 4px; text-align: center; color: var(--navy); font: normal 0.9375rem/1.1 var(--f-display); display: flex; flex-direction: column; align-items: center; justify-content: center; --pf-o: var(--line2); --pf-lo: var(--line2); }
-#b-retreat small { font: 600 0.6875rem/1.18 var(--f-body); color: var(--ink2); word-break: keep-all; }
+#b-retreat small { font: 600 0.6875rem/1.3 var(--f-body); color: var(--ink2); word-break: keep-all; }
 #b-retreat.armed { min-width: 0; color: var(--gold-ink); --pf-o: var(--gold-lo); --pf-f: var(--gold-tint); --pf-hi: #fffaf0; --pf-lo: #f0c86a; --pf-in: var(--gold); }
 #b-retreat.armed small { color: var(--gold-ink); }
+#b-retreat.relay-outcomes { flex: 3; padding-inline: 6px; font-size: 15px; line-height: 1.03125rem; }
+#b-retreat.relay-outcomes small { max-width: 100%; overflow-wrap: anywhere; }
 #b-retreat[disabled] { opacity: .45; pointer-events: none; }
 #b-heir { display: none; flex: 1.6; position: relative; overflow: hidden; text-align: left; padding: 3px 12px; color: var(--gold-ink); --pf-o: #c97206; --pf-f: var(--gold); --pf-hi: var(--gold-hi); --pf-lo: var(--gold-lo); --pf-sh: rgba(240, 146, 15, .25); }
 #b-heir.on { display: block; }

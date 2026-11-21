@@ -55,6 +55,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .spring-rates { padding: 6px 2px 2px; color: var(--ink2); }
 .spring-rates summary { cursor: pointer; font: normal 12px/18px var(--f-label); color: var(--navy); }
 .spring-rates p, .spring-service > p { margin: 4px 0 0; }
+#b-spring-bench { margin-top: 8px; }
 .draw-receipt { color: var(--aqua-ink); font-weight: 700; }
 .relic-rack:not(:has(.relic-slot:not(.empty))) { display: none; }
 
@@ -115,8 +116,14 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .run-screen .scroll { padding: 10px 12px 16px; }
 .run-screen .footer { padding: 10px 12px calc(12px + env(safe-area-inset-bottom)); }
 /* Fix the summary and action in place while the variable list scrolls. */
-.screen-split { flex: 1; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; overflow: hidden; }
-.screen-split > .scroll-list { min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
+.screen-split { flex: 1; display: grid; grid-template: auto minmax(0, 1fr) auto / minmax(0, 1fr); min-height: 0; overflow: hidden; }
+.screen-split > .fixed-top { grid-row: 1; }
+.screen-split > .scroll-list { grid-row: 2; }
+.screen-split > .fixed-foot { grid-row: 3; }
+.screen-split > .scroll-list, .screen-split .scroll-detail { min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
+/* Tabs share the fixed summary row and wrap before they can overflow. */
+.screen-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.screen-tabs .btn { flex: 1 1 0; min-width: fit-content; }
 .run-screen .screen-split > :is(.fixed-top, .scroll-list) { padding: 10px 12px; }
 .run-screen .screen-split > .scroll-list { padding-top: var(--u); padding-bottom: 16px; }
 #recruit .meta-page.screen-split { overflow: hidden; }
@@ -131,8 +138,6 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .face-badge { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
 .face-badge b { overflow-wrap: anywhere; }
 .loss { color: var(--coral-lo); font-weight: 700; }
-
-.run-route, .run-event { min-height: 0; display: flex; flex: 1; flex-direction: column; overflow-y: auto; }
 
 /* Floor progress uses framed cells on a flat track. */
 .floor-strip { position: relative; border: 0; background: none; display: flex; width: 100%; min-height: 52px; padding: 4px 12px 8px; gap: 4px; align-items: center; flex-shrink: 0; }
@@ -270,6 +275,16 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .recruit-receipts { display: flex; flex-wrap: wrap; gap: 6px; }
 .recruit-receipt { display: flex; align-items: center; gap: 4px; padding: var(--u) 6px; font: normal 12px/14px var(--f-label); }
 .recruit-receipt .run-face { width: 28px; height: 28px; }
+.companion-story {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  min-width: 0; overflow: hidden; white-space: normal; overflow-wrap: anywhere; word-break: keep-all;
+  font: 500 0.8125rem/1.4 var(--f-body); color: var(--ink2);
+}
+.meta-recruit-card .companion-story { margin-top: 3px; }
+.recruit-receipt:has(.companion-story) { flex: 1 1 100%; display: grid; grid-template-columns: auto auto 1fr; justify-items: start; }
+.recruit-receipt .companion-story { grid-column: 2 / -1; }
+.companion-records { list-style: none; margin: 4px 0 10px; padding: 0; display: grid; gap: 6px; }
+.companion-records small { display: block; }
 .wake-slot { min-width: 0; --pf-o: var(--line2); --pf-f: rgba(255, 255, 255, .55); --pf-sh: transparent; }
 .wake-slot:not(.landed) .wake-face { visibility: hidden; }
 .wake-slot.landed .wake-face { animation: wake-land .22s steps(4, end) both; }
@@ -296,7 +311,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 #reinforce .reserve-cards { flex-shrink: 0; }
 
 /* ---------- events: scene, a visual-novel dialog, choice cards ---------- */
-.run-event .run-scene { min-height: 190px; margin: 0 12px; }
+.run-event .run-scene { height: clamp(150px, 26dvh, 190px); }
 .event-cast { display: flex; position: absolute; left: 0; right: 0; bottom: 30px; align-items: flex-end; justify-content: space-between; padding: 0 12px; }
 .event-party { order: -1; }
 .event-visitors { display: flex; align-items: flex-end; justify-content: flex-end; margin-left: auto; }
@@ -305,10 +320,12 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .event-released { animation: event-depart .3s steps(6) both; }
 @keyframes event-step { from { translate: 0 0; } }
 @keyframes event-depart { to { translate: 18px 0; opacity: .3; } }
-.event-dialog { position: relative; min-height: 94px; flex: none; margin: 14px 12px 0; padding: 18px 14px 12px; }
+.event-dialog { position: relative; min-height: 94px; margin-top: 14px; padding: 18px 14px 12px; }
+/* Keep the title outside the dialogue's own scroll area. */
+.event-dialog .scroll-detail { max-height: min(7rem, 17dvh); }
 .event-dialog h2 { position: absolute; top: -12px; left: 12px; margin: 0; padding: 3px 22px 4px 12px; color: #fff;
    font-size: 0.9375rem; text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
-.event-choices { display: grid; gap: 10px; padding: 12px 12px calc(14px + env(safe-area-inset-bottom)); }
+.event-choices { display: grid; align-content: start; gap: 10px; }
 .event-choice { min-height: 76px; display: flex; flex-direction: column; justify-content: center; padding: 10px 14px; text-align: left; position: relative; --edge: var(--aqua); }
 .event-choice b { color: var(--aqua-ink); font-size: 0.9375rem; }
 .event-choice span { color: var(--ink); }

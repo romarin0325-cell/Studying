@@ -46,6 +46,12 @@
 
 .meta-panel { --pf-o: var(--line2); --pf-lo: var(--paper3); }
 .meta-page { position: relative; min-height: 0; overflow: auto; overscroll-behavior: contain; flex: 1; padding: 6px 14px calc(18px + env(safe-area-inset-bottom)); }
+.meta-page.screen-split { overflow: hidden; }
+.meta-page.screen-split > .scroll-list { padding: 2px 2px 8px; }
+:is(#dungeons, #recovery) .fixed-foot { display: grid; gap: 6px; padding-top: 8px; }
+.meta-recovery .fixed-top { padding: 14px; }
+.meta-recovery .fixed-foot [hidden] { display: none; }
+.meta-recovery .meta-danger { color: var(--coral-lo); --pf-o: var(--coral); }
 .meta-screen small, .meta-sheet small { font: 500 0.75rem/1.1rem var(--f-body); }
 .meta-screen h2 { font: normal 0.9375rem/1.3 var(--f-display); letter-spacing: 0; }
 
@@ -251,6 +257,7 @@
 .rift-result-cast b { font: normal 0.9375rem/1.1rem var(--f-display); }
 .rift-result-cast .fallen img { filter: grayscale(1); opacity: .6; }
 .rift-result-cast .fallen small { color: var(--coral-lo); }
+#daily-result details > summary { cursor: pointer; min-height: 44px; padding: 10px; font: 15px/22px var(--f-display); }
 .rift-stamp { display: inline-block; margin-top: 8px; padding: 4px 12px; clip-path: var(--notch); }
 .rift-record-list, .rift-record-pages { display: grid; gap: 6px; margin-top: 8px; }
 .rift-record-list .btn { justify-content: flex-start; text-align: left; }
@@ -333,6 +340,7 @@
 /* ---------- companions ---------- */
 .meta-collection-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
 .meta-collection-bar select { min-width: 0; }
+.meta-collection-bar input { width: 100%; min-width: 0; padding: 6px 8px; font: inherit; border: var(--u) solid var(--line2); border-radius: 0; }
 #meta-collected { margin-left: auto; padding: 3px 12px; background: var(--navy); color: #fff; font: normal 0.75rem var(--f-label); clip-path: var(--notch); text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
 .meta-collection-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .meta-cell { position: relative; min-width: 0; min-height: 100px; padding: 6px 2px 6px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 3px;
@@ -375,7 +383,7 @@
 .meta-clear-table th:first-child { width: 60%; }
 
 /* ---------- ending ---------- */
-.meta-ending-stage { --floor: 60px; height: clamp(240px, 46dvh, 420px); margin-bottom: 12px; clip-path: var(--notch); box-shadow: inset 0 0 0 var(--u) #fff; }
+.meta-ending-stage { --floor: 60px; height: clamp(150px, 28dvh, 260px); margin-bottom: 12px; clip-path: var(--notch); box-shadow: inset 0 0 0 var(--u) #fff; }
 .meta-ending-stage .meta-actor { --depth: 0px; animation: meta-procession 9.6s steps(96, end) both; animation-delay: calc(var(--actor-index) * 3.2s); }
 @keyframes meta-procession { from { left: 0; transform: translateX(-100%); } to { left: 100%; transform: translateX(0); } }
 

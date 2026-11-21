@@ -14,6 +14,7 @@ import { notebookScreen } from './screens/notebook.js';
 import { recordsScreen } from './screens/records.js';
 import { endingScreen } from './screens/ending.js';
 import { createDailyNavigation } from './nav/daily.js';
+import { bindRecoveryImport } from './nav/recovery.js';
 import { basicTutorial, createTutorial } from './tutorial.js';
 import { hasFinalConsonant } from './widgets.js';
 import * as Meta from '../engine/meta.js';
@@ -136,7 +137,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       departureLabel: collecting ? '동료 도감 보기' : null,
       daily: flags.dailyRift ? daily.hubView() : null, openDaily: daily.showDaily
     });
-    if (arriving.length) $('.meta-hub-actions', node).insertAdjacentHTML('afterbegin', recruitReceipt(arriving, widgets));
+    if (arriving.length) $('.meta-hub-actions', node).insertAdjacentHTML('afterbegin', recruitReceipt(arriving, widgets, profile.history));
     if (profile.ui?.announcement) updateUi({ announcement: null });
     for (const button of node.querySelectorAll('[data-meta-page]')) button.addEventListener('click', () => {
       openMeta(button.dataset.metaPage);
@@ -160,13 +161,13 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     if (id === 'collection') collectionScreen(content, { profile, roster, widgets, core, inspect });
     else if (id === 'notebook') {
       function renderNotebook() {
-        const scroll = content.scrollTop;
+        const scroll = $('.scroll-list', content)?.scrollTop ?? 0;
         notebookScreen(content, profile, roster.card, {
           goal: currentGoal(run), flags, missions: flags.missions ? Meta.missionsView(profile, roster) : null,
           openMission: !run ? kind => invite(kind) : null,
           describeMission: (label, line) => sheets.sheet(label, line)
         });
-        content.scrollTop = scroll;
+        $('.scroll-list', content).scrollTop = scroll;
       }
       function invite(kind, index = 0) {
         const periods = Meta.missionsView?.(profile, roster)?.claimable?.filter(period => period.kind === kind) ?? [];
@@ -214,16 +215,16 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     companionSheet({ core, roster, widgets, sheets, profile, id });
   }
 
-  function openDungeons() {
+  function openDungeons(scrollTop) {
     const node = page('dungeons', { back: showHub });
     const destinations = availableDungeons(profile);
     const mainDestinations = destinations.filter(dungeon => dungeon.id !== 'dawn_forest');
     const quick = !run && (mainDestinations.find(dungeon => dungeon.id === profile.ui?.destination)
       ?? mainDestinations.find(dungeon => dungeon.id === currentGoal()?.target?.dungeonId) ?? mainDestinations[0]);
     const difficulty = quick ? departureDifficulty(profile, quick.id) : 'normal';
-    const quickStart = quick ? { name: quick.name, difficulty, start: () => startExpedition(quick.id, difficulty) } : null;
+    const quickStart = quick ? { id: quick.id, name: quick.name, difficulty, start: () => startExpedition(quick.id, difficulty) } : null;
     dungeonsScreen(node, {
-      profile, roster, widgets, prepare: run ? null : prepare, quickStart,
+      profile, roster, widgets, prepare: run ? null : prepare, quickStart, scrollTop,
       openRoster(dungeonId) {
         const dungeon = DUNGEONS[dungeonId];
         rosterTable({ dungeon, pool: listedPool(roster, dungeon), profile, widgets, sheets, inspect });
@@ -264,11 +265,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     preparationOpen = false;
     updateProfile(withoutPreparation());
     if ($('#hub').classList.contains('on')) showHub();
-    else if ($('#dungeons').classList.contains('on')) {
-      const top = $('#dungeons .meta-page').scrollTop;
-      openDungeons();
-      $('#dungeons .meta-page').scrollTop = top;
-    }
+    else if ($('#dungeons').classList.contains('on')) openDungeons($('#dungeons .scroll-list').scrollTop);
   }
 
   function startExpedition(destination, difficulty = 'normal', contract = null) {
@@ -332,14 +329,9 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     if (basicTutorial(next) && run.dungeonId === 'dawn_forest' && announce.recruits.length) {
       next = Meta.markEntryStep(next, 'recruit');
     }
-    const recent = { ...next.ui?.recent };
     const entry = { dungeonId: run.dungeonId, floor: run.floor, result: run.result };
     const recruits = announce.recruits;
-    const returned = new Set(announce.returned ?? run.bench.filter(id => !run.fallen.includes(id)));
-    for (const id of new Set([...run.participated, ...recruits])) {
-      if (next.recruits[id]) recent[id] = [{ ...entry, returned: returned.has(id) }, ...(Array.isArray(recent[id]) ? recent[id] : [])].slice(0, 3);
-    }
-    const hubReturners = run.result === 'win' ? run.bench.filter(id => next.recruits[id]) : [];
+    const hubReturners = announce.returned.filter(id => next.recruits[id]);
     const previousReturners = Array.isArray(next.ui?.returners) ? next.ui.returners : [];
     const returners = [...new Set([...recruits, ...hubReturners, ...previousReturners])].slice(0, 3);
     const announcement = {
@@ -351,7 +343,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     run = null;
     review = null;
     const saved = updateProfile({ ...next, ui: {
-      ...next.ui, recruitChoices: null, entryBattle: null, entryDoor: null, recent, returners, announcement, latestRun
+      ...next.ui, recruitChoices: null, entryBattle: null, entryDoor: null, returners, announcement, latestRun
     } });
     if (announce.stamp) {
       if (saved) audio.sfx.stamp();
@@ -400,14 +392,29 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const unavailable = recovery === 'unavailable';
     const riftDamaged = !unavailable && store.exportBackup && currentBackup({ lastGood: true }).damagedDaily != null;
     const node = page('recovery');
-    node.innerHTML = `<div class="meta-panel meta-sheet meta-recovery">
-      <h2>${unavailable ? '저장 공간 접근 불가' : '전체 기록 복구 필요'}</h2>
-      ${riftDamaged ? '<p>균열 기록도 손상되었습니다. 직전 기록으로 복구하면 손상된 균열은 별도 보관합니다.</p>' : ''}
-      ${hasGood ? `<button class="btn go" id="meta-last-good">직전 기록으로 복구 · 동료 ${Object.keys(good.profile?.recruits ?? {}).length}명</button>` : ''}
-      <button class="btn${hasGood ? '' : ' go'}" data-backup-action="import">기록 가져오기</button>
-      <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
-      <p class="meta-feedback" role="status"></p>
-    </div>`;
+    node.classList.add('screen-split', 'meta-recovery');
+    node.innerHTML = `<div class="meta-panel fixed-top">
+        <h2>${unavailable ? '저장 공간 접근 불가' : '전체 기록 복구 필요'}</h2>
+        ${riftDamaged ? '<p>균열 기록도 손상되었습니다. 직전 기록으로 복구하면 손상된 균열은 별도 보관합니다.</p>' : ''}
+      </div>
+      <div class="fixed-foot">
+        ${hasGood ? `<button class="btn go" id="meta-last-good">직전 기록으로 복구 · 동료 ${Object.keys(good.profile?.recruits ?? {}).length}명</button>` : ''}
+        <button class="btn${hasGood ? '' : ' go'}" data-backup-action="import">기록 가져오기</button>
+        <input id="meta-recovery-file" type="file" accept=".json,application/json" hidden>
+        <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
+        ${unavailable ? '' : `<div id="meta-recovery-confirm" hidden>
+          <p>남아 있는 동료, 수첩, 균열과 복구 사본이 모두 삭제됩니다.</p>
+          <div class="screen-tabs">
+            <button class="btn" id="meta-recovery-cancel">취소</button>
+            <button class="btn meta-danger" id="meta-recovery-erase">모든 기록 지우기</button>
+          </div>
+        </div>`}
+        <p class="meta-feedback" role="status"></p>
+      </div>`;
+    const importAction = $('[data-backup-action="import"]', node);
+    if (store.exportBackup && store.inspectBackup && store.restoreBackup) {
+      bindRecoveryImport(node, { sheets, store, currentBackup, recovered: reloadAfterRestore });
+    } else importAction.disabled = true;
     $('#meta-last-good', node)?.addEventListener('click', event => {
       const result = store.restoreLastGood?.();
       if (result?.ok) {
@@ -415,21 +422,28 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
         reloadAfterRestore();
       } else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했습니다.';
     });
-    $('#meta-recovery-new', node).addEventListener('click', () => {
+    const startNew = $('#meta-recovery-new', node);
+    const confirmation = $('#meta-recovery-confirm', node);
+    startNew.addEventListener('click', () => {
       if (unavailable) {
         recovery = null;
         return showTitle();
       }
-      sheets.openSheet('새 기록을 시작할까요?', `<div class="meta-sheet">
-        <p>남아 있는 동료, 수첩, 균열과 복구 사본이 모두 삭제됩니다.</p>
-        <button class="btn meta-danger" id="meta-recovery-erase">모든 기록 지우기</button>
-      </div>`);
-      $('#meta-recovery-erase').addEventListener('click', resetData);
+      confirmation.hidden = false;
+      startNew.hidden = true;
+      $('#meta-recovery-cancel', node).focus();
     });
+    $('#meta-recovery-cancel', node)?.addEventListener('click', () => {
+      confirmation.hidden = true;
+      startNew.hidden = false;
+      startNew.focus();
+    });
+    $('#meta-recovery-erase', node)?.addEventListener('click', resetData);
   }
 
   $('#frame').addEventListener('click', event => {
-    const mode = event.target.closest('[data-backup-action]')?.dataset.backupAction;
+    const action = event.target.closest('[data-backup-action]');
+    const mode = action?.closest('#recovery') ? null : action?.dataset.backupAction;
     if (mode) openBackupSheet({ mode, sheets, store, currentBackup, recovered: reloadAfterRestore });
   });
   document.addEventListener('click', () => queueMicrotask(() => tutorial.sync(run)));

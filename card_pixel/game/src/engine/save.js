@@ -2,6 +2,7 @@ import { DUNGEONS } from '../content/dungeons.js';
 import { backupSlots, DAILY_KEY, DAMAGED_DAILY_KEY, LAST_GOOD_KEY, SESSION_KEY, SETTINGS_KEY } from '../ui/storage.js';
 import { restoreDailyData, withDailyCheckpoint } from './daily-store.js';
 import { entryState } from './entry.js';
+import { HISTORY_LIMIT } from './history.js';
 import { missionPeriodKeys, PROFILE_VERSION, recordRunProgress, validPreparation } from './meta.js';
 import { count, dictionary, parse, readVersion, restoreRun, runData, string, strings } from './run-codec.js';
 
@@ -36,7 +37,7 @@ function hasProgress(profile) {
 function profileData(profile, activeRun = false) {
   const entry = profile.ui?.entry === undefined ? entryState(activeRun || hasProgress(profile)) : profile.ui.entry;
   if (!validEntry(entry)) throw new TypeError('invalid_entry_state');
-  return { ...profile, ui: { ...profile.ui, entry } };
+  return { ...profile, history: profile.history ?? {}, ui: { ...profile.ui, entry } };
 }
 
 function validEntry(entry) {
@@ -58,11 +59,12 @@ export function restoreProfile(data, { migrate } = {}) {
     || !['lead', 'preferredCompanion', 'reserved'].every(key => nullableId(profile[key]))
     || !dictionary(profile.seals) || !Object.values(profile.seals).every(strings)) return null;
   profile.contractStamps ??= {};
+  profile.history ??= {};
   profile.missions ??= { periods: {} };
   profile.ui ??= {};
   if (!dictionary(profile.contractStamps) || !dictionary(profile.missions?.periods)
     || !Object.entries(profile.missions.periods).every(([key, period]) => validMissionPeriod(key, period, profile.recruits))
-    || !validProfileUi(profile.ui)) return null;
+    || !validProfileUi(profile.ui) || !validHistory(profile.history, profile.records)) return null;
   profile.ui.entry ??= entryState(hasProgress(profile));
   if (!validPreparation(profile, profile.ui.preparation)) profile.ui.preparation = null;
   for (const clear of Object.values(profile.records.clears)) clear.easy ??= 0;
@@ -74,6 +76,23 @@ const optional = (value, validate) => value == null || validate(value);
 const arrayOf = (value, validate) => Array.isArray(value) && Array.from(value).every(validate);
 const runEntry = entry => dictionary(entry) && dungeonId(entry.dungeonId) && count(entry.floor)
   && ['win', 'lose'].includes(entry.result);
+
+function validHistory(history, { appliedRuns, towerRunId }) {
+  const ids = new Set(appliedRuns);
+  const heirloom = (fact, key) => dictionary(fact) && string(fact[key]) && string(fact.skillName);
+  return optional(towerRunId, id => ids.has(id)) && dictionary(history)
+    && Object.values(history).every(entries => arrayOf(entries, entry => runEntry(entry) && ids.has(entry.runId)
+      && ['easy', 'normal', 'nightmare'].includes(entry.difficulty) && typeof entry.fielded === 'boolean'
+      && optional(entry.outcome, outcome => ['survived', 'reserve', 'fell', 'released'].includes(outcome))
+      && (entry.fallenFloor === undefined || count(entry.fallenFloor))
+      && arrayOf(entry.given, fact => heirloom(fact, 'toId'))
+      && arrayOf(entry.inherited, fact => heirloom(fact, 'fromId'))
+      && arrayOf(entry.used, fact => heirloom(fact, 'fromId') && count(fact.floor) && string(fact.roomType)
+        && typeof fact.won === 'boolean')
+      && arrayOf(entry.victories, fact => dictionary(fact) && ['gate', 'boss'].includes(fact.roomType)
+        && (fact.floor === undefined || count(fact.floor)))) && entries.length <= HISTORY_LIMIT
+      && new Set(entries.map(entry => entry.runId)).size === entries.length);
+}
 
 function validBattleLog(log) {
   return arrayOf(log, turn => dictionary(turn) && count(turn.turn) && arrayOf(turn.rows, row =>

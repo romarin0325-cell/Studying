@@ -150,10 +150,10 @@ export function eventScreen(run, ui, result = null) {
   const secondary = results.length ? results.map(line => '<p>' + esc(line) + '</p>').join('') :
     event && choices.length ? '<p>' + esc(DIALOGUE[event.id] || '') + '</p>' : '';
   const canChoose = choices.some(choice => choice.enabled);
-  node.innerHTML = head(run, '사건', run.floor + '층') + '<div class="run-event">' +
+  node.innerHTML = head(run, '사건', run.floor + '층') + '<div class="run-event screen-split"><div class="fixed-top">' +
     ui.scene(run.room.bg, artwork) + '<div class="event-dialog win"><h2>' + esc(event?.name || '고요한 방') +
-    '</h2><p>' + esc(event?.text || '방 안이 고요합니다.') + '</p>' + secondary + '</div>' +
-    '<div class="event-choices">' + plates +
+    '</h2><div class="scroll-detail" tabindex="0"><p>' + esc(event?.text || '방 안이 고요합니다.') + '</p>' + secondary + '</div></div></div>' +
+    '<div class="event-choices scroll-list">' + plates + '</div><div class="footer fixed-foot">' +
     '<button class="btn' + (canChoose ? '' : ' go') + '" id="b-leave">' +
     (choices.length ? '그냥 지나가기' : '다음 층으로') + '</button></div></div>';
   // The confirm button names what the chosen companion receives (or that they leave).

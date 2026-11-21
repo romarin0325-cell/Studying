@@ -21,11 +21,11 @@ export function altarScreen(run, ui, kept = null) {
   const actions = pending ? '<button class="btn" id="b-roll"' + (left && run.bench.length ? '' : ' disabled') +
     '>굴리기 (' + left + ')</button><button class="btn' + (current ? ' go' : '') + '" id="b-keep"' +
     (current ? '' : ' disabled') + '>축복 받기</button>' : '';
-  node.innerHTML = head(run, '혼돈의 제단', run.floor + '층') + '<div class="scroll">' +
+  node.innerHTML = head(run, '혼돈의 제단', run.floor + '층') + '<div class="screen-split"><div class="fixed-top">' +
     '<p class="lead">세 번까지 굴려. 받으면 그 동료의 기존 축복을 바꿔.</p>' +
     '<div class="altarslot win' + (current?.jackpot ? ' jackpot' : '') + '" id="slot">' + slot + '</div></div>' +
-    '<div class="footer">' + actions + (!pending || !current ? '<button class="btn" id="b-leave">' +
-    (pending ? '떠나기' : '다음 층으로') + '</button>' : '') + '</div>';
+    '<div class="footer fixed-foot">' + actions + (!pending || !current ? '<button class="btn' +
+    (pending ? '' : ' go') + '" id="b-leave">' + (pending ? '떠나기' : '다음 층으로') + '</button>' : '') + '</div></div>';
   show('altar');
   $('#b-leave', node)?.addEventListener('click', ui.leave);
   $('#b-keep', node)?.addEventListener('click', () => {

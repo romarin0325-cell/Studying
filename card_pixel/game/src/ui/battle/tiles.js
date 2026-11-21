@@ -278,18 +278,37 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     if (B.busy || !B.bridge.canRetreat()) return;
     const r = $('#b-retreat');
     if (!B.armed) {
-      const preview = B.bridge.previewRetreat();
+      const { danger, retreat: forecast, stand } = B.bridge.previewRelay();
       const current = B.D.allies[B.D.cur];
-      const pending = [...new Set(B.D.delayed?.filter(attack => attack.by === B.D.cur).map(attack => attack.name))];
-      const warning = pending.length ? '예약한 ' + pending.join('·') + ' 취소됨' : '';
-      const effect = preview.intent.resourceEffect;
-      const mp = effect?.kind === 'mp' && !effect.preventedBy ? ' · MP ' + effect.before + ' → ' + effect.after : '';
+      const pending = forecast.cancelsReserve;
+      const warning = pending ? '예약한 ' + pending.join('·') + ' 취소됨' : '';
+      let retreatLine, standLine;
       B.armed = true;
-      r.className = 'armed';
-      r.innerHTML = TERMS.retreat.short + ' 확정<small>' + esc(current.name + ' 생존 · ' + retreatAction(preview)) +
-        '</small><small>' + esc(retreatHp(preview) + mp) + '</small>';
+      r.classList.add('armed');
+      if (danger === 'none') {
+        const preview = B.bridge.previewRetreat();
+        const effect = preview.intent.resourceEffect;
+        const mp = effect?.kind === 'mp' && !effect.preventedBy ? ' · MP ' + effect.before + ' → ' + effect.after : '';
+        retreatLine = current.name + ' 생존 · ' + retreatAction(preview);
+        standLine = retreatHp(preview) + mp;
+      } else {
+        const { next } = forecast;
+        retreatLine = '물러나면 · ' + next.name + ' HP ' + next.hp + ' → ' + damageRange(next.hpAfter);
+        if (next.mpAfter != null) {
+          const before = B.D.allies[B.party.indexOf(next.id)].mp;
+          retreatLine += ' · MP ' + before + ' → ' + next.mpAfter;
+        }
+        standLine = '남으면 · ' + current.name + (stand.falls === 'certain' ? ' 쓰러짐' : ' 쓰러질 수 있음');
+        if (stand.heirloom) standLine += ' → ' + josa(stand.inheritor.name, '이/가') + ' ' + stand.heirloom.skill + ' 계승';
+        else standLine += ' · 물려받을 동료 없음';
+        if (stand.replaces) standLine += ' (기존 ' + stand.replaces.skill + ' 대신)';
+        r.classList.add('relay-outcomes');
+      }
+      r.innerHTML = TERMS.retreat.short + ' 확정<small>' + esc(retreatLine) + '</small><small>' + esc(standLine) + '</small>';
+      // With large text the command panel scrolls; keep the armed row with both outcomes fully in view.
+      r.scrollIntoView({ block: 'nearest' });
       $('#tally').innerHTML = '';
-      ticker([preview.intent.name, warning].filter(Boolean).join(' · '), true);
+      ticker([B.intent.name, warning].filter(Boolean).join(' · '), true);
       sfx.tap();
       return;
     }

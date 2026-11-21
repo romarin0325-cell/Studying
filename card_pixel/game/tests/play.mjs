@@ -182,7 +182,7 @@ function look({ canRetreat = false } = {}) {
     room: run?.room?.type,
     crystals: run?.crystals,
     pendingKind: run?.pending?.kind,
-    retry: !!run?.awaitingRetryResult,
+    retry: run?.phase === 'result' && run.result === null,
     doors: screen === 'map' ? run.doors.map(({ type, index, enemies }) => ({ type, index, battle: !!enemies.length })) : [],
     outcome: run?.result,
     stats: run?.stats

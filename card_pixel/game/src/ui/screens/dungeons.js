@@ -41,7 +41,7 @@ const UNLOCK = {
   region_clear_count: '서로 다른 세 지역 생환'
 };
 
-export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRoster, quickStart }) {
+export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRoster, quickStart, scrollTop }) {
   const flags = Meta.featureFlags(profile);
   const available = new Map(availableDungeons(profile).map(dungeon => [dungeon.id, dungeon]));
   const next = Object.values(DUNGEONS).find(dungeon => !available.has(dungeon.id));
@@ -58,7 +58,7 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRo
     const bossName = boss?.name || '그림자 둘';
     const clears = profile.records.clears[dungeon.id];
     const tag = prepare ? 'button' : 'article';
-    return `<${tag} class="meta-panel meta-dungeon"${prepare ? ` data-dungeon="${dungeon.id}"` : ''}>
+    return `<${tag} class="meta-panel meta-dungeon"${prepare ? ` data-dungeon="${dungeon.id}" aria-pressed="${dungeon.id === quickStart?.id}"` : ''}>
       <span class="meta-dungeon-art" data-region="${dungeon.id}" style="background-image:url(${background(dungeon.background)})"></span>
       <span class="meta-dungeon-copy">
         <b>${esc(dungeon.name)}</b>
@@ -71,11 +71,25 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRo
       <span class="meta-face boss" title="${esc(bossName)}" aria-label="${esc(bossName)}" role="img">${bossFace}</span>
     </${tag}>`;
   }).join('');
-  node.innerHTML = (quickStart
-    ? `<button class="btn" id="meta-quick-start">${esc(quickStart.name)}${flags.difficultyChoice ? ' · ' + DIFFICULTY_NAME[quickStart.difficulty] : ''} · 바로 출발</button>` : '') + rows;
+  node.classList.add('screen-split');
+  node.innerHTML = `<div class="scroll-list">${rows}</div>
+    ${quickStart ? `<div class="fixed-foot">
+      ${flags.prepEditing && quickStart.id !== 'dawn_forest' ? '<button class="btn" id="meta-prepare-destination">준비</button>' : ''}
+      <button class="btn go" id="meta-quick-start">${esc(quickStart.name)}${flags.difficultyChoice ? ' · ' + DIFFICULTY_NAME[quickStart.difficulty] : ''} · 바로 출발</button>
+    </div>` : ''}`;
   $('#meta-quick-start', node)?.addEventListener('click', quickStart?.start);
+  $('#meta-prepare-destination', node)?.addEventListener('click', () => prepare(quickStart.id));
   $$('[data-locked-roster]', node).forEach(button => button.addEventListener('click', () => openRoster(button.dataset.lockedRoster)));
   $$('[data-dungeon]', node).forEach(button => button.addEventListener('click', () => prepare(button.dataset.dungeon)));
+  const list = $('.scroll-list', node);
+  if (scrollTop != null) list.scrollTop = scrollTop;
+  const selected = $('[data-dungeon][aria-pressed="true"]', list);
+  if (selected) {
+    const row = selected.getBoundingClientRect();
+    const port = list.getBoundingClientRect();
+    if (row.top < port.top) list.scrollTop += row.top - port.top - 2;
+    else if (row.bottom > port.bottom) list.scrollTop += row.bottom - port.bottom + 8;
+  }
 }
 
 export function preparationSheet({ dungeonId, currentProfile, updateProfile, savePreparation, roster, widgets, sheets, start }) {
