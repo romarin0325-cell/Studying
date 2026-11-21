@@ -31,7 +31,7 @@ export function listedPool(roster, dungeon, view) {
 function regionalRule(dungeon) {
   const region = REGIONS[dungeon.region?.id];
   if (region) return region.desc;
-  return dungeon.region?.first ? '5층의 문에서 후반 지역 규칙을 고른다.' : '1층 대여 전투 · 지역 규칙 없음';
+  return dungeon.region?.first ? '5층의 문에서 후반 지역 규칙 선택' : '1층 대여 전투 · 지역 규칙 없음';
 }
 
 const UNLOCK = {
@@ -137,7 +137,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
         <h4>난이도</h4><div class="meta-prep-slots">${Object.keys(DIFFICULTY_NAME).map(id => `<button class="btn" data-difficulty="${id}"
           aria-pressed="${id === difficulty}"${entry?.difficulties?.includes(id) ? '' : ' disabled'}>${DIFFICULTY_NAME[id]}</button>`).join('')}</div>
         <p><small>꿈결 · 적 공격·마공 35% 감소</small></p>
-        ${entry?.difficulties?.includes('nightmare') ? '' : '<p><small>이 지역을 여정으로 생환하면 악몽이 열린다.</small></p>'}
+        ${entry?.difficulties?.includes('nightmare') ? '' : '<p><small>이 지역을 여정으로 생환하면 악몽이 열립니다.</small></p>'}
       </section>` : ''}
       ${canContract ? `<button class="btn meta-prep-contract" id="meta-contract-choice">
         악몽 계약 · ${esc(contractChoice?.name || '없음')}
@@ -187,7 +187,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
       const ids = view.seals.includes(id) ? view.seals.filter(sealed => sealed !== id) : [...view.seals, id];
       const result = setSeals(profile, dungeonId, ids, roster);
       if (result.announce.ok) updateProfile(result.profile);
-      const errors = { empty_grade: '각 등급에서 한 명 이상 남겨야 한다.', invalid_seals: `최대 ${view.sealSlots}명까지 봉인할 수 있다.` };
+      const errors = { empty_grade: '등급마다 최소 1명은 남겨야 합니다.', invalid_seals: `최대 ${view.sealSlots}명까지 봉인할 수 있습니다.` };
       sealsOpen = true;
       render(errors[result.announce.reason]);
     });

@@ -48,7 +48,7 @@ const html = `<!doctype html>
 <html lang="ko" translate="no"><head><meta charset="utf-8">
 <meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>다음은 너 — RELAYMARE</title>
+<title>다음은 너 · RELAYMARE</title>
 <link rel="icon" href="${pngUrl(path.join(here, 'assets/app-icon.png'))}">
 <style>${fontFaces}
 ${css}</style></head>

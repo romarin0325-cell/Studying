@@ -33,7 +33,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
       ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} · ${esc(stampContract.name)}</p>` : ''}
       <p class="meta-mission-earned" hidden>동료 초대 가능</p>
       ${candidates.length ? `<p>${won ? `생환자 중 최대 ${limit}명 영입` : '다음 원정 후보 한 명 예약'}</p>`
-        : `<p>${won ? '새로 영입할 동료가 없다.' : '예약할 동료가 없다.'}</p>`}
+        : `<p>${won ? '새로 영입할 동료가 없습니다.' : '예약할 동료가 없습니다.'}</p>`}
       <div class="meta-recruit-list">${candidates.map(id => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">
         <span class="meta-face">${face(id, 44)}</span>
         <span><b>${esc(card(id).name)}</b><small>${esc(reason(id))}</small></span>
@@ -72,7 +72,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
     else if (limit === 1) choices = [id];
     else if (choices.length < limit) choices = [...choices, id];
     else {
-      feedback.textContent = `최대 ${limit}명까지 영입할 수 있다.`;
+      feedback.textContent = `최대 ${limit}명까지 영입할 수 있습니다.`;
       return;
     }
     feedback.textContent = '';
@@ -94,7 +94,7 @@ export function missionRecruitSheet({ period, widgets, sheets, claim, next, rema
     <p>${period.kind === 'weekly' ? '주간' : '월간'} · ${esc(period.key.split(':')[1])}${remaining > 1 ? ` · 수령 ${remaining}건` : ''}</p>
     ${candidates.length ? `<div class="meta-recruit-list">${candidates.map(id => `<button class="meta-panel meta-recruit-card" data-invite="${esc(id)}" aria-pressed="false">
       <span class="meta-face">${widgets.face(id, 44)}</span><b>${esc(widgets.card(id).name)}</b>
-    </button>`).join('')}</div>` : '<p>완료 도장을 받을 수 있다.</p>'}
+    </button>`).join('')}</div>` : '<p>완료 도장을 받을 수 있습니다.</p>'}
     <p class="meta-feedback" role="status"></p>
     <button class="btn go" id="meta-mission-claim"${candidates.length ? ' disabled' : ''}>${candidates.length ? '관측소에 영입' : '완료 도장 받기'}</button>
     ${remaining > 1 ? '<button class="btn" id="meta-mission-next">다른 기간 보기</button>' : ''}

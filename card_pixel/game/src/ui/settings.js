@@ -54,7 +54,7 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else { try { await document.documentElement.requestFullscreen({ navigationUI: 'hide' }); } catch (e) { await document.documentElement.requestFullscreen(); } }
-    } catch (e) { sheet('전체화면', '이 브라우저에서는 전체화면을 열지 못했다. 브라우저 메뉴에서 다시 시도해 보자.'); }
+    } catch (e) { sheet('전체화면', '이 브라우저에서는 전체화면을 지원하지 않습니다. 브라우저 메뉴에서 직접 전환해 주세요.'); }
     syncFullscreen();
   }
   document.addEventListener('fullscreenchange', syncFullscreen);
@@ -101,11 +101,11 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
     const credits = $('#title.on, #hub.on') ? '<button class="btn" id="meta-credits">크레딧</button>' : '';
     openSheet('설정', '<div class="meta-sheet togs">' + row('sound', '소리', audio.soundOn, '효과음') +
       row('music', '음악', music.enabled, '배경 음악') +
-      row('rim', '윤곽선 강조', St.RIM.on, '동료와 적의 윤곽을 밝게 표시한다.') +
+      row('rim', '윤곽선 강조', St.RIM.on, '동료와 적의 외곽선을 밝게 표시') +
       row('text', '글자', textScale === 1.25, '', textScale === 1.25 ? '크게(125%)' : '보통') +
       row('markers', '표식 강조', markers, '선택 ✓ · 위험 !') +
       row('speed', '전투 속도', St.clock.speed === 2, '', St.clock.speed + '배') +
-      (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '주소창과 탭을 숨긴다.') : '') +
+      (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '브라우저 상단 바 숨기기') : '') +
       backup + credits + '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>');
     $$('#sheet .tog').forEach(b => b.addEventListener('click', async () => {
       const k = b.dataset.set;
@@ -133,7 +133,7 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
     });
     $('#meta-erase').addEventListener('click', () => {
       openSheet('기록을 지울까요?', `<div class="meta-sheet meta-erase-confirm">
-        <p>동료, 수첩, 기록과 진행 중인 원정을 모두 지운다. 되돌릴 수 없다.</p>
+        <p>동료, 수첩, 기록과 진행 중인 원정이 모두 삭제되며 되돌릴 수 없습니다.</p>
         <button class="btn" id="meta-erase-back">취소</button>
         <button class="btn meta-danger" id="meta-erase-confirm">모든 기록 지우기</button>
       </div>`);
@@ -155,12 +155,12 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
 }
 
 const BACKUP_ERROR = {
-  invalid_format: 'RELAYMARE 기록 파일을 골라 주세요.',
-  invalid_session: '파일의 동료와 수첩 기록이 손상됐다.',
-  invalid_run: '파일의 진행 중 원정이 손상됐다.',
-  invalid_daily: '파일의 오늘의 균열 기록이 손상됐다.',
-  invalid_settings: '파일의 설정이 손상됐다.',
-  storage_failed: '저장하지 못했다. 현재 기록은 그대로다.'
+  invalid_format: 'RELAYMARE 기록 파일을 선택해 주세요.',
+  invalid_session: '파일의 동료와 수첩 기록이 손상되었습니다.',
+  invalid_run: '파일의 진행 중 원정 기록이 손상되었습니다.',
+  invalid_daily: '파일의 오늘의 균열 기록이 손상되었습니다.',
+  invalid_settings: '파일의 설정 데이터가 손상되었습니다.',
+  storage_failed: '저장에 실패했습니다. 현재 기록은 그대로 유지됩니다.'
 };
 
 function backupProgress(summary, backup) {
@@ -184,17 +184,17 @@ function backupProgress(summary, backup) {
 export function openBackupSheet({ mode, sheets, store, currentBackup, recovered }) {
   const { openSheet } = sheets;
   const available = store.exportBackup && store.inspectBackup && (mode === 'export' || store.restoreBackup);
-  if (!available) return sheets.sheet('기록 파일', '이 버전에서는 기록 파일 기능을 사용할 수 없다.');
+  if (!available) return sheets.sheet('기록 파일', '이 버전에서는 기록 파일 기능을 사용할 수 없습니다.');
 
   if (mode === 'export') {
     const backup = currentBackup({ lastGood: true });
     const check = store.inspectBackup(backup);
-    if (!check.ok) return sheets.sheet('기록 내보내기', BACKUP_ERROR[check.reason] ?? '내보낼 기록을 확인하지 못했다.');
+    if (!check.ok) return sheets.sheet('기록 내보내기', BACKUP_ERROR[check.reason] ?? '내보낼 기록을 확인하지 못했습니다.');
     const label = backup.session?.profile ? `영입 동료 ${check.summary?.recruits ?? 0}명` : '설정과 균열 기록';
     const active = check.summary?.dailyActive;
     openSheet('기록 내보내기', `<div class="meta-sheet meta-backup"><p>${label}</p>
       ${active ? `<p>균열 ${esc(active.dayKey)} · ${active.floor}층</p>` : ''}
-      ${check.warnings?.includes('invalid_daily') ? '<p role="status">손상된 균열 기록은 파일에 따로 보관했다.</p>' : ''}
+      ${check.warnings?.includes('invalid_daily') ? '<p role="status">손상된 균열 기록은 파일에 별도 보관했습니다.</p>' : ''}
       <button class="btn go" id="meta-backup-download">기록 파일 받기</button></div>`);
     $('#meta-backup-download').addEventListener('click', () => {
       const url = URL.createObjectURL(new Blob([JSON.stringify(backup)], { type: 'application/json' }));
@@ -223,7 +223,7 @@ export function openBackupSheet({ mode, sheets, store, currentBackup, recovered 
       try { data = JSON.parse(await file.text()); } catch { /* Invalid file. */ }
       if (!input.isConnected || !$('#sheet').classList.contains('on')) return;
       const result = store.inspectBackup(data);
-      if (!result.ok) return choose(BACKUP_ERROR[result.reason] ?? '기록 파일을 확인하지 못했다.');
+      if (!result.ok) return choose(BACKUP_ERROR[result.reason] ?? '기록 파일을 확인하지 못했습니다.');
       compare(data, result);
     });
   }
@@ -244,8 +244,8 @@ export function openBackupSheet({ mode, sheets, store, currentBackup, recovered 
         <section><h4>현재 기록</h4><dl>${backupProgress(currentSummary, main.ok ? live : null)}</dl></section>
         <section><h4>파일 기록</h4><dl>${backupProgress(imported.summary, data)}</dl></section>
       </div>
-      ${imported.warnings?.includes('invalid_daily') ? '<p>파일의 손상된 균열 기록은 따로 보관한다.</p>' : ''}
-      <p>가져오면 이 브라우저의 기록이 파일 기록으로 바뀐다.</p>
+      ${imported.warnings?.includes('invalid_daily') ? '<p>파일의 손상된 균열 기록은 별도 보관합니다.</p>' : ''}
+      <p>가져오기를 진행하면 이 브라우저의 기록이 파일 기록으로 대체됩니다.</p>
       <p class="meta-feedback" role="status"></p>
       <button class="btn" id="meta-backup-repick">다른 파일 고르기</button>
       <button class="btn go" id="meta-backup-confirm">파일 기록으로 복원</button>
@@ -256,7 +256,7 @@ export function openBackupSheet({ mode, sheets, store, currentBackup, recovered 
       if (restored.ok) {
         event.currentTarget.disabled = true;
         recovered();
-      } else $('.meta-backup .meta-feedback').textContent = BACKUP_ERROR[restored.reason] ?? '기록을 복원하지 못했다.';
+      } else $('.meta-backup .meta-feedback').textContent = BACKUP_ERROR[restored.reason] ?? '기록을 복원하지 못했습니다.';
     });
   }
   choose();

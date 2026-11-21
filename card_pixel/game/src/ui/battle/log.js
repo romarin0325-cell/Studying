@@ -112,7 +112,7 @@ export function battleLog(events, party, enemies) {
         break;
       case 'down':
       case 'enemyDown': add('쓰러짐', [person(event.who)], 'down'); break;
-      case 'retreat': add('물러남 · 생환', [person(event.who)], 'retreat'); break;
+      case 'retreat': add('후퇴 · 생환', [person(event.who)], 'retreat'); break;
       case 'heirloom': add(event.skill.name, [person(event.from), person(event.to)], 'heirloom'); break;
       case 'log': {
         const actor = action?.faces[0];
@@ -133,7 +133,7 @@ export function openBattleLog(sheets, widgets, turns = []) {
     '><h4>' + turn + '턴</h4>' + rows.map(row => {
       const { key, kind, text, faces, amount, origin, hits } = row;
       const heading = kind.startsWith('heirloom') ? '유품 · ' + text : kind === 'reserve' ? turn + '턴 ' + text + ' 예약' :
-        kind === 'trigger' ? turn + '턴 발동' : kind === 'charge' ? text + ' · 차징' : text;
+        kind === 'trigger' ? turn + '턴 발동' : kind === 'charge' ? text + ' · 충전' : text;
       const jump = origin ? '<button class="log-jump" data-log-jump="' + origin + '">' + esc(text) + ' 예약 ↑</button>' :
         (hits ?? []).map(hit => '<button class="log-jump" data-log-jump="' + hit.key + '">' + hit.turn + '턴 발동 ↓</button>').join('');
       return '<div class="battle-log-row ' + kind + '" id="log-entry-' + key + '" tabindex="-1">' +

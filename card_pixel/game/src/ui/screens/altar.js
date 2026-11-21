@@ -14,13 +14,13 @@ export function altarScreen(run, ui, kept = null) {
   const fighter = current && card(current.id);
   const slot = fighter ? '<span class="pic">' + sprite(current.id) + '</span><span class="txt"><b>' + esc(fighter.name) +
     '</b><strong>+' + Math.round(current.multiplier * 100) + '%</strong><small>' +
-    (current.jackpot ? '대박 · ' : '') + (GRADE[fighter.grade] || '') + ' · 체력·공격·방어</small></span>' :
+    (current.jackpot ? '대성공! · ' : '') + (GRADE[fighter.grade] || '') + ' · 모든 능력치 상승</small></span>' :
     '<span class="empty">?</span>';
   const actions = pending ? '<button class="btn" id="b-roll"' + (left && run.bench.length ? '' : ' disabled') +
     '>굴리기 (' + left + ')</button><button class="btn' + (current ? ' go' : '') + '" id="b-keep"' +
     (current ? '' : ' disabled') + '>축복 받기</button>' : '';
   node.innerHTML = head(run, '혼돈의 제단', run.floor + '층') + '<div class="scroll">' +
-    '<p class="lead">무작위 동료 한 명이 원정 끝까지 축복을 받는다. 최대 세 번 굴리고 마지막 결과를 받는다.</p>' +
+    '<p class="lead">무작위 동료 1명에게 원정 종료까지 유지되는 축복을 부여합니다. 최대 3회까지 굴릴 수 있으며 마지막 결과가 적용됩니다.</p>' +
     '<div class="altarslot win' + (current?.jackpot ? ' jackpot' : '') + '" id="slot">' + slot + '</div></div>' +
     '<div class="footer">' + actions + (!pending || !current ? '<button class="btn" id="b-leave">' +
     (pending ? '떠나기' : '다음 층으로') + '</button>' : '') + '</div>';

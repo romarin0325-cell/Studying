@@ -7,9 +7,9 @@ export const shortRiftDate = dayKey => dayKey?.slice(5).replace('-', '.') || '';
 const REGION_HINT = {
   ember_carry: '교대 시 적 작열 최대 2 계승',
   twilight_bell: '3·6·9턴 적 디바인 +2',
-  starlit_sky: '문에서 시작 하늘 확인',
+  starlit_sky: '문에서 시작 필드 확인',
   tide_cycle: '3턴 강화 · 4턴 빈틈 · 보스 제외',
-  arena_charge: '일반 공격 2회 명중 → 기술 피해 ×2'
+  arena_charge: '일반 공격 2회 명중 → 스킬 피해 ×2'
 };
 
 function koreanRiftDate(dayKey) {
@@ -35,7 +35,7 @@ function face(widgets, id, name, options = {}) {
 export function openDailyPreparation(view, ui) {
   const { spec, official, dayKey = spec?.dayKey } = view;
   const { widgets, roster, sheets, start, inspectLoan, message } = ui;
-  if (!spec) return sheets.sheet('오늘의 균열', '오늘의 편성을 불러오지 못했다.');
+  if (!spec) return sheets.sheet('오늘의 균열', '오늘의 균열 편성을 불러오지 못했습니다.');
 
   const dungeon = DUNGEONS[spec.dungeonId];
   const region = REGIONS[dungeon?.region?.id];
@@ -60,7 +60,7 @@ export function openDailyPreparation(view, ui) {
     </div>` : ''}
     ${row('첫 출전', loans.slice(0, 3))}
     ${row('대기', loans.slice(3))}
-    ${official ? '' : '<p class="rift-prep-note">첫 도전은 오늘의 기록에 남는다. 이후에는 같은 균열을 연습할 수 있다.</p>'}
+    ${official ? '' : '<p class="rift-prep-note">첫 도전 결과가 오늘의 공식 기록으로 남으며, 이후에는 같은 균열을 연습할 수 있습니다.</p>'}
     <button class="btn go" id="meta-daily-start">${official ? '연습하기' : '첫 기록에 도전'}</button>
   </div>`);
   $('#meta-daily-start').addEventListener('click', () => start(dayKey, kind));
@@ -75,7 +75,7 @@ export function openEarlierRift(active, { sheets, resume, abandon }) {
   const prompt = () => openEarlierRift(active, { sheets, resume, abandon });
   sheets.openSheet(title, `<div class="meta-sheet rift-actions">
     <button class="btn go" id="meta-rift-resume">${esc(title)} 이어가기</button>
-    <button class="btn meta-danger" id="meta-rift-abandon">${esc([date, '도전을 포기'].filter(Boolean).join(' '))}</button>
+    <button class="btn meta-danger" id="meta-rift-abandon">${esc([date, '도전 포기'].filter(Boolean).join(' '))}</button>
   </div>`);
   $('#meta-rift-resume').addEventListener('click', resume);
   $('#meta-rift-abandon').addEventListener('click', () => {
@@ -88,7 +88,7 @@ export function openEarlierRift(active, { sheets, resume, abandon }) {
 
 export function dailyResultTitle(score) {
   if (score.outcome === 'win') return [shortRiftDate(score.dayKey), '균열 돌파'].filter(Boolean).join(' ');
-  return `${score.floor ?? 1}층에서 균열이 닫혔다`;
+  return `${score.floor ?? 1}층 균열 실패`;
 }
 
 function stamp(dayKey) {

@@ -14,16 +14,16 @@ import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../reli
 import { mountFormation } from './order.js';
 
 const AFFIX_RISK = {
-  tough: '첫 3턴 적 피해 절반', frenzy: '적 HP 절반부터 공격 ×1.5',
-  leech: '적이 준 피해의 절반 회복', thorns: '물리 피해 25% 반사'
+  tough: '첫 3턴 적 피해 50% 감소', frenzy: '적 HP 50% 이하 시 공·마공 ×1.5',
+  leech: '적이 가한 피해의 50% 회복', thorns: '물리 피해 25% 반사'
 };
 const ROOM_EFFECT = {
-  spring: '결정으로 동료 깨우기', altar: '무작위 동료 축복 · 최대 세 번',
+  spring: '결정으로 동료 깨우기', altar: '무작위 동료 축복 · 최대 3회',
   event: '사건 선택', treasure: '유물 장착'
 };
 const REGION_RISK = {
   ember_carry: '교대 시 작열 최대 2 계승', twilight_bell: '3·6·9턴 적 디바인 +2',
-  tide_cycle: REGIONS.tide_cycle.desc, arena_charge: '일반 공격 2회 명중 → 공격 기술 ×2'
+  tide_cycle: REGIONS.tide_cycle.desc, arena_charge: '일반 공격 2회 명중 → 공격 스킬 ×2'
 };
 const BOSS_LESSON = {
   iris_curse: '10턴 아포칼립스 · 선두에 물리 ×5',
@@ -128,7 +128,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
     if (!door.enemies.length) return '';
     const field = Run.doorStart?.(run, door.index)?.field ?? door.start?.field;
     if (!Array.isArray(field) || (!field.length && door.region?.id !== 'starlit_sky')) return '';
-    return '시작 하늘 · ' + (field.map(id => core.BUFF_NAMES[id] || id).join(' · ') || '비어 있음');
+    return '시작 필드 · ' + (field.map(id => core.BUFF_NAMES[id] || id).join(' · ') || '비어 있음');
   }
 
   function risks(door) {
@@ -180,7 +180,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
       ? eliteRisk || (floor === 6 && door.type === 'elite')
       : floor === 4 || floor === 6;
     if (!relevant) return '';
-    const goal = eliteRisk ? '이 위험 문을 지나 6층 정예에 도전한다.' : contract.rule;
+    const goal = eliteRisk ? '이 위험 문을 거쳐 6층 정예에 도전합니다.' : contract.rule;
     return '<h4>계약 · ' + esc(contract.name) + '</h4><p>' + esc(goal) + '</p>' +
       (run.contract.met ? '<p>달성</p>' : '');
   }

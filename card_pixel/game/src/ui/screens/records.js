@@ -21,13 +21,13 @@ export function runRecordSheet(run, card, openSheet, showBattleLog) {
   openSheet('원정 기록', `<div class="meta-sheet">
     <p>${esc(DUNGEONS[run.dungeonId].name)} · ${DIFFICULTY_NAME[run.difficulty]} · ${run.result === 'win' ? '생환' : '실패'}</p>
     ${recordTable([
-      ['도달한 층', `${run.floor} / ${run.floors}`],
+      ['도달 층', `${run.floor} / ${run.floors}`],
       ['전투', `${stats.battles}회 · ${stats.turns}턴`],
       ['최고 피해', hitText(stats.bestHit, card)],
       ['쓰러진 동료', run.fallen.map(id => card(id)?.name || id).join(', ') || '없음'],
       ['유품 사용', `${stats.heirloomsUsed}회`],
       ['최후의 일인', `${stats.lastStands}회`],
-      ['대박 축복', `${stats.jackpots}회`]
+      ['축복 대성공', `${stats.jackpots}회`]
     ])}
     ${showBattleLog && run.lastBattleLog?.length ? '<button class="btn" id="meta-latest-battle">마지막 전투 기록</button>' : ''}
   </div>`);

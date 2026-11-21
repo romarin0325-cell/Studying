@@ -16,15 +16,15 @@ export function springScreen(run, ui) {
   function base() {
     const full = replacementCount(run, 1) > 0;
     node.innerHTML = head(run, '소환의 샘', run.floor + '층') + '<div class="scroll">' +
-      '<p class="lead">꿈의 결정을 바쳐 동료를 깨운다.</p>' +
+      '<p class="lead">꿈의 결정으로 잠든 동료를 깨웁니다.</p>' +
       '<div class="svc"><button class="btn big" id="b-draw"><b>무작위 깨우기 · ◆' + COST.draw + '</b>' +
-      (full ? '<small>보낼 동료를 먼저 정함</small>' : '') + '<small>노멀 40 · 레어 30 · 에픽 20 · 전설 10</small></button>' +
-      '<button class="btn big" id="b-pick"><b>셋을 본다</b><small>보기 무료 · 합류 확정 시 ◆' + COST.pick +
-      '</small><small>노멀 25 · 레어 30 · 에픽 25 · 전설 20</small></button></div>' +
+      (full ? '<small>보낼 동료를 먼저 정함</small>' : '') + '<small>노멀 40% · 레어 30% · 에픽 20% · 전설 10%</small></button>' +
+      '<button class="btn big" id="b-pick"><b>후보 3명 보기</b><small>열람 무료 · 합류 확정 시 ◆' + COST.pick +
+      '</small><small>노멀 25% · 레어 30% · 에픽 25% · 전설 20%</small></button></div>' +
       '<p class="run-status" id="spring-status" role="status"></p>' +
       '<div class="cards" id="fresh">' + fresh.map(id => cardRow(run, id, { skills: false, sheet: true })).join('') + '</div>' +
       '<h3>동료 <span class="sm" id="sp-count"></span></h3><div class="benchrow" id="sp-bench"></div></div>' +
-      '<div class="footer"><button class="btn go" id="b-leave">샘을 떠난다</button></div>';
+      '<div class="footer"><button class="btn go" id="b-leave">샘 나가기</button></div>';
     show('spring');
     $('#b-draw', node).addEventListener('click', () => {
       function draw(replaceId = null) {
@@ -49,9 +49,9 @@ export function springScreen(run, ui) {
   }
 
   function showFailure(reason) {
-    $('#spring-status', node).textContent = reason === 'empty_pool' ? '깨울 수 있는 동료가 없다.' :
-      reason === 'insufficient_crystals' ? '결정이 부족하다.' :
-        reason === 'invalid_spring_key' ? '후보가 바뀌었다. 다시 골라 보자.' : '합류할 동료와 보낼 동료를 확인한다.';
+    $('#spring-status', node).textContent = reason === 'empty_pool' ? '더 이상 깨울 수 있는 동료가 없습니다.' :
+      reason === 'insufficient_crystals' ? '결정이 부족합니다.' :
+        reason === 'invalid_spring_key' ? '후보 목록이 갱신되었습니다. 다시 선택해 주세요.' : '합류할 동료와 보낼 동료를 확인해 주세요.';
   }
 
   function refresh() {
@@ -88,13 +88,13 @@ export function springScreen(run, ui) {
       '<div class="scroll"><div class="cards">' + (offer.candidates ?? []).map(id => cardRow(run, id, { offer: true })).join('') +
       '</div><p class="run-status" id="spring-status" role="status"></p></div>' +
       '<div class="footer"><button class="btn" id="b-spring-pass">닫기</button>' +
-      '<button class="btn go" id="b-take" disabled>한 명을 고른다</button></div>';
+      '<button class="btn go" id="b-take" disabled>동료 선택</button></div>';
     show('spring');
     let selected;
     const rows = $$('.cardrow', node);
     const take = $('#b-take', node);
     if (run.crystals < cost) {
-      $('#spring-status', node).textContent = '합류에 결정 ' + (cost - run.crystals) + '개가 부족하다.';
+      $('#spring-status', node).textContent = '합류에 결정 ' + (cost - run.crystals) + '개가 부족합니다.';
     }
     for (const row of rows) {
       row.disabled = !canJoin(run, row.dataset.id);

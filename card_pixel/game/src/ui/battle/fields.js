@@ -40,9 +40,9 @@ function fieldEffect(effect, instant, describe) {
     case 'random_field_buff':
       return { ids: effect.pool || [...RANDOM_FIELDS, 'arena'], line: '무작위 아군 강화 1종' };
     case 'roulette_field':
-      return { ids: RANDOM_FIELDS, line: '하늘 초기화 · 무작위 아군 강화 1종' };
+      return { ids: RANDOM_FIELDS, line: '필드 초기화 · 무작위 아군 강화 1종' };
     case 'delayed_random_unique_field_buffs':
-      return { ids: effect.pool, line: after + '없는 하늘 효과 최대 ' + effect.count + '종' };
+      return { ids: effect.pool, line: after + '미적용 필드 효과 최대 ' + effect.count + '종' };
     case 'consume_all_burn_cond_buff':
       return { ids: ['sun_bless', 'earth_bless'], line: '아군 공격·마공 증가 · 작열로 강화' };
     case 'moon_to_sun':
@@ -65,7 +65,7 @@ export function skillFields(core, option, artifacts) {
   return {
     line: fields.map(field => field.line).join(' · '),
     names: ids.map(id => core.BUFF_NAMES[id] || id),
-    detail: ids.map(id => (core.BUFF_NAMES[id] || id) + ' — 아군 ' + fieldInfo(core, id, artifacts)).join('. ') + '.',
+    detail: ids.map(id => (core.BUFF_NAMES[id] || id) + ' · 아군 ' + fieldInfo(core, id, artifacts)).join('. ') + '.',
     other
   };
 }

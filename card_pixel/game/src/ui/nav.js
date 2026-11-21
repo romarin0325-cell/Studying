@@ -86,7 +86,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   function warnSave() {
     if (warnedSave) return;
     warnedSave = true;
-    sessionNotice('저장에 실패했다. 새로고침하면 지금부터의 진행이 사라진다.');
+    sessionNotice('저장에 실패했습니다. 새로고침하면 현재 진행 상황이 사라집니다.');
   }
 
   function updateProfile(next) {
@@ -381,8 +381,8 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const riftDamaged = !unavailable && store.exportBackup && currentBackup({ lastGood: true }).damagedDaily != null;
     const node = page('recovery');
     node.innerHTML = `<div class="meta-panel meta-sheet meta-recovery">
-      <h2>${unavailable ? '저장 공간에 접근할 수 없다' : '전체 기록 복구 필요'}</h2>
-      ${riftDamaged ? '<p>균열 기록도 손상됐다. 직전 기록으로 복구하면 손상된 균열은 따로 보관한다.</p>' : ''}
+      <h2>${unavailable ? '저장 공간 접근 불가' : '전체 기록 복구 필요'}</h2>
+      ${riftDamaged ? '<p>균열 기록도 손상되었습니다. 직전 기록으로 복구하면 손상된 균열은 별도 보관합니다.</p>' : ''}
       ${hasGood ? `<button class="btn go" id="meta-last-good">직전 기록으로 복구 · 동료 ${Object.keys(good.profile?.recruits ?? {}).length}명</button>` : ''}
       <button class="btn${hasGood ? '' : ' go'}" data-backup-action="import">기록 가져오기</button>
       <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
@@ -393,7 +393,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       if (result?.ok) {
         event.currentTarget.disabled = true;
         reloadAfterRestore();
-      } else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했다.';
+      } else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했습니다.';
     });
     $('#meta-recovery-new', node).addEventListener('click', () => {
       if (unavailable) {
@@ -401,7 +401,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
         return showTitle();
       }
       sheets.openSheet('새 기록을 시작할까요?', `<div class="meta-sheet">
-        <p>남아 있는 동료, 수첩, 균열과 복구 사본을 지운다.</p>
+        <p>남아 있는 동료, 수첩, 균열과 복구 사본이 모두 삭제됩니다.</p>
         <button class="btn meta-danger" id="meta-recovery-erase">모든 기록 지우기</button>
       </div>`);
       $('#meta-recovery-erase').addEventListener('click', resetData);

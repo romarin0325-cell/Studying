@@ -7,7 +7,7 @@ import { BLESS } from '../../engine/awakenings.js';
 const NEXT = '다음 전투 한 번';
 const STAYS = '이번 원정 끝까지';
 const BET = {
-  empty_sky: '하늘을 비워 둔 채 승리',
+  empty_sky: '필드 효과 없이 승리',
   delayed_on_time: '예약 공격을 정시에 발동하고 승리',
   same_grade_full: '같은 등급 셋으로 출전해 승리'
 };
@@ -64,13 +64,13 @@ export function eventScreen(run, ui, result = null) {
           (amount ? ' 능력치 +' + Math.round(amount * 100) + '%' : ' 등급별 축복');
       }
       case 'altar':
-        return '무작위 동료 1명 축복 · 최대 세 번 굴리기';
+        return '무작위 동료 1명 축복 · 최대 3회 굴리기';
       case 'relic': {
         const relic = ui.artifacts.get(effect.id === 'offered' ? run.room.relic : effect.id);
         return (effect.temporary ? NEXT : STAYS) + ' · ' + (relic?.name || '유물 품절');
       }
       case 'field':
-        return NEXT + ' · 시작 하늘에 ' + effect.ids.map(id => ui.core.BUFF_NAMES[id] || id).join(' · ');
+        return NEXT + ' · 시작 필드: ' + effect.ids.map(id => ui.core.BUFF_NAMES[id] || id).join(' · ');
       case 'start':
         return NEXT + ' · 적 ' + Object.entries(effect.enemyDebuffs).map(([id, stacks]) =>
           (ui.core.BUFF_NAMES[id] || id) + ' +' + stacks).join(' · ');
@@ -143,7 +143,7 @@ export function eventScreen(run, ui, result = null) {
   const canChoose = choices.some(choice => choice.enabled);
   node.innerHTML = head(run, '사건', run.floor + '층') + '<div class="run-event">' +
     ui.scene(run.room.bg, artwork) + '<div class="event-dialog win"><h2>' + esc(event?.name || '고요한 방') +
-    '</h2><p>' + esc(event?.text || '방 안이 비어 있다.') + '</p>' + secondary + '</div>' +
+    '</h2><p>' + esc(event?.text || '방 안이 고요합니다.') + '</p>' + secondary + '</div>' +
     '<div class="event-choices">' + plates +
     '<button class="btn' + (canChoose ? '' : ' go') + '" id="b-leave">' +
     (choices.length ? '그냥 지나가기' : '다음 층으로') + '</button></div></div>';
@@ -153,7 +153,7 @@ export function eventScreen(run, ui, result = null) {
     const types = choice.ops.map(effect => effect.type);
     if (types.includes('heirloom')) return '유품 받기';
     if (types.includes('bless')) return '축복 받기';
-    return '고르기';
+    return '선택';
   }
 
   show('event');

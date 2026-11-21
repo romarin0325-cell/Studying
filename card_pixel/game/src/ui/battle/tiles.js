@@ -1,5 +1,5 @@
 import { $, $$, esc } from '../dom.js';
-import { TYPE, formatRange as damageRange } from '../widgets.js';
+import { TYPE, formatRange as damageRange, traitText } from '../widgets.js';
 import { relicEffect, relicMarks } from '../relics.js';
 import { FIELD } from './hud.js';
 import { skillFields } from './fields.js';
@@ -62,13 +62,13 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     }
     return ['', ''];
   }
-  const fullText = (o, me) => (o.index === 0 ? '마나를 쓰지 않는 기본 공격.' : core.SkillDisplay.body({
+  const fullText = (o, me) => (o.index === 0 ? 'MP를 소모하지 않는 기본 공격.' : core.SkillDisplay.body({
     name: o.name, type: o.type, val: o.val, cost: o.cost, tier: o.tier, effects: o.effects,
     isActualDelayedTrigger: o.preview?.instant
   }, { entity: me }));
   /* The tile line: the card's own skill text, shortened to fit two lines. The full text is one long press away. */
   function brief(o, me) {
-    if (o.index === 0) return '마나 0';
+    if (o.index === 0) return 'MP 0';
     return fullText(o, me)
       .replace(/^위력 [\d.~]+배\.\s*/, '')
       .replace(/\.?\s*발동 전에 시전자가 사망하면 예약 취소\.?/g, '')
@@ -105,12 +105,12 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     const actorId = stand.actorId ?? current.form ?? B.party[B.D.cur];
     const heirloom = heirloomSkill(card(actorId));
     const retreatHp = next && rescue.incomingHpAfter != null
-      ? next.name + ' HP ' + next.hp + ' → ' + damageRange(rescue.incomingHpAfter) : '뒤의 동료가 대신 맞는다';
+      ? next.name + ' HP ' + next.hp + ' → ' + damageRange(rescue.incomingHpAfter) : '다음 동료가 대신 피격';
     const inheritance = next && heirloom ? '쓰러지면 ' + next.name + (hasFinalConsonant(next.name) ? '이 ' : '가 ') +
-      heirloom.name + (hasFinalConsonant(heirloom.name) ? '을' : '를') + ' 받는다' : '쓰러지면 뒤의 동료에게 유품을 남긴다';
+      heirloom.name + (hasFinalConsonant(heirloom.name) ? '을' : '를') + ' 계승' : '쓰러지면 다음 동료에게 유품 계승';
     $('#opening-face').innerHTML = faceBadge(actorId, current.name) + '<b>HP ' + current.hp + ' / ' + current.maxHp + '</b>';
     $('#acts').innerHTML = '<button class="act opening-choice rescue" data-opening-rescue><b>' + esc(current.name) +
-      '를 살린다</b><small>' + esc(retreatHp) + '</small></button>' +
+      ' 생존 후퇴</b><small>' + esc(retreatHp) + '</small></button>' +
       '<button class="act opening-choice stand" data-i="' + stand.optionIndex + '"><b>' + esc(current.name) +
       '로 마지막 공격</b><small>' + esc(inheritance) + '</small><small>' + esc(B.D.enemy.name) + '에 피해 ' +
       esc(damageRange(stand.damageRange)) + '</small></button>';
@@ -132,7 +132,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       const usable = chooseForm ? forms.some(form => form.usable) : o.usable;
       const fields = skillFields(core, o, B.artifacts);
       const landing = delayedLine(o, D.turn);
-      let r2, r3 = chooseForm ? '변신할 형태를 고른다' : brief(o, me);
+      let r2, r3 = chooseForm ? '변신할 형태 선택' : brief(o, me);
       if (fields) {
         r2 = '<strong class="field-effect">' + esc(fields.line) + '</strong>';
         const other = fields.other.length ? brief({ ...o, effects: fields.other }, me) : '';
@@ -144,7 +144,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
         const damage = previewDamage(p);
         r2 = '<strong' + (damage.includes('~') ? ' class="range"' : '') + '>' + damage + '</strong>' +
           (p.instant ? '<small>즉시</small>' : adv ? '<small>▲상성</small>' : '') +
-          (p.forcedCrit ? '<small>치명</small>' : '') + (p.kill ? '<u>처치</u>' : '');
+          (p.forcedCrit ? '<small>확정 치명</small>' : '') + (p.kill ? '<u>처치</u>' : '');
       }
       else {
         const [forecast, description] = supportLine(o, B.intent);
@@ -170,7 +170,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     } else { h.className = ''; h.innerHTML = ''; h.disabled = true; delete h.dataset.i; }
     const r = $('#b-retreat'), can = B.bridge.canRetreat();
     B.armed = false; r.className = ''; r.disabled = !can;
-    r.innerHTML = '↩ 물러나기<small>' + (B.bridge.retreatUsed ? '이미 썼다' : can ? '살려서 뺀다 · 턴 소모' : '뒤에 남은 동료 없음') + '</small>';
+    r.innerHTML = '↩ 후퇴<small>' + (B.bridge.retreatUsed ? '사용 완료' : can ? '안전 이탈 · 턴 소모' : '교대할 동료 없음') + '</small>';
   }
   function lockPanel() { $$('.act').forEach(b => { b.disabled = true; }); $('#b-retreat').disabled = true; $('#b-heir').disabled = true; }
   function playAction(index) {
@@ -210,8 +210,8 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       return relic.name + ' · ' + relicEffect(relic);
     }).join(' ');
     sheet(name + ' · ' + TYPE[o.type] + (o.cost ? ' · MP ' + o.cost : '') + (o.heirloom ? ' · 유품' : ''),
-      (o.heirloom ? (o.heirFromName || '') + '에게서 물려받은 기술. 위력 1.5배, MP 0, 이 전투에서 한 번. ' : '') + fullText(o, me) +
-      (fields ? ' ' + fields.detail : '') + (relics ? ' ' + relics : '') + '  특성 — ' + me.trait.desc);
+      (o.heirloom ? (o.heirFromName || '') + '에게서 계승한 스킬 · 위력 1.5배, MP 0, 전투당 1회. ' : '') + fullText(o, me) +
+      (fields ? ' ' + fields.detail : '') + (relics ? ' ' + relics : '') + ' · 특성: ' + traitText(me.trait));
   }
   const acts = $('#acts');
   acts.addEventListener('pointerdown', ev => {
@@ -254,21 +254,21 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
         damageRange(preview.dmg) + ' · HP ' + next.hp + '→' + damageRange(hp) + mp :
         next.name + ' 출전 · 적 ' + preview.intent.name + ' · HP ' + next.hp + '→' + next.hp;
       const pending = [...new Set(B.D.delayed?.filter(attack => attack.by === B.D.cur).map(attack => attack.name))];
-      const warning = pending.length ? '예약한 ' + pending.join('·') + '도 취소된다' : '';
+      const warning = pending.length ? '예약한 ' + pending.join('·') + ' 취소됨' : '';
       let outcomes;
       const minimum = B.intent?.dmg?.[0];
       if (minimum != null && current.hp <= minimum) {
         const form = card(current.form || B.party[B.D.cur]);
         const heir = form && heirloomSkill(form);
         outcomes = [
-          '물러나면 ' + next.name + ' HP ' + next.hp + '→' + damageRange(hp),
+          '후퇴 시 ' + next.name + ' HP ' + next.hp + '→' + damageRange(hp),
           '쓰러지면 ' + next.name + '에게 ' + (heir ? heir.name + ' ×' + HEIRLOOM_POWER : '넘길 유품 없음')
         ];
       }
       B.armed = true;
       r.className = 'armed';
       const notes = warning ? [warning] : outcomes || ['턴 소모 · 유품 없음'];
-      r.innerHTML = esc(current.name) + ' 물러나기' + '<span class="retreat-face">' + faceBadge(next.form, next.name, 32) +
+      r.innerHTML = esc(current.name) + ' 후퇴 확정' + '<span class="retreat-face">' + faceBadge(next.form, next.name, 32) +
         '<small>HP ' + next.hp + ' → ' + damageRange(hp) + '</small></span>' + notes.map(note => '<small>' + esc(note) + '</small>').join('');
       $('#tally').innerHTML = '';
       // The button already carries the outcomes unless the reserved-attack warning took its place.

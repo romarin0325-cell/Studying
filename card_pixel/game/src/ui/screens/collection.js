@@ -1,6 +1,6 @@
 import { $, $$, esc } from '../dom.js';
 import { icon } from '../assets.js';
-import { TYPE } from '../widgets.js';
+import { traitText, TYPE } from '../widgets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { RELICS } from '../../content/relics.js';
 import { GRADE } from '../../engine/roster.js';
@@ -41,7 +41,7 @@ export function rosterTable({ dungeon, pool, currentProfile, updateProfile, widg
   sheets.openSheet(`${dungeon.name} · 출현표`, `<div class="meta-sheet meta-roster">
     <p>${counts(profile, ids)}${locked ? '' : ` · 이번 원정 후보 ${pool.effectiveIds.length}명`}</p>
     <p><small>기본 ${pool.baseIds.length}명${locked ? '' : ` · 추가 ${pool.addedIds?.length ?? 0}명 · 봉인 ${pool.sealedIds?.length ?? 0}명`}</small></p>
-    <p><small>만나고 싶은 동료를 한 명 표시할 수 있다. 추첨 확률은 그대로다.</small></p>
+    <p><small>만나고 싶은 동료 1명을 표시해 둘 수 있습니다. (등장 확률은 동일)</small></p>
     <div class="meta-collection-grid"></div>
   </div>`, { onClose: back });
   const grid = $('.meta-roster .meta-collection-grid');
@@ -81,8 +81,8 @@ export function companionSheet({ core, widgets, sheets, profile, id, setLead }) 
       ${recruit ? `<h4>최근 원정</h4><p>${recent.map(entry =>
         `${esc(DUNGEONS[entry.dungeonId].name)} · ${entry.floor}층 · ${entry.result === 'win' ? '원정 승리' : '원정 실패'} · ${entry.returned === true ? '생환' : entry.returned === false ? '미귀환' : '귀환 여부 미기록'}`
       ).join('<br>') || '원정 기록 없음'}</p>` : ''}
-      <h4>특성</h4><p>${esc(character.trait.desc)}</p>
-      <h4>기술</h4>${skills}
+      <h4>특성</h4><p>${esc(traitText(character.trait))}</p>
+      <h4>스킬</h4>${skills}
       ${setLead && recruit && profile.lead !== id ? '<button class="btn go" id="meta-set-lead">대표로 정하기</button>' : ''}
     </div>
   `);

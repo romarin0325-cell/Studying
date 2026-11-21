@@ -43,19 +43,19 @@ const isScripted = action => !!action && action.name !== '일반 공격' && (act
 export function affixView(id, enemy) {
   if (id === 'tough') {
     const turns = enemy ? enemy.buffs.damage_half ?? 0 : 3;
-    return { id, name: AFFIXES[id].name, turns, active: turns > 0, text: turns ? `피해 절반 ${turns}턴 남음` : '피해 반감 종료' };
+    return { id, name: AFFIXES[id].name, turns, active: turns > 0, text: turns ? `피해 반감 ${turns}턴 남음` : '피해 반감 종료' };
   }
   if (id === 'frenzy') {
     const ready = enemy && enemy.hp <= enemy.maxHp / 2;
     const active = !!enemy?.frenzied;
     const text = active ? '공·마공 ×1.5 적용 중'
-      : ready ? 'HP 절반 이하, 다음 턴 공·마공 ×1.5' : 'HP 절반 이하가 되면 다음 턴 공·마공 ×1.5';
+      : ready ? 'HP 50% 이하, 다음 턴 공·마공 ×1.5' : 'HP 50% 이하 시 다음 턴 공·마공 ×1.5';
     return { id, name: AFFIXES[id].name, active, text };
   }
   const text = {
-    leech: '준 HP 피해의 절반 회복',
+    leech: '가한 피해의 50% 회복',
     thorns: '물리 피해 25% 반사, 아군 HP 최저 1',
-    treasure: '승리 시 ◆+2'
+    treasure: '처치 시 ◆+2'
   };
   return { id, name: AFFIXES[id].name, active: true, text: text[id] };
 }

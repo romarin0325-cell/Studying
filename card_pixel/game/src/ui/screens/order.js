@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { blessingText, head, foeFlip, tempoBeatText } from '../widgets.js';
+import { blessingText, head, foeFlip, tempoBeatText, traitText } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import { HEIRLOOM_POWER, heirloomPreview } from '../../engine/bridge.js';
 import * as Run from '../../engine/run.js';
@@ -58,12 +58,12 @@ export function mountFormation(node, run, ui, { party: initial, door, onChange, 
     const trait = fighter?.trait;
     if (!trait) return '';
     if (trait.type === 'pos_stat_boost') {
-      return trait.pos === index ? '자리 효과 발동' : POSITION[trait.pos] + ' 전용';
+      return trait.pos === index ? '배치 효과 발동' : POSITION[trait.pos] + ' 전용';
     }
     if (/^syn_/.test(trait.type)) {
-      return core.Logic.calculateInitialStats(fighter, party, all, index).activeTrait ? '시너지 발동' : '시너지 조건 부족';
+      return core.Logic.calculateInitialStats(fighter, party, all, index).activeTrait ? '시너지 발동' : '시너지 미발동';
     }
-    return trait.desc;
+    return traitText(trait);
   }
 
   function select(choice) {

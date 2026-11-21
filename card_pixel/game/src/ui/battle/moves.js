@@ -149,7 +149,7 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     actor.front = 1;
     if (isBig(p)) await bigMove(p, seen); else await quietMove(p);
     if (why === 'evasion') { tween(target, { ox: dir * 10 }, 0.08).then(() => tween(target, { ox: 0 }, 0.2)); label('회피!', target, 'good'); sfx.miss(); }
-    else { St.ring(St.X(target), CY(target), why === 'barrier' ? '#ffc857' : '#8ea2ff', 28); label(why === 'barrier' ? '배리어! 무효' : '매직가드! 무효', target, 'good'); sfx.guard(); }
+    else { St.ring(St.X(target), CY(target), why === 'barrier' ? '#ffc857' : '#8ea2ff', 28); label(why === 'barrier' ? '배리어 무효!' : '매직가드 무효!', target, 'good'); sfx.guard(); }
     await wait(0.3);
   }
   async function settleMove(p, seen) {

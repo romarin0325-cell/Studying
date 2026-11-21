@@ -15,7 +15,7 @@ export function openCredits(openSheet, onClose) {
     </section>
     <section>
       <h4>그림</h4>
-      <p>캐릭터 도트는 소유자의 일러스트를 바탕으로 생성</p>
+      <p>원작 일러스트를 바탕으로 도트 그래픽 제작</p>
     </section>
     <section>
       <h4>소리</h4>

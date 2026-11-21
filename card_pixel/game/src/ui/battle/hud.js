@@ -31,12 +31,12 @@ export function intentLines(intent, countdown, hp, buffNames = {}) {
   const falls = intent.lethalText ?? (intent.lethal && Array.isArray(range) && hp != null
     ? range[0] >= hp ? '명중 시 쓰러짐' : '쓰러질 수 있음' : '');
   const damage = attack && range != null ? (Number.isFinite(hits?.whenMet) && Number.isFinite(hits?.otherwise) && hits.met == null
-    ? '때리면 ' + hits.whenMet + ' / 안 때리면 ' + hits.otherwise
+    ? '피격 시 ' + hits.whenMet + ' / 미피격 시 ' + hits.otherwise
     : 'HP ' + formatRange(range) + (hits?.met ? ' · 이미 피격' : '')) : '';
   const resource = kind === 'stun' ? '' : mpLossText(resourceEffect) ||
     (intent.extra?.includes('mana_burn') ? '현재 MP 전부 소멸' : '');
   const clean = kind !== 'stun' && intent.rule === 'cleanse'
-    ? '자기 약화 전부 해제 · 지금 ' + (Object.entries(intent.debuffs ?? {}).map(([id, value]) =>
+    ? '자기 약화 전부 해제 · 현재 ' + (Object.entries(intent.debuffs ?? {}).map(([id, value]) =>
       (buffNames[id] ?? id) + ' ' + value).join(' · ') || '약화 없음') : '';
   const modifier = kind === 'stun' ? '행동 불가' : vulnerable ? '받는 피해 ×' + vulnerable :
     kind === 'charge' ? '충전' : intent.reduction ? '다음 턴 받는 피해 ' + Math.round(intent.reduction * 100) + '% 감소' :
@@ -77,7 +77,7 @@ export function createHud(core, stage, sfx, widgets) {
       else out.push('<i class="' + (GOOD.includes(id) ? 'good' : 'bad') + '">' + esc(name) + (GOOD.includes(id) && v > 1 ? ' ' + v : '') + '</i>');
     }
     if (isFoe) {
-      if (unit.charging) out.push('<i class="bad">차징</i>');
+      if (unit.charging) out.push('<i class="bad">충전 중</i>');
       for (const affix of affixLines(unit)) out.push('<i class="affix' + (affix.id === 'frenzy' && affix.active ? ' on' : '') +
         '">' + esc([affix.name, affix.text].filter(Boolean).join(' · ')) + '</i>');
     } else if (unit.lastStand) out.push('<i class="last">최후의 일인</i>');
@@ -104,7 +104,7 @@ export function createHud(core, stage, sfx, widgets) {
       node.className = 'pm ' + (a.dead ? 'dead' : a.out ? 'out' : i === D.cur ? 'cur' : 'wait') + (a.lastStand ? ' last' : '');
       bar($('.hp u', node), a.hp, a.maxHp, fresh); $('.hp .n', node).textContent = a.hp + '/' + a.maxHp;
       $('.mp u', node).style.width = Math.max(0, Math.min(1, a.mp / a.maxMp)) * 100 + '%'; $('.mp .n', node).textContent = a.mp;
-      $('.st', node).textContent = a.dead ? '쓰러짐' : a.out ? '물러남' : '';
+      $('.st', node).textContent = a.dead ? '쓰러짐' : a.out ? '후퇴' : '';
     });
     const me = D.allies[Math.min(D.cur, 2)];
     chips($('#pa-chips'), me && !me.dead && !me.out ? me : { buffs: {} }, false);

@@ -64,20 +64,20 @@ export function createDailyNavigation({
       const view = dailyStore.view?.(currentProfile(), now);
       const date = shortRiftDate(view?.dayKey ?? view?.spec?.dayKey);
       if ($('#hub').classList.contains('on')) showHub();
-      showDaily(date ? `날짜가 바뀌었다. ${date} 균열을 확인하자.` : '날짜가 바뀌었다. 오늘의 균열을 확인하자.');
+      showDaily(date ? `날짜가 변경되었습니다. ${date} 균열을 확인해 주세요.` : '날짜가 변경되었습니다. 오늘의 균열을 확인해 주세요.');
     } else if (['active_exists', 'already_recorded', 'official_required'].includes(result?.reason)) {
       showDaily();
     } else if (result?.reason === 'storage_failed') {
       warnSave();
     } else {
-      sessionNotice('균열을 시작하지 못했다.');
+      sessionNotice('균열을 시작하지 못했습니다.');
     }
   }
 
   function resumeDaily() {
     const restored = dailyStore?.resume?.();
     if (restored?.ok && restored.run) return enterDaily(restored.run);
-    sessionNotice('진행 중인 균열을 불러오지 못했다.');
+    sessionNotice('진행 중인 균열을 불러오지 못했습니다.');
     const active = dailyStore?.view?.(currentProfile(), new Date())?.active;
     if (active && !$('#meta-rift-resume')) promptDailyResume(active);
   }
@@ -88,7 +88,7 @@ export function createDailyNavigation({
       showHub();
       showDaily();
     } else if (result?.reason === 'storage_failed') warnSave();
-    else sessionNotice('균열을 포기하지 못했다.');
+    else sessionNotice('균열을 포기하지 못했습니다.');
   }
 
   function enterDaily(current) {
@@ -108,7 +108,7 @@ export function createDailyNavigation({
       if (result?.reason === 'storage_failed') warnSave();
       const node = page('daily-result', { title: '균열 기록' });
       node.innerHTML = `<div class="meta-sheet rift-actions">
-        <p role="alert">균열 기록을 저장하지 못했다. 새로고침하거나 게임을 닫으면 마지막 저장 지점으로 돌아간다. 결과를 보관하려면 기록 파일을 받자.</p>
+        <p role="alert">균열 기록을 저장하지 못했습니다. 새로고침하거나 게임을 닫으면 마지막 저장 지점으로 돌아갑니다. 결과를 보관하려면 기록 파일을 내보내 주세요.</p>
         <button class="btn go" data-backup-action="export">기록 내보내기</button>
         <button class="btn" id="meta-rift-retry">다시 저장</button>
         <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>
@@ -118,7 +118,7 @@ export function createDailyNavigation({
         dailyRun = null;
         setReview(null);
         showHub();
-        sessionNotice('균열 결과는 아직 저장되지 않았다. 게임을 닫기 전에 기록을 내보낼 수 있다.');
+        sessionNotice('균열 결과가 아직 저장되지 않았습니다. 게임을 닫기 전에 기록을 내보내 주세요.');
       });
       return;
     }
