@@ -1,7 +1,7 @@
 import { $, $$, esc, show } from '../dom.js';
 import { bonusPercent, chooseReplacements, departureLoss, head, heirloomOffer, replacementCount } from '../widgets.js';
 import { chooseEvent } from '../../engine/run.js';
-import { eventChoices } from '../../engine/rooms.js';
+import { eventChoices, joinCount } from '../../engine/rooms.js';
 import { BLESS } from '../../engine/awakenings.js';
 
 const NEXT = '다음 전투 한 번';
@@ -88,7 +88,7 @@ export function eventScreen(run, ui, result = null) {
 
   const joinIds = choice => choice.ops.flatMap(op => op.type === 'join' && !op.random ? op.ids : []);
   function releases(choice) {
-    const count = choice.ops.filter(op => op.type === 'join').reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+    const count = joinCount(choice.ops);
     return choice.requiredReleases ?? replacementCount(run, count);
   }
   function targetValue(choice, id) {

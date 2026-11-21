@@ -1,4 +1,4 @@
-import { $, $$, esc, show } from '../dom.js';
+import { $, esc, show } from '../dom.js';
 import { foeFlip, TYPE } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';

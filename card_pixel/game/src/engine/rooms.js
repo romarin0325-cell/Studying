@@ -8,9 +8,9 @@ import { QUIRKS } from '../content/quirks.js';
 import { RELICS } from '../content/relics.js';
 import {
   BLESSING_MULTIPLIERS, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS, LESSON_NIGHTMARE_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
-  REGION_MULTIPLIERS, ROOM_MULTIPLIERS, ROSTER_LIMIT, START_MP, TEMPO_SEEDS, usesTempo
+  REGION_MULTIPLIERS, ROOM_MULTIPLIERS, START_MP, TEMPO_SEEDS, usesTempo
 } from '../content/tempo.js';
-import { BLESS, canJoin, drawFrom, join, RATES, release, seeCharacters, seeRelic, validateReplacements } from './awakenings.js';
+import { BLESS, canJoin, drawFrom, join, RATES, release, replacementCount, seeCharacters, seeRelic, validateReplacements } from './awakenings.js';
 import { heldHeirloomSkill } from './bridge.js';
 import { gradeOf } from './roster.js';
 import { nextFloat, pick, shuffle } from './rng.js';
@@ -281,11 +281,15 @@ export function eventChoices(run, core, roster) {
   });
 }
 
+export function joinCount(ops) {
+  return ops.filter(op => op.type === 'join').reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+}
+
 function addEventChoiceDetails(choice, run, core, roster) {
-  const incoming = choice.ops.filter(op => op.type === 'join')
-    .reduce((count, op) => count + (op.random ? 1 : op.ids.length), 0);
+  const incoming = joinCount(choice.ops);
   if (incoming) {
-    choice.requiredReleases = Math.max(0, run.bench.length + incoming - ROSTER_LIMIT);
+    // Event details use the lesson version, independently of tempo validation.
+    choice.requiredReleases = replacementCount(run, incoming, { enforceLimit: true });
     if (choice.requiredReleases > run.bench.filter(id => id !== run.lead).length) choice.enabled = false;
   }
   const blessing = choice.ops.find(op => op.type === 'bless' && Number.isFinite(op.multiplier));
@@ -307,9 +311,7 @@ function addEventChoiceDetails(choice, run, core, roster) {
 export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds = []) {
   const choice = eventChoices(run, core, roster).find(entry => entry.id === choiceId);
   if (!choice?.enabled || (choice.targets ? !choice.targets.includes(targetId) : targetId != null)) return invalid('invalid_event_choice');
-  const recruits = choice.ops.filter(op => op.type === 'join');
-  const recruitCount = recruits.reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
-  const error = validateReplacements(run, recruitCount, replaceIds);
+  const error = validateReplacements(run, joinCount(choice.ops), replaceIds);
   if (error) return invalid(error);
   const result = { ok: true, choiceId, effects: [] };
   const before = run.crystals;

@@ -3,6 +3,10 @@ export const CONTRACT_PAYOUT = 3;
 export const LEGACY_CONTRACT_RULE_VERSION = 1;
 export const CONTRACT_RULE_VERSION = 2;
 
+export function gateEscrow(floor, type) {
+  return floor === 4 && type === 'gate' ? CONTRACT_ESCROW : 0;
+}
+
 export const CONTRACTS = {
   rescue: {
     id: 'rescue', name: '살아서 넘긴 자리',

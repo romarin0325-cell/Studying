@@ -4,7 +4,7 @@ import { compare, dayKey, specFor, validAttempt } from './daily-rift.js';
 import { dailyRiftUnlocked } from './meta.js';
 import { invalid } from './rooms.js';
 import { createRun } from './run.js';
-import { restoreRun, serializeRun } from './save.js';
+import { restoreRun, serializeRun } from './run-codec.js';
 
 const VERSION = 1;
 const empty = () => ({ version: VERSION, days: {}, active: null });

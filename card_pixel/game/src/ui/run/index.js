@@ -3,7 +3,7 @@ import { create as createRoster } from '../../engine/roster.js';
 import { INTRO } from '../../content/intro.js';
 import { createStage } from '../../stage/stage.js';
 import { createAudio } from '../../stage/audio.js';
-import { $, esc, show } from '../dom.js';
+import { $, esc } from '../dom.js';
 import { createSheet, sheetMarkup } from '../sheet.js';
 import { createWidgets } from '../widgets.js';
 import { createDetails } from '../battle/sheets.js';
@@ -110,13 +110,7 @@ export function enterRun(run, host) {
     enterDoor(0);
   }
   function enterFormation(index, partyIds) {
-    const result = Run.enterBattleDoor
-      ? command(Run.enterBattleDoor, { floor: run.floor, index, partyIds })
-      : Run.chooseDoor(run, index);
-    if (!Run.enterBattleDoor && result.ok) {
-      const order = command(Run.confirmOrder, partyIds);
-      if (!order.ok) { host.save(run); route(); return order; }
-    }
+    const result = command(Run.enterBattleDoor, { floor: run.floor, index, partyIds });
     mapEntry = result.ok;
     return result;
   }

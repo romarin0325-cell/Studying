@@ -34,11 +34,15 @@ export function join(run, id) {
   }
 }
 
+export function replacementCount(run, incoming, { enforceLimit = usesTempo(run) } = {}) {
+  return enforceLimit ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
+}
+
 export function validateReplacements(run, incoming, ids) {
   if (!Array.isArray(ids) || new Set(ids).size !== ids.length || ids.some(id => !run.bench.includes(id))) {
     return 'invalid_replacement';
   }
-  const required = usesTempo(run) ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
+  const required = replacementCount(run, incoming);
   if (ids.length < required) return 'roster_full';
   if (ids.length > required) return 'invalid_replacement';
   return null;

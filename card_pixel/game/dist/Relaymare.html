@@ -10369,29 +10369,6 @@ const BattleRuntime = {
     return { allies, wild, bosses, has, card, facing, pool, poolName, wildOf, shadowOf, bossOf, LARGE: LARGE.filter((id) => wild.includes(id)) };
   }
 
-  // card_pixel/game/src/content/contracts.js
-  var CONTRACT_ESCROW = 1;
-  var CONTRACT_PAYOUT = 3;
-  var LEGACY_CONTRACT_RULE_VERSION = 1;
-  var CONTRACT_RULE_VERSION = 2;
-  var CONTRACTS = {
-    rescue: {
-      id: "rescue",
-      name: "\uC0B4\uC544\uC11C \uB118\uAE34 \uC790\uB9AC",
-      rule: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC4F0\uB7EC\uC9C8 \uC608\uACE0\uB97C \uBC1B\uC740 \uB3D9\uB8CC\uB97C \uBB3C\uB7EC\uB098\uAC8C \uD558\uACE0, \uADF8 \uB3D9\uB8CC\uB97C \uC0B4\uB824 \uC804\uD22C\uC5D0\uC11C \uC774\uAE34\uB2E4."
-    },
-    heirloom: {
-      id: "heirloom",
-      name: "\uB9C8\uC9C0\uB9C9 \uC720\uD488",
-      rule: "4\uCE35 \uBB38\uC9C0\uAE30\uC804\uC5D0\uC11C \uC720\uD488 \uAE30\uC220\uC758 \uBA85\uC911\uC73C\uB85C \uC801\uC744 \uC4F0\uB7EC\uB728\uB9AC\uACE0 \uC774\uAE34\uB2E4."
-    },
-    elite: {
-      id: "elite",
-      name: "\uB458\uC774 \uB3CC\uC544\uC628 \uC815\uC608\uC804",
-      rule: "2\uCE35 \uC704\uD5D8 \uBB38\uC744 \uC9C0\uB098 6\uCE35 \uC815\uC608\uB97C \uACE0\uB974\uACE0, \uC815\uC608\uC804\uC5D0 \uB098\uC120 \uB3D9\uB8CC \uB458 \uC774\uC0C1\uC774 \uC0B4\uC544\uC11C \uC774\uAE34\uB2E4."
-    }
-  };
-
   // card_pixel/game/src/ui/storage.js
   var SESSION_KEY = "relaymare.session";
   var DAILY_KEY = "relaymare.daily";
@@ -11291,6 +11268,32 @@ const BattleRuntime = {
     validPreparation: () => validPreparation
   });
 
+  // card_pixel/game/src/content/contracts.js
+  var CONTRACT_ESCROW = 1;
+  var CONTRACT_PAYOUT = 3;
+  var LEGACY_CONTRACT_RULE_VERSION = 1;
+  var CONTRACT_RULE_VERSION = 2;
+  function gateEscrow(floor, type) {
+    return floor === 4 && type === "gate" ? CONTRACT_ESCROW : 0;
+  }
+  var CONTRACTS = {
+    rescue: {
+      id: "rescue",
+      name: "\uC0B4\uC544\uC11C \uB118\uAE34 \uC790\uB9AC",
+      rule: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC4F0\uB7EC\uC9C8 \uC608\uACE0\uB97C \uBC1B\uC740 \uB3D9\uB8CC\uB97C \uBB3C\uB7EC\uB098\uAC8C \uD558\uACE0, \uADF8 \uB3D9\uB8CC\uB97C \uC0B4\uB824 \uC804\uD22C\uC5D0\uC11C \uC774\uAE34\uB2E4."
+    },
+    heirloom: {
+      id: "heirloom",
+      name: "\uB9C8\uC9C0\uB9C9 \uC720\uD488",
+      rule: "4\uCE35 \uBB38\uC9C0\uAE30\uC804\uC5D0\uC11C \uC720\uD488 \uAE30\uC220\uC758 \uBA85\uC911\uC73C\uB85C \uC801\uC744 \uC4F0\uB7EC\uB728\uB9AC\uACE0 \uC774\uAE34\uB2E4."
+    },
+    elite: {
+      id: "elite",
+      name: "\uB458\uC774 \uB3CC\uC544\uC628 \uC815\uC608\uC804",
+      rule: "2\uCE35 \uC704\uD5D8 \uBB38\uC744 \uC9C0\uB098 6\uCE35 \uC815\uC608\uB97C \uACE0\uB974\uACE0, \uC815\uC608\uC804\uC5D0 \uB098\uC120 \uB3D9\uB8CC \uB458 \uC774\uC0C1\uC774 \uC0B4\uC544\uC11C \uC774\uAE34\uB2E4."
+    }
+  };
+
   // card_pixel/game/src/content/missions.js
   var MISSION_UNLOCK_CHAPTER = 4;
   var MISSION_OFFER_LIMIT = 3;
@@ -11466,11 +11469,14 @@ const BattleRuntime = {
       delete run.introHeirlooms[id];
     }
   }
+  function replacementCount(run, incoming, { enforceLimit = usesTempo(run) } = {}) {
+    return enforceLimit ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
+  }
   function validateReplacements(run, incoming, ids) {
     if (!Array.isArray(ids) || new Set(ids).size !== ids.length || ids.some((id) => !run.bench.includes(id))) {
       return "invalid_replacement";
     }
-    const required = usesTempo(run) ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
+    const required = replacementCount(run, incoming);
     if (ids.length < required) return "roster_full";
     if (ids.length > required) return "invalid_replacement";
     return null;
@@ -11771,10 +11777,13 @@ const BattleRuntime = {
       return view;
     });
   }
+  function joinCount(ops) {
+    return ops.filter((op) => op.type === "join").reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+  }
   function addEventChoiceDetails(choice, run, core2, roster2) {
-    const incoming = choice.ops.filter((op) => op.type === "join").reduce((count2, op) => count2 + (op.random ? 1 : op.ids.length), 0);
+    const incoming = joinCount(choice.ops);
     if (incoming) {
-      choice.requiredReleases = Math.max(0, run.bench.length + incoming - ROSTER_LIMIT);
+      choice.requiredReleases = replacementCount(run, incoming, { enforceLimit: true });
       if (choice.requiredReleases > run.bench.filter((id) => id !== run.lead).length) choice.enabled = false;
     }
     const blessing = choice.ops.find((op) => op.type === "bless" && Number.isFinite(op.multiplier));
@@ -11796,9 +11805,7 @@ const BattleRuntime = {
   function resolveEvent(run, core2, roster2, choiceId, targetId, replaceIds = []) {
     const choice = eventChoices(run, core2, roster2).find((entry) => entry.id === choiceId);
     if (!choice?.enabled || (choice.targets ? !choice.targets.includes(targetId) : targetId != null)) return invalid("invalid_event_choice");
-    const recruits = choice.ops.filter((op) => op.type === "join");
-    const recruitCount = recruits.reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
-    const error = validateReplacements(run, recruitCount, replaceIds);
+    const error = validateReplacements(run, joinCount(choice.ops), replaceIds);
     if (error) return invalid(error);
     const result = { ok: true, choiceId, effects: [] };
     const before = run.crystals;
@@ -12328,9 +12335,10 @@ const BattleRuntime = {
       contract.met = metNow = true;
       contract.metAtFloor = floor;
     }
-    if (won && floor === 4 && run.room.type === "gate") {
-      contract.escrowed = CONTRACT_ESCROW;
-      crystals -= CONTRACT_ESCROW;
+    const escrow = won ? gateEscrow(floor, run.room.type) : 0;
+    if (escrow) {
+      contract.escrowed = escrow;
+      crystals -= escrow;
     }
     if (floor === 6) {
       if (won && !wiped && contract.met) {
@@ -13023,6 +13031,73 @@ const BattleRuntime = {
     };
   }
 
+  // card_pixel/game/src/engine/run-codec.js
+  var RUN_VERSION = 1;
+  var PHASES = ["start", "map", "room", "reward", "done"];
+  var dictionary = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+  var count = (value) => Number.isSafeInteger(value) && value >= 0;
+  var string = (value) => typeof value === "string" && value.length > 0;
+  var strings = (value) => Array.isArray(value) && Array.from(value).every(string);
+  function parse(data) {
+    try {
+      return typeof data === "string" ? JSON.parse(data) : structuredClone(data);
+    } catch {
+      return null;
+    }
+  }
+  function readVersion(data, version, migrate) {
+    const decoded = parse(data);
+    const migrated = decoded && decoded.version !== version ? migrate?.(decoded, version) : decoded;
+    return migrated?.version === version ? migrated : null;
+  }
+  function runData(run) {
+    const fighting = run.phase === "room" && run.room?.status === "battle";
+    const snapshot = fighting ? { ...run, room: { ...run.room, status: "order" } } : run;
+    return { version: RUN_VERSION, run: snapshot };
+  }
+  function serializeRun(run) {
+    return JSON.stringify(runData(run));
+  }
+  function restoreRun(data, { core: core2, roster: roster2, migrate } = {}) {
+    const run = readVersion(data, RUN_VERSION, migrate)?.run;
+    if (!dictionary(run) || !string(run.id) || !Object.hasOwn(DUNGEONS, run.dungeonId) || !PHASES.includes(run.phase) || !["easy", "normal", "nightmare"].includes(run.difficulty) || run.difficulty !== "normal" && (run.daily || DUNGEONS[run.dungeonId].layout === "intro") || !count(run.floor) || !count(run.floors) || run.floor > run.floors || !count(run.crystals) || !Number.isInteger(run.rng?.state) || run.rng.state < 0 || run.rng.state > 4294967295 || ![
+      "pool",
+      "bench",
+      "fallen",
+      "released",
+      "relics",
+      "companions",
+      "recruited",
+      "eligible",
+      "gateSurvivors",
+      "participated",
+      "seenCharacters",
+      "seenRelics",
+      "unchosen",
+      "introCandidates"
+    ].every((key) => strings(run[key])) || !["heirlooms", "blessings", "stats", "introHeirlooms"].every((key) => dictionary(run[key])) || !count(run.stats.gateWins) || !count(run.stats.turns) || !count(run.stats.heirloomsUsed) || !Array.isArray(run.doors) || !Array.from(run.doors).every(validDoor) || run.room !== null && (!validDoor(run.room) || !string(run.room.status)) || run.phase === "room" && !run.room || run.phase === "map" && !run.doors.length || run.phase === "done" && !["win", "lose"].includes(run.result) || run.endDayKey != null && !calendarDate(run.endDayKey)) return null;
+    run.contract ??= null;
+    if (run.contract !== null) {
+      if (!dictionary(run.contract) || !Object.hasOwn(CONTRACTS, run.contract.id)) return null;
+      run.contract.ruleVersion ??= LEGACY_CONTRACT_RULE_VERSION;
+      if (![LEGACY_CONTRACT_RULE_VERSION, CONTRACT_RULE_VERSION].includes(run.contract.ruleVersion)) return null;
+    }
+    run.daily ??= null;
+    run.tempoVersion ??= run.daily?.spec?.ruleVersion ?? 1;
+    if (!run.daily) run.lessonVersion ??= 0;
+    run.firstMainAssist ??= false;
+    run.openingLead ??= null;
+    for (const door of run.doors) door.tempo ??= null;
+    if (run.room) run.room.tempo ??= null;
+    run.lastParty ??= null;
+    run.guide ??= { bossOrder: false };
+    run.joinOrder ??= run.bench.slice();
+    return bindRun(run, { core: core2, roster: roster2 });
+  }
+  function validDoor(door) {
+    return dictionary(door) && string(door.type) && Array.isArray(door.enemies) && Array.from(door.enemies).every((enemy) => dictionary(enemy) && string(enemy.id) && Array.isArray(enemy.skills) && ["hp", "atk", "matk", "def", "mdef"].every((key) => Number.isFinite(enemy.stats?.[key])));
+  }
+
   // card_pixel/game/src/engine/daily-store.js
   var VERSION = 1;
   var empty = () => ({ version: VERSION, days: {}, active: null });
@@ -13044,18 +13119,18 @@ const BattleRuntime = {
     }
     return null;
   }
-  var dictionary = (value) => !!value && typeof value === "object" && !Array.isArray(value);
+  var dictionary2 = (value) => !!value && typeof value === "object" && !Array.isArray(value);
   var nonnegative = (n) => Number.isSafeInteger(n) && n >= 0;
   function validCheckpoint(checkpoint, spec) {
-    return dictionary(checkpoint) && Number.isInteger(checkpoint.floor) && checkpoint.floor >= 1 && checkpoint.floor <= FLOORS && nonnegative(checkpoint.turns) && nonnegative(checkpoint.heirloomsUsed) && Array.isArray(checkpoint.livingIds) && new Set(checkpoint.livingIds).size === checkpoint.livingIds.length && Array.from(checkpoint.livingIds).every((id) => spec.loanIds.includes(id));
+    return dictionary2(checkpoint) && Number.isInteger(checkpoint.floor) && checkpoint.floor >= 1 && checkpoint.floor <= FLOORS && nonnegative(checkpoint.turns) && nonnegative(checkpoint.heirloomsUsed) && Array.isArray(checkpoint.livingIds) && new Set(checkpoint.livingIds).size === checkpoint.livingIds.length && Array.from(checkpoint.livingIds).every((id) => spec.loanIds.includes(id));
   }
   function validScore(score, day, kind) {
-    if (!dictionary(score) || score.dayKey !== day.spec.dayKey || score.kind !== kind || !["win", "lose", "abandon"].includes(score.outcome) || !validCheckpoint(score, day.spec)) return false;
+    if (!dictionary2(score) || score.dayKey !== day.spec.dayKey || score.kind !== kind || !["win", "lose", "abandon"].includes(score.outcome) || !validCheckpoint(score, day.spec)) return false;
     const attempt = Number(score.runId?.split?.("/").at(-1));
     return score.runId === `rift/v${day.spec.ruleVersion}/${day.spec.dayKey}/${attempt}` && Number.isSafeInteger(attempt) && attempt <= day.starts && (kind === "official" ? attempt === 1 : attempt > 1);
   }
   function restoreDailyData(data, { core: core2, roster: roster2 }) {
-    if (!dictionary(data) || data.version !== VERSION || !dictionary(data.days) || data.active !== null && !dictionary(data.active)) return null;
+    if (!dictionary2(data) || data.version !== VERSION || !dictionary2(data.days) || data.active !== null && !dictionary2(data.active)) return null;
     const { active: active2 } = data;
     try {
       for (const [key, day] of Object.entries(data.days)) {
@@ -13066,7 +13141,7 @@ const BattleRuntime = {
           if (day.official !== null) return null;
         } else {
           if (!validScore(day.last, day, day.last?.kind) || !["official", "practice"].includes(day.last.kind)) return null;
-          if (day.last.receipts !== void 0 && (!dictionary(day.last.receipts) || Object.entries(day.last.receipts).some(([id, score]) => id !== score?.runId || !["official", "practice"].includes(score.kind) || !validScore(score, day, score.kind)))) return null;
+          if (day.last.receipts !== void 0 && (!dictionary2(day.last.receipts) || Object.entries(day.last.receipts).some(([id, score]) => id !== score?.runId || !["official", "practice"].includes(score.kind) || !validScore(score, day, score.kind)))) return null;
         }
       }
       if (active2) {
@@ -13236,91 +13311,26 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/engine/save.js
-  var RUN_VERSION = 1;
   var SESSION_VERSION = 1;
   var BACKUP_VERSION = 1;
-  var PHASES = ["start", "map", "room", "reward", "done"];
   var DEFAULT_SETTINGS = { sound: true, music: true, rim: true, speed: 1, textScale: 1, markers: true };
   var SETTING_VALUES = { speed: [1, 2], textScale: [1, 1.25] };
-  var dictionary2 = (value) => !!value && typeof value === "object" && !Array.isArray(value);
-  var count = (value) => Number.isSafeInteger(value) && value >= 0;
-  var string = (value) => typeof value === "string" && value.length > 0;
   var nullableId = (value) => value === null || string(value);
-  var strings = (value) => Array.isArray(value) && Array.from(value).every(string);
   var uniqueIds = (value) => strings(value) && new Set(value).size === value.length;
   var validSetting = (key, value) => SETTING_VALUES[key]?.includes(value) ?? typeof value === "boolean";
-  function parse(data) {
-    try {
-      return typeof data === "string" ? JSON.parse(data) : structuredClone(data);
-    } catch {
-      return null;
-    }
-  }
-  function readVersion(data, version, migrate) {
-    const decoded = parse(data);
-    const migrated = decoded && decoded.version !== version ? migrate?.(decoded, version) : decoded;
-    return migrated?.version === version ? migrated : null;
-  }
-  function runData(run) {
-    const fighting = run.phase === "room" && run.room?.status === "battle";
-    const snapshot = fighting ? { ...run, room: { ...run.room, status: "order" } } : run;
-    return { version: RUN_VERSION, run: snapshot };
-  }
   function normalizeSettings(raw) {
     return Object.fromEntries(Object.entries(DEFAULT_SETTINGS).map(([key, fallback]) => [
       key,
       validSetting(key, raw?.[key]) ? raw[key] : fallback
     ]));
   }
-  function serializeRun(run) {
-    return JSON.stringify(runData(run));
-  }
-  function restoreRun(data, { core: core2, roster: roster2, migrate } = {}) {
-    const run = readVersion(data, RUN_VERSION, migrate)?.run;
-    if (!dictionary2(run) || !string(run.id) || !Object.hasOwn(DUNGEONS, run.dungeonId) || !PHASES.includes(run.phase) || !["easy", "normal", "nightmare"].includes(run.difficulty) || run.difficulty !== "normal" && (run.daily || DUNGEONS[run.dungeonId].layout === "intro") || !count(run.floor) || !count(run.floors) || run.floor > run.floors || !count(run.crystals) || !Number.isInteger(run.rng?.state) || run.rng.state < 0 || run.rng.state > 4294967295 || ![
-      "pool",
-      "bench",
-      "fallen",
-      "released",
-      "relics",
-      "companions",
-      "recruited",
-      "eligible",
-      "gateSurvivors",
-      "participated",
-      "seenCharacters",
-      "seenRelics",
-      "unchosen",
-      "introCandidates"
-    ].every((key) => strings(run[key])) || !["heirlooms", "blessings", "stats", "introHeirlooms"].every((key) => dictionary2(run[key])) || !count(run.stats.gateWins) || !count(run.stats.turns) || !count(run.stats.heirloomsUsed) || !Array.isArray(run.doors) || !Array.from(run.doors).every(validDoor) || run.room !== null && (!validDoor(run.room) || !string(run.room.status)) || run.phase === "room" && !run.room || run.phase === "map" && !run.doors.length || run.phase === "done" && !["win", "lose"].includes(run.result) || run.endDayKey != null && !calendarDate(run.endDayKey)) return null;
-    run.contract ??= null;
-    if (run.contract !== null) {
-      if (!dictionary2(run.contract) || !Object.hasOwn(CONTRACTS, run.contract.id)) return null;
-      run.contract.ruleVersion ??= LEGACY_CONTRACT_RULE_VERSION;
-      if (![LEGACY_CONTRACT_RULE_VERSION, CONTRACT_RULE_VERSION].includes(run.contract.ruleVersion)) return null;
-    }
-    run.daily ??= null;
-    run.tempoVersion ??= run.daily?.spec?.ruleVersion ?? 1;
-    if (!run.daily) run.lessonVersion ??= 0;
-    run.firstMainAssist ??= false;
-    run.openingLead ??= null;
-    for (const door of run.doors) door.tempo ??= null;
-    if (run.room) run.room.tempo ??= null;
-    run.lastParty ??= null;
-    run.guide ??= { bossOrder: false };
-    run.joinOrder ??= run.bench.slice();
-    return bindRun(run, { core: core2, roster: roster2 });
-  }
-  function validDoor(door) {
-    return dictionary2(door) && string(door.type) && Array.isArray(door.enemies) && Array.from(door.enemies).every((enemy) => dictionary2(enemy) && string(enemy.id) && Array.isArray(enemy.skills) && ["hp", "atk", "matk", "def", "mdef"].every((key) => Number.isFinite(enemy.stats?.[key])));
-  }
   function restoreProfile(data, { migrate } = {}) {
     const profile = readVersion(data, PROFILE_VERSION, migrate);
-    if (!dictionary2(profile?.recruits) || !Object.values(profile.recruits).every((entry) => count(entry?.bond) && count(entry?.since)) || !dictionary2(profile.records) || !count(profile.records.runs) || !uniqueIds(profile.records.appliedRuns) || profile.records.appliedRuns.length !== profile.records.runs || !dictionary2(profile.records.clears) || !Object.entries(profile.records.clears).every(([id, clear]) => Object.hasOwn(DUNGEONS, id) && dictionary2(clear) && count(clear.normal) && count(clear.nightmare) && (clear.easy === void 0 || count(clear.easy))) || !Array.isArray(profile.notebook?.chapters) || !Array.from(profile.notebook.chapters).every((id) => Number.isInteger(id) && id >= 1 && id <= 7) || !["unlockedDungeons", "nightmareUnlocks"].every((key) => strings(profile[key]) && profile[key].every((id) => Object.hasOwn(DUNGEONS, id))) || !profile.unlockedDungeons.includes("dawn_forest") || !["companions", "seenCharacters", "seenRelics"].every((key) => strings(profile[key])) || !["lead", "preferredCompanion", "reserved"].every((key) => nullableId(profile[key])) || !dictionary2(profile.seals) || !Object.values(profile.seals).every(strings)) return null;
+    if (!dictionary(profile?.recruits) || !Object.values(profile.recruits).every((entry) => count(entry?.bond) && count(entry?.since)) || !dictionary(profile.records) || !count(profile.records.runs) || !uniqueIds(profile.records.appliedRuns) || profile.records.appliedRuns.length !== profile.records.runs || !dictionary(profile.records.clears) || !Object.entries(profile.records.clears).every(([id, clear]) => Object.hasOwn(DUNGEONS, id) && dictionary(clear) && count(clear.normal) && count(clear.nightmare) && (clear.easy === void 0 || count(clear.easy))) || !Array.isArray(profile.notebook?.chapters) || !Array.from(profile.notebook.chapters).every((id) => Number.isInteger(id) && id >= 1 && id <= 7) || !["unlockedDungeons", "nightmareUnlocks"].every((key) => strings(profile[key]) && profile[key].every((id) => Object.hasOwn(DUNGEONS, id))) || !profile.unlockedDungeons.includes("dawn_forest") || !["companions", "seenCharacters", "seenRelics"].every((key) => strings(profile[key])) || !["lead", "preferredCompanion", "reserved"].every((key) => nullableId(profile[key])) || !dictionary(profile.seals) || !Object.values(profile.seals).every(strings)) return null;
     profile.contractStamps ??= {};
     profile.missions ??= { periods: {} };
     profile.ui ??= {};
-    if (!dictionary2(profile.contractStamps) || !dictionary2(profile.missions?.periods) || !Object.entries(profile.missions.periods).every(([key, period]) => validMissionPeriod(key, period, profile.recruits)) || !validProfileUi(profile.ui)) return null;
+    if (!dictionary(profile.contractStamps) || !dictionary(profile.missions?.periods) || !Object.entries(profile.missions.periods).every(([key, period]) => validMissionPeriod(key, period, profile.recruits)) || !validProfileUi(profile.ui)) return null;
     profile.ui.wantedCompanionId ??= null;
     if (Object.hasOwn(profile.recruits, profile.ui.wantedCompanionId)) profile.ui.wantedCompanionId = null;
     if (!validPreparation(profile, profile.ui.preparation)) profile.ui.preparation = null;
@@ -13330,17 +13340,17 @@ const BattleRuntime = {
   var dungeonId = (id) => typeof id === "string" && Object.hasOwn(DUNGEONS, id);
   var optional = (value, validate) => value == null || validate(value);
   var arrayOf = (value, validate) => Array.isArray(value) && Array.from(value).every(validate);
-  var runEntry = (entry) => dictionary2(entry) && dungeonId(entry.dungeonId) && count(entry.floor) && ["win", "lose"].includes(entry.result);
+  var runEntry = (entry) => dictionary(entry) && dungeonId(entry.dungeonId) && count(entry.floor) && ["win", "lose"].includes(entry.result);
   function validBattleLog(log) {
-    return arrayOf(log, (turn) => dictionary2(turn) && count(turn.turn) && arrayOf(turn.rows, (row) => dictionary2(row) && count(row.key) && typeof row.text === "string" && typeof row.kind === "string" && /^[a-z-]*$/.test(row.kind) && optional(row.faces, (faces) => arrayOf(faces, (face2) => face2 === null || dictionary2(face2))) && optional(row.hits, (hits) => arrayOf(hits, (hit) => dictionary2(hit) && count(hit.key) && count(hit.turn))) && optional(row.origin, count) && optional(row.amount, Number.isFinite)));
+    return arrayOf(log, (turn) => dictionary(turn) && count(turn.turn) && arrayOf(turn.rows, (row) => dictionary(row) && count(row.key) && typeof row.text === "string" && typeof row.kind === "string" && /^[a-z-]*$/.test(row.kind) && optional(row.faces, (faces) => arrayOf(faces, (face2) => face2 === null || dictionary(face2))) && optional(row.hits, (hits) => arrayOf(hits, (hit) => dictionary(hit) && count(hit.key) && count(hit.turn))) && optional(row.origin, count) && optional(row.amount, Number.isFinite)));
   }
   function validProfileUi(ui) {
-    return dictionary2(ui) && optional(ui.wantedCompanionId, string) && optional(ui.returners, uniqueIds) && optional(ui.recruitChoices, (choices) => dictionary2(choices) && string(choices.runId) && uniqueIds(choices.ids)) && optional(ui.recent, (recent) => dictionary2(recent) && Object.values(recent).every((history) => arrayOf(history, runEntry))) && optional(ui.announcement, (notice) => dictionary2(notice) && ["dungeons", "nightmares"].every((key) => optional(notice[key], (ids) => arrayOf(ids, dungeonId))) && optional(notice.chapters, (chapters) => arrayOf(chapters, (id) => Number.isInteger(id) && id >= 1 && id <= 7))) && optional(ui.latestRun, (latest) => runEntry(latest) && strings(latest.fallen) && dictionary2(latest.stats) && optional(latest.lastBattleLog, validBattleLog));
+    return dictionary(ui) && optional(ui.wantedCompanionId, string) && optional(ui.returners, uniqueIds) && optional(ui.recruitChoices, (choices) => dictionary(choices) && string(choices.runId) && uniqueIds(choices.ids)) && optional(ui.recent, (recent) => dictionary(recent) && Object.values(recent).every((history) => arrayOf(history, runEntry))) && optional(ui.announcement, (notice) => dictionary(notice) && ["dungeons", "nightmares"].every((key) => optional(notice[key], (ids) => arrayOf(ids, dungeonId))) && optional(notice.chapters, (chapters) => arrayOf(chapters, (id) => Number.isInteger(id) && id >= 1 && id <= 7))) && optional(ui.latestRun, (latest) => runEntry(latest) && strings(latest.fallen) && dictionary(latest.stats) && optional(latest.lastBattleLog, validBattleLog));
   }
   function validMissionPeriod(key, period, recruits) {
     const date = key.startsWith("week:") ? key.slice(5) : key.startsWith("month:") ? key.slice(6) + "-01" : "";
     const keys = missionPeriodKeys(date);
-    return (key === keys?.weekly || key === keys?.monthly) && dictionary2(period) && count(period.gates) && uniqueIds(period.regionIds) && period.regionIds.every((id) => DUNGEONS[id]?.layout === "expedition" && id !== "creation_tower") && ["tracking", "earned", "claimed"].includes(period.state) && uniqueIds(period.offerOrder) && (period.claimedId === null || period.state === "claimed" && period.offerOrder.includes(period.claimedId) && Object.hasOwn(recruits, period.claimedId));
+    return (key === keys?.weekly || key === keys?.monthly) && dictionary(period) && count(period.gates) && uniqueIds(period.regionIds) && period.regionIds.every((id) => DUNGEONS[id]?.layout === "expedition" && id !== "creation_tower") && ["tracking", "earned", "claimed"].includes(period.state) && uniqueIds(period.offerOrder) && (period.claimedId === null || period.state === "claimed" && period.offerOrder.includes(period.claimedId) && Object.hasOwn(recruits, period.claimedId));
   }
   function sessionData(profile, run) {
     const progressed = run ? recordRunProgress(profile, run).profile : profile;
@@ -13405,12 +13415,12 @@ const BattleRuntime = {
       };
     }
     function validateBackup(data) {
-      if (!dictionary2(data) || data.format !== "relaymare" || data.version !== BACKUP_VERSION || !["session", "daily", "settings"].every((entry) => Object.hasOwn(data, entry))) return failed("invalid_format");
+      if (!dictionary(data) || data.format !== "relaymare" || data.version !== BACKUP_VERSION || !["session", "daily", "settings"].every((entry) => Object.hasOwn(data, entry))) return failed("invalid_format");
       const session = readSession(data.session);
       if (session.status === "profileDamaged") return failed("invalid_session");
       if (session.status === "runDamaged") return failed("invalid_run");
       if (data.daily !== null && !restoreDailyData(data.daily, deps) || data.damagedDaily !== void 0 && typeof data.damagedDaily !== "string") return failed("invalid_daily");
-      if (!dictionary2(data.settings) || Object.keys(DEFAULT_SETTINGS).some((entry) => Object.hasOwn(data.settings, entry) && !validSetting(entry, data.settings[entry]))) return failed("invalid_settings");
+      if (!dictionary(data.settings) || Object.keys(DEFAULT_SETTINGS).some((entry) => Object.hasOwn(data.settings, entry) && !validSetting(entry, data.settings[entry]))) return failed("invalid_settings");
       const days = Object.values(data.daily?.days ?? {});
       const active2 = data.daily?.active ?? null;
       const summary = {
@@ -15509,7 +15519,6 @@ const BattleRuntime = {
     ].filter(Boolean).join(" \xB7 ");
   }
   var foeFlip = (def) => (def.facing || "right") === "right";
-  var replacementCount = (run, incoming) => !run.daily && run.tempoVersion === 2 ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
   function chooseReplacements(run, ui, count2, action, { incoming = [], label } = {}) {
     const selected = /* @__PURE__ */ new Set();
     const names = (ids) => ids.map((id) => ui.widgets.card(id)?.name || id).join(" \xB7 ");
@@ -18493,8 +18502,12 @@ const BattleRuntime = {
     const turn = { introFixed: 1, threeBeat: 2, tide: 3 }[pattern];
     return beats.find((beat) => beat.turn === turn) ?? (pattern === "bossScript" ? beats.filter((beat) => TYPE[beat.type] && beat.power > 1).sort((a, b) => b.power - a.power || a.turn - b.turn)[0] : void 0);
   }
+  function contractEscrow(run, door) {
+    const amount2 = gateEscrow(run.floor, door.type);
+    return amount2 && CONTRACTS[run.contract?.id] ? amount2 : 0;
+  }
   function doorDecision(run, door, preview) {
-    const crystals = (door.reward ?? 0) - (run.floor === 4 && door.type === "gate" && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0);
+    const crystals = (door.reward ?? 0) - contractEscrow(run, door);
     if (!door.enemies.length) return REGIONS[door.regionChoice?.id]?.name ?? ROOM_NAMES[door.type] ?? door.name;
     if (preview?.bossRule) return door.type === "boss" ? preview.bossRule.name ?? door.name : door.name;
     if (preview?.lesson) return "2\uD134\uC9F8 \uC608\uD589" + (!run.daily && crystals > 0 ? " \xB7 \uACB0\uC815 " + crystals : "");
@@ -18555,15 +18568,12 @@ const BattleRuntime = {
       return lines;
     }
     function reward(door, crystalLabel = "\uACB0\uC815") {
-      const crystals = (door.reward ?? 0) - escrow(door);
+      const crystals = (door.reward ?? 0) - contractEscrow(run, door);
       const relic = !door.final && artifacts.get(door.relic);
       return [
         !rift && crystals ? crystalLabel + " +" + crystals : "",
         !rift && door.type === "gate" && !door.final ? relic ? "\uADF8\uB9BC\uC790 1\uBA85 \uB610\uB294 " + relic.name : "\uADF8\uB9BC\uC790 1\uBA85" : relic?.name
       ].filter(Boolean).join(" \xB7 ");
-    }
-    function escrow(door) {
-      return run.floor === 4 && door.type === "gate" && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0;
     }
     function roomEffect(door) {
       const count2 = run.bench.length;
@@ -18744,9 +18754,10 @@ const BattleRuntime = {
       const region = REGIONS[door.region?.id], quirk = QUIRKS[door.quirk], relic = !door.final && artifacts.get(door.relic);
       const rule = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
       const sky = startSky(door), gain = reward(door, "\uD655\uC815 \uACB0\uC815");
+      const escrow = contractEscrow(run, door);
       const treasure = door.enemies.some((enemy) => enemy.affixes?.includes("treasure"));
       const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : "";
-      openSheet(door.name, lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow(door) ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + CONTRACT_ESCROW + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 1\uBA85 \uCC98\uCE58\uB9C8\uB2E4 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
+      openSheet(door.name, lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 1\uBA85 \uCC98\uCE58\uB9C8\uB2E4 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
     }
   }
 
@@ -18979,7 +18990,7 @@ const BattleRuntime = {
     }
     const joinIds = (choice) => choice.ops.flatMap((op) => op.type === "join" && !op.random ? op.ids : []);
     function releases(choice) {
-      const count2 = choice.ops.filter((op) => op.type === "join").reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
+      const count2 = joinCount(choice.ops);
       return choice.requiredReleases ?? replacementCount(run, count2);
     }
     function targetValue(choice, id) {
@@ -19310,15 +19321,7 @@ const BattleRuntime = {
       enterDoor(0);
     }
     function enterFormation(index, partyIds) {
-      const result = enterBattleDoor ? command(enterBattleDoor, { floor: run.floor, index, partyIds }) : chooseDoor(run, index);
-      if (!enterBattleDoor && result.ok) {
-        const order = command(confirmOrder, partyIds);
-        if (!order.ok) {
-          host.save(run);
-          route();
-          return order;
-        }
-      }
+      const result = command(enterBattleDoor, { floor: run.floor, index, partyIds });
       mapEntry = result.ok;
       return result;
     }

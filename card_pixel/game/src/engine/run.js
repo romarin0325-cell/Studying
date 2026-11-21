@@ -1,4 +1,4 @@
-import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT, CONTRACT_RULE_VERSION, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
+import { CONTRACTS, CONTRACT_PAYOUT, CONTRACT_RULE_VERSION, gateEscrow, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
 import { LESSON_VERSION } from '../content/boss-lessons.js';
 import { BOSSES } from '../content/bosses.js';
 import { FLOORS as DAILY_FLOORS } from '../content/daily-rift.js';
@@ -440,9 +440,10 @@ function settleContract(run, summary, survivors, wiped) {
     contract.met = metNow = true;
     contract.metAtFloor = floor;
   }
-  if (won && floor === 4 && run.room.type === 'gate') {
-    contract.escrowed = CONTRACT_ESCROW;
-    crystals -= CONTRACT_ESCROW;
+  const escrow = won ? gateEscrow(floor, run.room.type) : 0;
+  if (escrow) {
+    contract.escrowed = escrow;
+    crystals -= escrow;
   }
   if (floor === 6) {
     if (won && !wiped && contract.met) {

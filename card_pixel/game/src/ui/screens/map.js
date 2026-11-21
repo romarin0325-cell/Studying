@@ -2,7 +2,7 @@ import { $, $$, esc, show } from '../dom.js';
 import { activeContract, affixChips, foeFlip, head, tempoBeatText, TYPE } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
-import { CONTRACTS, CONTRACT_ESCROW } from '../../content/contracts.js';
+import { CONTRACTS, gateEscrow } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { ROOM_NAMES } from '../../content/layouts.js';
 import { REGIONS } from '../../content/regions.js';
@@ -73,8 +73,13 @@ function primaryBeat(door, preview) {
     : undefined);
 }
 
+function contractEscrow(run, door) {
+  const amount = gateEscrow(run.floor, door.type);
+  return amount && CONTRACTS[run.contract?.id] ? amount : 0;
+}
+
 export function doorDecision(run, door, preview) {
-  const crystals = (door.reward ?? 0) - (run.floor === 4 && door.type === 'gate' && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0);
+  const crystals = (door.reward ?? 0) - contractEscrow(run, door);
   if (!door.enemies.length) return REGIONS[door.regionChoice?.id]?.name ?? ROOM_NAMES[door.type] ?? door.name;
   if (preview?.bossRule) return door.type === 'boss' ? preview.bossRule.name ?? door.name : door.name;
   if (preview?.lesson) return '2턴째 예행' + (!run.daily && crystals > 0 ? ' · 결정 ' + crystals : '');
@@ -143,16 +148,12 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
   }
 
   function reward(door, crystalLabel = '결정') {
-    const crystals = (door.reward ?? 0) - escrow(door);
+    const crystals = (door.reward ?? 0) - contractEscrow(run, door);
     const relic = !door.final && artifacts.get(door.relic);
     return [
       !rift && crystals ? crystalLabel + ' +' + crystals : '',
       !rift && door.type === 'gate' && !door.final ? (relic ? '그림자 1명 또는 ' + relic.name : '그림자 1명') : relic?.name
     ].filter(Boolean).join(' · ');
-  }
-
-  function escrow(door) {
-    return run.floor === 4 && door.type === 'gate' && CONTRACTS[run.contract?.id] ? CONTRACT_ESCROW : 0;
   }
 
   function roomEffect(door) {
@@ -376,6 +377,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
     const region = REGIONS[door.region?.id], quirk = QUIRKS[door.quirk], relic = !door.final && artifacts.get(door.relic);
     const rule = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
     const sky = startSky(door), gain = reward(door, '확정 결정');
+    const escrow = contractEscrow(run, door);
     const treasure = door.enemies.some(enemy => enemy.affixes?.includes('treasure'));
     const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : '';
     openSheet(door.name, lessonLine(door) + enemies + rule(quirk) + rule(region) +
@@ -384,7 +386,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
       (service ? '<p>' + esc(service) + '</p>' : '') +
       (service && door.type === 'spring' ? '<p>보유 결정 ' + run.crystals + '개</p>' : '') +
       (gain ? '<p class="gain">' + esc(gain) + '</p>' : '') +
-      (escrow(door) ? '<p>계약에 ◆' + CONTRACT_ESCROW + ' 맡김</p>' : '') +
+      (escrow ? '<p>계약에 ◆' + escrow + ' 맡김</p>' : '') +
       (treasure ? '<p class="gain">추가 보상 · 보물 적 1명 처치마다 결정 +2</p>' : '') + contractGoal(door) +
       (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ''));
   }

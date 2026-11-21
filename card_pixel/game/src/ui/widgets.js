@@ -3,8 +3,9 @@ import { tools } from './settings.js';
 import { ELEMENT, GRADE } from '../engine/roster.js';
 import { AFFIXES } from '../content/affixes.js';
 import * as ContractRules from '../content/contracts.js';
-import { ROSTER_LIMIT } from '../content/tempo.js';
 import { heirloomSkill } from '../engine/bridge.js';
+
+export { replacementCount } from '../engine/awakenings.js';
 
 export const TYPE = { phy: '물리', mag: '마법', sup: '보조', rest: '휴식' };
 const LEGACY_RULES = {
@@ -69,8 +70,6 @@ export const DOOR = {
   boss: ['보스', '꿈의 주인'], spring: ['소환의 샘', '꿈의 결정으로 동료를 깨운다'], altar: ['혼돈의 제단', '무작위 동료에게 축복 · 세 번까지 굴린다']
 };
 export const foeFlip = def => (def.facing || 'right') === 'right';
-export const replacementCount = (run, incoming) => !run.daily && run.tempoVersion === 2
-  ? Math.max(0, run.bench.length + incoming - ROSTER_LIMIT) : 0;
 
 export function chooseReplacements(run, ui, count, action, { incoming = [], label } = {}) {
   const selected = new Set();

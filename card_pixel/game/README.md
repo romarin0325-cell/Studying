@@ -19,10 +19,10 @@ node card_pixel/game/tests/play.mjs --seeds=7,21 --runs=2
 ```
 
 - 빌드는 esbuild로 `src/main.js`와 모듈을 묶어 `dist/Relaymare.html`을 만든다.
-- Node 테스트 5개는 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열의 생성·정산·저장(`daily`)을 확인한다.
+- Node 테스트 341개(하위 사례 포함)는 진입 파일 5개에서 실행한다. 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열의 생성·정산·저장(`daily`)을 확인한다.
 - 자동 플레이는 먼저 빌드한다. Playwright Chromium을 쓰고, 없으면 설치된 Chrome, Edge 순으로 시도한다. `CHROMIUM_PATH`로 실행 파일을 지정할 수 있다. `--seeds=7,21`과 `--runs=2`가 기본값이며 시드마다 입문 1판 뒤 본편 2판을 돈다. `--headed`를 붙이면 창을 띄운다.
 - 자동 플레이는 본편 이어하기, 브라우저 오류·멈춤, 행동 뒤 대기 시간과 전투 프레임을 확인한다. 화면은 `tests/shots/`에 남긴다.
-- `node card_pixel/game/tests/screens.mjs`는 엔진 명령으로 13가지 상태(범위 피해·즉시 발동·물러나기 경고·시작 하늘·문 HP·내기 문구·저장 실패·원정 복원 실패·미귀환 기록·필드 상한·변신 상세·빈자리 복원·차징 예고)를 만들어 Chrome에서 열고 글자를 확인한 뒤 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `--case <이름>`으로 하나만 돈다.
+- `node card_pixel/game/tests/screens.mjs`는 전투·원정·저장·균열 화면 사례 72개를 Chrome에서 확인하고 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `node card_pixel/game/tests/screens-map.mjs`는 지도·편성 화면 사례 7개를 확인하고 `tests/shots/screens-map/`에 화면을 남긴다. 두 명령 모두 `--case <이름>`으로 하나만 돌거나 `--validate-only`로 화면에 필요한 상태만 확인할 수 있다.
 - Windows 실행 파일 `dist/Relaymare.exe`는 `node card_pixel/game/launcher/build-launcher.mjs`로 만든다. 같은 폴더의 `Relaymare.html`을 Chrome(없으면 Edge)의 앱 창으로 연다. 자세한 내용은 [launcher/README.md](launcher/README.md).
 
 ## 시뮬레이션·음악·그림 도구
@@ -55,7 +55,12 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/engine/rooms.js` | 문과 적 구성, 사건 조건·효과, 유물 제안·장착 한도 |
 | `src/engine/awakenings.js` | 깨우기 확률·비용, 후보·합류, 제단 축복 뽑기 |
 | `src/engine/meta.js` | 프로필, 영입·인연·대표·동행·봉인, 해금과 수첩·기록 |
-| `src/engine/save.js` | 버전이 있는 원정·프로필 저장과 복원 |
+| `src/engine/save.js` | 본편 세션·프로필 저장과 전체 기록 백업·복원 |
+| `src/engine/run-codec.js` | 본편과 균열에서 쓰는 원정 직렬화·검증·복원 |
+| `src/engine/daily-rift.js` | 날짜별 균열 생성, 시도 검증과 채점 |
+| `src/engine/daily-store.js` | 균열 체크포인트와 첫 도전·연습 기록 저장 |
+| `src/engine/dates.js` | 달력 날짜 변환과 검증 |
+| `src/engine/opening.js` | 첫 전투 선택지의 결과 미리보기 |
 | `src/engine/roster.js` | 카드와 스프라이트로 동료 풀·야생·그림자·보스 구성 |
 | `src/engine/rng.js` | 시드 난수, 추첨과 섞기 |
 | `src/content/` | 던전·방·규칙·적 자료 |
@@ -70,6 +75,11 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/content/affixes.js` | 적에게 붙는 접두사 |
 | `src/content/wild.js` | 야생 몽마 수치·크기·기술 |
 | `src/content/bosses.js` | 보스 수치와 예고 문구. 기술은 카드 원본에서 읽는다 |
+| `src/content/boss-lessons.js` | 보스 행동표와 예행 전투 규칙 |
+| `src/content/contracts.js` | 악몽 계약 조건과 예치금·지급액 |
+| `src/content/daily-rift.js` | 균열 층 수와 지역·사건·전투 보정 자료 |
+| `src/content/missions.js` | 주간·월간 임무 해금과 보상 후보 기준 |
+| `src/content/tempo.js` | 템포 버전, 전투 시작값과 편성·증원 규칙 |
 | `src/ui/` | 화면·입력·표시 |
 | `src/ui/nav.js` | 제목·관측소·행선지·생환·엔딩 전환과 세션 저장 연결 |
 | `src/ui/run/` | 원정 화면의 진행 연결 |
@@ -82,6 +92,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/ui/screens/map.js` | 층 지도, 문 미리보기, 문으로 걷는 장면 |
 | `src/ui/screens/order.js` | 출전 순서와 유품 미리보기 |
 | `src/ui/screens/spring.js` | 소환의 샘에서 새 동료 깨우기 |
+| `src/ui/screens/reinforce.js` | 원정 중 증원과 합류·교체 선택 |
 | `src/ui/screens/altar.js` | 혼돈의 제단에서 축복 뽑기·확정 |
 | `src/ui/screens/event.js` | 사건 대사, 비용·대상·선택 결과 |
 | `src/ui/screens/gate-pick.js` | 문지기 보상에서 그림자 또는 유물 선택 |
@@ -91,12 +102,15 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/ui/screens/notebook.js` | 꿈길 수첩 장과 달성 표시 |
 | `src/ui/screens/records.js` | 원정과 누적 기록, 엔딩 다시 보기 진입 |
 | `src/ui/screens/ending.js` | 꿈길의 끝 기록 요약과 영입 동료 행진 |
+| `src/ui/screens/daily-rift.js` | 오늘의 균열 준비·결과·기록 화면 |
 | `src/ui/battle/` | 전투 화면과 사건 재생 |
 | `src/ui/battle/view.js` | 전투 조립, 엔진 사건 재생과 결과 전달 |
 | `src/ui/battle/hud.js` | 적·동료·하늘과 행동 예고 표시 |
 | `src/ui/battle/tiles.js` | 기술·유품·물러나기 명령 타일 |
 | `src/ui/battle/moves.js` | 공격·피격·교대 등 전투 연출 |
 | `src/ui/battle/sheets.js` | 적·동료·필드·유물의 상세 정보 |
+| `src/ui/battle/fields.js` | 전투 필드와 기술이 만드는 필드 설명 |
+| `src/ui/battle/log.js` | 전투 사건을 턴별 기록으로 정리하고 표시 |
 | `src/ui/assets.js` | 내장 스프라이트·배경·아이콘 조회 |
 | `src/ui/storage.js` | 브라우저 `localStorage` 접근 |
 | `src/ui/settings.js` | 음악·효과음·윤곽선 설정, 전체화면·기록 초기화 |
@@ -104,15 +118,21 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/ui/widgets.js` | 헤더·스프라이트·배지·수치표 등 공용 표시 |
 | `src/ui/dom.js` | DOM 조회·전환과 HTML 이스케이프 |
 | `src/ui/reveal.js` | 등급별 소환 공개 연출 |
+| `src/ui/relics.js` | 유물 상세 문구와 장착 비교 표시 |
 | `src/stage/` | 캔버스 무대와 합성 효과음 |
 | `src/stage/stage.js` | 저해상도 캔버스, 가상 시계·카메라·이펙트 |
 | `src/stage/audio.js` | 무대 시계에 맞춘 합성 효과음 |
+| `src/stage/walking-map.js` | 도트 지도 배치와 문까지 걷는 연출 |
 | `src/audio/` | 배경 음악 |
 | `src/audio/music.js` | 12곡 악보와 WebAudio 재생·전환 |
 | `src/styles/` | 공용(`base`)·전투(`battle`)·원정 화면(`screens`)·거점과 메타 화면(`meta`) CSS |
+| `src/styles/map.css` | 걷는 지도와 문·편성 패널 스타일 |
 | `assets/` | 포즈 PNG와 `sprites.json`, `backgrounds/`, `icons/` |
 | `tools/` | 카드 원본을 감싸는 `core-bundle.mjs`, 시뮬레이션, 미리듣기, 그림 자르기 |
-| `tests/` | Node 테스트 5개와 브라우저 자동 플레이 |
+| `tests/` | Node 테스트 진입 파일 5개, 화면·지도 갤러리, 브라우저 자동 플레이 |
+| `tests/support/core.mjs` | 테스트별 카드 코어 VM과 스프라이트 명단 생성 |
+| `tests/run/tempo-events.mjs` | `run.test.mjs`에서 등록하는 템포 2 사건 사례 |
+| `tests/screens/rift.mjs` | `screens.mjs`에서 등록하는 균열 화면 사례 |
 | `dist/` | 플레이용 단일 HTML |
 
 ## 어디를 고치면 무엇이 바뀌나
