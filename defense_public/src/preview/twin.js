@@ -1,4 +1,4 @@
-import {BOSS_ORDER,TIERS,TIER_IDS,levelStage} from '../content.js';
+import {BOSS_ORDER,TIERS,TIER_IDS,levelStage,TUNING} from '../content.js';
 import {TEAM_SIZE} from '../team-config.js';
 import {season} from './season.js';
 
@@ -8,7 +8,7 @@ export const TWIN_STAGE=Object.freeze({easy:levelStage(42),hard:levelStage(70),a
 export const TWIN_SIDES=Object.freeze(['left','right']);
 export const TWIN_SIDE=Object.freeze({left:{name:'은빛 별길',short:'은빛'},right:{name:'금빛 별길',short:'금빛'}});
 export const TWIN_BANDS=Object.freeze([{total:4,base:75},{total:8,base:95},{total:12,base:145}]);
-export const twinBandReward=(tier,i)=>Math.round(TWIN_BANDS[i].base*TIERS[tier].reward);
+export const twinBandReward=(tier,i)=>Math.round(TWIN_BANDS[i].base*TIERS[tier].reward)*TUNING.challengeRewardScale;
 export function twinBosses(seasonIndex,side,met){
   const m=Math.max(1,Math.min(met,BOSS_ORDER.length)),off=side==='right'?2:0;
   return [0,1].map(k=>BOSS_ORDER[(seasonIndex*4+off+k)%m]);

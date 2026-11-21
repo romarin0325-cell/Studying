@@ -14,33 +14,45 @@ test('every companion has one favourite gift with its line, its own line for the
   assert.deepEqual(Object.fromEntries(GIFT_IDS.map(gift=>[gift,Object.values(FAVORITE).filter(g=>g===gift).length])),{candy:14,letter:13,bouquet:15});
 });
 
-test('hearts fill by points; a fully fed companion reaches ten hearts in two to three weeks',()=>{
+test('hearts fill by points and cap at ten',()=>{
   const e={bond:0,bondXp:0};assert.equal(addBond(e,39),0);assert.equal(addBond(e,1),1);assert.equal(e.bondXp,0);
-  const total=BOND_STEPS.reduce((a,b)=>a+b,0),daily=10+20+10+10;
-  assert.ok(total/daily>=14&&total/daily<=21,`${total/daily} days at the best daily pace`);
-  addBond(e,1e6);assert.equal(e.bond,BOND_MAX);assert.equal(e.bondXp,0);
+  const total=BOND_STEPS.reduce((a,b)=>a+b,0);assert.equal(addBond(e,total-BOND_STEPS[0]),9);
+  assert.equal(addBond(e,50),0);assert.equal(e.bond,BOND_MAX);assert.equal(e.bondXp,0);
 });
 
-test('gifts grow in the basket (one every 8 hours, candy → letter → bouquet, three at most); favourites count double',()=>{
-  const p=createProfile(NOW);const id=p.partner,fav=FAVORITE[id],other=GIFT_IDS.find(g=>g!==fav);
-  assert.equal(command(p,'basket',{},NOW+7*HOUR).ok,false,'nothing before 8 hours');
-  assert.deepEqual(act(p,'basket',{},NOW+17*HOUR).gifts,['candy','letter']);assert.deepEqual(p.gifts,{candy:1,letter:1,bouquet:0});
-  // The clock keeps the hour already grown: the next gift is due 24 hours after the start.
-  assert.equal(command(p,'basket',{},NOW+23*HOUR).ok,false);assert.deepEqual(act(p,'basket',{},NOW+24*HOUR).gifts,['bouquet']);
+test('the basket grows a gift every 15 minutes up to eight, and favourites count double',()=>{
+  const p=createProfile(NOW),quarter=15*60000,id=p.partner,fav=FAVORITE[id],other=GIFT_IDS.find(g=>g!==fav);
+  assert.equal(command(p,'basket',{},NOW+quarter-1).ok,false);
+  assert.deepEqual(act(p,'basket',{},NOW+2.5*quarter).gifts,['candy','letter']);assert.deepEqual(p.gifts,{candy:1,letter:1,bouquet:0});
+  // Collecting keeps the elapsed part of the next interval.
+  assert.equal(command(p,'basket',{},NOW+3*quarter-1).ok,false);assert.deepEqual(act(p,'basket',{},NOW+3*quarter).gifts,['bouquet']);
   // A full basket stops growing until it is emptied.
-  assert.deepEqual(act(p,'basket',{},NOW+24*HOUR+5*DAY).gifts,['candy','letter','bouquet']);assert.equal(command(p,'basket',{},NOW+24*HOUR+5*DAY+7*HOUR).ok,false);
+  const full=NOW+5*DAY;assert.deepEqual(act(p,'basket',{},full).gifts,['candy','letter','bouquet','candy','letter','bouquet','candy','letter']);
+  assert.equal(command(p,'basket',{},full+quarter-1).ok,false);assert.deepEqual(act(p,'basket',{},full+quarter).gifts,['bouquet']);
   // Missions, dispatch and shooting stars no longer drop gifts; the third mission adds a crystal bonus.
   const q=createProfile(NOW);q.daily.combat=true;q.daily.merges=5;q.daily.idle=true;act(q,'daily',{id:'combat'});act(q,'daily',{id:'merge'});
   const last=act(q,'daily',{id:'idle'});assert.equal(last.all,true);assert.equal(last.reward,30+TUNING.dailyBonus);assert.deepEqual(q.gifts,{candy:0,letter:0,bouquet:0});
   q.idleAt=NOW-10*HOUR;act(q,'idle',{});assert.deepEqual(q.gifts,{candy:0,letter:0,bouquet:0});
-  // Giving: favourite 20 points with its line, others 10.
   p.gifts={candy:3,letter:3,bouquet:3};
-  const a=act(p,'gift',{id,gift:fav});assert.equal(a.points,20);assert.equal(a.line,FAVORITE_LINES[id]);
-  const b=act(p,'gift',{id,gift:other});assert.equal(b.points,10);assert.equal(b.line,GIFT_LINES[id]);assert.equal(p.heroes[id].bondXp,30);
+  const a=act(p,'gift',{id,gift:fav});assert.equal(a.points,100);assert.equal(a.line,FAVORITE_LINES[id]);
+  const b=act(p,'gift',{id,gift:other});assert.equal(b.points,50);assert.equal(b.line,GIFT_LINES[id]);assert.equal(p.heroes[id].bondXp,0);
   p.gifts.candy=0;assert.equal(command(p,'gift',{id,gift:'candy'},NOW).ok,false);
   assert.equal(command(p,'gift',{id:'queen',gift:'letter'},NOW).ok,false,'only owned companions');
-  // The greeting adds points instead of a heart.
-  p.petDay='';act(p,'pet',{},NOW+300*DAY);assert.equal(p.heroes[id].bond,1);assert.equal(p.heroes[id].bondXp,0);
+  p.petDay='';act(p,'pet',{},NOW+300*DAY);assert.equal(p.heroes[id].bond,3);assert.equal(p.heroes[id].bondXp,50);
+});
+
+test('battle bond gives owned expedition members eight on a win, three on a loss, and opens ten hearts once',()=>{
+  const p=createProfile(NOW),id=p.deck[0];p.cleared=3;Object.assign(p.heroes[id],{bond:9,bondXp:98});
+  const main=()=>{assert.ok(act(p,'begin',{mode:'main',stage:1}).ok);return act(p,'settle',{token:p.active.token,round:6,won:true});};
+  assert.deepEqual(main().bond,p.deck.map(hero=>({id:hero,points:8,hearts:Number(hero===id),opened:hero===id})));
+  assert.equal(p.heroes[id].bond,10);assert.equal(main().bond[0].opened,false);
+  assert.ok(act(p,'begin',{mode:'weekly'}).ok);
+  while(p.active.draft.length<p.deck.length){const at=p.active.offers.findIndex(o=>!p.heroes[o.id].owned);assert.ok(act(p,'draft',{index:Math.max(0,at)}).ok);}
+  const draft=p.active.deck;p.heroes[draft[0]].owned=true;
+  const unowned=draft.filter(hero=>!p.heroes[hero].owned),before=unowned.map(hero=>structuredClone(p.heroes[hero]));assert.ok(unowned.length);
+  const lost=act(p,'settle',{token:p.active.token,round:1,won:false});
+  assert.deepEqual(lost.bond,draft.filter(hero=>p.heroes[hero].owned).map(hero=>({id:hero,points:3,hearts:0,opened:false})));
+  assert.deepEqual(unowned.map(hero=>p.heroes[hero]),before);assert.equal(lost.dust,0);assert.equal(lost.star,null);
 });
 
 test('a memorial can become the lobby once its companion reaches ten hearts',()=>{
@@ -71,9 +83,9 @@ test('old saves keep their hearts, gain a gift bag, and over-capped greetings cl
   assert.deepEqual(p.gifts,{candy:0,letter:0,bouquet:0});assert.equal(p.lobby,null);assert.equal(p.daily.bouquet,false);assert.deepEqual(p.basket,{at:old.clockAt,next:0});
 });
 
-test('weekly entry is open from stage 3 whatever this week is, using only met bosses',()=>{
+test('draft entry opens at stage 3 and rotates between met bosses',()=>{
   for(let w=0;w<9;w++){
-    const p=createProfile(NOW),now=NOW+w*7*DAY;p.cleared=3;
+    const p=createProfile(NOW),now=NOW+w*4*HOUR;p.cleared=3;
     assert.ok(weeklyStage(p,now)<=3);const r=command(p,'begin',{mode:'weekly',tier:'easy'},now);assert.ok(r.ok,r.message);assert.ok(p.active.stage<=3);
   }
   const p=createProfile(NOW);p.cleared=20;assert.equal(weeklyStage(p,NOW),calendar(NOW).weekNo%9+1);

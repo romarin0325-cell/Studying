@@ -1,7 +1,7 @@
 import {HOUR} from '../economy.js';
 import {REQUESTS} from './requests-data.js';
 
-export const REQUEST_MAX=3,REQUEST_GAP_MIN=48*HOUR,REQUEST_GAP_SPAN=24*HOUR,REQUEST_FLAGS=Object.freeze(['moonlit','spared']);
+export const REQUEST_MAX=3,REQUEST_GAP_MIN=HOUR/2,REQUEST_GAP_SPAN=HOUR/2,REQUEST_FLAGS=Object.freeze(['moonlit','spared']);
 export const REQUEST=Object.fromEntries(REQUESTS.map(r=>[r.id,r]));
 export function requestState(p,now){
   const r=p?.requests;

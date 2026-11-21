@@ -1,24 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createProfile,command,parseProfile,ProfileStore} from '../src/profile.js';
-import {calendar} from '../src/economy.js';
-import {currentRecord,monthlyReward,monthlyPaid,monthlyDue} from '../src/monthly.js';
+import {calendar,HOUR} from '../src/economy.js';
+import {currentRecord,monthlyReward,monthlyPaid,monthlyDue,validRecord} from '../src/monthly.js';
 import {TIERS,TIER_IDS,CHALLENGE_WAVES} from '../src/content.js';
 import {wavePlan,challengeBase} from '../src/combat/engine.js';
-const NOW=Date.parse('2026-10-05T03:00:00Z'),NEXT=Date.parse('2026-11-01T00:00:00Z');
+const NOW=Date.parse('2026-10-05T03:00:00Z'),NEXT=calendar(NOW).periods.rush.end;
 const ready=()=>{const p=createProfile(NOW);p.cleared=3;return p;};
 const act=(p,id,args={},time=NOW)=>{const r=command(p,id,args,time);assert.ok(r.ok,r.message);return r;};
 function attempt(p,round,damage=0,time=NOW){act(p,'begin',{mode:'monthly',stage:4},time);const token=p.active.token;return act(p,'settle',{token,round,damage,seconds:37},time);}
 
-test('monthly health rises ten percent and rewards rise modestly without reversing progression',()=>{
+test('hunt keeps its health curve and pays triple rewards without reversing progression',()=>{
   const previousHp={easy:.33,hard:.33,abyss:.385};
-  assert.deepEqual(TIER_IDS.map(tier=>monthlyReward({tier,round:CHALLENGE_WAVES})),[1247,2206,3261]);
+  assert.deepEqual(TIER_IDS.map(tier=>monthlyReward({tier,round:CHALLENGE_WAVES})),[3741,6618,9783]);
   for(const tier of TIER_IDS){
     let reward=-1,hp=0;
     for(let round=0;round<=CHALLENGE_WAVES;round++){
       const next=monthlyReward({tier,round});
       const old=Math.round((100+35*round+(round===CHALLENGE_WAVES?150:0))*TIERS[tier].reward);
-      assert.ok(next>reward);assert.ok(next>old&&next<=Math.ceil(old*1.11));reward=next;
+      assert.ok(next>reward);assert.ok(next>old*3&&next<=Math.ceil(old*1.11)*3);reward=next;
       if(!round)continue;
       const base=challengeBase(round,tier).base*30,actual=wavePlan(round,0,'monthly',tier).sequence[0].hp;
       assert.ok(Math.abs(actual-base*previousHp[tier]*1.1)<=.5);
@@ -55,18 +55,28 @@ test('a save from the claim-once rule is handed what its record is still owed, o
   assert.equal(monthlyDue(waiting,NOW),monthlyReward({round:4}));
   // Its next run pays the whole record, improved or not.
   const next=attempt(waiting,1,10);assert.equal(next.reward,monthlyReward({round:4}));assert.equal(waiting.dreams,600+monthlyReward({round:4}));
-  // The oldest saves marked a month paid without a record: the amount is unknown, so nothing more is paid that month.
+  // An unknown paid amount keeps the period closed to prevent duplicate payment.
   const closed=ready();closed.monthly=calendar(NOW).month;attempt(closed,5,100);assert.equal(closed.dreams,600);assert.equal(monthlyDue(closed,NOW),0);
 });
 
-test('monthly rollover starts a new maximum and reward while retaining a lifetime record outside the result ring',()=>{
+test('eight-hour hunt rollover resets the paid best and keeps the lifetime record',()=>{
   const p=ready();attempt(p,50,30000);
   for(let i=0;i<35;i++)attempt(p,1,10);assert.equal(p.results.length,30);assert.equal(p.monthlyLifetime.round,50);
-  assert.equal(currentRecord(p,NEXT),null);assert.equal(command(p,'claimMonthly',{token:p.monthlyBest.token},NEXT).ok,false);
+  assert.equal(currentRecord(p,NEXT-1),p.monthlyBest);assert.equal(currentRecord(p,NEXT),null);assert.equal(monthlyPaid(p,NEXT),0);
+  assert.equal(command(p,'claimMonthly',{token:p.monthlyBest.token},NEXT).ok,false);
   const before=p.dreams;attempt(p,2,50,NEXT);assert.equal(p.monthlyBest.round,2);assert.equal(p.monthlyLifetime.round,50);
-  assert.equal(p.dreams,before+monthlyReward({round:2}),'the new month pays its own record from zero');
-  act(p,'begin',{mode:'monthly'},NEXT);const token=p.active.token;act(p,'settle',{token,round:4,damage:100},Date.parse('2026-12-01T00:00:00Z'));
-  assert.equal(p.monthlyBest.period,'2026-12','a crossing attempt belongs to its completion month');
+  assert.equal(p.dreams,before+monthlyReward({round:2}),'the new period pays its own record from zero');
+  act(p,'begin',{mode:'monthly'},NEXT);const token=p.active.token;act(p,'settle',{token,round:4,damage:100},NEXT+8*HOUR);
+  assert.equal(p.monthlyBest.period,calendar(NEXT+8*HOUR).month,'a crossing attempt belongs to its completion period');
+});
+
+test('a hunt record timestamp must be inside the rush period encoded by its ID',()=>{
+  const p=ready();attempt(p,3,200);const r=p.monthlyBest,{id,start,end}=calendar(r.at).periods.rush;
+  assert.equal(r.period,id);assert.ok(validRecord({...r,at:start}));assert.ok(validRecord({...r,at:end-1}));
+  for(const at of [start-1,end])assert.equal(validRecord({...r,at}),false);
+  for(const period of [calendar(r.at).week,'2026-10',calendar(end).month])assert.equal(validRecord({...r,period}),false);
+  const bad=structuredClone(p);bad.monthlyBest.at=end;assert.equal(parseProfile(bad),null);
+  for(const period of [calendar(r.at).week,'2026-10']){bad.monthlyBest=r;bad.monthly=period;bad.monthlyClaim=null;assert.equal(parseProfile(bad),null);}
 });
 
 test('legacy paid attempts cannot be paid again, but a legacy ongoing entry is allowed to finish and is paid',()=>{
@@ -74,7 +84,7 @@ test('legacy paid attempts cannot be paid again, but a legacy ongoing entry is a
   legacy.monthly=calendar(NOW).month;legacy.results=[{at:NOW,mode:'monthly',stage:4,round:5,reward:400,won:false}];
   const paid=parseProfile(legacy);assert.ok(paid);assert.equal(paid.monthlyClaim.round,5);assert.equal(command(paid,'claimMonthly',{token:paid.monthlyBest.token},NOW).ok,false);
   act(paid,'begin',{mode:'monthly'});assert.ok(paid.active);
-  const oldActive=ready();act(oldActive,'begin',{mode:'monthly'});oldActive.monthly='2026-10';delete oldActive.monthlyBest;delete oldActive.monthlyLifetime;delete oldActive.monthlyClaim;
+  const oldActive=ready();act(oldActive,'begin',{mode:'monthly'});oldActive.monthly=calendar(NOW).month;delete oldActive.monthlyBest;delete oldActive.monthlyLifetime;delete oldActive.monthlyClaim;
   const ongoing=parseProfile(oldActive);assert.ok(ongoing);assert.equal(ongoing.monthly,null);
   act(ongoing,'settle',{token:ongoing.active.token,round:2});assert.equal(ongoing.dreams,600+monthlyReward({round:2}));
 });
@@ -85,7 +95,7 @@ test('an owed reward is an atomic cross-window receipt and malformed records are
   for(const mutate of [r=>r.damage=NaN,r=>r.round=1001,r=>r.deck=['missing'],r=>r.seconds=-1]){const bad=structuredClone(p);mutate(bad.monthlyBest);assert.equal(parseProfile(bad),null);}
 });
 
-test('this month keeps the record that pays most; a short try at a higher tier does not lower the claim',async()=>{
+test('the current hunt keeps the record that pays most across tiers',async()=>{
   const {betterMonth,betterRecord,monthlyReward}=await import('../src/monthly.js');
   const easy={tier:'easy',round:18,damage:1},hard={tier:'hard',round:0,damage:9};
   assert.ok(monthlyReward(easy)>monthlyReward(hard));

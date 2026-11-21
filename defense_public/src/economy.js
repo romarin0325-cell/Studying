@@ -1,22 +1,12 @@
 import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,LATE_UNLOCK_STAGE,LATE_COMPANIONS,levelOf,TUNING as T} from './content.js';
 import {POWER_FACTOR} from './power-factor.js';
+import {periodOf} from './tempo.js';
 
 export const HOUR=3600000;
-// Season guardian of a calendar month (UTC+9). The six guardians retain the original rotation;
-// Behemoth joins the regular summon pool after the first part, alongside Venom.
-export const guardianOf=(year,month)=>HIDDEN[((year*12+month)%HIDDEN.length+HIDDEN.length)%HIDDEN.length];
-// The next months (as {year,month}) in which a hidden hero is the guardian, starting with this month.
-export function guardianMonths(id,now=Date.now(),count=2){
-  const d=new Date(now+9*HOUR),out=[];let y=d.getUTCFullYear(),m=d.getUTCMonth();
-  for(let i=0;i<HIDDEN.length*count+1&&out.length<count;i++){if(guardianOf(y,m)===id)out.push({year:y,month:m+1});if(++m>11){m=0;y++;}}
-  return out;
-}
 export function calendar(now=Date.now()){
-  const d=new Date(now+9*HOUR),day=d.toISOString().slice(0,10),month=day.slice(0,7);
-  const monday=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()-(d.getUTCDay()+6)%7));
-  // Normal-banner pickup: the standard URs rotate every Monday (UTC+9).
-  const weekNo=Math.round((monday.getTime()-Date.UTC(1970,0,5))/(7*24*HOUR));
-  return {day,month,weekNo,week:monday.toISOString().slice(0,10),guardian:guardianOf(d.getUTCFullYear(),d.getUTCMonth()),pickup:heroPool('UR',false)[weekNo%heroPool('UR',false).length]};
+  const day=new Date(now+9*HOUR).toISOString().slice(0,10),periods=Object.fromEntries(['pickup','guardian','draft','event','rush'].map(kind=>[kind,periodOf(kind,now)]));
+  const pick=(pool,index)=>pool[((index%pool.length)+pool.length)%pool.length];
+  return {day,week:periods.draft.id,weekNo:periods.draft.index,month:periods.rush.id,guardian:pick(HIDDEN,periods.guardian.index),pickup:pick(heroPool('UR',false),periods.pickup.index),periods};
 }
 export const duplicateCost=e=>Math.ceil(T.duplicateGrowth**e);
 export const enhanceMultiplier=e=>1+T.enhanceStep*e;
@@ -96,9 +86,8 @@ const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+levelOf(cl
 export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,cleared);return {dust:Math.floor(base*T.dispatchDust),dreams:Math.max(1,Math.floor(base*T.dispatchDreams))};};
 // The stardust bed is applied when a dispatch is collected, so growing it helps dispatches already under way.
 export const dispatchDust=(dust,beds,cleared)=>Math.floor(dust*(1+stardustBonus(beds,cleared)));
-export const stageReward=stage=>T.firstClearBase+T.firstClearStep*levelOf(stage);
-// Stardust for finishing a main stage (a loss pays the flat consolation).
-export const stageDust=(stage,won)=>won?40+levelOf(stage)*8:12;
+export const stageReward=stage=>{const L=levelOf(stage);return Math.round((T.firstClearBase+T.firstClearStep*L)*Math.min(3,1+L/15));};
+export const stageDust=(stage,won,first)=>won?(60+16*levelOf(stage))*(first?3:1):20;
 export const PERFECT_REWARD=100;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
 export const relicThreshold=tier=>Math.ceil(T.relicThresholdBase*(T.relicThresholdGrowth**tier-1)/(T.relicThresholdGrowth-1));
@@ -109,14 +98,12 @@ export function relicRates(draws){return relicTierRates(relicTier(draws));}
 export function rollIndex(rates,value){let sum=0;for(let i=0;i<rates.length;i++){sum+=rates[i];if(value<sum)return i;}return rates.length-1;}
 export const lateOpen=cleared=>cleared>=LATE_UNLOCK_STAGE;
 export function heroPool(rarity,open=true){return (ROSTER[rarity]||[]).filter(id=>open||!LATE_COMPANIONS.includes(id));}
-// A UR from the season banner is the monthly guardian half the time; from the normal
-// banner it is this week's pickup half the time.
-export function drawCharacter(random,season,guardian,pickup=null,urMult=1,open=true,minSR=false){
-  const base=T.heroRates,ur=base[3]*urMult,rates=[base[0]-(ur-base[3]),base[1],base[2],ur];
-  const rarity=minSR?['SR','UR'][rollIndex([base[2]/(base[2]+base[3]),base[3]/(base[2]+base[3])],random())]:['C','R','SR','UR'][rollIndex(rates,random())];
+// Half of UR rolls target the current guardian or pickup for that banner.
+export function drawCharacter(random,season,guardian,pickup=null,open=true){
+  const rarity=['C','R','SR','UR'][rollIndex(T.heroRates,random())];
   if(rarity==='UR'&&season&&random()<.5&&(open||!LATE_COMPANIONS.includes(guardian)))return guardian;
   if(rarity==='UR'&&!season&&pickup&&random()<.5)return pickup;
   const pool=heroPool(rarity,open);return pool[Math.floor(random()*pool.length)];
 }
 export function drawRelic(random,draws){const rarity=['C','R','SR','UR'][rollIndex(relicRates(draws),random())],pool=Object.values(ARTIFACT).filter(a=>a.rarity===rarity);return pool[Math.floor(random()*pool.length)].id;}
-export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+levelOf(profile.cleared)*2)*(1+stardustBonus(profile.beds,profile.cleared)));}
+export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+levelOf(profile.cleared)*T.idleDustStep)*(1+stardustBonus(profile.beds,profile.cleared)));}

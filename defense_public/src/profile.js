@@ -5,11 +5,10 @@ import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthl
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED,SOLO} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
 import {MEMORIAL_STORIES} from './memorial.js';
-import {BOND_MAX,GIFT_IDS,GREETING_POINTS,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
-import {questionOf} from './quiz.js';
-import {CONSTELLATIONS} from './library.js';
+import {BOND_MAX,GIFT_IDS,GREETING_POINTS,BATTLE_BOND,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
+import {CONSTELLATIONS,lightStar} from './library.js';
 import {season,eventOpen} from './preview/season.js';
-import {UNLOCKS,FTUE_STEPS,TOUR_IDS,BEGINNER_DAYS,beginnerState,urChoices} from './beginner.js';
+import {UNLOCKS,FTUE_STEPS,TOUR_IDS,beginnerState,urChoices} from './beginner.js';
 import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,validOathRules,OATH_BANDS,OATH_RULES} from './preview/oath.js';
 import {twinParty,twinPartyProblem,twinState,twinBandReward,twinCredit,twinBandsReached,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES} from './preview/twin.js';
 import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState,requestGoal} from './preview/requests.js';
@@ -35,33 +34,23 @@ const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<
 export const DAILY_MISSIONS=Object.freeze([{id:'combat',name:'원정 1회 완료',reward:60},{id:'merge',name:'전투에서 합성 5회',reward:30,goal:5},{id:'idle',name:'별똥별 수집',reward:30}]);
 // free / relicFree: today's free single summon on the companion and the relic banner.
 export function freshDaily(now){return {day:calendar(now).day,combat:false,merges:0,idle:false,free:false,relicFree:false,bouquet:false,accel:false,claimed:[]};}
-// Study (루미의 별의 서재): wrong answers wait in a notebook (latest pick kept); one a day becomes a star.
-// Finishing a constellation unlocks its illustration and opens the next one.
-export const WRONG_MAX=60;
+// Keep the album in its existing save shape. Study fields stay empty in the public game.
 export const freshStudy=()=>({wrong:[],solved:[],library:{index:0,stars:0,unlocked:[],day:''}});
 function validStudy(s){
-  if(!s||typeof s!=='object'||!Array.isArray(s.wrong)||s.wrong.length>WRONG_MAX||!s.library||typeof s.library!=='object')return false;
-  const keys=new Set();
-  for(const w of s.wrong){if(!w||!['concept','term'].includes(w.kind)||typeof w.id!=='string'||w.id.length>40||!(w.choice===-1||integer(w.choice,9))||!integer(w.at))return false;const key=w.kind+':'+w.id;if(keys.has(key))return false;keys.add(key);}
-  if(!Array.isArray(s.solved)||s.solved.length>2000||new Set(s.solved).size!==s.solved.length||s.solved.some(k=>typeof k!=='string'||k.length>60))return false;
-  const l=s.library;if(!integer(l.index,CONSTELLATIONS.length)||!integer(l.stars)||typeof l.day!=='string'||!Array.isArray(l.unlocked))return false;
+  if(!s||typeof s!=='object'||Array.isArray(s)||!Array.isArray(s.wrong)||s.wrong.length||!Array.isArray(s.solved)||s.solved.length)return false;
+  const l=s.library;if(!l||typeof l!=='object'||Array.isArray(l)||!integer(l.index,CONSTELLATIONS.length)||!integer(l.stars)||l.day!==''||!Array.isArray(l.unlocked))return false;
   if(l.index<CONSTELLATIONS.length?l.stars>=CONSTELLATIONS[l.index].stars.length:l.stars!==0)return false;
   return l.unlocked.length===l.index&&l.unlocked.every((id,i)=>CONSTELLATIONS[i].id===id);
 }
-// Saves from before the library get an empty one; entries whose question left the course (a new subject) are dropped.
 export function migrateStudy(p){
   if(p.study===undefined)p.study=freshStudy();
-  if(Array.isArray(p.study?.wrong))p.study.wrong=p.study.wrong.filter(w=>w&&questionOf(w.kind,w.id));
-  if(p.study&&typeof p.study==='object'){if(p.study.solved===undefined)p.study.solved=[];if(Array.isArray(p.study.solved))p.study.solved=p.study.solved.filter(k=>typeof k==='string'&&questionOf(...k.split(':')));}
+  if(p.study&&typeof p.study==='object'&&p.study.solved===undefined)p.study.solved=[];
 }
-// Gift basket: the clock starts when an old save first opens (nothing is owed for the time before).
-// Late companions (see LATE_COMPANIONS) the player has already been told about by the part one announcement.
-// This week's draft: entries used and the best record (whose reward is what the week has paid).
+// The current draft period's entries used and best paid record.
 export function weeklyState(p,now){const own=p.weekly===calendar(now).week,runs=own?p.weeklyRuns:0;return {runs,left:WEEKLY_ENTRIES-runs,best:own?p.weeklyBest:null};}
 const validWeeklyBest=b=>b===null||!!b&&typeof b==='object'&&integer(b.round,CHALLENGE_WAVES)&&typeof b.won==='boolean'&&!!TIERS[b.tier]&&integer(b.reward)&&b.reward>0;
-// Saves from the one-entry week: the entry counts as one run and its result becomes the week's best. A draft still in
-// progress has paid nothing yet. A settled entry whose receipt has left the 30-result history paid an unknown amount,
-// so that week stays closed as the old rule had it (no second full payment).
+// The legacy single-entry shape counts one run and recovers its best from the receipt. If the receipt has
+// left the history, keep the period closed to prevent duplicate payment.
 export function migrateWeekly(p){
   if(p.weeklyRuns!==undefined)return;p.weeklyRuns=typeof p.weekly==='string'?1:0;p.weeklyBest=null;if(!p.weeklyRuns||p.active?.mode==='weekly')return;
   const r=Array.isArray(p.results)?p.results.find(r=>r?.mode==='weekly'&&integer(r.at)&&calendar(r.at).week===p.weekly):null;
@@ -71,6 +60,7 @@ export function migrateWeekly(p){
 export function migrateNotices(p){if(!Array.isArray(p.noticeLate))p.noticeLate=[];}
 // The newly joined companions the announcement has not shown yet. Behemoth is a guardian and arrives through its own reveal.
 export const lateNoticeIds=p=>lateOpen(p.cleared)?LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)&&!(p.noticeLate||[]).includes(id)):[];
+// An old save missing a basket starts at its saved clock.
 export function migrateBasket(p){if(p.basket===undefined)p.basket={at:integer(p.clockAt)?p.clockAt:0,next:0};}
 const BASKET_MS=TUNING.basketHours*HOUR;
 export function basketState(p,now){const elapsed=Math.max(0,now-p.basket.at),ready=Math.min(TUNING.basketMax,Math.floor(elapsed/BASKET_MS));return {ready,full:ready>=TUNING.basketMax,nextIn:ready>=TUNING.basketMax?0:BASKET_MS-elapsed%BASKET_MS,next:p.basket.next};}
@@ -78,7 +68,7 @@ export const missionDone=(daily,id)=>id==='merge'?daily.merges>=5:!!daily[id];
 export function validateProfile(p){
   const unique=(a,valid)=>Array.isArray(a)&&new Set(a).size===a.length&&a.every(valid),f=p?.ftue,b=p?.beginner;
   if(!f||typeof f!=='object'||Array.isArray(f)||typeof f.legacy!=='boolean'||typeof f.skipped!=='boolean'||!unique(f.done,id=>FTUE_STEPS.includes(id))||!unique(f.seen,id=>Object.hasOwn(UNLOCKS,id))||!unique(f.tours,id=>TOUR_IDS.includes(id)))return false;
-  if(b!==null&&(!b||typeof b!=='object'||Array.isArray(b)||!Number.isInteger(b.count)||b.count<1||b.count>7||typeof b.last!=='string'||b.last.length>10||!unique(b.claimed,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.tasks,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.did,id=>['greet','water','gift','relic'].includes(id))||!(b.choice===null||HERO[b.choice]?.rarity==='UR')||typeof b.closed!=='boolean'))return false;
+  if(b!==null&&(!b||typeof b!=='object'||Array.isArray(b)||!Number.isInteger(b.count)||b.count<1||b.count>7||typeof b.last!=='string'||b.last.length>10||!unique(b.claimed,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.tasks,n=>Number.isInteger(n)&&n>=1&&n<=7)||!unique(b.did,id=>['greet','water','gift','relic','draft'].includes(id))||!(b.choice===null||HERO[b.choice]?.rarity==='UR')||typeof b.closed!=='boolean'))return false;
   if(typeof p.firstTen!=='boolean'||typeof p.eventSeen!=='string'||p.eventSeen.length>12||typeof p.eventFlip!=='boolean'||typeof p.trial!=='boolean'||!UNLOCKED&&(p.eventFlip||p.trial))return false;
   if(!p||p.version!==1||!integer(p.revision)||!integer(p.dreams)||!integer(p.dust)||!p.beds||typeof p.beds!=='object'||Object.keys(p.beds).sort().join()!==[...BED_IDS].sort().join()||!BED_IDS.every(id=>integer(p.beds[id]))||p.bedRev!==4||p.relicRev!==2||p.stageRev!==1||!integer(p.cleared,MAIN_STAGES)||!integer(p.rng,0xffffffff)||!p.rng||!integer(p.draws)||!integer(p.relicDraws))return false;
   if(!p.pity||!integer(p.pity.normal)||!integer(p.pity.season))return false;
@@ -102,7 +92,8 @@ export function validateProfile(p){
   if(p.monthlyClaim&&p.monthlyClaim.period!==p.monthly)return false;
   if(!Array.isArray(p.history)||p.history.length>50||p.history.some(h=>!integer(h.at)||!['normal','season','relic'].includes(h.banner)||!(HERO[h.id]||ARTIFACT[h.id])||typeof h.fresh!=='boolean'))return false;
   if(!Array.isArray(p.results)||p.results.length>30||p.results.some(r=>!integer(r.at)||!['main','weekly','monthly','oath','twin'].includes(r.mode)||!integer(r.stage,MAIN_STAGES)||!integer(r.round)||!integer(r.reward)||typeof r.won!=='boolean'))return false;
-  for(const k of ['weekly','monthly'])if(p[k]!==null&&(typeof p[k]!=='string'||!/^\d{4}-\d{2}(?:-\d{2})?$/.test(p[k])))return false;
+  if(p.weekly!==null&&(typeof p.weekly!=='string'||!/^D-?\d+$/.test(p.weekly)))return false;
+  if(p.monthly!==null&&(typeof p.monthly!=='string'||!/^R-?\d+$/.test(p.monthly)))return false;
   if(!integer(p.weeklyRuns,WEEKLY_ENTRIES)||p.weekly===null&&(p.weeklyRuns!==0||p.weeklyBest!==null)||!validWeeklyBest(p.weeklyBest))return false;
   if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly','oath','twin'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>p.active.mode==='weekly'&&p.active.draft?.length===TEAM_SIZE?!draftEligible(p,id):!p.heroes[id]?.owned||away(p,id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
   const a=p.active;
@@ -224,7 +215,7 @@ function draftOffers(p){
   return pool.length===1?[{id:pool[0],boon:'focus'},{id:pool[0],boon:'spark'}]:pool.slice(0,2).map(id=>({id,boon:random(p)<.5?'focus':'spark'}));
 }
 export function safeNow(p,now){return Math.max(p.clockAt,Math.floor(now));}
-function rollDay(p,now){const day=calendar(now).day;if(p.daily.day!==day)p.daily=freshDaily(now);const b=p.beginner;if(b&&!b.closed&&b.last!==day&&b.count<7){b.count++;b.last=day;}}
+function rollDay(p,now){if(p.daily.day!==calendar(now).day)p.daily=freshDaily(now);}
 // Old saves kept draw/dispatch missions; keep today's finished expedition only.
 export function migrateDaily(p){
   const d=p.daily;if(!d||typeof d!=='object')return;
@@ -239,7 +230,7 @@ export function migrateBond(p){
   if(p.lobby!==null&&p.lobby!==p.partner)p.lobby=null;
   if(p.daily&&typeof p.daily==='object'&&p.daily.bouquet===undefined)p.daily.bouquet=false;
 }
-// Bosses a player has met: the weekly and monthly lineups only use these (stage k has boss k).
+// The draft and hunt lineups only use bosses the player has met (stage k has boss k).
 export const metBosses=p=>Math.min(9,p.cleared);
 function validOathRecord(r){
   if(!r||typeof r!=='object'||typeof r.period!=='string'||!/^S-?\d+$/.test(r.period)||typeof r.token!=='string'||!r.token||r.token.length>100||!integer(r.at)||season(r.at).id!==r.period||!TIERS[r.tier])return false;
@@ -380,7 +371,7 @@ function settleTwin(p,a,args,now){
   return {newBest,side,round,total,bands,pay:bands.reduce((n,b)=>n+b.reward,0)};
 }
 function beginPreview(p,mode,args,now){
-  if(!eventOpen(mode,now,UNLOCKED&&p.eventFlip))return {ok:false,message:'이번 주 이벤트가 아니에요.'};
+  if(!eventOpen(mode,now,UNLOCKED&&p.eventFlip))return {ok:false,message:'지금 열려 있는 이벤트가 아니에요.'};
   if(p.cleared<TIERS.easy.unlock)return {ok:false,message:`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`};
   const tier=args.tier||'easy';if(!TIERS[tier]||p.cleared<TIERS[tier].unlock)return {ok:false,message:`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`};
   const stage=oathChapter(season(now).index,p.cleared)+1;
@@ -398,7 +389,7 @@ function beginPreview(p,mode,args,now){
   p.active={mode,stage,deck:[...party[args.side].deck],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(relics.map(id=>[id,relicLevel(p.relics[id])])),tier,side:args.side,relics:[...relics]};
   return {ok:true};
 }
-export const weeklyStage=(p,now)=>calendar(now).weekNo%Math.max(1,metBosses(p))+1;
+export const weeklyStage=(p,now)=>{const met=Math.max(1,metBosses(p));return (calendar(now).weekNo%met+met)%met+1;};
 function receive(table,id){const e=table[id],fresh=!e.owned;if(fresh)e.owned=true;else e.copies++;return fresh;}
 export function command(p,action,args={},now=Date.now()){
   now=safeNow(p,now);rollDay(p,now);
@@ -416,28 +407,28 @@ export function command(p,action,args={},now=Date.now()){
     const b=p.beginner,d=beginnerState(p).days[args.day-1],kind=args.kind;if(!Number.isInteger(args.day)||!d||!['login','task'].includes(kind)||!d[kind].claimable)return no('보상을 받을 수 없습니다.');
     const reward=d[kind].reward;let hero;if(kind==='login'&&args.day===7){if(!urChoices(p).some(x=>x.id===args.choice))return no('동료를 선택하세요.');hero={id:args.choice,fresh:receive(p.heroes,args.choice)};b.choice=args.choice;}
     for(const key of ['dreams','dust'])if(reward[key])p[key]=Math.min(Number.MAX_SAFE_INTEGER,p[key]+reward[key]);if(reward.bouquet)p.gifts.bouquet=Math.min(999,p.gifts.bouquet+reward.bouquet);
-    b[kind==='login'?'claimed':'tasks'].push(args.day);if(b.claimed.length===7&&b.tasks.length===7)b.closed=true;return {ok:true,reward,...(hero?{hero}:{})};
+    b[kind==='login'?'claimed':'tasks'].push(args.day);if(kind==='task')b.count=beginnerState(p).count;if(b.claimed.length===7&&b.tasks.length===7)b.closed=true;return {ok:true,reward,...(hero?{hero}:{})};
   }
   if(action==='memory'){
     const story=MEMORIAL_STORIES[args.id],e=p.heroes[args.id];if(!story||!e?.owned||e.bond<story.unlockBond||!integer(args.page,story.paragraphs.length-1))return no('호감도 10에서 인연 이야기가 열립니다.');
     p.memories[args.id]={page:args.page,of:story.paragraphs.length,read:!!p.memories[args.id]?.read||args.page===story.paragraphs.length-1};return {ok:true};
   }
   if(action==='draw'){
-    const banner=args.banner,count=args.count,free=args.free===true,boost=args.boost===true,first=args.first===true;if(!['normal','season','relic'].includes(banner)||![1,10].includes(count))return no('소환 정보를 확인하세요.');
-    if(first&&(banner!=='normal'||count!==10||p.firstTen||free||boost))return no('첫 10회 소환을 확인하세요.');
+    const banner=args.banner,count=args.count,free=args.free===true,first=args.first===true;
+    if(!['normal','season','relic'].includes(banner)||![1,10].includes(count)||Object.keys(args).some(k=>!['banner','count','free','first'].includes(k))||[args.free,args.first].some(v=>v!==undefined&&typeof v!=='boolean'))return no('소환 정보를 확인하세요.');
+    if(first&&(banner!=='normal'||count!==10||p.firstTen||free))return no('첫 10회 소환을 확인하세요.');
     const freeKey=banner==='relic'?'relicFree':'free';
     if(free&&(banner==='season'||count!==1||p.daily[freeKey]))return no('오늘의 무료 소환은 이미 사용했습니다.');
-    if(boost&&(free||count!==10))return no('부스트는 유료 10회 소환에서만 사용할 수 있습니다.');
     const cost=free||first?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily[freeKey]=true;if(first)p.firstTen=true;
-    p.dreams-=cost;const c=calendar(now),urMult=boost?2:1,paidHero=banner!=='relic'&&!free&&!first;
-    const pull=(bonus,minSR=false)=>{
+    p.dreams-=cost;const c=calendar(now),paidHero=banner!=='relic'&&cost>0;
+    const pull=bonus=>{
       if(paidHero&&!bonus)p.pity[banner]=Math.min(9999,p.pity[banner]+1);
-      const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',c.guardian,c.pickup,urMult,lateOpen(p.cleared),minSR);
+      const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',c.guardian,c.pickup,lateOpen(p.cleared));
       const item={id,fresh:receive(banner==='relic'?p.relics:p.heroes,id),banner,at:now};if(bonus)item.bonus=true;if(first)item.first=true;
       p.history.unshift(item);if(banner==='relic')p.relicDraws++;else p.draws++;return item;
     };
-    const items=[];for(let i=0;i<count;i++)items.push(pull(false,first&&i===9&&!items.some(x=>['SR','UR'].includes(HERO[x.id].rarity))));const bonus=boost&&random(p)<.1?Array.from({length:10},()=>pull(true)):[];
-    if(banner==='relic')did('relic');p.history=p.history.slice(0,50);return {ok:true,items,bonus,cost,free,pity:{normal:p.pity.normal,season:p.pity.season},...(first?{first:true}:{})};
+    const items=Array.from({length:count},()=>pull(false)),lucky=cost>0&&count===10&&random(p)<.1,bonus=lucky?Array.from({length:10},()=>pull(true)):[];
+    if(banner==='relic')did('relic');p.history=p.history.slice(0,50);return {ok:true,items,bonus,lucky,cost,free,pity:{normal:p.pity.normal,season:p.pity.season},...(first?{first:true}:{})};
   }
   if(action==='bed'){
     const id=args.id;if(!BED_IDS.includes(id))return no('알 수 없는 화단입니다.');if(p.active)return no('원정 종료 후 성장할 수 있습니다.');
@@ -468,18 +459,11 @@ export function command(p,action,args={},now=Date.now()){
     if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
     if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=TEAM_SIZE)return no(`전투에 남을 동료 ${TEAM_SIZE}명이 필요합니다. 먼저 동료를 더 모으세요.`);
     const {dust,dreams}=dispatchReward(combatPower(args.id,p.heroes[args.id],p.beds,collectionBonus(p.relics)),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward:dreams,dust});
-    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:'파견 출발 · 24시간 후 귀환'};
+    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:`파견 출발 · ${TUNING.dispatchHours}시간 후 귀환`};
   }
   if(action==='claimDispatch'){
     if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');// Dispatches sent before dust rewards keep the crystals they promised.
     const dust=dispatchDust(d.dust||0,p.beds,p.cleared);p.dreams+=d.reward;p.dust+=dust;p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,dust,message:`파견 보상 · ${dust?`별가루 +${fmtN(dust)} · `:''}꿈의결정 +${fmtN(d.reward)}`};
-  }
-  if(action==='accelerate'){
-    if(p.daily.accel)return no('오늘의 가속은 이미 사용했습니다.');
-    const running=p.dispatches.filter(d=>d.end>now);if(!running.length)return no('진행 중인 파견이 없습니다.');
-    p.daily.accel=true;if(args.correct!==true)return {ok:true,shifted:0,message:'오늘의 가속은 내일 다시 할 수 있습니다.'};
-    for(const d of running){const delta=Math.min(4*HOUR,d.end-now);d.start-=delta;d.end-=delta;}
-    return {ok:true,shifted:running.length,hours:4,message:`정답입니다. 진행 중인 파견 ${running.length}건을 최대 4시간 앞당겼습니다.`};
   }
   if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('아직 모인 별똥별이 없습니다.');p.dust+=reward;p.idleAt=now;p.daily.idle=true;return {ok:true,reward,message:`별가루 +${fmtN(reward)}`};}
   if(action==='basket'){
@@ -492,7 +476,7 @@ export function command(p,action,args={},now=Date.now()){
     const banner=args.banner;if(!['normal','season'].includes(banner))return no('교환할 수 없는 소환입니다.');
     if(p.pity[banner]<TUNING.pity[banner])return no(`소환 ${TUNING.pity[banner]}회마다 교환할 수 있어요.`);
     const c=calendar(now),pool=banner==='season'?[c.guardian]:heroPool('UR',lateOpen(p.cleared));if(!pool.includes(args.id))return no('교환할 수 있는 동료를 골라 주세요.');
-    // A late companion (Behemoth in its guardian month) cannot be taken through the exchange before part one is cleared either.
+    // The exchange follows the same late-companion unlock as summons.
     if(LATE_COMPANIONS.includes(args.id)&&!lateOpen(p.cleared))return no(`${HERO[args.id].name}은(는) 스테이지 ${LATE_UNLOCK_STAGE} 클리어 후에 교환할 수 있어요.`);
     p.pity[banner]-=TUNING.pity[banner];const item={id:args.id,fresh:receive(p.heroes,args.id),banner,at:now,pity:true};p.history.unshift(item);p.history=p.history.slice(0,50);
     return {ok:true,item,message:`${HERO[args.id].name}을(를) 데려왔어요`};
@@ -508,7 +492,7 @@ export function command(p,action,args={},now=Date.now()){
     const c=calendar(now),stage=mode==='weekly'&&p.cleared>=TIERS.easy.unlock?weeklyStage(p,now):args.stage||Math.min(MAIN_STAGES,p.cleared+1);if(!integer(stage,MAIN_STAGES)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
     if(mode!=='main'&&p.cleared<TIERS.easy.unlock)return no(`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`);
     const tier=mode==='main'?null:args.tier||'easy';if(mode!=='main'&&(!TIERS[tier]||p.cleared<TIERS[tier].unlock))return no(`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`);
-    if(mode==='weekly'&&weeklyState(p,now).left<=0)return no('이번 주의 입장 횟수를 모두 사용했습니다.');
+    if(mode==='weekly'&&weeklyState(p,now).left<=0)return no('이번 드래프트의 입장 횟수를 모두 사용했습니다.');
     if(mode==='weekly'){if(p.weekly!==c.week){p.weekly=c.week;p.weeklyRuns=0;p.weeklyBest=null;}p.weeklyRuns++;}
     random(p);
     p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(p.equipped.map(id=>[id,relicLevel(p.relics[id])])),...(tier?{tier}:{})};
@@ -521,13 +505,16 @@ export function command(p,action,args={},now=Date.now()){
     if(a.draft.length===TEAM_SIZE){a.deck=[...a.draft];a.offers=[];}else a.offers=draftOffers(p);return {ok:true};
   }
   if(action==='settle'){
-    const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0,clearReward=0,firstPerfect=false,unlocked=[],partOpened=false;if(!Array.isArray(p.perfect))p.perfect=[];
+    const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0,clearReward=0,dust=0,star=null,firstPerfect=false,unlocked=[],partOpened=false;if(!Array.isArray(p.perfect))p.perfect=[];
     if(a.mode==='main'){
-      if(args.won&&a.stage===p.cleared+1){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
-      p.dust+=stageDust(a.stage,!!args.won);
+      const first=!!args.won&&a.stage===p.cleared+1;
+      if(first){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
+      dust=stageDust(a.stage,!!args.won,first);p.dust+=dust;
+      if(args.won)star=lightStar(p.study.library);
     }
     let record=null,newBest=false,score=0,bands=[],side=null,total=0,shownRound=0,earned=0,paidBefore=0;
     if(a.mode==='weekly'){
+      did('draft');
       const tier=a.tier||'easy',round=Math.min(CHALLENGE_WAVES,args.round);earned=weeklyReward(tier,round,!!args.won);paidBefore=p.weeklyBest?.reward||0;
       if(earned>paidBefore){reward=earned-paidBefore;newBest=true;p.weeklyBest={round,won:!!args.won,tier,reward:earned};}
     }
@@ -536,7 +523,7 @@ export function command(p,action,args={},now=Date.now()){
       if(!validRecord(record))return no('전투 기록을 확인하세요.');
       newBest=betterMonth(record,currentRecord(p,now));if(newBest)p.monthlyBest=record;
       if(betterRecord(record,p.monthlyLifetime))p.monthlyLifetime=record;
-      // Paid here like the draft: whatever this month's best record is worth beyond what the month has paid.
+      // The rush pays the difference between its new best and what the period already paid.
       const best=currentRecord(p,now),paid=monthlyPaid(p,now),due=monthlyDue(p,now);earned=monthlyReward(best);paidBefore=Number.isFinite(paid)?paid:earned;
       if(due>0){reward+=due;p.monthly=best.period;p.monthlyClaim=structuredClone(best);}
     }
@@ -544,31 +531,19 @@ export function command(p,action,args={},now=Date.now()){
     if(a.mode==='twin'){const out=settleTwin(p,a,args,now);newBest=out.newBest;side=out.side;total=out.total;shownRound=out.round;bands=out.bands;reward+=out.pay;}
     const perfect=a.mode==='main'&&!!args.won&&args.perfect===true;
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
+    const points=args.won?BATTLE_BOND.win:BATTLE_BOND.loss,bond=a.deck.filter(id=>p.heroes[id]?.owned).map(id=>{
+      const e=p.heroes[id],hearts=addBond(e,points);return {id,points,hearts,opened:hearts>0&&e.bond===BOND_MAX};
+    });
     const requestsDone=args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
     p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;
-    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:a.mode==='monthly'?{earned,paidBefore}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
+    return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,dust,bond,star,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:a.mode==='monthly'?{earned,paidBefore}:{}),...(requestsDone!==undefined?{requestsDone}:{})};
   }
   if(action==='claimMonthly'){
     const record=currentRecord(p,now);if(p.active||!record||record.token!==args.token)return no('현재 만월 토벌전 최고 기록을 확인하세요.');
     // Settling pays the hunt, so this only hands over what a save from the claim-once rule is still owed.
-    const reward=monthlyDue(p,now);if(reward<=0)return no('이번 달 기록 보상은 이미 받았습니다.');
+    const reward=monthlyDue(p,now);if(reward<=0)return no('이번 토벌전 기록 보상은 이미 받았습니다.');
     p.dreams+=reward;p.monthly=record.period;p.monthlyClaim=structuredClone(record);
     return {ok:true,reward,message:`만월 토벌전 기록 보상 · 꿈의결정 +${reward}`};
-  }
-  if(action==='answer'){
-    const q=questionOf(args.kind,args.id);if(!q||!integer(args.choice,q.choices.length-1))return no('문제를 확인하세요.');
-    const correct=args.choice===q.answer,s=p.study,key=`${q.kind}:${q.id}`;
-    if(correct&&!s.solved.includes(key))s.solved.push(key);
-    if(!correct){const at=s.wrong.findIndex(w=>w.kind===q.kind&&w.id===q.id);if(at>=0)s.wrong.splice(at,1);s.wrong.push({kind:q.kind,id:q.id,choice:args.choice,at:now});if(s.wrong.length>WRONG_MAX)s.wrong.shift();}
-    return {ok:true,correct};
-  }
-  if(action==='libraryStar'){
-    const s=p.study,l=s.library,day=calendar(now).day,at=s.wrong.findIndex(w=>w.kind===args.kind&&w.id===args.id);
-    if(l.index>=CONSTELLATIONS.length)return no('일곱 별자리를 모두 완성했어요.');if(l.day===day)return no('오늘의 별은 이미 밝혔어요. 내일 다시 만나요.');
-    if(at<0)return no('오답 노트에 있는 문제만 복습할 수 있어요.');
-    s.wrong.splice(at,1);l.day=day;l.stars++;const c=CONSTELLATIONS[l.index];let completed=null;
-    if(l.stars>=c.stars.length){l.unlocked.push(c.id);l.index++;l.stars=0;completed=c.id;}
-    return {ok:true,completed,message:completed?`${c.name} 완성! 루미의 그림이 열렸어요.`:`별 하나가 켜졌어요 · ${c.name} ${l.stars}/${c.stars.length}`};
   }
   if(action==='setting'){if(args.id==='quality'){if(!['standard','high','low'].includes(args.value))return no('화질을 확인하세요.');}else if(!['sound','auto','reduced','cutin'].includes(args.id)||typeof args.value!=='boolean')return no('설정 값을 확인하세요.');p.settings[args.id]=args.value;return {ok:true};}
   if(action==='twinParty'){

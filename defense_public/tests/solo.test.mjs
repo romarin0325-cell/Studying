@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
 import {runInNewContext} from 'node:vm';
 import {createProfile as mainProfile,parseProfile as mainParse,SAVE_KEY as mainKey} from '../src/profile.js';
+import {calendar} from '../src/economy.js';
 
 const src=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../src');
 const result=await build({stdin:{contents:`export {createProfile,validateProfile,command,parseProfile,SAVE_KEY} from './profile.js';export {createBattle,resumeBattle} from './battle.js';export {validDeck,serialize,step,summon} from './combat/engine.js';export {validRecord} from './monthly.js';`,resolveDir:src},bundle:true,write:false,format:'cjs',platform:'node',define:{__GARDEN_SOLO__:'true'}});
@@ -28,5 +29,5 @@ test('solo summons and restored combat keep every unit in the selected single-ch
 test('solo weekly draft, dispatch replacement and monthly records use the same one-hero constraint',()=>{
   const p=solo.createProfile(NOW);p.cleared=9;assert.ok(solo.command(p,'dispatch',{slot:0,id:'star_boy'},NOW).ok);assert.equal(p.deck.length,1);assert.ok(!p.deck.includes('star_boy'));
   assert.ok(solo.command(p,'begin',{mode:'weekly',stage:10},NOW).ok);assert.equal(p.active.offers.length,2);assert.ok(solo.command(p,'draft',{index:0},NOW).ok);assert.equal(p.active.draft.length,1);assert.equal(p.active.offers.length,0);assert.ok(solo.createBattle(p));assert.ok(solo.validateProfile(p));
-  const record={period:'2026-10',token:'solo',round:1,damage:123,seconds:20,at:NOW,deck:[p.deck[0]]};assert.ok(solo.validRecord(record));assert.equal(solo.validRecord({...record,deck:mainProfile(NOW).deck}),false);
+  const record={period:calendar(NOW).month,token:'solo',round:1,damage:123,seconds:20,at:NOW,deck:[p.deck[0]]};assert.ok(solo.validRecord(record));assert.equal(solo.validRecord({...record,deck:mainProfile(NOW).deck}),false);
 });

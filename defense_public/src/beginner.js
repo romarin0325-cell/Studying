@@ -15,12 +15,13 @@ export const BEGINNER_DAYS=Object.freeze([
   {day:3,login:{dust:1000},task:{id:'water',text:'온실에 물 주기',reward:{dreams:100}}},
   {day:4,login:{dreams:300,bouquet:2},task:{id:'gift',text:'동료에게 선물 주기',reward:{dreams:100}}},
   {day:5,login:{dreams:800},task:{id:'relic',text:'유물 소환 1회',reward:{dreams:100}}},
-  {day:6,login:{dust:1500},task:{id:'clear18',text:'스테이지 18 클리어',reward:{dreams:200}}},
-  {day:7,login:{choice:'UR'},big:true,task:{id:'clear21',text:'스테이지 21 클리어',reward:{dreams:200}}},
+  {day:6,login:{dust:1500},task:{id:'clear21',text:'스테이지 21 클리어',reward:{dreams:200}}},
+  {day:7,login:{choice:'UR'},big:true,task:{id:'draft',text:'유성 드래프트 1회 완료',reward:{dreams:200}}},
 ]);
 export const urChoices=p=>heroPool('UR',lateOpen(p.cleared)).map(id=>({id,owned:!!p.heroes[id]?.owned}));
 export function beginnerState(p){
-  const b=p.beginner,active=!!b&&!b.closed,count=b?.count||0;
-  const days=BEGINNER_DAYS.map(d=>{const unlocked=count>=d.day,done=d.task.id.startsWith('clear')?p.cleared>=Number(d.task.id.slice(5)):!!b?.did.includes(d.task.id),loginClaimed=!!b?.claimed.includes(d.day),taskClaimed=!!b?.tasks.includes(d.day);return {day:d.day,big:!!d.big,unlocked,login:{reward:d.login,claimed:loginClaimed,claimable:active&&unlocked&&!loginClaimed},task:{...d.task,done,claimed:taskClaimed,claimable:active&&unlocked&&done&&!taskClaimed}};});
+  const b=p.beginner,active=!!b&&!b.closed;
+  const pending=b?BEGINNER_DAYS.find(d=>!b.tasks.includes(d.day)):null,count=b?(pending?.day??BEGINNER_DAYS.length):0;
+  const days=BEGINNER_DAYS.map(d=>{const unlocked=d.day<=count,done=d.task.id.startsWith('clear')?p.cleared>=Number(d.task.id.slice(5)):!!b?.did.includes(d.task.id),loginClaimed=!!b?.claimed.includes(d.day),taskClaimed=!!b?.tasks.includes(d.day);return {day:d.day,big:!!d.big,unlocked,login:{reward:d.login,claimed:loginClaimed,claimable:active&&unlocked&&!loginClaimed},task:{...d.task,done,claimed:taskClaimed,claimable:active&&unlocked&&done&&!taskClaimed}};});
   const next=days.find(d=>!d.login.claimed);return {active,count,days,next:next?{day:next.day,reward:next.login.reward}:null,choice:b?.choice??null};
 }

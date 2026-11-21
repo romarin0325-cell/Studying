@@ -51,8 +51,11 @@ test('base critical hits exist from the start; garden levels apply after unlocki
   assert.deepEqual(critStats({crit:0,critDamage:0},PART_STAGES),{chance:.05,damage:1.5});
   assert.equal(stardustBonus({stardust:10},dust-1),0);assert.ok(Math.abs(stardustBonus({stardust:10},dust)-.11)<1e-12);
   const p=createProfile(NOW);p.cleared=PART_STAGES-1;p.beds.stardust=34;p.idleAt=NOW-20*HOUR;
-  assert.equal(idleReward(p,NOW),Math.floor(20*(TUNING.idleDustPerHour+levelOf(PART_STAGES-1)*2)),'no bonus before the bed opens');
-  p.cleared=dust;assert.equal(idleReward(p,NOW),Math.floor(20*(TUNING.idleDustPerHour+60*2)*1.35),'idle dust grows with the level, not the intro');
+  assert.equal(idleReward(p,NOW),4*(168+levelOf(PART_STAGES-1)*24),'no bonus before the bed opens');
+  p.cleared=dust;const perHour=(168+60*24)*1.35;
+  assert.equal(idleReward(p,NOW),Math.floor(4*perHour));
+  p.idleAt=NOW-4*HOUR;assert.equal(idleReward(p,NOW),Math.floor(4*perHour));
+  p.idleAt=NOW-2.5*HOUR;assert.equal(idleReward(p,NOW),Math.floor(2.5*perHour));
 });
 
 test('growing a dawn bed: stage lock and cost',()=>{

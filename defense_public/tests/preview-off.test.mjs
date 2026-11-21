@@ -5,7 +5,7 @@ import {HEROES,TIERS} from '../src/content.js';
 import {TEAM_SIZE} from '../src/team-config.js';
 import {REQUEST_HEROES} from '../src/preview/requests-data.js';
 
-const NOW=Date.parse('2026-10-04T03:00:00Z');
+const NOW=Date.parse('2026-10-03T15:00:00Z');
 
 test('oath, twin and requests work without the preview flag and the profile still validates',()=>{
   const p=createProfile(NOW);

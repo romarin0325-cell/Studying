@@ -1,9 +1,8 @@
-// Bond (호감도): ten hearts per companion, filled by points from greetings and gifts.
-// Gifts come from one place, the gift basket in the garden: one every 8 hours (candy, letter, bouquet in turn).
-// One companion fed every gift and greeting reaches ten hearts in about two to three weeks.
+// Bond (호감도): ten hearts per companion, filled by greetings, gifts, requests and battles.
 export const BOND_MAX=10;
 export const BOND_STEPS=Object.freeze([40,50,60,70,75,80,85,90,95,105]);
-export const GREETING_POINTS=10,GIFT_POINTS=10,FAVORITE_POINTS=20;
+export const GREETING_POINTS=50,GIFT_POINTS=50,FAVORITE_POINTS=100;
+export const BATTLE_BOND=Object.freeze({win:8,loss:3});
 export const GIFT_IDS=Object.freeze(['candy','letter','bouquet']);
 export const GIFTS=Object.freeze({
   candy:{name:'별사탕',color:'#ffd36a'},

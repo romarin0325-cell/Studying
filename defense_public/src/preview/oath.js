@@ -1,4 +1,4 @@
-import {HERO,BOSS_ORDER,MAIN_STAGES} from '../content.js';
+import {HERO,BOSS_ORDER,MAIN_STAGES,TUNING} from '../content.js';
 import {season} from './season.js';
 
 export const OATH_WAVES=9;
@@ -32,7 +32,8 @@ export const OATHS=Object.freeze([
   {id:'glass',group:'pressure',points:4,name:'유리 코어',text:'코어 생명력이 10입니다.'},
 ]);
 export const OATH=Object.fromEntries(OATHS.map(o=>[o.id,o]));
-export const OATH_BANDS=Object.freeze([{score:5,reward:130},{score:10,reward:150},{score:15,reward:180},{score:20,reward:200},{score:25,reward:220},{score:30,reward:240},{score:35,reward:260},{score:40,reward:280},{score:45,reward:320},{score:50,reward:380}]);
+const oathBand=(score,base)=>({score,reward:base*TUNING.challengeRewardScale});
+export const OATH_BANDS=Object.freeze([oathBand(5,130),oathBand(10,150),oathBand(15,180),oathBand(20,200),oathBand(25,220),oathBand(30,240),oathBand(35,260),oathBand(40,280),oathBand(45,320),oathBand(50,380)]);
 const OLD_POINTS=Object.freeze({1:Object.freeze({tyrant:3,nobeam:3,rabbits:2}),2:Object.freeze({nobeam:3,rabbits:2})});
 export const validOathRules=rules=>Object.hasOwn(TIER_BASE_BY_RULES,rules);
 export const oathPoints=(id,rules=OATH_RULES)=>OLD_POINTS[rules]?.[id]??OATH[id]?.points??0;

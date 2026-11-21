@@ -20,11 +20,11 @@ test('nobeam and rabbits are mutually exclusive in either selection order',()=>{
   for(const id of ['nobeam','rabbits'])assert.equal(oathConflict([id]),'');
 });
 
-test('oath early rewards rise while each later band still pays more',()=>{
-  const old=[100,120,150,180,200,230,250,270,320,380];
+test('oath bands pay triple their base reward and rise at each score threshold',()=>{
+  const base=[130,150,180,200,220,240,260,280,320,380];
   for(const [i,band] of OATH_BANDS.entries()){
     assert.equal(band.score,(i+1)*5);
-    assert.ok(i<8?band.reward>old[i]:band.reward===old[i]);
+    assert.equal(band.reward,3*base[i]);
     if(i)assert.ok(band.reward>OATH_BANDS[i-1].reward);
   }
 });

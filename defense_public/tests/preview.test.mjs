@@ -1,28 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-globalThis.__GARDEN_PREVIEW__=true;
-globalThis.__GARDEN_UNLOCKED__=true;
-
 const {createProfile,command,validateProfile,parseProfile,ProfileStore,SAVE_KEY}=await import('../src/profile.js');
 const E=await import('../src/combat/engine.js');
 const {createBattle,resumeBattle}=await import('../src/battle.js');
 const {HERO,HEROES,CHAPTERS,TIERS,TIER_IDS,BOSS_ORDER,CHALLENGE_WAVES,ARTIFACTS,DEFAULT_DECK,MAIN_STAGES}=await import('../src/content.js');
-const {HOUR,calendar,stageDust}=await import('../src/economy.js');
+const {HOUR,stageDust}=await import('../src/economy.js');
 const {weeklyReward,monthlyReward}=await import('../src/monthly.js');
-const {season}=await import('../src/preview/season.js');
+const {season,eventWindow}=await import('../src/preview/season.js');
 const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
 const {twinBosses,twinBandReward,twinState,twinLocks,TWIN_WAVES,TWIN_STAGE,TWIN_SIDE}=await import('../src/preview/twin.js');
 const {requestTracker,requestGoal,REQUEST,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
 const {FAVORITE}=await import('../src/bond.js');
 const {REQUEST_REWARD:REQUEST_PAY,REQUEST_HEROES,REQUESTS,AFTERWORDS}=await import('../src/preview/requests-data.js');
-const {testGrant,TEST_TOOLS}=await import('../src/test-unlock.js');
+const {unlockProfile,testGrant,TEST_TOOLS}=await import('../src/test-unlock.js');
 
-const NOW=Date.parse('2026-10-04T03:00:00Z');
-const DAY=86400000;
+const NOW=Date.parse('2026-10-03T15:00:00Z'),TWIN_NOW=NOW+4*HOUR;
 const close=(a,b,m)=>{assert.ok(Math.abs(a-b)<1e-8,m||`${a} !~ ${b}`);};
-const profile=()=>createProfile(NOW);
-const ok=(p,action,args={},now=NOW)=>{const r=command(p,action,args,now);assert.equal(r.ok,true,r.message);return r;};
+const profile=()=>unlockProfile(createProfile(NOW));
+const ok=(p,action,args={},now=p.active?.mode==='twin'||action==='begin'&&args.mode==='twin'?TWIN_NOW:NOW)=>{const r=command(p,action,args,now);assert.equal(r.ok,true,r.message);return r;};
 const enemyWeight={grunt:1,armor:3.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
 function legacyWave(wave,chapter=0,mode='main',tier='easy'){
@@ -57,24 +53,14 @@ function spawn(s,kind,hp,wave=s.wave){
   s.wave=wave;s.queue=[{kind,hp}];s.spawnIn=0;s.enemies=[];E.step(s,.05);return s.enemies[0];
 }
 
-test('a season is the Monday pair that contains this week, including weeks before 1970',()=>{
-  const s=season(NOW),{weekNo}=calendar(NOW);
-  assert.equal(s.index,Math.floor(weekNo/2));
-  assert.equal(s.id,`S${s.index}`);
-  assert.equal(s.start,Date.UTC(1970,0,5)+s.index*2*7*DAY-9*HOUR);
-  assert.equal(s.end,s.start+14*DAY);
-  assert.equal(s.daysLeft,Math.max(1,Math.ceil((s.end-NOW)/DAY)));
-  assert.equal(season(s.start).id,s.id);
-  assert.equal(season(s.end-1).id,s.id);
-  assert.equal(season(s.end-1).daysLeft,1);
-  assert.equal(season(s.end).index,s.index+1);
-  let odd=null;
-  for(let t=Date.UTC(1969,10,1);t<Date.UTC(1970,0,4);t+=DAY){const w=calendar(t).weekNo;if(w<0&&w%2){odd=t;break;}}
-  assert.ok(odd);
-  const w=calendar(odd).weekNo,even=Math.floor(w/2)*2;
-  assert.equal(season(odd).index,Math.floor(w/2));
-  assert.equal(season(odd).start,Date.UTC(1970,0,5)+even*7*DAY-9*HOUR);
-  assert.notEqual(even,w-w%2);
+test('a season covers two consecutive event windows, including before the KST epoch',()=>{
+  for(const start of [-17*HOUR,NOW]){
+    const span=8*HOUR,index=(start+9*HOUR)/span,end=start+span,id=`S${index}`;
+    assert.deepEqual(season(start),{index,id,start,end,msLeft:span});
+    assert.deepEqual(season(start+4*HOUR),{index,id,start,end,msLeft:4*HOUR});
+    assert.deepEqual(season(end-1),{index,id,start,end,msLeft:1});
+    assert.equal(season(end).index,index+1);assert.equal(eventWindow(end-1).index,index*2+1);
+  }
 });
 
 test('oath and twin waves sample the challenge curve and leave main, weekly and monthly plans unchanged',()=>{
@@ -208,39 +194,40 @@ test('starlight oath pays each band once, ignores a failed run and keeps an olde
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:first});
   const win=ok(p,'settle',{token:p.active.token,round:9,won:true,deck:['zeke']});
   assert.equal(win.score,oathScore('easy',first));assert.equal(win.score,10);assert.equal(win.newBest,true);
-  assert.deepEqual(win.bands,[{score:5,reward:130},{score:10,reward:150}]);assert.equal(win.reward,280);
-  assert.equal(p.dreams,dreams+280);assert.deepEqual(win.record.deck,LEFT);assert.equal(p.oath.paid,2);assert.equal(validateProfile(p),true);
+  assert.deepEqual(win.bands,[{score:5,reward:390},{score:10,reward:450}]);assert.equal(win.reward,840);
+  assert.equal(p.dreams,dreams+840);assert.deepEqual(win.record.deck,LEFT);assert.equal(p.oath.paid,2);assert.equal(validateProfile(p),true);
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:first});
   const again=ok(p,'settle',{token:p.active.token,round:9,won:true});
-  assert.equal(again.newBest,false);assert.deepEqual(again.bands,[]);assert.equal(p.dreams,dreams+280);
+  assert.equal(again.newBest,false);assert.deepEqual(again.bands,[]);assert.equal(p.dreams,dreams+840);
   const more=['lowstar','nobeam','drought','heavy','untrained','purse'];
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:more});
   const better=ok(p,'settle',{token:p.active.token,round:9,won:true});
-  assert.equal(better.score,18);assert.deepEqual(better.bands,[{score:15,reward:180}]);assert.equal(p.dreams,dreams+460);assert.equal(p.oath.lifetime.score,18);
+  assert.equal(better.score,18);assert.deepEqual(better.bands,[{score:15,reward:540}]);assert.equal(p.dreams,dreams+1380);assert.equal(p.oath.lifetime.score,18);
   ok(p,'begin',{mode:'oath',tier:'easy',oaths:first});
   const lost=ok(p,'settle',{token:p.active.token,round:1,won:false});
-  assert.equal(lost.score,0);assert.equal(p.oath.best.score,18);assert.equal(p.dreams,dreams+460);
+  assert.equal(lost.score,0);assert.equal(p.oath.best.score,18);assert.equal(p.dreams,dreams+1380);
   const frozen=JSON.stringify(p);oathState(p,NOW);assert.equal(JSON.stringify(p),frozen);
 });
 
 test('event rewards and settlement follow the starting season',()=>{
-  assert.equal(OATH_BANDS.reduce((n,b)=>n+b.reward,0),2360);
-  assert.deepEqual(TIER_IDS.map(t=>[0,1,2].map(i=>twinBandReward(t,i))),[[98,124,189],[173,218,334],[255,323,493]]);
-  const boundary=Date.parse('2026-10-11T15:00:00Z'),before=boundary-60000,after=boundary+60000;
+  assert.equal(OATH_BANDS.reduce((n,b)=>n+b.reward,0),7080);
+  assert.deepEqual(TIER_IDS.map(t=>[0,1,2].map(i=>twinBandReward(t,i))),[[294,372,567],[519,654,1002],[765,969,1479]]);
+  const boundary=season(NOW).end,after=boundary+60000;
   for(const mode of ['oath','twin']){
+    const before=boundary-(mode==='oath'?4*HOUR:0)-60000;
     const p=profile();if(mode==='twin')ok(p,'twinParty',partyOf(),before);
     const initial=mode==='oath'?{mode,tier:'hard',oaths:[]}:{mode,tier:'easy',side:'left'};
     const begin=mode==='oath'?{mode,tier:'hard',oaths:['drought']}:{mode,tier:'easy',side:'right'};
     ok(p,'begin',initial,before-60000);const first=ok(p,'settle',{token:p.active.token,round:mode==='oath'?9:4,won:true},before-30000);assert.ok(first.reward>0);
     ok(p,'begin',begin,before);const out=ok(p,'settle',{token:p.active.token,round:mode==='oath'?9:6,won:true},after);
-    const state=p[mode];assert.equal(state.period,season(before).id);assert.deepEqual(out.bands.map(b=>b.reward),[mode==='oath'?180:124]);assert.ok(parseProfile(structuredClone(p)));
+    const state=p[mode];assert.equal(state.period,season(before).id);assert.deepEqual(out.bands.map(b=>b.reward),[mode==='oath'?540:372]);assert.ok(parseProfile(structuredClone(p)));
     if(mode==='oath'){assert.equal(state.best.at,boundary-1);assert.equal(state.lifetime.at,boundary-1);assert.equal(oathState(p,after).best,null);}
     else{assert.equal(state.records.easy.right.at,boundary-1);assert.equal(state.best.easy.at,boundary-1);assert.equal(state.lifetime.at,boundary-1);assert.equal(twinState(p,after).best.easy,null);}
     const q=profile();if(mode==='twin')ok(q,'twinParty',partyOf(),before);ok(q,'begin',begin,before);q[mode]=structuredClone(state);q[mode].period=season(after).id;
     if(mode==='oath'){q.oath.best=null;q.oath.paid=0;}const saved=structuredClone(q[mode]);const guarded=ok(q,'settle',{token:q.active.token,round:6,won:true},after);assert.deepEqual(q[mode],saved);assert.equal(guarded.reward,0);
     const lost=profile();if(mode==='twin')ok(lost,'twinParty',partyOf(),before);ok(lost,'begin',initial,before);const failure=ok(lost,'settle',{token:lost.active.token,round:0,won:false},after);assert.equal(lost[mode].period,season(before).id);assert.equal(failure.reward,0);assert.ok(parseProfile(structuredClone(lost)));
   }
-  const start=Date.parse('2026-11-08T15:00:00Z'),p=profile();ok(p,'begin',{mode:'oath',tier:'hard',oaths:[]},start+7*DAY-60000);ok(p,'settle',{token:p.active.token,round:9,won:true},start+7*DAY+60000);assert.equal(oathState(p,start+7*DAY).best.score,12);assert.equal(oathState(p,start+14*DAY).best,null);
+  const p=profile();ok(p,'begin',{mode:'oath',tier:'hard',oaths:[]},TWIN_NOW-60000);ok(p,'settle',{token:p.active.token,round:9,won:true},TWIN_NOW+60000);assert.equal(oathState(p,TWIN_NOW).best.score,12);assert.equal(oathState(p,boundary).best,null);
 });
 
 test('twin parties stay disjoint, the latest run replaces that side, and each tier pays its own bands',()=>{
@@ -248,11 +235,11 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   assert.match(command(fresh,'twinParty',partyOf(LEFT,[...LEFT]),NOW).message,/같은 동료/);
   assert.match(command(fresh,'twinParty',partyOf(LEFT,RIGHT,['hourglass'],['hourglass']),NOW).message,/같은 유물/);
   assert.match(command(fresh,'twinParty',partyOf(LEFT.slice(0,4),RIGHT),NOW).message,/5명/);
-  assert.match(command(fresh,'begin',{mode:'twin',side:'left'},NOW).message,/5명/);
+  assert.match(command(fresh,'begin',{mode:'twin',side:'left'},TWIN_NOW).message,/5명/);
   ok(fresh,'twinParty',partyOf());assert.deepEqual(fresh.deck,deck);assert.deepEqual(fresh.equipped,equipped);
   ok(fresh,'dispatch',{slot:0,id:'star_boy'});
   assert.match(command(fresh,'twinParty',partyOf(),NOW).message,/파견 중/);
-  ok(fresh,'claimDispatch',{slot:0},NOW+48*HOUR);
+  ok(fresh,'claimDispatch',{slot:0},NOW+HOUR);
   ok(fresh,'twinParty',partyOf());
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
   assert.equal(command(fresh,'twinParty',partyOf(),NOW).message,'진행 중인 쌍성 원정을 먼저 마치세요.');
@@ -283,7 +270,7 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   assert.equal(replay.newBest,false);assert.deepEqual(replay.bands,[]);
   assert.equal(fresh.twin.best.easy.total,8);assert.equal(fresh.twin.paid.easy,2);assert.equal(fresh.twin.lifetime.total,lifetimeTotal);
   assert.equal(fresh.dreams,dreams);
-  assert.equal(twinBandReward('easy',0),Math.round(75*1.3));
+  assert.equal(twinBandReward('easy',0),3*Math.round(75*1.3));
   ok(fresh,'twinParty',partyOf());assert.equal(fresh.twin.records.easy.left.round,1);assert.equal(fresh.twin.best.easy.total,8);
   const shifted={left:{deck:['guardian',...LEFT.slice(1)],relics:RELIC.slice(0,2)},right:{deck:RIGHT,relics:RELIC.slice(2,4)}};
   ok(fresh,'twinParty',shifted);assert.equal(fresh.twin.records.easy.left.round,1);assert.equal(fresh.twin.best.easy.total,8);assert.equal(fresh.twin.paid.easy,2);
@@ -291,14 +278,14 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   ok(fresh,'begin',{mode:'twin',tier:'hard',side:'left'});
   const hard=ok(fresh,'settle',{token:fresh.active.token,round:4,damage:1});
   assert.equal(hard.total,4);assert.deepEqual(hard.bands,[{tier:'hard',total:4,reward:twinBandReward('hard',0)}]);
-  assert.equal(twinBandReward('hard',0),Math.round(75*2.3));assert.equal(fresh.twin.paid.easy,2);assert.equal(fresh.twin.paid.hard,1);
+  assert.equal(twinBandReward('hard',0),3*Math.round(75*2.3));assert.equal(fresh.twin.paid.easy,2);assert.equal(fresh.twin.paid.hard,1);
   assert.equal(fresh.twin.lifetime.tier,'hard');assert.equal(fresh.twin.lifetime.total,4);
   const overlap={left:{deck:['guardian',...LEFT.slice(1)],relics:RELIC.slice(4,6)},right:{deck:['star_boy',...RIGHT.slice(1)],relics:RELIC.slice(6,8)}};
   ok(fresh,'twinParty',overlap);
   assert.deepEqual(twinLocks(fresh,NOW,'easy','right').heroes,fresh.twin.records.easy.left.deck);
   assert.deepEqual(twinLocks(fresh,NOW,'easy','left').heroes,fresh.twin.records.easy.right.deck);
   // The new right party shares a companion with the left record: entering is allowed, its result stays and the left record is cleared.
-  ok(fresh,'begin',{mode:'twin',tier:'easy',side:'right'},NOW);
+  ok(fresh,'begin',{mode:'twin',tier:'easy',side:'right'});
   const swap=ok(fresh,'settle',{token:fresh.active.token,round:3,damage:1});
   assert.equal(fresh.twin.records.easy.left,null);assert.equal(fresh.twin.records.easy.right.round,3);assert.equal(swap.total,3);
   assert.equal(fresh.twin.best.easy.total,8);assert.equal(fresh.twin.paid.easy,2);assert.deepEqual(swap.bands,[]);assert.equal(validateProfile(fresh),true);
@@ -350,6 +337,7 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   const p=profile(),owned=Object.fromEntries(Object.entries(p.heroes).map(([id,h])=>[id,h.owned]));
   for(const id of Object.keys(p.heroes))if(id!=='night_rabbit')p.heroes[id].owned=false;
   const first=ok(p,'requestArrive');assert.deepEqual(first.arrived,['night_rabbit-1']);
+  assert.equal(REQUEST_GAP_MIN,30*60000);assert.equal(REQUEST_GAP_SPAN,30*60000);assert.equal(REQUEST_MAX,3);
   assert.ok(p.requests.next>=NOW+REQUEST_GAP_MIN&&p.requests.next<NOW+REQUEST_GAP_MIN+REQUEST_GAP_SPAN);
   const rng=p.rng,next=p.requests.next;assert.deepEqual(command(p,'requestArrive',{},next-1).arrived,[]);assert.equal(p.rng,rng);assert.equal(p.requests.next,next);
   ok(p,'requestDecline',{id:'night_rabbit-1'});assert.deepEqual(p.requests.active,[]);
@@ -382,7 +370,7 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   const flagged=ok(p,'settle',{token:p.active.token,round:1,won:true,feats:{won:false,casts:{},bosses:2,flags:['spared']}});
   assert.deepEqual(flagged.requestsDone,['underdog-1','ash-3']);
   const dust=p.dust;ok(p,'begin',{mode:'main'});const quiet=ok(p,'settle',{token:p.active.token,round:1,won:true});
-  assert.equal(quiet.requestsDone,undefined);assert.equal(p.dust,dust+stageDust(p.results[0].stage,true));assert.equal(quiet.reward,0);
+  assert.equal(quiet.requestsDone,undefined);assert.equal(p.dust,dust+stageDust(p.results[0].stage,true,false));assert.equal(quiet.reward,0);
   ok(p,'begin',{mode:'weekly',tier:'easy'});
   while(p.active.draft.length<5)ok(p,'draft',{index:0});
   const weekly=ok(p,'settle',{token:p.active.token,round:4,won:false});
@@ -391,8 +379,8 @@ test('companion requests arrive on a cadence, progress from the active deck, and
   p.requests={next:NOW,active:[{id:'night_rabbit-1',at:NOW,seen:true,count:1,done:true}],claimed:[],after:[],read:[]};
   assert.equal(command(p,'requestDecline',{id:'night_rabbit-1'},NOW).message,'이미 끝낸 부탁은 거절할 수 없습니다.');
   const thanked=ok(p,'requestThank',{id:'night_rabbit-1'});
-  assert.equal(thanked.hero,'night_rabbit');assert.equal(thanked.gift,FAVORITE.night_rabbit);assert.equal(thanked.points,REQUEST_PAY.bond);assert.equal(thanked.afterword,false);
-  assert.equal(p.gifts.letter,999);assert.equal(p.heroes.night_rabbit.bond,1);
+  assert.equal(thanked.hero,'night_rabbit');assert.equal(thanked.gift,FAVORITE.night_rabbit);assert.equal(thanked.points,200);assert.equal(REQUEST_PAY.bond,200);assert.equal(thanked.afterword,false);
+  assert.equal(p.gifts.letter,999);assert.equal(p.heroes.night_rabbit.bond,3);assert.equal(p.heroes.night_rabbit.bondXp,50);
   p.requests.active.push({id:'night_rabbit-2',at:NOW,seen:false,count:3,done:true});
   assert.equal(ok(p,'requestThank',{id:'night_rabbit-2'}).afterword,false);
   p.requests.active.push({id:'night_rabbit-3',at:NOW,seen:false,count:1,done:true});
@@ -459,8 +447,8 @@ test('unowned companions never arrive with or progress requests, even through we
 });
 
 test('a stored oath and twin expedition still validates inside the profile store',async()=>{
-  let raw=null;const storage={getItem:()=>raw,setItem:(k,v)=>{assert.equal(k,SAVE_KEY);raw=v;}};
-  const store=new ProfileStore(storage,NOW);const p=store.value;
+  let raw=JSON.stringify(profile());const storage={getItem:()=>raw,setItem:(k,v)=>{assert.equal(k,SAVE_KEY);raw=v;}};
+  const store=new ProfileStore(storage,NOW);
   const call=(action,args,now=NOW)=>{const r=store.transact(action,args,now);assert.equal(r.ok,true,r.message);return r;};
   call('twinParty',partyOf());
   call('begin',{mode:'oath',tier:'abyss',oaths:['glass','purse']});
@@ -468,8 +456,8 @@ test('a stored oath and twin expedition still validates inside the profile store
   store.saveRun(E.serialize(battle));assert.equal(validateProfile(store.value),true);
   call('settle',{token:store.value.active.token,round:9,won:true});
   assert.equal(store.value.oath.best.score,27);assert.equal(store.value.oath.paid,5);
-  call('begin',{mode:'twin',tier:'easy',side:'right'});
-  call('settle',{token:store.value.active.token,round:4,damage:Number.POSITIVE_INFINITY});
+  call('begin',{mode:'twin',tier:'easy',side:'right'},TWIN_NOW);
+  call('settle',{token:store.value.active.token,round:4,damage:Number.POSITIVE_INFINITY},TWIN_NOW);
   assert.equal(store.value.twin.records.easy.right.damage,0);assert.equal(store.value.twin.best.easy.total,4);
   assert.equal(monthlyReward({round:1,tier:'easy'})>0,true);
   assert.equal(HEROES.length,42);

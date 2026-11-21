@@ -8,7 +8,7 @@
 //   rank   {hero, n}              `hero` reaches n stars at least once in a battle (counts once)
 //   flag   {flag, n}              a moment seen in battle: 'moonlit' (Night Rabbit casts while Silver and Snow Rabbit are on the
 //                                 board), 'spared' (Ash casts Armageddon and nobody is consumed)
-export const REQUEST_REWARD=Object.freeze({gifts:2,bond:40});
+export const REQUEST_REWARD=Object.freeze({gifts:2,bond:200});
 export const REQUESTS=Object.freeze([
   {id:'star_boy-1',hero:'star_boy',order:1,title:'형아와 특급 배달',goal:{type:'clear',with:'star_boy',n:1},hint:'별똥별소년을 편성해 원정 1번 클리어',
     arrive:['띵동! 수취인 형아 맞지? 오늘 특급 배송품은… 바로 나야!','배낭 끈도 단단히 조여 묶었어. 오늘은 형아 옆에 딱 붙어서 달릴래!','출발 신호만 내려 줘! 길은 내가 제일 먼저 뚫어 놓을게!'],

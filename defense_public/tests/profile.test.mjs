@@ -1,14 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,INTRO_STAGES,levelStage} from '../src/content.js';
-import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
+import {unlockProfile,topUpUnlocked,testGrant,TEST_TOOLS} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
-import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,draftEligible,draftPool,away,command} from '../src/profile.js';
+import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,draftEligible,draftPool,away,command,weeklyState,random} from '../src/profile.js';
 import {monthlyReward,weeklyReward,WEEKLY_ENTRIES} from '../src/monthly.js';
 import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,draftHeroEntry,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter,enhanceMultiplier,specialMultiplier,roseAttack,lateOpen} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
+import {CONSTELLATIONS} from '../src/library.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
 function memory(p=null){let raw=p?JSON.stringify(p):null;return {fail:false,getItem:()=>raw,setItem(k,v){if(this.fail)throw Error('quota');raw=v;}};}
 const storeFor=p=>new ProfileStore(memory(p),NOW);
@@ -96,7 +97,12 @@ test('daily missions come from playing, the free summons are once a day on each 
   // The relic banner has its own free single a day; the season banner has none and a free ten does not exist.
   const r=storeFor(createProfile(NOW)),r0=r.value.dreams;call(r,'draw',{banner:'relic',count:1,free:true});assert.equal(r.value.dreams,r0);assert.equal(r.value.daily.relicFree,true);assert.equal(r.value.daily.free,false);assert.equal(r.value.relicDraws,1);
   assert.equal(r.transact('draw',{banner:'relic',count:1,free:true},NOW).ok,false,'one free relic summon a day');call(r,'draw',{banner:'normal',count:1,free:true});
-  assert.equal(r.transact('draw',{banner:'relic',count:1,free:true},NOW+24*HOUR).ok,true,'the next day it is free again');
+  call(r,'pet');const midnight=Date.parse('2026-10-04T15:00:00Z');
+  assert.equal(r.transact('draw',{banner:'relic',count:1,free:true},midnight-1).ok,false);
+  assert.equal(r.transact('pet',{},midnight-1).ok,false);
+  assert.equal(r.transact('draw',{banner:'relic',count:1,free:true},midnight).ok,true);
+  assert.equal(r.transact('draw',{banner:'normal',count:1,free:true},midnight).ok,true);
+  assert.equal(r.transact('pet',{},midnight).ok,true);
   for(const [banner,count] of [['season',1],['relic',10],['normal',10]])assert.equal(storeFor(createProfile(NOW)).transact('draw',{banner,count,free:true},NOW).ok,false,banner+' '+count);
   call(s,'begin',{mode:'main',stage:1});call(s,'settle',{token:s.value.active.token,won:false,round:0,merges:5});assert.equal(s.value.daily.merges,5);
   call(s,'daily',{id:'merge'});call(s,'daily',{id:'combat'});assert.equal(s.transact('daily',{id:'merge'},NOW).ok,false);
@@ -165,15 +171,16 @@ test('older saves gain the relic patch entries',()=>{
   for(const id of ['spotlight','royal_crown','dream_crystal'])assert.deepEqual(loaded.relics[id],{owned:false,enhance:0,copies:0});
 });
 
-test('a dispatch cannot consume the last five battle heroes and has a fixed 24-hour receipt',()=>{
+test('a dispatch cannot consume the last five battle heroes and has a fixed one-hour receipt',()=>{
   const p=createProfile(NOW);p.cleared=9;const s=storeFor(p);
   assert.equal(s.transact('dispatch',{slot:0,id:'star_boy'},NOW).ok,false);
   const q=createProfile(NOW);q.cleared=9;q.heroes.queen.owned=true;const extra=storeFor(q);
-  call(extra,'dispatch',{slot:0,id:'star_boy'});
+  assert.equal(call(extra,'dispatch',{slot:0,id:'star_boy'}).message,'파견 출발 · 1시간 후 귀환');
   assert.ok(away(extra.value,'star_boy'));assert.equal(extra.value.deck.length,5);assert.ok(!extra.value.deck.includes('star_boy'));
   assert.equal(extra.transact('deck',{ids:DEFAULT_DECK},NOW).ok,false);
   assert.equal(extra.transact('begin',{mode:'main',stage:10,deck:DEFAULT_DECK},NOW).ok,false);
-  const d=extra.value.dispatches[0];assert.equal(d.end-d.start,TUNING.dispatchHours*HOUR);
+  const d=extra.value.dispatches[0];assert.equal(d.end-d.start,HOUR);
+  const malformed=structuredClone(extra.value);malformed.dispatches[0].end+=1;assert.equal(validateProfile(malformed),false);
   assert.ok(d.dust>d.reward&&d.reward>=1,'dust is the main dispatch reward');
   call(extra,'bed',{id:'rose'});assert.equal(extra.value.dispatches[0].reward,d.reward);assert.equal(extra.value.dispatches[0].dust,d.dust);
   assert.equal(extra.transact('claimDispatch',{slot:0},d.end-1).ok,false);
@@ -203,28 +210,32 @@ test('weekly draft survives reload, excludes dispatched heroes and produces five
   assert.equal(reload.value.weeklyRuns,1);assert.deepEqual(reload.value.weeklyBest,{round:3,won:false,tier:'easy',reward:weeklyReward('easy',3,false)});
 });
 
-test('the draft opens three times a week and pays the week only up to its best record',()=>{
+test('the draft allows three entries per four-hour period and pays its best record',()=>{
   const p=createProfile(NOW);p.cleared=TUNING.beds.crit.unlock-5;for(const h of HEROES)p.heroes[h.id].owned=true;const s=storeFor(p);
   const run=(tier,round,won)=>{call(s,'begin',{mode:'weekly',tier});for(let i=0;i<5;i++)call(s,'draft',{index:0});const before=s.value.dreams,r=call(s,'settle',{token:s.value.active.token,round,won});assert.equal(s.value.dreams-before,r.reward);return r;};
-  const first=run('easy',6,false);assert.equal(first.reward,weeklyReward('easy',6,false));assert.equal(first.newBest,true);assert.equal(first.left,2);
+  const first=run('easy',6,false);assert.equal(first.reward,3*Math.round(250*1.3));assert.equal(first.newBest,true);assert.equal(first.left,2);
   const worse=run('easy',4,false);assert.equal(worse.reward,0,'a lower record pays nothing');assert.equal(worse.newBest,false);assert.equal(worse.left,1);
   assert.equal(s.value.weeklyBest.round,6);
   const best=run('hard',18,true);assert.equal(best.reward,weeklyReward('hard',18,true)-weeklyReward('easy',6,false),'a better record pays the difference');
   assert.equal(best.newBest,true);assert.equal(best.left,0);assert.equal(best.earned,weeklyReward('hard',18,true));assert.equal(best.paidBefore,weeklyReward('easy',6,false));
-  assert.equal(s.value.dreams,600+weeklyReward('hard',18,true),'three runs pay one weekly reward');
-  const fourth=s.transact('begin',{mode:'weekly',tier:'easy'},NOW);assert.equal(fourth.ok,false);assert.match(fourth.message,/입장 횟수/);
+  assert.equal(s.value.dreams,600+weeklyReward('hard',18,true),'three runs pay only the period best');
+  const {end}=calendar(NOW).periods.draft;assert.equal(end-calendar(NOW).periods.draft.start,4*HOUR);
+  const fourth=s.transact('begin',{mode:'weekly',tier:'easy'},end-1);assert.equal(fourth.ok,false);assert.match(fourth.message,/입장 횟수/);
   assert.equal(s.value.weeklyRuns,3);assert.ok(validateProfile(s.value));
-  call(s,'begin',{mode:'weekly',tier:'easy'},NOW+7*24*HOUR);assert.equal(s.value.weeklyRuns,1,'Monday resets the entries');assert.equal(s.value.weeklyBest,null);
+  assert.deepEqual(weeklyState(s.value,end),{runs:0,left:3,best:null});
+  call(s,'begin',{mode:'weekly',tier:'easy'},end);assert.equal(s.value.weeklyRuns,1);assert.equal(s.value.weekly,calendar(end).week);assert.equal(s.value.weeklyBest,null);
   const bad=structuredClone(s.value);bad.weeklyRuns=4;assert.equal(validateProfile(bad),false);
-  const bad2=structuredClone(s.value);bad2.active=null;bad2.weekly=null;assert.equal(validateProfile(bad2),false,'no runs without a week');
+  for(const wrong of [null,calendar(end-1).week,calendar(end).month,'2026-10-04']){
+    const bad=structuredClone(s.value);bad.weekly=wrong;assert.equal(validateProfile(bad),false);
+  }
 });
 
-test('one-entry saves keep their week: the entry counts once and its result becomes the best record',()=>{
+test('the single-entry save shape keeps the draft period and recovers its best record',()=>{
   const p=createProfile(NOW);p.cleared=40;p.weekly=calendar(NOW).week;delete p.weeklyRuns;delete p.weeklyBest;
-  p.results=[{at:NOW-HOUR,mode:'weekly',stage:4,round:9,reward:weeklyReward('hard',9,false),won:false,tier:'hard'}];
+  p.results=[{at:NOW,mode:'weekly',stage:4,round:9,reward:weeklyReward('hard',9,false),won:false,tier:'hard'}];
   const m=parseProfile(p);assert.ok(m);assert.equal(m.weeklyRuns,1);assert.deepEqual(m.weeklyBest,{round:9,won:false,tier:'hard',reward:weeklyReward('hard',9,false)});
   const fresh=createProfile(NOW);delete fresh.weeklyRuns;delete fresh.weeklyBest;const n=parseProfile(fresh);assert.equal(n.weeklyRuns,0);assert.equal(n.weeklyBest,null);
-  // A settled entry whose receipt left the 30-result history keeps the week closed, so it cannot pay twice.
+  // A settled entry missing its receipt keeps the period closed to prevent duplicate payment.
   const lost=createProfile(NOW);lost.cleared=40;lost.weekly=calendar(NOW).week;delete lost.weeklyRuns;delete lost.weeklyBest;lost.results=[];
   const l=parseProfile(lost);assert.equal(l.weeklyRuns,WEEKLY_ENTRIES);assert.equal(l.weeklyBest,null);assert.equal(command(l,'begin',{mode:'weekly',tier:'easy'},NOW).ok,false);
   // A draft still running from the old rule has paid nothing: it settles in full and leaves two entries.
@@ -426,7 +437,7 @@ test('unlockProfile owns every companion (three below ten hearts to try gifts), 
   assert.equal(validateProfile(p),true);
 });
 
-test('a 20-hour dispatch migrates onto 24 hours and old dailies gain accel',()=>{
+test('the legacy dispatch migration retains the receipt and applies the one-hour duration',()=>{
   const raw=createProfile(NOW);raw.cleared=9;raw.heroes.queen.owned=true;
   raw.dispatches=[{slot:0,hero:'star_boy',start:NOW,end:NOW+20*HOUR,reward:77,dust:3}];
   raw.deck=raw.deck.filter(id=>id!=='star_boy');raw.deck.push('queen');
@@ -444,34 +455,46 @@ test('a 20-hour dispatch migrates onto 24 hours and old dailies gain accel',()=>
   assert.equal(filled.daily.accel,false);assert.deepEqual(filled.pity,{normal:0,season:4});
 });
 
-test('daily acceleration shifts every running dispatch once and a wrong answer still spends the day',()=>{
-  const idle=storeFor(createProfile(NOW));
-  assert.equal(idle.transact('accelerate',{correct:true},NOW).ok,false);assert.equal(idle.value.daily.accel,false);
-  const late=createProfile(NOW);late.cleared=9;late.heroes.queen.owned=true;const done=storeFor(late);
-  call(done,'dispatch',{slot:0,id:'star_boy'});
-  assert.equal(done.transact('accelerate',{correct:true},done.value.dispatches[0].end).ok,false);
-  assert.equal(done.value.daily.accel,false);
-  const wrong=createProfile(NOW);wrong.cleared=9;wrong.heroes.queen.owned=true;const w=storeFor(wrong);
-  call(w,'dispatch',{slot:0,id:'star_boy'});const end=w.value.dispatches[0].end,reward=w.value.dispatches[0].reward;
-  const miss=call(w,'accelerate',{correct:false});
-  assert.equal(miss.shifted,0);assert.equal(miss.hours,undefined);assert.equal(miss.message,'오늘의 가속은 내일 다시 할 수 있습니다.');
-  assert.equal(w.value.dispatches[0].end,end);assert.equal(w.value.daily.accel,true);
-  assert.equal(w.transact('accelerate',{correct:true},NOW).ok,false);
-  const next=call(w,'accelerate',{correct:true},NOW+23*HOUR);
-  assert.equal(next.shifted,1);assert.equal(next.hours,4);assert.equal(w.value.dispatches[0].reward,reward);
-  assert.equal(w.value.dispatches[0].end,end-HOUR);assert.equal(w.value.dispatches[0].end-w.value.dispatches[0].start,TUNING.dispatchHours*HOUR);
-  const p=createProfile(NOW);p.cleared=27;p.heroes.queen.owned=true;p.heroes.luna.owned=true;const s=storeFor(p);
-  call(s,'dispatch',{slot:0,id:'star_boy'});
-  call(s,'dispatch',{slot:1,id:'queen'},NOW+20*HOUR);
-  const [a,b]=s.value.dispatches.map(d=>({end:d.end,reward:d.reward})),when=NOW+22*HOUR;
-  const hit=call(s,'accelerate',{correct:true},when);
-  assert.equal(hit.shifted,2);assert.equal(hit.hours,4);
-  assert.equal(hit.message,'정답입니다. 진행 중인 파견 2건을 최대 4시간 앞당겼습니다.');
-  assert.equal(s.value.dispatches[0].end,a.end-Math.min(4*HOUR,a.end-when));
-  assert.equal(s.value.dispatches[1].end,b.end-Math.min(4*HOUR,b.end-when));
-  assert.equal(s.value.dispatches[0].reward,a.reward);assert.equal(s.value.dispatches[1].reward,b.reward);
-  for(const d of s.value.dispatches)assert.equal(d.end-d.start,TUNING.dispatchHours*HOUR);
-  assert.equal(s.transact('accelerate',{correct:true},when).ok,false);
+test('the time-hour tool shifts all waiting timers without changing the clock or receipts',()=>{
+  const p=createProfile(NOW);p.cleared=18;p.heroes.queen.owned=true;p.heroes.luna.owned=true;
+  for(const [slot,id] of [[0,'queen'],[1,'luna']])assert.ok(command(p,'dispatch',{slot,id},NOW).ok);
+  assert.ok(command(p,'requestArrive',{},NOW).arrived.length);
+  assert.deepEqual(TEST_TOOLS.find(t=>t.kind==='time-hour'),{kind:'time-hour',label:'시간 1시간 앞으로'});
+  const before=structuredClone(p);assert.equal(command(p,'testGrant',{kind:'time-hour'},NOW).ok,false);assert.deepEqual(p,before);
+  assert.ok(testGrant(p,'time-hour',NOW));assert.equal(p.clockAt,before.clockAt);assert.deepEqual(p.daily,before.daily);assert.deepEqual(p.beginner,before.beginner);
+  assert.equal(p.idleAt,before.idleAt-HOUR);assert.equal(p.basket.at,before.basket.at-HOUR);
+  assert.deepEqual(p.dispatches,before.dispatches.map(d=>({...d,start:d.start-HOUR,end:d.end-HOUR})));
+  assert.equal(p.requests.next,before.requests.next-HOUR);assert.deepEqual(p.requests.active,before.requests.active.map(r=>({...r,at:r.at-HOUR})));
+  assert.ok(validateProfile(p));assert.equal(command(p,'basket',{},NOW).gifts.length,4);
+  assert.ok(command(p,'idle',{},NOW).reward>0);assert.ok(command(p,'claimDispatch',{slot:0},NOW).ok);
+});
+
+test('the trial-day tool resets dailies and greeting while leaving the sprout board intact',()=>{
+  const p=createProfile(NOW),s=storeFor(p);call(s,'pet');call(s,'draw',{banner:'normal',count:1,free:true});
+  call(s,'beginnerClaim',{day:1,kind:'login'});const before=structuredClone(s.value);
+  assert.ok(testGrant(s.value,'trial-day',NOW));assert.deepEqual(s.value.beginner,before.beginner);
+  assert.equal(s.value.daily.day,before.daily.day);assert.equal(s.value.daily.free,false);assert.equal(s.value.petDay,'');
+  assert.equal(s.value.clockAt,before.clockAt);assert.ok(validateProfile(s.value));
+});
+
+test('a main win lights the album from stage 1 and releases a painting at each boundary',()=>{
+  const s=storeFor(createProfile(NOW));
+  const settle=won=>{call(s,'begin',{mode:'main',stage:1});return call(s,'settle',{token:s.value.active.token,round:6,won});};
+  const loss=settle(false);assert.equal(loss.star,null);assert.equal(loss.dust,20);
+  let first=true;
+  for(const c of CONSTELLATIONS)for(let stars=1;stars<=c.stars.length;stars++){
+    const completed=stars===c.stars.length?c.id:null,r=settle(true);
+    assert.deepEqual(r.star,{constellation:c.id,stars,of:c.stars.length,completed});
+    assert.equal(r.dust,first?180:60);assert.equal(r.clearReward,first?160:0);first=false;
+    assert.equal(s.value.study.library.stars,completed?0:stars);
+    if(completed)assert.equal(s.value.study.library.unlocked.at(-1),c.id);
+  }
+  const library={index:7,stars:0,unlocked:CONSTELLATIONS.map(c=>c.id),day:''};
+  assert.equal(settle(true).star,null);assert.deepEqual(parseProfile(s.raw).study,{wrong:[],solved:[],library});
+  for(const [field,value] of [['wrong',[{kind:'concept'}]],['solved',['concept:x']],['wrong',{}],['solved',null]]){
+    const bad=structuredClone(s.value);bad.study[field]=value;assert.equal(parseProfile(bad),null);
+  }
+  const bad=structuredClone(s.value);bad.study.library.day=calendar(NOW).day;assert.equal(parseProfile(bad),null);
 });
 
 test('paid summons fill the exchange gauge; at the threshold the player picks the companion, and a natural UR never empties it',()=>{
@@ -486,7 +509,7 @@ test('paid summons fill the exchange gauge; at the threshold the player picks th
   const p=createProfile(NOW);p.dreams=100000;p.pity.normal=TUNING.pity.normal-1;
   const one=command(p,'draw',{banner:'normal',count:1},NOW);assert.equal(one.items[0].pity,undefined);assert.equal(p.pity.normal,TUNING.pity.normal);
   assert.equal(command(p,'draw',{banner:'normal',count:1,free:true},NOW).ok,true);assert.equal(p.pity.normal,TUNING.pity.normal,'free pulls do not count');
-  // Exchange: any of the six normal URs; the season gauge takes only this month's guardian.
+  // The season exchange uses the guardian of the current window.
   assert.equal(command(p,'pityClaim',{banner:'normal',id:'doom'},NOW).ok,false,'a season guardian is not in the normal pool');
   const pick=command(p,'pityClaim',{banner:'normal',id:'queen'},NOW);
   assert.equal(pick.ok,true);assert.equal(pick.item.id,'queen');assert.equal(pick.item.pity,true);assert.equal(p.heroes.queen.owned,true);assert.equal(p.pity.normal,0);assert.equal(p.history[0].pity,true);
@@ -494,40 +517,31 @@ test('paid summons fill the exchange gauge; at the threshold the player picks th
   p.pity.season=TUNING.pity.season;const guardian=calendar(NOW).guardian,other=HEROES.find(h=>h.hidden&&h.id!==guardian).id;
   assert.equal(command(p,'pityClaim',{banner:'season',id:other},NOW).ok,false);
   assert.equal(command(p,'pityClaim',{banner:'season',id:guardian},NOW).ok,true);assert.equal(p.pity.season,0);assert.ok(validateProfile(p));
-  // The season gauge carries across months.
-  p.pity.season=37;command(p,'draw',{banner:'season',count:1},NOW+40*24*HOUR);assert.equal(p.pity.season,38);
+  // The season gauge carries across guardian windows.
+  p.pity.season=37;command(p,'draw',{banner:'season',count:1},calendar(NOW).periods.guardian.end);assert.equal(p.pity.season,38);
 });
 
-test('boost is a doubled-UR 10-pull and may add ten free bonus draws',()=>{
-  const [c,r,sr,ur]=TUNING.heroRates,start=c-(ur*2-ur)+r+sr,end=c+r+sr;
-  const step=rng=>{let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;return x>>>0||1;};
-  let state=1,found=0;for(let i=0;i<5000000&&!found;i++){const n=step(state),value=n/4294967296;if(value>=start&&value<end)found=state;else state=n;}
-  assert.ok(found);
-  const make=()=>{const q=createProfile(NOW);q.rng=found;q.dreams=100000;q.pity.normal=3;return q;};
-  const boosted=make(),plain=make();
-  const rb=command(boosted,'draw',{banner:'normal',count:10,boost:true},NOW);
-  const rp=command(plain,'draw',{banner:'normal',count:10},NOW);
-  assert.equal(rb.ok,true);assert.equal(HERO[rb.items[0].id].rarity,'UR');assert.equal(rb.items[0].pity,undefined);
-  assert.equal(HERO[rp.items[0].id].rarity,'SR');assert.deepEqual(rp.bonus,[]);
-  assert.equal(boosted.dreams,100000-TUNING.heroDrawCost*10);assert.equal(boosted.pity.normal,13);assert.equal(rb.pity.normal,13);
-  assert.equal(boosted.daily.free,false);
-  let sawBonus=false,sawNone=false;
-  for(let i=0;i<120&&!(sawBonus&&sawNone);i++){
-    const q=createProfile(NOW);q.dreams=100000;q.rng=(0x13579bdf+i*997)>>>0||1;q.pity.normal=4;
-    const dreams=q.dreams,result=command(q,'draw',{banner:'season',count:10,boost:true},NOW);
-    assert.equal(result.ok,true,result.message);assert.equal(result.items.length,10);assert.equal(q.dreams,dreams-TUNING.heroDrawCost*10);
-    assert.equal(q.daily.free,false);assert.equal(q.pity.season,10);assert.equal(q.pity.normal,4);assert.equal(result.items.some(item=>item.bonus),false);
-    if(result.bonus.length){sawBonus=true;assert.equal(result.bonus.length,10);assert.ok(result.bonus.every(item=>item.bonus===true&&item.banner==='season'&&item.pity===undefined&&q.history.includes(item)));assert.equal(q.pity.season,10);}
-    else{sawNone=true;assert.deepEqual(result.bonus,[]);}
+test('paid ten-pulls on every banner have ten percent luck and bonuses leave pity unchanged',()=>{
+  for(const banner of ['normal','season','relic']){
+    const seeds={rng:0x13579bdf},trials=2000;let wins=0;
+    for(let i=0;i<trials;i++){
+      random(seeds);const q=createProfile(NOW);q.dreams=100000;q.rng=seeds.rng;q.pity={normal:4,season:7};
+      const r=command(q,'draw',{banner,count:10},NOW),cost=10*(banner==='relic'?80:100);
+      assert.equal(r.ok,true,r.message);assert.equal(r.items.length,10);assert.equal(r.cost,cost);assert.equal(q.dreams,100000-cost);
+      assert.equal(q.daily.free,false);assert.deepEqual(r.pity,{normal:banner==='normal'?14:4,season:banner==='season'?17:7});
+      assert.ok(r.items.every(item=>!item.bonus&&!item.pity));assert.equal(r.bonus.length,r.lucky?10:0);
+      assert.ok(r.bonus.every(item=>item.bonus===true&&item.banner===banner&&!item.pity&&q.history.includes(item)));
+      wins+=Number(r.lucky);
+    }
+    assert.ok(Math.abs(wins/trials-.1)<.02,`${banner} luck: ${wins}/${trials}`);
   }
-  assert.ok(sawBonus&&sawNone);
   const refused=createProfile(NOW);refused.dreams=100000;
-  assert.equal(command(refused,'draw',{banner:'normal',count:1,boost:true},NOW).ok,false);
-  assert.equal(command(refused,'draw',{banner:'relic',count:1,boost:true},NOW).ok,false);
-  assert.equal(command(refused,'draw',{banner:'normal',count:1,free:true,boost:true},NOW).ok,false);
+  for(const boost of [true,false])assert.equal(command(refused,'draw',{banner:'normal',count:10,boost},NOW).ok,false);
   assert.equal(refused.daily.free,false);assert.equal(refused.dreams,100000);assert.equal(refused.pity.normal,0);
-  const relic=command(refused,'draw',{banner:'relic',count:1},NOW);assert.equal(relic.pity.normal,0);assert.deepEqual(relic.bonus,[]);
-  const free=command(refused,'draw',{banner:'normal',count:1,free:true},NOW);assert.equal(free.ok,true);assert.equal(refused.pity.normal,0);assert.equal(refused.daily.free,true);
+  for(const [banner,free] of [['relic',false],['relic',true],['normal',true],['normal',false],['season',false]]){
+    const single=command(refused,'draw',{banner,count:1,free},NOW);assert.equal(single.ok,true);assert.equal(single.lucky,false);assert.deepEqual(single.bonus,[]);
+  }
+  assert.deepEqual(refused.pity,{normal:1,season:1});assert.equal(refused.daily.free,true);
 });
 
 test('drawing relics during a saved run keeps the snapshotted collection bonus',()=>{
@@ -571,10 +585,10 @@ test('an old active run without a relic snapshot copies the saved run, and bad s
 
 test('Behemoth joins the normal UR pool and exchange only after part one, never the guardian rotation',()=>{
   const p=createProfile(NOW);assert.equal(HERO.behemoth.hidden,false);assert.ok(!HIDDEN.includes('behemoth'));
-  for(let month=0;month<12;month++)assert.notEqual(calendar(Date.UTC(2027,month,15,3)).guardian,'behemoth');
+  for(let period=0;period<HIDDEN.length;period++)assert.notEqual(calendar(NOW+period*4*HOUR).guardian,'behemoth');
   assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
   // Force a normal UR and Behemoth's actual slot; later additions need not leave it last.
-  const behemothUr=open=>{const pool=heroPool('UR',open),at=pool.indexOf('behemoth'),rolls=[.999999,at<0?.999999:(at+.5)/pool.length];return drawCharacter(()=>rolls.shift(),false,calendar(NOW).guardian,null,1,open);};
+  const behemothUr=open=>{const pool=heroPool('UR',open),at=pool.indexOf('behemoth'),rolls=[.999999,at<0?.999999:(at+.5)/pool.length];return drawCharacter(()=>rolls.shift(),false,calendar(NOW).guardian,null,open);};
   assert.notEqual(behemothUr(false),'behemoth');assert.equal(behemothUr(true),'behemoth');
   p.pity.normal=TUNING.pity.normal;p.pity.season=TUNING.pity.season;p.dreams=100000;
   for(const stage of [0,PART_STAGES-1]){

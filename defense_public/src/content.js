@@ -97,16 +97,16 @@ export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;
 export const BLESSINGS=source.BLESSINGS,BLESSING=source.BLESSING,TRANSFORM_ART=source.TRANSFORM_ART;
 export const ASSET_PATHS=source.ASSET_PATHS;
 export const TUNING=Object.freeze({
-  heroDrawCost:100,relicDrawCost:80,heroRates:[.70,.25,.048,.002],pity:{normal:200,season:200},
-  // Gift basket: one gift every 8 hours (candy → letter → bouquet), up to three waiting.
-  basketHours:8,basketMax:3,dailyBonus:30,
+  heroDrawCost:100,relicDrawCost:80,heroRates:[.698,.25,.048,.004],pity:{normal:200,season:200},
+  // Gift basket: one gift every 15 minutes (candy → letter → bouquet), up to eight waiting.
+  basketHours:.25,basketMax:8,dailyBonus:30,
   // Stat renewal v1: duplicates +5% each with a support milestone every 5.
   // levelCost* only converts old garden-level saves into greenhouse beds.
   duplicateGrowth:1.58,enhanceStep:.05,levelStep:.04,levelCostBase:90,levelCostGrowth:1.12,
-  specialStep:.10,specialEvery:5,dispatchHours:24,dispatchStageStep:.05,
+  specialStep:.10,specialEvery:5,dispatchHours:1,dispatchStageStep:.05,
   // Dispatch pays mostly dust; a small crystal share keeps it worth sending once dust is spare.
-  dispatchDust:1.5,dispatchDreams:.3,
-  idleHours:24,idleDustPerHour:14,firstClearBase:160,firstClearStep:10,
+  dispatchDust:3,dispatchDreams:.6,
+  idleHours:4,idleDustPerHour:168,idleDustStep:24,firstClearBase:160,firstClearStep:10,challengeRewardScale:3,
   // Dream greenhouse beds (docs/GARDEN_BALANCE.md): a steady slope to the knee, a firmer one to knee2, then a soft cap.
   // Each bed's knee meets the next bed's opening (rose 25 ≈ level 15, spring 18 ≈ level 30). Later beds start at the
   // price of that stage's income and meet the earlier beds' prices in the soft cap. knee is the bloom (만개) stage.

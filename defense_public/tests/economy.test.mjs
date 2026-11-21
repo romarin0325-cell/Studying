@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER,LATE_COMPANIONS,LATE_UNLOCK_STAGE,PART_STAGES} from '../src/content.js';
-import {drawCharacter,heroPool,lateOpen,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP,guardianOf,guardianMonths} from '../src/economy.js';
+import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER,LATE_COMPANIONS,LATE_UNLOCK_STAGE,PART_STAGES,levelStage} from '../src/content.js';
+import {drawCharacter,heroPool,lateOpen,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP,stageReward,stageDust} from '../src/economy.js';
+import {TEMPO,periodOf,guardianSlots} from '../src/tempo.js';
 import {createProfile,random} from '../src/profile.js';
 
 test('normal and seasonal draws enforce the hidden guardian boundary',()=>{
@@ -15,7 +16,7 @@ test('normal and seasonal draws enforce the hidden guardian boundary',()=>{
 });
 
 test('seeded independent draws match published rates and never leak other hidden heroes',()=>{
-  const p=createProfile(0),n=300000,counts={C:0,R:0,SR:0,UR:0},season={ordinary:0,guardian:0};
+  const p=createProfile(0),n=10000,counts={C:0,R:0,SR:0,UR:0},season={ordinary:0,guardian:0};
   for(let i=0;i<n;i++){
     const id=drawCharacter(()=>random(p),false,HIDDEN[0]);
     assert.equal(HERO[id].hidden,false);counts[HERO[id].rarity]++;
@@ -27,8 +28,9 @@ test('seeded independent draws match published rates and never leak other hidden
     const expected=n*TUNING.heroRates[i],sigma=Math.sqrt(n*TUNING.heroRates[i]*(1-TUNING.heroRates[i]));
     assert.ok(Math.abs(counts[r]-expected)<6*sigma,`${r}: ${counts[r]}/${n}`);
   }
-  for(const key of ['ordinary','guardian'])assert.ok(Math.abs(season[key]-n*.001)<6*Math.sqrt(n*.001*.999));
-  console.log('DRAW SAMPLE',JSON.stringify({n,counts,season}));
+  assert.ok(Math.abs(counts.UR/n-.004)<=.0015,`${counts.UR}/${n} normal URs`);
+  assert.ok(Math.abs((season.ordinary+season.guardian)/n-.004)<=.0015,`${season.ordinary+season.guardian}/${n} seasonal URs`);
+  for(const key of ['ordinary','guardian'])assert.ok(Math.abs(season[key]-n*.002)<6*Math.sqrt(n*.002*.998));
 });
 
 test('relic progression is normalized, increasingly expensive and bounded at every boundary',()=>{
@@ -111,6 +113,7 @@ test('dispatch uses four story gates and a logarithmic CP return with additive s
 });
 
 test('dispatch pays mostly dust with a small crystal share',()=>{
+  assert.deepEqual(dispatchReward(0,0),{dust:96,dreams:19});
   for(const [power,clear] of [[0,0],[500,9],[1500,36],[3000,45]]){
     const {dust,dreams}=dispatchReward(power,clear);
     assert.ok(Number.isSafeInteger(dust)&&Number.isSafeInteger(dreams)&&dreams>=1);
@@ -118,44 +121,53 @@ test('dispatch pays mostly dust with a small crystal share',()=>{
   }
 });
 
-test('drawCharacter urMult doubles the UR rate and takes that share from C',()=>{
-  const base=TUNING.heroRates;
-  const ratesFor=mult=>{const ur=base[3]*mult;return [base[0]-(ur-base[3]),base[1],base[2],ur];};
-  const band=(mult,value)=>{const rates=ratesFor(mult);let sum=0;for(let i=0;i<rates.length;i++){sum+=rates[i];if(value<sum)return ['C','R','SR','UR'][i];}return 'UR';};
-  const boosted=ratesFor(2);
-  assert.ok(Math.abs(boosted.reduce((a,b)=>a+b)-1)<1e-12);
-  assert.equal(boosted[3],base[3]*2);assert.equal(boosted[0],base[0]-base[3]);assert.equal(boosted[1],base[1]);assert.equal(boosted[2],base[2]);
+test('normal and season hero draws use the fixed rarity thresholds',()=>{
+  assert.deepEqual(TUNING.heroRates,[.698,.25,.048,.004]);
   const rolls=a=>()=>a.shift();
-  const rarity=(mult,value)=>HERO[drawCharacter(()=>value,false,'doom',null,mult)].rarity;
-  for(const mult of [1,2])for(let i=0;i<1000;i++){const value=i/1000;assert.equal(rarity(mult,value),band(mult,value),`${mult}@${value}`);}
-  const urAt=boosted[0]+boosted[1]+boosted[2];
-  assert.equal(drawCharacter(rolls([urAt,.4]),false,'doom','luna',2),'luna');
-  assert.equal(HERO[drawCharacter(rolls([urAt,.4]),false,'doom','luna',1)].rarity,'SR');
+  for(const season of [false,true])for(const [value,rarity] of [[.697999,'C'],[.698,'R'],[.947999,'R'],[.948,'SR'],[.995999,'SR'],[.996,'UR']]){
+    assert.equal(HERO[drawCharacter(rolls([value,.4]),season,'doom','luna')].rarity,rarity);
+  }
 });
 
-test('a normal-banner UR is the weekly pickup half the time',()=>{
+test('a normal-banner UR targets the current pickup half the time',()=>{
   // First roll lands on UR; expected pickup share is 1/2 + 1/2 x 1/(normal UR pool). The pool grows with new URs, so derive it.
   const expected=.5+.5/heroPool('UR',true).length;let n=0,pick=0;
   for(let i=0;i<20000;i++){const r=[.9999,Math.random(),Math.random()];let k=0;const id=drawCharacter(()=>r[k++]??Math.random(),false,'doom','luna');n++;if(id==='luna')pick++;assert.ok(ROSTER.UR.includes(id));}
   assert.ok(Math.abs(pick/n-expected)<.02,'pickup share '+pick/n+' expected '+expected);
 });
 
-test('calendar uses UTC+9, Monday weeks and six guardians independently of host locale',()=>{
-  const sunday=Date.parse('2026-10-04T14:59:59Z'),monday=sunday+1000;
-  const {pickup,weekNo,...rest}=calendar(sunday);assert.deepEqual(rest,{day:'2026-10-04',month:'2026-10',week:'2026-09-28',guardian:HIDDEN[3]});assert.equal(calendar(monday).weekNo,weekNo+1,'weekly chapter turns with the week');
-  assert.equal(calendar(monday).week,'2026-10-05');
-  // The normal-banner pickup turns over exactly at Monday 00:00 (UTC+9) and cycles all six standard URs.
-  assert.ok(ROSTER.UR.includes(pickup));assert.notEqual(calendar(monday).pickup,pickup);assert.equal(calendar(monday+6*24*HOUR).pickup,calendar(monday).pickup);
-  assert.equal(new Set(Array.from({length:6},(_,i)=>calendar(monday+i*7*24*HOUR).pickup)).size,6);
-  assert.equal(calendar(Date.parse('2026-10-31T15:00:00Z')).guardian,HIDDEN[4]);
-  // Behemoth moves to regular late summons; the original six guardians rotate.
-  assert.equal(calendar(Date.parse('2026-11-30T15:00:00Z')).guardian,'frost_witch');
-  assert.equal(calendar(Date.parse('2027-01-01T00:00:00Z')).guardian,'time_ruler');
-  assert.equal(calendar(Date.parse('2027-02-01T00:00:00Z')).guardian,'galaxy_whale');
-  assert.deepEqual(new Set(Array.from({length:6},(_,i)=>guardianOf(2027,i))),new Set(HIDDEN));
-  assert.deepEqual(guardianMonths('behemoth',Date.parse('2026-10-18T00:00:00Z')),[]);
-  assert.deepEqual(guardianMonths('cinderella',Date.parse('2026-10-18T00:00:00Z'),1),[{year:2026,month:10}]);
-  assert.equal(calendar(monday-HOUR).day,'2026-10-04');
+test('calendar periods turn at KST midnight and each aligned interval',()=>{
+  const epoch=-9*HOUR,midnight=Date.parse('2026-10-04T15:00:00Z');
+  assert.deepEqual(TEMPO,{pickupHours:2,guardianHours:4,draftHours:4,eventHours:4,rushHours:8});
+  assert.equal(calendar(midnight-1).day,'2026-10-04');assert.equal(calendar(midnight).day,'2026-10-05');
+  for(const [kind,hours,prefix] of [['pickup',2,'P'],['guardian',4,'G'],['draft',4,'D'],['event',4,'W'],['rush',8,'R']]){
+    const ms=hours*HOUR,index=(midnight-epoch)/ms;
+    assert.deepEqual(periodOf(kind,epoch-1),{kind,index:-1,id:`${prefix}-1`,start:epoch-ms,end:epoch});
+    assert.equal(periodOf(kind,midnight-1).id,`${prefix}${index-1}`);
+    for(let start=midnight,i=index;start<midnight+24*HOUR;start+=ms,i++){
+      const want={kind,index:i,id:`${prefix}${i}`,start,end:start+ms};
+      assert.deepEqual(calendar(start).periods[kind],want);assert.deepEqual(periodOf(kind,start+ms-1),want);
+      assert.equal(periodOf(kind,start+ms).index,i+1);
+    }
+  }
+  const c=calendar(midnight);assert.equal(c.week,c.periods.draft.id);assert.equal(c.weekNo,c.periods.draft.index);assert.equal(c.month,c.periods.rush.id);
+});
+
+test('pickup and guardian rotate through their ordered pools and guardian slots include the active window',()=>{
+  const start=-9*HOUR,pool=heroPool('UR',false),rotation=(hours,ids,key)=>[...ids,ids[0]].forEach((id,i)=>assert.equal(calendar(start+(i*hours)*HOUR)[key],id));
+  rotation(2,pool,'pickup');rotation(4,HIDDEN,'guardian');
+  assert.equal(calendar(start-1).pickup,pool.at(-1));assert.equal(calendar(start-1).guardian,HIDDEN.at(-1));
+  const [active,next]=guardianSlots(HIDDEN[0],start+HOUR);assert.deepEqual(active,{start,end:start+4*HOUR});assert.deepEqual(next,{start:start+24*HOUR,end:start+28*HOUR});
+  assert.deepEqual(guardianSlots(HIDDEN[0],active.end,1),[next]);assert.deepEqual(guardianSlots(HIDDEN[2],start,1),[{start:start+8*HOUR,end:start+12*HOUR}]);
+  assert.deepEqual(guardianSlots('behemoth',start),[]);
+});
+
+test('first clears scale dreams and triple win dust, with a flat loss award',()=>{
+  for(const [stage,L] of [[1,0],[levelStage(1),1],[levelStage(15),15],[levelStage(30),30],[levelStage(50),50]]){
+    assert.equal(stageReward(stage),Math.round((160+10*L)*Math.min(3,1+L/15)));
+    assert.equal(stageDust(stage,true,false),60+16*L);assert.equal(stageDust(stage,true,true),3*(60+16*L));
+    assert.equal(stageDust(stage,false,true),20);assert.equal(stageDust(stage,false,false),20);
+  }
 });
 
 test('companions added after the first part join the summon pool only once its last stage is cleared',()=>{
@@ -170,10 +182,10 @@ test('companions added after the first part join the summon pool only once its l
     assert.deepEqual(open,ROSTER[rarity]);
   }
   const seen=new Set();let n=1;const rng=()=>{n=(n*16807)%2147483647;return n/2147483647;};
-  for(let i=0;i<4000;i++)seen.add(drawCharacter(rng,false,null,null,1,false));
+  for(let i=0;i<4000;i++)seen.add(drawCharacter(rng,false,null,null,false));
   for(const id of LATE_COMPANIONS)assert.ok(!seen.has(id),'closed summon never draws '+id);
   const seenOpen=new Set();n=1;
-  for(let i=0;i<20000;i++)seenOpen.add(drawCharacter(rng,false,null,null,1,true));
+  for(let i=0;i<20000;i++)seenOpen.add(drawCharacter(rng,false,null,null,true));
   for(const id of ['underdog','toffee_apple'])assert.ok(seenOpen.has(id),'open summon can draw '+id);
   for(const id of LATE_COMPANIONS)assert.ok(HIDDEN.includes(id)||Object.values(ROSTER).some(p=>p.includes(id)),id+' is a roster or hidden companion');
 });

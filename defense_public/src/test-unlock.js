@@ -2,17 +2,15 @@
 // Most companions start at ten hearts (memorials open); three start lower so gifts can be tried.
 // Deck, partner and equipped relics stay as created.
 import {ARTIFACT,ARTIFACTS,HEROES,MAIN_STAGES,levelStage} from './content.js';
-import {COURSE} from './course.js';
-import {questionOf} from './quiz.js';
 import {PREVIEW} from './team-config.js';
-import {calendar} from './economy.js';
+import {calendar,HOUR} from './economy.js';
 export const UNLOCKED_STAGE=MAIN_STAGES;
 export function unlockProfile(p){
   for(const [id,entry] of Object.entries(p.heroes)){entry.owned=true;entry.bond={star_boy:6,siren:3,snow_rabbit:8}[id]??10;entry.bondXp=0;}
   // Relics at a mid-game spread (C Lv.7, R Lv.5, SR Lv.4, UR Lv.2) with spare duplicates to try levelling.
   for(const [id,entry] of Object.entries(p.relics)){const r=ARTIFACT[id].rarity;entry.owned=true;entry.enhance={C:6,R:4,SR:3,UR:1}[r];entry.copies={C:20,R:8,SR:5,UR:3}[r];}
   p.cleared=UNLOCKED_STAGE;p.dreams=99999;p.dust=99999;
-  // A finished account: no tutorial, no first-week board (the new-player trial in the test tools plays those).
+  // The new-player trial is where the unlocked build plays the tutorial and sprout board.
   p.ftue={legacy:true,done:[],seen:[],skipped:false,tours:[]};p.beginner=null;p.firstTen=true;
   // Content preview: a late-game account (greenhouse beds at their soft caps, every companion +15) so the challenge tiers
   // read as they would for a player near stage 90, and the three request companions below max hearts.
@@ -23,8 +21,9 @@ export function unlockProfile(p){
 // Currencies are capped like every other currency. Returns the toast, or '' for an unknown tool.
 export const TEST_GRANT=10000,TEST_CAP=9999999;
 export const TEST_TOOLS=Object.freeze([
-  {kind:'event-flip',label:'격주 이벤트 바꾸기'},
+  {kind:'event-flip',label:'이벤트 바꾸기'},
   {kind:'trial-day',label:'다음 접속일로'},
+  {kind:'time-hour',label:'시간 1시간 앞으로'},
   {kind:'ftue-reset',label:'튜토리얼 처음부터'},
   {kind:'wallet',label:'꿈의결정·별가루 +10,000'},
   {kind:'dreams',label:'꿈의결정 +100,000'},
@@ -41,8 +40,15 @@ export const TEST_TOOLS=Object.freeze([
 export function testGrant(p,kind='wallet',now=Date.now()){
   const add=(key,n)=>{p[key]=Math.min(TEST_CAP,p[key]+n);};
   switch(kind){
-    case 'event-flip':p.eventFlip=!p.eventFlip;return '격주 이벤트를 바꿨어요.';
-    case 'trial-day':if(p.beginner&&!p.beginner.closed){p.beginner.count=Math.min(7,p.beginner.count+1);p.beginner.last=calendar(now).day;}p.daily={day:calendar(now).day,combat:false,merges:0,idle:false,free:false,relicFree:false,bouquet:false,accel:false,claimed:[]};p.petDay='';return '다음 접속일로 이동했어요.';
+    case 'event-flip':p.eventFlip=!p.eventFlip;return '이벤트를 바꿨어요.';
+    case 'trial-day':p.daily={day:calendar(now).day,combat:false,merges:0,idle:false,free:false,relicFree:false,bouquet:false,accel:false,claimed:[]};p.petDay='';return '다음 접속일로 이동했어요.';
+    case 'time-hour':{
+      const earlier=at=>Math.max(0,at-HOUR);
+      p.idleAt=earlier(p.idleAt);p.basket.at=earlier(p.basket.at);
+      for(const d of p.dispatches){const shift=Math.min(HOUR,d.start);d.start-=shift;d.end-=shift;}
+      if(p.requests){p.requests.next=earlier(p.requests.next);for(const r of p.requests.active)r.at=earlier(r.at);}
+      return '시간을 1시간 앞당겼어요.';
+    }
     case 'ftue-reset':p.ftue.done=[];p.ftue.seen=[];p.ftue.tours=[];p.ftue.skipped=false;p.firstTen=false;return '튜토리얼을 초기화했어요.';
     case 'wallet':add('dreams',TEST_GRANT);add('dust',TEST_GRANT);return '테스트 지급: 꿈의결정·별가루 +10,000';
     case 'dreams':add('dreams',100000);return '테스트 지급: 꿈의결정 +100,000';
@@ -75,9 +81,5 @@ export function topUpUnlocked(p){
   if(p.heroes)for(const h of HEROES){const e=p.heroes[h.id];if(e&&!e.owned){e.owned=true;e.bond=10;e.bondXp=0;}}
   if(p.relics)for(const a of ARTIFACTS){const e=p.relics[a.id];if(e&&!e.owned){e.owned=true;e.enhance={C:6,R:4,SR:3,UR:1}[a.rarity];e.copies={C:20,R:8,SR:5,UR:3}[a.rarity];}}
   if(p.gifts)for(const id of Object.keys(p.gifts))p.gifts[id]=Math.max(p.gifts[id],30);
-  // Study: a few wrong answers to try the star library; today's star and acceleration reopen on every load.
-  const s=p.study;
-  if(s&&!s.wrong.length&&!s.library.index&&!s.library.stars)s.wrong=[...COURSE.lectures.slice(0,3).map(l=>['concept',l.quizzes[0].id]),...COURSE.terms.slice(0,3).map(t=>['term',t.quizzes[0].id])].map(([kind,id])=>{const q=questionOf(kind,id);return {kind,id,choice:(q.answer+1)%q.choices.length,at:0};});
-  if(s)s.library.day='';if(p.daily&&typeof p.daily.accel==='boolean')p.daily.accel=false;
   return p;
 }

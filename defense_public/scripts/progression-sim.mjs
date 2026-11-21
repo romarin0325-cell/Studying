@@ -1,11 +1,10 @@
 // New-player progression bench. A fresh profile plays the main stages in order through the real profile commands:
 // the first ten, ten-pulls whenever 1,000 dreams are on hand, the free daily summons, enhancement, auto formation,
-// rose watering and the first-week board, then a real battle with the in-game auto. A lost stage is tried again.
+// rose watering and the sprout board, then a real battle with the in-game auto. A lost stage is tried again.
 // It answers "how far does a new player get in the first sitting, and where do they stall?".
-//   node defense/scripts/progression-sim.mjs [--stages 27] [--players 8] [--ai basic|smart] [--tries 4] [--days 1] [--json out.json]
+//   node defense_public/scripts/progression-sim.mjs [--stages 27] [--players 8] [--ai basic|smart] [--tries 4] [--days 1] [--json out.json]
 // --ai basic: the in-game auto with no repositioning (a lazy player). smart: the measurement auto that also moves units.
-// --days N: the run spans N login days (day changes are spread evenly over the stage range), so the first-week
-// login rewards and dailies of later days arrive part-way.
+// --days N: spread KST day changes across the stage range so later dailies arrive part-way.
 import fs from 'node:fs/promises';
 import * as content from '../src/content.js';
 const {HERO,MAIN_STAGES,CHAPTERS}=content,levelOf=content.levelOf??(stage=>stage);
@@ -13,7 +12,7 @@ import {createProfile,command,teamPower} from '../src/profile.js';
 import {createBattle,clearedRounds,autoPlay as basicAuto} from '../src/battle.js';
 import {smartAutoPlay} from '../src/smart-auto.js';
 import {autoDeck,autoRelics} from '../src/auto-team.js';
-import {beginnerState,featureOpen} from '../src/beginner.js';
+import {BEGINNER_DAYS,beginnerState,featureOpen} from '../src/beginner.js';
 import {BED_IDS,bedCost,bedOpen,HOUR} from '../src/economy.js';
 import * as engine from '../src/combat/engine.js';
 
@@ -37,10 +36,10 @@ function battle(p,seedOffset){
 // Everything a player taps between battles, in the order a reward-chasing player would.
 function chores(p,now){
   const ok=(action,a={})=>command(p,action,a,now).ok;
-  const st=beginnerState(p);
-  for(const d of st.days)for(const kind of ['login','task']){
+  for(const {day} of BEGINNER_DAYS)for(const kind of ['login','task']){
+    const d=beginnerState(p).days[day-1];
     if(!d[kind].claimable)continue;
-    if(kind==='login'&&d.day===7){const pick=st.days&&['rumi','zeke','luna','jasmine','queen'].find(id=>!p.heroes[id].owned)||'rumi';ok('beginnerClaim',{day:7,kind,choice:pick});}
+    if(kind==='login'&&d.day===7){const pick=['rumi','zeke','luna','jasmine','queen'].find(id=>!p.heroes[id].owned)||'rumi';ok('beginnerClaim',{day:7,kind,choice:pick});}
     else ok('beginnerClaim',{day:d.day,kind});
   }
   ok('pet');if(featureOpen(p,'garden'))ok('basket');ok('idle');
