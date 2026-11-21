@@ -1,0 +1,39 @@
+{
+  "time": "2026-11-23T03:10:00.000Z",
+  "shots": [
+    "lobby",
+    "summon-normal",
+    "summon-season",
+    "rates",
+    "draft",
+    "hunt",
+    "event",
+    "library",
+    "garden",
+    "sprout",
+    "settings",
+    "result"
+  ],
+  "report": [
+    {
+      "side": "before",
+      "theme": "night",
+      "errors": []
+    },
+    {
+      "side": "before",
+      "theme": "bright",
+      "errors": []
+    },
+    {
+      "side": "after",
+      "theme": "night",
+      "errors": []
+    },
+    {
+      "side": "after",
+      "theme": "bright",
+      "errors": []
+    }
+  ]
+}
