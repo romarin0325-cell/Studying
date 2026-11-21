@@ -16,7 +16,7 @@ export const TERMS = {
   elite: { short: '강한 적 · 정예', firstUse: '강한 적', detail: '강한 적이 기다리는 전투입니다.', scope: '층' },
   gate: { short: '중간 보스 · 문지기', firstUse: '중간 보스', detail: '문지기를 쓰러뜨리고 다음 길을 엽니다.', scope: '층' },
   boss: { short: '보스 · 꿈의 주인', firstUse: '마지막 보스', detail: '마지막 적이 기다리는 전투입니다.', scope: '층' },
-  spring: { short: '소환의 샘', firstUse: '결정으로 동료를 뽑는 곳', detail: '결정 1개로 한 번 뽑기 · 새 동료 또는 강화', scope: '층' },
+  spring: { short: '소환의 샘', firstUse: '결정으로 동료를 뽑는 곳', detail: '결정 1개로 한 번 뽑기 · 새 동료, 강화 또는 기억', scope: '층' },
   treasure: { short: '보물방', firstUse: '유물을 얻는 곳', detail: '유물을 장착할 수 있습니다.', scope: '층' },
   event: { short: '사건', firstUse: '선택에 따라 보상이 달라지는 만남', detail: '선택의 조건과 효과를 확인할 수 있습니다.', scope: '층' },
   legend: { short: '전설군', firstUse: '전설군 · 전설·초월·이벤트 포함', detail: '전설·초월·이벤트 포함', scope: '뽑기' }

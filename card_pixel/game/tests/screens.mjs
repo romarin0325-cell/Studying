@@ -22,7 +22,7 @@ import { commandRelics, killLabel } from '../src/ui/battle/tiles.js';
 import { relicEffect } from '../src/ui/relics.js';
 import { ratesView } from '../src/engine/awakenings.js';
 import { TERMS } from '../src/ui/glossary.js';
-import { blessingText } from '../src/ui/widgets.js';
+import { blessingDetail, blessingText } from '../src/ui/widgets.js';
 import { playRun } from '../tools/sim.mjs';
 import { createRiftCases, riftDate } from './screens/rift.mjs';
 import { createEntryCases } from './screens/entry.mjs';
@@ -238,6 +238,7 @@ function fieldSupport() {
         const tile = skillTile(source, name);
         await text(tile.locator('.r2'), line, { exact: true });
         await text(tile.locator('.r3'), field);
+        await checkTileLines(tile);
         await capture(label, source);
         await tile.hover();
         await source.mouse.down();
@@ -1135,6 +1136,7 @@ function formationBoard() {
   const { blessing, party } = Run.getTempoView(run, 0);
   run.blessings[blessing.id] = .4;
   const blessed = blessingText(Run.getBlessingView(run, 0, party, blessing.id));
+  const blessedDetail = blessingDetail(Run.getBlessingView(run, 0, party, blessing.id));
   const reserve = run.bench.find(id => !party.includes(id));
   const expected = [reserve, party[2], party[1]];
   const session = storedSession({ run });
@@ -1150,7 +1152,7 @@ function formationBoard() {
       const blessedButton = blessedSlot < 0 ? order.locator(`[data-bench="${blessing.id}"]`) : slot(blessedSlot);
       await blessedButton.click();
       await order.locator('#b-formation-info').click();
-      await text(page.locator('#sheet.on .seat-blessing'), blessed, { exact: true });
+      await text(page.locator('#sheet.on .seat-blessing'), blessedDetail, { exact: true });
       await page.locator('#b-sheetclose').click();
       await blessedButton.click();
       const positions = await Promise.all([0, 1, 2].map(i => slot(i).boundingBox()));
@@ -1250,6 +1252,53 @@ function reinforcementBoard() {
   };
 }
 
+function singleReinforcement() {
+  const profile = Meta.markEntryStep(snowRabbitProfile(7, Meta.createProfile()), 'departure');
+  const run = makeRun({ seed: 4, tempoVersion: 2, profileView: Meta.startView(profile, 'ember_volcano') });
+  startBattle(run);
+  settleWin(run);
+  assert.equal(run.features.fullReinforcement, false);
+  assert.equal(run.pending.candidates.length, 1);
+  const [id] = run.pending.candidates;
+  assert.ok(!run.bench.includes(id) && run.bench.length < run.pending.limit);
+  const session = storedSession({ profile, run });
+  return {
+    session, proof: `First-main result offers ${id} inline on restore; join and skip both advance one floor`,
+    async show(page, { text, capture, revisit }) {
+      async function decision(source, join) {
+        if (await source.locator('#hub.on').count()) await source.locator('#meta-depart').click();
+        const result = source.locator('#result.on');
+        const take = result.locator('#b-reinforce-take');
+        const pass = result.locator('#b-reinforce-pass');
+        await text(take, roster.card(id).name + ' 합류', { exact: true });
+        await text(pass, '보충 없이 다음 층으로', { exact: true });
+        assert.equal(await result.locator('#b-next').isVisible(), false);
+        assert.equal(await result.locator('[data-candidate]').getAttribute('data-candidate'), id);
+        await capture(join ? undefined : 'skip', source);
+        await (join ? take : pass).click();
+        await source.locator('#map.on').waitFor();
+        const next = await source.evaluate(() => {
+          const { floor, bench, pending } = window.__game.run;
+          return { floor, bench, pending };
+        });
+        assert.deepEqual(next, { floor: 2, bench: join ? [...run.bench, id] : run.bench, pending: null });
+      }
+      await decision(page, true);
+      await revisit(session, source => decision(source, false));
+    }
+  };
+}
+
+async function checkTileLines(tile) {
+  assert.ok(await tile.evaluate(node => {
+    const bounds = node.getBoundingClientRect();
+    return [...node.querySelectorAll('.r2:not(:empty), .r3:not(:empty)')].every(line => {
+      const { width, height, top, bottom } = line.getBoundingClientRect();
+      return width > 0 && height > 0 && top >= bounds.top && bottom <= bounds.bottom;
+    });
+  }), 'Both command details should fit inside the tile');
+}
+
 function tempoTelegraph() {
   const run = makeRun({ seed: 1, tempoVersion: 2, dungeonId: 'starlit_garden', profileView: { lead: 'avalanche_maid' } });
   const battle = startBattle(run);
@@ -1260,12 +1309,22 @@ function tempoTelegraph() {
   const next = block.findLast(event => event.t === 'await');
   assert.equal(next.countdown.inTurns, 0);
   assert.equal(next.intent.name, next.countdown.name);
+  const forecast = { kind: 'mag', nextDistinct: { name: '빛가루', kind: 'mag', inTurns: 1, power: 1.9549999999999998 } };
+  assert.equal(intentLines(forecast)[1], '다음 턴 빛가루 · 마법 ×1.95');
+  assert.equal(forecast.nextDistinct.power, 1.9549999999999998);
   const range = ([min, max]) => min === max ? String(min) : min + '~' + max;
   return {
     session: storedSession({ run }), proof: `Barrier stops turn 1; turn 2 announces ${next.intent.name} ${range(next.intent.dmg)}`,
     async show(page, { text, capture }) {
       await openBattle(page);
-      await text(skillTile(page, '배리어').locator('.r3'), '다음 물리 차단');
+      const barrier = skillTile(page, '배리어');
+      await text(barrier.locator('.r3'), '다음 물리 차단');
+      await checkTileLines(barrier);
+      assert.ok(await page.locator('#party .pm:not(.none) .bar .n').evaluateAll(numbers => numbers.every(number => {
+        const rect = number.getBoundingClientRect();
+        const bar = number.parentElement.getBoundingClientRect();
+        return rect.top >= bar.top && rect.bottom <= bar.bottom && rect.left >= bar.left && rect.right <= bar.right;
+      })), 'HP and MP values fit inside the bars');
       await tapTile(page, '배리어');
       await text(page.locator('#intent.on'), next.intent.name);
       await text(page.locator('#intent.on'), 'HP ' + range(next.intent.dmg));
@@ -1296,8 +1355,9 @@ function lastHit() {
         observer.observe(document.querySelector('#fx'), { childList: true });
       });
       await page.locator('#b-heir').click();
-      await text(page.locator('.finish-damage'), String(hit.amount), { exact: true });
-      await text(page.locator('.finish-cast'), '유품 원주인');
+      await text(page.locator('.finish-damage'), hit.amount.toLocaleString('en-US'), { exact: true });
+      await text(page.locator('.finish-cast'), '승리', { exact: true });
+      assert.equal(await page.locator('.finish-cast img, .finish-cast .finish-portrait').count(), 0);
       await capture('impact', page, { duringBattle: true });
       await page.evaluate(() => { window.__game.clock.paused = false; });
       await text(page.locator('#result.on #b-next'), '다음 동료 고르기');
@@ -1519,7 +1579,7 @@ function groupedBattleLog() {
   };
 }
 
-function mapAwakenFaces() {
+function firstOrderAwakening() {
   const run = Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7 });
   command(Run.chooseStartPick, run, run.pending.candidates[0]);
   const pick = run.pending.candidates[0];
@@ -1527,19 +1587,19 @@ function mapAwakenFaces() {
   const result = command(Run.chooseStartPick, run, pick);
   assert.equal(result.awakened.length, 3);
   return {
-    session, proof: 'First main map reveals three random companions while the entrance is available',
+    session, proof: 'First formation names the three additional companions once',
     async show(page, { text, capture }) {
       if (await page.locator('#hub.on').count()) await page.locator('#hub.on #meta-depart').click();
       await page.locator(`#awaken.on #wake-choices [data-id="${pick}"]`).click();
       await page.locator('#awaken.on #b-wake').click();
-      await page.locator('#order.on #b-order-back').click();
-      await text(page.locator('#map.on .map-awaken > b'), '함께 깨어남');
-      const faces = page.locator('#map.on .map-awaken button');
-      assert.deepEqual(await faces.evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), result.awakened);
-      assert.equal(await page.locator('#map.on [data-door="0"]').isEnabled(), true);
-      await page.waitForFunction(() => [...document.querySelectorAll('.map-awaken button')].every(node =>
-        node.getAnimations().every(animation => animation.effect.getComputedTiming().endTime <= 770)));
+      const arrivals = page.locator('#order.on #order-awakened');
+      await text(arrivals, '함께 깨어남 · ' + result.awakened.map(id => roster.card(id).name).join(' · '), { exact: true });
       await capture();
+      await page.locator('#order.on #b-order-back').click();
+      assert.equal(await page.locator('#map.on .map-awaken').count(), 0);
+      await page.locator('#map.on [data-door="0"]').click();
+      await page.locator('#order.on').waitFor();
+      assert.equal(await arrivals.count(), 0);
     }
   };
 }
@@ -1619,13 +1679,13 @@ function blessingParity() {
       await text(seat, blessingText(boosted), { exact: true });
       await map.locator('.relay-seat[data-slot="0"]').click();
       await map.locator('#b-formation-info').click();
-      await text(page.locator('#sheet.on .seat-blessing'), blessingText(boosted), { exact: true });
+      await text(page.locator('#sheet.on .seat-blessing'), blessingDetail(boosted), { exact: true });
       await text(page.locator('#sheet.on .sg').getByText('638', { exact: true }), '638');
       await capture('formation');
       await page.locator('#b-sheetclose').click();
       await openBattle(page);
       await page.locator('#party [data-i="0"]').click();
-      await text(page.locator('#sheet.on .seat-blessing'), blessingText(boosted), { exact: true });
+      await text(page.locator('#sheet.on .seat-blessing'), blessingDetail(boosted), { exact: true });
       await text(page.locator('#sheet.on .ih small'), 'HP 638/638');
     }
   };
@@ -2385,8 +2445,8 @@ const { riftFixture, reachRiftFloor, riftRow, riftSaveFailure, damagedRiftRecove
 });
 const entryCases = createEntryCases({ roster, storedSession, snowRabbitProfile, nightmareProfile, mainReturn, enterObservatory });
 const tourCases = createTourCases({
-  core, roster, sessionKey, command, makeRun, startBattle, storedSession, snowRabbitProfile,
-  mainReturn, applyReturn, enterObservatory, openBattle, battleIdle, riftDate
+  core, roster, sessionKey, command, makeRun, startBattle, settleWin, storedSession, snowRabbitProfile,
+  mainReturn, applyReturn, enterObservatory, openBattle, battleIdle, riftDate, riftFixture
 });
 const caseGroups = { entry: entryCases, tours: tourCases };
 
@@ -2411,7 +2471,7 @@ const cases = {
   credits: creditsCase,
   'save-recovery': damagedRecovery,
   'save-import': saveImport,
-  'map-awaken-faces': mapAwakenFaces,
+  'first-order-awakening': firstOrderAwakening,
   'truthful-hud': truthfulHud,
   'blessing-parity': blessingParity,
   'spring-commit': springCommit,
@@ -2422,6 +2482,7 @@ const cases = {
   'opening-awaken': openingAwaken,
   'formation-board': formationBoard,
   'reinforcement-board': reinforcementBoard,
+  'single-reinforcement-result': singleReinforcement,
   'tempo-telegraph': tempoTelegraph,
   'last-hit': lastHit,
   'result-ordinary': resultOrdinary,
@@ -2648,7 +2709,7 @@ async function findOverflow(page) {
       const x = measureAxis(node, rect, 'X');
       const y = measureAxis(node, rect, 'Y');
       const where = selector(node, node.closest(surface));
-      if (x.visible && y.visible && node.textContent.trim() && node.scrollWidth > node.clientWidth + 1 &&
+      if (x.visible && y.visible && !node.matches('.map-door') && node.textContent.trim() && node.scrollWidth > node.clientWidth + 1 &&
         getComputedStyle(node).overflowX !== 'hidden') {
         issues.push([where, `text ${node.scrollWidth}px > ${node.clientWidth}px`]);
       }

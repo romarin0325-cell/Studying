@@ -141,9 +141,19 @@ async function assertMap(page, model) {
     const visible = await door.evaluate(node => {
       const line = node.querySelector('.map-door-line').getBoundingClientRect();
       const scene = node.closest('.walking-map').getBoundingClientRect();
-      return line.left >= scene.left - 1 && line.right <= scene.right + 1 && line.bottom <= scene.bottom + 1;
+      return line.left >= scene.left - 1 && line.right <= scene.right + 1 &&
+        line.top >= scene.top - 1 && line.bottom <= scene.bottom + 1;
     });
     assert.ok(visible, 'The decision line must fit inside the scene');
+  }
+  const lines = await scene.locator('.map-door-line').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().toJSON()));
+  if (lines.length === 3) {
+    for (const [index, rect] of lines.entries()) {
+      for (const next of lines.slice(index + 1)) {
+        assert.ok(rect.bottom <= next.top || next.bottom <= rect.top ||
+          rect.right <= next.left || next.right <= rect.left, 'Three-door labels must not overlap');
+      }
+    }
   }
   const actors = await scene.locator('.map-actor').evaluateAll(nodes => nodes.map(node => ({
     id: node.dataset.sheet, position: node.querySelector('small').textContent

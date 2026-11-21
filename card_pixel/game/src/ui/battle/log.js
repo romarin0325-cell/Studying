@@ -115,6 +115,7 @@ export function battleLog(events, party, enemies) {
       case 'enemyDown': add('쓰러짐', [person(event.who)], 'down'); break;
       case 'retreat': add('후퇴 · 생환', [person(event.who)], 'retreat'); break;
       case 'heirloom': add(event.skill.name, [person(event.from), person(event.to)], 'heirloom'); break;
+      case 'laststand': add('최후의 일인', [{ id: party[event.who.idx], side: 'ally' }], 'last-stand'); break;
       case 'log': {
         const actor = action?.faces[0];
         const duplicate = actor?.name && event.text?.startsWith(actor.name + '의 ' + action.text + '!');

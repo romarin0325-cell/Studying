@@ -258,7 +258,10 @@ async function playOrder({ page }) {
 
 async function playReinforce({ page }) {
   const screen = page.locator('#result.on .victory-decision');
-  await screen.locator('[data-candidate]').first().click();
+  const single = screen.locator('article[data-candidate]');
+  if (await single.count()) {
+    assert.equal(await screen.locator('#b-reinforce-pass').innerText(), '보충 없이 다음 층으로');
+  } else await screen.locator('button[data-candidate]').first().click();
   const outgoing = screen.locator('[data-release]').last();
   if (await outgoing.isVisible()) await outgoing.click();
   await screen.locator('#b-reinforce-take').click();

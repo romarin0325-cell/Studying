@@ -15,7 +15,7 @@ export function awakenScreen(run, ui) {
   const introCandidates = run.introCandidates ?? [];
   const observed = intro ? { ...run, heirlooms: { ...run.introHeirlooms, ...run.heirlooms } } : run;
   const leadPlate = id => '<div class="wake-lead win">' + faceBadge(id) +
-    '<span>첫 동행' + (observed.heirlooms[id] ? '<small>유품 · ' + esc(observed.heirlooms[id].name) + '</small>' : '') + '</span></div>';
+    '<span>대여 전투에서 함께 온 동료' + (observed.heirlooms[id] ? '<small>유품 · ' + esc(observed.heirlooms[id].name) + '</small>' : '') + '</span></div>';
 
   function line(ids) {
     return ids.map(id => '<button class="wake-face win g-' + esc(card(id).grade) + '" data-sheet="' + esc(id) + '">' +
@@ -63,7 +63,7 @@ export function awakenScreen(run, ui) {
   }
 
   const near = pending.near && card(pending.near);
-  const info = lead ? '함께 출발할 동료 1명을 선택하세요.' : intro ? TERMS.join.detail :
+  const info = intro ? '한 명을 고르면 나머지도 함께 깨어나. 추가 동료 ' + START.draws + '명은 무작위로 합류합니다.' :
     '동료를 선택하면 무작위로 ' + START.draws + '명이 추가 합류합니다.';
   const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>이번 원정 합류</h3><div class="cards">' +
     run.bench.map(id => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? TERMS.startCompanion.short : '' })).join('') + '</div>' : '';

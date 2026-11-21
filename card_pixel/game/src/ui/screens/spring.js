@@ -13,7 +13,8 @@ function rates(run, kind) {
   const label = group => group.group === 'legend' ? TERMS.legend.short : group.label;
   const summary = groups.map(group => label(group) + ' ' + percentText(group.percent)).join(' · ');
   return '<details class="spring-rates"><summary>' + esc(summary) + '</summary><p>' + TERMS.legend.detail +
-    '</p><p>' + esc(groups.map(group => label(group) + ' ' + group.count + '명').join(' · ')) + '</p></details>';
+    '</p><p>' + esc(groups.map(group => label(group) + ' ' + group.count + '명').join(' · ')) + '</p>' +
+    (kind === 'draw' && usesRepeatDraws(run) ? '<p><b>기억</b> · ' + TERMS.memory.detail + '</p>' : '') + '</details>';
 }
 
 export function springScreen(run, ui) {
@@ -77,7 +78,7 @@ export function springScreen(run, ui) {
     const pick = $('#b-pick', node);
     if (pick) pick.disabled = run.pending?.kind === 'springDraw' || repeat && !run.bench.length;
     $('#b-leave', node).disabled = run.tempoVersion !== 2 && run.pending?.kind === 'spring';
-    $('.gems', node).textContent = '◆ ' + run.crystals;
+    $('.gems', node).textContent = TERMS.crystal.short + ' ◆' + run.crystals;
     $('#sp-count', node).textContent = run.bench.length + '명';
     $('#sp-bench', node).innerHTML = benchMinis(run);
   }

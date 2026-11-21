@@ -25,9 +25,9 @@ export function runRecordSheet(run, card, openSheet, showBattleLog) {
       ['전투', `${stats.battles}회 · ${stats.turns}턴`],
       ['최고 피해', hitText(stats.bestHit, card)],
       ['쓰러진 동료', run.fallen.map(id => card(id)?.name || id).join(', ') || '없음'],
-      ['유품 사용', `${stats.heirloomsUsed}회`],
-      ['최후의 일인', `${stats.lastStands}회`],
-      ['축복 대성공', `${stats.jackpots}회`]
+      ...(run.features?.heirlooms === false ? [] : [['유품 사용', `${stats.heirloomsUsed}회`]]),
+      ...(run.features?.lastStand === false ? [] : [['최후의 일인', `${stats.lastStands}회`]]),
+      ...(run.features?.altar === false ? [] : [['축복 대성공', `${stats.jackpots}회`]])
     ])}
     ${showBattleLog && run.lastBattleLog?.length ? '<button class="btn" id="meta-latest-battle">마지막 전투 기록</button>' : ''}
   </div>`);

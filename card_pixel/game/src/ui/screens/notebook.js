@@ -33,7 +33,10 @@ const MISSION_COPY = {
 
 function missionRows(missions, claimEnabled) {
   return (missions?.current ?? []).map(period => {
-    const [label, goal, reward] = MISSION_COPY[period.kind];
+    const [label, goal, recruitReward] = MISSION_COPY[period.kind];
+    const stampOnly = period.state === 'claimed' && !period.claimedId ||
+      period.state === 'earned' && !period.candidates.length;
+    const reward = stampOnly ? '완료 도장' : recruitReward;
     const earned = missions.claimable?.filter(entry => entry.kind === period.kind).length ?? 0;
     const progress = period.kind === 'weekly' ? (period.gates ?? 0) + '회' : (period.regionIds?.length ?? 0) + '곳';
     const target = period.target + (period.kind === 'weekly' ? '회' : '곳');

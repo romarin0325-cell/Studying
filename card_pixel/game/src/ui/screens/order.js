@@ -20,7 +20,7 @@ function traitCondition(trait, name) {
   return rabbit ? ['snow', 'night', 'silver'].filter(id => id !== rabbit).map(id => name(id + '_rabbit')).join(' 또는 ') : '';
 }
 
-export function orderScreen(run, ui, { draft, onBack, onEnter } = {}) {
+export function orderScreen(run, ui, { draft, onBack, onEnter, awakened = [] } = {}) {
   ui.playMusic();
   const { core, widgets, audio, sheets } = ui;
   const { card, spr, sprite, faceBadge } = widgets;
@@ -74,8 +74,10 @@ export function orderScreen(run, ui, { draft, onBack, onEnter } = {}) {
   const firstBeats = tempo.enemies[0]?.beats.filter(beat => beat.turn === 1) ?? [];
   const firstAction = firstBeats.length === 1 ? enemyActionText(firstBeats[0]) : '';
   const title = run.daily ? '균열' : DUNGEONS[run.dungeonId].name;
+  const arrivals = awakened.length ? '<p class="map-receipt gain" role="status" id="order-awakened">함께 깨어남 · ' +
+    esc(awakened.map(name).join(' · ')) + '</p>' : '';
 
-  node.innerHTML = head(run, '출전 순서', null, { back: !!draft }) + '<div class="scroll">' +
+  node.innerHTML = head(run, '출전 순서', null, { back: !!draft }) + '<div class="scroll">' + arrivals +
     '<button class="win run-opponents" id="b-opponents"><span><b>' + esc(title) + ' ' + run.floor + '층 · 적 ' +
     door.enemies.length + '명</b><small>첫 적 ' + esc(first.name) + (firstAction ? ' · 첫 행동 ' + esc(firstAction) : '') +
     '</small></span><span class="opponent-info">정보</span></button><div class="formation"></div></div>' +

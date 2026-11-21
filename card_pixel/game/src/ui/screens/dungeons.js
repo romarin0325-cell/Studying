@@ -104,7 +104,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
     const outsidePool = Meta.startView(profile, dungeonId).companionCandidates.filter(id => !pool.some(row => row.id === id));
     const cell = row => {
       const [key, symbol, label] = status(row);
-      return `<button class="meta-cell meta-prep-cell" type="button" data-prep-id="${esc(row.id)}" data-status="${key}" aria-haspopup="dialog">
+      return `<button class="meta-cell meta-prep-cell" type="button" data-prep-id="${esc(row.id)}" data-status="${key}"${row.canInvite && !row.invited ? ' data-can-invite' : ''} aria-haspopup="dialog">
         <span class="meta-face">${widgets.face(row.id, 44)}</span><b>${name(row.id)}</b>
         <small><span aria-hidden="true">${symbol}</span> ${label}</small>
       </button>`;
@@ -117,7 +117,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
           aria-pressed="${id === difficulty}"${entry.difficulties.includes(id) ? '' : ' disabled'}>${id === 'nightmare' && lockedNightmare
           ? pixelIcon('lock', 16) : ''}${DIFFICULTY_NAME[id]}</button>`).join('')}</div>
         <p class="sm">꿈결 · 적 공격·마공 35% 감소</p>
-        ${lockedNightmare ? '<p class="sm">이 지역을 여정으로 생환하면 악몽이 열립니다.</p>' : ''}` : ''}
+        ${lockedNightmare ? '<p class="sm">이 지역을 여정으로 클리어하면 악몽이 열립니다.</p>' : ''}` : ''}
       ${canContract ? `<button class="btn meta-prep-contract" id="meta-contract-choice">악몽 계약 · ${esc(contractChoice?.name || '없음')}</button>` : ''}
       ${flags.regionRules ? `<button class="btn" id="meta-region-rule" data-rule="${esc(rule)}">지역 규칙</button>` : ''}
       <p id="meta-prep-summary" aria-live="polite">시작 ${name(lead.id)} · 샘 초대 ${invite.ids.length}/${invite.slots} · 출현 제외 ${exclude.ids.length}/${exclude.slots}</p>

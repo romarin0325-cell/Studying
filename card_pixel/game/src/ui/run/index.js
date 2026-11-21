@@ -124,19 +124,19 @@ export function enterRun(run, host) {
     }
     const draft = drafts.get(index);
     orderScreen(run, ui, {
-      draft,
+      draft, awakened,
       onBack: () => route({ browseMap: true }),
       onEnter(partyIds) {
         const result = command(Run.enterBattleDoor, { floor: draft.floor, index: draft.doorIndex, partyIds });
         mapEntry = result.ok;
         if (result.ok) {
           if (run.dungeonId === 'dawn_forest' && run.floor === 3) host.tutorial?.mark('formation', { entryDoor: null });
-          awakened = [];
           receipt = '';
         }
         return result;
       }
     });
+    awakened = [];
     if (run.dungeonId === 'dawn_forest' && run.floor === 3) {
       host.tutorial?.mark('door', { entryDoor: { runId: run.id, index } });
       host.tutorial?.sync(run);
@@ -146,10 +146,7 @@ export function enterRun(run, host) {
     core, roster, widgets, audio, sheets, icon, scene, artifacts, command, leave, route, enterDoor,
     previewDoor,
     companion: (id, blessing) => details.charSheet(run, id, { blessing }),
-    showAwakened(ids) {
-      const applied = host.profile?.()?.records?.appliedRuns ?? [];
-      if (!applied.some(id => !String(id).includes('/dawn_forest/'))) awakened = ids ?? [];
-    },
+    showAwakened(ids) { awakened = ids ?? []; },
     playMusic: () => host.runtime.music?.play(run.dungeonId)
   };
 
@@ -238,8 +235,7 @@ export function enterRun(run, host) {
         return previewDoor(door.index);
       }
       if (!browseMap && run.doors.length === 1 && run.doors[0].enemies.length) return previewDoor(0);
-      mapScreen(run, ui, { awakened, receipt });
-      awakened = [];
+      mapScreen(run, ui, { receipt });
       receipt = '';
       return;
     }

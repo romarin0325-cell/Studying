@@ -75,7 +75,7 @@ export function openEarlierRift(active, { sheets, resume, abandon }) {
   const title = [date, '균열'].filter(Boolean).join(' ');
   const prompt = () => openEarlierRift(active, { sheets, resume, abandon });
   sheets.openSheet(title, `<div class="meta-sheet rift-actions">
-    <button class="btn go" id="meta-rift-resume">${esc(title)} 이어가기</button>
+    <button class="btn go" id="meta-rift-resume" data-rift-date="${esc(date)}">${esc(title)} 이어가기</button>
     <button class="btn meta-danger" id="meta-rift-abandon">${esc([date, '도전 포기'].filter(Boolean).join(' '))}</button>
   </div>`);
   $('#meta-rift-resume').addEventListener('click', resume);

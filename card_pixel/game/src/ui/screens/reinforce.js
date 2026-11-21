@@ -14,18 +14,19 @@ export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = fals
   const kind = id => usesRepeatDraws(run) ? drawKind(run, id) : 'join';
   const { card, sprite, faceBadge } = ui.widgets;
   const candidates = (pending.candidates ?? []).slice(0, 3).filter(id => card(id));
-  const canResolve = typeof Run.resolveReinforcement === 'function';
-  let incoming = null;
+  const single = inline && candidates.length === 1;
+  let incoming = single ? candidates[0] : null;
   let outgoing = null;
   const swap = () => incoming && kind(incoming) === 'join' && replacementCount(run, 1) > 0;
 
   function submit(id, replaceId = null) {
-    if (run.pending !== pending || typeof Run.resolveReinforcement !== 'function') return;
+    if (run.pending !== pending) return;
     const result = ui.command(Run.resolveReinforcement, { key: pending.key, id, replaceId });
     if (result.ok) {
       const draw = result.draw ?? (result.joined ? { kind: 'join', id: result.joined } : null);
       if (!draw) return ui.leave();
       ui.audio.sfx.awaken();
+      if (single && draw.kind === 'join') return ui.leave();
       node.innerHTML = (inline ? '<h4>동료 보충</h4>' : head(run, '동료 보충', run.floor + '층')) +
         '<div class="' + (inline ? 'decision-body' : 'scroll') + '">' + drawCard(run, ui.widgets, draw) + '</div>' +
         '<div class="footer"><button class="btn go" id="b-reinforce-done">계속하기</button></div>';
@@ -40,15 +41,16 @@ export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = fals
     const { hp, atk, matk } = fighter.stats;
     const skills = fighter.skills.slice(0, 2).map(skill => '<span>' + esc(skill.name) +
       ' <small>' + esc(TYPE[skill.type] ?? '') + '</small></span>').join('');
-    return '<button class="win reinforce-card g-' + esc(fighter.grade) + '" data-candidate="' + esc(id) +
-      '" aria-pressed="' + (incoming === id) + '"><span class="reinforce-art">' + sprite(id) + '</span>' +
+    const tag = single ? 'article' : 'button';
+    return '<' + tag + ' class="win reinforce-card g-' + esc(fighter.grade) + '" data-candidate="' + esc(id) + '"' +
+      (single ? '' : ' aria-pressed="' + (incoming === id) + '"') + '><span class="reinforce-art">' + sprite(id) + '</span>' +
       '<span class="reinforce-copy"><span class="reinforce-name"><b>' + esc(fighter.name) + repeatBadge(run, id) + '</b><small>' +
       esc(GRADE[fighter.grade] ?? fighter.grade) + ' · <span class="el-' + esc(fighter.element) + '">' +
       esc(ELEMENT[fighter.element] ?? fighter.element) + '</span></small></span>' +
       '<small>' + TERMS[kind(id)].firstUse + '</small>' +
       '<span class="reinforce-stats">HP ' + hp + ' · 공 ' + atk + ' · 마공 ' + matk + '</span>' +
       '<span class="reinforce-trait">' + esc(traitText(fighter.trait)) + '</span>' +
-      '<span class="reinforce-skills">' + skills + '</span>' + heirloomOffer(fighter) + '</span></button>';
+      '<span class="reinforce-skills">' + skills + '</span>' + heirloomOffer(fighter) + '</span></' + tag + '>';
   }
 
   function render() {
@@ -62,14 +64,16 @@ export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = fals
           faceBadge(id, undefined, 40, run) + '</button>').join('') + '</div>' : '') +
       '<p id="reinforce-feedback" class="run-status" role="status"></p></div>' +
       (outgoing ? '<p class="loss release-loss">' + esc(card(outgoing).name + ' · ' + departureLoss(run, outgoing)) + '</p>' : '') +
-      '<div class="footer"><button class="btn" id="b-reinforce-pass">' + (full ? '현재 편성 유지' : '건너뛰기') + '</button>' +
-      '<button class="btn' + (swap() ? '' : ' go') + '" id="b-reinforce-take"' + (canResolve && incoming && (!swap() || outgoing) ? '' : ' disabled') +
-      '>' + esc(incoming ? (outgoing ? card(outgoing).name + ' 보내고 ' : '') + card(incoming).name + ' · ' + TERMS[kind(incoming)].short : '동료 고르기') + '</button></div>';
+      '<div class="footer"><button class="btn" id="b-reinforce-pass">' +
+      (single ? '보충 없이 다음 층으로' : full ? '현재 편성 유지' : '건너뛰기') + '</button>' +
+      '<button class="btn' + (swap() ? '' : ' go') + '" id="b-reinforce-take"' + (incoming && (!swap() || outgoing) ? '' : ' disabled') +
+      '>' + esc(incoming ? (outgoing ? card(outgoing).name + ' 보내고 ' : '') +
+        card(incoming).name + (single ? ' ' : ' · ') + TERMS[kind(incoming)].short : '동료 고르기') + '</button></div>';
     if (!inline) {
       show('reinforce');
       $('.scroll', node).scrollTop = scrollTop;
     }
-    for (const button of $$('[data-candidate]', node)) button.addEventListener('click', () => {
+    for (const button of $$('button[data-candidate]', node)) button.addEventListener('click', () => {
       incoming = button.dataset.candidate;
       outgoing = null;
       ui.audio.sfx.tap();
@@ -81,7 +85,7 @@ export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = fals
       render();
     });
     $('#b-reinforce-take', node).addEventListener('click', () => submit(incoming, outgoing));
-    $('#b-reinforce-pass', node).addEventListener('click', () => canResolve ? submit(null) : ui.leave());
+    $('#b-reinforce-pass', node).addEventListener('click', () => submit(null));
   }
   render();
 }

@@ -22,19 +22,20 @@ const ENTRY = {
 };
 
 const TOURS = {
-  heirloom: ['#b-heir.on, #b-next', '쓰러진 동료가 남긴 기술이야. 전투에서 한 번, MP 없이 쓸 수 있어.'],
-  'last-stand': ['#b-next, .act[data-i="0"]', '마지막 한 명은 공격·마공 ×1.5, 치명타율 +25%p를 받아.'],
-  relic: ['#b-equip, .run-relic-choice, .relic-slot:not(.empty), #b-field', '이 유물은 이번 원정 동안 적용돼.'],
+  heirloom: ['', '쓰러진 동료가 남긴 기술이야. 전투에서 한 번, MP 없이 쓸 수 있어.'],
+  'last-stand': ['', '마지막 한 명은 공격·마공 ×1.5, 치명타율 +25%p를 받아.'],
+  relic: ['', '이 유물은 이번 원정 동안 적용돼.'],
   'relic-replace': ['[data-replace]', '네 칸이 찼어. 새 유물로 바꿀 칸을 골라.'],
-  'spring-draw': ['#spring.on #b-draw', '결정 1개로 한 번 뽑아. 이미 함께라면 강해져.'],
+  'spring-draw': ['#spring.on #b-draw', '결정 1개로 한 번 뽑아. 새 동료가 합류하거나, 강화 또는 기억을 얻어.'],
   'spring-pick': ['#spring.on #b-pick', '후보 3칸은 무료로 보고, 한 명을 고를 때 결정 3개를 써.'],
-  preparation: ['#sheet.on #meta-change-lead, #sheet.on .meta-prep-cell:first-child', TERMS.springInvite.firstUse],
+  preparation: ['#sheet.on :is([data-can-invite], #meta-find-invites)', TERMS.springInvite.firstUse],
   difficulty: ['#sheet.on [data-difficulty="normal"]', '여정은 보통 난이도야. 이 지역을 여정으로 클리어하면 악몽이 열려.'],
-  region: ['#sheet.on #meta-region-rule, #battle.on #sky', '이 지역만의 전투 규칙이 있어.'],
-  'modified-door': ['', '이 문에는 전투를 바꾸는 효과가 있어.'],
-  altar: ['#altar.on #b-roll', '제단을 굴리면 동료 한 명이 이번 원정 동안 강해져.'],
-  wager: ['', '다음 전투에서 적힌 조건을 달성하면 보상을 받아.'],
-  mission: ['#notebook.on [data-mission], #notebook.on [data-mission-guide]', '이번 주나 달의 목표를 달성하면 동료를 영입할 수 있어.'],
+  region: ['#sheet.on #meta-region-rule', '이 지역만의 전투 규칙이 있어.'],
+  quirk: ['', '이 문에는 전투를 바꾸는 변덕이 있어.'],
+  affix: ['', '이 적은 접두사에 따라 달라져.'],
+  altar: ['#altar.on #b-roll', '세 번까지 굴려. 받으면 그 동료의 기존 축복을 바꿔.'],
+  wager: ['', '조건을 달성하고 그 전투에서 이기면 보상을 받아.'],
+  mission: ['#notebook.on [data-mission], #notebook.on [data-mission-guide]', '이번 주나 달의 목표를 달성하면 동료를 영입하거나 완료 도장을 받아.'],
   'daily-rift': ['#sheet.on #meta-daily-start, #sheet.on #meta-rift-resume',
     '오늘은 모두 같은 대여 동료로 시작해. 첫 도전과 연습은 따로 기록해.']
 };
@@ -70,7 +71,8 @@ export function createTutorial({ currentProfile, updateProfile, widgets, stage, 
 
   function find(selector) {
     if (!selector) return [];
-    return $$(selector).filter(node => node.getClientRects().length && !node.hidden && !node.disabled);
+    return $$(selector).filter(node => node.getClientRects().length && !node.hidden && !node.disabled &&
+      getComputedStyle(node).visibility === 'visible');
   }
 
   function basicStep(id, inBattle = false, selector) {
@@ -80,10 +82,11 @@ export function createTutorial({ currentProfile, updateProfile, widgets, stage, 
     return targets.length > 0;
   }
 
-  function tour(key, id, { selector, line, inBattle = false } = {}) {
+  function tour(key, id, { selector, line, inBattle = false, interactive = false, multiple = false } = {}) {
     const entry = currentProfile().ui.entry;
     if (entry.legacy || entry.tours.includes(id) || (visit === key && usedTour)) return false;
-    const targets = find(selector ?? TOURS[id][0]).slice(0, 1);
+    const matches = find(selector ?? TOURS[id][0]);
+    const targets = multiple ? matches : matches.slice(0, 1);
     if (!targets.length) return false;
     visit = key;
     const acknowledge = () => {
@@ -91,7 +94,8 @@ export function createTutorial({ currentProfile, updateProfile, widgets, stage, 
       updateProfile(Meta.markTour(currentProfile(), id));
       coach.hide();
     };
-    coach.show({ id: 'tour-' + id, line: line ?? TOURS[id][1], battle: inBattle, acknowledge }, targets);
+    coach.show({ id: 'tour-' + id, line: line ?? TOURS[id][1], battle: inBattle, acknowledge,
+      activate: interactive ? acknowledge : undefined }, targets);
     return true;
   }
 
@@ -130,60 +134,64 @@ export function createTutorial({ currentProfile, updateProfile, widgets, stage, 
         (!Meta.featureFlags(profile).firstMainCleared || profile.ui.tutorialReplay) && basicStep('departure')) return;
     }
 
-    if (coach.id?.startsWith('tour-') && visit === visitKey(screen, run, sheet)) return;
+    const key = visitKey(result ? 'battle-result' : screen, run, sheet);
+    if (coach.id?.startsWith('tour-') && visit === key) return;
     coach.hide();
     if (profile.ui.entry.legacy) return;
-    const key = visitKey(screen, run, sheet);
     if (visit !== key) usedTour = false;
     if (sheet) {
       if ($('.meta-prep')) {
         if (tour(key, 'preparation') || tour(key, 'difficulty')) return;
         const rule = $('#meta-region-rule')?.dataset.rule;
         if (rule) tour(key, 'region', { line: rule });
-      } else if (screen === 'hub') tour(key, 'daily-rift');
+      } else if (screen === 'hub') {
+        const resume = $('#meta-rift-resume');
+        const date = resume?.dataset.riftDate;
+        tour(key, 'daily-rift', { line: date ? date + ' 균열은 저장한 대여 동료로 이어가. 첫 도전과 연습은 따로 기록해.' : undefined });
+      }
       return;
     }
     if (screen === 'notebook') return tour(key, 'mission');
     if (!run || run.daily) return;
     if (screen === 'spring') {
-      if (!tour(key, 'spring-draw')) tour(key, 'spring-pick');
+      if (!tour(key, 'spring-draw', { interactive: true })) tour(key, 'spring-pick', { interactive: true });
     } else if (screen === 'altar') {
       tour(key, 'altar');
     } else if (screen === 'event' && run.features?.bets !== false) {
       const wager = eventChoices(run, core, roster).find(choice => choice.enabled && choice.ops.some(op => op.type === 'bet'));
       if (wager) tour(key, 'wager', { selector: `#event.on [data-choice="${CSS.escape(wager.id)}"]` });
     } else if (screen === 'map') {
-      const changed = run.doors.find(door => (run.features?.quirks !== false && door.quirk) ||
-        (run.features?.affixes !== false && door.enemies.some(enemy => enemy.affixes?.length)));
-      if (changed) {
-        const affix = run.features?.affixes !== false && changed.enemies.flatMap(enemy => enemy.affixes ?? [])[0];
-        const rule = (run.features?.quirks !== false && QUIRKS[changed.quirk]) || AFFIXES[affix];
-        if (tour(key, 'modified-door', {
-          selector: `#map.on .door-entry[data-door="${changed.index}"]`,
-          line: rule && rule.name + ' · ' + rule.desc
-        })) return;
+      const selector = door => `#map.on .door-entry[data-door="${door.index}"]`;
+      const quirky = run.features?.quirks !== false && run.doors.find(door => QUIRKS[door.quirk]);
+      if (quirky) {
+        const rule = QUIRKS[quirky.quirk];
+        if (tour(key, 'quirk', { selector: selector(quirky), line: rule.name + ' · ' + rule.desc })) return;
       }
-      const regional = run.features?.regionRules !== false && run.doors.find(door => REGIONS[door.region?.id]);
+      const prefixed = run.features?.affixes !== false && run.doors.find(door => door.enemies.some(enemy => enemy.affixes?.length));
+      if (prefixed) {
+        const affixes = [...new Set(prefixed.enemies.flatMap(enemy => enemy.affixes ?? []))].map(id => AFFIXES[id]).filter(Boolean);
+        if (affixes.length && tour(key, 'affix', { selector: selector(prefixed),
+          line: affixes.map(rule => rule.name + ' · ' + rule.desc).join(' / ') })) return;
+      }
+      const regional = run.features?.regionRules !== false && run.doors.find(door => door.enemies.length && REGIONS[door.region?.id]);
       if (regional && tour(key, 'region', {
-        selector: `#map.on .door-entry[data-door="${regional.index}"]`,
+        selector: selector(regional),
         line: REGIONS[regional.region.id].desc
       })) return;
       if (!tours.includes('relic') && run.relics.length) tour(key, 'relic', { selector: '#map.on .relic-slot:not(.empty)' });
     } else if (screen === 'treasure' || result) {
-      if (tour(key, 'relic-replace')) return;
-      if (result && battle?.run === run && battle.state.all.some(event => event.t === 'laststand') &&
-        tour(key, 'last-stand', { selector: '#b-next' })) return;
-      if (result && run.lastBattleResult?.transfers.length && tour(key, 'heirloom', { selector: '#b-next' })) return;
-      if (run.relics.length || $('#b-equip') || $('.run-relic-choice')) {
-        tour(key, 'relic', { selector: `#${screen}.on :is(#b-equip, .run-relic-choice, .relic-slot:not(.empty))` });
-      }
+      if (tour(key, 'relic-replace', { interactive: true, multiple: true })) return;
+      if (result && tour(key, 'last-stand', { selector: '#result.on [data-coach="last-stand"]' })) return;
+      if (result && tour(key, 'heirloom', { selector: '#result.on [data-coach="heirloom-transfer"]' })) return;
+      const scope = result ? '#result.on' : '#treasure.on';
+      if (tour(key, 'relic', { selector: scope + ' :is(#b-equip, .run-relic-choice)', interactive: true })) return;
+      tour(key, 'relic', { selector: scope + ' .relic-slot:not(.empty)' });
     } else if (ready) {
       if (battle.state.all.some(event => event.t === 'heirloom') &&
-        tour(key, 'heirloom', { selector: '#b-heir.on', inBattle: true })) return;
-      if (battle.state.all.some(event => event.t === 'laststand') &&
-        tour(key, 'last-stand', { selector: '#acts .act[data-i="0"]', inBattle: true })) return;
+        tour(key, 'heirloom', { selector: '#b-heir.on', inBattle: true, interactive: true })) return;
+      if (tour(key, 'last-stand', { selector: '#pa-chips [data-coach="last-stand"]', inBattle: true })) return;
       const rule = run.features?.regionRules !== false && REGIONS[run.room.region?.id];
-      if (rule) tour(key, 'region', { line: rule.desc, selector: '#sky', inBattle: true });
+      if (rule) tour(key, 'region', { line: rule.desc, selector: '#b-field', inBattle: true });
     }
   }
 

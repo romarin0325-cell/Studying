@@ -1,5 +1,5 @@
 import { $, esc } from '../dom.js';
-import { TYPE, formatRange, repeatBadge } from '../widgets.js';
+import { TYPE, formatMultiplier, formatRange, repeatBadge } from '../widgets.js';
 import { relicMarks } from '../relics.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
@@ -38,7 +38,7 @@ export function intentLines(intent, countdown, hp, buffNames = {}) {
   const clean = kind !== 'stun' && intent.rule === 'cleanse'
     ? '자기 약화 전부 해제 · 현재 ' + (Object.entries(intent.debuffs ?? {}).map(([id, value]) =>
       (buffNames[id] ?? id) + ' ' + value).join(' · ') || '약화 없음') : '';
-  const modifier = kind === 'stun' ? '행동 불가' : vulnerable ? '받는 피해 ×' + vulnerable :
+  const modifier = kind === 'stun' ? '행동 불가' : vulnerable ? '받는 피해 ×' + formatMultiplier(vulnerable) :
     kind === 'charge' ? '충전' : intent.reduction ? '다음 턴 받는 피해 ' + Math.round(intent.reduction * 100) + '% 감소' :
       intent.rule === 'swap_stats' ? '명중 뒤 공·마공, 물방·마방 교환' : clean;
   const block = resourceEffect?.preventedBy ?? intent.preventedBy;
@@ -51,7 +51,7 @@ export function intentLines(intent, countdown, hp, buffNames = {}) {
   const sameName = next?.name === intent.name && kind !== 'charge';
   const future = next?.name && next.inTurns > 0 && !sameName ?
     (next.inTurns === 1 ? '다음 턴 ' : next.inTurns + '턴 뒤 ') + [next.name, next.alt].filter(Boolean).join(' 또는 ') +
-    (TYPE[next.kind] ? ' · ' + TYPE[next.kind] + (next.power ? ' ×' + next.power : '') : '') : '';
+    (TYPE[next.kind] ? ' · ' + TYPE[next.kind] + (next.power ? ' ×' + formatMultiplier(next.power) : '') : '') : '';
   return [current, future];
 }
 
@@ -80,7 +80,7 @@ export function createHud(core, stage, sfx, widgets) {
       if (unit.charging) out.push('<i class="bad">충전 중</i>');
       for (const affix of affixLines(unit)) out.push('<i class="affix' + (affix.id === 'frenzy' && affix.active ? ' on' : '') +
         '">' + esc([affix.name, affix.text].filter(Boolean).join(' · ')) + '</i>');
-    } else if (unit.lastStand) out.push('<i class="last">최후의 일인</i>');
+    } else if (unit.lastStand) out.push('<i class="last" data-coach="last-stand">최후의 일인</i>');
     node.innerHTML = out.join('');
   }
   function bar(u, hp, max, instant) {
@@ -173,7 +173,7 @@ export function createHud(core, stage, sfx, widgets) {
   const tallyWorthy = (e, stats) => !!e.calc && ((e.calc.lines.length + (e.calc.crit ? 1 : 0)) >= 2 || (e.amount > stats.best && e.amount >= 250));
   async function tally(calc, amount, stats) {
     const barNode = $('#tally'); barNode.innerHTML = '';
-    const steps = [(calc.stat === 'atk' ? '공격 ' : '마공 ') + calc.base, '×' + calc.val].concat(calc.lines.map(shortLine));
+    const steps = [(calc.stat === 'atk' ? '공격 ' : '마공 ') + calc.base, '×' + formatMultiplier(calc.val)].concat(calc.lines.map(shortLine));
     if (calc.crit) steps.push('치명타');
     for (let i = 0; i < steps.length; i++) { const s = document.createElement('span'); s.textContent = steps[i]; barNode.appendChild(s); sfx.tick(i); await wait(0.12); }
     const sum = document.createElement('span'); sum.className = 'sum'; sum.textContent = '= ' + amount.toLocaleString('en-US'); barNode.appendChild(sum); sfx.tick(steps.length + 2);

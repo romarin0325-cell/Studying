@@ -34,12 +34,13 @@
 /* ---------- expedition header: region plate, floor, crystals, tools ---------- */
 .footer .btn.go { flex: 2; word-break: keep-all; }
 header.top { position: relative; z-index: 3; flex: none; display: flex; align-items: center; gap: 6px; height: 52px; padding: 0 10px 0 0; background: none; border: 0; }
-header.top b { align-self: stretch; display: flex; align-items: center; padding: 0 26px 0 14px; color: #fff;
-  font: normal 0.9375rem/1 var(--f-display); white-space: nowrap; text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
-header.top span { color: var(--ink2); }
-header.top b + span:not(.sp) { padding: 3px 10px; background: #fff; color: var(--navy); white-space: nowrap; clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); box-shadow: inset 0 calc(-1 * var(--u)) 0 var(--line2); }
-header.top .sp { flex: 1; }
-header.top .gems { padding: 4px 12px; background: #fff; color: var(--aqua-lo); white-space: nowrap; clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); box-shadow: inset 0 calc(-1 * var(--u)) 0 var(--line2); }
+header.top .run-heading { flex: 1; min-width: 0; align-self: stretch; display: flex; align-items: center; gap: 6px; }
+header.top b { align-self: stretch; min-width: 0; padding: 0 24px 0 12px; color: #fff;
+  font: normal 15px/52px var(--f-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
+header.top :is(.run-heading span, .gems) { flex: none; padding: 3px 8px; background: #fff; color: var(--navy);
+  white-space: nowrap; clip-path: var(--notch); font: normal 12px/1.2 var(--f-label); box-shadow: inset 0 calc(-1 * var(--u)) 0 var(--line2); }
+header.top .gems { color: var(--aqua-ink); }
 .log-button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: none; height: 40px;
   min-width: 58px; padding: 0 8px; color: var(--navy); font: normal 12px var(--f-label); --pf-f: #fff; --pf-lo: var(--line2); }
 .log-button[hidden] { display: none; }
@@ -59,7 +60,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 
 .altarslot { margin-top: 14px; display: flex; gap: 12px; align-items: center; justify-content: center; min-height: 136px; padding: 12px; --pf-o: #ffb4d2; --pf-f: var(--pink-tint); --pf-hi: #fff; --pf-lo: #ffb4d2; }
 .altarslot .pic { height: 110px; display: flex; align-items: flex-end; }
-.altarslot b { display: block; font: normal 0.9375rem var(--f-display); } .altarslot strong { display: block; font: normal 1.875rem var(--f-display); color: var(--pink-lo); } .altarslot small { font: 600 0.75rem var(--f-body); color: var(--ink2); }
+.altarslot b { display: block; font: normal 0.9375rem var(--f-display); } .altarslot strong { display: block; font: normal 15px/20px var(--f-display); color: var(--pink-lo); } .altarslot small { font: 600 0.75rem var(--f-body); color: var(--ink2); }
 .altarslot .empty { font: normal 1.875rem var(--f-display); color: var(--line2); }
 .altarslot.jackpot { animation: jack .4s steps(2) 3; --pf-o: var(--gold-lo); --pf-f: var(--gold-tint); --pf-hi: #fffbe9; --pf-lo: var(--gold); --pf-in: var(--gold); } .altarslot.jackpot strong { color: var(--gold-lo); }
 @keyframes jack { 50% { --pf-in: var(--gold-hi); } }
@@ -90,7 +91,16 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .run-screen .btn { min-height: 46px; }
 .run-screen .btn.go { min-height: 56px; }
 .run-screen header.top { height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 10px 0 0; gap: 6px; }
-.run-screen header.top button.ic { width: 40px; height: 40px; }
+.run-screen header.top button.ic { flex: none; width: 40px; height: 40px; }
+.large-text header.top .run-heading { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; }
+.large-text header.top b { align-self: auto; max-width: 100%; padding-inline: 8px 18px; line-height: 25px; }
+.large-text header.top .run-heading span { font: normal 10px/14px var(--f-tiny); padding: 0 6px; }
+@media (max-width: 380px) {
+  .run-screen header.top { gap: 4px; padding-right: 6px; }
+  header.top .run-heading { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; }
+  header.top b { align-self: auto; max-width: 100%; padding-inline: 8px 18px; line-height: 25px; }
+  header.top .run-heading span, header.top .gems { font: normal 10px/14px var(--f-tiny); padding-inline: 6px; }
+}
 .run-screen h2 { font: normal 1.25rem/1.25 var(--f-tiny); letter-spacing: 0; }
 .run-screen h3 { font: normal 0.9375rem/1.375rem var(--f-display); }
 .run-screen .sm, .run-screen small { font: 500 0.75rem/1.1rem var(--f-body); }
@@ -207,12 +217,18 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .relay-link { align-self: center; height: 48px; padding: 0; border: 0; background: transparent; color: var(--aqua-lo); font: 900 1.25rem var(--f-body); }
 .relay-link:disabled { color: var(--line2); cursor: default; }
 .relay-seat .seat-blessing, .seat-blessing, .card-detail { color: var(--aqua-ink); font: 700 0.75rem/1rem var(--f-body); }
+/* on seat and bench cards the blessing is one gold chip that never changes the card height */
+:is(.relay-seat, .reserve-cards button) .seat-blessing { display: block; max-width: 100%; margin-top: 3px; padding: 0 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--gold-tint); color: #8a4f00;
+  font: normal 0.75rem/1.25rem var(--f-label); clip-path: var(--notch); }
+:is(.relay-seat, .reserve-cards button) .seat-blessing:empty { display: none; }
 .formation-actions { display: flex; gap: 8px; }
 .formation-actions #b-go { flex: 1; }
 .formation-actions .btn { min-height: 50px; }
 .formation-actions [hidden] { display: none; }
 .formation-actions #b-formation-info { flex: 0 0 auto; }
-.reserve-cards button:has(.seat-blessing) { flex-direction: column; text-align: center; }
+/* every bench card in the formation screen has the same face-name-chip column, so a blessing never makes one card taller */
+#order .reserve-cards button { flex-direction: column; justify-content: center; gap: 2px; text-align: center; }
 .heir-offer { display: block; color: var(--gold-lo); font: 700 0.75rem/1rem var(--f-body); }
 .release-loss { margin: 8px 0; }
 #sheet .release-loss p, #result .release-loss, #sheet #event-target-effect.loss { color: var(--coral-lo); }
@@ -247,7 +263,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 /* ---------- reinforcement ---------- */
 #reinforce .scroll { display: flex; flex-direction: column; }
 .reinforce-candidates { display: grid; grid-auto-rows: 1fr; gap: 10px; flex: 1 0 auto; margin-top: 8px; }
-.run-screen .reinforce-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 136px; padding: 10px; text-align: left; --edge: var(--gc, var(--line2)); position: relative; }
+.reinforce-card { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 136px; padding: 10px; text-align: left; --edge: var(--gc, var(--line2)); position: relative; }
 .reinforce-card[aria-pressed="true"] { transform: translateY(calc(-1 * var(--u))); }
 .reinforce-art { height: 94px;
   --pf-o: color-mix(in srgb, var(--gc, #b9b3c4) 45%, #fff); --pf-f: color-mix(in srgb, var(--gc, #b9b3c4) 18%, #fff);
@@ -331,7 +347,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .coach { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
 .coach[hidden], .coach button[hidden] { display: none; }
 .coach-shade, .coach-ring, .coach-say { position: absolute; }
-.coach-shade { background: rgba(27, 24, 80, .66); pointer-events: auto; touch-action: none; }
+.coach-shade { background: rgba(27, 24, 80, .66); }
 .coach-ring { filter: none; clip-path: var(--notch); border: 2px solid var(--gold); }
 .coach-ring.nudge { animation: coach-nudge .24s steps(1, end); }
 @keyframes coach-nudge {
@@ -341,11 +357,11 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 }
 .coach-say {
   --pf-f: var(--paper); --pf-hi: var(--aqua-hi); --pf-lo: var(--paper3);
-  display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 10px;
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 4px 10px;
   align-items: center; padding: 8px 10px; pointer-events: auto;
 }
 .coach-face { grid-row: span 2; display: block; overflow: hidden; width: 44px; height: 44px; clip-path: var(--notch); }
-.coach-line { margin: 0; color: var(--ink); font: 600 .8125rem/1.45 var(--f-body); word-break: keep-all; }
+.coach-line { max-height: 100%; overflow: auto; margin: 0; color: var(--ink); font: 600 .8125rem/1.45 var(--f-body); word-break: keep-all; }
 .coach-buttons { grid-column: 2; display: flex; justify-content: flex-end; gap: 8px; }
 .coach-buttons .btn { padding: 4px 8px; min-height: 36px; font: 12px var(--f-label); }
 .coach-buttons .coach-next { --pf-f: var(--aqua-tint); --pf-lo: var(--aqua-hi); }

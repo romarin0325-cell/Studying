@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import * as Meta from '../../src/engine/meta.js';
 import * as Run from '../../src/engine/run.js';
 import { DUNGEONS } from '../../src/content/dungeons.js';
+import { checkCoachPlacement } from './coach.mjs';
 
 const labels = {
   boss: '보스전 출전', gate: '문지기 출전', battle: '일반전 출전', bench: '대기에서 귀환'
@@ -13,20 +14,7 @@ async function highlight(page, { text }, id, line, selector) {
   await text(coach(page).locator('.coach-line'), line, { exact: true });
   assert.equal(await coach(page).getAttribute('data-coach-step'), id);
   assert.equal(await coach(page).locator('.coach-next').isVisible(), id.startsWith('tour-'));
-  await page.waitForFunction(({ selector, id }) => {
-    const layer = document.querySelector('.coach:not([hidden])');
-    if (layer?.dataset.coachStep !== id) return false;
-    const hole = layer.querySelector('.coach-ring').getBoundingClientRect();
-    const bubble = layer.querySelector('.coach-say').getBoundingClientRect();
-    const targets = [...document.querySelectorAll(selector)].filter(button => button.getClientRects().length);
-    return targets.length > 0 && targets.every(button => {
-      const r = button.getBoundingClientRect();
-      const hit = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2);
-      return button.contains(hit) && hole.left <= r.left + 1 && hole.right >= r.right - 1 &&
-        hole.top <= r.top + 1 && hole.bottom >= r.bottom - 1 &&
-        (r.bottom <= bubble.top || r.top >= bubble.bottom);
-    });
-  }, { selector, id });
+  await checkCoachPlacement(page, id, selector);
 }
 
 async function acknowledge(page) {
@@ -107,14 +95,37 @@ export function createEntryCases({ roster, storedSession, snowRabbitProfile, nig
         await acknowledge(page);
         await page.locator('#result.on #b-next').click();
         await highlight(page, tools, 'awakening', '이번 원정에 함께할 동료 한 명을 골라.', '#wake-choices [data-coach]');
+        await text(page.locator('#awaken.on .lead'), '한 명을 고르면 나머지도 함께 깨어나');
+        await text(page.locator('#awaken.on .gems'), '결정 ◆0');
+        await text(page.locator('#wake-choices .st').first(), /물방 \d+ · 마방 \d+/);
+        const toolsInHeader = page.locator('#awaken.on header.top :is(.b-set, .b-full, .log-button):visible');
+        assert.equal(await toolsInHeader.count(), await page.locator(':root.nofs').count() ? 2 : 3);
+        for (const button of await toolsInHeader.all()) {
+          const box = await button.boundingBox();
+          assert.ok(box && box.x >= 0 && box.x + box.width <= page.viewportSize().width);
+        }
         assert(!(await stored(page)).done.includes('awakening'));
         await capture('awakening');
-        await page.locator('#wake-choices .cardrow').first().click();
+        const choices = page.locator('#wake-choices .cardrow');
+        if (rescue && page.viewportSize().width === 360) {
+          const scroll = page.locator('#awaken .scroll');
+          const beforeScroll = await scroll.evaluate(node => node.scrollTop);
+          const box = await coach(page).locator('.coach-ring').boundingBox();
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.wheel(0, 350);
+          await page.waitForFunction(before => {
+            const pane = document.querySelector('#awaken .scroll');
+            return pane.scrollTop > before || pane.scrollHeight <= pane.clientHeight + before;
+          }, beforeScroll);
+          await checkCoachPlacement(page, 'awakening', '#wake-choices .cardrow');
+        }
+        await choices.first().click();
         await highlight(page, tools, 'awakening-confirm', '고른 동료와 함께 가자.', '#b-wake');
         assert(!(await stored(page)).done.includes('awakening'));
         await page.locator('#b-wake').click();
         assert((await stored(page)).done.includes('awakening'));
         await text(page.locator('#awaken.on .wake-lead'), rescue ? '애쉬' : '눈토끼');
+        await text(page.locator('#awaken.on .wake-lead'), '대여 전투에서 함께 온 동료');
         await page.locator('#b-depart').click();
         await highlight(page, tools, 'door', '문에 적의 공격이 보여. 가고 싶은 문을 눌러.', '#map.on .door-entry');
         await capture('doors');
@@ -185,7 +196,7 @@ export function createEntryCases({ roster, storedSession, snowRabbitProfile, nig
     const name = roster.card(invited).name;
     return {
       session: storedSession({ profile }), settings: { textScale: 1.25 },
-      proof: `Four-column grid; start, invite, exclude and release ${invited} at constant height`,
+      proof: `Three columns at 125%; start, invite, exclude and release ${invited} at constant height`,
       async show(page, { text, capture }) {
         await enterObservatory(page);
         await page.locator('#meta-telescope').click();
@@ -195,7 +206,9 @@ export function createEntryCases({ roster, storedSession, snowRabbitProfile, nig
         const height = (await cell.boundingBox()).height;
         const menu = page.locator('#meta-prep-menu:popover-open');
         const columns = page.locator('.meta-prep-pool');
-        assert.equal(await columns.evaluate(node => getComputedStyle(node).gridTemplateColumns.split(' ').length), 4);
+        assert.equal(await columns.evaluate(node => getComputedStyle(node).gridTemplateColumns.split(' ').length), 3);
+        assert.equal(await cell.locator('small').evaluate(node => getComputedStyle(node).fontSize), '12px');
+        assert.equal(await cell.locator('b').evaluate(node => getComputedStyle(node).webkitLineClamp), '2');
         const change = async (verb, status) => {
           await cell.click();
           await menu.getByRole('button', { name: verb, exact: true }).click();
@@ -235,11 +248,14 @@ export function createEntryCases({ roster, storedSession, snowRabbitProfile, nig
     const rewards = Run.finishRun(run);
     assert(ids.every(id => rewards.recruitable.includes(id)));
     return {
-      session: storedSession({ profile, run }), proof: 'Four participation labels, first-main unlock notice and one preparation tour per visit',
+      session: storedSession({ profile, run }), proof: 'Four participation labels and preparation tour deferred with no eligible invite',
       async show(page, tools) {
         const { text, capture } = tools;
         await text(page.locator('#recruit.on .meta-recruit-body > p').filter({ hasText: '돌아온 동료' }), '돌아온 동료 중 한 명을 영입하세요.');
         for (const id of ids) await text(page.locator(`[data-candidate="${id}"] small`), labels[rewards.recruitTags[id]], { exact: true });
+        await page.locator('#meta-run-record').click();
+        assert.equal(await page.locator('#sheet.on').getByText('축복 대성공').count(), 0);
+        await page.locator('#b-sheetclose').click();
         await capture('recruit-tags');
         await page.locator('#meta-recruit-confirm').click();
         await text(page.locator('#hub.on .meta-first-unlock'), '이제 여정·지역 규칙·샘 초대를 쓸 수 있어', { exact: true });
@@ -248,14 +264,11 @@ export function createEntryCases({ roster, storedSession, snowRabbitProfile, nig
         await page.locator('#meta-telescope').click();
         const destination = page.locator('#dungeons.on [data-dungeon="ember_volcano"]');
         await destination.click();
-        await text(coach(page).locator('.coach-line'), '샘 초대: 이번 원정에서 처음 후보 3칸을 열면, 초대한 동료 중 한 명이 보여요.');
+        await text(coach(page).locator('.coach-line'), '여정은 보통 난이도야.');
+        assert.equal(await page.locator('#sheet.on :is([data-can-invite], #meta-find-invites)').count(), 0);
         await acknowledge(page);
         assert.equal(await coach(page).count(), 0);
-        assert((await stored(page)).tours.includes('preparation'));
-        await page.locator('#b-sheetclose').click();
-        await destination.click();
-        await text(coach(page).locator('.coach-line'), '여정은 보통 난이도야.');
-        await acknowledge(page);
+        assert(!(await stored(page)).tours.includes('preparation'));
         assert((await stored(page)).tours.includes('difficulty'));
       }
     };

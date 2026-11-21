@@ -345,7 +345,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters, missionEarned: !!announce.missions?.length,
       firstMain: !featureFlags(profile).firstMainCleared && featureFlags(next).firstMainCleared
     };
-    const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen,
+    const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen, features: run.features,
       lastBattleLog: run.lastBattleLog };
     run = null;
     review = null;

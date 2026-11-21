@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { activeContract, affixChips, enemyActionText, foeFlip, head, tempoBeatText, TYPE } from '../widgets.js';
+import { activeContract, affixChips, enemyActionText, foeFlip, formatMultiplier, head, tempoBeatText, TYPE } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
 import { CONTRACTS, gateEscrow } from '../../content/contracts.js';
@@ -43,7 +43,7 @@ export function doorLesson(preview) {
   const step = second ?? first;
   if (!step) return '';
   const type = TYPE[step.type] || '';
-  const power = value => Number.isFinite(value) ? ' ×' + value : '';
+  const power = value => Number.isFinite(value) ? ' ×' + formatMultiplier(value) : '';
   let rule = [step.name, step.val > 0 ? type + ' 공격' + power(step.val) : ''].filter(Boolean).join(' · ');
   switch (step.rule) {
     case 'front_hit': rule = '선두에 ' + type + power(step.val); break;
@@ -72,7 +72,7 @@ function doorLessonShort(preview) {
   const turn = (second ? 2 : 1) + '턴 ';
   if (LESSON_SHORT[step.rule]) return turn + LESSON_SHORT[step.rule];
   const type = step.rule === 'magic_followup' ? '마법' : TYPE[step.type] || '공격';
-  return turn + type + (Number.isFinite(step.val) ? ' ×' + step.val : '');
+  return turn + type + (Number.isFinite(step.val) ? ' ×' + formatMultiplier(step.val) : '');
 }
 function confront(name) {
   const endsWithConsonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
@@ -106,7 +106,7 @@ export function doorDecision(run, door, preview) {
   return !run.daily && crystals > 0 ? risk + ' · 결정 ' + crystals : risk;
 }
 
-export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
+export function mapScreen(run, ui, { receipt } = {}) {
   ui.playMusic();
   const { core, widgets, sheets, artifacts, scene, icon } = ui;
   const { card, spr, sprite, face, faceBadge } = widgets;
@@ -267,13 +267,10 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
   const cast = '<div class="map-walkers">' + lineup(front) + '</div>';
   const skip = '<button type="button" class="map-skip" hidden><span>건너뛰기</span></button>';
   const title = rift ? [shortRiftDate(rift.spec?.dayKey), '균열'].filter(Boolean).join(' ') : dungeon.name;
-  const faces = awakened.length ? '<div class="map-awaken win"><b>함께 깨어남</b><div class="map-awaken-faces">' +
-    awakened.map((id, index) => '<button class="btn" data-sheet="' + esc(id) + '" style="--wake-delay:' +
-      index * 170 + 'ms">' + faceBadge(id) + '</button>').join('') + '</div></div>' : '';
   node.innerHTML = head(run, title, run.floor + '층') + (run.relics.length ? relicStrip(core, run.relics) : '') + '<div class="run-route">' +
     '<button class="floor-strip" id="b-floors" aria-label="층 진행과 문지기 정보">' + track + '</button>' +
     scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + '</div>' + skip, 'walking-map') +
-    faces + (receipt ? '<p class="map-receipt gain" role="status">' + esc(receipt) + ' · 장착 완료</p>' : '') +
+    (receipt ? '<p class="map-receipt gain" role="status">' + esc(receipt) + ' · 장착 완료</p>' : '') +
     '<div class="run-doors">' + doors + '</div></div>';
   show('map');
   bindRelicSlots(node, run.relics, id => {
