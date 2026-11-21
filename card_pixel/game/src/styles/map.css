@@ -1,0 +1,219 @@
+#map .walking-map {
+  --branch-light: 1;
+  --other-paths: 1;
+  --scene-opacity: 1;
+  flex: 0 0 clamp(210px, 31dvh, 350px);
+  min-height: 210px;
+  margin: 0 12px;
+  background: #0e0a18;
+  isolation: isolate;
+}
+
+.map-landscape, .map-trails, .map-trail, .map-walkers, .map-walker-anchor, .map-portals {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-landscape {
+  inset: -4px;
+  background: linear-gradient(180deg, #120d231a, #120d231c 48%, #120d237a),
+    var(--landscape, none) center bottom / cover no-repeat;
+  opacity: var(--scene-opacity);
+}
+
+.map-trails { opacity: var(--scene-opacity); }
+.map-trail { width: 100%; height: 100%; }
+.map-trail:not(:first-child) { opacity: calc(var(--branch-light) * var(--other-paths)); }
+.map-trail.chosen { opacity: 1; }
+.map-walkers { z-index: 1; opacity: var(--scene-opacity); }
+.map-portals { z-index: 2; }
+
+#map .map-walker {
+  position: absolute;
+  top: -56px;
+  left: -24px;
+  width: 48px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+}
+
+.map-walker::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  bottom: -3px;
+  width: 24px;
+  height: 7px;
+  background: #130d248e;
+  clip-path: polygon(0 28%, 16% 0, 84% 0, 100% 28%, 100% 72%, 84% 100%, 16% 100%, 0 72%);
+}
+
+.map-walker-art {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateY(var(--foot-lift, 0px)) rotate(var(--walk-lean, 0deg));
+  pointer-events: none;
+}
+
+#map .map-walker img { position: absolute; animation: none; }
+#map .map-walker small {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  bottom: auto;
+  translate: -50% 0;
+  padding: 0 4px;
+  background: #1d1736;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.map-door {
+  --door-rim: #9982b2;
+  --door-fill: #432e56;
+  --door-shine: #d0abd7;
+  position: absolute;
+  left: clamp(28px, var(--door-x), 100% - 28px);
+  top: var(--door-y);
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.map-door:not(.chosen) { opacity: calc((.36 + .64 * var(--branch-light)) * var(--other-paths)); }
+.map-door.chosen { z-index: 1; }
+.map-door[aria-pressed="true"] { --door-rim: var(--aqua); --door-shine: var(--aqua); }
+.map-door:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.map-door[data-kind="spring"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #90ead9; }
+.map-door[data-kind="altar"], .map-door[data-kind="event"] { --door-rim: #ab82b1; --door-fill: #5a375c; --door-shine: #f8b5d9; }
+.map-door[data-kind="treasure"] { --door-rim: #b78854; --door-fill: #65412d; --door-shine: #ffd983; }
+.map-door:is([data-kind="gate"], [data-kind="boss"], [data-kind="elite"]) {
+  --door-rim: #ad7469;
+  --door-fill: #56303d;
+  --door-shine: #ffad8b;
+}
+
+.map-door-frame {
+  position: absolute;
+  inset: 0 2px;
+  background: #171026;
+  clip-path: polygon(0 24%, 10% 24%, 10% 12%, 22% 12%, 22% 4%, 78% 4%, 78% 12%, 90% 12%, 90% 24%, 100% 24%, 100% 100%, 0 100%);
+}
+
+.map-door-frame::before, .map-door-frame::after, .map-door-light {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-door-frame::before {
+  inset: 3px;
+  clip-path: inherit;
+  background: var(--door-rim);
+}
+
+.map-door-frame::after {
+  background: #110b1b;
+  opacity: var(--door-dark, 0);
+}
+
+.map-door-light {
+  inset: 11px 8px 4px;
+  background: repeating-linear-gradient(0deg, #161024 0 4px, var(--door-fill) 4px 8px, #161024 8px 12px);
+  clip-path: polygon(0 28%, 15% 28%, 15% 12%, 32% 12%, 32% 0, 68% 0, 68% 12%, 85% 12%, 85% 28%, 100% 28%, 100% 100%, 0 100%);
+  opacity: calc(.6 + .4 * var(--branch-light));
+}
+
+.map-door.chosen .map-door-light, .map-door:hover:not(:disabled) .map-door-light {
+  background: repeating-linear-gradient(0deg, var(--door-fill) 0 4px, var(--door-shine) 4px 8px, var(--door-fill) 8px 12px);
+}
+
+.map-door-emblem {
+  position: absolute;
+  inset: 7px 5px 3px;
+  display: grid;
+  place-items: center;
+}
+
+#map .map-door-emblem img { max-width: 40px; max-height: 42px; object-fit: contain; }
+.map-door-shadow { filter: brightness(0) drop-shadow(0 1px 0 var(--door-shine)); }
+
+#map .map-door-line {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  display: block;
+  width: max-content;
+  padding: 1px 4px;
+  background: var(--win);
+  color: var(--ink);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+#map .map-door[data-map-door="1"]:nth-last-child(2) { left: min(var(--door-x), 100% - 42px); }
+#map .map-door[data-map-door="1"]:nth-last-child(2) .map-door-line {
+  left: auto;
+  right: -12px;
+  transform: none;
+}
+#map .map-door:not(:first-child):last-child .map-door-line { top: calc(100% - 16px); }
+.walking-map[data-walk-phase="zoom"] .map-door.chosen .map-door-line { opacity: var(--scene-opacity); }
+
+.map-skip {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  padding: 9px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  align-content: start;
+}
+
+.map-skip span {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  background: var(--win);
+  color: var(--ink);
+  font-size: 0.75rem;
+}
+
+.door-plate.previewing { border-color: var(--aqua); }
+.run-doors:has(.previewing) .door-plate:not(.previewing) { min-height: 48px; }
+.run-doors:has(.previewing) .door-plate:not(.previewing) .door-entry > :not(.door-copy),
+.run-doors:has(.previewing) .door-plate:not(.previewing) .door-copy > :not(b) { display: none; }
+.door-plate.previewing .door-entry { flex-wrap: wrap; }
+.door-entry .door-lesson, .door-lesson { display: flex; align-items: center; gap: 4px; color: var(--gold); }
+.door-lesson .run-icon { width: 16px; height: 16px; flex: none; }
+.map-formation { padding: 0 12px calc(10px + env(safe-area-inset-bottom)); }
+.map-formation[hidden] { display: none; }
+.map-formation .relay-seats { margin-top: 0; }
+.map-formation .relay-seat { grid-template-rows: 16px 42px 20px auto; }
+.map-formation .reserve-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.map-formation .reserve-cards .run-face { width: 40px; height: 40px; }
+.map-awaken { margin: 6px 12px 0; padding: 5px 8px; text-align: center; color: var(--gold); flex: none; }
+.map-awaken-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.map-awaken-faces button { height: auto; padding: 4px; animation: map-awaken-in 260ms steps(5) var(--wake-delay) both; }
+.map-awaken-faces .run-face { width: 40px; height: 40px; }
+.map-receipt { margin: 8px 12px 0; }
+@keyframes map-awaken-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-awaken-faces button { animation: none; }
+}

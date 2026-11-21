@@ -257,14 +257,17 @@ function planCardAstra(plan, files, currentFiles) {
 }
 
 function planCardPixel(plan, files, currentFiles) {
-  const slice = file => file.startsWith('card_pixel/slice/') && !isDocumentation(file);
-  for (const file of currentFiles.filter(file => slice(file) && /\.(?:js|mjs|cjs)$/.test(file))) {
+  const isPixelGameSource = file => file.startsWith('card_pixel/game/') && !isDocumentation(file);
+  for (const file of currentFiles.filter(file => isPixelGameSource(file) && /\.(?:js|mjs|cjs)$/.test(file))) {
     addNodeCheck(plan, 'card', file);
   }
-  if (files.some(file => slice(file) || /^card\/game\/[^/]+\.js$/.test(file))) {
+  if (files.some(file => isPixelGameSource(file) || /^card\/game\/[^/]+\.js$/.test(file))) {
     addNodeTest(plan, 'card', 'card:pixel:rules', 'Check the Pixel Relay bridge and run rules', [
-      'card_pixel/slice/tests/bridge.test.mjs',
-      'card_pixel/slice/tests/rules.test.mjs'
+      'card_pixel/game/tests/bridge.test.mjs',
+      'card_pixel/game/tests/rules.test.mjs',
+      'card_pixel/game/tests/run.test.mjs',
+      'card_pixel/game/tests/music.test.mjs',
+      'card_pixel/game/tests/daily.test.mjs'
     ]);
   }
 }
@@ -451,7 +454,7 @@ function createPlan(changes, options = {}) {
   const plan = {
     files,
     detectedGames: ALL_GAMES.filter(game => files.some(file => file.startsWith(game + '/') || (
-      game === 'card' && /^(?:card_(?:legacy|astra|lumen)\/|card_pixel\/slice\/)/.test(file)
+      game === 'card' && /^(?:card_(?:legacy|astra|lumen)\/|card_pixel\/game\/)/.test(file)
     ))),
     steps: [],
     skipped: [],
@@ -504,7 +507,7 @@ function createPlan(changes, options = {}) {
     ...files.filter(isVerificationPath),
     ...files.filter(file => ALL_GAMES.some(game => file.startsWith(game + '/'))),
     ...files.filter(file => /^card_(?:legacy|astra|lumen)\//.test(file)),
-    ...files.filter(file => file.startsWith('card_pixel/slice/')),
+    ...files.filter(file => file.startsWith('card_pixel/game/')),
     ...files.filter(file => file.startsWith('card_deepseek/') && !currentFiles.includes(file)),
     ...files.filter(file => file.startsWith('scripts/verify_card_')),
     ...files.filter(file => file === 'scripts/verify_gemini_api_models.js'),

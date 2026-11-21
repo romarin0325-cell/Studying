@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 const dir=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(dir,'../../../..');
-const assets=path.join(root,'card_pixel/slice/assets');
+const assets=path.join(root,'card_pixel/game/assets');
 const ids=['ash','luna','red_dragon','golem','zeke','flame_sage','cherry_prince'];
 const meta=JSON.parse(await fs.readFile(path.join(assets,'sprites.json')));
 const fringe=JSON.parse(await fs.readFile(path.join(dir,'fringe-counts.json')));

@@ -1,100 +1,83 @@
-# card_pixel — 세 부분 지도 (엔진 · 테스트 빌드 · 기획서)
+# card_pixel — 세 부분 지도 (엔진 · 게임 · 기획서)
 
-이 폴더의 작업은 성격이 다른 세 부분으로 나뉜다. 섞어서 말하면 "이 숫자는 확정인가?", "이 화면이 규칙을 증명하나?" 같은 혼란이 생기므로, 무엇이 어느 부분에 속하고 어떻게 다시 확인하는지를 여기에 고정한다. 원칙과 결정 장부는 `AGENTS.md`, 날짜별 기록은 `history/`에 있다.
+「다음은 너」(RELAYMARE) v1은 `game/`에 있다. 엔진은 규칙을 돌리고, 게임은 그 규칙을 화면에 보여 주며, 기획서는 무엇을 왜 정했는지 남긴다. 작업 원칙과 소유자 결정은 [AGENTS.md](AGENTS.md), 날짜별 내역은 [history/](history/)에 있다.
 
 ## 한눈에
 
-| | ① 엔진 | ② 테스트 빌드 | ③ 기획서 |
+| | ① 엔진 | ② 게임 | ③ 기획서 |
 |---|---|---|---|
-| 한 줄 | 화면 없이 돌아가는 전투·원정 규칙 | 그 규칙을 손으로 플레이하는 한 파일 | 무엇을 왜 만드는지 적은 문서 |
-| 위치 | `slice/src/bridge.js` `run.js` `roster.js`, `slice/tools/core-bundle.mjs` `sim.mjs`, `slice/tests/bridge.test.mjs` `rules.test.mjs` | `slice/src/game.js` `stage.js` `style.css`, `slice/build.mjs`, `slice/assets/`, `slice/dist/RelaySlice.html`, `slice/tests/play.mjs`, `art/` | `plan/`(계획), `history/`(내역), `AGENTS.md`(원칙·결정) |
-| 다시 확인하는 법 | 명령 한 줄로 합격/불합격과 숫자가 나온다 | 빌드해서 열고, 자동 플레이로 오류·멈춤을 본다. 보기 좋은지는 사람이 본다 | 출처와 `[초안]` `[미확인]` 표시를 따라간다. 명령으로 판정되지 않는다 |
-| 믿어도 되는 것 | 규칙이 말한 대로 계산되는가, 같은 시드는 같은 원정인가 | 화면이 규칙을 제대로 보여 주고 끝까지 진행되는가 | 방향과 사용자가 정한 결정 |
-| 믿으면 안 되는 것 | "재미있는가"(숫자는 균형이 아니라 순간을 목표로 맞췄다) | "규칙이 맞는가"(화면이 막아 주지 않는다) | 수치(대부분 시뮬레이션하지 않은 초안) |
+| 한 줄 | 화면 없이 돌아가는 전투·원정·메타 규칙 | 관측소에서 출발해 창조의 탑 엔딩까지 하는 게임 | 설계·결정·다음 후보 |
+| 위치 | `game/src/engine/`, `game/src/content/`, `game/tools/`, `game/tests/`의 규칙 테스트 | `game/src/ui/`, `game/src/stage/`, `game/src/audio/`, `game/src/styles/`, `game/assets/`, `game/dist/Relaymare.html`, `game/tests/play.mjs`, `art/` | `plan/`, `history/`, `AGENTS.md` |
+| 다시 확인하는 법 | Node 테스트와 던전별 시뮬레이션 | 빌드와 브라우저 자동 플레이, 사람의 플레이 | 원문·결정 장부·작업 기록 대조 |
+| 확인할 수 있는 것 | 규칙 계산, 같은 조건·시드의 재현, 저장 복원 | 화면에 규칙이 보이고 실제 입력으로 진행되는지 | 방향, 결정한 사람과 이유, 확인할 질문 |
+| 별도 확인할 것 | 손맛과 실제 사람의 클리어율 | 개별 규칙 계산은 엔진 테스트로, 배치·연출·기기·소리는 직접 플레이로 | 구현 여부와 실제 수치는 코드·테스트로 |
 
-의존 방향은 한쪽이다: **③ 결정 → ① 엔진 → ② 화면**. 위의 어느 부분에도 속하지 않는 **원본**이 `card/game/`이다. 엔진은 이 파일들(`data.js` `logic.js` `skill_display.js` `battle_runtime.js`)을 고치지 않고 감싸서 쓴다. 전투 규칙 자체를 바꾸려면 `card/game`을 고치고, 그러면 카드 게임 화면 다섯 개도 함께 바뀐다.
+의존 방향은 **③ 결정 → ① 엔진 → ② 화면**이다. 카드 전투의 공용 원본은 `card/game/`에 있다. RELAYMARE는 `data.js`, `logic.js`, `skill_display.js`, `battle_runtime.js`를 그대로 감싸 쓴다. 공용 전투 규칙을 바꾸면 카드 게임 화면 다섯 개도 영향을 받는다.
 
 ## ① 엔진 — 다시 확인할 수 있는 부분
 
-화면, 소리, 그림이 없어도 돌아간다. 브라우저 없이 Node만으로 확인한다.
+브라우저 없이 Node에서 돌린다.
 
-- `tools/core-bundle.mjs`: `card/game` 규칙 파일을 고치지 않고 한 덩어리(`window.RelayCore`)로 감싼다. 바꾸는 것은 `setTimeout`뿐이다.
-- `src/bridge.js`: 전투를 화면 없이 돌리고 순서 있는 사건 목록을 돌려준다.
-  - 채택 규칙 A~D(보스 카운트다운 표시, 적 다음 행동 예고, 적 릴레이, 물러나기), 실험 규칙 E~H(유품, 최후의 일인, 꿈의 변덕 7종, 적 접두사 5종)
-- `src/run.js`: 일곱 층, 문, 깨우기·골라 깨우기, 혼돈의 제단, 영구 사망, 유품 보관, 보상. 시작은 골라 깨우기 2번 + 무작위 3명, 결정 1.
-- `src/roster.js`: 캐릭터·풀·적(야생 9종, 그림자, 보스 11종) 생성.
+- `game/tools/core-bundle.mjs`는 원본을 `window.RelayCore`로 감싸고 타이머를 브리지에 연결한다.
+- `game/src/engine/bridge.js`는 카드 전투를 실행해 순서 있는 사건과 정산용 요약을 돌려준다. 예고·교대·물러나기, 유품·최후의 일인·꿈의 변덕·접두사, 지역 규칙을 잇는다.
+- `game/src/engine/run.js`와 `rooms.js`는 입문 5층·본편 8층의 문, 편성, 영구 사망, 결정, 사건·유물과 보상을 처리한다. 원정 상태는 엔진 명령으로 바꾼다.
+- `game/src/engine/roster.js`는 카드와 실제 대기 스프라이트를 기준으로 던전 풀과 적을 구성한다. `meta.js`와 `save.js`는 영입·인연·해금과 프로필·원정 저장을 맡는다.
 
-다시 확인:
-```bash
-node --test card_pixel/slice/tests/bridge.test.mjs card_pixel/slice/tests/rules.test.mjs
-node card_pixel/slice/tools/sim.mjs 400
+```sh
+node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs
+node card_pixel/game/tools/sim.mjs --all
 ```
-- 첫 줄: 규칙 24개. 둘째 줄: 400판을 가장 강한 셋으로 자동 플레이해 클리어율·한 방 피해·유품 사용 횟수를 잰다.
-- 가장 최근 값(2026-11-18): 클리어 68%, 1,000 넘는 한 방이 나온 판 33%. 기준(`AGENTS.md` 원칙 4)은 클리어 60~70%, 한 방 25% 이상.
 
-주의:
-- `roster.js`는 스프라이트 메타데이터(`RELAY_ASSETS.sp`)를 읽어 **그림이 있는 캐릭터만** 풀에 넣는다. 테스트와 시뮬레이션은 가짜 메타데이터를 넣고 돌리므로, 그림 작업의 진행에 따라 숫자가 흔들리지 않는다.
-- 시뮬레이션 플레이어는 예고를 읽는 단순한 사람이다. 실제 사람의 클리어율이 아니다.
+Node 테스트는 전투·원정·저장 규칙과 음악 스케줄을 확인한다. 시뮬레이션은 실제 스프라이트 명단을 읽고 단순 플레이어로 던전별 클리어율과 한 방 피해 등을 잰다. 사람의 체감 난이도는 직접 플레이로 판단한다.
 
-## ② 테스트 빌드 — 손으로 플레이하는 부분
+## ② 게임 — 손으로 플레이하는 부분
 
-엔진 위에 화면을 얹은 한 파일이다. 규칙은 하나도 가지고 있지 않다(화면은 보여 주고 묻기만 한다).
+[game/dist/Relaymare.html](game/dist/Relaymare.html)을 브라우저에서 연다. 그림·규칙·음악은 HTML에 들어 있고 Galmuri 글꼴은 CDN에서 읽는다.
 
-- 산출물: `slice/dist/RelaySlice.html`(오프라인에서 열리는 한 파일, 글꼴만 CDN)
-- `src/stage.js`: 저해상도 캔버스 무대(2배 정수 확대), 가상 시계, 카메라, 코드로 그린 배경·이펙트, 합성 효과음, 윤곽선 강조, 전투 멈춤
-- `src/game.js`: 모든 화면(타이틀, 첫 깨우기, 지도, 출전 순서, 전투, 샘, 제단, 결산)과 전투 사건 재생기, 자세히 보기 시트, 설정, 전체화면
-- `src/style.css`, `assets/`(캐릭터·생물·보스 3포즈 + `sprites.json`), `tools/cut-sprites.mjs`
-- 그림 원본·생성 지시문·대조표: `art/`
+- 첫 실행은 새벽의 숲 대여 전투로 들어간다. 입문에서 생환한 동료를 영입한 뒤 관측소에서 본편에 출발한다. 이어하기, 동료·유물 도감, 꿈길 수첩, 기록과 엔딩을 포함한다.
+- `game/src/ui/`는 화면과 입력, `game/src/stage/`는 캔버스·효과음, `game/src/audio/`는 배경음을 맡는다. `game/assets/`에 포즈·배경·아이콘이 있고, 그림 원본과 생성 자료는 `art/`에 있다.
+- 플레이 방법, 옵션, 도구, 모듈 지도는 [game/README.md](game/README.md)에 있다.
 
-다시 확인:
-```bash
-node card_pixel/slice/build.mjs
-node card_pixel/slice/tests/play.mjs
+```sh
+node card_pixel/game/build.mjs
+node card_pixel/game/tests/play.mjs
 ```
-- 첫 줄: 빌드(`dist/`가 최신인지). 둘째 줄: 설치된 Chrome으로 원정 세 판을 끝까지 자동 플레이해 브라우저 오류, 멈춤, 행동 후 대기 시간, 프레임을 본다. 화면은 `slice/tests/shots/`(git 제외)에 남는다.
-- 이 명령이 **증명하지 못하는 것**: 연출이 촌스럽지 않은지, 배치가 편한지, 실제 휴대폰 터치·사파리·소리. 이것은 사람이 플레이해서 정한다.
-- 화면을 바꿨으면 전/후를 바꿔 볼 수 있는 검토 페이지를 `slice/tests/shots/`에 만들어 확인한다.
 
-임시인 것: 영입과 결정은 저장되지 않는다. 대표 기술·전용 연출은 없다(큰 공용 연출만). 보스·야생 수치는 시뮬레이션으로만 맞췄다.
+첫 줄은 단일 HTML을 만든다. 둘째 줄은 자체 빌드 뒤 시드별로 입문과 본편을 돌며 진행·이어하기·오류·대기 시간·프레임을 확인하고 `game/tests/shots/`에 화면을 남긴다. 실제 휴대폰 터치·Safari·소리와 배치·연출은 직접 플레이로 확인한다.
 
 ## ③ 기획서 — 방향과 이유
 
-명령으로 합격이 판정되지 않는다. 읽고 판단하는 문서이고, 확인하지 않은 것은 `[초안]` `[미확인]`으로 표시한다.
+출처와 `[초안]` `[미확인]` 표시를 따라 읽는다. 구현과 수치는 해당 코드와 검사 결과를 확인한다.
 
 | 위치 | 내용 |
 |---|---|
-| `plan/plan-content.md`, `plan/renewal-plan.html` | 리뉴얼 기획서 원문(2026-11-15 작성, 11-16 결정 반영)과 그 시각 페이지 |
-| `plan/experimental-rules.md` | 실험 규칙 E~H의 설계와 시뮬레이션 수치 — **엔진에 구현된 규칙의 설명서**다 |
-| `plan/roadmap.md` | 다음 순서와 남은 결정 |
-| `plan/structure.html` (`structure.json`) | 전체 구조도 |
-| `plan/source-inventory.md`, `plan/pixel-pilot/` | 조사와 도트 변환 실험의 근거 자료 |
-| `AGENTS.md` | 원칙, **결정 장부**(사용자가 정한 것), 역할, 검증 |
-| `history/` | 날짜별 한 일·확인한 것·확인하지 못한 것, GPT 위임 평가(`model-log.md`). 계획도 엔진도 아닌 **기록** |
+| [plan/plan-content.md](plan/plan-content.md), [plan/renewal-plan.html](plan/renewal-plan.html) | 초기 리뉴얼 기획서와 시각 페이지 |
+| [plan/experimental-rules.md](plan/experimental-rules.md) | E~H 설계와 시험 당시의 시뮬레이션 수치 |
+| [plan/v1-decisions.md](plan/v1-decisions.md) | v1에 반영한 Claude 판단과 이유. 소유자 확인 전 |
+| [plan/roadmap.md](plan/roadmap.md) | v1 이후 질문과 확장 후보 |
+| [plan/structure.html](plan/structure.html) (`structure.json`) | 초기 구조도 |
+| [plan/source-inventory.md](plan/source-inventory.md), [plan/pixel-pilot/](plan/pixel-pilot/) | 조사와 도트 변환 실험 자료 |
+| [AGENTS.md](AGENTS.md) | 작업 원칙과 소유자 결정 장부 |
+| [history/](history/) | 날짜별 작업·검증 기록과 GPT 위임 평가 |
 
-## 헷갈리기 쉬운 것 — 기획서와 시험판은 같지 않다
+## 헷갈리기 쉬운 것 — 초기 기획과 v1
 
-기획서(`plan-content.md`)는 본편 설계 초안이고, 시험판은 그중 "손맛"을 보기 위한 일부와 실험이다. 숫자가 다르면 시험판이 틀린 것이 아니라 단계가 다른 것이다.
-
-| 항목 | 기획서 | 시험판(엔진·빌드) |
+| 항목 | 초기 기획 | v1 엔진·게임 |
 |---|---|---|
-| 원정 길이 | 보통 난이도 10층 `[초안]` | 7층 |
-| 출발 | 대표 동료 1명 + 결정 8 | 골라 깨우기 2번(둘째는 같은 속성 후보 1명 포함) + 무작위 3명, 결정 1. 2026-11-18 사용자 요청으로 시작 풀을 넓혔고 숫자는 Claude 판단이다 |
-| 풀 | 던전별 기본 덱 40명 + 동행 | 공용 풀 하나(`common`). 던전별 풀은 나중 |
-| 보스 | 던전마다 지정 | 11종 중 원정마다 무작위 |
-| 난이도 | 꿈결·여정·악몽 3단 | 한 단계 |
-| 유품·최후의 일인·꿈의 변덕·적 접두사 | 본문에 설계 없음(요약 한 단락뿐) | 구현됨. 설계는 `plan/experimental-rules.md`에만 있고 유지 여부는 사용자가 플레이한 뒤 정한다 |
-| 영입·전역 재화·거점·가챠 | 설계 있음, 대부분 미확정 | 없음(영입과 결정은 저장되지 않는다) |
-| 원정 시간 | 12~15분 `[초안]` | 재지 않았다 |
+| 원정 길이·난이도 | 10층과 꿈결·여정·악몽 초안 | 새벽의 숲 5층, 테마 5곳과 창조의 탑 8층. 본편은 여정·악몽 |
+| 출발 | 대표 1명 + 결정 8 | 본편 골라 깨우기 2명 + 무작위 3명, 결정 1. 대표가 있으면 첫 선택을 대신한다 |
+| 풀·보스 | 던전별 기본 덱 + 동행, 지정 보스 | 던전별 풀에 대표·동행·예약 후보와 봉인 반영. 악몽에는 일부 던전의 숨은 보스 |
+| 원정 규칙 | 유품·최후의 일인·변덕·접두사는 이후 실험 문서에 정리 | 네 규칙 모두 쓰며, 지역 규칙·사건 28종·유물 14종(장착 4칸) 포함 |
+| 원정 밖 진행 | 거점·영입·전역 재화·가챠 초안 | 관측소·영입·인연·동행·봉인·수첩과 저장. 꿈 조각은 다음 원정 후보 예약에 쓴다 |
 
 ## 한 부분을 바꿨을 때 다시 볼 것
 
 | 바꾼 것 | 다시 볼 것 |
 |---|---|
-| `card/game/*` | ① 규칙 테스트와 시뮬레이션, ② 빌드와 자동 플레이. (카드 게임 화면 다섯 개도 영향받는다) |
-| `slice/src/bridge.js` `run.js` `roster.js` | ① 규칙 테스트와 시뮬레이션, ② 빌드(화면이 쓰는 값이 바뀌었는지) |
-| `slice/src/game.js` `stage.js` `style.css`, 그림 | ② 빌드와 자동 플레이, 바뀐 화면 스크린샷 |
-| `plan/` `history/` `AGENTS.md` | 제품 검증 불필요. 결정 장부와 `plan/roadmap.md`가 서로 맞는지만 본다 |
+| `card/game/`, `game/src/engine/`, `game/src/content/` | 바뀐 규칙에 가장 가까운 테스트와 빌드. 숫자를 바꿨다면 해당 던전 시뮬레이션 |
+| `game/src/ui/`, `game/src/stage/`, `game/src/audio/`, `game/src/styles/`, 그림 | 빌드와 바뀐 화면·소리 확인 |
+| `plan/`, `history/`, `AGENTS.md` | 결정 장부와 문서 대조 |
 
 ## 이 폴더 바로 아래의 옛 파일
 
-`build.mjs`, `serve.mjs`, `src/`, `dist/`, `generated/`, `scripts/`, `tests/`는 2026-11-15 이전부터 있던 다른 시험판(`DREAM_TOWER`)으로, 만든 사람 기록이 없고 지금 빌드에 쓰지 않는다. git에 넣지 않았고 지울지는 소유자에게 묻는다(`plan/roadmap.md` 남은 결정).
+`build.mjs`, `serve.mjs`, `src/`, `dist/`, `generated/`, `scripts/`, `tests/`는 2026-11-15 이전 시험판(`DREAM_TOWER`)의 미추적 파일이다. RELAYMARE v1의 빌드와 플레이는 `game/`에서 한다.

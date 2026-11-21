@@ -9,7 +9,7 @@ test-results/card-uis/
 test-results/meridian/
 
 # card_pixel: screenshots from the play test; full-size generated strips stay local (the 1x archive in art/strips-1x is committed)
-card_pixel/slice/tests/shots/
+card_pixel/game/tests/shots/
 card_pixel/art/strips/
 card_pixel/art/refs/
 card_pixel/plan/pixel-pilot/r4/*-strip*.png
