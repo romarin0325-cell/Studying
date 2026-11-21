@@ -9,15 +9,17 @@ import {HEROES,TUNING,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from '../src/con
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
-import {allQuestions} from '../src/quiz.js';
-import {eventWindow} from '../src/preview/season.js';
+import {activeEvent,eventWindow} from '../src/preview/season.js';
 import {monthlyReward} from '../src/monthly.js';
-import {stageReward,PERFECT_REWARD} from '../src/economy.js';
+import {HOUR,calendar,stageReward,stageDust,PERFECT_REWARD} from '../src/economy.js';
+import {TEMPO,periodOf} from '../src/tempo.js';
+import {BATTLE_BOND,BOND_MAX,bondNeed} from '../src/bond.js';
+import {CONSTELLATIONS} from '../src/library.js';
 // Companions announced at the part-one completion stage (the roster grows; counts come from the data, not from the day the test was written).
 const LATE_NEW=LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).length;
 const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenPublic.html')).href;
-const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.now();
+const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.UTC(2026,10,21,4,25);
 await fs.mkdir(output,{recursive:true});
 // Verify the release file in Git as well as the freshly built file. The first
 // local creation has no HEAD blob; CI and every committed release must have it.
@@ -28,16 +30,19 @@ if(committed!==null){
   const built=await fs.readFile(path.join(game,'dist/StarGardenPublic.html'),'utf8'),normalize=s=>s.replace(/\r\n/g,'\n');
   assert.ok(normalize(built)===normalize(committed),'committed artifact differs from its deployment inputs');
 }
-const browser=await (isWebkit?webkit:chromium).launch({headless:true});
+// CI installs Playwright's Chromium; a local machine without it uses the installed Chrome.
+const browser=await (isWebkit?webkit:chromium).launch({headless:true}).catch(error=>{if(isWebkit||process.env.CI)throw error;return chromium.launch({headless:true,channel:'chrome'});});
 const errors=[],requests=[],geometry=[],contexts=[];
 // The checks below were written for a player past the first session; the tutorial check opts in with {tutorial:true}.
-// These fixtures have also read this week's event; the event check opts in to an unread popup.
-const veteran=p=>p?{...p,ftue:{legacy:true,done:[],seen:[],skipped:false},beginner:null,firstTen:true,eventSeen:eventWindow(Math.max(NOW,p.clockAt)).id}:p;
-async function boot(width,height,profile=createProfile(NOW),fault=false,location=url,{tutorial=false,time}={}){
-  if(!tutorial)profile=veteran(profile);
+// Veteran fixtures have already seen the current event window.
+const veteran=(p,time=NOW)=>p?{...p,ftue:{legacy:true,done:[],seen:[],skipped:false},beginner:null,firstTen:true,eventSeen:eventWindow(Math.max(time,p.clockAt)).id}:p;
+async function boot(width,height,profile=createProfile(NOW),fault=false,location=url,{tutorial=false,time=NOW,lateNotice=false}={}){
+  if(!tutorial)profile=veteran(profile,time);
+  // Fixtures past the late-companion stage have read that announcement unless the check opts in (it would cover the screen).
+  if(profile&&!lateNotice&&profile.cleared>=LATE_UNLOCK_STAGE)profile={...profile,noticeLate:LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id))};
   const context=await browser.newContext({viewport:{width,height},hasTouch:true});
   contexts.push(context);const page=await context.newPage();
-  if(time!==undefined)await page.clock.setFixedTime(time);
+  await page.clock.setFixedTime(time);
   page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
   await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
   // Seed once in an empty document at the exact file URL, before the app or fault hooks run.
@@ -56,6 +61,16 @@ async function boot(width,height,profile=createProfile(NOW),fault=false,location
 const profile=page=>page.evaluate(()=>window.STAR_GARDEN.profile);
 const close=page=>page.locator('#sheet .sheet-top [data-action="close"]').click();
 const nav=(page,label)=>page.getByRole('button',{name:label,exact:true}).click();
+const countText=(at,end)=>{const minutes=Math.ceil((end-at)/60000);return Math.floor(minutes/60)+':'+String(minutes%60).padStart(2,'0');};
+async function checkCountdown(scope,at,end){
+  const digits=scope.locator('[data-countdown="'+end+'"]');
+  await digits.waitFor();
+  assert.equal(await digits.textContent(),countText(at,end));
+}
+async function skipSpotlights(page){
+  const skip=page.locator('#sheet [data-action="spot-skip"]');
+  if(await skip.isVisible())await skip.click();
+}
 async function shot(page,label,width,height){
   await page.screenshot({path:path.join(output,`${name}-${label}-${width}x${height}.png`),animations:'disabled'});
   const m=await page.evaluate(()=>{
@@ -92,6 +107,24 @@ async function inspectCell(page,index){
   await page.mouse.click(rect.x+at.x/720*rect.width,rect.y+at.y/780*rect.height);
   await page.locator('#unit-panel').waitFor();await page.locator('#unit-panel').scrollIntoViewIfNeeded();
 }
+function luckyNormalProfile(){
+  const p=createProfile(NOW);p.dreams=5000;p.firstTen=true;p.settings.reduced=true;
+  // No companion request may arrive on load: its arrival draws from the same rng and would move the seeded luck.
+  p.requests={next:NOW+24*3600000,active:[],claimed:[],after:[],read:[]};
+  for(let seed=1;seed<=10000;seed++){
+    p.rng=seed;
+    const result=command(structuredClone(p),'draw',{banner:'normal',count:10},NOW);
+    assert.ok(result.ok,result.message);
+    if(result.lucky){assert.equal(result.bonus.length,10);return p;}
+  }
+  assert.fail('No seed produced a lucky normal ten-pull');
+}
+function stageOneVictory(p){
+  const started=command(p,'begin',{mode:'main',stage:1},NOW);assert.ok(started.ok,started.message);
+  const won=createBattle(p);won.phase='victory';won.wave=6;won.won=true;won.stats.damage=2222;won.stats.byHero.star_boy=2222;
+  p.active.run=E.serialize(won);assert.ok(E.restore(p.active.run),'victory fixture is a valid saved battle');
+  return p;
+}
 try{
   // First session: Rumi points at the real sortie button, the hole passes the tap, the next step waits in the sheet.
   {
@@ -103,16 +136,24 @@ try{
     assert.deepEqual((await profile(page)).ftue.done,['lobby']);
     await shot(page,'tutorial-prepare',390,844);await t.context.close();
   }
-  // An unread weekly event is a separate home popup, not a repeated companion announcement.
+  // Read receipts apply to one event window, even when two windows share a date.
   {
-    const time=Date.UTC(2026,10,10,3),p=veteran(createProfile(time));p.cleared=3;p.eventSeen='';
+    const time=NOW,win=eventWindow(time),p=veteran(createProfile(time),time);p.cleared=3;p.eventSeen='';
     const t=await boot(390,844,p,false,url,{tutorial:true,time}),{page}=t;
     await page.locator('#sheet[data-kind="event"]').waitFor();
-    assert.equal((await profile(page)).eventSeen,eventWindow(time).id,'this event week is recorded as seen');
+    assert.equal(await page.locator('#sheet-kicker').innerText(),'이벤트');
+    assert.equal(await page.locator('.ev-pop').getAttribute('data-kind'),activeEvent(time));
+    await checkCountdown(page.locator('.ev-pop'),time,win.end);
+    assert.equal((await profile(page)).eventSeen,win.id,'the event window is recorded as seen');
     await shot(page,'event-notice',390,844);await close(page);
     await reload(t);await page.waitForTimeout(1200);
-    assert.equal((await profile(page)).eventSeen,eventWindow(time).id,'the event receipt survives a reload');
+    assert.equal((await profile(page)).eventSeen,win.id,'the event receipt survives a reload');
     assert.ok(await page.locator('#sheet[data-kind="event"]').isHidden(),'the same event is not announced twice');
+    const nextTime=win.end,next=eventWindow(nextTime);
+    await page.clock.setFixedTime(nextTime);await reload(t);
+    await page.locator('#sheet[data-kind="event"]').waitFor();
+    assert.equal(await page.locator('.ev-pop').getAttribute('data-kind'),activeEvent(nextTime));
+    assert.equal((await profile(page)).eventSeen,next.id,'the next window has its own receipt');
     await t.context.close();
   }
   if(isWebkit){
@@ -160,8 +201,7 @@ try{
   execFileSync(process.execPath,['defense_public/scripts/build.mjs','--solo'],{cwd:path.dirname(game),stdio:'pipe'});
   execFileSync(process.execPath,['defense_public/scripts/build.mjs','--web'],{cwd:path.dirname(game),stdio:'pipe'});
   const single=await boot(390,844,null,false,pathToFileURL(path.join(game,'test-results/solo/StarGardenPublicSolo.html')).href);
-  // A fresh solo save opens every feature, so on an event week (any real date since 2026-11-09) the weekly event popup
-  // arrives on the first home screen; close it before using the home buttons.
+  // A fresh solo save can show the current event on its first home screen.
   await single.page.waitForTimeout(700);if(await single.page.locator('#sheet[data-kind="event"]').isVisible())await close(single.page);
   assert.equal((await profile(single.page)).deck.length,1);await single.page.locator('[data-action="prepare"]').click();await single.page.locator('#sheet-footer [data-action="team"]').click();assert.equal(await single.page.locator('#sheet .five-line .team-slot').count(),1);await single.page.locator('[data-team-pick="star_boy"]').first().click();await single.page.locator('.choose-list [data-team-pick="snow_rabbit"]').click();await single.page.locator('[data-action="save-team"]').click();assert.deepEqual((await profile(single.page)).deck,['snow_rabbit']);
   await single.page.locator('[data-begin="main"]').click();await single.page.locator('#arena').waitFor();assert.equal(await single.page.locator('[data-skill]').count(),1);await single.page.locator('[data-action="summon-battle"]').click();assert.ok(await single.page.evaluate(()=>window.STAR_GARDEN.battle.board.filter(Boolean).every(u=>u.hero==='snow_rabbit')));await shot(single.page,'solo-battle',390,844);await single.page.locator('[data-action="leave"]').click();await single.page.locator('[data-action="save-leave"]').click();await reload(single);await single.page.locator('[data-action="resume"]').click();assert.equal(await single.page.evaluate(()=>window.STAR_GARDEN.battle.deck.join()),'snow_rabbit');await single.context.close();
@@ -212,19 +252,66 @@ try{
       return {topbar:hit(top,season)||hit(top,view),side:hit(sub,side)||hit(side,bar),subtitle:hit(sub,bar),season:hit(season,side),dock:hit(bar,dock),overflow:document.documentElement.scrollWidth>innerWidth};});
     assert.deepEqual(geo,{topbar:false,side:false,subtitle:false,season:false,dock:false,overflow:false},`lobby chrome ${width}x${height} notch ${shift}`);await t.context.close();
   }
-  // Study loop: a wrong answer in the 10-pull quiz lands in the notebook and becomes today's star (no API key: the built-in explanation).
+  // The seeded paid ten-pull reveals both sets while charging for the first set only.
   {
-    const rich=createProfile(NOW);rich.dreams=5000;const t=await boot(390,844,rich),{page}=t;
-    await nav(page,'소환');await page.locator('[data-draw="10"]').click();
-    assert.equal(await page.locator('#sheet[data-kind="quiz"] .quiz-choice').count(),4,'a 10-pull asks a concept question first');
-    const prompt=(await page.locator('.quiz-prompt').innerText()).trim(),asked=allQuestions('concept').find(c=>c.prompt===prompt);assert.ok(asked);
-    await page.locator(`[data-quiz-choice="${(asked.answer+1)%asked.choices.length}"]`).click();await page.locator('[data-action="quiz-go"]').click();
-    assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);assert.equal((await profile(page)).dreams,4000);
-    assert.deepEqual((await profile(page)).study.wrong.map(w=>w.id),[asked.id]);await close(page);
-    await nav(page,'홈');await page.locator('[data-action="library"]').click();await page.locator('.lib-cta [data-action="today-star"]').click();await page.locator('.wrong-row').click();
-    await page.locator('[data-light-star]:not([disabled])').click();await page.locator('.sky .star-dot.on').waitFor();
-    assert.deepEqual([(await profile(page)).study.library.stars,(await profile(page)).study.wrong.length],[1,0]);
-    await shot(page,'library',390,844);await t.context.close();
+    const rich=luckyNormalProfile(),t=await boot(390,844,rich),{page}=t;
+    await nav(page,'소환');const ten=page.locator('[data-draw="10"]');
+    assert.match(await ten.innerText(),/행운 보너스 10%/);await ten.click();
+    await page.locator('#sheet[data-kind="draw"]').waitFor();
+    assert.equal(await page.locator('#sheet[data-kind="quiz"]').count(),0);
+    assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);
+    const receipt=await profile(page),newHistory=receipt.history.slice(0,20);
+    assert.equal(receipt.dreams,rich.dreams-10*TUNING.heroDrawCost);
+    assert.equal(receipt.history.length,rich.history.length+20);
+    assert.ok(newHistory.every(entry=>entry.banner==='normal'));
+    assert.equal(newHistory.filter(entry=>entry.bonus).length,10);
+    await skipSpotlights(page);
+    const lucky=page.getByRole('button',{name:'행운이 찾아왔어요!',exact:true});
+    await lucky.waitFor();await lucky.click();
+    await page.locator('.reveal-stage.lucky').waitFor();await skipSpotlights(page);
+    assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);
+    assert.deepEqual((await profile(page)).history,receipt.history,'opening the bonus does not draw again');
+    await shot(page,'lucky-normal-ten',390,844);await t.context.close();
+  }
+  // Tasks were completed in advance so the browser exercises only the claim gates.
+  {
+    const fresh=createProfile(NOW),p=veteran(fresh);
+    p.cleared=21;p.beginner=fresh.beginner;p.beginner.did=['greet','water','gift','relic','draft'];
+    const t=await boot(390,844,p,false,url,{tutorial:true}),{page}=t;
+    const step=day=>page.locator('[data-sprout-day="'+day+'"]'),task=day=>page.locator('[data-sprout-task="'+day+'"]');
+    const anchor=page.locator('.sp-anchor-text em'),choice=page.locator('#sheet[data-kind="ur-choice"]');
+    await page.locator('[data-action="sprout"]').click();
+    assert.equal(await page.locator('#sheet-title').innerText(),'새싹 일곱 걸음');
+    assert.equal(await page.locator('.sp-days .sp-day').count(),7);
+    assert.equal(await anchor.innerText(),'앞으로 6단계');
+    assert.equal(await task(2).count(),0);assert.match(await step(2).getAttribute('class'),/\blocked\b/);
+    await step(1).click();assert.match(await step(2).getAttribute('class'),/\blocked\b/);
+    await step(2).click();assert.equal(await page.locator('#toast').innerText(),'앞 단계의 할 일을 마치면 열려요.');
+    assert.deepEqual((await profile(page)).beginner.tasks,[]);
+    for(let day=1;day<=6;day++){
+      assert.equal(await task(day).isEnabled(),true);
+      assert.match(await step(day+1).getAttribute('class'),/\blocked\b/);
+      if(day===6){
+        await step(7).click();
+        assert.equal(await choice.count(),0,'the UR picker is still locked before claiming task six');
+        assert.equal(await anchor.innerText(),'앞으로 1단계');
+      }
+      await task(day).click();
+      assert.match(await step(day+1).getAttribute('class'),/\bready\b/);
+      assert.equal(await page.locator('.lb-sprout .sprout-count').textContent(),(day+1)+'/7');
+    }
+    assert.equal(await anchor.innerText(),'지금 고를 수 있어요');
+    assert.deepEqual((await profile(page)).beginner.tasks,[1,2,3,4,5,6]);
+    await shot(page,'sprout-step-seven',390,844);
+    await step(7).click();await choice.waitFor();
+    const pick=choice.locator('[data-ur-pick="queen"]');
+    assert.equal(await choice.locator('[data-action="ur-confirm"]').isDisabled(),true);
+    await pick.click();await choice.locator('[data-action="ur-confirm"]').click();
+    await page.locator('#sheet[data-kind="draw"]').waitFor();
+    assert.equal((await profile(page)).beginner.choice,'queen');
+    await close(page);await page.locator('[data-action="sprout"]').click();
+    assert.equal(await anchor.innerText(),'받았어요');
+    await t.context.close();
   }
   for(const [width,height] of [[320,568],[390,844],[1280,900]]){
     const test=await boot(width,height),{page,context}=test;
@@ -245,12 +332,18 @@ try{
     assert.equal(await page.locator('#app').getAttribute('aria-hidden'),'true');
     await shot(page,'detail',width,height);await page.keyboard.press('Escape');assert.equal(await page.locator('#overlay').isVisible(),false);
     await nav(page,'소환');await shot(page,'summon',width,height);
-    await page.locator('[data-action="rates"]').click();assert.match(await page.locator('#sheet-body').innerText(),/70.00%/);await close(page);
+    await page.locator('[data-action="rates"]').click();
+    assert.match(await page.locator('#sheet-body').innerText(),/\b69\.8%/);
+    assert.match(await page.locator('#sheet-body').innerText(),/\b0\.4%/);
+    await checkCountdown(page.locator('#sheet-body'),NOW,periodOf('pickup',NOW).end);await close(page);
     assert.match(await page.locator('[data-draw="1"]').innerText(),/무료/);await page.locator('[data-draw="1"]').click();
     assert.equal((await profile(page)).dreams,640);assert.equal((await profile(page)).daily.free,true);assert.equal((await profile(page)).history.length,1);
     assert.equal(await page.locator('.reveal-grid .hero-card').count(),1);await shot(page,'reveal',width,height);await close(page);
     await page.locator('[data-banner="season"]').click();await page.locator('[data-action="rates"]').click();
-    assert.match(await page.locator('#sheet-body').innerText(),/0.100%/);await close(page);
+    assert.match(await page.locator('#sheet-body').innerText(),/\b0\.4%/);
+    const guardian=HEROES.find(h=>h.id===calendar(NOW).guardian);
+    assert.equal(await page.locator('#sheet-body .rate-row').filter({hasText:'UR · '+guardian.name}).locator('b').innerText(),'0.2%');
+    await checkCountdown(page.locator('#sheet-body'),NOW,periodOf('guardian',NOW).end);await close(page);
     await page.locator('[data-banner="relic"]').click();await shot(page,'relic-summon',width,height);
     assert.match(await page.locator('[data-draw="1"]').innerText(),/무료 소환/);
     await nav(page,'모험');assert.equal(await page.locator('.stage-list .stage').count(),9);assert.equal(await page.locator('[data-cycle="4"]').isDisabled(),true,'chapters open as they are reached');
@@ -301,6 +394,8 @@ try{
     assert.deepEqual((await profile(page)).active.deck,saved.active.deck);
     await page.locator('[data-action="leave"]').click();await page.locator('[data-action="save-leave"]').click();
     await page.locator('[data-action="settings"]').click();
+    const settings=page.locator('#sheet[data-kind="settings"]');await settings.waitFor();
+    assert.equal(await settings.locator('#tutor-key,.tutor-panel').count(),0);
     const backup={...await profile(page),dreams:3333};
     // File.text() in WebKit requires local I/O enabled; all remote requests
     // stay blocked before, during and after import.
@@ -312,7 +407,7 @@ try{
     await context.close();
   }
   const lateProfile=createProfile(NOW);lateProfile.cleared=LATE_UNLOCK_STAGE;
-  const lateTest=await boot(390,844,lateProfile);
+  const lateTest=await boot(390,844,lateProfile,false,url,{lateNotice:true});
   // The first load after clearing part one announces every new companion, shown once.
   await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
   assert.equal(await lateTest.page.locator('.late-card').count(),LATE_NEW,'every new companion is announced');
@@ -346,15 +441,29 @@ try{
   await page.locator('[data-collection="relic"]').click();await page.locator('.cards [data-relic="hourglass"]').click();
   await page.locator('[data-enhance-relic="hourglass"]').click();assert.equal((await profile(page)).relics.hourglass.enhance,3);await close(page);
   await nav(page,'소환');const fill=await profile(page);assert.equal(fill.pity.normal,0);
+  const relicPull=command(structuredClone(fill),'draw',{banner:'relic',count:10},NOW);assert.ok(relicPull.ok,relicPull.message);
   await page.locator('[data-banner="relic"]').click();await page.locator('[data-draw="10"]').click();
-  // The relic 10-pull asks the star quiz first (a right answer may add a lucky ten); skipping it draws at once.
-  await page.locator('#sheet[data-kind="quiz"]').waitFor();await page.locator('[data-action="quiz-skip"]').click();
-  assert.equal((await profile(page)).relicDraws,10);assert.equal((await profile(page)).dreams,4200);await shot(page,'ten-relics',390,844);await close(page);
+  await page.locator('#sheet[data-kind="draw"]').waitFor();
+  const afterRelics=await profile(page);
+  assert.equal(afterRelics.relicDraws,fill.relicDraws+10+relicPull.bonus.length);
+  assert.equal(afterRelics.dreams,fill.dreams-10*TUNING.relicDrawCost);await shot(page,'ten-relics',390,844);await close(page);
+  if(relicPull.lucky)await close(page);
   await nav(page,'정원');assert.equal(await page.locator('.slot.locked').count(),0);
   await page.locator('[data-dispatch-slot="0"]').click();await page.locator('[data-send="queen"]').click();
-  assert.equal((await profile(page)).dispatches[0].hero,'queen');assert.ok(!(await profile(page)).deck.includes('queen'));
+  const dispatched=await profile(page);
+  assert.equal(dispatched.dispatches[0].hero,'queen');assert.ok(!dispatched.deck.includes('queen'));
+  assert.equal(dispatched.dispatches[0].end-dispatched.dispatches[0].start,HOUR);
+  assert.match(await page.locator('#toast').innerText(),/파견 출발 · 1시간$/);
+  assert.equal(await page.locator('.gd [data-action="accel"]').count(),0);
+  await checkCountdown(page.locator('.slot.running[data-dispatch-slot="0"]'),NOW,dispatched.dispatches[0].end);
   await shot(page,'dispatch-active',390,844);
-  await nav(page,'모험');await page.locator('[data-mode="weekly"]').click();await page.locator('[data-action="prepare-mode"]').click();
+  await nav(page,'모험');await page.locator('[data-mode="weekly"]').click();
+  const draftCard=page.locator('.mode.weekly'),draftPeriod=periodOf('draft',NOW);
+  assert.equal(await draftCard.locator('.mode-tag').innerText(),TEMPO.draftHours+'시간마다 초기화');
+  await checkCountdown(draftCard,NOW,draftPeriod.end);
+  await draftCard.locator('[data-action="mode-info"]').click();
+  assert.ok((await page.locator('#sheet-body').innerText()).includes('4시간마다 3번 입장해요.'));
+  await close(page);await page.locator('[data-action="prepare-mode"]').click();
   await page.locator('[data-begin="weekly"]').click();await page.locator('[data-draft="0"]').waitFor();
   assert.equal(await page.locator('.draft-card').count(),2);await shot(page,'draft',390,844);
   await page.locator('[data-draft="0"]').click();const draft=await profile(page);
@@ -364,17 +473,41 @@ try{
   await page.locator('#arena').waitFor();assert.equal(await page.locator('.skill-button').count(),5);
   assert.ok(!(await profile(page)).active.deck.includes('queen'));
   await page.locator('[data-action="leave"]').click();await page.locator('[data-action="retire"]').click();await page.locator('[data-action="confirm-retire"]').click();
-  assert.equal((await profile(page)).active,null);assert.ok((await profile(page)).weekly);
-  assert.equal((await profile(page)).results[0].mode,'weekly');assert.equal((await profile(page)).weeklyRuns,1);
-  // Three entries a week: the result offers another run and the card shows two of three gems left.
-  await page.locator('#sheet[data-kind="result"] [data-action="weekly-retry"]').waitFor();await page.locator('#sheet [data-action="close"]').first().click();
-  assert.equal(await page.locator('.mode.weekly .entry-pass').getAttribute('aria-label'),'남은 입장 2/3');
-  assert.equal(await page.locator('.mode.weekly [data-action="prepare-mode"]').isDisabled(),false);
+  const settledDraft=await profile(page);
+  assert.equal(settledDraft.active,null);assert.equal(settledDraft.weekly,draftPeriod.id);
+  assert.equal(settledDraft.results[0].mode,'weekly');assert.equal(settledDraft.weeklyRuns,1);
+  // The result offers another run until all three entries are used.
+  await page.locator('#sheet[data-kind="result"] [data-action="weekly-retry"]').waitFor();await close(page);
+  const entries=draftCard.locator('.entry-pass');
+  assert.equal(await entries.getAttribute('aria-label'),'남은 입장 2/3');
+  assert.equal(await draftCard.locator('[data-action="prepare-mode"]').isDisabled(),false);
+  for(let used=2;used<=3;used++){
+    await draftCard.locator('[data-action="prepare-mode"]').click();await page.locator('[data-begin="weekly"]').click();
+    for(let pick=0;pick<5;pick++)await page.locator('[data-draft="0"]').click();
+    await page.locator('#arena').waitFor();await page.locator('[data-action="leave"]').click();
+    await page.locator('[data-action="retire"]').click();await page.locator('[data-action="confirm-retire"]').click();
+    await page.locator('#sheet[data-kind="result"]').waitFor();await close(page);
+    assert.equal((await profile(page)).weeklyRuns,used);
+  }
+  assert.equal(await entries.getAttribute('aria-label'),'남은 입장 0/3');
+  assert.equal(await draftCard.locator('[data-action="prepare-mode"]').isDisabled(),true);
+  // The entry badge and start button reset at the next four-hour boundary.
+  const nextDraft=periodOf('draft',draftPeriod.end);
+  await page.clock.setFixedTime(nextDraft.start);
+  await checkCountdown(draftCard,nextDraft.start,nextDraft.end);
+  assert.equal(await entries.getAttribute('aria-label'),'남은 입장 3/3');
+  await draftCard.locator('[data-action="prepare-mode"]').click();await page.locator('[data-begin="weekly"]').click();
+  await page.locator('[data-draft="0"]').waitFor();
+  assert.equal((await profile(page)).weekly,nextDraft.id);
+  assert.equal((await profile(page)).weeklyRuns,1);
   await test.context.close();
 
   const monthlyProfile=createProfile(NOW);monthlyProfile.cleared=3;monthlyProfile.settings.auto=false;
   const monthly=await boot(390,844,monthlyProfile);
-  await nav(monthly.page,'모험');await monthly.page.locator('[data-mode="monthly"]').click();await shot(monthly.page,'monthly-card',390,844);
+  await nav(monthly.page,'모험');await monthly.page.locator('[data-mode="monthly"]').click();
+  const rushPeriod=periodOf('rush',NOW),huntCard=monthly.page.locator('.mode.monthly');
+  assert.equal(await huntCard.locator('.mode-tag').innerText(),TEMPO.rushHours+'시간마다 초기화');
+  await checkCountdown(huntCard,NOW,rushPeriod.end);await shot(monthly.page,'monthly-card',390,844);
   await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();
   await monthly.page.waitForFunction(()=>window.STAR_GARDEN.battle?.enemies.length>0);
   await monthly.page.locator('[data-action="pause"]').click();
@@ -383,7 +516,9 @@ try{
   await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
   assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.ok((await profile(monthly.page)).monthlyBest);
   // The hunt pays its record when the run is settled; nothing is left to claim.
-  const monthlyPaid=600+monthlyReward((await profile(monthly.page)).monthlyBest);assert.equal((await profile(monthly.page)).dreams,monthlyPaid);assert.ok((await profile(monthly.page)).monthly);
+  const huntReceipt=await profile(monthly.page),monthlyPaid=monthlyProfile.dreams+monthlyReward(huntReceipt.monthlyBest);
+  assert.equal(huntReceipt.dreams,monthlyPaid);assert.equal(huntReceipt.monthly,rushPeriod.id);
+  assert.equal(huntReceipt.monthlyBest.period,rushPeriod.id);
   assert.match(await monthly.page.locator('#sheet-body').innerText(),/획득 보상/);assert.equal(await monthly.page.locator('[data-action="monthly-claim"]').count(),0);
   await shot(monthly.page,'monthly-record',390,844);await close(monthly.page);assert.match(await monthly.page.locator('#content .mode.monthly').innerText(),/받음/);
   await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
@@ -414,18 +549,70 @@ try{
 
   // Enter actual result/claim screens from serialized combat fixtures rather
   // than altering the running browser engine or creating fake DOM nodes.
-  const end=createProfile(NOW);command(end,'begin',{mode:'main',stage:1},NOW);const won=createBattle(end);
-  won.phase='victory';won.wave=6;won.won=true;won.stats.damage=2222;won.stats.byHero.star_boy=2222;end.active.run=E.serialize(won);
-  const result=await boot(390,844,end);
-  await result.page.locator('[data-action="resume"]').click();await result.page.locator('.battle-result').waitFor();
+  const end=stageOneVictory(createProfile(NOW)),result=await boot(390,844,end);
+  const firstConstellation=CONSTELLATIONS[0],firstProgress='1/'+firstConstellation.stars.length;
+  await result.page.locator('[data-action="resume"]').click();await result.page.locator('#sheet[data-kind="result"]').waitFor();
   // No core leak in the fixture: first clear plus the first perfect.
-  assert.equal((await profile(result.page)).cleared,1);assert.equal((await profile(result.page)).dreams,600+stageReward(1)+PERFECT_REWARD);assert.deepEqual((await profile(result.page)).perfect,[1]);assert.equal(await result.page.locator('.result-perfect').count(),1);await shot(result.page,'result',390,844);
+  const cleared=await profile(result.page),clearDust=stageDust(1,true,true);
+  assert.equal(cleared.cleared,1);assert.equal(cleared.dreams,end.dreams+stageReward(1)+PERFECT_REWARD);
+  assert.deepEqual(cleared.perfect,[1]);assert.equal(await result.page.locator('.result-perfect').count(),1);
+  assert.equal(cleared.dust,end.dust+clearDust);
+  assert.equal(await result.page.locator('.result-dust').innerText(),'별가루 +'+clearDust.toLocaleString('ko-KR'));
+  const faces=result.page.locator('.result-bond-face');
+  assert.equal(await faces.count(),5);
+  assert.deepEqual(await faces.locator('img').evaluateAll(imgs=>imgs.map(img=>img.alt)),end.deck.map(id=>HEROES.find(h=>h.id===id).name));
+  assert.deepEqual(await faces.locator(':scope > span:last-child').allTextContents(),end.deck.map(()=> '+'+BATTLE_BOND.win));
+  assert.equal(cleared.study.library.stars,1);
+  assert.equal(await result.page.locator('.result-star b').innerText(),firstProgress);
+  assert.equal(await result.page.locator('.result-star [data-result-art]').count(),0);
+  await shot(result.page,'result',390,844);
+  await close(result.page);await nav(result.page,'홈');await result.page.locator('[data-action="library"]').click();
+  const gallery=result.page.locator('.lib.gallery'),currentCard=gallery.locator('.gal-card.current');
+  await currentCard.waitFor();
+  assert.equal(await gallery.locator('.gal-card').count(),CONSTELLATIONS.length);
+  assert.equal(await gallery.locator('[data-library-tab]').count(),0);
+  assert.equal(await gallery.getByText(/강의|용어/).count(),0);
+  assert.equal(await currentCard.locator('.gal-count-big').textContent(),firstProgress);
+  assert.equal(await currentCard.locator('.gal-sky .star-dot.on').count(),1);
+  await shot(result.page,'library',390,844);
   await result.context.close();
+
+  // A replay supplies the last star and pushes one companion over the memorial threshold.
+  {
+    const p=createProfile(NOW);p.cleared=1;p.perfect=[1];p.study.library.stars=firstConstellation.stars.length-1;
+    const hero='star_boy',near=p.heroes[hero];near.bond=BOND_MAX-1;near.bondXp=bondNeed(near.bond)-1;
+    const t=await boot(390,844,stageOneVictory(p)),{page}=t;
+    await page.locator('[data-action="resume"]').click();await page.locator('#sheet[data-kind="result"]').waitFor();
+    const receipt=await profile(page);
+    assert.equal(receipt.dust,p.dust+stageDust(1,true,false));assert.equal(receipt.dreams,p.dreams);
+    assert.deepEqual(receipt.study.library.unlocked,[firstConstellation.id]);
+    assert.equal(receipt.heroes[hero].bond,BOND_MAX);
+    assert.equal(await page.locator('.result-star b').innerText(),firstConstellation.stars.length+'/'+firstConstellation.stars.length);
+    assert.equal(await page.locator('.result-bond-face[data-result-memory="'+hero+'"] use[href="#i-heart"]').count(),1);
+    const memoryLink=page.getByRole('button',{name:'인연 이야기 열림 · 보기',exact:true});
+    const paintingLink=page.getByRole('button',{name:'루미의 그림 보기',exact:true});
+    await memoryLink.waitFor();await paintingLink.waitFor();await shot(page,'result-unlocks',390,844);
+    const actions=page.locator('#sheet-footer .dialog-buttons button');
+    assert.equal(await actions.count(),2);
+    assert.ok(await actions.evaluateAll(buttons=>buttons.every(button=>{const r=button.getBoundingClientRect();return r.height>0&&r.top>=0&&r.bottom<=innerHeight+1;})),'both result actions fit in 390×844');
+    await memoryLink.click();
+    await page.locator('#sheet[data-kind="memorial"] #memory-art img').waitFor();
+    assert.equal(await page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES[hero].title);
+    await close(page);await paintingLink.click();
+    const painting=page.locator('#sheet[data-kind="library-art"]');
+    await painting.locator('.art-frame img').waitFor();
+    assert.equal(await painting.locator('#sheet-title').innerText(),firstConstellation.title);
+    assert.equal(await painting.locator('.art-frame img').getAttribute('alt'),firstConstellation.title);
+    await shot(page,'library-painting',390,844);
+    await painting.getByRole('button',{name:'회랑에 걸기',exact:true}).click();
+    await page.locator('#sheet[data-kind="result"]').waitFor();
+    await t.context.close();
+  }
   const gauge=createProfile(NOW);gauge.pity.normal=TUNING.pity.normal;const pity=await boot(390,844,gauge);await nav(pity.page,'소환');
   await pity.page.locator('.pity-chip.full').click();await pity.page.locator('[data-pity-pick="queen"]').click();await pity.page.locator('[data-action="pity-claim"]').click();
   assert.equal((await profile(pity.page)).heroes.queen.owned,true);assert.equal((await profile(pity.page)).pity.normal,0);assert.equal(await pity.page.locator('.reveal-grid .hero-card').count(),1);await shot(pity.page,'pity-exchange',390,844);await pity.context.close();
-  const sent=NOW-TUNING.dispatchHours*3600000,returned=createProfile(sent);returned.cleared=9;returned.heroes.queen.owned=true;
-  command(returned,'dispatch',{slot:0,id:'queen'},sent);returned.clockAt=NOW;
+  const sent=NOW-HOUR,returned=createProfile(sent);returned.cleared=9;returned.heroes.queen.owned=true;
+  const leaving=command(returned,'dispatch',{slot:0,id:'queen'},sent);assert.ok(leaving.ok,leaving.message);returned.clockAt=NOW;
   const claim=await boot(390,844,returned);await nav(claim.page,'정원');
   await claim.page.locator('.slot.ready[data-dispatch-slot="0"]').click();assert.equal((await profile(claim.page)).dispatches.length,0);
   assert.ok((await profile(claim.page)).dreams>600);await claim.context.close();
