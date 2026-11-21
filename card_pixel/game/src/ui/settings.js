@@ -1,4 +1,5 @@
 import { $, $$, esc, svg } from './dom.js';
+import { openCredits } from './credits.js';
 import { storage } from './storage.js';
 import * as Save from '../engine/save.js';
 import { DUNGEONS } from '../content/dungeons.js';
@@ -97,6 +98,7 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
       <button class="btn" data-backup-action="export">기록 내보내기</button>
       <button class="btn" data-backup-action="import">기록 가져오기</button>
     </div>` : '';
+    const credits = $('#title.on, #hub.on') ? '<button class="btn" id="meta-credits">크레딧</button>' : '';
     openSheet('설정', '<div class="meta-sheet togs">' + row('sound', '소리', audio.soundOn, '효과음') +
       row('music', '음악', music.enabled, '배경 음악') +
       row('rim', '윤곽선 강조', St.RIM.on, '동료와 적의 윤곽을 밝게 표시한다.') +
@@ -104,7 +106,7 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
       row('markers', '표식 강조', markers, '선택 ✓ · 위험 !') +
       row('speed', '전투 속도', St.clock.speed === 2, '', St.clock.speed + '배') +
       (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '주소창과 탭을 숨긴다.') : '') +
-      backup + '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>');
+      backup + credits + '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>');
     $$('#sheet .tog').forEach(b => b.addEventListener('click', async () => {
       const k = b.dataset.set;
       const scroll = $('#sh-body').scrollTop;
@@ -121,6 +123,14 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
       $('#sh-body').scrollTop = scroll;
       $(`[data-set="${k}"]`)?.focus({ preventScroll: true });
     }));
+    $('#meta-credits')?.addEventListener('click', () => {
+      const scroll = $('#sh-body').scrollTop;
+      openCredits(openSheet, () => {
+        settingsSheet();
+        $('#sh-body').scrollTop = scroll;
+        $('#meta-credits')?.focus({ preventScroll: true });
+      });
+    });
     $('#meta-erase').addEventListener('click', () => {
       openSheet('기록을 지울까요?', `<div class="meta-sheet meta-erase-confirm">
         <p>동료, 수첩, 기록과 진행 중인 원정을 모두 지운다. 되돌릴 수 없다.</p>

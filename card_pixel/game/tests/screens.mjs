@@ -1825,6 +1825,30 @@ function readingSettingsCase() {
   };
 }
 
+function creditsCase() {
+  return {
+    session: storedSession({ profile: snowRabbitProfile() }),
+    proof: 'Credits and the Galmuri license appear from title and observatory settings',
+    async show(page, { text, capture }) {
+      const sheet = page.locator('#sheet.on');
+      for (const screen of ['title', 'hub']) {
+        if (screen === 'hub') await enterObservatory(page);
+        await page.locator(`#${screen}.on .b-set`).click();
+        await sheet.getByRole('button', { name: '크레딧', exact: true }).click();
+        await text(sheet.locator('#sh-title'), '크레딧', { exact: true });
+        const font = sheet.locator('section').filter({ has: page.getByRole('heading', { name: '글꼴', exact: true }) });
+        await text(font.locator('p').first(), 'Galmuri 9·11·14 — quiple, SIL Open Font License 1.1', { exact: true });
+        await text(font.locator('.credits-license-url'), 'https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/LICENSE.txt', { exact: true });
+        assert.equal(await font.getByRole('link').count(), 0);
+        if (screen === 'hub') await capture();
+        await sheet.getByRole('button', { name: '닫기', exact: true }).click();
+        await text(sheet.locator('#sh-title'), '설정', { exact: true });
+        await sheet.getByRole('button', { name: '닫기', exact: true }).click();
+      }
+    }
+  };
+}
+
 function backupStore(entries) {
   const saved = new Map(Object.entries(entries));
   return Save.createSaveStore({
@@ -2184,6 +2208,7 @@ const cases = {
   'difficulty-choice': difficultyChoice,
   'missions-invitations': missionInvitations,
   'reading-settings': readingSettingsCase,
+  credits: creditsCase,
   'save-recovery': damagedRecovery,
   'save-import': saveImport,
   'map-awaken-faces': mapAwakenFaces,

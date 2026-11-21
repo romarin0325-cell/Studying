@@ -399,6 +399,8 @@
   letter-spacing: 0;
 }
 
+.credits-license-url { overflow-wrap: anywhere; }
+
 #sheet:has(.rift-prep) .in { margin-inline: 14px; }
 .rift-opponents { display: flex; align-items: center; gap: 6px; margin: 6px 0; }
 .rift-opponents .meta-face { flex: none; }
