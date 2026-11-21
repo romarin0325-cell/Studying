@@ -14,7 +14,7 @@ const meta = JSON.parse(read('assets/sprites.json'));
 const pngUrl = file => 'data:image/png;base64,' + fs.readFileSync(file).toString('base64');
 const sp = {};
 for (const [file, m] of Object.entries(meta)) {
-  sp[file.replace('.png', '')] = { src: pngUrl(path.join(here, 'assets', file)), w: m.width, h: m.height, cx: m.bodyCenterX, fy: m.feetBaselineY, facing: m.facing, kind: m.kind };
+  sp[file.replace('.png', '')] = { src: pngUrl(path.join(here, 'assets', file)), w: m.width, h: m.height, cx: m.bodyCenterX, fy: m.feetBaselineY, facing: m.facing, kind: m.kind, face: m.face };
 }
 
 function pngDirectory(name) {

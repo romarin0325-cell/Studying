@@ -173,9 +173,10 @@ export function createWidgets(ASSETS, card) {
   function face(id, box) {
     const m = spr(id);
     if (!m) return '';
-    return sprite(id, {
-      style: 'margin-left:' + Math.round((box || 40) / 2 - m.cx) + 'px;margin-top:-2px'
-    });
+    const style = m.face
+      ? 'display:block;margin-left:calc(50% - ' + m.face.x + 'px);margin-top:' + (-m.face.y) + 'px'
+      : 'margin-left:' + Math.round((box || 40) / 2 - m.cx) + 'px;margin-top:-2px';
+    return sprite(id, { style });
   }
 
   function cardRow(run, id, o) {

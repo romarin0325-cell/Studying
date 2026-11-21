@@ -14,12 +14,12 @@
 
 ```sh
 node card_pixel/game/build.mjs
-node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/daily.test.mjs
+node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/daily.test.mjs card_pixel/game/tests/assets.test.mjs
 node card_pixel/game/tests/play.mjs --seeds=7,21 --runs=2
 ```
 
 - 빌드는 esbuild로 `src/main.js`와 모듈을 묶어 `dist/Relaymare.html`을 만든다.
-- Node 테스트 341개(하위 사례 포함)는 진입 파일 5개에서 실행한다. 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열의 생성·정산·저장(`daily`)을 확인한다.
+- Node 테스트 350개(하위 사례 포함)는 진입 파일 6개에서 실행한다. 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열의 생성·정산·저장(`daily`), 캐릭터 그림의 포즈·크기·기준점·얼굴 상자(`assets`)를 확인한다.
 - 자동 플레이는 먼저 빌드한다. Playwright Chromium을 쓰고, 없으면 설치된 Chrome, Edge 순으로 시도한다. `CHROMIUM_PATH`로 실행 파일을 지정할 수 있다. `--seeds=7,21`과 `--runs=2`가 기본값이며 시드마다 입문 1판 뒤 본편 2판을 돈다. `--headed`를 붙이면 창을 띄운다.
 - 자동 플레이는 본편 이어하기, 브라우저 오류·멈춤, 행동 뒤 대기 시간과 전투 프레임을 확인한다. 화면은 `tests/shots/`에 남긴다.
 - `node card_pixel/game/tests/screens.mjs`는 전투·원정·저장·균열 화면 사례 72개를 Chrome에서 확인하고 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `node card_pixel/game/tests/screens-map.mjs`는 지도·편성 화면 사례 7개를 확인하고 `tests/shots/screens-map/`에 화면을 남긴다. 두 명령 모두 `--case <이름>`으로 하나만 돌거나 `--validate-only`로 화면에 필요한 상태만 확인할 수 있다.
@@ -32,14 +32,14 @@ node card_pixel/game/tools/sim.mjs --all
 node card_pixel/game/tools/sim.mjs --all --difficulty=nightmare
 node card_pixel/game/tools/sim.mjs --easy-audit
 node card_pixel/game/tools/sim.mjs --daily-from=2026-11-21 --days=60
-node card_pixel/game/tools/cut-sprites.mjs
+node card_pixel/game/tools/build-sprites.mjs
 node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pixel/art/icons card_pixel/game/assets/icons 32
 ```
 
 - 시뮬레이션은 실제 `assets/sprites.json`의 명단과 원정 명령을 써서 클리어율, 1,000 이상 한 방, 전투·사망·유품·영입 후보 수를 잰다. 기본은 홍련 화산 여정 300판이다. 횟수는 숫자 인수로, 던전은 `--dungeon=ember_volcano`처럼 지정한다. `--all`은 던전마다 그 횟수만큼 돌며, 악몽에서는 입문을 건너뛴다. `--plain`, `--no-heirloom`, `--no-laststand`로 비교한다.
 - [tools/music-preview.html](tools/music-preview.html)을 브라우저에서 바로 열어 합성 배경음 12곡을 듣는다. 전투·보스 곡은 던전을 골라 들어 볼 수 있다.
 - `node card_pixel/game/tools/music-levels.mjs`는 설치된 Chrome에서 12곡과 효과음 몇 개를 재생해 최고·평균(RMS) 음량, -1 dBFS 이상 비율, 가장 긴 무음 구간을 표와 JSON으로 남긴다.
-- 스프라이트 도구는 `../art/manifest.json`에서 `status: "ok"`인 띠의 대기·공격·피격 포즈를 잘라 `assets/`와 `sprites.json`을 갱신한다. 동료 높이는 `small` 58 / `medium` 64 / `normal` 72(기본) / `tall` 80px이고 `heightPx`로 덮어쓴다. 떨어진 파츠는 본체 면적의 1.5% 이상이면 남긴다. `keepParts: false`면 본체만 쓴다.
+- 스프라이트 도구는 `../art/pixel-v2/`(2026-11-21 GPT 도트 150종, 수정 6명 포함)의 대기·공격·피격 원본을 불투명 경계로 잘라 `assets/`와 `sprites.json`을 갱신한다. 픽셀과 배율은 원본 그대로이고, 기준점(몸 중심·발선)과 얼굴 상자(`face`: 머리 중심·정수리·머리 길이)를 함께 적는다. `sprites.json`의 키 순서와 `kind`·`size`·`facing`은 유지한다(키 순서가 동료 풀 순서다). `--import "<원본 묶음 폴더>"`는 원본 묶음에서 `art/pixel-v2/`로 다시 복사한다. 예전 띠(`../art/strips`)와 자르기 도구는 쓰지 않는다(도구는 git 기록에 있다).
 - 아이콘 도구는 `sheets.tsv`에 지정된 2×2 시트를 잘라 `assets/icons/`에 32×32 PNG로 저장한다.
 
 ## 모듈 지도
