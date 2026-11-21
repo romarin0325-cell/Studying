@@ -1,0 +1,52 @@
+{
+  "input": "candidate.png",
+  "inputSha256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+  "stageD": "atlas.png",
+  "stageDSha256": "282191296b4e79db247ba8d24045cca27cc553e88d9f88b7f23781acb040b3bd",
+  "scale": 1,
+  "shifts": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "clipped": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "eachRGBAChanged": [
+    2878,
+    2955,
+    16008,
+    16010
+  ],
+  "above32": [
+    1520,
+    1561,
+    14506,
+    14013
+  ],
+  "alphaOnly": [
+    2121,
+    2145,
+    15271,
+    15239
+  ],
+  "outsideMaskVsCandidate": 9233,
+  "selected": "candidate.png",
+  "note": "Retrospective C & D run, not an original generated production approval. Canonical alpha cleanup runs over the full atlas; cannot substitute the D output for a pixel-protected input."
+}

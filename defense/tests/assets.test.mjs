@@ -33,6 +33,11 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
     assert.equal(createHash('sha256').update(await fs.readFile(path.join(root,record.file))).digest('hex'),record.sha256);
   }
   const manifest={assets:previous.map(e=>replacements.get(e.id)||e)};
+  const turns=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/turnaround-20261120/pixels.json'),'utf8'));
+  assert.deepEqual(turns.map(e=>[e.id,e.editedDirections]),[
+    ['phantom',[2,3]],['lightning_sage',[2,3]],['time_magician',[3]]
+  ]);
+  const newProfiles=new Map(turns.map(e=>[e.id,e]));
   const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
   assert.equal(art.size,46);
   for(const entry of manifest.assets){
@@ -40,7 +45,23 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
     assert.deepEqual(entry.frames.map(f=>f.direction),['down','up','left','right']);
     assert.equal(installed.foot,.9375);assert.equal(installed.scale,1);assert.equal(installed.columns,2);assert.equal(installed.directional,true);
     assert.equal(installed.portrait.x,Math.round(frame.ellipse[0]));assert.equal(installed.portrait.y,Math.round(frame.ellipse[1]));
-    assert.equal(ASSET_PATHS[installed.atlas],'./'+entry.sourceWebp.file.replace(/^defense\//,''));
+    const replacement=newProfiles.get(entry.id);
+    assert.equal(ASSET_PATHS[installed.atlas],replacement?.source||'./'+entry.sourceWebp.file.replace(/^defense\//,''));
+    if(replacement){
+      assert.equal(replacement.before.png,entry.sourcePng.sha256,'regional edit starts from the last installed master');
+      assert.equal(replacement.before.source,entry.sourceWebp.sha256);
+      for(const [file,record] of [[replacement.master.file,replacement.master],[replacement.source,replacement.original],[replacement.output.path,replacement.output]]){
+        const bytes=await fs.readFile(assetFile(file));
+        assert.equal(bytes.length,record.bytes);
+        assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256,file);
+      }
+      for(const d of [0,1,2,3]){
+        const edited=replacement.editedDirections.includes(d);
+        assert.equal(replacement.master.changedPixels[d]>0,edited);
+        assert.equal(replacement.sourceVisibleChanges[d]>0,edited);
+        assert.equal(replacement.deployedVisibleChanges[d]>0,edited);
+      }
+    }
     for(const record of [entry.sourcePng,entry.sourceWebp]){
       const bytes=await fs.readFile(path.join(root,record.file));
       assert.equal(bytes.length,record.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256,record.file);

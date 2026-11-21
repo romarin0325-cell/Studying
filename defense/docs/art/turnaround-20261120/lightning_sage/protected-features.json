@@ -1,0 +1,86 @@
+{
+  "baseSha256": "6472dd601a8bc011f245de4534e373800bc055014e978355467c860d790b6ee8",
+  "candidateSha256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+  "semanticCaveat": "Optical rectangles and color selection independently sample vulnerable equipment pixels; the additional frozen and effective binary masks cover the whole 1024 sheet.",
+  "counts": {
+    "front": {
+      "pixels": 262144,
+      "changed": 0,
+      "first": null
+    },
+    "back": {
+      "pixels": 262144,
+      "changed": 0,
+      "first": null
+    },
+    "left": {
+      "pixels": 262144,
+      "changed": 11076,
+      "first": [
+        237,
+        622
+      ]
+    },
+    "right": {
+      "pixels": 262144,
+      "changed": 10888,
+      "first": [
+        779,
+        622
+      ]
+    },
+    "allBodyY315AndBelow": {
+      "pixels": 201728,
+      "changed": 0,
+      "first": null
+    },
+    "preservedOcularBandY220to276": {
+      "pixels": 58368,
+      "changed": 0,
+      "first": null
+    },
+    "leftGlassesWithPupil": {
+      "pixels": 3666,
+      "changed": 0,
+      "first": null
+    },
+    "rightGlassesWithPupil": {
+      "pixels": 3504,
+      "changed": 0,
+      "first": null
+    },
+    "leftSpearBlade": {
+      "pixels": 4267,
+      "changed": 0,
+      "first": null
+    },
+    "rightSpearBlade": {
+      "pixels": 4494,
+      "changed": 0,
+      "first": null
+    },
+    "leftSpearShaft": {
+      "pixels": 4360,
+      "changed": 0,
+      "first": null
+    },
+    "rightSpearShaft": {
+      "pixels": 5165,
+      "changed": 0,
+      "first": null
+    },
+    "saturatedBlueSpearCloakJewelHand": {
+      "pixels": 21230,
+      "changed": 0,
+      "first": null
+    },
+    "nonzeroRegistrationMask": {
+      "pixels": 44040,
+      "changed": 21964,
+      "first": [
+        237,
+        622
+      ]
+    }
+  }
+}

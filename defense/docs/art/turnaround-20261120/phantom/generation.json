@@ -1,0 +1,77 @@
+{
+  "character": "phantom",
+  "baseline": "defense/assets/cast-v2/phantom-pajamas-guided.png",
+  "baselineMasterSHA256": "35ac0caf9359d6244cbd6d1b9a39aff4a5da090be6bb55d9f78d495e4aaae4dc",
+  "selectedMasterSHA256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+  "jobs": [
+    {
+      "tool": "image_gen",
+      "toolOutput": "exec-a0bbf113-a339-4e5b-ad60-de7d18ecf31c",
+      "nativeFile": "imagegen-native.png",
+      "nativeSha256": "654ba4a17ba061c472daed8d3fac6147b77f6d186945bdebc5be1c0c0d407294",
+      "prompt": "Use case: precise-object-edit. Produce a transparent, square four-direction SD atlas for Phantom. This is a surgical edit of the existing pixels in IMAGE 4, the accepted registration and painting. Return its exact 2×2 layout and identical framing and positions on a square canvas (reference is 1024×1024, 512×512 per quadrant). The upper left FRONT and upper right BACK are fully locked. Bottom left faces LEFT and bottom right faces RIGHT; BOTH of their dense violet head/hair domes need correction. In each bottom cell the broad dense dome is currently near local y161–164. The dense dome should instead reach about local y138–141, roughly twenty-three pixels higher. Carry the solid outer round hair arc up across its breadth, like the amber guide in image 1. GROW the dense back and upper hair volume above the firmly fixed fringe and temples. BRING ITS SINGLE SHORT DISTINCT CURL with it, letting that separate curl reach about y114–119; raising just the curl does not fix the dome. Match the current near-black violet locks, fine blue-black edge, discrete pale lavender sheen, thick layered wisps, and their exact home parting and flow. No extra tufts or figure alterations. Keep each view's pupils, face and fringe over the eyes, chin, neck, ears, shoulders, lavender-star hoodie, trousers, feet and brown teddy bear unchanged and in EXACT pixel registration: soles (256,480) within each 512 cell. Preserve width at the temples. The right and left renderings are independently asymmetric. The accepted FRONT and BACK in Image 4, and every pixel outside the WHITE portions of Image 5, must be retained. No change of scale, framing or pose. Image 1 is a visual guide ONLY (front-left-right reading order): amber projected arcs are the desired dense dome, mint dashed line is the accepted front crown; do not copy guides/letters/background into output. Image 2 is frozen linework styling only; image 3 is Phantom's original teddy, pajamas and identity only; the accepted full atlas supplies scale and pose. Image 4 supplies every finished pixel and output layout. Image 5 is a binary allowed area on the same canvas, white = may edit, black = locked, never output a mask. Preserve transparent background. No types, diagrams, labels or added objects.\nAll cumulative post-generation checks remain required: original-design, frozen-style, anatomical-head, face-shape-expression, directional-registration, body-proportions, equipment-handedness, silhouette-perceived-size, outline-weight, shading-material, cast-consistency, game-size-readability, portrait-alignment, seams-contact, independent-detector, source-integrity, package-integrity.",
+      "promptSha256": "366f4e8147ffbda35661858ab8ed72e3daab34a547028cb43d730ee4f36d3cb7",
+      "referenceOrder": [
+        {
+          "order": 1,
+          "role": "Dome and registration guide (front–left–right, guide only)",
+          "file": "inputs/crown-instructions.png",
+          "sha256": "cf77064c414026162532be970c74dd3743b4a0865d469946630713491ee67437"
+        },
+        {
+          "order": 2,
+          "role": "Frozen front rendering style",
+          "file": "inputs/style-front.png",
+          "sha256": "527f92a49773da8c80dcd1e7c97e9588fb6d9bca58fc56ab023f431729e28703"
+        },
+        {
+          "order": 3,
+          "role": "Original character illustration, scaled preview / identity only",
+          "retention": "local design reference",
+          "file": "reference-original-preview.png",
+          "sha256": "296ee1f9cd995b572fd864f1371a37048f53789c6bf3d99192354cb5a1ca53b4"
+        },
+        {
+          "order": 4,
+          "role": "ref:edit-base",
+          "file": "defense/assets/cast-v2/phantom-pajamas-guided.png",
+          "sha256": "35ac0caf9359d6244cbd6d1b9a39aff4a5da090be6bb55d9f78d495e4aaae4dc"
+        },
+        {
+          "order": 5,
+          "role": "ref:edit-mask",
+          "file": "allowed-mask.png",
+          "sha256": "ba1e9df3cb7f0f6cd97a97fffa420dcae8773e539b4821f074f79fb837e25e01"
+        }
+      ],
+      "originalJobFileSHA256": "3bf9f1460dd618f5e2ae3cad1b32888fae43035ce5f48e5d30c2fad27e65b537",
+      "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+      "modelReported": null
+    },
+    {
+      "tool": "image_gen",
+      "toolOutput": "exec-0bdedd48-7778-4e87-b145-35f57c85e095",
+      "nativeFile": "treatment-native.png",
+      "nativeSha256": "23c56976415281ffd40d1dbc68cf232406a3778ab1fba9b77efb7475f1525ea6",
+      "prompt": "Precise-object-edit of IMAGE 1. This is a finished pair of cropped profile sprite busts of the SAME chibi boy, placed side by side on transparent 1024-square canvas. Keep the exact framing, crop, facial features and full high rounded silhouette of each head from image 1, all held in the same pixel locations. There are exactly two heads facing AWAY from each other: left faces left, right faces right. These are two artwork layers that need a skilled 2D anime clean-up artist to JOIN the painted upper hair to the existing lower fringe. The high dome, the separate curved loose single cowlick, and the eyes/jaw in image 1 are already correctly positioned. Right now the upper layers appear pasted onto the lower layers: in the center there are repeated identical nested lobes and a faint line break in a few edges. FOR EACH HEAD redraw the hair BETWEEN the dome and eyes to make naturally continuous curving locks running from the crown parting toward the temples. One graceful large central forelock with ONE heart/leaf-shaped termination, like the coherent swoops of IMAGE 2; remove the duplicate lower lobe and extra repeated highlights. Smooth any notches on the outside hair wings, minimize superfluous extra spikes, leave a natural individual flow. Preserve the gloss, near-black purple hair, very fine dark navy contour with tight selective lilac highlights and soft cell shade. Use image 2 ONLY as a reference for a clean natural topology of the flowing paint and for the exact character/color. Image 2 has the OLD compressed dome: do NOT use its smaller crown height or move the jaw. The target is image 1's visibly TALL upper hair, with the beautiful continuous and nonduplicated strand work of image 2. Don't make large new areas of bright shine; use one focused highlight group per lock. Eyes, ears, skin, expression, bear, collar, pajamas and entire lower half of image 1 must stay unchanged. Portrait busts only as shown, side by side, transparent, keep the original canvas proportions with the heads in precisely the same places and sizes, blank space above and below, identical partial torso crop. No text, figures, new objects, guides, labels, added outline, or background.",
+      "promptSha256": "82cc582c3b39b27b10c2323d7572bcb05fea965abd153baf06fd2794d206bb2d",
+      "referenceOrder": [
+        {
+          "order": 1,
+          "role": "visual reference",
+          "file": "inputs/turn-heads-treatment-base.png",
+          "sha256": "e2e85bfbeaa57f04f9365051b8ba2715ef47a3fdd4263ccd4c9ad0a1251a727f"
+        },
+        {
+          "order": 2,
+          "role": "visual reference",
+          "file": "inputs/turn-heads-flow-reference.png",
+          "sha256": "4f542fc687937be7fd7cb8ff037db4a2cfbce6fcd8def3e8e0fa52b797133db6"
+        }
+      ],
+      "originalJobFileSHA256": "e72ea4e707f46738041bf653a1892e70d322c96ab111fbf940aeee0dca17b725",
+      "policySha256": null,
+      "modelReported": null
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "baseline": "35ac0caf9359d6244cbd6d1b9a39aff4a5da090be6bb55d9f78d495e4aaae4dc",
+  "firstNative": "654ba4a17ba061c472daed8d3fac6147b77f6d186945bdebc5be1c0c0d407294",
+  "lastNative": "23c56976415281ffd40d1dbc68cf232406a3778ab1fba9b77efb7475f1525ea6",
+  "allowedMask": "ba1e9df3cb7f0f6cd97a97fffa420dcae8773e539b4821f074f79fb837e25e01",
+  "secondJobInputs": [
+    "e2e85bfbeaa57f04f9365051b8ba2715ef47a3fdd4263ccd4c9ad0a1251a727f",
+    "4f542fc687937be7fd7cb8ff037db4a2cfbce6fcd8def3e8e0fa52b797133db6"
+  ],
+  "final": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+  "finalChanged": 32676,
+  "outsidePermission": 0,
+  "absoluteDifferences": "b6904e5b045596cbfed7766205807bfb06f2a05583dc873c50f52b58b0ab4554",
+  "generator": "The two native generated images are supplied as historical stochastic inputs; no call or new paint is made in this replay."
+}

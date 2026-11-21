@@ -158,8 +158,8 @@
     },
     {
       "id": "unit-lightning_sage",
-      "source": "defense/assets/cast-v2/lightning_sage.webp",
-      "sha256": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
+      "source": "defense/assets/cast-turnaround-20261120/lightning_sage.webp",
+      "sha256": "c4044138cf54612f40d7b87ceabc71e65522d180e3cfcede735955ca0c9dbbfb",
       "width": 1024,
       "height": 1024
     },
@@ -200,8 +200,8 @@
     },
     {
       "id": "unit-phantom",
-      "source": "defense/assets/cast-v2/phantom-pajamas-guided.webp",
-      "sha256": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
+      "source": "defense/assets/cast-turnaround-20261120/phantom.webp",
+      "sha256": "ffc7ded1a2f12ea19b36ad7daf586b74547a99ec2f7eb3a4ddfe6613a78dc8bc",
       "width": 1024,
       "height": 1024
     },
@@ -270,8 +270,8 @@
     },
     {
       "id": "unit-time_magician",
-      "source": "defense/assets/cast-selected-20261109/time_magician.webp",
-      "sha256": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
+      "source": "defense/assets/cast-turnaround-20261120/time_magician.webp",
+      "sha256": "852c463579a1a7721796a00d7839822a5368174c5cd1653ee343499d436b758a",
       "width": 1024,
       "height": 1024
     },

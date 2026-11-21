@@ -1,0 +1,52 @@
+{
+  "character": "lightning_sage",
+  "baseline": "defense/assets/cast-v2/lightning_sage.png",
+  "baselineMasterSHA256": "6472dd601a8bc011f245de4534e373800bc055014e978355467c860d790b6ee8",
+  "selectedMasterSHA256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+  "jobs": [
+    {
+      "tool": "image_gen",
+      "toolOutput": "exec-dcca2c7f-4df2-440f-ab0b-fd5b1b7c9f80.png",
+      "nativeFile": "native.png",
+      "nativeSha256": "f45408395b4b687ece127474751f1d7b66603e1006883140e0c23e5d5b14f3ba",
+      "prompt": "Precision edit of the FIRST image, a 1024-square 2 by 2 transparent mobile RPG sprite sheet. Keep the full sheet pixel-registered. The two TOP views are already approved. Correct only the smaller-looking silver-white heads of the BOTTOM LEFT and BOTTOM RIGHT profiles. The second image has registration line ends, third image is his costume and identity, fourth repeats the exact edit target, fifth is the white allowed regions. In BOTH bottom profiles redraw the same broad layered silvery hair dome roughly 12 pixels HIGHER (from cell y143 to y131, ignoring the single cowlick). Keep that cowlick slim and the haircut recognizably his. Restore the round lower cheek beneath his thin round wire glasses, curving the little chin downward about 10–12 px (to y308–310); keep its short natural chin-to-collar connection. Preserve each golden eye, true nose profile, and exact glasses rims, temple arms, and expression. He is a calm youthful MALE sage. A single near eye per strict side view. Preserve the original spear, shaft, jewel, hands, blue lightning cloak, boots, body silhouettes and feet. Keep all four figures in their original precise locations and size, with finely inked coloured contour, same silver hair shadows and highlights, solid paint and genuine transparent pixels. No guides, no typography, no additional characters.\nAll cumulative post-generation checks remain required: original-design, frozen-style, anatomical-head, face-shape-expression, directional-registration, body-proportions, equipment-handedness, silhouette-perceived-size, outline-weight, shading-material, cast-consistency, game-size-readability, portrait-alignment, seams-contact, independent-detector, source-integrity, package-integrity.",
+      "promptSha256": "30ed3a604c836485aec92ac4839811b748a9565b23f7ec1f59ff6d9ec52d823b",
+      "referenceOrder": [
+        {
+          "order": 1,
+          "role": "EDIT TARGET approved original four-direction sheet",
+          "file": "defense/assets/cast-v2/lightning_sage.png",
+          "sha256": "6472dd601a8bc011f245de4534e373800bc055014e978355467c860d790b6ee8"
+        },
+        {
+          "order": 2,
+          "role": "side view baseline and intended horizontal crown and chin levels, analytical guides not paint",
+          "file": "inputs/side-guide.png",
+          "sha256": "ec3a32257c46aeae81db36b9bcbe0011fd4f585eaa6a2c262acd7e3a0754e3d6"
+        },
+        {
+          "order": 3,
+          "role": "original identity and costume illustration",
+          "retention": "local design reference",
+          "file": "번개의현자.png",
+          "sha256": "799131eb3485a47be98033a2a9ff21dd2c6b0fc44a808d419b4163ba865ec6ce"
+        },
+        {
+          "order": 4,
+          "role": "ref:edit-base",
+          "file": "defense/assets/cast-v2/lightning_sage.png",
+          "sha256": "6472dd601a8bc011f245de4534e373800bc055014e978355467c860d790b6ee8"
+        },
+        {
+          "order": 5,
+          "role": "ref:edit-mask",
+          "file": "allowed-mask.png",
+          "sha256": "2dba086f9424e1d164587a07a72ce364f3fb50fae17257400f5882f77a0d0c64"
+        }
+      ],
+      "originalJobFileSHA256": "cdef0989ff22ac847abe72754a8d4b63bf82ae505091429284e6b48e270d97e3",
+      "policySha256": "2aae0f10dae0c9af90a495c4da9c2c5da36c47c4b5cc8f99a575dd006c4d9914",
+      "modelReported": null
+    }
+  ]
+}

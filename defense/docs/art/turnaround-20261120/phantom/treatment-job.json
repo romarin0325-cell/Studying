@@ -1,0 +1,17 @@
+{
+  "tool": "image_gen",
+  "preparedAt": "2026-11-19T17:30:20.058Z",
+  "purpose": "Style and join repair of the local hair donor only. Does not attest the repo A–G for the post-registered final.",
+  "prompt": "Precise-object-edit of IMAGE 1. This is a finished pair of cropped profile sprite busts of the SAME chibi boy, placed side by side on transparent 1024-square canvas. Keep the exact framing, crop, facial features and full high rounded silhouette of each head from image 1, all held in the same pixel locations. There are exactly two heads facing AWAY from each other: left faces left, right faces right. These are two artwork layers that need a skilled 2D anime clean-up artist to JOIN the painted upper hair to the existing lower fringe. The high dome, the separate curved loose single cowlick, and the eyes/jaw in image 1 are already correctly positioned. Right now the upper layers appear pasted onto the lower layers: in the center there are repeated identical nested lobes and a faint line break in a few edges. FOR EACH HEAD redraw the hair BETWEEN the dome and eyes to make naturally continuous curving locks running from the crown parting toward the temples. One graceful large central forelock with ONE heart/leaf-shaped termination, like the coherent swoops of IMAGE 2; remove the duplicate lower lobe and extra repeated highlights. Smooth any notches on the outside hair wings, minimize superfluous extra spikes, leave a natural individual flow. Preserve the gloss, near-black purple hair, very fine dark navy contour with tight selective lilac highlights and soft cell shade. Use image 2 ONLY as a reference for a clean natural topology of the flowing paint and for the exact character/color. Image 2 has the OLD compressed dome: do NOT use its smaller crown height or move the jaw. The target is image 1's visibly TALL upper hair, with the beautiful continuous and nonduplicated strand work of image 2. Don't make large new areas of bright shine; use one focused highlight group per lock. Eyes, ears, skin, expression, bear, collar, pajamas and entire lower half of image 1 must stay unchanged. Portrait busts only as shown, side by side, transparent, keep the original canvas proportions with the heads in precisely the same places and sizes, blank space above and below, identical partial torso crop. No text, figures, new objects, guides, labels, added outline, or background.",
+  "refs": [
+    {
+      "file": "turn-heads-treatment-base.png",
+      "sha256": "e2e85bfbeaa57f04f9365051b8ba2715ef47a3fdd4263ccd4c9ad0a1251a727f"
+    },
+    {
+      "file": "turn-heads-flow-reference.png",
+      "sha256": "4f542fc687937be7fd7cb8ff037db4a2cfbce6fcd8def3e8e0fa52b797133db6"
+    }
+  ],
+  "transparent_background": true
+}

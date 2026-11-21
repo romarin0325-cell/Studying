@@ -1,0 +1,187 @@
+[
+  {
+    "id": "phantom",
+    "editedDirections": [
+      2,
+      3
+    ],
+    "before": {
+      "png": "35ac0caf9359d6244cbd6d1b9a39aff4a5da090be6bb55d9f78d495e4aaae4dc",
+      "source": "20ecf21b0dd3aba91f2d5107701d8804de47e6b916880334f17f8ffa884a736e",
+      "game": "f22359e0992f9db1fd08e8408b783b73fb7625c063e68207bf412357b1545282",
+      "gameBytes": 53624
+    },
+    "master": {
+      "file": "./assets/cast-turnaround-20261120/phantom.png",
+      "sha256": "9eae3bf6da53b86d96ccd4e98a1a75a2c428e388e0f3b26d5925c5fffc89a9dd",
+      "bytes": 599071,
+      "changedPixels": [
+        0,
+        0,
+        16358,
+        16318
+      ],
+      "changesOutsideMask": 0,
+      "maskSha256": "ba1e9df3cb7f0f6cd97a97fffa420dcae8773e539b4821f074f79fb837e25e01"
+    },
+    "source": "./assets/cast-turnaround-20261120/phantom.webp",
+    "original": {
+      "bytes": 341536,
+      "sha256": "ffc7ded1a2f12ea19b36ad7daf586b74547a99ec2f7eb3a4ddfe6613a78dc8bc",
+      "metadata": {
+        "width": 1024,
+        "height": 1024,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "output": {
+      "path": "./assets/optimized/cast-turnaround-20261120/phantom.webp",
+      "bytes": 144896,
+      "sha256": "787708892948c96449697dc8795a307e4b5e81db5fbb6231a0d62af215a7d326",
+      "metadata": {
+        "width": 640,
+        "height": 640,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "sourceVisibleChanges": [
+      0,
+      0,
+      16349,
+      16309
+    ],
+    "deployedVisibleChanges": [
+      0,
+      0,
+      7020,
+      7001
+    ],
+    "deployedChangesOutsideFilterSupport": 0,
+    "encoding": "lossless preservation of previous decoded pixels outside Lanczos support"
+  },
+  {
+    "id": "lightning_sage",
+    "editedDirections": [
+      2,
+      3
+    ],
+    "before": {
+      "png": "6472dd601a8bc011f245de4534e373800bc055014e978355467c860d790b6ee8",
+      "source": "85049bdc24e0ee377c7d75a2b5263833709d72e9aa6bdef5e3f9f131c9b614e1",
+      "game": "006e58485083b37e43b20e97cf6b29b681bbcd8e06ada46a8c5408e80309e913",
+      "gameBytes": 69514
+    },
+    "master": {
+      "file": "./assets/cast-turnaround-20261120/lightning_sage.png",
+      "sha256": "65694e129790428f246a1f4979a7c02dce4cc696d8b6a3e5001dbb1fafd8bee8",
+      "bytes": 684602,
+      "changedPixels": [
+        0,
+        0,
+        11076,
+        10888
+      ],
+      "changesOutsideMask": 0,
+      "maskSha256": "2dba086f9424e1d164587a07a72ce364f3fb50fae17257400f5882f77a0d0c64"
+    },
+    "source": "./assets/cast-turnaround-20261120/lightning_sage.webp",
+    "original": {
+      "bytes": 417840,
+      "sha256": "c4044138cf54612f40d7b87ceabc71e65522d180e3cfcede735955ca0c9dbbfb",
+      "metadata": {
+        "width": 1024,
+        "height": 1024,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "output": {
+      "path": "./assets/optimized/cast-turnaround-20261120/lightning_sage.webp",
+      "bytes": 182412,
+      "sha256": "db9f0e94c824eb02e62b3243033208d1c0b221848b8070a3bea6eed3828ec616",
+      "metadata": {
+        "width": 640,
+        "height": 640,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "sourceVisibleChanges": [
+      0,
+      0,
+      11046,
+      10874
+    ],
+    "deployedVisibleChanges": [
+      0,
+      0,
+      5292,
+      5398
+    ],
+    "deployedChangesOutsideFilterSupport": 0,
+    "encoding": "lossless preservation of previous decoded pixels outside Lanczos support"
+  },
+  {
+    "id": "time_magician",
+    "editedDirections": [
+      3
+    ],
+    "before": {
+      "png": "dfe8e55e2f12c5bd433d4a00088c601dfa8dca3b9247092e5931f18f796dbf4d",
+      "source": "dac8f3a4ed7b3ad183af697402d322eeb70b69aa26a8f4220026c99b0f20b07f",
+      "game": "d9d1b0cef97c9942b915df975ef47eb2d2f1325a4d7a80e91d142424e30f40b8",
+      "gameBytes": 192998
+    },
+    "master": {
+      "file": "./assets/cast-turnaround-20261120/time_magician.png",
+      "sha256": "497d5c23d1562209842d0573f51485dabcf559606253cdbf7031efb463a663a1",
+      "bytes": 731320,
+      "changedPixels": [
+        0,
+        0,
+        0,
+        15397
+      ],
+      "changesOutsideMask": 0,
+      "maskSha256": "9f01172a2dfbe5a11f5feb32379b000d469221c255434a16b2fcbfecf6c0cdeb"
+    },
+    "source": "./assets/cast-turnaround-20261120/time_magician.webp",
+    "original": {
+      "bytes": 448070,
+      "sha256": "852c463579a1a7721796a00d7839822a5368174c5cd1653ee343499d436b758a",
+      "metadata": {
+        "width": 1024,
+        "height": 1024,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "output": {
+      "path": "./assets/optimized/cast-turnaround-20261120/time_magician.webp",
+      "bytes": 194366,
+      "sha256": "b78d281aea0902efd8ffaf61e917d4363ed406f8dffb00af006992b61901edec",
+      "metadata": {
+        "width": 640,
+        "height": 640,
+        "hasAlpha": true,
+        "codec": "webp"
+      }
+    },
+    "sourceVisibleChanges": [
+      0,
+      0,
+      0,
+      15392
+    ],
+    "deployedVisibleChanges": [
+      0,
+      0,
+      0,
+      6647
+    ],
+    "deployedChangesOutsideFilterSupport": 0,
+    "encoding": "lossless preservation of previous decoded pixels outside Lanczos support"
+  }
+]
