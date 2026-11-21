@@ -90,6 +90,18 @@ export function drawEncounter(run, roster, kind = 'draw') {
   return rollFrom(run.rng, distribution(run, roster, RATES[kind], id => usesRepeatDraws(run) || canJoin(run, id)));
 }
 
+// One offer shows different people: duplicates inside the same offer are redrawn. The same companion may still
+// come back in later offers (boost/memory), which is the repeat-draw rule the owner asked for.
+export function drawDistinct(run, roster, kind, count, taken = []) {
+  const picked = [];
+  for (let tries = 0; picked.length < count && tries < count * 12; tries++) {
+    const id = drawEncounter(run, roster, kind);
+    if (!id) break;
+    if (!picked.includes(id) && !taken.includes(id)) picked.push(id);
+  }
+  return picked;
+}
+
 export function ratesView(run, kind = 'draw') {
   const rates = RATES[kind];
   if (!rates) throw new RangeError('invalid_draw_kind');

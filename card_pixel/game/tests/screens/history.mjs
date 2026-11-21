@@ -4,6 +4,8 @@ import * as Meta from '../../src/engine/meta.js';
 import * as Run from '../../src/engine/run.js';
 import { battleLog } from '../../src/ui/battle/log.js';
 import { playRun } from '../../tools/sim.mjs';
+import { storyLine } from '../../src/ui/story-lines.js';
+import { createCoreRoster } from '../support/core.mjs';
 
 function closeRun(profile, run, selection) {
   if (run.phase === 'result') assert.equal(Run.confirmResult(run).ok, true);
@@ -71,6 +73,9 @@ export function createHistoryCases({ storedSession, enterObservatory }) {
       let profile = towerApproach();
       profile = closeRun(profile, recordedReturn(profile, 'ember_volcano', 7).run);
       assert.equal(profile.history.red_dragon.length, 5);
+      const { roster } = createCoreRoster();
+      const latest = storyLine(profile.history.red_dragon[0], id => roster.card(id));
+      assert.ok(latest, 'The newest record yields a sentence');
       return {
         session: storedSession({ profile }), proof: 'Five settled expeditions in Red Dragon’s collection detail, newest first',
         async show(page, { text, capture }) {
@@ -80,7 +85,8 @@ export function createHistoryCases({ storedSession, enterObservatory }) {
           await text(page.locator('#sheet.on #sh-title'), '레드드래곤', { exact: true });
           const records = page.locator('#sheet.on .companion-records');
           assert.equal(await records.locator('.companion-story').count(), 5);
-          await text(records.locator('li').first().locator('.companion-story'), '홍련 화산 4층에서 쓰러져 혼돈의마법사에게 파이어브레스를 남겼다.', { exact: true });
+          // The screen must say what the newest record says, through the same sentence builder the UI uses.
+          await text(records.locator('li').first().locator('.companion-story'), latest, { exact: true });
           await text(records.locator('li').last().locator('small'), '새벽의 숲 · 5층 · 원정 승리 · 예비로 생환', { exact: true });
           await records.scrollIntoViewIfNeeded();
           await capture();

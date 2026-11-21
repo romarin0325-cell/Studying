@@ -106,6 +106,116 @@ function profileWithSnowRabbit() {
   return result.profile;
 }
 
+const relicRun = (seed = 7) => makeTempo({ seed, profileView: { features: { relicDoors: true } } });
+
+test('relic doors unlock on the first main win and old expeditions keep their existing doors', () => {
+  const profile = Meta.createProfile();
+  assert.equal(Meta.featureFlags(profile).relicDoors, false);
+  profile.records.clears.dawn_forest = { normal: 1 };
+  assert.equal(Meta.featureFlags(profile).relicDoors, false);
+  profile.records.clears.ember_volcano = { easy: 1 };
+  assert.equal(Meta.featureFlags(profile).relicDoors, true);
+
+  const savedOnFloor1 = roundTrip(reach(makeTempo(), 1));
+  assert.equal(Object.hasOwn(savedOnFloor1.features, 'relicDoors'), false);
+  const savedOnFloor2 = roundTrip(reach(savedOnFloor1, 2));
+  assert.equal(savedOnFloor2.doors[1].reward, 2);
+  assert.equal(savedOnFloor2.doors[1].relic, null);
+  savedOnFloor2.relics.push('frozen_body');
+  reach(savedOnFloor2, 4);
+  enter(savedOnFloor2);
+  settle(savedOnFloor2);
+  assert.equal(savedOnFloor2.pending.partner, undefined);
+});
+
+test('floor-2 risk door reveals the deterministic relic that victory actually grants', () => {
+  const seen = new Set();
+  for (const seed of [7, 8, 9, 10, 11, 12]) {
+    const run = reach(relicRun(seed), 1);
+    enter(run);
+    settle(run);
+    if (run.pending?.kind === 'reinforcement') ok(Run.resolveReinforcement(run, { key: run.pending.key, id: null }));
+    ok(Run.leaveRoom(run));
+    const rngBeforePreview = run.rng.state;
+    const preview = Run.previewNextFloor(run);
+    assert.equal(run.rng.state, rngBeforePreview);
+    ok(Run.nextFloor(run));
+    assert.deepEqual(run.doors, preview.doors);
+    assert.equal(run.rng.state, preview.rng.state);
+    assert.deepEqual(run.doors, reach(relicRun(seed), 2).doors);
+    assert.equal(run.rng.state, reach(makeTempo({ seed }), 2).rng.state);
+    const saved = roundTrip(run);
+    const [safe, risk] = saved.doors;
+    assert.equal(safe.reward, 1);
+    assert.equal(safe.relic, null);
+    assert.equal(risk.relicReward, true);
+    assert.equal(risk.reward, 0);
+    assert.ok(Object.hasOwn(RELICS, risk.relic));
+    assert.ok(saved.seenRelics.includes(risk.relic));
+    enter(saved, risk.index);
+    assert.equal(settle(saved).relic.id, risk.relic);
+    assert.deepEqual(saved.relics, [risk.relic]);
+    assert.deepEqual(saved.lastBattleResult.rewardDelta.relicIds, [risk.relic]);
+    seen.add(risk.relic);
+  }
+  assert.ok(seen.size > 1);
+});
+
+test('a full rack puts the revealed relic in front of floor-2 reinforcement after victory', () => {
+  const run = reach(relicRun(), 2);
+  const { relic, index } = run.doors[1];
+  const equipped = Object.keys(RELICS).filter(id => id !== relic).slice(0, 4);
+  run.relics = equipped.slice();
+  enter(run, index);
+  assert.equal(settle(run).relic.chooseReplacement, true);
+  assert.deepEqual(run.relics, equipped);
+  assert.deepEqual(run.pending.replace, equipped);
+  assert.equal(run.pending.id, relic);
+  assert.equal(run.pending.after.kind, 'reinforcement');
+
+  const skipped = roundTrip(run);
+  assert.equal(ok(Run.leaveRoom(skipped)).left, false);
+  assert.deepEqual(skipped.relics, equipped);
+  assert.equal(skipped.pending.kind, 'reinforcement');
+
+  const saved = roundTrip(run);
+  ok(Run.equipRelic(saved, relic, equipped[0]));
+  assert.deepEqual(saved.relics, [relic, ...equipped.slice(1)]);
+  assert.deepEqual(saved.lastBattleRelics, [relic]);
+  assert.equal(saved.pending.kind, 'reinforcement');
+});
+
+test('floor-4 partner choice works in either direction and consumes the normal reward', () => {
+  function gate(held) {
+    const run = reach(relicRun(), 3);
+    run.relics = held.slice();
+    reach(run, 4);
+    enter(run);
+    settle(run);
+    return roundTrip(run);
+  }
+  for (const [held, offered] of [['frozen_body', 'ice_break'], ['ice_break', 'frozen_body'], ['companion', 'big_bang']]) {
+    const run = gate([held]);
+    const { candidates, relic, partner } = run.pending;
+    assert.ok(candidates.length > 0);
+    assert.ok(relic && relic !== offered);
+    assert.equal(partner.id, offered);
+    assert.equal(partner.held, held);
+    assert.ok(partner.hint);
+
+    const takeOther = roundTrip(run);
+    ok(Run.chooseGateReward(takeOther, { kind: 'relic', id: relic }));
+    assert.deepEqual(takeOther.relics, [held, relic]);
+    assert.equal(Run.chooseGateReward(takeOther, { kind: 'relic', id: offered }).ok, false);
+
+    ok(Run.chooseGateReward(run, { kind: 'relic', id: offered }));
+    assert.deepEqual(run.relics, [held, offered]);
+    assert.equal(Run.chooseGateReward(run, { kind: 'join', id: candidates[0] }).ok, false);
+  }
+  assert.equal(gate([]).pending.partner, undefined);
+  assert.equal(gate(['frozen_body', 'ice_break']).pending.partner, undefined);
+});
+
 test('review 3: a gate relic paid by the championship bet leaves the shadow choice open', () => {
   const run = reach(make({
     dungeonId: 'arena', seed: 1103811, profileView: { lead: 'luna', companions: ['underdog'] }

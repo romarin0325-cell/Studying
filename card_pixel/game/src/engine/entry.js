@@ -18,7 +18,7 @@ export function entryState(legacy = false) {
   return { v: 1, legacy, done: [], tours: [], skipped: false };
 }
 
-export function featureFlags(profile) {
+function baseFeatureFlags(profile) {
   const legacy = profile.ui?.entry?.legacy ?? true;
   const introCleared = legacy || hasCleared(profile, 'dawn_forest');
   const firstMainCleared = legacy || Object.keys(DUNGEONS).some(id => id !== 'dawn_forest' && hasCleared(profile, id));
@@ -29,9 +29,16 @@ export function featureFlags(profile) {
   };
 }
 
-export const openFeatures = Object.freeze(featureFlags({}));
+// These keys are required by the run codec. New flags remain optional in saved runs.
+export const openFeatures = Object.freeze(baseFeatureFlags({}));
+
+export function featureFlags(profile) {
+  const flags = baseFeatureFlags(profile);
+  return { ...flags, relicDoors: flags.firstMainCleared };
+}
 
 export function hasFeature(run, key) {
+  if (key === 'relicDoors') return run.features?.relicDoors === true;
   return run.features?.[key] ?? true;
 }
 

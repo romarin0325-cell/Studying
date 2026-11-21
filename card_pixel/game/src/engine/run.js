@@ -4,11 +4,11 @@ import { FLOORS as DAILY_FLOORS } from '../content/daily-rift.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
-import { RELICS } from '../content/relics.js';
+import { RELICS, relicPartners } from '../content/relics.js';
 import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import {
-  applyDraw, canJoin, choicesFor, COST, drawEncounter, drawFrom, drawKind, join, RATES,
-  release as releaseCompanion, rollBlessing, seeCharacters, usesRepeatDraws, validateReplacements
+  applyDraw, canJoin, choicesFor, COST, drawDistinct, drawEncounter, drawFrom, drawKind, join, RATES,
+  release as releaseCompanion, rollBlessing, seeCharacters, seeRelic, usesRepeatDraws, validateReplacements
 } from './awakenings.js';
 import { dayKey, doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { hasFeature, openFeatures } from './entry.js';
@@ -319,7 +319,17 @@ function setGateReward(run, room, downs, betRelic) {
     candidates: unique(downs.map(entry => room.enemies[entry.idx].source).filter(id => canJoin(run, id, { allowReserved: true }))),
     relic: run.relics.includes(room.relic) || room.relic === betRelic ? null : room.relic
   };
+  addGatePartner(run);
   run.reserved = null;
+}
+
+function addGatePartner(run) {
+  if (run.floor !== 4 || !hasFeature(run, 'relicDoors') || run.pending?.kind !== 'gate') return;
+  const partner = relicPartners(run.relics).find(entry => entry.id !== run.pending.relic);
+  if (partner) {
+    run.pending.partner = partner;
+    seeRelic(run, partner.id);
+  } else delete run.pending.partner;
 }
 
 function setReinforcement(run, roster) {
@@ -329,7 +339,8 @@ function setReinforcement(run, roster) {
   const count = full ? REINFORCE_CHOICES : 1;
   const preview = { ...run, rng: floorRng(run, TEMPO_SEEDS.reinforcement) };
   const candidates = usesRepeatDraws(run)
-    ? Array.from({ length: count }, () => drawEncounter(preview, roster, 'pick')).filter(Boolean)
+    // The reinforcement board shows no rates; three different people make it a real choice.
+    ? drawDistinct(preview, roster, 'pick', count)
     : choicesFor(preview, roster, count);
   if (!candidates.length) return;
   seeCharacters(run, candidates);
@@ -539,7 +550,7 @@ export function settleBattle(run, input) {
       if (!final && !wiped) setReinforcement(run, roster);
     }
     if (!wiped) {
-      for (const id of [room.type === 'elite' && room.relic, betRelic].filter(Boolean)) {
+      for (const id of [(room.type === 'elite' || room.relicReward) && room.relic, betRelic].filter(Boolean)) {
         relic = grantRelic(run, id);
         if (relic.equipped) relics.push(id);
       }
@@ -585,7 +596,10 @@ export function chooseGateReward(run, choice) {
     run.pending = null;
     return { ok: true, joined: choice.id };
   }
-  if (choice?.kind === 'relic' && pending.relic && choice.id === pending.relic && !run.relics.includes(choice.id)) {
+  const partner = pending.partner;
+  const relicOffered = choice?.id && (choice.id === pending.relic ||
+    (choice.id === partner?.id && run.relics.includes(partner.held)));
+  if (choice?.kind === 'relic' && relicOffered && !run.relics.includes(choice.id)) {
     run.pending = null;
     const relic = grantRelic(run, choice.id);
     if (relic.equipped) recordBattleRelic(run, relic.id);
@@ -718,6 +732,7 @@ function repeatSpringOffer(run) {
     const available = run.paidPickUsed ? [] : run.companions.filter(id => canJoin(run, id, { allowReserved: true }));
     const invited = available.includes(run.preferredCompanion) ? run.preferredCompanion : pick(rng, available);
     const candidates = invited ? [invited] : [];
+    // Each ◆3 slot is its own draw at the displayed rates, so a repeat is allowed here (표기 확률 = 실제 확률).
     while (candidates.length < 3) {
       const id = drawEncounter({ ...run, rng }, roster, 'pick');
       if (!id) break;
@@ -859,6 +874,7 @@ export function equipRelic(run, id, replaceId) {
   run.crystals -= pending.cost;
   run.pending = pending.after;
   if (run.pending?.kind === 'gate' && run.relics.includes(run.pending.relic)) run.pending.relic = null;
+  addGatePartner(run);
   if (['reward', 'result'].includes(run.phase)) recordBattleRelic(run, id);
   return { ok: true, id, replaced: replaceId, cost: pending.cost, pending: copy(run.pending) };
 }

@@ -11,6 +11,7 @@ import { create as makeRoster } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import { createStage } from '../src/stage/stage.js';
 import { createMoves } from '../src/ui/battle/moves.js';
+import { intentLines } from '../src/ui/battle/hud.js';
 import { createCoreRoster } from './support/core.mjs';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
@@ -203,6 +204,78 @@ test('tempo tide has a fixed x2.5 spell and a fourth-beat opening even on a stro
   assert.equal(rest.intent.type, 'rest');
   assert.equal(rest.intent.vulnerable, 1.5);
   assert.equal(last(b.act(0), 'await').intent.kind, 'phy');
+});
+
+test('wild golem and night bat repeat their announced actions for six local turns', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const cases = [
+    ['golem', [
+      ['힘 충전 중', 'charge', 0, '다음 턴 강타 · 물리 ×1.6'],
+      ['강타', 'phy', 1.6, '다음 턴 약공 · 물리 ×0.55'],
+      ['약공', 'phy', 0.55, '다음 턴 힘 충전 중']
+    ]],
+    ['night_bat', [
+      ['흡혈 이빨', 'phy', 1.6, '다음 턴 빈틈 · 휴식 · 받는 피해 ×1.3'],
+      ['빈틈', 'rest', 0, '다음 턴 일반 공격 · 물리 ×1'],
+      ['일반 공격', 'phy', 1, '다음 턴 흡혈 이빨 · 물리 ×1.6']
+    ]]
+  ];
+  for (const [id, expected] of cases) {
+    const enemy = roster.wildOf(id, 1, { stats: { hp: 99999, atk: 40, matk: 0, def: 60, mdef: 60 } });
+    const preview = Bridge.enemyBeats(S.RelayCore, enemy, 'threeBeat');
+    assert.deepEqual(preview.map(({ name, type, power }) => [name, type, power]),
+      expected.map(([name, type, power]) => [name, type, power]));
+    const b = battle({ enemies: [enemy], tempo: { pattern: 'threeBeat' } });
+    let events = b.start();
+    for (let turn = 1; turn <= 6; turn++) {
+      const [name, kind, power, future] = expected[(turn - 1) % expected.length];
+      const { intent, countdown } = last(events, 'await');
+      assert.deepEqual([intent.localTurn, intent.name, intent.kind, intent.power ?? 0], [turn, name, kind, power]);
+      const [current, chip] = intentLines(intent, countdown);
+      assert.equal(chip, future);
+      assert.equal(current, kind === 'rest' ? '빈틈 · 적 휴식 · 받는 피해 ×1.3' :
+        '내 행동 뒤 · ' + name + (kind === 'charge' ? '' : ' · HP ' + intent.damageRange[0]));
+      events = b.act(0);
+      const action = events.find(e => e.t === 'act' && e.who.side === 'enemy');
+      const damage = events.find(e => e.t === 'hp' && e.who.side === 'ally' && e.delta < 0);
+      if (kind === 'rest') assert.equal(action, undefined);
+      else assert.deepEqual([action.skill.name, action.skill.val, action.charge], [name, power, kind === 'charge']);
+      if (power) assert.equal(damage.amount, intent.damageRange[0]);
+      else assert.equal(damage, undefined);
+    }
+  }
+});
+
+test('night bat opening multiplies preview and damage once, except when a lesson or tide overrides it', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const bat = roster.wildOf('night_bat', 1, { stats: { hp: 99999, atk: 1, matk: 0, def: 60, mdef: 60 } });
+  const lesson = makeBossLesson('iris_love', 2, 0);
+  const cases = [
+    [{ ...bat, id: 'test_dummy' }, { pattern: 'threeBeat' }, undefined, {}, {}],
+    [bat, { pattern: 'threeBeat' }, undefined, { 2: 1.3, 5: 1.3 }, { 2: '빈틈' }],
+    [bat, { pattern: 'threeBeat', lesson }, undefined, { 5: 1.3 }, { 2: '소울드레인 예행' }],
+    [bat, { pattern: 'tide', lesson }, { id: 'tide_cycle' }, { 4: 1.5 },
+      { 1: '일반 공격', 2: '소울드레인 예행', 3: '조류의 일격', 4: '물러간 조류' }]
+  ];
+  const baseline = [];
+  for (const [enemy, tempo, region, multipliers, named] of cases) {
+    const b = battle({ party: ['red_dragon'], enemies: [enemy], tempo, region });
+    let events = b.start();
+    b.host.battle.players[0].baseCrit = 0;
+    for (let turn = 1; turn <= 6; turn++) {
+      const wait = last(events, 'await');
+      const { intent } = wait;
+      if (named[turn]) assert.equal(intent.name, named[turn]);
+      if (named[turn + 1]) assert.equal(intent.nextDistinct.name, named[turn + 1]);
+      assert.equal(intent.vulnerable, multipliers[turn]);
+      const expected = Math.floor((baseline[turn] ?? option(b, '일반 공격').preview.dmg) * (multipliers[turn] ?? 1));
+      if (!(turn in baseline)) baseline[turn] = expected;
+      assert.equal(option(b, '일반 공격').preview.dmg, expected);
+      events = b.act(0);
+      const hit = events.find(e => e.t === 'hp' && e.who.side === 'enemy');
+      assert.equal(hit.amount, expected);
+    }
+  }
 });
 
 test('review 1: Red Moon wins when the death counter defeats the last enemy', () => {
@@ -526,16 +599,16 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
   function reachDecision() {
     const b = Bridge.create(core, Run.battleOptions(run));
     let events = b.start();
-    for (const name of ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격']) events = b.act(option(b, name).index);
-    assert.deepEqual([b.state().turn, b.enemyIndex, b.state().allies[0].hp], [5, 1, 62]);
-    assert.deepEqual(last(events, 'await').intent.damageRange, [212, 212]);
+    for (const name of ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격', '일반 공격']) events = b.act(option(b, name).index);
+    assert.deepEqual([b.state().turn, b.enemyIndex, b.state().allies[0].hp], [6, 1, 1]);
+    assert.deepEqual(last(events, 'await').intent.damageRange, [56, 56]);
     return b;
   }
   const retreating = reachDecision(), standing = reachDecision();
   const before = retreating.state();
   const expected = {
     danger: 'certain',
-    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [313, 313] } },
+    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [451, 451] } },
     stand: { falls: 'certain', inheritor: { id: 'siren', name: '세이렌' }, heirloom: { skill: '드래곤스파클', from: 'dragon_miko' }, replaces: null }
   };
   const random = Math.random;
@@ -548,7 +621,7 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
   assert.deepEqual(retreating.state(), before);
   assert.deepEqual(retreating.heirloomsGained(), []);
   assert.ok(last(retreating.retreat(), 'retreat'));
-  assert.deepEqual([retreating.state().cur, retreating.state().allies[1].hp], [1, 313]);
+  assert.deepEqual([retreating.state().cur, retreating.state().allies[1].hp], [1, 451]);
   assert.deepEqual(retreating.previewRelay().retreat, { available: false, next: null });
   const handoff = last(standing.act(0), 'heirloom');
   assert.deepEqual([handoff.to.idx, handoff.skill.name], [1, expected.stand.heirloom.skill]);

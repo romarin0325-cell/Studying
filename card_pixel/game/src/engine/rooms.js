@@ -5,7 +5,7 @@ import { EVENTS, eventForRun } from '../content/events.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { QUIRKS } from '../content/quirks.js';
-import { RELICS } from '../content/relics.js';
+import { RELIC_COMBOS, RELICS, relicPartners } from '../content/relics.js';
 import {
   BLESSING_MULTIPLIERS, ENTRY_FIRST_MAIN_ENEMY_HP, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS,
   LESSON_NIGHTMARE_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
@@ -61,10 +61,22 @@ function fitsRelic(run, roster, rule) {
   return true;
 }
 
-function relicOffer(run, roster) {
-  const available = Object.keys(RELICS).filter(id => !run.relics.includes(id));
+const comboHalves = new Set(RELIC_COMBOS.flatMap(({ ids }) => ids));
+const CONDITIONAL_DOOR_RELICS = new Set(['reverse', 'buff_overload', 'over_flame', 'over_divine', 'flame_piercing']);
+const DOOR_RELIC_WEIGHT = { fits: 2, combo: 6, conditional: 9 };
+
+function relicOffer(run, roster, { comboDoor = false, exclude = [] } = {}) {
+  const available = Object.keys(RELICS).filter(id => !run.relics.includes(id) && !exclude.includes(id));
   const fits = available.filter(id => fitsRelic(run, roster, RELICS[id].fits));
-  const id = pick(run.rng, fits.length ? fits : available);
+  const offers = comboDoor ? available.flatMap(id => {
+    const fit = fits.includes(id) ? DOOR_RELIC_WEIGHT.fits : 1;
+    const base = comboHalves.has(id) ? DOOR_RELIC_WEIGHT.combo
+      : CONDITIONAL_DOOR_RELICS.has(id) ? DOOR_RELIC_WEIGHT.conditional : 1;
+    return Array(fit * base).fill(id);
+  }) : fits.length ? fits : available;
+  // Preview the current draw for this door and keep the route's RNG sequence intact.
+  const rng = comboDoor ? { state: run.rng.state } : run.rng;
+  const id = pick(rng, offers);
   seeRelic(run, id);
   return id || null;
 }
@@ -176,7 +188,7 @@ export function applyDoorTempo(run, roster, door) {
   };
 }
 
-function makeBattleDoor(run, roster, dungeon, template, index, region, battleCount) {
+function makeBattleDoor(run, roster, dungeon, { relicReward, ...template }, index, region, battleCount) {
   const challenge = run.difficulty === 'nightmare' ? dungeon.nightmareRule : null;
   const elite = template.type === 'elite';
   const singleRisk = run.difficulty !== 'nightmare' && template.type === 'wild';
@@ -210,10 +222,16 @@ function makeBattleDoor(run, roster, dungeon, template, index, region, battleCou
   const hasSky = region?.id === 'starlit_sky';
   const filledSky = hasSky && !skyBet && (battleCount > 1 ? index === 1 : nextFloat(run.rng) < 0.5);
   const start = template.type === 'borrowed' ? INTRO.start : hasSky ? { field: filledSky ? SKY : [] } : null;
+  const comboDoor = relicReward && hasFeature(run, 'relicDoors');
+  const gate = template.type === 'gate';
+  const exclude = gate && run.floor === 4 && hasFeature(run, 'relicDoors')
+    ? relicPartners(run.relics).map(entry => entry.id) : [];
+  const relic = elite || gate || comboDoor ? relicOffer(run, roster, { comboDoor, exclude }) : null;
   const door = {
-    ...template, index, name: ROOM_NAMES[template.type], bg: dungeon.background, region: copy(region),
+    ...template, ...(comboDoor && relic && { relicReward: true, reward: 0 }),
+    index, name: ROOM_NAMES[template.type], bg: dungeon.background, region: copy(region),
     enemies, quirk: affixOnly || !hasFeature(run, 'quirks') ? null : quirk,
-    start: copy(start), relic: elite || template.type === 'gate' ? relicOffer(run, roster) : null
+    start: copy(start), relic
   };
   door.tempo = applyDoorTempo(run, roster, door);
   return door;

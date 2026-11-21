@@ -10,9 +10,10 @@ import { QUIRKS } from '../../content/quirks.js';
 import { AFFIXES } from '../../content/affixes.js';
 import { getWalkLayout, mapPosition, mountWalkingMap } from '../../stage/walking-map.js';
 import { shortRiftDate } from './daily-rift.js';
-import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../relics.js';
+import { bindRelicSlots, openRelicSheet, relicEffect, relicIcon, relicStrip } from '../relics.js';
 import { TERMS } from '../glossary.js';
 import { pixelIcon } from '../pixel-icons.js';
+import { wildBeatPattern } from '../../content/tempo.js';
 
 const AFFIX_RISK = {
   tough: '첫 3턴 적 피해 50% 감소', frenzy: '적 HP 50% 이하 시 공·마공 ×1.5',
@@ -82,6 +83,9 @@ function confront(name) {
 function primaryBeat(door, preview) {
   const pattern = preview?.pattern ?? door.tempo?.pattern;
   const beats = preview?.enemies?.[0]?.beats ?? [];
+  // A wild creature with its own pattern (golem charge → strike, bat strike → opening) headlines its strong beat.
+  const own = beats[0]?.pattern && wildBeatPattern(beats[0].pattern);
+  if (own) return beats.find(beat => beat.turn === own.strong) ?? beats[0];
   const turn = { introFixed: 1, threeBeat: 2, tide: 3 }[pattern];
   return beats.find(beat => beat.turn === turn) ?? (pattern === 'bossScript'
     ? beats.filter(beat => TYPE[beat.type] && beat.power > 1).sort((a, b) => b.power - a.power || a.turn - b.turn)[0]
@@ -215,10 +219,13 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const art = (enemy && sprite(enemy.sprite, { flip: foeFlip(enemy), cls: 'map-door-shadow' })) ||
       (visitor && sprite(visitor)) || icon(door.relic || (door.type === 'wild' ? 'battle' : door.type));
     const label = doorDecision(run, door, tempoViews[index]);
+    const relic = door.relicReward && artifacts.get(door.relic);
+    const name = [relic ? '위험한 문' : TERMS[door.type]?.short ?? door.name, label, relic?.name].filter(Boolean).join(' · ');
     return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + door.type +
-      '" data-coach="door" aria-label="' + esc((TERMS[door.type]?.short ?? door.name) + ' · ' + label) + '" style="--door-x:' + x + ';--door-y:' + y + '">' +
+      '" data-coach="door" aria-label="' + esc(name) + '" style="--door-x:' + x + ';--door-y:' + y + '">' +
       '<span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span>' +
-      '<span class="map-door-emblem">' + art + '</span></span><small class="map-door-line">' + esc(label) +
+      '<span class="map-door-emblem">' + art + '</span></span><small class="map-door-line' + (relic ? ' map-door-relic' : '') + '">' +
+      (relic ? relicIcon(relic.id, 16) + esc(relic.name) : esc(label)) +
       '</small></button>';
   }).join('');
 
@@ -226,7 +233,8 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const enemy = door.enemies[0];
     const isShowdown = run.doors.length === 1 && !!enemy;
     const opponent = enemy?.source ? card(enemy.source).name : enemy?.name;
-    const title = TERMS[door.type]?.short ?? door.name;
+    const relic = door.relicReward && artifacts.get(door.relic);
+    const title = relic ? '위험한 문' : TERMS[door.type]?.short ?? door.name;
     const info = [
       isShowdown && opponent ? confront(opponent) : enemy?.name,
       door.enemies.length > 1 ? '적 ' + door.enemies.length + '명이 차례로 등장' : ''
@@ -242,8 +250,9 @@ export function mapScreen(run, ui, { receipt } = {}) {
       (chips ? '<span class="chips door-chips">' + chips + '</span>' : '') +
       (rules ? '<small class="door-risk' + (risksHere.length ? ' danger' : '') + '">' + esc(rules) + '</small>' : '') +
       lessonLine(door) +
-      (gain ? '<small class="door-reward">' + esc(gain) + '</small>' : '') +
-      '</span>' + (door.relic && !door.final ? icon(door.relic) : '') + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' +
+      (gain ? '<small class="door-reward' + (relic ? ' door-relic' : '') + '">' +
+        (relic ? relicIcon(relic.id, 20) : '') + esc(gain) + '</small>' : '') +
+      '</span>' + (door.relic && !door.final && !relic ? icon(door.relic) : '') + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' +
       esc(title) + ' 정보">정보</button></div>';
   }).join('');
 

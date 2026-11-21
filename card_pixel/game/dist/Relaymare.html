@@ -1646,6 +1646,12 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
   transform: translateX(-50%);
   --pf-lo: var(--line2); --pf-sh: rgba(20, 14, 60, .35); }
 
+#map .map-door-relic, #map .door-entry .door-relic {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 #map .map-door[data-map-door="1"]:nth-last-child(2) { left: min(var(--door-x), 100% - 42px); }
 #map .map-door[data-map-door="1"]:nth-last-child(2) .map-door-line {
   left: auto;
@@ -8718,8 +8724,26 @@ const BattleRuntime = {
   };
   var INTRO_MULTIPLIERS = { 3: [0.92, 2.8], 5: [1.12, 4.5] };
   var basic = { name: "\uC77C\uBC18 \uACF5\uACA9", type: "phy", power: 1 };
-  var THREE_BEAT = [basic, { signature: true, power: 1.15 }, { name: "\uC57D\uACF5", type: "phy", power: 0.55 }];
+  var weak = { name: "\uC57D\uACF5", type: "phy", power: 0.55 };
+  var THREE_BEAT = [basic, { signature: true, power: 1.15 }, weak];
   var STRONG_BEAT = 2;
+  var WILD_BEAT_PATTERNS = {
+    golemCharge: {
+      strong: 2,
+      beats: [
+        { name: "\uD798 \uCDA9\uC804 \uC911", type: "sup", power: 0, isChargeStart: true, chargeMessage: "\uACE8\uB818\uC774 \uD798\uC744 \uBAA8\uC73C\uACE0 \uC788\uC2B5\uB2C8\uB2E4. (\uACF5\uACA9 \uC5C6\uC74C)" },
+        { name: "\uAC15\uD0C0", type: "phy", power: 1.6, chargeReset: true },
+        weak
+      ]
+    },
+    batOpening: {
+      strong: 1,
+      beats: [{ signature: true, power: 1 }, { name: "\uBE48\uD2C8", type: "rest", power: 0, vulnerable: 1.3 }, basic]
+    }
+  };
+  function wildBeatPattern(pattern) {
+    return Object.hasOwn(WILD_BEAT_PATTERNS, pattern) ? WILD_BEAT_PATTERNS[pattern] : null;
+  }
   var TIDE_BEATS = [
     basic,
     { name: "\uC794\uBB3C\uACB0", type: "phy", power: 0.75 },
@@ -8732,6 +8756,280 @@ const BattleRuntime = {
   var TEMPO_SEEDS = { blessing: 2500926157, reinforcement: 1740171825 };
   function usesTempo(run) {
     return !run.daily && run.tempoVersion === TEMPO_VERSION;
+  }
+
+  // card_pixel/game/src/content/wild.js
+  var WILD = {
+    golem: { name: "\uC545\uBABD \uACE8\uB818", element: "nature", size: "large", stats: { hp: 900, atk: 110, matk: 60, def: 80, mdef: 40 }, skill: ["\uAC15\uD0C0", "phy", 1.8] },
+    emerald_beetle: { name: "\uC5D0\uBA54\uB784\uB4DC \uAC11\uCDA9", element: "nature", size: "small", stats: { hp: 760, atk: 100, matk: 50, def: 95, mdef: 45 }, skill: ["\uAECD\uC9C8 \uB3CC\uC9C4", "phy", 1.8] },
+    magma_beetle: { name: "\uC6A9\uC554 \uAC11\uCDA9", element: "fire", size: "small", stats: { hp: 700, atk: 108, matk: 86, def: 75, mdef: 55 }, skill: ["\uC6A9\uC554 \uBD84\uCD9C", "mag", 1.8] },
+    gold_moth: { name: "\uD669\uAE08 \uB098\uBC29", element: "light", size: "small", stats: { hp: 560, atk: 60, matk: 118, def: 50, mdef: 90 }, skill: ["\uBE5B\uAC00\uB8E8", "mag", 1.7] },
+    treant: { name: "\uACE0\uBAA9 \uC218\uD638\uC790", element: "nature", size: "large", stats: { hp: 1050, atk: 100, matk: 70, def: 85, mdef: 70 }, skill: ["\uBFCC\uB9AC \uD718\uAC10\uAE30", "phy", 1.7] },
+    wraith: { name: "\uB9DD\uB839", element: "dark", size: "medium", stats: { hp: 620, atk: 60, matk: 122, def: 45, mdef: 95 }, skill: ["\uC800\uC8FC\uC758 \uC190\uAE38", "mag", 1.8] },
+    night_bat: { name: "\uBC24\uBC15\uC950", element: "dark", size: "small", stats: { hp: 520, atk: 112, matk: 60, def: 50, mdef: 50 }, skill: ["\uD761\uD608 \uC774\uBE68", "phy", 1.6] },
+    dark_knight: { name: "\uD751\uAE30\uC0AC", element: "dark", size: "large", stats: { hp: 980, atk: 122, matk: 70, def: 95, mdef: 60 }, skill: ["\uC554\uD751 \uBCA0\uAE30", "phy", 2] },
+    abyss_eye: { name: "\uC2EC\uC5F0\uC758 \uB208", element: "water", size: "medium", stats: { hp: 660, atk: 60, matk: 122, def: 55, mdef: 85 }, skill: ["\uB9C8\uC548", "mag", 1.8] }
+  };
+  var LARGE = ["golem", "treant", "dark_knight"];
+
+  // card_pixel/game/src/content/intro.js
+  var INTRO = {
+    party: ["ash", "snow_rabbit", "silver_rabbit"],
+    creature: "golem",
+    enemyHp: 220,
+    seed: 7,
+    start: { allyStart: { 0: { hp: 40, mp: 0 } } },
+    relayHint: "\uC560\uC26C\uAC00 \uC4F0\uB7EC\uC9C0\uBA74 \uB208\uD1A0\uB07C\uAC00 \uC544\uB9C8\uAC9F\uB3C8\uC744 \uACC4\uC2B9\uD569\uB2C8\uB2E4 \xB7 \uD6C4\uD1F4\uD558\uBA74 \uC804\uC6D0 \uC0DD\uC874\uD569\uB2C8\uB2E4.",
+    finaleGrades: ["normal", "rare"],
+    boss: { id: "shadow_pair", name: "\uADF8\uB9BC\uC790 \uB458", note: "\uCCAB \uAE68\uC6B0\uAE30\uC5D0\uC11C \uC120\uD0DD\uD558\uC9C0 \uC54A\uC740 \uD6C4\uBCF4\uC640 \uADF8\uB9BC\uC790 1\uBA85" }
+  };
+
+  // card_pixel/game/src/content/dungeons.js
+  var EMBER = { id: "ember_carry" };
+  var BELL = { id: "twilight_bell", turns: [3, 6, 9], stacks: 2 };
+  var SKY = { id: "starlit_sky" };
+  var TIDE = { id: "tide_cycle" };
+  var ARENA = { id: "arena_charge" };
+  var APPROACH = [0.86, 1, 1, 0.96, 1, 1.2, 1];
+  var nightmare = (scale) => ({ scale, extraAffix: true });
+  var standard = {
+    floors: 8,
+    layout: "expedition",
+    tiers: [...APPROACH, 1.2],
+    nightmareRule: nightmare(1.1)
+  };
+  var DUNGEONS = {
+    dawn_forest: {
+      id: "dawn_forest",
+      name: "\uC0C8\uBCBD\uC758 \uC232",
+      background: "dawn_forest",
+      pool: { name: "\uC785\uBB38 \uD480", ids: [
+        "ash",
+        "snow_rabbit",
+        "silver_rabbit",
+        "night_rabbit",
+        "sunflower",
+        "siren",
+        "aurora",
+        "guardian",
+        "storm_sage",
+        "luna",
+        "queen",
+        "rumi",
+        "red_dragon",
+        "gold_dragon"
+      ] },
+      floors: 5,
+      layout: "intro",
+      tiers: [1, 1, 0.56, 1, 0.46],
+      wild: ["golem", "emerald_beetle", "gold_moth"],
+      boss: INTRO.boss.id,
+      hiddenBosses: [],
+      nightmareRule: null,
+      region: null,
+      unlock: { kind: "initial" }
+    },
+    ember_volcano: {
+      ...standard,
+      id: "ember_volcano",
+      name: "\uD64D\uB828 \uD654\uC0B0",
+      background: "ember_volcano",
+      tiers: [...APPROACH, 1.25],
+      nightmareRule: nightmare(1),
+      // The two-enemy rooms, extra affixes, and hidden boss supply the pressure.
+      pool: { set: "ember_relay" },
+      wild: ["magma_beetle", "golem", "emerald_beetle"],
+      boss: "iris_curse",
+      hiddenBosses: ["artificial_demon_god"],
+      region: EMBER,
+      unlock: { kind: "intro_clear" }
+    },
+    twilight_cathedral: {
+      ...standard,
+      id: "twilight_cathedral",
+      name: "\uD669\uD63C \uC131\uB2F9",
+      background: "twilight_cathedral",
+      nightmareRule: nightmare(1.28),
+      // Gray was a softer finale than the other hidden bosses.
+      pool: { set: "twilight_liturgy" },
+      wild: ["wraith", "night_bat", "dark_knight"],
+      boss: "iris_love",
+      hiddenBosses: ["gray"],
+      region: BELL,
+      unlock: { kind: "intro_clear" }
+    },
+    starlit_garden: {
+      ...standard,
+      id: "starlit_garden",
+      name: "\uBCC4\uBE5B \uC815\uC6D0",
+      background: "starlit_garden",
+      pool: { set: "starlit_garden", spriteFallback: ["shooting_star_boy"] },
+      wild: ["gold_moth", "emerald_beetle", "treant"],
+      boss: "pharaoh",
+      hiddenBosses: ["flora"],
+      region: SKY,
+      unlock: { kind: "early_region_clear" }
+    },
+    midnight_trench: {
+      ...standard,
+      id: "midnight_trench",
+      name: "\uC2EC\uC57C\uC758 \uD574\uAD6C",
+      background: "midnight_trench",
+      tiers: [0.86, 1, 1, 1.16, 1, 1.2, 1, 1.18],
+      // Floor-four shadows last long enough to show their opening.
+      nightmareRule: nightmare(1),
+      // The stronger gate still applies alongside the extra affixes and hidden boss.
+      pool: { set: "midnight_tide" },
+      wild: ["abyss_eye", "wraith", "night_bat"],
+      boss: "poseidon",
+      hiddenBosses: ["demon_god"],
+      region: TIDE,
+      unlock: { kind: "early_region_clear" }
+    },
+    arena: {
+      ...standard,
+      id: "arena",
+      name: "\uD22C\uAE30\uC7A5",
+      background: "arena",
+      tiers: [...APPROACH, 1.23],
+      pool: { set: "arena_company", spriteFallback: ["underdog", "joker", "night_rabbit", "siren"] },
+      wild: ["golem", "dark_knight", "emerald_beetle"],
+      boss: "ares",
+      hiddenBosses: ["thor"],
+      region: ARENA,
+      unlock: { kind: "early_region_clear" }
+    },
+    creation_tower: {
+      ...standard,
+      id: "creation_tower",
+      name: "\uCC3D\uC870\uC758 \uD0D1",
+      background: "creation_tower",
+      tiers: [...APPROACH, 1.06],
+      nightmareRule: nightmare(1.05),
+      pool: { all: true, name: "\uC804\uCCB4 \uB3D9\uB8CC" },
+      wild: ["golem", "magma_beetle", "gold_moth", "wraith", "abyss_eye", "dark_knight"],
+      boss: "creator_god",
+      hiddenBosses: [],
+      region: { first: [EMBER, BELL, SKY, TIDE, ARENA], second: [EMBER, BELL, SKY, TIDE, ARENA] },
+      unlock: { kind: "region_clear_count", count: 3 }
+    }
+  };
+
+  // card_pixel/game/src/engine/roster.js
+  var ELEMENT = { fire: "\uBD88", water: "\uBB3C", nature: "\uC790\uC5F0", light: "\uBE5B", dark: "\uC5B4\uB460" };
+  var GRADE = { normal: "\uB178\uBA40", rare: "\uB808\uC5B4", epic: "\uC5D0\uD53D", legend: "\uC804\uC124", transcendence: "\uCD08\uC6D4", event: "\uC774\uBCA4\uD2B8" };
+  var POSITION = ["\uC120\uBD09", "\uC911\uACAC", "\uB300\uC7A5"];
+  var GRADE_BUCKETS = ["normal", "rare", "epic", "legend"];
+  var gradeOf = (grade) => GRADE_BUCKETS.includes(grade) ? grade : "legend";
+  var WILD_PATTERNS = { wild_golem: "golemCharge", wild_night_bat: "batOpening" };
+  var gradeRank = { normal: 0, rare: 1, epic: 2, legend: 3, transcendence: 3, event: 2 };
+  function strength(card) {
+    const { hp, atk, matk } = card.stats;
+    return hp / 4 + Math.max(atk, matk) + gradeRank[card.grade] * 30;
+  }
+  var power = (s) => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 2);
+  var clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  function expeditionPool(roster2, dungeonId2, startView4 = {}) {
+    if (!Object.hasOwn(DUNGEONS, dungeonId2)) throw new RangeError("Unknown dungeon: " + dungeonId2);
+    const dungeon = DUNGEONS[dungeonId2];
+    const { seals = [], companions = [], lead, reserved } = startView4;
+    const additions = dungeon.layout === "intro" ? [reserved] : [...companions, lead, reserved];
+    const baseIds = roster2.pool(dungeon.pool);
+    const availableIds = roster2.pool(dungeon.pool, { companions: additions });
+    const effectiveIds = roster2.pool(dungeon.pool, { companions: additions, seals });
+    return {
+      setName: roster2.poolName(dungeon.pool),
+      baseIds,
+      addedIds: effectiveIds.filter((id) => !baseIds.includes(id)),
+      sealedIds: availableIds.filter((id) => seals.includes(id)),
+      effectiveIds
+    };
+  }
+  function create(core2, assets2) {
+    const sp = assets2.sp;
+    const has = (id) => !!sp[id + "-idle"];
+    const card = (id) => core2.GameUtils.getCardById(id);
+    const facing = (id) => sp[id + "-idle"] && sp[id + "-idle"].facing || (id === "golem" || id === "emerald_beetle" ? "left" : "right");
+    const allies = core2.GameUtils.getAllCards().filter((c) => {
+      const idle = sp[c.id + "-idle"];
+      return !c.battleOnly && idle && (!idle.kind ? !WILD[c.id] : idle.kind === "ally");
+    }).map((c) => c.id);
+    const spriteFor = (role, id) => has(role + "_" + id) ? role + "_" + id : id;
+    const wild = Object.keys(WILD).filter((id) => has(spriteFor("wild", id)));
+    const bosses = Object.keys(BOSSES);
+    const poolName = (spec) => spec.name ?? core2.BASIC_CARD_SETS.find((entry) => entry.id === spec.set)?.name;
+    function pool(spec = "common", { seals = [], companions = [] } = {}) {
+      if (typeof spec === "string") {
+        spec = spec.startsWith("set:") ? { set: spec.slice(4) } : { all: spec === "common" };
+      }
+      const set = core2.BASIC_CARD_SETS.find((entry) => entry.id === spec.set);
+      const ids = spec.all ? allies : spec.ids || Object.values(set?.cardsByGrade || {}).flat();
+      const candidates = ids.filter((id) => allies.includes(id));
+      const fallback = (spec.spriteFallback || []).filter((id) => allies.includes(id) && !candidates.includes(id));
+      const missingGrades = GRADE_BUCKETS.filter((grade) => !candidates.some((id) => gradeOf(card(id).grade) === grade));
+      for (const grade of missingGrades) {
+        const match = fallback.find((id) => gradeOf(card(id).grade) === grade);
+        if (match) candidates.push(match);
+      }
+      for (const id of fallback) {
+        if (candidates.length >= 12) break;
+        if (!candidates.includes(id)) candidates.push(id);
+      }
+      return [.../* @__PURE__ */ new Set([...candidates, ...companions])].filter((id) => allies.includes(id) && !seals.includes(id));
+    }
+    function wildOf(id, mul = 1, extra) {
+      const w = WILD[id], s = w.stats;
+      const sprite2 = spriteFor("wild", id);
+      return Object.assign({
+        id: "wild_" + id,
+        sprite: sprite2,
+        look: "base",
+        kind: "\uC57C\uC0DD",
+        name: w.name,
+        element: w.element,
+        facing: facing(sprite2),
+        size: w.size,
+        stats: { hp: Math.round(s.hp * mul), atk: Math.round(s.atk * mul), matk: Math.round(s.matk * mul), def: s.def, mdef: s.mdef },
+        skills: [{ name: w.skill[0], type: w.skill[1], val: w.skill[2], rate: 0.3 }]
+      }, extra || {});
+    }
+    function shadowOf(id, mul = 1, extra) {
+      const c = card(id), s = c.stats;
+      const sig = (c.skills || []).filter((k) => k.type === "phy" || k.type === "mag").sort((x, y) => power(y) - power(x))[0];
+      return Object.assign({
+        id: "shadow_" + id,
+        sprite: id,
+        look: "shadow",
+        kind: "\uADF8\uB9BC\uC790",
+        name: "\uADF8\uB9BC\uC790 " + c.name,
+        element: c.element,
+        facing: facing(id),
+        source: id,
+        grade: c.grade,
+        stats: { hp: Math.round((300 + s.hp * 0.9) * mul), atk: Math.round(s.atk * 0.95 * mul), matk: Math.round(s.matk * 0.95 * mul), def: s.def, mdef: s.mdef },
+        skills: sig ? [{ name: sig.name, type: sig.type, val: clamp(Number.isFinite(sig.val) ? sig.val : 2, 1.6, 2.4), rate: 0.3 }] : []
+      }, extra || {});
+    }
+    function bossOf(id, mul = 1) {
+      const base = core2.ENEMIES.find((e) => e.id === id), b = BOSSES[id];
+      const preferred = spriteFor("boss", id);
+      const sprite2 = has(preferred) ? preferred : spriteFor("wild", "golem");
+      return {
+        id,
+        sprite: sprite2,
+        look: has(preferred) ? "base" : "boss",
+        aura: "boss",
+        kind: "\uBCF4\uC2A4",
+        name: base.name,
+        element: base.element,
+        facing: facing(sprite2),
+        stats: Object.fromEntries(Object.entries(b.stats).map(([key, value]) => [key, Math.round(value * mul)])),
+        skills: JSON.parse(JSON.stringify(base.skills)),
+        note: b.note,
+        boss: true
+      };
+    }
+    return { allies, wild, bosses, has, card, facing, pool, poolName, wildOf, shadowOf, bossOf, LARGE: LARGE.filter((id) => wild.includes(id)) };
   }
 
   // card_pixel/game/src/engine/bridge.js
@@ -8769,22 +9067,33 @@ const BattleRuntime = {
     };
     return { id, name: AFFIXES[id].name, active: true, text: text[id] };
   }
+  var enemyPattern = (enemy, pattern) => pattern === "threeBeat" && Object.hasOwn(WILD_PATTERNS, enemy.id) ? WILD_PATTERNS[enemy.id] : pattern;
   function patternActions(enemy, pattern, openingIntent) {
     if (pattern === "tide") return TIDE_BEATS;
-    if (pattern !== "threeBeat" && pattern !== "introFixed") return [];
+    const wild = wildBeatPattern(pattern);
+    if (!wild && pattern !== "threeBeat" && pattern !== "introFixed") return [];
     const basic2 = THREE_BEAT[0];
     const skill = enemy.skills.find((s) => isAttack(s) && (!openingIntent || s.type === openingIntent));
     const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic2;
     if (pattern === "introFixed") return openingIntent ? [signature, basic2, THREE_BEAT[2]] : [signature];
-    return THREE_BEAT.map((beat) => !beat.signature ? beat : skill ? { ...signature, power: signature.power * beat.power } : basic2);
+    return (wild?.beats ?? THREE_BEAT).map((beat) => !beat.signature ? beat : skill ? { ...signature, power: signature.power * beat.power } : basic2);
   }
   var lessonTideAfter = (lesson, turn) => lesson?.tideAfter && turn === lesson.steps.length + 1 ? lesson.tideAfter : null;
   function enemyBeats(core2, enemy, pattern, openingIntent, lesson) {
     if (pattern !== "bossScript") {
-      return patternActions(enemy, pattern, openingIntent).map(({ name, type, power: power2 }, index) => {
+      const selected = enemyPattern(enemy, pattern);
+      const wild = wildBeatPattern(selected);
+      return patternActions(enemy, selected, openingIntent).map(({ name, type, power: power2, vulnerable, isChargeStart }, index) => {
         const turn = index + 1;
         const action = lesson?.steps[index] ?? (pattern === "tide" ? lessonTideAfter(lesson, turn) : null);
-        return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : { turn, name, type, power: power2 };
+        return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : {
+          turn,
+          name,
+          type: isChargeStart ? "charge" : type,
+          power: power2,
+          ...wild && { pattern: selected },
+          ...wild && vulnerable && { vulnerable }
+        };
       });
     }
     const decide = coreHooks.get(core2)?.decide ?? core2.Logic.decideEnemyAction;
@@ -8942,7 +9251,7 @@ const BattleRuntime = {
     wrap(TM, "endEnemyTurn", (b, go) => b.onEndEnemyTurn(go));
     return original;
   }
-  function create(core2, opts) {
+  function create2(core2, opts) {
     const original = installHooks(core2);
     const { BattleRuntime, Logic, GameUtils, StatusRules, SideEffects, getMaxMana, buildBattleEnemy } = core2;
     const TM = BattleRuntime.TurnManager;
@@ -9255,7 +9564,9 @@ const BattleRuntime = {
     function setupEnemy(enemy) {
       const def = queue[B.enemyIdx] || {};
       enemy.affixes = (def.affixes || []).slice();
-      enemy.relayBeats = patternActions(enemy, pattern, opts.openingIntent);
+      const selected = enemyPattern(def, pattern);
+      enemy.relayPattern = inTide() && wildBeatPattern(selected) ? "tide" : selected;
+      enemy.relayBeats = patternActions(enemy, enemy.relayPattern, opts.openingIntent);
       const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk, opts.enemyAttackScale);
       Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
       if (hasAffix(enemy, "tough")) enemy.buffs.damage_half = 3;
@@ -9452,7 +9763,8 @@ const BattleRuntime = {
     B.onEndEnemyTurn = function(go) {
       const enemy = host.battle.enemy;
       finishEnemyAction();
-      if (lessonStep(localTurn(enemy))?.rule === "charged_hit") enemy.isCharging = false;
+      const turn = localTurn(enemy);
+      if (lessonStep(turn)?.rule === "charged_hit" || wildBeat(enemy, turn)?.chargeReset) enemy.isCharging = false;
       applyDefenseProtocol(enemy);
       if (hasAffix(enemy, "leech") && enemy.hp > 0) {
         const dealt = B.turnStartHp - players().reduce((n, p) => n + Math.max(0, p.hp), 0);
@@ -9517,10 +9829,10 @@ const BattleRuntime = {
     B.onCalc = function(source, target, skill, lines, result) {
       const b = host.battle;
       const cause = B.ctx.at(-1);
-      const vulnerable = target === b.enemy && tideVulnerability(target);
-      if (vulnerable && result.dmg > 0) {
-        result.dmg = tideDamage(result.dmg, vulnerable);
-        lines.push(`${REGIONS.tide_cycle.opening}: \uBC1B\uB294 \uD53C\uD574 ${vulnerable}\uBC30`);
+      const opening = target === b.enemy && enemyOpening(target);
+      if (opening && result.dmg > 0) {
+        result.dmg = openingDamage(result.dmg, opening);
+        lines.push(`${opening.name}: \uBC1B\uB294 \uD53C\uD574 ${opening.vulnerable}\uBC30`);
       }
       if (target === b.enemy) result.dmg = lessonGuardDamage(target, result.dmg, b.turn);
       if (target === b.enemy && cause?.source === source && isAlly(source)) {
@@ -9560,15 +9872,29 @@ const BattleRuntime = {
     function tideVulnerability(enemy) {
       if (!inTide()) return 0;
       const turn = localTurn(enemy);
-      if (pattern === "tide") return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
+      if (enemy.relayPattern === "tide") return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
       return turn > 0 && turn % 4 === 0 ? 1.5 : 0;
     }
-    const tideDamage = (damage, vulnerable) => vulnerable ? Math.floor(damage * vulnerable) : damage;
+    function wildBeat(enemy, turn) {
+      return wildBeatPattern(enemy.relayPattern) && enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
+    }
+    function enemyOpening(enemy) {
+      const tide = tideVulnerability(enemy);
+      if (tide) return { name: REGIONS.tide_cycle.opening, vulnerable: tide };
+      const turn = localTurn(enemy);
+      const beat = wildBeat(enemy, turn);
+      return beat?.vulnerable && !lessonAction(turn, enemy.isCharging) ? beat : null;
+    }
+    const openingDamage = (damage, opening) => opening ? Math.floor(damage * opening.vulnerable) : damage;
     function teachesLesson() {
       return !!lesson && B.enemyIdx <= lesson.maxUsesPerRoom && (B.lessonOwner === null || B.lessonOwner === B.enemyIdx);
     }
     function lessonStep(turn) {
       return teachesLesson() ? lesson.steps[turn - 1] : null;
+    }
+    function lessonAction(turn, charging) {
+      const step = lessonStep(turn);
+      return step && (step.rule !== "charged_hit" || charging) ? step : null;
     }
     function tideRipple(turn) {
       return inTide() && teachesLesson() ? lessonTideAfter(lesson, turn) : null;
@@ -9664,13 +9990,13 @@ const BattleRuntime = {
     }
     function decide(enemy) {
       const turn = localTurn(enemy);
-      const step = lessonStep(turn);
-      if (step && (step.rule !== "charged_hit" || enemy.isCharging)) return step;
+      const step = lessonAction(turn, enemy.isCharging);
+      if (step) return step;
       const ripple = tideRipple(turn);
       if (ripple) return ripple;
       if (enemy.relayBeats.length && (pattern !== "introFixed" || opts.openingIntent)) {
         const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
-        const strong = pattern === "tide" ? TIDE_STRONG_BEAT : STRONG_BEAT;
+        const strong = wildBeatPattern(enemy.relayPattern)?.strong ?? (enemy.relayPattern === "tide" ? TIDE_STRONG_BEAT : STRONG_BEAT);
         return { ...beat, val: beat.power, strong: pattern !== "introFixed" && (turn - 1) % enemy.relayBeats.length === strong - 1 };
       }
       const vulnerable = tideVulnerability(enemy);
@@ -9738,6 +10064,7 @@ const BattleRuntime = {
       const a = cache.action;
       const { attack: attack2, stunned, range, conditions, preventedBy, resourceEffect } = enemyResponse(cache, target, mayHitEnemy);
       const kind = stunned ? "stun" : a.isChargeStart ? "charge" : a.type;
+      const wildOpening = wildBeatPattern(enemy.relayPattern) && enemyOpening(enemy);
       const salience = stunned ? "ordinary" : actionSalience(a);
       const extra = (a.effects || []).map((e) => e.type).filter((t) => t !== "random_mult");
       const lethal = attack2 && range[1] >= target.hp;
@@ -9760,6 +10087,7 @@ const BattleRuntime = {
         ...a.bonus && { bonus: a.bonus, stat: a.stat },
         ...a.reduction && { reduction: a.reduction },
         ...a.vulnerable && { vulnerable: a.vulnerable },
+        ...wildOpening && { vulnerable: wildOpening.vulnerable, wildOpening: true },
         type: kind,
         ult: salience === "boss",
         ...attack2 && { power: a.val ?? 1, dmg: range, lethal, lethalText, extra },
@@ -9768,6 +10096,7 @@ const BattleRuntime = {
     }
     function nextDistinct(action, local) {
       const enemy = host.battle.enemy;
+      if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action);
       if (action.isChargeStart) {
         const next2 = lessonStep(local + 1) ?? enemy.skills.find((skill) => skill.name === (action.chargeSkillId ?? "\uB514\uBC14\uC778\uBE14\uB808\uC774\uB4DC"));
         if (next2) return { inTurns: 1, name: next2.name, kind: next2.type, power: next2.val };
@@ -9790,14 +10119,30 @@ const BattleRuntime = {
       const next = countdown(true);
       return next && next.name !== action.name ? next : null;
     }
+    function nextWildAction(enemy, local, current) {
+      const charging = !enemy.buffs.stun && current?.isChargeStart || enemy.isCharging && !current?.chargeReset;
+      const next = lessonAction(local + 1, charging) ?? wildBeat(enemy, local + 1);
+      return {
+        name: next.name,
+        kind: next.isChargeStart ? "charge" : next.type,
+        power: next.power ?? next.val,
+        inTurns: 1,
+        ...next.vulnerable && { vulnerable: next.vulnerable }
+      };
+    }
     function countdown(futureOnly = false) {
       const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
+      if (wildBeatPattern(enemy.relayPattern)) {
+        const next = nextWildAction(enemy, local, B.intentCache?.action);
+        return { ...next, charge: next.kind === "charge" };
+      }
       if (pattern === "threeBeat" || pattern === "tide") {
-        const strong = pattern === "tide" ? TIDE_STRONG_BEAT : STRONG_BEAT;
+        const tide = enemy.relayPattern === "tide";
+        const strong = tide ? TIDE_STRONG_BEAT : STRONG_BEAT;
         const period = enemy.relayBeats.length;
         let inTurns = (strong - local % period + period) % period;
         if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
-        return pattern === "tide" ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns) : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+        return tide ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns) : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
       }
       if (inTide()) {
         let inTurns = (3 - local % 4 + 4) % 4;
@@ -10000,8 +10345,7 @@ const BattleRuntime = {
           b.turn,
           host.state.artifacts
         );
-        const tideHit = tideDamage(result.dmg, tideVulnerability(enemy));
-        const hit = lessonGuardDamage(enemy, tideHit, b.turn);
+        const hit = lessonGuardDamage(enemy, openingDamage(result.dmg, enemyOpening(enemy)), b.turn);
         return { hit, total: hit * (hits + Number(chargedSkill(skill))), forcedCrit: !!result.isCrit };
       };
       active = B;
@@ -10221,279 +10565,6 @@ const BattleRuntime = {
         };
       }
     };
-  }
-
-  // card_pixel/game/src/content/wild.js
-  var WILD = {
-    golem: { name: "\uC545\uBABD \uACE8\uB818", element: "nature", size: "large", stats: { hp: 900, atk: 110, matk: 60, def: 80, mdef: 40 }, skill: ["\uAC15\uD0C0", "phy", 1.8] },
-    emerald_beetle: { name: "\uC5D0\uBA54\uB784\uB4DC \uAC11\uCDA9", element: "nature", size: "small", stats: { hp: 760, atk: 100, matk: 50, def: 95, mdef: 45 }, skill: ["\uAECD\uC9C8 \uB3CC\uC9C4", "phy", 1.8] },
-    magma_beetle: { name: "\uC6A9\uC554 \uAC11\uCDA9", element: "fire", size: "small", stats: { hp: 700, atk: 108, matk: 86, def: 75, mdef: 55 }, skill: ["\uC6A9\uC554 \uBD84\uCD9C", "mag", 1.8] },
-    gold_moth: { name: "\uD669\uAE08 \uB098\uBC29", element: "light", size: "small", stats: { hp: 560, atk: 60, matk: 118, def: 50, mdef: 90 }, skill: ["\uBE5B\uAC00\uB8E8", "mag", 1.7] },
-    treant: { name: "\uACE0\uBAA9 \uC218\uD638\uC790", element: "nature", size: "large", stats: { hp: 1050, atk: 100, matk: 70, def: 85, mdef: 70 }, skill: ["\uBFCC\uB9AC \uD718\uAC10\uAE30", "phy", 1.7] },
-    wraith: { name: "\uB9DD\uB839", element: "dark", size: "medium", stats: { hp: 620, atk: 60, matk: 122, def: 45, mdef: 95 }, skill: ["\uC800\uC8FC\uC758 \uC190\uAE38", "mag", 1.8] },
-    night_bat: { name: "\uBC24\uBC15\uC950", element: "dark", size: "small", stats: { hp: 520, atk: 112, matk: 60, def: 50, mdef: 50 }, skill: ["\uD761\uD608 \uC774\uBE68", "phy", 1.6] },
-    dark_knight: { name: "\uD751\uAE30\uC0AC", element: "dark", size: "large", stats: { hp: 980, atk: 122, matk: 70, def: 95, mdef: 60 }, skill: ["\uC554\uD751 \uBCA0\uAE30", "phy", 2] },
-    abyss_eye: { name: "\uC2EC\uC5F0\uC758 \uB208", element: "water", size: "medium", stats: { hp: 660, atk: 60, matk: 122, def: 55, mdef: 85 }, skill: ["\uB9C8\uC548", "mag", 1.8] }
-  };
-  var LARGE = ["golem", "treant", "dark_knight"];
-
-  // card_pixel/game/src/content/intro.js
-  var INTRO = {
-    party: ["ash", "snow_rabbit", "silver_rabbit"],
-    creature: "golem",
-    enemyHp: 220,
-    seed: 7,
-    start: { allyStart: { 0: { hp: 40, mp: 0 } } },
-    relayHint: "\uC560\uC26C\uAC00 \uC4F0\uB7EC\uC9C0\uBA74 \uB208\uD1A0\uB07C\uAC00 \uC544\uB9C8\uAC9F\uB3C8\uC744 \uACC4\uC2B9\uD569\uB2C8\uB2E4 \xB7 \uD6C4\uD1F4\uD558\uBA74 \uC804\uC6D0 \uC0DD\uC874\uD569\uB2C8\uB2E4.",
-    finaleGrades: ["normal", "rare"],
-    boss: { id: "shadow_pair", name: "\uADF8\uB9BC\uC790 \uB458", note: "\uCCAB \uAE68\uC6B0\uAE30\uC5D0\uC11C \uC120\uD0DD\uD558\uC9C0 \uC54A\uC740 \uD6C4\uBCF4\uC640 \uADF8\uB9BC\uC790 1\uBA85" }
-  };
-
-  // card_pixel/game/src/content/dungeons.js
-  var EMBER = { id: "ember_carry" };
-  var BELL = { id: "twilight_bell", turns: [3, 6, 9], stacks: 2 };
-  var SKY = { id: "starlit_sky" };
-  var TIDE = { id: "tide_cycle" };
-  var ARENA = { id: "arena_charge" };
-  var APPROACH = [0.86, 1, 1, 0.96, 1, 1.2, 1];
-  var nightmare = (scale) => ({ scale, extraAffix: true });
-  var standard = {
-    floors: 8,
-    layout: "expedition",
-    tiers: [...APPROACH, 1.2],
-    nightmareRule: nightmare(1.1)
-  };
-  var DUNGEONS = {
-    dawn_forest: {
-      id: "dawn_forest",
-      name: "\uC0C8\uBCBD\uC758 \uC232",
-      background: "dawn_forest",
-      pool: { name: "\uC785\uBB38 \uD480", ids: [
-        "ash",
-        "snow_rabbit",
-        "silver_rabbit",
-        "night_rabbit",
-        "sunflower",
-        "siren",
-        "aurora",
-        "guardian",
-        "storm_sage",
-        "luna",
-        "queen",
-        "rumi",
-        "red_dragon",
-        "gold_dragon"
-      ] },
-      floors: 5,
-      layout: "intro",
-      tiers: [1, 1, 0.56, 1, 0.46],
-      wild: ["golem", "emerald_beetle", "gold_moth"],
-      boss: INTRO.boss.id,
-      hiddenBosses: [],
-      nightmareRule: null,
-      region: null,
-      unlock: { kind: "initial" }
-    },
-    ember_volcano: {
-      ...standard,
-      id: "ember_volcano",
-      name: "\uD64D\uB828 \uD654\uC0B0",
-      background: "ember_volcano",
-      tiers: [...APPROACH, 1.25],
-      nightmareRule: nightmare(1),
-      // The two-enemy rooms, extra affixes, and hidden boss supply the pressure.
-      pool: { set: "ember_relay" },
-      wild: ["magma_beetle", "golem", "emerald_beetle"],
-      boss: "iris_curse",
-      hiddenBosses: ["artificial_demon_god"],
-      region: EMBER,
-      unlock: { kind: "intro_clear" }
-    },
-    twilight_cathedral: {
-      ...standard,
-      id: "twilight_cathedral",
-      name: "\uD669\uD63C \uC131\uB2F9",
-      background: "twilight_cathedral",
-      nightmareRule: nightmare(1.28),
-      // Gray was a softer finale than the other hidden bosses.
-      pool: { set: "twilight_liturgy" },
-      wild: ["wraith", "night_bat", "dark_knight"],
-      boss: "iris_love",
-      hiddenBosses: ["gray"],
-      region: BELL,
-      unlock: { kind: "intro_clear" }
-    },
-    starlit_garden: {
-      ...standard,
-      id: "starlit_garden",
-      name: "\uBCC4\uBE5B \uC815\uC6D0",
-      background: "starlit_garden",
-      pool: { set: "starlit_garden", spriteFallback: ["shooting_star_boy"] },
-      wild: ["gold_moth", "emerald_beetle", "treant"],
-      boss: "pharaoh",
-      hiddenBosses: ["flora"],
-      region: SKY,
-      unlock: { kind: "early_region_clear" }
-    },
-    midnight_trench: {
-      ...standard,
-      id: "midnight_trench",
-      name: "\uC2EC\uC57C\uC758 \uD574\uAD6C",
-      background: "midnight_trench",
-      tiers: [0.86, 1, 1, 1.16, 1, 1.2, 1, 1.18],
-      // Floor-four shadows last long enough to show their opening.
-      nightmareRule: nightmare(1),
-      // The stronger gate still applies alongside the extra affixes and hidden boss.
-      pool: { set: "midnight_tide" },
-      wild: ["abyss_eye", "wraith", "night_bat"],
-      boss: "poseidon",
-      hiddenBosses: ["demon_god"],
-      region: TIDE,
-      unlock: { kind: "early_region_clear" }
-    },
-    arena: {
-      ...standard,
-      id: "arena",
-      name: "\uD22C\uAE30\uC7A5",
-      background: "arena",
-      tiers: [...APPROACH, 1.23],
-      pool: { set: "arena_company", spriteFallback: ["underdog", "joker", "night_rabbit", "siren"] },
-      wild: ["golem", "dark_knight", "emerald_beetle"],
-      boss: "ares",
-      hiddenBosses: ["thor"],
-      region: ARENA,
-      unlock: { kind: "early_region_clear" }
-    },
-    creation_tower: {
-      ...standard,
-      id: "creation_tower",
-      name: "\uCC3D\uC870\uC758 \uD0D1",
-      background: "creation_tower",
-      tiers: [...APPROACH, 1.06],
-      nightmareRule: nightmare(1.05),
-      pool: { all: true, name: "\uC804\uCCB4 \uB3D9\uB8CC" },
-      wild: ["golem", "magma_beetle", "gold_moth", "wraith", "abyss_eye", "dark_knight"],
-      boss: "creator_god",
-      hiddenBosses: [],
-      region: { first: [EMBER, BELL, SKY, TIDE, ARENA], second: [EMBER, BELL, SKY, TIDE, ARENA] },
-      unlock: { kind: "region_clear_count", count: 3 }
-    }
-  };
-
-  // card_pixel/game/src/engine/roster.js
-  var ELEMENT = { fire: "\uBD88", water: "\uBB3C", nature: "\uC790\uC5F0", light: "\uBE5B", dark: "\uC5B4\uB460" };
-  var GRADE = { normal: "\uB178\uBA40", rare: "\uB808\uC5B4", epic: "\uC5D0\uD53D", legend: "\uC804\uC124", transcendence: "\uCD08\uC6D4", event: "\uC774\uBCA4\uD2B8" };
-  var POSITION = ["\uC120\uBD09", "\uC911\uACAC", "\uB300\uC7A5"];
-  var GRADE_BUCKETS = ["normal", "rare", "epic", "legend"];
-  var gradeOf = (grade) => GRADE_BUCKETS.includes(grade) ? grade : "legend";
-  var gradeRank = { normal: 0, rare: 1, epic: 2, legend: 3, transcendence: 3, event: 2 };
-  function strength(card) {
-    const { hp, atk, matk } = card.stats;
-    return hp / 4 + Math.max(atk, matk) + gradeRank[card.grade] * 30;
-  }
-  var power = (s) => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 2);
-  var clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  function expeditionPool(roster2, dungeonId2, startView4 = {}) {
-    if (!Object.hasOwn(DUNGEONS, dungeonId2)) throw new RangeError("Unknown dungeon: " + dungeonId2);
-    const dungeon = DUNGEONS[dungeonId2];
-    const { seals = [], companions = [], lead, reserved } = startView4;
-    const additions = dungeon.layout === "intro" ? [reserved] : [...companions, lead, reserved];
-    const baseIds = roster2.pool(dungeon.pool);
-    const availableIds = roster2.pool(dungeon.pool, { companions: additions });
-    const effectiveIds = roster2.pool(dungeon.pool, { companions: additions, seals });
-    return {
-      setName: roster2.poolName(dungeon.pool),
-      baseIds,
-      addedIds: effectiveIds.filter((id) => !baseIds.includes(id)),
-      sealedIds: availableIds.filter((id) => seals.includes(id)),
-      effectiveIds
-    };
-  }
-  function create2(core2, assets2) {
-    const sp = assets2.sp;
-    const has = (id) => !!sp[id + "-idle"];
-    const card = (id) => core2.GameUtils.getCardById(id);
-    const facing = (id) => sp[id + "-idle"] && sp[id + "-idle"].facing || (id === "golem" || id === "emerald_beetle" ? "left" : "right");
-    const allies = core2.GameUtils.getAllCards().filter((c) => {
-      const idle = sp[c.id + "-idle"];
-      return !c.battleOnly && idle && (!idle.kind ? !WILD[c.id] : idle.kind === "ally");
-    }).map((c) => c.id);
-    const spriteFor = (role, id) => has(role + "_" + id) ? role + "_" + id : id;
-    const wild = Object.keys(WILD).filter((id) => has(spriteFor("wild", id)));
-    const bosses = Object.keys(BOSSES);
-    const poolName = (spec) => spec.name ?? core2.BASIC_CARD_SETS.find((entry) => entry.id === spec.set)?.name;
-    function pool(spec = "common", { seals = [], companions = [] } = {}) {
-      if (typeof spec === "string") {
-        spec = spec.startsWith("set:") ? { set: spec.slice(4) } : { all: spec === "common" };
-      }
-      const set = core2.BASIC_CARD_SETS.find((entry) => entry.id === spec.set);
-      const ids = spec.all ? allies : spec.ids || Object.values(set?.cardsByGrade || {}).flat();
-      const candidates = ids.filter((id) => allies.includes(id));
-      const fallback = (spec.spriteFallback || []).filter((id) => allies.includes(id) && !candidates.includes(id));
-      const missingGrades = GRADE_BUCKETS.filter((grade) => !candidates.some((id) => gradeOf(card(id).grade) === grade));
-      for (const grade of missingGrades) {
-        const match = fallback.find((id) => gradeOf(card(id).grade) === grade);
-        if (match) candidates.push(match);
-      }
-      for (const id of fallback) {
-        if (candidates.length >= 12) break;
-        if (!candidates.includes(id)) candidates.push(id);
-      }
-      return [.../* @__PURE__ */ new Set([...candidates, ...companions])].filter((id) => allies.includes(id) && !seals.includes(id));
-    }
-    function wildOf(id, mul = 1, extra) {
-      const w = WILD[id], s = w.stats;
-      const sprite2 = spriteFor("wild", id);
-      return Object.assign({
-        id: "wild_" + id,
-        sprite: sprite2,
-        look: "base",
-        kind: "\uC57C\uC0DD",
-        name: w.name,
-        element: w.element,
-        facing: facing(sprite2),
-        size: w.size,
-        stats: { hp: Math.round(s.hp * mul), atk: Math.round(s.atk * mul), matk: Math.round(s.matk * mul), def: s.def, mdef: s.mdef },
-        skills: [{ name: w.skill[0], type: w.skill[1], val: w.skill[2], rate: 0.3 }]
-      }, extra || {});
-    }
-    function shadowOf(id, mul = 1, extra) {
-      const c = card(id), s = c.stats;
-      const sig = (c.skills || []).filter((k) => k.type === "phy" || k.type === "mag").sort((x, y) => power(y) - power(x))[0];
-      return Object.assign({
-        id: "shadow_" + id,
-        sprite: id,
-        look: "shadow",
-        kind: "\uADF8\uB9BC\uC790",
-        name: "\uADF8\uB9BC\uC790 " + c.name,
-        element: c.element,
-        facing: facing(id),
-        source: id,
-        grade: c.grade,
-        stats: { hp: Math.round((300 + s.hp * 0.9) * mul), atk: Math.round(s.atk * 0.95 * mul), matk: Math.round(s.matk * 0.95 * mul), def: s.def, mdef: s.mdef },
-        skills: sig ? [{ name: sig.name, type: sig.type, val: clamp(Number.isFinite(sig.val) ? sig.val : 2, 1.6, 2.4), rate: 0.3 }] : []
-      }, extra || {});
-    }
-    function bossOf(id, mul = 1) {
-      const base = core2.ENEMIES.find((e) => e.id === id), b = BOSSES[id];
-      const preferred = spriteFor("boss", id);
-      const sprite2 = has(preferred) ? preferred : spriteFor("wild", "golem");
-      return {
-        id,
-        sprite: sprite2,
-        look: has(preferred) ? "base" : "boss",
-        aura: "boss",
-        kind: "\uBCF4\uC2A4",
-        name: base.name,
-        element: base.element,
-        facing: facing(sprite2),
-        stats: Object.fromEntries(Object.entries(b.stats).map(([key, value]) => [key, Math.round(value * mul)])),
-        skills: JSON.parse(JSON.stringify(base.skills)),
-        note: b.note,
-        boss: true
-      };
-    }
-    return { allies, wild, bosses, has, card, facing, pool, poolName, wildOf, shadowOf, bossOf, LARGE: LARGE.filter((id) => wild.includes(id)) };
   }
 
   // card_pixel/game/src/ui/storage.js
@@ -11145,7 +11216,7 @@ const BattleRuntime = {
   var LAYOUTS = {
     expedition: [
       [{ type: "wild", reward: 1 }],
-      [{ type: "wild", reward: 1 }, { type: "wild", risk: true, reward: 2 }],
+      [{ type: "wild", reward: 1 }, { type: "wild", risk: true, reward: 2, relicReward: true }],
       [{ type: "spring" }, { type: "altar" }, { type: "event" }],
       [{ type: "gate", reward: 3 }],
       [{ type: "event" }, { type: "treasure" }],
@@ -11180,13 +11251,13 @@ const BattleRuntime = {
   // card_pixel/game/src/content/relics.js
   var RELICS = {
     reverse: { fits: { element: "nature" } },
-    companion: { fits: { deathDamage: true, relic: "big_bang" } },
+    companion: { fits: { deathDamage: true, relic: "big_bang" }, comboHint: "\uC804\uC124\xB7\uCD08\uC6D4 \uB3D9\uB8CC\uAC00 \uC4F0\uB7EC\uC9C8 \uB54C \uBE45\uBC45 \uD53C\uD574 2\uBC30" },
     double_attack: { fits: { normalAttack: true } },
     over_flame: { fits: { debuff: "burn" } },
     over_divine: { fits: { debuff: "divine" } },
     flame_piercing: { fits: { debuff: "burn", attack: "phy" } },
     frozen_body: { fits: { element: "water" } },
-    ice_break: { fits: { debuff: "stun", relic: "frozen_body" } },
+    ice_break: { fits: { debuff: "stun", relic: "frozen_body" }, comboHint: "\uAE30\uC808\uD55C \uC801\uC5D0\uAC8C \uD53C\uD574 2\uBC30" },
     support_boost: { fits: { support: true } },
     lucky_vicky: { fits: { critOrEvade: true } },
     big_bang: { fits: { grades: ["legend", "transcendence"] } },
@@ -11194,6 +11265,13 @@ const BattleRuntime = {
     gale_storm: { fits: { field: "gale", critOrEvade: true } },
     buff_overload: { fits: { fieldSources: 4 } }
   };
+  var RELIC_COMBOS = Object.entries(RELICS).flatMap(([id, { fits, comboHint }]) => fits.relic ? [{ ids: [fits.relic, id], hint: comboHint }] : []);
+  function relicPartners(held) {
+    return RELIC_COMBOS.flatMap(({ ids, hint }) => {
+      const owned = ids.filter((id) => held.includes(id));
+      return owned.length === 1 ? [{ id: ids.find((id) => id !== owned[0]), held: owned[0], hint }] : [];
+    });
+  }
 
   // card_pixel/game/src/engine/dates.js
   function localDayKey(now) {
@@ -11806,6 +11884,15 @@ const BattleRuntime = {
   function drawEncounter(run, roster2, kind = "draw") {
     return rollFrom(run.rng, distribution(run, roster2, RATES[kind], (id) => usesRepeatDraws(run) || canJoin(run, id)));
   }
+  function drawDistinct(run, roster2, kind, count2, taken = []) {
+    const picked = [];
+    for (let tries = 0; picked.length < count2 && tries < count2 * 12; tries++) {
+      const id = drawEncounter(run, roster2, kind);
+      if (!id) break;
+      if (!picked.includes(id) && !taken.includes(id)) picked.push(id);
+    }
+    return picked;
+  }
   function ratesView(run, kind = "draw") {
     const rates2 = RATES[kind];
     if (!rates2) throw new RangeError("invalid_draw_kind");
@@ -11896,7 +11983,7 @@ const BattleRuntime = {
   function entryState(legacy = false) {
     return { v: 1, legacy, done: [], tours: [], skipped: false };
   }
-  function featureFlags(profile) {
+  function baseFeatureFlags(profile) {
     const legacy = profile.ui?.entry?.legacy ?? true;
     const introCleared = legacy || hasCleared(profile, "dawn_forest");
     const firstMainCleared = legacy || Object.keys(DUNGEONS).some((id) => id !== "dawn_forest" && hasCleared(profile, id));
@@ -11908,8 +11995,13 @@ const BattleRuntime = {
       ...Object.fromEntries(ADVANCED.map((key) => [key, firstMainCleared]))
     };
   }
-  var openFeatures = Object.freeze(featureFlags({}));
+  var openFeatures = Object.freeze(baseFeatureFlags({}));
+  function featureFlags(profile) {
+    const flags = baseFeatureFlags(profile);
+    return { ...flags, relicDoors: flags.firstMainCleared };
+  }
   function hasFeature(run, key) {
+    if (key === "relicDoors") return run.features?.relicDoors === true;
     return run.features?.[key] ?? true;
   }
   function mark(profile, key, id) {
@@ -11960,10 +12052,19 @@ const BattleRuntime = {
     if (rule.attack) return skills.some((skill) => rule.attack === "any" ? ATTACK_TYPES.includes(skill.type) : skill.type === rule.attack);
     return true;
   }
-  function relicOffer(run, roster2) {
-    const available = Object.keys(RELICS).filter((id2) => !run.relics.includes(id2));
+  var comboHalves = new Set(RELIC_COMBOS.flatMap(({ ids }) => ids));
+  var CONDITIONAL_DOOR_RELICS = /* @__PURE__ */ new Set(["reverse", "buff_overload", "over_flame", "over_divine", "flame_piercing"]);
+  var DOOR_RELIC_WEIGHT = { fits: 2, combo: 6, conditional: 9 };
+  function relicOffer(run, roster2, { comboDoor = false, exclude = [] } = {}) {
+    const available = Object.keys(RELICS).filter((id2) => !run.relics.includes(id2) && !exclude.includes(id2));
     const fits = available.filter((id2) => fitsRelic(run, roster2, RELICS[id2].fits));
-    const id = pick(run.rng, fits.length ? fits : available);
+    const offers = comboDoor ? available.flatMap((id2) => {
+      const fit = fits.includes(id2) ? DOOR_RELIC_WEIGHT.fits : 1;
+      const base = comboHalves.has(id2) ? DOOR_RELIC_WEIGHT.combo : CONDITIONAL_DOOR_RELICS.has(id2) ? DOOR_RELIC_WEIGHT.conditional : 1;
+      return Array(fit * base).fill(id2);
+    }) : fits.length ? fits : available;
+    const rng = comboDoor ? { state: run.rng.state } : run.rng;
+    const id = pick(rng, offers);
     seeRelic(run, id);
     return id || null;
   }
@@ -12065,7 +12166,7 @@ const BattleRuntime = {
       startMp: intro ? door.type === "borrowed" ? INTRO.start.allyStart[0].mp : null : QUIRKS[door.quirk]?.ally?.mp ?? START_MP
     };
   }
-  function makeBattleDoor(run, roster2, dungeon, template, index, region, battleCount) {
+  function makeBattleDoor(run, roster2, dungeon, { relicReward, ...template }, index, region, battleCount) {
     const challenge = run.difficulty === "nightmare" ? dungeon.nightmareRule : null;
     const elite = template.type === "elite";
     const singleRisk = run.difficulty !== "nightmare" && template.type === "wild";
@@ -12095,8 +12196,13 @@ const BattleRuntime = {
     const hasSky = region?.id === "starlit_sky";
     const filledSky = hasSky && !skyBet && (battleCount > 1 ? index === 1 : nextFloat(run.rng) < 0.5);
     const start = template.type === "borrowed" ? INTRO.start : hasSky ? { field: filledSky ? SKY3 : [] } : null;
+    const comboDoor = relicReward && hasFeature(run, "relicDoors");
+    const gate = template.type === "gate";
+    const exclude = gate && run.floor === 4 && hasFeature(run, "relicDoors") ? relicPartners(run.relics).map((entry) => entry.id) : [];
+    const relic = elite || gate || comboDoor ? relicOffer(run, roster2, { comboDoor, exclude }) : null;
     const door = {
       ...template,
+      ...comboDoor && relic && { relicReward: true, reward: 0 },
       index,
       name: ROOM_NAMES[template.type],
       bg: dungeon.background,
@@ -12104,7 +12210,7 @@ const BattleRuntime = {
       enemies,
       quirk: affixOnly || !hasFeature(run, "quirks") ? null : quirk,
       start: copy(start),
-      relic: elite || template.type === "gate" ? relicOffer(run, roster2) : null
+      relic
     };
     door.tempo = applyDoorTempo(run, roster2, door);
     return door;
@@ -12424,7 +12530,7 @@ const BattleRuntime = {
         const blessing = options.blessings.find((entry) => entry.id === id);
         if (blessing) blessing.multiplier /= 2;
       }
-      const preview = create(core2, options);
+      const preview = create2(core2, options);
       preview.start();
       stats = preview.allyStats(party.indexOf(id));
     }
@@ -12771,7 +12877,16 @@ const BattleRuntime = {
       candidates: unique2(downs.map((entry) => room.enemies[entry.idx].source).filter((id) => canJoin(run, id, { allowReserved: true }))),
       relic: run.relics.includes(room.relic) || room.relic === betRelic ? null : room.relic
     };
+    addGatePartner(run);
     run.reserved = null;
+  }
+  function addGatePartner(run) {
+    if (run.floor !== 4 || !hasFeature(run, "relicDoors") || run.pending?.kind !== "gate") return;
+    const partner = relicPartners(run.relics).find((entry) => entry.id !== run.pending.relic);
+    if (partner) {
+      run.pending.partner = partner;
+      seeRelic(run, partner.id);
+    } else delete run.pending.partner;
   }
   function setReinforcement(run, roster2) {
     if (!usesTempo(run) || DUNGEONS[run.dungeonId].layout === "intro" || !REINFORCE_FLOORS.includes(run.floor)) return;
@@ -12779,7 +12894,7 @@ const BattleRuntime = {
     if (!full && run.bench.length >= ROSTER_LIMIT) return;
     const count2 = full ? REINFORCE_CHOICES : 1;
     const preview = { ...run, rng: floorRng(run, TEMPO_SEEDS.reinforcement) };
-    const candidates = usesRepeatDraws(run) ? Array.from({ length: count2 }, () => drawEncounter(preview, roster2, "pick")).filter(Boolean) : choicesFor(preview, roster2, count2);
+    const candidates = usesRepeatDraws(run) ? drawDistinct(preview, roster2, "pick", count2) : choicesFor(preview, roster2, count2);
     if (!candidates.length) return;
     seeCharacters(run, candidates);
     run.pending = { kind: "reinforcement", key: `${run.id}/${run.floor}`, candidates, limit: ROSTER_LIMIT };
@@ -12962,7 +13077,7 @@ const BattleRuntime = {
         if (!final && !wiped) setReinforcement(run, roster2);
       }
       if (!wiped) {
-        for (const id of [room.type === "elite" && room.relic, betRelic].filter(Boolean)) {
+        for (const id of [(room.type === "elite" || room.relicReward) && room.relic, betRelic].filter(Boolean)) {
           relic = grantRelic(run, id);
           if (relic.equipped) relics.push(id);
         }
@@ -13023,7 +13138,9 @@ const BattleRuntime = {
       run.pending = null;
       return { ok: true, joined: choice.id };
     }
-    if (choice?.kind === "relic" && pending.relic && choice.id === pending.relic && !run.relics.includes(choice.id)) {
+    const partner = pending.partner;
+    const relicOffered = choice?.id && (choice.id === pending.relic || choice.id === partner?.id && run.relics.includes(partner.held));
+    if (choice?.kind === "relic" && relicOffered && !run.relics.includes(choice.id)) {
       run.pending = null;
       const relic = grantRelic(run, choice.id);
       if (relic.equipped) recordBattleRelic(run, relic.id);
@@ -13286,6 +13403,7 @@ const BattleRuntime = {
     run.crystals -= pending.cost;
     run.pending = pending.after;
     if (run.pending?.kind === "gate" && run.relics.includes(run.pending.relic)) run.pending.relic = null;
+    addGatePartner(run);
     if (["reward", "result"].includes(run.phase)) recordBattleRelic(run, id);
     return { ok: true, id, replaced: replaceId, cost: pending.cost, pending: copy(run.pending) };
   }
@@ -18006,9 +18124,10 @@ const BattleRuntime = {
     const block = resourceEffect?.preventedBy ?? intent.preventedBy;
     const name = (kind === "charge" ? intent.name?.replace(/ 차징$/, " \uCDA9\uC804") : intent.name) || INTENT_TYPE[kind];
     const blocked = kind !== "stun" && BLOCKED_BY[block] ? BLOCKED_BY[block] + "\uB85C \uCC28\uB2E8" : "";
-    const current = [
+    const current = intent.wildOpening && kind === "rest" ? [name, "\uC801 \uD734\uC2DD", modifier].join(" \xB7 ") : [
       "\uB0B4 \uD589\uB3D9 \uB4A4",
       [name, modifier && !name?.includes(modifier) ? modifier : ""].filter(Boolean).join(" \xB7 "),
+      intent.wildOpening && kind === "stun" ? "\uBC1B\uB294 \uD53C\uD574 \xD7" + formatMultiplier(vulnerable) : "",
       blocked ? [attack2 ? damage : "", blocked].filter(Boolean).join(" / ") : [damage, resource].filter(Boolean).join(" / "),
       falls
     ].filter(Boolean).join(" \xB7 ");
@@ -18017,7 +18136,7 @@ const BattleRuntime = {
       inTurns: (countdown.inTurns ?? 0) + (countdown.charge ? 1 : 0)
     };
     const sameName = next?.name === intent.name && kind !== "charge";
-    const future = next?.name && next.inTurns > 0 && !sameName ? (next.inTurns === 1 ? "\uB2E4\uC74C \uD134 " : next.inTurns + "\uD134 \uB4A4 ") + [next.name, next.alt].filter(Boolean).join(" \uB610\uB294 ") + (TYPE[next.kind] ? " \xB7 " + TYPE[next.kind] + (next.power ? " \xD7" + formatMultiplier(next.power) : "") : "") : "";
+    const future = next?.name && next.inTurns > 0 && !sameName ? (next.inTurns === 1 ? "\uB2E4\uC74C \uD134 " : next.inTurns + "\uD134 \uB4A4 ") + [next.name, next.alt].filter(Boolean).join(" \uB610\uB294 ") + (TYPE[next.kind] ? " \xB7 " + TYPE[next.kind] + (next.power ? " \xD7" + formatMultiplier(next.power) : "") : "") + (next.vulnerable ? " \xB7 \uBC1B\uB294 \uD53C\uD574 \xD7" + formatMultiplier(next.vulnerable) : "") : "";
     return [current, future];
   }
   function affixLines(unit) {
@@ -20354,7 +20473,7 @@ const BattleRuntime = {
       B.allies = [];
       B.fallSpot = null;
       battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map((e) => e.id), party: B.party.slice() };
-      B.bridge = create(core2, options);
+      B.bridge = create2(core2, options);
       $("#result").classList.remove("on");
       $("#battle").classList.remove("resumed-result", "opening-decision");
       for (const id of ["b-field", "b-speed", "b-log"]) $("#" + id).hidden = simpleOpening;
@@ -20960,6 +21079,8 @@ const BattleRuntime = {
   function primaryBeat(door, preview) {
     const pattern = preview?.pattern ?? door.tempo?.pattern;
     const beats = preview?.enemies?.[0]?.beats ?? [];
+    const own = beats[0]?.pattern && wildBeatPattern(beats[0].pattern);
+    if (own) return beats.find((beat) => beat.turn === own.strong) ?? beats[0];
     const turn = { introFixed: 1, threeBeat: 2, tide: 3 }[pattern];
     return beats.find((beat) => beat.turn === turn) ?? (pattern === "bossScript" ? beats.filter((beat) => TYPE[beat.type] && beat.power > 1).sort((a, b) => b.power - a.power || a.turn - b.turn)[0] : void 0);
   }
@@ -21073,13 +21194,16 @@ const BattleRuntime = {
       const visitor = door.event?.requires?.present?.[0];
       const art = enemy && sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: "map-door-shadow" }) || visitor && sprite2(visitor) || icon2(door.relic || (door.type === "wild" ? "battle" : door.type));
       const label = doorDecision(run, door, tempoViews[index]);
-      return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + door.type + '" data-coach="door" aria-label="' + esc((TERMS[door.type]?.short ?? door.name) + " \xB7 " + label) + '" style="--door-x:' + x + ";--door-y:" + y + '"><span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span><span class="map-door-emblem">' + art + '</span></span><small class="map-door-line">' + esc(label) + "</small></button>";
+      const relic = door.relicReward && artifacts.get(door.relic);
+      const name = [relic ? "\uC704\uD5D8\uD55C \uBB38" : TERMS[door.type]?.short ?? door.name, label, relic?.name].filter(Boolean).join(" \xB7 ");
+      return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + door.type + '" data-coach="door" aria-label="' + esc(name) + '" style="--door-x:' + x + ";--door-y:" + y + '"><span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span><span class="map-door-emblem">' + art + '</span></span><small class="map-door-line' + (relic ? " map-door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 16) + esc(relic.name) : esc(label)) + "</small></button>";
     }).join("");
     const doors = run.doors.map((door) => {
       const enemy = door.enemies[0];
       const isShowdown = run.doors.length === 1 && !!enemy;
       const opponent = enemy?.source ? card(enemy.source).name : enemy?.name;
-      const title2 = TERMS[door.type]?.short ?? door.name;
+      const relic = door.relicReward && artifacts.get(door.relic);
+      const title2 = relic ? "\uC704\uD5D8\uD55C \uBB38" : TERMS[door.type]?.short ?? door.name;
       const info = [
         isShowdown && opponent ? confront(opponent) : enemy?.name,
         door.enemies.length > 1 ? "\uC801 " + door.enemies.length + "\uBA85\uC774 \uCC28\uB840\uB85C \uB4F1\uC7A5" : ""
@@ -21089,7 +21213,7 @@ const BattleRuntime = {
       const gain = reward(door);
       const quirk = run.features?.quirks !== false && door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
       const chips = quirk + (run.features?.affixes === false ? "" : door.enemies.map(affixChips).join(""));
-      return '<div class="door-plate win" data-kind="' + door.type + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      return '<div class="door-plate win" data-kind="' + door.type + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward' + (relic ? " door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 20) : "") + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final && !relic ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
     const front = defaultParty(run);
     const lineup = (party) => party.map((id, index) => {
@@ -21704,9 +21828,15 @@ const BattleRuntime = {
     if (!inline) ui.playMusic();
     const { card, cardRow } = ui.widgets;
     const { sfx } = ui.audio;
-    const { candidates, relic } = run.pending;
-    const artifact = ui.artifacts.get(relic);
-    node.innerHTML = (inline ? "<h4>\uBB38\uC9C0\uAE30 \uBCF4\uC0C1</h4>" : head(run, "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1", run.floor + "\uCE35")) + '<div class="' + (inline ? "decision-body" : "scroll") + '"><p class="lead">\uBB38\uC9C0\uAE30\uC804\uC5D0\uC11C \uC774\uAE34 \uADF8\uB9BC\uC790 1\uBA85\uC744 \uB370\uB824\uC624\uAC70\uB098 \uC720\uBB3C\uC744 \uC7A5\uCC29\uD558\uC138\uC694.</p><div class="cards">' + candidates.map((id) => cardRow(run, id, { tag: TERMS.join.firstUse, offer: true })).join("") + (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + relicIcon(relic, 32) + "<span><b>" + esc(artifact.name) + "</b><small>" + esc(relicEffect(artifact)) + "</small></span></button>" : "") + '</div></div><div class="footer"><button class="btn" id="b-leave">\uB450\uACE0 \uAC00\uAE30</button><button class="btn go" id="b-gate-take" disabled>\uBCF4\uC0C1 \uC120\uD0DD</button></div>';
+    const { candidates, relic, partner } = run.pending;
+    const lead = partner ? "\uBCF4\uC0C1\uC740 \uD558\uB098\uB9CC \uACE0\uB97C \uC218 \uC788\uC2B5\uB2C8\uB2E4." : "\uBB38\uC9C0\uAE30\uC804\uC5D0\uC11C \uC774\uAE34 \uADF8\uB9BC\uC790 1\uBA85\uC744 \uB370\uB824\uC624\uAC70\uB098 \uC720\uBB3C\uC744 \uC7A5\uCC29\uD558\uC138\uC694.";
+    const relicChoice = (id, combo) => {
+      const artifact = ui.artifacts.get(id);
+      if (!artifact) return "";
+      const hint = combo ? ui.artifacts.get(combo.held).name + " \uC870\uD569 \xB7 " + combo.hint : "";
+      return '<button class="win run-relic-choice" data-relic="' + esc(id) + '">' + relicIcon(id, 32) + "<span><b>" + esc(artifact.name) + "</b><small>" + esc(relicEffect(artifact)) + "</small>" + (hint ? '<small class="relic-combo-hint"><strong>' + esc(hint) + "</strong></small>" : "") + "</span></button>";
+    };
+    node.innerHTML = (inline ? "<h4>\uBB38\uC9C0\uAE30 \uBCF4\uC0C1</h4>" : head(run, "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1", run.floor + "\uCE35")) + '<div class="' + (inline ? "decision-body" : "scroll") + '"><p class="lead">' + lead + '</p><div class="cards">' + candidates.map((id) => cardRow(run, id, { tag: TERMS.join.firstUse, offer: true })).join("") + relicChoice(relic) + relicChoice(partner?.id, partner) + '</div></div><div class="footer"><button class="btn" id="b-leave">\uB450\uACE0 \uAC00\uAE30</button><button class="btn go" id="b-gate-take" disabled>\uBCF4\uC0C1 \uC120\uD0DD</button></div>';
     if (!inline) show("pick");
     let choice;
     const take = $("#b-gate-take", node);
@@ -21717,7 +21847,7 @@ const BattleRuntime = {
       sfx.tap();
       for (const other of rows) other.classList.toggle("sel", other === row);
       take.disabled = false;
-      take.textContent = choice.kind === "join" ? card(id).name + " \xB7 " + TERMS.join.short : run.relics.length === RELIC_LIMIT ? "\uAD50\uCCB4\uD560 \uC720\uBB3C \uACE0\uB974\uAE30" : artifact.name + " \uBC1B\uAE30";
+      take.textContent = choice.kind === "join" ? card(id).name + " \xB7 " + TERMS.join.short : run.relics.length === RELIC_LIMIT ? "\uAD50\uCCB4\uD560 \uC720\uBB3C \uACE0\uB974\uAE30" : ui.artifacts.get(id).name + " \uBC1B\uAE30";
     });
     function apply(selected) {
       if (!selected) return;
@@ -21806,7 +21936,7 @@ const BattleRuntime = {
   function mount(frame, shared) {
     const core2 = window.RelayCore;
     const assets2 = window.RELAY_ASSETS;
-    const roster2 = create2(core2, assets2);
+    const roster2 = create(core2, assets2);
     const stage2 = shared?.stage || createStage(assets2);
     const audio2 = shared?.audio || createAudio(stage2.clock);
     const widgets2 = createWidgets(assets2, roster2.card);
@@ -24797,7 +24927,7 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
   // card_pixel/game/src/main.js
   var { RelayCore: core, RELAY_ASSETS: assets } = window;
   window.__relayCoreTimer = scheduleTimer;
-  var roster = create2(core, assets);
+  var roster = create(core, assets);
   var stage = createStage(assets);
   var audio = createAudio(stage.clock);
   var widgets = createWidgets(assets, roster.card);

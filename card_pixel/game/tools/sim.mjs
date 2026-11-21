@@ -7,12 +7,14 @@
 // Use --entry-audit for the Ember route's battle entry and settlement commands.
 // Use --easy-audit for 32 paired first departures in each early dungeon.
 // Use --entry-easy-audit for the same seeds with a fresh profile and the first-departure rules.
+// Use --relic-audit for paired before/after runs on both floor-2 paths.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { CONTRACTS } from '../src/content/contracts.js';
 import { DUNGEONS } from '../src/content/dungeons.js';
+import { RELIC_COMBOS } from '../src/content/relics.js';
 import { ROSTER_LIMIT, TEMPO_VERSION, usesTempo } from '../src/content/tempo.js';
 import * as Bridge from '../src/engine/bridge.js';
 import * as Daily from '../src/engine/daily-rift.js';
@@ -203,7 +205,7 @@ function chooseDoor(run, naive) {
   return run.doors[0];
 }
 
-function resolveChoices(run, naive) {
+function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
   while (run.pending) {
     const pending = run.pending;
     if (pending.kind === 'start') {
@@ -212,7 +214,10 @@ function resolveChoices(run, naive) {
     }
     else if (pending.kind === 'gate') {
       const id = naive ? pending.candidates[0] : strongest(pending.candidates)[0];
-      if (id && (!pending.relic || (!naive && (run.bench.length < 4 || run.seed % 2)))) {
+      const partner = pending.partner?.id;
+      if (partner && (!id || (run.bench.length >= 4 && run.seed % 3 !== 0))) {
+        checked(R.chooseGateReward(run, { kind: 'relic', id: partner }));
+      } else if (id && (!pending.relic || (!naive && (run.bench.length < 4 || run.seed % 2)))) {
         const replaceId = usesTempo(run) && run.bench.length === ROSTER_LIMIT ? weakestReserve(run) : null;
         if (replaceId && naive) break;
         checked(R.chooseGateReward(run, { kind: 'join', id, replaceId }));
@@ -232,12 +237,16 @@ function resolveChoices(run, naive) {
       }
       checked(R.altarKeep(run));
     } else if (pending.kind === 'event') {
-      const choice = pending.choices.find(entry => entry.enabled && !entry.ops.some(op => op.type === 'release')
+      const buy = relicAudit && pending.choices.find(entry => entry.enabled && entry.ops.some(permanentRelic));
+      const choice = buy || pending.choices.find(entry => entry.enabled && !entry.ops.some(op => op.type === 'release')
         && (!usesTempo(run) || !entry.ops.some(op => op.type === 'join' && run.bench.length + (op.ids?.length ?? 1) > ROSTER_LIMIT)));
       if (!choice) break;
       checked(R.chooseEvent(run, choice.id, choice.targets ? strongest(choice.targets)[0] : undefined));
     } else if (pending.kind === 'relic') {
-      checked(R.equipRelic(run, pending.id, pending.replace[0]));
+      onRelicReplacement?.(run);
+      const replace = relicAudit ? pending.replace.find(id => !RELIC_COMBOS.some(({ ids }) =>
+        ids.includes(id) && ids.every(half => run.relics.includes(half) || half === pending.id))) : pending.replace[0];
+      checked(R.equipRelic(run, pending.id, replace ?? pending.replace[0]));
     } else {
       throw new Error('Unexpected pending choice: ' + pending.kind);
     }
@@ -251,15 +260,19 @@ function weakestReserve(run) {
 
 export function playRun(dungeonId, seed, {
   profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, doorOverride, serviceOverride,
-  firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty
+  firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty, relicDoors = false,
+  relicAudit = false, onRelicReplacement
 } = {}) {
   const profileView = profile ? Meta.startView(profile, dungeonId) : { bossOrder: firstMain };
+  if (relicDoors) profileView.features = { ...profileView.features, relicDoors: true };
+  else if (profileView.features) delete profileView.features.relicDoors;
   const intro = DUNGEONS[dungeonId].layout === 'intro';
   const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : selectedDifficulty,
     contract: intro ? null : contract, seed, profileView, tempoVersion, lessonVersion, plain: flag('--plain') });
   if (legacyDraws) delete run.drawRuleVersion;
   let heirloomsGained = 0;
-  resolveChoices(run, naive);
+  const rewards = { relicAudit, onRelicReplacement };
+  resolveChoices(run, naive, rewards);
   while (run.phase !== 'done') {
     const door = doorOverride?.(run) ?? chooseDoor(run, naive);
     if (!door.enemies.length) checked(R.chooseDoor(run, door.index));
@@ -286,7 +299,7 @@ export function playRun(dungeonId, seed, {
     } else if (door.type === 'treasure') {
       checked(R.takeTreasure(run));
     }
-    resolveChoices(run, naive);
+    resolveChoices(run, naive, rewards);
     if (run.phase === 'result') checked(R.confirmResult(run));
     onRoom?.(run);
     if (run.phase !== 'done') {
@@ -417,6 +430,74 @@ function measureContracts() {
 
 const ROOM_LABELS = ['B1', 'B2 safe', 'B2 risk', 'B3', 'B4 gate', 'B5 finale', 'B6 wild', 'B6 elite', 'B8 boss', 'Normal battles'];
 const percent = (part, whole) => whole ? `${(100 * part / whole).toFixed(1)}%` : '—';
+const permanentRelic = op => op.type === 'relic' && !op.temporary;
+
+function relicSample(dungeonId, seed, difficulty, relicDoors, risk) {
+  let bossRelics = null;
+  let completed = false;
+  let replacements = 0;
+  let survivedFloor2 = null;
+  const observeEquipped = run => { completed ||= RELIC_COMBOS.some(({ ids }) => ids.every(id => run.relics.includes(id))); };
+  const { run, end } = playRun(dungeonId, seed, {
+    difficulty, relicDoors, relicAudit: true,
+    doorOverride(run) {
+      if (run.floor === 2) return run.doors.find(door => Boolean(door.risk) === risk);
+      if (run.floor === 3) return run.doors.find(door => door.event?.choices.some(choice =>
+        (choice.cost ?? 0) <= run.crystals && choice.ops.some(permanentRelic)));
+      if (run.floor === run.floors) bossRelics = run.relics.length;
+    },
+    onBattle(run, state, summary, result) {
+      if (run.floor === 2) survivedFloor2 = result.survivors.length;
+      observeEquipped(run);
+    },
+    onRoom: observeEquipped,
+    onRelicReplacement(run) {
+      replacements++;
+      observeEquipped(run);
+    }
+  });
+  return { completed, bossRelics, replacements, survivedFloor2, recruits: end.recruitable.length, win: end.result === 'win',
+    exposed: RELIC_COMBOS.some(({ ids }) => ids.some(id => run.seenRelics.includes(id))) };
+}
+
+function measureRelics() {
+  const regions = flag('--all') ? Object.keys(DUNGEONS).filter(id => DUNGEONS[id].layout === 'expedition')
+    : argValue('--dungeon') ? dungeons : ['ember_volcano', 'twilight_cathedral'];
+  if (regions.some(id => DUNGEONS[id].layout !== 'expedition') || contract !== null) throw new RangeError('Relic audit uses expedition routes without contracts');
+  const seeds = Array.from({ length: runs }, (_, index) => seedOffset + 1000003 + 7919 * (index + 1));
+  const total = (samples, key) => samples.reduce((sum, sample) => sum + Number(sample[key]), 0);
+  const rate = (n, d) => `${n}/${d} · ${percent(n, d)}`;
+  const mean = (sum, count) => count ? (sum / count).toFixed(2) : '—';
+  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · seeds ${seedOffset + 1000003} + 7919 × i, i = 1…${runs} per dungeon`);
+  console.log('Mixed route takes risk when seed bit 2 is set, independently of the gate and elite route policies.');
+  console.log('At the gate, keep recruiting if the roster is small, otherwise consider the partner on two of three seeds.');
+  const routeRows = [];
+  console.log('| Difficulty | Relic doors | Combo / saw a half | Relics at boss | Fifth-relic offers | Clear |');
+  console.log('| --- | --- | ---: | ---: | ---: | ---: |');
+  for (const difficulty of ['normal', 'easy']) {
+    for (const enabled of [false, true]) {
+      const routes = { safe: [], risk: [] };
+      const mixed = regions.flatMap(id => seeds.map(seed => {
+        const safe = relicSample(id, seed, difficulty, enabled, false);
+        const risk = relicSample(id, seed, difficulty, enabled, true);
+        routes.safe.push(safe);
+        routes.risk.push(risk);
+        return seed & 4 ? risk : safe;
+      }));
+      const bosses = mixed.filter(sample => sample.bossRelics !== null);
+      const combo = rate(total(mixed, 'completed'), total(mixed, 'exposed'));
+      const phase = enabled ? 'after' : 'before';
+      console.log(`| ${difficulty} | ${phase} | ${combo} | ${mean(total(bosses, 'bossRelics'), bosses.length)} (${bosses.length}) | ${total(mixed, 'replacements')} | ${rate(total(mixed, 'win'), mixed.length)} |`);
+      for (const [path, samples] of Object.entries(routes)) {
+        const fought = samples.filter(sample => sample.survivedFloor2 !== null);
+        routeRows.push(`| ${difficulty} | ${phase} | ${path} | ${mean(total(fought, 'survivedFloor2'), fought.length)} (${fought.length}) | ${mean(total(samples, 'recruits'), samples.length)} | ${rate(total(samples, 'win'), samples.length)} |`);
+      }
+    }
+  }
+  console.log('\n| Difficulty | Relic doors | Paired path | B2 battle survivors | Eligible recruits per start | Clear |');
+  console.log('| --- | --- | --- | ---: | ---: | ---: |');
+  console.log(routeRows.join('\n'));
+}
 
 function measureFirstMain() {
   console.log(`tempo ${tempoVersion} · first main · ${runs} seeds per dungeon · careless, default formation`);
@@ -595,6 +676,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   else if (flag('--entry-audit')) measureEntry();
   else if (flag('--easy-audit')) measureEasy();
   else if (flag('--entry-easy-audit')) measureEasy(true);
+  else if (flag('--relic-audit')) measureRelics();
   else if (dailyFrom !== undefined) measureDaily();
   else if (flag('--first-main')) {
     if (difficulty !== 'normal') throw new RangeError('First main audit uses normal difficulty');

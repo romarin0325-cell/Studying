@@ -26,7 +26,8 @@ import { AFFIXES } from '../content/affixes.js';
 import { BOSSES } from '../content/bosses.js';
 import { QUIRKS } from '../content/quirks.js';
 import { REGIONS } from '../content/regions.js';
-import { BOSS_PREVIEW_TURNS, STRONG_BEAT, THREE_BEAT, TIDE_BEATS, TIDE_STRONG_BEAT } from '../content/tempo.js';
+import { BOSS_PREVIEW_TURNS, STRONG_BEAT, THREE_BEAT, TIDE_BEATS, TIDE_STRONG_BEAT, wildBeatPattern } from '../content/tempo.js';
+import { WILD_PATTERNS } from './roster.js';
 
 export { QUIRKS } from '../content/quirks.js';
 export { AFFIXES } from '../content/affixes.js';
@@ -72,14 +73,17 @@ export function affixView(id, enemy) {
   return { id, name: AFFIXES[id].name, active: true, text: text[id] };
 }
 
+const enemyPattern = (enemy, pattern) => pattern === 'threeBeat' && Object.hasOwn(WILD_PATTERNS, enemy.id)
+  ? WILD_PATTERNS[enemy.id] : pattern;
 function patternActions(enemy, pattern, openingIntent) {
   if (pattern === 'tide') return TIDE_BEATS;
-  if (pattern !== 'threeBeat' && pattern !== 'introFixed') return [];
+  const wild = wildBeatPattern(pattern);
+  if (!wild && pattern !== 'threeBeat' && pattern !== 'introFixed') return [];
   const basic = THREE_BEAT[0];
   const skill = enemy.skills.find(s => isAttack(s) && (!openingIntent || s.type === openingIntent));
   const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic;
   if (pattern === 'introFixed') return openingIntent ? [signature, basic, THREE_BEAT[2]] : [signature];
-  return THREE_BEAT.map(beat => !beat.signature ? beat : skill
+  return (wild?.beats ?? THREE_BEAT).map(beat => !beat.signature ? beat : skill
     ? { ...signature, power: signature.power * beat.power } : basic);
 }
 
@@ -87,10 +91,15 @@ const lessonTideAfter = (lesson, turn) => lesson?.tideAfter && turn === lesson.s
 
 export function enemyBeats(core, enemy, pattern, openingIntent, lesson) {
   if (pattern !== 'bossScript') {
-    return patternActions(enemy, pattern, openingIntent).map(({ name, type, power }, index) => {
+    const selected = enemyPattern(enemy, pattern);
+    const wild = wildBeatPattern(selected);
+    return patternActions(enemy, selected, openingIntent).map(({ name, type, power, vulnerable, isChargeStart }, index) => {
       const turn = index + 1;
       const action = lesson?.steps[index] ?? (pattern === 'tide' ? lessonTideAfter(lesson, turn) : null);
-      return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : { turn, name, type, power };
+      return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : {
+        turn, name, type: isChargeStart ? 'charge' : type, power,
+        ...(wild && { pattern: selected }), ...(wild && vulnerable && { vulnerable })
+      };
     });
   }
   const decide = coreHooks.get(core)?.decide ?? core.Logic.decideEnemyAction;
@@ -493,7 +502,9 @@ export function create(core, opts) {
   function setupEnemy(enemy) {
     const def = queue[B.enemyIdx] || {};
     enemy.affixes = (def.affixes || []).slice();
-    enemy.relayBeats = patternActions(enemy, pattern, opts.openingIntent);
+    const selected = enemyPattern(def, pattern);
+    enemy.relayPattern = inTide() && wildBeatPattern(selected) ? 'tide' : selected;
+    enemy.relayBeats = patternActions(enemy, enemy.relayPattern, opts.openingIntent);
     const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk, opts.enemyAttackScale);
     Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
     if (hasAffix(enemy, 'tough')) enemy.buffs.damage_half = 3;
@@ -678,7 +689,8 @@ export function create(core, opts) {
   B.onEndEnemyTurn = function (go) {
     const enemy = host.battle.enemy;
     finishEnemyAction();
-    if (lessonStep(localTurn(enemy))?.rule === 'charged_hit') enemy.isCharging = false;
+    const turn = localTurn(enemy);
+    if (lessonStep(turn)?.rule === 'charged_hit' || wildBeat(enemy, turn)?.chargeReset) enemy.isCharging = false;
     applyDefenseProtocol(enemy);
     if (hasAffix(enemy, 'leech') && enemy.hp > 0) {           // H leech: heal half of what it dealt this turn
       const dealt = B.turnStartHp - players().reduce((n, p) => n + Math.max(0, p.hp), 0);
@@ -733,10 +745,10 @@ export function create(core, opts) {
   B.onCalc = function (source, target, skill, lines, result) {
     const b = host.battle;
     const cause = B.ctx.at(-1);
-    const vulnerable = target === b.enemy && tideVulnerability(target);
-    if (vulnerable && result.dmg > 0) {
-      result.dmg = tideDamage(result.dmg, vulnerable);
-      lines.push(`${REGIONS.tide_cycle.opening}: 받는 피해 ${vulnerable}배`);
+    const opening = target === b.enemy && enemyOpening(target);
+    if (opening && result.dmg > 0) {
+      result.dmg = openingDamage(result.dmg, opening);
+      lines.push(`${opening.name}: 받는 피해 ${opening.vulnerable}배`);
     }
     if (target === b.enemy) result.dmg = lessonGuardDamage(target, result.dmg, b.turn);
     if (target === b.enemy && cause?.source === source && isAlly(source)) {
@@ -775,15 +787,29 @@ export function create(core, opts) {
   function tideVulnerability(enemy) {
     if (!inTide()) return 0;
     const turn = localTurn(enemy);
-    if (pattern === 'tide') return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
+    if (enemy.relayPattern === 'tide') return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
     return turn > 0 && turn % 4 === 0 ? 1.5 : 0;
   }
-  const tideDamage = (damage, vulnerable) => vulnerable ? Math.floor(damage * vulnerable) : damage;
+  function wildBeat(enemy, turn) {
+    return wildBeatPattern(enemy.relayPattern) && enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
+  }
+  function enemyOpening(enemy) {
+    const tide = tideVulnerability(enemy);
+    if (tide) return { name: REGIONS.tide_cycle.opening, vulnerable: tide };
+    const turn = localTurn(enemy);
+    const beat = wildBeat(enemy, turn);
+    return beat?.vulnerable && !lessonAction(turn, enemy.isCharging) ? beat : null;
+  }
+  const openingDamage = (damage, opening) => opening ? Math.floor(damage * opening.vulnerable) : damage;
   function teachesLesson() {
     return !!lesson && B.enemyIdx <= lesson.maxUsesPerRoom && (B.lessonOwner === null || B.lessonOwner === B.enemyIdx);
   }
   function lessonStep(turn) {
     return teachesLesson() ? lesson.steps[turn - 1] : null;
+  }
+  function lessonAction(turn, charging) {
+    const step = lessonStep(turn);
+    return step && (step.rule !== 'charged_hit' || charging) ? step : null;
   }
   function tideRipple(turn) {
     return inTide() && teachesLesson() ? lessonTideAfter(lesson, turn) : null;
@@ -879,13 +905,13 @@ export function create(core, opts) {
   }
   function decide(enemy) {
     const turn = localTurn(enemy);
-    const step = lessonStep(turn);
-    if (step && (step.rule !== 'charged_hit' || enemy.isCharging)) return step;
+    const step = lessonAction(turn, enemy.isCharging);
+    if (step) return step;
     const ripple = tideRipple(turn);
     if (ripple) return ripple;
     if (enemy.relayBeats.length && (pattern !== 'introFixed' || opts.openingIntent)) {
       const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
-      const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
+      const strong = wildBeatPattern(enemy.relayPattern)?.strong ?? (enemy.relayPattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT);
       return { ...beat, val: beat.power, strong: pattern !== 'introFixed' && (turn - 1) % enemy.relayBeats.length === strong - 1 };
     }
     const vulnerable = tideVulnerability(enemy);
@@ -949,6 +975,7 @@ export function create(core, opts) {
     const a = cache.action;
     const { attack, stunned, range, conditions, preventedBy, resourceEffect } = enemyResponse(cache, target, mayHitEnemy);
     const kind = stunned ? 'stun' : a.isChargeStart ? 'charge' : a.type;
+    const wildOpening = wildBeatPattern(enemy.relayPattern) && enemyOpening(enemy);
     const salience = stunned ? 'ordinary' : actionSalience(a);
     const extra = (a.effects || []).map(e => e.type).filter(t => t !== 'random_mult');
     const lethal = attack && range[1] >= target.hp;
@@ -962,12 +989,14 @@ export function create(core, opts) {
       ...(a.bonus && { bonus: a.bonus, stat: a.stat }),
       ...(a.reduction && { reduction: a.reduction }),
       ...(a.vulnerable && { vulnerable: a.vulnerable }),
+      ...(wildOpening && { vulnerable: wildOpening.vulnerable, wildOpening: true }),
       type: kind, ult: salience === 'boss', ...(attack && { power: a.val ?? 1, dmg: range, lethal, lethalText, extra }),
       ...(!attack && extra.length && { effects: extra })
     };
   }
   function nextDistinct(action, local) {
     const enemy = host.battle.enemy;
+    if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action);
     if (action.isChargeStart) {
       const next = lessonStep(local + 1) ?? enemy.skills.find(skill => skill.name === (action.chargeSkillId ?? '디바인블레이드'));
       if (next) return { inTurns: 1, name: next.name, kind: next.type, power: next.val };
@@ -990,14 +1019,25 @@ export function create(core, opts) {
     const next = countdown(true);
     return next && next.name !== action.name ? next : null;
   }
+  function nextWildAction(enemy, local, current) {
+    const charging = !enemy.buffs.stun && current?.isChargeStart || enemy.isCharging && !current?.chargeReset;
+    const next = lessonAction(local + 1, charging) ?? wildBeat(enemy, local + 1);
+    return { name: next.name, kind: next.isChargeStart ? 'charge' : next.type,
+      power: next.power ?? next.val, inTurns: 1, ...(next.vulnerable && { vulnerable: next.vulnerable }) };
+  }
   function countdown(futureOnly = false) {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
+    if (wildBeatPattern(enemy.relayPattern)) {
+      const next = nextWildAction(enemy, local, B.intentCache?.action);
+      return { ...next, charge: next.kind === 'charge' };
+    }
     if (pattern === 'threeBeat' || pattern === 'tide') {
-      const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
+      const tide = enemy.relayPattern === 'tide';
+      const strong = tide ? TIDE_STRONG_BEAT : STRONG_BEAT;
       const period = enemy.relayBeats.length;
       let inTurns = (strong - local % period + period) % period;
       if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
-      return pattern === 'tide' ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns)
+      return tide ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns)
         : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
     }
     if (inTide()) {
@@ -1159,8 +1199,7 @@ export function create(core, opts) {
       };
       const result = original.calc.call(Logic, player, enemy, attack, b.fieldBuffs, b.activeTraits, null,
         host.state.mode, host.state.deck, b.turn, host.state.artifacts);
-      const tideHit = tideDamage(result.dmg, tideVulnerability(enemy));
-      const hit = lessonGuardDamage(enemy, tideHit, b.turn);
+      const hit = lessonGuardDamage(enemy, openingDamage(result.dmg, enemyOpening(enemy)), b.turn);
       return { hit, total: hit * (hits + Number(chargedSkill(skill))), forcedCrit: !!result.isCrit };
     };
     active = B; B.probing = true;

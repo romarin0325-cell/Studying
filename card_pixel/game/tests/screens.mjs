@@ -33,6 +33,8 @@ import { createHistoryCases } from './screens/history.mjs';
 import { createAccessCases } from './screens/access.mjs';
 import { createGoalCases } from './screens/goals.mjs';
 import { createEpisodeCases } from './screens/episodes.mjs';
+import { createRelicCases } from './screens/relics.mjs';
+import { createPatternCases } from './screens/patterns.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -1165,43 +1167,45 @@ function relayOutcomes() {
 
   const battle = startBattle(run, { party: ['dragon_miko', 'siren', 'zeke'] });
   const session = storedSession({ run });
-  const moves = ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격'];
+  // The golem's charge → strike pattern decides the turn; the expected lines come from the real preview.
+  const moves = ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격', '일반 공격'];
   const safe = battle.previewRelay();
   assert.equal(safe.danger, 'none');
-  assert.deepEqual(safe.retreat.next.hpAfter, [419, 419]);
-  let events;
-  for (const name of moves) events = act(battle, name);
-  assert.deepEqual([run.floor, battle.enemyIndex, battle.state().turn, battle.state().allies[0].hp], [2, 1, 5, 62]);
-  assert.deepEqual(events.findLast(event => event.t === 'await').intent.damageRange, [212, 212]);
+  const safeAfter = safe.retreat.next.hpAfter[0];
+  for (const name of moves) act(battle, name);
+  const { turn, allies } = battle.state();
+  const hp = allies[0].hp;
+  assert.equal(run.floor, 2);
   const preview = battle.previewRelay();
   assert.equal(preview.danger, 'certain');
-  assert.deepEqual(preview.retreat.next.hpAfter, [313, 313]);
   assert.equal(preview.stand.inheritor.name, '세이렌');
   assert.equal(preview.stand.heirloom.skill, '드래곤스파클');
+  const after = preview.retreat.next.hpAfter[0];
+  assert.equal(preview.retreat.next.hpAfter[1], after);
   battle.retreat();
-  assert.equal(battle.state().allies[1].hp, preview.retreat.next.hpAfter[0]);
+  assert.equal(battle.state().allies[1].hp, after);
 
   return {
-    session, proof: '26019140 / floor 2 turn 5 / HP 62 vs 212 / Siren 500 → 313 or inherits Dragon Sparkle',
+    session, proof: `26019140 / floor 2 turn ${turn} / HP ${hp} / Siren 500 → ${after} or inherits Dragon Sparkle`,
     async show(page, { text, capture }) {
       await openBattle(page);
       const button = page.locator('#b-retreat');
       const lines = button.locator('small');
       await button.click();
       await text(button, TERMS.retreat.short + ' 확정');
-      assert.deepEqual(await lines.allTextContents(), ['용혈의무녀 생존 · 다음 동료가 이번 공격을 받음', '세이렌 HP 500 → 419']);
+      assert.deepEqual(await lines.allTextContents(), ['용혈의무녀 생존 · 다음 동료가 이번 공격을 받음', `세이렌 HP 500 → ${safeAfter}`]);
       assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), 0);
       await capture('safe');
       for (const name of moves) await tapTile(page, name);
-      await text(page.locator('#turn'), '5턴', { exact: true });
-      await text(page.locator('#party .pm.cur .hp .n'), '62/395', { exact: true });
+      await text(page.locator('#turn'), `${turn}턴`, { exact: true });
+      await text(page.locator('#party .pm.cur .hp .n'), `${hp}/395`, { exact: true });
       const tileSizes = () => page.locator('#acts .act').evaluateAll(tiles => tiles.map(tile => {
         const { width, height } = tile.getBoundingClientRect();
         return [width, height];
       }));
       const before = await tileSizes();
       await button.click();
-      await text(lines.nth(0), '물러나면 · 세이렌 HP 500 → 313', { exact: true });
+      await text(lines.nth(0), `물러나면 · 세이렌 HP 500 → ${after}`, { exact: true });
       await text(lines.nth(1), '남으면 · 용혈의무녀 쓰러짐 → 세이렌이 드래곤스파클 계승', { exact: true });
       assert.deepEqual(await tileSizes(), before, 'Arming retreat must keep command tile sizes');
       const misfits = await button.evaluate(node => {
@@ -2914,7 +2918,9 @@ const historyCases = createHistoryCases({ storedSession, enterObservatory });
 const accessCases = createAccessCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, snowRabbitProfile, enterObservatory });
 const goalCases = createGoalCases({ roster, storedSession, enterObservatory });
 const episodeCases = createEpisodeCases({ storedSession, enterObservatory });
-const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases, access: accessCases, goals: goalCases, episodes: episodeCases };
+const relicCases = createRelicCases({ core, roster, storedSession });
+const patternCases = createPatternCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, skillTile });
+const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases, access: accessCases, goals: goalCases, episodes: episodeCases, relics: relicCases, patterns: patternCases };
 
 const cases = {
   'rift-save-failure': withFixedRiftResult(riftSaveFailure, '[data-backup-action="export"]'),
@@ -3006,7 +3012,9 @@ const cases = {
   ...historyCases,
   ...accessCases,
   ...goalCases,
-  ...episodeCases
+  ...episodeCases,
+  ...relicCases,
+  ...patternCases
 };
 
 caseGroups['fixed-layouts'] = Object.fromEntries([

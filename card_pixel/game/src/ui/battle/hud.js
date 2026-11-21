@@ -44,14 +44,18 @@ export function intentLines(intent, countdown, hp, buffNames = {}) {
   const block = resourceEffect?.preventedBy ?? intent.preventedBy;
   const name = (kind === 'charge' ? intent.name?.replace(/ 차징$/, ' 충전') : intent.name) || INTENT_TYPE[kind];
   const blocked = kind !== 'stun' && BLOCKED_BY[block] ? BLOCKED_BY[block] + '로 차단' : '';
-  const current = ['내 행동 뒤', [name, modifier && !name?.includes(modifier) ? modifier : ''].filter(Boolean).join(' · '),
-    blocked ? [attack ? damage : '', blocked].filter(Boolean).join(' / ') : [damage, resource].filter(Boolean).join(' / '), falls].filter(Boolean).join(' · ');
+  const current = intent.wildOpening && kind === 'rest'
+    ? [name, '적 휴식', modifier].join(' · ')
+    : ['내 행동 뒤', [name, modifier && !name?.includes(modifier) ? modifier : ''].filter(Boolean).join(' · '),
+      intent.wildOpening && kind === 'stun' ? '받는 피해 ×' + formatMultiplier(vulnerable) : '',
+      blocked ? [attack ? damage : '', blocked].filter(Boolean).join(' / ') : [damage, resource].filter(Boolean).join(' / '), falls].filter(Boolean).join(' · ');
   const next = Object.hasOwn(intent, 'nextDistinct') ? intent.nextDistinct : countdown && { ...countdown,
     inTurns: (countdown.inTurns ?? 0) + (countdown.charge ? 1 : 0) };
   const sameName = next?.name === intent.name && kind !== 'charge';
   const future = next?.name && next.inTurns > 0 && !sameName ?
     (next.inTurns === 1 ? '다음 턴 ' : next.inTurns + '턴 뒤 ') + [next.name, next.alt].filter(Boolean).join(' 또는 ') +
-    (TYPE[next.kind] ? ' · ' + TYPE[next.kind] + (next.power ? ' ×' + formatMultiplier(next.power) : '') : '') : '';
+    (TYPE[next.kind] ? ' · ' + TYPE[next.kind] + (next.power ? ' ×' + formatMultiplier(next.power) : '') : '') +
+    (next.vulnerable ? ' · 받는 피해 ×' + formatMultiplier(next.vulnerable) : '') : '';
   return [current, future];
 }
 

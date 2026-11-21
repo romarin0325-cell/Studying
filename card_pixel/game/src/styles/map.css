@@ -176,6 +176,12 @@
   transform: translateX(-50%);
   --pf-lo: var(--line2); --pf-sh: rgba(20, 14, 60, .35); }
 
+#map .map-door-relic, #map .door-entry .door-relic {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 #map .map-door[data-map-door="1"]:nth-last-child(2) { left: min(var(--door-x), 100% - 42px); }
 #map .map-door[data-map-door="1"]:nth-last-child(2) .map-door-line {
   left: auto;

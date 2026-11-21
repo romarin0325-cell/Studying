@@ -40,8 +40,27 @@ export const FIRST_MAIN_ASSIST = {
 export const INTRO_MULTIPLIERS = { 3: [0.92, 2.8], 5: [1.12, 4.5] };
 
 const basic = { name: '일반 공격', type: 'phy', power: 1 };
-export const THREE_BEAT = [basic, { signature: true, power: 1.15 }, { name: '약공', type: 'phy', power: 0.55 }];
+const weak = { name: '약공', type: 'phy', power: 0.55 };
+export const THREE_BEAT = [basic, { signature: true, power: 1.15 }, weak];
 export const STRONG_BEAT = 2;
+const WILD_BEAT_PATTERNS = {
+  golemCharge: {
+    strong: 2,
+    beats: [
+      { name: '힘 충전 중', type: 'sup', power: 0, isChargeStart: true, chargeMessage: '골렘이 힘을 모으고 있습니다. (공격 없음)' },
+      { name: '강타', type: 'phy', power: 1.6, chargeReset: true },
+      weak
+    ]
+  },
+  batOpening: {
+    strong: 1,
+    beats: [{ signature: true, power: 1 }, { name: '빈틈', type: 'rest', power: 0, vulnerable: 1.3 }, basic]
+  }
+};
+export function wildBeatPattern(pattern) {
+  return Object.hasOwn(WILD_BEAT_PATTERNS, pattern) ? WILD_BEAT_PATTERNS[pattern] : null;
+}
+
 export const TIDE_BEATS = [
   basic, { name: '잔물결', type: 'phy', power: 0.75 }, { name: '조류의 일격', type: 'mag', power: 2.5 },
   { name: '물러간 조류', type: 'rest', power: 0, vulnerable: 1.5 }
