@@ -241,10 +241,12 @@ export function openBackupSheet({ mode, sheets, store, currentBackup, recovered 
       <button class="btn go" id="meta-backup-confirm">파일 기록으로 복원</button>
     </div>`);
     $('#meta-backup-repick').addEventListener('click', () => choose());
-    $('#meta-backup-confirm').addEventListener('click', () => {
+    $('#meta-backup-confirm').addEventListener('click', event => {
       const restored = store.restoreBackup(data);
-      if (restored.ok) recovered();
-      else $('.meta-backup .meta-feedback').textContent = BACKUP_ERROR[restored.reason] ?? '기록을 복원하지 못했다.';
+      if (restored.ok) {
+        event.currentTarget.disabled = true;
+        recovered();
+      } else $('.meta-backup .meta-feedback').textContent = BACKUP_ERROR[restored.reason] ?? '기록을 복원하지 못했다.';
     });
   }
   choose();

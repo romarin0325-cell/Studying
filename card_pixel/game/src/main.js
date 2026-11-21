@@ -24,7 +24,7 @@ const dailyStore = DailyStore.create?.(storage, { core, roster });
 
 let musicContext;
 let musicPlayer;
-let musicTrack;
+let musicRequest;
 let musicEnabled = true;
 const music = {
   get enabled() { return musicEnabled; },
@@ -33,13 +33,21 @@ const music = {
     musicPlayer?.setEnabled(enabled);
   },
   play(trackId, dungeonId) {
-    musicTrack = [trackId, dungeonId];
-    musicPlayer?.play(trackId, dungeonId);
+    musicRequest = () => musicPlayer?.play(trackId, dungeonId);
+    musicRequest();
+  },
+  playOutcome(trackId, battleKey) {
+    musicRequest = null;
+    return musicPlayer?.playOutcome(trackId, battleKey) ?? 'unavailable';
+  },
+  holdReward(dungeonId) {
+    musicRequest = () => musicPlayer?.holdReward(dungeonId);
+    musicRequest();
   }
 };
 
 const unlockEffects = audio.unlockAudio;
-audio.unlockAudio = function unlockAudio() {
+audio.unlockAudio = function unlockAudio({ skipPendingMusic = false } = {}) {
   unlockEffects();
   if (document.hidden || navigator.userActivation?.hasBeenActive === false) return;
   if (!musicContext) {
@@ -50,7 +58,7 @@ audio.unlockAudio = function unlockAudio() {
     } catch { return; }
     musicPlayer = createMusic({ context: musicContext, destination: musicContext.destination });
     musicPlayer.setEnabled(musicEnabled);
-    if (musicTrack) musicPlayer.play(...musicTrack);
+    if (!skipPendingMusic) musicRequest?.();
   }
   if (musicContext.state !== 'running') musicContext.resume().catch(() => {});
 };
@@ -71,7 +79,7 @@ settings.syncFullscreen();
 $('#frame').addEventListener('click', event => {
   const button = event.target.closest('.meta-screen button, .meta-sheet button, #b-sheetclose');
   if (button && !button.disabled && !button.matches('.b-set, .b-full')) {
-    audio.unlockAudio();
+    audio.unlockAudio({ skipPendingMusic: button.id === 'b-start' });
     audio.sfx.tap();
   }
 }, true);

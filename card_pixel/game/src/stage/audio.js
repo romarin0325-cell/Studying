@@ -41,6 +41,15 @@ export function createAudio(clock) {
     win: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.16, 'square', 0.045, 0, i * 0.1)),
     lose: () => [392, 330, 262, 196].forEach((f, i) => tone(f, 0.26, 'triangle', 0.06, 0, i * 0.22)),
     gem: () => tone(1568, 0.1, 'square', 0.035, 2093),
+    credit: () => tone(1175, 0.065, 'sine', 0.05, 1568),
+    join: () => { tone(440, 0.075, 'triangle', 0.045); tone(660, 0.1, 'triangle', 0.05, 0, 0.075); },
+    stamp: () => { noise(0.04, 0.08); tone(210, 0.095, 'triangle', 0.065, 110); },
+    restored: () => {
+      if (!soundOn || ac?.state !== 'running' || clock.fast) return false;
+      tone(440, 0.045, 'sine', 0.045);
+      tone(554, 0.055, 'sine', 0.045, 0, 0.05);
+      return true;
+    },
     awaken: () => [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, 'square', 0.04, 0, i * 0.07)),
     jackpot: () => [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0.14, 'square', 0.05, 0, i * 0.06)),
     roll: () => tone(880 + Math.random() * 440, 0.04, 'square', 0.025),

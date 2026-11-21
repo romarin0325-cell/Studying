@@ -450,7 +450,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     }
     foe.pose = 'hurt'; foe.white = 0.16; foe.front = 1; S.flash = 0.4; S.shake = 6; sfx.hit(true);
     St.sparks(St.X(foe), CY(foe), 40, ['#3a2f58', '#8b6cff', '#ffffff'], 100);
-    if (e.treasure) { label('보물 발견', foe, 'good', -14); sfx.gem(); }
+    if (e.treasure) label('보물 발견', foe, 'good', -14);
     clock.slow = 0.5; await wait(0.2); clock.slow = 1;
     await tween(foe, { alpha: 0, oy: 6 }, 0.45, 'in');
     St.removeActor(foe); B.foe = null; S.beads.burn = S.beads.divine = 0; S.danger = 0;
@@ -505,10 +505,14 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       '</div>';
   }
 
+  function outcomeCue(track, fallback) {
+    const status = music?.playOutcome(track, B.outcomeKey);
+    if (!status || status === 'unavailable') fallback();
+  }
+
   async function victory() {
-    music?.play('victory');
+    outcomeCue('victory', sfx.win);
     showIntent(null); S.danger = 0; tween(S, { dark: 0 }, 0.2);
-    sfx.win();
     if (B.finishNumber) {
       const living = B.bridge.survivors();
       const survivors = B.party.filter((id, index) => id && living[index]);
@@ -523,13 +527,13 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     }
     const b = St.banner('승리', run.floor + '층 · ' + ROOM_NAMES[B.door.type], 'gold big');
     const fp = foePos();
-    if (B.door.reward) St.gem(fp.x, S.BASE - 30, S.W - 60, 2, 0.65, () => sfx.gem());
+    if (B.door.reward) St.gem(fp.x, S.BASE - 30, S.W - 60, 2, 0.65);
     for (const idx of lineup(B.D)) { const a = B.allies[idx]; tween(a, { oy: -6 }, 0.12).then(() => tween(a, { oy: 0 }, 0.14, 'in')); }
     await wait(1.2); b.remove();
   }
   async function defeat() {
-    music?.play('defeat');
-    showIntent(null); sfx.lose(); tween(S, { dark: 0.6 }, 0.6);
+    outcomeCue('defeat', sfx.lose);
+    showIntent(null); tween(S, { dark: 0.6 }, 0.6);
     const b = St.banner('전멸', '꿈길이 끊겼다', 'ult big');
     await wait(1.4); b.remove();
   }
@@ -649,6 +653,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.lastWarning = null;
     B.blessingViews = new Map();
     B.finalHit = B.finishNumber = B.finisher = B.lastStriker = null;
+    B.outcomeKey = Symbol();
     B.artifacts = options.artifacts;
     B.temporaryRelic = run.nextBattle?.relic;
     B.chargeSpent = false;
@@ -671,11 +676,12 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     if (res) showResult(res, onContinue, onDecision);
   }
 
-  function showResult(res, advance, decision) {
+  function showResult(res, advance, decision, restored = false) {
     const rows = [];
     if (res.wiped) rows.push('<p>마지막 동료가 적과 함께 쓰러졌다. 원정은 여기서 끝난다.</p>');
     const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
-    if (res.win && battleCrystals > 0) rows.push('<p class="gain">결정 +' + battleCrystals + ' · 보유 ' + run.crystals + '</p>');
+    const gainedCrystals = res.win && battleCrystals > 0;
+    if (gainedCrystals) rows.push('<p class="gain">결정 +' + battleCrystals + ' · 보유 ' + run.crystals + '</p>');
     rows.push(...contractSettlement(run.floor, res.contract));
     if (res.fallen?.length) rows.push('<div class="fallen"><small>쓰러진 동료</small><div>' + res.fallen.map(id => '<span class="mini dead">' + face(id, 40) + '<b>' + esc(card(id).name) + '</b></span>').join('') + '</div></div>');
     for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>유품</b> ' + esc(card(g.to).name) + ' ← ' + esc(card(g.from).name) + '의 ' + esc(g.name) + '</p>');
@@ -698,9 +704,16 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       '<button class="btn log-button" id="b-result-log">기록</button></header>' + rows.join('') +
       '<div class="result-decision"></div><button class="btn go" id="b-next">' + esc(label) + '</button>';
     $('#result').classList.add('on');
+    if (!restored && res.ok) {
+      if (gainedCrystals) sfx.credit();
+      if (res.relics?.length || res.relic?.equipped) sfx.gem();
+    }
     $('#b-result-log').addEventListener('click', showLog);
     const next = $('#b-next', box);
-    if (res.win && run.phase === 'reward' && run.room.type !== 'borrowed') decision?.($('.result-decision', box), res, next);
+    if (res.win && run.phase === 'reward' && run.room.type !== 'borrowed') {
+      if (!restored && ['reinforcement', 'gate', 'relic'].includes(run.pending?.kind)) music?.holdReward(run.dungeonId);
+      decision?.($('.result-decision', box), res, next);
+    }
     box.scrollTop = 0;
     next.addEventListener('click', () => {
       sfx.tap(); $('#result').classList.remove('on');
@@ -732,7 +745,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.artifacts = run.relics;
     B.temporaryRelic = null;
     relayHint.hidden = true;
-    music?.play('victory');
+    music?.holdReward(run.dungeonId);
     St.clear();
     St.setRoom(run.room.bg, !!run.room.final);
     $('#battle').classList.remove('opening-decision');
@@ -742,7 +755,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     show('battle');
     layout();
     lockPanel();
-    showResult(result, advance, decision);
+    showResult(result, advance, decision, true);
   }
 
   /** Review hooks for the live page and hidden preview panes. */

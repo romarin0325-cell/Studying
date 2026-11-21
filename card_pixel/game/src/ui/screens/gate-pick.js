@@ -33,14 +33,16 @@ export function gatePickScreen(run, ui, { node = $('#pick'), inline = false, onR
       run.relics.length === RELIC_LIMIT ? '교체할 유물 고르기' : artifact.name + ' 받기';
   });
   function apply(selected) {
-    if (!selected || !ui.command(chooseGateReward, selected).ok) return;
+    if (!selected) return;
+    const result = ui.command(chooseGateReward, selected);
+    if (!result.ok) return;
     if (selected.kind === 'join') {
       sfx.awaken();
       ui.leave();
     } else {
-      sfx.gem();
+      if (result.relic.equipped) sfx.gem();
       if (onRelic) onRelic(selected.id);
-      else treasureScreen(run, ui, selected.id, { equipped: run.relics.includes(selected.id) });
+      else treasureScreen(run, ui, selected.id, { equipped: result.relic.equipped });
     }
   }
   take.addEventListener('click', () => {

@@ -82,9 +82,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
 
   function persist() {
     try {
-      if (store.save({ profile, run }) !== false) return;
+      if (store.save({ profile, run }) !== false) return true;
     } catch { /* The current session remains in memory. */ }
     warnSave();
+    return false;
   }
 
   function warnSave() {
@@ -95,7 +96,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
 
   function updateProfile(next) {
     profile = next;
-    persist();
+    return persist();
   }
 
   function updateUi(patch) {
@@ -172,7 +173,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
           claim(id) {
             const result = Meta.claimMission(profile, period.key, id, roster);
             if (!result?.announce?.ok) return false;
-            updateProfile(result.profile);
+            if (updateProfile(result.profile)) {
+              if (result.announce.recruits.length) audio.sfx.join();
+              else audio.sfx.stamp();
+            }
             sheets.closeSheet();
             renderNotebook();
             sessionNotice(id ? `${roster.card(id).name} · 관측소에 영입` : '임무 완료 도장 획득');
@@ -449,8 +453,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       lastBattleLog: run.lastBattleLog };
     run = null;
     review = null;
-    updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });
-    if (recruits.length) audio.sfx.crit();
+    const saved = updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });
+    if (announce.stamp) {
+      if (saved) audio.sfx.stamp();
+    } else if (recruits.length) audio.sfx.crit();
     if (endingDue()) showEnding(recruits);
     else showHub(recruits);
     return true;
@@ -484,6 +490,11 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     return store.exportBackup(good?.status === 'ok' ? { profile: good.profile, settings } : { settings });
   }
 
+  function reloadAfterRestore() {
+    if (audio.sfx.restored()) setTimeout(() => location.reload(), 110);
+    else location.reload();
+  }
+
   function showRecovery() {
     const good = store.loadLastGood?.();
     const hasGood = good?.status === 'ok';
@@ -498,10 +509,12 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
       <p class="meta-feedback" role="status"></p>
     </div>`;
-    $('#meta-last-good', node)?.addEventListener('click', () => {
+    $('#meta-last-good', node)?.addEventListener('click', event => {
       const result = store.restoreLastGood?.();
-      if (result?.ok) location.reload();
-      else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했다.';
+      if (result?.ok) {
+        event.currentTarget.disabled = true;
+        reloadAfterRestore();
+      } else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했다.';
     });
     $('#meta-recovery-new', node).addEventListener('click', () => {
       if (unavailable) {
@@ -518,7 +531,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
 
   $('#frame').addEventListener('click', event => {
     const mode = event.target.closest('[data-backup-action]')?.dataset.backupAction;
-    if (mode) openBackupSheet({ mode, sheets, store, currentBackup, recovered: () => location.reload() });
+    if (mode) openBackupSheet({ mode, sheets, store, currentBackup, recovered: reloadAfterRestore });
   });
 
   function showTitle(savedProfile, notice) {

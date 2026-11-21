@@ -252,7 +252,6 @@ test('play is idempotent and crossfades on the next bar with independent gains',
   music.play('dawn_forest');
   const queuedCount = context.nodes.length;
   music.play('dawn_forest');
-  music.play('hub');
   assert.equal(context.nodes.length, queuedCount);
   assert.deepEqual(outgoing.gain.events.slice(-2), [['set', 1, bar], ['ramp', 0, bar + 0.8]]);
 
@@ -272,6 +271,29 @@ test('play is idempotent and crossfades on the next bar with independent gains',
   assertReleased();
 });
 
+test('the latest screen request keeps the forest and cancels an already scheduled battle', t => {
+  const { context, music, tick, assertReleased } = setup(t);
+  music.play('dawn_forest');
+  const forest = context.sources[0].bus;
+  const start = context.sources[0].startAt;
+  const bar = 4 * 60 / TRACKS.dawn_forest.bpm;
+  music.play('battle');
+  tick(start + bar - 0.1);
+  const battle = context.sources.filter(source => source.bus !== forest);
+  assert.ok(battle.length);
+
+  music.play('dawn_forest');
+  assert.ok(battle.every(source => source.stopAt < source.startAt && !source.outputs.size));
+  assert.deepEqual(forest.gain.events, [['set', 0, start], ['ramp', 1, start + 0.065]]);
+  tick(start + bar + 0.85);
+  tick(start + 2 * bar - 0.1);
+  assert.ok(context.sources.some(source => source.bus === forest && source.startAt >= start + 2 * bar));
+  assert.deepEqual(context.sources.filter(source => source.bus !== forest), battle);
+  music.stop();
+  tick(start + 2 * bar + 0.1);
+  assertReleased();
+});
+
 test('replacing and stopping queued tracks disconnects notes scheduled in advance', t => {
   const { context, music, tick, assertReleased } = setup(t);
   music.play('arena');
@@ -286,6 +308,73 @@ test('replacing and stopping queued tracks disconnects notes scheduled in advanc
   music.stop();
   tick(bar + 0.15);
   assertReleased();
+});
+
+test('victory and defeat start 35 ms after the outcome and fade combat over 120 ms', t => {
+  const { context, music, tick, assertReleased } = setup(t);
+  for (const id of ['victory', 'defeat']) {
+    const combatIndex = context.sources.length;
+    music.play('battle');
+    const combat = context.sources[combatIndex].bus;
+    const now = context.currentTime + 0.4;
+    tick(now);
+    const battleKey = Symbol();
+    const first = context.sources.length;
+
+    assert.equal(music.playOutcome(id, battleKey), 'scheduled');
+    closeTo(context.sources[first].startAt, now + 0.035);
+    assert.deepEqual(combat.gain.events.slice(-2), [['set', 1, now], ['ramp', 0, now + 0.12]]);
+    const count = context.sources.length;
+    assert.equal(music.playOutcome(id, battleKey), 'alreadyHandled');
+    assert.equal(context.sources.length, count);
+    tick(now + 0.13);
+    assert.equal(combat.outputs.size, 0);
+    music.stop();
+    tick(now + 0.3);
+    assertReleased();
+  }
+
+  const count = context.sources.length;
+  music.setEnabled(false);
+  const muted = Symbol();
+  assert.equal(music.playOutcome('victory', muted), 'unavailable');
+  assert.equal(music.playOutcome('victory', muted), 'alreadyHandled');
+  music.setEnabled(true);
+  context.changeState('suspended');
+  assert.equal(music.playOutcome('defeat', Symbol()), 'unavailable');
+  context.changeState('running');
+  assert.equal(context.sources.length, count);
+  assertReleased();
+});
+
+test('victory can hand off to quiet regional music and a new screen cancels that handoff', t => {
+  const { context, music, tick, assertReleased } = setup(t);
+  for (const leaveEarly of [false, true]) {
+    const first = context.sources.length;
+    music.playOutcome('victory', Symbol());
+    const { startAt: start, bus: victory } = context.sources[first];
+    const end = start + TRACKS.victory.progression.length * TRACKS.victory.beats * 60 / TRACKS.victory.bpm;
+    music.holdReward('dawn_forest');
+    tick(end - 0.1);
+    const reward = context.sources.slice(first).filter(source => source.bus !== victory);
+    assert.ok(reward.length > 0);
+    assert.ok(reward.every(source => source.type === 'triangle' && source.startAt >= end - 1e-8));
+    closeTo(reward[0].startAt, end);
+
+    if (leaveEarly) {
+      music.play('dawn_forest');
+      assert.ok(reward.every(source => source.stopAt < source.startAt && !source.outputs.size));
+      const area = context.sources.slice(first).filter(source => source.bus !== victory && !reward.includes(source));
+      assert.ok(area.some(source => source.type === 'sine'));
+    } else {
+      tick(end + 0.05);
+      assert.equal(victory.outputs.size, 0);
+      assert.ok(reward[0].bus.outputs.size);
+    }
+    music.stop();
+    tick(end + 0.25);
+    assertReleased();
+  }
 });
 
 test('combat keeps the selected dungeon key, sound and meter', t => {

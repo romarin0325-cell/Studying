@@ -104,9 +104,11 @@ export function eventScreen(run, ui, result = null) {
       const outcome = ui.command(chooseEvent, choice.id, target, replaceIds);
       if (!outcome.ok) return;
       ui.sheets.closeSheet();
-      if (outcome.effects.some(effect => effect.type === 'join')) sfx.awaken();
+      const equipped = outcome.effects.some(effect => effect.type === 'relic' && effect.equipped);
+      if (equipped) sfx.gem();
+      else if (outcome.effects.some(effect => effect.type === 'join')) sfx.awaken();
       else sfx.tap();
-      if (run.pending || (run.room.relic && outcome.effects.some(effect => effect.type === 'relic' && effect.equipped))) ui.route();
+      if (run.pending || (run.room.relic && equipped)) ui.route();
       else eventScreen(run, ui, outcome);
     }
     const count = releases(choice);

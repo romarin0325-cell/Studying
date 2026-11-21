@@ -346,6 +346,7 @@ export function createMusic({ context, destination = context.destination }) {
   let current = null;
   let queued = null;
   let wanted = null;
+  let handledOutcome = null;
   let dungeon = 'dawn_forest';
   let enabled = true;
   let volume = 1;
@@ -516,8 +517,14 @@ export function createMusic({ context, destination = context.destination }) {
     bus.gain.setValueAtTime(0, at);
     bus.gain.linearRampToValueAtTime(1, at + fadeIn);
     bus.connect(master);
+    const score = makeScore(request.id, request.dungeon);
+    if (request.reward) {
+      const [pad, bass] = TRACKS[request.id].instruments;
+      score.events = score.events.filter(event => event.part === pad || event.part === bass)
+        .map(event => ({ ...event, strength: event.strength * 0.8 }));
+    }
     const deck = {
-      request, score: makeScore(request.id, request.dungeon), bus, start: at, fadeIn,
+      request, score, bus, start: at, fadeIn,
       cycle: 0, index: 0, voices: new Set(), fade: null, stopping: false
     };
     decks.add(deck);
@@ -535,17 +542,41 @@ export function createMusic({ context, destination = context.destination }) {
 
   function cue(request, now) {
     if (context.state === 'closed') return;
-    if (!current) {
+    if (TRACKS[request.id].once) {
+      for (const deck of decks) {
+        const level = gainAt(deck, now);
+        if (level === 0) releaseDeck(deck, now);
+        else fadeOut(deck, level, now, STOP_FADE);
+      }
+      current = startDeck(request, now + START_AHEAD, 0.065);
+    } else if (!current) {
       current = startDeck(request, now + START_AHEAD, 0.065);
     } else {
       const { start, score } = current;
       const nextBar = Math.max(1, Math.floor((now - start) / score.barDuration) + 1);
-      const bar = score.once ? Math.min(nextBar, score.duration / score.barDuration) : nextBar;
-      const at = start + bar * score.barDuration;
+      let offset = nextBar * score.barDuration;
+      if (score.once) offset = request.reward ? score.duration : Math.min(offset, score.duration);
+      const at = start + offset;
       fadeOut(current, 1, at, CROSSFADE);
       queued = startDeck(request, at, CROSSFADE);
     }
     schedule();
+  }
+
+  function requestTrack(request) {
+    const matches = other => other?.id === request.id && other.dungeon === request.dungeon &&
+      other.reward === request.reward;
+    const now = context.currentTime;
+    advance(now);
+    if (matches(wanted)) return;
+    cancelQueue(now);
+    if (matches(current?.request)) {
+      wanted = current.request;
+      schedule();
+      return;
+    }
+    wanted = request;
+    if (enabled) cue(wanted, now);
   }
 
   function play(id, dungeonId = dungeon) {
@@ -553,15 +584,29 @@ export function createMusic({ context, destination = context.destination }) {
     if (isDungeon(id)) dungeon = id;
     const combat = Boolean(TRACKS[id].bars);
     if (combat && isDungeon(dungeonId)) dungeon = dungeonId;
+    requestTrack({ id, dungeon: combat ? dungeon : null });
+  }
 
+  function playOutcome(id, battleKey) {
+    if (!TRACKS[id]?.once) return 'unavailable';
+    if (handledOutcome === battleKey) return 'alreadyHandled';
+    handledOutcome = battleKey;
+    if (!enabled || context.state !== 'running') {
+      stop();
+      return 'unavailable';
+    }
     const now = context.currentTime;
     advance(now);
-    const region = combat ? dungeon : null;
-    if (wanted?.id === id && wanted.dungeon === region) return;
-    if (current?.request.id === id && current.request.dungeon === region) return;
     cancelQueue(now);
-    wanted = { id, dungeon: region };
-    if (enabled) cue(wanted, now);
+    wanted = { id, dungeon: null };
+    cue(wanted, now);
+    return 'scheduled';
+  }
+
+  function holdReward(dungeonId) {
+    if (!isDungeon(dungeonId) || context.state === 'closed') return;
+    dungeon = dungeonId;
+    requestTrack({ id: dungeonId, dungeon: null, reward: true });
   }
 
   function fadeToSilence() {
@@ -590,8 +635,10 @@ export function createMusic({ context, destination = context.destination }) {
     const next = Boolean(value);
     if (enabled === next) return;
     enabled = next;
-    if (!enabled) fadeToSilence();
-    else if (wanted) {
+    if (!enabled) {
+      if (wanted && TRACKS[wanted.id].once) wanted = null;
+      fadeToSilence();
+    } else if (wanted) {
       wanted = { ...wanted };
       cue(wanted, context.currentTime);
     }
@@ -603,5 +650,5 @@ export function createMusic({ context, destination = context.destination }) {
     master?.gain.setTargetAtTime(MASTER_LEVEL * volume, context.currentTime, 0.025);
   }
 
-  return { play, stop, setEnabled, setVolume };
+  return { play, playOutcome, holdReward, stop, setEnabled, setVolume };
 }

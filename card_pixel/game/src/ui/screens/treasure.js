@@ -54,10 +54,10 @@ export function treasureScreen(run, ui, id, { equipped = false, node = $('#treas
   });
   $('#b-leave', node).addEventListener('click', equipped && run.pending?.kind === 'reinforcement' ? ui.route : ui.leave);
   equip?.addEventListener('click', () => {
-    if (offered && !ui.command(takeTreasure).ok) return;
-    if (run.pending?.kind === 'relic' && !ui.command(equipRelic, id, replacing).ok) {
-      ui.route();
-      return;
+    const offer = offered ? ui.command(takeTreasure) : null;
+    if (offer && !offer.ok) return;
+    if (!offer?.relic?.equipped) {
+      if (run.pending?.kind !== 'relic' || !ui.command(equipRelic, id, replacing).ok) return ui.route();
     }
     sfx.gem();
     if (onEquipped) onEquipped(id);

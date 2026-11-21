@@ -13924,6 +13924,7 @@ const BattleRuntime = {
     let current = null;
     let queued = null;
     let wanted = null;
+    let handledOutcome = null;
     let dungeon = "dawn_forest";
     let enabled = true;
     let volume = 1;
@@ -14097,9 +14098,14 @@ const BattleRuntime = {
       bus.gain.setValueAtTime(0, at);
       bus.gain.linearRampToValueAtTime(1, at + fadeIn);
       bus.connect(master);
+      const score = makeScore(request.id, request.dungeon);
+      if (request.reward) {
+        const [pad, bass] = TRACKS[request.id].instruments;
+        score.events = score.events.filter((event) => event.part === pad || event.part === bass).map((event) => ({ ...event, strength: event.strength * 0.8 }));
+      }
       const deck = {
         request,
-        score: makeScore(request.id, request.dungeon),
+        score,
         bus,
         start: at,
         fadeIn,
@@ -14122,31 +14128,66 @@ const BattleRuntime = {
     }
     function cue(request, now) {
       if (context.state === "closed") return;
-      if (!current) {
+      if (TRACKS[request.id].once) {
+        for (const deck of decks) {
+          const level = gainAt(deck, now);
+          if (level === 0) releaseDeck(deck, now);
+          else fadeOut(deck, level, now, STOP_FADE);
+        }
+        current = startDeck(request, now + START_AHEAD, 0.065);
+      } else if (!current) {
         current = startDeck(request, now + START_AHEAD, 0.065);
       } else {
         const { start, score } = current;
         const nextBar = Math.max(1, Math.floor((now - start) / score.barDuration) + 1);
-        const bar = score.once ? Math.min(nextBar, score.duration / score.barDuration) : nextBar;
-        const at = start + bar * score.barDuration;
+        let offset = nextBar * score.barDuration;
+        if (score.once) offset = request.reward ? score.duration : Math.min(offset, score.duration);
+        const at = start + offset;
         fadeOut(current, 1, at, CROSSFADE);
         queued = startDeck(request, at, CROSSFADE);
       }
       schedule();
+    }
+    function requestTrack(request) {
+      const matches = (other) => other?.id === request.id && other.dungeon === request.dungeon && other.reward === request.reward;
+      const now = context.currentTime;
+      advance2(now);
+      if (matches(wanted)) return;
+      cancelQueue(now);
+      if (matches(current?.request)) {
+        wanted = current.request;
+        schedule();
+        return;
+      }
+      wanted = request;
+      if (enabled) cue(wanted, now);
     }
     function play(id, dungeonId2 = dungeon) {
       if (!Object.hasOwn(TRACKS, id) || context.state === "closed") return;
       if (isDungeon(id)) dungeon = id;
       const combat = Boolean(TRACKS[id].bars);
       if (combat && isDungeon(dungeonId2)) dungeon = dungeonId2;
+      requestTrack({ id, dungeon: combat ? dungeon : null });
+    }
+    function playOutcome(id, battleKey) {
+      if (!TRACKS[id]?.once) return "unavailable";
+      if (handledOutcome === battleKey) return "alreadyHandled";
+      handledOutcome = battleKey;
+      if (!enabled || context.state !== "running") {
+        stop();
+        return "unavailable";
+      }
       const now = context.currentTime;
       advance2(now);
-      const region = combat ? dungeon : null;
-      if (wanted?.id === id && wanted.dungeon === region) return;
-      if (current?.request.id === id && current.request.dungeon === region) return;
       cancelQueue(now);
-      wanted = { id, dungeon: region };
-      if (enabled) cue(wanted, now);
+      wanted = { id, dungeon: null };
+      cue(wanted, now);
+      return "scheduled";
+    }
+    function holdReward(dungeonId2) {
+      if (!isDungeon(dungeonId2) || context.state === "closed") return;
+      dungeon = dungeonId2;
+      requestTrack({ id: dungeonId2, dungeon: null, reward: true });
     }
     function fadeToSilence() {
       const now = context.currentTime;
@@ -14172,8 +14213,10 @@ const BattleRuntime = {
       const next = Boolean(value);
       if (enabled === next) return;
       enabled = next;
-      if (!enabled) fadeToSilence();
-      else if (wanted) {
+      if (!enabled) {
+        if (wanted && TRACKS[wanted.id].once) wanted = null;
+        fadeToSilence();
+      } else if (wanted) {
         wanted = { ...wanted };
         cue(wanted, context.currentTime);
       }
@@ -14183,7 +14226,7 @@ const BattleRuntime = {
       volume = Math.min(1, Math.max(0, value));
       master?.gain.setTargetAtTime(MASTER_LEVEL * volume, context.currentTime, 0.025);
     }
-    return { play, stop, setEnabled, setVolume };
+    return { play, playOutcome, holdReward, stop, setEnabled, setVolume };
   }
 
   // card_pixel/game/src/stage/stage.js
@@ -15026,6 +15069,21 @@ const BattleRuntime = {
       win: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.16, "square", 0.045, 0, i * 0.1)),
       lose: () => [392, 330, 262, 196].forEach((f, i) => tone(f, 0.26, "triangle", 0.06, 0, i * 0.22)),
       gem: () => tone(1568, 0.1, "square", 0.035, 2093),
+      credit: () => tone(1175, 0.065, "sine", 0.05, 1568),
+      join: () => {
+        tone(440, 0.075, "triangle", 0.045);
+        tone(660, 0.1, "triangle", 0.05, 0, 0.075);
+      },
+      stamp: () => {
+        noise(0.04, 0.08);
+        tone(210, 0.095, "triangle", 0.065, 110);
+      },
+      restored: () => {
+        if (!soundOn || ac?.state !== "running" || clock.fast) return false;
+        tone(440, 0.045, "sine", 0.045);
+        tone(554, 0.055, "sine", 0.045, 0, 0.05);
+        return true;
+      },
       awaken: () => [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.12, "square", 0.04, 0, i * 0.07)),
       jackpot: () => [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0.14, "square", 0.05, 0, i * 0.06)),
       roll: () => tone(880 + Math.random() * 440, 0.04, "square", 0.025),
@@ -15321,10 +15379,12 @@ const BattleRuntime = {
       <button class="btn go" id="meta-backup-confirm">\uD30C\uC77C \uAE30\uB85D\uC73C\uB85C \uBCF5\uC6D0</button>
     </div>`);
       $("#meta-backup-repick").addEventListener("click", () => choose());
-      $("#meta-backup-confirm").addEventListener("click", () => {
+      $("#meta-backup-confirm").addEventListener("click", (event) => {
         const restored = store2.restoreBackup(data);
-        if (restored.ok) recovered();
-        else $(".meta-backup .meta-feedback").textContent = BACKUP_ERROR[restored.reason] ?? "\uAE30\uB85D\uC744 \uBCF5\uC6D0\uD558\uC9C0 \uBABB\uD588\uB2E4.";
+        if (restored.ok) {
+          event.currentTarget.disabled = true;
+          recovered();
+        } else $(".meta-backup .meta-feedback").textContent = BACKUP_ERROR[restored.reason] ?? "\uAE30\uB85D\uC744 \uBCF5\uC6D0\uD558\uC9C0 \uBABB\uD588\uB2E4.";
       });
     }
     choose();
@@ -17431,10 +17491,7 @@ const BattleRuntime = {
       S.shake = 6;
       sfx.hit(true);
       St.sparks(St.X(foe), CY(foe), 40, ["#3a2f58", "#8b6cff", "#ffffff"], 100);
-      if (e.treasure) {
-        label("\uBCF4\uBB3C \uBC1C\uACAC", foe, "good", -14);
-        sfx.gem();
-      }
+      if (e.treasure) label("\uBCF4\uBB3C \uBC1C\uACAC", foe, "good", -14);
       clock.slow = 0.5;
       await wait(0.2);
       clock.slow = 1;
@@ -17494,12 +17551,15 @@ const BattleRuntime = {
       const strike = amount2 == null ? "\uB9C8\uC9C0\uB9C9 \uC77C\uACA9" : "\uB9C8\uC9C0\uB9C9 \uC77C\uACA9 \xB7 " + amount2.toLocaleString("en-US") + " \uD53C\uD574";
       return '<div class="finish-portrait">' + (faceFrom || amount2 != null ? "<div><small>" + strike + "</small>" + (faceFrom || "") + "</div>" : "") + (donor ? "<div><small>\uC720\uD488 \uC6D0\uC8FC\uC778</small>" + faceBadge(donor) + "</div>" : "") + (survivors.length ? '<div><small>\uC0DD\uD658</small><div class="finish-survivors">' + survivors.map((id) => faceBadge(id)).join("") + "</div></div>" : "") + "</div>";
     }
+    function outcomeCue(track, fallback) {
+      const status = music2?.playOutcome(track, B.outcomeKey);
+      if (!status || status === "unavailable") fallback();
+    }
     async function victory() {
-      music2?.play("victory");
+      outcomeCue("victory", sfx.win);
       showIntent(null);
       S.danger = 0;
       tween(S, { dark: 0 }, 0.2);
-      sfx.win();
       if (B.finishNumber) {
         const living = B.bridge.survivors();
         const survivors = B.party.filter((id, index) => id && living[index]);
@@ -17514,7 +17574,7 @@ const BattleRuntime = {
       }
       const b = St.banner("\uC2B9\uB9AC", run.floor + "\uCE35 \xB7 " + ROOM_NAMES[B.door.type], "gold big");
       const fp = foePos();
-      if (B.door.reward) St.gem(fp.x, S.BASE - 30, S.W - 60, 2, 0.65, () => sfx.gem());
+      if (B.door.reward) St.gem(fp.x, S.BASE - 30, S.W - 60, 2, 0.65);
       for (const idx of lineup(B.D)) {
         const a = B.allies[idx];
         tween(a, { oy: -6 }, 0.12).then(() => tween(a, { oy: 0 }, 0.14, "in"));
@@ -17523,9 +17583,8 @@ const BattleRuntime = {
       b.remove();
     }
     async function defeat() {
-      music2?.play("defeat");
+      outcomeCue("defeat", sfx.lose);
       showIntent(null);
-      sfx.lose();
       tween(S, { dark: 0.6 }, 0.6);
       const b = St.banner("\uC804\uBA78", "\uAFC8\uAE38\uC774 \uB04A\uACBC\uB2E4", "ult big");
       await wait(1.4);
@@ -17738,6 +17797,7 @@ const BattleRuntime = {
       B.lastWarning = null;
       B.blessingViews = /* @__PURE__ */ new Map();
       B.finalHit = B.finishNumber = B.finisher = B.lastStriker = null;
+      B.outcomeKey = /* @__PURE__ */ Symbol();
       B.artifacts = options.artifacts;
       B.temporaryRelic = run.nextBattle?.relic;
       B.chargeSpent = false;
@@ -17763,11 +17823,12 @@ const BattleRuntime = {
       const res = onResult(B.bridge.summary(), currentLog());
       if (res) showResult(res, onContinue, onDecision);
     }
-    function showResult(res, advance2, decision) {
+    function showResult(res, advance2, decision, restored = false) {
       const rows = [];
       if (res.wiped) rows.push("<p>\uB9C8\uC9C0\uB9C9 \uB3D9\uB8CC\uAC00 \uC801\uACFC \uD568\uAED8 \uC4F0\uB7EC\uC84C\uB2E4. \uC6D0\uC815\uC740 \uC5EC\uAE30\uC11C \uB05D\uB09C\uB2E4.</p>");
       const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
-      if (res.win && battleCrystals > 0) rows.push('<p class="gain">\uACB0\uC815 +' + battleCrystals + " \xB7 \uBCF4\uC720 " + run.crystals + "</p>");
+      const gainedCrystals = res.win && battleCrystals > 0;
+      if (gainedCrystals) rows.push('<p class="gain">\uACB0\uC815 +' + battleCrystals + " \xB7 \uBCF4\uC720 " + run.crystals + "</p>");
       rows.push(...contractSettlement(run.floor, res.contract));
       if (res.fallen?.length) rows.push('<div class="fallen"><small>\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC</small><div>' + res.fallen.map((id) => '<span class="mini dead">' + face2(id, 40) + "<b>" + esc(card(id).name) + "</b></span>").join("") + "</div></div>");
       for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>\uC720\uD488</b> ' + esc(card(g.to).name) + " \u2190 " + esc(card(g.from).name) + "\uC758 " + esc(g.name) + "</p>");
@@ -17788,9 +17849,16 @@ const BattleRuntime = {
       }
       box.innerHTML = '<header class="result-heading"><h3>' + (res.win ? "\uB3CC\uD30C" : "\uC804\uBA78") + '</h3><button class="btn log-button" id="b-result-log">\uAE30\uB85D</button></header>' + rows.join("") + '<div class="result-decision"></div><button class="btn go" id="b-next">' + esc(label2) + "</button>";
       $("#result").classList.add("on");
+      if (!restored && res.ok) {
+        if (gainedCrystals) sfx.credit();
+        if (res.relics?.length || res.relic?.equipped) sfx.gem();
+      }
       $("#b-result-log").addEventListener("click", showLog);
       const next = $("#b-next", box);
-      if (res.win && run.phase === "reward" && run.room.type !== "borrowed") decision?.($(".result-decision", box), res, next);
+      if (res.win && run.phase === "reward" && run.room.type !== "borrowed") {
+        if (!restored && ["reinforcement", "gate", "relic"].includes(run.pending?.kind)) music2?.holdReward(run.dungeonId);
+        decision?.($(".result-decision", box), res, next);
+      }
       box.scrollTop = 0;
       next.addEventListener("click", () => {
         sfx.tap();
@@ -17821,7 +17889,7 @@ const BattleRuntime = {
       B.artifacts = run.relics;
       B.temporaryRelic = null;
       relayHint.hidden = true;
-      music2?.play("victory");
+      music2?.holdReward(run.dungeonId);
       St.clear();
       St.setRoom(run.room.bg, !!run.room.final);
       $("#battle").classList.remove("opening-decision");
@@ -17831,7 +17899,7 @@ const BattleRuntime = {
       show("battle");
       layout();
       lockPanel();
-      showResult(result, advance2, decision);
+      showResult(result, advance2, decision, true);
     }
     const review = {
       advance: St.advance,
@@ -18926,9 +18994,11 @@ const BattleRuntime = {
         const outcome = ui.command(chooseEvent, choice.id, target, replaceIds);
         if (!outcome.ok) return;
         ui.sheets.closeSheet();
-        if (outcome.effects.some((effect) => effect.type === "join")) sfx.awaken();
+        const equipped = outcome.effects.some((effect) => effect.type === "relic" && effect.equipped);
+        if (equipped) sfx.gem();
+        else if (outcome.effects.some((effect) => effect.type === "join")) sfx.awaken();
         else sfx.tap();
-        if (run.pending || run.room.relic && outcome.effects.some((effect) => effect.type === "relic" && effect.equipped)) ui.route();
+        if (run.pending || run.room.relic && equipped) ui.route();
         else eventScreen(run, ui, outcome);
       }
       const count2 = releases(choice);
@@ -19029,10 +19099,10 @@ const BattleRuntime = {
     });
     $("#b-leave", node).addEventListener("click", equipped && run.pending?.kind === "reinforcement" ? ui.route : ui.leave);
     equip?.addEventListener("click", () => {
-      if (offered && !ui.command(takeTreasure).ok) return;
-      if (run.pending?.kind === "relic" && !ui.command(equipRelic, id, replacing).ok) {
-        ui.route();
-        return;
+      const offer2 = offered ? ui.command(takeTreasure) : null;
+      if (offer2 && !offer2.ok) return;
+      if (!offer2?.relic?.equipped) {
+        if (run.pending?.kind !== "relic" || !ui.command(equipRelic, id, replacing).ok) return ui.route();
       }
       sfx.gem();
       if (onEquipped) onEquipped(id);
@@ -19079,14 +19149,16 @@ const BattleRuntime = {
       take.textContent = choice.kind === "join" ? card(id).name + " \uAE68\uC6B0\uAE30" : run.relics.length === RELIC_LIMIT ? "\uAD50\uCCB4\uD560 \uC720\uBB3C \uACE0\uB974\uAE30" : artifact.name + " \uBC1B\uAE30";
     });
     function apply(selected) {
-      if (!selected || !ui.command(chooseGateReward, selected).ok) return;
+      if (!selected) return;
+      const result = ui.command(chooseGateReward, selected);
+      if (!result.ok) return;
       if (selected.kind === "join") {
         sfx.awaken();
         ui.leave();
       } else {
-        sfx.gem();
+        if (result.relic.equipped) sfx.gem();
         if (onRelic) onRelic(selected.id);
-        else treasureScreen(run, ui, selected.id, { equipped: run.relics.includes(selected.id) });
+        else treasureScreen(run, ui, selected.id, { equipped: result.relic.equipped });
       }
     }
     take.addEventListener("click", () => {
@@ -20150,10 +20222,11 @@ const BattleRuntime = {
     }
     function persist() {
       try {
-        if (store2.save({ profile, run }) !== false) return;
+        if (store2.save({ profile, run }) !== false) return true;
       } catch {
       }
       warnSave();
+      return false;
     }
     function warnSave() {
       if (warnedSave) return;
@@ -20162,7 +20235,7 @@ const BattleRuntime = {
     }
     function updateProfile(next) {
       profile = next;
-      persist();
+      return persist();
     }
     function updateUi(patch) {
       updateProfile({ ...profile, ui: { ...profile.ui, ...patch } });
@@ -20242,7 +20315,10 @@ const BattleRuntime = {
             claim(id2) {
               const result = claimMission(profile, period.key, id2, roster2);
               if (!result?.announce?.ok) return false;
-              updateProfile(result.profile);
+              if (updateProfile(result.profile)) {
+                if (result.announce.recruits.length) audio2.sfx.join();
+                else audio2.sfx.stamp();
+              }
               sheets2.closeSheet();
               renderNotebook();
               sessionNotice(id2 ? `${roster2.card(id2).name} \xB7 \uAD00\uCE21\uC18C\uC5D0 \uC601\uC785` : "\uC784\uBB34 \uC644\uB8CC \uB3C4\uC7A5 \uD68D\uB4DD");
@@ -20549,8 +20625,10 @@ const BattleRuntime = {
       };
       run = null;
       review = null;
-      updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });
-      if (recruits.length) audio2.sfx.crit();
+      const saved = updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });
+      if (announce.stamp) {
+        if (saved) audio2.sfx.stamp();
+      } else if (recruits.length) audio2.sfx.crit();
       if (endingDue()) showEnding(recruits);
       else showHub(recruits);
       return true;
@@ -20583,6 +20661,10 @@ const BattleRuntime = {
       const good = lastGood ? store2.loadLastGood?.() : null;
       return store2.exportBackup(good?.status === "ok" ? { profile: good.profile, settings: settings2 } : { settings: settings2 });
     }
+    function reloadAfterRestore() {
+      if (audio2.sfx.restored()) setTimeout(() => location.reload(), 110);
+      else location.reload();
+    }
     function showRecovery() {
       const good = store2.loadLastGood?.();
       const hasGood = good?.status === "ok";
@@ -20597,10 +20679,12 @@ const BattleRuntime = {
       <button class="btn" id="meta-recovery-new">${unavailable ? "\uAE30\uB85D \uC5C6\uC774 \uC2DC\uC791" : "\uC0C8 \uAE30\uB85D \uC2DC\uC791"}</button>
       <p class="meta-feedback" role="status"></p>
     </div>`;
-      $("#meta-last-good", node)?.addEventListener("click", () => {
+      $("#meta-last-good", node)?.addEventListener("click", (event) => {
         const result = store2.restoreLastGood?.();
-        if (result?.ok) location.reload();
-        else $(".meta-feedback", node).textContent = "\uC9C1\uC804 \uAE30\uB85D\uC744 \uBCF5\uAD6C\uD558\uC9C0 \uBABB\uD588\uB2E4.";
+        if (result?.ok) {
+          event.currentTarget.disabled = true;
+          reloadAfterRestore();
+        } else $(".meta-feedback", node).textContent = "\uC9C1\uC804 \uAE30\uB85D\uC744 \uBCF5\uAD6C\uD558\uC9C0 \uBABB\uD588\uB2E4.";
       });
       $("#meta-recovery-new", node).addEventListener("click", () => {
         if (unavailable) {
@@ -20616,7 +20700,7 @@ const BattleRuntime = {
     }
     $("#frame").addEventListener("click", (event) => {
       const mode = event.target.closest("[data-backup-action]")?.dataset.backupAction;
-      if (mode) openBackupSheet({ mode, sheets: sheets2, store: store2, currentBackup, recovered: () => location.reload() });
+      if (mode) openBackupSheet({ mode, sheets: sheets2, store: store2, currentBackup, recovered: reloadAfterRestore });
     });
     function showTitle(savedProfile, notice) {
       music2.play("hub");
@@ -20660,7 +20744,7 @@ const BattleRuntime = {
   var dailyStore = create3?.(storage, { core, roster });
   var musicContext;
   var musicPlayer;
-  var musicTrack;
+  var musicRequest;
   var musicEnabled = true;
   var music = {
     get enabled() {
@@ -20671,12 +20755,20 @@ const BattleRuntime = {
       musicPlayer?.setEnabled(enabled);
     },
     play(trackId, dungeonId2) {
-      musicTrack = [trackId, dungeonId2];
-      musicPlayer?.play(trackId, dungeonId2);
+      musicRequest = () => musicPlayer?.play(trackId, dungeonId2);
+      musicRequest();
+    },
+    playOutcome(trackId, battleKey) {
+      musicRequest = null;
+      return musicPlayer?.playOutcome(trackId, battleKey) ?? "unavailable";
+    },
+    holdReward(dungeonId2) {
+      musicRequest = () => musicPlayer?.holdReward(dungeonId2);
+      musicRequest();
     }
   };
   var unlockEffects = audio.unlockAudio;
-  audio.unlockAudio = function unlockAudio() {
+  audio.unlockAudio = function unlockAudio({ skipPendingMusic = false } = {}) {
     unlockEffects();
     if (document.hidden || navigator.userActivation?.hasBeenActive === false) return;
     if (!musicContext) {
@@ -20689,7 +20781,7 @@ const BattleRuntime = {
       }
       musicPlayer = createMusic({ context: musicContext, destination: musicContext.destination });
       musicPlayer.setEnabled(musicEnabled);
-      if (musicTrack) musicPlayer.play(...musicTrack);
+      if (!skipPendingMusic) musicRequest?.();
     }
     if (musicContext.state !== "running") musicContext.resume().catch(() => {
     });
@@ -20709,7 +20801,7 @@ const BattleRuntime = {
   $("#frame").addEventListener("click", (event) => {
     const button = event.target.closest(".meta-screen button, .meta-sheet button, #b-sheetclose");
     if (button && !button.disabled && !button.matches(".b-set, .b-full")) {
-      audio.unlockAudio();
+      audio.unlockAudio({ skipPendingMusic: button.id === "b-start" });
       audio.sfx.tap();
     }
   }, true);
