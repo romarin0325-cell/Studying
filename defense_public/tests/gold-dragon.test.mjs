@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../src/combat/engine.js';
-import {HERO,ROSTER,LATE_COMPANIONS,DEFAULT_DECK,PART_STAGES} from '../src/content.js';
+import {HERO,ROSTER,LATE_COMPANIONS,DEFAULT_DECK,PART_STAGES,LATE_UNLOCK_STAGE} from '../src/content.js';
 import {heroPool,lateOpen} from '../src/economy.js';
 import {createProfile,parseProfile,validateProfile} from '../src/profile.js';
 import {skillType,measure,roster} from '../src/lab/model.js';
@@ -24,7 +24,7 @@ test('Gold joins the regular late UR pool after part one; old profiles gain one 
   const h=HERO.gold_dragon;assert.equal(h.rarity,'UR');assert.equal(h.hidden,false);
   assert.ok(ROSTER.UR.includes(h.id)&&LATE_COMPANIONS.includes(h.id));
   assert.ok(!heroPool('UR',false).includes(h.id)&&heroPool('UR',true).includes(h.id));
-  assert.equal(lateOpen(PART_STAGES-1),false);assert.equal(lateOpen(PART_STAGES),true);assert.equal(skillType(h),'범위');
+  assert.equal(lateOpen(LATE_UNLOCK_STAGE-1),false);assert.equal(lateOpen(LATE_UNLOCK_STAGE),true);assert.equal(skillType(h),'범위');
   const p=createProfile(0);delete p.heroes.gold_dragon;const back=parseProfile(JSON.stringify(p));
   assert.ok(back&&validateProfile(back));assert.equal(back.heroes.gold_dragon.owned,false);assert.deepEqual(back.deck,DEFAULT_DECK);
 });

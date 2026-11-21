@@ -1,4 +1,4 @@
-import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,CHAPTER_STAGES,partOf,levelOf,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
+import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,LATE_UNLOCK_STAGE,MAIN_STAGES,CHAPTER_STAGES,partOf,levelOf,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
 import {calendar,heroPool,lateOpen,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,draftHeroEntry,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicTierRates,relicRatesAt,idleReward,stageReward,HOUR,PERFECT_REWARD} from './economy.js';
@@ -789,8 +789,8 @@ function relicCard(id){
   const a=ARTIFACT[id],e=p().relics[id],ready=e.owned&&e.copies>=relicCost(a.rarity,e.enhance)&&!p().active,worn=p().equipped.includes(id);
   return `<button class="cc relic ${e.owned?'':'unowned'} ${ready?'ready':''} ${worn?'worn':''}" data-relic="${id}" data-rarity="${a.rarity}" aria-label="${a.name}${e.owned?` Lv.${relicLevel(e)}`:', 미보유'}${worn?', 장착 중':''}"><span class="cc-art">${image(id)}</span>${badge(a.rarity)}${e.owned?`<span class="cc-plus">Lv.${relicLevel(e)}</span>`:''}${ready?`<span class="cc-up">${icon('up')}</span>`:''}${worn?`<span class="cc-worn">${icon('check')}</span>`:''}<strong>${a.name}</strong></button>`;
 }
-// Companions added after part one stay out of the collection until its last stage (PART_STAGES) is cleared (or until owned).
-const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES||p().heroes[h.id].owned);
+// Companions added after part one stay out of the collection until LATE_UNLOCK_STAGE is cleared (or until owned).
+const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=LATE_UNLOCK_STAGE||p().heroes[h.id].owned);
 const memoryOpen=id=>p().heroes[id].owned&&p().heroes[id].bond>=MEMORIAL_STORIES[id].unlockBond;
 function renderCollection(){
   const owned=shown().filter(h=>p().heroes[h.id].owned).length,relics=ARTIFACTS.filter(a=>p().relics[a.id].owned).length,memories=shown().filter(h=>memoryOpen(h.id)).length+p().study.library.unlocked.length;
@@ -798,7 +798,7 @@ function renderCollection(){
   const tabs=[['hero','동료',`${owned}/${shown().length}`],...(featureOpen(p(),'relic')?[['relic','유물',`${relics}/${ARTIFACTS.length}`]]:[]),['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
   return `<section class="book">
     <div class="tabbar">${tabs.map(([id,name,count])=>`<button data-collection="${id}" aria-pressed="${collection===id}"><b>${name}</b><small>${count}</small></button>`).join('')}</div>
-    ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&p().cleared<PART_STAGES?`<p class="late-collection-note">${icon('lock')} 스테이지 ${PART_STAGES} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
+    ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&p().cleared<LATE_UNLOCK_STAGE?`<p class="late-collection-note">${icon('lock')} 스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
 }
 function rarityFilter(list,table){
   return `<div class="rare-filter">${RARITIES.map(r=>{const all=list.filter(x=>x.rarity===r),have=all.filter(x=>table[x.id].owned).length;return `<button data-filter="${r}" data-rarity="${r}" aria-pressed="${rarity===r}">${badge(r)}<span>${have}/${all.length}</span>${have===all.length?`<i class="done">${icon('check')}</i>`:''}</button>`;}).join('')}</div>`;
@@ -946,7 +946,7 @@ function partTeaser(x=PARTS[1]){
 // Arrival after the first clear of the last stage of part one: the new companion flips in, and the dawn garden is one tap away.
 const subjectOf=name=>{const c=name.charCodeAt(name.length-1)-0xAC00;return name+(c>=0&&c<11172&&c%28?'이':'가');};
 // ───────── Late companions: the part one announcement ─────────
-// Every companion on LATE_COMPANIONS joins the normal summon and the collection once part one (PART_STAGES) is cleared. Cleared saves that were never told
+// Every companion on LATE_COMPANIONS joins the normal summon and the collection once LATE_UNLOCK_STAGE is cleared. Cleared saves that were never told
 // see the announcement once, after the part one reveal or on the next home screen.
 const lateNew=()=>LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).sort((a,b)=>compareRarity(HERO[a],HERO[b]));
 const lateRarityLine=()=>RARITIES.map(r=>({r,n:lateNew().filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n).map(x=>`${RARITY[x.r].name} ${x.n}`).join(' · ');
@@ -957,7 +957,7 @@ function showLateNotice(){lateFresh=true;
   const ids=byRarity(lateNoticeIds(p()).length?lateNoticeIds(p()):lateNew());
   const counts=[...RARITIES].reverse().map(r=>({r,n:ids.filter(id=>HERO[id].rarity===r).length})).filter(x=>x.n);
   const tiles=ids.map((id,i)=>`<div class="late-card" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>${HERO[id].name}</b><small>${HERO[id].role.split(' · ')[0]}</small></div>`).join('');
-  show('새 동료가 합류했어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="late-notice"><span class="late-flash" aria-hidden="true"></span><span class="late-rays" aria-hidden="true"></span><div class="late-head"><p class="late-kicker">NEW COMPANIONS</p><p class="late-lede"><b>${ids.length}</b>명의 새 동료</p><p class="late-counts">${counts.map(({r,n})=>`<span data-rarity="${r}"><i>${r}</i>${n}</span>`).join('')}</p></div><div class="late-grid">${tiles}</div>
+  show('새 동료가 합류했어요',`스테이지 ${LATE_UNLOCK_STAGE} 클리어`,`<div class="late-notice"><span class="late-flash" aria-hidden="true"></span><span class="late-rays" aria-hidden="true"></span><div class="late-head"><p class="late-kicker">NEW COMPANIONS</p><p class="late-lede"><b>${ids.length}</b>명의 새 동료</p><p class="late-counts">${counts.map(({r,n})=>`<span data-rarity="${r}"><i>${r}</i>${n}</span>`).join('')}</p></div><div class="late-grid">${tiles}</div>
     <ul class="late-notes"><li>일반·수호자 소환에서 <b>같은 등급과 똑같은 확률</b>로 나오고, 도감에도 추가됐어요.</li></ul></div>`,
     `<button class="secondary" data-action="late-close">나중에</button><button class="primary shine" data-action="late-summon">소환하러 가기</button>`,'late');
   sound.reveal?.('SR');
@@ -967,8 +967,8 @@ function showLateNotice(){lateFresh=true;
 // notice until the first summon after it. After that the rates sheet lists them with everyone else.
 let lateFresh=false;
 function lateStrip(){
-  const open=p().cleared>=PART_STAGES,n=lateNew().length;if(open&&!lateFresh)return '';
-  return `<button class="sm-late ${open?'open':''}" data-action="late-info" aria-label="신규 동료 ${n}명">${icon(open?'star':'lock')}<span>${open?`신규 동료 ${n}명 소환 중`:`스테이지 ${PART_STAGES} 클리어 후 신규 동료 ${n}명이 합류해요`}</span><i>${icon('chevron')}</i></button>`;
+  const open=p().cleared>=LATE_UNLOCK_STAGE,n=lateNew().length;if(open&&!lateFresh)return '';
+  return `<button class="sm-late ${open?'open':''}" data-action="late-info" aria-label="신규 동료 ${n}명">${icon(open?'star':'lock')}<span>${open?`신규 동료 ${n}명 소환 중`:`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 신규 동료 ${n}명이 합류해요`}</span><i>${icon('chevron')}</i></button>`;
 }
 // A hero's chance in the current banner (same rules as drawCharacter: pickup or guardian take half of the UR share).
 function heroChance(id){
@@ -987,7 +987,7 @@ function showArrival({part=false,unlocked=[]}={}){
 // Part two opens when part one is cleared: the dawn sky rises over the dawn greenhouse and each newly opened thing is dealt in as a row.
 function showPartOpen(){
   const late=lateNew().length,sparks=Array.from({length:14},(_,i)=>`<i class="po-spark" style="--i:${i};--x:${(i*37+11)%100}%;--y:${(i*53+7)%62}%"></i>`).join('');
-  const rows=[['adventure','새벽의 별길',`스테이지 ${PARTS[1].first}–${PARTS[1].last}`],['garden','새벽 온실','치명타 확률 · 치명타 피해 화단'],...(late?[['summon',`신규 동료 ${late}명`,'별빛 소환에 합류']]:[])];
+  const rows=[['adventure','새벽의 별길',`스테이지 ${PARTS[1].first}–${PARTS[1].last}`],['garden','새벽 온실','치명타 확률 · 치명타 피해 화단'],...(late&&LATE_UNLOCK_STAGE>=PART_STAGES?[['summon',`신규 동료 ${late}명`,'별빛 소환에 합류']]:[])];
   show('새벽의 별길이 열렸어요',`스테이지 ${PART_STAGES} 클리어`,`<div class="part-open"><div class="po-sky" aria-hidden="true"><i class="po-rays"></i><i class="po-sun"></i>${sparks}</div><div class="po-head"><p class="po-kicker">PART 2</p><p class="po-title">새벽의 별길</p><p class="po-sub">STAGE ${PARTS[1].first} – ${PARTS[1].last}</p></div><ul class="po-list">${rows.map(([ic,b,s],i)=>`<li style="--i:${i}"><span class="po-ic">${icon(ic)}</span><span><b>${b}</b><small>${s}</small></span></li>`).join('')}</ul></div>`,
     '<div class="dialog-buttons"><button class="secondary" data-action="close">확인</button><button class="primary" data-action="go-dawn">새벽 온실 보기</button></div>','arrival');
   sound.reveal?.('UR');
@@ -1240,10 +1240,10 @@ function relicTierChip(){
 let pityPick=null;
 function pitySheet(){
   const which=banner==='relic'?'normal':banner,n=p().pity[which],max=T.pity[which],c=calendar(now()),end=c.periods[which==='season'?'guardian':'pickup'].end,pool=which==='season'?[c.guardian]:[c.pickup,...heroPool('UR',lateOpen(p().cleared)).filter(id=>id!==c.pickup)];
-  if(!pool.includes(pityPick))pityPick=pool[0];const locked=LATE_COMPANIONS.includes(pityPick)&&p().cleared<PART_STAGES,full=n>=max&&!locked;
+  if(!pool.includes(pityPick))pityPick=pool[0];const locked=LATE_COMPANIONS.includes(pityPick)&&p().cleared<LATE_UNLOCK_STAGE,full=n>=max&&!locked;
   show('교환',which==='season'?'수호자 소환':'일반 소환',`<div class="pity-meter" data-period-end="${end}"><span class="pity-ring big" style="--p:${Math.min(1,n/max).toFixed(3)}">${icon('star')}</span><div><b>${n}<em>/${max}</em></b><p>유료 소환 1회마다 1이 쌓여요. ${max}가 되면 원하는 동료 한 명을 데려올 수 있어요. UR이 나와도 줄지 않아요.</p>${countdown(end,'후 교대')}</div></div>
     <div class="pity-pool">${pool.map(id=>`<button class="pity-pick ${pityPick===id?'on':''}" data-pity-pick="${id}" data-rarity="UR">${image(id)}<b>${HERO[id].name}</b>${id===c.pickup&&which==='normal'?'<small>지금 픽업</small>':''}${p().heroes[id].owned?`<small class="have">보유 +${p().heroes[id].enhance}</small>`:''}</button>`).join('')}</div>`,
-    `<button class="primary wide shine" data-action="pity-claim" ${full?'':'disabled'}>${locked?`스테이지 ${PART_STAGES} 클리어 후 교환할 수 있어요`:full?`${HERO[pityPick].name} 데려오기`:`${max-n}회 더 소환하면 교환할 수 있어요`}</button>`,'pity');
+    `<button class="primary wide shine" data-action="pity-claim" ${full?'':'disabled'}>${locked?`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 교환할 수 있어요`:full?`${HERO[pityPick].name} 데려오기`:`${max-n}회 더 소환하면 교환할 수 있어요`}</button>`,'pity');
 }
 function claimPity(){
   const which=banner==='relic'?'normal':banner,result=act('pityClaim',{banner:which,id:pityPick},false);if(!result.ok){toast(result.message);return;}
@@ -1260,13 +1260,13 @@ function relicLadder(){
 }
 function rates(){
   const c=calendar(now()),urCount=heroPool('UR',lateOpen(p().cleared)).length;
-  const targets=[...(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES)))].sort(compareRarity);
+  const targets=[...(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=LATE_UNLOCK_STAGE)))].sort(compareRarity);
   let rows=banner==='relic'?relicLadder():RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct1(T.heroRates[i])}</b></div>`).join('');
-  if(banner==='season'){const half=pct1(T.heroRates[3]/2),closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<PART_STAGES;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${PART_STAGES} 클리어 후</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${half}</b></div>`;}
+  if(banner==='season'){const half=pct1(T.heroRates[3]/2),closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<LATE_UNLOCK_STAGE;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${LATE_UNLOCK_STAGE} 클리어 후</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${half}</b></div>`;}
   if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/urCount)}</b></div><div class="rate-row"><span>UR · 나머지 ${urCount-1}종 각각</span><b>${pct(T.heroRates[3]*.5/urCount)}</b></div>`;
   if(banner!=='relic'){
-    const open=p().cleared>=PART_STAGES;
-    rows+=`<div class="rate-head">신규 동료${open?'':` <small>스테이지 ${PART_STAGES} 클리어 후 합류</small>`}</div>`+(open?lateNew().map(id=>`<div class="rate-row"><span>${badge(HERO[id].rarity)} ${HERO[id].name}</span><b>${pct(heroChance(id))}</b></div>`).join(''):`<div class="rate-row late-closed"><span>${icon('lock')} ${lateRarityLine()}</span><b>${lateNew().length}명</b></div>`);
+    const open=p().cleared>=LATE_UNLOCK_STAGE;
+    rows+=`<div class="rate-head">신규 동료${open?'':` <small>스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 합류</small>`}</div>`+(open?lateNew().map(id=>`<div class="rate-row"><span>${badge(HERO[id].rarity)} ${HERO[id].name}</span><b>${pct(heroChance(id))}</b></div>`).join(''):`<div class="rate-row late-closed"><span>${icon('lock')} ${lateRarityLine()}</span><b>${lateNew().length}명</b></div>`);
   }
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'수호자':'일반',`${banner==='relic'?'':`<p class="fineprint" data-period-end="${c.periods[banner==='season'?'guardian':'pickup'].end}">${countdown(c.periods[banner==='season'?'guardian':'pickup'].end,'후 교대')}</p>`}${rows}
     <ul class="notes">${banner==='relic'?`<li>단계는 누적 소환 횟수로 올라요. 10회 중 단계가 오르면 다음 1회부터 적용돼요.</li>`
@@ -1832,7 +1832,7 @@ document.addEventListener('click',e=>{
     'save-team':saveFormation,
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
     'go-collection':()=>{close();screen='collection';collection='hero';render();},'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},
-    'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=PART_STAGES)showLateNotice();else show('신규 동료',`스테이지 ${PART_STAGES} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${PART_STAGES}을(를) 처음 클리어하면 일반 소환과 수호자 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
+    'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=LATE_UNLOCK_STAGE)showLateNotice();else show('신규 동료',`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${LATE_UNLOCK_STAGE}을(를) 처음 클리어하면 일반 소환과 수호자 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
     'go-garden':()=>{close();screen='garden';render();},'go-dawn':()=>{close();screen='garden';gardenTab='dawn';bedFocus='crit';render();},'go-home-gift':()=>{close();screen='home';giftTray=true;render();giftTray=true;const t=$('gift-tray');if(t){t.innerHTML=trayMarkup(p().partner);t.hidden=false;}},
     'monthly-claim':claimMonthlyDue,'twin-party':()=>twinFormation(),'save-twin':()=>{if(act('twinParty',twinDraft).ok){twinDraft=null;close();render();}},'oath-retry':()=>{close();oathPrepare();},'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},'weekly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'weekly');},
     speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},

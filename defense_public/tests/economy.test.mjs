@@ -179,7 +179,7 @@ test('first clears scale dreams and triple win dust, and losses pay for up to fi
 });
 
 test('companions added after the first part join the summon pool only once its last stage is cleared',()=>{
-  assert.equal(LATE_UNLOCK_STAGE,PART_STAGES);assert.equal(lateOpen(PART_STAGES-1),false);assert.equal(lateOpen(PART_STAGES),true);
+  assert.equal(LATE_UNLOCK_STAGE,levelStage(18),'public: late companions join at the end of chapter 3');assert.ok(LATE_UNLOCK_STAGE<PART_STAGES);assert.equal(lateOpen(LATE_UNLOCK_STAGE-1),false);assert.equal(lateOpen(LATE_UNLOCK_STAGE),true);
   assert.equal(HERO.behemoth.hidden,false);assert.equal(HERO.behemoth.rarity,'UR');assert.ok(!HIDDEN.includes('behemoth'));
   assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
   for(const id of LATE_COMPANIONS)assert.ok(HEROES.some(h=>h.id===id),id);

@@ -75,7 +75,9 @@ export const CLEAR_UNLOCKS=Object.freeze({});
 // Companions added after the first part open to the normal summon and the collection only once its last stage
 // has been cleared (before that the summon pool and the collection are exactly what they were). Every new
 // companion goes on this list.
-export const LATE_UNLOCK_STAGE=PART_STAGES;
+// Public build: they join at the end of chapter 3 (stage 27, the first wall) so a one-day tester meets them; part two and
+// the dawn garden still open at PART_STAGES. defense/ keeps them at PART_STAGES. See docs/PUBLIC_TEMPO.md.
+export const LATE_UNLOCK_STAGE=levelStage(18);
 export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon']);
 // Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
 // unlock is a stage; hard and abyss open at levels 36 and 72 of the original curve.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,INTRO_STAGES,levelStage} from '../src/content.js';
+import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,LATE_UNLOCK_STAGE,INTRO_STAGES,levelStage} from '../src/content.js';
 import {unlockProfile,topUpUnlocked,testGrant,TEST_TOOLS} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
@@ -260,7 +260,7 @@ test('a saved five-hero draft pool still gives two honest tactical choices on th
 });
 
 test('weekly draft includes unowned companions with part-one unlock, base enhancement, and shared growth',()=>{
-  const early=createProfile(NOW);early.cleared=PART_STAGES-1;early.beds.rose=10;early.beds.spring=5;early.beds.seed=4;
+  const early=createProfile(NOW);early.cleared=LATE_UNLOCK_STAGE-1;early.beds.rose=10;early.beds.spring=5;early.beds.seed=4;
   early.relics.hourglass={owned:true,enhance:2,copies:0};early.equipped=['hourglass'];
   early.heroes.star_boy.enhance=10;early.heroes.queen.owned=true;early.heroes.queen.enhance=6;
   const earlyStore=storeFor(early);call(earlyStore,'dispatch',{slot:0,id:'queen'});
@@ -272,12 +272,12 @@ test('weekly draft includes unowned companions with part-one unlock, base enhanc
   assert.equal(draftEligible(earlyStore.value,'gold_dragon'),false);
   assert.equal(draftEligible(earlyStore.value,'queen'),false);
 
-  // Owned late companions remain eligible before PART_STAGES just like in the collection.
+  // Owned late companions remain eligible before LATE_UNLOCK_STAGE just like in the collection.
   const ownedLate=createProfile(NOW);ownedLate.cleared=3;ownedLate.heroes.gold_dragon.owned=true;
   assert.equal(draftPool(ownedLate).includes('gold_dragon'),true);
 
   // After part one clear, all 42 companions (minus dispatched) join the draft pool.
-  const late=createProfile(NOW);late.cleared=PART_STAGES;late.beds.rose=10;late.beds.spring=5;late.beds.seed=4;
+  const late=createProfile(NOW);late.cleared=LATE_UNLOCK_STAGE;late.beds.rose=10;late.beds.spring=5;late.beds.seed=4;
   late.relics.hourglass={owned:true,enhance:2,copies:0};late.equipped=['hourglass'];
   late.heroes.star_boy.enhance=10;late.heroes.queen.owned=true;
   const lateStore=storeFor(late);call(lateStore,'dispatch',{slot:0,id:'queen'});
@@ -321,7 +321,7 @@ test('weekly draft includes unowned companions with part-one unlock, base enhanc
   const badAwayDeck=structuredClone(lateStore.value);badAwayDeck.active.draft[0]='queen';badAwayDeck.active.deck[0]='queen';assert.equal(validateProfile(badAwayDeck),false);
   const badMain=createProfile(NOW);badMain.active={mode:'main',stage:1,deck:['luna',...DEFAULT_DECK.slice(1)],started:NOW,seed:1,token:'t',boon:0,run:null,relicAttack:0,relicLevels:{}};
   assert.equal(validateProfile(badMain),false,'main mode still rejects unowned heroes');
-  assert.equal(lateOpen(PART_STAGES-1),false);assert.equal(lateOpen(PART_STAGES),true);
+  assert.equal(lateOpen(LATE_UNLOCK_STAGE-1),false);assert.equal(lateOpen(LATE_UNLOCK_STAGE),true);
 });
 
 test('failed monthly entry, record save and reward confirmation preserve the wallet and active run',()=>{
@@ -609,12 +609,12 @@ test('Behemoth joins the normal UR pool and exchange only after part one, never 
   const behemothUr=open=>{const pool=heroPool('UR',open),at=pool.indexOf('behemoth'),rolls=[.999999,at<0?.999999:(at+.5)/pool.length];return drawCharacter(()=>rolls.shift(),false,calendar(NOW).guardian,null,open);};
   assert.notEqual(behemothUr(false),'behemoth');assert.equal(behemothUr(true),'behemoth');
   p.pity.normal=TUNING.pity.normal;p.pity.season=TUNING.pity.season;p.dreams=100000;
-  for(const stage of [0,PART_STAGES-1]){
+  for(const stage of [0,LATE_UNLOCK_STAGE-1]){
     p.cleared=stage;assert.equal(command(p,'pityClaim',{banner:'normal',id:'behemoth'},NOW).ok,false);
     assert.equal(p.heroes.behemoth.owned,false);assert.equal(p.pity.normal,TUNING.pity.normal,'the gauge is kept');
   }
   const draws=command(p,'draw',{banner:'normal',count:10},NOW);assert.equal(draws.ok,true);assert.ok(!draws.items.some(i=>i.id==='behemoth'));
-  p.cleared=PART_STAGES;
+  p.cleared=LATE_UNLOCK_STAGE;
   assert.equal(command(p,'pityClaim',{banner:'season',id:'behemoth'},NOW).ok,false);assert.equal(p.pity.season,TUNING.pity.season);
   const late=command(p,'pityClaim',{banner:'normal',id:'behemoth'},NOW);
   assert.equal(late.ok,true);assert.equal(p.heroes.behemoth.owned,true);assert.equal(p.pity.normal,10,'the exchange spends only the normal gauge');
@@ -623,8 +623,8 @@ test('Behemoth joins the normal UR pool and exchange only after part one, never 
 test('the part one announcement covers the late companions once: not before its last stage, never twice, old saves get an empty list',()=>{
   const fresh=createProfile(NOW),announced=LATE_COMPANIONS.filter(id=>!HERO[id].hidden);
   assert.deepEqual(lateNoticeIds(fresh),[],'nothing to announce before part one is cleared');
-  fresh.cleared=PART_STAGES-1;assert.deepEqual(lateNoticeIds(fresh),[]);
-  fresh.cleared=PART_STAGES;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, including Behemoth');
+  fresh.cleared=LATE_UNLOCK_STAGE-1;assert.deepEqual(lateNoticeIds(fresh),[]);
+  fresh.cleared=LATE_UNLOCK_STAGE;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, including Behemoth');
   assert.deepEqual(announced.slice().sort(),['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon'].sort());
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);
   assert.deepEqual(lateNoticeIds(fresh),[]);assert.deepEqual(fresh.noticeLate.slice().sort(),announced.slice().sort());
