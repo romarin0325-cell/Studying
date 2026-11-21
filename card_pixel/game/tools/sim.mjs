@@ -6,6 +6,7 @@
 // Use --lessons=0 for the pre-E5 main route. --intent-audit replays its three boss fixtures.
 // Use --entry-audit for the Ember route's battle entry and settlement commands.
 // Use --easy-audit for 32 paired first departures in each early dungeon.
+// Use --entry-easy-audit for the same seeds with a fresh profile and the first-departure rules.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -34,7 +35,7 @@ if (![1, TEMPO_VERSION].includes(tempoVersion) || ![0, 1].includes(lessonVersion
 const dailyFrom = args.find(arg => arg.startsWith('--daily-from='))?.slice('--daily-from='.length);
 const days = Number(args.find(arg => arg.startsWith('--days='))?.slice('--days='.length) ?? 60);
 const contract = args.find(arg => arg.startsWith('--contract='))?.slice('--contract='.length) ?? null;
-const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--easy-audit') ? 32 : contract === null ? 300 : 120));
+const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--easy-audit') || flag('--entry-easy-audit') ? 32 : contract === null ? 300 : 120));
 const dungeon = args.find(arg => arg.startsWith('--dungeon='))?.slice('--dungeon='.length) || 'ember_volcano';
 const difficulty = args.find(arg => arg.startsWith('--difficulty='))?.slice('--difficulty='.length)
   ?? (flag('--nightmare') || contract !== null ? 'nightmare' : 'normal');
@@ -54,6 +55,11 @@ vm.runInContext(coreBundle(repo), sandbox);
 const core = sandbox.RelayCore;
 const roster = RelayRoster.create(core, { sp });
 const rules = { heirloom: !flag('--no-heirloom'), lastStand: !flag('--no-laststand') };
+const legacyProfile = () => {
+  const profile = Meta.createProfile();
+  profile.ui.entry.legacy = true;
+  return profile;
+};
 
 const strength = id => RelayRoster.strength(roster.card(id));
 const strongest = ids => ids.slice().sort((a, b) => strength(b) - strength(a));
@@ -185,7 +191,7 @@ function chooseDoor(run, naive) {
     const shorter = run.doors.reduce((best, door) => door.enemies.length < best.enemies.length ? door : best);
     return shorter;
   }
-  if (spring && run.crystals >= (run.bench.length < 3 ? 1 : 3)) return spring;
+  if (spring && run.crystals >= (run.features?.springPick === false || run.bench.length < 3 ? 1 : 3)) return spring;
   if (altar) return altar;
   if (run.floor === 2 && run.doors[1]?.risk) return run.seed % 2 ? run.doors[1] : run.doors[0];
   if (run.doors.some(door => door.type === 'treasure')) {
@@ -214,7 +220,8 @@ function resolveChoices(run, naive) {
       else break;
     } else if (pending.kind === 'reinforcement') {
       const id = naive ? pending.candidates[0] : strongest(pending.candidates)[0];
-      const replaceId = run.bench.length === ROSTER_LIMIT ? weakestReserve(run) : null;
+      const incoming = !run.drawRuleVersion || ![run.bench, run.fallen, run.released].some(ids => ids.includes(id));
+      const replaceId = incoming && run.bench.length === ROSTER_LIMIT ? weakestReserve(run) : null;
       const pass = replaceId && (naive || strength(id) <= strength(replaceId));
       checked(R.resolveReinforcement(run, { key: pending.key, id: pass ? null : id, replaceId: pass ? null : replaceId }));
     } else if (pending.kind === 'altar') {
@@ -243,12 +250,13 @@ function weakestReserve(run) {
 
 export function playRun(dungeonId, seed, {
   profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, doorOverride, serviceOverride,
-  firstMain = false, difficulty: selectedDifficulty = difficulty
+  firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty
 } = {}) {
   const profileView = profile ? Meta.startView(profile, dungeonId) : { bossOrder: firstMain };
   const intro = DUNGEONS[dungeonId].layout === 'intro';
   const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : selectedDifficulty,
     contract: intro ? null : contract, seed, profileView, tempoVersion, lessonVersion, plain: flag('--plain') });
+  if (legacyDraws) delete run.drawRuleVersion;
   let heirloomsGained = 0;
   resolveChoices(run, naive);
   while (run.phase !== 'done') {
@@ -265,7 +273,13 @@ export function playRun(dungeonId, seed, {
     } else if (door.type === 'spring') {
       if (!naive && run.bench.length < ROSTER_LIMIT && run.crystals >= R.COST.pick) {
         const offer = R.springPick(run);
-        if (offer.ok) checked(R.springTake(run, strongest(offer.candidates)[0]));
+        if (offer.ok) {
+          const id = strongest(offer.candidates)[0];
+          if (run.drawRuleVersion === 2) {
+            const { slotId } = offer.slots.find(slot => slot.id === id);
+            checked(R.commitSpringOffer(run, { offerKey: offer.key, slotId }));
+          } else checked(R.springTake(run, id));
+        }
       }
       while (run.bench.length < ROSTER_LIMIT && R.springDraw(run).ok) { /* Draw only while the pool and crystals allow it. */ }
     } else if (door.type === 'treasure') {
@@ -357,7 +371,7 @@ function measureBossOrder() {
     for (let i = 1; i <= pairs; i++) {
       const { run, end } = playRun('dawn_forest', 17 + 6151 * i, { naive: true });
       const recruits = end.recruitable.slice(0, 1);
-      const intro = Meta.applyRunEnd(Meta.createProfile(), run, { recruits });
+      const intro = Meta.applyRunEnd(legacyProfile(), run, { recruits });
       checked(intro.announce);
       const seed = 1000003 + 7919 * i;
       const baseline = playRun(id, seed, { profile: intro.profile, naive: true });
@@ -379,7 +393,7 @@ function measureContracts() {
   const rate = (n, count) => `${n}/${count} (${percent(n, count)})`;
   const total = { met: 0, paid: 0, stamped: 0, clear: 0 };
   for (const id of dungeons) {
-    const profile = Meta.createProfile();
+    const profile = legacyProfile();
     profile.unlockedDungeons.push(id);
     profile.nightmareUnlocks.push(id);
     const counts = { met: 0, paid: 0, stamped: 0, clear: 0 };
@@ -409,7 +423,7 @@ function measureFirstMain() {
     let gates = 0, reached = 0, wins = 0;
     for (let i = 1; i <= runs; i++) {
       const intro = playRun('dawn_forest', seedOffset + 17 + 6151 * i, { naive: true, opening: i % 2 ? 'stand' : 'rescue' });
-      const { profile } = Meta.applyRunEnd(Meta.createProfile(), intro.run, { recruits: intro.end.recruitable.slice(0, 1) });
+      const { profile } = Meta.applyRunEnd(legacyProfile(), intro.run, { recruits: intro.end.recruitable.slice(0, 1) });
       const { run } = playRun(id, seedOffset + 1000003 + 7919 * i, { profile, naive: true });
       reached += Number(run.floor >= 4);
       gates += Number(run.stats.gateWins > 0);
@@ -419,34 +433,37 @@ function measureFirstMain() {
   }
 }
 
-function measureEasy() {
+function measureEasy(entry = false) {
   const totals = { normal: 0, easy: 0 };
   const main = ['ember_volcano', 'twilight_cathedral'];
   const rate = (wins, count) => `${wins}/${count} · ${percent(wins, count)}`;
   const delta = (normal, easy, count) => `${(100 * (easy - normal) / count).toFixed(1)} pp`;
-  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${runs} pairs per dungeon · careless, default formation`);
+  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${runs} seeds per dungeon · careless, default formation`);
   console.log(`Main seeds: ${seedOffset + 26011221} + 7919 × i, i = 1…${runs}`);
-  console.log('| Dungeon | Journey | Easy | Difference |');
-  console.log('| --- | ---: | ---: | ---: |');
+  console.log(entry ? '| Dungeon | First main (easy) |' : '| Dungeon | Journey | Easy | Difference |');
+  console.log(entry ? '| --- | ---: |' : '| --- | ---: | ---: | ---: |');
   for (const id of main) {
     const wins = { normal: 0, easy: 0 };
     for (let i = 1; i <= runs; i++) {
+      const initial = entry ? Meta.createProfile() : legacyProfile();
       const intro = playRun('dawn_forest', seedOffset + 25300057 + 6151 * i, {
-        naive: true, opening: i % 2 ? 'stand' : 'rescue'
+        profile: initial, naive: true, opening: i % 2 ? 'stand' : 'rescue'
       });
-      const { profile } = Meta.applyRunEnd(Meta.createProfile(), intro.run, { recruits: intro.end.recruitable.slice(0, 1) });
+      const { profile } = Meta.applyRunEnd(initial, intro.run, { recruits: intro.end.recruitable.slice(0, 1) });
       const seed = seedOffset + 26011221 + 7919 * i;
-      for (const difficulty of Object.keys(wins)) {
+      for (const difficulty of entry ? ['easy'] : Object.keys(wins)) {
         const { end } = playRun(id, seed, { difficulty, profile, naive: true });
         wins[difficulty] += Number(end.result === 'win');
       }
     }
     totals.normal += wins.normal;
     totals.easy += wins.easy;
-    console.log(`| ${id} | ${rate(wins.normal, runs)} | ${rate(wins.easy, runs)} | ${delta(wins.normal, wins.easy, runs)} |`);
+    console.log(entry ? `| ${id} | ${rate(wins.easy, runs)} |`
+      : `| ${id} | ${rate(wins.normal, runs)} | ${rate(wins.easy, runs)} | ${delta(wins.normal, wins.easy, runs)} |`);
   }
   const count = runs * main.length;
-  console.log(`| Total | ${rate(totals.normal, count)} | ${rate(totals.easy, count)} | ${delta(totals.normal, totals.easy, count)} |`);
+  console.log(entry ? `| Total | ${rate(totals.easy, count)} |`
+    : `| Total | ${rate(totals.normal, count)} | ${rate(totals.easy, count)} | ${delta(totals.normal, totals.easy, count)} |`);
 }
 
 function battleMetrics(rooms, run, state, summary, result) {
@@ -574,6 +591,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (flag('--intent-audit')) measureIntents();
   else if (flag('--entry-audit')) measureEntry();
   else if (flag('--easy-audit')) measureEasy();
+  else if (flag('--entry-easy-audit')) measureEasy(true);
   else if (dailyFrom !== undefined) measureDaily();
   else if (flag('--first-main')) {
     if (difficulty !== 'normal') throw new RangeError('First main audit uses normal difficulty');

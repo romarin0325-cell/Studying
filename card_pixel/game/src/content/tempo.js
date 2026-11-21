@@ -1,5 +1,6 @@
 export const TEMPO_VERSION = 2;
 export const EASY_ENEMY_ATTACK = 0.65;
+export const ENTRY_FIRST_MAIN_ENEMY_HP = 0.79;
 export const START_MP = 65;
 export const REINFORCE_FLOORS = [1, 2, 6];
 export const ROSTER_LIMIT = 6;

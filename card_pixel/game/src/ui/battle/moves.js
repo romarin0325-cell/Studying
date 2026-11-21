@@ -1,7 +1,8 @@
 import { $$ } from '../dom.js';
+import { FIELD, GOOD } from './hud.js';
 
 export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp, card, spr }) {
-  const { S, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
+  const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY, reducedMotion } = St;
 
   const label = (text, actor, cls, dy) => St.number(text, St.X(actor), HY(actor) - 4 + (dy || 0), 'tag ' + (cls || ''));
 
@@ -27,12 +28,15 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     applyHp(e);
     if (!actor) return;
     const ratio = e.amount / unit.maxHp, big = ratio >= 0.3 || o.crit || o.big;
-    actor.pose = 'hurt'; actor.white = 0.09; actor.ox = (isAlly ? -1 : 1) * 4;
-    tween(actor, { ox: 0 }, 0.25);
-    S.shake = Math.max(S.shake, Math.min(7, 1 + ratio * 12 + (o.crit ? 2 : 0)));
-    if (o.crit) S.flash = Math.max(S.flash, 0.5);
-    St.sparks(St.X(actor), CY(actor), big ? 22 : 8, o.colors || St.ELEMENT_COLORS.none, big ? 100 : 50);
-    const text = (o.prefix || '') + e.amount.toLocaleString('en-US') + (o.adv ? ' ▲' : '');
+    actor.pose = 'hurt';
+    if (!reducedMotion()) {
+      actor.white = 0.09; actor.ox = (isAlly ? -1 : 1) * 4;
+      tween(actor, { ox: 0 }, 0.25);
+      S.shake = Math.max(S.shake, Math.min(7, 1 + ratio * 12 + (o.crit ? 2 : 0)));
+      if (o.crit) S.flash = Math.max(S.flash, 0.5);
+      St.sparks(St.X(actor), CY(actor), big ? 22 : 8, o.colors || St.ELEMENT_COLORS.none, big ? 100 : 50);
+    }
+    const text = (o.prefix || '') + (o.label ?? e.amount.toLocaleString('en-US')) + (o.adv ? ' ▲' : '');
     St.number(text, St.X(actor), HY(actor) - (big ? 8 : 2), (o.crit ? 'crit ' : big ? 'big ' : '') + (isAlly ? 'foe' : ''));
     sfx.hit(big); if (o.crit) sfx.crit();
     if (!isAlly && e.amount > stats.best) stats.best = e.amount;
@@ -55,22 +59,25 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   /* What each sprite's attack frame shows. A move of the other kind lunges or casts from the idle frame. */
   const ATTACK_FRAME = { red_dragon: 'mag', ash: 'mag', flame_sage: 'mag', luna: 'phy', zeke: 'phy', cherry_prince: 'phy', golem: 'phy' };
   const poseFor = (actor, kind) => (!ATTACK_FRAME[actor.sprite] || ATTACK_FRAME[actor.sprite] === kind ? 'attack' : 'idle');
-  async function bigMove(p, seen) {
+  async function bigMove(p) {
     const { actor, target, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
-    const key = (isFoe ? 'f:' : 'a:') + skill.name, first = !seen.has(key);
-    seen.add(key);
     const caster = unitOf(p.e.who).name;
     const who = isFoe && p.e.ult ? '필살' : p.e.heirloom ? '유품 · ' + (donor?.name || caster) : caster;
     actor.front = 1;
     $$('#fx .num').forEach(n => n.remove());
     const plate = St.plate(who, skill.name, isFoe && p.e.ult ? '#ff6b5e' : p.e.heirloom ? '#ffc857' : colors[1], dir);
+    if (reducedMotion()) {
+      actor.pose = poseFor(actor, p.kind);
+      p.stage = 'hit';
+      setTimeout(() => plate.remove(), 450);
+      await wait(0.12);
+      return;
+    }
     tween(S, { dark: isFoe ? 0.45 : 0.35 }, 0.12);
     sfx.charge();
     actor.pose = poseFor(actor, p.kind); actor.white = 0.06;
-    if (first) {
-      St.converge(St.X(actor) + dir * 10, CY(actor), 18, colors, 34, 0.3);
-      await St.punch(St.X(actor) + dir * 14, CY(actor) - 6, 0.18);
-    } else await wait(0.12);
+    St.converge(St.X(actor) + dir * 10, CY(actor), 18, colors, 34, 0.3);
+    await St.punch(St.X(actor) + dir * 14, CY(actor) - 6, 0.18);
     const tx = St.X(target), ty = CY(target);
     if (p.effectSprite) St.fly(St.X(actor) + dir * 14, CY(actor), tx, ty, 0.28, colors[1], 16, 2, null, p.effectSprite);
     const original = donor?.skills.find(s => s.name === skill.name && s.type === skill.type);
@@ -122,6 +129,8 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   async function quietMove(p) {
     const { actor, target, isFoe, colors } = p, dir = isFoe ? -1 : 1;
     actor.pose = poseFor(actor, p.kind);
+    p.stage = 'hit';
+    if (reducedMotion()) return;
     if (p.kind === 'phy') {
       sfx.swing(); await tween(actor, { ox: dir * (actor.pose === 'attack' ? 14 : 22), oy: (FY(target) - FY(actor)) * 0.5 }, 0.1, 'in');
       St.slash(St.X(target) - dir * 6, CY(target) - 8, colors[0], dir);
@@ -131,32 +140,38 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
       for (let i = 0; i < 12; i++) St.fly(fromX, fromY, St.X(target) - 8 + Math.random() * 16, CY(target) - 10 + Math.random() * 24, 0.16 + Math.random() * 0.1, colors[i % 3], 6, i % 4 ? 1 : 2);
       await wait(0.22);
     }
-    p.stage = 'hit';
   }
-  async function strikeAndHit(p, e, stats, seen, finishHit) {
+  async function strikeAndHit(p, step, stats, hasEffects, finishHit) {
+    const e = step.event;
     p.actor.front = 1;
-    if (p.stage === 'ready') { if (isBig(p)) await bigMove(p, seen); else await quietMove(p); }
+    if (p.stage === 'ready') { if (isBig(p)) await bigMove(p); else await quietMove(p); }
+    p.hitAt = clock.t;
     if (finishHit) {
       p.finishing = true;
       return finishHit(e);
     }
     const calc = e.calc || {};
-    impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p) }, stats);
-    await wait(0.14);
+    impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p), label: step.label }, stats);
+    if (!hasEffects) await wait(0.14);
   }
-  async function strikeMiss(p, why, seen) {
+  async function strikeMiss(p, why) {
     const { actor, target, isFoe } = p, dir = isFoe ? -1 : 1;
     actor.front = 1;
-    if (isBig(p)) await bigMove(p, seen); else await quietMove(p);
-    if (why === 'evasion') { tween(target, { ox: dir * 10 }, 0.08).then(() => tween(target, { ox: 0 }, 0.2)); label('회피!', target, 'good'); sfx.miss(); }
-    else { St.ring(St.X(target), CY(target), why === 'barrier' ? '#ffc857' : '#8ea2ff', 28); label(why === 'barrier' ? '배리어 무효!' : '매직가드 무효!', target, 'good'); sfx.guard(); }
+    if (isBig(p)) await bigMove(p); else await quietMove(p);
+    if (why === 'evasion') {
+      if (!reducedMotion()) tween(target, { ox: dir * 10 }, 0.08).then(() => tween(target, { ox: 0 }, 0.2));
+      label('회피!', target, 'good'); sfx.miss();
+    } else {
+      St.ring(St.X(target), CY(target), why === 'barrier' ? '#ffc857' : '#8ea2ff', 28, 0.3, reducedMotion());
+      label(why === 'barrier' ? '배리어 무효!' : '매직가드 무효!', target, 'good'); sfx.guard();
+    }
     await wait(0.3);
   }
-  async function settleMove(p, seen) {
+  async function settleMove(p) {
     try {
-      if (p.stage === 'ready' && p.e.salience === 'boss' && p.target) await bigMove(p, seen);
+      if (p.stage === 'ready' && p.e.salience === 'boss' && p.target) await bigMove(p);
       if (p.stage === 'ready') { p.actor.pose = poseFor(p.actor, p.kind); await wait(0.12); }
-      if (p.finishing) Object.assign(p.actor, { ox: 0, oy: 0 });
+      if (p.finishing || reducedMotion()) Object.assign(p.actor, { ox: 0, oy: 0 });
       else await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
       p.actor.pose = 'idle'; p.actor.front = 0;
       const t = p.target, tu = p.e.target && unitOf(p.e.target);
@@ -170,6 +185,44 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     }
   }
 
+  async function showEffects(plan, fieldSlot) {
+    if (!plan.length) return;
+    const fields = [], recipients = new Map();
+    for (const effect of plan) {
+      if (effect.at === 'field') {
+        fields.push(effect);
+        continue;
+      }
+      const actor = actorOf(effect.who);
+      if (!actor?.vis) continue;
+      if (effect.kind === 'delay') {
+        label(effect.label, actor, 'good');
+        continue;
+      }
+      const list = recipients.get(actor) ?? [];
+      list.push(effect);
+      recipients.set(actor, list);
+    }
+    if (fields.length) {
+      const colors = fields.flatMap(effect => effect.kind === 'field-add' ? effect.ids.map(id => FIELD[id]?.[1] || '#ccc') : []);
+      St.fieldNotice(fieldSlot, fields.map(effect => effect.label).join(' / '), colors);
+      sfx.buff();
+    }
+    const still = reducedMotion();
+    for (const [actor, buffs] of recipients) {
+      const ids = buffs.flatMap(effect => effect.ids);
+      const good = ids.some(id => GOOD.includes(id));
+      label(buffs.map(effect => effect.label).join(' · '), actor, good ? 'good' : 'bad');
+      if (good) {
+        St.ring(St.X(actor), CY(actor), '#5fd4a8', 22, 0.3, still);
+        sfx.guard();
+      } else if (ids.some(id => !id.startsWith('defProtocol'))) {
+        if (!still) St.sparks(St.X(actor), CY(actor), 7, ids.includes('burn') ? ['#ff5a3c', '#ffe07a'] : ['#b999ff', '#6b2433'], 40);
+        sfx.debuff();
+      }
+    }
+    await wait(0.24);
+  }
 
-  return { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove };
+  return { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects };
 }

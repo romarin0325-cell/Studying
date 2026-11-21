@@ -1,4 +1,4 @@
-// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--runs=2] [--headed] [--entry-count]
+// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--tutorial=both|follow|skip] [--intro-only] [--runs=2] [--headed] [--no-build]
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -55,6 +55,8 @@ if (args.includes('--entry-count')) {
 const option = (name, fallback) => args.find(arg => arg.startsWith(name + '='))?.slice(name.length + 1) ?? fallback;
 const seeds = option('--seeds', '7,21').split(',').map(Number);
 const runCount = Number(option('--runs', '2'));
+const tutorialMode = option('--tutorial', 'both');
+assert(['both', 'follow', 'skip'].includes(tutorialMode), 'Use --tutorial=both, --tutorial=follow or --tutorial=skip');
 assert(seeds.every(seed => Number.isSafeInteger(seed) && seed > 0 && seed <= 0xffffffff),
   'Use positive 32-bit seeds, for example --seeds=7,21');
 assert(Number.isSafeInteger(runCount) && runCount > 0, 'Use a positive run count, for example --runs=2');
@@ -65,8 +67,8 @@ const screenshotLabels = [
   'preparation', 'collection', 'notebook', 'records'
 ];
 const openingChoices = {
-  stand: { label: '애쉬로 마지막 공격', lead: '눈토끼', next: '눈토끼와 동행' },
-  rescue: { label: '애쉬 생존 후퇴', lead: '애쉬', next: '애쉬와 동행' }
+  stand: { label: '애쉬로 마지막 공격', lead: '눈토끼', next: '다음 동료 고르기' },
+  rescue: { label: '물러나기', lead: '애쉬', next: '다음 동료 고르기' }
 };
 
 async function launch() {
@@ -171,6 +173,7 @@ function look({ canRetreat = false } = {}) {
   ];
   return {
     screen, result, ready, opening, tap, form, formIndex, fighterId,
+    coach: document.querySelector('.coach:not([hidden])')?.dataset.coachStep,
     visible: JSON.stringify([screen, signature(active), signature(sheet), result]),
     bigMove: inBattle && !!active.querySelector('.skillplate'),
     dungeonId: run?.dungeonId,
@@ -179,7 +182,7 @@ function look({ canRetreat = false } = {}) {
     room: run?.room?.type,
     crystals: run?.crystals,
     pendingKind: run?.pending?.kind,
-    reinforcementFull: run?.pending?.kind === 'reinforcement' && run.bench.length >= (run.pending.limit ?? 6),
+    retry: !!run?.awaitingRetryResult,
     doors: screen === 'map' ? run.doors.map(({ type, index, enemies }) => ({ type, index, battle: !!enemies.length })) : [],
     outcome: run?.result,
     stats: run?.stats
@@ -204,9 +207,11 @@ async function clickIfVisible(page, selector) {
   return true;
 }
 
-async function playTitle({ page, shot }) {
+async function playTitle({ page, shot, skipTutorial }) {
   await page.locator('#title.on').waitFor();
+  await page.locator('.coach[data-coach-step="title"]').waitFor();
   await shot('title');
+  if (skipTutorial) await page.locator('.coach-skip').click();
   await page.locator('#title.on #b-start').click();
 }
 
@@ -235,30 +240,27 @@ async function playMap({ page }, state) {
   const safe = state.doors.find(door => door.type !== 'elite');
   const door = (state.crystals < 3 && elite) || safe || state.doors[0];
   assert(door, 'No doors on floor ' + state.floor);
-  const map = page.locator('#map.on');
-  if (!door.battle || state.doors.length > 1) await map.locator('.door-entry[data-door="' + door.index + '"]').click();
-  if (door.battle) {
-    if (door.type === 'boss') await clickIfVisible(page, '#map.on .relay-alternative#b-alternate-order');
-    const party = await map.locator('.map-actor').evaluateAll(nodes => nodes.map(node => node.dataset.sheet));
-    await map.locator('#b-go').click();
-    await page.locator('#battle.on').waitFor();
-    assert.deepEqual(await page.evaluate(() => window.__game.B.party.filter(Boolean)), party);
-  }
+  await page.locator('#map.on .door-entry[data-door="' + door.index + '"]').click();
   await page.locator('#map.on').waitFor({ state: 'hidden' });
+  if (door.battle) await page.locator('#order.on').waitFor();
 }
 
-async function playOrder({ page }, state) {
-  if (state.room === 'boss') await clickIfVisible(page, '#order.on .relay-alternative#b-alternate-order');
-  await page.locator('#order.on #b-go').click();
+async function playOrder({ page }) {
+  const order = page.locator('#order.on');
+  const go = order.locator('#b-go');
+  assert.equal(await go.innerText(), '이대로 전투 시작');
+  const names = await order.locator('.relay-seat b').allTextContents();
+  await go.click();
+  await page.locator('#battle.on').waitFor();
+  const actual = await page.evaluate(() => window.__game.B.party.map(id => id && window.__game.roster.card(id).name));
+  assert.deepEqual(actual, names.map(name => name === '빈 자리' ? null : name.replace(/★\d+$/, '')));
 }
 
-async function playReinforce({ page }, state) {
+async function playReinforce({ page }) {
   const screen = page.locator('#result.on .victory-decision');
-  if (state.reinforcementFull) {
-    await screen.locator('#b-reinforce-pass').click();
-    return;
-  }
   await screen.locator('[data-candidate]').first().click();
+  const outgoing = screen.locator('[data-release]').last();
+  if (await outgoing.isVisible()) await outgoing.click();
   await screen.locator('#b-reinforce-take').click();
 }
 
@@ -281,7 +283,8 @@ async function playSpring({ page }, state, expedition) {
     return;
   }
   if (expedition.springAttempt !== state.floor) {
-    const purchase = state.crystals >= 3 ? '#b-pick' : '#b-draw';
+    const purchase = state.crystals >= 3 && await page.locator('#spring.on #b-pick:not([disabled])').count()
+      ? '#b-pick' : '#b-draw';
     if (await clickIfVisible(page, '#spring.on ' + purchase + ':not([disabled])')) {
       expedition.springAttempt = state.floor;
       return;
@@ -325,18 +328,31 @@ async function playGateReward({ page }) {
 
 async function playBattle({ page }, state, expedition) {
   if (state.result) {
-    if (state.pendingKind === 'reinforcement') return playReinforce({ page }, state);
+    const result = page.locator('#battle.on #result.on');
+    if (await clickIfVisible(page, '#result.on #b-reinforce-done, #result.on #b-gate-done')) return;
+    const next = result.locator('#b-next');
+    if (await next.isVisible()) {
+      const label = await next.innerText();
+      const labels = { reinforcement: '동료 보충하기', gate: '문지기 보상 고르기', relic: '유물 보상 고르기' };
+      if (state.room === 'borrowed') assert.equal(label, openingChoices[expedition.openingPath].next);
+      else if (state.retry) assert.equal(label, '편성 바꿔 재도전');
+      else if (labels[state.pendingKind]) assert.equal(label, labels[state.pendingKind]);
+      else if (state.outcome) assert.match(label, /^(영입할 동료 고르기|다음 원정 후보 고르기|관측소로)$/);
+      else assert.equal(label, state.floor + 1 + '층으로');
+      if (label === '관측소로') expedition.returned = state;
+      await next.click();
+      return;
+    }
+    if (state.pendingKind === 'reinforcement') return playReinforce({ page });
     if (state.pendingKind === 'gate') return playGateReward({ page });
     if (state.pendingKind === 'relic') return playTreasure({ page }, state);
-    const next = page.locator('#battle.on #result.on #b-next');
-    if (state.room === 'borrowed') {
-      assert.equal(await next.innerText(), openingChoices[expedition.openingPath].next);
-    }
-    await next.click();
-    return;
+    throw new Error('Result has no available action');
   }
   if (!state.ready) return;
-  if (state.room === 'borrowed' && !expedition.borrowedStarted) {
+  if (state.coach === 'inherit' || state.coach === 'rescue') {
+    const target = state.coach === 'inherit' ? page.locator('#b-heir.on') : page.locator('.act').filter({ hasText: '실버스톰' });
+    await target.click();
+  } else if (state.room === 'borrowed' && !expedition.borrowedStarted) {
     assert.equal(state.fighterId, 'ash', 'The borrowed battle should start with Ash');
     assert(state.opening, 'Ash did not get the opening decision');
     const buttons = page.locator('#battle.on .opening-choice:not([disabled])');
@@ -394,7 +410,11 @@ async function playDestinations({ page, shot }, tried) {
 
 async function playPreparation({ page, shot }) {
   const depart = page.locator('#sheet.on .meta-prep #meta-start-expedition');
-  await depart.waitFor();
+  if (!await depart.isVisible()) {
+    assert.equal(await page.evaluate(() => window.__game.run?.difficulty), 'easy');
+    return;
+  }
+  await dismissTour(page);
   const journey = page.locator('#sheet.on [data-difficulty="normal"]');
   if (await journey.isVisible() && await journey.getAttribute('aria-pressed') !== 'true') await journey.click();
   await shot('preparation');
@@ -406,6 +426,7 @@ async function playHubPages({ page, shot }) {
   for (const id of ['collection', 'notebook', 'records']) {
     await page.locator('#hub.on [data-meta-page="' + id + '"]').click();
     await page.locator('#' + id + '.on').waitFor();
+    await dismissTour(page);
     await shot(id);
     await page.locator('#' + id + '.on .meta-back').click();
   }
@@ -422,6 +443,10 @@ const roomPlayers = {
   treasure: playTreasure,
   battle: playBattle
 };
+
+function dismissTour(page) {
+  return clickIfVisible(page, '.coach:not([hidden]) .coach-next:not([hidden])');
+}
 
 async function captureRoom({ shot }, state) {
   if (state.screen === 'awaken') await shot('first-awakening');
@@ -479,8 +504,13 @@ async function playExpedition(campaign, dungeon, depart, openingPath) {
   await depart(campaign);
   for (;;) {
     const state = await page.evaluate(look, { canRetreat: expedition.retreats === 0 });
-    assert.equal(state.dungeonId, dungeon, 'Unexpected expedition');
     const now = performance.now();
+    if (expedition.returned && ['hub', 'ending'].includes(state.screen)) {
+      await collectFrames(page, expedition);
+      report(campaign.seed, expedition, expedition.returned, (now - expedition.started) / 1000);
+      return;
+    }
+    assert.equal(state.dungeonId, dungeon, 'Unexpected expedition');
     if (state.visible !== previousScreen) {
       lastProgress = now;
       previousScreen = state.visible;
@@ -491,6 +521,7 @@ async function playExpedition(campaign, dungeon, depart, openingPath) {
     }
     if (now - lastProgress >= 25000) await failStuck(campaign, state);
     if (state.stats.retries >= 20) throw new Error('Intro gate retry limit reached on floor ' + state.floor);
+    if (state.coach?.startsWith('tour-') && await dismissTour(page)) continue;
     // A full roster (six) asks who leaves before a spring draw, a gate captive or an event recruit joins.
     if (await chooseWhoLeaves(page)) continue;
     await captureRoom(campaign, state);
@@ -547,8 +578,28 @@ async function playCampaign(campaign, openingPath) {
   url.searchParams.set('seed', seed);
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });
   await playExpedition(campaign, 'dawn_forest', playTitle, openingPath);
-  const tried = new Set();
-  for (let i = 0; i < runCount; i++) {
+  const first = 'ember_volcano';
+  async function departFirst() {
+    if (!campaign.skipTutorial) await page.locator('.coach[data-coach-step="departure"]').waitFor();
+    await page.locator('#hub.on #meta-depart').click();
+    assert.equal(await page.locator('#sheet.on .meta-prep').count(), 0);
+    const entry = await page.evaluate(() => ({
+      dungeon: window.__game.run.dungeonId,
+      difficulty: window.__game.run.difficulty,
+      tutorial: JSON.parse(localStorage.getItem('relaymare.session')).profile.ui.entry
+    }));
+    assert.equal(entry.dungeon, first);
+    assert.equal(entry.difficulty, 'easy');
+    assert.equal(entry.tutorial.skipped, campaign.skipTutorial);
+    if (!campaign.skipTutorial) assert(entry.tutorial.done.includes('departure'));
+  }
+  if (args.includes('--intro-only')) {
+    await departFirst();
+    return;
+  }
+  await playExpedition(campaign, first, departFirst);
+  const tried = new Set([first]);
+  for (let i = 1; i < runCount; i++) {
     const dungeon = await playDestinations(campaign, tried);
     tried.add(dungeon);
     await playExpedition(campaign, dungeon, playPreparation);
@@ -572,8 +623,9 @@ async function playSeed(browser, seed, index) {
     let openingPath = index % 2 ? 'rescue' : 'stand';
     if (seed === 7) openingPath = 'stand';
     if (seed === 21) openingPath = 'rescue';
-    const campaign = { page, seed, shot, resumed: false };
-    console.log('\nCampaign ' + seed + ' · opening: ' + openingChoices[openingPath].label);
+    const skipTutorial = tutorialMode === 'skip' || tutorialMode === 'both' && index % 2 === 1;
+    const campaign = { page, seed, shot, resumed: false, skipTutorial };
+    console.log('\nCampaign ' + seed + ' · opening: ' + openingChoices[openingPath].label + ' · ' + (skipTutorial ? 'skip' : 'follow'));
     await Promise.race([watchBrowser(page), playCampaign(campaign, openingPath)]);
   } finally {
     const missing = screenshotLabels.filter(label => !taken.has(label));
@@ -582,7 +634,7 @@ async function playSeed(browser, seed, index) {
   }
 }
 
-execFileSync(process.execPath, [path.join(game, 'build.mjs')], { cwd: repo, stdio: 'inherit' });
+if (!args.includes('--no-build')) execFileSync(process.execPath, [path.join(game, 'build.mjs')], { cwd: repo, stdio: 'inherit' });
 await fs.mkdir(shots, { recursive: true });
 const browser = await launch();
 try {

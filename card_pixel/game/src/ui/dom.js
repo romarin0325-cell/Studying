@@ -5,6 +5,7 @@ export const svg = d => '<svg viewBox="0 0 12 12" width="14" height="14" shape-r
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 export function show(id) {
+  const before = $('.screen.on')?.id;
   $$('.screen').forEach(screen => {
     const on = screen.id === id;
     if (!on && screen.classList.contains('on') && !['title', 'battle'].includes(screen.id)) {
@@ -12,4 +13,17 @@ export function show(id) {
     }
     screen.classList.toggle('on', on);
   });
+  if (before && before !== id) wipe();
+}
+
+/* A navy band sweeps across when the screen changes. It never takes clicks. */
+function wipe() {
+  const frame = $('#frame');
+  if (!frame || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  frame.querySelector(':scope > .wipe')?.remove();
+  const band = document.createElement('div');
+  band.className = 'wipe';
+  band.setAttribute('aria-hidden', 'true');
+  frame.append(band);
+  setTimeout(() => band.remove(), 520);
 }

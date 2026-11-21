@@ -1,12 +1,17 @@
 import { $, $$, esc } from '../dom.js';
-import { TYPE, formatRange as damageRange, skillText, traitText } from '../widgets.js';
+import { TYPE, formatRange as damageRange, hasFinalConsonant, skillText, traitText } from '../widgets.js';
 import { relicEffect, relicMarks } from '../relics.js';
 import { FIELD } from './hud.js';
 import { skillFields } from './fields.js';
-import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
+import { heirloomSkill } from '../../engine/bridge.js';
+import { TERMS } from '../glossary.js';
 
 const previewDamage = p => p.min != null && p.max != null ? damageRange([p.min, p.max]) : String(p.dmg ?? '');
-const hasFinalConsonant = name => /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
+export function killLabel(preview, hp) {
+  if (!preview || preview.delayed || hp <= 0) return '';
+  if (preview.kill && (preview.min ?? preview.dmg) >= hp) return '처치';
+  return (preview.max ?? preview.dmg) >= hp ? '명중 시 처치' : '';
+}
 
 export function commandRelics(artifacts, option, actor, { enemy, turn }) {
   const normal = option.index === 0;
@@ -105,13 +110,13 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     const actorId = stand.actorId ?? current.form ?? B.party[B.D.cur];
     const heirloom = heirloomSkill(card(actorId));
     const retreatHp = next && rescue.incomingHpAfter != null
-      ? next.name + ' HP ' + next.hp + ' → ' + damageRange(rescue.incomingHpAfter) : '다음 동료가 대신 피격';
+      ? next.name + ' HP ' + next.hp + ' → ' + damageRange(rescue.incomingHpAfter) : '다음 동료가 출전';
     const inheritance = next && heirloom ? '쓰러지면 ' + next.name + (hasFinalConsonant(next.name) ? '이 ' : '가 ') +
       heirloom.name + (hasFinalConsonant(heirloom.name) ? '을' : '를') + ' 계승' : '쓰러지면 다음 동료에게 유품 계승';
     $('#opening-face').innerHTML = faceBadge(actorId, current.name) + '<b>HP ' + current.hp + ' / ' + current.maxHp + '</b>';
-    $('#acts').innerHTML = '<button class="act opening-choice rescue" data-opening-rescue><b>' + esc(current.name) +
-      ' 생존 후퇴</b><small>' + esc(retreatHp) + '</small></button>' +
-      '<button class="act opening-choice stand" data-i="' + stand.optionIndex + '"><b>' + esc(current.name) +
+    $('#acts').innerHTML = '<button class="act opening-choice rescue" data-opening-rescue data-coach="retreat"><b>' + TERMS.retreat.short +
+      '</b><small>' + esc(current.name + ' 생존 · ' + TERMS.retreat.detail) + '</small><small>' + esc(retreatHp) + '</small></button>' +
+      '<button class="act opening-choice stand" data-coach="skill" data-i="' + stand.optionIndex + '"><b>' + esc(current.name) +
       '로 마지막 공격</b><small>' + esc(inheritance) + '</small><small>' + esc(B.D.enemy.name) + '에 피해 ' +
       esc(damageRange(stand.damageRange)) + '</small></button>';
   }
@@ -144,15 +149,17 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
         const damage = previewDamage(p);
         r2 = '<strong' + (damage.includes('~') ? ' class="range"' : '') + '>' + damage + '</strong>' +
           (p.instant ? '<small>즉시</small>' : adv ? '<small>▲상성</small>' : '') +
-          (p.forcedCrit ? '<small>확정 치명</small>' : '') + (p.kill ? '<u>처치</u>' : '');
+          (p.forcedCrit ? '<small>명중 시 치명타</small>' : '');
       }
       else {
         const [forecast, description] = supportLine(o, B.intent);
         r2 = forecast ? '<strong class="txt">' + esc(forecast) + '</strong>' : '';
         if (description) r3 = description;
       }
+      const kill = killLabel(p, D.enemy.hp);
+      if (kill) r2 += '<u>' + kill + '</u>';
       const marks = relicMarks(core, markedRelics(o));
-      return '<button class="act ' + o.type + '" data-i="' + o.index + '"' + (usable ? '' : ' disabled') + '>' +
+      return '<button class="act ' + o.type + '" data-coach="skill" data-i="' + o.index + '"' + (usable ? '' : ' disabled') + '>' +
         '<span class="ic">' + TYPE[o.type].slice(0, 1) + marks + '</span><span class="tx">' +
         '<span class="r1"><b>' + esc(name) + '</b><em>' + (o.cost ? 'MP ' + o.cost : '') + '</em></span>' +
         '<span class="r2">' + r2 + '</span><span class="r3">' + esc(r3) + '</span></span></button>';
@@ -165,21 +172,38 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       const p = heir.preview;
       h.className = 'on'; h.dataset.i = heir.index; h.disabled = false;
       const forecast = p?.instant ? previewDamage(p) + ' · 즉시' : p?.delayed ? delayedLine(heir, D.turn) : p ? previewDamage(p) : '';
-      h.innerHTML = '<small>유품 · ' + esc(heir.heirFromName || '') + '</small><b>' + esc(heir.name) + '</b><strong>' + esc(forecast) + '</strong>' +
-        relicMarks(core, markedRelics(heir)) + (p?.kill ? '<u>처치</u>' : '');
+      const kill = killLabel(p, D.enemy.hp);
+      h.innerHTML = '<small>' + TERMS.heirloom.short + ' · ' + esc(heir.heirFromName || '') + '</small><b>' + esc(heir.name) + '</b><strong>' + esc(forecast) + '</strong>' +
+        relicMarks(core, markedRelics(heir)) + (kill ? '<u>' + kill + '</u>' : '');
     } else { h.className = ''; h.innerHTML = ''; h.disabled = true; delete h.dataset.i; }
     const r = $('#b-retreat'), can = B.bridge.canRetreat();
     B.armed = false; r.className = ''; r.disabled = !can;
-    r.innerHTML = '↩ 후퇴<small>' + (B.bridge.retreatUsed ? '사용 완료' : can ? '안전 이탈 · 턴 소모' : '교대할 동료 없음') + '</small>';
+    const retreatPreview = can ? B.bridge.previewRetreat() : null;
+    r.innerHTML = '↩ ' + TERMS.retreat.short + '<small>' +
+      (can ? esc(D.allies[D.cur].name + ' 생존 · ' + retreatAction(retreatPreview)) :
+        B.bridge.retreatUsed ? '사용 완료' : '교대할 동료 없음') + '</small>' +
+      (can ? '<small>' + esc(retreatHp(retreatPreview)) + '</small>' : '');
+  }
+  function retreatAction(preview) {
+    return preview.intent.dmg ? TERMS.retreat.detail : '다음 동료 출전 · 적 ' + preview.intent.name;
+  }
+  function retreatHp(preview) {
+    const next = B.D.allies[preview.next.idx];
+    const hp = preview.dmg.map(damage => Math.max(0, next.hp - damage)).reverse();
+    return next.name + ' HP ' + next.hp + ' → ' + damageRange(hp);
   }
   function lockPanel() { $$('.act').forEach(b => { b.disabled = true; }); $('#b-retreat').disabled = true; $('#b-heir').disabled = true; }
   function playAction(index) {
     audio.unlockAudio(); sfx.tap();
-    play(B.bridge.act(index));
+    const events = B.bridge.act(index);
+    if (events.length) B.onAction?.(index, events);
+    play(events);
   }
   function retreat() {
     audio.unlockAudio(); sfx.tap();
-    play(B.bridge.retreat());
+    const events = B.bridge.retreat();
+    if (events.length) B.onAction?.('retreat', events);
+    play(events);
   }
   function formSheet(option) {
     const formIds = option.effects.find(e => e.type === 'transform_choice').forms;
@@ -235,44 +259,24 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
   });
   $('#b-heir').addEventListener('click', function () {
     if (B.busy || this.disabled || this.dataset.i == null) return;
-    audio.unlockAudio(); sfx.tap();
-    play(B.bridge.act(Number(this.dataset.i)));
+    playAction(Number(this.dataset.i));
   });
   $('#b-retreat').addEventListener('click', () => {
     if (B.busy || !B.bridge.canRetreat()) return;
     const r = $('#b-retreat');
     if (!B.armed) {
       const preview = B.bridge.previewRetreat();
-      const next = B.D.allies[preview.next.idx];
       const current = B.D.allies[B.D.cur];
-      const hp = preview.dmg.map(damage => Math.max(0, next.hp - damage)).reverse();
-      const skill = preview.intent.name;
-      const effect = preview.intent.resourceEffect;
-      const mp = effect?.kind === 'mp' && !effect.preventedBy ? ' · MP ' + effect.before + '→' + effect.after : '';
-      const line = preview.intent.dmg ? next.name + (hasFinalConsonant(next.name) ? '이 ' : '가 ') +
-        skill + (hasFinalConsonant(skill) ? '을' : '를') + ' 받음 · 명중 시 ' +
-        damageRange(preview.dmg) + ' · HP ' + next.hp + '→' + damageRange(hp) + mp :
-        next.name + ' 출전 · 적 ' + preview.intent.name + ' · HP ' + next.hp + '→' + next.hp;
       const pending = [...new Set(B.D.delayed?.filter(attack => attack.by === B.D.cur).map(attack => attack.name))];
       const warning = pending.length ? '예약한 ' + pending.join('·') + ' 취소됨' : '';
-      let outcomes;
-      const minimum = B.intent?.dmg?.[0];
-      if (minimum != null && current.hp <= minimum) {
-        const form = card(current.form || B.party[B.D.cur]);
-        const heir = form && heirloomSkill(form);
-        outcomes = [
-          '후퇴 시 ' + next.name + ' HP ' + next.hp + '→' + damageRange(hp),
-          '쓰러지면 ' + next.name + '에게 ' + (heir ? heir.name + ' ×' + HEIRLOOM_POWER : '넘길 유품 없음')
-        ];
-      }
+      const effect = preview.intent.resourceEffect;
+      const mp = effect?.kind === 'mp' && !effect.preventedBy ? ' · MP ' + effect.before + ' → ' + effect.after : '';
       B.armed = true;
       r.className = 'armed';
-      const notes = warning ? [warning] : outcomes || ['턴 소모 · 유품 없음'];
-      r.innerHTML = esc(current.name) + ' 후퇴 확정' + '<span class="retreat-face">' + faceBadge(next.form, next.name, 32) +
-        '<small>HP ' + next.hp + ' → ' + damageRange(hp) + '</small></span>' + notes.map(note => '<small>' + esc(note) + '</small>').join('');
+      r.innerHTML = TERMS.retreat.short + ' 확정<small>' + esc(current.name + ' 생존 · ' + retreatAction(preview)) +
+        '</small><small>' + esc(retreatHp(preview) + mp) + '</small>';
       $('#tally').innerHTML = '';
-      // The button already carries the outcomes unless the reserved-attack warning took its place.
-      ticker(warning && outcomes ? outcomes.join('\n') : line, true);
+      ticker([preview.intent.name, warning].filter(Boolean).join(' · '), true);
       sfx.tap();
       return;
     }

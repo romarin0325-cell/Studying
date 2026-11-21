@@ -17,7 +17,7 @@ export function endingScreen(node, { profile, widgets, goal, finish }) {
         ['원정', `${records.runs}회`],
         ['영입한 동료', `${companions.length}명`],
         ['최고 피해', hitText(records.bestHit, widgets.card)],
-        ['가장 오래 함께한 동료', longestText(records.longestServing, widgets.card)],
+        ['인연이 가장 높은 동료', longestText(records.longestServing, widgets.card)],
         ['생환 지역', regions.length ? `${regions.length}곳 · ${regions.map(region => region.name).join(' · ')}` : '기록 없음']
       ])}
     </section>

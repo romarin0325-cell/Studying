@@ -37,7 +37,7 @@ export function settingsSnapshot(stage, audio, music) {
   };
 }
 
-export function createSettings(St, audio, music, sheets, clearRecords) {
+export function createSettings(St, audio, music, sheets, clearRecords, replayTutorial) {
   const { sfx } = audio;
   const { openSheet, sheet } = sheets;
   let textScale = 1;
@@ -106,7 +106,9 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
       row('markers', '표식 강조', markers, '선택 ✓ · 위험 !') +
       row('speed', '전투 속도', St.clock.speed === 2, '', St.clock.speed + '배') +
       (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '브라우저 상단 바 숨기기') : '') +
+      (replayTutorial?.available() ? '<button class="btn" id="meta-replay-tutorial">튜토리얼 다시 보기</button>' : '') +
       backup + credits + '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>');
+    $('#meta-replay-tutorial')?.addEventListener('click', replayTutorial.start);
     $$('#sheet .tog').forEach(b => b.addEventListener('click', async () => {
       const k = b.dataset.set;
       const scroll = $('#sh-body').scrollTop;

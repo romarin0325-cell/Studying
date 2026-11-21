@@ -1,4 +1,5 @@
 import { $, $$, esc } from '../dom.js';
+import { icon } from '../assets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { REGIONS } from '../../content/regions.js';
 
@@ -24,7 +25,7 @@ export function dailyRow(view) {
   const action = unsavedResult ? '저장되지 않은 결과' : active ? (active.floor ? `${active.floor}층 이어가기` : '이어가기')
     : official ? '연습하기' : '첫 도전';
   const summary = [shortRiftDate(unsavedResult || active?.dayKey || dayKey), action].filter(Boolean).join(' · ');
-  return `<button class="btn daily-row" id="meta-daily-rift"><span>오늘의 균열</span><small>${esc(summary)}</small></button>`;
+  return `<button class="btn daily-row" id="meta-daily-rift"><img class="px" src="${icon('big_bang')}" alt="" width="32" height="32"><span>오늘의 균열</span><small>${esc(summary)}</small></button>`;
 }
 
 function face(widgets, id, name, options = {}) {
@@ -145,6 +146,7 @@ function openRiftRecord(row, sheets) {
     ${dungeon ? `<p>${esc(dungeon.name)}</p>` : ''}
     ${entry('첫 기록', row.official)}
     ${entry('연습 최고', row.bestPractice)}
+    <p class="sm">클리어 → 생존 인원 → 적은 턴</p>
     ${row.official?.outcome === 'win' ? stamp(dayKey) : ''}
   </div>`);
 }

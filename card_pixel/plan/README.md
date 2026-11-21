@@ -12,3 +12,8 @@
 | `source-inventory.md` | 카드 게임 데이터 조사 (GPT 작성, 미확인 항목 많음) | 2026-11-15 참고 자료 |
 | `pixel-pilot/` | 도트 변환 방식 비교(R1~R4)와 R4b 일관성 실험의 근거 | 2026-11-15~16 근거 자료 |
 | `assets/` | 기획서 페이지의 전투 목업에 쓴 첫 스프라이트 | 2026-11-15 |
+| `v1-decisions.md` | Claude가 정한 것과 이유·되돌리는 곳(결정 장부). 13절이 2026-11-21 밤 "입장권" 개편 | 계속 갱신 |
+| `ui-direction.md` | UI 방향: 새벽 꿈(실제로 본 레퍼런스와 공통 규칙), 6절 도트풍 리디자인 | 2026-11-21 |
+| `ui-review.html` | 새벽 꿈 UI 전후 비교(`build-ui-review.mjs`, 사진은 `ui-review/`) | 2026-11-21 |
+| `entry-report.html` | 2026-11-21 밤 작업 보고서: 요청별 처리, 화면 전후 28장, 판단, 확인한 것·못 한 것(`build-entry-report.mjs` + `entry-report-content.mjs`, 사진은 `entry-review/`) | 2026-11-22 |
+| `changes-review.html` | 원본 카드 게임과 달라진 규칙·콘텐츠 전체 검수(데이터에서 자동 생성: `build-changes-review.mjs`, 규칙 문장은 `../game/src/content/rulebook.js`) | 엔진을 바꾸면 다시 생성 |

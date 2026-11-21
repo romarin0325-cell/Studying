@@ -106,17 +106,26 @@ export function createRiftCases({
         await text(riftRow(page).locator('small'), '11.21 · 4층 이어가기', { exact: true });
         await capture();
         await page.locator('#hub.on #meta-depart').click();
+        await page.locator('#order.on #b-order-back').click();
         await text(page.locator('#map.on header b'), '홍련 화산', { exact: true });
         assert.equal(await page.evaluate(() => window.__game.run.id), main.id);
         await page.reload({ waitUntil: 'domcontentloaded' });
         await riftRow(page).click();
+        await page.locator('#order.on #b-order-back').click();
         const map = page.locator('#map.on');
         await text(map.locator('header b'), '11.21 균열', { exact: true });
         await text(map.locator('header .gems'), '기록 도전', { exact: true });
         assert.equal(await page.evaluate(() => window.__game.run.id), rift.id);
         assert.equal(await map.locator('.floor-cell').count(), 7);
-        assert.equal(await map.locator('.rift-gate .run-face img').count(), 2);
-        assert.equal(await map.locator('.floor-cell:last-child .run-face img').count(), 1);
+        const cells = map.locator('.floor-cell');
+        assert.equal(await cells.locator('img').count(), 0);
+        assert.equal(await cells.nth(3).locator('svg').count(), 1);
+        assert.equal(await cells.last().locator('svg').count(), 1);
+        const widths = await cells.evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().width));
+        assert.ok(Math.max(...widths) - Math.min(...widths) < 1);
+        await map.locator('#b-floors').click();
+        assert.equal(await page.locator('#sheet.on .floor-foes').first().locator('img').count(), 2);
+        await page.locator('#b-sheetclose').click();
         await capture('map');
       }
     };
@@ -154,6 +163,7 @@ export function createRiftCases({
         assert.equal(await page.evaluate(key => localStorage.getItem(key), dailyKey), null);
         await capture('midnight');
         await sheet.locator('#meta-daily-start').click();
+        await page.locator('#order.on #b-order-back').click();
         await text(page.locator('#map.on header b'), '11.22 균열', { exact: true });
       }
     };
@@ -210,6 +220,7 @@ export function createRiftCases({
         await capture();
         await again.click();
         if (won) {
+          await page.locator('#order.on #b-order-back').click();
           await text(page.locator('#map.on .gems'), '연습', { exact: true });
           assert.deepEqual(await page.evaluate(() => window.__game.run.daily.spec.loanIds), run.daily.spec.loanIds);
         } else {

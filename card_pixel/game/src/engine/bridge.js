@@ -414,6 +414,11 @@ export function create(core, opts) {
 
   /* ---------- G/H: setting units up ---------- */
   function applyAllyModifier(p, modifier) {
+    if (modifier.repeatStacks) {
+      const tenths = 10 + modifier.repeatStacks;
+      p.atk = Math.floor(p.atk * tenths / 10);
+      p.matk = Math.floor(p.matk * tenths / 10);
+    }
     if (modifier.atk) {
       p.atk = Math.floor(p.atk * modifier.atk);
       p.matk = Math.floor(p.matk * modifier.atk);
@@ -428,6 +433,8 @@ export function create(core, opts) {
   function setupAllies() {
     for (const p of players()) {
       p.relayModifiers = [];
+      const stacks = opts.repeatStacks?.[p.id] ?? 0;
+      if (stacks > 0) addAllyModifier(p, { repeatStacks: stacks });
       if (pattern !== 'introFixed' && Number.isFinite(opts.tempo?.startMp)) p.mp = Math.min(getMaxMana(p), opts.tempo.startMp);
       if (Q.ally) {
         addAllyModifier(p, Q.ally);

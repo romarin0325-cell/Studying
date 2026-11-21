@@ -1,6 +1,7 @@
 import { DUNGEONS } from '../content/dungeons.js';
 import { backupSlots, DAILY_KEY, DAMAGED_DAILY_KEY, LAST_GOOD_KEY, SESSION_KEY, SETTINGS_KEY } from '../ui/storage.js';
 import { restoreDailyData, withDailyCheckpoint } from './daily-store.js';
+import { entryState } from './entry.js';
 import { missionPeriodKeys, PROFILE_VERSION, recordRunProgress, validPreparation } from './meta.js';
 import { count, dictionary, parse, readVersion, restoreRun, runData, string, strings } from './run-codec.js';
 
@@ -21,7 +22,26 @@ export function normalizeSettings(raw) {
 }
 
 export function serializeProfile(profile) {
-  return JSON.stringify(profile);
+  return JSON.stringify(profileData(profile));
+}
+
+function hasProgress(profile) {
+  const { records, recruits, notebook, ui } = profile;
+  return !!(records.runs || records.appliedRuns.length || Object.keys(recruits).length || notebook.chapters.length
+    || notebook.firstLead || records.bestHit || records.longestServing || ui?.latestRun
+    || Object.values(ui?.recent ?? {}).some(history => history.length)
+    || Object.values(records.clears).some(clear => clear.easy || clear.normal || clear.nightmare));
+}
+
+function profileData(profile, activeRun = false) {
+  const entry = profile.ui?.entry === undefined ? entryState(activeRun || hasProgress(profile)) : profile.ui.entry;
+  if (!validEntry(entry)) throw new TypeError('invalid_entry_state');
+  return { ...profile, ui: { ...profile.ui, entry } };
+}
+
+function validEntry(entry) {
+  return dictionary(entry) && entry.v === 1 && typeof entry.legacy === 'boolean' && typeof entry.skipped === 'boolean'
+    && ['done', 'tours'].every(key => uniqueIds(entry[key]) && entry[key].every(id => id.trim()));
 }
 
 export function restoreProfile(data, { migrate } = {}) {
@@ -43,8 +63,7 @@ export function restoreProfile(data, { migrate } = {}) {
   if (!dictionary(profile.contractStamps) || !dictionary(profile.missions?.periods)
     || !Object.entries(profile.missions.periods).every(([key, period]) => validMissionPeriod(key, period, profile.recruits))
     || !validProfileUi(profile.ui)) return null;
-  profile.ui.wantedCompanionId ??= null;
-  if (Object.hasOwn(profile.recruits, profile.ui.wantedCompanionId)) profile.ui.wantedCompanionId = null;
+  profile.ui.entry ??= entryState(hasProgress(profile));
   if (!validPreparation(profile, profile.ui.preparation)) profile.ui.preparation = null;
   for (const clear of Object.values(profile.records.clears)) clear.easy ??= 0;
   return profile;
@@ -66,6 +85,7 @@ function validBattleLog(log) {
 
 function validProfileUi(ui) {
   return dictionary(ui) && optional(ui.wantedCompanionId, string) && optional(ui.returners, uniqueIds)
+    && (ui.entry === undefined || validEntry(ui.entry))
     && optional(ui.recruitChoices, choices => dictionary(choices) && string(choices.runId) && uniqueIds(choices.ids))
     && optional(ui.recent, recent => dictionary(recent) && Object.values(recent).every(history => arrayOf(history, runEntry)))
     && optional(ui.announcement, notice => dictionary(notice)
@@ -87,7 +107,7 @@ function validMissionPeriod(key, period, recruits) {
 
 function sessionData(profile, run) {
   const progressed = run ? recordRunProgress(profile, run).profile : profile;
-  return { version: SESSION_VERSION, profile: progressed, run: run ? runData(run) : null };
+  return { version: SESSION_VERSION, profile: profileData(progressed, !!run), run: run ? runData(run) : null };
 }
 
 function decodeStored(value) {
@@ -113,7 +133,10 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
     if (data.run == null) return { status: 'ok', profile, run: null };
     try {
       const run = restoreRun(data.run, { ...deps, migrate: migrateRun });
-      if (run && !run.daily) return { status: 'ok', profile: recordRunProgress(profile, run).profile, run };
+      if (run && !run.daily) {
+        if (data.profile?.ui?.entry === undefined) profile.ui.entry = entryState(true);
+        return { status: 'ok', profile: recordRunProgress(profile, run).profile, run };
+      }
     } catch {
       // A run migration can fail independently of the profile.
     }
