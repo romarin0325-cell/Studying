@@ -1,5 +1,5 @@
 import { $, esc } from '../dom.js';
-import { TYPE, formatRange } from '../widgets.js';
+import { TYPE, formatRange, repeatBadge } from '../widgets.js';
 import { relicMarks } from '../relics.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { AFFIXES } from '../../content/affixes.js';
@@ -92,7 +92,7 @@ export function createHud(core, stage, sfx, widgets) {
     $('#party').innerHTML = party.map((id, i) => {
       if (!id) return '<div class="pm none"></div>';
       return '<div class="pm" data-i="' + i + '"><span class="face">' + face(id, 40) + '<i>' + POSITION[i] + '</i></span><span class="info">' +
-        '<span class="top"><b>' + esc(card(id).name) + '</b>' + (run.heirlooms[id] ? '<i class="h">유</i>' : '') + '</span>' +
+        '<span class="top"><b>' + esc(card(id).name) + '</b>' + repeatBadge(run, id) + (run.heirlooms[id] ? '<i class="h">유</i>' : '') + '</span>' +
         '<span class="bar hp"><u></u><span class="n"></span></span><span class="bar mp"><u></u><span class="n"></span></span></span><em class="st"></em></div>';
     }).join('');
   }

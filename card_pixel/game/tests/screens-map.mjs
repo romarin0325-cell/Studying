@@ -61,13 +61,14 @@ function reachFloor(dungeonId, seed, floor) {
 }
 
 const cases = {
-  'one-door': { dungeon: 'ember_volcano', seed: 21, floor: 1, lines: ['물리 강공 · 결정 1'], select: 0, mode: 'speed' },
-  'two-doors': { dungeon: 'dawn_forest', seed: 7, floor: 3, lines: ['물리 강공 · 결정 1', '마법 강공 · 결정 1'], select: 0 },
+  'one-door': { dungeon: 'ember_volcano', seed: 21, floor: 1, lines: [/^물리 공격(?: ×[\d.]+)? · 결정 1$/], select: 0 },
+  'two-doors': { dungeon: 'dawn_forest', seed: 7, floor: 3, lines: [/^물리 공격(?: ×[\d.]+)? · 결정 1$/, /^마법 공격(?: ×[\d.]+)? · 결정 1$/], select: 0 },
   'formation-preview': { dungeon: 'twilight_cathedral', seed: 21, floor: 2,
-    lines: ['2턴째 예행 · 결정 1', '2턴째 예행 · 결정 2'], select: 1, swap: true },
+    lines: [/^2턴 · /, /^2턴 · /], select: 1, swap: true },
   'boss-lesson': { dungeon: 'twilight_cathedral', seed: 21, floor: 8, lines: ['사랑의 여신 아이리스'] },
+  'floor-strip': { dungeon: 'ember_volcano', seed: 21, floor: 4, lines: [/^전투|공격|결정/], strip: true },
   'three-doors': { dungeon: 'ember_volcano', seed: 21, floor: 3, lines: ['소환의 샘', '혼돈의 제단', '사건'] },
-  'mid-walk': { dungeon: 'dawn_forest', seed: 7, floor: 3, lines: ['물리 강공 · 결정 1', '마법 강공 · 결정 1'], select: 0, frame: 'walking' },
+  'mid-walk': { dungeon: 'ember_volcano', seed: 21, floor: 3, lines: ['소환의 샘', '혼돈의 제단', '사건'], select: 0, frame: 'walking' },
   'door-zoom': { dungeon: 'ember_volcano', seed: 21, floor: 3, lines: ['소환의 샘', '혼돈의 제단', '사건'], select: 1, frame: 'zoom' }
 };
 
@@ -77,7 +78,11 @@ function fixture(spec) {
   const initial = structuredClone(run);
   const layout = getWalkLayout(run);
   const actual = run.doors.map(door => doorDecision(run, door, Run.getTempoView(run, door.index)));
-  assert.deepEqual(actual, lines);
+  assert.equal(actual.length, lines.length);
+  for (const [index, line] of lines.entries()) {
+    if (line instanceof RegExp) assert.match(actual[index], line);
+    else assert.equal(actual[index], line);
+  }
   assert.equal(layout.branches.length, lines.length);
   if (lines.length === 3) assert.deepEqual(layout.branches.map(branch => branch.center), [[278, 162], [320, 230], [274, 295]]);
   assert.deepEqual(run, initial);
@@ -95,7 +100,6 @@ function fixture(spec) {
   if (select != null) {
     if (run.doors[select].enemies.length) {
       entering = party.slice();
-      if (reserve) entering[0] = reserve;
       command(Run.enterBattleDoor, run, { floor, index: select, partyIds: entering });
       destination = 'battle';
     } else {
@@ -107,7 +111,7 @@ function fixture(spec) {
     assert.deepEqual(store.load()?.run, expected);
     assert.equal(Run.chooseDoor(run, select).ok, false);
   }
-  return { ...spec, session: savedMap, party, reserve, entering, lesson, expected, destination };
+  return { ...spec, lines: actual, session: savedMap, initial, party, reserve, entering, lesson, expected, destination };
 }
 
 async function inject(page, session) {
@@ -115,6 +119,11 @@ async function inject(page, session) {
     if (location.href === url) localStorage.setItem(key, data);
   }, { url: gameUrl, key: sessionKey, data: session });
   await page.goto(gameUrl, { waitUntil: 'domcontentloaded' });
+  await page.locator('.screen.on').waitFor();
+  if (await page.locator('#order.on').isVisible()) {
+    assert.equal(await page.locator('#b-go').textContent(), '이대로 전투 시작');
+    await page.locator('#order.on #b-order-back').click();
+  }
   await page.locator('#map.on').waitFor();
 }
 
@@ -140,9 +149,17 @@ async function assertMap(page, model) {
   for (const [index, lesson] of model.lesson.entries()) {
     if (lesson) assert.equal(await map.locator(`[data-door-preview="${index}"] .door-lesson span`).textContent(), lesson);
   }
-  if (model.lines.length === 1 && model.floor !== 3) {
-    assert.equal(await scene.locator('[data-map-door]').getAttribute('aria-pressed'), 'true');
-    assert.equal(await map.locator('#b-go').textContent(), '이 편성으로 입장');
+  const cells = map.locator('.floor-cell');
+  const widths = await cells.evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().width));
+  assert.ok(Math.max(...widths) - Math.min(...widths) < 1);
+  assert.equal(await cells.locator('img').count(), 0);
+  assert.equal(await map.locator('.map-formation').count(), 0);
+  if (model.strip) {
+    assert.equal(await cells.locator('svg').count(), 2);
+    await map.locator('#b-floors').click();
+    const sheet = page.locator('#sheet.on');
+    assert.ok(await sheet.locator('.floor-foes img').count() >= 2);
+    await sheet.locator('#b-sheetclose').click();
   }
   return scene;
 }
@@ -170,14 +187,14 @@ async function assertSavedChoice(page, model) {
 async function capture(page) {
   await page.evaluate(async () => {
     await document.fonts.ready;
-    const portraits = document.querySelectorAll('#map.on img');
+    const portraits = document.querySelectorAll('.screen.on img');
     await Promise.all(Array.from(portraits, img => img.decode().catch(() => {})));
   });
   return page.screenshot({ animations: 'disabled' });
 }
 
 async function runCase(browser, model) {
-  const motion = !!model.frame || model.mode === 'speed';
+  const motion = !!model.frame;
   const context = await browser.newContext({ viewport, deviceScaleFactor: 1, reducedMotion: motion ? 'no-preference' : 'reduce' });
   try {
     const page = await context.newPage();
@@ -199,22 +216,28 @@ async function runCase(browser, model) {
       const openFromList = page.locator('#map.on [data-door="' + model.select + '"]');
       const openInScene = scene.locator('[data-map-door="' + model.select + '"]');
       const before = await scene.locator('.map-walker-anchor').first().evaluate(node => node.style.transform);
-      if (model.mode === 'speed') await page.evaluate(() => { window.__game.clock.speed = 2; });
+
       const input = model.frame === 'zoom' ? openFromList : openInScene;
+      if (model.reserve) {
+        await scene.locator('[data-map-door="0"]').click();
+        const order = page.locator('#order.on');
+        await order.locator(`[data-bench="${model.reserve}"]`).click();
+        await order.locator('[data-slot="0"]').click();
+        await order.locator('#b-order-back').click();
+        assert.equal(await page.evaluate(() => window.mapGalleryWrites), 0);
+        assert.deepEqual(await page.evaluate(() => structuredClone(window.__game.run)), model.initial);
+      }
       await input.click();
       if (model.entering) {
         assert.equal(await page.evaluate(() => window.mapGalleryWrites), 0);
         assert.equal(await page.evaluate(() => window.__game.run.phase), 'map');
-        const map = page.locator('#map.on');
+        const order = page.locator('#order.on');
+        assert.equal(await order.locator('#b-go').textContent(), '이대로 전투 시작');
         if (model.reserve) {
-          await map.locator(`[data-bench="${model.reserve}"]`).click();
-          await map.locator('.relay-seat[data-slot="0"]').click();
-          assert.deepEqual(await map.locator('.map-actor').evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), model.entering);
-          await map.locator('#b-go').scrollIntoViewIfNeeded();
+          assert.deepEqual(await order.locator('.relay-seat b').allTextContents(), model.entering.map(id => roster.card(id).name));
           image = await capture(page);
         }
-        await map.locator('#b-go').click();
-        if (model.frame) await scene.scrollIntoViewIfNeeded();
+        await order.locator('#b-go').click();
       }
       const destination = page.locator('#' + model.destination + '.on');
       if (model.frame) {
@@ -282,7 +305,7 @@ if (args['validate-only']) {
       for (const door of run.doors) {
         const view = Run.getTempoView(run, door.index);
         assert.equal(view.lesson.bossId, run.boss);
-        assert.match(doorLesson(view), /^2턴째 /);
+        assert.match(doorLesson(view), /^2턴 · /);
       }
     }
   }

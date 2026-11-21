@@ -203,12 +203,6 @@
 .door-plate.previewing .door-entry { flex-wrap: wrap; }
 .door-entry .door-lesson, .door-lesson { display: flex; align-items: center; gap: 4px; width: fit-content; padding: 1px 8px 1px 4px; color: #8a4f00; background: var(--gold-tint); clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); }
 .door-lesson .run-icon { width: 16px; height: 16px; flex: none; }
-.map-formation { padding: 0 12px calc(10px + env(safe-area-inset-bottom)); }
-.map-formation[hidden] { display: none; }
-.map-formation .relay-seats { margin-top: 0; }
-.map-formation .relay-seat { grid-template-rows: 18px 94px 20px auto; }
-.map-formation .reserve-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.map-formation .reserve-cards .run-face { width: 40px; height: 40px; }
 .map-awaken { margin: 10px 12px 0; padding: 8px 10px; text-align: center; color: var(--gold-ink); flex: none; --pf-o: var(--gold-lo); --pf-lo: var(--gold-tint); }
 .map-awaken > b { display: block; margin-bottom: 4px; font: normal 0.9375rem var(--f-display); }
 .map-awaken-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }

@@ -22,6 +22,24 @@ const ICONS = {
       '................'
     ]
   },
+  shield: {
+    palette: { o: '#29266a', a: '#1fc6c1', h: '#dcf8f5' },
+    rows: [
+      '................', '....oooooooo....', '..ooahaaaaaaoo..', '..oahaaaaaaaao..',
+      '..oahaahhaaaao..', '..oahaahhaaaao..', '..oaahhhhhaaao..', '...oaaahhaao....',
+      '...oaaahhaao....', '....oaaaaao.....', '.....oaaao......', '......oao.......',
+      '.......o........', '................', '................', '................'
+    ]
+  },
+  crown: {
+    palette: { o: '#29266a', g: '#ffc23a', h: '#fff1cc' },
+    rows: [
+      '................', '................', '.......oo.......', '..o....og....o..',
+      '.ogo..oggo..ogo.', '.oggo.oggo.oggo.', '.ogggoggggogggo.',
+      '..oggggggggggo..', '..oghgghgghggo..', '..oggggggggggo..', '...oooooooooo...',
+      '................', '................', '................', '................', '................'
+    ]
+  },
   lock: {
     palette: { o: '#29266a', S: '#c9c3e6', G: '#ffc23a', Y: '#d98a12' },
     rows: [

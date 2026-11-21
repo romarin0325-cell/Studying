@@ -9,7 +9,7 @@
   font: normal 0.9375rem/1 var(--f-display); white-space: nowrap; --pf-lo: var(--line2); }
 #bar button.on { color: #fff; --pf-f: var(--aqua); --pf-lo: #0b8090; --pf-o: var(--aqua-lo); --pf-in: var(--aqua); text-shadow: var(--u) var(--u) 0 var(--aqua-ink); }
 #bar #b-field { min-width: 48px; height: 40px; color: var(--gold-ink); --pf-f: var(--gold-tint); --pf-hi: #fff8df; --pf-lo: #f0c86a; }
-#bar #b-log { min-width: 44px; height: 40px; flex: none; }
+#bar #b-log { height: 40px; padding: 0 6px; font: normal 12px var(--f-label); }
 #bar button.ic { width: 36px; min-width: 36px; height: 36px; }
 /* the battle bar is the narrowest row; fullscreen stays on the other screens */
 #bar button.b-full { display: none; }
@@ -93,15 +93,16 @@
 .chips i.affix { background: var(--gold-tint); color: #8a4f00; } .chips i.affix.on { background: var(--coral); color: #fff; } .chips i.last { background: var(--coral); color: #fff; }
 
 /* the relay line: three chips, front first */
-#party { flex: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px 6px 4px; }
-.pm { position: relative; display: flex; gap: 5px; align-items: center; padding: 4px 6px 4px 4px; height: 56px; min-width: 0; --pf-o: var(--line2); --pf-lo: var(--line2); }
+#party { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; padding: 8px 6px 4px; }
+.pm { position: relative; display: flex; gap: 5px; align-items: center; padding: 4px 6px 4px 4px; min-height: 56px; min-width: 0; --pf-o: var(--line2); --pf-lo: var(--line2); }
 .pm.none { visibility: hidden; }
 .pm .face { position: relative; flex: none; width: 44px; height: 46px; overflow: hidden; clip-path: var(--notch); background: #f4f0ff; box-shadow: inset 0 calc(-1 * var(--u)) 0 #e3dcfa; }
 .pm .face i { position: absolute; left: 0; right: 0; bottom: 0; font: normal 0.625rem/0.875rem var(--f-tiny); font-style: normal; text-align: center; background: rgba(41, 38, 106, .82); color: #fff; }
 .pm.cur .face i { background: var(--aqua); }
 .pm .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.pm .top { display: flex; gap: 4px; align-items: baseline; white-space: nowrap; overflow: hidden; }
-.pm .top b { font: normal 0.9375rem/1.1 var(--f-display); overflow: hidden; text-overflow: ellipsis; }
+.pm .top { display: flex; gap: 2px; align-items: baseline; }
+.pm .top b { min-width: 0; font: normal 12px/13px var(--f-label); overflow-wrap: anywhere; }
+.pm .top .repeat-stack, .pm .top .h { padding-inline: 2px; }
 .pm .bar { height: 12px; } .pm .bar.mp { height: 8px; }
 .pm .bar .n { position: absolute; z-index: 1; right: 4px; top: -1px; font: normal 0.625rem/0.8125rem var(--f-tiny); color: #fff; text-shadow: var(--u) var(--u) 0 #1b1440, -1px 0 0 #1b1440, 0 -1px 0 #1b1440; }
 .pm .bar.mp .n { top: -3px; }
@@ -187,12 +188,11 @@
 .large-text .act .tx { padding-inline: 4px; }
 .large-text #foebar .nm { min-height: 1.375rem; height: auto; }
 .large-text #row2 { height: auto; }
-#row2 { flex: none; display: flex; gap: 7px; height: 48px; min-height: 48px; }
-#b-retreat { flex: 1; color: var(--navy); font: normal 0.9375rem/1.1 var(--f-display); display: flex; flex-direction: column; align-items: center; justify-content: center; --pf-o: var(--line2); --pf-lo: var(--line2); }
-#b-retreat small { font: 600 0.6875rem/1.1 var(--f-body); color: var(--ink2); }
+#row2 { flex: none; display: flex; gap: 7px; min-height: 48px; }
+#b-retreat { flex: 1; min-width: 0; padding: 4px; text-align: center; color: var(--navy); font: normal 0.9375rem/1.1 var(--f-display); display: flex; flex-direction: column; align-items: center; justify-content: center; --pf-o: var(--line2); --pf-lo: var(--line2); }
+#b-retreat small { font: 600 0.6875rem/1.18 var(--f-body); color: var(--ink2); word-break: keep-all; }
 #b-retreat.armed { min-width: 0; color: var(--gold-ink); --pf-o: var(--gold-lo); --pf-f: var(--gold-tint); --pf-hi: #fffaf0; --pf-lo: #f0c86a; --pf-in: var(--gold); }
-#b-retreat.armed small { max-width: 100%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; color: #8a4f00; }
-#b-retreat.armed small:only-of-type { white-space: normal; overflow-wrap: anywhere; }
+#b-retreat.armed small { color: var(--gold-ink); }
 #b-retreat[disabled] { opacity: .45; pointer-events: none; }
 #b-heir { display: none; flex: 1.6; position: relative; overflow: hidden; text-align: left; padding: 3px 12px; color: var(--gold-ink); --pf-o: #c97206; --pf-f: var(--gold); --pf-hi: var(--gold-hi); --pf-lo: var(--gold-lo); --pf-sh: rgba(240, 146, 15, .25); }
 #b-heir.on { display: block; }
@@ -204,9 +204,6 @@
 #b-heir .relic-marks { vertical-align: middle; margin-left: 6px; }
 #b-heir u { position: absolute; right: 8px; top: 7px; text-decoration: none; font: normal 0.625rem/1.1rem var(--f-tiny); background: var(--coral); color: #fff; padding: 0 7px; animation: blink .5s steps(2) infinite; clip-path: var(--notch); }
 #b-heir[disabled] { opacity: .45; pointer-events: none; }
-#row2:has(.armed) { height: auto; min-height: 80px; }
-.retreat-face { display: flex; align-items: center; gap: 6px; }
-.retreat-face .run-face { width: 32px; height: 24px; }
 
 #opening-face { display: none; }
 .opening-decision #opening-face { display: flex; min-height: 50px; align-items: center; justify-content: space-between; padding: 4px 12px; color: var(--coral-lo); font-weight: 700; }
@@ -216,7 +213,6 @@
 .opening-choice small { font: 600 0.8125rem/1.1rem var(--f-body); color: var(--ink); }
 .opening-choice.rescue { --t: var(--aqua); --t-lo: var(--aqua-lo); color: var(--aqua-ink); --pf-f: var(--aqua-tint); --pf-hi: #fff; }
 .opening-choice.stand { --t: var(--coral); --t-lo: var(--coral-lo); color: var(--coral-lo); --pf-f: var(--coral-tint); --pf-hi: #fff; }
-.opening-result { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding: 6px 10px; color: var(--gold-ink); }
 
 /* tap to inspect */
 #foebar, #sky, #pa-chips { pointer-events: auto; cursor: pointer; }
@@ -226,29 +222,24 @@
 #battle.resumed-result #hud, #battle.resumed-result #party, #battle.resumed-result #msg, #battle.resumed-result #panel { visibility: hidden; }
 
 /* the result panel */
-#result .result-heading h3 { display: flex; flex-direction: column; margin: 0 0 6px -16px; padding: 7px 34px 9px 16px; color: #fff; font: normal 1.875rem/1.05 var(--f-display); text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
-#result .result-heading h3::before { font: normal 0.625rem/1 var(--f-tiny); letter-spacing: .22em; color: var(--aqua-hi); margin-bottom: 3px; }
-#result .result-heading.won h3 { --st: #4a3fb0; }
-#result .result-heading.won h3::before { content: 'BREAK THROUGH' / ''; color: var(--gold-hi); }
-#result .result-heading.won { position: relative; }
-#result .result-heading.won::after { content: ''; position: absolute; left: 118px; top: 2px; width: 16px; height: 16px; background: var(--spark-gold) center / contain no-repeat; animation: twinkle 1.4s steps(2) infinite; }
+#result .result-heading h3 { margin: 0 0 6px -16px; padding: 10px 22px 12px 16px; color: #fff;
+  font: normal 15px/20px var(--f-display); word-break: keep-all; text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
+#result .result-heading.won h3 { --st: var(--navy3); }
 #result .result-heading.lost h3 { --st: #6b2f55; }
-#result .result-heading.lost h3::before { content: 'ALL DOWN' / ''; color: #ffb0bf; }
-#result .gain small { color: var(--ink2); font: 600 0.75rem var(--f-body); }
 #result .contract-met { color: var(--gold-lo); font-weight: 800; }
 #result .contract-failed { color: var(--coral-lo); font-weight: 800; }
-#result .fallen { margin: 8px 0; } #result .fallen small { display: block; font: 700 0.75rem var(--f-body); color: var(--coral-lo); margin-bottom: 4px; }
-#result .fallen div { display: flex; gap: 6px; flex-wrap: wrap; }
-#result .heirline { margin: 8px 0; padding: 8px 10px; --pf-o: var(--gold-lo); --pf-f: var(--gold-tint); --pf-hi: #fff8df; --pf-lo: var(--gold); }
-#result .heirline b { font: normal 0.9375rem var(--f-display); background: var(--gold); color: var(--gold-ink); padding: 1px 8px; margin-right: 6px; clip-path: var(--notch); }
-#result .heirline small { display: block; font: 600 0.75rem var(--f-body); color: #8a4f00; margin-top: 3px; }
+#result .result-fallen { color: var(--coral-lo); }
+#result .heirline { display: flex; align-items: center; gap: 10px; margin: 8px 0; padding: 8px 10px;
+  --pf-o: var(--gold-lo); --pf-f: var(--gold-tint); --pf-hi: #fff8df; --pf-lo: var(--gold); }
+#result .heirline p { margin: 0; }
+#result .heirline .run-face { width: 40px; height: 40px; }
 #result .in { max-height: 90%; overflow-y: auto; }
 .result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.result-heading .btn { width: auto; }
 .victory-decision { margin: 8px 0; }
 .result-decision > .relic-receipt + .relic-receipt { margin-top: 4px; }
 .victory-decision .footer { padding: 6px 0 0; background: none; }
 #result #b-next { margin-top: 10px; }
+#result #b-next[hidden] { display: none; }
 
 .num.finish-damage { z-index: 2; color: var(--gold); font: normal 1.875rem var(--f-display); animation: finish-grow .1s steps(4) both; }
 @keyframes finish-grow { from { translate: 0 8px; opacity: 0; } }
@@ -257,7 +248,6 @@
 .finish-portrait > div { display: grid; gap: 2px; align-content: start; }
 .finish-portrait small { color: var(--gold-lo); font-weight: 800; }
 .finish-portrait .run-face { width: 40px; height: 30px; }
-#result .finish-portrait { margin: 8px 0; }
 
 #sheet.battle-log-sheet { z-index: 10; }
 #sheet.battle-log-sheet .in { max-height: 72%; }
@@ -269,20 +259,18 @@
 .battle-log-row:is(.heirloom, .heirloom-use, .trigger) p { color: var(--gold-lo); font-weight: 700; }
 .battle-log-row.down p { color: var(--coral-lo); font-weight: 700; }
 .battle-log-row.retreat p { color: var(--aqua-lo); font-weight: 700; }
-.battle-log-row .run-face { width: 40px; height: 28px; }
-.log-faces { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.log-names { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.log-name { padding-left: 6px; border-left: 2px solid var(--aqua-lo); font-weight: 700; }
+.log-name.enemy { border-color: var(--coral); }
 .log-jump { min-height: 44px; min-width: 48px; color: var(--aqua-lo); padding: 0 12px; font: normal 0.9375rem var(--f-display); --pf-o: var(--line2); --pf-lo: var(--line2); }
 .battle-log-sheet #b-sheetclose { min-height: 48px; }
 #frame:has(#sheet.on) .finish-damage { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .num, .num.finish-damage, .cd.now, .banner, .skillplate, #tally span, .act .r2 u, #b-heir u, #b-heir::after,
-  #result .result-heading.won::after { animation: none; }
+  .num, .num.finish-damage, .cd.now, .banner, .skillplate, #tally span, .act .r2 u, #b-heir u, #b-heir::after { animation: none; }
   .bar u { transition: none; }
 }
 @media (max-height: 700px) {
   .act { min-height: 52px; } .act .r3 { -webkit-line-clamp: 1; }
   :root:not(.large-text) .act .r2 strong:not(.range, .txt, .delayed-forecast, .field-effect) { font: normal 1.5rem/24px var(--f-label); }
-  .pm { height: 50px; } #row2 { height: 42px; min-height: 42px; } #msg { height: 26px; }
+  .pm { min-height: 50px; } .pm .face { height: 42px; } #row2 { min-height: 42px; } #msg { height: 26px; }
 }
-
-.mini.dead { filter: grayscale(1) brightness(.75); width: 64px; height: 62px; } .mini.dead b { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font: 800 0.625rem/1rem var(--f-body); background: rgba(41, 38, 106, .8); color: #fff; }

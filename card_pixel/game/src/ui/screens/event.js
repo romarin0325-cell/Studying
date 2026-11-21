@@ -2,7 +2,8 @@ import { $, $$, esc, show } from '../dom.js';
 import { bonusPercent, chooseReplacements, departureLoss, head, heirloomOffer, replacementCount } from '../widgets.js';
 import { chooseEvent } from '../../engine/run.js';
 import { eventChoices, joinCount } from '../../engine/rooms.js';
-import { BLESS } from '../../engine/awakenings.js';
+import { BLESS, usesRepeatDraws } from '../../engine/awakenings.js';
+import { drawText } from '../reveal.js';
 
 const NEXT = '다음 전투 한 번';
 const STAYS = '이번 원정 끝까지';
@@ -35,7 +36,8 @@ export function eventScreen(run, ui, result = null) {
   const choices = run.pending?.kind === 'event' ? eventChoices(run, ui.core, ui.roster) : [];
   let selection = null;
   const hosts = event?.requires.present || [];
-  const joined = result?.effects.flatMap(effect => effect.type === 'join' ? effect.ids : []) || [];
+  const draws = result?.effects.flatMap(effect => effect.type === 'join' ?
+    effect.draw ? [effect.draw] : effect.ids.map(id => ({ kind: 'join', id })) : []) ?? [];
   const released = result?.effects.filter(effect => effect.type === 'release').map(effect => effect.id) ?? [];
 
   const actor = (id, classes, flip) => {
@@ -89,6 +91,7 @@ export function eventScreen(run, ui, result = null) {
   const joinIds = choice => choice.ops.flatMap(op => op.type === 'join' && !op.random ? op.ids : []);
   function releases(choice) {
     const count = joinCount(choice.ops);
+    if (usesRepeatDraws(run) && choice.ops.some(op => op.type === 'join' && op.random)) return 0;
     return choice.requiredReleases ?? replacementCount(run, count);
   }
   function targetValue(choice, id) {
@@ -102,6 +105,10 @@ export function eventScreen(run, ui, result = null) {
   function take(choice, target) {
     function apply(replaceIds) {
       const outcome = ui.command(chooseEvent, choice.id, target, replaceIds);
+      if (outcome.reason === 'roster_full' && outcome.requiredReleases > 0 && !replaceIds.length) {
+        chooseReplacements(run, ui, outcome.requiredReleases, apply, { incoming: joinIds(choice) });
+        return;
+      }
       if (!outcome.ok) return;
       ui.sheets.closeSheet();
       const equipped = outcome.effects.some(effect => effect.type === 'relic' && effect.equipped);
@@ -118,7 +125,7 @@ export function eventScreen(run, ui, result = null) {
 
   const cost = choice => choice.cost ? '결정 ' + choice.cost + ' · ' : '';
   const results = result ? [
-    joined.length ? joined.map(id => card(id).name).join(' · ') + ' · 이번 원정 합류' : '',
+    ...draws.map(draw => drawText(draw, card)),
     ...released.map(id => card(id).name + ' · 원정 이탈'),
     result.crystals ? '결정 ' + (result.crystals > 0 ? '+' : '') + result.crystals : '',
     ...result.effects.filter(effect => !['join', 'release'].includes(effect.type)).map(effect =>

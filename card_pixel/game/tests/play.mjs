@@ -1,4 +1,4 @@
-// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--runs=2] [--headed] [--entry-count]
+// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--runs=2] [--headed] [--no-build] [--entry-count]
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -65,8 +65,8 @@ const screenshotLabels = [
   'preparation', 'collection', 'notebook', 'records'
 ];
 const openingChoices = {
-  stand: { label: '애쉬로 마지막 공격', lead: '눈토끼', next: '눈토끼와 동행' },
-  rescue: { label: '애쉬 생존 후퇴', lead: '애쉬', next: '애쉬와 동행' }
+  stand: { label: '애쉬로 마지막 공격', lead: '눈토끼', next: '다음 동료 고르기' },
+  rescue: { label: '물러나기', lead: '애쉬', next: '다음 동료 고르기' }
 };
 
 async function launch() {
@@ -179,7 +179,7 @@ function look({ canRetreat = false } = {}) {
     room: run?.room?.type,
     crystals: run?.crystals,
     pendingKind: run?.pending?.kind,
-    reinforcementFull: run?.pending?.kind === 'reinforcement' && run.bench.length >= (run.pending.limit ?? 6),
+    retry: !!run?.awaitingRetryResult,
     doors: screen === 'map' ? run.doors.map(({ type, index, enemies }) => ({ type, index, battle: !!enemies.length })) : [],
     outcome: run?.result,
     stats: run?.stats
@@ -235,30 +235,27 @@ async function playMap({ page }, state) {
   const safe = state.doors.find(door => door.type !== 'elite');
   const door = (state.crystals < 3 && elite) || safe || state.doors[0];
   assert(door, 'No doors on floor ' + state.floor);
-  const map = page.locator('#map.on');
-  if (!door.battle || state.doors.length > 1) await map.locator('.door-entry[data-door="' + door.index + '"]').click();
-  if (door.battle) {
-    if (door.type === 'boss') await clickIfVisible(page, '#map.on .relay-alternative#b-alternate-order');
-    const party = await map.locator('.map-actor').evaluateAll(nodes => nodes.map(node => node.dataset.sheet));
-    await map.locator('#b-go').click();
-    await page.locator('#battle.on').waitFor();
-    assert.deepEqual(await page.evaluate(() => window.__game.B.party.filter(Boolean)), party);
-  }
+  await page.locator('#map.on .door-entry[data-door="' + door.index + '"]').click();
   await page.locator('#map.on').waitFor({ state: 'hidden' });
+  if (door.battle) await page.locator('#order.on').waitFor();
 }
 
-async function playOrder({ page }, state) {
-  if (state.room === 'boss') await clickIfVisible(page, '#order.on .relay-alternative#b-alternate-order');
-  await page.locator('#order.on #b-go').click();
+async function playOrder({ page }) {
+  const order = page.locator('#order.on');
+  const go = order.locator('#b-go');
+  assert.equal(await go.innerText(), '이대로 전투 시작');
+  const names = await order.locator('.relay-seat b').allTextContents();
+  await go.click();
+  await page.locator('#battle.on').waitFor();
+  const actual = await page.evaluate(() => window.__game.B.party.map(id => id && window.__game.roster.card(id).name));
+  assert.deepEqual(actual, names.map(name => name === '빈 자리' ? null : name.replace(/★\d+$/, '')));
 }
 
-async function playReinforce({ page }, state) {
+async function playReinforce({ page }) {
   const screen = page.locator('#result.on .victory-decision');
-  if (state.reinforcementFull) {
-    await screen.locator('#b-reinforce-pass').click();
-    return;
-  }
   await screen.locator('[data-candidate]').first().click();
+  const outgoing = screen.locator('[data-release]').last();
+  if (await outgoing.isVisible()) await outgoing.click();
   await screen.locator('#b-reinforce-take').click();
 }
 
@@ -281,7 +278,8 @@ async function playSpring({ page }, state, expedition) {
     return;
   }
   if (expedition.springAttempt !== state.floor) {
-    const purchase = state.crystals >= 3 ? '#b-pick' : '#b-draw';
+    const purchase = state.crystals >= 3 && await page.locator('#spring.on #b-pick:not([disabled])').count()
+      ? '#b-pick' : '#b-draw';
     if (await clickIfVisible(page, '#spring.on ' + purchase + ':not([disabled])')) {
       expedition.springAttempt = state.floor;
       return;
@@ -325,15 +323,25 @@ async function playGateReward({ page }) {
 
 async function playBattle({ page }, state, expedition) {
   if (state.result) {
-    if (state.pendingKind === 'reinforcement') return playReinforce({ page }, state);
+    const result = page.locator('#battle.on #result.on');
+    if (await clickIfVisible(page, '#result.on #b-reinforce-done, #result.on #b-gate-done')) return;
+    const next = result.locator('#b-next');
+    if (await next.isVisible()) {
+      const label = await next.innerText();
+      const labels = { reinforcement: '동료 보충하기', gate: '문지기 보상 고르기', relic: '유물 보상 고르기' };
+      if (state.room === 'borrowed') assert.equal(label, openingChoices[expedition.openingPath].next);
+      else if (state.retry) assert.equal(label, '편성 바꿔 재도전');
+      else if (labels[state.pendingKind]) assert.equal(label, labels[state.pendingKind]);
+      else if (state.outcome) assert.match(label, /^(영입할 동료 고르기|다음 원정 후보 고르기|관측소로)$/);
+      else assert.equal(label, state.floor + 1 + '층으로');
+      if (label === '관측소로') expedition.returned = state;
+      await next.click();
+      return;
+    }
+    if (state.pendingKind === 'reinforcement') return playReinforce({ page });
     if (state.pendingKind === 'gate') return playGateReward({ page });
     if (state.pendingKind === 'relic') return playTreasure({ page }, state);
-    const next = page.locator('#battle.on #result.on #b-next');
-    if (state.room === 'borrowed') {
-      assert.equal(await next.innerText(), openingChoices[expedition.openingPath].next);
-    }
-    await next.click();
-    return;
+    throw new Error('Result has no available action');
   }
   if (!state.ready) return;
   if (state.room === 'borrowed' && !expedition.borrowedStarted) {
@@ -479,8 +487,13 @@ async function playExpedition(campaign, dungeon, depart, openingPath) {
   await depart(campaign);
   for (;;) {
     const state = await page.evaluate(look, { canRetreat: expedition.retreats === 0 });
-    assert.equal(state.dungeonId, dungeon, 'Unexpected expedition');
     const now = performance.now();
+    if (expedition.returned && ['hub', 'ending'].includes(state.screen)) {
+      await collectFrames(page, expedition);
+      report(campaign.seed, expedition, expedition.returned, (now - expedition.started) / 1000);
+      return;
+    }
+    assert.equal(state.dungeonId, dungeon, 'Unexpected expedition');
     if (state.visible !== previousScreen) {
       lastProgress = now;
       previousScreen = state.visible;
@@ -582,7 +595,7 @@ async function playSeed(browser, seed, index) {
   }
 }
 
-execFileSync(process.execPath, [path.join(game, 'build.mjs')], { cwd: repo, stdio: 'inherit' });
+if (!args.includes('--no-build')) execFileSync(process.execPath, [path.join(game, 'build.mjs')], { cwd: repo, stdio: 'inherit' });
 await fs.mkdir(shots, { recursive: true });
 const browser = await launch();
 try {

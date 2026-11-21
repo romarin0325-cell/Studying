@@ -1,5 +1,7 @@
 import { $, esc, show } from '../dom.js';
-import { foeFlip, traitText, TYPE } from '../widgets.js';
+import { foeFlip, hasFinalConsonant, logButton, traitText, TYPE } from '../widgets.js';
+import { DUNGEONS } from '../../content/dungeons.js';
+import { TERMS } from '../glossary.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
 import { INTRO } from '../../content/intro.js';
@@ -31,7 +33,7 @@ export function contractSettlement(floor, contract) {
 export function battleMarkup() {
   return (
     '<section id="battle" class="screen">' +
-    '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">전장·유물</button><button id="b-speed">1배</button><button id="b-log">기록</button>' + tools() + '</header>' +
+    '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">전장·유물</button><button id="b-speed">1배</button>' + logButton('id="b-log"') + tools() + '</header>' +
     '<div id="stage"><canvas id="cv"></canvas><div id="hud">' +
     '<div id="foebar"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div>' +
     '<div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div>' +
@@ -40,7 +42,7 @@ export function battleMarkup() {
     '<div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">▶▶ 고속 진행</div></div>' +
     '<div id="party"></div>' +
     '<div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div>' +
-    '<div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div>' +
+    '<div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div>' +
     '<div class="sheet" id="result"><div class="in win" id="result-in"></div></div>' +
     '</section>'
   );
@@ -73,7 +75,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
 
   /* the party stands in a diagonal line, front fighter lowest and closest */
   const LANE = [[0.37, 0], [0.235, -14], [0.11, -27]];
-  const slotPos = k => { const l = LANE[Math.min(k, 2)]; return { x: Math.round(S.W * l[0]), y: l[1] }; };
+  const slotPos = (k, actor) => {
+    const [x, y] = LANE[Math.min(k, 2)];
+    return { x: Math.round(S.W * x), y: actor ? Math.max(y, St.tall(actor) + 5 - S.BASE) : y };
+  };
   const foePos = () => ({ x: Math.round(S.W * 0.76), y: -4 });
   function lineup(D) {
     const out = [];
@@ -84,7 +89,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const line = lineup(B.D), jobs = [];
     line.forEach((idx, k) => {
       const a = B.allies[idx]; if (!a) return;
-      const pos = slotPos(k);
+      const pos = slotPos(k, a);
       a.wait = k === 0 ? 0 : 1;
       if (animate && (Math.abs(a.x - pos.x) > 0.5 || Math.abs(a.y - pos.y) > 0.5)) jobs.push(tween(a, pos, 0.3)); else { a.x = pos.x; a.y = pos.y; }
     });
@@ -187,9 +192,16 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const currentLog = () => B.bridge ? battleLog(B.all.slice(0, B.played), B.party, B.door.enemies) : run?.lastBattleLog;
   function showLog() {
     sfx.tap();
-    openBattleLog(sheets, widgets, currentLog());
+    openBattleLog(sheets, widgets, $('#result').classList.contains('on') ? run.lastBattleLog : currentLog());
   }
   $('#b-log').addEventListener('click', showLog);
+  $('#result').addEventListener('click', event => {
+    const id = event.target.closest('[data-sheet]')?.dataset.sheet;
+    if (id) {
+      sfx.tap();
+      details.charSheet(run, id);
+    }
+  });
 
   function logLine(text) { B.log.push(text); if (!/^(===|---)/.test(text)) ticker(text); }
   async function showBanner(tag, text, cls, sec) { const b = St.banner(tag, text, cls); await wait(sec || 0.7); b.remove(); }
@@ -208,10 +220,11 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.allies = B.party.map((id, i) => {
       const u = B.D.allies[i];
       if (!id || !u) return null;
-      return St.makeActor({
-        sprite: id, ...slotPos(i), wait: i ? 1 : 0, flip: (spr(id)?.facing || 'right') === 'left',
+      const actor = St.makeActor({
+        sprite: id, wait: i ? 1 : 0, flip: (spr(id)?.facing || 'right') === 'left',
         vis: !u.dead && !u.out, aura: u.lastStand ? 'red' : null
       });
+      return Object.assign(actor, slotPos(i, actor));
     });
     B.foe = B.D.enemy.hp > 0 ? makeFoe(foeDef()) : null;
     if (B.foe && B.D.enemy.frenzied) B.foe.aura = 'red';
@@ -230,7 +243,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.allies.forEach((a, i) => { if (a) a.x = -60 - i * 26; });
     B.foe.x = S.W + 70;
     render(true);
-    const jobs = lineup(B.D).map((idx, k) => wait(k * 0.08).then(() => tween(B.allies[idx], slotPos(k), 0.4)));
+    const jobs = lineup(B.D).map((idx, k) => wait(k * 0.08).then(() => tween(B.allies[idx], slotPos(k, B.allies[idx]), 0.4)));
     jobs.push(wait(0.25).then(() => tween(B.foe, { x: foePos().x }, 0.4)).then(() => { St.dust(B.foe.x, FY(B.foe)); sfx.enter(); }));
     await Promise.all(jobs);
     await showBanner(def.kind, B.door.enemies.map(d => d.name).join(' → '), def.boss ? 'ult' : '', 0.8);
@@ -672,10 +685,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
 
   /* ---------- battle in and out ---------- */
   function roomLabel() {
-    return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + ROOM_NAMES[B.door.type];
+    return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + (TERMS[B.door.type]?.short ?? ROOM_NAMES[B.door.type]);
   }
 
-  function startBattle(expedition, options, settle, advance, { fromMap = false, decision } = {}) {
+  function startBattle(expedition, options, settle, advance, { fromMap = false, decision, simpleOpening = false } = {}) {
     run = expedition;
     onResult = settle;
     onContinue = advance;
@@ -698,6 +711,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.bridge = createBattle(core, options);
     $('#result').classList.remove('on');
     $('#battle').classList.remove('resumed-result', 'opening-decision');
+    for (const id of ['b-field', 'b-speed', 'b-log']) $('#' + id).hidden = simpleOpening;
     $('#acts').innerHTML = '';
     $('#b-heir').className = '';
     relayHint.hidden = door.type !== 'borrowed' || isOpening() && !!Opening.openingModel;
@@ -707,52 +721,81 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
   function finishBattle() {
     const res = onResult(B.bridge.summary(), currentLog());
-    if (res) showResult(res, onContinue, onDecision);
+    if (res?.ok) showResult(onContinue, onDecision, false);
   }
 
-  function showResult(res, advance, decision, restored = false) {
+  function showResult(advance, decision, restored) {
+    const result = run.lastBattleResult ?? {
+      floor: run.floor, roomType: run.room.type, outcome: 'win', wiped: false,
+      fallenIds: [], survivorIds: [], transfers: [],
+      rewardDelta: { crystals: 0, relicIds: run.lastBattleRelic ? [run.lastBattleRelic] : [] }
+    };
+    const { floor, roomType, outcome, wiped, fallenIds, transfers, rewardDelta } = result;
+    const won = outcome === 'win';
+    const final = roomType === 'boss' || run.room.final;
+    const name = id => card(id)?.name ?? id;
     const rows = [];
-    if (res.wiped) rows.push('<p>마지막 동료가 적과 함께 쓰러져 원정이 종료됩니다.</p>');
-    const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
-    const gainedCrystals = res.win && battleCrystals > 0;
-    if (gainedCrystals) rows.push('<p class="gain">결정 +' + battleCrystals + ' · 보유 ' + run.crystals + '</p>');
-    rows.push(...contractSettlement(run.floor, res.contract));
-    if (res.fallen?.length) rows.push('<div class="fallen"><small>쓰러진 동료</small><div>' + res.fallen.map(id => '<span class="mini dead">' + face(id, 40) + '<b>' + esc(card(id).name) + '</b></span>').join('') + '</div></div>');
-    for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>유품</b> ' + esc(card(g.to).name) + ' ← ' + esc(card(g.from).name) + '의 ' + esc(g.name) + '</p>');
-    if (res.bet) rows.push('<p>' + (res.bet.won ? '내기 성공' : '내기 실패') + '</p>');
-    if (res.win && (B.finalHit || res.survivors?.length)) rows.unshift(finishPortrait(res.survivors ?? [], B.finalHit?.amount));
-    const box = $('#result-in');
-    let label = '다음 층으로';
-    if (run.phase === 'done') label = '원정 결과';
-    else if (res.retry) label = '편성 다시 하기';
-    else if (run.room.type === 'borrowed') {
-      const lead = run.openingLead;
-      if (lead) {
-        const name = card(lead).name;
-        const consonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
-        label = name + (consonant ? '과 동행' : '와 동행');
-        rows.unshift('<div class="opening-result win">' + faceBadge(lead) + '<small>첫 동행</small></div>');
-      } else label = '살아남은 동료 깨우기';
+    if (fallenIds.length) {
+      const list = fallenIds.map(name).join('·');
+      rows.push('<p class="result-fallen">' + esc(list + (hasFinalConsonant(list) ? '이' : '가') + ' 쓰러졌습니다.') + '</p>');
     }
-    box.innerHTML = '<header class="result-heading ' + (res.win ? 'won' : 'lost') + '"><h3>' + (res.win ? '돌파' : '전멸') + '</h3>' +
-      '<button class="btn log-button" id="b-result-log">기록</button></header>' + rows.join('') +
-      '<div class="result-decision"></div><button class="btn go" id="b-next">' + esc(label) + '</button>';
+    if (transfers.length) {
+      const lines = transfers.map(({ toId, skillName }) => {
+        const target = name(toId);
+        return '<p>' + esc(target + (hasFinalConsonant(target) ? '이 ' : '가 ')) +
+          '<b>' + esc(skillName) + '</b>' + (hasFinalConsonant(skillName) ? '을' : '를') + ' 물려받았습니다.</p>';
+      });
+      rows.push('<div class="heirline"><span class="run-face">' + face(transfers[0].toId, 40) + '</span>' +
+        '<div>' + lines.join('') + '</div></div>');
+    }
+    if (rewardDelta.crystals > 0) {
+      rows.push('<p class="gain">' + TERMS.crystal.short + ' +' + rewardDelta.crystals + ' · 보유 ' + run.crystals + '개</p>');
+    }
+    const contract = run.contract && { ...run.contract, metNow: run.contract.metAtFloor === floor };
+    if (!run.awaitingRetryResult) rows.push(...contractSettlement(floor, contract));
+    const wager = (run.lastBattleLog?.at(-1)?.rows ?? []).find(row => row.kind === 'wager');
+    if (run.features?.bets !== false && wager) rows.push('<p>' + esc(wager.text) + '</p>');
+    if (won && wiped && final) rows.push('<p class="result-return">보스 격파 · 돌아온 동료 0명</p>');
+    else if (won && wiped) rows.push('<p>돌아온 동료가 없어 원정이 끝났습니다.</p>');
+
+    let label = (floor + 1) + '층으로';
+    if (run.awaitingRetryResult) label = '편성 바꿔 재도전';
+    else if (run.result && !run.pending) {
+      const rewards = R.runRewards(run);
+      label = run.daily ? '균열 기록 보기' : rewards.recruitable.length ? '영입할 동료 고르기' :
+        rewards.shardCandidates.length ? '다음 원정 후보 고르기' : '관측소로';
+    } else if (roomType === 'borrowed') label = '다음 동료 고르기';
+    else if (run.pending?.kind === 'reinforcement') label = '동료 보충하기';
+    else if (run.pending?.kind === 'gate') label = '문지기 보상 고르기';
+    else if (run.pending?.kind === 'relic') label = '유물 보상 고르기';
+
+    const title = won ? (run.daily ? '균열' : DUNGEONS[run.dungeonId].name) + ' ' + floor + '층 돌파' : '전멸';
+    const box = $('#result-in');
+    box.innerHTML = '<header class="result-heading ' + (won ? 'won' : 'lost') + '"><h3>' + esc(title) + '</h3>' +
+      logButton('id="b-result-log"') + '</header>' + rows.join('') +
+      '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label) + '</button>';
     $('#result').classList.add('on');
-    if (!restored && res.ok) {
-      if (gainedCrystals) sfx.credit();
-      if (res.relics?.length || res.relic?.equipped) sfx.gem();
+    if (!restored) {
+      if (rewardDelta.crystals > 0) sfx.credit();
+      if (rewardDelta.relicIds.length) sfx.gem();
     }
     $('#b-result-log').addEventListener('click', showLog);
     const next = $('#b-next', box);
-    if (res.win && run.phase === 'reward' && run.room.type !== 'borrowed') {
-      if (!restored && ['reinforcement', 'gate', 'relic'].includes(run.pending?.kind)) music?.holdReward(run.dungeonId);
-      decision?.($('.result-decision', box), res, next);
-    }
+    const reward = won && run.phase === 'reward' && roomType !== 'borrowed';
+    const pending = () => reward && ['reinforcement', 'gate', 'relic'].includes(run.pending?.kind);
+    const content = $('.result-decision', box);
+    if (reward) decision?.(content, result, next);
+    if (pending() && !restored) music?.holdReward(run.dungeonId);
     box.scrollTop = 0;
     next.addEventListener('click', () => {
-      sfx.tap(); $('#result').classList.remove('on');
-      advance(res);
-    }, { once: true });
+      sfx.tap();
+      if (pending()) decision(content, result, next, true);
+      else {
+        next.disabled = true;
+        $('#result').classList.remove('on');
+        advance();
+      }
+    });
   }
 
   function attach(expedition) {
@@ -769,7 +812,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.all = [];
   }
 
-  function restoreResult(expedition, advance, result = { win: true }, decision) {
+  function restoreResult(expedition, advance, decision) {
     attach(expedition);
     B.D = B.foe = B.bridge = null;
     B.allies = [];
@@ -789,7 +832,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     show('battle');
     layout();
     lockPanel();
-    showResult(result, advance, decision, true);
+    showResult(advance, decision, true);
   }
 
   /** Review hooks for the live page and hidden preview panes. */
