@@ -1,6 +1,8 @@
 /* RelayStage: the pixel stage. A low-resolution canvas (2x integer upscale), a virtual clock so
    every animation can be sped up or skipped, sprite variants (flash, waiting, shadow, boss),
    a camera that punches in at an integer zoom, cached backgrounds, props and particles. It knows nothing about rules. */
+import { spriteBox } from '../ui/battle/motion.js';
+
 export function createStage(ASSETS) {
   const SCALE = 2;
   const reducedMotion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -138,6 +140,11 @@ export function createStage(ASSETS) {
   const tall = a => (meta(a, 'idle') ? meta(a, 'idle').fy + 1 : 72);
   const headY = a => footY(a) - tall(a);
   const chestY = a => footY(a) - Math.round(tall(a) * 0.5);
+  function actorBox(a, m, now) {
+    const box = spriteBox(a, m, S.BASE);
+    const bob = a.pose === 'idle' && !a.still ? Math.round(Math.sin(now / 420 + a.phase) * 0.6) : 0;
+    return { ...box, top: box.top + bob };
+  }
 
   /* ---------- particles ---------- */
   function sparks(x, y, n, colors, pow, grav) {
@@ -269,9 +276,7 @@ export function createStage(ASSETS) {
     const look = a.white > 0 ? 'white' : (a.wait > 0.5 ? (a.look === 'base' ? 'wait' : a.look) : a.look);
     const img = variant(IMG[key] ? key : a.sprite + '-idle', look);
     if (!img) return;
-    const bob = a.pose === 'idle' && !a.still ? Math.round(Math.sin(now / 420 + a.phase) * 0.6) : 0;
-    const base = footY(a), cx = Math.round(X(a)), top = Math.round(base + a.oy - (m.fy + 1)) + bob;
-    const left = a.flip ? Math.round(cx - (m.w - m.cx)) : Math.round(cx - m.cx);
+    const base = footY(a), { cx, left, top } = actorBox(a, m, now);
     const sw = Math.round(m.w * 0.6);
     ctx.globalAlpha = 0.36 * a.alpha; ctx.fillStyle = '#000';
     ctx.fillRect(cx - (sw >> 1), base - 1, sw, 2); ctx.fillRect(cx - (sw >> 1) + 2, base + 1, sw - 4, 1);
@@ -363,9 +368,203 @@ export function createStage(ASSETS) {
     const R = Math.round(r);
     for (let dy = -R; dy <= R; dy++) { const half = Math.round(Math.sqrt(R * R - dy * dy)); ctx.fillRect(Math.round(x - half), Math.round(y + dy), half * 2 + 1, 1); }
   }
+
+  function pixels(points, color) {
+    const ys = points.map(([, y]) => y);
+    ctx.fillStyle = color;
+    for (let y = Math.min(...ys); y < Math.max(...ys); y++) {
+      const intersections = [];
+      for (let i = 0; i < points.length; i++) {
+        const [x0, y0] = points[i], [x1, y1] = points[(i + 1) % points.length];
+        if ((y0 > y + 0.5) !== (y1 > y + 0.5)) intersections.push(x0 + (x1 - x0) * (y + 0.5 - y0) / (y1 - y0));
+      }
+      intersections.sort((a, b) => a - b);
+      for (let i = 0; i < intersections.length; i += 2) {
+        const left = Math.round(intersections[i]), right = Math.round(intersections[i + 1]);
+        ctx.fillRect(left, y, right - left, 1);
+      }
+    }
+  }
+
+  function diamond(x, y, rx, ry, color) {
+    pixels([[x - rx, y], [x, y - ry], [x + rx, y], [x, y + ry]], color);
+  }
+
+  /* ---------- melee contact marks (skill-motion phase 1) ----------
+     Stock pixel-game hit marks: a white cutting edge, the element's mid colour as the body and its dark colour as the
+     inner rim; thick in the middle, thin at the ends; one smear frame, a few flying chips, then the fade in drawMelee.
+     Everything is drawn in whole logical pixels around the contact point (q.x, q.y); dir mirrors for the enemy side. */
+  const dot = (x, y, color) => { ctx.fillStyle = color; ctx.fillRect(Math.round(x), Math.round(y), 1, 1); };
+
+  // A crescent around contact point (px, py). Canonical shape: ")" bulging toward the target, radius r, sweeping
+  // plus/minus `half` radians, `thick` px at its middle. rot turns it about the contact point (-PI/4 slants it top-back
+  // to bottom-front for a right-facing swing).
+  function crescent(px, py, { r, half, thick, rot = 0, dir, colors, reveal = 1, shift = 0 }) {
+    const cos = Math.cos(rot), sin = Math.sin(rot);
+    const steps = Math.ceil(2 * half * r * 1.6);
+    for (let i = 0; i <= Math.round(steps * reveal); i++) {
+      const u = i / steps, a = -half + 2 * half * u;
+      const t = Math.max(1, Math.round(thick * Math.pow(Math.sin(Math.PI * u), 0.65)));
+      for (let k = 0; k < t; k++) {
+        const radius = r - k + shift, lx = radius * Math.cos(a) - r, ly = radius * Math.sin(a);
+        const color = k === 0 ? '#fff' : k === t - 1 && t > 2 ? colors[2] : colors[1];
+        dot(px + dir * (lx * cos - ly * sin), py + lx * sin + ly * cos, color);
+      }
+    }
+  }
+
+  // Chips that fly out from the contact point as the mark fades.
+  function chips(x, y, dir, frame, colors, count = 3, spread = 1) {
+    for (let i = 0; i < count; i++) {
+      const a = -1.1 + i * (2.2 / Math.max(1, count - 1)), d = (5 + frame * 4) * spread;
+      ctx.fillStyle = i % 2 ? colors[0] : '#fff';
+      ctx.fillRect(Math.round(x + dir * Math.cos(a) * d), Math.round(y + Math.sin(a) * d), 2, 2);
+    }
+  }
+
+  // A filled star polygon: n points, alternating outer and inner radius, optionally stretched.
+  function star(x, y, outer, inner, n, rot, color, sx = 1, sy = 1) {
+    const points = Array.from({ length: n * 2 }, (_, i) => {
+      const a = rot + Math.PI * i / n, r = i % 2 ? inner : outer;
+      return [Math.round(x + r * Math.cos(a) * sx), Math.round(y + r * Math.sin(a) * sy)];
+    });
+    pixels(points, color);
+  }
+  // The classic hit star: dark rim, body colour, a second star turned 45 degrees, white heart.
+  function hitStar(x, y, size, rot, colors, sx = 1, sy = 1) {
+    star(x, y, size + 2, (size + 2) * 0.42, 4, rot, colors[2], sx, sy);
+    star(x, y, size, size * 0.4, 4, rot, colors[1], sx, sy);
+    star(x, y, size * 0.62, size * 0.24, 4, rot + Math.PI / 4, colors[1], sx, sy);
+    star(x, y, size * 0.5, size * 0.2, 4, rot, '#fff', sx, sy);
+  }
+  const tri = (points, color) => pixels(points.map(([px, py]) => [Math.round(px), Math.round(py)]), color);
+
+  const BLADE = { diagonal: -Math.PI / 4, guillotine: 0, horizontal: -Math.PI / 2, scythe: Math.PI / 2 };
+  function bladeFx(q, frame) {
+    const { x, y, variant, big, dir, colors } = q;
+    const rot = BLADE[variant] ?? BLADE.diagonal, scythe = variant === 'scythe';
+    const r = scythe ? 30 : big ? 24 : q.basic ? 16 : 20, half = scythe ? 1.15 : 0.95, thick = big ? 7 : q.basic ? 4 : 6;
+    const last = big ? 4 : 2, cx = x + dir * Math.round(r * 0.45);
+    if (frame === 0) crescent(cx, y, { r, half, thick: thick - 2, rot, dir, colors, reveal: 0.55 });
+    else if (frame < last) {
+      if (big && frame >= 2) crescent(cx, y, { r: r - 5, half: half * 0.9, thick: thick - 3, rot, dir, colors: [colors[0], colors[2], colors[2]], shift: -3 });
+      crescent(cx, y, { r, half, thick, rot, dir, colors });
+      chips(x, y, dir, frame, colors, big ? 4 : 3);
+    } else {
+      crescent(cx, y, { r, half, thick: 2, rot, dir, colors, shift: 2 });
+      chips(x, y, dir, frame, colors, big ? 4 : 3);
+    }
+    if (variant === 'guillotine' && q.landed && frame >= 1) {   // the shadow left on the target after the chop
+      star(x + dir * 3, y + 6, 5, 2, 4, Math.PI / 4, '#281838');
+      star(x + dir * 3, y + 6, 3, 1, 4, Math.PI / 4, colors[1]);
+    }
+  }
+
+  function clawFx(q, frame) {
+    const { x, y, variant, big, dir, colors } = q;
+    const r = big ? 14 : 12, done = frame >= (big ? 4 : 2), cx = x + dir * 6;
+    const rake = (rot, offsetX, thick, reveal) => {
+      for (let i = 0; i < 3; i++) {
+        const off = (i - 1) * 6;                                   // spaced across the stroke, not along it
+        crescent(cx + dir * (offsetX + off * Math.cos(rot)), y + off * Math.sin(rot), { r, half: 0.8, thick, rot, dir, colors, reveal });
+      }
+    };
+    if (frame === 0) crescent(cx, y, { r, half: 0.8, thick: 3, rot: -Math.PI / 5, dir, colors, reveal: 0.6 });
+    else rake(-Math.PI / 5, 0, done ? 1 : 4, 1);
+    if ((variant === 'cross' && frame >= 1) || (big && frame >= 2)) rake(Math.PI / 5, 2, done ? 1 : 2, 1);   // the return rake
+    if (frame >= 1) chips(x + dir * 4, y, dir, frame, colors, 3, 0.8);
+  }
+
+  function thrustFx(q, frame) {
+    const { x, y, dir, colors, big, tip } = q;
+    const start = tip.x - dir * (big ? 10 : 6), end = x + dir * ((big ? 10 : 6) + (frame === 1 ? 3 : 0));
+    const len = Math.max(1, Math.abs(end - start));
+    for (let i = 0; i <= len; i++) {                                  // a wedge that thickens toward the point
+      const px = Math.round(start + dir * i), t = Math.round((frame >= 2 ? 1 : 2) * i / len);
+      ctx.fillStyle = colors[2]; ctx.fillRect(px, y - t - 1, 1, t * 2 + 3);
+      ctx.fillStyle = colors[1]; ctx.fillRect(px, y - t, 1, t * 2 + 1);
+      dot(px, y, '#fff');
+    }
+    if (frame >= 1) hitStar(end, y, big ? 8 : 6, 0, colors, 1.3, 0.8);
+    if (big && frame >= 2) for (const dy of [-6, 6]) { ctx.fillStyle = colors[0]; ctx.fillRect(Math.round(Math.min(start, start - dir * 10)), y + dy, 10, 1); }
+  }
+
+  const IMPACT = { kick: [-0.75, 1, 1], uppercut: [-1.25, 0.9, 1.3], body: [0.1, 1.25, 1], downward: [1, 1, 1.1], stomp: [0, 1.2, 0.8], strike: [0.3, 1, 1] };
+  function impactFx(q, frame) {
+    const { x, y, dir, colors, variant, big } = q;
+    if (variant === 'bat') {                                          // the bat's curved swing, then a fang-shaped flash
+      crescent(x + dir * 7, y, { r: big ? 20 : 16, half: 0.9, thick: frame === 0 ? 3 : 5, rot: -Math.PI / 3, dir, colors, reveal: frame === 0 ? 0.6 : 1 });
+      if (frame >= 1) for (const s of [-1, 1]) tri([[x + dir * 2, y - 2 + s * 4], [x + dir * 9, y + s * 4], [x + dir * 2, y + 2 + s * 4]], '#fff');
+      if (frame >= 2) chips(x, y, dir, frame, colors);
+      return;
+    }
+    const [rot, sx, sy] = IMPACT[variant] ?? IMPACT.strike;
+    const size = (big ? 12 : q.basic ? 7 : 9) + (frame === 1 ? 2 : 0) - (frame >= 2 ? 2 : 0);
+    const cy = variant === 'uppercut' ? y - 3 : y;
+    if (frame === 0) star(x, cy, size * 0.6, size * 0.25, 4, rot, '#fff', sx, sy);
+    else hitStar(x, cy, size, rot, colors, sx, sy);
+    if (variant === 'stomp' || variant === 'downward') {              // the ground answers
+      const d = 6 + frame * 3;
+      for (const s of [-1, 1]) { ctx.fillStyle = colors[2]; ctx.fillRect(Math.round(x + s * d), q.floor - 3 - frame, 3, 2); }
+    }
+    if (frame >= 1) chips(x, cy, dir, frame, colors, big ? 4 : 3);
+  }
+
+  function biteFx(q, frame) {
+    const { x, y, dir, colors, big } = q;
+    const gap = [9, 4, 0, 0, 0][frame], w = big ? 5 : 4, h = big ? 7 : 6;
+    for (const s of [-1, 1]) {                                         // upper jaw points down (s = -1), lower jaw up
+      const jaw = y + s * (gap + h);
+      ctx.fillStyle = colors[2]; ctx.fillRect(Math.round(Math.min(x - dir * (w * 1.5 + 2), x + dir * (w * 1.5 + 2))), Math.round(jaw), w * 3 + 5, 1);
+      for (let i = -1; i <= 1; i++) {
+        const tx = x + dir * i * (w + 1);
+        tri([[tx - w / 2, jaw], [tx + w / 2, jaw], [tx, jaw - s * h]], colors[2]);
+        tri([[tx - w / 2 + 1, jaw], [tx + w / 2 - 1, jaw], [tx, jaw - s * (h - 2)]], '#fff');
+      }
+    }
+    if (frame >= 2) hitStar(x, y, big ? 6 : 4, 0.3, colors);
+  }
+
+  const MELEE_FX = { blade: bladeFx, claw: clawFx, thrust: thrustFx, impact: impactFx, bite: biteFx };
+
+  function drawMelee(q, now) {
+    const age = clock.t - q.start;
+    const frame = Math.floor(age / (q.duration / (q.big ? 5 : 3)));
+    if (age >= q.duration) return;
+    ctx.save();
+    if (q.still) {
+      diamond(q.x, q.y, 5, 4, q.colors[1]);
+      diamond(q.x, q.y, 2, 2, '#fff');
+    } else {
+      ctx.globalAlpha = [1, 1, 0.8, 0.55, 0.35][frame];
+      if (q.big) {
+        ctx.save();
+        ctx.globalAlpha *= 0.55;
+        contactRing(q, 9 + frame * 3);
+        ctx.restore();
+      }
+      MELEE_FX[q.family](q, frame);
+    }
+    ctx.restore();
+  }
+
+  function contactRing(q, radius) {
+    const height = Math.round(radius * 0.7);
+    ctx.fillStyle = q.colors[0];
+    for (let dy = -height; dy <= height; dy++) {
+      const outer = Math.round(radius * Math.sqrt(1 - (dy / height) ** 2));
+      const inner = Math.abs(dy) >= height - 1 ? 0 :
+        Math.round((radius - 1) * Math.sqrt(1 - (dy / (height - 1)) ** 2));
+      ctx.fillRect(q.x - outer, q.y + dy, outer - inner + 1, 1);
+      ctx.fillRect(q.x + inner, q.y + dy, outer - inner + 1, 1);
+    }
+  }
+
   function drawProp(q, now) {
     ctx.globalAlpha = q.a == null ? 1 : Math.max(0, q.a);
-    if (q.kind === 'orb') {                     // the gathered charge in front of the caster
+    if (q.kind === 'meleeFx') {
+      drawMelee(q, now);
+    } else if (q.kind === 'orb') {              // the gathered charge in front of the caster
       const r = q.r + Math.sin(now / 50) * 0.6;
       disc(q.x, q.y, r + 2, q.colors[2]); disc(q.x, q.y, r, q.colors[1]); disc(q.x, q.y, r * 0.55, q.colors[0]); disc(q.x, q.y, r * 0.25, '#ffffff');
     } else if (q.kind === 'meteor') {

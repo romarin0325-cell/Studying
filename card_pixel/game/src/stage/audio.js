@@ -24,6 +24,7 @@ export function createAudio(clock) {
     tap: () => tone(660, 0.05, 'square', 0.03),
     tick: n => tone(440 * Math.pow(2, n / 7), 0.07, 'square', 0.04),
     swing: () => { noise(0.06, 0.04); tone(300, 0.08, 'triangle', 0.04, 160); },
+    bite: () => { tone(410, 0.035, 'triangle', 0.075, 180); tone(340, 0.035, 'triangle', 0.055, 150, 0.065); },
     hit: big => { noise(big ? 0.28 : 0.11, big ? 0.15 : 0.09); tone(big ? 86 : 150, big ? 0.28 : 0.1, 'triangle', 0.12, 46); },
     crit: () => { tone(880, 0.07, 'square', 0.05); tone(1320, 0.12, 'square', 0.045, 0, 0.06); },
     cast: () => { tone(520, 0.2, 'sine', 0.05, 980); tone(260, 0.2, 'triangle', 0.03, 520); },

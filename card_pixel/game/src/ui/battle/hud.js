@@ -78,8 +78,9 @@ export function createHud(core, stage, sfx, widgets) {
     }
     if (isFoe) {
       if (unit.charging) out.push('<i class="bad">충전 중</i>');
+      // Name and live count only (단단함 2턴); the full rule is in the enemy sheet, so the plate stays one chip row tall.
       for (const affix of affixLines(unit)) out.push('<i class="affix' + (affix.id === 'frenzy' && affix.active ? ' on' : '') +
-        '">' + esc([affix.name, affix.text].filter(Boolean).join(' · ')) + '</i>');
+        '" title="' + esc(affix.text ?? '') + '">' + esc(affix.name + (affix.turns ? ' ' + affix.turns + '턴' : '')) + '</i>');
     } else if (unit.lastStand) out.push('<i class="last" data-coach="last-stand">최후의 일인</i>');
     node.innerHTML = out.join('');
   }
@@ -114,7 +115,6 @@ export function createHud(core, stage, sfx, widgets) {
     const el = $('#pf-el'); el.textContent = ELEMENT[def.element] || ''; el.className = 'el-' + def.element;
     bar($('#pf-hp'), foe.hp, foe.maxHp, fresh); $('#pf-hpn').textContent = foe.hp.toLocaleString('en-US') + ' / ' + foe.maxHp.toLocaleString('en-US');
     chips($('#pf-chips'), foe, true);
-    placeSky();
     S.beads.burn = foe.buffs.burn || 0; S.beads.divine = foe.buffs.divine || 0;
     if (B.foe) { S.beads.x = B.foe.x; S.beads.y = FY(B.foe); }
     $('#sky-slots').innerHTML = relicMarks(core, skyRelics(B)) + Array.from({ length: fieldCap(core, B.artifacts) }, (_, i) => {
@@ -130,10 +130,6 @@ export function createHud(core, stage, sfx, widgets) {
     node.textContent = text;
     node.classList.toggle('retreat-preview', retreat);
     node.classList.toggle('retreat-outcomes', retreat && text.includes('\n'));
-  }
-
-  function placeSky() {
-    $('#sky').style.top = ($('#foebar').offsetHeight + 12) + 'px';
   }
 
   function enemyHeading(B) {
@@ -159,7 +155,6 @@ export function createHud(core, stage, sfx, widgets) {
     c.className = 'cd' + (future ? ' on' : '');
     S.danger = boss ? 1 : 0;
     enemyHeading(B);
-    placeSky();
   }
 
   function shortLine(line) {

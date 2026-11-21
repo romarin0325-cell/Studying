@@ -37,6 +37,18 @@ const strip = html => String(html).replace(/<[^>]*>/g, '');
 const FIELD_POOL = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'valentine', 'arena', 'reaper_realm', 'gale'];
 const DEFENSE_BUFFS = ['guard', 'barrier', 'magic_guard', 'damage_half', 'evasion'];
 const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
+const sameSkill = (a, b) => a.name === b.name && a.type === b.type;
+
+function skillSourceKey(role, owner, skill) {
+  const slots = owner?.skills || [];
+  const direct = slots.indexOf(skill);
+  if (direct !== -1) return [role, owner.id, direct + 1].join('/');
+  const first = slots.findIndex(slot => sameSkill(slot, skill));
+  if (first !== -1 && first === slots.findLastIndex(slot => sameSkill(slot, skill))) {
+    return [role, owner.id, first + 1].join('/');
+  }
+}
+
 const RANDOM_DAMAGE = ['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'];
 const isScripted = action => !!action && action.name !== '일반 공격' && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
 
@@ -306,6 +318,20 @@ export function create(core, opts) {
   const refOf = unit => (unit === host.battle.enemy ? enemyRef() : allyRef(unit.pos));
   const localTurn = enemy => host.battle.turn - (enemy.relayEnteredTurn || 1) + 1;
   const isAlly = unit => !!unit && unit !== host.battle.enemy && !!unit.proto;
+  let sourceCards;
+  function allySkillSource(source, skill, delayed) {
+    if (!isAttack(skill) || skill.name === host.NORMAL_ATTACK.name) return;
+    if (skill.heirloom) return skillSourceKey('ally', skill.heirFrom && GameUtils.getCardById(skill.heirFrom), skill);
+    const native = skillSourceKey('ally', source.proto, skill);
+    if (!delayed) return native;
+    // Roulette passes the original card skill. A delayed copy keeps its exact name and type.
+    sourceCards ??= GameUtils.getAllCards();
+    const original = sourceCards.find(card => card.skills.includes(skill));
+    if (original) return skillSourceKey('ally', original, skill);
+    if (native) return native;
+    const owners = sourceCards.filter(card => card.skills.some(slot => sameSkill(slot, skill)));
+    if (owners.length === 1) return skillSourceKey('ally', owners[0], skill);
+  }
   const hasAffix = (enemy, id) => !!enemy && Array.isArray(enemy.affixes) && enemy.affixes.includes(id);
   const players = () => (host.battle.players || []).filter(Boolean);
 
@@ -510,7 +536,8 @@ export function create(core, opts) {
     flush();
     const who = refOf(source);
     if (skill.heirloom && !delayed && isAlly(source)) B.heirloomsUsed++;
-    push({ t: 'act', who, target: refOf(target), delayed, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
+    const sourceKey = allySkillSource(source, skill, delayed);
+    push({ t: 'act', who, target: refOf(target), delayed, sourceKey, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
     B.ctx.push({ kind: 'act', who, skill, delayed, source });
     B.lastHit = null;
     const formId = source.formId;
@@ -642,9 +669,13 @@ export function create(core, opts) {
     if (action.type === 'rest') return action;
     const salience = actionSalience(action);
     const power = enemy.tookDamageThisTurn ? retaliationPower(action, enemy) ?? action.val : action.val;
+    const def = queue[B.enemyIdx];
+    const sourceKey = !action.isChargeStart && isAttack(action) && (def.source
+      ? skillSourceKey('ally', GameUtils.getCardById(def.source), action)
+      : skillSourceKey(isBoss() ? 'boss' : 'wild', def, action));
     push({
       t: 'act', who: enemyRef(), target: isAttack(action) && !action.isChargeStart ? allyRef(target.pos) : enemyRef(), delayed: false,
-      actionId: actionId(action), charge: !!action.isChargeStart, salience, ult: salience === 'boss',
+      sourceKey: sourceKey || undefined, actionId: actionId(action), charge: !!action.isChargeStart, salience, ult: salience === 'boss',
       skill: { name: action.name, type: action.isChargeStart ? 'sup' : action.type, tier: salience === 'boss' ? 3 : 1, cost: 0, val: power, effects: (action.effects || []).map(e => e.type) }
     });
     return action;

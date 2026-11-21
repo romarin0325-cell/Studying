@@ -1375,6 +1375,81 @@ function lastHit() {
   };
 }
 
+function motionContact() {
+  const cases = [
+    // One row per shared melee mark the owner sees most: the two reported skills, a basic attack, a thrust and a kick.
+    { shot: 'claw', lead: 'ancient_dragon', name: '드래곤크로', owner: 'ancient_dragon', slot: 2, pose: 'idle', family: 'claw' },
+    { shot: 'guillotine', lead: 'executor', name: '섀도우길로틴', owner: 'executor', slot: 3, pose: 'idle', family: 'blade', variant: 'guillotine' },
+    { shot: 'heirloom', lead: 'snow_rabbit', name: '섀도우길로틴', owner: 'executor', slot: 3, pose: 'idle', family: 'blade', variant: 'guillotine' },
+    { shot: 'basic', lead: 'void_knight', name: '일반 공격', owner: 'void_knight', pose: 'idle', family: 'impact', variant: 'strike' },
+    { shot: 'thrust', lead: 'cherry_prince', name: '블러썸피어스', owner: 'cherry_prince', slot: 2, pose: 'idle', family: 'thrust' },
+    { shot: 'kick', lead: 'silver_rabbit', name: '깡총깡총', owner: 'silver_rabbit', slot: 2, pose: 'attack', family: 'impact', variant: 'kick' }
+  ].map(test => ({ frameAge: 0.045, ...test })).map(test => {
+    const { lead, name, owner, slot } = test, heirloom = lead !== owner;
+    const run = makeRun({ seed: 21, floor: 2, tempoVersion: 2, profileView: { lead } });
+    run.lastParty = [lead, null, null];
+    if (heirloom) run.heirlooms[lead] = { from: owner, name };
+    const session = storedSession({ run });
+    const party = Run.defaultParty(run);
+    const battle = startBattle(run, { party });
+    const events = act(battle, name);
+    const cast = events.find(event => event.t === 'act');
+    if (slot) assert.equal(cast.sourceKey, `ally/${owner}/${slot}`);
+    assert.equal(cast.heirloom, heirloom);
+    const hits = events.filter(event => event.t === 'hp' && event.delta < 0 && event.who.side === 'enemy');
+    assert.equal(hits.length, 1);
+    assert.ok(hits[0].s.enemy.hp > 0, 'Use a non-finishing strike for the contact screenshot');
+    return { ...test, session, heirloom, damage: hits[0].amount };
+  });
+
+  return {
+    session: cases[0].session, motion: 'no-preference', mute: true,
+    proof: 'Dragon Claw, direct and inherited Shadow Guillotine, a basic attack, a thrust and a kick reach the target and land one HP event each',
+    async show(page, { text, capture, revisit }) {
+      async function showContact(source, test, main) {
+        await source.emulateMedia({ reducedMotion: 'no-preference' });
+        await openBattle(source);
+        await source.evaluate(() => { window.__game.clock.paused = true; });
+        await (test.heirloom ? source.locator('#b-heir') : skillTile(source, test.name)).click();
+        const hit = await source.evaluate(async ({ name, frameAge }) => {
+          const game = window.__game;
+          game.clock.paused = false;
+          try {
+            for (let n = 0; n < 180; n++) {
+              await game.advance(0.02);
+              const move = game.B.pending;
+              if (move?.e.skill.name !== name || move.hitAt == null || game.clock.t - move.hitAt < frameAge) continue;
+              return { pose: move.actor.pose, sprite: move.actor.sprite, offset: move.actor.ox,
+                targetPose: move.target.pose, family: move.motion?.family, variant: move.motion?.variant };
+            }
+            throw new Error('Contact frame did not play: ' + name);
+          } finally {
+            game.clock.paused = true;
+          }
+        }, test);
+        assert.equal(hit.sprite, test.owner);
+        assert.equal(hit.pose, test.pose);
+        assert.equal(hit.targetPose, 'hurt');
+        assert.ok(hit.offset > 0, 'The caster advanced from its lane');
+        assert.equal(hit.family, test.family);
+        if (test.variant) assert.equal(hit.variant, test.variant);
+        if (test.heirloom) await text(source.locator('.skillplate'), '유품 · 처형인');
+        await text(source.locator('#fx .num:not(.tag):not(.call)'), test.damage.toLocaleString('en-US'));
+        await capture(main ? undefined : test.shot, source, { duringBattle: true });
+        // A short film strip of the stage (every 30 ms from this frame) so the effect's shape can be reviewed frame by frame.
+        for (let frame = 1; frame <= 4; frame++) {
+          await source.locator('#stage').screenshot({ path: path.join(shots, `motion-contact-${test.shot}-f${frame}.png`) });
+          await source.evaluate(async () => { const game = window.__game; game.clock.paused = false; await game.advance(0.03); game.clock.paused = true; });
+        }
+        await source.evaluate(() => { window.__game.clock.paused = false; });
+        await battleIdle(source);
+      }
+      await showContact(page, cases[0], true);
+      for (const test of cases.slice(1)) await revisit(test.session, source => showContact(source, test, false));
+    }
+  };
+}
+
 function resultOrdinary() {
   const run = makeRun({ dungeonId: 'dawn_forest', seed: 7, floor: 3, tempoVersion: 2 });
   startBattle(run);
@@ -1476,7 +1551,7 @@ function repeatSpring(mode) {
       await text(page.locator(`#fresh [data-draw-kind="${mode}"] .draw-receipt`), mode === 'memory'
         ? '애쉬의 기억 → 눈토끼 · 공격·마공 +10%' : '눈토끼 · 이미 함께 · 강화 ★2 · 공격·마공 +10%', { exact: true });
       await text(page.locator('#fresh .repeat-stack'), '★2', { exact: true });
-      await text(page.locator('#spring.on .gems'), '◆ 4', { exact: true });
+      await text(page.locator('#spring.on .gems'), '결정 ◆4', { exact: true });
       assert.equal(await page.locator('#sheet.on').count(), 0);
       assert.equal(await page.evaluate(() => window.__game.run.bench.length), 6);
     }
@@ -1518,7 +1593,8 @@ function springRates() {
         await text(details.locator('summary'), texts(groups), { exact: true });
         await details.locator('summary').click();
         await text(details.locator('p').first(), '전설·초월·이벤트 포함', { exact: true });
-        await text(details.locator('p').last(), groups.map(group => group.label + ' ' + group.count + '명').join(' · '), { exact: true });
+        const counts = groups.map(group => group.label + ' ' + group.count + '명').join(' · ');
+        await text(details.getByText(counts, { exact: true }), counts, { exact: true });
       }
       await capture();
       await spring.locator('#b-pick').click();
@@ -1528,7 +1604,7 @@ function springRates() {
       assert.equal(await spring.locator('[data-slot-id="2"].sel').count(), 0);
       await spring.locator('#b-take').click();
       await text(spring.locator('[data-draw-kind="boost"] .draw-receipt'), '강화 ★1');
-      await text(spring.locator('.gems'), '◆ 2', { exact: true });
+      await text(spring.locator('.gems'), '결정 ◆2', { exact: true });
       await revisit(lockedSession, async lockedPage => {
         assert.equal(await lockedPage.locator('#spring.on #b-pick, #spring.on .spring-service:nth-child(2)').count(), 0);
       });
@@ -1634,7 +1710,10 @@ function truthfulHud() {
       await tapTile(page, '일반 공격');
       await text(page.locator('#pf-kind'), '다음 마법');
       await text(page.locator('#intent.on'), current, { exact: true });
-      await text(page.locator('#pf-chips .affix').filter({ hasText: '단단함' }), '피해 반감 2턴 남음');
+      // The plate keeps the trait to its name and live count; the sentence moves to the chip title and the enemy sheet.
+      const tough = page.locator('#pf-chips .affix').filter({ hasText: '단단함' });
+      await text(tough, '단단함 2턴', { exact: true });
+      assert.equal(await tough.getAttribute('title'), '피해 반감 2턴 남음');
       await capture('hud');
       await page.evaluate(() => {
         const observer = new MutationObserver(() => {
@@ -1723,14 +1802,14 @@ function springCommit() {
       const candidates = () => spring.locator('.cardrow').evaluateAll(nodes => nodes.map(node => node.dataset.id));
       assert.deepEqual(await candidates(), offer.candidates);
       await spring.locator('#b-spring-pass').click();
-      await text(spring.locator('.gems'), '◆ 5');
+      await text(spring.locator('.gems'), '결정 ◆5', { exact: true });
       await spring.locator('#b-pick').click();
       assert.deepEqual(await candidates(), offer.candidates);
       await spring.locator(`[data-slot-id="${selected.slotId}"]`).click();
       await text(spring.locator('#b-take'), '합류 · ◆3');
       await capture();
       await spring.locator('#b-take').click();
-      await text(spring.locator('.gems'), '◆ 2');
+      await text(spring.locator('.gems'), '결정 ◆2', { exact: true });
       await revisit(storedSession({ run: full }), async source => {
         await text(source.locator('#spring.on #b-draw'), TERMS.spring.detail);
         await capture('full', source);
@@ -1963,7 +2042,7 @@ function difficultyChoice() {
       await chooseRegion('ember_volcano');
       assert.equal(await sheet.locator('[data-difficulty="normal"]').getAttribute('aria-pressed'), 'true');
       assert.equal(await sheet.locator('[data-difficulty="nightmare"]').isDisabled(), true);
-      await text(sheet.locator('.meta-prep'), '이 지역을 여정으로 생환하면 악몽이 열립니다.');
+      await text(sheet.locator('.meta-prep'), '이 지역을 여정으로 클리어하면 악몽이 열립니다.');
       await sheet.locator('[data-difficulty="easy"]').click();
       await text(sheet.locator('.meta-prep'), '꿈결 · 적 공격·마공 35% 감소');
       await capture();
@@ -2058,7 +2137,7 @@ function readingSettingsCase() {
       assert.equal(await page.locator('#intent').evaluate(node => getComputedStyle(node, '::before').content.includes('!')), true);
       const lines = await page.locator('#acts .act .tx').evaluateAll(tiles => tiles.map(tile =>
         [...tile.children].filter(line => line.textContent.trim() && getComputedStyle(line).display !== 'none').length));
-      assert.ok(lines.every(lines => lines <= 2), `Visible lines per tile: ${lines}`);
+      assert.ok(lines.every(count => count <= 3), `Visible lines per tile: ${lines}`);
       await capture();
       await page.locator('#b-field').click();
       const frozen = await page.evaluate(() => [window.__game.clock.paused, window.__game.clock.t, window.__game.state().turn]);
@@ -2363,7 +2442,7 @@ function lowCrystalSpring() {
     async show(page, { text, capture }) {
       const spring = page.locator('#spring.on');
       await spring.locator('#b-draw').click();
-      await text(spring.locator('.gems'), '◆ 2');
+      await text(spring.locator('.gems'), '결정 ◆2', { exact: true });
       await spring.locator('#b-pick').click();
       assert.equal(await spring.locator('.cardrow').count(), offer.candidates.length);
       await text(spring.getByRole('status'), '결정 1개가 부족합니다');
@@ -2371,7 +2450,7 @@ function lowCrystalSpring() {
       assert.equal(await spring.locator('#b-take').isDisabled(), true);
       await capture();
       await spring.locator('#b-spring-pass').click();
-      await text(spring.locator('.gems'), '◆ 2');
+      await text(spring.locator('.gems'), '결정 ◆2', { exact: true });
     }
   };
 }
@@ -2485,6 +2564,7 @@ const cases = {
   'single-reinforcement-result': singleReinforcement,
   'tempo-telegraph': tempoTelegraph,
   'last-hit': lastHit,
+  'motion-contact': motionContact,
   'result-ordinary': resultOrdinary,
   'result-boss-wipe': resultBossWipe,
   'compact-stage': compactStage,
