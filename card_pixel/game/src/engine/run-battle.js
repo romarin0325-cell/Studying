@@ -3,6 +3,7 @@ import { INTRO } from '../content/intro.js';
 import { EASY_ENEMY_ATTACK } from '../content/tempo.js';
 import { affixView, create as createBattle, enemyBeats, enemyStatsWithQuirk, fieldCap } from './bridge.js';
 import { copy, RELIC_LIMIT } from './rooms.js';
+import { hasFeature } from './entry.js';
 
 const unique = ids => [...new Set(ids)];
 const enemyAttackScale = run => run.difficulty === 'easy' ? EASY_ENEMY_ATTACK : 1;
@@ -41,19 +42,17 @@ export function doorEnemies(run, index) {
   });
 }
 
-export function getTempoView(run, doorIndex, binding, { defaultParty, suggestOrder }) {
+export function getTempoView(run, doorIndex, binding, { defaultParty }) {
   const door = run.doors[doorIndex];
   const { core } = binding;
-  const suggested = door?.type === 'boss' && run.guide?.bossOrder ? suggestOrder(run) : null;
   return {
     party: door?.type === 'borrowed' ? INTRO.party.slice() : defaultParty(run),
-    suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
     enemies: doorEnemies(run, doorIndex).map((enemy, index) => ({
       id: enemy.id, name: enemy.name, maxHp: enemy.maxHp, element: enemy.element,
       beats: enemyBeats(core, enemy, door.tempo?.pattern, door.intent, index === 0 ? door.tempo?.lesson : null)
     })),
     pattern: door?.tempo?.pattern ?? null,
-    blessing: copy(door?.tempo?.blessing ?? null),
+    blessing: hasFeature(run, 'battleBlessing') ? copy(door?.tempo?.blessing ?? null) : null,
     startMp: door?.tempo?.startMp ?? null,
     enemyKind: door?.enemies[0]?.kind ?? null,
     enemyIndex: door?.enemies.length ? 0 : null,
@@ -72,7 +71,7 @@ function blessingBonus(blessing, id) {
 
 function battleBlessings(run, door) {
   const blessings = { ...run.blessings };
-  const blessing = door.tempo?.blessing;
+  const blessing = hasFeature(run, 'battleBlessing') && door.tempo?.blessing;
   if (blessing) {
     // The card core stores blessings as a bonus over base stats.
     const bonus = blessingBonus(blessing, blessing.id);
@@ -85,7 +84,7 @@ export function getBlessingView(run, doorIndex, partyIds, id, binding) {
   const { core, roster } = binding;
   const door = run.doors[doorIndex];
   const expeditionBonus = run.blessings[id] ?? 0;
-  const battleBonus = blessingBonus(door?.tempo?.blessing, id);
+  const battleBonus = hasFeature(run, 'battleBlessing') ? blessingBonus(door?.tempo?.blessing, id) : 0;
   const active = partyIds.includes(id);
   const effectiveBonus = Math.max(expeditionBonus, battleBonus) * (partyIds.includes('entropy') ? 2 : 1);
   let stats = null;
@@ -93,7 +92,7 @@ export function getBlessingView(run, doorIndex, partyIds, id, binding) {
     // A reserve has no assigned position. Show its own stats with the selected party's blessing multiplier.
     const party = active ? partyIds : id === 'entropy' || !partyIds.includes('entropy') ? [id] : [id, 'entropy'];
     const options = door?.enemies.length ? optionsForDoor(run, door, party, binding) : {
-      party, enemies: [roster.wildOf(INTRO.creature)], blessings: battleBlessings(run, {})
+      party, enemies: [roster.wildOf(INTRO.creature)], blessings: battleBlessings(run, {}), repeatStacks: run.repeatStacks
     };
     if (!active && id === 'entropy') {
       const blessing = options.blessings.find(entry => entry.id === id);
@@ -118,7 +117,9 @@ function optionsForDoor(run, room, party, binding) {
     ...(run.difficulty === 'easy' && { enemyAttackScale: enemyAttackScale(run) }),
     seed: room.type === 'borrowed' ? INTRO.seed : (run.seed + run.floor * 1013 + run.stats.battles * 7) >>> 0,
     heirlooms: run.heirlooms, blessings: battleBlessings(run, room),
+    ...(run.repeatStacks && { repeatStacks: run.repeatStacks }),
     ...(room.tempo && { tempo: room.tempo, openingIntent: room.intent }),
-    artifacts, region: room.region, start: battleStart(run, room, artifacts, binding), bet: run.nextBattle?.bet || null
+    artifacts, region: hasFeature(run, 'regionRules') ? room.region : null,
+    start: battleStart(run, room, artifacts, binding), bet: hasFeature(run, 'bets') ? run.nextBattle?.bet || null : null
   };
 }

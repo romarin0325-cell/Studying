@@ -6,6 +6,9 @@ import { calendarDate, localDayKey } from './dates.js';
 import { expeditionPool, gradeOf } from './roster.js';
 import { shuffle } from './rng.js';
 import { finishRun, runRewards, runRoster } from './run.js';
+import { entryState, featureFlags, hasCleared, hasFeature } from './entry.js';
+
+export { featureFlags, hasCleared, markEntryStep, markTour, skipTutorial } from './entry.js';
 
 export const PROFILE_VERSION = 1;
 const INTRO = 'dawn_forest';
@@ -13,10 +16,6 @@ const TOWER = 'creation_tower';
 const EARLY = ['ember_volcano', 'twilight_cathedral'];
 const REGIONS = Object.keys(DUNGEONS).filter(id => id !== INTRO && id !== TOWER);
 const completed = (profile, chapter) => profile.notebook.chapters.includes(chapter);
-export const hasCleared = (profile, dungeon) => {
-  const clear = profile.records.clears[dungeon];
-  return !!(clear?.easy || clear?.normal || clear?.nightmare);
-};
 const union = (left, right) => [...new Set([...left, ...right])];
 
 export function createProfile() {
@@ -26,15 +25,16 @@ export function createProfile() {
     notebook: { chapters: [], firstLead: null },
     unlockedDungeons: [INTRO], nightmareUnlocks: [], contractStamps: {},
     records: { runs: 0, clears: {}, bestHit: null, longestServing: null, appliedRuns: [] },
-    seenCharacters: [], seenRelics: [], missions: { periods: {} }, ui: { wantedCompanionId: null, preparation: null }
+    seenCharacters: [], seenRelics: [], missions: { periods: {} }, ui: { entry: entryState(), preparation: null }
   };
 }
 
 export function availableDungeons(profile) {
+  const { difficultyChoice } = featureFlags(profile);
   return Object.values(DUNGEONS).filter(dungeon => profile.unlockedDungeons.includes(dungeon.id))
     .map(({ id, name, floors, background }) => ({
       id, name, floors, background, difficulties: id === INTRO ? ['normal']
-        : profile.nightmareUnlocks.includes(id) ? ['easy', 'normal', 'nightmare'] : ['easy', 'normal']
+        : !difficultyChoice ? ['easy'] : profile.nightmareUnlocks.includes(id) ? ['easy', 'normal', 'nightmare'] : ['easy', 'normal']
     }));
 }
 
@@ -77,7 +77,6 @@ export function nextGoal(profile, run) {
   const preferred = profile.ui?.destination;
   const destination = unreturned || (openRegions.includes(preferred) ? preferred : openRegions[0]);
   const journey = (chapter, dungeonId) => ({ ...NOTEBOOK_GOALS[chapter], target: { screen: 'dungeons', dungeonId } });
-  const collect = () => ({ text: '만나고 싶은 동료의 출현 지역 보기', reward: '동료 수집', target: { screen: 'collection' } });
 
   if (chapters[6].completed) {
     if (unreturned) return { text: `${DUNGEONS[unreturned].name}에서 생환`, reward: '새 지역 생환 기록', target: { screen: 'dungeons', dungeonId: unreturned } };
@@ -86,7 +85,7 @@ export function nextGoal(profile, run) {
       const contractId = unlocked && Object.keys(stamps).find(id => stamps[id] === null);
       if (contractId) return { text: `${DUNGEONS[dungeonId].name} · ${CONTRACTS[contractId].name}`, reward: '악몽 계약 도장', target: { screen: 'dungeons', dungeonId, contractId } };
     }
-    return collect();
+    return { text: '동료 도감 보기', reward: '동료 수집', target: { screen: 'collection' } };
   }
 
   const chapter = chapters.find(entry => !entry.completed).id;
@@ -105,7 +104,7 @@ export function nextGoal(profile, run) {
 }
 
 export function dailyRiftUnlocked(profile) {
-  return completed(profile, 4);
+  return featureFlags(profile).dailyRift && completed(profile, 4);
 }
 
 function companionSlots(profile) {
@@ -122,17 +121,18 @@ function sealSlots(profile, dungeonId) {
 export function startView(profile, dungeonId = INTRO) {
   if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError('Unknown dungeon: ' + dungeonId);
   const recruited = Object.keys(profile.recruits);
+  const features = featureFlags(profile);
   const lead = completed(profile, 1) && recruited.includes(profile.lead) ? profile.lead : null;
-  const slots = companionSlots(profile);
-  const seals = (profile.seals[dungeonId] || []).slice();
+  const slots = features.prepEditing ? companionSlots(profile) : 0;
+  const seals = features.prepEditing ? (profile.seals[dungeonId] || []).slice() : [];
   const companions = profile.companions.filter(id => recruited.includes(id) && id !== lead && !seals.includes(id)).slice(0, slots);
   const actualLead = seals.includes(lead) ? null : lead;
   return {
-    dungeonId, lead: actualLead, leadCandidates: completed(profile, 1) ? recruited.slice() : [],
+    dungeonId, features, lead: actualLead, leadCandidates: features.prepEditing && completed(profile, 1) ? recruited.slice() : [],
     companionSlots: slots, companionCandidates: recruited.filter(id => id !== lead && !seals.includes(id)), companions,
     preferredCompanion: actualLead && profile.recruits[actualLead].bond >= 1 && companions.includes(profile.preferredCompanion)
       ? profile.preferredCompanion : null,
-    seals, sealSlots: sealSlots(profile, dungeonId), reserved: profile.reserved, introCleared: hasCleared(profile, INTRO),
+    seals, sealSlots: features.prepEditing ? sealSlots(profile, dungeonId) : 0, reserved: profile.reserved, introCleared: hasCleared(profile, INTRO),
     bossOrder: ![...REGIONS, TOWER].some(id => hasCleared(profile, id)),
     firstMainAssist: ![...REGIONS, TOWER].some(id => profile.records.clears[id]?.normal),
     recruited, runNumber: profile.records.runs + 1,
@@ -140,9 +140,54 @@ export function startView(profile, dungeonId = INTRO) {
   };
 }
 
+export function appearanceRegions(roster, id) {
+  return Object.values(DUNGEONS).filter(dungeon => expeditionPool(roster, dungeon.id).baseIds.includes(id)).map(dungeon => dungeon.id);
+}
+
+export function prepView(profile, dungeonId, roster) {
+  const view = startView(profile, dungeonId);
+  const intro = dungeonId === INTRO;
+  const editable = view.features.prepEditing;
+  const lead = intro ? null : profile.lead;
+  const invited = intro ? [] : profile.companions.slice();
+  const { baseIds, effectiveIds } = expeditionPool(roster, dungeonId, { ...view, lead, companions: invited, seals: [] });
+  const unlocked = profile.unlockedDungeons.includes(dungeonId);
+  const pool = effectiveIds.map(id => {
+    const base = baseIds.includes(id);
+    const start = lead === id;
+    const isInvited = invited.includes(id);
+    const excluded = view.seals.includes(id);
+    const grade = gradeOf(roster.card(id).grade);
+    const lastOfGrade = !baseIds.some(other => other !== id && !view.seals.includes(other) && gradeOf(roster.card(other).grade) === grade);
+    const inviteReason = intro ? '입문 원정에는 샘 초대가 없습니다'
+      : !editable ? '첫 본편을 클리어하면 샘 초대를 편집할 수 있습니다'
+      : start ? '시작 동료는 샘에 초대할 수 없습니다' : excluded ? '출현 제외를 먼저 해제하세요'
+        : !view.companionCandidates.includes(id) ? '영입한 동료만 샘에 초대할 수 있습니다'
+          : !isInvited && invited.length >= view.companionSlots ? '샘 초대 자리가 가득 찼습니다' : null;
+    const excludeReason = start ? '시작 동료는 제외할 수 없습니다'
+      : !editable || !unlocked ? '지금은 이 지역의 출현 제외를 편집할 수 없습니다'
+        : excluded ? null : !base ? '지역 기본 명단의 동료만 제외할 수 있습니다'
+          : lastOfGrade ? '등급마다 한 명은 남겨야 합니다'
+            : view.seals.length >= view.sealSlots ? '출현 제외 자리가 가득 찼습니다' : null;
+    return {
+      id, base, added: !base, start, invited: isInvited, excluded,
+      canInvite: inviteReason === null, canExclude: excludeReason === null,
+      reason: start && excluded ? excludeReason : excludeReason ?? inviteReason
+    };
+  });
+  return {
+    start: { id: lead, candidates: intro ? [] : view.leadCandidates },
+    invite: { slots: intro ? 0 : view.companionSlots, ids: invited },
+    exclude: { slots: view.sealSlots, ids: view.seals },
+    pool,
+    summary: `기본 ${baseIds.length}명 · 추가 ${pool.filter(row => row.added && !row.excluded).length}명 · 제외 ${view.seals.length}명`
+  };
+}
+
 const reject = (profile, reason, extra) => ({ profile, announce: { ok: false, reason, ...extra } });
 
 export function setExpeditionParty(profile, { lead = null, companions = [], preferredCompanion = null } = {}) {
+  if (!featureFlags(profile).prepEditing) return reject(profile, 'prep_locked');
   const recruited = Object.keys(profile.recruits);
   if (lead !== null && (!completed(profile, 1) || !recruited.includes(lead))) return reject(profile, 'invalid_lead');
   if (!Array.isArray(companions) || companions.length > companionSlots(profile)
@@ -156,10 +201,12 @@ export function setExpeditionParty(profile, { lead = null, companions = [], pref
 }
 
 export function setSeals(profile, dungeonId, ids, roster) {
+  if (!featureFlags(profile).prepEditing) return reject(profile, 'prep_locked');
   if (!profile.unlockedDungeons.includes(dungeonId) || !Array.isArray(ids)
     || ids.length > sealSlots(profile, dungeonId) || new Set(ids).size !== ids.length) return reject(profile, 'invalid_seals');
   const pool = roster.pool(DUNGEONS[dungeonId].pool);
   if (ids.some(id => !pool.includes(id))) return reject(profile, 'invalid_seals');
+  if (ids.includes(profile.lead) && !profile.seals[dungeonId]?.includes(profile.lead)) return reject(profile, 'lead_excluded');
   const remaining = pool.filter(id => !ids.includes(id)).map(id => gradeOf(roster.card(id).grade));
   if (pool.some(id => !remaining.includes(gradeOf(roster.card(id).grade)))) return reject(profile, 'empty_grade');
   return { profile: { ...profile, seals: { ...profile.seals, [dungeonId]: ids.slice() } }, announce: { ok: true } };
@@ -223,7 +270,7 @@ function missionCandidates(profile, period, mission, roster) {
 }
 
 export function missionsView(profile, roster, now = new Date()) {
-  if (!completed(profile, MISSION_UNLOCK_CHAPTER)) return { unlocked: false, current: [], claimable: [] };
+  if (!featureFlags(profile).missions || !completed(profile, MISSION_UNLOCK_CHAPTER)) return { unlocked: false, current: [], claimable: [] };
   const keys = missionPeriodKeys(localDayKey(now));
   const periods = profile.missions?.periods ?? {};
   function view(key, period) {
@@ -241,7 +288,7 @@ export function missionsView(profile, roster, now = new Date()) {
 export function creditMissions(profile, finishedRun) {
   if (finishedRun.daily || finishedRun.dungeonId === INTRO || finishedRun.phase !== 'done' || !finishedRun.result
     || !finishedRun.endDayKey || profile.records.appliedRuns.includes(finishedRun.id)
-    || !completed(profile, MISSION_UNLOCK_CHAPTER)) return profile;
+    || !hasFeature(finishedRun, 'missions') || !completed(profile, MISSION_UNLOCK_CHAPTER)) return profile;
   const keys = missionPeriodKeys(finishedRun.endDayKey);
   const roster = runRoster(finishedRun);
   if (!keys || !roster) return profile;
@@ -272,7 +319,6 @@ function addRecruit(profile, id) {
   profile.recruits[id] = { bond: 0, since: profile.records.runs };
   profile.lead ||= id;
   if (profile.reserved === id) profile.reserved = null;
-  if (profile.ui?.wantedCompanionId === id) profile.ui.wantedCompanionId = null;
 }
 
 function updateLongestServing(profile) {
@@ -281,6 +327,7 @@ function updateLongestServing(profile) {
 }
 
 export function claimMission(profile, periodKey, companionId, roster) {
+  if (!featureFlags(profile).missions) return reject(profile, 'mission_not_claimable');
   const period = Object.hasOwn(profile.missions?.periods ?? {}, periodKey) && profile.missions.periods[periodKey];
   const kind = typeof periodKey === 'string' && periodKind(periodKey);
   if (period?.state !== 'earned' || !kind) return reject(profile, 'mission_not_claimable');

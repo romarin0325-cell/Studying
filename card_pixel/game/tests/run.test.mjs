@@ -17,14 +17,23 @@ import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { mulberry32, nextFloat, shuffle } from '../src/engine/rng.js';
 import { DAILY_KEY, DAMAGED_DAILY_KEY, SESSION_KEY, SETTINGS_KEY, slotStorage } from '../src/ui/storage.js';
-import { playRun } from '../tools/sim.mjs';
+import { playRun as simulateRun } from '../tools/sim.mjs';
+import { registerEntryTests } from './run/entry.mjs';
 import { registerTempoEventTests } from './run/tempo-events.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const { core, roster, sp } = createCoreRoster();
-// Retain the original seeded fixtures on v1. The tempo tests below use the new-run default.
-const make = (opts = {}) => Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7, tempoVersion: 1, ...opts });
+// Retain the old draw rules for the historical seeded fixtures.
+const oldDraws = run => { delete run.drawRuleVersion; return run; };
+const make = (opts = {}) => oldDraws(Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7, tempoVersion: 1, ...opts }));
 const makeTempo = (opts = {}) => Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7, ...opts });
+const makeOldTempo = opts => oldDraws(makeTempo(opts));
+const playRun = (id, seed, opts) => simulateRun(id, seed, { legacyDraws: true, ...opts });
+const legacyProfile = () => {
+  const profile = Meta.createProfile();
+  profile.ui.entry.legacy = true;
+  return profile;
+};
 
 function ok(result) {
   assert.equal(result.ok, true, result.reason);
@@ -91,7 +100,7 @@ function profileWithSnowRabbit() {
   ok(Run.chooseStartPick(intro, 'snow_rabbit'));
   startPicks(intro);
   advance(intro);
-  const result = Meta.applyRunEnd(Meta.createProfile(), clear(intro), { recruits: ['snow_rabbit'] });
+  const result = Meta.applyRunEnd(legacyProfile(), clear(intro), { recruits: ['snow_rabbit'] });
   ok(result.announce);
   return result.profile;
 }
@@ -428,7 +437,7 @@ test('the expedition restores start, map, battle entrance, spring, gate and recr
   advance(run);
   run = roundTrip(clear(run));
   assert.deepEqual(Run.finishRun(run), {
-    result: run.result, recruitable: run.pending.recruitable, recruitLimit: 1, shardCandidates: []
+    result: run.result, recruitable: run.pending.recruitable, recruitTags: run.pending.recruitTags, recruitLimit: 1, shardCandidates: []
   });
 });
 
@@ -479,23 +488,23 @@ test('intro floor five goes straight from victory to recruitment', () => {
   const run = reach(make({ dungeonId: 'dawn_forest' }), 5);
   assert.equal(run.doors[0].relic, null);
   enter(run);
-  const { pending, survivors } = settle(run);
+  const { pending } = settle(run);
   assert.equal(pending, null);
   assert.equal(run.phase, 'done');
   assert.equal(run.stats.gateWins, 1);
-  assert.deepEqual(Run.finishRun(run).recruitable, survivors);
+  assert.deepEqual(Run.finishRun(run).recruitable, run.bench);
 });
 
 test('a saved intro finale gate reward resumes at recruitment', () => {
   const run = reach(make({ dungeonId: 'dawn_forest' }), 5);
   enter(run);
-  const { survivors } = settle(run);
+  settle(run);
   run.phase = 'reward';
   run.pending = { kind: 'gate', candidates: run.room.enemies.map(enemy => enemy.source), relic: 'reverse' };
   const restored = Save.restoreRun(Save.serializeRun(run), { core, roster });
   assert.equal(restored.phase, 'done');
   assert.equal(restored.pending, null);
-  assert.deepEqual(Run.finishRun(restored).recruitable, survivors);
+  assert.deepEqual(Run.finishRun(restored).recruitable, restored.bench);
 });
 
 test('first intro floor-five loss restores the bench and choices at room entrance', () => {
@@ -665,7 +674,7 @@ test('the altar resumes the latest roll and limits one visit to three rolls', ()
 });
 
 test('meta enforces recruitment limits, bonds, seals and all seven notebook chapters', () => {
-  let profile = Meta.createProfile();
+  let profile = legacyProfile();
   assert.deepEqual(Meta.availableDungeons(profile).map(entry => entry.id), ['dawn_forest']);
   assert.throws(() => make({ profileView: Meta.startView(profile) }), /Locked dungeon/);
   const play = (dungeonId, difficulty = 'normal') => clear(make({
@@ -1123,7 +1132,7 @@ test('v1 saves without tempo fields restore the same doors, formation, MP and re
 });
 
 test('tempo 2 reinforcement joins, passes and replaces atomically across save and repeat input', () => {
-  let run = reach(makeTempo(), 1);
+  let run = reach(makeOldTempo(), 1);
   enter(run);
   const { pending } = settle(run);
   assert.equal(pending.kind, 'reinforcement');
@@ -1157,7 +1166,7 @@ test('tempo 2 reinforcement joins, passes and replaces atomically across save an
 });
 
 test('reinforcement skips exhausted pools and waits behind an elite relic replacement', () => {
-  const exhausted = reach(makeTempo(), 1);
+  const exhausted = reach(makeOldTempo(), 1);
   exhausted.pool = exhausted.bench.slice();
   enter(exhausted);
   assert.equal(settle(exhausted).pending, null);
@@ -1232,7 +1241,8 @@ test('tempo 2 event doors offer 11 events per theme and 40 in the tower', () => 
   assert.ok(!collect(arena).has('ash_split_wick'));
 });
 
-registerTempoEventTests({ core, roster, makeTempo, reach, advance, enter, settle, ok });
+registerTempoEventTests({ core, roster, makeTempo: makeOldTempo, reach, advance, enter, settle, ok });
+registerEntryTests({ core, roster, makeTempo, reach, advance, enter, settle, clear, ok, roundTrip, reviewTwoStorage });
 
 test('one command validates a previewed battle door and saves its exact lineup once', () => {
   const run = reach(makeTempo(), 2);
@@ -1281,7 +1291,7 @@ test('one command validates a previewed battle door and saves its exact lineup o
 });
 
 test('a named spring pick is available across reload and only charges a successful commit', () => {
-  const run = reach(makeTempo({ profileView: { companions: ['snow_rabbit'], preferredCompanion: 'snow_rabbit' } }), 3);
+  const run = reach(makeOldTempo({ profileView: { companions: ['snow_rabbit'], preferredCompanion: 'snow_rabbit' } }), 3);
   enter(run);
   if (run.bench.includes('snow_rabbit')) run.bench = run.bench.filter(id => id !== 'snow_rabbit');
   run.crystals = 7;
@@ -1317,7 +1327,7 @@ test('a named spring pick is available across reload and only charges a successf
   assert.equal(full.heirlooms[replaceId], undefined);
   assert.ok(full.released.includes(replaceId));
 
-  const legacy = reach(makeTempo({ lessonVersion: 0 }), 3);
+  const legacy = reach(makeOldTempo({ lessonVersion: 0 }), 3);
   enter(legacy);
   legacy.crystals = 3;
   ok(Run.springPick(legacy));
@@ -1510,7 +1520,7 @@ test('adjusted events expose the actual payment, eligibility, replacement count 
 });
 
 test('tempo 2 spring draws and gate claims share the roster limit without automatic release', () => {
-  const run = reach(makeTempo(), 1);
+  const run = reach(makeOldTempo(), 1);
   enter(run);
   const { key, candidates: [id] } = settle(run).pending;
   ok(Run.resolveReinforcement(run, { key, id }));
@@ -1625,7 +1635,7 @@ test('easy returns unlock the campaign and ending while journey alone unlocks ni
     const result = Meta.applyRunEnd(profile, roundTrip(run), { recruits: [recruit] });
     ok(result.announce);
     assert.deepEqual(result.announce.nightmares, []);
-    assert.equal(result.profile.ui.wantedCompanionId, null);
+    assert.equal(result.profile.ui.wantedCompanionId, recruit);
     profile = result.profile;
     assert.equal(profile.records.clears[dungeonId].easy, 1);
     assert.equal(Meta.startView(profile, dungeonId).sealSlots, 0);
@@ -1649,7 +1659,7 @@ const localTime = stamp => new Date(stamp);
 const reviewTwoRoute = (...indices) => run => run.doors[indices[run.floor - 1]];
 
 function reviewTwoReturns() {
-  let profile = Meta.createProfile();
+  let profile = legacyProfile();
   for (const [dungeonId, seed] of [['dawn_forest', 17], [ember, 0]]) {
     const { run, end } = playRun(dungeonId, seed, { profile, opening: 'stand' });
     assert.equal(end.result, 'win');
@@ -2027,7 +2037,7 @@ test('mission dates are pinned at the first settlement and survive Sunday, month
   profile.ui.wantedCompanionId = options[0];
   const invite = Meta.claimMission(profile, nextWeek, options[0], roster);
   assert.deepEqual(ok(invite.announce).recruits, [options[0]]);
-  assert.equal(invite.profile.ui.wantedCompanionId, null);
+  assert.equal(invite.profile.ui.wantedCompanionId, options[0]);
   assert.equal(Meta.claimMission(invite.profile, nextWeek, options[0], roster).announce.reason, 'mission_not_claimable');
   const monthlyInvite = Meta.claimMission(invite.profile, november, month.candidates[0], roster);
   assert.deepEqual(ok(monthlyInvite.announce).recruits, [month.candidates[0]]);
@@ -2073,7 +2083,7 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   assert.deepEqual(store.loadDetailed(), { status: 'empty' });
   const offline = Save.createSaveStore({ getItem() { throw new Error('denied'); } });
   assert.deepEqual(offline.loadDetailed(), { status: 'unavailable' });
-  let profile = Meta.createProfile();
+  let profile = legacyProfile();
   for (const dungeonId of ['dawn_forest', ember]) {
     const { run, end } = playRun(dungeonId, 7, { profile, difficulty: 'easy', opening: 'stand' });
     assert.equal(end.result, 'win');
@@ -2091,7 +2101,7 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   assert.deepEqual(upgraded.profile.recruits, profile.recruits);
   assert.equal(upgraded.profile.records.clears[ember].easy, 0);
   assert.deepEqual(upgraded.profile.missions.periods, {});
-  assert.equal(upgraded.profile.ui.wantedCompanionId, null);
+  assert.equal(upgraded.profile.ui.entry.legacy, true);
   store.save({ profile });
   assert.deepEqual(store.loadLastGood(), { status: 'ok', profile, run: null });
 
@@ -2174,13 +2184,14 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   const { run, end } = playRun('twilight_cathedral', 21, { profile: restored.profile, difficulty: 'easy' });
   assert.equal(end.result, 'win');
   assert.equal(run.stats.battles, 5);
-  assert.equal(end.recruitable[0], 'ancient_soul');
-  const recruited = Meta.applyRunEnd(restored.profile, run, { recruits: ['ancient_soul'] });
-  assert.deepEqual(ok(recruited.announce).recruits, ['ancient_soul']);
+  const recruit = 'void_knight';
+  assert.equal(end.recruitable[0], recruit);
+  const recruited = Meta.applyRunEnd(restored.profile, run, { recruits: [recruit] });
+  assert.deepEqual(ok(recruited.announce).recruits, [recruit]);
   store.save({ profile: recruited.profile });
-  assert.deepEqual(store.loadDetailed().profile.recruits.ancient_soul, { bond: 0, since: 3 });
+  assert.deepEqual(store.loadDetailed().profile.recruits[recruit], { bond: 0, since: 3 });
   assert.equal(Meta.applyRunEnd(store.loadDetailed().profile, run).announce.reason, 'already_applied');
-  t.diagnostic(`Restored the floor-3 spring, ${summary.dailyOfficialStarts} official attempts, then recruited ancient_soul after ${run.stats.battles} battles.`);
+  t.diagnostic(`Restored the floor-3 spring, ${summary.dailyOfficialStarts} official attempts, then recruited ${recruit} after ${run.stats.battles} battles.`);
   assert.equal(store.clear(), true);
   assert.equal(entries.size, 0);
   assert.equal(store.loadLastGood().status, 'empty');

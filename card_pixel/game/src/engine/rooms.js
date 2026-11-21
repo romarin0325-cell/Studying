@@ -10,8 +10,12 @@ import {
   BLESSING_MULTIPLIERS, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS, LESSON_NIGHTMARE_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
   REGION_MULTIPLIERS, ROOM_MULTIPLIERS, START_MP, TEMPO_SEEDS, usesTempo
 } from '../content/tempo.js';
-import { BLESS, canJoin, drawFrom, join, RATES, release, replacementCount, seeCharacters, seeRelic, validateReplacements } from './awakenings.js';
+import {
+  applyDraw, BLESS, canJoin, drawEncounter, drawFrom, drawKind, join, RATES, release,
+  replacementCount, seeCharacters, seeRelic, usesRepeatDraws, validateReplacements
+} from './awakenings.js';
 import { heldHeirloomSkill } from './bridge.js';
+import { hasFeature } from './entry.js';
 import { gradeOf } from './roster.js';
 import { nextFloat, pick, shuffle } from './rng.js';
 
@@ -132,7 +136,7 @@ function battleScale(run, room) {
   const assist = run.firstMainAssist && (FIRST_MAIN_ASSIST[run.dungeonId]?.[key] || FIRST_MAIN_ASSIST[key]);
   const tunedNightmare = run.lessonVersion && LESSON_NIGHTMARE_MULTIPLIERS[run.dungeonId]?.[key];
   const nightmare = run.difficulty === 'nightmare' && (tunedNightmare || NIGHTMARE_MULTIPLIERS[run.dungeonId]?.[key]);
-  return assist || nightmare || REGION_MULTIPLIERS[run.dungeonId]?.[key] || ROOM_MULTIPLIERS[key];
+  return assist || nightmare || (hasFeature(run, 'regionRules') && REGION_MULTIPLIERS[run.dungeonId]?.[key]) || ROOM_MULTIPLIERS[key];
 }
 
 export function applyDoorTempo(run, roster, door) {
@@ -164,7 +168,7 @@ export function applyDoorTempo(run, roster, door) {
   return {
     pattern,
     ...(lesson && { lesson }),
-    blessing: intro ? null : battleBlessing(run, roster),
+    blessing: !intro && hasFeature(run, 'battleBlessing') ? battleBlessing(run, roster) : null,
     startMp: intro ? (door.type === 'borrowed' ? INTRO.start.allyStart[0].mp : null) : QUIRKS[door.quirk]?.ally?.mp ?? START_MP
   };
 }
@@ -174,7 +178,8 @@ function makeBattleDoor(run, roster, dungeon, template, index, region, battleCou
   const elite = template.type === 'elite';
   const singleRisk = run.difficulty !== 'nightmare' && template.type === 'wild';
   const quirks = Object.keys(QUIRKS);
-  const riskRoll = !run.plain && template.risk ? nextFloat(run.rng) * quirks.length : -1;
+  const riskRoll = !run.plain && template.risk && (hasFeature(run, 'quirks') || hasFeature(run, 'affixes'))
+    ? nextFloat(run.rng) * quirks.length : -1;
   const quirk = quirks[Math.floor(riskRoll)] || null;
   // Use the unused fraction of the roll to choose which modifier applies on a normal door.
   // Overflow always keeps its quirk because it adds an enemy to the room.
@@ -190,9 +195,10 @@ function makeBattleDoor(run, roster, dungeon, template, index, region, battleCou
   } else if (template.type === 'boss') {
     enemies = [roster.bossOf(run.boss, tier)];
   } else {
-    enemies = wildEnemies(run, roster, dungeon, template, tier, region, quirk);
+    enemies = wildEnemies(run, roster, dungeon, template, tier, region, hasFeature(run, 'quirks') ? quirk : null);
   }
-  const affixCount = run.plain ? 0 : (elite ? 2 : Number(!!template.risk && quirk !== 'overflow')) + Number(!!challenge?.extraAffix);
+  const affixCount = run.plain || !hasFeature(run, 'affixes') ? 0
+    : (elite ? 2 : Number(!!template.risk && quirk !== 'overflow')) + Number(!!challenge?.extraAffix);
   if (affixCount) {
     const affixes = shuffle(run.rng, Object.keys(AFFIXES)).slice(0, affixCount);
     if (!singleRisk || affixOnly) enemies[0].affixes = affixes;
@@ -203,7 +209,8 @@ function makeBattleDoor(run, roster, dungeon, template, index, region, battleCou
   const start = template.type === 'borrowed' ? INTRO.start : hasSky ? { field: filledSky ? SKY : [] } : null;
   const door = {
     ...template, index, name: ROOM_NAMES[template.type], bg: dungeon.background, region: copy(region),
-    enemies, quirk: affixOnly ? null : quirk, start: copy(start), relic: elite || template.type === 'gate' ? relicOffer(run, roster) : null
+    enemies, quirk: affixOnly || !hasFeature(run, 'quirks') ? null : quirk,
+    start: copy(start), relic: elite || template.type === 'gate' ? relicOffer(run, roster) : null
   };
   door.tempo = applyDoorTempo(run, roster, door);
   return door;
@@ -215,18 +222,36 @@ function eventCandidates(run) {
   return EVENTS.filter(event => (event.minTempoVersion ?? 1) <= (run.tempoVersion ?? 1)
     && (!event.dungeons || event.dungeons.includes(run.dungeonId))
     && (event.requires.present || []).every(present)
-    && (event.requires.bench || []).every(id => run.bench.includes(id)));
+    && (event.requires.bench || []).every(id => run.bench.includes(id)))
+    .map(event => configuredEvent(run, event)).filter(event => event.choices.length);
+}
+
+const DEFERRED_EVENT_OPS = ['bet', 'altar', 'field', 'start', 'firstSurvivalPay', 'relic'];
+
+function configuredEvent(run, event) {
+  const configured = eventForRun(event, run);
+  const choices = configured.choices.filter(choice => {
+    if (!hasFeature(run, 'bets') && choice.ops.some(op => op.type === 'bet')) return false;
+    if (!hasFeature(run, 'altar') && choice.ops.some(op => op.type === 'altar')) return false;
+    return hasFeature(run, 'pricedEvents') || (!choice.cost && choice.ops.every(op => !DEFERRED_EVENT_OPS.includes(op.type)));
+  });
+  return { ...configured, choices };
 }
 
 export function makeDoors(run, roster) {
   const dungeon = DUNGEONS[run.dungeonId];
-  const layout = LAYOUTS[dungeon.layout][run.floor - 1];
+  const layout = LAYOUTS[dungeon.layout][run.floor - 1]
+    .filter(template => template.type !== 'altar' || hasFeature(run, 'altar'))
+    .filter(template => template.type !== 'event' || run.floor >= 5 || hasFeature(run, 'pricedEvents'))
+    .filter(template => dungeon.layout !== 'intro' || template.type !== 'spring' || hasFeature(run, 'introSpring'));
   const battleCount = layout.filter(template => template.reward != null || ['borrowed', 'boss'].includes(template.type)).length;
   return layout.map((template, index) => {
-    const regionChoice = run.floor === 5 ? run.laterRegions?.[index] : null;
-    const region = regionChoice || run.region;
+    const regionChoice = hasFeature(run, 'regionRules') && run.floor === 5 ? run.laterRegions?.[index] : null;
+    const region = hasFeature(run, 'regionRules') ? regionChoice || run.region : null;
     if (template.reward != null || ['borrowed', 'boss'].includes(template.type)) {
-      return makeBattleDoor(run, roster, dungeon, template, index, region, battleCount);
+      const standard = !hasFeature(run, 'riskDoors') && (template.risk || template.type === 'elite')
+        ? { type: 'wild', reward: 1 } : template;
+      return makeBattleDoor(run, roster, dungeon, standard, index, region, battleCount);
     }
     const event = template.type === 'event' ? pick(run.rng, eventCandidates(run)) : null;
     const merchant = event?.id === 'grand_merchant';
@@ -234,7 +259,7 @@ export function makeDoors(run, roster) {
     return {
       ...template, index, name: event?.name || ROOM_NAMES[template.type], bg: dungeon.background,
       enemies: [], tempo: null, region: copy(region), regionChoice: copy(regionChoice || null),
-      event: event ? copy(eventForRun(event, run)) : null, relic
+      event: event ? copy(event) : null, relic
     };
   });
 }
@@ -266,7 +291,9 @@ export function eventChoices(run, core, roster) {
     }
     const eligible = choice.ops.every(op => {
       if (op.type === 'join' && !op.random) return op.ids.every(id => canJoin(run, id));
-      if (op.type === 'join' || (op.type === 'release' && op.randomReplacement)) return run.pool.some(id => canJoin(run, id));
+      if (op.type === 'join' || (op.type === 'release' && op.randomReplacement)) {
+        return usesRepeatDraws(run) ? run.pool.length > 0 : run.pool.some(id => canJoin(run, id));
+      }
       if (op.type === 'bet') return canAttemptBet(run, core, roster, op.kind);
       if (op.type === 'relic') {
         const id = op.id === 'offered' ? run.room.relic : op.id;
@@ -289,7 +316,9 @@ function addEventChoiceDetails(choice, run, core, roster) {
   const incoming = joinCount(choice.ops);
   if (incoming) {
     // Event details use the lesson version, independently of tempo validation.
-    choice.requiredReleases = replacementCount(run, incoming, { enforceLimit: true });
+    const random = usesRepeatDraws(run) && choice.ops.filter(op => op.type === 'join' && op.random).length;
+    choice.requiredReleases = random && replacementCount(run, incoming) > 0
+      ? null : replacementCount(run, incoming, { enforceLimit: true });
     if (choice.requiredReleases > run.bench.filter(id => id !== run.lead).length) choice.enabled = false;
   }
   const blessing = choice.ops.find(op => op.type === 'bless' && Number.isFinite(op.multiplier));
@@ -311,8 +340,21 @@ function addEventChoiceDetails(choice, run, core, roster) {
 export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds = []) {
   const choice = eventChoices(run, core, roster).find(entry => entry.id === choiceId);
   if (!choice?.enabled || (choice.targets ? !choice.targets.includes(targetId) : targetId != null)) return invalid('invalid_event_choice');
-  const error = validateReplacements(run, joinCount(choice.ops), replaceIds);
-  if (error) return invalid(error);
+  const rolled = new Map();
+  const preview = usesRepeatDraws(run) ? { ...run, rng: { ...run.rng } } : null;
+  let incoming = joinCount(choice.ops);
+  if (preview) {
+    for (const op of choice.ops) {
+      if (!op.random && !op.randomReplacement) continue;
+      const id = drawEncounter(preview, roster);
+      if (!id) return invalid('empty_pool');
+      rolled.set(op, id);
+      if (op.type === 'join' && drawKind(run, id) !== 'join') incoming--;
+    }
+  }
+  const error = validateReplacements(run, incoming, replaceIds);
+  if (error) return rolled.size ? { ...invalid(error), requiredReleases: replacementCount(run, incoming) } : invalid(error);
+  if (rolled.size) run.rng.state = preview.rng.state;
   const result = { ok: true, choiceId, effects: [] };
   const before = run.crystals;
   const paidRelic = choice.ops.some(op => op.type === 'relic' && !op.temporary);
@@ -332,6 +374,11 @@ export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds =
         (run.firstSurvivalPay ||= {})[op.id] = op.amount;
         break;
       case 'join': {
+        if (rolled.has(op)) {
+          const draw = applyDraw(run, rolled.get(op));
+          result.effects.push({ type: 'join', ids: draw.kind === 'join' ? [draw.id] : [], draw });
+          break;
+        }
         const ids = op.random ? [drawFrom(run, roster, RATES.draw)] : op.ids;
         for (const id of ids) join(run, id);
         result.effects.push({ type: 'join', ids: ids.slice() });
@@ -343,9 +390,14 @@ export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds =
         result.effects.push({ type: 'release', id: targetId });
         // The selected release has already opened the incoming fighter's seat.
         if (op.randomReplacement) {
-          const id = drawFrom(run, roster, RATES.draw);
-          join(run, id);
-          result.effects.push({ type: 'join', ids: [id] });
+          if (rolled.has(op)) {
+            const draw = applyDraw(run, rolled.get(op));
+            result.effects.push({ type: 'join', ids: draw.kind === 'join' ? [draw.id] : [], draw });
+          } else {
+            const id = drawFrom(run, roster, RATES.draw);
+            join(run, id);
+            result.effects.push({ type: 'join', ids: [id] });
+          }
         }
         break;
       case 'bless':
