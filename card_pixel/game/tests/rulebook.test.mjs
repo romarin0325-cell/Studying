@@ -41,7 +41,7 @@ const tempoRows = tempoFields - tempoScales.length - 2 + tempoScales.reduce((cou
 
 test('rulebook entries have all fields, unique IDs and existing implementation files', () => {
   const ids = new Set();
-  const groups = ['전투 규칙 추가', '깨우기·제단', '영입·동행·봉인', '결정·보상', '저장'];
+  const groups = ['전투 규칙 추가', '깨우기·제단', '영입·시작 동료·샘 초대·출현 제외', '결정·보상', '저장'];
   for (const entry of RULEBOOK) {
     assert.deepEqual(Object.keys(entry).sort(), ['group', 'id', 'name', 'rule', 'since', 'where']);
     assert.ok(Object.values(entry).every(value => typeof value === 'string' && value.trim()), entry.id);
@@ -66,7 +66,7 @@ test('generated page has one entry for every source item and unique review keys'
     relics: size(RELICS), bosses: size(BOSSES), lessons, wild: size(WILD), dungeons: size(DUNGEONS),
     floors, 'room-names': size(ROOM_NAMES), intro: LAYOUTS.intro.length,
     contracts: size(CONTRACTS), notebook: NOTEBOOK.length, missions: size(MISSIONS), daily: size(daily),
-    tempo: tempoRows, awakenings: groupSize('깨우기·제단'), recruitment: groupSize('영입·동행·봉인'),
+    tempo: tempoRows, awakenings: groupSize('깨우기·제단'), recruitment: groupSize('영입·시작 동료·샘 초대·출현 제외'),
     economy: groupSize('결정·보상'), save: groupSize('저장')
   };
   const sections = [...html.matchAll(/<section id="([^"]+)" data-total="(\d+)">([\s\S]*?)<\/section>/g)];

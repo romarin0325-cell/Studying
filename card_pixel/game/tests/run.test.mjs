@@ -1625,7 +1625,7 @@ test('easy and journey seed 7 share HP, enemy actions and the carried heirloom, 
 
 test('easy returns unlock the campaign and ending while journey alone unlocks nightmare and the first seal', () => {
   let profile = profileWithSnowRabbit();
-  assert.equal(Meta.nextGoal(profile).reward, '동행 1칸 열림');
+  assert.equal(Meta.nextGoal(profile).reward, '샘 초대 1칸 열림');
   assert.throws(() => makeTempo({ dungeonId: 'dawn_forest', difficulty: 'easy' }), /Unavailable difficulty/);
   assert.deepEqual(Meta.availableDungeons(profile).find(entry => entry.id === ember).difficulties, ['easy', 'normal']);
   for (const dungeonId of [ember, 'twilight_cathedral', 'starlit_garden', 'creation_tower']) {

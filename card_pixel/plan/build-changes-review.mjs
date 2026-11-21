@@ -62,7 +62,7 @@ function makeRow(key, name, where, effect, relation, sources, details = []) {
 }
 
 const ruleCategories = {
-  battle: '전투 규칙 추가', awakenings: '깨우기·제단', recruitment: '영입·동행·봉인',
+  battle: '전투 규칙 추가', awakenings: '깨우기·제단', recruitment: '영입·시작 동료·샘 초대·출현 제외',
   economy: '결정·보상', save: '저장'
 };
 

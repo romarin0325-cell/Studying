@@ -113,22 +113,22 @@ export const RULEBOOK = [
     where: 'card_pixel/game/src/engine/run.js:altarRoll', since: '원정 기본'
   },
   {
-    id: 'recruit-after-clear', group: '영입·동행·봉인', name: '생환 동료 영입',
+    id: 'recruit-after-clear', group: '영입·시작 동료·샘 초대·출현 제외', name: '생환 동료 영입',
     rule: '최종 승리 때 원정 명단에 살아서 남은 미영입 동료를 꿈결·여정에서 1명, 악몽에서 2명까지 영입합니다. 대기하거나 물러난 동료도 포함됩니다. 영입 후보에는 보스·문지기·일반 전투·대기 중 가장 높은 출전 이력이 붙습니다. 이미 영입한 동료의 인연 +1은 문지기 또는 보스전 출전 뒤 생존해야 적용됩니다. 정산 대기 중인 구저장은 당시 제시한 후보를 유지합니다.',
     where: 'card_pixel/game/src/engine/meta.js:applyRunEnd', since: '프로필 원정'
   },
   {
-    id: 'failed-run-shard', group: '영입·동행·봉인', name: '패배 뒤 조각',
+    id: 'failed-run-shard', group: '영입·시작 동료·샘 초대·출현 제외', name: '패배 뒤 조각',
     rule: '원정에서 패배하면 출전한 미영입 동료 1명을 조각으로 남길 수 있습니다. 다음 원정의 출현 풀에 추가되고 첫 깨우기에 우선 제안됩니다.',
     where: 'card_pixel/game/src/engine/run.js:runRewards', since: '프로필 원정'
   },
   {
-    id: 'companions', group: '영입·동행·봉인', name: '단계 해금과 출발 준비',
+    id: 'companions', group: '영입·시작 동료·샘 초대·출현 제외', name: '단계 해금과 출발 준비',
     rule: '신규 프로필의 입문 4층에는 보물방만 등장합니다. 입문을 클리어하면 홍련 화산과 황혼 성당이 열리고, 영입한 동료 1명이 본편 시작 동료가 됩니다. 첫 본편 클리어로 난이도 선택, 시작 동료·샘 초대·출현 제외 편집, 임무와 오늘의 균열이 열립니다. 샘 초대는 수첩 2·4·5장에서 각각 1·2·3칸을 얻으며, 초대 동료는 지역 출현 명단에도 추가됩니다.',
     where: 'card_pixel/game/src/engine/meta.js:prepView', since: '단계 해금 v1'
   },
   {
-    id: 'seals', group: '영입·동행·봉인', name: '던전별 출현 제외',
+    id: 'seals', group: '영입·시작 동료·샘 초대·출현 제외', name: '던전별 출현 제외',
     rule: '여정 생환 후 해당 던전에서 동료 1명, 악몽 생환 후 최대 3명을 출현 명단에서 뺍니다. 시작 동료는 제외할 수 없으며, 던전 기본 명단의 등급군은 각각 1명 이상 남겨야 합니다.',
     where: 'card_pixel/game/src/engine/meta.js:setSeals', since: '프로필 원정'
   },

@@ -92,12 +92,12 @@ export function nextGoal(profile, run) {
   if (chapter === 1) return journey(1, INTRO);
   const recruited = Object.keys(profile.recruits);
   if (chapter === 2 && !recruited.length) {
-    return { text: '생환 동료 영입', reward: '대표와 출발할 수 있음', target: { screen: 'dungeons', dungeonId: destination || INTRO } };
+    return { text: '생환 동료 영입', reward: '시작 동료와 출발할 수 있음', target: { screen: 'dungeons', dungeonId: destination || INTRO } };
   }
   if (chapter === 5 && !recruited.some(id => profile.notebook.firstLead && id !== profile.notebook.firstLead)) {
     if (!chapters[5].completed && unreturned) return journey(6, unreturned);
     if (profile.unlockedDungeons.includes(TOWER)) return journey(7, TOWER);
-    return { text: '새 동료 영입', reward: '다른 대표와 출발할 수 있음', target: { screen: 'dungeons', dungeonId: destination || INTRO } };
+    return { text: '새 동료 영입', reward: '다른 시작 동료와 출발할 수 있음', target: { screen: 'dungeons', dungeonId: destination || INTRO } };
   }
   if (chapter === 7) return journey(7, TOWER);
   return journey(chapter, destination || INTRO);
