@@ -1,4 +1,4 @@
-// Text of plan/entry-report.html (built by build-entry-report.mjs). Plain Korean for the owner.
+// Text of plan/entry-report.html (built by build-report.mjs, the default content). Plain Korean for the owner.
 export const REPORT = {
   subtitle: '2026-11-21 밤 · UI 선택 뒤 "입장권" 지시에 따른 작업 보고',
   toc: [['summary', '한눈에'], ['requests', '요청별 처리'], ['screens', '화면 전후'], ['decisions', '제가 판단한 것'], ['checks', '확인한 것'], ['files', '파일']],

@@ -26,6 +26,7 @@ const now = `
       <li><code>card_pixel/plan/entry-report.html</code> 이번 작업 보고서</li>
       <li><code>card_pixel/plan/v1-decisions.md</code> 결정 장부(13절이 최신)</li>
       <li><code>card_pixel/plan/changes-review.html</code> 원본 대비 검수</li>
+      <li><code>card_pixel/plan/skill-motion.html</code> 스킬 연출 전수조사와 공용 이펙트 계획</li>
       <li><code>card_pixel/history/README.md</code> 이력 목차</li></ul></article>
     <article class="card"><h3>규모</h3><p>파일·묶음 ${map.items.length}개 · 이정표 ${map.timeline.length}건 · 작업 공간 ${map.worktrees.length}곳 · 남은 과제 ${map.openTasks.length}건</p>
       <p class="dim">자료 생성 ${esc(day(map.generatedAt))} · 커밋 ${esc(String(map.commit).slice(0, 7))}</p></article>
