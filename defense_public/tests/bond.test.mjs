@@ -41,17 +41,19 @@ test('the basket grows a gift every 15 minutes up to eight, and favourites count
   p.petDay='';act(p,'pet',{},NOW+300*DAY);assert.equal(p.heroes[id].bond,3);assert.equal(p.heroes[id].bondXp,50);
 });
 
-test('battle bond gives owned expedition members eight on a win, three on a loss, and opens ten hearts once',()=>{
+test('battle bond pays eight for a win or a twelve-round draft loss and skips unowned and maxed heroes',()=>{
   const p=createProfile(NOW),id=p.deck[0];p.cleared=3;Object.assign(p.heroes[id],{bond:9,bondXp:98});
   const main=()=>{assert.ok(act(p,'begin',{mode:'main',stage:1}).ok);return act(p,'settle',{token:p.active.token,round:6,won:true});};
   assert.deepEqual(main().bond,p.deck.map(hero=>({id:hero,points:8,hearts:Number(hero===id),opened:hero===id})));
-  assert.equal(p.heroes[id].bond,10);assert.equal(main().bond[0].opened,false);
+  assert.equal(p.heroes[id].bond,10);assert.deepEqual(main().bond,p.deck.slice(1).map(id=>({id,points:8,hearts:0,opened:false})));
   assert.ok(act(p,'begin',{mode:'weekly'}).ok);
   while(p.active.draft.length<p.deck.length){const at=p.active.offers.findIndex(o=>!p.heroes[o.id].owned);assert.ok(act(p,'draft',{index:Math.max(0,at)}).ok);}
-  const draft=p.active.deck;p.heroes[draft[0]].owned=true;
+  const draft=p.active.deck,pick=draft.find(hero=>!p.heroes[hero].owned);assert.ok(pick);p.heroes[pick].owned=true;
   const unowned=draft.filter(hero=>!p.heroes[hero].owned),before=unowned.map(hero=>structuredClone(p.heroes[hero]));assert.ok(unowned.length);
-  const lost=act(p,'settle',{token:p.active.token,round:1,won:false});
-  assert.deepEqual(lost.bond,draft.filter(hero=>p.heroes[hero].owned).map(hero=>({id:hero,points:3,hearts:0,opened:false})));
+  const eligible=draft.filter(hero=>p.heroes[hero].owned&&p.heroes[hero].bond<BOND_MAX);assert.ok(eligible.length);
+  const xp=eligible.map(hero=>p.heroes[hero].bondXp),lost=act(p,'settle',{token:p.active.token,round:12,won:false});
+  assert.deepEqual(lost.bond,eligible.map(id=>({id,points:8,hearts:0,opened:false})));
+  assert.deepEqual(eligible.map(hero=>p.heroes[hero].bondXp),xp.map(n=>n+8));
   assert.deepEqual(unowned.map(hero=>p.heroes[hero]),before);assert.equal(lost.dust,0);assert.equal(lost.star,null);
 });
 

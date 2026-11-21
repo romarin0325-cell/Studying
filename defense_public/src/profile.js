@@ -421,13 +421,16 @@ export function command(p,action,args={},now=Date.now()){
     if(free&&(banner==='season'||count!==1||p.daily[freeKey]))return no('오늘의 무료 소환은 이미 사용했습니다.');
     const cost=free||first?0:(banner==='relic'?TUNING.relicDrawCost:TUNING.heroDrawCost)*count;if(p.dreams<cost)return no(`꿈의결정이 부족합니다. (${cost} 필요)`);if(free)p.daily[freeKey]=true;if(first)p.firstTen=true;
     p.dreams-=cost;const c=calendar(now),paidHero=banner!=='relic'&&cost>0;
-    const pull=bonus=>{
+    const pull=(bonus,minSR=false)=>{
       if(paidHero&&!bonus)p.pity[banner]=Math.min(9999,p.pity[banner]+1);
-      const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',c.guardian,c.pickup,lateOpen(p.cleared));
+      const id=banner==='relic'?drawRelic(()=>random(p),p.relicDraws):drawCharacter(()=>random(p),banner==='season',c.guardian,c.pickup,lateOpen(p.cleared),minSR);
       const item={id,fresh:receive(banner==='relic'?p.relics:p.heroes,id),banner,at:now};if(bonus)item.bonus=true;if(first)item.first=true;
       p.history.unshift(item);if(banner==='relic')p.relicDraws++;else p.draws++;return item;
     };
-    const items=Array.from({length:count},()=>pull(false)),lucky=cost>0&&count===10&&random(p)<.1,bonus=lucky?Array.from({length:10},()=>pull(true)):[];
+    // The tutorial guarantee only replaces the last rarity roll when the first nine missed SR and UR.
+    const items=[];
+    for(let i=0;i<count;i++)items.push(pull(false,first&&i===9&&!items.some(x=>['SR','UR'].includes(HERO[x.id].rarity))));
+    const lucky=cost>0&&count===10&&random(p)<.1,bonus=lucky?Array.from({length:10},()=>pull(true)):[];
     if(banner==='relic')did('relic');p.history=p.history.slice(0,50);return {ok:true,items,bonus,lucky,cost,free,pity:{normal:p.pity.normal,season:p.pity.season},...(first?{first:true}:{})};
   }
   if(action==='bed'){
@@ -509,7 +512,7 @@ export function command(p,action,args={},now=Date.now()){
     if(a.mode==='main'){
       const first=!!args.won&&a.stage===p.cleared+1;
       if(first){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
-      dust=stageDust(a.stage,!!args.won,first);p.dust+=dust;
+      dust=stageDust(a.stage,!!args.won,first,args.round);p.dust+=dust;
       if(args.won)star=lightStar(p.study.library);
     }
     let record=null,newBest=false,score=0,bands=[],side=null,total=0,shownRound=0,earned=0,paidBefore=0;
@@ -531,9 +534,11 @@ export function command(p,action,args={},now=Date.now()){
     if(a.mode==='twin'){const out=settleTwin(p,a,args,now);newBest=out.newBest;side=out.side;total=out.total;shownRound=out.round;bands=out.bands;reward+=out.pay;}
     const perfect=a.mode==='main'&&!!args.won&&args.perfect===true;
     if(perfect&&a.stage<=p.cleared&&!p.perfect.includes(a.stage)){p.perfect.push(a.stage);p.perfect.sort((x,y)=>x-y);reward+=PERFECT_REWARD;firstPerfect=true;}
-    const points=args.won?BATTLE_BOND.win:BATTLE_BOND.loss,bond=a.deck.filter(id=>p.heroes[id]?.owned).map(id=>{
-      const e=p.heroes[id],hearts=addBond(e,points);return {id,points,hearts,opened:hearts>0&&e.bond===BOND_MAX};
-    });
+    const points=args.won?BATTLE_BOND.win:Math.min(BATTLE_BOND.lossMax,args.round),bond=[];
+    if(points>0)for(const id of a.deck){
+      const e=p.heroes[id];if(!e?.owned||e.bond>=BOND_MAX)continue;
+      const hearts=addBond(e,points);bond.push({id,points,hearts,opened:e.bond===BOND_MAX});
+    }
     const requestsDone=args.feats!==undefined?validFeats(args.feats)?applyRequestProgress(p,a.deck,args.feats):[]:undefined;
     p.dreams+=reward;p.daily.combat=true;if(integer(args.merges,999))p.daily.merges=Math.min(9999,p.daily.merges+args.merges);p.results.unshift({at:now,mode:a.mode,stage:a.stage,round:args.round,reward,won:!!args.won,...(a.tier?{tier:a.tier}:{}),...(perfect?{perfect:true}:{})});p.results=p.results.slice(0,30);p.active=null;
     return {ok:true,reward,record,newBest,perfect,firstPerfect,clearReward,unlocked,partOpened,dust,bond,star,...(a.mode==='oath'?{score,bands}:{}),...(a.mode==='twin'?{side,round:shownRound,total,bands}:{}),...(a.mode==='weekly'?{earned,paidBefore,best:structuredClone(p.weeklyBest),left:WEEKLY_ENTRIES-p.weeklyRuns}:a.mode==='monthly'?{earned,paidBefore}:{}),...(requestsDone!==undefined?{requestsDone}:{})};

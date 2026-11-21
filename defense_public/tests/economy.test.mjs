@@ -129,6 +129,11 @@ test('normal and season hero draws use the fixed rarity thresholds',()=>{
   }
 });
 
+test('the guaranteed hero roll normalizes the public SR and UR rates',()=>{
+  const at=12/13,rarity=value=>{const rolls=[value,0];return HERO[drawCharacter(()=>rolls.shift(),false,'doom',null,true,true)].rarity;};
+  assert.equal(rarity(0),'SR');assert.equal(rarity(at-1e-9),'SR');assert.equal(rarity(at),'UR');assert.equal(rarity(.999),'UR');
+});
+
 test('a normal-banner UR targets the current pickup half the time',()=>{
   // First roll lands on UR; expected pickup share is 1/2 + 1/2 x 1/(normal UR pool). The pool grows with new URs, so derive it.
   const expected=.5+.5/heroPool('UR',true).length;let n=0,pick=0;
@@ -162,11 +167,14 @@ test('pickup and guardian rotate through their ordered pools and guardian slots 
   assert.deepEqual(guardianSlots('behemoth',start),[]);
 });
 
-test('first clears scale dreams and triple win dust, with a flat loss award',()=>{
+test('first clears scale dreams and triple win dust, and losses pay for up to five waves',()=>{
   for(const [stage,L] of [[1,0],[levelStage(1),1],[levelStage(15),15],[levelStage(30),30],[levelStage(50),50]]){
     assert.equal(stageReward(stage),Math.round((160+10*L)*Math.min(3,1+L/15)));
     assert.equal(stageDust(stage,true,false),60+16*L);assert.equal(stageDust(stage,true,true),3*(60+16*L));
-    assert.equal(stageDust(stage,false,true),20);assert.equal(stageDust(stage,false,false),20);
+    for(const [round,credited] of [[0,0],[1,1],[3,3],[5,5],[6,5]]){
+      const dust=Math.round((60+16*L)*credited/12);
+      assert.equal(stageDust(stage,false,false,round),dust);assert.equal(stageDust(stage,false,true,round),dust);
+    }
   }
 });
 

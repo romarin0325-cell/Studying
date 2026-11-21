@@ -477,10 +477,28 @@ test('the trial-day tool resets dailies and greeting while leaving the sprout bo
   assert.equal(s.value.clockAt,before.clockAt);assert.ok(validateProfile(s.value));
 });
 
+test('a three-wave main loss pays scaled dust and three points of battle bond',()=>{
+  const p=createProfile(NOW),level=7,stage=levelStage(level);p.cleared=stage-1;const s=storeFor(p);
+  call(s,'begin',{mode:'main',stage});const lost=call(s,'settle',{token:s.value.active.token,round:3,won:false});
+  assert.equal(lost.dust,Math.round((60+16*level)*3/12));assert.equal(s.value.dust,p.dust+lost.dust);
+  assert.deepEqual(lost.bond,p.deck.map(id=>({id,points:3,hearts:0,opened:false})));assert.ok(p.deck.every(id=>s.value.heroes[id].bondXp===3));
+  assert.equal(s.value.cleared,p.cleared);assert.equal(lost.star,null);
+});
+
+test('one hundred round-zero main forfeits leave dust and bond unchanged',()=>{
+  const p=createProfile(NOW),stage=levelStage(8);p.cleared=stage-1;const s=storeFor(p);
+  for(let i=0;i<100;i++){
+    const now=NOW+i*5000;call(s,'begin',{mode:'main',stage},now);
+    const lost=call(s,'settle',{token:s.value.active.token,round:0,won:false},now);
+    assert.equal(lost.dust,0);assert.deepEqual(lost.bond,[]);
+  }
+  assert.equal(s.value.dust,p.dust);assert.deepEqual(s.value.heroes,p.heroes);
+});
+
 test('a main win lights the album from stage 1 and releases a painting at each boundary',()=>{
   const s=storeFor(createProfile(NOW));
   const settle=won=>{call(s,'begin',{mode:'main',stage:1});return call(s,'settle',{token:s.value.active.token,round:6,won});};
-  const loss=settle(false);assert.equal(loss.star,null);assert.equal(loss.dust,20);
+  const loss=settle(false);assert.equal(loss.star,null);assert.equal(loss.dust,25);
   let first=true;
   for(const c of CONSTELLATIONS)for(let stars=1;stars<=c.stars.length;stars++){
     const completed=stars===c.stars.length?c.id:null,r=settle(true);

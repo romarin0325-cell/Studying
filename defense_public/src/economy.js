@@ -87,7 +87,7 @@ export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,clea
 // The stardust bed is applied when a dispatch is collected, so growing it helps dispatches already under way.
 export const dispatchDust=(dust,beds,cleared)=>Math.floor(dust*(1+stardustBonus(beds,cleared)));
 export const stageReward=stage=>{const L=levelOf(stage);return Math.round((T.firstClearBase+T.firstClearStep*L)*Math.min(3,1+L/15));};
-export const stageDust=(stage,won,first)=>won?(60+16*levelOf(stage))*(first?3:1):20;
+export const stageDust=(stage,won,first,round=0)=>{const dust=60+16*levelOf(stage);return won?dust*(first?3:1):Math.round(dust*Math.min(5,round)/6*.5);};
 export const PERFECT_REWARD=100;
 export function relicTier(draws){return Math.max(0,Math.floor(Math.log(1+draws*(T.relicThresholdGrowth-1)/T.relicThresholdBase)/Math.log(T.relicThresholdGrowth)+1e-12));}
 export const relicThreshold=tier=>Math.ceil(T.relicThresholdBase*(T.relicThresholdGrowth**tier-1)/(T.relicThresholdGrowth-1));
@@ -99,8 +99,9 @@ export function rollIndex(rates,value){let sum=0;for(let i=0;i<rates.length;i++)
 export const lateOpen=cleared=>cleared>=LATE_UNLOCK_STAGE;
 export function heroPool(rarity,open=true){return (ROSTER[rarity]||[]).filter(id=>open||!LATE_COMPANIONS.includes(id));}
 // Half of UR rolls target the current guardian or pickup for that banner.
-export function drawCharacter(random,season,guardian,pickup=null,open=true){
-  const rarity=['C','R','SR','UR'][rollIndex(T.heroRates,random())];
+export function drawCharacter(random,season,guardian,pickup=null,open=true,minSR=false){
+  const rates=T.heroRates,value=random();
+  const rarity=minSR?(value<rates[2]/(rates[2]+rates[3])?'SR':'UR'):['C','R','SR','UR'][rollIndex(rates,value)];
   if(rarity==='UR'&&season&&random()<.5&&(open||!LATE_COMPANIONS.includes(guardian)))return guardian;
   if(rarity==='UR'&&!season&&pickup&&random()<.5)return pickup;
   const pool=heroPool(rarity,open);return pool[Math.floor(random()*pool.length)];

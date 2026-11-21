@@ -2,7 +2,7 @@
 export const BOND_MAX=10;
 export const BOND_STEPS=Object.freeze([40,50,60,70,75,80,85,90,95,105]);
 export const GREETING_POINTS=50,GIFT_POINTS=50,FAVORITE_POINTS=100;
-export const BATTLE_BOND=Object.freeze({win:8,loss:3});
+export const BATTLE_BOND=Object.freeze({win:8,lossMax:8});
 export const GIFT_IDS=Object.freeze(['candy','letter','bouquet']);
 export const GIFTS=Object.freeze({
   candy:{name:'별사탕',color:'#ffd36a'},

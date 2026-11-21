@@ -48,17 +48,19 @@ test('task flags only follow successful actions and every claim closes the board
   assert.equal(beginnerState(p).days[6].task.done,false);assert.equal(command(p,'settle',{token:p.active.token,round:1,won:false},now).ok,true);
   assert.ok(p.beginner.did.includes('draft'));assert.equal(claim(7,'task').ok,true);assert.equal(p.beginner.closed,true);assert.equal(beginnerState(p).active,false);assert.ok(parseProfile(p));
 });
-test('first ten is free, uses the same hero rates, and preserves pity without luck',()=>{
-  const c=calendar(now);let plainTen=false;
+test('first ten guarantees SR or UR on the tenth pull when needed, with no pity or luck',()=>{
+  const c=calendar(now),high=id=>['SR','UR'].includes(HERO[id].rarity);let forced=false,ordinary=false;
   for(let seed=1;seed<=200;seed++){
     const p=createProfile(now);p.rng=seed;p.pity.normal=7;const q={rng:seed};
-    const expect=Array.from({length:10},()=>drawCharacter(()=>random(q),false,c.guardian,c.pickup,lateOpen(p.cleared)));
+    const pull=(state,minSR=false)=>drawCharacter(()=>random(state),false,c.guardian,c.pickup,lateOpen(p.cleared),minSR);
+    const firstNine=Array.from({length:9},()=>pull(q)),needsGuarantee=!firstNine.some(high),ordinaryTenth=pull({...q}),tenth=pull(q,needsGuarantee);
     const r=command(p,'draw',{banner:'normal',count:10,first:true},now);assert.equal(r.cost,0);assert.equal(p.dreams,600);assert.equal(p.pity.normal,7);
-    assert.deepEqual(r.items.map(x=>x.id),expect);assert.equal(p.rng,q.rng);assert.equal(r.lucky,false);assert.deepEqual(r.bonus,[]);
+    assert.deepEqual(r.items.map(x=>x.id),[...firstNine,tenth]);assert.equal(p.rng,q.rng);assert.equal(r.lucky,false);assert.deepEqual(r.bonus,[]);
     assert.ok(r.items.every(x=>x.first));assert.equal(command(p,'draw',{banner:'normal',count:10,first:true},now).ok,false);
-    plainTen||=r.items.every(x=>['C','R'].includes(HERO[x.id].rarity));
+    assert.ok(r.items.some(x=>high(x.id)));
+    if(!high(ordinaryTenth)){if(needsGuarantee)forced||=high(tenth);else ordinary||=ordinaryTenth===tenth;}
   }
-  assert.ok(plainTen);
+  assert.ok(forced&&ordinary);
 });
 test('relic luck retains ordinary pull RNG and can award bonus pulls',()=>{
   let bonus=false;for(let seed=1;seed<=100;seed++){const p=createProfile(now);p.dreams=100000;p.rng=seed;const q={rng:seed};let draws=p.relicDraws;const pull=()=>drawRelic(()=>random(q),draws++),expected=Array.from({length:10},pull),lucky=random(q)<.1;
