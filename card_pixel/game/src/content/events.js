@@ -28,7 +28,7 @@ const ORIGINAL_EVENTS = [
     requires: { present: ['phantom'] },
     choices: [
       { id: 'shadow', text: '그림자를 적에게 붙인다', ops: [{ type: 'start', enemyDebuffs: { darkness: 1 } }] },
-      { id: 'blackout', text: '빈 하늘로 끝까지 싸운다', ops: [{ type: 'bet', kind: 'empty_sky', reward: { crystals: 3 } }] }
+      { id: 'blackout', text: '필드 효과 없이 끝까지 싸운다', ops: [{ type: 'bet', kind: 'empty_sky', reward: { crystals: 3 } }] }
     ]
   },
   {
@@ -77,7 +77,7 @@ const ORIGINAL_EVENTS = [
     requires: { present: ['supernova'] },
     choices: [
       { id: 'cool', text: '식혀서 결정 둘을 꺼낸다', ops: [{ type: 'crystals', amount: 2 }] },
-      { id: 'overload', text: '노심을 연다 · 기술 사용 시 사망 위험 30%', ops: [{ type: 'relic', id: 'death_roulette', temporary: true }] }
+      { id: 'overload', text: '노심을 연다 · 스킬 사용 시 사망 위험 30%', ops: [{ type: 'relic', id: 'death_roulette', temporary: true }] }
     ]
   },
   {

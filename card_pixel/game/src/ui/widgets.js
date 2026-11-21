@@ -8,9 +8,29 @@ import { heirloomSkill } from '../engine/bridge.js';
 export { replacementCount } from '../engine/awakenings.js';
 
 export const TYPE = { phy: '물리', mag: '마법', sup: '보조', rest: '휴식' };
+export function traitText(traitOrCard) {
+  const trait = traitOrCard?.trait ?? traitOrCard;
+  const desc = typeof trait === 'string' ? trait : trait?.desc ?? '';
+  if (trait?.type === 'looter' || /^이 카드로 승리\s*시 추가 드로우$/.test(desc)) {
+    return '전투 승리 후 생존 시 결정 +1';
+  }
+  return desc
+    .replace(/덱에 (불|물|자연|빛|어둠) (\d+)장 이상 시/g, '출전 파티에 $1 $2명 이상 시')
+    .replace(/덱에 /g, '출전 파티에 ')
+    .replace(/덱의 모든 카드의/g, '출전 동료 전원의')
+    .replace(/덱의 지연 스킬이/g, '출전 파티의 예약 스킬이')
+    .replace(/덱 전체가/g, '출전 파티 전체가')
+    .replace(/덱이 전부/g, '출전 파티가 전부')
+    .replace(/이 카드는/g, '이 동료는')
+    .replace(/이 카드로/g, '이 동료로')
+    .replace(/디저트킹덤 카드 전체/g, '디저트킹덤 동료 전체')
+    .replace(/사망시/g, '사망 시')
+    .replace(/일반공격시/g, '일반 공격 시')
+    .replace(/(\d+%)확률로/g, '$1 확률로');
+}
 const LEGACY_RULES = {
-  rescue: '4층이나 6층에서 쓰러질 예고를 받은 동료를 물러나게 하고, 그 동료와 받은 동료가 함께 살아서 이긴다.',
-  heirloom: '4층이나 6층에서 유품 기술의 명중으로 적을 쓰러뜨리고 이긴다.'
+  rescue: '4층이나 6층에서 쓰러질 예고를 받은 동료를 후퇴시키고, 그 동료와 교대한 동료가 함께 생존하여 승리',
+  heirloom: '4층이나 6층에서 유품 스킬로 적을 처치하고 승리'
 };
 export function activeContract(run) {
   const id = run.contract?.id;
@@ -66,8 +86,8 @@ export function departureLoss(run, id) {
   ].filter(Boolean).join(' · ');
 }
 export const DOOR = {
-  wild: ['전투', '몽마가 기다린다'], elite: ['정예', '접두사 둘을 단 강적'], gate: ['문지기', '그림자의 릴레이 · 이기면 한 명이 동료가 된다'],
-  boss: ['보스', '꿈의 주인'], spring: ['소환의 샘', '꿈의 결정으로 동료를 깨운다'], altar: ['혼돈의 제단', '무작위 동료에게 축복 · 세 번까지 굴린다']
+  wild: ['전투', '일반 몽마 출현'], elite: ['정예', '변이 2종을 지닌 강적'], gate: ['문지기', '그림자 연전 · 승리 시 1명 합류'],
+  boss: ['보스', '꿈의 주인'], spring: ['소환의 샘', '꿈의 결정으로 동료 소환'], altar: ['혼돈의 제단', '무작위 동료 축복 · 최대 3회']
 };
 export const foeFlip = def => (def.facing || 'right') === 'right';
 
@@ -143,7 +163,7 @@ export function createWidgets(ASSETS, card) {
     return '<button class="cardrow win g-' + c.grade + (opt.cls ? ' ' + opt.cls : '') + '" data-id="' + id + '"' + (opt.sheet ? ' data-sheet="' + id + '"' : '') + '><span class="pic">' + sprite(id) + '</span><span class="txt">' +
       '<div class="nm">' + esc(c.name) + '<i class="grade">' + (GRADE[c.grade] || c.grade) + '</i><i class="el-' + c.element + '">' + ELEMENT[c.element] + '</i>' + (opt.tag ? '<i class="tag">' + esc(opt.tag) + '</i>' : '') + '</div>' +
       '<div class="st">HP ' + c.stats.hp + ' · 공 ' + c.stats.atk + ' · 마공 ' + c.stats.matk + ' · 방 ' + c.stats.def + '/' + c.stats.mdef + '</div>' +
-      '<div class="trait">' + esc(c.trait.desc) + '</div>' + (opt.offer ? heirloomOffer(c) : '') +
+      '<div class="trait">' + esc(traitText(c.trait)) + '</div>' + (opt.offer ? heirloomOffer(c) : '') +
       (opt.detail ? '<small class="card-detail">' + esc(opt.detail) + '</small>' : '') +
       (opt.skills !== false ? '<div class="sk">' + c.skills.map(s => esc(s.name) + '<small>' + TYPE[s.type] + (s.cost ? ' ' + s.cost : '') + '</small>').join(' · ') + '</div>' : '') +
       '<div class="badges">' + badges(run, id) + '</div></span></button>';

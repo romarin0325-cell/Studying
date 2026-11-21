@@ -13,12 +13,12 @@ export function gatePickScreen(run, ui, { node = $('#pick'), inline = false, onR
   const artifact = ui.artifacts.get(relic);
   node.innerHTML = (inline ? '<h4>문지기 보상</h4>' : head(run, '문지기 보상', run.floor + '층')) +
     '<div class="' + (inline ? 'decision-body' : 'scroll') + '">' +
-    '<p class="lead">그림자 한 명을 깨우거나 유물을 장착한다.</p><div class="cards">' +
+    '<p class="lead">정화된 그림자 1명을 깨우거나 유물을 장착하세요.</p><div class="cards">' +
     candidates.map(id => cardRow(run, id, { tag: '이번 원정 합류', offer: true })).join('') +
     (artifact ? '<button class="win run-relic-choice" data-relic="' + esc(relic) + '">' + relicIcon(relic, 32) +
       '<span><b>' + esc(artifact.name) + '</b><small>' + esc(relicEffect(artifact)) + '</small></span></button>' : '') +
     '</div></div><div class="footer"><button class="btn" id="b-leave">두고 가기</button>' +
-    '<button class="btn go" id="b-gate-take" disabled>보상을 고른다</button></div>';
+    '<button class="btn go" id="b-gate-take" disabled>보상 선택</button></div>';
   if (!inline) show('pick');
   let choice;
   const take = $('#b-gate-take', node);

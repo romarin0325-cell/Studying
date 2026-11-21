@@ -228,7 +228,7 @@ function fieldSupport() {
         await sheet.waitFor();
         await source.mouse.up();
         await text(sheet.locator('#sh-title'), name);
-        await text(sheet.locator('#sh-body p'), field + ' — 아군 ' + description);
+        await text(sheet.locator('#sh-body p'), field + ' · 아군 ' + description);
         await capture(label ? label + '-detail' : 'detail', source);
       }
       await check(page, '배틀필드', '일반 공격 피해 2배', '아레나', '일반 공격 피해 2배');
@@ -245,7 +245,7 @@ function retreatWarning() {
   const state = battle.state();
   assert.equal(state.turn, 2);
   assert.ok(battle.canRetreat() && state.delayed.some(attack => attack.by === state.cur && attack.name === skill));
-  const warning = '예약한 일루미네이션도 취소된다';
+  const warning = '예약한 일루미네이션 취소됨';
   return {
     session: storedSession({ run }), proof: `turn 2, ${skill} queued and retreat available`,
     async show(page, { text }) {
@@ -266,7 +266,7 @@ function doorSky() {
   command(Run.chooseEvent, run, 'powder');
   advance(run);
   assert.deepEqual(Run.doorStart(run, 0).field, ['star_powder']);
-  const sky = '시작 하늘 · 스타파우더';
+  const sky = '시작 필드 · 스타파우더';
   return {
     session, proof: `cake event → floor ${run.floor} start field: star_powder`,
     async show(page, { text, capture }) {
@@ -359,7 +359,7 @@ function saveFail() {
       }, sessionKey);
       await page.locator('#map.on #b-go').click();
       await page.locator('#battle.on').waitFor();
-      await text(page.locator('#session-notices p'), '저장에 실패했다');
+      await text(page.locator('#session-notices p'), '저장에 실패했습니다');
     }
   };
 }
@@ -541,7 +541,7 @@ function relicComparison(run, session, arrive, source) {
       assert.ok(left.x < right.x && left.y === right.y && left.height === right.height);
       if (cost) await text(screen.locator('.relic-cost'), `결정 ${cost}`, { exact: true });
       await text(screen.locator('#b-equip'), label, { exact: true });
-      await text(screen.locator('#b-leave'), '두고 간다', { exact: true });
+      await text(screen.locator('#b-leave'), '두고 가기', { exact: true });
       await capture();
       await screen.locator('#b-leave').click();
       const kept = await saved(page);
@@ -664,7 +664,7 @@ function formSheet() {
       await page.locator('#sheet.on [data-form]').filter({ hasText: '오로라윙' }).click();
       await battleIdle(page);
       await page.locator('#party .pm[data-i="0"]').click();
-      await text(page.locator('#sheet.on #sh-title'), '동료 · 지금');
+      await text(page.locator('#sheet.on #sh-title'), '동료 전투 정보');
       const sheet = page.locator('#sheet.on #sh-body');
       await text(sheet.getByText('오로라윙', { exact: true }), '오로라윙');
       const shown = sheet.locator('.skl > b');
@@ -839,7 +839,7 @@ function contractBattleSheet() {
       assert.doesNotMatch(await page.locator('#battle.on').innerText(), /둘이 돌아온 정예전/);
       await page.locator('#battle.on #b-field').click();
       const sheet = page.locator('#sheet.on #sh-body');
-      await text(sheet.locator('h4').filter({ hasText: name }), `계약 · ${name} · 아직`);
+      await text(sheet.locator('h4').filter({ hasText: name }), `계약 · ${name} · 진행 중`);
       await text(sheet.getByText(rule, { exact: true }), rule);
     }
   };
@@ -1025,7 +1025,7 @@ function retreatOutcomes() {
   const after = Math.max(0, next.hp - high);
   const maxAfter = Math.max(0, next.hp - low);
   assert.ok(allies[cur].hp <= ready.intent.dmg[0]);
-  const retreat = `물러나면 ${next.name} HP ${next.hp}→${after === maxAfter ? after : `${after}~${maxAfter}`}`;
+  const retreat = `후퇴 시 ${next.name} HP ${next.hp}→${after === maxAfter ? after : `${after}~${maxAfter}`}`;
   const fall = `쓰러지면 ${next.name}에게 ${Bridge.heirloomSkill(roster.card(allies[cur].form)).name} ×${Bridge.HEIRLOOM_POWER}`;
   return {
     session: storedSession({ run }), proof: `${allies[cur].hp} HP vs. minimum ${ready.intent.dmg[0]} damage; ${retreat} / ${fall}`,
@@ -1073,12 +1073,12 @@ function openingChoices() {
       assert.equal(await choice.count(), 2);
       await text(page.locator('#opening-face'), 'HP 40 / 420');
       await text(choice.nth(0), '눈토끼 HP 290 → 149');
-      await text(choice.nth(1), '쓰러지면 눈토끼가 아마겟돈을 받는다');
+      await text(choice.nth(1), '쓰러지면 눈토끼가 아마겟돈을 계승');
       await capture();
       await choice.nth(0).click();
       await battleIdle(page);
       await skillTile(page, '실버스톰').click();
-      await text(page.locator('#result.on #b-next'), '애쉬와 간다');
+      await text(page.locator('#result.on #b-next'), '애쉬와 동행');
       await capture('rescue');
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.locator('#result.on #b-result-log').click();
@@ -1107,11 +1107,11 @@ function openingAwaken() {
       await page.locator(`#wake-choices [data-id="${id}"]`).click();
       await page.locator('#b-wake').click();
       await page.locator('#b-wake-skip').click();
-      await text(page.locator('.wake-summary'), '내가 정한 둘 + 깨어난 셋 + 결정 1', { exact: true });
+      await text(page.locator('.wake-summary'), '선택 동료 2명 · 추가 합류 3명 · 결정 1', { exact: true });
       assert.deepEqual(await page.locator('.wake-slot.landed [data-sheet]').evaluateAll(nodes => nodes.map(node => node.dataset.sheet)), awakened);
       await capture();
       await page.reload({ waitUntil: 'domcontentloaded' });
-      await text(page.locator('.wake-summary'), '내가 정한 둘 + 깨어난 셋 + 결정 1');
+      await text(page.locator('.wake-summary'), '선택 동료 2명 · 추가 합류 3명 · 결정 1');
     }
   };
 }
@@ -1281,7 +1281,7 @@ function lastHit() {
       await text(page.locator('.finish-cast'), '유품 원주인');
       await capture('impact', page, { duringBattle: true });
       await page.evaluate(() => { window.__game.clock.paused = false; });
-      await text(page.locator('#result.on #b-next'), '눈토끼와 간다');
+      await text(page.locator('#result.on #b-next'), '눈토끼와 동행');
       await text(page.locator('#result.on .finish-portrait'), '생환');
       await text(page.locator('#result.on .finish-portrait'), hit.amount + ' 피해');
     }
@@ -1370,7 +1370,7 @@ function truthfulHud() {
   const [current] = intentLines(intent);
   assert.match(current, /HP 0 \/ 현재 MP −12/);
   assert.match(intentLines({ kind: 'mag', damageRange: [125, 375], lethalText: '쓰러질 수 있음',
-    conditions: [{ kind: 'enemyHitThisTurn', whenMet: 375, otherwise: 125, met: null }] })[0], /때리면 375 \/ 안 때리면 125 · 쓰러질 수 있음/);
+    conditions: [{ kind: 'enemyHitThisTurn', whenMet: 375, otherwise: 125, met: null }] })[0], /피격 시 375 \/ 미피격 시 125 · 쓰러질 수 있음/);
   const affixes = affixLines(battle.state().enemy);
   assert.equal(affixes.find(affix => affix.id === 'tough').turns, 2);
   const block = act(battle, '매직가드');
@@ -1384,7 +1384,7 @@ function truthfulHud() {
       await tapTile(page, '일반 공격');
       await text(page.locator('#pf-kind'), '다음 마법');
       await text(page.locator('#intent.on'), current, { exact: true });
-      await text(page.locator('#pf-chips .affix').filter({ hasText: '단단함' }), '피해 절반 2턴 남음');
+      await text(page.locator('#pf-chips .affix').filter({ hasText: '단단함' }), '피해 반감 2턴 남음');
       await capture('hud');
       await page.evaluate(() => {
         const observer = new MutationObserver(() => {
@@ -1727,7 +1727,7 @@ function difficultyChoice() {
       await chooseRegion('ember_volcano');
       assert.equal(await sheet.locator('[data-difficulty="normal"]').getAttribute('aria-pressed'), 'true');
       assert.equal(await sheet.locator('[data-difficulty="nightmare"]').isDisabled(), true);
-      await text(sheet.locator('.meta-prep-section').filter({ hasText: '난이도' }), '이 지역을 여정으로 생환하면 악몽이 열린다.');
+      await text(sheet.locator('.meta-prep-section').filter({ hasText: '난이도' }), '이 지역을 여정으로 생환하면 악몽이 열립니다.');
       await sheet.locator('[data-difficulty="easy"]').click();
       await text(sheet.locator('.meta-prep-section').filter({ hasText: '난이도' }), '꿈결 · 적 공격·마공 35% 감소');
       await capture();
@@ -1940,7 +1940,7 @@ function legacyContractReceipt() {
   return {
     session, proof: 'Unversioned Ember Nightmare seed 0 still shows the floor-6 heirloom rule and payout',
     async show(page, { text, capture, revisit }) {
-      await text(await openDoorInfo(page, door), '4층이나 6층에서 유품 기술의 명중으로 적을 쓰러뜨리고 이긴다.');
+      await text(await openDoorInfo(page, door), '4층이나 6층에서 유품 스킬로 적을 처치하고 승리');
       await capture();
       await revisit(storedSession({ run }), async source => {
         await text(source.locator('#result.on .contract-met'), '계약 달성');
@@ -2028,7 +2028,7 @@ function gardenStartingFields() {
   return {
     session, proof: names,
     async show(page, { text, capture, revisit }) {
-      await text(await openDoorInfo(page, index), '시작 하늘 · ' + names);
+      await text(await openDoorInfo(page, index), '시작 필드 · ' + names);
       await capture();
       await revisit(storedSession({ run }), async source => {
         await openBattle(source);
@@ -2113,7 +2113,7 @@ function lowCrystalSpring() {
       await text(spring.locator('.gems'), '◆ 2');
       await spring.locator('#b-pick').click();
       assert.equal(await spring.locator('.cardrow').count(), offer.candidates.length);
-      await text(spring.getByRole('status'), '합류에 결정 1개가 부족하다');
+      await text(spring.getByRole('status'), '합류에 결정 1개가 부족합니다');
       await spring.locator('.cardrow').first().click();
       assert.equal(await spring.locator('#b-take').isDisabled(), true);
       await capture();
@@ -2175,7 +2175,7 @@ function malformedProfileImport() {
       await page.locator('#meta-backup-file').setInputFiles({
         name: 'malformed.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(malformed))
       });
-      await text(page.locator('#sheet.on .meta-feedback'), '파일의 동료와 수첩 기록이 손상됐다.');
+      await text(page.locator('#sheet.on .meta-feedback'), '파일의 동료와 수첩 기록이 손상되었습니다.');
       assert.equal(await page.locator('#meta-backup-confirm').count(), 0);
       assert.equal(await page.evaluate(() => localStorage.getItem('relaymare.activeSlot')), null);
       assert.equal(await page.evaluate(() => localStorage.getItem('relaymare.lastGood')), session);

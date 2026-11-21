@@ -22,16 +22,14 @@ export function awakenScreen(run, ui) {
   }
 
   function completed(chosen, awakened, animate) {
-    const summary = chosen.length === 2 && awakened.length === 3
-      ? '내가 정한 둘 + 깨어난 셋 + 결정 ' + run.crystals
-      : '내가 정한 ' + chosen.length + '명 + 깨어난 ' + awakened.length + '명 + 결정 ' + run.crystals;
+    const summary = '선택 동료 ' + chosen.length + '명 · 추가 합류 ' + awakened.length + '명 · 결정 ' + run.crystals;
     node.innerHTML = head(run, '첫 깨우기', '2층') + '<div class="scroll">' +
-      (lead ? leadPlate(lead) : '') + '<h3>내가 정한 동료</h3><div class="wake-line">' + line(chosen.filter(id => id !== lead)) + '</div>' +
-      '<h3>깨어난 동료</h3><div class="wake-line" id="wake-draws">' + awakened.map(id =>
+      (lead ? leadPlate(lead) : '') + '<h3>선택한 동료</h3><div class="wake-line">' + line(chosen.filter(id => id !== lead)) + '</div>' +
+      '<h3>추가 합류 동료</h3><div class="wake-line" id="wake-draws">' + awakened.map(id =>
         '<div class="wake-slot g-' + esc(card(id).grade) + '">' + line([id]) + '</div>').join('') +
       '</div><p class="wake-summary win" aria-live="polite"></p></div>' +
       '<div class="footer"><button class="btn" id="b-wake-skip">건너뛰기</button>' +
-      '<button class="btn go" id="b-depart" hidden>꿈길로</button></div>';
+      '<button class="btn go" id="b-depart" hidden>원정 출발</button></div>';
     show('awaken');
     const skip = $('#b-wake-skip', node);
     const depart = $('#b-depart', node);
@@ -57,15 +55,15 @@ export function awakenScreen(run, ui) {
     }
     node.innerHTML = head(run, '첫 깨우기', '2층') + '<div class="scroll"><h3>이번 원정 합류</h3><div class="cards">' +
       run.bench.map(id => cardRow(run, id, { sheet: true, skills: false })).join('') +
-      '</div></div><div class="footer"><button class="btn go" id="b-depart">꿈길로</button></div>';
+      '</div></div><div class="footer"><button class="btn go" id="b-depart">원정 출발</button></div>';
     show('awaken');
     $('#b-depart', node).addEventListener('click', ui.leave);
     return;
   }
 
   const near = pending.near && card(pending.near);
-  const info = lead ? '함께 갈 동료 한 명을 고른다.' : intro ? '깨운 동료는 이번 원정에 합류한다.' :
-    '동료를 고르면 무작위로 ' + START.draws + '명이 더 깨어난다.';
+  const info = lead ? '함께 출발할 동료 1명을 선택하세요.' : intro ? '선택한 동료가 이번 원정에 합류합니다.' :
+    '동료를 선택하면 무작위로 ' + START.draws + '명이 추가 합류합니다.';
   const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>이번 원정 합류</h3><div class="cards">' +
     run.bench.map(id => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? '대표' : '' })).join('') + '</div>' : '';
 
@@ -79,7 +77,7 @@ export function awakenScreen(run, ui) {
   node.innerHTML = head(run, '첫 깨우기', '남은 선택 ' + pending.remaining) + '<div class="scroll">' + allies +
     '<p class="lead">' + info + '</p><div class="cards" id="wake-choices">' + cards + '</div></div>' +
     '<div class="footer"><button class="btn go" id="b-wake"' + (cards ? ' disabled' : '') + '>' +
-    (cards ? '한 명을 고른다' : '계속한다') + '</button></div>';
+    (cards ? '동료 선택' : '계속하기') + '</button></div>';
   show('awaken');
   let selected = null;
   const button = $('#b-wake', node);

@@ -150,7 +150,7 @@ export function createRiftCases({
         await page.evaluate(parts => window.__gallerySetDate(...parts), nextRiftDate);
         await sheet.locator('#meta-daily-start').click();
         await text(sheet.locator('#sh-title'), '11월 22일 · 오늘의 균열', { exact: true });
-        await text(sheet.locator('.rift-date-notice'), '날짜가 바뀌었다. 11.22 균열을 확인하자.', { exact: true });
+        await text(sheet.locator('.rift-date-notice'), '날짜가 변경되었습니다. 11.22 균열을 확인해 주세요.', { exact: true });
         assert.equal(await page.evaluate(key => localStorage.getItem(key), dailyKey), null);
         await capture('midnight');
         await sheet.locator('#meta-daily-start').click();
@@ -188,7 +188,7 @@ export function createRiftCases({
     const fixture = riftFixture();
     const run = settleRift(fixture.start(), won);
     command(fixture.store.save, run);
-    const title = won ? '11.21 균열 돌파' : '7층에서 균열이 닫혔다';
+    const title = won ? '11.21 균열 돌파' : '7층 균열 실패';
     assert.equal(fixture.store.resume().run.phase, 'done');
     return {
       ...fixture.page(null, won ? riftDate : nextRiftDate), proof: `${title} · 생존 ${run.bench.length}/5명 · ${run.stats.turns}턴`,
@@ -233,7 +233,7 @@ export function createRiftCases({
         await riftRow(page).click();
         const sheet = page.locator('#sheet.on');
         await text(sheet.locator('#meta-rift-resume'), '11.21 균열 이어가기', { exact: true });
-        await text(sheet.locator('#meta-rift-abandon'), '11.21 도전을 포기', { exact: true });
+        await text(sheet.locator('#meta-rift-abandon'), '11.21 도전 포기', { exact: true });
         await capture();
         await sheet.locator('#meta-rift-abandon').click();
         await text(sheet.locator('#sh-title'), '이 도전을 ‘포기’로 기록할까요?', { exact: true });
@@ -326,7 +326,7 @@ export function createRiftCases({
         await riftRow(page).click();
         const result = page.locator('#daily-result.on');
         // The export sheet opens at once (aria-modal), so read the alert by CSS rather than by role.
-        await text(result.locator('[role="alert"]'), '마지막 저장 지점으로 돌아간다');
+        await text(result.locator('[role="alert"]'), '마지막 저장 지점으로 돌아갑니다');
         if (await page.locator('#sheet.on #b-sheetclose').isVisible()) await page.locator('#sheet.on #b-sheetclose').click();
         await result.locator('#meta-rift-retry').click();
         await capture();
@@ -343,10 +343,10 @@ export function createRiftCases({
         assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).active.checkpoint.floor, dailyKey), 1);
         await page.locator('#b-sheetclose').click();
         await result.locator('#meta-rift-hub').click();
-        await text(page.locator('#session-notices'), '균열 결과는 아직 저장되지 않았다');
+        await text(page.locator('#session-notices'), '균열 결과가 아직 저장되지 않았습니다');
         await text(riftRow(page), '저장되지 않은 결과');
         await riftRow(page).click();
-        await text(result.getByRole('alert'), '균열 기록을 저장하지 못했다');
+        await text(result.getByRole('alert'), '균열 기록을 저장하지 못했습니다');
       }
     };
   }
@@ -373,14 +373,14 @@ export function createRiftCases({
       async show(page, { text, capture }) {
         await page.locator('#hub.on .b-set').click();
         await page.locator('#sheet.on [data-backup-action="export"]').click();
-        await text(page.locator('#sheet.on .meta-backup'), '손상된 균열 기록은 파일에 따로 보관했다');
+        await text(page.locator('#sheet.on .meta-backup'), '손상된 균열 기록은 파일에 별도 보관했습니다');
         const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#meta-backup-download').click()]);
         const exported = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
         assert.equal(exported.session.run.run.floor, 2);
         assert.equal(exported.damagedDaily, damaged);
         await page.evaluate(key => localStorage.setItem(key, '{"broken":'), sessionKey);
         await page.reload({ waitUntil: 'domcontentloaded' });
-        await text(page.locator('#recovery.on .meta-recovery'), '손상된 균열은 따로 보관한다');
+        await text(page.locator('#recovery.on .meta-recovery'), '손상된 균열은 별도 보관합니다');
         await capture();
         await Promise.all([page.waitForEvent('domcontentloaded'), page.locator('#meta-last-good').click()]);
         await enterObservatory(page);

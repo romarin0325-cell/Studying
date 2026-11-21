@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { departureLoss, head, heirloomOffer, TYPE } from '../widgets.js';
+import { departureLoss, head, heirloomOffer, traitText, TYPE } from '../widgets.js';
 import { ELEMENT, GRADE } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
 
@@ -21,7 +21,7 @@ export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = fals
       if (result.joined) ui.audio.sfx.awaken();
       ui.leave();
     } else {
-      $('#reinforce-feedback', node).textContent = '합류할 동료와 보낼 동료를 확인한다.';
+      $('#reinforce-feedback', node).textContent = '합류할 동료와 보낼 동료를 확인해 주세요.';
     }
   }
 
@@ -36,7 +36,7 @@ export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = fals
       esc(GRADE[fighter.grade] ?? fighter.grade) + ' · <span class="el-' + esc(fighter.element) + '">' +
       esc(ELEMENT[fighter.element] ?? fighter.element) + '</span></small></span>' +
       '<span class="reinforce-stats">HP ' + hp + ' · 공 ' + atk + ' · 마공 ' + matk + '</span>' +
-      '<span class="reinforce-trait">' + esc(fighter.trait?.desc ?? '') + '</span>' +
+      '<span class="reinforce-trait">' + esc(traitText(fighter.trait)) + '</span>' +
       '<span class="reinforce-skills">' + skills + '</span>' + heirloomOffer(fighter) + '</span></button>';
   }
 
@@ -51,7 +51,7 @@ export function reinforceScreen(run, ui, { node = $('#reinforce'), inline = fals
           faceBadge(id) + '</button>').join('') + '</div>' : '') +
       '<p id="reinforce-feedback" class="run-status" role="status"></p></div>' +
       (outgoing ? '<p class="loss release-loss">' + esc(card(outgoing).name + ' · ' + departureLoss(run, outgoing)) + '</p>' : '') +
-      '<div class="footer"><button class="btn" id="b-reinforce-pass">' + (full ? '현재 여섯 유지' : '자리를 비워 둔다') + '</button>' +
+      '<div class="footer"><button class="btn" id="b-reinforce-pass">' + (full ? '현재 편성 유지' : '건너뛰기') + '</button>' +
       '<button class="btn' + (full ? '' : ' go') + '" id="b-reinforce-take"' + (canResolve && incoming && (!full || outgoing) ? '' : ' disabled') +
       '>' + esc(incoming ? (outgoing ? card(outgoing).name + ' 보내고 ' : '') + card(incoming).name + ' 합류' : '합류할 동료 고르기') + '</button></div>';
     if (!inline) {

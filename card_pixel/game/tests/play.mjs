@@ -65,8 +65,8 @@ const screenshotLabels = [
   'preparation', 'collection', 'notebook', 'records'
 ];
 const openingChoices = {
-  stand: { label: '애쉬로 마지막 공격', lead: '눈토끼', next: '눈토끼와 간다' },
-  rescue: { label: '애쉬를 살린다', lead: '애쉬', next: '애쉬와 간다' }
+  stand: { label: '애쉬로 마지막 공격', lead: '눈토끼', next: '눈토끼와 동행' },
+  rescue: { label: '애쉬 생존 후퇴', lead: '애쉬', next: '애쉬와 동행' }
 };
 
 async function launch() {

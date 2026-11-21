@@ -1,5 +1,5 @@
 import { $, esc, show } from '../dom.js';
-import { foeFlip, TYPE } from '../widgets.js';
+import { foeFlip, traitText, TYPE } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
 import { INTRO } from '../../content/intro.js';
@@ -35,8 +35,8 @@ export function battleMarkup() {
     '<div id="foebar"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div>' +
     '<div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div>' +
     '<div class="chips" id="pf-chips"></div></div>' +
-    '<button class="sky" id="sky" aria-label="하늘 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
-    '<div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">▶▶ 넘기는 중</div></div>' +
+    '<button class="sky" id="sky" aria-label="필드 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
+    '<div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">▶▶ 고속 진행</div></div>' +
     '<div id="party"></div>' +
     '<div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div>' +
     '<div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div>' +
@@ -150,11 +150,11 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         message = '조류 · ' + [when + ' ' + tide.name, attack].filter(Boolean).join(' · ');
       }
     } else if (region?.id === 'arena_charge' && event?.region && !B.chargeSpent) {
-      message = event.region.ready ? '기세 2/2 · 다음 공격 기술 ×2' : '기세 ' + event.region.charge + '/2';
+      message = event.region.ready ? '기세 2/2 · 다음 공격 스킬 ×2' : '기세 ' + event.region.charge + '/2';
     } else if (region?.id === 'ember_carry' && event && B.D.enemy.idx < B.door.enemies.length - 1) {
       message = '교대 시 작열 최대 2 계승';
     } else if (region?.id === 'starlit_sky' && event && B.D.turn === 1) {
-      message = B.D.field.length ? '시작 하늘 · ' + B.D.field.length + '개' : '시작 하늘 · 비어 있음';
+      message = B.D.field.length ? '시작 필드 · ' + B.D.field.length + '개' : '시작 필드 · 비어 있음';
     }
     node.textContent = message;
   }
@@ -233,7 +233,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     jobs.push(wait(0.25).then(() => tween(B.foe, { x: foePos().x }, 0.4)).then(() => { St.dust(B.foe.x, FY(B.foe)); sfx.enter(); }));
     await Promise.all(jobs);
     await showBanner(def.kind, B.door.enemies.map(d => d.name).join(' → '), def.boss ? 'ult' : '', 0.8);
-    if (q) await showBanner('꿈의 변덕', q.name + ' — ' + q.desc, 'gold', 0.95);
+    if (q) await showBanner('꿈의 변덕', q.name + ' · ' + q.desc, 'gold', 0.95);
   }
   async function onAct(e) {
     const actor = actorOf(e.who), isFoe = e.who.side === 'enemy';
@@ -247,7 +247,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         await highlightStrong(e, actor);
         return;
       }
-      S.dark = 0.3; warnEnemy(); St.converge(St.X(actor), CY(actor), 24, colorsOf(e.who), 40, 0.5); label('힘을 모은다…', actor, 'bad');
+      S.dark = 0.3; warnEnemy(); St.converge(St.X(actor), CY(actor), 24, colorsOf(e.who), 40, 0.5); label('힘 충전 중…', actor, 'bad');
       await wait(0.6); tween(S, { dark: 0 }, 0.3); return;
     }
     if (strong) {
@@ -295,7 +295,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     applyHp(e);
     if (!actor) return;
     if (e.delta > 0) { St.number('+' + e.amount, St.X(actor), HY(actor) - 2, 'heal'); sfx.buff(); }
-    else if (e.cause?.kind === 'self') { St.number('-' + e.amount + ' 대가', St.X(actor), HY(actor) + 8, 'self'); actor.white = 0.06; }
+    else if (e.cause?.kind === 'self') { St.number('-' + e.amount + ' 반동', St.X(actor), HY(actor) + 8, 'self'); actor.white = 0.06; }
     else { actor.white = 0.08; St.number(String(e.amount), St.X(actor), HY(actor) - 2, e.who.side === 'ally' ? 'foe' : ''); sfx.hit(false); }
     await wait(0.16);
   }
@@ -344,7 +344,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       const f = FIELD[id] || [id, '#ccc'];
       for (let i = 0; i < 22; i++) St.rise(Math.random() * S.W, 34 + Math.random() * 24, 1, [f[1], '#ffffff'], 0);
       sfx.buff(); S.flash = 0.2;
-      await showBanner('하늘', (core.BUFF_NAMES[id] || id) + ' — 전장을 덮는다', 'gold', 0.45);
+      await showBanner('필드', (core.BUFF_NAMES[id] || id) + ' 발동', 'gold', 0.45);
     }
   }
   async function onDown(e) {
@@ -376,7 +376,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   async function onRelay(e) {
     if (e.phase === 'end') { await wait(0.2); if (B.relayBanner) { B.relayBanner.remove(); B.relayBanner = null; } return; }
     const victim = unitOf(e.victim), idx = e.linked ? responder() : -1;
-    const text = e.linked && idx >= 0 ? B.D.allies[idx].name + ' — ' + card(B.party[idx]).trait.desc : (victim ? victim.name : '') + ' — ' + e.trait;
+    const text = e.linked && idx >= 0 ? B.D.allies[idx].name + ' · ' + traitText(card(B.party[idx]).trait) : (victim ? victim.name : '') + ' · ' + traitText(e.trait);
     if (B.relayBanner) B.relayBanner.remove();
     B.relayBanner = St.banner('계승', text, 'low');
     sfx.relay();
@@ -403,10 +403,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       case 'echo': if (who) { label('메아리', who, 'good', -10); St.ring(St.X(who), CY(who), '#a8ffe0', 34); sfx.cast(); } await wait(0.18); break;
       case 'thorns': if (who) label('가시 -' + e.amount, who, 'bad', 6); await wait(0.12); break;
       case 'leech': if (who) { label('흡혈', who, 'bad', -10); St.rise(St.X(who), FY(who), 10, ['#ff6b5e', '#ffb0a8'], 24); } await wait(0.12); break;
-      case 'frenzy': if (who) { who.aura = 'red'; label('광폭 — 공격력 1.5배', who, 'bad', -10); warnEnemy(); } await wait(0.45); break;
-      case 'overflow': if (who) label('넘침 ' + e.amount, who, 'good', -10); await wait(0.2); break;
+      case 'frenzy': if (who) { who.aura = 'red'; label('광폭 · 공·마공 ×1.5', who, 'bad', -10); warnEnemy(); } await wait(0.45); break;
+      case 'overflow': if (who) label('초과 피해 ' + e.amount, who, 'good', -10); await wait(0.2); break;
       case 'starfall': await wait(0.05); break;
-      case 'martyr': await showBanner('순교', '남은 아군의 공격력 +40%', 'gold', 0.7); break;
+      case 'martyr': await showBanner('순교', '남은 아군 공격·마공 +40%', 'gold', 0.7); break;
       case 'twilight_bell': {
         const bell = St.bellPosition();
         if (bell) St.ring(bell.x, bell.y, '#ffc857', 34);
@@ -435,7 +435,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   async function onRetreat(e) {
     const a = actorOf(e.who), u = unitOf(e.who); if (u) u.out = true;
     render();
-    const b = St.banner('물러나기', (u ? u.name : '') + ' — 살아서 빠진다', 'gold');
+    const b = St.banner('후퇴', (u ? u.name : '') + ' · 안전 이탈', 'gold');
     if (a) { sfx.miss(); await tween(a, { oy: -8 }, 0.1); await tween(a, { oy: 0, x: -80, alpha: 0.2 }, 0.4, 'in'); a.vis = false; }
     await wait(0.3); b.remove();
   }
@@ -461,7 +461,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.foe = makeFoe(def); B.foe.x = S.W + 70;
     render(true);
     await tween(B.foe, { x: foePos().x }, 0.4); St.dust(B.foe.x, FY(B.foe)); sfx.enter();
-    await showBanner((e.who.idx + 1) + '/' + B.door.enemies.length, e.name + ' — 이어서 나선다', def.boss ? 'ult' : '', 0.6);
+    await showBanner((e.who.idx + 1) + '/' + B.door.enemies.length, e.name + ' 출현', def.boss ? 'ult' : '', 0.6);
   }
   const bossRoom = () => B.door.type === 'boss' || !!B.door.final;
   const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -678,7 +678,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
 
   function showResult(res, advance, decision, restored = false) {
     const rows = [];
-    if (res.wiped) rows.push('<p>마지막 동료가 적과 함께 쓰러졌다. 원정은 여기서 끝난다.</p>');
+    if (res.wiped) rows.push('<p>마지막 동료가 적과 함께 쓰러져 원정이 종료됩니다.</p>');
     const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
     const gainedCrystals = res.win && battleCrystals > 0;
     if (gainedCrystals) rows.push('<p class="gain">결정 +' + battleCrystals + ' · 보유 ' + run.crystals + '</p>');
@@ -696,7 +696,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       if (lead) {
         const name = card(lead).name;
         const consonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
-        label = name + (consonant ? '과 간다' : '와 간다');
+        label = name + (consonant ? '과 동행' : '와 동행');
         rows.unshift('<div class="opening-result win">' + faceBadge(lead) + '<small>첫 동행</small></div>');
       } else label = '살아남은 동료 깨우기';
     }
