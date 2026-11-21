@@ -1,6 +1,6 @@
 import { $, $$, esc } from '../dom.js';
 import { icon } from '../assets.js';
-import { traitText, TYPE } from '../widgets.js';
+import { skillText, traitText, TYPE } from '../widgets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { RELICS } from '../../content/relics.js';
 import { GRADE } from '../../engine/roster.js';
@@ -68,7 +68,7 @@ export function companionSheet({ core, widgets, sheets, profile, id, setLead }) 
   const entries = profile.ui?.recent?.[id];
   const recent = Array.isArray(entries) ? entries.filter(Boolean) : [];
   const skills = character.skills.map(skill => {
-    const body = core.SkillDisplay.body(skill, { entity: character });
+    const body = skillText(core.SkillDisplay.body(skill, { entity: character }));
     return `<div class="meta-skill">
       <b>${esc(skill.name)}</b> <small>${TYPE[skill.type] || ''} · MP ${skill.cost || 0}</small>
       <p>${esc(body || '')}</p>

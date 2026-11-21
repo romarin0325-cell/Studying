@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 // Share Math so the ESM bridge can seed the card core inside the VM.
 import * as Bridge from '../src/engine/bridge.js';
 import * as RelayRoster from '../src/engine/roster.js';
+import { skillText, traitText } from '../src/ui/widgets.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -218,4 +219,66 @@ test('live affixes and ordinary strong attacks report their own values, without 
   assert.equal(strong.affixes.find(affix => affix.id === 'frenzy').active, true);
   const blow = b.act(0).find(event => event.t === 'act' && event.who.side === 'enemy');
   assert.deepEqual([blow.salience, blow.ult], ['strong', false]);
+});
+
+test('traitText adapts every core card trait without card-game terms or spacing errors', () => {
+  const formIds = ['mirror_cocoon', 'aurora_wing', 'abyss_wing'];
+  const allCards = [
+    ...core.GameUtils.getAllCards(),
+    ...formIds.map(id => core.GameUtils.getCardById(id)).filter(Boolean)
+  ];
+  assert.ok(allCards.length >= 164);
+
+  const forbidden = /(덱|카드|필드\s*버프|지연\s*스킬|드로우|\d+장|일반등급)/;
+  const badSpacing = /(배치|사망|있을|사용|발생)시|일반공격시|적용중인|(부식|침묵)상태|(불|물|자연|빛|어둠)속성|\d+%(확률로|증가|상승|피해)/;
+  for (const card of allCards) {
+    const out = traitText(card.trait);
+    assert.ok(out.length > 0, `${card.id}: empty traitText`);
+    assert.ok(!forbidden.test(out), `${card.id}: leftover term in "${out}"`);
+    assert.ok(!badSpacing.test(out), `${card.id}: spacing error in "${out}"`);
+  }
+
+  const byId = Object.fromEntries(allCards.map(card => [card.id, card]));
+  assert.equal(traitText(byId.queen.trait), '전투 승리 후 생존 시 결정 +1');
+  assert.equal(traitText(byId.mimic.trait), '전투 승리 후 생존 시 결정 +1');
+  assert.equal(traitText(byId.mummy.trait), '중견 배치 시 출전 파티 전체 마법 방어력 15% 증가');
+  assert.equal(traitText(byId.guardian.trait), '선봉 배치 시 물리 공격력 30% 증가 / 출전 파티 전체의 [가드] 스킬 피해 감소율을 75%로 강화');
+  assert.equal(traitText(byId.prism_twin.trait), '이 동료의 일반 공격 피해 2배');
+  assert.equal(traitText(byId.harmonius.trait), '출전 파티에 있는 자신을 제외한 디저트킹덤 동료 하나당 물리 공격력/마법 공격력 50% 증가');
+  assert.equal(traitText(byId.jasmine_christmas.trait), '자스민이 생존해 있을 경우, 출전 파티의 빛 속성 동료 사망 시 자신의 기본 마법 공격력 기준 2배율 반격');
+  assert.equal(traitText(byId.victoria.trait), '대장 배치 시 아레나를 제외한 필드 효과의 능력치 보너스를 2배로 받음');
+  assert.equal(traitText(byId.trans_yeon_rabbit.trait), '출전 파티에 있는 토끼의 수만큼 물리 공격력·마법 공격력이 50% 증가');
+});
+
+test('skillText removes card-game terms from SkillDisplay across all cards and enemies', () => {
+  const formIds = ['mirror_cocoon', 'aurora_wing', 'abyss_wing'];
+  const allCards = [
+    ...core.GameUtils.getAllCards(),
+    ...formIds.map(id => core.GameUtils.getCardById(id)).filter(Boolean)
+  ];
+  const forbidden = /(덱|카드|지연\s*스킬|필드\s*버프)/;
+  let checked = 0;
+
+  for (const card of allCards) {
+    for (const skill of card.skills || []) {
+      const out = skillText(core.SkillDisplay.body(skill, { entity: card }));
+      assert.ok(!forbidden.test(out), `${card.id}/${skill.name}: "${out}"`);
+      checked++;
+    }
+  }
+  for (const enemy of core.ENEMIES || []) {
+    for (const skill of enemy.skills || []) {
+      const out = skillText(core.SkillDisplay.body(skill, { entity: enemy, enemy: true }));
+      assert.ok(!forbidden.test(out), `${enemy.id}/${skill.name}: "${out}"`);
+      checked++;
+    }
+  }
+  assert.ok(checked >= 500);
+});
+
+test('affix and quirk descriptions match their actual combat and reward rules', () => {
+  assert.match(Bridge.AFFIXES.treasure.desc, /승리/);
+  assert.match(Bridge.affixView('treasure').text, /승리/);
+  assert.match(Bridge.QUIRKS.overheat.desc, /공격력·마법공격력/);
+  assert.match(Bridge.QUIRKS.surge.desc, /최대·시작 MP 200/);
 });

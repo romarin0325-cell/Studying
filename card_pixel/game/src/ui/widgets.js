@@ -15,18 +15,38 @@ export function traitText(traitOrCard) {
     return '전투 승리 후 생존 시 결정 +1';
   }
   return desc
+    .replace(/자신 덱에 /g, '출전 파티에 ')
     .replace(/덱에 (불|물|자연|빛|어둠) (\d+)장 이상 시/g, '출전 파티에 $1 $2명 이상 시')
-    .replace(/덱에 /g, '출전 파티에 ')
     .replace(/덱의 모든 카드의/g, '출전 동료 전원의')
-    .replace(/덱의 지연 스킬이/g, '출전 파티의 예약 스킬이')
-    .replace(/덱 전체가/g, '출전 파티 전체가')
-    .replace(/덱이 전부/g, '출전 파티가 전부')
-    .replace(/이 카드는/g, '이 동료는')
-    .replace(/이 카드로/g, '이 동료로')
-    .replace(/디저트킹덤 카드 전체/g, '디저트킹덤 동료 전체')
-    .replace(/사망시/g, '사망 시')
+    .replace(/덱의 지연 스킬/g, '출전 파티의 예약 스킬')
+    .replace(/지연 스킬/g, '예약 스킬')
+    .replace(/덱 전체/g, '출전 파티 전체')
+    .replace(/덱이/g, '출전 파티가')
+    .replace(/덱은/g, '출전 파티는')
+    .replace(/덱을/g, '출전 파티를')
+    .replace(/덱과/g, '출전 파티와')
+    .replace(/덱/g, '출전 파티')
+    .replace(/이 카드/g, '이 동료')
+    .replace(/카드/g, '동료')
+    .replace(/필드 버프의 능력치 효과/g, '필드 효과의 능력치 보너스')
+    .replace(/필드\s*버프\s*수/g, '필드 효과 수')
+    .replace(/필드\s*버프/g, '필드 효과')
+    .replace(/일반등급/g, '노멀 등급')
+    .replace(/선봉배치시/g, '선봉 배치 시')
+    .replace(/선봉일시/g, '선봉 배치 시')
+    .replace(/(배치|사망|있을|사용|발생)시/g, '$1 시')
     .replace(/일반공격시/g, '일반 공격 시')
-    .replace(/(\d+%)확률로/g, '$1 확률로');
+    .replace(/적용중인/g, '적용 중인')
+    .replace(/(부식|침묵)상태/g, '$1 상태')
+    .replace(/(불|물|자연|빛|어둠)속성/g, '$1 속성')
+    .replace(/수 만큼/g, '수만큼')
+    .replace(/(\d+%)(확률로|증가|상승|피해)/g, '$1 $2');
+}
+export function skillText(body) {
+  return String(body ?? '')
+    .replace(/덱에 포함된/g, '출전 파티에 포함된')
+    .replace(/지연 스킬/g, '예약 스킬')
+    .replace(/필드\s*버프/g, '필드 효과');
 }
 const LEGACY_RULES = {
   rescue: '4층이나 6층에서 쓰러질 예고를 받은 동료를 후퇴시키고, 그 동료와 교대한 동료가 함께 생존하여 승리',

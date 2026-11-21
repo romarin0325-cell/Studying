@@ -350,7 +350,7 @@ const TEMPO_EVENTS = [
     text: '베놈이 뱃전에 플레이그의 매듭을 다섯 개 묶는다. 손을 놓자 아직 풀리지 않은 매듭이 물밑으로 가라앉는다.',
     requires: { present: ['venom'] },
     choices: [
-      { id: 'hold', text: '플레이그를 준다 · 물러나면 남은 예약 소멸',
+      { id: 'hold', text: '플레이그를 준다 · 후퇴하면 남은 예약 소멸',
         cost: 2, target: 'bench', ops: [{ type: 'heirloom', from: 'venom', name: '플레이그' }] },
       { id: 'brace', text: '대신 맞을 동료의 원정 축복을 25%로 교체한다',
         target: 'bench', ops: [{ type: 'bless', multiplier: 0.25 }] }
@@ -395,7 +395,7 @@ export function eventForRun(event, run) {
       choice('porter').ops.push({ type: 'crystals', amount: 1 }, { type: 'firstSurvivalPay', id: 'mimic', amount: 1 });
       break;
     case 'venom_five_knots':
-      choice('hold').text = '플레이그 · 다음 턴부터 매턴 1회·최대 5회·물러나면 남은 예약 소멸';
+      choice('hold').text = '플레이그 · 다음 턴부터 매턴 1회·최대 5회·후퇴하면 남은 예약 소멸';
       choice('hold').cost = run.floor === 5 ? 1 : 2;
       break;
     case 'rollcall_ends':

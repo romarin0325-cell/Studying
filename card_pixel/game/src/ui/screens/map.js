@@ -387,7 +387,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
       (service && door.type === 'spring' ? '<p>보유 결정 ' + run.crystals + '개</p>' : '') +
       (gain ? '<p class="gain">' + esc(gain) + '</p>' : '') +
       (escrow ? '<p>계약에 ◆' + escrow + ' 맡김</p>' : '') +
-      (treasure ? '<p class="gain">추가 보상 · 보물 적 1명 처치마다 결정 +2</p>' : '') + contractGoal(door) +
+      (treasure ? '<p class="gain">추가 보상 · 보물 적 처치 후 승리 시 1명당 결정 +2</p>' : '') + contractGoal(door) +
       (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ''));
   }
 }

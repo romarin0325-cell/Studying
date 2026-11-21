@@ -55,7 +55,7 @@ export function affixView(id, enemy) {
   const text = {
     leech: '가한 피해의 50% 회복',
     thorns: '물리 피해 25% 반사, 아군 HP 최저 1',
-    treasure: '처치 시 ◆+2'
+    treasure: '처치 후 승리 시 ◆+2'
   };
   return { id, name: AFFIXES[id].name, active: true, text: text[id] };
 }

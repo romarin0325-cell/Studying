@@ -1,5 +1,5 @@
 import { $, $$, esc } from '../dom.js';
-import { TYPE, formatRange as damageRange, traitText } from '../widgets.js';
+import { TYPE, formatRange as damageRange, skillText, traitText } from '../widgets.js';
 import { relicEffect, relicMarks } from '../relics.js';
 import { FIELD } from './hud.js';
 import { skillFields } from './fields.js';
@@ -62,10 +62,10 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     }
     return ['', ''];
   }
-  const fullText = (o, me) => (o.index === 0 ? 'MP를 소모하지 않는 기본 공격.' : core.SkillDisplay.body({
+  const fullText = (o, me) => (o.index === 0 ? 'MP를 소모하지 않는 기본 공격.' : skillText(core.SkillDisplay.body({
     name: o.name, type: o.type, val: o.val, cost: o.cost, tier: o.tier, effects: o.effects,
     isActualDelayedTrigger: o.preview?.instant
-  }, { entity: me }));
+  }, { entity: me })));
   /* The tile line: the card's own skill text, shortened to fit two lines. The full text is one long press away. */
   function brief(o, me) {
     if (o.index === 0) return 'MP 0';
@@ -75,11 +75,11 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       .replace(/사용 후 ([\d·]+)턴에 각각 위력 ([\d.]+)배로 공격 예약/g, (m, turns, x) => turns.split('·').length + '턴간 매 턴 ' + x + '배 공격 예약')
       .replace(/(\d+)턴 후 위력 ([\d.~]+)배로 공격 예약/g, '$1턴 후 $2배 공격 예약')
       .replace(/(각 )?예약 발동 시/g, '발동 시')
-      .replace(/(필드에 )?‘([^’]+)’ 중 무작위 (\d+)종/g, (m, f, list, n) => (list.split('·').some(x => FIELD_NAMES.has(x)) ? '무작위 필드 버프 ' : '무작위 디버프 ') + n + '종')
+      .replace(/(필드에 )?‘([^’]+)’ 중 무작위 (\d+)종/g, (m, f, list, n) => (list.split('·').some(x => FIELD_NAMES.has(x)) ? '무작위 필드 효과 ' : '무작위 디버프 ') + n + '종')
       .replace(/적이 (\S+) 상태이면/g, '$1 상태면')
       .replace(/(자신에게|적에게|자신의|적의) /g, '')
       .replace(/ \((다음 턴 행동 불가|받는 피해 50% 감소|마법 피해 무효|물리 피해 무효|회피율 \+50%p|최소 1 HP)\)/g, '')
-      .replace(/필드 버프 (?=‘)/g, '')
+      .replace(/필드 효과 (?=‘)/g, '')
       .replace(/\.$/, '').replace(/\. /g, ' · ')
       .replace(/발동 시 ([^ ·]+) 부여 · 발동 시 ([^ ·]+) 부여/g, '발동 시 $1·$2 부여');
   }
