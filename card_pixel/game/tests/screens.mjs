@@ -911,7 +911,9 @@ function contractPayout() {
       await text(page.locator('#result.on .relic-receipt'), '장착 완료');
       await capture();
       await page.locator('#result.on #b-next').click();
-      await page.locator('#result.on #b-reinforce-pass').click();
+      // This fixture is a tempo-1 run: no reinforcement follows the floor-6 win, the next button goes on.
+      const pass = page.locator('#result.on #b-reinforce-pass');
+      if (await pass.isVisible()) await pass.click();
       await page.locator('#map.on').waitFor();
       await revisit(storedSession({ run: failure.run }), async failurePage => {
         const resultSheet = failurePage.locator('#result.on');

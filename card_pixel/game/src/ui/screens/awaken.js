@@ -24,7 +24,7 @@ export function awakenScreen(run, ui) {
 
   function completed(chosen, awakened, animate) {
     const summary = '선택 동료 ' + chosen.length + '명 · 추가 합류 ' + awakened.length + '명 · 결정 ' + run.crystals;
-    node.innerHTML = head(run, '이번 원정 동료 고르기', '2층') + '<div class="scroll">' +
+    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="scroll">' +
       (lead ? leadPlate(lead) : '') + '<h3>선택한 동료</h3><div class="wake-line">' + line(chosen.filter(id => id !== lead)) + '</div>' +
       '<h3>추가 합류 동료</h3><div class="wake-line" id="wake-draws">' + awakened.map(id =>
         '<div class="wake-slot g-' + esc(card(id).grade) + '">' + line([id]) + '</div>').join('') +
@@ -54,7 +54,7 @@ export function awakenScreen(run, ui) {
       const split = Math.max(1, run.bench.length - START.draws);
       return completed(run.bench.slice(0, split), run.bench.slice(split), false);
     }
-    node.innerHTML = head(run, '이번 원정 동료 고르기', '2층') + '<div class="scroll"><h3>이번 원정 합류</h3><div class="cards">' +
+    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="scroll"><h3>이번 원정 합류</h3><div class="cards">' +
       run.bench.map(id => cardRow(run, id, { sheet: true, skills: false })).join('') +
       '</div></div><div class="footer"><button class="btn go" id="b-depart">원정 출발</button></div>';
     show('awaken');
@@ -75,7 +75,7 @@ export function awakenScreen(run, ui) {
       id === run.profileShard ? '예약 후보' : near && card(id).element === near.element ? '같은 속성' : '';
     return cardRow(observed, id, { tag, offer: true, coach: 'awakening-candidate' });
   }).join('');
-  node.innerHTML = head(run, '이번 원정 동료 고르기', '남은 선택 ' + pending.remaining) + '<div class="scroll">' + allies +
+  node.innerHTML = head(run, '동료 고르기', '남은 선택 ' + pending.remaining) + '<div class="scroll">' + allies +
     '<p class="lead">' + info + '</p><div class="cards" id="wake-choices">' + cards + '</div></div>' +
     '<div class="footer"><button class="btn go" id="b-wake" data-coach="awakening-confirm"' + (cards ? ' disabled' : '') + '>' +
     (cards ? '동료 선택' : '계속하기') + '</button></div>';

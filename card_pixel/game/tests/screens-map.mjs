@@ -64,7 +64,8 @@ const cases = {
   'one-door': { dungeon: 'ember_volcano', seed: 21, floor: 1, lines: [/^물리 공격(?: ×[\d.]+)? · 결정 1$/], select: 0 },
   'two-doors': { dungeon: 'dawn_forest', seed: 7, floor: 3, lines: [/^물리 공격(?: ×[\d.]+)? · 결정 1$/, /^마법 공격(?: ×[\d.]+)? · 결정 1$/], select: 0 },
   'formation-preview': { dungeon: 'twilight_cathedral', seed: 21, floor: 2,
-    lines: [/^2턴 · /, /^2턴 · /], select: 1, swap: true },
+    // the pill over a lesson door is the short form: turn, kind of hit, crystals (map.js doorLessonShort)
+    lines: [/^2턴 \S.* · 결정 \d+$/, /^2턴 \S.* · 결정 \d+$/], select: 1, swap: true },
   'boss-lesson': { dungeon: 'twilight_cathedral', seed: 21, floor: 8, lines: ['사랑의 여신 아이리스'] },
   'floor-strip': { dungeon: 'ember_volcano', seed: 21, floor: 4, lines: [/^전투|공격|결정/], strip: true },
   'three-doors': { dungeon: 'ember_volcano', seed: 21, floor: 3, lines: ['소환의 샘', '혼돈의 제단', '사건'] },
@@ -89,7 +90,10 @@ function fixture(spec) {
 
   let session;
   const store = createSaveStore({ getItem: () => session, setItem: (_, value) => { session = value; } }, { core, roster });
+  // These runs open every feature, which only a returning (legacy) player has; a new profile would
+  // pair them with first-contact coach tours that cover the doors.
   const profile = createProfile();
+  profile.ui.entry.legacy = true;
   store.save({ run, profile });
   const savedMap = session;
   assert.deepEqual(store.load()?.run, initial);

@@ -72,10 +72,12 @@
 }
 #title.meta-screen .corner { position: absolute; z-index: 2; top: calc(10px + env(safe-area-inset-top)); right: 10px; display: flex; gap: 6px; }
 .meta-title-name { position: relative; z-index: 1; margin-top: calc(9vh + env(safe-area-inset-top)); text-align: center; }
-.meta-title-name h1 { display: inline-block; font: normal 1.875rem/3.5rem var(--f-display); color: #fff;
-  text-shadow: var(--u) 0 0 var(--navy), calc(-1 * var(--u)) 0 0 var(--navy), 0 calc(-1 * var(--u)) 0 var(--navy),
-    0 var(--u) 0 var(--navy), var(--u) var(--u) 0 var(--navy), calc(-1 * var(--u)) var(--u) 0 var(--navy),
-    0 calc(2 * var(--u)) 0 var(--navy); }
+/* the logo is Galmuri14 at exactly 4x (60px): big chunky pixels, still crisp; outline 2 art pixels, drop 2 more */
+.meta-title-name h1 { display: inline-block; font: normal 3.75rem/4.5rem var(--f-display); color: #fff; letter-spacing: 2px;
+  text-shadow: calc(2 * var(--u)) 0 0 var(--navy), calc(-2 * var(--u)) 0 0 var(--navy), 0 calc(-2 * var(--u)) 0 var(--navy),
+    0 calc(2 * var(--u)) 0 var(--navy), calc(2 * var(--u)) calc(2 * var(--u)) 0 var(--navy), calc(-2 * var(--u)) calc(2 * var(--u)) 0 var(--navy),
+    calc(2 * var(--u)) calc(-2 * var(--u)) 0 var(--navy), calc(-2 * var(--u)) calc(-2 * var(--u)) 0 var(--navy),
+    0 calc(4 * var(--u)) 0 var(--navy), calc(2 * var(--u)) calc(4 * var(--u)) 0 var(--navy), calc(-2 * var(--u)) calc(4 * var(--u)) 0 var(--navy); }
 .meta-title-name h1 em { display: inline-block; font-style: normal; color: var(--pink); translate: 0 var(--u); }
 .meta-title-name span { display: block; width: max-content; max-width: 100%; margin: 16px auto 0; padding: 5px 26px 6px; color: var(--aqua-hi);
   font: normal 0.625rem/1.2 var(--f-tiny); letter-spacing: .42em; text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
@@ -172,7 +174,7 @@
 #hub .daily-row small { font: normal 0.75rem/1 var(--f-label); color: #6b3fd6; background: #fff; padding: 6px 10px; white-space: nowrap; clip-path: var(--notch); }
 .daily-row small { color: var(--gold-lo); }
 #meta-depart { width: 100%; min-height: 64px; font-size: 1.25rem; font-family: var(--f-tiny); }
-#meta-depart.ticket { justify-content: flex-start; padding-left: 122px; text-align: left; word-break: keep-all; }
+#meta-depart.ticket { justify-content: flex-start; padding-left: 122px; text-align: left; word-break: keep-all; text-wrap: balance; line-height: 1.25; }
 #meta-depart.ticket::before { left: auto; right: 14px; top: 10px; }
 .depart-art { position: absolute; left: 0; top: 0; bottom: 0; width: 112px; background-repeat: no-repeat; background-size: 390px 586px;
   background-position: center 40%; image-rendering: pixelated;
