@@ -592,7 +592,7 @@ export function command(p,action,args={},now=Date.now()){
     if(!Array.isArray(p.requests?.after)||!p.requests.after.includes(args.hero))return no('아직 후기를 볼 수 없습니다.');
     if(!p.requests.read.includes(args.hero))p.requests.read.push(args.hero);return {ok:true};
   }
-  if(action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind,now);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}
+  if((typeof __GARDEN_PUBLIC_WEB__==='undefined'||!__GARDEN_PUBLIC_WEB__)&&action==='testGrant'){if(!UNLOCKED)return no('사용할 수 없는 동작입니다.');const message=testGrant(p,args.kind,now);if(!message)return no('알 수 없는 테스트 도구입니다.');return {ok:true,message};}
   return no('사용할 수 없는 동작입니다.');
 }
 // Every command commits the entire profile, wallet and receipt together.

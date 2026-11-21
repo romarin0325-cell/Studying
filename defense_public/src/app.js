@@ -22,6 +22,7 @@ import {currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES,monthlyPaid,mont
 import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
+import {publicSession} from './public-session.js';
 import {season,eventWindow,activeEvent,nextEvent,eventOpen} from './preview/season.js';
 import {OATHS,OATH,OATH_GROUPS,OATH_CLOSED,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
 import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
@@ -40,6 +41,7 @@ const pct=n=>(n*100).toFixed(n<.001?3:2)+'%';
 let challengeTier='easy',screen='home',collection='hero',rarity='all',ownedOnly=false,banner='normal',mode='main',cycle=chapterNow(),gardenTab='dream',arrival=null,
   modal=null,modalInfo=null,previousFocus=null,toastTimer,run=null,renderer=null,speed=1,paused=false,saveBlocked=false,selected=-1,pointer=null,
   lastFrame=0,accumulator=0,autoIn=0,uiIn=0,previousPhase='',lastResult=null,resultDetail=false,hud=null;
+const telemetry=__GARDEN_PUBLIC_WEB__?publicSession({snapshot:()=>({screen:modal==='settings'?'settings':screen,checkpoint:p().cleared})}):null;
 const renderClock=new RenderClock(),performanceStats={renders:0,steps:0};
 const saves=new RunSaveQueue(()=>!run||store.saveRun(E.serialize(run)),{
   request:cb=>window.requestIdleCallback?window.requestIdleCallback(cb,{timeout:1200}):setTimeout(cb,80),
@@ -113,6 +115,7 @@ function shardsMarkup(){
 function toast(text){if(!text)return;clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,2800);}
 function settings(){sound.enabled=p().settings.sound;sound.music=p().settings.sound;sound.setVolume(.2);$('app').dataset.reduced=String(p().settings.reduced||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);if(renderer){renderer.reduced=$('app').dataset.reduced==='true';renderer.setQuality(p().settings.quality);}}
 function bindTestGrant(){
+  if(__GARDEN_PUBLIC_WEB__)return;
   if(!UNLOCKED||bindTestGrant.done)return;bindTestGrant.done=true;
   for(const id of ['dreams','dust']){
     const chip=$(id).closest('.pill');if(!chip)continue;
@@ -381,7 +384,7 @@ function renderDraft(){
     <p class="draft-help">선택은 자동 저장되어 나중에 이어할 수 있습니다.</p></section>`;
 }
 function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&a.draft.length<TEAM_SIZE){screen='draft';render();}else startBattle(true);}
-function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;requestTrack=requestTracker();screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();tutorialStart();sortieWipe();}
+function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;requestTrack=requestTracker();screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();tutorialStart();sortieWipe();telemetry?.battleStart(run.mode,run.chapter+1,run.mode==='main'?null:run.tier,resume,p().settings.auto);}
 function renderBattle(){
   if(!run)return;
   const name=run.mode==='main'?CHAPTERS[run.chapter].name:`${modeTitle(run.mode,run.side)} · ${(TIERS[run.tier]||TIERS.easy).name}`,tag=run.mode==='main'?`<small>STAGE</small><b>${stageLabel(run.chapter+1)}</b>`:`<b>${{weekly:'유성',monthly:'만월',oath:'서약',twin:TWIN_SIDE[run.side]?.short||'쌍성'}[run.mode]}</b>`;
@@ -551,7 +554,7 @@ function training(){
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
-function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],dust:result.dust,bond:result.bond,star:result.star,at:now(),weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null,monthly:snapshot.mode==='monthly'?{earned:result.earned,paidBefore:result.paidBefore}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=chapterNow();arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);
+function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}telemetry?.battleEnd(snapshot.mode,snapshot.stage,snapshot.tier,abandon?'leave':snapshot.won?'win':'loss',snapshot.round,snapshot.seconds,p().settings.auto);saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],dust:result.dust,bond:result.bond,star:result.star,at:now(),weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null,monthly:snapshot.mode==='monthly'?{earned:result.earned,paidBefore:result.paidBefore}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=chapterNow();arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);
   result.bond.filter(row=>row.opened).forEach(({id,hearts},i)=>{
     const before=p().heroes[id].bond-hearts;
     if(i===0)bondUp(id,before,true);else setTimeout(()=>bondUp(id,before,true),i*2900);
@@ -593,7 +596,7 @@ function showResult(r,animate=true){
   if(r.won){const mark=document.querySelector('#sheet .result-mark');if(mark)setTimeout(()=>{const c=centerOf(mark);burst(c.x,c.y,{count:16,spread:110,size:13,duration:1000,color:'#ffe08a'});},180);}
   if(r.perfect)sound.event({type:'perfect'});
 }
-function storagePause(){paused=true;saveBlocked=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인한 뒤 재개하세요.');wallet();if(run&&hud)updateBattle();}
+function storagePause(){telemetry?.error('save_unavailable');paused=true;saveBlocked=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인한 뒤 재개하세요.');wallet();if(run&&hud)updateBattle();}
 function syncBattlePhase(){
   if(!run)return false;
   if(run.phase!==previousPhase){
@@ -618,22 +621,23 @@ function retireSheet(){
 }
 const testToolsPanel=()=>`<div class="settings-row tools"><div><strong>테스트 도구</strong><small>로컬 테스트 빌드에서만 보입니다. 위쪽 꿈의결정·별가루 칩을 눌러도 10,000씩 들어옵니다.</small></div></div><div class="tool-grid">${p().trial?'<button class="secondary" data-action="trial-end">체험 끝내기</button>':'<button class="secondary" data-action="trial-start">신규 플레이 체험</button>'}${TEST_TOOLS.filter(t=>p().trial||!['trial-day','ftue-reset'].includes(t.kind)).map(t=>`<button class="secondary" data-test-tool="${t.kind}">${t.label}</button>`).join('')}<button class="secondary" data-test-tool="arrival">45 클리어 연출 보기</button><button class="secondary" data-test-tool="late-notice">신규 동료 안내 보기</button></div>`;
 function showSettings(){
+  telemetry?.view('settings');
   show('설정','',`${[['sound','사운드','음악과 효과음'],['auto','자동 전투','소환·합성·훈련·필살기를 맡습니다. 자리 옮기기는 직접 합니다.'],['reduced','연출 줄이기','화면 흔들림과 배경 움직임을 줄입니다. 위험 예고는 유지됩니다.'],['cutin','필살기 컷인','필살기 이름 띠를 전장 위에 띄웁니다.']].map(([id,title,text])=>`<div class="settings-row"><div><strong>${title}</strong><small>${text}</small></div><button class="switch" data-setting="${id}" aria-pressed="${p().settings[id]}" aria-label="${title}"></button></div>`).join('')}
     <div class="settings-row"><div><strong>전장 화질</strong><small>기본은 선명도와 전력 사용의 균형을 맞춥니다.</small></div><select id="quality-select" aria-label="전장 화질">${[['standard','기본'],['high','고화질'],['low','절전']].map(([id,text])=>`<option value="${id}" ${p().settings.quality===id?'selected':''}>${text}</option>`).join('')}</select></div>
-    ${UNLOCKED?testToolsPanel():''}
+    ${!__GARDEN_PUBLIC_WEB__&&UNLOCKED?testToolsPanel():''}
     <div class="settings-actions"><button class="secondary" data-action="export">백업 저장</button><button class="secondary" data-action="import">백업 불러오기</button></div>
     <p class="fineprint">진행 데이터는 이 기기의 브라우저에 저장됩니다. 기기를 옮길 때는 백업 파일을 사용하세요.</p>
-    <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
+    ${telemetry?.markup()||''}<details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
 function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').classList.remove('spotting');$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();coachTick();}
-function close(){if(!modal)return;if(resultDetail){resultDetail=false;showResult(lastResult,false);return;}const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();}
+function close(){if(!modal)return;if(resultDetail){resultDetail=false;showResult(lastResult,false);return;}const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();telemetry?.view(screen);if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'수호자':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
 function records(){
   show('모험 기록','최근 결과',monthlyRecordPanel()+(p().results.map(r=>`<div class="rate-row"><span style="display:block">${r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${modeTitle(r.mode,r.side)}${r.tier?` · ${TIERS[r.tier].name}`:''}`}<br><small>${calendar(r.at).day} · ${r.won?(r.mode==='main'?'클리어':'완주'):r.round+(r.mode==='main'?'라운드':'웨이브')}</small></span>${r.mode==='monthly'?'<span class="chip">기록 저장</span>':gem(r.reward)}</div>`).join('')||'<p class="empty">아직 모험 기록이 없습니다.</p>'),`<button class="secondary wide" data-action="close">확인</button>`,'records');
 }
-function exportBackup(){const blob=new Blob([JSON.stringify(p(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`StarGarden-${calendar(now()).day}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);toast('백업 파일을 저장했습니다.');}
+function exportBackup(){const blob=new Blob([JSON.stringify(p(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`StarGarden-${calendar(now()).day}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);telemetry?.backup('export','success');toast('백업 파일을 저장했습니다.');}
 // ───────── Shell ─────────
 // Five tabs. The garden gathers the idle loops (greenhouse, dispatch, gift basket); the library opens from home.
 const NAV=[['home','홈'],['collection','동료'],['adventure','모험'],['summon','소환'],['garden','정원']];
@@ -653,6 +657,7 @@ function navDots(){
   for(const b of document.querySelectorAll('#navigation .nav-item')){const on=!!dots[b.dataset.nav],dot=b.querySelector('.dot');if(on&&!dot)b.insertAdjacentHTML('beforeend','<i class="dot"></i>');else if(!on&&dot)dot.remove();}
 }
 function render(){
+  telemetry?.view(screen);
   const entering=$('app').dataset.screen!==screen;$('app').dataset.screen=screen;document.body.dataset.battle=String(screen==='battle');wallet();nav();
   const title=$('screen-title');if(title)title.textContent=TITLES[screen]||'';
   if(screen==='battle')return renderBattle();if(screen==='draft')return renderDraft();
@@ -1476,10 +1481,10 @@ const GUIDE='rumi',coach=createCoach({onSkip:()=>skipTutorial()});
 let coachHold=false,tutorialRun=false,tutorialMark=null,castAt=0,nextTip=false,dodgeDone=false,dodgeFrom=-1,dodgeTo=-1;
 const qs=s=>document.querySelector(s);
 const guideFace=()=>`<span class="coach-art">${image(GUIDE)}</span>`;
-function guide(id,target,line,opts={}){if(coach.id===id&&!opts.force)return;coach.show({id,target,line,name:'대현자 '+HERO[GUIDE].name,face:guideFace(),skippable:opts.skippable??true,...opts});}
-function ftueDone(step){if(!p().ftue.done.includes(step))act('ftue',{done:step},false);}
+function guide(id,target,line,opts={}){if(coach.id===id&&!opts.force)return;telemetry?.tutorial(id,'shown');coach.show({id,target,line,name:'대현자 '+HERO[GUIDE].name,face:guideFace(),skippable:opts.skippable??true,...opts});}
+function ftueDone(step){if(!p().ftue.done.includes(step)&&act('ftue',{done:step},false).ok)telemetry?.tutorial(step,'completed');}
 function skipTutorial(){
-  if(!act('ftue',{skip:true},false).ok)return;coach.hide();coachHold=false;
+  if(!act('ftue',{skip:true},false).ok)return;telemetry?.tutorial('all','skipped');coach.hide();coachHold=false;
   if(tutorialRun){tutorialRun=false;if(!p().settings.auto)act('setting',{id:'auto',value:true},false);const b=qs('.toggle-auto');if(b){b.querySelector('b').textContent='ON';b.setAttribute('aria-pressed','true');}}
   toast('튜토리얼을 건너뛰었어요. 첫 만남 10회 소환은 그대로 남아 있어요.');
 }
@@ -1797,7 +1802,7 @@ document.addEventListener('click',e=>{
   if(d.collection){collection=d.collection;rarity='all';render();return;}if(d.filter){rarity=rarity===d.filter?'all':d.filter;render();return;}
   if(d.banner){banner=d.banner;render();return;}if(d.mode){mode=d.mode;render();return;}if(d.tier){challengeTier=d.tier;render();return;}if(d.cycle){cycle=Number(d.cycle);render();return;}if(d.part){focusPart(Number(d.part));return;}
   if(d.garden){gardenTab=d.garden;bedFocus=GARDENS.find(g=>g.id===gardenTab).beds[0];refreshGarden();return;}
-  if(d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(['event-flip','trial-day','ftue-reset'].includes(d.testTool)){close();if(d.testTool==='ftue-reset')screen='home';render();return;}if(d.testTool==='request-now'){close();screen='home';render();return;}if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=chapterNow();refreshBehind();}return;}
+  if(!__GARDEN_PUBLIC_WEB__&&d.testTool){if(d.testTool==='arrival'){close();showArrival({part:true,unlocked:[]});return;}if(d.testTool==='late-notice'){close();showLateNotice();return;}const active=p().active;const r=act('testGrant',{kind:d.testTool});if(r.ok){if(['event-flip','trial-day','ftue-reset'].includes(d.testTool)){close();if(d.testTool==='ftue-reset')screen='home';render();return;}if(d.testTool==='request-now'){close();screen='home';render();return;}if(active&&!p().active){saves.reset();run=null;renderer=null;paused=false;screen='adventure';mode=active.mode;}cycle=chapterNow();refreshBehind();}return;}
   if(d.oath){toggleOath(d.oath);return;}
   if(d.twinEnter){twinPrepare(d.twinEnter);return;}if(d.twinBegin){begin('twin',0,d.twinBegin);return;}
   if(d.twinFocus){twinFocus=d.twinFocus;if(d.twinTab)twinTab=d.twinTab;keepScroll(()=>twinFormation(true));return;}if(d.twinTab){twinTab=d.twinTab;keepScroll(()=>twinFormation(true));return;}
@@ -1847,10 +1852,12 @@ document.addEventListener('click',e=>{
     'auto-twin':()=>{twinDraft=autoTwin(p());twinFormation(true);},'auto-oath':()=>{const ids=oathDeck(p(),oathPick);if(!ids){toast('조건에 맞는 동료가 부족해요');return;}if(act('deck',{ids},false).ok)oathPrepare();},
     'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),same=(a,b)=>[...a].sort().join()===[...b].sort().join(),changed=!same(deck,p().deck)||(featureOpen(p(),'relic')&&relics.length&&!same(relics,p().equipped));if(!changed){toast('지금 편성이 자동 편성과 같아요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);const after=teamPower(p());toast(after>=before?`전투력 ${fmt(before)} → ${fmt(after)}`:'역할을 맞춰 편성했어요');},
     'next-stage':()=>{close();prepare(Number(d.stage));},
+    ...(!__GARDEN_PUBLIC_WEB__?{
     'trial-start':()=>{if(!UNLOCKED)return;show('신규 플레이 체험','',`<p class="subtext">지금 프로필은 따로 보관하고, 처음 시작하는 프로필로 바꿉니다. 체험을 끝내면 지금 상태로 돌아옵니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-start-confirm">시작</button></div>`,'trial-confirm');},
     'trial-start-confirm':()=>{if(!UNLOCKED||p().trial)return;try{localStorage.setItem(SAVE_KEY+'.backup',store.raw||JSON.stringify(p()));const r=store.import(JSON.stringify(createProfile(Date.now(),{trial:true})));if(!r.ok){toast(r.message);return;}location.reload();}catch{toast('프로필을 보관할 수 없어요.');}},
     'trial-end':()=>{if(!UNLOCKED||!p().trial)return;show('체험 끝내기','',`<p class="subtext">보관한 프로필로 돌아갑니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-end-confirm">돌아가기</button></div>`,'trial-confirm');},
     'trial-end-confirm':()=>{if(!UNLOCKED||!p().trial)return;try{const raw=localStorage.getItem(SAVE_KEY+'.backup');if(!raw){toast('보관된 테스트 프로필이 없어요.');return;}const r=store.import(raw);if(!r.ok){toast(r.message);return;}localStorage.removeItem(SAVE_KEY+'.backup');location.reload();}catch{toast('프로필을 복원할 수 없어요.');}},
+    }:{}),
   };actions[d.action]?.();
 });
 // Every press gets a small sparkle; the summon stage skips to the full result.
@@ -1864,7 +1871,7 @@ document.addEventListener('pointerdown',e=>{
   if(e.target.closest?.('.reveal-stage'))skipReveal();
 },{passive:true});
 document.addEventListener('change',e=>{if(e.target.id==='quality-select')act('setting',{id:'quality',value:e.target.value},false);});
-$('backup-input').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>2*1024*1024){toast('백업 파일은 2MB 이하만 가능합니다.');return;}try{const raw=await file.text();if(!JSON.parse(raw)){toast('올바른 백업 파일이 아닙니다.');return;}show('백업을 복원할까요?','데이터',`<p class="subtext">현재 진행 데이터가 선택한 백업으로 교체됩니다. 필요하면 먼저 현재 데이터를 백업하세요.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="export">현재 데이터 백업</button><button id="confirm-import" class="primary">복원</button></div>`,'import');$('confirm-import').onclick=()=>{const result=store.import(raw);toast(result.ok?'백업을 복원했습니다.':result.message);if(result.ok){close();screen='home';run=null;render();}};}catch{toast('백업 파일을 읽을 수 없습니다.');}});
+$('backup-input').addEventListener('change',async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(file.size>2*1024*1024){toast('백업 파일은 2MB 이하만 가능합니다.');return;}try{const raw=await file.text();if(!JSON.parse(raw)){toast('올바른 백업 파일이 아닙니다.');return;}show('백업을 복원할까요?','데이터',`<p class="subtext">현재 진행 데이터가 선택한 백업으로 교체됩니다. 필요하면 먼저 현재 데이터를 백업하세요.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="export">현재 데이터 백업</button><button id="confirm-import" class="primary">복원</button></div>`,'import');$('confirm-import').onclick=()=>{const result=store.import(raw);telemetry?.backup('import',result.ok?'success':'failure');toast(result.ok?'백업을 복원했습니다.':result.message);if(result.ok){close();screen='home';run=null;render();}};}catch{toast('백업 파일을 읽을 수 없습니다.');}});
 document.addEventListener('keydown',e=>{if(lobbyView&&e.key==='Escape'){setLobbyView(false);e.preventDefault();return;}if(!modal)return;if(e.key==='Escape'){if(modal!=='reward'){close();}e.preventDefault();}if(e.key==='Tab'){const buttons=Array.from($('sheet').querySelectorAll('button:not(:disabled),summary,input,select,[tabindex="0"]')).filter(b=>b.offsetParent!==null),first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===$('sheet'))){e.preventDefault();last?.focus();}else if(!e.shiftKey&&(document.activeElement===last||document.activeElement===$('sheet'))){e.preventDefault();first?.focus();}}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(run){saves.mark();saves.flush();}sound.suspend();lastFrame=0;accumulator=0;renderClock.reset();}else{lastFrame=0;renderClock.reset();if(!paused)sound.unlock();}});
 window.addEventListener('pagehide',()=>{if(run){saves.mark();saves.flush();}});
@@ -1918,7 +1925,7 @@ document.documentElement.style.setProperty('--garden',`url("${window.__ASTRA_ASS
 for(const [name,id,path] of [['--greenhouse','greenhouse','./assets/merge/greenhouse.webp'],['--beds','greenhouse-beds','./assets/merge/greenhouse-beds.webp'],['--greenhouse-dawn','greenhouse-dawn','./assets/merge/greenhouse-dawn.webp'],['--beds-dawn','greenhouse-beds-dawn','./assets/merge/greenhouse-beds-dawn.webp'],['--gifts','gifts','./assets/merge/gifts.webp']])document.documentElement.style.setProperty(name,`url("${window.__ASTRA_ASSETS__?.[id]||path}")`);
 for(const id of ['event-oath','event-twin']){const src=window.__ASTRA_ASSETS__?.[id];if(src)document.documentElement.style.setProperty('--'+id,`url("${src}")`);}
 document.documentElement.style.setProperty('--altar',`url("${window.__ASTRA_ASSETS__?.['summon-altar']||'./assets/merge/summon-altar.webp'}")`);
-art.ready.then(()=>{if(art.failed.length)toast('일부 그림을 불러오지 못해 대체 이미지로 표시합니다.');});
+art.ready.then(()=>{if(art.failed.length){telemetry?.error('assets_failed');toast('일부 그림을 불러오지 못해 대체 이미지로 표시합니다.');}});
 // Title: a quiet garden at night and the logo. The first touch enters (and unlocks sound, which needs a gesture).
 // Automated browsers (screenshots, QA) skip it.
 {const splash=$('splash');
@@ -1930,4 +1937,4 @@ if(p().beginner&&!p().beginner.closed&&!store.broken)act('tick',{},false);
 $('app').dataset.solo=String(SOLO);syncFullscreen();render();requestAnimationFrame(frame);setTimeout(maybeLateNotice,700);
 // Read-only diagnostics for offline QA. Mutations use real buttons or fixtures
 // written to isolated browser storage before boot, never a production cheat UI.
-window.STAR_GARDEN={get profile(){return p();},get audio(){return {scene:sound.scene(),music:sound.playing?.id||null,loading:sound.loading||null,fallback:sound.failed,voices:sound.voices};},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};
+if(!__GARDEN_PUBLIC_WEB__)window.STAR_GARDEN={get profile(){return p();},get audio(){return {scene:sound.scene(),music:sound.playing?.id||null,loading:sound.loading||null,fallback:sound.failed,voices:sound.voices};},get battle(){return run;},get screen(){return screen;},get performance(){return {...performanceStats,saveWrites:saves.writes,saveFailures:saves.failures,savePending:saves.pending!==null,quality:p().settings.quality,dpr:renderer?.dpr||0,particles:renderer?.particles.length||0,impacts:renderer?.fx.impacts.length||0};}};

@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "star-garden-public",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-20",
+  "upload_source_maps": false,
+  "send_metrics": false,
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "assets": { "directory": "../../dist-public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+  "vars": { "ANALYTICS_ENABLED": "false" },
+  "ratelimits": [{ "name": "EVENT_LIMITER", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }],
+  "d1_databases": [{ "binding": "DB", "database_name": "star-garden-counts", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
+  "triggers": { "crons": ["17 3 * * *"] }
+}

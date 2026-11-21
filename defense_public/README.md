@@ -4,7 +4,8 @@
 
 ## 바로 실행
 
-- `dist/StarGardenPublic.html`(밤) 또는 `dist/StarGardenPublicBright.html`(맑음)을 브라우저로 엽니다. 그림·음악·폰트·코드가 모두 들어 있는 단일 파일(약 26MB)이라 정적 호스팅(GitHub Pages, itch.io 등)에 그대로 올릴 수 있습니다.
+- 로컬 실행은 `dist/StarGardenPublic.html`(밤) 또는 `dist/StarGardenPublicBright.html`(맑음)을 브라우저로 엽니다. 그림·음악·폰트·코드가 모두 들어 있는 단일 파일(약 26MB)입니다.
+- **웹 공개는 [공개 웹 릴리스 안내](docs/PUBLIC_WEB_RELEASE.md)**를 따릅니다. `npm run build:defense-public:web`로 작은 HTML과 분리된 압축 에셋을 만들며, 같은 도메인의 최소 집계 통계·보안 헤더·배포 전 검사를 별도로 준비했습니다. 실제 배포는 자동 실행하지 않습니다.
 - 저장은 그 브라우저의 localStorage(`astra.star-garden.public.v1`)에 남습니다. 설정 → 백업 저장/불러오기로 옮깁니다.
 
 ## 원본과 다른 점 (자세히는 [PUBLIC_TEMPO.md](docs/PUBLIC_TEMPO.md))

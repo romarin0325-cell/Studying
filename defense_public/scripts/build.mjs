@@ -13,6 +13,13 @@ import {EMBEDDED_ASSET_PATHS} from '../src/asset-policy.js';
 import {BRIGHT_ART,VISUAL_HEROES} from './image-policy.mjs';
 import {loadImagePack} from './image-pack.mjs';
 
+if(process.argv.includes('--public-web')){
+  const args=process.argv.slice(2);
+  for(let i=0;i<args.length;i++){if(args[i]==='--outdir'){if(!args[++i]||args[i].startsWith('--'))throw new Error('--outdir requires a directory');}else if(args[i]!=='--public-web')throw new Error('Public web cannot be combined with '+args[i]);}
+  const at=args.indexOf('--outdir');
+  const {buildPublicWeb}=await import('./public-web.mjs');
+  await buildPublicWeb(at<0?{}:{outdir:path.resolve(args[at+1])});
+}else{
 const solo=process.argv.includes('--solo'),web=process.argv.includes('--web'),compat=process.argv.includes('--compat'),preview=process.argv.includes('--preview'),unlocked=preview||process.argv.includes('--unlocked'),bright=preview||process.argv.includes('--bright');
 // --preview: the bright unlocked content test build (dist-test/), with the preview modes switched on.
 if(unlocked&&(solo||web||compat))throw new Error('--unlocked cannot be combined with --solo, --web or --compat.');
@@ -94,7 +101,7 @@ for(const [id,track] of Object.entries(MUSIC)){const bytes=await fs.readFile(ass
 const font=await fs.readFile(assetFile('./assets/Jua-Regular.woff2')),license=await readText(assetFile('./assets/Jua-OFL.txt'));
 const fontUri='data:font/woff2;base64,'+font.toString('base64');
 const night=await readText(path.join(game,'src/style.css'));
-const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_SOLO__:String(solo),__GARDEN_UNLOCKED__:String(unlocked),__GARDEN_PREVIEW__:String(preview)}});
+const js=await build({entryPoints:[path.join(game,'src/app.js')],bundle:true,write:false,metafile:true,format:'iife',target:['es2020'],minify:true,charset:'utf8',legalComments:'inline',define:{__GARDEN_PUBLIC_WEB__:'false',__GARDEN_SOLO__:String(solo),__GARDEN_UNLOCKED__:String(unlocked),__GARDEN_PREVIEW__:String(preview)}});
 for(const input of Object.keys(js.metafile.inputs)){
   const relative=path.relative(game,path.resolve(input));
   if(relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw new Error('External game source in Star Garden bundle: '+input);
@@ -150,3 +157,5 @@ console.log(`HTML, license and object glue: ${mib(report.htmlAndObjectGlueBytes)
 // The review workspace shares combat code but never writes game/profile state. It bundles content and
 // combat, so a release build rewrites it and the release check compares it like the two skins.
 // The public fork ships no balance lab.
+
+}
