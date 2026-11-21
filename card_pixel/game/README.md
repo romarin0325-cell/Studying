@@ -52,6 +52,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/engine/` | 전투·원정·프로필 규칙 |
 | `src/engine/bridge.js` | 카드 전투 연결, 예고·미리보기, 릴레이·유품·지역 효과, 전투 사건과 정산용 요약 |
 | `src/engine/run.js` | 원정 생성과 진행 명령, 출전 순서, 전투 정산, 보상 |
+| `src/engine/run-battle.js` | 원정 전투 옵션과 문·적·템포·축복 미리보기 |
 | `src/engine/rooms.js` | 문과 적 구성, 사건 조건·효과, 유물 제안·장착 한도 |
 | `src/engine/awakenings.js` | 깨우기 확률·비용, 후보·합류, 제단 축복 뽑기 |
 | `src/engine/meta.js` | 프로필, 영입·인연·대표·동행·봉인, 해금과 수첩·기록 |
@@ -82,6 +83,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/content/tempo.js` | 템포 버전, 전투 시작값과 편성·증원 규칙 |
 | `src/ui/` | 화면·입력·표시 |
 | `src/ui/nav.js` | 제목·관측소·행선지·생환·엔딩 전환과 세션 저장 연결 |
+| `src/ui/nav/daily.js` | 오늘의 균열 기록·준비·재개·결과 화면과 미저장 결과의 재시도·백업 연결 |
 | `src/ui/run/` | 원정 화면의 진행 연결 |
 | `src/ui/run/index.js` | 원정 화면 등록·전환, 엔진 명령 호출과 저장 |
 | `src/ui/screens/` | 장면별 HTML과 버튼 |

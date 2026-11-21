@@ -13,7 +13,7 @@ import { collectionScreen, companionSheet, rosterTable } from './screens/collect
 import { notebookScreen } from './screens/notebook.js';
 import { recordsScreen } from './screens/records.js';
 import { endingScreen } from './screens/ending.js';
-import { dailyResultScreen, dailyResultTitle, openDailyHistory, openDailyPreparation, openEarlierRift, shortRiftDate } from './screens/daily-rift.js';
+import { createDailyNavigation } from './nav/daily.js';
 import * as Meta from '../engine/meta.js';
 import { createRun, finishRun } from '../engine/run.js';
 import { DUNGEONS } from '../content/dungeons.js';
@@ -41,8 +41,6 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   let recovery = ['profileDamaged', 'unavailable'].includes(detail?.status) ? detail.status : null;
   let profile = stored?.profile || createProfile();
   let run = stored?.run || null;
-  let dailyRun = null;
-  let unsavedDailyResult = null;
   let review = null;
   let preparationOpen = false;
   let crystalCount = 0;
@@ -64,13 +62,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     assets,
     runtime: { stage, audio, music, sheets }
   };
-  const dailyHost = {
-    ...host,
-    save(current) {
-      if (current === dailyRun && !dailyStore?.save?.(current)?.ok) warnSave();
-    },
-    finish: finishDaily
-  };
+  const daily = createDailyNavigation({
+    currentProfile: host.profile, dailyStore, roster, widgets, details, assets, runtime: host.runtime,
+    page, showHub, warnSave, sessionNotice, setReview: current => { review = current; }
+  });
 
   function sessionNotice(message) {
     const notice = document.createElement('p');
@@ -127,14 +122,13 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const completedTower = profile.notebook.chapters.includes(7);
     const collecting = completedTower && target?.screen === 'collection';
     const destinationId = !collecting && (target?.dungeonId ?? profile.ui?.destination);
-    const rift = dailyStore?.view?.(profile, new Date());
+    const rift = daily.hubView();
     hubScreen(node, {
       profile, run, widgets, inspect, openDungeons, destinationId, resume: enterExpedition, goal, arriving,
       depart: collecting ? () => openMeta('collection', true)
         : destinationId ? () => prepare(destinationId, target?.contractId) : openDungeons,
       departureLabel: collecting ? '동료 출현 지역 보기' : null,
-      daily: unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift,
-      openDaily: showDaily
+      daily: rift, openDaily: daily.showDaily
     });
     if (profile.ui?.announcement) updateUi({ announcement: null });
     for (const button of node.querySelectorAll('[data-meta-page]')) button.addEventListener('click', () => {
@@ -186,121 +180,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       }
       renderNotebook();
     } else if (id === 'records') recordsScreen(content, profile, roster.card, sheets.openSheet, () => showEnding(),
-      dailyStore?.history ? showDailyHistory : null, log => openBattleLog(sheets, widgets, log));
-  }
-
-  function showDailyHistory(node) {
-    const cursors = [null];
-    function render() {
-      openDailyHistory(dailyStore.history({ before: cursors.at(-1), limit: 7 }) ?? {}, {
-        node, sheets,
-        next(cursor) { cursors.push(cursor); render(); },
-        previous: cursors.length > 1 ? () => { cursors.pop(); render(); } : null
-      });
-    }
-    render();
-  }
-
-  function showDaily(message) {
-    if (unsavedDailyResult) return finishDaily(unsavedDailyResult);
-    const view = dailyStore?.view?.(profile, new Date());
-    if (!view?.unlocked) return;
-    if (view.active) {
-      const today = view.dayKey ?? view.spec?.dayKey;
-      if (view.active.dayKey && today && view.active.dayKey !== today) return promptDailyResume(view.active);
-      return resumeDaily();
-    }
-    openDailyPreparation(view, {
-      roster, widgets, sheets, message, start: startDaily,
-      inspectLoan: (id, onClose) => details.charSheet(null, id, { loaned: true, onClose })
-    });
-  }
-
-  function promptDailyResume(active) {
-    openEarlierRift(active, { sheets, resume: resumeDaily, abandon: abandonDaily });
-  }
-
-  function startDaily(expectedDayKey, kind) {
-    const now = new Date();
-    const result = dailyStore?.start?.({ profile, now, expectedDayKey, kind });
-    if (result?.ok && result.run) return enterDaily(result.run);
-    if (result?.reason === 'date_changed') {
-      const view = dailyStore.view?.(profile, now);
-      const date = shortRiftDate(view?.dayKey ?? view?.spec?.dayKey);
-      if ($('#hub').classList.contains('on')) showHub();
-      showDaily(date ? `날짜가 바뀌었다. ${date} 균열을 확인하자.` : '날짜가 바뀌었다. 오늘의 균열을 확인하자.');
-    } else if (['active_exists', 'already_recorded', 'official_required'].includes(result?.reason)) {
-      showDaily();
-    } else if (result?.reason === 'storage_failed') {
-      warnSave();
-    } else {
-      sessionNotice('균열을 시작하지 못했다.');
-    }
-  }
-
-  function resumeDaily() {
-    const restored = dailyStore?.resume?.();
-    if (restored?.ok && restored.run) return enterDaily(restored.run);
-    sessionNotice('진행 중인 균열을 불러오지 못했다.');
-    const active = dailyStore?.view?.(profile, new Date())?.active;
-    if (active && !$('#meta-rift-resume')) promptDailyResume(active);
-  }
-
-  function abandonDaily(runId) {
-    const result = dailyStore?.abandon?.(runId);
-    if (result?.ok) {
-      showHub();
-      showDaily();
-    } else if (result?.reason === 'storage_failed') warnSave();
-    else sessionNotice('균열을 포기하지 못했다.');
-  }
-
-  function enterDaily(current) {
-    dailyRun = current;
-    review = null;
-    sheets.closeSheet();
-    audio.unlockAudio();
-    if (current.phase === 'done') return finishDaily(current);
-    review = enterRun(current, dailyHost) || null;
-  }
-
-  function finishDaily(current) {
-    if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== 'done') return;
-    const result = dailyStore?.finish?.(current);
-    if (!result?.ok) {
-      unsavedDailyResult = current;
-      if (result?.reason === 'storage_failed') warnSave();
-      const node = page('daily-result', { title: '균열 기록' });
-      node.innerHTML = `<div class="meta-sheet rift-actions">
-        <p role="alert">균열 기록을 저장하지 못했다. 새로고침하거나 게임을 닫으면 마지막 저장 지점으로 돌아간다. 결과를 보관하려면 기록 파일을 받자.</p>
-        <button class="btn go" data-backup-action="export">기록 내보내기</button>
-        <button class="btn" id="meta-rift-retry">다시 저장</button>
-        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>
-      </div>`;
-      $('#meta-rift-retry', node).addEventListener('click', () => finishDaily(current));
-      $('#meta-rift-hub', node).addEventListener('click', () => {
-        dailyRun = null;
-        review = null;
-        showHub();
-        sessionNotice('균열 결과는 아직 저장되지 않았다. 게임을 닫기 전에 기록을 내보낼 수 있다.');
-      });
-      return;
-    }
-    const spec = current.daily?.spec;
-    const score = {
-      runId: current.id, dayKey: spec?.dayKey, kind: current.daily?.kind, outcome: current.result,
-      floor: current.floor, turns: current.stats?.turns, livingIds: current.bench, heirloomsUsed: current.stats?.heirloomsUsed,
-      ...result.score
-    };
-    const view = dailyStore?.view?.(profile, new Date());
-    dailyRun = null;
-    unsavedDailyResult = null;
-    review = null;
-    const node = page('daily-result', { title: dailyResultTitle(score), track: score.outcome === 'win' ? 'victory' : 'defeat' });
-    dailyResultScreen(node, { spec, score, official: result.official }, {
-      widgets, today: view?.dayKey ?? view?.spec?.dayKey, practice: dayKey => startDaily(dayKey, 'practice'),
-      openToday: showDaily, hub: showHub
-    });
+      dailyStore?.history ? daily.showDailyHistory : null, log => openBattleLog(sheets, widgets, log));
   }
 
   function endingDue() {
@@ -470,8 +350,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     recovery = null;
     profile = createProfile();
     run = null;
-    dailyRun = null;
-    unsavedDailyResult = null;
+    daily.reset();
     review = null;
     preparationOpen = false;
     sheets.closeSheet();
@@ -485,7 +364,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
 
   function currentBackup({ lastGood = false } = {}) {
     const settings = settingsSnapshot(stage, audio, music);
-    if (!recovery) return store.exportBackup({ profile, run, dailyRun: unsavedDailyResult ?? dailyRun, settings });
+    if (!recovery) return store.exportBackup({ profile, run, dailyRun: daily.backupRun, settings });
     const good = lastGood ? store.loadLastGood?.() : null;
     return store.exportBackup(good?.status === 'ok' ? { profile: good.profile, settings } : { settings });
   }
@@ -559,5 +438,5 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     else showTitle(stored?.profile, detail?.status === 'runDamaged' || stored?.runError ? '원정만 손상 · 동료와 수첩 유지' : '');
   }
 
-  return { boot, closePreparation, resetData, inspect, get run() { return dailyRun ?? run; }, get review() { return review; } };
+  return { boot, closePreparation, resetData, inspect, get run() { return daily.run ?? run; }, get review() { return review; } };
 }

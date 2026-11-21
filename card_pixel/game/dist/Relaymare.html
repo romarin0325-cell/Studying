@@ -11331,7 +11331,7 @@ const BattleRuntime = {
     START: () => START,
     altarKeep: () => altarKeep,
     altarRoll: () => altarRoll,
-    battleOptions: () => battleOptions,
+    battleOptions: () => battleOptions2,
     bindRun: () => bindRun,
     chooseDoor: () => chooseDoor,
     chooseEvent: () => chooseEvent,
@@ -11342,13 +11342,13 @@ const BattleRuntime = {
     createRun: () => createRun,
     defaultParty: () => defaultParty,
     doorEnemies: () => doorEnemies,
-    doorStart: () => doorStart,
+    doorStart: () => doorStart2,
     enterBattleDoor: () => enterBattleDoor,
     equipRelic: () => equipRelic,
     finishRun: () => finishRun,
-    getBlessingView: () => getBlessingView,
+    getBlessingView: () => getBlessingView2,
     getSpringOffer: () => getSpringOffer,
-    getTempoView: () => getTempoView,
+    getTempoView: () => getTempoView2,
     leaveRoom: () => leaveRoom,
     nextFloor: () => nextFloor,
     resolveReinforcement: () => resolveReinforcement,
@@ -11895,15 +11895,133 @@ const BattleRuntime = {
     seeCharacters(run, run.doors.flatMap((door) => door.enemies.map((enemy) => enemy.source).filter(Boolean)));
   }
 
+  // card_pixel/game/src/engine/run-battle.js
+  var unique = (ids) => [...new Set(ids)];
+  var enemyAttackScale = (run) => run.difficulty === "easy" ? EASY_ENEMY_ATTACK : 1;
+  var battleRoom = (run) => run.phase === "room" && run.room?.status === "battle";
+  function battleStart(run, door, artifacts, binding) {
+    const eventStart = run.nextBattle?.start;
+    if (!door.start && !eventStart) return null;
+    const start = { ...door.start, ...eventStart };
+    if (door.start?.field || eventStart?.field) {
+      const { core: core2 } = binding;
+      start.field = unique([...eventStart?.field || [], ...door.start?.field || []]).slice(0, fieldCap(core2, artifacts));
+    }
+    return start;
+  }
+  function battleArtifacts(run) {
+    return unique([...run.relics, run.nextBattle?.relic].filter(Boolean)).slice(0, RELIC_LIMIT);
+  }
+  function doorStart(run, index, binding) {
+    const door = run.doors[index];
+    if (!door?.enemies.length) return { field: [], enemyDebuffs: {} };
+    const artifacts = battleArtifacts(run);
+    const start = battleStart(run, door, artifacts, binding);
+    const field = unique([...artifacts.includes("gale_storm") ? ["gale"] : [], ...start?.field || []]);
+    return { field: field.slice(-fieldCap(binding.core, artifacts)), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
+  }
+  function doorEnemies(run, index) {
+    const door = run.doors[index];
+    return (door?.enemies || []).map((enemy) => {
+      const stats = enemyStatsWithQuirk(enemy.stats, door.quirk, enemyAttackScale(run));
+      return { ...copy(enemy), stats, maxHp: stats.hp };
+    });
+  }
+  function getTempoView(run, doorIndex, binding, { defaultParty: defaultParty2, suggestOrder: suggestOrder2 }) {
+    const door = run.doors[doorIndex];
+    const { core: core2 } = binding;
+    const suggested = door?.type === "boss" && run.guide?.bossOrder ? suggestOrder2(run) : null;
+    return {
+      party: door?.type === "borrowed" ? INTRO.party.slice() : defaultParty2(run),
+      suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
+      enemies: doorEnemies(run, doorIndex).map((enemy, index) => ({
+        id: enemy.id,
+        name: enemy.name,
+        maxHp: enemy.maxHp,
+        element: enemy.element,
+        beats: enemyBeats(core2, enemy, door.tempo?.pattern, door.intent, index === 0 ? door.tempo?.lesson : null)
+      })),
+      pattern: door?.tempo?.pattern ?? null,
+      blessing: copy(door?.tempo?.blessing ?? null),
+      startMp: door?.tempo?.startMp ?? null,
+      enemyKind: door?.enemies[0]?.kind ?? null,
+      enemyIndex: door?.enemies.length ? 0 : null,
+      enemyCount: door?.enemies.length ?? 0,
+      lesson: copy(door?.tempo?.lesson ?? null),
+      affixes: (door?.enemies[0]?.affixes ?? []).map((id) => affixView(id)),
+      bossRule: door?.type === "boss" ? {
+        bossId: run.boss,
+        name: door.enemies[0].name,
+        text: BOSSES[run.boss].note
+      } : null
+    };
+  }
+  function blessingBonus(blessing, id) {
+    return blessing?.id === id ? Number((blessing.multiplier - 1).toFixed(2)) : 0;
+  }
+  function battleBlessings(run, door) {
+    const blessings = { ...run.blessings };
+    const blessing = door.tempo?.blessing;
+    if (blessing) {
+      const bonus = blessingBonus(blessing, blessing.id);
+      blessings[blessing.id] = Math.max(blessings[blessing.id] ?? 0, bonus);
+    }
+    return Object.entries(blessings).map(([id, multiplier]) => ({ id, multiplier }));
+  }
+  function getBlessingView(run, doorIndex, partyIds, id, binding) {
+    const { core: core2, roster: roster2 } = binding;
+    const door = run.doors[doorIndex];
+    const expeditionBonus = run.blessings[id] ?? 0;
+    const battleBonus = blessingBonus(door?.tempo?.blessing, id);
+    const active2 = partyIds.includes(id);
+    const effectiveBonus = Math.max(expeditionBonus, battleBonus) * (partyIds.includes("entropy") ? 2 : 1);
+    let stats = null;
+    if (roster2.card(id)) {
+      const party = active2 ? partyIds : id === "entropy" || !partyIds.includes("entropy") ? [id] : [id, "entropy"];
+      const options = door?.enemies.length ? optionsForDoor(run, door, party, binding) : {
+        party,
+        enemies: [roster2.wildOf(INTRO.creature)],
+        blessings: battleBlessings(run, {})
+      };
+      if (!active2 && id === "entropy") {
+        const blessing = options.blessings.find((entry) => entry.id === id);
+        if (blessing) blessing.multiplier /= 2;
+      }
+      const preview = create(core2, options);
+      preview.start();
+      stats = preview.allyStats(party.indexOf(id));
+    }
+    return { expeditionBonus, battleBonus, effectiveBonus, active: active2, stats };
+  }
+  function battleOptions(run, binding) {
+    if (!battleRoom(run)) return null;
+    return copy(optionsForDoor(run, run.room, run.room.party, binding));
+  }
+  function optionsForDoor(run, room, party, binding) {
+    const artifacts = battleArtifacts(run);
+    return {
+      party,
+      enemies: room.enemies,
+      quirk: room.quirk || null,
+      ...run.difficulty === "easy" && { enemyAttackScale: enemyAttackScale(run) },
+      seed: room.type === "borrowed" ? INTRO.seed : run.seed + run.floor * 1013 + run.stats.battles * 7 >>> 0,
+      heirlooms: run.heirlooms,
+      blessings: battleBlessings(run, room),
+      ...room.tempo && { tempo: room.tempo, openingIntent: room.intent },
+      artifacts,
+      region: room.region,
+      start: battleStart(run, room, artifacts, binding),
+      bet: run.nextBattle?.bet || null
+    };
+  }
+
   // card_pixel/game/src/engine/run.js
   var FLOORS2 = 8;
   var START = { picks: 2, draws: 3 };
   var dependencies = /* @__PURE__ */ new WeakMap();
-  var unique = (ids) => [...new Set(ids)];
-  var battleRoom = (run) => run.phase === "room" && run.room?.status === "battle";
+  var unique2 = (ids) => [...new Set(ids)];
   var springRoom = (run) => run.phase === "room" && run.room?.type === "spring" && run.room.status === "service";
   var runRoster = (run) => dependencies.get(run)?.roster;
-  var enemyAttackScale = (run) => run.difficulty === "easy" ? EASY_ENEMY_ATTACK : 1;
   function bindRun(run, { core: core2, roster: roster2 }) {
     dependencies.set(run, { core: core2, roster: roster2 });
     let reward = run.pending;
@@ -12100,7 +12218,7 @@ const BattleRuntime = {
       return invalid("invalid_candidate");
     }
     if (id) join(run, id);
-    run.unchosen = unique([...run.unchosen, ...pending.candidates]).filter((candidate) => canJoin(run, candidate));
+    run.unchosen = unique2([...run.unchosen, ...pending.candidates]).filter((candidate) => canJoin(run, candidate));
     if (pending.remaining > 1 && id) {
       const stillWaiting = (pending.priority || []).filter((other) => other !== id && canJoin(run, other));
       prepareStartPick(run, pending.remaining - 1, id, stillWaiting);
@@ -12171,120 +12289,17 @@ const BattleRuntime = {
     chooseDoor(run, index);
     return applyOrder(run, order);
   }
-  function battleStart(run, door, artifacts) {
-    const eventStart = run.nextBattle?.start;
-    if (!door.start && !eventStart) return null;
-    const start = { ...door.start, ...eventStart };
-    if (door.start?.field || eventStart?.field) {
-      const { core: core2 } = dependencies.get(run);
-      start.field = unique([...eventStart?.field || [], ...door.start?.field || []]).slice(0, fieldCap(core2, artifacts));
-    }
-    return start;
+  function doorStart2(run, index) {
+    return doorStart(run, index, dependencies.get(run));
   }
-  function battleArtifacts(run) {
-    return unique([...run.relics, run.nextBattle?.relic].filter(Boolean)).slice(0, RELIC_LIMIT);
+  function getTempoView2(run, doorIndex) {
+    return getTempoView(run, doorIndex, dependencies.get(run), { defaultParty, suggestOrder });
   }
-  function doorStart(run, index) {
-    const door = run.doors[index];
-    if (!door?.enemies.length) return { field: [], enemyDebuffs: {} };
-    const artifacts = battleArtifacts(run);
-    const start = battleStart(run, door, artifacts);
-    const field = unique([...artifacts.includes("gale_storm") ? ["gale"] : [], ...start?.field || []]);
-    return { field: field.slice(-fieldCap(dependencies.get(run).core, artifacts)), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
+  function getBlessingView2(run, doorIndex, partyIds, id) {
+    return getBlessingView(run, doorIndex, partyIds, id, dependencies.get(run));
   }
-  function doorEnemies(run, index) {
-    const door = run.doors[index];
-    return (door?.enemies || []).map((enemy) => {
-      const stats = enemyStatsWithQuirk(enemy.stats, door.quirk, enemyAttackScale(run));
-      return { ...copy(enemy), stats, maxHp: stats.hp };
-    });
-  }
-  function getTempoView(run, doorIndex) {
-    const door = run.doors[doorIndex];
-    const { core: core2 } = dependencies.get(run);
-    const suggested = door?.type === "boss" && run.guide?.bossOrder ? suggestOrder(run) : null;
-    return {
-      party: door?.type === "borrowed" ? INTRO.party.slice() : defaultParty(run),
-      suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
-      enemies: doorEnemies(run, doorIndex).map((enemy, index) => ({
-        id: enemy.id,
-        name: enemy.name,
-        maxHp: enemy.maxHp,
-        element: enemy.element,
-        beats: enemyBeats(core2, enemy, door.tempo?.pattern, door.intent, index === 0 ? door.tempo?.lesson : null)
-      })),
-      pattern: door?.tempo?.pattern ?? null,
-      blessing: copy(door?.tempo?.blessing ?? null),
-      startMp: door?.tempo?.startMp ?? null,
-      enemyKind: door?.enemies[0]?.kind ?? null,
-      enemyIndex: door?.enemies.length ? 0 : null,
-      enemyCount: door?.enemies.length ?? 0,
-      lesson: copy(door?.tempo?.lesson ?? null),
-      affixes: (door?.enemies[0]?.affixes ?? []).map((id) => affixView(id)),
-      bossRule: door?.type === "boss" ? {
-        bossId: run.boss,
-        name: door.enemies[0].name,
-        text: BOSSES[run.boss].note
-      } : null
-    };
-  }
-  function blessingBonus(blessing, id) {
-    return blessing?.id === id ? Number((blessing.multiplier - 1).toFixed(2)) : 0;
-  }
-  function battleBlessings(run, door) {
-    const blessings = { ...run.blessings };
-    const blessing = door.tempo?.blessing;
-    if (blessing) {
-      const bonus = blessingBonus(blessing, blessing.id);
-      blessings[blessing.id] = Math.max(blessings[blessing.id] ?? 0, bonus);
-    }
-    return Object.entries(blessings).map(([id, multiplier]) => ({ id, multiplier }));
-  }
-  function getBlessingView(run, doorIndex, partyIds, id) {
-    const { core: core2, roster: roster2 } = dependencies.get(run);
-    const door = run.doors[doorIndex];
-    const expeditionBonus = run.blessings[id] ?? 0;
-    const battleBonus = blessingBonus(door?.tempo?.blessing, id);
-    const active2 = partyIds.includes(id);
-    const effectiveBonus = Math.max(expeditionBonus, battleBonus) * (partyIds.includes("entropy") ? 2 : 1);
-    let stats = null;
-    if (roster2.card(id)) {
-      const party = active2 ? partyIds : id === "entropy" || !partyIds.includes("entropy") ? [id] : [id, "entropy"];
-      const options = door?.enemies.length ? optionsForDoor(run, door, party) : {
-        party,
-        enemies: [roster2.wildOf(INTRO.creature)],
-        blessings: battleBlessings(run, {})
-      };
-      if (!active2 && id === "entropy") {
-        const blessing = options.blessings.find((entry) => entry.id === id);
-        if (blessing) blessing.multiplier /= 2;
-      }
-      const preview = create(core2, options);
-      preview.start();
-      stats = preview.allyStats(party.indexOf(id));
-    }
-    return { expeditionBonus, battleBonus, effectiveBonus, active: active2, stats };
-  }
-  function battleOptions(run) {
-    if (!battleRoom(run)) return null;
-    return copy(optionsForDoor(run, run.room, run.room.party));
-  }
-  function optionsForDoor(run, room, party) {
-    const artifacts = battleArtifacts(run);
-    return {
-      party,
-      enemies: room.enemies,
-      quirk: room.quirk || null,
-      ...run.difficulty === "easy" && { enemyAttackScale: enemyAttackScale(run) },
-      seed: room.type === "borrowed" ? INTRO.seed : run.seed + run.floor * 1013 + run.stats.battles * 7 >>> 0,
-      heirlooms: run.heirlooms,
-      blessings: battleBlessings(run, room),
-      ...room.tempo && { tempo: room.tempo, openingIntent: room.intent },
-      artifacts,
-      region: room.region,
-      start: battleStart(run, room, artifacts),
-      bet: run.nextBattle?.bet || null
-    };
+  function battleOptions2(run) {
+    return battleOptions(run, dependencies.get(run));
   }
   function summarizeStats(run, summary) {
     const stats = run.stats;
@@ -12301,7 +12316,7 @@ const BattleRuntime = {
   function setGateReward(run, room, downs, betRelic) {
     run.pending = {
       kind: "gate",
-      candidates: unique(downs.map((entry) => room.enemies[entry.idx].source).filter((id) => canJoin(run, id, { allowReserved: true }))),
+      candidates: unique2(downs.map((entry) => room.enemies[entry.idx].source).filter((id) => canJoin(run, id, { allowReserved: true }))),
       relic: run.relics.includes(room.relic) || room.relic === betRelic ? null : room.relic
     };
     run.reserved = null;
@@ -12366,7 +12381,7 @@ const BattleRuntime = {
     const final = room.type === "boss" || !!room.final;
     const gate = room.type === "gate";
     summarizeStats(run, summary);
-    run.participated = unique([...run.participated, ...room.party.filter(Boolean)]);
+    run.participated = unique2([...run.participated, ...room.party.filter(Boolean)]);
     if (!win && final && gate && run.firstIntroClear) {
       run.stats.retries++;
       room.status = "order";
@@ -12389,9 +12404,9 @@ const BattleRuntime = {
     for (const { to, ...heirloom } of heirloomsGained) run.heirlooms[to] = copy(heirloom);
     if (gate && win) {
       run.stats.gateWins++;
-      run.gateSurvivors = unique([...run.gateSurvivors, ...survivors]);
+      run.gateSurvivors = unique2([...run.gateSurvivors, ...survivors]);
     }
-    if (!run.daily && win && (gate || final)) run.eligible = unique([...run.eligible, ...survivors]);
+    if (!run.daily && win && (gate || final)) run.eligible = unique2([...run.eligible, ...survivors]);
     const wiped = win && run.bench.length === 0;
     if (!win || wiped && !final) run.result = "lose";
     else if (final) run.result = "win";
@@ -16176,7 +16191,7 @@ const BattleRuntime = {
       const extra = [];
       if (shown.lastStand) extra.push('<li><i class="bad">\uCD5C\uD6C4\uC758 \uC77C\uC778</i>\uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 \xD71.5, \uCE58\uBA85\uD0C0\uC728 +25%p</li>');
       if (!B.blessingViews?.has(id)) {
-        B.blessingViews?.set(id, getBlessingView?.(run, B.door.index, B.party, id));
+        B.blessingViews?.set(id, getBlessingView2?.(run, B.door.index, B.party, id));
       }
       const blessing = B.blessingViews?.get(id);
       if (blessing) extra.push('<li class="seat-blessing">' + esc(blessingText(blessing)) + "</li>");
@@ -18289,7 +18304,7 @@ const BattleRuntime = {
     const blessingViews = /* @__PURE__ */ new Map();
     function view(id) {
       if (!id || !door) return;
-      if (!blessingViews.has(id)) blessingViews.set(id, getBlessingView?.(run, door.index, party, id));
+      if (!blessingViews.has(id)) blessingViews.set(id, getBlessingView2?.(run, door.index, party, id));
       return blessingViews.get(id);
     }
     function orderHint(alternateSeats) {
@@ -18328,7 +18343,7 @@ const BattleRuntime = {
       render();
     }
     function render() {
-      const tempo = door && getTempoView?.(run, door.index);
+      const tempo = door && getTempoView2?.(run, door.index);
       const alternative = door?.type === "boss" && run.guide?.bossOrder ? tempo?.suggestedParty ?? suggestOrder(run) : null;
       const alternateSeats = alternative?.some(Boolean) ? seats(alternative) : null;
       const blessing = tempo?.blessing ?? door?.tempo?.blessing;
@@ -18355,7 +18370,7 @@ const BattleRuntime = {
         recruits.length && (returning.length ? recruits.map(name).join(" \xB7 ") + " \xB7 " : "") + "\uC0DD\uD658 \uC2DC \uC601\uC785 \uD6C4\uBCF4",
         returning.length && returning.map(name).join(" \xB7 ") + " \xB7 \uC0DD\uD658 \uC2DC \uC778\uC5F0"
       ].filter(Boolean).map((line) => '<small class="recruit-flag">' + esc(line) + "</small>").join("");
-      const boost = !getBlessingView && blessing?.id ? '<div class="relay-blessing win">' + faceBadge(blessing.id) + "<span>\uC774\uBC88 \uC804\uD22C \uCD95\uBCF5</span></div>" : "";
+      const boost = !getBlessingView2 && blessing?.id ? '<div class="relay-blessing win">' + faceBadge(blessing.id) + "<span>\uC774\uBC88 \uC804\uD22C \uCD95\uBCF5</span></div>" : "";
       const focused = selected?.bench ?? party[selected?.slot];
       const action = entryLabel ?? (door?.final && run.stats.retries ? "\uD3B8\uC131\uC744 \uBC14\uAFD4 \uC7AC\uB3C4\uC804" : "\uCD9C\uC804 (" + party.filter(Boolean).length + "\uBA85)");
       node.innerHTML = boost + '<div class="relay-seats">' + board + "</div>" + (survival2 ? '<div class="relay-survival">' + survival2 + "</div>" : "") + orderHint(alternateSeats) + '<h3>\uB300\uAE30 \uB3D9\uB8CC</h3><div class="reserve-cards">' + (bench.map((id) => '<button class="win' + (selected?.bench === id ? " sel" : "") + '" data-bench="' + esc(id) + '" aria-pressed="' + (selected?.bench === id) + '">' + faceBadge(id, name(id), 48) + blessingLine(id) + "</button>").join("") || '<p class="sm">\uC5C6\uC74C</p>') + "</div>" + (onEnter ? '<div class="formation-actions">' + (focused ? '<button class="btn" id="b-formation-info">\uB3D9\uB8CC \uC815\uBCF4</button>' : "") + '<button class="btn go" id="b-go"' + (party.some(Boolean) ? "" : " disabled") + ">" + action + "</button></div>" : "");
@@ -18404,7 +18419,7 @@ const BattleRuntime = {
     const { face: face2, sprite: sprite2 } = ui.widgets;
     const node = $("#order");
     const room = run.room;
-    const tempo = getTempoView?.(run, room.index);
+    const tempo = getTempoView2?.(run, room.index);
     const quirk = QUIRKS[room.quirk];
     const hazards = [quirk?.name, ...new Set(room.enemies.flatMap((enemy) => (enemy.affixes || []).map((id) => AFFIXES[id]?.name)))].filter(Boolean);
     node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", run.floor + "\uCE35") + '<div class="scroll"><button class="win run-opponents" id="b-opponents"><span>' + room.enemies.map((enemy) => '<span class="run-face">' + face2(enemy.sprite, 32) + "</span>").join("") + "</span><span><b>" + esc(room.enemies.map((enemy) => enemy.name).join(" \u2192 ")) + "</b><small>" + esc((room.enemies.length > 1 ? room.enemies.length + "\uC5F0\uC804 \xB7 " : "") + room.name + (hazards.length ? " \xB7 " + hazards.join(" \xB7 ") : "")) + '</small></span></button><div class="formation"></div></div>';
@@ -18548,7 +18563,7 @@ const BattleRuntime = {
     }).join("");
     function startSky(door) {
       if (!door.enemies.length) return "";
-      const field = doorStart?.(run, door.index)?.field ?? door.start?.field;
+      const field = doorStart2?.(run, door.index)?.field ?? door.start?.field;
       if (!Array.isArray(field) || !field.length && door.region?.id !== "starlit_sky") return "";
       return "\uC2DC\uC791 \uD558\uB298 \xB7 " + (field.map((id) => core2.BUFF_NAMES[id] || id).join(" \xB7 ") || "\uBE44\uC5B4 \uC788\uC74C");
     }
@@ -18614,7 +18629,7 @@ const BattleRuntime = {
       return icon2(door.type);
     }
     const layout = getWalkLayout(run);
-    const tempoViews = run.doors.map((door) => getTempoView?.(run, door.index));
+    const tempoViews = run.doors.map((door) => getTempoView2?.(run, door.index));
     const lessonLine = (door) => {
       const lesson = doorLesson(tempoViews[door.index]);
       return lesson ? '<small class="door-lesson">' + icon2("battle") + "<span>" + esc(lesson) + "</span></small>" : "";
@@ -19415,7 +19430,7 @@ const BattleRuntime = {
         return orderScreen(run, ui);
       }
       if (run.room?.status === "battle") {
-        const options = battleOptions(run);
+        const options = battleOptions2(run);
         const fromMap = mapEntry;
         mapEntry = false;
         return battle.startBattle(run, options, (summary, log) => {
@@ -20160,6 +20175,181 @@ const BattleRuntime = {
     $("#meta-ending-finish", node).addEventListener("click", finish, { once: true });
   }
 
+  // card_pixel/game/src/ui/nav/daily.js
+  function createDailyNavigation({
+    currentProfile,
+    dailyStore: dailyStore2,
+    roster: roster2,
+    widgets: widgets2,
+    details,
+    assets: assets2,
+    runtime: runtime2,
+    page,
+    showHub,
+    warnSave,
+    sessionNotice,
+    setReview
+  }) {
+    const { audio: audio2, sheets: sheets2 } = runtime2;
+    let dailyRun = null;
+    let unsavedDailyResult = null;
+    const dailyHost = {
+      profile: currentProfile,
+      assets: assets2,
+      runtime: runtime2,
+      save(current) {
+        if (current === dailyRun && !dailyStore2?.save?.(current)?.ok) warnSave();
+      },
+      finish: finishDaily
+    };
+    function hubView() {
+      const rift = dailyStore2?.view?.(currentProfile(), /* @__PURE__ */ new Date());
+      return unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift;
+    }
+    function showDailyHistory(node) {
+      const cursors = [null];
+      function render() {
+        openDailyHistory(dailyStore2.history({ before: cursors.at(-1), limit: 7 }) ?? {}, {
+          node,
+          sheets: sheets2,
+          next(cursor) {
+            cursors.push(cursor);
+            render();
+          },
+          previous: cursors.length > 1 ? () => {
+            cursors.pop();
+            render();
+          } : null
+        });
+      }
+      render();
+    }
+    function showDaily(message) {
+      if (unsavedDailyResult) return finishDaily(unsavedDailyResult);
+      const view = dailyStore2?.view?.(currentProfile(), /* @__PURE__ */ new Date());
+      if (!view?.unlocked) return;
+      if (view.active) {
+        const today = view.dayKey ?? view.spec?.dayKey;
+        if (view.active.dayKey && today && view.active.dayKey !== today) return promptDailyResume(view.active);
+        return resumeDaily();
+      }
+      openDailyPreparation(view, {
+        roster: roster2,
+        widgets: widgets2,
+        sheets: sheets2,
+        message,
+        start: startDaily,
+        inspectLoan: (id, onClose) => details.charSheet(null, id, { loaned: true, onClose })
+      });
+    }
+    function promptDailyResume(active2) {
+      openEarlierRift(active2, { sheets: sheets2, resume: resumeDaily, abandon: abandonDaily });
+    }
+    function startDaily(expectedDayKey, kind) {
+      const now = /* @__PURE__ */ new Date();
+      const result = dailyStore2?.start?.({ profile: currentProfile(), now, expectedDayKey, kind });
+      if (result?.ok && result.run) return enterDaily(result.run);
+      if (result?.reason === "date_changed") {
+        const view = dailyStore2.view?.(currentProfile(), now);
+        const date = shortRiftDate(view?.dayKey ?? view?.spec?.dayKey);
+        if ($("#hub").classList.contains("on")) showHub();
+        showDaily(date ? `\uB0A0\uC9DC\uAC00 \uBC14\uB00C\uC5C8\uB2E4. ${date} \uADE0\uC5F4\uC744 \uD655\uC778\uD558\uC790.` : "\uB0A0\uC9DC\uAC00 \uBC14\uB00C\uC5C8\uB2E4. \uC624\uB298\uC758 \uADE0\uC5F4\uC744 \uD655\uC778\uD558\uC790.");
+      } else if (["active_exists", "already_recorded", "official_required"].includes(result?.reason)) {
+        showDaily();
+      } else if (result?.reason === "storage_failed") {
+        warnSave();
+      } else {
+        sessionNotice("\uADE0\uC5F4\uC744 \uC2DC\uC791\uD558\uC9C0 \uBABB\uD588\uB2E4.");
+      }
+    }
+    function resumeDaily() {
+      const restored = dailyStore2?.resume?.();
+      if (restored?.ok && restored.run) return enterDaily(restored.run);
+      sessionNotice("\uC9C4\uD589 \uC911\uC778 \uADE0\uC5F4\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uB2E4.");
+      const active2 = dailyStore2?.view?.(currentProfile(), /* @__PURE__ */ new Date())?.active;
+      if (active2 && !$("#meta-rift-resume")) promptDailyResume(active2);
+    }
+    function abandonDaily(runId) {
+      const result = dailyStore2?.abandon?.(runId);
+      if (result?.ok) {
+        showHub();
+        showDaily();
+      } else if (result?.reason === "storage_failed") warnSave();
+      else sessionNotice("\uADE0\uC5F4\uC744 \uD3EC\uAE30\uD558\uC9C0 \uBABB\uD588\uB2E4.");
+    }
+    function enterDaily(current) {
+      dailyRun = current;
+      setReview(null);
+      sheets2.closeSheet();
+      audio2.unlockAudio();
+      if (current.phase === "done") return finishDaily(current);
+      setReview(enterRun(current, dailyHost) || null);
+    }
+    function finishDaily(current) {
+      if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== "done") return;
+      const result = dailyStore2?.finish?.(current);
+      if (!result?.ok) {
+        unsavedDailyResult = current;
+        if (result?.reason === "storage_failed") warnSave();
+        const node2 = page("daily-result", { title: "\uADE0\uC5F4 \uAE30\uB85D" });
+        node2.innerHTML = `<div class="meta-sheet rift-actions">
+        <p role="alert">\uADE0\uC5F4 \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uB2E4. \uC0C8\uB85C\uACE0\uCE68\uD558\uAC70\uB098 \uAC8C\uC784\uC744 \uB2EB\uC73C\uBA74 \uB9C8\uC9C0\uB9C9 \uC800\uC7A5 \uC9C0\uC810\uC73C\uB85C \uB3CC\uC544\uAC04\uB2E4. \uACB0\uACFC\uB97C \uBCF4\uAD00\uD558\uB824\uBA74 \uAE30\uB85D \uD30C\uC77C\uC744 \uBC1B\uC790.</p>
+        <button class="btn go" data-backup-action="export">\uAE30\uB85D \uB0B4\uBCF4\uB0B4\uAE30</button>
+        <button class="btn" id="meta-rift-retry">\uB2E4\uC2DC \uC800\uC7A5</button>
+        <button class="btn" id="meta-rift-hub">\uAD00\uCE21\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30</button>
+      </div>`;
+        $("#meta-rift-retry", node2).addEventListener("click", () => finishDaily(current));
+        $("#meta-rift-hub", node2).addEventListener("click", () => {
+          dailyRun = null;
+          setReview(null);
+          showHub();
+          sessionNotice("\uADE0\uC5F4 \uACB0\uACFC\uB294 \uC544\uC9C1 \uC800\uC7A5\uB418\uC9C0 \uC54A\uC558\uB2E4. \uAC8C\uC784\uC744 \uB2EB\uAE30 \uC804\uC5D0 \uAE30\uB85D\uC744 \uB0B4\uBCF4\uB0BC \uC218 \uC788\uB2E4.");
+        });
+        return;
+      }
+      const spec = current.daily?.spec;
+      const score = {
+        runId: current.id,
+        dayKey: spec?.dayKey,
+        kind: current.daily?.kind,
+        outcome: current.result,
+        floor: current.floor,
+        turns: current.stats?.turns,
+        livingIds: current.bench,
+        heirloomsUsed: current.stats?.heirloomsUsed,
+        ...result.score
+      };
+      const view = dailyStore2?.view?.(currentProfile(), /* @__PURE__ */ new Date());
+      dailyRun = null;
+      unsavedDailyResult = null;
+      setReview(null);
+      const node = page("daily-result", { title: dailyResultTitle(score), track: score.outcome === "win" ? "victory" : "defeat" });
+      dailyResultScreen(node, { spec, score, official: result.official }, {
+        widgets: widgets2,
+        today: view?.dayKey ?? view?.spec?.dayKey,
+        practice: (dayKey) => startDaily(dayKey, "practice"),
+        openToday: showDaily,
+        hub: showHub
+      });
+    }
+    function reset() {
+      dailyRun = null;
+      unsavedDailyResult = null;
+    }
+    return {
+      hubView,
+      showDaily,
+      showDailyHistory,
+      reset,
+      get run() {
+        return dailyRun;
+      },
+      get backupRun() {
+        return unsavedDailyResult ?? dailyRun;
+      }
+    };
+  }
+
   // card_pixel/game/src/ui/nav.js
   var { availableDungeons: availableDungeons3, applyRunEnd: applyRunEnd2, createProfile: createProfile2, setExpeditionParty: setExpeditionParty3, startView: startView3 } = meta_exports;
   var PAGES = {
@@ -20187,8 +20377,6 @@ const BattleRuntime = {
     let recovery = ["profileDamaged", "unavailable"].includes(detail?.status) ? detail.status : null;
     let profile = stored?.profile || createProfile2();
     let run = stored?.run || null;
-    let dailyRun = null;
-    let unsavedDailyResult = null;
     let review = null;
     let preparationOpen = false;
     let crystalCount = 0;
@@ -20209,13 +20397,22 @@ const BattleRuntime = {
       assets: assets_exports,
       runtime: { stage: stage2, audio: audio2, music: music2, sheets: sheets2 }
     };
-    const dailyHost = {
-      ...host,
-      save(current) {
-        if (current === dailyRun && !dailyStore2?.save?.(current)?.ok) warnSave();
-      },
-      finish: finishDaily
-    };
+    const daily = createDailyNavigation({
+      currentProfile: host.profile,
+      dailyStore: dailyStore2,
+      roster: roster2,
+      widgets: widgets2,
+      details,
+      assets: assets_exports,
+      runtime: host.runtime,
+      page,
+      showHub,
+      warnSave,
+      sessionNotice,
+      setReview: (current) => {
+        review = current;
+      }
+    });
     function sessionNotice(message) {
       const notice = document.createElement("p");
       notice.className = "win";
@@ -20266,7 +20463,7 @@ const BattleRuntime = {
       const completedTower = profile.notebook.chapters.includes(7);
       const collecting = completedTower && target?.screen === "collection";
       const destinationId = !collecting && (target?.dungeonId ?? profile.ui?.destination);
-      const rift = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
+      const rift = daily.hubView();
       hubScreen(node, {
         profile,
         run,
@@ -20279,8 +20476,8 @@ const BattleRuntime = {
         arriving,
         depart: collecting ? () => openMeta("collection", true) : destinationId ? () => prepare(destinationId, target?.contractId) : openDungeons,
         departureLabel: collecting ? "\uB3D9\uB8CC \uCD9C\uD604 \uC9C0\uC5ED \uBCF4\uAE30" : null,
-        daily: unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift,
-        openDaily: showDaily
+        daily: rift,
+        openDaily: daily.showDaily
       });
       if (profile.ui?.announcement) updateUi({ announcement: null });
       for (const button of node.querySelectorAll("[data-meta-page]")) button.addEventListener("click", () => {
@@ -20336,135 +20533,9 @@ const BattleRuntime = {
         roster2.card,
         sheets2.openSheet,
         () => showEnding(),
-        dailyStore2?.history ? showDailyHistory : null,
+        dailyStore2?.history ? daily.showDailyHistory : null,
         (log) => openBattleLog(sheets2, widgets2, log)
       );
-    }
-    function showDailyHistory(node) {
-      const cursors = [null];
-      function render() {
-        openDailyHistory(dailyStore2.history({ before: cursors.at(-1), limit: 7 }) ?? {}, {
-          node,
-          sheets: sheets2,
-          next(cursor) {
-            cursors.push(cursor);
-            render();
-          },
-          previous: cursors.length > 1 ? () => {
-            cursors.pop();
-            render();
-          } : null
-        });
-      }
-      render();
-    }
-    function showDaily(message) {
-      if (unsavedDailyResult) return finishDaily(unsavedDailyResult);
-      const view = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
-      if (!view?.unlocked) return;
-      if (view.active) {
-        const today = view.dayKey ?? view.spec?.dayKey;
-        if (view.active.dayKey && today && view.active.dayKey !== today) return promptDailyResume(view.active);
-        return resumeDaily();
-      }
-      openDailyPreparation(view, {
-        roster: roster2,
-        widgets: widgets2,
-        sheets: sheets2,
-        message,
-        start: startDaily,
-        inspectLoan: (id, onClose) => details.charSheet(null, id, { loaned: true, onClose })
-      });
-    }
-    function promptDailyResume(active2) {
-      openEarlierRift(active2, { sheets: sheets2, resume: resumeDaily, abandon: abandonDaily });
-    }
-    function startDaily(expectedDayKey, kind) {
-      const now = /* @__PURE__ */ new Date();
-      const result = dailyStore2?.start?.({ profile, now, expectedDayKey, kind });
-      if (result?.ok && result.run) return enterDaily(result.run);
-      if (result?.reason === "date_changed") {
-        const view = dailyStore2.view?.(profile, now);
-        const date = shortRiftDate(view?.dayKey ?? view?.spec?.dayKey);
-        if ($("#hub").classList.contains("on")) showHub();
-        showDaily(date ? `\uB0A0\uC9DC\uAC00 \uBC14\uB00C\uC5C8\uB2E4. ${date} \uADE0\uC5F4\uC744 \uD655\uC778\uD558\uC790.` : "\uB0A0\uC9DC\uAC00 \uBC14\uB00C\uC5C8\uB2E4. \uC624\uB298\uC758 \uADE0\uC5F4\uC744 \uD655\uC778\uD558\uC790.");
-      } else if (["active_exists", "already_recorded", "official_required"].includes(result?.reason)) {
-        showDaily();
-      } else if (result?.reason === "storage_failed") {
-        warnSave();
-      } else {
-        sessionNotice("\uADE0\uC5F4\uC744 \uC2DC\uC791\uD558\uC9C0 \uBABB\uD588\uB2E4.");
-      }
-    }
-    function resumeDaily() {
-      const restored = dailyStore2?.resume?.();
-      if (restored?.ok && restored.run) return enterDaily(restored.run);
-      sessionNotice("\uC9C4\uD589 \uC911\uC778 \uADE0\uC5F4\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uB2E4.");
-      const active2 = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date())?.active;
-      if (active2 && !$("#meta-rift-resume")) promptDailyResume(active2);
-    }
-    function abandonDaily(runId) {
-      const result = dailyStore2?.abandon?.(runId);
-      if (result?.ok) {
-        showHub();
-        showDaily();
-      } else if (result?.reason === "storage_failed") warnSave();
-      else sessionNotice("\uADE0\uC5F4\uC744 \uD3EC\uAE30\uD558\uC9C0 \uBABB\uD588\uB2E4.");
-    }
-    function enterDaily(current) {
-      dailyRun = current;
-      review = null;
-      sheets2.closeSheet();
-      audio2.unlockAudio();
-      if (current.phase === "done") return finishDaily(current);
-      review = enterRun(current, dailyHost) || null;
-    }
-    function finishDaily(current) {
-      if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== "done") return;
-      const result = dailyStore2?.finish?.(current);
-      if (!result?.ok) {
-        unsavedDailyResult = current;
-        if (result?.reason === "storage_failed") warnSave();
-        const node2 = page("daily-result", { title: "\uADE0\uC5F4 \uAE30\uB85D" });
-        node2.innerHTML = `<div class="meta-sheet rift-actions">
-        <p role="alert">\uADE0\uC5F4 \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uB2E4. \uC0C8\uB85C\uACE0\uCE68\uD558\uAC70\uB098 \uAC8C\uC784\uC744 \uB2EB\uC73C\uBA74 \uB9C8\uC9C0\uB9C9 \uC800\uC7A5 \uC9C0\uC810\uC73C\uB85C \uB3CC\uC544\uAC04\uB2E4. \uACB0\uACFC\uB97C \uBCF4\uAD00\uD558\uB824\uBA74 \uAE30\uB85D \uD30C\uC77C\uC744 \uBC1B\uC790.</p>
-        <button class="btn go" data-backup-action="export">\uAE30\uB85D \uB0B4\uBCF4\uB0B4\uAE30</button>
-        <button class="btn" id="meta-rift-retry">\uB2E4\uC2DC \uC800\uC7A5</button>
-        <button class="btn" id="meta-rift-hub">\uAD00\uCE21\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30</button>
-      </div>`;
-        $("#meta-rift-retry", node2).addEventListener("click", () => finishDaily(current));
-        $("#meta-rift-hub", node2).addEventListener("click", () => {
-          dailyRun = null;
-          review = null;
-          showHub();
-          sessionNotice("\uADE0\uC5F4 \uACB0\uACFC\uB294 \uC544\uC9C1 \uC800\uC7A5\uB418\uC9C0 \uC54A\uC558\uB2E4. \uAC8C\uC784\uC744 \uB2EB\uAE30 \uC804\uC5D0 \uAE30\uB85D\uC744 \uB0B4\uBCF4\uB0BC \uC218 \uC788\uB2E4.");
-        });
-        return;
-      }
-      const spec = current.daily?.spec;
-      const score = {
-        runId: current.id,
-        dayKey: spec?.dayKey,
-        kind: current.daily?.kind,
-        outcome: current.result,
-        floor: current.floor,
-        turns: current.stats?.turns,
-        livingIds: current.bench,
-        heirloomsUsed: current.stats?.heirloomsUsed,
-        ...result.score
-      };
-      const view = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
-      dailyRun = null;
-      unsavedDailyResult = null;
-      review = null;
-      const node = page("daily-result", { title: dailyResultTitle(score), track: score.outcome === "win" ? "victory" : "defeat" });
-      dailyResultScreen(node, { spec, score, official: result.official }, {
-        widgets: widgets2,
-        today: view?.dayKey ?? view?.spec?.dayKey,
-        practice: (dayKey) => startDaily(dayKey, "practice"),
-        openToday: showDaily,
-        hub: showHub
-      });
     }
     function endingDue() {
       return profile.notebook.chapters.includes(7) && !profile.ui?.endingSeen;
@@ -20646,8 +20717,7 @@ const BattleRuntime = {
       recovery = null;
       profile = createProfile2();
       run = null;
-      dailyRun = null;
-      unsavedDailyResult = null;
+      daily.reset();
       review = null;
       preparationOpen = false;
       sheets2.closeSheet();
@@ -20660,7 +20730,7 @@ const BattleRuntime = {
     }
     function currentBackup({ lastGood = false } = {}) {
       const settings2 = settingsSnapshot(stage2, audio2, music2);
-      if (!recovery) return store2.exportBackup({ profile, run, dailyRun: unsavedDailyResult ?? dailyRun, settings: settings2 });
+      if (!recovery) return store2.exportBackup({ profile, run, dailyRun: daily.backupRun, settings: settings2 });
       const good = lastGood ? store2.loadLastGood?.() : null;
       return store2.exportBackup(good?.status === "ok" ? { profile: good.profile, settings: settings2 } : { settings: settings2 });
     }
@@ -20730,7 +20800,7 @@ const BattleRuntime = {
       else showTitle(stored?.profile, detail?.status === "runDamaged" || stored?.runError ? "\uC6D0\uC815\uB9CC \uC190\uC0C1 \xB7 \uB3D9\uB8CC\uC640 \uC218\uCCA9 \uC720\uC9C0" : "");
     }
     return { boot, closePreparation, resetData, inspect, get run() {
-      return dailyRun ?? run;
+      return daily.run ?? run;
     }, get review() {
       return review;
     } };

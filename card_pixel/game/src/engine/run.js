@@ -1,28 +1,26 @@
 import { CONTRACTS, CONTRACT_PAYOUT, CONTRACT_RULE_VERSION, gateEscrow, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
 import { LESSON_VERSION } from '../content/boss-lessons.js';
-import { BOSSES } from '../content/bosses.js';
 import { FLOORS as DAILY_FLOORS } from '../content/daily-rift.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
-import { EASY_ENEMY_ATTACK, REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
+import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import { canJoin, choicesFor, COST, drawFrom, join, RATES, release, rollBlessing, seeCharacters, validateReplacements } from './awakenings.js';
-import { affixView, create as createBattle, enemyBeats, enemyStatsWithQuirk, fieldCap } from './bridge.js';
 import { dayKey, doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { pick, shuffle } from './rng.js';
-import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
+import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, resolveEvent } from './rooms.js';
 import { expeditionPool, strength } from './roster.js';
+import * as RunBattle from './run-battle.js';
 
 export { COST, RATES };
+export { doorEnemies } from './run-battle.js';
 export const FLOORS = 8;
 export const START = { picks: 2, draws: 3 };
 const dependencies = new WeakMap();
 const unique = ids => [...new Set(ids)];
-const battleRoom = run => run.phase === 'room' && run.room?.status === 'battle';
 const springRoom = run => run.phase === 'room' && run.room?.type === 'spring' && run.room.status === 'service';
 export const runRoster = run => dependencies.get(run)?.roster;
-const enemyAttackScale = run => run.difficulty === 'easy' ? EASY_ENEMY_ATTACK : 1;
 
 // Keep the card core and sprite registry outside the persisted run.
 export function bindRun(run, { core, roster }) {
@@ -272,118 +270,20 @@ export function enterBattleDoor(run, { floor, index, partyIds } = {}) {
   return applyOrder(run, order);
 }
 
-function battleStart(run, door, artifacts) {
-  const eventStart = run.nextBattle?.start;
-  if (!door.start && !eventStart) return null;
-  const start = { ...door.start, ...eventStart };
-  if (door.start?.field || eventStart?.field) {
-    const { core } = dependencies.get(run);
-    start.field = unique([...(eventStart?.field || []), ...(door.start?.field || [])]).slice(0, fieldCap(core, artifacts));
-  }
-  return start;
-}
-
-function battleArtifacts(run) {
-  return unique([...run.relics, run.nextBattle?.relic].filter(Boolean)).slice(0, RELIC_LIMIT);
-}
-
 export function doorStart(run, index) {
-  const door = run.doors[index];
-  if (!door?.enemies.length) return { field: [], enemyDebuffs: {} };
-  const artifacts = battleArtifacts(run);
-  const start = battleStart(run, door, artifacts);
-  const field = unique([...(artifacts.includes('gale_storm') ? ['gale'] : []), ...(start?.field || [])]);
-  return { field: field.slice(-fieldCap(dependencies.get(run).core, artifacts)), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
-}
-
-export function doorEnemies(run, index) {
-  const door = run.doors[index];
-  return (door?.enemies || []).map(enemy => {
-    const stats = enemyStatsWithQuirk(enemy.stats, door.quirk, enemyAttackScale(run));
-    return { ...copy(enemy), stats, maxHp: stats.hp };
-  });
+  return RunBattle.doorStart(run, index, dependencies.get(run));
 }
 
 export function getTempoView(run, doorIndex) {
-  const door = run.doors[doorIndex];
-  const { core } = dependencies.get(run);
-  const suggested = door?.type === 'boss' && run.guide?.bossOrder ? suggestOrder(run) : null;
-  return {
-    party: door?.type === 'borrowed' ? INTRO.party.slice() : defaultParty(run),
-    suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
-    enemies: doorEnemies(run, doorIndex).map((enemy, index) => ({
-      id: enemy.id, name: enemy.name, maxHp: enemy.maxHp, element: enemy.element,
-      beats: enemyBeats(core, enemy, door.tempo?.pattern, door.intent, index === 0 ? door.tempo?.lesson : null)
-    })),
-    pattern: door?.tempo?.pattern ?? null,
-    blessing: copy(door?.tempo?.blessing ?? null),
-    startMp: door?.tempo?.startMp ?? null,
-    enemyKind: door?.enemies[0]?.kind ?? null,
-    enemyIndex: door?.enemies.length ? 0 : null,
-    enemyCount: door?.enemies.length ?? 0,
-    lesson: copy(door?.tempo?.lesson ?? null),
-    affixes: (door?.enemies[0]?.affixes ?? []).map(id => affixView(id)),
-    bossRule: door?.type === 'boss' ? {
-      bossId: run.boss, name: door.enemies[0].name, text: BOSSES[run.boss].note
-    } : null
-  };
-}
-
-function blessingBonus(blessing, id) {
-  return blessing?.id === id ? Number((blessing.multiplier - 1).toFixed(2)) : 0;
-}
-
-function battleBlessings(run, door) {
-  const blessings = { ...run.blessings };
-  const blessing = door.tempo?.blessing;
-  if (blessing) {
-    // The card core stores blessings as a bonus over base stats.
-    const bonus = blessingBonus(blessing, blessing.id);
-    blessings[blessing.id] = Math.max(blessings[blessing.id] ?? 0, bonus);
-  }
-  return Object.entries(blessings).map(([id, multiplier]) => ({ id, multiplier }));
+  return RunBattle.getTempoView(run, doorIndex, dependencies.get(run), { defaultParty, suggestOrder });
 }
 
 export function getBlessingView(run, doorIndex, partyIds, id) {
-  const { core, roster } = dependencies.get(run);
-  const door = run.doors[doorIndex];
-  const expeditionBonus = run.blessings[id] ?? 0;
-  const battleBonus = blessingBonus(door?.tempo?.blessing, id);
-  const active = partyIds.includes(id);
-  const effectiveBonus = Math.max(expeditionBonus, battleBonus) * (partyIds.includes('entropy') ? 2 : 1);
-  let stats = null;
-  if (roster.card(id)) {
-    // A reserve has no assigned position. Show its own stats with the selected party's blessing multiplier.
-    const party = active ? partyIds : id === 'entropy' || !partyIds.includes('entropy') ? [id] : [id, 'entropy'];
-    const options = door?.enemies.length ? optionsForDoor(run, door, party) : {
-      party, enemies: [roster.wildOf(INTRO.creature)], blessings: battleBlessings(run, {})
-    };
-    if (!active && id === 'entropy') {
-      const blessing = options.blessings.find(entry => entry.id === id);
-      if (blessing) blessing.multiplier /= 2;
-    }
-    const preview = createBattle(core, options);
-    preview.start();
-    stats = preview.allyStats(party.indexOf(id));
-  }
-  return { expeditionBonus, battleBonus, effectiveBonus, active, stats };
+  return RunBattle.getBlessingView(run, doorIndex, partyIds, id, dependencies.get(run));
 }
 
 export function battleOptions(run) {
-  if (!battleRoom(run)) return null;
-  return copy(optionsForDoor(run, run.room, run.room.party));
-}
-
-function optionsForDoor(run, room, party) {
-  const artifacts = battleArtifacts(run);
-  return {
-    party, enemies: room.enemies, quirk: room.quirk || null,
-    ...(run.difficulty === 'easy' && { enemyAttackScale: enemyAttackScale(run) }),
-    seed: room.type === 'borrowed' ? INTRO.seed : (run.seed + run.floor * 1013 + run.stats.battles * 7) >>> 0,
-    heirlooms: run.heirlooms, blessings: battleBlessings(run, room),
-    ...(room.tempo && { tempo: room.tempo, openingIntent: room.intent }),
-    artifacts, region: room.region, start: battleStart(run, room, artifacts), bet: run.nextBattle?.bet || null
-  };
+  return RunBattle.battleOptions(run, dependencies.get(run));
 }
 
 function summarizeStats(run, summary) {
@@ -475,7 +375,7 @@ function validSummary(summary, room) {
 }
 
 export function settleBattle(run, input) {
-  if (!battleRoom(run)) return invalid('no_active_battle');
+  if (!RunBattle.battleRoom(run)) return invalid('no_active_battle');
   const room = run.room;
   const summary = typeof input?.summary === 'function' ? input.summary() : input;
   if (!validSummary(summary, room)) return invalid('invalid_battle_summary');
