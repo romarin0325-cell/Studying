@@ -20,10 +20,10 @@ function koreanRiftDate(dayKey) {
 
 export function dailyRow(view) {
   if (!view?.unlocked) return '';
-  const { active, official, dayKey } = view;
-  const action = active ? (active.floor ? `${active.floor}층 이어가기` : '이어가기')
+  const { active, official, dayKey, unsavedResult } = view;
+  const action = unsavedResult ? '저장되지 않은 결과' : active ? (active.floor ? `${active.floor}층 이어가기` : '이어가기')
     : official ? '연습하기' : '첫 도전';
-  const summary = [shortRiftDate(active?.dayKey || dayKey), action].filter(Boolean).join(' · ');
+  const summary = [shortRiftDate(unsavedResult || active?.dayKey || dayKey), action].filter(Boolean).join(' · ');
   return `<button class="btn daily-row" id="meta-daily-rift"><span>오늘의 균열</span><small>${esc(summary)}</small></button>`;
 }
 

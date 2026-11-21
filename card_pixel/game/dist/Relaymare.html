@@ -171,7 +171,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #sky-slots { display: flex; flex: none; gap: 3px; }
 .sky:has(.relic-marks) { min-height: 48px; }
 #skyname { font: 0.625rem/0.875rem var(--px9); color: var(--ink); margin-left: 3px; text-shadow: 1px 1px 0 #000; }
-#region-next { font: 0.75rem/0.9375rem var(--px); color: var(--gold); margin-left: 4px; white-space: nowrap; }
+#region-next { font: 0.75rem/0.9375rem var(--px); color: var(--gold); margin-left: 4px; min-width: 0; overflow-wrap: anywhere; }
 #region-next:empty, #skyname:empty { display: none; }
 #pa-chips { position: absolute; left: 8px; bottom: 6px; max-width: 60%; }
 .intent { display: none; margin: 4px 0 0; color: var(--ink); font: 0.75rem/1.0625rem var(--px); overflow-wrap: anywhere; }
@@ -337,6 +337,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 .result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .result-heading .btn { width: auto; }
 .victory-decision { margin: 8px 0; }
+.result-decision > .relic-receipt + .relic-receipt { margin-top: 4px; }
 .victory-decision .footer { padding: 5px 0 0; }
 .victory-decision h4 { color: var(--gold); }
 #result #b-next { margin-top: 8px; }
@@ -8745,10 +8746,14 @@ const BattleRuntime = {
     if (pattern === "introFixed") return openingIntent ? [signature, basic2, THREE_BEAT[2]] : [signature];
     return THREE_BEAT.map((beat) => !beat.signature ? beat : skill ? { ...signature, power: signature.power * beat.power } : basic2);
   }
-  function enemyBeats(core2, enemy, pattern, openingIntent) {
+  var lessonTideAfter = (lesson, turn) => lesson?.tideAfter && turn === lesson.steps.length + 1 ? lesson.tideAfter : null;
+  function enemyBeats(core2, enemy, pattern, openingIntent, lesson) {
     if (pattern !== "bossScript") {
-      const beats2 = patternActions(enemy, pattern, openingIntent);
-      return beats2.map(({ name, type, power: power2 }, index) => ({ turn: index + 1, name, type, power: power2 }));
+      return patternActions(enemy, pattern, openingIntent).map(({ name, type, power: power2 }, index) => {
+        const turn = index + 1;
+        const action = lesson?.steps[index] ?? (pattern === "tide" ? lessonTideAfter(lesson, turn) : null);
+        return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : { turn, name, type, power: power2 };
+      });
     }
     const decide = coreHooks.get(core2)?.decide ?? core2.Logic.decideEnemyAction;
     const saved = Math.random;
@@ -8770,6 +8775,9 @@ const BattleRuntime = {
       Math.random = saved;
     }
     return beats;
+  }
+  function fieldCap(core2, artifacts) {
+    return artifacts.includes("buff_overload") ? 5 : core2.GAME_CONSTANTS.MAX_FIELD_BUFFS;
   }
   function enemyStatsWithQuirk(stats, quirk, attackScale = 1) {
     const modifiers = QUIRKS[quirk]?.foe || {};
@@ -9192,7 +9200,7 @@ const BattleRuntime = {
       const start = opts.start;
       if (!start) return;
       const b = host.battle;
-      for (const id of (start.field || []).slice(0, 3)) BattleRuntime.applyFieldBuff(host, id);
+      for (const id of (start.field || []).slice(0, fieldCap(core2, host.state.artifacts))) BattleRuntime.applyFieldBuff(host, id);
       for (const [id, stacks] of Object.entries(start.enemyDebuffs || {})) {
         StatusRules.add(b.enemy, id, stacks, host.state.artifacts);
       }
@@ -9474,6 +9482,9 @@ const BattleRuntime = {
     function lessonStep(turn) {
       return teachesLesson() ? lesson.steps[turn - 1] : null;
     }
+    function tideRipple(turn) {
+      return inTide() && teachesLesson() ? lessonTideAfter(lesson, turn) : null;
+    }
     function applyLessonOpening(enemy) {
       if (!lesson) return;
       enemy.lessonHitType = null;
@@ -9567,9 +9578,8 @@ const BattleRuntime = {
       const turn = localTurn(enemy);
       const step = lessonStep(turn);
       if (step && (step.rule !== "charged_hit" || enemy.isCharging)) return step;
-      if (inTide() && B.lessonOwner === B.enemyIdx && lesson?.tideAfter && turn === lesson.steps.length + 1) {
-        return lesson.tideAfter;
-      }
+      const ripple = tideRipple(turn);
+      if (ripple) return ripple;
       if (enemy.relayBeats.length && (pattern !== "introFixed" || opts.openingIntent)) {
         const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
         const strong = pattern === "tide" ? TIDE_STRONG_BEAT : STRONG_BEAT;
@@ -9659,7 +9669,7 @@ const BattleRuntime = {
         ...a.vulnerable && { vulnerable: a.vulnerable },
         type: kind,
         ult: salience === "boss",
-        ...attack2 && { dmg: range, lethal, lethalText, extra },
+        ...attack2 && { power: a.val ?? 1, dmg: range, lethal, lethalText, extra },
         ...!attack2 && extra.length && { effects: extra }
       };
     }
@@ -9673,6 +9683,8 @@ const BattleRuntime = {
         const next2 = lesson.steps.slice(local).find((step) => step && step.name !== action.name);
         if (next2) return { inTurns: lesson.steps.indexOf(next2) + 1 - local, name: next2.name, kind: next2.type, power: next2.val };
       }
+      const ripple = tideRipple(local + 1);
+      if (ripple) return { name: ripple.name, kind: ripple.type, power: ripple.val, inTurns: 1 };
       if (enemy.relayBeats.length && (pattern !== "introFixed" || opts.openingIntent)) {
         for (let offset = 1; offset < enemy.relayBeats.length; offset++) {
           const beat = enemy.relayBeats[(local + offset - 1) % enemy.relayBeats.length];
@@ -9692,12 +9704,12 @@ const BattleRuntime = {
         const period = enemy.relayBeats.length;
         let inTurns = (strong - local % period + period) % period;
         if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
-        return { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+        return pattern === "tide" ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns) : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
       }
       if (inTide()) {
         let inTurns = (3 - local % 4 + 4) % 4;
         if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = 4;
-        return { name: REGIONS.tide_cycle.hit, inTurns, charge: false };
+        return tideCountdown(REGIONS.tide_cycle.hit, local, inTurns);
       }
       const skillName = (action) => action.isChargeStart && action.name === "\uCC28\uC9C0" ? "\uB514\uBC14\uC778\uBE14\uB808\uC774\uB4DC" : action.name.replace(/ 차징$/, "");
       const cache = B.intentCache;
@@ -9726,6 +9738,15 @@ const BattleRuntime = {
         B.probing = false;
       }
       return null;
+    }
+    function tideCountdown(name, turn, inTurns) {
+      const ripple = tideRipple(turn + inTurns);
+      return {
+        name: ripple?.name ?? name,
+        inTurns,
+        charge: false,
+        ...ripple && { kind: ripple.type, power: ripple.val }
+      };
     }
     function nextEnemy() {
       const burn = region === "ember_carry" ? Math.min(2, host.battle.enemy.buffs.burn || 0) : 0;
@@ -9804,6 +9825,13 @@ const BattleRuntime = {
           wait.region = { bellIn: Number.isFinite(next) ? next - turn : null };
         } else if (region === "arena_charge") {
           wait.region = { charge: B.charge, ready: B.charge === 2 };
+        } else if (inTide()) {
+          wait.region = { tide: intent.kind === "rest" ? { name: intent.name, kind: intent.kind, vulnerable: intent.vulnerable, inTurns: 0 } : {
+            name: wait.countdown.name,
+            kind: wait.countdown.kind ?? "mag",
+            power: wait.countdown.power ?? TIDE_BEATS[TIDE_STRONG_BEAT - 1].power,
+            inTurns: wait.countdown.inTurns
+          } };
         }
         push(wait);
       }
@@ -10238,9 +10266,9 @@ const BattleRuntime = {
   }
   var power = (s) => (s.tier || 1) * 10 + (Number.isFinite(s.val) ? s.val : 2);
   var clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  function expeditionPool(roster2, dungeonId, startView4 = {}) {
-    if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError("Unknown dungeon: " + dungeonId);
-    const dungeon = DUNGEONS[dungeonId];
+  function expeditionPool(roster2, dungeonId2, startView4 = {}) {
+    if (!Object.hasOwn(DUNGEONS, dungeonId2)) throw new RangeError("Unknown dungeon: " + dungeonId2);
+    const dungeon = DUNGEONS[dungeonId2];
     const { seals = [], companions = [], lead, reserved } = startView4;
     const additions = dungeon.layout === "intro" ? [reserved] : [...companions, lead, reserved];
     const baseIds = roster2.pool(dungeon.pool);
@@ -10341,13 +10369,37 @@ const BattleRuntime = {
     return { allies, wild, bosses, has, card, facing, pool, poolName, wildOf, shadowOf, bossOf, LARGE: LARGE.filter((id) => wild.includes(id)) };
   }
 
+  // card_pixel/game/src/content/contracts.js
+  var CONTRACT_ESCROW = 1;
+  var CONTRACT_PAYOUT = 3;
+  var LEGACY_CONTRACT_RULE_VERSION = 1;
+  var CONTRACT_RULE_VERSION = 2;
+  var CONTRACTS = {
+    rescue: {
+      id: "rescue",
+      name: "\uC0B4\uC544\uC11C \uB118\uAE34 \uC790\uB9AC",
+      rule: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC4F0\uB7EC\uC9C8 \uC608\uACE0\uB97C \uBC1B\uC740 \uB3D9\uB8CC\uB97C \uBB3C\uB7EC\uB098\uAC8C \uD558\uACE0, \uADF8 \uB3D9\uB8CC\uB97C \uC0B4\uB824 \uC804\uD22C\uC5D0\uC11C \uC774\uAE34\uB2E4."
+    },
+    heirloom: {
+      id: "heirloom",
+      name: "\uB9C8\uC9C0\uB9C9 \uC720\uD488",
+      rule: "4\uCE35 \uBB38\uC9C0\uAE30\uC804\uC5D0\uC11C \uC720\uD488 \uAE30\uC220\uC758 \uBA85\uC911\uC73C\uB85C \uC801\uC744 \uC4F0\uB7EC\uB728\uB9AC\uACE0 \uC774\uAE34\uB2E4."
+    },
+    elite: {
+      id: "elite",
+      name: "\uB458\uC774 \uB3CC\uC544\uC628 \uC815\uC608\uC804",
+      rule: "2\uCE35 \uC704\uD5D8 \uBB38\uC744 \uC9C0\uB098 6\uCE35 \uC815\uC608\uB97C \uACE0\uB974\uACE0, \uC815\uC608\uC804\uC5D0 \uB098\uC120 \uB3D9\uB8CC \uB458 \uC774\uC0C1\uC774 \uC0B4\uC544\uC11C \uC774\uAE34\uB2E4."
+    }
+  };
+
   // card_pixel/game/src/ui/storage.js
   var SESSION_KEY = "relaymare.session";
   var DAILY_KEY = "relaymare.daily";
+  var DAMAGED_DAILY_KEY = "relaymare.dailyDamaged";
   var SETTINGS_KEY = "relaymare.settings";
   var LAST_GOOD_KEY = "relaymare.lastGood";
   var POINTER = "relaymare.activeSlot";
-  var SLOT_KEYS = [SESSION_KEY, DAILY_KEY, SETTINGS_KEY, LAST_GOOD_KEY];
+  var SLOT_KEYS = [SESSION_KEY, DAILY_KEY, DAMAGED_DAILY_KEY, SETTINGS_KEY, LAST_GOOD_KEY];
   var alternateKey = (slot, key) => slot === "b" ? "relaymare.slotB." + key : key;
   var rawByAdapter = /* @__PURE__ */ new WeakMap();
   function backupSlots(adapter) {
@@ -11100,8 +11152,8 @@ const BattleRuntime = {
     const day = dateIndex(key);
     if (!Number.isInteger(day) || ruleVersion !== RULE_VERSION) throw new RangeError("invalid_daily_options");
     const seed = seedFor(key);
-    const dungeonId = regionFor(day);
-    const dungeon = DUNGEONS[dungeonId];
+    const dungeonId2 = regionFor(day);
+    const dungeon = DUNGEONS[dungeonId2];
     const eventId = pick(stream(seed, 3), EVENTS);
     const visitor = eventFor(eventId).requires.present[0];
     const common = roster2.pool("common").sort();
@@ -11115,7 +11167,7 @@ const BattleRuntime = {
       return pick(gateRng, local.length ? local : common.filter(allowed));
     });
     const wildRng = stream(seed, 5);
-    const wildCount = dungeonId === "ember_volcano" ? 2 : 1;
+    const wildCount = dungeonId2 === "ember_volcano" ? 2 : 1;
     const wildIds = Object.fromEntries([1, 6].map((floor) => [
       floor,
       Array.from({ length: wildCount }, () => pick(wildRng, dungeon.wild))
@@ -11123,13 +11175,13 @@ const BattleRuntime = {
     const skyRng = stream(seed, 7);
     const sky = Object.fromEntries(BATTLE_FLOORS.map((floor) => [
       floor,
-      dungeonId !== "starlit_garden" ? null : nextFloat(skyRng) < 0.5 ? SKY2.slice() : []
+      dungeonId2 !== "starlit_garden" ? null : nextFloat(skyRng) < 0.5 ? SKY2.slice() : []
     ]));
     return {
       ruleVersion,
       dayKey: key,
       seed,
-      dungeonId,
+      dungeonId: dungeonId2,
       bossId: dungeon.boss,
       loanIds,
       gateIds,
@@ -11221,6 +11273,7 @@ const BattleRuntime = {
     applyRunEnd: () => applyRunEnd,
     availableDungeons: () => availableDungeons,
     claimMission: () => claimMission,
+    clearPreparation: () => clearPreparation,
     contractsFor: () => contractsFor,
     createProfile: () => createProfile,
     creditMissions: () => creditMissions,
@@ -11232,30 +11285,11 @@ const BattleRuntime = {
     notebookView: () => notebookView,
     recordRunProgress: () => recordRunProgress,
     setExpeditionParty: () => setExpeditionParty,
+    setPreparation: () => setPreparation,
     setSeals: () => setSeals,
-    startView: () => startView
+    startView: () => startView,
+    validPreparation: () => validPreparation
   });
-
-  // card_pixel/game/src/content/contracts.js
-  var CONTRACT_ESCROW = 1;
-  var CONTRACT_PAYOUT = 3;
-  var CONTRACTS = {
-    rescue: {
-      id: "rescue",
-      name: "\uC0B4\uC544\uC11C \uB118\uAE34 \uC790\uB9AC",
-      rule: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC4F0\uB7EC\uC9C8 \uC608\uACE0\uB97C \uBC1B\uC740 \uB3D9\uB8CC\uB97C \uBB3C\uB7EC\uB098\uAC8C \uD558\uACE0, \uADF8 \uB3D9\uB8CC\uB97C \uC0B4\uB824 \uC804\uD22C\uC5D0\uC11C \uC774\uAE34\uB2E4."
-    },
-    heirloom: {
-      id: "heirloom",
-      name: "\uB9C8\uC9C0\uB9C9 \uC720\uD488",
-      rule: "4\uCE35 \uBB38\uC9C0\uAE30\uC804\uC5D0\uC11C \uC720\uD488 \uAE30\uC220\uC758 \uBA85\uC911\uC73C\uB85C \uC801\uC744 \uC4F0\uB7EC\uB728\uB9AC\uACE0 \uC774\uAE34\uB2E4."
-    },
-    elite: {
-      id: "elite",
-      name: "\uB458\uC774 \uB3CC\uC544\uC628 \uC815\uC608\uC804",
-      rule: "2\uCE35 \uC704\uD5D8 \uBB38\uC744 \uC9C0\uB098 6\uCE35 \uC815\uC608\uB97C \uACE0\uB974\uACE0, \uC815\uC608\uC804\uC5D0 \uB098\uC120 \uB3D9\uB8CC \uB458 \uC774\uC0C1\uC774 \uC0B4\uC544\uC11C \uC774\uAE34\uB2E4."
-    }
-  };
 
   // card_pixel/game/src/content/missions.js
   var MISSION_UNLOCK_CHAPTER = 4;
@@ -11876,29 +11910,29 @@ const BattleRuntime = {
   }
   function createRun(options) {
     const { core: core2, roster: roster2, daily = null, difficulty = "normal", plain = false, contract = null } = options;
-    let { dungeonId, seed = 0, profileView = {} } = options;
+    let { dungeonId: dungeonId2, seed = 0, profileView = {} } = options;
     if (daily !== null) {
-      if (options.seed !== void 0 || dungeonId !== void 0 || options.profileView !== void 0 || difficulty !== "normal" || plain || contract !== null || !validAttempt(daily, roster2)) {
+      if (options.seed !== void 0 || dungeonId2 !== void 0 || options.profileView !== void 0 || difficulty !== "normal" || plain || contract !== null || !validAttempt(daily, roster2)) {
         throw new RangeError("invalid_daily_options");
       }
-      ({ dungeonId, seed } = daily.spec);
+      ({ dungeonId: dungeonId2, seed } = daily.spec);
     }
-    dungeonId ??= profileView.dungeonId || "dawn_forest";
-    const dungeon = DUNGEONS[dungeonId];
-    if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError("Unknown dungeon: " + dungeonId);
+    dungeonId2 ??= profileView.dungeonId || "dawn_forest";
+    const dungeon = DUNGEONS[dungeonId2];
+    if (!Object.hasOwn(DUNGEONS, dungeonId2)) throw new RangeError("Unknown dungeon: " + dungeonId2);
     const intro = dungeon.layout === "intro";
     if (!["easy", "normal", "nightmare"].includes(difficulty) || difficulty === "nightmare" && !dungeon.nightmareRule || difficulty === "easy" && intro) {
       throw new RangeError("Unavailable difficulty: " + difficulty);
     }
-    if (profileView.unlockedDungeons && !profileView.unlockedDungeons.includes(dungeonId)) throw new RangeError("Locked dungeon: " + dungeonId);
-    if (difficulty === "nightmare" && profileView.nightmareUnlocks && !profileView.nightmareUnlocks.includes(dungeonId)) {
-      throw new RangeError("Locked nightmare: " + dungeonId);
+    if (profileView.unlockedDungeons && !profileView.unlockedDungeons.includes(dungeonId2)) throw new RangeError("Locked dungeon: " + dungeonId2);
+    if (difficulty === "nightmare" && profileView.nightmareUnlocks && !profileView.nightmareUnlocks.includes(dungeonId2)) {
+      throw new RangeError("Locked nightmare: " + dungeonId2);
     }
     const tempoVersion = daily?.spec.ruleVersion ?? options.tempoVersion ?? TEMPO_VERSION;
     if (tempoVersion !== 1 && tempoVersion !== TEMPO_VERSION) throw new RangeError("invalid_tempo_version");
     const lessonVersion = daily || intro || tempoVersion !== TEMPO_VERSION ? 0 : options.lessonVersion ?? LESSON_VERSION;
     if (![0, LESSON_VERSION].includes(lessonVersion)) throw new RangeError("invalid_lesson_version");
-    if (contract !== null && (typeof contract !== "string" || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== "nightmare" || !profileView.nightmareUnlocks?.includes(dungeonId))) {
+    if (contract !== null && (typeof contract !== "string" || !Object.hasOwn(CONTRACTS, contract) || intro || difficulty !== "nightmare" || !profileView.nightmareUnlocks?.includes(dungeonId2))) {
       throw new RangeError("Unavailable contract: " + String(contract));
     }
     const rng = { state: daily ? daily.spec.altarSeed : seed >>> 0 };
@@ -11906,21 +11940,21 @@ const BattleRuntime = {
     const companions = intro ? [] : (profileView.companions || []).filter((id) => roster2.allies.includes(id) && !seals.includes(id));
     const lead = !intro && roster2.allies.includes(profileView.lead) && !seals.includes(profileView.lead) ? profileView.lead : null;
     const shard = roster2.allies.includes(profileView.reserved) && !seals.includes(profileView.reserved) ? profileView.reserved : null;
-    const pool = daily ? daily.spec.loanIds.slice() : expeditionPool(roster2, dungeonId, profileView).effectiveIds;
+    const pool = daily ? daily.spec.loanIds.slice() : expeditionPool(roster2, dungeonId2, profileView).effectiveIds;
     const boss = daily?.spec.bossId ?? (difficulty === "nightmare" && dungeon.hiddenBosses.length ? pick(rng, dungeon.hiddenBosses) : dungeon.boss);
     const preview = intro ? INTRO.boss : roster2.bossOf(boss);
     const bossPreview = { id: boss, name: preview.name, note: preview.note, sprite: preview.sprite || null };
     const region = dungeon.region?.first ? pick(rng, dungeon.region.first) : dungeon.region;
     const laterRegions = dungeon.region?.second ? shuffle(rng, dungeon.region.second.filter((rule) => rule.id !== region.id)).slice(0, 2) : null;
     const run = bindRun({
-      id: daily ? `rift/v${daily.spec.ruleVersion}/${daily.spec.dayKey}/${daily.attemptNo}` : [profileView.runNumber || 1, dungeonId, difficulty, seed >>> 0].join("/"),
+      id: daily ? `rift/v${daily.spec.ruleVersion}/${daily.spec.dayKey}/${daily.attemptNo}` : [profileView.runNumber || 1, dungeonId2, difficulty, seed >>> 0].join("/"),
       daily: copy(daily),
       ...!daily && { lessonVersion },
       ...lessonVersion && { blessingHistory: [] },
       tempoVersion,
       openingLead: null,
       firstMainAssist: !daily && !intro && (difficulty === "easy" || tempoVersion === TEMPO_VERSION && difficulty === "normal" && (profileView.firstMainAssist ?? profileView.bossOrder ?? true)),
-      dungeonId,
+      dungeonId: dungeonId2,
       difficulty,
       floors: daily ? FLOORS : dungeon.floors,
       seed: seed >>> 0,
@@ -11948,6 +11982,7 @@ const BattleRuntime = {
       crystals: intro || daily ? 0 : 1,
       contract: contract === null ? null : {
         id: contract,
+        ruleVersion: CONTRACT_RULE_VERSION,
         met: false,
         metAtFloor: null,
         riskDoorTaken: false,
@@ -12080,7 +12115,10 @@ const BattleRuntime = {
       prepareStartPick(run, openingLead ? 1 : START.picks, openingLead, [run.profileShard, ...run.introCandidates].filter(Boolean));
     }
     if (run.room.type === "altar") run.pending = { kind: "altar", rolls: 0, roll: null };
-    if (run.room.type === "event") run.pending = { kind: "event", choices: eventChoices(run, core2, roster2) };
+    if (run.room.type === "event") {
+      seeCharacters(run, run.room.event?.requires.present ?? []);
+      run.pending = { kind: "event", choices: eventChoices(run, core2, roster2) };
+    }
     return { ok: true, room: copy(run.room), pending: copy(run.pending) };
   }
   function defaultParty(run) {
@@ -12126,12 +12164,13 @@ const BattleRuntime = {
     chooseDoor(run, index);
     return applyOrder(run, order);
   }
-  function battleStart(run, door) {
+  function battleStart(run, door, artifacts) {
     const eventStart = run.nextBattle?.start;
     if (!door.start && !eventStart) return null;
     const start = { ...door.start, ...eventStart };
     if (door.start?.field || eventStart?.field) {
-      start.field = unique([...eventStart?.field || [], ...door.start?.field || []]).slice(0, 3);
+      const { core: core2 } = dependencies.get(run);
+      start.field = unique([...eventStart?.field || [], ...door.start?.field || []]).slice(0, fieldCap(core2, artifacts));
     }
     return start;
   }
@@ -12141,11 +12180,10 @@ const BattleRuntime = {
   function doorStart(run, index) {
     const door = run.doors[index];
     if (!door?.enemies.length) return { field: [], enemyDebuffs: {} };
-    const start = battleStart(run, door);
     const artifacts = battleArtifacts(run);
+    const start = battleStart(run, door, artifacts);
     const field = unique([...artifacts.includes("gale_storm") ? ["gale"] : [], ...start?.field || []]);
-    const cap = artifacts.includes("buff_overload") ? 5 : dependencies.get(run).core.GAME_CONSTANTS.MAX_FIELD_BUFFS;
-    return { field: field.slice(-cap), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
+    return { field: field.slice(-fieldCap(dependencies.get(run).core, artifacts)), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
   }
   function doorEnemies(run, index) {
     const door = run.doors[index];
@@ -12161,12 +12199,12 @@ const BattleRuntime = {
     return {
       party: door?.type === "borrowed" ? INTRO.party.slice() : defaultParty(run),
       suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
-      enemies: doorEnemies(run, doorIndex).map((enemy) => ({
+      enemies: doorEnemies(run, doorIndex).map((enemy, index) => ({
         id: enemy.id,
         name: enemy.name,
         maxHp: enemy.maxHp,
         element: enemy.element,
-        beats: enemyBeats(core2, enemy, door.tempo?.pattern, door.intent)
+        beats: enemyBeats(core2, enemy, door.tempo?.pattern, door.intent, index === 0 ? door.tempo?.lesson : null)
       })),
       pattern: door?.tempo?.pattern ?? null,
       blessing: copy(door?.tempo?.blessing ?? null),
@@ -12225,6 +12263,7 @@ const BattleRuntime = {
     return copy(optionsForDoor(run, run.room, run.room.party));
   }
   function optionsForDoor(run, room, party) {
+    const artifacts = battleArtifacts(run);
     return {
       party,
       enemies: room.enemies,
@@ -12234,9 +12273,9 @@ const BattleRuntime = {
       heirlooms: run.heirlooms,
       blessings: battleBlessings(run, room),
       ...room.tempo && { tempo: room.tempo, openingIntent: room.intent },
-      artifacts: battleArtifacts(run),
+      artifacts,
       region: room.region,
-      start: battleStart(run, room),
+      start: battleStart(run, room, artifacts),
       bet: run.nextBattle?.bet || null
     };
   }
@@ -12268,11 +12307,12 @@ const BattleRuntime = {
     run.pending = { kind: "reinforcement", key: `${run.id}/${run.floor}`, candidates, limit: ROSTER_LIMIT };
   }
   function meetsContract(run, summary, survivors) {
+    const legacy = (run.contract.ruleVersion ?? LEGACY_CONTRACT_RULE_VERSION) === LEGACY_CONTRACT_RULE_VERSION;
     switch (run.contract.id) {
       case "rescue":
-        return summary.rescues?.some(({ retreated, lethal }) => lethal && survivors.includes(retreated));
+        return summary.rescues?.some(({ retreated, incoming, lethal }) => lethal && survivors.includes(retreated) && (!legacy || survivors.includes(incoming)));
       case "heirloom":
-        return run.floor === 4 && summary.heirloomKills > 0;
+        return (legacy || run.floor === 4) && summary.heirloomKills > 0;
       case "elite":
         return run.floor === 6 && run.room.type === "elite" && run.contract.riskDoorTaken && survivors.length >= 2;
     }
@@ -12323,7 +12363,7 @@ const BattleRuntime = {
       run.stats.retries++;
       room.status = "order";
       room.party = null;
-      return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null, contract: null };
+      return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null, contract: null, relic: null, relics: [] };
     }
     const next = run.nextBattle;
     run.nextBattle = null;
@@ -12354,6 +12394,7 @@ const BattleRuntime = {
     const betWon = win && !!next?.bet && summary.bet?.kind === next.bet.kind && summary.bet?.won === true;
     const betRelic = betWon ? next.reward.relic : null;
     let relic = null;
+    const relics = [];
     if (win) {
       if (!run.daily) {
         crystals += (room.reward || 0) + 2 * downs.filter((entry) => entry.treasure).length;
@@ -12364,8 +12405,12 @@ const BattleRuntime = {
         if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
         if (!final && !wiped) setReinforcement(run, roster2);
       }
-      if (room.type === "elite" && room.relic && !wiped) relic = grantRelic(run, room.relic);
-      if (betRelic && !wiped) relic = grantRelic(run, betRelic);
+      if (!wiped) {
+        for (const id of [room.type === "elite" && room.relic, betRelic].filter(Boolean)) {
+          relic = grantRelic(run, id);
+          if (relic.equipped) relics.push(id);
+        }
+      }
       if (room.type === "borrowed" && !wiped) {
         if (usesTempo(run)) {
           const first = room.party[0];
@@ -12392,6 +12437,7 @@ const BattleRuntime = {
       heirloomsGained,
       crystals,
       relic,
+      relics,
       bet: next?.bet ? { ...next.bet, won: betWon } : null,
       contract: contract.progress,
       result: run.result,
@@ -12476,37 +12522,52 @@ const BattleRuntime = {
     run.pending = null;
     return { ok: true, id };
   }
-  function getSpringOffer(run) {
-    if (!springRoom(run)) return invalid("no_pick_waking");
+  function springOfferView(run) {
     if (run.pending?.kind === "spring") {
       const { candidates: candidates2, cost } = run.pending;
       return { ok: true, key: `${run.id}/${run.floor}/prepaid`, candidates: candidates2.slice(), cost, alreadyPaid: true };
     }
+    const { key, candidates } = run.room.springOffer;
+    return { ok: true, key, candidates: candidates.slice(), cost: COST.pick, alreadyPaid: false };
+  }
+  function getSpringOffer(run) {
+    if (!springRoom(run)) return invalid("no_pick_waking");
+    if (run.pending?.kind === "spring") return springOfferView(run);
     if (run.pending) return invalid("no_pick_waking");
-    if (!run.room.springOffer) {
-      if (run.crystals < COST.pick) return invalid("insufficient_crystals");
+    const prior = run.room.springOffer?.candidates;
+    const remaining = prior?.filter((id) => canJoin(run, id));
+    if (!prior || remaining.length !== prior.length) {
       const { roster: roster2 } = dependencies.get(run);
       const rng = { ...run.rng };
-      const available = run.paidPickUsed ? [] : run.companions.filter((id) => canJoin(run, id));
-      const companion = available.includes(run.preferredCompanion) ? run.preferredCompanion : pick(rng, available);
-      const candidates2 = choicesFor({ ...run, rng }, roster2, 3, { priority: companion ? [companion] : [] });
-      if (!candidates2.length) return invalid("empty_pool");
+      let priority = remaining;
+      if (!prior) {
+        const available = run.paidPickUsed ? [] : run.companions.filter((id) => canJoin(run, id));
+        const companion = available.includes(run.preferredCompanion) ? run.preferredCompanion : pick(rng, available);
+        priority = companion ? [companion] : [];
+      }
+      let candidates = choicesFor({ ...run, rng }, roster2, 3, { priority });
+      if (!candidates.length) return invalid("empty_pool");
+      if (prior) {
+        const replacements = candidates.slice(remaining.length);
+        candidates = prior.map((id) => remaining.includes(id) ? id : replacements.shift()).concat(replacements).filter(Boolean);
+      }
       const serial = (run.room.springOfferSerial ?? 0) + 1;
       run.room.springOfferSerial = serial;
       run.room.springOffer = {
         key: `${run.id}/${run.floor}/spring/${serial}`,
-        candidates: candidates2,
+        candidates,
         seed: run.rng.state,
         nextSeed: rng.state
       };
     }
-    const { key, candidates } = run.room.springOffer;
-    return { ok: true, key, candidates: candidates.slice(), cost: COST.pick, alreadyPaid: false };
+    const offer = springOfferView(run);
+    seeCharacters(run, offer.candidates);
+    return offer;
   }
   function commitSpringOffer(run, { key, id, replaceId = null } = {}) {
     if (!springRoom(run) || run.pending?.kind !== "spring" && !run.room.springOffer) return invalid("no_spring_pick");
-    const offer = getSpringOffer(run);
-    if (!offer.ok || key !== offer.key) return invalid("invalid_spring_key");
+    const offer = springOfferView(run);
+    if (key !== offer.key || !offer.alreadyPaid && offer.candidates.some((id2) => !canJoin(run, id2))) return invalid("invalid_spring_key");
     if (!offer.candidates.includes(id) || !canJoin(run, id)) return invalid("invalid_candidate");
     const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
     if (error) return invalid(error);
@@ -12516,7 +12577,6 @@ const BattleRuntime = {
     join(run, id);
     run.crystals -= charged;
     run.paidPickUsed = true;
-    seeCharacters(run, offer.candidates);
     if (offer.alreadyPaid) run.pending = null;
     else {
       const { seed, nextSeed } = run.room.springOffer;
@@ -12636,7 +12696,7 @@ const BattleRuntime = {
       seenCharacters: [],
       seenRelics: [],
       missions: { periods: {} },
-      ui: { wantedCompanionId: null }
+      ui: { wantedCompanionId: null, preparation: null }
     };
   }
   function availableDungeons(profile) {
@@ -12648,10 +12708,24 @@ const BattleRuntime = {
       difficulties: id === INTRO2 ? ["normal"] : profile.nightmareUnlocks.includes(id) ? ["easy", "normal", "nightmare"] : ["easy", "normal"]
     }));
   }
-  function contractsFor(profile, dungeonId) {
-    const earned = profile.contractStamps?.[dungeonId];
+  function validPreparation(profile, draft) {
+    if (!draft || typeof draft !== "object" || Array.isArray(draft)) return false;
+    const { dungeonId: dungeonId2, difficulty, contract } = draft;
+    const destination = availableDungeons(profile).find((dungeon) => dungeon.id === dungeonId2);
+    return !!destination?.difficulties.includes(difficulty) && (contract === null || difficulty === "nightmare" && typeof contract === "string" && Object.hasOwn(CONTRACTS, contract));
+  }
+  function setPreparation(profile, draft) {
+    if (!validPreparation(profile, draft)) return profile;
+    const { dungeonId: dungeonId2, difficulty, contract } = draft;
+    return { ...profile, ui: { ...profile.ui, preparation: { dungeonId: dungeonId2, difficulty, contract } } };
+  }
+  function clearPreparation(profile) {
+    return { ...profile, ui: { ...profile.ui, preparation: null } };
+  }
+  function contractsFor(profile, dungeonId2) {
+    const earned = profile.contractStamps?.[dungeonId2];
     const stamps = Object.fromEntries(Object.keys(CONTRACTS).map((id) => [id, earned?.[id] ?? null]));
-    return { unlocked: profile.nightmareUnlocks.includes(dungeonId), stamps };
+    return { unlocked: profile.nightmareUnlocks.includes(dungeonId2), stamps };
   }
   function notebookView(profile) {
     return NOTEBOOK.map((chapter) => ({ ...chapter, opens: chapter.opens.slice(), completed: completed(profile, chapter.id) }));
@@ -12663,14 +12737,14 @@ const BattleRuntime = {
     const unreturned = openRegions.find((id) => !hasCleared(profile, id));
     const preferred = profile.ui?.destination;
     const destination = unreturned || (openRegions.includes(preferred) ? preferred : openRegions[0]);
-    const journey = (chapter2, dungeonId) => ({ ...NOTEBOOK_GOALS[chapter2], target: { screen: "dungeons", dungeonId } });
+    const journey = (chapter2, dungeonId2) => ({ ...NOTEBOOK_GOALS[chapter2], target: { screen: "dungeons", dungeonId: dungeonId2 } });
     const collect = () => ({ text: "\uB9CC\uB098\uACE0 \uC2F6\uC740 \uB3D9\uB8CC\uC758 \uCD9C\uD604 \uC9C0\uC5ED \uBCF4\uAE30", reward: "\uB3D9\uB8CC \uC218\uC9D1", target: { screen: "collection" } });
     if (chapters[6].completed) {
       if (unreturned) return { text: `${DUNGEONS[unreturned].name}\uC5D0\uC11C \uC0DD\uD658`, reward: "\uC0C8 \uC9C0\uC5ED \uC0DD\uD658 \uAE30\uB85D", target: { screen: "dungeons", dungeonId: unreturned } };
-      for (const dungeonId of [...REGIONS3, TOWER]) {
-        const { unlocked, stamps } = contractsFor(profile, dungeonId);
+      for (const dungeonId2 of [...REGIONS3, TOWER]) {
+        const { unlocked, stamps } = contractsFor(profile, dungeonId2);
         const contractId = unlocked && Object.keys(stamps).find((id) => stamps[id] === null);
-        if (contractId) return { text: `${DUNGEONS[dungeonId].name} \xB7 ${CONTRACTS[contractId].name}`, reward: "\uC545\uBABD \uACC4\uC57D \uB3C4\uC7A5", target: { screen: "dungeons", dungeonId, contractId } };
+        if (contractId) return { text: `${DUNGEONS[dungeonId2].name} \xB7 ${CONTRACTS[contractId].name}`, reward: "\uC545\uBABD \uACC4\uC57D \uB3C4\uC7A5", target: { screen: "dungeons", dungeonId: dungeonId2, contractId } };
       }
       return collect();
     }
@@ -12696,20 +12770,20 @@ const BattleRuntime = {
     if (completed(profile, 4)) return 2;
     return Number(completed(profile, 2));
   }
-  function sealSlots(profile, dungeonId) {
-    const clear = profile.records.clears[dungeonId];
+  function sealSlots(profile, dungeonId2) {
+    const clear = profile.records.clears[dungeonId2];
     return clear?.nightmare ? 3 : clear?.normal ? 1 : 0;
   }
-  function startView(profile, dungeonId = INTRO2) {
-    if (!Object.hasOwn(DUNGEONS, dungeonId)) throw new RangeError("Unknown dungeon: " + dungeonId);
+  function startView(profile, dungeonId2 = INTRO2) {
+    if (!Object.hasOwn(DUNGEONS, dungeonId2)) throw new RangeError("Unknown dungeon: " + dungeonId2);
     const recruited = Object.keys(profile.recruits);
     const lead = completed(profile, 1) && recruited.includes(profile.lead) ? profile.lead : null;
     const slots = companionSlots(profile);
-    const seals = (profile.seals[dungeonId] || []).slice();
+    const seals = (profile.seals[dungeonId2] || []).slice();
     const companions = profile.companions.filter((id) => recruited.includes(id) && id !== lead && !seals.includes(id)).slice(0, slots);
     const actualLead = seals.includes(lead) ? null : lead;
     return {
-      dungeonId,
+      dungeonId: dungeonId2,
       lead: actualLead,
       leadCandidates: completed(profile, 1) ? recruited.slice() : [],
       companionSlots: slots,
@@ -12717,7 +12791,7 @@ const BattleRuntime = {
       companions,
       preferredCompanion: actualLead && profile.recruits[actualLead].bond >= 1 && companions.includes(profile.preferredCompanion) ? profile.preferredCompanion : null,
       seals,
-      sealSlots: sealSlots(profile, dungeonId),
+      sealSlots: sealSlots(profile, dungeonId2),
       reserved: profile.reserved,
       introCleared: hasCleared(profile, INTRO2),
       bossOrder: ![...REGIONS3, TOWER].some((id) => hasCleared(profile, id)),
@@ -12740,20 +12814,20 @@ const BattleRuntime = {
     }
     return { profile: { ...profile, lead, companions: companions.slice(), preferredCompanion }, announce: { ok: true } };
   }
-  function setSeals(profile, dungeonId, ids, roster2) {
-    if (!profile.unlockedDungeons.includes(dungeonId) || !Array.isArray(ids) || ids.length > sealSlots(profile, dungeonId) || new Set(ids).size !== ids.length) return reject(profile, "invalid_seals");
-    const pool = roster2.pool(DUNGEONS[dungeonId].pool);
+  function setSeals(profile, dungeonId2, ids, roster2) {
+    if (!profile.unlockedDungeons.includes(dungeonId2) || !Array.isArray(ids) || ids.length > sealSlots(profile, dungeonId2) || new Set(ids).size !== ids.length) return reject(profile, "invalid_seals");
+    const pool = roster2.pool(DUNGEONS[dungeonId2].pool);
     if (ids.some((id) => !pool.includes(id))) return reject(profile, "invalid_seals");
     const remaining = pool.filter((id) => !ids.includes(id)).map((id) => gradeOf(roster2.card(id).grade));
     if (pool.some((id) => !remaining.includes(gradeOf(roster2.card(id).grade)))) return reject(profile, "empty_grade");
-    return { profile: { ...profile, seals: { ...profile.seals, [dungeonId]: ids.slice() } }, announce: { ok: true } };
+    return { profile: { ...profile, seals: { ...profile.seals, [dungeonId2]: ids.slice() } }, announce: { ok: true } };
   }
   function addChapter(profile, chapter) {
     profile.notebook.chapters = union(profile.notebook.chapters, [chapter]).sort((a, b) => a - b);
   }
   function recordRunProgress(profile, run) {
     if (run.daily) return { profile, announce: { ok: true, chapters: [] } };
-    const next = structuredClone(profile);
+    const next = structuredClone(profile.ui?.preparation ? clearPreparation(profile) : profile);
     if (run.dungeonId !== INTRO2) {
       if (run.lead && Object.hasOwn(next.recruits, run.lead) && !completed(next, 2)) {
         next.notebook.firstLead = run.lead;
@@ -12889,17 +12963,17 @@ const BattleRuntime = {
     finishRun(run);
     let { profile: next } = recordRunProgress(profile, run);
     next.missions ??= { periods: {} };
-    const { dungeonId, difficulty } = run;
+    const { dungeonId: dungeonId2, difficulty } = run;
     const records = next.records;
     records.runs++;
-    if (run.stats.bestHit?.amount > (records.bestHit?.amount || 0)) records.bestHit = { ...run.stats.bestHit, dungeonId, difficulty };
+    if (run.stats.bestHit?.amount > (records.bestHit?.amount || 0)) records.bestHit = { ...run.stats.bestHit, dungeonId: dungeonId2, difficulty };
     next.seenCharacters = union(next.seenCharacters, run.seenCharacters);
     if (run.profileShard && run.profileShard === next.reserved) next.reserved = null;
     if (shard) next.reserved = shard;
     const bonds = [];
     let stamp2 = null;
     if (run.result === "win") {
-      const clears = records.clears[dungeonId] ||= { easy: 0, normal: 0, nightmare: 0 };
+      const clears = records.clears[dungeonId2] ||= { easy: 0, normal: 0, nightmare: 0 };
       clears.easy ??= 0;
       clears[difficulty] = (clears[difficulty] ?? 0) + 1;
       for (const id of run.eligible) {
@@ -12909,20 +12983,20 @@ const BattleRuntime = {
         }
       }
       for (const id of recruits) addRecruit(next, id);
-      if (dungeonId === INTRO2) addChapter(next, 1);
+      if (dungeonId2 === INTRO2) addChapter(next, 1);
       else {
         const contractId = run.contract?.id;
         if (difficulty === "nightmare" && run.contract?.met && Object.hasOwn(CONTRACTS, contractId)) {
-          const stamps = (next.contractStamps ||= {})[dungeonId] ||= {};
+          const stamps = (next.contractStamps ||= {})[dungeonId2] ||= {};
           if (!Object.hasOwn(stamps, contractId)) {
             stamps[contractId] = run.id;
-            stamp2 = { dungeonId, contractId };
+            stamp2 = { dungeonId: dungeonId2, contractId };
           }
         }
         addChapter(next, 4);
-        if (difficulty === "normal") next.nightmareUnlocks = union(next.nightmareUnlocks, [dungeonId]);
+        if (difficulty === "normal") next.nightmareUnlocks = union(next.nightmareUnlocks, [dungeonId2]);
         if (next.notebook.firstLead && run.lead && run.lead !== next.notebook.firstLead && run.gateSurvivors.includes(run.lead) && run.bench.includes(run.lead) && Object.hasOwn(profile.recruits, run.lead)) addChapter(next, 5);
-        if (dungeonId === TOWER) addChapter(next, 7);
+        if (dungeonId2 === TOWER) addChapter(next, 7);
       }
       unlockDungeons(next);
     }
@@ -13220,6 +13294,11 @@ const BattleRuntime = {
       "introCandidates"
     ].every((key) => strings(run[key])) || !["heirlooms", "blessings", "stats", "introHeirlooms"].every((key) => dictionary2(run[key])) || !count(run.stats.gateWins) || !count(run.stats.turns) || !count(run.stats.heirloomsUsed) || !Array.isArray(run.doors) || !Array.from(run.doors).every(validDoor) || run.room !== null && (!validDoor(run.room) || !string(run.room.status)) || run.phase === "room" && !run.room || run.phase === "map" && !run.doors.length || run.phase === "done" && !["win", "lose"].includes(run.result) || run.endDayKey != null && !calendarDate(run.endDayKey)) return null;
     run.contract ??= null;
+    if (run.contract !== null) {
+      if (!dictionary2(run.contract) || !Object.hasOwn(CONTRACTS, run.contract.id)) return null;
+      run.contract.ruleVersion ??= LEGACY_CONTRACT_RULE_VERSION;
+      if (![LEGACY_CONTRACT_RULE_VERSION, CONTRACT_RULE_VERSION].includes(run.contract.ruleVersion)) return null;
+    }
     run.daily ??= null;
     run.tempoVersion ??= run.daily?.spec?.ruleVersion ?? 1;
     if (!run.daily) run.lessonVersion ??= 0;
@@ -13241,11 +13320,22 @@ const BattleRuntime = {
     profile.contractStamps ??= {};
     profile.missions ??= { periods: {} };
     profile.ui ??= {};
-    if (!dictionary2(profile.contractStamps) || !dictionary2(profile.missions?.periods) || !Object.entries(profile.missions.periods).every(([key, period]) => validMissionPeriod(key, period, profile.recruits)) || !dictionary2(profile.ui) || profile.ui.wantedCompanionId !== void 0 && !nullableId(profile.ui.wantedCompanionId)) return null;
+    if (!dictionary2(profile.contractStamps) || !dictionary2(profile.missions?.periods) || !Object.entries(profile.missions.periods).every(([key, period]) => validMissionPeriod(key, period, profile.recruits)) || !validProfileUi(profile.ui)) return null;
     profile.ui.wantedCompanionId ??= null;
     if (Object.hasOwn(profile.recruits, profile.ui.wantedCompanionId)) profile.ui.wantedCompanionId = null;
+    if (!validPreparation(profile, profile.ui.preparation)) profile.ui.preparation = null;
     for (const clear of Object.values(profile.records.clears)) clear.easy ??= 0;
     return profile;
+  }
+  var dungeonId = (id) => typeof id === "string" && Object.hasOwn(DUNGEONS, id);
+  var optional = (value, validate) => value == null || validate(value);
+  var arrayOf = (value, validate) => Array.isArray(value) && Array.from(value).every(validate);
+  var runEntry = (entry) => dictionary2(entry) && dungeonId(entry.dungeonId) && count(entry.floor) && ["win", "lose"].includes(entry.result);
+  function validBattleLog(log) {
+    return arrayOf(log, (turn) => dictionary2(turn) && count(turn.turn) && arrayOf(turn.rows, (row) => dictionary2(row) && count(row.key) && typeof row.text === "string" && typeof row.kind === "string" && /^[a-z-]*$/.test(row.kind) && optional(row.faces, (faces) => arrayOf(faces, (face2) => face2 === null || dictionary2(face2))) && optional(row.hits, (hits) => arrayOf(hits, (hit) => dictionary2(hit) && count(hit.key) && count(hit.turn))) && optional(row.origin, count) && optional(row.amount, Number.isFinite)));
+  }
+  function validProfileUi(ui) {
+    return dictionary2(ui) && optional(ui.wantedCompanionId, string) && optional(ui.returners, uniqueIds) && optional(ui.recruitChoices, (choices) => dictionary2(choices) && string(choices.runId) && uniqueIds(choices.ids)) && optional(ui.recent, (recent) => dictionary2(recent) && Object.values(recent).every((history) => arrayOf(history, runEntry))) && optional(ui.announcement, (notice) => dictionary2(notice) && ["dungeons", "nightmares"].every((key) => optional(notice[key], (ids) => arrayOf(ids, dungeonId))) && optional(notice.chapters, (chapters) => arrayOf(chapters, (id) => Number.isInteger(id) && id >= 1 && id <= 7))) && optional(ui.latestRun, (latest) => runEntry(latest) && strings(latest.fallen) && dictionary2(latest.stats) && optional(latest.lastBattleLog, validBattleLog));
   }
   function validMissionPeriod(key, period, recruits) {
     const date = key.startsWith("week:") ? key.slice(5) : key.startsWith("month:") ? key.slice(6) + "-01" : "";
@@ -13291,20 +13381,27 @@ const BattleRuntime = {
     function exportBackup(live = {}) {
       function read(entry) {
         try {
-          return decodeStored(slots.read(slots.active(), entry));
+          return slots.read(slots.active(), entry);
         } catch {
           return null;
         }
       }
       const dailyRun = live.dailyRun ?? (live.run?.daily ? live.run : null);
-      let daily = Object.hasOwn(live, "daily") ? live.daily : read(DAILY_KEY);
+      const dailyRaw = Object.hasOwn(live, "daily") ? live.daily : read(DAILY_KEY);
+      let daily = dailyRaw == null ? null : parse(dailyRaw);
       if (daily?.days && dailyRun) daily = withDailyCheckpoint(daily, dailyRun);
+      let damagedDaily = read(DAMAGED_DAILY_KEY);
+      if (dailyRaw != null && !restoreDailyData(daily, deps)) {
+        damagedDaily = typeof dailyRaw === "string" ? dailyRaw : JSON.stringify(dailyRaw);
+        daily = null;
+      }
       return {
         format: "relaymare",
         version: BACKUP_VERSION,
-        session: live.profile ? sessionData(live.profile, live.run?.daily ? null : live.run) : read(key),
+        session: live.profile ? sessionData(live.profile, live.run?.daily ? null : live.run) : decodeStored(read(key)),
         daily,
-        settings: live.settings ? normalizeSettings(live.settings) : read(SETTINGS_KEY) ?? normalizeSettings()
+        ...typeof damagedDaily === "string" && { damagedDaily },
+        settings: live.settings ? normalizeSettings(live.settings) : decodeStored(read(SETTINGS_KEY)) ?? normalizeSettings()
       };
     }
     function validateBackup(data) {
@@ -13312,7 +13409,7 @@ const BattleRuntime = {
       const session = readSession(data.session);
       if (session.status === "profileDamaged") return failed("invalid_session");
       if (session.status === "runDamaged") return failed("invalid_run");
-      if (data.daily !== null && !restoreDailyData(data.daily, deps)) return failed("invalid_daily");
+      if (data.daily !== null && !restoreDailyData(data.daily, deps) || data.damagedDaily !== void 0 && typeof data.damagedDaily !== "string") return failed("invalid_daily");
       if (!dictionary2(data.settings) || Object.keys(DEFAULT_SETTINGS).some((entry) => Object.hasOwn(data.settings, entry) && !validSetting(entry, data.settings[entry]))) return failed("invalid_settings");
       const days = Object.values(data.daily?.days ?? {});
       const active2 = data.daily?.active ?? null;
@@ -13326,9 +13423,13 @@ const BattleRuntime = {
       };
       return { ok: true, summary, session };
     }
+    function dailyWarning(data) {
+      return typeof data.damagedDaily === "string" ? { warnings: ["invalid_daily"] } : {};
+    }
     function inspectBackup(data) {
-      const result = validateBackup(parse(data));
-      return result.ok ? { ok: true, summary: result.summary } : { ...result, summary: null };
+      const backup = parse(data);
+      const result = validateBackup(backup);
+      return result.ok ? { ok: true, summary: result.summary, ...dailyWarning(backup) } : { ...result, summary: null };
     }
     function restoreBackup(data) {
       const backup = parse(data);
@@ -13338,6 +13439,7 @@ const BattleRuntime = {
       const values = /* @__PURE__ */ new Map([
         [key, profile ? JSON.stringify(sessionData(profile, run)) : null],
         [DAILY_KEY, backup.daily === null ? null : JSON.stringify(backup.daily)],
+        [DAMAGED_DAILY_KEY, backup.damagedDaily ?? null],
         [SETTINGS_KEY, JSON.stringify(normalizeSettings(backup.settings))],
         [LAST_GOOD_KEY, profile ? JSON.stringify(sessionData(profile, null)) : null]
       ]);
@@ -13355,7 +13457,7 @@ const BattleRuntime = {
         });
         if (!verified.ok) return failed("storage_failed");
         slots.activate(next);
-        return { ok: true };
+        return { ok: true, ...dailyWarning(backup) };
       } catch {
         return failed("storage_failed");
       }
@@ -14032,11 +14134,11 @@ const BattleRuntime = {
       }
       schedule();
     }
-    function play(id, dungeonId = dungeon) {
+    function play(id, dungeonId2 = dungeon) {
       if (!Object.hasOwn(TRACKS, id) || context.state === "closed") return;
       if (isDungeon(id)) dungeon = id;
       const combat = Boolean(TRACKS[id].bars);
-      if (combat && isDungeon(dungeonId)) dungeon = dungeonId;
+      if (combat && isDungeon(dungeonId2)) dungeon = dungeonId2;
       const now = context.currentTime;
       advance2(now);
       const region = combat ? dungeon : null;
@@ -15137,13 +15239,13 @@ const BattleRuntime = {
   };
   function backupProgress(summary, backup) {
     const profile = backup?.session?.profile;
-    const { dungeonId, floor, dailyActive } = summary ?? {};
+    const { dungeonId: dungeonId2, floor, dailyActive } = summary ?? {};
     const mainKnown = summary?.recruits != null;
     const rows = [
       ["\uC601\uC785 \uB3D9\uB8CC", mainKnown ? summary.recruits + "\uBA85" : "\uD655\uC778 \uBD88\uAC00"],
       ["\uC644\uB8CC\uD55C \uC6D0\uC815", mainKnown ? (profile?.records?.runs ?? 0) + "\uD68C" : "\uD655\uC778 \uBD88\uAC00"],
       ["\uC218\uCCA9 \uC644\uB8CC", mainKnown ? (profile?.notebook?.chapters?.length ?? 0) + "\uC7A5" : "\uD655\uC778 \uBD88\uAC00"],
-      ["\uC9C4\uD589 \uC911 \uC6D0\uC815", dungeonId ? `${DUNGEONS[dungeonId]?.name ?? dungeonId} ${Math.max(floor ?? 1, 1)}\uCE35` : mainKnown ? "\uC5C6\uC74C" : "\uD655\uC778 \uBD88\uAC00"],
+      ["\uC9C4\uD589 \uC911 \uC6D0\uC815", dungeonId2 ? `${DUNGEONS[dungeonId2]?.name ?? dungeonId2} ${Math.max(floor ?? 1, 1)}\uCE35` : mainKnown ? "\uC5C6\uC74C" : "\uD655\uC778 \uBD88\uAC00"],
       ["\uADE0\uC5F4 \uACF5\uC2DD \uB3C4\uC804", summary?.dailyOfficialStarts != null ? `${summary.dailyOfficialStarts}\uD68C \xB7 \uC815\uC0B0 ${summary.dailyOfficialResults ?? 0}\uD68C` : "\uD655\uC778 \uBD88\uAC00"],
       ["\uC9C4\uD589 \uC911 \uADE0\uC5F4", dailyActive ? `${dailyActive.dayKey} \xB7 ${dailyActive.kind === "official" ? "\uAE30\uB85D \uB3C4\uC804" : "\uC5F0\uC2B5"} \xB7 ${dailyActive.floor}\uCE35` : summary?.dailyOfficialStarts != null ? "\uC5C6\uC74C" : "\uD655\uC778 \uBD88\uAC00"]
     ];
@@ -15151,14 +15253,17 @@ const BattleRuntime = {
   }
   function openBackupSheet({ mode, sheets: sheets2, store: store2, currentBackup, recovered }) {
     const { openSheet } = sheets2;
-    const available = store2.exportBackup && store2.inspectBackup && store2.restoreBackup;
+    const available = store2.exportBackup && store2.inspectBackup && (mode === "export" || store2.restoreBackup);
     if (!available) return sheets2.sheet("\uAE30\uB85D \uD30C\uC77C", "\uC774 \uBC84\uC804\uC5D0\uC11C\uB294 \uAE30\uB85D \uD30C\uC77C \uAE30\uB2A5\uC744 \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uB2E4.");
     if (mode === "export") {
       const backup = currentBackup({ lastGood: true });
       const check = store2.inspectBackup(backup);
       if (!check.ok) return sheets2.sheet("\uAE30\uB85D \uB0B4\uBCF4\uB0B4\uAE30", BACKUP_ERROR[check.reason] ?? "\uB0B4\uBCF4\uB0BC \uAE30\uB85D\uC744 \uD655\uC778\uD558\uC9C0 \uBABB\uD588\uB2E4.");
       const label = backup.session?.profile ? `\uC601\uC785 \uB3D9\uB8CC ${check.summary?.recruits ?? 0}\uBA85` : "\uC124\uC815\uACFC \uADE0\uC5F4 \uAE30\uB85D";
+      const active2 = check.summary?.dailyActive;
       openSheet("\uAE30\uB85D \uB0B4\uBCF4\uB0B4\uAE30", `<div class="meta-sheet meta-backup"><p>${label}</p>
+      ${active2 ? `<p>\uADE0\uC5F4 ${esc(active2.dayKey)} \xB7 ${active2.floor}\uCE35</p>` : ""}
+      ${check.warnings?.includes("invalid_daily") ? '<p role="status">\uC190\uC0C1\uB41C \uADE0\uC5F4 \uAE30\uB85D\uC740 \uD30C\uC77C\uC5D0 \uB530\uB85C \uBCF4\uAD00\uD588\uB2E4.</p>' : ""}
       <button class="btn go" id="meta-backup-download">\uAE30\uB85D \uD30C\uC77C \uBC1B\uAE30</button></div>`);
       $("#meta-backup-download").addEventListener("click", () => {
         const url = URL.createObjectURL(new Blob([JSON.stringify(backup)], { type: "application/json" }));
@@ -15190,7 +15295,7 @@ const BattleRuntime = {
         if (!input.isConnected || !$("#sheet").classList.contains("on")) return;
         const result = store2.inspectBackup(data);
         if (!result.ok) return choose(BACKUP_ERROR[result.reason] ?? "\uAE30\uB85D \uD30C\uC77C\uC744 \uD655\uC778\uD558\uC9C0 \uBABB\uD588\uB2E4.");
-        compare2(data, result.summary);
+        compare2(data, result);
       });
     }
     function compare2(data, imported) {
@@ -15207,8 +15312,9 @@ const BattleRuntime = {
       openSheet("\uAE30\uB85D \uAC00\uC838\uC624\uAE30 \uD655\uC778", `<div class="meta-sheet meta-backup">
       <div class="meta-backup-compare">
         <section><h4>\uD604\uC7AC \uAE30\uB85D</h4><dl>${backupProgress(currentSummary, main.ok ? live : null)}</dl></section>
-        <section><h4>\uD30C\uC77C \uAE30\uB85D</h4><dl>${backupProgress(imported, data)}</dl></section>
+        <section><h4>\uD30C\uC77C \uAE30\uB85D</h4><dl>${backupProgress(imported.summary, data)}</dl></section>
       </div>
+      ${imported.warnings?.includes("invalid_daily") ? "<p>\uD30C\uC77C\uC758 \uC190\uC0C1\uB41C \uADE0\uC5F4 \uAE30\uB85D\uC740 \uB530\uB85C \uBCF4\uAD00\uD55C\uB2E4.</p>" : ""}
       <p>\uAC00\uC838\uC624\uBA74 \uC774 \uBE0C\uB77C\uC6B0\uC800\uC758 \uAE30\uB85D\uC774 \uD30C\uC77C \uAE30\uB85D\uC73C\uB85C \uBC14\uB010\uB2E4.</p>
       <p class="meta-feedback" role="status"></p>
       <button class="btn" id="meta-backup-repick">\uB2E4\uB978 \uD30C\uC77C \uACE0\uB974\uAE30</button>
@@ -15273,6 +15379,56 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/widgets.js
   var TYPE = { phy: "\uBB3C\uB9AC", mag: "\uB9C8\uBC95", sup: "\uBCF4\uC870", rest: "\uD734\uC2DD" };
+  var LEGACY_RULES = {
+    rescue: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC4F0\uB7EC\uC9C8 \uC608\uACE0\uB97C \uBC1B\uC740 \uB3D9\uB8CC\uB97C \uBB3C\uB7EC\uB098\uAC8C \uD558\uACE0, \uADF8 \uB3D9\uB8CC\uC640 \uBC1B\uC740 \uB3D9\uB8CC\uAC00 \uD568\uAED8 \uC0B4\uC544\uC11C \uC774\uAE34\uB2E4.",
+    heirloom: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC720\uD488 \uAE30\uC220\uC758 \uBA85\uC911\uC73C\uB85C \uC801\uC744 \uC4F0\uB7EC\uB728\uB9AC\uACE0 \uC774\uAE34\uB2E4."
+  };
+  function activeContract(run) {
+    const id = run.contract?.id;
+    if (!Object.hasOwn(CONTRACTS, id)) return null;
+    const contract = CONTRACTS[id];
+    const legacyVersion = LEGACY_CONTRACT_RULE_VERSION ?? 1;
+    const legacy = (run.contract.ruleVersion ?? legacyVersion) === legacyVersion;
+    return { ...contract, legacy, rule: legacy && LEGACY_RULES[id] || contract.rule };
+  }
+  function tempoBeatText(beat, step) {
+    const action = beat.lesson ? { ...step, ...beat } : beat;
+    const power2 = action.power ?? action.val;
+    const type = TYPE[action.type];
+    const desc = typeof action.effect === "string" ? action.effect : "";
+    let effect = "";
+    switch (action.rule) {
+      case "mana_drain":
+        effect = "HP \uD53C\uD574 0 \xB7 \uD604\uC7AC MP " + (Number.isFinite(action.drainFlat) ? "\u2212" + action.drainFlat : "\uC804\uBD80 \uC18C\uBA78");
+        break;
+      case "retaliation":
+        effect = "\uD53C\uACA9 \uC2DC \xD7" + action.hitPower + " \xB7 \uBBF8\uD53C\uACA9 \uC2DC \xD7" + power2;
+        break;
+      case "front_hit":
+        effect = "\uC120\uB450 \uACF5\uACA9";
+        break;
+      case "charge":
+        effect = "\uB2E4\uC74C \uD134 \uAC15\uACF5";
+        break;
+      case "cleanse":
+        effect = "\uC790\uAE30 \uC57D\uD654 \uC804\uBD80 \uD574\uC81C";
+        break;
+      case "defense_protocol":
+        effect = "\uC9C1\uC804 \uD53C\uACA9 \uC885\uB958\uC758 \uBC29\uC5B4 +" + bonusPercent(action.bonus) + "%";
+        break;
+      case "alternating_defense":
+        effect = (action.stat === "mdef" ? "\uB9C8\uBC29" : "\uBB3C\uBC29") + " +" + bonusPercent(action.bonus) + "%";
+        break;
+      case "lesson_guard":
+        effect = "\uB2E4\uC74C \uD134 \uBC1B\uB294 \uD53C\uD574 " + bonusPercent(action.reduction) + "% \uAC10\uC18C";
+        break;
+      case "swap_stats":
+        effect = "\uBA85\uC911 \uB4A4 \uACF5\xB7\uB9C8\uACF5, \uBB3C\uBC29\xB7\uB9C8\uBC29 \uAD50\uD658";
+        break;
+    }
+    const modifier = beat.lesson && ["phy", "mag"].includes(action.type) && power2 > 0 && action.rule !== "retaliation";
+    return [beat.turn + "\uD134", beat.name, type && type + (modifier ? " \xD7" + power2 : ""), beat.lesson && (effect || desc)].filter(Boolean).join(" \xB7 ");
+  }
   var formatRange = (range) => Array.isArray(range) ? range[0] === range[1] ? String(range[0]) : range.join("~") : String(range ?? "");
   var bonusPercent = (bonus) => Math.round((bonus ?? 0) * 100);
   function blessingText(view) {
@@ -15429,9 +15585,9 @@ const BattleRuntime = {
   }
   function dailyRow(view) {
     if (!view?.unlocked) return "";
-    const { active: active2, official, dayKey } = view;
-    const action = active2 ? active2.floor ? `${active2.floor}\uCE35 \uC774\uC5B4\uAC00\uAE30` : "\uC774\uC5B4\uAC00\uAE30" : official ? "\uC5F0\uC2B5\uD558\uAE30" : "\uCCAB \uB3C4\uC804";
-    const summary = [shortRiftDate(active2?.dayKey || dayKey), action].filter(Boolean).join(" \xB7 ");
+    const { active: active2, official, dayKey, unsavedResult } = view;
+    const action = unsavedResult ? "\uC800\uC7A5\uB418\uC9C0 \uC54A\uC740 \uACB0\uACFC" : active2 ? active2.floor ? `${active2.floor}\uCE35 \uC774\uC5B4\uAC00\uAE30` : "\uC774\uC5B4\uAC00\uAE30" : official ? "\uC5F0\uC2B5\uD558\uAE30" : "\uCCAB \uB3C4\uC804";
+    const summary = [shortRiftDate(unsavedResult || active2?.dayKey || dayKey), action].filter(Boolean).join(" \xB7 ");
     return `<button class="btn daily-row" id="meta-daily-rift"><span>\uC624\uB298\uC758 \uADE0\uC5F4</span><small>${esc(summary)}</small></button>`;
   }
   function face(widgets2, id, name, options = {}) {
@@ -15581,7 +15737,7 @@ const BattleRuntime = {
     reaper_realm: ["\uC0AC\uC2E0", "#a678ff"],
     gale: ["\uC9C8\uD48D", "#7fe3c8"]
   };
-  var fieldCap = (core2, artifacts) => artifacts?.includes("buff_overload") ? 5 : core2.GAME_CONSTANTS.MAX_FIELD_BUFFS;
+  var fieldCap2 = (core2, artifacts = []) => fieldCap?.(core2, artifacts) ?? (artifacts.includes("buff_overload") ? 5 : core2.GAME_CONSTANTS.MAX_FIELD_BUFFS);
   var skyRelics = (B) => (B.artifacts || []).filter((id) => id === "buff_overload" || id === "gale_storm" && B.D?.turn <= 3 && B.D.field.includes("gale"));
   var INTENT_TYPE = { ...TYPE, charge: "\uCDA9\uC804", stun: "\uAE30\uC808" };
   var BLOCKED_BY = { magic_guard: "\uB9E4\uC9C1\uAC00\uB4DC", barrier: "\uBC30\uB9AC\uC5B4", evasion: "\uD68C\uD53C", stun: "\uAE30\uC808" };
@@ -15688,7 +15844,7 @@ const BattleRuntime = {
         S.beads.x = B.foe.x;
         S.beads.y = FY(B.foe);
       }
-      $("#sky-slots").innerHTML = relicMarks(core2, skyRelics(B)) + Array.from({ length: fieldCap(core2, B.artifacts) }, (_, i) => {
+      $("#sky-slots").innerHTML = relicMarks(core2, skyRelics(B)) + Array.from({ length: fieldCap2(core2, B.artifacts) }, (_, i) => {
         const id = D.field[i], f = id && (FIELD[id] || [id.slice(0, 2), "#ccc"]);
         return f ? '<i class="on" style="background:' + f[1] + '">' + esc(f[0].slice(0, 1)) + "</i>" : "<i></i>";
       }).join("");
@@ -15858,13 +16014,14 @@ const BattleRuntime = {
     defProtocolPhy: "\uBC29\uC5B4\uB825 +50% (\uBC29\uC5B4 \uD504\uB85C\uD1A0\uCF5C)",
     defProtocolMag: "\uB9C8\uBC95\uBC29\uC5B4\uB825 +50% (\uBC29\uC5B4 \uD504\uB85C\uD1A0\uCF5C)"
   };
-  function contractStatus(run, B) {
+  function contractStatus(run, B, contract) {
     const { id, met, failed: failed2, riskDoorTaken } = run.contract;
     if (met) return "\uB2EC\uC131";
     const fighters = B.party.filter(Boolean).length;
     const missedRisk = id === "elite" && run.floor >= 2 && !riskDoorTaken;
     const missedElite = id === "elite" && run.floor === 6 && (B.door.type !== "elite" || fighters < 2);
-    if (failed2 || run.floor > 6 || missedRisk || missedElite || id === "rescue" && run.floor === 6 && fighters < 2) return "\uC774\uBC88 \uC6D0\uC815 \uBD88\uAC00";
+    const missedHeirloom = id === "heirloom" && !contract.legacy && run.floor > 4;
+    if (failed2 || run.floor > 6 || missedRisk || missedElite || missedHeirloom || id === "rescue" && run.floor === 6 && fighters < 2) return "\uC774\uBC88 \uC6D0\uC815 \uBD88\uAC00";
     return "\uC544\uC9C1";
   }
   function createDetails(core2, widgets2, openSheet) {
@@ -15998,7 +16155,7 @@ const BattleRuntime = {
     }
     function fieldSheet(B) {
       const list = B.D?.field || [];
-      const max = fieldCap(core2, B.artifacts);
+      const max = fieldCap2(core2, B.artifacts);
       const relics = skyRelics(B).map((id) => {
         const relic = core2.GameUtils.getArtifactById(id);
         return "<p><b>" + esc(relic.name) + "</b> \xB7 " + esc(relicEffect(relic)) + "</p>";
@@ -16009,7 +16166,7 @@ const BattleRuntime = {
     function battlefieldSheet(run, B, focusSlot) {
       if (!B.door) return;
       const region = REGIONS[B.door.region?.id], quirk = QUIRKS[B.door.quirk];
-      const contract = CONTRACTS[run.contract?.id];
+      const contract = activeContract(run);
       const block = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
       const artifacts = B.artifacts || [];
       const focusField = () => $("#b-field")?.focus({ preventScroll: true });
@@ -16018,7 +16175,7 @@ const BattleRuntime = {
         riftKindLabel(run.daily.kind),
         "\uC815\uC0B0\uD55C \uC804\uD22C " + (run.stats?.turns ?? 0) + "\uD134"
       ].filter(Boolean).join(" \xB7 ") : "";
-      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", relicStrip(core2, artifacts, { temporary: B.temporaryRelic }) + (dailyLine ? "<p>" + esc(dailyLine) + "</p>" : "") + (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + contractStatus(run, B) + "</h4><p>" + esc(contract.rule) + "</p>" : ""), {
+      openSheet("\uC804\uC7A5\xB7\uC720\uBB3C", relicStrip(core2, artifacts, { temporary: B.temporaryRelic }) + (dailyLine ? "<p>" + esc(dailyLine) + "</p>" : "") + (block(region) || "<p>\uC9C0\uC5ED \uADDC\uCE59 \uC5C6\uC74C</p>") + block(quirk) + (contract ? "<h4>\uACC4\uC57D \xB7 " + esc(contract.name) + " \xB7 " + contractStatus(run, B, contract) + "</h4><p>" + esc(contract.rule) + "</p>" : ""), {
         latest: focusSlot != null ? `[data-slot="${focusSlot}"]` : void 0,
         onClose: focusField
       });
@@ -16795,12 +16952,17 @@ const BattleRuntime = {
       if (region?.id === "twilight_bell" && bellIn != null) {
         message = bellIn + "\uD134 \uB4A4 \uC801 \uB514\uBC14\uC778 +" + (region.stacks ?? REGIONS.twilight_bell.stacks);
       } else if (region?.id === "tide_cycle" && event && !foeDef().boss) {
-        const turns = event.countdown?.inTurns;
-        if (B.intent?.kind === "rest") {
-          message = "\uC870\uB958 \xB7 \uC801 \uD734\uC2DD" + (event.intent.vulnerable ? " \xB7 \uBC1B\uB294 \uD53C\uD574 \xD7" + event.intent.vulnerable : "");
-        } else if (turns === 0) message = "\uC870\uB958 \xB7 \uC774\uBC88 \uD134 2.5\uBC30";
-        else if (turns === 1) message = "\uC870\uB958 \xB7 \uB2E4\uC74C \uD134 2.5\uBC30";
-        else if (turns != null) message = "\uC870\uB958 \xB7 " + turns + "\uD134 \uB4A4 2.5\uBC30";
+        const tide = event.region?.tide ?? (B.intent?.kind === "rest" ? B.intent : event.countdown);
+        if (tide?.kind === "rest") {
+          message = "\uC870\uB958 \xB7 \uC801 \uD734\uC2DD" + (tide.vulnerable ? " \xB7 \uBC1B\uB294 \uD53C\uD574 \xD7" + tide.vulnerable : "");
+        } else if (tide?.name && tide.inTurns != null) {
+          const when = tide.inTurns === 0 ? "\uC774\uBC88 \uD134" : tide.inTurns === 1 ? "\uB2E4\uC74C \uD134" : tide.inTurns + "\uD134 \uB4A4";
+          const classic = tide.name === REGIONS.tide_cycle.hit;
+          const power2 = tide.power ?? (classic ? 2.5 : null);
+          const type = TYPE[tide.kind] ?? (classic ? TYPE.mag : "");
+          const attack2 = [type, power2 != null ? "\xD7" + power2 : ""].filter(Boolean).join(" ");
+          message = "\uC870\uB958 \xB7 " + [when + " " + tide.name, attack2].filter(Boolean).join(" \xB7 ");
+        }
       } else if (region?.id === "arena_charge" && event?.region && !B.chargeSpent) {
         message = event.region.ready ? "\uAE30\uC138 2/2 \xB7 \uB2E4\uC74C \uACF5\uACA9 \uAE30\uC220 \xD72" : "\uAE30\uC138 " + event.region.charge + "/2";
       } else if (region?.id === "ember_carry" && event && B.D.enemy.idx < B.door.enemies.length - 1) {
@@ -18178,7 +18340,7 @@ const BattleRuntime = {
       }
     });
     $("#b-opponents", node).addEventListener("click", () => {
-      ui.sheets.openSheet(room.name, room.enemies.map((enemy, index) => '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4>" + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id]?.desc || "") + "</p>").join("") + (tempo?.enemies?.[index]?.beats ?? []).map((beat) => "<p>" + esc(beat.turn + "\uBC15 \xB7 " + beat.name + " \xB7 " + (TYPE[beat.type] || "")) + "</p>").join("") + "</div></div>").join("") + (quirk ? "<p>" + esc(quirk.name + " \xB7 " + quirk.desc) + "</p>" : ""));
+      ui.sheets.openSheet(room.name, room.enemies.map((enemy, index) => '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4>" + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id]?.desc || "") + "</p>").join("") + (tempo?.enemies?.[index]?.beats ?? []).map((beat) => "<p>" + esc(tempoBeatText(beat, tempo.lesson?.steps?.[beat.turn - 1])) + "</p>").join("") + "</div></div>").join("") + (quirk ? "<p>" + esc(quirk.name + " \xB7 " + quirk.desc) + "</p>" : ""));
     });
   }
 
@@ -18304,9 +18466,10 @@ const BattleRuntime = {
       return '<span class="floor-cell' + classes + '"><small>' + floor + "</small>" + marker + "</span>";
     }).join("");
     function startSky(door) {
-      if (door.region?.id !== "starlit_sky" || !door.enemies.length) return "";
+      if (!door.enemies.length) return "";
       const field = doorStart?.(run, door.index)?.field ?? door.start?.field;
-      return field ? "\uC2DC\uC791 \uD558\uB298 \xB7 " + (field.map((id) => core2.BUFF_NAMES[id] || id).join(" \xB7 ") || "\uBE44\uC5B4 \uC788\uC74C") : "";
+      if (!Array.isArray(field) || !field.length && door.region?.id !== "starlit_sky") return "";
+      return "\uC2DC\uC791 \uD558\uB298 \xB7 " + (field.map((id) => core2.BUFF_NAMES[id] || id).join(" \xB7 ") || "\uBE44\uC5B4 \uC788\uC74C");
     }
     function risks(door) {
       const lines = [];
@@ -18348,7 +18511,7 @@ const BattleRuntime = {
       return ROOM_EFFECT[door.type] || "";
     }
     function contractGoal(door) {
-      const contract = CONTRACTS[run.contract?.id];
+      const contract = activeContract(run);
       if (!contract) return "";
       const { floor } = run;
       const eliteRisk = contract.id === "elite" && floor === 2 && door.risk;
@@ -18507,7 +18670,7 @@ const BattleRuntime = {
         const strong = Object.keys(ELEMENT).filter((element) => core2.Logic.getElementalMultiplier(element, enemy.element) > 1);
         const preview = tempo?.enemies?.[index];
         const hp = preview?.maxHp ?? ready?.[index]?.maxHp ?? enemy.stats.hp;
-        const beats = preview?.beats?.map((beat) => beat.turn + "\uD134 \xB7 " + beat.name + (TYPE[beat.type] ? " (" + TYPE[beat.type] + ")" : "")) ?? [];
+        const beats = preview?.beats?.map((beat) => tempoBeatText(beat, tempo.lesson?.steps?.[beat.turn - 1])) ?? [];
         return '<div class="run-foe-detail">' + sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === "shadow" ? "shadow-tint" : "" }) + "<div><h4>" + esc(enemy.name) + "</h4><p>" + esc(ELEMENT[enemy.element] || "") + " \xB7 HP " + hp + "</p>" + (strong.length ? "<p>\uC0C1\uC131 \uC6B0\uC704 \xB7 " + strong.map((element) => ELEMENT[element]).join(" \xB7 ") + "</p>" : "") + (beats.length ? "<p>" + esc(beats.join(" / ")) + "</p>" : "") + (enemy.note ? "<p>" + esc(enemy.note) + "</p>" : "") + (enemy.affixes || []).map((id) => "<p>" + esc(AFFIXES[id].name + (id === "treasure" ? "" : " \xB7 " + AFFIXES[id].desc)) + "</p>").join("") + "</div></div>";
       }).join("");
       const region = REGIONS[door.region?.id], quirk = QUIRKS[door.quirk], relic = !door.final && artifacts.get(door.relic);
@@ -18556,7 +18719,7 @@ const BattleRuntime = {
       refresh();
     }
     function showFailure(reason) {
-      $("#spring-status", node).textContent = reason === "empty_pool" ? "\uAE68\uC6B8 \uC218 \uC788\uB294 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4." : reason === "insufficient_crystals" ? "\uACB0\uC815\uC774 \uBD80\uC871\uD558\uB2E4." : "\uD569\uB958\uD560 \uB3D9\uB8CC\uC640 \uBCF4\uB0BC \uB3D9\uB8CC\uB97C \uD655\uC778\uD55C\uB2E4.";
+      $("#spring-status", node).textContent = reason === "empty_pool" ? "\uAE68\uC6B8 \uC218 \uC788\uB294 \uB3D9\uB8CC\uAC00 \uC5C6\uB2E4." : reason === "insufficient_crystals" ? "\uACB0\uC815\uC774 \uBD80\uC871\uD558\uB2E4." : reason === "invalid_spring_key" ? "\uD6C4\uBCF4\uAC00 \uBC14\uB00C\uC5C8\uB2E4. \uB2E4\uC2DC \uACE8\uB77C \uBCF4\uC790." : "\uD569\uB958\uD560 \uB3D9\uB8CC\uC640 \uBCF4\uB0BC \uB3D9\uB8CC\uB97C \uD655\uC778\uD55C\uB2E4.";
     }
     function refresh() {
       $("#b-draw", node).disabled = run.crystals < COST2.draw || run.pending?.kind === "spring";
@@ -18577,10 +18740,11 @@ const BattleRuntime = {
       fresh.unshift(id);
       if (box.isConnected && $("#fresh", node) === box) refresh();
     }
-    function openOffer() {
+    function openOffer(message) {
       const offer = getSpringOffer ? command(getSpringOffer) : run.pending?.kind === "spring" ? { ok: true } : command(springPick);
       if (!offer.ok) return showFailure(offer.reason);
       choose(getSpringOffer ? offer : { ...run.pending, alreadyPaid: true });
+      if (message) showFailure(message);
     }
     function choose(offer) {
       const cost = offer.alreadyPaid ? 0 : offer.cost ?? COST2.pick;
@@ -18590,6 +18754,9 @@ const BattleRuntime = {
       let selected;
       const rows = $$(".cardrow", node);
       const take = $("#b-take", node);
+      if (run.crystals < cost) {
+        $("#spring-status", node).textContent = "\uD569\uB958\uC5D0 \uACB0\uC815 " + (cost - run.crystals) + "\uAC1C\uAC00 \uBD80\uC871\uD558\uB2E4.";
+      }
       for (const row of rows) {
         row.disabled = !canJoin(run, row.dataset.id);
         row.addEventListener("click", () => {
@@ -18598,11 +18765,11 @@ const BattleRuntime = {
           for (const other of rows) other.classList.toggle("sel", other === row);
           take.disabled = run.crystals < cost;
           take.textContent = card(selected).name + " \xB7 \uC774\uBC88 \uC6D0\uC815 \uD569\uB958" + price;
-          if (take.disabled) showFailure("insufficient_crystals");
         });
       }
       function join2(id, replaceId = null) {
         const result = commitSpringOffer ? command(commitSpringOffer, { key: offer.key, id, replaceId }) : command(springTake, id, replaceId);
+        if (result.reason === "invalid_spring_key") return openOffer(result.reason);
         if (!result.ok) return showFailure(result.reason);
         base();
         if (id) showWaking(id, false);
@@ -19105,11 +19272,12 @@ const BattleRuntime = {
       playMusic: () => host.runtime.music?.play(run.dungeonId)
     };
     function battleDecision(node, result, next) {
-      let equipped = result.relic?.equipped ? result.relic.id : run.lastBattleRelic;
+      const gained = Array.isArray(result.relics) ? result.relics : [run.lastBattleRelic, result.relic?.equipped ? result.relic.id : null];
+      const equipped = new Set(gained.filter((id) => run.relics.includes(id)));
       const decision = document.createElement("div");
       decision.className = "victory-decision";
       function render() {
-        node.innerHTML = treasureReceipt(artifacts.get(equipped));
+        node.innerHTML = [...equipped].map((id) => treasureReceipt(artifacts.get(id))).join("");
         node.append(decision);
         next.hidden = true;
         const options = { node: decision, inline: true, onEquipped, onRelic: onEquipped };
@@ -19117,7 +19285,7 @@ const BattleRuntime = {
         if (run.pending?.kind === "reinforcement") reinforceScreen(run, rewardUi, options);
         else if (run.pending?.kind === "gate") gatePickScreen(run, rewardUi, options);
         else if (run.pending?.kind === "relic") treasureScreen(run, rewardUi, run.pending.id, options);
-        else if (equipped) {
+        else if (equipped.size) {
           decision.replaceChildren();
           next.hidden = false;
         } else {
@@ -19135,7 +19303,10 @@ const BattleRuntime = {
       }
       function onEquipped(id) {
         if (run.relics.includes(id)) {
-          equipped = run.lastBattleRelic = id;
+          for (const previous of equipped) if (!run.relics.includes(previous)) equipped.delete(previous);
+          equipped.add(id);
+          run.lastBattleRelic = id;
+          run.lastBattleRelics = [...equipped];
           host.save(run);
         }
         render();
@@ -19177,6 +19348,7 @@ const BattleRuntime = {
           if (result.ok) {
             run.lastBattleLog = log;
             run.lastBattleRelic = result.relic?.equipped ? result.relic.id : null;
+            run.lastBattleRelics = Array.isArray(result.relics) ? result.relics : null;
             host.save(run);
           }
           return result;
@@ -19185,7 +19357,7 @@ const BattleRuntime = {
       if (run.phase === "reward") {
         const contract = run.contract ? { ...run.contract, metNow: run.contract.metAtFloor === run.floor } : null;
         const relic = equippedRoomRelic() ? { id: run.room.relic, equipped: true } : null;
-        return battle.restoreResult(run, afterBattle, { win: true, contract, relic }, battleDecision);
+        return battle.restoreResult(run, afterBattle, { win: true, contract, relic, relics: run.lastBattleRelics }, battleDecision);
       }
       if (run.pending?.kind === "relic") return treasureScreen(run, ui, run.pending.id);
       if (run.pending?.kind === "altar" || run.room?.type === "altar") return altarScreen(run, ui);
@@ -19292,7 +19464,8 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/hub.js
   function hubLineup(lead, recent) {
-    return [...new Set([lead, ...recent].filter(Boolean))].slice(0, 3);
+    const ids = Array.isArray(recent) ? recent : [];
+    return [...new Set([lead, ...ids].filter((id) => typeof id === "string" && id))].slice(0, 3);
   }
   function sceneActors(ids, widgets2, { interactive = false, lead = null, arriving = [] } = {}) {
     return ids.map((id, index) => {
@@ -19435,7 +19608,8 @@ const BattleRuntime = {
     const character = card(id);
     if (!character) return;
     const recruit = profile.recruits[id];
-    const recent = profile.ui?.recent?.[id] || [];
+    const entries = profile.ui?.recent?.[id];
+    const recent = Array.isArray(entries) ? entries.filter(Boolean) : [];
     const skills = character.skills.map((skill) => {
       const body = core2.SkillDisplay.body(skill, { entity: character });
       return `<div class="meta-skill">
@@ -19465,7 +19639,7 @@ const BattleRuntime = {
     const wantedId = profile.ui?.wantedCompanionId;
     const wanted = showWanted && wantedId && widgets2.card(wantedId);
     const wantedRegions = wanted ? dungeons.filter((dungeon) => roster2.pool(dungeon.pool).includes(wantedId)) : [];
-    let dungeonId = wantedRegions[0]?.id ?? (Object.hasOwn(DUNGEONS, profile.ui?.destination) ? profile.ui.destination : dungeons[0].id);
+    let dungeonId2 = wantedRegions[0]?.id ?? (Object.hasOwn(DUNGEONS, profile.ui?.destination) ? profile.ui.destination : dungeons[0].id);
     node.innerHTML = `
     ${wantedRegions.length ? `<p class="meta-next-goal">${esc(wanted.name)} \xB7 ${esc(wantedRegions.map((dungeon) => dungeon.name).join(" \xB7 "))}</p>` : ""}
     <div class="meta-collection-bar">
@@ -19480,9 +19654,9 @@ const BattleRuntime = {
   `;
     const grid = $(".meta-collection-grid", node);
     const poolSelect = $("#meta-pool", node);
-    poolSelect.value = dungeonId;
+    poolSelect.value = dungeonId2;
     function render() {
-      if (dungeonId === "relics") {
+      if (dungeonId2 === "relics") {
         const known = relics.filter((relic) => profile.seenRelics.includes(relic.id));
         $("#meta-collected", node).textContent = `\uBC1C\uACAC ${known.length}/${relics.length}`;
         grid.classList.add("relics");
@@ -19491,12 +19665,12 @@ const BattleRuntime = {
         return;
       }
       grid.classList.remove("relics");
-      const pool = roster2.pool(DUNGEONS[dungeonId].pool);
+      const pool = roster2.pool(DUNGEONS[dungeonId2].pool);
       $("#meta-collected", node).textContent = `\uC870\uC6B0 ${pool.filter((id) => seen.has(id)).length}/${pool.length} \xB7 \uC601\uC785 ${pool.filter((id) => profile.recruits[id]).length}/${pool.length}`;
       companionGrid(grid, { ids: pool, profile, widgets: widgets2, select: inspect });
     }
     poolSelect.addEventListener("change", () => {
-      dungeonId = poolSelect.value;
+      dungeonId2 = poolSelect.value;
       render();
     });
     render();
@@ -19562,9 +19736,9 @@ const BattleRuntime = {
   `;
     if (renderDailyHistory) renderDailyHistory($("#meta-daily-history", node));
     for (const button of $$("[data-nightmare-record]", node)) button.addEventListener("click", () => {
-      const dungeonId = button.dataset.nightmareRecord;
-      const stamps = contractsFor?.(profile, dungeonId)?.stamps;
-      openSheet(`${DUNGEONS[dungeonId].name} \xB7 \uACC4\uC57D \uB3C4\uC7A5`, `<div class="meta-sheet">${recordTable(
+      const dungeonId2 = button.dataset.nightmareRecord;
+      const stamps = contractsFor?.(profile, dungeonId2)?.stamps;
+      openSheet(`${DUNGEONS[dungeonId2].name} \xB7 \uACC4\uC57D \uB3C4\uC7A5`, `<div class="meta-sheet">${recordTable(
         Object.values(CONTRACTS).map(({ id, name }) => [name, stamps?.[id] ? "\uD68D\uB4DD" : "\uBBF8\uD68D\uB4DD"])
       )}</div>`);
     });
@@ -19574,9 +19748,9 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/dungeons.js
   var { availableDungeons: availableDungeons2, setExpeditionParty: setExpeditionParty2, setSeals: setSeals2, startView: startView2 } = meta_exports;
-  function departureDifficulty(profile, dungeonId) {
-    const choice = profile.ui?.difficulty?.[dungeonId];
-    const entry = availableDungeons2(profile).find((dungeon) => dungeon.id === dungeonId);
+  function departureDifficulty(profile, dungeonId2) {
+    const choice = profile.ui?.difficulty?.[dungeonId2];
+    const entry = availableDungeons2(profile).find((dungeon) => dungeon.id === dungeonId2);
     return entry?.difficulties?.includes(choice) ? choice : "normal";
   }
   function listedPool(roster2, dungeon, view) {
@@ -19637,23 +19811,23 @@ const BattleRuntime = {
     $$("[data-locked-roster]", node).forEach((button) => button.addEventListener("click", () => openRoster(button.dataset.lockedRoster)));
     $$("[data-dungeon]", node).forEach((button) => button.addEventListener("click", () => prepare(button.dataset.dungeon)));
   }
-  function preparationSheet({ dungeonId, currentProfile, updateProfile, roster: roster2, widgets: widgets2, sheets: sheets2, start, initialContract = null }) {
-    const dungeon = DUNGEONS[dungeonId];
+  function preparationSheet({ dungeonId: dungeonId2, currentProfile, updateProfile, savePreparation, roster: roster2, widgets: widgets2, sheets: sheets2, start }) {
+    const dungeon = DUNGEONS[dungeonId2];
     const { card } = roster2;
     let sealsOpen = false;
     let leadRow;
-    let contract = initialContract;
-    let goalDifficulty = initialContract ? "nightmare" : null;
     function scrollPosition() {
       return { top: $("#sh-body").scrollTop, leads: leadRow?.scrollLeft, seals: $(".meta-seal-options")?.scrollTop };
     }
     function render(message = "", focusLead, scroll = scrollPosition()) {
       const profile = currentProfile();
-      const entry = availableDungeons2(profile).find((dungeon2) => dungeon2.id === dungeonId);
-      const view = startView2(profile, dungeonId);
-      const difficulty = goalDifficulty ?? departureDifficulty(profile, dungeonId);
+      const entry = availableDungeons2(profile).find((dungeon2) => dungeon2.id === dungeonId2);
+      const view = startView2(profile, dungeonId2);
+      const draft = profile.ui?.preparation;
+      const saved = draft?.dungeonId === dungeonId2 ? draft : null;
+      const difficulty = entry?.difficulties?.includes(saved?.difficulty) ? saved.difficulty : departureDifficulty(profile, dungeonId2);
       const pool = listedPool(roster2, dungeon, view);
-      const contracts = contractsFor?.(profile, dungeonId);
+      const contracts = contractsFor?.(profile, dungeonId2);
       const canContract = difficulty === "nightmare" && contracts?.unlocked;
       const intro = dungeon.layout === "intro";
       const lead = view.lead;
@@ -19661,7 +19835,7 @@ const BattleRuntime = {
       const name = (id) => esc(card(id).name);
       const option = (id, chosen) => `<option value="${id}"${id === chosen ? " selected" : ""}>${name(id)}</option>`;
       const leadChoices = view.leadCandidates.filter((id) => !view.seals.includes(id));
-      const contractChoice = canContract ? CONTRACTS[contract] : null;
+      const contractChoice = canContract && Object.hasOwn(CONTRACTS, saved?.contract) ? CONTRACTS[saved.contract] : null;
       sheets2.openSheet(`${dungeon.name} \xB7 \uC900\uBE44`, `<div class="meta-sheet meta-prep">
       <section class="meta-prep-section">
         <h4 id="meta-lead-heading">\uB300\uD45C</h4>
@@ -19741,7 +19915,7 @@ const BattleRuntime = {
       for (const button of $$(".meta-prep [data-seal]")) button.addEventListener("click", () => {
         const id = button.dataset.seal;
         const ids = view.seals.includes(id) ? view.seals.filter((sealed) => sealed !== id) : [...view.seals, id];
-        const result = setSeals2(profile, dungeonId, ids, roster2);
+        const result = setSeals2(profile, dungeonId2, ids, roster2);
         if (result.announce.ok) updateProfile(result.profile);
         const errors = { empty_grade: "\uAC01 \uB4F1\uAE09\uC5D0\uC11C \uD55C \uBA85 \uC774\uC0C1 \uB0A8\uACA8\uC57C \uD55C\uB2E4.", invalid_seals: `\uCD5C\uB300 ${view.sealSlots}\uBA85\uAE4C\uC9C0 \uBD09\uC778\uD560 \uC218 \uC788\uB2E4.` };
         sealsOpen = true;
@@ -19749,8 +19923,8 @@ const BattleRuntime = {
       });
       for (const button of $$(".meta-prep [data-difficulty]")) button.addEventListener("click", () => {
         sealsOpen = $("#meta-seals")?.open || false;
-        goalDifficulty = null;
-        updateProfile({ ...profile, ui: { ...profile.ui, difficulty: { ...profile.ui?.difficulty, [dungeonId]: button.dataset.difficulty } } });
+        const difficulty2 = button.dataset.difficulty;
+        savePreparation({ dungeonId: dungeonId2, difficulty: difficulty2, contract: difficulty2 === "nightmare" ? contractChoice?.id ?? null : null });
         render();
       });
       $("#meta-contract-choice")?.addEventListener("click", () => {
@@ -19761,8 +19935,8 @@ const BattleRuntime = {
           $("#meta-contract-choice")?.focus({ preventScroll: true });
         }
         sheets2.openSheet("\uC545\uBABD \uACC4\uC57D", `<div class="meta-sheet meta-contract-options">
-        <button class="btn" data-contract="" aria-pressed="${!contract}">\uACC4\uC57D \uC5C6\uC74C</button>
-        ${Object.values(CONTRACTS).map((entry2) => `<button class="btn big" data-contract="${entry2.id}" aria-pressed="${entry2.id === contract}">
+        <button class="btn" data-contract="" aria-pressed="${!contractChoice}">\uACC4\uC57D \uC5C6\uC74C</button>
+        ${Object.values(CONTRACTS).map((entry2) => `<button class="btn big" data-contract="${entry2.id}" aria-pressed="${entry2.id === contractChoice?.id}">
           <b>${esc(entry2.name)}</b><small>${esc(entry2.rule)}</small>
           <small>\uBB38\uC9C0\uAE30 \uBCF4\uC0C1\uC5D0\uC11C \u25C6${CONTRACT_ESCROW} \uB9E1\uAE40 \xB7 6\uCE35\uAE4C\uC9C0 \uB2EC\uC131\uD558\uBA74 \u25C6${CONTRACT_PAYOUT}</small>
           <small class="${contracts.stamps?.[entry2.id] ? "gain" : ""}">${contracts.stamps?.[entry2.id] ? "\uB3C4\uC7A5 \uD68D\uB4DD" : "\uB3C4\uC7A5 \uC5C6\uC74C"}</small>
@@ -19770,12 +19944,12 @@ const BattleRuntime = {
         <button class="btn" id="meta-contract-back">\uC900\uBE44\uB85C \uB3CC\uC544\uAC00\uAE30</button>
       </div>`, { onClose: back });
         for (const button of $$(".meta-contract-options [data-contract]")) button.addEventListener("click", () => {
-          contract = button.dataset.contract || null;
+          savePreparation({ dungeonId: dungeonId2, difficulty, contract: button.dataset.contract || null });
           back();
         });
         $("#meta-contract-back").addEventListener("click", back);
       });
-      $("#meta-start-expedition").addEventListener("click", () => start(dungeonId, difficulty, contractChoice?.id ?? null));
+      $("#meta-start-expedition").addEventListener("click", () => start(dungeonId2, difficulty, contractChoice?.id ?? null));
       function updateParty(nextLead, companions, preferredCompanion, focusLead2) {
         sealsOpen = $("#meta-seals")?.open || false;
         const result = setExpeditionParty2(profile, { lead: nextLead, companions, preferredCompanion });
@@ -19939,6 +20113,7 @@ const BattleRuntime = {
     let profile = stored?.profile || createProfile2();
     let run = stored?.run || null;
     let dailyRun = null;
+    let unsavedDailyResult = null;
     let review = null;
     let preparationOpen = false;
     let crystalCount = 0;
@@ -20015,6 +20190,7 @@ const BattleRuntime = {
       const completedTower = profile.notebook.chapters.includes(7);
       const collecting = completedTower && target?.screen === "collection";
       const destinationId = !collecting && (target?.dungeonId ?? profile.ui?.destination);
+      const rift = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
       hubScreen(node, {
         profile,
         run,
@@ -20027,7 +20203,7 @@ const BattleRuntime = {
         arriving,
         depart: collecting ? () => openMeta("collection", true) : destinationId ? () => prepare(destinationId, target?.contractId) : openDungeons,
         departureLabel: collecting ? "\uB3D9\uB8CC \uCD9C\uD604 \uC9C0\uC5ED \uBCF4\uAE30" : null,
-        daily: dailyStore2?.view?.(profile, /* @__PURE__ */ new Date()),
+        daily: unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift,
         openDaily: showDaily
       });
       if (profile.ui?.announcement) updateUi({ announcement: null });
@@ -20104,6 +20280,7 @@ const BattleRuntime = {
       render();
     }
     function showDaily(message) {
+      if (unsavedDailyResult) return finishDaily(unsavedDailyResult);
       const view = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
       if (!view?.unlocked) return;
       if (view.active) {
@@ -20164,13 +20341,25 @@ const BattleRuntime = {
       review = enterRun(current, dailyHost) || null;
     }
     function finishDaily(current) {
-      if (current !== dailyRun || current.phase !== "done") return;
+      if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== "done") return;
       const result = dailyStore2?.finish?.(current);
       if (!result?.ok) {
+        unsavedDailyResult = current;
         if (result?.reason === "storage_failed") warnSave();
         const node2 = page("daily-result", { title: "\uADE0\uC5F4 \uAE30\uB85D" });
-        node2.innerHTML = '<div class="rift-actions"><p>\uADE0\uC5F4 \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uB2E4.</p><button class="btn go" id="meta-rift-retry">\uB2E4\uC2DC \uC800\uC7A5</button></div>';
+        node2.innerHTML = `<div class="meta-sheet rift-actions">
+        <p role="alert">\uADE0\uC5F4 \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uB2E4. \uC0C8\uB85C\uACE0\uCE68\uD558\uAC70\uB098 \uAC8C\uC784\uC744 \uB2EB\uC73C\uBA74 \uB9C8\uC9C0\uB9C9 \uC800\uC7A5 \uC9C0\uC810\uC73C\uB85C \uB3CC\uC544\uAC04\uB2E4. \uACB0\uACFC\uB97C \uBCF4\uAD00\uD558\uB824\uBA74 \uAE30\uB85D \uD30C\uC77C\uC744 \uBC1B\uC790.</p>
+        <button class="btn go" data-backup-action="export">\uAE30\uB85D \uB0B4\uBCF4\uB0B4\uAE30</button>
+        <button class="btn" id="meta-rift-retry">\uB2E4\uC2DC \uC800\uC7A5</button>
+        <button class="btn" id="meta-rift-hub">\uAD00\uCE21\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30</button>
+      </div>`;
         $("#meta-rift-retry", node2).addEventListener("click", () => finishDaily(current));
+        $("#meta-rift-hub", node2).addEventListener("click", () => {
+          dailyRun = null;
+          review = null;
+          showHub();
+          sessionNotice("\uADE0\uC5F4 \uACB0\uACFC\uB294 \uC544\uC9C1 \uC800\uC7A5\uB418\uC9C0 \uC54A\uC558\uB2E4. \uAC8C\uC784\uC744 \uB2EB\uAE30 \uC804\uC5D0 \uAE30\uB85D\uC744 \uB0B4\uBCF4\uB0BC \uC218 \uC788\uB2E4.");
+        });
         return;
       }
       const spec = current.daily?.spec;
@@ -20187,6 +20376,7 @@ const BattleRuntime = {
       };
       const view = dailyStore2?.view?.(profile, /* @__PURE__ */ new Date());
       dailyRun = null;
+      unsavedDailyResult = null;
       review = null;
       const node = page("daily-result", { title: dailyResultTitle(score), track: score.outcome === "win" ? "victory" : "defeat" });
       dailyResultScreen(node, { spec, score, official: result.official }, {
@@ -20235,23 +20425,39 @@ const BattleRuntime = {
         widgets: widgets2,
         prepare: run ? null : prepare,
         quickStart,
-        openRoster(dungeonId) {
-          const dungeon = DUNGEONS[dungeonId];
+        openRoster(dungeonId2) {
+          const dungeon = DUNGEONS[dungeonId2];
           rosterTable({ dungeon, pool: listedPool(roster2, dungeon), locked: true, currentProfile: () => profile, updateProfile, widgets: widgets2, sheets: sheets2 });
         }
       });
     }
-    function prepare(dungeonId, contractId) {
-      if (run || !availableDungeons3(profile).some((dungeon) => dungeon.id === dungeonId)) return;
-      const initialContract = Object.hasOwn(CONTRACTS, contractId) && profile.nightmareUnlocks.includes(dungeonId) ? contractId : null;
-      if (profile.ui?.destination !== dungeonId || !profile.ui?.preparing) updateUi({ destination: dungeonId, preparing: true });
+    function prepare(dungeonId2, contractId) {
+      if (run || !availableDungeons3(profile).some((dungeon) => dungeon.id === dungeonId2)) return;
+      const initialContract = Object.hasOwn(CONTRACTS, contractId) && profile.nightmareUnlocks.includes(dungeonId2) ? contractId : null;
+      const saved = profile.ui?.preparation;
+      if (initialContract || saved?.dungeonId !== dungeonId2) {
+        savePreparation({ dungeonId: dungeonId2, difficulty: initialContract ? "nightmare" : departureDifficulty(profile, dungeonId2), contract: initialContract });
+      }
       preparationOpen = true;
-      preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster: roster2, widgets: widgets2, sheets: sheets2, start: startExpedition, initialContract });
+      preparationSheet({ dungeonId: dungeonId2, currentProfile: () => profile, updateProfile, savePreparation, roster: roster2, widgets: widgets2, sheets: sheets2, start: startExpedition });
+    }
+    function savePreparation(draft) {
+      const { dungeonId: dungeonId2, difficulty } = draft;
+      const next = { ...profile, ui: {
+        ...profile.ui,
+        destination: dungeonId2,
+        difficulty: { ...profile.ui?.difficulty, [dungeonId2]: difficulty }
+      } };
+      updateProfile(setPreparation?.(next, draft) ?? { ...next, ui: { ...next.ui, preparation: draft } });
+    }
+    function withoutPreparation() {
+      const next = clearPreparation?.(profile) ?? profile;
+      return { ...next, ui: { ...next.ui, preparation: null, preparing: false } };
     }
     function closePreparation() {
       if (!preparationOpen || $("#sheet").classList.contains("on")) return;
       preparationOpen = false;
-      updateUi({ preparing: false });
+      updateProfile(withoutPreparation());
       if ($("#hub").classList.contains("on")) showHub();
       else if ($("#dungeons").classList.contains("on")) {
         const top = $("#dungeons .meta-page").scrollTop;
@@ -20260,17 +20466,18 @@ const BattleRuntime = {
       }
     }
     function startExpedition(destination, difficulty = "normal", contract = null) {
-      const dungeonId = destination || "dawn_forest";
+      const dungeonId2 = destination || "dawn_forest";
       const requestedSeed = new URLSearchParams(location.search).get("seed");
       const seed = requestedSeed !== null && /^\d+$/.test(requestedSeed) ? Number(requestedSeed) >>> 0 : Math.floor(Math.random() * 4294967296);
-      run = createRun({ core: core2, roster: roster2, dungeonId, difficulty, contract, seed, profileView: startView3(profile, dungeonId) });
+      run = createRun({ core: core2, roster: roster2, dungeonId: dungeonId2, difficulty, contract, seed, profileView: startView3(profile, dungeonId2) });
       preparationOpen = false;
-      updateUi({
-        destination: destination || profile.ui?.destination,
-        preparing: false,
+      const next = withoutPreparation();
+      updateProfile({ ...next, ui: {
+        ...next.ui,
+        destination: destination || next.ui.destination,
         announcement: null,
-        ...destination && { difficulty: { ...profile.ui?.difficulty, [dungeonId]: difficulty } }
-      });
+        ...destination && { difficulty: { ...next.ui.difficulty, [dungeonId2]: difficulty } }
+      } });
       enterExpedition();
     }
     function enterExpedition() {
@@ -20287,7 +20494,7 @@ const BattleRuntime = {
       const saved = profile.ui?.recruitChoices;
       const candidates = rewards.result === "win" ? rewards.recruitable : rewards.shardCandidates;
       const initial = candidates.length === 1 ? candidates : [];
-      const choices = saved?.runId === run.id ? saved.ids.filter((id) => candidates.includes(id)) : initial;
+      const choices = saved?.runId === run.id && Array.isArray(saved.ids) ? saved.ids.filter((id) => candidates.includes(id)) : initial;
       const node = page("recruit", { title: rewards.result === "win" ? "\uC0DD\uD658" : "\uC6D0\uC815 \uC2E4\uD328" });
       recruitScreen(node, {
         run,
@@ -20321,10 +20528,11 @@ const BattleRuntime = {
       const recruits = announce.recruits;
       const returned = new Set(announce.returned ?? run.bench.filter((id) => !run.fallen.includes(id)));
       for (const id of /* @__PURE__ */ new Set([...run.participated, ...recruits])) {
-        if (next.recruits[id]) recent[id] = [{ ...entry, returned: returned.has(id) }, ...recent[id] || []].slice(0, 3);
+        if (next.recruits[id]) recent[id] = [{ ...entry, returned: returned.has(id) }, ...Array.isArray(recent[id]) ? recent[id] : []].slice(0, 3);
       }
       const hubReturners = run.result === "win" ? run.bench.filter((id) => next.recruits[id]) : [];
-      const returners = [.../* @__PURE__ */ new Set([...recruits, ...hubReturners, ...next.ui?.returners || []])].slice(0, 3);
+      const previousReturners = Array.isArray(next.ui?.returners) ? next.ui.returners : [];
+      const returners = [.../* @__PURE__ */ new Set([...recruits, ...hubReturners, ...previousReturners])].slice(0, 3);
       const announcement = {
         dungeons: announce.dungeons,
         nightmares: announce.nightmares,
@@ -20358,6 +20566,7 @@ const BattleRuntime = {
       profile = createProfile2();
       run = null;
       dailyRun = null;
+      unsavedDailyResult = null;
       review = null;
       preparationOpen = false;
       sheets2.closeSheet();
@@ -20370,7 +20579,7 @@ const BattleRuntime = {
     }
     function currentBackup({ lastGood = false } = {}) {
       const settings2 = settingsSnapshot(stage2, audio2, music2);
-      if (!recovery) return store2.exportBackup({ profile, run, dailyRun, settings: settings2 });
+      if (!recovery) return store2.exportBackup({ profile, run, dailyRun: unsavedDailyResult ?? dailyRun, settings: settings2 });
       const good = lastGood ? store2.loadLastGood?.() : null;
       return store2.exportBackup(good?.status === "ok" ? { profile: good.profile, settings: settings2 } : { settings: settings2 });
     }
@@ -20378,9 +20587,11 @@ const BattleRuntime = {
       const good = store2.loadLastGood?.();
       const hasGood = good?.status === "ok";
       const unavailable = recovery === "unavailable";
+      const riftDamaged = !unavailable && store2.exportBackup && currentBackup({ lastGood: true }).damagedDaily != null;
       const node = page("recovery");
       node.innerHTML = `<div class="meta-panel meta-sheet meta-recovery">
       <h2>${unavailable ? "\uC800\uC7A5 \uACF5\uAC04\uC5D0 \uC811\uADFC\uD560 \uC218 \uC5C6\uB2E4" : "\uC804\uCCB4 \uAE30\uB85D \uBCF5\uAD6C \uD544\uC694"}</h2>
+      ${riftDamaged ? "<p>\uADE0\uC5F4 \uAE30\uB85D\uB3C4 \uC190\uC0C1\uB410\uB2E4. \uC9C1\uC804 \uAE30\uB85D\uC73C\uB85C \uBCF5\uAD6C\uD558\uBA74 \uC190\uC0C1\uB41C \uADE0\uC5F4\uC740 \uB530\uB85C \uBCF4\uAD00\uD55C\uB2E4.</p>" : ""}
       ${hasGood ? `<button class="btn go" id="meta-last-good">\uC9C1\uC804 \uAE30\uB85D\uC73C\uB85C \uBCF5\uAD6C \xB7 \uB3D9\uB8CC ${Object.keys(good.profile?.recruits ?? {}).length}\uBA85</button>` : ""}
       <button class="btn${hasGood ? "" : " go"}" data-backup-action="import">\uAE30\uB85D \uAC00\uC838\uC624\uAE30</button>
       <button class="btn" id="meta-recovery-new">${unavailable ? "\uAE30\uB85D \uC5C6\uC774 \uC2DC\uC791" : "\uC0C8 \uAE30\uB85D \uC2DC\uC791"}</button>
@@ -20418,7 +20629,8 @@ const BattleRuntime = {
           else if (endingDue()) showEnding();
           else {
             showHub();
-            if (profile.ui?.preparing) prepare(profile.ui.destination);
+            const destination = profile.ui?.preparation?.dungeonId ?? (profile.ui?.preparing ? profile.ui.destination : null);
+            if (destination) prepare(destination);
           }
         }
       });
@@ -20458,9 +20670,9 @@ const BattleRuntime = {
       musicEnabled = enabled;
       musicPlayer?.setEnabled(enabled);
     },
-    play(trackId, dungeonId) {
-      musicTrack = [trackId, dungeonId];
-      musicPlayer?.play(trackId, dungeonId);
+    play(trackId, dungeonId2) {
+      musicTrack = [trackId, dungeonId2];
+      musicPlayer?.play(trackId, dungeonId2);
     }
   };
   var unlockEffects = audio.unlockAudio;

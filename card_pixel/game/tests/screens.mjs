@@ -26,6 +26,7 @@ import { relicEffect } from '../src/ui/relics.js';
 import { formationMoves } from '../src/ui/screens/order.js';
 import { blessingText } from '../src/ui/widgets.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
+import { playDaily, playRun } from '../tools/sim.mjs';
 
 const sessionKey = 'relaymare.session';
 const dailyKey = 'relaymare.daily';
@@ -148,8 +149,8 @@ function jsonSafe(value, path = 'run') {
   return path === 'run' ? JSON.parse(JSON.stringify(value)) : value;
 }
 
-function snowRabbitProfile() {
-  const intro = makeRun({ dungeonId: 'dawn_forest', seed: 7, floor: 2 });
+function snowRabbitProfile(seed = 7) {
+  const intro = makeRun({ dungeonId: 'dawn_forest', seed, floor: 2 });
   command(Run.chooseDoor, intro, 0);
   startPicks(intro, 'snow_rabbit');
   advance(intro);
@@ -2194,7 +2195,371 @@ function saveImport() {
   };
 }
 
+function riftSaveFailure() {
+  const fixture = riftFixture();
+  fixture.start();
+  const first = fixture.page();
+  const run = playDaily('2026-11-21');
+  assert.deepEqual([run.seed, run.result, run.floor, run.stats.turns], [20261121, 'win', 7, 33]);
+  command(fixture.store.save, run);
+  const finished = fixture.page();
+  const store = backupStore({ [sessionKey]: first.session, [dailyKey]: first.daily });
+  assert.equal(store.inspectBackup(store.exportBackup({ dailyRun: run })).summary.dailyActive.floor, 7);
+  return {
+    ...first, proof: '11.21 official win stays in memory while storage is stuck at floor 1',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await page.evaluate(({ key, finalSave }) => {
+        const { getItem, setItem } = Storage.prototype;
+        let reads = 0;
+        Storage.prototype.getItem = function (item) {
+          // The rift button reads the ledger, then resume reads the in-memory completion fixture.
+          if (this === localStorage && item === key && ++reads === 2) return finalSave;
+          return getItem.call(this, item);
+        };
+        Storage.prototype.setItem = function (item, value) {
+          if (this === localStorage && item === key) throw new DOMException('Forced rift write failure', 'QuotaExceededError');
+          return setItem.call(this, item, value);
+        };
+      }, { key: dailyKey, finalSave: finished.daily });
+      await riftRow(page).click();
+      const result = page.locator('#daily-result.on');
+      // The export sheet opens at once (aria-modal), so read the alert by CSS rather than by role.
+      await text(result.locator('[role="alert"]'), '마지막 저장 지점으로 돌아간다');
+      if (await page.locator('#sheet.on #b-sheetclose').isVisible()) await page.locator('#sheet.on #b-sheetclose').click();
+      await result.locator('#meta-rift-retry').click();
+      await capture();
+      await result.getByRole('button', { name: '기록 내보내기' }).click();
+      await text(page.locator('#sheet.on .meta-backup'), '균열 2026-11-21 · 7층');
+      const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#meta-backup-download').click()]);
+      const backup = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
+      // The rift store keeps its snapshot as serialized JSON text.
+      const raw = backup.daily.active.snapshot;
+      const snapshot = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      const exportedRun = snapshot?.run ?? snapshot;
+      assert.equal(exportedRun?.result, 'win', 'exported rift snapshot keys: ' + Object.keys(snapshot ?? {}).join(','));
+      assert.equal(backup.daily.active.checkpoint.floor, 7);
+      assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).active.checkpoint.floor, dailyKey), 1);
+      await page.locator('#b-sheetclose').click();
+      await result.locator('#meta-rift-hub').click();
+      await text(page.locator('#session-notices'), '균열 결과는 아직 저장되지 않았다');
+      await text(riftRow(page), '저장되지 않은 결과');
+      await riftRow(page).click();
+      await text(result.getByRole('alert'), '균열 기록을 저장하지 못했다');
+    }
+  };
+}
+
+function legacyContractReceipt() {
+  const checkpoint = makeRun({ seed: 0, floor: 6, difficulty: 'nightmare', contract: 'heirloom', tempoVersion: 2,
+    profileView: Meta.startView(nightmareProfile(), 'ember_volcano') });
+  const legacy = JSON.parse(storedSession({ run: checkpoint }));
+  delete legacy.run.run.contract.ruleVersion;
+  const session = JSON.stringify(legacy);
+  const run = Save.restoreRun(legacy.run, { core, roster });
+  const door = run.doors.find(candidate => candidate.type === 'elite').index;
+  startBattle(run, { door });
+  const result = settleWin(run, { heirloomKills: 1, heirloomsUsed: 1 });
+  assert.equal(result.contract.paid, CONTRACT_PAYOUT);
+  return {
+    session, proof: 'Unversioned Ember Nightmare seed 0 still shows the floor-6 heirloom rule and payout',
+    async show(page, { text, capture, revisit }) {
+      await text(await openDoorInfo(page, door), '4층이나 6층에서 유품 기술의 명중으로 적을 쓰러뜨리고 이긴다.');
+      await capture();
+      await revisit(storedSession({ run }), async source => {
+        await text(source.locator('#result.on .contract-met'), '계약 달성');
+        await text(source.locator('#result.on .gain').filter({ hasText: '7층 앞에서' }), '7층 앞에서 ◆' + CONTRACT_PAYOUT);
+        await capture('result', source);
+      });
+    }
+  };
+}
+
+function lessonActionTables() {
+  const run = makeRun({ dungeonId: 'twilight_cathedral', seed: 0, floor: 2, tempoVersion: 2 });
+  const session = storedSession({ run });
+  const preview = Run.getTempoView(run, 0);
+  const beat = preview.enemies[0].beats.find(action => action.turn === 2);
+  assert.equal(beat.name, '소울드레인 예행');
+  assert.equal(beat.lesson, true);
+  command(Run.chooseDoor, run, 0);
+  const order = storedSession({ run });
+  const line = '2턴 · 소울드레인 예행 · 마법 · HP 피해 0 · 현재 MP −12';
+  return {
+    session, proof: line,
+    async show(page, { text, capture, revisit }) {
+      const door = await openDoorInfo(page, 0);
+      await text(door.locator('.run-foe-detail').first(), line);
+      await capture();
+      await revisit(order, async source => {
+        await source.locator('#order.on #b-opponents').click();
+        await text(source.locator('#sheet.on .run-foe-detail').first(), line);
+        await capture('order', source);
+      });
+    }
+  };
+}
+
+function tideRippleWarning() {
+  const run = makeRun({ dungeonId: 'creation_tower', seed: 1, floor: 2, tempoVersion: 2, profileView: { lead: 'black_swan' } });
+  const battle = startBattle(run, { party: ['black_swan'] });
+  const second = act(battle, '회피태세').findLast(event => event.t === 'await');
+  const third = act(battle, '회피태세').findLast(event => event.t === 'await');
+  const ripple = '잔물결 · 물리 ×0.75';
+  assert.equal(second.countdown.name, '잔물결');
+  assert.equal(third.intent.name, second.countdown.name);
+  assert.equal(third.intent.kind, 'phy');
+  return {
+    session: storedSession({ run }), proof: ripple,
+    async show(page, { text, capture }) {
+      await openBattle(page);
+      await tapTile(page, '회피태세');
+      await text(page.locator('#pf-cd.on'), '다음 턴 ' + ripple);
+      await text(page.locator('#region-next'), '조류 · 다음 턴 ' + ripple);
+      await capture();
+      await tapTile(page, '회피태세');
+      await text(page.locator('#intent.on'), '잔물결');
+      await text(page.locator('#region-next'), '조류 · 이번 턴 ' + ripple);
+    }
+  };
+}
+
+const reviewGardenRoute = run => run.doors[[0, 0, 1, 0, 0, 1, 0, 0][run.floor - 1]];
+
+function gardenStartingFields() {
+  let checkpoint;
+  playRun('starlit_garden', 37, {
+    difficulty: 'easy', firstMain: true, doorOverride: reviewGardenRoute,
+    onBattle(run) {
+      if (run.floor === 4) command(Run.chooseGateReward, run, { kind: 'relic', id: 'buff_overload' });
+    },
+    serviceOverride(run) {
+      if (run.floor !== 5) return false;
+      assert.equal(run.room.event.id, 'two_garden_chairs');
+      return command(Run.chooseEvent, run, 'lanterns').ok;
+    },
+    onRoom(run) { if (run.floor === 5) checkpoint = Save.serializeRun(run); }
+  });
+  const run = Save.restoreRun(checkpoint, { core, roster });
+  advance(run);
+  const index = run.doors.find(door => door.type === 'elite').index;
+  const session = storedSession({ run });
+  const field = Run.doorStart(run, index).field;
+  assert.equal(field.length, 4);
+  assert.ok(field.includes('star_powder'));
+  assert.deepEqual(Array.from(startBattle(run, { door: index }).state().field), field);
+  const names = field.map(id => core.BUFF_NAMES[id]).join(' · ');
+  return {
+    session, proof: names,
+    async show(page, { text, capture, revisit }) {
+      await text(await openDoorInfo(page, index), '시작 하늘 · ' + names);
+      await capture();
+      await revisit(storedSession({ run }), async source => {
+        await openBattle(source);
+        const slots = source.locator('#sky-slots i');
+        assert.equal(await slots.count(), 5);
+        assert.equal(await source.locator('#sky-slots i.on').count(), 4);
+        await text(source.locator('#skyname'), names);
+        await capture('battle', source);
+      });
+    }
+  };
+}
+
+function doubleRelicReceipt() {
+  let checkpoint;
+  playRun('twilight_cathedral', 64, {
+    difficulty: 'easy', firstMain: true, doorOverride: reviewGardenRoute,
+    onRoom(run) {
+      if (run.floor !== 5) return;
+      assert.equal(run.room.event.id, 'whale_third_peal');
+      checkpoint = Save.serializeRun(run);
+    }
+  });
+  const run = Save.restoreRun(checkpoint, { core, roster });
+  advance(run);
+  const battle = startBattle(run, { door: 1, party: ['galaxy_whale', 'victoria', 'eclipse_queen'] });
+  const live = storedSession({ run });
+  const actions = [3, 0, 4].map(index => {
+    const option = battle.options().find(entry => entry.index === index);
+    battle.act(index);
+    return { name: option.name, heirloom: !!option.heirloom };
+  });
+  const summary = battle.summary();
+  assert.equal(summary.outcome, 'win');
+  assert.equal(summary.bet?.won, true);
+  const settlement = command(Run.settleBattle, run, summary);
+  assert.deepEqual(settlement.relics, ['big_bang', 'over_divine']);
+  return {
+    session: live, proof: 'Seed 64 wins the bet and the elite relic on the same turn',
+    async show(page, { text, capture }) {
+      await openBattle(page);
+      for (const { name } of actions.slice(0, -1)) await tapTile(page, name);
+      // The finishing action is the inherited skill, which lives on the heirloom button, not a skill tile.
+      const last = actions.at(-1);
+      await (last.heirloom ? page.locator('#b-heir') : skillTile(page, last.name)).click();
+      async function verify() {
+        const receipts = page.locator('#result.on .relic-receipt');
+        await text(receipts.nth(0), '빅뱅 · 장착 완료');
+        await text(receipts.nth(1), '오버디바인 · 장착 완료');
+        assert.equal(await receipts.count(), 2);
+      }
+      await verify();
+      await capture();
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await verify();
+    }
+  };
+}
+
+function lowCrystalSpring() {
+  let checkpoint;
+  playRun('dawn_forest', 17, {
+    opening: 'stand',
+    serviceOverride(run) {
+      if (run.room.type !== 'spring') return false;
+      assert.equal(run.crystals, 3);
+      checkpoint = Save.serializeRun(run);
+      return true;
+    }
+  });
+  const run = Save.restoreRun(checkpoint, { core, roster });
+  const session = storedSession({ run });
+  assert.equal(command(Run.springDraw, run).id, 'siren');
+  const offer = command(Run.getSpringOffer, run);
+  assert.equal(run.crystals, 2);
+  assert.ok(offer.candidates.length);
+  return {
+    session, proof: '◆2 reveals candidates for free and leaves commit disabled',
+    async show(page, { text, capture }) {
+      const spring = page.locator('#spring.on');
+      await spring.locator('#b-draw').click();
+      await text(spring.locator('.gems'), '◆ 2');
+      await spring.locator('#b-pick').click();
+      assert.equal(await spring.locator('.cardrow').count(), offer.candidates.length);
+      await text(spring.getByRole('status'), '합류에 결정 1개가 부족하다');
+      await spring.locator('.cardrow').first().click();
+      assert.equal(await spring.locator('#b-take').isDisabled(), true);
+      await capture();
+      await spring.locator('#b-spring-pass').click();
+      await text(spring.locator('.gems'), '◆ 2');
+    }
+  };
+}
+
+function resumePreparation() {
+  const intro = snowRabbitProfile(17);
+  const journey = mainReturn(intro, 'ember_volcano', 'normal', 0);
+  const { profile } = applyReturn(intro, journey);
+  const draft = { dungeonId: 'ember_volcano', difficulty: 'nightmare', contract: 'heirloom' };
+  return {
+    session: storedSession({ profile }), seed: 0, proof: 'Nightmare draft and contract persist through reload, and clear on departure or dismissal',
+    async show(page, { text, capture }) {
+      const panel = page.locator('#sheet.on');
+      const choice = panel.locator('#meta-contract-choice');
+      const open = async () => {
+        await page.locator('#hub.on #meta-telescope').click();
+        await page.locator('[data-dungeon="ember_volcano"]').click();
+        await panel.locator('[data-difficulty="nightmare"]').click();
+        await choice.click();
+        await panel.locator('[data-contract="heirloom"]').click();
+      };
+      const saved = () => page.evaluate(key => JSON.parse(localStorage.getItem(key)).profile.ui.preparation, sessionKey);
+      await enterObservatory(page);
+      await open();
+      assert.deepEqual(await saved(), draft);
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await enterObservatory(page);
+      await text(choice, '악몽 계약 · 마지막 유품');
+      await capture();
+      await page.locator('#b-sheetclose').click();
+      assert.equal(await saved(), null);
+      await enterObservatory(page);
+      await open();
+      await panel.locator('#meta-start-expedition').click();
+      assert.equal(await saved(), null);
+      assert.equal(await page.evaluate(() => window.__game.run.contract.id), draft.contract);
+    }
+  };
+}
+
+function damagedRiftRecovery() {
+  const intro = snowRabbitProfile(17);
+  const { profile } = applyReturn(intro, mainReturn(intro, 'ember_volcano', 'normal', 0));
+  const fixture = riftFixture(profile);
+  fixture.start();
+  const run = makeRun({ seed: 0, floor: 2, profileView: Meta.startView(profile, 'ember_volcano') });
+  const { session, daily, now } = fixture.page(run);
+  const damaged = daily.slice(0, daily.length / 2);
+  const lastGood = storedSession({ profile });
+  const store = backupStore({ [sessionKey]: session, [dailyKey]: damaged, 'relaymare.lastGood': lastGood });
+  const backup = store.exportBackup();
+  assert.deepEqual(store.inspectBackup(backup).warnings, ['invalid_daily']);
+  assert.equal(backup.session.run.run.floor, 2);
+  assert.equal(backup.damagedDaily, damaged);
+  assert.equal(store.restoreLastGood().ok, true);
+  assert.equal(store.loadDetailed().status, 'ok');
+  return {
+    session, daily: damaged, lastGood, now,
+    proof: 'Truncated rift is quarantined while the floor-2 main save exports and last good restores',
+    async show(page, { text, capture }) {
+      await page.locator('#hub.on .b-set').click();
+      await page.locator('#sheet.on [data-backup-action="export"]').click();
+      await text(page.locator('#sheet.on .meta-backup'), '손상된 균열 기록은 파일에 따로 보관했다');
+      const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#meta-backup-download').click()]);
+      const exported = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
+      assert.equal(exported.session.run.run.floor, 2);
+      assert.equal(exported.damagedDaily, damaged);
+      await page.evaluate(key => localStorage.setItem(key, '{"broken":'), sessionKey);
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await text(page.locator('#recovery.on .meta-recovery'), '손상된 균열은 따로 보관한다');
+      await capture();
+      await Promise.all([page.waitForEvent('domcontentloaded'), page.locator('#meta-last-good').click()]);
+      await enterObservatory(page);
+      await text(riftRow(page), '첫 도전');
+      assert.equal(await page.evaluate(() => window.__game.run), null);
+    }
+  };
+}
+
+function malformedProfileImport() {
+  const profile = snowRabbitProfile(17);
+  const session = storedSession({ profile });
+  const store = backupStore({ [sessionKey]: session, 'relaymare.lastGood': session });
+  const malformed = store.exportBackup();
+  malformed.session.profile.ui.returners = {};
+  assert.equal(store.inspectBackup(malformed).reason, 'invalid_session');
+  return {
+    session, lastGood: session, proof: 'Object in returners rejected before confirmation or slot switch',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      await page.locator('#hub.on .b-set').click();
+      await page.locator('#sheet.on [data-backup-action="import"]').click();
+      await page.locator('#meta-backup-file').setInputFiles({
+        name: 'malformed.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(malformed))
+      });
+      await text(page.locator('#sheet.on .meta-feedback'), '파일의 동료와 수첩 기록이 손상됐다.');
+      assert.equal(await page.locator('#meta-backup-confirm').count(), 0);
+      assert.equal(await page.evaluate(() => localStorage.getItem('relaymare.activeSlot')), null);
+      assert.equal(await page.evaluate(() => localStorage.getItem('relaymare.lastGood')), session);
+      await capture();
+      await page.locator('#b-sheetclose').click();
+      await text(page.locator('#hub.on h1'), '꿈의 관측소');
+    }
+  };
+}
+
 const cases = {
+  'rift-save-failure': riftSaveFailure,
+  'legacy-contract-receipt': legacyContractReceipt,
+  'lesson-action-tables': lessonActionTables,
+  'tide-ripple-warning': tideRippleWarning,
+  'garden-starting-fields': gardenStartingFields,
+  'double-relic-receipt': doubleRelicReceipt,
+  'low-crystal-spring': lowCrystalSpring,
+  'resume-preparation': resumePreparation,
+  'damaged-rift-recovery': damagedRiftRecovery,
+  'malformed-profile-import': malformedProfileImport,
   'next-goal': nextGoalLine,
   'ending-goal': endingGoal,
   'roster-table': preDepartureRoster,

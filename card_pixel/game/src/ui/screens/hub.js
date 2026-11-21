@@ -5,7 +5,8 @@ import { chapterTitle } from './notebook.js';
 import { dailyRow } from './daily-rift.js';
 
 export function hubLineup(lead, recent) {
-  return [...new Set([lead, ...recent].filter(Boolean))].slice(0, 3);
+  const ids = Array.isArray(recent) ? recent : [];
+  return [...new Set([lead, ...ids].filter(id => typeof id === 'string' && id))].slice(0, 3);
 }
 
 export function sceneActors(ids, widgets, { interactive = false, lead = null, arriving = [] } = {}) {

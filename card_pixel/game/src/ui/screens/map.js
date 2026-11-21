@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { affixChips, foeFlip, head, TYPE } from '../widgets.js';
+import { activeContract, affixChips, foeFlip, head, tempoBeatText, TYPE } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
 import { CONTRACTS, CONTRACT_ESCROW } from '../../content/contracts.js';
@@ -120,9 +120,10 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
   }).join('');
 
   function startSky(door) {
-    if (door.region?.id !== 'starlit_sky' || !door.enemies.length) return '';
+    if (!door.enemies.length) return '';
     const field = Run.doorStart?.(run, door.index)?.field ?? door.start?.field;
-    return field ? '시작 하늘 · ' + (field.map(id => core.BUFF_NAMES[id] || id).join(' · ') || '비어 있음') : '';
+    if (!Array.isArray(field) || (!field.length && door.region?.id !== 'starlit_sky')) return '';
+    return '시작 하늘 · ' + (field.map(id => core.BUFF_NAMES[id] || id).join(' · ') || '비어 있음');
   }
 
   function risks(door) {
@@ -170,7 +171,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
   }
 
   function contractGoal(door) {
-    const contract = CONTRACTS[run.contract?.id];
+    const contract = activeContract(run);
     if (!contract) return '';
     const { floor } = run;
     const eliteRisk = contract.id === 'elite' && floor === 2 && door.risk;
@@ -364,8 +365,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
       const strong = Object.keys(ELEMENT).filter(element => core.Logic.getElementalMultiplier(element, enemy.element) > 1);
       const preview = tempo?.enemies?.[index];
       const hp = preview?.maxHp ?? ready?.[index]?.maxHp ?? enemy.stats.hp;
-      const beats = preview?.beats?.map(beat => beat.turn + '턴 · ' + beat.name +
-        (TYPE[beat.type] ? ' (' + TYPE[beat.type] + ')' : '')) ?? [];
+      const beats = preview?.beats?.map(beat => tempoBeatText(beat, tempo.lesson?.steps?.[beat.turn - 1])) ?? [];
       return '<div class="run-foe-detail">' + sprite(enemy.sprite, { flip: foeFlip(enemy), cls: enemy.look === 'shadow' ? 'shadow-tint' : '' }) +
         '<div><h4>' + esc(enemy.name) + '</h4><p>' + esc(ELEMENT[enemy.element] || '') + ' · HP ' + hp + '</p>' +
         (strong.length ? '<p>상성 우위 · ' + strong.map(element => ELEMENT[element]).join(' · ') + '</p>' : '') +

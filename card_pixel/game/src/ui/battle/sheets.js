@@ -1,11 +1,10 @@
 import { $, esc } from '../dom.js';
-import { blessingText, TYPE, foeFlip, riftKindLabel, statGrid } from '../widgets.js';
+import { activeContract, blessingText, TYPE, foeFlip, riftKindLabel, statGrid } from '../widgets.js';
 import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../relics.js';
 import { shortRiftDate } from '../screens/daily-rift.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
-import { CONTRACTS } from '../../content/contracts.js';
 import { HEIRLOOM_POWER, heirloomSkill } from '../../engine/bridge.js';
 import { affixLines, FIELD, GOOD, fieldCap, intentLines, skyRelics } from './hud.js';
 import * as Run from '../../engine/run.js';
@@ -20,13 +19,14 @@ const STATUS_INFO = {
   guard: '받는 피해 50% 감소', damage_half: '받는 피해 50% 감소',
   defProtocolPhy: '방어력 +50% (방어 프로토콜)', defProtocolMag: '마법방어력 +50% (방어 프로토콜)'
 };
-function contractStatus(run, B) {
+function contractStatus(run, B, contract) {
   const { id, met, failed, riskDoorTaken } = run.contract;
   if (met) return '달성';
   const fighters = B.party.filter(Boolean).length;
   const missedRisk = id === 'elite' && run.floor >= 2 && !riskDoorTaken;
   const missedElite = id === 'elite' && run.floor === 6 && (B.door.type !== 'elite' || fighters < 2);
-  if (failed || run.floor > 6 || missedRisk || missedElite || (id === 'rescue' && run.floor === 6 && fighters < 2)) return '이번 원정 불가';
+  const missedHeirloom = id === 'heirloom' && !contract.legacy && run.floor > 4;
+  if (failed || run.floor > 6 || missedRisk || missedElite || missedHeirloom || (id === 'rescue' && run.floor === 6 && fighters < 2)) return '이번 원정 불가';
   return '아직';
 }
 
@@ -157,7 +157,7 @@ export function createDetails(core, widgets, openSheet) {
   function battlefieldSheet(run, B, focusSlot) {
     if (!B.door) return;
     const region = REGIONS[B.door.region?.id], quirk = QUIRKS[B.door.quirk];
-    const contract = CONTRACTS[run.contract?.id];
+    const contract = activeContract(run);
     const block = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
     const artifacts = B.artifacts || [];
     const focusField = () => $('#b-field')?.focus({ preventScroll: true });
@@ -165,7 +165,7 @@ export function createDetails(core, widgets, openSheet) {
       '정산한 전투 ' + (run.stats?.turns ?? 0) + '턴'].filter(Boolean).join(' · ') : '';
     openSheet('전장·유물', relicStrip(core, artifacts, { temporary: B.temporaryRelic }) + (dailyLine ? '<p>' + esc(dailyLine) + '</p>' : '') +
       (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
-      (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + contractStatus(run, B) +
+      (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + contractStatus(run, B, contract) +
         '</h4><p>' + esc(contract.rule) + '</p>' : ''), {
       latest: focusSlot != null ? `[data-slot="${focusSlot}"]` : undefined, onClose: focusField
     });

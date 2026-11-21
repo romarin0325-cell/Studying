@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { foeFlip } from '../widgets.js';
+import { foeFlip, TYPE } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
 import { INTRO } from '../../content/intro.js';
@@ -138,13 +138,17 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     if (region?.id === 'twilight_bell' && bellIn != null) {
       message = bellIn + '턴 뒤 적 디바인 +' + (region.stacks ?? REGIONS.twilight_bell.stacks);
     } else if (region?.id === 'tide_cycle' && event && !foeDef().boss) {
-      const turns = event.countdown?.inTurns;
-      if (B.intent?.kind === 'rest') {
-        message = '조류 · 적 휴식' + (event.intent.vulnerable ? ' · 받는 피해 ×' + event.intent.vulnerable : '');
+      const tide = event.region?.tide ?? (B.intent?.kind === 'rest' ? B.intent : event.countdown);
+      if (tide?.kind === 'rest') {
+        message = '조류 · 적 휴식' + (tide.vulnerable ? ' · 받는 피해 ×' + tide.vulnerable : '');
+      } else if (tide?.name && tide.inTurns != null) {
+        const when = tide.inTurns === 0 ? '이번 턴' : tide.inTurns === 1 ? '다음 턴' : tide.inTurns + '턴 뒤';
+        const classic = tide.name === REGIONS.tide_cycle.hit;
+        const power = tide.power ?? (classic ? 2.5 : null);
+        const type = TYPE[tide.kind] ?? (classic ? TYPE.mag : '');
+        const attack = [type, power != null ? '×' + power : ''].filter(Boolean).join(' ');
+        message = '조류 · ' + [when + ' ' + tide.name, attack].filter(Boolean).join(' · ');
       }
-      else if (turns === 0) message = '조류 · 이번 턴 2.5배';
-      else if (turns === 1) message = '조류 · 다음 턴 2.5배';
-      else if (turns != null) message = '조류 · ' + turns + '턴 뒤 2.5배';
     } else if (region?.id === 'arena_charge' && event?.region && !B.chargeSpent) {
       message = event.region.ready ? '기세 2/2 · 다음 공격 기술 ×2' : '기세 ' + event.region.charge + '/2';
     } else if (region?.id === 'ember_carry' && event && B.D.enemy.idx < B.door.enemies.length - 1) {

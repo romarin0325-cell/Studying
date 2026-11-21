@@ -38,7 +38,7 @@
 #sky-slots { display: flex; flex: none; gap: 3px; }
 .sky:has(.relic-marks) { min-height: 48px; }
 #skyname { font: 0.625rem/0.875rem var(--px9); color: var(--ink); margin-left: 3px; text-shadow: 1px 1px 0 #000; }
-#region-next { font: 0.75rem/0.9375rem var(--px); color: var(--gold); margin-left: 4px; white-space: nowrap; }
+#region-next { font: 0.75rem/0.9375rem var(--px); color: var(--gold); margin-left: 4px; min-width: 0; overflow-wrap: anywhere; }
 #region-next:empty, #skyname:empty { display: none; }
 #pa-chips { position: absolute; left: 8px; bottom: 6px; max-width: 60%; }
 .intent { display: none; margin: 4px 0 0; color: var(--ink); font: 0.75rem/1.0625rem var(--px); overflow-wrap: anywhere; }
@@ -204,6 +204,7 @@
 .result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .result-heading .btn { width: auto; }
 .victory-decision { margin: 8px 0; }
+.result-decision > .relic-receipt + .relic-receipt { margin-top: 4px; }
 .victory-decision .footer { padding: 5px 0 0; }
 .victory-decision h4 { color: var(--gold); }
 #result #b-next { margin-top: 8px; }

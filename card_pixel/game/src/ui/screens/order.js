@@ -1,5 +1,5 @@
 import { $, $$, esc, show } from '../dom.js';
-import { blessingText, head, foeFlip, TYPE } from '../widgets.js';
+import { blessingText, head, foeFlip, tempoBeatText } from '../widgets.js';
 import { POSITION } from '../../engine/roster.js';
 import { HEIRLOOM_POWER, heirloomPreview } from '../../engine/bridge.js';
 import * as Run from '../../engine/run.js';
@@ -193,7 +193,7 @@ export function orderScreen(run, ui) {
         (enemy.note ? '<p>' + esc(enemy.note) + '</p>' : '') +
         (enemy.affixes || []).map(id => '<p>' + esc(AFFIXES[id]?.desc || '') + '</p>').join('') +
         (tempo?.enemies?.[index]?.beats ?? []).map(beat =>
-          '<p>' + esc(beat.turn + '박 · ' + beat.name + ' · ' + (TYPE[beat.type] || '')) + '</p>').join('') +
+          '<p>' + esc(tempoBeatText(beat, tempo.lesson?.steps?.[beat.turn - 1])) + '</p>').join('') +
         '</div></div>').join('') + (quirk ? '<p>' + esc(quirk.name + ' · ' + quirk.desc) + '</p>' : ''));
   });
 }

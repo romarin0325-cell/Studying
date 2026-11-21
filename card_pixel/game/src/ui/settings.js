@@ -173,7 +173,7 @@ function backupProgress(summary, backup) {
 
 export function openBackupSheet({ mode, sheets, store, currentBackup, recovered }) {
   const { openSheet } = sheets;
-  const available = store.exportBackup && store.inspectBackup && store.restoreBackup;
+  const available = store.exportBackup && store.inspectBackup && (mode === 'export' || store.restoreBackup);
   if (!available) return sheets.sheet('기록 파일', '이 버전에서는 기록 파일 기능을 사용할 수 없다.');
 
   if (mode === 'export') {
@@ -181,7 +181,10 @@ export function openBackupSheet({ mode, sheets, store, currentBackup, recovered 
     const check = store.inspectBackup(backup);
     if (!check.ok) return sheets.sheet('기록 내보내기', BACKUP_ERROR[check.reason] ?? '내보낼 기록을 확인하지 못했다.');
     const label = backup.session?.profile ? `영입 동료 ${check.summary?.recruits ?? 0}명` : '설정과 균열 기록';
+    const active = check.summary?.dailyActive;
     openSheet('기록 내보내기', `<div class="meta-sheet meta-backup"><p>${label}</p>
+      ${active ? `<p>균열 ${esc(active.dayKey)} · ${active.floor}층</p>` : ''}
+      ${check.warnings?.includes('invalid_daily') ? '<p role="status">손상된 균열 기록은 파일에 따로 보관했다.</p>' : ''}
       <button class="btn go" id="meta-backup-download">기록 파일 받기</button></div>`);
     $('#meta-backup-download').addEventListener('click', () => {
       const url = URL.createObjectURL(new Blob([JSON.stringify(backup)], { type: 'application/json' }));
@@ -211,7 +214,7 @@ export function openBackupSheet({ mode, sheets, store, currentBackup, recovered 
       if (!input.isConnected || !$('#sheet').classList.contains('on')) return;
       const result = store.inspectBackup(data);
       if (!result.ok) return choose(BACKUP_ERROR[result.reason] ?? '기록 파일을 확인하지 못했다.');
-      compare(data, result.summary);
+      compare(data, result);
     });
   }
 
@@ -229,8 +232,9 @@ export function openBackupSheet({ mode, sheets, store, currentBackup, recovered 
     openSheet('기록 가져오기 확인', `<div class="meta-sheet meta-backup">
       <div class="meta-backup-compare">
         <section><h4>현재 기록</h4><dl>${backupProgress(currentSummary, main.ok ? live : null)}</dl></section>
-        <section><h4>파일 기록</h4><dl>${backupProgress(imported, data)}</dl></section>
+        <section><h4>파일 기록</h4><dl>${backupProgress(imported.summary, data)}</dl></section>
       </div>
+      ${imported.warnings?.includes('invalid_daily') ? '<p>파일의 손상된 균열 기록은 따로 보관한다.</p>' : ''}
       <p>가져오면 이 브라우저의 기록이 파일 기록으로 바뀐다.</p>
       <p class="meta-feedback" role="status"></p>
       <button class="btn" id="meta-backup-repick">다른 파일 고르기</button>

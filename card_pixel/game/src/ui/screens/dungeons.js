@@ -75,13 +75,11 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRo
   $$('[data-dungeon]', node).forEach(button => button.addEventListener('click', () => prepare(button.dataset.dungeon)));
 }
 
-export function preparationSheet({ dungeonId, currentProfile, updateProfile, roster, widgets, sheets, start, initialContract = null }) {
+export function preparationSheet({ dungeonId, currentProfile, updateProfile, savePreparation, roster, widgets, sheets, start }) {
   const dungeon = DUNGEONS[dungeonId];
   const { card } = roster;
   let sealsOpen = false;
   let leadRow;
-  let contract = initialContract;
-  let goalDifficulty = initialContract ? 'nightmare' : null;
 
   function scrollPosition() {
     return { top: $('#sh-body').scrollTop, leads: leadRow?.scrollLeft, seals: $('.meta-seal-options')?.scrollTop };
@@ -91,7 +89,9 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
     const profile = currentProfile();
     const entry = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
     const view = startView(profile, dungeonId);
-    const difficulty = goalDifficulty ?? departureDifficulty(profile, dungeonId);
+    const draft = profile.ui?.preparation;
+    const saved = draft?.dungeonId === dungeonId ? draft : null;
+    const difficulty = entry?.difficulties?.includes(saved?.difficulty) ? saved.difficulty : departureDifficulty(profile, dungeonId);
     const pool = listedPool(roster, dungeon, view);
     const contracts = Meta.contractsFor?.(profile, dungeonId);
     const canContract = difficulty === 'nightmare' && contracts?.unlocked;
@@ -101,7 +101,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
     const name = id => esc(card(id).name);
     const option = (id, chosen) => `<option value="${id}"${id === chosen ? ' selected' : ''}>${name(id)}</option>`;
     const leadChoices = view.leadCandidates.filter(id => !view.seals.includes(id));
-    const contractChoice = canContract ? CONTRACTS[contract] : null;
+    const contractChoice = canContract && Object.hasOwn(CONTRACTS, saved?.contract) ? CONTRACTS[saved.contract] : null;
 
     sheets.openSheet(`${dungeon.name} · 준비`, `<div class="meta-sheet meta-prep">
       <section class="meta-prep-section">
@@ -193,8 +193,8 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
     });
     for (const button of $$('.meta-prep [data-difficulty]')) button.addEventListener('click', () => {
       sealsOpen = $('#meta-seals')?.open || false;
-      goalDifficulty = null;
-      updateProfile({ ...profile, ui: { ...profile.ui, difficulty: { ...profile.ui?.difficulty, [dungeonId]: button.dataset.difficulty } } });
+      const difficulty = button.dataset.difficulty;
+      savePreparation({ dungeonId, difficulty, contract: difficulty === 'nightmare' ? contractChoice?.id ?? null : null });
       render();
     });
     $('#meta-contract-choice')?.addEventListener('click', () => {
@@ -205,8 +205,8 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
         $('#meta-contract-choice')?.focus({ preventScroll: true });
       }
       sheets.openSheet('악몽 계약', `<div class="meta-sheet meta-contract-options">
-        <button class="btn" data-contract="" aria-pressed="${!contract}">계약 없음</button>
-        ${Object.values(CONTRACTS).map(entry => `<button class="btn big" data-contract="${entry.id}" aria-pressed="${entry.id === contract}">
+        <button class="btn" data-contract="" aria-pressed="${!contractChoice}">계약 없음</button>
+        ${Object.values(CONTRACTS).map(entry => `<button class="btn big" data-contract="${entry.id}" aria-pressed="${entry.id === contractChoice?.id}">
           <b>${esc(entry.name)}</b><small>${esc(entry.rule)}</small>
           <small>문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김 · 6층까지 달성하면 ◆${CONTRACT_PAYOUT}</small>
           <small class="${contracts.stamps?.[entry.id] ? 'gain' : ''}">${contracts.stamps?.[entry.id] ? '도장 획득' : '도장 없음'}</small>
@@ -214,7 +214,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, ros
         <button class="btn" id="meta-contract-back">준비로 돌아가기</button>
       </div>`, { onClose: back });
       for (const button of $$('.meta-contract-options [data-contract]')) button.addEventListener('click', () => {
-        contract = button.dataset.contract || null;
+        savePreparation({ dungeonId, difficulty, contract: button.dataset.contract || null });
         back();
       });
       $('#meta-contract-back').addEventListener('click', back);

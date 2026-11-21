@@ -2,10 +2,44 @@ import { $, $$, esc } from './dom.js';
 import { tools } from './settings.js';
 import { ELEMENT, GRADE } from '../engine/roster.js';
 import { AFFIXES } from '../content/affixes.js';
+import * as ContractRules from '../content/contracts.js';
 import { ROSTER_LIMIT } from '../content/tempo.js';
 import { heirloomSkill } from '../engine/bridge.js';
 
 export const TYPE = { phy: '물리', mag: '마법', sup: '보조', rest: '휴식' };
+const LEGACY_RULES = {
+  rescue: '4층이나 6층에서 쓰러질 예고를 받은 동료를 물러나게 하고, 그 동료와 받은 동료가 함께 살아서 이긴다.',
+  heirloom: '4층이나 6층에서 유품 기술의 명중으로 적을 쓰러뜨리고 이긴다.'
+};
+export function activeContract(run) {
+  const id = run.contract?.id;
+  if (!Object.hasOwn(ContractRules.CONTRACTS, id)) return null;
+  const contract = ContractRules.CONTRACTS[id];
+  const legacyVersion = ContractRules.LEGACY_CONTRACT_RULE_VERSION ?? 1;
+  const legacy = (run.contract.ruleVersion ?? legacyVersion) === legacyVersion;
+  return { ...contract, legacy, rule: (legacy && LEGACY_RULES[id]) || contract.rule };
+}
+
+export function tempoBeatText(beat, step) {
+  const action = beat.lesson ? { ...step, ...beat } : beat;
+  const power = action.power ?? action.val;
+  const type = TYPE[action.type];
+  const desc = typeof action.effect === 'string' ? action.effect : '';
+  let effect = '';
+  switch (action.rule) {
+    case 'mana_drain': effect = 'HP 피해 0 · 현재 MP ' + (Number.isFinite(action.drainFlat) ? '−' + action.drainFlat : '전부 소멸'); break;
+    case 'retaliation': effect = '피격 시 ×' + action.hitPower + ' · 미피격 시 ×' + power; break;
+    case 'front_hit': effect = '선두 공격'; break;
+    case 'charge': effect = '다음 턴 강공'; break;
+    case 'cleanse': effect = '자기 약화 전부 해제'; break;
+    case 'defense_protocol': effect = '직전 피격 종류의 방어 +' + bonusPercent(action.bonus) + '%'; break;
+    case 'alternating_defense': effect = (action.stat === 'mdef' ? '마방' : '물방') + ' +' + bonusPercent(action.bonus) + '%'; break;
+    case 'lesson_guard': effect = '다음 턴 받는 피해 ' + bonusPercent(action.reduction) + '% 감소'; break;
+    case 'swap_stats': effect = '명중 뒤 공·마공, 물방·마방 교환'; break;
+  }
+  const modifier = beat.lesson && ['phy', 'mag'].includes(action.type) && power > 0 && action.rule !== 'retaliation';
+  return [beat.turn + '턴', beat.name, type && (type + (modifier ? ' ×' + power : '')), beat.lesson && (effect || desc)].filter(Boolean).join(' · ');
+}
 export const formatRange = range => Array.isArray(range)
   ? range[0] === range[1] ? String(range[0]) : range.join('~')
   : String(range ?? '');

@@ -42,6 +42,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   let profile = stored?.profile || createProfile();
   let run = stored?.run || null;
   let dailyRun = null;
+  let unsavedDailyResult = null;
   let review = null;
   let preparationOpen = false;
   let crystalCount = 0;
@@ -125,12 +126,14 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const completedTower = profile.notebook.chapters.includes(7);
     const collecting = completedTower && target?.screen === 'collection';
     const destinationId = !collecting && (target?.dungeonId ?? profile.ui?.destination);
+    const rift = dailyStore?.view?.(profile, new Date());
     hubScreen(node, {
       profile, run, widgets, inspect, openDungeons, destinationId, resume: enterExpedition, goal, arriving,
       depart: collecting ? () => openMeta('collection', true)
         : destinationId ? () => prepare(destinationId, target?.contractId) : openDungeons,
       departureLabel: collecting ? '동료 출현 지역 보기' : null,
-      daily: dailyStore?.view?.(profile, new Date()), openDaily: showDaily
+      daily: unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift,
+      openDaily: showDaily
     });
     if (profile.ui?.announcement) updateUi({ announcement: null });
     for (const button of node.querySelectorAll('[data-meta-page]')) button.addEventListener('click', () => {
@@ -195,6 +198,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function showDaily(message) {
+    if (unsavedDailyResult) return finishDaily(unsavedDailyResult);
     const view = dailyStore?.view?.(profile, new Date());
     if (!view?.unlocked) return;
     if (view.active) {
@@ -257,13 +261,25 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function finishDaily(current) {
-    if (current !== dailyRun || current.phase !== 'done') return;
+    if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== 'done') return;
     const result = dailyStore?.finish?.(current);
     if (!result?.ok) {
+      unsavedDailyResult = current;
       if (result?.reason === 'storage_failed') warnSave();
       const node = page('daily-result', { title: '균열 기록' });
-      node.innerHTML = '<div class="rift-actions"><p>균열 기록을 저장하지 못했다.</p><button class="btn go" id="meta-rift-retry">다시 저장</button></div>';
+      node.innerHTML = `<div class="meta-sheet rift-actions">
+        <p role="alert">균열 기록을 저장하지 못했다. 새로고침하거나 게임을 닫으면 마지막 저장 지점으로 돌아간다. 결과를 보관하려면 기록 파일을 받자.</p>
+        <button class="btn go" data-backup-action="export">기록 내보내기</button>
+        <button class="btn" id="meta-rift-retry">다시 저장</button>
+        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>
+      </div>`;
       $('#meta-rift-retry', node).addEventListener('click', () => finishDaily(current));
+      $('#meta-rift-hub', node).addEventListener('click', () => {
+        dailyRun = null;
+        review = null;
+        showHub();
+        sessionNotice('균열 결과는 아직 저장되지 않았다. 게임을 닫기 전에 기록을 내보낼 수 있다.');
+      });
       return;
     }
     const spec = current.daily?.spec;
@@ -274,6 +290,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     };
     const view = dailyStore?.view?.(profile, new Date());
     dailyRun = null;
+    unsavedDailyResult = null;
     review = null;
     const node = page('daily-result', { title: dailyResultTitle(score), track: score.outcome === 'win' ? 'victory' : 'defeat' });
     dailyResultScreen(node, { spec, score, official: result.official }, {
@@ -329,15 +346,30 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   function prepare(dungeonId, contractId) {
     if (run || !availableDungeons(profile).some(dungeon => dungeon.id === dungeonId)) return;
     const initialContract = Object.hasOwn(CONTRACTS, contractId) && profile.nightmareUnlocks.includes(dungeonId) ? contractId : null;
-    if (profile.ui?.destination !== dungeonId || !profile.ui?.preparing) updateUi({ destination: dungeonId, preparing: true });
+    const saved = profile.ui?.preparation;
+    if (initialContract || saved?.dungeonId !== dungeonId) {
+      savePreparation({ dungeonId, difficulty: initialContract ? 'nightmare' : departureDifficulty(profile, dungeonId), contract: initialContract });
+    }
     preparationOpen = true;
-    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, roster, widgets, sheets, start: startExpedition, initialContract });
+    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, savePreparation, roster, widgets, sheets, start: startExpedition });
+  }
+
+  function savePreparation(draft) {
+    const { dungeonId, difficulty } = draft;
+    const next = { ...profile, ui: { ...profile.ui, destination: dungeonId,
+      difficulty: { ...profile.ui?.difficulty, [dungeonId]: difficulty } } };
+    updateProfile(Meta.setPreparation?.(next, draft) ?? { ...next, ui: { ...next.ui, preparation: draft } });
+  }
+
+  function withoutPreparation() {
+    const next = Meta.clearPreparation?.(profile) ?? profile;
+    return { ...next, ui: { ...next.ui, preparation: null, preparing: false } };
   }
 
   function closePreparation() {
     if (!preparationOpen || $('#sheet').classList.contains('on')) return;
     preparationOpen = false;
-    updateUi({ preparing: false });
+    updateProfile(withoutPreparation());
     if ($('#hub').classList.contains('on')) showHub();
     else if ($('#dungeons').classList.contains('on')) {
       const top = $('#dungeons .meta-page').scrollTop;
@@ -353,10 +385,11 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       ? Number(requestedSeed) >>> 0 : Math.floor(Math.random() * 0x100000000);
     run = createRun({ core, roster, dungeonId, difficulty, contract, seed, profileView: startView(profile, dungeonId) });
     preparationOpen = false;
-    updateUi({
-      destination: destination || profile.ui?.destination, preparing: false, announcement: null,
-      ...(destination && { difficulty: { ...profile.ui?.difficulty, [dungeonId]: difficulty } })
-    });
+    const next = withoutPreparation();
+    updateProfile({ ...next, ui: {
+      ...next.ui, destination: destination || next.ui.destination, announcement: null,
+      ...(destination && { difficulty: { ...next.ui.difficulty, [dungeonId]: difficulty } })
+    } });
     enterExpedition();
   }
 
@@ -375,7 +408,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const saved = profile.ui?.recruitChoices;
     const candidates = rewards.result === 'win' ? rewards.recruitable : rewards.shardCandidates;
     const initial = candidates.length === 1 ? candidates : [];
-    const choices = saved?.runId === run.id ? saved.ids.filter(id => candidates.includes(id)) : initial;
+    const choices = saved?.runId === run.id && Array.isArray(saved.ids) ? saved.ids.filter(id => candidates.includes(id)) : initial;
     const node = page('recruit', { title: rewards.result === 'win' ? '생환' : '원정 실패' });
     recruitScreen(node, {
       run, rewards, profile, widgets, sheets, choices, preview: selection => applyRunEnd(profile, run, selection).announce,
@@ -404,10 +437,11 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const recruits = announce.recruits;
     const returned = new Set(announce.returned ?? run.bench.filter(id => !run.fallen.includes(id)));
     for (const id of new Set([...run.participated, ...recruits])) {
-      if (next.recruits[id]) recent[id] = [{ ...entry, returned: returned.has(id) }, ...(recent[id] || [])].slice(0, 3);
+      if (next.recruits[id]) recent[id] = [{ ...entry, returned: returned.has(id) }, ...(Array.isArray(recent[id]) ? recent[id] : [])].slice(0, 3);
     }
     const hubReturners = run.result === 'win' ? run.bench.filter(id => next.recruits[id]) : [];
-    const returners = [...new Set([...recruits, ...hubReturners, ...(next.ui?.returners || [])])].slice(0, 3);
+    const previousReturners = Array.isArray(next.ui?.returners) ? next.ui.returners : [];
+    const returners = [...new Set([...recruits, ...hubReturners, ...previousReturners])].slice(0, 3);
     const announcement = {
       dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters, missionEarned: !!announce.missions?.length
     };
@@ -431,6 +465,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     profile = createProfile();
     run = null;
     dailyRun = null;
+    unsavedDailyResult = null;
     review = null;
     preparationOpen = false;
     sheets.closeSheet();
@@ -444,7 +479,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
 
   function currentBackup({ lastGood = false } = {}) {
     const settings = settingsSnapshot(stage, audio, music);
-    if (!recovery) return store.exportBackup({ profile, run, dailyRun, settings });
+    if (!recovery) return store.exportBackup({ profile, run, dailyRun: unsavedDailyResult ?? dailyRun, settings });
     const good = lastGood ? store.loadLastGood?.() : null;
     return store.exportBackup(good?.status === 'ok' ? { profile: good.profile, settings } : { settings });
   }
@@ -453,9 +488,11 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const good = store.loadLastGood?.();
     const hasGood = good?.status === 'ok';
     const unavailable = recovery === 'unavailable';
+    const riftDamaged = !unavailable && store.exportBackup && currentBackup({ lastGood: true }).damagedDaily != null;
     const node = page('recovery');
     node.innerHTML = `<div class="meta-panel meta-sheet meta-recovery">
       <h2>${unavailable ? '저장 공간에 접근할 수 없다' : '전체 기록 복구 필요'}</h2>
+      ${riftDamaged ? '<p>균열 기록도 손상됐다. 직전 기록으로 복구하면 손상된 균열은 따로 보관한다.</p>' : ''}
       ${hasGood ? `<button class="btn go" id="meta-last-good">직전 기록으로 복구 · 동료 ${Object.keys(good.profile?.recruits ?? {}).length}명</button>` : ''}
       <button class="btn${hasGood ? '' : ' go'}" data-backup-action="import">기록 가져오기</button>
       <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
@@ -493,7 +530,8 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
         else if (endingDue()) showEnding();
         else {
           showHub();
-          if (profile.ui?.preparing) prepare(profile.ui.destination);
+          const destination = profile.ui?.preparation?.dungeonId ?? (profile.ui?.preparing ? profile.ui.destination : null);
+          if (destination) prepare(destination);
         }
       }
     });

@@ -50,7 +50,8 @@ export function springScreen(run, ui) {
 
   function showFailure(reason) {
     $('#spring-status', node).textContent = reason === 'empty_pool' ? '깨울 수 있는 동료가 없다.' :
-      reason === 'insufficient_crystals' ? '결정이 부족하다.' : '합류할 동료와 보낼 동료를 확인한다.';
+      reason === 'insufficient_crystals' ? '결정이 부족하다.' :
+        reason === 'invalid_spring_key' ? '후보가 바뀌었다. 다시 골라 보자.' : '합류할 동료와 보낼 동료를 확인한다.';
   }
 
   function refresh() {
@@ -72,11 +73,12 @@ export function springScreen(run, ui) {
     if (box.isConnected && $('#fresh', node) === box) refresh();
   }
 
-  function openOffer() {
+  function openOffer(message) {
     const offer = Run.getSpringOffer ? command(Run.getSpringOffer) :
       (run.pending?.kind === 'spring' ? { ok: true } : command(Run.springPick));
     if (!offer.ok) return showFailure(offer.reason);
     choose(Run.getSpringOffer ? offer : { ...run.pending, alreadyPaid: true });
+    if (message) showFailure(message);
   }
 
   function choose(offer) {
@@ -91,6 +93,9 @@ export function springScreen(run, ui) {
     let selected;
     const rows = $$('.cardrow', node);
     const take = $('#b-take', node);
+    if (run.crystals < cost) {
+      $('#spring-status', node).textContent = '합류에 결정 ' + (cost - run.crystals) + '개가 부족하다.';
+    }
     for (const row of rows) {
       row.disabled = !canJoin(run, row.dataset.id);
       row.addEventListener('click', () => {
@@ -99,12 +104,12 @@ export function springScreen(run, ui) {
         for (const other of rows) other.classList.toggle('sel', other === row);
         take.disabled = run.crystals < cost;
         take.textContent = card(selected).name + ' · 이번 원정 합류' + price;
-        if (take.disabled) showFailure('insufficient_crystals');
       });
     }
     function join(id, replaceId = null) {
       const result = Run.commitSpringOffer ? command(Run.commitSpringOffer, { key: offer.key, id, replaceId }) :
         command(Run.springTake, id, replaceId);
+      if (result.reason === 'invalid_spring_key') return openOffer(result.reason);
       if (!result.ok) return showFailure(result.reason);
       base();
       if (id) showWaking(id, false);

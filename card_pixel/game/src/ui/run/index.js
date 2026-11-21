@@ -132,11 +132,13 @@ export function enterRun(run, host) {
   };
 
   function battleDecision(node, result, next) {
-    let equipped = result.relic?.equipped ? result.relic.id : run.lastBattleRelic;
+    const gained = Array.isArray(result.relics) ? result.relics :
+      [run.lastBattleRelic, result.relic?.equipped ? result.relic.id : null];
+    const equipped = new Set(gained.filter(id => run.relics.includes(id)));
     const decision = document.createElement('div');
     decision.className = 'victory-decision';
     function render() {
-      node.innerHTML = treasureReceipt(artifacts.get(equipped));
+      node.innerHTML = [...equipped].map(id => treasureReceipt(artifacts.get(id))).join('');
       node.append(decision);
       next.hidden = true;
       const options = { node: decision, inline: true, onEquipped, onRelic: onEquipped };
@@ -144,7 +146,7 @@ export function enterRun(run, host) {
       if (run.pending?.kind === 'reinforcement') reinforceScreen(run, rewardUi, options);
       else if (run.pending?.kind === 'gate') gatePickScreen(run, rewardUi, options);
       else if (run.pending?.kind === 'relic') treasureScreen(run, rewardUi, run.pending.id, options);
-      else if (equipped) {
+      else if (equipped.size) {
         decision.replaceChildren();
         next.hidden = false;
       } else {
@@ -162,7 +164,10 @@ export function enterRun(run, host) {
     }
     function onEquipped(id) {
       if (run.relics.includes(id)) {
-        equipped = run.lastBattleRelic = id;
+        for (const previous of equipped) if (!run.relics.includes(previous)) equipped.delete(previous);
+        equipped.add(id);
+        run.lastBattleRelic = id;
+        run.lastBattleRelics = [...equipped];
         host.save(run);
       }
       render();
@@ -207,6 +212,7 @@ export function enterRun(run, host) {
         if (result.ok) {
           run.lastBattleLog = log;
           run.lastBattleRelic = result.relic?.equipped ? result.relic.id : null;
+          run.lastBattleRelics = Array.isArray(result.relics) ? result.relics : null;
           host.save(run);
         }
         return result;
@@ -215,7 +221,7 @@ export function enterRun(run, host) {
     if (run.phase === 'reward') {
       const contract = run.contract ? { ...run.contract, metNow: run.contract.metAtFloor === run.floor } : null;
       const relic = equippedRoomRelic() ? { id: run.room.relic, equipped: true } : null;
-      return battle.restoreResult(run, afterBattle, { win: true, contract, relic }, battleDecision);
+      return battle.restoreResult(run, afterBattle, { win: true, contract, relic, relics: run.lastBattleRelics }, battleDecision);
     }
     if (run.pending?.kind === 'relic') return treasureScreen(run, ui, run.pending.id);
     if (run.pending?.kind === 'altar' || run.room?.type === 'altar') return altarScreen(run, ui);

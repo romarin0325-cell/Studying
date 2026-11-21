@@ -11,7 +11,8 @@ export const FIELD = {
   destiny_oath: ['서약', '#ff8fb1'], earth_bless: ['대지', '#9ad06a'], twinkle_party: ['트윙', '#ffe07a'], star_powder: ['별', '#cfe3ff'],
   valentine: ['발렌', '#ff7aa8'], arena: ['투기', '#ff7a5a'], reaper_realm: ['사신', '#a678ff'], gale: ['질풍', '#7fe3c8']
 };
-export const fieldCap = (core, artifacts) => artifacts?.includes('buff_overload') ? 5 : core.GAME_CONSTANTS.MAX_FIELD_BUFFS;
+export const fieldCap = (core, artifacts = []) => Bridge.fieldCap?.(core, artifacts) ??
+  (artifacts.includes('buff_overload') ? 5 : core.GAME_CONSTANTS.MAX_FIELD_BUFFS);
 export const skyRelics = B => (B.artifacts || []).filter(id => id === 'buff_overload' ||
   (id === 'gale_storm' && B.D?.turn <= 3 && B.D.field.includes('gale')));
 

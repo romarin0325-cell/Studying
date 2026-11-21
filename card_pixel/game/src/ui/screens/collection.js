@@ -65,7 +65,8 @@ export function companionSheet({ core, widgets, sheets, profile, id, setLead }) 
   const character = card(id);
   if (!character) return;
   const recruit = profile.recruits[id];
-  const recent = profile.ui?.recent?.[id] || [];
+  const entries = profile.ui?.recent?.[id];
+  const recent = Array.isArray(entries) ? entries.filter(Boolean) : [];
   const skills = character.skills.map(skill => {
     const body = core.SkillDisplay.body(skill, { entity: character });
     return `<div class="meta-skill">
