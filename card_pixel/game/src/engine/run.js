@@ -8,7 +8,7 @@ import { RELICS } from '../content/relics.js';
 import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import {
   applyDraw, canJoin, choicesFor, COST, drawEncounter, drawFrom, drawKind, join, RATES,
-  release, rollBlessing, seeCharacters, usesRepeatDraws, validateReplacements
+  release as releaseCompanion, rollBlessing, seeCharacters, usesRepeatDraws, validateReplacements
 } from './awakenings.js';
 import { dayKey, doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { hasFeature, openFeatures } from './entry.js';
@@ -20,6 +20,7 @@ import * as RunBattle from './run-battle.js';
 export { COST, RATES };
 export { doorEnemies } from './run-battle.js';
 export const FLOORS = 8;
+export const CHRONICLE_LIMIT = 32;
 export const START = { picks: 2, draws: 3 };
 const dependencies = new WeakMap();
 const unique = ids => [...new Set(ids)];
@@ -98,6 +99,7 @@ export function createRun(options) {
     lead, companions, preferredCompanion: profileView.preferredCompanion || null,
     recruited: (profileView.recruited || []).slice(), profileShard: shard,
     bench: [], joinOrder: [], lastParty: null, fallen: [], released: [], heirlooms: {}, blessings: {}, relics: [],
+    chronicle: [],
     crystals: intro || daily ? 0 : 1,
     contract: contract === null ? null : {
       id: contract, ruleVersion: CONTRACT_RULE_VERSION, met: false, metAtFloor: null,
@@ -341,6 +343,34 @@ function participationTag(run, id) {
     : run.gateSurvivors.includes(id) ? 'gate' : run.participated.includes(id) ? 'battle' : 'bench');
 }
 
+function appendChronicle(run, record) {
+  const { floor, room } = run;
+  run.chronicle = [...(run.chronicle ?? []), { floor, roomType: room.type, ...record }].slice(-CHRONICLE_LIMIT);
+}
+
+function release(run, id) {
+  releaseCompanion(run, id);
+  appendChronicle(run, { released: [id] });
+}
+
+function recordBattleChronicle(run, summary, fallen, retry) {
+  const party = run.room.party.filter(Boolean);
+  const original = id => Object.hasOwn(summary.forms ?? {}, id) ? summary.forms[id] : id;
+  const fought = summary.fought?.map(original);
+  const transfers = summary.heirloomTransfers
+    ?? summary.heirloomsGained.map(({ to, from, name }) => ({ to, from, skill: name }));
+  const lastHit = original(summary.lastEnemyKiller ?? null);
+  appendChronicle(run, {
+    result: summary.outcome, party, fallen: fallen.map(id => ({ id })),
+    gained: transfers.map(({ to, from, skill }) => ({ to: original(to), from: original(from), skill })),
+    used: (summary.heirloomUses ?? []).map(({ by, from, skill }) => ({ by: original(by), from: original(from), skill })),
+    lastHit: party.includes(lastHit) ? lastHit : null,
+    bossOrGate: ['boss', 'gate'].includes(run.room.type),
+    ...(fought && { fought: party.filter(id => fought.includes(id)) }),
+    ...(retry && { retry: true })
+  });
+}
+
 function recordBattleResult(run, { outcome, wiped, fallen, survivors, heirloomsGained = [], crystals = 0, relics = [] }) {
   delete run.lastBattleRelic;
   delete run.lastBattleRelics;
@@ -408,6 +438,9 @@ function settleContract(run, summary, survivors, wiped) {
 }
 
 function validSummary(summary, room) {
+  const id = value => typeof value === 'string' && value.length > 0;
+  const facts = (values, key) => values === undefined || (Array.isArray(values) && Array.from(values).every(entry =>
+    id(entry?.[key]) && id(entry.from) && id(entry.skill)));
   return summary && ['win', 'lose'].includes(summary.outcome) && Array.isArray(summary.survivors)
     && room.party.every((id, index) => id === null || typeof summary.survivors[index] === 'boolean')
     && [summary.turns, summary.heirloomsUsed, summary.lastStands].every(n => Number.isInteger(n) && n >= 0)
@@ -420,6 +453,11 @@ function validSummary(summary, room) {
     && (!summary.bet || (typeof summary.bet.kind === 'string' && typeof summary.bet.won === 'boolean'))
     && Array.isArray(summary.heirloomsGained) && summary.heirloomsGained.every(entry => typeof entry?.to === 'string'
       && typeof entry.from === 'string' && typeof entry.name === 'string')
+    && facts(summary.heirloomTransfers, 'to') && facts(summary.heirloomUses, 'by')
+    && (summary.fought === undefined || (Array.isArray(summary.fought) && Array.from(summary.fought).every(id)))
+    && (summary.forms === undefined || (summary.forms && typeof summary.forms === 'object' && !Array.isArray(summary.forms)
+      && Object.values(summary.forms).every(id)))
+    && (summary.lastEnemyKiller == null || id(summary.lastEnemyKiller))
     && Array.isArray(summary.enemyDowns) && summary.enemyDowns.every(entry => Number.isInteger(entry?.idx)
       && entry.idx >= 0 && entry.idx < room.enemies.length && typeof entry.treasure === 'boolean');
 }
@@ -448,6 +486,7 @@ export function settleBattle(run, input) {
   }
   if (!win && final && gate && run.firstIntroClear) {
     run.stats.retries++;
+    recordBattleChronicle(run, summary, fallen, true);
     room.status = 'resolved';
     room.party = null;
     const lastBattleResult = recordBattleResult(run, {
@@ -520,6 +559,7 @@ export function settleBattle(run, input) {
   for (const id of room.party) {
     if (run.firstSurvivalPay) delete run.firstSurvivalPay[id];
   }
+  recordBattleChronicle(run, summary, fallen);
   room.status = 'resolved';
   run.phase = run.result ? 'result' : 'reward';
   const lastBattleResult = recordBattleResult(run, {
@@ -793,7 +833,13 @@ export function altarKeep(run) {
 export function chooseEvent(run, choiceId, targetId, replaceIds) {
   if (run.phase !== 'room' || run.pending?.kind !== 'event') return invalid('no_event');
   const { core, roster } = dependencies.get(run);
-  return resolveEvent(run, core, roster, choiceId, targetId, replaceIds);
+  const result = resolveEvent(run, core, roster, choiceId, targetId, replaceIds);
+  if (!result.ok) return result;
+  const released = result.effects.filter(effect => effect.type === 'release').map(({ id }) => id);
+  const gained = result.effects.filter(effect => effect.type === 'heirloom')
+    .map(({ id, from, name }) => ({ to: id, from, skill: name }));
+  if (gained.length || released.length) appendChronicle(run, { eventId: run.room.event.id, gained, released });
+  return result;
 }
 
 export function takeTreasure(run) {

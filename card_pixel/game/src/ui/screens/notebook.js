@@ -48,7 +48,7 @@ function missionRows(missions, claimEnabled) {
   }).join('');
 }
 
-export function notebookScreen(node, profile, card, { missions, openMission, describeMission, goal, flags = {} } = {}) {
+export function notebookScreen(node, profile, card, { missions, openMission, describeMission, goal, followGoal, flags = {} } = {}) {
   const chapters = notebookView(profile);
   const current = chapters.find(chapter => !chapter.completed) || chapters.at(-1);
   const clearedRegions = Object.values(DUNGEONS).filter(dungeon => {
@@ -56,6 +56,7 @@ export function notebookScreen(node, profile, card, { missions, openMission, des
     return ['intro_clear', 'early_region_clear'].includes(dungeon.unlock.kind) && (clears?.easy || clears?.normal || clears?.nightmare);
   });
   const firstLead = card(profile.notebook.firstLead)?.name;
+  const goalText = esc([goal?.text, goal?.reward].filter(Boolean).join(' · '));
 
   function openChapter(id) {
     const chapter = chapters.find(entry => entry.id === id);
@@ -95,8 +96,11 @@ export function notebookScreen(node, profile, card, { missions, openMission, des
       </div>
       ${missions?.unlocked ? `<div data-screen-panel="missions"><div class="meta-missions">${missionRows(missions, !!openMission)}</div></div>` : ''}
     </div>
-    ${goal?.text ? `<p class="meta-next-goal fixed-foot">${esc([goal.text, goal.reward].filter(Boolean).join(' · '))}</p>` : ''}
+    ${goalText ? `<div class="fixed-foot">${followGoal
+      ? `<button class="btn meta-next-goal" id="meta-follow-goal">${goalText}</button>`
+      : `<p class="meta-next-goal">${goalText}</p>`}</div>` : ''}
   `;
+  $('#meta-follow-goal', node)?.addEventListener('click', followGoal);
   if (missions?.unlocked) bindScreenTabs(node, node.dataset.screenTabActive ?? 'chapters');
   const list = $('.scroll-list', node);
   for (const button of node.querySelectorAll('[data-chapter]')) {

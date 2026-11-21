@@ -619,6 +619,8 @@ test('relay forecast hands off the transformed form attack and identifies the he
   const inherited = last(b.act(0), 'heirloom');
   assert.equal(inherited.skill.name, stand.heirloom.skill);
   assert.equal(b.heirloomsGained()[0].form, 'aurora_wing');
+  assert.deepEqual(b.summary().forms, { mirror_cocoon: 'miracle_larva', aurora_wing: 'miracle_larva' });
+  assert.deepEqual(b.summary().heirloomTransfers, [{ to: 'ash', from: 'miracle_larva', skill: '뷰티토네이도' }]);
   assert.deepEqual(b.options().filter(skill => skill.heirloom).map(skill => skill.name), [stand.heirloom.skill]);
 });
 
@@ -1066,15 +1068,24 @@ test('Summary accounts for a retreat, death, heirloom, last stand, treasure, and
       to: 'snow_rabbit', from: 'red_dragon', name: '파이어브레스', form: 'red_dragon',
       skill: Bridge.heirloomSkill(S.RelayCore.GameUtils.getCardById('red_dragon'))
     }],
+    heirloomTransfers: [{ to: 'snow_rabbit', from: 'red_dragon', skill: '파이어브레스' }],
+    heirloomUses: [{ by: 'snow_rabbit', from: 'red_dragon', skill: '파이어브레스' }],
+    forms: {}, fought: ['fairy', 'red_dragon', 'snow_rabbit'], lastEnemyKiller: 'snow_rabbit',
     heirloomsUsed: 1, lastStands: 1, enemyDowns: [{ idx: 0, treasure: true }, { idx: 1, treasure: false }],
     bestHit: { amount: hit.amount, by: 'snow_rabbit', skill: '파이어브레스' }, turns: 3, bet: null
   });
   summary.bestHit.amount = 0;
   summary.enemyDowns[0].treasure = false;
   summary.rescues[0].lethal = false;
+  summary.heirloomTransfers[0].from = 'fairy';
+  summary.heirloomUses[0].by = 'fairy';
+  summary.fought.pop();
   assert.equal(b.summary().bestHit.amount, hit.amount);
   assert.equal(b.summary().enemyDowns[0].treasure, true);
   assert.equal(b.summary().rescues[0].lethal, true);
+  assert.equal(b.summary().heirloomTransfers[0].from, 'red_dragon');
+  assert.equal(b.summary().heirloomUses[0].by, 'snow_rabbit');
+  assert.ok(b.summary().fought.includes('snow_rabbit'));
 });
 
 test('a rescue uses the minimum forecast on the outgoing fighter, including equality', () => {
@@ -1101,6 +1112,8 @@ test('an inherited delayed skill counts actual landings once per enemy', () => {
   assert.equal(b.outcome, 'win');
   assert.equal(b.summary().heirloomKills, 2);
   assert.equal(b.summary().heirloomsUsed, 1);
+  assert.deepEqual(b.summary().heirloomUses, [{ by: 'fairy', from: 'phantom', skill: '나이트메어' }]);
+  assert.equal(b.summary().lastEnemyKiller, 'fairy');
 });
 
 test('using an heirloom before a lethal counter or status does not credit the kill', () => {
@@ -1111,6 +1124,7 @@ test('using an heirloom before a lethal counter or status does not credit the ki
   assert.equal(counter.outcome, 'win');
   assert.equal(counter.summary().heirloomsUsed, 1);
   assert.equal(counter.summary().heirloomKills, 0);
+  assert.equal(counter.summary().lastEnemyKiller, 'red_moon');
 
   const status = battle({ party: ['fairy'], enemies: [quietEnemy(500)],
     heirlooms: { fairy: { from: 'red_dragon', name: '파이어브레스' } } });
@@ -1132,6 +1146,7 @@ test('using an heirloom before a lethal counter or status does not credit the ki
     assert.equal(statusKilled, true);
     assert.equal(status.outcome, 'win');
     assert.equal(status.summary().heirloomKills, 0);
+    assert.equal(status.summary().lastEnemyKiller, null);
   } finally {
     runtime.applySkillEffects = apply;
   }

@@ -2,7 +2,7 @@ import { DUNGEONS } from '../content/dungeons.js';
 import { CONTRACT_RULE_VERSION, CONTRACTS, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
 import { calendarDate } from './dates.js';
 import { openFeatures } from './entry.js';
-import { bindRun, runRewards } from './run.js';
+import { bindRun, CHRONICLE_LIMIT, runRewards } from './run.js';
 
 export const RUN_VERSION = 1;
 const PHASES = ['start', 'map', 'room', 'reward', 'result', 'done'];
@@ -52,6 +52,7 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
     || (run.room !== null && (!validDoor(run.room) || !string(run.room.status)))
     || (run.phase === 'room' && !run.room) || (run.phase === 'map' && !run.doors.length)
     || (run.phase === 'done' && !['win', 'lose'].includes(run.result))
+    || (run.chronicle !== undefined && !validChronicle(run.chronicle, run.floor))
     || (run.endDayKey != null && !calendarDate(run.endDayKey)) || !validEntryRules(run)) return null;
   run.contract ??= null;
   if (run.contract !== null) {
@@ -72,6 +73,25 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
   migrateResult(run);
   if (run.phase === 'result' && !validHeldResult(run)) return null;
   return bindRun(run, { core, roster });
+}
+
+function validChronicle(records, floor) {
+  const facts = (values, key) => Array.isArray(values) && Array.from(values).every(fact =>
+    dictionary(fact) && string(fact[key]) && string(fact.from) && string(fact.skill));
+  return Array.isArray(records) && records.length <= CHRONICLE_LIMIT && Array.from(records).every(record => {
+    if (!dictionary(record) || !count(record.floor) || record.floor > floor || !string(record.roomType)) return false;
+    if (!Object.hasOwn(record, 'party')) {
+      return strings(record.released) && (record.eventId === undefined
+        ? record.released.length > 0 : string(record.eventId) && facts(record.gained, 'to'));
+    }
+    return strings(record.party) && ['win', 'lose'].includes(record.result)
+      && (record.fought === undefined || (strings(record.fought) && record.fought.every(id => record.party.includes(id))))
+      && (record.retry === undefined || record.retry === true)
+      && Array.isArray(record.fallen) && Array.from(record.fallen).every(fact => dictionary(fact) && record.party.includes(fact.id))
+      && facts(record.gained, 'to') && facts(record.used, 'by')
+      && (record.lastHit === null || record.party.includes(record.lastHit))
+      && record.bossOrGate === ['gate', 'boss'].includes(record.roomType);
+  });
 }
 
 const recruitTags = tags => dictionary(tags) && Object.values(tags).every(tag => ['boss', 'gate', 'battle', 'bench'].includes(tag));

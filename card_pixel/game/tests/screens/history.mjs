@@ -58,7 +58,8 @@ export function createHistoryCases({ storedSession, enterObservatory }) {
           await text(sunflower.locator('.companion-tag'), '예비로 생환', { exact: true });
           await text(sunflower.locator('.companion-story'), '예비석에 남아 함께 돌아왔다.', { exact: true });
           await text(page.locator('#recruit.on [data-candidate="gold_dragon"] .companion-story'),
-            '레드드래곤의 파이어브레스를 쓴 홍련 화산 8층 보스전에서 이겼다.', { exact: true });
+            // The battle chronicle (C1) knows Gold Dragon also landed the boss's last hit, the more notable fact.
+            '홍련 화산 8층 보스전에서 마지막 일격을 날렸다.', { exact: true });
           await sunflower.click();
           await capture();
           await page.locator('#recruit.on #meta-recruit-confirm').click();
@@ -79,8 +80,8 @@ export function createHistoryCases({ storedSession, enterObservatory }) {
           await text(page.locator('#sheet.on #sh-title'), '레드드래곤', { exact: true });
           const records = page.locator('#sheet.on .companion-records');
           assert.equal(await records.locator('.companion-story').count(), 5);
-          await text(records.locator('li').first().locator('.companion-story'), '홍련 화산 원정에서 쓰러졌다.', { exact: true });
-          await text(records.locator('li').last().locator('small'), '새벽의 숲 · 5층 · 원정 승리 · 생환', { exact: true });
+          await text(records.locator('li').first().locator('.companion-story'), '홍련 화산 4층에서 쓰러져 혼돈의마법사에게 파이어브레스를 남겼다.', { exact: true });
+          await text(records.locator('li').last().locator('small'), '새벽의 숲 · 5층 · 원정 승리 · 예비로 생환', { exact: true });
           await records.scrollIntoViewIfNeeded();
           await capture();
         }
@@ -90,8 +91,10 @@ export function createHistoryCases({ storedSession, enterObservatory }) {
       const profile = towerApproach();
       const { run } = recordedReturn(profile, 'creation_tower', 1);
       const history = chronicle(run);
-      assert.deepEqual(history.red_dragon.given, [{ toId: 'fenrir', skillName: '파이어브레스' }]);
-      assert.deepEqual(history.trans_ares.inherited, [{ fromId: 'fenrir', skillName: '윈터하울링' }]);
+      // Facts may carry the floor now; compare who gave what to whom.
+      const pair = ({ toId, fromId, skillName }) => ({ ...(toId && { toId }), ...(fromId && { fromId }), skillName });
+      assert.deepEqual(history.red_dragon.given.map(pair), [{ toId: 'fenrir', skillName: '파이어브레스' }]);
+      assert.deepEqual(history.trans_ares.inherited.map(pair), [{ fromId: 'fenrir', skillName: '윈터하울링' }]);
       return {
         session: storedSession({ profile, run }), proof: 'Tower settlement remembers the fallen and the inheritor from that expedition',
         async show(page, { text, capture }) {
@@ -101,7 +104,7 @@ export function createHistoryCases({ storedSession, enterObservatory }) {
           await text(records.locator('li').filter({ hasText: '레드드래곤 ·' }),
             '레드드래곤 · 창조의 탑 8층에서 쓰러져 펜리르에게 파이어브레스를 남겼다.', { exact: true });
           await text(records.locator('li').filter({ hasText: '투신아레스 ·' }),
-            '투신아레스 · 펜리르의 윈터하울링을 이어받았다.', { exact: true });
+            '투신아레스 · 창조의 탑 8층 보스전에서 마지막 일격을 날렸다.', { exact: true });
           await records.scrollIntoViewIfNeeded();
           await capture();
           await page.locator('#ending.on [data-screen-tab="dreams"]').click();

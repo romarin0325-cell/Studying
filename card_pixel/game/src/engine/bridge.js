@@ -265,6 +265,7 @@ export function create(core, opts) {
     pendingNext: null, lastDownIdx: -1, intentCache: null, lastCalc: null, prev: null,
     lastHit: null, carry: 0, lastStandDone: false, turnStartHp: 0,
     gained: [], heirloomsUsed: 0, heirloomKills: 0, rescues: [], enemyDowns: [], bestHit: null,
+    fought: new Set(), heirloomUses: [], forms: {}, killingHit: null, lastEnemyKiller: null,
     charge: 0, chargeSpent: false, dueEffects: [], betMet: false, fieldSeen: false,
     lessonOwner: null, lessonPreviews: 0, lessonResolved: 0, enemyAction: null
   };
@@ -335,7 +336,14 @@ export function create(core, opts) {
   const hasAffix = (enemy, id) => !!enemy && Array.isArray(enemy.affixes) && enemy.affixes.includes(id);
   const players = () => (host.battle.players || []).filter(Boolean);
 
-  function push(ev) { ev.s = B.prev; B.events.push(ev); return ev; }
+  function push(ev) {
+    const fighter = ev.t === 'act' && ev.who.side === 'enemy' ? ev.target
+      : ['act', 'await', 'stunned'].includes(ev.t) ? ev.who : null;
+    if (fighter?.side === 'ally') B.fought.add(host.state.deck[fighter.idx]);
+    ev.s = B.prev;
+    B.events.push(ev);
+    return ev;
+  }
 
   function recordEnemyDown() {
     if (B.lastDownIdx === B.enemyIdx) return false;
@@ -349,6 +357,7 @@ export function create(core, opts) {
     }
     const treasure = hasAffix(host.battle.enemy, 'treasure');
     B.enemyDowns.push({ idx: B.enemyIdx, treasure });
+    B.lastEnemyKiller = B.killingHit;
     if (bet?.kind === 'kill_on_turn' && bet.turn === host.battle.turn) B.betMet = true;
     push({ t: 'enemyDown', who: enemyRef(), treasure });
     return true;
@@ -393,6 +402,14 @@ export function create(core, opts) {
       if (z.hp !== a.hp) {
         const ev = { t: 'hp', who, delta: z.hp - a.hp, amount: Math.abs(z.hp - a.hp), cause: describeCause(cause, who) };
         const c = B.lastCalc;
+        if (who.side === 'enemy' && ev.delta < 0) {
+          // Includes delayed attacks and death counters. Unattributed effects have no actor.
+          const actor = c?.target === unit && c.hpBefore > unit.hp && c.result.dmg > 0
+            ? c.by : cause?.rule === 'overflow' ? B.lastEnemyKiller : null;
+          const companion = actor && host.state.deck.includes(actor) ? actor : null;
+          if (companion) B.fought.add(companion);
+          if (unit.hp <= 0) B.killingHit = companion;
+        }
         if (c && c.target === unit && ev.delta < 0) {
           c.info.dmg = c.result.dmg;  // Companion can modify a death hit after the calculation returns.
           ev.calc = c.info;
@@ -406,7 +423,10 @@ export function create(core, opts) {
         const from = a.buffs[id] || 0, to = z.buffs[id] || 0;
         if (from !== to) push({ t: 'buff', who, id, from, to });
       });
-      if (z.form !== a.form) push({ t: 'form', who, name: z.name });
+      if (z.form !== a.form) {
+        if (who.side === 'ally') B.forms[z.form] = host.state.deck[who.idx];
+        push({ t: 'form', who, name: z.name });
+      }
       if (z.dead && !a.dead) push({ t: 'down', who });
     };
     now.allies.forEach((z, i) => diffUnit(allyRef(i), b.players[i], was.allies[i], z));
@@ -541,7 +561,13 @@ export function create(core, opts) {
   B.onSkill = function (source, target, skill, delayed, go) {
     flush();
     const who = refOf(source);
-    if (skill.heirloom && !delayed && isAlly(source)) B.heirloomsUsed++;
+    if (skill.heirloom && !delayed && isAlly(source)) {
+      B.heirloomsUsed++;
+      const by = source.baseCardId || source.id;
+      const held = B.gained.findLast(heirloom => heirloom.to === by) ?? opts.heirlooms?.[by];
+      const from = held?.from ?? B.forms[skill.heirFrom] ?? skill.heirFrom;
+      if (from) B.heirloomUses.push({ by, from, skill: skill.name });
+    }
     const sourceKey = allySkillSource(source, skill, delayed);
     push({ t: 'act', who, target: refOf(target), delayed, sourceKey, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
     B.ctx.push({ kind: 'act', who, skill, delayed, source });
@@ -565,7 +591,10 @@ export function create(core, opts) {
           push({ t: 'rule', rule: 'echo', who: enemyRef(), amount: extra });
           target.hp -= extra; target.tookDamageThisTurn = true;
           flush();
-          if (target.hp <= 0) host.winBattle();
+          if (target.hp <= 0) {
+            B.killingHit = source.baseCardId || source.id;
+            host.winBattle();
+          }
         }
         // H thorns: physical attackers take a quarter back, never below 1 HP
         if (hasAffix(enemy, 'thorns') && skill.type === 'phy' && !source.isDead && source.hp > 1) {
@@ -1014,6 +1043,7 @@ export function create(core, opts) {
   function nextEnemy() {
     const burn = region === 'ember_carry' ? Math.min(2, host.battle.enemy.buffs.burn || 0) : 0;
     B.enemyIdx++;
+    B.killingHit = null;
     host.battle.enemy = buildBattleEnemy(host);
     setupEnemy(host.battle.enemy);
     host.battle.enemy.relayEnteredTurn = host.battle.turn + 1;   // its own turn count starts with its first action
@@ -1299,6 +1329,11 @@ export function create(core, opts) {
         retreated: host.battle.players.map(p => !!p?.retreated),
         rescues: B.rescues.map(rescue => ({ ...rescue })),
         heirloomsGained: heirloomsGained(),
+        heirloomTransfers: B.gained.map(({ to, from, name }) => ({ to, from, skill: name })),
+        heirloomUses: B.heirloomUses.map(use => ({ ...use })),
+        forms: { ...B.forms },
+        fought: [...B.fought],
+        lastEnemyKiller: B.lastEnemyKiller,
         heirloomsUsed: B.heirloomsUsed,
         heirloomKills: B.heirloomKills,
         lastStands: Number(B.lastStandDone),

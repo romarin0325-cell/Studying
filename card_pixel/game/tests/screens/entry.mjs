@@ -6,7 +6,9 @@ import { josa } from '../../src/ui/text.js';
 import { checkCoachLines, checkCoachPlacement } from './coach.mjs';
 
 const labels = {
-  boss: '보스전 출전', gate: '문지기 출전', battle: '일반전 출전', bench: '대기에서 귀환'
+  boss: '보스전 출전', gate: '문지기전 출전', battle: '일반전 출전', bench: '대기에서 귀환',
+  'boss-standby': '보스전 대기', 'gate-standby': '문지기전 대기', 'battle-standby': '일반전 대기',
+  unrecorded: '출전 여부 미기록'
 };
 const stored = page => page.evaluate(() => JSON.parse(localStorage.getItem('relaymare.session')).profile.ui.entry);
 const coach = page => page.locator('.coach:not([hidden])');

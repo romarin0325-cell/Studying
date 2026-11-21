@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { EVENTS } from '../src/content/events.js';
+import * as Bridge from '../src/engine/bridge.js';
 import { chronicle } from '../src/engine/history.js';
 import * as Meta from '../src/engine/meta.js';
+import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { outcomeText, storyLine } from '../src/ui/story-lines.js';
 import { playRun } from '../tools/sim.mjs';
+import { createCoreRoster } from './support/core.mjs';
 
 const names = { ash: '애쉬', siren: '세이렌', silver_rabbit: '은토끼' };
 const card = id => names[id] && { name: names[id] };
@@ -17,6 +21,158 @@ function finishedRun(changes = {}) {
     ...changes
   };
 }
+
+const { core, roster } = createCoreRoster();
+
+function ok(result) {
+  assert.equal(result.ok, true, result.reason);
+  return result;
+}
+
+function runAt(floor, bench) {
+  const run = Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 7, plain: true });
+  while (run.pending?.kind === 'start') ok(Run.chooseStartPick(run, run.pending.candidates[0]));
+  run.bench = bench.slice();
+  run.joinOrder = bench.slice();
+  while (run.floor < floor) {
+    ok(Run.chooseDoor(run, 0));
+    run.room.status = 'resolved';
+    advance(run);
+  }
+  return run;
+}
+
+function advance(run) {
+  if (run.pending?.kind === 'reinforcement') {
+    ok(Run.resolveReinforcement(run, { key: run.pending.key, id: null }));
+  }
+  ok(Run.leaveRoom(run));
+  ok(Run.nextFloor(run));
+}
+
+function battleAt(run, party, hp = 1, atk = 0) {
+  // Supply a battle fixture on floor 3, whose main route normally has service rooms.
+  if (run.floor === 3) run.doors[0] = { ...run.doors[0], type: 'wild', reward: 1 };
+  const door = run.doors[0];
+  door.enemies = [{
+    id: 'test_shadow', name: '시험용 적', element: 'nature', ...door.enemies[0],
+    skills: [], stats: { hp, atk, matk: atk, def: 0, mdef: 0 }
+  }];
+  ok(Run.enterBattleDoor(run, { floor: run.floor, index: 0, partyIds: party }));
+  const battle = Bridge.create(core, { ...Run.battleOptions(run), tempo: null });
+  battle.start();
+  return battle;
+}
+
+test('floor-three fall and inheritance survive later battles and distinguish fighting, waiting and bench', () => {
+  let run = runAt(3, ['ash', 'siren', 'silver_rabbit', 'sunflower']);
+  const third = battleAt(run, ['ash', 'siren'], 1000, 5000);
+  third.host.battle.players[0].baseEva = 0;
+  third.act(0);
+  assert.equal(third.state().cur, 1);
+  third.host.battle.enemy.hp = 1;
+  third.act(0);
+  ok(Run.settleBattle(run, third));
+  const afterThird = structuredClone(run);
+  assert.equal(Run.settleBattle(run, third).reason, 'no_active_battle');
+  assert.deepEqual(run, afterThird);
+
+  run = Save.restoreRun(Save.serializeRun(run), { core, roster });
+  assert.deepEqual(run, afterThird);
+  advance(run);
+  const fourth = battleAt(run, ['siren', 'silver_rabbit']);
+  fourth.act(fourth.options().find(move => move.heirloom).index);
+  ok(Run.settleBattle(run, fourth));
+  assert.deepEqual(run.chronicle.at(-1), {
+    floor: 4, roomType: 'gate', result: 'win', party: ['siren', 'silver_rabbit'], fought: ['siren'], fallen: [],
+    gained: [], used: [{ by: 'siren', from: 'ash', skill: '아마겟돈' }], lastHit: 'siren', bossOrGate: true
+  });
+
+  advance(run);
+  ok(Run.chooseDoor(run, run.doors.find(door => door.type === 'treasure').index));
+  ok(Run.takeTreasure(run));
+  advance(run);
+  const sixth = battleAt(run, ['siren']);
+  sixth.act(0);
+  ok(Run.settleBattle(run, sixth));
+  advance(run);
+  ok(Run.chooseDoor(run, 0));
+  advance(run);
+  const boss = battleAt(run, ['siren']);
+  boss.act(0);
+  ok(Run.settleBattle(run, boss));
+  ok(Run.confirmResult(run));
+
+  const facts = chronicle(run);
+  assert.equal(facts.ash.fallenFloor, 3);
+  assert.deepEqual(facts.ash.given, [{ toId: 'siren', skillName: '아마겟돈', floor: 3 }]);
+  assert.deepEqual(facts.siren.used, [{ fromId: 'ash', skillName: '아마겟돈', floor: 4, roomType: 'gate', won: true }]);
+  assert.deepEqual(facts.siren.victories, [
+    { roomType: 'gate', floor: 4, lastHit: true }, { roomType: 'boss', floor: 8, lastHit: true }
+  ]);
+  assert.equal(facts.siren.participation, 'boss');
+  assert.equal(facts.silver_rabbit.participation, 'gate-standby');
+  assert.equal(facts.silver_rabbit.fielded, false);
+  assert.deepEqual(facts.silver_rabbit.victories, []);
+  assert.equal(facts.sunflower.participation, 'bench');
+  assert.equal(storyLine(facts.ash, card), '홍련 화산 3층에서 쓰러져 세이렌에게 아마겟돈을 남겼다.');
+  assert.equal(storyLine(facts.siren, card), '홍련 화산 8층 보스전에서 마지막 일격을 날렸다.');
+  assert.equal(storyLine(facts.silver_rabbit, card), '싸울 차례가 오기 전에 전투가 끝나 함께 돌아왔다.');
+  assert.equal(storyLine(facts.sunflower, card), '예비석에 남아 함께 돌아왔다.');
+  const { profile, announce } = Meta.applyRunEnd(Meta.createProfile(), run);
+  assert.equal(announce.ok, true);
+  assert.deepEqual(Save.restoreProfile(Save.serializeProfile(profile)).history.siren, [facts.siren]);
+});
+
+test('the event source survives use by a transformed companion without adding the form or event donor to the party', () => {
+  const run = runAt(5, ['miracle_larva']);
+  const eventDoor = run.doors.find(door => door.type === 'event');
+  eventDoor.event = EVENTS.find(event => event.id === 'ash_split_wick');
+  ok(Run.chooseDoor(run, eventDoor.index));
+  assert.equal(Run.chooseEvent(run, 'veil', 'ash').ok, false);
+  assert.deepEqual(run.chronicle, []);
+  ok(Run.chooseEvent(run, 'veil', 'miracle_larva'));
+  assert.equal(Run.chooseEvent(run, 'veil', 'miracle_larva').ok, false);
+  assert.deepEqual(run.chronicle, [
+    { floor: 5, roomType: 'event', eventId: 'ash_split_wick',
+      gained: [{ to: 'miracle_larva', from: 'ash', skill: '드림파이어' }], released: [] }
+  ]);
+  const before = chronicle(run).miracle_larva;
+  assert.equal(storyLine(before, card), '홍련 화산 5층 ‘애쉬의 갈라진 심지’에서 애쉬의 드림파이어를 이어받았다.');
+  advance(run);
+
+  const battle = battleAt(run, ['miracle_larva']);
+  battle.act(battle.options().find(move => move.name === '기적의우화').index);
+  battle.act(battle.options().find(move => move.name.includes('오로라윙')).index);
+  battle.act(battle.options().find(move => move.heirloom).index);
+  assert.deepEqual(battle.summary().forms, { mirror_cocoon: 'miracle_larva', aurora_wing: 'miracle_larva' });
+  assert.deepEqual(battle.summary().heirloomUses, [{ by: 'miracle_larva', from: 'ash', skill: '드림파이어' }]);
+  ok(Run.settleBattle(run, battle));
+
+  const facts = chronicle(run);
+  assert.deepEqual(Object.keys(facts), ['miracle_larva']);
+  assert.deepEqual(facts.miracle_larva.inherited, [
+    { fromId: 'ash', skillName: '드림파이어', eventId: 'ash_split_wick', floor: 5 }
+  ]);
+  assert.deepEqual(facts.miracle_larva.used, [
+    { fromId: 'ash', skillName: '드림파이어', floor: 6, roomType: 'wild', won: true }
+  ]);
+  assert.equal(run.chronicle.at(-1).lastHit, 'miracle_larva');
+});
+
+test('a real old run save opens without records and retains its latest battle facts', () => {
+  const run = runAt(8, ['siren']);
+  const boss = battleAt(run, ['siren']);
+  boss.act(0);
+  ok(Run.settleBattle(run, boss));
+  ok(Run.confirmResult(run));
+  delete run.chronicle;
+  const restored = Save.restoreRun(Save.serializeRun(run), { core, roster });
+  assert.ok(restored);
+  assert.equal(Object.hasOwn(restored, 'chronicle'), false);
+  assert.deepEqual(chronicle(restored).siren.victories, [{ roomType: 'boss', floor: 8 }]);
+  assert.equal(storyLine(chronicle(restored).siren, card), '홍련 화산 8층 보스전에서 함께 이겼다.');
+});
 
 test('audit seeds 17/1000197 let Sunflower return and join from reserve with bond zero', () => {
   const initial = Meta.createProfile();

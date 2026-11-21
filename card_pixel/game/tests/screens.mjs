@@ -30,6 +30,9 @@ import { createTourCases } from './screens/tours.mjs';
 import { createMotionCases } from './screens/motion.mjs';
 import { createResumeCases } from './screens/resume.mjs';
 import { createHistoryCases } from './screens/history.mjs';
+import { createAccessCases } from './screens/access.mjs';
+import { createGoalCases } from './screens/goals.mjs';
+import { createEpisodeCases } from './screens/episodes.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -2908,7 +2911,10 @@ const tourCases = createTourCases({
 const motionCases = createMotionCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, skillTile, shots });
 const resumeCases = createResumeCases({ makeRun, startBattle, settleWin, command, storedSession, snowRabbitProfile, sessionKey });
 const historyCases = createHistoryCases({ storedSession, enterObservatory });
-const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases };
+const accessCases = createAccessCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, snowRabbitProfile, enterObservatory });
+const goalCases = createGoalCases({ roster, storedSession, enterObservatory });
+const episodeCases = createEpisodeCases({ storedSession, enterObservatory });
+const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases, access: accessCases, goals: goalCases, episodes: episodeCases };
 
 const cases = {
   'rift-save-failure': withFixedRiftResult(riftSaveFailure, '[data-backup-action="export"]'),
@@ -2997,7 +3003,10 @@ const cases = {
   ...tourCases,
   ...motionCases,
   ...resumeCases,
-  ...historyCases
+  ...historyCases,
+  ...accessCases,
+  ...goalCases,
+  ...episodeCases
 };
 
 caseGroups['fixed-layouts'] = Object.fromEntries([

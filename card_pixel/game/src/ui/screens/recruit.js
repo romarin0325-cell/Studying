@@ -2,6 +2,7 @@ import { $, $$, esc } from '../dom.js';
 import { background } from '../assets.js';
 import { CONTRACTS } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
+import { episodeGreeting } from '../../content/episode-greetings.js';
 import { hubLineup, sceneActors } from './hub.js';
 import { runRecordSheet } from './records.js';
 import { openBattleLog } from '../battle/log.js';
@@ -10,7 +11,11 @@ import { TERMS } from '../glossary.js';
 import { chronicle } from '../../engine/history.js';
 import { outcomeText, storyLine } from '../story-lines.js';
 
-const TAGS = { boss: '보스전 출전', gate: '문지기 출전', battle: '일반전 출전', bench: '대기에서 귀환' };
+const TAGS = {
+  boss: '보스전 출전', gate: '문지기전 출전', battle: '일반전 출전', bench: '대기에서 귀환',
+  'boss-standby': '보스전 대기', 'gate-standby': '문지기전 대기', 'battle-standby': '일반전 대기',
+  unrecorded: '출전 여부 미기록'
+};
 
 function companionStory(entry, card) {
   const line = storyLine(entry, card);
@@ -30,7 +35,11 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
   const mustReserve = !won && candidates.length > 0;
   const { card, face } = widgets;
   const history = chronicle(run);
-  const reason = id => won ? TAGS[rewards.recruitTags[id]] : '출전 기록 있음';
+  const reason = id => {
+    const tag = history[id]?.participation;
+    if (tag) return TAGS[tag];
+    return won ? TAGS[rewards.recruitTags[id]] : '출전 기록 있음';
+  };
 
   node.classList.add('screen-split');
   node.innerHTML = `
@@ -104,10 +113,13 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
 }
 
 export function recruitReceipt(ids, { card, face }, history) {
-  return '<div class="recruit-receipts" role="status">' + ids.map(id =>
-    '<div class="recruit-receipt win" data-recruited="' + esc(id) + '"><span class="run-face">' + face(id, 28) + '</span>' +
-    '<b>' + esc(card(id).name) + '</b><span class="companion-tag">' + TERMS.recruit.short + '</span>' +
-    companionStory(history?.[id]?.[0], card) + '</div>').join('') + '</div>';
+  return '<div class="recruit-receipts" role="status">' + ids.map(id => {
+    const greeting = episodeGreeting(id);
+    return '<div class="recruit-receipt win" data-recruited="' + esc(id) + '"><span class="run-face">' + face(id, 28) + '</span>' +
+      '<b>' + esc(card(id).name) + '</b><span class="companion-tag">' + TERMS.recruit.short + '</span>' +
+      (greeting ? '<blockquote class="episode-greeting">' + esc(greeting) + '</blockquote>' : '') +
+      companionStory(history?.[id]?.[0], card) + '</div>';
+  }).join('') + '</div>';
 }
 
 export function missionRecruitSheet({ period, widgets, sheets, claim, next, remaining }) {

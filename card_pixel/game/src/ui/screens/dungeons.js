@@ -9,14 +9,7 @@ import { DIFFICULTY_NAME } from './records.js';
 import { pixelIcon } from '../pixel-icons.js';
 import { TERMS } from '../glossary.js';
 
-const { availableDungeons, setExpeditionParty, setSeals, startView } = Meta;
-
-export function departureDifficulty(profile, dungeonId) {
-  if (dungeonId !== 'dawn_forest' && !Meta.featureFlags(profile).difficultyChoice) return 'easy';
-  const choice = profile.ui?.difficulty?.[dungeonId];
-  const entry = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
-  return entry?.difficulties?.includes(choice) ? choice : 'normal';
-}
+const { availableDungeons, departureDifficulty, setExpeditionParty, setSeals, startView } = Meta;
 
 export function listedPool(roster, dungeon, view) {
   const pool = Roster.expeditionPool?.(roster, dungeon.id, view);
@@ -41,13 +34,14 @@ const UNLOCK = {
   region_clear_count: '서로 다른 세 지역 생환'
 };
 
-export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRoster, quickStart, scrollTop }) {
+export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRoster, quickStart, scrollTop, selectedId = quickStart?.id }) {
   const flags = Meta.featureFlags(profile);
   const available = new Map(availableDungeons(profile).map(dungeon => [dungeon.id, dungeon]));
   const next = Object.values(DUNGEONS).find(dungeon => !available.has(dungeon.id));
   const rows = Object.values(DUNGEONS).map(dungeon => {
-    if (!available.has(dungeon.id)) return (profile.ui.entry.legacy || dungeon === next) ? `
-      <article class="meta-panel meta-dungeon-locked">
+    const selected = dungeon.id === selectedId;
+    if (!available.has(dungeon.id)) return (profile.ui.entry.legacy || dungeon === next || selected) ? `
+      <article class="meta-panel meta-dungeon-locked"${selected ? ' aria-current="true"' : ''}>
         ${pixelIcon('lock')}
         <div><b>${esc(dungeon.name)}</b><small>${UNLOCK[dungeon.unlock.kind]}</small>
           <button class="btn meta-roster-line" data-locked-roster="${dungeon.id}">기본 출현 명단</button></div>
@@ -58,7 +52,7 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRo
     const bossName = boss?.name || '그림자 둘';
     const clears = profile.records.clears[dungeon.id];
     const tag = prepare ? 'button' : 'article';
-    return `<${tag} class="meta-panel meta-dungeon"${prepare ? ` data-dungeon="${dungeon.id}" aria-pressed="${dungeon.id === quickStart?.id}"` : ''}>
+    return `<${tag} class="meta-panel meta-dungeon"${prepare ? ` data-dungeon="${dungeon.id}" aria-pressed="${selected}"` : ''}>
       <span class="meta-dungeon-art" data-region="${dungeon.id}" style="background-image:url(${background(dungeon.background)})"></span>
       <span class="meta-dungeon-copy">
         <b>${esc(dungeon.name)}</b>
@@ -83,7 +77,7 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRo
   $$('[data-dungeon]', node).forEach(button => button.addEventListener('click', () => prepare(button.dataset.dungeon)));
   const list = $('.scroll-list', node);
   if (scrollTop != null) list.scrollTop = scrollTop;
-  const selected = $('[data-dungeon][aria-pressed="true"]', list);
+  const selected = $('[data-dungeon][aria-pressed="true"], .meta-dungeon-locked[aria-current="true"]', list);
   if (selected) {
     const row = selected.getBoundingClientRect();
     const port = list.getBoundingClientRect();

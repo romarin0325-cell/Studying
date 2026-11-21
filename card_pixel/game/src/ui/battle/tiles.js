@@ -8,6 +8,7 @@ import { heirloomSkill } from '../../engine/bridge.js';
 import { TERMS } from '../glossary.js';
 
 const previewDamage = p => p.min != null && p.max != null ? damageRange([p.min, p.max]) : String(p.dmg ?? '');
+const DETAIL_KEYS = 'I ?';
 export function killLabel(preview, hp) {
   if (!preview || preview.delayed || hp <= 0) return '';
   if (preview.kill && (preview.min ?? preview.dmg) >= hp) return '처치';
@@ -48,6 +49,9 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
   const { sfx } = audio;
   const { openSheet, closeSheet, sheet } = sheets;
   const FIELD_NAMES = new Set(Object.keys(FIELD).map(id => core.BUFF_NAMES[id]));
+  const panel = $('#panel'), acts = $('#acts');
+  const actionButtons = '.act, #b-heir, #b-retreat';
+  let lastFocusedAction;
   const markedRelics = option => commandRelics(B.artifacts, option,
     card(B.D.allies[B.D.cur].form || B.party[B.D.cur]), B.D);
 
@@ -141,6 +145,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     $('#battle').classList.toggle('opening-decision', !!opening);
     if (opening) {
       renderOpening(opening);
+      restoreActionFocus();
       return;
     }
     const tile = o => {
@@ -171,7 +176,8 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       const kill = killLabel(p, D.enemy.hp);
       if (kill) r2 += '<u>' + kill + '</u>';
       const marks = relicMarks(core, markedRelics(o));
-      return '<button class="act ' + o.type + '" data-coach="skill" data-i="' + o.index + '"' + (usable ? '' : ' disabled') + '>' +
+      return '<button class="act ' + o.type + '" data-coach="skill" aria-keyshortcuts="' + DETAIL_KEYS +
+        '" data-i="' + o.index + '"' + (usable ? '' : ' disabled') + '>' +
         '<span class="ic">' + TYPE[o.type].slice(0, 1) + marks + '</span><span class="tx">' +
         '<span class="r1"><b>' + esc(name) + '</b><em>' + (o.cost ? 'MP ' + o.cost : '') + '</em></span>' +
         '<span class="r2">' + r2 + '</span><span class="r3">' + esc(r3) + '</span></span></button>';
@@ -196,6 +202,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       (can ? esc(D.allies[D.cur].name + ' 생존 · ' + retreatAction(retreatPreview)) :
         B.bridge.retreatUsed ? '사용 완료' : '교대할 동료 없음') + '</small>' +
       (can ? '<small>' + esc(retreatHp(retreatPreview)) + '</small>' : '');
+    restoreActionFocus();
   }
   function retreatAction(preview) {
     return preview.intent.dmg ? TERMS.retreat.detail : '다음 동료 출전 · 적 ' + preview.intent.name;
@@ -205,7 +212,21 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     const hp = preview.dmg.map(damage => Math.max(0, next.hp - damage)).reverse();
     return next.name + ' HP ' + next.hp + ' → ' + damageRange(hp);
   }
-  function lockPanel() { $$('.act').forEach(b => { b.disabled = true; }); $('#b-retreat').disabled = true; $('#b-heir').disabled = true; }
+  function lockPanel() {
+    const active = document.activeElement;
+    lastFocusedAction = panel.contains(active) && active.matches(actionButtons) && active.matches(':focus-visible') ? active : null;
+    $$('.act').forEach(b => { b.disabled = true; }); $('#b-retreat').disabled = true; $('#b-heir').disabled = true;
+  }
+  function restoreActionFocus() {
+    const previous = lastFocusedAction;
+    lastFocusedAction = null;
+    const active = document.activeElement;
+    if (!previous || (active !== document.body && active !== previous) || $('#sheet.on')) return;
+    const match = previous.id ? '#' + previous.id : previous.dataset.i != null
+      ? `.act[data-i="${previous.dataset.i}"]` : '.act[data-opening-rescue]';
+    const enabled = $$(`:is(${actionButtons}):enabled`, panel).filter(button => button.getClientRects().length);
+    (enabled.find(button => button.matches(match)) ?? enabled[0])?.focus();
+  }
   function playAction(index) {
     audio.unlockAudio(); sfx.tap();
     const events = B.bridge.act(index);
@@ -218,7 +239,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     if (events.length) B.onAction?.('retreat', events);
     play(events);
   }
-  function formSheet(option) {
+  function formSheet(option, opener) {
     const formIds = option.effects.find(e => e.type === 'transform_choice').forms;
     const buttons = formIds.map(id => {
       const form = card(id);
@@ -229,7 +250,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       return '<button class="btn big" data-form="' + choice.index + '"' + (choice.usable ? '' : ' disabled') +
         '><b>' + esc(form.name) + '</b><small>' + esc(summary) + '</small></button>';
     });
-    openSheet(FORM_SKILL, '<div class="togs">' + buttons.join('') + '</div>');
+    openSheet(FORM_SKILL, '<div class="togs">' + buttons.join('') + '</div>', { opener });
     $$('#sh-body [data-form]').forEach(b => b.addEventListener('click', () => {
       if (B.busy || b.disabled) return;
       closeSheet();
@@ -237,7 +258,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     }));
   }
   let pressTimer = null, pressed = false;
-  function detail(index) {
+  function detail(index, opener) {
     const o = (B.options || [])[index]; if (!o) return;
     const me = card(B.party[B.D.cur]);
     const name = isFormOption(o) ? FORM_SKILL : o.name;
@@ -248,24 +269,49 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     }).join(' ');
     sheet(name + ' · ' + TYPE[o.type] + (o.cost ? ' · MP ' + o.cost : '') + (o.heirloom ? ' · 유품' : ''),
       (o.heirloom ? (o.heirFromName || '') + '에게서 계승한 스킬 · 위력 1.5배, MP 0, 전투당 1회. ' : '') + fullText(o, me) +
-      (fields ? ' ' + fields.detail : '') + (relics ? ' ' + relics : '') + ' · 특성: ' + traitText(me.trait));
+      (fields ? ' ' + fields.detail : '') + (relics ? ' ' + relics : '') + ' · 특성: ' + traitText(me.trait), { opener });
   }
-  const acts = $('#acts');
+  $('#b-heir').setAttribute('aria-keyshortcuts', DETAIL_KEYS);
+  panel.addEventListener('keydown', ev => {
+    const button = ev.target.closest(actionButtons);
+    if (!button || button.disabled || B.busy || $('#sheet.on') || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    if (ev.repeat && (ev.key === 'Enter' || ev.key === ' ')) ev.preventDefault();
+
+    if (button.matches('.act:not(.opening-choice), #b-heir') && (ev.key === '?' || ev.key.toLowerCase() === 'i')) {
+      ev.preventDefault();
+      if (!ev.repeat) detail(Number(button.dataset.i), button);
+      return;
+    }
+
+    if (!acts.contains(button) || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(ev.key)) return;
+    ev.preventDefault();
+    const tiles = $$('.act', acts);
+    const index = tiles.indexOf(button);
+    const columns = button.classList.contains('opening-choice') ? 1 : 2;
+    const column = index % columns;
+    const offset = { ArrowLeft: column > 0 ? -1 : 0, ArrowRight: column < columns - 1 ? 1 : 0,
+      ArrowUp: -columns, ArrowDown: columns }[ev.key];
+    const next = tiles[index + offset];
+    if (offset && next && !next.disabled) next.focus();
+  });
   acts.addEventListener('pointerdown', ev => {
     const b = ev.target.closest('.act:not(.opening-choice)'); if (!b) return;
     pressed = false; clearTimeout(pressTimer);
-    pressTimer = setTimeout(() => { pressed = true; detail(Number(b.dataset.i)); }, 480);
+    pressTimer = setTimeout(() => { pressed = true; detail(Number(b.dataset.i), b); }, 480);
   });
   ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => acts.addEventListener(t, () => clearTimeout(pressTimer)));
-  acts.addEventListener('contextmenu', ev => { const b = ev.target.closest('.act:not(.opening-choice)'); if (b) { ev.preventDefault(); detail(Number(b.dataset.i)); } });
+  acts.addEventListener('contextmenu', ev => { const b = ev.target.closest('.act:not(.opening-choice)'); if (b) { ev.preventDefault(); detail(Number(b.dataset.i), b); } });
   acts.addEventListener('click', ev => {
     const b = ev.target.closest('.act'); if (!b || b.disabled || B.busy) return;
     if (b.hasAttribute('data-opening-rescue')) return retreat();
-    if (pressed) { pressed = false; return; }
+    if (pressed) {
+      pressed = false;
+      if (ev.detail > 0) return;
+    }
     const index = Number(b.dataset.i), option = B.options[index];
     if (option && isFormOption(option)) {
       sfx.tap();
-      formSheet(option);
+      formSheet(option, b);
       return;
     }
     playAction(index);

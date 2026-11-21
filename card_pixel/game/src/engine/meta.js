@@ -8,6 +8,7 @@ import { expeditionPool, gradeOf } from './roster.js';
 import { shuffle } from './rng.js';
 import { finishRun, runRewards, runRoster } from './run.js';
 import { entryState, featureFlags, hasCleared, hasFeature } from './entry.js';
+import { resumeLabel } from '../ui/glossary.js';
 
 export { featureFlags, hasCleared, markEntryStep, markTour, skipTutorial } from './entry.js';
 
@@ -18,6 +19,18 @@ const EARLY = ['ember_volcano', 'twilight_cathedral'];
 const REGIONS = Object.keys(DUNGEONS).filter(id => id !== INTRO && id !== TOWER);
 const completed = (profile, chapter) => profile.notebook.chapters.includes(chapter);
 const union = (left, right) => [...new Set([...left, ...right])];
+
+export function knownCompanions(profile) {
+  const recorded = records => Object.keys(records ?? {}).filter(id => records[id].length);
+  return new Set([
+    ...(profile.seenCharacters ?? []), ...recorded(profile.history), ...recorded(profile.ui?.recent), ...Object.keys(profile.recruits)
+  ]);
+}
+
+export function unrecruitedCompanions(profile, roster) {
+  const known = knownCompanions(profile);
+  return (roster?.allies ?? [...known]).filter(id => known.has(id) && !Object.hasOwn(profile.recruits, id));
+}
 
 export function createProfile() {
   return {
@@ -37,6 +50,13 @@ export function availableDungeons(profile) {
       id, name, floors, background, difficulties: id === INTRO ? ['normal']
         : !difficultyChoice ? ['easy'] : profile.nightmareUnlocks.includes(id) ? ['easy', 'normal', 'nightmare'] : ['easy', 'normal']
     }));
+}
+
+export function departureDifficulty(profile, dungeonId) {
+  if (dungeonId !== INTRO && !featureFlags(profile).difficultyChoice) return 'easy';
+  const choice = profile.ui?.difficulty?.[dungeonId];
+  const entry = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
+  return entry?.difficulties.includes(choice) ? choice : 'normal';
 }
 
 export function validPreparation(profile, draft) {
@@ -67,38 +87,70 @@ export function notebookView(profile) {
   return NOTEBOOK.map(chapter => ({ ...chapter, opens: chapter.opens.slice(), completed: completed(profile, chapter.id) }));
 }
 
-export function nextGoal(profile, run) {
+function encounterGoal(profile, roster) {
+  const ids = new Set(unrecruitedCompanions(profile, roster));
+  if (!ids.size) return null;
+  // The tower's base pool contains every companion when no roster is supplied.
+  const destinations = availableDungeons(profile).filter(({ id }) => roster || id === TOWER);
+  const ranked = destinations.map(({ id }) => {
+    const { seals, reserved } = startView(profile, id);
+    const pool = roster ? expeditionPool(roster, id, { reserved }).effectiveIds : [...ids];
+    const matches = pool.filter(candidate => ids.has(candidate));
+    return { id, count: matches.filter(candidate => !seals.includes(candidate)).length, total: matches.length };
+  }).sort((a, b) => b.count - a.count || (a.count ? 0 : b.total - a.total));
+  const best = ranked[0];
+  if (!best?.total) return null;
+  return {
+    text: `영입 전 동료 ${best.count || best.total}명 · ${DUNGEONS[best.id].name}에서 만날 수 있음`,
+    reward: best.count ? '' : '출현 제외 해제 필요',
+    target: { screen: 'dungeons', dungeonId: best.id, difficulty: departureDifficulty(profile, best.id) }
+  };
+}
+
+export function nextGoal(profile, run, roster) {
   if (run) return run.phase === 'done'
-    ? { text: '원정 결과 확인', reward: run.result === 'win' ? '생환 정산' : '다음 원정 준비', target: { screen: 'recruit', dungeonId: run.dungeonId } }
-    : { text: `${DUNGEONS[run.dungeonId].name} ${run.floor || 1}층 이어가기`, reward: '', target: { screen: 'resume', dungeonId: run.dungeonId } };
+    ? { text: resumeLabel(run, profile.ui), reward: run.result === 'win' ? '생환 정산' : '다음 원정 준비', target: { screen: 'recruit', dungeonId: run.dungeonId } }
+    : { text: resumeLabel(run, profile.ui), reward: '', target: { screen: 'resume', dungeonId: run.dungeonId } };
 
   const chapters = notebookView(profile);
   const openRegions = REGIONS.filter(id => profile.unlockedDungeons.includes(id));
   const unreturned = openRegions.find(id => !hasCleared(profile, id));
   const preferred = profile.ui?.destination;
   const destination = unreturned || (openRegions.includes(preferred) ? preferred : openRegions[0]);
-  const journey = (chapter, dungeonId) => ({ ...NOTEBOOK_GOALS[chapter], target: { screen: 'dungeons', dungeonId } });
+  const travel = (dungeonId, difficulty = departureDifficulty(profile, dungeonId)) => ({ screen: 'dungeons', dungeonId, difficulty });
+  const journey = (chapter, dungeonId) => ({ ...NOTEBOOK_GOALS[chapter], target: travel(dungeonId) });
+  const chapter = chapters.find(entry => !entry.completed)?.id;
+  const recruited = Object.keys(profile.recruits);
 
   if (chapters[6].completed) {
-    if (unreturned) return { text: `${DUNGEONS[unreturned].name}에서 생환`, reward: '새 지역 생환 기록', target: { screen: 'dungeons', dungeonId: unreturned } };
-    for (const dungeonId of [...REGIONS, TOWER]) {
+    if (unreturned) return { text: `${DUNGEONS[unreturned].name}에서 생환`, reward: '새 지역 생환 기록', target: travel(unreturned) };
+    const expeditions = availableDungeons(profile).filter(({ id }) => id !== INTRO);
+    const locked = expeditions.find(({ id }) => !profile.records.clears[id]?.normal);
+    if (locked) return { text: `${locked.name} 여정 생환 → 악몽 해금`, reward: '', target: travel(locked.id, 'normal') };
+    if (chapter === 1) return journey(1, INTRO);
+    if (chapter === 5) {
+      const alternate = id => recruited.some(other => other !== profile.notebook.firstLead && !profile.seals[id]?.includes(other));
+      const ready = [destination, ...openRegions, TOWER].find(id => id && alternate(id));
+      return journey(chapter, ready ?? destination ?? TOWER);
+    }
+    if (chapter) return journey(chapter, destination ?? TOWER);
+    for (const { id: dungeonId } of expeditions) {
       const { unlocked, stamps } = contractsFor(profile, dungeonId);
       const contractId = unlocked && Object.keys(stamps).find(id => stamps[id] === null);
-      if (contractId) return { text: `${DUNGEONS[dungeonId].name} · ${CONTRACTS[contractId].name}`, reward: '악몽 계약 도장', target: { screen: 'dungeons', dungeonId, contractId } };
+      if (contractId) return { text: `${DUNGEONS[dungeonId].name} · ${CONTRACTS[contractId].name}`, reward: '악몽 계약 도장',
+        target: { ...travel(dungeonId, 'nightmare'), contractId } };
     }
-    return { text: '동료 도감 보기', reward: '동료 수집', target: { screen: 'collection' } };
+    return encounterGoal(profile, roster) ?? { text: '동료 도감 보기', reward: '동료 수집', target: { screen: 'collection' } };
   }
 
-  const chapter = chapters.find(entry => !entry.completed).id;
   if (chapter === 1) return journey(1, INTRO);
-  const recruited = Object.keys(profile.recruits);
   if (chapter === 2 && !recruited.length) {
-    return { text: '생환 동료 영입', reward: '시작 동료와 출발할 수 있음', target: { screen: 'dungeons', dungeonId: destination || INTRO } };
+    return { text: '생환 동료 영입', reward: '시작 동료와 출발할 수 있음', target: travel(destination || INTRO) };
   }
   if (chapter === 5 && !recruited.some(id => profile.notebook.firstLead && id !== profile.notebook.firstLead)) {
     if (!chapters[5].completed && unreturned) return journey(6, unreturned);
     if (profile.unlockedDungeons.includes(TOWER)) return journey(7, TOWER);
-    return { text: '새 동료 영입', reward: '다른 시작 동료와 출발할 수 있음', target: { screen: 'dungeons', dungeonId: destination || INTRO } };
+    return { text: '새 동료 영입', reward: '다른 시작 동료와 출발할 수 있음', target: travel(destination || INTRO) };
   }
   if (chapter === 7) return journey(7, TOWER);
   return journey(chapter, destination || INTRO);

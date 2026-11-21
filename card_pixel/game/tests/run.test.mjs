@@ -552,12 +552,15 @@ test('a saved intro finale gate reward resumes at recruitment', () => {
 test('first intro floor-five loss holds a retry result and confirmation restores the entrance', () => {
   let run = reach(make({ dungeonId: 'dawn_forest' }), 5);
   enter(run);
+  const party = run.room.party.filter(Boolean);
   const bench = run.bench.slice();
   const fate = run.fallen.slice();
   const crystals = run.crystals;
   const enemies = structuredClone(run.room.enemies);
   const result = settle(run, { outcome: 'lose', survivors: [false, false, false], enemyDowns: [] });
   assert.equal(result.retry, true);
+  assert.equal(run.chronicle.at(-1).retry, true);
+  assert.deepEqual(run.chronicle.at(-1).fallen, party.map(id => ({ id })));
   assert.equal(run.result, null);
   assert.equal(run.phase, 'result');
   assert.deepEqual(run.bench, bench);
@@ -585,6 +588,26 @@ test('first intro floor-five loss holds a retry result and confirmation restores
   const replay = reach(make({ dungeonId: 'dawn_forest', profileView: { introCleared: true } }), 5);
   enter(replay);
   assert.equal(settle(replay, { outcome: 'lose', survivors: [false, false, false] }).result, 'lose');
+});
+
+test('chronicle keeps the newest 32 settlements across intro retries and reload', () => {
+  const run = reach(make({ dungeonId: 'dawn_forest' }), 5);
+  enter(run);
+  const party = run.room.party.slice();
+  const before = run.chronicle.length;
+  for (let i = 0; i < 32; i++) {
+    settle(run, { outcome: 'lose', survivors: [false, false, false], enemyDowns: [], fought: [party[0]] });
+    ok(Run.confirmResult(run));
+    ok(Run.confirmOrder(run, party));
+  }
+  assert.ok(before > 0);
+  assert.equal(run.chronicle.length, 32);
+  assert.ok(run.chronicle.every(record => record.floor === 5 && record.retry));
+  settle(run, { fought: [party[0]] });
+  assert.equal(roundTrip(run).chronicle.at(-1).result, 'win');
+  const invalid = JSON.parse(Save.serializeRun(run));
+  invalid.run.chronicle.push(run.chronicle[0]);
+  assert.equal(Save.restoreRun(invalid, { core, roster }), null);
 });
 
 test('order, summary and rewards reject replay and exclude the fallen', () => {
@@ -1276,6 +1299,7 @@ test('tempo 2 reinforcement joins, passes and replaces atomically across save an
   assert.equal(run.bench.length, 6);
   assert.ok(run.released.includes(replaceId));
   assert.ok(!run.fallen.includes(replaceId));
+  assert.deepEqual(run.chronicle.at(-1), { floor: 2, roomType: run.room.type, released: [replaceId] });
   assert.equal(run.crystals, crystals);
 });
 
@@ -1319,6 +1343,7 @@ test('tempo 2 two-recruit event validates both releases and price before applyin
   assert.equal(run.bench.length, 6);
   assert.deepEqual(run.bench.slice(-2), rabbits);
   assert.deepEqual(run.released.slice(-2), [a, b]);
+  assert.deepEqual(run.chronicle.at(-1), { floor: 3, roomType: 'event', eventId: event.id, gained: [], released: [a, b] });
   assert.equal(Run.chooseEvent(run, 'both', null, [a, b]).ok, false);
   roundTrip(run);
 });

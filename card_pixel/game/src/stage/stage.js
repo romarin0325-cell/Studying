@@ -120,8 +120,17 @@ export function createStage(ASSETS) {
 
   /* ---------- stage state ---------- */
   const RIM = { on: true, color: [226, 216, 255], alpha: 0.6 };
-  const S = { W: 195, H: 200, BASE: 172, bg: 'cave', actors: [], parts: [], props: [], shake: 0, flash: 0, dark: 0, danger: 0, tint: null, tintA: 0,
+  const effectsOn = !reducedMotion();
+  let shake = 0, flash = 0;
+  const S = { W: 195, H: 200, BASE: 172, bg: 'cave', actors: [], parts: [], props: [], dark: 0, danger: 0, tint: null, tintA: 0,
+    shakeOn: effectsOn, flashOn: effectsOn,
+    get shake() { return this.shakeOn ? shake : 0; },
+    set shake(value) { shake = this.shakeOn ? value : 0; },
+    get flash() { return this.flashOn ? flash : 0; },
+    set flash(value) { flash = this.flashOn ? value : 0; },
     cam: { k: 1, x: 0, y: 0 }, beads: { burn: 0, divine: 0, x: 0, y: 0 } };
+  // The gallery reads the effective amplitudes through the existing window.__game.clock hook.
+  Object.defineProperty(clock, 'screenEffects', { get: () => ({ shake: S.shake, flash: S.flash }) });
   let cv, ctx, fxLayer, bgCache = null;
 
   const ELEMENT_COLORS = {

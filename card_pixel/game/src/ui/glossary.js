@@ -29,6 +29,18 @@ export function resumeLabel(run, entry) {
   return RESUME.label(DUNGEONS[run.dungeonId].name, point.floor, destination);
 }
 
+export const EPISODE = {
+  title: title => `인연 에피소드 · ${title}`,
+  locked: '함께 출전하면 열림',
+  unread: '새 에피소드',
+  settings: '설정',
+  appearance: '외모',
+  voice: '보이스 톤',
+  previous: '이전',
+  next: '다음',
+  saveFailed: '읽은 상태를 저장하지 못했습니다.'
+};
+
 export const TERMS = {
   crystal: { short: '결정', firstUse: '결정 ◆ · 이번 원정에서 쓰는 재화', detail: '소환의 샘과 원정 중 거래에 사용합니다.', scope: '원정' },
   join: { short: '합류', firstUse: '이번 원정 합류', detail: '이번 원정에 함께할 동료가 됩니다.', scope: '원정' },

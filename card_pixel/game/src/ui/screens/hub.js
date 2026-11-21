@@ -1,10 +1,13 @@
 import { $, $$, esc } from '../dom.js';
 import { background, icon } from '../assets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
+import { EPISODES } from '../../content/episodes.js';
+import { episodeState } from '../../engine/episodes.js';
+import { EPISODE } from '../glossary.js';
+import { saveEpisodeFlags } from './collection.js';
 import { chapterTitle } from './notebook.js';
 import { dailyRow } from './daily-rift.js';
 import { pixelIcon } from '../pixel-icons.js';
-import { resumeLabel } from '../glossary.js';
 import { josa } from '../text.js';
 
 export function hubLineup(lead, recent) {
@@ -39,9 +42,13 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
   const destination = DUNGEONS[destinationId];
   const title = lead ? josa(lead.name, '과/와') : '';
   const direction = destination ? josa(destination.name, '으로/로') : '떠날 곳 고르기';
-  const action = run ? resumeLabel(run, profile.ui)
+  const action = run ? goal.text
     : departureLabel ?? [title, direction].filter(Boolean).join(' ');
   const canBrowse = flags.introCleared && profile.notebook.chapters.includes(1);
+  const unread = Object.keys(EPISODES).filter(id => episodeState(profile, id) === 'new');
+  saveEpisodeFlags(profile, 'episodesUnlocked', unread.filter(id => profile.ui?.episodesUnlocked?.[id] !== true));
+  const episodeBadge = unread.length
+    ? `<span class="companion-tag" id="meta-episode-badge" style="position:absolute;right:100%;white-space:nowrap">${EPISODE.unread}</span>` : '';
   const announcement = profile.ui?.announcement;
   const unlocks = announcement ? [
     ...(announcement.dungeons ?? []).map(id => DUNGEONS[id].name),
@@ -52,11 +59,11 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
   const lineup = hubLineup(profile.lead, profile.ui?.returners || []);
   const leadSprite = profile.lead && widgets.spr(profile.lead);
   // The home screen: the party stands in the observatory, menu bubbles on the right, the trip ticket below.
-  const orb = (attributes, art, label) => `<button class="orb" ${attributes}><span class="orb-art">${art}</span><b class="outlined">${label}</b></button>`;
+  const orb = (attributes, art, label, badge = '') => `<button class="orb" ${attributes}><span class="orb-art">${art}</span><b class="outlined">${label}</b>${badge}</button>`;
   const orbs = [
     destination && !run && !firstMain ? orb('id="meta-change-destination" aria-label="행선지 바꾸기"', pixelIcon('telescope'), '행선지') : '',
     ...(canBrowse ? [
-      orb('data-meta-page="collection"', profile.lead ? widgets.face(profile.lead, 40) : `<img class="px" src="${icon('companion')}" alt="" width="32" height="32">`, '동료'),
+      orb('data-meta-page="collection"', profile.lead ? widgets.face(profile.lead, 40) : `<img class="px" src="${icon('companion')}" alt="" width="32" height="32">`, '동료', episodeBadge),
       orb('data-meta-page="notebook"', pixelIcon('book'), '수첩'),
       orb('data-meta-page="records"', `<img class="px" src="${icon('boss')}" alt="" width="32" height="32">`, '기록')
     ] : [])
