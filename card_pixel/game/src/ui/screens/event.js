@@ -38,6 +38,8 @@ export function eventScreen(run, ui, result = null) {
   const hosts = event?.requires.present || [];
   const draws = result?.effects.flatMap(effect => effect.type === 'join' ?
     effect.draw ? [effect.draw] : effect.ids.map(id => ({ kind: 'join', id })) : []) ?? [];
+  // Only new members walk into the scene; a boost or memory changes someone who is already here.
+  const joined = draws.filter(draw => draw.kind === 'join').map(draw => draw.id);
   const released = result?.effects.filter(effect => effect.type === 'release').map(effect => effect.id) ?? [];
 
   const actor = (id, classes, flip) => {

@@ -59,6 +59,21 @@ export function doorLesson(preview) {
   }
   return (second ? 2 : 1) + '턴 · ' + (step.rule === 'magic_followup' ? '마법 공격' + power(step.val) : rule);
 }
+// The pill over a door in the walking map has room for about sixteen characters, so it names the turn
+// and the kind of hit only; the door card below keeps the full rule from doorLesson().
+const LESSON_SHORT = {
+  mana_drain: 'MP 흡수', retaliation: '반격', cleanse: '정화', defense_protocol: '방어 상승',
+  alternating_defense: '방어 교대', lesson_guard: '피해 감소', swap_stats: '능력 교환'
+};
+function doorLessonShort(preview) {
+  const [first, second] = preview?.lesson?.steps ?? [];
+  const step = second ?? first;
+  if (!step) return '';
+  const turn = (second ? 2 : 1) + '턴 ';
+  if (LESSON_SHORT[step.rule]) return turn + LESSON_SHORT[step.rule];
+  const type = step.rule === 'magic_followup' ? '마법' : TYPE[step.type] || '공격';
+  return turn + type + (Number.isFinite(step.val) ? ' ×' + step.val : '');
+}
 function confront(name) {
   const endsWithConsonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
   return name + (endsWithConsonant ? '과 대면' : '와 대면');
@@ -82,7 +97,10 @@ export function doorDecision(run, door, preview) {
   const crystals = (door.reward ?? 0) - contractEscrow(run, door);
   if (!door.enemies.length) return REGIONS[door.regionChoice?.id]?.name ?? ROOM_NAMES[door.type] ?? door.name;
   if (preview?.bossRule) return door.type === 'boss' ? preview.bossRule.name ?? door.name : door.name;
-  if (preview?.lesson) return doorLesson(preview) || TERMS[door.type]?.short || door.name;
+  if (preview?.lesson) {
+    const lesson = doorLessonShort(preview) || TERMS[door.type]?.short || door.name;
+    return !run.daily && crystals > 0 ? lesson + ' · 결정 ' + crystals : lesson;
+  }
   const beat = primaryBeat(door, preview);
   const risk = enemyActionText(beat) || TERMS[door.type]?.short || door.name;
   return !run.daily && crystals > 0 ? risk + ' · 결정 ' + crystals : risk;
