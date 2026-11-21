@@ -3,6 +3,7 @@
    a camera that punches in at an integer zoom, cached backgrounds, props and particles. It knows nothing about rules. */
 export function createStage(ASSETS) {
   const SCALE = 2;
+  const reducedMotion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
   /* ---------- virtual clock ---------- */
   const clock = { t: 0, speed: 1, fast: false, slow: 1, paused: false, waiters: [], tweens: [] };
@@ -158,7 +159,9 @@ export function createStage(ASSETS) {
       S.parts.push({ bz: 1, t: 0, dur: (dur || 0.3) * (0.7 + Math.random() * 0.3), x0: x + Math.cos(ang) * r, y0: y + Math.sin(ang) * r * 0.7, x1: x, y1: y, cx: x + Math.cos(ang + 0.9) * r * 0.6, cy: y + Math.sin(ang + 0.9) * r * 0.4, c: colors[i % colors.length], s: i % 3 ? 1 : 2, x, y, trail: [] });
     }
   }
-  function ring(x, y, color, radius, life) { S.parts.push({ ring: 1, x, y, r: 2, to: radius || 26, life: life || 0.3, max: life || 0.3, c: color }); }
+  function ring(x, y, color, radius = 26, life = 0.3, still = false) {
+    S.parts.push({ ring: 1, x, y, r: still ? radius : 2, to: radius, life, max: life, c: color });
+  }
   function slash(x, y, color, dir) { S.parts.push({ sl: 1, x, y, life: 0.2, max: 0.2, c: color || '#ffffff', dir: dir || 1 }); }
   function dust(x, y) { for (let i = 0; i < 8; i++) S.parts.push({ x: x + (Math.random() - 0.5) * 18, y: (y == null ? S.BASE : y) - 1, vx: (Math.random() - 0.5) * 40, vy: -10 - Math.random() * 22, g: 60, life: 0.3 + Math.random() * 0.25, c: i % 2 ? '#8c7486' : '#6b5566', s: i % 3 ? 1 : 2 }); }
   function gem(x0, y0, x1, y1, dur, done) { S.parts.push({ bz: 1, gem: 1, t: 0, dur, x0, y0, x1, y1, cx: x0 + (Math.random() - 0.5) * 40, cy: Math.min(y0, y1) - 34, x: x0, y: y0, done, trail: [] }); }
@@ -423,6 +426,31 @@ export function createStage(ASSETS) {
     fxLayer.appendChild(d); setTimeout(() => d.remove(), 1300);
     return d;
   }
+  function fieldNotice(anchor, text, colors) {
+    if (!anchor) return;
+    const stage = fxLayer.getBoundingClientRect(), slot = anchor.getBoundingClientRect();
+    const x = Math.max(4, Math.round(slot.left - stage.left));
+    fxLayer.querySelector('[data-field-effect]')?.remove();
+    const note = document.createElement('div');
+    note.dataset.fieldEffect = '';
+    Object.assign(note.style, {
+      position: 'absolute', left: x + 'px', top: Math.round(slot.bottom - stage.top + 2) + 'px',
+      maxWidth: 'calc(100% - ' + (x + 4) + 'px)', boxSizing: 'border-box', padding: '2px 6px',
+      color: 'var(--ink)', background: 'var(--paper2)', border: '1px solid var(--line2)',
+      font: 'normal 0.75rem/1rem var(--f-label)'
+    });
+    for (const color of colors) {
+      const mark = document.createElement('span');
+      Object.assign(mark.style, {
+        display: 'inline-block', width: '7px', height: '7px', marginRight: '3px',
+        background: color, boxShadow: 'inset 0 0 0 1px var(--line2)'
+      });
+      note.append(mark);
+    }
+    note.append(text);
+    fxLayer.append(note);
+    wait(0.9).then(() => note.remove());
+  }
   function banner(tag, text, cls) {
     const b = document.createElement('div');
     b.className = 'banner ' + (cls || '');
@@ -486,7 +514,7 @@ export function createStage(ASSETS) {
   return {
     SCALE, S, clock, wait, tween, ELEMENT_COLORS,
     loadSprites, variant, IMG, makeActor, removeActor, meta, X, footY, headY, chestY, tall,
-    sparks, fly, rise, converge, ring, slash, dust, gem, number, banner, plate, prop, dropProp, punch,
+    sparks, fly, rise, converge, ring, slash, dust, gem, number, fieldNotice, banner, plate, prop, dropProp, punch, reducedMotion,
     init, resize, setRoom, bellPosition, clear, start, advance, draw, RIM,
     pause(on) { clock.paused = !!on; }
   };
