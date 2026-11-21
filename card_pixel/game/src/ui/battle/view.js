@@ -680,20 +680,28 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         B.busy = false; clock.fast = false; $('#skip').className = '';
       }
     }
-    if (bridge === B.bridge && bridge.outcome && $('#battle').classList.contains('on')) finishBattle();
+    if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
+    if (bridge.outcome) finishBattle();
+    else if (bridge.awaiting) B.onReady?.(B);
   }
 
   /* ---------- battle in and out ---------- */
   function roomLabel() {
-    return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + (TERMS[B.door.type]?.short ?? ROOM_NAMES[B.door.type]);
+    // The bar is narrow: plain kind only ('보스', not '보스 · 꿈의 주인'); the door card carries the flavour name.
+    const plain = TERMS[B.door.type]?.short?.split(' · ')[0];
+    return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + (plain ?? ROOM_NAMES[B.door.type]);
   }
 
-  function startBattle(expedition, options, settle, advance, { fromMap = false, decision, simpleOpening = false } = {}) {
+  function startBattle(expedition, options, settle, advance, {
+    fromMap = false, decision, simpleOpening = false, onAction, onReady, replay = []
+  } = {}) {
     run = expedition;
     onResult = settle;
     onContinue = advance;
     onDecision = decision;
     const door = run.room;
+    B.onAction = onAction;
+    B.onReady = onReady;
     B.door = door; B.party = options.party; B.log = []; B.all = []; B.pending = null; B.relayBanner = null;
     B.played = 0;
     B.fromMap = fromMap;
@@ -717,11 +725,21 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     relayHint.hidden = door.type !== 'borrowed' || isOpening() && !!Opening.openingModel;
     music?.play(door.type === 'boss' || door.final ? 'boss' : 'battle', run.dungeonId);
     show('battle'); layout(); ticker('');
-    play(B.bridge.start());
+    // The run codec restores a fighting room at its pre-battle checkpoint.
+    const events = B.bridge.start();
+    for (const action of replay) {
+      const accepted = action === 'retreat' ? B.bridge.retreat() : B.bridge.act(action);
+      if (!accepted.length) break;
+      events.push(...accepted);
+    }
+    play(events);
   }
   function finishBattle() {
     const res = onResult(B.bridge.summary(), currentLog());
-    if (res?.ok) showResult(onContinue, onDecision, false);
+    if (res?.ok) {
+      showResult(onContinue, onDecision, false);
+      B.onReady?.(B);
+    }
   }
 
   function showResult(advance, decision, restored) {

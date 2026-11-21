@@ -37,7 +37,7 @@ header.top { position: relative; z-index: 3; flex: none; display: flex; align-it
 header.top b { align-self: stretch; display: flex; align-items: center; padding: 0 26px 0 14px; color: #fff;
   font: normal 0.9375rem/1 var(--f-display); white-space: nowrap; text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
 header.top span { color: var(--ink2); }
-header.top b + span { padding: 3px 10px; background: #fff; color: var(--navy); white-space: nowrap; clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); box-shadow: inset 0 calc(-1 * var(--u)) 0 var(--line2); }
+header.top b + span:not(.sp) { padding: 3px 10px; background: #fff; color: var(--navy); white-space: nowrap; clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); box-shadow: inset 0 calc(-1 * var(--u)) 0 var(--line2); }
 header.top .sp { flex: 1; }
 header.top .gems { padding: 4px 12px; background: #fff; color: var(--aqua-lo); white-space: nowrap; clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); box-shadow: inset 0 calc(-1 * var(--u)) 0 var(--line2); }
 .log-button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex: none; height: 40px;
