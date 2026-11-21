@@ -26,7 +26,7 @@ export function createProfile() {
     notebook: { chapters: [], firstLead: null },
     unlockedDungeons: [INTRO], nightmareUnlocks: [], contractStamps: {},
     records: { runs: 0, clears: {}, bestHit: null, longestServing: null, appliedRuns: [] },
-    seenCharacters: [], seenRelics: [], missions: { periods: {} }, ui: { wantedCompanionId: null }
+    seenCharacters: [], seenRelics: [], missions: { periods: {} }, ui: { wantedCompanionId: null, preparation: null }
   };
 }
 
@@ -36,6 +36,24 @@ export function availableDungeons(profile) {
       id, name, floors, background, difficulties: id === INTRO ? ['normal']
         : profile.nightmareUnlocks.includes(id) ? ['easy', 'normal', 'nightmare'] : ['easy', 'normal']
     }));
+}
+
+export function validPreparation(profile, draft) {
+  if (!draft || typeof draft !== 'object' || Array.isArray(draft)) return false;
+  const { dungeonId, difficulty, contract } = draft;
+  const destination = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
+  return !!destination?.difficulties.includes(difficulty)
+    && (contract === null || (difficulty === 'nightmare' && typeof contract === 'string' && Object.hasOwn(CONTRACTS, contract)));
+}
+
+export function setPreparation(profile, draft) {
+  if (!validPreparation(profile, draft)) return profile;
+  const { dungeonId, difficulty, contract } = draft;
+  return { ...profile, ui: { ...profile.ui, preparation: { dungeonId, difficulty, contract } } };
+}
+
+export function clearPreparation(profile) {
+  return { ...profile, ui: { ...profile.ui, preparation: null } };
 }
 
 export function contractsFor(profile, dungeonId) {
@@ -153,7 +171,7 @@ function addChapter(profile, chapter) {
 
 export function recordRunProgress(profile, run) {
   if (run.daily) return { profile, announce: { ok: true, chapters: [] } };
-  const next = structuredClone(profile);
+  const next = structuredClone(profile.ui?.preparation ? clearPreparation(profile) : profile);
   if (run.dungeonId !== INTRO) {
     if (run.lead && Object.hasOwn(next.recruits, run.lead) && !completed(next, 2)) {
       next.notebook.firstLead = run.lead;

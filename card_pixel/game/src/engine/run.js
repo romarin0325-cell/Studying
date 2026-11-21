@@ -1,4 +1,4 @@
-import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../content/contracts.js';
+import { CONTRACTS, CONTRACT_ESCROW, CONTRACT_PAYOUT, CONTRACT_RULE_VERSION, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
 import { LESSON_VERSION } from '../content/boss-lessons.js';
 import { BOSSES } from '../content/bosses.js';
 import { FLOORS as DAILY_FLOORS } from '../content/daily-rift.js';
@@ -8,7 +8,7 @@ import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
 import { EASY_ENEMY_ATTACK, REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import { canJoin, choicesFor, COST, drawFrom, join, RATES, release, rollBlessing, seeCharacters, validateReplacements } from './awakenings.js';
-import { affixView, create as createBattle, enemyBeats, enemyStatsWithQuirk } from './bridge.js';
+import { affixView, create as createBattle, enemyBeats, enemyStatsWithQuirk, fieldCap } from './bridge.js';
 import { dayKey, doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { pick, shuffle } from './rng.js';
 import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, RELIC_LIMIT, resolveEvent } from './rooms.js';
@@ -97,7 +97,8 @@ export function createRun(options) {
     bench: [], joinOrder: [], lastParty: null, fallen: [], released: [], heirlooms: {}, blessings: {}, relics: [],
     crystals: intro || daily ? 0 : 1,
     contract: contract === null ? null : {
-      id: contract, met: false, metAtFloor: null, riskDoorTaken: false, escrowed: 0, paid: 0, failed: false
+      id: contract, ruleVersion: CONTRACT_RULE_VERSION, met: false, metAtFloor: null,
+      riskDoorTaken: false, escrowed: 0, paid: 0, failed: false
     },
     guide: { bossOrder: daily ? false : profileView.bossOrder ?? true },
     eligible: [], gateSurvivors: [], reserved: null, unchosen: [], participated: [], seenCharacters: [], seenRelics: [],
@@ -214,7 +215,10 @@ export function chooseDoor(run, index) {
     prepareStartPick(run, openingLead ? 1 : START.picks, openingLead, [run.profileShard, ...run.introCandidates].filter(Boolean));
   }
   if (run.room.type === 'altar') run.pending = { kind: 'altar', rolls: 0, roll: null };
-  if (run.room.type === 'event') run.pending = { kind: 'event', choices: eventChoices(run, core, roster) };
+  if (run.room.type === 'event') {
+    seeCharacters(run, run.room.event?.requires.present ?? []);
+    run.pending = { kind: 'event', choices: eventChoices(run, core, roster) };
+  }
   return { ok: true, room: copy(run.room), pending: copy(run.pending) };
 }
 
@@ -268,12 +272,13 @@ export function enterBattleDoor(run, { floor, index, partyIds } = {}) {
   return applyOrder(run, order);
 }
 
-function battleStart(run, door) {
+function battleStart(run, door, artifacts) {
   const eventStart = run.nextBattle?.start;
   if (!door.start && !eventStart) return null;
   const start = { ...door.start, ...eventStart };
   if (door.start?.field || eventStart?.field) {
-    start.field = unique([...(eventStart?.field || []), ...(door.start?.field || [])]).slice(0, 3);
+    const { core } = dependencies.get(run);
+    start.field = unique([...(eventStart?.field || []), ...(door.start?.field || [])]).slice(0, fieldCap(core, artifacts));
   }
   return start;
 }
@@ -285,11 +290,10 @@ function battleArtifacts(run) {
 export function doorStart(run, index) {
   const door = run.doors[index];
   if (!door?.enemies.length) return { field: [], enemyDebuffs: {} };
-  const start = battleStart(run, door);
   const artifacts = battleArtifacts(run);
+  const start = battleStart(run, door, artifacts);
   const field = unique([...(artifacts.includes('gale_storm') ? ['gale'] : []), ...(start?.field || [])]);
-  const cap = artifacts.includes('buff_overload') ? 5 : dependencies.get(run).core.GAME_CONSTANTS.MAX_FIELD_BUFFS;
-  return { field: field.slice(-cap), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
+  return { field: field.slice(-fieldCap(dependencies.get(run).core, artifacts)), enemyDebuffs: copy(start?.enemyDebuffs || {}) };
 }
 
 export function doorEnemies(run, index) {
@@ -307,9 +311,9 @@ export function getTempoView(run, doorIndex) {
   return {
     party: door?.type === 'borrowed' ? INTRO.party.slice() : defaultParty(run),
     suggestedParty: suggested ? [suggested[0] ?? null, suggested[1] ?? null, suggested[2] ?? null] : null,
-    enemies: doorEnemies(run, doorIndex).map(enemy => ({
+    enemies: doorEnemies(run, doorIndex).map((enemy, index) => ({
       id: enemy.id, name: enemy.name, maxHp: enemy.maxHp, element: enemy.element,
-      beats: enemyBeats(core, enemy, door.tempo?.pattern, door.intent)
+      beats: enemyBeats(core, enemy, door.tempo?.pattern, door.intent, index === 0 ? door.tempo?.lesson : null)
     })),
     pattern: door?.tempo?.pattern ?? null,
     blessing: copy(door?.tempo?.blessing ?? null),
@@ -371,13 +375,14 @@ export function battleOptions(run) {
 }
 
 function optionsForDoor(run, room, party) {
+  const artifacts = battleArtifacts(run);
   return {
     party, enemies: room.enemies, quirk: room.quirk || null,
     ...(run.difficulty === 'easy' && { enemyAttackScale: enemyAttackScale(run) }),
     seed: room.type === 'borrowed' ? INTRO.seed : (run.seed + run.floor * 1013 + run.stats.battles * 7) >>> 0,
     heirlooms: run.heirlooms, blessings: battleBlessings(run, room),
     ...(room.tempo && { tempo: room.tempo, openingIntent: room.intent }),
-    artifacts: battleArtifacts(run), region: room.region, start: battleStart(run, room), bet: run.nextBattle?.bet || null
+    artifacts, region: room.region, start: battleStart(run, room, artifacts), bet: run.nextBattle?.bet || null
   };
 }
 
@@ -412,11 +417,13 @@ function setReinforcement(run, roster) {
 }
 
 function meetsContract(run, summary, survivors) {
+  const legacy = (run.contract.ruleVersion ?? LEGACY_CONTRACT_RULE_VERSION) === LEGACY_CONTRACT_RULE_VERSION;
   switch (run.contract.id) {
     case 'rescue':
-      return summary.rescues?.some(({ retreated, lethal }) => lethal && survivors.includes(retreated));
+      return summary.rescues?.some(({ retreated, incoming, lethal }) =>
+        lethal && survivors.includes(retreated) && (!legacy || survivors.includes(incoming)));
     case 'heirloom':
-      return run.floor === 4 && summary.heirloomKills > 0;
+      return (legacy || run.floor === 4) && summary.heirloomKills > 0;
     case 'elite':
       return run.floor === 6 && run.room.type === 'elite' && run.contract.riskDoorTaken && survivors.length >= 2;
   }
@@ -483,7 +490,7 @@ export function settleBattle(run, input) {
     run.stats.retries++;
     room.status = 'order';
     room.party = null;
-    return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null, contract: null };
+    return { ok: true, win, retry: true, fallen: [], crystals: 0, result: null, contract: null, relic: null, relics: [] };
   }
 
   const next = run.nextBattle;
@@ -516,6 +523,7 @@ export function settleBattle(run, input) {
   const betWon = win && !!next?.bet && summary.bet?.kind === next.bet.kind && summary.bet?.won === true;
   const betRelic = betWon ? next.reward.relic : null;
   let relic = null;
+  const relics = [];
   if (win) {
     if (!run.daily) {
       crystals += (room.reward || 0) + 2 * downs.filter(entry => entry.treasure).length;
@@ -526,8 +534,12 @@ export function settleBattle(run, input) {
       if (gate && !final && !wiped) setGateReward(run, room, downs, betRelic);
       if (!final && !wiped) setReinforcement(run, roster);
     }
-    if (room.type === 'elite' && room.relic && !wiped) relic = grantRelic(run, room.relic);
-    if (betRelic && !wiped) relic = grantRelic(run, betRelic);
+    if (!wiped) {
+      for (const id of [room.type === 'elite' && room.relic, betRelic].filter(Boolean)) {
+        relic = grantRelic(run, id);
+        if (relic.equipped) relics.push(id);
+      }
+    }
     if (room.type === 'borrowed' && !wiped) {
       if (usesTempo(run)) {
         const first = room.party[0];
@@ -546,7 +558,7 @@ export function settleBattle(run, input) {
   room.status = 'resolved';
   run.phase = run.result && !run.pending ? 'done' : 'reward';
   return {
-    ok: true, win, wiped, fallen, survivors, heirloomsGained, crystals, relic,
+    ok: true, win, wiped, fallen, survivors, heirloomsGained, crystals, relic, relics,
     bet: next?.bet ? { ...next.bet, won: betWon } : null,
     contract: contract.progress,
     result: run.result, pending: copy(run.pending)
@@ -636,35 +648,51 @@ export function springTake(run, id, replaceId = null) {
   return { ok: true, id };
 }
 
-export function getSpringOffer(run) {
-  if (!springRoom(run)) return invalid('no_pick_waking');
+function springOfferView(run) {
   if (run.pending?.kind === 'spring') {
     const { candidates, cost } = run.pending;
     return { ok: true, key: `${run.id}/${run.floor}/prepaid`, candidates: candidates.slice(), cost, alreadyPaid: true };
   }
+  const { key, candidates } = run.room.springOffer;
+  return { ok: true, key, candidates: candidates.slice(), cost: COST.pick, alreadyPaid: false };
+}
+
+export function getSpringOffer(run) {
+  if (!springRoom(run)) return invalid('no_pick_waking');
+  if (run.pending?.kind === 'spring') return springOfferView(run);
   if (run.pending) return invalid('no_pick_waking');
-  if (!run.room.springOffer) {
-    if (run.crystals < COST.pick) return invalid('insufficient_crystals');
+  const prior = run.room.springOffer?.candidates;
+  const remaining = prior?.filter(id => canJoin(run, id));
+  if (!prior || remaining.length !== prior.length) {
     const { roster } = dependencies.get(run);
     const rng = { ...run.rng };
-    const available = run.paidPickUsed ? [] : run.companions.filter(id => canJoin(run, id));
-    const companion = available.includes(run.preferredCompanion) ? run.preferredCompanion : pick(rng, available);
-    const candidates = choicesFor({ ...run, rng }, roster, 3, { priority: companion ? [companion] : [] });
+    let priority = remaining;
+    if (!prior) {
+      const available = run.paidPickUsed ? [] : run.companions.filter(id => canJoin(run, id));
+      const companion = available.includes(run.preferredCompanion) ? run.preferredCompanion : pick(rng, available);
+      priority = companion ? [companion] : [];
+    }
+    let candidates = choicesFor({ ...run, rng }, roster, 3, { priority });
     if (!candidates.length) return invalid('empty_pool');
+    if (prior) {
+      const replacements = candidates.slice(remaining.length);
+      candidates = prior.map(id => remaining.includes(id) ? id : replacements.shift()).concat(replacements).filter(Boolean);
+    }
     const serial = (run.room.springOfferSerial ?? 0) + 1;
     run.room.springOfferSerial = serial;
     run.room.springOffer = {
       key: `${run.id}/${run.floor}/spring/${serial}`, candidates, seed: run.rng.state, nextSeed: rng.state
     };
   }
-  const { key, candidates } = run.room.springOffer;
-  return { ok: true, key, candidates: candidates.slice(), cost: COST.pick, alreadyPaid: false };
+  const offer = springOfferView(run);
+  seeCharacters(run, offer.candidates);
+  return offer;
 }
 
 export function commitSpringOffer(run, { key, id, replaceId = null } = {}) {
   if (!springRoom(run) || (run.pending?.kind !== 'spring' && !run.room.springOffer)) return invalid('no_spring_pick');
-  const offer = getSpringOffer(run);
-  if (!offer.ok || key !== offer.key) return invalid('invalid_spring_key');
+  const offer = springOfferView(run);
+  if (key !== offer.key || (!offer.alreadyPaid && offer.candidates.some(id => !canJoin(run, id)))) return invalid('invalid_spring_key');
   if (!offer.candidates.includes(id) || !canJoin(run, id)) return invalid('invalid_candidate');
   const error = validateReplacements(run, 1, replaceId === null ? [] : [replaceId]);
   if (error) return invalid(error);
@@ -674,7 +702,6 @@ export function commitSpringOffer(run, { key, id, replaceId = null } = {}) {
   join(run, id);
   run.crystals -= charged;
   run.paidPickUsed = true;
-  seeCharacters(run, offer.candidates);
   if (offer.alreadyPaid) run.pending = null;
   else {
     const { seed, nextSeed } = run.room.springOffer;

@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
-import { CONTRACT_ESCROW, CONTRACT_PAYOUT } from '../src/content/contracts.js';
+import { CONTRACT_ESCROW, CONTRACT_PAYOUT, CONTRACT_RULE_VERSION, LEGACY_CONTRACT_RULE_VERSION } from '../src/content/contracts.js';
 import { DUNGEONS } from '../src/content/dungeons.js';
 import { EVENTS, eventForRun } from '../src/content/events.js';
 import { INTRO } from '../src/content/intro.js';
 import { LAYOUTS } from '../src/content/layouts.js';
 import { RELICS } from '../src/content/relics.js';
 import * as Bridge from '../src/engine/bridge.js';
+import { canJoin } from '../src/engine/awakenings.js';
 import * as DailyStore from '../src/engine/daily-store.js';
 import * as Meta from '../src/engine/meta.js';
 import { openingModel } from '../src/engine/opening.js';
@@ -18,7 +19,7 @@ import { makeDoors } from '../src/engine/rooms.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { mulberry32, nextFloat, shuffle } from '../src/engine/rng.js';
-import { DAILY_KEY, SESSION_KEY, SETTINGS_KEY, slotStorage } from '../src/ui/storage.js';
+import { DAILY_KEY, DAMAGED_DAILY_KEY, SESSION_KEY, SETTINGS_KEY, slotStorage } from '../src/ui/storage.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 import { playRun } from '../tools/sim.mjs';
 
@@ -802,7 +803,8 @@ test('contracts require this dungeon’s unlocked nightmare and default to none'
   assert.throws(() => make({ difficulty: 'nightmare', contract: ['rescue'], profileView }), /Unavailable contract/);
   assert.equal(make({ difficulty: 'nightmare', profileView }).contract, null);
   assert.deepEqual(contractedRun('rescue', { profileView }).contract, {
-    id: 'rescue', met: false, metAtFloor: null, riskDoorTaken: false, escrowed: 0, paid: 0, failed: false
+    id: 'rescue', ruleVersion: CONTRACT_RULE_VERSION, met: false, metAtFloor: null,
+    riskDoorTaken: false, escrowed: 0, paid: 0, failed: false
   });
 });
 
@@ -2037,6 +2039,329 @@ test('easy returns unlock the campaign and ending while journey alone unlocks ni
 });
 
 const localTime = stamp => new Date(stamp);
+
+const reviewTwoRoute = (...indices) => run => run.doors[indices[run.floor - 1]];
+
+function reviewTwoReturns() {
+  let profile = Meta.createProfile();
+  for (const [dungeonId, seed] of [['dawn_forest', 17], [ember, 0]]) {
+    const { run, end } = playRun(dungeonId, seed, { profile, opening: 'stand' });
+    assert.equal(end.result, 'win');
+    const returned = Meta.applyRunEnd(profile, run, { recruits: end.recruitable.slice(0, 1) });
+    ok(returned.announce);
+    profile = returned.profile;
+  }
+  return profile;
+}
+
+function reviewTwoStorage() {
+  const entries = new Map();
+  return slotStorage({
+    getItem: key => entries.get(key) ?? null,
+    setItem: (key, value) => entries.set(key, value),
+    removeItem: key => entries.delete(key)
+  });
+}
+
+test('review 2.2: unversioned Ember seed 0 contracts retain the old heirloom payout and rescue rule', () => {
+  const seed = 0;
+  const checkpoint = reach(contractedRun('heirloom', { seed }), 6);
+  assert.equal(checkpoint.contract.ruleVersion, CONTRACT_RULE_VERSION);
+  const raw = JSON.parse(Save.serializeRun(checkpoint));
+  delete raw.run.contract.ruleVersion;
+  const legacy = Save.restoreRun(raw, { core, roster });
+  assert.equal(legacy.contract.ruleVersion, LEGACY_CONTRACT_RULE_VERSION);
+  const settled = [legacy, checkpoint].map(run => {
+    enter(run, 1);
+    return settle(run, { heirloomsUsed: 1, heirloomKills: 1 });
+  });
+  assert.deepEqual(settled.map(result => result.contract.paid), [3, 0]);
+  assert.deepEqual(settled.map(result => result.contract.metNow), [true, false]);
+  assert.equal(legacy.crystals - checkpoint.crystals, 3);
+  assert.equal(legacy.contract.metAtFloor, 6);
+  assert.equal(roundTrip(legacy).contract.ruleVersion, LEGACY_CONTRACT_RULE_VERSION);
+
+  const rescue = reach(contractedRun('rescue', { seed }), 6);
+  const oldSave = JSON.parse(Save.serializeRun(rescue));
+  delete oldSave.run.contract.ruleVersion;
+  const oldRescue = Save.restoreRun(oldSave, { core, roster });
+  for (const [run, met] of [[oldRescue, false], [rescue, true]]) {
+    enter(run, 1);
+    const [retreated, incoming] = run.room.party;
+    assert.equal(settle(run, { survivors: [false, false, true], retreated: [true, false, false],
+      rescues: [{ retreated, incoming, lethal: true }] }).contract.metNow, met);
+  }
+});
+
+test('review 2.3: Ember seed 2 fills only expired spring slots and issues a fresh key', () => {
+  const { end } = playRun(ember, 2, {
+    firstMain: true, doorOverride: reviewTwoRoute(0, 1, 1, 0, 1, 1, 0, 0),
+    serviceOverride(run) {
+      if (run.floor !== 7) return false;
+      assert.equal(run.crystals, 10);
+      const first = ok(Run.getSpringOffer(run));
+      const draw = () => ok(Run.springDraw(run, run.bench.length === 6 ? run.bench[0] : null)).id;
+      const removed = draw();
+      const slot = first.candidates.indexOf(removed);
+      assert.notEqual(slot, -1);
+      assert.equal(Run.commitSpringOffer(run, { key: first.key, id: removed }).reason, 'invalid_spring_key');
+      const partial = ok(Run.getSpringOffer(run));
+      assert.notEqual(partial.key, first.key);
+      first.candidates.forEach((id, index) => {
+        if (index !== slot) assert.equal(partial.candidates[index], id);
+      });
+      const drawn = [removed, ...Array.from({ length: 4 }, draw)];
+      assert.ok(first.candidates.every(id => drawn.includes(id)));
+      assert.equal(run.crystals, 5);
+      const refreshed = ok(Run.getSpringOffer(run));
+      assert.notEqual(refreshed.key, partial.key);
+      assert.equal(refreshed.candidates.length, 3);
+      assert.ok(refreshed.candidates.every(id => canJoin(run, id)));
+      assert.deepEqual(ok(Run.getSpringOffer(roundTrip(run))), refreshed);
+      return true;
+    }
+  });
+  assert.equal(end.result, 'win');
+});
+
+test('review 2.4: Twilight seed 0 forecasts the second turn Soul Drain and its flat MP loss', () => {
+  const run = reach(makeTempo({ dungeonId: 'twilight_cathedral', seed: 0 }), 2);
+  const [enemy] = Run.getTempoView(run, 0).enemies;
+  assert.equal(enemy.id, 'wild_dark_knight');
+  const beat = enemy.beats.find(entry => entry.turn === 2);
+  assert.deepEqual(beat, {
+    turn: 2, name: '소울드레인 예행', type: 'mag', power: 0, val: 0, rule: 'mana_drain', drainFlat: 12, lesson: true
+  });
+  enter(run);
+  const battle = Bridge.create(core, Run.battleOptions(run));
+  battle.start();
+  const { intent } = battle.act(0).find(event => event.t === 'await');
+  assert.equal(intent.name, beat.name);
+  assert.equal(intent.kind, beat.type);
+  assert.deepEqual(intent.damageRange, [0, 0]);
+  assert.equal(intent.resourceEffect.amount, beat.drainFlat);
+  const effect = battle.act(0).find(event => event.t === 'rule' && event.actionId === intent.actionId);
+  assert.deepEqual([effect.before, effect.after], [65, 53]);
+});
+
+test('review 2.5: Tower seed 1 forecasts the same ripple in intent, countdown, and tide warning', () => {
+  const run = reach(makeTempo({ dungeonId: 'creation_tower', seed: 1, profileView: { lead: 'black_swan' } }), 2);
+  assert.equal(run.doors[0].enemies[0].id, 'wild_abyss_eye');
+  assert.equal(run.doors[0].region.id, 'tide_cycle');
+  enter(run, 0, ['black_swan']);
+  const battle = Bridge.create(core, Run.battleOptions(run));
+  battle.start();
+  const evade = battle.options().find(move => move.name === '회피태세').index;
+  const second = battle.act(evade).find(event => event.t === 'await');
+  const ripple = { name: '잔물결', kind: 'phy', power: 0.75, inTurns: 1 };
+  assert.equal(second.intent.name, '저지먼트 예행');
+  assert.deepEqual(second.intent.nextDistinct, ripple);
+  assert.deepEqual(second.countdown, { ...ripple, charge: false });
+  assert.deepEqual(second.region.tide, ripple);
+  const third = battle.act(evade).find(event => event.t === 'await');
+  assert.equal(third.intent.name, ripple.name);
+  assert.equal(third.intent.kind, ripple.kind);
+  assert.equal(third.intent.power, ripple.power);
+  assert.deepEqual(third.region.tide, { ...ripple, inTurns: 0 });
+  const actual = battle.act(0).find(event => event.t === 'act' && event.who.side === 'enemy');
+  assert.equal(actual.skill.name, ripple.name);
+  assert.equal(actual.skill.type, ripple.kind);
+});
+
+const gardenReviewRoute = reviewTwoRoute(0, 0, 1, 0, 0, 1, 0, 0);
+
+test('review 2.6: Starlit seed 37 previews and starts all four fields with Buff Overload', () => {
+  const expected = ['goddess_descent', 'twinkle_party', 'sun_bless', 'star_powder'];
+  let verified = false;
+  playRun('starlit_garden', 37, {
+    difficulty: 'easy', firstMain: true,
+    doorOverride(run) {
+      if (run.floor === 6) {
+        assert.ok(run.relics.includes('buff_overload'));
+        for (const [keepRelic, fields] of [[true, expected], [false, expected.slice(0, 3)]]) {
+          const checkpoint = roundTrip(run);
+          if (!keepRelic) checkpoint.relics = checkpoint.relics.filter(id => id !== 'buff_overload');
+          assert.deepEqual(Run.doorStart(checkpoint, 1).field, fields);
+          enter(checkpoint, 1);
+          const battle = Bridge.create(core, Run.battleOptions(checkpoint));
+          const start = battle.start().find(event => event.t === 'begin');
+          assert.deepEqual(Array.from(start.s.field), fields);
+        }
+        verified = true;
+      }
+      return gardenReviewRoute(run);
+    },
+    onBattle(run) {
+      if (run.floor === 4) ok(Run.chooseGateReward(run, { kind: 'relic', id: 'buff_overload' }));
+    },
+    serviceOverride(run) {
+      if (run.floor !== 5) return false;
+      assert.equal(run.room.event.id, 'two_garden_chairs');
+      return ok(Run.chooseEvent(run, 'lanterns')).ok;
+    }
+  });
+  assert.equal(verified, true);
+});
+
+test('review 2.7: Twilight seed 64 settles both elite and third-peal bet relics', () => {
+  let checkpoint;
+  playRun('twilight_cathedral', 64, {
+    difficulty: 'easy', firstMain: true, doorOverride: gardenReviewRoute,
+    onRoom(run) {
+      if (run.floor !== 5) return;
+      assert.equal(run.room.event.id, 'whale_third_peal');
+      checkpoint = roundTrip(run);
+    }
+  });
+  advance(checkpoint);
+  enter(checkpoint, 1, ['galaxy_whale', 'victoria', 'eclipse_queen']);
+  const battle = Bridge.create(core, Run.battleOptions(checkpoint));
+  battle.start();
+  for (const index of [3, 0, 4]) battle.act(index);
+  assert.deepEqual(battle.summary().bet, { kind: 'kill_on_turn', won: true });
+  const result = ok(Run.settleBattle(checkpoint, battle));
+  assert.deepEqual(result.relics, ['big_bang', 'over_divine']);
+  assert.deepEqual(result.relic, { id: 'over_divine', equipped: true });
+  assert.ok(result.relics.every(id => checkpoint.relics.includes(id)));
+  assert.equal(Run.settleBattle(checkpoint, battle).reason, 'no_active_battle');
+});
+
+test('review 2.8: Dawn seed 17 reveals named candidates at two crystals and charges only on commit', () => {
+  let verified = false;
+  playRun('dawn_forest', 17, {
+    opening: 'stand',
+    serviceOverride(run) {
+      if (run.room.type !== 'spring') return false;
+      assert.equal(run.crystals, 3);
+      assert.equal(ok(Run.springDraw(run)).id, 'siren');
+      assert.equal(run.crystals, 2);
+      const seed = run.rng.state;
+      const offer = ok(Run.getSpringOffer(run));
+      assert.equal(offer.cost, 3);
+      assert.ok(offer.candidates.length > 0);
+      assert.equal(Run.commitSpringOffer(run, { key: offer.key, id: offer.candidates[0], replaceId: run.bench[0] }).reason,
+        'insufficient_crystals');
+      assert.equal(run.crystals, 2);
+      assert.equal(run.rng.state, seed);
+      assert.deepEqual(ok(Run.getSpringOffer(roundTrip(run))), offer);
+      verified = true;
+      return true;
+    }
+  });
+  assert.equal(verified, true);
+});
+
+test('review 2.9: revealed Ember spring candidates and the Starlit event cast stay seen on return', () => {
+  let firstSeen;
+  const emberRun = playRun(ember, 0, {
+    firstMain: true,
+    serviceOverride(run) {
+      if (run.floor !== 7) return false;
+      const seen = run.seenCharacters.slice();
+      firstSeen = ok(Run.getSpringOffer(run)).candidates.filter(id => !seen.includes(id));
+      assert.ok(firstSeen.length > 0);
+      assert.ok(firstSeen.every(id => roundTrip(run).seenCharacters.includes(id)));
+      return true;
+    }
+  }).run;
+  assert.equal(emberRun.result, 'win');
+  const returned = Meta.applyRunEnd(Meta.createProfile(), emberRun);
+  ok(returned.announce);
+  assert.ok(firstSeen.every(id => returned.profile.seenCharacters.includes(id)));
+
+  const garden = playRun('starlit_garden', 37, {
+    difficulty: 'easy', firstMain: true,
+    doorOverride(run) {
+      if (run.floor === 5) assert.ok(!run.seenCharacters.includes('victoria'));
+      return gardenReviewRoute(run);
+    },
+    serviceOverride(run) {
+      if (run.floor !== 5) return false;
+      assert.equal(run.room.event.id, 'two_garden_chairs');
+      assert.ok(run.seenCharacters.includes('victoria'));
+      return ok(Run.chooseEvent(run, 'lanterns')).ok;
+    },
+    onBattle(run) {
+      if (run.floor === 4) ok(Run.chooseGateReward(run, { kind: 'relic', id: 'buff_overload' }));
+    }
+  }).run;
+  const gardenReturn = Meta.applyRunEnd(returned.profile, garden);
+  ok(gardenReturn.announce);
+  assert.ok(gardenReturn.profile.seenCharacters.includes('victoria'));
+  assert.ok(!Object.hasOwn(gardenReturn.profile.recruits, 'victoria'));
+});
+
+test('review 2.10: a seeded Nightmare draft survives reload and clears on cancel or departure', () => {
+  const profile = reviewTwoReturns();
+  const store = Save.createSaveStore(reviewTwoStorage(), { core, roster });
+  const draft = { dungeonId: ember, difficulty: 'nightmare', contract: 'heirloom' };
+  const prepared = Meta.setPreparation(profile, draft);
+  assert.equal(profile.ui.preparation, null);
+  store.save({ profile: prepared });
+  const restored = store.load().profile;
+  assert.deepEqual(restored.ui.preparation, draft);
+  const cancelled = Meta.clearPreparation(restored);
+  store.save({ profile: cancelled });
+  assert.equal(store.load().profile.ui.preparation, null);
+  const run = makeTempo({ ...draft, seed: 0, profileView: Meta.startView(restored, ember) });
+  store.save({ profile: restored, run });
+  const departed = store.load();
+  assert.equal(departed.profile.ui.preparation, null);
+  assert.equal(departed.run.contract.id, 'heirloom');
+  assert.equal(departed.run.contract.ruleVersion, CONTRACT_RULE_VERSION);
+});
+
+test('review 2 reference 1: a truncated rift is reported and set aside through main export and last-good recovery', () => {
+  const profile = reviewTwoReturns();
+  const storage = reviewTwoStorage();
+  const store = Save.createSaveStore(storage, { core, roster });
+  const daily = DailyStore.create(storage, { core, roster });
+  const main = reach(makeTempo({ seed: 0, profileView: Meta.startView(profile, ember) }), 2);
+  store.save({ profile });
+  store.save({ profile, run: main });
+  const date = '2026-11-21';
+  ok(daily.start({ profile, now: localTime(date + 'T12:00:00'), expectedDayKey: date, kind: 'official' }));
+  const damaged = storage.getItem(DAILY_KEY).slice(0, -10);
+  storage.setItem(DAILY_KEY, damaged);
+  assert.equal(store.loadDetailed().run.floor, 2);
+  const backup = store.exportBackup();
+  assert.equal(backup.daily, null);
+  assert.equal(backup.damagedDaily, damaged);
+  assert.deepEqual(ok(store.inspectBackup(backup)).warnings, ['invalid_daily']);
+  const target = Save.createSaveStore(reviewTwoStorage(), { core, roster });
+  assert.deepEqual(ok(target.restoreBackup(backup)).warnings, ['invalid_daily']);
+  assert.equal(target.load().run.floor, 2);
+
+  storage.setItem(SESSION_KEY, '{');
+  assert.equal(store.loadDetailed().status, 'profileDamaged');
+  assert.deepEqual(ok(store.restoreLastGood()).warnings, ['invalid_daily']);
+  assert.deepEqual(store.load().profile, profile);
+  assert.equal(store.load().run, null);
+  assert.equal(storage.getItem(DAILY_KEY), null);
+  assert.equal(storage.getItem(DAMAGED_DAILY_KEY), damaged);
+});
+
+test('review 2 reference 2: unsafe UI arrays are rejected before a backup replaces either session', () => {
+  const storage = reviewTwoStorage();
+  const store = Save.createSaveStore(storage, { core, roster });
+  const profile = reviewTwoReturns();
+  const id = Object.keys(profile.recruits)[0];
+  profile.ui.returners = [id];
+  store.save({ profile });
+  const valid = store.exportBackup();
+  for (const patch of [
+    { returners: {} }, { returners: [null] }, { recruitChoices: { runId: 'saved-run', ids: {} } },
+    { recent: { [id]: [{}] } }, { announcement: { dungeons: ['unknown'] } },
+    { latestRun: { dungeonId: ember, floor: 8, result: 'win', fallen: {}, stats: {} } }
+  ]) {
+    const damaged = structuredClone(valid);
+    Object.assign(damaged.session.profile.ui, patch);
+    assert.equal(store.inspectBackup(damaged).reason, 'invalid_session');
+    assert.equal(store.restoreBackup(damaged).reason, 'invalid_session');
+    assert.deepEqual(store.loadLastGood().profile, profile);
+    assert.deepEqual(store.exportBackup(), valid);
+  }
+});
 
 function returnRun(profile, dungeonId, date, seed = 7) {
   return clear(makeTempo({ dungeonId, seed, difficulty: 'easy', profileView: Meta.startView(profile, dungeonId) }), localTime(date));

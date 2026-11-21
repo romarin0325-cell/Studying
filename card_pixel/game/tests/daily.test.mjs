@@ -397,6 +397,30 @@ test('failed writes preserve the active checkpoint and history paginates complet
   assert.deepEqual(store.history(), { rows: [], nextBefore: null });
 });
 
+test('review 2.1: a live rift victory exports and restores while persistent writes fail', () => {
+  const storage = memoryStorage();
+  const saves = Save.createSaveStore(storage, deps);
+  const daily = DailyStore.create(storage, deps);
+  const profile = unlockedProfile();
+  const first = ok(start(daily, FIRST, 'official', profile)).run;
+  const win = playDaily(FIRST);
+  assert.equal(win.id, first.id);
+  assert.deepEqual([win.result, win.floor, win.stats.turns, win.seed], ['win', 7, 33, 20261121]);
+  storage.failWrite = true;
+  reason(daily.save(win), 'storage_failed');
+  reason(daily.finish(win), 'storage_failed');
+  const backup = saves.exportBackup({ profile, dailyRun: win });
+  assert.equal(ok(saves.inspectBackup(backup)).summary.dailyActive.floor, 7);
+  assert.equal(ok(daily.resume()).run.floor, 1);
+
+  const target = memoryStorage();
+  ok(Save.createSaveStore(target, deps).restoreBackup(JSON.stringify(backup)));
+  const imported = DailyStore.create(target, deps);
+  const recovered = ok(imported.resume()).run;
+  assert.deepEqual([recovered.phase, recovered.result, recovered.floor, recovered.stats.turns], ['done', 'win', 7, 33]);
+  assert.equal(ok(imported.finish(recovered)).official.outcome, 'win');
+});
+
 test('an unreadable snapshot can be abandoned using the last written checkpoint', () => {
   const storage = memoryStorage();
   const store = DailyStore.create(storage, deps);

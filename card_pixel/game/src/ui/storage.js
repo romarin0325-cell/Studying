@@ -1,9 +1,10 @@
 export const SESSION_KEY = 'relaymare.session';
 export const DAILY_KEY = 'relaymare.daily';
+export const DAMAGED_DAILY_KEY = 'relaymare.dailyDamaged';
 export const SETTINGS_KEY = 'relaymare.settings';
 export const LAST_GOOD_KEY = 'relaymare.lastGood';
 const POINTER = 'relaymare.activeSlot';
-const SLOT_KEYS = [SESSION_KEY, DAILY_KEY, SETTINGS_KEY, LAST_GOOD_KEY];
+const SLOT_KEYS = [SESSION_KEY, DAILY_KEY, DAMAGED_DAILY_KEY, SETTINGS_KEY, LAST_GOOD_KEY];
 const alternateKey = (slot, key) => slot === 'b' ? 'relaymare.slotB.' + key : key;
 const rawByAdapter = new WeakMap();
 

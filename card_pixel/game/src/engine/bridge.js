@@ -71,10 +71,15 @@ function patternActions(enemy, pattern, openingIntent) {
     ? { ...signature, power: signature.power * beat.power } : basic);
 }
 
-export function enemyBeats(core, enemy, pattern, openingIntent) {
+const lessonTideAfter = (lesson, turn) => lesson?.tideAfter && turn === lesson.steps.length + 1 ? lesson.tideAfter : null;
+
+export function enemyBeats(core, enemy, pattern, openingIntent, lesson) {
   if (pattern !== 'bossScript') {
-    const beats = patternActions(enemy, pattern, openingIntent);
-    return beats.map(({ name, type, power }, index) => ({ turn: index + 1, name, type, power }));
+    return patternActions(enemy, pattern, openingIntent).map(({ name, type, power }, index) => {
+      const turn = index + 1;
+      const action = lesson?.steps[index] ?? (pattern === 'tide' ? lessonTideAfter(lesson, turn) : null);
+      return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : { turn, name, type, power };
+    });
   }
   const decide = coreHooks.get(core)?.decide ?? core.Logic.decideEnemyAction;
   const saved = Math.random;
@@ -95,6 +100,10 @@ export function enemyBeats(core, enemy, pattern, openingIntent) {
     }
   } finally { Math.random = saved; }
   return beats;
+}
+
+export function fieldCap(core, artifacts) {
+  return artifacts.includes('buff_overload') ? 5 : core.GAME_CONSTANTS.MAX_FIELD_BUFFS;
 }
 
 export function enemyStatsWithQuirk(stats, quirk, attackScale = 1) {
@@ -445,7 +454,7 @@ export function create(core, opts) {
     const start = opts.start;
     if (!start) return;
     const b = host.battle;
-    for (const id of (start.field || []).slice(0, 3)) BattleRuntime.applyFieldBuff(host, id);
+    for (const id of (start.field || []).slice(0, fieldCap(core, host.state.artifacts))) BattleRuntime.applyFieldBuff(host, id);
     for (const [id, stacks] of Object.entries(start.enemyDebuffs || {})) {
       StatusRules.add(b.enemy, id, stacks, host.state.artifacts);
     }
@@ -703,6 +712,9 @@ export function create(core, opts) {
   function lessonStep(turn) {
     return teachesLesson() ? lesson.steps[turn - 1] : null;
   }
+  function tideRipple(turn) {
+    return inTide() && teachesLesson() ? lessonTideAfter(lesson, turn) : null;
+  }
   function applyLessonOpening(enemy) {
     if (!lesson) return;
     enemy.lessonHitType = null;
@@ -796,9 +808,8 @@ export function create(core, opts) {
     const turn = localTurn(enemy);
     const step = lessonStep(turn);
     if (step && (step.rule !== 'charged_hit' || enemy.isCharging)) return step;
-    if (inTide() && B.lessonOwner === B.enemyIdx && lesson?.tideAfter && turn === lesson.steps.length + 1) {
-      return lesson.tideAfter;
-    }
+    const ripple = tideRipple(turn);
+    if (ripple) return ripple;
     if (enemy.relayBeats.length && (pattern !== 'introFixed' || opts.openingIntent)) {
       const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
       const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
@@ -872,7 +883,7 @@ export function create(core, opts) {
       ...(a.bonus && { bonus: a.bonus, stat: a.stat }),
       ...(a.reduction && { reduction: a.reduction }),
       ...(a.vulnerable && { vulnerable: a.vulnerable }),
-      type: kind, ult: salience === 'boss', ...(attack && { dmg: range, lethal, lethalText, extra }),
+      type: kind, ult: salience === 'boss', ...(attack && { power: a.val ?? 1, dmg: range, lethal, lethalText, extra }),
       ...(!attack && extra.length && { effects: extra })
     };
   }
@@ -886,6 +897,8 @@ export function create(core, opts) {
       const next = lesson.steps.slice(local).find(step => step && step.name !== action.name);
       if (next) return { inTurns: lesson.steps.indexOf(next) + 1 - local, name: next.name, kind: next.type, power: next.val };
     }
+    const ripple = tideRipple(local + 1);
+    if (ripple) return { name: ripple.name, kind: ripple.type, power: ripple.val, inTurns: 1 };
     if (enemy.relayBeats.length && (pattern !== 'introFixed' || opts.openingIntent)) {
       for (let offset = 1; offset < enemy.relayBeats.length; offset++) {
         const beat = enemy.relayBeats[(local + offset - 1) % enemy.relayBeats.length];
@@ -905,12 +918,13 @@ export function create(core, opts) {
       const period = enemy.relayBeats.length;
       let inTurns = (strong - local % period + period) % period;
       if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
-      return { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+      return pattern === 'tide' ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns)
+        : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
     }
     if (inTide()) {
       let inTurns = (3 - local % 4 + 4) % 4;
       if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = 4;
-      return { name: REGIONS.tide_cycle.hit, inTurns, charge: false };
+      return tideCountdown(REGIONS.tide_cycle.hit, local, inTurns);
     }
     const skillName = action => action.isChargeStart && action.name === '차지'
       ? '디바인블레이드' : action.name.replace(/ 차징$/, '');
@@ -938,6 +952,12 @@ export function create(core, opts) {
       }
     } finally { Math.random = saved; B.probing = false; }
     return null;
+  }
+
+  function tideCountdown(name, turn, inTurns) {
+    const ripple = tideRipple(turn + inTurns);
+    return { name: ripple?.name ?? name, inTurns, charge: false,
+      ...(ripple && { kind: ripple.type, power: ripple.val }) };
   }
 
   /* ---------- stepping ---------- */
@@ -1001,6 +1021,11 @@ export function create(core, opts) {
         wait.region = { bellIn: Number.isFinite(next) ? next - turn : null };
       } else if (region === 'arena_charge') {
         wait.region = { charge: B.charge, ready: B.charge === 2 };
+      } else if (inTide()) {
+        wait.region = { tide: intent.kind === 'rest'
+          ? { name: intent.name, kind: intent.kind, vulnerable: intent.vulnerable, inTurns: 0 }
+          : { name: wait.countdown.name, kind: wait.countdown.kind ?? 'mag',
+            power: wait.countdown.power ?? TIDE_BEATS[TIDE_STRONG_BEAT - 1].power, inTurns: wait.countdown.inTurns } };
       }
       push(wait);
     }

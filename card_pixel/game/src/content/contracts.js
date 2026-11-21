@@ -1,5 +1,7 @@
 export const CONTRACT_ESCROW = 1;
 export const CONTRACT_PAYOUT = 3;
+export const LEGACY_CONTRACT_RULE_VERSION = 1;
+export const CONTRACT_RULE_VERSION = 2;
 
 export const CONTRACTS = {
   rescue: {

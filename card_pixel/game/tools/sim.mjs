@@ -242,7 +242,7 @@ function weakestReserve(run) {
 }
 
 export function playRun(dungeonId, seed, {
-  profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride,
+  profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, doorOverride, serviceOverride,
   firstMain = false, difficulty: selectedDifficulty = difficulty
 } = {}) {
   const profileView = profile ? Meta.startView(profile, dungeonId) : { bossOrder: firstMain };
@@ -252,7 +252,7 @@ export function playRun(dungeonId, seed, {
   let heirloomsGained = 0;
   resolveChoices(run, naive);
   while (run.phase !== 'done') {
-    const door = chooseDoor(run, naive);
+    const door = doorOverride?.(run) ?? chooseDoor(run, naive);
     if (!door.enemies.length) checked(R.chooseDoor(run, door.index));
     if (door.enemies.length) {
       const retries = run.stats.retries;
@@ -260,8 +260,10 @@ export function playRun(dungeonId, seed, {
         if (run.stats.retries - retries >= 20) throw new Error('Intro retry limit: ' + run.id);
         heirloomsGained += fight(run, { naive, bossSuggestion, opening, onBattle, trace, actionOverride, door });
       } while (run.room.status === 'order');
+    } else if (serviceOverride?.(run)) {
+      // A seeded reproduction can use its own room command instead of the default policy.
     } else if (door.type === 'spring') {
-      if (!naive && run.bench.length < ROSTER_LIMIT) {
+      if (!naive && run.bench.length < ROSTER_LIMIT && run.crystals >= R.COST.pick) {
         const offer = R.springPick(run);
         if (offer.ok) checked(R.springTake(run, strongest(offer.candidates)[0]));
       }

@@ -1,8 +1,9 @@
 import { DUNGEONS } from '../content/dungeons.js';
-import { backupSlots, DAILY_KEY, LAST_GOOD_KEY, SESSION_KEY, SETTINGS_KEY } from '../ui/storage.js';
+import { CONTRACT_RULE_VERSION, CONTRACTS, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
+import { backupSlots, DAILY_KEY, DAMAGED_DAILY_KEY, LAST_GOOD_KEY, SESSION_KEY, SETTINGS_KEY } from '../ui/storage.js';
 import { restoreDailyData, withDailyCheckpoint } from './daily-store.js';
 import { calendarDate } from './dates.js';
-import { missionPeriodKeys, PROFILE_VERSION, recordRunProgress } from './meta.js';
+import { missionPeriodKeys, PROFILE_VERSION, recordRunProgress, validPreparation } from './meta.js';
 import { bindRun } from './run.js';
 
 export const RUN_VERSION = 1;
@@ -66,6 +67,11 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
     || (run.phase === 'done' && !['win', 'lose'].includes(run.result))
     || (run.endDayKey != null && !calendarDate(run.endDayKey))) return null;
   run.contract ??= null;
+  if (run.contract !== null) {
+    if (!dictionary(run.contract) || !Object.hasOwn(CONTRACTS, run.contract.id)) return null;
+    run.contract.ruleVersion ??= LEGACY_CONTRACT_RULE_VERSION;
+    if (![LEGACY_CONTRACT_RULE_VERSION, CONTRACT_RULE_VERSION].includes(run.contract.ruleVersion)) return null;
+  }
   run.daily ??= null;
   run.tempoVersion ??= run.daily?.spec?.ruleVersion ?? 1;
   if (!run.daily) run.lessonVersion ??= 0;
@@ -107,11 +113,37 @@ export function restoreProfile(data, { migrate } = {}) {
   profile.ui ??= {};
   if (!dictionary(profile.contractStamps) || !dictionary(profile.missions?.periods)
     || !Object.entries(profile.missions.periods).every(([key, period]) => validMissionPeriod(key, period, profile.recruits))
-    || !dictionary(profile.ui) || (profile.ui.wantedCompanionId !== undefined && !nullableId(profile.ui.wantedCompanionId))) return null;
+    || !validProfileUi(profile.ui)) return null;
   profile.ui.wantedCompanionId ??= null;
   if (Object.hasOwn(profile.recruits, profile.ui.wantedCompanionId)) profile.ui.wantedCompanionId = null;
+  if (!validPreparation(profile, profile.ui.preparation)) profile.ui.preparation = null;
   for (const clear of Object.values(profile.records.clears)) clear.easy ??= 0;
   return profile;
+}
+
+const dungeonId = id => typeof id === 'string' && Object.hasOwn(DUNGEONS, id);
+const optional = (value, validate) => value == null || validate(value);
+const arrayOf = (value, validate) => Array.isArray(value) && Array.from(value).every(validate);
+const runEntry = entry => dictionary(entry) && dungeonId(entry.dungeonId) && count(entry.floor)
+  && ['win', 'lose'].includes(entry.result);
+
+function validBattleLog(log) {
+  return arrayOf(log, turn => dictionary(turn) && count(turn.turn) && arrayOf(turn.rows, row =>
+    dictionary(row) && count(row.key) && typeof row.text === 'string' && typeof row.kind === 'string' && /^[a-z-]*$/.test(row.kind)
+    && optional(row.faces, faces => arrayOf(faces, face => face === null || dictionary(face)))
+    && optional(row.hits, hits => arrayOf(hits, hit => dictionary(hit) && count(hit.key) && count(hit.turn)))
+    && optional(row.origin, count) && optional(row.amount, Number.isFinite)));
+}
+
+function validProfileUi(ui) {
+  return dictionary(ui) && optional(ui.wantedCompanionId, string) && optional(ui.returners, uniqueIds)
+    && optional(ui.recruitChoices, choices => dictionary(choices) && string(choices.runId) && uniqueIds(choices.ids))
+    && optional(ui.recent, recent => dictionary(recent) && Object.values(recent).every(history => arrayOf(history, runEntry)))
+    && optional(ui.announcement, notice => dictionary(notice)
+      && ['dungeons', 'nightmares'].every(key => optional(notice[key], ids => arrayOf(ids, dungeonId)))
+      && optional(notice.chapters, chapters => arrayOf(chapters, id => Number.isInteger(id) && id >= 1 && id <= 7)))
+    && optional(ui.latestRun, latest => runEntry(latest) && strings(latest.fallen) && dictionary(latest.stats)
+      && optional(latest.lastBattleLog, validBattleLog));
 }
 
 function validMissionPeriod(key, period, recruits) {
@@ -170,19 +202,25 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
   function exportBackup(live = {}) {
     function read(entry) {
       try {
-        return decodeStored(slots.read(slots.active(), entry));
+        return slots.read(slots.active(), entry);
       } catch {
         return null;
       }
     }
     const dailyRun = live.dailyRun ?? (live.run?.daily ? live.run : null);
-    let daily = Object.hasOwn(live, 'daily') ? live.daily : read(DAILY_KEY);
+    const dailyRaw = Object.hasOwn(live, 'daily') ? live.daily : read(DAILY_KEY);
+    let daily = dailyRaw == null ? null : parse(dailyRaw);
     if (daily?.days && dailyRun) daily = withDailyCheckpoint(daily, dailyRun);
+    let damagedDaily = read(DAMAGED_DAILY_KEY);
+    if (dailyRaw != null && !restoreDailyData(daily, deps)) {
+      damagedDaily = typeof dailyRaw === 'string' ? dailyRaw : JSON.stringify(dailyRaw);
+      daily = null;
+    }
     return {
       format: 'relaymare', version: BACKUP_VERSION,
-      session: live.profile ? sessionData(live.profile, live.run?.daily ? null : live.run) : read(key),
-      daily,
-      settings: live.settings ? normalizeSettings(live.settings) : read(SETTINGS_KEY) ?? normalizeSettings()
+      session: live.profile ? sessionData(live.profile, live.run?.daily ? null : live.run) : decodeStored(read(key)),
+      daily, ...(typeof damagedDaily === 'string' && { damagedDaily }),
+      settings: live.settings ? normalizeSettings(live.settings) : decodeStored(read(SETTINGS_KEY)) ?? normalizeSettings()
     };
   }
 
@@ -192,7 +230,8 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
     const session = readSession(data.session);
     if (session.status === 'profileDamaged') return failed('invalid_session');
     if (session.status === 'runDamaged') return failed('invalid_run');
-    if (data.daily !== null && !restoreDailyData(data.daily, deps)) return failed('invalid_daily');
+    if ((data.daily !== null && !restoreDailyData(data.daily, deps))
+      || (data.damagedDaily !== undefined && typeof data.damagedDaily !== 'string')) return failed('invalid_daily');
     if (!dictionary(data.settings) || Object.keys(DEFAULT_SETTINGS).some(entry => Object.hasOwn(data.settings, entry)
       && !validSetting(entry, data.settings[entry]))) return failed('invalid_settings');
     const days = Object.values(data.daily?.days ?? {});
@@ -206,9 +245,14 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
     return { ok: true, summary, session };
   }
 
+  function dailyWarning(data) {
+    return typeof data.damagedDaily === 'string' ? { warnings: ['invalid_daily'] } : {};
+  }
+
   function inspectBackup(data) {
-    const result = validateBackup(parse(data));
-    return result.ok ? { ok: true, summary: result.summary } : { ...result, summary: null };
+    const backup = parse(data);
+    const result = validateBackup(backup);
+    return result.ok ? { ok: true, summary: result.summary, ...dailyWarning(backup) } : { ...result, summary: null };
   }
 
   function restoreBackup(data) {
@@ -219,6 +263,7 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
     const values = new Map([
       [key, profile ? JSON.stringify(sessionData(profile, run)) : null],
       [DAILY_KEY, backup.daily === null ? null : JSON.stringify(backup.daily)],
+      [DAMAGED_DAILY_KEY, backup.damagedDaily ?? null],
       [SETTINGS_KEY, JSON.stringify(normalizeSettings(backup.settings))],
       [LAST_GOOD_KEY, profile ? JSON.stringify(sessionData(profile, null)) : null]
     ]);
@@ -233,7 +278,7 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
       });
       if (!verified.ok) return failed('storage_failed');
       slots.activate(next);
-      return { ok: true };
+      return { ok: true, ...dailyWarning(backup) };
     } catch {
       return failed('storage_failed');
     }
