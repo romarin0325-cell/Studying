@@ -146,6 +146,7 @@ function openRiftRecord(row, sheets) {
     ${dungeon ? `<p>${esc(dungeon.name)}</p>` : ''}
     ${entry('첫 기록', row.official)}
     ${entry('연습 최고', row.bestPractice)}
+    <p class="sm">클리어 → 생존 인원 → 적은 턴</p>
     ${row.official?.outcome === 'win' ? stamp(dayKey) : ''}
   </div>`);
 }

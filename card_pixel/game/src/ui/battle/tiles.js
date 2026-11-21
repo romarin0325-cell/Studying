@@ -195,11 +195,15 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
   function lockPanel() { $$('.act').forEach(b => { b.disabled = true; }); $('#b-retreat').disabled = true; $('#b-heir').disabled = true; }
   function playAction(index) {
     audio.unlockAudio(); sfx.tap();
-    play(B.bridge.act(index));
+    const events = B.bridge.act(index);
+    if (events.length) B.onAction?.(index, events);
+    play(events);
   }
   function retreat() {
     audio.unlockAudio(); sfx.tap();
-    play(B.bridge.retreat());
+    const events = B.bridge.retreat();
+    if (events.length) B.onAction?.('retreat', events);
+    play(events);
   }
   function formSheet(option) {
     const formIds = option.effects.find(e => e.type === 'transform_choice').forms;
@@ -255,8 +259,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
   });
   $('#b-heir').addEventListener('click', function () {
     if (B.busy || this.disabled || this.dataset.i == null) return;
-    audio.unlockAudio(); sfx.tap();
-    play(B.bridge.act(Number(this.dataset.i)));
+    playAction(Number(this.dataset.i));
   });
   $('#b-retreat').addEventListener('click', () => {
     if (B.busy || !B.bridge.canRetreat()) return;

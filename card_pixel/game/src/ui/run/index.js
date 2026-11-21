@@ -89,7 +89,10 @@ export function enterRun(run, host) {
   const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
   function command(action, ...args) {
     const result = action(run, ...args);
-    if (result.ok) host.save(run);
+    if (result.ok) {
+      if (run.dungeonId === 'dawn_forest' && action === Run.chooseStartPick) host.tutorial?.mark('awakening');
+      host.save(run);
+    }
     return result;
   }
   let mapEntry = false;
@@ -126,10 +129,18 @@ export function enterRun(run, host) {
       onEnter(partyIds) {
         const result = command(Run.enterBattleDoor, { floor: draft.floor, index: draft.doorIndex, partyIds });
         mapEntry = result.ok;
-        if (result.ok) { awakened = []; receipt = ''; }
+        if (result.ok) {
+          if (run.dungeonId === 'dawn_forest' && run.floor === 3) host.tutorial?.mark('formation', { entryDoor: null });
+          awakened = [];
+          receipt = '';
+        }
         return result;
       }
     });
+    if (run.dungeonId === 'dawn_forest' && run.floor === 3) {
+      host.tutorial?.mark('door', { entryDoor: { runId: run.id, index } });
+      host.tutorial?.sync(run);
+    }
   }
   const ui = {
     core, roster, widgets, audio, sheets, icon, scene, artifacts, command, leave, route, enterDoor,
@@ -206,6 +217,14 @@ export function enterRun(run, host) {
   }
 
   function route({ browseMap = false } = {}) {
+    try {
+      return renderRoute(browseMap);
+    } finally {
+      host.tutorial?.sync(run);
+    }
+  }
+
+  function renderRoute(browseMap) {
     if (run.phase === 'done') return host.finish(run);
     if (run.pending?.kind === 'start') return awakenScreen(run, ui);
     if (run.room?.status === 'left') {
@@ -214,6 +233,10 @@ export function enterRun(run, host) {
     }
     if (run.phase === 'map') {
       if (run.doors[0]?.type === 'borrowed' || run.doors[0]?.type === 'awakening') return enterDoor(0);
+      const door = host.profile?.().ui?.entryDoor;
+      if (!browseMap && run.floor === 3 && door?.runId === run.id && run.doors[door.index]?.enemies.length) {
+        return previewDoor(door.index);
+      }
       if (!browseMap && run.doors.length === 1 && run.doors[0].enemies.length) return previewDoor(0);
       mapScreen(run, ui, { awakened, receipt });
       awakened = [];
@@ -244,7 +267,11 @@ export function enterRun(run, host) {
         return result;
       }, afterBattle, {
         fromMap, decision: battleDecision,
-        simpleOpening: host.profile?.()?.ui?.entry?.legacy === false && run.floor === 1 && run.room.type === 'borrowed'
+        simpleOpening: (host.profile?.()?.ui?.entry?.legacy === false || host.profile?.()?.ui?.tutorialReplay) &&
+          run.floor === 1 && run.room.type === 'borrowed',
+        onAction: (action, events) => host.tutorial?.accepted(run, action, events),
+        onReady: state => host.tutorial?.battleReady(run, state),
+        replay: run.room.type === 'borrowed' ? host.tutorial?.battleActions(run) : undefined
       });
     }
     if (run.phase === 'reward') return battle.restoreResult(run, afterBattle, battleDecision);

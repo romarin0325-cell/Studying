@@ -25,6 +25,7 @@ import { TERMS } from '../src/ui/glossary.js';
 import { blessingText } from '../src/ui/widgets.js';
 import { playRun } from '../tools/sim.mjs';
 import { createRiftCases, riftDate } from './screens/rift.mjs';
+import { createEntryCases } from './screens/entry.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -103,7 +104,7 @@ function act(battle, name) {
   return battle.act(skill.index);
 }
 
-function storedSession({ run = null, profile = Meta.createProfile(), unsupportedRun = false }) {
+function storedSession({ run = null, profile = legacyProfile(), unsupportedRun = false }) {
   const storage = new Map();
   const store = Save.createSaveStore({
     getItem: key => storage.get(key),
@@ -141,7 +142,13 @@ function jsonSafe(value, path = 'run') {
   return path === 'run' ? JSON.parse(JSON.stringify(value)) : value;
 }
 
-function snowRabbitProfile(seed = 7) {
+function legacyProfile() {
+  const profile = Meta.createProfile();
+  profile.ui.entry.legacy = true;
+  return profile;
+}
+
+function snowRabbitProfile(seed = 7, profile = legacyProfile()) {
   const intro = makeRun({ dungeonId: 'dawn_forest', seed, floor: 2 });
   command(Run.chooseDoor, intro, 0);
   startPicks(intro, 'snow_rabbit');
@@ -149,9 +156,9 @@ function snowRabbitProfile(seed = 7) {
   reachFloor(intro, 5);
   startBattle(intro);
   settleWin(intro);
-  const { announce, profile } = Meta.applyRunEnd(Meta.createProfile(), intro, { recruits: ['snow_rabbit'] });
-  assert.equal(announce.ok, true, announce.reason);
-  return profile;
+  const result = Meta.applyRunEnd(profile, intro, { recruits: ['snow_rabbit'] });
+  assert.equal(result.announce.ok, true, result.announce.reason);
+  return result.profile;
 }
 
 function tileRange() {
@@ -1070,8 +1077,11 @@ function openingChoices() {
       for (const id of ['b-speed', 'b-log', 'b-field']) assert.equal(await page.locator('#' + id).isVisible(), false);
       await text(choice.nth(1), '쓰러지면 눈토끼가 아마겟돈을 계승');
       await capture();
+      await page.locator('.coach-skip').click();
       await choice.nth(0).click();
       await battleIdle(page);
+      const tour = page.locator('.coach[data-coach-step="tour-last-stand"] .coach-next');
+      if (await tour.isVisible()) await tour.click();
       await skillTile(page, '실버스톰').click();
       await text(page.locator('#result.on #b-next'), '다음 동료 고르기');
       await capture('rescue');
@@ -1791,12 +1801,12 @@ function nextGoalLine() {
   const profile = snowRabbitProfile();
   const goal = Meta.nextGoal(profile, null);
   assert.equal(goal.target.screen, 'dungeons');
-  assert.equal(goal.reward, '동행 1칸 열림');
+  assert.equal(goal.reward, '샘 초대 1칸 열림');
   return {
     session: storedSession({ profile }), proof: 'Real intro return sets the first main goal and names its reward',
     async show(page, { text, capture }) {
       await enterObservatory(page);
-      await text(page.locator('#hub.on .meta-next-goal'), '눈토끼와 본편 출발 · 동행 1칸 열림', { exact: true });
+      await text(page.locator('#hub.on .meta-next-goal'), '눈토끼와 본편 출발 · 샘 초대 1칸 열림', { exact: true });
       await capture();
       await page.locator('#hub.on #meta-depart').click();
       await text(page.locator('#sheet.on #sh-title'), DUNGEONS[goal.target.dungeonId].name + ' · 준비');
@@ -1857,28 +1867,11 @@ function preDepartureRoster() {
       assert.doesNotMatch(await page.locator('#sheet.on .meta-roster').innerText(), /이번 원정 후보/);
       await page.locator('#b-sheetclose').click();
       await page.locator('#dungeons.on [data-dungeon="ember_volcano"]').click();
-      const button = page.locator('#sheet.on #meta-roster-open');
-      await text(button, '홍련의 계승 · 기본 39명 · 출현표');
-      await page.locator('#meta-seals summary').click();
-      await button.scrollIntoViewIfNeeded();
-      const formation = () => page.evaluate(() => ({
-        top: document.querySelector('#sh-body').scrollTop,
-        leads: document.querySelector('.meta-prep-leads').scrollLeft,
-        seals: document.querySelector('.meta-seal-options').scrollTop,
-        lead: document.querySelector('[data-lead][aria-pressed=true]')?.dataset.lead,
-        sealed: [...document.querySelectorAll('[data-seal][aria-pressed=true]')].map(el => el.dataset.seal)
-      }));
-      const before = await formation();
-      await button.click();
-      await text(page.locator('#sheet.on .meta-roster > p').first(), `이번 원정 후보 ${pool.effectiveIds.length}명`);
-      const unknown = page.locator(`.meta-roster [data-companion="${id}"].concealed`);
-      await text(unknown.locator('b'), roster.card(id).name);
-      await unknown.click();
-      await text(unknown, '만나고 싶은 동료');
+      const grid = page.locator('#sheet.on .meta-prep-pool');
+      assert.equal(await grid.locator('[data-prep-id]').count(), Meta.prepView(profile, dungeonId, roster).pool.length);
+      await text(grid.locator(`[data-prep-id="${sealed}"] small`), '출현 제외');
+      await text(grid.locator(`[data-prep-id="${id}"] b`), roster.card(id).name);
       await capture();
-      await page.locator('#b-sheetclose').click();
-      assert.deepEqual(await formation(), before);
-      assert.equal(await page.locator('#meta-seals').getAttribute('open'), '');
       await page.locator('#meta-start-expedition').click();
       const live = await page.evaluate(() => {
         const { pool, rng, seed } = window.__game.run;
@@ -1902,9 +1895,9 @@ function difficultyChoice() {
       await chooseRegion('ember_volcano');
       assert.equal(await sheet.locator('[data-difficulty="normal"]').getAttribute('aria-pressed'), 'true');
       assert.equal(await sheet.locator('[data-difficulty="nightmare"]').isDisabled(), true);
-      await text(sheet.locator('.meta-prep-section').filter({ hasText: '난이도' }), '이 지역을 여정으로 생환하면 악몽이 열립니다.');
+      await text(sheet.locator('.meta-prep'), '이 지역을 여정으로 생환하면 악몽이 열립니다.');
       await sheet.locator('[data-difficulty="easy"]').click();
-      await text(sheet.locator('.meta-prep-section').filter({ hasText: '난이도' }), '꿈결 · 적 공격·마공 35% 감소');
+      await text(sheet.locator('.meta-prep'), '꿈결 · 적 공격·마공 35% 감소');
       await capture();
       await page.locator('#b-sheetclose').click();
       await chooseRegion('twilight_cathedral');
@@ -2072,7 +2065,7 @@ function damagedRecovery() {
       assert.equal((JSON.parse(fs.readFileSync(await download.path(), 'utf8'))).session.profile.lead, profile.lead);
       await page.locator('#b-sheetclose').click();
       await enterObservatory(page);
-      await text(page.locator('#hub.on .meta-next-goal'), '동행 1칸 열림');
+      await text(page.locator('#hub.on .meta-next-goal'), '샘 초대 1칸 열림');
     }
   };
 }
@@ -2382,6 +2375,7 @@ const { riftFixture, reachRiftFloor, riftRow, riftSaveFailure, damagedRiftRecove
   core, roster, sessionKey, dailyKey, command, snowRabbitProfile, makeRun, startBattle, settleWin, storedSession,
   reachFloor, enterObservatory, openBattle, backupStore, mainReturn, applyReturn
 });
+const entryCases = createEntryCases({ roster, storedSession, snowRabbitProfile, nightmareProfile, mainReturn, enterObservatory });
 
 const cases = {
   'rift-save-failure': riftSaveFailure,
@@ -2454,7 +2448,8 @@ const cases = {
   'boss-formation': orderHint,
   'spring-count': springCount,
   'retreat-outcomes': retreatOutcomes,
-  ...riftCases
+  ...riftCases,
+  ...entryCases
 };
 
 async function inject(page, session, { daily, now, seed, mute, settings, lastGood } = {}) {
@@ -2639,7 +2634,7 @@ function parseArguments(args) {
     switch (args[i]) {
       case '--case':
         selected = args[++i];
-        assert.ok(Object.hasOwn(cases, selected), `Unknown case: ${selected ?? '(missing name)'}. Use ${Object.keys(cases).join(', ')}`);
+        assert.ok(selected === 'entry' || Object.hasOwn(cases, selected), `Unknown case: ${selected ?? '(missing name)'}. Use entry or ${Object.keys(cases).join(', ')}`);
         break;
       case '--validate-only':
         validateOnly = true;
@@ -2648,7 +2643,7 @@ function parseArguments(args) {
         assert.fail(`Unknown option: ${args[i]}`);
     }
   }
-  return { names: selected ? [selected] : Object.keys(cases), validateOnly };
+  return { names: selected === 'entry' ? Object.keys(entryCases) : selected ? [selected] : Object.keys(cases), validateOnly };
 }
 
 async function main() {
@@ -2686,7 +2681,7 @@ async function main() {
   } finally {
     await browser?.close();
   }
-  if (!validateOnly) {
+  if (!validateOnly && !launchError) {
     await writeSheet(captures);
     console.log(`Contact sheet: ${path.join(shots, 'sheet.png')}`);
   }

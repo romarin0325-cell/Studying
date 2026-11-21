@@ -66,7 +66,7 @@ export function awakenScreen(run, ui) {
   const info = lead ? '함께 출발할 동료 1명을 선택하세요.' : intro ? TERMS.join.detail :
     '동료를 선택하면 무작위로 ' + START.draws + '명이 추가 합류합니다.';
   const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>이번 원정 합류</h3><div class="cards">' +
-    run.bench.map(id => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? '대표' : '' })).join('') + '</div>' : '';
+    run.bench.map(id => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? TERMS.startCompanion.short : '' })).join('') + '</div>' : '';
 
   const candidates = intro ? pending.candidates.slice().sort((a, b) =>
     Number(introCandidates.includes(b)) - Number(introCandidates.includes(a))) : pending.candidates;

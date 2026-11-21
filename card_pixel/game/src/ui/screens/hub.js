@@ -31,7 +31,8 @@ export function sceneActors(ids, widgets, { interactive = false, lead = null, ar
   }).join('');
 }
 
-export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, depart, destinationId, departureLabel, resume, goal, arriving = [], daily, openDaily }) {
+export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, depart, destinationId, departureLabel, resume, goal,
+  arriving = [], daily, openDaily, flags, firstMain }) {
   const lead = profile.lead && widgets.card(profile.lead);
   const destination = DUNGEONS[destinationId];
   const finalConsonant = name => {
@@ -43,7 +44,7 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
   const direction = destination ? destination.name + (ending && ending !== 8 ? '으로' : '로') : '떠날 곳 고르기';
   const action = run ? `${DUNGEONS[run.dungeonId].name} ${Math.max(run.floor, 1)}층 이어가기`
     : departureLabel ?? [title, direction].filter(Boolean).join(' ');
-  const canBrowse = profile.notebook.chapters.includes(1);
+  const canBrowse = flags.introCleared && profile.notebook.chapters.includes(1);
   const announcement = profile.ui?.announcement;
   const unlocks = announcement ? [
     ...(announcement.dungeons ?? []).map(id => DUNGEONS[id].name),
@@ -56,7 +57,7 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
   // The home screen: the party stands in the observatory, menu bubbles on the right, the trip ticket below.
   const orb = (attributes, art, label) => `<button class="orb" ${attributes}><span class="orb-art">${art}</span><b class="outlined">${label}</b></button>`;
   const orbs = [
-    destination && !run ? orb('id="meta-change-destination" aria-label="행선지 바꾸기"', pixelIcon('telescope'), '행선지') : '',
+    destination && !run && !firstMain ? orb('id="meta-change-destination" aria-label="행선지 바꾸기"', pixelIcon('telescope'), '행선지') : '',
     ...(canBrowse ? [
       orb('data-meta-page="collection"', profile.lead ? widgets.face(profile.lead, 40) : `<img class="px" src="${icon('companion')}" alt="" width="32" height="32">`, '동료'),
       orb('data-meta-page="notebook"', pixelIcon('book'), '수첩'),
@@ -73,18 +74,20 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
       ${sceneActors(lineup, widgets, { interactive: true, lead: profile.lead, arriving })}
       ${!run && goal?.text ? `<p class="meta-next-goal bubble">${esc([goal.text, goal.reward].filter(Boolean).join(' · '))}</p>` : ''}
       ${orbs ? `<nav class="meta-hub-links" aria-label="관측소">${orbs}</nav>` : ''}
-      ${unlocks.length ? `<aside class="meta-unlocks" aria-label="해금">
+      ${announcement?.firstMain ? '<p class="meta-first-unlock win" role="status">이제 여정·지역 규칙·샘 초대를 쓸 수 있어</p>' : unlocks.length ? `<aside class="meta-unlocks" aria-label="해금">
         ${unlocks.map(label => `<div><span class="meta-bolt"><img class="px" src="${icon('gate')}" alt="" width="32" height="32"></span>${esc(label)}</div>`).join('')}
       </aside>` : ''}
     </div>
     <div class="meta-hub-actions">
       ${dailyRow(daily)}
-      <button class="btn go${ticketArt ? ' ticket' : ''}" id="meta-depart">${ticketArt}${esc(action)}</button>
+      <button class="btn go${ticketArt ? ' ticket' : ''}" id="meta-depart" data-coach="departure">${ticketArt}${esc(action)}</button>
+      ${firstMain ? '<button class="btn" id="meta-other-region">다른 지역</button>' : ''}
     </div>
   `;
   $('#meta-depart', node).addEventListener('click', run ? resume : depart);
   $('#meta-telescope', node).addEventListener('click', () => openDungeons());
   $('#meta-change-destination', node)?.addEventListener('click', () => openDungeons());
+  $('#meta-other-region', node)?.addEventListener('click', () => openDungeons());
   $('#meta-daily-rift', node)?.addEventListener('click', () => openDaily());
   $$('[data-companion]', node).forEach(button => button.addEventListener('click', () => inspect(button.dataset.companion)));
 }

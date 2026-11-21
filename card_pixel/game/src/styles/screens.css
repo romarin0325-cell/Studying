@@ -328,3 +328,24 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
   .map-actor img, .map-party.marching, .map-party.marching img, .event-joiner, .event-released, .relic-slot.equipped, .wake-slot.landed .wake-face { animation: none; }
   .landing .rays, .flash { display: none; }
 }
+.coach { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.coach[hidden], .coach button[hidden] { display: none; }
+.coach-shade, .coach-ring, .coach-say { position: absolute; }
+.coach-shade { background: rgba(27, 24, 80, .66); pointer-events: auto; touch-action: none; }
+.coach-ring { filter: none; clip-path: var(--notch); border: 2px solid var(--gold); }
+.coach-ring.nudge { animation: coach-nudge .24s steps(1, end); }
+@keyframes coach-nudge {
+  25% { transform: translate(-2px, 0); }
+  50% { transform: translate(2px, 0); }
+  75% { transform: translate(-2px, 0); }
+}
+.coach-say {
+  --pf-f: var(--paper); --pf-hi: var(--aqua-hi); --pf-lo: var(--paper3);
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 10px;
+  align-items: center; padding: 8px 10px; pointer-events: auto;
+}
+.coach-face { grid-row: span 2; display: block; overflow: hidden; width: 44px; height: 44px; clip-path: var(--notch); }
+.coach-line { margin: 0; color: var(--ink); font: 600 .8125rem/1.45 var(--f-body); word-break: keep-all; }
+.coach-buttons { grid-column: 2; display: flex; justify-content: flex-end; gap: 8px; }
+.coach-buttons .btn { padding: 4px 8px; min-height: 36px; font: 12px var(--f-label); }
+.coach-buttons .coach-next { --pf-f: var(--aqua-tint); --pf-lo: var(--aqua-hi); }

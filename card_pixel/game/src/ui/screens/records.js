@@ -7,7 +7,7 @@ export const DIFFICULTY_NAME = { easy: '꿈결', normal: '여정', nightmare: '�
 const amount = value => value.toLocaleString('ko-KR');
 export const hitText = (hit, card) => hit ? `${amount(hit.amount)} · ${card(hit.by)?.name || hit.by} · ${hit.skill}` : '기록 없음';
 export const longestText = (longest, card) => longest
-  ? `${card(longest.id)?.name || longest.id} · 인연 ${longest.bond ?? 0}` + (Number.isFinite(longest.since) ? ` · ${longest.since}번째 원정에서 영입` : '')
+  ? `${card(longest.id)?.name || longest.id} · 인연 ${longest.bond ?? 0}`
   : '기록 없음';
 
 export function recordTable(rows) {
@@ -39,21 +39,24 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
   const longest = records.longestServing;
   const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
   const latest = profile.ui?.latestRun;
+  const showDifficulty = Meta.featureFlags(profile).difficultyChoice;
   node.innerHTML = `
     <section class="meta-panel">
       ${recordTable([
         ['원정', `${records.runs}회`],
         ['최고 피해', hitText(records.bestHit, card)],
-        ...(bestPlace ? [['최고 피해 지역', `${bestPlace.name} · ${DIFFICULTY_NAME[records.bestHit.difficulty]}`]] : []),
-        ['가장 오래 함께한 동료', longestText(longest, card)]
+        ...(bestPlace ? [['최고 피해 지역', bestPlace.name + (showDifficulty ? ' · ' + DIFFICULTY_NAME[records.bestHit.difficulty] : '')]] : []),
+        ['인연이 가장 높은 동료', longestText(longest, card)]
       ])}
     </section>
     <section class="meta-panel">
       <h2>지역별 생환</h2>
       <table class="meta-record-table meta-clear-table">
-        <thead><tr><th scope="col">지역</th><th scope="col">꿈결</th><th scope="col">여정</th><th scope="col">악몽</th></tr></thead>
+        <thead><tr><th scope="col">지역</th>${showDifficulty
+          ? '<th scope="col">꿈결</th><th scope="col">여정</th><th scope="col">악몽</th>' : '<th scope="col">클리어</th>'}</tr></thead>
         <tbody>${Object.values(DUNGEONS).map(dungeon => {
           const clear = records.clears[dungeon.id];
+          if (!showDifficulty) return `<tr><th scope="row">${esc(dungeon.name)}</th><td>${(clear?.easy || 0) + (clear?.normal || 0)}회</td></tr>`;
           const count = (clear?.nightmare || 0) + '회';
           const nightmare = !dungeon.nightmareRule ? '—' : Meta.contractsFor
             ? `<button class="btn meta-nightmare-record" data-nightmare-record="${dungeon.id}" aria-label="${esc(dungeon.name)} 악몽 ${count} · 계약 도장">${count}</button>`

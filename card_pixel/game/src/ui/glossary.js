@@ -1,6 +1,12 @@
 export const TERMS = {
   crystal: { short: '결정', firstUse: '결정 ◆ · 이번 원정에서 쓰는 재화', detail: '소환의 샘과 원정 중 거래에 사용합니다.', scope: '원정' },
   join: { short: '합류', firstUse: '이번 원정 합류', detail: '이번 원정에 함께할 동료가 됩니다.', scope: '원정' },
+  recruit: { short: '영입', firstUse: '돌아온 동료를 관측소에 맞이', detail: '영입한 동료는 다음 원정에도 함께할 수 있습니다.', scope: '관측소' },
+  startCompanion: { short: '시작 동료', firstUse: '원정 시작부터 함께할 동료', detail: '시작 동료를 한 명 정할 수 있습니다.', scope: '준비' },
+  springInvite: { short: '샘 초대', firstUse: '샘 초대: 이번 원정에서 처음 후보 3칸을 열면, 초대한 동료 중 한 명이 보여요.',
+    detail: '영입한 동료를 이 지역 출현 명단에 추가하고 첫 샘 후보로 초대합니다.', scope: '준비' },
+  exclude: { short: '출현 제외', firstUse: '이 지역의 뽑기 후보에서 제외', detail: '등급마다 한 명은 출현 명단에 남겨야 합니다.', scope: '준비' },
+  bond: { short: '인연', firstUse: '영입 후 문지기나 보스에 출전해 살아 돌아온 횟수', detail: '출전하고 돌아온 동료의 인연이 오릅니다.', scope: '기록' },
   boost: { short: '강화', firstUse: '이미 함께 · 강화', detail: '공격·마공 +10%', scope: '원정' },
   memory: { short: '기억', firstUse: '동료의 기억', detail: '쓰러지거나 보낸 동료가 다시 나오면 가장 먼저 합류한 생존 동료에게 공격·마공 +10%를 줍니다.', scope: '원정' },
   heirloom: { short: '유품', firstUse: '쓰러진 동료가 남긴 기술', detail: '다음 동료가 물려받습니다. 위력 ×1.5 · MP 0 · 전투당 1회', scope: '원정' },

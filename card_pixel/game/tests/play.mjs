@@ -1,4 +1,4 @@
-// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--runs=2] [--headed] [--no-build] [--entry-count]
+// node card_pixel/game/tests/play.mjs [--seeds=7,21] [--tutorial=both|follow|skip] [--intro-only] [--runs=2] [--headed] [--no-build]
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -55,6 +55,8 @@ if (args.includes('--entry-count')) {
 const option = (name, fallback) => args.find(arg => arg.startsWith(name + '='))?.slice(name.length + 1) ?? fallback;
 const seeds = option('--seeds', '7,21').split(',').map(Number);
 const runCount = Number(option('--runs', '2'));
+const tutorialMode = option('--tutorial', 'both');
+assert(['both', 'follow', 'skip'].includes(tutorialMode), 'Use --tutorial=both, --tutorial=follow or --tutorial=skip');
 assert(seeds.every(seed => Number.isSafeInteger(seed) && seed > 0 && seed <= 0xffffffff),
   'Use positive 32-bit seeds, for example --seeds=7,21');
 assert(Number.isSafeInteger(runCount) && runCount > 0, 'Use a positive run count, for example --runs=2');
@@ -171,6 +173,7 @@ function look({ canRetreat = false } = {}) {
   ];
   return {
     screen, result, ready, opening, tap, form, formIndex, fighterId,
+    coach: document.querySelector('.coach:not([hidden])')?.dataset.coachStep,
     visible: JSON.stringify([screen, signature(active), signature(sheet), result]),
     bigMove: inBattle && !!active.querySelector('.skillplate'),
     dungeonId: run?.dungeonId,
@@ -204,9 +207,11 @@ async function clickIfVisible(page, selector) {
   return true;
 }
 
-async function playTitle({ page, shot }) {
+async function playTitle({ page, shot, skipTutorial }) {
   await page.locator('#title.on').waitFor();
+  await page.locator('.coach[data-coach-step="title"]').waitFor();
   await shot('title');
+  if (skipTutorial) await page.locator('.coach-skip').click();
   await page.locator('#title.on #b-start').click();
 }
 
@@ -344,7 +349,10 @@ async function playBattle({ page }, state, expedition) {
     throw new Error('Result has no available action');
   }
   if (!state.ready) return;
-  if (state.room === 'borrowed' && !expedition.borrowedStarted) {
+  if (state.coach === 'inherit' || state.coach === 'rescue') {
+    const target = state.coach === 'inherit' ? page.locator('#b-heir.on') : page.locator('.act').filter({ hasText: '실버스톰' });
+    await target.click();
+  } else if (state.room === 'borrowed' && !expedition.borrowedStarted) {
     assert.equal(state.fighterId, 'ash', 'The borrowed battle should start with Ash');
     assert(state.opening, 'Ash did not get the opening decision');
     const buttons = page.locator('#battle.on .opening-choice:not([disabled])');
@@ -402,7 +410,11 @@ async function playDestinations({ page, shot }, tried) {
 
 async function playPreparation({ page, shot }) {
   const depart = page.locator('#sheet.on .meta-prep #meta-start-expedition');
-  await depart.waitFor();
+  if (!await depart.isVisible()) {
+    assert.equal(await page.evaluate(() => window.__game.run?.difficulty), 'easy');
+    return;
+  }
+  await dismissTour(page);
   const journey = page.locator('#sheet.on [data-difficulty="normal"]');
   if (await journey.isVisible() && await journey.getAttribute('aria-pressed') !== 'true') await journey.click();
   await shot('preparation');
@@ -414,6 +426,7 @@ async function playHubPages({ page, shot }) {
   for (const id of ['collection', 'notebook', 'records']) {
     await page.locator('#hub.on [data-meta-page="' + id + '"]').click();
     await page.locator('#' + id + '.on').waitFor();
+    await dismissTour(page);
     await shot(id);
     await page.locator('#' + id + '.on .meta-back').click();
   }
@@ -430,6 +443,10 @@ const roomPlayers = {
   treasure: playTreasure,
   battle: playBattle
 };
+
+function dismissTour(page) {
+  return clickIfVisible(page, '.coach:not([hidden]) .coach-next:not([hidden])');
+}
 
 async function captureRoom({ shot }, state) {
   if (state.screen === 'awaken') await shot('first-awakening');
@@ -504,6 +521,7 @@ async function playExpedition(campaign, dungeon, depart, openingPath) {
     }
     if (now - lastProgress >= 25000) await failStuck(campaign, state);
     if (state.stats.retries >= 20) throw new Error('Intro gate retry limit reached on floor ' + state.floor);
+    if (state.coach?.startsWith('tour-') && await dismissTour(page)) continue;
     // A full roster (six) asks who leaves before a spring draw, a gate captive or an event recruit joins.
     if (await chooseWhoLeaves(page)) continue;
     await captureRoom(campaign, state);
@@ -560,8 +578,28 @@ async function playCampaign(campaign, openingPath) {
   url.searchParams.set('seed', seed);
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });
   await playExpedition(campaign, 'dawn_forest', playTitle, openingPath);
-  const tried = new Set();
-  for (let i = 0; i < runCount; i++) {
+  const first = 'ember_volcano';
+  async function departFirst() {
+    if (!campaign.skipTutorial) await page.locator('.coach[data-coach-step="departure"]').waitFor();
+    await page.locator('#hub.on #meta-depart').click();
+    assert.equal(await page.locator('#sheet.on .meta-prep').count(), 0);
+    const entry = await page.evaluate(() => ({
+      dungeon: window.__game.run.dungeonId,
+      difficulty: window.__game.run.difficulty,
+      tutorial: JSON.parse(localStorage.getItem('relaymare.session')).profile.ui.entry
+    }));
+    assert.equal(entry.dungeon, first);
+    assert.equal(entry.difficulty, 'easy');
+    assert.equal(entry.tutorial.skipped, campaign.skipTutorial);
+    if (!campaign.skipTutorial) assert(entry.tutorial.done.includes('departure'));
+  }
+  if (args.includes('--intro-only')) {
+    await departFirst();
+    return;
+  }
+  await playExpedition(campaign, first, departFirst);
+  const tried = new Set([first]);
+  for (let i = 1; i < runCount; i++) {
     const dungeon = await playDestinations(campaign, tried);
     tried.add(dungeon);
     await playExpedition(campaign, dungeon, playPreparation);
@@ -585,8 +623,9 @@ async function playSeed(browser, seed, index) {
     let openingPath = index % 2 ? 'rescue' : 'stand';
     if (seed === 7) openingPath = 'stand';
     if (seed === 21) openingPath = 'rescue';
-    const campaign = { page, seed, shot, resumed: false };
-    console.log('\nCampaign ' + seed + ' · opening: ' + openingChoices[openingPath].label);
+    const skipTutorial = tutorialMode === 'skip' || tutorialMode === 'both' && index % 2 === 1;
+    const campaign = { page, seed, shot, resumed: false, skipTutorial };
+    console.log('\nCampaign ' + seed + ' · opening: ' + openingChoices[openingPath].label + ' · ' + (skipTutorial ? 'skip' : 'follow'));
     await Promise.race([watchBrowser(page), playCampaign(campaign, openingPath)]);
   } finally {
     const missing = screenshotLabels.filter(label => !taken.has(label));
