@@ -34,7 +34,8 @@ const tempoScales = [
   tempo.ROOM_MULTIPLIERS, tempo.REGION_MULTIPLIERS, tempo.NIGHTMARE_MULTIPLIERS,
   tempo.LESSON_NIGHTMARE_MULTIPLIERS, tempo.FIRST_MAIN_ASSIST, tempo.INTRO_MULTIPLIERS
 ];
-const tempoFields = Object.values(tempo).filter(value => typeof value !== 'function').length;
+// The entry HP multiplier appears in the first-main battle rule.
+const tempoFields = Object.entries(tempo).filter(([key, value]) => key !== 'ENTRY_FIRST_MAIN_ENEMY_HP' && typeof value !== 'function').length;
 const tempoRows = tempoFields - tempoScales.length - 2 + tempoScales.reduce((count, table) => count + scaleCount(table), 0)
   + size(tempo.BLESSING_MULTIPLIERS) + size(tempo.TEMPO_SEEDS);
 
@@ -108,4 +109,15 @@ test('review content resolves replay variants and uses an offline script with no
   assert.doesNotMatch(html, /<(?:script|img)[^>]*\bsrc=|<link\b|@import\b/i);
   const script = html.match(/<script>([\s\S]+?)<\/script>/)[1];
   assert.doesNotThrow(() => new vm.Script(script));
+});
+
+test('the review covers entry unlocks, the current HP multiplier, repeat draws and recruitment', () => {
+  const effect = (category, id) => categories.find(section => section.id === category).rows
+    .find(item => item.id === category + '/' + id).effect;
+  const entry = effect('battle', 'first-main-assist');
+  assert.ok(entry.includes(`기존 HP 배율에 ×${tempo.ENTRY_FIRST_MAIN_ENEMY_HP}`));
+  assert.match(entry, /꿈결.*유료 거래.*5층부터 무료 즉시 선택/);
+  assert.match(effect('recruitment', 'companions'), /입문을 클리어하면.*첫 본편 클리어로.*오늘의 균열/);
+  assert.match(effect('battle', 'roster-limit'), /강화됩니다.*기억.*가장 먼저 합류.*10%/);
+  assert.match(effect('recruitment', 'recruit-after-clear'), /미영입.*대기하거나 물러난.*인연 \+1/);
 });

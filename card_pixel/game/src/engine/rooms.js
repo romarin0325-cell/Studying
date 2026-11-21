@@ -7,7 +7,8 @@ import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { QUIRKS } from '../content/quirks.js';
 import { RELICS } from '../content/relics.js';
 import {
-  BLESSING_MULTIPLIERS, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS, LESSON_NIGHTMARE_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
+  BLESSING_MULTIPLIERS, ENTRY_FIRST_MAIN_ENEMY_HP, FIRST_MAIN_ASSIST, FLOOR_SEED_STEP, INTRO_MULTIPLIERS,
+  LESSON_NIGHTMARE_MULTIPLIERS, NIGHTMARE_MULTIPLIERS,
   REGION_MULTIPLIERS, ROOM_MULTIPLIERS, START_MP, TEMPO_SEEDS, usesTempo
 } from '../content/tempo.js';
 import {
@@ -145,8 +146,10 @@ export function applyDoorTempo(run, roster, door) {
   const scale = intro ? INTRO_MULTIPLIERS[run.floor] : battleScale(run, door);
   if (scale) {
     const [hp, attack] = scale;
+    const firstMainEntry = !intro && run.difficulty === 'easy' && run.features?.firstMainCleared === false;
+    const hpScale = firstMainEntry ? hp * ENTRY_FIRST_MAIN_ENEMY_HP : hp;
     for (const { stats } of door.enemies) {
-      stats.hp = Math.round(stats.hp * hp);
+      stats.hp = Math.round(stats.hp * hpScale);
       stats.atk = Math.round(stats.atk * attack);
       stats.matk = Math.round(stats.matk * attack);
     }

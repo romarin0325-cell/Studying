@@ -612,10 +612,13 @@ function browserReview(page, validStatuses) {
       if (matches) visible++;
       if (record.status !== 'unreviewed') reviewed++;
     }
+    // While searching or filtering, categories with no match fold away so the matches sit together.
+    const filtering = terms.length > 0 || selected !== 'all';
     for (const section of sections) {
       const shown = section.querySelectorAll('.card:not([hidden])').length;
       section.querySelector('.section-count').textContent = shown + ' / ' + section.dataset.total;
-      section.querySelector('.empty').hidden = shown !== 0;
+      section.querySelector('.empty').hidden = shown !== 0 || filtering;
+      section.hidden = filtering && shown === 0;
     }
     count.textContent = '표시 ' + visible + ' / ' + rows.size + '개 · 판정 완료 ' + reviewed + '개';
     document.querySelector('#no-results').hidden = visible !== 0;

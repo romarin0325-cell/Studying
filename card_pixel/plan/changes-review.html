@@ -67,7 +67,7 @@
   <header>
     <div class="wrap">
       <h1>RELAYMARE 변경점 검수</h1>
-      <p>생성 시각 <time datetime="2026-11-21T11:33:02.792Z">2026-11-21T11:33:02.792Z (UTC)</time> · Git <code>31e0e883e841ddc054aeab3e56456312505acbc8</code> · 총 277개</p>
+      <p>생성 시각 <time datetime="2026-11-21T12:01:56.927Z">2026-11-21T12:01:56.927Z (UTC)</time> · Git <code>34b58b7684cb88fe02a35a46cde5e8e7c4052331</code> · 총 277개</p>
       <p>다시 만들기 <code>node card_pixel/plan/build-changes-review.mjs</code></p>
     </div>
   </header>
@@ -266,7 +266,7 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>무료 증원</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>템포 v2 · 본편 1·2·6층 전투 승리</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>템포 v2 본편 1·2·6층 전투에서 이기면 최대 3명 중 1명을 결정 0개로 깨우거나 건너뜁니다. 동료가 이미 6명이면 1명을 보내고 새 동료를 받습니다.<ul><li>도입 기준 · 템포 v2</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>템포 v2 본편 1·2·6층 전투에서 이기면 후보 중 1명을 결정 0개로 깨우거나 건너뜁니다. 신규 프로필의 첫 본편은 빈자리가 있을 때만 후보 1명을 제시합니다. 전체 증원이 열리면 최대 3개 후보가 나오며, 정원 6명에서 신규 합류를 고를 때만 기존 동료 1명을 보냅니다.<ul><li>도입 기준 · 템포 v2</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:reinforcement</code><code>card_pixel/game/src/engine/run.js:setReinforcement</code></dd></div>
   </dl>
@@ -279,7 +279,7 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>동료 6명과 출전 3자리</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>템포 v2 · 동료 합류와 전투 편성</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>템포 v2 원정 동료는 6명까지이며 전투에는 1~3명을 배치합니다. 합류로 한도를 넘기면 초과 인원만큼 동료를 보내야 합니다. 전투에서 쓰러지거나 원정에서 보낸 동료는 그 원정의 깨우기 풀에 다시 나오지 않습니다.<ul><li>도입 기준 · 템포 v2</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>현재 원정에서는 동료를 6명까지 보유하고 전투에 1~3명을 배치합니다. 새 ID가 나오면 합류하고, 정원 초과 시 보낼 동료를 고릅니다. 살아 있는 동료가 다시 나오면 강화됩니다. 쓰러지거나 보낸 동료가 나오면 기억이 되어 생존자 중 가장 먼저 합류한 동료를 강화합니다. 스택당 원래 공격력·마법공격력의 10%가 원정 동안 합산되며 축복과 별개입니다.<ul><li>도입 기준 · 템포 v2</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:roster-limit</code><code>card_pixel/game/src/engine/awakenings.js:replacementCount</code></dd></div>
   </dl>
@@ -292,7 +292,7 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>전투 축복</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>템포 v2 · 본편 전투 문과 편성</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>템포 v2 본편에서 전투마다 1명을 뽑고 노멀·레어를 우선합니다. 노멀 +60%, 레어 +45%, 에픽·이벤트 +30%, 전설·초월 +15%입니다. 원정 축복과 전투 축복 중 높은 수치를 쓰며, 예행 버전에는 같은 동료가 2번 연속 뽑히면 다음 추첨에서 다른 후보가 있는 한 제외합니다.<ul><li>도입 기준 · 템포 v2</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>전투 축복이 열린 템포 v2 본편에서 전투마다 1명을 뽑고 노멀·레어를 우선합니다. 노멀 +60%, 레어 +45%, 에픽·이벤트 +30%, 전설·초월 +15%입니다. 원정 축복과 전투 축복 중 높은 수치를 쓰며, 예행 버전에는 같은 동료가 2번 연속 뽑히면 다음 추첨에서 다른 후보가 있는 한 제외합니다.<ul><li>도입 기준 · 템포 v2</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:battle-blessing</code><code>card_pixel/game/src/engine/rooms.js:battleBlessing</code></dd></div>
   </dl>
@@ -303,15 +303,15 @@
 </article>
 <article class="card" data-item="battle/first-main-assist">
   <dl>
-    <div class="searchable"><dt>이름</dt><dd><h3>첫 본편 완충과 쉬움</h3></dd></div>
+    <div class="searchable"><dt>이름</dt><dd><h3>첫 본편 꿈결과 단순 규칙</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>본편 쉬움 또는 일반 첫 생환 전 · 문지기·보스</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>템포 v2 일반 본편 생환 전과 쉬움 난이도에서는 문지기 HP ×0.97·공격력 ×2.85, 보스 HP ×0.6·공격력 ×1.6을 층 보정 뒤 적용합니다. 화산 보스는 ×0.56·×1.55, 성당 보스는 ×0.53·×1.46입니다. 쉬움은 추가로 적 공·마공을 65%로 낮춥니다.<ul><li>도입 기준 · 템포 v2</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>신규 프로필의 첫 본편은 꿈결로 고정합니다. 지역 효과·추가 적·지역 배율, 위험·정예 문, 변덕, 접두사, 전투 축복, 제단, 내기와 유료 거래가 빠집니다. 사건은 5층부터 무료 즉시 선택만 나옵니다. 보스 예행·문지기·보스·보물·유물·◆1 깨우기와 단순 증원을 이용할 수 있습니다. 여정 첫 생환 전과 꿈결에서 적용하는 문지기·보스 완충을 포함해, 첫 본편에서는 일반 적·문지기·보스의 기존 HP 배율에 ×0.79를 추가로 곱한 뒤 반올림합니다. 꿈결의 적 공격력·마법공격력은 기존 65% 보정을 적용합니다.<ul><li>도입 기준 · 단계 해금 v1</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
-    <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:first-main-assist</code><code>card_pixel/game/src/engine/run.js:createRun</code></dd></div>
+    <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:first-main-assist</code><code>card_pixel/game/src/engine/rooms.js:applyDoorTempo</code></dd></div>
   </dl>
   <div class="review">
-    <label>판정<select aria-label="첫 본편 완충과 쉬움 판정"><option value="unreviewed">미검수</option><option value="confirmed">확인</option><option value="needs-fix">수정 필요</option><option value="question">질문</option></select></label>
-    <label>메모<input type="text" aria-label="첫 본편 완충과 쉬움 메모"></label>
+    <label>판정<select aria-label="첫 본편 꿈결과 단순 규칙 판정"><option value="unreviewed">미검수</option><option value="confirmed">확인</option><option value="needs-fix">수정 필요</option><option value="question">질문</option></select></label>
+    <label>메모<input type="text" aria-label="첫 본편 꿈결과 단순 규칙 메모"></label>
   </div>
 </article>
 <article class="card" data-item="battle/lesson-transfer">
@@ -3640,7 +3640,7 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>원정 시작 깨우기</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>본편 출발 전 · 새벽의 숲 2층</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>최대 3명씩 제안하여 2명을 고르고, 이후 3명을 무작위로 깨웁니다. 대표 또는 입문에서 보존된 선봉이 먼저 합류하면 선택은 1번입니다. 고르지 않은 후보 1명은 문지기 그림자로 예약될 수 있습니다.<ul><li>도입 기준 · 원정 기본</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>최대 3명씩 제안하여 2명을 고르고, 이후 3명을 무작위로 깨웁니다. 시작 동료 또는 입문에서 보존된 선봉이 먼저 합류하면 선택은 1번입니다. 출발 명단은 서로 다른 동료로 채우며, 고르지 않은 후보 1명은 문지기 그림자로 예약될 수 있습니다.<ul><li>도입 기준 · 원정 기본</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:opening-awakening</code><code>card_pixel/game/src/engine/run.js:completeStart</code></dd></div>
   </dl>
@@ -3653,9 +3653,9 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>깨우기 비용과 등급 확률</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>소환의 샘 · 본편 3·7층, 새벽의 숲 4층</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>샘에서 결정 1개를 쓰면 무작위 1명, 3개로는 최대 3명의 후보 중 1명을 고릅니다. 노멀·레어·에픽·전설 순으로 무작위는 40·30·20·10%, 선택 후보 추첨은 25·30·25·20%입니다. 이 두 비율은 원본 기본 모드의 일반·도전 소환과 같습니다. 후보가 없는 등급을 빼고 비율을 다시 계산하며, 이벤트·초월은 전설 묶음입니다.<ul><li>도입 기준 · 원정 기본</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>샘에서 결정 1개를 쓰면 한 번 뽑고, 3개를 쓰면 제시된 최대 3칸 중 1칸을 고릅니다. 노멀·레어·에픽·전설군 순서로 ◆1은 40·30·20·10%, ◆3의 무작위 한 칸은 25·30·25·20%입니다. 지역 출현 명단에서 출현 제외만 빼고, 등급을 먼저 뽑은 뒤 그 등급 안에서 균등하게 뽑습니다. 빈 등급의 가중치는 빼고 다시 계산합니다. 전설군에는 전설·초월·이벤트가 포함됩니다.<ul><li>도입 기준 · 뽑기 v2</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>원본 그대로를 다른 곳에서 씀</dd></div>
-    <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:awakening-rates</code><code>card_pixel/game/src/engine/awakenings.js:drawFrom</code><code>card_pixel/game/core/logic.js:GACHA_RATES:default</code></dd></div>
+    <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:awakening-rates</code><code>card_pixel/game/src/engine/awakenings.js:ratesView</code><code>card_pixel/game/core/logic.js:GACHA_RATES:default</code></dd></div>
   </dl>
   <div class="review">
     <label>판정<select aria-label="깨우기 비용과 등급 확률 판정"><option value="unreviewed">미검수</option><option value="confirmed">확인</option><option value="needs-fix">수정 필요</option><option value="question">질문</option></select></label>
@@ -3666,7 +3666,7 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>샘 후보 미리보기와 확정</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>예행 v1 · 본편 3·7층 소환의 샘</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>예행 v1에서는 결정 3개짜리 후보를 먼저 보고 1명을 확정할 때만 비용을 냅니다. 먼저 무작위 깨우기로 후보 1명을 얻으면 그 자리를 새 후보로 채웁니다. 기존 방식으로 이미 비용을 낸 제안을 불러오면 다시 지불하지 않습니다.<ul><li>도입 기준 · 예행 v1</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>첫 본편 클리어 뒤 ◆3 제시가 열립니다. 제시는 열람이 무료이며 1칸을 확정할 때 결제합니다. 무작위 칸은 같은 동료가 여러 칸에 나올 수 있고, 첫 유료 선택의 유효한 초대 동료는 초대 칸에 나옵니다. 제시와 슬롯은 다시 열거나 저장을 불러와도 고정됩니다. 진행 중인 뽑기 v1 원정은 기존 중복 제외 규칙을 쓰며, 이미 결제한 제안은 추가 차감 없이 확정할 수 있습니다.<ul><li>도입 기준 · 뽑기 v2</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:spring-pick</code><code>card_pixel/game/src/engine/run.js:commitSpringOffer</code></dd></div>
   </dl>
@@ -3696,7 +3696,7 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>생환 동료 영입</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>생환 후 정산</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>원정에서 생환하면 문지기 또는 최종전 출전 생존자 중 원정 끝까지 남은 미영입 동료를 1명까지 영입합니다. 악몽은 최대 2명입니다. 이미 영입한 대상이 조건을 충족하면 인연이 1 오릅니다.<ul><li>도입 기준 · 프로필 원정</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>최종 승리 때 원정 명단에 살아서 남은 미영입 동료를 꿈결·여정에서 1명, 악몽에서 2명까지 영입합니다. 대기하거나 물러난 동료도 포함됩니다. 영입 후보에는 보스·문지기·일반 전투·대기 중 가장 높은 출전 이력이 붙습니다. 이미 영입한 동료의 인연 +1은 문지기 또는 보스전 출전 뒤 생존해야 적용됩니다. 정산 대기 중인 구저장은 당시 제시한 후보를 유지합니다.<ul><li>도입 기준 · 프로필 원정</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:recruit-after-clear</code><code>card_pixel/game/src/engine/meta.js:applyRunEnd</code></dd></div>
   </dl>
@@ -3720,28 +3720,28 @@
 </article>
 <article class="card" data-item="recruitment/companions">
   <dl>
-    <div class="searchable"><dt>이름</dt><dd><h3>대표와 동행</h3></dd></div>
+    <div class="searchable"><dt>이름</dt><dd><h3>단계 해금과 출발 준비</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>수첩 1·2·4·5장 · 출발 준비 · 첫 유료 선택 깨우기</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>새벽의 숲을 처음 생환하면 영입 동료 중 대표 1명을 정해 본편에 데려갑니다. 동행은 수첩 2·4·5장에서 각각 1·2·3칸 열려 출현 풀에 들어가고, 첫 유료 선택 깨우기에서 가능한 동행 1명이 우선 후보에 듭니다. 대표 인연 1 이상이면 그 우선 동행을 지정할 수 있습니다.<ul><li>도입 기준 · 프로필 원정</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>신규 프로필의 입문 4층에는 보물방만 등장합니다. 입문을 클리어하면 홍련 화산과 황혼 성당이 열리고, 영입한 동료 1명이 본편 시작 동료가 됩니다. 첫 본편 클리어로 난이도 선택, 시작 동료·샘 초대·출현 제외 편집, 임무와 오늘의 균열이 열립니다. 샘 초대는 수첩 2·4·5장에서 각각 1·2·3칸을 얻으며, 초대 동료는 지역 출현 명단에도 추가됩니다.<ul><li>도입 기준 · 단계 해금 v1</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
-    <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:companions</code><code>card_pixel/game/src/engine/meta.js:startView</code></dd></div>
+    <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:companions</code><code>card_pixel/game/src/engine/meta.js:prepView</code></dd></div>
   </dl>
   <div class="review">
-    <label>판정<select aria-label="대표와 동행 판정"><option value="unreviewed">미검수</option><option value="confirmed">확인</option><option value="needs-fix">수정 필요</option><option value="question">질문</option></select></label>
-    <label>메모<input type="text" aria-label="대표와 동행 메모"></label>
+    <label>판정<select aria-label="단계 해금과 출발 준비 판정"><option value="unreviewed">미검수</option><option value="confirmed">확인</option><option value="needs-fix">수정 필요</option><option value="question">질문</option></select></label>
+    <label>메모<input type="text" aria-label="단계 해금과 출발 준비 메모"></label>
   </div>
 </article>
 <article class="card" data-item="recruitment/seals">
   <dl>
-    <div class="searchable"><dt>이름</dt><dd><h3>던전별 봉인</h3></dd></div>
+    <div class="searchable"><dt>이름</dt><dd><h3>던전별 출현 제외</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>일반·악몽 생환 뒤 해당 던전 출발 준비</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>일반 생환 후 해당 던전에서 동료 1명, 악몽 생환 후 최대 3명을 출현 풀에서 뺍니다. 던전 기본 풀에 있던 등급 묶음은 각각 1명 이상 남겨야 합니다.<ul><li>도입 기준 · 프로필 원정</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>여정 생환 후 해당 던전에서 동료 1명, 악몽 생환 후 최대 3명을 출현 명단에서 뺍니다. 시작 동료는 제외할 수 없으며, 던전 기본 명단의 등급군은 각각 1명 이상 남겨야 합니다.<ul><li>도입 기준 · 프로필 원정</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:seals</code><code>card_pixel/game/src/engine/meta.js:setSeals</code></dd></div>
   </dl>
   <div class="review">
-    <label>판정<select aria-label="던전별 봉인 판정"><option value="unreviewed">미검수</option><option value="confirmed">확인</option><option value="needs-fix">수정 필요</option><option value="question">질문</option></select></label>
-    <label>메모<input type="text" aria-label="던전별 봉인 메모"></label>
+    <label>판정<select aria-label="던전별 출현 제외 판정"><option value="unreviewed">미검수</option><option value="confirmed">확인</option><option value="needs-fix">수정 필요</option><option value="question">질문</option></select></label>
+    <label>메모<input type="text" aria-label="던전별 출현 제외 메모"></label>
   </div>
 </article>
   </section>
@@ -3795,7 +3795,7 @@
   <dl>
     <div class="searchable"><dt>이름</dt><dd><h3>프로필·원정 저장과 복구</h3></dd></div>
     <div class="searchable"><dt>어디서 나오나</dt><dd>본편 이어하기 · 균열 기록 · 설정의 백업·복원</dd></div>
-    <div class="searchable effect"><dt>효과</dt><dd>프로필과 본편 진행을 한 세션에 저장하고 균열 기록을 별도로 관리합니다. 원정 데이터만 손상되면 프로필로 복구할 수 있습니다. 정산 뒤 마지막 정상 프로필 1개를 보존하며, v1 JSON 백업에는 본편 세션·균열·설정을 담고 검증을 통과하면 저장 슬롯을 교체합니다.<ul><li>도입 기준 · 백업 v1</li></ul></dd></div>
+    <div class="searchable effect"><dt>효과</dt><dd>프로필과 본편 진행을 한 세션에 저장하고 균열 기록을 별도로 관리합니다. 단계 해금은 출발 시점의 규칙을 원정에 저장하고, 기존 진행 기록이 있는 구저장은 열린 기능을 유지합니다. 원정 데이터만 손상되면 프로필로 복구할 수 있습니다. 정산 뒤 마지막 정상 프로필 1개를 보존하며, v1 JSON 백업에는 본편 세션·균열·설정을 담고 검증을 통과하면 저장 슬롯을 교체합니다.<ul><li>도입 기준 · 백업 v1</li></ul></dd></div>
     <div class=""><dt>원본과의 관계</dt><dd>새로 생김</dd></div>
     <div class="searchable sources"><dt>자료 위치</dt><dd><code>card_pixel/game/src/content/rulebook.js:RULEBOOK:save-recovery</code><code>card_pixel/game/src/engine/save.js:createSaveStore</code></dd></div>
   </dl>
@@ -3861,10 +3861,13 @@
       if (matches) visible++;
       if (record.status !== 'unreviewed') reviewed++;
     }
+    // While searching or filtering, categories with no match fold away so the matches sit together.
+    const filtering = terms.length > 0 || selected !== 'all';
     for (const section of sections) {
       const shown = section.querySelectorAll('.card:not([hidden])').length;
       section.querySelector('.section-count').textContent = shown + ' / ' + section.dataset.total;
-      section.querySelector('.empty').hidden = shown !== 0;
+      section.querySelector('.empty').hidden = shown !== 0 || filtering;
+      section.hidden = filtering && shown === 0;
     }
     count.textContent = '표시 ' + visible + ' / ' + rows.size + '개 · 판정 완료 ' + reviewed + '개';
     document.querySelector('#no-results').hidden = visible !== 0;

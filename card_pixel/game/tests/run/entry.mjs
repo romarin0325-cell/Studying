@@ -7,8 +7,9 @@ import * as Run from '../../src/engine/run.js';
 import * as Save from '../../src/engine/save.js';
 import { EVENTS } from '../../src/content/events.js';
 import { DUNGEONS } from '../../src/content/dungeons.js';
-import { ROOM_MULTIPLIERS } from '../../src/content/tempo.js';
+import { ENTRY_FIRST_MAIN_ENEMY_HP, FIRST_MAIN_ASSIST, ROOM_MULTIPLIERS } from '../../src/content/tempo.js';
 import { gradeOf } from '../../src/engine/roster.js';
+import { applyDoorTempo } from '../../src/engine/rooms.js';
 import { SESSION_KEY } from '../../src/ui/storage.js';
 import { playRun } from '../../tools/sim.mjs';
 
@@ -117,6 +118,7 @@ export function registerEntryTests({ core, roster, makeTempo, reach, advance, en
           if (floor === 1) {
             const enemy = door.enemies[0];
             const baseline = roster.wildOf(enemy.id.slice(5), DUNGEONS[id].tiers[0]).stats;
+            assert.equal(enemy.stats.hp, Math.round(baseline.hp * (ROOM_MULTIPLIERS.wild[0] * ENTRY_FIRST_MAIN_ENEMY_HP)));
             assert.equal(enemy.stats.atk, Math.round(baseline.atk * ROOM_MULTIPLIERS.wild[1]));
           }
           if (door.type === 'event') {
@@ -136,6 +138,29 @@ export function registerEntryTests({ core, roster, makeTempo, reach, advance, en
         if ([2, 6].includes(floor)) assert.ok(run.doors[0].tempo.lesson);
         if (floor === 4) assert.equal(run.doors[0].type, 'gate');
         if (floor === 8) assert.equal(run.doors[0].type, 'boss');
+      }
+    }
+  });
+
+  test('only first-main entry scales wild, gate and boss HP without changing attack', () => {
+    const first = start(introClear());
+    const legacy = makeTempo({ difficulty: 'easy' });
+    const beforeEntryRules = { ...legacy, features: undefined };
+    const variants = [first, legacy, beforeEntryRules];
+    for (const [type, floor, [hp, attack]] of [
+      ['wild', 1, ROOM_MULTIPLIERS.wild],
+      ['gate', 4, FIRST_MAIN_ASSIST.gate],
+      ['boss', 8, FIRST_MAIN_ASSIST[ember].boss]
+    ]) {
+      // Ember has its own wild tuning when region rules are active.
+      for (const run of variants) {
+        const door = { type, enemies: [{ stats: { hp: 10000, atk: 100, matk: 200 } }] };
+        applyDoorTempo({ ...run, floor, lessonVersion: 0 }, roster, door);
+        const hpMultiplier = run === first ? hp * ENTRY_FIRST_MAIN_ENEMY_HP : type === 'wild' ? 0.64 : hp;
+        const attackMultiplier = run !== first && type === 'wild' ? 2.35 : attack;
+        assert.deepEqual(door.enemies[0].stats, {
+          hp: Math.round(10000 * hpMultiplier), atk: Math.round(100 * attackMultiplier), matk: Math.round(200 * attackMultiplier)
+        });
       }
     }
   });
