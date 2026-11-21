@@ -1,5 +1,5 @@
 import { $, esc } from '../dom.js';
-import { activeContract, blessingText, TYPE, foeFlip, riftKindLabel, statGrid, traitText } from '../widgets.js';
+import { activeContract, blessingText, TYPE, foeFlip, riftKindLabel, skillText, statGrid, traitText } from '../widgets.js';
 import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../relics.js';
 import { shortRiftDate } from '../screens/daily-rift.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
@@ -15,7 +15,7 @@ import { fieldInfo } from './fields.js';
 const STATUS_INFO = {
   weak: '공격력 -20%', silence: '마법공격력 -20%', curse: '마법방어력 -20%', temptation: '마법방어력 -20%',
   darkness: '방어력 -20% (부식 중첩 시 -40%)', corrosion: '방어력 -20% (암흑 중첩 시 -40%)',
-  stun: '다음 턴 행동 불가', evasion: '회피율 +50%', barrier: '물리 공격 1회 무효', magic_guard: '마법 공격 1회 무효',
+  stun: '다음 행동 1회 불가', evasion: '회피율 +50%', barrier: '물리 공격 1회 무효', magic_guard: '마법 공격 1회 무효',
   guard: '받는 피해 50% 감소', damage_half: '받는 피해 50% 감소',
   defProtocolPhy: '방어력 +50% (방어 프로토콜)', defProtocolMag: '마법방어력 +50% (방어 프로토콜)'
 };
@@ -35,7 +35,7 @@ export function createDetails(core, widgets, openSheet) {
 
   function skillBlock(s, entity, note) {
     let text = '';
-    try { text = core.SkillDisplay.body(s, { entity }); } catch (e) { text = ''; }
+    try { text = skillText(core.SkillDisplay.body(s, { entity })); } catch (e) { text = ''; }
     return '<div class="skl ' + s.type + '"><b>' + esc(s.name) + '</b><small>' + (TYPE[s.type] || '') + ' · MP ' + (s.cost || 0) + (note ? ' · ' + esc(note) : '') + '</small>' + (text ? '<p>' + esc(text) + '</p>' : '') + '</div>';
   }
   function heirBlock(skill, fromName, entity) {
@@ -43,14 +43,18 @@ export function createDetails(core, widgets, openSheet) {
     return '<h4>유품</h4><div class="heirbox"><p>' + esc(fromName) + '에게서 계승한 스킬 · 위력 ' + HEIRLOOM_POWER + '배 · MP 0 · 전투당 1회 (쓰러지면 소멸)</p>' + skillBlock(skill, entity) + '</div>';
   }
 
-  function statusList(buffs, extra, artifacts) {
+  function statusList(buffs, extra, artifacts, protocolBonus) {
     const stack = core.GAME_CONSTANTS.STACK_CAP;
     const items = Object.keys(buffs || {}).filter(id => buffs[id]).map(id => {
       const v = buffs[id], good = GOOD.includes(id) || /^defProtocol/.test(id);
       const relic = stack.ARTIFACT_MAP[id];
       const amount = relic ? ' ' + v + '스택' : (id === 'guard' || id === 'damage_half') ? ' ' + v + '턴' : '';
       const cap = artifacts?.includes(relic) ? stack.ENHANCED : stack.DEFAULT;
-      const info = relic ? '누적 표식 (최대 ' + cap + '스택) · 스택에 비례해 강화되거나 소모하는 스킬·특성과 연계' : STATUS_INFO[id];
+      let info = relic ? '누적 표식 (최대 ' + cap + '스택) · 스택에 비례해 강화되거나 소모하는 스킬·특성과 연계' : STATUS_INFO[id];
+      if (id === 'defProtocolPhy' || id === 'defProtocolMag') {
+        const pct = Math.round((protocolBonus ?? 0.5) * 100);
+        info = (id === 'defProtocolPhy' ? '방어력 +' : '마법방어력 +') + pct + '% (방어 프로토콜)';
+      }
       return '<li><i class="' + (good ? 'good' : 'bad') + '">' + esc((core.BUFF_NAMES[id] || id) + amount) + '</i>' + esc(info || '') + '</li>';
     }).concat(extra || []);
     return items.length ? '<ul class="stl">' + items.join('') + '</ul>' : '<p class="none">없음</p>';
@@ -132,14 +136,15 @@ export function createDetails(core, widgets, openSheet) {
     for (const affix of affixLines(shown)) extra.push('<li><i class="affix">' + esc(affix.name) + '</i>' + esc(affix.text) + '</li>');
     const buffs = { ...shown.buffs };
     if (shown.affixes?.includes('tough')) delete buffs.damage_half;
-    html += '<h4>상태 · 변이</h4>' + statusList(buffs, extra, B.artifacts);
+    const lessonBonus = live?.u?.lessonProtocol?.bonus ?? B.door.tempo?.lesson?.steps?.find(step => Number.isFinite(step?.bonus))?.bonus;
+    html += '<h4>상태 · 변이</h4>' + statusList(buffs, extra, B.artifacts, lessonBonus);
     if (def.source) html += '<h4>특성</h4><p>그림자에게는 원본 동료의 특성이 적용되지 않습니다.</p>';
     const lines = intentLines(B.intent, B.countdown, B.D.allies[B.D.cur]?.hp, core.BUFF_NAMES).filter(Boolean);
     if (def.note) lines.push(def.note);
     if (lines.length) html += '<h4>행동 예고</h4>' + lines.map(t => '<p>' + esc(t) + '</p>').join('');
     if (many) html += '<p class="sm">출현 순서: ' + B.door.enemies.map((d, k) => (k === shown.idx ? '▶ ' : '') + d.name).map(esc).join(' → ') + '</p>';
     const skills = (live && live.u.skills) || [];
-    if (skills.length) html += '<h4>스킬</h4>' + skills.map(sk => { let t = ''; try { t = core.SkillDisplay.body(sk, { entity: live.u, enemy: true }); } catch (e) { t = ''; } return '<div class="skl ' + sk.type + '"><b>' + esc(sk.name) + '</b><small>' + (TYPE[sk.type] || '') + '</small>' + (t ? '<p>' + esc(t) + '</p>' : '') + '</div>'; }).join('');
+    if (skills.length) html += '<h4>스킬</h4>' + skills.map(sk => { let t = ''; try { t = skillText(core.SkillDisplay.body(sk, { entity: live.u, enemy: true })); } catch (e) { t = ''; } return '<div class="skl ' + sk.type + '"><b>' + esc(sk.name) + '</b><small>' + (TYPE[sk.type] || '') + '</small>' + (t ? '<p>' + esc(t) + '</p>' : '') + '</div>'; }).join('');
     openSheet('적 전투 정보', html);
   }
   function fieldSheet(B) {

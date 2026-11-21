@@ -8567,7 +8567,7 @@ const BattleRuntime = {
       __defProp(target, name, { get: all[name], enumerable: true });
   };
 
-  // card_pixel/game/src/engine/rng.js
+  // Studying-card-pixel/card_pixel/game/src/engine/rng.js
   function nextFloat(rng) {
     rng.state = rng.state + 1831565813 >>> 0;
     let t = rng.state;
@@ -8591,16 +8591,16 @@ const BattleRuntime = {
     return shuffled;
   }
 
-  // card_pixel/game/src/content/affixes.js
+  // Studying-card-pixel/card_pixel/game/src/content/affixes.js
   var AFFIXES = {
     tough: { name: "\uB2E8\uB2E8\uD568", desc: "\uCCAB 3\uD134 \uB3D9\uC548 \uBC1B\uB294 \uD53C\uD574 50% \uAC10\uC18C" },
     frenzy: { name: "\uAD11\uD3ED", desc: "HP 50% \uC774\uD558 \uC2DC \uB2E4\uC74C \uD134\uBD80\uD130 \uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 1.5\uBC30" },
     leech: { name: "\uD761\uD608", desc: "\uAC00\uD55C \uD53C\uD574\uC758 50%\uB9CC\uD07C HP \uD68C\uBCF5" },
     thorns: { name: "\uAC00\uC2DC", desc: "\uBB3C\uB9AC \uACF5\uACA9 \uD53C\uACA9 \uC2DC \uD53C\uD574\uC758 25% \uBC18\uC0AC (\uC544\uAD70 \uCD5C\uC18C HP 1 \uC720\uC9C0)" },
-    treasure: { name: "\uBCF4\uBB3C", desc: "\uCC98\uCE58 \uC2DC \uAFC8\uC758 \uACB0\uC815 +2" }
+    treasure: { name: "\uBCF4\uBB3C", desc: "\uCC98\uCE58 \uD6C4 \uC804\uD22C \uC2B9\uB9AC \uC2DC \uAFC8\uC758 \uACB0\uC815 +2" }
   };
 
-  // card_pixel/game/src/content/bosses.js
+  // Studying-card-pixel/card_pixel/game/src/content/bosses.js
   var BOSSES = {
     artificial_demon_god: { stats: { hp: 2900, atk: 120, matk: 155, def: 60, mdef: 60 }, note: "10\uD134 '\uD30C\uAD34\uC758\uD615\uD0DC' \uBC1C\uB3D9 \xB7 \uD53C\uACA9 \uC720\uD615(\uBB3C\uB9AC\xB7\uB9C8\uBC95)\uC758 \uBC29\uC5B4\uB825\uC774 \uB2E4\uC74C \uD134 50% \uC0C1\uC2B9" },
     demon_god: { stats: { hp: 2900, atk: 115, matk: 115, def: 75, mdef: 75 }, note: "7\xB714\uD134 '\uC81C\uB178\uC0AC\uC774\uB4DC' \uBC1C\uB3D9 \xB7 \uC9DD\uC218 \uD134 \uBB3C\uB9AC\uBC29\uC5B4, \uD640\uC218 \uD134 \uB9C8\uBC95\uBC29\uC5B4 +50%" },
@@ -8609,25 +8609,25 @@ const BattleRuntime = {
     iris_curse: { stats: { hp: 2550, atk: 125, matk: 100, def: 80, mdef: 60 }, note: "10\uD134 '\uC544\uD3EC\uCE7C\uB9BD\uC2A4' \uBC1C\uB3D9 \xB7 \uC120\uB450 \uB3D9\uB8CC\uC5D0\uAC8C \uBB3C\uB9AC 5\uBC30 \uD53C\uD574" },
     pharaoh: { stats: { hp: 2900, atk: 110, matk: 110, def: 75, mdef: 75 }, note: "5\uD134\uB9C8\uB2E4 '\uACE0\uB300\uC758\uC800\uC8FC' \uBC1C\uB3D9 \xB7 \uD574\uB2F9 \uD134 \uD53C\uACA9 \uC2DC \uC704\uB825 3\uBC30 \uBC18\uACA9" },
     gray: { stats: { hp: 2600, atk: 115, matk: 115, def: 60, mdef: 60 }, note: "4\uD134\uB9C8\uB2E4 \uBB34\uC791\uC704 \uC704\uB825 2~4\uBC30 '\uC808\uB2E8' \xB7 14\uD134 '\uB514\uBA58\uC158\uC81C\uB85C' \uBC1C\uB3D9" },
-    thor: { stats: { hp: 3e3, atk: 120, matk: 100, def: 85, mdef: 55 }, note: "10\uD134 '\uC36C\uB354\uB7EC\uC26C' \uD6C4 \uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 \uBC18\uC804 \xB7 \uB192\uC740 \uBB3C\uB9AC\uBC29\uC5B4, \uB0AE\uC740 \uB9C8\uBC95\uBC29\uC5B4" },
+    thor: { stats: { hp: 3e3, atk: 120, matk: 100, def: 85, mdef: 55 }, note: "10\uD134 '\uC36C\uB354\uB7EC\uC26C' \uD6C4 \uACF5\xB7\uB9C8\uACF5 \uBC0F \uBB3C\uBC29\xB7\uB9C8\uBC29 \uAD50\uD658 \xB7 \uC2DC\uC791 \uC2DC \uB192\uC740 \uBB3C\uB9AC\uBC29\uC5B4, \uB0AE\uC740 \uB9C8\uBC95\uBC29\uC5B4" },
     flora: { stats: { hp: 2800, atk: 100, matk: 120, def: 70, mdef: 70 }, note: "\uC801\uC758 5\uD134\xB710\uD134 '\uC81C\uB124\uC2DC\uC2A4\uBE14\uB8F8'\uC73C\uB85C \uB514\uBC84\uD504 \uD574\uC81C \xB7 \uD50C\uB808\uC774\uC5B4\uC758 6\uD134\xB711\uD134 \uB3D9\uC548 \uBC1B\uB294 \uD53C\uD574 50% \uAC10\uC18C" },
     // Keep Poseidon's magic defense ahead of physical. Higher HP absorbs the bigger hits allowed by lower armor.
-    poseidon: { stats: { hp: 3800, atk: 115, matk: 105, def: 30, mdef: 50 }, note: "10\uD134 '\uC5B4\uBE44\uC2A4\uD504\uB808\uC154' (\uB9C8\uBC95 3\uBC30) \xB7 15\uD134 \uD544\uB4DC \uD6A8\uACFC 1\uC885 \uD574\uC81C" },
+    poseidon: { stats: { hp: 3800, atk: 115, matk: 105, def: 30, mdef: 50 }, note: "5\uD134 \uB514\uBC84\uD504 \uD574\uC81C \xB7 10\uD134 '\uC5B4\uBE44\uC2A4\uD504\uB808\uC154' (\uB9C8\uBC95 3\uBC30) \xB7 15\uD134 \uD544\uB4DC \uD6A8\uACFC 1\uC885 \uD574\uC81C" },
     creator_god: { stats: { hp: 3600, atk: 120, matk: 135, def: 80, mdef: 80 }, note: "2\uD134 '\uC800\uC9C0\uBA3C\uD2B8' (\uB9C8\uBC95 3.5\uBC30) \xB7 \uD655\uB960\uC801 \uCDA9\uC804 \uD6C4 \uB2E4\uC74C \uD134 '\uB514\uBC14\uC778\uBE14\uB808\uC774\uB4DC' (\uBB3C\uB9AC 4\uBC30)" }
   };
 
-  // card_pixel/game/src/content/quirks.js
+  // Studying-card-pixel/card_pixel/game/src/content/quirks.js
   var QUIRKS = {
     glass: { name: "\uC720\uB9AC \uB300\uD3EC", desc: "\uC544\uAD70\xB7\uC801 \uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 +60%, \uBAA8\uB4E0 \uBC29\uC5B4\uB825 0", foe: { atk: 1.6, def: 0 }, ally: { atk: 1.6, def: 0 } },
-    overheat: { name: "\uACFC\uC5F4", desc: "\uC544\uAD70 \uCE58\uBA85\uD0C0\uC728 +20%, \uCE58\uBA85\uD0C0 \uD53C\uD574 3\uBC30 \xB7 \uC801 \uACF5\uACA9\uB825 +25%", foe: { atk: 1.25 }, ally: { crit: 20 }, critMult: 3 },
-    surge: { name: "\uB9C8\uB098 \uD3ED\uC8FC", desc: "\uC544\uAD70 \uC2DC\uC791 MP 200 \xB7 \uC801 HP +35%", foe: { hp: 1.35 }, ally: { mp: 200 } },
+    overheat: { name: "\uACFC\uC5F4", desc: "\uC544\uAD70 \uCE58\uBA85\uD0C0\uC728 +20%, \uCE58\uBA85\uD0C0 \uD53C\uD574 3\uBC30 \xB7 \uC801 \uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 +25%", foe: { atk: 1.25 }, ally: { crit: 20 }, critMult: 3 },
+    surge: { name: "\uB9C8\uB098 \uD3ED\uC8FC", desc: "\uC544\uAD70 \uCD5C\uB300\xB7\uC2DC\uC791 MP 200 \xB7 \uC801 HP +35%", foe: { hp: 1.35 }, ally: { mp: 200 } },
     starfall: { name: "\uBCC4\uC758 \uBE44", desc: "\uB9E4 \uD134 \uC2DC\uC791 \uC2DC \uBB34\uC791\uC704 \uD544\uB4DC \uD6A8\uACFC \uBC1C\uB3D9" },
     overflow: { name: "\uB118\uCE68", desc: "\uC801 1\uBA85 \uCD94\uAC00 \uCD9C\uD604 \xB7 \uCC98\uCE58 \uC2DC \uCD08\uACFC \uD53C\uD574\uAC00 \uB2E4\uC74C \uC801\uC5D0\uAC8C \uC804\uC774" },
     martyr: { name: "\uC21C\uAD50", desc: "\uC544\uAD70\uC774 \uC4F0\uB7EC\uC9C8 \uB54C\uB9C8\uB2E4 \uB0A8\uC740 \uC544\uAD70 \uACF5\uACA9\uB825\xB7\uB9C8\uBC95\uACF5\uACA9\uB825 +40%" },
     echo: { name: "\uBA54\uC544\uB9AC", desc: "\uC544\uAD70\uC758 3\uD2F0\uC5B4 \uACF5\uACA9 \uC2A4\uD0AC\uC774 50% \uC704\uB825\uC73C\uB85C 1\uD68C \uCD94\uAC00 \uBC1C\uB3D9 \xB7 \uC801 HP +20%", foe: { hp: 1.2 } }
   };
 
-  // card_pixel/game/src/content/regions.js
+  // Studying-card-pixel/card_pixel/game/src/content/regions.js
   var REGIONS = {
     ember_carry: { id: "ember_carry", name: "\uC7BF\uBD88 \uACC4\uC2B9", desc: "\uC801 \uCC98\uCE58 \uC2DC \uB2E4\uC74C \uC801\uC5D0\uAC8C \uC791\uC5F4\uC744 \uCD5C\uB300 2\uC2A4\uD0DD \uC804\uC774" },
     twilight_bell: {
@@ -8649,7 +8649,7 @@ const BattleRuntime = {
     arena_charge: { id: "arena_charge", name: "\uD22C\uAE30\uC7A5\uC758 \uAE30\uC138", desc: "\uC77C\uBC18 \uACF5\uACA9 2\uD68C \uC801\uC911 \uC2DC \uB2E4\uC74C \uACF5\uACA9 \uC2A4\uD0AC \uD53C\uD574 2\uBC30 (\uC804\uD22C\uB2F9 1\uD68C)" }
   };
 
-  // card_pixel/game/src/content/tempo.js
+  // Studying-card-pixel/card_pixel/game/src/content/tempo.js
   var TEMPO_VERSION = 2;
   var EASY_ENEMY_ATTACK = 0.65;
   var START_MP = 65;
@@ -8714,7 +8714,7 @@ const BattleRuntime = {
     return !run.daily && run.tempoVersion === TEMPO_VERSION;
   }
 
-  // card_pixel/game/src/engine/bridge.js
+  // Studying-card-pixel/card_pixel/game/src/engine/bridge.js
   var strip = (html) => String(html).replace(/<[^>]*>/g, "");
   var FIELD_POOL = ["sun_bless", "moon_bless", "sanctuary", "goddess_descent", "earth_bless", "twinkle_party", "star_powder", "valentine", "arena", "reaper_realm", "gale"];
   var DEFENSE_BUFFS = ["guard", "barrier", "magic_guard", "damage_half", "evasion"];
@@ -8735,7 +8735,7 @@ const BattleRuntime = {
     const text = {
       leech: "\uAC00\uD55C \uD53C\uD574\uC758 50% \uD68C\uBCF5",
       thorns: "\uBB3C\uB9AC \uD53C\uD574 25% \uBC18\uC0AC, \uC544\uAD70 HP \uCD5C\uC800 1",
-      treasure: "\uCC98\uCE58 \uC2DC \u25C6+2"
+      treasure: "\uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC \u25C6+2"
     };
     return { id, name: AFFIXES[id].name, active: true, text: text[id] };
   }
@@ -10098,7 +10098,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/content/wild.js
+  // Studying-card-pixel/card_pixel/game/src/content/wild.js
   var WILD = {
     golem: { name: "\uC545\uBABD \uACE8\uB818", element: "nature", size: "large", stats: { hp: 900, atk: 110, matk: 60, def: 80, mdef: 40 }, skill: ["\uAC15\uD0C0", "phy", 1.8] },
     emerald_beetle: { name: "\uC5D0\uBA54\uB784\uB4DC \uAC11\uCDA9", element: "nature", size: "small", stats: { hp: 760, atk: 100, matk: 50, def: 95, mdef: 45 }, skill: ["\uAECD\uC9C8 \uB3CC\uC9C4", "phy", 1.8] },
@@ -10112,7 +10112,7 @@ const BattleRuntime = {
   };
   var LARGE = ["golem", "treant", "dark_knight"];
 
-  // card_pixel/game/src/content/intro.js
+  // Studying-card-pixel/card_pixel/game/src/content/intro.js
   var INTRO = {
     party: ["ash", "snow_rabbit", "silver_rabbit"],
     creature: "golem",
@@ -10124,7 +10124,7 @@ const BattleRuntime = {
     boss: { id: "shadow_pair", name: "\uADF8\uB9BC\uC790 \uB458", note: "\uCCAB \uAE68\uC6B0\uAE30\uC5D0\uC11C \uC120\uD0DD\uD558\uC9C0 \uC54A\uC740 \uD6C4\uBCF4\uC640 \uADF8\uB9BC\uC790 1\uBA85" }
   };
 
-  // card_pixel/game/src/content/dungeons.js
+  // Studying-card-pixel/card_pixel/game/src/content/dungeons.js
   var EMBER = { id: "ember_carry" };
   var BELL = { id: "twilight_bell", turns: [3, 6, 9], stacks: 2 };
   var SKY = { id: "starlit_sky" };
@@ -10255,7 +10255,7 @@ const BattleRuntime = {
     }
   };
 
-  // card_pixel/game/src/engine/roster.js
+  // Studying-card-pixel/card_pixel/game/src/engine/roster.js
   var ELEMENT = { fire: "\uBD88", water: "\uBB3C", nature: "\uC790\uC5F0", light: "\uBE5B", dark: "\uC5B4\uB460" };
   var GRADE = { normal: "\uB178\uBA40", rare: "\uB808\uC5B4", epic: "\uC5D0\uD53D", legend: "\uC804\uC124", transcendence: "\uCD08\uC6D4", event: "\uC774\uBCA4\uD2B8" };
   var POSITION = ["\uC120\uBD09", "\uC911\uACAC", "\uB300\uC7A5"];
@@ -10371,7 +10371,7 @@ const BattleRuntime = {
     return { allies, wild, bosses, has, card, facing, pool, poolName, wildOf, shadowOf, bossOf, LARGE: LARGE.filter((id) => wild.includes(id)) };
   }
 
-  // card_pixel/game/src/ui/storage.js
+  // Studying-card-pixel/card_pixel/game/src/ui/storage.js
   var SESSION_KEY = "relaymare.session";
   var DAILY_KEY = "relaymare.daily";
   var DAMAGED_DAILY_KEY = "relaymare.dailyDamaged";
@@ -10431,7 +10431,7 @@ const BattleRuntime = {
     }
   });
 
-  // card_pixel/game/src/content/daily-rift.js
+  // Studying-card-pixel/card_pixel/game/src/content/daily-rift.js
   var RULE_VERSION = 1;
   var REGIONS2 = ["ember_volcano", "twilight_cathedral", "starlit_garden", "midnight_trench", "arena"];
   var EVENTS = ["rumi", "glass_pawprints", "jellyfish_vials"];
@@ -10441,7 +10441,7 @@ const BattleRuntime = {
   var SCALE = { 1: 0.84, 4: 0.88, 6: 0.98, 7: 1.16 };
   var FLOORS = 7;
 
-  // card_pixel/game/src/content/events.js
+  // Studying-card-pixel/card_pixel/game/src/content/events.js
   var ORIGINAL_EVENTS = [
     {
       id: "jellyfish_vials",
@@ -10934,7 +10934,7 @@ const BattleRuntime = {
       choices: [
         {
           id: "hold",
-          text: "\uD50C\uB808\uC774\uADF8\uB97C \uC900\uB2E4 \xB7 \uBB3C\uB7EC\uB098\uBA74 \uB0A8\uC740 \uC608\uC57D \uC18C\uBA78",
+          text: "\uD50C\uB808\uC774\uADF8\uB97C \uC900\uB2E4 \xB7 \uD6C4\uD1F4\uD558\uBA74 \uB0A8\uC740 \uC608\uC57D \uC18C\uBA78",
           cost: 2,
           target: "bench",
           ops: [{ type: "heirloom", from: "venom", name: "\uD50C\uB808\uC774\uADF8" }]
@@ -11000,7 +11000,7 @@ const BattleRuntime = {
         choice("porter").ops.push({ type: "crystals", amount: 1 }, { type: "firstSurvivalPay", id: "mimic", amount: 1 });
         break;
       case "venom_five_knots":
-        choice("hold").text = "\uD50C\uB808\uC774\uADF8 \xB7 \uB2E4\uC74C \uD134\uBD80\uD130 \uB9E4\uD134 1\uD68C\xB7\uCD5C\uB300 5\uD68C\xB7\uBB3C\uB7EC\uB098\uBA74 \uB0A8\uC740 \uC608\uC57D \uC18C\uBA78";
+        choice("hold").text = "\uD50C\uB808\uC774\uADF8 \xB7 \uB2E4\uC74C \uD134\uBD80\uD130 \uB9E4\uD134 1\uD68C\xB7\uCD5C\uB300 5\uD68C\xB7\uD6C4\uD1F4\uD558\uBA74 \uB0A8\uC740 \uC608\uC57D \uC18C\uBA78";
         choice("hold").cost = run.floor === 5 ? 1 : 2;
         break;
       case "rollcall_ends":
@@ -11016,7 +11016,7 @@ const BattleRuntime = {
     return updated;
   }
 
-  // card_pixel/game/src/content/layouts.js
+  // Studying-card-pixel/card_pixel/game/src/content/layouts.js
   var LAYOUTS = {
     expedition: [
       [{ type: "wild", reward: 1 }],
@@ -11052,7 +11052,7 @@ const BattleRuntime = {
     treasure: "\uBCF4\uBB3C\uBC29"
   };
 
-  // card_pixel/game/src/content/relics.js
+  // Studying-card-pixel/card_pixel/game/src/content/relics.js
   var RELICS = {
     reverse: { fits: { element: "nature" } },
     companion: { fits: { deathDamage: true, relic: "big_bang" } },
@@ -11070,7 +11070,7 @@ const BattleRuntime = {
     buff_overload: { fits: { fieldSources: 4 } }
   };
 
-  // card_pixel/game/src/engine/dates.js
+  // Studying-card-pixel/card_pixel/game/src/engine/dates.js
   function localDayKey(now) {
     const year = String(now.getFullYear()).padStart(4, "0");
     const month = String(now.getMonth() + 1).padStart(2, "0");
@@ -11083,7 +11083,7 @@ const BattleRuntime = {
     return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === key ? date : null;
   }
 
-  // card_pixel/game/src/engine/daily-rift.js
+  // Studying-card-pixel/card_pixel/game/src/engine/daily-rift.js
   var MS_PER_DAY = 864e5;
   var BATTLE_FLOORS = [1, 4, 6, 7];
   var LOAN_GRADES = ["normal", "rare", "legend", "rare", "epic"];
@@ -11245,7 +11245,7 @@ const BattleRuntime = {
     return a.outcome === "lose" ? Math.sign(a.floor - b.floor) : 0;
   }
 
-  // card_pixel/game/src/engine/meta.js
+  // Studying-card-pixel/card_pixel/game/src/engine/meta.js
   var meta_exports = {};
   __export(meta_exports, {
     PROFILE_VERSION: () => PROFILE_VERSION,
@@ -11270,7 +11270,7 @@ const BattleRuntime = {
     validPreparation: () => validPreparation
   });
 
-  // card_pixel/game/src/content/contracts.js
+  // Studying-card-pixel/card_pixel/game/src/content/contracts.js
   var CONTRACT_ESCROW = 1;
   var CONTRACT_PAYOUT = 3;
   var LEGACY_CONTRACT_RULE_VERSION = 1;
@@ -11296,7 +11296,7 @@ const BattleRuntime = {
     }
   };
 
-  // card_pixel/game/src/content/missions.js
+  // Studying-card-pixel/card_pixel/game/src/content/missions.js
   var MISSION_UNLOCK_CHAPTER = 4;
   var MISSION_OFFER_LIMIT = 3;
   var MISSIONS = {
@@ -11304,7 +11304,7 @@ const BattleRuntime = {
     monthly: { kind: "monthly", target: 3, grades: ["legend"], salt: 729206161 }
   };
 
-  // card_pixel/game/src/content/notebook.js
+  // Studying-card-pixel/card_pixel/game/src/content/notebook.js
   var NOTEBOOK = [
     { id: 1, title: "\uCCAB \uC0DD\uD658", opens: ["hub", "recruiting", "lead"] },
     { id: 2, title: "\uB300\uD45C\uC640 \uCD9C\uBC1C", opens: ["companion_slot_1"] },
@@ -11324,7 +11324,7 @@ const BattleRuntime = {
     7: { text: "\uCC3D\uC870\uC758 \uD0D1 \uACA9\uD30C", reward: "\uC5D4\uB529 \uC5F4\uB9BC" }
   };
 
-  // card_pixel/game/src/engine/run.js
+  // Studying-card-pixel/card_pixel/game/src/engine/run.js
   var run_exports = {};
   __export(run_exports, {
     COST: () => COST,
@@ -11364,7 +11364,7 @@ const BattleRuntime = {
     takeTreasure: () => takeTreasure
   });
 
-  // card_pixel/game/src/content/boss-lessons.js
+  // Studying-card-pixel/card_pixel/game/src/content/boss-lessons.js
   var LESSON_VERSION = 1;
   var LESSON_TURN = 2;
   var LESSON_USES = 1;
@@ -11444,7 +11444,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/engine/awakenings.js
+  // Studying-card-pixel/card_pixel/game/src/engine/awakenings.js
   var RATES = {
     draw: { normal: 40, rare: 30, epic: 20, legend: 10 },
     pick: { normal: 25, rare: 30, epic: 25, legend: 20 }
@@ -11527,7 +11527,7 @@ const BattleRuntime = {
     return { id, multiplier: Math.round(base * (jackpot ? JACKPOT.mult : 1) * 100) / 100, jackpot };
   }
 
-  // card_pixel/game/src/engine/rooms.js
+  // Studying-card-pixel/card_pixel/game/src/engine/rooms.js
   var RELIC_LIMIT = 4;
   var SALE_PRICE = { normal: 1, rare: 2, epic: 3, legend: 4 };
   var SKY3 = ["sun_bless", "star_powder"];
@@ -11897,7 +11897,7 @@ const BattleRuntime = {
     seeCharacters(run, run.doors.flatMap((door) => door.enemies.map((enemy) => enemy.source).filter(Boolean)));
   }
 
-  // card_pixel/game/src/engine/run-battle.js
+  // Studying-card-pixel/card_pixel/game/src/engine/run-battle.js
   var unique = (ids) => [...new Set(ids)];
   var enemyAttackScale = (run) => run.difficulty === "easy" ? EASY_ENEMY_ATTACK : 1;
   var battleRoom = (run) => run.phase === "room" && run.room?.status === "battle";
@@ -12017,7 +12017,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/engine/run.js
+  // Studying-card-pixel/card_pixel/game/src/engine/run.js
   var FLOORS2 = 8;
   var START = { picks: 2, draws: 3 };
   var dependencies = /* @__PURE__ */ new WeakMap();
@@ -12692,7 +12692,7 @@ const BattleRuntime = {
     return rewards;
   }
 
-  // card_pixel/game/src/engine/meta.js
+  // Studying-card-pixel/card_pixel/game/src/engine/meta.js
   var PROFILE_VERSION = 1;
   var INTRO2 = "dawn_forest";
   var TOWER = "creation_tower";
@@ -13048,7 +13048,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/engine/run-codec.js
+  // Studying-card-pixel/card_pixel/game/src/engine/run-codec.js
   var RUN_VERSION = 1;
   var PHASES = ["start", "map", "room", "reward", "done"];
   var dictionary = (value) => !!value && typeof value === "object" && !Array.isArray(value);
@@ -13115,7 +13115,7 @@ const BattleRuntime = {
     return dictionary(door) && string(door.type) && Array.isArray(door.enemies) && Array.from(door.enemies).every((enemy) => dictionary(enemy) && string(enemy.id) && Array.isArray(enemy.skills) && ["hp", "atk", "matk", "def", "mdef"].every((key) => Number.isFinite(enemy.stats?.[key])));
   }
 
-  // card_pixel/game/src/engine/daily-store.js
+  // Studying-card-pixel/card_pixel/game/src/engine/daily-store.js
   var VERSION = 1;
   var empty = () => ({ version: VERSION, days: {}, active: null });
   var emptyDay = (spec) => ({ spec, starts: 0, official: null, bestPractice: null, last: null });
@@ -13327,7 +13327,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/engine/save.js
+  // Studying-card-pixel/card_pixel/game/src/engine/save.js
   var SESSION_VERSION = 1;
   var BACKUP_VERSION = 1;
   var DEFAULT_SETTINGS = { sound: true, music: true, rim: true, speed: 1, textScale: 1, markers: true };
@@ -13529,7 +13529,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/audio/music.js
+  // Studying-card-pixel/card_pixel/game/src/audio/music.js
   var TRACKS = {
     hub: {
       name: "\uAFC8\uC758 \uAD00\uCE21\uC18C",
@@ -14256,7 +14256,7 @@ const BattleRuntime = {
     return { play, playOutcome, holdReward, stop, setEnabled, setVolume };
   }
 
-  // card_pixel/game/src/stage/stage.js
+  // Studying-card-pixel/card_pixel/game/src/stage/stage.js
   function createStage(ASSETS) {
     const SCALE2 = 2;
     const clock = { t: 0, speed: 1, fast: false, slow: 1, paused: false, waiters: [], tweens: [] };
@@ -15010,7 +15010,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/stage/audio.js
+  // Studying-card-pixel/card_pixel/game/src/stage/audio.js
   function createAudio(clock) {
     let ac = null, soundOn = true;
     function unlockAudio2() {
@@ -15136,7 +15136,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/ui/dom.js
+  // Studying-card-pixel/card_pixel/game/src/ui/dom.js
   var $ = (q, r) => (r || document).querySelector(q);
   var $$ = (q, r) => Array.from((r || document).querySelectorAll(q));
   var esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -15152,7 +15152,7 @@ const BattleRuntime = {
     });
   }
 
-  // card_pixel/game/src/ui/assets.js
+  // Studying-card-pixel/card_pixel/game/src/ui/assets.js
   var assets_exports = {};
   __export(assets_exports, {
     background: () => background,
@@ -15170,7 +15170,7 @@ const BattleRuntime = {
     return window.RELAY_ASSETS?.icons?.[id] || "";
   }
 
-  // card_pixel/game/src/ui/credits.js
+  // Studying-card-pixel/card_pixel/game/src/ui/credits.js
   function openCredits(openSheet, onClose) {
     openSheet("\uD06C\uB808\uB527", `<div class="meta-sheet">
     <section>
@@ -15197,7 +15197,7 @@ const BattleRuntime = {
   </div>`, { onClose });
   }
 
-  // card_pixel/game/src/ui/settings.js
+  // Studying-card-pixel/card_pixel/game/src/ui/settings.js
   var ICON = {
     full: svg("M0 0h5v2H2v3H0zM7 0h5v5h-2V2H7zM0 7h2v3h3v2H0zM10 7h2v5H7v-2h3z"),
     shrink: svg("M3 0h2v5H0V3h3zM7 0h2v3h3v2H7zM0 7h5v5H3V9H0zM7 7h5v2H9v3H7z"),
@@ -15453,7 +15453,7 @@ const BattleRuntime = {
     choose();
   }
 
-  // card_pixel/game/src/ui/sheet.js
+  // Studying-card-pixel/card_pixel/game/src/ui/sheet.js
   function sheetMarkup() {
     return '<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title"><div class="in win"><h3 id="sh-title"></h3><div id="sh-body" class="shbody"></div><button class="btn" id="b-sheetclose">\uB2EB\uAE30</button></div></div>';
   }
@@ -15500,7 +15500,7 @@ const BattleRuntime = {
     return { openSheet, closeSheet, sheet };
   }
 
-  // card_pixel/game/src/ui/widgets.js
+  // Studying-card-pixel/card_pixel/game/src/ui/widgets.js
   var TYPE = { phy: "\uBB3C\uB9AC", mag: "\uB9C8\uBC95", sup: "\uBCF4\uC870", rest: "\uD734\uC2DD" };
   function traitText(traitOrCard) {
     const trait = traitOrCard?.trait ?? traitOrCard;
@@ -15508,7 +15508,10 @@ const BattleRuntime = {
     if (trait?.type === "looter" || /^이 카드로 승리\s*시 추가 드로우$/.test(desc)) {
       return "\uC804\uD22C \uC2B9\uB9AC \uD6C4 \uC0DD\uC874 \uC2DC \uACB0\uC815 +1";
     }
-    return desc.replace(/덱에 (불|물|자연|빛|어둠) (\d+)장 이상 시/g, "\uCD9C\uC804 \uD30C\uD2F0\uC5D0 $1 $2\uBA85 \uC774\uC0C1 \uC2DC").replace(/덱에 /g, "\uCD9C\uC804 \uD30C\uD2F0\uC5D0 ").replace(/덱의 모든 카드의/g, "\uCD9C\uC804 \uB3D9\uB8CC \uC804\uC6D0\uC758").replace(/덱의 지연 스킬이/g, "\uCD9C\uC804 \uD30C\uD2F0\uC758 \uC608\uC57D \uC2A4\uD0AC\uC774").replace(/덱 전체가/g, "\uCD9C\uC804 \uD30C\uD2F0 \uC804\uCCB4\uAC00").replace(/덱이 전부/g, "\uCD9C\uC804 \uD30C\uD2F0\uAC00 \uC804\uBD80").replace(/이 카드는/g, "\uC774 \uB3D9\uB8CC\uB294").replace(/이 카드로/g, "\uC774 \uB3D9\uB8CC\uB85C").replace(/디저트킹덤 카드 전체/g, "\uB514\uC800\uD2B8\uD0B9\uB364 \uB3D9\uB8CC \uC804\uCCB4").replace(/사망시/g, "\uC0AC\uB9DD \uC2DC").replace(/일반공격시/g, "\uC77C\uBC18 \uACF5\uACA9 \uC2DC").replace(/(\d+%)확률로/g, "$1 \uD655\uB960\uB85C");
+    return desc.replace(/자신 덱에 /g, "\uCD9C\uC804 \uD30C\uD2F0\uC5D0 ").replace(/덱에 (불|물|자연|빛|어둠) (\d+)장 이상 시/g, "\uCD9C\uC804 \uD30C\uD2F0\uC5D0 $1 $2\uBA85 \uC774\uC0C1 \uC2DC").replace(/덱의 모든 카드의/g, "\uCD9C\uC804 \uB3D9\uB8CC \uC804\uC6D0\uC758").replace(/덱의 지연 스킬/g, "\uCD9C\uC804 \uD30C\uD2F0\uC758 \uC608\uC57D \uC2A4\uD0AC").replace(/지연 스킬/g, "\uC608\uC57D \uC2A4\uD0AC").replace(/덱 전체/g, "\uCD9C\uC804 \uD30C\uD2F0 \uC804\uCCB4").replace(/덱이/g, "\uCD9C\uC804 \uD30C\uD2F0\uAC00").replace(/덱은/g, "\uCD9C\uC804 \uD30C\uD2F0\uB294").replace(/덱을/g, "\uCD9C\uC804 \uD30C\uD2F0\uB97C").replace(/덱과/g, "\uCD9C\uC804 \uD30C\uD2F0\uC640").replace(/덱/g, "\uCD9C\uC804 \uD30C\uD2F0").replace(/이 카드/g, "\uC774 \uB3D9\uB8CC").replace(/카드/g, "\uB3D9\uB8CC").replace(/필드 버프의 능력치 효과/g, "\uD544\uB4DC \uD6A8\uACFC\uC758 \uB2A5\uB825\uCE58 \uBCF4\uB108\uC2A4").replace(/필드\s*버프\s*수/g, "\uD544\uB4DC \uD6A8\uACFC \uC218").replace(/필드\s*버프/g, "\uD544\uB4DC \uD6A8\uACFC").replace(/일반등급/g, "\uB178\uBA40 \uB4F1\uAE09").replace(/선봉배치시/g, "\uC120\uBD09 \uBC30\uCE58 \uC2DC").replace(/선봉일시/g, "\uC120\uBD09 \uBC30\uCE58 \uC2DC").replace(/(배치|사망|있을|사용|발생)시/g, "$1 \uC2DC").replace(/일반공격시/g, "\uC77C\uBC18 \uACF5\uACA9 \uC2DC").replace(/적용중인/g, "\uC801\uC6A9 \uC911\uC778").replace(/(부식|침묵)상태/g, "$1 \uC0C1\uD0DC").replace(/(불|물|자연|빛|어둠)속성/g, "$1 \uC18D\uC131").replace(/수 만큼/g, "\uC218\uB9CC\uD07C").replace(/(\d+%)(확률로|증가|상승|피해)/g, "$1 $2");
+  }
+  function skillText(body) {
+    return String(body ?? "").replace(/덱에 포함된/g, "\uCD9C\uC804 \uD30C\uD2F0\uC5D0 \uD3EC\uD568\uB41C").replace(/지연 스킬/g, "\uC608\uC57D \uC2A4\uD0AC").replace(/필드\s*버프/g, "\uD544\uB4DC \uD6A8\uACFC");
   }
   var LEGACY_RULES = {
     rescue: "4\uCE35\uC774\uB098 6\uCE35\uC5D0\uC11C \uC4F0\uB7EC\uC9C8 \uC608\uACE0\uB97C \uBC1B\uC740 \uB3D9\uB8CC\uB97C \uD6C4\uD1F4\uC2DC\uD0A4\uACE0, \uADF8 \uB3D9\uB8CC\uC640 \uAD50\uB300\uD55C \uB3D9\uB8CC\uAC00 \uD568\uAED8 \uC0DD\uC874\uD558\uC5EC \uC2B9\uB9AC",
@@ -15648,7 +15651,7 @@ const BattleRuntime = {
     return { card, spr, sprite: sprite2, face: face2, faceBadge, cardRow, benchMinis, cardHead };
   }
 
-  // card_pixel/game/src/ui/relics.js
+  // Studying-card-pixel/card_pixel/game/src/ui/relics.js
   var EFFECTS = {
     reverse: "\uC790\uC5F0 \uC18D\uC131 \uB3D9\uB8CC\uAC00 \uC4F0\uB7EC\uC9C8 \uB54C \uD544\uB4DC \uD6A8\uACFC \u2018\uB300\uC9C0\uC758\uCD95\uBCF5\u2019 \uBC1C\uB3D9",
     companion: "\uC4F0\uB7EC\uC9C8 \uB54C \uBC1C\uB3D9\uD558\uB294 \uD2B9\uC131\uACFC \uC720\uBB3C\uC758 \uD53C\uD574 2\uBC30",
@@ -15699,7 +15702,7 @@ const BattleRuntime = {
     }).join("") + "</span>";
   }
 
-  // card_pixel/game/src/ui/screens/daily-rift.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/daily-rift.js
   var shortRiftDate = (dayKey) => dayKey?.slice(5).replace("-", ".") || "";
   var REGION_HINT = {
     ember_carry: "\uAD50\uB300 \uC2DC \uC801 \uC791\uC5F4 \uCD5C\uB300 2 \uACC4\uC2B9",
@@ -15851,7 +15854,7 @@ const BattleRuntime = {
     if (nextBefore) $("#meta-rift-next", node)?.addEventListener("click", () => next(nextBefore));
   }
 
-  // card_pixel/game/src/ui/battle/hud.js
+  // Studying-card-pixel/card_pixel/game/src/ui/battle/hud.js
   var GOOD = ["guard", "evasion", "barrier", "magic_guard", "damage_half"];
   var FIELD = {
     sun_bless: ["\uD0DC\uC591", "#ffb347"],
@@ -16054,7 +16057,7 @@ const BattleRuntime = {
     return { buildParty, render, ticker, showIntent, tallyWorthy, tally };
   }
 
-  // card_pixel/game/src/ui/battle/fields.js
+  // Studying-card-pixel/card_pixel/game/src/ui/battle/fields.js
   var FIELD_STATS = {
     atk: ["\uACF5\uACA9\uB825", "\uACF5\uACA9"],
     matk: ["\uB9C8\uBC95\uACF5\uACA9\uB825", "\uB9C8\uACF5"],
@@ -16127,7 +16130,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/ui/battle/sheets.js
+  // Studying-card-pixel/card_pixel/game/src/ui/battle/sheets.js
   var STATUS_INFO = {
     weak: "\uACF5\uACA9\uB825 -20%",
     silence: "\uB9C8\uBC95\uACF5\uACA9\uB825 -20%",
@@ -16135,7 +16138,7 @@ const BattleRuntime = {
     temptation: "\uB9C8\uBC95\uBC29\uC5B4\uB825 -20%",
     darkness: "\uBC29\uC5B4\uB825 -20% (\uBD80\uC2DD \uC911\uCCA9 \uC2DC -40%)",
     corrosion: "\uBC29\uC5B4\uB825 -20% (\uC554\uD751 \uC911\uCCA9 \uC2DC -40%)",
-    stun: "\uB2E4\uC74C \uD134 \uD589\uB3D9 \uBD88\uAC00",
+    stun: "\uB2E4\uC74C \uD589\uB3D9 1\uD68C \uBD88\uAC00",
     evasion: "\uD68C\uD53C\uC728 +50%",
     barrier: "\uBB3C\uB9AC \uACF5\uACA9 1\uD68C \uBB34\uD6A8",
     magic_guard: "\uB9C8\uBC95 \uACF5\uACA9 1\uD68C \uBB34\uD6A8",
@@ -16159,7 +16162,7 @@ const BattleRuntime = {
     function skillBlock(s, entity, note) {
       let text = "";
       try {
-        text = core2.SkillDisplay.body(s, { entity });
+        text = skillText(core2.SkillDisplay.body(s, { entity }));
       } catch (e) {
         text = "";
       }
@@ -16169,14 +16172,18 @@ const BattleRuntime = {
       if (!skill) return "";
       return '<h4>\uC720\uD488</h4><div class="heirbox"><p>' + esc(fromName) + "\uC5D0\uAC8C\uC11C \uACC4\uC2B9\uD55C \uC2A4\uD0AC \xB7 \uC704\uB825 " + HEIRLOOM_POWER + "\uBC30 \xB7 MP 0 \xB7 \uC804\uD22C\uB2F9 1\uD68C (\uC4F0\uB7EC\uC9C0\uBA74 \uC18C\uBA78)</p>" + skillBlock(skill, entity) + "</div>";
     }
-    function statusList(buffs, extra, artifacts) {
+    function statusList(buffs, extra, artifacts, protocolBonus) {
       const stack = core2.GAME_CONSTANTS.STACK_CAP;
       const items = Object.keys(buffs || {}).filter((id) => buffs[id]).map((id) => {
         const v = buffs[id], good = GOOD.includes(id) || /^defProtocol/.test(id);
         const relic = stack.ARTIFACT_MAP[id];
         const amount2 = relic ? " " + v + "\uC2A4\uD0DD" : id === "guard" || id === "damage_half" ? " " + v + "\uD134" : "";
         const cap = artifacts?.includes(relic) ? stack.ENHANCED : stack.DEFAULT;
-        const info = relic ? "\uB204\uC801 \uD45C\uC2DD (\uCD5C\uB300 " + cap + "\uC2A4\uD0DD) \xB7 \uC2A4\uD0DD\uC5D0 \uBE44\uB840\uD574 \uAC15\uD654\uB418\uAC70\uB098 \uC18C\uBAA8\uD558\uB294 \uC2A4\uD0AC\xB7\uD2B9\uC131\uACFC \uC5F0\uACC4" : STATUS_INFO[id];
+        let info = relic ? "\uB204\uC801 \uD45C\uC2DD (\uCD5C\uB300 " + cap + "\uC2A4\uD0DD) \xB7 \uC2A4\uD0DD\uC5D0 \uBE44\uB840\uD574 \uAC15\uD654\uB418\uAC70\uB098 \uC18C\uBAA8\uD558\uB294 \uC2A4\uD0AC\xB7\uD2B9\uC131\uACFC \uC5F0\uACC4" : STATUS_INFO[id];
+        if (id === "defProtocolPhy" || id === "defProtocolMag") {
+          const pct = Math.round((protocolBonus ?? 0.5) * 100);
+          info = (id === "defProtocolPhy" ? "\uBC29\uC5B4\uB825 +" : "\uB9C8\uBC95\uBC29\uC5B4\uB825 +") + pct + "% (\uBC29\uC5B4 \uD504\uB85C\uD1A0\uCF5C)";
+        }
         return '<li><i class="' + (good ? "good" : "bad") + '">' + esc((core2.BUFF_NAMES[id] || id) + amount2) + "</i>" + esc(info || "") + "</li>";
       }).concat(extra || []);
       return items.length ? '<ul class="stl">' + items.join("") + "</ul>" : '<p class="none">\uC5C6\uC74C</p>';
@@ -16265,7 +16272,8 @@ const BattleRuntime = {
       for (const affix of affixLines(shown)) extra.push('<li><i class="affix">' + esc(affix.name) + "</i>" + esc(affix.text) + "</li>");
       const buffs = { ...shown.buffs };
       if (shown.affixes?.includes("tough")) delete buffs.damage_half;
-      html += "<h4>\uC0C1\uD0DC \xB7 \uBCC0\uC774</h4>" + statusList(buffs, extra, B.artifacts);
+      const lessonBonus = live?.u?.lessonProtocol?.bonus ?? B.door.tempo?.lesson?.steps?.find((step) => Number.isFinite(step?.bonus))?.bonus;
+      html += "<h4>\uC0C1\uD0DC \xB7 \uBCC0\uC774</h4>" + statusList(buffs, extra, B.artifacts, lessonBonus);
       if (def.source) html += "<h4>\uD2B9\uC131</h4><p>\uADF8\uB9BC\uC790\uC5D0\uAC8C\uB294 \uC6D0\uBCF8 \uB3D9\uB8CC\uC758 \uD2B9\uC131\uC774 \uC801\uC6A9\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.</p>";
       const lines = intentLines(B.intent, B.countdown, B.D.allies[B.D.cur]?.hp, core2.BUFF_NAMES).filter(Boolean);
       if (def.note) lines.push(def.note);
@@ -16275,7 +16283,7 @@ const BattleRuntime = {
       if (skills.length) html += "<h4>\uC2A4\uD0AC</h4>" + skills.map((sk) => {
         let t = "";
         try {
-          t = core2.SkillDisplay.body(sk, { entity: live.u, enemy: true });
+          t = skillText(core2.SkillDisplay.body(sk, { entity: live.u, enemy: true }));
         } catch (e) {
           t = "";
         }
@@ -16320,7 +16328,7 @@ const BattleRuntime = {
     return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
   }
 
-  // card_pixel/game/src/engine/opening.js
+  // Studying-card-pixel/card_pixel/game/src/engine/opening.js
   function openingModel(bridge) {
     const state = bridge.state();
     const retreat = bridge.previewRetreat();
@@ -16335,7 +16343,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/ui/battle/tiles.js
+  // Studying-card-pixel/card_pixel/game/src/ui/battle/tiles.js
   var previewDamage = (p) => p.min != null && p.max != null ? formatRange([p.min, p.max]) : String(p.dmg ?? "");
   var hasFinalConsonant = (name) => /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 44032) % 28 !== 0;
   function commandRelics(artifacts, option, actor, { enemy, turn }) {
@@ -16398,7 +16406,7 @@ const BattleRuntime = {
       }
       return ["", ""];
     }
-    const fullText = (o, me) => o.index === 0 ? "MP\uB97C \uC18C\uBAA8\uD558\uC9C0 \uC54A\uB294 \uAE30\uBCF8 \uACF5\uACA9." : core2.SkillDisplay.body({
+    const fullText = (o, me) => o.index === 0 ? "MP\uB97C \uC18C\uBAA8\uD558\uC9C0 \uC54A\uB294 \uAE30\uBCF8 \uACF5\uACA9." : skillText(core2.SkillDisplay.body({
       name: o.name,
       type: o.type,
       val: o.val,
@@ -16406,10 +16414,10 @@ const BattleRuntime = {
       tier: o.tier,
       effects: o.effects,
       isActualDelayedTrigger: o.preview?.instant
-    }, { entity: me });
+    }, { entity: me }));
     function brief(o, me) {
       if (o.index === 0) return "MP 0";
-      return fullText(o, me).replace(/^위력 [\d.~]+배\.\s*/, "").replace(/\.?\s*발동 전에 시전자가 사망하면 예약 취소\.?/g, "").replace(/사용 후 ([\d·]+)턴에 각각 위력 ([\d.]+)배로 공격 예약/g, (m, turns, x) => turns.split("\xB7").length + "\uD134\uAC04 \uB9E4 \uD134 " + x + "\uBC30 \uACF5\uACA9 \uC608\uC57D").replace(/(\d+)턴 후 위력 ([\d.~]+)배로 공격 예약/g, "$1\uD134 \uD6C4 $2\uBC30 \uACF5\uACA9 \uC608\uC57D").replace(/(각 )?예약 발동 시/g, "\uBC1C\uB3D9 \uC2DC").replace(/(필드에 )?‘([^’]+)’ 중 무작위 (\d+)종/g, (m, f, list, n) => (list.split("\xB7").some((x) => FIELD_NAMES.has(x)) ? "\uBB34\uC791\uC704 \uD544\uB4DC \uBC84\uD504 " : "\uBB34\uC791\uC704 \uB514\uBC84\uD504 ") + n + "\uC885").replace(/적이 (\S+) 상태이면/g, "$1 \uC0C1\uD0DC\uBA74").replace(/(자신에게|적에게|자신의|적의) /g, "").replace(/ \((다음 턴 행동 불가|받는 피해 50% 감소|마법 피해 무효|물리 피해 무효|회피율 \+50%p|최소 1 HP)\)/g, "").replace(/필드 버프 (?=‘)/g, "").replace(/\.$/, "").replace(/\. /g, " \xB7 ").replace(/발동 시 ([^ ·]+) 부여 · 발동 시 ([^ ·]+) 부여/g, "\uBC1C\uB3D9 \uC2DC $1\xB7$2 \uBD80\uC5EC");
+      return fullText(o, me).replace(/^위력 [\d.~]+배\.\s*/, "").replace(/\.?\s*발동 전에 시전자가 사망하면 예약 취소\.?/g, "").replace(/사용 후 ([\d·]+)턴에 각각 위력 ([\d.]+)배로 공격 예약/g, (m, turns, x) => turns.split("\xB7").length + "\uD134\uAC04 \uB9E4 \uD134 " + x + "\uBC30 \uACF5\uACA9 \uC608\uC57D").replace(/(\d+)턴 후 위력 ([\d.~]+)배로 공격 예약/g, "$1\uD134 \uD6C4 $2\uBC30 \uACF5\uACA9 \uC608\uC57D").replace(/(각 )?예약 발동 시/g, "\uBC1C\uB3D9 \uC2DC").replace(/(필드에 )?‘([^’]+)’ 중 무작위 (\d+)종/g, (m, f, list, n) => (list.split("\xB7").some((x) => FIELD_NAMES.has(x)) ? "\uBB34\uC791\uC704 \uD544\uB4DC \uD6A8\uACFC " : "\uBB34\uC791\uC704 \uB514\uBC84\uD504 ") + n + "\uC885").replace(/적이 (\S+) 상태이면/g, "$1 \uC0C1\uD0DC\uBA74").replace(/(자신에게|적에게|자신의|적의) /g, "").replace(/ \((다음 턴 행동 불가|받는 피해 50% 감소|마법 피해 무효|물리 피해 무효|회피율 \+50%p|최소 1 HP)\)/g, "").replace(/필드 효과 (?=‘)/g, "").replace(/\.$/, "").replace(/\. /g, " \xB7 ").replace(/발동 시 ([^ ·]+) 부여 · 발동 시 ([^ ·]+) 부여/g, "\uBC1C\uB3D9 \uC2DC $1\xB7$2 \uBD80\uC5EC");
     }
     const FORM_SKILL = "\uAE30\uC801\uC758\uC6B0\uD654";
     const FORM_PREFIX = FORM_SKILL + " \u2192 ";
@@ -16621,7 +16629,7 @@ const BattleRuntime = {
     return { brief, renderActions, lockPanel };
   }
 
-  // card_pixel/game/src/ui/battle/moves.js
+  // Studying-card-pixel/card_pixel/game/src/ui/battle/moves.js
   function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp, card, spr }) {
     const { S, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
     const label = (text, actor, cls, dy) => St.number(text, St.X(actor), HY(actor) - 4 + (dy || 0), "tag " + (cls || ""));
@@ -16823,7 +16831,7 @@ const BattleRuntime = {
     return { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove };
   }
 
-  // card_pixel/game/src/ui/battle/log.js
+  // Studying-card-pixel/card_pixel/game/src/ui/battle/log.js
   var number = (value) => value.toLocaleString("en-US");
   var attackKey = (side, idx, name) => [side, idx, name].join(":");
   var PREVIEW = {
@@ -16967,7 +16975,7 @@ const BattleRuntime = {
     });
   }
 
-  // card_pixel/game/src/ui/battle/view.js
+  // Studying-card-pixel/card_pixel/game/src/ui/battle/view.js
   function contractSettlement(floor, contract) {
     if (!contract) return [];
     const rows = [];
@@ -18002,7 +18010,7 @@ const BattleRuntime = {
     } };
   }
 
-  // card_pixel/game/src/ui/reveal.js
+  // Studying-card-pixel/card_pixel/game/src/ui/reveal.js
   function revealLine(box, skip, sfx, done) {
     const slots = [...box.querySelectorAll(".wake-slot")];
     let timer;
@@ -18068,7 +18076,7 @@ const BattleRuntime = {
     setTimeout(() => f.remove(), 800);
   }
 
-  // card_pixel/game/src/ui/screens/awaken.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/awaken.js
   function awakenScreen(run, ui) {
     ui.playMusic();
     const { card, cardRow, faceBadge } = ui.widgets;
@@ -18147,7 +18155,7 @@ const BattleRuntime = {
     });
   }
 
-  // card_pixel/game/src/stage/walking-map.js
+  // Studying-card-pixel/card_pixel/game/src/stage/walking-map.js
   var WIDTH = 366;
   var HEIGHT = 350;
   var FRAME_MS = 1e3 / 60;
@@ -18320,7 +18328,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/ui/screens/order.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/order.js
   function formationMoves(party, target, name) {
     const seats = party.slice();
     const moves = [];
@@ -18482,7 +18490,7 @@ const BattleRuntime = {
     });
   }
 
-  // card_pixel/game/src/ui/screens/map.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/map.js
   var AFFIX_RISK = {
     tough: "\uCCAB 3\uD134 \uC801 \uD53C\uD574 50% \uAC10\uC18C",
     frenzy: "\uC801 HP 50% \uC774\uD558 \uC2DC \uACF5\xB7\uB9C8\uACF5 \xD71.5",
@@ -18818,11 +18826,11 @@ const BattleRuntime = {
       const escrow = contractEscrow(run, door);
       const treasure = door.enemies.some((enemy) => enemy.affixes?.includes("treasure"));
       const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : "";
-      openSheet(door.name, lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 1\uBA85 \uCC98\uCE58\uB9C8\uB2E4 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
+      openSheet(door.name, lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC 1\uBA85\uB2F9 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
     }
   }
 
-  // card_pixel/game/src/ui/screens/spring.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/spring.js
   function springScreen(run, ui) {
     ui.playMusic();
     const { widgets: widgets2, audio: audio2, command, leave } = ui;
@@ -18929,7 +18937,7 @@ const BattleRuntime = {
     if (run.pending?.kind === "spring") openOffer();
   }
 
-  // card_pixel/game/src/ui/screens/altar.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/altar.js
   function altarScreen(run, ui, kept = null) {
     ui.playMusic();
     const { card, sprite: sprite2 } = ui.widgets;
@@ -18973,7 +18981,7 @@ const BattleRuntime = {
     });
   }
 
-  // card_pixel/game/src/ui/screens/event.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/event.js
   var NEXT = "\uB2E4\uC74C \uC804\uD22C \uD55C \uBC88";
   var STAYS = "\uC774\uBC88 \uC6D0\uC815 \uB05D\uAE4C\uC9C0";
   var BET = {
@@ -19134,7 +19142,7 @@ const BattleRuntime = {
     });
   }
 
-  // card_pixel/game/src/ui/screens/treasure.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/treasure.js
   function treasureReceipt(relic) {
     return relic ? '<div class="relic-receipt win" role="status">' + relicIcon(relic.id, 32) + "<span>" + esc(relic.name) + ' \xB7 <b class="gain">\uC7A5\uCC29 \uC644\uB8CC</b></span></div>' : "";
   }
@@ -19200,7 +19208,7 @@ const BattleRuntime = {
     return /[가-힣]$/.test(word) && (word.charCodeAt(word.length - 1) - 44032) % 28 !== 0;
   }
 
-  // card_pixel/game/src/ui/screens/gate-pick.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/gate-pick.js
   function gatePickScreen(run, ui, { node = $("#pick"), inline = false, onRelic } = {}) {
     if (!inline) ui.playMusic();
     const { card, cardRow } = ui.widgets;
@@ -19242,7 +19250,7 @@ const BattleRuntime = {
     $("#b-leave", node).addEventListener("click", ui.leave);
   }
 
-  // card_pixel/game/src/ui/screens/reinforce.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/reinforce.js
   function reinforceScreen(run, ui, { node = $("#reinforce"), inline = false } = {}) {
     if (!inline) ui.playMusic();
     const pending = run.pending;
@@ -19293,7 +19301,7 @@ const BattleRuntime = {
     render();
   }
 
-  // card_pixel/game/src/ui/run/index.js
+  // Studying-card-pixel/card_pixel/game/src/ui/run/index.js
   var screens = ["awaken", "map", "order", "spring", "altar", "event", "treasure", "pick", "reinforce"];
   var runtime;
   function mount(frame, shared) {
@@ -19516,7 +19524,7 @@ const BattleRuntime = {
     return battle.review;
   }
 
-  // card_pixel/game/src/ui/screens/notebook.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/notebook.js
   var GOALS = {
     1: "\uC0C8\uBCBD\uC758 \uC232\uC5D0\uC11C \uC0DD\uD658",
     2: "\uB300\uD45C \uB3D9\uB8CC\uC640 \uD568\uAED8 \uBCF8\uD3B8 \uC6D0\uC815 \uCD9C\uBC1C",
@@ -19598,7 +19606,7 @@ const BattleRuntime = {
     openChapter(chapters.some((chapter) => chapter.id === Number(node.dataset.chapter)) ? Number(node.dataset.chapter) : current.id);
   }
 
-  // card_pixel/game/src/ui/screens/hub.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/hub.js
   function hubLineup(lead, recent) {
     const ids = Array.isArray(recent) ? recent : [];
     return [...new Set([lead, ...ids].filter((id) => typeof id === "string" && id))].slice(0, 3);
@@ -19670,7 +19678,7 @@ const BattleRuntime = {
     $$("[data-companion]", node).forEach((button) => button.addEventListener("click", () => inspect(button.dataset.companion)));
   }
 
-  // card_pixel/game/src/ui/screens/title.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/title.js
   function titleScreen({ profile, widgets: widgets2, start, notice }) {
     const node = $("#title");
     const lineup = profile ? hubLineup(profile.lead, profile.ui?.returners || []) : INTRO.party;
@@ -19688,7 +19696,7 @@ const BattleRuntime = {
     $("#b-start", node).addEventListener("click", start, { once: true });
   }
 
-  // card_pixel/game/src/ui/screens/collection.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/collection.js
   function companionGrid(grid, { ids, profile, widgets: widgets2, select, pool }) {
     const seen = /* @__PURE__ */ new Set([...profile.seenCharacters ?? [], ...Object.keys(profile.recruits)]);
     grid.innerHTML = ids.map((id) => {
@@ -19747,7 +19755,7 @@ const BattleRuntime = {
     const entries = profile.ui?.recent?.[id];
     const recent = Array.isArray(entries) ? entries.filter(Boolean) : [];
     const skills = character.skills.map((skill) => {
-      const body = core2.SkillDisplay.body(skill, { entity: character });
+      const body = skillText(core2.SkillDisplay.body(skill, { entity: character }));
       return `<div class="meta-skill">
       <b>${esc(skill.name)}</b> <small>${TYPE[skill.type] || ""} \xB7 MP ${skill.cost || 0}</small>
       <p>${esc(body || "")}</p>
@@ -19812,7 +19820,7 @@ const BattleRuntime = {
     render();
   }
 
-  // card_pixel/game/src/ui/screens/records.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/records.js
   var DIFFICULTY_NAME = { easy: "\uAFC8\uACB0", normal: "\uC5EC\uC815", nightmare: "\uC545\uBABD" };
   var amount = (value) => value.toLocaleString("ko-KR");
   var hitText = (hit, card) => hit ? `${amount(hit.amount)} \xB7 ${card(hit.by)?.name || hit.by} \xB7 ${hit.skill}` : "\uAE30\uB85D \uC5C6\uC74C";
@@ -19882,7 +19890,7 @@ const BattleRuntime = {
     $("#meta-replay-ending", node)?.addEventListener("click", replayEnding);
   }
 
-  // card_pixel/game/src/ui/screens/dungeons.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/dungeons.js
   var { availableDungeons: availableDungeons2, setExpeditionParty: setExpeditionParty2, setSeals: setSeals2, startView: startView2 } = meta_exports;
   function departureDifficulty(profile, dungeonId2) {
     const choice = profile.ui?.difficulty?.[dungeonId2];
@@ -20096,7 +20104,7 @@ const BattleRuntime = {
     render("", void 0, { top: 0 });
   }
 
-  // card_pixel/game/src/ui/screens/recruit.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/recruit.js
   function recruitScreen(node, { run, rewards, profile, widgets: widgets2, sheets: sheets2, choices, preview, endingPending, changeChoices, confirm }) {
     const won = rewards.result === "win";
     const dungeon = DUNGEONS[run.dungeonId];
@@ -20194,7 +20202,7 @@ const BattleRuntime = {
     $("#meta-mission-next")?.addEventListener("click", next);
   }
 
-  // card_pixel/game/src/ui/screens/ending.js
+  // Studying-card-pixel/card_pixel/game/src/ui/screens/ending.js
   function endingScreen(node, { profile, widgets: widgets2, goal, finish }) {
     const { records, recruits } = profile;
     const companions = Object.keys(recruits).sort((a, b) => recruits[a].since - recruits[b].since);
@@ -20221,7 +20229,7 @@ const BattleRuntime = {
     $("#meta-ending-finish", node).addEventListener("click", finish, { once: true });
   }
 
-  // card_pixel/game/src/ui/nav/daily.js
+  // Studying-card-pixel/card_pixel/game/src/ui/nav/daily.js
   function createDailyNavigation({
     currentProfile,
     dailyStore: dailyStore2,
@@ -20396,7 +20404,7 @@ const BattleRuntime = {
     };
   }
 
-  // card_pixel/game/src/ui/nav.js
+  // Studying-card-pixel/card_pixel/game/src/ui/nav.js
   var { availableDungeons: availableDungeons3, applyRunEnd: applyRunEnd2, createProfile: createProfile2, setExpeditionParty: setExpeditionParty3, startView: startView3 } = meta_exports;
   var PAGES = {
     hub: "\uAFC8\uC758 \uAD00\uCE21\uC18C",
@@ -20852,7 +20860,7 @@ const BattleRuntime = {
     } };
   }
 
-  // card_pixel/game/src/main.js
+  // Studying-card-pixel/card_pixel/game/src/main.js
   var { RelayCore: core, RELAY_ASSETS: assets } = window;
   window.__relayCoreTimer = scheduleTimer;
   var roster = create2(core, assets);

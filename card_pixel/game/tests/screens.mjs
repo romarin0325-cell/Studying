@@ -303,7 +303,7 @@ function doorHp() {
       await revisit(treasureSession, async treasurePage => {
         const treasureSheet = await openDoorInfo(treasurePage, 1);
         await text(treasureSheet.getByText('확정 결정 +2', { exact: true }), '확정 결정 +2');
-        const bonus = '추가 보상 · 보물 적 1명 처치마다 결정 +2';
+        const bonus = '추가 보상 · 보물 적 처치 후 승리 시 1명당 결정 +2';
         await text(treasureSheet.getByText(bonus, { exact: true }), bonus);
         await capture('treasure', treasurePage);
       });
