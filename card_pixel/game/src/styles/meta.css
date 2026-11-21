@@ -144,13 +144,15 @@
 #ending .meta-next-goal { margin: 8px 0; color: var(--navy2); font-weight: 700; word-break: keep-all; overflow-wrap: anywhere; }
 
 /* menu bubbles on the right of the room */
-.meta-hub-links { position: absolute; z-index: 3; right: 10px; top: calc(70px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 14px; }
+.meta-hub-links { position: absolute; z-index: 3; right: 10px; top: calc(70px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 20px; }
 .orb { position: relative; display: grid; place-items: center; width: 62px; height: 62px; padding: 0; --pf-f: rgba(238, 233, 255, .92); --pf-o: #fff; --pf-hi: #fff; --pf-lo: rgba(120, 104, 220, .16);
   --pf-ledge: calc(2 * var(--u)); --pf-sh: rgba(20, 14, 60, .38); }
-.orb-art { width: 40px; height: 40px; display: grid; place-items: center; margin-top: -6px; overflow: hidden; clip-path: var(--notch); }
+.orb-art { width: 40px; height: 40px; display: grid; place-items: center; margin-top: -8px; overflow: hidden; clip-path: var(--notch); }
 .orb-art img.px { display: block; }
 .orb-art > img:not([width="32"]) { justify-self: start; align-self: start; }
-.orb b { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); font-weight: normal; font-size: 0.9375rem; white-space: nowrap; }
+/* the label is a navy name tag pinned across the bottom edge, not outlined text over the icon */
+.orb b, .orb b.outlined { position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); padding: 2px 6px 1px; white-space: nowrap;
+  font: normal 0.75rem/1.25 var(--f-label); color: #fff; background: var(--navy); clip-path: var(--notch); text-shadow: none; }
 
 .meta-unlocks { position: absolute; top: calc(70px + env(safe-area-inset-top)); left: 12px; max-width: 60%; z-index: 3; display: grid; gap: 6px; pointer-events: none;
   animation: meta-unlocks-fade 500ms steps(5, end) 4s forwards; }
