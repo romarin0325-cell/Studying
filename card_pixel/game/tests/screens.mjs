@@ -29,8 +29,10 @@ import { createCoreRoster } from './support/core.mjs';
 const sessionKey = 'relaymare.session';
 const dailyKey = 'relaymare.daily';
 const gameUrl = new URL('../dist/Relaymare.html', import.meta.url).href;
-const shots = fileURLToPath(new URL('shots/screens/', import.meta.url));
-const viewport = { width: 390, height: 844 };
+// RELAY_VIEWPORT=430x900 shoots the launcher window size into shots/screens-430x900/ instead.
+const viewportSize = /^(\d+)x(\d+)$/.exec(process.env.RELAY_VIEWPORT ?? '');
+const viewport = viewportSize ? { width: Number(viewportSize[1]), height: Number(viewportSize[2]) } : { width: 390, height: 844 };
+const shots = fileURLToPath(new URL(viewportSize ? `shots/screens-${viewportSize[0]}/` : 'shots/screens/', import.meta.url));
 
 const { core, roster } = createCoreRoster();
 
@@ -1746,6 +1748,22 @@ function difficultyChoice() {
   };
 }
 
+// The destination list itself: open regions as stage cards, the rest locked with their unlock rule.
+function destinations() {
+  const profile = snowRabbitProfile();
+  return {
+    session: storedSession({ profile }), proof: 'After the intro two regions are open as stage cards; the others show how they unlock',
+    async show(page, { text }) {
+      await enterObservatory(page);
+      await page.locator('#hub.on #meta-telescope').click();
+      await text(page.locator('#dungeons.on [data-dungeon="ember_volcano"] .meta-dungeon-copy b'), '홍련 화산', { exact: true });
+      await text(page.locator('#dungeons.on [data-dungeon="twilight_cathedral"] .meta-dungeon-copy b'), '황혼 성당', { exact: true });
+      assert.ok(await page.locator('#dungeons.on .meta-dungeon-locked').count() > 0, 'Later regions stay locked after the intro');
+      await text(page.locator('#dungeons.on .meta-dungeon-locked small').first(), '홍련 화산 또는 황혼 성당 생환');
+    }
+  };
+}
+
 function missionInvitations() {
   let profile = snowRabbitProfile();
   const first = applyReturn(profile, mainReturn(profile, 'ember_volcano', 'easy'));
@@ -2206,6 +2224,7 @@ const cases = {
   'ending-goal': endingGoal,
   'roster-table': preDepartureRoster,
   'difficulty-choice': difficultyChoice,
+  destinations,
   'missions-invitations': missionInvitations,
   'reading-settings': readingSettingsCase,
   credits: creditsCase,

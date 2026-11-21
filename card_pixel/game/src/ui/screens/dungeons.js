@@ -8,6 +8,7 @@ import * as Meta from '../../engine/meta.js';
 import * as Roster from '../../engine/roster.js';
 import { rosterTable } from './collection.js';
 import { DIFFICULTY_NAME } from './records.js';
+import { pixelIcon } from '../pixel-icons.js';
 
 const { availableDungeons, setExpeditionParty, setSeals, startView } = Meta;
 
@@ -45,7 +46,7 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRo
   const rows = Object.values(DUNGEONS).map(dungeon => {
     if (!available.has(dungeon.id)) return `
       <article class="meta-panel meta-dungeon-locked">
-        <img class="px" src="${icon('gate')}" alt="" width="32" height="32">
+        ${pixelIcon('lock')}
         <div><b>${esc(dungeon.name)}</b><small>${UNLOCK[dungeon.unlock.kind]}</small>
           <button class="btn meta-roster-line" data-locked-roster="${dungeon.id}">기본 출현표</button></div>
       </article>

@@ -118,7 +118,8 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/ui/settings.js` | 음악·효과음·윤곽선 설정, 전체화면·기록 초기화 |
 | `src/ui/sheet.js` | 공용 하단 시트와 열려 있는 동안의 전투 시계 정지 |
 | `src/ui/widgets.js` | 헤더·스프라이트·배지·수치표 등 공용 표시 |
-| `src/ui/dom.js` | DOM 조회·전환과 HTML 이스케이프 |
+| `src/ui/dom.js` | DOM 조회·화면 전환(전환 띠 포함)과 HTML 이스케이프 |
+| `src/ui/pixel-icons.js` | 그림 아이콘이 없는 메뉴용 16×16 도트 아이콘(SVG, 줄 지도로 그림) |
 | `src/ui/reveal.js` | 등급별 소환 공개 연출 |
 | `src/ui/relics.js` | 유물 상세 문구와 장착 비교 표시 |
 | `src/stage/` | 캔버스 무대와 합성 효과음 |
@@ -127,7 +128,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/stage/walking-map.js` | 도트 지도 배치와 문까지 걷는 연출 |
 | `src/audio/` | 배경 음악 |
 | `src/audio/music.js` | 12곡 악보와 WebAudio 재생·전환 |
-| `src/styles/` | 공용(`base`)·전투(`battle`)·원정 화면(`screens`)·거점과 메타 화면(`meta`) CSS |
+| `src/styles/` | 공용(`base`: 색·모양·글꼴 토큰, 버튼, 시트, 장식)·전투(`battle`)·원정 화면(`screens`)·타이틀·관측소와 메타 화면(`meta`) CSS. 디자인 근거는 `plan/ui-direction.md` |
 | `src/styles/map.css` | 걷는 지도와 문·편성 패널 스타일 |
 | `assets/` | 포즈 PNG와 `sprites.json`, `backgrounds/`, `icons/` |
 | `tools/` | 카드 원본을 감싸는 `core-bundle.mjs`, 시뮬레이션, 미리듣기, 그림 자르기 |

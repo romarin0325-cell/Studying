@@ -237,7 +237,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
     const gain = reward(door);
     const quirk = door.quirk ? '<i>' + esc(QUIRKS[door.quirk].name) + '</i>' : '';
     const chips = quirk + door.enemies.map(affixChips).join('');
-    return '<div class="door-plate win" data-door-preview="' + door.index + '"><button class="door-entry" data-door="' + door.index + '">' +
+    return '<div class="door-plate win" data-kind="' + door.type + '" data-door-preview="' + door.index + '"><button class="door-entry" data-door="' + door.index + '">' +
       doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + '</b>' +
       (info ? '<small>' + esc(info) + '</small>' : '') +
       (chips ? '<span class="chips door-chips">' + chips + '</span>' : '') +

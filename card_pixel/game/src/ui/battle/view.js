@@ -700,7 +700,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         rows.unshift('<div class="opening-result win">' + faceBadge(lead) + '<small>첫 동행</small></div>');
       } else label = '살아남은 동료 깨우기';
     }
-    box.innerHTML = '<header class="result-heading"><h3>' + (res.win ? '돌파' : '전멸') + '</h3>' +
+    box.innerHTML = '<header class="result-heading ' + (res.win ? 'won' : 'lost') + '"><h3>' + (res.win ? '돌파' : '전멸') + '</h3>' +
       '<button class="btn log-button" id="b-result-log">기록</button></header>' + rows.join('') +
       '<div class="result-decision"></div><button class="btn go" id="b-next">' + esc(label) + '</button>';
     $('#result').classList.add('on');

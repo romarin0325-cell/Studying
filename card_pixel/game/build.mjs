@@ -36,13 +36,17 @@ const { outputFiles: [bundle] } = await build({
 });
 const css = ['base', 'battle', 'screens', 'meta', 'map'].map(name => read(`src/styles/${name}.css`)).join('\n');
 
-// Galmuri is embedded so the page looks the same offline (assets/fonts/README.md).
-function fontFace(name) {
+// Fonts are embedded so the page looks the same offline (assets/fonts/README.md).
+// Jua: titles and buttons. Noto Sans KR (variable 400-900): body text. Galmuri: pixel numbers.
+function fontFace(name, weight = 'normal') {
   const data = fs.readFileSync(path.join(here, 'assets/fonts', name + '.woff2')).toString('base64');
-  return `@font-face { font-family: '${name}'; font-weight: normal; font-display: block; ` +
+  return `@font-face { font-family: '${name}'; font-weight: ${weight}; font-display: block; ` +
     `src: url(data:font/woff2;base64,${data}) format('woff2'); }`;
 }
-const fontFaces = ['Galmuri9', 'Galmuri11', 'Galmuri14'].map(fontFace).join('\n');
+const fontFaces = [
+  fontFace('Jua'), fontFace('NotoSansKR', '400 900'),
+  ...['Galmuri9', 'Galmuri11', 'Galmuri14'].map(name => fontFace(name))
+].join('\n');
 
 const html = `<!doctype html>
 <html lang="ko" translate="no"><head><meta charset="utf-8">
