@@ -14,12 +14,12 @@
       "name": "꿈의 관측소",
       "dungeon": null,
       "peakDbfs": -25.628665431860394,
-      "rmsDbfs": -37.061273513072976,
+      "rmsDbfs": -37.06125083717459,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.08,
       "levelSeconds": 8,
       "silenceScanSeconds": 37.894729166666664,
-      "rmsVsHitDb": -11.007948116483703
+      "rmsVsHitDb": -10.769310107583319
     },
     {
       "kind": "music",
@@ -27,38 +27,38 @@
       "name": "새벽의 숲",
       "dungeon": null,
       "peakDbfs": -26.701052586911036,
-      "rmsDbfs": -37.10153154662591,
+      "rmsDbfs": -37.10152025407225,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.08,
       "levelSeconds": 8,
       "silenceScanSeconds": 20.425541666666668,
-      "rmsVsHitDb": -11.048206150036634
+      "rmsVsHitDb": -10.809579524480977
     },
     {
       "kind": "music",
       "id": "ember_volcano",
       "name": "홍련 화산",
       "dungeon": null,
-      "peakDbfs": -26.844427987090413,
-      "rmsDbfs": -39.71214875481663,
+      "peakDbfs": -26.844426564021973,
+      "rmsDbfs": -39.71195157326002,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.04,
       "levelSeconds": 8,
       "silenceScanSeconds": 16.2711875,
-      "rmsVsHitDb": -13.658823358227359
+      "rmsVsHitDb": -13.420010843668752
     },
     {
       "kind": "music",
       "id": "twilight_cathedral",
       "name": "황혼 성당",
       "dungeon": null,
-      "peakDbfs": -23.865105600552376,
-      "rmsDbfs": -34.66013814588911,
+      "peakDbfs": -23.86510459069585,
+      "rmsDbfs": -34.660133499523546,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.06,
       "levelSeconds": 8,
       "silenceScanSeconds": 26.666666666666668,
-      "rmsVsHitDb": -8.606812749299834
+      "rmsVsHitDb": -8.368192769932275
     },
     {
       "kind": "music",
@@ -66,25 +66,25 @@
       "name": "별빛 정원",
       "dungeon": null,
       "peakDbfs": -26.3112843164933,
-      "rmsDbfs": -39.64421593162365,
+      "rmsDbfs": -39.64418259122856,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.08,
       "levelSeconds": 8,
       "silenceScanSeconds": 13.584895833333333,
-      "rmsVsHitDb": -13.590890535034376
+      "rmsVsHitDb": -13.352241861637285
     },
     {
       "kind": "music",
       "id": "midnight_trench",
       "name": "심야의 해구",
       "dungeon": null,
-      "peakDbfs": -24.037224140007574,
-      "rmsDbfs": -35.21280102132218,
+      "peakDbfs": -24.037223109940264,
+      "rmsDbfs": -35.21279422176668,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.04,
       "levelSeconds": 8,
       "silenceScanSeconds": 32,
-      "rmsVsHitDb": -9.159475624732906
+      "rmsVsHitDb": -8.920853492175407
     },
     {
       "kind": "music",
@@ -92,12 +92,12 @@
       "name": "투기장",
       "dungeon": null,
       "peakDbfs": -26.199873202575866,
-      "rmsDbfs": -38.52427119649637,
+      "rmsDbfs": -38.52454745038326,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.06,
       "levelSeconds": 8,
       "silenceScanSeconds": 17.142854166666666,
-      "rmsVsHitDb": -12.4709457999071
+      "rmsVsHitDb": -12.232606720791988
     },
     {
       "kind": "music",
@@ -105,12 +105,12 @@
       "name": "창조의 탑",
       "dungeon": null,
       "peakDbfs": -25.162515285737715,
-      "rmsDbfs": -37.6664264425081,
+      "rmsDbfs": -37.66645980187076,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.08,
       "levelSeconds": 8,
       "silenceScanSeconds": 33.488375,
-      "rmsVsHitDb": -11.613101045918825
+      "rmsVsHitDb": -11.374519072279487
     },
     {
       "kind": "music",
@@ -118,12 +118,12 @@
       "name": "전투",
       "dungeon": "dawn_forest",
       "peakDbfs": -26.723315759999956,
-      "rmsDbfs": -38.85934233495486,
+      "rmsDbfs": -38.85914209107576,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.08,
       "levelSeconds": 8,
       "silenceScanSeconds": 15.9574375,
-      "rmsVsHitDb": -12.806016938365588
+      "rmsVsHitDb": -12.56720136148449
     },
     {
       "kind": "music",
@@ -131,25 +131,25 @@
       "name": "보스",
       "dungeon": "dawn_forest",
       "peakDbfs": -26.690969590673053,
-      "rmsDbfs": -38.02252021431401,
+      "rmsDbfs": -38.02254817528387,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.06,
       "levelSeconds": 8,
       "silenceScanSeconds": 13.801041666666666,
-      "rmsVsHitDb": -11.969194817724734
+      "rmsVsHitDb": -11.730607445692602
     },
     {
       "kind": "music",
       "id": "victory",
       "name": "승리",
       "dungeon": null,
-      "peakDbfs": -25.05327070210941,
-      "rmsDbfs": -37.620427826707754,
+      "peakDbfs": -25.053269544217738,
+      "rmsDbfs": -37.62029260374045,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.08227083333333333,
       "levelSeconds": 2.6422708333333333,
       "silenceScanSeconds": 2.6422708333333333,
-      "rmsVsHitDb": -11.567102430118481
+      "rmsVsHitDb": -11.328351874149181
     },
     {
       "kind": "music",
@@ -157,12 +157,12 @@
       "name": "패배",
       "dungeon": null,
       "peakDbfs": -24.584281535064743,
-      "rmsDbfs": -35.211583505260265,
+      "rmsDbfs": -35.21158468332333,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0.06,
       "levelSeconds": 5.057854166666667,
       "silenceScanSeconds": 5.057854166666667,
-      "rmsVsHitDb": -9.158258108670992
+      "rmsVsHitDb": -8.91964395373206
     },
     {
       "kind": "effect",
@@ -173,13 +173,13 @@
       "longestNearSilenceSeconds": 0,
       "levelSeconds": 0.05,
       "silenceScanSeconds": 0.05,
-      "rmsVsHitDb": -10.66840228138561
+      "rmsVsHitDb": -10.429786948383612
     },
     {
       "kind": "effect",
       "id": "hit",
-      "peakDbfs": -13.853032651838129,
-      "rmsDbfs": -26.053325396589273,
+      "peakDbfs": -13.933984828737227,
+      "rmsDbfs": -26.29194072959127,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0,
       "levelSeconds": 0.11,
@@ -189,13 +189,13 @@
     {
       "kind": "effect",
       "id": "heavy_hit",
-      "peakDbfs": -11.823883557176556,
-      "rmsDbfs": -23.84253335777089,
+      "peakDbfs": -11.888444541268754,
+      "rmsDbfs": -23.76868449141392,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0,
       "levelSeconds": 0.28,
       "silenceScanSeconds": 0.28,
-      "rmsVsHitDb": 2.210792038818383
+      "rmsVsHitDb": 2.52325623817735
     },
     {
       "kind": "effect",
@@ -206,7 +206,7 @@
       "longestNearSilenceSeconds": 0,
       "levelSeconds": 0.2,
       "silenceScanSeconds": 0.2,
-      "rmsVsHitDb": -6.74399799898918
+      "rmsVsHitDb": -6.505382665987181
     },
     {
       "kind": "effect",
@@ -217,18 +217,18 @@
       "longestNearSilenceSeconds": 0.06,
       "levelSeconds": 0.85,
       "silenceScanSeconds": 0.85,
-      "rmsVsHitDb": -10.350027204235424
+      "rmsVsHitDb": -10.111411871233425
     },
     {
       "kind": "effect",
       "id": "boom",
-      "peakDbfs": -10.017146706485388,
-      "rmsDbfs": -22.21087103803153,
+      "peakDbfs": -9.947710947321298,
+      "rmsDbfs": -22.175767753929257,
       "shareAboveMinus1Dbfs": 0,
       "longestNearSilenceSeconds": 0,
       "levelSeconds": 0.45,
       "silenceScanSeconds": 0.45,
-      "rmsVsHitDb": 3.8424543585577418
+      "rmsVsHitDb": 4.116172975662014
     }
   ]
 }
