@@ -23,7 +23,25 @@ node card_pixel/game/tests/play.mjs --no-build --intro-only --tutorial=both
 - Node 테스트 384개(하위 사례 포함)는 진입 파일 8개에서 실행한다. 전투 연결(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·저장(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열의 생성·정산·저장(`daily`), 캐릭터 그림의 포즈·크기·기준점·얼굴 상자(`assets`), 원본 대비 규칙 목록(`rulebook`), 복합 기술의 연출 계획(`effect-plan`)을 확인한다.
 - 자동 플레이는 먼저 빌드한다. Playwright Chromium을 쓰고, 없으면 설치된 Chrome, Edge 순으로 시도한다. `CHROMIUM_PATH`로 실행 파일을 지정할 수 있다. `--seeds=7,21`과 `--runs=2`가 기본값이며 시드마다 입문 1판 뒤 본편 2판을 돈다. `--headed`를 붙이면 창을 띄운다.
 - 자동 플레이는 본편 이어하기, 브라우저 오류·멈춤, 행동 뒤 대기 시간과 전투 프레임을 확인한다. `--intro-only --tutorial=both`는 새 프로필로 루미의 튜토리얼을 한 판은 따라가고(follow) 한 판은 건너뛰어(skip) 입문을 끝까지 돈다. 화면은 `tests/shots/`에 남긴다.
-- `node card_pixel/game/tests/screens.mjs`는 전투·원정·저장·균열·튜토리얼 화면 사례 86개를 Chrome에서 확인하고 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `node card_pixel/game/tests/screens-map.mjs`는 지도 화면 사례 8개를 확인하고 `tests/shots/screens-map/`에 화면을 남긴다. 두 명령 모두 `--case <이름>`으로 하나만 돌거나 `--validate-only`로 화면에 필요한 상태만 확인할 수 있다.
+- `node card_pixel/game/tests/screens.mjs`는 전투·원정·저장·균열·튜토리얼·기능 안내 화면 사례 100개를 Chrome에서 확인하고 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `node card_pixel/game/tests/screens-map.mjs`는 지도 화면 사례 8개를 확인하고 `tests/shots/screens-map/`에 화면을 남긴다. 두 명령 모두 `--case <이름>`으로 하나만 돌거나 `--validate-only`로 화면에 필요한 상태만 확인할 수 있다.
+- `RELAY_VIEWPORT=360x740`은 화면 갤러리의 뷰포트를 360×740으로 바꾸고 `tests/shots/screens-360x740/`에 저장한다.
+- `RELAY_TEXT_SCALE=1.25`는 저장된 글자 설정을 125%로 시작한다. 기본 크기는 `tests/shots/screens-390x844-text125/`, 두 옵션을 함께 쓰면 `tests/shots/screens-360x740-text125/`에 저장한다.
+- 화면 갤러리는 촬영마다 가로 넘침과 뷰포트 밖 버튼을 검사해 결과 표 뒤에 `OVERFLOW`로 표시한다. `--strict-overflow`는 경고가 나온 사례를 실패로 처리한다.
+- `--case tours`는 아래 14개 기능 안내를 확인한다. 각 사례는 대상 강조와 말풍선 위치, 안내 문구, 확인 후 저장, 다시 열었을 때의 미표시를 검사한다.
+  - `tour-heirloom` — 유품 기술 버튼
+  - `tour-last-stand` — 최후의 일인의 기본 공격 버튼
+  - `tour-relic` — 보물방의 첫 유물 장착 버튼
+  - `tour-relic-replace` — 네 칸이 찬 상태의 첫 유물 교체 칸
+  - `tour-spring-draw` — 샘의 ◆1 뽑기 버튼
+  - `tour-spring-pick` — 샘의 ◆3 후보 보기 버튼
+  - `tour-preparation` — 준비 편집의 첫 출현 명단 칸
+  - `tour-difficulty` — 준비 화면의 여정 난이도 버튼
+  - `tour-region` — 준비 화면의 홍련 화산 지역 규칙 버튼
+  - `tour-modified-door` — 광폭 변덕이 붙은 문
+  - `tour-altar` — 제단 굴리기 버튼
+  - `tour-wager` — 점성술사의 별판 내기 선택지
+  - `tour-mission` — 수첩의 주간 임무 안내 버튼
+  - `tour-daily-rift` — 오늘의 균열 첫 도전 버튼
 - Windows 실행 파일 `dist/Relaymare.exe`는 `node card_pixel/game/launcher/build-launcher.mjs`로 만든다. 같은 폴더의 `Relaymare.html`을 Chrome(없으면 Edge)의 앱 창으로 연다. 자세한 내용은 [launcher/README.md](launcher/README.md).
 
 ## 시뮬레이션·음악·그림 도구

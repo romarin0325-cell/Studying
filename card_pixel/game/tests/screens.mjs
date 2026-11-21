@@ -1,4 +1,4 @@
-// node card_pixel/game/tests/screens.mjs [--case <name>] [--validate-only]
+// node card_pixel/game/tests/screens.mjs [--case <name|entry|tours>] [--validate-only] [--strict-overflow]
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -26,15 +26,21 @@ import { blessingText } from '../src/ui/widgets.js';
 import { playRun } from '../tools/sim.mjs';
 import { createRiftCases, riftDate } from './screens/rift.mjs';
 import { createEntryCases } from './screens/entry.mjs';
+import { createTourCases } from './screens/tours.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
 const dailyKey = 'relaymare.daily';
 const gameUrl = new URL('../dist/Relaymare.html', import.meta.url).href;
-// RELAY_VIEWPORT=430x900 shoots the launcher window size into shots/screens-430x900/ instead.
-const viewportSize = /^(\d+)x(\d+)$/.exec(process.env.RELAY_VIEWPORT ?? '');
-const viewport = viewportSize ? { width: Number(viewportSize[1]), height: Number(viewportSize[2]) } : { width: 390, height: 844 };
-const shots = fileURLToPath(new URL(viewportSize ? `shots/screens-${viewportSize[0]}/` : 'shots/screens/', import.meta.url));
+const viewportMode = process.env.RELAY_VIEWPORT;
+const viewportSize = /^([1-9]\d*)x([1-9]\d*)$/.exec(viewportMode ?? '390x844');
+assert.ok(viewportSize, 'RELAY_VIEWPORT must be WxH (for example, 360x740)');
+const viewport = { width: Number(viewportSize[1]), height: Number(viewportSize[2]) };
+const textMode = process.env.RELAY_TEXT_SCALE;
+assert.ok(textMode === undefined || textMode === '1.25', 'RELAY_TEXT_SCALE must be 1.25');
+const textScale = textMode === '1.25' ? 1.25 : undefined;
+const shotSize = viewportMode || textScale ? `-${viewport.width}x${viewport.height}` : '';
+const shots = fileURLToPath(new URL(`shots/screens${shotSize}${textScale ? '-text125' : ''}/`, import.meta.url));
 
 const { core, roster } = createCoreRoster();
 
@@ -2084,7 +2090,7 @@ function saveImport() {
   const main = makeRun({ seed: 7, floor: 4, profileView: Meta.startView(incoming.profile, 'ember_volcano') });
   const file = incoming.page(main);
   const store = backupStore({ [sessionKey]: file.session, [dailyKey]: file.daily });
-  const backup = store.exportBackup();
+  const backup = store.exportBackup({ settings: textScale ? { textScale } : undefined });
   const inspected = store.inspectBackup(backup);
   assert.ok(inspected.ok, inspected.reason);
   assert.equal(inspected.summary.dailyOfficialStarts, 2);
@@ -2378,6 +2384,11 @@ const { riftFixture, reachRiftFloor, riftRow, riftSaveFailure, damagedRiftRecove
   reachFloor, enterObservatory, openBattle, backupStore, mainReturn, applyReturn
 });
 const entryCases = createEntryCases({ roster, storedSession, snowRabbitProfile, nightmareProfile, mainReturn, enterObservatory });
+const tourCases = createTourCases({
+  core, roster, sessionKey, command, makeRun, startBattle, storedSession, snowRabbitProfile,
+  mainReturn, applyReturn, enterObservatory, openBattle, battleIdle, riftDate
+});
+const caseGroups = { entry: entryCases, tours: tourCases };
 
 const cases = {
   'rift-save-failure': riftSaveFailure,
@@ -2451,15 +2462,16 @@ const cases = {
   'spring-count': springCount,
   'retreat-outcomes': retreatOutcomes,
   ...riftCases,
-  ...entryCases
+  ...entryCases,
+  ...tourCases
 };
 
 async function inject(page, session, { daily, now, seed, mute, settings, lastGood } = {}) {
   const url = seed == null ? gameUrl : gameUrl + '?seed=' + seed;
   const entries = [[sessionKey, session], ...(daily ? [[dailyKey, daily]] : [])];
   if (lastGood) entries.push(['relaymare.lastGood', lastGood]);
-  if (mute || settings) entries.push(['relaymare.settings', JSON.stringify({
-    ...(mute ? { sound: false, music: false } : {}), ...settings
+  if (mute || settings || textScale) entries.push(['relaymare.settings', JSON.stringify({
+    ...(mute ? { sound: false, music: false } : {}), ...settings, ...(textScale ? { textScale } : {})
   })]);
   await page.addInitScript(({ url, entries, now }) => {
     if (location.href !== url) return;
@@ -2487,6 +2499,7 @@ async function inject(page, session, { daily, now, seed, mute, settings, lastGoo
   }, { url, entries, now });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.locator('.screen.on').waitFor();
+  if (textScale) assert.equal(await page.locator(':root.large-text').count(), 1, '125% text must be active');
 }
 
 async function battleIdle(page) {
@@ -2527,7 +2540,7 @@ async function openDoorInfo(page, index) {
   return sheet;
 }
 
-async function withPage(browser, session, show, options) {
+async function withPage(browser, session, show, options, onFailure) {
   const context = await browser.newContext({ viewport, deviceScaleFactor: 1, reducedMotion: options?.motion ?? 'reduce' });
   try {
     const page = await context.newPage();
@@ -2553,7 +2566,8 @@ async function withPage(browser, session, show, options) {
       })()]);
     } catch (error) {
       // Keep what the screen looked like when the case failed.
-      await page.screenshot({ path: shots + 'last-failure.png' }).catch(() => {});
+      await page.screenshot({ path: path.join(shots, 'last-failure.png'), animations: 'disabled' })
+        .then(image => onFailure?.(page, image)).catch(() => {});
       throw error;
     }
     if (errors.length) throw errors[0];
@@ -2570,12 +2584,93 @@ async function capturePage(page, { duringBattle = false } = {}) {
     await Promise.all(images.map(img => img.decode().catch(() => {})));
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
+  if (textScale) assert.equal(await page.locator(':root.large-text').count(), 1, '125% text must be active at capture');
   return page.screenshot({ animations: 'disabled' });
 }
 
-async function runCase(browser, name, fixture) {
+async function findOverflow(page) {
+  return page.evaluate(() => {
+    const documentWidth = document.documentElement.clientWidth;
+    const contentWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+    const issues = [];
+    if (contentWidth > documentWidth + 1) issues.push(['html', `document ${contentWidth}px > ${documentWidth}px`]);
+
+    const surface = '.screen.on, #sheet.on, #result.on, .coach:not([hidden]) .coach-say';
+    const button = 'button, [role="button"], input:is([type="button"], [type="submit"], [type="reset"])';
+    const candidates = `${button}, .chip, .chips > *, .badges > *, .meta-stamp, h1, h2, h3, h4, h5, h6, [role="heading"]`;
+    const nodes = new Set([...document.querySelectorAll(surface)].flatMap(root => [...root.querySelectorAll(candidates)]));
+
+    function selector(node, root) {
+      const parts = [root.id ? '#' + CSS.escape(root.id) : '.coach-say'];
+      const ancestors = [];
+      for (let element = node; element !== root; element = element.parentElement) {
+        if (element.id) {
+          ancestors.unshift('#' + CSS.escape(element.id));
+          break;
+        }
+        const siblings = [...element.parentElement.children].filter(child => child.localName === element.localName);
+        const name = element.localName + (element.classList.length ? '.' + CSS.escape(element.classList[0]) : '');
+        ancestors.unshift(name + (siblings.length > 1 ? `:nth-of-type(${siblings.indexOf(element) + 1})` : ''));
+      }
+      return parts.concat(ancestors).join(' ');
+    }
+
+    function measureAxis(node, rect, axis) {
+      const horizontal = axis === 'X';
+      const [start, end, size] = horizontal ? ['left', 'right', 'width'] : ['top', 'bottom', 'height'];
+      const [clientStart, clientSize, scrollPosition, scrollSize] = horizontal
+        ? ['clientLeft', 'clientWidth', 'scrollLeft', 'scrollWidth']
+        : ['clientTop', 'clientHeight', 'scrollTop', 'scrollHeight'];
+      const viewportEnd = horizontal ? innerWidth : innerHeight;
+      let min = Math.max(0, rect[start]);
+      let max = Math.min(viewportEnd, rect[end]);
+      let outside = rect[start] < -1 || rect[end] > viewportEnd + 1;
+      for (let parent = node.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+        const overflow = getComputedStyle(parent)['overflow' + axis];
+        if (overflow === 'visible') continue;
+        const portStart = parent.getBoundingClientRect()[start] + parent[clientStart];
+        const portEnd = portStart + parent[clientSize];
+        min = Math.max(min, portStart);
+        max = Math.min(max, portEnd);
+        // Controls reachable by scrolling a pane within the viewport are expected outside its current view.
+        if (outside && (overflow === 'auto' || overflow === 'scroll') && portStart >= -1 && portEnd <= viewportEnd + 1 &&
+          rect[size] <= parent[clientSize] + 1 &&
+          rect[start] + parent[scrollPosition] >= portStart - 1 &&
+          rect[end] + parent[scrollPosition] <= portStart + parent[scrollSize] + 1) outside = false;
+      }
+      return { visible: max > min, outside };
+    }
+
+    for (const node of nodes) {
+      if (!node.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
+      const rect = node.getBoundingClientRect();
+      if (!rect.width || !rect.height) continue;
+      const x = measureAxis(node, rect, 'X');
+      const y = measureAxis(node, rect, 'Y');
+      const where = selector(node, node.closest(surface));
+      if (x.visible && y.visible && node.textContent.trim() && node.scrollWidth > node.clientWidth + 1 &&
+        getComputedStyle(node).overflowX !== 'hidden') {
+        issues.push([where, `text ${node.scrollWidth}px > ${node.clientWidth}px`]);
+      }
+      if (node.matches(button) && (x.outside || y.outside)) {
+        const bounds = [rect.left, rect.top, rect.right, rect.bottom].map(value => Math.round(value));
+        issues.push([where, `${Math.round(rect.width)}×${Math.round(rect.height)}px at [${bounds.join(', ')}] outside ${innerWidth}×${innerHeight}px`]);
+      }
+    }
+    return issues;
+  });
+}
+
+async function runCase(browser, name, fixture, captures, overflow) {
   const found = new Set();
-  const captures = [];
+  let capturedMain = false;
+  async function recordCapture(captureName, source, image, failed = false) {
+    fs.writeFileSync(path.join(shots, `${captureName}.png`), image);
+    captures.push({ name: captureName, image, failed });
+    for (const [selector, size] of await findOverflow(source)) {
+      overflow.add(`OVERFLOW ${captureName} · ${selector} · ${size}`);
+    }
+  }
   await withPage(browser, fixture.session, async page => {
     await fixture.show(page, {
       async text(locator, expected, { exact = false } = {}) {
@@ -2590,16 +2685,14 @@ async function runCase(browser, name, fixture) {
         found.add(expected);
       },
       async capture(label, source = page, options) {
-        captures.push({ name: label ? `${name}-${label}` : name, image: await capturePage(source, options) });
+        await recordCapture(label ? `${name}-${label}` : name, source, await capturePage(source, options));
+        if (!label) capturedMain = true;
       },
       revisit: (session, show) => withPage(browser, session, show)
     });
-    if (!captures.some(capture => capture.name === name)) {
-      captures.push({ name, image: await capturePage(page) });
-    }
-  }, fixture);
-  for (const capture of captures) fs.writeFileSync(path.join(shots, `${capture.name}.png`), capture.image);
-  return { found: [...found].join(' | '), captures };
+    if (!capturedMain) await recordCapture(name, page, await capturePage(page));
+  }, fixture, (page, image) => recordCapture(`${name}-failure`, page, image, true));
+  return [...found].join(' | ');
 }
 
 async function writeSheet(captures) {
@@ -2614,7 +2707,7 @@ async function writeSheet(captures) {
     const left = gutter + (index % columns) * (width + gutter);
     const top = gutter + Math.floor(index / columns) * (labelHeight + height + gutter);
     const label = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${labelHeight}">
-      <text x="2" y="19" fill="#f1eaf9" font-family="sans-serif" font-size="15">${capture.name}${capture.image ? '' : ' (failed)'}</text>
+      <text x="2" y="19" fill="#f1eaf9" font-family="sans-serif" font-size="15">${capture.name}${capture.failed || !capture.image ? ' (failed)' : ''}</text>
     </svg>`);
     composite.push({ input: label, left, top });
     if (capture.image) {
@@ -2632,24 +2725,30 @@ async function writeSheet(captures) {
 function parseArguments(args) {
   let selected;
   let validateOnly = false;
+  let strictOverflow = false;
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
       case '--case':
         selected = args[++i];
-        assert.ok(selected === 'entry' || Object.hasOwn(cases, selected), `Unknown case: ${selected ?? '(missing name)'}. Use entry or ${Object.keys(cases).join(', ')}`);
+        assert.ok(Object.hasOwn(caseGroups, selected) || Object.hasOwn(cases, selected),
+          `Unknown case: ${selected ?? '(missing name)'}. Use ${Object.keys(caseGroups).join(', ')} or ${Object.keys(cases).join(', ')}`);
         break;
       case '--validate-only':
         validateOnly = true;
+        break;
+      case '--strict-overflow':
+        strictOverflow = true;
         break;
       default:
         assert.fail(`Unknown option: ${args[i]}`);
     }
   }
-  return { names: selected === 'entry' ? Object.keys(entryCases) : selected ? [selected] : Object.keys(cases), validateOnly };
+  const names = Object.hasOwn(caseGroups, selected) ? Object.keys(caseGroups[selected]) : selected ? [selected] : Object.keys(cases);
+  return { names, validateOnly, strictOverflow };
 }
 
 async function main() {
-  const { names, validateOnly } = parseArguments(process.argv.slice(2));
+  const { names, validateOnly, strictOverflow } = parseArguments(process.argv.slice(2));
   let browser, launchError;
   if (!validateOnly) {
     fs.mkdirSync(shots, { recursive: true });
@@ -2661,23 +2760,28 @@ async function main() {
   }
   const results = [];
   const captures = [];
+  const warnings = [];
   try {
     for (const name of names) {
+      const overflow = new Set();
       try {
         const fixture = cases[name]();
         if (validateOnly) {
           results.push({ case: name, result: 'PASS', text: fixture.proof });
         } else {
           if (launchError) throw launchError;
-          const { found, captures: images } = await runCase(browser, name, fixture);
-          results.push({ case: name, result: 'PASS', text: found });
-          captures.push(...images);
+          const found = await runCase(browser, name, fixture, captures, overflow);
+          const failed = strictOverflow && overflow.size > 0;
+          results.push({ case: name, result: failed ? 'FAIL' : 'PASS',
+            text: failed ? `${overflow.size} overflow warning(s)` : found });
         }
       } catch (error) {
-        // Keep the first line and where in this file it failed; long assertion diffs hide the cause.
-        const where = error.stack?.match(/screens\.mjs:\d+/)?.[0] ?? '';
+        // Keep the first line and the closest fixture or gallery frame.
+        const where = error.stack?.match(/(?:screens\.mjs|screens[\\/][a-z]+\.mjs):\d+/)?.[0] ?? '';
         results.push({ case: name, result: 'FAIL', text: error.message.split('\n')[0] + (where ? ' @ ' + where : '') });
-        captures.push({ name });
+        if (captures.at(-1)?.name !== `${name}-failure`) captures.push({ name });
+      } finally {
+        warnings.push(...overflow);
       }
     }
   } finally {
@@ -2688,6 +2792,7 @@ async function main() {
     console.log(`Contact sheet: ${path.join(shots, 'sheet.png')}`);
   }
   console.table(results);
+  for (const warning of warnings) console.warn(warning);
   if (results.some(row => row.result === 'FAIL')) process.exitCode = 1;
 }
 
