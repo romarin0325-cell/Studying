@@ -24,7 +24,7 @@
 - `game/src/engine/roster.js`는 카드와 실제 대기 스프라이트를 기준으로 던전 풀과 적을 구성한다. `meta.js`와 `save.js`는 영입·인연·해금과 프로필·원정 저장을 맡는다.
 
 ```sh
-node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/skill-motions.test.mjs
+node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/skill-motions.test.mjs card_pixel/game/tests/text.test.mjs
 node card_pixel/game/tools/sim.mjs --all
 ```
 

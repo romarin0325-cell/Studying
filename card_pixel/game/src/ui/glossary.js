@@ -2,6 +2,14 @@ export const TERMS = {
   crystal: { short: '결정', firstUse: '결정 ◆ · 이번 원정에서 쓰는 재화', detail: '소환의 샘과 원정 중 거래에 사용합니다.', scope: '원정' },
   join: { short: '합류', firstUse: '이번 원정 합류', detail: '이번 원정에 함께할 동료가 됩니다.', scope: '원정' },
   recruit: { short: '영입', firstUse: '돌아온 동료를 관측소에 맞이', detail: '영입한 동료는 다음 원정에도 함께할 수 있습니다.', scope: '관측소' },
+  returned: { short: '생환' },
+  relayOrder: { short: '싸우는 순서', current: '지금', next: '다음' },
+  awakening: {
+    picked: '직접 고름', random: '무작위 합류',
+    detail: (remaining, draws, hasChoices) => (hasChoices
+      ? remaining === 1 ? '고른 한 명이 합류하고, ' : '고른 동료가 합류하고, 선택을 마치면 '
+      : '') + '무작위로 ' + draws + '명이 더 합류해.'
+  },
   startCompanion: { short: '시작 동료', firstUse: '원정 시작부터 함께할 동료', detail: '시작 동료를 한 명 정할 수 있습니다.', scope: '준비' },
   springInvite: { short: '샘 초대', firstUse: '샘 초대: 이번 원정에서 처음 후보 3칸을 열면, 초대한 동료 중 한 명이 보여요.',
     detail: '영입한 동료를 이 지역 출현 명단에 추가하고 첫 샘 후보로 초대합니다.', scope: '준비' },
@@ -9,7 +17,7 @@ export const TERMS = {
   bond: { short: '인연', firstUse: '영입 후 문지기나 보스에 출전해 살아 돌아온 횟수', detail: '출전하고 돌아온 동료의 인연이 오릅니다.', scope: '기록' },
   boost: { short: '강화', firstUse: '이미 함께 · 강화', detail: '공격·마공 +10%', scope: '원정' },
   memory: { short: '기억', firstUse: '동료의 기억', detail: '쓰러지거나 보낸 동료가 다시 나오면 가장 먼저 합류한 생존 동료에게 공격·마공 +10%를 줍니다.', scope: '원정' },
-  heirloom: { short: '유품', firstUse: '쓰러진 동료가 남긴 기술', detail: '다음 동료가 물려받습니다. 위력 ×1.5 · MP 0 · 전투당 1회', scope: '원정' },
+  heirloom: { short: '유품', firstUse: '쓰러진 동료가 남긴 기술', detail: '다음 동료가 물려받습니다. 위력 ×1.5 · MP 0 · 전투당 1회', use: 'MP 0 · 1회', scope: '원정' },
   relic: { short: '유물', firstUse: '이번 원정에 장착한 물건', detail: '전투에 효과를 주며 최대 4개를 장착합니다.', scope: '원정' },
   retreat: { short: '물러나기', firstUse: '이번 전투에서 살아서 빠짐', detail: '다음 동료가 이번 공격을 받음', scope: '전투' },
   wild: { short: '전투 · 몽마', firstUse: '일반 적', detail: '적을 물리치고 다음 층으로 갑니다.', scope: '층' },

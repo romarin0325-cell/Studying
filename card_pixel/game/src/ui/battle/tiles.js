@@ -1,5 +1,6 @@
 import { $, $$, esc } from '../dom.js';
-import { TYPE, formatRange as damageRange, hasFinalConsonant, skillText, traitText } from '../widgets.js';
+import { TYPE, formatRange as damageRange, skillText, traitText } from '../widgets.js';
+import { josa } from '../text.js';
 import { relicEffect, relicMarks } from '../relics.js';
 import { FIELD } from './hud.js';
 import { skillFields } from './fields.js';
@@ -43,7 +44,7 @@ export function commandRelics(artifacts, option, actor, { enemy, turn }) {
 }
 
 export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, ticker }) {
-  const { card, faceBadge } = widgets;
+  const { card } = widgets;
   const { sfx } = audio;
   const { openSheet, closeSheet, sheet } = sheets;
   const FIELD_NAMES = new Set(Object.keys(FIELD).map(id => core.BUFF_NAMES[id]));
@@ -105,19 +106,30 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
 
   function renderOpening(model) {
     const { stand, rescue } = model;
-    const current = B.D.allies[B.D.cur];
-    const next = B.D.allies.find(ally => ally?.form === rescue.incomingId);
+    const { allies, cur } = B.D;
+    const current = allies[cur];
+    const next = allies.find(ally => ally?.form === rescue.incomingId);
     const actorId = stand.actorId ?? current.form ?? B.party[B.D.cur];
     const heirloom = heirloomSkill(card(actorId));
     const retreatHp = next && rescue.incomingHpAfter != null
       ? next.name + ' HP ' + next.hp + ' → ' + damageRange(rescue.incomingHpAfter) : '다음 동료가 출전';
-    const inheritance = next && heirloom ? '쓰러지면 ' + next.name + (hasFinalConsonant(next.name) ? '이 ' : '가 ') +
-      heirloom.name + (hasFinalConsonant(heirloom.name) ? '을' : '를') + ' 계승' : '쓰러지면 다음 동료에게 유품 계승';
-    $('#opening-face').innerHTML = faceBadge(actorId, current.name) + '<b>HP ' + current.hp + ' / ' + current.maxHp + '</b>';
+    const inheritance = next && heirloom ? '쓰러지면 ' + josa(next.name, '이/가') + ' ' +
+      josa(heirloom.name, '을/를') + ' 계승' : '쓰러지면 다음 동료에게 유품 계승';
+    const relay = allies.filter(ally => ally && !ally.dead && !ally.out).map(ally => {
+      const position = ally === current ? 'current' : ally === next ? 'next' : '';
+      const hit = position === 'current' ? B.intent?.dmg : position === 'next' ? rescue.damageRange : null;
+      const danger = hit?.at(-1) >= ally.hp;
+      const tag = TERMS.relayOrder[position];
+      return '<span class="opening-relay-member' + (position === 'current' ? ' pf sel' : '') + '" data-fighter="' + esc(ally.form) + '">' +
+        '<span class="opening-relay-face">' + widgets.face(ally.form, 28) + '</span><span class="opening-relay-copy">' +
+        '<b>' + esc(ally.name) + '</b><small class="opening-relay-hp' + (danger ? ' danger' : '') + '">HP ' + ally.hp + '</small>' +
+        (tag ? '<small class="opening-relay-tag ' + position + '">' + tag + '</small>' : '') + '</span></span>';
+    }).join('<span class="opening-relay-chevron" aria-hidden="true">›</span>');
+    $('#opening-face').innerHTML = '<b class="opening-relay-label">' + TERMS.relayOrder.short + '</b>' + relay;
     $('#acts').innerHTML = '<button class="act opening-choice rescue" data-opening-rescue data-coach="retreat"><b>' + TERMS.retreat.short +
       '</b><small>' + esc(current.name + ' 생존 · ' + TERMS.retreat.detail) + '</small><small>' + esc(retreatHp) + '</small></button>' +
-      '<button class="act opening-choice stand" data-coach="skill" data-i="' + stand.optionIndex + '"><b>' + esc(current.name) +
-      '로 마지막 공격</b><small>' + esc(inheritance) + '</small><small>' + esc(B.D.enemy.name) + '에 피해 ' +
+      '<button class="act opening-choice stand" data-coach="skill" data-i="' + stand.optionIndex + '"><b>' + esc(josa(current.name, '으로/로')) +
+      ' 마지막 공격</b><small>' + esc(inheritance) + '</small><small>' + esc(B.D.enemy.name) + '에 피해 ' +
       esc(damageRange(stand.damageRange)) + '</small></button>';
   }
 
@@ -173,7 +185,8 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
       h.className = 'on'; h.dataset.i = heir.index; h.disabled = false;
       const forecast = p?.instant ? previewDamage(p) + ' · 즉시' : p?.delayed ? delayedLine(heir, D.turn) : p ? previewDamage(p) : '';
       const kill = killLabel(p, D.enemy.hp);
-      h.innerHTML = '<small>' + TERMS.heirloom.short + ' · ' + esc(heir.heirFromName || '') + '</small><b>' + esc(heir.name) + '</b><strong>' + esc(forecast) + '</strong>' +
+      h.innerHTML = '<small>' + TERMS.heirloom.short + ' · ' + esc(heir.heirFromName || '') +
+        ' · <span class="heirloom-use">' + TERMS.heirloom.use + '</span></small><b>' + esc(heir.name) + '</b><strong>' + esc(forecast) + '</strong>' +
         relicMarks(core, markedRelics(heir)) + (kill ? '<u>' + kill + '</u>' : '');
     } else { h.className = ''; h.innerHTML = ''; h.disabled = true; delete h.dataset.i; }
     const r = $('#b-retreat'), can = B.bridge.canRetreat();

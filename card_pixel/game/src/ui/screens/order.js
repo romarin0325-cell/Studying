@@ -77,15 +77,17 @@ export function orderScreen(run, ui, { draft, onBack, onEnter, awakened = [] } =
   const arrivals = awakened.length ? '<p class="map-receipt gain" role="status" id="order-awakened">함께 깨어남 · ' +
     esc(awakened.map(name).join(' · ')) + '</p>' : '';
 
-  node.innerHTML = head(run, '출전 순서', null, { back: !!draft }) + '<div class="scroll">' + arrivals +
+  node.innerHTML = head(run, '출전 순서', null, { back: !!draft }) + '<div class="screen-split"><div class="fixed-top">' + arrivals +
     '<button class="win run-opponents" id="b-opponents"><span><b>' + esc(title) + ' ' + run.floor + '층 · 적 ' +
     door.enemies.length + '명</b><small>첫 적 ' + esc(first.name) + (firstAction ? ' · 첫 행동 ' + esc(firstAction) : '') +
     '</small></span><span class="opponent-info">정보</span></button><div class="formation"></div></div>' +
-    '<div class="footer formation-actions"><button class="btn" id="b-formation-info" hidden>동료 정보</button>' +
-    '<button class="btn go" id="b-go" data-coach="formation-confirm">이대로 전투 시작</button></div>';
+    '<div class="scroll-list"></div>' +
+    '<div class="footer fixed-foot formation-actions"><button class="btn" id="b-formation-info" hidden>동료 정보</button>' +
+    '<button class="btn go" id="b-go" data-coach="formation-confirm">이대로 전투 시작</button></div></div>';
   show('order');
 
   const formation = $('.formation', node);
+  const reserves = $('.scroll-list', node);
   const info = $('#b-formation-info', node);
   const go = $('#b-go', node);
   const focused = () => selected?.bench ?? party[selected?.slot];
@@ -101,7 +103,7 @@ export function orderScreen(run, ui, { draft, onBack, onEnter, awakened = [] } =
         style: 'margin-bottom:' + (source.fy + 3 - source.h) + 'px'
       }) : '';
       const trait = traitLine(fighter, i);
-      return '<button class="relay-seat win" data-slot="' + i + '" aria-pressed="' + active + '">' +
+      return '<button class="relay-seat win' + (selected && !active ? ' sel' : '') + '" data-slot="' + i + '" aria-pressed="' + active + '">' +
         '<small>' + POSITION[i] + '</small><span class="relay-seat-art">' + art + '</span>' +
         '<b>' + esc(fighter?.name || '빈 자리') + repeatBadge(run, id) + '</b>' +
         (trait ? '<small class="relay-trait" title="' + esc(traitText(fighter.trait)) + '">' + esc(trait) + '</small>' : '') +
@@ -113,14 +115,14 @@ export function orderScreen(run, ui, { draft, onBack, onEnter, awakened = [] } =
         ' 유품 흐름"' + (entry?.skill ? '' : ' disabled') + '>→</button>';
     });
     const bench = run.bench.filter(id => !party.includes(id));
-    formation.innerHTML = '<div class="relay-seats">' + slots.map((slot, i) => slot + (links[i] ?? '')).join('') +
-      '</div><h3>대기 ' + bench.length + '명</h3><div class="reserve-cards">' + bench.map(id =>
+    formation.innerHTML = '<div class="relay-seats">' + slots.map((slot, i) => slot + (links[i] ?? '')).join('') + '</div>';
+    reserves.innerHTML = '<h3>대기 ' + bench.length + '명</h3><div class="reserve-cards">' + bench.map(id =>
         '<button class="win" data-bench="' + esc(id) + '" aria-pressed="' + (selected?.bench === id) + '">' +
         faceBadge(id, name(id), 40, run) + blessingLine(id) + '</button>').join('') + '</div>';
     info.hidden = !focused();
     go.disabled = !party.some(Boolean);
     for (const button of $$('[data-slot]', formation)) button.addEventListener('click', () => select({ slot: Number(button.dataset.slot) }));
-    for (const button of $$('[data-bench]', formation)) button.addEventListener('click', () => select({ bench: button.dataset.bench }));
+    for (const button of $$('[data-bench]', reserves)) button.addEventListener('click', () => select({ bench: button.dataset.bench }));
     for (const button of $$('[data-link]', formation)) button.addEventListener('click', () => {
       const { from, to, skill } = previews[Number(button.dataset.link)];
       const replaced = run.heirlooms?.[to]?.name;

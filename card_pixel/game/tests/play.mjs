@@ -230,8 +230,13 @@ async function playAwaken({ page }, state, expedition) {
   }
   if (await clickIfVisible(page, '#awaken.on #b-depart')) return;
   if (await clickIfVisible(page, '#awaken.on #b-wake:not([disabled])')) return;
-  if (await clickIfVisible(page, '#awaken.on #wake-choices .cardrow')) {
-    await page.locator('#awaken.on #b-wake').click();
+  const choice = page.locator('#awaken.on #wake-choices .cardrow').first();
+  if (await choice.isVisible()) {
+    const name = await choice.evaluate(node => window.__game.roster.card(node.dataset.id).name);
+    await choice.click();
+    const confirm = page.locator('#awaken.on #b-wake');
+    assert.equal(await confirm.innerText(), name + ' 합류');
+    await confirm.click();
   }
 }
 

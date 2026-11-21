@@ -8,7 +8,7 @@ import { openBattleLog } from './battle/log.js';
 import { titleScreen } from './screens/title.js';
 import { hubScreen } from './screens/hub.js';
 import { departureDifficulty, dungeonsScreen, listedPool, preparationSheet } from './screens/dungeons.js';
-import { missionRecruitSheet, recruitScreen } from './screens/recruit.js';
+import { missionRecruitSheet, recruitReceipt, recruitScreen } from './screens/recruit.js';
 import { collectionScreen, companionSheet, rosterTable } from './screens/collection.js';
 import { notebookScreen } from './screens/notebook.js';
 import { recordsScreen } from './screens/records.js';
@@ -136,6 +136,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       departureLabel: collecting ? '동료 도감 보기' : null,
       daily: flags.dailyRift ? daily.hubView() : null, openDaily: daily.showDaily
     });
+    if (arriving.length) $('.meta-hub-actions', node).insertAdjacentHTML('afterbegin', recruitReceipt(arriving, widgets));
     if (profile.ui?.announcement) updateUi({ announcement: null });
     for (const button of node.querySelectorAll('[data-meta-page]')) button.addEventListener('click', () => {
       openMeta(button.dataset.metaPage);

@@ -2,11 +2,12 @@ export async function checkCoachPlacement(page, id, selector) {
   await page.waitForFunction(({ id, selector }) => {
     const layer = document.querySelector('.coach:not([hidden])');
     if (layer?.dataset.coachStep !== id) return false;
-    const hole = layer.querySelector('.coach-ring').getBoundingClientRect();
+    const holes = [...layer.querySelectorAll('.coach-ring')].map(ring => ring.getBoundingClientRect());
     const bubble = layer.querySelector('.coach-say').getBoundingClientRect();
     const inside = rect => rect.width > 0 && rect.height > 0 &&
       rect.top >= 0 && rect.left >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight;
-    if (!inside(bubble) || !inside(hole) || (bubble.bottom > hole.top && hole.bottom > bubble.top)) return false;
+    if (!inside(bubble) || !holes.length || holes.some(hole => !inside(hole) ||
+      (bubble.bottom > hole.top && hole.bottom > bubble.top))) return false;
     for (const button of layer.querySelectorAll('.coach-buttons button:not([hidden])')) {
       const box = button.getBoundingClientRect();
       if (!inside(box) || box.bottom > bubble.bottom || box.top < bubble.top) return false;
@@ -33,10 +34,22 @@ export async function checkCoachPlacement(page, id, selector) {
       }
       if (right - left <= 2 || bottom - top <= 2) continue;
       visible++;
-      if (hole.left > left + 1 || hole.right < right - 1 || hole.top > top + 1 || hole.bottom < bottom - 1) return false;
+      if (!holes.some(hole => hole.left <= left + 1 && hole.right >= right - 1 &&
+        hole.top <= top + 1 && hole.bottom >= bottom - 1)) return false;
       const hit = document.elementFromPoint((left + right) / 2, (top + bottom) / 2);
       if (!target.contains(hit)) return false;
     }
     return visible > 0;
   }, { id, selector });
+}
+
+export async function checkCoachLines(page, count = 2) {
+  await page.waitForFunction(async count => {
+    await document.fonts.ready;
+    const line = document.querySelector('.coach:not([hidden]) .coach-line');
+    if (!line) return false;
+    const height = parseFloat(getComputedStyle(line).lineHeight);
+    return line.clientHeight > 0 && line.scrollHeight <= Math.ceil(height * count) &&
+      line.scrollHeight <= line.clientHeight + 1;
+  }, count);
 }

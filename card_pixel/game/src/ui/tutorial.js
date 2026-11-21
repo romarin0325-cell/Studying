@@ -1,24 +1,35 @@
 import { $, $$ } from './dom.js';
 import { createCoach } from './coach.js';
 import { TERMS } from './glossary.js';
+import { josa } from './text.js';
+import { formatRange } from './widgets.js';
 import * as Meta from '../engine/meta.js';
 import { QUIRKS } from '../content/quirks.js';
 import { AFFIXES } from '../content/affixes.js';
+import { DUNGEONS } from '../content/dungeons.js';
 import { REGIONS } from '../content/regions.js';
 import { eventChoices } from '../engine/rooms.js';
 
 const ENTRY = {
   title: ['#title.on #b-start', '형아, 루미가 하나씩 알려 줄게. 새벽의 숲으로 가 보자!'],
-  opening: ['#battle.on .opening-choice', '골렘이 공격해. 애쉬로 맞설지, 뒤로 물릴지 골라.'],
-  inherit: ['#battle.on #b-heir.on', '눈토끼가 애쉬의 아마겟돈을 받았어. 써 봐.'],
-  rescue: ['#battle.on .act[data-i="0"]', '애쉬는 살아 있어. 이제 앞에 선 동료로 공격해.'],
-  awakening: ['#awaken.on [data-coach="awakening-candidate"]', '이번 원정에 함께할 동료 한 명을 골라.'],
-  'awakening-confirm': ['#awaken.on [data-coach="awakening-confirm"]', '고른 동료와 함께 가자.'],
-  door: ['#map.on .door-entry[data-coach="door"]', '문에 적의 공격이 보여. 가고 싶은 문을 눌러.'],
-  formation: ['#order.on [data-coach="formation-confirm"]', '선봉부터 싸워. 준비됐으면 시작해.'],
-  recruit: ['#recruit.on [data-candidate]', '돌아온 동료 한 명을 다음에도 만날 수 있어.'],
-  'recruit-confirm': ['#recruit.on #meta-recruit-confirm', '이 동료를 관측소에 영입하자.'],
-  departure: ['#hub.on #meta-depart, #hub.on #meta-other-region', '이 동료와 첫 던전으로 떠나자.']
+  opening: ['#battle.on .opening-choice', ({ name, enemy, damage, hp }) =>
+    `앞에서 한 명씩 싸워. 지금은 ${name} 차례야.\n${josa(enemy, '이/가')} ${damage} 피해를 줄 거야. ${name} HP는 ${josa(hp, '이야/야')}.`,
+    ['#battle.on #intent', '#battle.on :is(#opening-face, .opening-choice)']],
+  inherit: ['#battle.on #b-heir.on', ({ name, next, skill }) =>
+    `쓰러진 ${josa(name, '이/가')} ${josa(skill, '을/를')} 남겼어. ${josa(next, '으로/로')} 써 봐.`],
+  rescue: [({ index }) => `#battle.on .act[data-i="${index}"]`, ({ name, next, skill }) =>
+    `${josa(name, '은/는')} 살았어. 대신 맞은 ${josa(next, '으로/로')} ${josa(skill, '을/를')} 써 봐.`],
+  awakening: ['#awaken.on [data-coach="awakening-candidate"]', '이번 원정에 데려갈 한 명을 골라.',
+    ['#awaken.on .fixed-top', '#awaken.on [data-coach="awakening-candidate"]']],
+  'awakening-confirm': ['#awaken.on [data-coach="awakening-confirm"]', ({ name }) => josa(name, '과/와') + ' 함께 가자.'],
+  door: ['#map.on :is(.door-entry[data-coach="door"], [data-coach="door-info"])', '두 문은 만날 적이 달라. 싸울 적을 골라.'],
+  formation: ['#order.on :is([data-slot], [data-coach="formation-confirm"])', '선봉부터 싸워. 바꾸려면 두 자리를 차례로 눌러.',
+    ['#order.on [data-slot]', '#order.on [data-coach="formation-confirm"]']],
+  recruit: ['#recruit.on [data-candidate]', '관측소에 영입할 한 명을 골라. 다음 원정에도 쓸 수 있어.'],
+  'recruit-confirm': ['#recruit.on #meta-recruit-confirm', ({ name }) => josa(name, '을/를') + ' 관측소에 영입하자.'],
+  departure: ['#hub.on #meta-depart, #hub.on #meta-other-region', ({ name, region }) =>
+    `${josa(name, '과/와')} ${josa(region, '으로/로')} 떠나자.`,
+    ['#hub.on :is(#meta-depart, #meta-other-region, .recruit-receipts)']]
 };
 
 const TOURS = {
@@ -75,11 +86,13 @@ export function createTutorial({ currentProfile, updateProfile, widgets, stage, 
       getComputedStyle(node).visibility === 'visible');
   }
 
-  function basicStep(id, inBattle = false, selector) {
-    const [target, line] = ENTRY[id];
-    const targets = find(selector ?? target);
-    if (targets.length) coach.show({ id, line, battle: inBattle, skip: dismissBasic }, targets);
-    return targets.length > 0;
+  function basicStep(id, context, inBattle = false) {
+    const [selector, copy, spotlights] = ENTRY[id];
+    const targets = find(typeof selector === 'function' ? selector(context) : selector);
+    if (!targets.length) return false;
+    const line = typeof copy === 'function' ? copy(context) : copy;
+    coach.show({ id, line, battle: inBattle, skip: dismissBasic }, targets, spotlights?.map(find));
+    return true;
   }
 
   function tour(key, id, { selector, line, inBattle = false, interactive = false, multiple = false } = {}) {
@@ -111,27 +124,42 @@ export function createTutorial({ currentProfile, updateProfile, widgets, stage, 
     if (basic && !sheet) {
       if (screen === 'title' && !done.includes('title') && basicStep('title')) return;
       if (intro && ready && run.room.type === 'borrowed') {
-        if (!done.includes('opening') && basicStep('opening', true)) return;
+        const { D, intent, options, all } = battle.state;
+        const { name, hp } = D.allies[D.cur];
+        if (!done.includes('opening') && intent?.dmg && basicStep('opening', {
+          name, hp, enemy: roster.card(D.enemy.form.replace(/^wild_/, ''))?.name ?? D.enemy.name, damage: formatRange(intent.dmg)
+        }, true)) return;
         if (!done.includes('opening-followup')) {
-          if (done.includes('opening-stand') && battle.state.all.some(event => event.t === 'heirloom')) {
-            if (basicStep('inherit', true)) return;
+          if (done.includes('opening-stand')) {
+            const heirloom = options.find(option => option.heirloom && option.usable);
+            if (heirloom && basicStep('inherit', { name: heirloom.heirFromName, next: name, skill: heirloom.name }, true)) return;
           }
           if (done.includes('opening-rescue')) {
-            const storm = battle.state.options.find(option => option.name === '실버스톰' && option.usable);
-            if (basicStep('rescue', true, storm && `#battle.on .act[data-i="${storm.index}"]`)) return;
+            const retreated = all.find(event => event.t === 'retreat');
+            const damage = option => option.preview.min ?? option.preview.dmg;
+            const skill = options.filter(option => option.usable && option.preview && !option.preview.delayed)
+              .sort((a, b) => damage(b) - damage(a))[0];
+            if (retreated && skill && basicStep('rescue', {
+              name: D.allies[retreated.who.idx].name, next: name, skill: skill.name, index: skill.index
+            }, true)) return;
           }
         }
       }
       if (intro && screen === 'awaken' && run.pending?.kind === 'start' && !done.includes('awakening')) {
-        if (basicStep($('#b-wake')?.disabled ? 'awakening' : 'awakening-confirm')) return;
+        const picked = $('#wake-choices .cardrow.sel')?.dataset.id;
+        if (picked ? basicStep('awakening-confirm', { name: widgets.card(picked).name }) : basicStep('awakening')) return;
       }
       if (intro && screen === 'map' && run.floor === 3 && !done.includes('door') && basicStep('door')) return;
       if (intro && screen === 'order' && run.floor === 3 && !done.includes('formation') && basicStep('formation')) return;
       if (intro && screen === 'recruit' && run.result === 'win' && !done.includes('recruit') && $('[data-candidate]')) {
-        if (basicStep($('[data-candidate][aria-pressed="true"]') ? 'recruit-confirm' : 'recruit')) return;
+        const picked = $('[data-candidate][aria-pressed="true"]')?.dataset.candidate;
+        if (picked ? basicStep('recruit-confirm', { name: widgets.card(picked).name }) : basicStep('recruit')) return;
       }
       if (!run && screen === 'hub' && profile.lead && Meta.featureFlags(profile).introCleared &&
-        (!Meta.featureFlags(profile).firstMainCleared || profile.ui.tutorialReplay) && basicStep('departure')) return;
+        (!Meta.featureFlags(profile).firstMainCleared || profile.ui.tutorialReplay)) {
+        const destination = DUNGEONS[$('#meta-depart [data-region]')?.dataset.region];
+        if (destination && basicStep('departure', { name: widgets.card(profile.lead).name, region: destination.name })) return;
+      }
     }
 
     const key = visitKey(result ? 'battle-result' : screen, run, sheet);

@@ -243,7 +243,7 @@ export function mapScreen(run, ui, { receipt } = {}) {
       (rules ? '<small class="door-risk' + (risksHere.length ? ' danger' : '') + '">' + esc(rules) + '</small>' : '') +
       lessonLine(door) +
       (gain ? '<small class="door-reward">' + esc(gain) + '</small>' : '') +
-      '</span>' + (door.relic && !door.final ? icon(door.relic) : '') + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' +
+      '</span>' + (door.relic && !door.final ? icon(door.relic) : '') + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' +
       esc(title) + ' 정보">정보</button></div>';
   }).join('');
 

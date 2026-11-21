@@ -275,3 +275,29 @@
   :root:not(.large-text) .act .r2 strong:not(.range, .txt, .delayed-forecast, .field-effect) { font: normal 1.5rem/24px var(--f-label); }
   .pm { min-height: 50px; } .pm .face { height: 42px; } #row2 { min-height: 42px; } #msg { height: 26px; }
 }
+
+/* Borrowed battle: the relay order sits directly above both opening choices (layout: Claude).
+   Each member is a face, its name on the first line, HP and the 지금/다음 tag side by side on the second. */
+.opening-decision #opening-face {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) 6px minmax(0, 1fr) 6px minmax(0, 1fr);
+  align-items: center; gap: 3px; flex: none; height: 44px; min-height: 0; padding: 0 calc(3 * var(--u));
+  color: var(--navy); --pf-lo: var(--line2);
+}
+.opening-relay-label { width: 3.2em; font: normal 12px/14px var(--f-label); text-align: center; word-break: keep-all; }
+.opening-relay-member {
+  display: flex; align-items: center; min-width: 0; gap: 3px; padding: 2px 3px;
+  --pf-f: var(--aqua-tint); --pf-lo: var(--aqua-hi); --pf-sh: transparent;
+}
+.opening-relay-face { flex: none; width: 28px; height: 28px; overflow: hidden; clip-path: var(--notch); background: var(--paper3); }
+.opening-relay-copy {
+  display: grid; grid-template-columns: auto 1fr; grid-template-areas: "name name" "hp tag";
+  align-items: center; column-gap: 3px; row-gap: 3px; min-width: 0;
+}
+.opening-relay-copy b { grid-area: name; font: normal 12px/12px var(--f-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opening-relay-hp { grid-area: hp; font: normal 10px/10px var(--f-tiny); white-space: nowrap; }
+.opening-relay-hp.danger { color: var(--coral-lo); }
+.opening-relay-tag { grid-area: tag; justify-self: start; padding: 0 2px; font: normal 10px/10px var(--f-tiny); white-space: nowrap; color: var(--aqua-ink); background: var(--aqua-hi); }
+.opening-relay-tag.next { color: var(--gold-ink); background: var(--gold); }
+/* a stepped pixel arrow instead of the › glyph */
+.opening-relay-chevron { justify-self: center; width: 6px; height: 10px; font-size: 0; background: var(--navy);
+  clip-path: polygon(0 0, 2px 0, 2px 2px, 4px 2px, 4px 4px, 6px 4px, 6px 6px, 4px 6px, 4px 8px, 2px 8px, 2px 10px, 0 10px); }

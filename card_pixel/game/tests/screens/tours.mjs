@@ -126,6 +126,9 @@ export function createTourCases({
         await battleIdle(page);
         await page.locator('#battle.on .opening-choice.stand').click();
         await battleEvent(page, 'heirloom');
+      },
+      async after(page, { text }) {
+        await text(page.locator('#b-heir.on .heirloom-use'), 'MP 0 · 1회', { exact: true });
       }
     });
   }

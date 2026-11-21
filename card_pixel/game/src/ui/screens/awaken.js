@@ -17,20 +17,21 @@ export function awakenScreen(run, ui) {
   const leadPlate = id => '<div class="wake-lead win">' + faceBadge(id) +
     '<span>대여 전투에서 함께 온 동료' + (observed.heirlooms[id] ? '<small>유품 · ' + esc(observed.heirlooms[id].name) + '</small>' : '') + '</span></div>';
 
-  function line(ids) {
+  function line(ids, tag) {
     return ids.map(id => '<button class="wake-face win g-' + esc(card(id).grade) + '" data-sheet="' + esc(id) + '">' +
-      faceBadge(id) + '</button>').join('');
+      faceBadge(id) + '<small class="companion-tag">' + tag + '</small></button>').join('');
   }
 
   function completed(chosen, awakened, animate) {
     const summary = '선택 동료 ' + chosen.length + '명 · 추가 합류 ' + awakened.length + '명 · 결정 ' + run.crystals;
-    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="scroll">' +
-      (lead ? leadPlate(lead) : '') + '<h3>선택한 동료</h3><div class="wake-line">' + line(chosen.filter(id => id !== lead)) + '</div>' +
+    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="screen-split"><div class="fixed-top">' +
+      (lead ? leadPlate(lead) : '') + '</div><div class="scroll-list"><h3>선택한 동료</h3><div class="wake-line">' +
+      line(chosen.filter(id => id !== lead), TERMS.awakening.picked) + '</div>' +
       '<h3>추가 합류 동료</h3><div class="wake-line" id="wake-draws">' + awakened.map(id =>
-        '<div class="wake-slot g-' + esc(card(id).grade) + '">' + line([id]) + '</div>').join('') +
+        '<div class="wake-slot g-' + esc(card(id).grade) + '">' + line([id], TERMS.awakening.random) + '</div>').join('') +
       '</div><p class="wake-summary win" aria-live="polite"></p></div>' +
-      '<div class="footer"><button class="btn" id="b-wake-skip">건너뛰기</button>' +
-      '<button class="btn go" id="b-depart" hidden>원정 출발</button></div>';
+      '<div class="footer fixed-foot"><button class="btn" id="b-wake-skip">건너뛰기</button>' +
+      '<button class="btn go" id="b-depart" hidden>원정 출발</button></div></div>';
     show('awaken');
     const skip = $('#b-wake-skip', node);
     const depart = $('#b-depart', node);
@@ -54,17 +55,16 @@ export function awakenScreen(run, ui) {
       const split = Math.max(1, run.bench.length - START.draws);
       return completed(run.bench.slice(0, split), run.bench.slice(split), false);
     }
-    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="scroll"><h3>이번 원정 합류</h3><div class="cards">' +
+    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="screen-split"><div class="fixed-top"><h3>이번 원정 합류</h3></div><div class="scroll-list"><div class="cards">' +
       run.bench.map(id => cardRow(run, id, { sheet: true, skills: false })).join('') +
-      '</div></div><div class="footer"><button class="btn go" id="b-depart">원정 출발</button></div>';
+      '</div></div><div class="footer fixed-foot"><button class="btn go" id="b-depart">원정 출발</button></div></div>';
     show('awaken');
     $('#b-depart', node).addEventListener('click', ui.leave);
     return;
   }
 
   const near = pending.near && card(pending.near);
-  const info = intro ? '한 명을 고르면 나머지도 함께 깨어나. 추가 동료 ' + START.draws + '명은 무작위로 합류합니다.' :
-    '동료를 선택하면 무작위로 ' + START.draws + '명이 추가 합류합니다.';
+  const info = TERMS.awakening.detail(pending.remaining, START.draws, pending.candidates.length > 0);
   const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>이번 원정 합류</h3><div class="cards">' +
     run.bench.map(id => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? TERMS.startCompanion.short : '' })).join('') + '</div>' : '';
 
@@ -75,10 +75,10 @@ export function awakenScreen(run, ui) {
       id === run.profileShard ? '예약 후보' : near && card(id).element === near.element ? '같은 속성' : '';
     return cardRow(observed, id, { tag, offer: true, coach: 'awakening-candidate' });
   }).join('');
-  node.innerHTML = head(run, '동료 고르기', '남은 선택 ' + pending.remaining) + '<div class="scroll">' + allies +
-    '<p class="lead">' + info + '</p><div class="cards" id="wake-choices">' + cards + '</div></div>' +
-    '<div class="footer"><button class="btn go" id="b-wake" data-coach="awakening-confirm"' + (cards ? ' disabled' : '') + '>' +
-    (cards ? '동료 선택' : '계속하기') + '</button></div>';
+  node.innerHTML = head(run, '동료 고르기', '남은 선택 ' + pending.remaining) + '<div class="screen-split"><div class="fixed-top">' + allies +
+    '<p class="lead">' + info + '</p></div><div class="scroll-list"><div class="cards" id="wake-choices">' + cards + '</div></div>' +
+    '<div class="footer fixed-foot"><button class="btn go" id="b-wake" data-coach="awakening-confirm"' + (cards ? ' disabled' : '') + '>' +
+    (cards ? '동료 선택' : '계속하기') + '</button></div></div>';
   show('awaken');
   let selected = null;
   const button = $('#b-wake', node);
@@ -89,7 +89,7 @@ export function awakenScreen(run, ui) {
       sfx.tap();
       for (const row of choices) row.classList.toggle('sel', row === choice);
       button.disabled = false;
-      button.textContent = card(selected).name + ' · ' + TERMS.join.short;
+      button.textContent = card(selected).name + ' ' + TERMS.join.short;
     });
   }
   button.addEventListener('click', () => {

@@ -1081,7 +1081,7 @@ function openingChoices() {
       await battleIdle(page);
       const choice = page.locator('#acts .opening-choice');
       assert.equal(await choice.count(), 2);
-      await text(page.locator('#opening-face'), 'HP 40 / 420');
+      await text(page.locator('#opening-face [data-fighter="ash"] .opening-relay-hp'), 'HP 40', { exact: true });
       await text(choice.nth(0), '눈토끼 HP 290 → 149');
       for (const id of ['b-speed', 'b-log', 'b-field']) assert.equal(await page.locator('#' + id).isVisible(), false);
       await text(choice.nth(1), '쓰러지면 눈토끼가 아마겟돈을 계승');

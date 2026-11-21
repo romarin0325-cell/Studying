@@ -45,8 +45,7 @@ export function createCoach({ face, pause }) {
   root.className = 'coach';
   root.hidden = true;
   root.innerHTML = `
-    <i class="coach-shade"></i><i class="coach-shade"></i><i class="coach-shade"></i><i class="coach-shade"></i>
-    <span class="coach-ring" aria-hidden="true"></span>
+    <i class="coach-shade" aria-hidden="true"></i>
     <div class="coach-say win">
       <span class="coach-face">${face}</span>
       <p class="coach-line" aria-live="polite"></p>
@@ -56,15 +55,16 @@ export function createCoach({ face, pause }) {
       </div>
     </div>`;
   document.body.append(root);
-  const shades = [...root.querySelectorAll('.coach-shade')];
-  const ring = $('.coach-ring', root);
+  const shade = $('.coach-shade', root);
   const say = $('.coach-say', root);
   const line = $('.coach-line', root);
   const next = $('.coach-next', root);
   const skip = $('.coach-skip', root);
   let current;
   let targets = [];
+  let groups = [];
   let visible = [];
+  const rings = [];
   let reservedPort;
   let animationFrame;
 
@@ -81,41 +81,65 @@ export function createCoach({ face, pause }) {
     const header = frame.querySelector('.run-screen.on > header.top');
     const targetTop = header && targets.every(target => !header.contains(target))
       ? Math.max(bounds.top, header.getBoundingClientRect().bottom) : bounds.top;
-    const rects = targets.map(target => visibleRect(target, { ...bounds, top: targetTop }));
-    visible = targets.filter((_, index) => rects[index]);
-    const holes = rects.filter(Boolean);
-    const left = holes.length ? Math.max(bounds.left, Math.floor(Math.min(...holes.map(r => r.left))) - PAD) : 0;
-    const right = holes.length ? Math.min(bounds.right, Math.ceil(Math.max(...holes.map(r => r.right))) + PAD) : 0;
-    const top = holes.length ? Math.max(targetTop, Math.floor(Math.min(...holes.map(r => r.top))) - PAD) : bounds.bottom;
-    const bottom = holes.length ? Math.min(bounds.bottom, Math.ceil(Math.max(...holes.map(r => r.bottom))) + PAD) : bounds.bottom;
+    const rects = new Map(groups.flat().map(target => [target, visibleRect(target, { ...bounds, top: targetTop })]));
+    visible = targets.filter(target => rects.get(target));
+    const holes = groups.flatMap(group => {
+      const boxes = group.map(target => rects.get(target)).filter(Boolean);
+      if (!boxes.length) return [];
+      return [{
+        left: Math.max(bounds.left, Math.floor(Math.min(...boxes.map(r => r.left))) - PAD),
+        right: Math.min(bounds.right, Math.ceil(Math.max(...boxes.map(r => r.right))) + PAD),
+        top: Math.max(targetTop, Math.floor(Math.min(...boxes.map(r => r.top))) - PAD),
+        bottom: Math.min(bounds.bottom, Math.ceil(Math.max(...boxes.map(r => r.bottom))) + PAD)
+      }];
+    }).sort((a, b) => a.top - b.top);
     say.style.left = bounds.left + GAP + 'px';
     say.style.width = Math.max(0, bounds.right - bounds.left - 2 * GAP) + 'px';
-    const aboveSpace = top - bounds.top - 2 * GAP;
-    const belowSpace = bounds.bottom - bottom - 2 * GAP;
-    const above = aboveSpace >= belowSpace;
-    const space = Math.max(0, aboveSpace, belowSpace);
+    let previous = bounds.top;
+    const gaps = holes.map(hole => {
+      const gap = { start: previous, end: hole.top };
+      previous = Math.max(previous, hole.bottom);
+      return gap;
+    });
+    gaps.push({ start: previous, end: bounds.bottom });
+    const gap = gaps.reduce((best, next) => next.end - next.start > best.end - best.start ? next : best);
+    const space = Math.max(0, gap.end - gap.start - 2 * GAP);
     const height = say.offsetHeight + Math.max(0, line.scrollHeight - line.clientHeight);
+    const above = gap.start === bounds.top;
     if (reserve && targets.length > 1 && space < height) {
-      const port = targets[0].closest('.scroll, .run-route');
-      if (port && targets.every(target => port.contains(target))) {
+      const port = targets[0].closest('.scroll, .scroll-list, .run-route');
+      const summary = groups.length > 1 && port?.matches('.scroll-list') ? port.previousElementSibling : null;
+      if (port && (groups.length === 1 || summary?.classList.contains('fixed-top')) &&
+        targets.every(target => port.contains(target))) {
         const room = port.getBoundingClientRect();
-        const available = above ? room.top - bounds.top : bounds.bottom - room.bottom;
+        // Keep the highlighted summary above the bubble and the choices below it.
+        const start = summary ? summary.getBoundingClientRect().bottom + PAD : bounds.top;
+        const beforeList = summary || above;
+        const available = beforeList ? room.top - start : bounds.bottom - room.bottom;
         const extra = Math.min(port.clientHeight / 2, Math.max(0, height + 2 * GAP + PAD - available));
         if (extra > 0) {
           reservedPort = port;
-          port.style.setProperty(above ? 'margin-block-start' : 'margin-block-end', extra + 'px');
+          port.style.setProperty(beforeList ? 'margin-block-start' : 'margin-block-end', extra + 'px');
           scrollIntoView(targets[0]);
           return place();
         }
       }
     }
-    placeBox(shades[0], 0, 0, innerWidth, top);
-    placeBox(shades[1], 0, bottom, innerWidth, innerHeight - bottom);
-    placeBox(shades[2], 0, top, left, bottom - top);
-    placeBox(shades[3], right, top, innerWidth - right, bottom - top);
-    placeBox(ring, left, top, right - left, bottom - top);
+    const rectangle = ({ left, top, right, bottom }) => `M${left} ${top}H${right}V${bottom}H${left}Z`;
+    shade.style.clipPath = `path(evenodd, "${rectangle({ left: 0, top: 0, right: innerWidth, bottom: innerHeight })}${holes.map(rectangle).join('')}")`;
+    while (rings.length > holes.length) rings.pop().remove();
+    for (const [index, { left, right, top, bottom }] of holes.entries()) {
+      if (!rings[index]) {
+        const ring = document.createElement('span');
+        ring.className = 'coach-ring';
+        ring.setAttribute('aria-hidden', 'true');
+        root.insertBefore(ring, say);
+        rings.push(ring);
+      }
+      placeBox(rings[index], left, top, right - left, bottom - top);
+    }
     say.style.maxHeight = space + 'px';
-    say.style.top = (above ? top - Math.min(say.offsetHeight, space) - GAP : bottom + GAP) + 'px';
+    say.style.top = (above ? gap.end - Math.min(say.offsetHeight, space) - GAP : gap.start + GAP) + 'px';
   }
 
   function follow() {
@@ -130,9 +154,9 @@ export function createCoach({ face, pause }) {
   }
 
   function nudge() {
-    ring.classList.remove('nudge');
-    void ring.offsetWidth;
-    ring.classList.add('nudge');
+    for (const ring of rings) ring.classList.remove('nudge');
+    void root.offsetWidth;
+    for (const ring of rings) ring.classList.add('nudge');
   }
 
   function block(event) {
@@ -175,13 +199,14 @@ export function createCoach({ face, pause }) {
     place(true);
   });
 
-  function show(step, buttons) {
-    if (current?.id === step.id && buttons.every((button, index) => button === targets[index]) &&
+  function show(step, buttons, spotlights = [buttons]) {
+    if (current?.id === step.id && current.line === step.line && buttons.every((button, index) => button === targets[index]) &&
       buttons.length === targets.length) return;
     const previous = current;
     clearReservation();
     current = step;
     targets = buttons;
+    groups = spotlights;
     root.hidden = false;
     root.dataset.coachStep = step.id;
     line.textContent = step.line;
@@ -203,6 +228,7 @@ export function createCoach({ face, pause }) {
     if (current?.battle) pause(false);
     current = null;
     targets = [];
+    groups = [];
     visible = [];
     root.hidden = true;
     delete root.dataset.coachStep;

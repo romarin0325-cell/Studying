@@ -68,7 +68,7 @@
 위임할 때마다 `history/model-log.md`에 한 줄: 날짜, 일, 모델, 걸린 시간, 쓸만한가, 문제.
 
 ## 검증 (바뀐 것만)
-- 전투 규칙·로그라이트 규칙: `node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/skill-motions.test.mjs`
+- 전투 규칙·로그라이트 규칙: `node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/skill-motions.test.mjs card_pixel/game/tests/text.test.mjs`
 - 숫자: `node card_pixel/game/tools/sim.mjs 300` (비교: `--plain`, `--no-heirloom`, `--no-laststand`)
 - 화면·실시간: `node card_pixel/game/tests/play.mjs` (설치된 Chrome으로 세 판을 끝까지 자동 플레이, 화면은 `game/tests/shots/`)
 - 빌드: `node card_pixel/game/build.mjs` → `game/dist/Relaymare.html`

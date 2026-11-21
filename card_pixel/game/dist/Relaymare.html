@@ -593,6 +593,32 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
   .pm { min-height: 50px; } .pm .face { height: 42px; } #row2 { min-height: 42px; } #msg { height: 26px; }
 }
 
+/* Borrowed battle: the relay order sits directly above both opening choices (layout: Claude).
+   Each member is a face, its name on the first line, HP and the 지금/다음 tag side by side on the second. */
+.opening-decision #opening-face {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) 6px minmax(0, 1fr) 6px minmax(0, 1fr);
+  align-items: center; gap: 3px; flex: none; height: 44px; min-height: 0; padding: 0 calc(3 * var(--u));
+  color: var(--navy); --pf-lo: var(--line2);
+}
+.opening-relay-label { width: 3.2em; font: normal 12px/14px var(--f-label); text-align: center; word-break: keep-all; }
+.opening-relay-member {
+  display: flex; align-items: center; min-width: 0; gap: 3px; padding: 2px 3px;
+  --pf-f: var(--aqua-tint); --pf-lo: var(--aqua-hi); --pf-sh: transparent;
+}
+.opening-relay-face { flex: none; width: 28px; height: 28px; overflow: hidden; clip-path: var(--notch); background: var(--paper3); }
+.opening-relay-copy {
+  display: grid; grid-template-columns: auto 1fr; grid-template-areas: "name name" "hp tag";
+  align-items: center; column-gap: 3px; row-gap: 3px; min-width: 0;
+}
+.opening-relay-copy b { grid-area: name; font: normal 12px/12px var(--f-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opening-relay-hp { grid-area: hp; font: normal 10px/10px var(--f-tiny); white-space: nowrap; }
+.opening-relay-hp.danger { color: var(--coral-lo); }
+.opening-relay-tag { grid-area: tag; justify-self: start; padding: 0 2px; font: normal 10px/10px var(--f-tiny); white-space: nowrap; color: var(--aqua-ink); background: var(--aqua-hi); }
+.opening-relay-tag.next { color: var(--gold-ink); background: var(--gold); }
+/* a stepped pixel arrow instead of the › glyph */
+.opening-relay-chevron { justify-self: center; width: 6px; height: 10px; font-size: 0; background: var(--navy);
+  clip-path: polygon(0 0, 2px 0, 2px 2px, 4px 2px, 4px 4px, 6px 4px, 6px 6px, 4px 6px, 4px 8px, 2px 8px, 2px 10px, 0 10px); }
+
 /* ---------- companion cards on reward, order and end screens ---------- */
 .cards { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .cardrow { position: relative; display: flex; gap: 10px; padding: 8px 10px 8px 8px; align-items: center; text-align: left; width: 100%; }
@@ -709,6 +735,14 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .run-status:empty { display: none; }
 .run-screen .scroll { padding: 10px 12px 16px; }
 .run-screen .footer { padding: 10px 12px calc(12px + env(safe-area-inset-bottom)); }
+/* Fix the summary and action in place while the variable list scrolls. */
+.screen-split { flex: 1; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; overflow: hidden; }
+.screen-split > .scroll-list { min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
+.run-screen .screen-split > :is(.fixed-top, .scroll-list) { padding: 10px 12px; }
+.run-screen .screen-split > .scroll-list { padding-top: var(--u); padding-bottom: 16px; }
+#recruit .meta-page.screen-split { overflow: hidden; }
+#recruit .screen-split > .scroll-list { padding: 0 14px 8px; }
+#recruit .screen-split .meta-return-stage { height: clamp(148px, 35dvh, 300px); }
 .run-icon, .run-screen .px, .run-face img { image-rendering: pixelated; max-width: none; flex-shrink: 0; }
 /* Keep the landscape on its image layer and draw the white rim above it. */
 .run-scene { min-height: 116px; flex: 1 0 116px; position: relative; overflow: hidden;
@@ -802,6 +836,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .relay-seats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr) 18px) minmax(0, 1fr); align-items: stretch; margin: 10px 0 8px; }
 .relay-seat { min-width: 0; display: grid; grid-template: 18px 100px auto 1fr / minmax(0, 1fr); align-content: start; justify-items: center; gap: 4px; padding: 8px 4px; text-align: center;
   --pf-f: #fff; --pf-lo: color-mix(in srgb, var(--gc, #cdc4f0) 22%, #fff); --pf-ledge: calc(2 * var(--u)); }
+.relay-seat[aria-pressed="true"] { --pf-f: var(--aqua-tint); }
 .relay-seat-art, .reinforce-art { display: flex; align-items: flex-end; justify-content: center; width: 100%; overflow: hidden; }
 
 .relay-seat-art { height: 100%; }
@@ -848,6 +883,14 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .wake-line { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
 .wake-face { width: 100%; min-height: 80px; min-width: 0; padding: 6px 4px; --pf-lo: var(--gc, var(--line2)); --pf-ledge: calc(2 * var(--u)); }
 .wake-face .face-badge { flex-direction: column; gap: 2px; }
+.companion-tag {
+  display: inline-block; margin-inline-start: 4px; padding: var(--u) 4px; clip-path: var(--notch);
+  color: var(--aqua-ink); background: var(--aqua-tint); font: normal 12px/14px var(--f-label);
+}
+.wake-face .companion-tag { display: block; width: fit-content; margin: 4px auto 0; }
+.recruit-receipts { display: flex; flex-wrap: wrap; gap: 6px; }
+.recruit-receipt { display: flex; align-items: center; gap: 4px; padding: var(--u) 6px; font: normal 12px/14px var(--f-label); }
+.recruit-receipt .run-face { width: 28px; height: 28px; }
 .wake-slot { min-width: 0; --pf-o: var(--line2); --pf-f: rgba(255, 255, 255, .55); --pf-sh: transparent; }
 .wake-slot:not(.landed) .wake-face { visibility: hidden; }
 .wake-slot.landed .wake-face { animation: wake-land .22s steps(4, end) both; }
@@ -942,7 +985,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .coach { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
 .coach[hidden], .coach button[hidden] { display: none; }
 .coach-shade, .coach-ring, .coach-say { position: absolute; }
-.coach-shade { background: rgba(27, 24, 80, .66); }
+.coach-shade { inset: 0; background: rgba(27, 24, 80, .66); }
 .coach-ring { filter: none; clip-path: var(--notch); border: 2px solid var(--gold); }
 .coach-ring.nudge { animation: coach-nudge .24s steps(1, end); }
 @keyframes coach-nudge {
@@ -957,6 +1000,9 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 }
 .coach-face { grid-row: span 2; display: block; overflow: hidden; width: 44px; height: 44px; clip-path: var(--notch); }
 .coach-line { max-height: 100%; overflow: auto; margin: 0; color: var(--ink); font: 600 .8125rem/1.45 var(--f-body); word-break: keep-all; }
+[data-coach-step]:not([data-coach-step^="tour-"]) > .coach-say { grid-template-rows: auto auto; }
+[data-coach-step]:not([data-coach-step^="tour-"]) .coach-face { grid-row: 2; }
+[data-coach-step]:not([data-coach-step^="tour-"]) .coach-line { grid-area: 1 / 1 / 2 / -1; white-space: pre-line; }
 .coach-buttons { grid-column: 2; display: flex; justify-content: flex-end; gap: 8px; }
 .coach-buttons .btn { padding: 4px 8px; min-height: 36px; font: 12px var(--f-label); }
 .coach-buttons .coach-next { --pf-f: var(--aqua-tint); --pf-lo: var(--aqua-hi); }
@@ -8623,6 +8669,16 @@ const BattleRuntime = {
   var FIELD_POOL = ["sun_bless", "moon_bless", "sanctuary", "goddess_descent", "earth_bless", "twinkle_party", "star_powder", "valentine", "arena", "reaper_realm", "gale"];
   var DEFENSE_BUFFS = ["guard", "barrier", "magic_guard", "damage_half", "evasion"];
   var isAttack = (skill) => skill.type === "phy" || skill.type === "mag";
+  var sameSkill = (a, b) => a.name === b.name && a.type === b.type;
+  function skillSourceKey(role, owner, skill) {
+    const slots = owner?.skills || [];
+    const direct = slots.indexOf(skill);
+    if (direct !== -1) return [role, owner.id, direct + 1].join("/");
+    const first = slots.findIndex((slot) => sameSkill(slot, skill));
+    if (first !== -1 && first === slots.findLastIndex((slot) => sameSkill(slot, skill))) {
+      return [role, owner.id, first + 1].join("/");
+    }
+  }
   var RANDOM_DAMAGE = ["random_mult", "random_mult_moon_boost", "delayed_random_attack"];
   var isScripted = (action) => !!action && action.name !== "\uC77C\uBC18 \uACF5\uACA9" && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
   function affixView(id, enemy) {
@@ -8939,6 +8995,19 @@ const BattleRuntime = {
     const refOf = (unit) => unit === host.battle.enemy ? enemyRef() : allyRef(unit.pos);
     const localTurn = (enemy) => host.battle.turn - (enemy.relayEnteredTurn || 1) + 1;
     const isAlly = (unit) => !!unit && unit !== host.battle.enemy && !!unit.proto;
+    let sourceCards;
+    function allySkillSource(source, skill, delayed) {
+      if (!isAttack(skill) || skill.name === host.NORMAL_ATTACK.name) return;
+      if (skill.heirloom) return skillSourceKey("ally", skill.heirFrom && GameUtils.getCardById(skill.heirFrom), skill);
+      const native = skillSourceKey("ally", source.proto, skill);
+      if (!delayed) return native;
+      sourceCards ??= GameUtils.getAllCards();
+      const original2 = sourceCards.find((card) => card.skills.includes(skill));
+      if (original2) return skillSourceKey("ally", original2, skill);
+      if (native) return native;
+      const owners = sourceCards.filter((card) => card.skills.some((slot) => sameSkill(slot, skill)));
+      if (owners.length === 1) return skillSourceKey("ally", owners[0], skill);
+    }
     const hasAffix = (enemy, id) => !!enemy && Array.isArray(enemy.affixes) && enemy.affixes.includes(id);
     const players = () => (host.battle.players || []).filter(Boolean);
     function push(ev) {
@@ -9158,7 +9227,8 @@ const BattleRuntime = {
       flush();
       const who = refOf(source);
       if (skill.heirloom && !delayed && isAlly(source)) B.heirloomsUsed++;
-      push({ t: "act", who, target: refOf(target), delayed, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map((e) => e.type) } });
+      const sourceKey = allySkillSource(source, skill, delayed);
+      push({ t: "act", who, target: refOf(target), delayed, sourceKey, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map((e) => e.type) } });
       B.ctx.push({ kind: "act", who, skill, delayed, source });
       B.lastHit = null;
       const formId = source.formId;
@@ -9311,11 +9381,14 @@ const BattleRuntime = {
       if (action.type === "rest") return action;
       const salience = actionSalience(action);
       const power2 = enemy.tookDamageThisTurn ? retaliationPower(action, enemy) ?? action.val : action.val;
+      const def = queue[B.enemyIdx];
+      const sourceKey = !action.isChargeStart && isAttack(action) && (def.source ? skillSourceKey("ally", GameUtils.getCardById(def.source), action) : skillSourceKey(isBoss() ? "boss" : "wild", def, action));
       push({
         t: "act",
         who: enemyRef(),
         target: isAttack(action) && !action.isChargeStart ? allyRef(target.pos) : enemyRef(),
         delayed: false,
+        sourceKey: sourceKey || void 0,
         actionId: actionId(action),
         charge: !!action.isChargeStart,
         salience,
@@ -14549,6 +14622,132 @@ const BattleRuntime = {
     return { play, playOutcome, holdReward, stop, setEnabled, setVolume };
   }
 
+  // card_pixel/game/src/content/skill-motions.js
+  function melee(expectedName, family, variant, frame, extra = {}) {
+    return { expectedName, family, variant, range: "melee", frame, ...extra };
+  }
+  var SKILL_MOTIONS = {
+    "ally/ancient_dragon/2": melee("\uB4DC\uB798\uACE4\uD06C\uB85C", "claw", "rake", "idle", { socket: "hand" }),
+    "ally/avalanche_maid/2": melee("\uBE59\uD558\uC758\uC77C\uACA9", "impact", "strike", "attack", { tint: "water" }),
+    "ally/behemoth/2": melee("\uB300\uC9C0\uBD84\uC1C4", "impact", "downward", "attack"),
+    "ally/blessing_tail/3": melee("\uC2A4\uD0C0\uD3ED\uC2A4\uD14C\uC77C", "impact", "body", "attack"),
+    "ally/cherry_prince/2": melee("\uBE14\uB7EC\uC378\uD53C\uC5B4\uC2A4", "thrust", "straight", "idle", { socket: "weaponTip" }),
+    "ally/cinderella/2": melee("\uD06C\uB9AC\uC2A4\uD0C8\uD0A5", "impact", "kick", "attack", { socket: "foot" }),
+    "ally/crystal_dancer/2": melee("\uB304\uC2F1\uB300\uAC70", "blade", "diagonal", "attack"),
+    "ally/deep_lord/3": melee("\uC2EC\uC5F0\uC758\uD3EC\uC639", "impact", "body", "idle"),
+    "ally/desert_fox/3": melee("\uBAA8\uB798\uB3CC\uC9C4", "impact", "body", "attack"),
+    "ally/doom_luther/1": melee("\uC9C4\uC2E4\uC758\uAC70\uC6B8", "impact", "strike", "attack"),
+    "ally/doom_luther/3": melee("\uAC13\uD0AC\uB7EC", "blade", "diagonal", "idle"),
+    "ally/ember_tiger/2": melee("\uC640\uC77C\uB4DC\uB7EC\uC26C", "impact", "body", "attack"),
+    "ally/ember_tiger/3": melee("\uBE14\uB808\uC774\uC988\uD06C\uB85C", "claw", "rake", "idle", { tint: "fire" }),
+    "ally/executor/3": melee("\uC100\uB3C4\uC6B0\uAE38\uB85C\uD2F4", "blade", "guillotine", "idle", { socket: "hand", tint: "dark" }),
+    "ally/fenrir/2": melee("\uD504\uB85C\uC2A4\uD2B8\uD33D", "claw", "cross", "attack", { tint: "water" }),
+    "ally/gold_dragon/3": melee("\uB4DC\uB798\uACE4\uD06C\uB85C", "claw", "rake", "idle", { socket: "hand" }),
+    "ally/gray/3": melee("\uCC28\uC6D0\uC808\uB2E8", "blade", "scythe", "attack", { socket: "weaponTip" }),
+    "ally/hellhound/2": melee("\uC100\uB3C4\uC6B0\uB7EC\uC26C", "impact", "body", "attack", { tint: "dark" }),
+    "ally/hellhound/3": melee("\uD5EC\uBC14\uC774\uD2B8", "impact", "bat", "attack"),
+    "ally/jellyfish_princess/3": melee("\uC5B4\uBE44\uC2A4\uC2A4\uD305", "thrust", "straight", "attack", { socket: "weaponTip" }),
+    "ally/kobold/2": melee("\uAE30\uC2B5", "impact", "strike", "attack"),
+    "ally/kobold/3": melee("\uAC15\uD0C0", "impact", "strike", "attack"),
+    "ally/mad_scientist/3": melee("\uB2E4\uD06C\uC778\uC81D\uC158", "thrust", "straight", "idle", { socket: "weaponTip", tint: "dark" }),
+    "ally/marshmallow/2": melee("\uAE30\uC2B5", "impact", "body", "attack"),
+    "ally/marshmallow/3": melee("\uBA5C\uD305\uD5C8\uADF8", "impact", "body", "attack"),
+    "ally/mawang/2": melee("\uB370\uC2A4\uD578\uB4DC", "impact", "body", "attack"),
+    "ally/mimic/2": melee("\uAE30\uC2B5", "impact", "body", "attack"),
+    "ally/mirage/3": melee("\uD32C\uD140\uB7EC\uC26C", "impact", "body", "attack"),
+    "ally/mummy/2": melee("\uAE30\uC2B5", "impact", "body", "idle"),
+    "ally/mushroom_king/2": melee("\uADF8\uB79C\uB4DC\uC2AC\uB7A8", "impact", "downward", "attack"),
+    "ally/night_rabbit/2": melee("\uAE61\uCD1D\uAE61\uCD1D", "impact", "kick", "attack", { socket: "foot" }),
+    "ally/paladin/3": melee("\uB4C0\uC5BC\uBE0C\uB808\uC774\uCEE4", "blade", "diagonal", "attack", { socket: "weaponTip" }),
+    "ally/perfect_aurora/1": melee("\uC9C4\uC2E4\uC758\uAC70\uC6B8", "impact", "strike", "idle"),
+    "ally/phoenix/2": melee("\uBA54\uD14C\uC624\uC784\uD329\uD2B8", "impact", "kick", "attack", { socket: "foot" }),
+    "ally/pudding_princess/2": melee("\uD478\uB529\uB7EC\uC26C", "impact", "body", "attack"),
+    "ally/red_dragon/3": melee("\uB4DC\uB798\uACE4\uD06C\uB85C", "claw", "rake", "attack", { socket: "hand" }),
+    "ally/red_moon/2": melee("\uB370\uC774\uBE0C\uB808\uC774\uCEE4", "impact", "strike", "attack", { socket: "forearm" }),
+    "ally/shadow_cat/2": melee("\uC0AC\uC77C\uB7F0\uD2B8\uC2A4\uD15D", "claw", "rake", "attack"),
+    "ally/shadow_cat/3": melee("\uBCA0\uB188\uC2AC\uB798\uC2DC", "claw", "rake", "attack"),
+    "ally/shadow_stalker/2": melee("\uC554\uC0B4", "blade", "diagonal", "attack"),
+    "ally/shadow_stalker/3": melee("\uC5B4\uC314\uC2E0\uB124\uC77C", "claw", "rake", "idle"),
+    "ally/shooting_star_boy/2": melee("\uC2A4\uD0C0\uD3F4\uB300\uC26C", "impact", "body", "attack"),
+    "ally/silver_rabbit/2": melee("\uAE61\uCD1D\uAE61\uCD1D", "impact", "kick", "attack", { socket: "foot" }),
+    "ally/skull_dragon/2": melee("\uB4DC\uB798\uACE4\uD06C\uB85C", "claw", "rake", "idle", { socket: "hand" }),
+    "ally/slime/3": melee("\uAC15\uD0C0", "impact", "strike", "idle"),
+    "ally/snow_penguin/2": melee("\uC81C\uD2B8\uC2AC\uB77C\uC774\uB4DC", "impact", "kick", "attack", { socket: "foot" }),
+    "ally/sun_moon_sword_maiden/3": melee("\uB8E8\uB098\uD06C\uB808\uC13C\uD2B8", "blade", "horizontal", "attack", { tint: "light" }),
+    "ally/sylphid/2": melee("\uC2E4\uD504\uC2A4\uD15D", "impact", "kick", "attack", { socket: "foot" }),
+    "ally/sylphid/3": melee("\uD15C\uD398\uC2A4\uD2B8\uD06C\uB85C", "claw", "rake", "idle"),
+    "ally/trans_ares/2": melee("\uD14C\uB77C\uC18C\uB4DC", "blade", "diagonal", "attack"),
+    "ally/trans_behemoth/2": melee("\uC6D4\uB4DC\uBE0C\uB808\uC774\uCEE4", "impact", "stomp", "attack", { socket: "foot" }),
+    "ally/trans_cinderella/2": melee("\uC0E4\uD130\uB9C1\uBE44\uD2B8", "impact", "kick", "idle", { socket: "foot" }),
+    "ally/trans_luna_jasmine/3": melee("\uB8E8\uB098\uBE14\uB808\uC774\uB4DC", "blade", "horizontal", "attack", { socket: "frontMemberBlade" }),
+    "ally/trans_poseidon/2": melee("\uD2B8\uB77C\uC774\uB358\uD2B8", "thrust", "straight", "idle", { socket: "weaponTip" }),
+    "ally/trans_thor/2": melee("\uBB20\uB2C8\uB974", "impact", "strike", "attack"),
+    "ally/trans_thor/3": melee("\uC36C\uB354\uB7EC\uC26C", "impact", "body", "attack", { socket: "weaponTip" }),
+    "ally/trans_yeon_rabbit/2": melee("\uD64D\uB828\uAC01", "impact", "kick", "attack", { socket: "foot", tint: "fire" }),
+    "ally/underdog/3": melee("\uAE30\uAC00\uD06C\uB7EC\uC154", "impact", "uppercut", "attack", { socket: "hand" }),
+    "ally/unicorn/2": melee("\uD640\uB9AC\uCC28\uC9C0", "thrust", "straight", "attack", { socket: "weaponTip", tint: "light" }),
+    "ally/venom/3": melee("\uBCA0\uB188\uD5C8\uADF8", "impact", "body", "attack"),
+    "ally/void_knight/2": melee("\uAC15\uD0C0", "impact", "strike", "attack"),
+    "ally/void_knight/3": melee("\uAE09\uC18C\uBCA0\uAE30", "blade", "diagonal", "attack"),
+    "ally/werebear/2": melee("\uBCA0\uC5B4\uB7EC\uC26C", "impact", "body", "attack"),
+    "ally/werebear/3": melee("\uAC15\uD0C0", "impact", "strike", "attack"),
+    "ally/zeke/2": melee("\uC774\uADF8\uB2C8\uC2A4\uC2A4\uB9E4\uC2DC", "blade", "diagonal", "attack", { socket: "weaponTip", tint: "fire" }),
+    "ally/zeke/3": melee("\uB77C\uADF8\uB098\uB85C\uD06C", "blade", "diagonal", "attack", { socket: "weaponTip" }),
+    "boss/ares/2": melee("\uD14C\uB77C\uC18C\uB4DC", "blade", "diagonal", "attack", { socket: "weaponTip" }),
+    "boss/creator_god/2": melee("\uB514\uBC14\uC778\uBE14\uB808\uC774\uB4DC", "blade", "diagonal", "idle", { socket: "hand", tint: "light" }),
+    "boss/demon_god/2": melee("\uC81C\uB178\uC0AC\uC774\uB4DC", "impact", "strike", "attack"),
+    "boss/gray/1": melee("\uC601\uD63C\uC808\uB2E8", "blade", "scythe", "attack", { socket: "weaponTip" }),
+    "boss/gray/2": melee("\uCC28\uC6D0\uC808\uB2E8", "blade", "scythe", "attack"),
+    "boss/gray/3": melee("\uB514\uBA58\uC158\uC81C\uB85C", "blade", "diagonal", "attack", { socket: "weaponTip" }),
+    "boss/poseidon/1": melee("\uD2B8\uB77C\uC774\uB358\uD2B8", "thrust", "straight", "attack", { socket: "weaponTip" }),
+    "boss/thor/1": melee("\uBB20\uB2C8\uB974", "impact", "strike", "attack", { socket: "weaponTip" }),
+    "boss/thor/2": melee("\uC36C\uB354\uB7EC\uC26C", "impact", "body", "attack"),
+    "wild/wild_dark_knight/1": melee("\uC554\uD751 \uBCA0\uAE30", "blade", "diagonal", "attack", { tint: "dark" }),
+    "wild/wild_emerald_beetle/1": melee("\uAECD\uC9C8 \uB3CC\uC9C4", "impact", "body", "attack"),
+    "wild/wild_golem/1": melee("\uAC15\uD0C0", "impact", "strike", "attack"),
+    "wild/wild_night_bat/1": melee("\uD761\uD608 \uC774\uBE68", "bite", "fangs", "attack", { socket: "mouth" }),
+    // Frame-only until the ranged delivery is implemented.
+    "ally/red_dragon/2": { expectedName: "\uD30C\uC774\uC5B4\uBE0C\uB808\uC2A4", family: "breath", variant: "fire", range: "ranged", frame: "idle", socket: "mouth" }
+  };
+  var BASIC_MOTION = { family: "impact", variant: "strike", range: "melee", frame: "idle" };
+
+  // card_pixel/game/src/ui/battle/motion.js
+  function isBigMove({ skill, side, heirloom, salience, isBasic }) {
+    const { tier, val } = skill;
+    return !isBasic && (salience === "boss" || !!heirloom || side === "ally" && tier >= 3 && (!Number.isFinite(val) || val >= 2));
+  }
+  function resolveMotion({ sourceKey, skill, side, heirloom, salience, isBasic, casterSprite }) {
+    const entry = isBasic && skill.type === "phy" ? BASIC_MOTION : Object.hasOwn(SKILL_MOTIONS, sourceKey) ? SKILL_MOTIONS[sourceKey] : null;
+    if (!entry || entry.expectedName && entry.expectedName !== skill.name) return null;
+    const { family, variant, range, frame, socket, tint } = entry;
+    const borrowed = sourceKey?.startsWith("ally/") && casterSprite && sourceKey.split("/")[1] !== casterSprite;
+    return {
+      family,
+      variant,
+      range,
+      frame: borrowed && !heirloom ? "idle" : frame,
+      ...socket && { socket },
+      ...tint && { tint },
+      size: isBigMove({ skill, side, heirloom, salience, isBasic }) ? "big" : "quiet"
+    };
+  }
+  function spriteBox(actor, meta, baseY = 0) {
+    const width = meta.w ?? meta.width, height = meta.h ?? meta.height;
+    const center = meta.cx ?? meta.bodyCenterX, baseline = meta.fy ?? meta.feetBaselineY;
+    const cx = Math.round(actor.x + (actor.ox ?? 0));
+    const feet = baseY + (actor.y ?? 0) + (actor.oy ?? 0);
+    const left = Math.round(cx - (actor.flip ? width - center : center));
+    const top = Math.round(feet - baseline - 1);
+    return { cx, feet, left, right: left + width, top, bottom: top + height, width, height };
+  }
+  function contactOffset({ caster, target, casterMeta, targetMeta, dir }) {
+    const from = spriteBox({ ...caster, ox: 0, oy: 0 }, casterMeta);
+    const to = spriteBox(target, targetMeta);
+    const leading = dir > 0 ? from.right : from.left;
+    const near = dir > 0 ? to.left : to.right;
+    return { ox: near + dir * 5 - leading, oy: to.feet - from.feet };
+  }
+
   // card_pixel/game/src/stage/stage.js
   function createStage(ASSETS) {
     const SCALE2 = 2;
@@ -14736,6 +14935,11 @@ const BattleRuntime = {
     const tall = (a) => meta(a, "idle") ? meta(a, "idle").fy + 1 : 72;
     const headY = (a) => footY(a) - tall(a);
     const chestY = (a) => footY(a) - Math.round(tall(a) * 0.5);
+    function actorBox(a, m, now) {
+      const box = spriteBox(a, m, S.BASE);
+      const bob = a.pose === "idle" && !a.still ? Math.round(Math.sin(now / 420 + a.phase) * 0.6) : 0;
+      return { ...box, top: box.top + bob };
+    }
     function sparks(x, y, n, colors, pow, grav) {
       for (let i = 0; i < n; i++) {
         const ang = Math.random() * 6.283, v = (pow || 60) * (0.3 + Math.random() * 0.7);
@@ -14918,9 +15122,7 @@ const BattleRuntime = {
       const look = a.white > 0 ? "white" : a.wait > 0.5 ? a.look === "base" ? "wait" : a.look : a.look;
       const img = variant(IMG[key] ? key : a.sprite + "-idle", look);
       if (!img) return;
-      const bob = a.pose === "idle" && !a.still ? Math.round(Math.sin(now / 420 + a.phase) * 0.6) : 0;
-      const base = footY(a), cx = Math.round(X(a)), top = Math.round(base + a.oy - (m.fy + 1)) + bob;
-      const left = a.flip ? Math.round(cx - (m.w - m.cx)) : Math.round(cx - m.cx);
+      const base = footY(a), { cx, left, top } = actorBox(a, m, now);
       const sw = Math.round(m.w * 0.6);
       ctx.globalAlpha = 0.36 * a.alpha;
       ctx.fillStyle = "#000";
@@ -15075,9 +15277,189 @@ const BattleRuntime = {
         ctx.fillRect(Math.round(x - half), Math.round(y + dy), half * 2 + 1, 1);
       }
     }
+    function pixels(points, color) {
+      const ys = points.map(([, y]) => y);
+      ctx.fillStyle = color;
+      for (let y = Math.min(...ys); y < Math.max(...ys); y++) {
+        const intersections = [];
+        for (let i = 0; i < points.length; i++) {
+          const [x0, y0] = points[i], [x1, y1] = points[(i + 1) % points.length];
+          if (y0 > y + 0.5 !== y1 > y + 0.5) intersections.push(x0 + (x1 - x0) * (y + 0.5 - y0) / (y1 - y0));
+        }
+        intersections.sort((a, b) => a - b);
+        for (let i = 0; i < intersections.length; i += 2) {
+          const left = Math.round(intersections[i]), right = Math.round(intersections[i + 1]);
+          ctx.fillRect(left, y, right - left, 1);
+        }
+      }
+    }
+    function diamond(x, y, rx, ry, color) {
+      pixels([[x - rx, y], [x, y - ry], [x + rx, y], [x, y + ry]], color);
+    }
+    const dot = (x, y, color) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+    };
+    function crescent(px, py, { r, half, thick, rot = 0, dir, colors, reveal: reveal2 = 1, shift = 0 }) {
+      const cos = Math.cos(rot), sin = Math.sin(rot);
+      const steps = Math.ceil(2 * half * r * 1.6);
+      for (let i = 0; i <= Math.round(steps * reveal2); i++) {
+        const u = i / steps, a = -half + 2 * half * u;
+        const t = Math.max(1, Math.round(thick * Math.pow(Math.sin(Math.PI * u), 0.65)));
+        for (let k = 0; k < t; k++) {
+          const radius = r - k + shift, lx = radius * Math.cos(a) - r, ly = radius * Math.sin(a);
+          const color = k === 0 ? "#fff" : k === t - 1 && t > 2 ? colors[2] : colors[1];
+          dot(px + dir * (lx * cos - ly * sin), py + lx * sin + ly * cos, color);
+        }
+      }
+    }
+    function chips(x, y, dir, frame2, colors, count2 = 3, spread = 1) {
+      for (let i = 0; i < count2; i++) {
+        const a = -1.1 + i * (2.2 / Math.max(1, count2 - 1)), d = (5 + frame2 * 4) * spread;
+        ctx.fillStyle = i % 2 ? colors[0] : "#fff";
+        ctx.fillRect(Math.round(x + dir * Math.cos(a) * d), Math.round(y + Math.sin(a) * d), 2, 2);
+      }
+    }
+    function star(x, y, outer, inner, n, rot, color, sx = 1, sy = 1) {
+      const points = Array.from({ length: n * 2 }, (_, i) => {
+        const a = rot + Math.PI * i / n, r = i % 2 ? inner : outer;
+        return [Math.round(x + r * Math.cos(a) * sx), Math.round(y + r * Math.sin(a) * sy)];
+      });
+      pixels(points, color);
+    }
+    function hitStar(x, y, size, rot, colors, sx = 1, sy = 1) {
+      star(x, y, size + 2, (size + 2) * 0.42, 4, rot, colors[2], sx, sy);
+      star(x, y, size, size * 0.4, 4, rot, colors[1], sx, sy);
+      star(x, y, size * 0.62, size * 0.24, 4, rot + Math.PI / 4, colors[1], sx, sy);
+      star(x, y, size * 0.5, size * 0.2, 4, rot, "#fff", sx, sy);
+    }
+    const tri = (points, color) => pixels(points.map(([px, py]) => [Math.round(px), Math.round(py)]), color);
+    const BLADE = { diagonal: -Math.PI / 4, guillotine: 0, horizontal: -Math.PI / 2, scythe: Math.PI / 2 };
+    function bladeFx(q, frame2) {
+      const { x, y, variant: variant2, big, dir, colors } = q;
+      const rot = BLADE[variant2] ?? BLADE.diagonal, scythe = variant2 === "scythe";
+      const r = scythe ? 30 : big ? 24 : q.basic ? 16 : 20, half = scythe ? 1.15 : 0.95, thick = big ? 7 : q.basic ? 4 : 6;
+      const last2 = big ? 4 : 2, cx = x + dir * Math.round(r * 0.45);
+      if (frame2 === 0) crescent(cx, y, { r, half, thick: thick - 2, rot, dir, colors, reveal: 0.55 });
+      else if (frame2 < last2) {
+        if (big && frame2 >= 2) crescent(cx, y, { r: r - 5, half: half * 0.9, thick: thick - 3, rot, dir, colors: [colors[0], colors[2], colors[2]], shift: -3 });
+        crescent(cx, y, { r, half, thick, rot, dir, colors });
+        chips(x, y, dir, frame2, colors, big ? 4 : 3);
+      } else {
+        crescent(cx, y, { r, half, thick: 2, rot, dir, colors, shift: 2 });
+        chips(x, y, dir, frame2, colors, big ? 4 : 3);
+      }
+      if (variant2 === "guillotine" && q.landed && frame2 >= 1) {
+        star(x + dir * 3, y + 6, 5, 2, 4, Math.PI / 4, "#281838");
+        star(x + dir * 3, y + 6, 3, 1, 4, Math.PI / 4, colors[1]);
+      }
+    }
+    function clawFx(q, frame2) {
+      const { x, y, variant: variant2, big, dir, colors } = q;
+      const r = big ? 14 : 12, done = frame2 >= (big ? 4 : 2), cx = x + dir * 6;
+      const rake = (rot, offsetX, thick, reveal2) => {
+        for (let i = 0; i < 3; i++) {
+          const off = (i - 1) * 6;
+          crescent(cx + dir * (offsetX + off * Math.cos(rot)), y + off * Math.sin(rot), { r, half: 0.8, thick, rot, dir, colors, reveal: reveal2 });
+        }
+      };
+      if (frame2 === 0) crescent(cx, y, { r, half: 0.8, thick: 3, rot: -Math.PI / 5, dir, colors, reveal: 0.6 });
+      else rake(-Math.PI / 5, 0, done ? 1 : 4, 1);
+      if (variant2 === "cross" && frame2 >= 1 || big && frame2 >= 2) rake(Math.PI / 5, 2, done ? 1 : 2, 1);
+      if (frame2 >= 1) chips(x + dir * 4, y, dir, frame2, colors, 3, 0.8);
+    }
+    function thrustFx(q, frame2) {
+      const { x, y, dir, colors, big, tip } = q;
+      const start2 = tip.x - dir * (big ? 10 : 6), end = x + dir * ((big ? 10 : 6) + (frame2 === 1 ? 3 : 0));
+      const len = Math.max(1, Math.abs(end - start2));
+      for (let i = 0; i <= len; i++) {
+        const px = Math.round(start2 + dir * i), t = Math.round((frame2 >= 2 ? 1 : 2) * i / len);
+        ctx.fillStyle = colors[2];
+        ctx.fillRect(px, y - t - 1, 1, t * 2 + 3);
+        ctx.fillStyle = colors[1];
+        ctx.fillRect(px, y - t, 1, t * 2 + 1);
+        dot(px, y, "#fff");
+      }
+      if (frame2 >= 1) hitStar(end, y, big ? 8 : 6, 0, colors, 1.3, 0.8);
+      if (big && frame2 >= 2) for (const dy of [-6, 6]) {
+        ctx.fillStyle = colors[0];
+        ctx.fillRect(Math.round(Math.min(start2, start2 - dir * 10)), y + dy, 10, 1);
+      }
+    }
+    const IMPACT = { kick: [-0.75, 1, 1], uppercut: [-1.25, 0.9, 1.3], body: [0.1, 1.25, 1], downward: [1, 1, 1.1], stomp: [0, 1.2, 0.8], strike: [0.3, 1, 1] };
+    function impactFx(q, frame2) {
+      const { x, y, dir, colors, variant: variant2, big } = q;
+      if (variant2 === "bat") {
+        crescent(x + dir * 7, y, { r: big ? 20 : 16, half: 0.9, thick: frame2 === 0 ? 3 : 5, rot: -Math.PI / 3, dir, colors, reveal: frame2 === 0 ? 0.6 : 1 });
+        if (frame2 >= 1) for (const s of [-1, 1]) tri([[x + dir * 2, y - 2 + s * 4], [x + dir * 9, y + s * 4], [x + dir * 2, y + 2 + s * 4]], "#fff");
+        if (frame2 >= 2) chips(x, y, dir, frame2, colors);
+        return;
+      }
+      const [rot, sx, sy] = IMPACT[variant2] ?? IMPACT.strike;
+      const size = (big ? 12 : q.basic ? 7 : 9) + (frame2 === 1 ? 2 : 0) - (frame2 >= 2 ? 2 : 0);
+      const cy = variant2 === "uppercut" ? y - 3 : y;
+      if (frame2 === 0) star(x, cy, size * 0.6, size * 0.25, 4, rot, "#fff", sx, sy);
+      else hitStar(x, cy, size, rot, colors, sx, sy);
+      if (variant2 === "stomp" || variant2 === "downward") {
+        const d = 6 + frame2 * 3;
+        for (const s of [-1, 1]) {
+          ctx.fillStyle = colors[2];
+          ctx.fillRect(Math.round(x + s * d), q.floor - 3 - frame2, 3, 2);
+        }
+      }
+      if (frame2 >= 1) chips(x, cy, dir, frame2, colors, big ? 4 : 3);
+    }
+    function biteFx(q, frame2) {
+      const { x, y, dir, colors, big } = q;
+      const gap = [9, 4, 0, 0, 0][frame2], w = big ? 5 : 4, h = big ? 7 : 6;
+      for (const s of [-1, 1]) {
+        const jaw = y + s * (gap + h);
+        ctx.fillStyle = colors[2];
+        ctx.fillRect(Math.round(Math.min(x - dir * (w * 1.5 + 2), x + dir * (w * 1.5 + 2))), Math.round(jaw), w * 3 + 5, 1);
+        for (let i = -1; i <= 1; i++) {
+          const tx = x + dir * i * (w + 1);
+          tri([[tx - w / 2, jaw], [tx + w / 2, jaw], [tx, jaw - s * h]], colors[2]);
+          tri([[tx - w / 2 + 1, jaw], [tx + w / 2 - 1, jaw], [tx, jaw - s * (h - 2)]], "#fff");
+        }
+      }
+      if (frame2 >= 2) hitStar(x, y, big ? 6 : 4, 0.3, colors);
+    }
+    const MELEE_FX = { blade: bladeFx, claw: clawFx, thrust: thrustFx, impact: impactFx, bite: biteFx };
+    function drawMelee(q, now) {
+      const age = clock.t - q.start;
+      const frame2 = Math.floor(age / (q.duration / (q.big ? 5 : 3)));
+      if (age >= q.duration) return;
+      ctx.save();
+      if (q.still) {
+        diamond(q.x, q.y, 5, 4, q.colors[1]);
+        diamond(q.x, q.y, 2, 2, "#fff");
+      } else {
+        ctx.globalAlpha = [1, 1, 0.8, 0.55, 0.35][frame2];
+        if (q.big) {
+          ctx.save();
+          ctx.globalAlpha *= 0.55;
+          contactRing(q, 9 + frame2 * 3);
+          ctx.restore();
+        }
+        MELEE_FX[q.family](q, frame2);
+      }
+      ctx.restore();
+    }
+    function contactRing(q, radius) {
+      const height = Math.round(radius * 0.7);
+      ctx.fillStyle = q.colors[0];
+      for (let dy = -height; dy <= height; dy++) {
+        const outer = Math.round(radius * Math.sqrt(1 - (dy / height) ** 2));
+        const inner = Math.abs(dy) >= height - 1 ? 0 : Math.round((radius - 1) * Math.sqrt(1 - (dy / (height - 1)) ** 2));
+        ctx.fillRect(q.x - outer, q.y + dy, outer - inner + 1, 1);
+        ctx.fillRect(q.x + inner, q.y + dy, outer - inner + 1, 1);
+      }
+    }
     function drawProp(q, now) {
       ctx.globalAlpha = q.a == null ? 1 : Math.max(0, q.a);
-      if (q.kind === "orb") {
+      if (q.kind === "meleeFx") {
+        drawMelee(q, now);
+      } else if (q.kind === "orb") {
         const r = q.r + Math.sin(now / 50) * 0.6;
         disc(q.x, q.y, r + 2, q.colors[2]);
         disc(q.x, q.y, r, q.colors[1]);
@@ -15385,6 +15767,10 @@ const BattleRuntime = {
       swing: () => {
         noise(0.06, 0.04);
         tone(300, 0.08, "triangle", 0.04, 160);
+      },
+      bite: () => {
+        tone(410, 0.035, "triangle", 0.075, 180);
+        tone(340, 0.035, "triangle", 0.055, 150, 0.065);
       },
       hit: (big) => {
         noise(big ? 0.28 : 0.11, big ? 0.15 : 0.09);
@@ -15851,6 +16237,13 @@ const BattleRuntime = {
     crystal: { short: "\uACB0\uC815", firstUse: "\uACB0\uC815 \u25C6 \xB7 \uC774\uBC88 \uC6D0\uC815\uC5D0\uC11C \uC4F0\uB294 \uC7AC\uD654", detail: "\uC18C\uD658\uC758 \uC0D8\uACFC \uC6D0\uC815 \uC911 \uAC70\uB798\uC5D0 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.", scope: "\uC6D0\uC815" },
     join: { short: "\uD569\uB958", firstUse: "\uC774\uBC88 \uC6D0\uC815 \uD569\uB958", detail: "\uC774\uBC88 \uC6D0\uC815\uC5D0 \uD568\uAED8\uD560 \uB3D9\uB8CC\uAC00 \uB429\uB2C8\uB2E4.", scope: "\uC6D0\uC815" },
     recruit: { short: "\uC601\uC785", firstUse: "\uB3CC\uC544\uC628 \uB3D9\uB8CC\uB97C \uAD00\uCE21\uC18C\uC5D0 \uB9DE\uC774", detail: "\uC601\uC785\uD55C \uB3D9\uB8CC\uB294 \uB2E4\uC74C \uC6D0\uC815\uC5D0\uB3C4 \uD568\uAED8\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.", scope: "\uAD00\uCE21\uC18C" },
+    returned: { short: "\uC0DD\uD658" },
+    relayOrder: { short: "\uC2F8\uC6B0\uB294 \uC21C\uC11C", current: "\uC9C0\uAE08", next: "\uB2E4\uC74C" },
+    awakening: {
+      picked: "\uC9C1\uC811 \uACE0\uB984",
+      random: "\uBB34\uC791\uC704 \uD569\uB958",
+      detail: (remaining, draws, hasChoices) => (hasChoices ? remaining === 1 ? "\uACE0\uB978 \uD55C \uBA85\uC774 \uD569\uB958\uD558\uACE0, " : "\uACE0\uB978 \uB3D9\uB8CC\uAC00 \uD569\uB958\uD558\uACE0, \uC120\uD0DD\uC744 \uB9C8\uCE58\uBA74 " : "") + "\uBB34\uC791\uC704\uB85C " + draws + "\uBA85\uC774 \uB354 \uD569\uB958\uD574."
+    },
     startCompanion: { short: "\uC2DC\uC791 \uB3D9\uB8CC", firstUse: "\uC6D0\uC815 \uC2DC\uC791\uBD80\uD130 \uD568\uAED8\uD560 \uB3D9\uB8CC", detail: "\uC2DC\uC791 \uB3D9\uB8CC\uB97C \uD55C \uBA85 \uC815\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.", scope: "\uC900\uBE44" },
     springInvite: {
       short: "\uC0D8 \uCD08\uB300",
@@ -15862,7 +16255,7 @@ const BattleRuntime = {
     bond: { short: "\uC778\uC5F0", firstUse: "\uC601\uC785 \uD6C4 \uBB38\uC9C0\uAE30\uB098 \uBCF4\uC2A4\uC5D0 \uCD9C\uC804\uD574 \uC0B4\uC544 \uB3CC\uC544\uC628 \uD69F\uC218", detail: "\uCD9C\uC804\uD558\uACE0 \uB3CC\uC544\uC628 \uB3D9\uB8CC\uC758 \uC778\uC5F0\uC774 \uC624\uB985\uB2C8\uB2E4.", scope: "\uAE30\uB85D" },
     boost: { short: "\uAC15\uD654", firstUse: "\uC774\uBBF8 \uD568\uAED8 \xB7 \uAC15\uD654", detail: "\uACF5\uACA9\xB7\uB9C8\uACF5 +10%", scope: "\uC6D0\uC815" },
     memory: { short: "\uAE30\uC5B5", firstUse: "\uB3D9\uB8CC\uC758 \uAE30\uC5B5", detail: "\uC4F0\uB7EC\uC9C0\uAC70\uB098 \uBCF4\uB0B8 \uB3D9\uB8CC\uAC00 \uB2E4\uC2DC \uB098\uC624\uBA74 \uAC00\uC7A5 \uBA3C\uC800 \uD569\uB958\uD55C \uC0DD\uC874 \uB3D9\uB8CC\uC5D0\uAC8C \uACF5\uACA9\xB7\uB9C8\uACF5 +10%\uB97C \uC90D\uB2C8\uB2E4.", scope: "\uC6D0\uC815" },
-    heirloom: { short: "\uC720\uD488", firstUse: "\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC\uAC00 \uB0A8\uAE34 \uAE30\uC220", detail: "\uB2E4\uC74C \uB3D9\uB8CC\uAC00 \uBB3C\uB824\uBC1B\uC2B5\uB2C8\uB2E4. \uC704\uB825 \xD71.5 \xB7 MP 0 \xB7 \uC804\uD22C\uB2F9 1\uD68C", scope: "\uC6D0\uC815" },
+    heirloom: { short: "\uC720\uD488", firstUse: "\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC\uAC00 \uB0A8\uAE34 \uAE30\uC220", detail: "\uB2E4\uC74C \uB3D9\uB8CC\uAC00 \uBB3C\uB824\uBC1B\uC2B5\uB2C8\uB2E4. \uC704\uB825 \xD71.5 \xB7 MP 0 \xB7 \uC804\uD22C\uB2F9 1\uD68C", use: "MP 0 \xB7 1\uD68C", scope: "\uC6D0\uC815" },
     relic: { short: "\uC720\uBB3C", firstUse: "\uC774\uBC88 \uC6D0\uC815\uC5D0 \uC7A5\uCC29\uD55C \uBB3C\uAC74", detail: "\uC804\uD22C\uC5D0 \uD6A8\uACFC\uB97C \uC8FC\uBA70 \uCD5C\uB300 4\uAC1C\uB97C \uC7A5\uCC29\uD569\uB2C8\uB2E4.", scope: "\uC6D0\uC815" },
     retreat: { short: "\uBB3C\uB7EC\uB098\uAE30", firstUse: "\uC774\uBC88 \uC804\uD22C\uC5D0\uC11C \uC0B4\uC544\uC11C \uBE60\uC9D0", detail: "\uB2E4\uC74C \uB3D9\uB8CC\uAC00 \uC774\uBC88 \uACF5\uACA9\uC744 \uBC1B\uC74C", scope: "\uC804\uD22C" },
     wild: { short: "\uC804\uD22C \xB7 \uBABD\uB9C8", firstUse: "\uC77C\uBC18 \uC801", detail: "\uC801\uC744 \uBB3C\uB9AC\uCE58\uACE0 \uB2E4\uC74C \uCE35\uC73C\uB85C \uAC11\uB2C8\uB2E4.", scope: "\uCE35" },
@@ -16447,7 +16840,7 @@ const BattleRuntime = {
       }
       if (isFoe) {
         if (unit.charging) out.push('<i class="bad">\uCDA9\uC804 \uC911</i>');
-        for (const affix of affixLines(unit)) out.push('<i class="affix' + (affix.id === "frenzy" && affix.active ? " on" : "") + '">' + esc([affix.name, affix.text].filter(Boolean).join(" \xB7 ")) + "</i>");
+        for (const affix of affixLines(unit)) out.push('<i class="affix' + (affix.id === "frenzy" && affix.active ? " on" : "") + '" title="' + esc(affix.text ?? "") + '">' + esc(affix.name + (affix.turns ? " " + affix.turns + "\uD134" : "")) + "</i>");
       } else if (unit.lastStand) out.push('<i class="last" data-coach="last-stand">\uCD5C\uD6C4\uC758 \uC77C\uC778</i>');
       node.innerHTML = out.join("");
     }
@@ -16493,7 +16886,6 @@ const BattleRuntime = {
       bar($("#pf-hp"), foe.hp, foe.maxHp, fresh);
       $("#pf-hpn").textContent = foe.hp.toLocaleString("en-US") + " / " + foe.maxHp.toLocaleString("en-US");
       chips($("#pf-chips"), foe, true);
-      placeSky();
       S.beads.burn = foe.buffs.burn || 0;
       S.beads.divine = foe.buffs.divine || 0;
       if (B.foe) {
@@ -16514,9 +16906,6 @@ const BattleRuntime = {
       node.textContent = text;
       node.classList.toggle("retreat-preview", retreat);
       node.classList.toggle("retreat-outcomes", retreat && text.includes("\n"));
-    }
-    function placeSky() {
-      $("#sky").style.top = $("#foebar").offsetHeight + 12 + "px";
     }
     function enemyHeading(B) {
       const idx = B.D?.enemy?.idx ?? 0;
@@ -16540,7 +16929,6 @@ const BattleRuntime = {
       c.className = "cd" + (future ? " on" : "");
       S.danger = boss ? 1 : 0;
       enemyHeading(B);
-      placeSky();
     }
     function shortLine(line) {
       if (/상성 우위/.test(line)) return "\uC0C1\uC131 \xD71.2";
@@ -16866,6 +17254,16 @@ const BattleRuntime = {
     };
   }
 
+  // card_pixel/game/src/ui/text.js
+  function josa(word, pair) {
+    const text = String(word);
+    const last = text.at(-1);
+    const syllable = /[0-9]/.test(last) ? "\uC601\uC77C\uC774\uC0BC\uC0AC\uC624\uC721\uCE60\uD314\uAD6C"[Number(last)] : last;
+    const ending = /[가-힣]/.test(syllable) ? (syllable.charCodeAt(0) - 44032) % 28 : 0;
+    const [closed, open] = pair.split("/");
+    return text + (ending && !(pair === "\uC73C\uB85C/\uB85C" && ending === 8) ? closed : open);
+  }
+
   // card_pixel/game/src/ui/battle/tiles.js
   var previewDamage = (p) => p.min != null && p.max != null ? formatRange([p.min, p.max]) : String(p.dmg ?? "");
   function killLabel(preview, hp) {
@@ -16905,7 +17303,7 @@ const BattleRuntime = {
     });
   }
   function createTiles({ core: core2, widgets: widgets2, audio: audio2, sheets: sheets2, B, foeDef, play, ticker }) {
-    const { card, faceBadge } = widgets2;
+    const { card } = widgets2;
     const { sfx } = audio2;
     const { openSheet, closeSheet, sheet } = sheets2;
     const FIELD_NAMES = new Set(Object.keys(FIELD).map((id) => core2.BUFF_NAMES[id]));
@@ -16961,14 +17359,22 @@ const BattleRuntime = {
     }
     function renderOpening(model) {
       const { stand, rescue } = model;
-      const current = B.D.allies[B.D.cur];
-      const next = B.D.allies.find((ally) => ally?.form === rescue.incomingId);
+      const { allies, cur } = B.D;
+      const current = allies[cur];
+      const next = allies.find((ally) => ally?.form === rescue.incomingId);
       const actorId = stand.actorId ?? current.form ?? B.party[B.D.cur];
       const heirloom = heirloomSkill(card(actorId));
       const retreatHp2 = next && rescue.incomingHpAfter != null ? next.name + " HP " + next.hp + " \u2192 " + formatRange(rescue.incomingHpAfter) : "\uB2E4\uC74C \uB3D9\uB8CC\uAC00 \uCD9C\uC804";
-      const inheritance = next && heirloom ? "\uC4F0\uB7EC\uC9C0\uBA74 " + next.name + (hasFinalConsonant(next.name) ? "\uC774 " : "\uAC00 ") + heirloom.name + (hasFinalConsonant(heirloom.name) ? "\uC744" : "\uB97C") + " \uACC4\uC2B9" : "\uC4F0\uB7EC\uC9C0\uBA74 \uB2E4\uC74C \uB3D9\uB8CC\uC5D0\uAC8C \uC720\uD488 \uACC4\uC2B9";
-      $("#opening-face").innerHTML = faceBadge(actorId, current.name) + "<b>HP " + current.hp + " / " + current.maxHp + "</b>";
-      $("#acts").innerHTML = '<button class="act opening-choice rescue" data-opening-rescue data-coach="retreat"><b>' + TERMS.retreat.short + "</b><small>" + esc(current.name + " \uC0DD\uC874 \xB7 " + TERMS.retreat.detail) + "</small><small>" + esc(retreatHp2) + '</small></button><button class="act opening-choice stand" data-coach="skill" data-i="' + stand.optionIndex + '"><b>' + esc(current.name) + "\uB85C \uB9C8\uC9C0\uB9C9 \uACF5\uACA9</b><small>" + esc(inheritance) + "</small><small>" + esc(B.D.enemy.name) + "\uC5D0 \uD53C\uD574 " + esc(formatRange(stand.damageRange)) + "</small></button>";
+      const inheritance = next && heirloom ? "\uC4F0\uB7EC\uC9C0\uBA74 " + josa(next.name, "\uC774/\uAC00") + " " + josa(heirloom.name, "\uC744/\uB97C") + " \uACC4\uC2B9" : "\uC4F0\uB7EC\uC9C0\uBA74 \uB2E4\uC74C \uB3D9\uB8CC\uC5D0\uAC8C \uC720\uD488 \uACC4\uC2B9";
+      const relay = allies.filter((ally) => ally && !ally.dead && !ally.out).map((ally) => {
+        const position = ally === current ? "current" : ally === next ? "next" : "";
+        const hit = position === "current" ? B.intent?.dmg : position === "next" ? rescue.damageRange : null;
+        const danger = hit?.at(-1) >= ally.hp;
+        const tag = TERMS.relayOrder[position];
+        return '<span class="opening-relay-member' + (position === "current" ? " pf sel" : "") + '" data-fighter="' + esc(ally.form) + '"><span class="opening-relay-face">' + widgets2.face(ally.form, 28) + '</span><span class="opening-relay-copy"><b>' + esc(ally.name) + '</b><small class="opening-relay-hp' + (danger ? " danger" : "") + '">HP ' + ally.hp + "</small>" + (tag ? '<small class="opening-relay-tag ' + position + '">' + tag + "</small>" : "") + "</span></span>";
+      }).join('<span class="opening-relay-chevron" aria-hidden="true">\u203A</span>');
+      $("#opening-face").innerHTML = '<b class="opening-relay-label">' + TERMS.relayOrder.short + "</b>" + relay;
+      $("#acts").innerHTML = '<button class="act opening-choice rescue" data-opening-rescue data-coach="retreat"><b>' + TERMS.retreat.short + "</b><small>" + esc(current.name + " \uC0DD\uC874 \xB7 " + TERMS.retreat.detail) + "</small><small>" + esc(retreatHp2) + '</small></button><button class="act opening-choice stand" data-coach="skill" data-i="' + stand.optionIndex + '"><b>' + esc(josa(current.name, "\uC73C\uB85C/\uB85C")) + " \uB9C8\uC9C0\uB9C9 \uACF5\uACA9</b><small>" + esc(inheritance) + "</small><small>" + esc(B.D.enemy.name) + "\uC5D0 \uD53C\uD574 " + esc(formatRange(stand.damageRange)) + "</small></button>";
     }
     function renderActions(opening) {
       const options = B.bridge.options(), D = B.D, me = card(B.party[D.cur]);
@@ -17017,7 +17423,7 @@ const BattleRuntime = {
         h.disabled = false;
         const forecast = p?.instant ? previewDamage(p) + " \xB7 \uC989\uC2DC" : p?.delayed ? delayedLine(heir, D.turn) : p ? previewDamage(p) : "";
         const kill = killLabel(p, D.enemy.hp);
-        h.innerHTML = "<small>" + TERMS.heirloom.short + " \xB7 " + esc(heir.heirFromName || "") + "</small><b>" + esc(heir.name) + "</b><strong>" + esc(forecast) + "</strong>" + relicMarks(core2, markedRelics(heir)) + (kill ? "<u>" + kill + "</u>" : "");
+        h.innerHTML = "<small>" + TERMS.heirloom.short + " \xB7 " + esc(heir.heirFromName || "") + ' \xB7 <span class="heirloom-use">' + TERMS.heirloom.use + "</span></small><b>" + esc(heir.name) + "</b><strong>" + esc(forecast) + "</strong>" + relicMarks(core2, markedRelics(heir)) + (kill ? "<u>" + kill + "</u>" : "");
       } else {
         h.className = "";
         h.innerHTML = "";
@@ -17162,19 +17568,31 @@ const BattleRuntime = {
     function beginMove(e, actor, isFoe) {
       const p = { e, actor, target: e.target ? actorOf(e.target) : null, kind: e.skill.type, isFoe, stage: "ready", colors: colorsOf(e.who) };
       const donor = e.heirloom && e.heirFrom && card(e.heirFrom);
-      if (!donor) return p;
-      p.donor = donor;
-      p.colors = St.ELEMENT_COLORS[donor.element] || St.ELEMENT_COLORS.none;
-      p.effectSprite = St.variant(donor.id + "-fx", "base");
-      const art = spr(donor.id);
-      if (art) {
-        p.caster = actor;
-        p.casterVisible = actor.vis;
-        actor.vis = false;
-        p.actor = St.makeActor({ sprite: donor.id, x: actor.x, y: actor.y, flip: art.facing === "left" });
+      if (donor) {
+        p.donor = donor;
+        p.colors = St.ELEMENT_COLORS[donor.element] || St.ELEMENT_COLORS.none;
+        const art = spr(donor.id);
+        if (art) {
+          p.caster = actor;
+          p.casterVisible = actor.vis;
+          actor.vis = false;
+          p.actor = St.makeActor({ sprite: donor.id, x: actor.x, y: actor.y, flip: art.facing === "left" });
+        }
       }
+      p.motionInput = {
+        sourceKey: e.sourceKey,
+        skill: e.skill,
+        side: e.who.side,
+        heirloom: e.heirloom,
+        salience: e.salience ?? (e.ult ? "boss" : void 0),
+        isBasic: p.kind === "phy" && e.skill.name === "\uC77C\uBC18 \uACF5\uACA9",
+        casterSprite: p.actor.sprite
+      };
+      p.motion = resolveMotion(p.motionInput);
+      if (donor && !isMelee(p)) p.effectSprite = St.variant(donor.id + "-fx", "base");
       return p;
     }
+    const isMelee = (p) => p.motion?.range === "melee";
     function impact(e, o, stats) {
       const actor = actorOf(e.who), unit = unitOf(e.who), isAlly = e.who.side === "ally";
       applyHp(e);
@@ -17182,22 +17600,25 @@ const BattleRuntime = {
       const ratio = e.amount / unit.maxHp, big = ratio >= 0.3 || o.crit || o.big;
       actor.pose = "hurt";
       if (!reducedMotion()) {
-        actor.white = 0.09;
-        actor.ox = (isAlly ? -1 : 1) * 4;
-        tween(actor, { ox: 0 }, 0.25);
-        S.shake = Math.max(S.shake, Math.min(7, 1 + ratio * 12 + (o.crit ? 2 : 0)));
-        if (o.crit) S.flash = Math.max(S.flash, 0.5);
-        St.sparks(St.X(actor), CY(actor), big ? 22 : 8, o.colors || St.ELEMENT_COLORS.none, big ? 100 : 50);
+        actor.white = o.melee ? 0.04 : 0.09;
+        if (!o.melee) {
+          actor.ox = (isAlly ? -1 : 1) * 4;
+          tween(actor, { ox: 0 }, 0.25);
+          S.shake = Math.max(S.shake, Math.min(7, 1 + ratio * 12 + (o.crit ? 2 : 0)));
+          if (o.crit) S.flash = Math.max(S.flash, 0.5);
+          St.sparks(St.X(actor), CY(actor), big ? 22 : 8, o.colors || St.ELEMENT_COLORS.none, big ? 100 : 50);
+        }
       }
       const text = (o.prefix || "") + (o.label ?? e.amount.toLocaleString("en-US")) + (o.adv ? " \u25B2" : "");
       St.number(text, St.X(actor), HY(actor) - (big ? 8 : 2), (o.crit ? "crit " : big ? "big " : "") + (isAlly ? "foe" : ""));
-      sfx.hit(big);
-      if (o.crit) sfx.crit();
+      if (o.melee === "bite") sfx.bite();
+      else if (o.melee === "blade" || o.melee === "claw" || o.melee === "thrust") sfx.swing();
+      else sfx.hit(o.melee ? o.big : big);
+      if (o.crit && !o.melee) sfx.crit();
       if (!isAlly && e.amount > stats.best) stats.best = e.amount;
     }
     function isBig(p) {
-      const { tier, val } = p.e.skill;
-      return p.e.salience === "boss" || p.e.salience == null && p.e.ult || !!p.e.heirloom || !p.isFoe && tier >= 3 && (!Number.isFinite(val) || val >= 2);
+      return p.motion ? p.motion.size === "big" : isBigMove(p.motionInput);
     }
     function shapeOf(skill, val) {
       const fx = skill.effects || [];
@@ -17206,28 +17627,50 @@ const BattleRuntime = {
       if (fx.includes("self_hp_cost_ratio") || (val ?? skill.val ?? 0) >= 4) return "meteor";
       return skill.type === "phy" ? "dash" : "beam";
     }
-    const ATTACK_FRAME = { red_dragon: "mag", ash: "mag", flame_sage: "mag", luna: "phy", zeke: "phy", cherry_prince: "phy", golem: "phy" };
-    const poseFor = (actor, kind) => !ATTACK_FRAME[actor.sprite] || ATTACK_FRAME[actor.sprite] === kind ? "attack" : "idle";
-    async function bigMove(p) {
-      const { actor, target, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
+    const ATTACK_FRAME = { red_dragon: "phy", ash: "mag", flame_sage: "mag", luna: "phy", zeke: "phy", cherry_prince: "phy", golem: "phy" };
+    const poseFor = ({ actor, kind, motion }) => motion?.frame ?? (!ATTACK_FRAME[actor.sprite] || ATTACK_FRAME[actor.sprite] === kind ? "attack" : "idle");
+    async function windUp(p) {
+      const { actor, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
       const caster = unitOf(p.e.who).name;
       const who = isFoe && p.e.ult ? "\uD544\uC0B4" : p.e.heirloom ? "\uC720\uD488 \xB7 " + (donor?.name || caster) : caster;
       actor.front = 1;
       $$("#fx .num").forEach((n) => n.remove());
-      const plate = St.plate(who, skill.name, isFoe && p.e.ult ? "#ff6b5e" : p.e.heirloom ? "#ffc857" : colors[1], dir);
+      p.plate = St.plate(who, skill.name, isFoe && p.e.ult ? "#ff6b5e" : p.e.heirloom ? "#ffc857" : colors[1], dir);
       if (reducedMotion()) {
-        actor.pose = poseFor(actor, p.kind);
-        p.stage = "hit";
-        setTimeout(() => plate.remove(), 450);
+        actor.pose = poseFor(p);
         await wait(0.12);
         return;
       }
       tween(S, { dark: isFoe ? 0.45 : 0.35 }, 0.12);
       sfx.charge();
-      actor.pose = poseFor(actor, p.kind);
+      actor.pose = isMelee(p) ? "idle" : poseFor(p);
       actor.white = 0.06;
       St.converge(St.X(actor) + dir * 10, CY(actor), 18, colors, 34, 0.3);
       await St.punch(St.X(actor) + dir * 14, CY(actor) - 6, 0.18);
+    }
+    function finishBig(p, x, y) {
+      if (!reducedMotion()) {
+        S.flash = isMelee(p) ? 0.22 : 0.6;
+        S.shake = 7;
+        if (!isMelee(p)) {
+          St.ring(x, y, p.colors[0], 40);
+          St.sparks(x, y, 34, p.colors, 130);
+        }
+        tween(S, { dark: 0 }, 0.3);
+      }
+      if (p.plate) {
+        if (isMelee(p)) wait(0.45).then(() => p.plate.remove());
+        else setTimeout(() => p.plate.remove(), 450);
+      }
+    }
+    async function bigMove(p) {
+      const { actor, target, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
+      await windUp(p);
+      if (reducedMotion()) {
+        finishBig(p);
+        p.stage = "hit";
+        return;
+      }
       const tx = St.X(target), ty = CY(target);
       if (p.effectSprite) St.fly(St.X(actor) + dir * 14, CY(actor), tx, ty, 0.28, colors[1], 16, 2, null, p.effectSprite);
       const original = donor?.skills.find((s) => s.name === skill.name && s.type === skill.type);
@@ -17285,17 +17728,12 @@ const BattleRuntime = {
           await wait(shape === "flurry" ? 0.07 : 0.06);
         }
       }
-      S.flash = 0.6;
-      S.shake = 7;
-      St.ring(tx, ty, colors[0], 40);
-      St.sparks(tx, ty, 34, colors, 130);
-      tween(S, { dark: 0 }, 0.3);
-      setTimeout(() => plate.remove(), 450);
+      finishBig(p, tx, ty);
       p.stage = "hit";
     }
     async function quietMove(p) {
       const { actor, target, isFoe, colors } = p, dir = isFoe ? -1 : 1;
-      actor.pose = poseFor(actor, p.kind);
+      actor.pose = poseFor(p);
       p.stage = "hit";
       if (reducedMotion()) return;
       if (p.kind === "phy") {
@@ -17309,27 +17747,80 @@ const BattleRuntime = {
         await wait(0.22);
       }
     }
+    async function meleeMove(p, landed) {
+      const { actor, target, isFoe, colors, motion } = p;
+      const dir = isFoe ? -1 : 1, big = isBig(p), still = reducedMotion();
+      if (big && !still) await windUp(p);
+      const casterMeta = St.meta(actor, motion.frame), targetMeta = St.meta(target, landed ? "hurt" : target.pose);
+      if (!still) {
+        const offset = contactOffset({ caster: actor, target, casterMeta, targetMeta, dir });
+        await tween(actor, offset, big ? 0.1 : 0.12, "in");
+        actor.pose = motion.frame;
+      }
+      const from = spriteBox(actor, still ? St.meta(actor) : casterMeta, S.BASE);
+      const to = spriteBox(target, targetMeta, S.BASE);
+      const near = dir > 0 ? to.left : to.right;
+      const x = near + dir * 2;
+      const low = motion.socket === "foot" || motion.variant === "scythe";
+      const floor = Math.round(to.feet);
+      const hand = Math.round(from.top + from.height * 0.63);
+      const body = Math.round(to.top + to.height * 0.64);
+      const y = low ? floor - (motion.variant === "stomp" ? 5 : 14) : Math.min(to.bottom - 7, Math.max(body, still ? body : hand + (motion.variant === "uppercut" ? -4 : 0)));
+      const tip = { x: still ? x : dir > 0 ? from.right : from.left };
+      const duration = still ? 0.09 : big ? 0.22 : 0.135;
+      p.stage = "hit";
+      if (big) finishBig(p, x, y);
+      const tint = motion.tint && St.ELEMENT_COLORS[motion.tint];
+      const fx = St.prop({
+        kind: "meleeFx",
+        family: motion.family,
+        variant: motion.variant,
+        x,
+        y,
+        tip,
+        floor,
+        dir,
+        colors: tint || colors,
+        big,
+        basic: p.motionInput.isBasic,
+        still,
+        landed,
+        start: clock.t,
+        duration
+      });
+      p.hitHold = wait(duration).then(() => St.dropProp(fx));
+    }
+    function deliver(p, landed) {
+      if (isMelee(p)) return meleeMove(p, landed);
+      return isBig(p) ? bigMove(p) : quietMove(p);
+    }
     async function strikeAndHit(p, step, stats, hasEffects, finishHit) {
       const e = step.event;
       p.actor.front = 1;
-      if (p.stage === "ready") {
-        if (isBig(p)) await bigMove(p);
-        else await quietMove(p);
-      }
+      if (p.stage === "ready") await deliver(p, true);
       p.hitAt = clock.t;
       if (finishHit) {
         p.finishing = true;
-        return finishHit(e);
+        await finishHit(e);
+        await p.hitHold;
+        return;
       }
       const calc = e.calc || {};
-      impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p), label: step.label }, stats);
-      if (!hasEffects) await wait(0.14);
+      impact(e, {
+        crit: !!calc.crit,
+        adv: !!calc.adv,
+        colors: p.colors,
+        big: isBig(p),
+        label: step.label,
+        melee: isMelee(p) && p.motion.family
+      }, stats);
+      if (p.hitHold) await p.hitHold;
+      else if (!hasEffects) await wait(0.14);
     }
     async function strikeMiss(p, why) {
       const { actor, target, isFoe } = p, dir = isFoe ? -1 : 1;
       actor.front = 1;
-      if (isBig(p)) await bigMove(p);
-      else await quietMove(p);
+      await deliver(p, false);
       if (why === "evasion") {
         if (!reducedMotion()) tween(target, { ox: dir * 10 }, 0.08).then(() => tween(target, { ox: 0 }, 0.2));
         label("\uD68C\uD53C!", target, "good");
@@ -17343,9 +17834,12 @@ const BattleRuntime = {
     }
     async function settleMove(p) {
       try {
-        if (p.stage === "ready" && p.e.salience === "boss" && p.target) await bigMove(p);
+        if (p.stage === "ready" && p.e.salience === "boss" && p.target) {
+          await deliver(p, false);
+          await p.hitHold;
+        }
         if (p.stage === "ready") {
-          p.actor.pose = poseFor(p.actor, p.kind);
+          p.actor.pose = poseFor(p);
           await wait(0.12);
         }
         if (p.finishing || reducedMotion()) Object.assign(p.actor, { ox: 0, oy: 0 });
@@ -18847,12 +19341,12 @@ const BattleRuntime = {
     const introCandidates = run.introCandidates ?? [];
     const observed = intro ? { ...run, heirlooms: { ...run.introHeirlooms, ...run.heirlooms } } : run;
     const leadPlate = (id) => '<div class="wake-lead win">' + faceBadge(id) + "<span>\uB300\uC5EC \uC804\uD22C\uC5D0\uC11C \uD568\uAED8 \uC628 \uB3D9\uB8CC" + (observed.heirlooms[id] ? "<small>\uC720\uD488 \xB7 " + esc(observed.heirlooms[id].name) + "</small>" : "") + "</span></div>";
-    function line(ids) {
-      return ids.map((id) => '<button class="wake-face win g-' + esc(card(id).grade) + '" data-sheet="' + esc(id) + '">' + faceBadge(id) + "</button>").join("");
+    function line(ids, tag) {
+      return ids.map((id) => '<button class="wake-face win g-' + esc(card(id).grade) + '" data-sheet="' + esc(id) + '">' + faceBadge(id) + '<small class="companion-tag">' + tag + "</small></button>").join("");
     }
     function completed2(chosen, awakened, animate) {
       const summary = "\uC120\uD0DD \uB3D9\uB8CC " + chosen.length + "\uBA85 \xB7 \uCD94\uAC00 \uD569\uB958 " + awakened.length + "\uBA85 \xB7 \uACB0\uC815 " + run.crystals;
-      node.innerHTML = head(run, "\uB3D9\uB8CC \uACE0\uB974\uAE30", "2\uCE35") + '<div class="scroll">' + (lead ? leadPlate(lead) : "") + '<h3>\uC120\uD0DD\uD55C \uB3D9\uB8CC</h3><div class="wake-line">' + line(chosen.filter((id) => id !== lead)) + '</div><h3>\uCD94\uAC00 \uD569\uB958 \uB3D9\uB8CC</h3><div class="wake-line" id="wake-draws">' + awakened.map((id) => '<div class="wake-slot g-' + esc(card(id).grade) + '">' + line([id]) + "</div>").join("") + '</div><p class="wake-summary win" aria-live="polite"></p></div><div class="footer"><button class="btn" id="b-wake-skip">\uAC74\uB108\uB6F0\uAE30</button><button class="btn go" id="b-depart" hidden>\uC6D0\uC815 \uCD9C\uBC1C</button></div>';
+      node.innerHTML = head(run, "\uB3D9\uB8CC \uACE0\uB974\uAE30", "2\uCE35") + '<div class="screen-split"><div class="fixed-top">' + (lead ? leadPlate(lead) : "") + '</div><div class="scroll-list"><h3>\uC120\uD0DD\uD55C \uB3D9\uB8CC</h3><div class="wake-line">' + line(chosen.filter((id) => id !== lead), TERMS.awakening.picked) + '</div><h3>\uCD94\uAC00 \uD569\uB958 \uB3D9\uB8CC</h3><div class="wake-line" id="wake-draws">' + awakened.map((id) => '<div class="wake-slot g-' + esc(card(id).grade) + '">' + line([id], TERMS.awakening.random) + "</div>").join("") + '</div><p class="wake-summary win" aria-live="polite"></p></div><div class="footer fixed-foot"><button class="btn" id="b-wake-skip">\uAC74\uB108\uB6F0\uAE30</button><button class="btn go" id="b-depart" hidden>\uC6D0\uC815 \uCD9C\uBC1C</button></div></div>';
       show("awaken");
       const skip = $("#b-wake-skip", node);
       const depart = $("#b-depart", node);
@@ -18875,20 +19369,20 @@ const BattleRuntime = {
         const split = Math.max(1, run.bench.length - START.draws);
         return completed2(run.bench.slice(0, split), run.bench.slice(split), false);
       }
-      node.innerHTML = head(run, "\uB3D9\uB8CC \uACE0\uB974\uAE30", "2\uCE35") + '<div class="scroll"><h3>\uC774\uBC88 \uC6D0\uC815 \uD569\uB958</h3><div class="cards">' + run.bench.map((id) => cardRow(run, id, { sheet: true, skills: false })).join("") + '</div></div><div class="footer"><button class="btn go" id="b-depart">\uC6D0\uC815 \uCD9C\uBC1C</button></div>';
+      node.innerHTML = head(run, "\uB3D9\uB8CC \uACE0\uB974\uAE30", "2\uCE35") + '<div class="screen-split"><div class="fixed-top"><h3>\uC774\uBC88 \uC6D0\uC815 \uD569\uB958</h3></div><div class="scroll-list"><div class="cards">' + run.bench.map((id) => cardRow(run, id, { sheet: true, skills: false })).join("") + '</div></div><div class="footer fixed-foot"><button class="btn go" id="b-depart">\uC6D0\uC815 \uCD9C\uBC1C</button></div></div>';
       show("awaken");
       $("#b-depart", node).addEventListener("click", ui.leave);
       return;
     }
     const near = pending.near && card(pending.near);
-    const info = intro ? "\uD55C \uBA85\uC744 \uACE0\uB974\uBA74 \uB098\uBA38\uC9C0\uB3C4 \uD568\uAED8 \uAE68\uC5B4\uB098. \uCD94\uAC00 \uB3D9\uB8CC " + START.draws + "\uBA85\uC740 \uBB34\uC791\uC704\uB85C \uD569\uB958\uD569\uB2C8\uB2E4." : "\uB3D9\uB8CC\uB97C \uC120\uD0DD\uD558\uBA74 \uBB34\uC791\uC704\uB85C " + START.draws + "\uBA85\uC774 \uCD94\uAC00 \uD569\uB958\uD569\uB2C8\uB2E4.";
+    const info = TERMS.awakening.detail(pending.remaining, START.draws, pending.candidates.length > 0);
     const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>\uC774\uBC88 \uC6D0\uC815 \uD569\uB958</h3><div class="cards">' + run.bench.map((id) => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? TERMS.startCompanion.short : "" })).join("") + "</div>" : "";
     const candidates = intro ? pending.candidates.slice().sort((a, b) => Number(introCandidates.includes(b)) - Number(introCandidates.includes(a))) : pending.candidates;
     const cards = candidates.map((id) => {
       const tag = introCandidates.includes(id) ? "\uB300\uC5EC \uC804\uD22C \uC0DD\uD658" : id === run.profileShard ? "\uC608\uC57D \uD6C4\uBCF4" : near && card(id).element === near.element ? "\uAC19\uC740 \uC18D\uC131" : "";
       return cardRow(observed, id, { tag, offer: true, coach: "awakening-candidate" });
     }).join("");
-    node.innerHTML = head(run, "\uB3D9\uB8CC \uACE0\uB974\uAE30", "\uB0A8\uC740 \uC120\uD0DD " + pending.remaining) + '<div class="scroll">' + allies + '<p class="lead">' + info + '</p><div class="cards" id="wake-choices">' + cards + '</div></div><div class="footer"><button class="btn go" id="b-wake" data-coach="awakening-confirm"' + (cards ? " disabled" : "") + ">" + (cards ? "\uB3D9\uB8CC \uC120\uD0DD" : "\uACC4\uC18D\uD558\uAE30") + "</button></div>";
+    node.innerHTML = head(run, "\uB3D9\uB8CC \uACE0\uB974\uAE30", "\uB0A8\uC740 \uC120\uD0DD " + pending.remaining) + '<div class="screen-split"><div class="fixed-top">' + allies + '<p class="lead">' + info + '</p></div><div class="scroll-list"><div class="cards" id="wake-choices">' + cards + '</div></div><div class="footer fixed-foot"><button class="btn go" id="b-wake" data-coach="awakening-confirm"' + (cards ? " disabled" : "") + ">" + (cards ? "\uB3D9\uB8CC \uC120\uD0DD" : "\uACC4\uC18D\uD558\uAE30") + "</button></div></div>";
     show("awaken");
     let selected = null;
     const button = $("#b-wake", node);
@@ -18899,7 +19393,7 @@ const BattleRuntime = {
         sfx.tap();
         for (const row of choices) row.classList.toggle("sel", row === choice);
         button.disabled = false;
-        button.textContent = card(selected).name + " \xB7 " + TERMS.join.short;
+        button.textContent = card(selected).name + " " + TERMS.join.short;
       });
     }
     button.addEventListener("click", () => {
@@ -19313,7 +19807,7 @@ const BattleRuntime = {
       const gain = reward(door);
       const quirk = run.features?.quirks !== false && door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
       const chips = quirk + (run.features?.affixes === false ? "" : door.enemies.map(affixChips).join(""));
-      return '<div class="door-plate win" data-kind="' + door.type + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      return '<div class="door-plate win" data-kind="' + door.type + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward">' + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
     const front = defaultParty(run);
     const lineup = (party) => party.map((id, index) => {
@@ -19462,9 +19956,10 @@ const BattleRuntime = {
     const firstAction = firstBeats.length === 1 ? enemyActionText(firstBeats[0]) : "";
     const title = run.daily ? "\uADE0\uC5F4" : DUNGEONS[run.dungeonId].name;
     const arrivals = awakened.length ? '<p class="map-receipt gain" role="status" id="order-awakened">\uD568\uAED8 \uAE68\uC5B4\uB0A8 \xB7 ' + esc(awakened.map(name).join(" \xB7 ")) + "</p>" : "";
-    node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", null, { back: !!draft }) + '<div class="scroll">' + arrivals + '<button class="win run-opponents" id="b-opponents"><span><b>' + esc(title) + " " + run.floor + "\uCE35 \xB7 \uC801 " + door.enemies.length + "\uBA85</b><small>\uCCAB \uC801 " + esc(first.name) + (firstAction ? " \xB7 \uCCAB \uD589\uB3D9 " + esc(firstAction) : "") + '</small></span><span class="opponent-info">\uC815\uBCF4</span></button><div class="formation"></div></div><div class="footer formation-actions"><button class="btn" id="b-formation-info" hidden>\uB3D9\uB8CC \uC815\uBCF4</button><button class="btn go" id="b-go" data-coach="formation-confirm">\uC774\uB300\uB85C \uC804\uD22C \uC2DC\uC791</button></div>';
+    node.innerHTML = head(run, "\uCD9C\uC804 \uC21C\uC11C", null, { back: !!draft }) + '<div class="screen-split"><div class="fixed-top">' + arrivals + '<button class="win run-opponents" id="b-opponents"><span><b>' + esc(title) + " " + run.floor + "\uCE35 \xB7 \uC801 " + door.enemies.length + "\uBA85</b><small>\uCCAB \uC801 " + esc(first.name) + (firstAction ? " \xB7 \uCCAB \uD589\uB3D9 " + esc(firstAction) : "") + '</small></span><span class="opponent-info">\uC815\uBCF4</span></button><div class="formation"></div></div><div class="scroll-list"></div><div class="footer fixed-foot formation-actions"><button class="btn" id="b-formation-info" hidden>\uB3D9\uB8CC \uC815\uBCF4</button><button class="btn go" id="b-go" data-coach="formation-confirm">\uC774\uB300\uB85C \uC804\uD22C \uC2DC\uC791</button></div></div>';
     show("order");
     const formation = $(".formation", node);
+    const reserves = $(".scroll-list", node);
     const info = $("#b-formation-info", node);
     const go = $("#b-go", node);
     const focused = () => selected?.bench ?? party[selected?.slot];
@@ -19479,18 +19974,19 @@ const BattleRuntime = {
           style: "margin-bottom:" + (source.fy + 3 - source.h) + "px"
         }) : "";
         const trait = traitLine(fighter, i);
-        return '<button class="relay-seat win" data-slot="' + i + '" aria-pressed="' + active2 + '"><small>' + POSITION[i] + '</small><span class="relay-seat-art">' + art + "</span><b>" + esc(fighter?.name || "\uBE48 \uC790\uB9AC") + repeatBadge(run, id) + "</b>" + (trait ? '<small class="relay-trait" title="' + esc(traitText(fighter.trait)) + '">' + esc(trait) + "</small>" : "") + blessingLine(id) + "</button>";
+        return '<button class="relay-seat win' + (selected && !active2 ? " sel" : "") + '" data-slot="' + i + '" aria-pressed="' + active2 + '"><small>' + POSITION[i] + '</small><span class="relay-seat-art">' + art + "</span><b>" + esc(fighter?.name || "\uBE48 \uC790\uB9AC") + repeatBadge(run, id) + "</b>" + (trait ? '<small class="relay-trait" title="' + esc(traitText(fighter.trait)) + '">' + esc(trait) + "</small>" : "") + blessingLine(id) + "</button>";
       });
       const links = slots.slice(1).map((_, i) => {
         const entry = previews[i];
         return '<button class="relay-link" data-link="' + i + '" aria-label="' + POSITION[i] + ' \uC720\uD488 \uD750\uB984"' + (entry?.skill ? "" : " disabled") + ">\u2192</button>";
       });
       const bench = run.bench.filter((id) => !party.includes(id));
-      formation.innerHTML = '<div class="relay-seats">' + slots.map((slot, i) => slot + (links[i] ?? "")).join("") + "</div><h3>\uB300\uAE30 " + bench.length + '\uBA85</h3><div class="reserve-cards">' + bench.map((id) => '<button class="win" data-bench="' + esc(id) + '" aria-pressed="' + (selected?.bench === id) + '">' + faceBadge(id, name(id), 40, run) + blessingLine(id) + "</button>").join("") + "</div>";
+      formation.innerHTML = '<div class="relay-seats">' + slots.map((slot, i) => slot + (links[i] ?? "")).join("") + "</div>";
+      reserves.innerHTML = "<h3>\uB300\uAE30 " + bench.length + '\uBA85</h3><div class="reserve-cards">' + bench.map((id) => '<button class="win" data-bench="' + esc(id) + '" aria-pressed="' + (selected?.bench === id) + '">' + faceBadge(id, name(id), 40, run) + blessingLine(id) + "</button>").join("") + "</div>";
       info.hidden = !focused();
       go.disabled = !party.some(Boolean);
       for (const button of $$("[data-slot]", formation)) button.addEventListener("click", () => select({ slot: Number(button.dataset.slot) }));
-      for (const button of $$("[data-bench]", formation)) button.addEventListener("click", () => select({ bench: button.dataset.bench }));
+      for (const button of $$("[data-bench]", reserves)) button.addEventListener("click", () => select({ bench: button.dataset.bench }));
       for (const button of $$("[data-link]", formation)) button.addEventListener("click", () => {
         const { from, to, skill } = previews[Number(button.dataset.link)];
         const replaced = run.heirlooms?.[to]?.name;
@@ -20816,25 +21312,30 @@ const BattleRuntime = {
     const mustReserve = !won && candidates.length > 0;
     const { card, face: face2 } = widgets2;
     const reason = (id) => won ? TAGS[rewards.recruitTags[id]] : "\uCD9C\uC804 \uAE30\uB85D \uC788\uC74C";
+    node.classList.add("screen-split");
     node.innerHTML = `
-    <div class="meta-scene meta-return-stage" style="background-image:url(${background(dungeon.background)})"></div>
-    <div class="meta-recruit-body">
-      <div class="meta-recruit-heading">
-        <h2>${won ? "\uB3D9\uB8CC \uC601\uC785" : "\uAFC8 \uC870\uAC01"}</h2>
-        <button class="btn" id="meta-run-record">\uAE30\uB85D</button>
-        ${run.lastBattleLog?.length ? '<button class="btn log-button" id="meta-battle-log">\uC804\uD22C \uAE30\uB85D</button>' : ""}
+    <div class="fixed-top">
+      <div class="meta-scene meta-return-stage" style="background-image:url(${background(dungeon.background)})"></div>
+      <div class="meta-recruit-body">
+        <div class="meta-recruit-heading">
+          <h2>${won ? "\uB3D9\uB8CC \uC601\uC785" : "\uAFC8 \uC870\uAC01"}</h2>
+          <button class="btn" id="meta-run-record">\uAE30\uB85D</button>
+          ${run.lastBattleLog?.length ? '<button class="btn log-button" id="meta-battle-log">\uC804\uD22C \uAE30\uB85D</button>' : ""}
+        </div>
+        ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} \xB7 ${esc(stampContract.name)}</p>` : ""}
+        <p class="meta-mission-earned" hidden>\uB3D9\uB8CC \uCD08\uB300 \uAC00\uB2A5</p>
+        ${candidates.length ? `<p>${won ? `\uB3CC\uC544\uC628 \uB3D9\uB8CC \uC911 ${limit === 2 ? "\uB450 \uBA85\uAE4C\uC9C0" : "\uD55C \uBA85\uC744"} \uC601\uC785\uD558\uC138\uC694.` : "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4 \uD55C \uBA85 \uC608\uC57D"}</p>` : `<p>${won ? "\uC0C8\uB85C \uC601\uC785\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4." : "\uC608\uC57D\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."}</p>`}
       </div>
-      ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} \xB7 ${esc(stampContract.name)}</p>` : ""}
-      <p class="meta-mission-earned" hidden>\uB3D9\uB8CC \uCD08\uB300 \uAC00\uB2A5</p>
-      ${candidates.length ? `<p>${won ? `\uB3CC\uC544\uC628 \uB3D9\uB8CC \uC911 ${limit === 2 ? "\uB450 \uBA85\uAE4C\uC9C0" : "\uD55C \uBA85\uC744"} \uC601\uC785\uD558\uC138\uC694.` : "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4 \uD55C \uBA85 \uC608\uC57D"}</p>` : `<p>${won ? "\uC0C8\uB85C \uC601\uC785\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4." : "\uC608\uC57D\uD560 \uB3D9\uB8CC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."}</p>`}
+    </div>
+    <div class="scroll-list">
       <div class="meta-recruit-list">${candidates.map((id) => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">
         <span class="meta-face">${face2(id, 44)}</span>
-        <span><b>${esc(card(id).name)}</b><small>${esc(reason(id))}</small></span>
+        <span><b>${esc(card(id).name)}</b>${won ? `<span class="companion-tag">${TERMS.returned.short}</span>` : ""}<small>${esc(reason(id))}</small></span>
         <span class="meta-recruit-mark" aria-hidden="true"></span>
       </button>`).join("")}</div>
-      <p class="meta-feedback" role="status"></p>
     </div>
-    <div class="meta-recruit-actions">
+    <div class="meta-recruit-actions fixed-foot">
+      <p class="meta-feedback" role="status"></p>
       <button class="btn go" id="meta-recruit-confirm"></button>
     </div>
   `;
@@ -20873,6 +21374,9 @@ const BattleRuntime = {
       if (!confirm(selection(choices))) feedback.textContent = "\uC120\uD0DD\uC744 \uB2E4\uC2DC \uD655\uC778\uD574 \uC8FC\uC138\uC694.";
     });
     renderSelection();
+  }
+  function recruitReceipt(ids, { card, face: face2 }) {
+    return '<div class="recruit-receipts" role="status">' + ids.map((id) => '<div class="recruit-receipt win" data-recruited="' + esc(id) + '"><span class="run-face">' + face2(id, 28) + "</span><b>" + esc(card(id).name) + '</b><span class="companion-tag">' + TERMS.recruit.short + "</span></div>").join("") + "</div>";
   }
   function missionRecruitSheet({ period, widgets: widgets2, sheets: sheets2, claim, next, remaining }) {
     let chosen = null;
@@ -21256,8 +21760,7 @@ const BattleRuntime = {
     root.className = "coach";
     root.hidden = true;
     root.innerHTML = `
-    <i class="coach-shade"></i><i class="coach-shade"></i><i class="coach-shade"></i><i class="coach-shade"></i>
-    <span class="coach-ring" aria-hidden="true"></span>
+    <i class="coach-shade" aria-hidden="true"></i>
     <div class="coach-say win">
       <span class="coach-face">${face2}</span>
       <p class="coach-line" aria-live="polite"></p>
@@ -21267,15 +21770,16 @@ const BattleRuntime = {
       </div>
     </div>`;
     document.body.append(root);
-    const shades = [...root.querySelectorAll(".coach-shade")];
-    const ring = $(".coach-ring", root);
+    const shade = $(".coach-shade", root);
     const say = $(".coach-say", root);
     const line = $(".coach-line", root);
     const next = $(".coach-next", root);
     const skip = $(".coach-skip", root);
     let current;
     let targets = [];
+    let groups = [];
     let visible = [];
+    const rings = [];
     let reservedPort;
     let animationFrame;
     function clearReservation() {
@@ -21293,41 +21797,63 @@ const BattleRuntime = {
       };
       const header = frame.querySelector(".run-screen.on > header.top");
       const targetTop = header && targets.every((target) => !header.contains(target)) ? Math.max(bounds.top, header.getBoundingClientRect().bottom) : bounds.top;
-      const rects = targets.map((target) => visibleRect(target, { ...bounds, top: targetTop }));
-      visible = targets.filter((_, index) => rects[index]);
-      const holes = rects.filter(Boolean);
-      const left = holes.length ? Math.max(bounds.left, Math.floor(Math.min(...holes.map((r) => r.left))) - PAD) : 0;
-      const right = holes.length ? Math.min(bounds.right, Math.ceil(Math.max(...holes.map((r) => r.right))) + PAD) : 0;
-      const top = holes.length ? Math.max(targetTop, Math.floor(Math.min(...holes.map((r) => r.top))) - PAD) : bounds.bottom;
-      const bottom = holes.length ? Math.min(bounds.bottom, Math.ceil(Math.max(...holes.map((r) => r.bottom))) + PAD) : bounds.bottom;
+      const rects = new Map(groups.flat().map((target) => [target, visibleRect(target, { ...bounds, top: targetTop })]));
+      visible = targets.filter((target) => rects.get(target));
+      const holes = groups.flatMap((group) => {
+        const boxes = group.map((target) => rects.get(target)).filter(Boolean);
+        if (!boxes.length) return [];
+        return [{
+          left: Math.max(bounds.left, Math.floor(Math.min(...boxes.map((r) => r.left))) - PAD),
+          right: Math.min(bounds.right, Math.ceil(Math.max(...boxes.map((r) => r.right))) + PAD),
+          top: Math.max(targetTop, Math.floor(Math.min(...boxes.map((r) => r.top))) - PAD),
+          bottom: Math.min(bounds.bottom, Math.ceil(Math.max(...boxes.map((r) => r.bottom))) + PAD)
+        }];
+      }).sort((a, b) => a.top - b.top);
       say.style.left = bounds.left + GAP + "px";
       say.style.width = Math.max(0, bounds.right - bounds.left - 2 * GAP) + "px";
-      const aboveSpace = top - bounds.top - 2 * GAP;
-      const belowSpace = bounds.bottom - bottom - 2 * GAP;
-      const above = aboveSpace >= belowSpace;
-      const space = Math.max(0, aboveSpace, belowSpace);
+      let previous = bounds.top;
+      const gaps = holes.map((hole) => {
+        const gap2 = { start: previous, end: hole.top };
+        previous = Math.max(previous, hole.bottom);
+        return gap2;
+      });
+      gaps.push({ start: previous, end: bounds.bottom });
+      const gap = gaps.reduce((best, next2) => next2.end - next2.start > best.end - best.start ? next2 : best);
+      const space = Math.max(0, gap.end - gap.start - 2 * GAP);
       const height = say.offsetHeight + Math.max(0, line.scrollHeight - line.clientHeight);
+      const above = gap.start === bounds.top;
       if (reserve && targets.length > 1 && space < height) {
-        const port = targets[0].closest(".scroll, .run-route");
-        if (port && targets.every((target) => port.contains(target))) {
+        const port = targets[0].closest(".scroll, .scroll-list, .run-route");
+        const summary = groups.length > 1 && port?.matches(".scroll-list") ? port.previousElementSibling : null;
+        if (port && (groups.length === 1 || summary?.classList.contains("fixed-top")) && targets.every((target) => port.contains(target))) {
           const room = port.getBoundingClientRect();
-          const available = above ? room.top - bounds.top : bounds.bottom - room.bottom;
+          const start = summary ? summary.getBoundingClientRect().bottom + PAD : bounds.top;
+          const beforeList = summary || above;
+          const available = beforeList ? room.top - start : bounds.bottom - room.bottom;
           const extra = Math.min(port.clientHeight / 2, Math.max(0, height + 2 * GAP + PAD - available));
           if (extra > 0) {
             reservedPort = port;
-            port.style.setProperty(above ? "margin-block-start" : "margin-block-end", extra + "px");
+            port.style.setProperty(beforeList ? "margin-block-start" : "margin-block-end", extra + "px");
             scrollIntoView(targets[0]);
             return place2();
           }
         }
       }
-      placeBox(shades[0], 0, 0, innerWidth, top);
-      placeBox(shades[1], 0, bottom, innerWidth, innerHeight - bottom);
-      placeBox(shades[2], 0, top, left, bottom - top);
-      placeBox(shades[3], right, top, innerWidth - right, bottom - top);
-      placeBox(ring, left, top, right - left, bottom - top);
+      const rectangle = ({ left, top, right, bottom }) => `M${left} ${top}H${right}V${bottom}H${left}Z`;
+      shade.style.clipPath = `path(evenodd, "${rectangle({ left: 0, top: 0, right: innerWidth, bottom: innerHeight })}${holes.map(rectangle).join("")}")`;
+      while (rings.length > holes.length) rings.pop().remove();
+      for (const [index, { left, right, top, bottom }] of holes.entries()) {
+        if (!rings[index]) {
+          const ring = document.createElement("span");
+          ring.className = "coach-ring";
+          ring.setAttribute("aria-hidden", "true");
+          root.insertBefore(ring, say);
+          rings.push(ring);
+        }
+        placeBox(rings[index], left, top, right - left, bottom - top);
+      }
       say.style.maxHeight = space + "px";
-      say.style.top = (above ? top - Math.min(say.offsetHeight, space) - GAP : bottom + GAP) + "px";
+      say.style.top = (above ? gap.end - Math.min(say.offsetHeight, space) - GAP : gap.start + GAP) + "px";
     }
     function follow() {
       if (!current) return;
@@ -21339,9 +21865,9 @@ const BattleRuntime = {
       return !current.acknowledge || current.activate;
     }
     function nudge() {
-      ring.classList.remove("nudge");
-      void ring.offsetWidth;
-      ring.classList.add("nudge");
+      for (const ring of rings) ring.classList.remove("nudge");
+      void root.offsetWidth;
+      for (const ring of rings) ring.classList.add("nudge");
     }
     function block(event) {
       if (!current || say.contains(event.target)) return;
@@ -21380,12 +21906,13 @@ const BattleRuntime = {
       scrollIntoView(targets.find((target) => target === document.activeElement) ?? targets[0]);
       place2(true);
     });
-    function show2(step, buttons) {
-      if (current?.id === step.id && buttons.every((button, index) => button === targets[index]) && buttons.length === targets.length) return;
+    function show2(step, buttons, spotlights = [buttons]) {
+      if (current?.id === step.id && current.line === step.line && buttons.every((button, index) => button === targets[index]) && buttons.length === targets.length) return;
       const previous = current;
       clearReservation();
       current = step;
       targets = buttons;
+      groups = spotlights;
       root.hidden = false;
       root.dataset.coachStep = step.id;
       line.textContent = step.line;
@@ -21406,6 +21933,7 @@ const BattleRuntime = {
       if (current?.battle) pause(false);
       current = null;
       targets = [];
+      groups = [];
       visible = [];
       root.hidden = true;
       delete root.dataset.coachStep;
@@ -21418,16 +21946,33 @@ const BattleRuntime = {
   // card_pixel/game/src/ui/tutorial.js
   var ENTRY = {
     title: ["#title.on #b-start", "\uD615\uC544, \uB8E8\uBBF8\uAC00 \uD558\uB098\uC529 \uC54C\uB824 \uC904\uAC8C. \uC0C8\uBCBD\uC758 \uC232\uC73C\uB85C \uAC00 \uBCF4\uC790!"],
-    opening: ["#battle.on .opening-choice", "\uACE8\uB818\uC774 \uACF5\uACA9\uD574. \uC560\uC26C\uB85C \uB9DE\uC124\uC9C0, \uB4A4\uB85C \uBB3C\uB9B4\uC9C0 \uACE8\uB77C."],
-    inherit: ["#battle.on #b-heir.on", "\uB208\uD1A0\uB07C\uAC00 \uC560\uC26C\uC758 \uC544\uB9C8\uAC9F\uB3C8\uC744 \uBC1B\uC558\uC5B4. \uC368 \uBD10."],
-    rescue: ['#battle.on .act[data-i="0"]', "\uC560\uC26C\uB294 \uC0B4\uC544 \uC788\uC5B4. \uC774\uC81C \uC55E\uC5D0 \uC120 \uB3D9\uB8CC\uB85C \uACF5\uACA9\uD574."],
-    awakening: ['#awaken.on [data-coach="awakening-candidate"]', "\uC774\uBC88 \uC6D0\uC815\uC5D0 \uD568\uAED8\uD560 \uB3D9\uB8CC \uD55C \uBA85\uC744 \uACE8\uB77C."],
-    "awakening-confirm": ['#awaken.on [data-coach="awakening-confirm"]', "\uACE0\uB978 \uB3D9\uB8CC\uC640 \uD568\uAED8 \uAC00\uC790."],
-    door: ['#map.on .door-entry[data-coach="door"]', "\uBB38\uC5D0 \uC801\uC758 \uACF5\uACA9\uC774 \uBCF4\uC5EC. \uAC00\uACE0 \uC2F6\uC740 \uBB38\uC744 \uB20C\uB7EC."],
-    formation: ['#order.on [data-coach="formation-confirm"]', "\uC120\uBD09\uBD80\uD130 \uC2F8\uC6CC. \uC900\uBE44\uB410\uC73C\uBA74 \uC2DC\uC791\uD574."],
-    recruit: ["#recruit.on [data-candidate]", "\uB3CC\uC544\uC628 \uB3D9\uB8CC \uD55C \uBA85\uC744 \uB2E4\uC74C\uC5D0\uB3C4 \uB9CC\uB0A0 \uC218 \uC788\uC5B4."],
-    "recruit-confirm": ["#recruit.on #meta-recruit-confirm", "\uC774 \uB3D9\uB8CC\uB97C \uAD00\uCE21\uC18C\uC5D0 \uC601\uC785\uD558\uC790."],
-    departure: ["#hub.on #meta-depart, #hub.on #meta-other-region", "\uC774 \uB3D9\uB8CC\uC640 \uCCAB \uB358\uC804\uC73C\uB85C \uB5A0\uB098\uC790."]
+    opening: [
+      "#battle.on .opening-choice",
+      ({ name, enemy, damage, hp }) => `\uC55E\uC5D0\uC11C \uD55C \uBA85\uC529 \uC2F8\uC6CC. \uC9C0\uAE08\uC740 ${name} \uCC28\uB840\uC57C.
+${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C. ${name} HP\uB294 ${josa(hp, "\uC774\uC57C/\uC57C")}.`,
+      ["#battle.on #intent", "#battle.on :is(#opening-face, .opening-choice)"]
+    ],
+    inherit: ["#battle.on #b-heir.on", ({ name, next, skill }) => `\uC4F0\uB7EC\uC9C4 ${josa(name, "\uC774/\uAC00")} ${josa(skill, "\uC744/\uB97C")} \uB0A8\uACBC\uC5B4. ${josa(next, "\uC73C\uB85C/\uB85C")} \uC368 \uBD10.`],
+    rescue: [({ index }) => `#battle.on .act[data-i="${index}"]`, ({ name, next, skill }) => `${josa(name, "\uC740/\uB294")} \uC0B4\uC558\uC5B4. \uB300\uC2E0 \uB9DE\uC740 ${josa(next, "\uC73C\uB85C/\uB85C")} ${josa(skill, "\uC744/\uB97C")} \uC368 \uBD10.`],
+    awakening: [
+      '#awaken.on [data-coach="awakening-candidate"]',
+      "\uC774\uBC88 \uC6D0\uC815\uC5D0 \uB370\uB824\uAC08 \uD55C \uBA85\uC744 \uACE8\uB77C.",
+      ["#awaken.on .fixed-top", '#awaken.on [data-coach="awakening-candidate"]']
+    ],
+    "awakening-confirm": ['#awaken.on [data-coach="awakening-confirm"]', ({ name }) => josa(name, "\uACFC/\uC640") + " \uD568\uAED8 \uAC00\uC790."],
+    door: ['#map.on :is(.door-entry[data-coach="door"], [data-coach="door-info"])', "\uB450 \uBB38\uC740 \uB9CC\uB0A0 \uC801\uC774 \uB2EC\uB77C. \uC2F8\uC6B8 \uC801\uC744 \uACE8\uB77C."],
+    formation: [
+      '#order.on :is([data-slot], [data-coach="formation-confirm"])',
+      "\uC120\uBD09\uBD80\uD130 \uC2F8\uC6CC. \uBC14\uAFB8\uB824\uBA74 \uB450 \uC790\uB9AC\uB97C \uCC28\uB840\uB85C \uB20C\uB7EC.",
+      ["#order.on [data-slot]", '#order.on [data-coach="formation-confirm"]']
+    ],
+    recruit: ["#recruit.on [data-candidate]", "\uAD00\uCE21\uC18C\uC5D0 \uC601\uC785\uD560 \uD55C \uBA85\uC744 \uACE8\uB77C. \uB2E4\uC74C \uC6D0\uC815\uC5D0\uB3C4 \uC4F8 \uC218 \uC788\uC5B4."],
+    "recruit-confirm": ["#recruit.on #meta-recruit-confirm", ({ name }) => josa(name, "\uC744/\uB97C") + " \uAD00\uCE21\uC18C\uC5D0 \uC601\uC785\uD558\uC790."],
+    departure: [
+      "#hub.on #meta-depart, #hub.on #meta-other-region",
+      ({ name, region }) => `${josa(name, "\uACFC/\uC640")} ${josa(region, "\uC73C\uB85C/\uB85C")} \uB5A0\uB098\uC790.`,
+      ["#hub.on :is(#meta-depart, #meta-other-region, .recruit-receipts)"]
+    ]
   };
   var TOURS = {
     heirloom: ["", "\uC4F0\uB7EC\uC9C4 \uB3D9\uB8CC\uAC00 \uB0A8\uAE34 \uAE30\uC220\uC774\uC57C. \uC804\uD22C\uC5D0\uC11C \uD55C \uBC88, MP \uC5C6\uC774 \uC4F8 \uC218 \uC788\uC5B4."],
@@ -21479,11 +22024,13 @@ const BattleRuntime = {
       if (!selector) return [];
       return $$(selector).filter((node) => node.getClientRects().length && !node.hidden && !node.disabled && getComputedStyle(node).visibility === "visible");
     }
-    function basicStep(id, inBattle = false, selector) {
-      const [target, line] = ENTRY[id];
-      const targets = find(selector ?? target);
-      if (targets.length) coach.show({ id, line, battle: inBattle, skip: dismissBasic }, targets);
-      return targets.length > 0;
+    function basicStep(id, context, inBattle = false) {
+      const [selector, copy2, spotlights] = ENTRY[id];
+      const targets = find(typeof selector === "function" ? selector(context) : selector);
+      if (!targets.length) return false;
+      const line = typeof copy2 === "function" ? copy2(context) : copy2;
+      coach.show({ id, line, battle: inBattle, skip: dismissBasic }, targets, spotlights?.map(find));
+      return true;
     }
     function tour(key, id, { selector, line, inBattle = false, interactive = false, multiple = false } = {}) {
       const entry = currentProfile().ui.entry;
@@ -21518,26 +22065,46 @@ const BattleRuntime = {
       if (basic2 && !sheet) {
         if (screen === "title" && !done.includes("title") && basicStep("title")) return;
         if (intro && ready && run.room.type === "borrowed") {
-          if (!done.includes("opening") && basicStep("opening", true)) return;
+          const { D, intent, options, all } = battle.state;
+          const { name, hp } = D.allies[D.cur];
+          if (!done.includes("opening") && intent?.dmg && basicStep("opening", {
+            name,
+            hp,
+            enemy: roster2.card(D.enemy.form.replace(/^wild_/, ""))?.name ?? D.enemy.name,
+            damage: formatRange(intent.dmg)
+          }, true)) return;
           if (!done.includes("opening-followup")) {
-            if (done.includes("opening-stand") && battle.state.all.some((event) => event.t === "heirloom")) {
-              if (basicStep("inherit", true)) return;
+            if (done.includes("opening-stand")) {
+              const heirloom = options.find((option) => option.heirloom && option.usable);
+              if (heirloom && basicStep("inherit", { name: heirloom.heirFromName, next: name, skill: heirloom.name }, true)) return;
             }
             if (done.includes("opening-rescue")) {
-              const storm = battle.state.options.find((option) => option.name === "\uC2E4\uBC84\uC2A4\uD1B0" && option.usable);
-              if (basicStep("rescue", true, storm && `#battle.on .act[data-i="${storm.index}"]`)) return;
+              const retreated = all.find((event) => event.t === "retreat");
+              const damage = (option) => option.preview.min ?? option.preview.dmg;
+              const skill = options.filter((option) => option.usable && option.preview && !option.preview.delayed).sort((a, b) => damage(b) - damage(a))[0];
+              if (retreated && skill && basicStep("rescue", {
+                name: D.allies[retreated.who.idx].name,
+                next: name,
+                skill: skill.name,
+                index: skill.index
+              }, true)) return;
             }
           }
         }
         if (intro && screen === "awaken" && run.pending?.kind === "start" && !done.includes("awakening")) {
-          if (basicStep($("#b-wake")?.disabled ? "awakening" : "awakening-confirm")) return;
+          const picked = $("#wake-choices .cardrow.sel")?.dataset.id;
+          if (picked ? basicStep("awakening-confirm", { name: widgets2.card(picked).name }) : basicStep("awakening")) return;
         }
         if (intro && screen === "map" && run.floor === 3 && !done.includes("door") && basicStep("door")) return;
         if (intro && screen === "order" && run.floor === 3 && !done.includes("formation") && basicStep("formation")) return;
         if (intro && screen === "recruit" && run.result === "win" && !done.includes("recruit") && $("[data-candidate]")) {
-          if (basicStep($('[data-candidate][aria-pressed="true"]') ? "recruit-confirm" : "recruit")) return;
+          const picked = $('[data-candidate][aria-pressed="true"]')?.dataset.candidate;
+          if (picked ? basicStep("recruit-confirm", { name: widgets2.card(picked).name }) : basicStep("recruit")) return;
         }
-        if (!run && screen === "hub" && profile.lead && featureFlags(profile).introCleared && (!featureFlags(profile).firstMainCleared || profile.ui.tutorialReplay) && basicStep("departure")) return;
+        if (!run && screen === "hub" && profile.lead && featureFlags(profile).introCleared && (!featureFlags(profile).firstMainCleared || profile.ui.tutorialReplay)) {
+          const destination = DUNGEONS[$("#meta-depart [data-region]")?.dataset.region];
+          if (destination && basicStep("departure", { name: widgets2.card(profile.lead).name, region: destination.name })) return;
+        }
       }
       const key = visitKey(result ? "battle-result" : screen, run, sheet);
       if (coach.id?.startsWith("tour-") && visit === key) return;
@@ -21783,6 +22350,7 @@ const BattleRuntime = {
         daily: flags.dailyRift ? daily.hubView() : null,
         openDaily: daily.showDaily
       });
+      if (arriving.length) $(".meta-hub-actions", node).insertAdjacentHTML("afterbegin", recruitReceipt(arriving, widgets2));
       if (profile.ui?.announcement) updateUi({ announcement: null });
       for (const button of node.querySelectorAll("[data-meta-page]")) button.addEventListener("click", () => {
         openMeta(button.dataset.metaPage);
