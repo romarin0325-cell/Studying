@@ -17,7 +17,7 @@
 
 .map-landscape {
   inset: -4px;
-  background: linear-gradient(180deg, #120d231a, #120d231c 48%, #120d237a),
+  background: linear-gradient(180deg, #120d231a 0 48%, #120d2338 48% 76%, #120d237a 76% 100%),
     var(--landscape, none) center bottom / cover no-repeat;
   opacity: var(--scene-opacity);
 }
@@ -31,10 +31,10 @@
 
 #map .map-walker {
   position: absolute;
-  top: -56px;
+  top: -96px;
   left: -24px;
   width: 48px;
-  height: 56px;
+  height: 96px;
   padding: 0;
   border: 0;
   background: none;
@@ -49,7 +49,7 @@
   width: 24px;
   height: 7px;
   background: #130d248e;
-  clip-path: polygon(0 28%, 16% 0, 84% 0, 100% 28%, 100% 72%, 84% 100%, 16% 100%, 0 72%);
+  clip-path: var(--notch);
 }
 
 .map-walker-art {
@@ -68,13 +68,11 @@
   bottom: auto;
   translate: -50% 0;
   padding: 0 7px;
-  border-radius: 999px;
   background: var(--navy);
   color: #fff;
-  font: 800 0.6875rem/1.25rem var(--f-body);
+  font: normal 0.75rem/1.25rem var(--f-label);
   white-space: nowrap;
-  pointer-events: none;
-}
+  pointer-events: none; clip-path: var(--notch); text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
 
 .map-door {
   --door-rim: #9982b2;
@@ -94,7 +92,6 @@
 
 .map-door:not(.chosen) { opacity: calc((.36 + .64 * var(--branch-light)) * var(--other-paths)); }
 .map-door.chosen { z-index: 1; }
-.map-door[aria-pressed="true"] { --door-rim: var(--aqua); --door-shine: var(--aqua); }
 .map-door:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
 .map-door[data-kind="spring"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #90ead9; }
 .map-door[data-kind="altar"], .map-door[data-kind="event"] { --door-rim: #ab82b1; --door-fill: #5a375c; --door-shine: #f8b5d9; }
@@ -104,6 +101,10 @@
   --door-fill: #56303d;
   --door-shine: #ffad8b;
 }
+
+.map-door[aria-pressed="true"] { --door-rim: var(--aqua-lo); --door-shine: var(--aqua); }
+.map-door:active .map-door-line { translate: 0 var(--u); --pf-drop: 0px; }
+.map-door[aria-pressed="true"] .map-door-line { --pf-o: var(--aqua-lo); --pf-in: var(--aqua); }
 
 .map-door-frame {
   position: absolute;
@@ -144,12 +145,13 @@
 .map-door-emblem {
   position: absolute;
   inset: 7px 5px 3px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
-#map .map-door-emblem img { max-width: 40px; max-height: 42px; object-fit: contain; }
-.map-door-shadow { filter: brightness(0) drop-shadow(0 1px 0 var(--door-shine)); }
+#map .map-door-emblem img { flex: none; }
+.map-door-shadow { filter: brightness(0) drop-shadow(0 var(--u) 0 var(--door-shine)); }
 
 #map .map-door-line {
   position: absolute;
@@ -159,14 +161,11 @@
   width: max-content;
   margin-top: 2px;
   padding: 1px 9px;
-  border-radius: 999px;
-  background: #fff;
   color: var(--navy);
-  font: normal 0.8125rem/1.25rem var(--f-display);
-  box-shadow: 0 2px 6px rgba(20, 14, 60, .35);
+  font: normal 0.75rem/1.25rem var(--f-label);
   white-space: nowrap;
   transform: translateX(-50%);
-}
+  --pf-lo: var(--line2); --pf-sh: rgba(20, 14, 60, .35); }
 
 #map .map-door[data-map-door="1"]:nth-last-child(2) { left: min(var(--door-x), 100% - 42px); }
 #map .map-door[data-map-door="1"]:nth-last-child(2) .map-door-line {
@@ -193,34 +192,31 @@
 .map-skip span {
   display: inline-block;
   padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .92);
   color: var(--navy);
-  font: normal 0.8125rem var(--f-display);
-  box-shadow: 0 2px 6px rgba(20, 14, 60, .3);
-}
+  font: normal 0.9375rem var(--f-display); --pf-f: rgba(255, 255, 255, .92); --pf-sh: rgba(20, 14, 60, .3); }
 
-.door-plate.previewing { box-shadow: inset 5px 0 0 var(--kind), 0 0 0 3px var(--aqua), var(--lift); }
+.map-skip:active span { transform: translateY(var(--u)); --pf-drop: 0px; }
+.door-plate.previewing { --pf-o: var(--aqua-lo); --pf-in: var(--aqua); }
 .run-doors:has(.previewing) .door-plate:not(.previewing) { min-height: 48px; }
 .run-doors:has(.previewing) .door-plate:not(.previewing) .door-entry > :not(.door-copy),
 .run-doors:has(.previewing) .door-plate:not(.previewing) .door-copy > :not(b) { display: none; }
 .door-plate.previewing .door-entry { flex-wrap: wrap; }
-.door-entry .door-lesson, .door-lesson { display: flex; align-items: center; gap: 4px; width: fit-content; padding: 1px 8px 1px 4px; border-radius: 999px; color: #8a4f00; background: var(--gold-tint); font-weight: 700; }
+.door-entry .door-lesson, .door-lesson { display: flex; align-items: center; gap: 4px; width: fit-content; padding: 1px 8px 1px 4px; color: #8a4f00; background: var(--gold-tint); clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); }
 .door-lesson .run-icon { width: 16px; height: 16px; flex: none; }
 .map-formation { padding: 0 12px calc(10px + env(safe-area-inset-bottom)); }
 .map-formation[hidden] { display: none; }
 .map-formation .relay-seats { margin-top: 0; }
-.map-formation .relay-seat { grid-template-rows: 16px 42px 20px auto; }
+.map-formation .relay-seat { grid-template-rows: 18px 94px 20px auto; }
 .map-formation .reserve-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .map-formation .reserve-cards .run-face { width: 40px; height: 40px; }
-.map-awaken { margin: 10px 12px 0; padding: 8px 10px; text-align: center; color: var(--gold-ink); flex: none; }
-.map-awaken > b { display: block; margin-bottom: 4px; font: normal 1rem var(--f-display); }
+.map-awaken { margin: 10px 12px 0; padding: 8px 10px; text-align: center; color: var(--gold-ink); flex: none; --pf-o: var(--gold-lo); --pf-lo: var(--gold-tint); }
+.map-awaken > b { display: block; margin-bottom: 4px; font: normal 0.9375rem var(--f-display); }
 .map-awaken-faces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
-.map-awaken-faces button { height: auto; padding: 4px; animation: map-awaken-in 260ms steps(5) var(--wake-delay) both; }
+.map-awaken-faces button { height: auto; padding: 4px; animation: map-awaken-in 260ms steps(4, end) var(--wake-delay) both; }
 .map-awaken-faces .run-face { width: 40px; height: 40px; }
-.map-receipt { margin: 10px 12px 0; padding: 6px 12px; border-radius: 999px; background: var(--aqua-tint); color: var(--aqua-ink); text-align: center; }
+.map-receipt { margin: 10px 12px 0; padding: 6px 12px; background: var(--aqua-tint); color: var(--aqua-ink); text-align: center; clip-path: var(--notch); }
 @keyframes map-awaken-in {
-  from { opacity: 0; transform: translateY(5px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {

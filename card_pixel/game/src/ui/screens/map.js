@@ -255,7 +255,7 @@ export function mapScreen(run, ui, { awakened = [], receipt } = {}) {
     const art = spr(id);
     if (!art) return '';
     const flip = art.facing === 'left';
-    const scale = .85;
+    const scale = 1;
     const style = 'width:' + art.w * scale + 'px;height:' + art.h * scale + 'px;' +
       'left:' + (-art.cx * scale) + 'px;top:' + (-(art.fy + 1) * scale) + 'px;' +
       'transform-origin:' + art.cx * scale + 'px ' + (art.fy + 1) * scale + 'px;';

@@ -67,7 +67,14 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
    Components set --pf-o (outline), --pf-f (fill), --pf-hi (top highlight), --pf-lo (bottom ledge),
    --pf-ledge (ledge height), --pf-sh (shadow colour), --pf-drop (shadow depth). The frame sits outside
    the box (box-shadow), so it never changes layout; leave --u of room around framed pieces. */
-:where(.pf, .win, .btn, .ic, .tog, .mini, .bubble, .ih .pic, .heirbox, #session-notices p) {
+:where(.pf, .win, .btn, .ic, .tog, .mini, .bubble, .ih .pic, .heirbox, #session-notices p,
+  .cardrow .pic, .note, .log-button, .revealing.tease, .floor-cell, .door-lineup, .door-entry > .run-icon,
+  .door-info, .wake-slot, .wake-face, .reinforce-art, .relic-dais, .relic-slot, .relic-compare-card,
+  .meta-panel, .meta-backup-compare section, .title-save-notice, .orb, .meta-unlocks > div, #hub .daily-row,
+  .meta-dungeon .meta-face.boss, .meta-screen select, .meta-sheet select, .meta-cell, .meta-relic,
+  .meta-companion-art, .meta-skill,
+  #bar button, #stage, #foebar, .sky, #skip, .banner, .pm, .act, #b-retreat, #b-heir, #result .heirline,
+  .battle-log-turn, .log-jump, .map-door-line, .map-skip span) {
   --pf-o: var(--navy); --pf-f: var(--paper); --pf-hi: transparent; --pf-lo: var(--paper3); --pf-ledge: var(--u);
   --pf-sh: var(--shade); --pf-drop: var(--u); --pf-in: transparent;
   border: 0; border-radius: 0;
@@ -86,11 +93,14 @@ img.px, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
     inset 0 0 0 var(--u) var(--pf-in);
 }
 /* selected or current piece: aqua frame two pixels thick */
-:where(.pf, .win, .btn, .tog, .mini).sel, :where(.pf, .win, .btn, .tog, .mini)[aria-pressed="true"] {
+:where(.pf, .win, .btn, .tog, .mini, .meta-panel, .meta-cell, .relic-slot).sel,
+:where(.pf, .win, .btn, .tog, .mini, .meta-panel, .meta-cell, .relic-slot)[aria-pressed="true"] {
   --pf-o: var(--aqua-lo); --pf-in: var(--aqua); }
 /* the stair end of a plate or tag: six one-pixel columns, each shorter, hanging from the top.
    Components set --st (colour); the body is a plain rectangle left of the stairs. */
-:where(.plate, .section-tag, .shbody h4, .meta-sheet h4, #result h4, .sheet h3) {
+:where(.plate, .section-tag, .shbody h4, .meta-sheet h4, #result h4, .sheet h3,
+  header.top b, .event-dialog h2, .meta-top h1, .meta-title-name span, .meta-dungeon-copy b,
+  #bar #room, .skillplate) {
   --st: var(--navy); --sw: calc(6 * var(--u));
   clip-path: none; border-radius: 0;
   background:

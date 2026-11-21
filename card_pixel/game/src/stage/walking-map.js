@@ -1,6 +1,7 @@
 const WIDTH = 366;
 const HEIGHT = 350;
 const FRAME_MS = 1000 / 60;
+const ACTOR_SPACING = 58;
 const ENTRY_END = 22;
 const ZOOM_START = 14;
 const ROOM_OPEN = 23;
@@ -121,7 +122,7 @@ export function mountWalkingMap(scene, layout, { run, instant, open, footstep })
     scene.style.setProperty('--branch-light', clamp((frame - 13) / 9));
     for (const { node, seat } of actors) {
       const step = frame - 5 - seat * 2;
-      const distance = lerp(106, readyDistance, clamp(step / 8)) - seat * 39;
+      const distance = lerp(106, readyDistance, clamp(step / 8)) - seat * ACTOR_SPACING;
       moveActor(node, entryTrack, distance, step < 8 ? step : -1, false);
     }
   }
@@ -153,7 +154,7 @@ export function mountWalkingMap(scene, layout, { run, instant, open, footstep })
       scene.dataset.walkPhase = frame < 4 ? 'chosen' : frame < ZOOM_START ? 'walking' : 'zoom';
       for (const { node, seat } of actors) {
         const step = frame - 3 - seat * 2;
-        const distance = lerp(readyDistance, track.length, clamp(step / 10)) - seat * 39;
+        const distance = lerp(readyDistance, track.length, clamp(step / 10)) - seat * ACTOR_SPACING;
         moveActor(node, track, distance, step < 10 ? step : -1, true);
       }
       const due = Number(frame >= 5) + Number(frame >= 11);
