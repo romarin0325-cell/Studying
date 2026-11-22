@@ -1,0 +1,62 @@
+import {HEROES,HERO,DEFAULT_DECK} from '../content.js';
+import {MIRACLE_FORMS} from '../new-companions.js';
+import * as E from '../combat/engine.js';
+import {battleMeta} from '../battle.js';
+import {critStats,combatPower} from '../economy.js';
+export const shapes={single:'단일',splash:'범위',pulse:'주변 범위',beam:'관통',cross:'십자 관통',chain:'연쇄',bounce:'도탄',zone:'장판'};
+export const roster=[...HEROES,...Object.entries(MIRACLE_FORMS).filter(([id])=>id!=='miracle_larva').map(([id,f])=>({...HERO.miracle_larva,...f,id,owner:'miracle_larva'}))];
+export const effects=['감속','노출','기절','빙결','성광','중독','화상'];
+export function tags(h){const text=h.trait.text+' '+h.skill.text;return effects.filter(t=>text.includes(t)||t==='중독'&&/독 \d|독이|독 피해/.test(text)||t==='화상'&&/불태|불타|불타는/.test(text)||t==='빙결'&&/얼리|얼어|얼립/.test(text)||t==='성광'&&h.trait.type==='battery');}
+export function skillType(h){const t=h.skill.type;if(['echo','haste','awaken','march','harmony','gift','lemonade','miracle_eclose'].includes(t))return '보조';if(['execute','royal','starfall','mirror'].includes(t))return '단일';if(['dragon','deathhand','armageddon','crush','singularity','applebomb','ultimate_breath'].includes(t))return '범위';return '전체';}
+export const conditionDefaults={coreNear:false,coreCrisis:false,auroraEven:false,normalDeck:false,lightningTeam:false,rabbitTeam:false,powerAura:false,speedAura:false,harmonyTeam:false,falseCinderella:false,supportTeam:false,goldOpening:false,appleApproach:false,prism:false,heroMax:false,age:1,joker:0,gold:200,gauge:120};
+const nativeConditions={
+ gold_dragon:{goldOpening:true},zeke:{coreNear:true,coreCrisis:true},aurora:{auroraEven:true},underdog:{normalDeck:true},lightning_sage:{lightningTeam:true},night_rabbit:{rabbitTeam:true},sunflower:{sun:3},star_boy:{age:0},time_ruler:{age:2},behemoth:{powerAura:true,speedAura:true},harmonious:{harmonyTeam:true},time_magician:{supportTeam:true},doom:{gold:240},cinderella:{falseCinderella:false},joker:{joker:5},toffee_apple:{appleApproach:true},
+};
+export function baselineOptions(o){return {...o,...conditionDefaults,low:false,slow:false,burn:false,divine:false,poison:false,exposure:false,stun:false,freeze:false,sun:0};}
+export function sortRows(rows,key){return [...rows].sort((a,b)=>key==='name'?a.h.name.localeCompare(b.h.name,'ko'):key==='normal'?b.normal.dps-a.normal.dps:key==='normalSkill'?b.normal.skillDamage-a.normal.skillDamage:(b.r[key]??0)-(a.r[key]??0));}
+export const defaults={...conditionDefaults,rank:1,training:0,enhance:0,rose:0,critBed:0,critDamageBed:0,critical:false,targets:5,seconds:20,boss:false,low:false,slow:false,burn:false,divine:false,poison:false,exposure:false,stun:false,freeze:false,sun:0};
+export function arena(h,opt={},draft={}){
+ const o={...defaults,...opt,...(opt.heroMax?nativeConditions[h.id]||{}:{})},id=h.owner||h.id;
+ const normalPool=HEROES.filter(x=>x.rarity==='C'&&!x.hidden).map(x=>x.id);
+ const deck=[id,...(o.normalDeck?normalPool:[...new Set(['great_detective',...DEFAULT_DECK])]).filter(x=>x!==id)].slice(0,5);
+ const beds={rose:o.rose,crit:o.critBed,critDamage:o.critDamageBed},entry={owned:true,enhance:o.enhance};
+ const profile={beds,heroes:Object.fromEntries(deck.map(hero=>[hero,hero===id?entry:{owned:true,enhance:0}]))};
+ const meta=battleMeta(profile,deck);meta[id].power*=draft.power||1;
+ const s=E.newRun({deck,chapter:2,seed:20261026,crit:o.critical?critStats(beds,Infinity):null,artifacts:o.prism?['prism']:[],meta});
+ const index=o.coreNear?10:o.harmonyTeam||o.supportTeam?7:2;
+ const u={...s.board.find(Boolean),uid:1000,hero:id,rank:o.rank,form:h.owner?h.id:undefined,cooldown:0,windup:0,target:null,attacks:0,born:-10,birthWave:2-o.age,disabled:0,invincible:0};
+ s.board.fill(null);s.board[index]=u;s.wave=2;if(id==='gold_dragon')s.waveTime=o.goldOpening?0:11;s.health=o.coreCrisis?9:20;s.gold=o.gold;s.jokerColor=o.joker===5?'chaos':E.JOKER.colors[o.joker]||'red';s.jokerSeen=o.joker===5?E.JOKER.all:1|(1<<Math.max(0,E.JOKER.colors.indexOf(s.jokerColor)));s.upgrades[id]=o.training;s.sunlight=o.sun;
+ const helpers=[];
+ const addHelper=(hero,cell,extra={})=>{if(cell===undefined||s.board[cell])return;const ally={...u,hero,form:undefined,uid:(s.nextId++)+2000,cooldown:1e8,windup:0,target:null,attacks:0,...extra};s.board[cell]=ally;helpers.push(ally);s.upgrades[hero]??=0;s.meta[hero]??={power:1,special:1};};
+ if(o.auroraEven&&id==='aurora')addHelper(id,24);
+ if(o.lightningTeam&&id==='lightning_sage'){for(const cell of [1,6,11])addHelper(id,cell);}
+ if(o.rabbitTeam&&id==='night_rabbit'){addHelper('snow_rabbit',24);addHelper('silver_rabbit',23);}
+ if(o.falseCinderella&&id==='cinderella')addHelper(id,24,{uid:u.uid-1});
+ if(o.harmonyTeam&&id==='harmonious')E.neighbors(index).forEach((cell,i)=>addHelper(['star_boy','queen','snow_rabbit','silver_rabbit'][i],cell));
+ if(o.supportTeam&&id==='time_magician')E.neighbors(index).forEach((cell,i)=>addHelper(['star_boy','queen','snow_rabbit','silver_rabbit'][i],cell));
+ const adjacent=E.neighbors(index);
+ if(o.powerAura)addHelper('ancient_dragon',adjacent.find(cell=>!s.board[cell]));
+ if(o.speedAura)addHelper('siren',adjacent.find(cell=>!s.board[cell]));
+ s.queue=Array.from({length:o.targets},()=>({kind:(o.boss||h.id==='storm_sage')?'boss':'grunt',hp:1e12}));
+ for(let i=0;i<o.targets;i++){s.spawnIn=0;E.step(s,.001);}
+ s.queue=[{kind:'grunt',hp:1e12}];s.spawnIn=1e8;s.events=[];s.shots=[];s.stats.damage=0;s.stats.byHero={};
+ s.enemies.forEach((e,i)=>{Object.assign(e,{progress:(o.coreNear?1925:284)+(i-(o.targets-1)/2)*24,speed:0,skillIn:1e8,hp:1e12,maxHp:o.low?4e12:1e12});
+ const add=(type,amount,power=0)=>e.statusEffects.push({type,amount,power,until:1e6,source:'lab:'+type,owner:'lab'});
+ if(o.burn)add('burn',.001);if(o.divine)add('divine',3);if(o.poison){add('poison',20,E.power(s,u));e.statusEffects.at(-1).until=s.time+12;}if(o.exposure)add('exposure',.35);if(o.stun)add('stun',1);if(o.freeze)add('freeze',1);if(o.slow)e.slowEffects.push({source:'lab',owner:'lab',amount:.35,until:1e6});
+ E.statusState(s,e);});
+ u.cooldown=0;u.windup=0;u.target=null;u.attacks=0;
+ return {s,u,o,h,draft,index,helpers};
+}
+export function advance(a,dt){
+ const count=a.u.attacks;
+ // Explicit contact fixture: one target approaches the first random apple.
+ if(a.o.appleApproach&&a.s.bombs.length){const bomb=a.s.bombs[0],contact=Math.max(0,bomb.progress-E.APPLEBOMB.trigger/2),first=a.s.enemies.find(e=>e.hp>0);if(first){const shift=contact-first.progress;for(const e of a.s.enemies)if(e.hp>0)e.progress=Math.max(0,Math.min(E.PATH_LENGTH,e.progress+shift));}}
+ E.step(a.s,dt);if(a.draft.interval&&a.u.attacks!==count)a.u.cooldown=Math.max(.02,a.draft.interval-.13);
+}
+export function castArena(a){const {s,h}=a;s.gauge=h.skill.type==='starfall'?a.o.gauge:E.skillCost(s,h.owner||h.id);return E.cast(s,h.owner||h.id);}
+export function measure(h,opt={},draft={}){
+ const a=arena(h,opt,draft),stats=E.combatStats(a.s,a.u,a.index,true),preview=E.castPreview(a.s,h.owner||h.id);
+ const run=(cast,isolated=false)=>{const b=arena(h,opt,draft);let immediate=0,ok={ok:true};if(cast){const before=b.s.stats.damage;ok=castArena(b);immediate=b.s.stats.damage-before;}for(let t=0;t<b.o.seconds;t+=.05){if(isolated)for(const unit of b.s.board)if(unit){unit.cooldown=1e8;unit.windup=0;}advance(b,.05);}const damage=Object.entries(b.s.stats.byHero).filter(([id])=>id!=='lab').reduce((n,[,d])=>n+d,0);return {damage,immediate,ok};};
+ const normal=run(false),skill=run(true),isolated=run(true,true),cost=draft.cost||E.skillCost(a.s,h.owner||h.id),gain=skill.damage-normal.damage;
+ return {base:h.damage,combatPower:combatPower(h.owner||h.id,{owned:true,enhance:a.o.enhance},{rose:a.o.rose}),power:stats.damage,interval:draft.interval||stats.interval,dps:normal.damage/a.o.seconds,direct:stats.damage/stats.interval,skill:skill.immediate,skillDamage:isolated.damage,gain,conditions:a.o,conditionNote:'개인 적중·주기·형태 효과는 실제 엔진에 포함',value:gain/(h.skill.type==='starfall'?a.o.gauge:cost)*100,cost,preview,bonuses:stats.bonuses,ok:skill.ok.ok};
+}

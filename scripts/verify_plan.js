@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'survivor', 'defense']);
-const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'survivor']);
+const ACTIVE_ROOT_GAMES = Object.freeze(['card', 'shooter', 'survivor', 'defense', 'defense_public']);
+const ALL_GAMES = Object.freeze(['card', 'shooter', 'defense', 'survivor', 'defense_public']);
 
 function normalizePath(file) {
   return String(file || '').replace(/\\/g, '/').replace(/^\.\//, '');
@@ -38,8 +38,8 @@ function currentChangePaths(changes) {
 }
 
 function isDocumentation(file) {
-  if (file === 'defense/docs/ASSET_OPTIMIZATION.json') return false;
-  if (file === 'survivor/assets/Jua-OFL.txt' || file === 'defense/assets/Jua-OFL.txt') return false;
+  if (/^defense(?:_public)?\/docs\/ASSET_OPTIMIZATION\.json$/.test(file)) return false;
+  if (/^(?:survivor|defense|defense_public)\/assets\/Jua-OFL\.txt$/.test(file)) return false;
   const lower = file.toLowerCase();
   return (
     lower.endsWith('.md')
@@ -443,6 +443,19 @@ function planDefense(plan, files, currentFiles) {
   }
 }
 
+function planDefensePublic(plan, files, currentFiles) {
+  const game = 'defense_public';
+  const product = files.filter(file => file.startsWith(game + '/') && !isDocumentation(file));
+  if (!product.length) return;
+  const inputs = /^defense_public\/(?:src\/|assets\/|index\.html$|package\.json$|docs\/ASSET_OPTIMIZATION\.json$|scripts\/(?:build|local-inputs|image-pack|image-policy|theme-bright)\.mjs$)/;
+  addStep(plan, makeStep(game + ':contracts-and-regressions', game, 'Run the public Star Garden tests once', 'node', ['--test', game + '/tests/*.test.mjs'], { needsInstall: true }));
+  if (product.some(file => inputs.test(file))) {
+    addStep(plan, makeStep(game + ':build', game, 'Build public Star Garden from its deployment inputs once', 'node', [game + '/scripts/build.mjs'], { needsInstall: true }));
+  }
+  const browser = game + '/tests/browser.mjs';
+  if (currentFiles.includes(browser)) addBrowserScript(plan, game, game + ':offline-browser', 'Run the public Star Garden browser scenario', browser);
+}
+
 function createPlan(changes, options = {}) {
   const files = changePaths(changes);
   const currentFiles = currentChangePaths(changes);
@@ -490,6 +503,7 @@ function createPlan(changes, options = {}) {
   }
   if (shouldPlan('shooter')) planShooter(plan, files, currentFiles);
   if (shouldPlan('defense')) planDefense(plan, files, currentFiles);
+  if (shouldPlan('defense_public')) planDefensePublic(plan, files, currentFiles);
   if (shouldPlan('survivor')) planSurvivor(plan, files, currentFiles);
 
   for (const game of plan.detectedGames) {
@@ -567,7 +581,7 @@ function fullPlan(game) {
         { needsInstall: true, browsers: ['chromium'] }
       )
     );
-  } else if (game === 'survivor' || game === 'defense') {
+  } else if (game === 'survivor' || game === 'defense' || game === 'defense_public') {
     throw new Error('Use the mapped standalone-game checks; a full-suite alias is not defined.');
   }
   plan.needsInstall = true;

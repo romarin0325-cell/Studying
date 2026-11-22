@@ -1,0 +1,622 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {execFileSync} from 'node:child_process';
+import {chromium,webkit} from 'playwright';
+import {createProfile,command,SAVE_KEY} from '../src/profile.js';
+import {HEROES,TUNING,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from '../src/content.js';
+import {createBattle,autoPlay} from '../src/battle.js';
+import * as E from '../src/combat/engine.js';
+import {MEMORIAL_STORIES} from '../src/memorial.js';
+import {activeEvent,eventWindow} from '../src/preview/season.js';
+import {monthlyReward} from '../src/monthly.js';
+import {HOUR,calendar,stageReward,stageDust,PERFECT_REWARD} from '../src/economy.js';
+import {TEMPO,periodOf} from '../src/tempo.js';
+import {BATTLE_BOND,BOND_MAX,bondNeed} from '../src/bond.js';
+import {CONSTELLATIONS} from '../src/library.js';
+// Companions announced at the part-one completion stage (the roster grows; counts come from the data, not from the day the test was written).
+const LATE_NEW=LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id)).length;
+const game=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const output=path.join(game,'test-results');let url=pathToFileURL(path.join(game,'dist/StarGardenPublic.html')).href;
+const isWebkit=process.argv.includes('--webkit'),name=isWebkit?'webkit':'chromium',NOW=Date.UTC(2026,10,21,4,25);
+await fs.mkdir(output,{recursive:true});
+// Verify the release file in Git as well as the freshly built file. The first
+// local creation has no HEAD blob; CI and every committed release must have it.
+let committed=null;
+try{committed=execFileSync('git',['show','HEAD:defense_public/dist/StarGardenPublic.html'],{cwd:path.dirname(game),encoding:'utf8',maxBuffer:64*1024*1024,stdio:['ignore','pipe','ignore']});}
+catch(error){if(process.env.CI)throw error;}
+if(committed!==null){
+  const built=await fs.readFile(path.join(game,'dist/StarGardenPublic.html'),'utf8'),normalize=s=>s.replace(/\r\n/g,'\n');
+  assert.ok(normalize(built)===normalize(committed),'committed artifact differs from its deployment inputs');
+}
+// CI installs Playwright's Chromium; a local machine without it uses the installed Chrome.
+const browser=await (isWebkit?webkit:chromium).launch({headless:true}).catch(error=>{if(isWebkit||process.env.CI)throw error;return chromium.launch({headless:true,channel:'chrome'});});
+const errors=[],requests=[],geometry=[],contexts=[];
+// The checks below were written for a player past the first session; the tutorial check opts in with {tutorial:true}.
+// Veteran fixtures have already seen the current event window.
+const veteran=(p,time=NOW)=>p?{...p,ftue:{legacy:true,done:[],seen:[],skipped:false},beginner:null,firstTen:true,eventSeen:eventWindow(Math.max(time,p.clockAt)).id}:p;
+async function boot(width,height,profile=createProfile(NOW),fault=false,location=url,{tutorial=false,time=NOW,lateNotice=false}={}){
+  if(!tutorial)profile=veteran(profile,time);
+  // Fixtures past the late-companion stage have read that announcement unless the check opts in (it would cover the screen).
+  if(profile&&!lateNotice&&profile.cleared>=LATE_UNLOCK_STAGE)profile={...profile,noticeLate:LATE_COMPANIONS.filter(id=>!HIDDEN.includes(id))};
+  const context=await browser.newContext({viewport:{width,height},hasTouch:true});
+  contexts.push(context);const page=await context.newPage();
+  await page.clock.setFixedTime(time);
+  page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
+  await page.route('**/*',r=>/^https?:/.test(r.request().url())?r.abort():r.continue());
+  // Seed once in an empty document at the exact file URL, before the app or fault hooks run.
+  // An init script runs again on reload and can restore the original fixture over a temporarily empty file store.
+  if(profile){
+    await page.route(location,r=>r.fulfill({contentType:'text/html',body:'<!doctype html><title>Profile fixture</title>'}),{times:1});
+    await page.goto(location);
+    await page.evaluate(({key,profile})=>localStorage.setItem(key,JSON.stringify(profile)),{key:SAVE_KEY,profile});
+  }
+  if(fault)await page.addInitScript(rewardOnly=>{window.__failRewardCheckpoint=rewardOnly;const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){let phase='';try{const saved=JSON.parse(v);phase=saved.active?.run?JSON.parse(saved.active.run).phase:'';}catch{}if(window.__testQuotaFailure||window.__failRewardCheckpoint&&phase==='reward')throw new DOMException('full','QuotaExceededError');return original.call(this,k,v);};},fault==='reward');
+  if(fault==='avif')await page.addInitScript(()=>{const decode=HTMLImageElement.prototype.decode;HTMLImageElement.prototype.decode=function(){return /\.avif$/.test(this.src)?Promise.reject(new DOMException('Unsupported codec','EncodingError')):decode.call(this);};});
+  await page.addInitScript(()=>{window.__memorialAssignments=[];const descriptor=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');Object.defineProperty(HTMLImageElement.prototype,'src',{...descriptor,set(value){if(this.dataset.memorial&&String(value).startsWith('data:image/')||String(value).includes('/memorial/'))window.__memorialAssignments.push(String(value).slice(0,80));descriptor.set.call(this,value);}});});
+  await page.goto(location);await context.setOffline(!(isWebkit&&location.includes('/test-results/web/')));await page.locator('.scene-partner').waitFor();await page.evaluate(()=>document.fonts.ready);
+  return {context,page,width,height};
+}
+const profile=page=>page.evaluate(()=>window.STAR_GARDEN.profile);
+const close=page=>page.locator('#sheet .sheet-top [data-action="close"]').click();
+const nav=(page,label)=>page.getByRole('button',{name:label,exact:true}).click();
+const countText=(at,end)=>{const minutes=Math.ceil((end-at)/60000);return Math.floor(minutes/60)+':'+String(minutes%60).padStart(2,'0');};
+async function checkCountdown(scope,at,end){
+  const digits=scope.locator('[data-countdown="'+end+'"]');
+  await digits.waitFor();
+  assert.equal(await digits.textContent(),countText(at,end));
+}
+async function skipSpotlights(page){
+  const skip=page.locator('#sheet [data-action="spot-skip"]');
+  if(await skip.isVisible())await skip.click();
+}
+async function shot(page,label,width,height){
+  await page.screenshot({path:path.join(output,`${name}-${label}-${width}x${height}.png`),animations:'disabled'});
+  const m=await page.evaluate(()=>{
+    const c=document.getElementById('content'),n=document.getElementById('navigation'),s=document.getElementById('sheet');
+    const bounds=el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+    const images=[...document.images].filter(i=>i.offsetParent!==null);
+    return {viewport:[innerWidth,innerHeight],documentWidth:document.documentElement.scrollWidth,contentWidth:c.clientWidth,contentScrollWidth:c.scrollWidth,nav:bounds(n),sheet:bounds(s),loaded:images.every(i=>i.complete&&i.naturalWidth>0)};
+  });
+  assert.ok(m.documentWidth<=width+1,label+' document clipping');
+  assert.ok(m.contentScrollWidth<=m.contentWidth+1,label+' content clipping');
+  assert.equal(m.loaded,true,label+' missing image');
+  if(await page.locator('#navigation').isVisible())assert.ok(m.nav.bottom<=height+1&&m.nav.width>=300);
+  if(await page.locator('#overlay').isVisible())assert.ok(m.sheet.bottom<=height+1&&m.sheet.x>=-1&&m.sheet.right<=width+1);
+  geometry.push({label,...m});
+}
+async function reload({page,context}){
+  // WebKit's offline navigation also blocks local files. HTTP is still denied.
+  if(isWebkit)await context.setOffline(false);
+  await page.reload();if(isWebkit)await context.setOffline(true);await page.locator('.scene-partner').waitFor();
+}
+function traitFixture(deck,placements,{wave=3,gold=24}={}){
+  const p=createProfile(NOW);p.settings.auto=false;
+  for(const h of HEROES)p.heroes[h.id].owned=true;
+  p.deck=[...deck];assert.ok(command(p,'begin',{mode:'main',stage:1},NOW).ok);
+  const s=createBattle(p),template={...s.board.find(Boolean)};s.board.fill(null);s.wave=wave;s.gold=gold;
+  for(const [i,hero,rank=1,birthWave=wave] of placements)s.board[i]={...template,uid:s.nextId++,hero,rank,birthWave,priority:E.targetingLocked(hero)?'random':'first',cooldown:99};
+  s.queue=[{kind:'boss',hp:1e8}];s.spawnIn=0;E.step(s,.05);
+  s.enemies[0].progress=E.PATH_LENGTH*.76;s.enemies[0].speed=0;s.enemies[0].skillIn=99;s.gauge=120;
+  E.personalTrait(s,s.board.find(u=>u?.hero==='time_ruler')||s.board.find(Boolean));
+  p.active.run=E.serialize(s);assert.ok(E.restore(p.active.run),'trait fixture is a valid saved battle');return p;
+}
+async function inspectCell(page,index){
+  await page.locator('#arena').scrollIntoViewIfNeeded();const rect=await page.locator('#arena').boundingBox(),at=E.cellPoint(index);
+  await page.mouse.click(rect.x+at.x/720*rect.width,rect.y+at.y/780*rect.height);
+  await page.locator('#unit-panel').waitFor();await page.locator('#unit-panel').scrollIntoViewIfNeeded();
+}
+function luckyNormalProfile(){
+  const p=createProfile(NOW);p.dreams=5000;p.firstTen=true;p.settings.reduced=true;
+  // No companion request may arrive on load: its arrival draws from the same rng and would move the seeded luck.
+  p.requests={next:NOW+24*3600000,active:[],claimed:[],after:[],read:[]};
+  for(let seed=1;seed<=10000;seed++){
+    p.rng=seed;
+    const result=command(structuredClone(p),'draw',{banner:'normal',count:10},NOW);
+    assert.ok(result.ok,result.message);
+    if(result.lucky){assert.equal(result.bonus.length,10);return p;}
+  }
+  assert.fail('No seed produced a lucky normal ten-pull');
+}
+function stageOneVictory(p){
+  const started=command(p,'begin',{mode:'main',stage:1},NOW);assert.ok(started.ok,started.message);
+  const won=createBattle(p);won.phase='victory';won.wave=6;won.won=true;won.stats.damage=2222;won.stats.byHero.star_boy=2222;
+  p.active.run=E.serialize(won);assert.ok(E.restore(p.active.run),'victory fixture is a valid saved battle');
+  return p;
+}
+try{
+  // First session: Rumi points at the real sortie button, the hole passes the tap, the next step waits in the sheet.
+  {
+    const t=await boot(390,844,createProfile(NOW),false,url,{tutorial:true}),{page}=t;
+    await page.locator('.coach:not([hidden]) .coach-line').waitFor();
+    assert.match(await page.locator('.coach-name').textContent(),/루미/);
+    await page.locator('.lb-depart').click();await page.locator('#sheet[data-kind="prepare"]').waitFor();
+    await page.waitForFunction(()=>/출격/.test(document.querySelector('.coach-line')?.textContent||''));
+    assert.deepEqual((await profile(page)).ftue.done,['lobby']);
+    await shot(page,'tutorial-prepare',390,844);await t.context.close();
+  }
+  // Read receipts apply to one event window, even when two windows share a date.
+  {
+    const time=NOW,win=eventWindow(time),p=veteran(createProfile(time),time);p.cleared=3;p.eventSeen='';
+    const t=await boot(390,844,p,false,url,{tutorial:true,time}),{page}=t;
+    await page.locator('#sheet[data-kind="event"]').waitFor();
+    assert.equal(await page.locator('#sheet-kicker').innerText(),'이벤트');
+    assert.equal(await page.locator('.ev-pop').getAttribute('data-kind'),activeEvent(time));
+    await checkCountdown(page.locator('.ev-pop'),time,win.end);
+    assert.equal((await profile(page)).eventSeen,win.id,'the event window is recorded as seen');
+    await shot(page,'event-notice',390,844);await close(page);
+    await reload(t);await page.waitForTimeout(1200);
+    assert.equal((await profile(page)).eventSeen,win.id,'the event receipt survives a reload');
+    assert.ok(await page.locator('#sheet[data-kind="event"]').isHidden(),'the same event is not announced twice');
+    const nextTime=win.end,next=eventWindow(nextTime);
+    await page.clock.setFixedTime(nextTime);await reload(t);
+    await page.locator('#sheet[data-kind="event"]').waitFor();
+    assert.equal(await page.locator('.ev-pop').getAttribute('data-kind'),activeEvent(nextTime));
+    assert.equal((await profile(page)).eventSeen,next.id,'the next window has its own receipt');
+    await t.context.close();
+  }
+  if(isWebkit){
+    const probe=await browser.newPage(),source=await fs.readFile(path.join(game,'assets/memorial/zeke.avif'));
+    const supportsAvif=await probe.evaluate(async src=>{const img=new Image();img.src=src;try{await img.decode();return img.naturalWidth===720;}catch{return false;}},'data:image/avif;base64,'+source.toString('base64'));await probe.close();
+    if(!supportsAvif){
+      const p=createProfile(NOW);p.heroes.star_boy.bond=10;const unsupported=await boot(390,844,p);
+      await unsupported.page.locator('[data-action="bond"]').click();await unsupported.page.locator('.bond-memory').click();await unsupported.page.waitForFunction(()=>document.getElementById('memory-art').getAttribute('aria-busy')==='false');
+      assert.match(await unsupported.page.locator('#memory-loading').innerText(),/그림을 불러오지 못했습니다/);assert.equal(await unsupported.page.locator('img[data-memorial]').count(),0);
+      await unsupported.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(unsupported.page)).memories.star_boy.read,true);await shot(unsupported.page,'avif-unsupported-reader',390,844);await close(unsupported.page);await unsupported.context.close();
+      execFileSync(process.execPath,['defense_public/scripts/build.mjs','--compat'],{cwd:path.dirname(game),stdio:'pipe'});
+      url=pathToFileURL(path.join(game,'test-results/compat/StarGardenPublicCompat.html')).href;
+      console.log('WebKit AVIF codec unavailable: verified graceful reader and using separate WebP-only compatibility artifact.');
+    }
+  }
+  for(const [width,height] of [[320,568],[390,844],[1280,900]]){
+    const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
+    const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
+    await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),HEROES.length,'every owned companion has a memory tile');assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
+    await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
+    const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
+    await m.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(m.page)).memories.zeke.read,true);await close(m.page);assert.equal(await m.page.locator('img[data-memorial]').count(),0);
+    await m.page.locator('[data-collection="hero"]').click();await m.page.locator('[data-hero="zeke"]').click();await m.page.locator('.bond-row').click();await m.page.locator('.bond-memory').click();await m.page.locator('#memory-art img').waitFor();
+    await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>document.getElementById('memory-progress').textContent==='100%');
+    await m.page.locator('[data-action="memorial-story"]').click();assert.ok(!(await m.page.locator('#sheet').getAttribute('class')).includes('mv-reading'),'the story steps aside for the painting');
+    assert.ok(await m.page.evaluate(()=>[...document.querySelectorAll('.mv-controls button')].every(b=>b.getBoundingClientRect().bottom<=innerHeight+1)),'viewer controls stay on screen');await shot(m.page,'memorial-art',width,height);await close(m.page);
+    if(width===390){
+      // Open and close every companion's picture through buttons, never hidden preload.
+      const unlocked=structuredClone(memories);unlocked.heroes.star_boy.bond=10;const chain=await boot(390,844,unlocked);
+      await nav(chain.page,'동료');await chain.page.locator('[data-collection="album"]').click();
+      for(const h of HEROES){await chain.page.locator(`.mem-tile[data-memorial="${h.id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await close(chain.page);assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
+      await chain.page.locator('.mem-tile[data-memorial="zeke"]').click();await close(chain.page);await chain.page.waitForTimeout(120);assert.equal(await chain.page.locator('img[data-memorial]').count(),0,'closing a pending decode cannot resurrect an image');await chain.context.close();
+    }
+    await m.context.close();
+  }
+  const ready=createProfile(NOW);ready.settings.auto=false;command(ready,'begin',{mode:'main',stage:1},NOW);const completed=createBattle(ready);
+  let finalTick=null;for(let i=0;i<5000&&completed.phase==='combat';i++){const before=E.serialize(completed);E.step(completed,.05);if(completed.phase==='reward')finalTick=E.restore(before);if(i%6===0&&completed.phase==='combat')autoPlay(completed);}assert.equal(completed.phase,'reward');assert.ok(finalTick);ready.active.run=E.serialize(completed);
+  const transition=structuredClone(ready);transition.active.run=E.serialize(finalTick);
+  const blocked=await boot(390,844,transition,'reward');await blocked.page.locator('[data-action="resume"]').click();await blocked.page.waitForFunction(()=>window.STAR_GARDEN.performance.saveFailures>0);assert.equal(await blocked.page.locator('[data-reward]').count(),0);assert.equal(await blocked.page.evaluate(()=>window.STAR_GARDEN.battle.phase),'reward');
+  await blocked.page.evaluate(()=>window.__failRewardCheckpoint=false);await blocked.page.locator('[data-action="pause"]').click();await blocked.page.locator('[data-reward]').first().waitFor();await shot(blocked.page,'reward-restored',390,844);await blocked.page.locator('[data-reward]').first().click();await blocked.page.waitForFunction(()=>window.STAR_GARDEN.battle.phase!=='reward');await blocked.context.close();
+  const automated=structuredClone(ready);automated.settings.auto=true;const manual=await boot(390,844,automated);await manual.page.locator('[data-action="resume"]').click();await manual.page.locator('[data-action="auto"]').click();await manual.page.locator('[data-reward]').first().waitFor();assert.equal((await profile(manual.page)).settings.auto,false);await shot(manual.page,'reward-auto-to-manual',390,844);await manual.page.locator('[data-reward]').first().click();await manual.context.close();
+
+  execFileSync(process.execPath,['defense_public/scripts/build.mjs','--solo'],{cwd:path.dirname(game),stdio:'pipe'});
+  execFileSync(process.execPath,['defense_public/scripts/build.mjs','--web'],{cwd:path.dirname(game),stdio:'pipe'});
+  const single=await boot(390,844,null,false,pathToFileURL(path.join(game,'test-results/solo/StarGardenPublicSolo.html')).href);
+  // A fresh solo save can show the current event on its first home screen.
+  await single.page.waitForTimeout(700);if(await single.page.locator('#sheet[data-kind="event"]').isVisible())await close(single.page);
+  assert.equal((await profile(single.page)).deck.length,1);await single.page.locator('[data-action="prepare"]').click();await single.page.locator('#sheet-footer [data-action="team"]').click();assert.equal(await single.page.locator('#sheet .five-line .team-slot').count(),1);await single.page.locator('[data-team-pick="star_boy"]').first().click();await single.page.locator('.choose-list [data-team-pick="snow_rabbit"]').click();await single.page.locator('[data-action="save-team"]').click();assert.deepEqual((await profile(single.page)).deck,['snow_rabbit']);
+  await single.page.locator('[data-begin="main"]').click();await single.page.locator('#arena').waitFor();assert.equal(await single.page.locator('[data-skill]').count(),1);await single.page.locator('[data-action="summon-battle"]').click();assert.ok(await single.page.evaluate(()=>window.STAR_GARDEN.battle.board.filter(Boolean).every(u=>u.hero==='snow_rabbit')));await shot(single.page,'solo-battle',390,844);await single.page.locator('[data-action="leave"]').click();await single.page.locator('[data-action="save-leave"]').click();await reload(single);await single.page.locator('[data-action="resume"]').click();assert.equal(await single.page.evaluate(()=>window.STAR_GARDEN.battle.deck.join()),'snow_rabbit');await single.context.close();
+  const folder=await boot(390,844,(()=>{const p=createProfile(NOW);p.heroes.star_boy.bond=10;return p;})(),'avif',pathToFileURL(path.join(game,'test-results/web/StarGardenPublic.html')).href);assert.equal(await folder.page.evaluate(()=>window.__memorialAssignments.length),0);await folder.page.locator('[data-action="bond"]').click();await folder.page.locator('.bond-memory').click();await folder.page.locator('#memory-art img').waitFor();assert.match(await folder.page.locator('#memory-art img').getAttribute('src'),/\.webp$/);await shot(folder.page,'web-memorial-fallback',390,844);await close(folder.page);assert.equal(await folder.page.locator('img[data-memorial]').count(),0);await folder.context.close();
+  for(const [width,height] of [[320,568],[390,844]]){
+    const fire=traitFixture(['zeke','ancient_dragon','siren','snow_rabbit','great_detective'],[[12,'zeke'],[11,'ancient_dragon']],{wave:1}),fireRun=E.restore(fire.active.run);
+    fireRun.enemies[0].progress=863;for(const u of fireRun.board)if(u)u.cooldown=.01;fire.active.run=E.serialize(fireRun);
+    const painted=await boot(width,height,fire);await painted.page.locator('[data-action="resume"]').click();await painted.page.waitForFunction(()=>window.STAR_GARDEN.battle.stats.damage>0);await shot(painted.page,'fire-basic-attacks',width,height);await painted.context.close();
+    const deck=['lightning_sage','aurora','star_boy','cinderella','zeke'];
+    const t=await boot(width,height,traitFixture(deck,[[6,deck[0]],[7,deck[0]],[11,deck[0]],[12,deck[0]],[8,deck[1]],[13,deck[1]],[16,deck[2]],[17,deck[3],2],[18,deck[3],2],[21,deck[4]]]));
+    await t.page.locator('[data-action="resume"]').click();
+    await inspectCell(t.page,6);assert.match(await t.page.locator('.unit-trait-line').innerText(),/4연결.*60%.*80%.*대상 \+1/);
+    await shot(t.page,'trait-lightning',width,height);
+    await inspectCell(t.page,8);assert.match(await t.page.locator('.unit-trait-line').innerText(),/아우로라 2기.*50%/);
+    await inspectCell(t.page,16);assert.match(await t.page.locator('.unit-trait-line').innerText(),/등장 웨이브.*150%/);
+    await inspectCell(t.page,17);assert.match(await t.page.locator('.unit-trait-line').innerText(),/50%/);
+    await t.page.locator('.unit-skill').click();await t.page.locator('#sheet[data-kind="skill-info"]').waitFor();assert.match(await t.page.locator('.skill-sheet').innerText(),/2성/);assert.match(await t.page.locator('.skill-now').innerText(),/지금 누르면[\s\S]*피해/);await shot(t.page,'skill-info-from-unit',width,height);await t.page.locator('.dialog-buttons [data-action="close"]').click();
+    await inspectCell(t.page,18);assert.match(await t.page.locator('.unit-trait-line').innerText(),/진짜 신데렐라.*따로/);
+    await inspectCell(t.page,21);assert.match(await t.page.locator('.unit-trait-line').innerText(),/40%/);
+    await t.page.locator('[data-action="deselect"]').click();await t.page.locator('#arena').scrollIntoViewIfNeeded();await shot(t.page,'trait-auras',width,height);await t.context.close();
+    const other=['avalanche_maid','flame_sage','storm_sage','time_ruler','doom'];
+    const f=await boot(width,height,traitFixture(other,[[6,other[0]],[8,other[1]],[12,other[2]],[16,other[3],1,1],[18,other[4]]]));
+    await f.page.locator('[data-action="resume"]').click();
+    await inspectCell(f.page,6);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/무작위 적/);
+    await inspectCell(f.page,8);assert.equal(await f.page.locator('[data-action="target"]').count(),0);assert.match(await f.page.locator('.fixed-target').innerText(),/경로 위/);await shot(f.page,'trait-fixed-target',width,height);
+    await inspectCell(f.page,16);assert.match(await f.page.locator('.unit-trait-line').innerText(),/이후 웨이브.*150%/);
+    const doom=f.page.locator('[data-skill="doom"]');assert.equal(await doom.getAttribute('aria-disabled'),'true');assert.match(await doom.getAttribute('aria-label'),/40골드.*골드 부족/);assert.match(await doom.innerText(),/40G/);
+    // An unavailable ultimate still opens its info card on a long press, and a tap does not cast it.
+    await f.page.locator('[data-action="deselect"]').click();const box=await doom.boundingBox();await f.page.mouse.move(box.x+box.width/2,box.y+box.height/2);await f.page.mouse.down();
+    await f.page.locator('#skill-tip').waitFor();assert.match(await f.page.locator('#skill-tip').innerText(),/왕궁의 암거래/);await f.page.mouse.up();
+    await doom.click({force:true});assert.equal(await f.page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),0);await f.context.close();
+  }
+  const paid=await boot(390,844,traitFixture(['doom','flame_sage','storm_sage','galaxy_whale','avalanche_maid'],[[6,'doom']],{gold:40}));
+  await paid.page.locator('[data-action="resume"]').click();await paid.page.locator('[data-skill="doom"]').click();
+  assert.equal(await paid.page.evaluate(()=>window.STAR_GARDEN.battle.gold),0);assert.equal(await paid.page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1);await paid.context.close();
+  const wind=traitFixture(['storm_sage','flame_sage','doom','galaxy_whale','avalanche_maid'],[[12,'storm_sage']]);
+  const windRun=E.restore(wind.active.run),boss=windRun.enemies[0],victim={...boss,uid:windRun.nextId++,kind:'grunt',boss:null,progress:900,hp:123456,maxHp:123456,shield:200};
+  windRun.enemies=[victim,boss];windRun.rng=16;
+  const origin=E.cellPoint(12);windRun.shots=[{uid:windRun.nextId++,source:windRun.board[12].uid,target:victim.uid,hero:'storm_sage',proc:true,damage:14,rank:1,count:1,origin,from:origin,to:E.pathPoint(900),life:.2,total:.2}];
+  wind.active.run=E.serialize(windRun);assert.ok(E.restore(wind.active.run));
+  const executed=await boot(390,844,wind);await executed.page.locator('[data-action="resume"]').click();
+  await executed.page.waitForFunction(()=>window.STAR_GARDEN.battle.stats.kills===1,{},{polling:16});
+  await shot(executed.page,'storm-instant-kill',390,844);await executed.context.close();
+  // Lobby chrome never overlaps on phone sizes, including tall full-screen viewports and a simulated notch (--top-shift).
+  for(const [width,height] of [[360,640],[390,844],[412,780],[412,915],[430,932]])for(const shift of [6,40]){
+    const t=await boot(width,height);await t.page.addStyleTag({content:`:root{--top-shift:${shift}px !important}`});await t.page.locator('.lb-touch').click();await t.page.locator('#subtitle.show').waitFor();await t.page.waitForTimeout(450);
+    const geo=await t.page.evaluate(()=>{const r=s=>document.querySelector(s)?.getBoundingClientRect(),hit=(a,b)=>!!(a&&b&&a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom),top=r('.topbar'),sub=r('#subtitle'),side=r('.lb-side'),season=r('.lb-season'),view=r('.lb-view'),bar=r('.lb-bar'),dock=r('.lb-dock');
+      return {topbar:hit(top,season)||hit(top,view),side:hit(sub,side)||hit(side,bar),subtitle:hit(sub,bar),season:hit(season,side),dock:hit(bar,dock),overflow:document.documentElement.scrollWidth>innerWidth};});
+    assert.deepEqual(geo,{topbar:false,side:false,subtitle:false,season:false,dock:false,overflow:false},`lobby chrome ${width}x${height} notch ${shift}`);await t.context.close();
+  }
+  // The seeded paid ten-pull reveals both sets while charging for the first set only.
+  {
+    const rich=luckyNormalProfile(),t=await boot(390,844,rich),{page}=t;
+    await nav(page,'소환');const ten=page.locator('[data-draw="10"]');
+    assert.match(await ten.innerText(),/행운 보너스 10%/);await ten.click();
+    await page.locator('#sheet[data-kind="draw"]').waitFor();
+    assert.equal(await page.locator('#sheet[data-kind="quiz"]').count(),0);
+    assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);
+    const receipt=await profile(page),newHistory=receipt.history.slice(0,20);
+    assert.equal(receipt.dreams,rich.dreams-10*TUNING.heroDrawCost);
+    assert.equal(receipt.history.length,rich.history.length+20);
+    assert.ok(newHistory.every(entry=>entry.banner==='normal'));
+    assert.equal(newHistory.filter(entry=>entry.bonus).length,10);
+    await skipSpotlights(page);
+    const lucky=page.getByRole('button',{name:'행운이 찾아왔어요!',exact:true});
+    await lucky.waitFor();await lucky.click();
+    await page.locator('.reveal-stage.lucky').waitFor();await skipSpotlights(page);
+    assert.equal(await page.locator('.reveal-grid .hero-card').count(),10);
+    assert.deepEqual((await profile(page)).history,receipt.history,'opening the bonus does not draw again');
+    await shot(page,'lucky-normal-ten',390,844);await t.context.close();
+  }
+  // Tasks were completed in advance so the browser exercises only the claim gates.
+  {
+    const fresh=createProfile(NOW),p=veteran(fresh);
+    p.cleared=21;p.beginner=fresh.beginner;p.beginner.did=['greet','water','gift','relic','draft'];
+    const t=await boot(390,844,p,false,url,{tutorial:true}),{page}=t;
+    const step=day=>page.locator('[data-sprout-day="'+day+'"]'),task=day=>page.locator('[data-sprout-task="'+day+'"]');
+    const anchor=page.locator('.sp-anchor-text em'),choice=page.locator('#sheet[data-kind="ur-choice"]');
+    await page.locator('[data-action="sprout"]').click();
+    assert.equal(await page.locator('#sheet-title').innerText(),'새싹 일곱 걸음');
+    assert.equal(await page.locator('.sp-days .sp-day').count(),7);
+    assert.equal(await anchor.innerText(),'앞으로 6단계');
+    assert.equal(await task(2).count(),0);assert.match(await step(2).getAttribute('class'),/\blocked\b/);
+    await step(1).click();assert.match(await step(2).getAttribute('class'),/\blocked\b/);
+    await step(2).click();assert.equal(await page.locator('#toast').innerText(),'앞 단계의 할 일을 마치면 열려요.');
+    assert.deepEqual((await profile(page)).beginner.tasks,[]);
+    for(let day=1;day<=6;day++){
+      assert.equal(await task(day).isEnabled(),true);
+      assert.match(await step(day+1).getAttribute('class'),/\blocked\b/);
+      if(day===6){
+        await step(7).click();
+        assert.equal(await choice.count(),0,'the UR picker is still locked before claiming task six');
+        assert.equal(await anchor.innerText(),'앞으로 1단계');
+      }
+      await task(day).click();
+      assert.match(await step(day+1).getAttribute('class'),/\bready\b/);
+      assert.equal(await page.locator('.lb-sprout .sprout-count').textContent(),(day+1)+'/7');
+    }
+    assert.equal(await anchor.innerText(),'지금 고를 수 있어요');
+    assert.deepEqual((await profile(page)).beginner.tasks,[1,2,3,4,5,6]);
+    await shot(page,'sprout-step-seven',390,844);
+    await step(7).click();await choice.waitFor();
+    const pick=choice.locator('[data-ur-pick="queen"]');
+    assert.equal(await choice.locator('[data-action="ur-confirm"]').isDisabled(),true);
+    await pick.click();await choice.locator('[data-action="ur-confirm"]').click();
+    await page.locator('#sheet[data-kind="draw"]').waitFor();
+    assert.equal((await profile(page)).beginner.choice,'queen');
+    await close(page);await page.locator('[data-action="sprout"]').click();
+    assert.equal(await anchor.innerText(),'받았어요');
+    await t.context.close();
+  }
+  for(const [width,height] of [[320,568],[390,844],[1280,900]]){
+    const test=await boot(width,height),{page,context}=test;
+    assert.equal((await profile(page)).deck.length,5);
+    assert.equal(await page.locator('.nav-item').count(),5);await shot(page,'home',width,height);
+    const navRect=await page.locator('#navigation').boundingBox();
+    assert.ok(navRect.y>height-100,'navigation remains at the bottom');
+    await page.locator('.lb-touch').click();assert.equal((await profile(page)).dreams,640);assert.equal(await page.locator('#greet-cue').count(),0);
+    await nav(page,'정원');await page.locator('.gd').waitFor();assert.equal(await page.locator('.bed.locked').count(),2);await page.locator('[data-bed-grow="rose"]').click();assert.equal((await profile(page)).beds.rose,1);assert.equal(await page.locator('.bed[data-bed="rose"] .bed-level').innerText(),'Lv.1');
+    await page.locator('[data-garden="dawn"]').click();assert.equal(await page.locator('.gd-house').getAttribute('data-garden'),'dawn');assert.equal(await page.locator('.bed.locked').count(),3,'the dawn beds are closed before stage 45');
+    await page.locator('[data-garden="dream"]').click();assert.equal(await page.locator('.bed.locked').count(),2);
+    assert.equal(await page.locator('.slot.locked').count(),4);await shot(page,'garden',width,height);
+    await nav(page,'동료');assert.match(await page.locator('.late-collection-note').innerText(),new RegExp(`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 신규 동료 ${LATE_NEW}명`));assert.equal(await page.locator('.cards .cc').count(),30);assert.equal(await page.locator('.cards .cc.unowned').count(),25);
+    await shot(page,'collection',width,height);
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),12);
+    await page.locator('[data-filter="UR"]').click();assert.equal(await page.locator('.cards .cc').count(),30,'tapping the filter again shows everything');
+    await page.locator('.cards [data-hero="star_boy"]').click();
+    assert.equal(await page.locator('#app').getAttribute('aria-hidden'),'true');
+    await shot(page,'detail',width,height);await page.keyboard.press('Escape');assert.equal(await page.locator('#overlay').isVisible(),false);
+    await nav(page,'소환');await shot(page,'summon',width,height);
+    await page.locator('[data-action="rates"]').click();
+    assert.match(await page.locator('#sheet-body').innerText(),/\b69\.8%/);
+    assert.match(await page.locator('#sheet-body').innerText(),/\b0\.4%/);
+    await checkCountdown(page.locator('#sheet-body'),NOW,periodOf('pickup',NOW).end);await close(page);
+    assert.match(await page.locator('[data-draw="1"]').innerText(),/무료/);await page.locator('[data-draw="1"]').click();
+    assert.equal((await profile(page)).dreams,640);assert.equal((await profile(page)).daily.free,true);assert.equal((await profile(page)).history.length,1);
+    assert.equal(await page.locator('.reveal-grid .hero-card').count(),1);await shot(page,'reveal',width,height);await close(page);
+    await page.locator('[data-banner="season"]').click();await page.locator('[data-action="rates"]').click();
+    assert.match(await page.locator('#sheet-body').innerText(),/\b0\.4%/);
+    const guardian=HEROES.find(h=>h.id===calendar(NOW).guardian);
+    assert.equal(await page.locator('#sheet-body .rate-row').filter({hasText:'UR · '+guardian.name}).locator('b').innerText(),'0.2%');
+    await checkCountdown(page.locator('#sheet-body'),NOW,periodOf('guardian',NOW).end);await close(page);
+    await page.locator('[data-banner="relic"]').click();await shot(page,'relic-summon',width,height);
+    assert.match(await page.locator('[data-draw="1"]').innerText(),/무료 소환/);
+    await nav(page,'모험');assert.equal(await page.locator('.stage-list .stage').count(),9);assert.equal(await page.locator('[data-cycle="4"]').isDisabled(),true,'chapters open as they are reached');
+    assert.equal(await page.locator('.part-tabs .part').count(),2);assert.equal(await page.locator('.part[data-part="2"]').getAttribute('data-locked'),'true','part two is locked until stage 45');
+    await page.locator('.part[data-part="2"]').click();assert.ok((await page.locator('.part-teaser').innerText()).includes('새벽의 별길'));await close(page);
+    await page.locator('[data-prepare-stage="1"]').click();await page.locator('#sheet-footer [data-action="team"]').click();
+    await page.locator('[data-action="save-team"]').click();
+    assert.equal(await page.locator('[data-begin="main"]').count(),1,'team confirmation returns to preparation');
+    await page.locator('[data-begin="main"]').click();await page.locator('#arena').waitFor();
+    assert.equal(await page.locator('.skill-button').count(),5);
+    await page.locator('[data-action="pause"]').click();
+    const battleTime=await page.evaluate(()=>window.STAR_GARDEN.battle.time);await page.waitForTimeout(180);
+    assert.equal(await page.evaluate(()=>window.STAR_GARDEN.battle.time),battleTime);
+    await shot(page,'battle',width,height);
+    const skills=await page.locator('.skills').boundingBox(),controls=await page.locator('.battle-controls').boundingBox();
+    assert.ok(skills.y+skills.height<=height+1,'all five skills fit the portrait viewport');
+    assert.ok(controls.y+controls.height<=height+1,'primary battle controls fit the portrait viewport');
+    await page.locator('[data-action="auto"]').click();await page.locator('[data-action="pause"]').click();
+    const move=await page.evaluate(()=>{const s=window.STAR_GARDEN.battle,from=s.board.findIndex(Boolean),other=s.board.findIndex((u,i)=>u&&i!==from);return {from,other,hero:s.board[from].hero,priority:s.board[from].priority,otherHero:s.board[other].hero,uid:s.board[from].uid,to:s.board.findIndex(u=>!u),board:s.board.map(u=>u?.uid||null)};});
+    const arena=await page.locator('#arena').boundingBox(),clickCell=async i=>{
+      const point=E.cellPoint(i);await page.mouse.click(arena.x+point.x/720*arena.width,arena.y+point.y/780*arena.height);
+    };
+    await clickCell(move.from);await clickCell(move.other);
+    assert.equal(await page.locator('#unit-panel strong').innerText(),HEROES.find(h=>h.id===move.otherHero).name,'tapping a second unit inspects it');
+    assert.deepEqual(await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null)),move.board,'tap cannot move, swap or merge');
+    await clickCell(move.to);assert.deepEqual(await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null)),move.board,'tap on empty cell cannot move');
+    const from=E.cellPoint(move.from),to=E.cellPoint(move.to);
+    await page.mouse.move(arena.x+from.x/720*arena.width,arena.y+from.y/780*arena.height);await page.mouse.down();await page.mouse.move(arena.x+to.x/720*arena.width,arena.y+to.y/780*arena.height,{steps:8});await page.mouse.up();
+    assert.equal(await page.evaluate(i=>window.STAR_GARDEN.battle.board[i]?.uid,move.to),move.uid,'real drag moves the captured unit');
+    await page.locator('[data-action="target"]').click();
+    const priorities=['first','boss','strong','last'];assert.equal(await page.evaluate(i=>window.STAR_GARDEN.battle.board[i].priority,move.to),priorities[(priorities.indexOf(move.priority)+1)%4]);
+    await page.locator('[data-action="deselect"]').click();
+    const beforeKeys=await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null));await page.locator('#arena').focus();await page.keyboard.press('Enter');await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');
+    assert.deepEqual(await page.evaluate(()=>window.STAR_GARDEN.battle.board.map(u=>u?.uid||null)),beforeKeys,'keyboard inspection cannot move a unit');
+    await page.waitForFunction(()=>window.STAR_GARDEN.battle.enemies.length>0);
+    await page.locator(`[data-skill="${move.hero}"]`).click();
+    assert.equal(await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),1,'real manual skill');
+    await page.locator('[data-action="leave"]').click();await page.locator('[data-action="save-leave"]').click();
+    const saved=await profile(page);assert.ok(saved.active.run);
+    // Reload only once the save is on disk; CI twice lost the save across this reload (2026-10-19, 10-20).
+    await page.waitForFunction(({key,revision})=>{try{const disk=JSON.parse(localStorage.getItem(key)||'null');return disk?.revision===revision&&!!disk.active?.run;}catch{return false;}},{key:SAVE_KEY,revision:saved.revision});
+    await reload(test);
+    // CI once timed out here (2026-10-19, passed on rerun). If the home screen offers no resume, say what the save looked like.
+    await page.locator('[data-action="resume"],[data-action="prepare"]').first().waitFor();
+    if(!await page.locator('[data-action="resume"]').count()){const after=await profile(page),disk=await page.evaluate(key=>{const raw=localStorage.getItem(key);if(!raw)return 'empty';try{const d=JSON.parse(raw);return 'revision '+d.revision+' run '+!!d.active?.run;}catch{return 'unreadable';}},SAVE_KEY),warning=await page.locator('.toast,.warning,[role=alert]').allInnerTexts().catch(()=>[]);assert.fail('no resume after reload: active='+JSON.stringify(after.active?Object.keys(after.active):null)+' run='+!!after.active?.run+' revision '+saved.revision+'->'+after.revision+' disk='+disk+' notes='+JSON.stringify(warning));}
+    await page.locator('[data-action="resume"]').click();await page.locator('#arena').waitFor();await page.locator('[data-action="pause"]').click();
+    assert.ok((await page.evaluate(()=>window.STAR_GARDEN.battle.time))>=battleTime);
+    assert.deepEqual((await profile(page)).active.deck,saved.active.deck);
+    await page.locator('[data-action="leave"]').click();await page.locator('[data-action="save-leave"]').click();
+    await page.locator('[data-action="settings"]').click();
+    const settings=page.locator('#sheet[data-kind="settings"]');await settings.waitFor();
+    assert.equal(await settings.locator('#tutor-key,.tutor-panel').count(),0);
+    const backup={...await profile(page),dreams:3333};
+    // File.text() in WebKit requires local I/O enabled; all remote requests
+    // stay blocked before, during and after import.
+    if(isWebkit)await context.setOffline(false);
+    await page.locator('#backup-input').setInputFiles({name:'garden.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+    await page.locator('#confirm-import').waitFor();await page.locator('#confirm-import').click();
+    if(isWebkit)await context.setOffline(true);
+    assert.equal((await profile(page)).dreams,3333);assert.ok((await profile(page)).active.run);
+    await context.close();
+  }
+  const lateProfile=createProfile(NOW);lateProfile.cleared=LATE_UNLOCK_STAGE;
+  const lateTest=await boot(390,844,lateProfile,false,url,{lateNotice:true});
+  // The first load after clearing part one announces every new companion, shown once.
+  await lateTest.page.locator('#sheet[data-kind="late"]').waitFor();
+  assert.equal(await lateTest.page.locator('.late-card').count(),LATE_NEW,'every new companion is announced');
+  assert.equal((await profile(lateTest.page)).noticeLate.length,LATE_NEW,'the announcement is recorded as seen');
+  const seenLate=(await profile(lateTest.page)).noticeLate;
+  await lateTest.page.waitForFunction(({key,ids})=>{try{return JSON.stringify(JSON.parse(localStorage.getItem(key)||'null')?.noticeLate)===JSON.stringify(ids);}catch{return false;}},{key:SAVE_KEY,ids:seenLate});
+  await shot(lateTest.page,'late-notice',390,844);
+  await lateTest.page.locator('[data-action="late-summon"]').click();await lateTest.page.locator('.sm-late.open').waitFor();
+  assert.ok(await lateTest.page.locator('#overlay').isHidden(),'the announcement closes');
+  await lateTest.page.locator('[data-action="rates"]').click();assert.match(await lateTest.page.locator('#sheet-body').innerText(),/신규 동료[\s\S]*언더독[\s\S]*베놈/);await close(lateTest.page);
+  await reload(lateTest);await lateTest.page.waitForTimeout(1200);
+  const lateReload=await lateTest.page.evaluate(key=>({kind:document.getElementById('sheet').dataset.kind,title:document.getElementById('sheet-title').textContent,noticeLate:window.STAR_GARDEN.profile.noticeLate,diskNoticeLate:JSON.parse(localStorage.getItem(key)||'null')?.noticeLate}),SAVE_KEY);
+  assert.deepEqual(lateReload.noticeLate,seenLate,'companion receipts survive a reload: '+JSON.stringify(lateReload));
+  assert.deepEqual(lateReload.diskNoticeLate,seenLate,'companion receipts remain in storage: '+JSON.stringify(lateReload));
+  assert.ok(await lateTest.page.locator('#sheet[data-kind="late"]').isHidden(),'companions are not announced again after a reload: '+JSON.stringify(lateReload));
+  await nav(lateTest.page,'동료');
+  assert.equal(await lateTest.page.locator('.cards .cc').count(),HEROES.length,'the new companions join the collection once part one is cleared');
+  for(const id of ['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom'])assert.equal(await lateTest.page.locator('.cards [data-hero="'+id+'"]').count(),1,id);
+  await shot(lateTest.page,'collection-late',390,844);await lateTest.context.close();
+  const grown=createProfile(NOW);grown.cleared=36;grown.dreams=5000;
+  for(const h of HEROES){grown.heroes[h.id].owned=true;grown.heroes[h.id].copies=3;}
+  grown.relics.hourglass={owned:true,enhance:2,copies:3};grown.equipped=['hourglass'];
+  const test=await boot(390,844,grown),{page}=test;
+  await page.locator('[data-action="bond"]').click();await page.locator('#sheet-footer [data-action="partner"]').click();await page.locator('[data-set-partner="luna"]').click();
+  assert.equal((await profile(page)).partner,'luna');await shot(page,'partner-luna',390,844);
+  await page.locator('[data-action="prepare"]').click();await page.locator('#sheet-footer [data-action="team"]').click();await page.locator('#sheet-body .five-line [data-team-pick="star_boy"]').click();
+  assert.equal(await page.locator('[data-action="save-team"]').isEnabled(),false);
+  await page.locator('[data-action="focus-team"]').click();await page.locator('.choose-list [data-team-pick="queen"]').click();
+  await page.locator('[data-action="save-team"]').click();assert.ok((await profile(page)).deck.includes('queen'));await close(page);
+  await nav(page,'동료');await page.locator('[data-filter="UR"]').click();await shot(page,'ur-collection',390,844);
+  await page.locator('[data-collection="relic"]').click();await page.locator('.cards [data-relic="hourglass"]').click();
+  await page.locator('[data-enhance-relic="hourglass"]').click();assert.equal((await profile(page)).relics.hourglass.enhance,3);await close(page);
+  await nav(page,'소환');const fill=await profile(page);assert.equal(fill.pity.normal,0);
+  const relicPull=command(structuredClone(fill),'draw',{banner:'relic',count:10},NOW);assert.ok(relicPull.ok,relicPull.message);
+  await page.locator('[data-banner="relic"]').click();await page.locator('[data-draw="10"]').click();
+  await page.locator('#sheet[data-kind="draw"]').waitFor();
+  const afterRelics=await profile(page);
+  assert.equal(afterRelics.relicDraws,fill.relicDraws+10+relicPull.bonus.length);
+  assert.equal(afterRelics.dreams,fill.dreams-10*TUNING.relicDrawCost);await shot(page,'ten-relics',390,844);await close(page);
+  if(relicPull.lucky)await close(page);
+  await nav(page,'정원');assert.equal(await page.locator('.slot.locked').count(),0);
+  await page.locator('[data-dispatch-slot="0"]').click();await page.locator('[data-send="queen"]').click();
+  const dispatched=await profile(page);
+  assert.equal(dispatched.dispatches[0].hero,'queen');assert.ok(!dispatched.deck.includes('queen'));
+  assert.equal(dispatched.dispatches[0].end-dispatched.dispatches[0].start,HOUR);
+  assert.match(await page.locator('#toast').innerText(),/파견 출발 · 1시간$/);
+  assert.equal(await page.locator('.gd [data-action="accel"]').count(),0);
+  await checkCountdown(page.locator('.slot.running[data-dispatch-slot="0"]'),NOW,dispatched.dispatches[0].end);
+  await shot(page,'dispatch-active',390,844);
+  await nav(page,'모험');await page.locator('[data-mode="weekly"]').click();
+  const draftCard=page.locator('.mode.weekly'),draftPeriod=periodOf('draft',NOW);
+  assert.equal(await draftCard.locator('.mode-tag').innerText(),TEMPO.draftHours+'시간마다 초기화');
+  await checkCountdown(draftCard,NOW,draftPeriod.end);
+  await draftCard.locator('[data-action="mode-info"]').click();
+  assert.ok((await page.locator('#sheet-body').innerText()).includes('4시간마다 3번 입장해요.'));
+  await close(page);await page.locator('[data-action="prepare-mode"]').click();
+  await page.locator('[data-begin="weekly"]').click();await page.locator('[data-draft="0"]').waitFor();
+  assert.equal(await page.locator('.draft-card').count(),2);await shot(page,'draft',390,844);
+  await page.locator('[data-draft="0"]').click();const draft=await profile(page);
+  await reload(test);await page.locator('[data-action="resume"]').click();
+  assert.deepEqual((await profile(page)).active.draft,draft.active.draft);
+  for(let i=1;i<5;i++)await page.locator('[data-draft="0"]').click();
+  await page.locator('#arena').waitFor();assert.equal(await page.locator('.skill-button').count(),5);
+  assert.ok(!(await profile(page)).active.deck.includes('queen'));
+  await page.locator('[data-action="leave"]').click();await page.locator('[data-action="retire"]').click();await page.locator('[data-action="confirm-retire"]').click();
+  const settledDraft=await profile(page);
+  assert.equal(settledDraft.active,null);assert.equal(settledDraft.weekly,draftPeriod.id);
+  assert.equal(settledDraft.results[0].mode,'weekly');assert.equal(settledDraft.weeklyRuns,1);
+  // The result offers another run until all three entries are used.
+  await page.locator('#sheet[data-kind="result"] [data-action="weekly-retry"]').waitFor();await close(page);
+  const entries=draftCard.locator('.entry-pass');
+  assert.equal(await entries.getAttribute('aria-label'),'남은 입장 2/3');
+  assert.equal(await draftCard.locator('[data-action="prepare-mode"]').isDisabled(),false);
+  for(let used=2;used<=3;used++){
+    await draftCard.locator('[data-action="prepare-mode"]').click();await page.locator('[data-begin="weekly"]').click();
+    for(let pick=0;pick<5;pick++)await page.locator('[data-draft="0"]').click();
+    await page.locator('#arena').waitFor();await page.locator('[data-action="leave"]').click();
+    await page.locator('[data-action="retire"]').click();await page.locator('[data-action="confirm-retire"]').click();
+    await page.locator('#sheet[data-kind="result"]').waitFor();await close(page);
+    assert.equal((await profile(page)).weeklyRuns,used);
+  }
+  assert.equal(await entries.getAttribute('aria-label'),'남은 입장 0/3');
+  assert.equal(await draftCard.locator('[data-action="prepare-mode"]').isDisabled(),true);
+  // The entry badge and start button reset at the next four-hour boundary.
+  const nextDraft=periodOf('draft',draftPeriod.end);
+  await page.clock.setFixedTime(nextDraft.start);
+  await checkCountdown(draftCard,nextDraft.start,nextDraft.end);
+  assert.equal(await entries.getAttribute('aria-label'),'남은 입장 3/3');
+  await draftCard.locator('[data-action="prepare-mode"]').click();await page.locator('[data-begin="weekly"]').click();
+  await page.locator('[data-draft="0"]').waitFor();
+  assert.equal((await profile(page)).weekly,nextDraft.id);
+  assert.equal((await profile(page)).weeklyRuns,1);
+  await test.context.close();
+
+  const monthlyProfile=createProfile(NOW);monthlyProfile.cleared=3;monthlyProfile.settings.auto=false;
+  const monthly=await boot(390,844,monthlyProfile);
+  await nav(monthly.page,'모험');await monthly.page.locator('[data-mode="monthly"]').click();
+  const rushPeriod=periodOf('rush',NOW),huntCard=monthly.page.locator('.mode.monthly');
+  assert.equal(await huntCard.locator('.mode-tag').innerText(),TEMPO.rushHours+'시간마다 초기화');
+  await checkCountdown(huntCard,NOW,rushPeriod.end);await shot(monthly.page,'monthly-card',390,844);
+  await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();
+  await monthly.page.waitForFunction(()=>window.STAR_GARDEN.battle?.enemies.length>0);
+  await monthly.page.locator('[data-action="pause"]').click();
+  const bosses=await monthly.page.evaluate(()=>window.STAR_GARDEN.battle.enemies.map(e=>e.boss));
+  assert.deepEqual(bosses,['artificial_demon']);await shot(monthly.page,'monthly-battle',390,844);
+  await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
+  assert.equal((await profile(monthly.page)).results[0].mode,'monthly');assert.ok((await profile(monthly.page)).monthlyBest);
+  // The hunt pays its record when the run is settled; nothing is left to claim.
+  const huntReceipt=await profile(monthly.page),monthlyPaid=monthlyProfile.dreams+monthlyReward(huntReceipt.monthlyBest);
+  assert.equal(huntReceipt.dreams,monthlyPaid);assert.equal(huntReceipt.monthly,rushPeriod.id);
+  assert.equal(huntReceipt.monthlyBest.period,rushPeriod.id);
+  assert.match(await monthly.page.locator('#sheet-body').innerText(),/획득 보상/);assert.equal(await monthly.page.locator('[data-action="monthly-claim"]').count(),0);
+  await shot(monthly.page,'monthly-record',390,844);await close(monthly.page);assert.match(await monthly.page.locator('#content .mode.monthly').innerText(),/받음/);
+  await shot(monthly.page,'monthly-claimed',390,844);await monthly.page.locator('[data-action="prepare-mode"]').click();await monthly.page.locator('[data-begin="monthly"]').click();await monthly.page.locator('#arena').waitFor();
+  await monthly.page.locator('[data-action="leave"]').click();await monthly.page.locator('[data-action="retire"]').click();await monthly.page.locator('[data-action="confirm-retire"]').click();
+  assert.equal((await profile(monthly.page)).dreams,monthlyPaid,'a second attempt cannot pay again');await monthly.context.close();
+
+  // Live duration UI uses restored engine state, then a real cast and pause.
+  const sustained=createProfile(NOW);sustained.settings.auto=false;sustained.settings.sound=false;command(sustained,'begin',{mode:'main',stage:1},NOW);const buffRun=createBattle(sustained);
+  for(let i=0;i<20&&!E.bestUnit(buffRun,'siren');i++){buffRun.gold+=1000;E.summon(buffRun);}assert.ok(E.bestUnit(buffRun,'siren'));
+  buffRun.queue=[{kind:'boss',hp:1e8}];buffRun.spawnIn=0;E.step(buffRun,.05);buffRun.enemies[0].speed=0;buffRun.enemies[0].skillIn=99;buffRun.gauge=120;sustained.active.run=E.serialize(buffRun);
+  const timer=await boot(390,844,sustained);await timer.page.locator('[data-action="resume"]').click();await timer.page.locator('[data-skill="siren"]').click();
+  await timer.page.waitForFunction(()=>document.querySelector('[data-skill="siren"] .skill-duration')?.hidden===false);await timer.page.waitForTimeout(1250);await shot(timer.page,'sustained-siren',390,844);
+  await timer.page.locator('[data-action="pause"]').click();const remaining=await timer.page.evaluate(()=>window.STAR_GARDEN.battle.buffs.haste);await timer.page.waitForTimeout(250);assert.equal(await timer.page.evaluate(()=>window.STAR_GARDEN.battle.buffs.haste),remaining);
+  assert.match(await timer.page.locator('[data-skill="siren"]').getAttribute('aria-label'),/발동 중/);await timer.context.close();
+
+  const faultProfile=createProfile(NOW);faultProfile.settings.auto=false;const quota=await boot(390,844,faultProfile,true);
+  await quota.page.locator('[data-action="prepare"]').click();await quota.page.locator('[data-begin="main"]').click();await quota.page.locator('#arena').waitFor();
+  await quota.page.evaluate(()=>window.__testQuotaFailure=true);await quota.page.locator('[data-action="pause"]').click();
+  assert.equal(await quota.page.locator('#pause-button').getAttribute('aria-label'),'전투 재개');const frozen=await quota.page.evaluate(()=>window.STAR_GARDEN.battle.time);
+  await quota.page.locator('[data-action="pause"]').click();await quota.page.waitForTimeout(180);assert.equal(await quota.page.evaluate(()=>window.STAR_GARDEN.battle.time),frozen,'failed retry stays paused');
+  await quota.page.locator('[data-action="leave"]').click();await quota.page.getByRole('button',{name:'닫기',exact:true}).click();await quota.page.waitForTimeout(180);assert.equal(await quota.page.evaluate(()=>window.STAR_GARDEN.battle.time),frozen,'dismissing a sheet cannot resume a failed checkpoint');
+  await quota.page.evaluate(()=>window.__testQuotaFailure=false);await quota.page.locator('[data-action="pause"]').click();await quota.page.waitForTimeout(180);assert.ok(await quota.page.evaluate(t=>window.STAR_GARDEN.battle.time>t,frozen));
+  await quota.page.locator('[data-action="leave"]').click();await quota.page.locator('[data-action="save-leave"]').click();assert.ok((await profile(quota.page)).active.run);await quota.context.close();
+
+  const best=createProfile(NOW);best.cleared=3;command(best,'begin',{mode:'monthly',stage:4},NOW);const bestRun=createBattle(best);bestRun.phase='defeat';bestRun.health=0;bestRun.wave=7;bestRun.time=81;bestRun.stats.kills=6;bestRun.stats.damage=567890;bestRun.stats.byHero.star_boy=300000;bestRun.stats.byHero.siren=267890;best.active.run=E.serialize(bestRun);
+  const record=await boot(390,844,best);await record.page.locator('[data-action="resume"]').click();await record.page.locator('.monthly-record').first().waitFor();assert.equal((await profile(record.page)).monthlyBest.round,6);const recordPaid=600+monthlyReward((await profile(record.page)).monthlyBest);assert.equal((await profile(record.page)).dreams,recordPaid);
+  await shot(record.page,'monthly-best-result',390,844);await close(record.page);assert.equal(await record.page.locator('#content [data-action="monthly-claim"]').count(),0);assert.match(await record.page.locator('#content .mode.monthly').innerText(),/받음/);await shot(record.page,'monthly-confirm',390,844);await record.context.close();
+
+  // Enter actual result/claim screens from serialized combat fixtures rather
+  // than altering the running browser engine or creating fake DOM nodes.
+  const end=stageOneVictory(createProfile(NOW)),result=await boot(390,844,end);
+  const firstConstellation=CONSTELLATIONS[0],firstProgress='1/'+firstConstellation.stars.length;
+  await result.page.locator('[data-action="resume"]').click();await result.page.locator('#sheet[data-kind="result"]').waitFor();
+  // No core leak in the fixture: first clear plus the first perfect.
+  const cleared=await profile(result.page),clearDust=stageDust(1,true,true);
+  assert.equal(cleared.cleared,1);assert.equal(cleared.dreams,end.dreams+stageReward(1)+PERFECT_REWARD);
+  assert.deepEqual(cleared.perfect,[1]);assert.equal(await result.page.locator('.result-perfect').count(),1);
+  assert.equal(cleared.dust,end.dust+clearDust);
+  assert.equal(await result.page.locator('.result-dust').innerText(),'별가루 +'+clearDust.toLocaleString('ko-KR'));
+  const faces=result.page.locator('.result-bond-face');
+  assert.equal(await faces.count(),5);
+  assert.deepEqual(await faces.locator('img').evaluateAll(imgs=>imgs.map(img=>img.alt)),end.deck.map(id=>HEROES.find(h=>h.id===id).name));
+  assert.deepEqual(await faces.locator(':scope > span:last-child').allTextContents(),end.deck.map(()=> '+'+BATTLE_BOND.win));
+  assert.equal(cleared.study.library.stars,1);
+  assert.equal(await result.page.locator('.result-star b').innerText(),firstProgress);
+  assert.equal(await result.page.locator('.result-star [data-result-art]').count(),0);
+  await shot(result.page,'result',390,844);
+  await close(result.page);await nav(result.page,'홈');await result.page.locator('[data-action="library"]').click();
+  const gallery=result.page.locator('.lib.gallery'),currentCard=gallery.locator('.gal-card.current');
+  await currentCard.waitFor();
+  assert.equal(await gallery.locator('.gal-card').count(),CONSTELLATIONS.length);
+  assert.equal(await gallery.locator('[data-library-tab]').count(),0);
+  assert.equal(await gallery.getByText(/강의|용어/).count(),0);
+  assert.equal(await currentCard.locator('.gal-count-big').textContent(),firstProgress);
+  assert.equal(await currentCard.locator('.gal-sky .star-dot.on').count(),1);
+  await shot(result.page,'library',390,844);
+  await result.context.close();
+
+  // A replay supplies the last star and pushes one companion over the memorial threshold.
+  {
+    const p=createProfile(NOW);p.cleared=1;p.perfect=[1];p.study.library.stars=firstConstellation.stars.length-1;
+    const hero='star_boy',near=p.heroes[hero];near.bond=BOND_MAX-1;near.bondXp=bondNeed(near.bond)-1;
+    const t=await boot(390,844,stageOneVictory(p)),{page}=t;
+    await page.locator('[data-action="resume"]').click();await page.locator('#sheet[data-kind="result"]').waitFor();
+    const receipt=await profile(page);
+    assert.equal(receipt.dust,p.dust+stageDust(1,true,false));assert.equal(receipt.dreams,p.dreams);
+    assert.deepEqual(receipt.study.library.unlocked,[firstConstellation.id]);
+    assert.equal(receipt.heroes[hero].bond,BOND_MAX);
+    assert.equal(await page.locator('.result-star b').innerText(),firstConstellation.stars.length+'/'+firstConstellation.stars.length);
+    assert.equal(await page.locator('.result-bond-face[data-result-memory="'+hero+'"] use[href="#i-heart"]').count(),1);
+    const memoryLink=page.getByRole('button',{name:'인연 이야기 열림 · 보기',exact:true});
+    const paintingLink=page.getByRole('button',{name:'루미의 그림 보기',exact:true});
+    await memoryLink.waitFor();await paintingLink.waitFor();await shot(page,'result-unlocks',390,844);
+    const actions=page.locator('#sheet-footer .dialog-buttons button');
+    assert.equal(await actions.count(),2);
+    assert.ok(await actions.evaluateAll(buttons=>buttons.every(button=>{const r=button.getBoundingClientRect();return r.height>0&&r.top>=0&&r.bottom<=innerHeight+1;})),'both result actions fit in 390×844');
+    await memoryLink.click();
+    await page.locator('#sheet[data-kind="memorial"] #memory-art img').waitFor();
+    assert.equal(await page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES[hero].title);
+    await close(page);await paintingLink.click();
+    const painting=page.locator('#sheet[data-kind="library-art"]');
+    await painting.locator('.art-frame img').waitFor();
+    assert.equal(await painting.locator('#sheet-title').innerText(),firstConstellation.title);
+    assert.equal(await painting.locator('.art-frame img').getAttribute('alt'),firstConstellation.title);
+    await shot(page,'library-painting',390,844);
+    await painting.getByRole('button',{name:'회랑에 걸기',exact:true}).click();
+    await page.locator('#sheet[data-kind="result"]').waitFor();
+    await t.context.close();
+  }
+  const gauge=createProfile(NOW);gauge.pity.normal=TUNING.pity.normal;const pity=await boot(390,844,gauge);await nav(pity.page,'소환');
+  await pity.page.locator('.pity-chip.full').click();await pity.page.locator('[data-pity-pick="queen"]').click();await pity.page.locator('[data-action="pity-claim"]').click();
+  assert.equal((await profile(pity.page)).heroes.queen.owned,true);assert.equal((await profile(pity.page)).pity.normal,0);assert.equal(await pity.page.locator('.reveal-grid .hero-card').count(),1);await shot(pity.page,'pity-exchange',390,844);await pity.context.close();
+  const sent=NOW-HOUR,returned=createProfile(sent);returned.cleared=9;returned.heroes.queen.owned=true;
+  const leaving=command(returned,'dispatch',{slot:0,id:'queen'},sent);assert.ok(leaving.ok,leaving.message);returned.clockAt=NOW;
+  const claim=await boot(390,844,returned);await nav(claim.page,'정원');
+  await claim.page.locator('.slot.ready[data-dispatch-slot="0"]').click();assert.equal((await profile(claim.page)).dispatches.length,0);
+  assert.ok((await profile(claim.page)).dreams>600);await claim.context.close();
+  assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
+  await fs.writeFile(path.join(output,name+'-verification.json'),JSON.stringify({browser:name,errors,externalRequests:requests,geometry},null,2));
+  console.log(`PASS ${name}: ${geometry.length} offline screen/geometry captures; five skills, gacha, dispatch, draft, resume, import, results; no page errors or external requests`);
+}finally{for(const c of contexts)await c.close().catch(()=>{});await browser.close();}
