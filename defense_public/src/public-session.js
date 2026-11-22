@@ -1,6 +1,41 @@
 import {createAnalytics,localEventAdapter} from './analytics.js';
 import {timeBucket,waveBucket} from './analytics-schema.js';
 
+// Only the logical tutorial step leaves the page, never a cell or hero ID.
+export function tutorialStepForGuide(id){
+  switch(id){
+    case 'lobby': case 'prepare': case 'summon': case 'auto': return id;
+    case 'merge-more': return 'merge';
+    case 'ten': case 'ten-go': case 'ten-nav': return 'firstTen';
+    case 'team-auto': case 'team-save': return 'formation';
+    default:
+      if(id.startsWith('merge:'))return 'merge';
+      if(id.startsWith('cast:'))return 'cast';
+      return null;
+  }
+}
+
+// Count a page affected by unavailable storage once, even if saving is retried.
+// Re-throw the original exception so the normal save/recovery behavior applies.
+export function observeProfileStorage(storage,onUnavailable){
+  let reported=false;
+  function report(error){
+    if(!reported){
+      reported=true;
+      onUnavailable();
+    }
+    throw error;
+  }
+  return {
+    getItem(key){
+      try{return storage.getItem(key);}catch(error){report(error);}
+    },
+    setItem(key,value){
+      try{return storage.setItem(key,value);}catch(error){report(error);}
+    },
+  };
+}
+
 export function publicSession({snapshot}){
   const config=window.__GARDEN_RELEASE__,analytics=createAnalytics({enabled:config?.analytics?.enabled,adapter:localEventAdapter()});
   let lastScreen=null;const shown=new Set(),completed=new Set();
