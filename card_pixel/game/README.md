@@ -12,6 +12,15 @@
 
 저장소 루트에서 실행한다.
 
+**검증 명령 하나:** `node card_pixel/game/tools/verify.mjs`는 고친 파일을 보고 단계를 고른다(작업 공간 규칙 C1~C4, `게임\AGENT-RULES.md`).
+
+- 빠른 확인(모든 커밋, 1~3분): 빌드, Node 시험, 화면 상태 검사, 고친 화면의 갤러리 사례(`tools/verify.mjs`의 `SCREEN_CASES` 표). 표에 없는 화면은 `--cases <이름>`으로 더한다.
+- 전체 확인(푸시 직전, 동시 작업 묶음이 끝났을 때, 공용 부분을 고쳤을 때, 20~40분): 빠른 확인과 갤러리 전체, 지도 갤러리, 자동 플레이 두 판, 튜토리얼 두 경로. 공용 부분은 `SHARED` 표(저장·원정 엔진·화면 전환·전투 화면·공용 CSS 등)이고, 거기 속한 파일을 고치면 저절로 전체 확인이 된다.
+- `--quick`·`--full`로 직접 고를 수 있다. `--layout`은 전체 확인에 360×740과 글씨 125% 갤러리를 더한다(배치나 CSS를 바꿨을 때). `--base origin/main`은 푸시 전 비교 기준을 바꾼다.
+- 작은 수정 하나에 전체 확인을 돌리지 않는다.
+
+개별 명령:
+
 ```sh
 node card_pixel/game/build.mjs
 node --test --test-isolation=none card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/daily.test.mjs card_pixel/game/tests/assets.test.mjs card_pixel/game/tests/rulebook.test.mjs card_pixel/game/tests/effect-plan.test.mjs card_pixel/game/tests/skill-motions.test.mjs card_pixel/game/tests/text.test.mjs card_pixel/game/tests/history.test.mjs card_pixel/game/tests/goals.test.mjs card_pixel/game/tests/episodes.test.mjs card_pixel/game/tests/save.test.mjs
