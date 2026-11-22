@@ -16,3 +16,8 @@ card_pixel/art/refs/
 card_pixel/plan/pixel-pilot/r4/*-strip*.png
 card_pixel/plan/pixel-pilot/r4/*-idle*.png
 card_pixel/plan/pixel-pilot/r4b/*-strip.png
+
+# Reproducible web releases and local operator configuration
+defense_public/dist-public/
+defense_public/release.local.json
+defense_public/deploy/cloudflare/.wrangler/

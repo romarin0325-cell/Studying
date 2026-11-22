@@ -452,6 +452,14 @@ function planDefensePublic(plan, files, currentFiles) {
   if (product.some(file => inputs.test(file))) {
     addStep(plan, makeStep(game + ':build', game, 'Build public Star Garden from its deployment inputs once', 'node', [game + '/scripts/build.mjs'], { needsInstall: true }));
   }
+  const web = product.some(file => inputs.test(file) || /^defense_public\/(?:release\.example\.json$|deploy\/cloudflare\/|scripts\/(?:public-web|check-public|serve-public)\.mjs$|tests\/(?:public-browser|public-web\.test|analytics\.test|collector(?:-smoke|\.test))\.mjs$)/.test(file));
+  if (web) {
+    addStep(plan, makeStep(game + ':build-web', game, 'Build only the allowlisted public web artifact', 'node', [game + '/scripts/build.mjs', '--public-web'], { needsInstall: true }));
+    addStep(plan, makeStep(game + ':check-web', game, 'Check hashes, source exposure and security headers', 'node', [game + '/scripts/check-public.mjs']));
+    addStep(plan, makeStep(game + ':collector:install', game, 'Install the isolated locked Cloudflare test tools', 'npm', ['ci', '--prefix', game + '/deploy/cloudflare', '--no-audit', '--no-fund'], { needsInstall: true }));
+    addStep(plan, makeStep(game + ':collector:runtime', game, 'Exercise the collector on local workerd and D1 without deploying', 'node', [game + '/tests/collector-smoke.mjs'], { needsInstall: true }));
+    addBrowserScript(plan, game, game + ':web-browser', 'Check the actual HTTP release on mobile Chromium and WebKit', game + '/tests/public-browser.mjs', ['chromium', 'webkit']);
+  }
   const browser = game + '/tests/browser.mjs';
   if (currentFiles.includes(browser)) addBrowserScript(plan, game, game + ':offline-browser', 'Run the public Star Garden browser scenario', browser);
 }
