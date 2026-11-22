@@ -16,7 +16,7 @@ export function killLabel(preview, hp) {
 }
 
 function retreatAction(intent) {
-  return intent.dmg ? '다음 동료가 공격 대상' : '다음 동료 출전 · 적 ' + intent.name;
+  return intent.dmg ? TERMS.retreat.detail : '다음 동료 출전 · 적 ' + intent.name;
 }
 
 function retreatHp(next) {

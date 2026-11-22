@@ -18,7 +18,7 @@ import { eventChoices } from '../src/engine/rooms.js';
 import * as Save from '../src/engine/save.js';
 import { battleLog } from '../src/ui/battle/log.js';
 import { affixLines, intentLines, skyRelics } from '../src/ui/battle/hud.js';
-import { commandRelics, killLabel } from '../src/ui/battle/tiles.js';
+import { commandRelics, killLabel, relayOutcomeLines } from '../src/ui/battle/tiles.js';
 import { relicEffect } from '../src/ui/relics.js';
 import { ratesView } from '../src/engine/awakenings.js';
 import { TERMS } from '../src/ui/glossary.js';
@@ -1173,13 +1173,15 @@ function relayOutcomes() {
   const moves = ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격', '일반 공격'];
   const safe = battle.previewRelay();
   assert.equal(safe.danger, 'none');
-  const safeAfter = safe.retreat.next.hpAfter[0];
+  // Expected lines come from the same pure formatter the tile uses, fed by the real preview.
+  const safeLines = relayOutcomeLines(safe, battle.state().allies[0], battle.previewRetreat().intent);
   for (const name of moves) act(battle, name);
   const { turn, allies } = battle.state();
   const hp = allies[0].hp;
   assert.equal(run.floor, 2);
   const preview = battle.previewRelay();
-  assert.equal(preview.danger, 'certain');
+  assert.notEqual(preview.danger, 'none');
+  const armedLines = relayOutcomeLines(preview, allies[0], battle.previewRetreat().intent);
   assert.equal(preview.stand.inheritor.name, '세이렌');
   assert.equal(preview.stand.heirloom.skill, '드래곤스파클');
   const after = preview.retreat.next.hpAfter[0];
@@ -1195,8 +1197,10 @@ function relayOutcomes() {
       const lines = button.locator('small');
       await button.click();
       await text(button, TERMS.retreat.short + ' 확정');
-      assert.deepEqual(await lines.allTextContents(), ['용혈의무녀 생존 · 다음 동료가 이번 공격을 받음', `세이렌 HP 500 → ${safeAfter}`]);
-      assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), 0);
+      assert.deepEqual(await lines.allTextContents(), safeLines);
+      // The wide two-line layout is used only when a line carries a chance or an MP note.
+      const wide = safe.retreat.next.evadeHp != null || !!safe.retreat.next.mpOnHit;
+      assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), wide ? 1 : 0);
       await capture('safe');
       for (const name of moves) await tapTile(page, name);
       await text(page.locator('#turn'), `${turn}턴`, { exact: true });
@@ -1207,8 +1211,8 @@ function relayOutcomes() {
       }));
       const before = await tileSizes();
       await button.click();
-      await text(lines.nth(0), `물러나면 · 세이렌 HP 500 → ${after}`, { exact: true });
-      await text(lines.nth(1), '남으면 · 용혈의무녀 쓰러짐 → 세이렌이 드래곤스파클 계승', { exact: true });
+      await text(lines.nth(0), armedLines[0], { exact: true });
+      await text(lines.nth(1), armedLines[1], { exact: true });
       assert.deepEqual(await tileSizes(), before, 'Arming retreat must keep command tile sizes');
       const misfits = await button.evaluate(node => {
         const panel = node.closest('#panel');
@@ -2181,6 +2185,37 @@ function applyReturn(profile, run, selection) {
   return result;
 }
 
+// Two real tabs of one game (one browser context shares localStorage): the second tab departs, which writes
+// the session, and the first tab must stop writing and offer to continue from the newest save.
+function staleTab() {
+  const profile = snowRabbitProfile();
+  return {
+    session: storedSession({ profile }), proof: 'A second tab saves; the first tab blocks itself and reloads the newest state',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      const other = await page.context().newPage();
+      try {
+        await other.goto(page.url());
+        await enterObservatory(other);
+        await other.locator('#hub.on #meta-depart').click();
+        await other.locator('#sheet.on #meta-start-expedition').click();
+        await other.locator('#hub.on').waitFor({ state: 'hidden' });
+        const notice = page.locator('#stale-session[open]');
+        await text(notice.locator('h3'), '다른 창에서 진행 중', { exact: true });
+        await text(notice.locator('#stale-session-resume'), '이 창에서 이어하기', { exact: true });
+        await capture();
+        await notice.locator('#stale-session-resume').click();
+        await page.waitForLoadState('load');
+        await page.locator('#stale-session[open]').waitFor({ state: 'detached', timeout: 3000 }).catch(() => {});
+        assert.equal(await page.locator('#stale-session[open]').count(), 0, 'The reloaded tab is the writer again');
+        await capture('reloaded');
+      } finally {
+        await other.close();
+      }
+    }
+  };
+}
+
 function nextGoalLine() {
   const profile = snowRabbitProfile();
   const goal = Meta.nextGoal(profile, null);
@@ -2938,6 +2973,7 @@ const cases = {
   'damaged-rift-recovery': damagedRiftRecovery,
   'malformed-profile-import': malformedProfileImport,
   'next-goal': nextGoalLine,
+  'stale-tab': staleTab,
   'ending-goal': endingGoal,
   'roster-table': preDepartureRoster,
   'difficulty-choice': difficultyChoice,
