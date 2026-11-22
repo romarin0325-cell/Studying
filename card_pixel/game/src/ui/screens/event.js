@@ -118,7 +118,10 @@ export function eventScreen(run, ui, result = null) {
       const equipped = outcome.effects.some(effect => effect.type === 'relic' && effect.equipped);
       if (equipped) sfx.gem();
       else if (outcome.effects.some(effect => effect.type === 'join')) sfx.awaken();
-      else sfx.tap();
+      else if (outcome.effects.some(effect => effect.type === 'promise')) {
+        ui.audio.unlockAudio();
+        sfx.seal();
+      } else sfx.tap();
       if (run.pending || (run.room.relic && equipped)) ui.route();
       else eventScreen(run, ui, outcome);
     }

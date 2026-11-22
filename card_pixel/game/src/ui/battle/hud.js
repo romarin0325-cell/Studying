@@ -22,6 +22,8 @@ export const mpLossText = effect => effect?.kind === 'mp'
   ? effect.mode === 'all' ? '현재 MP 전부 소멸' : Number.isFinite(effect.amount) ? '현재 MP −' + effect.amount : '현재 MP 감소'
   : '';
 const drainText = rate => rate ? '가한 피해 ' + Math.round(rate * 100) + '% 회복' : '';
+const inspectLabel = ({ name, hp, maxHp }) =>
+  `${name} · HP ${hp.toLocaleString('en-US')}/${maxHp.toLocaleString('en-US')} · 정보 보기`;
 
 export function intentLines(intent, countdown, hp, buffNames = {}) {
   if (!intent) return [];
@@ -100,7 +102,7 @@ export function createHud(core, stage, sfx, widgets) {
   function buildParty(run, party) {
     $('#party').innerHTML = party.map((id, i) => {
       if (!id) return '<div class="pm none"></div>';
-      return '<div class="pm" data-i="' + i + '"><span class="face">' + face(id, 40) + '<i>' + POSITION[i] + '</i></span><span class="info">' +
+      return '<div class="pm" data-i="' + i + '" role="button" tabindex="0"><span class="face">' + face(id, 40) + '<i>' + POSITION[i] + '</i></span><span class="info">' +
         '<span class="top"><b>' + esc(card(id).name) + '</b>' + repeatBadge(run, id) + (run.heirlooms[id] ? '<i class="h">유</i>' : '') + '</span>' +
         '<span class="bar hp"><u></u><span class="n"></span></span><span class="bar mp"><u></u><span class="n"></span></span></span><em class="st"></em></div>';
     }).join('');
@@ -110,6 +112,7 @@ export function createHud(core, stage, sfx, widgets) {
     $('#turn').textContent = D.turn + '턴';
     D.allies.forEach((a, i) => {
       const node = $('#party .pm[data-i="' + i + '"]'); if (!a || !node) return;
+      node.setAttribute('aria-label', inspectLabel(a));
       node.className = 'pm ' + (a.dead ? 'dead' : a.out ? 'out' : i === D.cur ? 'cur' : 'wait') + (a.lastStand ? ' last' : '');
       bar($('.hp u', node), a.hp, a.maxHp, fresh); $('.hp .n', node).textContent = a.hp + '/' + a.maxHp;
       $('.mp u', node).style.width = Math.max(0, Math.min(1, a.mp / a.maxMp)) * 100 + '%'; $('.mp .n', node).textContent = a.mp;
@@ -118,6 +121,7 @@ export function createHud(core, stage, sfx, widgets) {
     const me = D.allies[Math.min(D.cur, 2)];
     chips($('#pa-chips'), me && !me.dead && !me.out ? me : { buffs: {} }, false);
     const foe = D.enemy, def = B.door.enemies[foe.idx];
+    $('#foebar').setAttribute('aria-label', inspectLabel(foe));
     enemyHeading(B);
     $('#pf-name').textContent = foe.name;
     const el = $('#pf-el'); el.textContent = ELEMENT[def.element] || ''; el.className = 'el-' + def.element;
@@ -163,6 +167,7 @@ export function createHud(core, stage, sfx, widgets) {
     c.className = 'cd' + (future ? ' on' : '');
     S.danger = boss ? 1 : 0;
     enemyHeading(B);
+    return n.textContent;
   }
 
   function shortLine(line) {

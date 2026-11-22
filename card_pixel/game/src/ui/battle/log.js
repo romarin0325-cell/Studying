@@ -5,10 +5,20 @@ import { TERMS } from '../glossary.js';
 const number = value => value.toLocaleString('en-US');
 const attackKey = (side, idx, name) => [side, idx, name].join(':');
 const PREVIEW = {
-  mana_drain: 'MP 소멸', cleanse: '정화', retaliation: '피격에 따른 반격', charge: '충전',
+  mana_drain: 'MP 소멸', cleanse: TERMS.cleanse.short, retaliation: '피격에 따른 반격', charge: '충전',
   defense_protocol: '방어 전환', alternating_defense: '교대 방어', lesson_guard: '피해 감소', swap_stats: '능력치 교환'
 };
 const RESPONSES = { ...BLOCKED_BY, enemy_down: '적 처치', no_hit: '피격 없음' };
+
+function cleansedCount({ before, after, preventedBy }) {
+  if (preventedBy) return 0;
+  return Object.keys(before ?? {}).filter(id => before[id] > 0 && !(after?.[id] > 0)).length;
+}
+
+export function cleanseLabel(event) {
+  const count = cleansedCount(event);
+  return count ? `${TERMS.cleanse.short} · ${count}종 해제` : '';
+}
 
 function ruleResponse(event) {
   const { rule, before, after, preventedBy } = event;
@@ -19,7 +29,7 @@ function ruleResponse(event) {
   }
   if (rule === 'mana_drain' && Number.isFinite(before) && Number.isFinite(after)) return 'MP ' + before + ' → ' + after;
   if (Number.isFinite(before?.hp) && Number.isFinite(after?.hp)) return 'HP ' + before.hp + ' → ' + after.hp;
-  if (rule === 'cleanse') return Object.keys(before ?? {}).length ? '약화 해제' : '해제할 약화 없음';
+  if (rule === 'cleanse') return cleansedCount(event) ? '약화 해제' : '해제할 약화 없음';
   if (rule === 'charge') return '충전 완료';
   return '발동';
 }

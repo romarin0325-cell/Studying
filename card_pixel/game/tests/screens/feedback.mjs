@@ -1,0 +1,112 @@
+import assert from 'node:assert/strict';
+import { chooseDoor, chooseEvent } from '../../src/engine/run.js';
+import { cleanseLabel } from '../../src/ui/battle/log.js';
+import { playRun } from '../../tools/sim.mjs';
+
+export function trenchCleanseFixture(snapshot) {
+  const commands = [];
+  let session, party, warning, cleanse;
+  playRun('midnight_trench', 7919, {
+    relicDoors: true,
+    trace(run, wait, option, events) {
+      if (run.floor !== 2 || wait.s.turn > 2) return;
+      commands.push(option.index);
+      if (wait.s.turn === 1) {
+        session = snapshot?.(run);
+        party = Array.from(run.room.party);
+        assert.equal(wait.intent.salience, 'ordinary');
+        assert.equal(wait.countdown.inTurns, 2);
+        warning = events.find(event => event.t === 'await');
+      } else {
+        const cleanses = events.filter(event => event.t === 'rule' && event.rule === 'cleanse');
+        assert.equal(cleanses.length, 1);
+        [cleanse] = cleanses;
+        assert.ok(events.some(event => event.t === 'await' && event.s.turn === 3));
+      }
+    }
+  });
+  assert.deepEqual(commands, [2, 2]);
+  assert.equal(warning?.intent.salience, 'strong');
+  assert.equal(cleanse?.turn, 2);
+  assert.equal(cleanseLabel(cleanse), '정화 · 3종 해제');
+  return { session, party, commands, warning, cleanse };
+}
+
+export function createFeedbackCases({ makeRun, storedSession, openBattle, battleIdle }) {
+  return {
+    'access-cleanse-feedback': () => {
+      const { session, party, commands: [first, second], warning, cleanse } = trenchCleanseFixture(run => storedSession({ run }));
+      const cleanseLine = cleanseLabel(cleanse);
+      const warningKey = `${warning.enemyIndex}/${warning.s.turn}`;
+      return {
+        session, settings: { sound: true, music: false },
+        proof: 'Trench 7919 floor 2: fast-forward to a strong intent, then replay the three-status cleanse once',
+        async show(page, { text, capture }) {
+          await openBattle(page);
+          assert.deepEqual(await page.evaluate(() => window.__game.B.party), party);
+          await page.evaluate(() => {
+            const skip = document.querySelector('#skip');
+            window.__feedback = { fast: false, labels: [], announcements: [] };
+            new MutationObserver(records => {
+              window.__feedback.fast ||= skip.classList.contains('on') || records.some(record => record.oldValue === 'on');
+            }).observe(skip, { attributeFilter: ['class'], attributeOldValue: true });
+            new MutationObserver(records => {
+              for (const record of records) {
+                for (const node of record.addedNodes) {
+                  if (node.matches?.('.tag')) window.__feedback.labels.push(node.textContent);
+                }
+              }
+            }).observe(document.querySelector('#fx'), { childList: true });
+            new MutationObserver(records => {
+              for (const record of records) {
+                for (const node of record.addedNodes) window.__feedback.announcements.push(node.textContent);
+              }
+            }).observe(document.querySelector('#battle-announcement'), { childList: true });
+          });
+          const command = index => page.locator(`#acts .act[data-i="${index}"]`).click();
+          const intent = page.locator('#intent');
+          await command(first);
+          await page.locator('#cv').click();
+          await battleIdle(page);
+          await text(intent, warning.intent.name);
+          const warningState = await page.evaluate(() => ({
+            fast: window.__feedback.fast, readyFast: window.__game.clock.fast, key: window.__game.B.lastWarning
+          }));
+          assert.deepEqual(warningState, { fast: true, readyFast: false, key: warningKey });
+          const turn2 = await intent.textContent();
+          await command(second);
+          await battleIdle(page);
+          await text(page.locator('#ticker'), cleanseLine, { exact: true });
+          const turn3 = await intent.textContent();
+          const expected = turn3 + ' · ' + cleanseLine;
+          assert.equal(await page.locator('#battle-announcement').textContent(), expected);
+          const { labels, announcements } = await page.evaluate(() => window.__feedback);
+          assert.equal(labels.filter(label => label === cleanseLine).length, 1);
+          assert.deepEqual(announcements, [turn2, expected]);
+          await capture();
+        }
+      };
+    },
+    'access-promise-seal': () => {
+      const run = makeRun({ dungeonId: 'ember_volcano', seed: 7, floor: 3, tempoVersion: 2 });
+      const door = run.doors.find(entry => entry.event?.id === 'kept_chest');
+      assert.ok(door);
+      assert.equal(chooseDoor(run, door.index).ok, true);
+      const session = storedSession({ run });
+      const chosen = chooseEvent(run, 'deposit');
+      assert.equal(chosen.ok, true);
+      assert.equal(chosen.effects.some(effect => effect.type === 'promise'), true);
+      return {
+        session, settings: { sound: true, music: false },
+        proof: 'Ember 7 floor 3: the kept chest accepts the deposit and plays the promise seal',
+        async show(page, { text, capture }) {
+          const event = page.locator('#event.on');
+          await text(event.locator('h2'), '맡겨 둔 상자', { exact: true });
+          await event.locator('[data-choice="deposit"]').click();
+          await text(event.locator('.event-dialog'), `${run.promise.floor}층 약속`);
+          await capture();
+        }
+      };
+    }
+  };
+}

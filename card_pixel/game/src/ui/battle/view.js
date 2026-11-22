@@ -3,7 +3,7 @@ import { foeFlip, formatMultiplier, logButton, traitText, TYPE } from '../widget
 import { josa } from '../text.js';
 import { retreatStoryLine } from '../story-lines.js';
 import { DUNGEONS } from '../../content/dungeons.js';
-import { TERMS } from '../glossary.js';
+import { RESUME, TERMS } from '../glossary.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
 import { INTRO } from '../../content/intro.js';
@@ -18,8 +18,8 @@ import { syncBattleSpeed, tools } from '../settings.js';
 import { createHud } from './hud.js';
 import { createTiles } from './tiles.js';
 import { createMoves } from './moves.js';
-import { actionEnd, planEffects } from './effect-plan.js';
-import { battleLog, openBattleLog } from './log.js';
+import { actionCleanses, actionEnd, planEffects, warningDue } from './effect-plan.js';
+import { battleLog, cleanseLabel, openBattleLog } from './log.js';
 
 const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
 
@@ -53,6 +53,7 @@ export function planBattleAction(events, index, { core, artifacts }) {
     hp: new Map(plan.filter(step => step.event).map(step => [step.event, step])),
     effects: plan.filter(step => !step.event),
     changes: [],
+    cleanses: actionCleanses(segment, core.StatusRules),
     downs: []
   };
 }
@@ -83,16 +84,17 @@ export function battleFailure(run) {
 export function battleMarkup() {
   return (
     '<section id="battle" class="screen">' +
-    '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="전장·유물">전장</button><button id="b-speed">1배</button>' + logButton('id="b-log"') + tools() + '</header>' +
+    '<div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div>' +
     '<div id="stage"><canvas id="cv"></canvas><div id="hud">' +
-    '<div id="foebar"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div>' +
+    '<div id="foebar" role="button" tabindex="0"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div>' +
     '<div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div>' +
     '<div class="chips" id="pf-chips"></div></div>' +
-    '<button class="sky" id="sky" aria-label="필드 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
     '<div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">▶▶ 고속 진행</div></div>' +
     '<div id="party"></div>' +
     '<div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div>' +
-    '<div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div>' +
+    '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="전장·유물">전장</button><button id="b-speed">1배</button>' + logButton('id="b-log"') + tools() + '</header>' +
+    '<button class="sky" id="sky" aria-label="필드 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
+    '<div id="battle-announcement" aria-live="polite" aria-atomic="true"></div>' +
     '<div class="sheet" id="result"><div class="in win" id="result-in"></div></div>' +
     '</section>'
   );
@@ -102,6 +104,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
   const { sfx } = audio;
   const { card, face, spr } = widgets;
+  const announcement = $('#battle-announcement');
   const clone = o => JSON.parse(JSON.stringify(o));
   const LINKED_TRAITS = ['ally_death_base_atk_phy', 'ally_light_death_base_matk_mag'];
   const relayHint = $('#relay-hint');
@@ -181,13 +184,26 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const kind = intent?.kind ?? intent?.type;
     B.intent = intent && { ...intent, kind, dmg: intent.dmg ?? (['phy', 'mag'].includes(kind) ? intent.damageRange : undefined) };
     B.countdown = countdown;
-    hud.showIntent(B, countdown);
+    return hud.showIntent(B, countdown);
   }
-  function warnEnemy() {
+  function warnEnemy(forecast) {
     const key = (B.D?.enemy?.idx ?? 0) + '/' + B.D?.turn;
-    if (B.lastWarning === key) return;
-    B.lastWarning = key;
-    sfx.warn();
+    if (warningDue({ key, playedKey: B.lastWarning, fast: clock.fast, soundOn: audio.soundOn,
+      immediate: !forecast, intent: forecast?.intent, countdown: forecast?.countdown }) && sfx.warn()) B.lastWarning = key;
+  }
+  function stopFastForward() {
+    clock.fast = false;
+    $('#skip').className = '';
+  }
+  function showCommandIntent(event, commandReady = true) {
+    const line = showIntent(event.intent, event.countdown);
+    if (commandReady) stopFastForward();
+    warnEnemy(event);
+    if (commandReady && line && B.announcedTurn !== B.D.turn) {
+      B.announcedTurn = B.D.turn;
+      announcement.textContent = [line, ...B.cleanseLines].join(' · ');
+    }
+    B.cleanseLines.length = 0;
   }
 
   const isOpening = () => B.door.type === 'borrowed' && run.tempoVersion === 2;
@@ -241,14 +257,31 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     if (a === B.foe) foeSheet(); else allySheet(B.allies.indexOf(a));
   });
   /* The HUD pieces open their sheets even mid-animation; the battle waits while a sheet is open. */
-  $('#foebar').addEventListener('click', ev => { ev.stopPropagation(); sfx.tap(); foeSheet(); });
+  function inspectKey(event) {
+    const button = event.target.closest('[role="button"]');
+    if (!button || !['Enter', ' '].includes(event.key) || event.altKey || event.ctrlKey || event.metaKey) return;
+    event.preventDefault();
+    if (!event.repeat && !$('#sheet.on')) button.click();
+  }
+  $('#foebar').addEventListener('keydown', inspectKey);
+  $('#party').addEventListener('keydown', inspectKey);
+  $('#foebar').addEventListener('click', ev => {
+    ev.stopPropagation();
+    ev.currentTarget.focus({ preventScroll: true });
+    sfx.tap(); foeSheet();
+  });
   $('#sky').addEventListener('click', ev => { ev.stopPropagation(); sfx.tap(); fieldSheet(); });
   $('#b-field').addEventListener('click', () => {
     sfx.tap();
     details.battlefieldSheet(run, B);
   });
   $('#pa-chips').addEventListener('click', ev => { ev.stopPropagation(); if (B.D) { sfx.tap(); allySheet(Math.min(B.D.cur, 2)); } });
-  $('#party').addEventListener('click', ev => { const p = ev.target.closest('.pm[data-i]'); if (p && B.D) { sfx.tap(); allySheet(Number(p.dataset.i)); } });
+  $('#party').addEventListener('click', ev => {
+    const row = ev.target.closest('.pm[data-i]');
+    if (!row || !B.D) return;
+    row.focus({ preventScroll: true });
+    sfx.tap(); allySheet(Number(row.dataset.i));
+  });
   syncBattleSpeed(St);
   const currentLog = () => B.bridge ? battleLog(B.all.slice(0, B.played), B.party, B.door.enemies) : run?.lastBattleLog;
   function completeLog() {
@@ -429,6 +462,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       await Promise.all([settlePending(), pause > 0 ? wait(pause) : null]);
     }
     applyEffects(action.changes);
+    for (const event of action.cleanses) await onRule(event);
     await showEffects(action.effects, $('#sky'));
     await action.tally;
     for (const down of action.downs) await handle(down);
@@ -489,6 +523,17 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       case 'echo': if (who) { label('메아리', who, 'good', -10); St.ring(St.X(who), CY(who), '#a8ffe0', 34); sfx.cast(); } await wait(0.18); break;
       case 'thorns': if (who) label('가시 -' + e.amount, who, 'bad', 6); await wait(0.12); break;
       case 'leech': if (who) { label('흡혈', who, 'bad', -10); St.rise(St.X(who), FY(who), 10, ['#ff6b5e', '#ffb0a8'], 24); } await wait(0.12); break;
+      case 'cleanse': {
+        const text = cleanseLabel(e);
+        if (!text) break;
+        const target = e.target ? actorOf(e.target) : who;
+        // One line below the frenzy tag (-10), which the same enemy often shows in the same beat.
+        if (target) label(text, target, 'good', 10);
+        ticker(text);
+        B.cleanseLines.push(text);
+        sfx.chime(false);
+        break;
+      }
       case 'frenzy': if (who) { who.aura = 'red'; label('광폭 · 공·마공 ×1.5', who, 'bad', -10); warnEnemy(); } await wait(0.45); break;
       case 'overflow': if (who) label('초과 피해 ' + e.amount, who, 'good', -10); await wait(0.2); break;
       case 'starfall': await wait(0.05); break;
@@ -605,7 +650,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
 
   /* ---------- the event player ---------- */
-  async function handle(e, action) {
+  async function handle(e, action, commandReady) {
     switch (e.t) {
       case 'log': logLine(e.text); break;
       case 'begin': await intro(e); break;
@@ -641,8 +686,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       }
       case 'alert': ticker(e.text); break;
       case 'await':
-        await settlePending(); B.D = clone(e.s); await placeActors(true); render(); showIntent(e.intent, e.countdown);
-        if (['strong', 'boss'].includes(e.intent?.salience) || !e.intent?.salience && e.countdown?.inTurns <= 1) warnEnemy();
+        await settlePending(); B.D = clone(e.s); await placeActors(true); render(); showCommandIntent(e, commandReady);
         showRegion(e); renderReady();
         break;
       case 'win':
@@ -666,7 +710,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       setupBattleStage();
       placeActors(false);
       render(true);
-      showIntent(ready?.intent, ready?.countdown);
+      if (ready) showCommandIntent(ready);
       showRegion(ready);
     } finally {
       if (B.bridge.awaiting) {
@@ -699,8 +743,9 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         const e = events[i];
         if (e.t === 'act') action = planBattleAction(events, i, { core, artifacts: B.artifacts });
         if (action && (e.t === 'buff' || e.t === 'field')) action.changes.push(e);
+        else if (action && e.t === 'rule' && e.rule === 'cleanse') action.cleanses.push(e);
         else if (action && e.t === 'down') action.downs.push(e);
-        else await handle(e, action);
+        else await handle(e, action, i === events.length - 1);
         if (action?.end === i + 1) {
           await finishActionEffects(action);
           action = null;
@@ -724,7 +769,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       B.played = B.all.length;
     } finally {
       if (bridge === B.bridge) {
-        B.busy = false; clock.fast = false; $('#skip').className = '';
+        B.busy = false; stopFastForward();
       }
     }
     if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
@@ -755,6 +800,9 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.played = 0;
     B.fromMap = fromMap;
     B.lastWarning = null;
+    B.announcedTurn = null;
+    B.cleanseLines = [];
+    announcement.textContent = '';
     B.blessingViews = new Map();
     B.finalHit = B.finishNumber = null;
     B.outcomeKey = Symbol();
@@ -835,7 +883,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     if (retry) label = '편성 바꿔 재도전';
     else if (run.result && !run.pending) {
       const rewards = R.runRewards(run);
-      label = run.daily ? '균열 기록 보기' : won && rewards.recruitable.length ? '영입할 동료 고르기' :
+      label = run.daily ? RESUME.dailyResult : won && rewards.recruitable.length ? '영입할 동료 고르기' :
         rewards.shardCandidates.length ? '다음 원정 후보 고르기' : '관측소로';
     } else if (roomType === 'borrowed') label = '다음 동료 고르기';
     else if (run.pending?.kind === 'reinforcement') label = '동료 보충하기';
@@ -895,6 +943,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.door = run.room;
     B.artifacts = run.relics;
     B.temporaryRelic = null;
+    announcement.textContent = '';
     relayHint.hidden = true;
     music?.holdReward(run.dungeonId);
     St.clear();

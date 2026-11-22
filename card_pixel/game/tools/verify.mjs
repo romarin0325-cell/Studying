@@ -17,7 +17,7 @@ const option = name => { const at = args.indexOf(name); return at >= 0 ? args[at
 const base = option('--base') ?? 'HEAD';
 
 export const NODE_TESTS = ['bridge', 'rules', 'run', 'music', 'daily', 'assets', 'rulebook', 'effect-plan',
-  'skill-motions', 'text', 'history', 'goals', 'episodes', 'save'];
+  'skill-motions', 'text', 'history', 'goals', 'episodes', 'save', 'feedback'];
 
 // Parts many screens depend on: touching one of them asks for the full tier.
 export const SHARED = [

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { defaultParty } from '../../src/engine/run.js';
 import { resolveMotion } from '../../src/ui/battle/motion.js';
 import { SETTINGS_KEY } from '../../src/ui/storage.js';
+import { createFeedbackCases } from './feedback.mjs';
 
 const lead = 'snow_rabbit';
 const skill = '스노우샷';
@@ -30,6 +31,7 @@ export function createAccessCases({ makeRun, startBattle, storedSession, act, op
     const session = storedSession({ run });
     const battle = startBattle(run, { party: defaultParty(run) });
     const options = battle.options();
+    const initial = battle.state();
     assert.deepEqual(Array.from(options.filter(option => option.usable), option => option.index), [0, 1, 2, 3, 4]);
     assert.equal(options[2].name, skill);
     const events = act(battle, move);
@@ -47,10 +49,82 @@ export function createAccessCases({ makeRun, startBattle, storedSession, act, op
       assert.equal(battle.canRetreat(), true);
       assert.ok(battle.retreat().some(event => event.t === 'retreat'));
     }
-    return { session, damage: hits[0].amount };
+    return { session, initial, damage: hits[0].amount };
   }
 
   return {
+    ...createFeedbackCases({ makeRun, storedSession, openBattle, battleIdle }),
+    'access-inspection': () => {
+      const { session, initial } = battleFixture(skill);
+      assert.ok(initial.enemy && initial.allies[1] && initial.allies[2]);
+      assert.equal(initial.cur, 0);
+      return {
+        session, mute: true,
+        proof: 'A foe and three roster rows follow the command panel, with distinct enemy and bench sheets',
+        async show(page, { text, capture }) {
+          const foe = '#foebar';
+          const row = index => `#party .pm[data-i="${index}"]`;
+          const assertLabel = async (selector, { name, hp, maxHp }) => {
+            const locator = page.locator(selector);
+            assert.equal(await locator.getAttribute('role'), 'button');
+            assert.equal(await locator.getAttribute('tabindex'), '0');
+            assert.equal(await locator.getAttribute('aria-label'),
+              `${name} · HP ${hp.toLocaleString('en-US')}/${maxHp.toLocaleString('en-US')} · 정보 보기`);
+          };
+          async function inspect(selector, unit, key, title, closeKey) {
+            await assertLabel(selector, unit);
+            await page.keyboard.press(key);
+            await text(page.locator('#sheet.on #sh-title'), title, { exact: true });
+            await text(page.locator('#sheet.on .ih b').first(), unit.name, { exact: true });
+            const clock = await page.evaluate(async () => {
+              const game = window.__game;
+              const before = [game.clock.paused, game.clock.t, game.B.all.length];
+              await game.advance(0.2);
+              return { before, after: [game.clock.paused, game.clock.t, game.B.all.length] };
+            });
+            assert.equal(clock.before[0], true);
+            assert.deepEqual(clock.after, clock.before);
+            if (closeKey === 'Escape') await page.keyboard.press(closeKey);
+            else {
+              await tabTo(page, '#b-sheetclose');
+              await page.keyboard.press(closeKey);
+            }
+            await page.locator('#sheet').waitFor({ state: 'hidden' });
+            await focused(page, selector);
+            assert.equal(await page.evaluate(() => window.__game.clock.paused), false);
+          }
+
+          await openBattle(page);
+          assert.equal(await page.locator('#battle [aria-live="polite"]').count(), 1);
+          const announcement = page.locator('#battle-announcement');
+          assert.equal(await announcement.textContent(), await page.locator('#intent').textContent());
+          assert.equal(await announcement.evaluate(node => node.childNodes.length), 1);
+
+          await tabTo(page, tile(1));
+          for (const selector of [tile(2), tile(3), tile(0), '#b-heir', '#b-retreat', foe]) {
+            await page.keyboard.press('Tab');
+            await focused(page, selector);
+          }
+          await inspect(foe, initial.enemy, 'Enter', '적 전투 정보', 'Escape');
+          await page.keyboard.press('Tab');
+          await focused(page, row(0));
+          await page.keyboard.press('Tab');
+          await focused(page, row(1));
+          await inspect(row(1), initial.allies[1], 'Space', '동료 전투 정보', 'Enter');
+          await page.keyboard.press('Tab');
+          await focused(page, row(2));
+          await page.keyboard.press('Tab');
+          await focused(page, '#b-field');
+          const stageOffset = await page.locator('#sky').evaluate(node => {
+            const field = node.getBoundingClientRect();
+            const stage = document.querySelector('#stage').getBoundingClientRect();
+            return [field.left - stage.left, field.top - stage.top];
+          });
+          assert.deepEqual(stageOffset, [6, 14]);
+          await capture();
+        }
+      };
+    },
     'access-battle': () => {
       const { session } = battleFixture(skill);
       return {

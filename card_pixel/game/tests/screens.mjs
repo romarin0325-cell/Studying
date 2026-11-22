@@ -41,7 +41,8 @@ import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
 const dailyKey = 'relaymare.daily';
-const gameUrl = new URL('../dist/Relaymare.html', import.meta.url).href;
+// RELAY_GAME_URL points the gallery at another build (for example a frozen copy while the source is being edited).
+const gameUrl = process.env.RELAY_GAME_URL ?? new URL('../dist/Relaymare.html', import.meta.url).href;
 const viewportMode = process.env.RELAY_VIEWPORT;
 const viewportSize = /^([1-9]\d*)x([1-9]\d*)$/.exec(viewportMode ?? '390x844');
 assert.ok(viewportSize, 'RELAY_VIEWPORT must be WxH (for example, 360x740)');
@@ -3193,7 +3194,11 @@ async function capturePage(page, { duringBattle = false } = {}) {
 }
 
 async function findOverflow(page) {
-  return page.evaluate(() => {
+  return page.evaluate(async () => {
+    // Measure the settled layout: a sheet sliding up (sheet-up, 0.2 s) is briefly 40 px below the viewport,
+    // which reported hundreds of scrollable cells as outside it. Looping animations (blinks) never finish and are skipped.
+    const settling = document.getAnimations().filter(animation => animation.effect?.getComputedTiming().iterations !== Infinity);
+    await Promise.race([Promise.allSettled(settling.map(animation => animation.finished)), new Promise(done => setTimeout(done, 1000))]);
     const documentWidth = document.documentElement.clientWidth;
     const contentWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
     const issues = [];
@@ -3221,7 +3226,7 @@ async function findOverflow(page) {
 
     function measureAxis(node, rect, axis) {
       const horizontal = axis === 'X';
-      const [start, end, size] = horizontal ? ['left', 'right', 'width'] : ['top', 'bottom', 'height'];
+      const [start, end] = horizontal ? ['left', 'right'] : ['top', 'bottom'];
       const [clientStart, clientSize, scrollPosition, scrollSize] = horizontal
         ? ['clientLeft', 'clientWidth', 'scrollLeft', 'scrollWidth']
         : ['clientTop', 'clientHeight', 'scrollTop', 'scrollHeight'];
@@ -3236,13 +3241,22 @@ async function findOverflow(page) {
         const portEnd = portStart + parent[clientSize];
         min = Math.max(min, portStart);
         max = Math.min(max, portEnd);
-        // Controls reachable by scrolling a pane within the viewport are expected outside its current view.
-        if (outside && (overflow === 'auto' || overflow === 'scroll') && portStart >= -1 && portEnd <= viewportEnd + 1 &&
-          rect[size] <= parent[clientSize] + 1 &&
-          rect[start] + parent[scrollPosition] >= portStart - 1 &&
-          rect[end] + parent[scrollPosition] <= portStart + parent[scrollSize] + 1) outside = false;
       }
-      return { visible: max > min, outside };
+      // Controls reachable by scrolling are expected outside the current view. Scroll panes may nest
+      // (the preparation sheet scrolls, and so does its companion grid), so follow the chain of panes outward.
+      function reachable(element, from, to) {
+        if (from >= -1 && to <= viewportEnd + 1) return true;
+        for (let pane = element.parentElement; pane && pane !== document.body; pane = pane.parentElement) {
+          if (!/(auto|scroll)/.test(getComputedStyle(pane)['overflow' + axis])) continue;
+          const portStart = pane.getBoundingClientRect()[start] + pane[clientStart];
+          const contentStart = portStart - pane[scrollPosition];
+          if (to - from > pane[clientSize] + 1 || from < contentStart - 1 || to > contentStart + pane[scrollSize] + 1) return false;
+          return reachable(pane, portStart, portStart + pane[clientSize]);
+        }
+        return false;
+      }
+      if (outside && reachable(node, rect[start], rect[end])) outside = false;
+      return { visible: max > min, outside, min, max };
     }
 
     for (const node of nodes) {
@@ -3252,9 +3266,29 @@ async function findOverflow(page) {
       const x = measureAxis(node, rect, 'X');
       const y = measureAxis(node, rect, 'Y');
       const where = selector(node, node.closest(surface));
-      if (x.visible && y.visible && !node.matches('.map-door') && node.textContent.trim() && node.scrollWidth > node.clientWidth + 1 &&
+      // Art drawn past its tap box on purpose: map doors and walkers (sprites wider than the hit area),
+      // and the relay arrow glyph centred on its 18 px column.
+      if (x.visible && y.visible && !node.matches('.map-door, .map-actor, .relay-link') && node.textContent.trim() && node.scrollWidth > node.clientWidth + 1 &&
         getComputedStyle(node).overflowX !== 'hidden') {
         issues.push([where, `text ${node.scrollWidth}px > ${node.clientWidth}px`]);
+      }
+      // A control whose visible centre is under another element of the same surface cannot be tapped
+      // (11-23: at 360×740 the heirloom button covered the lower skill tiles and no text or bounds check saw it).
+      if (node.matches(button) && !node.disabled && x.visible && y.visible && !x.outside && !y.outside) {
+        const cover = document.elementFromPoint((x.min + x.max) / 2, (y.min + y.max) / 2);
+        const layer = element => element?.closest(surface);
+        // An open popover or dialog covers what is under it on purpose.
+        const popup = cover?.closest('[popover], [role="dialog"], [role="menu"]');
+        // A control under a pinned footer is fine when its own scroll pane can still lift it clear.
+        let pane = node.parentElement;
+        while (pane && pane !== document.body && !/(auto|scroll)/.test(getComputedStyle(pane).overflowY)) pane = pane.parentElement;
+        const coverTop = cover?.getBoundingClientRect().top ?? 0;
+        const liftable = pane && pane !== document.body && !pane.contains(cover) &&
+          pane.scrollHeight - pane.clientHeight - pane.scrollTop >= rect.bottom - coverTop;
+        if (cover && !node.contains(cover) && layer(cover) === layer(node) && !(popup && popup !== layer(node)) && !liftable) {
+          const name = cover.id ? '#' + cover.id : cover.localName + (cover.classList.length ? '.' + cover.classList[0] : '');
+          issues.push([where, `covered by ${name}`]);
+        }
       }
       if (node.matches(button) && (x.outside || y.outside)) {
         const bounds = [rect.left, rect.top, rect.right, rect.bottom].map(value => Math.round(value));
@@ -3375,9 +3409,11 @@ async function main() {
         } else {
           if (launchError) throw launchError;
           const found = await runCase(browser, name, fixture, captures, overflow);
-          const failed = strictOverflow && overflow.size > 0;
+          // A covered control cannot be tapped at all, so it always fails; other layout warnings fail with --strict-overflow.
+          const covered = [...overflow].filter(warning => warning.includes(' · covered by '));
+          const failed = covered.length > 0 || strictOverflow && overflow.size > 0;
           results.push({ case: name, result: failed ? 'FAIL' : 'PASS',
-            text: failed ? `${overflow.size} overflow warning(s)` : found });
+            text: covered.length ? `${covered.length} covered control(s)` : failed ? `${overflow.size} overflow warning(s)` : found });
         }
       } catch (error) {
         // Keep the first line and the closest fixture or gallery frame.

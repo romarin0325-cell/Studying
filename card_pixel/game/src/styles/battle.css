@@ -1,5 +1,7 @@
 /* ---------- battle: top bar, pixel scene with a white enemy plate, party chips, skill tiles in thumb reach ---------- */
-#bar { display: flex; align-items: center; gap: 5px; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 8px 0 0; flex: none; background: none; }
+#battle { --battle-bar-height: calc(52px + env(safe-area-inset-top)); }
+/* Commands come first in the document for Tab; the bar and panel keep their visual positions. */
+#bar { order: -1; display: flex; align-items: center; gap: 5px; height: var(--battle-bar-height); padding: env(safe-area-inset-top) 8px 0 0; flex: none; background: none; }
 #bar #room { align-self: stretch; display: flex; align-items: center; min-width: 0; padding: 0 22px 0 12px; color: #fff;
   font: normal 0.9375rem/1 var(--f-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: var(--u) var(--u) 0 var(--navy-deep); }
 #bar #turn { flex: none; padding: 3px 9px; background: #fff; color: var(--navy); clip-path: var(--notch); font: normal 0.75rem/1.2 var(--f-label); box-shadow: inset 0 calc(-1 * var(--u)) 0 var(--line2); }
@@ -18,6 +20,8 @@
 #stage { position: relative; flex: none; overflow: hidden; --pf-f: #2a2148; --pf-o: var(--navy); --pf-ledge: 0px; }
 #cv { display: block; }
 #hud, #fx { position: absolute; inset: 0; pointer-events: none; }
+#fx, #skip { z-index: 2; }
+#battle-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Keep the fill under the navy rim as its percentage changes. */
 .bar { position: relative; height: 10px; overflow: hidden; clip-path: var(--notch); background: var(--navy2); }
@@ -47,11 +51,12 @@
 .cd.on { display: block; } .cd.now { background: var(--coral); color: #fff; animation: blink .5s steps(2) infinite; }
 @keyframes blink { 50% { opacity: .6; } }
 /* the battlefield chip sits top left beside the enemy plate: slot icons on one row, the name below */
-.sky { position: absolute; top: 14px; left: 6px; right: auto; max-width: calc(34% - 14px); display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center;
+.sky { position: absolute; z-index: 1; top: calc(var(--battle-bar-height) + 14px); left: 6px; right: auto; max-width: calc(34% - 14px); display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center;
   padding: 4px 6px; --pf-f: rgba(255, 255, 255, .94); --pf-lo: var(--paper3); --pf-sh: rgba(20, 14, 60, .25); }
 .sky i { width: 18px; height: 18px; background: var(--paper3); box-shadow: inset 0 0 0 var(--u) var(--line2); font: normal 0.625rem/1.125rem var(--f-tiny); font-style: normal; text-align: center; color: var(--navy); overflow: hidden; clip-path: var(--notch); }
 .sky i.on { box-shadow: inset 0 0 0 var(--u) var(--aqua-lo); }
-#sky-slots { display: flex; flex: none; gap: 3px; }
+/* Six marks (a relic and five field slots) are wider than the chip at 390 px: wrap them instead of spilling past its frame. */
+#sky-slots { display: flex; flex-wrap: wrap; flex: 0 1 auto; min-width: 0; gap: 3px; }
 .sky:has(.relic-marks) { min-height: 44px; }
 #skyname { flex-basis: 100%; min-width: 0; font: normal 0.75rem/1rem var(--f-label); color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #region-next { flex-basis: 100%; font: 700 0.6875rem/0.9rem var(--f-body); color: var(--gold-lo); min-width: 0; word-break: keep-all; text-wrap: balance; }
@@ -144,13 +149,13 @@
 #tally span.sum { background: var(--gold); color: var(--gold-ink); font: normal 0.9375rem/1.375rem var(--f-display); } #tally span.rec { background: var(--coral); color: #fff; }
 
 /* skill tiles: type colour column, name, a big forecast number */
-#panel { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); min-height: 0; }
+#panel { order: 1; flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); min-height: 0; }
 #acts { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 6px; flex: 1; min-height: 0; max-height: 148px; }
 .act { --t: var(--ink3); --t-lo: var(--ink2); position: relative; display: flex; align-items: stretch; text-align: left; padding: 0; overflow: hidden; min-height: 56px; color: var(--ink);
   --pf-o: color-mix(in srgb, var(--t) 45%, #fff); --pf-f: #fff; --pf-hi: color-mix(in srgb, var(--t) 14%, #fff); --pf-lo: var(--pf-o); }
 .act.phy { --t: var(--phy); --t-lo: var(--phy-lo); } .act.mag { --t: var(--mag); --t-lo: var(--mag-lo); } .act.sup { --t: var(--sup); --t-lo: var(--sup-lo); }
 .act[disabled] { opacity: .45; pointer-events: none; filter: grayscale(.6); }
-#panel :is(.act, #b-heir, #b-retreat):focus-visible { outline: 2px solid var(--aqua-lo); outline-offset: 2px; }
+:is(#panel .act, #b-heir, #b-retreat, #foebar, .pm[data-i]):focus-visible { outline: 2px solid var(--aqua-lo); outline-offset: 2px; }
 .act .ic { flex: none; width: 28px; display: flex; align-items: center; justify-content: center; color: #fff; font: normal 0.9375rem var(--f-display);
   background: var(--t); box-shadow: inset 0 var(--u) 0 color-mix(in srgb, var(--t) 70%, #fff), inset 0 calc(-1 * var(--u)) 0 var(--t-lo);
   text-shadow: var(--u) var(--u) 0 var(--t-lo); }
@@ -224,7 +229,7 @@
 #foebar .nm u.ii { text-decoration: none; font: normal 0.625rem/1rem var(--f-tiny); width: 18px; height: 18px; text-align: center; color: #fff; background: var(--navy3); flex: none; clip-path: var(--notch); }
 .pm { cursor: pointer; }
 #cv { image-rendering: pixelated; }
-#battle.resumed-result #hud, #battle.resumed-result #party, #battle.resumed-result #msg, #battle.resumed-result #panel { visibility: hidden; }
+#battle.resumed-result :is(#hud, #sky, #party, #msg, #panel) { visibility: hidden; }
 
 /* the result panel */
 #result .result-heading h3 { margin: 0 0 6px -16px; padding: 10px 22px 12px 16px; color: #fff;

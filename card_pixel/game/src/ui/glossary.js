@@ -96,6 +96,7 @@ export const TERMS = {
   heirloom: { short: '유품', firstUse: '쓰러진 동료가 남긴 기술', detail: '다음 동료가 물려받습니다. 위력 ×1.5 · MP 0 · 전투당 1회', use: 'MP 0 · 1회', scope: '원정' },
   relic: { short: '유물', firstUse: '이번 원정에 장착한 물건', detail: '전투에 효과를 주며 최대 4개를 장착합니다.', scope: '원정' },
   retreat: { short: '물러나기', firstUse: '이번 전투에서 살아서 빠짐', detail: '다음 동료가 이번 공격을 받음', scope: '전투' },
+  cleanse: { short: '정화' },
   wild: { short: '전투 · 몽마', firstUse: '일반 적', detail: '적을 물리치고 다음 층으로 갑니다.', scope: '층' },
   elite: { short: '강한 적 · 정예', firstUse: '강한 적', detail: '강한 적이 기다리는 전투입니다.', scope: '층' },
   gate: { short: '중간 보스 · 문지기', firstUse: '중간 보스', detail: '문지기를 쓰러뜨리고 다음 길을 엽니다.', scope: '층' },

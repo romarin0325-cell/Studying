@@ -28,3 +28,25 @@ test('keepSeparators keeps the word before each " · " with the dot and leaves t
     '홍련 <span class="nobr">화산 ·</span> <span class="nobr">꿈결 ·</span> 바로 출발');
   assert.equal(keepSeparators('눈토끼와 홍련 화산으로'), '눈토끼와 홍련 화산으로');
 });
+
+// Workspace rule D4: a player-facing wording that the glossary owns is imported, never typed again in a screen.
+// The 11-22 audit found "다음 동료가 공격 대상" written beside TERMS.retreat.detail; this catches verbatim copies.
+test('screens use glossary wording instead of retyping it', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const glossary = await import('../src/ui/glossary.js');
+  const phrases = new Set();
+  (function collect(value) {
+    if (typeof value === 'string') { if (value.replace(/\s/g, '').length >= 6) phrases.add(value); }
+    else if (value && typeof value === 'object') Object.values(value).forEach(collect);
+  })([glossary.TERMS, glossary.RESUME, glossary.EPISODE, glossary.RIFT_PUZZLE]);
+  const root = new URL('../src/ui/', import.meta.url);
+  const files = fs.readdirSync(root, { recursive: true }).filter(file => file.endsWith('.js') && path.basename(file) !== 'glossary.js');
+  const copies = [];
+  for (const file of files) {
+    // Comments may quote a wording to explain why it is not shown; only code counts.
+    const source = fs.readFileSync(new URL(file.split(path.sep).join('/'), root), 'utf8').replace(/\/\/.*$/gm, '');
+    for (const phrase of phrases) if (source.includes(phrase)) copies.push(`${file}: "${phrase}"`);
+  }
+  assert.deepEqual(copies, [], 'Import these from ui/glossary.js');
+});
