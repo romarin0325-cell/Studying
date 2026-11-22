@@ -1,7 +1,7 @@
 import {HERO} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella,JOKER} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
-import {EXPANSION_VFX,EXPANSION_FX_PROFILES,drawExpansionEmblem,drawExpansionShot,drawExpansionSkill,drawExpansionImpact,expansionSkillEvents,expansionEvent} from './expansion-vfx.js';
+import {EXPANSION_VFX,EXPANSION_FX_PROFILES,drawExpansionEmblem,drawExpansionShot,drawExpansionSkill,drawExpansionImpact,drawVictoriaCharge,expansionSkillEvents,expansionEvent} from './expansion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
 import {drawGoldAttack,drawGoldPersistent,goldEvent,drawGoldGround,drawGoldImpact} from './gold-dragon-vfx.js';
@@ -604,6 +604,7 @@ export class CombatFX{
     // live condition without painting over faces, ranks, enemies or HP bars.
     const ctx=this.ctx;
     drawGoldPersistent(this,s,foreground,hiddenUid);
+    drawVictoriaCharge(this,s,foreground,hiddenUid);
     if(foreground){this.drawPlague(s);this.drawSunBlooms(s,hiddenUid);this.drawJokerWheels(s,hiddenUid);this.drawAntropyBadges(s,hiddenUid);}else{this.drawSunHalo(s);this.drawWards(s);}
     for(let i=0;i<s.board.length;i++){
       const u=s.board[i];if(!u||u.uid===hiddenUid)continue;

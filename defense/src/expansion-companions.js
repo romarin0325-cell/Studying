@@ -34,7 +34,7 @@ export const EXPANSION_HEROES=Object.freeze([
     id:'victoria',name:'빅토리아',title:'기적을 지휘하는 금장',color:'#f1d26f',art:art('victoria'),
     damage:24,interval:1.2,range:550,radius:24,shape:'beam',attack:'light',heightGroup:'medium',role:'대열 지휘 · 전체 강화',
     trait:{type:'formation_command',text:'같은 행과 열의 다른 동료는 공격력이 12%, 공격 속도가 10% 증가합니다. 여러 빅토리아의 효과는 중첩되지 않습니다.'},
-    skill:{name:'기적의증명',cost:80,type:'miracle_proof',text:'8초간 모든 동료의 공격력을 35%, 공격 속도를 20% 증가시킵니다. 현재 기절을 해제하고, 각자가 다음 기절 1회를 무시합니다.'},
+    skill:{name:'기적의증명',cost:80,type:'miracle_proof',text:'5초 차지 후 8초간 모든 동료의 공격력을 70%, 공격 속도를 40% 증가시킵니다.'},
   },
   {
     id:'deep_lord',name:'심해의주인',title:'월광 해류의 군주',color:'#55bfc2',art:art('deep_lord'),
@@ -76,7 +76,7 @@ export const EXPANSION_HEROES=Object.freeze([
     id:'succubus',name:'서큐버스',title:'초승달빛 달콤한 꿈',color:'#e889bd',art:art('succubus'),
     damage:26,interval:.95,range:500,radius:0,shape:'single',attack:'shadow',heightGroup:'short',role:'유혹 · 밀쳐내기',
     trait:{type:'fatal_charm',text:'4번째 기본 공격마다 대상을 경로 뒤로 약간 밀치고 3초간 35% 감속시킵니다. 보스는 밀쳐내기 거리가 절반입니다.'},
-    skill:{name:'다크판타지',cost:75,type:'dark_fantasy',text:'적이 가장 밀집한 반경 160 범위에 공격력 4배 피해를 주고 6초간 노출과 40% 감속을 부여합니다. 이미 감속 중인 적은 추가로 1.2초간 기절합니다.'},
+    skill:{name:'다크판타지',cost:75,type:'dark_fantasy',text:'적이 가장 밀집한 반경 160 범위에 공격력 4배 피해를 주고 6초간 노출(받는 피해 +15%)과 40% 감속을 부여합니다. 이미 감속 중인 적은 추가로 1.2초간 기절합니다.'},
   },
   {
     id:'skull_dragon',name:'스컬드래곤',title:'보라 불씨의 독룡',color:'#8560b8',art:art('skull_dragon'),
@@ -88,7 +88,7 @@ export const EXPANSION_HEROES=Object.freeze([
     id:'mad_scientist',name:'매드사이언티스트',title:'한계를 두 배로 시험하는 연구자',color:'#58bea9',art:art('mad_scientist'),
     damage:22,interval:1.3,range:470,radius:58,shape:'splash',attack:'syringe',heightGroup:'medium',role:'인접 촉매 · 고비용 실험',
     trait:{type:'mad_aura',text:'상하좌우 인접한 다른 동료의 공격력이 15%, 공격 속도가 10% 증가합니다. 여러 매드사이언티스트의 효과는 중첩되지 않습니다.'},
-    skill:{name:'익스페리먼트',cost:100,type:'experiment',text:'적이 가장 밀집한 반경 150 범위에 공격력 7배 피해를 주고 10초간 중독과 7초간 노출을 부여합니다. 기절 또는 감속 중인 적에게는 12배 피해를 줍니다.'},
+    skill:{name:'익스페리먼트',cost:100,type:'experiment',text:'적이 가장 밀집한 반경 150 범위에 공격력 7배 피해를 주고 10초간 중독과 7초간 노출(받는 피해 +15%)을 부여합니다. 기절 또는 감속 중인 적에게는 12배 피해를 줍니다.'},
   },
   {
     id:'crystal_dancer',name:'수정의무희',title:'물빛 단검의 무인',color:'#76cde0',art:art('crystal_dancer'),
@@ -117,8 +117,8 @@ export const EXPANSION_HEROES=Object.freeze([
   {
     id:'silent_librarian',name:'침묵의사서',title:'한 줄의 소음도 놓치지 않는 사서',color:'#799eb0',art:art('silent_librarian'),
     damage:18,interval:1.15,range:570,radius:0,shape:'single',attack:'cards',heightGroup:'medium',role:'노출 · 합성 파동',
-    trait:{type:'silent_tome',text:'5번째 기본 공격마다 대상에게 7초간 노출을 부여합니다. 합성 재료 또는 결과가 될 때 자기 주변 반경 180의 적에게 공격력 3배 피해를 줍니다.'},
-    skill:{name:'사일런스',cost:55,type:'silent_archive',text:'적 전체에 공격력 2배 피해를 주고 6초간 노출과 0.8초 기절을 부여합니다. 노출이 있던 적은 대신 1.4초간 기절합니다.'},
+    trait:{type:'silent_tome',text:'5번째 기본 공격마다 대상에게 7초간 노출(받는 피해 +10%)을 부여합니다. 합성 재료 또는 결과가 될 때 자기 주변 반경 180의 적에게 공격력 3배 피해를 줍니다.'},
+    skill:{name:'사일런스',cost:55,type:'silent_archive',text:'적 전체에 공격력 2배 피해를 주고 6초간 노출(받는 피해 +10%)과 0.8초 기절을 부여합니다. 노출이 있던 적은 대신 1.4초간 기절합니다.'},
   },
 ]);
 

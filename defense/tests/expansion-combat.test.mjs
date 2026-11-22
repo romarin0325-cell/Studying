@@ -76,6 +76,23 @@ test('authored basic-attack counters keep the existing burn, divine, slow and ex
   const book=arena([{hero:'silent_librarian',index:12,attacks:4}]),[reader]=enemiesFor(book,[{}]);land(book,launch(book,book.board[12]));assert.ok(reader.exposed>0);assert.ok(reader.exposeTime>6.9);
 });
 
+test('exposure descriptions and previews agree with real cast values and the cap',()=>{
+  for(const [hero,base] of [['succubus',.15],['mad_scientist',.15],['silent_librarian',.1]])for(const [rank,special] of [[1,1],[3,1.5],[5,10]]){
+    const s=arena([{hero,index:12,rank}]),[enemy]=enemiesFor(s,[{}]);
+    s.meta[hero]={...s.meta[hero],special};s.gauge=120;
+    const expected=Math.min(E.DAMAGE_TAKEN_CAP,base*special*E.rankControl(rank));
+    const preview=E.castPreview(s,hero).lines.join(' ');
+    assert.ok(preview.includes(`노출 ${Math.round(expected*100)}%`),`${hero} rank ${rank}: ${preview}`);
+    assert.ok(E.cast(s,hero).ok);
+    close(E.statusState(s,enemy).exposure,expected,`${hero} cast`);
+    const token=E.scaledTokens(hero,special).skill.find(([source])=>source===`${base*100}%`);
+    assert.deepEqual(token,[`${base*100}%`,`${Number((Math.min(E.DAMAGE_TAKEN_CAP,base*special)*100).toFixed(1))}%`]);
+  }
+  const book=arena([{hero:'silent_librarian',index:12,rank:5,attacks:4}]),[target]=enemiesFor(book,[{}]);
+  book.meta.silent_librarian={...book.meta.silent_librarian,special:2};
+  land(book,launch(book,book.board[12]));close(target.exposed,.1,'librarian basic exposure stays fixed');
+});
+
 test('conditional ultimates use live established statuses without consuming them',()=>{
   const soul=arena([{hero:'ancient_soul',index:12}]),[marked]=enemiesFor(soul,[{}]);addStatus(soul,marked,'burn',{amount:5});addStatus(soul,marked,'stun');soul.gauge=120;const base=E.combatStats(soul,soul.board[12]).damage,hp=marked.hp;assert.ok(E.cast(soul,'ancient_soul').ok);close(hp-marked.hp,base*5);assert.ok(marked.burnTime>0&&marked.stun>0);
 
@@ -86,12 +103,7 @@ test('conditional ultimates use live established statuses without consuming them
   const sakura=arena([{hero:'sakura',index:12}]),[hot,cold]=enemiesFor(sakura,[{progress:1200},{progress:1250}]);addStatus(sakura,hot,'burn',{amount:5});addStatus(sakura,hot,'divine');sakura.gauge=120;assert.ok(E.cast(sakura,'sakura').ok);assert.ok(hot.stun>0);assert.equal(cold.stun,0);assert.ok(hot.burnTime>0&&hot.divineTime>0);
 });
 
-test('Victoria and Archangel grant one-shot stun wards, while adjacent Archangel accelerates recovery',()=>{
-  const victory=arena([{hero:'victoria',index:12},{hero:'star_boy',index:13}]);enemiesFor(victory,[{}]);victory.board[13].disabled=2;victory.board[13].cursed=true;victory.gauge=120;assert.ok(E.cast(victory,'victoria').ok);
-  const miracle=victory.events.find(e=>e.type==='skill'&&e.hero==='victoria');assert.equal(miracle.support,true);assert.deepEqual(miracle.allies.map(p=>p.uid).sort(),victory.board.filter(Boolean).map(u=>u.uid).sort());assert.deepEqual(miracle.targets,miracle.allies);
-  assert.equal(victory.board[13].disabled,0);assert.equal(victory.board[13].cursed,true);assert.equal(victory.board[13].stunWard,1);assert.equal(victory.board[13].stunWardSource,'victoria');
-  const victorySave=E.restore(E.serialize(victory));assert.equal(victorySave.board[13].stunWardSource,'victoria');assert.equal(E.stunUnit(victory,13,2),false);assert.equal(victory.events.at(-1).hero,'victoria');assert.equal(victory.board[13].stunWardSource,null);assert.equal(victory.board[13].disabled,0);assert.equal(E.stunUnit(victory,13,2),true);assert.equal(victory.board[13].disabled,2);
-
+test('Archangel grants one-shot stun wards and accelerates adjacent recovery',()=>{
   const heaven=arena([{hero:'archangel',index:11},{hero:'star_boy',index:12}]);enemiesFor(heaven,[{}]);heaven.gauge=120;assert.ok(E.cast(heaven,'archangel').ok);
   const sanctuary=heaven.events.find(e=>e.type==='skill'&&e.hero==='archangel');assert.equal(sanctuary.support,false);assert.deepEqual(sanctuary.allies.map(p=>p.uid).sort(),heaven.board.filter(Boolean).map(u=>u.uid).sort());assert.ok(sanctuary.targets.every(p=>heaven.enemies.some(e=>e.uid===p.uid)));
   assert.equal(heaven.board[12].stunWard,1);assert.equal(heaven.board[12].stunWardSource,'archangel');const heavenSave=E.restore(E.serialize(heaven));assert.equal(heavenSave.board[12].stunWardSource,'archangel');E.stunUnit(heaven,12,2);assert.equal(heaven.events.at(-1).hero,'archangel');assert.equal(heaven.board[12].disabled,0);E.stunUnit(heaven,12,2);E.step(heaven,.05);close(heaven.board[12].disabled,1.925,'Archangel 50% recovery');
@@ -114,6 +126,45 @@ test('Mimic skill loot bypasses the normal cap and Sylphid kills extend only the
 test('Crystal Dancer deterministically ripostes one boss stun per ten seconds and the state restores',()=>{
   const s=arena([{hero:'crystal_dancer',index:12}]),[boss]=enemiesFor(s,[{kind:'boss',hp:1e6,progress:900}]),u=s.board[12];boss.boss='thor';const hp=boss.hp,hit=E.combatStats(s,u,12).damage*E.EXPANSION_RULES.crystalDancer.reflectFactor;
   assert.equal(E.stunUnit(s,12,2,{boss}),false);close(hp-boss.hp,hit);assert.equal(u.disabled,0);assert.ok(boss.stun>0);assert.equal(E.stunUnit(s,12,2,{boss}),true);assert.equal(u.disabled,2);assert.ok(E.restore(E.serialize(s)),'riposte cooldown and stun restore');
+});
+
+test('a cursed Crystal Dancer takes the boss stun without dodging or riposting',()=>{
+  const s=arena([{hero:'crystal_dancer',index:12}]),[boss]=enemiesFor(s,[{kind:'boss',hp:1e6,progress:900}]),u=s.board[12];
+  boss.boss='love_iris';u.cursed=true;const hp=boss.hp,damage=s.stats.damage;
+  assert.equal(E.stunUnit(s,12,2,{boss}),true);assert.equal(u.disabled,2);assert.equal(u.riposteAt,0);
+  assert.equal(boss.hp,hp);assert.equal(s.stats.damage,damage);assert.equal(boss.stun,0);assert.equal(s.events.some(e=>e.type==='crystalRiposte'),false);
+  u.cursed=false;u.disabled=0;assert.equal(E.stunUnit(s,12,2,{boss}),false,'counter remains available after curse ends');
+});
+
+test('Heartbreaker extends the longest stun with boss and consecutive ultimate control rules',()=>{
+  const normal=arena([{hero:'crystal_dancer',index:12}]),[grunt]=enemiesFor(normal,[{}]);
+  addStatus(normal,grunt,'stun',{duration:2});addStatus(normal,grunt,'stun',{duration:4});E.statusState(normal,grunt);
+  const before=grunt.statusEffects.filter(e=>e.type==='stun').map(e=>({...e}));normal.gauge=120;assert.ok(E.cast(normal,'crystal_dancer').ok);
+  const after=grunt.statusEffects.filter(e=>e.type==='stun');close(after[0].until,before[0].until);close(after[1].until,before[1].until+1);assert.equal(after[1].source,before[1].source);assert.equal(after[1].owner,before[1].owner);
+
+  const first=arena([{hero:'crystal_dancer',index:12}]),[boss]=enemiesFor(first,[{kind:'boss'}]);boss.boss='love_iris';
+  addStatus(first,boss,'stun',{duration:2});boss.statusEffects[0].source='legacy:stun';E.statusState(first,boss);const oldUntil=boss.statusEffects[0].until;first.gauge=120;assert.ok(E.cast(first,'crystal_dancer').ok);
+  close(boss.statusEffects[0].until,oldUntil+.5,'first ultimate extension on boss');close(boss.ccImmune,oldUntil+.5+E.BOSS_CONTROL_IMMUNITY);close(boss.ultControl,boss.ccImmune);assert.ok(E.restore(E.serialize(first)));
+
+  const chained=arena([{hero:'guardian',index:11},{hero:'crystal_dancer',index:12}]),[target]=enemiesFor(chained,[{kind:'boss'}]);target.boss='love_iris';chained.gauge=120;assert.ok(E.cast(chained,'guardian').ok);close(target.stun,.75);
+  const prior=target.statusEffects.find(e=>e.type==='stun'),source=prior.source,until=prior.until;chained.gauge=120;assert.ok(E.cast(chained,'crystal_dancer').ok);
+  close(prior.until,until+.25,'chained ultimate extension on boss');close(target.stun,1);assert.equal(prior.source,source);close(target.ultControl,prior.until+E.BOSS_CONTROL_IMMUNITY);close(target.ccImmune,target.ultControl);assert.ok(E.restore(E.serialize(chained)));
+});
+
+test('Heartbreaker does not extend stun under an active boss stun-immunity aura',()=>{
+  const s=arena([{hero:'crystal_dancer',index:12}]),[foe,protector]=enemiesFor(s,[{progress:1000},{kind:'boss',progress:1000}]);
+  protector.boss='artificial_demon';addStatus(s,foe,'stun',{duration:4});E.statusState(s,foe);const until=foe.statusEffects[0].until;
+  s.gauge=120;assert.ok(E.cast(s,'crystal_dancer').ok);close(foe.statusEffects[0].until,until);assert.equal(foe.ultControl,0);
+});
+
+test('repeated stun extensions remain restorable at the save deadline',()=>{
+  for(const kind of ['grunt','boss']){
+    const s=arena([{hero:'crystal_dancer',index:12}]),[foe]=enemiesFor(s,[{kind}]);if(kind==='boss')foe.boss='love_iris';
+    addStatus(s,foe,'stun',{duration:kind==='boss'?27.9:29.9});foe.statusEffects[0].source='legacy:stun';E.statusState(s,foe);
+    s.gauge=120;assert.ok(E.cast(s,'crystal_dancer').ok);
+    close(foe.statusEffects[0].until,s.time+(kind==='boss'?28:30));if(kind==='boss'){close(foe.ultControl,s.time+30);close(foe.ccImmune,s.time+30);}
+    s.gauge=120;assert.ok(E.cast(s,'crystal_dancer').ok);assert.ok(E.restore(E.serialize(s)),kind+' extended status restores');
+  }
 });
 
 test('all sixteen skill previews are side-effect free and every cast produces a restorable run',()=>{

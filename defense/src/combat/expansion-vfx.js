@@ -2,7 +2,7 @@
 // for the sixteen card-game companions. These drawings only consume production
 // attack / impact / skill events; they never decide combat state.
 import {HERO} from '../content.js';
-import {cellPoint} from './engine.js';
+import {cellPoint,VICTORIA_CHARGE} from './engine.js';
 import {EXPANSION_IDS,EXPANSION_RARITIES} from '../expansion-companions.js';
 
 export const EXPANSION_VFX=Object.freeze({
@@ -129,6 +129,18 @@ export function drawExpansionEmblem(fx,id,x,y,size,angle=0,alpha=1){
   if(rasterSignature(fx,id,true,x,y,size,size,angle,alpha))return true;
   const ctx=fx.ctx;
   ctx.save();ctx.globalAlpha*=alpha;drawMotif(ctx,spec.motif,x,y,size*.36,angle,spec.primary,spec.accent,fx.clock||0);ctx.restore();return true;
+}
+
+// Read directly from the saved charge, as the gold dragon does, so pause and
+// resume keep the visual countdown aligned with the actual buff release.
+export function drawVictoriaCharge(fx,s,foreground,hiddenUid=null){
+  const charge=s.victoriaCharge;if(!charge||s.phase!=='combat'||charge.wave!==s.wave||charge.source===hiddenUid)return;
+  const index=s.board.findIndex(u=>u?.uid===charge.source&&u.hero==='victoria');if(index<0)return;
+  const ctx=fx.ctx,p=cellPoint(index),progress=clamp((s.time-charge.started)/VICTORIA_CHARGE),remaining=Math.max(0,charge.ends-s.time);
+  if(!foreground){ctx.save();ctx.strokeStyle='#ffe29a';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(p.x,p.y+30,31,10,0,-Math.PI/2,-Math.PI/2+Math.PI*2*progress);ctx.stroke();ctx.restore();return;}
+  fx.glow('glow','#ffde93',p.x,p.y-88,95,.2+progress*.25);
+  drawExpansionEmblem(fx,'victoria',p.x,p.y-88,42+progress*28,0,.85);
+  ctx.save();ctx.font='700 15px system-ui';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#172632';ctx.fillStyle='#fff0c7';const label=remaining.toFixed(1);ctx.strokeText(label,p.x+32,p.y+19);ctx.fillText(label,p.x+32,p.y+19);ctx.restore();
 }
 
 export function drawExpansionShot(fx,shot,s,{x,y,angle,t,target=shot.to}){

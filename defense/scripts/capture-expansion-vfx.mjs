@@ -68,7 +68,9 @@ try{
       tiles.push({buffer:attackBuffer,label:`${hero} · BASIC`});await page.waitForTimeout(500);
       await page.evaluate(id=>{const s=window.STAR_GARDEN.battle;s.gauge=s.gaugeMax||120;s.gold=1000;const unit=s.board.find(u=>u?.hero===id);if(unit)unit.disabled=0;},hero);
       const before=await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills),button=page.locator(`[data-skill="${hero}"]`);
-      if(!await button.count()){errors.push('no skill button: '+hero);continue;}await button.click();await page.waitForTimeout(320);
+      if(!await button.count()){errors.push('no skill button: '+hero);continue;}await button.click();
+      if(hero==='victoria')await page.waitForFunction(()=>!window.STAR_GARDEN.battle.victoriaCharge&&window.STAR_GARDEN.battle.buffs.victoriaMiracle>0,null,{timeout:9000});
+      await page.waitForTimeout(320);
       if(await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills)===before){errors.push('cast refused: '+hero);continue;}
       const skillBuffer=await page.locator('#arena').screenshot();seen.skill.push(hero);tiles.push({buffer:skillBuffer,label:`${hero} · ULT`});await page.waitForTimeout(1500);
     }

@@ -101,7 +101,7 @@ test('real engine attacks and casts route every expansion hero through dedicated
     assert.ok(hitView.ctx.ops>beforeHit,id+' dedicated impact did not draw');assert.equal(hitView.ctx.depth,0,id+' impact context');
 
     s.events=[];s.gauge=120;s.gold=1000;s.board[12].disabled=0;
-    const cast=E.cast(s,id);assert.equal(cast.ok,true,id+' cast');const skillEvent=s.events.find(e=>e.type==='skill'&&e.hero===id);assert.ok(skillEvent,id+' missing real skill event');
+    const cast=E.cast(s,id);assert.equal(cast.ok,true,id+' cast');if(id==='victoria')for(let i=0;i<100;i++)E.step(s,.05);const skillEvent=s.events.find(e=>e.type==='skill'&&e.hero===id);assert.ok(skillEvent,id+' missing real skill event');
     if(id==='victoria'){assert.equal(skillEvent.support,true);assert.deepEqual(expansionAllyPoints(skillEvent),skillEvent.allies);assert.deepEqual(skillEvent.targets,skillEvent.allies);}
     if(id==='archangel'){assert.equal(skillEvent.support,false);assert.deepEqual(expansionAllyPoints(skillEvent),skillEvent.allies);assert.ok(skillEvent.targets.every(p=>s.enemies.some(e=>e.uid===p.uid)),'sanctuary damage receipts stay on enemies');}
     const skillView=effect(s);skillView.fx.event(skillEvent);
@@ -113,11 +113,21 @@ test('real engine attacks and casts route every expansion hero through dedicated
   }
 });
 
-test('Victoria and Archangel ward receipts keep their actual provider and dedicated art',()=>{
+test('Victoria charge immunity and Archangel ward receipts keep their actual provider and dedicated art',()=>{
   for(const id of ['victoria','archangel']){
     const s=arena(id);s.gauge=120;assert.ok(E.cast(s,id).ok);s.events=[];
     assert.equal(E.stunUnit(s,12,2),false,id+' ward');const ward=s.events.find(e=>e.type==='ward');assert.equal(ward.hero,id);
     const view=effect(s),before=view.ctx.ops;view.fx.event(ward);assert.equal(view.fx.impacts.at(-1).hero,id);view.fx.draw(.05);
     assert.ok(view.ctx.ops>before,id+' ward art did not draw');assert.equal(view.ctx.depth,0,id+' ward context');
   }
+});
+
+test('simultaneous Victoria and Gold charge visuals render independently from saved timers',()=>{
+  const s=arena('victoria');s.deck[1]='gold_dragon';s.upgrades.gold_dragon=0;s.board[3]={...s.board[12],uid:s.nextId++,hero:'gold_dragon',priority:'first'};
+  assert.ok(E.cast(s,'victoria').ok);s.gauge=120;assert.ok(E.cast(s,'gold_dragon').ok);
+  const restored=E.restore(E.serialize(s));assert.ok(restored);
+  const view=effect(restored);let before=view.ctx.ops;view.fx.drawPersonalTraits(restored,false);view.fx.drawPersonalTraits(restored,true);
+  assert.ok(view.ctx.ops>before,'both charge effects draw');assert.equal(view.ctx.depth,0);
+  before=view.ctx.ops;view.fx.drawPersonalTraits(restored,true,restored.goldCharge.source);assert.ok(view.ctx.ops>before,'Victoria remains visible when Gold hidden');
+  before=view.ctx.ops;view.fx.drawPersonalTraits(restored,true,restored.victoriaCharge.source);assert.ok(view.ctx.ops>before,'Gold remains visible when Victoria hidden');assert.equal(view.ctx.depth,0);
 });
