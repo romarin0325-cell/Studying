@@ -9,6 +9,7 @@ import {HEROES,TUNING,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from '../src/con
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
+import {PENDING_MEMORIAL_IDS} from '../src/expansion-companions.js';
 import {allQuestions} from '../src/quiz.js';
 import {eventWindow} from '../src/preview/season.js';
 import {monthlyReward} from '../src/monthly.js';
@@ -28,7 +29,11 @@ if(committed!==null){
   const built=await fs.readFile(path.join(game,'dist/StarGardenDefense.html'),'utf8'),normalize=s=>s.replace(/\r\n/g,'\n');
   assert.ok(normalize(built)===normalize(committed),'committed artifact differs from its deployment inputs');
 }
-const browser=await (isWebkit?webkit:chromium).launch({headless:true});
+const launcher=isWebkit?webkit:chromium;
+const browser=await launcher.launch({headless:true}).catch(error=>{
+  if(isWebkit)throw error;
+  return chromium.launch({headless:true,channel:'chrome'});
+});
 const errors=[],requests=[],geometry=[],contexts=[];
 // The checks below were written for a player past the first session; the tutorial check opts in with {tutorial:true}.
 // These fixtures have also read this week's event; the event check opts in to an unread popup.
@@ -132,7 +137,7 @@ try{
     const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
     await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
-    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),HEROES.length,'every owned companion has a memory tile');assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),HEROES.length,'every owned companion has a memory tile');assert.equal(await m.page.locator('.mem-tile.pending:disabled').count(),PENDING_MEMORIAL_IDS.length,'pending memorials stay visible and disabled');assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
     await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
     await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
     const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
@@ -145,7 +150,7 @@ try{
       // Open and close every companion's picture through buttons, never hidden preload.
       const unlocked=structuredClone(memories);unlocked.heroes.star_boy.bond=10;const chain=await boot(390,844,unlocked);
       await nav(chain.page,'동료');await chain.page.locator('[data-collection="album"]').click();
-      for(const h of HEROES){await chain.page.locator(`.mem-tile[data-memorial="${h.id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await close(chain.page);assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
+      for(const id of Object.keys(MEMORIAL_STORIES)){await chain.page.locator(`.mem-tile[data-memorial="${id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await close(chain.page);assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
       await chain.page.locator('.mem-tile[data-memorial="zeke"]').click();await close(chain.page);await chain.page.waitForTimeout(120);assert.equal(await chain.page.locator('img[data-memorial]').count(),0,'closing a pending decode cannot resurrect an image');await chain.context.close();
     }
     await m.context.close();

@@ -33,6 +33,7 @@ import {REQUESTS,REQUEST_HEROES,REQUEST_REWARD,AFTERWORDS} from './preview/reque
 // Every build uses the same in-game auto.
 const autoPlay=helperAuto;
 import {MEMORIAL_STORIES} from './memorial.js';
+import {PENDING_MEMORIAL_IDS} from './expansion-companions.js';
 import {burst,tapSpark,hearts,centerOf,floatText} from './fx.js';
 
 const $=id=>document.getElementById(id),storage={getItem:k=>window.localStorage.getItem(k),setItem:(k,v)=>window.localStorage.setItem(k,v)};
@@ -735,16 +736,16 @@ function giveGift(id,gift,button){
 }
 function bondUp(id,before){
   const e=p().heroes[id];if(e.bond<=before)return;
-  if(e.bond>=BOND_MAX){toast(`${HERO[id].name}과(와)의 인연의 기억이 열렸어요!`);const c=partnerPoint();burst(c.x,c.y,{count:26,spread:150,size:14,duration:1200,color:'#ff9ec0'});if(screen==='home'&&modal!=='bond')setTimeout(()=>{if(!modal)openMemorial(id);},900);}
+  if(e.bond>=BOND_MAX){const pending=PENDING_MEMORIAL_IDS.includes(id);toast(pending?`${HERO[id].name}과(와) 가장 가까운 사이가 되었어요! · 메모리얼 준비 중`:`${HERO[id].name}과(와)의 인연의 기억이 열렸어요!`);const c=partnerPoint();burst(c.x,c.y,{count:26,spread:150,size:14,duration:1200,color:'#ff9ec0'});if(!pending&&screen==='home'&&modal!=='bond')setTimeout(()=>{if(!modal)openMemorial(id);},900);}
   else toast(`${HERO[id].name} 호감도 ${e.bond}`);
 }
 // Bond sheet: hearts, the favourite gift, giving gifts, and the memory this bond opens.
 function bondSheet(id,reply=null){
-  const h=HERO[id],e=p().heroes[id];if(!h||!e?.owned)return;const max=e.bond>=BOND_MAX,left=bondNeed(e.bond)-(e.bondXp||0),story=MEMORIAL_STORIES[id],open=e.bond>=story.unlockBond;
+  const h=HERO[id],e=p().heroes[id];if(!h||!e?.owned)return;const max=e.bond>=BOND_MAX,left=bondNeed(e.bond)-(e.bondXp||0),story=MEMORIAL_STORIES[id],pending=PENDING_MEMORIAL_IDS.includes(id),open=!!story&&e.bond>=story.unlockBond;
   show(h.name,'인연',`<div class="bond-head" data-rarity="${h.rarity}"><span class="bond-face">${image(id,true)}</span><div class="bond-meter"><small>${h.title}</small><span class="bond-hearts big" aria-hidden="true">${heartsOf(e.bond)}</span><b>호감도 ${e.bond}<em>/${BOND_MAX}</em></b><div class="progress"><span style="width:${Math.round(bondRatio(e)*100)}%"></span></div><small>${max?'가장 가까운 사이예요':`다음 하트까지 ${left}`}</small></div></div>
-    <p class="bond-reply ${reply?'show':''}" role="status">${escapeText(reply||(max?'함께한 기억이 열려 있어요.':`${GIFTS[FAVORITE[id]].name}을(를) 가장 좋아해요.`))}</p>
+    <p class="bond-reply ${reply?'show':''}" role="status">${escapeText(reply||(max?(pending?'메모리얼은 준비 중이지만, 쌓인 인연은 그대로 간직하고 있어요.':'함께한 기억이 열려 있어요.'):`${GIFTS[FAVORITE[id]].name}을(를) 가장 좋아해요.`))}</p>
     <div class="bond-gifts">${GIFT_IDS.map(g=>{const n=p().gifts[g],fav=FAVORITE[id]===g;return `<button class="tray-gift ${fav?'fav':''}" data-give="${g}" data-to="${id}" ${n<1||max?'disabled':''}>${giftArt(g)}<b>${n}</b><small>+${giftPoints(id,g)}</small>${fav?`<i class="fav-heart">${icon('heart')}</i>`:''}</button>`;}).join('')}</div>
-    <button class="bond-memory ${open?'open':''}" data-memorial="${id}"><span class="bond-memory-art">${open&&window.__MEMORIAL_THUMBS__?.[id]?`<img src="${window.__MEMORIAL_THUMBS__[id]}" alt="" draggable="false">`:icon('lock')}</span><span><small>인연의 기억</small><strong>${escapeText(story.title)}</strong><em>${open?'감상하기':`호감도 ${story.unlockBond}에서 열려요`}</em></span>${icon('chevron')}</button>${bondRequests(id)}`,
+    <button class="bond-memory ${open?'open':''} ${pending?'pending':''}" data-memorial="${id}" ${pending?'disabled':''}><span class="bond-memory-art">${open&&window.__MEMORIAL_THUMBS__?.[id]?`<img src="${window.__MEMORIAL_THUMBS__[id]}" alt="" draggable="false">`:icon(pending?'clock':'lock')}</span><span><small>인연의 기억</small><strong>${escapeText(story?.title||'메모리얼 준비 중')}</strong><em>${pending?'새로운 이야기를 준비하고 있어요':open?'감상하기':`호감도 ${story.unlockBond}에서 열려요`}</em></span>${pending?'':icon('chevron')}</button>${bondRequests(id)}`,
     `<div class="dialog-buttons">${id===p().partner?'<button class="secondary" data-action="partner">파트너 바꾸기</button>':`<button class="secondary" data-set-partner="${id}">파트너로</button>`}<button class="primary" data-action="close">닫기</button></div>`,'bond',id);
 }
 function partners(){
@@ -775,11 +776,12 @@ function relicCard(id){
 }
 // Companions added after part one stay out of the collection until its last stage (PART_STAGES) is cleared (or until owned).
 const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES||p().heroes[h.id].owned);
-const memoryOpen=id=>p().heroes[id].owned&&p().heroes[id].bond>=MEMORIAL_STORIES[id].unlockBond;
+const memoryOpen=id=>{const story=MEMORIAL_STORIES[id];return !!story&&p().heroes[id].owned&&p().heroes[id].bond>=story.unlockBond;};
+const memoryAvailable=()=>shown().filter(h=>MEMORIAL_STORIES[h.id]);
 function renderCollection(){
   const owned=shown().filter(h=>p().heroes[h.id].owned).length,relics=ARTIFACTS.filter(a=>p().relics[a.id].owned).length,memories=shown().filter(h=>memoryOpen(h.id)).length+p().study.library.unlocked.length;
   if(!featureOpen(p(),'relic')&&collection==='relic')collection='hero';
-  const tabs=[['hero','동료',`${owned}/${shown().length}`],...(featureOpen(p(),'relic')?[['relic','유물',`${relics}/${ARTIFACTS.length}`]]:[]),['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
+  const tabs=[['hero','동료',`${owned}/${shown().length}`],...(featureOpen(p(),'relic')?[['relic','유물',`${relics}/${ARTIFACTS.length}`]]:[]),['album','기억',`${memories}/${memoryAvailable().length+CONSTELLATIONS.length}`]];
   return `<section class="book">
     <div class="tabbar">${tabs.map(([id,name,count])=>`<button data-collection="${id}" aria-pressed="${collection===id}"><b>${name}</b><small>${count}</small></button>`).join('')}</div>
     ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&p().cleared<PART_STAGES?`<p class="late-collection-note">${icon('lock')} 스테이지 ${PART_STAGES} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
@@ -805,10 +807,10 @@ function relicInfo(){
 }
 // Album: memories (bond ten) and the star-library paintings, every tile the same size.
 function albumView(){
-  const open=shown().filter(h=>memoryOpen(h.id)).length,arts=p().study.library.unlocked.length;
-  const tiles=[...shown()].sort((a,b)=>Number(memoryOpen(b.id))-Number(memoryOpen(a.id))||p().heroes[b.id].bond-p().heroes[a.id].bond).map(h=>{const e=p().heroes[h.id],on=memoryOpen(h.id),thumb=window.__MEMORIAL_THUMBS__?.[h.id];
-    return `<button class="mem-tile ${on?'open':''}" data-memorial="${h.id}" aria-label="${h.name} · ${on?escapeText(MEMORIAL_STORIES[h.id].title):`호감도 ${e.bond}/10`}">${on&&thumb?`<img src="${thumb}" alt="" draggable="false" loading="lazy">`:`<span class="mem-shade">${image(h.id)}</span>`}<span class="mem-cap">${on?`<b>${h.name}</b>`:`<span class="bond-hearts" aria-hidden="true">${heartsOf(e.owned?e.bond:0)}</span>`}</span></button>`;}).join('');
-  return `<div class="album-sec"><div class="album-head"><h3>인연의 기억</h3><span>${open}/${shown().length}</span></div><p class="album-note">호감도 10이 되면 그 동료와의 그림과 이야기가 열려요.</p><div class="mem-grid">${tiles}</div></div>
+  const open=memoryAvailable().filter(h=>memoryOpen(h.id)).length,arts=p().study.library.unlocked.length;
+  const tiles=[...shown()].sort((a,b)=>Number(memoryOpen(b.id))-Number(memoryOpen(a.id))||Number(!PENDING_MEMORIAL_IDS.includes(b.id))-Number(!PENDING_MEMORIAL_IDS.includes(a.id))||p().heroes[b.id].bond-p().heroes[a.id].bond).map(h=>{const e=p().heroes[h.id],on=memoryOpen(h.id),pending=PENDING_MEMORIAL_IDS.includes(h.id),story=MEMORIAL_STORIES[h.id],thumb=window.__MEMORIAL_THUMBS__?.[h.id];
+    return `<button class="mem-tile ${on?'open':''} ${pending?'pending':''}" data-memorial="${h.id}" ${pending?'disabled':''} aria-label="${h.name} · ${pending?'메모리얼 준비 중':on?escapeText(story.title):`호감도 ${e.bond}/10`}">${on&&thumb?`<img src="${thumb}" alt="" draggable="false" loading="lazy">`:`<span class="mem-shade">${image(h.id)}</span>`}<span class="mem-cap">${pending?'<b>준비 중</b>':on?`<b>${h.name}</b>`:`<span class="bond-hearts" aria-hidden="true">${heartsOf(e.owned?e.bond:0)}</span>`}</span></button>`;}).join('');
+  return `<div class="album-sec"><div class="album-head"><h3>인연의 기억</h3><span>${open}/${memoryAvailable().length}</span></div><p class="album-note">호감도 10이 되면 그 동료와의 그림과 이야기가 열려요. 준비 중인 메모리얼은 집계에서 제외돼요.</p><div class="mem-grid">${tiles}</div></div>
     <div class="album-sec"><div class="album-head"><h3>별자리 그림</h3><span>${arts}/${CONSTELLATIONS.length}</span></div><p class="album-note">루미의 별의 서재에서 별자리를 완성하면 걸려요.</p>${artGrid()}</div>`;
 }
 
@@ -829,7 +831,7 @@ function heroDetail(id){
     <div class="hd-skill"><span class="hd-tag">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost}+`:h.skill.cost}</span><h3>${h.skill.name}</h3><p>${liveText(h.skill.text,scaled.skill)}</p></div>
     <div class="hd-skill trait"><span class="hd-tag">특성</span><p>${liveText(h.trait.text,scaled.trait)}</p></div>
     ${id==='miracle_larva'?miracleFormsMarkup(mult*(1+collectionBonus(p().relics)),e.owned?specialMultiplier(e.enhance):1):''}
-    ${e.owned?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story.title)}</strong></span>${icon('chevron')}</button>`:''}
+    ${e.owned?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story?.title||'메모리얼 준비 중')}</strong></span>${icon('chevron')}</button>`:''}
     <details class="more"><summary>능력치 자세히</summary><div class="stat-line"><span><small>공격력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>${e.owned?powerBreakdown(id):''}
       <p class="fineprint">${id==='storm_sage'?'강화마다 기본 공격력 +5%, 5단계마다 즉사율 +0.1%p.':scaled.trait.length+scaled.skill.length?'강화마다 기본 공격력 +5%, 5단계마다 <em class="scaled">색으로 표시된 수치</em> +10%.':'강화마다 기본 공격력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
     e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}" ${p().partner===id?'disabled':''}>${p().partner===id?'지금 파트너':'파트너로'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>${isAway?'파견 중':'편성'}</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,'hero',id);
@@ -851,7 +853,8 @@ function relicDetail(id){
 // ───────── Memories ─────────
 // The painting fills the screen first; the story opens over it on request and remembers where reading stopped.
 function openMemorial(id){
-  const story=MEMORIAL_STORIES[id],e=p().heroes[id],h=HERO[id];if(!story||!e||!h)return;
+  const story=MEMORIAL_STORIES[id],e=p().heroes[id],h=HERO[id];if(!e||!h)return;
+  if(PENDING_MEMORIAL_IDS.includes(id)||!story){show(h.name,'인연의 기억',`<div class="mem-locked pending">${image(id,true)}<h3>메모리얼 준비 중</h3><p>${h.name}과(와)의 새로운 그림과 이야기를 준비하고 있어요.<br>호감도와 선물 기록은 그대로 쌓여요.</p></div>`,`<button class="secondary wide" data-action="close">닫기</button>`,'memorial-locked',id);return;}
   if(!memoryOpen(id)){
     show(h.name,'아직 열리지 않은 기억',`<div class="mem-locked">${image(id,true)}<h3>${escapeText(story.title)}</h3><span class="bond-hearts big" aria-hidden="true">${heartsOf(e.owned?e.bond:0)}</span><p>${e.owned?`호감도 ${story.unlockBond}에서 함께한 순간이 열려요. 지금 ${e.bond}`:'먼저 이 동료를 만나 주세요.'}</p></div>`,
       e.owned?`<button class="primary wide" data-action="bond" data-id="${id}">선물하러 가기</button>`:'<button class="secondary wide" data-action="close">닫기</button>','memorial-locked',id);return;

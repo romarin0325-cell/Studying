@@ -1,6 +1,7 @@
 // Star Garden owns these definitions. They were copied once when the prototype
 // branched from Confluence; all future balance and art changes are local.
 import {NEW_HEROES,NEW_ASSET_PATHS,MIRACLE_FORMS} from './new-companions.js';
+import {EXPANSION_HEROES,EXPANSION_ASSET_PATHS} from './expansion-companions.js';
 export const VERSION = 2;
 
 export const GRID = 5;
@@ -9,6 +10,7 @@ export const MAX_RANK = 6;
 
 export const HEROES = [
   ...NEW_HEROES,
+  ...EXPANSION_HEROES,
   {
     "id": "zeke",
     "name": "지크",
@@ -1916,6 +1918,7 @@ export const TRANSFORM_ART = {
 
 export const ASSET_PATHS = {
   ...NEW_ASSET_PATHS,
+  ...EXPANSION_ASSET_PATHS,
   "effects-sol-sweet": "./assets/merge/effects-sol-sweet.webp",
   "effects-sol-twilight": "./assets/merge/effects-sol-twilight.webp",
   "effects-companion-sweet": "./assets/merge/effects-companion-sweet.webp",

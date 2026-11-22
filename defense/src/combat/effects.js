@@ -1,6 +1,7 @@
 import {HERO} from '../content.js';
 import {cellPoint,pathPoint,attackGeometry,activeSkill,ACTIVE_SKILLS,neighbors,personalTrait,PATH,topCinderella,JOKER} from './engine.js';
 import {COMPANION_VISUALS,drawCompanionShot,drawCompanionSkill,drawCompanionImpact,drawCompanionBomb,companionSkillEvents} from './companion-vfx.js';
+import {EXPANSION_VFX,EXPANSION_FX_PROFILES,drawExpansionEmblem,drawExpansionShot,drawExpansionSkill,drawExpansionImpact,expansionSkillEvents,expansionEvent} from './expansion-vfx.js';
 import {drawLightningShot,drawLightningImpact,LIGHTNING_IMPACT_LIFE} from './lightning-vfx.js';
 import {drawNewShot,drawNewImpact,drawNewAttackShape,drawNewGround} from './new-companion-vfx.js';
 import {drawGoldAttack,drawGoldPersistent,goldEvent,drawGoldGround,drawGoldImpact} from './gold-dragon-vfx.js';
@@ -15,7 +16,7 @@ export const EXTRA_EMBLEMS=Object.freeze(Object.fromEntries([
   ...['star_boy','snow_rabbit','night_rabbit','mushroom_king','great_detective','guardian','avalanche_maid','red_dragon'].map((id,i)=>[id,['ultimates-extra-a',i,4,2]]),
   ...['aurora','storm_sage','flame_sage','lightning_sage','queen'].map((id,i)=>[id,['ultimates-extra-b',i,3,2]]),
 ]));
-const dedicated=hero=>ULTIMATE_FRAMES[hero]!==undefined||!!EXTRA_EMBLEMS[hero];
+const dedicated=hero=>ULTIMATE_FRAMES[hero]!==undefined||!!EXTRA_EMBLEMS[hero]||!!EXPANSION_VFX[hero];
 // Emblem scale per rarity for the dedicated support and field templates (UR keeps its original sizes).
 const RARITY_SCALE=Object.freeze({C:.82,R:.9,SR:1,UR:1});
 export const ultimateLayout=kind=>['royal','starfall','mirror','flurry','thunder','execute'].includes(kind)?'target':['vortex','singularity'].includes(kind)?'pull':['echo','haste','awaken','march','gift','harmony','trauma'].includes(kind)?'support':'field'; // crush is a field ultimate
@@ -49,6 +50,7 @@ FX_PROFILES.ash={motion:'blackfire',frame:11,offset:0};
 FX_PROFILES.venom={motion:'venomdrop',frame:11,offset:0};
 FX_PROFILES.demon_king={motion:'deathbolt',frame:15,offset:0};
 FX_PROFILES.miracle_larva={motion:'metamorphosis',frame:1,offset:0};
+Object.assign(FX_PROFILES,EXPANSION_FX_PROFILES);
 export const JOKER_HEX=Object.freeze({red:'#ff5a5a',blue:'#4aa8ff',green:'#5fd36a',white:'#f6f4ff',black:'#241a36',chaos:'#d9b8ff'});
 
 function stroke(ctx,points,color,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}
@@ -66,8 +68,8 @@ export const isUR=hero=>!!HERO[hero]&&(HERO[hero].hidden||HERO[hero].rarity==='U
 // Large signature emblems painted for this patch (fx-emblems atlas, black background, screen blend).
 const EMBLEM={phantom:0,cinderella:1,zeke:2};
 // Field-wide ultimates whose aura is global get a board-edge glow; partial ones mark their units.
-export const GLOBAL_AURAS=Object.freeze(['echo','haste','awaken','march','festive','radiance','harmony','winter']);
-export const PARTIAL_AURAS=Object.freeze(['trauma','midnight','venom']);
+export const GLOBAL_AURAS=Object.freeze(['echo','haste','awaken','march','festive','radiance','harmony','winter','victoriaMiracle','earthBlessing','sanctuary']);
+export const PARTIAL_AURAS=Object.freeze(['trauma','midnight','venom','gale']);
 
 // Same logical shape and dimensions as hit testing; no role labels on empty tiles.
 export function drawAttackRange(ctx,hero,from,aim,clock=0){
@@ -119,13 +121,14 @@ export class CombatFX{
   // Big signature art for a field ultimate: dedicated emblem when one exists, else the ultimate frame.
   centerArt(hero,x,y,size,angle,alpha){if(!this.emblem(hero,x,y,size,angle,alpha))this.ultimate(hero,x,y,size,size,angle,alpha);}
   point(uid,fallback){return this.enemies.get(uid)?.point||fallback;}
-  ultimate(hero,x,y,width,height=width,angle=0,alpha=1){const own=COMPANION_VISUALS[hero];if(own&&this.art.images[own.atlas]){this.atlasStamp(own.atlas,own.frame+4,4,2,x,y,width,height,angle,alpha,'source-over');return;}const extra=EXTRA_EMBLEMS[hero];if(extra&&this.art.images[extra[0]]){this.atlasStamp(extra[0],extra[1],extra[2],extra[3],x,y,width,height,angle,alpha,'source-over');return;}const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
+  ultimate(hero,x,y,width,height=width,angle=0,alpha=1){if(drawExpansionEmblem(this,hero,x,y,Math.max(width,height),angle,alpha))return;const own=COMPANION_VISUALS[hero];if(own&&this.art.images[own.atlas]){this.atlasStamp(own.atlas,own.frame+4,4,2,x,y,width,height,angle,alpha,'source-over');return;}const extra=EXTRA_EMBLEMS[hero];if(extra&&this.art.images[extra[0]]){this.atlasStamp(extra[0],extra[1],extra[2],extra[3],x,y,width,height,angle,alpha,'source-over');return;}const frame=ULTIMATE_FRAMES[hero];if(hero==='queen')this.atlasStamp('finishers',0,4,3,x,y,width,height,angle,alpha);else if(frame!==undefined)this.atlasStamp('ultimates',frame,4,4,x,y,width,height,angle,alpha,'source-over');else this.stamp(hero,x,y,width,angle,alpha);}
   atlasStamp(atlas,frame,columns,rows,x,y,width,height=width,angle=0,alpha=1,blend='screen'){
     const ctx=this.ctx,img=this.art.images[atlas];if(!img||alpha<=0)return;
     const w=img.naturalWidth/columns,h=img.naturalHeight/rows;
     ctx.save();ctx.globalAlpha*=alpha;ctx.globalCompositeOperation=blend;ctx.translate(x,y);ctx.rotate(angle);ctx.drawImage(img,frame%columns*w,Math.floor(frame/columns)*h,w,h,-width/2,-height/2,width,height);ctx.restore();
   }
   stamp(hero,x,y,size,angle=0,alpha=1,form=null){
+    if(drawExpansionEmblem(this,hero,x,y,size,angle,alpha))return;
     const own=COMPANION_VISUALS[hero];if(own&&this.art.images[own.atlas]){this.atlasStamp(own.atlas,own.frame,4,2,x,y,size,size,angle,alpha,'source-over');return;}
     const ctx=this.ctx,fx=FX_PROFILES[hero];if(!fx||alpha<=0)return;
     if(fx.atlas&&this.art.images[fx.atlas]){this.atlasStamp(fx.atlas,form==='trauma'?6:fx.frame,fx.columns,fx.rows,x,y,size,size,fx.motion==='halo'?0:angle,alpha);return;}
@@ -143,6 +146,7 @@ export class CombatFX{
     this.impacts.push(effect);if(this.impacts.length>128)this.impacts.shift();
   }
   event(e){
+    expansionEvent(this,e);
     if(e.type==='deathhandBlast'){
       // Positions of the counted targets as they stood when the hand closed (the dead ones are already gone).
       const points=(e.targets||[]).map(r=>{const at=this.enemies.get(r.uid);return {...r,...(at?.point||{x:e.x,y:e.y}),boss:!!at?.enemy?.boss};});
@@ -182,6 +186,7 @@ export class CombatFX{
     if(e.type==='skill'&&e.kind==='lemonade')for(const p of e.targets||[])this.add({type:'lemonPop',x:p.x,y:p.y,life:1,total:1});
     if(e.type==='bombSet')this.add({...e,life:.6,total:.6});
     if(e.type==='bombBlast')this.add({...e,life:.9,total:.9});
+    if(expansionSkillEvents(this,e))return;
     if(companionSkillEvents(this,e))return;
     if(e.type==='skill'){
       if(e.kind!=='dream'&&urReady(this,e.hero))return;
@@ -293,6 +298,7 @@ export class CombatFX{
     const seq=urSpec(this,skill);if(seq){if(skill.ur)seq.field?.(this,skill,skill.total-skill.life);return;}
     // Their signatures are drawn from their own events (hand over the pack, each cocoon hatching); the cast beat stays.
     if(skill.kind==='deathhand'||skill.kind==='miracle_eclose'){this.drawCast(skill);return;}
+    if(drawExpansionSkill(this,skill))return;
     if(drawCompanionSkill(this,skill))return;
     this.drawCast(skill);
     const ctx=this.ctx,h=HERO[skill.hero],fx=FX_PROFILES[skill.hero],age=skill.total-skill.life;
@@ -733,6 +739,7 @@ export class CombatFX{
     const t=Math.max(0,Math.min(1,1-shot.life/shot.total)),to={x:p.x,y:p.y-18},angle=Math.atan2(to.y-shot.from.y,to.x-shot.from.x),size=4+Math.min(5,shot.rank)*.65;
     const arc=['icicles','dragon','planet'].includes(f.motion)?34:f.motion==='leap'?20:7;
     const x=shot.from.x+(to.x-shot.from.x)*t,y=shot.from.y+(to.y-shot.from.y)*t-Math.sin(t*Math.PI)*arc;
+    if(drawExpansionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(drawNewShot(this,shot,s,{x,y,angle,t}))return;
     if(drawCompanionShot(this,shot,s,{x,y,angle,t,target:p}))return;
     if(h.id==='lightning_sage'){drawLightningShot(this,shot,s,p);return;}
@@ -881,6 +888,7 @@ export class CombatFX{
       if(e.type==='contact'){drawContact(this,e,t,1/(hitCounts.get(hitKey({x:e.x,y:e.y+18}))||1));continue;}
       if(e.type==='urFx'){e.draw(this,e,t);continue;}
       if(drawGoldImpact(this,e,t))continue;
+      if(drawExpansionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(drawNewImpact(this,e,t))continue;
       if(drawCompanionImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;
       if(drawLightningImpact(this,e,t,e.type==='impact'?1/(hitCounts.get(hitKey(e))||1):1))continue;

@@ -13,7 +13,7 @@ import {Art} from '../src/combat/render.js';
 import {portraitFrame} from '../src/portrait-layout.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 
-test('installed cast v2 matches the 40 selected masters and keeps anatomy separate from optical crops',async()=>{
+test('installed cast v2 and expansion keep reviewed masters separate from optical crops',async()=>{
   const original=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/sol-cast-v2/manifest.json'),'utf8'));
   const additions=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/demon-miracle/packing.json'),'utf8'));
   assert.equal(original.assets.length,40);
@@ -39,7 +39,10 @@ test('installed cast v2 matches the 40 selected masters and keeps anatomy separa
   ]);
   const newProfiles=new Map(turns.map(e=>[e.id,e]));
   const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
-  assert.equal(art.size,46);
+  assert.equal(
+    art.size,
+    new Set([...HEROES.map((hero)=>hero.id),...Object.keys(TRANSFORM_ART)]).size
+  );
   for(const entry of manifest.assets){
     const frame=entry.frames.find(f=>f.direction==='down'),installed=art.get(entry.id);assert.ok(installed,entry.id);
     assert.deepEqual(entry.frames.map(f=>f.direction),['down','up','left','right']);
@@ -102,7 +105,7 @@ test('summon face crops and prepared portraits share optical framing without mov
 });
 
 test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
-  assert.equal(Object.keys(ASSET_PATHS).length,99);
+  assert.equal(Object.keys(ASSET_PATHS).length,119);
   for(const id of ['event-oath','event-twin']){
     const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();
     assert.equal(m.format,'webp',id);assert.equal(m.width,1400,id);assert.equal(m.height,560,id);

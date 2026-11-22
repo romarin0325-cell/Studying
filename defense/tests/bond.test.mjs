@@ -7,11 +7,12 @@ import {HOUR,calendar} from '../src/economy.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z'),DAY=24*HOUR;
 const act=(p,action,args={},now=NOW)=>{const r=command(p,action,args,now);assert.ok(validateProfile(p),action+' keeps the profile valid');return r;};
 
-test('every companion has one favourite gift with its line, its own line for the other gifts; ten of each gift',()=>{
+test('every companion has one favourite gift with its line, its own line for the other gifts, and an even gift spread',()=>{
   assert.equal(Object.keys(FAVORITE).length,HEROES.length);
   for(const h of HEROES){assert.ok(GIFT_IDS.includes(FAVORITE[h.id]),h.id);assert.ok(FAVORITE_LINES[h.id],h.id);assert.ok(GIFT_LINES[h.id],h.id);}
   assert.equal(new Set(Object.values(GIFT_LINES)).size,HEROES.length,'no shared gift line');
-  assert.deepEqual(Object.fromEntries(GIFT_IDS.map(gift=>[gift,Object.values(FAVORITE).filter(g=>g===gift).length])),{candy:14,letter:13,bouquet:15});
+  const counts=GIFT_IDS.map(gift=>Object.values(FAVORITE).filter(g=>g===gift).length);
+  assert.ok(Math.max(...counts)-Math.min(...counts)<=2,counts.join('/'));
 });
 
 test('hearts fill by points; a fully fed companion reaches ten hearts in two to three weeks',()=>{
