@@ -22,7 +22,7 @@ import {currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES,monthlyPaid,mont
 import {RenderClock,RunSaveQueue} from './runtime.js';
 import {TEAM_SIZE,SOLO,SAVE_KEY,UNLOCKED} from './team-config.js';
 import {TEST_TOOLS} from './test-unlock.js';
-import {publicSession} from './public-session.js';
+import {observeProfileStorage,publicSession,tutorialStepForGuide} from './public-session.js';
 import {season,eventWindow,activeEvent,nextEvent,eventOpen} from './preview/season.js';
 import {OATHS,OATH,OATH_GROUPS,OATH_CLOSED,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
 import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
@@ -34,14 +34,15 @@ import {MEMORIAL_STORIES} from './memorial.js';
 import {burst,tapSpark,hearts,centerOf,floatText} from './fx.js';
 
 const $=id=>document.getElementById(id),storage={getItem:k=>window.localStorage.getItem(k),setItem:(k,v)=>window.localStorage.setItem(k,v)};
-const store=new ProfileStore(storage),art=new Art(),sound=new Sound();
+// The snapshot is read on later lifecycle events, after the profile is ready.
+const telemetry=__GARDEN_PUBLIC_WEB__?publicSession({snapshot:()=>({screen:modal==='settings'?'settings':screen,checkpoint:p().cleared})}):null;
+const store=new ProfileStore(telemetry?observeProfileStorage(storage,()=>telemetry.error('save_unavailable')):storage),art=new Art(),sound=new Sound();
 const modeTitle=(mode,side)=>mode==='weekly'?'유성 드래프트':mode==='monthly'?'만월 토벌전':mode==='oath'?'별빛 서약':mode==='twin'?`쌍성 원정 · ${TWIN_SIDE[side]?.short||''}`:'';
 const p=()=>store.value,now=()=>Math.max(Date.now(),p().clockAt),fmt=n=>Number.isFinite(n)?n>=100000?new Intl.NumberFormat('ko-KR',{notation:'compact',maximumFractionDigits:1}).format(n):Math.floor(n).toLocaleString('ko-KR'):'—';
 const pct=n=>(n*100).toFixed(n<.001?3:2)+'%';
 let challengeTier='easy',screen='home',collection='hero',rarity='all',ownedOnly=false,banner='normal',mode='main',cycle=chapterNow(),gardenTab='dream',arrival=null,
   modal=null,modalInfo=null,previousFocus=null,toastTimer,run=null,renderer=null,speed=1,paused=false,saveBlocked=false,selected=-1,pointer=null,
   lastFrame=0,accumulator=0,autoIn=0,uiIn=0,previousPhase='',lastResult=null,resultDetail=false,hud=null;
-const telemetry=__GARDEN_PUBLIC_WEB__?publicSession({snapshot:()=>({screen:modal==='settings'?'settings':screen,checkpoint:p().cleared})}):null;
 const renderClock=new RenderClock(),performanceStats={renders:0,steps:0};
 const saves=new RunSaveQueue(()=>!run||store.saveRun(E.serialize(run)),{
   request:cb=>window.requestIdleCallback?window.requestIdleCallback(cb,{timeout:1200}):setTimeout(cb,80),
@@ -554,7 +555,7 @@ function training(){
 function reward(){
   show('축복 선택',`웨이브 ${run.wave} 클리어`,`<p class="subtext">다음 웨이브에 적용할 축복을 하나 고르세요.</p><div class="reward-options" style="margin-top:14px">${run.reward.map(id=>`<button class="reward-option" data-reward="${id}"><strong>${BLESSING[id].name}</strong><small>${BLESSING[id].text}</small></button>`).join('')}</div>`,'','reward');
 }
-function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}telemetry?.battleEnd(snapshot.mode,snapshot.stage,snapshot.tier,abandon?'leave':snapshot.won?'win':'loss',snapshot.round,snapshot.seconds,p().settings.auto);saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],dust:result.dust,bond:result.bond,star:result.star,at:now(),weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null,monthly:snapshot.mode==='monthly'?{earned:result.earned,paidBefore:result.paidBefore}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=chapterNow();arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);
+function settle(abandon=false){if(!run||!p().active)return;const snapshot={won:!abandon&&run.phase==='victory',round:clearedRounds(run),stage:run.chapter+1,mode:run.mode,side:run.side||null,tier:run.mode==='main'?null:run.tier,damage:run.stats.damage,kills:run.stats.kills,seconds:run.time,byHero:{...run.stats.byHero}};const result=act('settle',{token:p().active.token,won:snapshot.won,round:snapshot.round,damage:snapshot.damage,seconds:snapshot.seconds,merges:Math.min(999,run.stats.merges),perfect:snapshot.won&&run.mode==='main'&&(run.stats.leaks||0)===0,...(requestTrack?{feats:requestTrack.feats(snapshot.won)}:{})},false);requestTrack=null;if(!result.ok){storagePause();return;}telemetry?.battleEnd(snapshot.mode,snapshot.stage,snapshot.tier,abandon?'leave':snapshot.won?'win':'loss',run.wave,snapshot.seconds,p().settings.auto);saves.reset();lastResult={...snapshot,reward:result.reward,newBest:result.newBest,perfect:result.perfect,firstPerfect:result.firstPerfect,clearReward:result.clearReward,score:result.score,bands:result.bands||[],total:result.total,requestsDone:result.requestsDone||[],dust:result.dust,bond:result.bond,star:result.star,at:now(),weekly:result.best?{earned:result.earned,paidBefore:result.paidBefore,best:result.best,left:result.left}:null,monthly:snapshot.mode==='monthly'?{earned:result.earned,paidBefore:result.paidBefore}:null};run=null;renderer=null;screen='adventure';mode=snapshot.mode;cycle=chapterNow();arrival=result.partOpened||result.unlocked?.length?{part:!!result.partOpened,unlocked:result.unlocked||[]}:null;close();render();showResult(lastResult);
   result.bond.filter(row=>row.opened).forEach(({id,hearts},i)=>{
     const before=p().heroes[id].bond-hearts;
     if(i===0)bondUp(id,before,true);else setTimeout(()=>bondUp(id,before,true),i*2900);
@@ -596,7 +597,7 @@ function showResult(r,animate=true){
   if(r.won){const mark=document.querySelector('#sheet .result-mark');if(mark)setTimeout(()=>{const c=centerOf(mark);burst(c.x,c.y,{count:16,spread:110,size:13,duration:1000,color:'#ffe08a'});},180);}
   if(r.perfect)sound.event({type:'perfect'});
 }
-function storagePause(){telemetry?.error('save_unavailable');paused=true;saveBlocked=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인한 뒤 재개하세요.');wallet();if(run&&hud)updateBattle();}
+function storagePause(){paused=true;saveBlocked=true;toast('저장에 실패해 전투를 일시정지했습니다. 저장 공간을 확인한 뒤 재개하세요.');wallet();if(run&&hud)updateBattle();}
 function syncBattlePhase(){
   if(!run)return false;
   if(run.phase!==previousPhase){
@@ -1481,7 +1482,14 @@ const GUIDE='rumi',coach=createCoach({onSkip:()=>skipTutorial()});
 let coachHold=false,tutorialRun=false,tutorialMark=null,castAt=0,nextTip=false,dodgeDone=false,dodgeFrom=-1,dodgeTo=-1;
 const qs=s=>document.querySelector(s);
 const guideFace=()=>`<span class="coach-art">${image(GUIDE)}</span>`;
-function guide(id,target,line,opts={}){if(coach.id===id&&!opts.force)return;telemetry?.tutorial(id,'shown');coach.show({id,target,line,name:'대현자 '+HERO[GUIDE].name,face:guideFace(),skippable:opts.skippable??true,...opts});}
+function guide(id,target,line,opts={}){
+  if(coach.id===id&&!opts.force)return;
+  coach.show({id,target,line,name:'대현자 '+HERO[GUIDE].name,face:guideFace(),skippable:opts.skippable??true,...opts});
+  if(telemetry){
+    const step=tutorialStepForGuide(id);
+    if(step)telemetry.tutorial(step,'shown');
+  }
+}
 function ftueDone(step){if(!p().ftue.done.includes(step)&&act('ftue',{done:step},false).ok)telemetry?.tutorial(step,'completed');}
 function skipTutorial(){
   if(!act('ftue',{skip:true},false).ok)return;telemetry?.tutorial('all','skipped');coach.hide();coachHold=false;

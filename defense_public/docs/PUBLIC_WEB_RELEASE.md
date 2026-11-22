@@ -76,6 +76,8 @@ npm run check --prefix defense_public/deploy/cloudflare
 
 **보내거나 저장하지 않는 것:** 사용자·기기·세션 식별자, 저장 토큰, 정확한 시각, 자유 입력, 전체 URL/쿼리, 이메일, IP, User-Agent, 스택/오류 메시지, 세이브 원문, 캐릭터 구성, 화면 녹화. 허용되지 않은 필드를 하나라도 포함한 요청은 전체 거부한다. 분석 전송 함수는 게임의 저장 객체를 받지 않는다.
 
+전투 보고서는 모드·난이도별로 종료 당시 도달한 웨이브를 집계한다. 예를 들어 4웨이브에서 패배하면 통계는 4~6 구간, 보상 정산은 완료한 3웨이브를 사용한다. 합성 칸이나 필살기 대상이 달라져도 같은 페이지의 같은 튜토리얼 단계 표시는 한 번으로 센다. 저장 불가 건수는 브라우저 저장소 읽기·쓰기에서 예외가 발생한 페이지 수다. 한 페이지에서 여러 번 실패해도 한 건이며, 재화 부족 등 게임 규칙상 거절은 여기에 포함하지 않는다.
+
 서버가 UTC 날짜를 붙이고 `(날짜, 이벤트, 검증된 분류 조합)`의 합계를 증가시킨다. 요청 원문이나 이벤트 한 건당 행은 보관하지 않는다. 별도 예산 테이블도 날짜당 합계·입장 플래그뿐이다. 여러 요청의 합산과 한도 처리는 원자적 D1 트랜잭션으로 묶는다. 일별 데이터는 30개 UTC 날짜까지 유지하며 매일 예약 삭제한다. 조회용 공개 API는 없다. 운영자는 `deploy/cloudflare/report.sql`을 인증된 D1 관리 경로에서 실행한다.
 
 `game_boot`는 사람 수가 아니다. 동일인이 재시도하면 여러 건이다. 탭 종료/네트워크 단절 시 전송이 누락될 수 있고 저장 후 나가기는 패배나 포기가 아니다. **시작 건수와 종료 건수의 차이를 정확한 이탈률로 표시하지 않는다.** 종료 승패·포기 비율, 실패 웨이브·소요 구간, 안내 완료 건수의 큰 차이를 개선의 단서로 사용한다. 개인별 순서, 고유 인원, 복귀/다음 날 유지율, 사람 단위 퍼널은 계산하지 않는다.
@@ -93,40 +95,55 @@ Cloudflare Workers **Static Assets + Worker + D1** 하나로 준비했다. Pages
 
 ## 실제 배포할 때
 
-이 절차의 `create`, `--remote`, 마지막 `deploy`는 아직 수행하지 않았다. 기본 설정의 D1 ID는 자리표시자다. Cloudflare 계정 연결과 최종 호스트 선택은 운영자가 배포 시 한다.
-
-1. 최종 저장소 커밋과 CI 통과를 확인한다. 아래 기기 점검을 마치고 최종 호스트를 정한다. `workers.dev`로 무료 테스트할 수 있다. 나중에 커스텀 도메인으로 바꾸면 저장 출처도 바뀐다.
-2. 루트에서 `release.example.json`을 `release.local.json`으로 복사한다. 이 예시는 집계 수집 활성이다. 분석 없이 공개하려면 `enabled`를 false로 두고 Worker도 false로 맞춘다.
+1. [Cloudflare 가입](https://dash.cloudflare.com/sign-up)에서 이메일·비밀번호로 계정을 만들고 받은 메일의 인증 링크를 연다. 대시보드의 **Workers & Pages**에서 Workers Free를 사용한다. 처음에 주소를 정하라는 화면이 나오면 사용할 서브도메인을 정한다. 게임 주소는 `https://star-garden-public.<선택한 이름>.workers.dev` 형식이다. 도메인 구매나 GitHub 연동 없이 Wrangler로 직접 올릴 수 있다. [계정 준비](https://developers.cloudflare.com/fundamentals/account/create-account/) · [무료 요금](https://developers.cloudflare.com/workers/platform/pricing/) · [workers.dev 주소](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/)
+2. Windows PowerShell에서 수정본이 있는 **저장소 루트**로 이동한다. 새 PC라면 먼저 Git과 Node.js 24 LTS를 설치하고 저장소를 받은 뒤 `npm ci`를 실행한다. 아래는 통계를 켜는 빌드다. 이미 같은 수정본의 `release-candidate`와 `wrangler.test.jsonc`를 준비했다면 3번으로 간다.
 
 ```powershell
-Copy-Item defense_public/release.example.json defense_public/release.local.json
-$env:GARDEN_RELEASE_CONFIG = 'defense_public/release.local.json'
+$env:GARDEN_RELEASE_CONFIG = (Resolve-Path defense_public/release.example.json).Path
 node defense_public/scripts/build.mjs --public-web --outdir defense_public/test-results/release-candidate
 node defense_public/scripts/check-public.mjs defense_public/test-results/release-candidate
-```
-
-3. `deploy/cloudflare/wrangler.jsonc`에서 `name`을 선택하고 `assets.directory`를 방금 출력한 폴더(설정 파일 기준 `../../test-results/release-candidate`)로 바꾼다. `vars.ANALYTICS_ENABLED`는 클라이언트와 일치하도록 문자열 `"true"`로 맞춘다. 기본 `false`이면 수신하더라도 저장하지 않는다.
-4. 별도 터미널에서 아래를 진행한다. 로그인은 **배포 운영자용**이며 플레이어 로그인이 아니다.
-
-```powershell
+Remove-Item Env:GARDEN_RELEASE_CONFIG
 cd defense_public/deploy/cloudflare
 npm ci
+```
+
+검사 결과에서 `analyticsEnabled: true`를 확인한다. 배포 설정 사본을 최초 한 번 만든다. 이 파일은 Git에서 제외한다.
+
+```powershell
+$config = Get-Content -Raw wrangler.jsonc | ConvertFrom-Json
+$config.assets.directory = '../../test-results/release-candidate'
+$config.vars.ANALYTICS_ENABLED = 'true'
+$config | ConvertTo-Json -Depth 10 | Set-Content -Encoding utf8 wrangler.test.jsonc
+```
+
+3. `defense_public/deploy/cloudflare` 폴더에서 아래 두 줄을 실행한다. 브라우저에서 내 Cloudflare 계정을 선택해 **Allow**를 누르고, 터미널의 계정 이름을 확인한다.
+
+```powershell
 npx wrangler login
-npx wrangler d1 create star-garden-counts
+npx wrangler whoami
 ```
 
-5. 생성 결과의 `database_id`를 설정의 자리표시자에 넣는다. 이후 명령은 실제 원격 DB를 변경한다.
+4. 집계용 D1 데이터베이스를 계정에 한 번 만든다. 이미 같은 이름으로 만들었다면 대시보드 D1에서 해당 데이터베이스의 ID를 확인한다.
 
 ```powershell
-npx wrangler d1 migrations apply DB --remote
-npm run check
-npx wrangler deploy
+npx wrangler d1 create star-garden-counts --no-update-config
+notepad .\wrangler.test.jsonc
 ```
 
-6. 배포 URL에서 밤/맑음, 저장/새로고침/이어하기, 백업 복원, 404, CSP와 캐시 헤더를 확인한다. 이벤트의 응답이 204인지, D1에 합계만 생기는지 점검한다. `observability.enabled:false`, 소스맵 업로드 없음, 별도 분석 기능 없음도 유지한다. [정적 헤더 동작](https://developers.cloudflare.com/workers/static-assets/headers/)
+메모장의 `database_id`에서 `00000000-0000-0000-0000-000000000000`을 터미널에 나온 **database_id**로 바꾸고 저장한다. `binding`은 `DB` 그대로 둔다. [D1 만들기와 연결](https://developers.cloudflare.com/d1/get-started/)
+
+5. 같은 폴더에서 다음을 **한 줄씩** 실행한다. 첫 줄이 원격 DB에 집계 테이블을 만들고, 둘째 줄이 업로드할 파일과 연결 설정을 검사한다. 두 명령이 성공하고 검사에 `ANALYTICS_ENABLED ("true")`가 보이면 마지막 줄로 게임을 공개한다.
 
 ```powershell
-npx wrangler d1 execute DB --remote --file report.sql
+npx wrangler d1 migrations apply DB --remote --config wrangler.test.jsonc
+npx wrangler deploy --dry-run --config wrangler.test.jsonc
+npx wrangler deploy --config wrangler.test.jsonc
+```
+
+6. 터미널에 나온 HTTPS 주소를 휴대전화로 열어 전투를 시작한다. 설정에서 **플레이 통계** 안내를 확인하고, 약 10초 이상 플레이한 뒤 저장 후 나가기 → 새로고침 → 이어하기를 시험한다. 같은 터미널에서 다음 조회를 실행하면 날짜·이벤트별 합계가 표시된다. 이후 아래의 실기기 항목을 확인한 뒤 테스터에게 이 주소를 공유한다.
+
+```powershell
+npx wrangler d1 execute DB --remote --config wrangler.test.jsonc --command "SELECT day,event,SUM(hits) AS hits FROM daily_counts GROUP BY day,event ORDER BY day DESC,event"
 ```
 
 새 버전은 새 출력 폴더로 빌드해 같은 Worker/호스트에 배포한다. `build-manifest.json`의 buildId와 배포 버전, 산출물을 운영자가 보관한다. HTML은 재검증하고 해시 에셋만 장기 캐시한다. 롤백은 Cloudflare의 이전 배포 또는 보관한 전체 산출물과 Worker 설정을 같이 사용한다. 저장 형식이 바뀌는 미래 버전의 롤백은 별도 호환성 점검이 필요하다. 수집 중지는 `ANALYTICS_ENABLED:"false"` 적용 후 배포하며, 클라이언트도 비활성으로 재빌드하면 전송 자체가 멈춘다.

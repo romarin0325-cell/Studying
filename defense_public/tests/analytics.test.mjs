@@ -2,7 +2,35 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createAnalytics,localEventAdapter} from '../src/analytics.js';
 import {validEvent,cleanEvent,timeBucket,waveBucket} from '../src/analytics-schema.js';
-import {createProfile} from '../src/profile.js';
+import {createProfile,ProfileStore} from '../src/profile.js';
+import {observeProfileStorage,tutorialStepForGuide} from '../src/public-session.js';
+
+test('ordinary command refusals and conflicting saves do not count as unavailable storage',()=>{
+  let raw=null,failures=0;
+  const storage=observeProfileStorage({getItem:()=>raw,setItem:(_key,value)=>{raw=value;}},()=>failures++);
+  const store=new ProfileStore(storage);
+  assert.equal(store.transact('begin',{mode:'main',stage:108}).ok,false);
+  raw=JSON.stringify(createProfile());
+  assert.equal(store.transact('begin',{mode:'main',stage:1}).ok,false);
+  assert.ok(store.conflict);
+  assert.equal(failures,0);
+});
+
+test('coach variants enqueue only the allowed logical shown step',async()=>{
+  const batches=[];
+  const analytics=createAnalytics({enabled:true,adapter:{send:batch=>batches.push(batch)}});
+  const variants=[
+    ['merge:0:1','merge'],['merge-more','merge'],['cast:star_boy','cast'],
+    ['ten','firstTen'],['ten-go','firstTen'],['ten-nav','firstTen'],
+    ['team-auto','formation'],['team-save','formation'],
+  ];
+  for(const [id] of variants){
+    assert.ok(analytics.track('tutorial_step',{step:tutorialStepForGuide(id),status:'shown'}),id);
+  }
+  await analytics.flush();
+  assert.deepEqual(batches.flat().map(e=>e.fields),variants.map(([,step])=>({step,status:'shown'})));
+  for(const id of ['dodge','tour:hero:1:n','next'])assert.equal(tutorialStepForGuide(id),null);
+});
 
 test('disabled config never sends; enabled capture accepts only exact, non-identifying fields',async()=>{
   for(const enabled of [false,undefined,'true']){

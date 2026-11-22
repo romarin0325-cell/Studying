@@ -13,6 +13,20 @@ function fixture(){
   return {db,env};
 }
 const boot={event:'game_boot',fields:{}};
+test('operator battle report keeps modes and tiers distinct for the same stage and wave',()=>{
+  const {db}=fixture();
+  try{
+    for(const [mode,tier,hits] of [['main','none',9],['oath','easy',90],['oath','hard',12]]){
+      const bucket=JSON.stringify({mode,tier,stage:1,result:'loss',wave:'4_6'});
+      db.prepare("INSERT INTO daily_counts VALUES(date('now'),'battle_end',?,?)").run(bucket,hits);
+    }
+    const script=fs.readFileSync(new URL('../deploy/cloudflare/report.sql',import.meta.url),'utf8');
+    const battleQuery=script.split(';').find(sql=>sql.includes("event='battle_end'"));
+    assert.deepEqual(db.prepare(battleQuery).all().map(row=>[row.mode,row.tier,row.battles]),[
+      ['main','none',9],['oath','easy',90],['oath','hard',12],
+    ]);
+  }finally{db.close();}
+});
 const request=(body={events:[boot]},headers={},url='https://game.example/api/event')=>new Request(url,{method:'POST',headers:{origin:'https://game.example','content-type':'application/json',...headers},body:JSON.stringify(body)});
 test('collector rejects unapproved fields, cross-origin, oversized and malformed input without writes',async()=>{
   const {db,env}=fixture();try{

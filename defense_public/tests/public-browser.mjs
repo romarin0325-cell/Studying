@@ -28,7 +28,7 @@ async function flush(page){
     await page.evaluate(()=>dispatchEvent(new Event('pagehide')));if(!await sent)break;
   }
 }
-function combatFixture(phase='combat'){
+function combatFixture(phase='combat',wave=1){
   const p=veteran(createProfile(NOW));p.settings.auto=false;p.settings.sound=false;
   assert.ok(command(p,'begin',{mode:'main',stage:1},NOW).ok);
   const run=createBattle(p),unit={...run.board.find(Boolean)};
@@ -36,12 +36,12 @@ function combatFixture(phase='combat'){
   run.gold=100;run.gauge=120;run.queue=[{kind:'boss',hp:1e8}];run.spawnIn=0;E.step(run,.05);
   run.enemies[0].progress=E.PATH_LENGTH*.7;run.enemies[0].speed=0;run.enemies[0].skillIn=99;
   if(phase==='victory'){run.phase='victory';run.wave=6;run.won=true;}
-  if(phase==='defeat'){run.phase='defeat';run.health=0;}
+  if(phase==='defeat'){run.phase='defeat';run.health=0;run.wave=wave;}
   p.active.run=E.serialize(run);assert.ok(E.restore(p.active.run));return {p,hero:unit.hero};
 }
 const reports=[];
 try{
-  for(const name of (process.argv.includes('--chromium-only')?['chromium']:['chromium','webkit'])){
+  for(const name of (process.argv.includes('--chromium-only')?['chromium']:process.argv.includes('--webkit-only')?['webkit']:['chromium','webkit'])){
     const browser=await (name==='webkit'?webkit:chromium).launch({headless:true}).catch(error=>{if(name==='webkit'||process.env.CI)throw error;return chromium.launch({headless:true,channel:'chrome'});});
     const errors=[],csp=[],external=[],events=[],captures=[];
     async function boot({width=390,height=844,profile=veteran(createProfile(NOW)),bright=false,enabled=true,storageBlocked=false}={}){
@@ -59,6 +59,9 @@ try{
       if(profile)await page.evaluate(({key,profile})=>localStorage.setItem(key,JSON.stringify(profile)),{key:SAVE_KEY,profile});
       await context.addCookies([{name:'unrelated',value:'must-not-send',url:base}]);
       await page.addInitScript(blocked=>{
+        if(blocked==='read'){
+          Storage.prototype.getItem=function(){throw new DOMException('blocked','SecurityError');};
+        }
         const set=Storage.prototype.setItem;
         Storage.prototype.setItem=function(k,v){if(blocked||window.__quota)throw new DOMException('full','QuotaExceededError');return set.call(this,k,v);};
       },storageBlocked);
@@ -78,6 +81,13 @@ try{
       await p.locator('.lb-depart').click();await p.locator('#sheet[data-kind="prepare"]').waitFor();
       assert.ok((await stored(p)).ftue.done.includes('lobby'));
       await p.locator('[data-begin="main"]').click();await p.locator('#arena').waitFor();
+      await p.locator('[data-action="summon-battle"]').click();
+      await p.locator('.coach-line').filter({hasText:/같은 동료/}).waitFor();
+      const mergeShown=()=>events.filter(e=>e.event==='tutorial_step'&&e.fields.step==='merge'&&e.fields.status==='shown');
+      // Let the normal timer deliver multiple batches if another send is already in flight.
+      const deadline=Date.now()+25000;
+      while(!mergeShown().length&&Date.now()<deadline)await flush(p);
+      assert.equal(mergeShown().length,1,JSON.stringify(events));
       await p.locator('.coach-skip').click();await p.locator('[data-action="leave"]').click();await p.locator('[data-action="save-leave"]').click();
       assert.ok((await stored(p)).active.run);await flush(p);await fresh.context.close();
 
@@ -113,8 +123,27 @@ try{
       await page.locator('#backup-input').setInputFiles({name:'restore.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(saved))});await page.locator('#confirm-import').click();assert.ok((await stored(page)).active.run);
       const keys=await page.evaluate(()=>Object.keys(localStorage));assert.deepEqual(keys,[SAVE_KEY]);await flush(page);await t.context.close();
 
-      for(const phase of ['victory','defeat']){
-        const t=await boot({profile:combatFixture(phase).p});await t.page.locator('[data-action="resume"]').click();await t.page.locator('#sheet[data-kind="result"]').waitFor();const saved=await stored(t.page);assert.equal(saved.active,null);assert.equal(saved.cleared,phase==='victory'?1:0);await shot(t,phase);await t.context.close();
+      for(const [phase,wave,band] of [['victory',6,'4_6'],['defeat',1,'1_3'],['defeat',4,'4_6'],['defeat',7,'7_9'],['defeat',10,'10_plus']]){
+        const before=events.length;
+        const t=await boot({profile:combatFixture(phase,wave).p});await t.page.locator('[data-action="resume"]').click();await t.page.locator('#sheet[data-kind="result"]').waitFor();const saved=await stored(t.page);assert.equal(saved.active,null);assert.equal(saved.cleared,phase==='victory'?1:0);
+        await flush(t.page);
+        const ends=events.slice(before).filter(e=>e.event==='battle_end');
+        assert.deepEqual(ends.map(e=>[e.fields.result,e.fields.wave]),[[phase==='victory'?'win':'loss',band]]);
+        if(phase==='victory'||wave===1)await shot(t,phase);
+        await t.context.close();
+      }
+      for(const fault of ['read','sortie']){
+        const before=events.length,t=await boot({storageBlocked:fault==='read'?'read':false});
+        if(fault==='sortie'){
+          await t.page.locator('.lb-depart').click();
+          await t.page.evaluate(()=>window.__quota=true);
+          await t.page.locator('[data-begin="main"]').click();
+          await t.page.locator('[data-begin="main"]').click();
+          assert.equal((await stored(t.page)).active,null);
+        }
+        await flush(t.page);
+        assert.equal(events.slice(before).filter(e=>e.event==='game_error'&&e.fields.code==='save_unavailable').length,1,fault);
+        await t.context.close();
       }
       const memoryProfile=veteran(createProfile(NOW));memoryProfile.heroes.star_boy.bond=10;
       const memory=await boot({profile:memoryProfile});await memory.page.route('**/*.avif',r=>r.abort());
