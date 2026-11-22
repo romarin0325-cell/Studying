@@ -1,4 +1,6 @@
 // node card_pixel/game/tools/sim.mjs [runs] [--all | --dungeon=<id>] [--difficulty=easy|normal|nightmare] [--tempo=1|2]
+// Main runs default to a profile after its first main win. Use --profile=first-main for its first departure.
+// Use --legacy to reproduce the old rules and stdout format.
 // Add --contract=rescue|heirloom|elite for the nightmare audit seeds (120 per dungeon by default).
 // Use --boss-order-audit for 160 paired first-boss runs in each of the two starting main dungeons.
 // Use --daily-from=YYYY-MM-DD --days=60 for paired first attempts at the daily rift.
@@ -45,9 +47,22 @@ const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--promise-audi
 const dungeon = args.find(arg => arg.startsWith('--dungeon='))?.slice('--dungeon='.length) || 'ember_volcano';
 const difficulty = args.find(arg => arg.startsWith('--difficulty='))?.slice('--difficulty='.length)
   ?? (flag('--nightmare') || contract !== null ? 'nightmare' : 'normal');
-const dungeons = flag('--all') ? Object.keys(DUNGEONS).filter(id => difficulty === 'normal' || DUNGEONS[id].nightmareRule) : [dungeon];
+const profileStage = argValue('--profile');
+const firstMain = profileStage === 'first-main';
+const firstMainDungeons = Object.values(DUNGEONS).filter(({ unlock }) => unlock.kind === 'intro_clear').map(({ id }) => id);
+const legacyCliRules = tempoVersion === 1 || lessonVersion === 0 || [
+  '--legacy', '--plain', '--no-heirloom', '--no-laststand', '--entry-audit', '--easy-audit',
+  '--first-main', '--boss-order-audit'
+].some(flag);
+const dungeons = flag('--all')
+  ? firstMain ? firstMainDungeons : Object.keys(DUNGEONS).filter(id => difficulty === 'normal' || DUNGEONS[id].nightmareRule)
+  : [dungeon];
 if (!['easy', 'normal', 'nightmare'].includes(difficulty)) throw new RangeError('Invalid difficulty: ' + difficulty);
 if (!runs || dungeons.some(id => !Object.hasOwn(DUNGEONS, id))) throw new RangeError('Invalid run count or dungeon');
+if (profileStage !== undefined && (!['first-main', 'after-main-win'].includes(profileStage) || legacyCliRules
+  || (firstMain && (contract !== null || dungeons.some(id => !firstMainDungeons.includes(id)))))) {
+  throw new RangeError('Unavailable profile: ' + profileStage);
+}
 if (contract !== null && (!Object.hasOwn(CONTRACTS, contract) || difficulty !== 'nightmare' || dungeons.some(id => !DUNGEONS[id].nightmareRule))) {
   throw new RangeError('Unavailable nightmare contract: ' + contract);
 }
@@ -66,6 +81,20 @@ const legacyProfile = () => {
   profile.ui.entry.legacy = true;
   return profile;
 };
+
+function releaseProfile(dungeonId, firstMain = false) {
+  const profile = Meta.createProfile();
+  if (DUNGEONS[dungeonId].layout !== 'intro') {
+    profile.records.clears.dawn_forest = { normal: 1 };
+    if (firstMain) profile.unlockedDungeons.push(...firstMainDungeons);
+    else {
+      profile.records.clears.ember_volcano = { normal: 1 };
+      profile.unlockedDungeons.push(dungeonId);
+      profile.nightmareUnlocks.push(dungeonId);
+    }
+  }
+  return profile;
+}
 
 const strength = id => RelayRoster.strength(roster.card(id));
 const strongest = ids => ids.slice().sort((a, b) => strength(b) - strength(a));
@@ -264,12 +293,14 @@ function weakestReserve(run) {
 
 export function playRun(dungeonId, seed, {
   profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, doorOverride, serviceOverride,
-  firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty, relicDoors = false,
+  firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty, relicDoors,
+  legacyRules = legacyCliRules || legacyDraws,
   relicAudit = false, onRelicReplacement
 } = {}) {
-  const profileView = profile ? Meta.startView(profile, dungeonId) : { bossOrder: firstMain };
-  if (relicDoors) profileView.features = { ...profileView.features, relicDoors: true };
-  else if (profileView.features) delete profileView.features.relicDoors;
+  const simulatedProfile = profile ?? (legacyRules ? null : releaseProfile(dungeonId, firstMain));
+  const profileView = simulatedProfile ? Meta.startView(simulatedProfile, dungeonId) : { bossOrder: firstMain };
+  if (relicDoors !== undefined) profileView.features = { ...profileView.features, relicDoors };
+  else if (legacyRules && profileView.features) delete profileView.features.relicDoors;
   const intro = DUNGEONS[dungeonId].layout === 'intro';
   const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : selectedDifficulty,
     contract: intro ? null : contract, seed, profileView, tempoVersion, lessonVersion, plain: flag('--plain') });
@@ -408,14 +439,17 @@ function measureBossOrder() {
 
 function measureContracts() {
   console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficulty} · ${contract} · ${runs} seeds per dungeon · offset ${seedOffset}`);
+  if (!legacyCliRules) printReleaseRules(Meta.featureFlags(releaseProfile(dungeons[0])), difficulty);
   console.log('| Dungeon | Met | Paid | Stamped | Clear |');
   console.log('| --- | ---: | ---: | ---: | ---: |');
   const rate = (n, count) => `${n}/${count} (${percent(n, count)})`;
   const total = { met: 0, paid: 0, stamped: 0, clear: 0 };
   for (const id of dungeons) {
-    const profile = legacyProfile();
-    profile.unlockedDungeons.push(id);
-    profile.nightmareUnlocks.push(id);
+    const profile = legacyCliRules ? legacyProfile() : releaseProfile(id);
+    if (legacyCliRules) {
+      profile.unlockedDungeons.push(id);
+      profile.nightmareUnlocks.push(id);
+    }
     const counts = { met: 0, paid: 0, stamped: 0, clear: 0 };
     for (let i = 1; i <= runs; i++) {
       const { run, end } = playRun(id, seedOffset + 2000003 + 6151 * i, { profile });
@@ -649,11 +683,21 @@ function battleMetrics(rooms, run, state, summary, result) {
   }
 }
 
+function printReleaseRules(features, difficulty) {
+  const profile = features.firstMainCleared ? 'after-main-win' : features.introCleared ? 'first-main' : 'new';
+  const entries = Object.entries(features);
+  const enabled = entries.filter(([, on]) => on).map(([name]) => name).join(', ');
+  const disabled = entries.filter(([, on]) => !on).map(([name]) => name).join(', ');
+  console.log(`Rules: release · profile ${profile} · ${difficulty} · on: ${enabled} · off: ${disabled || 'none'}`);
+}
+
 function measureRuns() {
-  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficulty} · ${runs} seeds per dungeon · offset ${seedOffset}${opening ? ` · ${opening}` : ''}`);
+  const difficultyLabel = firstMain ? `requested ${difficulty}` : difficulty;
+  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficultyLabel} · ${runs} seeds per dungeon · offset ${seedOffset}${opening ? ` · ${opening}` : ''}`);
   console.log('Rooms: turns / deaths / MP left / battles with a death / win rate.');
   const summaries = [];
   for (const id of dungeons) {
+    console.log(`\n${id}`);
     const rooms = {};
     const lessons = { 2: { total: 0, reached: 0 }, 6: { total: 0, reached: 0 } };
     const counts = { wins: 0, bossLosses: 0, voluntary: 0, eligible: 0, bigHits: 0, retries: 0 };
@@ -673,12 +717,14 @@ function measureRuns() {
         previous = { party, allAlive: party.length === 3 && result.survivors.length === 3 };
         if (result.result === 'lose' && run.room.type === 'boss') counts.bossLosses++;
       };
-      const { end, stats } = playRun(id, seedOffset + seed * 7919, { opening, onBattle, naive: flag('--careless') });
+      const { run, end, stats } = playRun(id, seedOffset + seed * 7919, {
+        opening, onBattle, naive: flag('--careless'), firstMain
+      });
+      if (seed === 1 && !legacyCliRules) printReleaseRules(run.features, run.difficulty);
       counts.wins += Number(end.result === 'win');
       counts.bigHits += Number(stats.best >= 1000);
       counts.retries += stats.retries;
     }
-    console.log(`\n${id}`);
     console.log('| Room | Battles | Turns / deaths / MP / death chance / win rate |');
     console.log('| --- | ---: | --- |');
     for (const label of ROOM_LABELS) {

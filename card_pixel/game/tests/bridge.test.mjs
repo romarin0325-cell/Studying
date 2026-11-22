@@ -7,13 +7,16 @@ import { fileURLToPath } from 'node:url';
 // Share Math so the ESM bridge can seed the card core inside the VM.
 import * as Bridge from '../src/engine/bridge.js';
 import { makeBossLesson } from '../src/content/boss-lessons.js';
+import { DUNGEONS } from '../src/content/dungeons.js';
 import { create as makeRoster } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import { createStage } from '../src/stage/stage.js';
 import { createMoves } from '../src/ui/battle/moves.js';
 import { intentLines } from '../src/ui/battle/hud.js';
+import { relayOutcomeLines } from '../src/ui/battle/tiles.js';
 import { createCoreRoster } from './support/core.mjs';
 import { coreBundle } from '../tools/core-bundle.mjs';
+import { playRun } from '../tools/sim.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..', '..', '..');
@@ -38,6 +41,29 @@ const option = (b, name) => b.options().find(o => o.name === name);
 const quietEnemy = (hp = 99999, overrides = {}) => dummy({
   stats: { hp, atk: 0, matk: 0, def: 60, mdef: 60, ...overrides }, skills: []
 });
+
+function eachRetreatDecision(dungeon, seed, check) {
+  let live, config, commands;
+  playRun(dungeon, seed, {
+    legacyRules: true, relicDoors: true,
+    actionOverride(run, wait, current) {
+      if (current !== live) {
+        live = current;
+        config = Run.battleOptions(run);
+        commands = [];
+      }
+      if (live.canRetreat()) check({ floor: run.floor, turn: wait.s.turn, commands, wait, replay });
+    },
+    trace(run, wait, move) { commands.push(move.index); }
+  });
+
+  function replay() {
+    const branch = Bridge.create(S.RelayCore, config);
+    branch.start();
+    for (const index of commands) branch.act(index);
+    return branch;
+  }
+}
 
 function bossFixture(id, stats) {
   const data = S.RelayCore.ENEMIES.find(enemy => enemy.id === id);
@@ -615,9 +641,10 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
   const retreating = reachDecision(), standing = reachDecision();
   const before = retreating.state();
   const expected = {
-    danger: 'certain',
-    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [451, 451] } },
-    stand: { falls: 'certain', inheritor: { id: 'siren', name: '세이렌' }, heirloom: { skill: '드래곤스파클', from: 'dragon_miko' }, replaces: null }
+    danger: 'possible',
+    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [451, 451], evadeHp: 500 } },
+    stand: { falls: 'possible', evadeChance: 5, lethalOnHit: true, inheritor: { id: 'siren', name: '세이렌' },
+      heirloom: { skill: '드래곤스파클', from: 'dragon_miko' }, replaces: null }
   };
   const random = Math.random;
   Math.random = () => { throw new Error('previewRelay must not roll'); };
@@ -627,6 +654,10 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
     Math.random = random;
   }
   assert.deepEqual(retreating.state(), before);
+  assert.deepEqual(relayOutcomeLines(expected, before.allies[0], retreating.previewRetreat().intent), [
+    '물러나면 세이렌 HP 500 → 451 · 회피 시 500',
+    '남으면 쓰러짐 → 세이렌이 드래곤스파클 계승 · 회피 5%'
+  ]);
   assert.deepEqual(retreating.heirloomsGained(), []);
   assert.ok(last(retreating.retreat(), 'retreat'));
   assert.deepEqual([retreating.state().cur, retreating.state().allies[1].hp], [1, 451]);
@@ -636,21 +667,110 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
   assert.equal(standing.heirloomsGained()[0].from, expected.stand.heirloom.from);
 });
 
+test('Ember 7919 retreat predicts Jack-o-Lantern’s evasion and preserves seeded event bytes', () => {
+  let checked = false;
+  eachRetreatDecision('ember_volcano', 7919, ({ floor, turn, commands, replay }) => {
+    if (floor !== 1 || turn !== 4) return;
+    assert.deepEqual(commands, [3, 1, 2]);
+    const b = replay(), control = replay();
+    const before = b.state();
+    assert.equal(b.allyStats(1).evasion, 10);
+    assert.equal(before.allies[1].buffs.evasion, undefined);
+    for (let i = 0; i < 3; i++) {
+      const forecast = b.previewRelay();
+      assert.deepEqual(forecast.retreat.next.hpAfter, [415, 415]);
+      assert.equal(forecast.retreat.next.evadeHp, 464);
+      assert.equal(relayOutcomeLines(forecast, before.allies[0], b.previewRetreat().intent)[1],
+        '잭오랜턴 HP 464 → 415 · 회피 시 464');
+    }
+    assert.deepEqual(b.state(), before);
+    const events = b.retreat();
+    assert.equal(JSON.stringify(events), JSON.stringify(control.retreat()));
+    assert.ok(events.some(event => event.t === 'miss' && event.why === 'evasion' && event.who.idx === 1));
+    assert.equal(b.state().allies[1].hp, 464);
+    checked = true;
+  });
+  assert.equal(checked, true);
+});
+
+test('Ember 23757 warns that Phoenix can evade the lethal floor 8 strike', () => {
+  let checked = false;
+  eachRetreatDecision('ember_volcano', 23757, ({ floor, turn, commands, wait, replay }) => {
+    if (floor !== 8 || turn !== 6) return;
+    assert.deepEqual(commands, [2, 2, 0, 0, 0]);
+    const b = replay(), control = replay();
+    const phoenix = b.state().allies[0];
+    assert.equal(phoenix.hp, 60);
+    assert.equal(phoenix.buffs.evasion, undefined);
+    const forecast = b.previewRelay();
+    assert.deepEqual([forecast.stand.falls, forecast.stand.lethalOnHit, forecast.stand.evadeChance], ['possible', true, 5]);
+    assert.match(relayOutcomeLines(forecast, phoenix, wait.intent)[1], /회피 5%/);
+    const events = b.act(0);
+    assert.equal(JSON.stringify(events), JSON.stringify(control.act(0)));
+    assert.ok(events.some(event => event.t === 'miss' && event.why === 'evasion' && event.who.idx === 0));
+    assert.equal(b.state().allies[0].hp, 60);
+    checked = true;
+  });
+  assert.equal(checked, true);
+});
+
+test('real retreat and standing branches agree with the forecast across six regions and eight seeds', t => {
+  let retreats = 0, lethalReplies = 0, dodged = 0;
+  for (const dungeon of Object.keys(DUNGEONS).filter(id => id !== 'dawn_forest')) {
+    for (let i = 1; i <= 8; i++) {
+      const seed = i * 7919;
+      eachRetreatDecision(dungeon, seed, ({ floor, turn, commands, wait, replay }) => {
+        const where = `${dungeon} ${seed} / floor ${floor} turn ${turn} after ${commands.join(',')}`;
+        const b = replay();
+        const { cur } = b.state(), { danger, retreat, stand } = b.previewRelay();
+        const idx = b.previewRetreat().next.idx;
+        b.retreat();
+        const { hp } = b.state().allies[idx];
+        const [min, max] = retreat.next.hpAfter;
+        assert.ok(hp === retreat.next.evadeHp || (min <= hp && hp <= max),
+          `${where}: ${hp} outside ${min}–${max}, evasion HP ${retreat.next.evadeHp}`);
+        retreats++;
+
+        if (danger !== 'certain' && !stand.lethalOnHit) return;
+        const standing = replay();
+        const events = standing.act(0);
+        // A command can defeat or stop the enemy before its announced reply.
+        if (!events.some(event => event.t === 'act' && event.actionId === wait.intent.actionId
+          && event.target.side === 'ally' && event.target.idx === cur)) return;
+        lethalReplies++;
+        if (!standing.state().allies[cur].dead) {
+          assert.ok(stand.evadeChance > 0, where);
+          assert.ok(events.some(event => event.t === 'miss' && event.why === 'evasion' && event.who.idx === cur), where);
+          dodged++;
+        }
+      });
+    }
+  }
+  assert.ok(retreats >= 1000 && lethalReplies > 0 && dodged > 0);
+  t.diagnostic(`${retreats} retreats, ${lethalReplies} lethal-on-hit replies including ${dodged} evaded`);
+});
+
 test('relay forecast distinguishes possible death and reports ascending HP after a variable hit', () => {
   const enemy = quietEnemy(99999, { atk: 100 });
   enemy.skills = [{ name: '시험용 예고', type: 'phy', rate: 1, effects: [{ type: 'random_mult', min: 1, max: 3 }] }];
   const b = battle({ party: ['fairy', null, 'red_dragon'], enemies: [enemy] });
   const [low, high] = last(b.start(), 'await').intent.damageRange;
   assert.ok(low < high);
-  b.host.battle.players[0].hp = high;
+  const player = b.host.battle.players[0];
+  player.baseEva = -100;
+  player.hp = high;
   const preview = b.previewRelay();
   assert.equal(preview.danger, 'possible');
   assert.equal(preview.stand.falls, 'possible');
   assert.equal(preview.stand.inheritor.id, 'red_dragon');
   const [nextLow, nextHigh] = b.previewRetreat().dmg;
   assert.deepEqual(preview.retreat.next.hpAfter, [420 - nextHigh, 420 - nextLow]);
-  b.host.battle.players[0].hp = low;
-  assert.equal(b.previewRelay().danger, 'certain');
+  player.hp = low;
+  const certain = b.previewRelay();
+  assert.equal(certain.danger, 'certain');
+  assert.match(relayOutcomeLines(certain, player, b.previewRetreat().intent)[1], /명중 시 쓰러짐/);
+  b.act(0);
+  assert.equal(b.state().allies[0].dead, true);
 });
 
 test('relay forecast accounts for guard, barrier and active evasion', () => {
@@ -658,6 +778,7 @@ test('relay forecast accounts for guard, barrier and active evasion', () => {
   const [damage] = last(b.start(), 'await').intent.damageRange;
   const player = b.host.battle.players[0];
   player.hp = damage - 1;
+  player.baseEva = -S.RelayCore.GAME_CONSTANTS.BASE_EVA_BONUS;
   assert.equal(b.previewRelay().danger, 'certain');
   for (const defense of ['guard', 'barrier', 'evasion']) {
     player.buffs = { [defense]: 1 };
@@ -665,6 +786,27 @@ test('relay forecast accounts for guard, barrier and active evasion', () => {
   }
   player.baseEva = 100;
   assert.equal(b.previewRelay().danger, 'none', 'guaranteed evasion');
+});
+
+test('relay forecast uses live evasion and defense from field, buffs and relics', () => {
+  const b = battle({
+    party: ['luna', 'snow_rabbit'], enemies: [quietEnemy(99999, { atk: 220 })],
+    artifacts: ['shadow_stab'], start: { field: ['moon_bless'] }
+  });
+  b.start();
+  const [player, next] = b.host.battle.players;
+  player.hp = 1;
+  player.baseEva = 7;
+  player.buffs.evasion = 1;
+  const forecast = b.previewRelay();
+  assert.equal(forecast.stand.evadeChance, 97);
+  assert.equal(forecast.stand.evadeChance, b.allyStats(0).evasion);
+  next.baseEva = 100;
+  const guaranteed = b.previewRelay().retreat.next;
+  assert.deepEqual(guaranteed.hpAfter, [next.hp, next.hp]);
+  assert.equal(guaranteed.evadeHp, undefined);
+  b.retreat();
+  assert.equal(b.state().allies[1].hp, next.maxHp);
 });
 
 test('relay forecast can show a lethal hit with no inheritor or retreat for the last companion', () => {
@@ -1179,6 +1321,7 @@ test('a rescue uses the minimum forecast on the outgoing fighter, including equa
     const [min, max] = last(b.start(), 'await').intent.dmg;
     assert.ok(max > min);
     b.host.battle.players[0].hp = min + offset;
+    if (offset === 0) assert.equal(b.previewRelay().stand.falls, 'possible');
     b.retreat();
     assert.deepEqual(b.summary().rescues, [{ retreated: 'fairy', incoming: 'red_dragon', lethal: offset === 0 }]);
   }

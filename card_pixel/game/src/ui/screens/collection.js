@@ -7,44 +7,27 @@ import { RELICS } from '../../content/relics.js';
 import { episodePages, episodeState } from '../../engine/episodes.js';
 import { GRADE } from '../../engine/roster.js';
 import { appearanceRegions, knownCompanions, missionsView, unrecruitedCompanions } from '../../engine/meta.js';
-import { restoreProfile } from '../../engine/save.js';
 import { EPISODE, TERMS } from '../glossary.js';
-import { backupSlots, LAST_GOOD_KEY, SESSION_KEY, storage } from '../storage.js';
 import { outcomeText, storyLine } from '../story-lines.js';
 import { josa } from '../text.js';
 
-export function saveEpisodeFlags(profile, field, ids) {
+// `write` is the session store's saveEpisodeFlags. It must be the store this tab already loaded: a second store
+// would bump the revision behind the tab's back and make the tab look stale to itself.
+export function saveEpisodeFlags(profile, field, ids, write) {
   if (!ids.length) return true;
   const flags = Object.fromEntries(ids.map(id => [id, true]));
-  const ui = (profile.ui ??= {});
-  ui[field] = { ...ui[field], ...flags };
-  const slots = backupSlots(storage);
   try {
-    const slot = slots.active();
-    const runs = profile.records.appliedRuns;
-    // Patch only these UI flags so an active expedition keeps its serialized checkpoint.
-    function write(key) {
-      const session = JSON.parse(slots.read(slot, key));
-      const saved = restoreProfile(session?.profile);
-      const applied = saved?.records.appliedRuns;
-      if (applied?.length !== runs.length || !runs.every((id, index) => applied[index] === id)
-        || !ids.every(id => saved.recruits[id]?.since === profile.recruits[id]?.since)) return false;
-      const savedUi = (session.profile.ui ??= {});
-      savedUi[field] = { ...savedUi[field], ...flags };
-      slots.write(slot, key, JSON.stringify(session));
-      return true;
-    }
-    if (!write(SESSION_KEY)) return false;
-    try { write(LAST_GOOD_KEY); } catch { /* Keep the primary save. */ }
+    if (!write(profile, field, flags)?.ok) return false;
+    const ui = (profile.ui ??= {});
+    ui[field] = { ...ui[field], ...flags };
     return true;
   } catch { return false; }
 }
 
-function readEpisode(sheets, profile, id) {
+async function readEpisode(sheets, profile, id, saveFlags) {
   const { title, appearance, voice, body } = EPISODES[id];
   const pages = episodePages(body);
-  const saved = episodeState(profile, id) === 'read' || saveEpisodeFlags(profile, 'episodesRead', [id]);
-  if (!Object.keys(EPISODES).some(other => episodeState(profile, other) === 'new')) $('#meta-episode-badge')?.remove();
+  const saved = episodeState(profile, id) === 'read' || saveFlags('episodesRead', [id]);
   sheets.openSheet(title, `<div class="episode-reader">
     <div class="episode-scroll">
       ${appearance || voice ? `<details class="episode-notes">
@@ -54,7 +37,7 @@ function readEpisode(sheets, profile, id) {
       </details>` : ''}
       <div class="episode-page" tabindex="0"></div>
     </div>
-    ${saved ? '' : `<p role="status">${EPISODE.saveFailed}</p>`}
+    <p class="episode-save-status" role="status" hidden></p>
     <div class="episode-controls">
       <button class="btn" type="button" id="episode-prev">${EPISODE.previous}</button>
       <span class="episode-count" role="status"></span>
@@ -81,6 +64,11 @@ function readEpisode(sheets, profile, id) {
   previous.addEventListener('click', () => { index--; showPage(); });
   next.addEventListener('click', () => { index++; showPage(); });
   showPage();
+  if (!await saved && reader.isConnected) {
+    const status = $('.episode-save-status', reader);
+    status.textContent = EPISODE.saveFailed;
+    status.hidden = false;
+  }
 }
 
 function historyList(profile, id, card) {
@@ -128,7 +116,7 @@ export function rosterTable({ dungeon, pool, profile, widgets, sheets, inspect }
   companionGrid(grid, { ids, pool, profile, seen, widgets, select: inspect });
 }
 
-export function companionSheet({ core, roster, widgets, sheets, profile, id, openDestination, openMission }) {
+export function companionSheet({ core, roster, widgets, sheets, profile, id, openDestination, openMission, saveFlags }) {
   const { card, sprite } = widgets;
   const character = card(id);
   if (!character) return;
@@ -169,7 +157,7 @@ export function companionSheet({ core, roster, widgets, sheets, profile, id, ope
   `);
   $('[data-companion-depart]', $('#sh-body'))?.addEventListener('click', () => openDestination(destination));
   $('#meta-companion-mission')?.addEventListener('click', () => openMission(mission));
-  if (episode === 'new' || episode === 'read') $('#meta-episode').addEventListener('click', () => readEpisode(sheets, profile, id));
+  if (episode === 'new' || episode === 'read') $('#meta-episode').addEventListener('click', () => readEpisode(sheets, profile, id, saveFlags));
 }
 
 export function collectionScreen(node, { profile, roster, widgets, core, inspect }) {

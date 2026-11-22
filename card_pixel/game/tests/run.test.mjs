@@ -1540,6 +1540,43 @@ test('the floor-3 promise charges once, survives reload and grants the disclosed
   assert.equal(granted.relics.filter(id => id === offer.relic).length, 1);
 });
 
+test('Ember seed 1063355 reserves the promised relic on floor 5 and preserves already saved offers', () => {
+  function floor5Save() {
+    let saved;
+    simulateRun(ember, 1063355, {
+      relicDoors: true,
+      doorOverride(run) {
+        if (run.floor === 3) return run.doors.find(door => door.event?.id === 'kept_chest');
+        if (run.floor === 5) saved = Save.serializeRun(run);
+      },
+      serviceOverride(run) {
+        if (run.room.event?.id !== 'kept_chest') return false;
+        ok(Run.chooseEvent(run, 'deposit'));
+        return true;
+      }
+    });
+    assert.ok(saved);
+    return saved;
+  }
+
+  const saved = floor5Save();
+  assert.equal(floor5Save(), saved);
+  const snapshot = JSON.parse(saved);
+  const { doors } = snapshot.run;
+  const promise = doors.find(door => door.promiseId);
+  const treasure = doors.find(door => door.type === 'treasure');
+  assert.equal(promise.relic, 'double_attack');
+  assert.ok(treasure.relic);
+  assert.notEqual(treasure.relic, promise.relic);
+
+  assert.deepEqual(Save.restoreRun(saved, { core, roster }).doors, doors);
+  treasure.relic = promise.relic; // Floor-5 doors saved before the reservation fix.
+  const old = Save.restoreRun(snapshot, { core, roster });
+  assert.deepEqual(old.doors, doors);
+  enter(old, treasure.index);
+  assert.equal(ok(Run.takeTreasure(old)).relic.id, promise.relic);
+});
+
 test('the promise relic uses the existing free replacement flow when the rack is full', () => {
   const { run, offer } = takePromiseToFloor5();
   run.relics = Object.keys(RELICS).filter(id => id !== offer.relic).slice(0, 4);

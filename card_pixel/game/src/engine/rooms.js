@@ -67,7 +67,7 @@ const CONDITIONAL_DOOR_RELICS = new Set(['reverse', 'buff_overload', 'over_flame
 const DOOR_RELIC_WEIGHT = { fits: 2, combo: 6, conditional: 9 };
 
 function relicOffer(run, roster, { comboDoor = false, exclude = [] } = {}) {
-  const reserved = run.floor < run.promise?.floor ? run.promise.relic : null;
+  const reserved = run.floor <= run.promise?.floor ? run.promise.relic : null;
   const available = Object.keys(RELICS).filter(id => id !== reserved && !run.relics.includes(id) && !exclude.includes(id));
   const fits = available.filter(id => fitsRelic(run, roster, RELICS[id].fits));
   const offers = comboDoor ? available.flatMap(id => {

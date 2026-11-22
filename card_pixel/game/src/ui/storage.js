@@ -23,6 +23,7 @@ export function backupSlots(adapter) {
     active,
     read: (slot, key) => raw.getItem(alternateKey(slot, key)),
     write,
+    affectsSession: (changed, key) => changed === null || changed === POINTER || changed === key || changed === alternateKey('b', key),
     activate(slot) {
       if (raw.setItem(POINTER, slot) === false) throw new Error('Storage write failed');
     },
@@ -60,3 +61,10 @@ export const storage = slotStorage({
     window.localStorage.removeItem(key);
   }
 });
+
+export function withSessionWrite(write) {
+  // Keep the revision check and both copies in one cross-tab critical section. Browsers without Web Locks
+  // (older Safari, insecure contexts) still save: the revision check alone then refuses a stale tab.
+  const locks = globalThis.navigator?.locks;
+  return locks?.request ? locks.request(SESSION_KEY, write) : Promise.resolve().then(write);
+}

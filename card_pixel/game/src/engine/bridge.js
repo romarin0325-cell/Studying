@@ -939,6 +939,20 @@ export function create(core, opts) {
     const effects = (strongest?.effects || []).filter(effect => effect.type !== 'random_mult');
     return { type: 'mag', name: REGIONS.tide_cycle.hit, val: powerRoll * 2.5, effects, strong: true };
   }
+  function enemyMultiplierRange(action, enemy) {
+    if (!action.effects?.some(effect => effect.type === 'random_mult')) {
+      const power = original.multiplier.call(Logic, action, enemy);
+      return [power, power];
+    }
+    // Probe the core's multiplier at both ends without advancing either RNG.
+    const saved = Math.random;
+    try {
+      Math.random = () => 0;
+      const low = original.multiplier.call(Logic, action, enemy);
+      Math.random = () => 1 - Number.EPSILON;
+      return [low, original.multiplier.call(Logic, action, enemy)];
+    } finally { Math.random = saved; }
+  }
   function enemyHitPreview(action, target, mayHitEnemy) {
     const b = host.battle, enemy = b.enemy;
     const es = Logic.calculateStats(enemy, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
@@ -946,26 +960,25 @@ export function create(core, opts) {
     const physical = action.type === 'phy';
     const ward = physical ? 'barrier' : 'magic_guard';
     const preventedBy = ts.evasion >= 100 ? 'evasion' : target.buffs[ward] ? ward : null;
-    // Telegraphs give damage on hit. An active evasion buff also gives a miss branch in the relay forecast.
-    const canEvade = !!target.buffs.evasion && ts.evasion > 0;
+    // Keep the on-hit damage used by the telegraph and rescue contract.
+    const evadeChance = preventedBy ? 0 : Math.max(0, ts.evasion);
     const val = physical ? es.atk : es.matk;
     const def = physical ? ts.def : ts.mdef;
-    const random = (action.effects || []).find(e => e.type === 'random_mult');
-    let lo = Number.isFinite(action.val) ? action.val : 1, hi = lo;
-    if (random) { lo = random.min; hi = lo + Math.ceil(random.max - lo); }
+    const [lo, hi] = enemyMultiplierRange(action, enemy);
     const reduce = 1 - StatusRules.damageReduction(target).rate;
     const hit = m => preventedBy ? 0 : Math.floor(val * m * (100 / (100 + def)) * reduce);
     const hitPower = retaliationPower(action, enemy);
-    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy, canEvade };
+    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy, evadeChance };
     const met = enemy.tookDamageThisTurn ? true : mayHitEnemy ? null : false;
     const otherwise = hit(lo), whenMet = hit(hitPower);
-    const range = [met === true ? whenMet : otherwise, met === false ? otherwise : whenMet];
-    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy, canEvade };
+    const range = met === true ? [whenMet, whenMet] : met === false ? [otherwise, hit(hi)]
+      : [Math.min(otherwise, whenMet), Math.max(hit(hi), whenMet)];
+    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy, evadeChance };
   }
   function enemyResponse({ action: a, intentRule }, target, mayHitEnemy) {
     const stunned = !!host.battle.enemy.buffs.stun;
     const attack = !stunned && !a.isChargeStart && isAttack(a);
-    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null };
+    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null, evadeChance: 0 };
     const preventedBy = stunned ? 'stun' : hit.preventedBy;
     const resourceEffect = intentRule === 'mana_drain' ? {
       kind: 'mp', mode: a.drainFlat ? 'flat' : 'all',
@@ -1249,23 +1262,26 @@ export function create(core, opts) {
   function canRetreat() {
     return B.awaiting && !B.retreatUsed && !B.outcome && !!nextAlly();
   }
-  function relayHit(target, mayHitEnemy) {
-    const { range, canEvade, resourceEffect } = enemyResponse(B.intentCache, target, mayHitEnemy);
-    return { min: canEvade ? 0 : Math.min(...range), max: Math.max(...range), resourceEffect };
-  }
   function previewRelay() {
     // settle() has already chosen this enemy's action before exposing an awaiting turn.
     const player = B.awaiting && !B.outcome ? currentPlayer() : null;
-    const hit = player && relayHit(player, true);
-    const danger = !hit || hit.max < player.hp ? 'none' : hit.min >= player.hp ? 'certain' : 'possible';
+    const hit = player && enemyResponse(B.intentCache, player, true);
+    const lethalOnHit = !!hit && hit.range[0] >= player.hp;
+    const danger = !hit || hit.range[1] < player.hp ? 'none' : lethalOnHit && !hit.evadeChance ? 'certain' : 'possible';
     const handoff = danger !== 'none' ? inheritance(player) : null;
     const held = handoff?.heir.skills.find(skill => skill.heirloom);
     const next = player && !B.retreatUsed ? nextAlly(player) : null;
     const retreat = { available: !!next, next: null };
     if (next) {
-      const { min, max, resourceEffect } = relayHit(next, false);
-      retreat.next = { id: next.id, name: next.name, hp: next.hp, hpAfter: [Math.max(0, next.hp - max), Math.max(0, next.hp - min)] };
-      if (resourceEffect && !resourceEffect.preventedBy) retreat.next.mpAfter = resourceEffect.after;
+      const { range: [min, max], evadeChance, resourceEffect } = enemyResponse(B.intentCache, next, false);
+      const hpAfter = [Math.max(0, next.hp - max), Math.max(0, next.hp - min)];
+      retreat.next = { id: next.id, name: next.name, hp: next.hp, hpAfter };
+      if (evadeChance && max > 0) retreat.next.evadeHp = next.hp;
+      if (resourceEffect && !resourceEffect.preventedBy) {
+        retreat.next.mpBefore = resourceEffect.before;
+        retreat.next.mpAfter = resourceEffect.after;
+        if (evadeChance) retreat.next.mpOnHit = true;
+      }
       const reserves = host.battle.delayedEffects.filter(effect => effect.source === player).map(effect => effect.skill.name);
       if (reserves.length) retreat.cancelsReserve = [...new Set(reserves)];
     }
@@ -1273,6 +1289,7 @@ export function create(core, opts) {
       danger, retreat,
       stand: {
         falls: danger === 'none' ? 'no' : danger,
+        ...(danger === 'possible' && hit.evadeChance && { evadeChance: hit.evadeChance, lethalOnHit }),
         inheritor: handoff ? { id: handoff.heir.id, name: handoff.heir.name } : null,
         heirloom: handoff ? { skill: handoff.skill.name, from: player.id } : null,
         replaces: held ? { skill: held.name } : null

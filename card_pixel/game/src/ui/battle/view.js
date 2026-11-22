@@ -1,5 +1,7 @@
 import { $, esc, show } from '../dom.js';
-import { foeFlip, formatMultiplier, hasFinalConsonant, logButton, traitText, TYPE } from '../widgets.js';
+import { foeFlip, formatMultiplier, logButton, traitText, TYPE } from '../widgets.js';
+import { josa } from '../text.js';
+import { retreatStoryLine } from '../story-lines.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { TERMS } from '../glossary.js';
 import { POSITION } from '../../engine/roster.js';
@@ -65,6 +67,17 @@ export function contractSettlement(floor, contract) {
       (contract.escrowed || CONTRACT_ESCROW) + ' 사라짐</p>');
   }
   return rows;
+}
+
+export function battleFailure(run) {
+  const result = run.lastBattleResult;
+  if (run.result === 'win' || (run.result !== 'lose' && result?.outcome !== 'lose')) return null;
+  // An intro retry keeps the fallen fighters in the roster for the new attempt.
+  const alive = run.bench.filter(id => !result?.fallenIds.includes(id));
+  if (result?.wiped || !alive.length) return { title: '전멸', subtitle: '꿈길이 끊겼다', survivors: [] };
+  const fielded = (result?.survivorIds ?? []).filter(id => alive.includes(id));
+  const survivors = [...fielded, ...alive.filter(id => !fielded.includes(id))];
+  return { title: '원정 실패', subtitle: `살아남은 동료 ${survivors.length}명`, survivors };
 }
 
 export function battleMarkup() {
@@ -229,6 +242,16 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   $('#party').addEventListener('click', ev => { const p = ev.target.closest('.pm[data-i]'); if (p && B.D) { sfx.tap(); allySheet(Number(p.dataset.i)); } });
   syncBattleSpeed(St);
   const currentLog = () => B.bridge ? battleLog(B.all.slice(0, B.played), B.party, B.door.enemies) : run?.lastBattleLog;
+  function completeLog() {
+    const log = battleLog(B.all, B.party, B.door.enemies);
+    const retreat = B.all.find(event => event.t === 'retreat');
+    if (retreat) {
+      // Keep the roster identity for the chronicle even when the fighter retreated in another form.
+      const row = log.flatMap(turn => turn.rows).find(row => row.kind === 'retreat');
+      row.faces[0].id = B.party[retreat.who.idx];
+    }
+    return log;
+  }
   function showLog() {
     sfx.tap();
     openBattleLog(sheets, widgets, $('#result').classList.contains('on') ? run.lastBattleLog : currentLog());
@@ -564,11 +587,12 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     plate.remove();
     B.finishNumber?.remove();
   }
-  async function defeat() {
+  async function defeat({ title, subtitle }) {
     outcomeCue('defeat', sfx.lose);
     showIntent(null); tween(S, { dark: 0.6 }, 0.6);
-    const b = St.banner('전멸', '꿈길이 끊겼다', 'ult big');
+    const b = St.banner(title, subtitle, 'ult big');
     await wait(1.4); b.remove();
+    B.finishNumber?.remove();
   }
 
   /* ---------- the event player ---------- */
@@ -612,8 +636,14 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         if (['strong', 'boss'].includes(e.intent?.salience) || !e.intent?.salience && e.countdown?.inTurns <= 1) warnEnemy();
         showRegion(e); renderReady();
         break;
-      case 'win': await settlePending(); await victory(); break;
-      case 'lose': await settlePending(); await defeat(); break;
+      case 'win':
+      case 'lose': {
+        await settlePending();
+        const failure = battleFailure(run);
+        if (failure) await defeat(failure);
+        else if (e.t === 'win') await victory();
+        break;
+      }
     }
   }
   function resyncBattle(events) {
@@ -645,7 +675,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       ticker('');
     }
     B.all = B.all.concat(events);
-    if (events.some(e => e.t === 'win')) {
+    // The bridge resolves the entire command synchronously. Persist its complete log before replaying any of it.
+    const settlement = bridge.outcome ? await onResult(bridge.summary(), completeLog()) : null;
+    if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
+    if (bridge.outcome === 'win') {
       B.finalHit = events.findLast(e => e.t === 'hp' && e.who?.side === 'enemy' &&
         e.who.idx === B.door.enemies.length - 1 && e.delta < 0 && e.amount > 0 && (e.s?.enemy?.hp ?? 0) === 0);
     }
@@ -686,8 +719,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       }
     }
     if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
-    if (bridge.outcome) finishBattle();
-    else if (bridge.awaiting) B.onReady?.(B);
+    if (settlement?.ok) {
+      showResult(onContinue, onDecision, false);
+      B.onReady?.(B);
+    } else if (bridge.awaiting) B.onReady?.(B);
   }
 
   /* ---------- battle in and out ---------- */
@@ -739,14 +774,6 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     }
     play(events);
   }
-  function finishBattle() {
-    const res = onResult(B.bridge.summary(), currentLog());
-    if (res?.ok) {
-      showResult(onContinue, onDecision, false);
-      B.onReady?.(B);
-    }
-  }
-
   function showResult(advance, decision, restored) {
     const result = run.lastBattleResult ?? {
       floor: run.floor, roomType: run.room.type, outcome: run.result ?? 'win', wiped: false,
@@ -754,20 +781,28 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       rewardDelta: { crystals: 0, relicIds: run.lastBattleRelic ? [run.lastBattleRelic] : [] }
     };
     const { floor, roomType, outcome, wiped, fallenIds, survivorIds, transfers, rewardDelta } = result;
-    const won = outcome === 'win';
+    const failure = battleFailure(run);
+    const won = outcome === 'win' && !failure;
     const final = roomType === 'boss' || run.room.final;
     const retry = run.phase === 'result' && run.result === null;
     const name = id => card(id)?.name ?? id;
     const rows = [];
     if (fallenIds.length) {
       const list = fallenIds.map(name).join('·');
-      rows.push('<p class="result-fallen">' + esc(list + (hasFinalConsonant(list) ? '이' : '가') + ' 쓰러졌습니다.') + '</p>');
+      rows.push('<p class="result-fallen">' + esc(josa(list, '이/가') + ' 쓰러졌습니다.') + '</p>');
     }
+    if (failure?.survivors.length) {
+      const [first, ...others] = failure.survivors;
+      const lead = card(first)?.name ?? '동료';
+      rows.push('<p class="result-return">' + esc(lead + (others.length ? ` 외 ${others.length}명` : '') + ' 생존') + '</p>');
+    }
+    const retreat = retreatStoryLine(run, card);
+    if (retreat) rows.push('<p class="result-retreat">' + esc(retreat) + '</p>');
     if (transfers.length) {
       const lines = transfers.map(({ toId, skillName }) => {
-        const target = name(toId);
-        return '<p data-coach="heirloom-transfer">' + esc(target + (hasFinalConsonant(target) ? '이 ' : '가 ')) +
-          '<b>' + esc(skillName) + '</b>' + (hasFinalConsonant(skillName) ? '을' : '를') + ' 물려받았습니다.</p>';
+        const skill = esc(skillName);
+        return '<p data-coach="heirloom-transfer">' + esc(josa(name(toId), '이/가')) + ' <b>' + skill + '</b>' +
+          esc(josa(skillName, '을/를').slice(skillName.length)) + ' 물려받았습니다.</p>';
       });
       rows.push('<div class="heirline"><span class="run-face">' + face(transfers[0].toId, 40) + '</span>' +
         '<div>' + lines.join('') + '</div></div>');
@@ -785,20 +820,20 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const wager = (run.lastBattleLog?.at(-1)?.rows ?? []).find(row => row.kind === 'wager');
     if (run.features?.bets !== false && wager) rows.push('<p>' + esc(wager.text) + '</p>');
     if (won && wiped && final) rows.push('<p class="result-return">보스 격파 · 돌아온 동료 0명</p>');
-    else if (won && wiped) rows.push('<p>돌아온 동료가 없어 원정이 끝났습니다.</p>');
+    else if (outcome === 'win' && wiped) rows.push('<p>전투에서 이겼습니다. 돌아온 동료가 없어 원정이 끝났습니다.</p>');
 
     let label = (floor + 1) + '층으로';
     if (retry) label = '편성 바꿔 재도전';
     else if (run.result && !run.pending) {
       const rewards = R.runRewards(run);
-      label = run.daily ? '균열 기록 보기' : rewards.recruitable.length ? '영입할 동료 고르기' :
+      label = run.daily ? '균열 기록 보기' : won && rewards.recruitable.length ? '영입할 동료 고르기' :
         rewards.shardCandidates.length ? '다음 원정 후보 고르기' : '관측소로';
     } else if (roomType === 'borrowed') label = '다음 동료 고르기';
     else if (run.pending?.kind === 'reinforcement') label = '동료 보충하기';
     else if (run.pending?.kind === 'gate') label = '문지기 보상 고르기';
     else if (run.pending?.kind === 'relic') label = '유물 보상 고르기';
 
-    const title = won ? (run.daily ? '균열' : DUNGEONS[run.dungeonId].name) + ' ' + floor + '층 돌파' : '전멸';
+    const title = failure?.title ?? (run.daily ? '균열' : DUNGEONS[run.dungeonId].name) + ' ' + floor + '층 돌파';
     const box = $('#result-in');
     box.innerHTML = '<header class="result-heading ' + (won ? 'won' : 'lost') + '"><h3>' + esc(title) + '</h3>' +
       logButton('id="b-result-log"') + '</header>' + rows.join('') +

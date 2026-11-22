@@ -94,6 +94,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 @keyframes sparkle { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
 .flash { position: absolute; inset: 0; pointer-events: none; z-index: 7; animation: flash .7s steps(6) forwards; }
 .flash.gold { background: #fff4cc; } .flash.violet { background: #e6dcff; }
+.meta-no-flash .flash { display: none; }
 @keyframes flash { from { opacity: .7; } to { opacity: 0; } }
 
 /* ---------- expedition screens ---------- */

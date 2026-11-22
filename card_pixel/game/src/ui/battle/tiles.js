@@ -1,6 +1,6 @@
 import { $, $$, esc } from '../dom.js';
 import { TYPE, formatRange as damageRange, skillText, traitText } from '../widgets.js';
-import { josa } from '../text.js';
+import { josa, keepSeparators } from '../text.js';
 import { relicEffect, relicMarks } from '../relics.js';
 import { FIELD } from './hud.js';
 import { skillFields } from './fields.js';
@@ -13,6 +13,29 @@ export function killLabel(preview, hp) {
   if (!preview || preview.delayed || hp <= 0) return '';
   if (preview.kill && (preview.min ?? preview.dmg) >= hp) return '처치';
   return (preview.max ?? preview.dmg) >= hp ? '명중 시 처치' : '';
+}
+
+function retreatAction(intent) {
+  return intent.dmg ? '다음 동료가 공격 대상' : '다음 동료 출전 · 적 ' + intent.name;
+}
+
+function retreatHp(next) {
+  const miss = next.evadeHp == null ? '' : ' · 회피 시 ' + next.evadeHp;
+  return next.name + ' HP ' + next.hp + ' → ' + damageRange(next.hpAfter) + miss;
+}
+
+export function relayOutcomeLines({ danger, retreat: { next }, stand }, current, intent) {
+  let hp = retreatHp(next);
+  if (next.mpAfter != null) hp += (next.mpOnHit ? ' · 명중 시 MP ' : ' · MP ') + next.mpBefore + ' → ' + next.mpAfter;
+  if (danger === 'none') return [current.name + ' 생존 · ' + retreatAction(intent), hp];
+
+  const falls = stand.lethalOnHit ? '쓰러짐' : stand.falls === 'certain' ? '명중 시 쓰러짐' : '쓰러질 수 있음';
+  let stay = '남으면 ' + falls;
+  if (stand.heirloom) stay += ' → ' + josa(stand.inheritor.name, '이/가') + ' ' + stand.heirloom.skill + ' 계승';
+  else stay += ' · 계승 없음';
+  if (stand.replaces) stay += ' (기존 ' + stand.replaces.skill + ' 대신)';
+  if (stand.evadeChance) stay += ' · 회피 ' + stand.evadeChance + '%';
+  return ['물러나면 ' + hp, stay];
 }
 
 export function commandRelics(artifacts, option, actor, { enemy, turn }) {
@@ -115,8 +138,8 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     const next = allies.find(ally => ally?.form === rescue.incomingId);
     const actorId = stand.actorId ?? current.form ?? B.party[B.D.cur];
     const heirloom = heirloomSkill(card(actorId));
-    const retreatHp = next && rescue.incomingHpAfter != null
-      ? next.name + ' HP ' + next.hp + ' → ' + damageRange(rescue.incomingHpAfter) : '다음 동료가 출전';
+    const incoming = B.bridge.previewRelay().retreat.next;
+    const hpLine = incoming ? retreatHp(incoming) : '다음 동료가 출전';
     const inheritance = next && heirloom ? '쓰러지면 ' + josa(next.name, '이/가') + ' ' +
       josa(heirloom.name, '을/를') + ' 계승' : '쓰러지면 다음 동료에게 유품 계승';
     const relay = allies.filter(ally => ally && !ally.dead && !ally.out).map(ally => {
@@ -131,7 +154,7 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     }).join('<span class="opening-relay-chevron" aria-hidden="true">›</span>');
     $('#opening-face').innerHTML = '<b class="opening-relay-label">' + TERMS.relayOrder.short + '</b>' + relay;
     $('#acts').innerHTML = '<button class="act opening-choice rescue" data-opening-rescue data-coach="retreat"><b>' + TERMS.retreat.short +
-      '</b><small>' + esc(current.name + ' 생존 · ' + TERMS.retreat.detail) + '</small><small>' + esc(retreatHp) + '</small></button>' +
+      '</b><small>' + esc(current.name + ' 생존 · ' + retreatAction(B.intent)) + '</small><small>' + keepSeparators(esc(hpLine)) + '</small></button>' +
       '<button class="act opening-choice stand" data-coach="skill" data-i="' + stand.optionIndex + '"><b>' + esc(josa(current.name, '으로/로')) +
       ' 마지막 공격</b><small>' + esc(inheritance) + '</small><small>' + esc(B.D.enemy.name) + '에 피해 ' +
       esc(damageRange(stand.damageRange)) + '</small></button>';
@@ -197,20 +220,12 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     } else { h.className = ''; h.innerHTML = ''; h.disabled = true; delete h.dataset.i; }
     const r = $('#b-retreat'), can = B.bridge.canRetreat();
     B.armed = false; r.className = ''; r.disabled = !can;
-    const retreatPreview = can ? B.bridge.previewRetreat() : null;
+    const next = can ? B.bridge.previewRelay().retreat.next : null;
     r.innerHTML = '↩ ' + TERMS.retreat.short + '<small>' +
-      (can ? esc(D.allies[D.cur].name + ' 생존 · ' + retreatAction(retreatPreview)) :
+      (can ? esc(D.allies[D.cur].name + ' 생존 · ' + retreatAction(B.intent)) :
         B.bridge.retreatUsed ? '사용 완료' : '교대할 동료 없음') + '</small>' +
-      (can ? '<small>' + esc(retreatHp(retreatPreview)) + '</small>' : '');
+      (can ? '<small>' + keepSeparators(esc(retreatHp(next))) + '</small>' : '');
     restoreActionFocus();
-  }
-  function retreatAction(preview) {
-    return preview.intent.dmg ? TERMS.retreat.detail : '다음 동료 출전 · 적 ' + preview.intent.name;
-  }
-  function retreatHp(preview) {
-    const next = B.D.allies[preview.next.idx];
-    const hp = preview.dmg.map(damage => Math.max(0, next.hp - damage)).reverse();
-    return next.name + ' HP ' + next.hp + ' → ' + damageRange(hp);
   }
   function lockPanel() {
     const active = document.activeElement;
@@ -324,33 +339,16 @@ export function createTiles({ core, widgets, audio, sheets, B, foeDef, play, tic
     if (B.busy || !B.bridge.canRetreat()) return;
     const r = $('#b-retreat');
     if (!B.armed) {
-      const { danger, retreat: forecast, stand } = B.bridge.previewRelay();
+      const preview = B.bridge.previewRelay();
       const current = B.D.allies[B.D.cur];
-      const pending = forecast.cancelsReserve;
+      const { next, cancelsReserve: pending } = preview.retreat;
       const warning = pending ? '예약한 ' + pending.join('·') + ' 취소됨' : '';
-      let retreatLine, standLine;
+      const lines = relayOutcomeLines(preview, current, B.intent);
       B.armed = true;
       r.classList.add('armed');
-      if (danger === 'none') {
-        const preview = B.bridge.previewRetreat();
-        const effect = preview.intent.resourceEffect;
-        const mp = effect?.kind === 'mp' && !effect.preventedBy ? ' · MP ' + effect.before + ' → ' + effect.after : '';
-        retreatLine = current.name + ' 생존 · ' + retreatAction(preview);
-        standLine = retreatHp(preview) + mp;
-      } else {
-        const { next } = forecast;
-        retreatLine = '물러나면 · ' + next.name + ' HP ' + next.hp + ' → ' + damageRange(next.hpAfter);
-        if (next.mpAfter != null) {
-          const before = B.D.allies[B.party.indexOf(next.id)].mp;
-          retreatLine += ' · MP ' + before + ' → ' + next.mpAfter;
-        }
-        standLine = '남으면 · ' + current.name + (stand.falls === 'certain' ? ' 쓰러짐' : ' 쓰러질 수 있음');
-        if (stand.heirloom) standLine += ' → ' + josa(stand.inheritor.name, '이/가') + ' ' + stand.heirloom.skill + ' 계승';
-        else standLine += ' · 물려받을 동료 없음';
-        if (stand.replaces) standLine += ' (기존 ' + stand.replaces.skill + ' 대신)';
-        r.classList.add('relay-outcomes');
-      }
-      r.innerHTML = TERMS.retreat.short + ' 확정<small>' + esc(retreatLine) + '</small><small>' + esc(standLine) + '</small>';
+      if (preview.danger !== 'none' || next.evadeHp != null || next.mpOnHit) r.classList.add('relay-outcomes');
+      r.innerHTML = TERMS.retreat.short + ' 확정' +
+        lines.map(line => '<small>' + keepSeparators(esc(line)) + '</small>').join('');
       // With large text the command panel scrolls; keep the armed row with both outcomes fully in view.
       r.scrollIntoView({ block: 'nearest' });
       $('#tally').innerHTML = '';

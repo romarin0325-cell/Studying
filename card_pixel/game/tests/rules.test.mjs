@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 // Share Math so the ESM bridge can seed the card core inside the VM.
 import * as Bridge from '../src/engine/bridge.js';
 import * as RelayRoster from '../src/engine/roster.js';
+import { allowsSummonFlash } from '../src/ui/reveal.js';
 import { skillText, traitText } from '../src/ui/widgets.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
@@ -27,6 +28,13 @@ const brute = over => dummy(Object.assign({ stats: { hp: 99999, atk: 5000, matk:
 const battle = opts => Bridge.create(core, Object.assign({ party: ['red_dragon', 'ash', 'luna'], enemies: [dummy()], seed: 7 }, opts));
 const last = (events, t) => events.filter(e => e.t === t).pop();
 const plain = v => JSON.parse(JSON.stringify(v));   // objects from the vm realm compared as plain data
+
+test('summon flash requires both the app setting and unrestricted OS motion', () => {
+  assert.equal(allowsSummonFlash(true, false), true);
+  assert.equal(allowsSummonFlash(true, true), false);
+  assert.equal(allowsSummonFlash(false, false), false);
+  assert.equal(allowsSummonFlash(false, true), false);
+});
 
 test('E heirloom: the fallen fighter\'s strongest attack goes to the next one, free and at 1.5x', () => {
   const b = battle({ enemies: [brute()] });
