@@ -301,6 +301,7 @@
 .meta-prep [data-difficulty] { flex: 1 1 0; }
 .meta-prep-lead { display: flex; gap: 8px; align-items: center; min-height: 44px; }
 #sheet .meta-prep-lead .btn { width: auto; margin-left: auto; }
+#sheet .meta-prep-lead [data-goal-focus]:focus { outline: 3px solid var(--aqua); outline-offset: 2px; }
 #meta-prep-summary { font-weight: 700; margin-block: 8px; }
 #meta-region-rule, #meta-find-invites { margin-block: 6px; }
 .meta-prep .meta-prep-pool {

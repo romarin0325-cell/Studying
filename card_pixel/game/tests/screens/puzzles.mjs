@@ -6,9 +6,10 @@ import * as Run from '../../src/engine/run.js';
 import { dreamClearProfile } from './goals.mjs';
 
 // Use the same decisions for every starting order. The bot reads the options available that turn.
-export function playPuzzleFight(run, core, order = Run.defaultParty(run), allow = () => true) {
+export function settlePuzzleFight(run, core, order = Run.defaultParty(run), allow = () => true) {
   assert.equal(Run.confirmOrder(run, order).ok, true);
-  const battle = Bridge.create(core, Run.battleOptions(run));
+  const options = Run.battleOptions(run);
+  const battle = Bridge.create(core, options);
   let events = battle.start();
   let defended = false;
   const actions = [];
@@ -40,8 +41,25 @@ export function playPuzzleFight(run, core, order = Run.defaultParty(run), allow 
   assert.ok(battle.outcome, 'The fixed fight must finish');
   const summary = battle.summary();
   assert.equal(Run.settleBattle(run, summary).ok, true);
+  return { summary, actions, battleSeed: options.seed };
+}
+
+export function playPuzzleFight(run, core, order, allow) {
+  const fight = settlePuzzleFight(run, core, order, allow);
   assert.equal(Run.confirmResult(run).ok, true);
-  return { summary, actions };
+  return fight;
+}
+
+export function advanceFirstRiftFight(run, core) {
+  assert.equal(Run.enterBattleDoor(run, { floor: 1, index: 0, partyIds: Run.defaultParty(run) }).ok, true);
+  const battle = Bridge.create(core, Run.battleOptions(run));
+  battle.start();
+  for (const index of [3, 3, 3, 0]) battle.act(index);
+  assert.equal(battle.outcome, 'win');
+  assert.equal(Run.settleBattle(run, battle.summary()).ok, true);
+  assert.equal(Run.leaveRoom(run).ok, true);
+  assert.equal(Run.nextFloor(run).ok, true);
+  assert.deepEqual([run.floor, run.phase, run.stats.turns], [2, 'map', 4]);
 }
 
 export function createPuzzleCases({ core, roster, dailyKey, storedSession, enterObservatory }) {
@@ -62,11 +80,11 @@ export function createPuzzleCases({ core, roster, dailyKey, storedSession, enter
 
   function fixtureStore() {
     const saved = new Map();
-    const store = DailyStore.create({
+    const storage = {
       getItem: key => saved.get(key) ?? null,
       setItem: (key, value) => saved.set(key, value)
-    }, { core, roster });
-    return { store, saved };
+    };
+    return { store: DailyStore.create(storage, { core, roster }), saved, storage };
   }
 
   function startFixture(store, endingId) {
@@ -77,8 +95,9 @@ export function createPuzzleCases({ core, roster, dailyKey, storedSession, enter
 
   function fightFixture(store, endingId) {
     const run = startFixture(store, endingId);
-    const { actions } = playPuzzleFight(run, core, order);
-    const { ok, reason, score } = store.finishPuzzle(run);
+    const { actions } = settlePuzzleFight(run, core, order);
+    const recorded = store.finishPuzzle(run);
+    const { ok, reason, score } = recorded;
     assert.equal(ok, true, reason);
     assert.deepEqual([score.outcome, score.goalMet, score.turns, score.survivors], ['win', endingId === heirloom.id, 24, 1]);
     if (endingId === heirloom.id) {
@@ -93,6 +112,8 @@ export function createPuzzleCases({ core, roster, dailyKey, storedSession, enter
         { kind: 'survive', target: 'hellhound', met: false, value: 'fallen' }
       ]);
     }
+    assert.equal(Run.confirmResult(run).ok, true);
+    assert.deepEqual(store.finishPuzzle(run), recorded);
     return actions;
   }
 
@@ -114,6 +135,12 @@ export function createPuzzleCases({ core, roster, dailyKey, storedSession, enter
           await page.locator(`#battle.on :is(#acts .act, #b-heir)[data-i="${index}"]`).click();
         }
         await page.evaluate(() => window.__game.settle());
+        const readLedger = () => page.evaluate(key => localStorage.getItem(key), dailyKey);
+        const recorded = await readLedger();
+        const { puzzleBests, days, active } = JSON.parse(recorded);
+        const endingBests = puzzleBests[puzzle.id];
+        assert.deepEqual([days, active, Object.keys(endingBests), endingBests[ending.id].turns],
+          [{}, null, [ending.id], 24]);
         await page.locator('#result.on #b-next').click();
         const result = page.locator('#daily-result.on');
         await text(result.locator('h1'), met ? '목표 달성' : '목표 미달성', { exact: true });
@@ -123,16 +150,66 @@ export function createPuzzleCases({ core, roster, dailyKey, storedSession, enter
           [...row.children].map(cell => cell.textContent).join('|'))), expected);
         await text(result.locator('.rift-puzzle-other'), `다른 결말 · ${other.title}`, { exact: true });
         assert.equal(await result.locator('.rift-stamp').count(), 0);
-        const ledger = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), dailyKey);
-        const endingBests = ledger.puzzleBests[puzzle.id];
-        assert.deepEqual([ledger.days, ledger.active, Object.keys(endingBests), endingBests[ending.id].turns],
-          [{}, null, [ending.id], 24]);
+        assert.equal(await readLedger(), recorded);
         await capture();
       }
     };
   }
 
   return {
+    'rift-stale-tab'() {
+      const now = [2026, 10, 21, 12];
+      const { store, saved, storage } = fixtureStore();
+      const { ok, reason, run } = store.start({
+        profile, now: new Date(...now), expectedDayKey: '2026-11-21', kind: 'official'
+      });
+      assert.equal(ok, true, reason);
+      const first = saved.get(dailyKey);
+      const second = DailyStore.create(storage, { core, roster });
+      const stale = second.resume().run;
+      advanceFirstRiftFight(run, core);
+      assert.deepEqual(store.save(run), { ok: true });
+      const latest = saved.get(dailyKey);
+      assert.equal(Run.enterBattleDoor(stale, { floor: 1, index: 0, partyIds: Run.defaultParty(stale) }).ok, true);
+      assert.deepEqual(second.save(stale), { ok: false, reason: 'stale_tab' });
+      assert.equal(saved.get(dailyKey), latest);
+
+      async function resumeRift(page) {
+        await enterObservatory(page);
+        await page.locator('#hub.on #meta-daily-rift').click();
+        await page.locator('#sheet.on #meta-rift-resume').click();
+      }
+
+      return {
+        session: storedSession({ profile }), daily: first, now, mute: true,
+        proof: 'A second tab saves floor two, so floor-one confirmation is refused and reload keeps four turns',
+        async show(page, { text, capture }) {
+          await resumeRift(page);
+          const enter = page.locator('#order.on #b-go');
+          await enter.waitFor();
+          const other = await page.context().newPage();
+          try {
+            await other.goto(page.url(), { waitUntil: 'domcontentloaded' });
+            await other.evaluate(({ key, checkpoint }) => localStorage.setItem(key, checkpoint), { key: dailyKey, checkpoint: latest });
+            await enter.click();
+            const notice = page.locator('#stale-session[open]');
+            await text(notice.locator('h3'), '다른 창에서 진행 중', { exact: true });
+            await text(notice.locator('button'), '이 창에서 이어하기', { exact: true });
+            assert.equal(await page.evaluate(key => localStorage.getItem(key), dailyKey), latest);
+            await capture(undefined, page, { duringBattle: true });
+            await Promise.all([page.waitForEvent('domcontentloaded'), notice.locator('button').click()]);
+            await resumeRift(page);
+            await page.locator('#map.on').waitFor();
+            assert.deepEqual(await page.evaluate(() => {
+              const { floor, phase, stats } = window.__game.run;
+              return [floor, phase, stats.turns];
+            }), [2, 'map', 4]);
+          } finally {
+            await other.close();
+          }
+        }
+      };
+    },
     'puzzles-list'() {
       const { store, saved } = fixtureStore();
       fightFixture(store, heirloom.id);

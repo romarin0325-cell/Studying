@@ -3,6 +3,29 @@ import { chooseDoor, chooseEvent } from '../../src/engine/run.js';
 import { cleanseLabel } from '../../src/ui/battle/log.js';
 import { playRun } from '../../tools/sim.mjs';
 
+export function beetleWarningFixture(snapshot) {
+  const commands = [];
+  let session, party, danger, weak;
+  playRun('ember_volcano', 7919, {
+    trace(run, wait, option) {
+      if (run.floor !== 1 || wait.s.turn > 3) return;
+      assert.equal(wait.s.enemy.form, 'wild_emerald_beetle');
+      if (wait.s.turn === 1) {
+        session = snapshot?.(run);
+        party = Array.from(run.room.party);
+        danger = wait;
+      }
+      if (wait.s.turn < 3) commands.push(option.index);
+      else weak = wait;
+    }
+  });
+  assert.deepEqual(commands, [1, 3]);
+  assert.deepEqual([danger.intent.salience, danger.countdown.name, danger.countdown.inTurns], ['ordinary', '껍질 돌진', 1]);
+  assert.deepEqual([weak.intent.name, weak.intent.power, weak.intent.salience], ['약공', 0.55, 'ordinary']);
+  assert.deepEqual([weak.countdown.name, weak.countdown.inTurns], ['껍질 반격', 1]);
+  return { session, party, commands, danger, weak };
+}
+
 export function trenchCleanseFixture(snapshot) {
   const commands = [];
   let session, party, warning, cleanse;
@@ -34,6 +57,27 @@ export function trenchCleanseFixture(snapshot) {
 
 export function createFeedbackCases({ makeRun, storedSession, openBattle, battleIdle }) {
   return {
+    'access-danger-warning': () => {
+      const { session, party, commands, weak } = beetleWarningFixture(run => storedSession({ run }));
+      return {
+        session, settings: { sound: true, music: false },
+        proof: 'Ember 7919 floor 1: commands 1,3 leave a weak hit before shell counter without a strong warning',
+        async show(page, { text, capture }) {
+          await openBattle(page);
+          assert.deepEqual(await page.evaluate(() => window.__game.B.party), party);
+          for (const [offset, index] of commands.entries()) {
+            await page.locator(`#acts .act[data-i="${index}"]`).click();
+            await battleIdle(page);
+            if (offset === 0) {
+              assert.equal(await page.evaluate(() => window.__game.B.lastWarning), `${weak.enemyIndex}/${weak.s.turn - 1}`);
+            }
+          }
+          await text(page.locator('#intent'), weak.intent.name);
+          assert.notEqual(await page.evaluate(() => window.__game.B.lastWarning), `${weak.enemyIndex}/${weak.s.turn}`);
+          await capture();
+        }
+      };
+    },
     'access-cleanse-feedback': () => {
       const { session, party, commands: [first, second], warning, cleanse } = trenchCleanseFixture(run => storedSession({ run }));
       const cleanseLine = cleanseLabel(cleanse);

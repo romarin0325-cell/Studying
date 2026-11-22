@@ -1040,7 +1040,7 @@ export function create(core, opts) {
   }
   function nextDistinct(action, local) {
     const enemy = host.battle.enemy;
-    if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action);
+    if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action).forecast;
     if (action.isChargeStart) {
       const next = lessonStep(local + 1) ?? enemy.skills.find(skill => skill.name === (action.chargeSkillId ?? '디바인블레이드'));
       if (next) return { inTurns: 1, name: next.name, kind: next.type, power: next.val };
@@ -1060,22 +1060,27 @@ export function create(core, opts) {
     if (inTide() && local % TIDE_BEATS.length === TIDE_STRONG_BEAT) {
       return { name: REGIONS.tide_cycle.rest, kind: 'rest', inTurns: 1 };
     }
-    const next = countdown(true);
-    return next && next.name !== action.name ? next : null;
+    const forecast = countdown(true);
+    if (!forecast || forecast.name === action.name) return null;
+    const { salience, ...next } = forecast;
+    return next;
   }
   function nextWildAction(enemy, local, current) {
     const charging = !enemy.buffs.stun && current?.isChargeStart || enemy.isCharging && !current?.chargeReset;
-    const next = lessonAction(local + 1, charging) ?? wildBeat(enemy, local + 1);
-    return { name: next.name, kind: next.isChargeStart ? 'charge' : next.type,
+    const step = lessonAction(local + 1, charging);
+    const next = step ?? wildBeat(enemy, local + 1);
+    const strong = local % enemy.relayBeats.length === wildBeatPattern(enemy.relayPattern).strong - 1;
+    const forecast = { name: next.name, kind: next.isChargeStart ? 'charge' : next.type,
       power: next.power ?? next.val, inTurns: 1, ...(next.vulnerable && { vulnerable: next.vulnerable }),
       ...(next.drainRate && { drainRate: effectiveDrainRate(next, enemy) }),
       ...(next.hitPower && next.vulnerable && { hitPower: next.hitPower }) };
+    return { forecast, salience: actionSalience(step ?? { ...next, strong }) };
   }
   function countdown(futureOnly = false) {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
     if (wildBeatPattern(enemy.relayPattern)) {
-      const next = nextWildAction(enemy, local, B.intentCache?.action);
-      return { ...next, charge: next.kind === 'charge' };
+      const { forecast: next, salience } = nextWildAction(enemy, local, B.intentCache?.action);
+      return { ...next, charge: next.kind === 'charge', salience };
     }
     if (pattern === 'threeBeat' || pattern === 'tide') {
       const tide = enemy.relayPattern === 'tide';
@@ -1084,7 +1089,7 @@ export function create(core, opts) {
       let inTurns = (strong - local % period + period) % period;
       if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
       return tide ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns)
-        : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+        : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false, salience: 'strong' };
     }
     if (inTide()) {
       let inTurns = (3 - local % 4 + 4) % 4;
@@ -1111,7 +1116,7 @@ export function create(core, opts) {
         if (!isScripted(a)) continue;
         Math.random = () => 0;
         const other = original.decide.call(Logic, { ...futureEnemy }, local + k);
-        const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart };
+        const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart, salience: actionSalience(a) };
         if (isScripted(other) && skillName(other) !== next.name) next.alt = skillName(other);
         return next;
       }
@@ -1121,7 +1126,7 @@ export function create(core, opts) {
 
   function tideCountdown(name, turn, inTurns) {
     const ripple = tideRipple(turn + inTurns);
-    return { name: ripple?.name ?? name, inTurns, charge: false,
+    return { name: ripple?.name ?? name, inTurns, charge: false, salience: ripple ? actionSalience(ripple) : 'strong',
       ...(ripple && { kind: ripple.type, power: ripple.val }) };
   }
 
@@ -1175,9 +1180,13 @@ export function create(core, opts) {
         B.lessonPreviews++;
       }
       const intent = currentIntent();
+      const forecast = countdown();
+      const { salience: countdownSalience, ...countdownView } = forecast ?? {};
+      // Only an ordinary intent needs a warning based on the following turn.
+      if (intent.salience === 'ordinary' && countdownView.inTurns === 1) intent.countdownSalience = countdownSalience;
       const def = queue[B.enemyIdx];
       const wait = {
-        t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent, countdown: countdown(),
+        t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent, countdown: forecast && countdownView,
         enemyKind: def.kind ?? null, enemyIndex: B.enemyIdx, enemyCount: queue.length,
         affixes: (def.affixes ?? []).map(id => affixView(id, host.battle.enemy))
       };

@@ -2,6 +2,7 @@ import { $, $$, esc, show } from '../dom.js';
 import { activeContract, affixChips, enemyActionText, foeFlip, formatMultiplier, head, tempoBeatText, TYPE } from '../widgets.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
 import * as Run from '../../engine/run.js';
+import { eventChoices } from '../../engine/rooms.js';
 import { CONTRACTS, gateEscrow } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { ROOM_NAMES } from '../../content/layouts.js';
@@ -14,7 +15,8 @@ import { bindRelicSlots, openRelicSheet, relicEffect, relicIcon, relicStrip } fr
 import { TERMS } from '../glossary.js';
 import { pixelIcon } from '../pixel-icons.js';
 import { wildBeatPattern } from '../../content/tempo.js';
-import { josa } from '../text.js';
+import { josa, keepSeparators } from '../text.js';
+import { describeEventOffer } from '../event-offers.js';
 
 const AFFIX_RISK = {
   tough: '첫 3턴 적 피해 50% 감소', frenzy: '적 HP 50% 이하 시 공·마공 ×1.5',
@@ -226,6 +228,9 @@ export function mapScreen(run, ui, { receipt } = {}) {
 
   const layout = getWalkLayout(run);
   const tempoViews = run.doors.map(door => Run.getTempoView?.(run, door.index));
+  const eventOffers = run.doors.map(door => eventChoices(run, core, ui.roster, door).map(choice => ({
+    id: choice.id, ...describeEventOffer(run, choice, { card, core, artifacts, room: door })
+  })));
   const lessonLine = door => {
     const lesson = doorLesson(tempoViews[door.index]);
     return lesson ? '<small class="door-lesson">' + icon('battle') + '<span>' + esc(lesson) + '</span></small>' : '';
@@ -253,14 +258,19 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const isShowdown = run.doors.length === 1 && !!enemy;
     const opponent = enemy?.source ? card(enemy.source).name : enemy?.name;
     const relic = (door.relicReward || door.promiseId) && artifacts.get(door.relic);
-    const title = door.relicReward && relic ? '위험한 문' : doorTitle(door);
+    const title = door.relicReward && relic ? '위험한 문' : door.event?.name ?? doorTitle(door);
     const info = [
       isShowdown && opponent ? confront(opponent) : enemy?.name,
       door.enemies.length > 1 ? '적 ' + door.enemies.length + '명이 차례로 등장' : ''
     ].filter(Boolean).join(' · ');
     const risksHere = risks(door);
-    const rules = risksHere.join(' · ') || (door.promiseId ? promiseLine() : roomEffect(door));
-    const gain = reward(door);
+    const rules = door.event ? '' : risksHere.join(' · ') || (door.promiseId ? promiseLine() : roomEffect(door));
+    const gain = door.event ? '' : reward(door);
+    const losesPromise = forfeits(door);
+    const offers = eventOffers[door.index].slice(0, losesPromise ? 2 : 3).map(offer =>
+      '<small class="door-event-offer" data-event-offer="' + esc(offer.id) + '" title="' + esc(offer.name) + '">' +
+      '<span>' + esc(offer.shortName) + '</span><span>· ' + esc(offer.compactPrice) + '</span>' +
+      (offer.condition ? '<span class="loss" title="' + esc(offer.condition) + '">조건</span>' : '') + '</small>').join('');
     const quirk = run.features?.quirks !== false && door.quirk ? '<i>' + esc(QUIRKS[door.quirk].name) + '</i>' : '';
     const chips = quirk + (run.features?.affixes === false ? '' : door.enemies.map(affixChips).join(''));
     return '<div class="door-plate win" data-kind="' + doorKind(door) + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' +
@@ -268,11 +278,12 @@ export function mapScreen(run, ui, { receipt } = {}) {
       (info ? '<small>' + esc(info) + '</small>' : '') +
       (chips ? '<span class="chips door-chips">' + chips + '</span>' : '') +
       (rules ? '<small class="door-risk' + (risksHere.length ? ' danger' : '') + '">' + esc(rules) + '</small>' : '') +
-      (forfeits(door) ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + '</small>' : '') +
+      offers +
+      (losesPromise ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + '</small>' : '') +
       lessonLine(door) +
       (gain ? '<small class="door-reward' + (relic ? ' door-relic' : '') + '">' +
         (relic ? relicIcon(relic.id, 20) : '') + esc(gain) + '</small>' : '') +
-      '</span>' + (door.relic && !door.final && !relic ? icon(door.relic) : '') + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' +
+      '</span>' + (door.relic && !door.final && !relic && !door.event ? icon(door.relic) : '') + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' +
       esc(title) + ' 정보">정보</button></div>';
   }).join('');
 
@@ -374,13 +385,19 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const quirk = run.features?.quirks !== false && QUIRKS[door.quirk];
     const relic = !door.final && artifacts.get(door.relic);
     const rule = entry => entry ? '<h4>' + esc(entry.name) + '</h4><p>' + esc(entry.desc) + '</p>' : '';
-    const sky = startSky(door), gain = reward(door, '확정 결정');
+    const sky = startSky(door), gain = door.event ? '' : reward(door, '확정 결정');
     const escrow = contractEscrow(run, door);
     const treasure = run.features?.affixes !== false && door.enemies.some(enemy => enemy.affixes?.includes('treasure'));
-    const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : '';
-    openSheet(doorTitle(door), lessonLine(door) + enemies + rule(quirk) + rule(region) +
+    const service = !door.event && run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : '';
+    const offers = eventOffers[door.index];
+    const offerList = offers.length ? '<ul class="door-event-offers">' + offers.map(offer =>
+      '<li data-event-offer="' + esc(offer.id) + '"><b>' + keepSeparators(esc(offer.name)) + '</b>' +
+      '<p>' + keepSeparators(esc(offer.detail)) + '</p>' +
+      (offer.releaseNote ? '<p class="loss">' + esc(offer.releaseNote) + '</p>' : '') +
+      (offer.condition ? '<p class="loss">' + keepSeparators(esc(offer.condition)) + '</p>' : '') + '</li>').join('') + '</ul>' : '';
+    const eventInfo = door.event ? '<h4>' + esc(door.event.name) + '</h4><p>' + esc(door.event.text) + '</p>' + offerList : '';
+    openSheet(doorTitle(door), eventInfo + lessonLine(door) + enemies + rule(quirk) + rule(region) +
       (sky ? '<p>' + esc(sky) + '</p>' : '') +
-      (door.event ? '<p>' + esc(door.event.text) + '</p>' : '') +
       (service ? '<p>' + esc(service) + '</p>' : '') +
       (service && door.type === 'spring' ? '<p>보유 결정 ' + run.crystals + '개</p>' : '') +
       (gain ? '<p class="gain">' + esc(gain) + '</p>' : '') +

@@ -15,7 +15,10 @@ const place = (who, cast) => same(who, cast?.who) ? 'caster' :
 
 export function warningDue({ key, playedKey, fast, soundOn, immediate = false, intent, countdown }) {
   if (!soundOn || fast || key === playedKey) return false;
-  return immediate || ['strong', 'boss'].includes(intent?.salience) || countdown?.inTurns === 1;
+  const danger = ['strong', 'boss'];
+  if (immediate || danger.includes(intent?.salience)) return true;
+  if (intent?.salience == null) return countdown?.inTurns >= 0 && countdown.inTurns <= 1;
+  return countdown?.inTurns === 1 && danger.includes(intent.countdownSalience);
 }
 
 // Core skills report their cleanses as buff deltas. Prefer the detailed rule response when it exists.

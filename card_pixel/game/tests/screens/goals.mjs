@@ -1,6 +1,19 @@
 import assert from 'node:assert/strict';
 import { DUNGEONS } from '../../src/content/dungeons.js';
-import { appearanceRegions, companionSpringRates, createProfile, missionPeriodKeys, missionsView, nextGoal, unrecruitedCompanions } from '../../src/engine/meta.js';
+import { appearanceRegions, applyRunEnd, companionSpringRates, contractsFor, createProfile, missionPeriodKeys, missionsView, nextGoal, unrecruitedCompanions } from '../../src/engine/meta.js';
+import { playRun } from '../../tools/sim.mjs';
+
+export function firstMainReturnProfile() {
+  const profile = createProfile();
+  const intro = playRun('dawn_forest', 2007919, { profile, opening: 'rescue' });
+  const recruited = applyRunEnd(profile, intro.run, { recruits: ['red_dragon'] });
+  assert.ok(recruited.announce.ok);
+  const ember = playRun('ember_volcano', 2015838, { profile: recruited.profile, difficulty: 'easy' });
+  const returned = applyRunEnd(recruited.profile, ember.run, { recruits: ['phoenix'] });
+  assert.ok(returned.announce.ok);
+  assert.equal(ember.end.result, 'win');
+  return returned.profile;
+}
 
 export function dreamClearProfile() {
   const profile = createProfile();
@@ -23,6 +36,13 @@ export function dreamClearProfile() {
   return profile;
 }
 
+export function rescueContractProfile() {
+  const profile = dreamClearProfile();
+  profile.records.clears.ember_volcano.normal = 1;
+  profile.nightmareUnlocks.push('ember_volcano');
+  return profile;
+}
+
 export function createGoalCases({ roster, storedSession, enterObservatory }) {
   const goalText = '홍련 화산 여정 생환 → 악몽 해금';
   const companion = 'marshmallow';
@@ -36,6 +56,61 @@ export function createGoalCases({ roster, storedSession, enterObservatory }) {
   }
 
   return {
+    'goals-start-companion'() {
+      const profile = firstMainReturnProfile();
+      profile.ui.entry.tours.push('mission');
+      const goal = nextGoal(profile, null, roster);
+      assert.equal(profile.lead, 'red_dragon');
+      assert.deepEqual(goal.target, {
+        screen: 'dungeons', dungeonId: 'twilight_cathedral', difficulty: 'normal', startCompanionNot: 'red_dragon'
+      });
+      return {
+        session: storedSession({ profile }), proof: 'After Ember 2015838, the Twilight goal requires changing away from Red Dragon',
+        async show(page, { text, capture }) {
+          const panel = sheet(page);
+          const change = panel.locator('#meta-change-lead[data-goal-focus]');
+          const checkPreparation = async () => {
+            await text(panel.locator('#sh-title'), '황혼 성당 · 준비', { exact: true });
+            await text(panel.locator('.meta-prep-lead b'), '레드드래곤', { exact: true });
+            await text(panel.locator('#meta-prep-lead-hint'), '레드드래곤 말고 다른 시작 동료', { exact: true });
+            assert.ok(await change.evaluate(button => button === document.activeElement));
+            assert.equal(await change.evaluate(button => getComputedStyle(button).outlineStyle), 'solid');
+          };
+          await enterObservatory(page);
+          await page.locator('#hub.on #meta-depart').click();
+          await checkPreparation();
+          await capture('observatory');
+          await panel.locator('#b-sheetclose').click();
+          await page.locator('#hub.on [data-meta-page="notebook"]').click();
+          await page.locator('#notebook.on #meta-follow-goal').click();
+          await checkPreparation();
+          await capture();
+          await change.press('Enter');
+          await panel.locator('[data-choose-prep="phoenix"]').click();
+          await text(panel.locator('.meta-prep-lead b'), '피닉스', { exact: true });
+        }
+      };
+    },
+    'goals-contract-rewards'() {
+      const profile = rescueContractProfile();
+      assert.equal(contractsFor(profile, 'ember_volcano').unlocked, true);
+      assert.equal(contractsFor(profile, 'ember_volcano').stamps.rescue, null);
+      return {
+        session: storedSession({ profile }), proof: 'Ember Nightmare is unlocked and the rescue contract stamp is unearned',
+        async show(page, { text, capture }) {
+          await enterObservatory(page);
+          await page.locator('#hub.on #meta-telescope').click();
+          await page.locator('#dungeons.on [data-dungeon="ember_volcano"]').click();
+          const panel = sheet(page);
+          await panel.locator('[data-difficulty="nightmare"]').click();
+          await panel.locator('#meta-contract-choice').click();
+          const rescue = panel.locator('[data-contract="rescue"]');
+          await text(rescue.locator('.meta-contract-rewards'), '결정 ◆3 · 6층 도달 시 / 도장 · 원정 생환 시', { exact: true });
+          await text(rescue.locator('small').filter({ hasText: '도장 없음' }), '도장 없음', { exact: true });
+          await capture();
+        }
+      };
+    },
     'goals-journey-unlock'() {
       const profile = dreamClearProfile();
       const goal = nextGoal(profile, null, roster);

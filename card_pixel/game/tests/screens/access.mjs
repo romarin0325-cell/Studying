@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { defaultParty } from '../../src/engine/run.js';
+import { INTRO } from '../../src/content/intro.js';
+import { defaultParty, settleBattle } from '../../src/engine/run.js';
 import { resolveMotion } from '../../src/ui/battle/motion.js';
 import { SETTINGS_KEY } from '../../src/ui/storage.js';
 import { createFeedbackCases } from './feedback.mjs';
@@ -54,6 +55,55 @@ export function createAccessCases({ makeRun, startBattle, storedSession, act, op
 
   return {
     ...createFeedbackCases({ makeRun, storedSession, openBattle, battleIdle }),
+    'access-result-focus': () => {
+      const run = makeRun({ dungeonId: 'dawn_forest', seed: 7, tempoVersion: 2 });
+      const battle = startBattle(run, { party: INTRO.party });
+      const session = storedSession({ run });
+      assert.ok(battle.retreat().some(event => event.t === 'retreat'));
+      const finisher = '실버스톰';
+      act(battle, finisher);
+      assert.equal(battle.outcome, 'win');
+      assert.equal(settleBattle(run, battle.summary()).ok, true);
+      return {
+        session, mute: true,
+        proof: 'Dawn Forest 7: retreat and Silver Storm open the live result; Tab wraps and closing the log returns to its button',
+        async show(page, { text, capture }) {
+          const board = page.locator('#result.on');
+          const next = '#result.on #b-next';
+          const log = '#result.on #b-result-log';
+          await battleIdle(page);
+          await page.locator('[data-opening-rescue]').click();
+          await battleIdle(page);
+          await page.locator('#acts .act').filter({ hasText: finisher }).click();
+          await board.waitFor();
+          await focused(page, next);
+          const background = await page.locator('#battle > :not(#result)').evaluateAll(nodes => nodes.every(node => node.inert));
+          assert.equal(background, true);
+          await page.locator('#foebar').evaluate(node => node.focus());
+          await focused(page, next);
+          for (const key of ['Tab', 'Shift+Tab']) {
+            await page.keyboard.press(key);
+            await focused(page, log);
+            await page.keyboard.press(key);
+            await focused(page, next);
+          }
+          await page.keyboard.press('Tab');
+          await page.keyboard.press('Enter');
+          await text(page.locator('#sheet.on #sh-title'), '전투 기록', { exact: true });
+          assert.equal(await board.evaluate(node => node.inert), true);
+          await page.keyboard.press('Escape');
+          await page.locator('#sheet').waitFor({ state: 'hidden' });
+          await focused(page, log);
+          await capture();
+          await page.reload({ waitUntil: 'domcontentloaded' });
+          await board.waitFor();
+          await focused(page, next);
+          await page.keyboard.press('Enter');
+          await board.waitFor({ state: 'hidden' });
+          assert.equal(await page.locator('#battle > [inert]').count(), 0);
+        }
+      };
+    },
     'access-inspection': () => {
       const { session, initial } = battleFixture(skill);
       assert.ok(initial.enemy && initial.allies[1] && initial.allies[2]);

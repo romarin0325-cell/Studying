@@ -573,6 +573,7 @@ img.shadow-tint { filter: grayscale(1) sepia(1) hue-rotate(220deg) saturate(2.2)
 #result .heirline .run-face { width: 40px; height: 40px; }
 #result .result-last-stand { margin: 6px 0; align-items: center; }
 #result .in { max-height: 90%; overflow-y: auto; }
+#result[inert] { z-index: 5; }
 .result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .victory-decision { margin: 8px 0; }
 .result-decision > .relic-receipt + .relic-receipt { margin-top: 4px; }
@@ -819,6 +820,11 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .door-entry b, .door-entry small { display: block; }
 .door-entry b { font: normal 0.9375rem/1.25 var(--f-display); color: var(--ink); }
 .door-entry small { color: var(--ink2); }
+.door-entry .door-event-offer { display: flex; gap: 0.25em; white-space: nowrap; }
+.door-event-offer > :first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.door-event-offers { display: grid; gap: 8px; list-style: none; margin: 8px 0; padding: 0; }
+.door-event-offers > li { border-top: 1px solid var(--line); padding-top: 8px; }
+#sh-body .door-event-offers p { margin: 2px 0 0; }
 .door-lineup { display: flex; align-items: flex-end; gap: 2px; flex: none; padding: 4px 6px 2px;
   --pf-o: color-mix(in srgb, var(--kind) 26%, #fff); --pf-f: color-mix(in srgb, var(--kind) 10%, #fff); --pf-lo: var(--pf-o); --pf-sh: transparent; }
 .door-entry > .run-icon { flex: none; padding: 8px; width: 48px; height: 48px;
@@ -1379,6 +1385,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .meta-prep [data-difficulty] { flex: 1 1 0; }
 .meta-prep-lead { display: flex; gap: 8px; align-items: center; min-height: 44px; }
 #sheet .meta-prep-lead .btn { width: auto; margin-left: auto; }
+#sheet .meta-prep-lead [data-goal-focus]:focus { outline: 3px solid var(--aqua); outline-offset: 2px; }
 #meta-prep-summary { font-weight: 700; margin-block: 8px; }
 #meta-region-rule, #meta-find-invites { margin-block: 6px; }
 .meta-prep .meta-prep-pool {
@@ -10205,7 +10212,7 @@ const BattleRuntime = {
     }
     function nextDistinct(action, local) {
       const enemy = host.battle.enemy;
-      if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action);
+      if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action).forecast;
       if (action.isChargeStart) {
         const next2 = lessonStep(local + 1) ?? enemy.skills.find((skill) => skill.name === (action.chargeSkillId ?? "\uB514\uBC14\uC778\uBE14\uB808\uC774\uB4DC"));
         if (next2) return { inTurns: 1, name: next2.name, kind: next2.type, power: next2.val };
@@ -10225,13 +10232,17 @@ const BattleRuntime = {
       if (inTide() && local % TIDE_BEATS.length === TIDE_STRONG_BEAT) {
         return { name: REGIONS.tide_cycle.rest, kind: "rest", inTurns: 1 };
       }
-      const next = countdown(true);
-      return next && next.name !== action.name ? next : null;
+      const forecast = countdown(true);
+      if (!forecast || forecast.name === action.name) return null;
+      const { salience, ...next } = forecast;
+      return next;
     }
     function nextWildAction(enemy, local, current) {
       const charging = !enemy.buffs.stun && current?.isChargeStart || enemy.isCharging && !current?.chargeReset;
-      const next = lessonAction(local + 1, charging) ?? wildBeat(enemy, local + 1);
-      return {
+      const step = lessonAction(local + 1, charging);
+      const next = step ?? wildBeat(enemy, local + 1);
+      const strong = local % enemy.relayBeats.length === wildBeatPattern(enemy.relayPattern).strong - 1;
+      const forecast = {
         name: next.name,
         kind: next.isChargeStart ? "charge" : next.type,
         power: next.power ?? next.val,
@@ -10240,12 +10251,13 @@ const BattleRuntime = {
         ...next.drainRate && { drainRate: effectiveDrainRate(next, enemy) },
         ...next.hitPower && next.vulnerable && { hitPower: next.hitPower }
       };
+      return { forecast, salience: actionSalience(step ?? { ...next, strong }) };
     }
     function countdown(futureOnly = false) {
       const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
       if (wildBeatPattern(enemy.relayPattern)) {
-        const next = nextWildAction(enemy, local, B.intentCache?.action);
-        return { ...next, charge: next.kind === "charge" };
+        const { forecast: next, salience } = nextWildAction(enemy, local, B.intentCache?.action);
+        return { ...next, charge: next.kind === "charge", salience };
       }
       if (pattern === "threeBeat" || pattern === "tide") {
         const tide = enemy.relayPattern === "tide";
@@ -10253,7 +10265,7 @@ const BattleRuntime = {
         const period = enemy.relayBeats.length;
         let inTurns = (strong - local % period + period) % period;
         if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
-        return tide ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns) : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+        return tide ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns) : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false, salience: "strong" };
       }
       if (inTide()) {
         let inTurns = (3 - local % 4 + 4) % 4;
@@ -10278,7 +10290,7 @@ const BattleRuntime = {
           if (!isScripted(a)) continue;
           Math.random = () => 0;
           const other = original.decide.call(Logic, { ...futureEnemy }, local + k);
-          const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart };
+          const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart, salience: actionSalience(a) };
           if (isScripted(other) && skillName(other) !== next.name) next.alt = skillName(other);
           return next;
         }
@@ -10294,6 +10306,7 @@ const BattleRuntime = {
         name: ripple?.name ?? name,
         inTurns,
         charge: false,
+        salience: ripple ? actionSalience(ripple) : "strong",
         ...ripple && { kind: ripple.type, power: ripple.val }
       };
     }
@@ -10358,12 +10371,15 @@ const BattleRuntime = {
           B.lessonPreviews++;
         }
         const intent = currentIntent();
+        const forecast = countdown();
+        const { salience: countdownSalience, ...countdownView } = forecast ?? {};
+        if (intent.salience === "ordinary" && countdownView.inTurns === 1) intent.countdownSalience = countdownSalience;
         const def = queue[B.enemyIdx];
         const wait = {
           t: "await",
           who: allyRef(host.battle.currentPlayerIdx),
           intent,
-          countdown: countdown(),
+          countdown: forecast && countdownView,
           enemyKind: def.kind ?? null,
           enemyIndex: B.enemyIdx,
           enemyCount: queue.length,
@@ -11825,7 +11841,7 @@ const BattleRuntime = {
     2: { text: "\uC2DC\uC791 \uB3D9\uB8CC\uC640 \uBCF8\uD3B8 \uCD9C\uBC1C", reward: "\uC0D8 \uCD08\uB300 1\uCE78 \uC5F4\uB9BC" },
     3: { text: "4\uCE35 \uBB38\uC9C0\uAE30 \uACA9\uD30C", reward: "\uC720\uBB3C \uB3C4\uAC10 \uC5F4\uB9BC" },
     4: { text: "\uBCF8\uD3B8\uC5D0\uC11C \uCC98\uC74C \uC0DD\uD658", reward: "\uC624\uB298\uC758 \uADE0\uC5F4 \xB7 \uC601\uC785 \uC784\uBB34 \xB7 \uC0D8 \uCD08\uB300 2\uCE78 \uC5F4\uB9BC" },
-    5: { text: "\uB2E4\uB978 \uC2DC\uC791 \uB3D9\uB8CC\uB85C \uBB38\uC9C0\uAE30\uB97C \uC774\uAE30\uACE0 \uD568\uAED8 \uC0DD\uD658", reward: "\uC0D8 \uCD08\uB300 3\uCE78 \uC5F4\uB9BC" },
+    5: { text: "\uB2E4\uB978 \uC2DC\uC791 \uB3D9\uB8CC\uB85C \uBB38\uC9C0\uAE30\uB97C \uC774\uAE30\uACE0 \uD568\uAED8 \uC0DD\uD658", reward: "\uC0D8 \uCD08\uB300 3\uCE78 \uC5F4\uB9BC", startCompanionNot: "firstLead" },
     6: { text: "\uBBF8\uC0DD\uD658 \uD14C\uB9C8 \uC9C0\uC5ED\uC5D0\uC11C \uC0DD\uD658", reward: "\uCC3D\uC870\uC758 \uD0D1 \uC5F4\uB9BC" },
     7: { text: "\uCC3D\uC870\uC758 \uD0D1 \uACA9\uD30C", reward: "\uC5D4\uB529 \uC5F4\uB9BC" }
   };
@@ -12241,8 +12257,9 @@ const BattleRuntime = {
     }
     return run.bench.length > 0;
   }
-  function eventChoices(run, core2, roster2) {
-    return (run.room.event?.choices || []).map((choice) => {
+  function eventChoices(run, core2, roster2, door = run.room) {
+    const promise = run.phase === "map" && run.promise?.floor === run.floor ? null : run.promise;
+    return (door?.event?.choices || []).map((choice) => {
       let targets = null;
       if (choice.target === "bench") targets = run.bench.slice();
       if (choice.target === "release") {
@@ -12254,22 +12271,22 @@ const BattleRuntime = {
           return usesRepeatDraws(run) ? run.pool.length > 0 : run.pool.some((id) => canJoin(run, id));
         }
         if (op.type === "bet") return canAttemptBet(run, core2, roster2, op.kind);
-        if (op.type === "promise") return run.promise === null && !!op.offer && !run.relics.includes(op.offer.relic);
+        if (op.type === "promise") return promise === null && !!op.offer && !run.relics.includes(op.offer.relic);
         if (op.type === "relic") {
-          const id = op.id === "offered" ? run.room.relic : op.id;
+          const id = op.id === "offered" ? door.relic : op.id;
           return !!id && !run.relics.includes(id) && (!op.temporary || !run.nextBattle?.relic && run.relics.length < RELIC_LIMIT);
         }
         return true;
       });
       const view = { ...copy(choice), targets, enabled: eligible && (targets === null || targets.length > 0) && run.crystals >= (choice.cost || 0) };
-      if (run.lessonVersion) addEventChoiceDetails(view, run, core2, roster2);
+      if (run.lessonVersion) addEventChoiceDetails(view, run, core2, roster2, door.event.id);
       return view;
     });
   }
   function joinCount(ops) {
     return ops.filter((op) => op.type === "join").reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
   }
-  function addEventChoiceDetails(choice, run, core2, roster2) {
+  function addEventChoiceDetails(choice, run, core2, roster2, eventId) {
     const incoming = joinCount(choice.ops);
     if (incoming) {
       const random = usesRepeatDraws(run) && choice.ops.filter((op) => op.type === "join" && op.random).length;
@@ -12284,10 +12301,10 @@ const BattleRuntime = {
         after: blessing.multiplier
       }]));
     }
-    if (run.room.event.id === "kobold_boot_exchange" && choice.id === "exchange") {
+    if (eventId === "kobold_boot_exchange" && choice.id === "exchange") {
       choice.netCrystals = Object.fromEntries(choice.targets.map((id) => [id, SALE_PRICE[gradeOf(roster2.card(id).grade)] - choice.cost]));
     }
-    if (run.room.event.id === "penguin_ice_seam" && choice.id === "carry") {
+    if (eventId === "penguin_ice_seam" && choice.id === "carry") {
       choice.waterAllies = run.bench.filter((id) => core2.GameUtils.cardMatchesElement(roster2.card(id), "water"));
       if (!choice.waterAllies.length) choice.text += " \xB7 \uBB3C \uB3D9\uB8CC \uC5C6\uC74C";
     }
@@ -13867,6 +13884,7 @@ const BattleRuntime = {
     join: { short: "\uD569\uB958", firstUse: "\uC774\uBC88 \uC6D0\uC815 \uD569\uB958", detail: "\uC774\uBC88 \uC6D0\uC815\uC5D0 \uD568\uAED8\uD560 \uB3D9\uB8CC\uAC00 \uB429\uB2C8\uB2E4.", scope: "\uC6D0\uC815" },
     recruit: { short: "\uC601\uC785", firstUse: "\uB3CC\uC544\uC628 \uB3D9\uB8CC\uB97C \uAD00\uCE21\uC18C\uC5D0 \uB9DE\uC774", detail: "\uC601\uC785\uD55C \uB3D9\uB8CC\uB294 \uB2E4\uC74C \uC6D0\uC815\uC5D0\uB3C4 \uD568\uAED8\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.", scope: "\uAD00\uCE21\uC18C" },
     returned: { short: "\uC0DD\uD658" },
+    stamp: { short: "\uB3C4\uC7A5" },
     relayOrder: { short: "\uC2F8\uC6B0\uB294 \uC21C\uC11C", current: "\uC9C0\uAE08", next: "\uB2E4\uC74C" },
     awakening: {
       picked: "\uC9C1\uC811 \uACE0\uB984",
@@ -13896,6 +13914,10 @@ const BattleRuntime = {
     treasure: { short: "\uBCF4\uBB3C\uBC29", firstUse: "\uC720\uBB3C\uC744 \uC5BB\uB294 \uACF3", detail: "\uC720\uBB3C\uC744 \uC7A5\uCC29\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.", scope: "\uCE35" },
     event: { short: "\uC0AC\uAC74", firstUse: "\uC120\uD0DD\uC5D0 \uB530\uB77C \uBCF4\uC0C1\uC774 \uB2EC\uB77C\uC9C0\uB294 \uB9CC\uB0A8", detail: "\uC120\uD0DD\uC758 \uC870\uAC74\uACFC \uD6A8\uACFC\uB97C \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.", scope: "\uCE35" },
     legend: { short: "\uC804\uC124\uAD70", firstUse: "\uC804\uC124\uAD70 \xB7 \uC804\uC124\xB7\uCD08\uC6D4\xB7\uC774\uBCA4\uD2B8 \uD3EC\uD568", detail: "\uC804\uC124\xB7\uCD08\uC6D4\xB7\uC774\uBCA4\uD2B8 \uD3EC\uD568", scope: "\uBF51\uAE30" }
+  };
+  var PREPARATION = {
+    otherStartCompanion: (name) => `${name} \uB9D0\uACE0 \uB2E4\uB978 ${TERMS.startCompanion.short}`,
+    contractRewards: (payout) => `${TERMS.crystal.short} \u25C6${payout} \xB7 6\uCE35 \uB3C4\uB2EC \uC2DC / ${TERMS.stamp.short} \xB7 \uC6D0\uC815 ${TERMS.returned.short} \uC2DC`
   };
 
   // card_pixel/game/src/engine/meta.js
@@ -14008,7 +14030,13 @@ const BattleRuntime = {
     const preferred = profile.ui?.destination;
     const destination = unreturned || (openRegions.includes(preferred) ? preferred : openRegions[0]);
     const travel = (dungeonId2, difficulty = departureDifficulty(profile, dungeonId2)) => ({ screen: "dungeons", dungeonId: dungeonId2, difficulty });
-    const journey = (chapter2, dungeonId2) => ({ ...NOTEBOOK_GOALS[chapter2], target: travel(dungeonId2) });
+    const journey = (chapter2, dungeonId2) => {
+      const { startCompanionNot, ...goal } = NOTEBOOK_GOALS[chapter2];
+      const target = travel(dungeonId2);
+      const previousLead = startCompanionNot && profile.notebook[startCompanionNot];
+      if (previousLead) target.startCompanionNot = previousLead;
+      return { ...goal, target };
+    };
     const chapter = chapters.find((entry) => !entry.completed)?.id;
     const recruited = Object.keys(profile.recruits);
     if (chapters[6].completed) {
@@ -14524,6 +14552,13 @@ const BattleRuntime = {
   }
   var dictionary2 = (value) => !!value && typeof value === "object" && !Array.isArray(value);
   var nonnegative = (n) => Number.isSafeInteger(n) && n >= 0;
+  var validRevision = (active2) => active2?.revision === void 0 || nonnegative(active2.revision);
+  function checkpointHead(slot, active2) {
+    return { slot, revision: saveRevision(active2), hasSave: active2 !== null, runId: active2?.runId };
+  }
+  function staleCheckpoint(head2, observed) {
+    return saveHeadChanged(head2, observed) || observed && head2.runId !== observed.runId;
+  }
   function validCheckpoint(checkpoint, spec) {
     return dictionary2(checkpoint) && Number.isInteger(checkpoint.floor) && checkpoint.floor >= 1 && checkpoint.floor <= FLOORS && nonnegative(checkpoint.turns) && nonnegative(checkpoint.heirloomsUsed) && Array.isArray(checkpoint.livingIds) && new Set(checkpoint.livingIds).size === checkpoint.livingIds.length && Array.from(checkpoint.livingIds).every((id) => spec.loanIds.includes(id));
   }
@@ -14553,7 +14588,7 @@ const BattleRuntime = {
     return Number(a.goalMet) - Number(b.goalMet) || Number(a.outcome === "win") - Number(b.outcome === "win") || a.survivors - b.survivors || b.turns - a.turns;
   }
   function restoreDailyData(data, { core: core2, roster: roster2 }) {
-    if (!dictionary2(data) || data.version !== VERSION || !dictionary2(data.days) || data.active !== null && !dictionary2(data.active)) return null;
+    if (!dictionary2(data) || data.version !== VERSION || !dictionary2(data.days) || data.active !== null && !dictionary2(data.active) || !validRevision(data.active)) return null;
     const { active: active2 } = data;
     try {
       for (const [key, day] of Object.entries(data.days)) {
@@ -14601,26 +14636,44 @@ const BattleRuntime = {
     return score ? response(day, score, true) : null;
   }
   function create3(storage2, { core: core2, roster: roster2 }) {
-    storage2 = slotStorage(storage2);
+    const slots = backupSlots(storage2);
     const puzzlesInPlay = /* @__PURE__ */ new WeakMap();
+    const runHeads = /* @__PURE__ */ new WeakMap();
+    let loaded;
+    let viewed;
     function read() {
       try {
-        const saved = storage2.getItem(DAILY_KEY);
-        if (saved == null) return empty();
-        const data = JSON.parse(saved);
-        if (data?.version === VERSION && data.days && typeof data.days === "object" && !Array.isArray(data.days) && (data.active === null || typeof data.active === "object")) return data;
+        const slot = slots.active();
+        const saved = slots.read(slot, DAILY_KEY);
+        const data = saved == null ? empty() : JSON.parse(saved);
+        if (data?.version === VERSION && dictionary2(data.days) && (data.active === null || dictionary2(data.active)) && validRevision(data.active)) return { data, head: checkpointHead(slot, data.active) };
       } catch {
       }
       return null;
     }
-    function write(data) {
+    function write(data, slot) {
       try {
-        return storage2.setItem(DAILY_KEY, JSON.stringify(data)) !== false;
+        slots.write(slot, DAILY_KEY, JSON.stringify(data));
+        return true;
       } catch {
         return false;
       }
     }
-    function settle(data, outcome, checkpoint) {
+    function remember(run, head2) {
+      runHeads.set(run, head2);
+      loaded = viewed = head2;
+    }
+    function writeCheckpoint(data, head2, run) {
+      try {
+        data.active.revision = nextSaveRevision(head2.revision);
+      } catch {
+        return invalid("invalid_save");
+      }
+      if (!write(data, head2.slot)) return invalid("storage_failed");
+      remember(run, checkpointHead(head2.slot, data.active));
+      return { ok: true };
+    }
+    function settle(data, head2, outcome, checkpoint) {
       const { runId, dayKey, kind } = data.active;
       const day = data.days[dayKey];
       if (!day || !checkpoint) return invalid("invalid_save");
@@ -14631,12 +14684,12 @@ const BattleRuntime = {
       if (prior.runId) receipts[prior.runId] = prior;
       day.last = Object.keys(receipts).length ? { ...score, receipts } : score;
       data.active = null;
-      return write(data) ? response(day, score, false) : invalid("storage_failed");
+      return write(data, head2.slot) ? response(day, score, false) : invalid("storage_failed");
     }
     return {
       puzzles(profile) {
         if (!riftPuzzlesUnlocked(profile)) return [];
-        const data = read();
+        const data = read()?.data;
         return RIFT_PUZZLES.map((puzzle) => ({
           ...puzzle,
           endings: puzzle.endings.map((ending) => {
@@ -14673,30 +14726,36 @@ const BattleRuntime = {
         const attempt = puzzlesInPlay.get(run);
         if (!attempt) return invalid("invalid_puzzle");
         const { puzzle, ending } = attempt;
-        if (run.phase !== "done" || run.floor !== puzzle.floor || !["win", "lose"].includes(run.result)) {
+        const terminal = run.phase === "done" || run.phase === "result" && run.result === "win";
+        if (!terminal || run.floor !== puzzle.floor || !["win", "lose"].includes(run.result)) {
           return invalid("run_not_done");
         }
+        if (attempt.receipt) return attempt.receipt;
         const checkpoint = checkpointFor(run);
         const facts = puzzleBattleFacts(run);
         if (!checkpoint || !facts) return invalid("invalid_puzzle");
         const score = { ...checkpoint, ...facts, outcome: run.result };
         const result = judgePuzzleGoal(ending.goal, score);
-        const data = read();
-        if (!data) return { ...invalid("invalid_save"), score: result };
+        const saved = read();
+        if (!saved) return { ...invalid("invalid_save"), score: result };
+        const { data, head: head2 } = saved;
         const best = storedPuzzleScore(data, puzzle, ending);
         if (!best || comparePuzzle(result, judgePuzzleGoal(ending.goal, best)) > 0) {
           const bests = puzzleBests(data);
           bests[puzzle.id] = { ...bests[puzzle.id], [ending.id]: score };
-          if (!write({ ...data, puzzleBests: bests })) {
+          if (!write({ ...data, puzzleBests: bests }, head2.slot)) {
             return { ...invalid("storage_failed"), score: result };
           }
         }
-        return { ok: true, score: result };
+        attempt.receipt = { ok: true, score: result };
+        return attempt.receipt;
       },
       view(profile, now) {
         const key = localDayKey(now);
         const unlocked = dailyRiftUnlocked(profile);
-        const { days, active: active2 } = read() || empty();
+        const saved = read();
+        if (saved) viewed = saved.head;
+        const { days, active: active2 } = saved?.data ?? empty();
         const today = days[key];
         return {
           dayKey: key,
@@ -14711,8 +14770,9 @@ const BattleRuntime = {
         if (!dailyRiftUnlocked(profile)) return invalid("locked");
         const key = localDayKey(now);
         if (key !== expectedDayKey) return invalid("date_changed");
-        const data = read();
-        if (!data) return invalid("invalid_save");
+        const saved = read();
+        if (!saved) return invalid("invalid_save");
+        const { data, head: head2 } = saved;
         if (data.active) return invalid("active_exists");
         if (kind !== "official" && kind !== "practice") return invalid("invalid_save");
         const day = data.days[key];
@@ -14729,22 +14789,29 @@ const BattleRuntime = {
         } catch {
           return invalid("invalid_save");
         }
-        return write(data) ? { ok: true, run } : invalid("storage_failed");
+        const written = writeCheckpoint(data, head2, run);
+        return written.ok ? { ok: true, run } : written;
       },
       resume() {
-        const data = read();
-        if (!data) return invalid("invalid_save");
+        const saved = read();
+        if (!saved) return invalid("invalid_save");
+        const { data, head: head2 } = saved;
         if (!data.active) return invalid("no_active");
         try {
           const run = restoreRun(data.active.snapshot, { core: core2, roster: roster2 });
-          if (activeCheckpoint(data, run) && validAttempt(run.daily, roster2)) return { ok: true, run };
+          if (activeCheckpoint(data, run) && validAttempt(run.daily, roster2)) {
+            remember(run, head2);
+            return { ok: true, run };
+          }
         } catch {
         }
         return invalid("invalid_save");
       },
       save(run) {
-        const data = read();
-        if (!data) return invalid("invalid_save");
+        const saved = read();
+        if (!saved) return invalid("invalid_save");
+        const { data, head: head2 } = saved;
+        if (staleCheckpoint(head2, runHeads.get(run) ?? loaded)) return invalid("stale_tab");
         if (!data.active) return invalid("no_active");
         const checkpoint = activeCheckpoint(data, run);
         if (!checkpoint) return invalid("invalid_save");
@@ -14756,30 +14823,34 @@ const BattleRuntime = {
           return invalid("invalid_save");
         }
         data.active = { ...data.active, snapshot, checkpoint };
-        return write(data) ? { ok: true } : invalid("storage_failed");
+        return writeCheckpoint(data, head2, run);
       },
       finish(run) {
-        const data = read();
-        if (!data) return invalid("invalid_save");
+        const saved = read();
+        if (!saved) return invalid("invalid_save");
+        const { data, head: head2 } = saved;
         const duplicate = previousResult(data, run?.id);
         if (duplicate) return duplicate;
+        if (staleCheckpoint(head2, runHeads.get(run) ?? loaded)) return invalid("stale_tab");
         if (!data.active) return invalid("no_active");
         const checkpoint = activeCheckpoint(data, run);
         if (!checkpoint) return invalid("invalid_save");
         if (run.phase !== "done" || !["win", "lose"].includes(run.result)) return invalid("run_not_done");
-        return settle(data, run.result, checkpoint);
+        return settle(data, head2, run.result, checkpoint);
       },
       abandon(runId) {
-        const data = read();
-        if (!data) return invalid("invalid_save");
+        const saved = read();
+        if (!saved) return invalid("invalid_save");
+        const { data, head: head2 } = saved;
         const duplicate = previousResult(data, runId);
         if (duplicate) return duplicate;
+        if (staleCheckpoint(head2, viewed)) return invalid("stale_tab");
         if (!data.active) return invalid("no_active");
         if (runId !== data.active.runId) return invalid("invalid_save");
-        return settle(data, "abandon", data.active.checkpoint);
+        return settle(data, head2, "abandon", data.active.checkpoint);
       },
       history({ before = null, limit = 7 } = {}) {
-        const { days } = read() || empty();
+        const { days } = read()?.data ?? empty();
         const keys = Object.keys(days).filter((key) => days[key]?.official && (before === null || key < before)).sort().reverse();
         const rows = keys.slice(0, limit).map((key) => {
           const { spec, official, bestPractice } = days[key];
@@ -14788,12 +14859,13 @@ const BattleRuntime = {
         return { rows, nextBefore: keys.length > rows.length ? rows.at(-1)?.dayKey ?? null : null };
       },
       clear() {
-        storage2.removeItem(DAILY_KEY);
+        slots.write(slots.active(), DAILY_KEY, null);
       }
     };
   }
 
   // card_pixel/game/src/engine/save.js
+  var STALE_SAVE_EVENT = "relaymare:stale-save";
   var SESSION_VERSION = 1;
   var BACKUP_VERSION = 1;
   var DEFAULT_SETTINGS = { sound: true, music: true, rim: true, speed: 1, textScale: 1, markers: true };
@@ -14856,9 +14928,19 @@ const BattleRuntime = {
     const progressed = run ? recordRunProgress(profile, run).profile : profile;
     return { version: SESSION_VERSION, profile: profileData(progressed, !!run), run: run ? runData(run) : null };
   }
+  function saveRevision(data) {
+    return count(data?.revision) ? data.revision : 0;
+  }
+  function saveHeadChanged(head2, observed) {
+    return observed ? head2.slot !== observed.slot || head2.revision !== observed.revision || head2.hasSave !== observed.hasSave : head2.revision > 0;
+  }
+  function nextSaveRevision(current) {
+    const revision = current + 1;
+    if (!count(revision)) throw new RangeError("Invalid save revision");
+    return revision;
+  }
   function sessionRevision(raw) {
-    const revision = parse(raw)?.revision;
-    return count(revision) ? revision : 0;
+    return saveRevision(parse(raw));
   }
   function decodeStored(value) {
     return value == null ? null : parse(value) ?? value;
@@ -14874,10 +14956,10 @@ const BattleRuntime = {
     function readHead() {
       const slot = slots.active();
       const raw = slots.read(slot, key) ?? null;
-      return { slot, raw, revision: sessionRevision(raw) };
+      return { slot, raw, hasSave: raw !== null, revision: sessionRevision(raw) };
     }
     function isStale(head2) {
-      stale ||= observed ? head2.slot !== observed.slot || head2.revision !== observed.revision || head2.raw !== null !== observed.hasSave : head2.revision > 0;
+      stale ||= saveHeadChanged(head2, observed);
       return stale;
     }
     function remember({ slot, raw, revision }) {
@@ -14885,13 +14967,11 @@ const BattleRuntime = {
       lastRevision = Math.max(lastRevision, revision);
     }
     function revisionAfter(head2) {
-      const revision = Math.max(
+      return nextSaveRevision(Math.max(
         head2.revision,
         lastRevision,
         head2.revision === 0 ? sessionRevision(slots.read(head2.slot, LAST_GOOD_KEY)) : 0
-      ) + 1;
-      if (!count(revision)) throw new RangeError("Invalid save revision");
-      return revision;
+      ));
     }
     function writeSession(slot, raw, revision) {
       slots.write(slot, key, raw);
@@ -14938,6 +15018,7 @@ const BattleRuntime = {
       }
     }
     function watchStale(events, notify) {
+      events.addEventListener(STALE_SAVE_EVENT, notify);
       events.addEventListener("storage", (event) => {
         if (notified || !slots.affectsSession(event.key, key)) return;
         try {
@@ -18081,6 +18162,12 @@ const BattleRuntime = {
   var TABBABLE = 'button, input, select, textarea, a[href], summary, [tabindex], [contenteditable="true"]';
   var canFocus = (node) => node?.isConnected && !node.matches(":disabled") && !node.closest("[inert]") && node.getClientRects().length > 0 && getComputedStyle(node).visibility === "visible";
   var tabStops = (scope) => $$(TABBABLE, scope).filter((node) => node.tabIndex >= 0 && canFocus(node));
+  var activeResult = () => $("#battle.on #result.on");
+  function focusPrimary(scope) {
+    const controls = tabStops(scope);
+    const primary = controls.find((node) => node.matches(".go, .claim, #b-start, #b-next, #b-go")) ?? controls.find((node) => node.matches("#acts .act, .fixed-foot button")) ?? controls[0];
+    primary?.focus({ preventScroll: true });
+  }
   function sheetMarkup() {
     return '<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title"><div class="in win"><h3 id="sh-title" tabindex="-1"></h3><div id="sh-body" class="shbody"></div><button class="btn" id="b-sheetclose">\uB2EB\uAE30</button></div></div>';
   }
@@ -18092,7 +18179,11 @@ const BattleRuntime = {
     let afterDismiss;
     let opening;
     function openSheet(title, html, { onClose, variant, latest, opener = document.activeElement } = {}) {
-      if (!opening) opening = { opener: opener === document.body ? null : opener };
+      if (!opening) {
+        const result = activeResult();
+        opening = { opener: opener === document.body ? null : opener, result };
+        if (result) result.inert = true;
+      }
       afterDismiss = onClose;
       heading.textContent = title;
       body.innerHTML = html;
@@ -18106,15 +18197,13 @@ const BattleRuntime = {
       stage2.pause(true);
     }
     function restoreFocus(opener) {
-      if (canFocus(opener)) {
+      const result = activeResult();
+      if ((!result || result.contains(opener)) && canFocus(opener)) {
         opener.focus({ preventScroll: true });
         if (document.activeElement === opener) return;
       }
-      const screen = $("#battle.on #result.on") ?? $(".screen.on");
-      if (!screen) return;
-      const controls = tabStops(screen);
-      const primary = controls.find((node) => node.matches(".go, .claim, #b-start, #b-next, #b-go")) ?? controls.find((node) => node.matches("#acts .act, .fixed-foot button")) ?? controls[0];
-      primary?.focus({ preventScroll: true });
+      const screen = result ?? $(".screen.on");
+      if (screen) focusPrimary(screen);
     }
     function closeSheet() {
       const closed = opening;
@@ -18123,6 +18212,7 @@ const BattleRuntime = {
       panel.classList.remove("on", "battle-log-sheet");
       stage2.pause(false);
       if (closed) {
+        if (closed.result) closed.result.inert = false;
         restoreFocus(closed.opener);
         queueMicrotask(() => {
           if (!opening && document.activeElement === document.body) restoreFocus(closed.opener);
@@ -18142,7 +18232,9 @@ const BattleRuntime = {
       if (event.target === panel) dismiss();
     });
     document.addEventListener("keydown", (event) => {
-      if (!opening || !["Tab", "Escape"].includes(event.key)) return;
+      if (!["Tab", "Escape"].includes(event.key)) return;
+      const scope = opening ? panel : activeResult();
+      if (!scope || !opening && (event.key !== "Tab" || $(".coach:not([hidden])") || event.target?.closest?.("dialog[open]"))) return;
       event.preventDefault();
       event.stopPropagation();
       if (event.key === "Escape") {
@@ -18152,13 +18244,12 @@ const BattleRuntime = {
         if (opening === current) dismiss();
         return;
       }
-      const controls = tabStops(panel);
+      const controls = tabStops(scope);
       if (event.shiftKey) controls.reverse();
       const active2 = document.activeElement;
       const index = controls.indexOf(active2);
-      const direction = event.shiftKey ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING;
-      const next = index >= 0 ? controls[index + 1] : panel.contains(active2) ? controls.find((node) => active2.compareDocumentPosition(node) & direction) : null;
-      (next ?? controls[0] ?? heading).focus();
+      const next = index >= 0 ? controls[index + 1] : scope.contains(active2) ? controls.find((node) => active2.compareDocumentPosition(node) & (event.shiftKey ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING)) : null;
+      (next ?? controls[0] ?? (opening ? heading : scope)).focus();
     }, true);
     return { openSheet, closeSheet, sheet };
   }
@@ -20102,7 +20193,10 @@ const BattleRuntime = {
   var place = (who, cast) => same(who, cast?.who) ? "caster" : who.side === (cast?.who.side ?? "ally") ? "ally" : "foe";
   function warningDue({ key, playedKey, fast, soundOn, immediate = false, intent, countdown }) {
     if (!soundOn || fast || key === playedKey) return false;
-    return immediate || ["strong", "boss"].includes(intent?.salience) || countdown?.inTurns === 1;
+    const danger = ["strong", "boss"];
+    if (immediate || danger.includes(intent?.salience)) return true;
+    if (intent?.salience == null) return countdown?.inTurns >= 0 && countdown.inTurns <= 1;
+    return countdown?.inTurns === 1 && danger.includes(intent.countdownSalience);
   }
   function actionCleanses(events, statusRules) {
     const { who, target, skill } = events[0];
@@ -20423,13 +20517,14 @@ const BattleRuntime = {
     return { title: "\uC6D0\uC815 \uC2E4\uD328", subtitle: `\uC0B4\uC544\uB0A8\uC740 \uB3D9\uB8CC ${survivors.length}\uBA85`, survivors };
   }
   function battleMarkup() {
-    return '<section id="battle" class="screen"><div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar" role="button" tabindex="0"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div><div class="chips" id="pf-chips"></div></div><div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uACE0\uC18D \uC9C4\uD589</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="\uC804\uC7A5\xB7\uC720\uBB3C">\uC804\uC7A5</button><button id="b-speed">1\uBC30</button>' + logButton('id="b-log"') + tools() + '</header><button class="sky" id="sky" aria-label="\uD544\uB4DC \uC815\uBCF4"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button><div id="battle-announcement" aria-live="polite" aria-atomic="true"></div><div class="sheet" id="result"><div class="in win" id="result-in"></div></div></section>';
+    return '<section id="battle" class="screen"><div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar" role="button" tabindex="0"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div><div class="chips" id="pf-chips"></div></div><div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uACE0\uC18D \uC9C4\uD589</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="\uC804\uC7A5\xB7\uC720\uBB3C">\uC804\uC7A5</button><button id="b-speed">1\uBC30</button>' + logButton('id="b-log"') + tools() + '</header><button class="sky" id="sky" aria-label="\uD544\uB4DC \uC815\uBCF4"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button><div id="battle-announcement" aria-live="polite" aria-atomic="true"></div><div class="sheet" id="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1"><div class="in win" id="result-in"></div></div></section>';
   }
   function createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: St, audio: audio2, sheets: sheets2, details, music: music2 }) {
     const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
     const { sfx } = audio2;
     const { card, face: face2, spr } = widgets2;
     const announcement = $("#battle-announcement");
+    const resultBoard = $("#result");
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const LINKED_TRAITS = ["ally_death_base_atk_phy", "ally_light_death_base_matk_mag"];
     const relayHint = $("#relay-hint");
@@ -21327,6 +21422,12 @@ const BattleRuntime = {
       const plain = TERMS[B.door.type]?.short?.split(" \xB7 ")[0];
       return run.daily ? "\uADE0\uC5F4 " + run.floor + "\uCE35" : run.floor + "\uCE35 \xB7 " + (plain ?? ROOM_NAMES[B.door.type]);
     }
+    function setResultOpen(open) {
+      resultBoard.classList.toggle("on", open);
+      for (const background2 of resultBoard.parentElement.children) {
+        if (background2 !== resultBoard) background2.inert = open;
+      }
+    }
     function startBattle(expedition, options, settle, advance2, {
       fromMap = false,
       decision,
@@ -21367,7 +21468,7 @@ const BattleRuntime = {
       B.fallSpot = null;
       battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map((e) => e.id), party: B.party.slice() };
       B.bridge = create2(core2, options);
-      $("#result").classList.remove("on");
+      setResultOpen(false);
       $("#battle").classList.remove("resumed-result", "opening-decision");
       for (const id of ["b-field", "b-speed", "b-log"]) $("#" + id).hidden = simpleOpening;
       $("#acts").innerHTML = "";
@@ -21445,8 +21546,8 @@ const BattleRuntime = {
       else if (run.pending?.kind === "relic") label2 = "\uC720\uBB3C \uBCF4\uC0C1 \uACE0\uB974\uAE30";
       const title = failure?.title ?? (run.daily ? "\uADE0\uC5F4" : DUNGEONS[run.dungeonId].name) + " " + floor + "\uCE35 \uB3CC\uD30C";
       const box = $("#result-in");
-      box.innerHTML = '<header class="result-heading ' + (won ? "won" : "lost") + '"><h3>' + esc(title) + "</h3>" + logButton('id="b-result-log"') + "</header>" + rows.join("") + '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label2) + "</button>";
-      $("#result").classList.add("on");
+      box.innerHTML = '<header class="result-heading ' + (won ? "won" : "lost") + '"><h3 id="result-title">' + esc(title) + "</h3>" + logButton('id="b-result-log"') + "</header>" + rows.join("") + '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label2) + "</button>";
+      setResultOpen(true);
       if (!restored) {
         if (rewardDelta.crystals > 0) sfx.credit();
         if (rewardDelta.relicIds.length) sfx.gem();
@@ -21460,12 +21561,15 @@ const BattleRuntime = {
       if (reward) decision?.(content, result, next, singleReinforcement);
       if (pending() && !restored) music2?.holdReward(run.dungeonId);
       box.scrollTop = 0;
+      focusPrimary(resultBoard);
       next.addEventListener("click", () => {
         sfx.tap();
-        if (pending()) decision(content, result, next, true);
-        else {
+        if (pending()) {
+          decision(content, result, next, true);
+          focusPrimary(resultBoard);
+        } else {
           next.disabled = true;
-          $("#result").classList.remove("on");
+          setResultOpen(false);
           advance2();
         }
       });
@@ -21881,6 +21985,73 @@ const BattleRuntime = {
     };
   }
 
+  // card_pixel/game/src/ui/event-offers.js
+  var NEXT = "\uB2E4\uC74C \uC804\uD22C \uD55C \uBC88";
+  var STAYS = "\uC774\uBC88 \uC6D0\uC815 \uB05D\uAE4C\uC9C0";
+  var BET = {
+    empty_sky: "\uD544\uB4DC \uD6A8\uACFC \uC5C6\uC774 \uC2B9\uB9AC",
+    delayed_on_time: "\uC608\uC57D \uACF5\uACA9\uC744 \uC815\uC2DC\uC5D0 \uBC1C\uB3D9\uD558\uACE0 \uC2B9\uB9AC",
+    same_grade_full: "\uAC19\uC740 \uB4F1\uAE09 \uC14B\uC73C\uB85C \uCD9C\uC804\uD574 \uC2B9\uB9AC"
+  };
+  function eventEffectText(effect, { card, artifacts, core: core2, room }, target) {
+    const name = (id) => card(id).name;
+    switch (effect.type) {
+      case "join":
+        return STAYS + " \xB7 " + (effect.random ? "\uBB34\uC791\uC704 \uB3D9\uB8CC 1\uBA85" : effect.ids.map(name).join(" \xB7 ")) + " \uD569\uB958";
+      case "release":
+        return (target ? name(target) : "\uB3D9\uB8CC 1\uBA85") + " \uC774\uD0C8 \xB7 \uCD95\uBCF5\xB7\uC720\uD488 \uC18C\uBA78 \xB7 \uB4F1\uAE09\uC5D0 \uB530\uB77C \uACB0\uC815 \uD68D\uB4DD";
+      case "bless": {
+        const amount2 = effect.multiplier === "grade" ? target ? BLESS[card(target).grade] : null : effect.multiplier;
+        return STAYS + " \xB7 " + (effect.all ? "\uBAA8\uB4E0 \uB3D9\uB8CC" : target ? name(target) : "\uB3D9\uB8CC 1\uBA85") + (amount2 ? " \uB2A5\uB825\uCE58 +" + Math.round(amount2 * 100) + "%" : " \uB4F1\uAE09\uBCC4 \uCD95\uBCF5");
+      }
+      case "altar":
+        return "\uBB34\uC791\uC704 \uB3D9\uB8CC 1\uBA85 \uCD95\uBCF5 \xB7 \uCD5C\uB300 3\uD68C \uAD74\uB9AC\uAE30";
+      case "relic": {
+        const relic = artifacts.get(effect.id === "offered" ? room.relic : effect.id);
+        return (effect.temporary ? NEXT : STAYS) + " \xB7 " + (relic?.name || "\uC720\uBB3C \uD488\uC808");
+      }
+      case "field":
+        return NEXT + " \xB7 \uC2DC\uC791 \uD544\uB4DC: " + effect.ids.map((id) => core2.BUFF_NAMES[id] || id).join(" \xB7 ");
+      case "start":
+        return NEXT + " \xB7 \uC801 " + Object.entries(effect.enemyDebuffs).map(([id, stacks]) => (core2.BUFF_NAMES[id] || id) + " +" + stacks).join(" \xB7 ");
+      case "bet": {
+        const condition = effect.kind === "kill_on_turn" ? effect.turn + "\uD134\uC5D0 \uC801 \uD558\uB098 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC" : BET[effect.kind];
+        const prize = effect.reward.crystals ? "\uACB0\uC815 +" + effect.reward.crystals : artifacts.get(effect.reward.relic)?.name;
+        return (effect.kind === "kill_on_turn" ? "\uB2E4\uC74C \uC804\uD22C " : NEXT + " \xB7 ") + condition + " \u2192 " + prize + " \xB7 \uC2E4\uD328 \uC2DC \uBCF4\uC0C1 \uC5C6\uC74C";
+      }
+      case "crystals":
+        return "\uACB0\uC815 +" + effect.amount;
+      case "heirloom":
+        return STAYS + " \xB7 " + (target ? name(target) + "\uC5D0\uAC8C " : "") + "\uC720\uD488 " + effect.name;
+    }
+  }
+  function eventReleaseCount(run, choice) {
+    if (usesRepeatDraws(run) && choice.ops.some((op) => op.type === "join" && op.random)) return 0;
+    return choice.requiredReleases ?? replacementCount(run, joinCount(choice.ops));
+  }
+  function describeEventOffer(run, choice, context) {
+    const { card, artifacts, core: core2, room } = context;
+    const promise = choice.ops.find((effect) => effect.type === "promise")?.offer;
+    const relic = artifacts.get(promise?.relic);
+    const effects = choice.ops.map((effect) => eventEffectText(effect, context)).filter(Boolean);
+    if (room.event.id === "penguin_ice_seam" && choice.id === "carry" && !choice.text.includes("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C") && !run.bench.some((id) => core2.GameUtils.cardMatchesElement(card(id), "water"))) effects.push("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C");
+    const price = choice.cost ? "\u25C6" + choice.cost : "\uBB34\uB8CC";
+    const crystalGain = !choice.cost && choice.ops.find((op) => op.type === "crystals");
+    const heirloom = choice.ops.find((op) => op.type === "heirloom");
+    const shortfall = (choice.cost || 0) - run.crystals;
+    const unmet = shortfall > 0 ? "\uACB0\uC815 " + shortfall + "\uAC1C \uBD80\uC871" : choice.targets?.length === 0 ? "\uC120\uD0DD\uD560 \uB3D9\uB8CC \uC5C6\uC74C" : "\uC9C0\uAE08\uC740 \uC120\uD0DD\uD560 \uC218 \uC5C6\uC74C";
+    const releases = eventReleaseCount(run, choice);
+    return {
+      name: relic ? josa(price, "\uC744/\uB97C") + " \uB9E1\uAE30\uBA74 " + promise.floor + "\uCE35\uC5D0\uC11C " + relic.name + " \uC778\uC218" : choice.text,
+      detail: relic ? relic.name + " \xB7 " + relicEffect(relic) : [price, ...effects].join(" \xB7 "),
+      shortName: relic?.name ?? heirloom?.name ?? choice.text.split(" \xB7 ")[0],
+      compactPrice: crystalGain ? eventEffectText(crystalGain, context) : price,
+      condition: choice.enabled ? "" : "\uC870\uAC74 \xB7 " + unmet,
+      releaseNote: releases ? "\uBCF4\uB0BC \uB3D9\uB8CC " + releases + "\uBA85 \uD544\uC694" : "",
+      promiseRelic: relic?.id
+    };
+  }
+
   // card_pixel/game/src/ui/screens/map.js
   var AFFIX_RISK = {
     tough: "\uCCAB 3\uD134 \uC801 \uD53C\uD574 50% \uAC10\uC18C",
@@ -22094,6 +22265,10 @@ const BattleRuntime = {
     }
     const layout = getWalkLayout(run);
     const tempoViews = run.doors.map((door) => getTempoView2?.(run, door.index));
+    const eventOffers = run.doors.map((door) => eventChoices(run, core2, ui.roster, door).map((choice) => ({
+      id: choice.id,
+      ...describeEventOffer(run, choice, { card, core: core2, artifacts, room: door })
+    })));
     const lessonLine = (door) => {
       const lesson = doorLesson(tempoViews[door.index]);
       return lesson ? '<small class="door-lesson">' + icon2("battle") + "<span>" + esc(lesson) + "</span></small>" : "";
@@ -22118,17 +22293,19 @@ const BattleRuntime = {
       const isShowdown = run.doors.length === 1 && !!enemy;
       const opponent = enemy?.source ? card(enemy.source).name : enemy?.name;
       const relic = (door.relicReward || door.promiseId) && artifacts.get(door.relic);
-      const title2 = door.relicReward && relic ? "\uC704\uD5D8\uD55C \uBB38" : doorTitle(door);
+      const title2 = door.relicReward && relic ? "\uC704\uD5D8\uD55C \uBB38" : door.event?.name ?? doorTitle(door);
       const info = [
         isShowdown && opponent ? confront(opponent) : enemy?.name,
         door.enemies.length > 1 ? "\uC801 " + door.enemies.length + "\uBA85\uC774 \uCC28\uB840\uB85C \uB4F1\uC7A5" : ""
       ].filter(Boolean).join(" \xB7 ");
       const risksHere = risks(door);
-      const rules = risksHere.join(" \xB7 ") || (door.promiseId ? promiseLine() : roomEffect(door));
-      const gain = reward(door);
+      const rules = door.event ? "" : risksHere.join(" \xB7 ") || (door.promiseId ? promiseLine() : roomEffect(door));
+      const gain = door.event ? "" : reward(door);
+      const losesPromise = forfeits(door);
+      const offers = eventOffers[door.index].slice(0, losesPromise ? 2 : 3).map((offer) => '<small class="door-event-offer" data-event-offer="' + esc(offer.id) + '" title="' + esc(offer.name) + '"><span>' + esc(offer.shortName) + "</span><span>\xB7 " + esc(offer.compactPrice) + "</span>" + (offer.condition ? '<span class="loss" title="' + esc(offer.condition) + '">\uC870\uAC74</span>' : "") + "</small>").join("");
       const quirk = run.features?.quirks !== false && door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
       const chips = quirk + (run.features?.affixes === false ? "" : door.enemies.map(affixChips).join(""));
-      return '<div class="door-plate win" data-kind="' + doorKind(door) + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + (forfeits(door) ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward' + (relic ? " door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 20) : "") + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final && !relic ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      return '<div class="door-plate win" data-kind="' + doorKind(door) + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + offers + (losesPromise ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward' + (relic ? " door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 20) : "") + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final && !relic && !door.event ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
     const front = defaultParty(run);
     const lineup = (party) => party.map((id, index) => {
@@ -22207,11 +22384,14 @@ const BattleRuntime = {
       const quirk = run.features?.quirks !== false && QUIRKS[door.quirk];
       const relic = !door.final && artifacts.get(door.relic);
       const rule = (entry) => entry ? "<h4>" + esc(entry.name) + "</h4><p>" + esc(entry.desc) + "</p>" : "";
-      const sky = startSky(door), gain = reward(door, "\uD655\uC815 \uACB0\uC815");
+      const sky = startSky(door), gain = door.event ? "" : reward(door, "\uD655\uC815 \uACB0\uC815");
       const escrow = contractEscrow(run, door);
       const treasure = run.features?.affixes !== false && door.enemies.some((enemy) => enemy.affixes?.includes("treasure"));
-      const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : "";
-      openSheet(doorTitle(door), lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (forfeits(door) ? '<p class="loss">' + esc(lostDeposit(door)) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC 1\uBA85\uB2F9 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
+      const service = !door.event && run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : "";
+      const offers = eventOffers[door.index];
+      const offerList = offers.length ? '<ul class="door-event-offers">' + offers.map((offer) => '<li data-event-offer="' + esc(offer.id) + '"><b>' + keepSeparators(esc(offer.name)) + "</b><p>" + keepSeparators(esc(offer.detail)) + "</p>" + (offer.releaseNote ? '<p class="loss">' + esc(offer.releaseNote) + "</p>" : "") + (offer.condition ? '<p class="loss">' + keepSeparators(esc(offer.condition)) + "</p>" : "") + "</li>").join("") + "</ul>" : "";
+      const eventInfo = door.event ? "<h4>" + esc(door.event.name) + "</h4><p>" + esc(door.event.text) + "</p>" + offerList : "";
+      openSheet(doorTitle(door), eventInfo + lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (forfeits(door) ? '<p class="loss">' + esc(lostDeposit(door)) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC 1\uBA85\uB2F9 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
     }
   }
 
@@ -22506,13 +22686,6 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/screens/event.js
-  var NEXT = "\uB2E4\uC74C \uC804\uD22C \uD55C \uBC88";
-  var STAYS = "\uC774\uBC88 \uC6D0\uC815 \uB05D\uAE4C\uC9C0";
-  var BET = {
-    empty_sky: "\uD544\uB4DC \uD6A8\uACFC \uC5C6\uC774 \uC2B9\uB9AC",
-    delayed_on_time: "\uC608\uC57D \uACF5\uACA9\uC744 \uC815\uC2DC\uC5D0 \uBC1C\uB3D9\uD558\uACE0 \uC2B9\uB9AC",
-    same_grade_full: "\uAC19\uC740 \uB4F1\uAE09 \uC14B\uC73C\uB85C \uCD9C\uC804\uD574 \uC2B9\uB9AC"
-  };
   var DIALOGUE = {
     greenhouse: "\u201C\uD654\uBD84\uC744 \uB370\uB824\uAC08 \uAC70\uBA74 \uBCD5\uC744 \uCB10\uC5B4 \uC918.\u201D",
     rabbit_tracks: "\u201C\uAD74 \uC548\uC5D0 \uD55C \uB9C8\uB9AC \uB354 \uC788\uC5B4.\u201D",
@@ -22533,6 +22706,7 @@ const BattleRuntime = {
     const { sfx } = ui.audio;
     const event = run.room.event;
     const node = $("#event");
+    const offerContext = { card, artifacts: ui.artifacts, core: ui.core, room: run.room };
     const choices = run.pending?.kind === "event" ? eventChoices(run, ui.core, ui.roster) : [];
     let selection = null;
     const hosts = event?.requires.present || [];
@@ -22550,44 +22724,7 @@ const BattleRuntime = {
     const party = run.bench.find((id) => !joined.includes(id) && !hosts.includes(id));
     const visible = [...new Set([...hosts, ...joined, ...released].filter(Boolean))];
     const artwork = '<div class="event-cast">' + (party ? actor(party, "event-party", false) : "") + '<div class="event-visitors">' + visible.map((id) => actor(id, joined.includes(id) ? "event-joiner" : released.includes(id) ? "event-released" : "", true)).join("") + "</div></div>";
-    function effectText(effect, target) {
-      const name = (id) => card(id).name;
-      switch (effect.type) {
-        case "join":
-          return STAYS + " \xB7 " + (effect.random ? "\uBB34\uC791\uC704 \uB3D9\uB8CC 1\uBA85" : effect.ids.map(name).join(" \xB7 ")) + " \uD569\uB958";
-        case "release":
-          return (target ? name(target) : "\uB3D9\uB8CC 1\uBA85") + " \uC774\uD0C8 \xB7 \uCD95\uBCF5\xB7\uC720\uD488 \uC18C\uBA78 \xB7 \uB4F1\uAE09\uC5D0 \uB530\uB77C \uACB0\uC815 \uD68D\uB4DD";
-        case "bless": {
-          const amount2 = effect.multiplier === "grade" ? target ? BLESS[card(target).grade] : null : effect.multiplier;
-          return STAYS + " \xB7 " + (effect.all ? "\uBAA8\uB4E0 \uB3D9\uB8CC" : target ? name(target) : "\uB3D9\uB8CC 1\uBA85") + (amount2 ? " \uB2A5\uB825\uCE58 +" + Math.round(amount2 * 100) + "%" : " \uB4F1\uAE09\uBCC4 \uCD95\uBCF5");
-        }
-        case "altar":
-          return "\uBB34\uC791\uC704 \uB3D9\uB8CC 1\uBA85 \uCD95\uBCF5 \xB7 \uCD5C\uB300 3\uD68C \uAD74\uB9AC\uAE30";
-        case "relic": {
-          const relic = ui.artifacts.get(effect.id === "offered" ? run.room.relic : effect.id);
-          return (effect.temporary ? NEXT : STAYS) + " \xB7 " + (relic?.name || "\uC720\uBB3C \uD488\uC808");
-        }
-        case "field":
-          return NEXT + " \xB7 \uC2DC\uC791 \uD544\uB4DC: " + effect.ids.map((id) => ui.core.BUFF_NAMES[id] || id).join(" \xB7 ");
-        case "start":
-          return NEXT + " \xB7 \uC801 " + Object.entries(effect.enemyDebuffs).map(([id, stacks]) => (ui.core.BUFF_NAMES[id] || id) + " +" + stacks).join(" \xB7 ");
-        case "bet": {
-          const condition = effect.kind === "kill_on_turn" ? effect.turn + "\uD134\uC5D0 \uC801 \uD558\uB098 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC" : BET[effect.kind];
-          const prize = effect.reward.crystals ? "\uACB0\uC815 +" + effect.reward.crystals : ui.artifacts.get(effect.reward.relic)?.name;
-          return (effect.kind === "kill_on_turn" ? "\uB2E4\uC74C \uC804\uD22C " : NEXT + " \xB7 ") + condition + " \u2192 " + prize + " \xB7 \uC2E4\uD328 \uC2DC \uBCF4\uC0C1 \uC5C6\uC74C";
-        }
-        case "crystals":
-          return "\uACB0\uC815 +" + effect.amount;
-        case "heirloom":
-          return STAYS + " \xB7 " + (target ? name(target) + "\uC5D0\uAC8C " : "") + "\uC720\uD488 " + effect.name;
-      }
-    }
     const joinIds = (choice) => choice.ops.flatMap((op) => op.type === "join" && !op.random ? op.ids : []);
-    function releases(choice) {
-      const count2 = joinCount(choice.ops);
-      if (usesRepeatDraws(run) && choice.ops.some((op) => op.type === "join" && op.random)) return 0;
-      return choice.requiredReleases ?? replacementCount(run, count2);
-    }
     function targetValue(choice, id) {
       const change = choice.blessingChanges?.[id];
       const net = choice.netCrystals?.[id];
@@ -22614,28 +22751,22 @@ const BattleRuntime = {
         if (run.pending || run.room.relic && equipped) ui.route();
         else eventScreen(run, ui, outcome);
       }
-      const count2 = releases(choice);
+      const count2 = eventReleaseCount(run, choice);
       if (count2) chooseReplacements(run, ui, count2, apply, { incoming: joinIds(choice) });
       else apply([]);
     }
-    const cost = (choice) => choice.cost ? "\uACB0\uC815 " + choice.cost + " \xB7 " : "";
     const results = result ? [
       ...draws.map((draw) => drawText(draw, card)),
       ...released.map((id) => card(id).name + " \xB7 \uC6D0\uC815 \uC774\uD0C8"),
       result.crystals ? "\uACB0\uC815 " + (result.crystals > 0 ? "+" : "") + result.crystals : "",
-      ...result.effects.filter((effect) => !["join", "release"].includes(effect.type)).map((effect) => effect.type === "bless" ? effectText(effect, effect.id) : effectText(effect))
+      ...result.effects.filter((effect) => !["join", "release"].includes(effect.type)).map((effect) => eventEffectText(effect, offerContext, effect.type === "bless" ? effect.id : void 0))
     ].filter(Boolean) : [];
     const plates = choices.map((choice) => {
-      const short = run.crystals < (choice.cost || 0) ? "\uACB0\uC815 " + (choice.cost - run.crystals) + "\uAC1C \uBD80\uC871" : "";
-      const count2 = releases(choice);
+      const { name, detail, condition, releaseNote, promiseRelic } = describeEventOffer(run, choice, offerContext);
       const changes = !choice.targets && choice.blessingChanges ? Object.keys(choice.blessingChanges).map((id) => "<small>" + esc(card(id).name + " \xB7 " + targetValue(choice, id)) + "</small>").join("") : "";
       const offer = joinIds(choice).map((id) => heirloomOffer(card(id))).join("");
-      const promise = choice.ops.find((effect) => effect.type === "promise")?.offer;
-      const relic = ui.artifacts.get(promise?.relic);
-      const effects = choice.ops.map((effect) => effectText(effect)).filter(Boolean);
-      if (event.id === "penguin_ice_seam" && choice.id === "carry" && !choice.text.includes("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C") && !run.bench.some((id) => ui.core.GameUtils.cardMatchesElement(card(id), "water"))) effects.push("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C");
-      const label = relic ? '<b class="promise-choice">' + relicIcon(relic.id, 20) + esc(josa("\u25C6" + promise.deposit, "\uC744/\uB97C") + " \uB9E1\uAE30\uBA74 " + promise.floor + "\uCE35\uC5D0\uC11C " + relic.name + " \uC778\uC218") + "</b><span>" + esc(relic.name + " \xB7 " + relicEffect(relic)) + "</span>" : "<b>" + esc(choice.text) + "</b><span>" + esc(cost(choice) + effects.join(" \xB7 ")) + "</span>";
-      return '<button class="event-choice win" data-choice="' + esc(choice.id) + '"' + (choice.enabled ? "" : " disabled") + ">" + label + offer + changes + (count2 ? '<small class="loss">\uBCF4\uB0BC \uB3D9\uB8CC ' + count2 + "\uBA85 \uD544\uC694</small>" : "") + (short || !choice.enabled ? "<small>" + esc(short || "\uC870\uAC74 \uBBF8\uCDA9\uC871") + "</small>" : "") + "</button>";
+      const label = (promiseRelic ? '<b class="promise-choice">' + relicIcon(promiseRelic, 20) : "<b>") + esc(name) + "</b><span>" + esc(detail) + "</span>";
+      return '<button class="event-choice win" data-choice="' + esc(choice.id) + '"' + (choice.enabled ? "" : " disabled") + ">" + label + offer + changes + (releaseNote ? '<small class="loss">' + esc(releaseNote) + "</small>" : "") + (condition ? "<small>" + esc(condition) + "</small>" : "") + "</button>";
     }).join("");
     const promised = event?.id === run.promise?.id && ui.artifacts.get(run.promise?.relic);
     if (promised) results.push(run.promise.floor + "\uCE35 \uC57D\uC18D \xB7 " + promised.name + " \uC778\uC218");
@@ -22669,7 +22800,7 @@ const BattleRuntime = {
         const losing = choice.target === "release" ? departureLoss(run, selection) : "";
         const line = [detail, losing].filter(Boolean).join(" \xB7 ");
         const text = $("#event-target-effect");
-        text.textContent = line || choice.ops.map((effect) => effectText(effect, selection)).filter(Boolean).join(" \xB7 ");
+        text.textContent = line || choice.ops.map((effect) => eventEffectText(effect, offerContext, selection)).filter(Boolean).join(" \xB7 ");
         text.classList.toggle("loss", !!losing);
         confirm.disabled = false;
         confirm.textContent = card(selection).name + " \xB7 " + targetVerb(choice);
@@ -23902,10 +24033,12 @@ const BattleRuntime = {
       else if (row.bottom > port.bottom) list.scrollTop += row.bottom - port.bottom + 8;
     }
   }
-  function preparationSheet({ dungeonId: dungeonId2, currentProfile, updateProfile, savePreparation, roster: roster2, widgets: widgets2, sheets: sheets2, start }) {
+  function preparationSheet({ dungeonId: dungeonId2, currentProfile, updateProfile, savePreparation, roster: roster2, widgets: widgets2, sheets: sheets2, start, startCompanionNot }) {
     const dungeon = DUNGEONS[dungeonId2];
     if (!featureFlags(currentProfile()).prepEditing) return;
     const name = (id) => esc(roster2.card(id)?.name ?? id ?? "\uBBF8\uC9C0\uC815");
+    const previousLeadName = startCompanionNot && roster2.card(startCompanionNot)?.name;
+    const leadHint = previousLeadName && PREPARATION.otherStartCompanion(previousLeadName);
     const status = (row) => row.excluded ? ["excluded", "\xD7", TERMS.exclude.short] : row.start ? ["start", "\u2605", "\uC2DC\uC791"] : row.invited ? ["invited", "\u21AA", TERMS.springInvite.short] : row.added ? ["added", "+", "\uCD94\uAC00"] : ["base", "\xB7", "\uAE30\uBCF8"];
     function scrollPosition() {
       return { top: $("#sh-body").scrollTop, grid: $(".meta-prep-pool")?.scrollTop ?? 0 };
@@ -23916,6 +24049,7 @@ const BattleRuntime = {
       const entry = availableDungeons2(profile).find((dungeon2) => dungeon2.id === dungeonId2);
       const { start: lead, invite, exclude, pool } = prepView(profile, dungeonId2, roster2);
       const leadChoices = lead.candidates.filter((id) => !exclude.ids.includes(id) && id !== lead.id);
+      const goalFocus = leadHint && leadChoices.length;
       const draft = profile.ui.preparation?.dungeonId === dungeonId2 ? profile.ui.preparation : null;
       const difficulty = entry?.difficulties?.includes(draft?.difficulty) ? draft.difficulty : departureDifficulty2(profile, dungeonId2);
       const contracts = contractsFor(profile, dungeonId2);
@@ -23940,10 +24074,11 @@ const BattleRuntime = {
       ${flags.regionRules ? `<button class="btn" id="meta-region-rule" data-rule="${esc(rule)}">\uC9C0\uC5ED \uADDC\uCE59</button>` : ""}
       <p id="meta-prep-summary" aria-live="polite">\uC2DC\uC791 ${name(lead.id)} \xB7 \uC0D8 \uCD08\uB300 ${invite.ids.length}/${invite.slots} \xB7 \uCD9C\uD604 \uC81C\uC678 ${exclude.ids.length}/${exclude.slots}</p>
       <section class="meta-prep-section">
-        <h4>\uC2DC\uC791 \uB3D9\uB8CC 1\uBA85</h4>
+        <h4>${TERMS.startCompanion.short} 1\uBA85</h4>
         <div class="meta-prep-lead">${lead.id ? `<span class="meta-face">${widgets2.face(lead.id, 44)}</span>` : ""}
-          <b>${name(lead.id)}</b><button class="btn" id="meta-change-lead"${leadChoices.length ? "" : " disabled"}>\uBC14\uAFB8\uAE30</button>
+          <b>${name(lead.id)}</b><button class="btn" id="meta-change-lead"${leadHint ? ' aria-describedby="meta-prep-lead-hint"' : ""}${goalFocus ? " data-goal-focus" : ""}${leadChoices.length ? "" : " disabled"}>\uBC14\uAFB8\uAE30</button>
         </div>
+        ${leadHint ? `<p class="sm" id="meta-prep-lead-hint">${esc(leadHint)}</p>` : ""}
       </section>
       <section class="meta-prep-section">
         <h4>\uC774 \uC9C0\uC5ED \uCD9C\uD604 \uBA85\uB2E8</h4>
@@ -24031,8 +24166,9 @@ const BattleRuntime = {
         <button class="btn" data-contract="" aria-pressed="${!contractChoice}">\uACC4\uC57D \uC5C6\uC74C</button>
         ${Object.values(CONTRACTS).map((contract) => `<button class="btn big" data-contract="${contract.id}" aria-pressed="${contract.id === contractChoice?.id}">
           <b>${esc(contract.name)}</b><small>${esc(contract.rule)}</small>
-          <small>\uBB38\uC9C0\uAE30 \uBCF4\uC0C1\uC5D0\uC11C \u25C6${CONTRACT_ESCROW} \uB9E1\uAE40 \xB7 6\uCE35\uAE4C\uC9C0 \uB2EC\uC131\uD558\uBA74 \u25C6${CONTRACT_PAYOUT}</small>
-          <small class="${contracts.stamps[contract.id] ? "gain" : ""}">${contracts.stamps[contract.id] ? "\uB3C4\uC7A5 \uD68D\uB4DD" : "\uB3C4\uC7A5 \uC5C6\uC74C"}</small>
+          <small>\uBB38\uC9C0\uAE30 \uBCF4\uC0C1\uC5D0\uC11C \u25C6${CONTRACT_ESCROW} \uB9E1\uAE40</small>
+          <small class="meta-contract-rewards">${keepSeparators(esc(PREPARATION.contractRewards(CONTRACT_PAYOUT)))}</small>
+          <small class="${contracts.stamps[contract.id] ? "gain" : ""}">${TERMS.stamp.short} ${contracts.stamps[contract.id] ? "\uD68D\uB4DD" : "\uC5C6\uC74C"}</small>
         </button>`).join("")}
         <button class="btn" id="meta-contract-back">\uC900\uBE44\uB85C \uB3CC\uC544\uAC00\uAE30</button>
       </div>`, { onClose: restore });
@@ -24045,6 +24181,7 @@ const BattleRuntime = {
       $("#meta-start-expedition").addEventListener("click", () => start(dungeonId2, difficulty, contractChoice?.id ?? null));
     }
     render("", { top: 0, grid: 0 });
+    $("[data-goal-focus]")?.focus();
   }
   function showMenu(menu, anchor) {
     if (menu.matches(":popover-open")) menu.hidePopover();
@@ -24493,12 +24630,19 @@ const BattleRuntime = {
     const { audio: audio2, sheets: sheets2 } = runtime2;
     let dailyRun = null;
     let unsavedDailyResult = null;
+    function showStale(result) {
+      if (result?.reason !== "stale_tab") return false;
+      window.dispatchEvent(new Event(STALE_SAVE_EVENT));
+      return true;
+    }
     const dailyHost = {
       profile: currentProfile,
       assets: assets2,
       runtime: runtime2,
       save(current) {
-        if (current === dailyRun && !dailyStore2?.save?.(current)?.ok) warnSave();
+        if (current !== dailyRun) return;
+        const result = dailyStore2?.save?.(current);
+        if (!result?.ok && !showStale(result)) warnSave();
       },
       finish: finishDaily
     };
@@ -24583,6 +24727,7 @@ const BattleRuntime = {
     }
     function abandonDaily(runId) {
       const result = dailyStore2?.abandon?.(runId);
+      if (showStale(result)) return;
       if (result?.ok) {
         showHub();
         showDaily();
@@ -24617,12 +24762,22 @@ const BattleRuntime = {
       setReview(null);
       sheets2.closeSheet();
       audio2.unlockAudio();
-      setReview(enterRun(run, { ...dailyHost, save() {
-      }, finish: (current) => finishPuzzle(current, puzzle, ending) }) || null);
+      let saveFailure;
+      setReview(enterRun(run, {
+        ...dailyHost,
+        save(current) {
+          if (current !== dailyRun || current.phase !== "result" || current.result !== "win") return;
+          const result2 = dailyStore2.finishPuzzle(current);
+          if (!result2.ok) {
+            saveFailure = result2;
+            warnSave();
+          }
+        },
+        finish: (current) => finishPuzzle(current, puzzle, ending, saveFailure)
+      }) || null);
       mountPuzzleFormation(puzzle, ending, { widgets: widgets2, exit: returnToPuzzles });
     }
-    function finishPuzzle(run, puzzle, ending) {
-      const result = dailyStore2.finishPuzzle(run);
+    function finishPuzzle(run, puzzle, ending, result = dailyStore2.finishPuzzle(run)) {
       if (!result.score) return;
       dailyRun = null;
       setReview(null);
@@ -24672,6 +24827,7 @@ const BattleRuntime = {
     function finishDaily(current) {
       if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== "done") return;
       const result = dailyStore2?.finish?.(current);
+      if (showStale(result)) return;
       if (!result?.ok) {
         unsavedDailyResult = current;
         if (result?.reason === "storage_failed") warnSave();
@@ -25614,7 +25770,7 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
       });
       tutorial.sync(run);
     }
-    function prepare(dungeonId2, { difficulty, contractId } = {}) {
+    function prepare(dungeonId2, { difficulty, contractId, startCompanionNot } = {}) {
       const destination = availableDungeons3(profile).find((dungeon) => dungeon.id === dungeonId2);
       if (run || !destination) return;
       const chosenDifficulty = destination.difficulties.includes(difficulty) ? difficulty : departureDifficulty3(profile, dungeonId2);
@@ -25627,8 +25783,21 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
         savePreparation({ dungeonId: dungeonId2, difficulty: chosenDifficulty, contract: initialContract });
       }
       preparationOpen = true;
-      preparationSheet({ dungeonId: dungeonId2, currentProfile: () => profile, updateProfile, savePreparation, roster: roster2, widgets: widgets2, sheets: sheets2, start: startExpedition });
-      tutorial.sync(run);
+      preparationSheet({
+        dungeonId: dungeonId2,
+        currentProfile: () => profile,
+        updateProfile,
+        savePreparation,
+        roster: roster2,
+        widgets: widgets2,
+        sheets: sheets2,
+        start: startExpedition,
+        startCompanionNot
+      });
+      syncTutorial();
+    }
+    function syncTutorial() {
+      if (!$("#sheet.on [data-goal-focus]")) tutorial.sync(run);
     }
     function savePreparation(draft) {
       const { dungeonId: dungeonId2, difficulty } = draft;
@@ -25861,7 +26030,7 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
       if (mode) openBackupSheet({ mode, ...backupActions() });
     });
     document.addEventListener("click", () => queueMicrotask(() => {
-      if (!staleTab) tutorial.sync(run);
+      if (!staleTab) syncTutorial();
     }));
     function replayTutorial() {
       if (run || daily.run || !$("#title.on, #hub.on")) return;

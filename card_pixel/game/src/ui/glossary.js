@@ -79,6 +79,7 @@ export const TERMS = {
   join: { short: '합류', firstUse: '이번 원정 합류', detail: '이번 원정에 함께할 동료가 됩니다.', scope: '원정' },
   recruit: { short: '영입', firstUse: '돌아온 동료를 관측소에 맞이', detail: '영입한 동료는 다음 원정에도 함께할 수 있습니다.', scope: '관측소' },
   returned: { short: '생환' },
+  stamp: { short: '도장' },
   relayOrder: { short: '싸우는 순서', current: '지금', next: '다음' },
   awakening: {
     picked: '직접 고름', random: '무작위 합류',
@@ -105,4 +106,9 @@ export const TERMS = {
   treasure: { short: '보물방', firstUse: '유물을 얻는 곳', detail: '유물을 장착할 수 있습니다.', scope: '층' },
   event: { short: '사건', firstUse: '선택에 따라 보상이 달라지는 만남', detail: '선택의 조건과 효과를 확인할 수 있습니다.', scope: '층' },
   legend: { short: '전설군', firstUse: '전설군 · 전설·초월·이벤트 포함', detail: '전설·초월·이벤트 포함', scope: '뽑기' }
+};
+
+export const PREPARATION = {
+  otherStartCompanion: name => `${name} 말고 다른 ${TERMS.startCompanion.short}`,
+  contractRewards: payout => `${TERMS.crystal.short} ◆${payout} · 6층 도달 시 / ${TERMS.stamp.short} · 원정 ${TERMS.returned.short} 시`
 };

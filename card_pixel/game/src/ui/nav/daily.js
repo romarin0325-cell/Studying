@@ -1,5 +1,6 @@
 import { $ } from '../dom.js';
 import { riftPuzzlesUnlocked } from '../../engine/daily-rift.js';
+import { STALE_SAVE_EVENT } from '../../engine/save.js';
 import { enterRun } from '../run/index.js';
 import {
   dailyResultScreen, dailyResultTitle, mountPuzzleFormation, openDailyHistory, openDailyPreparation, openEarlierRift,
@@ -14,12 +15,20 @@ export function createDailyNavigation({
   let dailyRun = null;
   let unsavedDailyResult = null;
 
+  function showStale(result) {
+    if (result?.reason !== 'stale_tab') return false;
+    window.dispatchEvent(new Event(STALE_SAVE_EVENT));
+    return true;
+  }
+
   const dailyHost = {
     profile: currentProfile,
     assets,
     runtime,
     save(current) {
-      if (current === dailyRun && !dailyStore?.save?.(current)?.ok) warnSave();
+      if (current !== dailyRun) return;
+      const result = dailyStore?.save?.(current);
+      if (!result?.ok && !showStale(result)) warnSave();
     },
     finish: finishDaily
   };
@@ -98,6 +107,7 @@ export function createDailyNavigation({
 
   function abandonDaily(runId) {
     const result = dailyStore?.abandon?.(runId);
+    if (showStale(result)) return;
     if (result?.ok) {
       showHub();
       showDaily();
@@ -136,12 +146,23 @@ export function createDailyNavigation({
     setReview(null);
     sheets.closeSheet();
     audio.unlockAudio();
-    setReview(enterRun(run, { ...dailyHost, save() {}, finish: current => finishPuzzle(current, puzzle, ending) }) || null);
+    let saveFailure;
+    setReview(enterRun(run, {
+      ...dailyHost,
+      save(current) {
+        if (current !== dailyRun || current.phase !== 'result' || current.result !== 'win') return;
+        const result = dailyStore.finishPuzzle(current);
+        if (!result.ok) {
+          saveFailure = result;
+          warnSave();
+        }
+      },
+      finish: current => finishPuzzle(current, puzzle, ending, saveFailure)
+    }) || null);
     mountPuzzleFormation(puzzle, ending, { widgets, exit: returnToPuzzles });
   }
 
-  function finishPuzzle(run, puzzle, ending) {
-    const result = dailyStore.finishPuzzle(run);
+  function finishPuzzle(run, puzzle, ending, result = dailyStore.finishPuzzle(run)) {
     if (!result.score) return;
     dailyRun = null;
     setReview(null);
@@ -182,6 +203,7 @@ export function createDailyNavigation({
   function finishDaily(current) {
     if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== 'done') return;
     const result = dailyStore?.finish?.(current);
+    if (showStale(result)) return;
     if (!result?.ok) {
       unsavedDailyResult = current;
       if (result?.reason === 'storage_failed') warnSave();

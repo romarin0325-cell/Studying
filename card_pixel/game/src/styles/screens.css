@@ -179,6 +179,11 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .door-entry b, .door-entry small { display: block; }
 .door-entry b { font: normal 0.9375rem/1.25 var(--f-display); color: var(--ink); }
 .door-entry small { color: var(--ink2); }
+.door-entry .door-event-offer { display: flex; gap: 0.25em; white-space: nowrap; }
+.door-event-offer > :first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.door-event-offers { display: grid; gap: 8px; list-style: none; margin: 8px 0; padding: 0; }
+.door-event-offers > li { border-top: 1px solid var(--line); padding-top: 8px; }
+#sh-body .door-event-offers p { margin: 2px 0 0; }
 .door-lineup { display: flex; align-items: flex-end; gap: 2px; flex: none; padding: 4px 6px 2px;
   --pf-o: color-mix(in srgb, var(--kind) 26%, #fff); --pf-f: color-mix(in srgb, var(--kind) 10%, #fff); --pf-lo: var(--pf-o); --pf-sh: transparent; }
 .door-entry > .run-icon { flex: none; padding: 8px; width: 48px; height: 48px;

@@ -124,7 +124,13 @@ export function nextGoal(profile, run, roster) {
   const preferred = profile.ui?.destination;
   const destination = unreturned || (openRegions.includes(preferred) ? preferred : openRegions[0]);
   const travel = (dungeonId, difficulty = departureDifficulty(profile, dungeonId)) => ({ screen: 'dungeons', dungeonId, difficulty });
-  const journey = (chapter, dungeonId) => ({ ...NOTEBOOK_GOALS[chapter], target: travel(dungeonId) });
+  const journey = (chapter, dungeonId) => {
+    const { startCompanionNot, ...goal } = NOTEBOOK_GOALS[chapter];
+    const target = travel(dungeonId);
+    const previousLead = startCompanionNot && profile.notebook[startCompanionNot];
+    if (previousLead) target.startCompanionNot = previousLead;
+    return { ...goal, target };
+  };
   const chapter = chapters.find(entry => !entry.completed)?.id;
   const recruited = Object.keys(profile.recruits);
 

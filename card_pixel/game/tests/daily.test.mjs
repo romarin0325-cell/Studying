@@ -13,7 +13,7 @@ import * as Save from '../src/engine/save.js';
 import { RIFT_PUZZLES } from '../src/content/rift-puzzles.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 import { dailyTotals, playDaily } from '../tools/sim.mjs';
-import { playPuzzleFight } from './screens/puzzles.mjs';
+import { advanceFirstRiftFight, playPuzzleFight, settlePuzzleFight } from './screens/puzzles.mjs';
 
 process.env.TZ = 'Asia/Tokyo';
 const repo = fileURLToPath(new URL('../../../', import.meta.url));
@@ -281,6 +281,27 @@ test('puzzle judgment excludes reserves and distinguishes receiving an heirloom 
   assert.equal(Daily.judgePuzzleGoal(ember.endings[1].goal, { ...used, outcome: 'lose' }).goalMet, false);
 });
 
+test('a won puzzle ending is saved before result confirmation and survives reopening', () => {
+  const storage = memoryStorage();
+  const store = DailyStore.create(storage, deps);
+  const profile = puzzleProfile();
+  const puzzle = RIFT_PUZZLES[0];
+  const run = startPuzzle(store, puzzle, 'heirloom', profile);
+  const { battleSeed } = settlePuzzleFight(run, core, ['hellhound', 'time_ruler', 'trauma']);
+  assert.deepEqual([run.seed, battleSeed, run.phase, run.result, run.stats.turns], [20261143, 20268234, 'result', 'win', 24]);
+  const first = ok(store.finishPuzzle(run));
+  assert.equal(first.score.goalMet, true);
+  assert.deepEqual(first.score.heirloomUses, [{ by: 'time_ruler', from: 'hellhound' }]);
+
+  const reopened = DailyStore.create(storage, deps);
+  assert.deepEqual(reopened.puzzles(profile)[0].endings.map(ending => ending.best), [null, first.score]);
+  const recorded = storage.getItem(KEY);
+  storage.failWrite = true;
+  ok(Run.confirmResult(run));
+  assert.deepEqual(ok(store.finishPuzzle(run)), first);
+  assert.equal(storage.getItem(KEY), recorded);
+});
+
 test('puzzle bests round-trip separately from the official rift, stamps and the active expedition', () => {
   const storage = memoryStorage();
   const store = DailyStore.create(storage, deps);
@@ -312,7 +333,7 @@ test('puzzle bests round-trip separately from the official rift, stamps and the 
   const run = startPuzzle(store, puzzle, heirloom.id, profile);
   reason(store.finishPuzzle(run), 'run_not_done');
   reason(store.save(run), 'invalid_save');
-  playPuzzleFight(run, core, ['hellhound', 'time_ruler', 'trauma']);
+  settlePuzzleFight(run, core, ['hellhound', 'time_ruler', 'trauma']);
   reason(store.finish(run), 'invalid_save');
   assert.equal(storage.getItem(KEY), before);
   assert.equal(Meta.creditMissions(profile, run), profile);
@@ -324,6 +345,7 @@ test('puzzle bests round-trip separately from the official rift, stamps and the 
   assert.equal(failed.reason, 'storage_failed');
   assert.equal(failed.score.goalMet, true);
   assert.equal(storage.getItem(KEY), before);
+  ok(Run.confirmResult(run));
   storage.failWrite = false;
   const { score } = ok(store.finishPuzzle(run));
   assert.deepEqual(score, failed.score);
@@ -511,6 +533,30 @@ test('restoring battle and altar checkpoints preserves the independent main sess
   assert.equal(ok(store.abandon(abandoned.id)).score.outcome, 'abandon');
   assert.equal(storage.getItem('relaymare.session'), savedMain);
   assert.deepEqual(session.load().profile, JSON.parse(savedMain).profile);
+});
+
+test('a stale rift tab cannot overwrite a floor-two checkpoint with its floor-one formation', () => {
+  const storage = memoryStorage();
+  const firstTab = DailyStore.create(storage, deps);
+  const secondTab = DailyStore.create(storage, deps);
+  ok(start(firstTab, FIRST));
+  const legacy = JSON.parse(storage.getItem(KEY));
+  delete legacy.active.revision;
+  storage.setItem(KEY, JSON.stringify(legacy));
+  const stale = ok(secondTab.resume()).run;
+  const current = ok(firstTab.resume()).run;
+  assert.notEqual(stale, current);
+
+  advanceFirstRiftFight(current, core);
+  ok(firstTab.save(current));
+
+  ok(Run.enterBattleDoor(stale, { floor: 1, index: 0, partyIds: Run.defaultParty(stale) }));
+  const saved = storage.getItem(KEY);
+  reason(secondTab.save(stale), 'stale_tab');
+  reason(secondTab.abandon(stale.id), 'stale_tab');
+  assert.equal(storage.getItem(KEY), saved);
+  const reloaded = ok(DailyStore.create(storage, deps).resume()).run;
+  assert.deepEqual([reloaded.floor, reloaded.phase, reloaded.stats.turns], [2, 'map', 4]);
 });
 
 test('the first record and stamp stay fixed while practice best and duplicate receipts update independently', () => {

@@ -31,6 +31,7 @@ import { createMotionCases } from './screens/motion.mjs';
 import { createResumeCases } from './screens/resume.mjs';
 import { createHistoryCases } from './screens/history.mjs';
 import { createAccessCases } from './screens/access.mjs';
+import { createEventDoorCases } from './screens/event-doors.mjs';
 import { createGoalCases } from './screens/goals.mjs';
 import { createEpisodeCases } from './screens/episodes.mjs';
 import { createRelicCases } from './screens/relics.mjs';
@@ -922,7 +923,9 @@ function contractSheet() {
   const profile = nightmareProfile();
   const session = storedSession({ profile });
   const { name, rule } = CONTRACTS.heirloom;
-  const terms = `문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김 · 6층까지 달성하면 ◆${CONTRACT_PAYOUT}`;
+  const terms = `문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김`;
+  // W4C (11-23): both rewards and their moments on one line.
+  const rewards = `결정 ◆${CONTRACT_PAYOUT} · 6층 도달 시 / 도장 · 원정 생환 시`;
   assert.equal(Meta.contractsFor(profile, 'ember_volcano').stamps.heirloom, null);
   return {
     session, proof: 'normal clear unlocked the three nightmare contracts in ember_volcano',
@@ -940,6 +943,7 @@ function contractSheet() {
       await text(option.locator('b'), name);
       await text(option.locator('small').filter({ hasText: rule }), rule);
       await text(option.locator('small').filter({ hasText: terms }), terms);
+      await text(option.locator('.meta-contract-rewards'), rewards, { exact: true });
       await text(option.locator('small').filter({ hasText: '도장 없음' }), '도장 없음');
       await capture();
       await option.click();
@@ -2952,6 +2956,7 @@ const tourCases = createTourCases({
 const motionCases = createMotionCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, skillTile, shots });
 const resumeCases = createResumeCases({ makeRun, startBattle, settleWin, command, storedSession, snowRabbitProfile, sessionKey });
 const historyCases = createHistoryCases({ storedSession, enterObservatory });
+const eventDoorCases = createEventDoorCases({ core, roster, storedSession });
 const accessCases = createAccessCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, snowRabbitProfile, enterObservatory });
 const goalCases = createGoalCases({ roster, storedSession, enterObservatory });
 const episodeCases = createEpisodeCases({ storedSession, enterObservatory });
@@ -3056,7 +3061,8 @@ const cases = {
   ...relicCases,
   ...patternCases,
   ...promiseCases,
-  ...puzzleCases
+  ...puzzleCases,
+  ...eventDoorCases
 };
 
 caseGroups['fixed-layouts'] = Object.fromEntries([

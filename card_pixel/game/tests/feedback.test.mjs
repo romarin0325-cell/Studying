@@ -5,7 +5,8 @@ import { create } from '../src/engine/bridge.js';
 import { warningDue } from '../src/ui/battle/effect-plan.js';
 import { cleanseLabel } from '../src/ui/battle/log.js';
 import { planBattleAction } from '../src/ui/battle/view.js';
-import { trenchCleanseFixture } from './screens/feedback.mjs';
+import { createSheet } from '../src/ui/sheet.js';
+import { beetleWarningFixture, trenchCleanseFixture } from './screens/feedback.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 test('the trench cleanse reports the distinct statuses removed on floor 2, turn 2', () => {
@@ -40,11 +41,25 @@ const strong = { salience: 'strong' };
 const ordinary = { salience: 'ordinary' };
 const command = { key: '0/2', playedKey: null, fast: false, soundOn: true, intent: strong };
 
-test('fast-forward leaves a qualifying warning available when commands resume', () => {
-  assert.equal(warningDue({ ...command, fast: true }), false);
-  assert.equal(warningDue(command), true);
-  assert.equal(warningDue({ ...command, intent: ordinary, countdown: { inTurns: 1 } }), true);
-  assert.equal(warningDue({ ...command, intent: ordinary, countdown: { inTurns: 2 } }), false);
+test('Ember 7919 warns for the beetle charge and stays quiet for the weak hit before shell counter', () => {
+  const { danger, weak } = beetleWarningFixture();
+  assert.equal(warningDue({ ...command, ...danger }), true);
+  assert.equal(warningDue({ ...command, ...weak }), false);
+});
+
+test('Trench 7919 leaves exactly one strong warning available when commands resume after fast-forward', () => {
+  const { warning } = trenchCleanseFixture();
+  const key = `${warning.enemyIndex}/${warning.s.turn}`;
+  const forecast = { ...command, ...warning, key };
+  assert.equal(warningDue({ ...forecast, fast: true }), false);
+  assert.equal(warningDue(forecast), true);
+  assert.equal(warningDue({ ...forecast, playedKey: key }), false);
+});
+
+test('only an intent without salience can use an unclassified countdown for its warning', () => {
+  assert.equal(warningDue({ ...command, intent: {}, countdown: { inTurns: 1 } }), true);
+  assert.equal(warningDue({ ...command, intent: {}, countdown: { inTurns: 2 } }), false);
+  assert.equal(warningDue({ ...command, intent: ordinary, countdown: { inTurns: 1 } }), false);
 });
 
 test('audible warnings are delivered only once per enemy and turn', () => {
@@ -57,6 +72,56 @@ test('a muted setting never leaves an old warning to play on a later command', (
   assert.equal(warningDue({ ...command, fast: true, soundOn: false }), false);
   assert.equal(warningDue({ ...command, soundOn: false }), false);
   assert.equal(warningDue({ ...command, key: '0/3', intent: ordinary }), false);
+});
+
+test('the open result board wraps Tab and receives focus back from its detail sheet', async () => {
+  const bindings = new Map();
+  const doc = {
+    body: {},
+    querySelector: selector => bindings.get(selector) ?? null,
+    addEventListener(type, listener) { bindings.set(type, listener); }
+  };
+  const button = (primary = false) => ({
+    tabIndex: 0, isConnected: true, matches: selector => primary && selector.includes('#b-next'),
+    closest: () => null, getClientRects: () => [{}], focus() { doc.activeElement = this; },
+    addEventListener() {}
+  });
+  const log = button(), next = button(true), foe = button();
+  const result = { querySelectorAll: () => [log, next], contains: node => node === log || node === next };
+  bindings.set('#battle.on #result.on', result);
+  bindings.set('#sheet', { classList: { toggle() {}, add() {}, remove() {} }, addEventListener() {} });
+  bindings.set('#sh-title', button());
+  bindings.set('#sh-body', { querySelectorAll: () => [] });
+  bindings.set('#b-sheetclose', button());
+
+  const previousDocument = globalThis.document, previousStyle = globalThis.getComputedStyle;
+  globalThis.document = doc;
+  globalThis.getComputedStyle = () => ({ visibility: 'visible' });
+  try {
+    const sheet = createSheet({ pause() {} });
+    next.focus();
+    let trapped = false;
+    bindings.get('keydown')({ key: 'Tab', preventDefault() { trapped = true; }, stopPropagation() {} });
+    assert.equal(trapped, true);
+    assert.equal(doc.activeElement, log);
+    bindings.get('keydown')({ key: 'Tab', shiftKey: true, preventDefault() {}, stopPropagation() {} });
+    assert.equal(doc.activeElement, next);
+
+    sheet.openSheet('전투 기록', '', { opener: log });
+    assert.equal(result.inert, true);
+    sheet.closeSheet();
+    assert.equal(result.inert, false);
+    assert.equal(doc.activeElement, log);
+    sheet.openSheet('적 전투 정보', '', { opener: foe });
+    sheet.closeSheet();
+    assert.equal(doc.activeElement, next);
+  } finally {
+    await Promise.resolve(); // Let the sheet's focus restoration finish before removing the DOM stub.
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+    if (previousStyle === undefined) delete globalThis.getComputedStyle;
+    else globalThis.getComputedStyle = previousStyle;
+  }
 });
 
 test('the warning reports when audio can play and the seal schedules a short click and two rising notes', t => {

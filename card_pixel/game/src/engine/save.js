@@ -7,6 +7,7 @@ import { missionPeriodKeys, PROFILE_VERSION, recordRunProgress, validPreparation
 import { count, dictionary, parse, readVersion, restoreRun, runData, string, strings } from './run-codec.js';
 
 export { RUN_VERSION, serializeRun, restoreRun } from './run-codec.js';
+export const STALE_SAVE_EVENT = 'relaymare:stale-save';
 
 const SESSION_VERSION = 1;
 const BACKUP_VERSION = 1;
@@ -129,9 +130,23 @@ function sessionData(profile, run) {
   return { version: SESSION_VERSION, profile: profileData(progressed, !!run), run: run ? runData(run) : null };
 }
 
+export function saveRevision(data) {
+  return count(data?.revision) ? data.revision : 0;
+}
+
+export function saveHeadChanged(head, observed) {
+  return observed ? head.slot !== observed.slot || head.revision !== observed.revision
+    || head.hasSave !== observed.hasSave : head.revision > 0;
+}
+
+export function nextSaveRevision(current) {
+  const revision = current + 1;
+  if (!count(revision)) throw new RangeError('Invalid save revision');
+  return revision;
+}
+
 function sessionRevision(raw) {
-  const revision = parse(raw)?.revision;
-  return count(revision) ? revision : 0;
+  return saveRevision(parse(raw));
 }
 
 function decodeStored(value) {
@@ -151,12 +166,11 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
   function readHead() {
     const slot = slots.active();
     const raw = slots.read(slot, key) ?? null;
-    return { slot, raw, revision: sessionRevision(raw) };
+    return { slot, raw, hasSave: raw !== null, revision: sessionRevision(raw) };
   }
 
   function isStale(head) {
-    stale ||= observed ? head.slot !== observed.slot || head.revision !== observed.revision
-      || (head.raw !== null) !== observed.hasSave : head.revision > 0;
+    stale ||= saveHeadChanged(head, observed);
     return stale;
   }
 
@@ -166,10 +180,8 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
   }
 
   function revisionAfter(head) {
-    const revision = Math.max(head.revision, lastRevision,
-      head.revision === 0 ? sessionRevision(slots.read(head.slot, LAST_GOOD_KEY)) : 0) + 1;
-    if (!count(revision)) throw new RangeError('Invalid save revision');
-    return revision;
+    return nextSaveRevision(Math.max(head.revision, lastRevision,
+      head.revision === 0 ? sessionRevision(slots.read(head.slot, LAST_GOOD_KEY)) : 0));
   }
 
   function writeSession(slot, raw, revision) {
@@ -222,6 +234,7 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
   }
 
   function watchStale(events, notify) {
+    events.addEventListener(STALE_SAVE_EVENT, notify);
     events.addEventListener('storage', event => {
       if (notified || !slots.affectsSession(event.key, key)) return;
       try {

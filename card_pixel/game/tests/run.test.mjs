@@ -13,15 +13,17 @@ import * as Meta from '../src/engine/meta.js';
 import { openingModel } from '../src/engine/opening.js';
 import { create as makeRoster, expeditionPool, GRADE_BUCKETS, gradeOf } from '../src/engine/roster.js';
 import { resumePoint } from '../src/engine/resume.js';
-import { makeDoors } from '../src/engine/rooms.js';
+import { eventChoices, makeDoors } from '../src/engine/rooms.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { mulberry32, nextFloat, shuffle } from '../src/engine/rng.js';
 import { DAILY_KEY, DAMAGED_DAILY_KEY, SESSION_KEY, SETTINGS_KEY, slotStorage } from '../src/ui/storage.js';
+import { describeEventOffer } from '../src/ui/event-offers.js';
 import { resumeLabel } from '../src/ui/glossary.js';
 import { playRun as simulateRun } from '../tools/sim.mjs';
 import { registerEntryTests } from './run/entry.mjs';
 import { registerTempoEventTests } from './run/tempo-events.mjs';
+import { emberEventDoorFixture } from './screens/event-doors.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const { core, roster, sp } = createCoreRoster();
@@ -2586,4 +2588,57 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   assert.equal(store.clear(), true);
   assert.equal(entries.size, 0);
   assert.equal(store.loadLastGood().status, 'empty');
+});
+
+test('Ember seed 150461 discloses Ash’s saved offers and prices before entry without consuming RNG', () => {
+  const { run, door } = emberEventDoorFixture({ core, roster });
+  const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
+  const list = room => eventChoices(run, core, roster, room)
+    .map(choice => describeEventOffer(run, choice, { room, core, artifacts, card: roster.card }));
+  const checkpoint = Save.serializeRun(run);
+  const rng = run.rng.state;
+  const choices = eventChoices(run, core, roster, door);
+  const offers = list(door);
+  assert.deepEqual(offers.map(offer => [offer.shortName, offer.compactPrice, offer.condition]), [
+    ['드림파이어', '무료', ''], ['아마겟돈', '◆2', '']
+  ]);
+  assert.match(offers[0].detail, /^무료 · .*유품 드림파이어$/);
+  assert.match(offers[1].detail, /^◆2 · .*유품 아마겟돈$/);
+  assert.equal(Save.serializeRun(run), checkpoint);
+
+  ok(Run.chooseDoor(run, door.index));
+  assert.equal(run.rng.state, rng);
+  assert.deepEqual(run.room.event, door.event);
+  assert.deepEqual(run.pending.choices, choices);
+  assert.deepEqual(list(run.room), offers);
+
+  const old = JSON.parse(Save.serializeRun(run));
+  delete old.run.lessonVersion;
+  const restored = Save.restoreRun(old, { core, roster });
+  assert.ok(restored);
+  assert.deepEqual(restored.room.event, door.event);
+  assert.deepEqual(restored.pending.choices, choices);
+  assert.deepEqual(eventChoices(restored, core, roster), choices);
+  const target = choices[0].targets[0];
+  ok(Run.chooseEvent(restored, 'veil', target));
+  assert.equal(restored.heirlooms[target].name, '드림파이어');
+});
+
+test('an event preview keeps unaffordable choices and names the relic stored on an event door', () => {
+  const run = reach(makeTempo({ seed: 21 }), 3);
+  const door = run.doors.find(entry => entry.type === 'event');
+  const event = EVENTS.find(entry => entry.id === 'grand_merchant');
+  const relic = 'companion';
+  Object.assign(door, { name: event.name, event, relic });
+  run.crystals = 1;
+  const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
+  const choices = eventChoices(run, core, roster, door);
+  assert.equal(choices.length, event.choices.length);
+  const choice = choices.find(entry => entry.id === 'relic');
+  assert.equal(choice.enabled, false);
+  const offer = describeEventOffer(run, choice, { room: door, core, artifacts, card: roster.card });
+  assert.equal(offer.condition, '조건 · 결정 3개 부족');
+  assert.equal(offer.detail, '◆4 · 이번 원정 끝까지 · ' + artifacts.get(relic).name);
+  ok(Run.chooseDoor(run, door.index));
+  assert.deepEqual(eventChoices(run, core, roster), choices);
 });

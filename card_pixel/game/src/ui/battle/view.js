@@ -15,6 +15,7 @@ import { FORM_MARKERS } from '../../content/skill-motions.js';
 import { create as createBattle } from '../../engine/bridge.js';
 import * as Opening from '../../engine/opening.js';
 import { syncBattleSpeed, tools } from '../settings.js';
+import { focusPrimary } from '../sheet.js';
 import { createHud } from './hud.js';
 import { createTiles } from './tiles.js';
 import { createMoves } from './moves.js';
@@ -95,7 +96,7 @@ export function battleMarkup() {
     '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="전장·유물">전장</button><button id="b-speed">1배</button>' + logButton('id="b-log"') + tools() + '</header>' +
     '<button class="sky" id="sky" aria-label="필드 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
     '<div id="battle-announcement" aria-live="polite" aria-atomic="true"></div>' +
-    '<div class="sheet" id="result"><div class="in win" id="result-in"></div></div>' +
+    '<div class="sheet" id="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1"><div class="in win" id="result-in"></div></div>' +
     '</section>'
   );
 }
@@ -105,6 +106,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const { sfx } = audio;
   const { card, face, spr } = widgets;
   const announcement = $('#battle-announcement');
+  const resultBoard = $('#result');
   const clone = o => JSON.parse(JSON.stringify(o));
   const LINKED_TRAITS = ['ally_death_base_atk_phy', 'ally_light_death_base_matk_mag'];
   const relayHint = $('#relay-hint');
@@ -786,6 +788,13 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + (plain ?? ROOM_NAMES[B.door.type]);
   }
 
+  function setResultOpen(open) {
+    resultBoard.classList.toggle('on', open);
+    for (const background of resultBoard.parentElement.children) {
+      if (background !== resultBoard) background.inert = open;
+    }
+  }
+
   function startBattle(expedition, options, settle, advance, {
     fromMap = false, decision, simpleOpening = false, onAction, onReady, replay = []
   } = {}) {
@@ -814,7 +823,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.D = B.foe = null; B.allies = []; B.fallSpot = null;
     battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map(e => e.id), party: B.party.slice() };
     B.bridge = createBattle(core, options);
-    $('#result').classList.remove('on');
+    setResultOpen(false);
     $('#battle').classList.remove('resumed-result', 'opening-decision');
     for (const id of ['b-field', 'b-speed', 'b-log']) $('#' + id).hidden = simpleOpening;
     $('#acts').innerHTML = '';
@@ -892,10 +901,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
 
     const title = failure?.title ?? (run.daily ? '균열' : DUNGEONS[run.dungeonId].name) + ' ' + floor + '층 돌파';
     const box = $('#result-in');
-    box.innerHTML = '<header class="result-heading ' + (won ? 'won' : 'lost') + '"><h3>' + esc(title) + '</h3>' +
+    box.innerHTML = '<header class="result-heading ' + (won ? 'won' : 'lost') + '"><h3 id="result-title">' + esc(title) + '</h3>' +
       logButton('id="b-result-log"') + '</header>' + rows.join('') +
       '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label) + '</button>';
-    $('#result').classList.add('on');
+    setResultOpen(true);
     if (!restored) {
       if (rewardDelta.crystals > 0) sfx.credit();
       if (rewardDelta.relicIds.length) sfx.gem();
@@ -909,12 +918,15 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     if (reward) decision?.(content, result, next, singleReinforcement);
     if (pending() && !restored) music?.holdReward(run.dungeonId);
     box.scrollTop = 0;
+    focusPrimary(resultBoard);
     next.addEventListener('click', () => {
       sfx.tap();
-      if (pending()) decision(content, result, next, true);
-      else {
+      if (pending()) {
+        decision(content, result, next, true);
+        focusPrimary(resultBoard);
+      } else {
         next.disabled = true;
-        $('#result').classList.remove('on');
+        setResultOpen(false);
         advance();
       }
     });

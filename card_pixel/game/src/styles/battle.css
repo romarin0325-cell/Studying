@@ -245,6 +245,7 @@
 #result .heirline .run-face { width: 40px; height: 40px; }
 #result .result-last-stand { margin: 6px 0; align-items: center; }
 #result .in { max-height: 90%; overflow-y: auto; }
+#result[inert] { z-index: 5; }
 .result-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .victory-decision { margin: 8px 0; }
 .result-decision > .relic-receipt + .relic-receipt { margin-top: 4px; }

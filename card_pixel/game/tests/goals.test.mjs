@@ -3,12 +3,14 @@ import test from 'node:test';
 import { CONTRACTS } from '../src/content/contracts.js';
 import { NOTEBOOK_GOALS } from '../src/content/notebook.js';
 import { ratesView, springDrawChance } from '../src/engine/awakenings.js';
-import { applyRunEnd, companionSpringRates, nextGoal, setExpeditionParty, setSeals, startView, unrecruitedCompanions, validPreparation } from '../src/engine/meta.js';
+import { applyRunEnd, companionSpringRates, nextGoal, setExpeditionParty, setPreparation, setSeals, startView, unrecruitedCompanions, validPreparation } from '../src/engine/meta.js';
 import { gradeOf } from '../src/engine/roster.js';
 import { chooseStartPick, createRun } from '../src/engine/run.js';
 import { restoreProfile, serializeProfile } from '../src/engine/save.js';
 import { resumeLabel } from '../src/ui/glossary.js';
-import { dreamClearProfile } from './screens/goals.mjs';
+import { preparationSheet } from '../src/ui/screens/dungeons.js';
+import { playRun } from '../tools/sim.mjs';
+import { dreamClearProfile, firstMainReturnProfile, rescueContractProfile } from './screens/goals.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const { core, roster } = createCoreRoster();
@@ -25,6 +27,75 @@ const clearOnJourney = profile => {
     profile.nightmareUnlocks.push(id);
   }
 };
+
+function renderPreparation(t, profile, target) {
+  const documentBefore = globalThis.document;
+  const clicks = new Map();
+  const view = { html: '', focused: null, click: selector => clicks.get(selector)() };
+  globalThis.document = {
+    querySelector(selector) {
+      if (selector === '[data-goal-focus]' && !view.html.includes(' data-goal-focus')) return null;
+      return {
+        focus: () => { view.focused = selector; },
+        addEventListener: (event, handler) => { if (event === 'click') clicks.set(selector, handler); }
+      };
+    },
+    querySelectorAll: () => []
+  };
+  t.after(() => {
+    if (documentBefore === undefined) delete globalThis.document;
+    else globalThis.document = documentBefore;
+  });
+  preparationSheet({ ...target, roster, currentProfile: () => profile, widgets: { face: () => '' },
+    updateProfile: () => assert.fail('Opening the sheet changed the party'),
+    savePreparation: () => assert.fail('Opening the sheet changed the draft'),
+    sheets: { openSheet(_title, html) { view.html = html; } }
+  });
+  return view;
+}
+
+test('following the different-start goal names and focuses the change while the player keeps their own choice', t => {
+  const profile = firstMainReturnProfile();
+  const original = structuredClone(profile);
+  const goal = nextGoal(profile, null, roster);
+  assert.equal(goal.text, NOTEBOOK_GOALS[5].text);
+  assert.deepEqual(goal.target, {
+    screen: 'dungeons', dungeonId: 'twilight_cathedral', difficulty: 'normal', startCompanionNot: 'red_dragon'
+  });
+  const view = renderPreparation(t, profile, goal.target);
+  assert.match(view.html, /<div class="meta-prep-lead">[\s\S]*?<b>레드드래곤<\/b><button[^>]+id="meta-change-lead"[^>]+data-goal-focus>바꾸기<\/button>\s*<\/div>\s*<p[^>]+id="meta-prep-lead-hint">레드드래곤 말고 다른 시작 동료<\/p>/);
+  assert.equal(view.focused, '[data-goal-focus]');
+  assert.deepEqual(profile, original);
+
+  const { dungeonId, difficulty } = goal.target;
+  const originalLeadWin = playRun(dungeonId, 2023757, { profile, difficulty });
+  assert.equal(originalLeadWin.end.result, 'win');
+  assert.equal(nextGoal(applyRunEnd(profile, originalLeadWin.run).profile).text, goal.text);
+
+  const alternate = setExpeditionParty(profile, { lead: 'phoenix', companions: profile.companions });
+  assert.ok(alternate.announce.ok);
+  assert.equal(nextGoal(alternate.profile).target.startCompanionNot, 'red_dragon');
+  const returning = playRun(dungeonId, 2023758, { profile: alternate.profile, difficulty });
+  assert.equal(returning.end.result, 'win');
+  assert.ok(returning.run.gateSurvivors.includes('phoenix') && returning.run.bench.includes('phoenix'));
+  const settled = applyRunEnd(alternate.profile, returning.run);
+  assert.ok(settled.announce.ok && settled.profile.notebook.chapters.includes(5));
+  assert.notEqual(nextGoal(settled.profile).text, goal.text);
+});
+
+test('the Ember rescue contract picker shows the crystal and stamp timing together', t => {
+  const target = { dungeonId: ember, difficulty: 'nightmare', contract: null };
+  const profile = setPreparation(rescueContractProfile(), target);
+  const view = renderPreparation(t, profile, target);
+  assert.equal(view.focused, null);
+  view.click('#meta-contract-choice');
+  const option = view.html.match(/<button[^>]+data-contract="rescue"[^>]*>([\s\S]*?)<\/button>/)?.[1];
+  assert.ok(option);
+  const rewards = option.match(/<small class="meta-contract-rewards">(.*?)<\/small>/)?.[1];
+  assert.equal(rewards?.replace(/<[^>]+>/g, ''), '결정 ◆3 · 6층 도달 시 / 도장 · 원정 생환 시');
+  assert.match(option, /문지기 보상에서 ◆1 맡김/);
+  assert.match(option, /도장 없음/);
+});
 
 test('after the tower, unreturned regions outrank Journey unlocks and an all-Dream profile selects Journey', () => {
   const profile = dreamClearProfile();
@@ -50,7 +121,8 @@ test('unfinished notebook chapters beat untaken contracts, and untaken contracts
   assert.equal(nextGoal(profile).target.dungeonId, 'creation_tower');
   profile.records.clears.creation_tower.normal = 1;
   assert.deepEqual(nextGoal(profile, null), {
-    ...NOTEBOOK_GOALS[5], target: { screen: 'dungeons', dungeonId: 'twilight_cathedral', difficulty: 'normal' }
+    text: NOTEBOOK_GOALS[5].text, reward: NOTEBOOK_GOALS[5].reward,
+    target: { screen: 'dungeons', dungeonId: 'twilight_cathedral', difficulty: 'normal', startCompanionNot: 'snow_rabbit' }
   });
   profile.notebook.chapters = profile.notebook.chapters.filter(chapter => chapter !== 2);
   assert.equal(nextGoal(profile).text, NOTEBOOK_GOALS[2].text);

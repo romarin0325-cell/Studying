@@ -4,6 +4,14 @@ const TABBABLE = 'button, input, select, textarea, a[href], summary, [tabindex],
 const canFocus = node => node?.isConnected && !node.matches(':disabled') && !node.closest('[inert]') &&
   node.getClientRects().length > 0 && getComputedStyle(node).visibility === 'visible';
 const tabStops = scope => $$(TABBABLE, scope).filter(node => node.tabIndex >= 0 && canFocus(node));
+const activeResult = () => $('#battle.on #result.on');
+
+export function focusPrimary(scope) {
+  const controls = tabStops(scope);
+  const primary = controls.find(node => node.matches('.go, .claim, #b-start, #b-next, #b-go')) ??
+    controls.find(node => node.matches('#acts .act, .fixed-foot button')) ?? controls[0];
+  primary?.focus({ preventScroll: true });
+}
 
 export function sheetMarkup() {
   return '<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title"><div class="in win"><h3 id="sh-title" tabindex="-1"></h3><div id="sh-body" class="shbody"></div><button class="btn" id="b-sheetclose">닫기</button></div></div>';
@@ -19,7 +27,11 @@ export function createSheet(stage) {
   let opening;
 
   function openSheet(title, html, { onClose, variant, latest, opener = document.activeElement } = {}) {
-    if (!opening) opening = { opener: opener === document.body ? null : opener };
+    if (!opening) {
+      const result = activeResult();
+      opening = { opener: opener === document.body ? null : opener, result };
+      if (result) result.inert = true;
+    }
     afterDismiss = onClose;
     heading.textContent = title;
     body.innerHTML = html;
@@ -34,16 +46,13 @@ export function createSheet(stage) {
   }
 
   function restoreFocus(opener) {
-    if (canFocus(opener)) {
+    const result = activeResult();
+    if ((!result || result.contains(opener)) && canFocus(opener)) {
       opener.focus({ preventScroll: true });
       if (document.activeElement === opener) return;
     }
-    const screen = $('#battle.on #result.on') ?? $('.screen.on');
-    if (!screen) return;
-    const controls = tabStops(screen);
-    const primary = controls.find(node => node.matches('.go, .claim, #b-start, #b-next, #b-go')) ??
-      controls.find(node => node.matches('#acts .act, .fixed-foot button')) ?? controls[0];
-    primary?.focus({ preventScroll: true });
+    const screen = result ?? $('.screen.on');
+    if (screen) focusPrimary(screen);
   }
 
   function closeSheet() {
@@ -53,6 +62,7 @@ export function createSheet(stage) {
     panel.classList.remove('on', 'battle-log-sheet');
     stage.pause(false);
     if (closed) {
+      if (closed.result) closed.result.inert = false;
       restoreFocus(closed.opener);
       // Closing preparation can synchronously render a new copy of the screen.
       queueMicrotask(() => {
@@ -76,7 +86,9 @@ export function createSheet(stage) {
     if (event.target === panel) dismiss();
   });
   document.addEventListener('keydown', event => {
-    if (!opening || !['Tab', 'Escape'].includes(event.key)) return;
+    if (!['Tab', 'Escape'].includes(event.key)) return;
+    const scope = opening ? panel : activeResult();
+    if (!scope || (!opening && (event.key !== 'Tab' || $('.coach:not([hidden])') || event.target?.closest?.('dialog[open]')))) return;
     event.preventDefault();
     event.stopPropagation();
     if (event.key === 'Escape') {
@@ -87,14 +99,14 @@ export function createSheet(stage) {
       return;
     }
 
-    const controls = tabStops(panel);
+    const controls = tabStops(scope);
     if (event.shiftKey) controls.reverse();
     const active = document.activeElement;
     const index = controls.indexOf(active);
-    const direction = event.shiftKey ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING;
-    const next = index >= 0 ? controls[index + 1] : panel.contains(active)
-      ? controls.find(node => active.compareDocumentPosition(node) & direction) : null;
-    (next ?? controls[0] ?? heading).focus();
+    const next = index >= 0 ? controls[index + 1] : scope.contains(active)
+      ? controls.find(node => active.compareDocumentPosition(node) &
+          (event.shiftKey ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING)) : null;
+    (next ?? controls[0] ?? (opening ? heading : scope)).focus();
   }, true);
 
   return { openSheet, closeSheet, sheet };

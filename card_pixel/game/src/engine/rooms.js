@@ -327,8 +327,10 @@ function canAttemptBet(run, core, roster, kind) {
   return run.bench.length > 0;
 }
 
-export function eventChoices(run, core, roster) {
-  return (run.room.event?.choices || []).map(choice => {
+export function eventChoices(run, core, roster, door = run.room) {
+  // Entering a door on the promised floor clears the outstanding promise first.
+  const promise = run.phase === 'map' && run.promise?.floor === run.floor ? null : run.promise;
+  return (door?.event?.choices || []).map(choice => {
     let targets = null;
     if (choice.target === 'bench') targets = run.bench.slice();
     if (choice.target === 'release') {
@@ -340,16 +342,16 @@ export function eventChoices(run, core, roster) {
         return usesRepeatDraws(run) ? run.pool.length > 0 : run.pool.some(id => canJoin(run, id));
       }
       if (op.type === 'bet') return canAttemptBet(run, core, roster, op.kind);
-      if (op.type === 'promise') return run.promise === null && !!op.offer && !run.relics.includes(op.offer.relic);
+      if (op.type === 'promise') return promise === null && !!op.offer && !run.relics.includes(op.offer.relic);
       if (op.type === 'relic') {
-        const id = op.id === 'offered' ? run.room.relic : op.id;
+        const id = op.id === 'offered' ? door.relic : op.id;
         return !!id && !run.relics.includes(id) && (!op.temporary
           || (!run.nextBattle?.relic && run.relics.length < RELIC_LIMIT));
       }
       return true;
     });
     const view = { ...copy(choice), targets, enabled: eligible && (targets === null || targets.length > 0) && run.crystals >= (choice.cost || 0) };
-    if (run.lessonVersion) addEventChoiceDetails(view, run, core, roster);
+    if (run.lessonVersion) addEventChoiceDetails(view, run, core, roster, door.event.id);
     return view;
   });
 }
@@ -358,7 +360,7 @@ export function joinCount(ops) {
   return ops.filter(op => op.type === 'join').reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
 }
 
-function addEventChoiceDetails(choice, run, core, roster) {
+function addEventChoiceDetails(choice, run, core, roster, eventId) {
   const incoming = joinCount(choice.ops);
   if (incoming) {
     // Event details use the lesson version, independently of tempo validation.
@@ -374,10 +376,10 @@ function addEventChoiceDetails(choice, run, core, roster) {
       before: run.blessings[id] ?? 0, after: blessing.multiplier
     }]));
   }
-  if (run.room.event.id === 'kobold_boot_exchange' && choice.id === 'exchange') {
+  if (eventId === 'kobold_boot_exchange' && choice.id === 'exchange') {
     choice.netCrystals = Object.fromEntries(choice.targets.map(id => [id, SALE_PRICE[gradeOf(roster.card(id).grade)] - choice.cost]));
   }
-  if (run.room.event.id === 'penguin_ice_seam' && choice.id === 'carry') {
+  if (eventId === 'penguin_ice_seam' && choice.id === 'carry') {
     choice.waterAllies = run.bench.filter(id => core.GameUtils.cardMatchesElement(roster.card(id), 'water'));
     if (!choice.waterAllies.length) choice.text += ' · 물 동료 없음';
   }

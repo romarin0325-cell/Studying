@@ -315,7 +315,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     tutorial.sync(run);
   }
 
-  function prepare(dungeonId, { difficulty, contractId } = {}) {
+  function prepare(dungeonId, { difficulty, contractId, startCompanionNot } = {}) {
     const destination = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
     if (run || !destination) return;
     const chosenDifficulty = destination.difficulties.includes(difficulty) ? difficulty : departureDifficulty(profile, dungeonId);
@@ -328,8 +328,14 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       savePreparation({ dungeonId, difficulty: chosenDifficulty, contract: initialContract });
     }
     preparationOpen = true;
-    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, savePreparation, roster, widgets, sheets, start: startExpedition });
-    tutorial.sync(run);
+    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, savePreparation, roster, widgets, sheets,
+      start: startExpedition, startCompanionNot });
+    syncTutorial();
+  }
+
+  function syncTutorial() {
+    // The goal's change button owns focus while its preparation sheet is open.
+    if (!$('#sheet.on [data-goal-focus]')) tutorial.sync(run);
   }
 
   function savePreparation(draft) {
@@ -548,7 +554,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const mode = action?.closest('#recovery') ? null : action?.dataset.backupAction;
     if (mode) openBackupSheet({ mode, ...backupActions() });
   });
-  document.addEventListener('click', () => queueMicrotask(() => { if (!staleTab) tutorial.sync(run); }));
+  document.addEventListener('click', () => queueMicrotask(() => { if (!staleTab) syncTutorial(); }));
 
   function replayTutorial() {
     if (run || daily.run || !$('#title.on, #hub.on')) return;

@@ -7,7 +7,8 @@ import * as Meta from '../../engine/meta.js';
 import * as Roster from '../../engine/roster.js';
 import { DIFFICULTY_NAME } from './records.js';
 import { pixelIcon } from '../pixel-icons.js';
-import { TERMS } from '../glossary.js';
+import { PREPARATION, TERMS } from '../glossary.js';
+import { keepSeparators } from '../text.js';
 
 const { availableDungeons, departureDifficulty, setExpeditionParty, setSeals, startView } = Meta;
 
@@ -86,10 +87,12 @@ export function dungeonsScreen(node, { profile, roster, widgets, prepare, openRo
   }
 }
 
-export function preparationSheet({ dungeonId, currentProfile, updateProfile, savePreparation, roster, widgets, sheets, start }) {
+export function preparationSheet({ dungeonId, currentProfile, updateProfile, savePreparation, roster, widgets, sheets, start, startCompanionNot }) {
   const dungeon = DUNGEONS[dungeonId];
   if (!Meta.featureFlags(currentProfile()).prepEditing) return;
   const name = id => esc(roster.card(id)?.name ?? id ?? '미지정');
+  const previousLeadName = startCompanionNot && roster.card(startCompanionNot)?.name;
+  const leadHint = previousLeadName && PREPARATION.otherStartCompanion(previousLeadName);
   const status = row => row.excluded ? ['excluded', '×', TERMS.exclude.short] :
     row.start ? ['start', '★', '시작'] : row.invited ? ['invited', '↪', TERMS.springInvite.short] :
       row.added ? ['added', '+', '추가'] : ['base', '·', '기본'];
@@ -104,6 +107,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
     const entry = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
     const { start: lead, invite, exclude, pool } = Meta.prepView(profile, dungeonId, roster);
     const leadChoices = lead.candidates.filter(id => !exclude.ids.includes(id) && id !== lead.id);
+    const goalFocus = leadHint && leadChoices.length;
     const draft = profile.ui.preparation?.dungeonId === dungeonId ? profile.ui.preparation : null;
     const difficulty = entry?.difficulties?.includes(draft?.difficulty) ? draft.difficulty : departureDifficulty(profile, dungeonId);
     const contracts = Meta.contractsFor(profile, dungeonId);
@@ -130,10 +134,12 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
       ${flags.regionRules ? `<button class="btn" id="meta-region-rule" data-rule="${esc(rule)}">지역 규칙</button>` : ''}
       <p id="meta-prep-summary" aria-live="polite">시작 ${name(lead.id)} · 샘 초대 ${invite.ids.length}/${invite.slots} · 출현 제외 ${exclude.ids.length}/${exclude.slots}</p>
       <section class="meta-prep-section">
-        <h4>시작 동료 1명</h4>
+        <h4>${TERMS.startCompanion.short} 1명</h4>
         <div class="meta-prep-lead">${lead.id ? `<span class="meta-face">${widgets.face(lead.id, 44)}</span>` : ''}
-          <b>${name(lead.id)}</b><button class="btn" id="meta-change-lead"${leadChoices.length ? '' : ' disabled'}>바꾸기</button>
+          <b>${name(lead.id)}</b><button class="btn" id="meta-change-lead"${leadHint ? ' aria-describedby="meta-prep-lead-hint"' : ''}${
+            goalFocus ? ' data-goal-focus' : ''}${leadChoices.length ? '' : ' disabled'}>바꾸기</button>
         </div>
+        ${leadHint ? `<p class="sm" id="meta-prep-lead-hint">${esc(leadHint)}</p>` : ''}
       </section>
       <section class="meta-prep-section">
         <h4>이 지역 출현 명단</h4>
@@ -225,8 +231,9 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
         <button class="btn" data-contract="" aria-pressed="${!contractChoice}">계약 없음</button>
         ${Object.values(CONTRACTS).map(contract => `<button class="btn big" data-contract="${contract.id}" aria-pressed="${contract.id === contractChoice?.id}">
           <b>${esc(contract.name)}</b><small>${esc(contract.rule)}</small>
-          <small>문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김 · 6층까지 달성하면 ◆${CONTRACT_PAYOUT}</small>
-          <small class="${contracts.stamps[contract.id] ? 'gain' : ''}">${contracts.stamps[contract.id] ? '도장 획득' : '도장 없음'}</small>
+          <small>문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김</small>
+          <small class="meta-contract-rewards">${keepSeparators(esc(PREPARATION.contractRewards(CONTRACT_PAYOUT)))}</small>
+          <small class="${contracts.stamps[contract.id] ? 'gain' : ''}">${TERMS.stamp.short} ${contracts.stamps[contract.id] ? '획득' : '없음'}</small>
         </button>`).join('')}
         <button class="btn" id="meta-contract-back">준비로 돌아가기</button>
       </div>`, { onClose: restore });
@@ -240,6 +247,7 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
   }
 
   render('', { top: 0, grid: 0 });
+  $('[data-goal-focus]')?.focus();
 }
 
 function showMenu(menu, anchor) {
