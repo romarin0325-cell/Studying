@@ -5,6 +5,7 @@ import { ROOM_NAMES } from '../content/layouts.js';
 import { RELICS } from '../content/relics.js';
 import { heirloomSkill } from './bridge.js';
 import { localDayKey } from './dates.js';
+import { hasCleared } from './entry.js';
 import { nextFloat, pick, shuffle } from './rng.js';
 
 const MS_PER_DAY = 86_400_000;
@@ -16,6 +17,17 @@ const stream = (seed, k) => ({ state: (seed ^ Math.imul(k, 0x9e3779b9)) >>> 0 })
 const sameList = (a, b) => a.length === b.length && b.every((value, i) => value === a[i]);
 
 export { localDayKey as dayKey };
+
+export function riftPuzzlesUnlocked(profile) {
+  return !!profile?.records?.clears && hasCleared(profile, 'creation_tower');
+}
+
+export function puzzleGoalMet(goal, score) {
+  return score.outcome === 'win'
+    && score.livingIds.length >= (goal.survivors ?? 0)
+    && score.turns <= (goal.maxTurns ?? Infinity)
+    && score.heirloomsUsed >= (goal.heirloomUses ?? 0);
+}
 
 function dateIndex(key) {
   if (typeof key !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return NaN;

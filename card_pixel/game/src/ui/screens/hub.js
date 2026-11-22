@@ -8,7 +8,7 @@ import { saveEpisodeFlags } from './collection.js';
 import { chapterTitle } from './notebook.js';
 import { dailyRow } from './daily-rift.js';
 import { pixelIcon } from '../pixel-icons.js';
-import { josa } from '../text.js';
+import { josa, keepSeparators } from '../text.js';
 
 export function hubLineup(lead, recent) {
   const ids = Array.isArray(recent) ? recent : [];
@@ -84,7 +84,7 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
     </div>
     <div class="meta-hub-actions">
       ${dailyRow(daily)}
-      <button class="btn go${ticketArt ? ' ticket' : ''}" id="meta-depart" data-coach="departure">${ticketArt}${esc(action)}</button>
+      <button class="btn go${ticketArt ? ' ticket' : ''}" id="meta-depart" data-coach="departure">${ticketArt}<span class="ticket-label">${keepSeparators(esc(action))}</span></button>
       ${firstMain ? '<button class="btn" id="meta-other-region">다른 지역</button>' : ''}
     </div>
   `;

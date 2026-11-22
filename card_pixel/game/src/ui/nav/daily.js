@@ -1,6 +1,10 @@
 import { $ } from '../dom.js';
+import { riftPuzzlesUnlocked } from '../../engine/daily-rift.js';
 import { enterRun } from '../run/index.js';
-import { dailyResultScreen, dailyResultTitle, openDailyHistory, openDailyPreparation, openEarlierRift, shortRiftDate } from '../screens/daily-rift.js';
+import {
+  dailyResultScreen, dailyResultTitle, mountPuzzleFormation, openDailyHistory, openDailyPreparation, openEarlierRift,
+  openRiftPuzzles, puzzleResultScreen, puzzleResultTitle, riftPuzzleEntry, shortRiftDate
+} from '../screens/daily-rift.js';
 
 export function createDailyNavigation({
   currentProfile, dailyStore, roster, widgets, details, assets, runtime,
@@ -25,7 +29,8 @@ export function createDailyNavigation({
     return unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift;
   }
 
-  function showDailyHistory(node) {
+  function showDailyHistory(node, puzzleEntry) {
+    puzzleEntry?.addEventListener('click', openPuzzles);
     const cursors = [null];
     function render() {
       const history = dailyStore.history({ before: cursors.at(-1), limit: 7 }) ?? {};
@@ -46,17 +51,23 @@ export function createDailyNavigation({
     if (!view?.unlocked) return;
     if (view.active) {
       const today = view.dayKey ?? view.spec?.dayKey;
-      if (view.active.dayKey && today && view.active.dayKey !== today) return promptDailyResume(view.active);
+      if (riftPuzzlesUnlocked(currentProfile()) || (view.active.dayKey && today && view.active.dayKey !== today)) {
+        return promptDailyResume(view.active);
+      }
       return resumeDaily();
     }
     openDailyPreparation(view, {
       roster, widgets, sheets, message, start: startDaily,
+      openPuzzles: riftPuzzlesUnlocked(currentProfile()) ? openPuzzles : null,
       inspectLoan: (id, onClose) => details.charSheet(null, id, { loaned: true, onClose })
     });
   }
 
   function promptDailyResume(active) {
-    openEarlierRift(active, { sheets, resume: resumeDaily, abandon: abandonDaily });
+    openEarlierRift(active, {
+      sheets, resume: resumeDaily, abandon: abandonDaily,
+      openPuzzles: riftPuzzlesUnlocked(currentProfile()) ? openPuzzles : null
+    });
   }
 
   function startDaily(expectedDayKey, kind) {
@@ -103,6 +114,42 @@ export function createDailyNavigation({
     setReview(enterRun(current, dailyHost) || null);
   }
 
+  function openPuzzles() {
+    const puzzles = dailyStore.puzzles(currentProfile());
+    if (puzzles.length) openRiftPuzzles(puzzles, { sheets, start: startPuzzle });
+  }
+
+  function returnToPuzzles() {
+    dailyRun = null;
+    setReview(null);
+    showHub();
+    openPuzzles();
+  }
+
+  function startPuzzle(puzzleId) {
+    const result = dailyStore.startPuzzle({ profile: currentProfile(), puzzleId });
+    if (!result.ok) return sessionNotice('퍼즐을 시작하지 못했습니다.');
+    const { puzzle, run } = result;
+    dailyRun = run;
+    setReview(null);
+    sheets.closeSheet();
+    audio.unlockAudio();
+    setReview(enterRun(run, { ...dailyHost, save() {}, finish: current => finishPuzzle(current, puzzle) }) || null);
+    mountPuzzleFormation(puzzle, returnToPuzzles);
+  }
+
+  function finishPuzzle(run, puzzle) {
+    const result = dailyStore.finishPuzzle(run);
+    if (!result.score) return;
+    dailyRun = null;
+    setReview(null);
+    const { score } = result;
+    const node = page('daily-result', { title: puzzleResultTitle(score), track: score.goalMet ? 'victory' : 'defeat' });
+    puzzleResultScreen(node, { puzzle, score, saved: result.ok }, {
+      widgets, again: () => startPuzzle(puzzle.id), list: returnToPuzzles, hub: showHub, retry: () => finishPuzzle(run, puzzle)
+    });
+  }
+
   function showResult(current, result) {
     const spec = current.daily?.spec;
     const score = {
@@ -140,7 +187,9 @@ export function createDailyNavigation({
       actions.innerHTML = `
         <button class="btn go" data-backup-action="export">기록 내보내기</button>
         <button class="btn" id="meta-rift-retry">다시 저장</button>
-        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>`;
+        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>
+        ${riftPuzzlesUnlocked(currentProfile()) ? riftPuzzleEntry() : ''}`;
+      $('#meta-rift-puzzles', node)?.addEventListener('click', openPuzzles);
       $('#meta-rift-retry', node).addEventListener('click', () => finishDaily(current));
       $('#meta-rift-hub', node).addEventListener('click', () => {
         dailyRun = null;
@@ -164,6 +213,6 @@ export function createDailyNavigation({
   return {
     hubView, showDaily, showDailyHistory, reset,
     get run() { return dailyRun; },
-    get backupRun() { return unsavedDailyResult ?? dailyRun; }
+    get backupRun() { return unsavedDailyResult ?? (dailyRun?.daily?.puzzleId ? null : dailyRun); }
   };
 }

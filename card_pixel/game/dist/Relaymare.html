@@ -53,6 +53,9 @@
 :root.large-text { font-size: 125%; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 500 0.8125rem/1.5 var(--f-body); overscroll-behavior: none; }
+/* Korean wraps between words, as commercial games set it ("맞춘다" never splits into "맞춘/다"); a word wider than its box still breaks. */
+html { word-break: keep-all; overflow-wrap: break-word; }
+.nobr { white-space: nowrap; }
 body { display: flex; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: manipulation;
   background: linear-gradient(180deg, #e2dbfa 0 50%, #d9d1f5 50% 100%); }
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -1078,6 +1081,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 #ending .meta-top h1::before { content: 'ENDING' / ''; }
 #recruit .meta-top h1::before { content: 'RETURN' / ''; }
 #daily-result .meta-top h1::before { content: 'DAILY RIFT' / ''; }
+#daily-result:has(.rift-puzzle-result) .meta-top h1::before { content: 'RIFT PUZZLE' / ''; }
 #recovery .meta-top h1::before { content: 'RECOVERY' / ''; }
 #recruit .meta-top h1:empty { display: none; }
 .meta-top:has(.meta-back) h1 { margin-left: 2px; }
@@ -1312,7 +1316,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .rift-companion, #sheet .rift-loans .rift-companion { display: grid; justify-items: center; align-content: start; gap: 3px; min-width: 0; text-align: center; overflow-wrap: anywhere; padding: 8px 2px; }
 #sheet .rift-loans .rift-companion { font: normal 0.9375rem/1.1rem var(--f-display); }
 #sheet .rift-prep-note { margin: 10px 0; }
-.rift-prep > .go { margin-top: 8px; }
+.rift-prep .rift-actions { margin-top: 8px; }
 .rift-actions { display: grid; gap: 8px; }
 .rift-result { padding: 14px; margin-bottom: 12px; }
 .rift-result-cast { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-bottom: 10px; }
@@ -1324,6 +1328,22 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .rift-record-list, .rift-record-pages { display: grid; gap: 6px; margin-top: 8px; }
 .rift-record-list .btn { justify-content: flex-start; text-align: left; }
 .rift-record-pages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rift-puzzle-list { display: grid; gap: 8px; }
+/* One track as wide as the card: .btn centres its content, which gave every card a different indent. */
+#sheet .rift-puzzle-card { display: grid; grid-template-columns: minmax(0, 1fr); justify-content: stretch; gap: 3px; justify-items: start;
+  padding: 9px 12px; text-align: left; word-break: keep-all; overflow-wrap: anywhere; }
+.rift-puzzle-card b { font: normal 0.9375rem/1.2 var(--f-display); }
+.rift-puzzle-card small { color: var(--ink2); }
+.rift-puzzle-goal { margin: 4px 0 8px; font: 500 0.8125rem/1.4 var(--f-body); word-break: keep-all; }
+/* Puzzle result: one row per goal condition, met or missed, with the value this attempt reached. */
+.rift-puzzle-checks { display: grid; gap: 5px; margin: 10px 0 8px; padding: 0; list-style: none; }
+.rift-puzzle-checks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  font: 500 0.875rem/1.35 var(--f-body); word-break: keep-all; }
+.rift-puzzle-checks b { min-width: 3.2em; padding: 2px 6px; text-align: center; color: #fff; background: var(--aqua-lo);
+  font: normal 0.75rem/1.3 var(--f-display); clip-path: var(--notch); }
+.rift-puzzle-checks .missed b { background: var(--coral-lo); }
+.rift-puzzle-checks small { color: var(--ink2); font-size: 0.8125rem; }
+.rift-puzzle-result .rift-puzzle-stats { color: var(--ink2); font-size: 0.8125rem; }
 
 /* preparation sheet */
 .meta-prep-section { border-bottom: 1.5px dashed var(--line); padding: 6px 0 10px; }
@@ -1481,6 +1501,14 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 
 /* Anchor the choices low, where the thumb rests; all doors show when they fit and only the list scrolls when they do not. */
 #map .run-route > .fixed-top { padding-top: 0; }
+#map .floor-cell.promise:where(:not(.cur)) {
+  color: var(--aqua-ink);
+  --pf-o: var(--aqua-lo);
+  --pf-f: var(--aqua-tint);
+}
+#map .floor-cell.promise .relic-icon { flex: none; }
+#event .promise-choice { display: flex; align-items: center; gap: 6px; }
+#event .promise-choice .relic-icon { flex: none; }
 #map .run-doors.scroll-list {
   align-self: end;
   align-content: start;
@@ -1575,6 +1603,8 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .map-door[data-kind="spring"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #90ead9; }
 .map-door[data-kind="altar"], .map-door[data-kind="event"] { --door-rim: #ab82b1; --door-fill: #5a375c; --door-shine: #f8b5d9; }
 .map-door[data-kind="treasure"] { --door-rim: #b78854; --door-fill: #65412d; --door-shine: #ffd983; }
+.map-door[data-kind="promise"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #ffd983; }
+#map .door-plate[data-kind="promise"] { --kind: var(--aqua); }
 .map-door:is([data-kind="gate"], [data-kind="boss"], [data-kind="elite"]) {
   --door-rim: #ad7469;
   --door-fill: #56303d;
@@ -9392,6 +9422,19 @@ const BattleRuntime = {
       const owners = sourceCards.filter((card) => card.skills.some((slot) => sameSkill(slot, skill)));
       if (owners.length === 1) return skillSourceKey("ally", owners[0], skill);
     }
+    function sourceMotionSkill(sourceKey) {
+      const [role, id, slot] = sourceKey?.split("/") ?? [];
+      if (role !== "ally") return;
+      const owner = GameUtils.getCardById(id), skill = owner?.skills[Number(slot) - 1];
+      if (skill) return {
+        name: skill.name,
+        type: skill.type,
+        tier: skill.tier || 1,
+        val: skill.val,
+        effects: (skill.effects || []).map((effect) => effect.type),
+        element: owner.element
+      };
+    }
     const hasAffix = (enemy, id) => !!enemy && Array.isArray(enemy.affixes) && enemy.affixes.includes(id);
     const players = () => (host.battle.players || []).filter(Boolean);
     function push(ev) {
@@ -9461,7 +9504,7 @@ const BattleRuntime = {
       const cause = B.ctx.length ? B.ctx[B.ctx.length - 1] : null;
       const diffUnit = (who, unit, a, z) => {
         if (!a || !z) return;
-        if (z.mp !== a.mp) push({ t: "mp", who, delta: z.mp - a.mp });
+        if (z.mp !== a.mp) push({ t: "mp", who, delta: z.mp - a.mp, cause: describeCause(cause, who) });
         if (z.hp !== a.hp) {
           const ev = { t: "hp", who, delta: z.hp - a.hp, amount: Math.abs(z.hp - a.hp), cause: describeCause(cause, who) };
           const c = B.lastCalc;
@@ -9486,7 +9529,7 @@ const BattleRuntime = {
         });
         if (z.form !== a.form) {
           if (who.side === "ally") B.forms[z.form] = host.state.deck[who.idx];
-          push({ t: "form", who, name: z.name });
+          push({ t: "form", who, name: z.name, form: z.form });
         }
         if (z.dead && !a.dead) push({ t: "down", who });
       };
@@ -9638,7 +9681,19 @@ const BattleRuntime = {
         if (from) B.heirloomUses.push({ by, from, skill: skill.name });
       }
       const sourceKey = allySkillSource(source, skill, delayed);
-      push({ t: "act", who, target: refOf(target), delayed, sourceKey, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map((e) => e.type) } });
+      const trigger = delayed ? B.dueEffects.some((effect) => effect.source === source && effect.skill === skill) ? "reserved" : "follow-up" : void 0;
+      push({
+        t: "act",
+        who,
+        target: refOf(target),
+        delayed,
+        trigger,
+        sourceKey,
+        sourceSkill: sourceMotionSkill(sourceKey),
+        heirloom: !!skill.heirloom,
+        heirFrom: skill.heirFrom,
+        skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map((e) => e.type) }
+      });
       B.ctx.push({ kind: "act", who, skill, delayed, source });
       B.lastHit = null;
       const formId = source.formId;
@@ -9803,10 +9858,12 @@ const BattleRuntime = {
         target: isAttack(action) && !action.isChargeStart ? allyRef(target.pos) : enemyRef(),
         delayed: false,
         sourceKey: sourceKey || void 0,
+        sourceSkill: sourceMotionSkill(sourceKey || void 0),
         actionId: actionId(action),
         charge: !!action.isChargeStart,
         salience,
         ult: salience === "boss",
+        manaDrain: !action.isChargeStart && rule === "mana_drain",
         skill: { name: action.name, type: action.isChargeStart ? "sup" : action.type, tier: salience === "boss" ? 3 : 1, cost: 0, val: power2, effects: (action.effects || []).map((e) => e.type) }
       });
       return action;
@@ -10637,6 +10694,39 @@ const BattleRuntime = {
   var SCALE = { 1: 0.84, 4: 0.88, 6: 0.98, 7: 1.16 };
   var FLOORS = 7;
 
+  // card_pixel/game/src/content/rift-puzzles.js
+  var RIFT_PUZZLES = [
+    {
+      id: "arena-relay",
+      title: "\uBAA8\uB798 \uC704\uC758 \uBC1C\uC790\uAD6D",
+      spec: "2026-11-22",
+      floor: 7,
+      rentals: ["hellhound", "trauma", "time_ruler", "discipline_captain", "entropy"],
+      // The daily's boss entrance, after three battles. Earlier turns are excluded from the score.
+      setup: { seedOffset: 21, relics: ["big_bang"], blessings: { time_ruler: 0.4, hellhound: 0.3 } },
+      goal: { survivors: 3 },
+      note: "\uAD00\uC911\uC774 \uB5A0\uB09C \uB4A4\uC5D0\uB3C4 \uBAA8\uB798 \uC704\uC758 \uBC1C\uC790\uAD6D\uC740 \uB0A8\uC544 \uC788\uB2E4."
+    },
+    {
+      id: "ember-clock",
+      title: "\uC2DD\uC9C0 \uC54A\uB294 \uC7BF\uBD88",
+      spec: "2026-11-23",
+      floor: 7,
+      rentals: ["shooting_star_boy", "night_rabbit", "cinderella", "forget_me_not", "pudding_princess"],
+      goal: { maxTurns: 12 },
+      note: "\uAEBC\uC9C4 \uC904 \uC54C\uC558\uB358 \uC7BF\uBD88\uC774 \uC7AC \uBC11\uC5D0\uC11C \uB2E4\uC2DC \uBE5B\uB09C\uB2E4."
+    },
+    {
+      id: "trench-heirlooms",
+      title: "\uBC14\uB2E4 \uBC11\uC758 \uBA54\uC544\uB9AC",
+      spec: "2026-11-26",
+      floor: 7,
+      rentals: ["black_swan", "sphinx", "sylphid", "legendary_captain", "unicorn"],
+      goal: { survivors: 3, heirloomUses: 2 },
+      note: "\uBB3C\uACB0\uC774 \uC7A6\uC544\uB4E4\uC790 \uBA3C \uBC14\uB2E4\uC5D0\uC11C \uC885\uC18C\uB9AC\uAC00 \uB4E4\uB824\uC628\uB2E4."
+    }
+  ];
+
   // card_pixel/game/src/content/events.js
   var ORIGINAL_EVENTS = [
     {
@@ -11186,6 +11276,24 @@ const BattleRuntime = {
     }
   ];
   var EVENTS2 = [...ORIGINAL_EVENTS, ...TEMPO_EVENTS.map((event) => ({ ...event, minTempoVersion: 2 }))];
+  var PROMISE_EVENTS = {
+    ember_volcano: {
+      offerFloor: 3,
+      floor: 5,
+      chance: 1 / 4,
+      doorName: "\uC57D\uC18D\uD55C \uC790\uB9AC",
+      event: {
+        id: "kept_chest",
+        name: "\uB9E1\uACA8 \uB454 \uC0C1\uC790",
+        text: "\uD654\uC0B0\uC758 \uC0C1\uC790\uC9C0\uAE30\uAC00 \uACB0\uC815\uC744 \uD558\uB098 \uB0B4\uBBFC\uB2E4. \u201C\uC9C0\uAE08 \uAC00\uC838\uAC00\uB3C4 \uC88B\uC544. \uB124 \uACB0\uC815 \uD558\uB098\uB97C \uB9E1\uAE30\uBA74 5\uCE35\uC5D0 \uC774 \uC720\uBB3C\uC744 \uB0A8\uACA8 \uB458\uAC8C.\u201D",
+        requires: {},
+        choices: [
+          { id: "take_crystal", text: "\uC9C0\uAE08 \u25C61 \uBC1B\uAE30", ops: [{ type: "crystals", amount: 1 }] },
+          { id: "deposit", text: "\uACB0\uC815 \uB9E1\uAE30\uAE30", cost: 1, ops: [{ type: "promise" }] }
+        ]
+      }
+    }
+  };
   function eventForRun(event, run) {
     if (!event || !run.lessonVersion) return event;
     const updated = structuredClone(event);
@@ -11286,6 +11394,76 @@ const BattleRuntime = {
     return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === key ? date : null;
   }
 
+  // card_pixel/game/src/engine/entry.js
+  var ADVANCED = [
+    "difficultyChoice",
+    "regionRules",
+    "riskDoors",
+    "quirks",
+    "affixes",
+    "battleBlessing",
+    "bets",
+    "altar",
+    "pricedEvents",
+    "springPick",
+    "fullReinforcement",
+    "prepEditing",
+    "missions",
+    "dailyRift"
+  ];
+  var ALWAYS = [
+    "enemyIntent",
+    "retreat",
+    "heirlooms",
+    "lastStand",
+    "gate",
+    "boss",
+    "bossLessons",
+    "treasure",
+    "relics",
+    "springDraw",
+    "reinforcement"
+  ];
+  var hasCleared = (profile, dungeon) => {
+    const clear = profile.records.clears[dungeon];
+    return !!(clear?.easy || clear?.normal || clear?.nightmare);
+  };
+  function entryState(legacy = false) {
+    return { v: 1, legacy, done: [], tours: [], skipped: false };
+  }
+  function baseFeatureFlags(profile) {
+    const legacy = profile.ui?.entry?.legacy ?? true;
+    const introCleared = legacy || hasCleared(profile, "dawn_forest");
+    const firstMainCleared = legacy || Object.keys(DUNGEONS).some((id) => id !== "dawn_forest" && hasCleared(profile, id));
+    return {
+      introCleared,
+      firstMainCleared,
+      introSpring: legacy,
+      ...Object.fromEntries(ALWAYS.map((key) => [key, true])),
+      ...Object.fromEntries(ADVANCED.map((key) => [key, firstMainCleared]))
+    };
+  }
+  var openFeatures = Object.freeze(baseFeatureFlags({}));
+  function featureFlags(profile) {
+    const flags = baseFeatureFlags(profile);
+    return { ...flags, relicDoors: flags.firstMainCleared };
+  }
+  function hasFeature(run, key) {
+    if (key === "relicDoors") return run.features?.relicDoors === true;
+    return run.features?.[key] ?? true;
+  }
+  function mark(profile, key, id) {
+    const entry = profile.ui?.entry ?? entryState(true);
+    if (typeof id !== "string" || !id.trim() || entry[key].includes(id)) return profile;
+    return { ...profile, ui: { ...profile.ui, entry: { ...entry, [key]: [...entry[key], id] } } };
+  }
+  var markEntryStep = (profile, stepId) => mark(profile, "done", stepId);
+  var markTour = (profile, tourId) => mark(profile, "tours", tourId);
+  function skipTutorial(profile) {
+    const entry = profile.ui?.entry ?? entryState(true);
+    return entry.skipped ? profile : { ...profile, ui: { ...profile.ui, entry: { ...entry, skipped: true } } };
+  }
+
   // card_pixel/game/src/engine/daily-rift.js
   var MS_PER_DAY = 864e5;
   var BATTLE_FLOORS = [1, 4, 6, 7];
@@ -11294,6 +11472,12 @@ const BattleRuntime = {
   var eventFor = (id) => EVENTS2.find((event) => event.id === id);
   var stream = (seed, k) => ({ state: (seed ^ Math.imul(k, 2654435769)) >>> 0 });
   var sameList = (a, b) => a.length === b.length && b.every((value, i) => value === a[i]);
+  function riftPuzzlesUnlocked(profile) {
+    return !!profile?.records?.clears && hasCleared(profile, "creation_tower");
+  }
+  function puzzleGoalMet(goal, score) {
+    return score.outcome === "win" && score.livingIds.length >= (goal.survivors ?? 0) && score.turns <= (goal.maxTurns ?? Infinity) && score.heirloomsUsed >= (goal.heirloomUses ?? 0);
+  }
   function dateIndex(key) {
     if (typeof key !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return NaN;
     const [year, month, day] = key.split("-").map(Number);
@@ -11946,81 +12130,12 @@ const BattleRuntime = {
     return { id, multiplier: Math.round(base * (jackpot ? JACKPOT.mult : 1) * 100) / 100, jackpot };
   }
 
-  // card_pixel/game/src/engine/entry.js
-  var ADVANCED = [
-    "difficultyChoice",
-    "regionRules",
-    "riskDoors",
-    "quirks",
-    "affixes",
-    "battleBlessing",
-    "bets",
-    "altar",
-    "pricedEvents",
-    "springPick",
-    "fullReinforcement",
-    "prepEditing",
-    "missions",
-    "dailyRift"
-  ];
-  var ALWAYS = [
-    "enemyIntent",
-    "retreat",
-    "heirlooms",
-    "lastStand",
-    "gate",
-    "boss",
-    "bossLessons",
-    "treasure",
-    "relics",
-    "springDraw",
-    "reinforcement"
-  ];
-  var hasCleared = (profile, dungeon) => {
-    const clear = profile.records.clears[dungeon];
-    return !!(clear?.easy || clear?.normal || clear?.nightmare);
-  };
-  function entryState(legacy = false) {
-    return { v: 1, legacy, done: [], tours: [], skipped: false };
-  }
-  function baseFeatureFlags(profile) {
-    const legacy = profile.ui?.entry?.legacy ?? true;
-    const introCleared = legacy || hasCleared(profile, "dawn_forest");
-    const firstMainCleared = legacy || Object.keys(DUNGEONS).some((id) => id !== "dawn_forest" && hasCleared(profile, id));
-    return {
-      introCleared,
-      firstMainCleared,
-      introSpring: legacy,
-      ...Object.fromEntries(ALWAYS.map((key) => [key, true])),
-      ...Object.fromEntries(ADVANCED.map((key) => [key, firstMainCleared]))
-    };
-  }
-  var openFeatures = Object.freeze(baseFeatureFlags({}));
-  function featureFlags(profile) {
-    const flags = baseFeatureFlags(profile);
-    return { ...flags, relicDoors: flags.firstMainCleared };
-  }
-  function hasFeature(run, key) {
-    if (key === "relicDoors") return run.features?.relicDoors === true;
-    return run.features?.[key] ?? true;
-  }
-  function mark(profile, key, id) {
-    const entry = profile.ui?.entry ?? entryState(true);
-    if (typeof id !== "string" || !id.trim() || entry[key].includes(id)) return profile;
-    return { ...profile, ui: { ...profile.ui, entry: { ...entry, [key]: [...entry[key], id] } } };
-  }
-  var markEntryStep = (profile, stepId) => mark(profile, "done", stepId);
-  var markTour = (profile, tourId) => mark(profile, "tours", tourId);
-  function skipTutorial(profile) {
-    const entry = profile.ui?.entry ?? entryState(true);
-    return entry.skipped ? profile : { ...profile, ui: { ...profile.ui, entry: { ...entry, skipped: true } } };
-  }
-
   // card_pixel/game/src/engine/rooms.js
   var RELIC_LIMIT = 4;
   var SALE_PRICE = { normal: 1, rare: 2, epic: 3, legend: 4 };
   var SKY3 = ["sun_bless", "star_powder"];
   var ATTACK_TYPES = ["phy", "mag"];
+  var PROMISE_SALT = 1349676909;
   var copy = (value) => structuredClone(value);
   var invalid = (reason) => ({ ok: false, reason });
   function fitsRelic(run, roster2, rule) {
@@ -12056,7 +12171,8 @@ const BattleRuntime = {
   var CONDITIONAL_DOOR_RELICS = /* @__PURE__ */ new Set(["reverse", "buff_overload", "over_flame", "over_divine", "flame_piercing"]);
   var DOOR_RELIC_WEIGHT = { fits: 2, combo: 6, conditional: 9 };
   function relicOffer(run, roster2, { comboDoor = false, exclude = [] } = {}) {
-    const available = Object.keys(RELICS).filter((id2) => !run.relics.includes(id2) && !exclude.includes(id2));
+    const reserved = run.floor < run.promise?.floor ? run.promise.relic : null;
+    const available = Object.keys(RELICS).filter((id2) => id2 !== reserved && !run.relics.includes(id2) && !exclude.includes(id2));
     const fits = available.filter((id2) => fitsRelic(run, roster2, RELICS[id2].fits));
     const offers = comboDoor ? available.flatMap((id2) => {
       const fit = fits.includes(id2) ? DOOR_RELIC_WEIGHT.fits : 1;
@@ -12233,14 +12349,14 @@ const BattleRuntime = {
     const dungeon = DUNGEONS[run.dungeonId];
     const layout = LAYOUTS[dungeon.layout][run.floor - 1].filter((template) => template.type !== "altar" || hasFeature(run, "altar")).filter((template) => template.type !== "event" || run.floor >= 5 || hasFeature(run, "pricedEvents")).filter((template) => dungeon.layout !== "intro" || template.type !== "spring" || hasFeature(run, "introSpring"));
     const battleCount = layout.filter((template) => template.reward != null || ["borrowed", "boss"].includes(template.type)).length;
-    return layout.map((template, index) => {
+    const doors = layout.map((template, index) => {
       const regionChoice = hasFeature(run, "regionRules") && run.floor === 5 ? run.laterRegions?.[index] : null;
       const region = hasFeature(run, "regionRules") ? regionChoice || run.region : null;
       if (template.reward != null || ["borrowed", "boss"].includes(template.type)) {
         const standard2 = !hasFeature(run, "riskDoors") && (template.risk || template.type === "elite") ? { type: "wild", reward: 1 } : template;
         return makeBattleDoor(run, roster2, dungeon, standard2, index, region, battleCount);
       }
-      const event = template.type === "event" ? pick(run.rng, eventCandidates(run)) : null;
+      const event = template.type === "event" ? drawEvent(run, roster2) : null;
       const merchant = event?.id === "grand_merchant";
       const relic = template.type === "treasure" || merchant ? relicOffer(run, roster2) : null;
       return {
@@ -12256,6 +12372,33 @@ const BattleRuntime = {
         relic
       };
     });
+    if (run.promise?.floor === run.floor) {
+      doors.push({
+        type: "event",
+        index: doors.length,
+        name: PROMISE_EVENTS[run.dungeonId].doorName,
+        bg: dungeon.background,
+        enemies: [],
+        tempo: null,
+        event: null,
+        relic: run.promise.relic,
+        promiseId: run.promise.id
+      });
+    }
+    return doors;
+  }
+  function drawEvent(run, roster2) {
+    const ordinary = pick(run.rng, eventCandidates(run));
+    const config = PROMISE_EVENTS[run.dungeonId];
+    if (run.promise !== null || !usesRepeatDraws(run) || run.floor !== config?.offerFloor) return ordinary;
+    const rng = floorRng(run, PROMISE_SALT);
+    if (nextFloat(rng) >= config.chance) return ordinary;
+    const relic = relicOffer({ ...run, rng, seenRelics: run.seenRelics.slice() }, roster2);
+    if (!relic) return ordinary;
+    const event = copy(config.event);
+    const deposit = event.choices.find((choice) => choice.id === "deposit");
+    deposit.ops[0].offer = { id: event.id, relic, floor: config.floor, deposit: deposit.cost };
+    return event;
   }
   function canAttemptBet(run, core2, roster2, kind) {
     if (run.nextBattle?.bet) return false;
@@ -12286,6 +12429,7 @@ const BattleRuntime = {
           return usesRepeatDraws(run) ? run.pool.length > 0 : run.pool.some((id) => canJoin(run, id));
         }
         if (op.type === "bet") return canAttemptBet(run, core2, roster2, op.kind);
+        if (op.type === "promise") return run.promise === null && !!op.offer && !run.relics.includes(op.offer.relic);
         if (op.type === "relic") {
           const id = op.id === "offered" ? run.room.relic : op.id;
           return !!id && !run.relics.includes(id) && (!op.temporary || !run.nextBattle?.relic && run.relics.length < RELIC_LIMIT);
@@ -12355,6 +12499,10 @@ const BattleRuntime = {
       switch (op.type) {
         case "crystals":
           run.crystals += op.amount;
+          break;
+        case "promise":
+          run.promise = copy(op.offer);
+          result.effects.push(copy(op));
           break;
         case "firstSurvivalPay":
           (run.firstSurvivalPay ||= {})[op.id] = op.amount;
@@ -12642,6 +12790,7 @@ const BattleRuntime = {
       doors: [],
       room: null,
       pending: null,
+      ...!plain && lessonVersion && features?.pricedEvents && Object.hasOwn(PROMISE_EVENTS, dungeonId2) && { promise: null },
       lead,
       companions,
       preferredCompanion: profileView.preferredCompanion || null,
@@ -12785,9 +12934,21 @@ const BattleRuntime = {
     return { ok: true, id, awakened: completeStart(run), reserved: run.reserved, pending: null };
   }
   function chooseDoor(run, index) {
-    if (run.phase !== "map" || !Number.isInteger(index) || !run.doors[index]) return invalid("invalid_door");
-    run.room = { ...copy(run.doors[index]), status: "service", party: null };
+    const door = Number.isInteger(index) ? run.doors[index] : null;
+    if (run.phase !== "map" || !door) return invalid("invalid_door");
+    const promise = run.promise?.floor === run.floor ? run.promise : null;
+    if (door.promiseId && (door.promiseId !== promise?.id || door.relic !== promise.relic)) return invalid("invalid_promise_door");
+    run.room = { ...copy(door), status: "service", party: null };
     run.phase = "room";
+    if (promise) {
+      run.promise = null;
+      run.doors = run.doors.filter((entry) => !entry.promiseId);
+    }
+    if (door.promiseId) {
+      run.room.status = "resolved";
+      const relic = grantRelic(run, door.relic);
+      return { ok: true, room: copy(run.room), pending: copy(run.pending), relic };
+    }
     if (run.contract && run.floor === 2 && run.room.risk) run.contract.riskDoorTaken = true;
     const { core: core2, roster: roster2 } = dependencies.get(run);
     if (run.room.regionChoice) run.region = copy(run.room.regionChoice);
@@ -12801,6 +12962,9 @@ const BattleRuntime = {
     if (run.room.type === "event") {
       seeCharacters(run, run.room.event?.requires.present ?? []);
       run.pending = { kind: "event", choices: eventChoices(run, core2, roster2) };
+      for (const choice of run.pending.choices) {
+        for (const op of choice.ops) if (op.type === "promise") seeRelic(run, op.offer.relic);
+      }
     }
     return { ok: true, room: copy(run.room), pending: copy(run.pending) };
   }
@@ -12882,7 +13046,7 @@ const BattleRuntime = {
   }
   function addGatePartner(run) {
     if (run.floor !== 4 || !hasFeature(run, "relicDoors") || run.pending?.kind !== "gate") return;
-    const partner = relicPartners(run.relics).find((entry) => entry.id !== run.pending.relic);
+    const partner = relicPartners(run.relics).find((entry) => entry.id !== run.pending.relic && entry.id !== run.promise?.relic);
     if (partner) {
       run.pending.partner = partner;
       seeRelic(run, partner.id);
@@ -13058,6 +13222,7 @@ const BattleRuntime = {
     const wiped = win && nobodyReturned;
     if (!win || wiped && !final) run.result = "lose";
     else if (final) run.result = "win";
+    if (run.result && run.promise) run.promise = null;
     const { roster: roster2 } = dependencies.get(run);
     const downs = [...new Map(summary.enemyDowns.map((entry) => [entry.idx, entry])).values()];
     const contract = settleContract(run, summary, survivors, wiped);
@@ -13537,6 +13702,12 @@ const BattleRuntime = {
     previous: "\uC774\uC804",
     next: "\uB2E4\uC74C",
     saveFailed: "\uC77D\uC740 \uC0C1\uD0DC\uB97C \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4."
+  };
+  var RIFT_PUZZLE = {
+    title: "\uADE0\uC5F4 \uD37C\uC990",
+    met: "\uBAA9\uD45C \uB2EC\uC131",
+    missed: "\uBAA9\uD45C \uBBF8\uB2EC\uC131",
+    list: "\uD37C\uC990 \uBAA9\uB85D"
   };
   var TERMS = {
     crystal: { short: "\uACB0\uC815", firstUse: "\uACB0\uC815 \u25C6 \xB7 \uC774\uBC88 \uC6D0\uC815\uC5D0\uC11C \uC4F0\uB294 \uC7AC\uD654", detail: "\uC18C\uD658\uC758 \uC0D8\uACFC \uC6D0\uC815 \uC911 \uAC70\uB798\uC5D0 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.", scope: "\uC6D0\uC815" },
@@ -14075,7 +14246,7 @@ const BattleRuntime = {
       "seenRelics",
       "unchosen",
       "introCandidates"
-    ].every((key) => strings(run[key])) || !["heirlooms", "blessings", "stats", "introHeirlooms"].every((key) => dictionary(run[key])) || !count(run.stats.gateWins) || !count(run.stats.turns) || !count(run.stats.heirloomsUsed) || !Array.isArray(run.doors) || !Array.from(run.doors).every(validDoor) || run.room !== null && (!validDoor(run.room) || !string(run.room.status)) || run.phase === "room" && !run.room || run.phase === "map" && !run.doors.length || run.phase === "done" && !["win", "lose"].includes(run.result) || run.chronicle !== void 0 && !validChronicle(run.chronicle, run.floor) || run.endDayKey != null && !calendarDate(run.endDayKey) || !validEntryRules(run)) return null;
+    ].every((key) => strings(run[key])) || !["heirlooms", "blessings", "stats", "introHeirlooms"].every((key) => dictionary(run[key])) || !count(run.stats.gateWins) || !count(run.stats.turns) || !count(run.stats.heirloomsUsed) || !Array.isArray(run.doors) || !Array.from(run.doors).every(validDoor) || run.room !== null && (!validDoor(run.room) || !string(run.room.status)) || run.phase === "room" && !run.room || run.phase === "map" && !run.doors.length || run.phase === "done" && !["win", "lose"].includes(run.result) || run.chronicle !== void 0 && !validChronicle(run.chronicle, run.floor) || run.endDayKey != null && !calendarDate(run.endDayKey) || !validEntryRules(run) || !validPromise(run)) return null;
     run.contract ??= null;
     if (run.contract !== null) {
       if (!dictionary(run.contract) || !Object.hasOwn(CONTRACTS, run.contract.id)) return null;
@@ -14095,6 +14266,16 @@ const BattleRuntime = {
     migrateResult(run);
     if (run.phase === "result" && !validHeldResult(run)) return null;
     return bindRun(run, { core: core2, roster: roster2 });
+  }
+  function validPromise(run) {
+    const doors = run.doors.filter((door2) => door2.promiseId !== void 0);
+    const promise = run.promise;
+    if (promise == null) return !doors.length;
+    const config = PROMISE_EVENTS[run.dungeonId];
+    if (!config || run.daily || !dictionary(promise) || promise.id !== config.event.id || !string(promise.relic) || !Object.hasOwn(RELICS, promise.relic) || promise.floor !== config.floor || promise.deposit !== config.event.choices.find((choice) => choice.id === "deposit").cost || run.floor < config.offerFloor || run.floor > promise.floor || ["start", "result", "done"].includes(run.phase)) return false;
+    if (run.floor < promise.floor) return !doors.length;
+    const [door] = doors;
+    return run.phase === "map" && doors.length === 1 && door === run.doors.at(-1) && door.index === run.doors.length - 1 && door.promiseId === promise.id && door.relic === promise.relic && door.type === "event" && !door.enemies.length;
   }
   function validChronicle(records, floor) {
     const facts = (values, key) => Array.isArray(values) && Array.from(values).every((fact) => dictionary(fact) && string(fact[key]) && string(fact.from) && string(fact.skill));
@@ -14167,7 +14348,7 @@ const BattleRuntime = {
     const { active: active2 } = data;
     const daily = run?.daily;
     const day = data.days[active2?.dayKey];
-    if (!daily || !day || run.id !== active2.runId || daily.kind !== active2.kind || daily.attemptNo !== day.starts || !day.spec || daily.spec?.dayKey !== active2.dayKey || run.seed !== day.spec.seed || run.dungeonId !== day.spec.dungeonId || run.floors !== FLOORS || run.difficulty !== "normal" || run.contract !== null || run.crystals !== 0) return null;
+    if (!daily || daily.puzzleId || !day || run.id !== active2.runId || daily.kind !== active2.kind || daily.attemptNo !== day.starts || !day.spec || daily.spec?.dayKey !== active2.dayKey || run.seed !== day.spec.seed || run.dungeonId !== day.spec.dungeonId || run.floors !== FLOORS || run.difficulty !== "normal" || run.contract !== null || run.crystals !== 0) return null;
     try {
       if (JSON.stringify(daily.spec) === JSON.stringify(day.spec)) return checkpointFor(run);
     } catch {
@@ -14183,6 +14364,14 @@ const BattleRuntime = {
     if (!dictionary2(score) || score.dayKey !== day.spec.dayKey || score.kind !== kind || !["win", "lose", "abandon"].includes(score.outcome) || !validCheckpoint(score, day.spec)) return false;
     const attempt = Number(score.runId?.split?.("/").at(-1));
     return score.runId === `rift/v${day.spec.ruleVersion}/${day.spec.dayKey}/${attempt}` && Number.isSafeInteger(attempt) && attempt <= day.starts && (kind === "official" ? attempt === 1 : attempt > 1);
+  }
+  function puzzleBest(data, puzzle) {
+    const best = data?.puzzleBests?.[puzzle.id];
+    if (!["win", "lose"].includes(best?.outcome) || best.floor !== puzzle.floor || !validCheckpoint(best, { loanIds: puzzle.rentals })) return null;
+    return { ...best, goalMet: puzzleGoalMet(puzzle.goal, best) };
+  }
+  function comparePuzzle(a, b) {
+    return Number(a.goalMet) - Number(b.goalMet) || Number(a.outcome === "win") - Number(b.outcome === "win") || a.livingIds.length - b.livingIds.length || b.turns - a.turns;
   }
   function restoreDailyData(data, { core: core2, roster: roster2 }) {
     if (!dictionary2(data) || data.version !== VERSION || !dictionary2(data.days) || data.active !== null && !dictionary2(data.active)) return null;
@@ -14234,6 +14423,7 @@ const BattleRuntime = {
   }
   function create3(storage2, { core: core2, roster: roster2 }) {
     storage2 = slotStorage(storage2);
+    const puzzlesInPlay = /* @__PURE__ */ new WeakMap();
     function read() {
       try {
         const saved = storage2.getItem(DAILY_KEY);
@@ -14265,6 +14455,55 @@ const BattleRuntime = {
       return write(data) ? response(day, score, false) : invalid("storage_failed");
     }
     return {
+      puzzles(profile) {
+        if (!riftPuzzlesUnlocked(profile)) return [];
+        const data = read();
+        return RIFT_PUZZLES.map((puzzle) => ({ ...puzzle, best: puzzleBest(data, puzzle) }));
+      },
+      startPuzzle({ profile, puzzleId }) {
+        if (!riftPuzzlesUnlocked(profile)) return invalid("locked");
+        const puzzle = RIFT_PUZZLES.find((item) => item.id === puzzleId);
+        if (!puzzle) return invalid("invalid_puzzle");
+        try {
+          const spec = specFor(puzzle.spec, roster2);
+          if (puzzle.rentals.some((id) => !spec.loanIds.includes(id))) return invalid("invalid_puzzle");
+          const run = createRun({ core: core2, roster: roster2, daily: { spec, kind: "practice", attemptNo: 2, puzzleId } });
+          run.id = `puzzle/${puzzleId}`;
+          run.floor = puzzle.floor;
+          run.doors = doorsFor(spec, puzzle.floor, roster2).map((door) => ({ ...door, tempo: null }));
+          run.joinOrder = puzzle.rentals.slice();
+          run.bench = puzzle.rentals.slice();
+          run.seed += puzzle.setup?.seedOffset ?? 0;
+          run.relics = puzzle.setup?.relics.slice() ?? [];
+          run.blessings = { ...puzzle.setup?.blessings };
+          if (!chooseDoor(run, 0).ok) return invalid("invalid_puzzle");
+          puzzlesInPlay.set(run, puzzle);
+          return { ok: true, run, puzzle };
+        } catch {
+          return invalid("invalid_puzzle");
+        }
+      },
+      finishPuzzle(run) {
+        const puzzle = puzzlesInPlay.get(run);
+        if (!puzzle) return invalid("invalid_puzzle");
+        if (run.phase !== "done" || run.floor !== puzzle.floor || !["win", "lose"].includes(run.result)) {
+          return invalid("run_not_done");
+        }
+        const checkpoint = checkpointFor(run);
+        if (!checkpoint) return invalid("invalid_puzzle");
+        const score = { ...checkpoint, outcome: run.result };
+        const result = { ...score, goalMet: puzzleGoalMet(puzzle.goal, score) };
+        const data = read();
+        if (!data) return { ...invalid("invalid_save"), score: result };
+        const best = puzzleBest(data, puzzle);
+        if (!best || comparePuzzle(result, best) > 0) {
+          const puzzleBests = dictionary2(data.puzzleBests) ? data.puzzleBests : {};
+          if (!write({ ...data, puzzleBests: { ...puzzleBests, [puzzle.id]: score } })) {
+            return { ...invalid("storage_failed"), score: result };
+          }
+        }
+        return { ok: true, score: result };
+      },
       view(profile, now) {
         const key = localDayKey(now);
         const unlocked = dailyRiftUnlocked(profile);
@@ -15341,6 +15580,13 @@ const BattleRuntime = {
   function ranged(expectedName, family, variant, frame, socket, extra = {}) {
     return { expectedName, family, variant, range: "ranged", frame, socket, ...extra };
   }
+  var FORM_ART = "miracle_larva";
+  var FORM_OUTLINE_WIDTH = 2;
+  var FORM_MARKERS = {
+    mirror_cocoon: [172, 208, 255],
+    aurora_wing: [137, 255, 202],
+    abyss_wing: [210, 126, 255]
+  };
   var SKILL_MOTIONS = {
     "ally/ancient_dragon/2": melee("\uB4DC\uB798\uACE4\uD06C\uB85C", "claw", "rake", "idle", { socket: "hand" }),
     "ally/avalanche_maid/2": melee("\uBE59\uD558\uC758\uC77C\uACA9", "impact", "strike", "attack", { tint: "water" }),
@@ -15355,7 +15601,7 @@ const BattleRuntime = {
     "ally/doom_luther/3": melee("\uAC13\uD0AC\uB7EC", "blade", "diagonal", "idle"),
     "ally/ember_tiger/2": melee("\uC640\uC77C\uB4DC\uB7EC\uC26C", "impact", "body", "attack"),
     "ally/ember_tiger/3": melee("\uBE14\uB808\uC774\uC988\uD06C\uB85C", "claw", "rake", "idle", { tint: "fire" }),
-    "ally/executor/3": melee("\uC100\uB3C4\uC6B0\uAE38\uB85C\uD2F4", "blade", "guillotine", "idle", { socket: "hand", tint: "dark" }),
+    "ally/executor/3": melee("\uC100\uB3C4\uC6B0\uAE38\uB85C\uD2F4", "blade", "guillotine", "idle", { socket: "hand", tint: "dark", forceBig: true }),
     "ally/fenrir/2": melee("\uD504\uB85C\uC2A4\uD2B8\uD33D", "claw", "cross", "attack", { tint: "water" }),
     "ally/gold_dragon/3": melee("\uB4DC\uB798\uACE4\uD06C\uB85C", "claw", "rake", "idle", { socket: "hand" }),
     "ally/gray/3": melee("\uCC28\uC6D0\uC808\uB2E8", "blade", "scythe", "attack", { socket: "weaponTip" }),
@@ -15476,7 +15722,7 @@ const BattleRuntime = {
     "ally/fallen_angel/2": ranged("\uB2E4\uD06C\uB808\uC774", "ray", "straight", "attack", "hand"),
     "ally/fallen_angel/3": ranged("\uD0C0\uB77D\uC758\uB099\uC778", "field", "circle", "idle", "hand"),
     "ally/fenrir/3": ranged("\uC708\uD130\uD558\uC6B8\uB9C1", "blast", "wave", "idle", "mouth"),
-    "ally/fireworks_girl/2": ranged("\uD398\uC2A4\uD2F0\uBC8C\uB098\uC774\uD2B8", "blast", "burst", "attack", "top"),
+    "ally/fireworks_girl/2": ranged("\uD398\uC2A4\uD2F0\uBC8C\uB098\uC774\uD2B8", "blast", "eruption", "attack", "top"),
     "ally/fireworks_girl/3": ranged("\uC2A4\uD30C\uD074\uCE90\uB17C", "shot", "bullet", "idle", "hand"),
     "ally/flame_sage/2": ranged("\uD504\uB85C\uBBF8\uB10C\uC2A4", "blast", "eruption", "attack", "ground"),
     "ally/flare_ribbon/3": ranged("\uC2A4\uD30C\uD074\uB798\uC26C", "field", "bind", "attack", "hand"),
@@ -15517,13 +15763,13 @@ const BattleRuntime = {
     "ally/night_rabbit/3": ranged("\uBB38\uB77C\uC774\uD2B8", "ray", "straight", "idle", "hand"),
     "ally/paladin/2": ranged("\uD640\uB9AC\uADF8\uB77C\uC6B4\uB4DC", "field", "circle", "idle", "ground"),
     "ally/perfect_aurora/2": ranged("\uD5C8\uC2E4\uC758\uAC70\uC6B8", "orb", "bolt", "idle", "hand"),
-    "ally/perfect_aurora/3": ranged("\uD37C\uD399\uD2B8\uD50C\uB79C", "mark", "reserve", "attack", "hand"),
-    "ally/phantom/2": ranged("\uB098\uC774\uD2B8\uBA54\uC5B4", "mark", "reserve", "attack", "hand"),
+    "ally/perfect_aurora/3": ranged("\uD37C\uD399\uD2B8\uD50C\uB79C", "ray", "straight", "attack", "hand", { tint: "light" }),
+    "ally/phantom/2": ranged("\uB098\uC774\uD2B8\uBA54\uC5B4", "orb", "bolt", "attack", "hand", { tint: "dark" }),
     "ally/phantom/3": ranged("\uC18C\uC6B8\uB514\uC2A4\uD2B8\uB85C\uC774\uC5B4", "blast", "burst", "idle", "hand"),
     "ally/phoenix/3": ranged("\uC0E4\uC774\uB2DD\uD50C\uB808\uC784", "blast", "eruption", "idle", "hand"),
     "ally/priest_of_end/3": ranged("\uC0AC\uC2E0\uAC15\uB9BC", "field", "summon", "attack", "hand"),
     "ally/prism_twin/2": ranged("\uD504\uB9AC\uC998\uC154\uD50C", "field", "circle", "attack", "hand"),
-    "ally/prism_twin/3": ranged("\uC77C\uB8E8\uBBF8\uB124\uC774\uC158", "mark", "reserve", "idle", "hand"),
+    "ally/prism_twin/3": ranged("\uC77C\uB8E8\uBBF8\uB124\uC774\uC158", "ray", "straight", "idle", "hand", { tint: "light" }),
     "ally/prophet/3": ranged("\uC288\uD37C\uB0B4\uCD94\uB7F4", "field", "roulette", "attack", "hand"),
     "ally/pudding_princess/3": ranged("\uD478\uB529\uD30C\uB77C\uB2E4\uC774\uC2A4", "field", "circle", "idle", "hand"),
     "ally/red_moon/3": ranged("\uC774\uD130\uB110\uD50C\uB808\uC784", "blast", "eruption", "idle", "hand"),
@@ -15559,7 +15805,7 @@ const BattleRuntime = {
     "ally/supernova/2": ranged("\uD30C\uC774\uB110\uBC84\uC2A4\uD2B8", "blast", "burst", "attack", "hand"),
     "ally/time_magician/2": ranged("\uC561\uC140\uB7EC\uB808\uC774\uD130", "orb", "bolt", "idle", "hand"),
     "ally/time_magician/3": ranged("\uB370\uC2A4\uD074\uB85D", "field", "circle", "attack", "hand"),
-    "ally/time_ruler/2": ranged("\uC885\uC5B8\uC758\uC608\uACE0", "mark", "reserve", "attack", "hand"),
+    "ally/time_ruler/2": ranged("\uC885\uC5B8\uC758\uC608\uACE0", "orb", "bolt", "attack", "hand"),
     "ally/tinker_bell/3": ranged("\uB124\uBC84\uB79C\uB4DC", "field", "circle", "idle", "hand"),
     "ally/toffee_apple/2": ranged("\uC560\uD504\uD130\uD14C\uC774\uC2A4\uD2B8", "mark", "curse", "attack", "hand"),
     "ally/toffee_apple/3": ranged("\uC288\uAC70\uB178\uC774\uC988", "blast", "wave", "idle", "mouth"),
@@ -15568,7 +15814,7 @@ const BattleRuntime = {
     "ally/trans_chaos_lord/2": ranged("\uD504\uB9AC\uC998\uBE0C\uB808\uC774\uCEE4", "drift", "shard", "attack", "hand"),
     "ally/trans_chaos_lord/3": ranged("\uB370\uC2A4\uD2F0\uB2C8\uB8F0\uB81B", "field", "roulette", "idle", "hand"),
     "ally/trans_cinderella/3": ranged("\uBBF8\uB77C\uD074\uC2A4\uD3A0", "field", "circle", "attack", "hand"),
-    "ally/trans_executor/3": ranged("\uC778\uACFC\uC5ED\uC804", "mark", "reserve", "attack", "hand"),
+    "ally/trans_executor/3": ranged("\uC778\uACFC\uC5ED\uC804", "ray", "straight", "attack", "hand", { tint: "dark" }),
     "ally/trans_flora/3": ranged("\uBE14\uB7EC\uC378\uD15C\uD398\uC2A4\uD2B8", "drift", "petal", "attack", "hand"),
     "ally/trans_gray/2": ranged("\uBCF4\uC774\uB4DC\uC774\uD130", "orb", "absorb", "idle", "hand"),
     "ally/trans_poseidon/3": ranged("\uC5B4\uBE44\uC2A4\uD504\uB808\uC154", "blast", "ground", "attack", "weaponTip"),
@@ -15577,7 +15823,7 @@ const BattleRuntime = {
     "ally/trauma/3": ranged("\uB9C8\uC778\uB4DC\uBE0C\uB808\uC774\uCEE4", "mark", "curse", "idle", "hand"),
     "ally/vampire/2": ranged("\uBE14\uB7EC\uB4DC\uB4DC\uB808\uC778", "orb", "absorb", "attack", "hand", { tint: "dark" }),
     "ally/vampire/3": ranged("\uB2E4\uD06C\uB2C8\uC2A4", "orb", "bolt", "idle", "hand"),
-    "ally/venom/2": ranged("\uD50C\uB808\uC774\uADF8", "mark", "reserve", "idle", "hand"),
+    "ally/venom/2": ranged("\uD50C\uB808\uC774\uADF8", "drift", "powder", "idle", "hand", { tint: "dark" }),
     "ally/victoria/2": ranged("\uC5D0\uD14C\uB974\uB79C\uC2A4", "shot", "fire", "attack", "weaponTip"),
     "ally/world_tree/2": ranged("\uB300\uC9C0\uC758\uBD84\uB178", "blast", "ground", "idle", "ground"),
     "ally/world_tree/3": ranged("\uC544\uC2A4\uD2B8\uB784\uB8E8\uD2B8", "field", "bind", "attack", "ground"),
@@ -15616,46 +15862,53 @@ const BattleRuntime = {
   var BASIC_MOTION = { family: "impact", variant: "strike", range: "melee", frame: "idle" };
 
   // card_pixel/game/src/ui/battle/motion.js
-  var FORM_SPRITES = /* @__PURE__ */ new Set(["mirror_cocoon", "aurora_wing", "abyss_wing"]);
   var ATTACK_FRAME = { red_dragon: "phy", ash: "mag", flame_sage: "mag", luna: "phy", zeke: "phy", cherry_prince: "phy", golem: "phy" };
   var MOTION_FRAME = 0.03;
-  function isBigMove({ skill, side, heirloom, salience, isBasic }) {
+  function isBigMove({ skill, side, salience, isBasic }) {
     const { type, tier, val } = skill;
-    return !isBasic && type !== "sup" && (salience === "boss" || !!heirloom || side === "ally" && tier >= 3 && (!Number.isFinite(val) || val >= 2));
+    return !isBasic && type !== "sup" && (salience === "boss" || side === "ally" && tier >= 3 && (!Number.isFinite(val) || val >= 2));
   }
-  function defaultMotion(skill, casterSprite, big, basePower) {
+  function defaultMotion(skill, casterSprite, big) {
     const phy = skill.type === "phy";
     const frame = skill.type === "sup" || ATTACK_FRAME[casterSprite] && ATTACK_FRAME[casterSprite] !== skill.type ? "idle" : "attack";
-    const fx = skill.effects ?? [];
+    const fx = (skill.effects ?? []).map((effect) => effect.type ?? effect);
     if (skill.type === "sup") {
       if (fx.includes("field_buff")) return { family: "field", variant: "circle", range: "ranged", frame, socket: "hand" };
       return { family: "mark", variant: fx.includes("debuff") ? "curse" : "heal", range: "ranged", frame, socket: "hand" };
     }
     if (!big) return phy ? { ...BASIC_MOTION, frame } : { family: "orb", variant: "bolt", range: "ranged", frame, socket: "hand" };
-    if (fx.includes("random_mult") || fx.includes("multi_hit")) return phy ? { family: "blade", variant: "double", range: "melee", frame } : { family: "fall", variant: "rain", range: "ranged", frame, socket: "top" };
+    if (fx.some((type) => ["random_mult", "random_mult_moon_boost", "delayed_random_attack", "multi_hit"].includes(type))) return phy ? { family: "blade", variant: "double", range: "melee", frame } : { family: "fall", variant: "rain", range: "ranged", frame, socket: "top" };
     if (fx.includes("consume_debuff_all") || fx.includes("consume_field_all")) {
       return { family: "blast", variant: "burst", range: "ranged", frame, socket: "hand" };
     }
-    if (fx.includes("self_hp_cost_ratio") || (basePower ?? skill.val) >= 4) {
+    if (fx.includes("self_hp_cost_ratio") || skill.val >= 4) {
       return { family: "fall", variant: "meteor", range: "ranged", frame, socket: "top" };
     }
     return phy ? { family: "impact", variant: "body", range: "melee", frame } : { family: "ray", variant: "straight", range: "ranged", frame, socket: "hand" };
   }
-  function resolveMotion({ sourceKey, skill, side, heirloom, salience, isBasic, casterSprite, basePower }) {
+  function resolveMotion({ sourceKey, skill, sourceSkill, side, salience, isBasic, casterSprite, casterForm }) {
     const [role, owner, slot] = sourceKey?.split("/") ?? [];
-    const key = role === "ally" && FORM_SPRITES.has(owner) ? `form/${owner}/${slot}` : sourceKey;
+    const key = role === "ally" && Object.hasOwn(FORM_MARKERS, owner) ? `form/${owner}/${slot}` : sourceKey;
     const entry = Object.hasOwn(SKILL_MOTIONS, key) ? SKILL_MOTIONS[key] : null;
     const exact = entry?.expectedName === skill.name ? entry : null;
-    const big = !isBasic && exact?.forceBig || isBigMove({ skill, side, heirloom, salience, isBasic });
-    const { family, variant, range, frame, socket, tint } = isBasic && skill.type === "phy" ? BASIC_MOTION : exact ?? defaultMotion(skill, casterSprite, big, basePower);
-    const borrowed = role === "ally" && casterSprite && owner !== casterSprite;
+    const native = role === "ally" || role === "form";
+    const original = sourceSkill ?? skill;
+    const big = !isBasic && exact?.forceBig || isBigMove({
+      skill: original,
+      side: native ? "ally" : side,
+      salience: native ? void 0 : salience,
+      isBasic
+    });
+    const { family, variant, range, frame, socket, tint } = isBasic && skill.type === "phy" ? BASIC_MOTION : exact ?? defaultMotion(original, native ? owner : casterSprite, big);
+    const borrowed = native && casterSprite && owner !== (casterForm ?? casterSprite);
     return {
       family,
       variant,
       range,
-      frame: borrowed && !heirloom ? "idle" : frame,
+      frame: borrowed ? "idle" : frame,
       ...socket && { socket },
       ...tint && { tint },
+      ...Object.hasOwn(FORM_MARKERS, casterForm) && { marker: casterForm },
       size: big ? "big" : "quiet"
     };
   }
@@ -15689,7 +15942,7 @@ const BattleRuntime = {
     const flight = Math.min(big ? 0.26 : 0.145, distance / speed);
     if (family === "fall") {
       const falling = Math.max(2, Math.min(3, Math.round(fallHeight / speed / MOTION_FRAME)));
-      return { flight: falling * MOTION_FRAME, travel: (1 + falling + (variant === "rain" ? 2 : 0)) * MOTION_FRAME, hold: 0.12 };
+      return { flight: falling * MOTION_FRAME, travel: (1 + falling) * MOTION_FRAME, hold: 0.12 };
     }
     if (family === "breath") return { travel: Math.max(0.06, flight), hold: 0.12, linger: big ? 4 : 2 };
     if (family === "ray") return { travel: Math.max(0.06, flight), hold: big ? 0.18 : 0.12 };
@@ -15798,10 +16051,12 @@ const BattleRuntime = {
       entry[name] = c;
       return c;
     }
-    function rimOf(key) {
+    function rimOf(key, color, width) {
       const entry = IMG[key];
       if (!entry) return null;
-      if (entry.rim) return entry.rim;
+      const rims = entry.rims ??= /* @__PURE__ */ new Map();
+      const id = width + ":" + color.join(",");
+      if (rims.has(id)) return rims.get(id);
       const im = entry.base, w = im.width, h = im.height;
       const src = document.createElement("canvas");
       src.width = w;
@@ -15810,22 +16065,27 @@ const BattleRuntime = {
       sx.drawImage(im, 0, 0);
       const a = sx.getImageData(0, 0, w, h).data;
       const c = document.createElement("canvas");
-      c.width = w + 2;
-      c.height = h + 2;
-      const x = c.getContext("2d"), out = x.createImageData(w + 2, h + 2), d = out.data;
+      c.width = w + 2 * width;
+      c.height = h + 2 * width;
+      const x = c.getContext("2d"), out = x.createImageData(c.width, c.height), d = out.data;
       const solid = (px, py) => px >= 0 && py >= 0 && px < w && py < h && a[(py * w + px) * 4 + 3] > 0;
-      for (let y = -1; y <= h; y++) for (let X0 = -1; X0 <= w; X0++) {
-        if (solid(X0, y)) continue;
-        if (solid(X0 - 1, y) || solid(X0 + 1, y) || solid(X0, y - 1) || solid(X0, y + 1)) {
-          const i = ((y + 1) * (w + 2) + (X0 + 1)) * 4;
-          d[i] = RIM.color[0];
-          d[i + 1] = RIM.color[1];
-          d[i + 2] = RIM.color[2];
+      for (let py = -width; py < h + width; py++) for (let px = -width; px < w + width; px++) {
+        if (solid(px, py)) continue;
+        for (let dy = -width; dy <= width; dy++) {
+          const reach = width - Math.abs(dy);
+          let touches = false;
+          for (let dx = -reach; dx <= reach && !touches; dx++) touches = solid(px + dx, py + dy);
+          if (!touches) continue;
+          const i = ((py + width) * c.width + px + width) * 4;
+          d[i] = color[0];
+          d[i + 1] = color[1];
+          d[i + 2] = color[2];
           d[i + 3] = 255;
+          break;
         }
       }
       x.putImageData(out, 0, 0);
-      entry.rim = c;
+      rims.set(id, c);
       return c;
     }
     function loadSprites() {
@@ -15883,6 +16143,8 @@ const BattleRuntime = {
       beads: { burn: 0, divine: 0, x: 0, y: 0 }
     };
     Object.defineProperty(clock, "screenEffects", { get: () => ({ shake: S.shake, flash: S.flash }) });
+    let framesDrawn = 0;
+    Object.defineProperty(clock, "framesDrawn", { get: () => framesDrawn });
     let cv, ctx, fxLayer, bgCache = null;
     const ELEMENT_COLORS = {
       fire: ["#ffe07a", "#ff8a3a", "#ff5a3c"],
@@ -15901,8 +16163,10 @@ const BattleRuntime = {
       const i = S.actors.indexOf(a);
       if (i >= 0) S.actors.splice(i, 1);
     }
+    const spriteId = (a) => Object.hasOwn(FORM_MARKERS, a.form) ? FORM_ART : a.sprite;
     function meta(a, pose) {
-      return ASSETS.sp[a.sprite + "-" + (pose || a.pose)] || ASSETS.sp[a.sprite + "-idle"];
+      const sprite2 = spriteId(a);
+      return ASSETS.sp[sprite2 + "-" + (pose || a.pose)] || ASSETS.sp[sprite2 + "-idle"];
     }
     const X = (a) => a.x + a.ox;
     const footY = (a) => S.BASE + (a ? a.y || 0 : 0);
@@ -15910,8 +16174,9 @@ const BattleRuntime = {
     const headY = (a) => footY(a) - tall(a);
     const chestY = (a) => footY(a) - Math.round(tall(a) * 0.5);
     function socket(a, name) {
-      const pose = ASSETS.sp[a.sprite + "-" + a.pose] ? a.pose : "idle";
-      const key = a.sprite + "-" + pose;
+      const sprite2 = spriteId(a);
+      const pose = ASSETS.sp[sprite2 + "-" + a.pose] ? a.pose : "idle";
+      const key = sprite2 + "-" + pose;
       return socketPoint(
         { ...a, y: S.BASE + a.y },
         meta(a, pose),
@@ -16098,10 +16363,12 @@ const BattleRuntime = {
     }
     function drawActor(a, now) {
       if (!a.vis || a.alpha <= 0.01) return;
-      const key = a.sprite + "-" + a.pose, m = meta(a);
+      const sprite2 = spriteId(a);
+      const key = sprite2 + "-" + a.pose, m = meta(a);
       if (!m) return;
       const look = a.white > 0 ? "white" : a.wait > 0.5 ? a.look === "base" ? "wait" : a.look : a.look;
-      const img = variant(IMG[key] ? key : a.sprite + "-idle", look);
+      const imageKey = IMG[key] ? key : sprite2 + "-idle";
+      const img = variant(imageKey, look);
       if (!img) return;
       const base = footY(a), { cx, left, top } = actorBox(a, m, now);
       const sw = Math.round(m.w * 0.6);
@@ -16118,21 +16385,17 @@ const BattleRuntime = {
           ctx.restore();
         } else ctx.drawImage(image, left + dx, top + dy);
       };
-      if (RIM.on && a.white <= 0 && a.rim !== false) {
-        const rim = rimOf(IMG[key] ? key : a.sprite + "-idle");
+      const formColor = Object.hasOwn(FORM_MARKERS, a.form) ? FORM_MARKERS[a.form] : null;
+      if (formColor || RIM.on && a.white <= 0 && a.rim !== false) {
+        const width = formColor ? FORM_OUTLINE_WIDTH : 1;
+        const rim = rimOf(imageKey, formColor ?? RIM.color, width);
         if (rim) {
-          ctx.globalAlpha = a.alpha * RIM.alpha * (a.wait > 0.5 ? 0.55 : 1);
-          if (a.flip) {
-            ctx.save();
-            ctx.translate(left + m.w + 1, top - 1);
-            ctx.scale(-1, 1);
-            ctx.drawImage(rim, 0, 0);
-            ctx.restore();
-          } else ctx.drawImage(rim, left - 1, top - 1);
+          ctx.globalAlpha = a.alpha * (formColor ? 1 : RIM.alpha) * (a.wait > 0.5 ? 0.55 : 1);
+          blit(rim, a.flip ? width : -width, -width);
         }
       }
       if (a.aura && a.white <= 0) {
-        const glow = variant(IMG[key] ? key : a.sprite + "-idle", a.aura);
+        const glow = variant(imageKey, a.aura);
         ctx.globalAlpha = a.alpha * (0.42 + 0.22 * Math.sin(now / 260 + a.phase));
         blit(glow, -1, 0);
         blit(glow, 1, 0);
@@ -16192,7 +16455,8 @@ const BattleRuntime = {
       }
     }
     function draw(now) {
-      if (!ctx) return;
+      if (!ctx || !visible()) return;
+      framesDrawn++;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       if (S.shake > 0.3) ctx.translate(Math.round((Math.random() * 2 - 1) * S.shake), Math.round((Math.random() * 2 - 1) * S.shake * 0.6));
       const cam = S.cam;
@@ -16516,8 +16780,7 @@ const BattleRuntime = {
     }
     function orbFx(q, f) {
       const absorb = q.variant === "absorb";
-      const from = absorb ? q.to : q.from, to = absorb ? q.from : q.to;
-      const { colors } = q;
+      const { from, to, colors } = q;
       const radius = q.big ? 6 : scaled(q, 4);
       if (f.hit) {
         const step = Math.min(1, f.frame / 3);
@@ -16593,23 +16856,20 @@ const BattleRuntime = {
     function fallFx(q, f) {
       const { to, floor, colors, variant: variant2 } = q;
       const rain = variant2 === "rain";
-      if (!f.hit && f.frame === 0) ellipseSegments(to.x, floor - 1, 6, 1, 12, 1, [colors[2], colors[1]]);
-      for (let i = 0; i < (rain ? 3 : 1); i++) {
-        const x = to.x + (rain ? (i - 1) * 8 : 0);
-        const begin = (1 + i) * MOTION_FRAME;
-        const age = (f.hit ? q.travel + f.hitAge : f.age) - begin;
-        if (age < 0) continue;
-        if (age >= q.flight) {
-          const landing = Math.floor((age - q.flight) / MOTION_FRAME);
-          if (landing > 3) continue;
-          hitStar(x, to.y, scaled(q, Math.max(3, 6 - landing)), -Math.PI / 4, colors);
-          chips(x, floor - 3, q.dir, landing, colors, 2, 0.7);
-          continue;
+      if (f.hit) {
+        if (f.frame <= 3) {
+          hitStar(to.x, to.y, scaled(q, Math.max(3, 6 - f.frame)), -Math.PI / 4, colors);
+          chips(to.x, floor - 3, q.dir, f.frame, colors, 2, 0.7);
         }
+        return;
+      }
+      if (f.frame === 0) ellipseSegments(to.x, floor - 1, 6, 1, 12, 1, [colors[2], colors[1]]);
+      const age = f.age - MOTION_FRAME;
+      if (age < 0) return;
+      for (let i = 0; i < (rain ? 3 : 1); i++) {
         const t = unit(age / q.flight);
-        const from = { x: x - q.dir * (rain || variant2 !== "meteor" ? 0 : 16), y: q.fallY };
-        const end = { x, y: to.y };
-        const head2 = motionPoint(from, end, t);
+        const from = { x: to.x + (rain ? (i - 1) * 12 : variant2 === "meteor" ? -q.dir * 16 : 0), y: q.fallY };
+        const head2 = motionPoint(from, to, t);
         if (variant2 === "meteor") {
           if (q.effectSprite) {
             ctx.save();
@@ -16621,7 +16881,7 @@ const BattleRuntime = {
             ctx.restore();
           }
           for (let j = 6; j >= 1; j--) {
-            const tail = motionPoint(from, end, Math.max(0, t - j * 0.065));
+            const tail = motionPoint(from, to, Math.max(0, t - j * 0.065));
             const r = Math.max(1, scaled(q, 4) - j);
             disc(tail.x, tail.y, r, j % 2 ? colors[2] : colors[1]);
           }
@@ -16816,8 +17076,9 @@ const BattleRuntime = {
       ctx.save();
       clipBenchFaces(q, now);
       ctx.globalAlpha = (q.landed ? 1 : 0.65) * (hit ? Math.max(0.25, 1 - hitAge / q.hold) : 1);
-      if (q.still && q.family !== "mark") hitStar(q.to.x, q.to.y, scaled(q, 5), 0, q.colors);
-      else RANGED_FX[q.family](q, { hit, age, hitAge, frame: frame2, progress: hit ? 1 : unit(age / q.travel) });
+      if (q.still && q.family !== "mark" && !(q.family === "orb" && q.variant === "absorb")) {
+        hitStar(q.to.x, q.to.y, scaled(q, 5), 0, q.colors);
+      } else RANGED_FX[q.family](q, { hit, age, hitAge, frame: frame2, progress: hit ? 1 : unit(age / q.travel) });
       ctx.restore();
     }
     function drawCostFlare(q, now) {
@@ -16913,7 +17174,8 @@ const BattleRuntime = {
       fxLayer.appendChild(p);
       return p;
     }
-    let last = 0, running = false;
+    let last = 0, raf = null, screen = null, observer = null;
+    const visible = () => !screen || screen.isConnected && screen.classList.contains("on");
     function sim(real) {
       const dt = stepClock(real);
       updateParts(dt);
@@ -16922,20 +17184,37 @@ const BattleRuntime = {
       for (const a of S.actors) if (a.white > 0) a.white -= dt;
     }
     function frame(now) {
+      raf = null;
+      if (!visible()) return;
       const real = Math.min(0.05, (now - last) / 1e3);
       last = now;
       sim(real);
       draw(now);
-      requestAnimationFrame(frame);
+      raf = requestAnimationFrame(frame);
+    }
+    function stop() {
+      if (raf != null) cancelAnimationFrame(raf);
+      raf = null;
+    }
+    function syncVisibility() {
+      if (!visible()) {
+        stop();
+        return;
+      }
+      if (raf != null) return;
+      last = performance.now();
+      draw(last);
+      raf = requestAnimationFrame(frame);
     }
     function start() {
-      if (running) return;
-      running = true;
-      last = performance.now();
-      requestAnimationFrame(frame);
+      if (screen && !observer) {
+        observer = new MutationObserver(syncVisibility);
+        observer.observe(screen, { attributes: true, attributeFilter: ["class"] });
+      }
+      syncVisibility();
     }
     async function advance2(sec, step = 0.02) {
-      for (let n = Math.round(sec / step); n > 0; n--) {
+      for (let n = Math.round(sec / step); n > 0 && visible(); n--) {
         sim(step);
         for (let k = 0; k < 6; k++) await null;
       }
@@ -16943,9 +17222,13 @@ const BattleRuntime = {
       return Math.round(clock.t * 100) / 100;
     }
     function init(canvas, fx) {
+      stop();
+      observer?.disconnect();
+      observer = null;
       cv = canvas;
       ctx = cv.getContext("2d");
       fxLayer = fx;
+      screen = cv.closest("#battle");
     }
     function resize(W, H) {
       S.W = W;
@@ -17963,7 +18246,7 @@ const BattleRuntime = {
   }
   function openDailyPreparation(view, ui) {
     const { spec, official, dayKey = spec?.dayKey } = view;
-    const { widgets: widgets2, roster: roster2, sheets: sheets2, start, inspectLoan, message } = ui;
+    const { widgets: widgets2, roster: roster2, sheets: sheets2, start, inspectLoan, message, openPuzzles } = ui;
     if (!spec) return sheets2.sheet("\uC624\uB298\uC758 \uADE0\uC5F4", "\uC624\uB298\uC758 \uADE0\uC5F4 \uD3B8\uC131\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.");
     const dungeon = DUNGEONS[spec.dungeonId];
     const region = REGIONS[dungeon?.region?.id];
@@ -17989,22 +18272,28 @@ const BattleRuntime = {
     ${row("\uCCAB \uCD9C\uC804", loans.slice(0, 3))}
     ${row("\uB300\uAE30", loans.slice(3))}
     ${official ? "" : '<p class="rift-prep-note">\uCCAB \uB3C4\uC804 \uACB0\uACFC\uAC00 \uC624\uB298\uC758 \uACF5\uC2DD \uAE30\uB85D\uC73C\uB85C \uB0A8\uC73C\uBA70, \uC774\uD6C4\uC5D0\uB294 \uAC19\uC740 \uADE0\uC5F4\uC744 \uC5F0\uC2B5\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.</p>'}
-    <button class="btn go" id="meta-daily-start">${official ? "\uC5F0\uC2B5\uD558\uAE30" : "\uCCAB \uAE30\uB85D\uC5D0 \uB3C4\uC804"}</button>
+    <div class="rift-actions">
+      <button class="btn go" id="meta-daily-start">${official ? "\uC5F0\uC2B5\uD558\uAE30" : "\uCCAB \uAE30\uB85D\uC5D0 \uB3C4\uC804"}</button>
+      ${openPuzzles ? riftPuzzleEntry() : ""}
+    </div>
   </div>`);
     $("#meta-daily-start").addEventListener("click", () => start(dayKey, kind));
+    if (openPuzzles) $("#meta-rift-puzzles").addEventListener("click", openPuzzles);
     for (const button of $$("#sh-body [data-rift-loan]")) button.addEventListener("click", () => {
       inspectLoan(button.dataset.riftLoan, render);
     });
   }
-  function openEarlierRift(active2, { sheets: sheets2, resume, abandon }) {
+  function openEarlierRift(active2, { sheets: sheets2, resume, abandon, openPuzzles }) {
     const date = shortRiftDate(active2.dayKey);
     const title = [date, "\uADE0\uC5F4"].filter(Boolean).join(" ");
-    const prompt = () => openEarlierRift(active2, { sheets: sheets2, resume, abandon });
+    const prompt = () => openEarlierRift(active2, { sheets: sheets2, resume, abandon, openPuzzles });
     sheets2.openSheet(title, `<div class="meta-sheet rift-actions">
     <button class="btn go" id="meta-rift-resume" data-rift-date="${esc(date)}">${esc(title)} \uC774\uC5B4\uAC00\uAE30</button>
     <button class="btn meta-danger" id="meta-rift-abandon">${esc([date, "\uB3C4\uC804 \uD3EC\uAE30"].filter(Boolean).join(" "))}</button>
+    ${openPuzzles ? riftPuzzleEntry() : ""}
   </div>`);
     $("#meta-rift-resume").addEventListener("click", resume);
+    if (openPuzzles) $("#meta-rift-puzzles").addEventListener("click", openPuzzles);
     $("#meta-rift-abandon").addEventListener("click", () => {
       sheets2.openSheet("\uC774 \uB3C4\uC804\uC744 \u2018\uD3EC\uAE30\u2019\uB85C \uAE30\uB85D\uD560\uAE4C\uC694?", `<div class="meta-sheet rift-actions">
       <button class="btn meta-danger" id="meta-rift-confirm-abandon">\uD3EC\uAE30</button>
@@ -18022,19 +18311,22 @@ const BattleRuntime = {
   function survival(score, total = 5) {
     return `\uC0DD\uC874 ${score.livingIds?.length ?? 0}/${total}\uBA85`;
   }
+  function resultCast(loans, score, widgets2) {
+    const living = new Set(score.livingIds ?? []);
+    return `<div class="rift-result-cast">
+      ${loans.map((id) => `<div class="rift-companion${living.has(id) ? "" : " fallen"}">
+        ${face(widgets2, id)}<b>${esc(widgets2.card(id)?.name || id)}</b>${living.has(id) ? "" : "<small>\uC4F0\uB7EC\uC9D0</small>"}
+      </div>`).join("")}
+    </div>`;
+  }
   function dailyResultScreen(node, { spec, score, official }, { widgets: widgets2, today, practice, openToday, hub }) {
     const sameDay = score.dayKey && today === score.dayKey;
-    const living = new Set(score.livingIds ?? []);
     const loans = spec?.loanIds ?? [];
     const stamped = score.outcome === "win" && (score.kind === "official" || official && official.runId === score.runId);
     const survivors = survival(score, loans.length || 5);
     node.innerHTML = `<section class="meta-panel rift-result">
-    <div class="rift-result-cast">
-      ${loans.map((id) => `<div class="rift-companion${living.has(id) ? "" : " fallen"}">
-        ${face(widgets2, id)}<b>${esc(widgets2.card(id)?.name || id)}</b>${living.has(id) ? "" : "<small>\uC4F0\uB7EC\uC9D0</small>"}
-      </div>`).join("")}
-    </div>
-    ${score.outcome === "win" && !living.size ? `<p>\uBCF4\uC2A4 \uACA9\uD30C \xB7 ${survivors}</p><p>${score.turns ?? 0}\uD134</p>` : `<p>${survivors} \xB7 ${score.turns ?? 0}\uD134</p>`}
+    ${resultCast(loans, score, widgets2)}
+    ${score.outcome === "win" && !score.livingIds?.length ? `<p>\uBCF4\uC2A4 \uACA9\uD30C \xB7 ${survivors}</p><p>${score.turns ?? 0}\uD134</p>` : `<p>${survivors} \xB7 ${score.turns ?? 0}\uD134</p>`}
     <p>\uC720\uD488 \uC0AC\uC6A9 ${score.heirloomsUsed ?? 0}\uD68C</p>
     ${stamped ? stamp(score.dayKey) : ""}
   </section>
@@ -18044,6 +18336,82 @@ const BattleRuntime = {
   </div>`;
     $("#meta-rift-again", node).addEventListener("click", sameDay ? () => practice(score.dayKey) : () => openToday());
     $("#meta-rift-hub", node).addEventListener("click", () => hub());
+  }
+  function riftPuzzleEntry(id = "meta-rift-puzzles") {
+    return `<button class="btn" id="${id}">${RIFT_PUZZLE.title}</button>`;
+  }
+  function puzzleConditions({ survivors, maxTurns, heirloomUses }) {
+    return [
+      { label: "\uBCF4\uC2A4 \uACA9\uD30C", met: (score) => score.outcome === "win", value: (score) => score.outcome === "win" ? "\uACA9\uD30C" : "\uC2E4\uD328" },
+      survivors != null && {
+        label: `\uC0DD\uC874 ${survivors}\uBA85 \uC774\uC0C1`,
+        met: (score) => score.livingIds.length >= survivors,
+        value: (score) => `${score.livingIds.length}\uBA85`
+      },
+      maxTurns != null && { label: `${maxTurns}\uD134 \uC774\uB0B4`, met: (score) => score.turns <= maxTurns, value: (score) => `${score.turns}\uD134` },
+      heirloomUses != null && {
+        label: `\uC720\uD488 ${heirloomUses}\uD68C \uC774\uC0C1 \uC0AC\uC6A9`,
+        met: (score) => score.heirloomsUsed >= heirloomUses,
+        value: (score) => `${score.heirloomsUsed}\uD68C`
+      }
+    ].filter(Boolean);
+  }
+  function puzzleGoal(goal) {
+    return puzzleConditions(goal).map((condition) => condition.label).join(" \xB7 ");
+  }
+  function puzzleChecks(goal, score) {
+    return `<ul class="rift-puzzle-checks">${puzzleConditions(goal).map(({ label, met, value }) => {
+      const done = met(score);
+      return `<li class="${done ? "met" : "missed"}"><b>${done ? "\uB2EC\uC131" : "\uBBF8\uB2EC"}</b><span>${esc(label)}</span><small>${esc(value(score))}</small></li>`;
+    }).join("")}</ul>`;
+  }
+  function puzzleResultTitle(score) {
+    return score.goalMet ? RIFT_PUZZLE.met : RIFT_PUZZLE.missed;
+  }
+  function openRiftPuzzles(puzzles, { sheets: sheets2, start }) {
+    sheets2.openSheet(RIFT_PUZZLE.title, `<div class="meta-sheet rift-puzzle-list">
+    ${puzzles.map(({ id, title, goal, note, best }) => `<button class="btn rift-puzzle-card" data-rift-puzzle="${esc(id)}">
+      <b>${esc(title)}</b>
+      <span>${esc(puzzleGoal(goal))}</span>
+      <small>\uCD5C\uACE0 \uAE30\uB85D \xB7 ${best ? `${puzzleResultTitle(best)} \xB7 ${survival(best)} \xB7 ${best.turns}\uD134${goal.heirloomUses != null ? ` \xB7 \uC720\uD488 ${best.heirloomsUsed}\uD68C` : ""}` : "\uAE30\uB85D \uC5C6\uC74C"}</small>
+      <small>${esc(note)}</small>
+    </button>`).join("")}
+  </div>`);
+    for (const button of $$("#sh-body [data-rift-puzzle]")) {
+      button.addEventListener("click", () => start(button.dataset.riftPuzzle));
+    }
+  }
+  function mountPuzzleFormation(puzzle, exit) {
+    const node = $("#order.on");
+    $(".fixed-top", node).insertAdjacentHTML(
+      "afterbegin",
+      `<p class="rift-puzzle-goal">${esc(puzzle.title)} \xB7 ${esc(puzzleGoal(puzzle.goal))}</p>`
+    );
+    $(".top", node).insertAdjacentHTML(
+      "afterbegin",
+      `<button class="btn order-back" id="meta-puzzle-exit" aria-label="${RIFT_PUZZLE.list}\uC73C\uB85C \uB3CC\uC544\uAC00\uAE30">\u2190</button>`
+    );
+    $("#meta-puzzle-exit", node).addEventListener("click", exit);
+  }
+  function puzzleResultScreen(node, { puzzle, score, saved }, { widgets: widgets2, again, list, hub, retry }) {
+    node.classList.add("screen-split");
+    node.innerHTML = `<section class="meta-panel rift-result rift-puzzle-result fixed-top">
+    <h2>${esc(puzzle.title)}</h2>
+    ${puzzleChecks(puzzle.goal, score)}
+    <p class="rift-puzzle-stats">${survival(score)} \xB7 ${score.turns}\uD134 \xB7 \uC720\uD488 \uC0AC\uC6A9 ${score.heirloomsUsed}\uD68C</p>
+    ${saved ? "" : '<p role="alert">\uD37C\uC990 \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.</p>'}
+  </section>
+  <div class="scroll-list">${resultCast(puzzle.rentals, score, widgets2)}</div>
+  <div class="rift-actions fixed-foot">
+    ${saved ? "" : '<button class="btn" id="meta-puzzle-save">\uB2E4\uC2DC \uC800\uC7A5</button>'}
+    <button class="btn go" id="meta-puzzle-again">\uB2E4\uC2DC \uB3C4\uC804</button>
+    <button class="btn" id="meta-puzzle-list">${RIFT_PUZZLE.list}</button>
+    <button class="btn" id="meta-puzzle-hub">\uAD00\uCE21\uC18C\uB85C</button>
+  </div>`;
+    $("#meta-puzzle-save", node)?.addEventListener("click", retry);
+    $("#meta-puzzle-again", node).addEventListener("click", again);
+    $("#meta-puzzle-list", node).addEventListener("click", list);
+    $("#meta-puzzle-hub", node).addEventListener("click", () => hub());
   }
   function scoreLabel(score) {
     if (!score) return "\uAE30\uB85D \uC5C6\uC74C";
@@ -18583,6 +18951,9 @@ const BattleRuntime = {
     const [closed, open] = pair.split("/");
     return text + (ending && !(pair === "\uC73C\uB85C/\uB85C" && ending === 8) ? closed : open);
   }
+  function keepSeparators(html) {
+    return String(html).replace(/(\S+) · /g, '<span class="nobr">$1 \xB7</span> ');
+  }
 
   // card_pixel/game/src/ui/battle/tiles.js
   var previewDamage = (p) => p.min != null && p.max != null ? formatRange([p.min, p.max]) : String(p.dmg ?? "");
@@ -18958,37 +19329,64 @@ const BattleRuntime = {
     const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY, reducedMotion } = St;
     const label = (text, actor, cls, dy) => St.number(text, St.X(actor), HY(actor) - 4 + (dy || 0), "tag " + (cls || ""));
     function beginMove(e, actor, isFoe, action) {
-      const p = { e, actor, target: e.target ? actorOf(e.target) : null, isFoe, stage: "ready", colors: colorsOf(e.who) };
-      const donor = e.heirloom && e.heirFrom && card(e.heirFrom) || null;
+      const target = e.target ? actorOf(e.target) : null;
+      const p = {
+        e,
+        actor,
+        target,
+        isFoe,
+        stage: "ready",
+        colors: colorsOf(e.who),
+        reserve: action?.effects.some((effect) => effect.kind === "delay")
+      };
+      const donor = e.heirloom && e.heirFrom ? card(e.heirFrom) : null;
+      const donorForm = donor && Object.hasOwn(FORM_MARKERS, donor.id) ? donor.id : null;
+      const sourceArt = donorForm ? FORM_ART : donor?.id;
+      const art = sourceArt && spr(sourceArt);
+      const unit = unitOf(e.who);
+      p.fromEdge = e.trigger === "reserved" && (!actor?.vis || !unit || unit.hp <= 0 || unit.dead || unit.out);
       if (donor) {
         p.donor = donor;
         p.colors = St.ELEMENT_COLORS[donor.element] || St.ELEMENT_COLORS.none;
-        const art = spr(donor.id);
-        if (art) {
-          p.caster = actor;
-          p.casterVisible = actor.vis;
-          actor.vis = false;
-          p.actor = St.makeActor({ sprite: donor.id, x: actor.x, y: actor.y, flip: art.facing === "left" !== isFoe });
-        }
+      }
+      if (p.fromEdge) {
+        p.actor = {
+          sprite: art ? sourceArt : actor?.sprite ?? target?.sprite,
+          x: isFoe ? St.S.W - 1 : 0,
+          y: target?.y ?? 0,
+          ox: 0,
+          oy: 0,
+          vis: false,
+          pose: "idle"
+        };
+      } else if (art && !p.reserve) {
+        p.caster = actor;
+        p.casterVisible = actor.vis;
+        actor.vis = false;
+        p.actor = St.makeActor({ sprite: donor.id, form: donorForm, x: actor.x, y: actor.y, flip: art.facing === "left" !== isFoe });
       }
       p.basic = e.skill.name === "\uC77C\uBC18 \uACF5\uACA9";
       p.motion = resolveMotion({
         sourceKey: e.sourceKey,
         skill: e.skill,
+        sourceSkill: e.sourceSkill,
         side: e.who.side,
-        heirloom: e.heirloom,
         salience: e.salience ?? (e.ult ? "boss" : void 0),
         isBasic: p.basic,
-        casterSprite: p.actor.sprite,
-        basePower: donor?.skills.find((s) => s.name === e.skill.name && s.type === e.skill.type)?.val
+        casterSprite: art ? sourceArt : p.actor.sprite,
+        casterForm: donorForm ?? p.actor.form
       });
-      if (donor && !isMelee(p)) p.effectSprite = St.variant(donor.id + "-fx", "base");
-      if (p.motion.tint) p.colors = St.ELEMENT_COLORS[p.motion.tint] ?? p.colors;
+      const owner = e.sourceKey?.split("/")[1];
+      if (owner && p.motion.family === "fall") p.effectSprite = St.variant(owner + "-fx", "base");
+      p.colors = St.ELEMENT_COLORS[p.motion.tint ?? e.sourceSkill?.element] ?? p.colors;
       if (action) {
         const hp = [...action.hp.values()];
-        p.reserve = action.effects.some((effect) => effect.kind === "delay");
-        p.support = !action.miss && !hp.some((step) => step.strike);
-        if (p.support) {
+        const hasStrike = hp.some((step) => step.strike);
+        p.manaOnly = !hasStrike && (action.drains?.size > 0 || e.manaDrain);
+        p.support = !action.miss && !hasStrike && !p.manaOnly && !action.followUp;
+        if (p.manaOnly) {
+          p.motion = { ...p.motion, family: "orb", variant: "absorb", range: "ranged", socket: p.motion.socket ?? "hand" };
+        } else if (p.support) {
           const selfField = p.motion.family === "field" && p.motion.variant !== "bind" && action.effects.some((effect) => effect.at === "field");
           const recipient = hp.find((step) => step.kind === "heal") ?? (!selfField && action.effects.find((effect) => effect.who && effect.kind !== "delay"));
           if (recipient) p.target = actorOf(recipient.who) ?? p.target;
@@ -19028,11 +19426,15 @@ const BattleRuntime = {
     }
     async function windUp(p) {
       const { actor, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
-      const caster = unitOf(p.e.who).name;
+      const caster = unitOf(p.e.who)?.name ?? skill.name;
       const who = isFoe && p.e.ult ? "\uD544\uC0B4" : p.e.heirloom ? "\uC720\uD488 \xB7 " + (donor?.name || caster) : caster;
       actor.front = 1;
       $$("#fx .num").forEach((n) => n.remove());
       p.plate = St.plate(who, skill.name, isFoe && p.e.ult ? "#ff6b5e" : p.e.heirloom ? "#ffc857" : colors[1], dir);
+      if (p.fromEdge) {
+        sfx.charge?.();
+        return;
+      }
       if (reducedMotion()) {
         actor.pose = p.motion.frame;
         sfx.charge?.();
@@ -19076,27 +19478,29 @@ const BattleRuntime = {
       const { actor, motion, colors } = p, target = reserve ? actor : p.target ?? actor;
       const still = reducedMotion(), big = !reserve && isBig(p), dir = p.isFoe ? -1 : 1;
       const family = reserve ? "mark" : motion.family;
-      const variant = reserve ? "reserve" : motion.variant === "reserve" ? "curse" : motion.variant;
+      const variant = reserve ? "reserve" : motion.variant;
       actor.casting = true;
-      if (big) await windUp(p);
+      const windup = big && p.stage === "ready";
+      if (windup) await windUp(p);
       else sfx[CAST_SOUND[family]]?.();
-      actor.pose = motion.frame;
-      const targetMeta = St.meta(target, landed && !p.support ? "hurt" : target.pose);
+      actor.pose = reserve ? "idle" : motion.frame;
+      const targetMeta = St.meta(target, landed && !p.support && !p.manaOnly ? "hurt" : target.pose);
       const box = spriteBox(target, targetMeta, S.BASE);
-      const from = St.socket(actor, reserve ? "top" : motion.socket);
       const chest = { x: box.cx, y: Math.round(box.top + box.height * 0.6) };
+      const from = reserve ? St.socket(target, "top") : p.fromEdge ? { x: actor.x, y: chest.y } : St.socket(actor, motion.socket);
       const edge = dir > 0 ? box.left : box.right - 1;
       const to = family === "breath" && dir * (edge - from.x) > 0 ? { ...chest, x: edge } : chest;
-      const fromFloor = St.socket(actor, "ground");
+      const fromFloor = p.fromEdge ? { x: actor.x, y: FY(actor) } : St.socket(actor, "ground");
       const fallY = box.top - 40;
       const launch = family === "blast" && (["wave", "ground"].includes(variant) || variant === "eruption" && motion.socket === "top");
       const timing = rangedTiming({ family, variant, from, to, big, still, fallHeight: to.y - fallY, launch });
-      const fx = St.prop({
+      const absorb = family === "orb" && variant === "absorb";
+      const fx = p.fx = St.prop({
         kind: "rangedFx",
         caster: actor,
         target,
-        from,
-        to,
+        from: absorb ? to : from,
+        to: absorb ? from : to,
         fromFloor,
         fallY,
         launch,
@@ -19119,18 +19523,30 @@ const BattleRuntime = {
       fx.arrived = clock.t;
       p.stage = "hit";
       p.hitAt = clock.t;
-      if (big) finishBig(p);
+      if (windup) finishBig(p);
       p.hitHold = wait(timing.hold).then(() => St.dropProp(fx));
     }
     async function playCast(p) {
       hpCostFlare(p);
+      if (p.e.heirloom && !p.reserve && !isBig(p)) {
+        const donor = p.donor?.name ?? unitOf(p.e.who)?.name;
+        p.heirloomPlate = St.plate("\uC720\uD488 \xB7 " + donor, p.e.skill.name, "#ffc857", p.isFoe ? -1 : 1);
+      }
       if (p.labelCast) label(p.e.skill.name, p.actor, "good");
-      if (!p.support) return;
+      if (!p.reserve && !p.support) return;
       p.actor.front = 1;
       if (p.reserve) await rangedMove(p, true, true);
       else await deliver(p, true);
-      if (p.reserve) sfx.tick?.(0);
-      else sfx.chime?.(p.motion.variant === "heal" || p.beneficial);
+      if (p.reserve) {
+        sfx.tick?.(0);
+        await p.hitHold;
+      } else sfx.chime?.(p.motion.variant === "heal" || p.beneficial);
+    }
+    async function playDrain(p, e, applyMp) {
+      await rangedMove(p, true);
+      applyMp(e);
+      label("MP " + e.delta.toLocaleString("en-US"), actorOf(e.who), "bad");
+      await p.hitHold;
     }
     function showHeal(e, p) {
       const target = actorOf(e.who);
@@ -19157,30 +19573,31 @@ const BattleRuntime = {
     async function meleeMove(p, landed) {
       const { actor, target, isFoe, colors, motion } = p;
       const dir = isFoe ? -1 : 1, big = isBig(p), still = reducedMotion();
+      const windup = big && !still && p.stage === "ready";
       actor.casting = true;
-      if (big && !still) await windUp(p);
+      if (windup) await windUp(p);
       else sfx.throw?.();
       const casterMeta = St.meta(actor, motion.frame), targetMeta = St.meta(target, landed ? "hurt" : target.pose);
-      if (!still) {
+      if (!still && !p.fromEdge) {
         const offset = contactOffset({ caster: actor, target, casterMeta, targetMeta, dir });
         await tween(actor, offset, big ? 0.1 : 0.12, "in");
         actor.pose = motion.frame;
       }
-      const from = spriteBox(actor, still ? St.meta(actor) : casterMeta, S.BASE);
+      const from = p.fromEdge ? null : spriteBox(actor, still ? St.meta(actor) : casterMeta, S.BASE);
       const to = spriteBox(target, targetMeta, S.BASE);
       const near = dir > 0 ? to.left : to.right;
       const x = near + dir * 2;
       const low = motion.socket === "foot" || motion.variant === "scythe";
       const floor = Math.round(to.feet);
-      const hand = Math.round(from.top + from.height * 0.63);
+      const hand = from && Math.round(from.top + from.height * 0.63);
       const body = Math.round(to.top + to.height * 0.64);
-      const y = low ? floor - (motion.variant === "stomp" ? 5 : 14) : Math.min(to.bottom - 7, Math.max(body, still ? body : hand + (motion.variant === "uppercut" ? -4 : 0)));
-      const tip = motion.family === "thrust" ? St.socket(actor, motion.socket ?? "weaponTip") : null;
+      const y = low ? floor - (motion.variant === "stomp" ? 5 : 14) : Math.min(to.bottom - 7, Math.max(body, still || p.fromEdge ? body : hand + (motion.variant === "uppercut" ? -4 : 0)));
+      const tip = motion.family === "thrust" ? p.fromEdge ? { x: actor.x, y } : St.socket(actor, motion.socket ?? "weaponTip") : null;
       const duration = still ? 0.09 : big ? 0.22 : 0.135;
       p.stage = "hit";
       p.hitAt = clock.t;
-      if (big) finishBig(p);
-      const fx = St.prop({
+      if (windup) finishBig(p);
+      const fx = p.fx = St.prop({
         kind: "meleeFx",
         family: motion.family,
         variant: motion.variant,
@@ -19209,7 +19626,7 @@ const BattleRuntime = {
     async function strikeAndHit(p, step, stats, hasEffects, finishHit) {
       const e = step.event;
       p.actor.front = 1;
-      if (p.stage === "ready") await deliver(p, true);
+      await deliver(p, true);
       if (finishHit) {
         p.finishing = true;
         await finishHit(e);
@@ -19246,7 +19663,7 @@ const BattleRuntime = {
     }
     async function settleMove(p) {
       try {
-        if (p.stage === "ready" && p.e.salience === "boss" && p.target) {
+        if (p.stage === "ready" && p.e.salience === "boss" && p.target && !p.manaOnly) {
           await deliver(p, false);
         }
         if (p.hitHold) await p.hitHold;
@@ -19263,9 +19680,11 @@ const BattleRuntime = {
         if (t && tu && tu.hp > 0 && t.pose === "hurt") t.pose = "idle";
         if (S.dark > 0.01) tween(S, { dark: 0 }, 0.2);
       } finally {
+        if (p.heirloomPlate) p.heirloomPlate.remove();
         if (p.caster) {
           St.removeActor(p.actor);
           p.caster.vis = p.casterVisible;
+          p.caster.casting = false;
         }
       }
     }
@@ -19307,7 +19726,7 @@ const BattleRuntime = {
       }
       await wait(0.24);
     }
-    return { beginMove, playCast, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects };
+    return { beginMove, playCast, playDrain, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects };
   }
 
   // card_pixel/game/src/ui/battle/effect-plan.js
@@ -19575,6 +19994,44 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/battle/view.js
+  var same2 = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
+  function planBattleAction(events, index, { core: core2, artifacts }) {
+    const cast = events[index], end = actionEnd(events, index), next = events[end];
+    const segment = events.slice(index, end);
+    const plan = planEffects(segment, { core: core2, artifacts, next: next?.s });
+    if (cast.skill.effects?.includes("random_skill_trigger_from_list") && !cast.delayed && cast.who.side === "ally") {
+      const { delayed, turn } = cast.s;
+      const previous = delayed.slice();
+      const turns = [];
+      for (const effect of (next?.s ?? segment.at(-1).s).delayed) {
+        if (effect.by !== cast.who.idx || effect.name === cast.skill.name || effect.turn <= turn) continue;
+        const index2 = previous.findIndex((d) => d.by === effect.by && d.turn === effect.turn && d.name === effect.name);
+        if (index2 < 0) turns.push(effect.turn);
+        else previous.splice(index2, 1);
+      }
+      if (turns.length) {
+        turns.sort((a, b) => a - b);
+        plan.push({
+          at: "caster",
+          kind: "delay",
+          who: cast.who,
+          turns,
+          turn,
+          label: [...new Set(turns)].map((due) => due - turn).join("\xB7") + "\uD134 \uB4A4"
+        });
+      }
+    }
+    return {
+      end,
+      miss: segment.some((event) => event.t === "miss"),
+      drains: new Set(segment.filter((event) => event.t === "mp" && event.delta < 0 && same2(event.who, cast.target) && event.cause?.kind === "act" && same2(event.cause.by, cast.who) && event.cause.skill === cast.skill.name)),
+      followUp: next?.trigger === "follow-up" && same2(next.who, cast.who),
+      hp: new Map(plan.filter((step) => step.event).map((step) => [step.event, step])),
+      effects: plan.filter((step) => !step.event),
+      changes: [],
+      downs: []
+    };
+  }
   function contractSettlement(floor, contract) {
     if (!contract) return [];
     const rows = [];
@@ -19593,7 +20050,6 @@ const BattleRuntime = {
     const { sfx } = audio2;
     const { card, face: face2, spr } = widgets2;
     const clone = (o) => JSON.parse(JSON.stringify(o));
-    const same2 = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
     const LINKED_TRAITS = ["ally_death_base_atk_phy", "ally_light_death_base_matk_mag"];
     const relayHint = $("#relay-hint");
     const B = { bridge: null, door: null, party: [], allies: [], foe: null, D: null, pending: null, busy: false, log: [], all: [], relayBanner: null, armed: false, intent: null, fallSpot: null, options: [] };
@@ -19651,7 +20107,7 @@ const BattleRuntime = {
     const hud = createHud(core2, St, sfx, widgets2);
     const { ticker, tally, tallyWorthy } = hud;
     const { brief, renderActions, lockPanel } = createTiles({ core: core2, widgets: widgets2, audio: audio2, sheets: sheets2, B, foeDef, play, ticker });
-    const { beginMove, playCast, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects } = createMoves({
+    const { beginMove, playCast, playDrain, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects } = createMoves({
       stage: St,
       sfx,
       actorOf,
@@ -19787,6 +20243,13 @@ const BattleRuntime = {
       if (u) u.hp = Math.max(0, Math.min(u.maxHp, u.hp + e.delta));
       render();
     }
+    function applyMp(e) {
+      const u = unitOf(e.who);
+      if (u) {
+        u.mp += e.delta;
+        render();
+      }
+    }
     function settlePending() {
       const move = B.pending;
       if (!move) return;
@@ -19804,7 +20267,8 @@ const BattleRuntime = {
           wait: i ? 1 : 0,
           flip: (spr(id)?.facing || "right") === "left",
           vis: !u.dead && !u.out,
-          aura: u.lastStand ? "red" : null
+          aura: u.lastStand ? "red" : null,
+          form: Object.hasOwn(FORM_MARKERS, u.form) ? u.form : null
         });
         return Object.assign(actor, slotPos(i, actor));
       });
@@ -19840,7 +20304,7 @@ const BattleRuntime = {
     }
     async function onAct(e, action) {
       const actor = actorOf(e.who), isFoe = e.who.side === "enemy";
-      if (!actor) return;
+      if (!actor && e.trigger !== "reserved") return;
       $("#tally").innerHTML = "";
       const strong = isFoe && e.salience === "strong";
       showIntent(null);
@@ -19867,7 +20331,7 @@ const BattleRuntime = {
       if (e.ult || e.salience === "boss") {
         warnEnemy();
         await wait(0.12);
-      } else if (e.skill.type !== "sup" && !strong && e.skill.name !== "\uC77C\uBC18 \uACF5\uACA9" && !isBig(B.pending) && !effects.some((effect) => effect.kind === "delay")) {
+      } else if (actor && !B.pending.fromEdge && e.skill.type !== "sup" && !strong && e.skill.name !== "\uC77C\uBC18 \uACF5\uACA9" && !isBig(B.pending) && !effects.some((effect) => effect.kind === "delay")) {
         B.pending.call = St.number(e.skill.name + (e.delayed ? " \uBC1C\uB3D9" : ""), St.X(actor), HY(actor) - 12, "call");
       }
       await playCast(B.pending);
@@ -20247,14 +20711,10 @@ const BattleRuntime = {
           await settlePending();
           await onAct(e, action);
           break;
-        case "mp": {
-          const u = unitOf(e.who);
-          if (u) {
-            u.mp += e.delta;
-            render();
-          }
+        case "mp":
+          if (B.pending?.manaOnly && action?.drains.has(e)) await playDrain(B.pending, e, applyMp);
+          else applyMp(e);
           break;
-        }
         case "hp":
           await onHp(e, action);
           break;
@@ -20315,9 +20775,11 @@ const BattleRuntime = {
           await foeEnter(e);
           break;
         case "form": {
-          const u = unitOf(e.who);
+          const u = unitOf(e.who), actor = actorOf(e.who);
+          if (actor) actor.form = Object.hasOwn(FORM_MARKERS, e.form) ? e.form : null;
           if (u) {
             u.name = e.name;
+            u.form = e.form;
             render();
           }
           break;
@@ -20383,18 +20845,7 @@ const BattleRuntime = {
           if (bridge !== B.bridge || !$("#battle").classList.contains("on")) return;
           B.played = start + i + 1;
           const e = events[i];
-          if (e.t === "act") {
-            const end = actionEnd(events, i);
-            const plan = planEffects(events.slice(i, end), { core: core2, artifacts: B.artifacts, next: events[end]?.s });
-            action = {
-              end,
-              miss: events.slice(i + 1, end).some((event) => event.t === "miss"),
-              hp: new Map(plan.filter((step) => step.event).map((step) => [step.event, step])),
-              effects: plan.filter((step) => !step.event),
-              changes: [],
-              downs: []
-            };
-          }
+          if (e.t === "act") action = planBattleAction(events, i, { core: core2, artifacts: B.artifacts });
           if (action && (e.t === "buff" || e.t === "field")) action.changes.push(e);
           else if (action && e.t === "down") action.downs.push(e);
           else await handle(e, action);
@@ -21088,8 +21539,11 @@ const BattleRuntime = {
     const amount2 = gateEscrow(run.floor, door.type);
     return amount2 && CONTRACTS[run.contract?.id] ? amount2 : 0;
   }
+  var doorTitle = (door) => door.promiseId ? door.name : TERMS[door.type]?.short ?? door.name;
+  var doorKind = (door) => door.promiseId ? "promise" : door.type;
   function doorDecision(run, door, preview) {
     const crystals = (door.reward ?? 0) - contractEscrow(run, door);
+    if (door.promiseId) return door.name;
     if (!door.enemies.length) return REGIONS[door.regionChoice?.id]?.name ?? ROOM_NAMES[door.type] ?? door.name;
     if (preview?.bossRule) return door.type === "boss" ? preview.bossRule.name ?? door.name : door.name;
     if (preview?.lesson) {
@@ -21114,8 +21568,17 @@ const BattleRuntime = {
     const bossId = rift?.spec?.bossId;
     const boss = run.bossPreview || (bossId && ui.roster.bosses.includes(bossId) ? ui.roster.bossOf(bossId) : null);
     const gateFloor = intro ? run.floors : 4;
+    const promise = run.promise;
+    const promisedRelic = artifacts.get(promise?.relic);
+    const forfeits = (door) => promise?.floor === run.floor && !door.promiseId;
+    const lostDeposit = (door) => (door.type === "treasure" ? "\uBCF4\uBB3C\uBC29" : "\uC0AC\uAC74 \uBC29") + "\uC5D0 \uAC00\uBA74 \uB9E1\uAE34 " + josa("\u25C6" + promise.deposit, "\uC774/\uAC00") + " \uC0AC\uB77C\uC9D1\uB2C8\uB2E4.";
+    const promiseLine = () => promise ? "\uB9E1\uAE34 " + josa("\u25C6" + promise.deposit, "\uC73C\uB85C/\uB85C") + " \uBC1B\uB294 \uC720\uBB3C \xB7 \uC804\uD22C \uC5C6\uC74C" : "";
     const track = Array.from({ length: run.floors }, (_, index) => {
       const floor = index + 1;
+      if (promisedRelic && floor === promise.floor) {
+        const label = floor + "\uCE35 \uC57D\uC18D \xB7 " + promisedRelic.name;
+        return '<span class="floor-cell promise' + (floor === run.floor ? " cur" : "") + '" data-promise-floor="' + floor + '" title="' + esc(label) + '"><small>' + floor + "</small>" + relicIcon(promisedRelic.id, 16, "\uC57D\uC18D \xB7 " + promisedRelic.name) + "</span>";
+      }
       const marker = floor === gateFloor ? pixelIcon("shield", 16) : floor === run.floors ? pixelIcon("crown", 16) : "";
       const classes = floor === run.floor ? " cur" : floor < run.floor ? " done" : "";
       return '<span class="floor-cell' + classes + '"><small>' + floor + "</small>" + marker + "</span>";
@@ -21194,26 +21657,31 @@ const BattleRuntime = {
       const visitor = door.event?.requires?.present?.[0];
       const art = enemy && sprite2(enemy.sprite, { flip: foeFlip(enemy), cls: "map-door-shadow" }) || visitor && sprite2(visitor) || icon2(door.relic || (door.type === "wild" ? "battle" : door.type));
       const label = doorDecision(run, door, tempoViews[index]);
-      const relic = door.relicReward && artifacts.get(door.relic);
-      const name = [relic ? "\uC704\uD5D8\uD55C \uBB38" : TERMS[door.type]?.short ?? door.name, label, relic?.name].filter(Boolean).join(" \xB7 ");
-      return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + door.type + '" data-coach="door" aria-label="' + esc(name) + '" style="--door-x:' + x + ";--door-y:" + y + '"><span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span><span class="map-door-emblem">' + art + '</span></span><small class="map-door-line' + (relic ? " map-door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 16) + esc(relic.name) : esc(label)) + "</small></button>";
+      const relic = (door.relicReward || door.promiseId) && artifacts.get(door.relic);
+      const name = [
+        door.relicReward && relic ? "\uC704\uD5D8\uD55C \uBB38" : doorTitle(door),
+        door.promiseId ? "" : label,
+        relic?.name,
+        forfeits(door) ? lostDeposit(door) : ""
+      ].filter(Boolean).join(" \xB7 ");
+      return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + doorKind(door) + '" data-coach="door" aria-label="' + esc(name) + '" style="--door-x:' + x + ";--door-y:" + y + '"><span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span><span class="map-door-emblem">' + art + '</span></span><small class="map-door-line' + (relic ? " map-door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 16) + esc(door.promiseId ? door.name : relic.name) : esc(label)) + "</small></button>";
     }).join("");
     const doors = run.doors.map((door) => {
       const enemy = door.enemies[0];
       const isShowdown = run.doors.length === 1 && !!enemy;
       const opponent = enemy?.source ? card(enemy.source).name : enemy?.name;
-      const relic = door.relicReward && artifacts.get(door.relic);
-      const title2 = relic ? "\uC704\uD5D8\uD55C \uBB38" : TERMS[door.type]?.short ?? door.name;
+      const relic = (door.relicReward || door.promiseId) && artifacts.get(door.relic);
+      const title2 = door.relicReward && relic ? "\uC704\uD5D8\uD55C \uBB38" : doorTitle(door);
       const info = [
         isShowdown && opponent ? confront(opponent) : enemy?.name,
         door.enemies.length > 1 ? "\uC801 " + door.enemies.length + "\uBA85\uC774 \uCC28\uB840\uB85C \uB4F1\uC7A5" : ""
       ].filter(Boolean).join(" \xB7 ");
       const risksHere = risks(door);
-      const rules = risksHere.join(" \xB7 ") || roomEffect(door);
+      const rules = risksHere.join(" \xB7 ") || (door.promiseId ? promiseLine() : roomEffect(door));
       const gain = reward(door);
       const quirk = run.features?.quirks !== false && door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
       const chips = quirk + (run.features?.affixes === false ? "" : door.enemies.map(affixChips).join(""));
-      return '<div class="door-plate win" data-kind="' + door.type + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward' + (relic ? " door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 20) : "") + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final && !relic ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      return '<div class="door-plate win" data-kind="' + doorKind(door) + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + (forfeits(door) ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward' + (relic ? " door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 20) : "") + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final && !relic ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
     const front = defaultParty(run);
     const lineup = (party) => party.map((id, index) => {
@@ -21231,7 +21699,7 @@ const BattleRuntime = {
     const cast = '<div class="map-walkers">' + lineup(front) + "</div>";
     const skip = '<button type="button" class="map-skip" hidden><span>\uAC74\uB108\uB6F0\uAE30</span></button>';
     const title = rift ? [shortRiftDate(rift.spec?.dayKey), "\uADE0\uC5F4"].filter(Boolean).join(" ") : dungeon.name;
-    node.innerHTML = head(run, title, run.floor + "\uCE35") + (run.relics.length ? relicStrip(core2, run.relics) : "") + '<div class="screen-split run-route"><div class="fixed-top"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4">' + track + "</button>" + scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + "</div>" + skip, "walking-map") + (receipt ? '<p class="map-receipt gain" role="status">' + esc(receipt) + " \xB7 \uC7A5\uCC29 \uC644\uB8CC</p>" : "") + '</div><div class="run-doors scroll-list">' + doors + "</div></div>";
+    node.innerHTML = head(run, title, run.floor + "\uCE35") + (run.relics.length ? relicStrip(core2, run.relics) : "") + '<div class="screen-split run-route"><div class="fixed-top"><button class="floor-strip" id="b-floors" aria-label="\uCE35 \uC9C4\uD589\uACFC \uBB38\uC9C0\uAE30 \uC815\uBCF4' + (promisedRelic ? " \xB7 " + promise.floor + "\uCE35 \uC57D\uC18D " + esc(promisedRelic.name) : "") + '">' + track + "</button>" + scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + "</div>" + skip, "walking-map") + (receipt ? '<p class="map-receipt gain" role="status">' + esc(receipt) + " \xB7 \uC7A5\uCC29 \uC644\uB8CC</p>" : "") + '</div><div class="run-doors scroll-list">' + doors + "</div></div>";
     show("map");
     bindRelicSlots(node, run.relics, (id) => {
       ui.audio.sfx.tap();
@@ -21276,7 +21744,7 @@ const BattleRuntime = {
     $("#b-floors", node).addEventListener("click", () => {
       const group = (floor, title2, foes) => foes.length ? "<h4>" + floor + "\uCE35 \xB7 " + title2 + '</h4><div class="floor-foes">' + foes.map(({ sprite: id, name }) => faceBadge(id, name)).join("") + "</div>" : "";
       const introBoss = intro && boss?.sprite && !gateFoes.some((foe) => foe.sprite === boss.sprite);
-      openSheet("\uCE35 \uC9C4\uD589", "<p>\uD604\uC7AC " + run.floor + " / " + run.floors + "\uCE35</p>" + group(gateFloor, TERMS.gate.firstUse, introBoss ? [...gateFoes, boss] : gateFoes) + group(run.floors, TERMS.boss.firstUse, !intro && boss?.sprite ? [boss] : []) + (boss?.note ? "<p>" + esc(boss.note) + "</p>" : ""));
+      openSheet("\uCE35 \uC9C4\uD589", "<p>\uD604\uC7AC " + run.floor + " / " + run.floors + "\uCE35</p>" + group(gateFloor, TERMS.gate.firstUse, introBoss ? [...gateFoes, boss] : gateFoes) + (promisedRelic ? "<h4>" + promise.floor + "\uCE35 \xB7 \uC57D\uC18D\uD55C \uC790\uB9AC</h4><p>" + esc(promisedRelic.name) + " \uC778\uC218</p>" : "") + group(run.floors, TERMS.boss.firstUse, !intro && boss?.sprite ? [boss] : []) + (boss?.note ? "<p>" + esc(boss.note) + "</p>" : ""));
     });
     function describeDoor(door) {
       const ready = doorEnemies?.(run, door.index);
@@ -21296,7 +21764,7 @@ const BattleRuntime = {
       const escrow = contractEscrow(run, door);
       const treasure = run.features?.affixes !== false && door.enemies.some((enemy) => enemy.affixes?.includes("treasure"));
       const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : "";
-      openSheet(TERMS[door.type]?.short ?? door.name, lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC 1\uBA85\uB2F9 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
+      openSheet(doorTitle(door), lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (door.event ? "<p>" + esc(door.event.text) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (forfeits(door) ? '<p class="loss">' + esc(lostDeposit(door)) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC 1\uBA85\uB2F9 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
     }
   }
 
@@ -21712,10 +22180,15 @@ const BattleRuntime = {
       const count2 = releases(choice);
       const changes = !choice.targets && choice.blessingChanges ? Object.keys(choice.blessingChanges).map((id) => "<small>" + esc(card(id).name + " \xB7 " + targetValue(choice, id)) + "</small>").join("") : "";
       const offer = joinIds(choice).map((id) => heirloomOffer(card(id))).join("");
+      const promise = choice.ops.find((effect) => effect.type === "promise")?.offer;
+      const relic = ui.artifacts.get(promise?.relic);
       const effects = choice.ops.map((effect) => effectText(effect)).filter(Boolean);
       if (event.id === "penguin_ice_seam" && choice.id === "carry" && !choice.text.includes("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C") && !run.bench.some((id) => ui.core.GameUtils.cardMatchesElement(card(id), "water"))) effects.push("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C");
-      return '<button class="event-choice win" data-choice="' + esc(choice.id) + '"' + (choice.enabled ? "" : " disabled") + "><b>" + esc(choice.text) + "</b><span>" + esc(cost(choice) + effects.join(" \xB7 ")) + "</span>" + offer + changes + (count2 ? '<small class="loss">\uBCF4\uB0BC \uB3D9\uB8CC ' + count2 + "\uBA85 \uD544\uC694</small>" : "") + (short || !choice.enabled ? "<small>" + esc(short || "\uC870\uAC74 \uBBF8\uCDA9\uC871") + "</small>" : "") + "</button>";
+      const label = relic ? '<b class="promise-choice">' + relicIcon(relic.id, 20) + esc(josa("\u25C6" + promise.deposit, "\uC744/\uB97C") + " \uB9E1\uAE30\uBA74 " + promise.floor + "\uCE35\uC5D0\uC11C " + relic.name + " \uC778\uC218") + "</b><span>" + esc(relic.name + " \xB7 " + relicEffect(relic)) + "</span>" : "<b>" + esc(choice.text) + "</b><span>" + esc(cost(choice) + effects.join(" \xB7 ")) + "</span>";
+      return '<button class="event-choice win" data-choice="' + esc(choice.id) + '"' + (choice.enabled ? "" : " disabled") + ">" + label + offer + changes + (count2 ? '<small class="loss">\uBCF4\uB0BC \uB3D9\uB8CC ' + count2 + "\uBA85 \uD544\uC694</small>" : "") + (short || !choice.enabled ? "<small>" + esc(short || "\uC870\uAC74 \uBBF8\uCDA9\uC871") + "</small>" : "") + "</button>";
     }).join("");
+    const promised = event?.id === run.promise?.id && ui.artifacts.get(run.promise?.relic);
+    if (promised) results.push(run.promise.floor + "\uCE35 \uC57D\uC18D \xB7 " + promised.name + " \uC778\uC218");
     const secondary = results.length ? results.map((line) => "<p>" + esc(line) + "</p>").join("") : event && choices.length ? "<p>" + esc(DIALOGUE[event.id] || "") + "</p>" : "";
     const canChoose = choices.some((choice) => choice.enabled);
     node.innerHTML = head(run, "\uC0AC\uAC74", run.floor + "\uCE35") + '<div class="run-event screen-split"><div class="fixed-top">' + ui.scene(run.room.bg, artwork) + '<div class="event-dialog win"><h2>' + esc(event?.name || "\uACE0\uC694\uD55C \uBC29") + '</h2><div class="scroll-detail" tabindex="0"><p>' + esc(event?.text || "\uBC29 \uC548\uC774 \uACE0\uC694\uD569\uB2C8\uB2E4.") + "</p>" + secondary + '</div></div></div><div class="event-choices scroll-list">' + plates + '</div><div class="footer fixed-foot"><button class="btn' + (canChoose ? "" : " go") + '" id="b-leave">' + (choices.length ? "\uADF8\uB0E5 \uC9C0\uB098\uAC00\uAE30" : "\uB2E4\uC74C \uCE35\uC73C\uB85C") + "</button></div></div>";
@@ -21770,7 +22243,7 @@ const BattleRuntime = {
     const comparing = canEquip && run.relics.length === RELIC_LIMIT;
     const replaceable = comparing ? pending?.replace ?? run.relics : [];
     const { sfx } = ui.audio;
-    const title = run.room.type === "treasure" ? "\uBCF4\uBB3C\uBC29" : "\uC720\uBB3C";
+    const title = run.room.type === "treasure" ? "\uBCF4\uBB3C\uBC29" : run.room.promiseId ? run.room.name : "\uC720\uBB3C";
     const cost = pending?.cost ?? 0;
     const short = Math.max(0, cost - run.crystals);
     let replacing = null;
@@ -23058,7 +23531,7 @@ const BattleRuntime = {
     </div>
     <div class="meta-hub-actions">
       ${dailyRow(daily)}
-      <button class="btn go${ticketArt ? " ticket" : ""}" id="meta-depart" data-coach="departure">${ticketArt}${esc(action)}</button>
+      <button class="btn go${ticketArt ? " ticket" : ""}" id="meta-depart" data-coach="departure">${ticketArt}<span class="ticket-label">${keepSeparators(esc(action))}</span></button>
       ${firstMain ? '<button class="btn" id="meta-other-region">\uB2E4\uB978 \uC9C0\uC5ED</button>' : ""}
     </div>
   `;
@@ -23121,6 +23594,7 @@ const BattleRuntime = {
     const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
     const latest = profile.ui?.latestRun;
     const showDifficulty = featureFlags(profile).difficultyChoice;
+    const showPuzzles = renderDailyHistory && riftPuzzlesUnlocked(profile);
     node.classList.add("screen-split");
     node.innerHTML = `
     ${renderDailyHistory ? `<div class="fixed-top screen-tabs" role="group" aria-label="\uAE30\uB85D \uC885\uB958">
@@ -23152,13 +23626,14 @@ const BattleRuntime = {
     </section>
     ${renderDailyHistory ? '<section class="meta-panel" id="meta-daily-history" data-screen-panel="rift"></section>' : ""}
     </div>
-    ${latest || profile.ui?.endingSeen ? `<div class="fixed-foot">
+    ${latest || profile.ui?.endingSeen || showPuzzles ? `<div class="fixed-foot">
+    ${showPuzzles ? riftPuzzleEntry("meta-record-puzzles") : ""}
     ${latest ? `<button class="btn" id="meta-latest-record">\uCD5C\uADFC \uC6D0\uC815 \xB7 ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ""}
     ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">\uC5D4\uB529 \uB2E4\uC2DC \uBCF4\uAE30</button>' : ""}
     </div>` : ""}
   `;
     if (renderDailyHistory) {
-      const hasDailyHistory = renderDailyHistory($("#meta-daily-history", node));
+      const hasDailyHistory = renderDailyHistory($("#meta-daily-history", node), $("#meta-record-puzzles", node));
       bindScreenTabs(node, hasDailyHistory && !latest ? "rift" : "expedition");
     }
     for (const button of $$("[data-nightmare-record]", node)) button.addEventListener("click", () => {
@@ -23632,7 +24107,8 @@ const BattleRuntime = {
       const rift = dailyStore2?.view?.(currentProfile(), /* @__PURE__ */ new Date());
       return unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift;
     }
-    function showDailyHistory(node) {
+    function showDailyHistory(node, puzzleEntry) {
+      puzzleEntry?.addEventListener("click", openPuzzles);
       const cursors = [null];
       function render() {
         const history = dailyStore2.history({ before: cursors.at(-1), limit: 7 }) ?? {};
@@ -23659,7 +24135,9 @@ const BattleRuntime = {
       if (!view?.unlocked) return;
       if (view.active) {
         const today = view.dayKey ?? view.spec?.dayKey;
-        if (view.active.dayKey && today && view.active.dayKey !== today) return promptDailyResume(view.active);
+        if (riftPuzzlesUnlocked(currentProfile()) || view.active.dayKey && today && view.active.dayKey !== today) {
+          return promptDailyResume(view.active);
+        }
         return resumeDaily();
       }
       openDailyPreparation(view, {
@@ -23668,11 +24146,17 @@ const BattleRuntime = {
         sheets: sheets2,
         message,
         start: startDaily,
+        openPuzzles: riftPuzzlesUnlocked(currentProfile()) ? openPuzzles : null,
         inspectLoan: (id, onClose) => details.charSheet(null, id, { loaned: true, onClose })
       });
     }
     function promptDailyResume(active2) {
-      openEarlierRift(active2, { sheets: sheets2, resume: resumeDaily, abandon: abandonDaily });
+      openEarlierRift(active2, {
+        sheets: sheets2,
+        resume: resumeDaily,
+        abandon: abandonDaily,
+        openPuzzles: riftPuzzlesUnlocked(currentProfile()) ? openPuzzles : null
+      });
     }
     function startDaily(expectedDayKey, kind) {
       const now = /* @__PURE__ */ new Date();
@@ -23713,6 +24197,43 @@ const BattleRuntime = {
       audio2.unlockAudio();
       if (current.phase === "done") return finishDaily(current);
       setReview(enterRun(current, dailyHost) || null);
+    }
+    function openPuzzles() {
+      const puzzles = dailyStore2.puzzles(currentProfile());
+      if (puzzles.length) openRiftPuzzles(puzzles, { sheets: sheets2, start: startPuzzle });
+    }
+    function returnToPuzzles() {
+      dailyRun = null;
+      setReview(null);
+      showHub();
+      openPuzzles();
+    }
+    function startPuzzle(puzzleId) {
+      const result = dailyStore2.startPuzzle({ profile: currentProfile(), puzzleId });
+      if (!result.ok) return sessionNotice("\uD37C\uC990\uC744 \uC2DC\uC791\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.");
+      const { puzzle, run } = result;
+      dailyRun = run;
+      setReview(null);
+      sheets2.closeSheet();
+      audio2.unlockAudio();
+      setReview(enterRun(run, { ...dailyHost, save() {
+      }, finish: (current) => finishPuzzle(current, puzzle) }) || null);
+      mountPuzzleFormation(puzzle, returnToPuzzles);
+    }
+    function finishPuzzle(run, puzzle) {
+      const result = dailyStore2.finishPuzzle(run);
+      if (!result.score) return;
+      dailyRun = null;
+      setReview(null);
+      const { score } = result;
+      const node = page("daily-result", { title: puzzleResultTitle(score), track: score.goalMet ? "victory" : "defeat" });
+      puzzleResultScreen(node, { puzzle, score, saved: result.ok }, {
+        widgets: widgets2,
+        again: () => startPuzzle(puzzle.id),
+        list: returnToPuzzles,
+        hub: showHub,
+        retry: () => finishPuzzle(run, puzzle)
+      });
     }
     function showResult(current, result) {
       const spec = current.daily?.spec;
@@ -23758,7 +24279,9 @@ const BattleRuntime = {
         actions.innerHTML = `
         <button class="btn go" data-backup-action="export">\uAE30\uB85D \uB0B4\uBCF4\uB0B4\uAE30</button>
         <button class="btn" id="meta-rift-retry">\uB2E4\uC2DC \uC800\uC7A5</button>
-        <button class="btn" id="meta-rift-hub">\uAD00\uCE21\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30</button>`;
+        <button class="btn" id="meta-rift-hub">\uAD00\uCE21\uC18C\uB85C \uB3CC\uC544\uAC00\uAE30</button>
+        ${riftPuzzlesUnlocked(currentProfile()) ? riftPuzzleEntry() : ""}`;
+        $("#meta-rift-puzzles", node)?.addEventListener("click", openPuzzles);
         $("#meta-rift-retry", node).addEventListener("click", () => finishDaily(current));
         $("#meta-rift-hub", node).addEventListener("click", () => {
           dailyRun = null;
@@ -23786,7 +24309,7 @@ const BattleRuntime = {
         return dailyRun;
       },
       get backupRun() {
-        return unsavedDailyResult ?? dailyRun;
+        return unsavedDailyResult ?? (dailyRun?.daily?.puzzleId ? null : dailyRun);
       }
     };
   }

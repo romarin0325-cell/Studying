@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { josa } from '../src/ui/text.js';
+import { josa, keepSeparators } from '../src/ui/text.js';
 
 test('josa chooses particles for Hangul endings, rieul and numbers', () => {
   for (const [word, pair, expected] of [
@@ -18,4 +18,13 @@ test('josa chooses particles for Hangul endings, rieul and numbers', () => {
     [42, '이야/야', '42야'],
     [41, '으로/로', '41로']
   ]) assert.equal(josa(word, pair), expected);
+});
+
+test('keepSeparators keeps the word before each " · " with the dot and leaves the text unchanged', () => {
+  const html = keepSeparators('황혼 성당 8층 · 결과 확인');
+  assert.equal(html, '황혼 성당 <span class="nobr">8층 ·</span> 결과 확인');
+  assert.equal(html.replace(/<[^>]+>/g, ''), '황혼 성당 8층 · 결과 확인');
+  assert.equal(keepSeparators('홍련 화산 · 꿈결 · 바로 출발'),
+    '홍련 <span class="nobr">화산 ·</span> <span class="nobr">꿈결 ·</span> 바로 출발');
+  assert.equal(keepSeparators('눈토끼와 홍련 화산으로'), '눈토끼와 홍련 화산으로');
 });

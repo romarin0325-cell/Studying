@@ -35,6 +35,8 @@ import { createGoalCases } from './screens/goals.mjs';
 import { createEpisodeCases } from './screens/episodes.mjs';
 import { createRelicCases } from './screens/relics.mjs';
 import { createPatternCases } from './screens/patterns.mjs';
+import { createPromiseCases } from './screens/promise.mjs';
+import { createPuzzleCases } from './screens/puzzles.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
@@ -2920,7 +2922,9 @@ const goalCases = createGoalCases({ roster, storedSession, enterObservatory });
 const episodeCases = createEpisodeCases({ storedSession, enterObservatory });
 const relicCases = createRelicCases({ core, roster, storedSession });
 const patternCases = createPatternCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, skillTile });
-const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases, access: accessCases, goals: goalCases, episodes: episodeCases, relics: relicCases, patterns: patternCases };
+const promiseCases = createPromiseCases({ core, makeRun, command, advance, reachFloor, storedSession });
+const puzzleCases = createPuzzleCases({ core, roster, dailyKey, storedSession, enterObservatory });
+const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases, access: accessCases, goals: goalCases, episodes: episodeCases, relics: relicCases, patterns: patternCases, promise: promiseCases, puzzles: puzzleCases };
 
 const cases = {
   'rift-save-failure': withFixedRiftResult(riftSaveFailure, '[data-backup-action="export"]'),
@@ -3014,7 +3018,9 @@ const cases = {
   ...goalCases,
   ...episodeCases,
   ...relicCases,
-  ...patternCases
+  ...patternCases,
+  ...promiseCases,
+  ...puzzleCases
 };
 
 caseGroups['fixed-layouts'] = Object.fromEntries([

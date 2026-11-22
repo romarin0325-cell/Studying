@@ -4,6 +4,8 @@ import { chooseEvent } from '../../engine/run.js';
 import { eventChoices, joinCount } from '../../engine/rooms.js';
 import { BLESS, usesRepeatDraws } from '../../engine/awakenings.js';
 import { drawText } from '../reveal.js';
+import { relicEffect, relicIcon } from '../relics.js';
+import { josa } from '../text.js';
 
 const NEXT = '다음 전투 한 번';
 const STAYS = '이번 원정 끝까지';
@@ -139,14 +141,23 @@ export function eventScreen(run, ui, result = null) {
     const changes = !choice.targets && choice.blessingChanges ? Object.keys(choice.blessingChanges).map(id =>
       '<small>' + esc(card(id).name + ' · ' + targetValue(choice, id)) + '</small>').join('') : '';
     const offer = joinIds(choice).map(id => heirloomOffer(card(id))).join('');
+    const promise = choice.ops.find(effect => effect.type === 'promise')?.offer;
+    const relic = ui.artifacts.get(promise?.relic);
     const effects = choice.ops.map(effect => effectText(effect)).filter(Boolean);
     if (event.id === 'penguin_ice_seam' && choice.id === 'carry' && !choice.text.includes('물 동료 없음') &&
       !run.bench.some(id => ui.core.GameUtils.cardMatchesElement(card(id), 'water'))) effects.push('물 동료 없음');
+    const label = relic
+      ? '<b class="promise-choice">' + relicIcon(relic.id, 20) +
+        esc(josa('◆' + promise.deposit, '을/를') + ' 맡기면 ' + promise.floor + '층에서 ' + relic.name + ' 인수') + '</b>' +
+        // What the relic does, so the deposit is a judgement about this party rather than about a name.
+        '<span>' + esc(relic.name + ' · ' + relicEffect(relic)) + '</span>'
+      : '<b>' + esc(choice.text) + '</b><span>' + esc(cost(choice) + effects.join(' · ')) + '</span>';
     return '<button class="event-choice win" data-choice="' + esc(choice.id) + '"' + (choice.enabled ? '' : ' disabled') +
-      '><b>' + esc(choice.text) + '</b><span>' + esc(cost(choice) + effects.join(' · ')) +
-      '</span>' + offer + changes + (count ? '<small class="loss">보낼 동료 ' + count + '명 필요</small>' : '') +
+      '>' + label + offer + changes + (count ? '<small class="loss">보낼 동료 ' + count + '명 필요</small>' : '') +
       (short || !choice.enabled ? '<small>' + esc(short || '조건 미충족') + '</small>' : '') + '</button>';
   }).join('');
+  const promised = event?.id === run.promise?.id && ui.artifacts.get(run.promise?.relic);
+  if (promised) results.push(run.promise.floor + '층 약속 · ' + promised.name + ' 인수');
   const secondary = results.length ? results.map(line => '<p>' + esc(line) + '</p>').join('') :
     event && choices.length ? '<p>' + esc(DIALOGUE[event.id] || '') + '</p>' : '';
   const canChoose = choices.some(choice => choice.enabled);

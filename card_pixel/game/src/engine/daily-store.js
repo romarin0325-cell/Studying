@@ -1,9 +1,10 @@
 import { FLOORS } from '../content/daily-rift.js';
+import { RIFT_PUZZLES } from '../content/rift-puzzles.js';
 import { DAILY_KEY as KEY, slotStorage } from '../ui/storage.js';
-import { compare, dayKey, specFor, validAttempt } from './daily-rift.js';
+import { compare, dayKey, doorsFor, puzzleGoalMet, riftPuzzlesUnlocked, specFor, validAttempt } from './daily-rift.js';
 import { dailyRiftUnlocked } from './meta.js';
 import { invalid } from './rooms.js';
-import { createRun } from './run.js';
+import { chooseDoor, createRun } from './run.js';
 import { restoreRun, serializeRun } from './run-codec.js';
 
 const VERSION = 1;
@@ -23,7 +24,7 @@ function activeCheckpoint(data, run) {
   const { active } = data;
   const daily = run?.daily;
   const day = data.days[active?.dayKey];
-  if (!daily || !day || run.id !== active.runId || daily.kind !== active.kind || daily.attemptNo !== day.starts
+  if (!daily || daily.puzzleId || !day || run.id !== active.runId || daily.kind !== active.kind || daily.attemptNo !== day.starts
     || !day.spec || daily.spec?.dayKey !== active.dayKey
     || run.seed !== day.spec.seed || run.dungeonId !== day.spec.dungeonId || run.floors !== FLOORS
     || run.difficulty !== 'normal' || run.contract !== null || run.crystals !== 0) return null;
@@ -51,6 +52,18 @@ function validScore(score, day, kind) {
   const attempt = Number(score.runId?.split?.('/').at(-1));
   return score.runId === `rift/v${day.spec.ruleVersion}/${day.spec.dayKey}/${attempt}`
     && Number.isSafeInteger(attempt) && attempt <= day.starts && (kind === 'official' ? attempt === 1 : attempt > 1);
+}
+
+function puzzleBest(data, puzzle) {
+  const best = data?.puzzleBests?.[puzzle.id];
+  if (!['win', 'lose'].includes(best?.outcome) || best.floor !== puzzle.floor
+    || !validCheckpoint(best, { loanIds: puzzle.rentals })) return null;
+  return { ...best, goalMet: puzzleGoalMet(puzzle.goal, best) };
+}
+
+function comparePuzzle(a, b) {
+  return Number(a.goalMet) - Number(b.goalMet) || Number(a.outcome === 'win') - Number(b.outcome === 'win')
+    || a.livingIds.length - b.livingIds.length || b.turns - a.turns;
 }
 
 export function restoreDailyData(data, { core, roster }) {
@@ -118,6 +131,7 @@ function previousResult(data, runId) {
 
 export function create(storage, { core, roster }) {
   storage = slotStorage(storage);
+  const puzzlesInPlay = new WeakMap();
   function read() {
     try {
       const saved = storage.getItem(KEY);
@@ -156,6 +170,60 @@ export function create(storage, { core, roster }) {
   }
 
   return {
+    puzzles(profile) {
+      if (!riftPuzzlesUnlocked(profile)) return [];
+      const data = read();
+      return RIFT_PUZZLES.map(puzzle => ({ ...puzzle, best: puzzleBest(data, puzzle) }));
+    },
+
+    startPuzzle({ profile, puzzleId }) {
+      if (!riftPuzzlesUnlocked(profile)) return invalid('locked');
+      const puzzle = RIFT_PUZZLES.find(item => item.id === puzzleId);
+      if (!puzzle) return invalid('invalid_puzzle');
+      try {
+        const spec = specFor(puzzle.spec, roster);
+        if (puzzle.rentals.some(id => !spec.loanIds.includes(id))) return invalid('invalid_puzzle');
+        const run = createRun({ core, roster, daily: { spec, kind: 'practice', attemptNo: 2, puzzleId } });
+        run.id = `puzzle/${puzzleId}`;
+        run.floor = puzzle.floor;
+        run.doors = doorsFor(spec, puzzle.floor, roster).map(door => ({ ...door, tempo: null }));
+        run.joinOrder = puzzle.rentals.slice();
+        run.bench = puzzle.rentals.slice();
+        // Offset the boss seed to match the fixed entrance without counting earlier battles.
+        run.seed += puzzle.setup?.seedOffset ?? 0;
+        run.relics = puzzle.setup?.relics.slice() ?? [];
+        run.blessings = { ...puzzle.setup?.blessings };
+        if (!chooseDoor(run, 0).ok) return invalid('invalid_puzzle');
+        puzzlesInPlay.set(run, puzzle);
+        return { ok: true, run, puzzle };
+      } catch {
+        return invalid('invalid_puzzle');
+      }
+    },
+
+    finishPuzzle(run) {
+      const puzzle = puzzlesInPlay.get(run);
+      if (!puzzle) return invalid('invalid_puzzle');
+      if (run.phase !== 'done' || run.floor !== puzzle.floor || !['win', 'lose'].includes(run.result)) {
+        return invalid('run_not_done');
+      }
+      const checkpoint = checkpointFor(run);
+      if (!checkpoint) return invalid('invalid_puzzle');
+      const score = { ...checkpoint, outcome: run.result };
+      const result = { ...score, goalMet: puzzleGoalMet(puzzle.goal, score) };
+      const data = read();
+      if (!data) return { ...invalid('invalid_save'), score: result };
+      const best = puzzleBest(data, puzzle);
+      if (!best || comparePuzzle(result, best) > 0) {
+        // Keep this map in the existing backup slot, independently of daily attempts.
+        const puzzleBests = dictionary(data.puzzleBests) ? data.puzzleBests : {};
+        if (!write({ ...data, puzzleBests: { ...puzzleBests, [puzzle.id]: score } })) {
+          return { ...invalid('storage_failed'), score: result };
+        }
+      }
+      return { ok: true, score: result };
+    },
+
     view(profile, now) {
       const key = dayKey(now);
       const unlocked = dailyRiftUnlocked(profile);

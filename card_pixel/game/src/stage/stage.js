@@ -2,6 +2,7 @@
    every animation can be sped up or skipped, sprite variants (flash, waiting, shadow, boss),
    a camera that punches in at an integer zoom, cached backgrounds, props and particles. It knows nothing about rules. */
 import { SPRITE_SOCKET_OVERRIDES } from '../content/sprite-sockets.js';
+import { FORM_ART, FORM_MARKERS, FORM_OUTLINE_WIDTH } from '../content/skill-motions.js';
 import { MOTION_FRAME, motionPoint, socketPoint, spriteBox } from '../ui/battle/motion.js';
 
 export function createStage(ASSETS) {
@@ -74,27 +75,33 @@ export function createStage(ASSETS) {
     entry[name] = c;
     return c;
   }
-  /** A 1 px outline around the silhouette, one pixel outside the sprite (canvas is 2 px larger). */
-  function rimOf(key) {
+  function rimOf(key, color, width) {
     const entry = IMG[key];
     if (!entry) return null;
-    if (entry.rim) return entry.rim;
+    const rims = entry.rims ??= new Map();
+    const id = width + ':' + color.join(',');
+    if (rims.has(id)) return rims.get(id);
     const im = entry.base, w = im.width, h = im.height;
     const src = document.createElement('canvas'); src.width = w; src.height = h;
     const sx = src.getContext('2d'); sx.drawImage(im, 0, 0);
     const a = sx.getImageData(0, 0, w, h).data;
-    const c = document.createElement('canvas'); c.width = w + 2; c.height = h + 2;
-    const x = c.getContext('2d'), out = x.createImageData(w + 2, h + 2), d = out.data;
+    const c = document.createElement('canvas'); c.width = w + 2 * width; c.height = h + 2 * width;
+    const x = c.getContext('2d'), out = x.createImageData(c.width, c.height), d = out.data;
     const solid = (px, py) => px >= 0 && py >= 0 && px < w && py < h && a[(py * w + px) * 4 + 3] > 0;
-    for (let y = -1; y <= h; y++) for (let X0 = -1; X0 <= w; X0++) {
-      if (solid(X0, y)) continue;
-      if (solid(X0 - 1, y) || solid(X0 + 1, y) || solid(X0, y - 1) || solid(X0, y + 1)) {
-        const i = ((y + 1) * (w + 2) + (X0 + 1)) * 4;
-        d[i] = RIM.color[0]; d[i + 1] = RIM.color[1]; d[i + 2] = RIM.color[2]; d[i + 3] = 255;
+    for (let py = -width; py < h + width; py++) for (let px = -width; px < w + width; px++) {
+      if (solid(px, py)) continue;
+      for (let dy = -width; dy <= width; dy++) {
+        const reach = width - Math.abs(dy);
+        let touches = false;
+        for (let dx = -reach; dx <= reach && !touches; dx++) touches = solid(px + dx, py + dy);
+        if (!touches) continue;
+        const i = ((py + width) * c.width + px + width) * 4;
+        d[i] = color[0]; d[i + 1] = color[1]; d[i + 2] = color[2]; d[i + 3] = 255;
+        break;
       }
     }
     x.putImageData(out, 0, 0);
-    entry.rim = c;
+    rims.set(id, c);
     return c;
   }
   function loadSprites() {
@@ -131,6 +138,8 @@ export function createStage(ASSETS) {
     cam: { k: 1, x: 0, y: 0 }, beads: { burn: 0, divine: 0, x: 0, y: 0 } };
   // The gallery reads the effective amplitudes through the existing window.__game.clock hook.
   Object.defineProperty(clock, 'screenEffects', { get: () => ({ shake: S.shake, flash: S.flash }) });
+  let framesDrawn = 0;
+  Object.defineProperty(clock, 'framesDrawn', { get: () => framesDrawn });
   let cv, ctx, fxLayer, bgCache = null;
 
   const ELEMENT_COLORS = {
@@ -144,15 +153,20 @@ export function createStage(ASSETS) {
     return a;
   }
   function removeActor(a) { const i = S.actors.indexOf(a); if (i >= 0) S.actors.splice(i, 1); }
-  function meta(a, pose) { return ASSETS.sp[a.sprite + '-' + (pose || a.pose)] || ASSETS.sp[a.sprite + '-idle']; }
+  const spriteId = a => Object.hasOwn(FORM_MARKERS, a.form) ? FORM_ART : a.sprite;
+  function meta(a, pose) {
+    const sprite = spriteId(a);
+    return ASSETS.sp[sprite + '-' + (pose || a.pose)] || ASSETS.sp[sprite + '-idle'];
+  }
   const X = a => a.x + a.ox;
   const footY = a => S.BASE + (a ? a.y || 0 : 0);           // every actor stands on its own lane of the floor
   const tall = a => (meta(a, 'idle') ? meta(a, 'idle').fy + 1 : 72);
   const headY = a => footY(a) - tall(a);
   const chestY = a => footY(a) - Math.round(tall(a) * 0.5);
   function socket(a, name) {
-    const pose = ASSETS.sp[a.sprite + '-' + a.pose] ? a.pose : 'idle';
-    const key = a.sprite + '-' + pose;
+    const sprite = spriteId(a);
+    const pose = ASSETS.sp[sprite + '-' + a.pose] ? a.pose : 'idle';
+    const key = sprite + '-' + pose;
     return socketPoint({ ...a, y: S.BASE + a.y }, meta(a, pose),
       { ...ASSETS.sockets?.[key], ...SPRITE_SOCKET_OVERRIDES[key] }, name);
   }
@@ -286,10 +300,12 @@ export function createStage(ASSETS) {
   /* ---------- drawing ---------- */
   function drawActor(a, now) {
     if (!a.vis || a.alpha <= 0.01) return;
-    const key = a.sprite + '-' + a.pose, m = meta(a);
+    const sprite = spriteId(a);
+    const key = sprite + '-' + a.pose, m = meta(a);
     if (!m) return;
     const look = a.white > 0 ? 'white' : (a.wait > 0.5 ? (a.look === 'base' ? 'wait' : a.look) : a.look);
-    const img = variant(IMG[key] ? key : a.sprite + '-idle', look);
+    const imageKey = IMG[key] ? key : sprite + '-idle';
+    const img = variant(imageKey, look);
     if (!img) return;
     const base = footY(a), { cx, left, top } = actorBox(a, m, now);
     const sw = Math.round(m.w * 0.6);
@@ -299,16 +315,17 @@ export function createStage(ASSETS) {
       if (a.flip) { ctx.save(); ctx.translate(left + m.w + dx, top + dy); ctx.scale(-1, 1); ctx.drawImage(image, 0, 0); ctx.restore(); }
       else ctx.drawImage(image, left + dx, top + dy);
     };
-    if (RIM.on && a.white <= 0 && a.rim !== false) {     // light rim behind the sprite, under any aura
-      const rim = rimOf(IMG[key] ? key : a.sprite + '-idle');
+    const formColor = Object.hasOwn(FORM_MARKERS, a.form) ? FORM_MARKERS[a.form] : null;
+    if (formColor || (RIM.on && a.white <= 0 && a.rim !== false)) {
+      const width = formColor ? FORM_OUTLINE_WIDTH : 1;
+      const rim = rimOf(imageKey, formColor ?? RIM.color, width);
       if (rim) {
-        ctx.globalAlpha = a.alpha * RIM.alpha * (a.wait > 0.5 ? 0.55 : 1);
-        if (a.flip) { ctx.save(); ctx.translate(left + m.w + 1, top - 1); ctx.scale(-1, 1); ctx.drawImage(rim, 0, 0); ctx.restore(); }
-        else ctx.drawImage(rim, left - 1, top - 1);
+        ctx.globalAlpha = a.alpha * (formColor ? 1 : RIM.alpha) * (a.wait > 0.5 ? 0.55 : 1);
+        blit(rim, a.flip ? width : -width, -width);
       }
     }
     if (a.aura && a.white <= 0) {
-      const glow = variant(IMG[key] ? key : a.sprite + '-idle', a.aura);
+      const glow = variant(imageKey, a.aura);
       ctx.globalAlpha = a.alpha * (0.42 + 0.22 * Math.sin(now / 260 + a.phase));
       blit(glow, -1, 0); blit(glow, 1, 0); blit(glow, 0, -1); blit(glow, 0, 1);
     }
@@ -339,7 +356,8 @@ export function createStage(ASSETS) {
     }
   }
   function draw(now) {
-    if (!ctx) return;
+    if (!ctx || !visible()) return;
+    framesDrawn++;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (S.shake > 0.3) ctx.translate(Math.round((Math.random() * 2 - 1) * S.shake), Math.round((Math.random() * 2 - 1) * S.shake * 0.6));
     const cam = S.cam;
@@ -665,8 +683,7 @@ export function createStage(ASSETS) {
 
   function orbFx(q, f) {
     const absorb = q.variant === 'absorb';
-    const from = absorb ? q.to : q.from, to = absorb ? q.from : q.to;
-    const { colors } = q;
+    const { from, to, colors } = q;
     const radius = q.big ? 6 : scaled(q, 4);
     if (f.hit) {
       const step = Math.min(1, f.frame / 3);
@@ -746,23 +763,20 @@ export function createStage(ASSETS) {
   function fallFx(q, f) {
     const { to, floor, colors, variant } = q;
     const rain = variant === 'rain';
-    if (!f.hit && f.frame === 0) ellipseSegments(to.x, floor - 1, 6, 1, 12, 1, [colors[2], colors[1]]);
-    for (let i = 0; i < (rain ? 3 : 1); i++) {
-      const x = to.x + (rain ? (i - 1) * 8 : 0);
-      const begin = (1 + i) * MOTION_FRAME;
-      const age = (f.hit ? q.travel + f.hitAge : f.age) - begin;
-      if (age < 0) continue;
-      if (age >= q.flight) {
-        const landing = Math.floor((age - q.flight) / MOTION_FRAME);
-        if (landing > 3) continue;
-        hitStar(x, to.y, scaled(q, Math.max(3, 6 - landing)), -Math.PI / 4, colors);
-        chips(x, floor - 3, q.dir, landing, colors, 2, 0.7);
-        continue;
+    if (f.hit) {
+      if (f.frame <= 3) {
+        hitStar(to.x, to.y, scaled(q, Math.max(3, 6 - f.frame)), -Math.PI / 4, colors);
+        chips(to.x, floor - 3, q.dir, f.frame, colors, 2, 0.7);
       }
+      return;
+    }
+    if (f.frame === 0) ellipseSegments(to.x, floor - 1, 6, 1, 12, 1, [colors[2], colors[1]]);
+    const age = f.age - MOTION_FRAME;
+    if (age < 0) return;
+    for (let i = 0; i < (rain ? 3 : 1); i++) {
       const t = unit(age / q.flight);
-      const from = { x: x - q.dir * (rain || variant !== 'meteor' ? 0 : 16), y: q.fallY };
-      const end = { x, y: to.y };
-      const head = motionPoint(from, end, t);
+      const from = { x: to.x + (rain ? (i - 1) * 12 : variant === 'meteor' ? -q.dir * 16 : 0), y: q.fallY };
+      const head = motionPoint(from, to, t);
       if (variant === 'meteor') {
         if (q.effectSprite) {
           ctx.save();
@@ -774,7 +788,7 @@ export function createStage(ASSETS) {
           ctx.restore();
         }
         for (let j = 6; j >= 1; j--) {
-          const tail = motionPoint(from, end, Math.max(0, t - j * 0.065));
+          const tail = motionPoint(from, to, Math.max(0, t - j * 0.065));
           const r = Math.max(1, scaled(q, 4) - j);
           disc(tail.x, tail.y, r, j % 2 ? colors[2] : colors[1]);
         }
@@ -964,7 +978,9 @@ export function createStage(ASSETS) {
     ctx.save();
     clipBenchFaces(q, now);
     ctx.globalAlpha = (q.landed ? 1 : 0.65) * (hit ? Math.max(0.25, 1 - hitAge / q.hold) : 1);
-    if (q.still && q.family !== 'mark') hitStar(q.to.x, q.to.y, scaled(q, 5), 0, q.colors);
+    if (q.still && q.family !== 'mark' && !(q.family === 'orb' && q.variant === 'absorb')) {
+      hitStar(q.to.x, q.to.y, scaled(q, 5), 0, q.colors);
+    }
     else RANGED_FX[q.family](q, { hit, age, hitAge, frame, progress: hit ? 1 : unit(age / q.travel) });
     ctx.restore();
   }
@@ -1052,7 +1068,8 @@ export function createStage(ASSETS) {
   }
 
   /* ---------- frame loop ---------- */
-  let last = 0, running = false;
+  let last = 0, raf = null, screen = null, observer = null;
+  const visible = () => !screen || (screen.isConnected && screen.classList.contains('on'));
   function sim(real) {
     const dt = stepClock(real);
     updateParts(dt);
@@ -1060,19 +1077,44 @@ export function createStage(ASSETS) {
     for (const a of S.actors) if (a.white > 0) a.white -= dt;
   }
   function frame(now) {
+    raf = null;
+    if (!visible()) return;
     const real = Math.min(0.05, (now - last) / 1000); last = now;
     sim(real); draw(now);
-    requestAnimationFrame(frame);
+    raf = requestAnimationFrame(frame);
   }
-  function start() { if (running) return; running = true; last = performance.now(); requestAnimationFrame(frame); }
+  function stop() {
+    if (raf != null) cancelAnimationFrame(raf);
+    raf = null;
+  }
+  function syncVisibility() {
+    if (!visible()) { stop(); return; }
+    if (raf != null) return;
+    last = performance.now();
+    draw(last);
+    raf = requestAnimationFrame(frame);
+  }
+  function start() {
+    if (screen && !observer) {
+      observer = new MutationObserver(syncVisibility);
+      observer.observe(screen, { attributes: true, attributeFilter: ['class'] });
+    }
+    syncVisibility();
+  }
   /** Review hook: advance stage time by hand when the page is not animating (hidden preview pane). */
   async function advance(sec, step = 0.02) {
-    for (let n = Math.round(sec / step); n > 0; n--) { sim(step); for (let k = 0; k < 6; k++) await null; }
+    for (let n = Math.round(sec / step); n > 0 && visible(); n--) { sim(step); for (let k = 0; k < 6; k++) await null; }
     draw(performance.now());
     return Math.round(clock.t * 100) / 100;
   }
 
-  function init(canvas, fx) { cv = canvas; ctx = cv.getContext('2d'); fxLayer = fx; }
+  function init(canvas, fx) {
+    stop();
+    observer?.disconnect();
+    observer = null;
+    cv = canvas; ctx = cv.getContext('2d'); fxLayer = fx;
+    screen = cv.closest('#battle');
+  }
   function resize(W, H) {
     S.W = W; S.H = H; S.BASE = H - 22; bgCache = null;
     cv.width = W; cv.height = H; cv.style.width = W * SCALE + 'px'; cv.style.height = H * SCALE + 'px';

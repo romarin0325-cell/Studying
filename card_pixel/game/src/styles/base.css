@@ -42,6 +42,9 @@
 :root.large-text { font-size: 125%; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 500 0.8125rem/1.5 var(--f-body); overscroll-behavior: none; }
+/* Korean wraps between words, as commercial games set it ("맞춘다" never splits into "맞춘/다"); a word wider than its box still breaks. */
+html { word-break: keep-all; overflow-wrap: break-word; }
+.nobr { white-space: nowrap; }
 body { display: flex; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: manipulation;
   background: linear-gradient(180deg, #e2dbfa 0 50%, #d9d1f5 50% 100%); }
 button { font: inherit; color: inherit; cursor: pointer; }

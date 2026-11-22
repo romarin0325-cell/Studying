@@ -10,8 +10,10 @@ import * as Meta from '../src/engine/meta.js';
 import { create as makeRoster } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
+import { RIFT_PUZZLES } from '../src/content/rift-puzzles.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 import { dailyTotals, playDaily } from '../tools/sim.mjs';
+import { playPuzzleFight, puzzleSolutions } from './screens/puzzles.mjs';
 
 process.env.TZ = 'Asia/Tokyo';
 const repo = fileURLToPath(new URL('../../../', import.meta.url));
@@ -53,6 +55,14 @@ function unlockedProfile() {
   profile.seenCharacters = ['ash'];
   profile.seenRelics = ['reverse'];
   profile.contractStamps = { ember_volcano: { rescue: 'earlier-run' } };
+  return profile;
+}
+
+function puzzleProfile() {
+  const profile = unlockedProfile();
+  profile.records.clears.creation_tower = { easy: 0, normal: 1, nightmare: 0 };
+  profile.notebook.chapters.push(7);
+  profile.ui.endingSeen = true;
   return profile;
 }
 
@@ -193,6 +203,95 @@ test('swapping the arena boss order changes the real fight to a 46-turn win with
   assert.deepEqual([won.result, won.floor, won.stats.turns, won.bench.length], ['win', 7, 46, 3]);
   assert.equal(won.heirlooms.trauma.from, 'time_ruler');
   assert.equal(won.heirlooms.trauma.name, '종언의예고');
+});
+
+const puzzleOutcomes = {
+  'arena-relay': [['lose', 9, 2, 1], ['win', 24, 3, 1]],
+  'ember-clock': [['win', 17, 3, 2], ['win', 11, 3, 2]],
+  'trench-heirlooms': [['lose', 13, 2, 2], ['win', 18, 3, 2]]
+};
+
+for (const puzzle of RIFT_PUZZLES) {
+  test(`puzzle ${puzzle.id} fails with the default and meets the goal with the verified formation`, () => {
+    const profile = puzzleProfile();
+    const store = DailyStore.create(memoryStorage(), deps);
+    function play(order) {
+      const { run } = ok(store.startPuzzle({ profile, puzzleId: puzzle.id }));
+      assert.deepEqual([run.floor, run.room.type, run.room.status, run.stats.turns], [7, 'boss', 'order', 0]);
+      assert.deepEqual(run.bench, puzzle.rentals);
+      assert.deepEqual(Run.defaultParty(run), puzzle.rentals.slice(0, 3));
+      const { summary } = playPuzzleFight(run, core, order);
+      const { score } = ok(store.finishPuzzle(run));
+      return { summary, score };
+    }
+    const original = play().score;
+    const { score, summary } = play(puzzleSolutions[puzzle.id]);
+    assert.equal(original.goalMet, false);
+    assert.equal(score.goalMet, true);
+    const stats = ({ outcome, turns, livingIds, heirloomsUsed }) => [outcome, turns, livingIds.length, heirloomsUsed];
+    assert.deepEqual([stats(original), stats(score)], puzzleOutcomes[puzzle.id]);
+    play();
+    assert.deepEqual(store.puzzles(profile).find(entry => entry.id === puzzle.id).best, score);
+    if (puzzle.id === 'arena-relay') {
+      assert.ok(summary.heirloomsGained.some(({ from, to, name }) =>
+        from === 'time_ruler' && to === 'trauma' && name === '종언의예고'));
+    }
+  });
+}
+
+test('puzzle bests round-trip separately from the official rift, stamps and the active expedition', () => {
+  const storage = memoryStorage();
+  const store = DailyStore.create(storage, deps);
+  const puzzleId = RIFT_PUZZLES[0].id;
+  const beforeTower = unlockedProfile();
+  beforeTower.ui.endingSeen = true;
+  assert.deepEqual(store.puzzles(beforeTower), []);
+  reason(store.startPuzzle({ profile: beforeTower, puzzleId }), 'locked');
+  const profile = puzzleProfile();
+  const session = Save.createSaveStore(storage, deps);
+  const main = Run.createRun({ ...deps, dungeonId: 'ember_volcano', seed: 7 });
+  session.save({ profile, run: main });
+  const savedMain = storage.getItem('relaymare.session');
+  const mainBefore = structuredClone(main);
+
+  ok(start(store, FIRST));
+  ok(store.finish(playDaily(FIRST, { naive: true })));
+  const active = ok(start(store, SECOND)).run;
+  const before = storage.getItem(KEY);
+  const history = store.history();
+  assert.equal(history.rows[0].official.outcome, 'win');
+  assert.equal(store.puzzles(profile).length, 3);
+  assert.ok(store.puzzles(profile).every(puzzle => puzzle.best === null));
+  const { run } = ok(store.startPuzzle({ profile, puzzleId }));
+  reason(store.finishPuzzle(run), 'run_not_done');
+  reason(store.save(run), 'invalid_save');
+  playPuzzleFight(run, core, puzzleSolutions[puzzleId]);
+  reason(store.finish(run), 'invalid_save');
+  assert.equal(storage.getItem(KEY), before);
+  assert.equal(Meta.creditMissions(profile, run), profile);
+  assert.equal(Meta.applyRunEnd(profile, run).announce.reason, 'daily_run');
+  assert.equal(session.save({ profile, run }), false);
+
+  storage.failWrite = true;
+  assert.equal(store.finishPuzzle(run).reason, 'storage_failed');
+  assert.equal(storage.getItem(KEY), before);
+  storage.failWrite = false;
+  const { score } = ok(store.finishPuzzle(run));
+  const { puzzleBests, ...daily } = JSON.parse(storage.getItem(KEY));
+  assert.deepEqual(Object.keys(puzzleBests), [puzzleId]);
+  assert.deepEqual(daily, JSON.parse(before));
+  assert.deepEqual(store.history(), history);
+  assert.equal(ok(store.resume()).run.id, active.id);
+  assert.equal(storage.getItem('relaymare.session'), savedMain);
+  assert.deepEqual(main, mainBefore);
+
+  const imported = memoryStorage();
+  const backup = session.exportBackup({ profile, run: main, dailyRun: run });
+  ok(Save.createSaveStore(imported, deps).restoreBackup(backup));
+  const reopened = DailyStore.create(imported, deps);
+  assert.deepEqual(reopened.puzzles(profile)[0].best, score);
+  assert.deepEqual(reopened.history(), history);
+  assert.equal(ok(reopened.resume()).run.id, active.id);
 });
 
 test('battle settlement pays zero crystals, grants risk D once, and accepts a zero-survivor boss win', () => {

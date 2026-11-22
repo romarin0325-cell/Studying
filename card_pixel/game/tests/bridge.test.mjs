@@ -69,9 +69,17 @@ test('Soul Drain previews zero HP damage, the incoming MP, and the actual respon
       assert.deepEqual(intent.damageRange, [0, 0]);
       assert.deepEqual([intent.resourceEffect.mode, intent.resourceEffect.before, intent.resourceEffect.after, intent.resourceEffect.preventedBy],
         [type, 34, blocked ? 34 : type === 'flat' ? 10 : 0, blocked]);
-      const rule = b.act(0).find(event => event.actionId === intent.actionId && event.t === 'rule');
+      const events = b.act(0);
+      const rule = events.find(event => event.actionId === intent.actionId && event.t === 'rule');
       assert.deepEqual([rule.target, rule.before, rule.after, rule.preventedBy],
         [{ side: 'ally', idx: 0 }, 34, intent.resourceEffect.after, blocked]);
+      const cast = events.find(event => event.t === 'act' && event.actionId === intent.actionId);
+      assert.equal(cast.manaDrain, true);
+      const losses = events.filter(event => event.t === 'mp' && event.cause?.skill === cast.skill.name);
+      assert.deepEqual(losses.map(event => [event.who, event.delta, event.cause.by]), blocked ? [] : [
+        [cast.target, intent.resourceEffect.after - 34, cast.who]
+      ]);
+      assert.equal(events.some(event => event.t === 'hp' && event.cause?.skill === cast.skill.name), false);
     }
     const { b } = prepare(type, null);
     const preview = b.previewRetreat();
@@ -803,6 +811,7 @@ test('Mirror Cocoon offers both 20 MP transformations and applies the selected f
     const mp = b.state().allies[0].mp;
     const events = b.act(choices.find(o => o.name === '기적의우화 → ' + name).index);
     assert.equal(events.find(e => e.t === 'form').name, name);
+    assert.equal(events.find(e => e.t === 'form').form, formId);
     assert.equal(b.state().allies[0].form, formId);
     assert.equal(b.state().allies[0].mp, mp - 20);
   }
@@ -1085,13 +1094,14 @@ test('Delayed-on-time requires damage from a scheduled landing, including a winn
   const events = scheduled.act(option(scheduled, '나이트메어').index);
   const landing = events.find(e => e.t === 'act' && e.delayed);
   assert.equal(landing.s.turn, 2);
+  assert.equal(landing.trigger, 'reserved');
   assert.ok(events.some(e => e.t === 'hp' && e.who.side === 'enemy' && e.cause.delayed));
   assert.equal(scheduled.outcome, 'win');
   assert.deepEqual(scheduled.summary().bet, { kind: 'delayed_on_time', won: true });
 
   const instant = battle({ ...config, party: ['phantom', 'time_magician'] });
   instant.start();
-  assert.ok(instant.act(option(instant, '나이트메어').index).some(e => e.t === 'act' && e.delayed));
+  assert.equal(instant.act(option(instant, '나이트메어').index).find(e => e.t === 'act' && e.delayed)?.trigger, 'follow-up');
   assert.equal(instant.outcome, 'win');
   assert.deepEqual(instant.summary().bet, { kind: 'delayed_on_time', won: false });
 });

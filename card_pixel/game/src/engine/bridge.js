@@ -342,6 +342,13 @@ export function create(core, opts) {
     const owners = sourceCards.filter(card => card.skills.some(slot => sameSkill(slot, skill)));
     if (owners.length === 1) return skillSourceKey('ally', owners[0], skill);
   }
+  function sourceMotionSkill(sourceKey) {
+    const [role, id, slot] = sourceKey?.split('/') ?? [];
+    if (role !== 'ally') return;
+    const owner = GameUtils.getCardById(id), skill = owner?.skills[Number(slot) - 1];
+    if (skill) return { name: skill.name, type: skill.type, tier: skill.tier || 1, val: skill.val,
+      effects: (skill.effects || []).map(effect => effect.type), element: owner.element };
+  }
   const hasAffix = (enemy, id) => !!enemy && Array.isArray(enemy.affixes) && enemy.affixes.includes(id);
   const players = () => (host.battle.players || []).filter(Boolean);
 
@@ -407,7 +414,7 @@ export function create(core, opts) {
     const cause = B.ctx.length ? B.ctx[B.ctx.length - 1] : null;
     const diffUnit = (who, unit, a, z) => {
       if (!a || !z) return;
-      if (z.mp !== a.mp) push({ t: 'mp', who, delta: z.mp - a.mp });
+      if (z.mp !== a.mp) push({ t: 'mp', who, delta: z.mp - a.mp, cause: describeCause(cause, who) });
       if (z.hp !== a.hp) {
         const ev = { t: 'hp', who, delta: z.hp - a.hp, amount: Math.abs(z.hp - a.hp), cause: describeCause(cause, who) };
         const c = B.lastCalc;
@@ -434,7 +441,7 @@ export function create(core, opts) {
       });
       if (z.form !== a.form) {
         if (who.side === 'ally') B.forms[z.form] = host.state.deck[who.idx];
-        push({ t: 'form', who, name: z.name });
+        push({ t: 'form', who, name: z.name, form: z.form });
       }
       if (z.dead && !a.dead) push({ t: 'down', who });
     };
@@ -580,7 +587,10 @@ export function create(core, opts) {
       if (from) B.heirloomUses.push({ by, from, skill: skill.name });
     }
     const sourceKey = allySkillSource(source, skill, delayed);
-    push({ t: 'act', who, target: refOf(target), delayed, sourceKey, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
+    const trigger = delayed ? (B.dueEffects.some(effect => effect.source === source && effect.skill === skill)
+      ? 'reserved' : 'follow-up') : undefined;
+    push({ t: 'act', who, target: refOf(target), delayed, trigger, sourceKey, sourceSkill: sourceMotionSkill(sourceKey),
+      heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
     B.ctx.push({ kind: 'act', who, skill, delayed, source });
     B.lastHit = null;
     const formId = source.formId;
@@ -722,7 +732,8 @@ export function create(core, opts) {
       : skillSourceKey(isBoss() ? 'boss' : 'wild', def, action));
     push({
       t: 'act', who: enemyRef(), target: isAttack(action) && !action.isChargeStart ? allyRef(target.pos) : enemyRef(), delayed: false,
-      sourceKey: sourceKey || undefined, actionId: actionId(action), charge: !!action.isChargeStart, salience, ult: salience === 'boss',
+      sourceKey: sourceKey || undefined, sourceSkill: sourceMotionSkill(sourceKey || undefined), actionId: actionId(action),
+      charge: !!action.isChargeStart, salience, ult: salience === 'boss', manaDrain: !action.isChargeStart && rule === 'mana_drain',
       skill: { name: action.name, type: action.isChargeStart ? 'sup' : action.type, tier: salience === 'boss' ? 3 : 1, cost: 0, val: power, effects: (action.effects || []).map(e => e.type) }
     });
     return action;

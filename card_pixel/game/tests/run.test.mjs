@@ -1458,13 +1458,13 @@ test('tempo 2 two-recruit event validates both releases and price before applyin
   roundTrip(run);
 });
 
-test('tempo 2 event doors offer 11 events per theme and 40 in the tower', () => {
+test('tempo 2 ordinary event doors offer 11 events per theme and 40 in the tower', () => {
   const newEvents = EVENTS.filter(event => event.minTempoVersion === 2);
   assert.equal(newEvents.length, 12);
   const collect = run => {
     const offered = new Set();
     for (let state = 0; state < 512; state++) {
-      const door = makeDoors({ ...run, rng: { state } }, roster).find(entry => entry.type === 'event');
+      const door = makeDoors({ ...run, promise: undefined, rng: { state } }, roster).find(entry => entry.type === 'event');
       if (door?.event) offered.add(door.event.id);
     }
     return offered;
@@ -1488,6 +1488,110 @@ test('tempo 2 event doors offer 11 events per theme and 40 in the tower', () => 
   const arena = reach(makeTempo({ dungeonId: 'arena', profileView: { companions: ['ash'] } }), 3);
   assert.ok(arena.pool.includes('ash'));
   assert.ok(!collect(arena).has('ash_split_wick'));
+});
+
+function openPromiseEvent() {
+  const run = reach(makeTempo({ seed: 7 }), 3);
+  const door = run.doors.find(entry => entry.type === 'event');
+  assert.equal(door.event.id, 'kept_chest');
+  enter(run, door.index);
+  const { offer } = run.pending.choices.find(choice => choice.id === 'deposit').ops[0];
+  return { run, offer };
+}
+
+function takePromiseToFloor5() {
+  const { run, offer } = openPromiseEvent();
+  ok(Run.chooseEvent(run, 'deposit'));
+  advance(run);
+  return { run: reach(run, 5), offer };
+}
+
+test('the floor-3 promise charges once, survives reload and grants the disclosed relic once on floor 5', () => {
+  const { run, offer } = openPromiseEvent();
+  const crystals = run.crystals;
+  assert.deepEqual(offer, { id: 'kept_chest', relic: offer.relic, floor: 5, deposit: 1 });
+  assert.ok(run.seenRelics.includes(offer.relic));
+  assert.equal(ok(Run.chooseEvent(run, 'deposit')).crystals, -1);
+  assert.equal(run.crystals, crystals - 1);
+  assert.equal(Run.chooseEvent(run, 'deposit').ok, false);
+  assert.deepEqual(run.promise, offer);
+  assert.equal(run.relics.includes(offer.relic), false);
+  advance(run);
+  const restored = roundTrip(run);
+  enter(restored);
+  settle(restored);
+  assert.notEqual(restored.pending.relic, offer.relic);
+  ok(Run.leaveRoom(restored));
+  const preview = Run.previewNextFloor(restored);
+  assert.deepEqual(restored.promise, offer);
+  ok(Run.nextFloor(restored));
+  assert.deepEqual(restored.doors, preview.doors);
+  const map = roundTrip(restored);
+  assert.deepEqual(map.doors.slice(0, 2).map(door => door.type), ['event', 'treasure']);
+  const door = map.doors[2];
+  assert.equal(door.name, '약속한 자리');
+  assert.equal(door.relic, offer.relic);
+  const beforeGrant = map.crystals;
+  assert.deepEqual(ok(Run.chooseDoor(map, door.index)).relic, { id: offer.relic, equipped: true });
+  assert.equal(map.promise, null);
+  assert.equal(map.crystals, beforeGrant);
+  const granted = roundTrip(map);
+  assert.equal(Run.chooseDoor(granted, door.index).ok, false);
+  assert.equal(granted.relics.filter(id => id === offer.relic).length, 1);
+});
+
+test('the promise relic uses the existing free replacement flow when the rack is full', () => {
+  const { run, offer } = takePromiseToFloor5();
+  run.relics = Object.keys(RELICS).filter(id => id !== offer.relic).slice(0, 4);
+  const crystals = run.crystals;
+  const door = run.doors.find(entry => entry.promiseId);
+  assert.equal(ok(Run.chooseDoor(run, door.index)).relic.chooseReplacement, true);
+  assert.equal(run.promise, null);
+  const restored = roundTrip(run);
+  const replace = restored.relics[0];
+  assert.equal(restored.pending.cost, 0);
+  ok(Run.equipRelic(restored, offer.relic, replace));
+  assert.equal(Run.equipRelic(restored, offer.relic, replace).ok, false);
+  assert.equal(restored.relics[0], offer.relic);
+  assert.equal(restored.crystals, crystals);
+});
+
+test('taking the immediate crystal leaves the two ordinary floor-5 doors', () => {
+  const { run } = openPromiseEvent();
+  assert.equal(ok(Run.chooseEvent(run, 'take_crystal')).crystals, 1);
+  assert.equal(run.promise, null);
+  advance(run);
+  assert.deepEqual(reach(run, 5).doors.map(door => door.type), ['event', 'treasure']);
+  assert.ok(run.doors.every(door => !door.promiseId));
+});
+
+test('entering a different floor-5 door forfeits the deposit and removes the promise door', () => {
+  for (const type of ['treasure', 'event']) {
+    const { run } = takePromiseToFloor5();
+    const promise = run.doors.find(door => door.promiseId);
+    const crystals = run.crystals;
+    enter(run, run.doors.find(door => door.type === type && !door.promiseId).index);
+    assert.equal(run.crystals, crystals);
+    assert.equal(run.promise, null);
+    assert.ok(run.doors.every(door => !door.promiseId));
+    if (type === 'treasure') assert.equal(ok(Run.takeTreasure(run)).relic?.id, run.room.relic);
+    const restored = roundTrip(run);
+    assert.equal(Run.chooseDoor(restored, promise.index).ok, false);
+    advance(restored);
+    assert.ok(restored.doors.every(door => !door.promiseId));
+  }
+});
+
+test('an old Ember save without promise state restores the old floor-3 and floor-5 doors', () => {
+  const run = reach(makeTempo({ seed: 7 }), 2);
+  const old = JSON.parse(Save.serializeRun(run));
+  delete old.run.promise;
+  const restored = Save.restoreRun(old, { core, roster });
+  assert.ok(restored);
+  assert.deepEqual(restored.doors, old.run.doors);
+  assert.equal(Object.hasOwn(restored, 'promise'), false);
+  assert.notEqual(reach(restored, 3).doors.find(door => door.type === 'event').event.id, 'kept_chest');
+  assert.deepEqual(roundTrip(reach(restored, 5)).doors.map(door => door.type), ['event', 'treasure']);
 });
 
 registerTempoEventTests({ core, roster, makeTempo: makeOldTempo, reach, advance, enter, settle, ok });

@@ -77,10 +77,14 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/engine/awakenings.js` | 깨우기 확률·비용(복원추출, 표기 = 실제 `ratesView`), 합류·강화·기억 판정, 제단 축복 뽑기 |
 | `src/engine/entry.js` | 새 플레이어의 단계 해금(`featureFlags`), 튜토리얼·기능 안내 기록(`profile.ui.entry`) |
 | `src/engine/meta.js` | 프로필, 영입·인연, 준비 모델(`prepView`: 시작 동료·샘 초대·출현 제외), 해금과 수첩·기록 |
+| `src/engine/history.js` | 원정 기록(`run.chronicle`: 전투별 계승·사용·형태·막타)과 동료별 귀환 이력(`profile.history`: 출전·대기·생환·쓰러짐) |
+| `src/engine/resume.js` | 이어가기 지점 판정(`resumePoint`: 전투 입구·결과판·지도·방) |
+| `src/engine/episodes.js` | 인연 에피소드 해금(영입 → 실제 출전 → 그 원정 정산)과 읽음 표시 |
 | `src/engine/save.js` | 본편 세션·프로필 저장과 전체 기록 백업·복원 |
 | `src/engine/run-codec.js` | 본편과 균열에서 쓰는 원정 직렬화·검증·복원 |
 | `src/engine/daily-rift.js` | 날짜별 균열 생성, 시도 검증과 채점 |
 | `src/engine/daily-store.js` | 균열 체크포인트와 첫 도전·연습 기록 저장 |
+| `src/content/rift-puzzles.js` | 엔딩 뒤 균열 퍼즐 3판(재사용하는 균열 날짜, 대여 5인, 목표, 한 줄 이야기). 해답은 `tests/daily.test.mjs`에만 있다 |
 | `src/engine/dates.js` | 달력 날짜 변환과 검증 |
 | `src/engine/opening.js` | 첫 전투 선택지의 결과 미리보기 |
 | `src/engine/roster.js` | 카드와 스프라이트로 동료 풀·야생·그림자·보스 구성 |
@@ -102,9 +106,16 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/content/daily-rift.js` | 균열 층 수와 지역·사건·전투 보정 자료 |
 | `src/content/missions.js` | 주간·월간 임무 해금과 보상 후보 기준 |
 | `src/content/tempo.js` | 템포 버전, 전투 시작값과 편성·증원 규칙 |
+| `src/content/skill-motions.js` | 기술별 연출 자료(원래 칸 키 `역할/주인/칸`: 계열·변형·자세·발사 지점·속성색)와 변신 형태 윤곽선(`FORM_MARKERS`) |
+| `src/content/sprite-sockets.js` | 자동 추출한 발사 지점(`assets/sprite-sockets.json`)을 덮어쓰는 보정값 |
+| `src/content/episodes.js` | 소유자 시나리오 31편 원문. `tools/import-episodes.mjs`로 만들고 직접 고치지 않는다 |
+| `src/content/episode-greetings.js` | 영입 인사 예외(첫 원문 대사 대신 같은 에피소드의 다른 원문 대사를 쓰는 12명) |
+| `src/content/rulebook.js` | 카드 원본 대비 바뀐 규칙 검수 자료(`plan/changes-review.html`). 게임은 불러오지 않는다 |
 | `src/ui/` | 화면·입력·표시 |
 | `src/ui/nav.js` | 제목·관측소·행선지·생환·엔딩 전환과 세션 저장 연결 |
 | `src/ui/nav/daily.js` | 오늘의 균열 기록·준비·재개·결과 화면과 미저장 결과의 재시도·백업 연결 |
+| `src/ui/nav/recovery.js` | 저장 손상 때의 복구 화면과 백업 가져오기 연결 |
+| `src/ui/nav/screen-tabs.js` | 탭이 있는 화면(수첩·기록·엔딩)의 공용 탭 전환 |
 | `src/ui/run/` | 원정 화면의 진행 연결 |
 | `src/ui/run/index.js` | 원정 화면 등록·전환, 엔진 명령 호출과 저장 |
 | `src/ui/screens/` | 장면별 HTML과 버튼 |
@@ -135,12 +146,16 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/ui/battle/fields.js` | 전투 필드와 기술이 만드는 필드 설명 |
 | `src/ui/battle/log.js` | 전투 사건을 턴별 기록으로 정리하고 표시(아군·적 색 표식) |
 | `src/ui/battle/effect-plan.js` | 한 시전의 사건을 "타격 → 실제로 바뀐 곳의 효과" 그리기 계획으로 바꾸는 순수 함수 |
+| `src/ui/battle/motion.js` | 기술 연출 판정(`resolveMotion`: 유품·룰렛·그림자·변신도 원래 칸으로)과 접점·발사 지점 계산 |
 | `src/ui/assets.js` | 내장 스프라이트·배경·아이콘 조회 |
 | `src/ui/storage.js` | 브라우저 `localStorage` 접근 |
 | `src/ui/settings.js` | 음악·효과음·윤곽선 설정, 전체화면·기록 초기화, 튜토리얼 다시 보기 |
 | `src/ui/coach.js` | 실제 버튼에 구멍을 내는 코치 표시(디펜스 방식, 도트 스타일) |
 | `src/ui/tutorial.js` | 루미의 첫 세션 안내 단계와 기능 안내(명령 성공으로 진행) |
 | `src/ui/glossary.js` | 화면 공통 용어(`short`·`firstUse`·`detail`·`scope`) 한 곳 |
+| `src/ui/text.js` | 조사 고르기(`josa`)와 줄 첫머리에 "·"가 오지 않게 하는 `keepSeparators` |
+| `src/ui/story-lines.js` | 원정 기록을 동료별 한 줄 문장으로(지어내지 않고 실제 사건만) |
+| `src/ui/credits.js` | 만든 사람과 글꼴·도구 라이선스 시트 |
 | `src/ui/sheet.js` | 공용 하단 시트와 열려 있는 동안의 전투 시계 정지 |
 | `src/ui/widgets.js` | 헤더·스프라이트·배지·수치표 등 공용 표시 |
 | `src/ui/dom.js` | DOM 조회·화면 전환(전환 띠 포함)과 HTML 이스케이프 |
@@ -156,12 +171,13 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/styles/` | 공용(`base`: 색·모양·글꼴 토큰, 버튼, 시트, 장식)·전투(`battle`)·원정 화면(`screens`)·타이틀·관측소와 메타 화면(`meta`) CSS. 디자인 근거는 `plan/ui-direction.md` |
 | `src/styles/map.css` | 걷는 지도와 문·편성 패널 스타일 |
 | `assets/` | 포즈 PNG와 `sprites.json`, `backgrounds/`, `icons/` |
-| `tools/` | `core/`의 전투 규칙을 감싸는 `core-bundle.mjs`, 시뮬레이션, 미리듣기, 그림 만들기 |
-| `tests/` | Node 테스트 진입 파일 8개, 화면·지도 갤러리, 브라우저 자동 플레이(튜토리얼 따라가기·건너뛰기 포함) |
+| `tools/` | `core/`의 전투 규칙을 감싸는 `core-bundle.mjs`, 시뮬레이션(`sim.mjs`), 미리듣기, 그림 만들기, 발사 지점 추출(`sprite-sockets.mjs`), 시나리오 가져오기(`import-episodes.mjs`) |
+| `tests/` | Node 테스트 진입 파일 13개, 화면·지도 갤러리, 브라우저 자동 플레이(튜토리얼 따라가기·건너뛰기 포함), 성능 측정(`perf.mjs`) |
 | `tests/screens/entry.mjs` | `screens.mjs`에서 등록하는 튜토리얼·단계 해금·준비 화면 사례 |
 | `tests/support/core.mjs` | 테스트별 카드 코어 VM과 스프라이트 명단 생성 |
 | `tests/run/tempo-events.mjs` | `run.test.mjs`에서 등록하는 템포 2 사건 사례 |
 | `tests/screens/rift.mjs` | `screens.mjs`에서 등록하는 균열 화면 사례 |
+| `tests/screens/*.mjs` | 갤러리 묶음(`--case <묶음>`): `tours`·`coach` 안내, `motion` 연출, `resume` 이어가기, `history` 귀환 기록, `access` 키보드·편안함, `goals` 엔딩 뒤 목표, `episodes` 인연, `relics` 유물 문, `patterns` 야생 패턴, `promise` 약속, `puzzles` 균열 퍼즐 |
 | `dist/` | 플레이용 단일 HTML |
 
 ## 어디를 고치면 무엇이 바뀌나

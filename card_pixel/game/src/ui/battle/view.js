@@ -9,6 +9,7 @@ import { ROOM_NAMES } from '../../content/layouts.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
 import { CONTRACT_ESCROW } from '../../content/contracts.js';
+import { FORM_MARKERS } from '../../content/skill-motions.js';
 import { create as createBattle } from '../../engine/bridge.js';
 import * as Opening from '../../engine/opening.js';
 import { syncBattleSpeed, tools } from '../settings.js';
@@ -17,6 +18,42 @@ import { createTiles } from './tiles.js';
 import { createMoves } from './moves.js';
 import { actionEnd, planEffects } from './effect-plan.js';
 import { battleLog, openBattleLog } from './log.js';
+
+const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
+
+export function planBattleAction(events, index, { core, artifacts }) {
+  const cast = events[index], end = actionEnd(events, index), next = events[end];
+  const segment = events.slice(index, end);
+  const plan = planEffects(segment, { core, artifacts, next: next?.s });
+  // A delayed roulette draw has a different skill name and emits its own cast only on arrival.
+  if (cast.skill.effects?.includes('random_skill_trigger_from_list') && !cast.delayed && cast.who.side === 'ally') {
+    const { delayed, turn } = cast.s;
+    const previous = delayed.slice();
+    const turns = [];
+    for (const effect of (next?.s ?? segment.at(-1).s).delayed) {
+      if (effect.by !== cast.who.idx || effect.name === cast.skill.name || effect.turn <= turn) continue;
+      const index = previous.findIndex(d => d.by === effect.by && d.turn === effect.turn && d.name === effect.name);
+      if (index < 0) turns.push(effect.turn);
+      else previous.splice(index, 1);
+    }
+    if (turns.length) {
+      turns.sort((a, b) => a - b);
+      plan.push({ at: 'caster', kind: 'delay', who: cast.who, turns, turn,
+        label: [...new Set(turns)].map(due => due - turn).join('·') + '턴 뒤' });
+    }
+  }
+  return {
+    end,
+    miss: segment.some(event => event.t === 'miss'),
+    drains: new Set(segment.filter(event => event.t === 'mp' && event.delta < 0 && same(event.who, cast.target) &&
+      event.cause?.kind === 'act' && same(event.cause.by, cast.who) && event.cause.skill === cast.skill.name)),
+    followUp: next?.trigger === 'follow-up' && same(next.who, cast.who),
+    hp: new Map(plan.filter(step => step.event).map(step => [step.event, step])),
+    effects: plan.filter(step => !step.event),
+    changes: [],
+    downs: []
+  };
+}
 
 export function contractSettlement(floor, contract) {
   if (!contract) return [];
@@ -53,7 +90,6 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const { sfx } = audio;
   const { card, face, spr } = widgets;
   const clone = o => JSON.parse(JSON.stringify(o));
-  const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
   const LINKED_TRAITS = ['ally_death_base_atk_phy', 'ally_light_death_base_matk_mag'];
   const relayHint = $('#relay-hint');
 
@@ -111,7 +147,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const hud = createHud(core, St, sfx, widgets);
   const { ticker, tally, tallyWorthy } = hud;
   const { brief, renderActions, lockPanel } = createTiles({ core, widgets, audio, sheets, B, foeDef, play, ticker });
-  const { beginMove, playCast, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects } = createMoves({
+  const { beginMove, playCast, playDrain, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects } = createMoves({
     stage: St, sfx, actorOf, unitOf, colorsOf, applyHp, card, spr
   });
   const foeSheet = () => details.foeSheet(B);
@@ -209,6 +245,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   function logLine(text) { B.log.push(text); if (!/^(===|---)/.test(text)) ticker(text); }
   async function showBanner(tag, text, cls, sec) { const b = St.banner(tag, text, cls); await wait(sec || 0.7); b.remove(); }
   function applyHp(e) { const u = unitOf(e.who); if (u) u.hp = Math.max(0, Math.min(u.maxHp, u.hp + e.delta)); render(); }
+  function applyMp(e) { const u = unitOf(e.who); if (u) { u.mp += e.delta; render(); } }
 
   function settlePending() {
     const move = B.pending;
@@ -225,7 +262,8 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       if (!id || !u) return null;
       const actor = St.makeActor({
         sprite: id, wait: i ? 1 : 0, flip: (spr(id)?.facing || 'right') === 'left',
-        vis: !u.dead && !u.out, aura: u.lastStand ? 'red' : null
+        vis: !u.dead && !u.out, aura: u.lastStand ? 'red' : null,
+        form: Object.hasOwn(FORM_MARKERS, u.form) ? u.form : null
       });
       return Object.assign(actor, slotPos(i, actor));
     });
@@ -254,7 +292,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
   async function onAct(e, action) {
     const actor = actorOf(e.who), isFoe = e.who.side === 'enemy';
-    if (!actor) return;
+    if (!actor && e.trigger !== 'reserved') return;
     $('#tally').innerHTML = '';
     const strong = isFoe && e.salience === 'strong';
     showIntent(null);
@@ -274,7 +312,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const { effects } = action;
     B.pending = beginMove(e, actor, isFoe, action);
     if (e.ult || e.salience === 'boss') { warnEnemy(); await wait(0.12); }
-    else if (e.skill.type !== 'sup' && !strong && e.skill.name !== '일반 공격' && !isBig(B.pending) && !effects.some(effect => effect.kind === 'delay')) {
+    else if (actor && !B.pending.fromEdge && e.skill.type !== 'sup' && !strong && e.skill.name !== '일반 공격' && !isBig(B.pending) && !effects.some(effect => effect.kind === 'delay')) {
       B.pending.call = St.number(e.skill.name + (e.delayed ? ' 발동' : ''), St.X(actor), HY(actor) - 12, 'call');
     }
     await playCast(B.pending);
@@ -540,7 +578,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       case 'begin': await intro(e); break;
       case 'turn': await settlePending(); B.D.turn = e.n; render(); break;
       case 'act': await settlePending(); await onAct(e, action); break;
-      case 'mp': { const u = unitOf(e.who); if (u) { u.mp += e.delta; render(); } break; }
+      case 'mp':
+        if (B.pending?.manaOnly && action?.drains.has(e)) await playDrain(B.pending, e, applyMp);
+        else applyMp(e);
+        break;
       case 'hp': await onHp(e, action); break;
       case 'buff':
       case 'field':
@@ -559,7 +600,12 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       case 'enemyTurn': await settlePending(); await wait(0.08); break;
       case 'enemyDown': await settlePending(); await foeDeath(e); break;
       case 'enemyEnter': await foeEnter(e); break;
-      case 'form': { const u = unitOf(e.who); if (u) { u.name = e.name; render(); } break; }
+      case 'form': {
+        const u = unitOf(e.who), actor = actorOf(e.who);
+        if (actor) actor.form = Object.hasOwn(FORM_MARKERS, e.form) ? e.form : null;
+        if (u) { u.name = e.name; u.form = e.form; render(); }
+        break;
+      }
       case 'alert': ticker(e.text); break;
       case 'await':
         await settlePending(); B.D = clone(e.s); await placeActors(true); render(); showIntent(e.intent, e.countdown);
@@ -609,18 +655,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
         B.played = start + i + 1;
         const e = events[i];
-        if (e.t === 'act') {
-          const end = actionEnd(events, i);
-          const plan = planEffects(events.slice(i, end), { core, artifacts: B.artifacts, next: events[end]?.s });
-          action = {
-            end,
-            miss: events.slice(i + 1, end).some(event => event.t === 'miss'),
-            hp: new Map(plan.filter(step => step.event).map(step => [step.event, step])),
-            effects: plan.filter(step => !step.event),
-            changes: [],
-            downs: []
-          };
-        }
+        if (e.t === 'act') action = planBattleAction(events, i, { core, artifacts: B.artifacts });
         if (action && (e.t === 'buff' || e.t === 'field')) action.changes.push(e);
         else if (action && e.t === 'down') action.downs.push(e);
         else await handle(e, action);

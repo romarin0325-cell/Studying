@@ -41,6 +41,13 @@ export const EPISODE = {
   saveFailed: '읽은 상태를 저장하지 못했습니다.'
 };
 
+export const RIFT_PUZZLE = {
+  title: '균열 퍼즐',
+  met: '목표 달성',
+  missed: '목표 미달성',
+  list: '퍼즐 목록'
+};
+
 export const TERMS = {
   crystal: { short: '결정', firstUse: '결정 ◆ · 이번 원정에서 쓰는 재화', detail: '소환의 샘과 원정 중 거래에 사용합니다.', scope: '원정' },
   join: { short: '합류', firstUse: '이번 원정 합류', detail: '이번 원정에 함께할 동료가 됩니다.', scope: '원정' },

@@ -8,18 +8,21 @@
 // Use --easy-audit for 32 paired first departures in each early dungeon.
 // Use --entry-easy-audit for the same seeds with a fresh profile and the first-departure rules.
 // Use --relic-audit for paired before/after runs on both floor-2 paths.
+// Use --promise-audit for 64 paired Ember Journey seeds that offer the floor-3 promise.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { CONTRACTS } from '../src/content/contracts.js';
 import { DUNGEONS } from '../src/content/dungeons.js';
-import { RELIC_COMBOS } from '../src/content/relics.js';
+import { PROMISE_EVENTS } from '../src/content/events.js';
+import { RELIC_COMBOS, RELICS } from '../src/content/relics.js';
 import { ROSTER_LIMIT, TEMPO_VERSION, usesTempo } from '../src/content/tempo.js';
 import * as Bridge from '../src/engine/bridge.js';
 import * as Daily from '../src/engine/daily-rift.js';
 import * as Meta from '../src/engine/meta.js';
 import * as RelayRoster from '../src/engine/roster.js';
+import { fitsRelic } from '../src/engine/rooms.js';
 import * as R from '../src/engine/run.js';
 import { coreBundle } from './core-bundle.mjs';
 
@@ -37,7 +40,8 @@ if (![1, TEMPO_VERSION].includes(tempoVersion) || ![0, 1].includes(lessonVersion
 const dailyFrom = args.find(arg => arg.startsWith('--daily-from='))?.slice('--daily-from='.length);
 const days = Number(args.find(arg => arg.startsWith('--days='))?.slice('--days='.length) ?? 60);
 const contract = args.find(arg => arg.startsWith('--contract='))?.slice('--contract='.length) ?? null;
-const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--easy-audit') || flag('--entry-easy-audit') ? 32 : contract === null ? 300 : 120));
+const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--promise-audit') ? 64
+  : flag('--easy-audit') || flag('--entry-easy-audit') ? 32 : contract === null ? 300 : 120));
 const dungeon = args.find(arg => arg.startsWith('--dungeon='))?.slice('--dungeon='.length) || 'ember_volcano';
 const difficulty = args.find(arg => arg.startsWith('--difficulty='))?.slice('--difficulty='.length)
   ?? (flag('--nightmare') || contract !== null ? 'nightmare' : 'normal');
@@ -499,6 +503,79 @@ function measureRelics() {
   console.log(routeRows.join('\n'));
 }
 
+function promiseRelicValue(run, id) {
+  if (!id || id === 'death_roulette' || run.relics.includes(id)) return 0;
+  const fit = Number(fitsRelic(run, roster, RELICS[id].fits));
+  const combo = Number(RELIC_COMBOS.some(({ ids }) => ids.includes(id) &&
+    ids.every(half => half === id || run.relics.includes(half))));
+  const broad = Number(['double_attack', 'support_boost', 'lucky_vicky', 'gale_storm'].includes(id));
+  return 1 + fit + 2 * combo + broad;
+}
+
+function promiseSample(dungeonId, seed, accept) {
+  const config = PROMISE_EVENTS[dungeonId];
+  let offered = false;
+  let tookTreasure = false;
+  let claimed = false;
+  let bossRelics = null;
+  const { end } = playRun(dungeonId, seed, {
+    relicDoors: true,
+    doorOverride(run) {
+      if (run.floor === config.offerFloor) return run.doors.find(door => door.event?.id === config.event.id);
+      if (run.floor === config.floor) {
+        const treasure = run.doors.find(door => door.type === 'treasure');
+        const promised = run.doors.find(door => door.promiseId);
+        if (promised && promiseRelicValue(run, promised.relic) > promiseRelicValue(run, treasure.relic)) {
+          claimed = true;
+          return promised;
+        }
+        tookTreasure = Boolean(promised);
+        return treasure;
+      }
+      if (run.floor === run.floors) bossRelics = run.relics.length;
+    },
+    serviceOverride(run) {
+      const deposit = run.room.event?.id === config.event.id && run.pending.choices.find(choice => choice.id === 'deposit');
+      if (!deposit?.enabled) return false;
+      offered = true;
+      checked(R.chooseEvent(run, accept ? deposit.id : 'take_crystal'));
+      return true;
+    }
+  });
+  return { offered, win: end.result === 'win', tookTreasure, claimed, bossRelics };
+}
+
+function measurePromises() {
+  if (dungeon !== 'ember_volcano' || dungeons.length !== 1 || difficulty !== 'normal'
+    || tempoVersion !== TEMPO_VERSION || !lessonVersion || flag('--plain')) {
+    throw new RangeError('Promise audit uses the current Ember Journey rules');
+  }
+  const decline = [], accept = [];
+  let screened = 0;
+  while (decline.length < runs) {
+    const seed = seedOffset + 1000003 + 7919 * ++screened;
+    const baseline = promiseSample(dungeon, seed, false);
+    if (!baseline.offered) continue;
+    decline.push(baseline);
+    accept.push(promiseSample(dungeon, seed, true));
+  }
+  console.log(`Ember Journey · ${runs} paired offers · first eligible seeds from ${seedOffset + 1000003} + 7919 × i · ${screened} screened`);
+  console.log('F5: unowned relic +1, party fit +1, completed combo +2, broad utility +1; Death Roulette 0; ties go to treasure.');
+  console.log('| F3 choice | Clear | Mean relics at boss (reached) | F5 promise | F5 treasure instead |');
+  console.log('| --- | ---: | ---: | ---: | ---: |');
+  for (const [label, samples] of [['Take ◆1', decline], ['Deposit ◆1', accept]]) {
+    const wins = samples.filter(sample => sample.win).length;
+    const bosses = samples.filter(sample => sample.bossRelics !== null);
+    const mean = bosses.length ? (bosses.reduce((sum, sample) => sum + sample.bossRelics, 0) / bosses.length).toFixed(2) : '—';
+    const claimed = samples.filter(sample => sample.claimed).length;
+    const treasure = samples.filter(sample => sample.tookTreasure).length;
+    const split = claimed + treasure;
+    console.log(`| ${label} | ${wins}/${runs} (${percent(wins, runs)}) | ${mean} (${bosses.length}) | ${split ? claimed : '—'} | ${split ? `${treasure}/${split} (${percent(treasure, split)})` : '—'} |`);
+  }
+  const difference = 100 * (accept.filter(sample => sample.win).length - decline.filter(sample => sample.win).length) / runs;
+  console.log(`Clear difference (deposit − take): ${difference.toFixed(2)} pp`);
+}
+
 function measureFirstMain() {
   console.log(`tempo ${tempoVersion} · first main · ${runs} seeds per dungeon · careless, default formation`);
   console.log('| Dungeon | Gate pass | Gate reached | Clear |');
@@ -677,6 +754,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   else if (flag('--easy-audit')) measureEasy();
   else if (flag('--entry-easy-audit')) measureEasy(true);
   else if (flag('--relic-audit')) measureRelics();
+  else if (flag('--promise-audit')) measurePromises();
   else if (dailyFrom !== undefined) measureDaily();
   else if (flag('--first-main')) {
     if (difficulty !== 'normal') throw new RangeError('First main audit uses normal difficulty');

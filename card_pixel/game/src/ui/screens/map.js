@@ -14,6 +14,7 @@ import { bindRelicSlots, openRelicSheet, relicEffect, relicIcon, relicStrip } fr
 import { TERMS } from '../glossary.js';
 import { pixelIcon } from '../pixel-icons.js';
 import { wildBeatPattern } from '../../content/tempo.js';
+import { josa } from '../text.js';
 
 const AFFIX_RISK = {
   tough: '첫 3턴 적 피해 50% 감소', frenzy: '적 HP 50% 이하 시 공·마공 ×1.5',
@@ -97,8 +98,12 @@ function contractEscrow(run, door) {
   return amount && CONTRACTS[run.contract?.id] ? amount : 0;
 }
 
+const doorTitle = door => door.promiseId ? door.name : TERMS[door.type]?.short ?? door.name;
+const doorKind = door => door.promiseId ? 'promise' : door.type;
+
 export function doorDecision(run, door, preview) {
   const crystals = (door.reward ?? 0) - contractEscrow(run, door);
+  if (door.promiseId) return door.name;
   if (!door.enemies.length) return REGIONS[door.regionChoice?.id]?.name ?? ROOM_NAMES[door.type] ?? door.name;
   if (preview?.bossRule) return door.type === 'boss' ? preview.bossRule.name ?? door.name : door.name;
   if (preview?.lesson) {
@@ -125,9 +130,22 @@ export function mapScreen(run, ui, { receipt } = {}) {
   const bossId = rift?.spec?.bossId;
   const boss = run.bossPreview || (bossId && ui.roster.bosses.includes(bossId) ? ui.roster.bossOf(bossId) : null);
   const gateFloor = intro ? run.floors : 4;
+  const promise = run.promise;
+  const promisedRelic = artifacts.get(promise?.relic);
+  const forfeits = door => promise?.floor === run.floor && !door.promiseId;
+  const lostDeposit = door => (door.type === 'treasure' ? '보물방' : '사건 방') +
+    '에 가면 맡긴 ' + josa('◆' + promise.deposit, '이/가') + ' 사라집니다.';
+  // The promise door says what entering costs now (nothing) next to the relic it names.
+  const promiseLine = () => promise ? '맡긴 ' + josa('◆' + promise.deposit, '으로/로') + ' 받는 유물 · 전투 없음' : '';
 
   const track = Array.from({ length: run.floors }, (_, index) => {
     const floor = index + 1;
+    if (promisedRelic && floor === promise.floor) {
+      const label = floor + '층 약속 · ' + promisedRelic.name;
+      return '<span class="floor-cell promise' + (floor === run.floor ? ' cur' : '') +
+        '" data-promise-floor="' + floor + '" title="' + esc(label) + '"><small>' + floor + '</small>' +
+        relicIcon(promisedRelic.id, 16, '약속 · ' + promisedRelic.name) + '</span>';
+    }
     const marker = floor === gateFloor ? pixelIcon('shield', 16) : floor === run.floors ? pixelIcon('crown', 16) : '';
     const classes = floor === run.floor ? ' cur' : floor < run.floor ? ' done' : '';
     return '<span class="floor-cell' + classes + '"><small>' + floor + '</small>' + marker + '</span>';
@@ -219,13 +237,14 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const art = (enemy && sprite(enemy.sprite, { flip: foeFlip(enemy), cls: 'map-door-shadow' })) ||
       (visitor && sprite(visitor)) || icon(door.relic || (door.type === 'wild' ? 'battle' : door.type));
     const label = doorDecision(run, door, tempoViews[index]);
-    const relic = door.relicReward && artifacts.get(door.relic);
-    const name = [relic ? '위험한 문' : TERMS[door.type]?.short ?? door.name, label, relic?.name].filter(Boolean).join(' · ');
-    return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + door.type +
+    const relic = (door.relicReward || door.promiseId) && artifacts.get(door.relic);
+    const name = [door.relicReward && relic ? '위험한 문' : doorTitle(door), door.promiseId ? '' : label, relic?.name,
+      forfeits(door) ? lostDeposit(door) : ''].filter(Boolean).join(' · ');
+    return '<button type="button" class="map-door" data-map-door="' + index + '" data-kind="' + doorKind(door) +
       '" data-coach="door" aria-label="' + esc(name) + '" style="--door-x:' + x + ';--door-y:' + y + '">' +
       '<span class="map-door-frame" aria-hidden="true"><span class="map-door-light"></span>' +
       '<span class="map-door-emblem">' + art + '</span></span><small class="map-door-line' + (relic ? ' map-door-relic' : '') + '">' +
-      (relic ? relicIcon(relic.id, 16) + esc(relic.name) : esc(label)) +
+      (relic ? relicIcon(relic.id, 16) + esc(door.promiseId ? door.name : relic.name) : esc(label)) +
       '</small></button>';
   }).join('');
 
@@ -233,22 +252,23 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const enemy = door.enemies[0];
     const isShowdown = run.doors.length === 1 && !!enemy;
     const opponent = enemy?.source ? card(enemy.source).name : enemy?.name;
-    const relic = door.relicReward && artifacts.get(door.relic);
-    const title = relic ? '위험한 문' : TERMS[door.type]?.short ?? door.name;
+    const relic = (door.relicReward || door.promiseId) && artifacts.get(door.relic);
+    const title = door.relicReward && relic ? '위험한 문' : doorTitle(door);
     const info = [
       isShowdown && opponent ? confront(opponent) : enemy?.name,
       door.enemies.length > 1 ? '적 ' + door.enemies.length + '명이 차례로 등장' : ''
     ].filter(Boolean).join(' · ');
     const risksHere = risks(door);
-    const rules = risksHere.join(' · ') || roomEffect(door);
+    const rules = risksHere.join(' · ') || (door.promiseId ? promiseLine() : roomEffect(door));
     const gain = reward(door);
     const quirk = run.features?.quirks !== false && door.quirk ? '<i>' + esc(QUIRKS[door.quirk].name) + '</i>' : '';
     const chips = quirk + (run.features?.affixes === false ? '' : door.enemies.map(affixChips).join(''));
-    return '<div class="door-plate win" data-kind="' + door.type + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' +
+    return '<div class="door-plate win" data-kind="' + doorKind(door) + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' +
       doorPreview(door) + '<span class="door-copy"><b>' + esc(title) + '</b>' +
       (info ? '<small>' + esc(info) + '</small>' : '') +
       (chips ? '<span class="chips door-chips">' + chips + '</span>' : '') +
       (rules ? '<small class="door-risk' + (risksHere.length ? ' danger' : '') + '">' + esc(rules) + '</small>' : '') +
+      (forfeits(door) ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + '</small>' : '') +
       lessonLine(door) +
       (gain ? '<small class="door-reward' + (relic ? ' door-relic' : '') + '">' +
         (relic ? relicIcon(relic.id, 20) : '') + esc(gain) + '</small>' : '') +
@@ -278,7 +298,8 @@ export function mapScreen(run, ui, { receipt } = {}) {
   const title = rift ? [shortRiftDate(rift.spec?.dayKey), '균열'].filter(Boolean).join(' ') : dungeon.name;
   node.innerHTML = head(run, title, run.floor + '층') + (run.relics.length ? relicStrip(core, run.relics) : '') +
     '<div class="screen-split run-route"><div class="fixed-top">' +
-    '<button class="floor-strip" id="b-floors" aria-label="층 진행과 문지기 정보">' + track + '</button>' +
+    '<button class="floor-strip" id="b-floors" aria-label="층 진행과 문지기 정보' +
+    (promisedRelic ? ' · ' + promise.floor + '층 약속 ' + esc(promisedRelic.name) : '') + '">' + track + '</button>' +
     scene(dungeon.background, landscape + trails + cast + '<div class="map-portals">' + portals + '</div>' + skip, 'walking-map') +
     (receipt ? '<p class="map-receipt gain" role="status">' + esc(receipt) + ' · 장착 완료</p>' : '') +
     '</div><div class="run-doors scroll-list">' + doors + '</div></div>';
@@ -329,6 +350,7 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const introBoss = intro && boss?.sprite && !gateFoes.some(foe => foe.sprite === boss.sprite);
     openSheet('층 진행', '<p>현재 ' + run.floor + ' / ' + run.floors + '층</p>' +
       group(gateFloor, TERMS.gate.firstUse, introBoss ? [...gateFoes, boss] : gateFoes) +
+      (promisedRelic ? '<h4>' + promise.floor + '층 · 약속한 자리</h4><p>' + esc(promisedRelic.name) + ' 인수</p>' : '') +
       group(run.floors, TERMS.boss.firstUse, !intro && boss?.sprite ? [boss] : []) +
       (boss?.note ? '<p>' + esc(boss.note) + '</p>' : ''));
   });
@@ -356,12 +378,13 @@ export function mapScreen(run, ui, { receipt } = {}) {
     const escrow = contractEscrow(run, door);
     const treasure = run.features?.affixes !== false && door.enemies.some(enemy => enemy.affixes?.includes('treasure'));
     const service = run.floor === 7 && run.bench.length < 3 ? roomEffect(door) : '';
-    openSheet(TERMS[door.type]?.short ?? door.name, lessonLine(door) + enemies + rule(quirk) + rule(region) +
+    openSheet(doorTitle(door), lessonLine(door) + enemies + rule(quirk) + rule(region) +
       (sky ? '<p>' + esc(sky) + '</p>' : '') +
       (door.event ? '<p>' + esc(door.event.text) + '</p>' : '') +
       (service ? '<p>' + esc(service) + '</p>' : '') +
       (service && door.type === 'spring' ? '<p>보유 결정 ' + run.crystals + '개</p>' : '') +
       (gain ? '<p class="gain">' + esc(gain) + '</p>' : '') +
+      (forfeits(door) ? '<p class="loss">' + esc(lostDeposit(door)) + '</p>' : '') +
       (escrow ? '<p>계약에 ◆' + escrow + ' 맡김</p>' : '') +
       (treasure ? '<p class="gain">추가 보상 · 보물 적 처치 후 승리 시 1명당 결정 +2</p>' : '') + contractGoal(door) +
       (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ''));

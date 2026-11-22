@@ -2,6 +2,7 @@ import { $, $$, esc } from '../dom.js';
 import { icon } from '../assets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { REGIONS } from '../../content/regions.js';
+import { RIFT_PUZZLE } from '../glossary.js';
 
 export const shortRiftDate = dayKey => dayKey?.slice(5).replace('-', '.') || '';
 
@@ -35,7 +36,7 @@ function face(widgets, id, name, options = {}) {
 
 export function openDailyPreparation(view, ui) {
   const { spec, official, dayKey = spec?.dayKey } = view;
-  const { widgets, roster, sheets, start, inspectLoan, message } = ui;
+  const { widgets, roster, sheets, start, inspectLoan, message, openPuzzles } = ui;
   if (!spec) return sheets.sheet('오늘의 균열', '오늘의 균열 편성을 불러오지 못했습니다.');
 
   const dungeon = DUNGEONS[spec.dungeonId];
@@ -62,23 +63,29 @@ export function openDailyPreparation(view, ui) {
     ${row('첫 출전', loans.slice(0, 3))}
     ${row('대기', loans.slice(3))}
     ${official ? '' : '<p class="rift-prep-note">첫 도전 결과가 오늘의 공식 기록으로 남으며, 이후에는 같은 균열을 연습할 수 있습니다.</p>'}
-    <button class="btn go" id="meta-daily-start">${official ? '연습하기' : '첫 기록에 도전'}</button>
+    <div class="rift-actions">
+      <button class="btn go" id="meta-daily-start">${official ? '연습하기' : '첫 기록에 도전'}</button>
+      ${openPuzzles ? riftPuzzleEntry() : ''}
+    </div>
   </div>`);
   $('#meta-daily-start').addEventListener('click', () => start(dayKey, kind));
+  if (openPuzzles) $('#meta-rift-puzzles').addEventListener('click', openPuzzles);
   for (const button of $$('#sh-body [data-rift-loan]')) button.addEventListener('click', () => {
     inspectLoan(button.dataset.riftLoan, render);
   });
 }
 
-export function openEarlierRift(active, { sheets, resume, abandon }) {
+export function openEarlierRift(active, { sheets, resume, abandon, openPuzzles }) {
   const date = shortRiftDate(active.dayKey);
   const title = [date, '균열'].filter(Boolean).join(' ');
-  const prompt = () => openEarlierRift(active, { sheets, resume, abandon });
+  const prompt = () => openEarlierRift(active, { sheets, resume, abandon, openPuzzles });
   sheets.openSheet(title, `<div class="meta-sheet rift-actions">
     <button class="btn go" id="meta-rift-resume" data-rift-date="${esc(date)}">${esc(title)} 이어가기</button>
     <button class="btn meta-danger" id="meta-rift-abandon">${esc([date, '도전 포기'].filter(Boolean).join(' '))}</button>
+    ${openPuzzles ? riftPuzzleEntry() : ''}
   </div>`);
   $('#meta-rift-resume').addEventListener('click', resume);
+  if (openPuzzles) $('#meta-rift-puzzles').addEventListener('click', openPuzzles);
   $('#meta-rift-abandon').addEventListener('click', () => {
     sheets.openSheet('이 도전을 ‘포기’로 기록할까요?', `<div class="meta-sheet rift-actions">
       <button class="btn meta-danger" id="meta-rift-confirm-abandon">포기</button>
@@ -100,19 +107,23 @@ function survival(score, total = 5) {
   return `생존 ${score.livingIds?.length ?? 0}/${total}명`;
 }
 
+function resultCast(loans, score, widgets) {
+  const living = new Set(score.livingIds ?? []);
+  return `<div class="rift-result-cast">
+      ${loans.map(id => `<div class="rift-companion${living.has(id) ? '' : ' fallen'}">
+        ${face(widgets, id)}<b>${esc(widgets.card(id)?.name || id)}</b>${living.has(id) ? '' : '<small>쓰러짐</small>'}
+      </div>`).join('')}
+    </div>`;
+}
+
 export function dailyResultScreen(node, { spec, score, official }, { widgets, today, practice, openToday, hub }) {
   const sameDay = score.dayKey && today === score.dayKey;
-  const living = new Set(score.livingIds ?? []);
   const loans = spec?.loanIds ?? [];
   const stamped = score.outcome === 'win' && (score.kind === 'official' || (official && official.runId === score.runId));
   const survivors = survival(score, loans.length || 5);
   node.innerHTML = `<section class="meta-panel rift-result">
-    <div class="rift-result-cast">
-      ${loans.map(id => `<div class="rift-companion${living.has(id) ? '' : ' fallen'}">
-        ${face(widgets, id)}<b>${esc(widgets.card(id)?.name || id)}</b>${living.has(id) ? '' : '<small>쓰러짐</small>'}
-      </div>`).join('')}
-    </div>
-    ${score.outcome === 'win' && !living.size ? `<p>보스 격파 · ${survivors}</p><p>${score.turns ?? 0}턴</p>`
+    ${resultCast(loans, score, widgets)}
+    ${score.outcome === 'win' && !score.livingIds?.length ? `<p>보스 격파 · ${survivors}</p><p>${score.turns ?? 0}턴</p>`
       : `<p>${survivors} · ${score.turns ?? 0}턴</p>`}
     <p>유품 사용 ${score.heirloomsUsed ?? 0}회</p>
     ${stamped ? stamp(score.dayKey) : ''}
@@ -123,6 +134,82 @@ export function dailyResultScreen(node, { spec, score, official }, { widgets, to
   </div>`;
   $('#meta-rift-again', node).addEventListener('click', sameDay ? () => practice(score.dayKey) : () => openToday());
   $('#meta-rift-hub', node).addEventListener('click', () => hub());
+}
+
+export function riftPuzzleEntry(id = 'meta-rift-puzzles') {
+  return `<button class="btn" id="${id}">${RIFT_PUZZLE.title}</button>`;
+}
+
+// Each goal condition with the value one attempt reached. The overall verdict stays engine/daily-rift.js puzzleGoalMet;
+// these rows only show the player which part of it held.
+function puzzleConditions({ survivors, maxTurns, heirloomUses }) {
+  return [
+    { label: '보스 격파', met: score => score.outcome === 'win', value: score => score.outcome === 'win' ? '격파' : '실패' },
+    survivors != null && { label: `생존 ${survivors}명 이상`,
+      met: score => score.livingIds.length >= survivors, value: score => `${score.livingIds.length}명` },
+    maxTurns != null && { label: `${maxTurns}턴 이내`, met: score => score.turns <= maxTurns, value: score => `${score.turns}턴` },
+    heirloomUses != null && { label: `유품 ${heirloomUses}회 이상 사용`,
+      met: score => score.heirloomsUsed >= heirloomUses, value: score => `${score.heirloomsUsed}회` }
+  ].filter(Boolean);
+}
+
+function puzzleGoal(goal) {
+  return puzzleConditions(goal).map(condition => condition.label).join(' · ');
+}
+
+function puzzleChecks(goal, score) {
+  return `<ul class="rift-puzzle-checks">${puzzleConditions(goal).map(({ label, met, value }) => {
+    const done = met(score);
+    return `<li class="${done ? 'met' : 'missed'}"><b>${done ? '달성' : '미달'}</b><span>${esc(label)}</span><small>${esc(value(score))}</small></li>`;
+  }).join('')}</ul>`;
+}
+
+export function puzzleResultTitle(score) {
+  return score.goalMet ? RIFT_PUZZLE.met : RIFT_PUZZLE.missed;
+}
+
+export function openRiftPuzzles(puzzles, { sheets, start }) {
+  sheets.openSheet(RIFT_PUZZLE.title, `<div class="meta-sheet rift-puzzle-list">
+    ${puzzles.map(({ id, title, goal, note, best }) => `<button class="btn rift-puzzle-card" data-rift-puzzle="${esc(id)}">
+      <b>${esc(title)}</b>
+      <span>${esc(puzzleGoal(goal))}</span>
+      <small>최고 기록 · ${best ? `${puzzleResultTitle(best)} · ${survival(best)} · ${best.turns}턴${goal.heirloomUses != null ? ` · 유품 ${best.heirloomsUsed}회` : ''}` : '기록 없음'}</small>
+      <small>${esc(note)}</small>
+    </button>`).join('')}
+  </div>`);
+  for (const button of $$('#sh-body [data-rift-puzzle]')) {
+    button.addEventListener('click', () => start(button.dataset.riftPuzzle));
+  }
+}
+
+export function mountPuzzleFormation(puzzle, exit) {
+  const node = $('#order.on');
+  $('.fixed-top', node).insertAdjacentHTML('afterbegin',
+    `<p class="rift-puzzle-goal">${esc(puzzle.title)} · ${esc(puzzleGoal(puzzle.goal))}</p>`);
+  $('.top', node).insertAdjacentHTML('afterbegin',
+    `<button class="btn order-back" id="meta-puzzle-exit" aria-label="${RIFT_PUZZLE.list}으로 돌아가기">←</button>`);
+  $('#meta-puzzle-exit', node).addEventListener('click', exit);
+}
+
+export function puzzleResultScreen(node, { puzzle, score, saved }, { widgets, again, list, hub, retry }) {
+  node.classList.add('screen-split');
+  node.innerHTML = `<section class="meta-panel rift-result rift-puzzle-result fixed-top">
+    <h2>${esc(puzzle.title)}</h2>
+    ${puzzleChecks(puzzle.goal, score)}
+    <p class="rift-puzzle-stats">${survival(score)} · ${score.turns}턴 · 유품 사용 ${score.heirloomsUsed}회</p>
+    ${saved ? '' : '<p role="alert">퍼즐 기록을 저장하지 못했습니다.</p>'}
+  </section>
+  <div class="scroll-list">${resultCast(puzzle.rentals, score, widgets)}</div>
+  <div class="rift-actions fixed-foot">
+    ${saved ? '' : '<button class="btn" id="meta-puzzle-save">다시 저장</button>'}
+    <button class="btn go" id="meta-puzzle-again">다시 도전</button>
+    <button class="btn" id="meta-puzzle-list">${RIFT_PUZZLE.list}</button>
+    <button class="btn" id="meta-puzzle-hub">관측소로</button>
+  </div>`;
+  $('#meta-puzzle-save', node)?.addEventListener('click', retry);
+  $('#meta-puzzle-again', node).addEventListener('click', again);
+  $('#meta-puzzle-list', node).addEventListener('click', list);
+  $('#meta-puzzle-hub', node).addEventListener('click', () => hub());
 }
 
 function scoreLabel(score) {

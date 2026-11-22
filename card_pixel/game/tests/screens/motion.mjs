@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { defaultParty } from '../../src/engine/run.js';
+import { resolveMotion } from '../../src/ui/battle/motion.js';
+import { planBattleAction } from '../../src/ui/battle/view.js';
+import { createCoreRoster } from '../support/core.mjs';
 
 const samples = [
   { shot: 'demon-breath', lead: 'mawang', name: '데몬브레스', family: 'breath' },
@@ -109,5 +112,144 @@ export function createMotionCases({ makeRun, startBattle, storedSession, act, op
       }
     };
   }
-  return { 'motion-ranged': fixture };
+  function phaseThreeFixture() {
+    const { core, roster } = createCoreRoster();
+    const guillotine = { name: '섀도우길로틴', owner: 'executor', family: 'blade', variant: 'guillotine', turn: 1 };
+    const cases = [
+      { ...guillotine, shot: 'direct', lead: 'executor' },
+      { ...guillotine, shot: 'heirloom', lead: 'snow_rabbit', heirloom: true },
+      { shot: 'aurora-wing', lead: 'miracle_larva', name: '미라클파우더', family: 'drift', variant: 'powder',
+        turn: 3, form: 'aurora_wing', before: ['기적의우화', '기적의우화 → 오로라윙'] },
+      { shot: 'reserve', lead: 'fireworks_girl', name: '페스티벌나이트', family: 'mark', variant: 'reserve', turn: 1 },
+      { shot: 'soul-drain', lead: 'guardian', name: '소울드레인', family: 'orb', variant: 'absorb', turn: 7,
+        before: Array(6).fill('일반 공격'), command: '일반 공격' }
+    ].map(sample => {
+      const { lead, name, heirloom, owner, form } = sample;
+      const run = makeRun({ seed: 21, floor: 2, tempoVersion: 2, profileView: { lead } });
+      run.lastParty = [lead, null, null];
+      run.nextBattle = { start: { allyStart: [{ mp: 100 }] } };
+      if (heirloom) run.heirlooms[lead] = { from: owner, name };
+      const door = run.doors[0];
+      if (sample.shot === 'soul-drain') {
+        door.enemies = [roster.bossOf('iris_love')];
+        door.tempo = { ...door.tempo, pattern: 'bossScript', lesson: null };
+      }
+      Object.assign(door.enemies[0].stats, { hp: 20000, atk: 5, matk: 5 });
+      const session = storedSession({ run });
+      const battle = startBattle(run, { party: defaultParty(run) });
+      for (const prep of sample.before ?? []) act(battle, prep);
+      const events = act(battle, sample.command ?? name);
+      const index = events.findIndex(event => event.t === 'act' && event.skill.name === name);
+      const cast = events[index];
+      assert.equal(cast?.s.turn, sample.turn, name);
+      const motionFor = event => resolveMotion({ ...event, side: event.who.side, casterSprite: owner ?? lead, casterForm: form });
+      const plan = planBattleAction(events, index, { core, artifacts: run.relics });
+      const motion = motionFor(cast);
+      if (sample.variant !== 'reserve') assert.deepEqual([motion.family, motion.variant], [sample.family, sample.variant]);
+      const strikes = [...plan.hp.values()].filter(step => step.strike);
+      if (owner) {
+        assert.equal(cast.sourceKey, 'ally/executor/3');
+        assert.equal(cast.heirloom, !!heirloom);
+      }
+      if (form) {
+        assert.equal(cast.s.allies[0].form, form);
+        assert.equal(cast.sourceKey, 'ally/aurora_wing/2');
+      }
+      if (sample.shot === 'reserve') {
+        assert.deepEqual(plan.effects.find(effect => effect.kind === 'delay')?.turns, [2, 3, 4]);
+        assert.equal(strikes.length, 0);
+        const landing = events.findIndex(event => event.t === 'act' && event.skill.name === name && event.trigger === 'reserved');
+        assert.equal(events[landing]?.s.turn, 2);
+        const resolved = motionFor(events[landing]);
+        assert.deepEqual([resolved.family, resolved.variant, resolved.socket], ['blast', 'eruption', 'top']);
+        const hit = [...planBattleAction(events, landing, { core, artifacts: run.relics }).hp.values()];
+        assert.equal(hit.filter(step => step.strike).length, 1);
+        return { ...sample, session, amount: hit.find(step => step.strike).event.amount };
+      }
+      if (sample.shot === 'soul-drain') {
+        assert.equal(cast.sourceKey, 'boss/iris_love/3');
+        assert.equal(strikes.length, 0);
+        assert.equal(plan.drains.size, 1);
+        return { ...sample, session, mp: [...plan.drains][0].delta };
+      }
+      assert.equal(strikes.length, 1);
+      return { ...sample, session, amount: strikes[0].event.amount };
+    });
+
+    return {
+      session: cases[0].session, motion: 'no-preference', mute: true,
+      proof: 'Direct and heirloom guillotine, Aurora Wing, Festival Night clock and landing, and Soul Drain',
+      async show(page, { capture, revisit, text }) {
+        async function seek(source, sample, traveling = false) {
+          const frame = await source.evaluate(async ({ name, family, variant, turn, traveling }) => {
+            const game = window.__game;
+            game.clock.paused = false;
+            try {
+              const seen = new Set();   // what played instead, for the failure message
+              for (let i = 0; i < 400; i++) {
+                await game.advance(0.02);
+                const move = game.B.pending, fx = move?.fx;
+                if (move) seen.add(`${move.e.skill.name}/t${move.e.s?.turn}/${fx?.family ?? '-'}/${fx?.variant ?? '-'}/${fx?.arrived != null ? 'arrived' : 'travel'}`);
+                if (move?.e.skill.name !== name || move.e.s.turn !== turn || !fx) continue;
+                if (fx.family !== family || fx.variant !== variant) continue;
+                if (traveling ? fx.arrived != null : move.hitAt == null || game.clock.t - move.hitAt < 0.015) continue;
+                return { sprite: move.actor.sprite, form: move.actor.form, size: move.motion.size,
+                  socket: move.motion.socket, trigger: move.e.trigger, mp: game.B.D.allies[0]?.mp,
+                  from: fx.from?.x, to: fx.to?.x, targetsCaster: fx.target === game.B.allies[0] && fx.caster === fx.target,
+                  casterX: move.actor.x, targetX: move.target?.x };
+              }
+              throw new Error('Phase three frame did not play: ' + name + '/' + variant + '/' + turn + ' · seen ' + [...seen].slice(-6).join(', '));
+            } finally { game.clock.paused = true; }
+          }, { ...sample, traveling });
+          return frame;
+        }
+
+        async function showSample(source, sample, main) {
+          await openBattle(source);
+          for (const name of sample.before ?? []) {
+            if (name.includes(' → ')) {
+              const [skill, form] = name.split(' → ');
+              await skillTile(source, skill).click();
+              await source.locator('#sheet.on [data-form]').filter({ hasText: form }).click();
+            } else await skillTile(source, name).click();
+            await battleIdle(source);
+          }
+          await source.evaluate(() => { window.__game.clock.paused = true; });
+          await (sample.heirloom ? source.locator('#b-heir') : skillTile(source, sample.command ?? sample.name)).click();
+          // The heirloom name plate for this skill is asserted in motion-contact; here the donor art, size and socket are checked.
+          // The MP drain is shown on arrival (the absorb appears already landing), so seek the arrival frame for it too.
+          const frame = await seek(source, sample, false);
+          if (sample.owner) {
+            assert.deepEqual([frame.sprite, frame.size, frame.socket], [sample.owner, 'big', 'hand']);
+          }
+          if (sample.form) assert.deepEqual([frame.sprite, frame.form], ['miracle_larva', sample.form]);
+          if (sample.variant === 'reserve') assert.equal(frame.targetsCaster, true);
+          if (sample.mp != null) {
+            assert.equal(frame.from, frame.targetX);
+            // At the arrival frame the absorb has landed; it starts at the target and spans to a different point.
+            assert.notEqual(frame.to, frame.from);
+            // The exact MP change is asserted on the event plan in Node; here the drain must be a real loss.
+            assert.ok(sample.mp < 0, 'The boss drained MP');
+          }
+          await capture(main ? undefined : sample.shot, source, { duringBattle: true });
+          if (sample.variant === 'reserve') {
+            const landing = await seek(source, { ...sample, family: 'blast', variant: 'eruption', turn: 2 });
+            assert.equal(landing.trigger, 'reserved');
+            assert.equal(landing.socket, 'top');
+            await text(source.locator('#fx .num:not(.tag):not(.call):not(.foe)'), sample.amount.toLocaleString('en-US'));
+            await capture('reserve-landing', source, { duringBattle: true });
+          } else if (sample.mp != null) {
+            assert.equal((await seek(source, sample)).mp, 0);
+            await text(source.locator('#fx .num.tag.bad'), 'MP ' + sample.mp.toLocaleString('en-US'));
+            await capture('soul-drain-mp', source, { duringBattle: true });
+          }
+          await source.evaluate(() => { window.__game.clock.paused = false; });
+          await battleIdle(source);
+        }
+        await showSample(page, cases[0], true);
+        for (const sample of cases.slice(1)) await revisit(sample.session, source => showSample(source, sample, false));
+      }
+    };
+  }
+  return { 'motion-ranged': fixture, 'motion-phase-three': phaseThreeFixture };
 }
