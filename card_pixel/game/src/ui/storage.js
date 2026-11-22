@@ -61,10 +61,3 @@ export const storage = slotStorage({
     window.localStorage.removeItem(key);
   }
 });
-
-export function withSessionWrite(write) {
-  // Keep the revision check and both copies in one cross-tab critical section. Browsers without Web Locks
-  // (older Safari, insecure contexts) still save: the revision check alone then refuses a stale tab.
-  const locks = globalThis.navigator?.locks;
-  return locks?.request ? locks.request(SESSION_KEY, write) : Promise.resolve().then(write);
-}

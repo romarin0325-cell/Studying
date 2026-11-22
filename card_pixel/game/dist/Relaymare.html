@@ -10706,10 +10706,6 @@ const BattleRuntime = {
       window.localStorage.removeItem(key);
     }
   });
-  function withSessionWrite(write) {
-    const locks = globalThis.navigator?.locks;
-    return locks?.request ? locks.request(SESSION_KEY, write) : Promise.resolve().then(write);
-  }
 
   // card_pixel/game/src/content/daily-rift.js
   var RULE_VERSION = 1;
@@ -22834,11 +22830,11 @@ const BattleRuntime = {
         const options = battleOptions2(run);
         const fromMap = mapEntry;
         mapEntry = false;
-        return battle.startBattle(run, options, async (summary, log) => {
+        return battle.startBattle(run, options, (summary, log) => {
           const result = settleBattle(run, summary);
           if (result.ok) {
             recordBattleLog(run, appendSettlement(log, result));
-            await host.save(run);
+            host.save(run);
           }
           return result;
         }, afterBattle, {
@@ -23966,7 +23962,7 @@ const BattleRuntime = {
       return false;
     }
   }
-  async function readEpisode(sheets2, profile, id, saveFlags) {
+  function readEpisode(sheets2, profile, id, saveFlags) {
     const { title, appearance, voice, body } = EPISODES[id];
     const pages = episodePages(body);
     const saved = episodeState(profile, id) === "read" || saveFlags("episodesRead", [id]);
@@ -24012,7 +24008,7 @@ const BattleRuntime = {
       showPage();
     });
     showPage();
-    if (!await saved && reader.isConnected) {
+    if (!saved) {
       const status = $(".episode-save-status", reader);
       status.textContent = EPISODE.saveFailed;
       status.hidden = false;
@@ -25072,9 +25068,7 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
     let gainedAtReturn = false;
     let warnedSave = false;
     let staleTab = false;
-    let settling = false;
     let reloading = false;
-    let sessionEpoch = 0;
     const details = createDetails(core2, widgets2, sheets2.openSheet);
     const tutorial = createTutorial({ currentProfile: () => profile, updateProfile, widgets: widgets2, stage: stage2, core: core2, roster: roster2 });
     const host = {
@@ -25082,7 +25076,7 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
         if (staleTab || current !== run) return;
         if (run.result === "win" && run.crystals > crystalCount) gainedAtReturn = true;
         crystalCount = run.crystals;
-        return persist();
+        persist();
       },
       finish(current) {
         if (!staleTab && current === run && current.phase === "done") showRecruit();
@@ -25115,11 +25109,13 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
     function showStaleTab() {
       if (staleTab) return;
       staleTab = true;
-      preparationOpen = false;
-      sheets2.closeSheet();
-      tutorial.reset();
-      stage2.pause(true);
-      staleNotice.showModal();
+      queueMicrotask(() => {
+        preparationOpen = false;
+        sheets2.closeSheet();
+        tutorial.reset();
+        stage2.pause(true);
+        staleNotice.showModal();
+      });
     }
     function sessionNotice(message) {
       const notice = document.createElement("p");
@@ -25128,21 +25124,17 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
       $("#session-notices").append(notice);
       setTimeout(() => notice.remove(), 1e4);
     }
-    async function writeSession(write, onFailure = warnSave) {
-      const epoch = sessionEpoch;
+    function writeSession(write, onFailure = warnSave) {
+      if (staleTab || reloading) return false;
       try {
-        return await withSessionWrite(() => {
-          if (staleTab || reloading || sessionEpoch !== epoch) return false;
-          const result = write();
-          if (result?.reason === "stale_tab") showStaleTab();
-          else if (result === false || result?.ok === false) onFailure();
-          else return true;
-          return false;
-        });
+        const result = write();
+        if (result?.reason === "stale_tab") showStaleTab();
+        else if (result === false || result?.ok === false) onFailure();
+        else return true;
       } catch {
         if (!staleTab) onFailure();
-        return false;
       }
+      return false;
     }
     function persist() {
       return writeSession(() => store2.save({ profile, run }));
@@ -25274,19 +25266,12 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
             claim(id2) {
               const result = claimMission(profile, period.key, id2, roster2);
               if (!result?.announce?.ok) return false;
-              const button = $("#meta-mission-claim");
-              button.disabled = true;
-              writeSession(() => saveProfile(result.profile)).then((saved) => {
-                if (!saved || staleTab) {
-                  button.disabled = false;
-                  return;
-                }
-                if (result.announce.recruits.length) audio2.sfx.join();
-                else audio2.sfx.stamp();
-                sheets2.closeSheet();
-                renderNotebook();
-                sessionNotice(id2 ? `${roster2.card(id2).name} \xB7 \uAD00\uCE21\uC18C\uC5D0 \uC601\uC785` : "\uC784\uBB34 \uC644\uB8CC \uB3C4\uC7A5 \uD68D\uB4DD");
-              });
+              if (!writeSession(() => saveProfile(result.profile))) return true;
+              if (result.announce.recruits.length) audio2.sfx.join();
+              else audio2.sfx.stamp();
+              sheets2.closeSheet();
+              renderNotebook();
+              sessionNotice(id2 ? `${roster2.card(id2).name} \xB7 \uAD00\uCE21\uC18C\uC5D0 \uC601\uC785` : "\uC784\uBB34 \uC644\uB8CC \uB3C4\uC7A5 \uD68D\uB4DD");
               return true;
             }
           });
@@ -25314,9 +25299,8 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
         profile,
         widgets: widgets2,
         goal: currentGoal(),
-        async finish() {
-          if (!profile.ui?.endingSeen && !await updateUi({ endingSeen: true })) return;
-          if (staleTab) return;
+        finish() {
+          if (staleTab || !profile.ui?.endingSeen && !updateUi({ endingSeen: true })) return;
           showHub(arriving);
         }
       });
@@ -25448,44 +25432,25 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
         choices,
         preview: (selection) => applyRunEnd2(profile, run, selection).announce,
         endingPending: run.dungeonId === "creation_tower" && rewards.result === "win" && !profile.ui?.endingSeen,
-        changeChoices: (ids) => {
-          if (!settling) updateUi({ recruitChoices: { runId: run.id, ids } });
-        },
+        changeChoices: (ids) => updateUi({ recruitChoices: { runId: run.id, ids } }),
         confirm: confirmReturn
       });
       tutorial.sync(run);
     }
     function confirmReturn(choices) {
       if (!run || staleTab) return false;
-      if (settling) return true;
-      const result = applyRunEnd2(profile, run, choices);
-      const { announce } = result;
+      const { profile: next, announce } = applyRunEnd2(profile, run, choices);
       if (!announce.ok && announce.reason !== "already_applied") return false;
-      const current = run;
-      const button = $("#meta-recruit-confirm");
-      settling = true;
-      button.disabled = true;
-      writeSession(() => settleReturn(result, current)).then((saved) => {
-        settling = false;
-        if (!saved || staleTab) {
-          button.disabled = false;
-          return;
-        }
-        const recruits = announce.ok ? announce.recruits : [];
-        if (announce.stamp) audio2.sfx.stamp();
-        else if (recruits.length) audio2.sfx.crit();
-        if (endingDue()) showEnding(recruits);
-        else showHub(recruits);
-      });
+      const returned = announce.ok ? returnProfile(next, announce, run) : { ...profile, ui: { ...profile.ui, recruitChoices: null } };
+      if (!writeSession(() => saveProfile(returned, null))) return true;
+      run = null;
+      review = null;
+      const recruits = announce.ok ? announce.recruits : [];
+      if (announce.stamp) audio2.sfx.stamp();
+      else if (recruits.length) audio2.sfx.crit();
+      if (endingDue()) showEnding(recruits);
+      else showHub(recruits);
       return true;
-    }
-    function settleReturn({ profile: next, announce }, current) {
-      const result = saveProfile(announce.ok ? returnProfile(next, announce, current) : { ...profile, ui: { ...profile.ui, recruitChoices: null } }, null);
-      if (result !== false && result?.ok !== false) {
-        run = null;
-        review = null;
-      }
-      return result;
     }
     function returnProfile(next, announce, run2) {
       if (basicTutorial(next) && run2.dungeonId === "dawn_forest" && announce.recruits.length) {
@@ -25522,14 +25487,13 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
         latestRun
       } };
     }
-    async function resetData() {
-      if (!await writeSession(() => {
+    function resetData() {
+      if (!writeSession(() => {
         const result = store2.clear();
         if (result !== true) return result;
         if (!store2.loadDetailed) dailyStore2?.clear?.();
-        sessionEpoch++;
         return true;
-      }) || staleTab) return;
+      })) return;
       recovery = null;
       profile = createProfile2();
       run = null;
@@ -25563,23 +25527,14 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
       }, onFailure);
     }
     function backupActions() {
-      let restoring;
       return { sheets: sheets2, currentBackup, store: !store2.restoreBackup ? store2 : {
         ...store2,
         restoreBackup(data) {
-          restoring = finishRestore(() => store2.restoreBackup(data), () => {
-            const feedback = $(".meta-backup .meta-feedback");
-            if (feedback) feedback.textContent = "\uD30C\uC77C \uAE30\uB85D\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
+          const ok = finishRestore(() => store2.restoreBackup(data), () => {
           });
-          return { ok: true };
+          return ok ? { ok: true } : { ok: false, reason: "storage_failed" };
         }
-      }, async recovered() {
-        if (await restoring) reloadAfterRestore();
-        else if (!staleTab) {
-          const button = $("#meta-backup-confirm");
-          if (button) button.disabled = false;
-        }
-      } };
+      }, recovered: reloadAfterRestore };
     }
     function showRecovery() {
       const good = store2.loadLastGood?.();
@@ -25610,10 +25565,10 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
       if (store2.exportBackup && store2.inspectBackup && store2.restoreBackup) {
         bindRecoveryImport(node, backupActions());
       } else importAction.disabled = true;
-      $("#meta-last-good", node)?.addEventListener("click", async (event) => {
+      $("#meta-last-good", node)?.addEventListener("click", (event) => {
         const button = event.currentTarget;
         button.disabled = true;
-        const recovered = await finishRestore(() => store2.restoreLastGood(), () => {
+        const recovered = finishRestore(() => store2.restoreLastGood(), () => {
           $(".meta-feedback", node).textContent = "\uC9C1\uC804 \uAE30\uB85D\uC744 \uBCF5\uAD6C\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
         });
         if (recovered) reloadAfterRestore();
@@ -25645,10 +25600,10 @@ ${josa(enemy, "\uC774/\uAC00")} ${damage} \uD53C\uD574\uB97C \uC904 \uAC70\uC57C
     document.addEventListener("click", () => queueMicrotask(() => {
       if (!staleTab) tutorial.sync(run);
     }));
-    async function replayTutorial() {
+    function replayTutorial() {
       if (run || daily.run || !$("#title.on, #hub.on")) return;
       const entry = { ...profile.ui.entry, done: [], skipped: false };
-      if (!await updateUi({ entry, tutorialReplay: "queued", entryDoor: null, entryBattle: null }) || staleTab) return;
+      if (!updateUi({ entry, tutorialReplay: "queued", entryDoor: null, entryBattle: null })) return;
       sheets2.closeSheet();
       tutorial.reset();
       showTitle(profile);

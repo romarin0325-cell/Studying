@@ -4,7 +4,7 @@ import { episodeState } from '../src/engine/episodes.js';
 import { applyRunEnd, createProfile } from '../src/engine/meta.js';
 import { createSaveStore } from '../src/engine/save.js';
 import { saveEpisodeFlags } from '../src/ui/screens/collection.js';
-import { LAST_GOOD_KEY, SESSION_KEY, withSessionWrite } from '../src/ui/storage.js';
+import { LAST_GOOD_KEY, SESSION_KEY } from '../src/ui/storage.js';
 import { playRun } from '../tools/sim.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
@@ -104,17 +104,6 @@ test('the storage listener makes the older tab stale, and reloading lets it conf
   assert.equal(JSON.parse(storage.getItem(SESSION_KEY)).revision, 3);
   assert.deepEqual(Object.keys(reloaded.loadLastGood().profile.recruits), [snow]);
   assert.deepEqual(confirm(a, tabA, night), stale);
-});
-
-test('overlapping write requests serialize the live save and last-good backup', async () => {
-  const { storage, a, b, tabA, tabB } = openTabs();
-  const writes = [
-    withSessionWrite(() => confirm(a, tabA, night)),
-    withSessionWrite(() => confirm(b, tabB, snow))
-  ];
-  assert.deepEqual(await Promise.all(writes), [{ ok: true }, stale]);
-  assert.equal(storage.getItem(LAST_GOOD_KEY), storage.getItem(SESSION_KEY));
-  assert.deepEqual(Object.keys(a.loadLastGood().profile.recruits), [night]);
 });
 
 test('the active slot changes only after a current tab successfully restores a backup', () => {

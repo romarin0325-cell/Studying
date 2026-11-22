@@ -17,7 +17,6 @@ import { createDailyNavigation } from './nav/daily.js';
 import { bindRecoveryImport } from './nav/recovery.js';
 import { basicTutorial, createTutorial } from './tutorial.js';
 import { hasFinalConsonant } from './widgets.js';
-import { withSessionWrite } from './storage.js';
 import * as Meta from '../engine/meta.js';
 import { episodeState } from '../engine/episodes.js';
 import { createRun, finishRun } from '../engine/run.js';
@@ -59,9 +58,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   let gainedAtReturn = false;
   let warnedSave = false;
   let staleTab = false;
-  let settling = false;
   let reloading = false;
-  let sessionEpoch = 0;
   const details = createDetails(core, widgets, sheets.openSheet);
   const tutorial = createTutorial({ currentProfile: () => profile, updateProfile, widgets, stage, core, roster });
 
@@ -70,8 +67,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       if (staleTab || current !== run) return;
       if (run.result === 'win' && run.crystals > crystalCount) gainedAtReturn = true;
       crystalCount = run.crystals;
-      // The write is queued behind other tabs' writes; callers that must not move on before it lands await this.
-      return persist();
+      persist();
     },
     finish(current) {
       if (!staleTab && current === run && current.phase === 'done') showRecruit();
@@ -94,11 +90,14 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   function showStaleTab() {
     if (staleTab) return;
     staleTab = true;
-    preparationOpen = false;
-    sheets.closeSheet();
-    tutorial.reset();
-    stage.pause(true);
-    staleNotice.showModal();
+    // A click can still render after its save is refused. Close that UI before showing the notice.
+    queueMicrotask(() => {
+      preparationOpen = false;
+      sheets.closeSheet();
+      tutorial.reset();
+      stage.pause(true);
+      staleNotice.showModal();
+    });
   }
 
   function sessionNotice(message) {
@@ -109,21 +108,17 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     setTimeout(() => notice.remove(), 10000);
   }
 
-  async function writeSession(write, onFailure = warnSave) {
-    const epoch = sessionEpoch;
+  function writeSession(write, onFailure = warnSave) {
+    if (staleTab || reloading) return false;
     try {
-      return await withSessionWrite(() => {
-        if (staleTab || reloading || sessionEpoch !== epoch) return false;
-        const result = write();
-        if (result?.reason === 'stale_tab') showStaleTab();
-        else if (result === false || result?.ok === false) onFailure();
-        else return true;
-        return false;
-      });
+      const result = write();
+      if (result?.reason === 'stale_tab') showStaleTab();
+      else if (result === false || result?.ok === false) onFailure();
+      else return true;
     } catch {
       if (!staleTab) onFailure();
-      return false;
     }
+    return false;
   }
 
   function persist() {
@@ -253,19 +248,12 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
           claim(id) {
             const result = Meta.claimMission(profile, period.key, id, roster);
             if (!result?.announce?.ok) return false;
-            const button = $('#meta-mission-claim');
-            button.disabled = true;
-            writeSession(() => saveProfile(result.profile)).then(saved => {
-              if (!saved || staleTab) {
-                button.disabled = false;
-                return;
-              }
-              if (result.announce.recruits.length) audio.sfx.join();
-              else audio.sfx.stamp();
-              sheets.closeSheet();
-              renderNotebook();
-              sessionNotice(id ? `${roster.card(id).name} · 관측소에 영입` : '임무 완료 도장 획득');
-            });
+            if (!writeSession(() => saveProfile(result.profile))) return true;
+            if (result.announce.recruits.length) audio.sfx.join();
+            else audio.sfx.stamp();
+            sheets.closeSheet();
+            renderNotebook();
+            sessionNotice(id ? `${roster.card(id).name} · 관측소에 영입` : '임무 완료 도장 획득');
             return true;
           }
         });
@@ -285,9 +273,8 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const node = page('ending');
     endingScreen(node, {
       profile, widgets, goal: currentGoal(),
-      async finish() {
-        if (!profile.ui?.endingSeen && !await updateUi({ endingSeen: true })) return;
-        if (staleTab) return;
+      finish() {
+        if (staleTab || (!profile.ui?.endingSeen && !updateUi({ endingSeen: true }))) return;
         showHub(arriving);
       }
     });
@@ -403,9 +390,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     recruitScreen(node, {
       run, rewards, profile, widgets, sheets, choices, preview: selection => applyRunEnd(profile, run, selection).announce,
       endingPending: run.dungeonId === 'creation_tower' && rewards.result === 'win' && !profile.ui?.endingSeen,
-      changeChoices: ids => {
-        if (!settling) updateUi({ recruitChoices: { runId: run.id, ids } });
-      },
+      changeChoices: ids => updateUi({ recruitChoices: { runId: run.id, ids } }),
       confirm: confirmReturn
     });
     tutorial.sync(run);
@@ -413,37 +398,19 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
 
   function confirmReturn(choices) {
     if (!run || staleTab) return false;
-    if (settling) return true;
-    const result = applyRunEnd(profile, run, choices);
-    const { announce } = result;
+    const { profile: next, announce } = applyRunEnd(profile, run, choices);
     if (!announce.ok && announce.reason !== 'already_applied') return false;
-    const current = run;
-    const button = $('#meta-recruit-confirm');
-    settling = true;
-    button.disabled = true;
-    writeSession(() => settleReturn(result, current)).then(saved => {
-      settling = false;
-      if (!saved || staleTab) {
-        button.disabled = false;
-        return;
-      }
-      const recruits = announce.ok ? announce.recruits : [];
-      if (announce.stamp) audio.sfx.stamp();
-      else if (recruits.length) audio.sfx.crit();
-      if (endingDue()) showEnding(recruits);
-      else showHub(recruits);
-    });
+    const returned = announce.ok ? returnProfile(next, announce, run)
+      : { ...profile, ui: { ...profile.ui, recruitChoices: null } };
+    if (!writeSession(() => saveProfile(returned, null))) return true;
+    run = null;
+    review = null;
+    const recruits = announce.ok ? announce.recruits : [];
+    if (announce.stamp) audio.sfx.stamp();
+    else if (recruits.length) audio.sfx.crit();
+    if (endingDue()) showEnding(recruits);
+    else showHub(recruits);
     return true;
-  }
-
-  function settleReturn({ profile: next, announce }, current) {
-    const result = saveProfile(announce.ok ? returnProfile(next, announce, current)
-      : { ...profile, ui: { ...profile.ui, recruitChoices: null } }, null);
-    if (result !== false && result?.ok !== false) {
-      run = null;
-      review = null;
-    }
-    return result;
   }
 
   function returnProfile(next, announce, run) {
@@ -466,14 +433,13 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     } };
   }
 
-  async function resetData() {
-    if (!await writeSession(() => {
+  function resetData() {
+    if (!writeSession(() => {
       const result = store.clear();
       if (result !== true) return result;
       if (!store.loadDetailed) dailyStore?.clear?.();
-      sessionEpoch++;
       return true;
-    }) || staleTab) return;
+    })) return;
     recovery = null;
     profile = createProfile();
     run = null;
@@ -511,24 +477,13 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function backupActions() {
-    let restoring;
     return { sheets, currentBackup, store: !store.restoreBackup ? store : {
       ...store,
       restoreBackup(data) {
-        // The import sheet disables its button and hands completion to recovered().
-        restoring = finishRestore(() => store.restoreBackup(data), () => {
-          const feedback = $('.meta-backup .meta-feedback');
-          if (feedback) feedback.textContent = '파일 기록을 저장하지 못했습니다.';
-        });
-        return { ok: true };
+        const ok = finishRestore(() => store.restoreBackup(data), () => {});
+        return ok ? { ok: true } : { ok: false, reason: 'storage_failed' };
       }
-    }, async recovered() {
-      if (await restoring) reloadAfterRestore();
-      else if (!staleTab) {
-        const button = $('#meta-backup-confirm');
-        if (button) button.disabled = false;
-      }
-    } };
+    }, recovered: reloadAfterRestore };
   }
 
   function showRecovery() {
@@ -560,10 +515,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     if (store.exportBackup && store.inspectBackup && store.restoreBackup) {
       bindRecoveryImport(node, backupActions());
     } else importAction.disabled = true;
-    $('#meta-last-good', node)?.addEventListener('click', async event => {
+    $('#meta-last-good', node)?.addEventListener('click', event => {
       const button = event.currentTarget;
       button.disabled = true;
-      const recovered = await finishRestore(() => store.restoreLastGood(), () => {
+      const recovered = finishRestore(() => store.restoreLastGood(), () => {
         $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했습니다.';
       });
       if (recovered) reloadAfterRestore();
@@ -595,10 +550,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   });
   document.addEventListener('click', () => queueMicrotask(() => { if (!staleTab) tutorial.sync(run); }));
 
-  async function replayTutorial() {
+  function replayTutorial() {
     if (run || daily.run || !$('#title.on, #hub.on')) return;
     const entry = { ...profile.ui.entry, done: [], skipped: false };
-    if (!await updateUi({ entry, tutorialReplay: 'queued', entryDoor: null, entryBattle: null }) || staleTab) return;
+    if (!updateUi({ entry, tutorialReplay: 'queued', entryDoor: null, entryBattle: null })) return;
     sheets.closeSheet();
     tutorial.reset();
     showTitle(profile);

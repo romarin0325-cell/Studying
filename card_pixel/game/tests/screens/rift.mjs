@@ -379,7 +379,9 @@ export function createRiftCases({
     assert.deepEqual(store.inspectBackup(backup).warnings, ['invalid_daily']);
     assert.equal(backup.session.run.run.floor, 2);
     assert.equal(backup.damagedDaily, damaged);
-    assert.equal(store.restoreLastGood().ok, true);
+    assert.equal(store.loadDetailed().status, 'ok');
+    const restored = store.restoreLastGood();
+    assert.ok(restored.ok, restored.reason);
     assert.equal(store.loadDetailed().status, 'ok');
     return {
       session, daily: damaged, lastGood, now,

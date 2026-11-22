@@ -1138,21 +1138,20 @@ function retreatOutcomes() {
   const battle = Bridge.create(core, Run.battleOptions(run));
   const ready = battle.start().findLast(event => event.t === 'await');
   const { allies, cur } = battle.state();
-  const preview = battle.previewRetreat();
-  const next = allies[preview.next.idx];
-  const [low, high] = preview.dmg;
-  const after = Math.max(0, next.hp - high);
-  const maxAfter = Math.max(0, next.hp - low);
+  const preview = battle.previewRelay();
+  const lines = relayOutcomeLines(preview, allies[cur], ready.intent);
+  const { next } = preview.retreat;
+  const wide = preview.danger !== 'none' || next.evadeHp != null || !!next.mpOnHit;
   assert.ok(allies[cur].hp <= ready.intent.dmg[0]);
-  const retreat = `${next.name} HP ${next.hp} → ${after === maxAfter ? after : `${after}~${maxAfter}`}`;
   return {
-    session: storedSession({ run }), proof: `${allies[cur].hp} HP vs. minimum ${ready.intent.dmg[0]} damage; ${retreat}`,
+    session: storedSession({ run }), proof: `${allies[cur].hp} HP vs. minimum ${ready.intent.dmg[0]} damage; ${lines.join(' / ')}`,
     async show(page, { text }) {
       await battleIdle(page);
-      await page.locator('#b-retreat').click();
-      const button = page.locator('#b-retreat.armed');
-      await text(button, '물러나면 · ' + retreat);
-      await text(button, '남으면 · 애쉬 쓰러짐');
+      const button = page.locator('#b-retreat');
+      await button.click();
+      await text(button, TERMS.retreat.short + ' 확정');
+      assert.deepEqual(await button.locator('small').allTextContents(), lines);
+      assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), wide ? 1 : 0);
       await text(page.locator('#turn'), '1턴');
     }
   };
@@ -2700,7 +2699,7 @@ const reviewGardenRoute = run => run.doors[[0, 0, 1, 0, 0, 1, 0, 0][run.floor - 
 function gardenStartingFields() {
   let checkpoint;
   playRun('starlit_garden', 37, {
-    difficulty: 'easy', firstMain: true, doorOverride: reviewGardenRoute,
+    difficulty: 'easy', legacyRules: true, firstMain: true, doorOverride: reviewGardenRoute,
     onBattle(run) {
       if (run.floor === 4) command(Run.chooseGateReward, run, { kind: 'relic', id: 'buff_overload' });
     },
@@ -2740,7 +2739,7 @@ function gardenStartingFields() {
 function doubleRelicReceipt() {
   let checkpoint;
   playRun('twilight_cathedral', 64, {
-    difficulty: 'easy', firstMain: true, doorOverride: reviewGardenRoute,
+    difficulty: 'easy', legacyRules: true, firstMain: true, doorOverride: reviewGardenRoute,
     onRoom(run) {
       if (run.floor !== 5) return;
       assert.equal(run.room.event.id, 'whale_third_peal');
@@ -2786,7 +2785,7 @@ function doubleRelicReceipt() {
 function lowCrystalSpring() {
   let checkpoint;
   playRun('dawn_forest', 17, {
-    opening: 'stand',
+    legacyRules: true, opening: 'stand',
     serviceOverride(run) {
       if (run.room.type !== 'spring') return false;
       assert.equal(run.crystals, 3);

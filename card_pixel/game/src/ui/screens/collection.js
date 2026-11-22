@@ -24,7 +24,7 @@ export function saveEpisodeFlags(profile, field, ids, write) {
   } catch { return false; }
 }
 
-async function readEpisode(sheets, profile, id, saveFlags) {
+function readEpisode(sheets, profile, id, saveFlags) {
   const { title, appearance, voice, body } = EPISODES[id];
   const pages = episodePages(body);
   const saved = episodeState(profile, id) === 'read' || saveFlags('episodesRead', [id]);
@@ -64,7 +64,7 @@ async function readEpisode(sheets, profile, id, saveFlags) {
   previous.addEventListener('click', () => { index--; showPage(); });
   next.addEventListener('click', () => { index++; showPage(); });
   showPage();
-  if (!await saved && reader.isConnected) {
+  if (!saved) {
     const status = $('.episode-save-status', reader);
     status.textContent = EPISODE.saveFailed;
     status.hidden = false;

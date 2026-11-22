@@ -245,12 +245,12 @@ export function enterRun(run, host) {
       const options = Run.battleOptions(run);
       const fromMap = mapEntry;
       mapEntry = false;
-      return battle.startBattle(run, options, async (summary, log) => {
+      return battle.startBattle(run, options, (summary, log) => {
         const result = Run.settleBattle(run, summary);
         if (result.ok) {
           Run.recordBattleLog(run, appendSettlement(log, result));
           // The settled result is written before the last hit and the victory/defeat plate play.
-          await host.save(run);
+          host.save(run);
         }
         return result;
       }, afterBattle, {
