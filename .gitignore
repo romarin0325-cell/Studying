@@ -21,3 +21,4 @@ card_pixel/plan/pixel-pilot/r4b/*-strip.png
 defense_public/dist-public/
 defense_public/release.local.json
 defense_public/deploy/cloudflare/.wrangler/
+defense_public/deploy/cloudflare/wrangler.test.jsonc
