@@ -54,7 +54,15 @@ const WILD_BEAT_PATTERNS = {
   },
   batOpening: {
     strong: 1,
-    beats: [{ signature: true, power: 1 }, { name: '빈틈', type: 'rest', power: 0, vulnerable: 1.3 }, basic]
+    beats: [{ signature: true, power: 1, drainRate: 0.3 }, { name: '빈틈', type: 'rest', power: 0, vulnerable: 1.3 }, basic]
+  },
+  beetleShell: {
+    strong: 2,
+    beats: [
+      { name: '껍질 반격', type: 'phy', power: 0.55, hitPower: 1, vulnerable: 0.9 },
+      { name: '껍질 돌진', type: 'phy', power: 1.85 },
+      weak
+    ]
   }
 };
 export function wildBeatPattern(pattern) {

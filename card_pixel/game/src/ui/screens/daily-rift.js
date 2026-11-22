@@ -3,6 +3,7 @@ import { icon } from '../assets.js';
 import { DUNGEONS } from '../../content/dungeons.js';
 import { REGIONS } from '../../content/regions.js';
 import { RIFT_PUZZLE } from '../glossary.js';
+import { keepSeparators } from '../text.js';
 
 export const shortRiftDate = dayKey => dayKey?.slice(5).replace('-', '.') || '';
 
@@ -140,27 +141,15 @@ export function riftPuzzleEntry(id = 'meta-rift-puzzles') {
   return `<button class="btn" id="${id}">${RIFT_PUZZLE.title}</button>`;
 }
 
-// Each goal condition with the value one attempt reached. The overall verdict stays engine/daily-rift.js puzzleGoalMet;
-// these rows only show the player which part of it held.
-function puzzleConditions({ survivors, maxTurns, heirloomUses }) {
-  return [
-    { label: '보스 격파', met: score => score.outcome === 'win', value: score => score.outcome === 'win' ? '격파' : '실패' },
-    survivors != null && { label: `생존 ${survivors}명 이상`,
-      met: score => score.livingIds.length >= survivors, value: score => `${score.livingIds.length}명` },
-    maxTurns != null && { label: `${maxTurns}턴 이내`, met: score => score.turns <= maxTurns, value: score => `${score.turns}턴` },
-    heirloomUses != null && { label: `유품 ${heirloomUses}회 이상 사용`,
-      met: score => score.heirloomsUsed >= heirloomUses, value: score => `${score.heirloomsUsed}회` }
-  ].filter(Boolean);
-}
+const puzzleName = widgets => id => widgets.card(id)?.name ?? '동료';
+const puzzleLabel = ({ kind, target }, name) => RIFT_PUZZLE.conditions[kind](target, name);
+const puzzleGoal = (ending, name) => ending.conditions.map(condition => puzzleLabel(condition, name)).join(' · ');
 
-function puzzleGoal(goal) {
-  return puzzleConditions(goal).map(condition => condition.label).join(' · ');
-}
-
-function puzzleChecks(goal, score) {
-  return `<ul class="rift-puzzle-checks">${puzzleConditions(goal).map(({ label, met, value }) => {
-    const done = met(score);
-    return `<li class="${done ? 'met' : 'missed'}"><b>${done ? '달성' : '미달'}</b><span>${esc(label)}</span><small>${esc(value(score))}</small></li>`;
+function puzzleChecks(score, name) {
+  return `<ul class="rift-puzzle-checks">${score.conditions.map(condition => {
+    const { kind, met, value } = condition;
+    return `<li class="${met ? 'met' : 'missed'}"><b>${met ? RIFT_PUZZLE.conditionMet : RIFT_PUZZLE.conditionMissed}</b>
+      <span>${esc(puzzleLabel(condition, name))}</span><small>${esc(RIFT_PUZZLE.values[kind](value, name))}</small></li>`;
   }).join('')}</ul>`;
 }
 
@@ -168,35 +157,59 @@ export function puzzleResultTitle(score) {
   return score.goalMet ? RIFT_PUZZLE.met : RIFT_PUZZLE.missed;
 }
 
-export function openRiftPuzzles(puzzles, { sheets, start }) {
+export function openRiftPuzzles(puzzles, { sheets, choose }) {
+  const endingRecord = ({ title, best }) => {
+    const mark = best ? best.goalMet ? RIFT_PUZZLE.conditionMet : RIFT_PUZZLE.conditionMissed : RIFT_PUZZLE.noRecord;
+    return `<span class="rift-puzzle-ending">
+      <span>${esc(title)}</span><small class="rift-puzzle-mark${best?.goalMet ? ' met' : ''}">${mark}</small>
+      ${best ? `<small class="rift-puzzle-record">${keepSeparators(esc(`${RIFT_PUZZLE.best} · ${RIFT_PUZZLE.survivors(best.survivors)} · ${best.turns}턴`))}</small>` : ''}
+    </span>`;
+  };
   sheets.openSheet(RIFT_PUZZLE.title, `<div class="meta-sheet rift-puzzle-list">
-    ${puzzles.map(({ id, title, goal, note, best }) => `<button class="btn rift-puzzle-card" data-rift-puzzle="${esc(id)}">
+    ${puzzles.map(({ id, title, note, endings }) => `<button class="btn rift-puzzle-card" data-rift-puzzle="${esc(id)}">
       <b>${esc(title)}</b>
-      <span>${esc(puzzleGoal(goal))}</span>
-      <small>최고 기록 · ${best ? `${puzzleResultTitle(best)} · ${survival(best)} · ${best.turns}턴${goal.heirloomUses != null ? ` · 유품 ${best.heirloomsUsed}회` : ''}` : '기록 없음'}</small>
       <small>${esc(note)}</small>
+      ${endings.map(endingRecord).join('')}
     </button>`).join('')}
   </div>`);
-  for (const button of $$('#sh-body [data-rift-puzzle]')) {
-    button.addEventListener('click', () => start(button.dataset.riftPuzzle));
+  for (const puzzle of puzzles) {
+    $(`#sh-body [data-rift-puzzle="${puzzle.id}"]`).addEventListener('click', () => choose(puzzle));
   }
 }
 
-export function mountPuzzleFormation(puzzle, exit) {
+export function openPuzzleEndings(puzzle, { sheets, widgets, start, list }) {
+  const name = puzzleName(widgets);
+  sheets.openSheet(RIFT_PUZZLE.choose, `<div class="meta-sheet rift-puzzle-list">
+    <p>${esc(puzzle.title)}</p>
+    ${puzzle.endings.map(ending => `<button class="btn rift-puzzle-card" data-rift-ending="${esc(ending.id)}">
+      <b>${esc(ending.title)}</b>
+      <small>${keepSeparators(esc(puzzleGoal(ending, name)))}</small>
+    </button>`).join('')}
+  </div>`, { onClose: list });
+  for (const button of $$('#sh-body [data-rift-ending]')) {
+    button.addEventListener('click', () => start(puzzle.id, button.dataset.riftEnding));
+  }
+}
+
+export function mountPuzzleFormation(puzzle, ending, { widgets, exit }) {
   const node = $('#order.on');
   $('.fixed-top', node).insertAdjacentHTML('afterbegin',
-    `<p class="rift-puzzle-goal">${esc(puzzle.title)} · ${esc(puzzleGoal(puzzle.goal))}</p>`);
+    `<p class="rift-puzzle-goal">${keepSeparators(esc(`${puzzle.title} · ${ending.title}`))}
+      <br>${keepSeparators(esc(puzzleGoal(ending, puzzleName(widgets))))}</p>`);
   $('.top', node).insertAdjacentHTML('afterbegin',
     `<button class="btn order-back" id="meta-puzzle-exit" aria-label="${RIFT_PUZZLE.list}으로 돌아가기">←</button>`);
   $('#meta-puzzle-exit', node).addEventListener('click', exit);
 }
 
-export function puzzleResultScreen(node, { puzzle, score, saved }, { widgets, again, list, hub, retry }) {
+export function puzzleResultScreen(node, { puzzle, ending, score, saved }, { widgets, again, list, hub, retry }) {
+  const other = puzzle.endings.find(item => item.id !== ending.id);
   node.classList.add('screen-split');
   node.innerHTML = `<section class="meta-panel rift-result rift-puzzle-result fixed-top">
     <h2>${esc(puzzle.title)}</h2>
-    ${puzzleChecks(puzzle.goal, score)}
-    <p class="rift-puzzle-stats">${survival(score)} · ${score.turns}턴 · 유품 사용 ${score.heirloomsUsed}회</p>
+    <p class="rift-puzzle-chosen">${esc(ending.title)}</p>
+    ${puzzleChecks(score, puzzleName(widgets))}
+    <p class="rift-puzzle-stats">${keepSeparators(esc(`${RIFT_PUZZLE.survivors(score.survivors)} · ${score.turns}턴 · 유품 사용 ${score.heirloomsUsed}회`))}</p>
+    <p class="rift-puzzle-other">${keepSeparators(esc(RIFT_PUZZLE.other(other.title)))}</p>
     ${saved ? '' : '<p role="alert">퍼즐 기록을 저장하지 못했습니다.</p>'}
   </section>
   <div class="scroll-list">${resultCast(puzzle.rentals, score, widgets)}</div>

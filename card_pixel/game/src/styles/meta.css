@@ -269,16 +269,20 @@
   padding: 9px 12px; text-align: left; word-break: keep-all; overflow-wrap: anywhere; }
 .rift-puzzle-card b { font: normal 0.9375rem/1.2 var(--f-display); }
 .rift-puzzle-card small { color: var(--ink2); }
+.rift-puzzle-ending { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline;
+  column-gap: 8px; border-top: 1px solid var(--line); padding: 4px 0 2px; font: 500 0.8125rem/1.35 var(--f-body); }
+.rift-puzzle-ending .rift-puzzle-mark.met { color: var(--aqua-lo); }
+.rift-puzzle-record { grid-column: 1 / -1; }
 .rift-puzzle-goal { margin: 4px 0 8px; font: 500 0.8125rem/1.4 var(--f-body); word-break: keep-all; }
 /* Puzzle result: one row per goal condition, met or missed, with the value this attempt reached. */
 .rift-puzzle-checks { display: grid; gap: 5px; margin: 10px 0 8px; padding: 0; list-style: none; }
 .rift-puzzle-checks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px;
-  font: 500 0.875rem/1.35 var(--f-body); word-break: keep-all; }
+  font: 500 0.875rem/1.35 var(--f-body); word-break: keep-all; overflow-wrap: anywhere; }
 .rift-puzzle-checks b { min-width: 3.2em; padding: 2px 6px; text-align: center; color: #fff; background: var(--aqua-lo);
   font: normal 0.75rem/1.3 var(--f-display); clip-path: var(--notch); }
 .rift-puzzle-checks .missed b { background: var(--coral-lo); }
-.rift-puzzle-checks small { color: var(--ink2); font-size: 0.8125rem; }
-.rift-puzzle-result .rift-puzzle-stats { color: var(--ink2); font-size: 0.8125rem; }
+.rift-puzzle-checks small { max-width: 8em; color: var(--ink2); font-size: 0.8125rem; }
+.rift-puzzle-result :is(.rift-puzzle-stats, .rift-puzzle-other) { color: var(--ink2); font-size: 0.8125rem; }
 
 /* preparation sheet */
 .meta-prep-section { border-bottom: 1.5px dashed var(--line); padding: 6px 0 10px; }

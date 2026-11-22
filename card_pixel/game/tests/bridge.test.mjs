@@ -13,6 +13,7 @@ import * as Run from '../src/engine/run.js';
 import { createStage } from '../src/stage/stage.js';
 import { createMoves } from '../src/ui/battle/moves.js';
 import { intentLines } from '../src/ui/battle/hud.js';
+import { battleLog } from '../src/ui/battle/log.js';
 import { relayOutcomeLines } from '../src/ui/battle/tiles.js';
 import { createCoreRoster } from './support/core.mjs';
 import { coreBundle } from '../tools/core-bundle.mjs';
@@ -251,7 +252,7 @@ test('wild golem and night bat repeat their announced actions for six local turn
     ['night_bat', [
       ['흡혈 이빨', 'phy', 1.6, '다음 턴 빈틈 · 휴식 · 받는 피해 ×1.3'],
       ['빈틈', 'rest', 0, '다음 턴 일반 공격 · 물리 ×1'],
-      ['일반 공격', 'phy', 1, '다음 턴 흡혈 이빨 · 물리 ×1.6']
+      ['일반 공격', 'phy', 1, '다음 턴 흡혈 이빨 · 물리 ×1.6 · 가한 피해 30% 회복']
     ]]
   ];
   for (const [id, expected] of cases) {
@@ -268,7 +269,8 @@ test('wild golem and night bat repeat their announced actions for six local turn
       const [current, chip] = intentLines(intent, countdown);
       assert.equal(chip, future);
       assert.equal(current, kind === 'rest' ? '빈틈 · 적 휴식 · 받는 피해 ×1.3' :
-        '내 행동 뒤 · ' + name + (kind === 'charge' ? '' : ' · HP ' + intent.damageRange[0]));
+        '내 행동 뒤 · ' + name + (kind === 'charge' ? '' : ' · HP ' + intent.damageRange[0]) +
+        (name === '흡혈 이빨' ? ' · 가한 피해 30% 회복' : ''));
       events = b.act(0);
       const action = events.find(e => e.t === 'act' && e.who.side === 'enemy');
       const damage = events.find(e => e.t === 'hp' && e.who.side === 'ally' && e.delta < 0);
@@ -278,6 +280,25 @@ test('wild golem and night bat repeat their announced actions for six local turn
       else assert.equal(damage, undefined);
     }
   }
+});
+
+test('the wounded twilight bat in seed 15838 heals 90 HP from its 302-damage bite', () => {
+  let seen = false;
+  playRun('twilight_cathedral', 15838, { relicDoors: true, trace(run, wait, move, events) {
+    if (run.floor !== 2 || wait.s.turn !== 1) return;
+    assert.equal(wait.s.enemy.form, 'wild_night_bat');
+    assert.deepEqual(wait.s.enemy.affixes, []);
+    assert.equal(move.name, '고스트소울');
+    const damage = events.find(e => e.t === 'hp' && e.cause?.skill === '흡혈 이빨');
+    assert.deepEqual([damage.s.enemy.hp, damage.s.enemy.maxHp, damage.delta], [246, 348, -302]);
+    const heal = events.find(e => e.t === 'hp' && e.who.side === 'enemy' && e.delta > 0);
+    assert.deepEqual([heal.delta, heal.s.enemy.hp], [90, 336]);
+    assert.ok(events.some(e => e.t === 'rule' && e.rule === 'leech' && e.amount === 90));
+    assert.ok(battleLog([wait, ...events], run.room.party, run.room.enemies)
+      .flatMap(turn => turn.rows).some(row => row.text === '흡혈 +90'));
+    seen = true;
+  } });
+  assert.ok(seen);
 });
 
 test('night bat opening multiplies preview and damage once, except when a lesson or tide overrides it', () => {
@@ -308,6 +329,76 @@ test('night bat opening multiplies preview and damage once, except when a lesson
       events = b.act(0);
       const hit = events.find(e => e.t === 'hp' && e.who.side === 'enemy');
       assert.equal(hit.amount, expected);
+    }
+  }
+});
+
+test('emerald beetle mitigates hits, counters harder when hit, and announces all six beats', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const enemy = roster.wildOf('emerald_beetle', 1, { stats: { hp: 99999, atk: 40, matk: 0, def: 60, mdef: 60 } });
+  const tempo = { pattern: 'threeBeat' };
+  const b = battle({ enemies: [enemy], tempo });
+  const regular = battle({ enemies: [{ ...enemy, id: 'test_dummy' }], tempo });
+  regular.start();
+  const normalDamage = option(regular, '일반 공격').preview.dmg;
+  let events = b.start();
+  const lead = b.host.battle.players[0];
+  lead.baseCrit = -100;
+  lead.baseEva = -100;
+  lead.skills.push({ name: '대기', type: 'sup', cost: 0, effects: [] });
+  const beats = [
+    ['껍질 반격', 0.55, '다음 턴 껍질 돌진 · 물리 ×1.85'],
+    ['껍질 돌진', 1.85, '다음 턴 약공 · 물리 ×0.55'],
+    ['약공', 0.55, '다음 턴 껍질 반격 · 물리 ×0.55 / 피격 시 ×1 · 받는 피해 ×0.9']
+  ];
+  for (let turn = 1; turn <= 6; turn++) {
+    const [name, power, future] = beats[(turn - 1) % beats.length];
+    const { intent, countdown } = last(events, 'await');
+    assert.deepEqual([intent.localTurn, intent.name, intent.kind, intent.power], [turn, name, 'phy', power]);
+    assert.equal(intent.salience, name === '껍질 돌진' ? 'strong' : 'ordinary');
+    const [current, chip] = intentLines(intent, countdown);
+    assert.equal(chip, future);
+    assert.equal(intentLines({ ...intent, nextDistinct: countdown }, null)[1], future);
+    if (name === '껍질 반격') {
+      const [unhit, hit] = intent.damageRange;
+      assert.ok(hit > unhit);
+      assert.equal(current, `내 행동 뒤 · 껍질 반격 · 적 받는 피해 ×0.9 · 피격 시 ${hit} / 미피격 시 ${unhit}`);
+      assert.equal(intent.conditions[0].met, null);
+      assert.equal(option(b, '일반 공격').preview.dmg, Math.floor(normalDamage * 0.9));
+    } else {
+      assert.equal(current, `내 행동 뒤 · ${name} · HP ${intent.damageRange[0]}`);
+    }
+    const wait = turn === 4;
+    events = b.act(wait ? option(b, '대기').index : 0);
+    const action = events.find(e => e.t === 'act' && e.who.side === 'enemy');
+    const damage = events.find(e => e.t === 'hp' && e.who.side === 'ally' && e.delta < 0);
+    assert.deepEqual([action.skill.name, action.skill.val, damage.amount],
+      [name, turn === 1 ? 1 : power, intent.damageRange[turn === 1 ? 1 : 0]]);
+    if (turn === 1) assert.equal(events.find(e => e.t === 'hp' && e.who.side === 'enemy').amount, Math.floor(normalDamage * 0.9));
+    if (wait) assert.ok(!events.some(e => e.t === 'hp' && e.who.side === 'enemy'));
+  }
+});
+
+test('rehearsal and tide override the beetle shell and ram in previews and combat', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const enemy = roster.wildOf('emerald_beetle', 1, { stats: { hp: 99999, atk: 1, matk: 1, def: 60, mdef: 60 } });
+  const lesson = makeBossLesson('ares', 2, 0);
+  const cases = [
+    ['threeBeat', undefined, ['물리 충전', '충전 일격', '약공', '껍질 반격', '껍질 돌진', '약공'], { 4: 0.9 }],
+    ['tide', { id: 'tide_cycle' }, ['물리 충전', '충전 일격', '조류의 일격', '물러간 조류', '일반 공격', '잔물결'], { 4: 1.5 }]
+  ];
+  for (const [pattern, region, names, modifiers] of cases) {
+    const preview = Bridge.enemyBeats(S.RelayCore, enemy, pattern, undefined, lesson);
+    assert.deepEqual(preview.map(beat => beat.name), names.slice(0, preview.length));
+    const b = battle({ enemies: [enemy], tempo: { pattern, lesson }, region });
+    let events = b.start();
+    for (const [index, name] of names.entries()) {
+      const { intent } = last(events, 'await');
+      assert.equal(intent.name, name);
+      assert.equal(intent.vulnerable, modifiers[index + 1]);
+      assert.equal(intent.conditions.length, name === '껍질 반격' ? 1 : 0);
+      if (pattern === 'threeBeat' && names[index + 1]) assert.equal(intent.nextDistinct.name, names[index + 1]);
+      events = b.act(0);
     }
   }
 });
@@ -670,18 +761,18 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
 test('Ember 7919 retreat predicts Jack-o-Lantern’s evasion and preserves seeded event bytes', () => {
   let checked = false;
   eachRetreatDecision('ember_volcano', 7919, ({ floor, turn, commands, replay }) => {
-    if (floor !== 1 || turn !== 4) return;
-    assert.deepEqual(commands, [3, 1, 2]);
+    if (floor !== 1 || turn !== 5) return;
+    assert.deepEqual(commands, [1, 3, 1, 0]);
     const b = replay(), control = replay();
     const before = b.state();
     assert.equal(b.allyStats(1).evasion, 10);
     assert.equal(before.allies[1].buffs.evasion, undefined);
     for (let i = 0; i < 3; i++) {
       const forecast = b.previewRelay();
-      assert.deepEqual(forecast.retreat.next.hpAfter, [415, 415]);
+      assert.deepEqual(forecast.retreat.next.hpAfter, [349, 349]);
       assert.equal(forecast.retreat.next.evadeHp, 464);
       assert.equal(relayOutcomeLines(forecast, before.allies[0], b.previewRetreat().intent)[1],
-        '잭오랜턴 HP 464 → 415 · 회피 시 464');
+        '잭오랜턴 HP 464 → 349 · 회피 시 464');
     }
     assert.deepEqual(b.state(), before);
     const events = b.retreat();

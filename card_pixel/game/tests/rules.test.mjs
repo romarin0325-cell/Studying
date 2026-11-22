@@ -178,6 +178,36 @@ test('H tough, thorns, leech and frenzy do what the door says', () => {
   assert.equal(fr.host.battle.enemy.atk, Math.floor(atk0 * 1.5));
 });
 
+test('bat bite heals only actual HP removed, capped, with the higher prefix rate applied once', async t => {
+  const move = { name: '대기', type: 'sup', cost: 0, effects: [] };
+  for (const { name, missing = 500, atk = 120, evade = false, affixes = [], allyHp, expected, rate = 0.3 } of [
+    { name: 'max HP on hit', missing: 0, expected: 0 },
+    { name: 'caps at max HP', missing: 1, expected: 1 },
+    { name: 'miss with prefix', evade: true, affixes: ['leech'], rate: 0.5, expected: 0 },
+    { name: 'zero damage', atk: 0, expected: 0 },
+    { name: 'overkill uses remaining HP', atk: 5000, allyHp: 11, expected: 3 },
+    { name: 'prefix uses 50%, no second heal', affixes: ['leech'], rate: 0.5 }
+  ]) await t.test(name, () => {
+    const bat = roster.wildOf('night_bat', 1, { affixes, stats: { hp: 2000, atk, matk: 0, def: 50, mdef: 50 } });
+    const b = battle({ enemies: [bat], tempo: { pattern: 'threeBeat' } });
+    assert.equal(last(b.start(), 'await').intent.drainRate, rate);
+    const { enemy, players: [lead] } = b.host.battle;
+    enemy.hp -= missing;
+    lead.skills.push(move);
+    lead.baseEva = evade ? 100 : -100;
+    if (allyHp) lead.hp = allyHp;
+    const events = b.act(b.options().find(o => o.name === move.name).index);
+    const bite = events.find(e => e.t === 'hp' && e.cause?.skill === '흡혈 이빨');
+    const amount = expected ?? Math.floor(-bite.delta * rate);
+    const heal = events.filter(e => e.t === 'hp' && e.who.side === 'enemy' && e.delta > 0);
+    assert.equal(heal[0]?.s.enemy.hp ?? enemy.hp, enemy.maxHp - missing + amount);
+    assert.deepEqual(events.filter(e => e.t === 'rule' && e.rule === 'leech').map(e => e.amount), amount ? [amount] : []);
+    assert.deepEqual(heal.map(e => e.delta), amount ? [amount] : []);
+    if (evade) assert.ok(events.some(e => e.t === 'miss' && e.why === 'evasion'));
+    if (allyHp) assert.ok(bite.amount > allyHp);
+  });
+});
+
 test('rule B still holds with every quirk and affix: the announced action is the one taken, the damage is in range', () => {
   let compared = 0;
   for (const quirk of [null, ...Object.keys(Bridge.QUIRKS)]) {

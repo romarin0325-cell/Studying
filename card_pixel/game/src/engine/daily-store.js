@@ -1,7 +1,9 @@
 import { FLOORS } from '../content/daily-rift.js';
 import { RIFT_PUZZLES } from '../content/rift-puzzles.js';
 import { DAILY_KEY as KEY, slotStorage } from '../ui/storage.js';
-import { compare, dayKey, doorsFor, puzzleGoalMet, riftPuzzlesUnlocked, specFor, validAttempt } from './daily-rift.js';
+import {
+  compare, dayKey, doorsFor, judgePuzzleGoal, puzzleBattleFacts, puzzleConditions, riftPuzzlesUnlocked, specFor, validAttempt
+} from './daily-rift.js';
 import { dailyRiftUnlocked } from './meta.js';
 import { invalid } from './rooms.js';
 import { chooseDoor, createRun } from './run.js';
@@ -54,16 +56,34 @@ function validScore(score, day, kind) {
     && Number.isSafeInteger(attempt) && attempt <= day.starts && (kind === 'official' ? attempt === 1 : attempt > 1);
 }
 
-function puzzleBest(data, puzzle) {
-  const best = data?.puzzleBests?.[puzzle.id];
+function storedPuzzleScore(data, puzzle, ending) {
+  // The former single-goal scores lack fielding and heirloom attribution. None prove either new goal.
+  const best = data?.puzzleBests?.[puzzle.id]?.[ending.id];
   if (!['win', 'lose'].includes(best?.outcome) || best.floor !== puzzle.floor
     || !validCheckpoint(best, { loanIds: puzzle.rentals })) return null;
-  return { ...best, goalMet: puzzleGoalMet(puzzle.goal, best) };
+  const validIds = ids => Array.isArray(ids) && new Set(ids).size === ids.length
+    && Array.from(ids).every(id => puzzle.rentals.includes(id));
+  const { foughtIds, fallenIds, livingIds, heirloomUses } = best;
+  if (!validIds(foughtIds) || foughtIds.length > 3 || !validIds(fallenIds)
+    || fallenIds.length + livingIds.length !== puzzle.rentals.length || fallenIds.some(id => livingIds.includes(id))
+    || !Array.isArray(heirloomUses) || Array.from(heirloomUses).some(use =>
+      !foughtIds.includes(use?.by) || use.by === use.from || !fallenIds.includes(use.from))) return null;
+  return best;
+}
+
+function puzzleBests(data) {
+  return Object.fromEntries(RIFT_PUZZLES.flatMap(puzzle => {
+    const scores = puzzle.endings.flatMap(ending => {
+      const score = storedPuzzleScore(data, puzzle, ending);
+      return score ? [[ending.id, score]] : [];
+    });
+    return scores.length ? [[puzzle.id, Object.fromEntries(scores)]] : [];
+  }));
 }
 
 function comparePuzzle(a, b) {
   return Number(a.goalMet) - Number(b.goalMet) || Number(a.outcome === 'win') - Number(b.outcome === 'win')
-    || a.livingIds.length - b.livingIds.length || b.turns - a.turns;
+    || a.survivors - b.survivors || b.turns - a.turns;
 }
 
 export function restoreDailyData(data, { core, roster }) {
@@ -173,13 +193,20 @@ export function create(storage, { core, roster }) {
     puzzles(profile) {
       if (!riftPuzzlesUnlocked(profile)) return [];
       const data = read();
-      return RIFT_PUZZLES.map(puzzle => ({ ...puzzle, best: puzzleBest(data, puzzle) }));
+      return RIFT_PUZZLES.map(puzzle => ({
+        ...puzzle,
+        endings: puzzle.endings.map(ending => {
+          const score = storedPuzzleScore(data, puzzle, ending);
+          return { ...ending, conditions: puzzleConditions(ending.goal), best: score && judgePuzzleGoal(ending.goal, score) };
+        })
+      }));
     },
 
-    startPuzzle({ profile, puzzleId }) {
+    startPuzzle({ profile, puzzleId, endingId }) {
       if (!riftPuzzlesUnlocked(profile)) return invalid('locked');
       const puzzle = RIFT_PUZZLES.find(item => item.id === puzzleId);
-      if (!puzzle) return invalid('invalid_puzzle');
+      const ending = puzzle?.endings.find(item => item.id === endingId);
+      if (!ending) return invalid('invalid_puzzle');
       try {
         const spec = specFor(puzzle.spec, roster);
         if (puzzle.rentals.some(id => !spec.loanIds.includes(id))) return invalid('invalid_puzzle');
@@ -191,33 +218,36 @@ export function create(storage, { core, roster }) {
         run.bench = puzzle.rentals.slice();
         // Offset the boss seed to match the fixed entrance without counting earlier battles.
         run.seed += puzzle.setup?.seedOffset ?? 0;
-        run.relics = puzzle.setup?.relics.slice() ?? [];
+        run.relics = puzzle.setup?.relics?.slice() ?? [];
         run.blessings = { ...puzzle.setup?.blessings };
         if (!chooseDoor(run, 0).ok) return invalid('invalid_puzzle');
-        puzzlesInPlay.set(run, puzzle);
-        return { ok: true, run, puzzle };
+        puzzlesInPlay.set(run, { puzzle, ending });
+        return { ok: true, run, puzzle, ending: { ...ending, conditions: puzzleConditions(ending.goal) } };
       } catch {
         return invalid('invalid_puzzle');
       }
     },
 
     finishPuzzle(run) {
-      const puzzle = puzzlesInPlay.get(run);
-      if (!puzzle) return invalid('invalid_puzzle');
+      const attempt = puzzlesInPlay.get(run);
+      if (!attempt) return invalid('invalid_puzzle');
+      const { puzzle, ending } = attempt;
       if (run.phase !== 'done' || run.floor !== puzzle.floor || !['win', 'lose'].includes(run.result)) {
         return invalid('run_not_done');
       }
       const checkpoint = checkpointFor(run);
-      if (!checkpoint) return invalid('invalid_puzzle');
-      const score = { ...checkpoint, outcome: run.result };
-      const result = { ...score, goalMet: puzzleGoalMet(puzzle.goal, score) };
+      const facts = puzzleBattleFacts(run);
+      if (!checkpoint || !facts) return invalid('invalid_puzzle');
+      const score = { ...checkpoint, ...facts, outcome: run.result };
+      const result = judgePuzzleGoal(ending.goal, score);
       const data = read();
       if (!data) return { ...invalid('invalid_save'), score: result };
-      const best = puzzleBest(data, puzzle);
-      if (!best || comparePuzzle(result, best) > 0) {
+      const best = storedPuzzleScore(data, puzzle, ending);
+      if (!best || comparePuzzle(result, judgePuzzleGoal(ending.goal, best)) > 0) {
         // Keep this map in the existing backup slot, independently of daily attempts.
-        const puzzleBests = dictionary(data.puzzleBests) ? data.puzzleBests : {};
-        if (!write({ ...data, puzzleBests: { ...puzzleBests, [puzzle.id]: score } })) {
+        const bests = puzzleBests(data);
+        bests[puzzle.id] = { ...bests[puzzle.id], [ending.id]: score };
+        if (!write({ ...data, puzzleBests: bests })) {
           return { ...invalid('storage_failed'), score: result };
         }
       }

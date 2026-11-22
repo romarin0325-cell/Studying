@@ -11,6 +11,7 @@
 // Use --entry-easy-audit for the same seeds with a fresh profile and the first-departure rules.
 // Use --relic-audit for paired before/after runs on both floor-2 paths.
 // Use --promise-audit for 64 paired Ember Journey seeds that offer the floor-3 promise.
+// Use --beetle-audit --all for paired first-shell decisions with a usable defense and no killing blow.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -747,6 +748,62 @@ function measureRuns() {
   console.log(summaries.join('\n'));
 }
 
+function measureBeetles() {
+  console.log(`Beetle shell · ${runs} seeds per dungeon · first eligible decision per run`);
+  console.log('If the bot would attack and cannot finish the beetle, use the best available physical defense on the shell. Resume the bot policy for the ram and later turns.');
+  console.log('| Dungeon | Pairs | Battle wins (bot → defend) | Turns (bot → defend) | Deaths (bot → defend) |');
+  console.log('| --- | ---: | ---: | ---: | ---: |');
+  for (const id of dungeons.filter(id => DUNGEONS[id].layout !== 'intro' && DUNGEONS[id].wild.includes('emerald_beetle'))) {
+    const matchesRoom = (run, branch) => branch && run.floor === branch.floor && run.room.index === branch.room;
+    const sameDecision = (wait, branch) => wait.s.turn === branch.turn && wait.s.enemy.idx === branch.enemy;
+    const tally = { bot: [], defend: [] };
+    for (let i = 1; i <= runs; i++) {
+      const seed = seedOffset + i * 7919;
+      let candidate, branch;
+      const record = policy => (run, state, summary, result) => {
+        if (matchesRoom(run, branch)) tally[policy].push({ seed, ...branch, ally: run.room.party[branch.ally],
+          win: Number(result.win), turns: summary.turns,
+          deaths: summary.survivors.filter((alive, index) => !alive && state.allies[index]).length });
+      };
+      playRun(id, seed, {
+        actionOverride(run, wait, bridge) {
+          candidate = null;
+          if (branch || wait.s.enemy.form !== 'wild_emerald_beetle' || wait.intent.localTurn !== 1) return;
+          const counter = wait.intent.conditions.find(c => c.kind === 'enemyHitThisTurn');
+          if (counter?.met !== null || counter.whenMet <= counter.otherwise) return;
+          const usable = bridge.options().filter(option => option.usable);
+          if (usable.some(option => option.preview?.kill)) return;
+          const defense = usable.filter(option => ['guard', 'damage_half', 'barrier'].includes(option.defense?.kind))
+            .sort((a, b) => b.defense.reduction - a.defense.reduction || a.cost - b.cost)[0];
+          if (defense) candidate = { floor: run.floor, room: run.room.index, turn: wait.s.turn,
+            enemy: wait.s.enemy.idx, ally: wait.s.cur, index: defense.index, defense: defense.name };
+        },
+        trace(run, wait, move) {
+          if (candidate && move.preview?.dmg > 0) branch = { ...candidate, attack: move.name };
+        },
+        onBattle: record('bot')
+      });
+      if (!branch) continue;
+      playRun(id, seed, {
+        actionOverride(run, wait) {
+          if (matchesRoom(run, branch) && sameDecision(wait, branch)) return branch.index;
+        },
+        onBattle: record('defend')
+      });
+    }
+    const totals = key => ['bot', 'defend'].map(policy => tally[policy].reduce((sum, row) => sum + row[key], 0)).join(' → ');
+    if (tally.bot.length !== tally.defend.length) throw new Error('Unpaired beetle battles: ' + id);
+    console.log(`| ${id} | ${tally.bot.length} | ${totals('win')} | ${totals('turns')} | ${totals('deaths')} |`);
+    const saves = tally.defend.flatMap((row, index) => {
+      const bot = tally.bot[index];
+      return row.win > bot.win || (row.win === bot.win && row.deaths < bot.deaths)
+        ? [`${row.seed}/F${row.floor} T${row.turn} (${row.ally}, ${row.attack} → ${row.defense}): ` +
+          `wins ${bot.win} → ${row.win}, deaths ${bot.deaths} → ${row.deaths}`] : [];
+    });
+    if (saves.length) console.log(`  Better outcomes: ${saves.length} · ${saves.slice(0, 3).join('; ')}`);
+  }
+}
+
 function measureIntents() {
   const cases = [
     ['twilight_cathedral', 8207928, [7]],
@@ -801,6 +858,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   else if (flag('--entry-easy-audit')) measureEasy(true);
   else if (flag('--relic-audit')) measureRelics();
   else if (flag('--promise-audit')) measurePromises();
+  else if (flag('--beetle-audit')) measureBeetles();
   else if (dailyFrom !== undefined) measureDaily();
   else if (flag('--first-main')) {
     if (difficulty !== 'normal') throw new RangeError('First main audit uses normal difficulty');

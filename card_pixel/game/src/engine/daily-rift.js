@@ -22,11 +22,52 @@ export function riftPuzzlesUnlocked(profile) {
   return !!profile?.records?.clears && hasCleared(profile, 'creation_tower');
 }
 
-export function puzzleGoalMet(goal, score) {
-  return score.outcome === 'win'
-    && score.livingIds.length >= (goal.survivors ?? 0)
-    && score.turns <= (goal.maxTurns ?? Infinity)
-    && score.heirloomsUsed >= (goal.heirloomUses ?? 0);
+export function puzzleConditions(goal) {
+  const conditions = [{ kind: 'win' }];
+  for (const target of goal.survive ?? []) conditions.push({ kind: 'survive', target });
+  for (const kind of ['fall', 'heirloomUsed', 'survivors', 'maxTurns']) {
+    if (goal[kind] !== undefined) conditions.push({ kind, target: goal[kind] });
+  }
+  return conditions;
+}
+
+export function puzzleBattleFacts(run) {
+  const battle = run.chronicle?.findLast(record => record.floor === run.floor && record.roomType === 'boss'
+    && record.result === run.result && !record.retry);
+  if (!battle?.fought) return null;
+  return {
+    foughtIds: battle.fought.slice(),
+    fallenIds: battle.fallen.map(({ id }) => id),
+    heirloomUses: battle.used.map(({ by, from }) => ({ by, from }))
+  };
+}
+
+export function judgePuzzleGoal(goal, score) {
+  const { livingIds, foughtIds, fallenIds, heirloomUses, outcome, turns } = score;
+  const survivors = foughtIds.filter(id => livingIds.includes(id)).length;
+  const status = id => fallenIds.includes(id) ? 'fallen'
+    : foughtIds.includes(id) && livingIds.includes(id) ? 'alive' : 'didNotFight';
+  const conditions = puzzleConditions(goal).map(condition => {
+    const { kind, target } = condition;
+    switch (kind) {
+      case 'win':
+        return { ...condition, met: outcome === 'win', value: outcome };
+      case 'survive':
+      case 'fall': {
+        const value = status(target);
+        return { ...condition, met: value === (kind === 'survive' ? 'alive' : 'fallen'), value };
+      }
+      case 'heirloomUsed': {
+        const value = [...new Set(heirloomUses.filter(use => use.from === target && use.by !== target).map(use => use.by))];
+        return { ...condition, met: value.length > 0, value };
+      }
+      case 'survivors':
+        return { ...condition, met: survivors >= target, value: survivors };
+      case 'maxTurns':
+        return { ...condition, met: turns <= target, value: turns };
+    }
+  });
+  return { ...score, survivors, conditions, goalMet: conditions.every(condition => condition.met) };
 }
 
 function dateIndex(key) {

@@ -112,6 +112,13 @@ export function ratesView(run, kind = 'draw') {
     }));
 }
 
+export function springDrawChance(run, id) {
+  if (!run.pool.includes(id) || (!usesRepeatDraws(run) && !canJoin(run, id))) return 0;
+  const grade = gradeOf(runRoster(run).card(id).grade);
+  const { percent, count } = ratesView(run).find(rate => rate.group === grade);
+  return percent / count;
+}
+
 export function drawKind(run, id) {
   if (run.fallen.includes(id) || run.released.includes(id)) return 'memory';
   return run.bench.includes(id) ? 'boost' : 'join';

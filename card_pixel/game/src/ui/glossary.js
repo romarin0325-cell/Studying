@@ -1,5 +1,6 @@
 import { DUNGEONS } from '../content/dungeons.js';
 import { resumePoint } from '../engine/resume.js';
+import { josa } from './text.js';
 
 export const RESUME = {
   battle: {
@@ -41,11 +42,36 @@ export const EPISODE = {
   saveFailed: '읽은 상태를 저장하지 못했습니다.'
 };
 
+const puzzleCompanionStatus = value => ({ alive: '생존', fallen: '쓰러짐', didNotFight: '싸우지 않음' })[value];
+
 export const RIFT_PUZZLE = {
   title: '균열 퍼즐',
   met: '목표 달성',
   missed: '목표 미달성',
-  list: '퍼즐 목록'
+  list: '퍼즐 목록',
+  choose: '결말 고르기',
+  other: title => `다른 결말 · ${title}`,
+  conditionMet: '달성',
+  conditionMissed: '미달',
+  noRecord: '기록 없음',
+  best: '최고 기록',
+  survivors: count => `출전 생존 ${count}명`,
+  conditions: {
+    win: () => '보스 격파',
+    survive: (id, name) => `${josa(name(id), '이/가')} 직접 싸우고 생존`,
+    fall: (id, name) => `${josa(name(id), '이/가')} 쓰러짐`,
+    heirloomUsed: (id, name) => `다른 동료가 ${name(id)}의 유품 사용`,
+    survivors: count => `출전 생존 ${count}명 이상`,
+    maxTurns: count => `${count}턴 이내`
+  },
+  values: {
+    win: value => value === 'win' ? '격파' : '실패',
+    survive: puzzleCompanionStatus,
+    fall: puzzleCompanionStatus,
+    heirloomUsed: (ids, name) => ids.length ? ids.map(name).join(', ') : '사용 안 함',
+    survivors: count => `${count}명`,
+    maxTurns: count => `${count}턴`
+  }
 };
 
 export const TERMS = {

@@ -37,6 +37,7 @@ const strip = html => String(html).replace(/<[^>]*>/g, '');
 
 const FIELD_POOL = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'valentine', 'arena', 'reaper_realm', 'gale'];
 const DEFENSE_BUFFS = ['guard', 'barrier', 'magic_guard', 'damage_half', 'evasion'];
+const LEECH_AFFIX_RATE = 0.5;
 const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
 const sameSkill = (a, b) => a.name === b.name && a.type === b.type;
 
@@ -83,8 +84,8 @@ function patternActions(enemy, pattern, openingIntent) {
   const skill = enemy.skills.find(s => isAttack(s) && (!openingIntent || s.type === openingIntent));
   const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic;
   if (pattern === 'introFixed') return openingIntent ? [signature, basic, THREE_BEAT[2]] : [signature];
-  return (wild?.beats ?? THREE_BEAT).map(beat => !beat.signature ? beat : skill
-    ? { ...signature, power: signature.power * beat.power } : basic);
+  return (wild?.beats ?? THREE_BEAT).map(({ signature: usesSignature, ...beat }) => !usesSignature ? beat : skill
+    ? { ...signature, ...beat, power: signature.power * beat.power } : basic);
 }
 
 const lessonTideAfter = (lesson, turn) => lesson?.tideAfter && turn === lesson.steps.length + 1 ? lesson.tideAfter : null;
@@ -93,12 +94,12 @@ export function enemyBeats(core, enemy, pattern, openingIntent, lesson) {
   if (pattern !== 'bossScript') {
     const selected = enemyPattern(enemy, pattern);
     const wild = wildBeatPattern(selected);
-    return patternActions(enemy, selected, openingIntent).map(({ name, type, power, vulnerable, isChargeStart }, index) => {
+    return patternActions(enemy, selected, openingIntent).map(({ name, type, power, vulnerable, hitPower, isChargeStart }, index) => {
       const turn = index + 1;
       const action = lesson?.steps[index] ?? (pattern === 'tide' ? lessonTideAfter(lesson, turn) : null);
       return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : {
         turn, name, type: isChargeStart ? 'charge' : type, power,
-        ...(wild && { pattern: selected }), ...(wild && vulnerable && { vulnerable })
+        ...(wild && { pattern: selected }), ...(wild && vulnerable && { vulnerable }), ...(hitPower && { hitPower })
       };
     });
   }
@@ -702,10 +703,10 @@ export function create(core, opts) {
     const turn = localTurn(enemy);
     if (lessonStep(turn)?.rule === 'charged_hit' || wildBeat(enemy, turn)?.chargeReset) enemy.isCharging = false;
     applyDefenseProtocol(enemy);
-    if (hasAffix(enemy, 'leech') && enemy.hp > 0) {           // H leech: heal half of what it dealt this turn
+    // The bite already applied the stronger rate once, to the bite's actual HP damage.
+    if (!B.ctx.at(-1)?.skill?.drainRate && hasAffix(enemy, 'leech') && enemy.hp > 0) {
       const dealt = B.turnStartHp - players().reduce((n, p) => n + Math.max(0, p.hp), 0);
-      const heal = Math.min(enemy.maxHp - enemy.hp, Math.floor(Math.max(0, dealt) * 0.5));
-      if (heal > 0) { push({ t: 'rule', rule: 'leech', who: enemyRef(), amount: heal }); asRule('leech', () => { enemy.hp += heal; }); }
+      healFromDrain(enemy, dealt, LEECH_AFFIX_RATE);
     }
     B.closeEnemyTurn();
     return go();
@@ -718,9 +719,12 @@ export function create(core, opts) {
     else action = decide(enemy);
     B.intentCache = null;
     const top = B.ctx[B.ctx.length - 1];
-    if (top && top.enemyTurn) top.skill = action;
-    if (action.chargeSkillId) enemy.chargeSkillId = action.chargeSkillId;
     const target = currentPlayer();
+    if (top?.enemyTurn) {
+      top.skill = action;
+      if (action.drainRate) top.targetHp = target.hp;
+    }
+    if (action.chargeSkillId) enemy.chargeSkillId = action.chargeSkillId;
     const rule = actionRule(action);
     if (rule && rule !== 'defense_protocol') B.enemyAction = { action, rule, enemy, target, before: ruleValue(rule, enemy, target) };
     if (action.type === 'rest') return action;
@@ -738,8 +742,23 @@ export function create(core, opts) {
     });
     return action;
   };
+  function effectiveDrainRate(action, enemy) {
+    return Math.max(action.drainRate, hasAffix(enemy, 'leech') ? LEECH_AFFIX_RATE : 0);
+  }
+  function healFromDrain(enemy, dealt, rate) {
+    const amount = Math.min(enemy.maxHp - enemy.hp, Math.floor(dealt * rate));
+    if (!(amount > 0) || enemy.hp <= 0) return 0;
+    push({ t: 'rule', rule: 'leech', who: enemyRef(), amount });
+    asRule('leech', () => { enemy.hp += amount; });
+    return amount;
+  }
   B.onEnemyEffects = function (source, target, skill, go) {
     const result = go();
+    const turn = B.ctx.at(-1);
+    if (skill.drainRate && turn?.enemyTurn && turn.skill === skill && source === host.battle.enemy) {
+      const amount = healFromDrain(source, turn.targetHp - Math.max(0, target.hp), effectiveDrainRate(skill, source));
+      if (amount) host.log(`흡혈 +${amount.toLocaleString('en-US')}`);
+    }
     if (B.enemyAction?.action !== skill || source !== host.battle.enemy) return result;
     B.enemyAction.landed = true;
     if (skill.drainFlat) target.mp = Math.max(0, target.mp - skill.drainFlat);
@@ -1013,6 +1032,7 @@ export function create(core, opts) {
       ...(a.bonus && { bonus: a.bonus, stat: a.stat }),
       ...(a.reduction && { reduction: a.reduction }),
       ...(a.vulnerable && { vulnerable: a.vulnerable }),
+      ...(a.drainRate && !stunned && { drainRate: effectiveDrainRate(a, enemy) }),
       ...(wildOpening && { vulnerable: wildOpening.vulnerable, wildOpening: true }),
       type: kind, ult: salience === 'boss', ...(attack && { power: a.val ?? 1, dmg: range, lethal, lethalText, extra }),
       ...(!attack && extra.length && { effects: extra })
@@ -1047,7 +1067,9 @@ export function create(core, opts) {
     const charging = !enemy.buffs.stun && current?.isChargeStart || enemy.isCharging && !current?.chargeReset;
     const next = lessonAction(local + 1, charging) ?? wildBeat(enemy, local + 1);
     return { name: next.name, kind: next.isChargeStart ? 'charge' : next.type,
-      power: next.power ?? next.val, inTurns: 1, ...(next.vulnerable && { vulnerable: next.vulnerable }) };
+      power: next.power ?? next.val, inTurns: 1, ...(next.vulnerable && { vulnerable: next.vulnerable }),
+      ...(next.drainRate && { drainRate: effectiveDrainRate(next, enemy) }),
+      ...(next.hitPower && next.vulnerable && { hitPower: next.hitPower }) };
   }
   function countdown(futureOnly = false) {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);

@@ -6,10 +6,12 @@ import { EPISODES } from '../../content/episodes.js';
 import { RELICS } from '../../content/relics.js';
 import { episodePages, episodeState } from '../../engine/episodes.js';
 import { GRADE } from '../../engine/roster.js';
-import { appearanceRegions, knownCompanions, missionsView, unrecruitedCompanions } from '../../engine/meta.js';
+import { appearanceRegions, companionSpringRates, knownCompanions, missionsView, unrecruitedCompanions } from '../../engine/meta.js';
 import { EPISODE, TERMS } from '../glossary.js';
 import { outcomeText, storyLine } from '../story-lines.js';
-import { josa } from '../text.js';
+import { josa, keepSeparators } from '../text.js';
+
+const springPercent = percent => percent.toFixed(1) + '%';
 
 // `write` is the session store's saveEpisodeFlags. It must be the store this tab already loaded: a second store
 // would bump the revision behind the tab's back and make the tab look stale to itself.
@@ -125,9 +127,14 @@ export function companionSheet({ core, roster, widgets, sheets, profile, id, ope
   const regions = appearanceRegions(roster, id);
   const met = !recruit && knownCompanions(profile).has(id);
   const unlocked = regions.filter(region => profile.unlockedDungeons.includes(region));
-  const destination = met && openDestination && (unlocked.find(region => !profile.seals[region]?.includes(id)) ?? unlocked[0] ?? regions[0]);
-  const departureHint = destination && (!unlocked.length ? '지역 해금 필요'
+  const [best, ...otherRates] = met ? companionSpringRates(profile, roster, id).filter(rate => rate.unlocked && rate.percent > 0) : [];
+  const destination = met && openDestination && (best?.dungeonId
+    ?? unlocked.find(region => !profile.seals[region]?.includes(id)) ?? unlocked[0] ?? regions[0]);
+  const departureHint = destination && !best && (!unlocked.length ? '지역 해금 필요'
     : profile.seals[destination]?.includes(id) ? '준비에서 출현 제외 해제 필요' : '');
+  const direction = destination && josa(DUNGEONS[destination].name, '으로/로');
+  const departureLabel = direction && (best ? `${direction} · ◆1 칸 ${springPercent(best.percent)}` : `${direction} 출발`);
+  const otherRegions = otherRates.map(rate => `${DUNGEONS[rate.dungeonId].name} ${springPercent(rate.percent)}`).join(' · ');
   const mission = met && openMission && missionsView(profile, roster).claimable.find(period => period.candidates.includes(id));
   const skills = character.skills.map(skill => {
     const body = skillText(core.SkillDisplay.body(skill, { entity: character }));
@@ -140,8 +147,10 @@ export function companionSheet({ core, roster, widgets, sheets, profile, id, ope
     <div class="meta-sheet meta-companion">
       <div class="meta-companion-art">${sprite(id)}</div>
       <p>나오는 지역: ${esc(regions.map(region => DUNGEONS[region].name).join(' · ') || '지역 기본 명단에 없음')}</p>
-      ${destination || mission ? `<div class="meta-companion-links">
-        ${destination ? `<button class="btn" data-companion-depart="${destination}">${esc(josa(DUNGEONS[destination].name, '으로/로'))} 출발</button>` : ''}
+      ${destination || best || mission ? `<div class="meta-companion-links">
+        ${destination ? `<button class="btn" data-companion-depart="${destination}"><span>${keepSeparators(esc(departureLabel))}</span></button>`
+          : best ? `<small>${keepSeparators(esc(`${DUNGEONS[best.dungeonId].name} · ◆1 칸 ${springPercent(best.percent)}`))}</small>` : ''}
+        ${otherRegions ? `<small class="meta-companion-rates">${keepSeparators(esc(otherRegions))}</small>` : ''}
         ${departureHint ? `<small>${departureHint}</small>` : ''}
         ${mission ? `<button class="btn" id="meta-companion-mission">${mission.kind === 'weekly' ? '주간' : '월간'} 영입 임무</button>` : ''}
       </div>` : ''}

@@ -3,7 +3,7 @@ import { riftPuzzlesUnlocked } from '../../engine/daily-rift.js';
 import { enterRun } from '../run/index.js';
 import {
   dailyResultScreen, dailyResultTitle, mountPuzzleFormation, openDailyHistory, openDailyPreparation, openEarlierRift,
-  openRiftPuzzles, puzzleResultScreen, puzzleResultTitle, riftPuzzleEntry, shortRiftDate
+  openPuzzleEndings, openRiftPuzzles, puzzleResultScreen, puzzleResultTitle, riftPuzzleEntry, shortRiftDate
 } from '../screens/daily-rift.js';
 
 export function createDailyNavigation({
@@ -116,7 +116,9 @@ export function createDailyNavigation({
 
   function openPuzzles() {
     const puzzles = dailyStore.puzzles(currentProfile());
-    if (puzzles.length) openRiftPuzzles(puzzles, { sheets, start: startPuzzle });
+    if (puzzles.length) openRiftPuzzles(puzzles, { sheets, choose: puzzle => {
+      openPuzzleEndings(puzzle, { sheets, widgets, start: startPuzzle, list: openPuzzles });
+    } });
   }
 
   function returnToPuzzles() {
@@ -126,27 +128,28 @@ export function createDailyNavigation({
     openPuzzles();
   }
 
-  function startPuzzle(puzzleId) {
-    const result = dailyStore.startPuzzle({ profile: currentProfile(), puzzleId });
+  function startPuzzle(puzzleId, endingId) {
+    const result = dailyStore.startPuzzle({ profile: currentProfile(), puzzleId, endingId });
     if (!result.ok) return sessionNotice('퍼즐을 시작하지 못했습니다.');
-    const { puzzle, run } = result;
+    const { puzzle, ending, run } = result;
     dailyRun = run;
     setReview(null);
     sheets.closeSheet();
     audio.unlockAudio();
-    setReview(enterRun(run, { ...dailyHost, save() {}, finish: current => finishPuzzle(current, puzzle) }) || null);
-    mountPuzzleFormation(puzzle, returnToPuzzles);
+    setReview(enterRun(run, { ...dailyHost, save() {}, finish: current => finishPuzzle(current, puzzle, ending) }) || null);
+    mountPuzzleFormation(puzzle, ending, { widgets, exit: returnToPuzzles });
   }
 
-  function finishPuzzle(run, puzzle) {
+  function finishPuzzle(run, puzzle, ending) {
     const result = dailyStore.finishPuzzle(run);
     if (!result.score) return;
     dailyRun = null;
     setReview(null);
     const { score } = result;
     const node = page('daily-result', { title: puzzleResultTitle(score), track: score.goalMet ? 'victory' : 'defeat' });
-    puzzleResultScreen(node, { puzzle, score, saved: result.ok }, {
-      widgets, again: () => startPuzzle(puzzle.id), list: returnToPuzzles, hub: showHub, retry: () => finishPuzzle(run, puzzle)
+    puzzleResultScreen(node, { puzzle, ending, score, saved: result.ok }, {
+      widgets, again: () => startPuzzle(puzzle.id, ending.id), list: returnToPuzzles, hub: showHub,
+      retry: () => finishPuzzle(run, puzzle, ending)
     });
   }
 

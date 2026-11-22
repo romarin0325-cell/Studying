@@ -13,7 +13,7 @@ import * as Save from '../src/engine/save.js';
 import { RIFT_PUZZLES } from '../src/content/rift-puzzles.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 import { dailyTotals, playDaily } from '../tools/sim.mjs';
-import { playPuzzleFight, puzzleSolutions } from './screens/puzzles.mjs';
+import { playPuzzleFight } from './screens/puzzles.mjs';
 
 process.env.TZ = 'Asia/Tokyo';
 const repo = fileURLToPath(new URL('../../../', import.meta.url));
@@ -205,49 +205,96 @@ test('swapping the arena boss order changes the real fight to a 46-turn win with
   assert.equal(won.heirlooms.trauma.name, '종언의예고');
 });
 
-const puzzleOutcomes = {
-  'arena-relay': [['lose', 9, 2, 1], ['win', 24, 3, 1]],
-  'ember-clock': [['win', 17, 3, 2], ['win', 11, 3, 2]],
-  'trench-heirlooms': [['lose', 13, 2, 2], ['win', 18, 3, 2]]
+const puzzleCounts = {
+  'arena-relay': { wins: 21, save: 4, heirloom: 7 },
+  'ember-clock': { wins: 26, save: 2, heirloom: 2 },
+  'trench-heirlooms': { wins: 6, save: 4, heirloom: 2 }
 };
 
+function startPuzzle(store, puzzle, endingId, profile = puzzleProfile()) {
+  return ok(store.startPuzzle({ profile, puzzleId: puzzle.id, endingId })).run;
+}
+
 for (const puzzle of RIFT_PUZZLES) {
-  test(`puzzle ${puzzle.id} fails with the default and meets the goal with the verified formation`, () => {
-    const profile = puzzleProfile();
+  test(`puzzle ${puzzle.id}: all 60 formations have distinct winning orders for both endings`, () => {
+    assert.equal(puzzle.endings.length, 2);
+    const [save, heirloom] = puzzle.endings;
+    assert.deepEqual([save.id, heirloom.id], ['save', 'heirloom']);
+    assert.deepEqual(save.goal.survive, [heirloom.goal.fall]);
+    assert.equal(heirloom.goal.fall, heirloom.goal.heirloomUsed);
+    const orders = puzzle.rentals.flatMap(first => puzzle.rentals.filter(id => id !== first)
+      .flatMap(second => puzzle.rentals.filter(id => id !== first && id !== second).map(third => [first, second, third])));
+    assert.equal(orders.length, 60);
     const store = DailyStore.create(memoryStorage(), deps);
-    function play(order) {
-      const { run } = ok(store.startPuzzle({ profile, puzzleId: puzzle.id }));
+    const counts = { wins: 0, save: 0, heirloom: 0 };
+    for (const [index, order] of orders.entries()) {
+      const run = startPuzzle(store, puzzle, save.id);
       assert.deepEqual([run.floor, run.room.type, run.room.status, run.stats.turns], [7, 'boss', 'order', 0]);
       assert.deepEqual(run.bench, puzzle.rentals);
       assert.deepEqual(Run.defaultParty(run), puzzle.rentals.slice(0, 3));
-      const { summary } = playPuzzleFight(run, core, order);
+      playPuzzleFight(run, core, index === 0 ? undefined : order);
       const { score } = ok(store.finishPuzzle(run));
-      return { summary, score };
+      const other = Daily.judgePuzzleGoal(heirloom.goal, score);
+      assert.ok(!(score.goalMet && other.goalMet), order.join(', '));
+      if (index === 0) assert.deepEqual([score.goalMet, other.goalMet], [false, false]);
+      if (score.outcome === 'win') counts.wins++;
+      if (score.goalMet) counts.save++;
+      if (other.goalMet) counts.heirloom++;
     }
-    const original = play().score;
-    const { score, summary } = play(puzzleSolutions[puzzle.id]);
-    assert.equal(original.goalMet, false);
-    assert.equal(score.goalMet, true);
-    const stats = ({ outcome, turns, livingIds, heirloomsUsed }) => [outcome, turns, livingIds.length, heirloomsUsed];
-    assert.deepEqual([stats(original), stats(score)], puzzleOutcomes[puzzle.id]);
-    play();
-    assert.deepEqual(store.puzzles(profile).find(entry => entry.id === puzzle.id).best, score);
-    if (puzzle.id === 'arena-relay') {
-      assert.ok(summary.heirloomsGained.some(({ from, to, name }) =>
-        from === 'time_ruler' && to === 'trauma' && name === '종언의예고'));
-    }
+    assert.deepEqual(counts, puzzleCounts[puzzle.id]);
+    assert.ok(counts.save >= 2 && counts.heirloom >= 2);
   });
 }
+
+test('puzzle judgment excludes reserves and distinguishes receiving an heirloom from using it', () => {
+  const [arena, ember] = RIFT_PUZZLES;
+  const store = DailyStore.create(memoryStorage(), deps);
+  const reserve = startPuzzle(store, arena, 'save');
+  playPuzzleFight(reserve, core, ['trauma', 'time_ruler', 'entropy']);
+  const { score: withReserve } = ok(store.finishPuzzle(reserve));
+  assert.equal(withReserve.outcome, 'win');
+  assert.ok(withReserve.livingIds.includes('hellhound'));
+  assert.deepEqual(withReserve.conditions[1], { kind: 'survive', target: 'hellhound', met: false, value: 'didNotFight' });
+  const activeCount = Daily.judgePuzzleGoal({ survivors: 2 }, withReserve);
+  assert.deepEqual(activeCount.conditions[1], { kind: 'survivors', target: 2, met: false, value: 1 });
+  assert.equal(activeCount.goalMet, false);
+
+  const order = ['cinderella', 'forget_me_not', 'pudding_princess'];
+  const receive = startPuzzle(store, ember, 'heirloom');
+  playPuzzleFight(receive, core, order, option => option.heirFrom !== 'cinderella');
+  assert.ok(receive.chronicle.at(-1).gained.some(use => use.from === 'cinderella' && use.to === 'forget_me_not'));
+  const { score: received } = ok(store.finishPuzzle(receive));
+  assert.deepEqual(received.conditions, [
+    { kind: 'win', met: true, value: 'win' },
+    { kind: 'fall', target: 'cinderella', met: true, value: 'fallen' },
+    { kind: 'heirloomUsed', target: 'cinderella', met: false, value: [] },
+    { kind: 'maxTurns', target: 12, met: true, value: 11 }
+  ]);
+  assert.equal(received.goalMet, false);
+
+  const use = startPuzzle(store, ember, 'heirloom');
+  playPuzzleFight(use, core, order);
+  const { score: used } = ok(store.finishPuzzle(use));
+  assert.deepEqual(used.conditions[2], { kind: 'heirloomUsed', target: 'cinderella', met: true, value: ['forget_me_not'] });
+  assert.equal(used.goalMet, true);
+  assert.deepEqual(store.puzzles(puzzleProfile())[1].endings[1].best, used);
+  assert.equal(Daily.judgePuzzleGoal(ember.endings[1].goal, { ...used, outcome: 'lose' }).goalMet, false);
+});
 
 test('puzzle bests round-trip separately from the official rift, stamps and the active expedition', () => {
   const storage = memoryStorage();
   const store = DailyStore.create(storage, deps);
-  const puzzleId = RIFT_PUZZLES[0].id;
+  const puzzle = RIFT_PUZZLES[0];
+  const puzzleId = puzzle.id;
+  const [save, heirloom] = puzzle.endings;
   const beforeTower = unlockedProfile();
   beforeTower.ui.endingSeen = true;
   assert.deepEqual(store.puzzles(beforeTower), []);
-  reason(store.startPuzzle({ profile: beforeTower, puzzleId }), 'locked');
+  reason(store.startPuzzle({ profile: beforeTower, puzzleId, endingId: save.id }), 'locked');
   const profile = puzzleProfile();
+  const profileBefore = structuredClone(profile);
+  reason(store.startPuzzle({ profile, puzzleId }), 'invalid_puzzle');
+  reason(store.startPuzzle({ profile, puzzleId, endingId: 'other' }), 'invalid_puzzle');
   const session = Save.createSaveStore(storage, deps);
   const main = Run.createRun({ ...deps, dungeonId: 'ember_volcano', seed: 7 });
   session.save({ profile, run: main });
@@ -261,11 +308,11 @@ test('puzzle bests round-trip separately from the official rift, stamps and the 
   const history = store.history();
   assert.equal(history.rows[0].official.outcome, 'win');
   assert.equal(store.puzzles(profile).length, 3);
-  assert.ok(store.puzzles(profile).every(puzzle => puzzle.best === null));
-  const { run } = ok(store.startPuzzle({ profile, puzzleId }));
+  assert.ok(store.puzzles(profile).every(puzzle => puzzle.endings.every(ending => ending.best === null)));
+  const run = startPuzzle(store, puzzle, heirloom.id, profile);
   reason(store.finishPuzzle(run), 'run_not_done');
   reason(store.save(run), 'invalid_save');
-  playPuzzleFight(run, core, puzzleSolutions[puzzleId]);
+  playPuzzleFight(run, core, ['hellhound', 'time_ruler', 'trauma']);
   reason(store.finish(run), 'invalid_save');
   assert.equal(storage.getItem(KEY), before);
   assert.equal(Meta.creditMissions(profile, run), profile);
@@ -273,25 +320,70 @@ test('puzzle bests round-trip separately from the official rift, stamps and the 
   assert.equal(session.save({ profile, run }), false);
 
   storage.failWrite = true;
-  assert.equal(store.finishPuzzle(run).reason, 'storage_failed');
+  const failed = store.finishPuzzle(run);
+  assert.equal(failed.reason, 'storage_failed');
+  assert.equal(failed.score.goalMet, true);
   assert.equal(storage.getItem(KEY), before);
   storage.failWrite = false;
   const { score } = ok(store.finishPuzzle(run));
+  assert.deepEqual(score, failed.score);
+  assert.deepEqual(store.puzzles(profile)[0].endings.map(ending => ending.best), [null, score]);
+
+  const rescue = startPuzzle(store, puzzle, save.id, profile);
+  playPuzzleFight(rescue, core, ['entropy', 'discipline_captain', 'hellhound']);
+  const { score: rescued } = ok(store.finishPuzzle(rescue));
+  assert.equal(rescued.goalMet, true);
+  const missed = startPuzzle(store, puzzle, save.id, profile);
+  playPuzzleFight(missed, core, ['hellhound', 'entropy', 'time_ruler']);
+  const { score: wrongEnding } = ok(store.finishPuzzle(missed));
+  assert.equal(wrongEnding.goalMet, false);
+  assert.equal(Daily.judgePuzzleGoal(heirloom.goal, wrongEnding).goalMet, true);
+  assert.ok(wrongEnding.turns < score.turns);
   const { puzzleBests, ...daily } = JSON.parse(storage.getItem(KEY));
   assert.deepEqual(Object.keys(puzzleBests), [puzzleId]);
+  assert.deepEqual(Object.keys(puzzleBests[puzzleId]).sort(), [heirloom.id, save.id]);
   assert.deepEqual(daily, JSON.parse(before));
   assert.deepEqual(store.history(), history);
   assert.equal(ok(store.resume()).run.id, active.id);
   assert.equal(storage.getItem('relaymare.session'), savedMain);
   assert.deepEqual(main, mainBefore);
+  assert.deepEqual(profile, profileBefore);
 
   const imported = memoryStorage();
   const backup = session.exportBackup({ profile, run: main, dailyRun: run });
   ok(Save.createSaveStore(imported, deps).restoreBackup(backup));
   const reopened = DailyStore.create(imported, deps);
-  assert.deepEqual(reopened.puzzles(profile)[0].best, score);
+  assert.deepEqual(reopened.puzzles(profile)[0].endings.map(ending => ending.best), [rescued, score]);
   assert.deepEqual(reopened.history(), history);
   assert.equal(ok(reopened.resume()).run.id, active.id);
+});
+
+test('old puzzle bests cannot prove either named ending and are discarded without touching daily records', () => {
+  const storage = memoryStorage();
+  const profile = puzzleProfile();
+  const store = DailyStore.create(storage, deps);
+  ok(start(store, FIRST, 'official', profile));
+  const old = JSON.parse(storage.getItem(KEY));
+  old.puzzleBests = {
+    'arena-relay': { outcome: 'win', floor: 7, turns: 24, livingIds: ['trauma', 'discipline_captain', 'entropy'], heirloomsUsed: 1 },
+    'ember-clock': { outcome: 'win', floor: 7, turns: 11, livingIds: ['night_rabbit', 'cinderella', 'pudding_princess'], heirloomsUsed: 2 },
+    'trench-heirlooms': { outcome: 'win', floor: 7, turns: 18, livingIds: ['sphinx', 'sylphid', 'unicorn'], heirloomsUsed: 2 }
+  };
+  const raw = JSON.stringify(old);
+  storage.setItem(KEY, raw);
+  assert.ok(DailyStore.restoreDailyData(old, deps));
+  assert.ok(store.puzzles(profile).every(puzzle => puzzle.endings.every(ending => ending.best === null)));
+  assert.equal(storage.getItem(KEY), raw);
+
+  const run = startPuzzle(store, RIFT_PUZZLES[0], 'save', profile);
+  playPuzzleFight(run, core, ['entropy', 'discipline_captain', 'hellhound']);
+  const { score } = ok(store.finishPuzzle(run));
+  const { puzzleBests, ...daily } = JSON.parse(storage.getItem(KEY));
+  assert.deepEqual(Object.keys(puzzleBests), ['arena-relay']);
+  assert.deepEqual(Object.keys(puzzleBests['arena-relay']), ['save']);
+  assert.deepEqual(daily, { version: old.version, days: old.days, active: old.active });
+  assert.deepEqual(store.puzzles(profile)[0].endings.map(ending => ending.best), [score, null]);
+  assert.equal(ok(store.resume()).run.id, old.active.runId);
 });
 
 test('battle settlement pays zero crystals, grants risk D once, and accepts a zero-survivor boss win', () => {

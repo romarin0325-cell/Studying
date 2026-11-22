@@ -2,14 +2,23 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { CONTRACTS } from '../src/content/contracts.js';
 import { NOTEBOOK_GOALS } from '../src/content/notebook.js';
-import { applyRunEnd, nextGoal, unrecruitedCompanions, validPreparation } from '../src/engine/meta.js';
+import { ratesView, springDrawChance } from '../src/engine/awakenings.js';
+import { applyRunEnd, companionSpringRates, nextGoal, setExpeditionParty, setSeals, startView, unrecruitedCompanions, validPreparation } from '../src/engine/meta.js';
+import { gradeOf } from '../src/engine/roster.js';
+import { chooseStartPick, createRun } from '../src/engine/run.js';
 import { restoreProfile, serializeProfile } from '../src/engine/save.js';
 import { resumeLabel } from '../src/ui/glossary.js';
 import { dreamClearProfile } from './screens/goals.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
-const { roster } = createCoreRoster();
+const { core, roster } = createCoreRoster();
 const ember = 'ember_volcano';
+const arena = 'arena';
+const guardian = 'guardian';
+const tower = 'creation_tower';
+const springRateIn = (profile, companion, dungeonId) => companionSpringRates(profile, roster, companion)
+  .find(rate => rate.dungeonId === dungeonId);
+
 const clearOnJourney = profile => {
   for (const id of profile.unlockedDungeons.filter(id => id !== 'dawn_forest')) {
     profile.records.clears[id].normal = 1;
@@ -98,4 +107,90 @@ test('active goals share the resume checkpoint wording and saved door', () => {
   run.doors = [{ type: 'spring', index: 0, enemies: [] }, { type: 'elite', index: 1, enemies: [{ id: 'elite' }] }];
   profile.ui.entryDoor = { runId: run.id, index: 1 };
   assert.equal(nextGoal(profile, run).text, '홍련 화산 3층 · 강한 적 전투 입구부터');
+});
+
+test('the encounter recommendation rotates after two visits unless the region has a progression goal', () => {
+  const profile = dreamClearProfile();
+  clearOnJourney(profile);
+  profile.notebook.chapters.push(5);
+  for (const id of profile.nightmareUnlocks) {
+    profile.contractStamps[id] = Object.fromEntries(Object.keys(CONTRACTS).map(contract => [contract, 'return-again']));
+  }
+  profile.seenCharacters.push('behemoth');
+  profile.records.appliedRuns.push(`9/${tower}/normal/21`);
+  profile.records.runs++;
+  assert.equal(nextGoal(profile, null, roster).target.dungeonId, tower);
+  profile.records.appliedRuns.push(`10/${tower}/nightmare/7`);
+  profile.records.runs++;
+  assert.equal(nextGoal(profile, null, roster).target.dungeonId, 'starlit_garden');
+  assert.equal(nextGoal(profile, null).target.screen, 'collection');
+
+  profile.records.clears[tower].normal = 0;
+  assert.deepEqual(nextGoal(profile, null, roster).target, { screen: 'dungeons', dungeonId: tower, difficulty: 'normal' });
+});
+
+test('Guardian ranks Arena over the Creation Tower and the new tutorial has no spring', () => {
+  const profile = dreamClearProfile();
+  const original = structuredClone(profile);
+  const ranked = companionSpringRates(profile, roster, guardian);
+  assert.deepEqual(ranked.slice(0, 2), [
+    { dungeonId: arena, unlocked: true, percent: 2 },
+    { dungeonId: tower, unlocked: true, percent: 20 / 31 }
+  ]);
+  assert.equal(ranked.find(rate => rate.dungeonId === 'dawn_forest').percent, 0);
+  assert.deepEqual(profile, original);
+
+  profile.unlockedDungeons = profile.unlockedDungeons.filter(id => id !== arena);
+  assert.deepEqual(springRateIn(profile, guardian, arena), { dungeonId: arena, unlocked: false, percent: 2 });
+  profile.ui.entry.legacy = true;
+  assert.ok(springRateIn(profile, guardian, 'dawn_forest').percent > 0);
+});
+
+test('spring previews apply same-grade invitations, out-of-pool reservations and regional seals', () => {
+  const profile = dreamClearProfile();
+  const invite = 'storm_sage';
+  profile.recruits[invite] = { bond: 0, since: 1 };
+  assert.equal(springRateIn(profile, invite, arena).percent, 0);
+  const invited = setExpeditionParty(profile, { lead: profile.lead, companions: [invite] });
+  assert.ok(invited.announce.ok);
+  assert.equal(springRateIn(invited.profile, invite, arena).percent, 20 / 11);
+  assert.equal(springRateIn(invited.profile, guardian, arena).percent, 20 / 11);
+
+  assert.equal(springRateIn(profile, guardian, ember).percent, 0);
+  invited.profile.reserved = guardian;
+  assert.ok(springRateIn(invited.profile, guardian, ember).percent > 0);
+  invited.profile.records.clears.arena.normal = 1;
+  const sealed = setSeals(invited.profile, arena, [guardian], roster);
+  assert.ok(sealed.announce.ok);
+  assert.equal(springRateIn(sealed.profile, guardian, arena).percent, 0);
+  assert.equal(springRateIn(sealed.profile, invite, arena).percent, 2);
+  assert.equal(springRateIn(sealed.profile, guardian, tower).percent, 20 / 31);
+});
+
+test('individual spring slot chances use the displayed grade rate for the same run', () => {
+  const profile = dreamClearProfile();
+  const run = createRun({ core, roster, profileView: startView(profile, arena), seed: 7 });
+  assert.ok(chooseStartPick(run, run.pending.candidates[0]).ok);
+  assert.ok(run.reserved);
+  const original = structuredClone(run);
+  const rates = ratesView(run);
+  for (const id of run.pool) {
+    const { percent, count } = rates.find(rate => rate.group === gradeOf(roster.card(id).grade));
+    assert.equal(springDrawChance(run, id), percent / count, id);
+  }
+  assert.equal(springDrawChance(run, guardian), springRateIn(profile, guardian, arena).percent);
+  assert.ok(springDrawChance(run, run.reserved) > 0);
+  assert.deepEqual(run, original);
+
+  delete run.drawRuleVersion;
+  assert.equal(springDrawChance(run, run.reserved), 0);
+  assert.equal(springDrawChance(run, run.bench[0]), 0);
+  run.pool = [guardian];
+  assert.equal(springDrawChance(run, guardian), 100);
+  run.pool = [];
+  assert.equal(springDrawChance(run, guardian), 0);
+  assert.ok(ratesView(run).every(rate => rate.percent === 0 && rate.count === 0));
+
+  const emptyRoster = { ...roster, allies: [], pool: () => [] };
+  assert.ok(companionSpringRates(profile, emptyRoster, guardian).every(rate => rate.percent === 0));
 });

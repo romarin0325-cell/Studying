@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { DUNGEONS } from '../../src/content/dungeons.js';
-import { appearanceRegions, createProfile, missionPeriodKeys, missionsView, nextGoal, unrecruitedCompanions } from '../../src/engine/meta.js';
+import { appearanceRegions, companionSpringRates, createProfile, missionPeriodKeys, missionsView, nextGoal, unrecruitedCompanions } from '../../src/engine/meta.js';
 
 export function dreamClearProfile() {
   const profile = createProfile();
@@ -64,10 +64,15 @@ export function createGoalCases({ roster, storedSession, enterObservatory }) {
     },
     'goals-collection-unrecruited'() {
       const profile = dreamClearProfile();
+      profile.ui.difficulty.midnight_trench = 'easy';
       assert.deepEqual(new Set(unrecruitedCompanions(profile, roster)), new Set([companion, 'deep_lord']));
       assert.equal(appearanceRegions(roster, companion)[0], 'ember_volcano');
+      const openRates = companionSpringRates(profile, roster, companion).filter(rate => rate.unlocked && rate.percent > 0);
+      assert.deepEqual(openRates.map(rate => [rate.dungeonId, rate.percent]), [
+        ['midnight_trench', 4], ['ember_volcano', 40 / 11], ['starlit_garden', 40 / 11], ['creation_tower', 40 / 26]
+      ]);
       return {
-        session: storedSession({ profile }), proof: 'Unrecruited sightings open the companion detail and select an unlocked appearance region',
+        session: storedSession({ profile }), proof: 'Unrecruited companion has four available springs and the best destination differs from the first base region',
         async show(page, { text, capture }) {
           await openUnrecruited(page);
           await text(collection(page).locator('#meta-unrecruited[aria-pressed="true"]'), '영입 전', { exact: true });
@@ -75,14 +80,48 @@ export function createGoalCases({ roster, storedSession, enterObservatory }) {
           assert.equal(await collection(page).locator('[data-companion]').count(), 2);
           await capture('filtered');
           await collection(page).locator(`[data-companion="${companion}"]`).click();
-          const depart = sheet(page).locator('[data-companion-depart="ember_volcano"]');
-          await text(depart, '홍련 화산으로 출발', { exact: true });
+          const depart = sheet(page).locator('[data-companion-depart="midnight_trench"]');
+          await text(depart, '심야의 해구로 · ◆1 칸 4.0%', { exact: true });
+          await text(sheet(page).locator('.meta-companion-rates'), '홍련 화산 3.6% · 별빛 정원 3.6% · 창조의 탑 1.5%', { exact: true });
           await capture('companion');
           await depart.click();
           const destinations = page.locator('#dungeons.on');
-          await text(destinations.locator('[data-dungeon="ember_volcano"][aria-pressed="true"] b'), '홍련 화산', { exact: true });
-          await text(destinations.locator('#meta-quick-start'), '홍련 화산 · 꿈결 · 바로 출발', { exact: true });
+          await text(destinations.locator('[data-dungeon="midnight_trench"][aria-pressed="true"] b'), '심야의 해구', { exact: true });
+          await text(destinations.locator('#meta-quick-start'), '심야의 해구 · 꿈결 · 바로 출발', { exact: true });
           await capture();
+        }
+      };
+    },
+    'goals-collection-spring-hints'() {
+      const profile = dreamClearProfile();
+      profile.unlockedDungeons = ['dawn_forest', 'ember_volcano', 'twilight_cathedral'];
+      profile.records.clears = { dawn_forest: profile.records.clears.dawn_forest, ember_volcano: { easy: 1, normal: 1, nightmare: 0 } };
+      profile.notebook.chapters = [1, 2, 3, 4];
+      profile.seals.ember_volcano = [companion];
+      profile.seenCharacters.push('behemoth');
+      profile.ui.destination = 'ember_volcano';
+      assert.deepEqual(appearanceRegions(roster, 'behemoth'), ['creation_tower']);
+      assert.ok(roster.pool(DUNGEONS.ember_volcano.pool).includes('sunflower') && profile.recruits.sunflower);
+      for (const id of [companion, 'behemoth']) {
+        assert.ok(unrecruitedCompanions(profile, roster).includes(id));
+        assert.ok(companionSpringRates(profile, roster, id).every(rate => !rate.unlocked || !rate.percent));
+      }
+      return {
+        session: storedSession({ profile }), proof: 'Sealed and locked companions have no open spring rates, while Sunflower is already recruited',
+        async show(page, { text, capture }) {
+          await openUnrecruited(page);
+          await collection(page).locator(`[data-companion="${companion}"]`).click();
+          await text(sheet(page).locator('.meta-companion-links small'), '준비에서 출현 제외 해제 필요', { exact: true });
+          await capture('sealed');
+          await sheet(page).locator('#b-sheetclose').click();
+          await collection(page).locator('[data-companion="behemoth"]').click();
+          await text(sheet(page).locator('.meta-companion-links small'), '지역 해금 필요', { exact: true });
+          await capture('locked');
+          await sheet(page).locator('#b-sheetclose').click();
+          await collection(page).locator('#meta-unrecruited').click();
+          await collection(page).locator('[data-companion="sunflower"]').click();
+          assert.equal(await sheet(page).locator('.meta-companion-links').count(), 0);
+          await capture('recruited');
         }
       };
     },

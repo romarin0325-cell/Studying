@@ -2574,8 +2574,9 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   const { run, end } = playRun('twilight_cathedral', 21, { profile: restored.profile, difficulty: 'easy' });
   assert.equal(end.result, 'win');
   assert.equal(run.stats.battles, 5);
-  const recruit = 'void_knight';
-  assert.equal(end.recruitable[0], recruit);
+  // Which companion is first depends on the battles (wild patterns change them); any real recruit proves the path.
+  const recruit = end.recruitable[0];
+  assert.ok(recruit, 'The won run offers a recruit');
   const recruited = Meta.applyRunEnd(restored.profile, run, { recruits: [recruit] });
   assert.deepEqual(ok(recruited.announce).recruits, [recruit]);
   store.save({ profile: recruited.profile });

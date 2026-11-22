@@ -111,6 +111,12 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   let battleContext = null;
   let run = null, onResult, onContinue, onDecision;
 
+  let row2Height = 0;
+  // The stage gives way whenever the retreat row changes height (odds lines appear, the heirloom button narrows it).
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => {
+    if ($('#battle').classList.contains('on') && $('#row2').offsetHeight !== row2Height) layout();
+  }).observe($('#row2'));
+
   function layout() {
     const frame = $('#frame'), w = Math.floor(Math.min(430, frame.clientWidth) / 2) * 2, h = frame.clientHeight;
     const top = $('#bar').offsetHeight || 48;
@@ -118,7 +124,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const largeText = document.documentElement.classList.contains('large-text');
     // Below the stage (battle.css): party row 54 + message band 34 + panel 6 + two command rows (2×56 + 6) + 6 + retreat row 40 = 258.
     // From 700px tall the command rows may grow to their 148px cap (+30). What is left goes to the stage.
-    const reserved = top + bottom + 258 + (h >= 700 ? 30 : 0) + (largeText ? 36 : 0);
+    // The retreat row grows when its odds lines wrap beside the heirloom button (82px at 360 wide); reserve what it really takes,
+    // or the command rows are squeezed under it and the lower skill tiles cannot be tapped.
+    row2Height = $('#row2').offsetHeight;
+    const reserved = top + bottom + 258 - 40 + Math.max(40, row2Height) + (h >= 700 ? 30 : 0) + (largeText ? 36 : 0);
     const W = w / 2, H = Math.max(132, Math.min(214, Math.floor((h - reserved) / 2)));
     St.resize(W, H);
     $('#stage').style.height = H * 2 + 'px';
