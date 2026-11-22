@@ -45,6 +45,7 @@ function memoryStorage() {
 function unlockedProfile() {
   const profile = Meta.createProfile();
   profile.notebook.chapters.push(1, 2, 4);
+  profile.records.clears.ember_volcano = { easy: 1, normal: 0, nightmare: 0 };
   profile.recruits.ash = { bond: 3, since: 1 };
   profile.lead = 'ash';
   profile.seals.midnight_trench = ['werebear'];
@@ -128,6 +129,7 @@ test('the first rift is fixed by date alone and opens at notebook chapter four',
   assert.deepEqual(store.view(profile, nowOn(FIRST)).spec, spec);
   sandbox.location.search = '?seed=42';
   locked.notebook.chapters.push(4);
+  locked.records.clears.ember_volcano = { easy: 1, normal: 0, nightmare: 0 };
   assert.deepEqual(store.view(locked, nowOn(FIRST)).spec, spec);
   assert.equal(storage.getItem(KEY), null);
   reason(start(store, FIRST, 'practice'), 'official_required');
@@ -200,7 +202,7 @@ test('battle settlement pays zero crystals, grants risk D once, and accepts a ze
   const win = playDaily(key, { naive: true });
   const ended = ok(store.finish(win));
   assert.deepEqual([ended.official.outcome, ended.score.turns, ended.score.livingIds], ['win', 49, []]);
-  assert.deepEqual(Run.finishRun(win), { result: 'win', recruitable: [], recruitLimit: 0, shardCandidates: [] });
+  assert.deepEqual(Run.finishRun(win), { result: 'win', recruitable: [], recruitTags: {}, recruitLimit: 0, shardCandidates: [] });
   assert.equal(win.pending, null);
 
   const wiped = attempt(FIRST);

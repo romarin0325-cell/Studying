@@ -1,164 +1,263 @@
 import { $$ } from '../dom.js';
+import { FIELD, GOOD } from './hud.js';
+import { contactOffset, MOTION_FRAME, rangedTiming, resolveMotion, spriteBox } from './motion.js';
+
+const CAST_SOUND = { shot: 'throw', orb: 'cast', breath: 'whoosh', ray: 'zap', fall: 'whoosh',
+  blast: 'whoosh', field: 'cast', drift: 'whoosh', mark: 'cast' };
 
 export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp, card, spr }) {
-  const { S, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
+  const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY, reducedMotion } = St;
 
   const label = (text, actor, cls, dy) => St.number(text, St.X(actor), HY(actor) - 4 + (dy || 0), 'tag ' + (cls || ''));
 
-  function beginMove(e, actor, isFoe) {
-    const p = { e, actor, target: e.target ? actorOf(e.target) : null, kind: e.skill.type, isFoe, stage: 'ready', colors: colorsOf(e.who) };
-    const donor = e.heirloom && e.heirFrom && card(e.heirFrom);
-    if (!donor) return p;
-    p.donor = donor;
-    p.colors = St.ELEMENT_COLORS[donor.element] || St.ELEMENT_COLORS.none;
-    p.effectSprite = St.variant(donor.id + '-fx', 'base');
-    const art = spr(donor.id);
-    if (art) {
-      p.caster = actor;
-      p.casterVisible = actor.vis;
-      actor.vis = false;
-      p.actor = St.makeActor({ sprite: donor.id, x: actor.x, y: actor.y, flip: art.facing === 'left' });
+  function beginMove(e, actor, isFoe, action) {
+    const p = { e, actor, target: e.target ? actorOf(e.target) : null, isFoe, stage: 'ready', colors: colorsOf(e.who) };
+    // null, not false: optional chaining below only stops on null/undefined.
+    const donor = (e.heirloom && e.heirFrom && card(e.heirFrom)) || null;
+    if (donor) {
+      p.donor = donor;
+      p.colors = St.ELEMENT_COLORS[donor.element] || St.ELEMENT_COLORS.none;
+      const art = spr(donor.id);
+      if (art) {
+        p.caster = actor;
+        p.casterVisible = actor.vis;
+        actor.vis = false;
+        p.actor = St.makeActor({ sprite: donor.id, x: actor.x, y: actor.y, flip: (art.facing === 'left') !== isFoe });
+      }
+    }
+    p.basic = e.skill.name === '일반 공격';
+    p.motion = resolveMotion({
+      sourceKey: e.sourceKey, skill: e.skill, side: e.who.side, heirloom: e.heirloom,
+      salience: e.salience ?? (e.ult ? 'boss' : undefined),
+      isBasic: p.basic, casterSprite: p.actor.sprite, basePower: donor?.skills.find(s => s.name === e.skill.name && s.type === e.skill.type)?.val
+    });
+    if (donor && !isMelee(p)) p.effectSprite = St.variant(donor.id + '-fx', 'base');
+    if (p.motion.tint) p.colors = St.ELEMENT_COLORS[p.motion.tint] ?? p.colors;
+    if (action) {
+      const hp = [...action.hp.values()];
+      p.reserve = action.effects.some(effect => effect.kind === 'delay');
+      p.support = !action.miss && !hp.some(step => step.strike);
+      if (p.support) {
+        const selfField = p.motion.family === 'field' && p.motion.variant !== 'bind' &&
+          action.effects.some(effect => effect.at === 'field');
+        const recipient = hp.find(step => step.kind === 'heal') ?? (!selfField &&
+          action.effects.find(effect => effect.who && effect.kind !== 'delay'));
+        if (recipient) p.target = actorOf(recipient.who) ?? p.target;
+        else if (selfField || e.skill.type === 'sup') p.target = p.actor;
+      }
+      p.labelCast = e.skill.type === 'sup' && !action.effects.some(effect => effect.at === 'caster');
+      p.beneficial = hp.some(step => step.kind === 'heal' && step.at !== 'foe') ||
+        action.effects.some(effect => effect.who && effect.at !== 'foe' && effect.ids?.some(id => GOOD.includes(id)));
     }
     return p;
   }
+
+  const isMelee = p => p.motion.range === 'melee';
+  const isBig = p => p.motion.size === 'big';
 
   function impact(e, o, stats) {
     const actor = actorOf(e.who), unit = unitOf(e.who), isAlly = e.who.side === 'ally';
     applyHp(e);
     if (!actor) return;
     const ratio = e.amount / unit.maxHp, big = ratio >= 0.3 || o.crit || o.big;
-    actor.pose = 'hurt'; actor.white = 0.09; actor.ox = (isAlly ? -1 : 1) * 4;
-    tween(actor, { ox: 0 }, 0.25);
-    S.shake = Math.max(S.shake, Math.min(7, 1 + ratio * 12 + (o.crit ? 2 : 0)));
-    if (o.crit) S.flash = Math.max(S.flash, 0.5);
-    St.sparks(St.X(actor), CY(actor), big ? 22 : 8, o.colors || St.ELEMENT_COLORS.none, big ? 100 : 50);
-    const text = (o.prefix || '') + e.amount.toLocaleString('en-US') + (o.adv ? ' ▲' : '');
+    actor.pose = 'hurt';
+    if (!reducedMotion()) {
+      actor.white = 0.04;
+      if (!o.melee) {
+        actor.ox = (isAlly ? -1 : 1) * 4;
+        tween(actor, { ox: 0 }, 0.25);
+        S.shake = Math.max(S.shake, Math.min(7, 1 + ratio * 12 + (o.crit ? 2 : 0)));
+        if (o.crit && !o.ranged) S.flash = Math.max(S.flash, 0.5);
+        if (!o.ranged) St.sparks(St.X(actor), CY(actor), big ? 22 : 8, o.colors || St.ELEMENT_COLORS.none, big ? 100 : 50);
+      }
+    }
+    const text = (o.prefix || '') + (o.label ?? e.amount.toLocaleString('en-US')) + (o.adv ? ' ▲' : '');
     St.number(text, St.X(actor), HY(actor) - (big ? 8 : 2), (o.crit ? 'crit ' : big ? 'big ' : '') + (isAlly ? 'foe' : ''));
-    sfx.hit(big); if (o.crit) sfx.crit();
+    if (o.melee === 'bite') sfx.bite();
+    else if (o.melee === 'blade' || o.melee === 'claw' || o.melee === 'thrust') sfx.swing();
+    else if (o.crit && o.ranged) sfx.crit();
+    else sfx.hit(o.melee ? o.big : big);
+    if (o.crit && !o.melee && !o.ranged) sfx.crit();
     if (!isAlly && e.amount > stats.best) stats.best = e.amount;
   }
 
-  /* B. Big common move: name plate, wind-up with a 2x camera punch on the caster, then one
-     of six shapes chosen from the skill's own data, then one impact. Quiet moves (A) skip all of it. */
-  function isBig(p) {
-    const { tier, val } = p.e.skill;
-    return (p.e.salience === 'boss' || p.e.salience == null && p.e.ult) ||
-      !!p.e.heirloom || (!p.isFoe && tier >= 3 && (!Number.isFinite(val) || val >= 2));
-  }
-  function shapeOf(skill, val) {
-    const fx = skill.effects || [];
-    if (fx.includes('random_mult') || fx.includes('multi_hit')) return skill.type === 'phy' ? 'flurry' : 'rain';
-    if (fx.includes('consume_debuff_all') || fx.includes('consume_field_all')) return 'burst';
-    if (fx.includes('self_hp_cost_ratio') || (val ?? skill.val ?? 0) >= 4) return 'meteor';
-    return skill.type === 'phy' ? 'dash' : 'beam';
-  }
-  /* What each sprite's attack frame shows. A move of the other kind lunges or casts from the idle frame. */
-  const ATTACK_FRAME = { red_dragon: 'mag', ash: 'mag', flame_sage: 'mag', luna: 'phy', zeke: 'phy', cherry_prince: 'phy', golem: 'phy' };
-  const poseFor = (actor, kind) => (!ATTACK_FRAME[actor.sprite] || ATTACK_FRAME[actor.sprite] === kind ? 'attack' : 'idle');
-  async function bigMove(p, seen) {
-    const { actor, target, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
-    const key = (isFoe ? 'f:' : 'a:') + skill.name, first = !seen.has(key);
-    seen.add(key);
+  async function windUp(p) {
+    const { actor, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
     const caster = unitOf(p.e.who).name;
     const who = isFoe && p.e.ult ? '필살' : p.e.heirloom ? '유품 · ' + (donor?.name || caster) : caster;
     actor.front = 1;
     $$('#fx .num').forEach(n => n.remove());
-    const plate = St.plate(who, skill.name, isFoe && p.e.ult ? '#ff6b5e' : p.e.heirloom ? '#ffc857' : colors[1], dir);
+    p.plate = St.plate(who, skill.name, isFoe && p.e.ult ? '#ff6b5e' : p.e.heirloom ? '#ffc857' : colors[1], dir);
+    if (reducedMotion()) {
+      actor.pose = p.motion.frame;
+      sfx.charge?.();
+      await wait(0.12);
+      return;
+    }
     tween(S, { dark: isFoe ? 0.45 : 0.35 }, 0.12);
-    sfx.charge();
-    actor.pose = poseFor(actor, p.kind); actor.white = 0.06;
-    if (first) {
-      St.converge(St.X(actor) + dir * 10, CY(actor), 18, colors, 34, 0.3);
-      await St.punch(St.X(actor) + dir * 14, CY(actor) - 6, 0.18);
-    } else await wait(0.12);
-    const tx = St.X(target), ty = CY(target);
-    if (p.effectSprite) St.fly(St.X(actor) + dir * 14, CY(actor), tx, ty, 0.28, colors[1], 16, 2, null, p.effectSprite);
-    const original = donor?.skills.find(s => s.name === skill.name && s.type === skill.type);
-    const shape = shapeOf(skill, original && (original.val ?? 0));
-    if (shape === 'beam') {
-      const x0 = St.X(actor) + dir * 16, y = CY(actor) - 4;
-      const orb = St.prop({ kind: 'orb', x: x0, y, r: 2, colors });
-      await tween(orb, { r: 6 }, 0.12); St.dropProp(orb);
-      const bm = St.prop({ kind: 'beam', x0, x1: x0, y, h: 1, colors, flare: true });
-      sfx.beam(); await tween(bm, { x1: tx, h: 6 }, 0.1, 'in');
-      for (let i = 0; i < 26; i++) St.fly(x0, y + (Math.random() - 0.5) * 8, tx + (Math.random() - 0.5) * 10, ty + (Math.random() - 0.5) * 16, 0.12 + Math.random() * 0.12, colors[i % 3], 2, i % 4 ? 1 : 2);
-      await tween(bm, { h: 8 }, 0.18);
-      tween(bm, { h: 0, a: 0 }, 0.14).then(() => St.dropProp(bm));
-    } else if (shape === 'meteor') {
-      const m = St.prop({ kind: 'meteor', x: tx - dir * 110, y: -20, r: 11, colors, trail: [] });
-      sfx.beam(); await tween(m, { x: tx, y: ty }, 0.38, 'in'); St.dropProp(m);
-      const bu = St.prop({ kind: 'burst', x: tx, y: ty, r: 4, colors });
-      tween(bu, { r: 22, a: 0 }, 0.32).then(() => St.dropProp(bu)); sfx.boom();
-    } else if (shape === 'rain') {
-      for (let i = 0; i < 5; i++) {
-        const m = St.prop({ kind: 'meteor', x: tx - dir * (60 + i * 10), y: -16 - i * 6, r: 5, colors, trail: [] });
-        const job = tween(m, { x: tx - 14 + i * 7, y: ty - 6 + (i % 2) * 12 }, 0.22, 'in').then(() => { St.dropProp(m); St.sparks(m.x, m.y, 6, colors, 50); sfx.hit(false); S.shake = 3; });
-        if (i === 4) await job; else await wait(0.07);
-      }
-    } else if (shape === 'burst') {
-      for (let i = 0; i < 12; i++) St.fly(tx + (Math.random() - 0.5) * 40, ty - 30 - Math.random() * 20, tx, ty, 0.2 + Math.random() * 0.1, colors[i % 3], 6, 2);
-      await wait(0.24);
-      const bu = St.prop({ kind: 'burst', x: tx, y: ty, r: 3, colors });
-      sfx.boom(); await tween(bu, { r: 20 }, 0.16); tween(bu, { r: 24, a: 0 }, 0.2).then(() => St.dropProp(bu));
-    } else {                                     // dash / flurry: afterimages, a pass through the target, clean cuts
-      const x0 = St.X(actor), through = tx + dir * 26, n = shape === 'flurry' ? 4 : 2;
-      for (let i = 0; i < 4; i++) {
-        const g = St.prop({ kind: 'ghost', sprite: actor.sprite, key: actor.sprite + '-' + actor.pose, look: actor.look === 'base' ? 'white' : actor.look, flip: actor.flip, x: x0 + (through - x0) * (i / 4), footY: FY(actor), a: 0.15 + i * 0.1 });
-        tween(g, { a: 0 }, 0.35).then(() => St.dropProp(g));
-      }
-      sfx.swing(); await tween(actor, { ox: through - actor.x, oy: (FY(target) - FY(actor)) }, 0.08, 'in');
-      for (let i = 0; i < n; i++) {
-        const c = St.prop({ kind: 'cut', x: tx, y: ty - 4 + i * 5, len: 46 - i * 4, ang: (i % 2 ? -0.55 : 0.55) * dir + (i * 0.2), t: 0, a: 1, color: colors[i % 3] });
-        tween(c, { t: 1 }, 0.07).then(() => tween(c, { a: 0 }, 0.18)).then(() => St.dropProp(c));
-        sfx.swing(); await wait(shape === 'flurry' ? 0.07 : 0.06);
-      }
+    sfx.charge?.();
+    actor.pose = isMelee(p) ? 'idle' : p.motion.frame; actor.white = 0.06;
+    if (isMelee(p)) {
+      const point = St.socket(actor, p.motion.socket);
+      St.converge(point.x, point.y, 18, colors, 22, 0.3);
     }
-    S.flash = 0.6; S.shake = 7;
-    St.ring(tx, ty, colors[0], 40); St.sparks(tx, ty, 34, colors, 130);
-    tween(S, { dark: 0 }, 0.3);
-    setTimeout(() => plate.remove(), 450);
-    p.stage = 'hit';
+    await St.punch(St.X(actor) + dir * 14, CY(actor) - 6, 0.18);
   }
-  async function quietMove(p) {
-    const { actor, target, isFoe, colors } = p, dir = isFoe ? -1 : 1;
-    actor.pose = poseFor(actor, p.kind);
-    if (p.kind === 'phy') {
-      sfx.swing(); await tween(actor, { ox: dir * (actor.pose === 'attack' ? 14 : 22), oy: (FY(target) - FY(actor)) * 0.5 }, 0.1, 'in');
-      St.slash(St.X(target) - dir * 6, CY(target) - 8, colors[0], dir);
-    } else {
-      sfx.cast();
-      const fromX = St.X(actor) + dir * 18, fromY = CY(actor) - 6;
-      for (let i = 0; i < 12; i++) St.fly(fromX, fromY, St.X(target) - 8 + Math.random() * 16, CY(target) - 10 + Math.random() * 24, 0.16 + Math.random() * 0.1, colors[i % 3], 6, i % 4 ? 1 : 2);
-      await wait(0.22);
+
+  function finishBig(p) {
+    if (!reducedMotion()) {
+      if (isMelee(p)) S.flash = 0.22;
+      S.shake = isMelee(p) ? 7 : 4;
+      tween(S, { dark: 0 }, 0.3);
     }
-    p.stage = 'hit';
+    if (p.plate) wait(0.45).then(() => p.plate.remove());
   }
-  async function strikeAndHit(p, e, stats, seen, finishHit) {
+
+  function hpCostFlare(p) {
+    if (p.e.sourceKey !== 'ally/ash/2' || p.e.skill.name !== '아마겟돈' || reducedMotion()) return;
+    const box = spriteBox(p.actor, St.meta(p.actor), S.BASE);
+    const fx = St.prop({ kind: 'costFlare', caster: p.actor, x: box.cx,
+      y: Math.round(box.top + box.height * 0.58), rx: Math.round(box.width * 0.4), ry: Math.round(box.height * 0.22),
+      start: clock.t, colors: St.ELEMENT_COLORS.fire });
+    wait(2 * MOTION_FRAME).then(() => St.dropProp(fx));
+  }
+
+  async function rangedMove(p, landed, reserve = false) {
+    const { actor, motion, colors } = p, target = reserve ? actor : p.target ?? actor;
+    const still = reducedMotion(), big = !reserve && isBig(p), dir = p.isFoe ? -1 : 1;
+    const family = reserve ? 'mark' : motion.family;
+    const variant = reserve ? 'reserve' : motion.variant === 'reserve' ? 'curse' : motion.variant;
+    actor.casting = true;
+    if (big) await windUp(p);
+    else sfx[CAST_SOUND[family]]?.();
+    actor.pose = motion.frame;
+    const targetMeta = St.meta(target, landed && !p.support ? 'hurt' : target.pose);
+    const box = spriteBox(target, targetMeta, S.BASE);
+    const from = St.socket(actor, reserve ? 'top' : motion.socket);
+    const chest = { x: box.cx, y: Math.round(box.top + box.height * 0.6) };
+    const edge = dir > 0 ? box.left : box.right - 1;
+    const to = family === 'breath' && dir * (edge - from.x) > 0 ? { ...chest, x: edge } : chest;
+    const fromFloor = St.socket(actor, 'ground');
+    const fallY = box.top - 40;
+    const launch = family === 'blast' && (['wave', 'ground'].includes(variant) ||
+      (variant === 'eruption' && motion.socket === 'top'));
+    const timing = rangedTiming({ family, variant, from, to, big, still, fallHeight: to.y - fallY, launch });
+    const fx = St.prop({ kind: 'rangedFx', caster: actor, target, from, to, fromFloor, fallY, launch, effectSprite: p.effectSprite,
+      floor: Math.round(box.feet), head: box.top, dir, family, variant, colors,
+      beneficial: p.beneficial, basic: p.basic, big, still, landed, start: clock.t, ...timing });
+    if (timing.travel) await wait(timing.travel);
+    fx.arrived = clock.t;
+    p.stage = 'hit';
+    p.hitAt = clock.t;
+    if (big) finishBig(p);
+    p.hitHold = wait(timing.hold).then(() => St.dropProp(fx));
+  }
+
+  async function playCast(p) {
+    hpCostFlare(p);
+    if (p.labelCast) label(p.e.skill.name, p.actor, 'good');
+    if (!p.support) return;
     p.actor.front = 1;
-    if (p.stage === 'ready') { if (isBig(p)) await bigMove(p, seen); else await quietMove(p); }
+    if (p.reserve) await rangedMove(p, true, true);
+    else await deliver(p, true);
+    if (p.reserve) sfx.tick?.(0);
+    else sfx.chime?.(p.motion.variant === 'heal' || p.beneficial);
+  }
+
+  function showHeal(e, p) {
+    const target = actorOf(e.who);
+    if (!target || (p?.support && p.target === target && p.motion.family === 'mark' && p.motion.variant === 'heal')) return;
+    const box = spriteBox(target, St.meta(target), S.BASE);
+    const to = { x: box.cx, y: Math.round(box.top + box.height * 0.6) };
+    const hold = reducedMotion() ? 0.09 : 0.135;
+    const fx = St.prop({ kind: 'rangedFx', family: 'mark', variant: 'heal', to, target,
+      start: clock.t, arrived: clock.t, landed: true, hold, still: reducedMotion() });
+    if (p) p.healAt = clock.t;
+    sfx.chime?.(true);
+    wait(hold).then(() => St.dropProp(fx));
+  }
+
+  async function meleeMove(p, landed) {
+    const { actor, target, isFoe, colors, motion } = p;
+    const dir = isFoe ? -1 : 1, big = isBig(p), still = reducedMotion();
+    actor.casting = true;
+    if (big && !still) await windUp(p);
+    else sfx.throw?.();
+    // The HP event switches the target to hurt on this same frame.
+    const casterMeta = St.meta(actor, motion.frame), targetMeta = St.meta(target, landed ? 'hurt' : target.pose);
+    if (!still) {
+      const offset = contactOffset({ caster: actor, target, casterMeta, targetMeta, dir });
+      await tween(actor, offset, big ? 0.1 : 0.12, 'in');
+      actor.pose = motion.frame;
+    }
+
+    const from = spriteBox(actor, still ? St.meta(actor) : casterMeta, S.BASE);
+    const to = spriteBox(target, targetMeta, S.BASE);
+    const near = dir > 0 ? to.left : to.right;
+    const x = near + dir * 2;
+    const low = motion.socket === 'foot' || motion.variant === 'scythe';
+    const floor = Math.round(to.feet);
+    const hand = Math.round(from.top + from.height * 0.63);
+    const body = Math.round(to.top + to.height * 0.64);
+    const y = low ? floor - (motion.variant === 'stomp' ? 5 : 14) :
+      Math.min(to.bottom - 7, Math.max(body, still ? body : hand + (motion.variant === 'uppercut' ? -4 : 0)));
+    const tip = motion.family === 'thrust' ? St.socket(actor, motion.socket ?? 'weaponTip') : null;
+    const duration = still ? 0.09 : big ? 0.22 : 0.135;
+    p.stage = 'hit';
+    p.hitAt = clock.t;
+    if (big) finishBig(p);
+    const fx = St.prop({ kind: 'meleeFx', family: motion.family, variant: motion.variant, x, y, tip, floor, dir, colors,
+      big, basic: p.basic, still, landed, start: clock.t, duration });
+    p.hitHold = wait(duration).then(() => St.dropProp(fx));
+  }
+
+  function deliver(p, landed) {
+    if (!isMelee(p)) return rangedMove(p, landed);
+    if (p.target && p.target !== p.actor) return meleeMove(p, landed);
+    p.actor.pose = p.motion.frame;
+    p.stage = 'hit';
+    p.hitAt = clock.t;
+  }
+
+  async function strikeAndHit(p, step, stats, hasEffects, finishHit) {
+    const e = step.event;
+    p.actor.front = 1;
+    if (p.stage === 'ready') await deliver(p, true);
     if (finishHit) {
       p.finishing = true;
-      return finishHit(e);
+      await finishHit(e);
+      await p.hitHold;
+      return;
     }
     const calc = e.calc || {};
-    impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p) }, stats);
-    await wait(0.14);
+    impact(e, { crit: !!calc.crit, adv: !!calc.adv, colors: p.colors, big: isBig(p),
+      label: step.label, melee: isMelee(p) && p.motion.family, ranged: !isMelee(p) }, stats);
+    if (p.hitHold) await p.hitHold;
+    else if (!hasEffects) await wait(0.14);
   }
-  async function strikeMiss(p, why, seen) {
+  async function strikeMiss(p, why) {
     const { actor, target, isFoe } = p, dir = isFoe ? -1 : 1;
     actor.front = 1;
-    if (isBig(p)) await bigMove(p, seen); else await quietMove(p);
-    if (why === 'evasion') { tween(target, { ox: dir * 10 }, 0.08).then(() => tween(target, { ox: 0 }, 0.2)); label('회피!', target, 'good'); sfx.miss(); }
-    else { St.ring(St.X(target), CY(target), why === 'barrier' ? '#ffc857' : '#8ea2ff', 28); label(why === 'barrier' ? '배리어 무효!' : '매직가드 무효!', target, 'good'); sfx.guard(); }
+    await deliver(p, false);
+    if (why === 'evasion') {
+      if (!reducedMotion()) tween(target, { ox: dir * 10 }, 0.08).then(() => tween(target, { ox: 0 }, 0.2));
+      label('회피!', target, 'good'); sfx.miss();
+    } else {
+      St.ring(St.X(target), CY(target), why === 'barrier' ? '#ffc857' : '#8ea2ff', 28, 0.3, reducedMotion());
+      label(why === 'barrier' ? '배리어 무효!' : '매직가드 무효!', target, 'good'); sfx.guard();
+    }
     await wait(0.3);
   }
-  async function settleMove(p, seen) {
+  async function settleMove(p) {
     try {
-      if (p.stage === 'ready' && p.e.salience === 'boss' && p.target) await bigMove(p, seen);
-      if (p.stage === 'ready') { p.actor.pose = poseFor(p.actor, p.kind); await wait(0.12); }
-      if (p.finishing) Object.assign(p.actor, { ox: 0, oy: 0 });
-      else await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
-      p.actor.pose = 'idle'; p.actor.front = 0;
+      if (p.stage === 'ready' && p.e.salience === 'boss' && p.target) {
+        await deliver(p, false);
+      }
+      if (p.hitHold) await p.hitHold;
+      if (p.stage === 'ready') { p.actor.pose = p.motion.frame; await wait(0.12); }
+      if (p.finishing || reducedMotion()) Object.assign(p.actor, { ox: 0, oy: 0 });
+      else if (p.actor.ox || p.actor.oy) await tween(p.actor, { ox: 0, oy: 0 }, 0.1);
+      p.actor.pose = 'idle'; p.actor.front = 0; p.actor.casting = false;
       const t = p.target, tu = p.e.target && unitOf(p.e.target);
       if (t && tu && tu.hp > 0 && t.pose === 'hurt') t.pose = 'idle';
       if (S.dark > 0.01) tween(S, { dark: 0 }, 0.2);
@@ -170,6 +269,44 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     }
   }
 
+  async function showEffects(plan, fieldSlot) {
+    if (!plan.length) return;
+    const fields = [], recipients = new Map();
+    for (const effect of plan) {
+      if (effect.at === 'field') {
+        fields.push(effect);
+        continue;
+      }
+      const actor = actorOf(effect.who);
+      if (!actor?.vis) continue;
+      if (effect.kind === 'delay') {
+        label(effect.label, actor, 'good');
+        continue;
+      }
+      const list = recipients.get(actor) ?? [];
+      list.push(effect);
+      recipients.set(actor, list);
+    }
+    if (fields.length) {
+      const colors = fields.flatMap(effect => effect.kind === 'field-add' ? effect.ids.map(id => FIELD[id]?.[1] || '#ccc') : []);
+      St.fieldNotice(fieldSlot, fields.map(effect => effect.label).join(' / '), colors);
+      sfx.buff();
+    }
+    const still = reducedMotion();
+    for (const [actor, buffs] of recipients) {
+      const ids = buffs.flatMap(effect => effect.ids);
+      const good = ids.some(id => GOOD.includes(id));
+      label(buffs.map(effect => effect.label).join(' · '), actor, good ? 'good' : 'bad');
+      if (good) {
+        St.ring(St.X(actor), CY(actor), '#5fd4a8', 22, 0.3, still);
+        sfx.guard();
+      } else if (ids.some(id => !id.startsWith('defProtocol'))) {
+        if (!still) St.sparks(St.X(actor), CY(actor), 7, ids.includes('burn') ? ['#ff5a3c', '#ffe07a'] : ['#b999ff', '#6b2433'], 40);
+        sfx.debuff();
+      }
+    }
+    await wait(0.24);
+  }
 
-  return { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove };
+  return { beginMove, playCast, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects };
 }

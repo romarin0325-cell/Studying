@@ -1,4 +1,5 @@
 import * as Run from '../../engine/run.js';
+import { resumePoint } from '../../engine/resume.js';
 import { create as createRoster } from '../../engine/roster.js';
 import { INTRO } from '../../content/intro.js';
 import { createStage } from '../../stage/stage.js';
@@ -8,7 +9,7 @@ import { createSheet, sheetMarkup } from '../sheet.js';
 import { createWidgets } from '../widgets.js';
 import { createDetails } from '../battle/sheets.js';
 import { battleMarkup, createBattleView } from '../battle/view.js';
-import { openBattleLog } from '../battle/log.js';
+import { appendSettlement, openBattleLog } from '../battle/log.js';
 import { awakenScreen } from '../screens/awaken.js';
 import { mapScreen } from '../screens/map.js';
 import { orderScreen } from '../screens/order.js';
@@ -89,10 +90,15 @@ export function enterRun(run, host) {
   const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
   function command(action, ...args) {
     const result = action(run, ...args);
-    if (result.ok) host.save(run);
+    if (result.ok) {
+      if (run.dungeonId === 'dawn_forest' && action === Run.chooseStartPick) host.tutorial?.mark('awakening');
+      host.save(run);
+    }
     return result;
   }
   let mapEntry = false;
+  const drafts = new Map();
+  let draftFloor;
   let awakened = [];
   let receipt = '';
   function leave(equipped) {
@@ -109,46 +115,70 @@ export function enterRun(run, host) {
     if (!command(Run.leaveRoom).ok || !command(Run.nextFloor).ok) return;
     enterDoor(0);
   }
-  function enterFormation(index, partyIds) {
-    const result = command(Run.enterBattleDoor, { floor: run.floor, index, partyIds });
-    mapEntry = result.ok;
-    return result;
+  function previewDoor(index) {
+    if (draftFloor !== run.floor) {
+      drafts.clear();
+      draftFloor = run.floor;
+    }
+    if (!drafts.has(index)) {
+      drafts.set(index, { runId: run.id, floor: run.floor, doorIndex: index, partyIds: Run.defaultParty(run) });
+    }
+    const draft = drafts.get(index);
+    orderScreen(run, ui, {
+      draft, awakened,
+      onBack: () => route({ browseMap: true }),
+      onEnter(partyIds) {
+        const result = command(Run.enterBattleDoor, { floor: draft.floor, index: draft.doorIndex, partyIds });
+        mapEntry = result.ok;
+        if (result.ok) {
+          if (run.dungeonId === 'dawn_forest' && run.floor === 3) host.tutorial?.mark('formation', { entryDoor: null });
+          receipt = '';
+        }
+        return result;
+      }
+    });
+    awakened = [];
+    if (run.dungeonId === 'dawn_forest' && run.floor === 3) {
+      host.tutorial?.mark('door', { entryDoor: { runId: run.id, index } });
+      host.tutorial?.sync(run);
+    }
   }
   const ui = {
     core, roster, widgets, audio, sheets, icon, scene, artifacts, command, leave, route, enterDoor,
-    enterFormation,
+    previewDoor,
     companion: (id, blessing) => details.charSheet(run, id, { blessing }),
-    showAwakened(ids) {
-      const applied = host.profile?.()?.records?.appliedRuns ?? [];
-      if (!applied.some(id => !String(id).includes('/dawn_forest/'))) awakened = ids ?? [];
-    },
+    showAwakened(ids) { awakened = ids ?? []; },
     playMusic: () => host.runtime.music?.play(run.dungeonId)
   };
 
-  function battleDecision(node, result, next) {
-    const gained = Array.isArray(result.relics) ? result.relics :
-      [run.lastBattleRelic, result.relic?.equipped ? result.relic.id : null];
-    const equipped = new Set(gained.filter(id => run.relics.includes(id)));
+  function battleDecision(node, result, next, open = false) {
     const decision = document.createElement('div');
     decision.className = 'victory-decision';
+    function showReceipts() {
+      const gained = run.lastBattleRelics ?? result.rewardDelta.relicIds;
+      node.innerHTML = gained.filter(id => run.relics.includes(id)).map(id => treasureReceipt(artifacts.get(id))).join('');
+    }
     function render() {
-      node.innerHTML = [...equipped].map(id => treasureReceipt(artifacts.get(id))).join('');
+      if (run.phase === 'result' && !run.pending) return route();
+      showReceipts();
       node.append(decision);
       next.hidden = true;
-      const options = { node: decision, inline: true, onEquipped, onRelic: onEquipped };
+      const options = { node: decision, inline: true, onEquipped: render, onRelic: render };
       const rewardUi = { ...ui, leave: leaveDecision };
       if (run.pending?.kind === 'reinforcement') reinforceScreen(run, rewardUi, options);
       else if (run.pending?.kind === 'gate') gatePickScreen(run, rewardUi, options);
       else if (run.pending?.kind === 'relic') treasureScreen(run, rewardUi, run.pending.id, options);
-      else if (equipped.size) {
-        decision.replaceChildren();
-        next.hidden = false;
-      } else {
-        next.hidden = false;
+      else {
         decision.remove();
+        next.textContent = (run.floor + 1) + '층으로';
+        next.hidden = false;
       }
     }
     function leaveDecision() {
+      if (run.phase === 'result') {
+        if (!confirmHeldResult()) render();
+        return;
+      }
       const left = command(Run.leaveRoom);
       if (!left.ok) return;
       if (left.left) {
@@ -156,30 +186,42 @@ export function enterRun(run, host) {
         route();
       } else render();
     }
-    function onEquipped(id) {
-      if (run.relics.includes(id)) {
-        for (const previous of equipped) if (!run.relics.includes(previous)) equipped.delete(previous);
-        equipped.add(id);
-        run.lastBattleRelic = id;
-        run.lastBattleRelics = [...equipped];
-        host.save(run);
-      }
-      render();
-    }
-    render();
+    if (open) render();
+    else showReceipts();
   }
 
-  function afterBattle(result) {
-    if (run.phase === 'done' || result.retry) return route();
+  function confirmHeldResult() {
+    const result = command(Run.confirmResult);
+    if (result.retry) {
+      route();
+      return true;
+    }
+    if (!result.left) return false;
+    host.finish(run);
+    if (!run.daily) {
+      const rewards = Run.runRewards(run);
+      if (!rewards.recruitable.length && !rewards.shardCandidates.length) {
+        $('#recruit.on #meta-recruit-confirm')?.click();
+      }
+    }
+    return true;
+  }
+
+  function afterBattle() {
+    if (run.phase === 'result') return confirmHeldResult();
     if (run.room.type === 'borrowed' && run.phase === 'reward') return wakeSurvivors();
     leave();
   }
 
-  function equippedRoomRelic() {
-    return ['elite', 'gate'].includes(run.room?.type) && run.relics.includes(run.room.relic);
+  function route({ browseMap = false } = {}) {
+    try {
+      return renderRoute(browseMap);
+    } finally {
+      host.tutorial?.sync(run);
+    }
   }
 
-  function route() {
+  function renderRoute(browseMap) {
     if (run.phase === 'done') return host.finish(run);
     if (run.pending?.kind === 'start') return awakenScreen(run, ui);
     if (run.room?.status === 'left') {
@@ -187,12 +229,14 @@ export function enterRun(run, host) {
       return;
     }
     if (run.phase === 'map') {
-      if (run.doors[0]?.type === 'borrowed' || run.doors[0]?.type === 'awakening') return enterDoor(0);
-      mapScreen(run, ui, { awakened, receipt });
-      awakened = [];
+      const point = resumePoint(run, host.profile?.()?.ui);
+      if (point.kind === 'borrowed' || point.kind === 'awakening') return enterDoor(0);
+      if (!browseMap && point.kind === 'battle') return previewDoor(point.doorIndex);
+      mapScreen(run, ui, { receipt });
       receipt = '';
       return;
     }
+    if (run.phase === 'result' || run.phase === 'reward') return battle.restoreResult(run, afterBattle, battleDecision);
     if (run.room?.status === 'order') {
       if (run.room.type === 'borrowed' && command(Run.confirmOrder, INTRO.party).ok) return route();
       return orderScreen(run, ui);
@@ -204,18 +248,17 @@ export function enterRun(run, host) {
       return battle.startBattle(run, options, (summary, log) => {
         const result = Run.settleBattle(run, summary);
         if (result.ok) {
-          run.lastBattleLog = log;
-          run.lastBattleRelic = result.relic?.equipped ? result.relic.id : null;
-          run.lastBattleRelics = Array.isArray(result.relics) ? result.relics : null;
-          host.save(run);
+          command(Run.recordBattleLog, appendSettlement(log, result));
         }
         return result;
-      }, afterBattle, { fromMap, decision: battleDecision });
-    }
-    if (run.phase === 'reward') {
-      const contract = run.contract ? { ...run.contract, metNow: run.contract.metAtFloor === run.floor } : null;
-      const relic = equippedRoomRelic() ? { id: run.room.relic, equipped: true } : null;
-      return battle.restoreResult(run, afterBattle, { win: true, contract, relic, relics: run.lastBattleRelics }, battleDecision);
+      }, afterBattle, {
+        fromMap, decision: battleDecision,
+        simpleOpening: (host.profile?.()?.ui?.entry?.legacy === false || host.profile?.()?.ui?.tutorialReplay) &&
+          run.floor === 1 && run.room.type === 'borrowed',
+        onAction: (action, events) => host.tutorial?.accepted(run, action, events),
+        onReady: state => host.tutorial?.battleReady(run, state),
+        replay: run.room.type === 'borrowed' ? host.tutorial?.battleActions(run) : undefined
+      });
     }
     if (run.pending?.kind === 'relic') return treasureScreen(run, ui, run.pending.id);
     if (run.pending?.kind === 'altar' || run.room?.type === 'altar') return altarScreen(run, ui);

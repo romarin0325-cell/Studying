@@ -28,13 +28,16 @@ export function createDailyNavigation({
   function showDailyHistory(node) {
     const cursors = [null];
     function render() {
-      openDailyHistory(dailyStore.history({ before: cursors.at(-1), limit: 7 }) ?? {}, {
+      const history = dailyStore.history({ before: cursors.at(-1), limit: 7 }) ?? {};
+      openDailyHistory(history, {
         node, sheets,
         next(cursor) { cursors.push(cursor); render(); },
         previous: cursors.length > 1 ? () => { cursors.pop(); render(); } : null
       });
+      node.closest('.scroll-list').scrollTop = 0;
+      return !!history.rows?.length;
     }
-    render();
+    return render();
   }
 
   function showDaily(message) {
@@ -100,19 +103,44 @@ export function createDailyNavigation({
     setReview(enterRun(current, dailyHost) || null);
   }
 
+  function showResult(current, result) {
+    const spec = current.daily?.spec;
+    const score = {
+      runId: current.id, dayKey: spec?.dayKey, kind: result?.ok ? current.daily?.kind : null, outcome: current.result,
+      floor: current.floor, turns: current.stats?.turns, livingIds: current.bench, heirloomsUsed: current.stats?.heirloomsUsed,
+      ...result?.score
+    };
+    const title = result?.ok ? dailyResultTitle(score) : '균열 기록';
+    const track = result?.ok ? (score.outcome === 'win' ? 'victory' : 'defeat') : 'hub';
+    const view = dailyStore?.view?.(currentProfile(), new Date());
+    const node = page('daily-result', { title, track });
+    dailyResultScreen(node, { spec, score, official: result?.official }, {
+      widgets, today: view?.dayKey ?? view?.spec?.dayKey, practice: dayKey => startDaily(dayKey, 'practice'),
+      openToday: showDaily, hub: showHub
+    });
+    node.classList.add('screen-split');
+    const summary = $('.rift-result', node);
+    summary.classList.add('fixed-top');
+    const actions = $('.rift-actions', node);
+    actions.classList.add('fixed-foot');
+    // Keep the score fixed and expand only the companion record.
+    summary.insertAdjacentHTML('afterend', '<div class="scroll-list"><details><summary>동료 기록</summary></details></div>');
+    $('.scroll-list details', node).append($('.rift-result-cast', summary));
+    return { node, summary, actions };
+  }
+
   function finishDaily(current) {
     if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== 'done') return;
     const result = dailyStore?.finish?.(current);
     if (!result?.ok) {
       unsavedDailyResult = current;
       if (result?.reason === 'storage_failed') warnSave();
-      const node = page('daily-result', { title: '균열 기록' });
-      node.innerHTML = `<div class="meta-sheet rift-actions">
-        <p role="alert">균열 기록을 저장하지 못했습니다. 새로고침하거나 게임을 닫으면 마지막 저장 지점으로 돌아갑니다. 결과를 보관하려면 기록 파일을 내보내 주세요.</p>
+      const { node, summary, actions } = showResult(current, result);
+      summary.insertAdjacentHTML('beforeend', '<p role="alert">균열 기록을 저장하지 못했습니다. 새로고침하거나 게임을 닫으면 마지막 저장 지점으로 돌아갑니다. 결과를 보관하려면 기록 파일을 내보내 주세요.</p>');
+      actions.innerHTML = `
         <button class="btn go" data-backup-action="export">기록 내보내기</button>
         <button class="btn" id="meta-rift-retry">다시 저장</button>
-        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>
-      </div>`;
+        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>`;
       $('#meta-rift-retry', node).addEventListener('click', () => finishDaily(current));
       $('#meta-rift-hub', node).addEventListener('click', () => {
         dailyRun = null;
@@ -122,21 +150,10 @@ export function createDailyNavigation({
       });
       return;
     }
-    const spec = current.daily?.spec;
-    const score = {
-      runId: current.id, dayKey: spec?.dayKey, kind: current.daily?.kind, outcome: current.result,
-      floor: current.floor, turns: current.stats?.turns, livingIds: current.bench, heirloomsUsed: current.stats?.heirloomsUsed,
-      ...result.score
-    };
-    const view = dailyStore?.view?.(currentProfile(), new Date());
     dailyRun = null;
     unsavedDailyResult = null;
     setReview(null);
-    const node = page('daily-result', { title: dailyResultTitle(score), track: score.outcome === 'win' ? 'victory' : 'defeat' });
-    dailyResultScreen(node, { spec, score, official: result.official }, {
-      widgets, today: view?.dayKey ?? view?.spec?.dayKey, practice: dayKey => startDaily(dayKey, 'practice'),
-      openToday: showDaily, hub: showHub
-    });
+    showResult(current, result);
   }
 
   function reset() {

@@ -1,5 +1,5 @@
 import { $, esc } from '../dom.js';
-import { activeContract, blessingText, TYPE, foeFlip, riftKindLabel, skillText, statGrid, traitText } from '../widgets.js';
+import { activeContract, blessingDetail, TYPE, foeFlip, formatMultiplier, riftKindLabel, skillText, statGrid, traitText } from '../widgets.js';
 import { bindRelicSlots, openRelicSheet, relicEffect, relicStrip } from '../relics.js';
 import { shortRiftDate } from '../screens/daily-rift.js';
 import { ELEMENT, POSITION } from '../../engine/roster.js';
@@ -68,7 +68,7 @@ export function createDetails(core, widgets, openSheet) {
     let html = cardHead(id, ROLE_OF(c)) + statGrid([['체력', actual.maxHp ?? actual.hp ?? s.hp, s.hp],
       ['공격', actual.atk ?? s.atk, s.atk], ['마공', actual.matk ?? s.matk, s.matk],
       ['방어', actual.def ?? s.def, s.def], ['마방', actual.mdef ?? s.mdef, s.mdef]]);
-    if (blessing) html += '<p class="seat-blessing">' + esc(blessingText(blessing)) + '</p>';
+    if (blessing) html += '<p class="seat-blessing">' + esc(blessingDetail(blessing)) + '</p>';
     else if (run?.blessings[id]) html += '<ul class="stl">' + blessLine(run, id) + '</ul>';
     const heir = from ? heirBlock(h.skill ?? heirloomSkill(from), from.name, from) : '';
     html += '<h4>특성</h4><p>' + esc(traitText(c.trait)) + '</p>' + heir + '<h4>스킬</h4>' + c.skills.map(sk => skillBlock(sk, c)).join('');
@@ -105,12 +105,12 @@ export function createDetails(core, widgets, openSheet) {
       if (rows.some(r => r[1] !== r[2])) html += '<p class="sm">취소선 수치는 전투 시작 시 기본값입니다. (축복·필드·상태·최후의 일인 반영)</p>';
     }
     const extra = [];
-    if (shown.lastStand) extra.push('<li><i class="bad">최후의 일인</i>공격력·마법공격력 ×1.5, 치명타율 +25%</li>');
+    if (shown.lastStand) extra.push('<li><i class="bad">최후의 일인</i>공격력·마법공격력 ×1.5, 치명타율 +25%p</li>');
     if (!B.blessingViews?.has(id)) {
       B.blessingViews?.set(id, Run.getBlessingView?.(run, B.door.index, B.party, id));
     }
     const blessing = B.blessingViews?.get(id);
-    if (blessing) extra.push('<li class="seat-blessing">' + esc(blessingText(blessing)) + '</li>');
+    if (blessing) extra.push('<li class="seat-blessing">' + esc(blessingDetail(blessing)) + '</li>');
     else if (run.blessings[id]) extra.push(blessLine(run, id));
     html += '<h4>상태</h4>' + statusList(shown.buffs, extra, B.artifacts);
     const traitNote = /^syn_/.test(c.trait.type) ? (init && init.activeTrait ? ' (발동 중)' : ' (미발동)') : c.trait.type === 'pos_stat_boost' ? (c.trait.pos === i ? ' (배치 효과 발동)' : ' (' + POSITION[c.trait.pos] + ' 전용)') : '';
@@ -130,7 +130,8 @@ export function createDetails(core, widgets, openSheet) {
       html += statGrid([['공격', s.atk, raw.atk], ['마공', s.matk, raw.matk], ['방어', s.def, raw.def], ['마방', s.mdef, raw.mdef]]);
     }
     const strong = Object.keys(ELEMENT).filter(el => core.Logic.getElementalMultiplier(el, def.element) > 1);
-    if (strong.length) html += '<p class="sm">약점 상성: ' + strong.map(el => ELEMENT[el]).join('·') + ' 속성 공격 시 피해 ×' + core.Logic.getElementalMultiplier(strong[0], def.element) + '</p>';
+    if (strong.length) html += '<p class="sm">약점 상성: ' + strong.map(el => ELEMENT[el]).join('·') + ' 속성 공격 시 피해 ×' +
+      formatMultiplier(core.Logic.getElementalMultiplier(strong[0], def.element)) + '</p>';
     const extra = [];
     if (shown.charging) extra.push('<li><i class="bad">충전 중</i>힘을 모으는 중 · 다음 턴 강력한 공격 발동</li>');
     for (const affix of affixLines(shown)) extra.push('<li><i class="affix">' + esc(affix.name) + '</i>' + esc(affix.text) + '</li>');
@@ -168,8 +169,10 @@ export function createDetails(core, widgets, openSheet) {
     const focusField = () => $('#b-field')?.focus({ preventScroll: true });
     const dailyLine = run.daily ? [shortRiftDate(run.daily.spec?.dayKey), riftKindLabel(run.daily.kind),
       '정산한 전투 ' + (run.stats?.turns ?? 0) + '턴'].filter(Boolean).join(' · ') : '';
-    openSheet('전장·유물', relicStrip(core, artifacts, { temporary: B.temporaryRelic }) + (dailyLine ? '<p>' + esc(dailyLine) + '</p>' : '') +
-      (block(region) || '<p>지역 규칙 없음</p>') + block(quirk) +
+    openSheet('전장·유물', (run.features?.relics === false ? '' : relicStrip(core, artifacts, { temporary: B.temporaryRelic })) +
+      (dailyLine ? '<p>' + esc(dailyLine) + '</p>' : '') +
+      (run.features?.regionRules === false ? '' : block(region) || '<p>지역 규칙 없음</p>') +
+      (run.features?.quirks === false ? '' : block(quirk)) +
       (contract ? '<h4>계약 · ' + esc(contract.name) + ' · ' + contractStatus(run, B, contract) +
         '</h4><p>' + esc(contract.rule) + '</p>' : ''), {
       latest: focusSlot != null ? `[data-slot="${focusSlot}"]` : undefined, onClose: focusField

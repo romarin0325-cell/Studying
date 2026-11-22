@@ -26,7 +26,8 @@ import { AFFIXES } from '../content/affixes.js';
 import { BOSSES } from '../content/bosses.js';
 import { QUIRKS } from '../content/quirks.js';
 import { REGIONS } from '../content/regions.js';
-import { BOSS_PREVIEW_TURNS, STRONG_BEAT, THREE_BEAT, TIDE_BEATS, TIDE_STRONG_BEAT } from '../content/tempo.js';
+import { BOSS_PREVIEW_TURNS, STRONG_BEAT, THREE_BEAT, TIDE_BEATS, TIDE_STRONG_BEAT, wildBeatPattern } from '../content/tempo.js';
+import { WILD_PATTERNS } from './roster.js';
 
 export { QUIRKS } from '../content/quirks.js';
 export { AFFIXES } from '../content/affixes.js';
@@ -37,6 +38,18 @@ const strip = html => String(html).replace(/<[^>]*>/g, '');
 const FIELD_POOL = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'valentine', 'arena', 'reaper_realm', 'gale'];
 const DEFENSE_BUFFS = ['guard', 'barrier', 'magic_guard', 'damage_half', 'evasion'];
 const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
+const sameSkill = (a, b) => a.name === b.name && a.type === b.type;
+
+function skillSourceKey(role, owner, skill) {
+  const slots = owner?.skills || [];
+  const direct = slots.indexOf(skill);
+  if (direct !== -1) return [role, owner.id, direct + 1].join('/');
+  const first = slots.findIndex(slot => sameSkill(slot, skill));
+  if (first !== -1 && first === slots.findLastIndex(slot => sameSkill(slot, skill))) {
+    return [role, owner.id, first + 1].join('/');
+  }
+}
+
 const RANDOM_DAMAGE = ['random_mult', 'random_mult_moon_boost', 'delayed_random_attack'];
 const isScripted = action => !!action && action.name !== '일반 공격' && (action.rate === 0 || !!action.isChargeStart || !!action.chargeReset);
 
@@ -60,14 +73,17 @@ export function affixView(id, enemy) {
   return { id, name: AFFIXES[id].name, active: true, text: text[id] };
 }
 
+const enemyPattern = (enemy, pattern) => pattern === 'threeBeat' && Object.hasOwn(WILD_PATTERNS, enemy.id)
+  ? WILD_PATTERNS[enemy.id] : pattern;
 function patternActions(enemy, pattern, openingIntent) {
   if (pattern === 'tide') return TIDE_BEATS;
-  if (pattern !== 'threeBeat' && pattern !== 'introFixed') return [];
+  const wild = wildBeatPattern(pattern);
+  if (!wild && pattern !== 'threeBeat' && pattern !== 'introFixed') return [];
   const basic = THREE_BEAT[0];
   const skill = enemy.skills.find(s => isAttack(s) && (!openingIntent || s.type === openingIntent));
   const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic;
   if (pattern === 'introFixed') return openingIntent ? [signature, basic, THREE_BEAT[2]] : [signature];
-  return THREE_BEAT.map(beat => !beat.signature ? beat : skill
+  return (wild?.beats ?? THREE_BEAT).map(beat => !beat.signature ? beat : skill
     ? { ...signature, power: signature.power * beat.power } : basic);
 }
 
@@ -75,10 +91,15 @@ const lessonTideAfter = (lesson, turn) => lesson?.tideAfter && turn === lesson.s
 
 export function enemyBeats(core, enemy, pattern, openingIntent, lesson) {
   if (pattern !== 'bossScript') {
-    return patternActions(enemy, pattern, openingIntent).map(({ name, type, power }, index) => {
+    const selected = enemyPattern(enemy, pattern);
+    const wild = wildBeatPattern(selected);
+    return patternActions(enemy, selected, openingIntent).map(({ name, type, power, vulnerable, isChargeStart }, index) => {
       const turn = index + 1;
       const action = lesson?.steps[index] ?? (pattern === 'tide' ? lessonTideAfter(lesson, turn) : null);
-      return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : { turn, name, type, power };
+      return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : {
+        turn, name, type: isChargeStart ? 'charge' : type, power,
+        ...(wild && { pattern: selected }), ...(wild && vulnerable && { vulnerable })
+      };
     });
   }
   const decide = coreHooks.get(core)?.decide ?? core.Logic.decideEnemyAction;
@@ -253,6 +274,7 @@ export function create(core, opts) {
     pendingNext: null, lastDownIdx: -1, intentCache: null, lastCalc: null, prev: null,
     lastHit: null, carry: 0, lastStandDone: false, turnStartHp: 0,
     gained: [], heirloomsUsed: 0, heirloomKills: 0, rescues: [], enemyDowns: [], bestHit: null,
+    fought: new Set(), heirloomUses: [], forms: {}, killingHit: null, lastEnemyKiller: null,
     charge: 0, chargeSpent: false, dueEffects: [], betMet: false, fieldSeen: false,
     lessonOwner: null, lessonPreviews: 0, lessonResolved: 0, enemyAction: null
   };
@@ -306,10 +328,31 @@ export function create(core, opts) {
   const refOf = unit => (unit === host.battle.enemy ? enemyRef() : allyRef(unit.pos));
   const localTurn = enemy => host.battle.turn - (enemy.relayEnteredTurn || 1) + 1;
   const isAlly = unit => !!unit && unit !== host.battle.enemy && !!unit.proto;
+  let sourceCards;
+  function allySkillSource(source, skill, delayed) {
+    if (skill.name === host.NORMAL_ATTACK.name) return;
+    if (skill.heirloom) return skillSourceKey('ally', skill.heirFrom && GameUtils.getCardById(skill.heirFrom), skill);
+    const native = skillSourceKey('ally', source.proto, skill);
+    if (!delayed) return native;
+    // Roulette passes the original card skill. A delayed copy keeps its exact name and type.
+    sourceCards ??= GameUtils.getAllCards();
+    const original = sourceCards.find(card => card.skills.includes(skill));
+    if (original) return skillSourceKey('ally', original, skill);
+    if (native) return native;
+    const owners = sourceCards.filter(card => card.skills.some(slot => sameSkill(slot, skill)));
+    if (owners.length === 1) return skillSourceKey('ally', owners[0], skill);
+  }
   const hasAffix = (enemy, id) => !!enemy && Array.isArray(enemy.affixes) && enemy.affixes.includes(id);
   const players = () => (host.battle.players || []).filter(Boolean);
 
-  function push(ev) { ev.s = B.prev; B.events.push(ev); return ev; }
+  function push(ev) {
+    const fighter = ev.t === 'act' && ev.who.side === 'enemy' ? ev.target
+      : ['act', 'await', 'stunned'].includes(ev.t) ? ev.who : null;
+    if (fighter?.side === 'ally') B.fought.add(host.state.deck[fighter.idx]);
+    ev.s = B.prev;
+    B.events.push(ev);
+    return ev;
+  }
 
   function recordEnemyDown() {
     if (B.lastDownIdx === B.enemyIdx) return false;
@@ -323,6 +366,7 @@ export function create(core, opts) {
     }
     const treasure = hasAffix(host.battle.enemy, 'treasure');
     B.enemyDowns.push({ idx: B.enemyIdx, treasure });
+    B.lastEnemyKiller = B.killingHit;
     if (bet?.kind === 'kill_on_turn' && bet.turn === host.battle.turn) B.betMet = true;
     push({ t: 'enemyDown', who: enemyRef(), treasure });
     return true;
@@ -367,6 +411,14 @@ export function create(core, opts) {
       if (z.hp !== a.hp) {
         const ev = { t: 'hp', who, delta: z.hp - a.hp, amount: Math.abs(z.hp - a.hp), cause: describeCause(cause, who) };
         const c = B.lastCalc;
+        if (who.side === 'enemy' && ev.delta < 0) {
+          // Includes delayed attacks and death counters. Unattributed effects have no actor.
+          const actor = c?.target === unit && c.hpBefore > unit.hp && c.result.dmg > 0
+            ? c.by : cause?.rule === 'overflow' ? B.lastEnemyKiller : null;
+          const companion = actor && host.state.deck.includes(actor) ? actor : null;
+          if (companion) B.fought.add(companion);
+          if (unit.hp <= 0) B.killingHit = companion;
+        }
         if (c && c.target === unit && ev.delta < 0) {
           c.info.dmg = c.result.dmg;  // Companion can modify a death hit after the calculation returns.
           ev.calc = c.info;
@@ -380,7 +432,10 @@ export function create(core, opts) {
         const from = a.buffs[id] || 0, to = z.buffs[id] || 0;
         if (from !== to) push({ t: 'buff', who, id, from, to });
       });
-      if (z.form !== a.form) push({ t: 'form', who, name: z.name });
+      if (z.form !== a.form) {
+        if (who.side === 'ally') B.forms[z.form] = host.state.deck[who.idx];
+        push({ t: 'form', who, name: z.name });
+      }
       if (z.dead && !a.dead) push({ t: 'down', who });
     };
     now.allies.forEach((z, i) => diffUnit(allyRef(i), b.players[i], was.allies[i], z));
@@ -414,6 +469,11 @@ export function create(core, opts) {
 
   /* ---------- G/H: setting units up ---------- */
   function applyAllyModifier(p, modifier) {
+    if (modifier.repeatStacks) {
+      const tenths = 10 + modifier.repeatStacks;
+      p.atk = Math.floor(p.atk * tenths / 10);
+      p.matk = Math.floor(p.matk * tenths / 10);
+    }
     if (modifier.atk) {
       p.atk = Math.floor(p.atk * modifier.atk);
       p.matk = Math.floor(p.matk * modifier.atk);
@@ -428,6 +488,8 @@ export function create(core, opts) {
   function setupAllies() {
     for (const p of players()) {
       p.relayModifiers = [];
+      const stacks = opts.repeatStacks?.[p.id] ?? 0;
+      if (stacks > 0) addAllyModifier(p, { repeatStacks: stacks });
       if (pattern !== 'introFixed' && Number.isFinite(opts.tempo?.startMp)) p.mp = Math.min(getMaxMana(p), opts.tempo.startMp);
       if (Q.ally) {
         addAllyModifier(p, Q.ally);
@@ -440,7 +502,9 @@ export function create(core, opts) {
   function setupEnemy(enemy) {
     const def = queue[B.enemyIdx] || {};
     enemy.affixes = (def.affixes || []).slice();
-    enemy.relayBeats = patternActions(enemy, pattern, opts.openingIntent);
+    const selected = enemyPattern(def, pattern);
+    enemy.relayPattern = inTide() && wildBeatPattern(selected) ? 'tide' : selected;
+    enemy.relayBeats = patternActions(enemy, enemy.relayPattern, opts.openingIntent);
     const { hp, atk, matk, def: defense, mdef } = enemyStatsWithQuirk(def.stats, quirk, opts.enemyAttackScale);
     Object.assign(enemy, { hp, maxHp: hp, atk, matk, def: defense, mdef, baseAtk: atk, baseMatk: matk, baseDef: defense, baseMdef: mdef });
     if (hasAffix(enemy, 'tough')) enemy.buffs.damage_half = 3;
@@ -466,17 +530,23 @@ export function create(core, opts) {
   }
 
   /* ---------- E/F: what happens when an ally falls ---------- */
+  function nextAlly(from = currentPlayer()) {
+    return players().find(p => !p.isDead && p.pos > from.pos);
+  }
+  function inheritance(victim) {
+    const heir = rules.heirloom && nextAlly(victim);
+    const skill = heir && heirloomSkill(victim.proto);
+    return skill ? { heir, skill } : null;
+  }
   function afterAllyDown(victim) {
     if (!isAlly(victim) || victim.retreated) return;
-    if (rules.heirloom) {
-      const skill = heirloomSkill(victim.proto);
-      const heir = players().find(p => !p.isDead && p.pos > victim.pos);
-      if (skill && heir) {
-        heir.skills = heir.skills.filter(s => !s.heirloom);
-        heir.skills.push(skill);
-        B.gained.push({ to: heir.id, from: victim.id, name: skill.name, form: victim.formId, skill });
-        push({ t: 'heirloom', from: allyRef(victim.pos), to: allyRef(heir.pos), skill: { name: skill.name, type: skill.type, tier: skill.tier || 1 } });
-      }
+    const handoff = inheritance(victim);
+    if (handoff) {
+      const { heir, skill } = handoff;
+      heir.skills = heir.skills.filter(s => !s.heirloom);
+      heir.skills.push(skill);
+      B.gained.push({ to: heir.id, from: victim.id, name: skill.name, form: victim.formId, skill });
+      push({ t: 'heirloom', from: allyRef(victim.pos), to: allyRef(heir.pos), skill: { name: skill.name, type: skill.type, tier: skill.tier || 1 } });
     }
     if (quirk === 'martyr') {
       const alive = players().filter(p => !p.isDead);
@@ -502,8 +572,15 @@ export function create(core, opts) {
   B.onSkill = function (source, target, skill, delayed, go) {
     flush();
     const who = refOf(source);
-    if (skill.heirloom && !delayed && isAlly(source)) B.heirloomsUsed++;
-    push({ t: 'act', who, target: refOf(target), delayed, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
+    if (skill.heirloom && !delayed && isAlly(source)) {
+      B.heirloomsUsed++;
+      const by = source.baseCardId || source.id;
+      const held = B.gained.findLast(heirloom => heirloom.to === by) ?? opts.heirlooms?.[by];
+      const from = held?.from ?? B.forms[skill.heirFrom] ?? skill.heirFrom;
+      if (from) B.heirloomUses.push({ by, from, skill: skill.name });
+    }
+    const sourceKey = allySkillSource(source, skill, delayed);
+    push({ t: 'act', who, target: refOf(target), delayed, sourceKey, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
     B.ctx.push({ kind: 'act', who, skill, delayed, source });
     B.lastHit = null;
     const formId = source.formId;
@@ -525,7 +602,10 @@ export function create(core, opts) {
           push({ t: 'rule', rule: 'echo', who: enemyRef(), amount: extra });
           target.hp -= extra; target.tookDamageThisTurn = true;
           flush();
-          if (target.hp <= 0) host.winBattle();
+          if (target.hp <= 0) {
+            B.killingHit = source.baseCardId || source.id;
+            host.winBattle();
+          }
         }
         // H thorns: physical attackers take a quarter back, never below 1 HP
         if (hasAffix(enemy, 'thorns') && skill.type === 'phy' && !source.isDead && source.hp > 1) {
@@ -609,7 +689,8 @@ export function create(core, opts) {
   B.onEndEnemyTurn = function (go) {
     const enemy = host.battle.enemy;
     finishEnemyAction();
-    if (lessonStep(localTurn(enemy))?.rule === 'charged_hit') enemy.isCharging = false;
+    const turn = localTurn(enemy);
+    if (lessonStep(turn)?.rule === 'charged_hit' || wildBeat(enemy, turn)?.chargeReset) enemy.isCharging = false;
     applyDefenseProtocol(enemy);
     if (hasAffix(enemy, 'leech') && enemy.hp > 0) {           // H leech: heal half of what it dealt this turn
       const dealt = B.turnStartHp - players().reduce((n, p) => n + Math.max(0, p.hp), 0);
@@ -635,9 +716,13 @@ export function create(core, opts) {
     if (action.type === 'rest') return action;
     const salience = actionSalience(action);
     const power = enemy.tookDamageThisTurn ? retaliationPower(action, enemy) ?? action.val : action.val;
+    const def = queue[B.enemyIdx];
+    const sourceKey = !action.isChargeStart && (def.source
+      ? skillSourceKey('ally', GameUtils.getCardById(def.source), action)
+      : skillSourceKey(isBoss() ? 'boss' : 'wild', def, action));
     push({
       t: 'act', who: enemyRef(), target: isAttack(action) && !action.isChargeStart ? allyRef(target.pos) : enemyRef(), delayed: false,
-      actionId: actionId(action), charge: !!action.isChargeStart, salience, ult: salience === 'boss',
+      sourceKey: sourceKey || undefined, actionId: actionId(action), charge: !!action.isChargeStart, salience, ult: salience === 'boss',
       skill: { name: action.name, type: action.isChargeStart ? 'sup' : action.type, tier: salience === 'boss' ? 3 : 1, cost: 0, val: power, effects: (action.effects || []).map(e => e.type) }
     });
     return action;
@@ -660,10 +745,10 @@ export function create(core, opts) {
   B.onCalc = function (source, target, skill, lines, result) {
     const b = host.battle;
     const cause = B.ctx.at(-1);
-    const vulnerable = target === b.enemy && tideVulnerability(target);
-    if (vulnerable && result.dmg > 0) {
-      result.dmg = tideDamage(result.dmg, vulnerable);
-      lines.push(`${REGIONS.tide_cycle.opening}: 받는 피해 ${vulnerable}배`);
+    const opening = target === b.enemy && enemyOpening(target);
+    if (opening && result.dmg > 0) {
+      result.dmg = openingDamage(result.dmg, opening);
+      lines.push(`${opening.name}: 받는 피해 ${opening.vulnerable}배`);
     }
     if (target === b.enemy) result.dmg = lessonGuardDamage(target, result.dmg, b.turn);
     if (target === b.enemy && cause?.source === source && isAlly(source)) {
@@ -702,15 +787,29 @@ export function create(core, opts) {
   function tideVulnerability(enemy) {
     if (!inTide()) return 0;
     const turn = localTurn(enemy);
-    if (pattern === 'tide') return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
+    if (enemy.relayPattern === 'tide') return enemy.relayBeats[(turn - 1) % TIDE_BEATS.length]?.vulnerable ?? 0;
     return turn > 0 && turn % 4 === 0 ? 1.5 : 0;
   }
-  const tideDamage = (damage, vulnerable) => vulnerable ? Math.floor(damage * vulnerable) : damage;
+  function wildBeat(enemy, turn) {
+    return wildBeatPattern(enemy.relayPattern) && enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
+  }
+  function enemyOpening(enemy) {
+    const tide = tideVulnerability(enemy);
+    if (tide) return { name: REGIONS.tide_cycle.opening, vulnerable: tide };
+    const turn = localTurn(enemy);
+    const beat = wildBeat(enemy, turn);
+    return beat?.vulnerable && !lessonAction(turn, enemy.isCharging) ? beat : null;
+  }
+  const openingDamage = (damage, opening) => opening ? Math.floor(damage * opening.vulnerable) : damage;
   function teachesLesson() {
     return !!lesson && B.enemyIdx <= lesson.maxUsesPerRoom && (B.lessonOwner === null || B.lessonOwner === B.enemyIdx);
   }
   function lessonStep(turn) {
     return teachesLesson() ? lesson.steps[turn - 1] : null;
+  }
+  function lessonAction(turn, charging) {
+    const step = lessonStep(turn);
+    return step && (step.rule !== 'charged_hit' || charging) ? step : null;
   }
   function tideRipple(turn) {
     return inTide() && teachesLesson() ? lessonTideAfter(lesson, turn) : null;
@@ -806,13 +905,13 @@ export function create(core, opts) {
   }
   function decide(enemy) {
     const turn = localTurn(enemy);
-    const step = lessonStep(turn);
-    if (step && (step.rule !== 'charged_hit' || enemy.isCharging)) return step;
+    const step = lessonAction(turn, enemy.isCharging);
+    if (step) return step;
     const ripple = tideRipple(turn);
     if (ripple) return ripple;
     if (enemy.relayBeats.length && (pattern !== 'introFixed' || opts.openingIntent)) {
       const beat = enemy.relayBeats[(turn - 1) % enemy.relayBeats.length];
-      const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
+      const strong = wildBeatPattern(enemy.relayPattern)?.strong ?? (enemy.relayPattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT);
       return { ...beat, val: beat.power, strong: pattern !== 'introFixed' && (turn - 1) % enemy.relayBeats.length === strong - 1 };
     }
     const vulnerable = tideVulnerability(enemy);
@@ -836,6 +935,8 @@ export function create(core, opts) {
     const physical = action.type === 'phy';
     const ward = physical ? 'barrier' : 'magic_guard';
     const preventedBy = ts.evasion >= 100 ? 'evasion' : target.buffs[ward] ? ward : null;
+    // Telegraphs give damage on hit. An active evasion buff also gives a miss branch in the relay forecast.
+    const canEvade = !!target.buffs.evasion && ts.evasion > 0;
     const val = physical ? es.atk : es.matk;
     const def = physical ? ts.def : ts.mdef;
     const random = (action.effects || []).find(e => e.type === 'random_mult');
@@ -844,51 +945,58 @@ export function create(core, opts) {
     const reduce = 1 - StatusRules.damageReduction(target).rate;
     const hit = m => preventedBy ? 0 : Math.floor(val * m * (100 / (100 + def)) * reduce);
     const hitPower = retaliationPower(action, enemy);
-    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy };
+    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy, canEvade };
     const met = enemy.tookDamageThisTurn ? true : mayHitEnemy ? null : false;
     const otherwise = hit(lo), whenMet = hit(hitPower);
     const range = [met === true ? whenMet : otherwise, met === false ? otherwise : whenMet];
-    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy };
+    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy, canEvade };
+  }
+  function enemyResponse({ action: a, intentRule }, target, mayHitEnemy) {
+    const stunned = !!host.battle.enemy.buffs.stun;
+    const attack = !stunned && !a.isChargeStart && isAttack(a);
+    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null };
+    const preventedBy = stunned ? 'stun' : hit.preventedBy;
+    const resourceEffect = intentRule === 'mana_drain' ? {
+      kind: 'mp', mode: a.drainFlat ? 'flat' : 'all',
+      amount: a.drainFlat ?? target.mp, before: target.mp,
+      after: preventedBy ? target.mp : Math.max(0, target.mp - (a.drainFlat ?? target.mp)),
+      onHit: true, preventedBy
+    } : null;
+    return { ...hit, attack, stunned, preventedBy, resourceEffect };
   }
   function currentIntent(target = currentPlayer(), mayHitEnemy = true) {
     const b = host.battle, enemy = b.enemy;
     const local = localTurn(enemy);
-    const stunned = !!enemy.buffs.stun;
     let cache = B.intentCache;
     if (!cache || cache.enemy !== enemy || cache.turn !== b.turn) {
-      const action = stunned ? lessonStep(local) ?? { type: 'stun', name: '기절' } : decide(enemy);
+      const action = enemy.buffs.stun ? lessonStep(local) ?? { type: 'stun', name: '기절' } : decide(enemy);
       cache = B.intentCache = { enemy, turn: b.turn, action, intentRule: actionRule(action), target: currentPlayer() };
     }
     const a = cache.action;
+    const { attack, stunned, range, conditions, preventedBy, resourceEffect } = enemyResponse(cache, target, mayHitEnemy);
     const kind = stunned ? 'stun' : a.isChargeStart ? 'charge' : a.type;
+    const wildOpening = wildBeatPattern(enemy.relayPattern) && enemyOpening(enemy);
     const salience = stunned ? 'ordinary' : actionSalience(a);
-    const attack = !stunned && !a.isChargeStart && isAttack(a);
-    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null };
-    const { range, conditions, preventedBy } = hit;
-    const resourceEffect = cache.intentRule === 'mana_drain' ? {
-      kind: 'mp', mode: a.drainFlat ? 'flat' : 'all',
-      amount: a.drainFlat ?? target.mp, before: target.mp,
-      after: stunned || preventedBy ? target.mp : Math.max(0, target.mp - (a.drainFlat ?? target.mp)),
-      onHit: true, preventedBy: stunned ? 'stun' : preventedBy
-    } : null;
     const extra = (a.effects || []).map(e => e.type).filter(t => t !== 'random_mult');
     const lethal = attack && range[1] >= target.hp;
     const lethalText = !lethal ? null : range[0] >= target.hp ? '명중 시 쓰러짐' : '쓰러질 수 있음';
     return {
       kind, name: stunned ? '기절' : a.name, target: attack ? allyRef(target.pos) : ruleTarget(a, cache.intentRule, target),
       localTurn: local, damageRange: range, conditions, resourceEffect, salience,
-      nextDistinct: nextDistinct(a, local), actionId: actionId(a), rule: cache.intentRule, preventedBy: stunned ? 'stun' : preventedBy,
+      nextDistinct: nextDistinct(a, local), actionId: actionId(a), rule: cache.intentRule, preventedBy,
       ...(cache.intentRule === 'cleanse' && { debuffs: enemyDebuffs(enemy) }),
       ...(local === lesson?.transferBeforeLocalTurn && enemy.lessonProtocol && { defenseProtocol: enemy.lessonProtocol }),
       ...(a.bonus && { bonus: a.bonus, stat: a.stat }),
       ...(a.reduction && { reduction: a.reduction }),
       ...(a.vulnerable && { vulnerable: a.vulnerable }),
+      ...(wildOpening && { vulnerable: wildOpening.vulnerable, wildOpening: true }),
       type: kind, ult: salience === 'boss', ...(attack && { power: a.val ?? 1, dmg: range, lethal, lethalText, extra }),
       ...(!attack && extra.length && { effects: extra })
     };
   }
   function nextDistinct(action, local) {
     const enemy = host.battle.enemy;
+    if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action);
     if (action.isChargeStart) {
       const next = lessonStep(local + 1) ?? enemy.skills.find(skill => skill.name === (action.chargeSkillId ?? '디바인블레이드'));
       if (next) return { inTurns: 1, name: next.name, kind: next.type, power: next.val };
@@ -911,14 +1019,25 @@ export function create(core, opts) {
     const next = countdown(true);
     return next && next.name !== action.name ? next : null;
   }
+  function nextWildAction(enemy, local, current) {
+    const charging = !enemy.buffs.stun && current?.isChargeStart || enemy.isCharging && !current?.chargeReset;
+    const next = lessonAction(local + 1, charging) ?? wildBeat(enemy, local + 1);
+    return { name: next.name, kind: next.isChargeStart ? 'charge' : next.type,
+      power: next.power ?? next.val, inTurns: 1, ...(next.vulnerable && { vulnerable: next.vulnerable }) };
+  }
   function countdown(futureOnly = false) {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
+    if (wildBeatPattern(enemy.relayPattern)) {
+      const next = nextWildAction(enemy, local, B.intentCache?.action);
+      return { ...next, charge: next.kind === 'charge' };
+    }
     if (pattern === 'threeBeat' || pattern === 'tide') {
-      const strong = pattern === 'tide' ? TIDE_STRONG_BEAT : STRONG_BEAT;
+      const tide = enemy.relayPattern === 'tide';
+      const strong = tide ? TIDE_STRONG_BEAT : STRONG_BEAT;
       const period = enemy.relayBeats.length;
       let inTurns = (strong - local % period + period) % period;
       if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
-      return pattern === 'tide' ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns)
+      return tide ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns)
         : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
     }
     if (inTide()) {
@@ -964,6 +1083,7 @@ export function create(core, opts) {
   function nextEnemy() {
     const burn = region === 'ember_carry' ? Math.min(2, host.battle.enemy.buffs.burn || 0) : 0;
     B.enemyIdx++;
+    B.killingHit = null;
     host.battle.enemy = buildBattleEnemy(host);
     setupEnemy(host.battle.enemy);
     host.battle.enemy.relayEnteredTurn = host.battle.turn + 1;   // its own turn count starts with its first action
@@ -1079,8 +1199,7 @@ export function create(core, opts) {
       };
       const result = original.calc.call(Logic, player, enemy, attack, b.fieldBuffs, b.activeTraits, null,
         host.state.mode, host.state.deck, b.turn, host.state.artifacts);
-      const tideHit = tideDamage(result.dmg, tideVulnerability(enemy));
-      const hit = lessonGuardDamage(enemy, tideHit, b.turn);
+      const hit = lessonGuardDamage(enemy, openingDamage(result.dmg, enemyOpening(enemy)), b.turn);
       return { hit, total: hit * (hits + Number(chargedSkill(skill))), forcedCrit: !!result.isCrit };
     };
     active = B; B.probing = true;
@@ -1116,11 +1235,38 @@ export function create(core, opts) {
     }
     return { kind, reduction };
   }
-  function nextAlly() {
-    return players().find(p => !p.isDead && p.pos > host.battle.currentPlayerIdx);
-  }
   function canRetreat() {
     return B.awaiting && !B.retreatUsed && !B.outcome && !!nextAlly();
+  }
+  function relayHit(target, mayHitEnemy) {
+    const { range, canEvade, resourceEffect } = enemyResponse(B.intentCache, target, mayHitEnemy);
+    return { min: canEvade ? 0 : Math.min(...range), max: Math.max(...range), resourceEffect };
+  }
+  function previewRelay() {
+    // settle() has already chosen this enemy's action before exposing an awaiting turn.
+    const player = B.awaiting && !B.outcome ? currentPlayer() : null;
+    const hit = player && relayHit(player, true);
+    const danger = !hit || hit.max < player.hp ? 'none' : hit.min >= player.hp ? 'certain' : 'possible';
+    const handoff = danger !== 'none' ? inheritance(player) : null;
+    const held = handoff?.heir.skills.find(skill => skill.heirloom);
+    const next = player && !B.retreatUsed ? nextAlly(player) : null;
+    const retreat = { available: !!next, next: null };
+    if (next) {
+      const { min, max, resourceEffect } = relayHit(next, false);
+      retreat.next = { id: next.id, name: next.name, hp: next.hp, hpAfter: [Math.max(0, next.hp - max), Math.max(0, next.hp - min)] };
+      if (resourceEffect && !resourceEffect.preventedBy) retreat.next.mpAfter = resourceEffect.after;
+      const reserves = host.battle.delayedEffects.filter(effect => effect.source === player).map(effect => effect.skill.name);
+      if (reserves.length) retreat.cancelsReserve = [...new Set(reserves)];
+    }
+    return {
+      danger, retreat,
+      stand: {
+        falls: danger === 'none' ? 'no' : danger,
+        inheritor: handoff ? { id: handoff.heir.id, name: handoff.heir.name } : null,
+        heirloom: handoff ? { skill: handoff.skill.name, from: player.id } : null,
+        replaces: held ? { skill: held.name } : null
+      }
+    };
   }
   function survivors() { return host.battle.players.map(p => !!p && (!p.isDead || !!p.retreated)); }
   function heirloomsGained() { return structuredClone(B.gained); }
@@ -1185,6 +1331,7 @@ export function create(core, opts) {
       const intent = currentIntent(player, false);
       return { next: allyRef(player.pos), intent, dmg: intent.dmg || [0, 0], lethal: !!intent.lethal };
     },
+    previewRelay,
     options() {
       if (!B.awaiting || B.outcome) return [];
       const player = currentPlayer();
@@ -1221,6 +1368,11 @@ export function create(core, opts) {
         retreated: host.battle.players.map(p => !!p?.retreated),
         rescues: B.rescues.map(rescue => ({ ...rescue })),
         heirloomsGained: heirloomsGained(),
+        heirloomTransfers: B.gained.map(({ to, from, name }) => ({ to, from, skill: name })),
+        heirloomUses: B.heirloomUses.map(use => ({ ...use })),
+        forms: { ...B.forms },
+        fought: [...B.fought],
+        lastEnemyKiller: B.lastEnemyKiller,
         heirloomsUsed: B.heirloomsUsed,
         heirloomKills: B.heirloomKills,
         lastStands: Number(B.lastStandDone),

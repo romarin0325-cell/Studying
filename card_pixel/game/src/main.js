@@ -72,7 +72,10 @@ document.addEventListener('visibilitychange', () => {
 mountPage();
 const sheets = createSheet(stage);
 const navigation = createNavigation({ core, roster, widgets, stage, audio, music, sheets, store, dailyStore });
-const settings = createSettings(stage, audio, music, sheets, navigation.resetData);
+const settings = createSettings(stage, audio, music, sheets, navigation.resetData, {
+  available: () => !navigation.run && !!$('#title.on, #hub.on'),
+  start: navigation.replayTutorial
+});
 
 settings.loadSettings();
 settings.syncFullscreen();
