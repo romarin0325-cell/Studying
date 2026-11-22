@@ -5,17 +5,17 @@
 ## 목적
 - 카드 게임(`card/`, DREAMWEAVER)을 **도트 로그라이트 릴레이 RPG**로 다시 만든다.
 - 최우선은 켜자마자 재미있고 "다음이 보고 싶다"는 느낌이다. 보수적인 최소 수정이 목표가 아니다. **우아한 숫자보다 파격적인 재미.**
-- 그대로 살리는 것: 영구 사망 3인 릴레이 전투, 특성·스킬·캐릭터성(`card/game`의 규칙).
+- 그대로 살리는 것: 영구 사망 3인 릴레이 전투, 특성·스킬·캐릭터성(`card/game`에서 가져와 `game/core/`에서 관리하는 규칙).
 
 ## 원칙
-1. **전투 규칙의 원본은 `card/game`이다.** RELAYMARE는 그 파일을 고치지 않고 감싼다(`game/tools/core-bundle.mjs`). 전투 규칙을 바꾸려면 `card/game`을 고치고, 그러면 카드 게임 화면 다섯 개(card, legacy, astra, lumen, claude)도 함께 바뀐다.
+1. **RELAYMARE 전투 규칙의 원본은 `game/core/`다.** 2026-11-21에 `card/game`의 규칙 파일 네 개를 그대로 복사해 왔다(출처 커밋은 `game/core/README.md`). `game/tools/core-bundle.mjs`가 이 파일들을 읽는다. `game/core/`를 고치면 RELAYMARE만 바뀌고 `card/`의 카드 게임들은 바뀌지 않는다. 반대로 `card/game`의 이후 변경도 RELAYMARE에 들어오지 않는다.
 2. 로그라이트 층(문, 꿈의 변덕, 적 접두사, 유품, 최후의 일인, 경제)은 `game/src/engine/bridge.js`와 `game/src/engine/run.js`에만 둔다.
 3. **공용 구조 먼저.** 캐릭터·풀·적 생성은 `game/src/engine/roster.js` 하나에 둔다. 지금은 공용 풀(`common`)을 쓰고, 던전별 풀은 나중에 `pool('set:<기본덱 id>')`로 바꾼다.
 4. 숫자는 시뮬레이션(`game/tools/sim.mjs`)으로 맞추되 목표는 균형이 아니라 **순간**이다. 현재 기준: 예고를 읽는 플레이로 클리어 60~70%, 1,000 넘는 한 방이 나오는 판 25% 이상.
 5. 그림
    - 이미지 생성은 **모두 오른쪽 보기**로 만든다. 적은 코드에서 좌우를 뒤집는다(생성 도구가 "왼쪽 보기" 지시를 반복해서 어겼다, 2026-11-18).
-   - 크기: 동료 58/64/72/80px(키 등급, 기본 72px), 생물 48/64/80px(크기 등급), 보스 104px.
-   - 그림에 코드로 덧칠하지 않는다. 비율은 생성에서 고치고, 색·외곽선은 후처리(`game/tools/cut-sprites.mjs`)로 맞춘다.
+   - 지금 그림은 2026-11-21 GPT 도트 150종(`art/pixel-v2/`, 소유자 채택)이다. 캐릭터마다 머리 크기·비율·대표 공격 자세가 맞춰져 있다(기립 동료 머리 약 29px, 키 60~69px, 보스 약 105px).
+   - 그림에 코드로 덧칠하지 않는다. 원본의 픽셀과 배율을 그대로 쓰고, `game/tools/build-sprites.mjs`가 불투명 경계로 잘라 기준점과 얼굴 상자를 적는다. 화면에서는 1배·2배 같은 정수 배율로만 그린다.
 6. 연출은 지금 **두 단계만** 정했다.
    - 조용한 공용: 일반 공격, 1~2티어, 보조, 상태이상. 짧은 돌진·베기·탄.
    - 큰 공용: 3티어 공격, 보스 필살, 유품. 이름판 + 시전자에게 2배 카메라 + 스킬 데이터로 고른 모양 6종(광선·운석·비·폭발·돌진·연타) + 충격 한 번.
@@ -68,7 +68,7 @@
 위임할 때마다 `history/model-log.md`에 한 줄: 날짜, 일, 모델, 걸린 시간, 쓸만한가, 문제.
 
 ## 검증 (바뀐 것만)
-- 전투 규칙·로그라이트 규칙: `node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs`
+- 전투 규칙·로그라이트 규칙: `node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/skill-motions.test.mjs card_pixel/game/tests/text.test.mjs`
 - 숫자: `node card_pixel/game/tools/sim.mjs 300` (비교: `--plain`, `--no-heirloom`, `--no-laststand`)
 - 화면·실시간: `node card_pixel/game/tests/play.mjs` (설치된 Chrome으로 세 판을 끝까지 자동 플레이, 화면은 `game/tests/shots/`)
 - 빌드: `node card_pixel/game/build.mjs` → `game/dist/Relaymare.html`

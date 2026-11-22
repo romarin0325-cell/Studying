@@ -8,8 +8,11 @@ import { fileURLToPath } from 'node:url';
 import * as Bridge from '../src/engine/bridge.js';
 import { makeBossLesson } from '../src/content/boss-lessons.js';
 import { create as makeRoster } from '../src/engine/roster.js';
+import * as Run from '../src/engine/run.js';
 import { createStage } from '../src/stage/stage.js';
 import { createMoves } from '../src/ui/battle/moves.js';
+import { intentLines } from '../src/ui/battle/hud.js';
+import { createCoreRoster } from './support/core.mjs';
 import { coreBundle } from '../tools/core-bundle.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -75,6 +78,7 @@ test('Soul Drain previews zero HP damage, the incoming MP, and the actual respon
     for (let i = 0; i < 5; i++) assert.deepEqual(b.previewRetreat(), preview);
     assert.deepEqual([preview.intent.target, preview.intent.resourceEffect.before, preview.intent.resourceEffect.after],
       [{ side: 'ally', idx: 2 }, 18, 0]);
+    assert.equal(b.previewRelay().retreat.next.mpAfter, 0);
     const response = b.retreat().find(event => event.t === 'rule' && event.actionId === preview.intent.actionId);
     assert.deepEqual([response.target, response.before, response.after], [preview.intent.target, 18, 0]);
   }
@@ -200,6 +204,78 @@ test('tempo tide has a fixed x2.5 spell and a fourth-beat opening even on a stro
   assert.equal(rest.intent.type, 'rest');
   assert.equal(rest.intent.vulnerable, 1.5);
   assert.equal(last(b.act(0), 'await').intent.kind, 'phy');
+});
+
+test('wild golem and night bat repeat their announced actions for six local turns', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const cases = [
+    ['golem', [
+      ['힘 충전 중', 'charge', 0, '다음 턴 강타 · 물리 ×1.6'],
+      ['강타', 'phy', 1.6, '다음 턴 약공 · 물리 ×0.55'],
+      ['약공', 'phy', 0.55, '다음 턴 힘 충전 중']
+    ]],
+    ['night_bat', [
+      ['흡혈 이빨', 'phy', 1.6, '다음 턴 빈틈 · 휴식 · 받는 피해 ×1.3'],
+      ['빈틈', 'rest', 0, '다음 턴 일반 공격 · 물리 ×1'],
+      ['일반 공격', 'phy', 1, '다음 턴 흡혈 이빨 · 물리 ×1.6']
+    ]]
+  ];
+  for (const [id, expected] of cases) {
+    const enemy = roster.wildOf(id, 1, { stats: { hp: 99999, atk: 40, matk: 0, def: 60, mdef: 60 } });
+    const preview = Bridge.enemyBeats(S.RelayCore, enemy, 'threeBeat');
+    assert.deepEqual(preview.map(({ name, type, power }) => [name, type, power]),
+      expected.map(([name, type, power]) => [name, type, power]));
+    const b = battle({ enemies: [enemy], tempo: { pattern: 'threeBeat' } });
+    let events = b.start();
+    for (let turn = 1; turn <= 6; turn++) {
+      const [name, kind, power, future] = expected[(turn - 1) % expected.length];
+      const { intent, countdown } = last(events, 'await');
+      assert.deepEqual([intent.localTurn, intent.name, intent.kind, intent.power ?? 0], [turn, name, kind, power]);
+      const [current, chip] = intentLines(intent, countdown);
+      assert.equal(chip, future);
+      assert.equal(current, kind === 'rest' ? '빈틈 · 적 휴식 · 받는 피해 ×1.3' :
+        '내 행동 뒤 · ' + name + (kind === 'charge' ? '' : ' · HP ' + intent.damageRange[0]));
+      events = b.act(0);
+      const action = events.find(e => e.t === 'act' && e.who.side === 'enemy');
+      const damage = events.find(e => e.t === 'hp' && e.who.side === 'ally' && e.delta < 0);
+      if (kind === 'rest') assert.equal(action, undefined);
+      else assert.deepEqual([action.skill.name, action.skill.val, action.charge], [name, power, kind === 'charge']);
+      if (power) assert.equal(damage.amount, intent.damageRange[0]);
+      else assert.equal(damage, undefined);
+    }
+  }
+});
+
+test('night bat opening multiplies preview and damage once, except when a lesson or tide overrides it', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const bat = roster.wildOf('night_bat', 1, { stats: { hp: 99999, atk: 1, matk: 0, def: 60, mdef: 60 } });
+  const lesson = makeBossLesson('iris_love', 2, 0);
+  const cases = [
+    [{ ...bat, id: 'test_dummy' }, { pattern: 'threeBeat' }, undefined, {}, {}],
+    [bat, { pattern: 'threeBeat' }, undefined, { 2: 1.3, 5: 1.3 }, { 2: '빈틈' }],
+    [bat, { pattern: 'threeBeat', lesson }, undefined, { 5: 1.3 }, { 2: '소울드레인 예행' }],
+    [bat, { pattern: 'tide', lesson }, { id: 'tide_cycle' }, { 4: 1.5 },
+      { 1: '일반 공격', 2: '소울드레인 예행', 3: '조류의 일격', 4: '물러간 조류' }]
+  ];
+  const baseline = [];
+  for (const [enemy, tempo, region, multipliers, named] of cases) {
+    const b = battle({ party: ['red_dragon'], enemies: [enemy], tempo, region });
+    let events = b.start();
+    b.host.battle.players[0].baseCrit = 0;
+    for (let turn = 1; turn <= 6; turn++) {
+      const wait = last(events, 'await');
+      const { intent } = wait;
+      if (named[turn]) assert.equal(intent.name, named[turn]);
+      if (named[turn + 1]) assert.equal(intent.nextDistinct.name, named[turn + 1]);
+      assert.equal(intent.vulnerable, multipliers[turn]);
+      const expected = Math.floor((baseline[turn] ?? option(b, '일반 공격').preview.dmg) * (multipliers[turn] ?? 1));
+      if (!(turn in baseline)) baseline[turn] = expected;
+      assert.equal(option(b, '일반 공격').preview.dmg, expected);
+      events = b.act(0);
+      const hit = events.find(e => e.t === 'hp' && e.who.side === 'enemy');
+      assert.equal(hit.amount, expected);
+    }
+  }
 });
 
 test('review 1: Red Moon wins when the death counter defeats the last enemy', () => {
@@ -504,6 +580,128 @@ test('rule D: the last fighter cannot retreat', () => {
   const b = battle({ party: ['luna'], seed: 2 });
   b.start();
   assert.equal(b.canRetreat(), false);
+});
+
+test('the seeded floor 2 relay forecast agrees with both actual outcomes against the second enemy', () => {
+  const { core, roster } = createCoreRoster();
+  const run = Run.createRun({ core, roster, dungeonId: 'ember_volcano', seed: 26019140, tempoVersion: 2 });
+  for (const id of ['dragon_miko', 'zeke']) assert.equal(Run.chooseStartPick(run, id).ok, true);
+  assert.equal(Run.enterBattleDoor(run, { floor: 1, index: 0, partyIds: ['werebear', 'lightning_sage', 'zeke'] }).ok, true);
+  const first = Bridge.create(core, Run.battleOptions(run));
+  first.start();
+  for (const name of ['강타', '강타', '강타', '일반 공격', '일반 공격']) first.act(option(first, name).index);
+  assert.equal(first.outcome, 'win');
+  assert.equal(Run.settleBattle(run, first.summary()).ok, true);
+  assert.equal(Run.resolveReinforcement(run, { key: run.pending.key, id: 'hellhound', replaceId: null }).ok, true);
+  assert.equal(Run.leaveRoom(run).ok, true);
+  assert.equal(Run.nextFloor(run).ok, true);
+  assert.equal(Run.enterBattleDoor(run, { floor: 2, index: 0, partyIds: ['dragon_miko', 'siren', 'zeke'] }).ok, true);
+  function reachDecision() {
+    const b = Bridge.create(core, Run.battleOptions(run));
+    let events = b.start();
+    for (const name of ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격', '일반 공격']) events = b.act(option(b, name).index);
+    assert.deepEqual([b.state().turn, b.enemyIndex, b.state().allies[0].hp], [6, 1, 1]);
+    assert.deepEqual(last(events, 'await').intent.damageRange, [56, 56]);
+    return b;
+  }
+  const retreating = reachDecision(), standing = reachDecision();
+  const before = retreating.state();
+  const expected = {
+    danger: 'certain',
+    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [451, 451] } },
+    stand: { falls: 'certain', inheritor: { id: 'siren', name: '세이렌' }, heirloom: { skill: '드래곤스파클', from: 'dragon_miko' }, replaces: null }
+  };
+  const random = Math.random;
+  Math.random = () => { throw new Error('previewRelay must not roll'); };
+  try {
+    for (let i = 0; i < 3; i++) assert.deepEqual(retreating.previewRelay(), expected);
+  } finally {
+    Math.random = random;
+  }
+  assert.deepEqual(retreating.state(), before);
+  assert.deepEqual(retreating.heirloomsGained(), []);
+  assert.ok(last(retreating.retreat(), 'retreat'));
+  assert.deepEqual([retreating.state().cur, retreating.state().allies[1].hp], [1, 451]);
+  assert.deepEqual(retreating.previewRelay().retreat, { available: false, next: null });
+  const handoff = last(standing.act(0), 'heirloom');
+  assert.deepEqual([handoff.to.idx, handoff.skill.name], [1, expected.stand.heirloom.skill]);
+  assert.equal(standing.heirloomsGained()[0].from, expected.stand.heirloom.from);
+});
+
+test('relay forecast distinguishes possible death and reports ascending HP after a variable hit', () => {
+  const enemy = quietEnemy(99999, { atk: 100 });
+  enemy.skills = [{ name: '시험용 예고', type: 'phy', rate: 1, effects: [{ type: 'random_mult', min: 1, max: 3 }] }];
+  const b = battle({ party: ['fairy', null, 'red_dragon'], enemies: [enemy] });
+  const [low, high] = last(b.start(), 'await').intent.damageRange;
+  assert.ok(low < high);
+  b.host.battle.players[0].hp = high;
+  const preview = b.previewRelay();
+  assert.equal(preview.danger, 'possible');
+  assert.equal(preview.stand.falls, 'possible');
+  assert.equal(preview.stand.inheritor.id, 'red_dragon');
+  const [nextLow, nextHigh] = b.previewRetreat().dmg;
+  assert.deepEqual(preview.retreat.next.hpAfter, [420 - nextHigh, 420 - nextLow]);
+  b.host.battle.players[0].hp = low;
+  assert.equal(b.previewRelay().danger, 'certain');
+});
+
+test('relay forecast accounts for guard, barrier and active evasion', () => {
+  const b = battle({ enemies: [quietEnemy(99999, { atk: 100 })] });
+  const [damage] = last(b.start(), 'await').intent.damageRange;
+  const player = b.host.battle.players[0];
+  player.hp = damage - 1;
+  assert.equal(b.previewRelay().danger, 'certain');
+  for (const defense of ['guard', 'barrier', 'evasion']) {
+    player.buffs = { [defense]: 1 };
+    assert.equal(b.previewRelay().danger, defense === 'evasion' ? 'possible' : 'none', defense);
+  }
+  player.baseEva = 100;
+  assert.equal(b.previewRelay().danger, 'none', 'guaranteed evasion');
+});
+
+test('relay forecast can show a lethal hit with no inheritor or retreat for the last companion', () => {
+  const b = battle({ party: ['luna'], enemies: [quietEnemy(99999, { atk: 100 })] });
+  b.start();
+  const player = b.host.battle.players[0];
+  player.hp = 1;
+  player.baseEva = -100;
+  assert.deepEqual(b.previewRelay(), {
+    danger: 'certain', retreat: { available: false, next: null },
+    stand: { falls: 'certain', inheritor: null, heirloom: null, replaces: null }
+  });
+  assert.ok(last(b.act(0), 'lose'));
+  assert.deepEqual(b.heirloomsGained(), []);
+});
+
+test('relay forecast hands off the transformed form attack and identifies the heirloom it replaces', () => {
+  const b = battle({
+    party: ['miracle_larva', 'ash'], enemies: [quietEnemy(99999, { atk: 40 })],
+    heirlooms: { ash: { from: 'red_dragon' } }
+  });
+  b.start();
+  for (const name of ['기적의우화', '기적의우화 → 오로라윙']) b.act(option(b, name).index);
+  assert.equal(b.state().allies[0].form, 'aurora_wing');
+  const player = b.host.battle.players[0];
+  player.hp = 1;
+  player.baseEva = -100;
+  const { stand } = b.previewRelay();
+  assert.deepEqual(stand, {
+    falls: 'certain', inheritor: { id: 'ash', name: '애쉬' },
+    heirloom: { skill: '뷰티토네이도', from: 'miracle_larva' }, replaces: { skill: '파이어브레스' }
+  });
+  const inherited = last(b.act(0), 'heirloom');
+  assert.equal(inherited.skill.name, stand.heirloom.skill);
+  assert.equal(b.heirloomsGained()[0].form, 'aurora_wing');
+  assert.deepEqual(b.summary().forms, { mirror_cocoon: 'miracle_larva', aurora_wing: 'miracle_larva' });
+  assert.deepEqual(b.summary().heirloomTransfers, [{ to: 'ash', from: 'miracle_larva', skill: '뷰티토네이도' }]);
+  assert.deepEqual(b.options().filter(skill => skill.heirloom).map(skill => skill.name), [stand.heirloom.skill]);
+});
+
+test('relay forecast lists the outgoing fighter’s pending reserves only once', () => {
+  const b = battle({ party: ['prism_twin', 'ash'], enemies: [quietEnemy()] });
+  b.start();
+  b.act(option(b, '일루미네이션').index);
+  assert.deepEqual(b.previewRelay().retreat.cancelsReserve, ['일루미네이션']);
 });
 
 test('rule C: enemies arrive one after another and allies keep their state', () => {
@@ -943,15 +1141,24 @@ test('Summary accounts for a retreat, death, heirloom, last stand, treasure, and
       to: 'snow_rabbit', from: 'red_dragon', name: '파이어브레스', form: 'red_dragon',
       skill: Bridge.heirloomSkill(S.RelayCore.GameUtils.getCardById('red_dragon'))
     }],
+    heirloomTransfers: [{ to: 'snow_rabbit', from: 'red_dragon', skill: '파이어브레스' }],
+    heirloomUses: [{ by: 'snow_rabbit', from: 'red_dragon', skill: '파이어브레스' }],
+    forms: {}, fought: ['fairy', 'red_dragon', 'snow_rabbit'], lastEnemyKiller: 'snow_rabbit',
     heirloomsUsed: 1, lastStands: 1, enemyDowns: [{ idx: 0, treasure: true }, { idx: 1, treasure: false }],
     bestHit: { amount: hit.amount, by: 'snow_rabbit', skill: '파이어브레스' }, turns: 3, bet: null
   });
   summary.bestHit.amount = 0;
   summary.enemyDowns[0].treasure = false;
   summary.rescues[0].lethal = false;
+  summary.heirloomTransfers[0].from = 'fairy';
+  summary.heirloomUses[0].by = 'fairy';
+  summary.fought.pop();
   assert.equal(b.summary().bestHit.amount, hit.amount);
   assert.equal(b.summary().enemyDowns[0].treasure, true);
   assert.equal(b.summary().rescues[0].lethal, true);
+  assert.equal(b.summary().heirloomTransfers[0].from, 'red_dragon');
+  assert.equal(b.summary().heirloomUses[0].by, 'snow_rabbit');
+  assert.ok(b.summary().fought.includes('snow_rabbit'));
 });
 
 test('a rescue uses the minimum forecast on the outgoing fighter, including equality', () => {
@@ -978,6 +1185,8 @@ test('an inherited delayed skill counts actual landings once per enemy', () => {
   assert.equal(b.outcome, 'win');
   assert.equal(b.summary().heirloomKills, 2);
   assert.equal(b.summary().heirloomsUsed, 1);
+  assert.deepEqual(b.summary().heirloomUses, [{ by: 'fairy', from: 'phantom', skill: '나이트메어' }]);
+  assert.equal(b.summary().lastEnemyKiller, 'fairy');
 });
 
 test('using an heirloom before a lethal counter or status does not credit the kill', () => {
@@ -988,6 +1197,7 @@ test('using an heirloom before a lethal counter or status does not credit the ki
   assert.equal(counter.outcome, 'win');
   assert.equal(counter.summary().heirloomsUsed, 1);
   assert.equal(counter.summary().heirloomKills, 0);
+  assert.equal(counter.summary().lastEnemyKiller, 'red_moon');
 
   const status = battle({ party: ['fairy'], enemies: [quietEnemy(500)],
     heirlooms: { fairy: { from: 'red_dragon', name: '파이어브레스' } } });
@@ -1009,6 +1219,7 @@ test('using an heirloom before a lethal counter or status does not credit the ki
     assert.equal(statusKilled, true);
     assert.equal(status.outcome, 'win');
     assert.equal(status.summary().heirloomKills, 0);
+    assert.equal(status.summary().lastEnemyKiller, null);
   } finally {
     runtime.applySkillEffects = apply;
   }

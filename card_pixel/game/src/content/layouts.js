@@ -1,7 +1,7 @@
 export const LAYOUTS = {
   expedition: [
     [{ type: 'wild', reward: 1 }],
-    [{ type: 'wild', reward: 1 }, { type: 'wild', risk: true, reward: 2 }],
+    [{ type: 'wild', reward: 1 }, { type: 'wild', risk: true, reward: 2, relicReward: true }],
     [{ type: 'spring' }, { type: 'altar' }, { type: 'event' }],
     [{ type: 'gate', reward: 3 }],
     [{ type: 'event' }, { type: 'treasure' }],

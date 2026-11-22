@@ -1,6 +1,6 @@
 import { $, $$, esc, svg } from './dom.js';
 import { openCredits } from './credits.js';
-import { storage } from './storage.js';
+import { SETTINGS_KEY, storage } from './storage.js';
 import * as Save from '../engine/save.js';
 import { DUNGEONS } from '../content/dungeons.js';
 
@@ -11,12 +11,14 @@ const ICON = {
 };
 export const tools = () => '<button class="b-full ic" aria-label="' + (document.fullscreenElement ? '전체화면 나가기' : '전체화면') + '"><span class="i-full">' + ICON.full + '</span><span class="i-shrink">' + ICON.shrink + '</span></button><button class="b-set ic" aria-label="설정">' + ICON.gear + '</button>';
 
-const SETTINGS_KEY = 'relaymare.settings';
-
-function readingSettings(raw) {
-  return Save.normalizeSettings?.(raw) ?? {
+function readingSettings(raw, effectsOn) {
+  const settings = Save.normalizeSettings?.(raw) ?? {
     sound: raw?.sound !== false, music: raw?.music !== false, rim: raw?.rim !== false,
     speed: raw?.speed === 2 ? 2 : 1, textScale: raw?.textScale === 1.25 ? 1.25 : 1, markers: raw?.markers !== false
+  };
+  return { ...settings,
+    shake: typeof raw?.shake === 'boolean' ? raw.shake : effectsOn,
+    flash: typeof raw?.flash === 'boolean' ? raw.flash : effectsOn
   };
 }
 
@@ -32,12 +34,13 @@ export function settingsSnapshot(stage, audio, music) {
   const root = document.documentElement;
   return {
     sound: audio.soundOn, music: music.enabled, rim: stage.RIM.on, speed: stage.clock.speed,
+    shake: stage.S.shakeOn, flash: stage.S.flashOn,
     textScale: root.classList.contains('large-text') ? 1.25 : 1,
     markers: root.classList.contains('emphasize-markers')
   };
 }
 
-export function createSettings(St, audio, music, sheets, clearRecords) {
+export function createSettings(St, audio, music, sheets, clearRecords, replayTutorial) {
   const { sfx } = audio;
   const { openSheet, sheet } = sheets;
   let textScale = 1;
@@ -69,11 +72,13 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
   function loadSettings() {
     let raw;
     try { raw = JSON.parse(storage.getItem(SETTINGS_KEY) || '{}'); } catch { /* Use defaults. */ }
-    const saved = readingSettings(raw);
+    const saved = readingSettings(raw, !St.reducedMotion());
     audio.soundOn = saved.sound;
     music.setEnabled(saved.music);
     St.RIM.on = saved.rim;
     St.clock.speed = saved.speed;
+    St.S.shakeOn = saved.shake;
+    St.S.flashOn = saved.flash;
     textScale = saved.textScale;
     markers = saved.markers;
     syncReading();
@@ -90,7 +95,7 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
     saveSettings();
   }
 
-  function settingsSheet() {
+  function settingsSheet({ opener } = {}) {
     const row = (k, label, on, sub = '', value = on ? '켜짐' : '꺼짐') =>
       `<button class="tog${on ? ' on' : ''}" data-set="${k}" aria-pressed="${on}"><b>${label}</b>
         ${sub ? `<small>${sub}</small>` : ''}<span>${value}</span></button>`;
@@ -101,17 +106,25 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
     const credits = $('#title.on, #hub.on') ? '<button class="btn" id="meta-credits">크레딧</button>' : '';
     openSheet('설정', '<div class="meta-sheet togs">' + row('sound', '소리', audio.soundOn, '효과음') +
       row('music', '음악', music.enabled, '배경 음악') +
+      row('shake', '화면 흔들림', St.S.shakeOn) +
+      row('flash', '번쩍임', St.S.flashOn) +
       row('rim', '윤곽선 강조', St.RIM.on, '동료와 적의 외곽선을 밝게 표시') +
       row('text', '글자', textScale === 1.25, '', textScale === 1.25 ? '크게(125%)' : '보통') +
       row('markers', '표식 강조', markers, '선택 ✓ · 위험 !') +
       row('speed', '전투 속도', St.clock.speed === 2, '', St.clock.speed + '배') +
       (fsSupported ? row('full', '전체화면', !!document.fullscreenElement, '브라우저 상단 바 숨기기') : '') +
-      backup + credits + '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>');
+      (replayTutorial?.available() ? '<button class="btn" id="meta-replay-tutorial">튜토리얼 다시 보기</button>' : '') +
+      backup + credits + '<button class="btn meta-danger" id="meta-erase">기록 지우기</button></div>', { opener });
+    $('#meta-replay-tutorial')?.addEventListener('click', replayTutorial.start);
     $$('#sheet .tog').forEach(b => b.addEventListener('click', async () => {
       const k = b.dataset.set;
       const scroll = $('#sh-body').scrollTop;
       if (k === 'sound') { audio.soundOn = !audio.soundOn; audio.unlockAudio(); }
       else if (k === 'music') music.setEnabled(!music.enabled);
+      else if (k === 'shake' || k === 'flash') {
+        St.S[k + 'On'] = !St.S[k + 'On'];
+        if (!St.S[k + 'On']) St.S[k] = 0;
+      }
       else if (k === 'rim') St.RIM.on = !St.RIM.on;
       else if (k === 'text') textScale = textScale === 1 ? 1.25 : 1;
       else if (k === 'markers') markers = !markers;
@@ -137,7 +150,7 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
         <button class="btn" id="meta-erase-back">취소</button>
         <button class="btn meta-danger" id="meta-erase-confirm">모든 기록 지우기</button>
       </div>`);
-      $('#meta-erase-back').addEventListener('click', settingsSheet);
+      $('#meta-erase-back').addEventListener('click', () => settingsSheet());
       $('#meta-erase-confirm').addEventListener('click', clearRecords);
     });
   }
@@ -148,7 +161,7 @@ export function createSettings(St, audio, music, sheets, clearRecords) {
     audio.unlockAudio();
     sfx.tap();
     if (t.classList.contains('b-full')) toggleFullscreen();
-    else settingsSheet();
+    else settingsSheet({ opener: t });
   });
 
   return { loadSettings, syncFullscreen, settingsSheet };

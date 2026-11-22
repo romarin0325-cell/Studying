@@ -2,10 +2,25 @@ import { $, $$, esc } from '../dom.js';
 import { background } from '../assets.js';
 import { CONTRACTS } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
-import { LAYOUTS } from '../../content/layouts.js';
+import { episodeGreeting } from '../../content/episode-greetings.js';
 import { hubLineup, sceneActors } from './hub.js';
 import { runRecordSheet } from './records.js';
 import { openBattleLog } from '../battle/log.js';
+import { featureFlags } from '../../engine/meta.js';
+import { TERMS } from '../glossary.js';
+import { chronicle } from '../../engine/history.js';
+import { outcomeText, storyLine } from '../story-lines.js';
+
+const TAGS = {
+  boss: '보스전 출전', gate: '문지기전 출전', battle: '일반전 출전', bench: '대기에서 귀환',
+  'boss-standby': '보스전 대기', 'gate-standby': '문지기전 대기', 'battle-standby': '일반전 대기',
+  unrecorded: '출전 여부 미기록'
+};
+
+function companionStory(entry, card) {
+  const line = storyLine(entry, card);
+  return line ? `<span class="companion-story" title="${esc(line)}">${esc(line)}</span>` : '';
+}
 
 export function recruitScreen(node, { run, rewards, profile, widgets, sheets, choices, preview, endingPending, changeChoices, confirm }) {
   const won = rewards.result === 'win';
@@ -18,30 +33,40 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
   const limit = won ? rewards.recruitLimit : 1;
   const mustRecruit = won && candidates.length > 0 && !profile.lead && run.firstIntroClear;
   const mustReserve = !won && candidates.length > 0;
-  const gateFloor = LAYOUTS[dungeon.layout].findIndex(doors => doors.some(door => door.type === 'gate')) + 1;
   const { card, face } = widgets;
-  const reason = id => won ? `${run.room?.party?.includes(id) ? run.floor : gateFloor}층 출전 · 생환` : '출전 기록 있음';
+  const history = chronicle(run);
+  const reason = id => {
+    const tag = history[id]?.participation;
+    if (tag) return TAGS[tag];
+    return won ? TAGS[rewards.recruitTags[id]] : '출전 기록 있음';
+  };
 
+  node.classList.add('screen-split');
   node.innerHTML = `
-    <div class="meta-scene meta-return-stage" style="background-image:url(${background(dungeon.background)})"></div>
-    <div class="meta-recruit-body">
-      <div class="meta-recruit-heading">
-        <h2>${won ? '동료 영입' : '꿈 조각'}</h2>
-        <button class="btn" id="meta-run-record">기록</button>
-        ${run.lastBattleLog?.length ? '<button class="btn log-button" id="meta-battle-log">전투 기록</button>' : ''}
+    <div class="fixed-top">
+      <div class="meta-scene meta-return-stage" style="background-image:url(${background(dungeon.background)})"></div>
+      <div class="meta-recruit-body">
+        <div class="meta-recruit-heading">
+          <h2>${won ? '동료 영입' : '꿈 조각'}</h2>
+          <button class="btn" id="meta-run-record">기록</button>
+          ${run.lastBattleLog?.length ? '<button class="btn log-button" id="meta-battle-log">전투 기록</button>' : ''}
+        </div>
+        ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} · ${esc(stampContract.name)}</p>` : ''}
+        <p class="meta-mission-earned" hidden>동료 초대 가능</p>
+        ${candidates.length ? `<p>${won ? `돌아온 동료 중 ${limit === 2 ? '두 명까지' : '한 명을'} 영입하세요.` : '다음 원정 후보 한 명 예약'}</p>`
+          : `<p>${won ? '새로 영입할 동료가 없습니다.' : '예약할 동료가 없습니다.'}</p>`}
       </div>
-      ${stampDungeon && stampContract ? `<p class="meta-contract-stamp">${esc(stampDungeon.name)} · ${esc(stampContract.name)}</p>` : ''}
-      <p class="meta-mission-earned" hidden>동료 초대 가능</p>
-      ${candidates.length ? `<p>${won ? `생환자 중 최대 ${limit}명 영입` : '다음 원정 후보 한 명 예약'}</p>`
-        : `<p>${won ? '새로 영입할 동료가 없습니다.' : '예약할 동료가 없습니다.'}</p>`}
+    </div>
+    <div class="scroll-list">
       <div class="meta-recruit-list">${candidates.map(id => `<button class="meta-panel meta-recruit-card" data-candidate="${id}">
         <span class="meta-face">${face(id, 44)}</span>
-        <span><b>${esc(card(id).name)}</b><small>${esc(reason(id))}</small></span>
+        <span><b>${esc(card(id).name)}</b>${won ? `<span class="companion-tag">${outcomeText(history[id])}</span>` : ''}
+          ${reason(id) ? `<small>${esc(reason(id))}</small>` : ''}${companionStory(history[id], card)}</span>
         <span class="meta-recruit-mark" aria-hidden="true"></span>
       </button>`).join('')}</div>
-      <p class="meta-feedback" role="status"></p>
     </div>
-    <div class="meta-recruit-actions">
+    <div class="meta-recruit-actions fixed-foot">
+      <p class="meta-feedback" role="status"></p>
       <button class="btn go" id="meta-recruit-confirm"></button>
     </div>
   `;
@@ -59,7 +84,7 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
       button.setAttribute('aria-pressed', selected);
       $('.meta-recruit-mark', button).textContent = selected ? '선택' : '';
     }
-    $('.meta-mission-earned', node).hidden = !preview(selection(active))?.missions?.length;
+    $('.meta-mission-earned', node).hidden = !featureFlags(profile).missions || !preview(selection(active))?.missions?.length;
     action.textContent = active.length
       ? won ? `${active.map(id => card(id).name).join(' · ')} · 관측소에 영입` : '다음 원정 후보로 예약'
       : endingPending ? '엔딩 보기' : '관측소로 돌아가기';
@@ -85,6 +110,16 @@ export function recruitScreen(node, { run, rewards, profile, widgets, sheets, ch
     if (!confirm(selection(choices))) feedback.textContent = '선택을 다시 확인해 주세요.';
   });
   renderSelection();
+}
+
+export function recruitReceipt(ids, { card, face }, history) {
+  return '<div class="recruit-receipts" role="status">' + ids.map(id => {
+    const greeting = episodeGreeting(id);
+    return '<div class="recruit-receipt win" data-recruited="' + esc(id) + '"><span class="run-face">' + face(id, 28) + '</span>' +
+      '<b>' + esc(card(id).name) + '</b><span class="companion-tag">' + TERMS.recruit.short + '</span>' +
+      (greeting ? '<blockquote class="episode-greeting">' + esc(greeting) + '</blockquote>' : '') +
+      companionStory(history?.[id]?.[0], card) + '</div>';
+  }).join('') + '</div>';
 }
 
 export function missionRecruitSheet({ period, widgets, sheets, claim, next, remaining }) {

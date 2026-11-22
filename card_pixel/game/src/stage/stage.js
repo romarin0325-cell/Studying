@@ -1,8 +1,12 @@
 /* RelayStage: the pixel stage. A low-resolution canvas (2x integer upscale), a virtual clock so
    every animation can be sped up or skipped, sprite variants (flash, waiting, shadow, boss),
    a camera that punches in at an integer zoom, cached backgrounds, props and particles. It knows nothing about rules. */
+import { SPRITE_SOCKET_OVERRIDES } from '../content/sprite-sockets.js';
+import { MOTION_FRAME, motionPoint, socketPoint, spriteBox } from '../ui/battle/motion.js';
+
 export function createStage(ASSETS) {
   const SCALE = 2;
+  const reducedMotion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
   /* ---------- virtual clock ---------- */
   const clock = { t: 0, speed: 1, fast: false, slow: 1, paused: false, waiters: [], tweens: [] };
@@ -116,8 +120,17 @@ export function createStage(ASSETS) {
 
   /* ---------- stage state ---------- */
   const RIM = { on: true, color: [226, 216, 255], alpha: 0.6 };
-  const S = { W: 195, H: 200, BASE: 172, bg: 'cave', actors: [], parts: [], props: [], shake: 0, flash: 0, dark: 0, danger: 0, tint: null, tintA: 0,
+  const effectsOn = !reducedMotion();
+  let shake = 0, flash = 0;
+  const S = { W: 195, H: 200, BASE: 172, bg: 'cave', actors: [], parts: [], props: [], dark: 0, danger: 0, tint: null, tintA: 0,
+    shakeOn: effectsOn, flashOn: effectsOn,
+    get shake() { return this.shakeOn ? shake : 0; },
+    set shake(value) { shake = this.shakeOn ? value : 0; },
+    get flash() { return this.flashOn ? flash : 0; },
+    set flash(value) { flash = this.flashOn ? value : 0; },
     cam: { k: 1, x: 0, y: 0 }, beads: { burn: 0, divine: 0, x: 0, y: 0 } };
+  // The gallery reads the effective amplitudes through the existing window.__game.clock hook.
+  Object.defineProperty(clock, 'screenEffects', { get: () => ({ shake: S.shake, flash: S.flash }) });
   let cv, ctx, fxLayer, bgCache = null;
 
   const ELEMENT_COLORS = {
@@ -137,6 +150,17 @@ export function createStage(ASSETS) {
   const tall = a => (meta(a, 'idle') ? meta(a, 'idle').fy + 1 : 72);
   const headY = a => footY(a) - tall(a);
   const chestY = a => footY(a) - Math.round(tall(a) * 0.5);
+  function socket(a, name) {
+    const pose = ASSETS.sp[a.sprite + '-' + a.pose] ? a.pose : 'idle';
+    const key = a.sprite + '-' + pose;
+    return socketPoint({ ...a, y: S.BASE + a.y }, meta(a, pose),
+      { ...ASSETS.sockets?.[key], ...SPRITE_SOCKET_OVERRIDES[key] }, name);
+  }
+  function actorBox(a, m, now) {
+    const box = spriteBox(a, m, S.BASE);
+    const bob = a.pose === 'idle' && !a.still && !a.casting ? Math.round(Math.sin(now / 420 + a.phase) * 0.6) : 0;
+    return { ...box, top: box.top + bob };
+  }
 
   /* ---------- particles ---------- */
   function sparks(x, y, n, colors, pow, grav) {
@@ -158,8 +182,9 @@ export function createStage(ASSETS) {
       S.parts.push({ bz: 1, t: 0, dur: (dur || 0.3) * (0.7 + Math.random() * 0.3), x0: x + Math.cos(ang) * r, y0: y + Math.sin(ang) * r * 0.7, x1: x, y1: y, cx: x + Math.cos(ang + 0.9) * r * 0.6, cy: y + Math.sin(ang + 0.9) * r * 0.4, c: colors[i % colors.length], s: i % 3 ? 1 : 2, x, y, trail: [] });
     }
   }
-  function ring(x, y, color, radius, life) { S.parts.push({ ring: 1, x, y, r: 2, to: radius || 26, life: life || 0.3, max: life || 0.3, c: color }); }
-  function slash(x, y, color, dir) { S.parts.push({ sl: 1, x, y, life: 0.2, max: 0.2, c: color || '#ffffff', dir: dir || 1 }); }
+  function ring(x, y, color, radius = 26, life = 0.3, still = false) {
+    S.parts.push({ ring: 1, x, y, r: still ? radius : 2, to: radius, life, max: life, c: color });
+  }
   function dust(x, y) { for (let i = 0; i < 8; i++) S.parts.push({ x: x + (Math.random() - 0.5) * 18, y: (y == null ? S.BASE : y) - 1, vx: (Math.random() - 0.5) * 40, vy: -10 - Math.random() * 22, g: 60, life: 0.3 + Math.random() * 0.25, c: i % 2 ? '#8c7486' : '#6b5566', s: i % 3 ? 1 : 2 }); }
   function gem(x0, y0, x1, y1, dur, done) { S.parts.push({ bz: 1, gem: 1, t: 0, dur, x0, y0, x1, y1, cx: x0 + (Math.random() - 0.5) * 40, cy: Math.min(y0, y1) - 34, x: x0, y: y0, done, trail: [] }); }
   function updateParts(dt) {
@@ -266,9 +291,7 @@ export function createStage(ASSETS) {
     const look = a.white > 0 ? 'white' : (a.wait > 0.5 ? (a.look === 'base' ? 'wait' : a.look) : a.look);
     const img = variant(IMG[key] ? key : a.sprite + '-idle', look);
     if (!img) return;
-    const bob = a.pose === 'idle' && !a.still ? Math.round(Math.sin(now / 420 + a.phase) * 0.6) : 0;
-    const base = footY(a), cx = Math.round(X(a)), top = Math.round(base + a.oy - (m.fy + 1)) + bob;
-    const left = a.flip ? Math.round(cx - (m.w - m.cx)) : Math.round(cx - m.cx);
+    const base = footY(a), { cx, left, top } = actorBox(a, m, now);
     const sw = Math.round(m.w * 0.6);
     ctx.globalAlpha = 0.36 * a.alpha; ctx.fillStyle = '#000';
     ctx.fillRect(cx - (sw >> 1), base - 1, sw, 2); ctx.fillRect(cx - (sw >> 1) + 2, base + 1, sw - 4, 1);
@@ -309,9 +332,6 @@ export function createStage(ASSETS) {
         const k = 1 - p.life / p.max, r = p.r + (p.to - p.r) * k; ctx.fillStyle = p.c; ctx.globalAlpha = 1 - k;
         for (let i = 0; i < 24; i++) { const ang = i / 24 * 6.283; ctx.fillRect(Math.round(p.x + Math.cos(ang) * r), Math.round(p.y + Math.sin(ang) * r * 0.55), 2, 2); }
         ctx.globalAlpha = 1;
-      } else if (p.sl) {
-        const n = Math.min(22, Math.round((1 - p.life / p.max) * 52));
-        for (let k = 0; k < 3; k++) for (let j = 0; j < n; j++) { ctx.fillStyle = j > n - 6 ? '#fff' : p.c; ctx.fillRect((p.x + p.dir * (11 + k * 8 - j)) | 0, (p.y - 4 + k * 3 + j * 1.5) | 0, 2, 2); }
       } else {
         if (p.trail) { ctx.fillStyle = p.c; ctx.globalAlpha = 0.45; for (let i = 0; i < p.trail.length; i += 2) ctx.fillRect(p.trail[i] | 0, p.trail[i + 1] | 0, 1, 1); ctx.globalAlpha = 1; }
         ctx.fillStyle = p.c; ctx.fillRect(p.x | 0, p.y | 0, p.s, p.s);
@@ -351,7 +371,7 @@ export function createStage(ASSETS) {
     if (S.flash > 0.01) { ctx.fillStyle = 'rgba(255,255,255,' + S.flash + ')'; ctx.fillRect(0, 0, S.W, S.H); }
   }
 
-  /* ---------- scripted props: code-drawn shapes for the big common moves ---------- */
+  /* ---------- scripted props: shared skill motions ---------- */
   function prop(o) { S.props.push(o); return o; }
   function dropProp(o) { const i = S.props.indexOf(o); if (i >= 0) S.props.splice(i, 1); }
   function disc(x, y, r, color) {              // a pixel circle from horizontal runs
@@ -360,48 +380,614 @@ export function createStage(ASSETS) {
     const R = Math.round(r);
     for (let dy = -R; dy <= R; dy++) { const half = Math.round(Math.sqrt(R * R - dy * dy)); ctx.fillRect(Math.round(x - half), Math.round(y + dy), half * 2 + 1, 1); }
   }
-  function drawProp(q, now) {
-    ctx.globalAlpha = q.a == null ? 1 : Math.max(0, q.a);
-    if (q.kind === 'orb') {                     // the gathered charge in front of the caster
-      const r = q.r + Math.sin(now / 50) * 0.6;
-      disc(q.x, q.y, r + 2, q.colors[2]); disc(q.x, q.y, r, q.colors[1]); disc(q.x, q.y, r * 0.55, q.colors[0]); disc(q.x, q.y, r * 0.25, '#ffffff');
-    } else if (q.kind === 'meteor') {
-      if (q.trail.length < 2 || q.trail[q.trail.length - 2] !== q.x || q.trail[q.trail.length - 1] !== q.y) { q.trail.push(q.x, q.y); if (q.trail.length > 24) q.trail.splice(0, 2); }
-      for (let i = 0; i < q.trail.length; i += 2) { const k = (i + 2) / q.trail.length; disc(q.trail[i], q.trail[i + 1], Math.max(1, q.r * k * 0.8), q.colors[i % 4 ? 2 : 1]); }
-      disc(q.x, q.y, q.r, q.colors[2]); disc(q.x - 1, q.y - 1, q.r * 0.72, q.colors[1]); disc(q.x - 2, q.y - 2, q.r * 0.42, q.colors[0]); disc(q.x - 2, q.y - 2, Math.max(1, q.r * 0.2), '#ffffff');
-    } else if (q.kind === 'beam') {             // tapered beam: glow, body, white core, streaks running to the target
-      const dir = q.x1 >= q.x0 ? 1 : -1, len = Math.abs(q.x1 - q.x0) | 0, h = q.h;
-      for (let i = 0; i <= len; i += 1) {
-        const x = Math.round(q.x0 + dir * i), taper = Math.min(1, i / 14) * 0.5 + 0.5, wave = Math.sin((i - now * 0.35) / 4) * 0.7;
-        const t = Math.max(0, h * taper + wave);
-        if (t < 0.5) continue;
-        ctx.fillStyle = q.colors[2]; ctx.fillRect(x, Math.round(q.y - t - 2), 1, Math.round(t * 2 + 4));
-        ctx.fillStyle = q.colors[1]; ctx.fillRect(x, Math.round(q.y - t * 0.7), 1, Math.max(1, Math.round(t * 1.4)));
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(x, Math.round(q.y - t * 0.3), 1, Math.max(1, Math.round(t * 0.6)));
+
+  function pixels(points, color) {
+    const ys = points.map(([, y]) => y);
+    ctx.fillStyle = color;
+    for (let y = Math.min(...ys); y < Math.max(...ys); y++) {
+      const intersections = [];
+      for (let i = 0; i < points.length; i++) {
+        const [x0, y0] = points[i], [x1, y1] = points[(i + 1) % points.length];
+        if ((y0 > y + 0.5) !== (y1 > y + 0.5)) intersections.push(x0 + (x1 - x0) * (y + 0.5 - y0) / (y1 - y0));
       }
-      if (h > 1) for (let k = 0; k < 9; k++) {
-        const along = ((now * 0.32 + k * 23) % Math.max(1, len)) | 0, off = ((k * 7) % 5 - 2) * h * 0.35;
-        ctx.fillStyle = k % 2 ? q.colors[0] : '#ffffff'; ctx.fillRect(Math.round(q.x0 + dir * along) - (dir < 0 ? 6 : 0), Math.round(q.y + off), 6, 1);
-      }
-      disc(q.x0, q.y, h * 0.95, q.colors[1]); disc(q.x0, q.y, h * 0.5, '#ffffff');
-      if (q.flare) { const f = h * 1.5 + ((now / 45 | 0) % 2); disc(q.x1, q.y, f, q.colors[2]); disc(q.x1, q.y, f * 0.7, q.colors[1]); disc(q.x1, q.y, f * 0.4, '#ffffff'); }
-    } else if (q.kind === 'burst') {            // a detonation that swells and thins out
-      disc(q.x, q.y, q.r, q.colors[2]); disc(q.x, q.y, q.r * 0.75, q.colors[1]); disc(q.x, q.y, q.r * 0.45, q.colors[0]); disc(q.x, q.y, q.r * 0.2, '#ffffff');
-    } else if (q.kind === 'ghost') {
-      const key = IMG[q.key] ? q.key : q.sprite + '-idle', img = variant(key, q.look), m = ASSETS.sp[key];
-      if (img && m) {
-        const top = Math.round(q.footY - (m.fy + 1)), left = q.flip ? Math.round(q.x - (m.w - m.cx)) : Math.round(q.x - m.cx);
-        if (q.flip) { ctx.save(); ctx.translate(left + m.w, top); ctx.scale(-1, 1); ctx.drawImage(img, 0, 0); ctx.restore(); } else ctx.drawImage(img, left, top);
-      }
-    } else if (q.kind === 'cut') {              // one clean diagonal cut that opens across the target
-      const n = Math.round(q.len * q.t), cos = Math.cos(q.ang), sin = Math.sin(q.ang);
-      for (let j = 0; j < n; j++) {
-        const x = q.x + (j - q.len / 2) * cos, y = q.y + (j - q.len / 2) * sin, edge = j > n - 4;
-        ctx.fillStyle = edge ? '#ffffff' : q.color; ctx.fillRect(Math.round(x), Math.round(y), 2, edge ? 2 : 1);
-        if (!edge && j % 2) { ctx.fillStyle = '#ffffff'; ctx.fillRect(Math.round(x), Math.round(y) - 1, 1, 1); }
+      intersections.sort((a, b) => a - b);
+      for (let i = 0; i < intersections.length; i += 2) {
+        const left = Math.round(intersections[i]), right = Math.round(intersections[i + 1]);
+        ctx.fillRect(left, y, right - left, 1);
       }
     }
-    ctx.globalAlpha = 1;
+  }
+
+  function diamond(x, y, rx, ry, color) {
+    x = Math.round(x); y = Math.round(y);
+    pixels([[x - rx, y], [x, y - ry], [x + rx, y], [x, y + ry]], color);
+  }
+
+  /* ---------- melee contact marks (skill-motion phase 1) ----------
+     Stock pixel-game hit marks: a white cutting edge, the element's mid colour as the body and its dark colour as the
+     inner rim; thick in the middle, thin at the ends; one smear frame, a few flying chips, then the fade in drawMelee.
+     Everything is drawn in whole logical pixels around the contact point (q.x, q.y); dir mirrors for the enemy side. */
+  const dot = (x, y, color) => { ctx.fillStyle = color; ctx.fillRect(Math.round(x), Math.round(y), 1, 1); };
+  const OUTLINE = 'rgba(27, 24, 80, .7)';   // navy edge so a mark reads on any target colour
+
+  // A crescent around contact point (px, py). Canonical shape: ")" bulging toward the target, radius r, sweeping
+  // plus/minus `half` radians, `thick` px at its middle. rot turns it about the contact point (-PI/4 slants it top-back
+  // to bottom-front for a right-facing swing).
+  function crescent(px, py, { r, half, thick, rot = 0, dir, colors, reveal = 1, shift = 0 }) {
+    const cos = Math.cos(rot), sin = Math.sin(rot);
+    const steps = Math.ceil(2 * half * r * 1.6);
+    for (let i = 0; i <= Math.round(steps * reveal); i++) {
+      const u = i / steps, a = -half + 2 * half * u;
+      const t = Math.max(1, Math.round(thick * Math.pow(Math.sin(Math.PI * u), 0.65)));
+      for (let k = 0; k < t; k++) {
+        const radius = r - k + shift, lx = radius * Math.cos(a) - r, ly = radius * Math.sin(a);
+        const color = k === 0 ? '#fff' : k === t - 1 && t > 2 ? colors[2] : colors[1];
+        dot(px + dir * (lx * cos - ly * sin), py + lx * sin + ly * cos, color);
+      }
+    }
+  }
+
+  // Chips that fly out from the contact point as the mark fades.
+  function chips(x, y, dir, frame, colors, count = 3, spread = 1) {
+    for (let i = 0; i < count; i++) {
+      const a = -1.1 + i * (2.2 / Math.max(1, count - 1)), d = (5 + frame * 4) * spread;
+      ctx.fillStyle = i % 2 ? colors[0] : '#fff';
+      ctx.fillRect(Math.round(x + dir * Math.cos(a) * d), Math.round(y + Math.sin(a) * d), 2, 2);
+    }
+  }
+
+  // A filled star polygon: n points, alternating outer and inner radius, optionally stretched.
+  function star(x, y, outer, inner, n, rot, color, sx = 1, sy = 1) {
+    const points = Array.from({ length: n * 2 }, (_, i) => {
+      const a = rot + Math.PI * i / n, r = i % 2 ? inner : outer;
+      return [Math.round(x + r * Math.cos(a) * sx), Math.round(y + r * Math.sin(a) * sy)];
+    });
+    pixels(points, color);
+  }
+  // The classic hit star: dark rim, body colour, a second star turned 45 degrees, white heart.
+  function hitStar(x, y, size, rot, colors, sx = 1, sy = 1) {
+    star(x, y, size + 3, (size + 3) * 0.42, 4, rot, OUTLINE, sx, sy);
+    star(x, y, size + 2, (size + 2) * 0.42, 4, rot, colors[2], sx, sy);
+    star(x, y, size, size * 0.4, 4, rot, colors[1], sx, sy);
+    star(x, y, size * 0.62, size * 0.24, 4, rot + Math.PI / 4, colors[1], sx, sy);
+    star(x, y, size * 0.5, size * 0.2, 4, rot, '#fff', sx, sy);
+  }
+  const tri = (points, color) => pixels(points.map(([px, py]) => [Math.round(px), Math.round(py)]), color);
+
+  const BLADE = { diagonal: -Math.PI / 4, guillotine: 0, horizontal: -Math.PI / 2, scythe: Math.PI / 2 };
+  function bladeFx(q, frame) {
+    const { x, y, variant, big, dir, colors } = q;
+    const rot = BLADE[variant] ?? BLADE.diagonal, scythe = variant === 'scythe';
+    const r = scythe ? 30 : big ? 24 : q.basic ? 16 : 20, half = scythe ? 1.15 : 0.95, thick = big ? 7 : q.basic ? 4 : 6;
+    const last = big ? 4 : 2, cx = x + dir * Math.round(r * 0.45);
+    if (frame === 0) crescent(cx, y, { r, half, thick: thick - 2, rot, dir, colors, reveal: 0.55 });
+    else if (frame < last) {
+      if (big && frame >= 2) crescent(cx, y, { r: r - 5, half: half * 0.9, thick: thick - 3, rot, dir, colors: [colors[0], colors[2], colors[2]], shift: -3 });
+      crescent(cx, y, { r, half, thick, rot, dir, colors });
+      chips(x, y, dir, frame, colors, big ? 4 : 3);
+    } else {
+      crescent(cx, y, { r, half, thick: 2, rot, dir, colors, shift: 2 });
+      chips(x, y, dir, frame, colors, big ? 4 : 3);
+    }
+    if (variant === 'guillotine' && q.landed && frame >= 1) {   // the shadow left on the target after the chop
+      star(x + dir * 3, y + 6, 5, 2, 4, Math.PI / 4, '#281838');
+      star(x + dir * 3, y + 6, 3, 1, 4, Math.PI / 4, colors[1]);
+    }
+    if (variant === 'double' && frame >= 1 && frame < last) {
+      crescent(cx, y + 7, { r: r - 5, half, thick: thick - 2, rot: -rot, dir, colors });
+    }
+  }
+
+  function clawFx(q, frame) {
+    const { x, y, variant, big, dir, colors } = q;
+    const r = big ? 14 : 12, done = frame >= (big ? 4 : 2), cx = x + dir * 6;
+    const rake = (rot, offsetX, thick, reveal) => {
+      for (let i = 0; i < 3; i++) {
+        const off = (i - 1) * 6;                                   // spaced across the stroke, not along it
+        crescent(cx + dir * (offsetX + off * Math.cos(rot)), y + off * Math.sin(rot), { r, half: 0.8, thick, rot, dir, colors, reveal });
+      }
+    };
+    if (frame === 0) crescent(cx, y, { r, half: 0.8, thick: 3, rot: -Math.PI / 5, dir, colors, reveal: 0.6 });
+    else rake(-Math.PI / 5, 0, done ? 1 : 4, 1);
+    if ((variant === 'cross' && frame >= 1) || (big && frame >= 2)) rake(Math.PI / 5, 2, done ? 1 : 2, 1);   // the return rake
+    if (frame >= 1) chips(x + dir * 4, y, dir, frame, colors, 3, 0.8);
+  }
+
+  function thrustFx(q, frame) {
+    const { x, y, dir, colors, big, tip } = q;
+    const end = { x: x + dir * ((big ? 10 : 6) + (frame === 1 ? 3 : 0)), y };
+    const len = Math.max(1, Math.abs(end.x - tip.x));
+    for (let i = 0; i <= len; i++) {                                  // a wedge that thickens toward the point
+      const t = Math.round((frame >= 2 ? 1 : 2) * i / len);
+      const p = motionPoint(tip, end, i / len);
+      rect(p.x, p.y - t - 1, 1, t * 2 + 3, colors[2]);
+      rect(p.x, p.y - t, 1, t * 2 + 1, colors[1]);
+      dot(p.x, p.y, '#fff');
+    }
+    if (frame >= 1) hitStar(end.x, y, big ? 8 : 6, 0, colors, 1.3, 0.8);
+    if (big && frame >= 2) for (const dy of [-6, 6]) rect(Math.min(tip.x, tip.x - dir * 10), y + dy, 10, 1, colors[0]);
+  }
+
+  const IMPACT = { kick: [-0.75, 1, 1], uppercut: [-1.25, 0.9, 1.3], body: [0.1, 1.25, 1], downward: [1, 1, 1.1], stomp: [0, 1.2, 0.8], strike: [0.3, 1, 1] };
+  function impactFx(q, frame) {
+    const { x, y, dir, colors, variant, big } = q;
+    if (variant === 'bat') {                                          // the bat's curved swing, then a fang-shaped flash
+      crescent(x + dir * 7, y, { r: big ? 20 : 16, half: 0.9, thick: frame === 0 ? 3 : 5, rot: -Math.PI / 3, dir, colors, reveal: frame === 0 ? 0.6 : 1 });
+      if (frame >= 1) for (const s of [-1, 1]) tri([[x + dir * 2, y - 2 + s * 4], [x + dir * 9, y + s * 4], [x + dir * 2, y + 2 + s * 4]], '#fff');
+      if (frame >= 2) chips(x, y, dir, frame, colors);
+      return;
+    }
+    const [rot, sx, sy] = IMPACT[variant] ?? IMPACT.strike;
+    const size = (big ? 12 : q.basic ? 7 : 9) + (frame === 1 ? 2 : 0) - (frame >= 2 ? 2 : 0);
+    const cy = variant === 'uppercut' ? y - 3 : y;
+    if (frame === 0) star(x, cy, size * 0.6, size * 0.25, 4, rot, '#fff', sx, sy);
+    else hitStar(x, cy, size, rot, colors, sx, sy);
+    if (variant === 'stomp' || variant === 'downward') {              // the ground answers
+      const d = 6 + frame * 3;
+      for (const s of [-1, 1]) { ctx.fillStyle = colors[2]; ctx.fillRect(Math.round(x + s * d), q.floor - 3 - frame, 3, 2); }
+    }
+    if (frame >= 1) chips(x, cy, dir, frame, colors, big ? 4 : 3);
+  }
+
+  function biteFx(q, frame) {
+    const { x, y, dir, colors, big } = q;
+    const gap = [9, 4, 0, 0, 0][frame], w = big ? 5 : 4, h = big ? 7 : 6;
+    for (const s of [-1, 1]) {                                         // upper jaw points down (s = -1), lower jaw up
+      const jaw = y + s * (gap + h);
+      ctx.fillStyle = colors[2]; ctx.fillRect(Math.round(Math.min(x - dir * (w * 1.5 + 2), x + dir * (w * 1.5 + 2))), Math.round(jaw), w * 3 + 5, 1);
+      for (let i = -1; i <= 1; i++) {
+        const tx = x + dir * i * (w + 1);
+        tri([[tx - w / 2, jaw], [tx + w / 2, jaw], [tx, jaw - s * h]], colors[2]);
+        tri([[tx - w / 2 + 1, jaw], [tx + w / 2 - 1, jaw], [tx, jaw - s * (h - 2)]], '#fff');
+      }
+    }
+    if (frame >= 2) hitStar(x, y, big ? 6 : 4, 0.3, colors);
+  }
+
+  const MELEE_FX = { blade: bladeFx, claw: clawFx, thrust: thrustFx, impact: impactFx, bite: biteFx };
+
+  function drawMelee(q, now) {
+    const age = clock.t - q.start;
+    const frame = Math.floor(age / (q.duration / (q.big ? 5 : 3)));
+    if (age >= q.duration) return;
+    ctx.save();
+    if (q.still) {
+      diamond(q.x, q.y, 5, 4, q.colors[1]);
+      diamond(q.x, q.y, 2, 2, '#fff');
+    } else {
+      ctx.globalAlpha = [1, 1, 0.8, 0.55, 0.35][frame];
+      if (q.big) {
+        ctx.save();
+        ctx.globalAlpha *= 0.55;
+        contactRing(q, 9 + frame * 3);
+        ctx.restore();
+      }
+      MELEE_FX[q.family](q, frame);
+    }
+    ctx.restore();
+  }
+
+  function contactRing(q, radius) {
+    const height = Math.round(radius * 0.7);
+    ctx.fillStyle = q.colors[0];
+    for (let dy = -height; dy <= height; dy++) {
+      const outer = Math.round(radius * Math.sqrt(1 - (dy / height) ** 2));
+      const inner = Math.abs(dy) >= height - 1 ? 0 :
+        Math.round((radius - 1) * Math.sqrt(1 - (dy / (height - 1)) ** 2));
+      ctx.fillRect(q.x - outer, q.y + dy, outer - inner + 1, 1);
+      ctx.fillRect(q.x + inner, q.y + dy, outer - inner + 1, 1);
+    }
+  }
+
+  const rect = (x, y, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x), Math.round(y), w, h);
+  };
+  // Strength: basic attacks smallest, other quiet skills a clear step up, big moves largest (Claude's review).
+  const scaled = (q, size) => Math.max(1, Math.round(size * (q.big ? 1.5 : q.basic ? 0.8 : 1.25)));
+  const unit = value => Math.min(1, Math.max(0, value));
+
+  function pixelLine(from, to, width, color) {
+    const steps = Math.ceil(Math.max(Math.abs(to.x - from.x), Math.abs(to.y - from.y)));
+    const offset = Math.floor(width / 2);
+    for (let i = 0; i <= steps; i++) {
+      const point = motionPoint(from, to, i / (steps || 1));
+      rect(point.x - offset, point.y - offset, width, width, color);
+    }
+  }
+
+  function outlinedOrb(x, y, r, colors) {
+    disc(x, y, r, colors[2]);
+    disc(x, y, Math.max(1, r - 1), colors[1]);
+    rect(x - (r > 3 ? 1 : 0), y - 1, r > 3 ? 2 : 1, 2, '#fff');
+  }
+
+  function hollowRing(x, y, radius, width, colors, octagon = false, open = false) {
+    for (let dy = -radius - 1; dy <= radius + 1; dy++) for (let dx = -radius - 1; dx <= radius + 1; dx++) {
+      if (open && dy < 0 && Math.abs(dx) < radius * 0.55) continue;
+      const d = octagon ? Math.max(Math.abs(dx), Math.abs(dy), (Math.abs(dx) + Math.abs(dy)) * 0.7) : Math.hypot(dx, dy);
+      if (d > radius && d <= radius + 1) { dot(x + dx, y + dy, OUTLINE); continue; }
+      if (d <= radius && d > radius - width) {
+        const edge = d > radius - Math.min(0.8, width * 0.45);
+        dot(x + dx, y + dy, edge ? colors[2] : d <= radius - width + 0.8 ? '#fff' : colors[1]);
+      }
+    }
+  }
+
+  function shotFx(q, f) {
+    const { from, to, variant, colors, dir } = q;
+    if (f.hit) {
+      hitStar(to.x, to.y, scaled(q, 7 - Math.min(f.frame, 2)), 0, colors);
+      return;
+    }
+    const arc = ['throw', 'snowball', 'talisman'].includes(variant) ? Math.max(14, Math.hypot(to.x - from.x, to.y - from.y) * 0.25) : 0;
+    const head = motionPoint(from, to, f.progress, arc);
+    if (variant === 'chain') {
+      const count = Math.ceil(Math.hypot(head.x - from.x, head.y - from.y) / 4);
+      for (let i = 0; i < count; i++) {
+        const { x, y } = motionPoint(from, head, i / count);
+        rect(x, y, 2, 2, i % 2 ? colors[1] : colors[0]);
+      }
+    } else {
+      const alpha = ctx.globalAlpha;
+      for (let i = 3; i >= 1; i--) {
+        const t = f.progress - i * 0.055;
+        if (t < 0) continue;
+        const { x, y } = motionPoint(from, to, t, arc);
+        ctx.globalAlpha = alpha * (1 - i * 0.22);
+        rect(x, y, 2, 2, colors[i - 1]);
+      }
+      ctx.globalAlpha = alpha;
+    }
+    const { x, y } = head;
+    if (variant === 'talisman') {
+      const w = scaled(q, 4), h = scaled(q, 6);
+      rect(x - w / 2, y - h / 2, w, h, colors[2]);
+      rect(x - w / 2 + 1, y - h / 2, w - 2, h - 1, '#fff');
+      rect(x - 1, y - 1, 2, 2, '#e0514c');
+    } else if (variant === 'bullet') {
+      rect(x - dir * 2 - 1, y - 1, scaled(q, 5), 2, colors[2]);
+      rect(x - dir - 1, y - 1, scaled(q, 3), 2, colors[1]);
+      rect(x - dir - 1, y, scaled(q, 3), 1, '#fff');
+      if (f.frame === 0) hitStar(from.x, from.y, scaled(q, 4), 0, colors);
+    } else {
+      const d = scaled(q, 5);
+      for (let row = 0; row < d; row++) {
+        const inset = Math.max(0, Math.floor(Math.abs(row - (d - 1) / 2)) - 1);
+        const left = x - Math.floor(d / 2) + inset, width = d - 2 * inset;
+        const yy = y + row - Math.floor(d / 2);
+        rect(left, yy, width, 1, colors[2]);
+        if (row > 0 && row < d - 1) rect(left + 1, yy, width - 2, 1, colors[1]);
+      }
+      rect(x - (d >= 7 ? 1 : 0), y - 1, d >= 7 ? 2 : 1, 1, '#fff');
+    }
+  }
+
+  function orbFx(q, f) {
+    const absorb = q.variant === 'absorb';
+    const from = absorb ? q.to : q.from, to = absorb ? q.from : q.to;
+    const { colors } = q;
+    const radius = q.big ? 6 : scaled(q, 4);
+    if (f.hit) {
+      const step = Math.min(1, f.frame / 3);
+      const r = absorb ? scaled(q, 4) + f.frame : Math.round(radius + ((q.big ? 16 : scaled(q, 10)) - radius) * step);
+      hollowRing(to.x, to.y, r, 3, colors);
+      if (absorb) for (const [dx, dy] of [[-7, -2], [4, -6], [7, 2], [-3, 4]]) {
+        rect(to.x + dx, to.y + dy - f.frame * 2, 2, 2, colors[1]);
+        dot(to.x + dx, to.y + dy - f.frame * 2, '#fff');
+      }
+      return;
+    }
+    if (f.age < q.charge) {
+      const growth = f.age / q.charge;
+      const d = Math.round(8 - growth * 5);
+      for (const [dx, dy] of [[-d, 0], [0, -d], [d, 0], [0, d]]) rect(from.x + dx, from.y + dy, 2, 2, colors[0]);
+      outlinedOrb(from.x, from.y, Math.round(2 + (radius - 2) * growth), colors);
+      return;
+    }
+    const t = unit((f.age - q.charge) / Math.max(0.001, q.travel - q.charge));
+    const head = motionPoint(from, to, t);
+    const alpha = ctx.globalAlpha;
+    for (let i = 2; i >= 1; i--) {
+      const a = motionPoint(from, to, Math.max(0, t - i * 0.13));
+      const b = motionPoint(from, to, Math.max(0, t - (i - 1) * 0.13));
+      ctx.globalAlpha = alpha * (i === 2 ? 0.35 : 0.65);
+      pixelLine(a, b, 2, colors[1]);
+    }
+    ctx.globalAlpha = alpha;
+    outlinedOrb(head.x, head.y, radius, colors);
+  }
+
+  function breathFx(q, f) {
+    const { from, to, colors, dir } = q;
+    const reach = f.hit ? 1 : f.progress;
+    const steps = Math.max(1, Math.round(Math.abs(from.x - to.x) * reach));
+    const half = q.big ? 16 : scaled(q, 10);
+    const fade = f.hit ? 1 - f.frame / (q.linger + 1) : 1;
+    const frame = f.hit ? f.frame + 2 : Math.min(1, f.frame);
+    for (let i = 0; i <= steps && (!f.hit || f.frame < q.linger); i++) {
+      const t = (i / steps) * reach;
+      const point = motionPoint(from, to, t);
+      const flicker = ((Math.imul(i + 7, 37) ^ Math.imul(frame + 3, 71)) >>> 0) % 3 - 1;
+      const h = Math.max(2, Math.round((2 + (half - 2) * t) * fade + (i > 1 ? flicker : 0)));
+      rect(point.x, point.y - h, 1, h * 2 + 1, colors[2]);
+      rect(point.x, point.y - h + 1, 1, h * 2 - 1, colors[1]);
+      const core = Math.floor(h / 3);
+      rect(point.x, point.y - core, 1, core * 2 + 1, '#fff');
+    }
+    if (f.hit) for (let i = 0; i < (q.big ? 4 : 2); i++) {
+      rect(to.x + dir * (3 + i * 3 + f.frame * 3), to.y + (i % 2 ? 1 : -1) * (i * 3 + f.frame), 2, 2, colors[i % 3]);
+    }
+  }
+
+  function rayFx(q, f) {
+    const { from, to, colors } = q;
+    const head = motionPoint(from, to, f.progress);
+    const pilot = !f.hit && f.frame === 0;
+    if (pilot) pixelLine(from, head, 1, colors[0]);
+    else {
+      const core = q.big ? 3 : 2;
+      const pulse = q.big && f.hit && f.frame > 0 && f.frame % 2 ? 2 : 0;
+      if (q.big) pixelLine(from, head, core + 4 + pulse, colors[2]);
+      pixelLine(from, head, core + 2 + pulse, colors[1]);
+      pixelLine(from, head, core, '#fff');
+    }
+    hitStar(from.x, from.y, q.big ? 5 : scaled(q, 3), 0, colors);
+    if (f.hit) hitStar(to.x, to.y, scaled(q, Math.max(4, 8 - f.frame)), 0, colors);
+  }
+
+  function ellipseSegments(x, y, rx, ry, count, reveal, colors) {
+    for (let i = 0; i < count * reveal; i++) {
+      const angle = i * 2 * Math.PI / count;
+      rect(x + rx * Math.cos(angle) - 1, y + ry * Math.sin(angle), 2, 2, colors[i % colors.length]);
+    }
+  }
+
+  function fallFx(q, f) {
+    const { to, floor, colors, variant } = q;
+    const rain = variant === 'rain';
+    if (!f.hit && f.frame === 0) ellipseSegments(to.x, floor - 1, 6, 1, 12, 1, [colors[2], colors[1]]);
+    for (let i = 0; i < (rain ? 3 : 1); i++) {
+      const x = to.x + (rain ? (i - 1) * 8 : 0);
+      const begin = (1 + i) * MOTION_FRAME;
+      const age = (f.hit ? q.travel + f.hitAge : f.age) - begin;
+      if (age < 0) continue;
+      if (age >= q.flight) {
+        const landing = Math.floor((age - q.flight) / MOTION_FRAME);
+        if (landing > 3) continue;
+        hitStar(x, to.y, scaled(q, Math.max(3, 6 - landing)), -Math.PI / 4, colors);
+        chips(x, floor - 3, q.dir, landing, colors, 2, 0.7);
+        continue;
+      }
+      const t = unit(age / q.flight);
+      const from = { x: x - q.dir * (rain || variant !== 'meteor' ? 0 : 16), y: q.fallY };
+      const end = { x, y: to.y };
+      const head = motionPoint(from, end, t);
+      if (variant === 'meteor') {
+        if (q.effectSprite) {
+          ctx.save();
+          ctx.globalAlpha *= 0.45;
+          const { width, height } = q.effectSprite;
+          ctx.translate(Math.round(head.x), Math.round(head.y - 4));
+          ctx.scale(q.dir, 1);
+          ctx.drawImage(q.effectSprite, -Math.floor(width / 2), -Math.floor(height / 2));
+          ctx.restore();
+        }
+        for (let j = 6; j >= 1; j--) {
+          const tail = motionPoint(from, end, Math.max(0, t - j * 0.065));
+          const r = Math.max(1, scaled(q, 4) - j);
+          disc(tail.x, tail.y, r, j % 2 ? colors[2] : colors[1]);
+        }
+        outlinedOrb(head.x, head.y, q.big ? 6 : scaled(q, 4), colors);
+      } else if (variant === 'candy') {
+        disc(head.x, head.y, scaled(q, 2), colors[2]);
+        for (let j = 0; j < 2; j++) rect(head.x - 1, head.y + j - 1, 3, 1, colors[j]);
+        dot(head.x - 1, head.y - 1, '#fff');
+      } else {
+        diamond(head.x, head.y, scaled(q, 2), scaled(q, 3), colors[2]);
+        pixelLine({ x: head.x, y: head.y - 2 }, { x: head.x, y: head.y + 2 }, 2, colors[1]);
+        dot(head.x, head.y - 1, '#fff');
+      }
+    }
+  }
+
+  function castSpark(point, color, r) {
+    diamond(point.x, point.y, r, r, color);
+    dot(point.x, point.y, '#fff');
+  }
+
+  function blastFx(q, f) {
+    const { from, fromFloor, to, floor, dir, colors, variant } = q;
+    if (f.hit) {
+      const i = Math.min(f.frame, 2);
+      const r = scaled(q, [4, 8, q.big ? 14 : 12][i]);
+      hollowRing(to.x, to.y, r, 4 - i, colors, true);
+      if (i === 1) for (const dx of [-1, 1]) for (const dy of [-1, 1]) {
+        const edge = { x: to.x + dx * r * 0.6, y: to.y + dy * r * 0.6 };
+        pixelLine(edge, { x: edge.x + dx * 4, y: edge.y + dy * 4 }, 2, colors[0]);
+      }
+      if (variant === 'eruption') for (let j = -1; j <= 1; j++) {
+        const spark = { x: to.x + j * scaled(q, 7), y: floor - 5 - i * 5 - (j === 0 ? 4 : 0) };
+        pixelLine({ x: spark.x, y: spark.y + 5 }, spark, 2, colors[1]);
+        castSpark(spark, colors[2], 2);
+      }
+    } else if (variant === 'ground') {
+      for (let i = 0; i < 2; i++) {
+        const a = { x: fromFloor.x, y: fromFloor.y + i * 3 - 2 };
+        const b = motionPoint(a, { x: to.x, y: floor + i * 3 - 2 }, f.progress);
+        pixelLine(a, b, 2, colors[i > 0 ? 2 : 1]);
+        chips(b.x, b.y - 3, dir, f.frame % 2, colors, 2, 0.5);
+      }
+    } else if (variant === 'wave') {
+      for (let i = 0; i < 3; i++) {
+        const r = scaled(q, 6 + 3 * i);
+        const point = motionPoint(from, to, Math.max(0, f.progress - i * 0.12));
+        for (let j = -r; j <= r; j++) {
+          const x = point.x + dir * Math.round(Math.sqrt(r * r - j * j) * 0.65);
+          rect(x, point.y + j, 2, 1, j % 4 === 0 ? '#fff' : colors[1 + (i % 2)]);
+        }
+      }
+    } else if (q.launch) {
+      for (const side of [-1, 1]) {
+        const head = motionPoint(from, { x: to.x + side * 5, y: to.y }, f.progress, 13);
+        const tail = motionPoint(from, to, Math.max(0, f.progress - 0.15), 13);
+        pixelLine(tail, head, 2, colors[2]);
+        castSpark(head, colors[1], 2);
+      }
+    } else {
+      castSpark(from, colors[1], 2);
+    }
+  }
+
+  function fieldFx(q, f) {
+    const { from, to, floor, colors, variant } = q;
+    const progress = f.hit ? 1 : f.progress;
+    const rx = q.big ? 22 : scaled(q, 15), ry = q.big ? 6 : scaled(q, 4);
+    ellipseSegments(to.x, floor - 2, rx, ry, q.big ? 26 : 18, Math.max(0.12, progress), [colors[1], '#fff']);
+    if (!f.hit) castSpark(from, colors[2], 2);
+    if (f.hit) for (let i = 0; i < 4; i++) {
+      const x = to.x + (i % 2 ? 1 : -1) * Math.round(rx * (i < 2 ? 0.72 : 0.33));
+      const y = floor - (i < 2 ? 5 : 1) - Math.min(6, f.frame * 2);
+      castSpark({ x, y }, colors[1], 1);
+    }
+    if (variant === 'summon') {
+      const y = floor - 4 - Math.round(progress * scaled(q, 10)), w = scaled(q, 10);
+      rect(to.x - w / 2, y + 2, w, floor - y - 2, colors[2]);
+      rect(to.x - w / 2 + 1, y, w - 2, floor - y - 2, colors[1]);
+      rect(to.x - 1, y + 1, 2, 2, '#fff');
+    } else if (variant === 'bind') for (const side of [-1, 1]) {
+      let previous = { x: to.x + side * scaled(q, 7), y: floor - 2 };
+      const links = Math.ceil(Math.max(0, floor - to.y - 2) / 4 * progress);
+      for (let i = 1; i <= links; i++) {
+        const next = { x: to.x + side * (scaled(q, 7) + (i % 2 ? 3 : 0)), y: floor - 2 - i * 4 };
+        pixelLine(previous, next, 2, colors[1]);
+        dot(next.x, next.y, '#fff');
+        previous = next;
+      }
+    }
+  }
+
+  const DRIFT_PALETTES = {
+    petal: ['#ffd6f2', '#f99dc9', '#a45289'], snow: ['#fff', '#d6fbff', '#759bc0'],
+    water: ELEMENT_COLORS.water, wind: ['#fff', '#bbebdd', '#5c9c9e'], sand: ['#fff1a8', '#eabc64', '#a06c3e'],
+    cream: ['#fff', '#fff0d0', '#ca9d88']
+  };
+
+  function driftFx(q, f) {
+    const { from, to, fromFloor, floor, variant } = q;
+    const colors = DRIFT_PALETTES[variant] ?? q.colors;
+    if (f.hit) {
+      for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [-1.4, 0], [1.4, 0]]) {
+        const d = scaled(q, 3 + f.frame * 2);
+        castSpark({ x: to.x + dx * d, y: to.y + dy * d }, colors[1], 2);
+      }
+      return;
+    }
+    const dist = Math.max(1, Math.hypot(to.x - from.x, to.y - from.y));
+    for (let i = 0; i < (q.big ? 5 : 3); i++) {
+      for (let j = 15; j >= 0; j--) {
+        const t = f.progress - (j + i * 3) / dist;
+        if (t < 0) continue;
+        const { x, y } = motionPoint(from, to, t);
+        const phase = (t * dist / 16 + i / 3 - f.frame / 5) * Math.PI * 2;
+        const wave = Math.sin(phase) * 3;
+        const low = motionPoint(fromFloor, { x: to.x, y: floor }, t).y - 5;
+        const height = variant === 'water' ? y + (low - y) * Math.sin(Math.PI * t) : y;
+        const spread = (i - (q.big ? 2 : 1)) * 4 * Math.sin(Math.PI * t);
+        const dy = height + wave + spread;
+        const dx = variant === 'cream' ? Math.cos(phase) * 3 : 0;
+        rect(x + dx, dy, variant === 'wind' && j % 4 === 0 ? 4 : 2, 2, j > 10 ? colors[2] : colors[1]);
+        if (j === 0 || j === 6) dot(x + dx, dy, '#fff');
+        if (variant === 'storm' && j === 5 && i < 2) {
+          const bend = { x: x + 2, y: dy - 3 };
+          pixelLine({ x: x - 2, y: dy - 5 }, bend, 2, colors[2]);
+          pixelLine(bend, { x: x, y: dy + 1 }, 2, colors[0]);
+        }
+      }
+    }
+  }
+
+  function markFx(q, f) {
+    const { to, from, colors, variant, beneficial, head } = q;
+    if (variant === 'reserve') {
+      const center = { x: from.x, y: Math.max(7, from.y - 7) };
+      hollowRing(center.x, center.y, 5, 2, colors);
+      const angle = f.frame * Math.PI / 2;
+      pixelLine(center, { x: center.x, y: center.y - 3 }, 1, colors[1]);
+      pixelLine(center, { x: center.x + Math.cos(angle) * 3, y: center.y + Math.sin(angle) * 3 }, 1, '#fff');
+    } else if (variant === 'heal' || (beneficial && ['question', 'whisper', 'mark'].includes(variant))) {
+      const mint = ['#e8fff5', '#76dcb0', '#328f78'];
+      hollowRing(to.x, to.y, scaled(q, 8), 2, mint, false, true);
+      for (const [dx, dy] of [[-8, 0], [0, -5], [8, 2]]) {
+        const x = to.x + dx, y = to.y + dy - Math.min(10, f.frame * 4);
+        const r = scaled(q, 2);
+        rect(x - r, y, r * 2 + 1, 2, mint[1]);
+        rect(x, y - r, 2, r * 2 + 1, mint[1]);
+        dot(x, y, '#fff');
+      }
+    } else {
+      const y = Math.max(6, head + Math.min(8, f.frame * 4));
+      const r = scaled(q, 4), h = scaled(q, 8);
+      const a = { x: to.x - r, y }, b = { x: to.x + r, y }, c = { x: to.x, y: y + h };
+      tri([[a.x, a.y], [b.x, b.y], [c.x, c.y]], colors[2]);
+      pixelLine(a, b, 2, colors[1]); pixelLine(a, c, 2, colors[1]); pixelLine(b, c, 2, colors[1]);
+      dot(to.x, y + 2, colors[0]);
+      if (f.frame > 0) for (let i = -1; i <= 1; i++) rect(to.x + i * 4, y + h + f.frame * 3 + Math.abs(i), 2, 2, colors[2]);
+    }
+  }
+
+  const RANGED_FX = { shot: shotFx, orb: orbFx, breath: breathFx, ray: rayFx, fall: fallFx, blast: blastFx,
+    field: fieldFx, drift: driftFx, mark: markFx };
+
+  function clipBenchFaces(q, now) {
+    for (const actor of S.actors) {
+      if (actor === q.caster || actor === q.target || !actor.vis || actor.wait <= 0.5) continue;
+      const idle = meta(actor, 'idle'), current = meta(actor);
+      if (!idle?.face || !current) continue;
+      const { x, y, size } = idle.face;
+      const box = actorBox(actor, current, now);
+      const origin = x + current.cx - idle.cx;
+      const center = box.left + (actor.flip ? box.width - 1 - origin : origin);
+      ctx.beginPath();
+      ctx.rect(-S.W, -S.H, 3 * S.W, 3 * S.H);
+      ctx.rect(Math.round(center - size / 2), box.top + y + current.fy - idle.fy, size, size);
+      ctx.clip('evenodd');
+    }
+  }
+
+  function drawRanged(q, now) {
+    const hit = q.arrived !== undefined;
+    const age = Math.max(0, clock.t - q.start);
+    const hitAge = hit ? clock.t - q.arrived : 0;
+    const frame = q.still ? 0 : Math.floor((hit ? hitAge : age) / MOTION_FRAME);
+    if ((hit && hitAge >= q.hold) || (q.still && !hit)) return;
+    ctx.save();
+    clipBenchFaces(q, now);
+    ctx.globalAlpha = (q.landed ? 1 : 0.65) * (hit ? Math.max(0.25, 1 - hitAge / q.hold) : 1);
+    if (q.still && q.family !== 'mark') hitStar(q.to.x, q.to.y, scaled(q, 5), 0, q.colors);
+    else RANGED_FX[q.family](q, { hit, age, hitAge, frame, progress: hit ? 1 : unit(age / q.travel) });
+    ctx.restore();
+  }
+
+  function drawCostFlare(q, now) {
+    const frame = Math.floor((clock.t - q.start) / MOTION_FRAME);
+    if (frame >= 2) return;
+    ctx.save();
+    clipBenchFaces(q, now);
+    for (let i = 0; i < 6; i++) {
+      const angle = i * Math.PI / 3 + frame * Math.PI / 6;
+      const x = q.x + Math.cos(angle) * q.rx, y = q.y + Math.sin(angle) * q.ry;
+      rect(x, y - 1, 2, 3, q.colors[2]);
+      dot(x, y - 2, q.colors[0]);
+      dot(x + 1, y, q.colors[1]);
+    }
+    ctx.restore();
+  }
+
+  function drawProp(q, now) {
+    if (q.kind === 'meleeFx') drawMelee(q, now);
+    else if (q.kind === 'rangedFx') drawRanged(q, now);
+    else if (q.kind === 'costFlare') drawCostFlare(q, now);
   }
 
   /** Camera punch-in on a point, then back. Holds at exactly 2x so pixels stay square. */
@@ -422,6 +1008,31 @@ export function createStage(ASSETS) {
     d.style.left = Math.round(x * SCALE) + 'px'; d.style.top = Math.round(Math.max(16, y) * SCALE) + 'px';
     fxLayer.appendChild(d); setTimeout(() => d.remove(), 1300);
     return d;
+  }
+  function fieldNotice(anchor, text, colors) {
+    if (!anchor) return;
+    const stage = fxLayer.getBoundingClientRect(), slot = anchor.getBoundingClientRect();
+    const x = Math.max(4, Math.round(slot.left - stage.left));
+    fxLayer.querySelector('[data-field-effect]')?.remove();
+    const note = document.createElement('div');
+    note.dataset.fieldEffect = '';
+    Object.assign(note.style, {
+      position: 'absolute', left: x + 'px', top: Math.round(slot.bottom - stage.top + 2) + 'px',
+      maxWidth: 'calc(100% - ' + (x + 4) + 'px)', boxSizing: 'border-box', padding: '2px 6px',
+      color: 'var(--ink)', background: 'var(--paper2)', border: '1px solid var(--line2)',
+      font: 'normal 0.75rem/1rem var(--f-label)'
+    });
+    for (const color of colors) {
+      const mark = document.createElement('span');
+      Object.assign(mark.style, {
+        display: 'inline-block', width: '7px', height: '7px', marginRight: '3px',
+        background: color, boxShadow: 'inset 0 0 0 1px var(--line2)'
+      });
+      note.append(mark);
+    }
+    note.append(text);
+    fxLayer.append(note);
+    wait(0.9).then(() => note.remove());
   }
   function banner(tag, text, cls) {
     const b = document.createElement('div');
@@ -455,8 +1066,8 @@ export function createStage(ASSETS) {
   }
   function start() { if (running) return; running = true; last = performance.now(); requestAnimationFrame(frame); }
   /** Review hook: advance stage time by hand when the page is not animating (hidden preview pane). */
-  async function advance(sec) {
-    for (let n = Math.round(sec / 0.02); n > 0; n--) { sim(0.02); for (let k = 0; k < 6; k++) await null; }
+  async function advance(sec, step = 0.02) {
+    for (let n = Math.round(sec / step); n > 0; n--) { sim(step); for (let k = 0; k < 6; k++) await null; }
     draw(performance.now());
     return Math.round(clock.t * 100) / 100;
   }
@@ -485,8 +1096,8 @@ export function createStage(ASSETS) {
 
   return {
     SCALE, S, clock, wait, tween, ELEMENT_COLORS,
-    loadSprites, variant, IMG, makeActor, removeActor, meta, X, footY, headY, chestY, tall,
-    sparks, fly, rise, converge, ring, slash, dust, gem, number, banner, plate, prop, dropProp, punch,
+    loadSprites, variant, IMG, makeActor, removeActor, meta, socket, X, footY, headY, chestY, tall,
+    sparks, fly, rise, converge, ring, dust, gem, number, fieldNotice, banner, plate, prop, dropProp, punch, reducedMotion,
     init, resize, setRoom, bellPosition, clear, start, advance, draw, RIM,
     pause(on) { clock.paused = !!on; }
   };

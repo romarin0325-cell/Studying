@@ -12,26 +12,29 @@ export function altarScreen(run, ui, kept = null) {
   const current = pending?.roll || kept;
   const left = pending ? 3 - pending.rolls : 0;
   const fighter = current && card(current.id);
+  const percent = multiplier => '+' + Math.round(multiplier * 100) + '%';
+  const previous = fighter ? percent(kept?.previous ?? run.blessings[current.id] ?? 0) : '';
   const slot = fighter ? '<span class="pic">' + sprite(current.id) + '</span><span class="txt"><b>' + esc(fighter.name) +
-    '</b><strong>+' + Math.round(current.multiplier * 100) + '%</strong><small>' +
+    '</b><small>기존 축복 ' + previous + '</small><strong>새 축복 ' + percent(current.multiplier) + '</strong><small>' +
     (current.jackpot ? '대성공! · ' : '') + (GRADE[fighter.grade] || '') + ' · 모든 능력치 상승</small></span>' :
     '<span class="empty">?</span>';
   const actions = pending ? '<button class="btn" id="b-roll"' + (left && run.bench.length ? '' : ' disabled') +
     '>굴리기 (' + left + ')</button><button class="btn' + (current ? ' go' : '') + '" id="b-keep"' +
     (current ? '' : ' disabled') + '>축복 받기</button>' : '';
-  node.innerHTML = head(run, '혼돈의 제단', run.floor + '층') + '<div class="scroll">' +
-    '<p class="lead">무작위 동료 1명에게 원정 종료까지 유지되는 축복을 부여합니다. 최대 3회까지 굴릴 수 있으며 마지막 결과가 적용됩니다.</p>' +
+  node.innerHTML = head(run, '혼돈의 제단', run.floor + '층') + '<div class="screen-split"><div class="fixed-top">' +
+    '<p class="lead">세 번까지 굴려. 받으면 그 동료의 기존 축복을 바꿔.</p>' +
     '<div class="altarslot win' + (current?.jackpot ? ' jackpot' : '') + '" id="slot">' + slot + '</div></div>' +
-    '<div class="footer">' + actions + (!pending || !current ? '<button class="btn" id="b-leave">' +
-    (pending ? '떠나기' : '다음 층으로') + '</button>' : '') + '</div>';
+    '<div class="footer fixed-foot">' + actions + (!pending || !current ? '<button class="btn' +
+    (pending ? '' : ' go') + '" id="b-leave">' + (pending ? '떠나기' : '다음 층으로') + '</button>' : '') + '</div></div>';
   show('altar');
   $('#b-leave', node)?.addEventListener('click', ui.leave);
   $('#b-keep', node)?.addEventListener('click', () => {
+    const previous = run.blessings[current.id] ?? 0;
     const result = ui.command(altarKeep);
     if (result.ok) {
       sfx.awaken();
       if (run.room.type === 'event') ui.route();
-      else altarScreen(run, ui, result);
+      else altarScreen(run, ui, { ...result, previous });
     }
   });
   $('#b-roll', node)?.addEventListener('click', async event => {

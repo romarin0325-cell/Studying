@@ -2,7 +2,8 @@ import { $, $$, esc, show } from '../dom.js';
 import { bonusPercent, chooseReplacements, departureLoss, head, heirloomOffer, replacementCount } from '../widgets.js';
 import { chooseEvent } from '../../engine/run.js';
 import { eventChoices, joinCount } from '../../engine/rooms.js';
-import { BLESS } from '../../engine/awakenings.js';
+import { BLESS, usesRepeatDraws } from '../../engine/awakenings.js';
+import { drawText } from '../reveal.js';
 
 const NEXT = '다음 전투 한 번';
 const STAYS = '이번 원정 끝까지';
@@ -35,7 +36,10 @@ export function eventScreen(run, ui, result = null) {
   const choices = run.pending?.kind === 'event' ? eventChoices(run, ui.core, ui.roster) : [];
   let selection = null;
   const hosts = event?.requires.present || [];
-  const joined = result?.effects.flatMap(effect => effect.type === 'join' ? effect.ids : []) || [];
+  const draws = result?.effects.flatMap(effect => effect.type === 'join' ?
+    effect.draw ? [effect.draw] : effect.ids.map(id => ({ kind: 'join', id })) : []) ?? [];
+  // Only new members walk into the scene; a boost or memory changes someone who is already here.
+  const joined = draws.filter(draw => draw.kind === 'join').map(draw => draw.id);
   const released = result?.effects.filter(effect => effect.type === 'release').map(effect => effect.id) ?? [];
 
   const actor = (id, classes, flip) => {
@@ -89,6 +93,7 @@ export function eventScreen(run, ui, result = null) {
   const joinIds = choice => choice.ops.flatMap(op => op.type === 'join' && !op.random ? op.ids : []);
   function releases(choice) {
     const count = joinCount(choice.ops);
+    if (usesRepeatDraws(run) && choice.ops.some(op => op.type === 'join' && op.random)) return 0;
     return choice.requiredReleases ?? replacementCount(run, count);
   }
   function targetValue(choice, id) {
@@ -102,6 +107,10 @@ export function eventScreen(run, ui, result = null) {
   function take(choice, target) {
     function apply(replaceIds) {
       const outcome = ui.command(chooseEvent, choice.id, target, replaceIds);
+      if (outcome.reason === 'roster_full' && outcome.requiredReleases > 0 && !replaceIds.length) {
+        chooseReplacements(run, ui, outcome.requiredReleases, apply, { incoming: joinIds(choice) });
+        return;
+      }
       if (!outcome.ok) return;
       ui.sheets.closeSheet();
       const equipped = outcome.effects.some(effect => effect.type === 'relic' && effect.equipped);
@@ -118,7 +127,7 @@ export function eventScreen(run, ui, result = null) {
 
   const cost = choice => choice.cost ? '결정 ' + choice.cost + ' · ' : '';
   const results = result ? [
-    joined.length ? joined.map(id => card(id).name).join(' · ') + ' · 이번 원정 합류' : '',
+    ...draws.map(draw => drawText(draw, card)),
     ...released.map(id => card(id).name + ' · 원정 이탈'),
     result.crystals ? '결정 ' + (result.crystals > 0 ? '+' : '') + result.crystals : '',
     ...result.effects.filter(effect => !['join', 'release'].includes(effect.type)).map(effect =>
@@ -141,10 +150,10 @@ export function eventScreen(run, ui, result = null) {
   const secondary = results.length ? results.map(line => '<p>' + esc(line) + '</p>').join('') :
     event && choices.length ? '<p>' + esc(DIALOGUE[event.id] || '') + '</p>' : '';
   const canChoose = choices.some(choice => choice.enabled);
-  node.innerHTML = head(run, '사건', run.floor + '층') + '<div class="run-event">' +
+  node.innerHTML = head(run, '사건', run.floor + '층') + '<div class="run-event screen-split"><div class="fixed-top">' +
     ui.scene(run.room.bg, artwork) + '<div class="event-dialog win"><h2>' + esc(event?.name || '고요한 방') +
-    '</h2><p>' + esc(event?.text || '방 안이 고요합니다.') + '</p>' + secondary + '</div>' +
-    '<div class="event-choices">' + plates +
+    '</h2><div class="scroll-detail" tabindex="0"><p>' + esc(event?.text || '방 안이 고요합니다.') + '</p>' + secondary + '</div></div></div>' +
+    '<div class="event-choices scroll-list">' + plates + '</div><div class="footer fixed-foot">' +
     '<button class="btn' + (canChoose ? '' : ' go') + '" id="b-leave">' +
     (choices.length ? '그냥 지나가기' : '다음 층으로') + '</button></div></div>';
   // The confirm button names what the chosen companion receives (or that they leave).

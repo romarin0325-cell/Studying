@@ -12,6 +12,8 @@ export function openCredits(openSheet, onClose) {
       <h4>글꼴</h4>
       <p>Galmuri 9·11·14 — quiple, SIL Open Font License 1.1</p>
       <p class="credits-license-url">https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/LICENSE.txt</p>
+      <p>주아(Jua) — The Jua Project Authors, SIL Open Font License 1.1</p>
+      <p>Noto Sans KR — Adobe·Google, SIL Open Font License 1.1</p>
     </section>
     <section>
       <h4>그림</h4>

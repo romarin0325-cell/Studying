@@ -1,5 +1,7 @@
 import { $, esc, show } from '../dom.js';
-import { foeFlip, traitText, TYPE } from '../widgets.js';
+import { foeFlip, formatMultiplier, hasFinalConsonant, logButton, traitText, TYPE } from '../widgets.js';
+import { DUNGEONS } from '../../content/dungeons.js';
+import { TERMS } from '../glossary.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
 import { INTRO } from '../../content/intro.js';
@@ -10,9 +12,10 @@ import { CONTRACT_ESCROW } from '../../content/contracts.js';
 import { create as createBattle } from '../../engine/bridge.js';
 import * as Opening from '../../engine/opening.js';
 import { syncBattleSpeed, tools } from '../settings.js';
-import { createHud, FIELD, GOOD } from './hud.js';
+import { createHud } from './hud.js';
 import { createTiles } from './tiles.js';
 import { createMoves } from './moves.js';
+import { actionEnd, planEffects } from './effect-plan.js';
 import { battleLog, openBattleLog } from './log.js';
 
 export function contractSettlement(floor, contract) {
@@ -30,7 +33,7 @@ export function contractSettlement(floor, contract) {
 export function battleMarkup() {
   return (
     '<section id="battle" class="screen">' +
-    '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field">전장·유물</button><button id="b-speed">1배</button><button id="b-log">기록</button>' + tools() + '</header>' +
+    '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="전장·유물">전장</button><button id="b-speed">1배</button>' + logButton('id="b-log"') + tools() + '</header>' +
     '<div id="stage"><canvas id="cv"></canvas><div id="hud">' +
     '<div id="foebar"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div>' +
     '<div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div>' +
@@ -39,7 +42,7 @@ export function battleMarkup() {
     '<div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">▶▶ 고속 진행</div></div>' +
     '<div id="party"></div>' +
     '<div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div>' +
-    '<div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir"></button><button id="b-retreat"></button></div></div>' +
+    '<div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div>' +
     '<div class="sheet" id="result"><div class="in win" id="result-in"></div></div>' +
     '</section>'
   );
@@ -48,13 +51,13 @@ export function battleMarkup() {
 export function createBattleView({ core, roster, widgets, stage: St, audio, sheets, details, music }) {
   const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
   const { sfx } = audio;
-  const { card, face, faceBadge, spr } = widgets;
+  const { card, face, spr } = widgets;
   const clone = o => JSON.parse(JSON.stringify(o));
   const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
   const LINKED_TRAITS = ['ally_death_base_atk_phy', 'ally_light_death_base_matk_mag'];
   const relayHint = $('#relay-hint');
 
-  const B = { bridge: null, door: null, party: [], allies: [], foe: null, D: null, pending: null, busy: false, log: [], all: [], relayBanner: null, armed: false, intent: null, fallSpot: null, options: [], seen: new Set() };
+  const B = { bridge: null, door: null, party: [], allies: [], foe: null, D: null, pending: null, busy: false, log: [], all: [], relayBanner: null, armed: false, intent: null, fallSpot: null, options: [] };
   const errors = [];
   let battleContext = null;
   let run = null, onResult, onContinue, onDecision;
@@ -63,7 +66,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const frame = $('#frame'), w = Math.floor(Math.min(430, frame.clientWidth) / 2) * 2, h = frame.clientHeight;
     const top = $('#bar').offsetHeight || 48;
     const bottom = parseFloat(window.getComputedStyle($('#panel')).paddingBottom) || 8;
-    const reserved = top + bottom + (h < 700 ? 270 : 365);
+    const largeText = document.documentElement.classList.contains('large-text');
+    // Below the stage (battle.css): party row 54 + message band 34 + panel 6 + two command rows (2×56 + 6) + 6 + retreat row 40 = 258.
+    // From 700px tall the command rows may grow to their 148px cap (+30). What is left goes to the stage.
+    const reserved = top + bottom + 258 + (h >= 700 ? 30 : 0) + (largeText ? 36 : 0);
     const W = w / 2, H = Math.max(132, Math.min(214, Math.floor((h - reserved) / 2)));
     St.resize(W, H);
     $('#stage').style.height = H * 2 + 'px';
@@ -72,7 +78,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
 
   /* the party stands in a diagonal line, front fighter lowest and closest */
   const LANE = [[0.37, 0], [0.235, -14], [0.11, -27]];
-  const slotPos = k => { const l = LANE[Math.min(k, 2)]; return { x: Math.round(S.W * l[0]), y: l[1] }; };
+  const slotPos = (k, actor) => {
+    const [x, y] = LANE[Math.min(k, 2)];
+    return { x: Math.round(S.W * x), y: actor ? Math.max(y, St.tall(actor) + 5 - S.BASE) : y };
+  };
   const foePos = () => ({ x: Math.round(S.W * 0.76), y: -4 });
   function lineup(D) {
     const out = [];
@@ -83,7 +92,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const line = lineup(B.D), jobs = [];
     line.forEach((idx, k) => {
       const a = B.allies[idx]; if (!a) return;
-      const pos = slotPos(k);
+      const pos = slotPos(k, a);
       a.wait = k === 0 ? 0 : 1;
       if (animate && (Math.abs(a.x - pos.x) > 0.5 || Math.abs(a.y - pos.y) > 0.5)) jobs.push(tween(a, pos, 0.3)); else { a.x = pos.x; a.y = pos.y; }
     });
@@ -102,7 +111,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const hud = createHud(core, St, sfx, widgets);
   const { ticker, tally, tallyWorthy } = hud;
   const { brief, renderActions, lockPanel } = createTiles({ core, widgets, audio, sheets, B, foeDef, play, ticker });
-  const { beginMove, isBig, label, impact, strikeAndHit, strikeMiss, settleMove } = createMoves({
+  const { beginMove, playCast, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects } = createMoves({
     stage: St, sfx, actorOf, unitOf, colorsOf, applyHp, card, spr
   });
   const foeSheet = () => details.foeSheet(B);
@@ -140,13 +149,13 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     } else if (region?.id === 'tide_cycle' && event && !foeDef().boss) {
       const tide = event.region?.tide ?? (B.intent?.kind === 'rest' ? B.intent : event.countdown);
       if (tide?.kind === 'rest') {
-        message = '조류 · 적 휴식' + (tide.vulnerable ? ' · 받는 피해 ×' + tide.vulnerable : '');
+        message = '조류 · 적 휴식' + (tide.vulnerable ? ' · 받는 피해 ×' + formatMultiplier(tide.vulnerable) : '');
       } else if (tide?.name && tide.inTurns != null) {
         const when = tide.inTurns === 0 ? '이번 턴' : tide.inTurns === 1 ? '다음 턴' : tide.inTurns + '턴 뒤';
         const classic = tide.name === REGIONS.tide_cycle.hit;
         const power = tide.power ?? (classic ? 2.5 : null);
         const type = TYPE[tide.kind] ?? (classic ? TYPE.mag : '');
-        const attack = [type, power != null ? '×' + power : ''].filter(Boolean).join(' ');
+        const attack = [type, power != null ? '×' + formatMultiplier(power) : ''].filter(Boolean).join(' ');
         message = '조류 · ' + [when + ' ' + tide.name, attack].filter(Boolean).join(' · ');
       }
     } else if (region?.id === 'arena_charge' && event?.region && !B.chargeSpent) {
@@ -186,9 +195,16 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const currentLog = () => B.bridge ? battleLog(B.all.slice(0, B.played), B.party, B.door.enemies) : run?.lastBattleLog;
   function showLog() {
     sfx.tap();
-    openBattleLog(sheets, widgets, currentLog());
+    openBattleLog(sheets, widgets, $('#result').classList.contains('on') ? run.lastBattleLog : currentLog());
   }
   $('#b-log').addEventListener('click', showLog);
+  $('#result').addEventListener('click', event => {
+    const id = event.target.closest('[data-sheet]')?.dataset.sheet;
+    if (id) {
+      sfx.tap();
+      details.charSheet(run, id);
+    }
+  });
 
   function logLine(text) { B.log.push(text); if (!/^(===|---)/.test(text)) ticker(text); }
   async function showBanner(tag, text, cls, sec) { const b = St.banner(tag, text, cls); await wait(sec || 0.7); b.remove(); }
@@ -198,7 +214,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const move = B.pending;
     if (!move) return;
     B.pending = null;
-    return settleMove(move, B.seen);
+    return settleMove(move);
   }
 
   function setupBattleStage() {
@@ -207,10 +223,11 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.allies = B.party.map((id, i) => {
       const u = B.D.allies[i];
       if (!id || !u) return null;
-      return St.makeActor({
-        sprite: id, ...slotPos(i), wait: i ? 1 : 0, flip: (spr(id)?.facing || 'right') === 'left',
+      const actor = St.makeActor({
+        sprite: id, wait: i ? 1 : 0, flip: (spr(id)?.facing || 'right') === 'left',
         vis: !u.dead && !u.out, aura: u.lastStand ? 'red' : null
       });
+      return Object.assign(actor, slotPos(i, actor));
     });
     B.foe = B.D.enemy.hp > 0 ? makeFoe(foeDef()) : null;
     if (B.foe && B.D.enemy.frenzied) B.foe.aura = 'red';
@@ -229,13 +246,13 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.allies.forEach((a, i) => { if (a) a.x = -60 - i * 26; });
     B.foe.x = S.W + 70;
     render(true);
-    const jobs = lineup(B.D).map((idx, k) => wait(k * 0.08).then(() => tween(B.allies[idx], slotPos(k), 0.4)));
+    const jobs = lineup(B.D).map((idx, k) => wait(k * 0.08).then(() => tween(B.allies[idx], slotPos(k, B.allies[idx]), 0.4)));
     jobs.push(wait(0.25).then(() => tween(B.foe, { x: foePos().x }, 0.4)).then(() => { St.dust(B.foe.x, FY(B.foe)); sfx.enter(); }));
     await Promise.all(jobs);
     await showBanner(def.kind, B.door.enemies.map(d => d.name).join(' → '), def.boss ? 'ult' : '', 0.8);
     if (q) await showBanner('꿈의 변덕', q.name + ' · ' + q.desc, 'gold', 0.95);
   }
-  async function onAct(e) {
+  async function onAct(e, action) {
     const actor = actorOf(e.who), isFoe = e.who.side === 'enemy';
     if (!actor) return;
     $('#tally').innerHTML = '';
@@ -254,16 +271,13 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       warnEnemy();
       await highlightStrong(e, actor);
     }
-    if (e.skill.type === 'sup') {
-      actor.front = 1; label(e.skill.name, actor, 'good');
-      sfx.buff(); St.ring(St.X(actor), CY(actor), '#5fd4a8', 24); St.rise(St.X(actor), FY(actor) - 8, 12, ['#5fd4a8', '#d6fff7', '#ffc857'], 30);
-      await tween(actor, { oy: -4 }, 0.08); await tween(actor, { oy: 0 }, 0.1, 'in'); await wait(0.1);
-      actor.front = 0; return;
-    }
-    B.pending = beginMove(e, actor, isFoe);
+    const { effects } = action;
+    B.pending = beginMove(e, actor, isFoe, action);
     if (e.ult || e.salience === 'boss') { warnEnemy(); await wait(0.12); }
-    else if (!strong && e.skill.name !== '일반 공격' && !isBig(B.pending)) St.number(e.skill.name, St.X(actor), HY(actor) - 12, 'call');
-    else if (e.delayed) label(e.skill.name + ' 발동', actor, 'good');
+    else if (e.skill.type !== 'sup' && !strong && e.skill.name !== '일반 공격' && !isBig(B.pending) && !effects.some(effect => effect.kind === 'delay')) {
+      B.pending.call = St.number(e.skill.name + (e.delayed ? ' 발동' : ''), St.X(actor), HY(actor) - 12, 'call');
+    }
+    await playCast(B.pending);
   }
   async function highlightStrong(e, actor) {
     actor.white = 0.15;
@@ -271,22 +285,19 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     await wait(0.15);
     name.remove();
   }
-  async function onHp(e) {
+  async function onHp(e, action) {
     const p = B.pending;
-    if (e.who.side === 'enemy' && e.delta < 0 && e.cause?.by?.side === 'ally') {
-      const source = e.cause.by;
-      B.lastStriker = { id: unitOf(source)?.form || B.party[source.idx], name: unitOf(source)?.name,
-        donor: p && same(source, p.e.who) ? p.e.heirFrom : null };
-    }
+    const step = action?.hp.get(e);
     const finisher = e === B.finalHit;
-    if (p && e.cause?.kind === 'act' && same(e.cause.by, p.e.who) && e.delta < 0 && !same(e.who, p.e.who)) {
+    if (p && step?.strike) {
       let sum = null;
       if (!finisher && p.stage === 'ready' && !p.isFoe && tallyWorthy(e, B.hitRecord)) {
         sum = tally(e.calc, e.amount, B.hitRecord);
         if (!isBig(p)) await sum;
       }
-      await strikeAndHit(p, e, B.hitRecord, B.seen, finisher ? finishHit : null);
-      if (sum) await sum;
+      await strikeAndHit(p, step, B.hitRecord, action.effects.length > 0, finisher ? finishHit : null);
+      if (sum && action.effects.length) action.tally = sum;
+      else if (sum) await sum;
       return;
     }
     if (e.cause?.kind === 'relay' && e.who.side === 'enemy' && e.delta < 0) { await relayHit(e); return; }
@@ -294,9 +305,12 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     const actor = actorOf(e.who);
     applyHp(e);
     if (!actor) return;
-    if (e.delta > 0) { St.number('+' + e.amount, St.X(actor), HY(actor) - 2, 'heal'); sfx.buff(); }
+    if (e.delta > 0) {
+      St.number(step?.label ?? '+' + e.amount, St.X(actor), HY(actor) - 2, 'heal');
+      showHeal(e, p);
+    }
     else if (e.cause?.kind === 'self') { St.number('-' + e.amount + ' 반동', St.X(actor), HY(actor) + 8, 'self'); actor.white = 0.06; }
-    else { actor.white = 0.08; St.number(String(e.amount), St.X(actor), HY(actor) - 2, e.who.side === 'ally' ? 'foe' : ''); sfx.hit(false); }
+    else { actor.white = 0.08; St.number(step?.label ?? String(e.amount), St.X(actor), HY(actor) - 2, e.who.side === 'ally' ? 'foe' : ''); sfx.hit(false); }
     await wait(0.16);
   }
   function responder() {
@@ -317,8 +331,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     }
     await wait(0.32);
     if (e === B.finalHit) {
-      const finisher = B.D.allies[idx >= 0 ? idx : e.cause.victim?.idx];
-      await finishHit(e, finisher && { id: finisher.form, name: finisher.name });
+      await finishHit(e);
     } else {
       impact(e, { crit: !!e.calc?.crit, adv: !!e.calc?.adv, colors, prefix: '반격 ' }, B.hitRecord);
       await wait(0.28);
@@ -326,26 +339,29 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     if (from) { from.pose = 'idle'; from.front = 0; }
     if (foe && B.D.enemy.hp > 0) foe.pose = 'idle';
   }
-  async function onBuff(e) {
-    const u = unitOf(e.who), actor = actorOf(e.who); if (!u) return;
+  function applyBuff(e) {
+    const u = unitOf(e.who); if (!u) return;
     if (e.to) u.buffs[e.id] = e.to; else delete u.buffs[e.id];
-    render();
-    if (!actor || e.to <= e.from) return;
-    const name = core.BUFF_NAMES[e.id] || e.id, good = GOOD.includes(e.id);
-    if (/^defProtocol/.test(e.id)) { label(e.id === 'defProtocolPhy' ? '물리 방어 상승' : '마법 방어 상승', actor, 'bad', 10); await wait(0.2); return; }
-    label(name + (e.id === 'burn' || e.id === 'divine' ? ' ' + e.to : ''), actor, good ? 'good' : 'bad', 10);
-    if (good) { St.ring(St.X(actor), CY(actor), '#5fd4a8', 22); sfx.guard(); }
-    else { St.sparks(St.X(actor), CY(actor), 7, e.id === 'burn' ? ['#ff5a3c', '#ffe07a'] : ['#b999ff', '#6b2433'], 40); sfx.debuff(); }
-    await wait(0.12);
   }
-  async function onField(e) {
-    B.D.field = e.list.slice(); render();
-    for (const id of e.add) {
-      const f = FIELD[id] || [id, '#ccc'];
-      for (let i = 0; i < 22; i++) St.rise(Math.random() * S.W, 34 + Math.random() * 24, 1, [f[1], '#ffffff'], 0);
-      sfx.buff(); S.flash = 0.2;
-      await showBanner('필드', (core.BUFF_NAMES[id] || id) + ' 발동', 'gold', 0.45);
+  function applyEffects(events) {
+    for (const e of events) {
+      if (e.t === 'buff') applyBuff(e);
+      else B.D.field = e.list.slice();
     }
+    if (events.length) render();
+  }
+  async function finishActionEffects(action) {
+    if (action.effects.length) {
+      const move = B.pending;
+      if (action.effects.some(effect => effect.at === 'caster')) move?.call?.remove();
+      const elapsed = move?.hitAt == null ? null : clock.t - move.hitAt;
+      const pause = elapsed == null ? 0 : Math.max(0, 0.18 - elapsed);
+      await Promise.all([settlePending(), pause > 0 ? wait(pause) : null]);
+    }
+    applyEffects(action.changes);
+    await showEffects(action.effects, $('#sky'));
+    await action.tally;
+    for (const down of action.downs) await handle(down);
   }
   async function onDown(e) {
     const a = actorOf(e.who), u = unitOf(e.who); if (u) { u.dead = true; u.hp = 0; }
@@ -416,12 +432,12 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       }
       case 'ember_carry': if (who) label('작열 계승 +' + e.stacks, who, 'bad'); break;
       case 'tide_cycle':
-        ticker(e.vulnerable ? e.name + ' · 적이 받는 피해 ×' + e.vulnerable : '조류가 물러났다 · 적 휴식');
+        ticker(e.vulnerable ? e.name + ' · 적이 받는 피해 ×' + formatMultiplier(e.vulnerable) : '조류가 물러났다 · 적 휴식');
         break;
       case 'arena_charge':
         B.chargeSpent = true;
         showRegion();
-        if (who) label('기세 ×' + e.multiplier, who, 'good');
+        if (who) label('기세 ×' + formatMultiplier(e.multiplier), who, 'good');
         break;
     }
   }
@@ -467,12 +483,11 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const frames = count => wait(count / 60);
 
-  async function finishHit(e, striker) {
+  async function finishHit(e) {
     const foe = B.foe;
     applyHp(e);
     if (!foe) return;
     const reduced = reducedMotion();
-    B.finisher = striker ?? (e.cause?.by?.side === 'ally' || e.cause?.rule === 'overflow' ? B.lastStriker : null);
     showIntent(null);
     foe.pose = 'hurt';
     foe.front = 1;
@@ -495,16 +510,6 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     }
   }
 
-  function finishPortrait(survivors, amount) {
-    const faceFrom = B.finisher?.id && faceBadge(B.finisher.id, B.finisher.name);
-    const donor = B.finisher?.donor;
-    const strike = amount == null ? '마지막 일격' : '마지막 일격 · ' + amount.toLocaleString('en-US') + ' 피해';
-    return '<div class="finish-portrait">' + (faceFrom || amount != null ? '<div><small>' + strike + '</small>' + (faceFrom || '') + '</div>' : '') +
-      (donor ? '<div><small>유품 원주인</small>' + faceBadge(donor) + '</div>' : '') +
-      (survivors.length ? '<div><small>생환</small><div class="finish-survivors">' + survivors.map(id => faceBadge(id)).join('') + '</div></div>' : '') +
-      '</div>';
-  }
-
   function outcomeCue(track, fallback) {
     const status = music?.playOutcome(track, B.outcomeKey);
     if (!status || status === 'unavailable') fallback();
@@ -513,23 +518,13 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   async function victory() {
     outcomeCue('victory', sfx.win);
     showIntent(null); S.danger = 0; tween(S, { dark: 0 }, 0.2);
-    if (B.finishNumber) {
-      const living = B.bridge.survivors();
-      const survivors = B.party.filter((id, index) => id && living[index]);
-      const plate = document.createElement('div');
-      plate.className = 'finish-cast win';
-      plate.innerHTML = '<b>승리</b>' + finishPortrait(survivors);
-      $('#fx').append(plate);
-      await frames(reducedMotion() ? 2 : bossRoom() ? 44 : 18);
-      plate.remove();
-      B.finishNumber.remove();
-      return;
-    }
-    const b = St.banner('승리', run.floor + '층 · ' + ROOM_NAMES[B.door.type], 'gold big');
-    const fp = foePos();
-    if (B.door.reward) St.gem(fp.x, S.BASE - 30, S.W - 60, 2, 0.65);
-    for (const idx of lineup(B.D)) { const a = B.allies[idx]; tween(a, { oy: -6 }, 0.12).then(() => tween(a, { oy: 0 }, 0.14, 'in')); }
-    await wait(1.2); b.remove();
+    const plate = document.createElement('div');
+    plate.className = 'finish-cast win';
+    plate.textContent = '승리';
+    $('#fx').append(plate);
+    await frames(reducedMotion() ? 2 : bossRoom() ? 44 : 18);
+    plate.remove();
+    B.finishNumber?.remove();
   }
   async function defeat() {
     outcomeCue('defeat', sfx.lose);
@@ -539,17 +534,20 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
 
   /* ---------- the event player ---------- */
-  async function handle(e) {
+  async function handle(e, action) {
     switch (e.t) {
       case 'log': logLine(e.text); break;
       case 'begin': await intro(e); break;
       case 'turn': await settlePending(); B.D.turn = e.n; render(); break;
-      case 'act': await settlePending(); await onAct(e); break;
+      case 'act': await settlePending(); await onAct(e, action); break;
       case 'mp': { const u = unitOf(e.who); if (u) { u.mp += e.delta; render(); } break; }
-      case 'hp': await onHp(e); break;
-      case 'buff': await onBuff(e); break;
-      case 'field': await onField(e); break;
-      case 'miss': if (B.pending && B.pending.stage === 'ready') { await strikeMiss(B.pending, e.why, B.seen); B.pending.stage = 'hit'; } break;
+      case 'hp': await onHp(e, action); break;
+      case 'buff':
+      case 'field':
+        applyEffects([e]);
+        await showEffects(planEffects([e], { core, artifacts: B.artifacts }), $('#sky'));
+        break;
+      case 'miss': if (B.pending?.stage === 'ready') await strikeMiss(B.pending, e.why); break;
       case 'stunned': { await settlePending(); const a = actorOf(e.who); if (a) { label('기절! 행동 불가', a, 'bad'); sfx.debuff(); await wait(0.42); } break; }
       case 'down': await settlePending(); await onDown(e); break;
       case 'heirloom': await settlePending(); await onHeirloom(e); break;
@@ -605,12 +603,31 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       B.finalHit = events.findLast(e => e.t === 'hp' && e.who?.side === 'enemy' &&
         e.who.idx === B.door.enemies.length - 1 && e.delta < 0 && e.amount > 0 && (e.s?.enemy?.hp ?? 0) === 0);
     }
-    let i = 0;
+    let i = 0, action;
     try {
       for (; i < events.length; i++) {
         if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
         B.played = start + i + 1;
-        await handle(events[i]);
+        const e = events[i];
+        if (e.t === 'act') {
+          const end = actionEnd(events, i);
+          const plan = planEffects(events.slice(i, end), { core, artifacts: B.artifacts, next: events[end]?.s });
+          action = {
+            end,
+            miss: events.slice(i + 1, end).some(event => event.t === 'miss'),
+            hp: new Map(plan.filter(step => step.event).map(step => [step.event, step])),
+            effects: plan.filter(step => !step.event),
+            changes: [],
+            downs: []
+          };
+        }
+        if (action && (e.t === 'buff' || e.t === 'field')) action.changes.push(e);
+        else if (action && e.t === 'down') action.downs.push(e);
+        else await handle(e, action);
+        if (action?.end === i + 1) {
+          await finishActionEffects(action);
+          action = null;
+        }
       }
       await settlePending();
     } catch (error) {
@@ -633,26 +650,34 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
         B.busy = false; clock.fast = false; $('#skip').className = '';
       }
     }
-    if (bridge === B.bridge && bridge.outcome && $('#battle').classList.contains('on')) finishBattle();
+    if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
+    if (bridge.outcome) finishBattle();
+    else if (bridge.awaiting) B.onReady?.(B);
   }
 
   /* ---------- battle in and out ---------- */
   function roomLabel() {
-    return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + ROOM_NAMES[B.door.type];
+    // The bar is narrow: plain kind only ('보스', not '보스 · 꿈의 주인'); the door card carries the flavour name.
+    const plain = TERMS[B.door.type]?.short?.split(' · ')[0];
+    return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + (plain ?? ROOM_NAMES[B.door.type]);
   }
 
-  function startBattle(expedition, options, settle, advance, { fromMap = false, decision } = {}) {
+  function startBattle(expedition, options, settle, advance, {
+    fromMap = false, decision, simpleOpening = false, onAction, onReady, replay = []
+  } = {}) {
     run = expedition;
     onResult = settle;
     onContinue = advance;
     onDecision = decision;
     const door = run.room;
-    B.door = door; B.party = options.party; B.log = []; B.all = []; B.pending = null; B.relayBanner = null; B.seen = new Set();
+    B.onAction = onAction;
+    B.onReady = onReady;
+    B.door = door; B.party = options.party; B.log = []; B.all = []; B.pending = null; B.relayBanner = null;
     B.played = 0;
     B.fromMap = fromMap;
     B.lastWarning = null;
     B.blessingViews = new Map();
-    B.finalHit = B.finishNumber = B.finisher = B.lastStriker = null;
+    B.finalHit = B.finishNumber = null;
     B.outcomeKey = Symbol();
     B.artifacts = options.artifacts;
     B.temporaryRelic = run.nextBattle?.relic;
@@ -664,61 +689,108 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.bridge = createBattle(core, options);
     $('#result').classList.remove('on');
     $('#battle').classList.remove('resumed-result', 'opening-decision');
+    for (const id of ['b-field', 'b-speed', 'b-log']) $('#' + id).hidden = simpleOpening;
     $('#acts').innerHTML = '';
     $('#b-heir').className = '';
     relayHint.hidden = door.type !== 'borrowed' || isOpening() && !!Opening.openingModel;
     music?.play(door.type === 'boss' || door.final ? 'boss' : 'battle', run.dungeonId);
     show('battle'); layout(); ticker('');
-    play(B.bridge.start());
+    // The run codec restores a fighting room at its pre-battle checkpoint.
+    const events = B.bridge.start();
+    for (const action of replay) {
+      const accepted = action === 'retreat' ? B.bridge.retreat() : B.bridge.act(action);
+      if (!accepted.length) break;
+      events.push(...accepted);
+    }
+    play(events);
   }
   function finishBattle() {
     const res = onResult(B.bridge.summary(), currentLog());
-    if (res) showResult(res, onContinue, onDecision);
+    if (res?.ok) {
+      showResult(onContinue, onDecision, false);
+      B.onReady?.(B);
+    }
   }
 
-  function showResult(res, advance, decision, restored = false) {
+  function showResult(advance, decision, restored) {
+    const result = run.lastBattleResult ?? {
+      floor: run.floor, roomType: run.room.type, outcome: run.result ?? 'win', wiped: false,
+      fallenIds: [], survivorIds: [], transfers: [],
+      rewardDelta: { crystals: 0, relicIds: run.lastBattleRelic ? [run.lastBattleRelic] : [] }
+    };
+    const { floor, roomType, outcome, wiped, fallenIds, survivorIds, transfers, rewardDelta } = result;
+    const won = outcome === 'win';
+    const final = roomType === 'boss' || run.room.final;
+    const retry = run.phase === 'result' && run.result === null;
+    const name = id => card(id)?.name ?? id;
     const rows = [];
-    if (res.wiped) rows.push('<p>마지막 동료가 적과 함께 쓰러져 원정이 종료됩니다.</p>');
-    const battleCrystals = (res.crystals ?? 0) - (run.floor === 6 ? res.contract?.paid ?? 0 : 0);
-    const gainedCrystals = res.win && battleCrystals > 0;
-    if (gainedCrystals) rows.push('<p class="gain">결정 +' + battleCrystals + ' · 보유 ' + run.crystals + '</p>');
-    rows.push(...contractSettlement(run.floor, res.contract));
-    if (res.fallen?.length) rows.push('<div class="fallen"><small>쓰러진 동료</small><div>' + res.fallen.map(id => '<span class="mini dead">' + face(id, 40) + '<b>' + esc(card(id).name) + '</b></span>').join('') + '</div></div>');
-    for (const g of res.heirloomsGained || []) rows.push('<p class="heirline"><b>유품</b> ' + esc(card(g.to).name) + ' ← ' + esc(card(g.from).name) + '의 ' + esc(g.name) + '</p>');
-    if (res.bet) rows.push('<p>' + (res.bet.won ? '내기 성공' : '내기 실패') + '</p>');
-    if (res.win && (B.finalHit || res.survivors?.length)) rows.unshift(finishPortrait(res.survivors ?? [], B.finalHit?.amount));
-    const box = $('#result-in');
-    let label = '다음 층으로';
-    if (run.phase === 'done') label = '원정 결과';
-    else if (res.retry) label = '편성 다시 하기';
-    else if (run.room.type === 'borrowed') {
-      const lead = run.openingLead;
-      if (lead) {
-        const name = card(lead).name;
-        const consonant = /[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 !== 0;
-        label = name + (consonant ? '과 동행' : '와 동행');
-        rows.unshift('<div class="opening-result win">' + faceBadge(lead) + '<small>첫 동행</small></div>');
-      } else label = '살아남은 동료 깨우기';
+    if (fallenIds.length) {
+      const list = fallenIds.map(name).join('·');
+      rows.push('<p class="result-fallen">' + esc(list + (hasFinalConsonant(list) ? '이' : '가') + ' 쓰러졌습니다.') + '</p>');
     }
-    box.innerHTML = '<header class="result-heading"><h3>' + (res.win ? '돌파' : '전멸') + '</h3>' +
-      '<button class="btn log-button" id="b-result-log">기록</button></header>' + rows.join('') +
-      '<div class="result-decision"></div><button class="btn go" id="b-next">' + esc(label) + '</button>';
+    if (transfers.length) {
+      const lines = transfers.map(({ toId, skillName }) => {
+        const target = name(toId);
+        return '<p data-coach="heirloom-transfer">' + esc(target + (hasFinalConsonant(target) ? '이 ' : '가 ')) +
+          '<b>' + esc(skillName) + '</b>' + (hasFinalConsonant(skillName) ? '을' : '를') + ' 물려받았습니다.</p>';
+      });
+      rows.push('<div class="heirline"><span class="run-face">' + face(transfers[0].toId, 40) + '</span>' +
+        '<div>' + lines.join('') + '</div></div>');
+    }
+    const lastStand = run.lastBattleLog?.flatMap(turn => turn.rows).find(row => row.kind === 'last-stand')?.faces[0]?.id;
+    if (lastStand && survivorIds.includes(lastStand)) {
+      rows.push('<div class="result-last-stand chips">' + esc(name(lastStand)) +
+        ' <i class="last" data-coach="last-stand">최후의 일인</i></div>');
+    }
+    if (rewardDelta.crystals > 0) {
+      rows.push('<p class="gain">' + TERMS.crystal.short + ' +' + rewardDelta.crystals + ' · 보유 ' + run.crystals + '개</p>');
+    }
+    const contract = run.contract && { ...run.contract, metNow: run.contract.metAtFloor === floor };
+    if (!retry) rows.push(...contractSettlement(floor, contract));
+    const wager = (run.lastBattleLog?.at(-1)?.rows ?? []).find(row => row.kind === 'wager');
+    if (run.features?.bets !== false && wager) rows.push('<p>' + esc(wager.text) + '</p>');
+    if (won && wiped && final) rows.push('<p class="result-return">보스 격파 · 돌아온 동료 0명</p>');
+    else if (won && wiped) rows.push('<p>돌아온 동료가 없어 원정이 끝났습니다.</p>');
+
+    let label = (floor + 1) + '층으로';
+    if (retry) label = '편성 바꿔 재도전';
+    else if (run.result && !run.pending) {
+      const rewards = R.runRewards(run);
+      label = run.daily ? '균열 기록 보기' : rewards.recruitable.length ? '영입할 동료 고르기' :
+        rewards.shardCandidates.length ? '다음 원정 후보 고르기' : '관측소로';
+    } else if (roomType === 'borrowed') label = '다음 동료 고르기';
+    else if (run.pending?.kind === 'reinforcement') label = '동료 보충하기';
+    else if (run.pending?.kind === 'gate') label = '문지기 보상 고르기';
+    else if (run.pending?.kind === 'relic') label = '유물 보상 고르기';
+
+    const title = won ? (run.daily ? '균열' : DUNGEONS[run.dungeonId].name) + ' ' + floor + '층 돌파' : '전멸';
+    const box = $('#result-in');
+    box.innerHTML = '<header class="result-heading ' + (won ? 'won' : 'lost') + '"><h3>' + esc(title) + '</h3>' +
+      logButton('id="b-result-log"') + '</header>' + rows.join('') +
+      '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label) + '</button>';
     $('#result').classList.add('on');
-    if (!restored && res.ok) {
-      if (gainedCrystals) sfx.credit();
-      if (res.relics?.length || res.relic?.equipped) sfx.gem();
+    if (!restored) {
+      if (rewardDelta.crystals > 0) sfx.credit();
+      if (rewardDelta.relicIds.length) sfx.gem();
     }
     $('#b-result-log').addEventListener('click', showLog);
     const next = $('#b-next', box);
-    if (res.win && run.phase === 'reward' && run.room.type !== 'borrowed') {
-      if (!restored && ['reinforcement', 'gate', 'relic'].includes(run.pending?.kind)) music?.holdReward(run.dungeonId);
-      decision?.($('.result-decision', box), res, next);
-    }
+    const reward = won && ['reward', 'result'].includes(run.phase) && roomType !== 'borrowed';
+    const pending = () => reward && ['reinforcement', 'gate', 'relic'].includes(run.pending?.kind);
+    const content = $('.result-decision', box);
+    const singleReinforcement = run.pending?.kind === 'reinforcement' && run.pending.candidates.length === 1;
+    if (reward) decision?.(content, result, next, singleReinforcement);
+    if (pending() && !restored) music?.holdReward(run.dungeonId);
     box.scrollTop = 0;
     next.addEventListener('click', () => {
-      sfx.tap(); $('#result').classList.remove('on');
-      advance(res);
-    }, { once: true });
+      sfx.tap();
+      if (pending()) decision(content, result, next, true);
+      else {
+        next.disabled = true;
+        $('#result').classList.remove('on');
+        advance();
+      }
+    });
   }
 
   function attach(expedition) {
@@ -735,12 +807,12 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.all = [];
   }
 
-  function restoreResult(expedition, advance, result = { win: true }, decision) {
+  function restoreResult(expedition, advance, decision) {
     attach(expedition);
     B.D = B.foe = B.bridge = null;
     B.allies = [];
     B.log = [];
-    B.finalHit = B.finisher = null;
+    B.finalHit = B.finishNumber = null;
     B.door = run.room;
     B.artifacts = run.relics;
     B.temporaryRelic = null;
@@ -755,7 +827,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     show('battle');
     layout();
     lockPanel();
-    showResult(result, advance, decision, true);
+    showResult(advance, decision, true);
   }
 
   /** Review hooks for the live page and hidden preview panes. */

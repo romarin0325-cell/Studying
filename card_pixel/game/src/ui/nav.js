@@ -7,19 +7,23 @@ import { createDetails } from './battle/sheets.js';
 import { openBattleLog } from './battle/log.js';
 import { titleScreen } from './screens/title.js';
 import { hubScreen } from './screens/hub.js';
-import { departureDifficulty, dungeonsScreen, listedPool, preparationSheet } from './screens/dungeons.js';
-import { missionRecruitSheet, recruitScreen } from './screens/recruit.js';
+import { dungeonsScreen, listedPool, preparationSheet } from './screens/dungeons.js';
+import { missionRecruitSheet, recruitReceipt, recruitScreen } from './screens/recruit.js';
 import { collectionScreen, companionSheet, rosterTable } from './screens/collection.js';
 import { notebookScreen } from './screens/notebook.js';
 import { recordsScreen } from './screens/records.js';
 import { endingScreen } from './screens/ending.js';
 import { createDailyNavigation } from './nav/daily.js';
+import { bindRecoveryImport } from './nav/recovery.js';
+import { basicTutorial, createTutorial } from './tutorial.js';
+import { hasFinalConsonant } from './widgets.js';
 import * as Meta from '../engine/meta.js';
 import { createRun, finishRun } from '../engine/run.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { CONTRACTS } from '../content/contracts.js';
 
-const { availableDungeons, applyRunEnd, createProfile, setExpeditionParty, startView } = Meta;
+const { availableDungeons, applyRunEnd, createProfile, departureDifficulty, featureFlags, startView } = Meta;
+const FIRST_MAIN = 'ember_volcano';
 
 const PAGES = {
   hub: '꿈의 관측소', dungeons: '행선지', recruit: '', collection: '동료 도감',
@@ -47,6 +51,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   let gainedAtReturn = false;
   let warnedSave = false;
   const details = createDetails(core, widgets, sheets.openSheet);
+  const tutorial = createTutorial({ currentProfile: () => profile, updateProfile, widgets, stage, core, roster });
 
   const host = {
     save(current) {
@@ -59,6 +64,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       if (current === run && current.phase === 'done') showRecruit();
     },
     profile: () => profile,
+    tutorial,
     assets,
     runtime: { stage, audio, music, sheets }
   };
@@ -119,51 +125,70 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const node = page('hub');
     const goal = currentGoal(run);
     const target = goal?.target;
-    const completedTower = profile.notebook.chapters.includes(7);
-    const collecting = completedTower && target?.screen === 'collection';
-    const destinationId = !collecting && (target?.dungeonId ?? profile.ui?.destination);
-    const rift = daily.hubView();
+    const flags = featureFlags(profile);
+    const firstMain = !run && (flags.introCleared && !flags.firstMainCleared || profile.ui.tutorialReplay === 'active');
+    const collecting = !firstMain && target?.screen === 'collection';
+    const destinationId = firstMain ? FIRST_MAIN : !collecting && (target?.dungeonId ?? profile.ui?.destination);
     hubScreen(node, {
-      profile, run, widgets, inspect, openDungeons, destinationId, resume: enterExpedition, goal, arriving,
-      depart: collecting ? () => openMeta('collection', true)
-        : destinationId ? () => prepare(destinationId, target?.contractId) : openDungeons,
-      departureLabel: collecting ? '동료 출현 지역 보기' : null,
-      daily: rift, openDaily: daily.showDaily
+      profile, run, widgets, inspect, openDungeons, destinationId, resume: enterExpedition, goal, arriving, flags, firstMain,
+      depart: firstMain ? () => startExpedition(FIRST_MAIN, departureDifficulty(profile, FIRST_MAIN))
+        : () => followGoal(target),
+      departureLabel: collecting ? '동료 도감 보기' : null,
+      daily: flags.dailyRift ? daily.hubView() : null, openDaily: daily.showDaily
     });
+    if (arriving.length) $('.meta-hub-actions', node).insertAdjacentHTML('afterbegin', recruitReceipt(arriving, widgets, profile.history));
     if (profile.ui?.announcement) updateUi({ announcement: null });
     for (const button of node.querySelectorAll('[data-meta-page]')) button.addEventListener('click', () => {
       openMeta(button.dataset.metaPage);
     });
+    tutorial.sync(run);
   }
 
   function currentGoal(current = null) {
-    const goal = Meta.nextGoal?.(profile, current);
+    const goal = Meta.nextGoal?.(profile, current, roster);
     const name = profile.lead && roster.card(profile.lead)?.name;
-    const text = name && goal?.text === '대표 동료와 본편 출발'
-      ? goal.text.replace('대표 동료와', name + (/[가-힣]$/.test(name) && (name.charCodeAt(name.length - 1) - 0xac00) % 28 ? '과' : '와'))
+    const text = name && goal?.text === '시작 동료와 본편 출발'
+      ? name + (hasFinalConsonant(name) ? '과' : '와') + ' 본편 출발'
       : goal?.text;
-    return goal && { ...goal, text };
+    const reward = goal?.reward.includes('샘 초대') && !featureFlags(profile).prepEditing ? '' : goal?.reward;
+    return goal && { ...goal, text, reward };
   }
 
-  function openMeta(id, showWanted = false) {
+  function followGoal(target, fromNotebook = false) {
+    if (target?.screen === 'resume') return enterExpedition();
+    if (target?.screen === 'recruit') return showRecruit();
+    if (target?.screen === 'collection') return openMeta('collection');
+    if (!target?.dungeonId || (fromNotebook && (!featureFlags(profile).prepEditing || target.dungeonId === 'dawn_forest'))) {
+      return openDungeons({ target });
+    }
+    return prepare(target.dungeonId, target);
+  }
+
+  function openMeta(id, { mission } = {}) {
+    const flags = featureFlags(profile);
     const content = page(id, { back: showHub });
-    if (id === 'collection') collectionScreen(content, { profile, roster, widgets, core, inspect, showWanted });
+    if (id === 'collection') collectionScreen(content, { profile, roster, widgets, core, inspect });
     else if (id === 'notebook') {
+      if (mission) content.dataset.screenTabActive = 'missions';
       function renderNotebook() {
-        const scroll = content.scrollTop;
+        const scroll = $('.scroll-list', content)?.scrollTop ?? 0;
+        const goal = currentGoal(run);
         notebookScreen(content, profile, roster.card, {
-          goal: currentGoal(run), missions: Meta.missionsView?.(profile, roster),
-          openMission: !run && Meta.claimMission ? kind => invite(kind) : null
+          goal, followGoal: () => followGoal(goal?.target, true),
+          flags, missions: flags.missions ? Meta.missionsView(profile, roster) : null,
+          openMission: !run ? kind => invite(kind) : null,
+          describeMission: (label, line) => sheets.sheet(label, line)
         });
-        content.scrollTop = scroll;
+        $('.scroll-list', content).scrollTop = scroll;
       }
-      function invite(kind, index = 0) {
+      function invite(kind, key) {
         const periods = Meta.missionsView?.(profile, roster)?.claimable?.filter(period => period.kind === kind) ?? [];
         if (run || !periods.length) return;
+        const index = Math.max(0, periods.findIndex(period => period.key === key));
         const period = periods[index];
         missionRecruitSheet({
           period, widgets, sheets, remaining: periods.length,
-          next: () => invite(kind, (index + 1) % periods.length),
+          next: () => invite(kind, periods[(index + 1) % periods.length].key),
           claim(id) {
             const result = Meta.claimMission(profile, period.key, id, roster);
             if (!result?.announce?.ok) return false;
@@ -179,8 +204,10 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
         });
       }
       renderNotebook();
+      if (mission) invite(mission.kind, mission.key);
     } else if (id === 'records') recordsScreen(content, profile, roster.card, sheets.openSheet, () => showEnding(),
-      dailyStore?.history ? daily.showDailyHistory : null, log => openBattleLog(sheets, widgets, log));
+      flags.dailyRift && dailyStore?.history ? daily.showDailyHistory : null, log => openBattleLog(sheets, widgets, log));
+    tutorial.sync(run);
   }
 
   function endingDue() {
@@ -199,43 +226,55 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function inspect(id) {
-    companionSheet({ core, widgets, sheets, profile, id, setLead });
-  }
-
-  function setLead(lead) {
-    const companions = profile.companions.filter(id => id !== lead);
-    const result = setExpeditionParty(profile, { lead, companions });
-    if (result.announce.ok) updateProfile(result.profile);
-    if ($('#hub').classList.contains('on')) showHub();
-    inspect(lead);
-  }
-
-  function openDungeons() {
-    const node = page('dungeons', { back: showHub });
-    const destinations = availableDungeons(profile);
-    const mainDestinations = destinations.filter(dungeon => dungeon.id !== 'dawn_forest');
-    const quick = !run && (mainDestinations.find(dungeon => dungeon.id === profile.ui?.destination)
-      ?? mainDestinations.find(dungeon => dungeon.id === currentGoal()?.target?.dungeonId) ?? mainDestinations[0]);
-    const difficulty = quick ? departureDifficulty(profile, quick.id) : 'normal';
-    const quickStart = quick ? { name: quick.name, difficulty, start: () => startExpedition(quick.id, difficulty) } : null;
-    dungeonsScreen(node, {
-      profile, roster, widgets, prepare: run ? null : prepare, quickStart,
-      openRoster(dungeonId) {
-        const dungeon = DUNGEONS[dungeonId];
-        rosterTable({ dungeon, pool: listedPool(roster, dungeon), locked: true, currentProfile: () => profile, updateProfile, widgets, sheets });
+    companionSheet({
+      core, roster, widgets, sheets, profile, id,
+      openDestination: run ? null : dungeonId => {
+        sheets.closeSheet();
+        openDungeons({ target: { dungeonId } });
+      },
+      openMission: run ? null : mission => {
+        sheets.closeSheet();
+        openMeta('notebook', { mission });
       }
     });
   }
 
-  function prepare(dungeonId, contractId) {
-    if (run || !availableDungeons(profile).some(dungeon => dungeon.id === dungeonId)) return;
-    const initialContract = Object.hasOwn(CONTRACTS, contractId) && profile.nightmareUnlocks.includes(dungeonId) ? contractId : null;
+  function openDungeons({ scrollTop, target } = {}) {
+    const node = page('dungeons', { back: showHub });
+    const destinations = availableDungeons(profile);
+    const mainDestinations = destinations.filter(dungeon => dungeon.id !== 'dawn_forest');
+    const selected = target?.dungeonId ? destinations.find(dungeon => dungeon.id === target.dungeonId)
+      : mainDestinations.find(dungeon => dungeon.id === profile.ui?.destination)
+        ?? mainDestinations.find(dungeon => dungeon.id === currentGoal()?.target?.dungeonId) ?? mainDestinations[0];
+    const difficulty = selected && (selected.difficulties.includes(target?.difficulty) ? target.difficulty : departureDifficulty(profile, selected.id));
+    const quickStart = !run && selected ? { id: selected.id, name: selected.name, difficulty,
+      start: () => startExpedition(selected.id, difficulty) } : null;
+    dungeonsScreen(node, {
+      profile, roster, widgets, prepare: run ? null : dungeonId => prepare(dungeonId, target?.dungeonId === dungeonId ? target : undefined),
+      quickStart, scrollTop, selectedId: target?.dungeonId ?? quickStart?.id,
+      openRoster(dungeonId) {
+        const dungeon = DUNGEONS[dungeonId];
+        rosterTable({ dungeon, pool: listedPool(roster, dungeon), profile, widgets, sheets, inspect });
+      }
+    });
+    tutorial.sync(run);
+  }
+
+  function prepare(dungeonId, { difficulty, contractId } = {}) {
+    const destination = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
+    if (run || !destination) return;
+    const chosenDifficulty = destination.difficulties.includes(difficulty) ? difficulty : departureDifficulty(profile, dungeonId);
+    if (!featureFlags(profile).prepEditing || dungeonId === 'dawn_forest') {
+      return startExpedition(dungeonId, chosenDifficulty);
+    }
+    const initialContract = Object.hasOwn(CONTRACTS, contractId) && chosenDifficulty === 'nightmare' ? contractId : null;
     const saved = profile.ui?.preparation;
-    if (initialContract || saved?.dungeonId !== dungeonId) {
-      savePreparation({ dungeonId, difficulty: initialContract ? 'nightmare' : departureDifficulty(profile, dungeonId), contract: initialContract });
+    if (difficulty || saved?.dungeonId !== dungeonId) {
+      savePreparation({ dungeonId, difficulty: chosenDifficulty, contract: initialContract });
     }
     preparationOpen = true;
     preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, savePreparation, roster, widgets, sheets, start: startExpedition });
+    tutorial.sync(run);
   }
 
   function savePreparation(draft) {
@@ -255,11 +294,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     preparationOpen = false;
     updateProfile(withoutPreparation());
     if ($('#hub').classList.contains('on')) showHub();
-    else if ($('#dungeons').classList.contains('on')) {
-      const top = $('#dungeons .meta-page').scrollTop;
-      openDungeons();
-      $('#dungeons .meta-page').scrollTop = top;
-    }
+    else if ($('#dungeons').classList.contains('on')) openDungeons({ scrollTop: $('#dungeons .scroll-list').scrollTop });
   }
 
   function startExpedition(destination, difficulty = 'normal', contract = null) {
@@ -269,11 +304,14 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       ? Number(requestedSeed) >>> 0 : Math.floor(Math.random() * 0x100000000);
     run = createRun({ core, roster, dungeonId, difficulty, contract, seed, profileView: startView(profile, dungeonId) });
     preparationOpen = false;
-    const next = withoutPreparation();
+    let next = withoutPreparation();
+    if (basicTutorial(next)) next = Meta.markEntryStep(next, dungeonId === 'dawn_forest' ? 'title' : 'departure');
     updateProfile({ ...next, ui: {
       ...next.ui, destination: destination || next.ui.destination, announcement: null,
+      entryDoor: null, entryBattle: null, tutorialReplay: dungeonId === 'dawn_forest' && next.ui.tutorialReplay ? 'active' : null,
       ...(destination && { difficulty: { ...next.ui.difficulty, [dungeonId]: difficulty } })
     } });
+    tutorial.reset();
     enterExpedition();
   }
 
@@ -300,6 +338,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       changeChoices: ids => updateUi({ recruitChoices: { runId: run.id, ids } }),
       confirm: confirmReturn
     });
+    tutorial.sync(run);
   }
 
   function confirmReturn(choices) {
@@ -315,25 +354,26 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       else showHub();
       return true;
     }
-    const next = result.profile;
-    const recent = { ...next.ui?.recent };
+    let next = result.profile;
+    if (basicTutorial(next) && run.dungeonId === 'dawn_forest' && announce.recruits.length) {
+      next = Meta.markEntryStep(next, 'recruit');
+    }
     const entry = { dungeonId: run.dungeonId, floor: run.floor, result: run.result };
     const recruits = announce.recruits;
-    const returned = new Set(announce.returned ?? run.bench.filter(id => !run.fallen.includes(id)));
-    for (const id of new Set([...run.participated, ...recruits])) {
-      if (next.recruits[id]) recent[id] = [{ ...entry, returned: returned.has(id) }, ...(Array.isArray(recent[id]) ? recent[id] : [])].slice(0, 3);
-    }
-    const hubReturners = run.result === 'win' ? run.bench.filter(id => next.recruits[id]) : [];
+    const hubReturners = announce.returned.filter(id => next.recruits[id]);
     const previousReturners = Array.isArray(next.ui?.returners) ? next.ui.returners : [];
     const returners = [...new Set([...recruits, ...hubReturners, ...previousReturners])].slice(0, 3);
     const announcement = {
-      dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters, missionEarned: !!announce.missions?.length
+      dungeons: announce.dungeons, nightmares: announce.nightmares, chapters: announce.chapters, missionEarned: !!announce.missions?.length,
+      firstMain: !featureFlags(profile).firstMainCleared && featureFlags(next).firstMainCleared
     };
-    const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen,
+    const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen, features: run.features,
       lastBattleLog: run.lastBattleLog };
     run = null;
     review = null;
-    const saved = updateProfile({ ...next, ui: { ...next.ui, recruitChoices: null, recent, returners, announcement, latestRun } });
+    const saved = updateProfile({ ...next, ui: {
+      ...next.ui, recruitChoices: null, entryBattle: null, entryDoor: null, returners, announcement, latestRun
+    } });
     if (announce.stamp) {
       if (saved) audio.sfx.stamp();
     } else if (recruits.length) audio.sfx.crit();
@@ -359,6 +399,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     stage.clock.fast = false;
     stage.clock.slow = 1;
     stage.clear();
+    tutorial.reset();
     showTitle();
   }
 
@@ -380,14 +421,29 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const unavailable = recovery === 'unavailable';
     const riftDamaged = !unavailable && store.exportBackup && currentBackup({ lastGood: true }).damagedDaily != null;
     const node = page('recovery');
-    node.innerHTML = `<div class="meta-panel meta-sheet meta-recovery">
-      <h2>${unavailable ? '저장 공간 접근 불가' : '전체 기록 복구 필요'}</h2>
-      ${riftDamaged ? '<p>균열 기록도 손상되었습니다. 직전 기록으로 복구하면 손상된 균열은 별도 보관합니다.</p>' : ''}
-      ${hasGood ? `<button class="btn go" id="meta-last-good">직전 기록으로 복구 · 동료 ${Object.keys(good.profile?.recruits ?? {}).length}명</button>` : ''}
-      <button class="btn${hasGood ? '' : ' go'}" data-backup-action="import">기록 가져오기</button>
-      <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
-      <p class="meta-feedback" role="status"></p>
-    </div>`;
+    node.classList.add('screen-split', 'meta-recovery');
+    node.innerHTML = `<div class="meta-panel fixed-top">
+        <h2>${unavailable ? '저장 공간 접근 불가' : '전체 기록 복구 필요'}</h2>
+        ${riftDamaged ? '<p>균열 기록도 손상되었습니다. 직전 기록으로 복구하면 손상된 균열은 별도 보관합니다.</p>' : ''}
+      </div>
+      <div class="fixed-foot">
+        ${hasGood ? `<button class="btn go" id="meta-last-good">직전 기록으로 복구 · 동료 ${Object.keys(good.profile?.recruits ?? {}).length}명</button>` : ''}
+        <button class="btn${hasGood ? '' : ' go'}" data-backup-action="import">기록 가져오기</button>
+        <input id="meta-recovery-file" type="file" accept=".json,application/json" hidden>
+        <button class="btn" id="meta-recovery-new">${unavailable ? '기록 없이 시작' : '새 기록 시작'}</button>
+        ${unavailable ? '' : `<div id="meta-recovery-confirm" hidden>
+          <p>남아 있는 동료, 수첩, 균열과 복구 사본이 모두 삭제됩니다.</p>
+          <div class="screen-tabs">
+            <button class="btn" id="meta-recovery-cancel">취소</button>
+            <button class="btn meta-danger" id="meta-recovery-erase">모든 기록 지우기</button>
+          </div>
+        </div>`}
+        <p class="meta-feedback" role="status"></p>
+      </div>`;
+    const importAction = $('[data-backup-action="import"]', node);
+    if (store.exportBackup && store.inspectBackup && store.restoreBackup) {
+      bindRecoveryImport(node, { sheets, store, currentBackup, recovered: reloadAfterRestore });
+    } else importAction.disabled = true;
     $('#meta-last-good', node)?.addEventListener('click', event => {
       const result = store.restoreLastGood?.();
       if (result?.ok) {
@@ -395,48 +451,69 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
         reloadAfterRestore();
       } else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했습니다.';
     });
-    $('#meta-recovery-new', node).addEventListener('click', () => {
+    const startNew = $('#meta-recovery-new', node);
+    const confirmation = $('#meta-recovery-confirm', node);
+    startNew.addEventListener('click', () => {
       if (unavailable) {
         recovery = null;
         return showTitle();
       }
-      sheets.openSheet('새 기록을 시작할까요?', `<div class="meta-sheet">
-        <p>남아 있는 동료, 수첩, 균열과 복구 사본이 모두 삭제됩니다.</p>
-        <button class="btn meta-danger" id="meta-recovery-erase">모든 기록 지우기</button>
-      </div>`);
-      $('#meta-recovery-erase').addEventListener('click', resetData);
+      confirmation.hidden = false;
+      startNew.hidden = true;
+      $('#meta-recovery-cancel', node).focus();
     });
+    $('#meta-recovery-cancel', node)?.addEventListener('click', () => {
+      confirmation.hidden = true;
+      startNew.hidden = false;
+      startNew.focus();
+    });
+    $('#meta-recovery-erase', node)?.addEventListener('click', resetData);
   }
 
   $('#frame').addEventListener('click', event => {
-    const mode = event.target.closest('[data-backup-action]')?.dataset.backupAction;
+    const action = event.target.closest('[data-backup-action]');
+    const mode = action?.closest('#recovery') ? null : action?.dataset.backupAction;
     if (mode) openBackupSheet({ mode, sheets, store, currentBackup, recovered: reloadAfterRestore });
   });
+  document.addEventListener('click', () => queueMicrotask(() => tutorial.sync(run)));
+
+  function replayTutorial() {
+    if (run || daily.run || !$('#title.on, #hub.on')) return;
+    const entry = { ...profile.ui.entry, done: [], skipped: false };
+    updateUi({ entry, tutorialReplay: 'queued', entryDoor: null, entryBattle: null });
+    sheets.closeSheet();
+    tutorial.reset();
+    showTitle(profile);
+  }
 
   function showTitle(savedProfile, notice) {
     music.play('hub');
     titleScreen({
       profile: savedProfile, widgets, notice,
       start() {
-        if (!savedProfile) startExpedition();
+        if (profile.ui.tutorialReplay === 'queued' || !savedProfile || !profile.records.runs && !profile.notebook.chapters.length) startExpedition();
         else if (endingDue()) showEnding();
         else {
           showHub();
           const destination = profile.ui?.preparation?.dungeonId ?? (profile.ui?.preparing ? profile.ui.destination : null);
-          if (destination) prepare(destination);
+          if (destination && featureFlags(profile).prepEditing) prepare(destination);
         }
       }
     });
+    tutorial.sync(run);
   }
 
   function boot() {
     if (recovery) showRecovery();
     else if (run?.phase === 'done') showRecruit();
     // The observatory opens with the first return: until then a reload goes straight back into the intro.
-    else if (run && !Object.keys(profile.recruits || {}).length) enterExpedition();
+    else if (run && (!Object.keys(profile.recruits).length || run.dungeonId === 'dawn_forest' && basicTutorial(profile))) enterExpedition();
     else if (run) showHub();
+    else if (featureFlags(profile).introCleared && profile.ui.tutorialReplay !== 'queued' &&
+      (basicTutorial(profile) || profile.ui.tutorialReplay === 'active' || profile.ui.announcement?.firstMain)) showHub();
     else showTitle(stored?.profile, detail?.status === 'runDamaged' || stored?.runError ? '원정만 손상 · 동료와 수첩 유지' : '');
   }
 
-  return { boot, closePreparation, resetData, inspect, get run() { return daily.run ?? run; }, get review() { return review; } };
+  return { boot, closePreparation, resetData, inspect, replayTutorial,
+    get run() { return daily.run ?? run; }, get review() { return review; } };
 }
