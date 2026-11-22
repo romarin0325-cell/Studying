@@ -1939,6 +1939,43 @@ test('tempo 2 spring draws and gate claims share the roster limit without automa
   assert.ok(run.bench.includes(captive));
 });
 
+test('tempo 1 sim replaces the weakest reserve at the full gate on Cathedral seed 102947', () => {
+  let gate;
+  const { run } = simulateRun('twilight_cathedral', 102947, {
+    tempoVersion: 1,
+    onRoom(run) {
+      if (run.floor === 4) gate = { bench: run.bench.slice(), released: run.released.slice() };
+    }
+  });
+  assert.deepEqual(gate, {
+    bench: ['gumiho', 'priest_of_end', 'lightning_sage', 'santa', 'ghost_king', 'galaxy_whale'],
+    released: ['void_knight']
+  });
+  assert.equal(run.phase, 'done');
+});
+
+test('tempo 1 sim retries a full random awakening and keeps the lead on Tower seed 150461', () => {
+  const profile = legacyProfile();
+  profile.records.clears.dawn_forest = { normal: 1 };
+  profile.unlockedDungeons.push('creation_tower');
+  profile.notebook.chapters = [1];
+  profile.lead = 'joker';
+  profile.recruits.joker = { bond: 0 };
+  let eventBench;
+  const { run } = simulateRun('creation_tower', 150461, {
+    profile, tempoVersion: 1, difficulty: 'easy',
+    doorOverride(run) {
+      if (run.floor === 5) return run.doors.find(door => door.event?.id === 'empty_role');
+    },
+    onRoom(run) {
+      if (run.room.event?.id === 'empty_role') eventBench = run.bench.slice();
+    }
+  });
+  assert.deepEqual(eventBench, ['fallen_angel', 'unicorn', 'trans_cinderella', 'joker', 'behemoth', 'paladin']);
+  const event = run.chronicle.find(entry => entry.eventId === 'empty_role');
+  assert.deepEqual(event?.released, ['snow_rabbit']);
+});
+
 test('main assist follows the first-main guide while nightmare keeps its separate floor scale', () => {
   const assisted = reach(makeTempo(), 4);
   const regular = reach(makeTempo({ profileView: { bossOrder: false } }), 4);

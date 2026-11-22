@@ -17489,6 +17489,8 @@ const BattleRuntime = {
       if (!anchor) return;
       const stage2 = fxLayer.getBoundingClientRect(), slot = anchor.getBoundingClientRect();
       const x = Math.max(4, Math.round(slot.left - stage2.left));
+      const chip = (anchor.closest(".sky") ?? anchor).getBoundingClientRect();
+      const width = Math.max(96, Math.round(chip.right - stage2.left) - x);
       fxLayer.querySelector("[data-field-effect]")?.remove();
       const note = document.createElement("div");
       note.dataset.fieldEffect = "";
@@ -17496,7 +17498,7 @@ const BattleRuntime = {
         position: "absolute",
         left: x + "px",
         top: Math.round(slot.bottom - stage2.top + 2) + "px",
-        maxWidth: "calc(100% - " + (x + 4) + "px)",
+        maxWidth: "min(" + width + "px, calc(100% - " + (x + 4) + "px))",
         boxSizing: "border-box",
         padding: "2px 6px",
         color: "var(--ink)",
@@ -19325,62 +19327,6 @@ const BattleRuntime = {
     return { charSheet, allySheet, foeSheet, fieldSheet, battlefieldSheet };
   }
 
-  // card_pixel/game/src/ui/story-lines.js
-  var OUTCOME_NAMES = { survived: "\uC0DD\uD658", reserve: "\uC608\uBE44\uB85C \uC0DD\uD658", fell: "\uC4F0\uB7EC\uC9D0", released: "\uBCF4\uB0C4" };
-  var BATTLE_NAMES = { gate: "\uBB38\uC9C0\uAE30\uC804", boss: "\uBCF4\uC2A4\uC804" };
-  function outcomeText(entry) {
-    if (entry.runId) return OUTCOME_NAMES[entry.outcome] ?? "";
-    return entry.result === "win" && entry.returned === true ? "\uC0DD\uD658" : "\uADC0\uD658 \uC5EC\uBD80 \uBBF8\uAE30\uB85D";
-  }
-  function retreatStoryLine(run, card) {
-    const result = run.lastBattleResult;
-    if (!result?.survivorIds.length) return "";
-    const battle = run.chronicle?.findLast((record) => record.floor === result.floor && record.party);
-    const retreat = run.lastBattleLog?.flatMap((turn) => turn.rows).find((row) => row.kind === "retreat")?.faces?.[0];
-    if (!retreat || retreat.side !== "ally" || !result.survivorIds.includes(retreat.id) || !battle?.party.includes(retreat.id)) return "";
-    const name = card(retreat.id)?.name;
-    return name ? `${josa(name, "\uC774/\uAC00")} \uBB3C\uB7EC\uB098 \uC0B4\uC544\uB0A8\uC558\uB2E4.` : "";
-  }
-  function storyLine(entry, card) {
-    if (!entry) return "";
-    const dungeon = DUNGEONS[entry.dungeonId]?.name;
-    if (!dungeon) return "";
-    const place2 = (floor) => floor === void 0 ? dungeon : `${dungeon} ${floor}\uCE35`;
-    const name = (id) => card(id)?.name;
-    const skillObject = ({ fromId, skillName }) => josa([name(fromId), skillName].filter(Boolean).join("\uC758 "), "\uC744/\uB97C");
-    const inherited = entry.inherited.find((fact) => fact.eventId) ?? entry.inherited[0];
-    if (entry.outcome === "fell") {
-      const where = entry.fallenFloor === void 0 ? `${dungeon} \uC6D0\uC815\uC5D0\uC11C` : `${place2(entry.fallenFloor)}\uC5D0\uC11C`;
-      const given = entry.given.find((fact) => (fact.floor === void 0 || fact.floor === entry.fallenFloor) && name(fact.toId));
-      if (given) return `${where} \uC4F0\uB7EC\uC838 ${name(given.toId)}\uC5D0\uAC8C ${josa(given.skillName, "\uC744/\uB97C")} \uB0A8\uACBC\uB2E4.`;
-      if (inherited) return `${skillObject(inherited)} \uC774\uC5B4\uBC1B\uACE0 ${where} \uC4F0\uB7EC\uC84C\uB2E4.`;
-      return `${where} \uC4F0\uB7EC\uC84C\uB2E4.`;
-    }
-    const finishingBlow = entry.victories.find((fact) => fact.roomType === "boss" && fact.lastHit);
-    if (finishingBlow) return `${place2(finishingBlow.floor)} \uBCF4\uC2A4\uC804\uC5D0\uC11C \uB9C8\uC9C0\uB9C9 \uC77C\uACA9\uC744 \uB0A0\uB838\uB2E4.`;
-    const used = entry.used.find((fact) => BATTLE_NAMES[fact.roomType] && fact.won) ?? entry.used[0];
-    if (used) {
-      const battle = BATTLE_NAMES[used.roomType] ?? "\uC804\uD22C";
-      return `${skillObject(used)} \uC4F4 ${place2(used.floor)} ${battle}\uC5D0\uC11C ${used.won ? "\uC774\uACBC\uB2E4" : "\uD328\uD588\uB2E4"}.`;
-    }
-    const event = inherited?.eventId && EVENTS2.find((event2) => event2.id === inherited.eventId);
-    if (event) return `${place2(inherited.floor)} \u2018${event.name}\u2019\uC5D0\uC11C ${skillObject(inherited)} \uC774\uC5B4\uBC1B\uC558\uB2E4.`;
-    if (inherited) return `${skillObject(inherited)} \uC774\uC5B4\uBC1B\uC558\uB2E4.`;
-    if (entry.outcome === "released" && entry.releasedFloor !== void 0) {
-      return `${place2(entry.releasedFloor)}\uC5D0\uC11C \uC77C\uD589\uACFC \uD5E4\uC5B4\uC84C\uB2E4.`;
-    }
-    if (entry.outcome === "released") return `${dungeon} \uC6D0\uC815 \uB3C4\uC911 \uC77C\uD589\uACFC \uD5E4\uC5B4\uC84C\uB2E4.`;
-    const victory = entry.victories.find((fact) => fact.roomType === "boss") ?? entry.victories[0];
-    if (victory) return `${place2(victory.floor)} ${BATTLE_NAMES[victory.roomType]}\uC5D0\uC11C \uD568\uAED8 \uC774\uACBC\uB2E4.`;
-    if (entry.outcome === "reserve") {
-      return entry.participation?.endsWith("-standby") ? "\uC2F8\uC6B8 \uCC28\uB840\uAC00 \uC624\uAE30 \uC804\uC5D0 \uC804\uD22C\uAC00 \uB05D\uB098 \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4." : "\uC608\uBE44\uC11D\uC5D0 \uB0A8\uC544 \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4.";
-    }
-    if (entry.participation === "unrecorded" && entry.outcome === "survived") return `${dungeon}\uC5D0\uC11C \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4.`;
-    if (entry.outcome === "survived") return `${dungeon} \uC804\uD22C\uC5D0 \uB098\uC130\uACE0 \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4.`;
-    if (entry.fielded) return `${dungeon} \uC6D0\uC815\uC5D0\uC11C \uC804\uD22C\uC5D0 \uB098\uC130\uB2E4.`;
-    return "";
-  }
-
   // card_pixel/game/src/engine/opening.js
   function openingModel(bridge) {
     const state = bridge.state();
@@ -20164,6 +20110,201 @@ const BattleRuntime = {
     return { beginMove, playCast, playDrain, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects };
   }
 
+  // card_pixel/game/src/ui/story-lines.js
+  var OUTCOME_NAMES = { survived: "\uC0DD\uD658", reserve: "\uC608\uBE44\uB85C \uC0DD\uD658", fell: "\uC4F0\uB7EC\uC9D0", released: "\uBCF4\uB0C4" };
+  var BATTLE_NAMES = { gate: "\uBB38\uC9C0\uAE30\uC804", boss: "\uBCF4\uC2A4\uC804" };
+  function outcomeText(entry) {
+    if (entry.runId) return OUTCOME_NAMES[entry.outcome] ?? "";
+    return entry.result === "win" && entry.returned === true ? "\uC0DD\uD658" : "\uADC0\uD658 \uC5EC\uBD80 \uBBF8\uAE30\uB85D";
+  }
+  function retreatStoryLine(run, card) {
+    const result = run.lastBattleResult;
+    if (!result?.survivorIds.length) return "";
+    const battle = run.chronicle?.findLast((record) => record.floor === result.floor && record.party);
+    const retreat = run.lastBattleLog?.flatMap((turn) => turn.rows).find((row) => row.kind === "retreat")?.faces?.[0];
+    if (!retreat || retreat.side !== "ally" || !result.survivorIds.includes(retreat.id) || !battle?.party.includes(retreat.id)) return "";
+    const name = card(retreat.id)?.name;
+    return name ? `${josa(name, "\uC774/\uAC00")} \uBB3C\uB7EC\uB098 \uC0B4\uC544\uB0A8\uC558\uB2E4.` : "";
+  }
+  function storyLine(entry, card) {
+    if (!entry) return "";
+    const dungeon = DUNGEONS[entry.dungeonId]?.name;
+    if (!dungeon) return "";
+    const place2 = (floor) => floor === void 0 ? dungeon : `${dungeon} ${floor}\uCE35`;
+    const name = (id) => card(id)?.name;
+    const skillObject = ({ fromId, skillName }) => josa([name(fromId), skillName].filter(Boolean).join("\uC758 "), "\uC744/\uB97C");
+    const inherited = entry.inherited.find((fact) => fact.eventId) ?? entry.inherited[0];
+    if (entry.outcome === "fell") {
+      const where = entry.fallenFloor === void 0 ? `${dungeon} \uC6D0\uC815\uC5D0\uC11C` : `${place2(entry.fallenFloor)}\uC5D0\uC11C`;
+      const given = entry.given.find((fact) => (fact.floor === void 0 || fact.floor === entry.fallenFloor) && name(fact.toId));
+      if (given) return `${where} \uC4F0\uB7EC\uC838 ${name(given.toId)}\uC5D0\uAC8C ${josa(given.skillName, "\uC744/\uB97C")} \uB0A8\uACBC\uB2E4.`;
+      if (inherited) return `${skillObject(inherited)} \uC774\uC5B4\uBC1B\uACE0 ${where} \uC4F0\uB7EC\uC84C\uB2E4.`;
+      return `${where} \uC4F0\uB7EC\uC84C\uB2E4.`;
+    }
+    const finishingBlow = entry.victories.find((fact) => fact.roomType === "boss" && fact.lastHit);
+    if (finishingBlow) return `${place2(finishingBlow.floor)} \uBCF4\uC2A4\uC804\uC5D0\uC11C \uB9C8\uC9C0\uB9C9 \uC77C\uACA9\uC744 \uB0A0\uB838\uB2E4.`;
+    const used = entry.used.find((fact) => BATTLE_NAMES[fact.roomType] && fact.won) ?? entry.used[0];
+    if (used) {
+      const battle = BATTLE_NAMES[used.roomType] ?? "\uC804\uD22C";
+      return `${skillObject(used)} \uC4F4 ${place2(used.floor)} ${battle}\uC5D0\uC11C ${used.won ? "\uC774\uACBC\uB2E4" : "\uD328\uD588\uB2E4"}.`;
+    }
+    const event = inherited?.eventId && EVENTS2.find((event2) => event2.id === inherited.eventId);
+    if (event) return `${place2(inherited.floor)} \u2018${event.name}\u2019\uC5D0\uC11C ${skillObject(inherited)} \uC774\uC5B4\uBC1B\uC558\uB2E4.`;
+    if (inherited) return `${skillObject(inherited)} \uC774\uC5B4\uBC1B\uC558\uB2E4.`;
+    if (entry.outcome === "released" && entry.releasedFloor !== void 0) {
+      return `${place2(entry.releasedFloor)}\uC5D0\uC11C \uC77C\uD589\uACFC \uD5E4\uC5B4\uC84C\uB2E4.`;
+    }
+    if (entry.outcome === "released") return `${dungeon} \uC6D0\uC815 \uB3C4\uC911 \uC77C\uD589\uACFC \uD5E4\uC5B4\uC84C\uB2E4.`;
+    const victory = entry.victories.find((fact) => fact.roomType === "boss") ?? entry.victories[0];
+    if (victory) return `${place2(victory.floor)} ${BATTLE_NAMES[victory.roomType]}\uC5D0\uC11C \uD568\uAED8 \uC774\uACBC\uB2E4.`;
+    if (entry.outcome === "reserve") {
+      return entry.participation?.endsWith("-standby") ? "\uC2F8\uC6B8 \uCC28\uB840\uAC00 \uC624\uAE30 \uC804\uC5D0 \uC804\uD22C\uAC00 \uB05D\uB098 \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4." : "\uC608\uBE44\uC11D\uC5D0 \uB0A8\uC544 \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4.";
+    }
+    if (entry.participation === "unrecorded" && entry.outcome === "survived") return `${dungeon}\uC5D0\uC11C \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4.`;
+    if (entry.outcome === "survived") return `${dungeon} \uC804\uD22C\uC5D0 \uB098\uC130\uACE0 \uD568\uAED8 \uB3CC\uC544\uC654\uB2E4.`;
+    if (entry.fielded) return `${dungeon} \uC6D0\uC815\uC5D0\uC11C \uC804\uD22C\uC5D0 \uB098\uC130\uB2E4.`;
+    return "";
+  }
+
+  // card_pixel/game/src/ui/battle/result.js
+  function resultMarkup() {
+    return '<div class="sheet" id="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1"><div class="in win" id="result-in"></div></div>';
+  }
+  function battleFailure(run) {
+    const result = run.lastBattleResult;
+    if (run.result === "win" || run.result !== "lose" && result?.outcome !== "lose") return null;
+    const alive = run.bench.filter((id) => !result?.fallenIds.includes(id));
+    if (result?.wiped || !alive.length) return { title: "\uC804\uBA78", subtitle: "\uAFC8\uAE38\uC774 \uB04A\uACBC\uB2E4", survivors: [] };
+    const fielded = (result?.survivorIds ?? []).filter((id) => alive.includes(id));
+    const survivors = [...fielded, ...alive.filter((id) => !fielded.includes(id))];
+    return { title: "\uC6D0\uC815 \uC2E4\uD328", subtitle: `\uC0B4\uC544\uB0A8\uC740 \uB3D9\uB8CC ${survivors.length}\uBA85`, survivors };
+  }
+  function contractSettlement(floor, contract) {
+    if (!contract) return [];
+    const rows = [];
+    if (contract.metNow) rows.push('<p class="contract-met">\uACC4\uC57D \uB2EC\uC131</p>');
+    if (floor === 6) {
+      if (contract.paid) rows.push('<p class="gain">7\uCE35 \uC55E\uC5D0\uC11C \u25C6' + contract.paid + "</p>");
+      else if (contract.failed) rows.push('<p class="contract-failed">\uACC4\uC57D \uC2E4\uD328 \xB7 \uB9E1\uAE34 \u25C6' + (contract.escrowed || CONTRACT_ESCROW) + " \uC0AC\uB77C\uC9D0</p>");
+    }
+    return rows;
+  }
+  function resultNextLabel(run, { floor, roomType, won, retry }) {
+    if (retry) return "\uD3B8\uC131 \uBC14\uAFD4 \uC7AC\uB3C4\uC804";
+    if (run.result && !run.pending) {
+      const rewards = runRewards(run);
+      if (run.daily) return RESUME.dailyResult;
+      if (won && rewards.recruitable.length) return "\uC601\uC785\uD560 \uB3D9\uB8CC \uACE0\uB974\uAE30";
+      return rewards.shardCandidates.length ? "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4 \uACE0\uB974\uAE30" : "\uAD00\uCE21\uC18C\uB85C";
+    }
+    if (roomType === "borrowed") return "\uB2E4\uC74C \uB3D9\uB8CC \uACE0\uB974\uAE30";
+    if (run.pending?.kind === "reinforcement") return "\uB3D9\uB8CC \uBCF4\uCDA9\uD558\uAE30";
+    if (run.pending?.kind === "gate") return "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1 \uACE0\uB974\uAE30";
+    if (run.pending?.kind === "relic") return "\uC720\uBB3C \uBCF4\uC0C1 \uACE0\uB974\uAE30";
+    return floor + 1 + "\uCE35\uC73C\uB85C";
+  }
+  function createResultBoard({ getRun, widgets: widgets2, details, showLog, sfx, music: music2 }) {
+    const panel = $("#result");
+    const { card, face: face2 } = widgets2;
+    const isOpen = () => panel.classList.contains("on");
+    function setOpen(open) {
+      panel.classList.toggle("on", open);
+      for (const background2 of panel.parentElement.children) {
+        if (background2 !== panel) background2.inert = open;
+      }
+    }
+    const hide = () => setOpen(false);
+    panel.addEventListener("click", (event) => {
+      const id = event.target.closest("[data-sheet]")?.dataset.sheet;
+      if (id) {
+        sfx.tap();
+        details.charSheet(getRun(), id);
+      }
+    });
+    function show2({ advance: advance2, decision, restored = false }) {
+      const run = getRun();
+      const result = run.lastBattleResult ?? {
+        floor: run.floor,
+        roomType: run.room.type,
+        outcome: run.result ?? "win",
+        wiped: false,
+        fallenIds: [],
+        survivorIds: [],
+        transfers: [],
+        rewardDelta: { crystals: 0, relicIds: run.lastBattleRelic ? [run.lastBattleRelic] : [] }
+      };
+      const { floor, roomType, outcome, wiped, fallenIds, survivorIds, transfers, rewardDelta } = result;
+      const failure = battleFailure(run);
+      const won = outcome === "win" && !failure;
+      const final = roomType === "boss" || run.room.final;
+      const retry = run.phase === "result" && run.result === null;
+      const name = (id) => card(id)?.name ?? id;
+      const rows = [];
+      if (fallenIds.length) {
+        const list = fallenIds.map(name).join("\xB7");
+        rows.push('<p class="result-fallen">' + esc(josa(list, "\uC774/\uAC00") + " \uC4F0\uB7EC\uC84C\uC2B5\uB2C8\uB2E4.") + "</p>");
+      }
+      if (failure?.survivors.length) {
+        const [first, ...others] = failure.survivors;
+        const lead = card(first)?.name ?? "\uB3D9\uB8CC";
+        rows.push('<p class="result-return">' + esc(lead + (others.length ? ` \uC678 ${others.length}\uBA85` : "") + " \uC0DD\uC874") + "</p>");
+      }
+      const retreat = retreatStoryLine(run, card);
+      if (retreat) rows.push('<p class="result-retreat">' + esc(retreat) + "</p>");
+      if (transfers.length) {
+        const lines = transfers.map(({ toId, skillName }) => {
+          const skill = esc(skillName);
+          return '<p data-coach="heirloom-transfer">' + esc(josa(name(toId), "\uC774/\uAC00")) + " <b>" + skill + "</b>" + esc(josa(skillName, "\uC744/\uB97C").slice(skillName.length)) + " \uBB3C\uB824\uBC1B\uC558\uC2B5\uB2C8\uB2E4.</p>";
+        });
+        rows.push('<div class="heirline"><span class="run-face">' + face2(transfers[0].toId, 40) + "</span><div>" + lines.join("") + "</div></div>");
+      }
+      const lastStand = run.lastBattleLog?.flatMap((turn) => turn.rows).find((row) => row.kind === "last-stand")?.faces[0]?.id;
+      if (lastStand && survivorIds.includes(lastStand)) {
+        rows.push('<div class="result-last-stand chips">' + esc(name(lastStand)) + ' <i class="last" data-coach="last-stand">\uCD5C\uD6C4\uC758 \uC77C\uC778</i></div>');
+      }
+      if (rewardDelta.crystals > 0) {
+        rows.push('<p class="gain">' + TERMS.crystal.short + " +" + rewardDelta.crystals + " \xB7 \uBCF4\uC720 " + run.crystals + "\uAC1C</p>");
+      }
+      const contract = run.contract && { ...run.contract, metNow: run.contract.metAtFloor === floor };
+      if (!retry) rows.push(...contractSettlement(floor, contract));
+      const wager = (run.lastBattleLog?.at(-1)?.rows ?? []).find((row) => row.kind === "wager");
+      if (run.features?.bets !== false && wager) rows.push("<p>" + esc(wager.text) + "</p>");
+      if (won && wiped && final) rows.push('<p class="result-return">\uBCF4\uC2A4 \uACA9\uD30C \xB7 \uB3CC\uC544\uC628 \uB3D9\uB8CC 0\uBA85</p>');
+      else if (outcome === "win" && wiped) rows.push("<p>\uC804\uD22C\uC5D0\uC11C \uC774\uACBC\uC2B5\uB2C8\uB2E4. \uB3CC\uC544\uC628 \uB3D9\uB8CC\uAC00 \uC5C6\uC5B4 \uC6D0\uC815\uC774 \uB05D\uB0AC\uC2B5\uB2C8\uB2E4.</p>");
+      const label = resultNextLabel(run, { floor, roomType, won, retry });
+      const title = failure?.title ?? (run.daily ? "\uADE0\uC5F4" : DUNGEONS[run.dungeonId].name) + " " + floor + "\uCE35 \uB3CC\uD30C";
+      const box = $("#result-in", panel);
+      box.innerHTML = '<header class="result-heading ' + (won ? "won" : "lost") + '"><h3 id="result-title">' + esc(title) + "</h3>" + logButton('id="b-result-log"') + "</header>" + rows.join("") + '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label) + "</button>";
+      setOpen(true);
+      if (!restored) {
+        if (rewardDelta.crystals > 0) sfx.credit();
+        if (rewardDelta.relicIds.length) sfx.gem();
+      }
+      $("#b-result-log", box).addEventListener("click", showLog);
+      const next = $("#b-next", box);
+      const reward = won && ["reward", "result"].includes(run.phase) && roomType !== "borrowed";
+      const pending = () => reward && ["reinforcement", "gate", "relic"].includes(getRun().pending?.kind);
+      const content = $(".result-decision", box);
+      const singleReinforcement = run.pending?.kind === "reinforcement" && run.pending.candidates.length === 1;
+      if (reward) decision?.(content, result, next, singleReinforcement);
+      if (pending() && !restored) music2?.holdReward(getRun().dungeonId);
+      box.scrollTop = 0;
+      focusPrimary(panel);
+      next.addEventListener("click", () => {
+        sfx.tap();
+        if (pending()) {
+          decision(content, result, next, true);
+          focusPrimary(panel);
+        } else {
+          next.disabled = true;
+          hide();
+          advance2();
+        }
+      });
+    }
+    return { show: show2, hide, isOpen };
+  }
+
   // card_pixel/game/src/ui/battle/effect-plan.js
   var BOUNDARY = /* @__PURE__ */ new Set([
     "act",
@@ -20497,34 +20638,14 @@ const BattleRuntime = {
       downs: []
     };
   }
-  function contractSettlement(floor, contract) {
-    if (!contract) return [];
-    const rows = [];
-    if (contract.metNow) rows.push('<p class="contract-met">\uACC4\uC57D \uB2EC\uC131</p>');
-    if (floor === 6) {
-      if (contract.paid) rows.push('<p class="gain">7\uCE35 \uC55E\uC5D0\uC11C \u25C6' + contract.paid + "</p>");
-      else if (contract.failed) rows.push('<p class="contract-failed">\uACC4\uC57D \uC2E4\uD328 \xB7 \uB9E1\uAE34 \u25C6' + (contract.escrowed || CONTRACT_ESCROW) + " \uC0AC\uB77C\uC9D0</p>");
-    }
-    return rows;
-  }
-  function battleFailure(run) {
-    const result = run.lastBattleResult;
-    if (run.result === "win" || run.result !== "lose" && result?.outcome !== "lose") return null;
-    const alive = run.bench.filter((id) => !result?.fallenIds.includes(id));
-    if (result?.wiped || !alive.length) return { title: "\uC804\uBA78", subtitle: "\uAFC8\uAE38\uC774 \uB04A\uACBC\uB2E4", survivors: [] };
-    const fielded = (result?.survivorIds ?? []).filter((id) => alive.includes(id));
-    const survivors = [...fielded, ...alive.filter((id) => !fielded.includes(id))];
-    return { title: "\uC6D0\uC815 \uC2E4\uD328", subtitle: `\uC0B4\uC544\uB0A8\uC740 \uB3D9\uB8CC ${survivors.length}\uBA85`, survivors };
-  }
   function battleMarkup() {
-    return '<section id="battle" class="screen"><div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar" role="button" tabindex="0"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div><div class="chips" id="pf-chips"></div></div><div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uACE0\uC18D \uC9C4\uD589</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="\uC804\uC7A5\xB7\uC720\uBB3C">\uC804\uC7A5</button><button id="b-speed">1\uBC30</button>' + logButton('id="b-log"') + tools() + '</header><button class="sky" id="sky" aria-label="\uD544\uB4DC \uC815\uBCF4"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button><div id="battle-announcement" aria-live="polite" aria-atomic="true"></div><div class="sheet" id="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1"><div class="in win" id="result-in"></div></div></section>';
+    return '<section id="battle" class="screen"><div id="panel"><div id="opening-face" class="win"></div><div id="acts"></div><div id="row2"><button id="b-heir" data-coach="heirloom"></button><button id="b-retreat" data-coach="retreat"></button></div></div><div id="stage"><canvas id="cv"></canvas><div id="hud"><div id="foebar" role="button" tabindex="0"><div id="pf-kind"></div><div class="nm"><b id="pf-name"></b><em id="pf-el"></em><span id="pf-hpn"></span><u class="ii">i</u></div><div class="intent" id="intent"></div><div class="cd" id="pf-cd"></div><div class="bar hp"><u id="pf-hp"></u></div><div class="chips" id="pf-chips"></div></div><div class="chips" id="pa-chips"></div></div><div id="fx"></div><div id="skip">\u25B6\u25B6 \uACE0\uC18D \uC9C4\uD589</div></div><div id="party"></div><div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div><header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="\uC804\uC7A5\xB7\uC720\uBB3C">\uC804\uC7A5</button><button id="b-speed">1\uBC30</button>' + logButton('id="b-log"') + tools() + '</header><button class="sky" id="sky" aria-label="\uD544\uB4DC \uC815\uBCF4"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button><div id="battle-announcement" aria-live="polite" aria-atomic="true"></div>' + resultMarkup() + "</section>";
   }
   function createBattleView({ core: core2, roster: roster2, widgets: widgets2, stage: St, audio: audio2, sheets: sheets2, details, music: music2 }) {
     const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
     const { sfx } = audio2;
-    const { card, face: face2, spr } = widgets2;
+    const { card, spr } = widgets2;
     const announcement = $("#battle-announcement");
-    const resultBoard = $("#result");
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const LINKED_TRAITS = ["ally_death_base_atk_phy", "ally_light_death_base_matk_mag"];
     const relayHint = $("#relay-hint");
@@ -20738,16 +20859,10 @@ const BattleRuntime = {
     }
     function showLog() {
       sfx.tap();
-      openBattleLog(sheets2, widgets2, $("#result").classList.contains("on") ? run.lastBattleLog : currentLog());
+      openBattleLog(sheets2, widgets2, resultBoard.isOpen() ? run.lastBattleLog : currentLog());
     }
+    const resultBoard = createResultBoard({ getRun: () => run, widgets: widgets2, details, showLog, sfx, music: music2 });
     $("#b-log").addEventListener("click", showLog);
-    $("#result").addEventListener("click", (event) => {
-      const id = event.target.closest("[data-sheet]")?.dataset.sheet;
-      if (id) {
-        sfx.tap();
-        details.charSheet(run, id);
-      }
-    });
     function logLine(text) {
       B.log.push(text);
       if (!/^(===|---)/.test(text)) ticker(text);
@@ -21414,19 +21529,13 @@ const BattleRuntime = {
       }
       if (bridge !== B.bridge || !$("#battle").classList.contains("on")) return;
       if (settlement?.ok) {
-        showResult(onContinue, onDecision, false);
+        resultBoard.show({ advance: onContinue, decision: onDecision });
         B.onReady?.(B);
       } else if (bridge.awaiting) B.onReady?.(B);
     }
     function roomLabel() {
       const plain = TERMS[B.door.type]?.short?.split(" \xB7 ")[0];
       return run.daily ? "\uADE0\uC5F4 " + run.floor + "\uCE35" : run.floor + "\uCE35 \xB7 " + (plain ?? ROOM_NAMES[B.door.type]);
-    }
-    function setResultOpen(open) {
-      resultBoard.classList.toggle("on", open);
-      for (const background2 of resultBoard.parentElement.children) {
-        if (background2 !== resultBoard) background2.inert = open;
-      }
     }
     function startBattle(expedition, options, settle, advance2, {
       fromMap = false,
@@ -21468,7 +21577,7 @@ const BattleRuntime = {
       B.fallSpot = null;
       battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map((e) => e.id), party: B.party.slice() };
       B.bridge = create2(core2, options);
-      setResultOpen(false);
+      resultBoard.hide();
       $("#battle").classList.remove("resumed-result", "opening-decision");
       for (const id of ["b-field", "b-speed", "b-log"]) $("#" + id).hidden = simpleOpening;
       $("#acts").innerHTML = "";
@@ -21485,94 +21594,6 @@ const BattleRuntime = {
         events.push(...accepted);
       }
       play(events);
-    }
-    function showResult(advance2, decision, restored) {
-      const result = run.lastBattleResult ?? {
-        floor: run.floor,
-        roomType: run.room.type,
-        outcome: run.result ?? "win",
-        wiped: false,
-        fallenIds: [],
-        survivorIds: [],
-        transfers: [],
-        rewardDelta: { crystals: 0, relicIds: run.lastBattleRelic ? [run.lastBattleRelic] : [] }
-      };
-      const { floor, roomType, outcome, wiped, fallenIds, survivorIds, transfers, rewardDelta } = result;
-      const failure = battleFailure(run);
-      const won = outcome === "win" && !failure;
-      const final = roomType === "boss" || run.room.final;
-      const retry = run.phase === "result" && run.result === null;
-      const name = (id) => card(id)?.name ?? id;
-      const rows = [];
-      if (fallenIds.length) {
-        const list = fallenIds.map(name).join("\xB7");
-        rows.push('<p class="result-fallen">' + esc(josa(list, "\uC774/\uAC00") + " \uC4F0\uB7EC\uC84C\uC2B5\uB2C8\uB2E4.") + "</p>");
-      }
-      if (failure?.survivors.length) {
-        const [first, ...others] = failure.survivors;
-        const lead = card(first)?.name ?? "\uB3D9\uB8CC";
-        rows.push('<p class="result-return">' + esc(lead + (others.length ? ` \uC678 ${others.length}\uBA85` : "") + " \uC0DD\uC874") + "</p>");
-      }
-      const retreat = retreatStoryLine(run, card);
-      if (retreat) rows.push('<p class="result-retreat">' + esc(retreat) + "</p>");
-      if (transfers.length) {
-        const lines = transfers.map(({ toId, skillName }) => {
-          const skill = esc(skillName);
-          return '<p data-coach="heirloom-transfer">' + esc(josa(name(toId), "\uC774/\uAC00")) + " <b>" + skill + "</b>" + esc(josa(skillName, "\uC744/\uB97C").slice(skillName.length)) + " \uBB3C\uB824\uBC1B\uC558\uC2B5\uB2C8\uB2E4.</p>";
-        });
-        rows.push('<div class="heirline"><span class="run-face">' + face2(transfers[0].toId, 40) + "</span><div>" + lines.join("") + "</div></div>");
-      }
-      const lastStand = run.lastBattleLog?.flatMap((turn) => turn.rows).find((row) => row.kind === "last-stand")?.faces[0]?.id;
-      if (lastStand && survivorIds.includes(lastStand)) {
-        rows.push('<div class="result-last-stand chips">' + esc(name(lastStand)) + ' <i class="last" data-coach="last-stand">\uCD5C\uD6C4\uC758 \uC77C\uC778</i></div>');
-      }
-      if (rewardDelta.crystals > 0) {
-        rows.push('<p class="gain">' + TERMS.crystal.short + " +" + rewardDelta.crystals + " \xB7 \uBCF4\uC720 " + run.crystals + "\uAC1C</p>");
-      }
-      const contract = run.contract && { ...run.contract, metNow: run.contract.metAtFloor === floor };
-      if (!retry) rows.push(...contractSettlement(floor, contract));
-      const wager = (run.lastBattleLog?.at(-1)?.rows ?? []).find((row) => row.kind === "wager");
-      if (run.features?.bets !== false && wager) rows.push("<p>" + esc(wager.text) + "</p>");
-      if (won && wiped && final) rows.push('<p class="result-return">\uBCF4\uC2A4 \uACA9\uD30C \xB7 \uB3CC\uC544\uC628 \uB3D9\uB8CC 0\uBA85</p>');
-      else if (outcome === "win" && wiped) rows.push("<p>\uC804\uD22C\uC5D0\uC11C \uC774\uACBC\uC2B5\uB2C8\uB2E4. \uB3CC\uC544\uC628 \uB3D9\uB8CC\uAC00 \uC5C6\uC5B4 \uC6D0\uC815\uC774 \uB05D\uB0AC\uC2B5\uB2C8\uB2E4.</p>");
-      let label2 = floor + 1 + "\uCE35\uC73C\uB85C";
-      if (retry) label2 = "\uD3B8\uC131 \uBC14\uAFD4 \uC7AC\uB3C4\uC804";
-      else if (run.result && !run.pending) {
-        const rewards = runRewards(run);
-        label2 = run.daily ? RESUME.dailyResult : won && rewards.recruitable.length ? "\uC601\uC785\uD560 \uB3D9\uB8CC \uACE0\uB974\uAE30" : rewards.shardCandidates.length ? "\uB2E4\uC74C \uC6D0\uC815 \uD6C4\uBCF4 \uACE0\uB974\uAE30" : "\uAD00\uCE21\uC18C\uB85C";
-      } else if (roomType === "borrowed") label2 = "\uB2E4\uC74C \uB3D9\uB8CC \uACE0\uB974\uAE30";
-      else if (run.pending?.kind === "reinforcement") label2 = "\uB3D9\uB8CC \uBCF4\uCDA9\uD558\uAE30";
-      else if (run.pending?.kind === "gate") label2 = "\uBB38\uC9C0\uAE30 \uBCF4\uC0C1 \uACE0\uB974\uAE30";
-      else if (run.pending?.kind === "relic") label2 = "\uC720\uBB3C \uBCF4\uC0C1 \uACE0\uB974\uAE30";
-      const title = failure?.title ?? (run.daily ? "\uADE0\uC5F4" : DUNGEONS[run.dungeonId].name) + " " + floor + "\uCE35 \uB3CC\uD30C";
-      const box = $("#result-in");
-      box.innerHTML = '<header class="result-heading ' + (won ? "won" : "lost") + '"><h3 id="result-title">' + esc(title) + "</h3>" + logButton('id="b-result-log"') + "</header>" + rows.join("") + '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label2) + "</button>";
-      setResultOpen(true);
-      if (!restored) {
-        if (rewardDelta.crystals > 0) sfx.credit();
-        if (rewardDelta.relicIds.length) sfx.gem();
-      }
-      $("#b-result-log").addEventListener("click", showLog);
-      const next = $("#b-next", box);
-      const reward = won && ["reward", "result"].includes(run.phase) && roomType !== "borrowed";
-      const pending = () => reward && ["reinforcement", "gate", "relic"].includes(run.pending?.kind);
-      const content = $(".result-decision", box);
-      const singleReinforcement = run.pending?.kind === "reinforcement" && run.pending.candidates.length === 1;
-      if (reward) decision?.(content, result, next, singleReinforcement);
-      if (pending() && !restored) music2?.holdReward(run.dungeonId);
-      box.scrollTop = 0;
-      focusPrimary(resultBoard);
-      next.addEventListener("click", () => {
-        sfx.tap();
-        if (pending()) {
-          decision(content, result, next, true);
-          focusPrimary(resultBoard);
-        } else {
-          next.disabled = true;
-          setResultOpen(false);
-          advance2();
-        }
-      });
     }
     function attach(expedition) {
       if (run === expedition) return;
@@ -21608,7 +21629,7 @@ const BattleRuntime = {
       show("battle");
       layout();
       lockPanel();
-      showResult(advance2, decision, true);
+      resultBoard.show({ advance: advance2, decision, restored: true });
     }
     const review = {
       advance: St.advance,

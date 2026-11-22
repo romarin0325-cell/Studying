@@ -21,11 +21,12 @@ import { DUNGEONS } from '../src/content/dungeons.js';
 import { PROMISE_EVENTS } from '../src/content/events.js';
 import { RELIC_COMBOS, RELICS } from '../src/content/relics.js';
 import { ROSTER_LIMIT, TEMPO_VERSION, usesTempo } from '../src/content/tempo.js';
+import { replacementCount, usesRepeatDraws } from '../src/engine/awakenings.js';
 import * as Bridge from '../src/engine/bridge.js';
 import * as Daily from '../src/engine/daily-rift.js';
 import * as Meta from '../src/engine/meta.js';
 import * as RelayRoster from '../src/engine/roster.js';
-import { fitsRelic } from '../src/engine/rooms.js';
+import { fitsRelic, joinCount } from '../src/engine/rooms.js';
 import * as R from '../src/engine/run.js';
 import { coreBundle } from './core-bundle.mjs';
 
@@ -252,7 +253,7 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
       if (partner && (!id || (run.bench.length >= 4 && run.seed % 3 !== 0))) {
         checked(R.chooseGateReward(run, { kind: 'relic', id: partner }));
       } else if (id && (!pending.relic || (!naive && (run.bench.length < 4 || run.seed % 2)))) {
-        const replaceId = usesTempo(run) && run.bench.length === ROSTER_LIMIT ? weakestReserve(run) : null;
+        const [replaceId = null] = chooseReleases(run, replacementCount(run, 1));
         if (replaceId && naive) break;
         checked(R.chooseGateReward(run, { kind: 'join', id, replaceId }));
       }
@@ -261,7 +262,7 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
     } else if (pending.kind === 'reinforcement') {
       const id = naive ? pending.candidates[0] : strongest(pending.candidates)[0];
       const incoming = !run.drawRuleVersion || ![run.bench, run.fallen, run.released].some(ids => ids.includes(id));
-      const replaceId = incoming && run.bench.length === ROSTER_LIMIT ? weakestReserve(run) : null;
+      const [replaceId = null] = chooseReleases(run, replacementCount(run, Number(incoming)));
       const pass = replaceId && (naive || strength(id) <= strength(replaceId));
       checked(R.resolveReinforcement(run, { key: pending.key, id: pass ? null : id, replaceId: pass ? null : replaceId }));
     } else if (pending.kind === 'altar') {
@@ -275,7 +276,7 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
       const choice = buy || pending.choices.find(entry => entry.enabled && !entry.ops.some(op => op.type === 'release')
         && (!usesTempo(run) || !entry.ops.some(op => op.type === 'join' && run.bench.length + (op.ids?.length ?? 1) > ROSTER_LIMIT)));
       if (!choice) break;
-      checked(R.chooseEvent(run, choice.id, choice.targets ? strongest(choice.targets)[0] : undefined));
+      takeEvent(run, choice);
     } else if (pending.kind === 'relic') {
       onRelicReplacement?.(run);
       const replace = relicAudit ? pending.replace.find(id => !RELIC_COMBOS.some(({ ids }) =>
@@ -287,15 +288,31 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
   }
 }
 
-function weakestReserve(run) {
-  const reserves = run.bench.filter(id => !run.lastParty?.includes(id));
-  return strongest(reserves.length ? reserves : run.bench).at(-1);
+function chooseReleases(run, count) {
+  if (!count) return [];
+  // Release the weakest reserves first, then members of the last party. Keep the lead.
+  const weakestFirst = strongest(run.bench.filter(id => id !== run.lead)).reverse();
+  const inLastParty = id => run.lastParty?.includes(id);
+  return [...weakestFirst.filter(id => !inLastParty(id)), ...weakestFirst.filter(inLastParty)].slice(0, count);
+}
+
+function takeEvent(run, choice) {
+  const target = choice.targets ? strongest(choice.targets)[0] : undefined;
+  // A random awakening may boost an existing member or grant a memory instead of joining.
+  const randomJoin = usesRepeatDraws(run) && choice.ops.some(op => op.type === 'join' && op.random);
+  const count = randomJoin ? 0 : replacementCount(run, joinCount(choice.ops));
+  const result = R.chooseEvent(run, choice.id, target, chooseReleases(run, count));
+  if (result.reason === 'roster_full' && result.requiredReleases > 0 && !count) {
+    return checked(R.chooseEvent(run, choice.id, target, chooseReleases(run, result.requiredReleases)));
+  }
+  return checked(result);
 }
 
 export function playRun(dungeonId, seed, {
   profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, doorOverride, serviceOverride,
   firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty, relicDoors,
-  legacyRules = legacyCliRules || legacyDraws,
+  tempoVersion: selectedTempo = tempoVersion,
+  legacyRules = legacyCliRules || legacyDraws || selectedTempo === 1,
   relicAudit = false, onRelicReplacement
 } = {}) {
   const simulatedProfile = profile ?? (legacyRules ? null : releaseProfile(dungeonId, firstMain));
@@ -304,7 +321,7 @@ export function playRun(dungeonId, seed, {
   else if (legacyRules && profileView.features) delete profileView.features.relicDoors;
   const intro = DUNGEONS[dungeonId].layout === 'intro';
   const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : selectedDifficulty,
-    contract: intro ? null : contract, seed, profileView, tempoVersion, lessonVersion, plain: flag('--plain') });
+    contract: intro ? null : contract, seed, profileView, tempoVersion: selectedTempo, lessonVersion, plain: flag('--plain') });
   if (legacyDraws) delete run.drawRuleVersion;
   let heirloomsGained = 0;
   const rewards = { relicAudit, onRelicReplacement };
@@ -372,7 +389,7 @@ export function playDaily(key, { naive = false, bossOrder = null } = {}) {
     else if (door.type === 'event') {
       const id = naive ? run.pending.choices[0].id : DAILY_EVENTS[spec.eventId];
       const choice = run.pending.choices.find(entry => entry.id === id);
-      checked(R.chooseEvent(run, id, choice.targets ? strongest(choice.targets)[0] : undefined));
+      takeEvent(run, choice);
     }
     resolveChoices(run, naive);
     if (run.phase === 'result') checked(R.confirmResult(run));

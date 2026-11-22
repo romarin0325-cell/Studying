@@ -4,8 +4,10 @@ import { createAudio } from '../src/stage/audio.js';
 import { create } from '../src/engine/bridge.js';
 import { warningDue } from '../src/ui/battle/effect-plan.js';
 import { cleanseLabel } from '../src/ui/battle/log.js';
+import { contractSettlement, resultNextLabel } from '../src/ui/battle/result.js';
 import { planBattleAction } from '../src/ui/battle/view.js';
 import { createSheet } from '../src/ui/sheet.js';
+import { RESUME } from '../src/ui/glossary.js';
 import { beetleWarningFixture, trenchCleanseFixture } from './screens/feedback.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
@@ -72,6 +74,38 @@ test('a muted setting never leaves an old warning to play on a later command', (
   assert.equal(warningDue({ ...command, fast: true, soundOn: false }), false);
   assert.equal(warningDue({ ...command, soundOn: false }), false);
   assert.equal(warningDue({ ...command, key: '0/3', intent: ordinary }), false);
+});
+
+test('the result board labels the next step for retries, borrowed battles and pending rewards', () => {
+  const battle = { floor: 4, roomType: 'gate', won: true, retry: false };
+  assert.equal(resultNextLabel({ pending: { kind: 'gate' } }, { ...battle, retry: true }), '편성 바꿔 재도전');
+  assert.equal(resultNextLabel({}, { ...battle, roomType: 'borrowed' }), '다음 동료 고르기');
+  assert.equal(resultNextLabel({ pending: { kind: 'reinforcement' } }, battle), '동료 보충하기');
+  assert.equal(resultNextLabel({ pending: { kind: 'gate' } }, battle), '문지기 보상 고르기');
+  assert.equal(resultNextLabel({ pending: { kind: 'relic' } }, battle), '유물 보상 고르기');
+  assert.equal(resultNextLabel({}, battle), '5층으로');
+});
+
+test('the final battle label uses saved reward choices and the daily result label', () => {
+  const boss = { floor: 8, roomType: 'boss', won: true, retry: false };
+  const win = { result: 'win', resultRewards: { recruitable: ['ash'], recruitTags: { ash: 'boss' } } };
+  const loss = { result: 'lose', resultRewards: { shardCandidates: ['ash'] } };
+  assert.equal(resultNextLabel(win, boss), '영입할 동료 고르기');
+  assert.equal(resultNextLabel(loss, { ...boss, won: false }), '다음 원정 후보 고르기');
+  assert.equal(resultNextLabel({ ...win, resultRewards: { recruitable: [] } }, boss), '관측소로');
+  assert.equal(resultNextLabel({ ...win, daily: true }, boss), RESUME.dailyResult);
+  assert.equal(resultNextLabel({ ...win, pending: { kind: 'relic' } }, boss), '유물 보상 고르기');
+});
+
+test('the result board reports contract completion and shows payment or forfeiture on floor six', () => {
+  assert.deepEqual(contractSettlement(6, null), []);
+  assert.deepEqual(contractSettlement(5, { metNow: true, paid: 3 }), ['<p class="contract-met">계약 달성</p>']);
+  assert.deepEqual(contractSettlement(6, { metNow: true, paid: 3 }), [
+    '<p class="contract-met">계약 달성</p>', '<p class="gain">7층 앞에서 ◆3</p>'
+  ]);
+  assert.deepEqual(contractSettlement(6, { failed: true, escrowed: 2 }), [
+    '<p class="contract-failed">계약 실패 · 맡긴 ◆2 사라짐</p>'
+  ]);
 });
 
 test('the open result board wraps Tab and receives focus back from its detail sheet', async () => {

@@ -1,26 +1,24 @@
 import { $, esc, show } from '../dom.js';
 import { foeFlip, formatMultiplier, logButton, traitText, TYPE } from '../widgets.js';
-import { josa } from '../text.js';
-import { retreatStoryLine } from '../story-lines.js';
-import { DUNGEONS } from '../../content/dungeons.js';
-import { RESUME, TERMS } from '../glossary.js';
+import { TERMS } from '../glossary.js';
 import { POSITION } from '../../engine/roster.js';
 import * as R from '../../engine/run.js';
 import { INTRO } from '../../content/intro.js';
 import { ROOM_NAMES } from '../../content/layouts.js';
 import { QUIRKS } from '../../content/quirks.js';
 import { REGIONS } from '../../content/regions.js';
-import { CONTRACT_ESCROW } from '../../content/contracts.js';
 import { FORM_MARKERS } from '../../content/skill-motions.js';
 import { create as createBattle } from '../../engine/bridge.js';
 import * as Opening from '../../engine/opening.js';
 import { syncBattleSpeed, tools } from '../settings.js';
-import { focusPrimary } from '../sheet.js';
 import { createHud } from './hud.js';
 import { createTiles } from './tiles.js';
 import { createMoves } from './moves.js';
+import { battleFailure, createResultBoard, resultMarkup } from './result.js';
 import { actionCleanses, actionEnd, planEffects, warningDue } from './effect-plan.js';
 import { battleLog, cleanseLabel, openBattleLog } from './log.js';
+
+export { battleFailure, contractSettlement } from './result.js';
 
 const same = (a, b) => !!a && !!b && a.side === b.side && a.idx === b.idx;
 
@@ -59,29 +57,6 @@ export function planBattleAction(events, index, { core, artifacts }) {
   };
 }
 
-export function contractSettlement(floor, contract) {
-  if (!contract) return [];
-  const rows = [];
-  if (contract.metNow) rows.push('<p class="contract-met">계약 달성</p>');
-  if (floor === 6) {
-    if (contract.paid) rows.push('<p class="gain">7층 앞에서 ◆' + contract.paid + '</p>');
-    else if (contract.failed) rows.push('<p class="contract-failed">계약 실패 · 맡긴 ◆' +
-      (contract.escrowed || CONTRACT_ESCROW) + ' 사라짐</p>');
-  }
-  return rows;
-}
-
-export function battleFailure(run) {
-  const result = run.lastBattleResult;
-  if (run.result === 'win' || (run.result !== 'lose' && result?.outcome !== 'lose')) return null;
-  // An intro retry keeps the fallen fighters in the roster for the new attempt.
-  const alive = run.bench.filter(id => !result?.fallenIds.includes(id));
-  if (result?.wiped || !alive.length) return { title: '전멸', subtitle: '꿈길이 끊겼다', survivors: [] };
-  const fielded = (result?.survivorIds ?? []).filter(id => alive.includes(id));
-  const survivors = [...fielded, ...alive.filter(id => !fielded.includes(id))];
-  return { title: '원정 실패', subtitle: `살아남은 동료 ${survivors.length}명`, survivors };
-}
-
 export function battleMarkup() {
   return (
     '<section id="battle" class="screen">' +
@@ -96,7 +71,7 @@ export function battleMarkup() {
     '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="전장·유물">전장</button><button id="b-speed">1배</button>' + logButton('id="b-log"') + tools() + '</header>' +
     '<button class="sky" id="sky" aria-label="필드 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
     '<div id="battle-announcement" aria-live="polite" aria-atomic="true"></div>' +
-    '<div class="sheet" id="result" role="dialog" aria-modal="true" aria-labelledby="result-title" tabindex="-1"><div class="in win" id="result-in"></div></div>' +
+    resultMarkup() +
     '</section>'
   );
 }
@@ -104,9 +79,8 @@ export function battleMarkup() {
 export function createBattleView({ core, roster, widgets, stage: St, audio, sheets, details, music }) {
   const { S, clock, wait, tween, footY: FY, headY: HY, chestY: CY } = St;
   const { sfx } = audio;
-  const { card, face, spr } = widgets;
+  const { card, spr } = widgets;
   const announcement = $('#battle-announcement');
-  const resultBoard = $('#result');
   const clone = o => JSON.parse(JSON.stringify(o));
   const LINKED_TRAITS = ['ally_death_base_atk_phy', 'ally_light_death_base_matk_mag'];
   const relayHint = $('#relay-hint');
@@ -298,16 +272,10 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
   function showLog() {
     sfx.tap();
-    openBattleLog(sheets, widgets, $('#result').classList.contains('on') ? run.lastBattleLog : currentLog());
+    openBattleLog(sheets, widgets, resultBoard.isOpen() ? run.lastBattleLog : currentLog());
   }
+  const resultBoard = createResultBoard({ getRun: () => run, widgets, details, showLog, sfx, music });
   $('#b-log').addEventListener('click', showLog);
-  $('#result').addEventListener('click', event => {
-    const id = event.target.closest('[data-sheet]')?.dataset.sheet;
-    if (id) {
-      sfx.tap();
-      details.charSheet(run, id);
-    }
-  });
 
   function logLine(text) { B.log.push(text); if (!/^(===|---)/.test(text)) ticker(text); }
   async function showBanner(tag, text, cls, sec) { const b = St.banner(tag, text, cls); await wait(sec || 0.7); b.remove(); }
@@ -776,7 +744,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     }
     if (bridge !== B.bridge || !$('#battle').classList.contains('on')) return;
     if (settlement?.ok) {
-      showResult(onContinue, onDecision, false);
+      resultBoard.show({ advance: onContinue, decision: onDecision });
       B.onReady?.(B);
     } else if (bridge.awaiting) B.onReady?.(B);
   }
@@ -786,13 +754,6 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     // The bar is narrow: plain kind only ('보스', not '보스 · 꿈의 주인'); the door card carries the flavour name.
     const plain = TERMS[B.door.type]?.short?.split(' · ')[0];
     return run.daily ? '균열 ' + run.floor + '층' : run.floor + '층 · ' + (plain ?? ROOM_NAMES[B.door.type]);
-  }
-
-  function setResultOpen(open) {
-    resultBoard.classList.toggle('on', open);
-    for (const background of resultBoard.parentElement.children) {
-      if (background !== resultBoard) background.inert = open;
-    }
   }
 
   function startBattle(expedition, options, settle, advance, {
@@ -823,7 +784,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.D = B.foe = null; B.allies = []; B.fallSpot = null;
     battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map(e => e.id), party: B.party.slice() };
     B.bridge = createBattle(core, options);
-    setResultOpen(false);
+    resultBoard.hide();
     $('#battle').classList.remove('resumed-result', 'opening-decision');
     for (const id of ['b-field', 'b-speed', 'b-log']) $('#' + id).hidden = simpleOpening;
     $('#acts').innerHTML = '';
@@ -839,97 +800,6 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
       events.push(...accepted);
     }
     play(events);
-  }
-  function showResult(advance, decision, restored) {
-    const result = run.lastBattleResult ?? {
-      floor: run.floor, roomType: run.room.type, outcome: run.result ?? 'win', wiped: false,
-      fallenIds: [], survivorIds: [], transfers: [],
-      rewardDelta: { crystals: 0, relicIds: run.lastBattleRelic ? [run.lastBattleRelic] : [] }
-    };
-    const { floor, roomType, outcome, wiped, fallenIds, survivorIds, transfers, rewardDelta } = result;
-    const failure = battleFailure(run);
-    const won = outcome === 'win' && !failure;
-    const final = roomType === 'boss' || run.room.final;
-    const retry = run.phase === 'result' && run.result === null;
-    const name = id => card(id)?.name ?? id;
-    const rows = [];
-    if (fallenIds.length) {
-      const list = fallenIds.map(name).join('·');
-      rows.push('<p class="result-fallen">' + esc(josa(list, '이/가') + ' 쓰러졌습니다.') + '</p>');
-    }
-    if (failure?.survivors.length) {
-      const [first, ...others] = failure.survivors;
-      const lead = card(first)?.name ?? '동료';
-      rows.push('<p class="result-return">' + esc(lead + (others.length ? ` 외 ${others.length}명` : '') + ' 생존') + '</p>');
-    }
-    const retreat = retreatStoryLine(run, card);
-    if (retreat) rows.push('<p class="result-retreat">' + esc(retreat) + '</p>');
-    if (transfers.length) {
-      const lines = transfers.map(({ toId, skillName }) => {
-        const skill = esc(skillName);
-        return '<p data-coach="heirloom-transfer">' + esc(josa(name(toId), '이/가')) + ' <b>' + skill + '</b>' +
-          esc(josa(skillName, '을/를').slice(skillName.length)) + ' 물려받았습니다.</p>';
-      });
-      rows.push('<div class="heirline"><span class="run-face">' + face(transfers[0].toId, 40) + '</span>' +
-        '<div>' + lines.join('') + '</div></div>');
-    }
-    const lastStand = run.lastBattleLog?.flatMap(turn => turn.rows).find(row => row.kind === 'last-stand')?.faces[0]?.id;
-    if (lastStand && survivorIds.includes(lastStand)) {
-      rows.push('<div class="result-last-stand chips">' + esc(name(lastStand)) +
-        ' <i class="last" data-coach="last-stand">최후의 일인</i></div>');
-    }
-    if (rewardDelta.crystals > 0) {
-      rows.push('<p class="gain">' + TERMS.crystal.short + ' +' + rewardDelta.crystals + ' · 보유 ' + run.crystals + '개</p>');
-    }
-    const contract = run.contract && { ...run.contract, metNow: run.contract.metAtFloor === floor };
-    if (!retry) rows.push(...contractSettlement(floor, contract));
-    const wager = (run.lastBattleLog?.at(-1)?.rows ?? []).find(row => row.kind === 'wager');
-    if (run.features?.bets !== false && wager) rows.push('<p>' + esc(wager.text) + '</p>');
-    if (won && wiped && final) rows.push('<p class="result-return">보스 격파 · 돌아온 동료 0명</p>');
-    else if (outcome === 'win' && wiped) rows.push('<p>전투에서 이겼습니다. 돌아온 동료가 없어 원정이 끝났습니다.</p>');
-
-    let label = (floor + 1) + '층으로';
-    if (retry) label = '편성 바꿔 재도전';
-    else if (run.result && !run.pending) {
-      const rewards = R.runRewards(run);
-      label = run.daily ? RESUME.dailyResult : won && rewards.recruitable.length ? '영입할 동료 고르기' :
-        rewards.shardCandidates.length ? '다음 원정 후보 고르기' : '관측소로';
-    } else if (roomType === 'borrowed') label = '다음 동료 고르기';
-    else if (run.pending?.kind === 'reinforcement') label = '동료 보충하기';
-    else if (run.pending?.kind === 'gate') label = '문지기 보상 고르기';
-    else if (run.pending?.kind === 'relic') label = '유물 보상 고르기';
-
-    const title = failure?.title ?? (run.daily ? '균열' : DUNGEONS[run.dungeonId].name) + ' ' + floor + '층 돌파';
-    const box = $('#result-in');
-    box.innerHTML = '<header class="result-heading ' + (won ? 'won' : 'lost') + '"><h3 id="result-title">' + esc(title) + '</h3>' +
-      logButton('id="b-result-log"') + '</header>' + rows.join('') +
-      '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label) + '</button>';
-    setResultOpen(true);
-    if (!restored) {
-      if (rewardDelta.crystals > 0) sfx.credit();
-      if (rewardDelta.relicIds.length) sfx.gem();
-    }
-    $('#b-result-log').addEventListener('click', showLog);
-    const next = $('#b-next', box);
-    const reward = won && ['reward', 'result'].includes(run.phase) && roomType !== 'borrowed';
-    const pending = () => reward && ['reinforcement', 'gate', 'relic'].includes(run.pending?.kind);
-    const content = $('.result-decision', box);
-    const singleReinforcement = run.pending?.kind === 'reinforcement' && run.pending.candidates.length === 1;
-    if (reward) decision?.(content, result, next, singleReinforcement);
-    if (pending() && !restored) music?.holdReward(run.dungeonId);
-    box.scrollTop = 0;
-    focusPrimary(resultBoard);
-    next.addEventListener('click', () => {
-      sfx.tap();
-      if (pending()) {
-        decision(content, result, next, true);
-        focusPrimary(resultBoard);
-      } else {
-        next.disabled = true;
-        setResultOpen(false);
-        advance();
-      }
-    });
   }
 
   function attach(expedition) {
@@ -967,7 +837,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     show('battle');
     layout();
     lockPanel();
-    showResult(advance, decision, true);
+    resultBoard.show({ advance, decision, restored: true });
   }
 
   /** Review hooks for the live page and hidden preview panes. */

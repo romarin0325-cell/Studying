@@ -1029,12 +1029,15 @@ export function createStage(ASSETS) {
     if (!anchor) return;
     const stage = fxLayer.getBoundingClientRect(), slot = anchor.getBoundingClientRect();
     const x = Math.max(4, Math.round(slot.left - stage.left));
+    // Stay in the field chip's column: running right put the note over the enemy plate's forecast line (11-23).
+    const chip = (anchor.closest('.sky') ?? anchor).getBoundingClientRect();
+    const width = Math.max(96, Math.round(chip.right - stage.left) - x);
     fxLayer.querySelector('[data-field-effect]')?.remove();
     const note = document.createElement('div');
     note.dataset.fieldEffect = '';
     Object.assign(note.style, {
       position: 'absolute', left: x + 'px', top: Math.round(slot.bottom - stage.top + 2) + 'px',
-      maxWidth: 'calc(100% - ' + (x + 4) + 'px)', boxSizing: 'border-box', padding: '2px 6px',
+      maxWidth: 'min(' + width + 'px, calc(100% - ' + (x + 4) + 'px))', boxSizing: 'border-box', padding: '2px 6px',
       color: 'var(--ink)', background: 'var(--paper2)', border: '1px solid var(--line2)',
       font: 'normal 0.75rem/1rem var(--f-label)'
     });

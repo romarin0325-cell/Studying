@@ -150,6 +150,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/ui/screens/daily-rift.js` | 오늘의 균열 준비·결과·기록 화면 |
 | `src/ui/battle/` | 전투 화면과 사건 재생 |
 | `src/ui/battle/view.js` | 전투 조립, 엔진 사건 재생과 결과 전달 |
+| `src/ui/battle/result.js` | 실시간·복원 결과판 문구, 보상 표시 연결, 버튼과 초점 |
 | `src/ui/battle/hud.js` | 적·동료·하늘과 행동 예고 표시 |
 | `src/ui/battle/tiles.js` | 기술·유품·물러나기 명령 타일 |
 | `src/ui/battle/moves.js` | 공격·피격·교대 등 전투 연출 |
