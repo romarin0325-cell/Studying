@@ -29,7 +29,7 @@ node card_pixel/game/tests/play.mjs --no-build --intro-only --tutorial=both
 ```
 
 - 빌드는 esbuild로 `src/main.js`와 모듈을 묶어 `dist/Relaymare.html`을 만든다.
-- Node 테스트 486개(하위 사례 포함)는 진입 파일 15개에서 실행한다. 전투 연결과 후퇴 미리보기(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·약속(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열과 균열 퍼즐(`daily`), 캐릭터 그림의 포즈·크기·기준점·얼굴 상자(`assets`), 원본 대비 규칙 목록(`rulebook`), 복합 기술의 연출 계획(`effect-plan`), 기술 연출 판정(`skill-motions`), 조사와 줄머리 처리(`text`), 귀환·원정 기록(`history`), 엔딩 뒤 목표(`goals`), 인연 에피소드 원문과 해금(`episodes`), 두 탭 저장과 리비전(`save`)을 확인한다.
+- Node 테스트 516개(하위 사례 포함)는 진입 파일 15개에서 실행한다. 전투 연결과 후퇴 미리보기(`bridge`), 릴레이 추가 규칙(`rules`), 원정·메타·약속(`run`), 음악 스케줄과 미리듣기 소스 일치(`music`), 오늘의 균열과 균열 퍼즐(`daily`), 캐릭터 그림의 포즈·크기·기준점·얼굴 상자(`assets`), 원본 대비 규칙 목록(`rulebook`), 복합 기술의 연출 계획(`effect-plan`), 기술 연출 판정(`skill-motions`), 조사와 줄머리 처리(`text`), 귀환·원정 기록(`history`), 엔딩 뒤 목표(`goals`), 인연 에피소드 원문과 해금(`episodes`), 두 탭 저장과 리비전(`save`)을 확인한다.
 - 자동 플레이는 먼저 빌드한다. Playwright Chromium을 쓰고, 없으면 설치된 Chrome, Edge 순으로 시도한다. `CHROMIUM_PATH`로 실행 파일을 지정할 수 있다. `--seeds=7,21`과 `--runs=2`가 기본값이며 시드마다 입문 1판 뒤 본편 2판을 돈다. `--headed`를 붙이면 창을 띄운다.
 - 자동 플레이는 본편 이어하기, 브라우저 오류·멈춤, 행동 뒤 대기 시간과 전투 프레임을 확인한다. `--intro-only --tutorial=both`는 새 프로필로 루미의 튜토리얼을 한 판은 따라가고(follow) 한 판은 건너뛰어(skip) 입문을 끝까지 돈다. 화면은 `tests/shots/`에 남긴다.
 - `node card_pixel/game/tests/screens.mjs`는 전투·원정·저장·균열·튜토리얼·기능 안내 화면 사례 147개(두 탭 저장 사례 포함)를 Chrome에서 확인하고 `tests/shots/screens/`에 화면과 모아 보기 `sheet.png`를 남긴다. `node card_pixel/game/tests/screens-map.mjs`는 지도 화면 사례 8개를 확인하고 `tests/shots/screens-map/`에 화면을 남긴다. 두 명령 모두 `--case <이름>`으로 하나만 돌거나 `--validate-only`로 화면에 필요한 상태만 확인할 수 있다.
