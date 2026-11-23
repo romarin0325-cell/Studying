@@ -655,7 +655,7 @@ function showSettings(){
     ${telemetry?.markup()||''}<details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
 function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').classList.remove('spotting');$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();coachTick();}
-function close(){if(!modal)return;if(resultDetail){resultDetail=false;showResult(lastResult,false);return;}const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();telemetry?.view(screen);if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();if(!run)setTimeout(()=>{if(!modal)maybeUnlockNews();},460);}
+function close(){hideStatusPeek();if(!modal)return;if(resultDetail){resultDetail=false;showResult(lastResult,false);return;}const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();telemetry?.view(screen);if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();if(!run)setTimeout(()=>{if(!modal)maybeUnlockNews();},460);}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'수호자':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
@@ -1306,7 +1306,7 @@ const copula=name=>{const c=name.charCodeAt(name.length-1)-0xAC00;return name+(c
 const BANNER_ORDER=['normal','season','relic'],BANNER_WORD={normal:['일반 소환','STANDARD'],season:['수호자 소환','GUARDIAN'],relic:['유물 소환','RELIC']};
 function switchBanner(next){
   if(next===banner)return;
-  const stage=qs('.sm-stage'),old=stage?.querySelector('.sm-figure'),dir=BANNER_ORDER.indexOf(next)>BANNER_ORDER.indexOf(banner)?1:-1;
+  const stage=qs('.sm-stage'),old=stage?.querySelector('.sm-figure:not(.sm-ghost)'),dir=BANNER_ORDER.indexOf(next)>BANNER_ORDER.indexOf(banner)?1:-1;
   banner=next;
   if(!old||motionOff()){refreshBehind();return;}
   // The old figure is kept as a still copy inside the stage, under the band, and leaves before the new one arrives.
@@ -1773,19 +1773,20 @@ function sproutSheet(){
 }
 function claimSprout(day,button){
   const d=FW.beginnerState(p()).days[day-1];if(!d?.claimable){if(d&&!d.unlocked)toast('앞 걸음의 할 일을 마치면 열려요.');return;}
-  if(d.reward.choice){urChoiceSheet();return;}
-  const r=act('beginnerClaim',{day},false);if(!r.ok)return;
+  const chosen=FW.beginnerState(p()).choice;
+  if(d.reward.choice&&!chosen){urChoiceSheet();return;}
+  const r=act('beginnerClaim',{day,...(d.reward.choice?{choice:chosen}:{})},false);if(!r.ok)return;
   const c=button?centerOf(button):{x:innerWidth/2,y:innerHeight/2};burst(c.x,c.y,{count:d.big?26:12,spread:d.big?140:80,size:d.big?14:11,color:'#ffe39a'});
   toast(rewardWords(r.reward));refreshLobby();mountSprout();sproutSheet();
 }
 function claimSproutAll(){
   const total={dreams:0,dust:0,bouquet:0};
   for(let day=1;day<=7;day++){
-    const d=FW.beginnerState(p()).days[day-1];if(!d.claimable||d.reward.choice)continue;
-    const r=act('beginnerClaim',{day},false);if(r.ok)for(const k of Object.keys(total))total[k]+=r.reward[k]||0;
+    const st=FW.beginnerState(p()),d=st.days[day-1];if(!d.claimable||d.reward.choice&&!st.choice)continue;
+    const r=act('beginnerClaim',{day,...(d.reward.choice?{choice:st.choice}:{})},false);if(r.ok)for(const k of Object.keys(total))total[k]+=r.reward[k]||0;
   }
   const words=rewardWords(total);if(words)toast(words);refreshLobby();mountSprout();
-  if(FW.beginnerState(p()).days[6].claimable)urChoiceSheet();else sproutSheet();
+  const after=FW.beginnerState(p());if(after.days[6].claimable&&!after.choice)urChoiceSheet();else if(after.active)sproutSheet();else close();
 }
 let urPick=null;
 const withOf=name=>{const c=name.charCodeAt(name.length-1)-0xAC00;return name+(c>=0&&c<11172&&c%28?'과':'와');};
@@ -1795,7 +1796,7 @@ function urChoiceSheet(){
     `<div class="dialog-buttons"><button class="secondary" data-action="sprout">돌아가기</button><button class="primary shine" data-action="ur-confirm" ${urPick?'':'disabled'}>${urPick?`${withOf(HERO[urPick].name)} 함께하기`:'동료를 골라요'}</button></div>`,'ur-choice');
 }
 function confirmUr(){
-  if(!urPick)return;const r=act('beginnerClaim',{day:7,choice:urPick},false);if(!r.ok)return;urPick=null;const words=rewardWords(r.reward||{});if(words)setTimeout(()=>toast(words),1600);banner='normal';refreshLobby();mountSprout();
+  if(!urPick)return;const r=act('beginnerClaim',{day:7,choice:urPick},false);if(!r.ok)return;urPick=null;const words=rewardWords(r.reward||{});if(words)setTimeout(()=>toast(words),1600);if(!r.hero){close();if(words)toast(words);return;}banner='normal';refreshLobby();mountSprout();
   reveal([{id:r.hero.id,fresh:r.hero.fresh}],{count:1,cost:0,label:'새싹 일곱 걸음 · 일곱 번째 걸음'});
 }
 
@@ -1825,7 +1826,7 @@ const UNLOCK_NEWS={
 };
 let unlockGo=null;
 function maybeUnlockNews(){
-  if(modal||screen==='battle'||screen==='draft'||$('splash')||FW.ftueNext(p())||coach.active&&!tour)return false;
+  if(modal||screen==='battle'||screen==='draft'||$('splash')||store.broken||store.conflict||FW.ftueNext(p())||coach.active&&!tour)return false;
   const fresh=FW.newlyOpened(p()).filter(id=>UNLOCK_NEWS[id]);if(!fresh.length)return false;
   if(tour){tour=null;coach.hide();}
   for(const id of fresh)act('ftue',{seen:id},false);
