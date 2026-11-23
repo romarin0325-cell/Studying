@@ -1,9 +1,7 @@
 // Lobby dialogue, one voice per companion (src: the companion memorials and the character voice notes).
-import {EXPANSION_JOIN_LINES,EXPANSION_PARTNER_LINES} from './expansion-social.js';
 // talk: tapping the partner cycles these. close: added from six hearts. greet: the daily greeting (인사).
 const L=(talk,close,greet)=>({talk,close,greet});
 export const PARTNER_LINES=Object.freeze({
-  ...EXPANSION_PARTNER_LINES,
   gold_dragon:L(['지크 이야기를 들었느냐? 축복은 내가 주었지만, 그 힘으로 버틴 것은 그 아이 자신이란다.','보물은 마음껏 구경해도 좋다. 다만 내 꼬리를 금화 더미로 착각해서 밟지는 말거라.','오늘은 그대가 길을 골라 보겠느냐? 늘 내려다보기만 하던 풍경도 함께 걸으면 다르더구나.'],
     '내게 기대어 쉬어도 좋다. 하지만 그대가 내 어깨를 빌려줄 날도 있겠지. 나는 그날도 기다리고 있단다.',['어서 오너라. 오늘의 이야기는 그대부터 들려주겠느냐?','그대의 발소리를 기억해 두었지. 자, 이쪽은 바람이 덜 분단다.']),
   demon_king:L(['홍차 한 잔 내와. 각설탕은 두 개… 보지 말고 그냥 넣어.','세계 정복? 먼지 나는 건 질색이야. 조용한 그늘이 훨씬 예쁘거든.','데스핸드로 햇볕을 가려 달라고? …흑마법을 양산처럼 쓰는군.'],'다른 관객은 안 받아. 해 질 녘 내 맞은편은 늘 네 자리야.',['왔어? 반 박자 늦었네. 자리 비워 뒀어.','마침 노을 빛깔이 좋네. 차 식기 전에 이리 앉아.']),
@@ -92,7 +90,6 @@ export const greetLine=(id,day='')=>{const g=PARTNER_LINES[id]?.greet||['…'];l
 // The first-meeting line on the summon spotlight (a new companion joins), in each companion's own voice.
 // A companion without one falls back to the first daily greeting.
 export const JOIN_LINES=Object.freeze({
-  ...EXPANSION_JOIN_LINES,
   demon_king:'빛깔이 고운 정원이네. 좋아, 당분간 여기 머물러 주지.',
   miracle_larva:'여기가 네 정원이야? 따뜻하다… 나도 여기서 자라도 돼?',
   star_boy:'띵동! 별똥별 특급 배달, 오늘부터 형아 전담이야!',

@@ -1,5 +1,4 @@
 import * as source from './data.js';
-import {EXPANSION_IDS,EXPANSION_RARITIES} from './expansion-companions.js';
 
 // This game's copied definitions and art are maintained independently.
 // Rarity deliberately carries no stat multiplier; the author will balance it.
@@ -14,10 +13,10 @@ export const RARITY = {
   UR:{name:'얼티밋레어',color:'#e6be6c',motif:'왕관'},
 };
 export const ROSTER = {
-  C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog','joker','sunflower',...EXPANSION_RARITIES.C],
-  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple','antropy','demon_king',...EXPANSION_RARITIES.R],
-  SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom','cure_master','ash','miracle_larva',...EXPANSION_RARITIES.SR],
-  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','venom','behemoth','gold_dragon',...EXPANSION_RARITIES.UR],
+  C:['star_boy','snow_rabbit','silver_rabbit','night_rabbit','siren','mushroom_king','underdog','joker','sunflower'],
+  R:['great_detective','guardian','avalanche_maid','santa','red_dragon','aurora','toffee_apple','antropy','demon_king'],
+  SR:['storm_sage','flame_sage','lightning_sage','time_magician','ancient_dragon','phantom','cure_master','ash','miracle_larva'],
+  UR:['zeke','luna','jasmine','queen','rumi','cherry_prince','venom','behemoth','gold_dragon'],
 };
 // Season guardians in rotation order (one per month). Behemoth is a regular late-unlock UR.
 export const HIDDEN = ['time_ruler','galaxy_whale','doom','cinderella','harmonious','frost_witch'];
@@ -77,7 +76,7 @@ export const CLEAR_UNLOCKS=Object.freeze({});
 // has been cleared (before that the summon pool and the collection are exactly what they were). Every new
 // companion goes on this list.
 export const LATE_UNLOCK_STAGE=PART_STAGES;
-export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon',...EXPANSION_IDS]);
+export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon']);
 // Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
 // unlock is a stage; hard and abyss open at levels 36 and 72 of the original curve.
 // from/to are levels of the original curve (levelOf) at the first and last wave. challengeBase bends

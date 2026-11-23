@@ -472,7 +472,7 @@ test('a stored oath and twin expedition still validates inside the profile store
   call('settle',{token:store.value.active.token,round:4,damage:Number.POSITIVE_INFINITY});
   assert.equal(store.value.twin.records.easy.right.damage,0);assert.equal(store.value.twin.best.easy.total,4);
   assert.equal(monthlyReward({round:1,tier:'easy'})>0,true);
-  assert.equal(HEROES.length,58);
+  assert.equal(HEROES.length,42);
 });
 
 test('an old twin set is dropped on load and overlapping side records are rejected',()=>{
