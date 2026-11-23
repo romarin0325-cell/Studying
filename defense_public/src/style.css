@@ -2254,3 +2254,22 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 /* The card being filled: a quiet nebula behind the stars. */
 .gal-card.current .gal-stage{background:radial-gradient(60% 45% at 30% 40%,rgba(120,90,220,.22),transparent 70%),radial-gradient(55% 40% at 72% 62%,rgba(60,140,220,.18),transparent 70%),radial-gradient(120% 90% at 50% 30%,#141a44,#080c22 75%)}
 .star-dot.on{filter:drop-shadow(0 0 1.6px rgba(255,206,110,.95)) drop-shadow(0 0 5px rgba(255,180,80,.45))}
+/* Sprout steps: a seven-pip track (done, ready, current, ahead), then one row per step with its own reward. */
+.sp-track{list-style:none;display:flex;align-items:center;margin:14px 6px 4px;padding:0}
+.sp-track li{position:relative;flex:1;display:flex;align-items:center}
+.sp-track li::before{content:'';width:12px;height:12px;flex:none;border-radius:50%;background:var(--panel2);border:1.5px solid var(--line2);z-index:1}
+.sp-track li:not(:last-child)::after{content:'';flex:1;height:2px;margin:0 -1px;background:var(--line2)}
+.sp-track li:last-child{flex:none}
+.sp-track li:last-child::before{width:18px;height:18px;border-color:var(--gold);background:radial-gradient(circle,#ffe7a6 0 30%,transparent 34%),var(--panel2)}
+.sp-track li.got::before{background:var(--gold);border-color:var(--gold)}
+.sp-track li.got:not(:last-child)::after{background:linear-gradient(90deg,var(--gold),var(--gold))}
+.sp-track li.ready::before{border-color:#7fe3f2;background:#7fe3f2;box-shadow:0 0 10px rgba(127,227,242,.7)}
+.sp-track li.now::before{border-color:#7fe3f2;box-shadow:0 0 0 3px rgba(127,227,242,.18)}
+.sp-step .sp-reward{display:flex;align-items:center;gap:6px;flex:none;font-size:12px}
+.sp-step .sp-reward .ic{width:15px;height:15px}
+.sp-step .sp-reward b{font-weight:800}
+.sp-step.locked{opacity:.62}
+.sp-step.claimed{opacity:.55}
+.sp-step.big strong{color:var(--gold)}
+.sp-step button{flex:none;min-width:56px}
+.sp-step .sp-reward .gift-art{width:24px;height:24px;margin:-4px 0}
