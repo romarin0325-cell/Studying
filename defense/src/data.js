@@ -1821,7 +1821,7 @@ export const BOSSES = {
     "frame": 0
   },
   "love_iris": {
-    "name": "사랑의 여신 아이리스",
+    "name": "아이리스",
     "color": "#f7b6d4",
     "pattern": "starlust",
     "warning": "사랑의 시험 · 별빛이 가득 차 있으면 별빛 −60",
@@ -1829,7 +1829,7 @@ export const BOSSES = {
     "frame": 1
   },
   "curse_iris": {
-    "name": "저주의 여신 아이리스",
+    "name": "저주받은 아이리스",
     "color": "#bc8be0",
     "pattern": "curse",
     "warning": "저주 · 동료 한 명이 해제될 때까지 행동하지 못합니다",
@@ -1837,7 +1837,7 @@ export const BOSSES = {
     "frame": 2
   },
   "flora": {
-    "name": "꽃의 여신 플로라",
+    "name": "플로라",
     "color": "#c9dd8d",
     "pattern": "stun1",
     "warning": "꽃가루 폭풍 · 빛나는 1칸 2초 기절",
@@ -1848,7 +1848,7 @@ export const BOSSES = {
     "frame": 3
   },
   "poseidon": {
-    "name": "해신 포세이돈",
+    "name": "포세이돈",
     "color": "#77c9e3",
     "pattern": "stun1",
     "warning": "해일의 일격 · 빛나는 1칸 2초 기절",
@@ -1859,7 +1859,7 @@ export const BOSSES = {
     "frame": 4
   },
   "beelzebub": {
-    "name": "마신 벨제뷔트",
+    "name": "벨제뷔트",
     "color": "#dfa590",
     "pattern": ["warp","seal"],
     "warning": "공간 붕괴 · 감속·기절·빙결이 아닌 적이 앞으로 순간이동",
@@ -1868,7 +1868,7 @@ export const BOSSES = {
     "frame": 5
   },
   "thor": {
-    "name": "뇌신 토르",
+    "name": "토르",
     "color": "#a9dcff",
     "pattern": "storm",
     "warning": "신벌의 낙뢰 · 빛나는 3칸에서 이동하세요",
@@ -1878,7 +1878,7 @@ export const BOSSES = {
     "frame": 0
   },
   "ares": {
-    "name": "투신 아레스",
+    "name": "아레스",
     "color": "#ffa88b",
     "pattern": "shuffle",
     "warning": "투신의 난무 · 2.6초 뒤 모든 동료의 자리가 뒤섞입니다",
@@ -1887,7 +1887,7 @@ export const BOSSES = {
     "frame": 1
   },
   "astea": {
-    "name": "창조신 아스테아",
+    "name": "아스테아",
     "color": "#e8d3ff",
     "pattern": "judgement",
     "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",

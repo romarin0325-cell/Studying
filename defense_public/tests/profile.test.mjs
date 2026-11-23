@@ -171,14 +171,14 @@ test('older saves gain the relic patch entries',()=>{
   for(const id of ['spotlight','royal_crown','dream_crystal'])assert.deepEqual(loaded.relics[id],{owned:false,enhance:0,copies:0});
 });
 
-test('a dispatch cannot consume the last five battle heroes and has a fixed one-hour receipt',()=>{
-  const p=createProfile(NOW);p.cleared=9;const s=storeFor(p);
-  assert.equal(s.transact('dispatch',{slot:0,id:'star_boy'},NOW).ok,false);
-  const q=createProfile(NOW);q.cleared=9;q.heroes.queen.owned=true;const extra=storeFor(q);
+test('dispatch keeps the active hero in the five-person lineup and has a fixed one-hour receipt',()=>{
+  const p=createProfile(NOW);p.cleared=18;const extra=storeFor(p);
   assert.equal(call(extra,'dispatch',{slot:0,id:'star_boy'}).message,'파견 출발 · 1시간 후 귀환');
-  assert.ok(away(extra.value,'star_boy'));assert.equal(extra.value.deck.length,5);assert.ok(!extra.value.deck.includes('star_boy'));
-  assert.equal(extra.transact('deck',{ids:DEFAULT_DECK},NOW).ok,false);
-  assert.equal(extra.transact('begin',{mode:'main',stage:10,deck:DEFAULT_DECK},NOW).ok,false);
+  assert.ok(away(extra.value,'star_boy'));assert.deepEqual(extra.value.deck,DEFAULT_DECK);
+  assert.equal(extra.transact('dispatch',{slot:1,id:'star_boy'},NOW).ok,false);
+  call(extra,'deck',{ids:DEFAULT_DECK});
+  call(extra,'begin',{mode:'main',stage:19,deck:DEFAULT_DECK});
+  assert.deepEqual(createBattle(extra.value).deck,DEFAULT_DECK);
   const d=extra.value.dispatches[0];assert.equal(d.end-d.start,HOUR);
   const malformed=structuredClone(extra.value);malformed.dispatches[0].end+=1;assert.equal(validateProfile(malformed),false);
   assert.ok(d.dust>d.reward&&d.reward>=1,'dust is the main dispatch reward');
@@ -197,13 +197,14 @@ test('a dispatch sent before dust rewards still validates and pays its promised 
   const bad=structuredClone(p);bad.dispatches[0].dust=-1;assert.equal(validateProfile(bad),false);
 });
 
-test('weekly draft survives reload, excludes dispatched heroes and produces five distinct choices',()=>{
+test('weekly draft survives reload and can pick a dispatched hero',()=>{
   const p=createProfile(NOW);p.cleared=9;for(const h of HEROES)p.heroes[h.id].owned=true;
   const s=storeFor(p);call(s,'dispatch',{slot:0,id:'queen'});call(s,'begin',{mode:'weekly',stage:10});
-  assert.ok(!s.value.active.draftPool.includes('queen'));assert.equal(s.value.weekly,calendar(NOW).week);
+  assert.ok(s.value.active.draftPool.includes('queen'));assert.equal(s.value.weekly,calendar(NOW).week);
+  s.value.active.offers=[{id:'queen',boon:'focus'},{id:'star_boy',boon:'spark'}];
   call(s,'draft',{index:0});const reload=new ProfileStore(s.storage,NOW);assert.deepEqual(reload.value.active,s.value.active);
   for(let i=1;i<5;i++)call(reload,'draft',{index:i%2});
-  assert.equal(new Set(reload.value.active.deck).size,5);assert.ok(validateProfile(reload.value));
+  assert.equal(new Set(reload.value.active.deck).size,5);assert.ok(reload.value.active.deck.includes('queen'));assert.ok(validateProfile(reload.value));
   assert.ok(createBattle(reload.value));assert.equal(reload.transact('begin',{mode:'weekly'},NOW).ok,false);
   const token=reload.value.active.token;call(reload,'settle',{token,round:3,won:false});assert.equal(reload.value.dreams,600+weeklyReward('easy',3,false));
   assert.equal(reload.transact('settle',{token,round:3,won:false},NOW).ok,false);
@@ -265,24 +266,24 @@ test('weekly draft includes unowned companions with part-one unlock, base enhanc
   early.heroes.star_boy.enhance=10;early.heroes.queen.owned=true;early.heroes.queen.enhance=6;
   const earlyStore=storeFor(early);call(earlyStore,'dispatch',{slot:0,id:'queen'});
   call(earlyStore,'begin',{mode:'weekly'});
-  const expectedEarly=HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)&&h.id!=='queen').map(h=>h.id);
-  assert.deepEqual(earlyStore.value.active.draftPool,expectedEarly,'before part one: early owned + unowned (including hidden), excluding late and dispatched');
+  const expectedEarly=HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)).map(h=>h.id);
+  assert.deepEqual(earlyStore.value.active.draftPool,expectedEarly,'before late unlock: early owned and unowned, including dispatched');
   assert.equal(LATE_COMPANIONS.some(id=>earlyStore.value.active.draftPool.includes(id)),false);
   assert.equal(HIDDEN.every(id=>earlyStore.value.active.draftPool.includes(id)),true);
   assert.equal(draftEligible(earlyStore.value,'gold_dragon'),false);
-  assert.equal(draftEligible(earlyStore.value,'queen'),false);
+  assert.equal(draftEligible(earlyStore.value,'queen'),true);
 
   // Owned late companions remain eligible before LATE_UNLOCK_STAGE just like in the collection.
   const ownedLate=createProfile(NOW);ownedLate.cleared=3;ownedLate.heroes.gold_dragon.owned=true;
   assert.equal(draftPool(ownedLate).includes('gold_dragon'),true);
 
-  // After part one clear, all 42 companions (minus dispatched) join the draft pool.
+  // After the late unlock, all companions join the draft pool.
   const late=createProfile(NOW);late.cleared=LATE_UNLOCK_STAGE;late.beds.rose=10;late.beds.spring=5;late.beds.seed=4;
   late.relics.hourglass={owned:true,enhance:2,copies:0};late.equipped=['hourglass'];
   late.heroes.star_boy.enhance=10;late.heroes.queen.owned=true;
   const lateStore=storeFor(late);call(lateStore,'dispatch',{slot:0,id:'queen'});
   call(lateStore,'begin',{mode:'weekly'});
-  assert.equal(lateStore.value.active.draftPool.length,HEROES.length-1);
+  assert.equal(lateStore.value.active.draftPool.length,HEROES.length);
   assert.equal(LATE_COMPANIONS.every(id=>lateStore.value.active.draftPool.includes(id)),true);
 
   // Unowned drafted companions compute combat power and battle multipliers at enhance 0 while keeping shared growth;
@@ -315,10 +316,8 @@ test('weekly draft includes unowned companions with part-one unlock, base enhanc
   lateStore.value.active.run=E.serialize(run);
   const reloaded=parseProfile(JSON.stringify(lateStore.value));assert.ok(reloaded&&resumeBattle(reloaded));
 
-  // Validation rejects unowned late companions before part one, dispatched heroes, and non-weekly unowned decks.
+  // Validation rejects unowned late companions before their unlock, and non-weekly unowned decks.
   const badEarly=structuredClone(earlyStore.value);badEarly.active.draftPool.push('gold_dragon');assert.equal(validateProfile(badEarly),false);
-  const badAway=structuredClone(lateStore.value);badAway.active.draftPool.push('queen');assert.equal(validateProfile(badAway),false);
-  const badAwayDeck=structuredClone(lateStore.value);badAwayDeck.active.draft[0]='queen';badAwayDeck.active.deck[0]='queen';assert.equal(validateProfile(badAwayDeck),false);
   const badMain=createProfile(NOW);badMain.active={mode:'main',stage:1,deck:['luna',...DEFAULT_DECK.slice(1)],started:NOW,seed:1,token:'t',boon:0,run:null,relicAttack:0,relicLevels:{}};
   assert.equal(validateProfile(badMain),false,'main mode still rejects unowned heroes');
   assert.equal(lateOpen(LATE_UNLOCK_STAGE-1),false);assert.equal(lateOpen(LATE_UNLOCK_STAGE),true);
@@ -470,8 +469,9 @@ test('the time-hour tool shifts all waiting timers without changing the clock or
 });
 
 test('the trial-day tool resets dailies and greeting while leaving the sprout board intact',()=>{
-  const p=createProfile(NOW),s=storeFor(p);call(s,'pet');call(s,'draw',{banner:'normal',count:1,free:true});
-  call(s,'beginnerClaim',{day:1,kind:'login'});const before=structuredClone(s.value);
+  const p=createProfile(NOW);p.cleared=1;
+  const s=storeFor(p);call(s,'pet');call(s,'draw',{banner:'normal',count:1,free:true});
+  call(s,'beginnerClaim',{day:1});const before=structuredClone(s.value);
   assert.ok(testGrant(s.value,'trial-day',NOW));assert.deepEqual(s.value.beginner,before.beginner);
   assert.equal(s.value.daily.day,before.daily.day);assert.equal(s.value.daily.free,false);assert.equal(s.value.petDay,'');
   assert.equal(s.value.clockAt,before.clockAt);assert.ok(validateProfile(s.value));
@@ -495,20 +495,22 @@ test('one hundred round-zero main forfeits leave dust and bond unchanged',()=>{
   assert.equal(s.value.dust,p.dust);assert.deepEqual(s.value.heroes,p.heroes);
 });
 
-test('a main win lights the album from stage 1 and releases a painting at each boundary',()=>{
+test('main wins light stars from the library unlock and release paintings at each boundary',()=>{
   const s=storeFor(createProfile(NOW));
-  const settle=won=>{call(s,'begin',{mode:'main',stage:1});return call(s,'settle',{token:s.value.active.token,round:6,won});};
+  const settle=(won,stage)=>{call(s,'begin',{mode:'main',stage});return call(s,'settle',{token:s.value.active.token,round:6,won});};
   const loss=settle(false);assert.equal(loss.star,null);assert.equal(loss.dust,25);
+  for(let stage=1;stage<=3;stage++)assert.equal(settle(true,stage).star,null);
+  assert.equal(s.value.study.library.stars,0);
   let first=true;
   for(const c of CONSTELLATIONS)for(let stars=1;stars<=c.stars.length;stars++){
-    const completed=stars===c.stars.length?c.id:null,r=settle(true);
+    const completed=stars===c.stars.length?c.id:null,r=settle(true,4);
     assert.deepEqual(r.star,{constellation:c.id,stars,of:c.stars.length,completed});
     assert.equal(r.dust,first?180:60);assert.equal(r.clearReward,first?160:0);first=false;
     assert.equal(s.value.study.library.stars,completed?0:stars);
     if(completed)assert.equal(s.value.study.library.unlocked.at(-1),c.id);
   }
   const library={index:7,stars:0,unlocked:CONSTELLATIONS.map(c=>c.id),day:''};
-  assert.equal(settle(true).star,null);assert.deepEqual(parseProfile(s.raw).study,{wrong:[],solved:[],library});
+  assert.equal(settle(true,4).star,null);assert.deepEqual(parseProfile(s.raw).study,{wrong:[],solved:[],library});
   for(const [field,value] of [['wrong',[{kind:'concept'}]],['solved',['concept:x']],['wrong',{}],['solved',null]]){
     const bad=structuredClone(s.value);bad.study[field]=value;assert.equal(parseProfile(bad),null);
   }

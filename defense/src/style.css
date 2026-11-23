@@ -1076,11 +1076,7 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .boss-main small{font-size:10.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wave-strip .battle-hint{margin:0;font-size:10.5px;text-align:left;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .unit-panel{position:absolute;inset:0;z-index:6;margin:0;padding:9px 10px;box-sizing:border-box;box-shadow:0 -6px 24px rgba(0,0,0,.45),var(--shadow);animation:card-up .18s cubic-bezier(.2,.9,.3,1)}
-.battle.compact .battle-slot{height:0;margin:0;position:static}
-.battle.compact .wave-strip{display:none}
-.battle.compact .unit-panel{inset:auto 0 max(8px,env(safe-area-inset-bottom)) 0}
 .unit-panel{display:flex;flex-direction:column;justify-content:space-between}
-.battle.compact .unit-panel{--glass:linear-gradient(180deg,rgba(30,38,86,.98),rgba(13,17,44,.99));justify-content:flex-start}
 .battle-notice.warn{border-color:#ff7d6e88;color:#ffe2dc;font-weight:700}
 .unit-card-head{display:flex;align-items:center;gap:9px}
 .unit-card-head .unit-name{display:flex;align-items:center;gap:6px}
@@ -1127,7 +1123,6 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 /* Thumb-safe edges: menus start a little below the top edge, the battle dock ends above the bottom edge. */
 .topbar{height:auto;min-height:56px;padding-top:max(14px,calc(env(safe-area-inset-top) + 8px))}
 .battle-dock{padding-bottom:max(18px,calc(env(safe-area-inset-bottom) + 10px))}
-.battle.compact .unit-panel{inset:auto 0 max(18px,calc(env(safe-area-inset-bottom) + 10px)) 0}
 /* Unit card: portrait + three short lines, then one action row. Fits the 132px slot with room. */
 .unit-panel{justify-content:center;gap:8px;padding:9px 10px}
 .unit-card-head{align-items:center;gap:10px}
@@ -1218,7 +1213,6 @@ body[data-battle=true] .battle-notice,body[data-battle=true] .overlay{backdrop-f
 .battle-controls button{min-height:40px}
 .battle-dock .skills{margin:5px 0}
 .battle-dock{padding-bottom:max(30px,calc(env(safe-area-inset-bottom) + 18px))}
-.battle.compact .unit-panel{inset:auto 0 max(30px,calc(env(safe-area-inset-bottom) + 18px)) 0}
 .skill-rank{position:absolute;top:3px;left:3px;z-index:1;min-width:22px;padding:0 4px;border-radius:7px;font-size:9.5px;font-weight:800;line-height:15px;color:#fff;background:rgba(10,14,36,.85);border:1px solid var(--rk,#8a93b8)}
 .skill-rank[data-rank="2"]{--rk:#7fe6a0}.skill-rank[data-rank="3"]{--rk:#7fc4ff}.skill-rank[data-rank="4"]{--rk:#c58bff}.skill-rank[data-rank="5"]{--rk:#ffd36a;color:#ffe9a8}
 /* Numbers that grow with enhancement, shown at their current value. The lobby sheet, battle sheet, relic sheet and
@@ -1253,14 +1247,6 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .library::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.8;background:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent),radial-gradient(1.4px 1.4px at 78% 12%,#ffe9b0 50%,transparent),radial-gradient(1px 1px at 46% 30%,#cfe0ff 50%,transparent),radial-gradient(1.2px 1.2px at 88% 40%,#fff 50%,transparent),radial-gradient(1px 1px at 24% 52%,#ffe9b0 50%,transparent),radial-gradient(1px 1px at 64% 66%,#fff 50%,transparent),radial-gradient(1.3px 1.3px at 8% 80%,#cfe0ff 50%,transparent),radial-gradient(1px 1px at 92% 86%,#fff 50%,transparent)}
 
 .sky{display:block;width:min(100%,300px);aspect-ratio:1;margin:6px auto 4px;overflow:visible}
-.sky line{stroke:rgba(190,205,255,.2);stroke-width:.6;stroke-dasharray:1.4 1.6}
-.sky line.on{stroke:#ffe7a6;stroke-width:.8;stroke-dasharray:none;filter:drop-shadow(0 0 1.5px #ffd36a)}
-.star-dot .core{fill:rgba(200,212,255,.38)}
-.star-dot .glow{fill:rgba(255,214,110,.18)}
-.star-dot.on .core{fill:#fff6d6}
-.star-dot.on{filter:drop-shadow(0 0 2px #ffd36a)}
-.star-dot.next .core{fill:none;stroke:#ffe7a6;stroke-width:.6;animation:star-next 1.6s ease-in-out infinite}
-.star-dot.just .core,.star-dot.just .glow{transform-box:fill-box;transform-origin:center;animation:star-just 1.1s cubic-bezier(.2,.9,.3,1.3) both}
 @keyframes star-next{50%{opacity:.25}}
 @keyframes star-just{0%{transform:scale(0);opacity:0}60%{transform:scale(1.8);opacity:1}100%{transform:scale(1)}}
 
@@ -1726,11 +1712,12 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .sm[data-banner=season]::after,.sm[data-banner=relic]::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;mix-blend-mode:color;opacity:.55}
 .sm[data-banner=season]::after{background:radial-gradient(ellipse at 50% 55%,#8b5cf0,#2a1660 80%)}
 .sm[data-banner=relic]::after{background:radial-gradient(ellipse at 50% 55%,#e0a040,#3a2408 80%)}
+.sm-tabs{position:relative;z-index:3}
 .sm-tabs .dot{top:6px;right:16%}
 .sm-stage{position:relative;flex:1;min-height:330px}
-.sm-halo{position:absolute;left:0;right:0;margin:0 auto;bottom:16%;width:min(86%,360px);aspect-ratio:1;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,230,170,0) 0 8deg,rgba(255,230,170,.2) 10deg 14deg,rgba(255,230,170,0) 16deg 24deg);-webkit-mask:radial-gradient(closest-side,#000 40%,transparent);mask:radial-gradient(closest-side,#000 40%,transparent);animation:spin 50s linear infinite}
+.sm-halo{pointer-events:none;position:absolute;left:0;right:0;margin:0 auto;bottom:16%;width:min(86%,360px);aspect-ratio:1;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,230,170,0) 0 8deg,rgba(255,230,170,.2) 10deg 14deg,rgba(255,230,170,0) 16deg 24deg);-webkit-mask:radial-gradient(closest-side,#000 40%,transparent);mask:radial-gradient(closest-side,#000 40%,transparent);animation:spin 50s linear infinite}
 .sm[data-banner=season] .sm-halo{background:repeating-conic-gradient(from 0deg,rgba(210,170,255,0) 0 8deg,rgba(210,170,255,.26) 10deg 14deg,rgba(210,170,255,0) 16deg 24deg)}
-.sm-figure{position:absolute;left:0;right:0;margin:0 auto;bottom:6%;height:84%;max-width:100%;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(0,0,0,.5)) drop-shadow(0 0 26px rgba(255,230,170,.25));animation:breathe 5s ease-in-out infinite}
+.sm-figure{pointer-events:none;position:absolute;left:0;right:0;margin:0 auto;bottom:6%;height:84%;max-width:100%;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(0,0,0,.5)) drop-shadow(0 0 26px rgba(255,230,170,.25));animation:breathe 5s ease-in-out infinite}
 .sm[data-banner=relic] .sm-figure{height:50%;bottom:22%}
 .sm-copy{position:absolute;left:0;top:2px;max-width:66%;z-index:2}
 .sm-tag{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:10px;color:var(--gold-ink);background:linear-gradient(180deg,#fff0bf,#e2a94a)}
@@ -2212,9 +2199,6 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .skill-duration.spent{background:#1b2146eb;color:#c9cfee;border-color:#8d97c870}
 .aura-chip.move-wait i{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#121a40;color:#dfe5ff}
 .aura-chip.move-wait .ic{width:17px;height:17px}
-.oath-board{flex:none;margin-left:auto;display:grid;grid-template-columns:repeat(5,5px);gap:1.5px;padding:3px;border-radius:5px;background:rgba(255,255,255,.04)}
-.oath-board i{width:5px;height:5px;border-radius:1.5px;background:currentColor;opacity:.75}
-.oath-board i.off{background:none;box-shadow:inset 0 0 0 1px currentColor;opacity:.4}
 /* Twin doors: the entry row sits at the bottom of both doors; an overlap note is a quiet line, not an error. */
 .twin-door{grid-template-rows:auto auto auto 1fr auto}
 .twin-door-foot{align-self:end}
@@ -2247,3 +2231,113 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .form-list{grid-auto-rows:max-content}
 .relic-slot b{word-break:keep-all}
 .rl-row.end::before{display:none}
+
+/* ───────── Status words: tappable keywords, the peek card and the status page ─────────
+   One hue per status, used for the keyword underline, the badge and the page row. */
+[data-st=expose]{--st:#ffb35c}[data-st=slow]{--st:#7cc7ff}[data-st=stun]{--st:#ffd95a}[data-st=freeze]{--st:#a8e6ff}[data-st=divine]{--st:#fff0a0}
+[data-st=burn]{--st:#ff7a52}[data-st=poison]{--st:#8fdc5e}[data-st=curse]{--st:#c79bff}[data-st=ward]{--st:#7ff0cf}
+.kw{display:inline;min-height:0;padding:0;margin:0;border:0;background:none;font:inherit;line-height:inherit;letter-spacing:inherit;cursor:pointer;
+  color:color-mix(in srgb,var(--st) 62%,var(--text));text-decoration:underline dotted color-mix(in srgb,var(--st) 85%,transparent);text-decoration-thickness:1.5px;text-underline-offset:3px;border-radius:3px}
+.kw:focus-visible{outline:2px solid var(--st);outline-offset:1px}
+.st-badge{display:inline-grid;place-items:center;flex:none;width:28px;height:28px;border-radius:9px;color:var(--st);
+  background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--st) 30%,transparent),color-mix(in srgb,var(--st) 10%,transparent));border:1px solid color-mix(in srgb,var(--st) 55%,transparent)}
+.st-badge .st-ic{width:17px;height:17px;stroke-width:1.9}
+.status-peek{position:fixed;z-index:150;width:min(300px,calc(100vw - 16px));padding:12px 14px 8px;border-radius:14px;background:var(--panel);border:1px solid var(--line2);
+  box-shadow:0 14px 34px rgba(0,0,0,.45);color:var(--text);font-size:13px;line-height:1.55;animation:peekIn .16s ease-out}
+.status-peek::before{content:'';position:absolute;left:var(--ax);top:-6px;width:10px;height:10px;margin-left:-5px;background:var(--panel);border-left:1px solid var(--line2);border-top:1px solid var(--line2);transform:rotate(45deg)}
+.status-peek.above::before{top:auto;bottom:-6px;transform:rotate(225deg)}
+.status-peek .pk-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.status-peek .pk-head b{font-size:15px}
+.status-peek .pk-head small{margin-left:auto;font-size:11px;color:var(--text3)}
+.status-peek p{margin:0;color:var(--text2)}
+.status-peek .link{display:inline-flex;align-items:center;gap:2px;margin-top:4px;padding:0}
+.status-peek .link .ic{width:13px;height:13px}
+@keyframes peekIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.st-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.st-row{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.st-row.focus{border-color:color-mix(in srgb,var(--st) 70%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--st) 40%,transparent),0 0 18px color-mix(in srgb,var(--st) 18%,transparent)}
+.st-row .st-badge{width:38px;height:38px;border-radius:12px}
+.st-row .st-badge .st-ic{width:21px;height:21px}
+.st-row div{min-width:0}
+.st-row b{display:flex;align-items:baseline;gap:6px;font-size:15px}
+.st-row b small{font-size:11px;font-weight:600;color:var(--text3)}
+.st-row p{margin:3px 0 0;font-size:13px;line-height:1.55;color:var(--text2);word-break:keep-all}
+.st-row .st-rule{font-size:12px;color:var(--text3)}
+/* Draft: the ⓘ on each candidate opens its trait and ultimate. */
+.draft-slot{position:relative;display:flex;min-width:0}
+.draft-slot .draft-card{flex:1;min-width:0}
+.draft-info{position:absolute;top:8px;right:8px;z-index:1;width:32px;height:32px;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;background:rgba(10,16,32,.72);border:1px solid var(--line2);color:var(--text2)}
+.draft-info .ic{width:17px;height:17px}
+.draft-help .link{min-height:28px}
+
+/* Summon tab switch: a slanted band with the banner name crosses the stage while the figures trade places. */
+.sm-ghost{position:absolute;z-index:1;pointer-events:none}
+.sm-wipe{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.sm-wipe-band{position:relative;width:150%;height:min(46%,190px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;overflow:hidden;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 2px,transparent 2px 9px),linear-gradient(180deg,var(--wb2),var(--wb) 30%,var(--wb) 70%,var(--wb2));
+  box-shadow:0 0 0 1.5px rgba(255,255,255,.4) inset,0 16px 40px rgba(0,0,0,.45)}
+.sm-wipe-band::before,.sm-wipe-band::after{content:'';position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(255,240,200,.95) 30%,rgba(255,255,255,1) 50%,rgba(255,240,200,.95) 70%,transparent)}
+.sm-wipe-band::before{top:10px}.sm-wipe-band::after{bottom:10px}
+.sm-wipe-shine{position:absolute;inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.35) 48%,transparent 60%);animation:wipeShine .76s ease-out}
+.sm-wipe-band small,.sm-wipe-band b{position:relative;transform:skewX(14deg)}
+.sm-wipe-band small{font-size:11px;font-weight:800;letter-spacing:.38em;color:rgba(255,255,255,.8)}
+.sm-wipe-band b{font-family:var(--display);font-weight:400;font-size:38px;line-height:1.1;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.5)}
+.sm-wipe[data-banner=normal]{--wb:rgba(36,78,178,.96);--wb2:rgba(18,36,96,.96)}
+.sm-wipe[data-banner=season]{--wb:rgba(104,58,200,.96);--wb2:rgba(46,22,110,.96)}
+.sm-wipe[data-banner=relic]{--wb:rgba(184,116,30,.96);--wb2:rgba(92,52,10,.96)}
+@keyframes wipeShine{from{transform:translateX(-60%)}to{transform:translateX(60%)}}
+
+/* ───────── Battle arrangements (fitBattle) ─────────
+   rail: wide windows get a right column for the slot, the ultimates and the controls. */
+.app[data-layout=rail]{max-width:min(100vw,1120px)}
+.app[data-layout=rail] .battle{display:grid;grid-template-columns:minmax(0,1fr) clamp(286px,29vw,336px);grid-template-rows:auto auto minmax(0,1fr);
+  grid-template-areas:"top dock" "hud dock" "stage dock";column-gap:18px;padding:max(14px,env(safe-area-inset-top)) 18px 0}
+.app[data-layout=rail] .battle-top{grid-area:top}
+.app[data-layout=rail] .hud{grid-area:hud}
+.app[data-layout=rail] .battle-stage{grid-area:stage;margin:4px 0 16px}
+.app[data-layout=rail] .battle-dock{grid-area:dock;display:flex;flex-direction:column;min-height:0;padding:6px 0 20px}
+.app[data-layout=rail] .battle-slot{height:auto;min-height:178px;margin:0}
+
+.app[data-layout=rail] .battle-dock .skills{margin:auto 0 8px}
+.app[data-layout=rail] .unit-panel{justify-content:flex-start;gap:12px;padding:12px}
+.app[data-layout=rail] .unit-card-row{grid-template-columns:1fr}
+.app[data-layout=rail] .unit-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.app[data-layout=rail] .skill-button{min-height:64px}
+/* short: a short, narrow window keeps the slot in the flow at a smaller height; the card drops to its essentials. */
+.battle.short .battle-slot{height:100px}
+.battle.short .wave-strip{padding:6px 10px;gap:5px}
+.battle.short .wave-strip .battle-hint{display:none}
+.battle.short .unit-panel{gap:5px;padding:6px 9px}
+.battle.short .unit-card-head .unit-face{width:38px;height:38px}
+.battle.short .unit-card-head .unit-trait-line{display:none}
+.battle.short .unit-card-row .unit-skill,.battle.short .unit-card-row .unit-actions button,.battle.short .unit-card-row .fixed-target{min-height:34px}
+/* rail: the wave strip stays in view and the unit card stands under it (the column has the room). */
+.app[data-layout=rail] .battle-slot{display:flex;flex-direction:column;gap:10px}
+.app[data-layout=rail] .wave-strip{height:auto;min-height:0;flex:none}
+.app[data-layout=rail] .battle-slot.inspecting .wave-strip{opacity:1;pointer-events:auto}
+.app[data-layout=rail] .unit-panel{position:relative;inset:auto;flex:none}
+.app[data-layout=rail] .battle.tight .battle-slot.inspecting .wave-strip{display:none}
+/* Progress reset: the one destructive control in settings reads as such. */
+.settings-row.reset{margin-top:10px}
+.secondary.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
+.primary.danger{color:#fff;background:linear-gradient(180deg,#ff7d6e,#c8443a);border-color:#ff9a8e;box-shadow:0 4px 14px rgba(200,68,58,.35)}
+
+/* Constellations (skyMarkup): stars drawn as light. */
+.sky .sky-dust circle{fill:#e3e9ff}
+.sky .ln{stroke:rgba(190,205,255,.22);stroke-width:.45;stroke-dasharray:.5 1.9;stroke-linecap:round}
+.sky .ln.on{stroke:#fff3cc;stroke-width:.6;stroke-dasharray:none}
+.sky .ln-glow{stroke:#ffc65a;stroke-width:2.8;stroke-linecap:round;opacity:.2}
+.star-dot .core{fill:rgba(210,220,255,.5)}
+.star-dot.on .core{fill:#fff}
+.star-dot .halo{fill:url(#sky-halo)}
+.star-dot.on .halo,.star-dot.on .spike{transform-box:fill-box;transform-origin:center;animation:sky-twinkle 3.4s ease-in-out infinite;animation-delay:var(--d)}
+.star-dot.on .spike{fill:#fff4d4}
+.star-dot.next .ring{fill:none;stroke:#ffe7a6;stroke-width:.42;stroke-dasharray:1.3 1.1;transform-box:fill-box;transform-origin:center;animation:sky-ring 7s linear infinite}
+.star-dot.next .core{fill:#ffe7a6;animation:star-next 1.6s ease-in-out infinite}
+.star-dot.just .halo,.star-dot.just .spike{animation:sky-born 1.1s cubic-bezier(.2,.9,.3,1) both}
+@keyframes sky-twinkle{0%,100%{transform:scale(.88) rotate(0deg);opacity:.78}50%{transform:scale(1.06) rotate(10deg);opacity:1}}
+@keyframes sky-ring{to{transform:rotate(360deg)}}
+@keyframes sky-born{from{transform:scale(.2);opacity:0}60%{transform:scale(1.35);opacity:1}to{transform:scale(1);opacity:1}}
+/* The card being filled: a quiet nebula behind the stars. */
+.gal-card.current .gal-stage{background:radial-gradient(60% 45% at 30% 40%,rgba(120,90,220,.22),transparent 70%),radial-gradient(55% 40% at 72% 62%,rgba(60,140,220,.18),transparent 70%),radial-gradient(120% 90% at 50% 30%,#141a44,#080c22 75%)}
+.star-dot.on{filter:drop-shadow(0 0 1.6px rgba(255,206,110,.95)) drop-shadow(0 0 5px rgba(255,180,80,.45))}

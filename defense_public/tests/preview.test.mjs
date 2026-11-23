@@ -8,7 +8,7 @@ const {HERO,HEROES,CHAPTERS,TIERS,TIER_IDS,BOSS_ORDER,CHALLENGE_WAVES,ARTIFACTS,
 const {HOUR,stageDust}=await import('../src/economy.js');
 const {weeklyReward,monthlyReward}=await import('../src/monthly.js');
 const {season,eventWindow}=await import('../src/preview/season.js');
-const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
+const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_RULES,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
 const {twinBosses,twinBandReward,twinState,twinLocks,TWIN_WAVES,TWIN_STAGE,TWIN_SIDE}=await import('../src/preview/twin.js');
 const {requestTracker,requestGoal,REQUEST,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
 const {FAVORITE}=await import('../src/bond.js');
@@ -238,10 +238,10 @@ test('twin parties stay disjoint, the latest run replaces that side, and each ti
   assert.match(command(fresh,'begin',{mode:'twin',side:'left'},TWIN_NOW).message,/5명/);
   ok(fresh,'twinParty',partyOf());assert.deepEqual(fresh.deck,deck);assert.deepEqual(fresh.equipped,equipped);
   ok(fresh,'dispatch',{slot:0,id:'star_boy'});
-  assert.match(command(fresh,'twinParty',partyOf(),NOW).message,/파견 중/);
-  ok(fresh,'claimDispatch',{slot:0},NOW+HOUR);
   ok(fresh,'twinParty',partyOf());
   ok(fresh,'begin',{mode:'twin',tier:'easy',side:'left'});
+  assert.ok(fresh.dispatches.some(d=>fresh.active.deck.includes(d.hero)));
+  ok(fresh,'claimDispatch',{slot:0},NOW+HOUR);
   assert.equal(command(fresh,'twinParty',partyOf(),NOW).message,'진행 중인 쌍성 원정을 먼저 마치세요.');
   assert.deepEqual(fresh.active.deck,LEFT);assert.deepEqual(fresh.active.relics,RELIC.slice(0,2));
   assert.deepEqual(Object.keys(fresh.active.relicLevels),RELIC.slice(0,2));
@@ -564,7 +564,7 @@ test('v3 retunes deck oath points while v1 and v2 saved scores and paid bands su
       const saved=parseProfile(JSON.stringify(p));assert.ok(saved,`${id} v${rules}`);assert.equal(saved.oath.best.score,score);assert.equal(saved.oath.paid,2);
       ok(saved,'begin',{mode:'oath',tier:'hard',oaths:[id],deck});
       const wallet=saved.dreams,result=ok(saved,'settle',{token:saved.active.token,round:9,won:true});
-      assert.equal(result.record.rules,3);assert.equal(result.score,oathScore('hard',[id]));
+      assert.equal(result.record.rules,OATH_RULES);assert.equal(result.score,oathScore('hard',[id]));
       assert.ok(result.bands.every(b=>b.score>10),'already paid bands are never paid again');
       assert.equal(saved.dreams,wallet+result.reward);assert.ok(validateProfile(saved));
     }

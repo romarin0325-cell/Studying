@@ -1,6 +1,6 @@
 import {HERO,HEROES,ARTIFACT,ARTIFACTS,DEFAULT_DECK,TUNING,TIERS,TIER_IDS,CHALLENGE_WAVES,ROSTER,MAIN_STAGES,PART_STAGES,INTRO_STAGES,CLEAR_UNLOCKS,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN,MAX_RANK} from './content.js';
 import {lateOpen,heroPool,calendar,duplicateCost,relicCost,relicLevel,collectionBonus,levelCost,bedCost,bedOpen,BED_IDS,dispatchSlots,dispatchReward,dispatchDust,combatPower,stageReward,stageDust,PERFECT_REWARD,idleReward,drawCharacter,drawRelic,HOUR} from './economy.js';
-import {resumeBattle,battleMeta} from './battle.js';
+import {resumeBattle,battleMeta,captureBattle} from './battle.js';
 import {migrateMonthly,validRecord,betterRecord,betterMonth,currentRecord,monthlyReward,weeklyReward,WEEKLY_ENTRIES,monthlyPaid,monthlyDue} from './monthly.js';
 import {TEAM_SIZE,SAVE_KEY,UNLOCKED,SOLO} from './team-config.js';
 import {unlockProfile,topUpUnlocked,testGrant} from './test-unlock.js';
@@ -8,7 +8,7 @@ import {MEMORIAL_STORIES} from './memorial.js';
 import {BOND_MAX,GIFT_IDS,GREETING_POINTS,BATTLE_BOND,FAVORITE,FAVORITE_LINES,GIFT_LINES,GIFTS,addBond,bondNeed,giftPoints} from './bond.js';
 import {CONSTELLATIONS,lightStar} from './library.js';
 import {season,eventOpen} from './preview/season.js';
-import {UNLOCKS,FTUE_STEPS,TOUR_IDS,beginnerState,urChoices} from './beginner.js';
+import {UNLOCKS,FTUE_STEPS,TOUR_IDS,migrateChallengeFtue,featureOpen,BEGINNER_DAYS,beginnerState,urChoices} from './beginner.js';
 import {oathConflict,oathDeckProblem,oathScore,oathBandsReached,oathState,oathChapter,validOathRules,OATH_BANDS,OATH_RULES} from './preview/oath.js';
 import {twinParty,twinPartyProblem,twinState,twinBandReward,twinCredit,twinBandsReached,TWIN_BANDS,TWIN_WAVES,TWIN_SIDES} from './preview/twin.js';
 import {REQUEST_MAX,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_FLAGS,REQUEST,requestState,requestGoal} from './preview/requests.js';
@@ -20,14 +20,26 @@ const freshFtue=legacy=>({legacy,done:[],seen:[],skipped:false,tours:[]});
 const freshBeginner=now=>({count:1,last:calendar(now).day,claimed:[],tasks:[],did:[],choice:null,closed:false});
 export function createProfile(now=Date.now(),{trial=false}={}){
   trial=UNLOCKED&&trial===true;
-  return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(SOLO),beginner:SOLO?null:freshBeginner(now),firstTen:SOLO,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,stageRev:1,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'star_boy',
+  return (UNLOCKED&&!trial?unlockProfile:p=>p)({version:1,revision:0,dreams:600,dust:180,cleared:0,ftue:freshFtue(SOLO),beginner:SOLO?null:freshBeginner(now),firstTen:SOLO,eventSeen:'',eventFlip:false,trial,beds:{rose:0,spring:0,seed:0,crit:0,critDamage:0,stardust:0},bedRev:4,relicRev:2,stageRev:1,deck:DEFAULT_DECK.slice(0,TEAM_SIZE),partner:'great_detective',
     heroes:Object.fromEntries(HEROES.map(h=>[h.id,entry(DEFAULT_DECK.includes(h.id))])),
     relics:Object.fromEntries(ARTIFACTS.map(a=>[a.id,{owned:false,enhance:0,copies:0}])),equipped:[],dispatches:[],
-    draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now,clockAt:now,petDay:'',memories:{},weekly:null,weeklyRuns:0,weeklyBest:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
+    draws:0,relicDraws:0,pity:{normal:0,season:0},rng:0x13579bdf,history:[],idleAt:now-TUNING.idleHours*HOUR,clockAt:now,petDay:'',memories:{},weekly:null,weeklyRuns:0,weeklyBest:null,monthly:null,gifts:{candy:0,letter:0,bouquet:0},basket:{at:now,next:0},lobby:null,noticeLate:[],perfect:[],
     monthlyBest:null,monthlyLifetime:null,monthlyClaim:null,
     daily:freshDaily(now),study:freshStudy(),settings:{sound:true,auto:true,reduced:false,cutin:true,quality:'standard'},active:null,results:[]});
 }
 const integer=(n,max=Number.MAX_SAFE_INTEGER)=>Number.isSafeInteger(n)&&n>=0&&n<=max;
+const record=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
+function validBattleSnapshot(p,a){
+  const s=a.snapshot;
+  if(!record(s)||!Array.isArray(s.artifacts)||s.artifacts.length>3||new Set(s.artifacts).size!==s.artifacts.length||s.artifacts.some(id=>!p.relics[id]?.owned))return false;
+  if(a.mode==='twin'&&s.artifacts.join()!==a.relics.join())return false;
+  if(!integer(s.met,9)||!Number.isInteger(s.gaugeMax)||s.gaugeMax<120||!Number.isInteger(s.startGold)||s.startGold<0)return false;
+  if(!record(s.crit)||!Number.isFinite(s.crit.chance)||s.crit.chance<=0||!Number.isFinite(s.crit.damage)||s.crit.damage<1)return false;
+  if(a.mode==='weekly'&&a.draft.length<TEAM_SIZE)return s.meta===null;
+  return record(s.meta)&&Object.keys(s.meta).length===a.deck.length&&a.deck.every(id=>{
+    const m=s.meta[id];return record(m)&&Number.isFinite(m.power)&&m.power>=1&&Number.isFinite(m.special)&&m.special>=1;
+  });
+}
 // Daily missions are things any player does just by playing (UI part 2):
 // finish an expedition, merge five times, collect the shooting stars. A free
 // single summon replaces the old "spend gems to earn gems" mission.
@@ -82,8 +94,8 @@ export function validateProfile(p){
   if(!Array.isArray(p.equipped)||p.equipped.length>3||new Set(p.equipped).size!==p.equipped.length||p.equipped.some(id=>!p.relics[id]?.owned))return false;
   if(!Array.isArray(p.dispatches)||p.dispatches.length>dispatchSlots(p.cleared)||new Set(p.dispatches.map(d=>d.hero)).size!==p.dispatches.length||new Set(p.dispatches.map(d=>d.slot)).size!==p.dispatches.length)return false;
   if(p.dispatches.some(d=>!p.heroes[d.hero]?.owned||!integer(d.slot,3)||d.slot>=dispatchSlots(p.cleared)||!integer(d.start)||!integer(d.end)||d.end-d.start!==TUNING.dispatchHours*HOUR||!integer(d.reward)||d.dust!==undefined&&!integer(d.dust)))return false;
-  if(p.deck.some(id=>p.dispatches.some(d=>d.hero===id)))return false;
-  if(!integer(p.idleAt)||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
+
+  if(!Number.isSafeInteger(p.idleAt)||p.idleAt < -TUNING.idleHours*HOUR||!integer(p.clockAt)||typeof p.petDay!=='string'||!p.daily||typeof p.daily.day!=='string'||!Array.isArray(p.daily.claimed)||p.daily.claimed.some(id=>!DAILY_MISSIONS.some(m=>m.id===id))||new Set(p.daily.claimed).size!==p.daily.claimed.length)return false;
   if(['combat','idle','free','relicFree','bouquet','accel'].some(k=>typeof p.daily[k]!=='boolean')||!integer(p.daily.merges,9999)||!p.settings||['sound','auto','reduced','cutin'].some(k=>typeof p.settings[k]!=='boolean'))return false;
   if(!validStudy(p.study))return false;
   if(!p.basket||!integer(p.basket.at)||!integer(p.basket.next,GIFT_IDS.length-1))return false;
@@ -95,7 +107,7 @@ export function validateProfile(p){
   if(p.weekly!==null&&(typeof p.weekly!=='string'||!/^D-?\d+$/.test(p.weekly)))return false;
   if(p.monthly!==null&&(typeof p.monthly!=='string'||!/^R-?\d+$/.test(p.monthly)))return false;
   if(!integer(p.weeklyRuns,WEEKLY_ENTRIES)||p.weekly===null&&(p.weeklyRuns!==0||p.weeklyBest!==null)||!validWeeklyBest(p.weeklyBest))return false;
-  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly','oath','twin'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>p.active.mode==='weekly'&&p.active.draft?.length===TEAM_SIZE?!draftEligible(p,id):!p.heroes[id]?.owned||away(p,id))||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
+  if(p.active!==null&&(!p.active||typeof p.active!=='object'||!['main','weekly','monthly','oath','twin'].includes(p.active.mode)||!Array.isArray(p.active.deck)||p.active.deck.length!==TEAM_SIZE||new Set(p.active.deck).size!==TEAM_SIZE||p.active.deck.some(id=>p.active.mode==='weekly'&&p.active.draft?.length===TEAM_SIZE?!draftEligible(p,id):!p.heroes[id]?.owned)||!integer(p.active.stage,MAIN_STAGES)||p.active.stage<1||!integer(p.active.started)||typeof p.active.token!=='string'||!integer(p.active.boon,TEAM_SIZE)))return false;
   const a=p.active;
   if(a){
     if(a.stage>p.cleared+1||!integer(a.seed,0xffffffff)||!a.seed||a.token.length>100||a.run!==null&&(typeof a.run!=='string'||a.run.length>2*1024*1024))return false;
@@ -106,12 +118,13 @@ export function validateProfile(p){
       if(a.draft.length<TEAM_SIZE&&a.draftPool.length-a.draft.length>1&&a.offers[0].id===a.offers[1].id)return false;
       if(a.draft.length===TEAM_SIZE&&a.deck.join()!==a.draft.join()||a.draft.length<TEAM_SIZE&&a.run!==null||p.weekly!==calendar(a.started).week||p.weeklyRuns<1)return false;
     }else if(a.boon!==0)return false;
-    if(a.mode==='oath'&&(oathConflict(a.oaths)||oathDeckProblem(a.oaths,a.deck)||!TIERS[a.tier]))return false;
+    if(a.mode==='oath'&&(!Number.isInteger(a.oathRules)||!validOathRules(a.oathRules)||oathConflict(a.oaths)||oathDeckProblem(a.oaths,a.deck)||!TIERS[a.tier]))return false;
     if(a.mode==='twin'&&(!TWIN_SIDES.includes(a.side)||!TIERS[a.tier]||!Array.isArray(a.relics)||a.relics.length>3||new Set(a.relics).size!==a.relics.length||a.relics.some(id=>!p.relics[id]?.owned)))return false;
     if(a.mode!=='main'&&a.tier!==undefined&&!TIERS[a.tier])return false;
-    if(a.relicAttack!==undefined&&!(Number.isFinite(a.relicAttack)&&a.relicAttack>=0&&a.relicAttack<=10))return false;
-    const relicKeys=a.mode==='twin'?a.relics||[]:p.equipped;
-    if(a.relicLevels!==undefined&&(!a.relicLevels||typeof a.relicLevels!=='object'||Array.isArray(a.relicLevels)||Object.keys(a.relicLevels).length!==relicKeys.length||Object.keys(a.relicLevels).some(id=>!relicKeys.includes(id)||!integer(a.relicLevels[id])||a.relicLevels[id]<1)))return false;
+    if(!(Number.isFinite(a.relicAttack)&&a.relicAttack>=0&&a.relicAttack<=10))return false;
+    if(!validBattleSnapshot(p,a))return false;
+    const relicKeys=a.snapshot.artifacts;
+    if(!record(a.relicLevels)||Object.keys(a.relicLevels).length!==relicKeys.length||Object.keys(a.relicLevels).some(id=>!relicKeys.includes(id)||!integer(a.relicLevels[id])||a.relicLevels[id]<1))return false;
     if(a.run!==null&&!resumeBattle(p))return false;
   }
   if(!validOath(p)||!validTwin(p)||!validRequests(p))return false;
@@ -148,7 +161,7 @@ export function migratePity(p){
 export function migrateRelicSnapshot(p){
   const a=p.active;if(!a||typeof a!=='object'||a.relicAttack!==undefined&&a.relicLevels!==undefined)return;
   let run=null;if(typeof a.run==='string'){try{run=JSON.parse(a.run);}catch{}}
-  const equipped=Array.isArray(p.equipped)?p.equipped:[];
+  const equipped=a.mode==='twin'?(Array.isArray(a.relics)?a.relics:[]):(Array.isArray(p.equipped)?p.equipped:[]);
   if(a.relicAttack===undefined)a.relicAttack=Number.isFinite(run?.relicAttack)?run.relicAttack:collectionBonus(p.relics);
   if(a.relicLevels===undefined){const from=run?.relicLevels&&typeof run.relicLevels==='object'&&!Array.isArray(run.relicLevels)?run.relicLevels:null;a.relicLevels=Object.fromEntries(equipped.map(id=>[id,from&&Number.isInteger(from[id])?from[id]:relicLevel(p.relics?.[id])]));}
 }
@@ -184,13 +197,18 @@ export function migrateTwin(p){
 }
 // A battle checkpoint that no longer restores (an update changed combat or growth numbers) must not lock the whole
 // save: the sortie is kept and restarts from wave 1. notes.runDropped tells the caller that this happened.
-export function parseProfile(raw,notes){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateBeginner(p);migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);migrateWeekly(p);migrateStages(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;}if(validateProfile(p))return p;if(p?.active&&typeof p.active==='object'&&typeof p.active.run==='string'){p.active.run=null;if(validateProfile(p)){if(notes)notes.runDropped=true;return p;}}return null;}catch{return null;}}
-export function migrateBeginner(p){const legacy=!(p.cleared<=2&&p.draws===0);if(p.ftue===undefined)p.ftue=freshFtue(legacy);if(p.ftue&&typeof p.ftue==='object'&&p.ftue.tours===undefined)p.ftue.tours=[];if(p.beginner===undefined)p.beginner=legacy?null:freshBeginner(Date.now());if(p.firstTen===undefined)p.firstTen=legacy;if(p.eventSeen===undefined)p.eventSeen='';if(p.eventFlip===undefined)p.eventFlip=false;if(p.trial===undefined)p.trial=false;}
+export function parseProfile(raw,notes){try{const p=typeof raw==='string'?JSON.parse(raw):structuredClone(raw);if(p?.version===1){migrateBeginner(p);migrateNotices(p);migrateMonthly(p);migrateGarden(p);migrateBeds(p);migrateDaily(p);migrateBond(p);migrateRelics(p);migrateStudy(p);migrateBasket(p);migrateDispatch(p);migratePity(p);migrateRelicSnapshot(p);migrateMemories(p);migrateTwin(p);migrateWeekly(p);migrateStages(p);if(Number.isSafeInteger(p.cleared)&&p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))grantClearUnlocks(p);if(p.relics&&typeof p.relics==='object')for(const a of ARTIFACTS)if(!p.relics[a.id])p.relics[a.id]={owned:false,enhance:0,copies:0};if(p.heroes&&typeof p.heroes==='object'&&!Array.isArray(p.heroes))for(const h of HEROES)if(!p.heroes[h.id])p.heroes[h.id]=entry(false);if(p.perfect===undefined)p.perfect=[];if(p.memories===undefined)p.memories={};if(p.settings&&p.settings.quality===undefined)p.settings.quality='standard';if(p.settings&&p.settings.cutin===undefined)p.settings.cutin=true;migrateBattleSnapshot(p);}if(validateProfile(p))return p;if(p?.active&&typeof p.active==='object'&&typeof p.active.run==='string'){p.active.run=null;if(validateProfile(p)){if(notes)notes.runDropped=true;return p;}}return null;}catch{return null;}}
+function migrateBattleSnapshot(p){
+  const a=p.active;if(!a||typeof a!=='object')return;
+  if(a.mode==='oath'&&a.oathRules===undefined)a.oathRules=3;
+  if(a.snapshot===undefined)captureBattle(p);
+}
+export function migrateBeginner(p){const legacy=!(p.cleared<=2&&p.draws===0);if(p.ftue===undefined)p.ftue=freshFtue(legacy);if(p.ftue&&typeof p.ftue==='object'&&p.ftue.tours===undefined)p.ftue.tours=[];migrateChallengeFtue(p.ftue);if(p.beginner===undefined)p.beginner=legacy?null:freshBeginner(Date.now());if(p.firstTen===undefined)p.firstTen=legacy;if(p.eventSeen===undefined)p.eventSeen='';if(p.eventFlip===undefined)p.eventFlip=false;if(p.trial===undefined)p.trial=false;}
 const fmtN=n=>Math.floor(n).toLocaleString('ko-KR');
 export function random(p){let x=p.rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;p.rng=x>>>0||1;return p.rng/4294967296;}
 export const away=(p,id)=>p.dispatches.some(d=>d.hero===id);
-export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned&&!away(p,h.id)).map(h=>h.id);
-export const draftEligible=(p,id)=>!!HERO[id]&&!away(p,id)&&(!!p.heroes?.[id]?.owned||!LATE_COMPANIONS.includes(id)||lateOpen(p.cleared));
+export const available=p=>HEROES.filter(h=>p.heroes[h.id].owned).map(h=>h.id);
+export const draftEligible=(p,id)=>!!HERO[id]&&(!!p.heroes?.[id]?.owned||!LATE_COMPANIONS.includes(id)||lateOpen(p.cleared));
 export const draftPool=p=>HEROES.filter(h=>draftEligible(p,h.id)).map(h=>h.id);
 // Greenhouse saves keep their exact power. Rose is +1% per level (bed revision 2): one old
 // garden level (+4%) is four rose levels, one revision-1 rose level (+2%) is two.
@@ -339,8 +357,8 @@ function settleOath(p,a,args,now){
   const s=season(integer(a.started)?a.started:now),at=Math.min(now,s.end-1),st=oathState(p,at);
   if(p.oath?.period&&Number(p.oath.period.slice(1))>s.index)return {record:null,newBest:false,score:0,bands:[],pay:0};
   if(!args.won){p.oath={period:st.period,best:st.best,paid:st.best?st.paid:0,lifetime:st.lifetime};return {record:null,newBest:false,score:0,bands:[],pay:0};}
-  const tier=a.tier||'easy',oaths=[...(a.oaths||[])],score=oathScore(tier,oaths);
-  const record={period:st.period,token:a.token,score,tier,oaths,deck:[...a.deck],at,rules:OATH_RULES};
+  const tier=a.tier||'easy',oaths=[...(a.oaths||[])],score=oathScore(tier,oaths,a.oathRules);
+  const record={period:st.period,token:a.token,score,tier,oaths,deck:[...a.deck],at,rules:a.oathRules};
   const newBest=!st.best||score>st.best.score,best=newBest?record:st.best,reached=oathBandsReached(best.score),bands=[];
   for(let i=st.paid;i<reached;i++)bands.push({score:OATH_BANDS[i].score,reward:OATH_BANDS[i].reward});
   p.oath={period:st.period,best,paid:reached,lifetime:!st.lifetime||score>st.lifetime.score?record:st.lifetime};
@@ -376,17 +394,19 @@ function beginPreview(p,mode,args,now){
   const tier=args.tier||'easy';if(!TIERS[tier]||p.cleared<TIERS[tier].unlock)return {ok:false,message:`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`};
   const stage=oathChapter(season(now).index,p.cleared)+1;
   if(mode==='oath'){
-    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return {ok:false,message:`파견 중이 아닌 동료 ${TEAM_SIZE}명이 필요합니다.`};
+    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned))return {ok:false,message:`서로 다른 동료 ${TEAM_SIZE}명이 필요합니다.`};
     const conflict=oathConflict(args.oaths);if(conflict)return {ok:false,message:conflict};
     const problem=oathDeckProblem(args.oaths,ids);if(problem)return {ok:false,message:problem};
     random(p);
-    p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(p.equipped.map(id=>[id,relicLevel(p.relics[id])])),tier,oaths:[...args.oaths]};
+    p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,tier,oaths:[...args.oaths],oathRules:OATH_RULES};
+    captureBattle(p);
     return {ok:true};
   }
   if(!TWIN_SIDES.includes(args.side))return {ok:false,message:'별길을 확인하세요.'};
   const party=twinParty(p),problem=twinPartyProblem(p,party);if(problem)return {ok:false,message:problem};
   const relics=party[args.side].relics;random(p);
-  p.active={mode,stage,deck:[...party[args.side].deck],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(relics.map(id=>[id,relicLevel(p.relics[id])])),tier,side:args.side,relics:[...relics]};
+  p.active={mode,stage,deck:[...party[args.side].deck],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,tier,side:args.side,relics:[...relics]};
+  captureBattle(p);
   return {ok:true};
 }
 export const weeklyStage=(p,now)=>{const met=Math.max(1,metBosses(p));return (calendar(now).weekNo%met+met)%met+1;};
@@ -404,10 +424,24 @@ export function command(p,action,args={},now=Date.now()){
     if(args.done!==undefined&&!p.ftue.done.includes(args.done))p.ftue.done.push(args.done);if(args.seen!==undefined&&!p.ftue.seen.includes(args.seen))p.ftue.seen.push(args.seen);if(args.skip===true){p.ftue.skipped=true;p.ftue.done=[...FTUE_STEPS];}return {ok:true};
   }
   if(action==='beginnerClaim'){
-    const b=p.beginner,d=beginnerState(p).days[args.day-1],kind=args.kind;if(!Number.isInteger(args.day)||!d||!['login','task'].includes(kind)||!d[kind].claimable)return no('보상을 받을 수 없습니다.');
-    const reward=d[kind].reward;let hero;if(kind==='login'&&args.day===7){if(!urChoices(p).some(x=>x.id===args.choice))return no('동료를 선택하세요.');hero={id:args.choice,fresh:receive(p.heroes,args.choice)};b.choice=args.choice;}
-    for(const key of ['dreams','dust'])if(reward[key])p[key]=Math.min(Number.MAX_SAFE_INTEGER,p[key]+reward[key]);if(reward.bouquet)p.gifts.bouquet=Math.min(999,p.gifts.bouquet+reward.bouquet);
-    b[kind==='login'?'claimed':'tasks'].push(args.day);if(kind==='task')b.count=beginnerState(p).count;if(b.claimed.length===7&&b.tasks.length===7)b.closed=true;return {ok:true,reward,...(hero?{hero}:{})};
+    const {day,choice}=args,b=p.beginner,d=beginnerState(p).days[day-1];
+    if(!Number.isInteger(day)||!d?.claimable)return no('보상을 받을 수 없습니다.');
+    const step=BEGINNER_DAYS[day-1],reward={dreams:0,dust:0,bouquet:0};let hero;
+    if(step.login.choice&&!urChoices(p).some(x=>x.id===choice))return no('동료를 선택하세요.');
+    const parts=[];
+    if(!b.claimed.includes(day)){
+      if(step.login.choice){
+        hero={id:choice,fresh:receive(p.heroes,choice)};b.choice=choice;
+      }
+      parts.push(step.login);b.claimed.push(day);
+    }
+    if(!b.tasks.includes(day)){parts.push(step.task.reward);b.tasks.push(day);}
+    for(const part of parts)for(const key of Object.keys(reward))reward[key]+=part[key]??0;
+    for(const key of ['dreams','dust'])p[key]=Math.min(Number.MAX_SAFE_INTEGER,p[key]+reward[key]);
+    p.gifts.bouquet=Math.min(999,p.gifts.bouquet+reward.bouquet);
+    b.count=beginnerState(p).count;
+    if(b.claimed.length===7&&b.tasks.length===7)b.closed=true;
+    return {ok:true,reward,...(hero?{hero}:{})};
   }
   if(action==='memory'){
     const story=MEMORIAL_STORIES[args.id],e=p.heroes[args.id];if(!story||!e?.owned||e.bond<story.unlockBond||!integer(args.page,story.paragraphs.length-1))return no('호감도 10에서 인연 이야기가 열립니다.');
@@ -434,12 +468,12 @@ export function command(p,action,args={},now=Date.now()){
     if(banner==='relic')did('relic');p.history=p.history.slice(0,50);return {ok:true,items,bonus,lucky,cost,free,pity:{normal:p.pity.normal,season:p.pity.season},...(first?{first:true}:{})};
   }
   if(action==='bed'){
-    const id=args.id;if(!BED_IDS.includes(id))return no('알 수 없는 화단입니다.');if(p.active)return no('원정 종료 후 성장할 수 있습니다.');
+    const id=args.id;if(!BED_IDS.includes(id))return no('알 수 없는 화단입니다.');
     if(!bedOpen(id,p.cleared))return no(`스테이지 ${TUNING.beds[id].unlock} 클리어 후 열립니다.`);const cost=bedCost(id,p.beds[id]);
     if(!Number.isSafeInteger(cost)||p.dust<cost)return no('별가루가 부족합니다.');p.dust-=cost;p.beds[id]++;did('water');return {ok:true,level:p.beds[id]};
   }
   if(action==='enhance'){
-    const table=args.kind==='relic'?p.relics:p.heroes,e=table[args.id];if(!e?.owned||p.active)return no('원정 종료 후 강화할 수 있습니다.');const cost=args.kind==='relic'?relicCost(ARTIFACT[args.id].rarity,e.enhance):duplicateCost(e.enhance);if(!Number.isSafeInteger(cost)||e.copies<cost)return no(`중복 ${args.kind==='relic'?'유물':'동료'}이 ${cost}개 필요합니다.`);e.copies-=cost;e.enhance++;return {ok:true,message:`강화 +${e.enhance} 달성`};
+    const table=args.kind==='relic'?p.relics:p.heroes,e=table[args.id];if(!e?.owned)return no('보유한 동료나 유물만 강화할 수 있습니다.');const cost=args.kind==='relic'?relicCost(ARTIFACT[args.id].rarity,e.enhance):duplicateCost(e.enhance);if(!Number.isSafeInteger(cost)||e.copies<cost)return no(`중복 ${args.kind==='relic'?'유물':'동료'}이 ${cost}개 필요합니다.`);e.copies-=cost;e.enhance++;return {ok:true,message:`강화 +${e.enhance} 달성`};
   }
   if(action==='partner'){if(!p.heroes[args.id]?.owned)return no('아직 획득하지 못한 동료입니다.');if(p.partner!==args.id)p.lobby=null;p.partner=args.id;return {ok:true};}
   if(action==='pet'){const day=calendar(now).day;if(p.petDay===day)return no('오늘 인사는 이미 완료했습니다.');p.petDay=day;const hearts=addBond(p.heroes[p.partner],GREETING_POINTS);p.dreams+=40;did('greet');return {ok:true,hearts,message:`인사 완료 · 꿈의결정 +40${hearts?' · 호감도 상승!':''}`};}
@@ -450,22 +484,22 @@ export function command(p,action,args={},now=Date.now()){
   if(action==='noticeLate'){p.noticeLate=[...new Set([...p.noticeLate,...lateNoticeIds(p)])];return {ok:true};}
   if(action==='lobby'){if(args.id===null){p.lobby=null;return {ok:true};}const e=p.heroes[args.id];if(!MEMORIAL_STORIES[args.id]||!e?.owned||e.bond<BOND_MAX)return no('호감도 10에서 메모리얼을 메인 화면으로 쓸 수 있습니다.');p.lobby=args.id;p.partner=args.id;return {ok:true};}
   if(action==='deck'){
-    const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 서로 다른 동료 ${TEAM_SIZE}명을 선택하세요.`);p.deck=[...ids];return {ok:true,message:'편성을 저장했습니다.'};
+    const ids=args.ids;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned))return no(`서로 다른 동료 ${TEAM_SIZE}명을 선택하세요.`);p.deck=[...ids];return {ok:true,message:'편성을 저장했습니다.'};
   }
   if(action==='relics'){
-    const ids=args.ids;if(p.active||!Array.isArray(ids)||ids.length>3||new Set(ids).size!==ids.length||ids.some(id=>!p.relics[id]?.owned))return no('보유한 서로 다른 유물을 3개까지 장착할 수 있습니다.');p.equipped=[...ids];return {ok:true,message:'유물 장착을 저장했습니다.'};
+    const ids=args.ids;if(!Array.isArray(ids)||ids.length>3||new Set(ids).size!==ids.length||ids.some(id=>!p.relics[id]?.owned))return no('보유한 서로 다른 유물을 3개까지 장착할 수 있습니다.');p.equipped=[...ids];return {ok:true,message:'유물 장착을 저장했습니다.'};
   }
   if(action==='equip'){
-    if(p.active||!p.relics[args.id]?.owned)return no('보유한 유물만 장착할 수 있습니다.');const at=p.equipped.indexOf(args.id);if(at>=0)p.equipped.splice(at,1);else if(p.equipped.length<3)p.equipped.push(args.id);else return no('유물은 최대 3개까지 장착할 수 있습니다.');return {ok:true};
+    if(!p.relics[args.id]?.owned)return no('보유한 유물만 장착할 수 있습니다.');const at=p.equipped.indexOf(args.id);if(at>=0)p.equipped.splice(at,1);else if(p.equipped.length<3)p.equipped.push(args.id);else return no('유물은 최대 3개까지 장착할 수 있습니다.');return {ok:true};
   }
   if(action==='dispatch'){
-    if(p.active||!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
-    if(!p.heroes[args.id]?.owned||away(p,args.id)||available(p).length<=TEAM_SIZE)return no(`전투에 남을 동료 ${TEAM_SIZE}명이 필요합니다. 먼저 동료를 더 모으세요.`);
+    if(!integer(args.slot,3)||args.slot>=dispatchSlots(p.cleared)||p.dispatches.some(d=>d.slot===args.slot))return no('사용 가능한 파견 슬롯을 선택하세요.');
+    if(!p.heroes[args.id]?.owned||away(p,args.id))return no('이미 파견 중인 동료이거나 보유하지 않은 동료입니다.');
     const {dust,dreams}=dispatchReward(combatPower(args.id,p.heroes[args.id],p.beds,collectionBonus(p.relics)),p.cleared);p.dispatches.push({slot:args.slot,hero:args.id,start:now,end:now+TUNING.dispatchHours*HOUR,reward:dreams,dust});
-    p.deck=p.deck.filter(id=>id!==args.id);for(const id of available(p))if(p.deck.length<TEAM_SIZE&&!p.deck.includes(id))p.deck.push(id);return {ok:true,message:`파견 출발 · ${TUNING.dispatchHours}시간 후 귀환`};
+    return {ok:true,message:`파견 출발 · ${TUNING.dispatchHours}시간 후 귀환`};
   }
   if(action==='claimDispatch'){
-    if(p.active)return no('원정 종료 후 파견 보상을 받을 수 있습니다.');const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');// Dispatches sent before dust rewards keep the crystals they promised.
+    const d=p.dispatches.find(d=>d.slot===args.slot);if(!d||d.end>now)return no('아직 파견 중입니다.');// Dispatches sent before dust rewards keep the crystals they promised.
     const dust=dispatchDust(d.dust||0,p.beds,p.cleared);p.dreams+=d.reward;p.dust+=dust;p.dispatches=p.dispatches.filter(x=>x!==d);return {ok:true,reward:d.reward,dust,message:`파견 보상 · ${dust?`별가루 +${fmtN(dust)} · `:''}꿈의결정 +${fmtN(d.reward)}`};
   }
   if(action==='idle'){const reward=idleReward(p,now);if(reward<1)return no('아직 모인 별똥별이 없습니다.');p.dust+=reward;p.idleAt=now;p.daily.idle=true;return {ok:true,reward,message:`별가루 +${fmtN(reward)}`};}
@@ -491,21 +525,21 @@ export function command(p,action,args={},now=Date.now()){
     if(p.active)return no('진행 중인 원정을 먼저 이어하세요.');const mode=args.mode;
     if(mode==='oath'||mode==='twin')return beginPreview(p,mode,args,now);
     if(!['main','weekly','monthly'].includes(mode))return no('원정 종류를 확인하세요.');
-    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned||away(p,id)))return no(`파견 중이 아닌 동료 ${TEAM_SIZE}명이 필요합니다.`);
+    const ids=args.deck||p.deck;if(!Array.isArray(ids)||ids.length!==TEAM_SIZE||new Set(ids).size!==TEAM_SIZE||ids.some(id=>!p.heroes[id]?.owned))return no(`서로 다른 동료 ${TEAM_SIZE}명이 필요합니다.`);
     const c=calendar(now),stage=mode==='weekly'&&p.cleared>=TIERS.easy.unlock?weeklyStage(p,now):args.stage||Math.min(MAIN_STAGES,p.cleared+1);if(!integer(stage,MAIN_STAGES)||stage<1||stage>p.cleared+1)return no('이전 스테이지를 먼저 클리어하세요.');
     if(mode!=='main'&&p.cleared<TIERS.easy.unlock)return no(`스테이지 ${TIERS.easy.unlock} 클리어 시 해금됩니다.`);
     const tier=mode==='main'?null:args.tier||'easy';if(mode!=='main'&&(!TIERS[tier]||p.cleared<TIERS[tier].unlock))return no(`${TIERS[tier]?.name||'난이도'}는 스테이지 ${TIERS[tier]?.unlock??TIERS.easy.unlock} 클리어 후 열립니다.`);
     if(mode==='weekly'&&weeklyState(p,now).left<=0)return no('이번 드래프트의 입장 횟수를 모두 사용했습니다.');
     if(mode==='weekly'){if(p.weekly!==c.week){p.weekly=c.week;p.weeklyRuns=0;p.weeklyBest=null;}p.weeklyRuns++;}
     random(p);
-    p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,relicAttack:collectionBonus(p.relics),relicLevels:Object.fromEntries(p.equipped.map(id=>[id,relicLevel(p.relics[id])])),...(tier?{tier}:{})};
-    if(mode==='weekly'){p.active.draftPool=draftPool(p);p.active.draft=[];p.active.offers=draftOffers(p);}return {ok:true};
+    p.active={mode,stage,deck:[...ids],started:now,seed:p.rng,token:`${now}-${p.rng}-${p.revision}`,boon:0,run:null,...(tier?{tier}:{})};
+    if(mode==='weekly'){p.active.draftPool=draftPool(p);p.active.draft=[];p.active.offers=draftOffers(p);}captureBattle(p);return {ok:true};
   }
   if(action==='draft'){
     const a=p.active;if(a?.mode!=='weekly'||a.draft?.length>=TEAM_SIZE||!integer(args.index,1))return no('제시된 두 후보 중에서 선택하세요.');
-    const choice=a.offers?.[args.index];if(!choice||a.draft.includes(choice.id)||away(p,choice.id))return no('선택할 수 없는 동료입니다.');
+    const choice=a.offers?.[args.index];if(!choice||a.draft.includes(choice.id))return no('선택할 수 없는 동료입니다.');
     a.draft.push(choice.id);if(choice.boon==='focus')a.boon++;
-    if(a.draft.length===TEAM_SIZE){a.deck=[...a.draft];a.offers=[];}else a.offers=draftOffers(p);return {ok:true};
+    if(a.draft.length===TEAM_SIZE){a.deck=[...a.draft];a.offers=[];a.snapshot.meta=battleMeta(p,a.deck);}else a.offers=draftOffers(p);return {ok:true};
   }
   if(action==='settle'){
     const a=p.active;if(!a||a.token!==args.token||!integer(args.round))return no('이미 정산한 원정입니다.');let reward=0,clearReward=0,dust=0,star=null,firstPerfect=false,unlocked=[],partOpened=false;if(!Array.isArray(p.perfect))p.perfect=[];
@@ -513,11 +547,11 @@ export function command(p,action,args={},now=Date.now()){
       const first=!!args.won&&a.stage===p.cleared+1;
       if(first){p.cleared=a.stage;clearReward=stageReward(a.stage);reward=clearReward;unlocked=grantClearUnlocks(p);partOpened=a.stage===PART_STAGES;}
       dust=stageDust(a.stage,!!args.won,first,args.round);p.dust+=dust;
-      if(args.won)star=lightStar(p.study.library);
+      if(args.won&&featureOpen(p,'library'))star=lightStar(p.study.library);
     }
     let record=null,newBest=false,score=0,bands=[],side=null,total=0,shownRound=0,earned=0,paidBefore=0;
     if(a.mode==='weekly'){
-      did('draft');
+      if(a.draft.length===TEAM_SIZE)did('draft');
       const tier=a.tier||'easy',round=Math.min(CHALLENGE_WAVES,args.round);earned=weeklyReward(tier,round,!!args.won);paidBefore=p.weeklyBest?.reward||0;
       if(earned>paidBefore){reward=earned-paidBefore;newBest=true;p.weeklyBest={round,won:!!args.won,tier,reward:earned};}
     }
