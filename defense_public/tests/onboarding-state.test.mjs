@@ -112,7 +112,7 @@ test('an older draft checkpoint keeps its boss count through the intro-stage sav
   const old=engine.serialize(createBattle(p));
   p.active.run=old;delete p.active.snapshot;delete p.stageRev;
   const loaded=parseProfile(p);assert.ok(loaded);
-  assert.equal(loaded.cleared,14);
+  assert.equal(loaded.cleared,11);
   assert.equal(engine.serialize(resumeBattle(loaded)),old);
 });
 

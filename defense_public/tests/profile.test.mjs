@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,LATE_UNLOCK_STAGE,INTRO_STAGES,levelStage} from '../src/content.js';
+import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,LATE_UNLOCK_STAGE,levelStage,battleChapter} from '../src/content.js';
 import {unlockProfile,topUpUnlocked,testGrant,TEST_TOOLS} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,draftEligible,draftPool,away,command,weeklyState,random} from '../src/profile.js';
 import {monthlyReward,weeklyReward,WEEKLY_ENTRIES} from '../src/monthly.js';
-import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,draftHeroEntry,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter,enhanceMultiplier,specialMultiplier,roseAttack,lateOpen} from '../src/economy.js';
+import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,draftHeroEntry,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter,enhanceMultiplier,specialMultiplier,roseAttack,lateOpen,stageReward} from '../src/economy.js';
 import {createBattle,resumeBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {CONSTELLATIONS} from '../src/library.js';
@@ -385,20 +385,65 @@ test('topUpUnlocked owns companions and relics added after the save, and testGra
   assert.equal(p.dreams,9999999);assert.equal(p.dust,9999999);assert.equal(validateProfile(p),true);
 });
 
-test('a save from before the intro chapter moves every main stage it names nine places and keeps its battle',()=>{
+test('an unmarked save migrates through the intro revision before compression',()=>{
   const old=createProfile(NOW);delete old.stageRev;old.cleared=20;old.perfect=[3,7,20];
   old.results=[{at:NOW,mode:'main',stage:20,round:6,reward:0,won:true},{at:NOW,mode:'weekly',stage:4,round:3,reward:10,won:false}];
-  call(storeFor(old),'tick');assert.equal(old.cleared,20,'a store on an in-memory profile does not migrate it');
   old.active={mode:'main',stage:21,deck:[...old.deck],started:NOW,seed:77,token:'t-1',boon:0,run:null,relicAttack:0,relicLevels:{}};
   old.active.run=E.serialize(createBattle({...old,active:{...old.active}}));
-  const moved=parseProfile(JSON.stringify(old));assert.ok(moved);assert.equal(moved.stageRev,1);
-  assert.equal(moved.cleared,20+INTRO_STAGES);assert.deepEqual(moved.perfect,[12,16,29]);
-  assert.equal(moved.results[0].stage,29);assert.equal(moved.results[1].stage,4,'other modes keep their stage');
-  assert.equal(moved.active.stage,30);assert.equal(JSON.parse(moved.active.run).chapter,29);assert.ok(resumeBattle(moved),'the battle in progress resumes on the same enemies');
-  assert.equal(parseProfile(JSON.stringify(moved)).cleared,moved.cleared,'a migrated save is not moved twice');
-  // A save that had not cleared a stage starts in the intro, and its stage 1 run stays stage 1.
-  const young=createProfile(NOW);delete young.stageRev;const y=parseProfile(JSON.stringify(young));assert.equal(y.cleared,0);assert.equal(y.stageRev,1);
-  const bad=createProfile(NOW);bad.stageRev=2;assert.equal(parseProfile(JSON.stringify(bad)),null);
+  const moved=parseProfile(JSON.stringify(old));assert.ok(moved);assert.equal(moved.stageRev,2);
+  assert.equal(moved.cleared,24);assert.deepEqual(moved.perfect,[10,13,24]);
+  assert.equal(moved.results[0].stage,24);assert.equal(moved.results[1].stage,4,'other modes keep their stage');
+  assert.equal(moved.active.stage,25);assert.equal(moved.active.legacyMainStage,30);assert.equal(resumeBattle(moved).chapter,24);
+  assert.deepEqual(parseProfile(JSON.stringify(moved)),moved,'a migrated save is not moved twice');
+  const young=createProfile(NOW);delete young.stageRev;const y=parseProfile(JSON.stringify(young));assert.equal(y.cleared,0);assert.equal(y.stageRev,2);
+  const bad=createProfile(NOW);bad.stageRev=3;assert.equal(parseProfile(JSON.stringify(bad)),null);
+});
+
+test('compression keeps a saved first-clear fight including future waves and settles it on the new next stage',()=>{
+  const old=createProfile(NOW);old.stageRev=1;old.cleared=54;old.perfect=[1,2,53,54];old.beds.crit=3;
+  old.results=[{at:NOW,mode:'main',stage:54,round:6,reward:1150,won:true},{at:NOW,mode:'monthly',stage:54,round:4,reward:500,won:false}];
+  assert.ok(command(old,'begin',{mode:'main',stage:55},NOW).ok);
+  const started=E.newRun({deck:old.deck,chapter:45,legacyMainStage:55,seed:old.active.seed,meta:old.active.snapshot.meta,crit:old.active.snapshot.crit});
+  E.step(started,.1);started.spawnIn=0;E.step(started,.05);
+  const checkpoint=JSON.parse(E.serialize(started));checkpoint.chapter=54;delete checkpoint.legacyMainStage;
+  old.active.run=JSON.stringify(checkpoint);
+  const s=storeFor(old),moved=s.value;
+  assert.equal(s.broken,false);assert.equal(s.restarted,false);
+  assert.equal(moved.cleared,45);assert.deepEqual(moved.perfect,[1,44,45]);assert.equal(moved.beds.crit,3);
+  assert.deepEqual(moved.results.map(r=>r.stage),[45,54]);
+  assert.equal(moved.active.stage,46,'the old first clear maps to the first uncleared new stage');
+  const resumed=resumeBattle(moved);assert.equal(resumed.chapter,45);assert.equal(resumed.legacyMainStage,55);
+  assert.deepEqual(resumed.enemies,started.enemies);assert.deepEqual(resumed.queue,started.queue);assert.deepEqual(resumed.board,started.board);
+  assert.equal(battleChapter(resumed).bosses[0],'artificial_demon');assert.equal(battleChapter(resumed).part,2);
+  resumed.phase='intermission';resumed.breakTime=0;resumed.enemies=[];resumed.queue=[];E.step(resumed,.05);
+  assert.deepEqual(resumed.queue,E.wavePlan(2,45,'main','easy',55).sequence);
+  assert.notDeepEqual(resumed.queue,E.wavePlan(2,45).sequence);
+  assert.ok(s.saveRun(E.serialize(resumed)));assert.deepEqual(parseProfile(s.raw),s.value);
+  const token=s.value.active.token,r=call(s,'settle',{token,round:6,won:true,perfect:true});
+  assert.equal(r.clearReward,stageReward(46));assert.equal(r.partOpened,false);assert.equal(s.value.cleared,46);assert.equal(s.value.results[0].stage,46);
+  assert.equal(s.transact('settle',{token,round:6,won:true},NOW).ok,false);
+  call(s,'begin',{mode:'main',stage:45});
+  const replay=call(s,'settle',{token:s.value.active.token,round:6,won:true,perfect:true});
+  assert.equal(replay.reward,0);assert.equal(replay.firstPerfect,false);assert.equal(replay.partOpened,false);
+});
+
+test('compression keeps in-flight dispatches, eligible draft pools and historical challenge stage numbers',()=>{
+  const old=createProfile(NOW);old.stageRev=1;old.cleared=27;
+  assert.ok(command(old,'dispatch',{slot:2,id:old.deck[0]},NOW).ok);
+  assert.ok(command(old,'begin',{mode:'weekly',tier:'easy'},NOW).ok);
+  assert.ok(old.active.draftPool.includes('behemoth'));
+  const s=storeFor(old);assert.equal(s.broken,false);assert.equal(s.value.cleared,22);
+  assert.deepEqual(s.value.active.draftPool,old.active.draftPool);assert.deepEqual(s.value.dispatches,old.dispatches);
+  const paid=call(s,'claimDispatch',{slot:2},NOW+HOUR);assert.equal(paid.reward,old.dispatches[0].reward);
+  assert.equal(s.transact('claimDispatch',{slot:2},NOW+HOUR).ok,false);
+
+  const veteran=createProfile(NOW);veteran.stageRev=1;veteran.cleared=108;
+  veteran.results=[{at:NOW,mode:'monthly',stage:103,round:9,reward:100,won:false}];
+  assert.ok(command(veteran,'begin',{mode:'monthly',stage:90},NOW).ok);
+  veteran.active.stage=108;
+  veteran.active.run=E.serialize(createBattle(veteran));
+  const moved=parseProfile(veteran);assert.ok(moved);assert.equal(moved.cleared,90);
+  assert.equal(moved.results[0].stage,103);assert.equal(moved.active.stage,108);assert.equal(resumeBattle(moved).chapter,107);
 });
 
 test('perfect clears pay 100 dreams once on main stages',()=>{
@@ -478,7 +523,7 @@ test('the trial-day tool resets dailies and greeting while leaving the sprout bo
 });
 
 test('a three-wave main loss pays scaled dust and three points of battle bond',()=>{
-  const p=createProfile(NOW),level=7,stage=levelStage(level);p.cleared=stage-1;const s=storeFor(p);
+  const p=createProfile(NOW),level=7,stage=14;p.cleared=stage-1;const s=storeFor(p);
   call(s,'begin',{mode:'main',stage});const lost=call(s,'settle',{token:s.value.active.token,round:3,won:false});
   assert.equal(lost.dust,Math.round((60+16*level)*3/12));assert.equal(s.value.dust,p.dust+lost.dust);
   assert.deepEqual(lost.bond,p.deck.map(id=>({id,points:3,hearts:0,opened:false})));assert.ok(p.deck.every(id=>s.value.heroes[id].bondXp===3));

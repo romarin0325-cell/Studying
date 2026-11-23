@@ -3,7 +3,7 @@ import {TEAM_SIZE} from '../team-config.js';
 import {season} from './season.js';
 
 export const TWIN_WAVES=6;
-// Each road is a main-stage wave plan (6 waves, bosses on 3 and 6) at the highest level of that tier's band.
+// References for the former fixed difficulty of each route. New waves use the full TIERS bands.
 export const TWIN_STAGE=Object.freeze({easy:levelStage(42),hard:levelStage(70),abyss:levelStage(90)});
 export const TWIN_SIDES=Object.freeze(['left','right']);
 export const TWIN_SIDE=Object.freeze({left:{name:'은빛 별길',short:'은빛'},right:{name:'금빛 별길',short:'금빛'}});

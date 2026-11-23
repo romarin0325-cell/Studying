@@ -34,15 +34,15 @@ test('sprout steps open in order after the preceding step pays, regardless of lo
   assert.equal(state.days[1].unlocked,true);assert.equal(state.days[1].claimable,false);
   command(p,'ftue',{skip:true},later);assert.equal(ftueNext(p),null);
 });
-test('successful actions and clear 15 complete all seven steps and award a single chosen UR',()=>{
-  const p=createProfile(now);p.cleared=14;p.dreams=10000;p.dust=10000;p.gifts.candy=1;
+test('successful actions and clear 13 complete all seven steps and award a single chosen UR',()=>{
+  const p=createProfile(now);p.cleared=12;p.dreams=10000;p.dust=10000;p.gifts.candy=1;
   const act=(action,args={})=>command(p,action,args,now),claim=(day,choice)=>act('beginnerClaim',{day,choice});
   assert.equal(act('gift',{id:'missing',gift:'candy'}).ok,false);assert.deepEqual(p.beginner.did,[]);
   assert.ok(act('pet').ok);assert.ok(act('bed',{id:'rose'}).ok);
   assert.ok(act('gift',{id:p.partner,gift:'candy'}).ok);assert.ok(act('draw',{banner:'relic',count:1}).ok);
   assert.deepEqual(beginnerState(p).days.map(d=>[d.task.id,d.reward]),[
     ['clear1',{dreams:600}],['greet',{dreams:2100}],['water',{dreams:100,dust:1000}],
-    ['gift',{dreams:400,bouquet:2}],['relic',{dreams:900}],['draft',{dreams:200,dust:1500}],['clear15',{dreams:200,choice:'UR'}]
+    ['gift',{dreams:400,bouquet:2}],['relic',{dreams:900}],['draft',{dreams:200,dust:1500}],['clear13',{dreams:200,choice:'UR'}]
   ]);
   for(let day=1;day<=5;day++)assert.ok(claim(day).ok);
   const choice=urChoices(p)[0].id;p.heroes[choice].owned=true;
@@ -55,7 +55,7 @@ test('successful actions and clear 15 complete all seven steps and award a singl
   assert.ok(act('settle',{token:p.active.token,round:1,won:false}).ok);
   assert.deepEqual(claim(6).reward,{dreams:200,dust:1500,bouquet:0});
   assert.equal(claim(7,choice).ok,false);
-  assert.ok(act('begin',{mode:'main',stage:15}).ok);
+  assert.ok(act('begin',{mode:'main',stage:13}).ok);
   assert.ok(act('settle',{token:p.active.token,round:6,won:true}).ok);
   assert.equal(claim(7).ok,false);assert.equal(claim(7,'star_boy').ok,false);
   assert.deepEqual(claim(7,choice),{ok:true,reward:{dreams:200,dust:0,bouquet:0},hero:{id:choice,fresh:false}});

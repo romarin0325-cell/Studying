@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,CHAPTER_STAGES,INTRO_STAGES,CLEAR_UNLOCKS,TUNING,HERO,levelStage,levelOf,levelHp,partOf} from '../src/content.js';
-import {BED_IDS,GARDENS,bedCost,bedOpen,critChance,critDamage,critStats,stardustRate,stardustBonus,idleReward,dispatchDust,dispatchReward,combatPower,HOUR} from '../src/economy.js';
+import {CHAPTERS,PARTS,PART_STAGES,MAIN_STAGES,CHAPTER_STAGES,CLEAR_UNLOCKS,TUNING,HERO,levelStage,levelOf,stageHp,stageMilestone,partOf,LATE_UNLOCK_STAGE} from '../src/content.js';
+import {BEGINNER_DAYS,UNLOCKS} from '../src/beginner.js';
+import {TWIN_STAGE} from '../src/preview/twin.js';
+import {BED_IDS,GARDENS,bedCost,bedOpen,critChance,critDamage,critStats,stardustRate,stardustBonus,idleReward,dispatchDust,dispatchReward,DISPATCH_UNLOCK_STAGES,combatPower,HOUR} from '../src/economy.js';
 import {createProfile,validateProfile,parseProfile,command,grantClearUnlocks} from '../src/profile.js';
 import {createBattle,resumeBattle,autoPlay} from '../src/battle.js';
 import {testGrant,TEST_TOOLS} from '../src/test-unlock.js';
@@ -9,20 +11,47 @@ import * as E from '../src/combat/engine.js';
 const NOW=Date.parse('2026-10-04T03:00:00Z');
 const ok=(p,a,args={},now=NOW)=>{const r=command(p,a,args,now);assert.ok(r.ok,r.message);return r;};
 
-test('stages come from the part and chapter lists: 108 stages, an intro chapter, the same slope, chapter names for both parts',()=>{
-  assert.equal(MAIN_STAGES,108);assert.equal(PART_STAGES,54);assert.equal(CHAPTERS.length,MAIN_STAGES);
-  assert.deepEqual(PARTS.map(x=>x.chapters.length),[6,6]);assert.equal(new Set(PARTS.flatMap(x=>x.chapters)).size,12);
-  assert.deepEqual(PARTS.map(x=>[x.first,x.last,x.chapterAt]),[[1,54,0],[55,108,6]]);
+test('public main stages have ten named chapters of nine stages across two equal parts',()=>{
+  assert.equal(MAIN_STAGES,90);assert.equal(PART_STAGES,45);assert.equal(CHAPTERS.length,90);
+  assert.equal(CHAPTER_STAGES,9);
+  assert.deepEqual(PARTS.map(x=>x.chapters),[
+    ['별빛 산책','달빛 정원','별무리 숲','은하 사원','창조의 끝'],
+    ['새벽 정원','이슬 숲','노을 사원','창조의 시작','첫 햇살의 언덕'],
+  ]);
+  assert.deepEqual(PARTS.map(x=>[x.first,x.last,x.chapterAt]),[[1,45,0],[46,90,5]]);
   assert.equal(MAIN_STAGES,PARTS.reduce((n,x)=>n+x.chapters.length*CHAPTER_STAGES,0),'every stage belongs to a chapter of a part');
   for(const c of CHAPTERS){assert.equal(c.part,c.stage<=PART_STAGES?1:2);assert.equal(partOf(c.stage).id,c.part);assert.equal(c.bosses[0],CHAPTERS[(c.stage-1)%9].bosses[0],'stage n meets boss (n-1)%9');}
-  // Stage n after the intro is level n-9 of the original line, which it follows exactly from level 18.
-  for(let level=18;level<=levelOf(MAIN_STAGES);level++)assert.ok(Math.abs(CHAPTERS[levelStage(level)-1].hp-(1+2.5*(level-1)/8))<1e-12,'level '+level);
-  // The intro and the bent start rise steadily and meet the old stage 1 and the line without a jump.
-  for(let i=1;i<levelStage(18);i++)assert.ok(CHAPTERS[i].hp>CHAPTERS[i-1].hp,'stage '+(i+1)+' is harder than the one before');
-  assert.equal(CHAPTERS[INTRO_STAGES].hp,1,'stage 10 is the old stage 1');assert.ok(CHAPTERS[INTRO_STAGES-1].hp<1);
-  assert.ok(levelHp(9)<1+2.5*8/8,'old stage 9 (now 18) is easier than before');
   assert.equal(CHAPTERS[PART_STAGES].bosses[0],CHAPTERS[0].bosses[0],'the first dawn stage repeats the first boss');
   assert.notEqual(CHAPTERS[PART_STAGES].name,CHAPTERS[0].name,'dawn names differ from the night ones');
+});
+
+test('each new stage interpolates old HP and floors its old income level',()=>{
+  const intro=[.30,.36,.42,.49,.56,.63,.71,.8,.9];
+  function oldHp(stage){
+    if(stage<=9)return intro[stage-1];
+    const level=stage-9;
+    return level>=18?1+2.5*(level-1)/8:1+(2.5*17/8)*((level-1)/17)**1.7;
+  }
+  assert.equal(stageHp(1),.30);
+  assert.equal(stageHp(90),oldHp(108));
+  for(const {stage,hp,level} of CHAPTERS){
+    const position=1+(stage-1)*107/89,left=Math.floor(position),right=Math.ceil(position);
+    const expected=oldHp(left)+(position-left)*(oldHp(right)-oldHp(left));
+    assert.ok(Math.abs(hp-expected)<1e-12,`stage ${stage}`);
+    assert.equal(level,Math.max(0,left-9));
+    if(stage>1)assert.ok(hp>CHAPTERS[stage-2].hp,`stage ${stage} is harder than the previous stage`);
+  }
+});
+
+test('difficulty milestones move to the nearest stage while tutorial gates keep their pace',()=>{
+  const milestones=[[9,8],[15,13],[18,15],[24,20],[27,23],[36,30],[39,33],[51,43],[54,45],[69,58],[79,66],[99,83],[108,90]];
+  for(const [previous,current] of milestones)assert.equal(stageMilestone(previous),current,`former stage ${previous}`);
+  assert.equal(LATE_UNLOCK_STAGE,23);
+  assert.deepEqual(Object.values(TUNING.beds).map(b=>b.unlock),[0,20,33,45,45,58]);
+  assert.deepEqual(DISPATCH_UNLOCK_STAGES,[8,15,23,30]);
+  assert.deepEqual(TWIN_STAGE,{easy:43,hard:66,abyss:83});
+  assert.deepEqual(UNLOCKS,{garden:2,library:4,relic:6,draft:8,dispatch:9,season:11,monthly:13,request:15,event:17});
+  assert.deepEqual(BEGINNER_DAYS[6].task,{id:'clear13',text:'스테이지 13 클리어',reward:{dreams:200}});
 });
 
 test('dawn garden: beds, caps and unlock stages',()=>{
