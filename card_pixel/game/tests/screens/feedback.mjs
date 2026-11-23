@@ -3,6 +3,28 @@ import { chooseDoor, chooseEvent } from '../../src/engine/run.js';
 import { cleanseLabel } from '../../src/ui/battle/log.js';
 import { playRun } from '../../tools/sim.mjs';
 
+
+// Claude cannot listen, so the gallery records what the synthesizer actually starts:
+// each oscillator's waveform and starting frequency (11-23, after W3/W4B sound work).
+async function recordTones(page) {
+  await page.evaluate(() => {
+    window.__tones = [];
+    // Pitches are scheduled with setValueAtTime, so .value still reads the 440 Hz default at start().
+    const set = AudioParam.prototype.setValueAtTime;
+    AudioParam.prototype.setValueAtTime = function (value, time) {
+      this.__scheduled ??= value;
+      return set.call(this, value, time);
+    };
+    const start = OscillatorNode.prototype.start;
+    OscillatorNode.prototype.start = function (...args) {
+      window.__tones.push({ type: this.type, hz: Math.round(this.frequency.__scheduled ?? this.frequency.value), state: this.context.state });
+      return start.apply(this, args);
+    };
+  });
+}
+const tones = page => page.evaluate(() => window.__tones);
+const warnTones = list => list.filter(tone => tone.type === 'sawtooth' && tone.hz === 104).length;
+
 export function emberRewardFixture(floor, kind, storedSession) {
   let reward;
   playRun('ember_volcano', 23757, {
@@ -84,6 +106,7 @@ export function createFeedbackCases({ makeRun, storedSession, openBattle, battle
           await openBattle(page);
           assert.deepEqual(await page.evaluate(() => window.__game.B.party), party);
           for (const [offset, index] of commands.entries()) {
+            if (offset === commands.length - 1) await recordTones(page);
             await page.locator(`#acts .act[data-i="${index}"]`).click();
             await battleIdle(page);
             if (offset === 0) {
@@ -92,6 +115,10 @@ export function createFeedbackCases({ makeRun, storedSession, openBattle, battle
           }
           await text(page.locator('#intent'), weak.intent.name);
           assert.notEqual(await page.evaluate(() => window.__game.B.lastWarning), `${weak.enemyIndex}/${weak.s.turn}`);
+          const heard = await tones(page);
+          // Other battle sounds played in the same span, so silence here means no warning, not no audio.
+          assert.ok(heard.length > 0, 'The synthesizer ran during the turn');
+          assert.equal(warnTones(heard), 0, 'No warning tone before a weak hit');
           await capture();
         }
       };
@@ -127,6 +154,7 @@ export function createFeedbackCases({ makeRun, storedSession, openBattle, battle
           });
           const command = index => page.locator(`#acts .act[data-i="${index}"]`).click();
           const intent = page.locator('#intent');
+          await recordTones(page);
           await command(first);
           await page.locator('#cv').click();
           await battleIdle(page);
@@ -135,6 +163,8 @@ export function createFeedbackCases({ makeRun, storedSession, openBattle, battle
             fast: window.__feedback.fast, readyFast: window.__game.clock.fast, key: window.__game.B.lastWarning
           }));
           assert.deepEqual(warningState, { fast: true, readyFast: false, key: warningKey });
+          // The warning muted by fast-forward is heard once when the command returns: two 104 Hz sawtooth pulses.
+          assert.equal(warnTones(await tones(page)), 2, 'One audible warning after fast-forward');
           const turn2 = await intent.textContent();
           await command(second);
           await battleIdle(page);
@@ -164,8 +194,12 @@ export function createFeedbackCases({ makeRun, storedSession, openBattle, battle
         async show(page, { text, capture }) {
           const event = page.locator('#event.on');
           await text(event.locator('h2'), '맡겨 둔 상자', { exact: true });
+          await recordTones(page);
           await event.locator('[data-choice="deposit"]').click();
           await text(event.locator('.event-dialog'), `${run.promise.floor}층 약속`);
+          // The seal: 784 Hz then 1175 Hz sine, distinct from the 660 Hz square tap.
+          const seal = (await tones(page)).filter(tone => tone.type === 'sine').map(tone => tone.hz);
+          assert.deepEqual(seal, [784, 1175]);
           await capture();
         }
       };

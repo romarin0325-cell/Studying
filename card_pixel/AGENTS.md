@@ -2,6 +2,8 @@
 
 이 폴더에서 일하기 전에 이 파일, `README.md`(엔진·테스트 빌드·기획서 세 부분 지도), `plan/README.md`, `history/` 의 최신 기록을 읽는다.
 
+작업 공간 전체의 공통 규칙(역할, 지시문, 검증 단계, 화면 검수, 보고)은 저장소 밖 `게임\AGENT-RULES.md`, 폴더 지도는 `게임\WORKSPACE.md`에 있다. 검증은 `node card_pixel/game/tools/verify.mjs`(빠른 확인·전체 확인)로 한다. 최근 결정은 `plan/v1-decisions.md` §19 이후와 `plan/2026-11-23-day-report.md`.
+
 ## 목적
 - 카드 게임(`card/`, DREAMWEAVER)을 **도트 로그라이트 릴레이 RPG**로 다시 만든다.
 - 최우선은 켜자마자 재미있고 "다음이 보고 싶다"는 느낌이다. 보수적인 최소 수정이 목표가 아니다. **우아한 숫자보다 파격적인 재미.**
