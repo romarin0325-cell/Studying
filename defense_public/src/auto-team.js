@@ -14,22 +14,27 @@ import {oathConflict,oathDeckProblem} from './preview/oath.js';
 // weak companion is never forced in for a role. Equal scores keep a companion already in the team (auto never swaps
 // equals), then prefer an attack shape the team does not have yet.
 export const ROLE_STEP=.15,ROLE_FLOOR=.7;
+export const isMelee=id=>HERO[id]?.shape==='pulse';
 export function autoDeck(p,{exclude=[],allow=null,size=TEAM_SIZE}={}){
   const bonus=collectionBonus(p.relics),held=new Set(p.deck),deck=[];
-  const pool=HEROES.filter(h=>p.heroes[h.id]?.owned&&!p.dispatches.some(d=>d.hero===h.id)&&!exclude.includes(h.id)&&(!allow||allow(h.id))).map(h=>h.id);
+  const pool=HEROES.filter(h=>p.heroes[h.id]?.owned&&!exclude.includes(h.id)&&(!allow||allow(h.id))).map(h=>h.id);
   const power=Object.fromEntries(pool.map(id=>[id,combatPower(id,p.heroes[id],p.beds,bonus)]));
   pool.sort((a,b)=>power[b]-power[a]||compareRarity(HERO[b],HERO[a]));
-  const floor=ROLE_FLOOR*(power[pool[Math.min(TEAM_SIZE,pool.length)-1]]??0);
+  const ranged=pool.filter(id=>!isMelee(id));
+  const floorPool=ranged.length>=Math.min(size,TEAM_SIZE)?ranged:pool;
+  const floor=ROLE_FLOOR*(power[floorPool[Math.min(TEAM_SIZE,floorPool.length)-1]]??0);
   const teamScore=team=>team.reduce((sum,id)=>sum+power[id]*(1+synergy(id,team)),0);
   while(pool.length&&deck.length<size){
-    const missing=ROLE_NEEDS.filter(r=>!deck.some(id=>hasRole(id,r))&&pool.some(id=>power[id]>=floor&&hasRole(id,r)));
+    const eligible=ranged.length?ranged:pool;
+    const missing=ROLE_NEEDS.filter(r=>!deck.some(id=>hasRole(id,r))&&eligible.some(id=>power[id]>=floor&&hasRole(id,r)));
     const covers=id=>power[id]>=floor?missing.filter(r=>hasRole(id,r)).length:0;
     const slots=Math.min(size,TEAM_SIZE)-deck.length,must=slots>0&&missing.length>=slots;
     const base=teamScore(deck),gain=id=>Math.round((teamScore([...deck,id])-base)*(1+ROLE_STEP*covers(id)));
-    const cands=must&&pool.some(id=>covers(id))?pool.filter(id=>covers(id)):pool;
+    const cands=must&&eligible.some(id=>covers(id))?eligible.filter(id=>covers(id)):eligible;
     const shapes=new Set(deck.map(id=>HERO[id].shape)),rank=id=>[gain(id),held.has(id)?1:0,shapes.has(HERO[id].shape)?0:1];
     let best=cands[0];for(const id of cands){const a=rank(id),b=rank(best);if(a[0]>b[0]||a[0]===b[0]&&(a[1]>b[1]||a[1]===b[1]&&a[2]>b[2]))best=id;}
     deck.push(best);pool.splice(pool.indexOf(best),1);
+    if(ranged.length)ranged.splice(ranged.indexOf(best),1);
   }
   return deck;
 }

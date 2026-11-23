@@ -1,4 +1,5 @@
 // Companion requests. Content only: titles, goals, dialogue and afterwords.
+import {EXPANSION_AFTERWORDS,EXPANSION_REQUESTS} from '../expansion-social.js';
 // The rules (arrival, progress, rewards) live in requests.js; this file is written and reviewed by hand.
 // Goal types read by requests.js:
 //   clear  {with?, rarities?, n}  win an expedition (any mode) with every `with` hero (an id or a list of ids) in the deck /
@@ -10,6 +11,7 @@
 //                                 board), 'spared' (Ash casts Armageddon and nobody is consumed)
 export const REQUEST_REWARD=Object.freeze({gifts:2,bond:40});
 export const REQUESTS=Object.freeze([
+  ...EXPANSION_REQUESTS,
   {id:'star_boy-1',hero:'star_boy',order:1,title:'형아와 특급 배달',goal:{type:'clear',with:'star_boy',n:1},hint:'별똥별소년을 편성해 원정 1번 클리어',
     arrive:['띵동! 수취인 형아 맞지? 오늘 특급 배송품은… 바로 나야!','배낭 끈도 단단히 조여 묶었어. 오늘은 형아 옆에 딱 붙어서 달릴래!','출발 신호만 내려 줘! 길은 내가 제일 먼저 뚫어 놓을게!'],
     thanks:['야호-! 사고 없이 왕복 완료! 오늘 배달도 백 점 만점이지?','신나서 앞서 뛰다가도 뒤돌아보면 형아가 늘 거기 있어서 든든했어. 헤헤.','자, 수령 확인 도장 대신이야! 주머니 속에서 안 깨지게 꼭 쥐고 왔어!']},
@@ -38,7 +40,7 @@ export const REQUESTS=Object.freeze([
     arrive:['저기 기둥 그림자 뒤에 밤토끼가 아까부터 당신 옷자락만 보고 있네요.','혼자 두면 밤새 발 시릴 텐데, 모른 척 셋이서 달 구경이나 나가지 않으실래요?','소란스러운 축복보다 고요한 달빛이 어울리는 밤이니까요.'],
     thanks:['밤토끼가 당신 소매를 놓지 않던데요. 후후, 덕분에 보폭이 나란해서 좋았어요.','달 아래서 무슨 기도를 올렸는지는 비밀이에요. 맞히시면 상을 드릴지도요?','달빛을 머금어 더 하얗게 핀 아이들이에요. 오늘 밤은 당신 머리맡에 두세요.']},
   {id:'night_rabbit-1',hero:'night_rabbit',order:1,title:'한밤의 산책',goal:{type:'clear',with:'night_rabbit',n:1},hint:'밤토끼를 편성해 원정 1번 클리어',
-    arrive:['…자?','아, 아니구나. …있잖아. 오늘 밤에 나가자. 밖에.','별이 제일 잘 보이는 데까지. …너 혼자 가면 안 되니까, 나도 데려가.'],
+    arrive:['…자?','아, 아니구나. …있잖아. 오늘 밤에 나가자. 밖에.','별이 제일 잘 보이는 데까지. …밤길 혼자 걷는 건 싫으니까, 너도 같이 가.'],
     thanks:['…돌아왔다. 둘 다.','밤길은 원래 무서운 건데, 오늘은 하나도 안 무서웠어.','이거. …너 잠든 동안 구석에서 몰래 적어 둔 거야. 나 없을 때만 펼쳐 봐.']},
   {id:'night_rabbit-2',hero:'night_rabbit',order:2,title:'달그림자 연습',goal:{type:'casts',hero:'night_rabbit',n:3},hint:'달그림자 도약 3번 사용',
     arrive:['나, 요즘 밤마다 그림자 밟고 높이 뛰는 연습 해.','저 위까지 단숨에 솟구치면… 어디에 섞여 있든 네가 한눈에 보이거든.','내가 공중에 뜰 때마다 올려다봐 줘. …한순간도 딴 데 보면 안 돼.'],
@@ -391,6 +393,7 @@ export const REQUESTS=Object.freeze([
 ]);
 export const REQUEST_HEROES=Object.freeze([...new Set(REQUESTS.map(r=>r.hero))]);
 export const AFTERWORDS=Object.freeze({
+  ...EXPANSION_AFTERWORDS,
   star_boy:{title:'배달 없는 저녁',paragraphs:[
     '야영지에 다시 저녁이 내려앉았다. 당신이 텐트 앞에 의자 두 개와 우유를 놓자, 익숙한 바람 소리가 가까워졌다.',
     '별똥별소년은 이번에는 먼지를 일으키지 않으려고 일찍 속도를 줄였다. 그래도 발끝이 바닥에 닿는 순간 작은 별빛이 폴짝 튀었다.',

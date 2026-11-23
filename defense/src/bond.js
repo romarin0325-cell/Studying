@@ -1,6 +1,7 @@
 // Bond (호감도): ten hearts per companion, filled by points from greetings and gifts.
 // Gifts come from one place, the gift basket in the garden: one every 8 hours (candy, letter, bouquet in turn).
 // One companion fed every gift and greeting reaches ten hearts in about two to three weeks.
+import {EXPANSION_FAVORITE,EXPANSION_FAVORITE_LINES,EXPANSION_GIFT_LINES} from './expansion-social.js';
 export const BOND_MAX=10;
 export const BOND_STEPS=Object.freeze([40,50,60,70,75,80,85,90,95,105]);
 export const GREETING_POINTS=10,GIFT_POINTS=10,FAVORITE_POINTS=20;
@@ -11,15 +12,16 @@ export const GIFTS=Object.freeze({
   bouquet:{name:'꽃다발',color:'#9fe0b0'},
 });
 const group=(gift,ids)=>ids.map(id=>[id,gift]);
-export const FAVORITE=Object.freeze(Object.fromEntries([
+export const FAVORITE=Object.freeze({...Object.fromEntries([
   ...group('letter',['demon_king']),
   ...group('bouquet',['miracle_larva','gold_dragon']),
   ...group('candy',['star_boy','siren','guardian','red_dragon','storm_sage','phantom','rumi','galaxy_whale','harmonious','time_ruler','toffee_apple','sunflower','cure_master','venom']),
   ...group('letter',['snow_rabbit','night_rabbit','great_detective','santa','flame_sage','lightning_sage','zeke','luna','jasmine','doom','behemoth','joker']),
   ...group('bouquet',['silver_rabbit','mushroom_king','avalanche_maid','aurora','time_magician','ancient_dragon','queen','cherry_prince','cinderella','frost_witch','underdog','antropy','ash']),
-]));
+]),...EXPANSION_FAVORITE});
 // What each companion says to the gift they love.
 export const FAVORITE_LINES=Object.freeze({
+  ...EXPANSION_FAVORITE_LINES,
   gold_dragon:'용의 둥지에도 없는 꽃이로구나. 그래, 그대가 골랐으니 더 귀한 것이겠지. 가까이서 함께 보자꾸나.',
   demon_king:'직접 쓴 편지야? 글씨체가 고우네. 책갈피 사이에 끼워 둘게.',
   miracle_larva:'내 머리핀하고 닮은 꽃이다! 시들기 전에 네 옆에 놓아도 돼?',
@@ -65,6 +67,7 @@ export const FAVORITE_LINES=Object.freeze({
 });
 // What each companion says to the other two gifts, in that companion's own voice.
 export const GIFT_LINES=Object.freeze({
+  ...EXPANSION_GIFT_LINES,
   gold_dragon:'나를 떠올리며 골랐단 말이지? 고맙구나. 보물의 주인이 되는 것도 제법 기쁜 일이야.',
   demon_king:'관람료 대신인가? 안목이 제법이네. 기분 좋게 받아 두지.',
   miracle_larva:'나한테 주는 거야? 고마워! 나뭇가지 위 보물함에 넣어 둘게.',

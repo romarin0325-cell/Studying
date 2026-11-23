@@ -5,12 +5,15 @@ import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 import {HEROES,ASSET_PATHS} from '../src/content.js';
 import {MEMORIAL_STORIES,MEMORIAL_MEDIA_PATHS,MEMORIAL_MEDIA_MANIFEST} from '../src/memorial.js';
+import {EXPANSION_IDS,PENDING_MEMORIAL_IDS} from '../src/expansion-companions.js';
 import {assetFile} from '../scripts/local-inputs.mjs';
 import {createProfile,command,parseProfile,validateProfile} from '../src/profile.js';
 
-test('all thirty original stories unlock at bond ten and match the supplied body hashes',()=>{
-  const ids=HEROES.map(h=>h.id).sort();
+test('finished memorials match their supplied media while the expansion is explicitly pending',()=>{
+  assert.deepEqual([...PENDING_MEMORIAL_IDS].sort(),[...EXPANSION_IDS].sort());
+  const ids=HEROES.map(h=>h.id).filter(id=>!PENDING_MEMORIAL_IDS.includes(id)).sort();
   for(const table of [MEMORIAL_STORIES,MEMORIAL_MEDIA_PATHS,MEMORIAL_MEDIA_MANIFEST])assert.deepEqual(Object.keys(table).sort(),ids);
+  for(const id of PENDING_MEMORIAL_IDS)for(const table of [MEMORIAL_STORIES,MEMORIAL_MEDIA_PATHS,MEMORIAL_MEDIA_MANIFEST])assert.equal(table[id],undefined,id+' remains pending');
   for(const id of ids){
     const s=MEMORIAL_STORIES[id],m=MEMORIAL_MEDIA_MANIFEST[id];assert.equal(s.unlockBond,10);assert.ok(s.title.length>2);assert.ok(s.paragraphs.length>0);
     assert.doesNotMatch(s.title,/^\[?\d+[-.]\d*/);
@@ -20,7 +23,7 @@ test('all thirty original stories unlock at bond ten and match the supplied body
 
 test('lazy memorial pack is separate from combat textures, AVIF 4:4:4, opaque and within mobile budgets',async()=>{
   let total=0,base64=0;
-  for(const h of HEROES){
+  for(const h of HEROES.filter(h=>!PENDING_MEMORIAL_IDS.includes(h.id))){
     const id=h.id,m=MEMORIAL_MEDIA_MANIFEST[id],relative=MEMORIAL_MEDIA_PATHS[id];assert.ok(!Object.values(ASSET_PATHS).includes(relative));
     const bytes=await fs.readFile(assetFile(relative)),meta=await sharp(bytes).metadata();
     assert.equal(meta.format,'heif');assert.equal(meta.width,720);assert.equal(meta.height,1080);assert.equal(meta.hasAlpha,false);
@@ -36,6 +39,8 @@ test('bond ten gates reading, progress survives old-save migration, and no readi
   p.heroes.star_boy.bond=10;const wallet=[p.dreams,p.dust],bond=p.heroes.star_boy.bond;assert.ok(command(p,'memory',{id:'star_boy',page:1}).ok);assert.equal(parseProfile(JSON.stringify(p)).memories.star_boy.page,1);assert.deepEqual([p.dreams,p.dust],wallet);assert.equal(p.heroes.star_boy.bond,bond);
   assert.ok(command(p,'memory',{id:'star_boy',page:MEMORIAL_STORIES.star_boy.paragraphs.length-1}).ok);assert.equal(p.memories.star_boy.read,true);assert.ok(command(p,'memory',{id:'star_boy',page:0}).ok);assert.equal(p.memories.star_boy.read,true);
   p.memories.star_boy.page=9999;assert.equal(validateProfile(p),false);delete p.memories;assert.ok(parseProfile(p));
+  const pending=createProfile(1791198000000);pending.heroes.ancient_soul.owned=true;pending.heroes.ancient_soul.bond=10;
+  assert.equal(command(pending,'memory',{id:'ancient_soul',page:0}).ok,false,'pending memorials cannot create invalid reading progress');
 });
 test('reading paragraphs: no paragraph splits a quote or ends mid-sentence, and pre-pass-18 progress keeps its place',()=>{
   for(const [id,s] of Object.entries(MEMORIAL_STORIES))for(const [i,t] of s.paragraphs.entries()){

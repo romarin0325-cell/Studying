@@ -56,6 +56,19 @@ function mem(s){let m=memory.get(s);if(!m){m={dps:0,lastDamage:s.stats.damage,la
 const alive=s=>s.enemies.filter(e=>e.hp>0);
 const timeLeft=s=>s.mode==='main'?Math.max(20,(6-s.wave+(['reward','intermission'].includes(s.phase)?0:.5))*50):150;
 const remainingFight=(s,dps)=>(alive(s).reduce((n,e)=>n+e.hp+(e.shield||0),0)+s.queue.reduce((n,q)=>n+q.hp,0))/Math.max(1,dps);
+// Forecast the new placement-independent buff after the channel, including
+// the ultimate-family maximum already active then and the caster's lost attacks.
+export function victoriaChargeValue(s,u,remaining,damageScale=1){
+  const delay=E.VICTORIA_CHARGE,window=Math.max(0,remaining-delay);if(!u||window<=0)return 0;
+  const future={...s,buffs:Object.fromEntries(Object.entries(s.buffs).map(([k,v])=>[k,Math.max(0,v-delay)])),buffScale:{...s.buffScale},buffSpotlight:{...s.buffSpotlight}};
+  const before=boardValue(future),duration=E.skillDuration(s,E.ULT_BUFF.victoriaMiracle.seconds*E.special(s,'victoria'),'victoriaMiracle');
+  const target=E.has(s,'spotlight')?future.board.reduce((best,ally,index)=>{if(!ally)return best;const damage=E.combatStats(future,ally,index).damage;return !best||damage>best.damage?{ally,damage}:best;},null)?.ally:null;
+  future.buffs.victoriaMiracle=duration;future.buffScale.victoriaMiracle=E.rankControl(u.rank);
+  if(target)future.buffSpotlight.victoriaMiracle=target.uid;else delete future.buffSpotlight.victoriaMiracle;
+  const gain=Math.max(0,boardValue(future)-before)*Math.min(duration,window)*damageScale;
+  const lost=unitValue(s,u,s.board.indexOf(u))*Math.min(delay,remaining)*damageScale;
+  return Math.max(0,gain-lost);
+}
 // An immune unit already standing on a lit cell is safe, so it is not a dodge candidate and adds no blocked value.
 // The cell itself stays dangerous: empty lit cells, and anywhere an immune unit now stands, are not places to step onto.
 const litPatterns=['seal','storm','stun1','judgement','thunder'];
@@ -102,6 +115,7 @@ function ultValue(s,m,id,gv){
   // A big damage ultimate that could follow a setup (exposure, mirror) right after.
   const follow=()=>Math.max(0,...s.deck.filter(o=>o!==id&&E.bestUnit(s,o)&&s.gauge-E.skillCost(s,id)>=E.skillCost(s,o)&&s.gold>=E.skillGoldCost(o)&&!['expose','mirror'].includes(HERO[o].skill.type)).map(o=>{const t=HERO[o].skill.type;return ['deathhand','royal','execute','fortune','inferno','combust','thunder','ice_court','dragon','crush','flurry','singularity','vortex','glassfall','goddess','trauma','nightmare','dividend','starfall'].includes(t)?ultValue(s,m,o,gv)*.6:0;}));
   switch(type){
+    case 'miracle_proof':return victoriaChargeValue(s,u,rem,m.scale);
     case 'ultimate_breath':{
       if(rem<E.GOLD_DRAGON.charge+E.GOLD_DRAGON.flight)return 0;
       const target=E.goldBreathTarget(s,u);if(!target)return 0;

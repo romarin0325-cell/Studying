@@ -109,13 +109,13 @@
     },
     {
       "name": "specific SR",
-      "perDraw": 0.005333333333333333,
-      "meanDraws": 187.5,
-      "medianDraws": 130,
-      "p90Draws": 431,
-      "at20": 0.10143131043988785,
-      "at50": 0.23461807114031052,
-      "at100": 0.41419050297502125
+      "perDraw": 0.0036923076923076922,
+      "meanDraws": 270.8333333333333,
+      "medianDraws": 188,
+      "p90Draws": 623,
+      "at20": 0.0713123530430696,
+      "at50": 0.16886002303462733,
+      "at100": 0.3092063386899997
     },
     {
       "name": "any normal UR",
@@ -1638,6 +1638,30 @@
       "hidden": false
     },
     {
+      "id": "blessing_tail",
+      "name": "블레싱테일",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "marshmallow",
+      "name": "마시멜로",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "mimic",
+      "name": "미믹",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
+      "id": "silent_librarian",
+      "name": "침묵의사서",
+      "rarity": "C",
+      "hidden": false
+    },
+    {
       "id": "great_detective",
       "name": "명탐정",
       "rarity": "R",
@@ -1688,6 +1712,30 @@
     {
       "id": "demon_king",
       "name": "마왕",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "succubus",
+      "name": "서큐버스",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "skull_dragon",
+      "name": "스컬드래곤",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "mad_scientist",
+      "name": "매드사이언티스트",
+      "rarity": "R",
+      "hidden": false
+    },
+    {
+      "id": "crystal_dancer",
+      "name": "수정의무희",
       "rarity": "R",
       "hidden": false
     },
@@ -1746,6 +1794,30 @@
       "hidden": false
     },
     {
+      "id": "dainichi_nyorai",
+      "name": "대일여래",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "gumiho",
+      "name": "구미호",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "archangel",
+      "name": "대천사",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
+      "id": "sylphid",
+      "name": "실피드",
+      "rarity": "SR",
+      "hidden": false
+    },
+    {
       "id": "zeke",
       "name": "지크",
       "rarity": "UR",
@@ -1796,6 +1868,30 @@
     {
       "id": "gold_dragon",
       "name": "골드드래곤",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "ancient_soul",
+      "name": "에인션트소울",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "victoria",
+      "name": "빅토리아",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "deep_lord",
+      "name": "심해의주인",
+      "rarity": "UR",
+      "hidden": false
+    },
+    {
+      "id": "sakura",
+      "name": "사쿠라",
       "rarity": "UR",
       "hidden": false
     },

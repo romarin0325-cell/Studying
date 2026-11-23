@@ -11,7 +11,7 @@ const {HERO,HEROES,CHAPTERS,TIERS,TIER_IDS,BOSS_ORDER,CHALLENGE_WAVES,ARTIFACTS,
 const {HOUR,calendar,stageDust}=await import('../src/economy.js');
 const {weeklyReward,monthlyReward}=await import('../src/monthly.js');
 const {season}=await import('../src/preview/season.js');
-const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
+const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_RULES,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
 const {twinBosses,twinBandReward,twinState,twinLocks,TWIN_WAVES,TWIN_STAGE,TWIN_SIDE}=await import('../src/preview/twin.js');
 const {requestTracker,requestGoal,REQUEST,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
 const {FAVORITE}=await import('../src/bond.js');
@@ -472,7 +472,7 @@ test('a stored oath and twin expedition still validates inside the profile store
   call('settle',{token:store.value.active.token,round:4,damage:Number.POSITIVE_INFINITY});
   assert.equal(store.value.twin.records.easy.right.damage,0);assert.equal(store.value.twin.best.easy.total,4);
   assert.equal(monthlyReward({round:1,tier:'easy'})>0,true);
-  assert.equal(HEROES.length,42);
+  assert.equal(HEROES.length,58);
 });
 
 test('an old twin set is dropped on load and overlapping side records are rejected',()=>{
@@ -576,7 +576,7 @@ test('v3 retunes deck oath points while v1 and v2 saved scores and paid bands su
       const saved=parseProfile(JSON.stringify(p));assert.ok(saved,`${id} v${rules}`);assert.equal(saved.oath.best.score,score);assert.equal(saved.oath.paid,2);
       ok(saved,'begin',{mode:'oath',tier:'hard',oaths:[id],deck});
       const wallet=saved.dreams,result=ok(saved,'settle',{token:saved.active.token,round:9,won:true});
-      assert.equal(result.record.rules,3);assert.equal(result.score,oathScore('hard',[id]));
+      assert.equal(result.record.rules,OATH_RULES);assert.equal(result.score,oathScore('hard',[id]));
       assert.ok(result.bands.every(b=>b.score>10),'already paid bands are never paid again');
       assert.equal(saved.dreams,wallet+result.reward);assert.ok(validateProfile(saved));
     }

@@ -68,9 +68,9 @@ test('combat power is one formula; auto formation fills the team roles, then tak
   for(const role of ROLE_NEEDS)if(owned.some(id=>hasRole(id,role)&&power(id)>=floor))assert.ok(deck.some(id=>hasRole(id,role)),role);
   // A weak companion is never forced in for a role: everything picked is at least the floor.
   assert.ok(deck.every(id=>power(id)>=floor));
-  // Without role gaps the pick is combat power order: five strikers with area attacks and nothing else to fill.
+  // Fill the five available ranged slots ahead of a stronger pulse companion.
   const two=createProfile(now);for(const e of Object.values(two.heroes))e.owned=false;for(const id of ['zeke','luna','cherry_prince','venom','cinderella','star_boy'])two.heroes[id].owned=true;
-  assert.equal(autoDeck(two).includes('star_boy'),false);
+  assert.equal(autoDeck(two).includes('zeke'),false);
   // A pick that already matches the team never swaps anyone.
   p.deck=[...deck].reverse();assert.deepEqual([...autoDeck(p)].sort(),[...p.deck].sort());
   const fresh=createProfile(now);assert.deepEqual([...autoDeck(fresh)].sort(),[...fresh.deck].sort());
