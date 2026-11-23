@@ -200,9 +200,9 @@ test('crush uses the reduced trained radius for hit boundaries, previews, effect
 });
 
 test('the exact rarity roster has independent valid stats and every main stage rotates the nine guardians',()=>{
-  assert.equal(HEROES.length,42);assert.equal(new Set(HEROES.map(h=>h.id)).size,42);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기']);
-  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','엔트로피','마왕']);
+  assert.equal(HEROES.length,58);assert.equal(new Set(HEROES.map(h=>h.id)).size,58);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='C').map(h=>h.name),['별똥별소년','눈토끼','은토끼','밤토끼','세이렌','머쉬룸킹','언더독','조커','해바라기','블레싱테일','마시멜로','미믹','침묵의사서']);
+  assert.deepEqual(HEROES.filter(h=>h.rarity==='R').map(h=>h.name),['명탐정','가디언','메이드','산타','레드드래곤','아우로라','토피애플','엔트로피','마왕','서큐버스','스컬드래곤','매드사이언티스트','수정의무희']);
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
   assert.equal(CHAPTERS.length,MAIN_STAGES);assert.equal(CHAPTERS[PART_STAGES-1].part,1);assert.equal(CHAPTERS[PART_STAGES].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
@@ -333,6 +333,7 @@ test('gauge caps and restores at 120, both delayed strikes hit at 0.3 seconds, a
 test('sustained skill timers, total durations and numeric attack stats survive resume without a cosmetic damage change',()=>{
   for(const id of Object.keys(E.ACTIVE_SKILLS)){
     const deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5),s=ensureHero(E.newRun({deck,seed:1234}),id);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;E.step(s,.05);s.gauge=120;assert.ok(E.cast(s,id).ok);
+    if(id==='victoria'){s.enemies[0].speed=0;s.enemies[0].skillIn=1e6;s.queue=[{kind:'grunt',hp:1e9}];s.spawnIn=1e6;for(let i=0;i<100;i++)E.step(s,.05);}
     const active=E.activeSkill(s,id);assert.ok(active);E.step(s,.05);const saved=E.restore(E.serialize(s));assert.ok(saved);assert.equal(E.activeSkill(saved,id).total,active.total);assert.ok(E.activeSkill(saved,id).remaining<active.remaining);
     const u=E.bestUnit(s,id),fast=E.combatStats(s,u),detail=E.combatStats(s,u,undefined,true);assert.equal(fast.damage,detail.damage);assert.equal(fast.interval,detail.interval);assert.deepEqual(fast.bonuses,[]);
     for(let i=0;i<260;i++)E.step(s,.05);assert.equal(E.activeSkill(s,id),null,id);
@@ -2817,6 +2818,30 @@ test('동행의 악수 counts every support aura (Miracle Wing, Cure Master too)
   const cursed=traitArena([{hero:'star_boy',index:12},{hero:'siren',index:13}],{artifacts:['guild']});cursed.board[13].cursed=true;close(ratio(cursed),1);
   const crown=traitArena([{hero:'star_boy',index:12,rank:3}],{artifacts:['crown']});
   assert.ok(E.combatStats(crown,crown.board[12],12,true).bonuses.some(b=>b.startsWith('작은 왕관 +')));
+});
+
+test('동행의 악수 follows Victoria lines and adjacent Archangel and Scientist support',()=>{
+  const effect=(s,index)=>{const u=s.board[index],withGuild=E.combatStats(s,u,index).damage;s.artifacts=s.artifacts.filter(id=>id!=='guild');const withoutGuild=E.combatStats(s,u,index).damage;s.artifacts.push('guild');return withGuild/withoutGuild;};
+  const bonus=1+E.RELIC_VALUES.guild.power;
+  for(const source of [10,2,14,22]){
+    const s=traitArena([{hero:'star_boy',index:12},{hero:'victoria',index:source}],{artifacts:['guild']});
+    close(effect(s,12),bonus,`Victoria same row or column ${source}`);
+    s.board[source].cursed=true;close(effect(s,12),1,'cursed Victoria gives no command');
+  }
+  for(const source of [6,8,16,18,9]){
+    const s=traitArena([{hero:'star_boy',index:12},{hero:'victoria',index:source}],{artifacts:['guild']});
+    close(effect(s,12),1,`Victoria does not reach ${source}`);
+  }
+  const self=traitArena([{hero:'victoria',index:12}],{artifacts:['guild']});close(effect(self,12),1,'Victoria does not command herself');
+  for(const hero of ['archangel','mad_scientist']){
+    const s=traitArena([{hero:'star_boy',index:12},{hero,index:13}],{artifacts:['guild']});
+    close(effect(s,12),bonus,`${hero} adjacent aura`);
+    s.board[13].disabled=2;close(effect(s,12),bonus,`${hero} aura remains active while stunned`);
+    s.board[13].cursed=true;close(effect(s,12),1,`${hero} cursed aura`);
+    const far=traitArena([{hero:'star_boy',index:12},{hero,index:14}],{artifacts:['guild']});close(effect(far,12),1,`${hero} does not reach two cells away`);
+  }
+  const overlapping=traitArena([{hero:'star_boy',index:12},{hero:'victoria',index:10},{hero:'archangel',index:13},{hero:'mad_scientist',index:7}],{artifacts:['guild']});
+  close(effect(overlapping,12),bonus,'overlapping support sources grant the relic bonus once');
 });
 
 test('finishers lock the enemy with the most health left, not the biggest maximum',()=>{

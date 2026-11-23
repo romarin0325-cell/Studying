@@ -49,11 +49,11 @@ export async function assetProvenance(){
   const fontFile=assetFile('./assets/Jua-Regular.woff2'),licenseFile=assetFile('./assets/Jua-OFL.txt');
   const font=await fs.readFile(fontFile),license=(await fs.readFile(licenseFile,'utf8')).replace(/\r\n/g,'\n');
   const memorial=[];
-  for(const h of HEROES){
-    const file=assetFile(MEMORIAL_MEDIA_PATHS[h.id]),bytes=await fs.readFile(file),m=await sharp(bytes).metadata();
-    const webpFile=assetFile(MEMORIAL_WEBP_PATHS[h.id]),webp=await fs.readFile(webpFile),wm=await sharp(webp).metadata();
-    memorial.push({id:h.id,source:sourcePath(file),sha256:hash(bytes),width:m.width,height:m.height,bytes:bytes.length,sourceSha256:MEMORIAL_MEDIA_MANIFEST[h.id].sourceSha256,
-      webp:{source:sourcePath(webpFile),sha256:hash(webp),width:wm.width,height:wm.height,bytes:webp.length,quality:MEMORIAL_MEDIA_MANIFEST[h.id].webp.quality}});
+  for(const id of Object.keys(MEMORIAL_MEDIA_MANIFEST)){
+    const file=assetFile(MEMORIAL_MEDIA_PATHS[id]),bytes=await fs.readFile(file),m=await sharp(bytes).metadata();
+    const webpFile=assetFile(MEMORIAL_WEBP_PATHS[id]),webp=await fs.readFile(webpFile),wm=await sharp(webp).metadata();
+    memorial.push({id,source:sourcePath(file),sha256:hash(bytes),width:m.width,height:m.height,bytes:bytes.length,sourceSha256:MEMORIAL_MEDIA_MANIFEST[id].sourceSha256,
+      webp:{source:sourcePath(webpFile),sha256:hash(webp),width:wm.width,height:wm.height,bytes:webp.length,quality:MEMORIAL_MEDIA_MANIFEST[id].webp.quality}});
   }
   const library=[];
   for(const [id,relative] of Object.entries(LIBRARY_ART)){

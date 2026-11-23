@@ -171,7 +171,7 @@ export class Renderer {
     this.fx.enemies.clear();for(const e of s.enemies)this.fx.enemies.set(e.uid,{enemy:e,point:pathPoint(this.movedProgress(e.uid,e.progress)),hp:e.hp});
     this.fx.reduced=this.reduced;this.fx.drawZones(s);for(const skill of this.skills)this.fx.drawSkillField(skill);this.fx.drawPersistent(s);this.fx.drawPersonalTraits(s);this.fx.drawAttackShapes();
     const field=this.skill?.life>0?this.skill.hero:'';if(this.canvas.dataset.skillField!==field)this.canvas.dataset.skillField=field;
-    const signature=(s.goldCharge?.source||'')+'|'+s.board.map(u=>u?`${u.uid}:${u.hero}:${u.rank}`:'').join('|');if(signature!==this.boardSignature){this.boardSignature=signature;this.mergeable=s.board.flatMap((u,i)=>u&&s.board.some(b=>canMerge(u,b,s))?[i]:[]);}
+    const signature=(s.goldCharge?.source||'')+':'+(s.victoriaCharge?.source||'')+'|'+s.board.map(u=>u?`${u.uid}:${u.hero}:${u.rank}`:'').join('|');if(signature!==this.boardSignature){this.boardSignature=signature;this.mergeable=s.board.flatMap((u,i)=>u&&s.board.some(b=>canMerge(u,b,s))?[i]:[]);}
     for(const i of this.mergeable){const p=cellPoint(i);ctx.fillStyle='#e2eac912';rounded(ctx,p.x-40,p.y-40,80,80,7);ctx.fill();for(const [dx,dy] of [[-1,-1],[1,1]])line(ctx,[[p.x+dx*27,p.y+dy*40],[p.x+dx*40,p.y+dy*40],[p.x+dx*40,p.y+dy*27]],'#ede4adbb',2.5);star(ctx,p.x+32,p.y-31,5,'#fff1b9',Math.PI/4);}
     if(this.selected>=0&&s.board[this.selected]){
       const a=s.board[this.selected];

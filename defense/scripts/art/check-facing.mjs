@@ -17,7 +17,9 @@ const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..')
 // Follow the actual game's atlas inventory, including transformations. Retained
 // pre-pass paintings may no longer be the installed art and must not be checked instead.
 const UNIT_FILES=new Map(Object.entries(ASSET_PATHS).filter(([id])=>id.startsWith('unit-')).map(([id,source])=>[id.slice(5),path.resolve(repo,'defense',source)]));
-export const CHECKED_BY_EYE=Object.freeze(['behemoth','queen','toffee_apple','venom']);
+// These silhouettes put warm props, halos or hair on the skin-colour centroid's front side.
+// Their two profile cells were reviewed visually and still pass the independent mirror-shape check.
+export const CHECKED_BY_EYE=Object.freeze(['ancient_soul','behemoth','blessing_tail','dainichi_nyorai','queen','toffee_apple','venom','victoria']);
 // Gold horns/wings satisfy the skin colour threshold. Measure inside the reviewed anatomical
 // head ellipses, and sample cheeks below the horn line, not the top-half alpha silhouette.
 // Coordinates are frozen in docs/art/gold-dragon-20261029/sd/packing.json; no image is resized.
