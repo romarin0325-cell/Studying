@@ -206,11 +206,9 @@ test('the exact rarity roster has independent valid stats and every main stage r
   for(const h of HEROES)for(const key of ['damage','interval','range','radius'])assert.ok(Number.isFinite(h[key])&&h[key]>=0,h.id+' '+key);
   assert.equal(CHAPTERS.length,MAIN_STAGES);assert.equal(CHAPTERS[PART_STAGES-1].part,1);assert.equal(CHAPTERS[PART_STAGES].part,2);
   for(const c of CHAPTERS){assert.equal(c.bosses[0],BOSS_ORDER[(c.stage-1)%9]);assert.equal(new Set(c.bosses).size,1);}
-  // From level 18 (stage 27) on, the health line keeps its original slope of 2.5/8 a stage.
-  for(let i=levelStage(18);i<MAIN_STAGES;i++)assert.ok(Math.abs(CHAPTERS[i].hp-CHAPTERS[i-1].hp-2.5/8)<1e-12);
 });
 
-test('six main waves contain exactly two copies of one boss and stage nine follows the renewed base health and slope',()=>{
+test('six main waves contain exactly two copies of one boss and use the stage health multiplier',()=>{
   for(const chapter of [0,8,9,17,35,53,MAIN_STAGES-1]){
     let bosses=0;
     for(let wave=1;wave<=6;wave++){
@@ -224,7 +222,6 @@ test('six main waves contain exactly two copies of one boss and stage nine follo
     const expected=Math.round(Math.round(100*1.34**11*CHAPTERS[chapter].hp*32)*E.BOSS_HEALTH_SCALE);
     assert.equal(E.wavePlan(6,chapter).sequence.find(e=>e.kind==='boss').hp,expected);
   }
-  assert.equal(CHAPTERS[levelStage(18)-1].hp,1+2.5*17/8,'stage 27 has the health the old stage 18 had');
   assert.equal(E.BOSS_HEALTH_SCALE,.65);
 });
 

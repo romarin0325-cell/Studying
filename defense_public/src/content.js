@@ -39,60 +39,66 @@ const worlds=[0,1,0,3,4,2,5,3,6];
 // Main stages. A part is a list of chapters and every chapter is nine stages, one turn of the nine bosses (stage n
 // meets BOSS_ORDER[(n-1)%9]). To add stages, append a chapter name to the last part (nine stages) or add a part (its
 // worlds turn to dawn and it opens when the part before it is cleared). Every count, tab and unlock that follows a part
-// end is derived from this list. See docs/STAGES.md.
+// end is derived from this list. See docs/PUBLIC_TEMPO.md.
 export const CHAPTER_STAGES=9;
 export const PARTS=Object.freeze([
-  {id:1,name:'달빛의 별길',chapters:['별빛 산책','달빛 정원','별무리 숲','은하 사원','시간의 탑','창조의 끝']},
-  {id:2,name:'새벽의 별길',chapters:['새벽 정원','이슬 숲','노을 사원','되감긴 탑','창조의 시작','첫 햇살의 언덕']},
+  {id:1,name:'달빛의 별길',chapters:['별빛 산책','달빛 정원','별무리 숲','은하 사원','창조의 끝']},
+  {id:2,name:'새벽의 별길',chapters:['새벽 정원','이슬 숲','노을 사원','창조의 시작','첫 햇살의 언덕']},
 ].map((part,i,all)=>{
   const start=all.slice(0,i).reduce((n,x)=>n+x.chapters.length*CHAPTER_STAGES,0);
   return Object.freeze({...part,chapters:Object.freeze([...part.chapters]),first:start+1,last:start+part.chapters.length*CHAPTER_STAGES,chapterAt:start/CHAPTER_STAGES});
 }));
 export const MAIN_STAGES=PARTS.at(-1).last;
-// The stage whose first clear opens the second part (and the dawn garden and the late companions with it).
+// The stage whose first clear opens the second part and the dawn garden.
 export const PART_STAGES=PARTS[0].last;
 export const partOf=stage=>PARTS.find(x=>stage<=x.last)||PARTS.at(-1);
-// The first chapter is the gentle intro: its own health steps rise to the old stage 1. From stage 10 on, stage n is
-// level n-9 (the stage number before the intro was added), so difficulty-tied unlocks, stage-scaled income and
-// challenge targets are written as levels and turned into stages with levelStage.
-// Enemy health per level: the original straight line (+2.5/8 per level) from level EASE_JOIN on. Before it the line is
-// bent (power EASE) so the first session runs on to about stage 18 before the first real wall; it meets the line at
-// EASE_JOIN with the same health. See docs/STAGES.md for the new-player measurements.
-export const INTRO_STAGES=CHAPTER_STAGES;
+// Revision 1 has nine intro steps followed by the old level curve. The public route samples all 108 steps.
+export const INTRO_STAGES=9,PREVIOUS_MAIN_STAGES=108,PREVIOUS_PART_STAGES=54;
 const INTRO_HP=Object.freeze([.3,.36,.42,.49,.56,.63,.71,.8,.9]),EASE_JOIN=18,EASE=1.7;
 const lineHp=level=>1+2.5*(level-1)/8;
 export const levelHp=level=>level>=EASE_JOIN?lineHp(level):1+(lineHp(EASE_JOIN)-1)*Math.pow((level-1)/(EASE_JOIN-1),EASE);
-export const levelOf=stage=>Math.max(0,stage-INTRO_STAGES);
-export const levelStage=level=>level+INTRO_STAGES;
+export const previousStageHp=stage=>stage<=INTRO_STAGES?INTRO_HP[stage-1]:levelHp(stage-INTRO_STAGES);
+const previousStageAt=stage=>1+(stage-1)*(PREVIOUS_MAIN_STAGES-1)/(MAIN_STAGES-1);
+export const compressedStageAt=stage=>stage===0?0:1+(stage-1)*(MAIN_STAGES-1)/(PREVIOUS_MAIN_STAGES-1);
+export const stageMilestone=previousStage=>Math.round(compressedStageAt(previousStage));
+// A migrated account keeps difficulty gates it already reached while its clear count rounds down.
+export const stageForUnlocks=p=>Math.max(p.cleared,stageMilestone(p.stageLegacyCleared??0));
+export const levelOf=stage=>Math.max(0,Math.floor(previousStageAt(stage))-INTRO_STAGES);
+export const levelStage=level=>stageMilestone(level+INTRO_STAGES);
+export function stageHp(stage){
+  const position=previousStageAt(stage),lower=Math.floor(position),hp=previousStageHp(lower);
+  return hp+(previousStageHp(Math.ceil(position))-hp)*(position-lower);
+}
 const DAWN_NAMES=['새벽 정원','깨어난 숲의 노래','맑은 심연','여명의 왕좌','벼락 새벽의 첨탑','잿불의 성채','재창세의 성원'];
 export const CHAPTERS=Array.from({length:MAIN_STAGES},(_,id)=>{
   const stage=id+1,cycle=Math.floor(id/CHAPTER_STAGES)+1,part=partOf(stage).id,boss=BOSS_ORDER[id%9],themeAt=worlds[id%9],base=source.STAGE_THEMES[themeAt],level=levelOf(stage);
   return {...base,id,name:part===1?`${base.name}`:DAWN_NAMES[themeAt],caption:`${cycle}번째 별길 · ${BOSSES[boss].name}`,bosses:[boss,boss,boss],
-    hp:level?levelHp(level):INTRO_HP[id],level,cycle,stage,part};
+    hp:stageHp(stage),level,cycle,stage,part};
 });
+// A sortie started before compression keeps the old boss and scenery while using its new stage number for settlement.
+export function battleChapter(run){
+  const stage=run.legacyMainStage;
+  if(stage===undefined)return CHAPTERS[run.chapter]??CHAPTERS[PART_STAGES+run.chapter%CHAPTER_STAGES];
+  return CHAPTERS[(stage-1)%CHAPTER_STAGES+(stage>PREVIOUS_PART_STAGES?PART_STAGES:0)];
+}
 // The former temporary Behemoth clear grant is retired. Already owned companions stay owned.
 export const CLEAR_UNLOCKS=Object.freeze({});
 // Companions added after the first part open to the normal summon and the collection only once its last stage
 // has been cleared (before that the summon pool and the collection are exactly what they were). Every new
 // companion goes on this list.
-// Public build: they join at the end of chapter 3 (stage 27, the first wall) so a one-day tester meets them; part two and
-// the dawn garden still open at PART_STAGES. defense/ keeps them at PART_STAGES. See docs/PUBLIC_TEMPO.md.
+// The public build keeps the former stage 27 difficulty as the point where these companions join.
 export const LATE_UNLOCK_STAGE=levelStage(18);
 export const LATE_COMPANIONS=Object.freeze(['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon']);
-// Weekly draft and monthly boss rush: three tiers over 18 waves (rounds).
-// unlock is a stage; hard and abyss open at levels 36 and 72 of the original curve.
-// from/to are levels of the original curve (levelOf) at the first and last wave. challengeBase bends
-// that climb forward, and `late` is the extra health at the last wave (not a wave-17 cliff).
-// A full clear is meant to be a stretch near the next tier's unlock. Rewards scale with `reward`.
-// See docs/archive/2026-10-28-CHALLENGE_RETUNE.md.
+// All challenge modes sample these public main-stage bands from their first wave to their last.
+// Hard and abyss open when the preceding tier's end stage is cleared.
 export const CHALLENGE_WAVES=18;
 export const TIERS=Object.freeze({
   // lateAt parks the late add-on on the last waves. weeklyLate (see wavePlan) raises every
   // weekly enemy the same way, so a full clear stays a stretch after the board has snowballed.
   // It is small enough that hard stays above easy without a weeklyLate of its own.
-  easy:{name:'쉬움',unlock:3,from:12,to:42,late:1,lateAt:6,boss:1.05,weeklyLate:.4,monthly:.363,reward:1.3},
-  hard:{name:'어려움',unlock:levelStage(36),from:40,to:70,late:.9,boss:1.15,monthly:.363,reward:2.3},
-  abyss:{name:'심연',unlock:levelStage(72),from:68,to:88,late:1,boss:1.25,monthly:.4235,reward:3.4},
+  easy:{name:'쉬움',unlock:3,from:1,to:20,late:1,lateAt:6,boss:1.05,weeklyLate:.4,monthly:.363,reward:1.3},
+  hard:{name:'어려움',unlock:20,from:20,to:55,late:.9,boss:1.15,monthly:.363,reward:2.3},
+  abyss:{name:'심연',unlock:55,from:55,to:MAIN_STAGES,late:1,boss:1.25,monthly:.4235,reward:3.4},
 });
 export const TIER_IDS=Object.keys(TIERS);
 export const VERSION=source.VERSION,GRID=source.GRID,MAX_RANK=source.MAX_RANK;
@@ -112,7 +118,7 @@ export const TUNING=Object.freeze({
   // Dream greenhouse beds (docs/GARDEN_BALANCE.md): a steady slope to the knee, a firmer one to knee2, then a soft cap.
   // Each bed's knee meets the next bed's opening (rose 25 ≈ level 15, spring 18 ≈ level 30). Later beds start at the
   // price of that stage's income and meet the earlier beds' prices in the soft cap. knee is the bloom (만개) stage.
-  // unlock is a stage: spring, seed and stardust at levels 15, 30 and 60; the dawn beds with the second part.
+  // Spring, seed and stardust use milestones from the old levels 15, 30 and 60. The dawn beds open with part two.
   beds:{rose:{unlock:0,base:120,growth:1.05,knee:25,steep:1.09,knee2:42,steep2:1.2},spring:{unlock:levelStage(15),base:300,growth:1.06,knee:18,steep:1.09,knee2:28,steep2:1.2},seed:{unlock:levelStage(30),base:700,growth:1.06,knee:12,steep:1.09,knee2:20,steep2:1.2},
     // Second garden (opens with part two): price grows by `growth` to `rise` (70% of the soft-cap level), by `steep`
     // from there to `knee2` (the soft-cap level), by `steep2` after; effects are linear and unbounded, so the soft cap

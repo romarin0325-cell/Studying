@@ -51,7 +51,7 @@ test('copied combat, collection and growth sources load with every other game ab
   const load=relative=>import(pathToFileURL(path.join(local,relative)).href);
   const [content,profile,battle,engine]=await Promise.all([load('src/content.js'),load('src/profile.js'),load('src/battle.js'),load('src/combat/engine.js')]);
   // The copy loads the same roster as the game (combat.test pins its size).
-  assert.deepEqual(content.HEROES.map(h=>h.id),HEROES.map(h=>h.id));assert.equal(content.CHAPTERS.length,content.MAIN_STAGES);assert.equal(content.MAIN_STAGES,108);
+  assert.deepEqual(content.HEROES.map(h=>h.id),HEROES.map(h=>h.id));assert.equal(content.CHAPTERS.length,content.MAIN_STAGES);assert.equal(content.MAIN_STAGES,90);
   const player=profile.createProfile(1791082800000);
   assert.ok(profile.command(player,'begin',{mode:'main',stage:1},1791082800000).ok);
   const run=battle.createBattle(player);

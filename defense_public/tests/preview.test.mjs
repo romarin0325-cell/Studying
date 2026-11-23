@@ -4,12 +4,12 @@ import assert from 'node:assert/strict';
 const {createProfile,command,validateProfile,parseProfile,ProfileStore,SAVE_KEY}=await import('../src/profile.js');
 const E=await import('../src/combat/engine.js');
 const {createBattle,resumeBattle}=await import('../src/battle.js');
-const {HERO,HEROES,CHAPTERS,TIERS,TIER_IDS,BOSS_ORDER,CHALLENGE_WAVES,ARTIFACTS,DEFAULT_DECK,MAIN_STAGES}=await import('../src/content.js');
+const {HERO,HEROES,CHAPTERS,TIERS,TIER_IDS,BOSS_ORDER,CHALLENGE_WAVES,ARTIFACTS,DEFAULT_DECK,MAIN_STAGES,stageHp}=await import('../src/content.js');
 const {HOUR,stageDust}=await import('../src/economy.js');
 const {weeklyReward,monthlyReward}=await import('../src/monthly.js');
 const {season,eventWindow}=await import('../src/preview/season.js');
 const {oathScore,oathBosses,oathMods,OATH_BANDS,OATH_RULES,OATH_WAVES,oathState}=await import('../src/preview/oath.js');
-const {twinBosses,twinBandReward,twinState,twinLocks,TWIN_WAVES,TWIN_STAGE,TWIN_SIDE}=await import('../src/preview/twin.js');
+const {twinBosses,twinBandReward,twinState,twinLocks,TWIN_WAVES,TWIN_SIDE}=await import('../src/preview/twin.js');
 const {requestTracker,requestGoal,REQUEST,REQUEST_GAP_MIN,REQUEST_GAP_SPAN,REQUEST_MAX}=await import('../src/preview/requests.js');
 const {FAVORITE}=await import('../src/bond.js');
 const {REQUEST_REWARD:REQUEST_PAY,REQUEST_HEROES,REQUESTS,AFTERWORDS}=await import('../src/preview/requests-data.js');
@@ -21,7 +21,7 @@ const profile=()=>unlockProfile(createProfile(NOW));
 const ok=(p,action,args={},now=p.active?.mode==='twin'||action==='begin'&&args.mode==='twin'?TWIN_NOW:NOW)=>{const r=command(p,action,args,now);assert.equal(r.ok,true,r.message);return r;};
 const enemyWeight={grunt:1,armor:3.5,runner:.65,wisp:.9,boss:32};
 const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9===8&&wave>=5?'wisp':'grunt';
-function legacyWave(wave,chapter=0,mode='main',tier='easy'){
+function legacyWave(wave,chapter=0,mode='main',tier='easy',hp=CHAPTERS[chapter].hp){
   if(mode==='monthly'){
     const {base}=E.challengeBase(wave,tier),hp=Math.round(base*30*(TIERS[tier]||TIERS.easy).monthly);
     return {sequence:[{kind:'boss',hp}],interval:.65,healthBudget:hp};
@@ -35,7 +35,7 @@ function legacyWave(wave,chapter=0,mode='main',tier='easy'){
     if(grow!==1)for(const e of sequence)e.hp=Math.round(e.hp*grow);
     return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:sequence.reduce((n,e)=>n+e.hp,0)};
   }
-  const oldWave=wave*2,base=E.WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*CHAPTERS[chapter].hp,oldCount=12+oldWave*2;
+  const oldWave=wave*2,base=E.WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*hp,oldCount=12+oldWave*2;
   const budget=Array.from({length:oldCount},(_,i)=>Math.round(base*enemyWeight[enemyKind(i,wave)])).reduce((a,b)=>a+b,0);
   const count=Math.round(oldCount*Math.min(.9,.64+(wave-1)*.025));
   const kinds=Array.from({length:count},(_,i)=>enemyKind(i,wave)),weight=kinds.reduce((sum,k)=>sum+enemyWeight[k],0);let assigned=0;
@@ -63,23 +63,31 @@ test('a season covers two consecutive event windows, including before the KST ep
   }
 });
 
-test('oath and twin waves sample the challenge curve and leave main, weekly and monthly plans unchanged',()=>{
+test('all challenge modes use the full tier band and keep their original wave composition and bonuses',()=>{
+  assert.deepEqual(TIER_IDS.map(id=>[TIERS[id].name,TIERS[id].unlock,TIERS[id].from,TIERS[id].to]),[
+    ['쉬움',3,1,20],['어려움',20,20,55],['심연',55,55,90],
+  ]);
   for(const chapter of [0,8,44,89])for(let wave=1;wave<=6;wave++)assert.deepEqual(E.wavePlan(wave,chapter),legacyWave(wave,chapter));
   for(const mode of ['weekly','monthly'])for(const tier of TIER_IDS)for(let wave=1;wave<=18;wave++)assert.deepEqual(E.wavePlan(wave,0,mode,tier),legacyWave(wave,0,mode,tier));
-  for(let wave=1;wave<=OATH_WAVES;wave++){
-    const plan=E.wavePlan(wave,0,'oath','hard');
-    assert.equal(plan.sequence.filter(e=>e.kind==='boss').length,wave%3===0?1:0);
-    const cw=1+(wave-1)*11/8,{base,oldWave}=E.challengeBase(cw,'hard');
-    const grunt=plan.sequence.find(e=>e.kind==='grunt');
-    assert.equal(grunt.hp,Math.round(base*enemyWeight.grunt));
-    assert.equal(plan.interval,Math.max(.46,1.05-(oldWave-1)*.06));
-    if(wave%3===0)assert.equal(plan.sequence.find(e=>e.kind==='boss').hp,Math.round(base*32*E.BOSS_HEALTH_SCALE*TIERS.hard.boss));
-  }
-  assert.equal(1+(OATH_WAVES-1)*11/8,12);
-  for(let wave=1;wave<=TWIN_WAVES;wave++){
-    const plan=E.wavePlan(wave,0,'twin','abyss');
-    assert.equal(plan.sequence.filter(e=>e.kind==='boss').length,wave%3===0?1:0);
-    assert.deepEqual(plan,E.wavePlan(wave,TWIN_STAGE.abyss-1,'main'));
+  for(const tier of TIER_IDS){
+    const t=TIERS[tier],hpAt=progress=>stageHp(t.from+(t.to-t.from)*progress**.33);
+    for(let wave=1;wave<=CHALLENGE_WAVES;wave++){
+      const k=(wave-1)/(CHALLENGE_WAVES-1),oldWave=2+10*k**.33;
+      close(E.challengeBase(wave,tier).base,E.WAVE_BASE_HEALTH*1.34**(oldWave-1)*hpAt(k)*(1+t.late*k**(t.lateAt??.33)));
+    }
+    for(let wave=1;wave<=OATH_WAVES;wave++){
+      const progress=(wave-1)/(OATH_WAVES-1),k=progress*11/17,oldWave=2+10*k**.33;
+      const base=E.WAVE_BASE_HEALTH*1.34**(oldWave-1)*hpAt(progress)*(1+t.late*k**(t.lateAt??.33));
+      const plan=E.wavePlan(wave,0,'oath',tier);
+      assert.equal(plan.sequence.filter(e=>e.kind==='boss').length,wave%3===0?1:0);
+      assert.equal(plan.sequence.find(e=>e.kind==='grunt').hp,Math.round(base));
+      close(plan.interval,Math.max(.46,1.05-(oldWave-1)*.06));
+      if(wave%3===0)assert.equal(plan.sequence.find(e=>e.kind==='boss').hp,Math.round(base*32*E.BOSS_HEALTH_SCALE*t.boss));
+    }
+    for(let wave=1;wave<=TWIN_WAVES;wave++){
+      const plan=E.wavePlan(wave,0,'twin',tier);
+      assert.deepEqual(plan,legacyWave(wave,0,'main',tier,hpAt((wave-1)/(TWIN_WAVES-1))));
+    }
   }
   assert.equal(E.lastWave({mode:'oath'}),9);
   assert.equal(E.lastWave({mode:'twin'}),6);
@@ -90,6 +98,28 @@ test('oath and twin waves sample the challenge curve and leave main, weekly and 
   twin.phase='combat';twin.wave=6;twin.queue=[];twin.enemies=[];E.step(twin,.05);assert.equal(twin.phase,'victory');
 });
 
+test('hard and abyss entries use the same clear boundaries in all four modes',()=>{
+  for(const mode of ['weekly','monthly','oath','twin'])for(const [tier,stage] of [['hard',20],['abyss',55]]){
+    const now=mode==='twin'?TWIN_NOW:NOW,p=profile();
+    if(mode==='twin')ok(p,'twinParty',partyOf(),now);
+    const args={mode,tier,oaths:[],side:'left'};
+    p.cleared=stage-1;
+    assert.match(command(p,'begin',args,now).message,new RegExp(`스테이지 ${stage}`));
+    p.cleared=stage;
+    ok(p,'begin',args,now);
+    assert.equal(p.active.tier,tier);
+  }
+});
+
+test('a mode uses one measured HP multiplier at spawn for its whole tier range',()=>{
+  for(const [mode,scale] of Object.entries({weekly:.44,monthly:.20,oath:.31,twin:.30}))for(const tier of TIER_IDS){
+    const s=E.newRun({mode,tier,seed:1,oaths:mode==='oath'?['tough1']:[]});
+    const [first]=s.queue;
+    s.spawnIn=0;E.step(s,.05);
+    assert.equal(s.enemies[0].maxHp,Math.round(first.hp*scale*(mode==='oath'?1.25:1)),`${mode} ${tier}`);
+  }
+});
+
 test('each starlight oath changes only its own combat rule',()=>{
   const tough=E.newRun({oaths:['tough1','haste'],seed:1});
   const grunt=spawn(tough,'grunt',1000);
@@ -98,7 +128,7 @@ test('each starlight oath changes only its own combat rule',()=>{
   const heavier=E.newRun({oaths:['tough2','tyrant'],mode:'oath',lineup:['flora','thor','ares'],seed:2});
   const boss=spawn(heavier,'boss',1000,3);
   assert.equal(boss.boss,'flora');
-  assert.equal(boss.maxHp,Math.round(1000*1.5*1.5));
+  assert.equal(boss.maxHp,Math.round(1000*(1.5*.31)*1.5));
   assert.equal(spawn(heavier,'boss',1000,6).boss,'thor');
   assert.equal(spawn(heavier,'boss',1000,9).boss,'ares');
   const fallback=E.newRun({mode:'oath',seed:3});

@@ -1,7 +1,7 @@
-import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,LATE_UNLOCK_STAGE,MAIN_STAGES,CHAPTER_STAGES,partOf,levelOf,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
+import {CHALLENGE_WAVES,TIERS,TIER_IDS,HERO,HEROES,HIDDEN,ARTIFACT,ARTIFACTS,RARITY,RARITIES,compareRarity,DEFAULT_DECK,CHAPTERS,PARTS,PART_STAGES,LATE_UNLOCK_STAGE,MAIN_STAGES,CHAPTER_STAGES,partOf,levelOf,stageForUnlocks,battleChapter,LATE_COMPANIONS,BOSSES,BOSS_ORDER,BLESSING,ROSTER,TUNING as T} from './content.js';
 import {talkLines,greetLine,joinLine} from './lines.js';
 import {relicLevel,relicCost,relicPhase,relicScale,relicPoints,collectionPoints,collectionBonus,COLLECTION_WEIGHT,COLLECTION_OWN_BONUS,COLLECTION_POINTS_PER_PERCENT} from './economy.js';
-import {calendar,heroPool,lateOpen,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,draftHeroEntry,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,dispatchReward,relicTier,relicThreshold,relicTierRates,relicRatesAt,idleReward,stageReward,HOUR,PERFECT_REWARD} from './economy.js';
+import {calendar,heroPool,lateOpen,duplicateCost,enhanceMultiplier,specialMultiplier,heroMultiplier,combatPower,draftHeroEntry,bedCost,bedOpen,GARDENS,critChance,critDamage,stardustRate,stardustBonus,dispatchDust,roseAttack,springGauge,seedGold,dispatchSlots,DISPATCH_UNLOCK_STAGES,dispatchReward,relicTier,relicThreshold,relicTierRates,relicRatesAt,idleReward,stageReward,HOUR,PERFECT_REWARD} from './economy.js';
 import {TEMPO,periodOf,guardianSlots} from './tempo.js';
 import {ProfileStore,createProfile,lateNoticeIds,available,away,teamPower,DAILY_MISSIONS,missionDone,weeklyStage,weeklyState,metBosses,basketState} from './profile.js';
 import {featureOpen,UNLOCKS} from './beginner.js';
@@ -25,7 +25,7 @@ import {TEST_TOOLS} from './test-unlock.js';
 import {observeProfileStorage,publicSession,tutorialStepForGuide} from './public-session.js';
 import {season,eventWindow,activeEvent,nextEvent,eventOpen} from './preview/season.js';
 import {OATHS,OATH,OATH_GROUPS,OATH_TIER_BASE,OATH_BANDS,OATH_WAVES,oathScore,oathConflict,oathDeckProblem,oathBosses,oathState} from './preview/oath.js';
-import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,TWIN_STAGE,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
+import {TWIN_SIDE,TWIN_SIDES,TWIN_BANDS,TWIN_WAVES,twinBandReward,twinBosses,twinParty,twinPartyProblem,twinLocks,twinOverlap,twinCredit,twinState} from './preview/twin.js';
 import {REQUEST,REQUEST_MAX,requestState,requestTracker,requestGoal} from './preview/requests.js';
 import {REQUESTS,REQUEST_HEROES,REQUEST_REWARD,AFTERWORDS} from './preview/requests-data.js';
 // Every build uses the same in-game auto.
@@ -105,7 +105,7 @@ const BED_UI={
 };
 // Art stage only (sprout → bud → bloom → starlit); it follows the cost knees without saying so.
 const bedStage=(id,level)=>{const b=T.beds[id],k=b.knee;return level>=b.knee2?3:level>=k?2:level>=Math.ceil(k*.35)?1:0;};
-const bedReady=(profile,id)=>bedOpen(id,profile.cleared)&&profile.dust>=bedCost(id,profile.beds[id]);
+const bedReady=(profile,id)=>bedOpen(id,stageForUnlocks(profile))&&profile.dust>=bedCost(id,profile.beds[id]);
 let bedFocus='rose';
 // Shooting stars pile up on the lobby floor with the idle reward (max 9 shards).
 const SHARD_SPOTS=[[62,74],[80,68],[44,58],[88,56],[70,60],[26,54],[56,66],[14,47],[86,44]];
@@ -395,7 +395,7 @@ function resume(){close();const a=p().active;if(!a)return;if(a.mode==='weekly'&&
 function startBattle(resume=false){clearTimeout(toastTimer);$('toast').hidden=true;const saved=resume?resumeBattle(p()):null;if(resume&&p().active.run&&!saved){toast('원정 저장을 복원할 수 없습니다. 백업을 확인하세요.');return;}run=saved||createBattle(p());if(!run)return;requestTrack=requestTracker();screen='battle';paused=false;saveBlocked=false;selected=-1;pointer=null;accumulator=0;autoIn=0;uiIn=0;lastFrame=0;renderClock.reset();saves.reset();previousPhase='';close();render();saves.mark();saves.flush();sound.unlock();tutorialStart();sortieWipe();telemetry?.battleStart(run.mode,run.chapter+1,run.mode==='main'?null:run.tier,resume,p().settings.auto);}
 function renderBattle(){
   if(!run)return;
-  const name=run.mode==='main'?CHAPTERS[run.chapter].name:`${modeTitle(run.mode,run.side)} · ${(TIERS[run.tier]||TIERS.easy).name}`,tag=run.mode==='main'?`<small>STAGE</small><b>${stageLabel(run.chapter+1)}</b>`:`<b>${{weekly:'유성',monthly:'만월',oath:'서약',twin:TWIN_SIDE[run.side]?.short||'쌍성'}[run.mode]}</b>`;
+  const name=run.mode==='main'?battleChapter(run).name:`${modeTitle(run.mode,run.side)} · ${(TIERS[run.tier]||TIERS.easy).name}`,tag=run.mode==='main'?`<small>STAGE</small><b>${stageLabel(run.chapter+1)}</b>`:`<b>${{weekly:'유성',monthly:'만월',oath:'서약',twin:TWIN_SIDE[run.side]?.short||'쌍성'}[run.mode]}</b>`;
   $('content').innerHTML=`<section class="battle" id="battle">
     <div class="battle-top"><div class="battle-title"><span class="stage-tag" data-mode="${run.mode}">${tag}</span><div class="battle-name"><strong>${name}</strong><small id="wave-label"></small></div></div><button class="chip-btn" data-action="speed" aria-label="전투 속도">${icon('speed')}<b>${speed}×</b></button><button class="icon-btn" id="pause-button" data-action="pause" aria-label="전투 일시정지">${icon('pause')}</button><button class="icon-btn" data-action="leave" aria-label="저장하고 나가기">${icon('exit')}</button></div>
     <div class="hud"><span class="hud-item hp">${icon('heart')}<b id="health"></b></span><span class="hud-item">${icon('coin')}<b id="gold"></b></span><span class="hud-gauge">${icon('star')}<span class="gauge-bar"><i id="gauge-fill"></i></span><b id="gauge"></b><small>/${E.gaugeCap(run)}</small></span><span id="battle-time" class="hud-time"></span></div>
@@ -447,7 +447,7 @@ function updateStrip(boss){
   if(hud['wave-pips'].dataset.key!==key){hud['wave-pips'].dataset.key=key;hud['wave-pips'].innerHTML=E.lastWave(run)<=9?`<small>WAVE</small>${Array.from({length:E.lastWave(run)},(_,i)=>{const w=i+1;return `<i class="${w%3===0?'boss':''} ${done(w)?'done':w===run.wave?'current':''}">${w%3===0?icon('crown'):''}</i>`;}).join('')}`:`<small>${run.mode==='monthly'?'BOSS':'WAVE'}</small><b>${Math.min(run.wave,CHALLENGE_WAVES)}</b><span class="round-of">/ ${CHALLENGE_WAVES}</span><span class="round-bar"><i style="width:${Math.min(1,(run.wave-1)/CHALLENGE_WAVES)*100}%"></i></span>`;}
   const left=run.enemies.filter(e=>e.hp>0).length+run.queue.length;
   changedText(hud['wave-left'],run.phase==='intermission'?`다음 웨이브 ${Math.max(0,run.breakTime).toFixed(1)}초`:run.phase==='reward'?'축복 선택':`남은 적 ${left}`);
-  const queued=run.queue.some(q=>q.kind==='boss'),next=boss?run.wave:queued?run.wave:run.mode==='main'?(run.wave<3?3:run.wave<6?6:0):0,id=boss?.boss||(next&&(run.mode==='main'?CHAPTERS[run.chapter].bosses[0]:null));
+  const queued=run.queue.some(q=>q.kind==='boss'),next=boss?run.wave:queued?run.wave:run.mode==='main'?(run.wave<3?3:run.wave<6?6:0):0,id=boss?.boss||(next&&(run.mode==='main'?battleChapter(run).bosses[0]:null));
   const line=hud['boss-line'];line.hidden=!id;if(!id)return;line.classList.toggle('live',!!boss);
   changedText(hud['boss-name'],BOSSES[id].name);changedText(hud['boss-state'],boss?`${Math.ceil(boss.hp/boss.maxHp*100)}%`:next===run.wave?'곧 등장':`${next}웨이브 등장`);changedText(hud['boss-trait'],BOSSES[id].trait||BOSSES[id].warning||'');
   const fill=`scaleX(${boss?Math.max(0,boss.hp/boss.maxHp).toFixed(3):1})`;if(hud['boss-fill'].style.transform!==fill)hud['boss-fill'].style.transform=fill;
@@ -589,7 +589,7 @@ function resultProgress(r){
 function showResult(r,animate=true){
   const mvp=Object.entries(r.byHero).sort((a,b)=>b[1]-a[1])[0],label=r.mode==='main'?`스테이지 ${stageLabel(r.stage)}`:`${modeTitle(r.mode,r.side)} · ${(TIERS[r.tier]||TIERS.easy).name}`;
   const crowned=r.mode==='main'&&r.won&&r.perfect,retry=r.mode==='main'&&r.won&&!r.perfect&&!(p().perfect||[]).includes(r.stage)?'코어 피해 없이 다시 클리어하면 퍼펙트 보상 +100':'';
-  const wonLine=r.won?[`파견 보상 +${levelOf(p().cleared)*5}%`,dispatchSlots(p().cleared)>dispatchSlots(p().cleared-1)?'파견 슬롯이 해금되었습니다.':'',retry].filter(Boolean).join(' · '):r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 웨이브에 도전하세요.';
+  const wonLine=r.won?[`파견 보상 +${levelOf(p().cleared)*5}%`,r.clearReward&&featureOpen(p(),'dispatch')&&dispatchSlots(stageForUnlocks(p()))>dispatchSlots(stageForUnlocks({...p(),cleared:p().cleared-1}))?'파견 슬롯이 해금되었습니다.':'',retry].filter(Boolean).join(' · '):r.mode==='main'?'동료를 육성하거나 편성·배치를 바꿔 다시 도전하세요.':'동료와 유물을 키워 더 높은 웨이브에 도전하세요.';
   const w=r.weekly,split=crowned&&r.firstPerfect?`<small class="reward-split">${r.clearReward>0?`첫 클리어 +${r.clearReward} · 퍼펙트 +100`:'퍼펙트 +100'}</small>`:'';
   // The draft and the hunt read the same way: the period's best record, what this run added, and what the period has paid.
   const per=r.mode==='weekly'?w:r.mode==='monthly'?r.monthly:null,span=r.mode==='weekly'?'이번 회차':'이번 만월',best=r.mode==='monthly'?currentRecord(p(),r.at):null;
@@ -820,7 +820,7 @@ function relicCard(id){
   return `<button class="cc relic ${e.owned?'':'unowned'} ${ready?'ready':''} ${worn?'worn':''}" data-relic="${id}" data-rarity="${a.rarity}" aria-label="${a.name}${e.owned?` Lv.${relicLevel(e)}`:', 미보유'}${worn?', 장착 중':''}"><span class="cc-art">${image(id)}</span>${badge(a.rarity)}${e.owned?`<span class="cc-plus">Lv.${relicLevel(e)}</span>`:''}${ready?`<span class="cc-up">${icon('up')}</span>`:''}${worn?`<span class="cc-worn">${icon('check')}</span>`:''}<strong>${a.name}</strong></button>`;
 }
 // Companions added after part one stay out of the collection until LATE_UNLOCK_STAGE is cleared (or until owned).
-const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=LATE_UNLOCK_STAGE||p().heroes[h.id].owned);
+const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||stageForUnlocks(p())>=LATE_UNLOCK_STAGE||p().heroes[h.id].owned);
 const memoryOpen=id=>p().heroes[id].owned&&p().heroes[id].bond>=MEMORIAL_STORIES[id].unlockBond;
 function renderCollection(){
   const owned=shown().filter(h=>p().heroes[h.id].owned).length,relics=ARTIFACTS.filter(a=>p().relics[a.id].owned).length,memories=shown().filter(h=>memoryOpen(h.id)).length+p().study.library.unlocked.length;
@@ -828,7 +828,7 @@ function renderCollection(){
   const tabs=[['hero','동료',`${owned}/${shown().length}`],...(featureOpen(p(),'relic')?[['relic','유물',`${relics}/${ARTIFACTS.length}`]]:[]),['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
   return `<section class="book">
     <div class="tabbar">${tabs.map(([id,name,count])=>`<button data-collection="${id}" aria-pressed="${collection===id}"><b>${name}</b><small>${count}</small></button>`).join('')}</div>
-    ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&p().cleared<LATE_UNLOCK_STAGE?`<p class="late-collection-note">${icon('lock')} 스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
+    ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&stageForUnlocks(p())<LATE_UNLOCK_STAGE?`<p class="late-collection-note">${icon('lock')} 스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
 }
 function rarityFilter(list,table){
   return `<div class="rare-filter">${RARITIES.map(r=>{const all=list.filter(x=>x.rarity===r),have=all.filter(x=>table[x.id].owned).length;return `<button data-filter="${r}" data-rarity="${r}" aria-pressed="${rarity===r}">${badge(r)}<span>${have}/${all.length}</span>${have===all.length?`<i class="done">${icon('check')}</i>`:''}</button>`;}).join('')}</div>`;
@@ -1042,12 +1042,12 @@ function showLateNotice(){lateFresh=true;
 // notice until the first summon after it. After that the rates sheet lists them with everyone else.
 let lateFresh=false;
 function lateStrip(){
-  const open=p().cleared>=LATE_UNLOCK_STAGE,n=lateNew().length;if(open&&!lateFresh)return '';
+  const open=stageForUnlocks(p())>=LATE_UNLOCK_STAGE,n=lateNew().length;if(open&&!lateFresh)return '';
   return `<button class="sm-late ${open?'open':''}" data-action="late-info" aria-label="신규 동료 ${n}명">${icon(open?'star':'lock')}<span>${open?`신규 동료 ${n}명 소환 중`:`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 신규 동료 ${n}명이 합류해요`}</span><i>${icon('chevron')}</i></button>`;
 }
 // A hero's chance in the current banner (same rules as drawCharacter: pickup or guardian take half of the UR share).
 function heroChance(id){
-  const c=calendar(now()),r=RARITIES.indexOf(HERO[id].rarity),pool=heroPool(HERO[id].rarity,lateOpen(p().cleared)),base=T.heroRates[r];
+  const c=calendar(now()),r=RARITIES.indexOf(HERO[id].rarity),pool=heroPool(HERO[id].rarity,lateOpen(stageForUnlocks(p()))),base=T.heroRates[r];
   if(HERO[id].rarity!=='UR')return base/pool.length;
   return banner==='season'?base*.5/pool.length:base*((id===c.pickup?.5:0)+.5/pool.length);
 }
@@ -1222,7 +1222,7 @@ function twinPrepare(side){
   if(!eventOpen('twin',now(),eventFlip())){toast('지금 열린 이벤트가 아니에요.');return;}
   if(p().active){activeRunSheet();return;}
   const party=twinParty(p())[side];
-  show(TWIN_SIDE[side].name,'출격 준비',`<div class="prep-boss twin-${side}"><small>${TIERS[challengeTier].name} · ${TWIN_WAVES}웨이브 · 스테이지 ${TWIN_STAGE[challengeTier]} 수준</small><h2>${TWIN_SIDE[side].name}</h2>${bossRoute(twinBosses(season(now()).index,side,metBosses(p())))}</div>
+  show(TWIN_SIDE[side].name,'출격 준비',`<div class="prep-boss twin-${side}"><small>${TIERS[challengeTier].name} · ${TWIN_WAVES}웨이브 · 스테이지 ${TIERS[challengeTier].from}–${TIERS[challengeTier].to} 수준</small><h2>${TWIN_SIDE[side].name}</h2>${bossRoute(twinBosses(season(now()).index,side,metBosses(p())))}</div>
     <div class="panel-head"><h3>${TWIN_SIDE[side].short} 편성</h3><span class="power">전투력 <b>${fmt(deckPower(party.deck))}</b></span></div>${five(party.deck)}
     <div class="panel-head"><h3>유물</h3></div>${relicRow(party.relics)}${twinOverlap(p(),now(),challengeTier,side)?`<p class="oath-problem">${icon('info')}<span>${TWIN_SIDE[side==='left'?'right':'left'].name} 기록과 겹치는 동료·유물이 있어요. 이번 결과가 남고 ${TWIN_SIDE[side==='left'?'right':'left'].short} 기록은 비워져요.</span></p>`:''}${requestChips(party.deck)}`,
     `<div class="dialog-buttons"><button class="secondary" data-action="twin-party">편성</button><button class="primary shine" data-twin-begin="${side}">입장</button></div>`,'prepare',{stage:0,kind:'twin',side});
@@ -1281,7 +1281,7 @@ function afterwordMarkup(id){
 
 function previewInfo(kind){
   const body=kind==='oath'?`<ul class="notes"><li>${OATH_WAVES}웨이브, 3웨이브마다 보스가 나와요. 클리어해야 점수가 남아요.</li><li>점수는 난이도(쉬움 ${OATH_TIER_BASE.easy} · 어려움 ${OATH_TIER_BASE.hard} · 심연 ${OATH_TIER_BASE.abyss})와 고른 서약 점수의 합이에요.</li><li>시즌 최고 점수가 구간에 닿을 때마다 보상을 바로 받아요. 시즌은 ${TEMPO.eventHours*2}시간마다 바뀌고 역대 최고 기록은 남아요.</li><li>파견 중인 동료는 참여할 수 없어요.</li></ul>`
-    :`<ul class="notes"><li>좌우 별길은 각각 ${TWIN_WAVES}웨이브, 3웨이브마다 보스가 나와요. 난이도마다 그 구간 최고 메인 스테이지 수준이에요.</li><li>두 편성은 동료와 유물을 나눠 가져요. 같은 동료나 유물을 양쪽에 둘 수 없어요.</li><li>별길마다 마지막 기록이 남고, 좌우 기록을 합산해요. 반대쪽 기록과 겹치는 동료·유물로 도전하면 이번 결과가 남고 반대쪽 기록은 비워져요.</li><li>시즌 최고 합계는 남고, 이미 받은 보상도 그대로예요.</li><li>난이도마다 합계 구간 보상을 한 번씩 받아요. 높은 난이도의 합계는 낮은 난이도에도 인정돼요. 시즌은 ${TEMPO.eventHours*2}시간마다 바뀌어요.</li></ul>`;
+    :`<ul class="notes"><li>좌우 별길은 각각 ${TWIN_WAVES}웨이브, 3웨이브마다 보스가 나와요. 웨이브가 진행될수록 해당 난이도의 메인 스테이지 구간을 따라 적이 강해져요.</li><li>두 편성은 동료와 유물을 나눠 가져요. 같은 동료나 유물을 양쪽에 둘 수 없어요.</li><li>별길마다 마지막 기록이 남고, 좌우 기록을 합산해요. 반대쪽 기록과 겹치는 동료·유물로 도전하면 이번 결과가 남고 반대쪽 기록은 비워져요.</li><li>시즌 최고 합계는 남고, 이미 받은 보상도 그대로예요.</li><li>난이도마다 합계 구간 보상을 한 번씩 받아요. 높은 난이도의 합계는 낮은 난이도에도 인정돼요. 시즌은 ${TEMPO.eventHours*2}시간마다 바뀌어요.</li></ul>`;
   const end=eventWindow(now()).end;
   show(kind==='oath'?'별빛 서약':'쌍성 원정','규칙',`<p class="fineprint" data-period-end="${end}">${countdown(end,'남음')}</p>${body}`,`<button class="primary wide" data-action="close">확인</button>`,'info',kind);
 }
@@ -1345,8 +1345,8 @@ function relicTierChip(){
 }
 let pityPick=null;
 function pitySheet(){
-  const which=banner==='relic'?'normal':banner,n=p().pity[which],max=T.pity[which],c=calendar(now()),end=c.periods[which==='season'?'guardian':'pickup'].end,pool=which==='season'?[c.guardian]:[c.pickup,...heroPool('UR',lateOpen(p().cleared)).filter(id=>id!==c.pickup)];
-  if(!pool.includes(pityPick))pityPick=pool[0];const locked=LATE_COMPANIONS.includes(pityPick)&&p().cleared<LATE_UNLOCK_STAGE,full=n>=max&&!locked;
+  const which=banner==='relic'?'normal':banner,n=p().pity[which],max=T.pity[which],c=calendar(now()),end=c.periods[which==='season'?'guardian':'pickup'].end,pool=which==='season'?[c.guardian]:[c.pickup,...heroPool('UR',lateOpen(stageForUnlocks(p()))).filter(id=>id!==c.pickup)];
+  if(!pool.includes(pityPick))pityPick=pool[0];const locked=LATE_COMPANIONS.includes(pityPick)&&stageForUnlocks(p())<LATE_UNLOCK_STAGE,full=n>=max&&!locked;
   show('교환',which==='season'?'수호자 소환':'일반 소환',`<div class="pity-meter" data-period-end="${end}"><span class="pity-ring big" style="--p:${Math.min(1,n/max).toFixed(3)}">${icon('star')}</span><div><b>${n}<em>/${max}</em></b><p>유료 소환 1회마다 1이 쌓여요. ${max}가 되면 원하는 동료 한 명을 데려올 수 있어요. UR이 나와도 줄지 않아요.</p>${countdown(end,'후 교대')}</div></div>
     <div class="pity-pool">${pool.map(id=>`<button class="pity-pick ${pityPick===id?'on':''}" data-pity-pick="${id}" data-rarity="UR">${image(id)}<b>${HERO[id].name}</b>${id===c.pickup&&which==='normal'?'<small>지금 픽업</small>':''}${p().heroes[id].owned?`<small class="have">보유 +${p().heroes[id].enhance}</small>`:''}</button>`).join('')}</div>`,
     `<button class="primary wide shine" data-action="pity-claim" ${full?'':'disabled'}>${locked?`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 교환할 수 있어요`:full?`${HERO[pityPick].name} 데려오기`:`${max-n}회 더 소환하면 교환할 수 있어요`}</button>`,'pity');
@@ -1365,13 +1365,13 @@ function relicLadder(){
   return `<div class="relic-ladder"><div class="rl-row rl-cols"><span></span>${RARITIES.map(r=>`<span>${badge(r)}</span>`).join('')}</div>${steps}${near?`<div class="rl-row max"><span class="rl-step"><i>∞</i><span><b>한계</b></span></span>${cells(relicRatesAt(1))}</div>`:''}</div>`;
 }
 function rates(){
-  const c=calendar(now()),urCount=heroPool('UR',lateOpen(p().cleared)).length;
-  const targets=[...(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||p().cleared>=LATE_UNLOCK_STAGE)))].sort(compareRarity);
+  const c=calendar(now()),urCount=heroPool('UR',lateOpen(stageForUnlocks(p()))).length;
+  const targets=[...(banner==='relic'?ARTIFACTS:HEROES.filter(h=>(!h.hidden||banner==='season'&&h.id===c.guardian)&&(!LATE_COMPANIONS.includes(h.id)||stageForUnlocks(p())>=LATE_UNLOCK_STAGE)))].sort(compareRarity);
   let rows=banner==='relic'?relicLadder():RARITIES.map((r,i)=>`<div class="rate-row"><span>${badge(r)} ${RARITY[r].name}</span><b>${pct1(T.heroRates[i])}</b></div>`).join('');
-  if(banner==='season'){const half=pct1(T.heroRates[3]/2),closed=LATE_COMPANIONS.includes(c.guardian)&&p().cleared<LATE_UNLOCK_STAGE;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${LATE_UNLOCK_STAGE} 클리어 후</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${half}</b></div>`;}
+  if(banner==='season'){const half=pct1(T.heroRates[3]/2),closed=LATE_COMPANIONS.includes(c.guardian)&&stageForUnlocks(p())<LATE_UNLOCK_STAGE;rows+=closed?`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>스테이지 ${LATE_UNLOCK_STAGE} 클리어 후</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${pct(T.heroRates[3])}</b></div>`:`<div class="rate-row"><span>UR · ${HERO[c.guardian].name}</span><b>${half}</b></div><div class="rate-row"><span>일반 UR ${urCount}종 합계</span><b>${half}</b></div>`;}
   if(banner==='normal')rows+=`<div class="rate-row"><span>UR · 픽업 ${HERO[c.pickup].name}</span><b>${pct(T.heroRates[3]*.5+T.heroRates[3]*.5/urCount)}</b></div><div class="rate-row"><span>UR · 나머지 ${urCount-1}종 각각</span><b>${pct(T.heroRates[3]*.5/urCount)}</b></div>`;
   if(banner!=='relic'){
-    const open=p().cleared>=LATE_UNLOCK_STAGE;
+    const open=stageForUnlocks(p())>=LATE_UNLOCK_STAGE;
     rows+=`<div class="rate-head">신규 동료${open?'':` <small>스테이지 ${LATE_UNLOCK_STAGE} 클리어 후 합류</small>`}</div>`+(open?lateNew().map(id=>`<div class="rate-row"><span>${badge(HERO[id].rarity)} ${HERO[id].name}</span><b>${pct(heroChance(id))}</b></div>`).join(''):`<div class="rate-row late-closed"><span>${icon('lock')} ${lateRarityLine()}</span><b>${lateNew().length}명</b></div>`);
   }
   show('소환 확률',banner==='relic'?`유물 ${relicTier(p().relicDraws)}단계`:banner==='season'?'수호자':'일반',`${banner==='relic'?'':`<p class="fineprint" data-period-end="${c.periods[banner==='season'?'guardian':'pickup'].end}">${countdown(c.periods[banner==='season'?'guardian':'pickup'].end,'후 교대')}</p>`}${rows}
@@ -1388,16 +1388,16 @@ function renderGarden(){
 }
 // Two gardens: the dream greenhouse and the dawn greenhouse (opens with part two; viewable before, with locked beds).
 function gardenTabs(){
-  const open=bedOpen('crit',p().cleared),fresh=open&&!GARDENS[1].beds.some(id=>p().beds[id]>0);
+  const open=bedOpen('crit',stageForUnlocks(p())),fresh=open&&!GARDENS[1].beds.some(id=>p().beds[id]>0);
   return `<div class="garden-tabs" role="tablist">${GARDENS.map((g,i)=>`<button role="tab" class="gtab" data-garden="${g.id}" aria-selected="${gardenTab===g.id}">${i&&!open?icon('lock'):''}<b>${i?'새벽 온실':'꿈의 온실'}</b>${i&&fresh?'<em class="new">NEW</em>':''}</button>`).join('')}</div>`;
 }
 function bedRow(){
   const profile=p();
-  return `<div class="bed-row">${GARDENS.find(g=>g.id===gardenTab).beds.map(id=>{const u=BED_UI[id],unlocked=bedOpen(id,profile.cleared),lv=profile.beds[id];
+  return `<div class="bed-row">${GARDENS.find(g=>g.id===gardenTab).beds.map(id=>{const u=BED_UI[id],unlocked=bedOpen(id,stageForUnlocks(profile)),lv=profile.beds[id];
     return `<button class="bed ${bedFocus===id?'focus':''} ${unlocked?'':'locked'}" data-bed="${id}" style="--bed-row:${u.row};--bed-stage:${bedStage(id,lv)};--bed-color:${u.color};order:${u.order}" aria-pressed="${bedFocus===id}"><span class="bed-art"></span>${unlocked?`<span class="bed-level">Lv.${lv}</span>`:`<span class="bed-lock">${icon('lock')}</span>`}${bedReady(profile,id)?'<i class="dot"></i>':''}<b class="bed-name">${u.name}</b><small class="bed-sub">${unlocked?`${u.effect} ${u.value(lv)}`:`스테이지 ${T.beds[id].unlock}`}</small></button>`;}).join('')}</div>`;
 }
 function bedPanel(id){
-  const profile=p(),u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,profile.cleared),cost=bedCost(id,lv),ready=bedReady(profile,id);
+  const profile=p(),u=BED_UI[id],lv=profile.beds[id],unlocked=bedOpen(id,stageForUnlocks(profile)),cost=bedCost(id,lv),ready=bedReady(profile,id);
   return `<div class="bed-panel" style="--bed-color:${u.color}"><div class="bed-panel-info"><small>${u.effect}</small><b>${unlocked?`${u.value(lv)} ${icon('chevron')} <em>${u.value(lv+1)}</em>`:'잠김'}</b></div>
     <button class="primary bed-grow ${ready?'shine':''}" data-bed-grow="${id}" ${ready?'':'disabled'}>${!unlocked?`${icon('lock')}<b>스테이지 ${T.beds[id].unlock}</b>`:`${icon('drop')}<b>물 주기</b><span class="cost dust">${icon('dust')}<b>${fmt(cost)}</b></span>`}</button></div>`;
 }
@@ -1407,7 +1407,7 @@ function refreshGarden(){
 }
 function growBed(id){
   const before=bedStage(id,p().beds[id]),result=act('bed',{id},false);if(!result.ok){toast(result.message);return false;}
-  const house=document.querySelector('.gd-house');if(house){const tabs=house.querySelector('.garden-tabs');if(tabs)tabs.outerHTML=gardenTabs();const row=house.querySelector('.bed-row');for(const node of row.querySelectorAll('.bed[data-bed]')){const k=node.dataset.bed,u=BED_UI[k],lv=p().beds[k];node.style.setProperty('--bed-stage',bedStage(k,lv));const level=node.querySelector('.bed-level');if(level)level.textContent=`Lv.${lv}`;const sub=node.querySelector('.bed-sub');if(sub&&bedOpen(k,p().cleared))sub.textContent=`${u.effect} ${u.value(lv)}`;const ready=bedReady(p(),k),dot=node.querySelector('.dot');if(ready&&!dot)node.insertAdjacentHTML('beforeend','<i class="dot"></i>');else if(!ready&&dot)dot.remove();}
+  const house=document.querySelector('.gd-house');if(house){const tabs=house.querySelector('.garden-tabs');if(tabs)tabs.outerHTML=gardenTabs();const row=house.querySelector('.bed-row');for(const node of row.querySelectorAll('.bed[data-bed]')){const k=node.dataset.bed,u=BED_UI[k],lv=p().beds[k];node.style.setProperty('--bed-stage',bedStage(k,lv));const level=node.querySelector('.bed-level');if(level)level.textContent=`Lv.${lv}`;const sub=node.querySelector('.bed-sub');if(sub&&bedOpen(k,stageForUnlocks(p())))sub.textContent=`${u.effect} ${u.value(lv)}`;const ready=bedReady(p(),k),dot=node.querySelector('.dot');if(ready&&!dot)node.insertAdjacentHTML('beforeend','<i class="dot"></i>');else if(!ready&&dot)dot.remove();}
     const panel=house.querySelector('.bed-panel');if(panel)panel.outerHTML=bedPanel(bedFocus);}
   const art=document.querySelector(`.bed[data-bed="${id}"] .bed-art`);if(!art)return true;
   const c=centerOf(art),stage=bedStage(id,result.level),u=BED_UI[id];art.classList.remove('grow');void art.offsetWidth;art.classList.add('grow');
@@ -1416,20 +1416,20 @@ function growBed(id){
   return true;
 }
 function dispatchMarkup(){
-  const profile=p(),count=dispatchSlots(profile.cleared),ready=profile.dispatches.filter(x=>x.end<=now()).length;
+  const profile=p(),count=dispatchSlots(stageForUnlocks(profile)),ready=profile.dispatches.filter(x=>x.end<=now()).length;
   const tiles=Array.from({length:4},(_,slot)=>{const x=profile.dispatches.find(y=>y.slot===slot);
-    if(slot>=count)return `<button class="slot locked" disabled>${icon('lock')}<small>스테이지 ${9*(slot+1)}</small></button>`;
+    if(slot>=count)return `<button class="slot locked" disabled>${icon('lock')}<small>스테이지 ${DISPATCH_UNLOCK_STAGES[slot]}</small></button>`;
     if(!x)return `<button class="slot empty" data-dispatch-slot="${slot}">${icon('plus')}<small>보내기</small></button>`;
     const done=x.end<=now(),ratio=Math.min(1,(now()-x.start)/(x.end-x.start));
     return `<button class="slot ${done?'ready':'running'}" data-dispatch-slot="${slot}" data-rarity="${HERO[x.hero].rarity}"><span class="slot-ring" style="--p:${ratio.toFixed(3)}">${image(x.hero)}</span><small ${done?'':`data-countdown="${x.end}"`}>${done?'받기!':timerText(x.end)}</small></button>`;}).join('');
   return `<div class="sec-head"><h3>파견</h3><span class="sec-sub">${count}/4</span><span class="grow"></span>${ready>1?'<button class="chip-btn gold" data-action="claim-all">모두 받기</button>':''}<button class="info-btn" data-action="dispatch-info" aria-label="파견 안내">${icon('info')}</button></div><div class="slot-row">${tiles}</div>`;
 }
 function dispatchInfo(){
-  show('파견','정원',`<ul class="notes"><li>동료 한 명을 ${T.dispatchHours}시간 동안 보내 별가루와 꿈의결정을 모아요. 앱을 닫아도 시간은 흘러요.</li><li>보상은 출발할 때의 전투력과 클리어한 스테이지 수로 정해져요. 지금 보너스 +${Math.round(levelOf(p().cleared)*T.dispatchStageStep*100)}%.</li>${stardustBonus(p().beds,p().cleared)>0?`<li>별똥별 가속으로 받을 때 별가루가 +${Math.round(stardustBonus(p().beds,p().cleared)*100)}% 늘어요.</li>`:''}<li>파견 중인 동료도 편성과 전투에 그대로 쓸 수 있어요.</li><li>슬롯은 스테이지 9·18·27·36을 클리어하면 하나씩 열려요.</li></ul>`,`<button class="primary wide" data-action="close">확인</button>`,'info');
+  show('파견','정원',`<ul class="notes"><li>동료 한 명을 ${T.dispatchHours}시간 동안 보내 별가루와 꿈의결정을 모아요. 앱을 닫아도 시간은 흘러요.</li><li>보상은 출발할 때의 전투력과 클리어한 스테이지 수로 정해져요. 지금 보너스 +${Math.round(levelOf(p().cleared)*T.dispatchStageStep*100)}%.</li>${stardustBonus(p().beds,stageForUnlocks(p()))>0?`<li>별똥별 가속으로 받을 때 별가루가 +${Math.round(stardustBonus(p().beds,stageForUnlocks(p()))*100)}% 늘어요.</li>`:''}<li>파견 중인 동료도 편성과 전투에 그대로 쓸 수 있어요.</li><li>슬롯은 스테이지 ${DISPATCH_UNLOCK_STAGES.join('·')}을 클리어하면 하나씩 열려요.</li></ul>`,`<button class="primary wide" data-action="close">확인</button>`,'info');
 }
 function dispatchTap(slot){
   const x=p().dispatches.find(y=>y.slot===slot);if(!x){chooseDispatch(slot);return;}
-  if(x.end>now()){toast(`${HERO[x.hero].name} · ${timerText(x.end)} 후 귀환 · 별가루 ${fmt(dispatchDust(x.dust||0,p().beds,p().cleared))} · 꿈의결정 ${fmt(x.reward)}`);return;}
+  if(x.end>now()){toast(`${HERO[x.hero].name} · ${timerText(x.end)} 후 귀환 · 별가루 ${fmt(dispatchDust(x.dust||0,p().beds,stageForUnlocks(p())))} · 꿈의결정 ${fmt(x.reward)}`);return;}
   claimDispatches([slot]);
 }
 function claimDispatches(slots){
@@ -1939,7 +1939,7 @@ function maybeEventPopup(){
 // ── Sortie: a quick slanted band with the stage and the five faces while the battle builds underneath.
 function sortieWipe(){
   if(!run||$('app').dataset.reduced==='true')return;qs('.sortie')?.remove();
-  const label=run.mode==='main'?`STAGE ${stageLabel(run.chapter+1)}`:modeTitle(run.mode,run.side),name=run.mode==='main'?BOSSES[CHAPTERS[run.chapter].bosses[0]].name:(TIERS[run.tier]||TIERS.easy).name;
+  const label=run.mode==='main'?`STAGE ${stageLabel(run.chapter+1)}`:modeTitle(run.mode,run.side),name=run.mode==='main'?BOSSES[battleChapter(run).bosses[0]].name:(TIERS[run.tier]||TIERS.easy).name;
   const node=document.createElement('div');node.className='sortie';node.setAttribute('aria-hidden','true');
   node.innerHTML=`<span class="sortie-band"><small>${label}</small><b>${escapeText(name)}</b></span><span class="sortie-faces">${run.deck.map((id,i)=>`<i style="--i:${i}">${image(id)}</i>`).join('')}</span>`;
   document.body.append(node);setTimeout(()=>node.remove(),1150);
@@ -2016,7 +2016,7 @@ document.addEventListener('click',e=>{
     'save-team':saveFormation,
     'go-summon':()=>{close();screen='summon';banner='normal';render();},'go-relic-summon':()=>{close();screen='summon';banner='relic';render();},
     'go-collection':()=>{close();screen='collection';collection='hero';render();},'go-relics':()=>{close();screen='collection';collection='relic';rarity='all';render();},
-    'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(p().cleared>=LATE_UNLOCK_STAGE)showLateNotice();else show('신규 동료',`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${LATE_UNLOCK_STAGE}을(를) 처음 클리어하면 일반 소환과 수호자 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
+    'late-close':()=>close(),'late-summon':()=>{close();screen='summon';banner='normal';render();},'late-info':()=>{if(stageForUnlocks(p())>=LATE_UNLOCK_STAGE)showLateNotice();else show('신규 동료',`스테이지 ${LATE_UNLOCK_STAGE} 클리어 후`,`<div class="late-notice closed"><p class="late-lede"><b>신규 동료 ${lateNew().length}명</b>이 기다리고 있어요</p><div class="late-grid">${byRarity(lateNew()).map((id,i)=>`<div class="late-card locked" data-rarity="${HERO[id].rarity}" style="--i:${i}"><span class="late-art">${image(id)}</span><span class="late-rar">${HERO[id].rarity}</span><b>???</b><small>${icon('lock')}</small></div>`).join('')}</div><ul class="late-notes"><li>스테이지 ${LATE_UNLOCK_STAGE}을(를) 처음 클리어하면 일반 소환과 수호자 소환, 도감에 한꺼번에 합류해요(${lateRarityLine()}).</li><li>그전에는 소환 풀과 확률이 지금과 같아요.</li></ul></div>`,`<button class="primary wide" data-action="close">확인</button>`,'late-locked');},
     'go-garden':()=>{close();screen='garden';render();},'go-dawn':()=>{close();screen='garden';gardenTab='dawn';bedFocus='crit';render();},'go-home-gift':()=>{close();screen='home';giftTray=true;render();giftTray=true;const t=$('gift-tray');if(t){t.innerHTML=trayMarkup(p().partner);t.hidden=false;}},
     'monthly-claim':claimMonthlyDue,'twin-party':()=>twinFormation(),'save-twin':()=>{if(act('twinParty',twinDraft).ok){twinDraft=null;close();render();}},'oath-retry':()=>{close();oathPrepare();},'monthly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'monthly');},'weekly-retry':()=>{close();prepare(Math.min(MAIN_STAGES,p().cleared+1),'weekly');},
     speed:()=>{speed=speed===1?2:1;button.querySelector('b').textContent=speed+'×';},pause:()=>{if(paused)resumeCombat();else{paused=true;saves.mark();saves.flush();updateBattle();}},

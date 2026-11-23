@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER,LATE_COMPANIONS,LATE_UNLOCK_STAGE,PART_STAGES,levelStage} from '../src/content.js';
+import {HERO,HEROES,HIDDEN,ARTIFACTS,TUNING,ROSTER,LATE_COMPANIONS,LATE_UNLOCK_STAGE,PART_STAGES} from '../src/content.js';
 import {drawCharacter,heroPool,lateOpen,drawRelic,relicRates,relicThreshold,relicTier,duplicateCost,enhanceMultiplier,specialMultiplier,dispatchReward,dispatchSlots,calendar,HOUR,relicCost,relicScale,relicPhase,relicLevel,relicPoints,collectionBonus,collectionPoints,RELIC_LEVEL_STEP,stageReward,stageDust} from '../src/economy.js';
 import {TEMPO,periodOf,guardianSlots} from '../src/tempo.js';
 import {createProfile,random} from '../src/profile.js';
@@ -101,10 +101,10 @@ test('relics keep the rarity written on them, not their place in the list',()=>{
 });
 
 test('dispatch uses four story gates and a logarithmic CP return with additive stage bonuses',()=>{
-  for(const [clear,count] of [[0,0],[8,0],[9,1],[18,2],[27,3],[36,4],[45,4]])assert.equal(dispatchSlots(clear),count);
+  for(const [clear,count] of [[0,0],[7,0],[8,1],[14,1],[15,2],[22,2],[23,3],[29,3],[30,4],[45,4]])assert.equal(dispatchSlots(clear),count);
   for(const kind of ['dust','dreams']){
     // The stage bonus grows with the level (the intro chapter adds none).
-    const a=dispatchReward(1000,9)[kind],b=dispatchReward(1000,29)[kind];
+    const a=dispatchReward(1000,8)[kind],b=dispatchReward(1000,25)[kind];
     assert.equal(dispatchReward(1000,0)[kind],a);
     assert.ok(Math.abs(b-2*a)<=1);
     assert.ok(dispatchReward(1000000,9)[kind]>dispatchReward(10000,9)[kind]);
@@ -168,7 +168,7 @@ test('pickup and guardian rotate through their ordered pools and guardian slots 
 });
 
 test('first clears scale dreams and triple win dust, and losses pay for up to five waves',()=>{
-  for(const [stage,L] of [[1,0],[levelStage(1),1],[levelStage(15),15],[levelStage(30),30],[levelStage(50),50]]){
+  for(const [stage,L] of [[1,0],[8,0],[9,1],[20,14],[21,16],[33,30],[50,50],[90,99]]){
     assert.equal(stageReward(stage),Math.round((160+10*L)*Math.min(3,1+L/15)));
     assert.equal(stageDust(stage,true,false),60+16*L);assert.equal(stageDust(stage,true,true),3*(60+16*L));
     for(const [round,credited] of [[0,0],[1,1],[3,3],[5,5],[6,5]]){
@@ -179,7 +179,7 @@ test('first clears scale dreams and triple win dust, and losses pay for up to fi
 });
 
 test('companions added after the first part join the summon pool only once its last stage is cleared',()=>{
-  assert.equal(LATE_UNLOCK_STAGE,levelStage(18),'public: late companions join at the end of chapter 3');assert.ok(LATE_UNLOCK_STAGE<PART_STAGES);assert.equal(lateOpen(LATE_UNLOCK_STAGE-1),false);assert.equal(lateOpen(LATE_UNLOCK_STAGE),true);
+  assert.equal(LATE_UNLOCK_STAGE,23,'public: late companions join at the former stage 27 difficulty');assert.ok(LATE_UNLOCK_STAGE<PART_STAGES);assert.equal(lateOpen(LATE_UNLOCK_STAGE-1),false);assert.equal(lateOpen(LATE_UNLOCK_STAGE),true);
   assert.equal(HERO.behemoth.hidden,false);assert.equal(HERO.behemoth.rarity,'UR');assert.ok(!HIDDEN.includes('behemoth'));
   assert.ok(!heroPool('UR',false).includes('behemoth'));assert.ok(heroPool('UR',true).includes('behemoth'));
   for(const id of LATE_COMPANIONS)assert.ok(HEROES.some(h=>h.id===id),id);

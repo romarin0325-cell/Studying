@@ -1,4 +1,4 @@
-import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,LATE_UNLOCK_STAGE,LATE_COMPANIONS,levelOf,TUNING as T} from './content.js';
+import {HERO,ARTIFACT,ARTIFACTS,ROSTER,HIDDEN,LATE_UNLOCK_STAGE,LATE_COMPANIONS,levelOf,stageMilestone,stageForUnlocks,TUNING as T} from './content.js';
 import {POWER_FACTOR} from './power-factor.js';
 import {periodOf} from './tempo.js';
 
@@ -80,8 +80,9 @@ export function combatPower(id,entry,beds,relicBonus=0){
   const h=HERO[id];if(!h||!entry?.owned)return 0;
   return Math.round(POWER_BASE*POWER_RARITY[h.rarity]*(POWER_FACTOR[id]??1)*heroMultiplier(entry,beds)*(1+relicBonus)*(1+POWER_SPECIAL_SHARE*(specialMultiplier(entry.enhance)-1)));
 }
-export const dispatchSlots=cleared=>Math.min(4,Math.floor(cleared/9));
-// Stage-scaled income reads the level (levelOf): the intro chapter adds no step, so later rewards keep their scale.
+export const DISPATCH_UNLOCK_STAGES=Object.freeze([9,18,27,36].map(stageMilestone));
+export const dispatchSlots=cleared=>DISPATCH_UNLOCK_STAGES.filter(stage=>cleared>=stage).length;
+// Stage-scaled income uses the level at the equivalent point on the previous difficulty curve.
 const dispatchBase=(power,cleared)=>(32+20*Math.log2(1+power/500))*(1+levelOf(cleared)*T.dispatchStageStep);
 export const dispatchReward=(power,cleared)=>{const base=dispatchBase(power,cleared);return {dust:Math.floor(base*T.dispatchDust),dreams:Math.max(1,Math.floor(base*T.dispatchDreams))};};
 // The stardust bed is applied when a dispatch is collected, so growing it helps dispatches already under way.
@@ -107,4 +108,4 @@ export function drawCharacter(random,season,guardian,pickup=null,open=true,minSR
   const pool=heroPool(rarity,open);return pool[Math.floor(random()*pool.length)];
 }
 export function drawRelic(random,draws){const rarity=['C','R','SR','UR'][rollIndex(relicRates(draws),random())],pool=Object.values(ARTIFACT).filter(a=>a.rarity===rarity);return pool[Math.floor(random()*pool.length)].id;}
-export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+levelOf(profile.cleared)*T.idleDustStep)*(1+stardustBonus(profile.beds,profile.cleared)));}
+export function idleReward(profile,now){const elapsed=Math.max(0,Math.min(T.idleHours*HOUR,now-profile.idleAt));return Math.floor(elapsed/HOUR*(T.idleDustPerHour+levelOf(profile.cleared)*T.idleDustStep)*(1+stardustBonus(profile.beds,stageForUnlocks(profile))));}
