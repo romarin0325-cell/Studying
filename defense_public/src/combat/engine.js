@@ -1333,12 +1333,12 @@ export function castPreview(s,id){
     }
   }else if(type==='flurry'){
     const count=nightRabbitTargetCount(s),aimed=Math.min(count,targets.length);
-    lines.push(targets.length?`가장 앞선 적 ${aimed}명에게 공격력 9배, ${hit(9)}를 줍니다. 최대 ${count}명입니다.`:`가장 앞선 적에게 공격력 9배, ${hit(9)}를 줍니다. 최대 ${count}명입니다.`);
+    lines.push(targets.length?`가장 앞선 적 ${aimed}명(최대 ${count}명)에게 공격력 9배, ${hit(9)}를 줍니다.`:`가장 앞선 적부터 최대 ${count}명에게 공격력 9배, ${hit(9)}를 줍니다.`);
   }else if(type==='thunder'){
     const stun=1.2*control*scale;
     lines.push(`적 전체에게 공격력 ${THUNDER_FACTOR}배, ${allHit(THUNDER_FACTOR)}를 줍니다.`);
     lines.push(`일반 적은 ${sec(stun)}, 보스는 ${sec(stun*BOSS_CONTROL_SCALE)} 동안 기절합니다.`);
-  }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 공격력 ${factor}배, ${allHit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`내고 남은 골드 40마다 +1배 (최대 ${12+level}배).`);}
+  }else if(type==='fortune'){const level=s.upgrades[id]||0,factor=fortuneFactor(s.gold-skillGoldCost(id),level);lines.push(`적 전체에게 공격력 ${factor}배, ${allHit(factor)}를 줍니다.`);if(factor<12+level)lines.push(`쓰고 남은 골드 40마다 공격력이 1배씩 늘어납니다(최대 ${12+level}배).`);}
   else if(type==='dividend'){
     lines.push(`적 전체에게 공격력 4배, ${allHit(4)}를 주고 즉시 골드 ${QUEEN_TAX}을 받습니다.`);
     // The edict pays half of this wave's base income once; a second cast in the same wave only adds the tax.
