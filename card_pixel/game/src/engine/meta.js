@@ -2,11 +2,12 @@ import { CONTRACTS } from '../content/contracts.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { MISSIONS, MISSION_OFFER_LIMIT, MISSION_UNLOCK_CHAPTER } from '../content/missions.js';
 import { NOTEBOOK, NOTEBOOK_GOALS } from '../content/notebook.js';
+import { springDrawChance } from './awakenings.js';
 import { calendarDate, localDayKey } from './dates.js';
 import { chronicle, HISTORY_LIMIT, returnedCompanions } from './history.js';
 import { expeditionPool, gradeOf } from './roster.js';
 import { shuffle } from './rng.js';
-import { finishRun, runRewards, runRoster } from './run.js';
+import { createRun, finishRun, runRewards, runRoster } from './run.js';
 import { entryState, featureFlags, hasCleared, hasFeature } from './entry.js';
 import { resumeLabel } from '../ui/glossary.js';
 
@@ -98,7 +99,12 @@ function encounterGoal(profile, roster) {
     const matches = pool.filter(candidate => ids.has(candidate));
     return { id, count: matches.filter(candidate => !seals.includes(candidate)).length, total: matches.length };
   }).sort((a, b) => b.count - a.count || (a.count ? 0 : b.total - a.total));
-  const best = ranked[0];
+  let best = ranked[0];
+  // Settled main run IDs are recorded in order as run number / dungeon / difficulty / seed.
+  const recent = profile.records.appliedRuns.slice(-2);
+  if (best && recent.length === 2 && recent.every(id => id.split('/')[1] === best.id)) {
+    best = ranked.find(entry => entry.id !== best.id && entry.count > 0);
+  }
   if (!best?.total) return null;
   return {
     text: `영입 전 동료 ${best.count || best.total}명 · ${DUNGEONS[best.id].name}에서 만날 수 있음`,
@@ -118,7 +124,13 @@ export function nextGoal(profile, run, roster) {
   const preferred = profile.ui?.destination;
   const destination = unreturned || (openRegions.includes(preferred) ? preferred : openRegions[0]);
   const travel = (dungeonId, difficulty = departureDifficulty(profile, dungeonId)) => ({ screen: 'dungeons', dungeonId, difficulty });
-  const journey = (chapter, dungeonId) => ({ ...NOTEBOOK_GOALS[chapter], target: travel(dungeonId) });
+  const journey = (chapter, dungeonId) => {
+    const { startCompanionNot, ...goal } = NOTEBOOK_GOALS[chapter];
+    const target = travel(dungeonId);
+    const previousLead = startCompanionNot && profile.notebook[startCompanionNot];
+    if (previousLead) target.startCompanionNot = previousLead;
+    return { ...goal, target };
+  };
   const chapter = chapters.find(entry => !entry.completed)?.id;
   const recruited = Object.keys(profile.recruits);
 
@@ -195,6 +207,17 @@ export function startView(profile, dungeonId = INTRO) {
 
 export function appearanceRegions(roster, id) {
   return Object.values(DUNGEONS).filter(dungeon => expeditionPool(roster, dungeon.id).baseIds.includes(id)).map(dungeon => dungeon.id);
+}
+
+export function companionSpringRates(profile, roster, id) {
+  return Object.values(DUNGEONS).map(dungeon => {
+    const { unlockedDungeons, ...profileView } = startView(profile, dungeon.id);
+    const unlocked = unlockedDungeons.includes(dungeon.id);
+    const hasSpring = dungeon.layout !== 'intro' || profileView.features.introSpring;
+    // Use a fresh run to apply the same pool and draw version even for a locked region preview.
+    const percent = hasSpring ? springDrawChance(createRun({ roster, profileView }), id) : 0;
+    return { dungeonId: dungeon.id, unlocked, percent };
+  }).sort((a, b) => b.percent - a.percent);
 }
 
 export function prepView(profile, dungeonId, roster) {

@@ -6,45 +6,30 @@ import { EPISODES } from '../../content/episodes.js';
 import { RELICS } from '../../content/relics.js';
 import { episodePages, episodeState } from '../../engine/episodes.js';
 import { GRADE } from '../../engine/roster.js';
-import { appearanceRegions, knownCompanions, missionsView, unrecruitedCompanions } from '../../engine/meta.js';
-import { restoreProfile } from '../../engine/save.js';
+import { appearanceRegions, companionSpringRates, knownCompanions, missionsView, unrecruitedCompanions } from '../../engine/meta.js';
 import { EPISODE, TERMS } from '../glossary.js';
-import { backupSlots, LAST_GOOD_KEY, SESSION_KEY, storage } from '../storage.js';
 import { outcomeText, storyLine } from '../story-lines.js';
-import { josa } from '../text.js';
+import { josa, keepSeparators } from '../text.js';
 
-export function saveEpisodeFlags(profile, field, ids) {
+const springPercent = percent => percent.toFixed(1) + '%';
+
+// `write` is the session store's saveEpisodeFlags. It must be the store this tab already loaded: a second store
+// would bump the revision behind the tab's back and make the tab look stale to itself.
+export function saveEpisodeFlags(profile, field, ids, write) {
   if (!ids.length) return true;
   const flags = Object.fromEntries(ids.map(id => [id, true]));
-  const ui = (profile.ui ??= {});
-  ui[field] = { ...ui[field], ...flags };
-  const slots = backupSlots(storage);
   try {
-    const slot = slots.active();
-    const runs = profile.records.appliedRuns;
-    // Patch only these UI flags so an active expedition keeps its serialized checkpoint.
-    function write(key) {
-      const session = JSON.parse(slots.read(slot, key));
-      const saved = restoreProfile(session?.profile);
-      const applied = saved?.records.appliedRuns;
-      if (applied?.length !== runs.length || !runs.every((id, index) => applied[index] === id)
-        || !ids.every(id => saved.recruits[id]?.since === profile.recruits[id]?.since)) return false;
-      const savedUi = (session.profile.ui ??= {});
-      savedUi[field] = { ...savedUi[field], ...flags };
-      slots.write(slot, key, JSON.stringify(session));
-      return true;
-    }
-    if (!write(SESSION_KEY)) return false;
-    try { write(LAST_GOOD_KEY); } catch { /* Keep the primary save. */ }
+    if (!write(profile, field, flags)?.ok) return false;
+    const ui = (profile.ui ??= {});
+    ui[field] = { ...ui[field], ...flags };
     return true;
   } catch { return false; }
 }
 
-function readEpisode(sheets, profile, id) {
+function readEpisode(sheets, profile, id, saveFlags) {
   const { title, appearance, voice, body } = EPISODES[id];
   const pages = episodePages(body);
-  const saved = episodeState(profile, id) === 'read' || saveEpisodeFlags(profile, 'episodesRead', [id]);
-  if (!Object.keys(EPISODES).some(other => episodeState(profile, other) === 'new')) $('#meta-episode-badge')?.remove();
+  const saved = episodeState(profile, id) === 'read' || saveFlags('episodesRead', [id]);
   sheets.openSheet(title, `<div class="episode-reader">
     <div class="episode-scroll">
       ${appearance || voice ? `<details class="episode-notes">
@@ -54,7 +39,7 @@ function readEpisode(sheets, profile, id) {
       </details>` : ''}
       <div class="episode-page" tabindex="0"></div>
     </div>
-    ${saved ? '' : `<p role="status">${EPISODE.saveFailed}</p>`}
+    <p class="episode-save-status" role="status" hidden></p>
     <div class="episode-controls">
       <button class="btn" type="button" id="episode-prev">${EPISODE.previous}</button>
       <span class="episode-count" role="status"></span>
@@ -81,6 +66,11 @@ function readEpisode(sheets, profile, id) {
   previous.addEventListener('click', () => { index--; showPage(); });
   next.addEventListener('click', () => { index++; showPage(); });
   showPage();
+  if (!saved) {
+    const status = $('.episode-save-status', reader);
+    status.textContent = EPISODE.saveFailed;
+    status.hidden = false;
+  }
 }
 
 function historyList(profile, id, card) {
@@ -128,7 +118,7 @@ export function rosterTable({ dungeon, pool, profile, widgets, sheets, inspect }
   companionGrid(grid, { ids, pool, profile, seen, widgets, select: inspect });
 }
 
-export function companionSheet({ core, roster, widgets, sheets, profile, id, openDestination, openMission }) {
+export function companionSheet({ core, roster, widgets, sheets, profile, id, openDestination, openMission, saveFlags }) {
   const { card, sprite } = widgets;
   const character = card(id);
   if (!character) return;
@@ -137,9 +127,14 @@ export function companionSheet({ core, roster, widgets, sheets, profile, id, ope
   const regions = appearanceRegions(roster, id);
   const met = !recruit && knownCompanions(profile).has(id);
   const unlocked = regions.filter(region => profile.unlockedDungeons.includes(region));
-  const destination = met && openDestination && (unlocked.find(region => !profile.seals[region]?.includes(id)) ?? unlocked[0] ?? regions[0]);
-  const departureHint = destination && (!unlocked.length ? '지역 해금 필요'
+  const [best, ...otherRates] = met ? companionSpringRates(profile, roster, id).filter(rate => rate.unlocked && rate.percent > 0) : [];
+  const destination = met && openDestination && (best?.dungeonId
+    ?? unlocked.find(region => !profile.seals[region]?.includes(id)) ?? unlocked[0] ?? regions[0]);
+  const departureHint = destination && !best && (!unlocked.length ? '지역 해금 필요'
     : profile.seals[destination]?.includes(id) ? '준비에서 출현 제외 해제 필요' : '');
+  const direction = destination && josa(DUNGEONS[destination].name, '으로/로');
+  const departureLabel = direction && (best ? `${direction} · ◆1 칸 ${springPercent(best.percent)}` : `${direction} 출발`);
+  const otherRegions = otherRates.map(rate => `${DUNGEONS[rate.dungeonId].name} ${springPercent(rate.percent)}`).join(' · ');
   const mission = met && openMission && missionsView(profile, roster).claimable.find(period => period.candidates.includes(id));
   const skills = character.skills.map(skill => {
     const body = skillText(core.SkillDisplay.body(skill, { entity: character }));
@@ -152,8 +147,10 @@ export function companionSheet({ core, roster, widgets, sheets, profile, id, ope
     <div class="meta-sheet meta-companion">
       <div class="meta-companion-art">${sprite(id)}</div>
       <p>나오는 지역: ${esc(regions.map(region => DUNGEONS[region].name).join(' · ') || '지역 기본 명단에 없음')}</p>
-      ${destination || mission ? `<div class="meta-companion-links">
-        ${destination ? `<button class="btn" data-companion-depart="${destination}">${esc(josa(DUNGEONS[destination].name, '으로/로'))} 출발</button>` : ''}
+      ${destination || best || mission ? `<div class="meta-companion-links">
+        ${destination ? `<button class="btn" data-companion-depart="${destination}"><span>${keepSeparators(esc(departureLabel))}</span></button>`
+          : best ? `<small>${keepSeparators(esc(`${DUNGEONS[best.dungeonId].name} · ◆1 칸 ${springPercent(best.percent)}`))}</small>` : ''}
+        ${otherRegions ? `<small class="meta-companion-rates">${keepSeparators(esc(otherRegions))}</small>` : ''}
         ${departureHint ? `<small>${departureHint}</small>` : ''}
         ${mission ? `<button class="btn" id="meta-companion-mission">${mission.kind === 'weekly' ? '주간' : '월간'} 영입 임무</button>` : ''}
       </div>` : ''}
@@ -169,7 +166,7 @@ export function companionSheet({ core, roster, widgets, sheets, profile, id, ope
   `);
   $('[data-companion-depart]', $('#sh-body'))?.addEventListener('click', () => openDestination(destination));
   $('#meta-companion-mission')?.addEventListener('click', () => openMission(mission));
-  if (episode === 'new' || episode === 'read') $('#meta-episode').addEventListener('click', () => readEpisode(sheets, profile, id));
+  if (episode === 'new' || episode === 'read') $('#meta-episode').addEventListener('click', () => readEpisode(sheets, profile, id, saveFlags));
 }
 
 export function collectionScreen(node, { profile, roster, widgets, core, inspect }) {

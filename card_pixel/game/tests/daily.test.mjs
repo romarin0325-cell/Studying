@@ -10,8 +10,10 @@ import * as Meta from '../src/engine/meta.js';
 import { create as makeRoster } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
+import { RIFT_PUZZLES } from '../src/content/rift-puzzles.js';
 import { coreBundle } from '../tools/core-bundle.mjs';
 import { dailyTotals, playDaily } from '../tools/sim.mjs';
+import { advanceFirstRiftFight, playPuzzleFight, settlePuzzleFight } from './screens/puzzles.mjs';
 
 process.env.TZ = 'Asia/Tokyo';
 const repo = fileURLToPath(new URL('../../../', import.meta.url));
@@ -53,6 +55,14 @@ function unlockedProfile() {
   profile.seenCharacters = ['ash'];
   profile.seenRelics = ['reverse'];
   profile.contractStamps = { ember_volcano: { rescue: 'earlier-run' } };
+  return profile;
+}
+
+function puzzleProfile() {
+  const profile = unlockedProfile();
+  profile.records.clears.creation_tower = { easy: 0, normal: 1, nightmare: 0 };
+  profile.notebook.chapters.push(7);
+  profile.ui.endingSeen = true;
   return profile;
 }
 
@@ -195,6 +205,209 @@ test('swapping the arena boss order changes the real fight to a 46-turn win with
   assert.equal(won.heirlooms.trauma.name, '종언의예고');
 });
 
+const puzzleCounts = {
+  'arena-relay': { wins: 21, save: 4, heirloom: 7 },
+  'ember-clock': { wins: 26, save: 2, heirloom: 2 },
+  'trench-heirlooms': { wins: 6, save: 4, heirloom: 2 }
+};
+
+function startPuzzle(store, puzzle, endingId, profile = puzzleProfile()) {
+  return ok(store.startPuzzle({ profile, puzzleId: puzzle.id, endingId })).run;
+}
+
+for (const puzzle of RIFT_PUZZLES) {
+  test(`puzzle ${puzzle.id}: all 60 formations have distinct winning orders for both endings`, () => {
+    assert.equal(puzzle.endings.length, 2);
+    const [save, heirloom] = puzzle.endings;
+    assert.deepEqual([save.id, heirloom.id], ['save', 'heirloom']);
+    assert.deepEqual(save.goal.survive, [heirloom.goal.fall]);
+    assert.equal(heirloom.goal.fall, heirloom.goal.heirloomUsed);
+    const orders = puzzle.rentals.flatMap(first => puzzle.rentals.filter(id => id !== first)
+      .flatMap(second => puzzle.rentals.filter(id => id !== first && id !== second).map(third => [first, second, third])));
+    assert.equal(orders.length, 60);
+    const store = DailyStore.create(memoryStorage(), deps);
+    const counts = { wins: 0, save: 0, heirloom: 0 };
+    for (const [index, order] of orders.entries()) {
+      const run = startPuzzle(store, puzzle, save.id);
+      assert.deepEqual([run.floor, run.room.type, run.room.status, run.stats.turns], [7, 'boss', 'order', 0]);
+      assert.deepEqual(run.bench, puzzle.rentals);
+      assert.deepEqual(Run.defaultParty(run), puzzle.rentals.slice(0, 3));
+      playPuzzleFight(run, core, index === 0 ? undefined : order);
+      const { score } = ok(store.finishPuzzle(run));
+      const other = Daily.judgePuzzleGoal(heirloom.goal, score);
+      assert.ok(!(score.goalMet && other.goalMet), order.join(', '));
+      if (index === 0) assert.deepEqual([score.goalMet, other.goalMet], [false, false]);
+      if (score.outcome === 'win') counts.wins++;
+      if (score.goalMet) counts.save++;
+      if (other.goalMet) counts.heirloom++;
+    }
+    assert.deepEqual(counts, puzzleCounts[puzzle.id]);
+    assert.ok(counts.save >= 2 && counts.heirloom >= 2);
+  });
+}
+
+test('puzzle judgment excludes reserves and distinguishes receiving an heirloom from using it', () => {
+  const [arena, ember] = RIFT_PUZZLES;
+  const store = DailyStore.create(memoryStorage(), deps);
+  const reserve = startPuzzle(store, arena, 'save');
+  playPuzzleFight(reserve, core, ['trauma', 'time_ruler', 'entropy']);
+  const { score: withReserve } = ok(store.finishPuzzle(reserve));
+  assert.equal(withReserve.outcome, 'win');
+  assert.ok(withReserve.livingIds.includes('hellhound'));
+  assert.deepEqual(withReserve.conditions[1], { kind: 'survive', target: 'hellhound', met: false, value: 'didNotFight' });
+  const activeCount = Daily.judgePuzzleGoal({ survivors: 2 }, withReserve);
+  assert.deepEqual(activeCount.conditions[1], { kind: 'survivors', target: 2, met: false, value: 1 });
+  assert.equal(activeCount.goalMet, false);
+
+  const order = ['cinderella', 'forget_me_not', 'pudding_princess'];
+  const receive = startPuzzle(store, ember, 'heirloom');
+  playPuzzleFight(receive, core, order, option => option.heirFrom !== 'cinderella');
+  assert.ok(receive.chronicle.at(-1).gained.some(use => use.from === 'cinderella' && use.to === 'forget_me_not'));
+  const { score: received } = ok(store.finishPuzzle(receive));
+  assert.deepEqual(received.conditions, [
+    { kind: 'win', met: true, value: 'win' },
+    { kind: 'fall', target: 'cinderella', met: true, value: 'fallen' },
+    { kind: 'heirloomUsed', target: 'cinderella', met: false, value: [] },
+    { kind: 'maxTurns', target: 12, met: true, value: 11 }
+  ]);
+  assert.equal(received.goalMet, false);
+
+  const use = startPuzzle(store, ember, 'heirloom');
+  playPuzzleFight(use, core, order);
+  const { score: used } = ok(store.finishPuzzle(use));
+  assert.deepEqual(used.conditions[2], { kind: 'heirloomUsed', target: 'cinderella', met: true, value: ['forget_me_not'] });
+  assert.equal(used.goalMet, true);
+  assert.deepEqual(store.puzzles(puzzleProfile())[1].endings[1].best, used);
+  assert.equal(Daily.judgePuzzleGoal(ember.endings[1].goal, { ...used, outcome: 'lose' }).goalMet, false);
+});
+
+test('a won puzzle ending is saved before result confirmation and survives reopening', () => {
+  const storage = memoryStorage();
+  const store = DailyStore.create(storage, deps);
+  const profile = puzzleProfile();
+  const puzzle = RIFT_PUZZLES[0];
+  const run = startPuzzle(store, puzzle, 'heirloom', profile);
+  const { battleSeed } = settlePuzzleFight(run, core, ['hellhound', 'time_ruler', 'trauma']);
+  assert.deepEqual([run.seed, battleSeed, run.phase, run.result, run.stats.turns], [20261143, 20268234, 'result', 'win', 24]);
+  const first = ok(store.finishPuzzle(run));
+  assert.equal(first.score.goalMet, true);
+  assert.deepEqual(first.score.heirloomUses, [{ by: 'time_ruler', from: 'hellhound' }]);
+
+  const reopened = DailyStore.create(storage, deps);
+  assert.deepEqual(reopened.puzzles(profile)[0].endings.map(ending => ending.best), [null, first.score]);
+  const recorded = storage.getItem(KEY);
+  storage.failWrite = true;
+  ok(Run.confirmResult(run));
+  assert.deepEqual(ok(store.finishPuzzle(run)), first);
+  assert.equal(storage.getItem(KEY), recorded);
+});
+
+test('puzzle bests round-trip separately from the official rift, stamps and the active expedition', () => {
+  const storage = memoryStorage();
+  const store = DailyStore.create(storage, deps);
+  const puzzle = RIFT_PUZZLES[0];
+  const puzzleId = puzzle.id;
+  const [save, heirloom] = puzzle.endings;
+  const beforeTower = unlockedProfile();
+  beforeTower.ui.endingSeen = true;
+  assert.deepEqual(store.puzzles(beforeTower), []);
+  reason(store.startPuzzle({ profile: beforeTower, puzzleId, endingId: save.id }), 'locked');
+  const profile = puzzleProfile();
+  const profileBefore = structuredClone(profile);
+  reason(store.startPuzzle({ profile, puzzleId }), 'invalid_puzzle');
+  reason(store.startPuzzle({ profile, puzzleId, endingId: 'other' }), 'invalid_puzzle');
+  const session = Save.createSaveStore(storage, deps);
+  const main = Run.createRun({ ...deps, dungeonId: 'ember_volcano', seed: 7 });
+  session.save({ profile, run: main });
+  const savedMain = storage.getItem('relaymare.session');
+  const mainBefore = structuredClone(main);
+
+  ok(start(store, FIRST));
+  ok(store.finish(playDaily(FIRST, { naive: true })));
+  const active = ok(start(store, SECOND)).run;
+  const before = storage.getItem(KEY);
+  const history = store.history();
+  assert.equal(history.rows[0].official.outcome, 'win');
+  assert.equal(store.puzzles(profile).length, 3);
+  assert.ok(store.puzzles(profile).every(puzzle => puzzle.endings.every(ending => ending.best === null)));
+  const run = startPuzzle(store, puzzle, heirloom.id, profile);
+  reason(store.finishPuzzle(run), 'run_not_done');
+  reason(store.save(run), 'invalid_save');
+  settlePuzzleFight(run, core, ['hellhound', 'time_ruler', 'trauma']);
+  reason(store.finish(run), 'invalid_save');
+  assert.equal(storage.getItem(KEY), before);
+  assert.equal(Meta.creditMissions(profile, run), profile);
+  assert.equal(Meta.applyRunEnd(profile, run).announce.reason, 'daily_run');
+  assert.equal(session.save({ profile, run }), false);
+
+  storage.failWrite = true;
+  const failed = store.finishPuzzle(run);
+  assert.equal(failed.reason, 'storage_failed');
+  assert.equal(failed.score.goalMet, true);
+  assert.equal(storage.getItem(KEY), before);
+  ok(Run.confirmResult(run));
+  storage.failWrite = false;
+  const { score } = ok(store.finishPuzzle(run));
+  assert.deepEqual(score, failed.score);
+  assert.deepEqual(store.puzzles(profile)[0].endings.map(ending => ending.best), [null, score]);
+
+  const rescue = startPuzzle(store, puzzle, save.id, profile);
+  playPuzzleFight(rescue, core, ['entropy', 'discipline_captain', 'hellhound']);
+  const { score: rescued } = ok(store.finishPuzzle(rescue));
+  assert.equal(rescued.goalMet, true);
+  const missed = startPuzzle(store, puzzle, save.id, profile);
+  playPuzzleFight(missed, core, ['hellhound', 'entropy', 'time_ruler']);
+  const { score: wrongEnding } = ok(store.finishPuzzle(missed));
+  assert.equal(wrongEnding.goalMet, false);
+  assert.equal(Daily.judgePuzzleGoal(heirloom.goal, wrongEnding).goalMet, true);
+  assert.ok(wrongEnding.turns < score.turns);
+  const { puzzleBests, ...daily } = JSON.parse(storage.getItem(KEY));
+  assert.deepEqual(Object.keys(puzzleBests), [puzzleId]);
+  assert.deepEqual(Object.keys(puzzleBests[puzzleId]).sort(), [heirloom.id, save.id]);
+  assert.deepEqual(daily, JSON.parse(before));
+  assert.deepEqual(store.history(), history);
+  assert.equal(ok(store.resume()).run.id, active.id);
+  assert.equal(storage.getItem('relaymare.session'), savedMain);
+  assert.deepEqual(main, mainBefore);
+  assert.deepEqual(profile, profileBefore);
+
+  const imported = memoryStorage();
+  const backup = session.exportBackup({ profile, run: main, dailyRun: run });
+  ok(Save.createSaveStore(imported, deps).restoreBackup(backup));
+  const reopened = DailyStore.create(imported, deps);
+  assert.deepEqual(reopened.puzzles(profile)[0].endings.map(ending => ending.best), [rescued, score]);
+  assert.deepEqual(reopened.history(), history);
+  assert.equal(ok(reopened.resume()).run.id, active.id);
+});
+
+test('old puzzle bests cannot prove either named ending and are discarded without touching daily records', () => {
+  const storage = memoryStorage();
+  const profile = puzzleProfile();
+  const store = DailyStore.create(storage, deps);
+  ok(start(store, FIRST, 'official', profile));
+  const old = JSON.parse(storage.getItem(KEY));
+  old.puzzleBests = {
+    'arena-relay': { outcome: 'win', floor: 7, turns: 24, livingIds: ['trauma', 'discipline_captain', 'entropy'], heirloomsUsed: 1 },
+    'ember-clock': { outcome: 'win', floor: 7, turns: 11, livingIds: ['night_rabbit', 'cinderella', 'pudding_princess'], heirloomsUsed: 2 },
+    'trench-heirlooms': { outcome: 'win', floor: 7, turns: 18, livingIds: ['sphinx', 'sylphid', 'unicorn'], heirloomsUsed: 2 }
+  };
+  const raw = JSON.stringify(old);
+  storage.setItem(KEY, raw);
+  assert.ok(DailyStore.restoreDailyData(old, deps));
+  assert.ok(store.puzzles(profile).every(puzzle => puzzle.endings.every(ending => ending.best === null)));
+  assert.equal(storage.getItem(KEY), raw);
+
+  const run = startPuzzle(store, RIFT_PUZZLES[0], 'save', profile);
+  playPuzzleFight(run, core, ['entropy', 'discipline_captain', 'hellhound']);
+  const { score } = ok(store.finishPuzzle(run));
+  const { puzzleBests, ...daily } = JSON.parse(storage.getItem(KEY));
+  assert.deepEqual(Object.keys(puzzleBests), ['arena-relay']);
+  assert.deepEqual(Object.keys(puzzleBests['arena-relay']), ['save']);
+  assert.deepEqual(daily, { version: old.version, days: old.days, active: old.active });
+  assert.deepEqual(store.puzzles(profile)[0].endings.map(ending => ending.best), [score, null]);
+  assert.equal(ok(store.resume()).run.id, old.active.runId);
+});
+
 test('battle settlement pays zero crystals, grants risk D once, and accepts a zero-survivor boss win', () => {
   const store = DailyStore.create(memoryStorage(), deps);
   const key = '2026-12-03';
@@ -320,6 +533,83 @@ test('restoring battle and altar checkpoints preserves the independent main sess
   assert.equal(ok(store.abandon(abandoned.id)).score.outcome, 'abandon');
   assert.equal(storage.getItem('relaymare.session'), savedMain);
   assert.deepEqual(session.load().profile, JSON.parse(savedMain).profile);
+});
+
+test('a stale rift tab cannot overwrite a floor-two checkpoint with its floor-one formation', () => {
+  const storage = memoryStorage();
+  const firstTab = DailyStore.create(storage, deps);
+  const secondTab = DailyStore.create(storage, deps);
+  ok(start(firstTab, FIRST));
+  const legacy = JSON.parse(storage.getItem(KEY));
+  delete legacy.active.revision;
+  storage.setItem(KEY, JSON.stringify(legacy));
+  const stale = ok(secondTab.resume()).run;
+  const current = ok(firstTab.resume()).run;
+  assert.notEqual(stale, current);
+
+  advanceFirstRiftFight(current, core);
+  ok(firstTab.save(current));
+
+  ok(Run.enterBattleDoor(stale, { floor: 1, index: 0, partyIds: Run.defaultParty(stale) }));
+  const saved = storage.getItem(KEY);
+  reason(secondTab.save(stale), 'stale_tab');
+  reason(secondTab.abandon(stale.id), 'stale_tab');
+  assert.equal(storage.getItem(KEY), saved);
+  const reloaded = ok(DailyStore.create(storage, deps).resume()).run;
+  assert.deepEqual([reloaded.floor, reloaded.phase, reloaded.stats.turns], [2, 'map', 4]);
+});
+
+test('repeated restores of the same live rift backup reject old floor-one checkpoints', () => {
+  const storage = memoryStorage();
+  const profile = unlockedProfile();
+  const saves = Save.createSaveStore(storage, deps);
+  const daily = DailyStore.create(storage, deps);
+  const live = ok(start(daily, FIRST, 'official', profile)).run;
+  const oldTabs = Array.from({ length: 3 }, () => {
+    const store = DailyStore.create(storage, deps);
+    const run = ok(store.resume()).run;
+    assert.equal(run.floor, 1);
+    return { store, run };
+  });
+  advanceFirstRiftFight(live, core);
+  storage.failWrite = true;
+  reason(daily.save(live), 'storage_failed');
+  const backup = saves.exportBackup({ profile, dailyRun: live });
+  assert.equal(backup.daily.active.revision, 1);
+  assert.equal(backup.daily.active.checkpoint.floor, 2);
+  const file = JSON.stringify(backup);
+  storage.failWrite = false;
+
+  let tabOpenedAfterFirstRestore;
+  for (const [index, { store, run }] of oldTabs.entries()) {
+    ok(saves.restoreBackup(file));
+    reason(store.save(run), 'stale_tab');
+    if (index === 0) {
+      const reopened = DailyStore.create(storage, deps);
+      tabOpenedAfterFirstRestore = { store: reopened, run: ok(reopened.resume()).run };
+    }
+  }
+  reason(tabOpenedAfterFirstRestore.store.save(tabOpenedAfterFirstRestore.run), 'stale_tab');
+  const restored = ok(daily.resume()).run;
+  assert.deepEqual([restored.floor, restored.stats.turns], [2, 4]);
+  ok(daily.save(restored));
+  assert.equal(ok(DailyStore.create(storage, deps).resume()).run.floor, 2);
+});
+
+test('a rift started after two empty restores cannot be overwritten by the original attempt', () => {
+  const storage = memoryStorage();
+  const profile = unlockedProfile();
+  const saves = Save.createSaveStore(storage, deps);
+  const daily = DailyStore.create(storage, deps);
+  const file = JSON.stringify(saves.exportBackup({ profile }));
+  const old = ok(start(daily, FIRST, 'official', profile)).run;
+  ok(saves.restoreBackup(file));
+  ok(saves.restoreBackup(file));
+  const current = DailyStore.create(storage, deps);
+  const run = ok(start(current, FIRST, 'official', profile)).run;
+  assert.equal(run.id, old.id);
+  reason(daily.save(old), 'stale_tab');
+  ok(current.save(run));
 });
 
 test('the first record and stamp stay fixed while practice best and duplicate receipts update independently', () => {

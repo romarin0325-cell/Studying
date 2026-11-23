@@ -11,6 +11,14 @@
 
 /* Anchor the choices low, where the thumb rests; all doors show when they fit and only the list scrolls when they do not. */
 #map .run-route > .fixed-top { padding-top: 0; }
+#map .floor-cell.promise:where(:not(.cur)) {
+  color: var(--aqua-ink);
+  --pf-o: var(--aqua-lo);
+  --pf-f: var(--aqua-tint);
+}
+#map .floor-cell.promise .relic-icon { flex: none; }
+#event .promise-choice { display: flex; align-items: center; gap: 6px; }
+#event .promise-choice .relic-icon { flex: none; }
 #map .run-doors.scroll-list {
   align-self: end;
   align-content: start;
@@ -105,6 +113,8 @@
 .map-door[data-kind="spring"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #90ead9; }
 .map-door[data-kind="altar"], .map-door[data-kind="event"] { --door-rim: #ab82b1; --door-fill: #5a375c; --door-shine: #f8b5d9; }
 .map-door[data-kind="treasure"] { --door-rim: #b78854; --door-fill: #65412d; --door-shine: #ffd983; }
+.map-door[data-kind="promise"] { --door-rim: #649caa; --door-fill: #225063; --door-shine: #ffd983; }
+#map .door-plate[data-kind="promise"] { --kind: var(--aqua); }
 .map-door:is([data-kind="gate"], [data-kind="boss"], [data-kind="elite"]) {
   --door-rim: #ad7469;
   --door-fill: #56303d;

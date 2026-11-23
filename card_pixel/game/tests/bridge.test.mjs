@@ -7,13 +7,17 @@ import { fileURLToPath } from 'node:url';
 // Share Math so the ESM bridge can seed the card core inside the VM.
 import * as Bridge from '../src/engine/bridge.js';
 import { makeBossLesson } from '../src/content/boss-lessons.js';
+import { DUNGEONS } from '../src/content/dungeons.js';
 import { create as makeRoster } from '../src/engine/roster.js';
 import * as Run from '../src/engine/run.js';
 import { createStage } from '../src/stage/stage.js';
 import { createMoves } from '../src/ui/battle/moves.js';
 import { intentLines } from '../src/ui/battle/hud.js';
+import { battleLog } from '../src/ui/battle/log.js';
+import { relayOutcomeLines } from '../src/ui/battle/tiles.js';
 import { createCoreRoster } from './support/core.mjs';
 import { coreBundle } from '../tools/core-bundle.mjs';
+import { playRun } from '../tools/sim.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..', '..', '..');
@@ -38,6 +42,29 @@ const option = (b, name) => b.options().find(o => o.name === name);
 const quietEnemy = (hp = 99999, overrides = {}) => dummy({
   stats: { hp, atk: 0, matk: 0, def: 60, mdef: 60, ...overrides }, skills: []
 });
+
+function eachRetreatDecision(dungeon, seed, check) {
+  let live, config, commands;
+  playRun(dungeon, seed, {
+    legacyRules: true, relicDoors: true,
+    actionOverride(run, wait, current) {
+      if (current !== live) {
+        live = current;
+        config = Run.battleOptions(run);
+        commands = [];
+      }
+      if (live.canRetreat()) check({ floor: run.floor, turn: wait.s.turn, commands, wait, replay });
+    },
+    trace(run, wait, move) { commands.push(move.index); }
+  });
+
+  function replay() {
+    const branch = Bridge.create(S.RelayCore, config);
+    branch.start();
+    for (const index of commands) branch.act(index);
+    return branch;
+  }
+}
 
 function bossFixture(id, stats) {
   const data = S.RelayCore.ENEMIES.find(enemy => enemy.id === id);
@@ -69,9 +96,17 @@ test('Soul Drain previews zero HP damage, the incoming MP, and the actual respon
       assert.deepEqual(intent.damageRange, [0, 0]);
       assert.deepEqual([intent.resourceEffect.mode, intent.resourceEffect.before, intent.resourceEffect.after, intent.resourceEffect.preventedBy],
         [type, 34, blocked ? 34 : type === 'flat' ? 10 : 0, blocked]);
-      const rule = b.act(0).find(event => event.actionId === intent.actionId && event.t === 'rule');
+      const events = b.act(0);
+      const rule = events.find(event => event.actionId === intent.actionId && event.t === 'rule');
       assert.deepEqual([rule.target, rule.before, rule.after, rule.preventedBy],
         [{ side: 'ally', idx: 0 }, 34, intent.resourceEffect.after, blocked]);
+      const cast = events.find(event => event.t === 'act' && event.actionId === intent.actionId);
+      assert.equal(cast.manaDrain, true);
+      const losses = events.filter(event => event.t === 'mp' && event.cause?.skill === cast.skill.name);
+      assert.deepEqual(losses.map(event => [event.who, event.delta, event.cause.by]), blocked ? [] : [
+        [cast.target, intent.resourceEffect.after - 34, cast.who]
+      ]);
+      assert.equal(events.some(event => event.t === 'hp' && event.cause?.skill === cast.skill.name), false);
     }
     const { b } = prepare(type, null);
     const preview = b.previewRetreat();
@@ -217,7 +252,7 @@ test('wild golem and night bat repeat their announced actions for six local turn
     ['night_bat', [
       ['흡혈 이빨', 'phy', 1.6, '다음 턴 빈틈 · 휴식 · 받는 피해 ×1.3'],
       ['빈틈', 'rest', 0, '다음 턴 일반 공격 · 물리 ×1'],
-      ['일반 공격', 'phy', 1, '다음 턴 흡혈 이빨 · 물리 ×1.6']
+      ['일반 공격', 'phy', 1, '다음 턴 흡혈 이빨 · 물리 ×1.6 · 가한 피해 30% 회복']
     ]]
   ];
   for (const [id, expected] of cases) {
@@ -234,7 +269,8 @@ test('wild golem and night bat repeat their announced actions for six local turn
       const [current, chip] = intentLines(intent, countdown);
       assert.equal(chip, future);
       assert.equal(current, kind === 'rest' ? '빈틈 · 적 휴식 · 받는 피해 ×1.3' :
-        '내 행동 뒤 · ' + name + (kind === 'charge' ? '' : ' · HP ' + intent.damageRange[0]));
+        '내 행동 뒤 · ' + name + (kind === 'charge' ? '' : ' · HP ' + intent.damageRange[0]) +
+        (name === '흡혈 이빨' ? ' · 가한 피해 30% 회복' : ''));
       events = b.act(0);
       const action = events.find(e => e.t === 'act' && e.who.side === 'enemy');
       const damage = events.find(e => e.t === 'hp' && e.who.side === 'ally' && e.delta < 0);
@@ -244,6 +280,25 @@ test('wild golem and night bat repeat their announced actions for six local turn
       else assert.equal(damage, undefined);
     }
   }
+});
+
+test('the wounded twilight bat in seed 15838 heals 90 HP from its 302-damage bite', () => {
+  let seen = false;
+  playRun('twilight_cathedral', 15838, { relicDoors: true, trace(run, wait, move, events) {
+    if (run.floor !== 2 || wait.s.turn !== 1) return;
+    assert.equal(wait.s.enemy.form, 'wild_night_bat');
+    assert.deepEqual(wait.s.enemy.affixes, []);
+    assert.equal(move.name, '고스트소울');
+    const damage = events.find(e => e.t === 'hp' && e.cause?.skill === '흡혈 이빨');
+    assert.deepEqual([damage.s.enemy.hp, damage.s.enemy.maxHp, damage.delta], [246, 348, -302]);
+    const heal = events.find(e => e.t === 'hp' && e.who.side === 'enemy' && e.delta > 0);
+    assert.deepEqual([heal.delta, heal.s.enemy.hp], [90, 336]);
+    assert.ok(events.some(e => e.t === 'rule' && e.rule === 'leech' && e.amount === 90));
+    assert.ok(battleLog([wait, ...events], run.room.party, run.room.enemies)
+      .flatMap(turn => turn.rows).some(row => row.text === '흡혈 +90'));
+    seen = true;
+  } });
+  assert.ok(seen);
 });
 
 test('night bat opening multiplies preview and damage once, except when a lesson or tide overrides it', () => {
@@ -274,6 +329,76 @@ test('night bat opening multiplies preview and damage once, except when a lesson
       events = b.act(0);
       const hit = events.find(e => e.t === 'hp' && e.who.side === 'enemy');
       assert.equal(hit.amount, expected);
+    }
+  }
+});
+
+test('emerald beetle mitigates hits, counters harder when hit, and announces all six beats', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const enemy = roster.wildOf('emerald_beetle', 1, { stats: { hp: 99999, atk: 40, matk: 0, def: 60, mdef: 60 } });
+  const tempo = { pattern: 'threeBeat' };
+  const b = battle({ enemies: [enemy], tempo });
+  const regular = battle({ enemies: [{ ...enemy, id: 'test_dummy' }], tempo });
+  regular.start();
+  const normalDamage = option(regular, '일반 공격').preview.dmg;
+  let events = b.start();
+  const lead = b.host.battle.players[0];
+  lead.baseCrit = -100;
+  lead.baseEva = -100;
+  lead.skills.push({ name: '대기', type: 'sup', cost: 0, effects: [] });
+  const beats = [
+    ['껍질 반격', 0.55, '다음 턴 껍질 돌진 · 물리 ×1.85'],
+    ['껍질 돌진', 1.85, '다음 턴 약공 · 물리 ×0.55'],
+    ['약공', 0.55, '다음 턴 껍질 반격 · 물리 ×0.55 / 피격 시 ×1 · 받는 피해 ×0.9']
+  ];
+  for (let turn = 1; turn <= 6; turn++) {
+    const [name, power, future] = beats[(turn - 1) % beats.length];
+    const { intent, countdown } = last(events, 'await');
+    assert.deepEqual([intent.localTurn, intent.name, intent.kind, intent.power], [turn, name, 'phy', power]);
+    assert.equal(intent.salience, name === '껍질 돌진' ? 'strong' : 'ordinary');
+    const [current, chip] = intentLines(intent, countdown);
+    assert.equal(chip, future);
+    assert.equal(intentLines({ ...intent, nextDistinct: countdown }, null)[1], future);
+    if (name === '껍질 반격') {
+      const [unhit, hit] = intent.damageRange;
+      assert.ok(hit > unhit);
+      assert.equal(current, `내 행동 뒤 · 껍질 반격 · 적 받는 피해 ×0.9 · 피격 시 ${hit} / 미피격 시 ${unhit}`);
+      assert.equal(intent.conditions[0].met, null);
+      assert.equal(option(b, '일반 공격').preview.dmg, Math.floor(normalDamage * 0.9));
+    } else {
+      assert.equal(current, `내 행동 뒤 · ${name} · HP ${intent.damageRange[0]}`);
+    }
+    const wait = turn === 4;
+    events = b.act(wait ? option(b, '대기').index : 0);
+    const action = events.find(e => e.t === 'act' && e.who.side === 'enemy');
+    const damage = events.find(e => e.t === 'hp' && e.who.side === 'ally' && e.delta < 0);
+    assert.deepEqual([action.skill.name, action.skill.val, damage.amount],
+      [name, turn === 1 ? 1 : power, intent.damageRange[turn === 1 ? 1 : 0]]);
+    if (turn === 1) assert.equal(events.find(e => e.t === 'hp' && e.who.side === 'enemy').amount, Math.floor(normalDamage * 0.9));
+    if (wait) assert.ok(!events.some(e => e.t === 'hp' && e.who.side === 'enemy'));
+  }
+});
+
+test('rehearsal and tide override the beetle shell and ram in previews and combat', () => {
+  const roster = makeRoster(S.RelayCore, { sp: {} });
+  const enemy = roster.wildOf('emerald_beetle', 1, { stats: { hp: 99999, atk: 1, matk: 1, def: 60, mdef: 60 } });
+  const lesson = makeBossLesson('ares', 2, 0);
+  const cases = [
+    ['threeBeat', undefined, ['물리 충전', '충전 일격', '약공', '껍질 반격', '껍질 돌진', '약공'], { 4: 0.9 }],
+    ['tide', { id: 'tide_cycle' }, ['물리 충전', '충전 일격', '조류의 일격', '물러간 조류', '일반 공격', '잔물결'], { 4: 1.5 }]
+  ];
+  for (const [pattern, region, names, modifiers] of cases) {
+    const preview = Bridge.enemyBeats(S.RelayCore, enemy, pattern, undefined, lesson);
+    assert.deepEqual(preview.map(beat => beat.name), names.slice(0, preview.length));
+    const b = battle({ enemies: [enemy], tempo: { pattern, lesson }, region });
+    let events = b.start();
+    for (const [index, name] of names.entries()) {
+      const { intent } = last(events, 'await');
+      assert.equal(intent.name, name);
+      assert.equal(intent.vulnerable, modifiers[index + 1]);
+      assert.equal(intent.conditions.length, name === '껍질 반격' ? 1 : 0);
+      if (pattern === 'threeBeat' && names[index + 1]) assert.equal(intent.nextDistinct.name, names[index + 1]);
+      events = b.act(0);
     }
   }
 });
@@ -607,9 +732,10 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
   const retreating = reachDecision(), standing = reachDecision();
   const before = retreating.state();
   const expected = {
-    danger: 'certain',
-    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [451, 451] } },
-    stand: { falls: 'certain', inheritor: { id: 'siren', name: '세이렌' }, heirloom: { skill: '드래곤스파클', from: 'dragon_miko' }, replaces: null }
+    danger: 'possible',
+    retreat: { available: true, next: { id: 'siren', name: '세이렌', hp: 500, hpAfter: [451, 451], evadeHp: 500 } },
+    stand: { falls: 'possible', evadeChance: 5, lethalOnHit: true, inheritor: { id: 'siren', name: '세이렌' },
+      heirloom: { skill: '드래곤스파클', from: 'dragon_miko' }, replaces: null }
   };
   const random = Math.random;
   Math.random = () => { throw new Error('previewRelay must not roll'); };
@@ -619,6 +745,10 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
     Math.random = random;
   }
   assert.deepEqual(retreating.state(), before);
+  assert.deepEqual(relayOutcomeLines(expected, before.allies[0], retreating.previewRetreat().intent), [
+    '물러나면 세이렌 HP 500 → 451 · 회피 시 500',
+    '남으면 쓰러짐 → 세이렌이 드래곤스파클 계승 · 회피 5%'
+  ]);
   assert.deepEqual(retreating.heirloomsGained(), []);
   assert.ok(last(retreating.retreat(), 'retreat'));
   assert.deepEqual([retreating.state().cur, retreating.state().allies[1].hp], [1, 451]);
@@ -628,21 +758,110 @@ test('the seeded floor 2 relay forecast agrees with both actual outcomes against
   assert.equal(standing.heirloomsGained()[0].from, expected.stand.heirloom.from);
 });
 
+test('Ember 7919 retreat predicts Jack-o-Lantern’s evasion and preserves seeded event bytes', () => {
+  let checked = false;
+  eachRetreatDecision('ember_volcano', 7919, ({ floor, turn, commands, replay }) => {
+    if (floor !== 1 || turn !== 5) return;
+    assert.deepEqual(commands, [1, 3, 1, 0]);
+    const b = replay(), control = replay();
+    const before = b.state();
+    assert.equal(b.allyStats(1).evasion, 10);
+    assert.equal(before.allies[1].buffs.evasion, undefined);
+    for (let i = 0; i < 3; i++) {
+      const forecast = b.previewRelay();
+      assert.deepEqual(forecast.retreat.next.hpAfter, [349, 349]);
+      assert.equal(forecast.retreat.next.evadeHp, 464);
+      assert.equal(relayOutcomeLines(forecast, before.allies[0], b.previewRetreat().intent)[1],
+        '잭오랜턴 HP 464 → 349 · 회피 시 464');
+    }
+    assert.deepEqual(b.state(), before);
+    const events = b.retreat();
+    assert.equal(JSON.stringify(events), JSON.stringify(control.retreat()));
+    assert.ok(events.some(event => event.t === 'miss' && event.why === 'evasion' && event.who.idx === 1));
+    assert.equal(b.state().allies[1].hp, 464);
+    checked = true;
+  });
+  assert.equal(checked, true);
+});
+
+test('Ember 23757 warns that Phoenix can evade the lethal floor 8 strike', () => {
+  let checked = false;
+  eachRetreatDecision('ember_volcano', 23757, ({ floor, turn, commands, wait, replay }) => {
+    if (floor !== 8 || turn !== 6) return;
+    assert.deepEqual(commands, [2, 2, 0, 0, 0]);
+    const b = replay(), control = replay();
+    const phoenix = b.state().allies[0];
+    assert.equal(phoenix.hp, 60);
+    assert.equal(phoenix.buffs.evasion, undefined);
+    const forecast = b.previewRelay();
+    assert.deepEqual([forecast.stand.falls, forecast.stand.lethalOnHit, forecast.stand.evadeChance], ['possible', true, 5]);
+    assert.match(relayOutcomeLines(forecast, phoenix, wait.intent)[1], /회피 5%/);
+    const events = b.act(0);
+    assert.equal(JSON.stringify(events), JSON.stringify(control.act(0)));
+    assert.ok(events.some(event => event.t === 'miss' && event.why === 'evasion' && event.who.idx === 0));
+    assert.equal(b.state().allies[0].hp, 60);
+    checked = true;
+  });
+  assert.equal(checked, true);
+});
+
+test('real retreat and standing branches agree with the forecast across six regions and eight seeds', t => {
+  let retreats = 0, lethalReplies = 0, dodged = 0;
+  for (const dungeon of Object.keys(DUNGEONS).filter(id => id !== 'dawn_forest')) {
+    for (let i = 1; i <= 8; i++) {
+      const seed = i * 7919;
+      eachRetreatDecision(dungeon, seed, ({ floor, turn, commands, wait, replay }) => {
+        const where = `${dungeon} ${seed} / floor ${floor} turn ${turn} after ${commands.join(',')}`;
+        const b = replay();
+        const { cur } = b.state(), { danger, retreat, stand } = b.previewRelay();
+        const idx = b.previewRetreat().next.idx;
+        b.retreat();
+        const { hp } = b.state().allies[idx];
+        const [min, max] = retreat.next.hpAfter;
+        assert.ok(hp === retreat.next.evadeHp || (min <= hp && hp <= max),
+          `${where}: ${hp} outside ${min}–${max}, evasion HP ${retreat.next.evadeHp}`);
+        retreats++;
+
+        if (danger !== 'certain' && !stand.lethalOnHit) return;
+        const standing = replay();
+        const events = standing.act(0);
+        // A command can defeat or stop the enemy before its announced reply.
+        if (!events.some(event => event.t === 'act' && event.actionId === wait.intent.actionId
+          && event.target.side === 'ally' && event.target.idx === cur)) return;
+        lethalReplies++;
+        if (!standing.state().allies[cur].dead) {
+          assert.ok(stand.evadeChance > 0, where);
+          assert.ok(events.some(event => event.t === 'miss' && event.why === 'evasion' && event.who.idx === cur), where);
+          dodged++;
+        }
+      });
+    }
+  }
+  assert.ok(retreats >= 1000 && lethalReplies > 0 && dodged > 0);
+  t.diagnostic(`${retreats} retreats, ${lethalReplies} lethal-on-hit replies including ${dodged} evaded`);
+});
+
 test('relay forecast distinguishes possible death and reports ascending HP after a variable hit', () => {
   const enemy = quietEnemy(99999, { atk: 100 });
   enemy.skills = [{ name: '시험용 예고', type: 'phy', rate: 1, effects: [{ type: 'random_mult', min: 1, max: 3 }] }];
   const b = battle({ party: ['fairy', null, 'red_dragon'], enemies: [enemy] });
   const [low, high] = last(b.start(), 'await').intent.damageRange;
   assert.ok(low < high);
-  b.host.battle.players[0].hp = high;
+  const player = b.host.battle.players[0];
+  player.baseEva = -100;
+  player.hp = high;
   const preview = b.previewRelay();
   assert.equal(preview.danger, 'possible');
   assert.equal(preview.stand.falls, 'possible');
   assert.equal(preview.stand.inheritor.id, 'red_dragon');
   const [nextLow, nextHigh] = b.previewRetreat().dmg;
   assert.deepEqual(preview.retreat.next.hpAfter, [420 - nextHigh, 420 - nextLow]);
-  b.host.battle.players[0].hp = low;
-  assert.equal(b.previewRelay().danger, 'certain');
+  player.hp = low;
+  const certain = b.previewRelay();
+  assert.equal(certain.danger, 'certain');
+  assert.match(relayOutcomeLines(certain, player, b.previewRetreat().intent)[1], /명중 시 쓰러짐/);
+  b.act(0);
+  assert.equal(b.state().allies[0].dead, true);
 });
 
 test('relay forecast accounts for guard, barrier and active evasion', () => {
@@ -650,6 +869,7 @@ test('relay forecast accounts for guard, barrier and active evasion', () => {
   const [damage] = last(b.start(), 'await').intent.damageRange;
   const player = b.host.battle.players[0];
   player.hp = damage - 1;
+  player.baseEva = -S.RelayCore.GAME_CONSTANTS.BASE_EVA_BONUS;
   assert.equal(b.previewRelay().danger, 'certain');
   for (const defense of ['guard', 'barrier', 'evasion']) {
     player.buffs = { [defense]: 1 };
@@ -657,6 +877,27 @@ test('relay forecast accounts for guard, barrier and active evasion', () => {
   }
   player.baseEva = 100;
   assert.equal(b.previewRelay().danger, 'none', 'guaranteed evasion');
+});
+
+test('relay forecast uses live evasion and defense from field, buffs and relics', () => {
+  const b = battle({
+    party: ['luna', 'snow_rabbit'], enemies: [quietEnemy(99999, { atk: 220 })],
+    artifacts: ['shadow_stab'], start: { field: ['moon_bless'] }
+  });
+  b.start();
+  const [player, next] = b.host.battle.players;
+  player.hp = 1;
+  player.baseEva = 7;
+  player.buffs.evasion = 1;
+  const forecast = b.previewRelay();
+  assert.equal(forecast.stand.evadeChance, 97);
+  assert.equal(forecast.stand.evadeChance, b.allyStats(0).evasion);
+  next.baseEva = 100;
+  const guaranteed = b.previewRelay().retreat.next;
+  assert.deepEqual(guaranteed.hpAfter, [next.hp, next.hp]);
+  assert.equal(guaranteed.evadeHp, undefined);
+  b.retreat();
+  assert.equal(b.state().allies[1].hp, next.maxHp);
 });
 
 test('relay forecast can show a lethal hit with no inheritor or retreat for the last companion', () => {
@@ -803,6 +1044,7 @@ test('Mirror Cocoon offers both 20 MP transformations and applies the selected f
     const mp = b.state().allies[0].mp;
     const events = b.act(choices.find(o => o.name === '기적의우화 → ' + name).index);
     assert.equal(events.find(e => e.t === 'form').name, name);
+    assert.equal(events.find(e => e.t === 'form').form, formId);
     assert.equal(b.state().allies[0].form, formId);
     assert.equal(b.state().allies[0].mp, mp - 20);
   }
@@ -1085,13 +1327,14 @@ test('Delayed-on-time requires damage from a scheduled landing, including a winn
   const events = scheduled.act(option(scheduled, '나이트메어').index);
   const landing = events.find(e => e.t === 'act' && e.delayed);
   assert.equal(landing.s.turn, 2);
+  assert.equal(landing.trigger, 'reserved');
   assert.ok(events.some(e => e.t === 'hp' && e.who.side === 'enemy' && e.cause.delayed));
   assert.equal(scheduled.outcome, 'win');
   assert.deepEqual(scheduled.summary().bet, { kind: 'delayed_on_time', won: true });
 
   const instant = battle({ ...config, party: ['phantom', 'time_magician'] });
   instant.start();
-  assert.ok(instant.act(option(instant, '나이트메어').index).some(e => e.t === 'act' && e.delayed));
+  assert.equal(instant.act(option(instant, '나이트메어').index).find(e => e.t === 'act' && e.delayed)?.trigger, 'follow-up');
   assert.equal(instant.outcome, 'win');
   assert.deepEqual(instant.summary().bet, { kind: 'delayed_on_time', won: false });
 });
@@ -1169,6 +1412,7 @@ test('a rescue uses the minimum forecast on the outgoing fighter, including equa
     const [min, max] = last(b.start(), 'await').intent.dmg;
     assert.ok(max > min);
     b.host.battle.players[0].hp = min + offset;
+    if (offset === 0) assert.equal(b.previewRelay().stand.falls, 'possible');
     b.retreat();
     assert.deepEqual(b.summary().rescues, [{ retreated: 'fairy', incoming: 'red_dragon', lethal: offset === 0 }]);
   }

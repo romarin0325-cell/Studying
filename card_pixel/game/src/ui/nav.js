@@ -9,7 +9,7 @@ import { titleScreen } from './screens/title.js';
 import { hubScreen } from './screens/hub.js';
 import { dungeonsScreen, listedPool, preparationSheet } from './screens/dungeons.js';
 import { missionRecruitSheet, recruitReceipt, recruitScreen } from './screens/recruit.js';
-import { collectionScreen, companionSheet, rosterTable } from './screens/collection.js';
+import { collectionScreen, companionSheet, rosterTable, saveEpisodeFlags } from './screens/collection.js';
 import { notebookScreen } from './screens/notebook.js';
 import { recordsScreen } from './screens/records.js';
 import { endingScreen } from './screens/ending.js';
@@ -18,9 +18,11 @@ import { bindRecoveryImport } from './nav/recovery.js';
 import { basicTutorial, createTutorial } from './tutorial.js';
 import { hasFinalConsonant } from './widgets.js';
 import * as Meta from '../engine/meta.js';
+import { episodeState } from '../engine/episodes.js';
 import { createRun, finishRun } from '../engine/run.js';
 import { DUNGEONS } from '../content/dungeons.js';
 import { CONTRACTS } from '../content/contracts.js';
+import { EPISODES } from '../content/episodes.js';
 
 const { availableDungeons, applyRunEnd, createProfile, departureDifficulty, featureFlags, startView } = Meta;
 const FIRST_MAIN = 'ember_volcano';
@@ -36,6 +38,11 @@ export function mountPage() {
     ${Object.keys(PAGES).map(id => `<section id="${id}" class="screen meta-screen"></section>`).join('')}
     ${sheetMarkup()}
     <div id="session-notices" role="alert"></div>
+    <dialog id="stale-session" class="win meta-sheet" aria-labelledby="stale-session-title" aria-describedby="stale-session-copy">
+      <h3 id="stale-session-title">다른 창에서 진행 중</h3>
+      <p id="stale-session-copy">이 창의 화면은 오래된 상태입니다. 최신 진행을 불러와 이 창에서 이어 할 수 있어요.</p>
+      <button class="btn go" id="stale-session-resume" autofocus>이 창에서 이어하기</button>
+    </dialog>
   </div>`;
 }
 
@@ -50,18 +57,20 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   let crystalCount = 0;
   let gainedAtReturn = false;
   let warnedSave = false;
+  let staleTab = false;
+  let reloading = false;
   const details = createDetails(core, widgets, sheets.openSheet);
   const tutorial = createTutorial({ currentProfile: () => profile, updateProfile, widgets, stage, core, roster });
 
   const host = {
     save(current) {
-      if (current !== run) return;
+      if (staleTab || current !== run) return;
       if (run.result === 'win' && run.crystals > crystalCount) gainedAtReturn = true;
       crystalCount = run.crystals;
       persist();
     },
     finish(current) {
-      if (current === run && current.phase === 'done') showRecruit();
+      if (!staleTab && current === run && current.phase === 'done') showRecruit();
     },
     profile: () => profile,
     tutorial,
@@ -73,6 +82,24 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     page, showHub, warnSave, sessionNotice, setReview: current => { review = current; }
   });
 
+  const staleNotice = $('#stale-session');
+  staleNotice.addEventListener('cancel', event => event.preventDefault());
+  $('#stale-session-resume', staleNotice).addEventListener('click', () => location.reload());
+  store.watchStale?.(window, showStaleTab);
+
+  function showStaleTab() {
+    if (staleTab) return;
+    staleTab = true;
+    // A click can still render after its save is refused. Close that UI before showing the notice.
+    queueMicrotask(() => {
+      preparationOpen = false;
+      sheets.closeSheet();
+      tutorial.reset();
+      stage.pause(true);
+      staleNotice.showModal();
+    });
+  }
+
   function sessionNotice(message) {
     const notice = document.createElement('p');
     notice.className = 'win';
@@ -81,12 +108,21 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     setTimeout(() => notice.remove(), 10000);
   }
 
-  function persist() {
+  function writeSession(write, onFailure = warnSave) {
+    if (staleTab || reloading) return false;
     try {
-      if (store.save({ profile, run }) !== false) return true;
-    } catch { /* The current session remains in memory. */ }
-    warnSave();
+      const result = write();
+      if (result?.reason === 'stale_tab') showStaleTab();
+      else if (result === false || result?.ok === false) onFailure();
+      else return true;
+    } catch {
+      if (!staleTab) onFailure();
+    }
     return false;
+  }
+
+  function persist() {
+    return writeSession(() => store.save({ profile, run }));
   }
 
   function warnSave() {
@@ -101,7 +137,27 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function updateUi(patch) {
-    updateProfile({ ...profile, ui: { ...profile.ui, ...patch } });
+    return writeSession(() => saveProfile({ ...profile, ui: { ...profile.ui, ...patch } }));
+  }
+
+  function saveProfile(next, activeRun = run) {
+    const result = store.save({ profile: next, run: activeRun });
+    if (result !== false && result?.ok !== false) profile = next;
+    return result;
+  }
+
+  function saveFlags(field, ids) {
+    return writeSession(() => {
+      let result;
+      const saved = saveEpisodeFlags(profile, field, ids, (current, key, flags) => {
+        result = store.saveEpisodeFlags(current, key, flags);
+        return result;
+      });
+      if (saved && field === 'episodesRead' && !Object.keys(EPISODES).some(id => episodeState(profile, id) === 'new')) {
+        $('#meta-episode-badge')?.remove();
+      }
+      return saved || result || false;
+    }, field === 'episodesRead' ? () => {} : warnSave);
   }
 
   function page(id, { title = PAGES[id], back, track = 'hub' } = {}) {
@@ -130,7 +186,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     const collecting = !firstMain && target?.screen === 'collection';
     const destinationId = firstMain ? FIRST_MAIN : !collecting && (target?.dungeonId ?? profile.ui?.destination);
     hubScreen(node, {
-      profile, run, widgets, inspect, openDungeons, destinationId, resume: enterExpedition, goal, arriving, flags, firstMain,
+      profile, run, widgets, inspect, openDungeons, destinationId, resume: enterExpedition, goal, arriving, flags, firstMain, saveFlags,
       depart: firstMain ? () => startExpedition(FIRST_MAIN, departureDifficulty(profile, FIRST_MAIN))
         : () => followGoal(target),
       departureLabel: collecting ? '동료 도감 보기' : null,
@@ -192,10 +248,9 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
           claim(id) {
             const result = Meta.claimMission(profile, period.key, id, roster);
             if (!result?.announce?.ok) return false;
-            if (updateProfile(result.profile)) {
-              if (result.announce.recruits.length) audio.sfx.join();
-              else audio.sfx.stamp();
-            }
+            if (!writeSession(() => saveProfile(result.profile))) return true;
+            if (result.announce.recruits.length) audio.sfx.join();
+            else audio.sfx.stamp();
             sheets.closeSheet();
             renderNotebook();
             sessionNotice(id ? `${roster.card(id).name} · 관측소에 영입` : '임무 완료 도장 획득');
@@ -219,7 +274,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     endingScreen(node, {
       profile, widgets, goal: currentGoal(),
       finish() {
-        if (!profile.ui?.endingSeen) updateUi({ endingSeen: true });
+        if (staleTab || (!profile.ui?.endingSeen && !updateUi({ endingSeen: true }))) return;
         showHub(arriving);
       }
     });
@@ -227,7 +282,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
 
   function inspect(id) {
     companionSheet({
-      core, roster, widgets, sheets, profile, id,
+      core, roster, widgets, sheets, profile, id, saveFlags,
       openDestination: run ? null : dungeonId => {
         sheets.closeSheet();
         openDungeons({ target: { dungeonId } });
@@ -260,7 +315,7 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     tutorial.sync(run);
   }
 
-  function prepare(dungeonId, { difficulty, contractId } = {}) {
+  function prepare(dungeonId, { difficulty, contractId, startCompanionNot } = {}) {
     const destination = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
     if (run || !destination) return;
     const chosenDifficulty = destination.difficulties.includes(difficulty) ? difficulty : departureDifficulty(profile, dungeonId);
@@ -273,8 +328,14 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       savePreparation({ dungeonId, difficulty: chosenDifficulty, contract: initialContract });
     }
     preparationOpen = true;
-    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, savePreparation, roster, widgets, sheets, start: startExpedition });
-    tutorial.sync(run);
+    preparationSheet({ dungeonId, currentProfile: () => profile, updateProfile, savePreparation, roster, widgets, sheets,
+      start: startExpedition, startCompanionNot });
+    syncTutorial();
+  }
+
+  function syncTutorial() {
+    // The goal's change button owns focus while its preparation sheet is open.
+    if (!$('#sheet.on [data-goal-focus]')) tutorial.sync(run);
   }
 
   function savePreparation(draft) {
@@ -342,19 +403,23 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   }
 
   function confirmReturn(choices) {
-    if (!run) return false;
-    const result = applyRunEnd(profile, run, choices);
-    const { announce } = result;
-    if (!announce.ok) {
-      if (announce.reason !== 'already_applied') return false;
-      run = null;
-      review = null;
-      updateUi({ recruitChoices: null });
-      if (endingDue()) showEnding();
-      else showHub();
-      return true;
-    }
-    let next = result.profile;
+    if (!run || staleTab) return false;
+    const { profile: next, announce } = applyRunEnd(profile, run, choices);
+    if (!announce.ok && announce.reason !== 'already_applied') return false;
+    const returned = announce.ok ? returnProfile(next, announce, run)
+      : { ...profile, ui: { ...profile.ui, recruitChoices: null } };
+    if (!writeSession(() => saveProfile(returned, null))) return true;
+    run = null;
+    review = null;
+    const recruits = announce.ok ? announce.recruits : [];
+    if (announce.stamp) audio.sfx.stamp();
+    else if (recruits.length) audio.sfx.crit();
+    if (endingDue()) showEnding(recruits);
+    else showHub(recruits);
+    return true;
+  }
+
+  function returnProfile(next, announce, run) {
     if (basicTutorial(next) && run.dungeonId === 'dawn_forest' && announce.recruits.length) {
       next = Meta.markEntryStep(next, 'recruit');
     }
@@ -369,24 +434,18 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
     };
     const latestRun = { ...entry, difficulty: run.difficulty, floors: run.floors, stats: run.stats, fallen: run.fallen, features: run.features,
       lastBattleLog: run.lastBattleLog };
-    run = null;
-    review = null;
-    const saved = updateProfile({ ...next, ui: {
+    return { ...next, ui: {
       ...next.ui, recruitChoices: null, entryBattle: null, entryDoor: null, returners, announcement, latestRun
-    } });
-    if (announce.stamp) {
-      if (saved) audio.sfx.stamp();
-    } else if (recruits.length) audio.sfx.crit();
-    if (endingDue()) showEnding(recruits);
-    else showHub(recruits);
-    return true;
+    } };
   }
 
   function resetData() {
-    try {
-      if (store.clear() === false) return warnSave();
+    if (!writeSession(() => {
+      const result = store.clear();
+      if (result !== true) return result;
       if (!store.loadDetailed) dailyStore?.clear?.();
-    } catch { return warnSave(); }
+      return true;
+    })) return;
     recovery = null;
     profile = createProfile();
     run = null;
@@ -413,6 +472,24 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   function reloadAfterRestore() {
     if (audio.sfx.restored()) setTimeout(() => location.reload(), 110);
     else location.reload();
+  }
+
+  function finishRestore(restore, onFailure) {
+    return writeSession(() => {
+      const result = restore();
+      if (result?.ok) reloading = true;
+      return result;
+    }, onFailure);
+  }
+
+  function backupActions() {
+    return { sheets, currentBackup, store: !store.restoreBackup ? store : {
+      ...store,
+      restoreBackup(data) {
+        const ok = finishRestore(() => store.restoreBackup(data), () => {});
+        return ok ? { ok: true } : { ok: false, reason: 'storage_failed' };
+      }
+    }, recovered: reloadAfterRestore };
   }
 
   function showRecovery() {
@@ -442,14 +519,16 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
       </div>`;
     const importAction = $('[data-backup-action="import"]', node);
     if (store.exportBackup && store.inspectBackup && store.restoreBackup) {
-      bindRecoveryImport(node, { sheets, store, currentBackup, recovered: reloadAfterRestore });
+      bindRecoveryImport(node, backupActions());
     } else importAction.disabled = true;
     $('#meta-last-good', node)?.addEventListener('click', event => {
-      const result = store.restoreLastGood?.();
-      if (result?.ok) {
-        event.currentTarget.disabled = true;
-        reloadAfterRestore();
-      } else $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했습니다.';
+      const button = event.currentTarget;
+      button.disabled = true;
+      const recovered = finishRestore(() => store.restoreLastGood(), () => {
+        $('.meta-feedback', node).textContent = '직전 기록을 복구하지 못했습니다.';
+      });
+      if (recovered) reloadAfterRestore();
+      else button.disabled = false;
     });
     const startNew = $('#meta-recovery-new', node);
     const confirmation = $('#meta-recovery-confirm', node);
@@ -473,14 +552,14 @@ export function createNavigation({ core, roster, widgets, stage, audio, music, s
   $('#frame').addEventListener('click', event => {
     const action = event.target.closest('[data-backup-action]');
     const mode = action?.closest('#recovery') ? null : action?.dataset.backupAction;
-    if (mode) openBackupSheet({ mode, sheets, store, currentBackup, recovered: reloadAfterRestore });
+    if (mode) openBackupSheet({ mode, ...backupActions() });
   });
-  document.addEventListener('click', () => queueMicrotask(() => tutorial.sync(run)));
+  document.addEventListener('click', () => queueMicrotask(() => { if (!staleTab) syncTutorial(); }));
 
   function replayTutorial() {
     if (run || daily.run || !$('#title.on, #hub.on')) return;
     const entry = { ...profile.ui.entry, done: [], skipped: false };
-    updateUi({ entry, tutorialReplay: 'queued', entryDoor: null, entryBattle: null });
+    if (!updateUi({ entry, tutorialReplay: 'queued', entryDoor: null, entryBattle: null })) return;
     sheets.closeSheet();
     tutorial.reset();
     showTitle(profile);

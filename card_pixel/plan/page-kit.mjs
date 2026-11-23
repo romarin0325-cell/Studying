@@ -8,7 +8,7 @@ export const BASE_CSS = `
 :root { --u: 2px; --navy: #29266a; --navy2: #3f3a8f; --ink: #26244f; --ink2: #5e5b8c; --paper: #fff; --paper2: #f7f5ff; --line: #cdc4f0;
   --aqua: #1fc6c1; --aqua-lo: #0f9aaa; --gold: #ffc23a; --gold-ink: #6b3a00; --coral: #e23a52; --pink: #ff5c9d; --violet: #8a6cff; }
 * { box-sizing: border-box; }
-body { margin: 0; color: var(--ink); font: 15px/1.6 system-ui, 'Malgun Gothic', sans-serif;
+body { margin: 0; color: var(--ink); font: 15px/1.6 system-ui, 'Malgun Gothic', sans-serif; word-break: keep-all; overflow-wrap: break-word;
   background: linear-gradient(180deg, #d6eaff 0 12%, #e2e5ff 12% 30%, #ebe5ff 30% 60%, #f6e5f6 60% 100%) fixed; }
 header.top { background: var(--navy); color: #fff; padding: 18px 16px 14px; box-shadow: 0 var(--u) 0 #1b1850; }
 header.top h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }

@@ -21,6 +21,9 @@ export const BLOCKED_BY = { magic_guard: '매직가드', barrier: '배리어', e
 export const mpLossText = effect => effect?.kind === 'mp'
   ? effect.mode === 'all' ? '현재 MP 전부 소멸' : Number.isFinite(effect.amount) ? '현재 MP −' + effect.amount : '현재 MP 감소'
   : '';
+const drainText = rate => rate ? '가한 피해 ' + Math.round(rate * 100) + '% 회복' : '';
+const inspectLabel = ({ name, hp, maxHp }) =>
+  `${name} · HP ${hp.toLocaleString('en-US')}/${maxHp.toLocaleString('en-US')} · 정보 보기`;
 
 export function intentLines(intent, countdown, hp, buffNames = {}) {
   if (!intent) return [];
@@ -38,7 +41,7 @@ export function intentLines(intent, countdown, hp, buffNames = {}) {
   const clean = kind !== 'stun' && intent.rule === 'cleanse'
     ? '자기 약화 전부 해제 · 현재 ' + (Object.entries(intent.debuffs ?? {}).map(([id, value]) =>
       (buffNames[id] ?? id) + ' ' + value).join(' · ') || '약화 없음') : '';
-  const modifier = kind === 'stun' ? '행동 불가' : vulnerable ? '받는 피해 ×' + formatMultiplier(vulnerable) :
+  const modifier = kind === 'stun' ? '행동 불가' : vulnerable ? (vulnerable < 1 ? '적 ' : '') + '받는 피해 ×' + formatMultiplier(vulnerable) :
     kind === 'charge' ? '충전' : intent.reduction ? '다음 턴 받는 피해 ' + Math.round(intent.reduction * 100) + '% 감소' :
       intent.rule === 'swap_stats' ? '명중 뒤 공·마공, 물방·마방 교환' : clean;
   const block = resourceEffect?.preventedBy ?? intent.preventedBy;
@@ -48,14 +51,17 @@ export function intentLines(intent, countdown, hp, buffNames = {}) {
     ? [name, '적 휴식', modifier].join(' · ')
     : ['내 행동 뒤', [name, modifier && !name?.includes(modifier) ? modifier : ''].filter(Boolean).join(' · '),
       intent.wildOpening && kind === 'stun' ? '받는 피해 ×' + formatMultiplier(vulnerable) : '',
-      blocked ? [attack ? damage : '', blocked].filter(Boolean).join(' / ') : [damage, resource].filter(Boolean).join(' / '), falls].filter(Boolean).join(' · ');
+      blocked ? [attack ? damage : '', blocked].filter(Boolean).join(' / ') : [damage, resource].filter(Boolean).join(' / '),
+      drainText(intent.drainRate), falls].filter(Boolean).join(' · ');
   const next = Object.hasOwn(intent, 'nextDistinct') ? intent.nextDistinct : countdown && { ...countdown,
     inTurns: (countdown.inTurns ?? 0) + (countdown.charge ? 1 : 0) };
   const sameName = next?.name === intent.name && kind !== 'charge';
   const future = next?.name && next.inTurns > 0 && !sameName ?
     (next.inTurns === 1 ? '다음 턴 ' : next.inTurns + '턴 뒤 ') + [next.name, next.alt].filter(Boolean).join(' 또는 ') +
     (TYPE[next.kind] ? ' · ' + TYPE[next.kind] + (next.power ? ' ×' + formatMultiplier(next.power) : '') : '') +
-    (next.vulnerable ? ' · 받는 피해 ×' + formatMultiplier(next.vulnerable) : '') : '';
+    (next.hitPower ? ' / 피격 시 ×' + formatMultiplier(next.hitPower) : '') +
+    (next.vulnerable ? ' · 받는 피해 ×' + formatMultiplier(next.vulnerable) : '') +
+    (next.drainRate ? ' · ' + drainText(next.drainRate) : '') : '';
   return [current, future];
 }
 
@@ -96,7 +102,7 @@ export function createHud(core, stage, sfx, widgets) {
   function buildParty(run, party) {
     $('#party').innerHTML = party.map((id, i) => {
       if (!id) return '<div class="pm none"></div>';
-      return '<div class="pm" data-i="' + i + '"><span class="face">' + face(id, 40) + '<i>' + POSITION[i] + '</i></span><span class="info">' +
+      return '<div class="pm" data-i="' + i + '" role="button" tabindex="0"><span class="face">' + face(id, 40) + '<i>' + POSITION[i] + '</i></span><span class="info">' +
         '<span class="top"><b>' + esc(card(id).name) + '</b>' + repeatBadge(run, id) + (run.heirlooms[id] ? '<i class="h">유</i>' : '') + '</span>' +
         '<span class="bar hp"><u></u><span class="n"></span></span><span class="bar mp"><u></u><span class="n"></span></span></span><em class="st"></em></div>';
     }).join('');
@@ -106,6 +112,7 @@ export function createHud(core, stage, sfx, widgets) {
     $('#turn').textContent = D.turn + '턴';
     D.allies.forEach((a, i) => {
       const node = $('#party .pm[data-i="' + i + '"]'); if (!a || !node) return;
+      node.setAttribute('aria-label', inspectLabel(a));
       node.className = 'pm ' + (a.dead ? 'dead' : a.out ? 'out' : i === D.cur ? 'cur' : 'wait') + (a.lastStand ? ' last' : '');
       bar($('.hp u', node), a.hp, a.maxHp, fresh); $('.hp .n', node).textContent = a.hp + '/' + a.maxHp;
       $('.mp u', node).style.width = Math.max(0, Math.min(1, a.mp / a.maxMp)) * 100 + '%'; $('.mp .n', node).textContent = a.mp;
@@ -114,6 +121,7 @@ export function createHud(core, stage, sfx, widgets) {
     const me = D.allies[Math.min(D.cur, 2)];
     chips($('#pa-chips'), me && !me.dead && !me.out ? me : { buffs: {} }, false);
     const foe = D.enemy, def = B.door.enemies[foe.idx];
+    $('#foebar').setAttribute('aria-label', inspectLabel(foe));
     enemyHeading(B);
     $('#pf-name').textContent = foe.name;
     const el = $('#pf-el'); el.textContent = ELEMENT[def.element] || ''; el.className = 'el-' + def.element;
@@ -159,6 +167,7 @@ export function createHud(core, stage, sfx, widgets) {
     c.className = 'cd' + (future ? ' on' : '');
     S.danger = boss ? 1 : 0;
     enemyHeading(B);
+    return n.textContent;
   }
 
   function shortLine(line) {

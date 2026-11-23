@@ -4,11 +4,10 @@ import { DUNGEONS } from '../../content/dungeons.js';
 import { EPISODES } from '../../content/episodes.js';
 import { episodeState } from '../../engine/episodes.js';
 import { EPISODE } from '../glossary.js';
-import { saveEpisodeFlags } from './collection.js';
 import { chapterTitle } from './notebook.js';
 import { dailyRow } from './daily-rift.js';
 import { pixelIcon } from '../pixel-icons.js';
-import { josa } from '../text.js';
+import { josa, keepSeparators } from '../text.js';
 
 export function hubLineup(lead, recent) {
   const ids = Array.isArray(recent) ? recent : [];
@@ -37,7 +36,7 @@ export function sceneActors(ids, widgets, { interactive = false, lead = null, ar
 }
 
 export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, depart, destinationId, departureLabel, resume, goal,
-  arriving = [], daily, openDaily, flags, firstMain }) {
+  arriving = [], daily, openDaily, flags, firstMain, saveFlags }) {
   const lead = profile.lead && widgets.card(profile.lead);
   const destination = DUNGEONS[destinationId];
   const title = lead ? josa(lead.name, '과/와') : '';
@@ -46,7 +45,8 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
     : departureLabel ?? [title, direction].filter(Boolean).join(' ');
   const canBrowse = flags.introCleared && profile.notebook.chapters.includes(1);
   const unread = Object.keys(EPISODES).filter(id => episodeState(profile, id) === 'new');
-  saveEpisodeFlags(profile, 'episodesUnlocked', unread.filter(id => profile.ui?.episodesUnlocked?.[id] !== true));
+  const newlyUnlocked = unread.filter(id => profile.ui?.episodesUnlocked?.[id] !== true);
+  if (newlyUnlocked.length) saveFlags('episodesUnlocked', newlyUnlocked);
   const episodeBadge = unread.length
     ? `<span class="companion-tag" id="meta-episode-badge" style="position:absolute;right:100%;white-space:nowrap">${EPISODE.unread}</span>` : '';
   const announcement = profile.ui?.announcement;
@@ -84,7 +84,7 @@ export function hubScreen(node, { profile, run, widgets, inspect, openDungeons, 
     </div>
     <div class="meta-hub-actions">
       ${dailyRow(daily)}
-      <button class="btn go${ticketArt ? ' ticket' : ''}" id="meta-depart" data-coach="departure">${ticketArt}${esc(action)}</button>
+      <button class="btn go${ticketArt ? ' ticket' : ''}" id="meta-depart" data-coach="departure">${ticketArt}<span class="ticket-label">${keepSeparators(esc(action))}</span></button>
       ${firstMain ? '<button class="btn" id="meta-other-region">다른 지역</button>' : ''}
     </div>
   `;

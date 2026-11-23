@@ -37,6 +37,7 @@ const strip = html => String(html).replace(/<[^>]*>/g, '');
 
 const FIELD_POOL = ['sun_bless', 'moon_bless', 'sanctuary', 'goddess_descent', 'earth_bless', 'twinkle_party', 'star_powder', 'valentine', 'arena', 'reaper_realm', 'gale'];
 const DEFENSE_BUFFS = ['guard', 'barrier', 'magic_guard', 'damage_half', 'evasion'];
+const LEECH_AFFIX_RATE = 0.5;
 const isAttack = skill => skill.type === 'phy' || skill.type === 'mag';
 const sameSkill = (a, b) => a.name === b.name && a.type === b.type;
 
@@ -83,8 +84,8 @@ function patternActions(enemy, pattern, openingIntent) {
   const skill = enemy.skills.find(s => isAttack(s) && (!openingIntent || s.type === openingIntent));
   const signature = skill ? { ...skill, power: skill.val ?? 1 } : basic;
   if (pattern === 'introFixed') return openingIntent ? [signature, basic, THREE_BEAT[2]] : [signature];
-  return (wild?.beats ?? THREE_BEAT).map(beat => !beat.signature ? beat : skill
-    ? { ...signature, power: signature.power * beat.power } : basic);
+  return (wild?.beats ?? THREE_BEAT).map(({ signature: usesSignature, ...beat }) => !usesSignature ? beat : skill
+    ? { ...signature, ...beat, power: signature.power * beat.power } : basic);
 }
 
 const lessonTideAfter = (lesson, turn) => lesson?.tideAfter && turn === lesson.steps.length + 1 ? lesson.tideAfter : null;
@@ -93,12 +94,12 @@ export function enemyBeats(core, enemy, pattern, openingIntent, lesson) {
   if (pattern !== 'bossScript') {
     const selected = enemyPattern(enemy, pattern);
     const wild = wildBeatPattern(selected);
-    return patternActions(enemy, selected, openingIntent).map(({ name, type, power, vulnerable, isChargeStart }, index) => {
+    return patternActions(enemy, selected, openingIntent).map(({ name, type, power, vulnerable, hitPower, isChargeStart }, index) => {
       const turn = index + 1;
       const action = lesson?.steps[index] ?? (pattern === 'tide' ? lessonTideAfter(lesson, turn) : null);
       return action ? { ...structuredClone(action), turn, power: action.val, lesson: true } : {
         turn, name, type: isChargeStart ? 'charge' : type, power,
-        ...(wild && { pattern: selected }), ...(wild && vulnerable && { vulnerable })
+        ...(wild && { pattern: selected }), ...(wild && vulnerable && { vulnerable }), ...(hitPower && { hitPower })
       };
     });
   }
@@ -342,6 +343,13 @@ export function create(core, opts) {
     const owners = sourceCards.filter(card => card.skills.some(slot => sameSkill(slot, skill)));
     if (owners.length === 1) return skillSourceKey('ally', owners[0], skill);
   }
+  function sourceMotionSkill(sourceKey) {
+    const [role, id, slot] = sourceKey?.split('/') ?? [];
+    if (role !== 'ally') return;
+    const owner = GameUtils.getCardById(id), skill = owner?.skills[Number(slot) - 1];
+    if (skill) return { name: skill.name, type: skill.type, tier: skill.tier || 1, val: skill.val,
+      effects: (skill.effects || []).map(effect => effect.type), element: owner.element };
+  }
   const hasAffix = (enemy, id) => !!enemy && Array.isArray(enemy.affixes) && enemy.affixes.includes(id);
   const players = () => (host.battle.players || []).filter(Boolean);
 
@@ -407,7 +415,7 @@ export function create(core, opts) {
     const cause = B.ctx.length ? B.ctx[B.ctx.length - 1] : null;
     const diffUnit = (who, unit, a, z) => {
       if (!a || !z) return;
-      if (z.mp !== a.mp) push({ t: 'mp', who, delta: z.mp - a.mp });
+      if (z.mp !== a.mp) push({ t: 'mp', who, delta: z.mp - a.mp, cause: describeCause(cause, who) });
       if (z.hp !== a.hp) {
         const ev = { t: 'hp', who, delta: z.hp - a.hp, amount: Math.abs(z.hp - a.hp), cause: describeCause(cause, who) };
         const c = B.lastCalc;
@@ -434,7 +442,7 @@ export function create(core, opts) {
       });
       if (z.form !== a.form) {
         if (who.side === 'ally') B.forms[z.form] = host.state.deck[who.idx];
-        push({ t: 'form', who, name: z.name });
+        push({ t: 'form', who, name: z.name, form: z.form });
       }
       if (z.dead && !a.dead) push({ t: 'down', who });
     };
@@ -580,7 +588,10 @@ export function create(core, opts) {
       if (from) B.heirloomUses.push({ by, from, skill: skill.name });
     }
     const sourceKey = allySkillSource(source, skill, delayed);
-    push({ t: 'act', who, target: refOf(target), delayed, sourceKey, heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
+    const trigger = delayed ? (B.dueEffects.some(effect => effect.source === source && effect.skill === skill)
+      ? 'reserved' : 'follow-up') : undefined;
+    push({ t: 'act', who, target: refOf(target), delayed, trigger, sourceKey, sourceSkill: sourceMotionSkill(sourceKey),
+      heirloom: !!skill.heirloom, heirFrom: skill.heirFrom, skill: { name: skill.name, type: skill.type, tier: skill.tier || 1, cost: skill.cost || 0, val: skill.val, effects: (skill.effects || []).map(e => e.type) } });
     B.ctx.push({ kind: 'act', who, skill, delayed, source });
     B.lastHit = null;
     const formId = source.formId;
@@ -692,10 +703,10 @@ export function create(core, opts) {
     const turn = localTurn(enemy);
     if (lessonStep(turn)?.rule === 'charged_hit' || wildBeat(enemy, turn)?.chargeReset) enemy.isCharging = false;
     applyDefenseProtocol(enemy);
-    if (hasAffix(enemy, 'leech') && enemy.hp > 0) {           // H leech: heal half of what it dealt this turn
+    // The bite already applied the stronger rate once, to the bite's actual HP damage.
+    if (!B.ctx.at(-1)?.skill?.drainRate && hasAffix(enemy, 'leech') && enemy.hp > 0) {
       const dealt = B.turnStartHp - players().reduce((n, p) => n + Math.max(0, p.hp), 0);
-      const heal = Math.min(enemy.maxHp - enemy.hp, Math.floor(Math.max(0, dealt) * 0.5));
-      if (heal > 0) { push({ t: 'rule', rule: 'leech', who: enemyRef(), amount: heal }); asRule('leech', () => { enemy.hp += heal; }); }
+      healFromDrain(enemy, dealt, LEECH_AFFIX_RATE);
     }
     B.closeEnemyTurn();
     return go();
@@ -708,9 +719,12 @@ export function create(core, opts) {
     else action = decide(enemy);
     B.intentCache = null;
     const top = B.ctx[B.ctx.length - 1];
-    if (top && top.enemyTurn) top.skill = action;
-    if (action.chargeSkillId) enemy.chargeSkillId = action.chargeSkillId;
     const target = currentPlayer();
+    if (top?.enemyTurn) {
+      top.skill = action;
+      if (action.drainRate) top.targetHp = target.hp;
+    }
+    if (action.chargeSkillId) enemy.chargeSkillId = action.chargeSkillId;
     const rule = actionRule(action);
     if (rule && rule !== 'defense_protocol') B.enemyAction = { action, rule, enemy, target, before: ruleValue(rule, enemy, target) };
     if (action.type === 'rest') return action;
@@ -722,13 +736,29 @@ export function create(core, opts) {
       : skillSourceKey(isBoss() ? 'boss' : 'wild', def, action));
     push({
       t: 'act', who: enemyRef(), target: isAttack(action) && !action.isChargeStart ? allyRef(target.pos) : enemyRef(), delayed: false,
-      sourceKey: sourceKey || undefined, actionId: actionId(action), charge: !!action.isChargeStart, salience, ult: salience === 'boss',
+      sourceKey: sourceKey || undefined, sourceSkill: sourceMotionSkill(sourceKey || undefined), actionId: actionId(action),
+      charge: !!action.isChargeStart, salience, ult: salience === 'boss', manaDrain: !action.isChargeStart && rule === 'mana_drain',
       skill: { name: action.name, type: action.isChargeStart ? 'sup' : action.type, tier: salience === 'boss' ? 3 : 1, cost: 0, val: power, effects: (action.effects || []).map(e => e.type) }
     });
     return action;
   };
+  function effectiveDrainRate(action, enemy) {
+    return Math.max(action.drainRate, hasAffix(enemy, 'leech') ? LEECH_AFFIX_RATE : 0);
+  }
+  function healFromDrain(enemy, dealt, rate) {
+    const amount = Math.min(enemy.maxHp - enemy.hp, Math.floor(dealt * rate));
+    if (!(amount > 0) || enemy.hp <= 0) return 0;
+    push({ t: 'rule', rule: 'leech', who: enemyRef(), amount });
+    asRule('leech', () => { enemy.hp += amount; });
+    return amount;
+  }
   B.onEnemyEffects = function (source, target, skill, go) {
     const result = go();
+    const turn = B.ctx.at(-1);
+    if (skill.drainRate && turn?.enemyTurn && turn.skill === skill && source === host.battle.enemy) {
+      const amount = healFromDrain(source, turn.targetHp - Math.max(0, target.hp), effectiveDrainRate(skill, source));
+      if (amount) host.log(`흡혈 +${amount.toLocaleString('en-US')}`);
+    }
     if (B.enemyAction?.action !== skill || source !== host.battle.enemy) return result;
     B.enemyAction.landed = true;
     if (skill.drainFlat) target.mp = Math.max(0, target.mp - skill.drainFlat);
@@ -928,6 +958,20 @@ export function create(core, opts) {
     const effects = (strongest?.effects || []).filter(effect => effect.type !== 'random_mult');
     return { type: 'mag', name: REGIONS.tide_cycle.hit, val: powerRoll * 2.5, effects, strong: true };
   }
+  function enemyMultiplierRange(action, enemy) {
+    if (!action.effects?.some(effect => effect.type === 'random_mult')) {
+      const power = original.multiplier.call(Logic, action, enemy);
+      return [power, power];
+    }
+    // Probe the core's multiplier at both ends without advancing either RNG.
+    const saved = Math.random;
+    try {
+      Math.random = () => 0;
+      const low = original.multiplier.call(Logic, action, enemy);
+      Math.random = () => 1 - Number.EPSILON;
+      return [low, original.multiplier.call(Logic, action, enemy)];
+    } finally { Math.random = saved; }
+  }
   function enemyHitPreview(action, target, mayHitEnemy) {
     const b = host.battle, enemy = b.enemy;
     const es = Logic.calculateStats(enemy, b.fieldBuffs, host.state.mode, host.state.artifacts, b.turn);
@@ -935,26 +979,25 @@ export function create(core, opts) {
     const physical = action.type === 'phy';
     const ward = physical ? 'barrier' : 'magic_guard';
     const preventedBy = ts.evasion >= 100 ? 'evasion' : target.buffs[ward] ? ward : null;
-    // Telegraphs give damage on hit. An active evasion buff also gives a miss branch in the relay forecast.
-    const canEvade = !!target.buffs.evasion && ts.evasion > 0;
+    // Keep the on-hit damage used by the telegraph and rescue contract.
+    const evadeChance = preventedBy ? 0 : Math.max(0, ts.evasion);
     const val = physical ? es.atk : es.matk;
     const def = physical ? ts.def : ts.mdef;
-    const random = (action.effects || []).find(e => e.type === 'random_mult');
-    let lo = Number.isFinite(action.val) ? action.val : 1, hi = lo;
-    if (random) { lo = random.min; hi = lo + Math.ceil(random.max - lo); }
+    const [lo, hi] = enemyMultiplierRange(action, enemy);
     const reduce = 1 - StatusRules.damageReduction(target).rate;
     const hit = m => preventedBy ? 0 : Math.floor(val * m * (100 / (100 + def)) * reduce);
     const hitPower = retaliationPower(action, enemy);
-    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy, canEvade };
+    if (hitPower === null) return { range: [hit(lo), hit(hi)], conditions: [], preventedBy, evadeChance };
     const met = enemy.tookDamageThisTurn ? true : mayHitEnemy ? null : false;
     const otherwise = hit(lo), whenMet = hit(hitPower);
-    const range = [met === true ? whenMet : otherwise, met === false ? otherwise : whenMet];
-    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy, canEvade };
+    const range = met === true ? [whenMet, whenMet] : met === false ? [otherwise, hit(hi)]
+      : [Math.min(otherwise, whenMet), Math.max(hit(hi), whenMet)];
+    return { range, conditions: [{ kind: 'enemyHitThisTurn', met, otherwise, whenMet, baseMultiplier: lo, hitMultiplier: hitPower }], preventedBy, evadeChance };
   }
   function enemyResponse({ action: a, intentRule }, target, mayHitEnemy) {
     const stunned = !!host.battle.enemy.buffs.stun;
     const attack = !stunned && !a.isChargeStart && isAttack(a);
-    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null };
+    const hit = attack ? enemyHitPreview(a, target, mayHitEnemy) : { range: [0, 0], conditions: [], preventedBy: null, evadeChance: 0 };
     const preventedBy = stunned ? 'stun' : hit.preventedBy;
     const resourceEffect = intentRule === 'mana_drain' ? {
       kind: 'mp', mode: a.drainFlat ? 'flat' : 'all',
@@ -989,6 +1032,7 @@ export function create(core, opts) {
       ...(a.bonus && { bonus: a.bonus, stat: a.stat }),
       ...(a.reduction && { reduction: a.reduction }),
       ...(a.vulnerable && { vulnerable: a.vulnerable }),
+      ...(a.drainRate && !stunned && { drainRate: effectiveDrainRate(a, enemy) }),
       ...(wildOpening && { vulnerable: wildOpening.vulnerable, wildOpening: true }),
       type: kind, ult: salience === 'boss', ...(attack && { power: a.val ?? 1, dmg: range, lethal, lethalText, extra }),
       ...(!attack && extra.length && { effects: extra })
@@ -996,7 +1040,7 @@ export function create(core, opts) {
   }
   function nextDistinct(action, local) {
     const enemy = host.battle.enemy;
-    if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action);
+    if (wildBeatPattern(enemy.relayPattern)) return nextWildAction(enemy, local, action).forecast;
     if (action.isChargeStart) {
       const next = lessonStep(local + 1) ?? enemy.skills.find(skill => skill.name === (action.chargeSkillId ?? '디바인블레이드'));
       if (next) return { inTurns: 1, name: next.name, kind: next.type, power: next.val };
@@ -1016,20 +1060,27 @@ export function create(core, opts) {
     if (inTide() && local % TIDE_BEATS.length === TIDE_STRONG_BEAT) {
       return { name: REGIONS.tide_cycle.rest, kind: 'rest', inTurns: 1 };
     }
-    const next = countdown(true);
-    return next && next.name !== action.name ? next : null;
+    const forecast = countdown(true);
+    if (!forecast || forecast.name === action.name) return null;
+    const { salience, ...next } = forecast;
+    return next;
   }
   function nextWildAction(enemy, local, current) {
     const charging = !enemy.buffs.stun && current?.isChargeStart || enemy.isCharging && !current?.chargeReset;
-    const next = lessonAction(local + 1, charging) ?? wildBeat(enemy, local + 1);
-    return { name: next.name, kind: next.isChargeStart ? 'charge' : next.type,
-      power: next.power ?? next.val, inTurns: 1, ...(next.vulnerable && { vulnerable: next.vulnerable }) };
+    const step = lessonAction(local + 1, charging);
+    const next = step ?? wildBeat(enemy, local + 1);
+    const strong = local % enemy.relayBeats.length === wildBeatPattern(enemy.relayPattern).strong - 1;
+    const forecast = { name: next.name, kind: next.isChargeStart ? 'charge' : next.type,
+      power: next.power ?? next.val, inTurns: 1, ...(next.vulnerable && { vulnerable: next.vulnerable }),
+      ...(next.drainRate && { drainRate: effectiveDrainRate(next, enemy) }),
+      ...(next.hitPower && next.vulnerable && { hitPower: next.hitPower }) };
+    return { forecast, salience: actionSalience(step ?? { ...next, strong }) };
   }
   function countdown(futureOnly = false) {
     const b = host.battle, enemy = b.enemy, local = localTurn(enemy);
     if (wildBeatPattern(enemy.relayPattern)) {
-      const next = nextWildAction(enemy, local, B.intentCache?.action);
-      return { ...next, charge: next.kind === 'charge' };
+      const { forecast: next, salience } = nextWildAction(enemy, local, B.intentCache?.action);
+      return { ...next, charge: next.kind === 'charge', salience };
     }
     if (pattern === 'threeBeat' || pattern === 'tide') {
       const tide = enemy.relayPattern === 'tide';
@@ -1038,7 +1089,7 @@ export function create(core, opts) {
       let inTurns = (strong - local % period + period) % period;
       if (inTurns === 0 && (enemy.buffs.stun || futureOnly)) inTurns = period;
       return tide ? tideCountdown(enemy.relayBeats[strong - 1].name, local, inTurns)
-        : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false };
+        : { name: enemy.relayBeats[strong - 1].name, inTurns, charge: false, salience: 'strong' };
     }
     if (inTide()) {
       let inTurns = (3 - local % 4 + 4) % 4;
@@ -1065,7 +1116,7 @@ export function create(core, opts) {
         if (!isScripted(a)) continue;
         Math.random = () => 0;
         const other = original.decide.call(Logic, { ...futureEnemy }, local + k);
-        const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart };
+        const next = { name: skillName(a), inTurns: k, charge: !!a.isChargeStart, salience: actionSalience(a) };
         if (isScripted(other) && skillName(other) !== next.name) next.alt = skillName(other);
         return next;
       }
@@ -1075,7 +1126,7 @@ export function create(core, opts) {
 
   function tideCountdown(name, turn, inTurns) {
     const ripple = tideRipple(turn + inTurns);
-    return { name: ripple?.name ?? name, inTurns, charge: false,
+    return { name: ripple?.name ?? name, inTurns, charge: false, salience: ripple ? actionSalience(ripple) : 'strong',
       ...(ripple && { kind: ripple.type, power: ripple.val }) };
   }
 
@@ -1129,9 +1180,13 @@ export function create(core, opts) {
         B.lessonPreviews++;
       }
       const intent = currentIntent();
+      const forecast = countdown();
+      const { salience: countdownSalience, ...countdownView } = forecast ?? {};
+      // Only an ordinary intent needs a warning based on the following turn.
+      if (intent.salience === 'ordinary' && countdownView.inTurns === 1) intent.countdownSalience = countdownSalience;
       const def = queue[B.enemyIdx];
       const wait = {
-        t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent, countdown: countdown(),
+        t: 'await', who: allyRef(host.battle.currentPlayerIdx), intent, countdown: forecast && countdownView,
         enemyKind: def.kind ?? null, enemyIndex: B.enemyIdx, enemyCount: queue.length,
         affixes: (def.affixes ?? []).map(id => affixView(id, host.battle.enemy))
       };
@@ -1238,23 +1293,26 @@ export function create(core, opts) {
   function canRetreat() {
     return B.awaiting && !B.retreatUsed && !B.outcome && !!nextAlly();
   }
-  function relayHit(target, mayHitEnemy) {
-    const { range, canEvade, resourceEffect } = enemyResponse(B.intentCache, target, mayHitEnemy);
-    return { min: canEvade ? 0 : Math.min(...range), max: Math.max(...range), resourceEffect };
-  }
   function previewRelay() {
     // settle() has already chosen this enemy's action before exposing an awaiting turn.
     const player = B.awaiting && !B.outcome ? currentPlayer() : null;
-    const hit = player && relayHit(player, true);
-    const danger = !hit || hit.max < player.hp ? 'none' : hit.min >= player.hp ? 'certain' : 'possible';
+    const hit = player && enemyResponse(B.intentCache, player, true);
+    const lethalOnHit = !!hit && hit.range[0] >= player.hp;
+    const danger = !hit || hit.range[1] < player.hp ? 'none' : lethalOnHit && !hit.evadeChance ? 'certain' : 'possible';
     const handoff = danger !== 'none' ? inheritance(player) : null;
     const held = handoff?.heir.skills.find(skill => skill.heirloom);
     const next = player && !B.retreatUsed ? nextAlly(player) : null;
     const retreat = { available: !!next, next: null };
     if (next) {
-      const { min, max, resourceEffect } = relayHit(next, false);
-      retreat.next = { id: next.id, name: next.name, hp: next.hp, hpAfter: [Math.max(0, next.hp - max), Math.max(0, next.hp - min)] };
-      if (resourceEffect && !resourceEffect.preventedBy) retreat.next.mpAfter = resourceEffect.after;
+      const { range: [min, max], evadeChance, resourceEffect } = enemyResponse(B.intentCache, next, false);
+      const hpAfter = [Math.max(0, next.hp - max), Math.max(0, next.hp - min)];
+      retreat.next = { id: next.id, name: next.name, hp: next.hp, hpAfter };
+      if (evadeChance && max > 0) retreat.next.evadeHp = next.hp;
+      if (resourceEffect && !resourceEffect.preventedBy) {
+        retreat.next.mpBefore = resourceEffect.before;
+        retreat.next.mpAfter = resourceEffect.after;
+        if (evadeChance) retreat.next.mpOnHit = true;
+      }
       const reserves = host.battle.delayedEffects.filter(effect => effect.source === player).map(effect => effect.skill.name);
       if (reserves.length) retreat.cancelsReserve = [...new Set(reserves)];
     }
@@ -1262,6 +1320,7 @@ export function create(core, opts) {
       danger, retreat,
       stand: {
         falls: danger === 'none' ? 'no' : danger,
+        ...(danger === 'possible' && hit.evadeChance && { evadeChance: hit.evadeChance, lethalOnHit }),
         inheritor: handoff ? { id: handoff.heir.id, name: handoff.heir.name } : null,
         heirloom: handoff ? { skill: handoff.skill.name, from: player.id } : null,
         replaces: held ? { skill: held.name } : null

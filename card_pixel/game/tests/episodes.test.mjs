@@ -132,8 +132,11 @@ test('episode flags save in the active slot without replacing the expedition che
     const session = JSON.parse(inactive);
     session.run = { version: 1, run: { phase: 'room', room: { status: 'order' } } };
     slots.write('b', SESSION_KEY, JSON.stringify(session));
-    assert.ok(saveEpisodeFlags(profile, 'episodesUnlocked', [id]));
-    assert.ok(saveEpisodeFlags(profile, 'episodesRead', [id]));
+    // The tab's own store, loaded after the slot switch above, writes the flags.
+    const tab = createSaveStore(storage);
+    tab.loadDetailed();
+    assert.ok(saveEpisodeFlags(profile, 'episodesUnlocked', [id], tab.saveEpisodeFlags));
+    assert.ok(saveEpisodeFlags(profile, 'episodesRead', [id], tab.saveEpisodeFlags));
     assert.equal(slots.read('a', SESSION_KEY), inactive);
     const updated = JSON.parse(slots.read('b', SESSION_KEY));
     assert.deepEqual(updated.run, session.run);

@@ -13,7 +13,7 @@ export const NOTEBOOK_GOALS = {
   2: { text: '시작 동료와 본편 출발', reward: '샘 초대 1칸 열림' },
   3: { text: '4층 문지기 격파', reward: '유물 도감 열림' },
   4: { text: '본편에서 처음 생환', reward: '오늘의 균열 · 영입 임무 · 샘 초대 2칸 열림' },
-  5: { text: '다른 시작 동료로 문지기를 이기고 함께 생환', reward: '샘 초대 3칸 열림' },
+  5: { text: '다른 시작 동료로 문지기를 이기고 함께 생환', reward: '샘 초대 3칸 열림', startCompanionNot: 'firstLead' },
   6: { text: '미생환 테마 지역에서 생환', reward: '창조의 탑 열림' },
   7: { text: '창조의 탑 격파', reward: '엔딩 열림' }
 };

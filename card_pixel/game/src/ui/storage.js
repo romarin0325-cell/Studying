@@ -23,6 +23,7 @@ export function backupSlots(adapter) {
     active,
     read: (slot, key) => raw.getItem(alternateKey(slot, key)),
     write,
+    affectsSession: (changed, key) => changed === null || changed === POINTER || changed === key || changed === alternateKey('b', key),
     activate(slot) {
       if (raw.setItem(POINTER, slot) === false) throw new Error('Storage write failed');
     },

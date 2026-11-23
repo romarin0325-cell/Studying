@@ -1,8 +1,10 @@
 import { $, $$, esc } from '../dom.js';
 import { CONTRACTS } from '../../content/contracts.js';
 import { DUNGEONS } from '../../content/dungeons.js';
+import { riftPuzzlesUnlocked } from '../../engine/daily-rift.js';
 import * as Meta from '../../engine/meta.js';
 import { bindScreenTabs } from '../nav/screen-tabs.js';
+import { riftPuzzleEntry } from './daily-rift.js';
 
 export const DIFFICULTY_NAME = { easy: '꿈결', normal: '여정', nightmare: '악몽' };
 const amount = value => value.toLocaleString('ko-KR');
@@ -41,6 +43,7 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
   const bestPlace = records.bestHit && DUNGEONS[records.bestHit.dungeonId];
   const latest = profile.ui?.latestRun;
   const showDifficulty = Meta.featureFlags(profile).difficultyChoice;
+  const showPuzzles = renderDailyHistory && riftPuzzlesUnlocked(profile);
   node.classList.add('screen-split');
   node.innerHTML = `
     ${renderDailyHistory ? `<div class="fixed-top screen-tabs" role="group" aria-label="기록 종류">
@@ -75,13 +78,14 @@ export function recordsScreen(node, profile, card, openSheet, replayEnding, rend
     </section>
     ${renderDailyHistory ? '<section class="meta-panel" id="meta-daily-history" data-screen-panel="rift"></section>' : ''}
     </div>
-    ${latest || profile.ui?.endingSeen ? `<div class="fixed-foot">
+    ${latest || profile.ui?.endingSeen || showPuzzles ? `<div class="fixed-foot">
+    ${showPuzzles ? riftPuzzleEntry('meta-record-puzzles') : ''}
     ${latest ? `<button class="btn" id="meta-latest-record">최근 원정 · ${esc(DUNGEONS[latest.dungeonId].name)}</button>` : ''}
     ${profile.ui?.endingSeen ? '<button class="btn" id="meta-replay-ending">엔딩 다시 보기</button>' : ''}
     </div>` : ''}
   `;
   if (renderDailyHistory) {
-    const hasDailyHistory = renderDailyHistory($('#meta-daily-history', node));
+    const hasDailyHistory = renderDailyHistory($('#meta-daily-history', node), $('#meta-record-puzzles', node));
     bindScreenTabs(node, hasDailyHistory && !latest ? 'rift' : 'expedition');
   }
   for (const button of $$('[data-nightmare-record]', node)) button.addEventListener('click', () => {

@@ -1,4 +1,5 @@
 import { $$ } from '../dom.js';
+import { FORM_ART, FORM_MARKERS } from '../../content/skill-motions.js';
 import { FIELD, GOOD } from './hud.js';
 import { contactOffset, MOTION_FRAME, rangedTiming, resolveMotion, spriteBox } from './motion.js';
 
@@ -11,33 +12,45 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   const label = (text, actor, cls, dy) => St.number(text, St.X(actor), HY(actor) - 4 + (dy || 0), 'tag ' + (cls || ''));
 
   function beginMove(e, actor, isFoe, action) {
-    const p = { e, actor, target: e.target ? actorOf(e.target) : null, isFoe, stage: 'ready', colors: colorsOf(e.who) };
-    // null, not false: optional chaining below only stops on null/undefined.
-    const donor = (e.heirloom && e.heirFrom && card(e.heirFrom)) || null;
+    const target = e.target ? actorOf(e.target) : null;
+    const p = { e, actor, target, isFoe, stage: 'ready', colors: colorsOf(e.who),
+      reserve: action?.effects.some(effect => effect.kind === 'delay') };
+    const donor = e.heirloom && e.heirFrom ? card(e.heirFrom) : null;
+    const donorForm = donor && Object.hasOwn(FORM_MARKERS, donor.id) ? donor.id : null;
+    const sourceArt = donorForm ? FORM_ART : donor?.id;
+    const art = sourceArt && spr(sourceArt);
+    const unit = unitOf(e.who);
+    p.fromEdge = e.trigger === 'reserved' && (!actor?.vis || !unit || unit.hp <= 0 || unit.dead || unit.out);
     if (donor) {
       p.donor = donor;
       p.colors = St.ELEMENT_COLORS[donor.element] || St.ELEMENT_COLORS.none;
-      const art = spr(donor.id);
-      if (art) {
-        p.caster = actor;
-        p.casterVisible = actor.vis;
-        actor.vis = false;
-        p.actor = St.makeActor({ sprite: donor.id, x: actor.x, y: actor.y, flip: (art.facing === 'left') !== isFoe });
-      }
+    }
+    if (p.fromEdge) {
+      p.actor = { sprite: art ? sourceArt : actor?.sprite ?? target?.sprite, x: isFoe ? St.S.W - 1 : 0,
+        y: target?.y ?? 0, ox: 0, oy: 0, vis: false, pose: 'idle' };
+    } else if (art && !p.reserve) {
+      p.caster = actor;
+      p.casterVisible = actor.vis;
+      actor.vis = false;
+      p.actor = St.makeActor({ sprite: donor.id, form: donorForm, x: actor.x, y: actor.y, flip: (art.facing === 'left') !== isFoe });
     }
     p.basic = e.skill.name === '일반 공격';
     p.motion = resolveMotion({
-      sourceKey: e.sourceKey, skill: e.skill, side: e.who.side, heirloom: e.heirloom,
+      sourceKey: e.sourceKey, skill: e.skill, sourceSkill: e.sourceSkill, side: e.who.side,
       salience: e.salience ?? (e.ult ? 'boss' : undefined),
-      isBasic: p.basic, casterSprite: p.actor.sprite, basePower: donor?.skills.find(s => s.name === e.skill.name && s.type === e.skill.type)?.val
+      isBasic: p.basic, casterSprite: art ? sourceArt : p.actor.sprite, casterForm: donorForm ?? p.actor.form
     });
-    if (donor && !isMelee(p)) p.effectSprite = St.variant(donor.id + '-fx', 'base');
-    if (p.motion.tint) p.colors = St.ELEMENT_COLORS[p.motion.tint] ?? p.colors;
+    const owner = e.sourceKey?.split('/')[1];
+    if (owner && p.motion.family === 'fall') p.effectSprite = St.variant(owner + '-fx', 'base');
+    p.colors = St.ELEMENT_COLORS[p.motion.tint ?? e.sourceSkill?.element] ?? p.colors;
     if (action) {
       const hp = [...action.hp.values()];
-      p.reserve = action.effects.some(effect => effect.kind === 'delay');
-      p.support = !action.miss && !hp.some(step => step.strike);
-      if (p.support) {
+      const hasStrike = hp.some(step => step.strike);
+      p.manaOnly = !hasStrike && (action.drains?.size > 0 || e.manaDrain);
+      p.support = !action.miss && !hasStrike && !p.manaOnly && !action.followUp;
+      if (p.manaOnly) {
+        p.motion = { ...p.motion, family: 'orb', variant: 'absorb', range: 'ranged', socket: p.motion.socket ?? 'hand' };
+      } else if (p.support) {
         const selfField = p.motion.family === 'field' && p.motion.variant !== 'bind' &&
           action.effects.some(effect => effect.at === 'field');
         const recipient = hp.find(step => step.kind === 'heal') ?? (!selfField &&
@@ -83,11 +96,15 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
 
   async function windUp(p) {
     const { actor, isFoe, colors, donor } = p, dir = isFoe ? -1 : 1, skill = p.e.skill;
-    const caster = unitOf(p.e.who).name;
+    const caster = unitOf(p.e.who)?.name ?? skill.name;
     const who = isFoe && p.e.ult ? '필살' : p.e.heirloom ? '유품 · ' + (donor?.name || caster) : caster;
     actor.front = 1;
     $$('#fx .num').forEach(n => n.remove());
     p.plate = St.plate(who, skill.name, isFoe && p.e.ult ? '#ff6b5e' : p.e.heirloom ? '#ffc857' : colors[1], dir);
+    if (p.fromEdge) {
+      sfx.charge?.();
+      return;
+    }
     if (reducedMotion()) {
       actor.pose = p.motion.frame;
       sfx.charge?.();
@@ -126,42 +143,59 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     const { actor, motion, colors } = p, target = reserve ? actor : p.target ?? actor;
     const still = reducedMotion(), big = !reserve && isBig(p), dir = p.isFoe ? -1 : 1;
     const family = reserve ? 'mark' : motion.family;
-    const variant = reserve ? 'reserve' : motion.variant === 'reserve' ? 'curse' : motion.variant;
+    const variant = reserve ? 'reserve' : motion.variant;
     actor.casting = true;
-    if (big) await windUp(p);
+    const windup = big && p.stage === 'ready';
+    if (windup) await windUp(p);
     else sfx[CAST_SOUND[family]]?.();
-    actor.pose = motion.frame;
-    const targetMeta = St.meta(target, landed && !p.support ? 'hurt' : target.pose);
+    actor.pose = reserve ? 'idle' : motion.frame;
+    const targetMeta = St.meta(target, landed && !p.support && !p.manaOnly ? 'hurt' : target.pose);
     const box = spriteBox(target, targetMeta, S.BASE);
-    const from = St.socket(actor, reserve ? 'top' : motion.socket);
     const chest = { x: box.cx, y: Math.round(box.top + box.height * 0.6) };
+    const from = reserve ? St.socket(target, 'top') : p.fromEdge ? { x: actor.x, y: chest.y } : St.socket(actor, motion.socket);
     const edge = dir > 0 ? box.left : box.right - 1;
     const to = family === 'breath' && dir * (edge - from.x) > 0 ? { ...chest, x: edge } : chest;
-    const fromFloor = St.socket(actor, 'ground');
+    const fromFloor = p.fromEdge ? { x: actor.x, y: FY(actor) } : St.socket(actor, 'ground');
     const fallY = box.top - 40;
     const launch = family === 'blast' && (['wave', 'ground'].includes(variant) ||
       (variant === 'eruption' && motion.socket === 'top'));
     const timing = rangedTiming({ family, variant, from, to, big, still, fallHeight: to.y - fallY, launch });
-    const fx = St.prop({ kind: 'rangedFx', caster: actor, target, from, to, fromFloor, fallY, launch, effectSprite: p.effectSprite,
+    const absorb = family === 'orb' && variant === 'absorb';
+    const fx = p.fx = St.prop({ kind: 'rangedFx', caster: actor, target,
+      from: absorb ? to : from, to: absorb ? from : to, fromFloor, fallY, launch, effectSprite: p.effectSprite,
       floor: Math.round(box.feet), head: box.top, dir, family, variant, colors,
       beneficial: p.beneficial, basic: p.basic, big, still, landed, start: clock.t, ...timing });
     if (timing.travel) await wait(timing.travel);
     fx.arrived = clock.t;
     p.stage = 'hit';
     p.hitAt = clock.t;
-    if (big) finishBig(p);
+    if (windup) finishBig(p);
     p.hitHold = wait(timing.hold).then(() => St.dropProp(fx));
   }
 
   async function playCast(p) {
     hpCostFlare(p);
+    if (p.e.heirloom && !p.reserve && !isBig(p)) {
+      const donor = p.donor?.name ?? unitOf(p.e.who)?.name;
+      p.heirloomPlate = St.plate('유품 · ' + donor, p.e.skill.name, '#ffc857', p.isFoe ? -1 : 1);
+    }
     if (p.labelCast) label(p.e.skill.name, p.actor, 'good');
-    if (!p.support) return;
+    if (!p.reserve && !p.support) return;
     p.actor.front = 1;
     if (p.reserve) await rangedMove(p, true, true);
     else await deliver(p, true);
-    if (p.reserve) sfx.tick?.(0);
+    if (p.reserve) {
+      sfx.tick?.(0);
+      await p.hitHold;
+    }
     else sfx.chime?.(p.motion.variant === 'heal' || p.beneficial);
+  }
+
+  async function playDrain(p, e, applyMp) {
+    await rangedMove(p, true);
+    applyMp(e);
+    label('MP ' + e.delta.toLocaleString('en-US'), actorOf(e.who), 'bad');
+    await p.hitHold;
   }
 
   function showHeal(e, p) {
@@ -180,33 +214,35 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   async function meleeMove(p, landed) {
     const { actor, target, isFoe, colors, motion } = p;
     const dir = isFoe ? -1 : 1, big = isBig(p), still = reducedMotion();
+    const windup = big && !still && p.stage === 'ready';
     actor.casting = true;
-    if (big && !still) await windUp(p);
+    if (windup) await windUp(p);
     else sfx.throw?.();
     // The HP event switches the target to hurt on this same frame.
     const casterMeta = St.meta(actor, motion.frame), targetMeta = St.meta(target, landed ? 'hurt' : target.pose);
-    if (!still) {
+    if (!still && !p.fromEdge) {
       const offset = contactOffset({ caster: actor, target, casterMeta, targetMeta, dir });
       await tween(actor, offset, big ? 0.1 : 0.12, 'in');
       actor.pose = motion.frame;
     }
 
-    const from = spriteBox(actor, still ? St.meta(actor) : casterMeta, S.BASE);
+    const from = p.fromEdge ? null : spriteBox(actor, still ? St.meta(actor) : casterMeta, S.BASE);
     const to = spriteBox(target, targetMeta, S.BASE);
     const near = dir > 0 ? to.left : to.right;
     const x = near + dir * 2;
     const low = motion.socket === 'foot' || motion.variant === 'scythe';
     const floor = Math.round(to.feet);
-    const hand = Math.round(from.top + from.height * 0.63);
+    const hand = from && Math.round(from.top + from.height * 0.63);
     const body = Math.round(to.top + to.height * 0.64);
     const y = low ? floor - (motion.variant === 'stomp' ? 5 : 14) :
-      Math.min(to.bottom - 7, Math.max(body, still ? body : hand + (motion.variant === 'uppercut' ? -4 : 0)));
-    const tip = motion.family === 'thrust' ? St.socket(actor, motion.socket ?? 'weaponTip') : null;
+      Math.min(to.bottom - 7, Math.max(body, still || p.fromEdge ? body : hand + (motion.variant === 'uppercut' ? -4 : 0)));
+    const tip = motion.family === 'thrust'
+      ? (p.fromEdge ? { x: actor.x, y } : St.socket(actor, motion.socket ?? 'weaponTip')) : null;
     const duration = still ? 0.09 : big ? 0.22 : 0.135;
     p.stage = 'hit';
     p.hitAt = clock.t;
-    if (big) finishBig(p);
-    const fx = St.prop({ kind: 'meleeFx', family: motion.family, variant: motion.variant, x, y, tip, floor, dir, colors,
+    if (windup) finishBig(p);
+    const fx = p.fx = St.prop({ kind: 'meleeFx', family: motion.family, variant: motion.variant, x, y, tip, floor, dir, colors,
       big, basic: p.basic, still, landed, start: clock.t, duration });
     p.hitHold = wait(duration).then(() => St.dropProp(fx));
   }
@@ -222,7 +258,7 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   async function strikeAndHit(p, step, stats, hasEffects, finishHit) {
     const e = step.event;
     p.actor.front = 1;
-    if (p.stage === 'ready') await deliver(p, true);
+    await deliver(p, true);
     if (finishHit) {
       p.finishing = true;
       await finishHit(e);
@@ -250,7 +286,7 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
   }
   async function settleMove(p) {
     try {
-      if (p.stage === 'ready' && p.e.salience === 'boss' && p.target) {
+      if (p.stage === 'ready' && p.e.salience === 'boss' && p.target && !p.manaOnly) {
         await deliver(p, false);
       }
       if (p.hitHold) await p.hitHold;
@@ -262,9 +298,11 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
       if (t && tu && tu.hp > 0 && t.pose === 'hurt') t.pose = 'idle';
       if (S.dark > 0.01) tween(S, { dark: 0 }, 0.2);
     } finally {
+      if (p.heirloomPlate) p.heirloomPlate.remove();
       if (p.caster) {
         St.removeActor(p.actor);
         p.caster.vis = p.casterVisible;
+        p.caster.casting = false;
       }
     }
   }
@@ -308,5 +346,5 @@ export function createMoves({ stage: St, sfx, actorOf, unitOf, colorsOf, applyHp
     await wait(0.24);
   }
 
-  return { beginMove, playCast, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects };
+  return { beginMove, playCast, playDrain, showHeal, isBig, label, impact, strikeAndHit, strikeMiss, settleMove, showEffects };
 }

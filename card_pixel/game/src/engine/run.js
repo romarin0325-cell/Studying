@@ -2,18 +2,19 @@ import { CONTRACTS, CONTRACT_PAYOUT, CONTRACT_RULE_VERSION, gateEscrow, LEGACY_C
 import { LESSON_VERSION } from '../content/boss-lessons.js';
 import { FLOORS as DAILY_FLOORS } from '../content/daily-rift.js';
 import { DUNGEONS } from '../content/dungeons.js';
+import { PROMISE_EVENTS } from '../content/events.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { RELICS, relicPartners } from '../content/relics.js';
 import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import {
   applyDraw, canJoin, choicesFor, COST, drawDistinct, drawEncounter, drawFrom, drawKind, join, RATES,
-  release as releaseCompanion, rollBlessing, seeCharacters, seeRelic, usesRepeatDraws, validateReplacements
+  release as releaseCompanion, replacementCount, rollBlessing, seeCharacters, seeRelic, usesRepeatDraws, validateReplacements
 } from './awakenings.js';
 import { dayKey, doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { hasFeature, openFeatures } from './entry.js';
 import { pick, shuffle } from './rng.js';
-import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, resolveEvent } from './rooms.js';
+import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, joinCount, makeDoors, observeDoors, resolveEvent } from './rooms.js';
 import { expeditionPool, strength } from './roster.js';
 import * as RunBattle from './run-battle.js';
 
@@ -96,6 +97,7 @@ export function createRun(options) {
       && (profileView.firstMainAssist ?? profileView.bossOrder ?? true))),
     dungeonId, difficulty, floors: daily ? DAILY_FLOORS : dungeon.floors, seed: seed >>> 0, rng, pool, plain,
     phase: 'start', floor: 0, doors: [], room: null, pending: null,
+    ...(!plain && lessonVersion && features?.pricedEvents && Object.hasOwn(PROMISE_EVENTS, dungeonId) && { promise: null }),
     lead, companions, preferredCompanion: profileView.preferredCompanion || null,
     recruited: (profileView.recruited || []).slice(), profileShard: shard,
     bench: [], joinOrder: [], lastParty: null, fallen: [], released: [], heirlooms: {}, blessings: {}, relics: [],
@@ -214,9 +216,22 @@ export function chooseStartPick(run, id) {
 }
 
 export function chooseDoor(run, index) {
-  if (run.phase !== 'map' || !Number.isInteger(index) || !run.doors[index]) return invalid('invalid_door');
-  run.room = { ...copy(run.doors[index]), status: 'service', party: null };
+  const door = Number.isInteger(index) ? run.doors[index] : null;
+  if (run.phase !== 'map' || !door) return invalid('invalid_door');
+  const promise = run.promise?.floor === run.floor ? run.promise : null;
+  if (door.promiseId && (door.promiseId !== promise?.id || door.relic !== promise.relic)) return invalid('invalid_promise_door');
+  run.room = { ...copy(door), status: 'service', party: null };
   run.phase = 'room';
+  if (promise) {
+    run.promise = null;
+    // The promise door is appended, so removing it leaves the ordinary doors' indexes intact.
+    run.doors = run.doors.filter(entry => !entry.promiseId);
+  }
+  if (door.promiseId) {
+    run.room.status = 'resolved';
+    const relic = grantRelic(run, door.relic);
+    return { ok: true, room: copy(run.room), pending: copy(run.pending), relic };
+  }
   if (run.contract && run.floor === 2 && run.room.risk) run.contract.riskDoorTaken = true;
   const { core, roster } = dependencies.get(run);
   if (run.room.regionChoice) run.region = copy(run.room.regionChoice);
@@ -230,8 +245,52 @@ export function chooseDoor(run, index) {
   if (run.room.type === 'event') {
     seeCharacters(run, run.room.event?.requires.present ?? []);
     run.pending = { kind: 'event', choices: eventChoices(run, core, roster) };
+    for (const choice of run.pending.choices) {
+      for (const op of choice.ops) if (op.type === 'promise') seeRelic(run, op.offer.relic);
+    }
   }
   return { ok: true, room: copy(run.room), pending: copy(run.pending) };
+}
+
+function previewRun(run) {
+  const context = dependencies.get(run);
+  if (!context) return null;
+  // Reuse the real room commands without changing the live RNG, discovery log or pending choice.
+  const preview = copy(run);
+  dependencies.set(preview, context);
+  return preview;
+}
+
+export function previewServiceDoor(run, index) {
+  const type = run.doors[index]?.type;
+  if (run.phase !== 'map' || (type !== 'spring' && type !== 'altar')) return null;
+  const preview = previewRun(run);
+  if (!preview || !chooseDoor(preview, index).ok) return null;
+  return type === 'spring' ? getSpringOffer(preview) : altarRoll(preview);
+}
+
+export function previewEventWake(run, index, choiceId) {
+  const onMap = run.phase === 'map';
+  if (!onMap && run.pending?.kind !== 'event') return null;
+  const room = onMap ? run.doors[index] : run.room;
+  const choice = room?.event?.choices.find(entry => entry.id === choiceId);
+  if (!choice || choice.target || choice.ops.length !== 1) return null;
+  const [op] = choice.ops;
+  if (op.type !== 'join' || !op.random) return null;
+
+  const preview = previewRun(run);
+  if (!preview || (onMap && !chooseDoor(preview, index).ok)) return null;
+  let outcome = chooseEvent(preview, choiceId);
+  let requiredReleases = 0;
+  if (outcome.reason === 'roster_full') {
+    requiredReleases = outcome.requiredReleases ?? replacementCount(preview, joinCount(choice.ops));
+    // A lone new arrival stays the same regardless of which companion makes room.
+    const sample = preview.bench.filter(id => id !== preview.lead).slice(0, requiredReleases);
+    outcome = chooseEvent(preview, choiceId, undefined, sample);
+  }
+  if (!outcome.ok) return null;
+  const effect = outcome.effects.find(entry => entry.type === 'join');
+  return { id: effect.draw?.id ?? effect.ids[0], kind: effect.draw?.kind ?? 'join', requiredReleases };
 }
 
 export function defaultParty(run) {
@@ -325,7 +384,7 @@ function setGateReward(run, room, downs, betRelic) {
 
 function addGatePartner(run) {
   if (run.floor !== 4 || !hasFeature(run, 'relicDoors') || run.pending?.kind !== 'gate') return;
-  const partner = relicPartners(run.relics).find(entry => entry.id !== run.pending.relic);
+  const partner = relicPartners(run.relics).find(entry => entry.id !== run.pending.relic && entry.id !== run.promise?.relic);
   if (partner) {
     run.pending.partner = partner;
     seeRelic(run, partner.id);
@@ -530,6 +589,7 @@ export function settleBattle(run, input) {
   const wiped = win && nobodyReturned;
   if (!win || (wiped && !final)) run.result = 'lose';
   else if (final) run.result = 'win';
+  if (run.result && run.promise) run.promise = null;
 
   const { roster } = dependencies.get(run);
   const downs = [...new Map(summary.enemyDowns.map(entry => [entry.idx, entry])).values()];

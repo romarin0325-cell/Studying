@@ -9,6 +9,14 @@ function ranged(expectedName, family, variant, frame, socket, extra = {}) {
   return { expectedName, family, variant, range: 'ranged', frame, socket, ...extra };
 }
 
+export const FORM_ART = 'miracle_larva';
+export const FORM_OUTLINE_WIDTH = 2;
+export const FORM_MARKERS = {
+  mirror_cocoon: [172, 208, 255],
+  aurora_wing: [137, 255, 202],
+  abyss_wing: [210, 126, 255]
+};
+
 export const SKILL_MOTIONS = {
   'ally/ancient_dragon/2': melee('드래곤크로', 'claw', 'rake', 'idle', { socket: 'hand' }),
   'ally/avalanche_maid/2': melee('빙하의일격', 'impact', 'strike', 'attack', { tint: 'water' }),
@@ -23,7 +31,7 @@ export const SKILL_MOTIONS = {
   'ally/doom_luther/3': melee('갓킬러', 'blade', 'diagonal', 'idle'),
   'ally/ember_tiger/2': melee('와일드러쉬', 'impact', 'body', 'attack'),
   'ally/ember_tiger/3': melee('블레이즈크로', 'claw', 'rake', 'idle', { tint: 'fire' }),
-  'ally/executor/3': melee('섀도우길로틴', 'blade', 'guillotine', 'idle', { socket: 'hand', tint: 'dark' }),
+  'ally/executor/3': melee('섀도우길로틴', 'blade', 'guillotine', 'idle', { socket: 'hand', tint: 'dark', forceBig: true }),
   'ally/fenrir/2': melee('프로스트팽', 'claw', 'cross', 'attack', { tint: 'water' }),
   'ally/gold_dragon/3': melee('드래곤크로', 'claw', 'rake', 'idle', { socket: 'hand' }),
   'ally/gray/3': melee('차원절단', 'blade', 'scythe', 'attack', { socket: 'weaponTip' }),
@@ -145,7 +153,7 @@ export const SKILL_MOTIONS = {
   'ally/fallen_angel/2': ranged('다크레이', 'ray', 'straight', 'attack', 'hand'),
   'ally/fallen_angel/3': ranged('타락의낙인', 'field', 'circle', 'idle', 'hand'),
   'ally/fenrir/3': ranged('윈터하울링', 'blast', 'wave', 'idle', 'mouth'),
-  'ally/fireworks_girl/2': ranged('페스티벌나이트', 'blast', 'burst', 'attack', 'top'),
+  'ally/fireworks_girl/2': ranged('페스티벌나이트', 'blast', 'eruption', 'attack', 'top'),
   'ally/fireworks_girl/3': ranged('스파클캐논', 'shot', 'bullet', 'idle', 'hand'),
   'ally/flame_sage/2': ranged('프로미넌스', 'blast', 'eruption', 'attack', 'ground'),
   'ally/flare_ribbon/3': ranged('스파클래쉬', 'field', 'bind', 'attack', 'hand'),
@@ -186,13 +194,13 @@ export const SKILL_MOTIONS = {
   'ally/night_rabbit/3': ranged('문라이트', 'ray', 'straight', 'idle', 'hand'),
   'ally/paladin/2': ranged('홀리그라운드', 'field', 'circle', 'idle', 'ground'),
   'ally/perfect_aurora/2': ranged('허실의거울', 'orb', 'bolt', 'idle', 'hand'),
-  'ally/perfect_aurora/3': ranged('퍼펙트플랜', 'mark', 'reserve', 'attack', 'hand'),
-  'ally/phantom/2': ranged('나이트메어', 'mark', 'reserve', 'attack', 'hand'),
+  'ally/perfect_aurora/3': ranged('퍼펙트플랜', 'ray', 'straight', 'attack', 'hand', { tint: 'light' }),
+  'ally/phantom/2': ranged('나이트메어', 'orb', 'bolt', 'attack', 'hand', { tint: 'dark' }),
   'ally/phantom/3': ranged('소울디스트로이어', 'blast', 'burst', 'idle', 'hand'),
   'ally/phoenix/3': ranged('샤이닝플레임', 'blast', 'eruption', 'idle', 'hand'),
   'ally/priest_of_end/3': ranged('사신강림', 'field', 'summon', 'attack', 'hand'),
   'ally/prism_twin/2': ranged('프리즘셔플', 'field', 'circle', 'attack', 'hand'),
-  'ally/prism_twin/3': ranged('일루미네이션', 'mark', 'reserve', 'idle', 'hand'),
+  'ally/prism_twin/3': ranged('일루미네이션', 'ray', 'straight', 'idle', 'hand', { tint: 'light' }),
   'ally/prophet/3': ranged('슈퍼내추럴', 'field', 'roulette', 'attack', 'hand'),
   'ally/pudding_princess/3': ranged('푸딩파라다이스', 'field', 'circle', 'idle', 'hand'),
   'ally/red_moon/3': ranged('이터널플레임', 'blast', 'eruption', 'idle', 'hand'),
@@ -228,7 +236,7 @@ export const SKILL_MOTIONS = {
   'ally/supernova/2': ranged('파이널버스트', 'blast', 'burst', 'attack', 'hand'),
   'ally/time_magician/2': ranged('액셀러레이터', 'orb', 'bolt', 'idle', 'hand'),
   'ally/time_magician/3': ranged('데스클록', 'field', 'circle', 'attack', 'hand'),
-  'ally/time_ruler/2': ranged('종언의예고', 'mark', 'reserve', 'attack', 'hand'),
+  'ally/time_ruler/2': ranged('종언의예고', 'orb', 'bolt', 'attack', 'hand'),
   'ally/tinker_bell/3': ranged('네버랜드', 'field', 'circle', 'idle', 'hand'),
   'ally/toffee_apple/2': ranged('애프터테이스트', 'mark', 'curse', 'attack', 'hand'),
   'ally/toffee_apple/3': ranged('슈거노이즈', 'blast', 'wave', 'idle', 'mouth'),
@@ -237,7 +245,7 @@ export const SKILL_MOTIONS = {
   'ally/trans_chaos_lord/2': ranged('프리즘브레이커', 'drift', 'shard', 'attack', 'hand'),
   'ally/trans_chaos_lord/3': ranged('데스티니룰렛', 'field', 'roulette', 'idle', 'hand'),
   'ally/trans_cinderella/3': ranged('미라클스펠', 'field', 'circle', 'attack', 'hand'),
-  'ally/trans_executor/3': ranged('인과역전', 'mark', 'reserve', 'attack', 'hand'),
+  'ally/trans_executor/3': ranged('인과역전', 'ray', 'straight', 'attack', 'hand', { tint: 'dark' }),
   'ally/trans_flora/3': ranged('블러썸템페스트', 'drift', 'petal', 'attack', 'hand'),
   'ally/trans_gray/2': ranged('보이드이터', 'orb', 'absorb', 'idle', 'hand'),
   'ally/trans_poseidon/3': ranged('어비스프레셔', 'blast', 'ground', 'attack', 'weaponTip'),
@@ -246,7 +254,7 @@ export const SKILL_MOTIONS = {
   'ally/trauma/3': ranged('마인드브레이커', 'mark', 'curse', 'idle', 'hand'),
   'ally/vampire/2': ranged('블러드드레인', 'orb', 'absorb', 'attack', 'hand', { tint: 'dark' }),
   'ally/vampire/3': ranged('다크니스', 'orb', 'bolt', 'idle', 'hand'),
-  'ally/venom/2': ranged('플레이그', 'mark', 'reserve', 'idle', 'hand'),
+  'ally/venom/2': ranged('플레이그', 'drift', 'powder', 'idle', 'hand', { tint: 'dark' }),
   'ally/victoria/2': ranged('에테르랜스', 'shot', 'fire', 'attack', 'weaponTip'),
   'ally/world_tree/2': ranged('대지의분노', 'blast', 'ground', 'idle', 'ground'),
   'ally/world_tree/3': ranged('아스트랄루트', 'field', 'bind', 'attack', 'ground'),

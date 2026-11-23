@@ -11,7 +11,7 @@ export const SPRITE_SOCKET_OVERRIDES = {
   'abyss_eye-idle': { eye: [30, 25] },
   'abyss_eye-attack': { eye: [31, 21] },
   'magma_beetle-attack': { top: [22, 13] },
-  'snow_rabbit-attack': { hand: [42, 61] },
+  'snow_rabbit-attack': { hand: [42, 57] }, // 2026-11-23 head-recheck frame (65×80): the hand sits 4 px higher
   'mawang-idle': { mouth: [29, 32] },
   'fairy-attack': { hand: [41, 53] },
   'vampire-attack': { hand: [40, 36] },

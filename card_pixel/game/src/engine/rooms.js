@@ -1,7 +1,7 @@
 import { AFFIXES } from '../content/affixes.js';
 import { LESSON_SALT, makeBossLesson } from '../content/boss-lessons.js';
 import { DUNGEONS } from '../content/dungeons.js';
-import { EVENTS, eventForRun } from '../content/events.js';
+import { EVENTS, PROMISE_EVENTS, eventForRun } from '../content/events.js';
 import { INTRO } from '../content/intro.js';
 import { LAYOUTS, ROOM_NAMES } from '../content/layouts.js';
 import { QUIRKS } from '../content/quirks.js';
@@ -24,10 +24,11 @@ export const RELIC_LIMIT = 4;
 const SALE_PRICE = { normal: 1, rare: 2, epic: 3, legend: 4 };
 const SKY = ['sun_bless', 'star_powder'];
 const ATTACK_TYPES = ['phy', 'mag'];
+const PROMISE_SALT = 0x50726f6d;
 export const copy = value => structuredClone(value);
 export const invalid = reason => ({ ok: false, reason });
 
-function fitsRelic(run, roster, rule) {
+export function fitsRelic(run, roster, rule) {
   const cards = run.bench.map(roster.card);
   const skills = cards.flatMap(card => card.skills || []);
   const effects = skills.flatMap(skill => skill.effects || []);
@@ -66,7 +67,8 @@ const CONDITIONAL_DOOR_RELICS = new Set(['reverse', 'buff_overload', 'over_flame
 const DOOR_RELIC_WEIGHT = { fits: 2, combo: 6, conditional: 9 };
 
 function relicOffer(run, roster, { comboDoor = false, exclude = [] } = {}) {
-  const available = Object.keys(RELICS).filter(id => !run.relics.includes(id) && !exclude.includes(id));
+  const reserved = run.floor <= run.promise?.floor ? run.promise.relic : null;
+  const available = Object.keys(RELICS).filter(id => id !== reserved && !run.relics.includes(id) && !exclude.includes(id));
   const fits = available.filter(id => fitsRelic(run, roster, RELICS[id].fits));
   const offers = comboDoor ? available.flatMap(id => {
     const fit = fits.includes(id) ? DOOR_RELIC_WEIGHT.fits : 1;
@@ -266,7 +268,7 @@ export function makeDoors(run, roster) {
     .filter(template => template.type !== 'event' || run.floor >= 5 || hasFeature(run, 'pricedEvents'))
     .filter(template => dungeon.layout !== 'intro' || template.type !== 'spring' || hasFeature(run, 'introSpring'));
   const battleCount = layout.filter(template => template.reward != null || ['borrowed', 'boss'].includes(template.type)).length;
-  return layout.map((template, index) => {
+  const doors = layout.map((template, index) => {
     const regionChoice = hasFeature(run, 'regionRules') && run.floor === 5 ? run.laterRegions?.[index] : null;
     const region = hasFeature(run, 'regionRules') ? regionChoice || run.region : null;
     if (template.reward != null || ['borrowed', 'boss'].includes(template.type)) {
@@ -274,7 +276,7 @@ export function makeDoors(run, roster) {
         ? { type: 'wild', reward: 1 } : template;
       return makeBattleDoor(run, roster, dungeon, standard, index, region, battleCount);
     }
-    const event = template.type === 'event' ? pick(run.rng, eventCandidates(run)) : null;
+    const event = template.type === 'event' ? drawEvent(run, roster) : null;
     const merchant = event?.id === 'grand_merchant';
     const relic = template.type === 'treasure' || merchant ? relicOffer(run, roster) : null;
     return {
@@ -283,6 +285,28 @@ export function makeDoors(run, roster) {
       event: event ? copy(event) : null, relic
     };
   });
+  if (run.promise?.floor === run.floor) {
+    doors.push({
+      type: 'event', index: doors.length, name: PROMISE_EVENTS[run.dungeonId].doorName, bg: dungeon.background,
+      enemies: [], tempo: null, event: null, relic: run.promise.relic, promiseId: run.promise.id
+    });
+  }
+  return doors;
+}
+
+function drawEvent(run, roster) {
+  // Keep the ordinary draw on the route RNG even when the floor-local promise roll replaces it.
+  const ordinary = pick(run.rng, eventCandidates(run));
+  const config = PROMISE_EVENTS[run.dungeonId];
+  if (run.promise !== null || !usesRepeatDraws(run) || run.floor !== config?.offerFloor) return ordinary;
+  const rng = floorRng(run, PROMISE_SALT);
+  if (nextFloat(rng) >= config.chance) return ordinary;
+  const relic = relicOffer({ ...run, rng, seenRelics: run.seenRelics.slice() }, roster);
+  if (!relic) return ordinary;
+  const event = copy(config.event);
+  const deposit = event.choices.find(choice => choice.id === 'deposit');
+  deposit.ops[0].offer = { id: event.id, relic, floor: config.floor, deposit: deposit.cost };
+  return event;
 }
 
 function canAttemptBet(run, core, roster, kind) {
@@ -303,8 +327,10 @@ function canAttemptBet(run, core, roster, kind) {
   return run.bench.length > 0;
 }
 
-export function eventChoices(run, core, roster) {
-  return (run.room.event?.choices || []).map(choice => {
+export function eventChoices(run, core, roster, door = run.room) {
+  // Entering a door on the promised floor clears the outstanding promise first.
+  const promise = run.phase === 'map' && run.promise?.floor === run.floor ? null : run.promise;
+  return (door?.event?.choices || []).map(choice => {
     let targets = null;
     if (choice.target === 'bench') targets = run.bench.slice();
     if (choice.target === 'release') {
@@ -316,15 +342,16 @@ export function eventChoices(run, core, roster) {
         return usesRepeatDraws(run) ? run.pool.length > 0 : run.pool.some(id => canJoin(run, id));
       }
       if (op.type === 'bet') return canAttemptBet(run, core, roster, op.kind);
+      if (op.type === 'promise') return promise === null && !!op.offer && !run.relics.includes(op.offer.relic);
       if (op.type === 'relic') {
-        const id = op.id === 'offered' ? run.room.relic : op.id;
+        const id = op.id === 'offered' ? door.relic : op.id;
         return !!id && !run.relics.includes(id) && (!op.temporary
           || (!run.nextBattle?.relic && run.relics.length < RELIC_LIMIT));
       }
       return true;
     });
     const view = { ...copy(choice), targets, enabled: eligible && (targets === null || targets.length > 0) && run.crystals >= (choice.cost || 0) };
-    if (run.lessonVersion) addEventChoiceDetails(view, run, core, roster);
+    if (run.lessonVersion) addEventChoiceDetails(view, run, core, roster, door.event.id);
     return view;
   });
 }
@@ -333,7 +360,7 @@ export function joinCount(ops) {
   return ops.filter(op => op.type === 'join').reduce((sum, op) => sum + (op.random ? 1 : op.ids.length), 0);
 }
 
-function addEventChoiceDetails(choice, run, core, roster) {
+function addEventChoiceDetails(choice, run, core, roster, eventId) {
   const incoming = joinCount(choice.ops);
   if (incoming) {
     // Event details use the lesson version, independently of tempo validation.
@@ -349,10 +376,10 @@ function addEventChoiceDetails(choice, run, core, roster) {
       before: run.blessings[id] ?? 0, after: blessing.multiplier
     }]));
   }
-  if (run.room.event.id === 'kobold_boot_exchange' && choice.id === 'exchange') {
+  if (eventId === 'kobold_boot_exchange' && choice.id === 'exchange') {
     choice.netCrystals = Object.fromEntries(choice.targets.map(id => [id, SALE_PRICE[gradeOf(roster.card(id).grade)] - choice.cost]));
   }
-  if (run.room.event.id === 'penguin_ice_seam' && choice.id === 'carry') {
+  if (eventId === 'penguin_ice_seam' && choice.id === 'carry') {
     choice.waterAllies = run.bench.filter(id => core.GameUtils.cardMatchesElement(roster.card(id), 'water'));
     if (!choice.waterAllies.length) choice.text += ' · 물 동료 없음';
   }
@@ -390,6 +417,10 @@ export function resolveEvent(run, core, roster, choiceId, targetId, replaceIds =
     switch (op.type) {
       case 'crystals':
         run.crystals += op.amount;
+        break;
+      case 'promise':
+        run.promise = copy(op.offer);
+        result.effects.push(copy(op));
         break;
       case 'firstSurvivalPay':
         (run.firstSurvivalPay ||= {})[op.id] = op.amount;

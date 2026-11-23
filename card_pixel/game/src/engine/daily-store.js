@@ -1,10 +1,14 @@
 import { FLOORS } from '../content/daily-rift.js';
-import { DAILY_KEY as KEY, slotStorage } from '../ui/storage.js';
-import { compare, dayKey, specFor, validAttempt } from './daily-rift.js';
+import { RIFT_PUZZLES } from '../content/rift-puzzles.js';
+import { backupSlots, DAILY_KEY as KEY } from '../ui/storage.js';
+import {
+  compare, dayKey, doorsFor, judgePuzzleGoal, puzzleBattleFacts, puzzleConditions, riftPuzzlesUnlocked, specFor, validAttempt
+} from './daily-rift.js';
 import { dailyRiftUnlocked } from './meta.js';
 import { invalid } from './rooms.js';
-import { createRun } from './run.js';
+import { chooseDoor, createRun } from './run.js';
 import { restoreRun, serializeRun } from './run-codec.js';
+import { nextSaveRevision, saveHead, saveHeadChanged } from './save.js';
 
 const VERSION = 1;
 const empty = () => ({ version: VERSION, days: {}, active: null });
@@ -23,7 +27,7 @@ function activeCheckpoint(data, run) {
   const { active } = data;
   const daily = run?.daily;
   const day = data.days[active?.dayKey];
-  if (!daily || !day || run.id !== active.runId || daily.kind !== active.kind || daily.attemptNo !== day.starts
+  if (!daily || daily.puzzleId || !day || run.id !== active.runId || daily.kind !== active.kind || daily.attemptNo !== day.starts
     || !day.spec || daily.spec?.dayKey !== active.dayKey
     || run.seed !== day.spec.seed || run.dungeonId !== day.spec.dungeonId || run.floors !== FLOORS
     || run.difficulty !== 'normal' || run.contract !== null || run.crystals !== 0) return null;
@@ -37,6 +41,11 @@ function activeCheckpoint(data, run) {
 
 const dictionary = value => !!value && typeof value === 'object' && !Array.isArray(value);
 const nonnegative = n => Number.isSafeInteger(n) && n >= 0;
+const validRevision = active => active?.revision === undefined || nonnegative(active.revision);
+
+function staleCheckpoint(head, observed) {
+  return saveHeadChanged(head, observed) || (observed && head.runId !== observed.runId);
+}
 
 function validCheckpoint(checkpoint, spec) {
   return dictionary(checkpoint) && Number.isInteger(checkpoint.floor) && checkpoint.floor >= 1 && checkpoint.floor <= FLOORS
@@ -53,9 +62,39 @@ function validScore(score, day, kind) {
     && Number.isSafeInteger(attempt) && attempt <= day.starts && (kind === 'official' ? attempt === 1 : attempt > 1);
 }
 
+function storedPuzzleScore(data, puzzle, ending) {
+  // The former single-goal scores lack fielding and heirloom attribution. None prove either new goal.
+  const best = data?.puzzleBests?.[puzzle.id]?.[ending.id];
+  if (!['win', 'lose'].includes(best?.outcome) || best.floor !== puzzle.floor
+    || !validCheckpoint(best, { loanIds: puzzle.rentals })) return null;
+  const validIds = ids => Array.isArray(ids) && new Set(ids).size === ids.length
+    && Array.from(ids).every(id => puzzle.rentals.includes(id));
+  const { foughtIds, fallenIds, livingIds, heirloomUses } = best;
+  if (!validIds(foughtIds) || foughtIds.length > 3 || !validIds(fallenIds)
+    || fallenIds.length + livingIds.length !== puzzle.rentals.length || fallenIds.some(id => livingIds.includes(id))
+    || !Array.isArray(heirloomUses) || Array.from(heirloomUses).some(use =>
+      !foughtIds.includes(use?.by) || use.by === use.from || !fallenIds.includes(use.from))) return null;
+  return best;
+}
+
+function puzzleBests(data) {
+  return Object.fromEntries(RIFT_PUZZLES.flatMap(puzzle => {
+    const scores = puzzle.endings.flatMap(ending => {
+      const score = storedPuzzleScore(data, puzzle, ending);
+      return score ? [[ending.id, score]] : [];
+    });
+    return scores.length ? [[puzzle.id, Object.fromEntries(scores)]] : [];
+  }));
+}
+
+function comparePuzzle(a, b) {
+  return Number(a.goalMet) - Number(b.goalMet) || Number(a.outcome === 'win') - Number(b.outcome === 'win')
+    || a.survivors - b.survivors || b.turns - a.turns;
+}
+
 export function restoreDailyData(data, { core, roster }) {
   if (!dictionary(data) || data.version !== VERSION || !dictionary(data.days)
-    || (data.active !== null && !dictionary(data.active))) return null;
+    || (data.active !== null && !dictionary(data.active)) || !validRevision(data.active)) return null;
   const { active } = data;
   try {
     for (const [key, day] of Object.entries(data.days)) {
@@ -117,29 +156,55 @@ function previousResult(data, runId) {
 }
 
 export function create(storage, { core, roster }) {
-  storage = slotStorage(storage);
+  const slots = backupSlots(storage);
+  const puzzlesInPlay = new WeakMap();
+  const runHeads = new WeakMap();
+  // Reading the hub banner can refresh the abandon prompt without updating a loaded run.
+  let loaded;
+  let viewed;
+
   function read() {
     try {
-      const saved = storage.getItem(KEY);
-      if (saved == null) return empty();
-      const data = JSON.parse(saved);
-      if (data?.version === VERSION && data.days && typeof data.days === 'object'
-        && !Array.isArray(data.days) && (data.active === null || typeof data.active === 'object')) return data;
+      const slot = slots.active();
+      const saved = slots.read(slot, KEY);
+      const data = saved == null ? empty() : JSON.parse(saved);
+      if (data?.version === VERSION && dictionary(data.days) && (data.active === null || dictionary(data.active))
+        && validRevision(data.active)) {
+        const { active } = data;
+        return { data, head: { ...saveHead(slots, slot, active, active !== null), runId: active?.runId } };
+      }
     } catch {
       // A damaged save can still be cleared through settings.
     }
     return null;
   }
 
-  function write(data) {
+  function write(data, slot) {
     try {
-      return storage.setItem(KEY, JSON.stringify(data)) !== false;
+      slots.write(slot, KEY, JSON.stringify(data));
+      return true;
     } catch {
       return false;
     }
   }
 
-  function settle(data, outcome, checkpoint) {
+  function remember(run, head) {
+    runHeads.set(run, head);
+    loaded = viewed = head;
+  }
+
+  function writeCheckpoint(data, head, run) {
+    try {
+      data.active.revision = nextSaveRevision(head.revision);
+    } catch {
+      return invalid('invalid_save');
+    }
+    if (!write(data, head.slot)) return invalid('storage_failed');
+    remember(run, { ...head, revision: data.active.revision, hasSave: true, runId: data.active.runId });
+    return { ok: true };
+  }
+
+  function settle(data, head, outcome, checkpoint) {
     const { runId, dayKey, kind } = data.active;
     const day = data.days[dayKey];
     if (!day || !checkpoint) return invalid('invalid_save');
@@ -152,14 +217,84 @@ export function create(storage, { core, roster }) {
     if (prior.runId) receipts[prior.runId] = prior;
     day.last = Object.keys(receipts).length ? { ...score, receipts } : score;
     data.active = null;
-    return write(data) ? response(day, score, false) : invalid('storage_failed');
+    return write(data, head.slot) ? response(day, score, false) : invalid('storage_failed');
   }
 
   return {
+    puzzles(profile) {
+      if (!riftPuzzlesUnlocked(profile)) return [];
+      const data = read()?.data;
+      return RIFT_PUZZLES.map(puzzle => ({
+        ...puzzle,
+        endings: puzzle.endings.map(ending => {
+          const score = storedPuzzleScore(data, puzzle, ending);
+          return { ...ending, conditions: puzzleConditions(ending.goal), best: score && judgePuzzleGoal(ending.goal, score) };
+        })
+      }));
+    },
+
+    startPuzzle({ profile, puzzleId, endingId }) {
+      if (!riftPuzzlesUnlocked(profile)) return invalid('locked');
+      const puzzle = RIFT_PUZZLES.find(item => item.id === puzzleId);
+      const ending = puzzle?.endings.find(item => item.id === endingId);
+      if (!ending) return invalid('invalid_puzzle');
+      try {
+        const spec = specFor(puzzle.spec, roster);
+        if (puzzle.rentals.some(id => !spec.loanIds.includes(id))) return invalid('invalid_puzzle');
+        const run = createRun({ core, roster, daily: { spec, kind: 'practice', attemptNo: 2, puzzleId } });
+        run.id = `puzzle/${puzzleId}`;
+        run.floor = puzzle.floor;
+        run.doors = doorsFor(spec, puzzle.floor, roster).map(door => ({ ...door, tempo: null }));
+        run.joinOrder = puzzle.rentals.slice();
+        run.bench = puzzle.rentals.slice();
+        // Offset the boss seed to match the fixed entrance without counting earlier battles.
+        run.seed += puzzle.setup?.seedOffset ?? 0;
+        run.relics = puzzle.setup?.relics?.slice() ?? [];
+        run.blessings = { ...puzzle.setup?.blessings };
+        if (!chooseDoor(run, 0).ok) return invalid('invalid_puzzle');
+        puzzlesInPlay.set(run, { puzzle, ending });
+        return { ok: true, run, puzzle, ending: { ...ending, conditions: puzzleConditions(ending.goal) } };
+      } catch {
+        return invalid('invalid_puzzle');
+      }
+    },
+
+    finishPuzzle(run) {
+      const attempt = puzzlesInPlay.get(run);
+      if (!attempt) return invalid('invalid_puzzle');
+      const { puzzle, ending } = attempt;
+      const terminal = run.phase === 'done' || (run.phase === 'result' && run.result === 'win');
+      if (!terminal || run.floor !== puzzle.floor || !['win', 'lose'].includes(run.result)) {
+        return invalid('run_not_done');
+      }
+      if (attempt.receipt) return attempt.receipt;
+      const checkpoint = checkpointFor(run);
+      const facts = puzzleBattleFacts(run);
+      if (!checkpoint || !facts) return invalid('invalid_puzzle');
+      const score = { ...checkpoint, ...facts, outcome: run.result };
+      const result = judgePuzzleGoal(ending.goal, score);
+      const saved = read();
+      if (!saved) return { ...invalid('invalid_save'), score: result };
+      const { data, head } = saved;
+      const best = storedPuzzleScore(data, puzzle, ending);
+      if (!best || comparePuzzle(result, judgePuzzleGoal(ending.goal, best)) > 0) {
+        // Keep this map in the existing backup slot, independently of daily attempts.
+        const bests = puzzleBests(data);
+        bests[puzzle.id] = { ...bests[puzzle.id], [ending.id]: score };
+        if (!write({ ...data, puzzleBests: bests }, head.slot)) {
+          return { ...invalid('storage_failed'), score: result };
+        }
+      }
+      attempt.receipt = { ok: true, score: result };
+      return attempt.receipt;
+    },
+
     view(profile, now) {
       const key = dayKey(now);
       const unlocked = dailyRiftUnlocked(profile);
-      const { days, active } = read() || empty();
+      const saved = read();
+      if (saved) viewed = saved.head;
+      const { days, active } = saved?.data ?? empty();
       const today = days[key];
       return {
         dayKey: key, unlocked, spec: unlocked ? today?.spec ?? specFor(key, roster) : null,
@@ -172,8 +307,9 @@ export function create(storage, { core, roster }) {
       if (!dailyRiftUnlocked(profile)) return invalid('locked');
       const key = dayKey(now);
       if (key !== expectedDayKey) return invalid('date_changed');
-      const data = read();
-      if (!data) return invalid('invalid_save');
+      const saved = read();
+      if (!saved) return invalid('invalid_save');
+      const { data, head } = saved;
       if (data.active) return invalid('active_exists');
       if (kind !== 'official' && kind !== 'practice') return invalid('invalid_save');
       const day = data.days[key];
@@ -190,16 +326,21 @@ export function create(storage, { core, roster }) {
       } catch {
         return invalid('invalid_save');
       }
-      return write(data) ? { ok: true, run } : invalid('storage_failed');
+      const written = writeCheckpoint(data, head, run);
+      return written.ok ? { ok: true, run } : written;
     },
 
     resume() {
-      const data = read();
-      if (!data) return invalid('invalid_save');
+      const saved = read();
+      if (!saved) return invalid('invalid_save');
+      const { data, head } = saved;
       if (!data.active) return invalid('no_active');
       try {
         const run = restoreRun(data.active.snapshot, { core, roster });
-        if (activeCheckpoint(data, run) && validAttempt(run.daily, roster)) return { ok: true, run };
+        if (activeCheckpoint(data, run) && validAttempt(run.daily, roster)) {
+          remember(run, head);
+          return { ok: true, run };
+        }
       } catch {
         // The separate checkpoint still lets the player abandon an unreadable snapshot.
       }
@@ -207,8 +348,10 @@ export function create(storage, { core, roster }) {
     },
 
     save(run) {
-      const data = read();
-      if (!data) return invalid('invalid_save');
+      const saved = read();
+      if (!saved) return invalid('invalid_save');
+      const { data, head } = saved;
+      if (staleCheckpoint(head, runHeads.get(run) ?? loaded)) return invalid('stale_tab');
       if (!data.active) return invalid('no_active');
       const checkpoint = activeCheckpoint(data, run);
       if (!checkpoint) return invalid('invalid_save');
@@ -220,33 +363,37 @@ export function create(storage, { core, roster }) {
         return invalid('invalid_save');
       }
       data.active = { ...data.active, snapshot, checkpoint };
-      return write(data) ? { ok: true } : invalid('storage_failed');
+      return writeCheckpoint(data, head, run);
     },
 
     finish(run) {
-      const data = read();
-      if (!data) return invalid('invalid_save');
+      const saved = read();
+      if (!saved) return invalid('invalid_save');
+      const { data, head } = saved;
       const duplicate = previousResult(data, run?.id);
       if (duplicate) return duplicate;
+      if (staleCheckpoint(head, runHeads.get(run) ?? loaded)) return invalid('stale_tab');
       if (!data.active) return invalid('no_active');
       const checkpoint = activeCheckpoint(data, run);
       if (!checkpoint) return invalid('invalid_save');
       if (run.phase !== 'done' || !['win', 'lose'].includes(run.result)) return invalid('run_not_done');
-      return settle(data, run.result, checkpoint);
+      return settle(data, head, run.result, checkpoint);
     },
 
     abandon(runId) {
-      const data = read();
-      if (!data) return invalid('invalid_save');
+      const saved = read();
+      if (!saved) return invalid('invalid_save');
+      const { data, head } = saved;
       const duplicate = previousResult(data, runId);
       if (duplicate) return duplicate;
+      if (staleCheckpoint(head, viewed)) return invalid('stale_tab');
       if (!data.active) return invalid('no_active');
       if (runId !== data.active.runId) return invalid('invalid_save');
-      return settle(data, 'abandon', data.active.checkpoint);
+      return settle(data, head, 'abandon', data.active.checkpoint);
     },
 
     history({ before = null, limit = 7 } = {}) {
-      const { days } = read() || empty();
+      const { days } = read()?.data ?? empty();
       const keys = Object.keys(days).filter(key => days[key]?.official && (before === null || key < before)).sort().reverse();
       const rows = keys.slice(0, limit).map(key => {
         const { spec, official, bestPractice } = days[key];
@@ -256,7 +403,7 @@ export function create(storage, { core, roster }) {
     },
 
     clear() {
-      storage.removeItem(KEY);
+      slots.write(slots.active(), KEY, null);
     }
   };
 }

@@ -1,5 +1,7 @@
 import { DUNGEONS } from '../content/dungeons.js';
 import { CONTRACT_RULE_VERSION, CONTRACTS, LEGACY_CONTRACT_RULE_VERSION } from '../content/contracts.js';
+import { PROMISE_EVENTS } from '../content/events.js';
+import { RELICS } from '../content/relics.js';
 import { calendarDate } from './dates.js';
 import { openFeatures } from './entry.js';
 import { bindRun, CHRONICLE_LIMIT, runRewards } from './run.js';
@@ -53,7 +55,7 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
     || (run.phase === 'room' && !run.room) || (run.phase === 'map' && !run.doors.length)
     || (run.phase === 'done' && !['win', 'lose'].includes(run.result))
     || (run.chronicle !== undefined && !validChronicle(run.chronicle, run.floor))
-    || (run.endDayKey != null && !calendarDate(run.endDayKey)) || !validEntryRules(run)) return null;
+    || (run.endDayKey != null && !calendarDate(run.endDayKey)) || !validEntryRules(run) || !validPromise(run)) return null;
   run.contract ??= null;
   if (run.contract !== null) {
     if (!dictionary(run.contract) || !Object.hasOwn(CONTRACTS, run.contract.id)) return null;
@@ -73,6 +75,22 @@ export function restoreRun(data, { core, roster, migrate } = {}) {
   migrateResult(run);
   if (run.phase === 'result' && !validHeldResult(run)) return null;
   return bindRun(run, { core, roster });
+}
+
+function validPromise(run) {
+  const doors = run.doors.filter(door => door.promiseId !== undefined);
+  const promise = run.promise;
+  if (promise == null) return !doors.length;
+  const config = PROMISE_EVENTS[run.dungeonId];
+  if (!config || run.daily || !dictionary(promise) || promise.id !== config.event.id
+    || !string(promise.relic) || !Object.hasOwn(RELICS, promise.relic)
+    || promise.floor !== config.floor || promise.deposit !== config.event.choices.find(choice => choice.id === 'deposit').cost
+    || run.floor < config.offerFloor || run.floor > promise.floor || ['start', 'result', 'done'].includes(run.phase)) return false;
+  if (run.floor < promise.floor) return !doors.length;
+  const [door] = doors;
+  return run.phase === 'map' && doors.length === 1 && door === run.doors.at(-1)
+    && door.index === run.doors.length - 1 && door.promiseId === promise.id && door.relic === promise.relic
+    && door.type === 'event' && !door.enemies.length;
 }
 
 function validChronicle(records, floor) {

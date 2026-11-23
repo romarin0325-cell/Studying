@@ -16,6 +16,7 @@
 #ending .meta-top h1::before { content: 'ENDING' / ''; }
 #recruit .meta-top h1::before { content: 'RETURN' / ''; }
 #daily-result .meta-top h1::before { content: 'DAILY RIFT' / ''; }
+#daily-result:has(.rift-puzzle-result) .meta-top h1::before { content: 'RIFT PUZZLE' / ''; }
 #recovery .meta-top h1::before { content: 'RECOVERY' / ''; }
 #recruit .meta-top h1:empty { display: none; }
 .meta-top:has(.meta-back) h1 { margin-left: 2px; }
@@ -250,7 +251,7 @@
 .rift-companion, #sheet .rift-loans .rift-companion { display: grid; justify-items: center; align-content: start; gap: 3px; min-width: 0; text-align: center; overflow-wrap: anywhere; padding: 8px 2px; }
 #sheet .rift-loans .rift-companion { font: normal 0.9375rem/1.1rem var(--f-display); }
 #sheet .rift-prep-note { margin: 10px 0; }
-.rift-prep > .go { margin-top: 8px; }
+.rift-prep .rift-actions { margin-top: 8px; }
 .rift-actions { display: grid; gap: 8px; }
 .rift-result { padding: 14px; margin-bottom: 12px; }
 .rift-result-cast { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-bottom: 10px; }
@@ -262,6 +263,26 @@
 .rift-record-list, .rift-record-pages { display: grid; gap: 6px; margin-top: 8px; }
 .rift-record-list .btn { justify-content: flex-start; text-align: left; }
 .rift-record-pages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rift-puzzle-list { display: grid; gap: 8px; }
+/* One track as wide as the card: .btn centres its content, which gave every card a different indent. */
+#sheet .rift-puzzle-card { display: grid; grid-template-columns: minmax(0, 1fr); justify-content: stretch; gap: 3px; justify-items: start;
+  padding: 9px 12px; text-align: left; word-break: keep-all; overflow-wrap: anywhere; }
+.rift-puzzle-card b { font: normal 0.9375rem/1.2 var(--f-display); }
+.rift-puzzle-card small { color: var(--ink2); }
+.rift-puzzle-ending { display: grid; width: 100%; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline;
+  column-gap: 8px; border-top: 1px solid var(--line); padding: 4px 0 2px; font: 500 0.8125rem/1.35 var(--f-body); }
+.rift-puzzle-ending .rift-puzzle-mark.met { color: var(--aqua-lo); }
+.rift-puzzle-record { grid-column: 1 / -1; }
+.rift-puzzle-goal { margin: 4px 0 8px; font: 500 0.8125rem/1.4 var(--f-body); word-break: keep-all; }
+/* Puzzle result: one row per goal condition, met or missed, with the value this attempt reached. */
+.rift-puzzle-checks { display: grid; gap: 5px; margin: 10px 0 8px; padding: 0; list-style: none; }
+.rift-puzzle-checks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  font: 500 0.875rem/1.35 var(--f-body); word-break: keep-all; overflow-wrap: anywhere; }
+.rift-puzzle-checks b { min-width: 3.2em; padding: 2px 6px; text-align: center; color: #fff; background: var(--aqua-lo);
+  font: normal 0.75rem/1.3 var(--f-display); clip-path: var(--notch); }
+.rift-puzzle-checks .missed b { background: var(--coral-lo); }
+.rift-puzzle-checks small { max-width: 8em; color: var(--ink2); font-size: 0.8125rem; }
+.rift-puzzle-result :is(.rift-puzzle-stats, .rift-puzzle-other) { color: var(--ink2); font-size: 0.8125rem; }
 
 /* preparation sheet */
 .meta-prep-section { border-bottom: 1.5px dashed var(--line); padding: 6px 0 10px; }
@@ -280,6 +301,7 @@
 .meta-prep [data-difficulty] { flex: 1 1 0; }
 .meta-prep-lead { display: flex; gap: 8px; align-items: center; min-height: 44px; }
 #sheet .meta-prep-lead .btn { width: auto; margin-left: auto; }
+#sheet .meta-prep-lead [data-goal-focus]:focus { outline: 3px solid var(--aqua); outline-offset: 2px; }
 #meta-prep-summary { font-weight: 700; margin-block: 8px; }
 #meta-region-rule, #meta-find-invites { margin-block: 6px; }
 .meta-prep .meta-prep-pool {

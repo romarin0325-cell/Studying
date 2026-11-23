@@ -13,6 +13,31 @@ const same = (a, b) => a && b && a.side === b.side && a.idx === b.idx;
 const place = (who, cast) => same(who, cast?.who) ? 'caster' :
   who.side === (cast?.who.side ?? 'ally') ? 'ally' : 'foe';
 
+export function warningDue({ key, playedKey, fast, soundOn, immediate = false, intent, countdown }) {
+  if (!soundOn || fast || key === playedKey) return false;
+  const danger = ['strong', 'boss'];
+  if (immediate || danger.includes(intent?.salience)) return true;
+  if (intent?.salience == null) return countdown?.inTurns >= 0 && countdown.inTurns <= 1;
+  return countdown?.inTurns === 1 && danger.includes(intent.countdownSalience);
+}
+
+// Core skills report their cleanses as buff deltas. Prefer the detailed rule response when it exists.
+export function actionCleanses(events, statusRules) {
+  const { who, target, skill } = events[0];
+  const effects = skill.effects ?? [];
+  const targets = [];
+  if (effects.includes('clear_self_debuffs')) targets.push(who);
+  if (target && effects.some(effect => effect === 'clear_target_debuffs' || effect === 'wild_card_debuff') &&
+      !targets.some(unit => same(unit, target))) targets.push(target);
+  return targets.flatMap(unit => {
+    if (events.some(e => e.t === 'rule' && e.rule === 'cleanse' && same(e.target ?? e.who, unit))) return [];
+    const removed = events.filter(e => e.t === 'buff' && same(e.who, unit) && e.from > 0 && e.to === 0 && statusRules.isNegative(e.id));
+    if (!removed.length) return [];
+    const before = Object.fromEntries(removed.map(e => [e.id, e.from]));
+    return [{ rule: 'cleanse', target: unit, before, after: {} }];
+  });
+}
+
 export function actionEnd(events, start) {
   const turn = events[start].s.turn;
   let end = start + 1;
