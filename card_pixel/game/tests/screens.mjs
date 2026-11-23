@@ -32,6 +32,7 @@ import { createResumeCases } from './screens/resume.mjs';
 import { createHistoryCases } from './screens/history.mjs';
 import { createAccessCases } from './screens/access.mjs';
 import { createEventDoorCases } from './screens/event-doors.mjs';
+import { createDoorPreviewCases } from './screens/door-previews.mjs';
 import { createGoalCases } from './screens/goals.mjs';
 import { createEpisodeCases } from './screens/episodes.mjs';
 import { createRelicCases } from './screens/relics.mjs';
@@ -2957,6 +2958,7 @@ const motionCases = createMotionCases({ makeRun, startBattle, storedSession, act
 const resumeCases = createResumeCases({ makeRun, startBattle, settleWin, command, storedSession, snowRabbitProfile, sessionKey });
 const historyCases = createHistoryCases({ storedSession, enterObservatory });
 const eventDoorCases = createEventDoorCases({ core, roster, storedSession });
+const doorPreviewCases = createDoorPreviewCases({ core, roster, storedSession });
 const accessCases = createAccessCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, snowRabbitProfile, enterObservatory });
 const goalCases = createGoalCases({ roster, storedSession, enterObservatory });
 const episodeCases = createEpisodeCases({ storedSession, enterObservatory });
@@ -3062,7 +3064,8 @@ const cases = {
   ...patternCases,
   ...promiseCases,
   ...puzzleCases,
-  ...eventDoorCases
+  ...eventDoorCases,
+  ...doorPreviewCases
 };
 
 caseGroups['fixed-layouts'] = Object.fromEntries([

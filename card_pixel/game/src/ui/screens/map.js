@@ -17,6 +17,7 @@ import { pixelIcon } from '../pixel-icons.js';
 import { wildBeatPattern } from '../../content/tempo.js';
 import { josa, keepSeparators } from '../text.js';
 import { describeEventOffer } from '../event-offers.js';
+import { describeAltarRoll, describeSpringCandidates, SPRING_EMPTY_POOL, SPRING_PICK_TITLE, springPickPrice } from '../service-offers.js';
 
 const AFFIX_RISK = {
   tough: '첫 3턴 적 피해 50% 감소', frenzy: '적 HP 50% 이하 시 공·마공 ×1.5',
@@ -231,6 +232,38 @@ export function mapScreen(run, ui, { receipt } = {}) {
   const eventOffers = run.doors.map(door => eventChoices(run, core, ui.roster, door).map(choice => ({
     id: choice.id, ...describeEventOffer(run, choice, { card, core, artifacts, room: door })
   })));
+  const serviceOffers = run.doors.map(door => {
+    const offer = Run.previewServiceDoor(run, door.index);
+    if (!offer?.ok) return offer;
+    return door.type === 'spring'
+      ? { ...offer, slots: describeSpringCandidates(run, offer, card) }
+      : { ...offer, ...describeAltarRoll(run, offer, card) };
+  });
+
+  function serviceLine(door) {
+    const offer = serviceOffers[door.index];
+    if (!offer?.ok) return '';
+    const line = door.type === 'spring'
+      ? ['◆' + offer.cost, ...offer.slots.map(slot => slot.name + ' ' + slot.short)].join(' · ')
+      : offer.name + ' · ' + offer.next;
+    return '<small class="door-service-preview">' + keepSeparators(esc(line)) + '</small>';
+  }
+
+  function serviceDetail(door) {
+    const offer = serviceOffers[door.index];
+    if (offer?.reason === 'empty_pool') return '<p>' + SPRING_EMPTY_POOL + '</p>';
+    if (!offer?.ok) return '';
+    if (door.type === 'altar') {
+      return '<div class="door-altar-roll"><h4>첫 굴림 · ' + esc(offer.name) + '</h4>' +
+        '<p>' + esc(offer.previous) + '</p><p>' + esc(offer.next) + '</p><p>' +
+        keepSeparators(esc(offer.effect)) + '</p></div>';
+    }
+    return '<h4>' + SPRING_PICK_TITLE + '</h4><p>' + keepSeparators(esc(springPickPrice(offer.cost))) + '</p>' +
+      '<ul class="door-spring-candidates">' + offer.slots.map(({ slotId, name, tag, detail }) =>
+        '<li data-slot-id="' + esc(slotId) + '"><b>' + esc(name) + '</b><p>' +
+        keepSeparators(esc(tag)) + '</p><p>' + keepSeparators(esc(detail)) + '</p></li>').join('') + '</ul>';
+  }
+
   const lessonLine = door => {
     const lesson = doorLesson(tempoViews[door.index]);
     return lesson ? '<small class="door-lesson">' + icon('battle') + '<span>' + esc(lesson) + '</span></small>' : '';
@@ -278,6 +311,7 @@ export function mapScreen(run, ui, { receipt } = {}) {
       (info ? '<small>' + esc(info) + '</small>' : '') +
       (chips ? '<span class="chips door-chips">' + chips + '</span>' : '') +
       (rules ? '<small class="door-risk' + (risksHere.length ? ' danger' : '') + '">' + esc(rules) + '</small>' : '') +
+      serviceLine(door) +
       offers +
       (losesPromise ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + '</small>' : '') +
       lessonLine(door) +
@@ -396,7 +430,7 @@ export function mapScreen(run, ui, { receipt } = {}) {
       (offer.releaseNote ? '<p class="loss">' + esc(offer.releaseNote) + '</p>' : '') +
       (offer.condition ? '<p class="loss">' + keepSeparators(esc(offer.condition)) + '</p>' : '') + '</li>').join('') + '</ul>' : '';
     const eventInfo = door.event ? '<h4>' + esc(door.event.name) + '</h4><p>' + esc(door.event.text) + '</p>' + offerList : '';
-    openSheet(doorTitle(door), eventInfo + lessonLine(door) + enemies + rule(quirk) + rule(region) +
+    openSheet(doorTitle(door), eventInfo + serviceDetail(door) + lessonLine(door) + enemies + rule(quirk) + rule(region) +
       (sky ? '<p>' + esc(sky) + '</p>' : '') +
       (service ? '<p>' + esc(service) + '</p>' : '') +
       (service && door.type === 'spring' ? '<p>보유 결정 ' + run.crystals + '개</p>' : '') +

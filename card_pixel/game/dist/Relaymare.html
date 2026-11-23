@@ -822,9 +822,10 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .door-entry small { color: var(--ink2); }
 .door-entry .door-event-offer { display: flex; gap: 0.25em; white-space: nowrap; }
 .door-event-offer > :first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.door-event-offers { display: grid; gap: 8px; list-style: none; margin: 8px 0; padding: 0; }
-.door-event-offers > li { border-top: 1px solid var(--line); padding-top: 8px; }
-#sh-body .door-event-offers p { margin: 2px 0 0; }
+.door-service-preview { font-weight: 700; }
+:is(.door-event-offers, .door-spring-candidates) { display: grid; gap: 8px; list-style: none; margin: 8px 0; padding: 0; }
+:is(.door-event-offers, .door-spring-candidates) > li { border-top: 1px solid var(--line); padding-top: 8px; }
+#sh-body :is(.door-event-offers, .door-spring-candidates, .door-altar-roll) p { margin: 2px 0 0; }
 .door-lineup { display: flex; align-items: flex-end; gap: 2px; flex: none; padding: 4px 6px 2px;
   --pf-o: color-mix(in srgb, var(--kind) 26%, #fff); --pf-f: color-mix(in srgb, var(--kind) 10%, #fff); --pf-lo: var(--pf-o); --pf-sh: transparent; }
 .door-entry > .run-icon { flex: none; padding: 8px; width: 48px; height: 48px;
@@ -11879,6 +11880,7 @@ const BattleRuntime = {
     leaveRoom: () => leaveRoom,
     nextFloor: () => nextFloor,
     previewNextFloor: () => previewNextFloor,
+    previewServiceDoor: () => previewServiceDoor,
     recordBattleLog: () => recordBattleLog,
     resolveReinforcement: () => resolveReinforcement,
     runRewards: () => runRewards,
@@ -12810,6 +12812,15 @@ const BattleRuntime = {
     }
     return { ok: true, room: copy(run.room), pending: copy(run.pending) };
   }
+  function previewServiceDoor(run, index) {
+    const type = run.doors[index]?.type;
+    const context = dependencies.get(run);
+    if (run.phase !== "map" || !context || type !== "spring" && type !== "altar") return null;
+    const preview = copy(run);
+    dependencies.set(preview, context);
+    if (!chooseDoor(preview, index).ok) return null;
+    return type === "spring" ? getSpringOffer(preview) : altarRoll(preview);
+  }
   function defaultParty(run) {
     const party = (run.lastParty || [null, null, null]).map((id) => run.bench.includes(id) ? id : null);
     const reserves = (run.joinOrder ?? run.bench).filter((id) => run.bench.includes(id) && !party.includes(id));
@@ -13575,8 +13586,8 @@ const BattleRuntime = {
   function springDrawChance(run, id) {
     if (!run.pool.includes(id) || !usesRepeatDraws(run) && !canJoin(run, id)) return 0;
     const grade = gradeOf(runRoster(run).card(id).grade);
-    const { percent, count: count2 } = ratesView(run).find((rate) => rate.group === grade);
-    return percent / count2;
+    const { percent: percent2, count: count2 } = ratesView(run).find((rate) => rate.group === grade);
+    return percent2 / count2;
   }
   function drawKind(run, id) {
     if (run.fallen.includes(id) || run.released.includes(id)) return "memory";
@@ -14124,8 +14135,8 @@ const BattleRuntime = {
       const { unlockedDungeons, ...profileView } = startView(profile, dungeon.id);
       const unlocked = unlockedDungeons.includes(dungeon.id);
       const hasSpring = dungeon.layout !== "intro" || profileView.features.introSpring;
-      const percent = hasSpring ? springDrawChance(createRun({ roster: roster2, profileView }), id) : 0;
-      return { dungeonId: dungeon.id, unlocked, percent };
+      const percent2 = hasSpring ? springDrawChance(createRun({ roster: roster2, profileView }), id) : 0;
+      return { dungeonId: dungeon.id, unlocked, percent: percent2 };
     }).sort((a, b) => b.percent - a.percent);
   }
   function prepView(profile, dungeonId2, roster2) {
@@ -19418,16 +19429,16 @@ const BattleRuntime = {
       const defense = o.defense;
       if (defense) {
         const { kind, reduction } = defense;
-        const percent = Math.round(reduction * 100);
-        if (kind === "evasion") return ["\uD68C\uD53C " + percent + "%", "\uC801 \uACF5\uACA9 \uD68C\uD53C \uD655\uB960"];
+        const percent2 = Math.round(reduction * 100);
+        if (kind === "evasion") return ["\uD68C\uD53C " + percent2 + "%", "\uC801 \uACF5\uACA9 \uD68C\uD53C \uD655\uB960"];
         const blocking = kind === "barrier" ? "phy" : kind === "magic_guard" ? "mag" : null;
         if (blocking && intent?.kind !== blocking) return [TYPE[blocking] + " \uD53C\uD574 \uCC28\uB2E8", "\uD55C \uBC88 \uBB34\uD6A8"];
         const currentBuffs = B.D.allies[B.D.cur].buffs;
         const dmg = !currentBuffs.guard && !currentBuffs.damage_half ? intent?.dmg : null;
         const reduced = dmg && dmg.map((amount2) => Math.floor(amount2 * (1 - reduction)));
         return [
-          dmg ? formatRange(dmg) + " \u2192 " + formatRange(reduced) : "\uD53C\uD574 \u2212" + percent + "%",
-          blocking ? "\uB2E4\uC74C " + TYPE[blocking] + " \uCC28\uB2E8" : (TYPE[intent?.kind] ? TYPE[intent.kind] + " \uD53C\uD574 " : "\uBC1B\uB294 \uD53C\uD574 ") + percent + "% \uAC10\uC18C"
+          dmg ? formatRange(dmg) + " \u2192 " + formatRange(reduced) : "\uD53C\uD574 \u2212" + percent2 + "%",
+          blocking ? "\uB2E4\uC74C " + TYPE[blocking] + " \uCC28\uB2E8" : (TYPE[intent?.kind] ? TYPE[intent.kind] + " \uD53C\uD574 " : "\uBC1B\uB294 \uD53C\uD574 ") + percent2 + "% \uAC10\uC18C"
         ];
       }
       return ["", ""];
@@ -22073,6 +22084,36 @@ const BattleRuntime = {
     };
   }
 
+  // card_pixel/game/src/ui/service-offers.js
+  var SPRING_PICK_TITLE = "\uD6C4\uBCF4 3\uCE78 \uC911 \uD558\uB098 \uC120\uD0DD";
+  var SPRING_EMPTY_POOL = "\uB354 \uC774\uC0C1 \uAE68\uC6B8 \uC218 \uC788\uB294 \uB3D9\uB8CC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.";
+  var springPickPrice = (cost) => "\uBCF4\uAE30 \uBB34\uB8CC \xB7 \uC120\uD0DD\uD560 \uB54C \uACB0\uC815 " + cost + "\uAC1C";
+  function describeSpringCandidates(run, offer, card) {
+    const repeat = usesRepeatDraws(run) && !offer.alreadyPaid;
+    return offer.slots.map((slot) => {
+      const name = card(slot.id).name;
+      const kind = repeat ? drawKind(run, slot.id) : "join";
+      return {
+        ...slot,
+        name,
+        kind,
+        short: TERMS[kind].short,
+        detail: TERMS[kind].firstUse,
+        tag: slot.source === "invite" ? "\uCD08\uB300 \uD655\uC815 \xB7 " + name : "\uBB34\uC791\uC704"
+      };
+    });
+  }
+  var percent = (multiplier) => "+" + Math.round(multiplier * 100) + "%";
+  function describeAltarRoll(run, roll, card, previous = run.blessings[roll.id] ?? 0) {
+    const fighter = card(roll.id);
+    return {
+      name: fighter.name,
+      previous: "\uAE30\uC874 \uCD95\uBCF5 " + percent(previous),
+      next: "\uC0C8 \uCD95\uBCF5 " + percent(roll.multiplier),
+      effect: (roll.jackpot ? "\uB300\uC131\uACF5! \xB7 " : "") + (GRADE[fighter.grade] || "") + " \xB7 \uBAA8\uB4E0 \uB2A5\uB825\uCE58 \uC0C1\uC2B9"
+    };
+  }
+
   // card_pixel/game/src/ui/screens/map.js
   var AFFIX_RISK = {
     tough: "\uCCAB 3\uD134 \uC801 \uD53C\uD574 50% \uAC10\uC18C",
@@ -22290,6 +22331,26 @@ const BattleRuntime = {
       id: choice.id,
       ...describeEventOffer(run, choice, { card, core: core2, artifacts, room: door })
     })));
+    const serviceOffers = run.doors.map((door) => {
+      const offer = previewServiceDoor(run, door.index);
+      if (!offer?.ok) return offer;
+      return door.type === "spring" ? { ...offer, slots: describeSpringCandidates(run, offer, card) } : { ...offer, ...describeAltarRoll(run, offer, card) };
+    });
+    function serviceLine(door) {
+      const offer = serviceOffers[door.index];
+      if (!offer?.ok) return "";
+      const line = door.type === "spring" ? ["\u25C6" + offer.cost, ...offer.slots.map((slot) => slot.name + " " + slot.short)].join(" \xB7 ") : offer.name + " \xB7 " + offer.next;
+      return '<small class="door-service-preview">' + keepSeparators(esc(line)) + "</small>";
+    }
+    function serviceDetail(door) {
+      const offer = serviceOffers[door.index];
+      if (offer?.reason === "empty_pool") return "<p>" + SPRING_EMPTY_POOL + "</p>";
+      if (!offer?.ok) return "";
+      if (door.type === "altar") {
+        return '<div class="door-altar-roll"><h4>\uCCAB \uAD74\uB9BC \xB7 ' + esc(offer.name) + "</h4><p>" + esc(offer.previous) + "</p><p>" + esc(offer.next) + "</p><p>" + keepSeparators(esc(offer.effect)) + "</p></div>";
+      }
+      return "<h4>" + SPRING_PICK_TITLE + "</h4><p>" + keepSeparators(esc(springPickPrice(offer.cost))) + '</p><ul class="door-spring-candidates">' + offer.slots.map(({ slotId, name, tag, detail }) => '<li data-slot-id="' + esc(slotId) + '"><b>' + esc(name) + "</b><p>" + keepSeparators(esc(tag)) + "</p><p>" + keepSeparators(esc(detail)) + "</p></li>").join("") + "</ul>";
+    }
     const lessonLine = (door) => {
       const lesson = doorLesson(tempoViews[door.index]);
       return lesson ? '<small class="door-lesson">' + icon2("battle") + "<span>" + esc(lesson) + "</span></small>" : "";
@@ -22326,7 +22387,7 @@ const BattleRuntime = {
       const offers = eventOffers[door.index].slice(0, losesPromise ? 2 : 3).map((offer) => '<small class="door-event-offer" data-event-offer="' + esc(offer.id) + '" title="' + esc(offer.name) + '"><span>' + esc(offer.shortName) + "</span><span>\xB7 " + esc(offer.compactPrice) + "</span>" + (offer.condition ? '<span class="loss" title="' + esc(offer.condition) + '">\uC870\uAC74</span>' : "") + "</small>").join("");
       const quirk = run.features?.quirks !== false && door.quirk ? "<i>" + esc(QUIRKS[door.quirk].name) + "</i>" : "";
       const chips = quirk + (run.features?.affixes === false ? "" : door.enemies.map(affixChips).join(""));
-      return '<div class="door-plate win" data-kind="' + doorKind(door) + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + offers + (losesPromise ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward' + (relic ? " door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 20) : "") + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final && !relic && !door.event ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
+      return '<div class="door-plate win" data-kind="' + doorKind(door) + '" data-door-preview="' + door.index + '"><button class="door-entry" data-coach="door" data-door="' + door.index + '">' + doorPreview(door) + '<span class="door-copy"><b>' + esc(title2) + "</b>" + (info ? "<small>" + esc(info) + "</small>" : "") + (chips ? '<span class="chips door-chips">' + chips + "</span>" : "") + (rules ? '<small class="door-risk' + (risksHere.length ? " danger" : "") + '">' + esc(rules) + "</small>" : "") + serviceLine(door) + offers + (losesPromise ? '<small class="door-risk danger">' + esc(lostDeposit(door)) + "</small>" : "") + lessonLine(door) + (gain ? '<small class="door-reward' + (relic ? " door-relic" : "") + '">' + (relic ? relicIcon(relic.id, 20) : "") + esc(gain) + "</small>" : "") + "</span>" + (door.relic && !door.final && !relic && !door.event ? icon2(door.relic) : "") + '</button><button class="door-info" data-coach="door-info" data-info="' + door.index + '" aria-label="' + esc(title2) + ' \uC815\uBCF4">\uC815\uBCF4</button></div>';
     }).join("");
     const front = defaultParty(run);
     const lineup = (party) => party.map((id, index) => {
@@ -22412,7 +22473,7 @@ const BattleRuntime = {
       const offers = eventOffers[door.index];
       const offerList = offers.length ? '<ul class="door-event-offers">' + offers.map((offer) => '<li data-event-offer="' + esc(offer.id) + '"><b>' + keepSeparators(esc(offer.name)) + "</b><p>" + keepSeparators(esc(offer.detail)) + "</p>" + (offer.releaseNote ? '<p class="loss">' + esc(offer.releaseNote) + "</p>" : "") + (offer.condition ? '<p class="loss">' + keepSeparators(esc(offer.condition)) + "</p>" : "") + "</li>").join("") + "</ul>" : "";
       const eventInfo = door.event ? "<h4>" + esc(door.event.name) + "</h4><p>" + esc(door.event.text) + "</p>" + offerList : "";
-      openSheet(doorTitle(door), eventInfo + lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (forfeits(door) ? '<p class="loss">' + esc(lostDeposit(door)) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC 1\uBA85\uB2F9 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
+      openSheet(doorTitle(door), eventInfo + serviceDetail(door) + lessonLine(door) + enemies + rule(quirk) + rule(region) + (sky ? "<p>" + esc(sky) + "</p>" : "") + (service ? "<p>" + esc(service) + "</p>" : "") + (service && door.type === "spring" ? "<p>\uBCF4\uC720 \uACB0\uC815 " + run.crystals + "\uAC1C</p>" : "") + (gain ? '<p class="gain">' + esc(gain) + "</p>" : "") + (forfeits(door) ? '<p class="loss">' + esc(lostDeposit(door)) + "</p>" : "") + (escrow ? "<p>\uACC4\uC57D\uC5D0 \u25C6" + escrow + " \uB9E1\uAE40</p>" : "") + (treasure ? '<p class="gain">\uCD94\uAC00 \uBCF4\uC0C1 \xB7 \uBCF4\uBB3C \uC801 \uCC98\uCE58 \uD6C4 \uC2B9\uB9AC \uC2DC 1\uBA85\uB2F9 \uACB0\uC815 +2</p>' : "") + contractGoal(door) + (relic ? rule({ ...relic, desc: relicEffect(relic) }) : ""));
     }
   }
 
@@ -22538,7 +22599,7 @@ const BattleRuntime = {
 
   // card_pixel/game/src/ui/screens/spring.js
   var { COST: COST2 } = run_exports;
-  var percentText = (percent) => new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 2 }).format(percent) + "%";
+  var percentText = (percent2) => new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 2 }).format(percent2) + "%";
   function rates(run, kind) {
     const groups = ratesView(run, kind);
     const label = (group) => group.group === "legend" ? TERMS.legend.short : group.label;
@@ -22556,7 +22617,7 @@ const BattleRuntime = {
     function base({ revealing = false } = {}) {
       const pending = run.pending?.kind === "springDraw" ? run.pending : null;
       const pick2 = run.features?.springPick !== false || run.pending?.kind === "spring";
-      node.innerHTML = head(run, TERMS.spring.short, run.floor + "\uCE35") + '<div class="screen-split"><div class="fixed-top"><p class="lead">' + TERMS.crystal.firstUse + '</p><div class="svc"><div class="spring-service win"><button class="btn big" id="b-draw"><b>' + (pending ? esc(card(pending.id).name) + " \uD569\uB958 \uACC4\uC18D" : TERMS.spring.detail) + "</b></button>" + rates(run, "draw") + "</div>" + (pick2 ? '<div class="spring-service win"><button class="btn big" id="b-pick"><b>\uD6C4\uBCF4 3\uCE78 \uC911 \uD558\uB098 \uC120\uD0DD</b><small>\uBCF4\uAE30 \uBB34\uB8CC \xB7 \uC120\uD0DD\uD560 \uB54C \uACB0\uC815 ' + COST2.pick + '\uAC1C</small></button><p class="sm">\uBB34\uC791\uC704 \uD55C \uCE78\uB2F9</p>' + rates(run, "pick") + "</div>" : "") + '</div><p class="run-status" id="spring-status" role="status"></p><div class="cards" id="fresh">' + (!revealing && fresh.length ? drawCard(run, widgets2, fresh[0]) : "") + '</div><button class="btn" id="b-spring-bench">\uB3D9\uB8CC <span class="sm" id="sp-count"></span></button></div><div class="footer fixed-foot"><button class="btn go" id="b-leave">\uC0D8 \uB098\uAC00\uAE30</button></div></div>';
+      node.innerHTML = head(run, TERMS.spring.short, run.floor + "\uCE35") + '<div class="screen-split"><div class="fixed-top"><p class="lead">' + TERMS.crystal.firstUse + '</p><div class="svc"><div class="spring-service win"><button class="btn big" id="b-draw"><b>' + (pending ? esc(card(pending.id).name) + " \uD569\uB958 \uACC4\uC18D" : TERMS.spring.detail) + "</b></button>" + rates(run, "draw") + "</div>" + (pick2 ? '<div class="spring-service win"><button class="btn big" id="b-pick"><b>' + SPRING_PICK_TITLE + "</b><small>" + springPickPrice(COST2.pick) + '</small></button><p class="sm">\uBB34\uC791\uC704 \uD55C \uCE78\uB2F9</p>' + rates(run, "pick") + "</div>" : "") + '</div><p class="run-status" id="spring-status" role="status"></p><div class="cards" id="fresh">' + (!revealing && fresh.length ? drawCard(run, widgets2, fresh[0]) : "") + '</div><button class="btn" id="b-spring-bench">\uB3D9\uB8CC <span class="sm" id="sp-count"></span></button></div><div class="footer fixed-foot"><button class="btn go" id="b-leave">\uC0D8 \uB098\uAC00\uAE30</button></div></div>';
       show("spring");
       $("#b-draw", node).addEventListener("click", () => {
         if (pending) return completeDraw(pending);
@@ -22584,7 +22645,7 @@ const BattleRuntime = {
       chooseReplacements(run, ui, 1, ([replaceId]) => finish(command(commitSpringDraw, { key: pending.key, replaceId }), true), { incoming: [pending.id] });
     }
     function showFailure(reason) {
-      $("#spring-status", node).textContent = reason === "empty_pool" ? "\uB354 \uC774\uC0C1 \uAE68\uC6B8 \uC218 \uC788\uB294 \uB3D9\uB8CC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4." : reason === "insufficient_crystals" ? "\uACB0\uC815\uC774 \uBD80\uC871\uD569\uB2C8\uB2E4." : reason === "invalid_spring_key" || reason === "invalid_spring_slot" ? "\uD6C4\uBCF4 \uBAA9\uB85D\uC774 \uBC14\uB00C\uC5C8\uC2B5\uB2C8\uB2E4. \uB2E4\uC2DC \uACE8\uB77C \uC8FC\uC138\uC694." : "\uD569\uB958\uD560 \uB3D9\uB8CC\uC640 \uBCF4\uB0BC \uB3D9\uB8CC\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.";
+      $("#spring-status", node).textContent = reason === "empty_pool" ? SPRING_EMPTY_POOL : reason === "insufficient_crystals" ? "\uACB0\uC815\uC774 \uBD80\uC871\uD569\uB2C8\uB2E4." : reason === "invalid_spring_key" || reason === "invalid_spring_slot" ? "\uD6C4\uBCF4 \uBAA9\uB85D\uC774 \uBC14\uB00C\uC5C8\uC2B5\uB2C8\uB2E4. \uB2E4\uC2DC \uACE8\uB77C \uC8FC\uC138\uC694." : "\uD569\uB958\uD560 \uB3D9\uB8CC\uC640 \uBCF4\uB0BC \uB3D9\uB8CC\uB97C \uD655\uC778\uD574 \uC8FC\uC138\uC694.";
     }
     function refresh() {
       $("#b-draw", node).disabled = run.crystals < COST2.draw || run.pending?.kind === "spring" || repeat && !run.bench.length;
@@ -22618,13 +22679,8 @@ const BattleRuntime = {
     function choose(offer) {
       const cost = offer.alreadyPaid ? 0 : offer.cost;
       const price = cost ? " \xB7 \u25C6" + cost : " \xB7 \uACB0\uC81C \uC644\uB8CC";
-      const previewKind = (id) => repeat && !offer.alreadyPaid ? drawKind(run, id) : "join";
-      node.innerHTML = head(run, "\uD6C4\uBCF4 3\uCE78 \uC911 \uD558\uB098 \uC120\uD0DD", null) + '<div class="screen-split"><div class="fixed-top"><p class="run-status" id="spring-status" role="status"></p></div><div class="scroll-list spring-candidates"><div class="cards">' + offer.slots.map(({ slotId, id, source }) => cardRow(run, id, {
-        slotId,
-        offer: true,
-        tag: source === "invite" ? "\uCD08\uB300 \uD655\uC815 \xB7 " + card(id).name : "\uBB34\uC791\uC704",
-        detail: TERMS[previewKind(id)].firstUse
-      })).join("") + '</div></div><div class="footer fixed-foot"><button class="btn" id="b-spring-pass">\uB2EB\uAE30</button><button class="btn go" id="b-take" disabled>\uB3D9\uB8CC \uC120\uD0DD</button></div></div>';
+      const candidates = describeSpringCandidates(run, offer, card);
+      node.innerHTML = head(run, SPRING_PICK_TITLE, null) + '<div class="screen-split"><div class="fixed-top"><p class="run-status" id="spring-status" role="status"></p></div><div class="scroll-list spring-candidates"><div class="cards">' + candidates.map(({ slotId, id, tag, detail }) => cardRow(run, id, { slotId, offer: true, tag, detail })).join("") + '</div></div><div class="footer fixed-foot"><button class="btn" id="b-spring-pass">\uB2EB\uAE30</button><button class="btn go" id="b-take" disabled>\uB3D9\uB8CC \uC120\uD0DD</button></div></div>';
       show("spring");
       let selected;
       const rows = $$(".cardrow", node);
@@ -22633,22 +22689,22 @@ const BattleRuntime = {
       for (const row of rows) {
         row.disabled = (!repeat || offer.alreadyPaid) && !canJoin(run, row.dataset.id);
         row.addEventListener("click", () => {
-          selected = offer.slots.find((slot) => slot.slotId === row.dataset.slotId);
+          selected = candidates.find((slot) => slot.slotId === row.dataset.slotId);
           sfx.tap();
           for (const other of rows) other.classList.toggle("sel", other === row);
           take.disabled = run.crystals < cost;
-          take.textContent = card(selected.id).name + " \xB7 " + TERMS[previewKind(selected.id)].short + price;
+          take.textContent = selected.name + " \xB7 " + selected.short + price;
         });
       }
       take.addEventListener("click", () => {
         if (!selected) return;
-        const { id, slotId } = selected;
+        const { id, slotId, kind } = selected;
         function commit(replaceId = null) {
           const result = command(commitSpringOffer, { offerKey: offer.offerKey, slotId, replaceId });
           if (result.reason === "invalid_spring_key") return openOffer(result.reason);
           finish(result, false);
         }
-        const count2 = previewKind(id) === "join" ? replacementCount(run, 1) : 0;
+        const count2 = kind === "join" ? replacementCount(run, 1) : 0;
         if (count2) chooseReplacements(run, ui, count2, ([replaceId]) => commit(replaceId), { incoming: [id] });
         else commit();
       });
@@ -22668,21 +22724,19 @@ const BattleRuntime = {
     const pending = run.pending;
     const current = pending?.roll || kept;
     const left = pending ? 3 - pending.rolls : 0;
-    const fighter = current && card(current.id);
-    const percent = (multiplier) => "+" + Math.round(multiplier * 100) + "%";
-    const previous = fighter ? percent(kept?.previous ?? run.blessings[current.id] ?? 0) : "";
-    const slot = fighter ? '<span class="pic">' + sprite2(current.id) + '</span><span class="txt"><b>' + esc(fighter.name) + "</b><small>\uAE30\uC874 \uCD95\uBCF5 " + previous + "</small><strong>\uC0C8 \uCD95\uBCF5 " + percent(current.multiplier) + "</strong><small>" + (current.jackpot ? "\uB300\uC131\uACF5! \xB7 " : "") + (GRADE[fighter.grade] || "") + " \xB7 \uBAA8\uB4E0 \uB2A5\uB825\uCE58 \uC0C1\uC2B9</small></span>" : '<span class="empty">?</span>';
+    const blessing = current && describeAltarRoll(run, current, card, kept?.previous);
+    const slot = blessing ? '<span class="pic">' + sprite2(current.id) + '</span><span class="txt"><b>' + esc(blessing.name) + "</b><small>" + esc(blessing.previous) + "</small><strong>" + esc(blessing.next) + "</strong><small>" + esc(blessing.effect) + "</small></span>" : '<span class="empty">?</span>';
     const actions = pending ? '<button class="btn" id="b-roll"' + (left && run.bench.length ? "" : " disabled") + ">\uAD74\uB9AC\uAE30 (" + left + ')</button><button class="btn' + (current ? " go" : "") + '" id="b-keep"' + (current ? "" : " disabled") + ">\uCD95\uBCF5 \uBC1B\uAE30</button>" : "";
     node.innerHTML = head(run, "\uD63C\uB3C8\uC758 \uC81C\uB2E8", run.floor + "\uCE35") + '<div class="screen-split"><div class="fixed-top"><p class="lead">\uC138 \uBC88\uAE4C\uC9C0 \uAD74\uB824. \uBC1B\uC73C\uBA74 \uADF8 \uB3D9\uB8CC\uC758 \uAE30\uC874 \uCD95\uBCF5\uC744 \uBC14\uAFD4.</p><div class="altarslot win' + (current?.jackpot ? " jackpot" : "") + '" id="slot">' + slot + '</div></div><div class="footer fixed-foot">' + actions + (!pending || !current ? '<button class="btn' + (pending ? "" : " go") + '" id="b-leave">' + (pending ? "\uB5A0\uB098\uAE30" : "\uB2E4\uC74C \uCE35\uC73C\uB85C") + "</button>" : "") + "</div></div>";
     show("altar");
     $("#b-leave", node)?.addEventListener("click", ui.leave);
     $("#b-keep", node)?.addEventListener("click", () => {
-      const previous2 = run.blessings[current.id] ?? 0;
+      const previous = run.blessings[current.id] ?? 0;
       const result = ui.command(altarKeep);
       if (result.ok) {
         sfx.awaken();
         if (run.room.type === "event") ui.route();
-        else altarScreen(run, ui, { ...result, previous: previous2 });
+        else altarScreen(run, ui, { ...result, previous });
       }
     });
     $("#b-roll", node)?.addEventListener("click", async (event) => {
@@ -24363,7 +24417,7 @@ const BattleRuntime = {
   }
 
   // card_pixel/game/src/ui/screens/collection.js
-  var springPercent = (percent) => percent.toFixed(1) + "%";
+  var springPercent = (percent2) => percent2.toFixed(1) + "%";
   function saveEpisodeFlags(profile, field, ids, write) {
     if (!ids.length) return true;
     const flags = Object.fromEntries(ids.map((id) => [id, true]));

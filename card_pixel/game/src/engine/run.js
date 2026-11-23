@@ -252,6 +252,17 @@ export function chooseDoor(run, index) {
   return { ok: true, room: copy(run.room), pending: copy(run.pending) };
 }
 
+export function previewServiceDoor(run, index) {
+  const type = run.doors[index]?.type;
+  const context = dependencies.get(run);
+  if (run.phase !== 'map' || !context || (type !== 'spring' && type !== 'altar')) return null;
+  // Reuse the real room commands without changing the live RNG, discovery log or pending choice.
+  const preview = copy(run);
+  dependencies.set(preview, context);
+  if (!chooseDoor(preview, index).ok) return null;
+  return type === 'spring' ? getSpringOffer(preview) : altarRoll(preview);
+}
+
 export function defaultParty(run) {
   const party = (run.lastParty || [null, null, null]).map(id => run.bench.includes(id) ? id : null);
   const reserves = (run.joinOrder ?? run.bench).filter(id => run.bench.includes(id) && !party.includes(id));

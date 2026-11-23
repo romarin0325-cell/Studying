@@ -165,6 +165,7 @@ node card_pixel/game/tools/cut-icons.mjs card_pixel/art/icons/sheets.tsv card_pi
 | `src/ui/coach.js` | 실제 버튼에 구멍을 내는 코치 표시(디펜스 방식, 도트 스타일) |
 | `src/ui/tutorial.js` | 루미의 첫 세션 안내 단계와 기능 안내(명령 성공으로 진행) |
 | `src/ui/glossary.js` | 화면 공통 용어(`short`·`firstUse`·`detail`·`scope`) 한 곳 |
+| `src/ui/service-offers.js` | 샘 후보와 제단 축복을 방 화면과 지도 문에서 같은 문구로 표시 |
 | `src/ui/text.js` | 조사 고르기(`josa`)와 줄 첫머리에 "·"가 오지 않게 하는 `keepSeparators` |
 | `src/ui/story-lines.js` | 원정 기록을 동료별 한 줄 문장으로(지어내지 않고 실제 사건만) |
 | `src/ui/credits.js` | 만든 사람과 글꼴·도구 라이선스 시트 |

@@ -97,6 +97,70 @@ function roundTrip(run, actualRoster = roster) {
   return restored;
 }
 
+function checkServiceDoorPreviews(run) {
+  const before = Save.serializeRun(run);
+  const previews = run.doors.map(door => Run.previewServiceDoor(run, door.index));
+  assert.equal(Save.serializeRun(run), before, 'Looking at every door leaves the run untouched');
+  for (const door of run.doors) {
+    const preview = previews[door.index];
+    if (door.type !== 'spring' && door.type !== 'altar') {
+      assert.equal(preview, null);
+      continue;
+    }
+    const control = Save.restoreRun(before, { core, roster });
+    const inspected = Save.restoreRun(before, { core, roster });
+    assert.ok(control);
+    assert.ok(inspected);
+    const label = `${run.id} F${run.floor} ${door.type}`;
+    assert.deepEqual(Run.previewServiceDoor(inspected, door.index), preview, label);
+    assert.equal(Save.serializeRun(inspected), before, label);
+    assert.deepEqual(ok(Run.chooseDoor(inspected, door.index)), ok(Run.chooseDoor(control, door.index)), label);
+    assert.equal(Save.serializeRun(inspected), Save.serializeRun(control), label);
+    const action = door.type === 'spring' ? Run.getSpringOffer : Run.altarRoll;
+    assert.deepEqual(action(inspected), preview, label);
+    assert.deepEqual(action(control), preview, label);
+    assert.equal(Save.serializeRun(inspected), Save.serializeRun(control), label);
+  }
+  return previews.filter(offer => offer !== null);
+}
+
+for (const { id, layout } of Object.values(DUNGEONS)) {
+  if (layout !== 'expedition') continue;
+  test(`service door previews match both entries for 300 seeds in ${id}`, () => {
+    for (let seed = 1; seed <= 300; seed++) {
+      const run = makeTempo({ dungeonId: id, seed: seed * 7919 });
+      for (const floor of [3, 7]) {
+        reach(run, floor);
+        const offers = checkServiceDoorPreviews(run);
+        assert.equal(offers.length, 2);
+        assert.ok(offers.every(offer => offer.ok));
+      }
+    }
+  });
+}
+
+test('service door previews use the rolled doors and draw rules from an old map save', () => {
+  const map = reach(make(), 3);
+  map.crystals = 0;
+  const old = JSON.parse(Save.serializeRun(map));
+  for (const key of ['entryRulesVersion', 'features', 'repeatStacks', 'rewardRuleVersion', 'participationTags']) delete old.run[key];
+  const run = Save.restoreRun(old, { core, roster });
+  assert.ok(run);
+  assert.deepEqual(run.doors, map.doors);
+  const [spring] = checkServiceDoorPreviews(run);
+  assert.equal(spring.cost, Run.COST.pick);
+  assert.equal(new Set(spring.candidates).size, 3);
+});
+
+test('service door previews also work in the intro and respect the spring pick unlock', () => {
+  const intro = reach(makeTempo({ dungeonId: 'dawn_forest' }), 4);
+  assert.equal(checkServiceDoorPreviews(intro).filter(offer => offer.ok).length, 1);
+  const locked = reach(makeTempo({ profileView: { features: { springPick: false } } }), 3);
+  const [spring, altar] = checkServiceDoorPreviews(locked);
+  assert.equal(spring.reason, 'spring_pick_locked');
+  assert.ok(altar.ok);
+});
+
 function profileWithSnowRabbit() {
   const intro = reach(make({ dungeonId: 'dawn_forest', seed: 7 }), 2);
   enter(intro);

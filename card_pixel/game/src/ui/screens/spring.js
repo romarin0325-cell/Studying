@@ -1,9 +1,10 @@
 import { $, $$, esc, show } from '../dom.js';
 import { chooseReplacements, head, replacementCount } from '../widgets.js';
 import * as Run from '../../engine/run.js';
-import { canJoin, drawKind, ratesView, usesRepeatDraws } from '../../engine/awakenings.js';
+import { canJoin, ratesView, usesRepeatDraws } from '../../engine/awakenings.js';
 import { drawCard, reveal } from '../reveal.js';
 import { TERMS } from '../glossary.js';
+import { describeSpringCandidates, SPRING_EMPTY_POOL, SPRING_PICK_TITLE, springPickPrice } from '../service-offers.js';
 
 const { COST } = Run;
 const percentText = percent => new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 }).format(percent) + '%';
@@ -33,8 +34,8 @@ export function springScreen(run, ui) {
       '<p class="lead">' + TERMS.crystal.firstUse + '</p>' +
       '<div class="svc"><div class="spring-service win"><button class="btn big" id="b-draw"><b>' +
       (pending ? esc(card(pending.id).name) + ' 합류 계속' : TERMS.spring.detail) + '</b></button>' + rates(run, 'draw') + '</div>' +
-      (pick ? '<div class="spring-service win"><button class="btn big" id="b-pick"><b>후보 3칸 중 하나 선택</b>' +
-        '<small>보기 무료 · 선택할 때 결정 ' + COST.pick + '개</small></button>' +
+      (pick ? '<div class="spring-service win"><button class="btn big" id="b-pick"><b>' + SPRING_PICK_TITLE + '</b>' +
+        '<small>' + springPickPrice(COST.pick) + '</small></button>' +
         '<p class="sm">무작위 한 칸당</p>' + rates(run, 'pick') + '</div>' : '') + '</div>' +
       '<p class="run-status" id="spring-status" role="status"></p>' +
       '<div class="cards" id="fresh">' + (!revealing && fresh.length ? drawCard(run, widgets, fresh[0]) : '') + '</div>' +
@@ -72,7 +73,7 @@ export function springScreen(run, ui) {
   }
 
   function showFailure(reason) {
-    $('#spring-status', node).textContent = reason === 'empty_pool' ? '더 이상 깨울 수 있는 동료가 없습니다.' :
+    $('#spring-status', node).textContent = reason === 'empty_pool' ? SPRING_EMPTY_POOL :
       reason === 'insufficient_crystals' ? '결정이 부족합니다.' :
         reason === 'invalid_spring_key' || reason === 'invalid_spring_slot' ? '후보 목록이 바뀌었습니다. 다시 골라 주세요.' :
           '합류할 동료와 보낼 동료를 확인해 주세요.';
@@ -113,14 +114,11 @@ export function springScreen(run, ui) {
   function choose(offer) {
     const cost = offer.alreadyPaid ? 0 : offer.cost;
     const price = cost ? ' · ◆' + cost : ' · 결제 완료';
-    const previewKind = id => repeat && !offer.alreadyPaid ? drawKind(run, id) : 'join';
-    node.innerHTML = head(run, '후보 3칸 중 하나 선택', null) +
+    const candidates = describeSpringCandidates(run, offer, card);
+    node.innerHTML = head(run, SPRING_PICK_TITLE, null) +
       '<div class="screen-split"><div class="fixed-top"><p class="run-status" id="spring-status" role="status"></p></div>' +
-      '<div class="scroll-list spring-candidates"><div class="cards">' + offer.slots.map(({ slotId, id, source }) =>
-        cardRow(run, id, {
-          slotId, offer: true, tag: source === 'invite' ? '초대 확정 · ' + card(id).name : '무작위',
-          detail: TERMS[previewKind(id)].firstUse
-        })).join('') +
+      '<div class="scroll-list spring-candidates"><div class="cards">' + candidates.map(({ slotId, id, tag, detail }) =>
+        cardRow(run, id, { slotId, offer: true, tag, detail })).join('') +
       '</div></div><div class="footer fixed-foot"><button class="btn" id="b-spring-pass">닫기</button>' +
       '<button class="btn go" id="b-take" disabled>동료 선택</button></div></div>';
     show('spring');
@@ -131,22 +129,22 @@ export function springScreen(run, ui) {
     for (const row of rows) {
       row.disabled = (!repeat || offer.alreadyPaid) && !canJoin(run, row.dataset.id);
       row.addEventListener('click', () => {
-        selected = offer.slots.find(slot => slot.slotId === row.dataset.slotId);
+        selected = candidates.find(slot => slot.slotId === row.dataset.slotId);
         sfx.tap();
         for (const other of rows) other.classList.toggle('sel', other === row);
         take.disabled = run.crystals < cost;
-        take.textContent = card(selected.id).name + ' · ' + TERMS[previewKind(selected.id)].short + price;
+        take.textContent = selected.name + ' · ' + selected.short + price;
       });
     }
     take.addEventListener('click', () => {
       if (!selected) return;
-      const { id, slotId } = selected;
+      const { id, slotId, kind } = selected;
       function commit(replaceId = null) {
         const result = command(Run.commitSpringOffer, { offerKey: offer.offerKey, slotId, replaceId });
         if (result.reason === 'invalid_spring_key') return openOffer(result.reason);
         finish(result, false);
       }
-      const count = previewKind(id) === 'join' ? replacementCount(run, 1) : 0;
+      const count = kind === 'join' ? replacementCount(run, 1) : 0;
       if (count) chooseReplacements(run, ui, count, ([replaceId]) => commit(replaceId), { incoming: [id] });
       else commit();
     });
