@@ -19,30 +19,24 @@ export const ROLES=Object.freeze({
   cherry_prince:['strike'],venom:['strike'],behemoth:['strike'],gold_dragon:['strike'],time_ruler:['strike','control'],
   galaxy_whale:['strike','control'],doom:['strike','economy'],cinderella:['strike'],harmonious:['support'],
   frost_witch:['strike','control'],
-  ancient_soul:['strike'],victoria:['support'],deep_lord:['strike','control'],sakura:['strike'],
-  dainichi_nyorai:['strike','support'],gumiho:['strike'],archangel:['strike','support'],sylphid:['strike','control'],
-  succubus:['strike','control'],skull_dragon:['strike'],mad_scientist:['strike','support'],crystal_dancer:['strike','control'],
-  blessing_tail:['support'],marshmallow:['strike','support'],mimic:['strike','economy'],silent_librarian:['strike','control'],
 });
 export const ROLE_NEEDS=Object.freeze(['strike','support','economy','control','area']);
 export const hasRole=(id,role)=>role==='area'?HERO[id].shape!=='single':ROLES[id].includes(role);
 
 // Small synergies: a companion whose trait or ultimate reads a status counts it when a teammate applies that status.
 const GIVES=Object.freeze({
-  burn:['red_dragon','flame_sage','ash','zeke','venom','ancient_soul','sakura','marshmallow'],
-  radiance:['silver_rabbit','aurora','jasmine','ancient_soul','sakura','archangel','blessing_tail'],
-  slow:['snow_rabbit','phantom','time_ruler','galaxy_whale','frost_witch','storm_sage','sylphid','succubus','marshmallow'],
-  stop:['snow_rabbit','guardian','lightning_sage','storm_sage','time_ruler','deep_lord','crystal_dancer','silent_librarian'],
-  poison:['mushroom_king','venom','phantom','mad_scientist'],
+  burn:['red_dragon','flame_sage','ash','zeke','venom'],
+  radiance:['silver_rabbit','aurora','jasmine'],
+  slow:['snow_rabbit','phantom','time_ruler','galaxy_whale','frost_witch','storm_sage'],
+  stop:['snow_rabbit','guardian','lightning_sage','storm_sage','time_ruler'],
+  poison:['mushroom_king','venom','phantom'],
   rabbit:['snow_rabbit','silver_rabbit'],
-  aura:['siren','ancient_dragon','harmonious','victoria','archangel','mad_scientist'],
+  aura:['siren','ancient_dragon','harmonious'],
 });
 const NEEDS=Object.freeze({
   red_dragon:['burn'],flame_sage:['burn'],cherry_prince:['burn','radiance'],galaxy_whale:['radiance'],
   avalanche_maid:['slow','stop'],venom:['poison'],night_rabbit:['rabbit'],behemoth:['aura'],
   demon_king:['slow','stop','poison','burn','radiance'],
-  ancient_soul:['burn','radiance'],sakura:['burn','radiance'],deep_lord:['slow','stop','poison','burn','radiance'],
-  dainichi_nyorai:['aura'],gumiho:['burn','radiance'],crystal_dancer:['stop'],mad_scientist:['slow','stop'],
 });
 export const SYNERGY_STEP=.1,SYNERGY_MAX=.2;
 // Share added to a companion's score by the teammates already chosen.

@@ -2,7 +2,7 @@
 // Generated with the other reports (node defense/scripts/generated-reports.mjs) and checked by --check and the unit
 // tests, so the numbers cannot drift from the game. The other docs are dated records of the day they were written;
 // when one of their numbers disagrees with this file, this file is right.
-import {HEROES,ARTIFACTS,ROSTER,HIDDEN,LATE_COMPANIONS,TUNING,MAIN_STAGES,PART_STAGES,PARTS,TIERS,CHALLENGE_WAVES} from '../src/content.js';
+import {HEROES,ARTIFACTS,ROSTER,HIDDEN,TUNING,MAIN_STAGES,PART_STAGES,PARTS,TIERS,CHALLENGE_WAVES} from '../src/content.js';
 import * as E from '../src/combat/engine.js';
 import {OATHS,OATH_RULES,OATH_TIER_BASE,OATH_BANDS} from '../src/preview/oath.js';
 import {MONTHLY_REWARDS,monthlyReward} from '../src/monthly.js';
@@ -35,7 +35,7 @@ export function currentValues(){
     `- **메인 스테이지:** ${MAIN_STAGES}개. ${PARTS.map(x=>`제${x.id}부 「${x.name}」 ${x.first}–${x.last}(${x.chapters.length}개 장 × 9)`).join(', ')}. 1장은 입문 장이고, 스테이지 10부터는 레벨 n-9의 체력 곡선을 따른다(레벨 18부터 기존 직선, 그 전은 낮게 휜 곡선, docs/STAGES.md). 제2부는 스테이지 ${PART_STAGES}를 클리어하면 열린다.`,
     `- **스테이지 ${PART_STAGES} 첫 클리어:** 제2부와 새벽 온실이 열리고 베히모스·베놈 등 신규 동료가 정규 소환 풀에 합류한다. 동료를 확정 지급하지 않으며 기존 보유 개체는 유지한다.`,
     `- **퍼펙트 클리어:** 코어 체력을 잃지 않고 메인 스테이지를 클리어하면 퍼펙트. 스테이지마다 첫 퍼펙트에 꿈의결정 ${PERFECT_REWARD}.`,
-    `- **일반 소환 UR(${ROSTER.UR.length}명):** ${ROSTER.UR.map(id=>HEROES.find(h=>h.id===id).name).join(', ')}. 픽업은 초기 정규 UR ${heroPool('UR',false).length}명을 매주 월요일(UTC+9) 순서대로 순환한다. ${ROSTER.UR.filter(id=>LATE_COMPANIONS.includes(id)).map(id=>HEROES.find(h=>h.id===id).name).join('·')}은(는) 스테이지 ${PART_STAGES} 클리어 후 일반 풀에 합류한다.`,
+    `- **일반 소환 UR(${ROSTER.UR.length}명):** ${ROSTER.UR.map(id=>HEROES.find(h=>h.id===id).name).join(', ')}. 픽업은 초기 정규 UR ${heroPool('UR',false).length}명을 매주 월요일(UTC+9) 순서대로 순환한다. 베놈·베히모스·골드드래곤은 스테이지 ${PART_STAGES} 클리어 후 일반 풀에 합류한다.`,
     `- **이달의 수호자(히든 ${HIDDEN.length}명, 시즌 소환에서만):** ${HIDDEN.map(id=>HEROES.find(h=>h.id===id).name).join(' → ')} 순서로 월마다 한 명. 월 번호는 (연도×12+월 인덱스) % ${HIDDEN.length}이고 지금 2026년 10월은 ${HEROES.find(h=>h.id===guardianOf(2026,9)).name}, 2027년 1월은 ${HEROES.find(h=>h.id===guardianOf(2027,0)).name}.`,
     `- **소환 확률:** C/R/SR/UR = ${TUNING.heroRates.map(r=>(r*100).toFixed(1).replace(/\.0$/,'')+'%').join(' / ')}, 천장 ${TUNING.pity.normal}/${TUNING.pity.season}.`,'');
   const bedRows=GARDENS.flatMap(g=>g.beds.map(id=>{const b=TUNING.beds[id],cap=b.knee2,name={rose:'용기의 장미',spring:'별이슬 샘',seed:'황금 씨앗',crit:'여명의 엉겅퀴',critDamage:'노을빛 불꽃나리',stardust:'유성우 은방울'}[id];

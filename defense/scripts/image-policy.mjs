@@ -39,7 +39,6 @@ export function imageInputs(){
   for(const [id,source] of Object.entries(BRIGHT_ART))inputs.push({id:'bright:'+id,source,profile:'atlas',uses:['Bright window.__ASTRA_ASSETS__.'+id+'; '+(id==='lobby'?'home lobby (Bright only)':'home / summon / greenhouse')]});
   for(const [id,source] of Object.entries(LIBRARY_ART))inputs.push({id:'library:'+id,source,profile:'illustration',uses:['window.__LIBRARY_MEDIA__.'+id+'; completed constellation illustration']});
   for(const h of HEROES){
-    if(!MEMORIAL_MEDIA_PATHS[h.id]||!MEMORIAL_WEBP_PATHS[h.id])continue;
     inputs.push({id:'memorial:'+h.id,source:MEMORIAL_MEDIA_PATHS[h.id],profile:'memorialAvif',uses:['window.__MEMORIAL_MEDIA__.'+h.id+'; standalone painting / web primary']});
     inputs.push({id:'memorial-webp:'+h.id,source:MEMORIAL_WEBP_PATHS[h.id],profile:'memorialWebp',uses:['window.__MEMORIAL_MEDIA__.'+h.id+'; compat painting / web fallback','memorialThumb:'+h.id+'; album thumbnail cropped from preserved source']});
   }
@@ -66,7 +65,7 @@ export function derivedImageInputs(){
   for(const a of ARTIFACTS)inputs.push({id:'relic:'+a.id,source:ASSET_PATHS[a.atlas],profile:'relic',
     crop:{...(RELIC_GRIDS[a.atlas]||{columns:2,rows:2}),index:a.icon},
     destination:'./assets/optimized/ui/relics/'+a.id+'.webp',uses:['window.__GARDEN_MEDIA__; collection / summon / equipment']});
-  for(const h of HEROES.filter(h=>MEMORIAL_WEBP_PATHS[h.id]))inputs.push({id:'memorialThumb:'+h.id,source:MEMORIAL_WEBP_PATHS[h.id],profile:'memorialThumb',crop:null,
+  for(const h of HEROES)inputs.push({id:'memorialThumb:'+h.id,source:MEMORIAL_WEBP_PATHS[h.id],profile:'memorialThumb',crop:null,
     destination:'./assets/optimized/ui/memorial-thumbs/'+h.id+'.webp',uses:['window.__MEMORIAL_THUMBS__; album without full-painting decode']});
   return inputs;
 }
