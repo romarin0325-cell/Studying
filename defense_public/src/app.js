@@ -402,7 +402,7 @@ function renderBattle(){
     <div class="battle-stage"><div class="arena-wrap"><div class="aura-chips" id="aura-chips" aria-label="지속 중인 필살기"></div><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div></div>
     <div class="battle-dock">
     <div class="battle-slot" id="battle-slot"><div class="wave-strip"><div class="wave-row"><span class="wave-pips" id="wave-pips"></span><span class="wave-left" id="wave-left"></span></div><div class="boss-line" id="boss-line" hidden><span class="boss-mark">${icon('crown')}</span><div class="boss-main"><div class="boss-head"><b id="boss-name"></b><em id="boss-state"></em></div><span class="boss-bar"><i id="boss-fill"></i></span><small id="boss-trait"></small></div></div>${p().cleared<3?'<p class="battle-hint">드래그: 이동·합성 · 탭: 동료 정보 · 필살기 길게: 설명</p>':''}</div><div id="unit-panel" class="unit-panel" hidden></div></div>
-    <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${E.skillName(run,id)}">${image(id)}<small>${icon('star')}${E.skillCost(run,id)}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span><span class="skill-rank" hidden></span></button>`).join('')}</div>
+    <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${E.skillName(run,id)}">${image(id)}<span class="skill-name"><b>${E.skillName(run,id)}</b><em>${HERO[id].name}</em></span><small>${icon('star')}${E.skillCost(run,id)}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span><span class="skill-rank" hidden></span></button>`).join('')}</div>
     <div class="battle-controls"><button class="primary" data-action="summon-battle">${icon('plus')}<span>동료 소환</span><b id="summon-cost"></b></button><button class="secondary" data-action="training">${icon('up')}훈련</button><button class="secondary toggle-auto" data-action="auto" aria-pressed="${p().settings.auto}"><span>자동</span><b>${p().settings.auto?'ON':'OFF'}</b></button></div>
     </div></section>`;
   hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice','battle','battle-slot','wave-pips','wave-left','boss-line','boss-name','boss-state','boss-fill','boss-trait'].map(id=>[id,$(id)]));
@@ -1650,7 +1650,7 @@ function battleCoach(step){
   const st=run.stats;
   if(step==='summon'){
     if(tutorialMark&&st.summons>tutorialMark.summons){ftueDone('summon');tutorialMark={...st};return;}
-    coachHold=true;guide('summon',()=>qs('[data-action="summon-battle"]'),'동료가 많을수록 든든하지! 아래 동료 소환을 눌러 봐, 형아.');return;
+    coachHold=true;guide('summon',()=>qs('[data-action="summon-battle"]'),'동료가 많을수록 든든하지! 동료 소환을 눌러 봐, 형아.');return;
   }
   if(step==='merge'){
     if(st.merges>(tutorialMark?.merges||0)){ftueDone('merge');tutorialMark={...run.stats};coachHold=false;coach.hide();selected=-1;updateUnit();return;}
@@ -1667,7 +1667,7 @@ function battleCoach(step){
       if(m){coachHold=true;guide('move:'+m.from+':'+m.to,()=>cellsRect(m.from,m.to),'동료는 빈 칸으로 끌어서 옮길 수도 있어. 적이 지나가는 길에 가까울수록 더 잘 맞혀!',{drag:{from:()=>cellScreen(m.from),to:()=>cellScreen(m.to)}});return;}
       coachHold=false;if(coach.active)coach.hide();return;
     }
-    coachHold=true;guide('cast:'+id,()=>qs(`[data-skill="${id}"]`),'별빛이 가득 찼어! 아래 동료 얼굴을 누르면 필살기가 나가. 지금이야, 형아!');return;
+    coachHold=true;guide('cast:'+id,()=>qs(`[data-skill="${id}"]`),'별빛이 가득 찼어! 반짝이는 동료 얼굴을 누르면 필살기가 나가. 지금이야, 형아!');return;
   }
   if(step==='auto'){
     if(p().settings.auto){ftueDone('auto');coachHold=false;coach.hide();return;}
