@@ -7,6 +7,7 @@
 | 폴더 | 게임 | 문서 시작점 | 실행 파일 |
 | --- | --- | --- | --- |
 | `defense/` | 드림위버: 별빛 정원 · Star Garden (정식 Defense) | [README](defense/README.md) · [AGENTS](defense/AGENTS.md) · [docs](defense/docs/README.md) | `defense/dist/StarGardenDefense.html` (Bright: `StarGardenDefenseBright.html`) |
+| `defense_public/` | 별빛 정원 공개판 · 웹 공개 테스트용(몇 시간 주기, 학습 퀴즈 없음) | [README](defense_public/README.md) · [AGENTS](defense_public/AGENTS.md) · [템포](defense_public/docs/PUBLIC_TEMPO.md) | `defense_public/dist/StarGardenPublic.html` (Bright: `StarGardenPublicBright.html`) |
 | `card/` | DREAMWEAVER · Card | [card/README](card/README.md) · [doc](card/doc/README.md) | `card/dist/DREAMWEAVER.html` |
 | `card_legacy/` | DREAMWEAVER · Legacy (기존 어두운 화면, 최신 공통 기능) | [README](card_legacy/README.md) | `card_legacy/dist/DREAMWEAVER-Legacy.html` |
 | `card_astra/` | DREAMWEAVER · Astra (Card의 새 화면) | [README](card_astra/README.md) | `card_astra/dist/DREAMWEAVER-Astra.html` |
@@ -28,6 +29,8 @@ npm run verify             # 고른 검사를 실행한다
 
 npm run build:defense      # Star Garden 일반판 + Bright
 npm run test:defense       # Star Garden 단위·계약 테스트
+npm run build:defense-public  # 공개판 일반 + Bright
+npm run test:defense-public   # 공개판 테스트
 npm run build:card         # Card
 npm run build:card-astra   # Astra
 npm run build:card-lumen   # Lumen

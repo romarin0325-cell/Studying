@@ -9,6 +9,7 @@ import {HEROES,TUNING,LATE_COMPANIONS,LATE_UNLOCK_STAGE,HIDDEN} from '../src/con
 import {createBattle,autoPlay} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 import {MEMORIAL_STORIES} from '../src/memorial.js';
+import {PENDING_MEMORIAL_IDS} from '../src/expansion-companions.js';
 import {allQuestions} from '../src/quiz.js';
 import {eventWindow} from '../src/preview/season.js';
 import {monthlyReward} from '../src/monthly.js';
@@ -28,7 +29,11 @@ if(committed!==null){
   const built=await fs.readFile(path.join(game,'dist/StarGardenDefense.html'),'utf8'),normalize=s=>s.replace(/\r\n/g,'\n');
   assert.ok(normalize(built)===normalize(committed),'committed artifact differs from its deployment inputs');
 }
-const browser=await (isWebkit?webkit:chromium).launch({headless:true});
+const launcher=isWebkit?webkit:chromium;
+const browser=await launcher.launch({headless:true}).catch(error=>{
+  if(isWebkit)throw error;
+  return chromium.launch({headless:true,channel:'chrome'});
+});
 const errors=[],requests=[],geometry=[],contexts=[];
 // The checks below were written for a player past the first session; the tutorial check opts in with {tutorial:true}.
 // These fixtures have also read this week's event; the event check opts in to an unread popup.
@@ -119,7 +124,7 @@ try{
     const probe=await browser.newPage(),source=await fs.readFile(path.join(game,'assets/memorial/zeke.avif'));
     const supportsAvif=await probe.evaluate(async src=>{const img=new Image();img.src=src;try{await img.decode();return img.naturalWidth===720;}catch{return false;}},'data:image/avif;base64,'+source.toString('base64'));await probe.close();
     if(!supportsAvif){
-      const p=createProfile(NOW);p.heroes.star_boy.bond=10;const unsupported=await boot(390,844,p);
+      const p=createProfile(NOW);p.heroes.star_boy.bond=10;p.partner='star_boy';const unsupported=await boot(390,844,p);
       await unsupported.page.locator('[data-action="bond"]').click();await unsupported.page.locator('.bond-memory').click();await unsupported.page.waitForFunction(()=>document.getElementById('memory-art').getAttribute('aria-busy')==='false');
       assert.match(await unsupported.page.locator('#memory-loading').innerText(),/그림을 불러오지 못했습니다/);assert.equal(await unsupported.page.locator('img[data-memorial]').count(),0);
       await unsupported.page.locator('#memory-text').evaluate(el=>{el.scrollTop=el.scrollHeight;el.dispatchEvent(new Event('scroll'));});assert.equal((await profile(unsupported.page)).memories.star_boy.read,true);await shot(unsupported.page,'avif-unsupported-reader',390,844);await close(unsupported.page);await unsupported.context.close();
@@ -129,10 +134,10 @@ try{
     }
   }
   for(const [width,height] of [[320,568],[390,844],[1280,900]]){
-    const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;
+    const memories=createProfile(NOW);for(const h of HEROES){memories.heroes[h.id].owned=true;memories.heroes[h.id].bond=10;}memories.heroes.star_boy.bond=9;memories.partner='star_boy';
     const m=await boot(width,height,memories);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'no memory decode at boot');
     await m.page.locator('[data-action="bond"]').click();await m.page.locator('.bond-memory').click();assert.match(await m.page.locator('.mem-locked').innerText(),/호감도 10/);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'locked preview uses collection portrait');await shot(m.page,'memorial-locked',width,height);await close(m.page);
-    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),HEROES.length,'every owned companion has a memory tile');assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
+    await nav(m.page,'동료');await m.page.locator('[data-collection="album"]').click();assert.equal(await m.page.locator('.mem-tile[data-memorial]').count(),HEROES.length,'every owned companion has a memory tile');assert.equal(await m.page.locator('.mem-tile.pending:disabled').count(),PENDING_MEMORIAL_IDS.length,'pending memorials stay visible and disabled');assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),0,'album uses build-time thumbnails');await shot(m.page,'memorial-album',width,height);
     await m.page.locator('.mem-tile[data-memorial="zeke"]').click();await m.page.locator('#memory-art img').waitFor();assert.equal(await m.page.locator('img[data-memorial]').count(),1);assert.equal(await m.page.evaluate(()=>window.__memorialAssignments.length),1);assert.equal(await m.page.locator('#sheet-kicker').innerText(),MEMORIAL_STORIES.zeke.title);
     await m.page.locator('[data-action="memorial-story"]').click();await m.page.waitForFunction(()=>{const b=document.querySelector('.sheet-body').getBoundingClientRect(),n=document.getElementById('memory-narrative').getBoundingClientRect();return Math.abs(n.bottom-b.bottom)<=1.5;});
     const reading=await m.page.evaluate(()=>{const body=document.querySelector('.sheet-body').getBoundingClientRect(),text=document.getElementById('memory-text').getBoundingClientRect();return {bottom:text.bottom,boundary:body.bottom,height:text.height};});assert.ok(reading.bottom<=reading.boundary+1.5&&reading.height>=90,`story panel visible above the controls ${width}x${height} ${JSON.stringify(reading)}`);await shot(m.page,'memorial-reader',width,height);
@@ -145,7 +150,7 @@ try{
       // Open and close every companion's picture through buttons, never hidden preload.
       const unlocked=structuredClone(memories);unlocked.heroes.star_boy.bond=10;const chain=await boot(390,844,unlocked);
       await nav(chain.page,'동료');await chain.page.locator('[data-collection="album"]').click();
-      for(const h of HEROES){await chain.page.locator(`.mem-tile[data-memorial="${h.id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await close(chain.page);assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
+      for(const id of Object.keys(MEMORIAL_STORIES)){await chain.page.locator(`.mem-tile[data-memorial="${id}"]`).click();await chain.page.locator('#memory-art img').waitFor();assert.equal(await chain.page.locator('img[data-memorial]').count(),1);await close(chain.page);assert.equal(await chain.page.locator('img[data-memorial]').count(),0);}
       await chain.page.locator('.mem-tile[data-memorial="zeke"]').click();await close(chain.page);await chain.page.waitForTimeout(120);assert.equal(await chain.page.locator('img[data-memorial]').count(),0,'closing a pending decode cannot resurrect an image');await chain.context.close();
     }
     await m.context.close();
@@ -165,7 +170,7 @@ try{
   await single.page.waitForTimeout(700);if(await single.page.locator('#sheet[data-kind="event"]').isVisible())await close(single.page);
   assert.equal((await profile(single.page)).deck.length,1);await single.page.locator('[data-action="prepare"]').click();await single.page.locator('#sheet-footer [data-action="team"]').click();assert.equal(await single.page.locator('#sheet .five-line .team-slot').count(),1);await single.page.locator('[data-team-pick="star_boy"]').first().click();await single.page.locator('.choose-list [data-team-pick="snow_rabbit"]').click();await single.page.locator('[data-action="save-team"]').click();assert.deepEqual((await profile(single.page)).deck,['snow_rabbit']);
   await single.page.locator('[data-begin="main"]').click();await single.page.locator('#arena').waitFor();assert.equal(await single.page.locator('[data-skill]').count(),1);await single.page.locator('[data-action="summon-battle"]').click();assert.ok(await single.page.evaluate(()=>window.STAR_GARDEN.battle.board.filter(Boolean).every(u=>u.hero==='snow_rabbit')));await shot(single.page,'solo-battle',390,844);await single.page.locator('[data-action="leave"]').click();await single.page.locator('[data-action="save-leave"]').click();await reload(single);await single.page.locator('[data-action="resume"]').click();assert.equal(await single.page.evaluate(()=>window.STAR_GARDEN.battle.deck.join()),'snow_rabbit');await single.context.close();
-  const folder=await boot(390,844,(()=>{const p=createProfile(NOW);p.heroes.star_boy.bond=10;return p;})(),'avif',pathToFileURL(path.join(game,'test-results/web/StarGardenDefense.html')).href);assert.equal(await folder.page.evaluate(()=>window.__memorialAssignments.length),0);await folder.page.locator('[data-action="bond"]').click();await folder.page.locator('.bond-memory').click();await folder.page.locator('#memory-art img').waitFor();assert.match(await folder.page.locator('#memory-art img').getAttribute('src'),/\.webp$/);await shot(folder.page,'web-memorial-fallback',390,844);await close(folder.page);assert.equal(await folder.page.locator('img[data-memorial]').count(),0);await folder.context.close();
+  const folder=await boot(390,844,(()=>{const p=createProfile(NOW);p.heroes.star_boy.bond=10;p.partner='star_boy';return p;})(),'avif',pathToFileURL(path.join(game,'test-results/web/StarGardenDefense.html')).href);assert.equal(await folder.page.evaluate(()=>window.__memorialAssignments.length),0);await folder.page.locator('[data-action="bond"]').click();await folder.page.locator('.bond-memory').click();await folder.page.locator('#memory-art img').waitFor();assert.match(await folder.page.locator('#memory-art img').getAttribute('src'),/\.webp$/);await shot(folder.page,'web-memorial-fallback',390,844);await close(folder.page);assert.equal(await folder.page.locator('img[data-memorial]').count(),0);await folder.context.close();
   for(const [width,height] of [[320,568],[390,844]]){
     const fire=traitFixture(['zeke','ancient_dragon','siren','snow_rabbit','great_detective'],[[12,'zeke'],[11,'ancient_dragon']],{wave:1}),fireRun=E.restore(fire.active.run);
     fireRun.enemies[0].progress=863;for(const u of fireRun.board)if(u)u.cooldown=.01;fire.active.run=E.serialize(fireRun);

@@ -1,0 +1,6 @@
+{
+  "name": "star-garden-release-tools",
+  "private": true,
+  "scripts": { "dev": "wrangler dev --local", "check": "wrangler deploy --dry-run", "migrate:local": "wrangler d1 migrations apply DB --local" },
+  "devDependencies": { "wrangler": "4.166.0" }
+}

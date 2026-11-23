@@ -71,7 +71,7 @@ test('crownless blocks UR decks and shares the rarity lock with lowstar',()=>{
     ['crownless','deck',3,'왕관 없는 원정','UR 동료를 편성할 수 없습니다.'],
     ['once','tempo',2,'단 한 번의 응답','동료마다 필살기를 웨이브당 한 번만 쓸 수 있습니다.'],
     ['ceiling','tempo',3,'낮은 천장','동료는 3성까지만 오릅니다.'],
-    ['hollow','board',3,'닫힌 중심','전장 가운데 9칸을 쓸 수 없습니다.'],
+    ['hollow','board',3,'닫힌 십자로','전장 한가운데를 가로지르는 가로·세로 줄 9칸을 쓸 수 없습니다.'],
     ['stiff','board',2,'굳은 발걸음','전투 중 자리를 옮기면 8초 동안 다시 옮길 수 없습니다. 합성은 할 수 있습니다.'],
   ]){
     assert.equal(OATH[id].group,group,id);
@@ -96,13 +96,13 @@ test('crownless blocks UR decks and shares the rarity lock with lowstar',()=>{
   assert.equal(oathMods(['ceiling']).rankCap,3);
   assert.equal(oathMods(['hollow']).closed,OATH_CLOSED);
   assert.ok(Object.isFrozen(OATH_CLOSED));
-  assert.deepEqual([...OATH_CLOSED],[6,7,8,11,12,13,16,17,18]);
+  assert.deepEqual([...OATH_CLOSED],[2,7,10,11,12,13,14,17,22]);
   assert.equal(oathMods(['stiff']).moveCooldown,8);
 });
 
-test('hollow keeps every unit off the centre and rejects a closed-cell save',()=>{
+test('hollow keeps every unit off the central cross and rejects a closed-cell save',()=>{
   const s=E.newRun({mode:'oath',oaths:['hollow'],seed:3});
-  assert.deepEqual(occupied(s).sort((a,b)=>a.u.uid-b.u.uid).map(p=>p.i),[21,23,2]);
+  assert.deepEqual(occupied(s).sort((a,b)=>a.u.uid-b.u.uid).map(p=>p.i),[16,18,6]);
   for(const i of OATH_CLOSED)assert.equal(s.board[i],null,`opening ${i}`);
   s.gold=1e7;
   for(let n=0;n<30;n++){
@@ -339,7 +339,7 @@ test('smart auto clears five oaths without closed cells, ranks above 3, or a sec
   const deck=SR,meta=Object.fromEntries(deck.map(id=>[id,{power:2000,special:1}]));
   const s=E.newRun({mode:'oath',oaths:['crownless','once','ceiling','hollow','stiff'],deck,meta,seed:1,startGold:2000});
   assert.equal(oathDeckProblem(s.oaths,s.deck),'');
-  assert.deepEqual(occupied(s).sort((a,b)=>a.u.uid-b.u.uid).map(p=>p.i),[21,23,2]);
+  assert.deepEqual(occupied(s).sort((a,b)=>a.u.uid-b.u.uid).map(p=>p.i),[16,18,6]);
   const casts=new Map();
   const watch=()=>{
     for(const ev of s.events){

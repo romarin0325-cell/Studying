@@ -1,5 +1,7 @@
 # AGENTS.md
 
+> 이 저장소 밖 작업 공간(`게임` 폴더) 전체의 공통 규칙은 `..\AGENT-RULES.md`(역할, 지시문, 검증 단계, 화면 검수, 보고), 폴더 지도는 `..\WORKSPACE.md`에 있다. 이 파일과 각 프로젝트 `AGENTS.md`가 그 위에서 프로젝트별 규칙을 더한다.
+
 ## Priority
 Functional correctness of the browser app is more important than refactoring or style polish.
 
@@ -21,6 +23,7 @@ Functional correctness of the browser app is more important than refactoring or 
 - `card_pixel/`: Pixel relay roguelite renewal of the card game: plan (`card_pixel/plan/`), work history (`card_pixel/history/`), sprite sources (`card_pixel/art/`) and the RELAYMARE game (`card_pixel/game/dist/Relaymare.html`), whose battle rules live in `card_pixel/game/core/` (copied from `card/game` on 2026-11-21, now independent). Rules for this folder are in `card_pixel/AGENTS.md`. Build `node card_pixel/game/build.mjs`; tests `node --test card_pixel/game/tests/bridge.test.mjs card_pixel/game/tests/rules.test.mjs card_pixel/game/tests/run.test.mjs card_pixel/game/tests/music.test.mjs card_pixel/game/tests/daily.test.mjs card_pixel/game/tests/assets.test.mjs card_pixel/game/tests/rulebook.test.mjs card_pixel/game/tests/effect-plan.test.mjs`; screen gallery `node card_pixel/game/tests/screens.mjs`.
 - `shooter/`: Astral Bloom shooter (`shooter/dist/AstralBloom.html`)
 - `defense/`: Star Garden defense (`defense/dist/StarGardenDefense.html`, Bright skin `defense/dist/StarGardenDefenseBright.html`). Build both with `npm run build:defense`; rules for this game are in `defense/AGENTS.md`.
+- `defense_public/`: Star Garden public web-test fork (2026-11-21): hours-long cycles instead of days/weeks, no study quiz or API input (`defense_public/dist/StarGardenPublic.html`, Bright `StarGardenPublicBright.html`). Build both with `npm run build:defense-public`; rules in `defense_public/AGENTS.md`, tempo and income in `defense_public/docs/PUBLIC_TEMPO.md`.
 - `survivor/`: Astra Nocturne survivor game (`survivor/dist/AstraNocturne.html`)
 - `rpg/`: Turn RPG: Legend Edition, one self-contained page (`rpg/new.html`: UI, rules, data, SVG fallbacks and WebAudio music; character/enemy art is the card game's 3:5 PNGs placed beside it); no build or tests.
 

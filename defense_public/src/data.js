@@ -1,0 +1,2055 @@
+// Star Garden owns these definitions. They were copied once when the prototype
+// branched from Confluence; all future balance and art changes are local.
+import {NEW_HEROES,NEW_ASSET_PATHS,MIRACLE_FORMS} from './new-companions.js';
+export const VERSION = 2;
+
+export const GRID = 5;
+
+export const MAX_RANK = 6;
+
+export const HEROES = [
+  ...NEW_HEROES,
+  {
+    "id": "zeke",
+    "name": "지크",
+    "title": "불굴의 용기사",
+    "color": "#ff995c",
+    "art": {
+      "atlas": "unit-zeke",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 255,
+        "y": 198,
+        "size": 250
+      }
+    },
+    "damage": 31,
+    "interval": 1.2,
+    "attack": "slash",
+    "trait": {
+      "type": "burn",
+      "text": "자기 칸 주변(반경 250)의 적을 공격하여 화상을 부여합니다. 적이 코어 근처(경로 마지막 1/4)에 진입하면 지크의 공격력이 40% 증가합니다."
+    },
+    "skill": {
+      "name": "라그나로크",
+      "cost": 70,
+      "type": "inferno",
+      "text": "적 전체에게 공격력 7배(코어 생명력이 절반 미만이면 14배) 피해를 주고 화상을 부여합니다."
+    },
+    "heightGroup": "tall",
+    "role": "선봉 · 회전 베기",
+    "shape": "pulse",
+    "range": 250,
+    "radius": 250
+  },
+  {
+    "id": "rumi",
+    "name": "루미",
+    "title": "꿈을 짓는 마법사",
+    "color": "#7dddf1",
+    "art": {
+      "atlas": "unit-rumi",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 261,
+        "y": 213,
+        "size": 250
+      }
+    },
+    "damage": 10,
+    "interval": 1.05,
+    "attack": "star",
+    "trait": {
+      "type": "wild",
+      "text": "기본 공격이 일직선으로 관통합니다. 같은 성급의 어떤 동료와도 합성할 수 있으며, 합성 시 상대 동료의 성급이 1단계 상승합니다."
+    },
+    "skill": {
+      "name": "꿈의 메아리",
+      "cost": 60,
+      "type": "echo",
+      "text": "10초간 모든 동료가 기본 공격 시 공격력 65%의 추가 공격을 1회 더 가합니다."
+    },
+    "heightGroup": "medium",
+    "role": "합성 · 관통 별",
+    "shape": "beam",
+    "range": 440,
+    "radius": 24
+  },
+  {
+    "id": "luna",
+    "name": "루나",
+    "title": "달그늘의 암살자",
+    "color": "#c5a0ff",
+    "art": {
+      "atlas": "unit-luna",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 248,
+        "y": 206,
+        "size": 272
+      }
+    },
+    "damage": 55,
+    "interval": 1.25,
+    "attack": "blade",
+    "trait": {
+      "type": "execute",
+      "text": "보스를 우선 공격하며, 보스에게 주는 피해가 35% 증가합니다. 기본 공격 시 체력이 40% 이하인 적에게 주는 피해가 100% 증가합니다."
+    },
+    "skill": {
+      "name": "제노사이드 스텝",
+      "cost": 80,
+      "type": "execute",
+      "text": "보스를 우선으로 최대 5명의 적에게 공격력 16배(체력이 40% 이하인 적은 30배) 피해를 줍니다. 강화된 피해로 적을 처치할 때마다 다음 적에게 최대 5회까지 연쇄됩니다."
+    },
+    "heightGroup": "medium",
+    "role": "보스 처형 · 단일",
+    "shape": "single",
+    "range": 340,
+    "radius": 0,
+    "bossDamage": 1.35
+  },
+  {
+    "id": "cinderella",
+    "name": "신데렐라",
+    "title": "한밤의 기적",
+    "color": "#f7a5cc",
+    "art": {
+      "atlas": "unit-cinderella",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 253,
+        "y": 204,
+        "size": 250
+      }
+    },
+    "damage": 26,
+    "interval": 1,
+    "attack": "star",
+    "trait": {
+      "type": "miracle",
+      "text": "전장에서 성급이 가장 높은 신데렐라 1명이 '진짜 신데렐라'가 되어 공격력이 50% 증가합니다. 진짜 신데렐라는 12번째 기본 공격마다 '자정의 종'을 울려 보스(없으면 현재 대상)에게 공격력 10배, 주변(반경 150) 적에게 3배 피해를 줍니다."
+    },
+    "skill": {
+      "name": "자정의 기적",
+      "cost": 65,
+      "type": "glassfall",
+      "text": "적 전체에게 공격력 3배 피해를 줍니다. 10초간 진짜 신데렐라의 공격 속도가 50% 증가하고, 4번째 기본 공격마다 자정의 종을 울립니다."
+    },
+    "heightGroup": "medium",
+    "role": "자정의 종 · 보스 저격",
+    "shape": "single",
+    "range": 480,
+    "radius": 0
+  },
+  {
+    "id": "snow_rabbit",
+    "name": "눈토끼",
+    "title": "겨울의 작은 발자국",
+    "color": "#9bdfef",
+    "art": {
+      "atlas": "unit-snow_rabbit",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 240,
+        "y": 234,
+        "size": 250
+      }
+    },
+    "damage": 10,
+    "interval": 0.95,
+    "attack": "ice",
+    "trait": {
+      "type": "slow",
+      "text": "기본 공격 시 적을 2.4초간 35% 감속시킵니다."
+    },
+    "skill": {
+      "name": "하얀 숨결",
+      "cost": 65,
+      "type": "freeze",
+      "text": "적 전체에게 공격력 3배 피해를 주고 2초간 빙결시키며, 6초간 50% 감속시킵니다."
+    },
+    "heightGroup": "short",
+    "role": "감속 · 작은 폭발",
+    "shape": "splash",
+    "range": 450,
+    "radius": 48
+  },
+  {
+    "id": "avalanche_maid",
+    "name": "아발란체메이드",
+    "title": "잠든 눈사태",
+    "color": "#9fc5f7",
+    "art": {
+      "atlas": "unit-avalanche_maid",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 247,
+        "y": 215,
+        "size": 250
+      }
+    },
+    "damage": 32,
+    "interval": 1.65,
+    "attack": "ice",
+    "trait": {
+      "type": "shatter",
+      "text": "기본 공격 시 사거리 내 무작위 적과 주변(반경 100)을 공격하며, 공격 목표를 직접 지정할 수 없습니다. 기본 공격 시 감속 상태인 적에게 주는 피해가 75% 증가합니다."
+    },
+    "skill": {
+      "name": "백야의 눈사태",
+      "cost": 80,
+      "type": "avalanche",
+      "text": "적 전체에게 공격력 4배(기절·빙결 상태인 적은 12배) 피해를 주고, 4초간 50% 감속시킵니다."
+    },
+    "heightGroup": "medium",
+    "role": "빙결 연계 · 포격",
+    "shape": "splash",
+    "range": 560,
+    "radius": 100
+  },
+  {
+    "id": "night_rabbit",
+    "name": "밤토끼",
+    "title": "별 없는 밤의 도약",
+    "color": "#bd91e3",
+    "art": {
+      "atlas": "unit-night_rabbit",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 257,
+        "y": 224,
+        "size": 250
+      }
+    },
+    "damage": 29,
+    "interval": 0.7,
+    "attack": "blade",
+    "trait": {
+      "type": "rabbit",
+      "text": "기본 공격이 적을 맞힌 뒤 근처 적 1명에게 65% 피해로 튑니다. 전장에 다른 토끼 동료(눈토끼·은토끼)가 있으면 종류당 자신의 공격 속도가 20% 증가합니다."
+    },
+    "skill": {
+      "name": "달그림자 도약",
+      "cost": 65,
+      "type": "flurry",
+      "text": "가장 앞선 적부터 최대 9명(전장의 눈토끼·은토끼 종류당 +2명)에게 공격력 9배 피해를 줍니다."
+    },
+    "heightGroup": "short",
+    "role": "토끼 연계 · 도탄",
+    "shape": "bounce",
+    "range": 390,
+    "radius": 135
+  },
+  {
+    "id": "guardian",
+    "name": "가디언",
+    "title": "대륙을 옮긴 손",
+    "color": "#e2ba75",
+    "art": {
+      "atlas": "unit-guardian",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 249,
+        "y": 236,
+        "size": 250
+      }
+    },
+    "damage": 55,
+    "interval": 1.8,
+    "attack": "stone",
+    "trait": {
+      "type": "stun",
+      "text": "자기 칸 주변(반경 230)의 적을 공격하며, 3번째 기본 공격마다 적을 0.7초간 기절시킵니다."
+    },
+    "skill": {
+      "name": "대륙의 맥동",
+      "cost": 75,
+      "type": "quake",
+      "text": "적 전체에게 공격력 2.4배 피해를 주고 밀쳐내며 1.5초간 기절시킵니다. 코어 근처(경로 마지막 1/3)의 적은 2배 거리만큼 밀쳐내고 3초간 기절시킵니다."
+    },
+    "heightGroup": "short",
+    "role": "근접 방벽 · 타일 충격",
+    "shape": "pulse",
+    "range": 230,
+    "radius": 230
+  },
+  {
+    "id": "storm_sage",
+    "name": "폭풍의현자",
+    "title": "흐름을 읽는 자",
+    "color": "#8dd2c4",
+    "art": {
+      "atlas": "unit-storm_sage",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 258,
+        "y": 214,
+        "size": 250
+      }
+    },
+    "damage": 34,
+    "interval": 0.85,
+    "attack": "wind",
+    "trait": {
+      "type": "gust",
+      "text": "기본 공격이 일직선으로 관통한 뒤 주위 적 1명에게 65% 피해로 튑니다. 기본 공격에 맞은 일반 적은 1% 확률로 즉사합니다."
+    },
+    "skill": {
+      "name": "태풍의 눈",
+      "cost": 75,
+      "type": "vortex",
+      "text": "적 전체를 앞쪽으로 끌어당겨 공격력 5배 피해를 주고, 1.5초간 기절시키며 4초간 60% 감속시킵니다."
+    },
+    "heightGroup": "tall",
+    "role": "관통 · 바람길",
+    "shape": "beam",
+    "range": 560,
+    "radius": 42
+  },
+  {
+    "id": "lightning_sage",
+    "name": "번개의현자",
+    "title": "찰나의 섬광",
+    "color": "#f2db84",
+    "art": {
+      "atlas": "unit-lightning_sage",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 234,
+        "y": 227,
+        "size": 250
+      }
+    },
+    "damage": 39,
+    "interval": 1.2,
+    "attack": "lightning",
+    "trait": {
+      "type": "chain",
+      "text": "기본 공격이 가까운 적 2명에게 연쇄되어 65% 피해를 줍니다. 상하좌우로 연결된 번개의현자 수에 따라 공격력과 연쇄 성능이 증가합니다(공격력: 2기 +20%, 3기 +40%, 4기 +60%, 5기 이상 +80%)."
+    },
+    "skill": {
+      "name": "천둥의 연쇄",
+      "cost": 80,
+      "type": "thunder",
+      "text": "적 전체에게 공격력 8배 피해를 주고 1.2초간 기절시킵니다."
+    },
+    "heightGroup": "tall",
+    "role": "연쇄 · 번개",
+    "shape": "chain",
+    "range": 470,
+    "radius": 190
+  },
+  {
+    "id": "red_dragon",
+    "name": "레드드래곤",
+    "title": "진홍의 포효",
+    "color": "#ff805c",
+    "art": {
+      "atlas": "unit-red_dragon",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 255,
+        "y": 203,
+        "size": 250
+      }
+    },
+    "damage": 36,
+    "interval": 1.75,
+    "attack": "fire",
+    "trait": {
+      "type": "splash",
+      "text": "기본 공격 시 화상 상태인 적에게 주는 피해가 40% 증가합니다."
+    },
+    "skill": {
+      "name": "용의 숨결",
+      "cost": 90,
+      "type": "dragon",
+      "text": "적이 가장 밀집한 반경 180 범위에 공격력 14배 피해를 주고 화상을 부여합니다."
+    },
+    "heightGroup": "tall",
+    "role": "화상 연계 · 폭격",
+    "shape": "splash",
+    "range": 590,
+    "radius": 88
+  },
+  {
+    "id": "flame_sage",
+    "name": "화염의현자",
+    "title": "꺼지지 않는 잔불",
+    "color": "#edab55",
+    "art": {
+      "atlas": "unit-flame_sage",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 249,
+        "y": 217,
+        "size": 250
+      }
+    },
+    "damage": 38,
+    "interval": 1.1,
+    "attack": "fire",
+    "trait": {
+      "type": "burn",
+      "text": "기본 공격 시 경로 위 무작위 위치에 3.9초간 지속되는 불바닥을 생성하여 지나는 적에게 피해를 주고 화상을 부여합니다. 공격 목표를 직접 지정할 수 없습니다."
+    },
+    "skill": {
+      "name": "작열의 문장",
+      "cost": 75,
+      "type": "combust",
+      "text": "적 전체에게 공격력 4배(화상 상태인 적은 10배) 피해를 주고 화상을 부여합니다."
+    },
+    "heightGroup": "tall",
+    "role": "지속 피해 · 불바닥",
+    "shape": "zone",
+    "range": 430,
+    "radius": 64
+  },
+  {
+    "id": "mushroom_king",
+    "name": "머쉬룸킹",
+    "title": "독의 왕관",
+    "color": "#baaf66",
+    "art": {
+      "atlas": "unit-mushroom_king",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 266,
+        "y": 224,
+        "size": 250
+      }
+    },
+    "damage": 6,
+    "interval": 0.95,
+    "attack": "spore",
+    "trait": {
+      "type": "poison",
+      "text": "기본 공격 시 포자 장판을 생성하여 적에게 중독 1중첩을 부여합니다. 머쉬룸킹을 합성하면 적 전체에게 중독 2중첩을 부여합니다."
+    },
+    "skill": {
+      "name": "왕의 마지막 포자",
+      "cost": 70,
+      "type": "plague",
+      "text": "적 전체에게 공격력 3배 피해를 주고 12초간 중독 8중첩을 부여합니다. 이미 중독 20중첩 이상인 적은 남은 중독 피해의 30%를 즉시 추가로 받습니다."
+    },
+    "heightGroup": "medium",
+    "role": "중독 · 포자밭",
+    "shape": "zone",
+    "range": 370,
+    "radius": 66
+  },
+  {
+    "id": "great_detective",
+    "name": "명탐정",
+    "title": "진실을 비추는 빛",
+    "color": "#f2d8a0",
+    "art": {
+      "atlas": "unit-great_detective",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 263,
+        "y": 229,
+        "size": 250
+      }
+    },
+    "damage": 20,
+    "interval": 1.6,
+    "attack": "light",
+    "trait": {
+      "type": "expose",
+      "text": "보스를 우선 공격하며, 기본 공격 시 적에게 4초간 노출(받는 피해 +8%, 보스 +15%)을 부여합니다."
+    },
+    "skill": {
+      "name": "완벽한 추리",
+      "cost": 70,
+      "type": "expose",
+      "text": "적 전체에게 공격력 3배 피해를 주고, 10초간 노출(받는 피해 +35%)을 부여합니다."
+    },
+    "heightGroup": "medium",
+    "role": "보스 약화 · 저격",
+    "shape": "single",
+    "range": 900,
+    "radius": 0,
+    "bossPriority": true
+  },
+  {
+    "id": "siren",
+    "name": "세이렌",
+    "title": "물결의 노래",
+    "color": "#91d8f7",
+    "art": {
+      "atlas": "unit-siren",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 252,
+        "y": 217,
+        "size": 250
+      }
+    },
+    "damage": 7,
+    "interval": 1.25,
+    "attack": "water",
+    "trait": {
+      "type": "hasteAura",
+      "text": "상하좌우 동료의 공격 속도가 15% 증가합니다."
+    },
+    "skill": {
+      "name": "공명의 아리아",
+      "cost": 65,
+      "type": "haste",
+      "text": "10초간 모든 동료의 공격 속도가 35% 증가합니다."
+    },
+    "heightGroup": "medium",
+    "role": "인접 지원 · 물결",
+    "shape": "splash",
+    "range": 400,
+    "radius": 58
+  },
+  {
+    "id": "phantom",
+    "name": "팬텀",
+    "title": "곰인형 속 악몽",
+    "color": "#c9a0cb",
+    "art": {
+      "atlas": "unit-phantom",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 245,
+        "y": 237,
+        "size": 250
+      }
+    },
+    "damage": 19,
+    "interval": 1.3,
+    "attack": "shadow",
+    "trait": {
+      "type": "fear",
+      "text": "기본 공격 시 악몽 장판을 생성하여 지나는 적을 25% 감속시킵니다."
+    },
+    "skill": {
+      "name": "깨어나지 않는 밤",
+      "cost": 75,
+      "type": "nightmare",
+      "text": "적 전체에게 공격력 4배 피해를 주고 밀쳐내며, 6초간 노출(받는 피해 +25%)과 12초간 중독 4중첩을 부여합니다."
+    },
+    "heightGroup": "short",
+    "role": "견제 · 악몽 덫",
+    "shape": "zone",
+    "range": 460,
+    "radius": 60
+  },
+  {
+    "id": "queen",
+    "name": "여왕",
+    "title": "장미의 통치자",
+    "color": "#e9a5bb",
+    "art": {
+      "atlas": "unit-queen",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 253,
+        "y": 223,
+        "size": 250
+      }
+    },
+    "damage": 26,
+    "interval": 1.35,
+    "attack": "rose",
+    "trait": {
+      "type": "dividend",
+      "text": "웨이브 종료 시 1성 기준 12G를 획득합니다(성급당 +6G, 4·7·10웨이브부터 +1G, 여왕 합산 웨이브당 최대 90G)."
+    },
+    "skill": {
+      "name": "장미의 세금",
+      "cost": 60,
+      "type": "dividend",
+      "text": "적 전체에게 공격력 4배 피해를 주고 즉시 20G를 획득합니다. 이번 웨이브 종료 시 기본 웨이브 골드의 50%를 추가로 획득합니다(웨이브당 1회)."
+    },
+    "heightGroup": "medium",
+    "role": "배당 경제 · 장미",
+    "shape": "single",
+    "range": 440,
+    "radius": 0
+  },
+  {
+    "id": "galaxy_whale",
+    "name": "은하고래",
+    "title": "별바다의 주인",
+    "color": "#90a9ec",
+    "art": {
+      "atlas": "unit-galaxy_whale",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 277,
+        "y": 217,
+        "size": 250
+      }
+    },
+    "damage": 18,
+    "interval": 2,
+    "attack": "cosmos",
+    "trait": {
+      "type": "gravity",
+      "text": "기본 공격 시 중력 장판을 생성하여 적을 40% 감속시킵니다. 적에게 걸린 성광 1중첩당 중력 장판 피해가 30%씩 증가합니다."
+    },
+    "skill": {
+      "name": "별바다의 중심",
+      "cost": 80,
+      "type": "singularity",
+      "text": "적 전체를 앞쪽으로 끌어당겨 공격력 8배 피해를 주고 4초간 60% 감속시킵니다. 대상의 성광을 모두 소모하여 1중첩당 피해가 100%씩 증가합니다(3중첩 시 32배)."
+    },
+    "heightGroup": "medium",
+    "role": "성광 수확 · 중력장",
+    "shape": "zone",
+    "range": 550,
+    "radius": 98
+  },
+  {
+    "id": "silver_rabbit",
+    "name": "은토끼",
+    "title": "새벽을 잇는 발자국",
+    "color": "#c4e5df",
+    "art": {
+      "atlas": "unit-silver_rabbit",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 247,
+        "y": 240,
+        "size": 250
+      }
+    },
+    "damage": 26,
+    "interval": 0.9,
+    "attack": "light",
+    "trait": {
+      "type": "battery",
+      "text": "기본 공격이 일직선으로 관통하며 적에게 6초간 성광 1중첩을 부여합니다(최대 3중첩). 성광 상태인 적이 처치되면 중첩 수에 비례해 별빛을 추가로 획득합니다."
+    },
+    "skill": {
+      "name": "은빛 행진",
+      "cost": 60,
+      "type": "march",
+      "text": "10초간 모든 동료의 공격 속도가 20% 증가하며, 기본 공격 시 6초간 성광 1중첩을 부여합니다."
+    },
+    "heightGroup": "short",
+    "role": "성광 부여 · 관통광",
+    "shape": "beam",
+    "range": 500,
+    "radius": 22
+  },
+  {
+    "id": "ancient_dragon",
+    "name": "에인션트드래곤",
+    "title": "오랜 별의 지혜",
+    "color": "#e1c486",
+    "art": {
+      "atlas": "unit-ancient_dragon",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 252,
+        "y": 215,
+        "size": 250
+      }
+    },
+    "damage": 22,
+    "interval": 1.6,
+    "attack": "light",
+    "trait": {
+      "type": "powerAura",
+      "text": "기본 공격이 자기 행과 열 전체를 십자로 관통합니다. 상하좌우 동료의 공격력이 20% 증가합니다."
+    },
+    "skill": {
+      "name": "태고의 약속",
+      "cost": 75,
+      "type": "awaken",
+      "text": "10초간 모든 동료의 공격력이 40% 증가합니다."
+    },
+    "heightGroup": "tall",
+    "role": "인접 지원 · 십자화염",
+    "shape": "cross",
+    "range": 620,
+    "radius": 55
+  },
+  {
+    "id": "time_ruler",
+    "name": "시간의지배자",
+    "title": "멈춘 시계의 여왕",
+    "color": "#c4bcf4",
+    "art": {
+      "atlas": "unit-time_ruler",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 256,
+        "y": 204,
+        "size": 250
+      }
+    },
+    "damage": 26,
+    "interval": 1.1,
+    "attack": "time",
+    "trait": {
+      "type": "chrono",
+      "text": "기본 공격 시 시간 장판을 생성하여 적을 25% 감속시킵니다. 소환·합성된 웨이브에는 공격력이 기본의 75%, 다음 웨이브에는 100%, 그 이후에는 150%가 됩니다."
+    },
+    "skill": {
+      "name": "아직 오지 않은 순간",
+      "cost": 90,
+      "type": "rewind",
+      "text": "적 전체에게 공격력 3배 피해를 주고, 6초 전 위치로 되돌리며 2초간 기절시킵니다."
+    },
+    "heightGroup": "medium",
+    "role": "시간 제어 · 시계장",
+    "shape": "zone",
+    "range": 490,
+    "radius": 72
+  },
+  {
+    "id": "doom",
+    "name": "둠",
+    "title": "웃음 뒤의 계약",
+    "color": "#ad97da",
+    "art": {
+      "atlas": "unit-doom",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 247,
+        "y": 206,
+        "size": 250
+      }
+    },
+    "damage": 34,
+    "interval": 1.1,
+    "attack": "shadow",
+    "trait": {
+      "type": "sacrifice",
+      "text": "기본 공격이 일직선으로 관통합니다. 둠끼리 합성하면 합성에 사용한 성급 × 40G를 즉시 획득합니다."
+    },
+    "skill": {
+      "name": "왕궁의 암거래",
+      "cost": 60,
+      "goldCost": 40,
+      "type": "fortune",
+      "text": "40G를 소모해 적 전체에게 공격력 7배 피해를 줍니다. 소모 후 남은 골드 40G당 피해가 +1배씩 증가합니다(최대 +5배)."
+    },
+    "heightGroup": "medium",
+    "role": "합성 경제 · 관통검",
+    "shape": "beam",
+    "range": 450,
+    "radius": 22
+  },
+  {
+    "id": "santa",
+    "name": "산타",
+    "title": "성야의 배달부",
+    "color": "#f7b994",
+    "art": {
+      "atlas": "unit-santa",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 253,
+        "y": 210,
+        "size": 250
+      }
+    },
+    "damage": 13,
+    "interval": 1.05,
+    "attack": "gift",
+    "trait": {
+      "type": "gift",
+      "text": "4번째 기본 공격마다 범위와 피해가 2배인 선물 폭탄을 던집니다. 선물 폭탄으로 적을 처치하면 1G를 추가로 획득합니다."
+    },
+    "skill": {
+      "name": "한밤의 선물",
+      "cost": 80,
+      "type": "gift",
+      "text": "편성된 동료 중 무작위 1명을 전장에 1성으로 소환하고, 6초간 모든 동료의 공격 속도가 20% 증가합니다."
+    },
+    "heightGroup": "medium",
+    "role": "선물 · 포격",
+    "shape": "splash",
+    "range": 510,
+    "radius": 56
+  },
+  {
+    "id": "jasmine",
+    "name": "자스민",
+    "title": "빛을 모으는 왕녀",
+    "color": "#ffe6a5",
+    "art": {
+      "atlas": "unit-jasmine",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 257,
+        "y": 221,
+        "size": 250
+      }
+    },
+    "damage": 20,
+    "interval": 1.15,
+    "attack": "light",
+    "trait": {
+      "type": "divine",
+      "text": "기본 공격 시 적에게 6초간 성광 1중첩을 부여합니다(최대 3중첩). 기본 공격 시 성광 3중첩 상태인 적에게 주는 피해가 65% 증가합니다."
+    },
+    "skill": {
+      "name": "여신강림",
+      "cost": 80,
+      "type": "goddess",
+      "text": "적 전체에게 공격력 5배 피해를 주고 모든 동료의 기절과 저주를 해제하며, 10초간 모든 동료의 공격력이 50% 증가합니다."
+    },
+    "heightGroup": "medium",
+    "role": "성광 연계 · 빛의 파동",
+    "shape": "splash",
+    "range": 510,
+    "radius": 60
+  },
+  {
+    "id": "star_boy",
+    "name": "별똥별소년",
+    "title": "소원을 가르는 유성",
+    "color": "#7eddfa",
+    "art": {
+      "atlas": "unit-star_boy",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 246,
+        "y": 226,
+        "size": 250
+      }
+    },
+    "damage": 25,
+    "interval": 0.65,
+    "attack": "comet",
+    "trait": {
+      "type": "starfall",
+      "text": "5번째 기본 공격마다 2.2배 피해를 줍니다. 소환·합성된 웨이브에는 공격력이 기본의 150%, 다음 웨이브에는 100%, 그 이후에는 75%가 됩니다."
+    },
+    "skill": {
+      "name": "소원을 담은 별",
+      "cost": 60,
+      "type": "starfall",
+      "text": "보유한 별빛을 모두 소모해 체력이 가장 높은 적에게 소모한 별빛 1당 공격력 0.5배 피해를 줍니다(별빛 60 소모 시 30배, 120 소모 시 60배)."
+    },
+    "heightGroup": "medium",
+    "role": "강적 추적 · 유성탄",
+    "shape": "single",
+    "range": 650,
+    "radius": 0
+  },
+  {
+    "id": "time_magician",
+    "name": "시간의마술사",
+    "title": "부서진 동화의 주인",
+    "color": "#e093df",
+    "art": {
+      "atlas": "unit-time_magician",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 255,
+        "y": 207,
+        "size": 250
+      }
+    },
+    "damage": 26,
+    "interval": 1.35,
+    "attack": "time",
+    "trait": {
+      "type": "accelerate",
+      "text": "기본 공격이 일직선으로 관통합니다. 자신의 3번째 기본 공격마다 상하좌우 동료가 공격력 60%의 추가 공격을 1회 가합니다."
+    },
+    "skill": {
+      "name": "트라우마 · 어둠의 신데렐라",
+      "cost": 80,
+      "type": "trauma",
+      "text": "적 전체에게 공격력 4배 피해를 주고, 10초간 전장의 시간의마술사가 트라우마로 변신하여 공격력이 150%, 공격 속도가 35% 증가합니다."
+    },
+    "heightGroup": "medium",
+    "role": "시간 연계 · 관통침",
+    "shape": "beam",
+    "range": 520,
+    "radius": 28
+  },
+  {
+    "id": "cherry_prince",
+    "name": "체리프린스",
+    "title": "붉은 약속의 왕자",
+    "color": "#ffacc4",
+    "art": {
+      "atlas": "unit-cherry_prince",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 253,
+        "y": 202,
+        "size": 250
+      }
+    },
+    "damage": 54,
+    "interval": 1.5,
+    "attack": "blade",
+    "trait": {
+      "type": "regal",
+      "text": "보스를 우선 공격하며, 보스에게 주는 피해가 25% 증가합니다. 기본 공격 시 화상 또는 성광 3중첩 상태인 적에게 주는 피해가 60% 증가합니다."
+    },
+    "skill": {
+      "name": "체리 블로섬 · 왕자의 일격",
+      "cost": 85,
+      "type": "royal",
+      "text": "체력이 가장 높은 적에게 공격력 24배(화상 또는 성광 3중첩 상태인 적은 48배) 피해를 줍니다."
+    },
+    "heightGroup": "tall",
+    "role": "강적 결전 · 검광",
+    "shape": "single",
+    "range": 590,
+    "radius": 0,
+    "bossDamage": 1.25
+  },
+  {
+    "id": "frost_witch",
+    "name": "혹한의마녀",
+    "title": "영겁의 빙관",
+    "color": "#a8e4fa",
+    "art": {
+      "atlas": "unit-frost_witch",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 241,
+        "y": 208,
+        "size": 250
+      }
+    },
+    "damage": 38,
+    "interval": 1.5,
+    "attack": "ice",
+    "trait": {
+      "type": "permafrost",
+      "text": "기본 공격이 일직선으로 관통하며 적을 2.4초간 40% 감속시킵니다. 이미 감속 상태인 적은 0.6초간 빙결시키며(동일 대상 재발동 대기시간 3초), 빙결 상태인 적이 처치되면 주변 적을 감속시킵니다."
+    },
+    "skill": {
+      "name": "빙궁의 칙령",
+      "cost": 80,
+      "type": "ice_court",
+      "text": "6초간 겨울을 내려 적 전체에게 공격력 9배 피해를 주고, 50% 감속과 노출(받는 피해 +15%)을 부여합니다. 겨울 동안 적이 처치되면 주변 일반 적을 0.8초간 빙결시킵니다."
+    },
+    "heightGroup": "tall",
+    "role": "냉기 확산 · 얼음창",
+    "shape": "beam",
+    "range": 550,
+    "radius": 32
+  },
+  {
+    "id": "harmonious",
+    "name": "하모니어스",
+    "title": "달콤한 조화의 수호신",
+    "color": "#9ce3c5",
+    "art": {
+      "atlas": "unit-harmonious",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 262,
+        "y": 225,
+        "size": 250
+      }
+    },
+    "damage": 14,
+    "interval": 1.3,
+    "attack": "sugar",
+    "trait": {
+      "type": "harmonyAura",
+      "text": "상하좌우에 있는 다른 종류의 동료 수에 비례하여, 상하좌우 동료의 공격력이 종류당 +6%, 공격 속도가 종류당 +5% 증가합니다."
+    },
+    "skill": {
+      "name": "디저트 앙상블",
+      "cost": 70,
+      "type": "harmony",
+      "text": "10초간 모든 동료의 공격력과 공격 속도가 25% 증가합니다."
+    },
+    "heightGroup": "short",
+    "role": "다양성 지원 · 조화",
+    "shape": "single",
+    "range": 460,
+    "radius": 0
+  },
+  {
+    "id": "aurora",
+    "name": "아우로라",
+    "title": "거울 너머의 미소",
+    "color": "#d6befa",
+    "art": {
+      "atlas": "unit-aurora",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 258,
+        "y": 224,
+        "size": 250
+      }
+    },
+    "damage": 30,
+    "interval": 1.3,
+    "attack": "mirror",
+    "trait": {
+      "type": "refraction",
+      "text": "기본 공격 후 같은 대상에게 공격력 75%의 환영탄을 추가로 발사하여 6초간 성광 1중첩을 부여합니다. 전장의 아우로라 수가 2기 이상 짝수이면 공격력이 50% 증가합니다."
+    },
+    "skill": {
+      "name": "천면경",
+      "cost": 75,
+      "type": "mirror",
+      "text": "체력이 가장 높은 적에게 5초간 거울을 걸고, 종료 시 공격력 12배 피해와 거울 지속 중 대상이 받은 피해의 50%를 추가로 줍니다."
+    },
+    "heightGroup": "medium",
+    "role": "지연 반사 · 환영탄",
+    "shape": "single",
+    "range": 540,
+    "radius": 0
+  },
+  {
+    "id": "behemoth",
+    "name": "베히모스",
+    "title": "대지를 쪼갠 주먹",
+    "color": "#b9dd6a",
+    "art": {
+      "atlas": "unit-behemoth",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 257,
+        "y": 222,
+        "size": 250
+      }
+    },
+    "damage": 44,
+    "interval": 2,
+    "attack": "stone",
+    "trait": {
+      "type": "auraDouble",
+      "text": "자기 칸 주변(반경 210)의 적을 공격합니다. 상하좌우 동료에게 받는 오라 효과가 2배로 적용됩니다."
+    },
+    "skill": {
+      "name": "대지분쇄",
+      "cost": 70,
+      "type": "crush",
+      "text": "무작위 적과 그 주변에 0.5초 간격으로 3회에 걸쳐 각 공격력 6배 피해를 줍니다."
+    },
+    "heightGroup": "tall",
+    "role": "오라 증폭 · 대지 분쇄",
+    "shape": "pulse",
+    "range": 210,
+    "radius": 210
+  },
+  {
+    "id": "underdog",
+    "name": "언더독",
+    "title": "마력 없는 주먹",
+    "color": "#9fb2e0",
+    "art": {
+      "atlas": "unit-underdog",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 259,
+        "y": 226,
+        "size": 250
+      }
+    },
+    "damage": 25,
+    "interval": 0.9,
+    "attack": "stone",
+    "trait": {
+      "type": "underdog",
+      "text": "커먼(C) 등급 동료로만 편성하면 공격력이 100% 증가합니다."
+    },
+    "skill": {
+      "name": "빅쇼",
+      "cost": 80,
+      "type": "bigshow",
+      "text": "적 전체에게 공격력 10배 피해를 주고, 모든 동료를 2초간 기절시킵니다."
+    },
+    "heightGroup": "tall",
+    "role": "노멀 편성 · 단일",
+    "shape": "single",
+    "range": 560,
+    "radius": 0
+  },
+  {
+    "id": "toffee_apple",
+    "name": "토피애플",
+    "title": "달콤한 함정",
+    "color": "#e5604a",
+    "art": {
+      "atlas": "unit-toffee_apple",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 251,
+        "y": 217,
+        "size": 250
+      }
+    },
+    "damage": 36,
+    "interval": 1.4,
+    "attack": "sugar",
+    "trait": {
+      "type": "toffee",
+      "text": "기본 공격이 일직선으로 관통합니다. '애플봄'이 폭발할 때마다 이번 웨이브 동안 토피애플의 공격력이 30%씩 증가합니다."
+    },
+    "skill": {
+      "name": "애플봄",
+      "cost": 95,
+      "type": "applebomb",
+      "text": "경로 위 무작위 위치에 사과 폭탄을 설치하고(최대 5개), 시전한 토피애플이 3초간 기절합니다. 적이 접근하면 폭탄이 폭발하여 반경 200 범위에 공격력 18배 피해를 줍니다."
+    },
+    "heightGroup": "medium",
+    "role": "저축 폭탄 · 관통",
+    "shape": "beam",
+    "range": 520,
+    "radius": 24
+  },
+  {
+    "id": "joker",
+    "name": "조커",
+    "title": "색이 바뀌는 광대",
+    "color": "#f06aa8",
+    "art": {
+      "atlas": "unit-joker",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 237,
+        "y": 215,
+        "size": 250
+      }
+    },
+    "damage": 20,
+    "interval": 1,
+    "attack": "cards",
+    "trait": {
+      "type": "joker",
+      "text": "기본 공격 시 현재 색에 따른 디버프를 부여합니다(빨강: 화상 · 파랑: 2.4초간 20% 감속 · 초록: 중독 1중첩 · 하양: 6초간 성광 1중첩 · 검정: 4초간 노출(받는 피해 +6%))."
+    },
+    "skill": {
+      "name": "레인보우 룰렛",
+      "cost": 50,
+      "type": "roulette",
+      "text": "적 전체에게 공격력 3배 피해를 주고 현재와 다른 무작위 색으로 변경합니다. 5가지 색을 모두 거치면 '카오스 룰렛'(별빛 100)으로 강화되어 적 전체에게 공격력 6배 피해를 주고, 이후 기본 공격 시 5가지 디버프를 모두 부여합니다."
+    },
+    "heightGroup": "medium",
+    "role": "상태 부여 · 범위",
+    "shape": "splash",
+    "range": 430,
+    "radius": 56
+  },
+  {
+    "id": "sunflower",
+    "name": "해바라기",
+    "title": "느긋한 광합성",
+    "color": "#f2c230",
+    "art": {
+      "atlas": "unit-sunflower",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 255,
+        "y": 230,
+        "size": 250
+      }
+    },
+    "damage": 36,
+    "interval": 1,
+    "attack": "sun",
+    "trait": {
+      "type": "sunlight",
+      "text": "웨이브 종료 시 해바라기가 공유하는 햇빛을 1중첩 획득합니다(최대 3중첩). 햇빛이 1·2·3중첩일 때 기본 공격이 반경 30·60·90 범위의 적에게 함께 피해를 줍니다."
+    },
+    "skill": {
+      "name": "솔라플레어",
+      "cost": 90,
+      "type": "solarflare",
+      "text": "보유한 햇빛을 모두 소모해 적 전체에게 공격력 2배 피해를 주며, 소모한 햇빛 1중첩당 피해가 +4배씩 증가합니다(3중첩 소모 시 14배)."
+    },
+    "heightGroup": "medium",
+    "role": "햇빛 저축 · 단일",
+    "shape": "single",
+    "range": 500,
+    "radius": 0
+  },
+  {
+    "id": "antropy",
+    "name": "엔트로피",
+    "title": "디버프를 삼키는 빛",
+    "color": "#c9b4f0",
+    "art": {
+      "atlas": "unit-antropy",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 246,
+        "y": 219,
+        "size": 250
+      }
+    },
+    "damage": 24,
+    "interval": 1.4,
+    "attack": "halo",
+    "trait": {
+      "type": "antropy",
+      "text": "자신은 적과 동료가 거는 기절과 저주에 면역입니다(소멸 제외)."
+    },
+    "skill": {
+      "name": "노바레퀴엠",
+      "cost": 50,
+      "type": "requiem",
+      "text": "적 전체의 모든 디버프를 해제하고 공격력 9배 피해를 줍니다."
+    },
+    "heightGroup": "short",
+    "role": "디버프 무효 · 범위",
+    "shape": "splash",
+    "range": 480,
+    "radius": 70
+  },
+  {
+    "id": "cure_master",
+    "name": "큐어마스터",
+    "title": "굿나잇 큐어",
+    "color": "#ff8fc1",
+    "art": {
+      "atlas": "unit-cure_master",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 255,
+        "y": 213,
+        "size": 250
+      }
+    },
+    "damage": 21,
+    "interval": 1.3,
+    "attack": "syringe",
+    "trait": {
+      "type": "cure",
+      "text": "자신과 상하좌우 동료에게 무적(기절·저주·소멸 면역) 효과를 부여합니다."
+    },
+    "skill": {
+      "name": "레몬 배리어",
+      "cost": 50,
+      "type": "lemonade",
+      "text": "모든 동료의 기절과 저주를 해제하고, 4초간 무적(기절·저주·소멸 면역) 상태로 만듭니다."
+    },
+    "heightGroup": "medium",
+    "role": "보호 · 장판",
+    "shape": "zone",
+    "range": 460,
+    "radius": 60
+  },
+  {
+    "id": "ash",
+    "name": "애쉬",
+    "title": "재가 된 계약",
+    "color": "#ff7048",
+    "art": {
+      "atlas": "unit-ash",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 261,
+        "y": 198,
+        "size": 250
+      }
+    },
+    "damage": 28,
+    "interval": 1.4,
+    "attack": "fire",
+    "trait": {
+      "type": "burn",
+      "text": "기본 공격 시 화상을 부여합니다."
+    },
+    "skill": {
+      "name": "아마겟돈",
+      "cost": 70,
+      "type": "armageddon",
+      "text": "가장 성급이 낮은 다른 동료 1명을 소멸시키고(무적 상태면 소멸하지 않음), 적이 가장 밀집한 반경 180 범위에 공격력 22배 피해를 줍니다."
+    },
+    "heightGroup": "medium",
+    "role": "화상 · 범위",
+    "shape": "splash",
+    "range": 470,
+    "radius": 64
+  },
+  {
+    "id": "venom",
+    "name": "베놈",
+    "title": "침묵하는 재앙",
+    "color": "#6bc45a",
+    "art": {
+      "atlas": "unit-venom",
+      "row": 0,
+      "columns": 2,
+      "foot": 0.9375,
+      "scale": 1,
+      "directional": true,
+      "portrait": {
+        "x": 251,
+        "y": 228,
+        "size": 250
+      }
+    },
+    "damage": 34,
+    "interval": 1.2,
+    "attack": "poison",
+    "trait": {
+      "type": "venom",
+      "text": "기본 공격 시 중독 1중첩과 화상을 함께 부여합니다."
+    },
+    "skill": {
+      "name": "플래이그",
+      "cost": 80,
+      "type": "venomplague",
+      "text": "적 전체에게 공격력 3배 피해를 주고 12초간 중독 3중첩을 부여하며, 10초간 적이 받는 화상·중독 피해가 2배가 됩니다."
+    },
+    "heightGroup": "medium",
+    "role": "지속 피해 · 단일",
+    "shape": "single",
+    "range": 520,
+    "radius": 0
+  }
+];
+
+export const ARTIFACTS = [
+  {
+    "id": "hourglass",
+    "name": "별모래 시계",
+    "text": "합성할 때마다 별빛을 10 더 얻습니다. 최대치를 넘친 별빛은 60까지 모아 두었다가 다음 필살기를 쓰면 돌려받습니다.",
+    "scale": ["10"],
+    "icon": 0,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "ember",
+    "name": "불씨의 심장",
+    "text": "화상 피해가 70% 늘어납니다. 화상 입은 적이 쓰러지면 반경 90 안의 적에게 화상이 옮겨 붙습니다.",
+    "scale": ["70%"],
+    "icon": 1,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "frost",
+    "name": "녹지 않는 꽃",
+    "text": "감속 중인 적에게 주는 피해가 22% 늘어납니다.",
+    "scale": ["22%"],
+    "icon": 2,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "banner",
+    "name": "홀로 선 깃발",
+    "text": "상하좌우에 다른 동료가 없는 동료의 공격력이 21% 오릅니다.",
+    "scale": ["21%"],
+    "icon": 3,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "chorus",
+    "name": "쌍둥이 음표",
+    "text": "같은 동료가 전장에 3명 이상이면 그 동료들의 공격 속도가 35% 오릅니다.",
+    "scale": ["35%"],
+    "icon": 4,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "lantern",
+    "name": "꺼지지 않는 등불",
+    "text": "필살기를 쓰면 쓴 별빛의 20%를 돌려받습니다.",
+    "scale": ["20%"],
+    "icon": 5,
+    "atlas": "relics-v2",
+    "rarity": "SR",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "lens",
+    "name": "예리한 달조각",
+    "text": "보스에게 주는 피해가 30% 늘어납니다.",
+    "scale": ["30%"],
+    "icon": 6,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "seed",
+    "name": "숨 쉬는 씨앗",
+    "text": "중독 피해가 50% 늘어납니다.",
+    "scale": ["50%"],
+    "icon": 7,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "feather",
+    "name": "첫새벽의 깃털",
+    "text": "웨이브를 마칠 때마다 골드를 받습니다. 첫 웨이브 9G부터 웨이브마다 3G씩 늘어나 최대 60G입니다.",
+    "scale": [{"t":"9G", "int":true}, {"t":"3G", "int":true}, {"t":"60G", "int":true}],
+    "icon": 8,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "crown",
+    "name": "작은 왕관",
+    "text": "3성 이상 동료의 공격력이 16% 오릅니다.",
+    "scale": ["16%"],
+    "icon": 9,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "sprout",
+    "name": "풋내기 훈장",
+    "text": "1·2성 동료의 공격력이 20% 오르고, 동료 소환 비용이 2G 줄어듭니다.",
+    "scale": ["20%"],
+    "icon": 10,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "amulet",
+    "name": "수호자의 부적",
+    "text": "코어 가까이(경로 마지막 3분의 1) 온 적에게 주는 피해가 35% 늘어납니다. 코어가 피해를 입을 때마다 별빛을 5 얻습니다.",
+    "scale": ["35%", "5"],
+    "icon": 11,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  },
+  {
+    "id": "meteor",
+    "name": "떨어진 별",
+    "text": "동료의 12번째 공격마다 명중 지점에 운석이 떨어져, 반경 100 안의 적에게 그 공격 피해의 110%를 줍니다.",
+    "scale": ["110%"],
+    "icon": 12,
+    "atlas": "relics-v2",
+    "rarity": "R",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "prism",
+    "name": "천 갈래 프리즘",
+    "text": "번개의현자·밤토끼·폭풍의현자의 공격이 다른 적에게 튈 때, 튄 공격의 피해가 100% 늘어납니다.",
+    "scale": ["100%"],
+    "icon": 13,
+    "atlas": "relics-v2",
+    "rarity": "R",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "tide",
+    "name": "파도의 소라",
+    "text": "별빛을 100 이상 지니고 있으면 모든 동료의 공격력이 30% 오릅니다.",
+    "scale": ["30%"],
+    "icon": 14,
+    "atlas": "relics-v2",
+    "rarity": "R",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "roots",
+    "name": "영원의 뿌리",
+    "text": "장판의 지속 시간이 20%, 범위가 10% 늘어납니다.",
+    "scale": ["20%", "10%"],
+    "icon": 15,
+    "atlas": "relics-v2",
+    "rarity": "R",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "guild",
+    "name": "동행의 악수",
+    "text": "지원 오라를 받는 동료의 공격력이 25% 오릅니다.",
+    "scale": ["25%"],
+    "icon": 16,
+    "atlas": "relics-v2",
+    "rarity": "R",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "phoenix",
+    "name": "돌아오는 새벽",
+    "text": "원정마다 한 번, 코어에 닿은 보스를 경로 절반 지점으로 되돌리고, 그 보스가 받는 피해를 20% 늘립니다.",
+    "scale": ["20%"],
+    "icon": 17,
+    "atlas": "relics-v2",
+    "rarity": "R",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "twin",
+    "name": "쌍성의 거울",
+    "text": "필살기 피해가 적중하고 1.5초 뒤 120%로 한 번 더 들어갑니다. 버프와 소환은 반복되지 않습니다.",
+    "scale": ["120%"],
+    "icon": 18,
+    "atlas": "relics-v2",
+    "rarity": "UR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "constellation",
+    "name": "삼중 성좌",
+    "text": "상하좌우에 서로 다른 동료가 3종 있으면 공격력이 32%, 4종이면 50% 오릅니다.",
+    "scale": ["32%", "50%"],
+    "icon": 19,
+    "atlas": "relics-v2",
+    "rarity": "SR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "alchemy",
+    "name": "별빛 연금술",
+    "text": "합성으로 생긴 동료는 그 웨이브부터 2웨이브 동안 공격력이 60% 오릅니다.",
+    "scale": ["60%"],
+    "icon": 20,
+    "atlas": "relics-v2",
+    "rarity": "UR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "orbit",
+    "name": "별바다의 궤도",
+    "text": "3성 이상 동료의 공격이 명중 지점에 2초 동안 별장판을 남깁니다. 별장판은 0.5초마다 그 공격 피해의 5%를 줍니다.",
+    "scale": ["5%"],
+    "icon": 21,
+    "atlas": "relics-v2",
+    "rarity": "SR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "tempo_bell",
+    "name": "이어지는 종",
+    "text": "웨이브를 넘길 때마다 모든 동료의 공격 속도가 4% 오릅니다(최대 36%).",
+    "scale": ["4%"],
+    "icon": 22,
+    "atlas": "relics-v2",
+    "rarity": "SR",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "chalice",
+    "name": "독화의 성배",
+    "text": "화상과 중독 3중첩을 함께 가진 적이 받는 피해가 70% 늘어납니다.",
+    "scale": ["70%"],
+    "icon": 23,
+    "atlas": "relics-v2",
+    "rarity": "UR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "royal_seal",
+    "name": "결전의 인장",
+    "text": "보스가 나타날 때마다 별빛을 30 얻고, 보스에게 주는 피해가 40% 늘어납니다.",
+    "scale": ["30", "40%"],
+    "icon": 24,
+    "atlas": "relics-v2",
+    "rarity": "UR",
+    "color": "#86c8ee"
+  },
+  {
+    "id": "gift_ribbon",
+    "name": "기적의 리본",
+    "text": "동료를 소환하면 25% 확률로 리본을 단 2성으로 나옵니다.",
+    "scale": ["25%"],
+    "icon": 25,
+    "atlas": "relics-v2",
+    "rarity": "UR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "broken_clock",
+    "name": "시간의 보석",
+    "text": "버프 필살기와 트라우마 변신의 지속 시간이 100% 늘어납니다.",
+    "scale": ["100%"],
+    "icon": 26,
+    "atlas": "relics-v2",
+    "rarity": "UR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "spotlight",
+    "name": "스포트라이트",
+    "text": "전역 필살기의 공격력·공격 속도·추가 공격 버프가 시전 시 공격력이 가장 높은 동료 1기에게 100% 늘어 적용되고, 나머지에게는 50%만 적용됩니다.",
+    "scale": ["100%"],
+    "icon": 27,
+    "atlas": "relics-v2",
+    "rarity": "SR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "royal_crown",
+    "name": "로열 크라운",
+    "text": "코어가 받는 피해가 3배가 되고, 웨이브를 마칠 때마다 골드 30을 받습니다.",
+    "scale": [{"t":"30", "int":true}],
+    "icon": 28,
+    "atlas": "relics-v2",
+    "rarity": "SR",
+    "color": "#c9a0f5"
+  },
+  {
+    "id": "dream_crystal",
+    "name": "꿈의 조각",
+    "text": "원정을 시작할 때 별빛을 10 더 얻고, 루미의 공격력이 100% 오릅니다.",
+    "scale": [{"t":"10", "int":true}, "100%"],
+    "icon": 29,
+    "atlas": "relics-v2",
+    "rarity": "C",
+    "color": "#bbd5cc"
+  }
+];
+
+export const BLESSINGS = [
+  {
+    "id": "arrival",
+    "name": "빛나는 초대장",
+    "category": "즉시",
+    "text": "편성 동료 한 명이 2성으로 합류합니다. 빈칸이 없으면 자리가 날 때 합류합니다.",
+    "icon": 0
+  },
+  {
+    "id": "surge",
+    "name": "내일의 새벽검",
+    "category": "다음 웨이브",
+    "text": "다음 웨이브 동안 모든 동료의 공격력이 25% 오릅니다.",
+    "icon": 1
+  },
+  {
+    "id": "training",
+    "name": "동행의 지혜",
+    "category": "성장",
+    "text": "이번 원정의 훈련 비용이 10%p 줄어듭니다(최대 50%).",
+    "icon": 2
+  },
+  {
+    "id": "oath",
+    "name": "별들의 약속",
+    "category": "영구",
+    "text": "이번 원정 동안 모든 동료의 공격력이 6%p 오릅니다.",
+    "icon": 3
+  },
+  {
+    "id": "purse",
+    "name": "여행자의 보급",
+    "category": "즉시",
+    "text": "골드 35를 즉시 얻습니다.",
+    "icon": 4
+  },
+  {
+    "id": "mend",
+    "name": "다시 피는 꽃",
+    "category": "회복",
+    "text": "코어 생명력 3을 회복하고 별빛을 20 채웁니다.",
+    "icon": 5
+  }
+];
+
+export const BOSSES = {
+  "artificial_demon": {
+    "name": "인조마신",
+    "color": "#8ee8ee",
+    "pattern": "seal",
+    "warning": "기절 · 빛나는 한 행 2.4초",
+    "exposeScale": 2,
+    "aura": 180,
+    "auraImmuneControl": "stun",
+    "trait": "행 기절 · 보스 주변 기절 무효 · 노출 2배",
+    "frame": 0
+  },
+  "love_iris": {
+    "name": "아이리스",
+    "color": "#f7b6d4",
+    "pattern": "starlust",
+    "warning": "사랑의 시험 · 별빛이 가득 차 있으면 별빛 −60",
+    "trait": "가득 찬 별빛 강탈",
+    "frame": 1
+  },
+  "curse_iris": {
+    "name": "저주받은 아이리스",
+    "color": "#bc8be0",
+    "pattern": "curse",
+    "warning": "저주 · 동료 한 명이 해제될 때까지 행동하지 못합니다",
+    "trait": "예고 없는 저주 2회 · 합성·회수·자스민으로 해제",
+    "frame": 2
+  },
+  "flora": {
+    "name": "플로라",
+    "color": "#c9dd8d",
+    "pattern": "stun1",
+    "warning": "꽃가루 폭풍 · 빛나는 1칸 2초 기절",
+    "immune": "poison",
+    "dotScale": {"burn":2},
+    "aura": 180,
+    "trait": "보스 주변 중독 무효 · 화상 피해 2배",
+    "frame": 3
+  },
+  "poseidon": {
+    "name": "포세이돈",
+    "color": "#77c9e3",
+    "pattern": "stun1",
+    "warning": "해일의 일격 · 빛나는 1칸 2초 기절",
+    "immune": "burn",
+    "dotScale": {"poison":2},
+    "aura": 180,
+    "trait": "보스 주변 화상 무효 · 중독 피해 2배",
+    "frame": 4
+  },
+  "beelzebub": {
+    "name": "벨제뷔트",
+    "color": "#dfa590",
+    "pattern": ["warp","seal"],
+    "warning": "공간 붕괴 · 감속·기절·빙결이 아닌 적이 앞으로 순간이동",
+    "warnings": {"warp":"공간 붕괴 · 감속·기절·빙결이 아닌 적이 앞으로 순간이동","seal":"붕괴의 문장 · 빛나는 한 행 2.4초 기절"},
+    "trait": "제어되지 않은 적을 앞당김 · 행 기절",
+    "frame": 5
+  },
+  "thor": {
+    "name": "토르",
+    "color": "#a9dcff",
+    "pattern": "storm",
+    "warning": "신벌의 낙뢰 · 빛나는 3칸에서 이동하세요",
+    "judgement": "천둥 기둥 · 빛나는 세로 3줄이 3초 기절합니다. 토르를 기절시키면 취소됩니다",
+    "trait": "낙뢰 3칸 · 길 중간에서 세로 3줄 기절 1회 · 기절로 취소",
+    "atlas": "bosses-expansion",
+    "frame": 0
+  },
+  "ares": {
+    "name": "아레스",
+    "color": "#ffa88b",
+    "pattern": "shuffle",
+    "warning": "투신의 난무 · 2.6초 뒤 모든 동료의 자리가 뒤섞입니다",
+    "trait": "전체 재배치",
+    "atlas": "bosses-expansion",
+    "frame": 1
+  },
+  "astea": {
+    "name": "아스테아",
+    "color": "#e8d3ff",
+    "pattern": "judgement",
+    "warning": "천벌 · 빛나는 칸의 동료가 사라집니다. 옮기세요",
+    "basicScale": 0.5,
+    "deathWard": 180,
+    "trait": "일반 공격·장판 피해 절반 · 보스 주변 즉사 면역 · 예고된 칸에 천벌",
+    "atlas": "bosses-expansion",
+    "frame": 2
+  }
+};
+
+export const TRANSFORM_ART = {
+  ...Object.fromEntries(Object.entries(MIRACLE_FORMS).map(([id,form])=>[id,form.art])),
+  "trauma": {
+    "atlas": "unit-trauma",
+    "row": 0,
+    "columns": 2,
+    "foot": 0.9375,
+    "scale": 1,
+    "directional": true,
+    "portrait": {
+      "x": 252,
+      "y": 204,
+      "size": 250
+    }
+  }
+};
+
+export const ASSET_PATHS = {
+  ...NEW_ASSET_PATHS,
+  "effects-sol-sweet": "./assets/merge/effects-sol-sweet.webp",
+  "effects-sol-twilight": "./assets/merge/effects-sol-twilight.webp",
+  "effects-companion-sweet": "./assets/merge/effects-companion-sweet.webp",
+  "effects-companion-twilight": "./assets/merge/effects-companion-twilight.webp",
+  "ultimates-extra-a": "./assets/merge/ultimates-extra-a.webp",
+  "ultimates-extra-b": "./assets/merge/ultimates-extra-b.webp",
+  "unit-zeke": "./assets/cast-v2/zeke-shoulder.webp",
+  "unit-rumi": "./assets/cast-v2/rumi.webp",
+  "unit-luna": "./assets/cast-selected-20261108/luna.webp",
+  "unit-cinderella": "./assets/cast-v2/cinderella.webp",
+  "unit-snow_rabbit": "./assets/cast-v2/snow_rabbit.webp",
+  "unit-avalanche_maid": "./assets/cast-v2/avalanche_maid.webp",
+  "unit-night_rabbit": "./assets/cast-v2/night_rabbit.webp",
+  "unit-guardian": "./assets/cast-v2/guardian.webp",
+  "unit-storm_sage": "./assets/cast-v2/storm_sage.webp",
+  "unit-lightning_sage": "./assets/cast-turnaround-20261120/lightning_sage.webp",
+  "unit-red_dragon": "./assets/cast-selected-20261108/red_dragon.webp",
+  "unit-flame_sage": "./assets/cast-v2/flame_sage.webp",
+  "unit-mushroom_king": "./assets/cast-v2/mushroom_king.webp",
+  "unit-great_detective": "./assets/cast-v2/great_detective.webp",
+  "unit-siren": "./assets/cast-selected-20261108/siren.webp",
+  "unit-phantom": "./assets/cast-turnaround-20261120/phantom.webp",
+  "unit-queen": "./assets/cast-v2/queen.webp",
+  "unit-galaxy_whale": "./assets/cast-v2/galaxy_whale.webp",
+  "unit-silver_rabbit": "./assets/cast-v2/silver_rabbit.webp",
+  "unit-ancient_dragon": "./assets/cast-v2/ancient_dragon.webp",
+  "unit-time_ruler": "./assets/cast-v2/time_ruler.webp",
+  "unit-doom": "./assets/cast-selected-20261108/doom.webp",
+  "unit-santa": "./assets/cast-v2/santa.webp",
+  "unit-jasmine": "./assets/cast-v2/jasmine.webp",
+  "unit-star_boy": "./assets/cast-v2/star_boy.webp",
+  "unit-time_magician": "./assets/cast-turnaround-20261120/time_magician.webp",
+  "unit-cherry_prince": "./assets/cast-selected-20261108/cherry_prince.webp",
+  "unit-frost_witch": "./assets/cast-v2/frost_witch.webp",
+  "unit-harmonious": "./assets/cast-v2/harmonious.webp",
+  "unit-aurora": "./assets/cast-v2/aurora.webp",
+  "unit-behemoth": "./assets/cast-v2/behemoth.webp",
+  "unit-underdog": "./assets/cast-v2/underdog.webp",
+  "unit-toffee_apple": "./assets/cast-v2/toffee-apple-lean.webp",
+  "unit-joker": "./assets/cast-v2/joker.webp",
+  "unit-sunflower": "./assets/cast-v2/sunflower.webp",
+  "unit-antropy": "./assets/cast-v2/antropy.webp",
+  "unit-cure_master": "./assets/cast-v2/cure_master.webp",
+  "unit-ash": "./assets/cast-v2/ash.webp",
+  "unit-venom": "./assets/cast-v2/venom.webp",
+  "garden": "./assets/merge/garden.webp",
+  "summon-altar": "./assets/merge/summon-altar.webp",
+  "event-oath": "./assets/merge/event-oath.webp",
+  "event-twin": "./assets/merge/event-twin.webp",
+  "greenhouse": "./assets/merge/greenhouse.webp",
+  "greenhouse-beds": "./assets/merge/greenhouse-beds.webp",
+  "greenhouse-dawn": "./assets/merge/greenhouse-dawn.webp",
+  "greenhouse-beds-dawn": "./assets/merge/greenhouse-beds-dawn.webp",
+  "gifts": "./assets/merge/gifts.webp",
+  "fx-emblems": "./assets/merge/fx-emblems.webp",
+  "bosses": "./assets/moonlit/realm-bosses.webp",
+  "creatures": "./assets/moonlit/creatures.webp",
+  "relics": "./assets/merge/relics.webp",
+  "blessings": "./assets/merge/blessings.webp",
+  "effects": "./assets/merge/effects.webp",
+  "unit-trauma": "./assets/cast-v2/trauma.webp",
+  "effects-expansion": "./assets/merge/effects-expansion.webp",
+  "finishers": "./assets/merge/finishers.webp",
+  "relics-expansion": "./assets/merge/relics-expansion.webp",
+  "bosses-expansion": "./assets/merge/bosses-expansion.webp",
+  "realms-expansion": "./assets/merge/realms-expansion.webp",
+  "effects-trio": "./assets/merge/effects-trio.webp",
+  "effects-behemoth": "./assets/merge/effects-behemoth.webp",
+  "effects-applebomb": "./assets/merge/effects-applebomb.webp",
+  "effects-bigshow": "./assets/merge/effects-bigshow.webp",
+  "ultimates": "./assets/merge/ultimates.webp",
+  "ancient-cross": "./assets/merge/ancient-cross.webp",
+  "zeke-cone": "./assets/merge/zeke-cone.webp",
+  "zeke-slash": "./assets/merge/zeke-slash.webp",
+  "zeke-spin": "./assets/merge/zeke-spin.webp",
+  "effects-demon-miracle": "./assets/merge/effects-demon-miracle.webp",
+  "effects-deathhand": "./assets/merge/effects-deathhand.webp",
+  "effects-eclose": "./assets/merge/effects-eclose.webp",
+  "effects-joker-sun": "./assets/merge/effects-joker-sun.webp",
+  "effects-chaos-sun": "./assets/merge/effects-chaos-sun.webp",
+  "zeke-ragnarok": "./assets/merge/zeke-ragnarok.webp",
+  "ash-armageddon": "./assets/merge/ash-armageddon.webp",
+  "luna-blade": "./assets/merge/luna-blade.webp",
+  "ur-kit": "./assets/merge/ur-kit.webp",
+  "ur-sweets": "./assets/merge/ur-sweets.webp",
+  "ur-kit2": "./assets/merge/ur-kit2.webp",
+  "ur-kit3": "./assets/merge/ur-kit3.webp",
+  "orbit-zone": "./assets/merge/orbit-zone.webp",
+  "orbit-sea": "./assets/merge/orbit-sea.webp",
+  "relics-new": "./assets/merge/relics-new.webp",
+  "relics-patch": "./assets/merge/relics-patch.webp",
+  "relics-v2": "./assets/merge/relics-v2.webp"
+};
+
+export const STAGE_THEMES = [
+  {
+    "name": "달빛 정원",
+    "color": "#7dbac1",
+    "world": 0
+  },
+  {
+    "name": "잠든 숲의 노래",
+    "color": "#a9bd80",
+    "world": 3
+  },
+  {
+    "name": "푸른 심연",
+    "color": "#82aec7",
+    "world": 4
+  },
+  {
+    "name": "황혼의 왕좌",
+    "color": "#c799ba",
+    "world": 5
+  },
+  {
+    "name": "뇌명의 첨탑",
+    "color": "#96c9f3",
+    "world": 6,
+    "background": 0
+  },
+  {
+    "name": "전쟁신의 성채",
+    "color": "#edab94",
+    "world": 7,
+    "background": 1
+  },
+  {
+    "name": "창세의 성원",
+    "color": "#dbc5fc",
+    "world": 8,
+    "background": 2
+  }
+];
+
+export const HERO=Object.fromEntries(HEROES.map(hero=>[hero.id,hero]));
+export const BLESSING=Object.fromEntries(BLESSINGS.map(blessing=>[blessing.id,blessing]));

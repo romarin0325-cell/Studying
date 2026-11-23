@@ -1,0 +1,182 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import sharp from 'sharp';
+import {HEROES,ARTIFACTS,ASSET_PATHS,TRANSFORM_ART} from '../src/content.js';
+import {assetFile} from '../scripts/local-inputs.mjs';
+import {loadImagePack} from '../scripts/image-pack.mjs';
+import {BUILD_ONLY_ATLASES,RUNTIME_ASSET_PATHS} from '../src/asset-policy.js';
+import {Art} from '../src/combat/render.js';
+import {portraitFrame} from '../src/portrait-layout.js';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+
+test('installed cast v2 matches the 40 selected masters and keeps anatomy separate from optical crops',async()=>{
+  const original=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/sol-cast-v2/manifest.json'),'utf8'));
+  const additions=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/demon-miracle/packing.json'),'utf8'));
+  assert.equal(original.assets.length,40);
+  assert.equal(additions.assets.length,5);
+  const gold=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/gold-dragon-20261029/installation.json'),'utf8'));
+  const selection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/selected-cast-20261108/selection.json'),'utf8'));
+  assert.deepEqual(selection.assets.map(e=>e.id),['luna','siren','cherry_prince','doom','red_dragon']);
+  const profileSelection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/time-magician-left-20261109/selection.json'),'utf8'));
+  assert.deepEqual(profileSelection.assets.map(e=>e.id),['time_magician']);
+  const selected=[...selection.assets,...profileSelection.assets];
+  const replacements=new Map(selected.map(e=>[e.id,e]));
+  assert.equal(replacements.size,selected.length,'selected inventory must not contain duplicate heroes');
+  const previous=[...original.assets,...additions.assets,...gold.assets];
+  // A later owner-selected painting replaces the active inventory entry; the
+  // previous master remains recoverable and its recorded bytes stay untouched.
+  for(const entry of previous.filter(e=>replacements.has(e.id)))for(const record of [entry.sourcePng,entry.sourceWebp]){
+    assert.equal(createHash('sha256').update(await fs.readFile(path.join(root,record.file))).digest('hex'),record.sha256);
+  }
+  const manifest={assets:previous.map(e=>replacements.get(e.id)||e)};
+  const turns=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/turnaround-20261120/pixels.json'),'utf8'));
+  assert.deepEqual(turns.map(e=>[e.id,e.editedDirections]),[
+    ['phantom',[2,3]],['lightning_sage',[2,3]],['time_magician',[3]]
+  ]);
+  const newProfiles=new Map(turns.map(e=>[e.id,e]));
+  const art=new Map([...HEROES.map(h=>[h.id,h.art]),...Object.entries(TRANSFORM_ART)]);
+  assert.equal(art.size,46);
+  for(const entry of manifest.assets){
+    const frame=entry.frames.find(f=>f.direction==='down'),installed=art.get(entry.id);assert.ok(installed,entry.id);
+    assert.deepEqual(entry.frames.map(f=>f.direction),['down','up','left','right']);
+    assert.equal(installed.foot,.9375);assert.equal(installed.scale,1);assert.equal(installed.columns,2);assert.equal(installed.directional,true);
+    assert.equal(installed.portrait.x,Math.round(frame.ellipse[0]));assert.equal(installed.portrait.y,Math.round(frame.ellipse[1]));
+    const replacement=newProfiles.get(entry.id);
+    assert.equal(ASSET_PATHS[installed.atlas],replacement?.source||'./'+entry.sourceWebp.file.replace(/^defense\//,''));
+    if(replacement){
+      assert.equal(replacement.before.png,entry.sourcePng.sha256,'regional edit starts from the last installed master');
+      assert.equal(replacement.before.source,entry.sourceWebp.sha256);
+      for(const [file,record] of [[replacement.master.file,replacement.master],[replacement.source,replacement.original],[replacement.output.path,replacement.output]]){
+        const bytes=await fs.readFile(assetFile(file));
+        assert.equal(bytes.length,record.bytes);
+        assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256,file);
+      }
+      for(const d of [0,1,2,3]){
+        const edited=replacement.editedDirections.includes(d);
+        assert.equal(replacement.master.changedPixels[d]>0,edited);
+        assert.equal(replacement.sourceVisibleChanges[d]>0,edited);
+        assert.equal(replacement.deployedVisibleChanges[d]>0,edited);
+      }
+    }
+    for(const record of [entry.sourcePng,entry.sourceWebp]){
+      const bytes=await fs.readFile(path.join(root,record.file));
+      assert.equal(bytes.length,record.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256,record.file);
+    }
+    for(const view of entry.frames){assert.deepEqual(view.sole,[256,480]);assert.equal(view.commonScale,entry.commonScale);assert.equal(view.paintedClipping,0);}
+    assert.ok(entry.measurementUncertaintyPacked>0,'covered head estimates must not imply exact ground truth');
+  }
+});
+test('selected cast retains its authored UI crop and disclosed art limitations',async()=>{
+  const selection=JSON.parse(await fs.readFile(path.join(root,'defense/docs/art/selected-cast-20261108/selection.json'),'utf8'));
+  for(const entry of selection.assets){
+    const hero=HEROES.find(h=>h.id===entry.id),p=portraitFrame(hero);
+    assert.deepEqual([p.x,p.y,p.size],[...entry.portrait.center,entry.portrait.size],entry.id+' approved portrait');
+    assert.deepEqual([hero.art.portrait.x,hero.art.portrait.y],entry.anatomyCenter,'UI offset does not overwrite head measurements');
+    assert.equal(entry.visibleLosslessPixelChanges,0);
+  }
+  const cherry=selection.assets.find(e=>e.id==='cherry_prince');
+  assert.equal(cherry.review.seventeenCheckApproval,false,'owner selection does not rewrite an art caution as pass');
+  assert.equal(cherry.review.checks.find(c=>c.id==='directional-registration').status,'caution');
+  assert.equal(selection.assets.find(e=>e.id==='luna').review.seventeenCheckApproval,false,'earlier NEW2 selection is not a retroactive17-check approval');
+});
+test('summon face crops and prepared portraits share optical framing without moving anatomy',async()=>{
+  const {derivedImageInputs}=await import('../scripts/image-policy.mjs');
+  const crops=new Map(derivedImageInputs().filter(x=>x.id.startsWith('portrait:')).map(x=>[x.id.slice(9),x]));
+  for(const hero of HEROES){
+    const anatomy={...hero.art.portrait},frame=portraitFrame(hero),prepared=crops.get(hero.id);
+    assert.ok(prepared,hero.id);
+    assert.equal(frame.size,hero.id==='gold_dragon'?240:anatomy.size,'only Gold Dragon has the reviewed 4.17% portrait zoom');
+    const verticalLimit=hero.id==='demon_king'?16:8;
+    assert.ok(Math.abs(frame.x-anatomy.x)<=8&&Math.abs(frame.y-anatomy.y)<=verticalLimit,'only reviewed optical translations');
+    assert.deepEqual(hero.art.portrait,anatomy,'anatomical measurement is preserved');
+    assert.deepEqual(prepared.crop,{left:Math.round(frame.x-frame.size/2),top:Math.round(frame.y-frame.size/2),width:frame.size,height:frame.size},hero.id);
+  }
+  assert.equal(portraitFrame(HEROES.find(h=>h.id==='toffee_apple')).x, HEROES.find(h=>h.id==='toffee_apple').art.portrait.x-7);
+  const demon=HEROES.find(h=>h.id==='demon_king');
+  assert.deepEqual(portraitFrame(demon),{...demon.art.portrait,y:demon.art.portrait.y-16},'lower the visible face without resizing it or changing anatomy');
+  assert.deepEqual(crops.get('demon_king').crop,{left:130,top:79,width:250,height:250},'the collection and summon use the reviewed higher crop');
+});
+
+test('all collection, boss and battle textures resolve to local art with valid authored crops',async()=>{
+  assert.equal(Object.keys(ASSET_PATHS).length,99);
+  for(const id of ['event-oath','event-twin']){
+    const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();
+    assert.equal(m.format,'webp',id);assert.equal(m.width,1400,id);assert.equal(m.height,560,id);
+    assert.equal(Object.hasOwn(RUNTIME_ASSET_PATHS,id),false,id+' is loaded lazily');
+  }
+  // Greenhouse (stage art, 4 growth stages x 3 beds) and three large ultimate emblems.
+  for(const [id,w,h] of [['greenhouse',720,1290],['greenhouse-beds',768,576],['greenhouse-dawn',720,1290],['greenhouse-beds-dawn',768,576],['fx-emblems',1536,512],['ur-kit',1024,768],['ur-sweets',1024,768],['ur-kit2',1024,1024],['ur-kit3',1024,1024],['gifts',768,256],['effects-sol-sweet',1024,512],['effects-sol-twilight',1024,512],['effects-companion-sweet',1024,512],['effects-companion-twilight',1024,512],['ultimates-extra-a',1024,512],['ultimates-extra-b',768,512],['effects-demon-miracle',1536,768],['effects-deathhand',1024,1024],['effects-eclose',768,768],['zeke-spin',1152,384],['effects-joker-sun',768,384],['zeke-ragnarok',1536,512],['luna-blade',768,256],['ash-armageddon',1024,512],['effects-chaos-sun',1024,512],['orbit-sea',512,256]]){const m=await sharp(assetFile(ASSET_PATHS[id])).metadata();assert.equal(m.format,'webp',id);assert.equal(m.width,w,id);assert.equal(m.height,h,id);}
+  // The summon altar (UI part 1) is a single portrait stage painting.
+  const altar=await sharp(assetFile(ASSET_PATHS['summon-altar'])).metadata();
+  assert.equal(altar.format,'webp');assert.equal(altar.width,720);assert.equal(altar.height,1290);
+  for(const h of HEROES){
+    const file=assetFile(ASSET_PATHS[h.art.atlas]),meta=await sharp(file).metadata();
+    assert.equal(meta.width,1024);assert.equal(meta.height,1024);assert.equal(meta.hasAlpha,true);
+    const p=h.art.portrait;assert.ok(p.x-p.size/2>=0&&p.y-p.size/2>=0&&p.x+p.size/2<=1024&&p.y+p.size/2<=1024,h.id);
+  }
+  const provenance=JSON.parse(await fs.readFile(path.join(root,'defense/docs/ASSET_PROVENANCE.json'),'utf8'));
+  for(const a of provenance.assets){
+    const bytes=await fs.readFile(path.join(root,a.source));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),a.sha256,a.id);
+  }
+  assert.equal(ARTIFACTS.length,30);assert.equal(new Set(ARTIFACTS.map(a=>a.id)).size,30);
+  // Rows of three in the collection: 12 C, 6 R, 6 SR, 6 UR.
+  assert.deepEqual(['C','R','SR','UR'].map(rarity=>ARTIFACTS.filter(a=>a.rarity===rarity).length),[12,6,6,6]);
+  // 2026-11-18 restyle: every relic icon is one 512 cell of the 6x5 relics-v2 atlas, one relic per cell.
+  const v2=await sharp(assetFile(ASSET_PATHS['relics-v2'])).metadata();
+  assert.equal(v2.width,3072);assert.equal(v2.height,2560);assert.equal(v2.hasAlpha,true);
+  assert.ok(ARTIFACTS.every(a=>a.atlas==='relics-v2'&&Number.isInteger(a.icon)&&a.icon>=0&&a.icon<30));
+  assert.equal(new Set(ARTIFACTS.map(a=>a.icon)).size,30);
+});
+
+test('time magician selection changes only the left view and retains the previous masters',async()=>{
+  const base=path.join(root,'defense/assets');
+  const read=async(file,index,size)=>sharp(path.join(base,file)).extract({left:index%2*size,top:Math.floor(index/2)*size,width:size,height:size}).ensureAlpha().raw().toBuffer();
+  const visibleChanges=(a,b)=>{let n=0;for(let i=0;i<a.length;i+=4){if(!a[i+3]&&!b[i+3])continue;if(a[i]!==b[i]||a[i+1]!==b[i+1]||a[i+2]!==b[i+2]||a[i+3]!==b[i+3])n++;}return n;};
+  for(const index of [0,1,2,3]){
+    const [oldP,newP,oldW,newW,oldOpt,newOpt]=await Promise.all([
+      read('cast-v2/time_magician.png',index,512),read('cast-selected-20261109/time_magician.png',index,512),
+      read('cast-v2/time_magician.webp',index,512),read('cast-selected-20261109/time_magician.webp',index,512),
+      read('optimized/cast-v2/time_magician.webp',index,320),read('optimized/cast-selected-20261109/time_magician.webp',index,320),
+    ]);
+    if(index===2){assert.notDeepEqual(newP,oldP,'the selected left view must change');assert.ok(visibleChanges(oldW,newW)>0);assert.ok(visibleChanges(oldOpt,newOpt)>0);assert.equal(visibleChanges(newP,newW),0,'selected PNG and WebP must show the same left artwork');}
+    else{assert.deepEqual(newP,oldP,'previous PNG view must be preserved');assert.equal(visibleChanges(oldW,newW),0,'previous source WebP view must be preserved');assert.equal(visibleChanges(oldOpt,newOpt),0,'previous optimized view must be preserved');}
+  }
+});
+
+
+test('optimized images preserve the source pack, codec, alpha and sprite geometry',async()=>{
+  const {manifest,read}=await loadImagePack();
+  assert.ok(manifest.totals.outputBytes<manifest.totals.deployableSourceBytes);
+  assert.deepEqual(Object.keys(BUILD_ONLY_ATLASES).sort(),['blessings','effects-sol-sweet','effects-sol-twilight','orbit-zone','relics','relics-expansion','relics-new','relics-patch','relics-v2','zeke-slash']);
+  for(const image of manifest.images){
+    if(image.id.startsWith('atlas:unit-')){
+      const m=await sharp(read(image.source)).metadata();
+      assert.equal(m.width,640,image.id);assert.equal(m.height,640,image.id);assert.equal(m.hasAlpha,true,image.id);
+      assert.notEqual(image.output.path,image.source,'both pre-pass and optimized files must exist');
+    }
+    if(image.profile===null)assert.equal(image.output,null,'build-only atlases must not gain a deployed copy');
+  }
+});
+
+test('battle preload requests exactly the runtime pack, without build-only file fallbacks',async()=>{
+  const requests=[],previousWindow=globalThis.window,previousImage=globalThis.Image;
+  try{
+    globalThis.window={__ASTRA_ASSETS__:Object.fromEntries(Object.keys(RUNTIME_ASSET_PATHS).map(id=>[id,'embedded:'+id]))};
+    globalThis.Image=class{
+      naturalWidth=640;
+      set src(value){requests.push(value);queueMicrotask(()=>this.onload());}
+    };
+    const art=new Art();await art.ready;
+    assert.deepEqual(requests.sort(),Object.keys(RUNTIME_ASSET_PATHS).map(id=>'embedded:'+id).sort());
+    assert.deepEqual(art.failed,[]);
+    for(const id of Object.keys(BUILD_ONLY_ATLASES))assert.equal(art.images[id],undefined);
+  }finally{
+    if(previousWindow===undefined)delete globalThis.window;else globalThis.window=previousWindow;
+    if(previousImage===undefined)delete globalThis.Image;else globalThis.Image=previousImage;
+  }
+});

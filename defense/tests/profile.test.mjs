@@ -4,6 +4,7 @@ import {HEROES,HERO,DEFAULT_DECK,ARTIFACT,TUNING,HIDDEN,MAIN_STAGES,PART_STAGES,
 import {unlockProfile,topUpUnlocked,testGrant} from '../src/test-unlock.js';
 import {lateNoticeIds} from '../src/profile.js';
 import {LATE_COMPANIONS} from '../src/content.js';
+import {EXPANSION_IDS} from '../src/expansion-companions.js';
 import {ProfileStore,SAVE_KEY,createProfile,validateProfile,parseProfile,available,draftEligible,draftPool,away,command} from '../src/profile.js';
 import {monthlyReward,weeklyReward,WEEKLY_ENTRIES} from '../src/monthly.js';
 import {duplicateCost,relicCost,collectionBonus,HOUR,calendar,levelCost,heroMultiplier,combatPower,draftHeroEntry,bedCost,springGauge,seedGold,relicLevel,heroPool,drawCharacter,enhanceMultiplier,specialMultiplier,roseAttack,lateOpen} from '../src/economy.js';
@@ -248,6 +249,18 @@ test('a saved five-hero draft pool still gives two honest tactical choices on th
   call(loaded,'draft',{index:1});assert.equal(new Set(loaded.value.active.deck).size,5);
 });
 
+test('dispatching an offered hero during a saved five-hero draft refills its candidates',()=>{
+  const p=createProfile(NOW);p.cleared=9;p.heroes.queen.owned=true;
+  assert.ok(command(p,'begin',{mode:'weekly'},NOW).ok);
+  p.active.draftPool=[...DEFAULT_DECK.slice(0,4),'queen'];
+  p.active.offers=[{id:'queen',boon:'focus'},{id:DEFAULT_DECK[0],boon:'spark'}];
+  const s=storeFor(p);call(s,'dispatch',{slot:0,id:'queen'});
+  assert.equal(s.value.active.offers.some(o=>o.id==='queen'),false);
+  for(let i=0;i<5;i++)call(s,'draft',{index:0});
+  assert.equal(s.value.active.deck.includes('queen'),false);
+  assert.ok(createBattle(s.value));
+});
+
 test('weekly draft includes unowned companions with part-one unlock, base enhancement, and shared growth',()=>{
   const early=createProfile(NOW);early.cleared=PART_STAGES-1;early.beds.rose=10;early.beds.spring=5;early.beds.seed=4;
   early.relics.hourglass={owned:true,enhance:2,copies:0};early.equipped=['hourglass'];
@@ -304,10 +317,9 @@ test('weekly draft includes unowned companions with part-one unlock, base enhanc
   lateStore.value.active.run=E.serialize(run);
   const reloaded=parseProfile(JSON.stringify(lateStore.value));assert.ok(reloaded&&resumeBattle(reloaded));
 
-  // Validation rejects unowned late companions before part one, dispatched heroes, and non-weekly unowned decks.
+  // Validation rejects unowned late companions, active drafted heroes sent away, and non-weekly unowned decks.
   const badEarly=structuredClone(earlyStore.value);badEarly.active.draftPool.push('gold_dragon');assert.equal(validateProfile(badEarly),false);
-  const badAway=structuredClone(lateStore.value);badAway.active.draftPool.push('queen');assert.equal(validateProfile(badAway),false);
-  const badAwayDeck=structuredClone(lateStore.value);badAwayDeck.active.draft[0]='queen';badAwayDeck.active.deck[0]='queen';assert.equal(validateProfile(badAwayDeck),false);
+  const badAwayDeck=structuredClone(lateStore.value);badAwayDeck.active.draftPool.push('queen');badAwayDeck.active.draft[0]='queen';badAwayDeck.active.deck[0]='queen';assert.equal(validateProfile(badAwayDeck),false);
   const badMain=createProfile(NOW);badMain.active={mode:'main',stage:1,deck:['luna',...DEFAULT_DECK.slice(1)],started:NOW,seed:1,token:'t',boon:0,run:null,relicAttack:0,relicLevels:{}};
   assert.equal(validateProfile(badMain),false,'main mode still rejects unowned heroes');
   assert.equal(lateOpen(PART_STAGES-1),false);assert.equal(lateOpen(PART_STAGES),true);
@@ -593,7 +605,7 @@ test('the part one announcement covers the late companions once: not before its 
   assert.deepEqual(lateNoticeIds(fresh),[],'nothing to announce before part one is cleared');
   fresh.cleared=PART_STAGES-1;assert.deepEqual(lateNoticeIds(fresh),[]);
   fresh.cleared=PART_STAGES;assert.deepEqual(lateNoticeIds(fresh),announced,'every non-hidden late companion, including Behemoth');
-  assert.deepEqual(announced.slice().sort(),['behemoth','underdog','toffee_apple','joker','sunflower','antropy','cure_master','ash','venom','demon_king','miracle_larva','gold_dragon'].sort());
+  assert.equal(announced.length,28);assert.ok(EXPANSION_IDS.every(id=>announced.includes(id)),'the sixteen-card expansion is announced');
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);
   assert.deepEqual(lateNoticeIds(fresh),[]);assert.deepEqual(fresh.noticeLate.slice().sort(),announced.slice().sort());
   assert.equal(command(fresh,'noticeLate',{},NOW).ok,true);assert.equal(fresh.noticeLate.length,announced.length,'marking twice adds nothing');

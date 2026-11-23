@@ -52,3 +52,12 @@ jobs:
             defense/test-results/*.png
             defense/test-results/*.json
           retention-days: 7
+      - name: Preserve public web mobile captures
+        if: always() && hashFiles('defense_public/test-results/public-web/report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: defense-public-web-review
+          path: |
+            defense_public/test-results/public-web/*.png
+            defense_public/test-results/public-web/*.json
+          retention-days: 7

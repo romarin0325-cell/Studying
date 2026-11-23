@@ -47,10 +47,9 @@ for(const a of ARTIFACTS){
   const bytes=pack.readDerived('relic:'+a.id);
   sizes.relics+=bytes.length;media['relic:'+a.id]='data:image/webp;base64,'+bytes.toString('base64');
 }
-const expectedIds=HEROES.map(h=>h.id).sort().join(',');
-for(const map of [MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS,MEMORIAL_MEDIA_MANIFEST]){
-  if(Object.keys(map).sort().join(',')!==expectedIds)throw new Error('Memorial roster mismatch.');
-}
+const heroIds=new Set(HEROES.map(h=>h.id)),memorialIds=Object.keys(MEMORIAL_MEDIA_MANIFEST).sort(),expectedMemorialIds=memorialIds.join(',');
+if(memorialIds.some(id=>!heroIds.has(id)))throw new Error('Memorial references an unknown companion.');
+for(const map of [MEMORIAL_MEDIA_PATHS,MEMORIAL_WEBP_PATHS])if(Object.keys(map).sort().join(',')!==expectedMemorialIds)throw new Error('Memorial media catalog mismatch.');
 async function readMemorial(id,format){
   const entry=MEMORIAL_MEDIA_MANIFEST[id],record=format==='avif'?entry:entry.webp;
   const relative=format==='avif'?MEMORIAL_MEDIA_PATHS[id]:MEMORIAL_WEBP_PATHS[id];
@@ -64,23 +63,23 @@ async function readMemorial(id,format){
   return optimized;
 }
 if(web)await fs.mkdir(path.join(output,'memorial'),{recursive:true});
-for(const h of HEROES){
+for(const id of memorialIds){
   // Each standalone embeds one full-painting codec; encodings are prepared offline.
   const formats=web?['avif','webp']:[compat?'webp':'avif'];
   for(const format of formats){
-    const bytes=await readMemorial(h.id,format);
+    const bytes=await readMemorial(id,format);
     if(web){
-      const name=`${h.id}.${hash(bytes).slice(0,12)}.${format}`;
+      const name=`${id}.${hash(bytes).slice(0,12)}.${format}`;
       await fs.writeFile(path.join(output,'memorial',name),bytes);
-      (format==='avif'?memorial:memorialFallback)[h.id]='./memorial/'+name;
-    }else memorial[h.id]=`data:image/${format};base64,`+bytes.toString('base64');
+      (format==='avif'?memorial:memorialFallback)[id]='./memorial/'+name;
+    }else memorial[id]=`data:image/${format};base64,`+bytes.toString('base64');
   }
 }
 // The AVIF pack stays under 2.5 MiB. The WebP fallback (browsers without AVIF, compat/web builds) holds the same 35+ paintings at up to 96 KiB each, so it gets 4 MiB.
 if(sizes.avif>=2.5*1024*1024||sizes.webp>=4*1024*1024||(!web&&byteLength(memorial)>=(compat?5.5:3)*1024*1024))throw new Error('Memorial aggregate budget exceeded.');
 // Album thumbnails: 240x360 WebP from each memorial painting, so the album never decodes thirty full paintings.
 const memorialThumbs={};let thumbBytes=0;
-for(const h of HEROES){const bytes=pack.readDerived('memorialThumb:'+h.id);thumbBytes+=bytes.length;memorialThumbs[h.id]='data:image/webp;base64,'+bytes.toString('base64');}
+for(const id of memorialIds){const bytes=pack.readDerived('memorialThumb:'+id);thumbBytes+=bytes.length;memorialThumbs[id]='data:image/webp;base64,'+bytes.toString('base64');}
 // Star library illustrations: small WebP files embedded in every build (shown only after a constellation is finished).
 const library={};let libraryBytes=0;
 for(const [id,relative] of Object.entries(LIBRARY_ART)){

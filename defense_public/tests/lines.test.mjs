@@ -1,0 +1,24 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {HEROES} from '../src/content.js';
+import {PARTNER_LINES,talkLines,greetLine,CLOSE_BOND} from '../src/lines.js';
+import {REQUEST} from '../src/preview/requests.js';
+
+test('Siren asks her companion to listen from the front seat',()=>{
+  assert.equal(REQUEST['siren-1'].arrive.at(-1),'대신 당신은 맨 앞자리에서 들어 주셔야 해요!');
+  assert.ok(REQUEST['siren-1'].arrive.every(line=>!line.includes('밀랍')));
+});
+
+test('every companion has its own lobby lines: three taps, a close line from six hearts, two greetings',()=>{
+  assert.equal(Object.keys(PARTNER_LINES).length,HEROES.length);
+  const all=new Set();
+  for(const h of HEROES){
+    const l=PARTNER_LINES[h.id];assert.ok(l,h.id);
+    assert.equal(l.talk.length,3,h.id);assert.equal(l.greet.length,2,h.id);assert.ok(l.close,h.id);
+    // User-authored longer lines wrap in the lobby; preserve their wording.
+    for(const line of [...l.talk,l.close,...l.greet]){assert.ok(line.length>0&&line.length<=120,`${h.id}: ${line}`);assert.ok(!all.has(line),`duplicate: ${line}`);all.add(line);}
+    assert.equal(talkLines(h.id,CLOSE_BOND-1).length,3);assert.deepEqual(talkLines(h.id,CLOSE_BOND),[...l.talk,l.close]);
+    assert.ok(l.greet.includes(greetLine(h.id,'2026-10-13')));
+  }
+  assert.notEqual(greetLine('zeke','2026-10-13'),greetLine('zeke','2026-10-14'),'the greeting alternates by day');
+});

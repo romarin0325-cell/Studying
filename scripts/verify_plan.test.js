@@ -239,6 +239,45 @@ test('Star Garden packer changes run the dependency-free guard test without a bu
   }
 });
 
+test('public Star Garden product changes select its unit suite once without mapping other games', () => {
+  const plan = createPlan(changes('defense_public/tests/profile.test.mjs', 'defense_public/scripts/progression-sim.mjs'));
+  assert.deepEqual(plan.detectedGames, ['defense_public']);
+  assert.deepEqual(plan.warnings, []);
+  assert.deepEqual(plan.steps.map(step => [step.command, ...step.args]), [['node', '--test', 'defense_public/tests/*.test.mjs']]);
+  assert.deepEqual(plan.browsers, []);
+  assert.deepEqual(createPlan(changes('defense_public/README.md', 'defense_public/docs/notes.json')).steps, []);
+});
+
+test('public Star Garden deployment inputs select one build with dependencies and the unit suite', () => {
+  const inputs = ['src/tempo.js', 'assets/example.webp', 'assets/Jua-OFL.txt', 'index.html', 'package.json', 'docs/ASSET_OPTIMIZATION.json',
+    ...['build', 'local-inputs', 'image-pack', 'image-policy', 'theme-bright'].map(name => 'scripts/' + name + '.mjs')];
+  for (const files of [...inputs.map(input => [input]), inputs]) {
+    const plan = createPlan(changes(...files.map(file => 'defense_public/' + file)));
+    assert.deepEqual(ids(plan), ['defense_public:build', 'defense_public:build-web', 'defense_public:check-web', 'defense_public:collector:install', 'defense_public:collector:runtime', 'defense_public:contracts-and-regressions', 'defense_public:web-browser']);
+    assert.deepEqual(plan.steps[0].args, ['defense_public/scripts/build.mjs']);
+    assert.equal(plan.steps[0].needsInstall, true);
+  }
+});
+
+test('public Star Garden browser changes select Chromium and its unit suite', () => {
+  const file = 'defense_public/tests/browser.mjs';
+  const plan = createPlan(changes(file));
+  assert.deepEqual(ids(plan), ['defense_public:contracts-and-regressions', 'defense_public:offline-browser']);
+  assert.deepEqual(plan.browsers, ['chromium']);
+  assert.deepEqual(plan.steps[1].args, [file]);
+  assert.deepEqual(plan.steps[1].browsers, ['chromium']);
+});
+
+test('public web scripts and collector changes select the HTTP release gate without other games', () => {
+  for(const file of ['release.example.json','scripts/public-web.mjs','scripts/check-public.mjs','scripts/serve-public.mjs','tests/public-browser.mjs','tests/analytics.test.mjs','tests/collector.test.mjs','tests/collector-smoke.mjs','deploy/cloudflare/worker.mjs','deploy/cloudflare/wrangler.jsonc','deploy/cloudflare/package-lock.json']){
+    const plan=createPlan(changes('defense_public/'+file));
+    assert.ok(ids(plan).includes('defense_public:build-web'),file);
+    assert.ok(ids(plan).includes('defense_public:collector:runtime'),file);
+    assert.deepEqual(plan.browsers,['chromium','webkit'],file);
+    assert.ok(plan.steps.every(step=>step.game==='defense_public'),file);
+  }
+});
+
 test('Nocturne runtime builds once and never selects existing game suites', () => {
   const plan = createPlan(changes('survivor/src/engine.js', 'survivor/assets/jasmine.webp', 'scripts/verify_plan.js'));
   assert.deepEqual(plan.blocked, []);
