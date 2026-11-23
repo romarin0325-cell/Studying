@@ -128,6 +128,24 @@ test('the active slot changes only after a current tab successfully restores a b
   assert.equal(b.load(), null);
 });
 
+test('an older tab stays stale when repeated recovery reuses its session slot and revision', () => {
+  const { storage } = storageFixture();
+  const old = createSaveStore(storage);
+  const profile = createProfile();
+  assert.ok(old.save({ profile }).ok);
+  assert.ok(old.save({ profile }).ok);
+  const file = JSON.stringify(old.exportBackup({ profile }));
+  storage.setItem(SESSION_KEY, '{');
+
+  const recovery = createSaveStore(storage);
+  assert.equal(recovery.loadDetailed().status, 'profileDamaged');
+  assert.ok(recovery.restoreBackup(file).ok);
+  assert.ok(recovery.restoreBackup(file).ok);
+  assert.equal(JSON.parse(storage.getItem(SESSION_KEY)).revision, 2);
+  assert.deepEqual(old.save({ profile }), stale);
+  assert.ok(recovery.save({ profile }).ok);
+});
+
 test('a revision-less session opens and its first save starts at revision 1', () => {
   const { storage } = storageFixture();
   const profile = createProfile();

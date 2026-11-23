@@ -110,5 +110,6 @@ export const TERMS = {
 
 export const PREPARATION = {
   otherStartCompanion: name => `${name} 말고 다른 ${TERMS.startCompanion.short}`,
-  contractRewards: payout => `${TERMS.crystal.short} ◆${payout} · 6층 도달 시 / ${TERMS.stamp.short} · 원정 ${TERMS.returned.short} 시`
+  startCompanionReady: name => `조건 충족 · ${TERMS.startCompanion.short} ${name}`,
+  contractRewards: payout => `계약 달성 시 · ${TERMS.crystal.short} ${josa('◆' + payout, '은/는')} 6층 승리 뒤 / ${josa(TERMS.stamp.short, '은/는')} 원정 ${TERMS.returned.short} 뒤`
 };

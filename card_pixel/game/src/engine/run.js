@@ -9,12 +9,12 @@ import { RELICS, relicPartners } from '../content/relics.js';
 import { REINFORCE_CHOICES, REINFORCE_FLOORS, ROSTER_LIMIT, TEMPO_SEEDS, TEMPO_VERSION, usesTempo } from '../content/tempo.js';
 import {
   applyDraw, canJoin, choicesFor, COST, drawDistinct, drawEncounter, drawFrom, drawKind, join, RATES,
-  release as releaseCompanion, rollBlessing, seeCharacters, seeRelic, usesRepeatDraws, validateReplacements
+  release as releaseCompanion, replacementCount, rollBlessing, seeCharacters, seeRelic, usesRepeatDraws, validateReplacements
 } from './awakenings.js';
 import { dayKey, doorsFor as dailyDoors, validAttempt } from './daily-rift.js';
 import { hasFeature, openFeatures } from './entry.js';
 import { pick, shuffle } from './rng.js';
-import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, makeDoors, observeDoors, resolveEvent } from './rooms.js';
+import { applyDoorTempo, copy, eventChoices, floorRng, grantRelic, invalid, joinCount, makeDoors, observeDoors, resolveEvent } from './rooms.js';
 import { expeditionPool, strength } from './roster.js';
 import * as RunBattle from './run-battle.js';
 
@@ -252,15 +252,45 @@ export function chooseDoor(run, index) {
   return { ok: true, room: copy(run.room), pending: copy(run.pending) };
 }
 
-export function previewServiceDoor(run, index) {
-  const type = run.doors[index]?.type;
+function previewRun(run) {
   const context = dependencies.get(run);
-  if (run.phase !== 'map' || !context || (type !== 'spring' && type !== 'altar')) return null;
+  if (!context) return null;
   // Reuse the real room commands without changing the live RNG, discovery log or pending choice.
   const preview = copy(run);
   dependencies.set(preview, context);
-  if (!chooseDoor(preview, index).ok) return null;
+  return preview;
+}
+
+export function previewServiceDoor(run, index) {
+  const type = run.doors[index]?.type;
+  if (run.phase !== 'map' || (type !== 'spring' && type !== 'altar')) return null;
+  const preview = previewRun(run);
+  if (!preview || !chooseDoor(preview, index).ok) return null;
   return type === 'spring' ? getSpringOffer(preview) : altarRoll(preview);
+}
+
+export function previewEventWake(run, index, choiceId) {
+  const onMap = run.phase === 'map';
+  if (!onMap && run.pending?.kind !== 'event') return null;
+  const room = onMap ? run.doors[index] : run.room;
+  const choice = room?.event?.choices.find(entry => entry.id === choiceId);
+  if (!choice || choice.target || choice.ops.length !== 1) return null;
+  const [op] = choice.ops;
+  if (op.type !== 'join' || !op.random) return null;
+
+  const preview = previewRun(run);
+  if (!preview || (onMap && !chooseDoor(preview, index).ok)) return null;
+  let outcome = chooseEvent(preview, choiceId);
+  let requiredReleases = 0;
+  if (outcome.reason === 'roster_full') {
+    requiredReleases = outcome.requiredReleases ?? replacementCount(preview, joinCount(choice.ops));
+    // A lone new arrival stays the same regardless of which companion makes room.
+    const sample = preview.bench.filter(id => id !== preview.lead).slice(0, requiredReleases);
+    outcome = chooseEvent(preview, choiceId, undefined, sample);
+  }
+  if (!outcome.ok) return null;
+  const effect = outcome.effects.find(entry => entry.type === 'join');
+  return { id: effect.draw?.id ?? effect.ids[0], kind: effect.draw?.kind ?? 'join', requiredReleases };
 }
 
 export function defaultParty(run) {

@@ -559,6 +559,59 @@ test('a stale rift tab cannot overwrite a floor-two checkpoint with its floor-on
   assert.deepEqual([reloaded.floor, reloaded.phase, reloaded.stats.turns], [2, 'map', 4]);
 });
 
+test('repeated restores of the same live rift backup reject old floor-one checkpoints', () => {
+  const storage = memoryStorage();
+  const profile = unlockedProfile();
+  const saves = Save.createSaveStore(storage, deps);
+  const daily = DailyStore.create(storage, deps);
+  const live = ok(start(daily, FIRST, 'official', profile)).run;
+  const oldTabs = Array.from({ length: 3 }, () => {
+    const store = DailyStore.create(storage, deps);
+    const run = ok(store.resume()).run;
+    assert.equal(run.floor, 1);
+    return { store, run };
+  });
+  advanceFirstRiftFight(live, core);
+  storage.failWrite = true;
+  reason(daily.save(live), 'storage_failed');
+  const backup = saves.exportBackup({ profile, dailyRun: live });
+  assert.equal(backup.daily.active.revision, 1);
+  assert.equal(backup.daily.active.checkpoint.floor, 2);
+  const file = JSON.stringify(backup);
+  storage.failWrite = false;
+
+  let tabOpenedAfterFirstRestore;
+  for (const [index, { store, run }] of oldTabs.entries()) {
+    ok(saves.restoreBackup(file));
+    reason(store.save(run), 'stale_tab');
+    if (index === 0) {
+      const reopened = DailyStore.create(storage, deps);
+      tabOpenedAfterFirstRestore = { store: reopened, run: ok(reopened.resume()).run };
+    }
+  }
+  reason(tabOpenedAfterFirstRestore.store.save(tabOpenedAfterFirstRestore.run), 'stale_tab');
+  const restored = ok(daily.resume()).run;
+  assert.deepEqual([restored.floor, restored.stats.turns], [2, 4]);
+  ok(daily.save(restored));
+  assert.equal(ok(DailyStore.create(storage, deps).resume()).run.floor, 2);
+});
+
+test('a rift started after two empty restores cannot be overwritten by the original attempt', () => {
+  const storage = memoryStorage();
+  const profile = unlockedProfile();
+  const saves = Save.createSaveStore(storage, deps);
+  const daily = DailyStore.create(storage, deps);
+  const file = JSON.stringify(saves.exportBackup({ profile }));
+  const old = ok(start(daily, FIRST, 'official', profile)).run;
+  ok(saves.restoreBackup(file));
+  ok(saves.restoreBackup(file));
+  const current = DailyStore.create(storage, deps);
+  const run = ok(start(current, FIRST, 'official', profile)).run;
+  assert.equal(run.id, old.id);
+  reason(daily.save(old), 'stale_tab');
+  ok(current.save(run));
+});
+
 test('the first record and stamp stay fixed while practice best and duplicate receipts update independently', () => {
   const storage = memoryStorage();
   const store = DailyStore.create(storage, deps);

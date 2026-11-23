@@ -3,6 +3,24 @@ import { chooseDoor, chooseEvent } from '../../src/engine/run.js';
 import { cleanseLabel } from '../../src/ui/battle/log.js';
 import { playRun } from '../../tools/sim.mjs';
 
+export function emberRewardFixture(floor, kind, storedSession) {
+  let reward;
+  playRun('ember_volcano', 23757, {
+    onBattle(run, state, summary) {
+      if (run.floor !== floor) return;
+      assert.equal(summary.outcome, 'win');
+      assert.equal(run.pending?.kind, kind);
+      reward = {
+        session: storedSession({ run }),
+        candidate: run.pending.candidates[0],
+        bench: [...run.bench]
+      };
+    }
+  });
+  assert.ok(reward?.candidate);
+  return reward;
+}
+
 export function beetleWarningFixture(snapshot) {
   const commands = [];
   let session, party, danger, weak;

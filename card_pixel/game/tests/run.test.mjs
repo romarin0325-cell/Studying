@@ -23,7 +23,7 @@ import { resumeLabel } from '../src/ui/glossary.js';
 import { playRun as simulateRun } from '../tools/sim.mjs';
 import { registerEntryTests } from './run/entry.mjs';
 import { registerTempoEventTests } from './run/tempo-events.mjs';
-import { emberEventDoorFixture } from './screens/event-doors.mjs';
+import { emberEventDoorFixture, eventDoorFixture, randomWakeCases } from './screens/event-doors.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const { core, roster, sp } = createCoreRoster();
@@ -2731,6 +2731,40 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   assert.equal(store.clear(), true);
   assert.equal(entries.size, 0);
   assert.equal(store.loadLastGood().status, 'empty');
+});
+
+test('seeded event wakes show the actual companion and outcome before and after entry', () => {
+  const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
+  for (const fixture of randomWakeCases) {
+    const { run, door } = eventDoorFixture({ core, roster }, fixture);
+    const before = Save.serializeRun(run);
+    const offerAt = room => {
+      const choice = eventChoices(run, core, roster, room).find(entry => entry.id === fixture.choiceId);
+      return describeEventOffer(run, choice, { room, core, artifacts, card: roster.card });
+    };
+    const mapOffer = offerAt(door);
+    assert.equal(Save.serializeRun(run), before);
+    ok(Run.chooseDoor(run, door.index));
+    const entered = Save.serializeRun(run);
+    const roomOffer = offerAt(run.room);
+    assert.equal(Save.serializeRun(run), entered);
+
+    let outcome = Run.chooseEvent(run, fixture.choiceId);
+    if (fixture.requiresRelease) {
+      assert.equal(outcome.reason, 'roster_full');
+      assert.equal(outcome.requiredReleases, 1);
+      assert.equal(Save.serializeRun(run), entered);
+      outcome = Run.chooseEvent(run, fixture.choiceId, undefined, [run.bench.find(id => id !== run.lead)]);
+    }
+    const draw = ok(outcome).effects.find(effect => effect.draw).draw;
+    assert.equal(draw.id, fixture.id);
+    assert.equal(draw.kind, fixture.kind);
+    for (const offer of [mapOffer, roomOffer]) {
+      assert.equal(offer.shortName, fixture.label);
+      assert.ok(offer.detail.includes(fixture.label), offer.detail);
+      assert.equal(offer.releaseNote, fixture.requiresRelease ? '보낼 동료 1명 필요' : '');
+    }
+  }
 });
 
 test('Ember seed 150461 discloses Ash’s saved offers and prices before entry without consuming RNG', () => {

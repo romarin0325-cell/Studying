@@ -925,8 +925,8 @@ function contractSheet() {
   const session = storedSession({ profile });
   const { name, rule } = CONTRACTS.heirloom;
   const terms = `문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김`;
-  // W4C (11-23): both rewards and their moments on one line.
-  const rewards = `결정 ◆${CONTRACT_PAYOUT} · 6층 도달 시 / 도장 · 원정 생환 시`;
+  // W4C, corrected by W8B (11-23): the contract must be achieved, then each reward has its moment.
+  const rewards = `계약 달성 시 · 결정 ◆${CONTRACT_PAYOUT}은 6층 승리 뒤 / 도장은 원정 생환 뒤`;
   assert.equal(Meta.contractsFor(profile, 'ember_volcano').stamps.heirloom, null);
   return {
     session, proof: 'normal clear unlocked the three nightmare contracts in ember_volcano',

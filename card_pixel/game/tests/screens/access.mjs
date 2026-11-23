@@ -3,7 +3,7 @@ import { INTRO } from '../../src/content/intro.js';
 import { defaultParty, settleBattle } from '../../src/engine/run.js';
 import { resolveMotion } from '../../src/ui/battle/motion.js';
 import { SETTINGS_KEY } from '../../src/ui/storage.js';
-import { createFeedbackCases } from './feedback.mjs';
+import { createFeedbackCases, emberRewardFixture } from './feedback.mjs';
 
 const lead = 'snow_rabbit';
 const skill = '스노우샷';
@@ -55,6 +55,61 @@ export function createAccessCases({ makeRun, startBattle, storedSession, act, op
 
   return {
     ...createFeedbackCases({ makeRun, storedSession, openBattle, battleIdle }),
+    'access-gate-reward-focus': () => {
+      const { session, candidate, bench } = emberRewardFixture(4, 'gate', storedSession);
+      assert.equal(bench.length, 4);
+      assert.ok(!bench.includes(candidate));
+      return {
+        session, mute: true,
+        proof: 'Ember 23757 floor 4: joining the gatekeeper reward focuses Continue and clears the battle dialog on departure',
+        async show(page, { text, capture }) {
+          const next = '#result.on #b-next';
+          const done = '#result.on #b-gate-done';
+          await text(page.locator(next), '문지기 보상 고르기', { exact: true });
+          await focused(page, next);
+          await page.keyboard.press('Enter');
+          await page.locator(`#result.on [data-id="${candidate}"]`).click();
+          await page.locator('#result.on #b-gate-take').click();
+          await text(page.locator(done), '계속하기', { exact: true });
+          await focused(page, done);
+          await capture();
+          await page.keyboard.press('Enter');
+          await page.locator('#map.on').waitFor();
+          assert.equal(await page.locator('#battle [inert], #battle.resumed-result, #battle #result.on').count(), 0);
+          assert.deepEqual(await page.evaluate(() => {
+            const { floor, bench } = window.__game.run;
+            return { floor, bench };
+          }), { floor: 5, bench: [...bench, candidate] });
+        }
+      };
+    },
+    'access-reinforcement-focus': () => {
+      const { session, candidate, bench } = emberRewardFixture(2, 'reinforcement', storedSession);
+      const [outgoing] = bench;
+      assert.equal(bench.length, 6);
+      assert.ok(!bench.includes(candidate));
+      return {
+        session, mute: true,
+        proof: 'Ember 23757 floor 2: selecting an outgoing companion focuses the replacement confirmation, then Continue',
+        async show(page, { text, capture }) {
+          const board = page.locator('#result.on');
+          const take = '#result.on #b-reinforce-take';
+          const done = '#result.on #b-reinforce-done';
+          await board.locator('#b-next').click();
+          await board.locator(`[data-candidate="${candidate}"]`).click();
+          assert.equal(await page.locator(take).isDisabled(), true);
+          await board.locator(`[data-release="${outgoing}"]`).click();
+          await focused(page, take);
+          await page.keyboard.press('Enter');
+          await text(page.locator(done), '계속하기', { exact: true });
+          await focused(page, done);
+          await capture();
+          await page.keyboard.press('Enter');
+          await page.locator('#map.on').waitFor();
+          assert.equal(await page.locator('#battle [inert], #battle #result.on').count(), 0);
+        }
+      };
+    },
     'access-result-focus': () => {
       const run = makeRun({ dungeonId: 'dawn_forest', seed: 7, tempoVersion: 2 });
       const battle = startBattle(run, { party: INTRO.party });

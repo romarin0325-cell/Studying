@@ -10,7 +10,7 @@ import { restoreProfile, serializeProfile } from '../src/engine/save.js';
 import { resumeLabel } from '../src/ui/glossary.js';
 import { preparationSheet } from '../src/ui/screens/dungeons.js';
 import { playRun } from '../tools/sim.mjs';
-import { dreamClearProfile, firstMainReturnProfile, rescueContractProfile } from './screens/goals.mjs';
+import { dreamClearProfile, firstMainReturnProfile, readyStartCompanionProfile, rescueContractProfile } from './screens/goals.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const { core, roster } = createCoreRoster();
@@ -83,7 +83,31 @@ test('following the different-start goal names and focuses the change while the 
   assert.notEqual(nextGoal(settled.profile).text, goal.text);
 });
 
-test('the Ember rescue contract picker shows the crystal and stamp timing together', t => {
+test('the different-start goal confirms an already eligible start companion without moving focus', t => {
+  const profile = readyStartCompanionProfile();
+  const original = structuredClone(profile);
+  const goal = nextGoal(profile, null, roster);
+  assert.equal(goal.text, NOTEBOOK_GOALS[5].text);
+  assert.equal(goal.target.startCompanionNot, 'ash');
+  const view = renderPreparation(t, profile, goal.target);
+  assert.match(view.html, /id="meta-prep-lead-hint">조건 충족 · 시작 동료 눈토끼<\/p>/);
+  assert.doesNotMatch(view.html, /data-goal-focus/);
+  assert.equal(view.focused, null);
+  assert.deepEqual(profile, original);
+});
+
+test('the different-start goal offers and focuses a change if the start companion is missing', t => {
+  const profile = readyStartCompanionProfile();
+  profile.lead = null;
+  const original = structuredClone(profile);
+  const goal = nextGoal(profile, null, roster);
+  const view = renderPreparation(t, profile, goal.target);
+  assert.match(view.html, /id="meta-prep-lead-hint">애쉬 말고 다른 시작 동료<\/p>/);
+  assert.equal(view.focused, '[data-goal-focus]');
+  assert.deepEqual(profile, original);
+});
+
+test('the Ember rescue contract picker requires achievement before either reward', t => {
   const target = { dungeonId: ember, difficulty: 'nightmare', contract: null };
   const profile = setPreparation(rescueContractProfile(), target);
   const view = renderPreparation(t, profile, target);
@@ -92,7 +116,7 @@ test('the Ember rescue contract picker shows the crystal and stamp timing togeth
   const option = view.html.match(/<button[^>]+data-contract="rescue"[^>]*>([\s\S]*?)<\/button>/)?.[1];
   assert.ok(option);
   const rewards = option.match(/<small class="meta-contract-rewards">(.*?)<\/small>/)?.[1];
-  assert.equal(rewards?.replace(/<[^>]+>/g, ''), '결정 ◆3 · 6층 도달 시 / 도장 · 원정 생환 시');
+  assert.equal(rewards?.replace(/<[^>]+>/g, ''), '계약 달성 시 · 결정 ◆3은 6층 승리 뒤 / 도장은 원정 생환 뒤');
   assert.match(option, /문지기 보상에서 ◆1 맡김/);
   assert.match(option, /도장 없음/);
 });

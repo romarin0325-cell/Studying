@@ -11886,6 +11886,7 @@ const BattleRuntime = {
     getTempoView: () => getTempoView2,
     leaveRoom: () => leaveRoom,
     nextFloor: () => nextFloor,
+    previewEventWake: () => previewEventWake,
     previewNextFloor: () => previewNextFloor,
     previewServiceDoor: () => previewServiceDoor,
     recordBattleLog: () => recordBattleLog,
@@ -12819,14 +12820,40 @@ const BattleRuntime = {
     }
     return { ok: true, room: copy(run.room), pending: copy(run.pending) };
   }
-  function previewServiceDoor(run, index) {
-    const type = run.doors[index]?.type;
+  function previewRun(run) {
     const context = dependencies.get(run);
-    if (run.phase !== "map" || !context || type !== "spring" && type !== "altar") return null;
+    if (!context) return null;
     const preview = copy(run);
     dependencies.set(preview, context);
-    if (!chooseDoor(preview, index).ok) return null;
+    return preview;
+  }
+  function previewServiceDoor(run, index) {
+    const type = run.doors[index]?.type;
+    if (run.phase !== "map" || type !== "spring" && type !== "altar") return null;
+    const preview = previewRun(run);
+    if (!preview || !chooseDoor(preview, index).ok) return null;
     return type === "spring" ? getSpringOffer(preview) : altarRoll(preview);
+  }
+  function previewEventWake(run, index, choiceId) {
+    const onMap = run.phase === "map";
+    if (!onMap && run.pending?.kind !== "event") return null;
+    const room = onMap ? run.doors[index] : run.room;
+    const choice = room?.event?.choices.find((entry) => entry.id === choiceId);
+    if (!choice || choice.target || choice.ops.length !== 1) return null;
+    const [op] = choice.ops;
+    if (op.type !== "join" || !op.random) return null;
+    const preview = previewRun(run);
+    if (!preview || onMap && !chooseDoor(preview, index).ok) return null;
+    let outcome = chooseEvent(preview, choiceId);
+    let requiredReleases = 0;
+    if (outcome.reason === "roster_full") {
+      requiredReleases = outcome.requiredReleases ?? replacementCount(preview, joinCount(choice.ops));
+      const sample = preview.bench.filter((id) => id !== preview.lead).slice(0, requiredReleases);
+      outcome = chooseEvent(preview, choiceId, void 0, sample);
+    }
+    if (!outcome.ok) return null;
+    const effect = outcome.effects.find((entry) => entry.type === "join");
+    return { id: effect.draw?.id ?? effect.ids[0], kind: effect.draw?.kind ?? "join", requiredReleases };
   }
   function defaultParty(run) {
     const party = (run.lastParty || [null, null, null]).map((id) => run.bench.includes(id) ? id : null);
@@ -13938,7 +13965,8 @@ const BattleRuntime = {
   };
   var PREPARATION = {
     otherStartCompanion: (name) => `${name} \uB9D0\uACE0 \uB2E4\uB978 ${TERMS.startCompanion.short}`,
-    contractRewards: (payout) => `${TERMS.crystal.short} \u25C6${payout} \xB7 6\uCE35 \uB3C4\uB2EC \uC2DC / ${TERMS.stamp.short} \xB7 \uC6D0\uC815 ${TERMS.returned.short} \uC2DC`
+    startCompanionReady: (name) => `\uC870\uAC74 \uCDA9\uC871 \xB7 ${TERMS.startCompanion.short} ${name}`,
+    contractRewards: (payout) => `\uACC4\uC57D \uB2EC\uC131 \uC2DC \xB7 ${TERMS.crystal.short} ${josa("\u25C6" + payout, "\uC740/\uB294")} 6\uCE35 \uC2B9\uB9AC \uB4A4 / ${josa(TERMS.stamp.short, "\uC740/\uB294")} \uC6D0\uC815 ${TERMS.returned.short} \uB4A4`
   };
 
   // card_pixel/game/src/engine/meta.js
@@ -14574,9 +14602,6 @@ const BattleRuntime = {
   var dictionary2 = (value) => !!value && typeof value === "object" && !Array.isArray(value);
   var nonnegative = (n) => Number.isSafeInteger(n) && n >= 0;
   var validRevision = (active2) => active2?.revision === void 0 || nonnegative(active2.revision);
-  function checkpointHead(slot, active2) {
-    return { slot, revision: saveRevision(active2), hasSave: active2 !== null, runId: active2?.runId };
-  }
   function staleCheckpoint(head2, observed) {
     return saveHeadChanged(head2, observed) || observed && head2.runId !== observed.runId;
   }
@@ -14667,7 +14692,10 @@ const BattleRuntime = {
         const slot = slots.active();
         const saved = slots.read(slot, DAILY_KEY);
         const data = saved == null ? empty() : JSON.parse(saved);
-        if (data?.version === VERSION && dictionary2(data.days) && (data.active === null || dictionary2(data.active)) && validRevision(data.active)) return { data, head: checkpointHead(slot, data.active) };
+        if (data?.version === VERSION && dictionary2(data.days) && (data.active === null || dictionary2(data.active)) && validRevision(data.active)) {
+          const { active: active2 } = data;
+          return { data, head: { ...saveHead(slots, slot, active2, active2 !== null), runId: active2?.runId } };
+        }
       } catch {
       }
       return null;
@@ -14691,7 +14719,7 @@ const BattleRuntime = {
         return invalid("invalid_save");
       }
       if (!write(data, head2.slot)) return invalid("storage_failed");
-      remember(run, checkpointHead(head2.slot, data.active));
+      remember(run, { ...head2, revision: data.active.revision, hasSave: true, runId: data.active.runId });
       return { ok: true };
     }
     function settle(data, head2, outcome, checkpoint) {
@@ -14889,6 +14917,7 @@ const BattleRuntime = {
   var STALE_SAVE_EVENT = "relaymare:stale-save";
   var SESSION_VERSION = 1;
   var BACKUP_VERSION = 1;
+  var RESTORE_ID_KEY = "relaymare.restoreId";
   var DEFAULT_SETTINGS = { sound: true, music: true, rim: true, speed: 1, textScale: 1, markers: true };
   var SETTING_VALUES = { speed: [1, 2], textScale: [1, 1.25] };
   var nullableId = (value) => value === null || string(value);
@@ -14952,8 +14981,11 @@ const BattleRuntime = {
   function saveRevision(data) {
     return count(data?.revision) ? data.revision : 0;
   }
+  function saveHead(slots, slot, data, hasSave) {
+    return { slot, revision: saveRevision(data), hasSave, restoreId: slots.read(slot, RESTORE_ID_KEY) ?? null };
+  }
   function saveHeadChanged(head2, observed) {
-    return observed ? head2.slot !== observed.slot || head2.revision !== observed.revision || head2.hasSave !== observed.hasSave : head2.revision > 0;
+    return observed ? head2.slot !== observed.slot || head2.revision !== observed.revision || head2.hasSave !== observed.hasSave || head2.restoreId !== observed.restoreId : head2.revision > 0 || head2.hasSave && head2.restoreId !== null;
   }
   function nextSaveRevision(current) {
     const revision = current + 1;
@@ -14977,14 +15009,14 @@ const BattleRuntime = {
     function readHead() {
       const slot = slots.active();
       const raw = slots.read(slot, key) ?? null;
-      return { slot, raw, hasSave: raw !== null, revision: sessionRevision(raw) };
+      return { ...saveHead(slots, slot, parse(raw), raw !== null), raw };
     }
     function isStale(head2) {
       stale ||= saveHeadChanged(head2, observed);
       return stale;
     }
-    function remember({ slot, raw, revision }) {
-      observed = { slot, revision, hasSave: raw !== null };
+    function remember({ slot, revision, hasSave, restoreId }) {
+      observed = { slot, revision, hasSave, restoreId };
       lastRevision = Math.max(lastRevision, revision);
     }
     function revisionAfter(head2) {
@@ -14994,9 +15026,9 @@ const BattleRuntime = {
         head2.revision === 0 ? sessionRevision(slots.read(head2.slot, LAST_GOOD_KEY)) : 0
       ));
     }
-    function writeSession(slot, raw, revision) {
-      slots.write(slot, key, raw);
-      remember({ slot, raw, revision });
+    function writeSession(head2, raw, revision) {
+      slots.write(head2.slot, key, raw);
+      remember({ ...head2, revision, hasSave: true });
     }
     function readSession(raw) {
       if (raw == null) return { status: "empty" };
@@ -15114,8 +15146,10 @@ const BattleRuntime = {
         if (isStale(head2)) return failed("stale_tab");
         const revision = revisionAfter(head2);
         const raw = JSON.stringify({ ...profile ? sessionData(profile, run) : { version: SESSION_VERSION, profile: null, run: null }, revision });
+        const restoreId = globalThis.crypto.getRandomValues(new Uint32Array(4)).join("-");
         const values = /* @__PURE__ */ new Map([
           [key, raw],
+          [RESTORE_ID_KEY, restoreId],
           [DAILY_KEY, backup.daily === null ? null : JSON.stringify(backup.daily)],
           [DAMAGED_DAILY_KEY, backup.damagedDaily ?? null],
           [SETTINGS_KEY, JSON.stringify(normalizeSettings(backup.settings))],
@@ -15134,7 +15168,7 @@ const BattleRuntime = {
         });
         if (!verified.ok) return failed("storage_failed");
         slots.activate(next);
-        remember({ slot: next, raw, revision });
+        remember({ slot: next, revision, hasSave: true, restoreId });
         return { ok: true, ...dailyWarning(backup) };
       } catch {
         return failed("storage_failed");
@@ -15156,7 +15190,7 @@ const BattleRuntime = {
       }
       const raw = patch(head2.raw);
       if (raw === null) return failed("storage_failed");
-      writeSession(head2.slot, raw, revision);
+      writeSession(head2, raw, revision);
       try {
         const good = patch(slots.read(head2.slot, LAST_GOOD_KEY));
         if (good !== null) slots.write(head2.slot, LAST_GOOD_KEY, good);
@@ -15171,7 +15205,7 @@ const BattleRuntime = {
         if (isStale(head2)) return failed("stale_tab");
         const revision = revisionAfter(head2);
         const snapshot = JSON.stringify({ ...sessionData(profile, run), revision });
-        writeSession(head2.slot, snapshot, revision);
+        writeSession(head2, snapshot, revision);
         if (!run && profile.records.appliedRuns.length && readSession(snapshot).status === "ok") {
           try {
             slots.write(head2.slot, LAST_GOOD_KEY, snapshot);
@@ -15201,8 +15235,11 @@ const BattleRuntime = {
       clear() {
         try {
           if (isStale(readHead())) return failed("stale_tab");
-          slots.clear(key);
-          remember({ slot: "a", raw: null, revision: 0 });
+          if (key !== SESSION_KEY) {
+            for (const slot of ["a", "b"]) slots.write(slot, key, null);
+          }
+          slots.clear(RESTORE_ID_KEY);
+          remember({ slot: "a", revision: 0, hasSave: false, restoreId: null });
           return true;
         } catch {
           return false;
@@ -18186,9 +18223,9 @@ const BattleRuntime = {
   var canFocus = (node) => node?.isConnected && !node.matches(":disabled") && !node.closest("[inert]") && node.getClientRects().length > 0 && getComputedStyle(node).visibility === "visible";
   var tabStops = (scope) => $$(TABBABLE, scope).filter((node) => node.tabIndex >= 0 && canFocus(node));
   var activeResult = () => $("#battle.on #result.on");
-  function focusPrimary(scope) {
+  function focusPrimary(scope, preferred = ".go, .claim, #b-start, #b-next, #b-go") {
     const controls = tabStops(scope);
-    const primary = controls.find((node) => node.matches(".go, .claim, #b-start, #b-next, #b-go")) ?? controls.find((node) => node.matches("#acts .act, .fixed-foot button")) ?? controls[0];
+    const primary = controls.find((node) => node.matches(preferred)) ?? controls.find((node) => node.matches("#acts .act, .fixed-foot button")) ?? controls[0];
     primary?.focus({ preventScroll: true });
   }
   function sheetMarkup() {
@@ -20224,17 +20261,42 @@ const BattleRuntime = {
     if (run.pending?.kind === "relic") return "\uC720\uBB3C \uBCF4\uC0C1 \uACE0\uB974\uAE30";
     return floor + 1 + "\uCE35\uC73C\uB85C";
   }
-  function createResultBoard({ getRun, widgets: widgets2, details, showLog, sfx, music: music2 }) {
+  function createResultBoard({ getRun, widgets: widgets2, details, showLog, closeSheet, sfx, music: music2 }) {
     const panel = $("#result");
+    const box = $("#result-in", panel);
+    const screen = panel.parentElement;
     const { card, face: face2 } = widgets2;
     const isOpen = () => panel.classList.contains("on");
+    const primarySelector = "button.go:not([hidden]), #b-reinforce-take";
+    let primary = null;
     function setOpen(open) {
       panel.classList.toggle("on", open);
-      for (const background2 of panel.parentElement.children) {
+      for (const background2 of screen.children) {
         if (background2 !== panel) background2.inert = open;
       }
     }
-    const hide = () => setOpen(false);
+    function close() {
+      if (!isOpen()) return;
+      setOpen(false);
+      screen.classList.remove("resumed-result");
+      if (panel.inert) closeSheet();
+      panel.inert = false;
+      primary = null;
+    }
+    function focusAction() {
+      const action = $(primarySelector, box);
+      if (action === primary || panel.inert) return;
+      primary = action;
+      focusPrimary(action?.closest(".victory-decision") ?? panel, primarySelector);
+    }
+    const updates = new MutationObserver(() => {
+      if (!isOpen()) return;
+      if (screen.classList.contains("on")) focusAction();
+      else close();
+    });
+    updates.observe(box, { subtree: true, childList: true, attributes: true, attributeFilter: ["hidden"] });
+    updates.observe(panel, { attributes: true, attributeFilter: ["inert"] });
+    updates.observe(screen, { attributes: true, attributeFilter: ["class"] });
     panel.addEventListener("click", (event) => {
       const id = event.target.closest("[data-sheet]")?.dataset.sheet;
       if (id) {
@@ -20294,7 +20356,6 @@ const BattleRuntime = {
       else if (outcome === "win" && wiped) rows.push("<p>\uC804\uD22C\uC5D0\uC11C \uC774\uACBC\uC2B5\uB2C8\uB2E4. \uB3CC\uC544\uC628 \uB3D9\uB8CC\uAC00 \uC5C6\uC5B4 \uC6D0\uC815\uC774 \uB05D\uB0AC\uC2B5\uB2C8\uB2E4.</p>");
       const label = resultNextLabel(run, { floor, roomType, won, retry });
       const title = failure?.title ?? (run.daily ? "\uADE0\uC5F4" : DUNGEONS[run.dungeonId].name) + " " + floor + "\uCE35 \uB3CC\uD30C";
-      const box = $("#result-in", panel);
       box.innerHTML = '<header class="result-heading ' + (won ? "won" : "lost") + '"><h3 id="result-title">' + esc(title) + "</h3>" + logButton('id="b-result-log"') + "</header>" + rows.join("") + '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label) + "</button>";
       setOpen(true);
       if (!restored) {
@@ -20310,20 +20371,20 @@ const BattleRuntime = {
       if (reward) decision?.(content, result, next, singleReinforcement);
       if (pending() && !restored) music2?.holdReward(getRun().dungeonId);
       box.scrollTop = 0;
-      focusPrimary(panel);
+      focusAction();
       next.addEventListener("click", () => {
         sfx.tap();
         if (pending()) {
           decision(content, result, next, true);
-          focusPrimary(panel);
+          focusAction();
         } else {
           next.disabled = true;
-          hide();
+          close();
           advance2();
         }
       });
     }
-    return { show: show2, hide, isOpen };
+    return { show: show2, close, isOpen };
   }
 
   // card_pixel/game/src/ui/battle/effect-plan.js
@@ -20882,7 +20943,15 @@ const BattleRuntime = {
       sfx.tap();
       openBattleLog(sheets2, widgets2, resultBoard.isOpen() ? run.lastBattleLog : currentLog());
     }
-    const resultBoard = createResultBoard({ getRun: () => run, widgets: widgets2, details, showLog, sfx, music: music2 });
+    const resultBoard = createResultBoard({
+      getRun: () => run,
+      widgets: widgets2,
+      details,
+      showLog,
+      closeSheet: sheets2.closeSheet,
+      sfx,
+      music: music2
+    });
     $("#b-log").addEventListener("click", showLog);
     function logLine(text) {
       B.log.push(text);
@@ -21598,8 +21667,8 @@ const BattleRuntime = {
       B.fallSpot = null;
       battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map((e) => e.id), party: B.party.slice() };
       B.bridge = create2(core2, options);
-      resultBoard.hide();
-      $("#battle").classList.remove("resumed-result", "opening-decision");
+      resultBoard.close();
+      $("#battle").classList.remove("opening-decision");
       for (const id of ["b-field", "b-speed", "b-log"]) $("#" + id).hidden = simpleOpening;
       $("#acts").innerHTML = "";
       $("#b-heir").className = "";
@@ -21630,6 +21699,7 @@ const BattleRuntime = {
       B.all = [];
     }
     function restoreResult(expedition, advance2, decision) {
+      resultBoard.close();
       attach(expedition);
       B.D = B.foe = B.bridge = null;
       B.allies = [];
@@ -22035,11 +22105,11 @@ const BattleRuntime = {
     delayed_on_time: "\uC608\uC57D \uACF5\uACA9\uC744 \uC815\uC2DC\uC5D0 \uBC1C\uB3D9\uD558\uACE0 \uC2B9\uB9AC",
     same_grade_full: "\uAC19\uC740 \uB4F1\uAE09 \uC14B\uC73C\uB85C \uCD9C\uC804\uD574 \uC2B9\uB9AC"
   };
-  function eventEffectText(effect, { card, artifacts, core: core2, room }, target) {
+  function eventEffectText(effect, { card, artifacts, core: core2, room, randomWake }, target) {
     const name = (id) => card(id).name;
     switch (effect.type) {
       case "join":
-        return STAYS + " \xB7 " + (effect.random ? "\uBB34\uC791\uC704 \uB3D9\uB8CC 1\uBA85" : effect.ids.map(name).join(" \xB7 ")) + " \uD569\uB958";
+        return STAYS + " \xB7 " + (effect.random ? randomWake ?? "\uBB34\uC791\uC704 \uB3D9\uB8CC 1\uBA85 " + TERMS.join.short : effect.ids.map(name).join(" \xB7 ") + " " + TERMS.join.short);
       case "release":
         return (target ? name(target) : "\uB3D9\uB8CC 1\uBA85") + " \uC774\uD0C8 \xB7 \uCD95\uBCF5\xB7\uC720\uD488 \uC18C\uBA78 \xB7 \uB4F1\uAE09\uC5D0 \uB530\uB77C \uACB0\uC815 \uD68D\uB4DD";
       case "bless": {
@@ -22075,18 +22145,21 @@ const BattleRuntime = {
     const { card, artifacts, core: core2, room } = context;
     const promise = choice.ops.find((effect) => effect.type === "promise")?.offer;
     const relic = artifacts.get(promise?.relic);
-    const effects = choice.ops.map((effect) => eventEffectText(effect, context)).filter(Boolean);
+    const hasRandomWake = choice.ops.some((op) => op.type === "join" && op.random);
+    const wake = hasRandomWake && choice.enabled ? previewEventWake(run, room.index, choice.id) : null;
+    const randomWake = wake ? card(wake.id).name + " " + TERMS[wake.kind].short : hasRandomWake && usesRepeatDraws(run) ? [TERMS.join, TERMS.boost, TERMS.memory].map((term) => term.short).join("\xB7") + " \uC911 \uD558\uB098" : null;
+    const effects = choice.ops.map((effect) => eventEffectText(effect, { ...context, randomWake })).filter(Boolean);
     if (room.event.id === "penguin_ice_seam" && choice.id === "carry" && !choice.text.includes("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C") && !run.bench.some((id) => core2.GameUtils.cardMatchesElement(card(id), "water"))) effects.push("\uBB3C \uB3D9\uB8CC \uC5C6\uC74C");
     const price = choice.cost ? "\u25C6" + choice.cost : "\uBB34\uB8CC";
     const crystalGain = !choice.cost && choice.ops.find((op) => op.type === "crystals");
     const heirloom = choice.ops.find((op) => op.type === "heirloom");
     const shortfall = (choice.cost || 0) - run.crystals;
     const unmet = shortfall > 0 ? "\uACB0\uC815 " + shortfall + "\uAC1C \uBD80\uC871" : choice.targets?.length === 0 ? "\uC120\uD0DD\uD560 \uB3D9\uB8CC \uC5C6\uC74C" : "\uC9C0\uAE08\uC740 \uC120\uD0DD\uD560 \uC218 \uC5C6\uC74C";
-    const releases = eventReleaseCount(run, choice);
+    const releases = wake?.requiredReleases ?? eventReleaseCount(run, choice);
     return {
       name: relic ? josa(price, "\uC744/\uB97C") + " \uB9E1\uAE30\uBA74 " + promise.floor + "\uCE35\uC5D0\uC11C " + relic.name + " \uC778\uC218" : choice.text,
       detail: relic ? relic.name + " \xB7 " + relicEffect(relic) : [price, ...effects].join(" \xB7 "),
-      shortName: relic?.name ?? heirloom?.name ?? choice.text.split(" \xB7 ")[0],
+      shortName: relic?.name ?? heirloom?.name ?? randomWake ?? choice.text.split(" \xB7 ")[0],
       compactPrice: crystalGain ? eventEffectText(crystalGain, context) : price,
       condition: choice.enabled ? "" : "\uC870\uAC74 \xB7 " + unmet,
       releaseNote: releases ? "\uBCF4\uB0BC \uB3D9\uB8CC " + releases + "\uBA85 \uD544\uC694" : "",
@@ -24123,7 +24196,6 @@ const BattleRuntime = {
     if (!featureFlags(currentProfile()).prepEditing) return;
     const name = (id) => esc(roster2.card(id)?.name ?? id ?? "\uBBF8\uC9C0\uC815");
     const previousLeadName = startCompanionNot && roster2.card(startCompanionNot)?.name;
-    const leadHint = previousLeadName && PREPARATION.otherStartCompanion(previousLeadName);
     const status = (row) => row.excluded ? ["excluded", "\xD7", TERMS.exclude.short] : row.start ? ["start", "\u2605", "\uC2DC\uC791"] : row.invited ? ["invited", "\u21AA", TERMS.springInvite.short] : row.added ? ["added", "+", "\uCD94\uAC00"] : ["base", "\xB7", "\uAE30\uBCF8"];
     function scrollPosition() {
       return { top: $("#sh-body").scrollTop, grid: $(".meta-prep-pool")?.scrollTop ?? 0 };
@@ -24133,14 +24205,18 @@ const BattleRuntime = {
       const flags = featureFlags(profile);
       const entry = availableDungeons2(profile).find((dungeon2) => dungeon2.id === dungeonId2);
       const { start: lead, invite, exclude, pool } = prepView(profile, dungeonId2, roster2);
+      const { lead: activeLead, companionCandidates } = startView(profile, dungeonId2);
+      const activeLeadName = activeLead && roster2.card(activeLead)?.name;
       const leadChoices = lead.candidates.filter((id) => !exclude.ids.includes(id) && id !== lead.id);
-      const goalFocus = leadHint && leadChoices.length;
+      const needsLeadChange = previousLeadName && (!activeLeadName || activeLead === startCompanionNot);
+      const leadHint = previousLeadName && (needsLeadChange ? PREPARATION.otherStartCompanion(previousLeadName) : PREPARATION.startCompanionReady(activeLeadName));
+      const goalFocus = needsLeadChange && leadChoices.some((id) => id !== startCompanionNot);
       const draft = profile.ui.preparation?.dungeonId === dungeonId2 ? profile.ui.preparation : null;
       const difficulty = entry?.difficulties?.includes(draft?.difficulty) ? draft.difficulty : departureDifficulty2(profile, dungeonId2);
       const contracts = contractsFor(profile, dungeonId2);
       const canContract = difficulty === "nightmare" && contracts.unlocked;
       const contractChoice = canContract && Object.hasOwn(CONTRACTS, draft?.contract) ? CONTRACTS[draft.contract] : null;
-      const outsidePool = startView(profile, dungeonId2).companionCandidates.filter((id) => !pool.some((row) => row.id === id));
+      const outsidePool = companionCandidates.filter((id) => !pool.some((row) => row.id === id));
       const cell = (row) => {
         const [key, symbol, label] = status(row);
         return `<button class="meta-cell meta-prep-cell" type="button" data-prep-id="${esc(row.id)}" data-status="${key}"${row.canInvite && !row.invited ? " data-can-invite" : ""} aria-haspopup="dialog">

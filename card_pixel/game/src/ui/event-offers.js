@@ -1,5 +1,7 @@
 import { BLESS, replacementCount, usesRepeatDraws } from '../engine/awakenings.js';
 import { joinCount } from '../engine/rooms.js';
+import { previewEventWake } from '../engine/run.js';
+import { TERMS } from './glossary.js';
 import { relicEffect } from './relics.js';
 import { josa } from './text.js';
 
@@ -11,11 +13,12 @@ const BET = {
   same_grade_full: '같은 등급 셋으로 출전해 승리'
 };
 
-export function eventEffectText(effect, { card, artifacts, core, room }, target) {
+export function eventEffectText(effect, { card, artifacts, core, room, randomWake }, target) {
   const name = id => card(id).name;
   switch (effect.type) {
     case 'join':
-      return STAYS + ' · ' + (effect.random ? '무작위 동료 1명' : effect.ids.map(name).join(' · ')) + ' 합류';
+      return STAYS + ' · ' + (effect.random ? randomWake ?? '무작위 동료 1명 ' + TERMS.join.short
+        : effect.ids.map(name).join(' · ') + ' ' + TERMS.join.short);
     case 'release':
       return (target ? name(target) : '동료 1명') + ' 이탈 · 축복·유품 소멸 · 등급에 따라 결정 획득';
     case 'bless': {
@@ -55,7 +58,12 @@ export function describeEventOffer(run, choice, context) {
   const { card, artifacts, core, room } = context;
   const promise = choice.ops.find(effect => effect.type === 'promise')?.offer;
   const relic = artifacts.get(promise?.relic);
-  const effects = choice.ops.map(effect => eventEffectText(effect, context)).filter(Boolean);
+  const hasRandomWake = choice.ops.some(op => op.type === 'join' && op.random);
+  const wake = hasRandomWake && choice.enabled ? previewEventWake(run, room.index, choice.id) : null;
+  const randomWake = wake ? card(wake.id).name + ' ' + TERMS[wake.kind].short
+    : hasRandomWake && usesRepeatDraws(run) ? [TERMS.join, TERMS.boost, TERMS.memory].map(term => term.short).join('·') + ' 중 하나'
+    : null;
+  const effects = choice.ops.map(effect => eventEffectText(effect, { ...context, randomWake })).filter(Boolean);
   if (room.event.id === 'penguin_ice_seam' && choice.id === 'carry' && !choice.text.includes('물 동료 없음') &&
     !run.bench.some(id => core.GameUtils.cardMatchesElement(card(id), 'water'))) effects.push('물 동료 없음');
 
@@ -65,11 +73,11 @@ export function describeEventOffer(run, choice, context) {
   const shortfall = (choice.cost || 0) - run.crystals;
   const unmet = shortfall > 0 ? '결정 ' + shortfall + '개 부족'
     : choice.targets?.length === 0 ? '선택할 동료 없음' : '지금은 선택할 수 없음';
-  const releases = eventReleaseCount(run, choice);
+  const releases = wake?.requiredReleases ?? eventReleaseCount(run, choice);
   return {
     name: relic ? josa(price, '을/를') + ' 맡기면 ' + promise.floor + '층에서 ' + relic.name + ' 인수' : choice.text,
     detail: relic ? relic.name + ' · ' + relicEffect(relic) : [price, ...effects].join(' · '),
-    shortName: relic?.name ?? heirloom?.name ?? choice.text.split(' · ')[0],
+    shortName: relic?.name ?? heirloom?.name ?? randomWake ?? choice.text.split(' · ')[0],
     compactPrice: crystalGain ? eventEffectText(crystalGain, context) : price,
     condition: choice.enabled ? '' : '조건 · ' + unmet,
     releaseNote: releases ? '보낼 동료 ' + releases + '명 필요' : '',

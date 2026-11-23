@@ -6,9 +6,9 @@ const canFocus = node => node?.isConnected && !node.matches(':disabled') && !nod
 const tabStops = scope => $$(TABBABLE, scope).filter(node => node.tabIndex >= 0 && canFocus(node));
 const activeResult = () => $('#battle.on #result.on');
 
-export function focusPrimary(scope) {
+export function focusPrimary(scope, preferred = '.go, .claim, #b-start, #b-next, #b-go') {
   const controls = tabStops(scope);
-  const primary = controls.find(node => node.matches('.go, .claim, #b-start, #b-next, #b-go')) ??
+  const primary = controls.find(node => node.matches(preferred)) ??
     controls.find(node => node.matches('#acts .act, .fixed-foot button')) ?? controls[0];
   primary?.focus({ preventScroll: true });
 }

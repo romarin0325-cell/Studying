@@ -92,7 +92,6 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
   if (!Meta.featureFlags(currentProfile()).prepEditing) return;
   const name = id => esc(roster.card(id)?.name ?? id ?? '미지정');
   const previousLeadName = startCompanionNot && roster.card(startCompanionNot)?.name;
-  const leadHint = previousLeadName && PREPARATION.otherStartCompanion(previousLeadName);
   const status = row => row.excluded ? ['excluded', '×', TERMS.exclude.short] :
     row.start ? ['start', '★', '시작'] : row.invited ? ['invited', '↪', TERMS.springInvite.short] :
       row.added ? ['added', '+', '추가'] : ['base', '·', '기본'];
@@ -106,14 +105,19 @@ export function preparationSheet({ dungeonId, currentProfile, updateProfile, sav
     const flags = Meta.featureFlags(profile);
     const entry = availableDungeons(profile).find(dungeon => dungeon.id === dungeonId);
     const { start: lead, invite, exclude, pool } = Meta.prepView(profile, dungeonId, roster);
+    const { lead: activeLead, companionCandidates } = Meta.startView(profile, dungeonId);
+    const activeLeadName = activeLead && roster.card(activeLead)?.name;
     const leadChoices = lead.candidates.filter(id => !exclude.ids.includes(id) && id !== lead.id);
-    const goalFocus = leadHint && leadChoices.length;
+    const needsLeadChange = previousLeadName && (!activeLeadName || activeLead === startCompanionNot);
+    const leadHint = previousLeadName && (needsLeadChange ? PREPARATION.otherStartCompanion(previousLeadName)
+      : PREPARATION.startCompanionReady(activeLeadName));
+    const goalFocus = needsLeadChange && leadChoices.some(id => id !== startCompanionNot);
     const draft = profile.ui.preparation?.dungeonId === dungeonId ? profile.ui.preparation : null;
     const difficulty = entry?.difficulties?.includes(draft?.difficulty) ? draft.difficulty : departureDifficulty(profile, dungeonId);
     const contracts = Meta.contractsFor(profile, dungeonId);
     const canContract = difficulty === 'nightmare' && contracts.unlocked;
     const contractChoice = canContract && Object.hasOwn(CONTRACTS, draft?.contract) ? CONTRACTS[draft.contract] : null;
-    const outsidePool = Meta.startView(profile, dungeonId).companionCandidates.filter(id => !pool.some(row => row.id === id));
+    const outsidePool = companionCandidates.filter(id => !pool.some(row => row.id === id));
     const cell = row => {
       const [key, symbol, label] = status(row);
       return `<button class="meta-cell meta-prep-cell" type="button" data-prep-id="${esc(row.id)}" data-status="${key}"${row.canInvite && !row.invited ? ' data-can-invite' : ''} aria-haspopup="dialog">

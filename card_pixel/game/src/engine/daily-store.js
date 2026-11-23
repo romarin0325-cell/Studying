@@ -8,7 +8,7 @@ import { dailyRiftUnlocked } from './meta.js';
 import { invalid } from './rooms.js';
 import { chooseDoor, createRun } from './run.js';
 import { restoreRun, serializeRun } from './run-codec.js';
-import { nextSaveRevision, saveHeadChanged, saveRevision } from './save.js';
+import { nextSaveRevision, saveHead, saveHeadChanged } from './save.js';
 
 const VERSION = 1;
 const empty = () => ({ version: VERSION, days: {}, active: null });
@@ -42,10 +42,6 @@ function activeCheckpoint(data, run) {
 const dictionary = value => !!value && typeof value === 'object' && !Array.isArray(value);
 const nonnegative = n => Number.isSafeInteger(n) && n >= 0;
 const validRevision = active => active?.revision === undefined || nonnegative(active.revision);
-
-function checkpointHead(slot, active) {
-  return { slot, revision: saveRevision(active), hasSave: active !== null, runId: active?.runId };
-}
 
 function staleCheckpoint(head, observed) {
   return saveHeadChanged(head, observed) || (observed && head.runId !== observed.runId);
@@ -173,7 +169,10 @@ export function create(storage, { core, roster }) {
       const saved = slots.read(slot, KEY);
       const data = saved == null ? empty() : JSON.parse(saved);
       if (data?.version === VERSION && dictionary(data.days) && (data.active === null || dictionary(data.active))
-        && validRevision(data.active)) return { data, head: checkpointHead(slot, data.active) };
+        && validRevision(data.active)) {
+        const { active } = data;
+        return { data, head: { ...saveHead(slots, slot, active, active !== null), runId: active?.runId } };
+      }
     } catch {
       // A damaged save can still be cleared through settings.
     }
@@ -201,7 +200,7 @@ export function create(storage, { core, roster }) {
       return invalid('invalid_save');
     }
     if (!write(data, head.slot)) return invalid('storage_failed');
-    remember(run, checkpointHead(head.slot, data.active));
+    remember(run, { ...head, revision: data.active.revision, hasSave: true, runId: data.active.runId });
     return { ok: true };
   }
 

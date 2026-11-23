@@ -274,7 +274,9 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     sfx.tap();
     openBattleLog(sheets, widgets, resultBoard.isOpen() ? run.lastBattleLog : currentLog());
   }
-  const resultBoard = createResultBoard({ getRun: () => run, widgets, details, showLog, sfx, music });
+  const resultBoard = createResultBoard({
+    getRun: () => run, widgets, details, showLog, closeSheet: sheets.closeSheet, sfx, music
+  });
   $('#b-log').addEventListener('click', showLog);
 
   function logLine(text) { B.log.push(text); if (!/^(===|---)/.test(text)) ticker(text); }
@@ -784,8 +786,8 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
     B.D = B.foe = null; B.allies = []; B.fallSpot = null;
     battleContext = { seed: run.seed, floor: run.floor, doorType: door.type, enemyIds: door.enemies.map(e => e.id), party: B.party.slice() };
     B.bridge = createBattle(core, options);
-    resultBoard.hide();
-    $('#battle').classList.remove('resumed-result', 'opening-decision');
+    resultBoard.close();
+    $('#battle').classList.remove('opening-decision');
     for (const id of ['b-field', 'b-speed', 'b-log']) $('#' + id).hidden = simpleOpening;
     $('#acts').innerHTML = '';
     $('#b-heir').className = '';
@@ -817,6 +819,7 @@ export function createBattleView({ core, roster, widgets, stage: St, audio, shee
   }
 
   function restoreResult(expedition, advance, decision) {
+    resultBoard.close();
     attach(expedition);
     B.D = B.foe = B.bridge = null;
     B.allies = [];

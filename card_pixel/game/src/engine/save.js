@@ -11,6 +11,7 @@ export const STALE_SAVE_EVENT = 'relaymare:stale-save';
 
 const SESSION_VERSION = 1;
 const BACKUP_VERSION = 1;
+const RESTORE_ID_KEY = 'relaymare.restoreId';
 const DEFAULT_SETTINGS = { sound: true, music: true, rim: true, speed: 1, textScale: 1, markers: true };
 const SETTING_VALUES = { speed: [1, 2], textScale: [1, 1.25] };
 const nullableId = value => value === null || string(value);
@@ -130,13 +131,18 @@ function sessionData(profile, run) {
   return { version: SESSION_VERSION, profile: profileData(progressed, !!run), run: run ? runData(run) : null };
 }
 
-export function saveRevision(data) {
+function saveRevision(data) {
   return count(data?.revision) ? data.revision : 0;
+}
+
+export function saveHead(slots, slot, data, hasSave) {
+  return { slot, revision: saveRevision(data), hasSave, restoreId: slots.read(slot, RESTORE_ID_KEY) ?? null };
 }
 
 export function saveHeadChanged(head, observed) {
   return observed ? head.slot !== observed.slot || head.revision !== observed.revision
-    || head.hasSave !== observed.hasSave : head.revision > 0;
+    || head.hasSave !== observed.hasSave || head.restoreId !== observed.restoreId
+    : head.revision > 0 || (head.hasSave && head.restoreId !== null);
 }
 
 export function nextSaveRevision(current) {
@@ -166,7 +172,7 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
   function readHead() {
     const slot = slots.active();
     const raw = slots.read(slot, key) ?? null;
-    return { slot, raw, hasSave: raw !== null, revision: sessionRevision(raw) };
+    return { ...saveHead(slots, slot, parse(raw), raw !== null), raw };
   }
 
   function isStale(head) {
@@ -174,8 +180,8 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
     return stale;
   }
 
-  function remember({ slot, raw, revision }) {
-    observed = { slot, revision, hasSave: raw !== null };
+  function remember({ slot, revision, hasSave, restoreId }) {
+    observed = { slot, revision, hasSave, restoreId };
     lastRevision = Math.max(lastRevision, revision);
   }
 
@@ -184,9 +190,9 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
       head.revision === 0 ? sessionRevision(slots.read(head.slot, LAST_GOOD_KEY)) : 0));
   }
 
-  function writeSession(slot, raw, revision) {
-    slots.write(slot, key, raw);
-    remember({ slot, raw, revision });
+  function writeSession(head, raw, revision) {
+    slots.write(head.slot, key, raw);
+    remember({ ...head, revision, hasSave: true });
   }
 
   function readSession(raw) {
@@ -314,8 +320,11 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
       const revision = revisionAfter(head);
       const raw = JSON.stringify({ ...(profile ? sessionData(profile, run)
         : { version: SESSION_VERSION, profile: null, run: null }), revision });
+      // Stage a new identity with every restore, including backups without an active rift.
+      const restoreId = globalThis.crypto.getRandomValues(new Uint32Array(4)).join('-');
       const values = new Map([
         [key, raw],
+        [RESTORE_ID_KEY, restoreId],
         [DAILY_KEY, backup.daily === null ? null : JSON.stringify(backup.daily)],
         [DAMAGED_DAILY_KEY, backup.damagedDaily ?? null],
         [SETTINGS_KEY, JSON.stringify(normalizeSettings(backup.settings))],
@@ -331,7 +340,7 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
       });
       if (!verified.ok) return failed('storage_failed');
       slots.activate(next);
-      remember({ slot: next, raw, revision });
+      remember({ slot: next, revision, hasSave: true, restoreId });
       return { ok: true, ...dailyWarning(backup) };
     } catch {
       return failed('storage_failed');
@@ -358,7 +367,7 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
     // Preserve the saved expedition checkpoint while changing only the episode flags.
     const raw = patch(head.raw);
     if (raw === null) return failed('storage_failed');
-    writeSession(head.slot, raw, revision);
+    writeSession(head, raw, revision);
     try {
       const good = patch(slots.read(head.slot, LAST_GOOD_KEY));
       if (good !== null) slots.write(head.slot, LAST_GOOD_KEY, good);
@@ -373,7 +382,7 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
       if (isStale(head)) return failed('stale_tab');
       const revision = revisionAfter(head);
       const snapshot = JSON.stringify({ ...sessionData(profile, run), revision });
-      writeSession(head.slot, snapshot, revision);
+      writeSession(head, snapshot, revision);
       if (!run && profile.records.appliedRuns.length && readSession(snapshot).status === 'ok') {
         try {
           slots.write(head.slot, LAST_GOOD_KEY, snapshot);
@@ -404,8 +413,11 @@ export function createSaveStore(storage, { key = SESSION_KEY, core, roster, migr
     clear() {
       try {
         if (isStale(readHead())) return failed('stale_tab');
-        slots.clear(key);
-        remember({ slot: 'a', raw: null, revision: 0 });
+        if (key !== SESSION_KEY) {
+          for (const slot of ['a', 'b']) slots.write(slot, key, null);
+        }
+        slots.clear(RESTORE_ID_KEY);
+        remember({ slot: 'a', revision: 0, hasSave: false, restoreId: null });
         return true;
       } catch {
         return false;

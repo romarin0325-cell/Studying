@@ -50,18 +50,48 @@ export function resultNextLabel(run, { floor, roomType, won, retry }) {
   return (floor + 1) + '층으로';
 }
 
-export function createResultBoard({ getRun, widgets, details, showLog, sfx, music }) {
+export function createResultBoard({ getRun, widgets, details, showLog, closeSheet, sfx, music }) {
   const panel = $('#result');
+  const box = $('#result-in', panel);
+  const screen = panel.parentElement;
   const { card, face } = widgets;
   const isOpen = () => panel.classList.contains('on');
+  const primarySelector = 'button.go:not([hidden]), #b-reinforce-take';
+  let primary = null;
 
   function setOpen(open) {
     panel.classList.toggle('on', open);
-    for (const background of panel.parentElement.children) {
+    for (const background of screen.children) {
       if (background !== panel) background.inert = open;
     }
   }
-  const hide = () => setOpen(false);
+
+  function close() {
+    if (!isOpen()) return;
+    setOpen(false);
+    screen.classList.remove('resumed-result');
+    if (panel.inert) closeSheet();
+    panel.inert = false;
+    primary = null;
+  }
+
+  function focusAction() {
+    const action = $(primarySelector, box);
+    // Keep the current focus for updates that leave the same action in place.
+    if (action === primary || panel.inert) return;
+    primary = action;
+    focusPrimary(action?.closest('.victory-decision') ?? panel, primarySelector);
+  }
+
+  // Reward screens can replace their own controls or navigate directly out of battle.
+  const updates = new MutationObserver(() => {
+    if (!isOpen()) return;
+    if (screen.classList.contains('on')) focusAction();
+    else close();
+  });
+  updates.observe(box, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+  updates.observe(panel, { attributes: true, attributeFilter: ['inert'] });
+  updates.observe(screen, { attributes: true, attributeFilter: ['class'] });
 
   panel.addEventListener('click', event => {
     const id = event.target.closest('[data-sheet]')?.dataset.sheet;
@@ -122,7 +152,6 @@ export function createResultBoard({ getRun, widgets, details, showLog, sfx, musi
 
     const label = resultNextLabel(run, { floor, roomType, won, retry });
     const title = failure?.title ?? (run.daily ? '균열' : DUNGEONS[run.dungeonId].name) + ' ' + floor + '층 돌파';
-    const box = $('#result-in', panel);
     box.innerHTML = '<header class="result-heading ' + (won ? 'won' : 'lost') + '"><h3 id="result-title">' + esc(title) + '</h3>' +
       logButton('id="b-result-log"') + '</header>' + rows.join('') +
       '<div class="result-decision"></div><button class="btn go" id="b-next" data-coach="result-next">' + esc(label) + '</button>';
@@ -140,19 +169,19 @@ export function createResultBoard({ getRun, widgets, details, showLog, sfx, musi
     if (reward) decision?.(content, result, next, singleReinforcement);
     if (pending() && !restored) music?.holdReward(getRun().dungeonId);
     box.scrollTop = 0;
-    focusPrimary(panel);
+    focusAction();
     next.addEventListener('click', () => {
       sfx.tap();
       if (pending()) {
         decision(content, result, next, true);
-        focusPrimary(panel);
+        focusAction();
       } else {
         next.disabled = true;
-        hide();
+        close();
         advance();
       }
     });
   }
 
-  return { show, hide, isOpen };
+  return { show, close, isOpen };
 }

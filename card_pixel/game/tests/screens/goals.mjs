@@ -43,6 +43,13 @@ export function rescueContractProfile() {
   return profile;
 }
 
+export function readyStartCompanionProfile() {
+  const profile = dreamClearProfile();
+  profile.notebook = { chapters: [1, 2, 3, 4], firstLead: 'ash' };
+  profile.recruits = { ash: { bond: 1, since: 1 }, snow_rabbit: { bond: 0, since: 2 } };
+  return profile;
+}
+
 export function createGoalCases({ roster, storedSession, enterObservatory }) {
   const goalText = '홍련 화산 여정 생환 → 악몽 해금';
   const companion = 'marshmallow';
@@ -91,6 +98,25 @@ export function createGoalCases({ roster, storedSession, enterObservatory }) {
         }
       };
     },
+    'goals-start-companion-ready'() {
+      const profile = readyStartCompanionProfile();
+      assert.equal(profile.lead, 'snow_rabbit');
+      assert.equal(nextGoal(profile, null, roster).target.startCompanionNot, 'ash');
+      return {
+        session: storedSession({ profile }), proof: 'Snow Rabbit already satisfies the different-start goal',
+        async show(page, { text, capture }) {
+          await enterObservatory(page);
+          await page.locator('#hub.on [data-meta-page="notebook"]').click();
+          await page.locator('#notebook.on #meta-follow-goal').click();
+          const panel = sheet(page);
+          await text(panel.locator('.meta-prep-lead b'), '눈토끼', { exact: true });
+          await text(panel.locator('#meta-prep-lead-hint'), '조건 충족 · 시작 동료 눈토끼', { exact: true });
+          assert.equal(await panel.locator('[data-goal-focus]').count(), 0);
+          assert.equal(await panel.locator(':focus').getAttribute('data-difficulty'), 'easy');
+          await capture();
+        }
+      };
+    },
     'goals-contract-rewards'() {
       const profile = rescueContractProfile();
       assert.equal(contractsFor(profile, 'ember_volcano').unlocked, true);
@@ -105,7 +131,7 @@ export function createGoalCases({ roster, storedSession, enterObservatory }) {
           await panel.locator('[data-difficulty="nightmare"]').click();
           await panel.locator('#meta-contract-choice').click();
           const rescue = panel.locator('[data-contract="rescue"]');
-          await text(rescue.locator('.meta-contract-rewards'), '결정 ◆3 · 6층 도달 시 / 도장 · 원정 생환 시', { exact: true });
+          await text(rescue.locator('.meta-contract-rewards'), '계약 달성 시 · 결정 ◆3은 6층 승리 뒤 / 도장은 원정 생환 뒤', { exact: true });
           await text(rescue.locator('small').filter({ hasText: '도장 없음' }), '도장 없음', { exact: true });
           await capture();
         }
