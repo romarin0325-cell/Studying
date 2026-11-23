@@ -23053,13 +23053,14 @@ const BattleRuntime = {
     let choice;
     const take = $("#b-gate-take", node);
     const rows = $$("[data-id], [data-relic]", node);
-    for (const row of rows) row.addEventListener("click", () => {
+    for (const row of rows) row.addEventListener("click", (event) => {
       const id = row.dataset.id || row.dataset.relic;
       choice = { kind: row.dataset.id ? "join" : "relic", id };
       sfx.tap();
       for (const other of rows) other.classList.toggle("sel", other === row);
       take.disabled = false;
       take.textContent = choice.kind === "join" ? card(id).name + " \xB7 " + TERMS.join.short : run.relics.length === RELIC_LIMIT ? "\uAD50\uCCB4\uD560 \uC720\uBB3C \uACE0\uB974\uAE30" : ui.artifacts.get(id).name + " \uBC1B\uAE30";
+      if (event.detail === 0) take.focus();
     });
     function apply(selected) {
       if (!selected) return;

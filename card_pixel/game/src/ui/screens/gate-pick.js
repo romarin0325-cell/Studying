@@ -33,7 +33,7 @@ export function gatePickScreen(run, ui, { node = $('#pick'), inline = false, onR
   let choice;
   const take = $('#b-gate-take', node);
   const rows = $$('[data-id], [data-relic]', node);
-  for (const row of rows) row.addEventListener('click', () => {
+  for (const row of rows) row.addEventListener('click', event => {
     const id = row.dataset.id || row.dataset.relic;
     choice = { kind: row.dataset.id ? 'join' : 'relic', id };
     sfx.tap();
@@ -41,6 +41,8 @@ export function gatePickScreen(run, ui, { node = $('#pick'), inline = false, onR
     take.disabled = false;
     take.textContent = choice.kind === 'join' ? card(id).name + ' · ' + TERMS.join.short :
       run.relics.length === RELIC_LIMIT ? '교체할 유물 고르기' : ui.artifacts.get(id).name + ' 받기';
+    // A keyboard pick (Enter/Space reports detail 0) moves on to the confirm button it just enabled (audit 7).
+    if (event.detail === 0) take.focus();
   });
   function apply(selected) {
     if (!selected) return;
