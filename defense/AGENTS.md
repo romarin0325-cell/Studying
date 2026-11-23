@@ -2,6 +2,8 @@
 
 상위 `AGENTS.md`의 기능·범위별 검증 원칙을 따른다. 이 폴더의 규칙은 두 부분이다: 사용자가 반복해 지적한 작업 지침(아래 "작업 지침"), 그리고 빌드·에셋 배포 규칙(그 뒤 "빌드와 에셋 배포").
 
+> 공개판(`defense_public/`)과의 차이와 그 의도: [../defense_public/docs/ORIGINAL_DIFFERENCES.md](../defense_public/docs/ORIGINAL_DIFFERENCES.md). 원본을 고칠 때 공개판에도 적용할지는 이 문서로 정한다.
+
 ## 작업 지침
 사용자가 여러 번 반복해서 지적한 내용을 정리한 규칙이다. 지시를 받으면 먼저 여기에 비추어 본다.
 
