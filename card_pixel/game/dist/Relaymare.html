@@ -8745,6 +8745,13 @@ const BattleRuntime = {
     legend: 1.15,
     transcendence: 1.15
   };
+  var ALTAR_REROLL = {
+    bless: { normal: 0.16, rare: 0.125, epic: 0.095, legend: 0.05, transcendence: 0.05, event: 0.095 },
+    jackpot: { chance: 0.27, mult: 4.5 }
+  };
+  function altarRerollRules(run) {
+    return !run.daily && run.room?.type === "altar" && run.pending?.rolls > 0 ? ALTAR_REROLL : null;
+  }
   var ROOM_MULTIPLIERS = {
     wild: [0.67, 2.8],
     risk: [0.76, 3.3],
@@ -13626,10 +13633,13 @@ const BattleRuntime = {
   }
   function rollBlessing(run, roster2) {
     if (!run.bench.length) return null;
+    const reroll = altarRerollRules(run);
+    const bless = reroll?.bless ?? BLESS;
+    const odds = reroll?.jackpot ?? JACKPOT;
     const id = pick(run.rng, run.bench);
-    const base = BLESS[roster2.card(id).grade] || 0.2;
-    const jackpot = nextFloat(run.rng) < JACKPOT.chance;
-    return { id, multiplier: Math.round(base * (jackpot ? JACKPOT.mult : 1) * 100) / 100, jackpot };
+    const base = bless[roster2.card(id).grade] || bless.epic;
+    const jackpot = nextFloat(run.rng) < odds.chance;
+    return { id, multiplier: Math.round(base * (jackpot ? odds.mult : 1) * 100) / 100, jackpot };
   }
 
   // card_pixel/game/src/engine/history.js

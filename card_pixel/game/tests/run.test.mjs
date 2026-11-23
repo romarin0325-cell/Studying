@@ -7,7 +7,7 @@ import { INTRO } from '../src/content/intro.js';
 import { LAYOUTS } from '../src/content/layouts.js';
 import { RELICS } from '../src/content/relics.js';
 import * as Bridge from '../src/engine/bridge.js';
-import { canJoin } from '../src/engine/awakenings.js';
+import { canJoin, rollBlessing } from '../src/engine/awakenings.js';
 import * as DailyStore from '../src/engine/daily-store.js';
 import * as Meta from '../src/engine/meta.js';
 import { openingModel } from '../src/engine/opening.js';
@@ -981,6 +981,48 @@ test('the altar resumes the latest roll and limits one visit to three rolls', ()
   assert.equal(kept.id, latest.id);
   assert.equal(run.blessings[kept.id], latest.multiplier);
   assert.equal(Run.altarKeep(run).ok, false);
+});
+
+test('only expedition altar rerolls use the wider blessing table', () => {
+  const roll = (grade, rolls, state, { type = 'altar', daily = null } = {}) => {
+    const run = { bench: ['ash'], rng: { state }, room: { type }, pending: { kind: 'altar', rolls }, daily };
+    return rollBlessing(run, { card: () => ({ grade }) });
+  };
+  // The second RNG sample is about 0.193 at state 17 and 0.325 at state 2.
+  for (const [grade, initial, ordinary, jackpot] of [
+    ['normal', 0.4, 0.16, 0.72], ['rare', 0.3, 0.13, 0.56], ['epic', 0.2, 0.1, 0.43],
+    ['legend', 0.1, 0.05, 0.23], ['transcendence', 0.1, 0.05, 0.23], ['event', 0.2, 0.1, 0.43]
+  ]) {
+    assert.deepEqual(roll(grade, 0, 17), { id: 'ash', multiplier: initial, jackpot: false });
+    for (const rolls of [1, 2]) {
+      assert.deepEqual(roll(grade, rolls, 2), { id: 'ash', multiplier: ordinary, jackpot: false });
+      assert.deepEqual(roll(grade, rolls, 17), { id: 'ash', multiplier: jackpot, jackpot: true });
+    }
+  }
+  for (const [rolls, mode] of [[0, {}], [2, { type: 'event' }], [2, { daily: {} }]]) {
+    assert.deepEqual(roll('normal', rolls, 0, mode), { id: 'ash', multiplier: 1, jackpot: true });
+    assert.deepEqual(roll('normal', rolls, 17, mode), { id: 'ash', multiplier: 0.4, jackpot: false });
+  }
+});
+
+test('a pre-W7 save keeps its stored second altar roll when resumed', () => {
+  const run = reach(make(), 3);
+  enter(run, 1);
+  ok(Run.altarRoll(run));
+  run.rng.state = 0;
+  const legacyRoll = rollBlessing({ ...run, room: { type: 'event' }, rng: { ...run.rng } }, roster);
+  const updatedRoll = ok(Run.altarRoll(run));
+  assert.equal(legacyRoll.id, updatedRoll.id);
+  assert.notEqual(legacyRoll.multiplier, updatedRoll.multiplier);
+
+  const snapshot = JSON.parse(Save.serializeRun(run));
+  snapshot.run.pending.roll = legacyRoll;
+  const restored = Save.restoreRun(snapshot, { core, roster });
+  assert.deepEqual(resumePoint(restored), { kind: 'altar', floor: 3 });
+  assert.deepEqual(restored.pending, { kind: 'altar', rolls: 2, roll: legacyRoll });
+  assert.deepEqual(restored.rng, run.rng);
+  assert.deepEqual(ok(Run.altarKeep(restored)), { ok: true, ...legacyRoll });
+  assert.equal(restored.blessings[legacyRoll.id], legacyRoll.multiplier);
 });
 
 test('meta enforces recruitment limits, bonds, seals and all seven notebook chapters', () => {

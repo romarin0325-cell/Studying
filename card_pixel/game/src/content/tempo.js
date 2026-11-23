@@ -8,6 +8,14 @@ export const REINFORCE_CHOICES = 3;
 export const BLESSING_MULTIPLIERS = {
   normal: 1.6, rare: 1.45, epic: 1.3, event: 1.3, legend: 1.15, transcendence: 1.15
 };
+const ALTAR_REROLL = {
+  bless: { normal: 0.16, rare: 0.125, epic: 0.095, legend: 0.05, transcendence: 0.05, event: 0.095 },
+  jackpot: { chance: 0.27, mult: 4.5 }
+};
+
+export function altarRerollRules(run) {
+  return !run.daily && run.room?.type === 'altar' && run.pending?.rolls > 0 ? ALTAR_REROLL : null;
+}
 
 // Pairs are [HP, ATK/MATK], applied after the existing dungeon and floor tiers.
 export const ROOM_MULTIPLIERS = {

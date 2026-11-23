@@ -1,6 +1,6 @@
 import { nextFloat, pick, shuffle } from './rng.js';
 import { GRADE, gradeOf } from './roster.js';
-import { ROSTER_LIMIT, usesTempo } from '../content/tempo.js';
+import { altarRerollRules, ROSTER_LIMIT, usesTempo } from '../content/tempo.js';
 import { runRoster } from './run.js';
 
 export const RATES = {
@@ -159,8 +159,11 @@ export function choicesFor(run, roster, count, { priority = [], near = null } = 
 
 export function rollBlessing(run, roster) {
   if (!run.bench.length) return null;
+  const reroll = altarRerollRules(run);
+  const bless = reroll?.bless ?? BLESS;
+  const odds = reroll?.jackpot ?? JACKPOT;
   const id = pick(run.rng, run.bench);
-  const base = BLESS[roster.card(id).grade] || 0.2;
-  const jackpot = nextFloat(run.rng) < JACKPOT.chance;
-  return { id, multiplier: Math.round(base * (jackpot ? JACKPOT.mult : 1) * 100) / 100, jackpot };
+  const base = bless[roster.card(id).grade] || bless.epic;
+  const jackpot = nextFloat(run.rng) < odds.chance;
+  return { id, multiplier: Math.round(base * (jackpot ? odds.mult : 1) * 100) / 100, jackpot };
 }
