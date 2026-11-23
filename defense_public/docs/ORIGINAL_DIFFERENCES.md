@@ -118,11 +118,12 @@
 루미 대사의 주기 낱말("4시간마다" 대 "달마다" 등)은 `app.js`의 `PACE`, 서재 소개는 `LIBRARY_LINES`, 새싹 안내는 `SPROUT_TIP` 한 곳에 모았다. 나머지 튜토리얼 코드는 두 판본이 같다.
 **수정이 오면**: 대사·안내를 고치면 두 판본에 같이 적용하고, 주기·서재·새싹에 관한 낱말만 각 판본의 `PACE`·`LIBRARY_LINES`·`SPROUT_TIP`에서 따로 고친다.
 
-### K. 아직 옮기지 않은 원본 변경 — 의도 기록 없음
-- **카드 동료 16명**(빅토리아 등, 원본 PR 701, 2026-11-23)과 그 연출·대사·전용 규칙: 원본에만 있다. 원본 `expansion-companions.js`, `expansion-social.js`, `combat/expansion-vfx.js`, `companion-guide/`, 그리고 `data.js`·`lines.js`·`roles.js`·`power-factor.js`·`smart-auto.js`·`combat/effects.js`·`combat/engine.js`의 연결 부분.
-- 공개판에서 일부러 뺐다는 기록은 없다. 공개판이 원본에서 갈라진(2026-11-21) 뒤 원본에 들어온 것이라 아직 옮기지 않은 상태로 본다. 옮길지는 소유자 결정이 필요하다.
+### K. 카드 동료 16명 — 어느 판본에도 넣지 않음 (시험판 전용)
+- 카드 게임에서 옮긴 16명(빅토리아 등, PR 701)은 **별도 시험판**용이다. 시험판은 브랜치 `codex/defense-full-roster`(작업 폴더 `full-test`)에 있다.
+- 원본에 잘못 병합되었던 것을 2026-11-24 PR 705로 원본에서 뺐다(소유자 결정). 공개판에는 처음부터 없다.
+- **수정이 오면**: 16명 관련 작업은 시험판에서만 한다. 원본·공개판에 넣으려면 소유자 결정이 먼저다.
 
-## 3. 파일 지도 (2026-11-24, `defense/src`와 `defense_public/src` 비교)
+## 3. 파일 지도 (2026-11-24, `defense/src`와 `defense_public/src` 비교, PR 705로 카드 동료를 뺀 원본 기준)
 
 **같은 파일 — 두 판본에 그대로 적용(파일째 복사 가능)**
 `asset-policy.js`, `audio-tracks.js`, `coach.js`, `fx.js`, `icons.js`, `runtime.js`, `memorial.js`, `memorial-media.js`, `new-companions.js`, `new-memorial-media.js`, `portrait-layout.js`, `lab/*`, `combat/audio.js`, `combat/blade-vfx.js`, `combat/companion-vfx.js`, `combat/gold-dragon-vfx.js`, `combat/lightning-vfx.js`, `combat/new-companion-vfx.js`, `combat/ur-vfx.js`, `combat/ur-warm.js`, 그리고 `index.html`.
@@ -131,25 +132,24 @@
 | 파일 | 갈라진 이유(이 문서의 항목) |
 |---|---|
 | `app.js` | A 주기 표시, E 새싹 시트, F 파견 안내, G 서재, H 학습 화면, I 집계, J 문구 |
-| `content.js` | A·B `TUNING`, C 확률, D 90스테이지·도전 구간·환산 시점, K 신규 동료 |
+| `content.js` | A·B `TUNING`, C 확률, D 90스테이지·도전 구간·환산 시점 |
 | `profile.js` | B 수입·전투 인연, D 저장 이전(stageRev 2), E 새싹, F 파견, G 서재 별, H 학습 |
 | `economy.js` | B 수입, D 레벨 환산, A 파견 슬롯 |
 | `beginner.js` | E 새싹 |
 | `battle.js`, `combat/render.js` | D 스테이지 환산(전투 배경·체력) |
-| `combat/engine.js` | D 도전 구간, K 신규 동료 규칙 |
-| `combat/effects.js`, `data.js`, `lines.js`, `roles.js`, `power-factor.js`, `smart-auto.js` | K 신규 동료(원본만) |
+| `combat/engine.js` | D 도전 구간 |
 | `bond.js` | B 호감도 |
 | `monthly.js`, `preview/season.js`, `preview/requests.js` | A 주기 |
 | `preview/twin.js` | B 도전 보상, D 난이도 구간, F 파견 중 동료 참여 |
 | `preview/oath.js` | B 도전 보상 배율(`challengeRewardScale`) |
-| `preview/requests-data.js` | B 부탁 호감도 보상(원본 40, 공개판 200), K 신규 동료의 부탁·후일담(원본만) |
+| `preview/requests-data.js` | B 부탁 호감도 보상(원본 40, 공개판 200) |
 | `library.js` | G 서재 별 |
 | `auto-team.js` | F 파견 중 동료 포함 |
 | `team-config.js` | I 저장 키 |
 | `test-unlock.js` | D 스테이지 수(테스트 도구) |
 | `style.css`, `theme-bright.css` | E 새싹 걸음 스타일, I 공개 웹, H 학습 화면(원본) |
 
-**원본에만 있는 파일**: `course.js`, `quiz.js`, `tutor.js`(H 학습), `expansion-companions.js`, `expansion-social.js`, `combat/expansion-vfx.js`, `companion-guide/*`(K 신규 동료).
+**원본에만 있는 파일**: `course.js`, `quiz.js`, `tutor.js`(H 학습).
 **공개판에만 있는 파일**: `tempo.js`(A), `analytics.js`, `analytics-schema.js`, `public-session.js`, `public-web.css`(I).
 
 ## 4. 두 판본에 공통으로 둔 최근 결정 (헷갈리기 쉬운 것)
@@ -162,4 +162,4 @@
 `defense_public/AGENTS.md`의 규칙을 따른다: 갈라진 파일은 차이를 보고 옮기고, 같은 파일·데이터·에셋은 그대로 옮겨도 된다. 옮긴 뒤 공개판 단위 시험·빌드·브라우저 시험, 시간·수입이 걸리면 하루 시뮬레이션을 돌리고, 이 문서의 3장 파일 지도를 다시 맞춘다(`cmp`로 두 `src`를 비교하면 같은 파일·갈라진 파일 목록이 바로 나온다).
 
 ## 변경 기록
-- 2026-11-24: 문서 작성. D(90스테이지·도전 구간)와 K(신규 동료 16명 미반영) 기록.
+- 2026-11-24: 문서 작성. D(90스테이지·도전 구간) 기록. K: 카드 동료 16명은 시험판 전용으로 정리(PR 705로 원본에서 제거).
