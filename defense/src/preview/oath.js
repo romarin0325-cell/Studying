@@ -3,12 +3,16 @@ import {season} from './season.js';
 
 export const OATH_WAVES=9;
 // Keep stored scores under their original rules. v2 raised hard to 12 and lowered tyrant to 2;
-// v3 prices nobeam at 2 and rabbits at 4. See docs/SEASON_CONTENT.md.
-export const OATH_RULES=3;
-const TIER_BASE_BY_RULES=Object.freeze({1:Object.freeze({easy:0,hard:10,abyss:20}),2:Object.freeze({easy:0,hard:12,abyss:20}),3:Object.freeze({easy:0,hard:12,abyss:20})});
+// v3 prices nobeam at 2 and rabbits at 4; v4 closes a cross instead of a square.
+export const OATH_RULES=4;
+const TIER_BASE=Object.freeze({easy:0,hard:12,abyss:20});
+const TIER_BASE_BY_RULES=Object.freeze({1:Object.freeze({easy:0,hard:10,abyss:20}),2:TIER_BASE,3:TIER_BASE,4:TIER_BASE});
 export const OATH_TIER_BASE=TIER_BASE_BY_RULES[OATH_RULES];
 export const OATH_GROUPS=Object.freeze({deck:'편성',tempo:'운영',board:'배치',pressure:'압박'});
-export const OATH_CLOSED=Object.freeze([6,7,8,11,12,13,16,17,18]);
+export const OATH_CLOSED=Object.freeze([2,7,10,11,12,13,14,17,22]);
+const OLD_OATH_CLOSED=Object.freeze([6,7,8,11,12,13,16,17,18]);
+// Only the save adapter can pass this marker to the engine. Saves and command inputs keep the 'hollow' ID.
+export const LEGACY_HOLLOW=Symbol('legacy hollow');
 export const OATHS=Object.freeze([
   {id:'lowstar',group:'deck',points:5,name:'낮은 별의 맹세',text:'C·R 동료만 편성할 수 있습니다.',exclusive:'rarity'},
   {id:'nobeam',group:'deck',points:2,name:'곧은 길 봉인',text:'관통 공격 동료를 편성할 수 없습니다.',exclusive:'beam'},
@@ -23,7 +27,7 @@ export const OATHS=Object.freeze([
   {id:'once',group:'tempo',points:2,name:'단 한 번의 응답',text:'동료마다 필살기를 웨이브당 한 번만 쓸 수 있습니다.'},
   {id:'ceiling',group:'tempo',points:3,name:'낮은 천장',text:'동료는 3성까지만 오릅니다.'},
   {id:'scatter',group:'board',points:2,name:'흩어진 별자리',text:'배치 오라(에인션트 드래곤·세이렌·하모니어스)의 효과가 절반입니다.'},
-  {id:'hollow',group:'board',points:3,name:'닫힌 중심',text:'전장 가운데 9칸을 쓸 수 없습니다.'},
+  {id:'hollow',group:'board',points:3,name:'닫힌 십자로',text:'전장 한가운데를 가로지르는 가로·세로 줄 9칸을 쓸 수 없습니다.'},
   {id:'stiff',group:'board',points:2,name:'굳은 발걸음',text:'전투 중 자리를 옮기면 8초 동안 다시 옮길 수 없습니다. 합성은 할 수 있습니다.'},
   {id:'tough1',group:'pressure',points:2,name:'단단한 밤',text:'적 체력 +25%',exclusive:'tough'},
   {id:'tough2',group:'pressure',points:4,name:'더 단단한 밤',text:'적 체력 +50%',exclusive:'tough'},
@@ -40,7 +44,8 @@ export const oathScore=(tier,ids,rules=OATH_RULES)=>TIER_BASE_BY_RULES[rules][ti
 export function oathConflict(ids){
   if(!Array.isArray(ids))return '서약을 확인하세요.';
   const seen=new Set(),excl=new Map();
-  for(const id of ids){
+  for(const key of ids){
+    const id=key===LEGACY_HOLLOW?'hollow':key;
     const o=OATH[id];if(!o)return '알 수 없는 서약입니다.';
     if(seen.has(id))return '같은 서약을 두 번 걸 수 없습니다.';
     seen.add(id);
@@ -70,7 +75,8 @@ export function oathMods(ids){
   if(on('scatter'))m.aura=.5;
   if(on('once'))m.oncePerWave=true;
   if(on('ceiling'))m.rankCap=3;
-  if(on('hollow'))m.closed=OATH_CLOSED;
+  if(on(LEGACY_HOLLOW))m.closed=OLD_OATH_CLOSED;
+  else if(on('hollow'))m.closed=OATH_CLOSED;
   if(on('stiff'))m.moveCooldown=8;
   if(on('glass'))m.core=10;
   return m;

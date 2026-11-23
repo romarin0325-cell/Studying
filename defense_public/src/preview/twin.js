@@ -19,10 +19,9 @@ export function twinParty(p){
   return {left:copySide(raw?.left),right:copySide(raw?.right)};
 }
 export function twinPartyProblem(p,party){
-  const away=id=>!!p?.dispatches?.some(d=>d.hero===id);
   for(const side of TWIN_SIDES){
     const deck=party?.[side]?.deck,relics=party?.[side]?.relics;
-    if(!Array.isArray(deck)||deck.length!==TEAM_SIZE||new Set(deck).size!==deck.length||deck.some(id=>!p?.heroes?.[id]?.owned||away(id)))return `은빛·금빛에 파견 중이 아닌 서로 다른 동료 ${TEAM_SIZE}명씩 필요합니다.`;
+    if(!Array.isArray(deck)||deck.length!==TEAM_SIZE||new Set(deck).size!==deck.length||deck.some(id=>!p?.heroes?.[id]?.owned))return `은빛·금빛에 서로 다른 동료 ${TEAM_SIZE}명씩 필요합니다.`;
     if(!Array.isArray(relics)||relics.length>3||new Set(relics).size!==relics.length||relics.some(id=>!p?.relics?.[id]?.owned))return '보유한 서로 다른 유물을 별길마다 3개까지 장착할 수 있습니다.';
   }
   const heroes=[...party.left.deck,...party.right.deck],relics=[...party.left.relics,...party.right.relics];

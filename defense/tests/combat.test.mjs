@@ -243,8 +243,9 @@ test('five starter heroes finish a real opening expedition with no growth or rar
 
 test('persistent growth reaches actual direct, skill and poison damage without changing rarity base stats',()=>{
   const runFor=(id,enhance)=>{
-    const p=active();p.heroes[id].owned=true;p.heroes[id].enhance=enhance;
-    p.active.deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5);
+    const now=Date.UTC(2026,10,9),p=createProfile(now);p.heroes[id].owned=true;p.heroes[id].enhance=enhance;
+    const deck=[id,...DEFAULT_DECK.filter(x=>x!==id)].slice(0,5);
+    assert.ok(command(p,'begin',{mode:'main',deck},now).ok);
     const s=ensureHero(createBattle(p),id);s.board=s.board.map(u=>u?.hero===id?u:null);s.queue=[{kind:'boss',hp:1e9}];s.spawnIn=0;
     E.step(s,.05);s.enemies[0].progress=300;s.enemies[0].speed=0;s.enemies[0].skillIn=1e9;
     return s;
