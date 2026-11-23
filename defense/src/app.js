@@ -633,7 +633,7 @@ function showSettings(){
     <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
 function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').classList.remove('spotting');$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();coachTick();}
-function close(){hideStatusPeek();if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();if(!run)setTimeout(()=>{if(!modal)maybeUnlockNews();},460);}
+function close(){hideStatusPeek();if(!modal)return;if(modal==='news'&&unlockLater){const later=unlockLater;unlockLater=null;setTimeout(later,0);}tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();if(!run)setTimeout(()=>{if(!modal)maybeUnlockNews();},460);}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
@@ -1788,7 +1788,12 @@ function coachTick(){
   if(coach.id==='reward'){rewardTipDone=true;coach.hide();}
   if(!step&&draftCoach())return;
   if(tipStep){if(step||modal||screen!=='home'){tipStep=null;coach.hide();}return;}
-  if(!step){coachHold=false;tutorialRun=false;if(tourTick())return;if(coach.active)coach.hide();return;}
+  if(!step){coachHold=false;tutorialRun=false;if(tourTick())return;
+    if(returnTip){
+      if(screen==='adventure'||screen==='battle'||screen==='draft')returnTip=false;
+      else if(!modal&&qs('.nav-item[data-nav="adventure"]')){guide('back',()=>qs('.nav-item[data-nav="adventure"]'),'다 둘러봤으면 다시 모험으로 가자! 다음 스테이지가 형아를 기다리고 있어.',{onSkip:()=>{returnTip=false;coach.hide();},next:{label:'조금 더 볼래',onNext:()=>{returnTip=false;coach.hide();}}});return;}
+    }
+    if(coach.active)coach.hide();return;}
   if(step==='lobby'){
     if(modal==='prepare'){ftueDone('lobby');return coachTick();}
     if(screen==='home'&&!modal&&!lobbyView&&!$('splash'))guide('lobby',()=>qs('.lb-depart'),'형아, 어서 와! 오늘부터 대현자 루미가 하나하나 알려 줄게. 먼저 출격부터! (윙크)');else coach.hide();return;
@@ -1904,15 +1909,17 @@ const UNLOCK_NEWS={
   request:{name:'동료의 부탁',ic:'heart',line:'이제 동료들이 가끔 부탁하러 정원에 찾아올 거야. 들어 주면 그 동료랑 훨씬 가까워져!',go:'확인',to:null},
   event:{name:'이벤트',ic:'adventure',line:`이벤트가 열렸어! 별빛 서약이랑 쌍성 원정이 ${PACE.event} 번갈아 열려. 지금 열린 쪽부터 같이 보자!`,go:'모험으로',to:()=>{screen='adventure';mode=eventMode();render();}},
 };
-let unlockGo=null;
-function maybeUnlockNews(){
+// later: what the player was about to do (the next stage from a result). '계속 진행' runs it, so chaining stages never
+// skips the news; going to the feature instead leaves a one-line way back to the adventure once its tour is done.
+let unlockGo=null,unlockLater=null,returnTip=false;
+function maybeUnlockNews(later=null){
   if(modal||screen==='battle'||screen==='draft'||$('splash')||store.broken||store.conflict||FW.ftueNext(p())||coach.active&&!tour)return false;
   const fresh=FW.newlyOpened(p()).filter(id=>UNLOCK_NEWS[id]);if(!fresh.length)return false;
   if(tour){tour=null;coach.hide();}
   for(const id of fresh)act('ftue',{seen:id},false);
-  const first=UNLOCK_NEWS[fresh[0]];unlockGo=first.to;
+  const first=UNLOCK_NEWS[fresh[0]];unlockGo=first.to;unlockLater=later;
   show(fresh.length>1?'새로 열렸어요':first.name,'루미의 새 소식',`<div class="news"><span class="news-face">${image(GUIDE)}</span><p class="news-line">${escapeText(first.line)}</p></div><ul class="news-list">${fresh.map(id=>`<li>${icon(UNLOCK_NEWS[id].ic)}<b>${UNLOCK_NEWS[id].name}</b></li>`).join('')}</ul>`,
-    first.to?`<div class="dialog-buttons"><button class="secondary" data-action="close">나중에</button><button class="primary shine" data-action="unlock-go">${first.go}</button></div>`:'<button class="primary wide" data-action="close">확인</button>','news');
+    first.to?`<div class="dialog-buttons"><button class="secondary" data-action="close">${later?'계속 진행':'나중에'}</button><button class="primary shine" data-action="unlock-go">${first.go}</button></div>`:'<button class="primary wide" data-action="close">확인</button>','news');
   return true;
 }
 
@@ -2037,7 +2044,7 @@ document.addEventListener('click',e=>{
   if(d.action==='save-team'&&FW.ftueNext(p())==='formation'&&editingDeck.length===TEAM_SIZE){ftueDone('formation');setTimeout(()=>{if(modal)return;if(screen!=='home'){screen='home';render();}tipStep='stars';tutorialTips();},80);}
   const a={sprout:sproutSheet,'sprout-all':claimSproutAll,'ur-confirm':confirmUr,'first-ten':firstTen,
     'ftue-summon':()=>{close();screen='summon';banner='normal';render();},
-    'unlock-go':()=>{const go=unlockGo;unlockGo=null;close();go?.();},
+    'unlock-go':()=>{const go=unlockGo;unlockGo=null;unlockLater=null;close();returnTip=!!go;go?.();},
     'event-go':()=>{close();screen='adventure';mode=d.kind;render();},
   }[d.action];if(a)a();
 });
@@ -2113,7 +2120,7 @@ document.addEventListener('click',e=>{
     'auto-team-pick':()=>{editingDeck=autoDeck(p());formation('hero',true);},'auto-relic-pick':()=>{editingRelics=autoRelics(p());formation('relic',true);},
     'auto-twin':()=>{twinDraft=autoTwin(p());twinFormation(true);},'auto-oath':()=>{const ids=oathDeck(p(),oathPick);if(!ids){toast('조건에 맞는 동료가 부족해요');return;}if(act('deck',{ids},false).ok)oathPrepare();},
     'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),same=(a,b)=>[...a].sort().join()===[...b].sort().join(),changed=!same(deck,p().deck)||(featureOpen(p(),'relic')&&relics.length&&!same(relics,p().equipped));if(!changed){toast('지금 편성이 자동 편성과 같아요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);const after=teamPower(p());toast(after>=before?`전투력 ${fmt(before)} → ${fmt(after)}`:'역할을 맞춰 편성했어요');},
-    'next-stage':()=>{close();prepare(Number(d.stage));},
+    'next-stage':()=>{close();const go=()=>prepare(Number(d.stage));if(!maybeUnlockNews(go))go();},
     'trial-start':()=>{if(!UNLOCKED)return;show('신규 플레이 체험','',`<p class="subtext">지금 프로필은 따로 보관하고, 처음 시작하는 프로필로 바꿉니다. 체험을 끝내면 지금 상태로 돌아옵니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-start-confirm">시작</button></div>`,'trial-confirm');},
     'trial-start-confirm':()=>{if(!UNLOCKED||p().trial)return;try{localStorage.setItem(SAVE_KEY+'.backup',store.raw||JSON.stringify(p()));const r=store.import(JSON.stringify(createProfile(Date.now(),{trial:true})));if(!r.ok){toast(r.message);return;}location.reload();}catch{toast('프로필을 보관할 수 없어요.');}},
     'trial-end':()=>{if(!UNLOCKED||!p().trial)return;show('체험 끝내기','',`<p class="subtext">보관한 프로필로 돌아갑니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-end-confirm">돌아가기</button></div>`,'trial-confirm');},
