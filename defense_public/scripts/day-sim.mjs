@@ -47,10 +47,10 @@ function player(index){
   const st={battles:0,wins:0,heroPulls:0,relicPulls:0,lucky:0,seen:{draft:'',rush:'',oath:''},challengeMinutes:0};
   const addReward=(bucket,r)=>{if(!r)return;if(r.dreams)dreams[bucket]+=r.dreams;if(r.dust)dust[bucket]+=r.dust;};
   function chores(){
-    for(const d of beginnerState(p).days)for(const kind of ['login','task']){
-      if(!d[kind].claimable)continue;
-      const choice=kind==='login'&&d.day===7?(urChoices(p).find(x=>!x.owned)||urChoices(p)[0]).id:undefined;
-      const r=ok('beginnerClaim',{day:d.day,kind,...(choice?{choice}:{})});if(r.ok)addReward('sprout',r.reward);
+    for(let day=1;day<=7;day++){
+      const d=beginnerState(p).days[day-1];if(!d.claimable)continue;
+      const choice=d.reward.choice?(urChoices(p).find(x=>!x.owned)||urChoices(p)[0]).id:undefined;
+      const r=ok('beginnerClaim',{day,choice});if(r.ok)addReward('sprout',r.reward);
     }
     const pet=ok('pet');if(pet.ok)dreams.daily+=40;
     if(featureOpen(p,'garden')){ok('basket');for(const g of ['bouquet','letter','candy'])while(p.gifts[g]>0&&p.heroes[p.partner].bond<BOND_MAX&&ok('gift',{id:p.partner,gift:g}).ok);}
@@ -58,8 +58,8 @@ function player(index){
     for(const d of [...p.dispatches])if(d.end<=now){const r=ok('claimDispatch',{slot:d.slot});if(r.ok){dust.dispatch+=r.dust;dreams.dispatch+=r.reward;}}
     for(let slot=0;slot<dispatchSlots(p.cleared);slot++){
       if(p.dispatches.some(d=>d.slot===slot))continue;
-      const spare=Object.keys(p.heroes).filter(id=>p.heroes[id].owned&&!p.deck.includes(id)&&!p.dispatches.some(d=>d.hero===id)).sort((a,b)=>combatPower(b,p.heroes[b],p.beds)-combatPower(a,p.heroes[a],p.beds));
-      if(!spare.length||!ok('dispatch',{slot,id:spare[0]}).ok)break;
+      const candidates=Object.keys(p.heroes).filter(id=>p.heroes[id].owned&&!p.dispatches.some(d=>d.hero===id)).sort((a,b)=>combatPower(b,p.heroes[b],p.beds)-combatPower(a,p.heroes[a],p.beds));
+      if(!candidates.length||!ok('dispatch',{slot,id:candidates[0]}).ok)break;
     }
     if(!p.firstTen&&p.cleared>=1)ok('draw',{banner:'normal',count:10,first:true});
     ok('draw',{banner:'normal',count:1,free:true});if(featureOpen(p,'relic'))ok('draw',{banner:'relic',count:1,free:true});
@@ -102,9 +102,9 @@ function player(index){
       chores();
       if(p.cleared>=TIERS.easy.unlock){
         const c=calendar(now);
-        if(st.seen.draft!==c.week){st.seen.draft=c.week;challenge('weekly');continue;}
-        if(st.seen.rush!==c.month){st.seen.rush=c.month;challenge('monthly');continue;}
-        const s=season(now).id;if(eventOpen('oath',now)&&st.seen.oath!==s){st.seen.oath=s;challenge('oath');continue;}
+        if(featureOpen(p,'draft')&&st.seen.draft!==c.week){st.seen.draft=c.week;challenge('weekly');continue;}
+        if(featureOpen(p,'monthly')&&st.seen.rush!==c.month){st.seen.rush=c.month;challenge('monthly');continue;}
+        const s=season(now).id;if(featureOpen(p,'event')&&eventOpen('oath',now)&&st.seen.oath!==s){st.seen.oath=s;challenge('oath');continue;}
       }
       if(p.cleared>=MAIN_STAGES){now=end;break;}
       if(fails<2){const r=main(p.cleared+1);fails=r.won?0:fails+1;}
@@ -114,7 +114,7 @@ function player(index){
     marks.push({hour:b,stage:p.cleared,power:teamPower(p),beds:{...p.beds},battles:st.battles,wins:st.wins,heroPulls:st.heroPulls,relicPulls:st.relicPulls,lucky:st.lucky,
       heroes:owned,urs:Object.keys(p.heroes).filter(id=>p.heroes[id].owned&&HERO[id].rarity==='UR').length,relics:Object.values(p.relics).filter(e=>e.owned).length,
       memorials:Object.values(p.heroes).filter(e=>e.owned&&e.bond>=BOND_MAX).length,partnerBond:p.heroes[p.partner].bond,paintings:p.study.library.unlocked.length,
-      sprout:p.beginner?p.beginner.tasks.length:7,challengeMinutes:Math.round(st.challengeMinutes),dust:{...dust},dreams:{...dreams}});
+      sprout:p.beginner?beginnerState(p).days.filter(d=>d.claimed).length:7,challengeMinutes:Math.round(st.challengeMinutes),dust:{...dust},dreams:{...dreams}});
   }
   return marks;
 }

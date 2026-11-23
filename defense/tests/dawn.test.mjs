@@ -128,14 +128,16 @@ test('runs saved before critical hits restore without them, and bad crit data is
   const nan=JSON.parse(E.serialize(run));nan.crit={chance:'x',damage:2};assert.equal(E.restore(nan),null);
 });
 
-test('a battle takes its crit setting from the profile and resumes only with the same one',()=>{
+test('a battle locks its crit setting on entry and rejects checkpoint edits',()=>{
   const p=createProfile(NOW);p.cleared=PART_STAGES+5;Object.assign(p.beds,{crit:10,critDamage:4});
   ok(p,'begin',{mode:'main',stage:PART_STAGES+5},NOW);
   const run=createBattle(p);assert.deepEqual(run.crit,critStats(p.beds,p.cleared));assert.ok(run.crit.chance>.05);
   p.active.run=E.serialize(run);assert.ok(resumeBattle(p));
-  p.beds.crit=11;assert.equal(resumeBattle(p),null,'a different crit setting cannot resume the old run');
+  p.beds.crit=11;assert.deepEqual(resumeBattle(p)?.crit,run.crit);
+  const forged=JSON.parse(p.active.run);forged.crit=critStats(p.beds,p.cleared);
+  p.active.run=JSON.stringify(forged);assert.equal(resumeBattle(p),null);
   // a run from before crits existed still resumes
-  p.beds.crit=10;const legacy=JSON.parse(p.active.run);delete legacy.crit;delete legacy.critRng;p.active.run=JSON.stringify(legacy);assert.ok(resumeBattle(p));
+  const legacy=JSON.parse(E.serialize(run));delete legacy.crit;delete legacy.critRng;p.active.run=JSON.stringify(legacy);assert.ok(resumeBattle(p));
   const early=createProfile(NOW);early.cleared=10;ok(early,'begin',{mode:'main',stage:10},NOW);assert.deepEqual(createBattle(early).crit,{chance:.05,damage:1.5});
 });
 
