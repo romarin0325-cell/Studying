@@ -145,7 +145,7 @@ try{
         assert.equal(events.slice(before).filter(e=>e.event==='game_error'&&e.fields.code==='save_unavailable').length,1,fault);
         await t.context.close();
       }
-      const memoryProfile=veteran(createProfile(NOW));memoryProfile.heroes.star_boy.bond=10;
+      const memoryProfile=veteran(createProfile(NOW));memoryProfile.heroes.star_boy.bond=10;memoryProfile.partner='star_boy';
       const memory=await boot({profile:memoryProfile});await memory.page.route('**/*.avif',r=>r.abort());
       await memory.page.locator('[data-action="bond"]').click();await memory.page.locator('.bond-memory').click();
       await memory.page.waitForFunction(()=>document.getElementById('memory-art')?.getAttribute('aria-busy')==='false');
