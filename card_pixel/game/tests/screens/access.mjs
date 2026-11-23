@@ -203,6 +203,11 @@ export function createAccessCases({ makeRun, startBattle, storedSession, act, op
           assert.equal(await page.locator('#battle [aria-live="polite"]').count(), 1);
           const announcement = page.locator('#battle-announcement');
           assert.equal(await announcement.textContent(), await page.locator('#intent').textContent());
+          // What a screen reader receives: the computed accessibility tree, not only the attributes we set.
+          const tree = await page.locator('#battle').ariaSnapshot();
+          const exposed = unit => `button "${unit.name} · HP ${unit.hp.toLocaleString('en-US')}/${unit.maxHp.toLocaleString('en-US')} · 정보 보기"`;
+          for (const unit of [initial.enemy, ...initial.allies.filter(Boolean)]) assert.ok(tree.includes(exposed(unit)), exposed(unit));
+          assert.match(tree, /status:|- status/, 'The intent line is exposed as a live status region');
           assert.equal(await announcement.evaluate(node => node.childNodes.length), 1);
 
           await tabTo(page, tile(1));

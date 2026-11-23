@@ -70,7 +70,7 @@ export function battleMarkup() {
     '<div id="msg"><p id="relay-hint" hidden>' + esc(INTRO.relayHint) + '</p><div id="ticker"></div><div id="tally"></div></div>' +
     '<header id="bar"><span id="room"></span><span id="turn"></span><span class="sp"></span><button id="b-field" aria-label="전장·유물">전장</button><button id="b-speed">1배</button>' + logButton('id="b-log"') + tools() + '</header>' +
     '<button class="sky" id="sky" aria-label="필드 정보"><span id="sky-slots"></span><span id="skyname"></span><small id="region-next"></small></button>' +
-    '<div id="battle-announcement" aria-live="polite" aria-atomic="true"></div>' +
+    '<div id="battle-announcement" role="status" aria-live="polite" aria-atomic="true"></div>' +
     resultMarkup() +
     '</section>'
   );
